@@ -611,10 +611,9 @@ function reCalcAll() {
 function setDecimalFormat(label) {
   return new MenuItem({
     label: label,
-    run(state, dispatch) {
+    run(state, _, view) {
       state.doc.attrs.decimalFormat = label
-      const tr = hurmet.updateCalculations(state, schema.nodes.calculation, true)
-      dispatch(tr)
+      hurmet.updateCalculations(view, schema.nodes.calculation, true)
     }
   })
 }
