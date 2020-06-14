@@ -15,7 +15,7 @@ import { functionRegEx } from "./module"
  *  This module is called to update Hurmet calculation cells.
  *  More specifically, it is called:
  *    1. When an author submits one calculation cell.
- *    2. When a new Hurmet.io instance has opened.  (from index.js)
+ *    2. When a new Hurmet.app instance has opened. (from index.js)
  *    3. When a user has opened a new file.         (from openFile.js)
  *    4. When a recalculate-all has been called, possibly after a paste. (from menu.js)
  *

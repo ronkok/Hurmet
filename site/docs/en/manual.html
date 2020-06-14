@@ -940,7 +940,7 @@ unit,in ,in²
 <li>The <code>fetch(url)</code> function is available to load data from a remote CSV file into a data frame. Since Hurmet runs in a browser, the url must begin with <code>http:</code> or <code>https:</code></li>
 </ol>
 <p>A fetch example:</p>
-<pre><code>wideFlanges = fetch(&quot;https://Hurmet.io/data/example.csv&quot;) = !</code></pre><p>That example loads in this data:</p>
+<pre><code>wideFlanges = fetch(&quot;https://hurmet.app/data/example.csv&quot;) = !</code></pre><p>That example loads in this data:</p>
 <p><span class="tex">\begin{array}{l|c c c c c c c c c c}\text{name}&amp;\mathrm{weight}&amp;\mathrm{area}&amp;d&amp;\mathrm{bf}&amp;\mathrm{tw}&amp;\mathrm{tf}&amp;\mathrm{Ix}&amp;\mathrm{Sx}&amp;\mathrm{Iy}&amp;\mathrm{Sy} \\ \;&amp;{\text{lbf/ft}}&amp;{\text{in}^{2}}&amp;{\text{in}}&amp;{\text{in}}&amp;{\text{in}}&amp;{\text{in}}&amp;{\text{in}^{4}}&amp;{\text{in}^{3}}&amp;{\text{in}^{4}}&amp;{\text{in}^{3}} \\ \hline\text{W14X90}&amp;90 &amp;26.5 &amp;14 &amp;14.5 &amp;0.44 &amp;0.71 &amp;999 &amp;143 &amp;362 &amp;49.9  \\ \text{W12X65}&amp;65 &amp;19.1 &amp;12.1 &amp;12 &amp;0.39 &amp;0.605 &amp;533 &amp;87.9 &amp;174 &amp;29.1  \\ \text{W10X49}&amp;49 &amp;14.4 &amp;10 &amp;10 &amp;0.34 &amp;0.56 &amp;272 &amp;54.6 &amp;93.4 &amp;18.7  \\ \text{W8X31}&amp;31 &amp;9.13 &amp;8 &amp;8 &amp;0.285 &amp;0.435 &amp;110 &amp;27.5 &amp;37.1 &amp;9.27  \\ \text{W8X18}&amp;18 &amp;5.26 &amp;8.14 &amp;5.25 &amp;0.23 &amp;0.33 &amp;61.9 &amp;15.2 &amp;7.97 &amp;3.04  \\ \text{W6X15}&amp;15 &amp;4.43 &amp;5.99 &amp;5.99 &amp;0.23 &amp;0.26 &amp;29.1 &amp;9.72 &amp;9.32 &amp;3.11  \\ \text{W4X13}&amp;13 &amp;3.83 &amp;4.16 &amp;4.06 &amp;0.28 &amp;0.345 &amp;11.3 &amp;5.46 &amp;3.86 &amp;1.9\end{array}</span></p>
 
 <p>As data frames go, that example is still pretty small. When I assign a data frame to a variable, I usually suppress its display by using the <strong>!</strong> display selector.</p>
@@ -1885,7 +1885,7 @@ divideBy(a, b)
 <p>The word <code>private</code> may be written before a function. Private functions cannot be called from outside the module.</p>
 <pre><code>private function waterDensity()
     return &#39;62.4 lbf/ft³&#39;</code></pre><p>A Hurmet document can load an entire module into a variable with a fetch statement, like this:</p>
-<pre><code>lib = fetch(&quot;http://Hurmet.io/functions/arithmetic.hrms.txt&quot;) = !</code></pre><p>To use modules, one writes the module name and variable/function name in dot notation, as in:</p>
+<p>To use modules, one writes the module name and variable/function name in dot notation, as in:</p>
 <p><span class='tex'>f_\mathrm{r} = 7.5 \, \sqrt{\mathrm{lib} {.} f_\mathrm{c}'}= \color{blue}7.5 \, \sqrt{4{,}500}\color{black}= 503 \, \,\mathrm{psi}</span></p>
 <p><span class='tex'>x = \mathrm{lib} {.} \operatorname{divideBy}(10 ,\: 5)= 2</span></p>
 <p>One can do multiple assignments (not functions) in one statement:</p>

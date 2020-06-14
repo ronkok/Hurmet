@@ -577,7 +577,7 @@ Data frames can be quite large, so Hurmet gives you two ways to define them inco
 
 A fetch example:
 
-    wideFlanges = fetch("https://Hurmet.io/data/example.csv") = !
+    wideFlanges = fetch("https://hurmet.app/data/example.csv") = !
 
 That example loads in this data:
 
@@ -1300,7 +1300,6 @@ The word `private` may be written before a function. Private functions cannot be
 
 A Hurmet document can load an entire module into a variable with a fetch statement, like this:
 
-    lib = fetch("http://Hurmet.io/functions/arithmetic.hrms.txt") = !
 
 To use modules, one writes the module name and variable/function name in dot notation, as in:
 
