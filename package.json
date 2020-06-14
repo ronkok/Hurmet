@@ -2,7 +2,7 @@
   "name": "hurmet",
   "version": "2020.06.14",
   "description": "Rich text editor on the web, featuring live calculations.",
-  "homepage": "https://hurmet.net",
+  "homepage": "https://hurmet.io",
   "license": "MIT",
   "private": true,
   "maintainers": [
