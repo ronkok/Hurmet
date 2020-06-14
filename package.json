@@ -1,0 +1,53 @@
+{
+  "name": "hurmet",
+  "version": "2020.06.12",
+  "description": "Rich text editor on the web, featuring live calculations.",
+  "homepage": "https://hurmet.net",
+  "license": "MIT",
+  "private": true,
+  "maintainers": [
+    {
+      "name": "Ron Kok",
+      "email": "ronkok14@outlook.com"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ronkok/Hurmet"
+  },
+  "files": [
+    "src/"
+  ],
+  "dependencies": {
+    "filesaver.js-npm": "1.0.1",
+    "prosemirror-commands": "^1.0.8",
+    "prosemirror-dropcursor": "^1.3.2",
+    "prosemirror-example-setup": "^1.0.1",
+    "prosemirror-gapcursor": "^1.1.3",
+    "prosemirror-history": "^1.0.4",
+    "prosemirror-inputrules": "^1.1.2",
+    "prosemirror-keymap": "^1.1.3",
+    "prosemirror-menu": "^1.0.5",
+    "prosemirror-model": "^1.9.1",
+    "prosemirror-state": "^1.3.2",
+    "prosemirror-tables": "^1.0.0",
+    "prosemirror-transform": "^1.2.3",
+    "prosemirror-view": "^1.14.2"
+  },
+  "devDependencies": {
+    "eslint": "^7.0.0",
+    "rollup": "^1.13.0",
+    "rollup-plugin-commonjs": "^10.0.0",
+    "rollup-plugin-node-resolve": "^5.0.1"
+  },
+  "scripts": {
+    "math": "rollup --config utils/rollup.hurmet.config.js",
+    "docs": "node utils/buildDocs.js",
+    "pm": "rollup --config utils/rollup.prosemirror.config.js && node utils/editPM.js",
+    "minify": "uglifyjs preview/prosemirror.js -o site/prosemirror.min.js -m && uglifyjs preview/hurmet.js -o site/hurmet.min.js -m",
+    "build": "yarn pm && yarn math && yarn docs && yarn minify",
+    "test": "yarn test:lint && node test/test.js",
+    "test:lint": "eslint src",
+    "test:unit": "node test/test.js"
+  }
+}

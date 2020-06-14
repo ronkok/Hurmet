@@ -1,0 +1,211 @@
+
+* { margin:0; padding:0; }  /* reset */
+
+body { font-family: "Times New Roman", Cambria, "Cambria Math", Georgia, serif; }
+	   
+@media all {body {font-size: 20px;}}
+@media (max-width:830px){body {font-size: 18px;}}
+@media (max-width:740px){body {font-size: 16px;}}
+
+main { position: absolute;
+        top: 0;
+        padding: 0px 2.5px 0px 2.5px; }
+
+#sidebar { position: fixed;
+           top: 0;
+           margin: 0px 2.5px 0px 2.5px;
+           overflow:fixed; }
+           
+#demo {
+   margin: 0px 2.5px 0px 2.5px;
+   overflow:fixed;
+}
+
+@media all {
+	#sidebar {left:  50px; width: 245px; }
+	main     {left: 330px; width:580px;  }
+   #demo    {width: 210px; }
+   .CodeMirror { width: 205px; }
+}
+ 
+@media (max-width:880px) {
+	#sidebar {left: 0px; width: 20%; }
+	main     {left: 24%; width: 75%; }
+   #demo    {display: none }
+}
+						  
+@media (max-width:670px) {
+	#sidebar {left: 0px; width:  5%; }
+	main     {left:  7%; width: 90%; }
+   #demo    {display: none; }
+}
+
+h1, h2, h3 { font-family: Verdana, sans-serif;
+             font-variant: small-caps;
+             letter-spacing: 0.05em;
+             margin-top: 3em; }
+			 
+h1 { font-size: 140%; margin-top: 1em; }
+h2 { font-size: 110%; margin-bottom: 0.5em; }
+h3 { font-size: 110%; margin-bottom: 0.5em; margin-top: 0.8em; }
+h4 {                  margin-bottom: 0.5em; margin-top: 0.8em; }
+
+p { margin-top: 1em;
+    line-height: 1.35;
+    text-align: justify; }
+
+hr { margin: 1em; }
+	
+/* Style subscripts and superscripts to avoid wide line spacing. */	
+sub, sup { font-size: 75%;
+	     line-height: 0; 
+	     position: relative; 
+	     vertical-align: baseline; }
+sup { top: -0.5em; }
+sub { bottom: -0.25em; }	
+
+.reduced { font-size:80%; }
+.dim  { color: gray; }
+.katex { font-size: 1em !important; }  /* Otherwise math is sized 20% larger than other text. */
+
+.indented   { margin-left: 2.5em; }
+p.indented  { margin-top: 0.25em; text-align: left; }
+.indented p { margin-top: 0.5em;  text-align: left; }
+
+table { font-size: inherit;
+        margin-left: 1.5em;
+        border-collapse: collapse;
+        width: auto; }
+        
+div > table { margin-left: 0; }
+
+table td { padding: 0.3em 0.8em 0.3em 0.8em;
+           vertical-align: middle;
+           hyphens: none; }
+
+table th { font-size: 95%;
+           padding: 0.3rem 0.5rem 0.3rem 0.5rem;
+           line-height: 1.05;
+           border-bottom: 1px solid #ccc; }
+
+table.horiz-lined { margin-left: 0; }
+table.horiz-lined tr { border-bottom: 1px solid #ccc; }
+table.horiz-lined th, table.horiz-lined td { vertical-align: middle; }
+
+div.table-grid + table {margin-left: 0;}
+div.table-grid + table th, div.table-grid + table td { border: 1px solid #aaa; vertical-align: middle; }
+
+table.grid {margin-left: 0; }
+table.grid th, table.grid td { border: 1px solid #aaa; vertical-align: middle; }
+
+div.table-markup + table { white-space: nowrap; }
+div.table-markup + table tr th:nth-child(2),
+div.table-markup + table tr td:nth-child(2) { border-right: 1px solid #aaa; }
+
+div.table-auto-correct + table { white-space: nowrap; margin: 0 0 0 -0.5em; }
+div.table-auto-correct + table tr th:nth-child(2),
+div.table-auto-correct + table tr th:nth-child(4),
+div.table-auto-correct + table tr th:nth-child(6),
+div.table-auto-correct + table tr th:nth-child(8),
+div.table-auto-correct + table tr td:nth-child(2),
+div.table-auto-correct + table tr td:nth-child(4),
+div.table-auto-correct + table tr td:nth-child(6),
+div.table-auto-correct + table tr td:nth-child(8) { border-right: 1px solid #aaa; }
+
+div.table-no-wrap + table { white-space: nowrap; }
+
+dt { font-size: 100%; font-weight: bold;  margin-top: 0.8em; }
+dd { margin-left: 2.5em; line-height: 1.35; }
+
+h5 { font-size: 100%; font-weight: bold;  margin-top: 0.8em; }
+#function-list dt { font-weight: normal; }
+h5 + p { margin-left: 2.5em; line-height: 1.35; }
+h5 + div { margin-left: 2.5em; line-height: 1.35; }
+
+ol li { position: relative; left: 2.2em; width:88%; line-height: 1.35; margin-top: 0.5em;}
+ul li { list-style-type: disc; line-height: 1.35; margin-top: 0.5em; position: relative; left: 1.8em; }
+
+a { text-decoration: underline;
+    color: inherit; }
+
+pre { margin: 0px;
+      padding: 12px 12px 12px 12px;
+      line-height: 1.5;
+      display: block;
+      overflow: visible; }
+
+code { font-family: Consolas,"Courier New",Courier,monospace;
+       font-size: 85%;
+       /*color: #404040;*/
+       background-color: rgba(27, 31, 35, 0.05); }
+pre > code, td code {background-color: transparent;} 
+
+#input-container {
+    font-size: 0.9em;
+    width: 100%;
+    height: 3em;
+    border-radius: 4px;
+    border: 1px solid rgb(200, 200, 200);
+    display: inline-block;
+    padding: 0.5em 0.5em;
+    vertical-align: top;
+    resize: none;
+}
+
+#demo-output {
+    font-size: 0.9em;
+    width: 100%;
+    height: 5em;
+    padding: 1em 1em;
+    vertical-align: top;   
+}
+
+summary {outline: none; cursor: pointer;}
+
+.mobile-menu { position: absolute;
+			   background:#fff;
+			   border:1px solid #aaa;
+			   padding-right: 3em; } 
+.mobile-menu summary:after { content: none; }
+
+/* Table of Contents, sidebar version */
+.toc { cursor: pointer; 
+       font-family: Calibri, sans-serif; 
+	    padding-top: 0.5em;
+	    background:#fff; }
+	   
+.toc li { list-style: none; 
+          line-height: 1.35;
+		  position: relative;
+      margin-top: 0em;
+		  left: 0em; }
+		  
+.toc ul li { left: 1.4em;
+  margin-top: 0em;
+             width:88%; }
+			 
+#sidebar a { text-decoration: none;
+             color: inherit; }
+			 
+/* Table of Contents, mobile version */
+#mobile-nav { display: none;               /* hidden on large screens */
+              position: fixed; } 
+
+/* On small screens, switch from sidebar TOC to navicon and drop-down menu */
+@media screen and (max-width: 670px) { #mobile-nav { display: block; } 
+                                       #sidebar    { display: none;}
+			.margin-note { position : absolute; top: -9999px; left: -9999px; color: black; display: block; }
+			.margin-indicator:focus .margin-note { position : inherit; }
+			.margin-note:hover                   { position : inherit; }
+			.margin-note:focus                   { position : inherit; }
+}       
+
+#mobile-nav li  { list-style: none; 
+                  margin: 0;
+				  padding: 0.2em; }
+				  
+#mobile-nav li a { width: 60px; }
+
+#mobile-nav a { text-decoration: none;
+                color: inherit; }
+

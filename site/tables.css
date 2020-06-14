@@ -1,0 +1,107 @@
+.ProseMirror .tableWrapper {
+  overflow-x: auto;
+}
+.ProseMirror table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  overflow: hidden;
+  margin-bottom: 1em;
+}
+.ProseMirror td, .ProseMirror th {
+  vertical-align: center;
+  box-sizing: border-box;
+  position: relative;
+  min-width: 1em;
+  padding: 2px 3px;
+}
+.ProseMirror table p { line-height: 1.2; margin: 2px 0 2px 0; }
+.ProseMirror header table p  { line-height: 1.6; }
+.ProseMirror td > *, .ProseMirror th > *,
+.ProseMirror td > *:first-child {
+  margin-top: 2px;
+  margin-bottom: 3px;
+}
+.ProseMirror th > *:first-child {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+.ProseMirror .column-resize-handle {
+  position: absolute;
+  right: -2px; top: 0; bottom: 0;
+  width: 4px;
+  z-index: 20;
+  background-color: #adf;
+  pointer-events: none;
+}
+.ProseMirror.resize-cursor {
+  cursor: ew-resize;
+  cursor: col-resize;
+}
+/* Give selected cells a blue overlay */
+.ProseMirror .selectedCell:after {
+  z-index: 2;
+  position: absolute;
+  content: "";
+  left: 0; right: 0; top: 0; bottom: 0;
+  background: rgba(200, 200, 255, 0.4);
+  pointer-events: none;
+}
+
+/* Table styles */
+.ProseMirror table.grid td, .ProseMirror table.grid th {
+  border: 1px solid #ddd;
+}
+.ProseMirror table.grid th { font-weight: 600 }
+
+.ProseMirror table.nogrid td, .ProseMirror table.nogrid th {
+  border: none;
+}
+.ProseMirror table.rules td, .ProseMirror table.rules th {
+  border-bottom: 2px solid #ddd;
+}
+.ProseMirror table.rules tr:last-child td { border-bottom: none; }
+
+.ProseMirror table.one-rule th {
+  border-bottom: 1px solid #111111;  
+}
+.ProseMirror table.one-rule td {
+  border: none;
+}
+
+.ProseMirror table.two-rules th { border-bottom: 1px solid #111111; }
+.ProseMirror table.two-rules tr:last-child td { border-top: 1px solid #111111; }
+
+.ProseMirror table.three-rules th { border-top: 2px solid #111111; border-bottom: 1px solid #111111; }
+.ProseMirror table.three-rules tr:last-child td { border-bottom: 2px solid #111111; }
+
+.ProseMirror table.four-rules th { border-top: 2px solid #111111; border-bottom: 1px solid #111111; }
+.ProseMirror table.four-rules tr:nth-child(5n) td { padding-bottom: 1em; }
+.ProseMirror table.four-rules tr:last-child td { border-top: 1px solid #111111; border-bottom: 2px solid #111111; }
+
+.ProseMirror table.striped th, .ProseMirror table.striped td { border: 1px solid #ddd }
+.ProseMirror table.striped tbody tr:nth-child(even) {
+   background-color: #f6f8fa;
+}
+.ProseMirror table.striped th { font-weight: 600 }
+
+/* Column alignment. Apply these classes to the table node. */
+.c1r td:nth-child(1), .c1r th:nth-child(1),
+.c2r td:nth-child(2), .c2r th:nth-child(2),
+.c3r td:nth-child(3), .c3r th:nth-child(3),
+.c4r td:nth-child(4), .c4r th:nth-child(4),
+.c5r td:nth-child(5), .c5r th:nth-child(5),
+.c6r td:nth-child(6), .c6r th:nth-child(6),
+.c7r td:nth-child(7), .c7r th:nth-child(7),
+.c8r td:nth-child(8), .c8r th:nth-child(8),
+.c9r td:nth-child(9), .c9r th:nth-child(9) { text-align:right }
+
+.c1c td:nth-child(1), .c1c th:nth-child(1),
+.c2c td:nth-child(2), .c2c th:nth-child(2),
+.c3c td:nth-child(3), .c3c th:nth-child(3),
+.c4c td:nth-child(4), .c4c th:nth-child(4),
+.c5c td:nth-child(5), .c5c th:nth-child(5),
+.c6c td:nth-child(6), .c6c th:nth-child(6),
+.c7c td:nth-child(7), .c7c th:nth-child(7),
+.c8c td:nth-child(8), .c8c th:nth-child(8),
+.c9c td:nth-child(9), .c9c th:nth-child(9) { text-align:center }

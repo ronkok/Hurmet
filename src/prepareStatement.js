@@ -1,0 +1,264 @@
+﻿import { parse } from "./parser"
+import { dt } from "./constants"
+import { valueFromLiteral } from "./literal"
+import { functionRegEx, scanModule } from "./module"
+
+/*  prepareStatement.js
+ *
+ *  This module is called when: (1) an author submits a Hurmet calculation dialog box, or
+ *  (2) when a new document is opened, or (3) when recalculate-all is called.
+ *  Here we do some preparation in a calculation cell prior to calculation.
+ *
+ *  This module does NOT calculate the result of an expression. It stops just short of that.
+ *  How do we choose where to draw the line between tasks done here and tasks done later?
+ *  We do as much here as we can without knowing the values that other cells have assigned
+ *  to variables. The goal is to minimize the amount of work done by each dependent cell
+ *  when an author changes an assigned value.  Later, calculation updates will not have to
+ *  repeat the work done in this module, so updates will be faster.
+ *
+ *  Variable inputStr contains the string that an author wrote into the dialog box.
+ *
+ *  From that entry this module will:
+ *    1. Determine the name of the cell, as in "x" from "x = 12"
+ *    2. Parse the entry string into TeX, to be passed later to KaTeX for rendering.
+ *    3. If the input asks for a calculation:
+ *       a. Parse the expression into an echo string (in TeX) with placeholders that will be
+ *          filled in later with values when the calculation is done.
+ *       b. Parse the expression into RPN (postfix) to be passed later to evaluate().
+ *       c. Process the unit of measure, if any, of the result. Save it for later calculation.
+ *    4. If an assigned value is static, not calculated, find its value.
+ *    5. If a unit has been defined in a staic assignment, find the value in Hurmet base units.
+ *    6. Append all the display strings together.
+ *    7. Return the result. Hurmet will attach it to ProseMirror "attrs" of that node.
+ */
+
+const containsOperator = /[+\-×·*∘⌧/^%‰&√!¡|‖&=<>≟≠≤≥∈∉⋐∧∨⊻¬]|\xa0(modulo|\\atop|root|\?{}|%|⎾⏋|⎿⏌|\[\]|\(\))\xa0/
+const mustDoCalculation = /^(!{1,2}|[$$£¥\u20A0-\u20CF]?(\?{1,2}|@{1,2}|%{1,2})[^=!(?@%!{})]*)$/
+const currencyRegEx = /^[$£¥\u20A0-\u20CF]/
+const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/
+const isKeyWord = /^(π|true|false|root|if|else|and|or|otherwise|modulo|for|while|break|return|raise)$/
+
+const shortcut = (str, decimalFormat) => {
+  const tex = parse(str, decimalFormat)
+  return { entry: str, tex, alt: str }
+}
+
+export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
+  let leadStr = ""
+  let mainStr = ""
+  let trailStr = ""
+  let isCalc = false
+  let suppressResultDisplay = false
+  let displayResultOnly = false
+  let omitEcho = false
+  let posOfFirstEquals = 0
+  let expression = ""
+  let echo = ""
+  let rpn = ""
+  let resultDisplay = ""
+  let name = ""
+  let leadsWithCurrency = false
+  let value
+  let unit
+  let dtype
+  let str = ""
+
+  if (functionRegEx.test(inputStr)) {
+    // This cell contains a custom function.
+    const posFn = inputStr.indexOf("function")
+    const posParen = inputStr.indexOf("(")
+    name = inputStr.slice(posFn + 8, posParen).trim()
+    const attrs = {
+      entry: inputStr,
+      name,
+      value: scanModule(inputStr, decimalFormat).value[name],
+      // TODO: what to do with comma decimals?
+      dtype: dt.MODULE,
+      error: false
+    }
+    return attrs
+  }
+
+  str = inputStr
+
+  const posOfLastEquals = str.lastIndexOf("=") + 1
+
+  if (posOfLastEquals > 1) {
+    // input has form:  mainStr = trailStr
+    mainStr = str.substring(0, posOfLastEquals - 1).trim()
+    trailStr = str.substring(posOfLastEquals).trim()
+
+    if (mustDoCalculation.test(trailStr)) {
+      // trailStr contains a ? or a @ or a % or a !. In other words,
+      // input has form:  mainStr = something [?@%!] something
+      // The ? or @ or % or ! signals that the author wants a calculation done.
+      isCalc = true
+
+      // A ! tells us to calculate and save the result, but to NOT display the result.
+      suppressResultDisplay = trailStr.indexOf("!") > -1
+
+      // A @ tells us to display only the result.
+      displayResultOnly = trailStr.indexOf("@") > -1
+
+      omitEcho = trailStr.indexOf("%") > -1
+
+      posOfFirstEquals = mainStr.indexOf("=") + 1
+      if (posOfFirstEquals) {
+        // input has form:  leadStr = something = trailStr
+        leadStr = mainStr.slice(0, posOfFirstEquals - 1).trim()
+
+        // Input has form:  name = expression = trailStr, or
+        //                  name1, name2, = expression = trailStr
+        expression = mainStr.substring(posOfFirstEquals).trim()
+        if (leadStr.indexOf(",") > -1) {
+          const potentialIdentifiers = leadStr.split(",")
+          for (let i = 0; i < potentialIdentifiers.length; i++) {
+            const candidate = potentialIdentifiers[i].trim()
+            if (isKeyWord.test(candidate) || !isValidIdentifier.test(candidate)) {
+              // leadStr is not a list of valid identifiers.
+              // So this isn't a valid calculation statement. Let's finish early.
+              return shortcut(str, decimalFormat)
+            }
+          }
+          // multiple assignment.
+          name = potentialIdentifiers.map(e => e.trim())
+
+        } else {
+          if (isValidIdentifier.test(leadStr) && !isKeyWord.test(leadStr)) {
+            name = leadStr
+          } else {
+            // The "=" sign is inside an expression. There is no lead identifier.
+            // // input has form:  expression = trailStr
+            expression = mainStr
+          }
+        }
+      } else {
+        // This calculation string contains only one "=" character.
+        // input has form:  expression = trailStr
+        expression = mainStr
+      }
+    } else  if (isValidIdentifier.test(mainStr) && !isKeyWord.test(mainStr)) {
+      // No calculation display selector is present,
+      // but there is one "=" and a valid idendtifier.
+      // It may be an assignment statement.
+      // input has form:  name = trailStr
+      name = mainStr
+      if (trailStr === "") {
+        const tex = parse(str, decimalFormat)
+        return { entry: str, tex, alt: str }
+      }
+    } else {
+      // input has form:  mainStr = trailStr.
+      // It almost works as an assignment statment, but mainStr is not a valid identifier.
+      // So we'll finish early.
+      return shortcut(str, decimalFormat)
+    }
+  } else {
+    // str contains no "=" character. Let's fnish early.
+    return shortcut(str, decimalFormat)
+  }
+
+  if (expression.length > 0) {
+    // The author may want a calculaltion done on the expression.
+    if (/^\s*fetch\(/.test(expression)) {
+      // fetch() functions are handled in updateCalculations.js, not here.
+      // It's easier from there to send a fetch() callback to a ProseMirror transaction.
+      isCalc = false
+      echo = ""
+
+    } else {
+      // Parse the expression. Stop short of doing the calculation.
+      [echo, rpn] = parse(expression, decimalFormat, true)
+
+      // Shoulld we display an echo of the expression, with values shown for each variable?
+      if (suppressResultDisplay || displayResultOnly || echo.indexOf("〖") === -1
+          || /\u00a0for\u00a0/.test(rpn)) {
+        // No.
+        echo = ""
+      } else if (omitEcho) {
+        echo = ""
+      } else {
+        // The expression calls a variable.
+        // If it also contains an operator or a function, then we need to show the echo.
+        if (containsOperator.test("\xa0" + rpn + "\xa0")) {
+          echo = "{\\color{blue}" + echo + "}"
+        } else {
+          echo = ""
+        }
+      }
+    }
+  }
+
+  // Now let's turn our attention from the expression to the trailStr.
+  if (currencyRegEx.test(trailStr)) {
+    leadsWithCurrency = true
+    unit = trailStr.charAt(0)
+  }
+
+  if (suppressResultDisplay) {
+    resultDisplay = "!"
+
+  } else if (isCalc) {
+    // trailStr contains a placeholder for a calculation result display.
+    value = null
+
+    if (!leadsWithCurrency) {
+      // Check for a unit, even if it isn't a unit-aware calculation
+      unit = trailStr.replace(/[?@%']/g, "").trim()
+    }
+
+    if (unit) {
+      resultDisplay = parse("'" + trailStr.replace(/'/g, "").trim() + "'", decimalFormat)
+    } else {
+      resultDisplay = parse(trailStr, decimalFormat).replace(/\\%/g, "%")
+    }
+    resultDisplay = resultDisplay.replace(/\\text\{(\?\??|%%?)\}/, "$1")
+
+  } else {
+    // trailStr may be a static value in an assignment statement.
+    // Check if trailStr is a valid literal.
+    [value, unit, dtype, resultDisplay] = valueFromLiteral(trailStr, name, decimalFormat)
+
+    if (dtype === dt.ERROR) { return shortcut(str, decimalFormat) }
+  }
+
+  // Assemble the equation to display
+  let eqn = ""
+  let altEqn = ""
+  if (!displayResultOnly) {
+    eqn = parse(mainStr, decimalFormat)
+    altEqn = mainStr
+    if (echo.length > 0 && !omitEcho) {
+      eqn += " = " + echo
+    }
+    if (!suppressResultDisplay) {
+      eqn += " = " + resultDisplay
+      altEqn += " = " + trailStr
+    }
+  }
+
+  // Populate the object to be returned.
+  // It will eventually be attached to ProseMirror schema attrs, so call it "attrs".
+  const attrs = {
+    entry: str,
+    template: eqn,
+    altTemplate: altEqn,
+    resultdisplay: resultDisplay,
+    dtype: dtype,
+    error: false
+  }
+
+  if (name) { attrs.name = name }
+  if (isCalc) {
+    attrs.resulttemplate = resultDisplay
+    attrs.altresulttemplate = trailStr
+  } else {
+    attrs.tex = eqn
+    attrs.alt = altEqn
+  }
+  if (rpn) { attrs.rpn = rpn }
+  if (value) { attrs.value = value }
+  if (unit) { attrs.unit = unit }
+
+  return attrs
+}

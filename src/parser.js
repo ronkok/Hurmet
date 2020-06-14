@@ -1,0 +1,1495 @@
+﻿import { isIn } from "./utils"
+import { tt, lex, addTextEscapes, texFromNumStr } from "./lexer"
+import { exponentRegEx, numeralFromSuperScript } from "./units"
+import { Rnl } from "./rational"
+
+/*
+ * parser.js
+ *
+ * This file takes a text string and compiles it to TeX.
+ * If the isCalc flag is set, then parse() also compiles the text to an RPN string
+ * used elsewhere for further Hurmet computation.
+ *
+*/
+
+// Keep the next three lists sorted, so that the isIn() binary search will work properly.
+const builtInFunctions = [
+  "Gamma", "abs", "acos", "acosd", "acot", "acotd", "acsc", "acscd",
+  "asec", "asecd", "asin", "asind", "atan", "atan2", "atand", "binomial", "chr", "cos", "cosd",
+  "cosh", "cosh", "cot", "cotd", "coth", "coth", "csc", "cscd", "csch", "csch", "exp", "fetch",
+  "format", "gcd", "hypot", "isNaN", "length", "lerp", "ln", "log", "log10", "log2",
+  "logFactorial", "logGamma", "logn", "logΓ", "random", "rms", "round", "roundSig", "roundn",
+  "sec", "secd", "sech", "sech", "sign", "sin", "sind", "sinh", "sinh", "tan", "tand", "tanh",
+  "tanh", "trace", "transpose", "zeros", "Γ"
+]
+
+const builtInReducerFunctions = [
+  "lineChart", "max", "mean", "median", "min", "product", "range", "stddev", "sum", "variance"
+]
+
+const trigFunctions = ["cos", "cosd", "cot", "cotd", "csc", "cscd", "sec", "secd",
+  "sin", "sind", "tand", "tan"]
+
+const rationalRPN = numStr => {
+  // Return a representation of a rational number that is recognized by evalRPN().
+  const num = Rnl.fromString(numStr)
+  return "▸" + String(num[0]) + "/" + String(num[1])
+}
+
+const numberRegEx = new RegExp(Rnl.numberPattern)
+
+const calligraphicRegEx = /^(:?\uD835[\uDC9C-\uDCCF]|[\udc9d\udca0\udca1\udca3\udca4\udca7\udca8\udcad\udcba\udcbc\udcc1\udcc4])/
+
+const bmpCalligraphic = {
+  "\u212C": "B",
+  "\u2130": "E",
+  "\u2131": "F",
+  "\u210B": "H",
+  "\u2110": "I",
+  "\u2112": "L",
+  "\u2133": "M",
+  "\u211B": "R",
+  "\u212F": "e",
+  "\u210A": "g",
+  "\u2113": "l",
+  "\u2134": "o"
+}
+
+const assertCalligraphic = str => {
+  // The Unicode code points for "fancy" letters do not distinguish between script
+  // and calligraphic. Hurmet takes them to be calligraphic.
+  // That currently comes naturally to MathML if the system font in use is Cambria Math.
+  // For KaTeX HTML, we have to assert it, which we do here.
+  // I may have to revisit this and also assert in MathML, depending on how
+  // https://github.com/mathml-refresh/mathml/issues/61 is resolved.
+  // I do not append \uFE00 as Murray Sargent proposes, at least not yet.
+  // Ref: https://blogs.msdn.microsoft.com/murrays/2016/02/05/unicode-math-calligraphic-alphabets/
+  const match = calligraphicRegEx.exec(str)
+  if (!match) { return str }
+  let ch = ""
+  if (str.charAt(0) === "\uD835") {
+    const codePoint = str.charCodeAt(1)
+    ch = String.fromCharCode(codePoint - (codePoint <= 0xdcb5 ? 0xdc5b : 0xdc55))
+  } else {
+    // Characters in the Unicode Basic Multilingual Plane
+    ch = bmpCalligraphic[str.charAt(0)]
+  }
+  return `\\mathcal{${ch}}` + str.slice(match[0].length)
+}
+
+const checkForUnaryMinus = (token, prevToken) => {
+  switch (prevToken.ttype) {
+    case tt.NUM:
+    case tt.ORD:
+    case tt.VAR:
+    case tt.RIGHTBRACKET:
+    case tt.LONGVAR:
+    case tt.QUANTITY:
+    case tt.SUPCHAR:
+    case tt.PRIME:
+    case tt.FACTORIAL:
+      return token
+    default:
+    // do nothing
+  }
+  if (token.output === "-") {
+    return { input: "~", output: "\\text{-}", ttype: tt.UNARYMINUS }
+  } else {
+    return { input: "+", output: "~+", ttype: tt.UNARYMINUS }
+  }
+}
+
+const numFromSuperChar = {
+  "⁻": "-",
+  "²": "2",
+  "³": "3",
+  "¹": "1",
+  "⁰": "0",
+  "⁴": "4",
+  "⁵": "5",
+  "⁶": "6",
+  "⁷": "7",
+  "⁸": "8",
+  "⁹": "9"
+}
+
+const numFromSupChars = str => {
+  let num = ""
+  for (const ch of str) {
+    num += numFromSuperChar[ch]
+  }
+  return num
+}
+
+const colorSpecRegEx = /^(#([a-f0-9]{6}|[a-f0-9]{3})|[a-z]+|\([^)]+\))/i
+
+const midDotRegEx = /^(\*|·|\.|-[A-Za-z])/
+
+const unitRegEx = /^[A-Za-z0-9_\-⁰¹²³\u2074-\u2079⁻/·*.°′″‴ΩΩµμ]+/
+
+export const unitTeXFromString = str => {
+  // This function supports function parseQuantityLiteral()
+
+  // I wrap a unit name with an extra pair of braces {}.
+  // Tt's a hint so that plugValsIntoEcho() can easily remove a unit name.
+  let unit = " {\\text{"
+  let inExponent = false
+
+  for (let i = 0; i < str.length; i++) {
+    let ch = str.charAt(i)
+    if (exponentRegEx.test(ch)) {
+      ch = numeralFromSuperScript(ch)
+    }
+    if (midDotRegEx.test(str.slice(i))) {
+      unit += "}\\mkern1mu{\\cdot}\\mkern1mu\\text{"
+    } else if (/[0-9-]/.test(ch)) {
+      ch = ch === "-" ? "\\text{-}" : ch
+      if (inExponent) {
+        unit += ch
+      } else {
+        unit += "}^{" + ch
+        inExponent = true
+      }
+    } else if (ch === "^") {
+      unit += "}^{"
+      inExponent = true
+    } else if (inExponent) {
+      unit += "}\\text{" + ch
+      inExponent = false
+    } else {
+      unit += ch
+    }
+  }
+
+  return unit + "}}"
+}
+
+const currencyRegEx = /^-?[$$£¥\u20A0-\u20CF]/
+
+export const parseQuantityLiteral = (str, decimalFormat, tokenSep, isCalc) => {
+  // In Hurmet, a string delimited by single quotation marks, '…',
+  // is a QUANTITY literal, which includes a magnitude and a unit of measure.
+  // Examples: '10 lbf'  '-$50'   '30°'  '10 N⋅m/s'
+  // The magnitude can be a number, a vector, a matrix, or a map.
+
+  let tex = ""
+  let rpn = ""
+  let numStr = ""
+  let isNegated = false
+
+  str = str.replace(/'/g, "")
+
+  let currencySymbol = ""
+  let currencyRPN = ""
+  const currencyMatch = currencyRegEx.exec(str)
+  if (currencyMatch) {
+    currencySymbol = currencyMatch[0]
+    currencyRPN = currencySymbol
+    str = str.slice(currencySymbol.length).trim()
+    if (currencySymbol.charAt(0) === "-") {
+      isNegated = true
+      currencySymbol = "\\text{-}" + currencySymbol.slice(1)
+      currencyRPN = currencyRPN.slice(1)
+    }
+    currencySymbol = currencySymbol.replace("$", "\\$")
+  }
+
+  const c0 = str.charAt(0)
+  if (c0 === "?" || c0 === "@" || c0 === "!" || c0 === "%") {
+    // We're here because parse() has been called from prepareStatement().
+    // It wants us to return a resultTemplate with a TeX version of the
+    // statement's trail string. Put the display selector inside \text{}.
+    numStr = str.substring(0, str.charAt(1) === c0 ? 2 : 1)
+    tex = currencySymbol + "\\text{" + numStr + "}"
+
+  } else if ("([{".indexOf(c0) > -1) {
+    // A matrix or dictionary occupies the place normally held by a number.
+    const endChar = c0 === "{"
+      ? "}"
+      : c0 === "["
+      ? "]"
+      : c0 === "("
+      ? ")"
+      : "}"
+    const pos = str.indexOf(endChar)
+    numStr =  str.slice(0, pos + 1)
+
+    if (isCalc) {
+      [tex, rpn] = parse(numStr, decimalFormat, true)
+      if (tokenSep !== "\xa0") {
+        // We're inside a ternary expression. Use a different token separator.
+        rpn = rpn.replace(/\xa0/g, tokenSep)
+      }
+    } else {
+      tex = parse(numStr, decimalFormat, false)
+    }
+
+  } else {
+    const numParts = str.match(numberRegEx)
+    if (numParts) {
+      numStr = numParts[0]
+      rpn = rationalRPN(numStr)
+      tex = currencySymbol + texFromNumStr(numParts, decimalFormat)
+    } else {
+      // TODO: Error message.
+    }
+  }
+
+  if (currencySymbol.length > 0) {
+    rpn = numStr + "\xa0" + "applyUnit" + "\xa0" + currencyRPN
+    if (isNegated) { rpn = "-" + rpn }
+    return [tex, rpn]
+  }
+
+  tex += "\\;"
+
+  if (numStr.length < str.length) {
+    str = str.slice(numStr.length)
+    str = str.replace(/^\s*/, "")
+    let unitTex = ""
+
+    if ("°′″".indexOf(str.charAt(0)) > -1) {
+      tex = tex.replace(/\\;$/, "")
+    }
+
+    const unitMatch = unitRegEx.exec(str)
+    if (unitMatch) {
+      str = unitMatch[0]
+      if (isCalc) { rpn += "\xa0" + "applyUnit" + "\xa0" + str }
+      const posViniculum = str.indexOf("//")
+      if (posViniculum >= 0) {
+        // A stacked fraction.
+        const numerator = str.slice(0, posViniculum)
+        const denominator = str.slice(posViniculum + 2)
+        unitTex = "\\frac{" + unitTeXFromString(numerator) + "}{" +
+          unitTeXFromString(denominator) + "}"
+      } else {
+        unitTex = unitTeXFromString(str)
+      }
+    }
+    if (unitTex.length > 0 && numStr.length === 0) {
+      unitTex = "\\," + unitTex
+    }
+    tex += unitTex
+  }
+
+  return [tex, rpn]
+}
+
+const factors = /[0-9A-Za-zøØıȷ(\u0391-\u03A9\u03B1-\u03C9ϕℎℏ¨ˆˉ˙˜\uD835\uDC34-\uDC67\uDEE2-\uDF14ℂℇ\u210A-\u2113\u2118-\u211D\u2124-\u2126\u2128-\u212D\u212F-\u2138\u213D-\u2149\u2183\u2184\u2206\u221A-\u221C\u221E]/
+
+const setUpIf = (rpn, tokenInput, exprStack, delim) => {
+  // The Hurmet CASES expression acts lazily. To accommodate that, push the
+  // sub-expression onto a stack of expressions. At the closing brace,
+  // we'll pop all the expressions off the stack and place them after the conditions.
+  // Later, evaluate.js will evaluate the conditions and then pick the correct expression.
+  const expression = rpn.replace(/^.*\xa0/, "").replace(/§$/, "\xa0")
+  exprStack.push(expression)
+  rpn = rpn.length === expression.length ? "" : rpn.slice(0, rpn.length - expression.length)
+  delim.numArgs += 1
+  if (tokenInput === "otherwise") { rpn += "true" }
+  return rpn
+}
+
+const functionExpoRegEx = /^[\^⁻⁰¹²³\u2074-\u2079]/
+
+const openParenRegEx = /^ *\(/
+
+const exponentOfFunction = (str, decimalFormat, isCalc) => {
+  // As in: sin²()
+  let expoInput = ""
+  if (str.charAt(0) !== "^") {
+    expoInput = /^[⁰¹²³\u2074-\u2079⁻]+/.exec(str)[0]
+    expoInput = numeralFromSuperScript(expoInput)
+  } else if (!openParenRegEx.test(str.slice(1))) {
+    expoInput = lex(str.slice(1), decimalFormat, { input: "", output: "", ttype: 50 })[0]
+  } else {
+    // The exponent is in parens. Find its extent.
+    expoInput = "("
+    let level = 1
+    for (let i = 2; i < str.length; i++) {
+      const ch = str.charAt(i)
+      expoInput += ch
+      if ("\"'`".indexOf(ch) > -1) {
+        const pos = str.indexOf(ch, i + 1)
+        expoInput += str.slice(i + 1, pos + 1)
+        i = pos
+      } else if ("([{⟨\u2308\u23BF\u23BE\u3016".indexOf(ch) > -1) {
+        level += 1
+      } else if (")]}⟩\u2309\u230B\u23CC\u3017".indexOf(ch) > -1) {
+        level -= 1
+      }
+      if (level === 0) { break }
+    }
+  }
+
+  const parseInput = (expoInput.charAt(0) === "(")
+    ? expoInput.slice(1, -1).trim()
+    : expoInput
+
+  if (isCalc) {
+    const expoOutput = parse(parseInput, decimalFormat, true)
+    return [expoInput, "{" + expoOutput[0] + "}", expoOutput[1]]
+  } else {
+    const expoTex = parse(parseInput, decimalFormat, false)
+    return [expoInput, "{" + expoTex + "}", ""]
+  }
+}
+
+const testForImplicitMult = (prevToken, texStack, str) => {
+  // Some math expressions imply a multiplication without writing an explicit operator token.
+  // Examples:  e = m c², y = 3(2+5), n = (a+5)x, z = 5 + 2i
+  // Hurmet writes the echo expression with a more explicit written form of multiplication.
+  // The echo shows each multiplication in one of three ways: a x b,  a · b, or (a)(b)
+  // This sub is going to determine if such an adjustment is required for the current position.
+
+  if (texStack.length > 0) {
+    // Test for a tex unary function or a function w/ tt.SUP or tt.SUB
+    const topType = texStack[texStack.length - 1].ttype
+    if (topType === tt.UNARY || topType === tt.BINARY) { return false }
+    if (topType === tt.SUB || topType === tt.SUP) {
+      if (texStack[texStack.length - 1].isOnFunction) { return false }
+    }
+  }
+
+  let isPreceededByFactor = false
+  if (prevToken.output) {
+    const pc = prevToken.output.charAt(prevToken.length - 1)
+    if (")]}".indexOf(pc) > -1) {
+      if ((pc === ")" || pc === "]") && /^[([]/.test(str)) {
+        // This was already handled by the tt.RIGHTBRACKET case
+        return false
+      } else {
+        isPreceededByFactor = true
+      }
+    } else {
+      switch (prevToken.ttype) {
+        case tt.ORD:
+        case tt.NUM:
+        case tt.VAR:
+        case tt.LONGVAR:
+        case tt.PRIME:
+        case tt.SUP:
+        case tt.SUPCHAR:
+        case tt.SUB:
+        case tt.PROPERTY:
+        case tt.QUANTITY:
+        case tt.RIGHTBRACKET:
+        case tt.FACTORIAL:
+          isPreceededByFactor = true
+          break
+        default:
+          isPreceededByFactor = false
+      }
+    }
+  }
+  if (isPreceededByFactor && nextCharIsFactor(str, prevToken)) { return true }
+  return false
+}
+
+const nextCharIsFactor = (str, token) => {
+  const fc = str.charAt(0)
+
+  let fcMeetsTest = false
+  if (str.length > 0) {
+    if (fc === "|" || fc === "‖") {
+      // TODO: Work out left/right
+    } else if (/^#?[({[]/.test(str) &&
+      (isIn(token.ttype, [tt.ORD, tt.NUM, tt.RIGHTBRACKET, tt.QUANTITY]))) {
+      return true
+    } else {
+      if (factors.test(fc)) {
+        fcMeetsTest = !/^(if|and|atop|or|else|modulo|otherwise|not|for|in|while)\b/.test(str)
+      }
+    }
+  }
+  return fcMeetsTest
+}
+
+const surroundWithParens = (token) => {
+  if (token.output.indexOf("\\frac{") > -1) {
+    token.output = "\\left(" + token.output + "\\right)"
+  } else {
+    token.output = "(" + token.output + ")"
+  }
+  return token
+}
+
+const cloneToken = token => {
+  return {
+    input: token.input,
+    output: token.output,
+    ttype: token.ttype,
+    closeDelim: token.closeDelim
+  }
+}
+
+// The RegEx below is equal to /^\s+/ except it omits \n and the no-break space \xa0.
+// I use \xa0 to precede the combining arrow accent character \u20D7.
+export const leadingSpaceRegEx = /^[ \f\r\t\v\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]+/
+
+/* eslint-disable indent-legacy */
+const rpnPrecFromType = [
+  12, 12, 15, 13, 16, 10,
+       7, 15, -1, -1, -1,
+      -1,  1, -1,  0,  0,
+      -1,  0, -1, -1,  0,
+       6,  7,  5,  4,  1,
+      -1, 16, 15, -1, 14,
+      13,  9,  3,  2, 10,
+      -1, -1,  4, 3
+]
+
+const texPrecFromType = [
+  12, 12, 15, 13, 16, 10,
+       2, 15, -1,  2,  2,
+       2,  1,  2,  2,  0,
+       1,  1,  2,  2,  1,
+       2,  2,  1,  1,  1,
+       2, -1, 15,  2, 14,
+      13,  9, -1,  1, -1,
+      15, -1,  1,  -1
+]
+/* eslint-enable indent-legacy */
+
+/* Operator Precedence
+TeX  RPN
+  0    0    ( [ {        delimiters
+  1    1    , ;  :       separators for arguments, elements, rows, and key:value pairs
+  1    2    for in while loop keywords
+  1    3    :            range separator
+  1    4    if ∧ ∨       logical operators, return
+  1    5    < > ≤ ≥      comparisons
+  2    6    + -          addition and subtraction
+  2    7    * (x)(y) /   multiplication, division
+  9    9    ∠            \angle. Used as a separator for complex numbers in polar notation
+ 10   10    -            unary minus
+ 12   12    sqrt sin     unary functions, math functions, and binary functions (e.g. root 3 x)
+ 13   13    ^            superscript, i.e. exponent
+ 14   14    ! % ‰        factorial, percent, permil
+ 15   15    _ ' .        subscript, prime, dot notation property accessor
+ 16   16    hat bb       accent and font
+*/
+
+// Delimiter types
+const dNOTHING = 0
+const dPAREN = 1 //           () or [] or {} w/o internal , ; : |
+const dFUNCTION = 2 //        sin(x)
+const dACCESSOR = 3 //        identifier[index] or identifier[start:step:end]
+const dMATRIX = 4 //          [1; 2] or (1, 2; 3, 4) or {1, 2}
+const dVECTORFROMRANGE = 5 // [start:end] or [start:step:end]
+const dDICTIONARY = 6 //      { key:value, key:value } or { key:value; key:value }
+const dCASES = 7 //           { a if b; c otherwise }
+const dSUBSCRIPT = 8 //       Parens around a subscript do not get converted into matrices.
+const dDISTRIB = 9 //         A probability distribution defined by a confidence interval.
+
+export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
+  // Variable definitions
+  let tex = ""
+  let rpn = ""
+  let token = {}
+  let prevToken = { input: "", output: "", ttype: 50 }
+  let mustLex = true
+  let posOfPrevRun = 0
+  let isPrecededBySpace = false
+  let isFollowedBySpace = false
+  let isImplicitMult = false
+  let followedByFactor = false
+  let op
+  const texStack = [] // operator stack for TeX rendering
+  const rpnStack = [] // operator stack for RPN
+  const delims = [{ delimType: dNOTHING, isTall: false }] // delimiter stack
+  let okToAppend = true
+  let fc = ""
+  let pendingFunctionName = ""
+  let tokenSep = "\xa0" // no break space
+  let rpnPrec = -1
+  const exprStack = [] // Use for lazy evalulation of ternary (If) expressions
+
+  // This function, parse(), is the main function for this module.
+  // Before we get to the start line, we write two enclosed functions,
+  // popRpnTokens() and popTexTokens().
+  // They are placed here in order to share variable scope with parse().
+
+  const popRpnTokens = rpnPrec => {
+    if (isCalc && rpnPrec >= 0) {
+      // Pop operators off the rpnStack and append them to the rpn string
+      while (rpnStack.length > 0) {
+        if (rpnStack[rpnStack.length - 1].prec < rpnPrec) { break }
+        rpn += rpnStack.pop().symbol + tokenSep
+      }
+    }
+  }
+
+  const popTexTokens = (texPrec, okToAppend, closeDelim) => {
+
+    if (!okToAppend) { return }
+
+    // Pop tokens off the texStack. Append closing delimiters to the tex string.
+    // When necessary, insert an opening brace before a fraction numerator.
+    if (texStack.length === 0) {
+      if (prevToken.ttype !== tt.RIGHTBRACKET && prevToken.ttype !== tt.LEFTRIGHT) {
+        // The purpose of op.pos in general is to let some possible
+        // upcoming division know where to insert a "\frac{" before the numerator.
+        // If we've gotten here, then no operators are on the texStack, so set op.pos
+        // at the beginning of the previous token.
+        op = { pos: posOfPrevRun, ttype: prevToken.ttype, closeDelim: "" }
+      }
+      return
+    }
+
+    const topOp = texStack[texStack.length - 1]
+    if (
+      (texPrec === 2 || texPrec === 12  || texPrec === 14 || texPrec === 15) &&
+      (prevToken.ttype !== tt.RIGHTBRACKET && prevToken.ttype !== tt.LEFTRIGHT) &&
+      topOp.prec < texPrec
+    ) {
+      op = { pos: posOfPrevRun, ttype: prevToken.ttype, closeDelim: "" }
+      return
+    }
+
+    //  Pop operators whose precedence ≥ texPrec. Append a close delimiter for each.
+    let delim = {}
+    while (texStack[texStack.length - 1].prec >= texPrec) {
+      op = texStack.pop()
+
+      // Before we append braces, check if we must hide a pair of parens.
+      if (op.prec === 0) {
+        // We just popped a delimiter operator.
+        delim = delims[delims.length - 1]
+        if ((op.ttype === tt.LEFTBRACKET || op.ttype === tt.LEFTRIGHT) &&
+          op.closeDelim.length > 0) {
+          if (texStack.length > 0) {
+            if (
+              op.ttype === tt.LEFTRIGHT &&
+              token.output === ")" &&
+              texStack[texStack.length - 1].closeDelim === ")"
+            ) {
+              // op is a middle |, as in P(A|B). Check if it's tall.
+              if (delim.isTall) {
+                tex = tex.substring(0, op.pos) + "\\middle" + tex.substring(op.pos)
+                delims[delims.length - 1].isTall = true
+              }
+              // Pop another delim.
+              op = texStack.pop()
+              delims.pop()
+              delim = delims[delims.length - 1]
+            }
+          }
+
+          // The next line enables |ϕ⟩ notation.
+          if (op.closeDelim === "\\rvert " && closeDelim) { op.closeDelim = closeDelim }
+
+          if (delim.delimType === dMATRIX) {
+            tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + 1)
+            op.closeDelim = delim.close
+          } else if (delim.delimType === dCASES) {
+            tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + 2)
+            op.closeDelim = delim.close
+          } else if (delim.delimType === dPAREN &&
+            delim.name === "(" && /^(\/|\\atop\s)/.test(str)) {
+            // The parens surround a numerator. Delete them.
+            tex = tex.substring(0, op.pos) + tex.substring(op.pos + 1)
+            op.closeDelim = ""
+          } else if (delim.delimType === dDICTIONARY && delim.open.length > 3) {
+            tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + 2)
+            op.closeDelim = delim.close
+          } else if (delim.isPrecededByDiv && delim.delimType === dPAREN &&
+              delim.name === "(" && (/^[^^_!%]/.test(str) || str.length === 0)) {
+            // The parens surround a denominator. Delete them.
+            tex = tex.substring(0, op.pos) + tex.substring(op.pos + 1)
+            op.closeDelim = ""
+          } else if (delim.isTall) {
+            // Make the delims tall.
+            if (/^\\left/.test(tex.substring(op.pos)) === false) {
+              tex = tex.substring(0, op.pos) + "\\left" + tex.substring(op.pos)
+            }
+            if (/\\right/.test(op.closeDelim) === false) {
+              op.closeDelim = "\\right" + token.output
+            }
+          }
+        }
+      }
+
+      tex = tex.replace(/\\, *$/, "") // Remove an implicit multiplication space.
+      tex += op.closeDelim
+
+      if (op.closeDelim.slice(-1) === "{") {
+        // We just closed the first part of a binary function, e.g. root()(),
+        // or a function exponent (sin^2 θ) or function subscript (log_10)
+        if (op.ttype === tt.BINARY) {
+          texStack.push({ prec: 12, pos: op.pos, ttype: tt.UNARY, closeDelim: "}" })
+          if (isCalc) {
+            rpn += tokenSep
+            if (rpnStack[rpnStack.length - 1].symbol === "\\sqrt") {
+              rpnStack[rpnStack.length - 1].symbol = "root"
+            }
+          }
+        }
+        op.ttype = tt.UNARY
+        prevToken = { input: "", output: "", ttype: tt.UNARY }
+        return
+      }
+
+      if (texStack.length === 0 || op.prec === 0) {
+        return
+      }
+    }
+  }
+
+  // With the closed functions out of the way, we execute the main parse loop.
+  str = str.replace(leadingSpaceRegEx, "") //       trim leading white space from string
+  str = str.replace(/\s+$/, "") //                  trim trailing white space
+
+  while (str.length > 0) {
+    // Get the next token.
+    if (str.charAt(0) === "\n") {
+      str = str.slice(1)
+      const prevChar = prevToken ? prevToken.input.slice(-1) : "0"
+      if (
+        prevToken.ttype === tt.COMMENT ||
+        ("{[(,;+-".indexOf(prevChar) === -1 && !/^ *[)}\]]/.test(str))
+      ) {
+        popTexTokens(0, true)
+        tex += "\\\\ "
+        const matchObj = /^ +/.exec(str)
+        if (matchObj) {
+          tex += "\\quad ".repeat(matchObj[0].length - 1)
+        }
+      }
+      str = str.trim()
+    }
+
+    mustLex = true // default
+
+    isImplicitMult = isPrecededBySpace && okToAppend &&
+      testForImplicitMult(prevToken, texStack, str)
+    if (isImplicitMult) {
+      const prevType = prevToken.ttype
+      token = {
+        input: "⌧",
+        output: prevType === tt.LONGVAR || prevType === tt.NUM ? "\\," : "",
+        ttype: tt.MULT
+      }
+      isFollowedBySpace = false
+      mustLex = false
+    }
+
+    if (mustLex) {
+      const tkn = lex(str, decimalFormat, prevToken)
+      token = { input: tkn[0], output: tkn[1], ttype: tkn[2], closeDelim: tkn[3] }
+      str = str.substring(token.input.length)
+      isFollowedBySpace = leadingSpaceRegEx.test(str)
+      str = str.replace(leadingSpaceRegEx, "")
+      followedByFactor = nextCharIsFactor(str, token)
+    }
+
+    switch (token.ttype) {
+      case tt.ACCESSOR: //   dot between a dictionary name and a property, as in r.PROPERTY
+      case tt.PUNCT: //      spaces and newlines
+      case tt.BIN: //        infix math operators that render but don't calc, e.g. \bowtie
+      case tt.ADD: //        infix add/subtract operators, + -
+      case tt.MULT: //       infix mult/divide operators, × * · // ÷
+      case tt.REL: //        relational operators, e.g  < →
+      case tt.ANGLE: //      \angle. Used as a separator for complex numbers in polar notation
+      case tt.UNDEROVER: { // int, sum, lim, etc
+        if (token.output.length > 0 && "- +".indexOf(token.output) > -1) {
+          token = checkForUnaryMinus(token, prevToken)
+        }
+
+        if (isCalc && token.ttype !== tt.PUNCT) {
+          if (token.output !== "\\text{-}") { rpn += tokenSep }
+          rpnPrec = rpnPrecFromType[token.ttype]
+          popRpnTokens(rpnPrec)
+        }
+
+        const texPrec = texPrecFromType[token.ttype]
+        popTexTokens(texPrec, okToAppend)
+        tex += token.output + " "
+        posOfPrevRun = tex.length
+
+        if (token.ttype === tt.UNDEROVER && delims.length > 1) {
+          delims[delims.length - 1].isTall = true
+        } else if (isCalc) {
+          rpnStack.push({ prec: rpnPrec, symbol: token.input })
+        }
+
+        okToAppend = true
+        break
+      }
+
+      case tt.NUM:
+      case tt.ORD:
+        // Numbers and ORDs get appended directly onto rpn. Pass -1 to suppress an rpn pop.
+        popTexTokens(2, okToAppend)
+        if (isCalc) {
+          popRpnTokens(-1)
+          rpn += token.ttype === tt.NUM ? rationalRPN(token.input) : token.input
+        }
+        if (isPrecededBySpace) { posOfPrevRun = tex.length }
+        if (isCalc &&
+          (prevToken.ttype === tt.MULT || (followedByFactor && prevToken.ttype !== tt.DIV))) {
+          token = surroundWithParens(token)
+        }
+        tex += token.output + " "
+        okToAppend = true
+
+        if (isCalc && !isFollowedBySpace && followedByFactor) {
+          // We've encountered something like the expression "2a".
+          rpn += tokenSep
+          popTexTokens(2, okToAppend)
+          popRpnTokens(7)
+          rpnStack.push({ prec: rpnPrecFromType[tt.MULT], symbol: "⌧" })
+        }
+        break
+
+      case tt.STRING: {
+        popTexTokens(2, okToAppend)
+        const ch = token.input.charAt(0)
+        if (isCalc) { rpn += ch + token.output + ch }  // Keep before addTextEscapes()
+        token.output = addTextEscapes(token.output)
+        token.output = token.output.replace(/ +$/, "\\,") // Prevent loss of trailing space
+        tex += "\\text{" + token.output + "}"
+        okToAppend = true
+        break
+      }
+
+      case tt.VAR: //      variable name, one letter long
+      case tt.LONGVAR: // multi-letter variable name
+        if (token.ttype === tt.LONGVAR && prevToken.input === "⌧") {
+          tex += "\\," // Place a space before a long variable name.
+        }
+        // variables get appended directly onto rpn.
+        popTexTokens(7, okToAppend)
+        if (isPrecededBySpace) { posOfPrevRun = tex.length }
+
+        token.output = assertCalligraphic(token.output)
+
+        if (!isCalc) {
+          if (token.ttype === tt.LONGVAR) {
+            token.output = "\\mathrm{" + token.output + "}"
+          }
+        } else if (prevToken.input === "for") {
+          rpn += '"' + token.input + '"' // a loop index variable name.
+        } else {
+          // We're in the echo of a Hurmet calculation.
+          if (str.charAt(0) === ".") {
+            token.output = token.ttype === tt.LONGVAR
+              ? "\\mathrm{" + token.output + "}"
+              : token.output
+          } else {
+            token.output = token.input
+            token.output = "〖" + token.output
+          }
+          rpn += "¿" + token.input
+        }
+
+        tex += token.output + " "
+        if (isCalc) {
+          // The variable's value may be tall. We don't know.
+          delims[delims.length - 1].isTall = true
+        }
+        okToAppend = true
+        break
+
+      case tt.QUANTITY: { //  e.g.  '10 meters'
+        popTexTokens(2, okToAppend)
+        if (isPrecededBySpace) { posOfPrevRun = tex.length }
+        const [qtyTex, qtyRPN] = parseQuantityLiteral(token.input,
+          decimalFormat, tokenSep, isCalc)
+        token.output = qtyTex
+        if (prevToken.ttype === tt.MULT || followedByFactor) {
+          token = surroundWithParens(token)
+        }
+        if (isCalc) { rpn += tokenSep + qtyRPN }
+        tex += token.output
+        if (/\\begin|\\frac/.test(token.output)) { delims[delims.length - 1].isTall = true }
+        okToAppend = true
+        if (isCalc && !isFollowedBySpace && followedByFactor) {
+          // We've encountered something like the expression "2a".
+          rpn += tokenSep
+          popTexTokens(2, okToAppend)
+          popRpnTokens(7)
+          rpnStack.push({ prec: rpnPrecFromType[tt.MULT], symbol: "⌧" })
+        }
+        break
+      }
+
+      case tt.PROPERTY: {
+        // A word after a dot ACCESSOR operator. I.e., A property in dot notation
+        // Treat somewhat similarly to tt.STRING
+        popTexTokens(15, okToAppend)
+        if (isCalc) { rpn += '"' + token.output + '"' }
+        const pos = token.input.indexOf("_")
+        if (pos > -1) {
+          tex += token.input.substring(0, pos) + "_\\mathrm{" +
+            token.input.substring(pos + 1) + "}"
+        } else {
+          token.output = addTextEscapes(token.output)
+          token.output = token.output.replace(/ +$/, "\\,") // Prevent loss of trailing space
+          tex += "\\text{" + token.output + "}"
+        }
+        okToAppend = true
+        break
+      }
+
+      case tt.TO: {
+        // A probability distribution defined by its low and high values.
+        // As in: (2 to 3) or [2 to 3] or {2 to 3}
+        delims[delims.length - 1].delimType = dDISTRIB
+        popTexTokens(1, okToAppend)
+        posOfPrevRun = tex.length
+        tex += token.output
+        if (isCalc) {
+          rpn += tokenSep
+          popRpnTokens(3)
+          const symbol = delims[delims.length - 1].symbol
+          const distribution = symbol === "("
+            ? "normal"
+            : symbol === "["
+            ? "uniform"
+            : "lognormal"
+          rpnStack.push({ prec: 3, symbol: distribution })
+        }
+        break
+      }
+
+      case tt.COLON: {
+        //   range separator, as in 1:n, or key:value separator
+        let isKeyValueSeparator = false
+        const topDelim = delims[delims.length - 1]
+        if (topDelim.delimType === dDICTIONARY) {
+          isKeyValueSeparator = true
+        } else if (topDelim.delimType === dPAREN && topDelim.name === "{") {
+          topDelim.delimType = dDICTIONARY
+          isKeyValueSeparator = true
+        } else if (topDelim.delimType === dPAREN && topDelim.name === "[")  {
+          topDelim.delimType = dVECTORFROMRANGE
+        }
+        rpnPrec = isKeyValueSeparator ? 1 : 3
+
+        if (isCalc) {
+          rpn += tokenSep
+          popRpnTokens(rpnPrec)
+        }
+        popTexTokens(1, okToAppend)
+        posOfPrevRun = tex.length
+
+        if (isCalc) {
+          rpnStack.push({ prec: rpnPrec, symbol: isKeyValueSeparator ? ":" : ".." })
+          if (str.charAt(0) === "]" && !isKeyValueSeparator) {
+            rpn += '"∞"' // slice of the form: identifier[n:]
+          }
+        }
+        tex += token.output
+        break
+      }
+
+      case tt.DIV:  // ///  / or \atop
+        if (isCalc) { rpn += tokenSep }
+        popTexTokens(2, true)
+        popRpnTokens(7)
+        if (token.input === "//") {
+          // case fraction
+          texStack.push({ prec: 2, pos: op.pos, ttype: tt.DIV, closeDelim: "}" })
+          tex = tex.substring(0, op.pos) + "\\frac{" + tex.substring(op.pos) + "}{"
+        } else if (token.input === "/") {
+          // displaystyle fraction
+          texStack.push({ prec: 2, pos: op.pos, ttype: tt.DIV, closeDelim: "}" })
+          tex = tex.substring(0, op.pos) + "\\dfrac{" + tex.substring(op.pos) + "}{"
+        } else {
+          // atop, for binomials
+          texStack.push({ prec: 2, pos: op.pos, ttype: tt.DIV, closeDelim: "}}" })
+          tex = tex.substring(0, op.pos) + "{{" + tex.substring(op.pos) + "}\\atop{"
+        }
+        if (isCalc) {
+          if (token.input === "\\atop") {
+            if (delims[delims.length - 1].delimType === dPAREN) {
+              rpnStack.push({ prec: 7, symbol: "()" })
+            }
+          } else {
+            rpnStack.push({ prec: 7, symbol: token.input })
+          }
+        }
+        delims[delims.length - 1].isTall = true
+        posOfPrevRun = tex.length
+        okToAppend = false
+        break
+
+      case tt.SUB: { // _
+        popTexTokens(15, true)
+        const subCD = prevToken.ttype === tt.FUNCTION ? "}{" : "}"
+        texStack.push({ prec: 15, pos: op.pos, ttype: tt.SUB, closeDelim: subCD })
+        tex += "_{"
+        if (isCalc) { rpn += "_" }
+        okToAppend = false
+        break
+      }
+
+      case tt.SUP: // ^
+        if (isCalc) {
+          rpn += tokenSep
+          popRpnTokens(13)
+        }
+        popTexTokens(13, true)
+        if (prevToken.ttype === tt.RIGHTBRACKET) {
+          texStack.push({ prec: 13, pos: op.pos, ttype: tt.SUP, closeDelim: "}" })
+        } else {
+          texStack.push({ prec: 13, pos: posOfPrevRun, ttype: tt.SUP, closeDelim: "}" })
+        }
+        if (isCalc) { rpnStack.push({ prec: 13, symbol: "^" }) }
+        tex += "^{"
+        okToAppend = false
+        break
+
+      case tt.SUPCHAR: { //  ²³¹⁰⁴⁵⁶⁷⁸⁹⁻
+        if (isCalc) {
+          rpn += tokenSep
+          popRpnTokens(13)
+        }
+        popTexTokens(13, true)
+        const supNum = numFromSupChars(token.output)
+        if (prevToken.ttype === tt.RIGHTBRACKET) {
+          texStack.push({ prec: 13, pos: op.pos, ttype: tt.SUP, closeDelim: "}" })
+        } else {
+          texStack.push({ prec: 13, pos: posOfPrevRun, ttype: tt.SUP, closeDelim: "}" })
+        }
+        tex += "^{" + supNum
+        if (isCalc) {
+          rpnStack.push({ prec: 13, symbol: "^" })
+          rpn += rationalRPN(supNum)
+        }
+        okToAppend = true
+        break
+      }
+
+      case tt.FUNCTION: { // e.g. sin or tan,  shows parens
+        popTexTokens(2, okToAppend)
+        posOfPrevRun = tex.length
+        // Is there an exponent on the function name?
+        if (functionExpoRegEx.test(str)) {
+          const [expoInput, expoTex, expoRPN] = exponentOfFunction(str, decimalFormat, isCalc)
+          if (isCalc && expoRPN === `▸1/1${tokenSep}~` && isIn(token.input, trigFunctions)) {
+            // Inverse trig function.
+            token.input = "a" + token.input
+            token.output = "\\a" + token.output.slice(1)
+          } else {
+            if (isCalc) { token.input += tokenSep + expoRPN + tokenSep + "^" }
+            token.output += "^" + expoTex
+          }
+          const L = expoInput.length + (str.charAt(0) === "^" ? 1 : 0)
+          str = str.slice(L).trim()
+        }
+        if (isCalc) {
+          rpnStack.push({ prec: 12, symbol: token.input })
+          if (prevToken.input === "⌧") { tex += "×" }
+        }
+        fc = str.charAt(0)
+        texStack.push({
+          prec: 12,
+          pos: tex.length,
+          ttype: tt.FUNCTION,
+          closeDelim: fc === "(" ? "" : "}"
+        })
+        tex += token.output
+        tex += fc === "(" ? "" : "{"
+        pendingFunctionName = token.input
+        okToAppend = false
+        break
+      }
+
+      case tt.ACCENT:
+        if (isCalc) {
+          rpn += tokenSep
+          popRpnTokens(16)
+        }
+        popTexTokens(1, okToAppend)
+
+        if (isCalc) {
+          texStack.push({ prec: 16, pos: tex.length, ttype: tt.ACCENT, closeDelim: "〗" })
+          tex += "〖" + token.input
+          rpn += "¿" + token.input
+        } else {
+          texStack.push({ prec: 16, pos: tex.length, ttype: tt.ACCENT, closeDelim: "}" })
+          tex += token.output + "{"
+        }
+
+        delims[delims.length - 1].isTall = true
+        okToAppend = false
+        break
+
+      case tt.PRIME:
+        popTexTokens(15, true)
+        if (isCalc) { rpn += token.input }
+        tex = tex.trim() + token.output + " "
+        okToAppend = true
+        break
+
+      case tt.BINARY: { // e.g. root(3)(x)
+        popTexTokens(1, okToAppend)
+        posOfPrevRun = tex.length
+        const binCD = token.input === "root" ? "]{" : "}{"
+        texStack.push({ prec: 12, pos: tex.length, ttype: tt.BINARY, closeDelim: binCD })
+        if (isCalc) { rpnStack.push({ prec: 12, symbol: token.output }) }
+        tex += token.output + (token.input === "root" ? "[" : "{")
+        delims[delims.length - 1].isTall = true
+        okToAppend = false
+        break
+      }
+
+      case tt.UNARY: // e.g. bb, hat, or sqrt, or xrightarrow, hides parens
+        popTexTokens(1, okToAppend)
+        posOfPrevRun = tex.length
+        texStack.push({ prec: 12, pos: tex.length, ttype: tt.UNARY, closeDelim: "}" })
+        if (isCalc) { rpnStack.push({ prec: 12, symbol: token.input }) }
+        if (isCalc && prevToken.input === "⌧") {
+          // preceded by implicit multiplication
+          tex += "×"
+        }
+        tex += token.output
+
+        if (/det|inf/.test(token.input) && str.charAt(0) === "_") {
+          texStack.push({ prec: 15, pos: tex.length, ttype: tt.SUB, closeDelim: "}" })
+          token = { input: "_", output: "_", ttype: tt.SUB }
+          tex += "_{"
+          str = str.substring(1)
+          str = str.replace(/^\s+/, "")
+        } else if (token.input === "\\color") {
+          const colorMatch = colorSpecRegEx.exec(str)
+          if (colorMatch) {
+            tex += "{" + colorMatch[0].replace(/[()]/g, "") + "}"
+            texStack.pop()
+            str = str.slice(colorMatch[0].length).trim()
+          } else {
+            // User is in the middle of writing a color spec. Avoid an error message.
+            tex += "{"
+          }
+        } else {
+          tex += "{"
+        }
+        delims[delims.length - 1].isTall = true
+        okToAppend = false
+        break
+
+      case tt.FACTORIAL:
+        popTexTokens(14, true)
+        texStack.push({ prec: 14, pos: op.pos, ttype: tt.FACTORIAL, closeDelim: "" })
+        if (isCalc) {
+          popRpnTokens(14)
+          rpn += tokenSep + token.output
+        }
+        tex += token.output
+        okToAppend = true
+        break
+
+      case tt.RETURN:
+        // Special treatment in order to enable user-defined functions.
+        popTexTokens(1, okToAppend)
+        posOfPrevRun = tex.length
+        if (isCalc) {
+          popRpnTokens(4)
+          rpnStack.push({ prec: 4, symbol: "return" })
+        }
+        tex += token.output + " "
+        break
+
+      case tt.KEYWORD:
+        // Either "for", "in", "while", or "break"
+        popTexTokens(1, true)
+        posOfPrevRun = tex.length
+        if (isCalc) {
+          popRpnTokens(2)
+          if (token.input === "in") {
+            rpn += tokenSep
+            rpnStack.push({ prec: rpnPrec, symbol: "for" })
+          }
+        }
+        tex += token.output + " "
+        break
+
+      case tt.LOGIC: {
+        // logic words: if and or otherwise
+        popTexTokens(1, okToAppend)
+        if (isCalc) { rpn += tokenSep }
+        popRpnTokens(4)
+        const topDelim = delims[delims.length - 1]
+        if (token.input === "if" || token.input === "otherwise") {
+          if (topDelim.delimType === dPAREN && topDelim.name === "{") {
+            // Change the enclosing delim pair to a CASES expression.
+            topDelim.delimType = dCASES
+            topDelim.close = "\\end{cases}"
+            topDelim.open = "\\begin{cases}"
+            // In order to get lazy evaluation of a CASES, we will have to move the
+            // expressions after the conditions. Temporarily change the token separator.
+            if (isCalc && tokenSep === "\xa0" && token.input === "if") {
+              // Change the token separators in the preceding RPN.
+              rpn = rpn.slice(0, topDelim.rpnPos) +
+                rpn.slice(topDelim.rpnPos).replace(/\xa0/g, "§")
+            }
+          }
+        }
+        if (topDelim.delimType === dCASES && isIn(token.input, ["if", "otherwise"])) {
+          tex += "&"
+        }
+        tex += token.output
+        if (isCalc) {
+          if (topDelim.delimType === dCASES &&
+            (token.input === "if" || token.input === "otherwise")) {
+            // We're in an If Expression and we just reached the end of an expression.
+            rpn = setUpIf(rpn, token.input, exprStack, topDelim)
+            tokenSep = "\xa0"
+          } else {
+            rpnStack.push({ prec: 4, symbol: token.input })
+          }
+        }
+        posOfPrevRun = tex.length
+        okToAppend = true
+        break
+      }
+
+      case tt.LEFTBRACKET: {
+        popTexTokens(2, okToAppend)
+        const isPrecededByDiv = prevToken.ttype === tt.DIV
+        let isFuncParen = false
+
+        const texStackItem = {
+          prec: 0,
+          pos: tex.length,
+          ttype: tt.LEFTBRACKET
+        }
+
+        if ((token.input === "(" || token.input === "[") && prevToken.ttype < 5) {
+          // The delimiters are here to delimit a TeX function extent.
+          // Make the delimiters invisible.
+          texStackItem.closeDelim = ""
+        } else if (token.input === "(" && op.ttype === tt.BINARY) {
+          texStackItem.closeDelim = ""
+        } else {
+          texStackItem.closeDelim = token.closeDelim
+          isFuncParen = (token.input === "(" || token.input === "[") &&
+            prevToken.ttype === tt.FUNCTION
+          tex += token.output
+        }
+        texStack.push(texStackItem)
+
+        if (isCalc) {
+          while (rpnStack.length > 0 && rpnStack[rpnStack.length - 1].symbol === ".") {
+            rpn += tokenSep + rpnStack.pop().symbol
+          }
+          rpnStack.push({ prec: 0, symbol: token.output.trim() })
+        }
+
+        const numArgs = /^\s*[)}\]]/.test(str) ? 0 : 1
+
+        const delim = {
+          name: token.input,
+          isTall: false,
+          open: token.output,
+          close: texStackItem.closeDelim,
+          numArgs,
+          numRows: numArgs,
+          rpnPos: rpn.length,
+          isPrecededByDiv,
+          isFuncParen
+        }
+
+        if (isFuncParen) {
+          delim.delimType = dFUNCTION
+          delim.name = pendingFunctionName
+        } else if (prevToken.ttype === tt.SUB) {
+          delim.delimType = dSUBSCRIPT
+          delim.name = "("
+        } else if (token.input === "{") {
+          // This may change to a dDICTIONARY or a CASES.
+          delim.delimType = dPAREN
+          delim.rpnLength = rpn.length
+        } else if (token.input === "[" &&
+            (isIn(prevToken.ttype, [tt.VAR, tt.LONGVAR, tt.STRING, tt.PROPERTY]) ||
+            prevToken.input === "]")) {
+          rpn += tokenSep
+          delim.delimType = dACCESSOR
+        } else {
+          // This may change to a MATRIX, but for now we'll say it's a paren.
+          delim.delimType = dPAREN
+          delim.name = token.input
+        }
+        delims.push(delim)
+
+        pendingFunctionName = ""
+        posOfPrevRun = tex.length
+        okToAppend = false
+        break
+      }
+
+      case tt.SEP: {
+        // Either a comma or a semi-colon. Colons are handled elsewhere.
+        popTexTokens(1, okToAppend)
+        posOfPrevRun = tex.length
+
+        if (token.input === "\\," || token.input === "\\;") {
+          // escape characters that enable commas in a non-matrix paren.
+          tex += token.output + " "
+        } else {
+          const delim = delims[delims.length - 1]
+          if (delim.delimType === dPAREN &&
+            !(token.input === "," && delim.name === "{")) {
+            delim.delimType = dMATRIX
+            const ch = delim.name === "[" ? "b" : delim.name === "(" ? "p" : "B"
+            delim.open = `\\begin{${ch}matrix}`
+            delim.close = `\\end{${ch}matrix}`
+            delim.isTall = true
+            token.output = token.input === "," ? "&" : "\\\\"
+          } else if (delim.delimType === dMATRIX && token.input === ",") {
+            token.output = "&"
+          } else if (delim.delimType === dDICTIONARY && token.input === ";") {
+            token.output = "\\\\"
+            if (!delim.open.length < 5) {
+              delim.open = "\\begin{Bmatrix}"
+              delim.close = "\\end{Bmatrix}"
+              delim.isTall = true
+            }
+          } else if (delim.delimType > 3 && token.input === ";") {
+            token.output = "\\\\"
+          }
+          if (isCalc) {
+            if (prevToken.ttype === tt.LEFTBRACKET && delim.delimType === dACCESSOR) {
+              rpn += "▸0/1"
+            }
+            rpn += tokenSep
+            popRpnTokens(1)
+          }
+
+          tex += token.output + " "
+
+          if (isCalc) {
+            if (delims.length === 1) {
+              rpn += token.output
+
+            } else {
+              if (token.input === ";") {
+                delim.numRows += 1
+                if (delims.length > 0 && delim.delimType === dCASES) {
+                // We're about to begin an expression inside an If Expression.
+                // Temporarily change the token separator.
+                  tokenSep = "§"
+                }
+              }
+
+              if (delim.numRows === 1) {
+                if (token.input === ","  ||
+                    (token.input === " " && (delim.delimType === dMATRIX))) {
+                  if (str.charAt(0) === "]") { rpn += "▸0/1" }
+                }
+              }
+              delim.numArgs += 1
+            }
+          }
+        }
+        okToAppend = true
+        break
+      }
+
+      case tt.RIGHTBRACKET: {
+        popTexTokens(0, true, token.output)
+        const topDelim = delims.pop()
+
+        if (topDelim.isTall && delims.length > 1) {
+          // If the inner parens are tall, then the outer parens must also be tall.
+          delims[delims.length - 1].isTall = true
+        }
+
+        if (isCalc) {
+          while (rpnStack.length > 0 && rpnStack[rpnStack.length - 1].prec > 0) {
+            rpn += tokenSep + rpnStack.pop().symbol
+          }
+          if (topDelim.delimType === dCASES && prevToken.input !== "otherwise") {
+            // "otherwise" is optional. We've just found a case where it is omitted.
+            // So run function setUpIf as if "otherwise" were present.
+            rpn = setUpIf(rpn, "otherwise", exprStack, topDelim)
+            tokenSep = "\xa0"
+          }
+          const rpnOp = rpnStack.pop()
+          const numArgs = topDelim.numArgs
+          const numRows = topDelim.numRows
+          const numCols = topDelim.numArgs / topDelim.numRows
+
+          const firstSep = numArgs === 0 ? "" : tokenSep
+
+          switch (topDelim.delimType) {
+            case dFUNCTION: {
+              let symbol = rpnStack.pop().symbol
+              if (numArgs === 2) {
+                if (symbol === "log") { symbol = "logn" }
+                if (symbol === "round") { symbol = "roundn" }
+              }
+              rpn += (symbol.slice(-1) === "^")
+                ? firstSep + symbol
+                : isIn(symbol, builtInFunctions)
+                ? firstSep + symbol
+                : isIn(symbol, builtInReducerFunctions)
+                ? firstSep + symbol + tokenSep + numArgs
+                : firstSep + "function" + tokenSep + symbol + tokenSep + numArgs
+              break
+            }
+
+            case dACCESSOR:
+              // This is the end of a […] following a variable name.
+              rpn += firstSep + "[]" + tokenSep + numArgs
+              break
+
+            case dMATRIX:
+              rpn += firstSep + "matrix" + tokenSep + numRows + tokenSep + numCols
+              break
+
+            case dCASES:
+              tokenSep = "\xa0"
+              rpn += tokenSep + "cases" + tokenSep + numRows + tokenSep
+              while (exprStack.length > 0) {
+                // Append the expressions that correspond to each condition.
+                rpn += exprStack.shift()
+              }
+              rpn = rpn.slice(0, -1)
+              break
+
+            case dDICTIONARY:
+              rpn += firstSep + "dictionary" + tokenSep + numArgs
+              break
+
+            case dVECTORFROMRANGE:
+              // [start:step:end]
+              rpn += tokenSep + "matrix" + tokenSep + "1" + tokenSep + "1"
+              break
+
+            case dDISTRIB:
+              // (bottom to top)
+              // Do nothing. This is handled by tt.TO above.
+              break
+
+            default:
+              if (rpnOp.symbol === "\\lfloor") { rpn += tokenSep + "⎿⏌" }
+              if (rpnOp.symbol === "\\lceil") { rpn += tokenSep + "⎾⏋" }
+          }
+          if ((token.input === ")" && /^[([]/.test(str)) ||
+            (token.input === "]" && /^\(/.test(str))) {
+            // Implicit multiplication between parens, as in (2)(3)
+            // Not between square brackets, as in dict[row][property]
+            rpn += tokenSep
+            rpnStack.push({ prec: rpnPrecFromType[tt.MULT], symbol: "⌧" })
+          }
+        }
+
+        posOfPrevRun = tex.length
+        okToAppend = op.ttype !== tt.BINARY
+        break
+      }
+
+      case tt.LEFTRIGHT: {
+        // A "|" or "‖" character, which are used as |x|, ‖M‖,  P(A|B),  {x|x ∈ℝ}, |ϕ⟩
+        popTexTokens(1, okToAppend)
+        const topDelim = delims[delims.length - 1]
+
+        let isRightDelim = false
+        if (texStack.length > 0) {
+          isRightDelim =
+            texStack[texStack.length - 1].ttype === tt.LEFTRIGHT ||
+            texStack[texStack.length - 1].closeDelim === "\u27E9" || // Dirac ket
+            texStack[texStack.length - 1].closeDelim === "\\right." ||
+            texStack[texStack.length - 1].closeDelim === "\\end{vmatrix}"
+        }
+        if (isRightDelim) {
+          // Treat as a right delimiter
+          topDelim.close = token.input === "|" ? "\\rvert " : "\\rVert "
+          texStack[texStack.length - 1].closeDelim = topDelim.close
+          popTexTokens(0, okToAppend)
+          delims.pop()
+          if (isCalc) {
+            while (rpnStack.length > 0 && rpnStack[rpnStack.length - 1].prec > 0) {
+              rpn += tokenSep + rpnStack.pop().symbol
+            }
+            rpn += tokenSep + rpnStack.pop().symbol
+          }
+          okToAppend = op.ttype !== tt.BINARY
+        } else if (topDelim.delimType === dPAREN && topDelim.name === "{") {
+          tex += "\\mid "
+          posOfPrevRun = tex.length
+          okToAppend = true
+        } else {
+          // Treat as a left delimiter
+          texStack.push({
+            prec: 0,
+            pos: tex.length,
+            ttype: tt.LEFTRIGHT,
+            closeDelim: token.input === "|" ? "\\rvert " : "\\rVert "
+          })
+
+          delims.push({
+            delimType: dPAREN,
+            name: token.input,
+            isTall: false,
+            open: token.input === "|" ? "\\lvert " : "\\lVert ",
+            close: token.input === "|" ? "\\rvert " : "\\rVert ",
+            numArgs: 1,
+            numRows: 1,
+            rpnPos: rpn.length,
+            isPrecededByDiv: prevToken.ttype === tt.DIV
+          })
+
+          if (isCalc) {
+            rpnStack.push({ prec: 0, symbol: token.output })
+          }
+
+          tex += token.input === "|" ? "\\lvert " : "\\lVert "
+          posOfPrevRun = tex.length
+          okToAppend = false
+        }
+        break
+      }
+
+      case tt.COMMENT:
+        popTexTokens(0, true)
+        tex += token.output + " "
+        break
+
+      default:
+        if (isCalc) {
+          rpn += tokenSep
+          popRpnTokens(12)
+        }
+        popTexTokens(1, okToAppend)
+        texStack.push({ prec: 1, pos: tex.length, ttype: tt.ORD, closeDelim: "" })
+        if (isCalc) { rpnStack.push({ prec: 12, symbol: token.output }) }
+        tex += token.output + " "
+        posOfPrevRun = tex.length
+        okToAppend = true
+    }
+
+    prevToken = cloneToken(token)
+    isPrecededBySpace = isFollowedBySpace || token.input === "⌧"
+  }
+
+  popTexTokens(0, true) // Pop all the remaining close delimiters off the stack.
+
+  if (isCalc) {
+    while (rpnStack.length > 0) {
+      rpn += tokenSep + rpnStack.pop().symbol
+    }
+    const varRegEx = /〖[^ ]+/g
+    let arr
+    while ((arr = varRegEx.exec(tex)) !== null) {
+      if ("¨ˆˉ˙˜".indexOf(arr[0][1]) === -1) {
+        const pos = arr.index + arr[0].length
+        tex = tex.substring(0, pos) + "〗" + tex.substring(pos)
+      }
+    }
+  }
+
+  tex = tex.replace(/ {2,}/g, " ") // Replace multiple spaces with single space.
+  tex = tex.replace(/\s+(?=[_^'!)}\]〗])/g, "") // Delete spaces before right delims
+  tex = tex.replace(/\s+$/, "") //                 Delete trailing space
+
+  // I use the next two lines when debugging.
+//  if (isCalc) { console.log(tex) }
+//  if (isCalc) { console.log(rpn) }
+
+  return isCalc ? [tex, rpn] : tex
+}

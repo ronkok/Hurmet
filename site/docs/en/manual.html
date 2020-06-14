@@ -1,0 +1,2097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="utf-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+   <title>Hurmet Manual</title>
+   <link rel="shortcut icon" href="../../images/equal-sign.ico">
+   <link rel="stylesheet" media="print" href="../../print.css">
+   <link rel="stylesheet" href="../../lib/codemirror.css">
+   <link rel="stylesheet" href="../docstyles.css">
+   <link rel="stylesheet" href="../../katex/katex.min.css">
+   <script src="../../lib/codemirror.js"></script>
+   <script src="../../lib/closebrackets.js"></script>
+   <script src="../../lib/matchbrackets.js"></script>
+   <script src="../../katex/katex.min.js"></script>
+   <script src="../../hurmet.min.js"></script>
+   <script src="../demonstration.js"></script>
+</head>
+
+<body>
+<main id="main">
+
+<h1 id="hurmet-reference-manual">Hurmet Reference Manual</h1>
+<h2 id="introduction">Introduction</h2>
+<p><em>Hurmet</em> is a rich-text editor that gives you the ability to create high quality calculation documents using standard math notation.</p>
+<p>Hurmet calculations are much easier to read and check than spreadsheet calculations. Hurmet does not hide the active expressions and intermediate values of a calculation. They’re all open for review in the displayed document.</p>
+<p>You are welcome to use the <a href="../../index.html">Hurmet.io</a> web page under terms of the <a href="https://opensource.org/licenses/MIT/">MIT License</a>. The source code is available in Hurmet’s GitHub <a href="https://github.com/ronkok/Hurmet" target="_blank">repository</a>.</p>
+<p>Hurmet is in active development. You are free to use it, but be aware that there may be bugs and that I have plans for <a href="#coming-attractions">more features</a>. As I add those features, it’s possible that some of the existing features may break.</p>
+<h2 id="editor-basics">Editor Basics</h2>
+<p>Hurmet provides rich-text editing capabilities. You can apply styles to a document range by selecting text, then clicking one of the menu bar buttons:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;"></th>
+<th style="text-align: left;"></th>
+</tr>
+</thead>
+<tbody><tr>
+<td style="text-align: left;"><strong>≡</strong> <img src="../../images/folder-open.svg" alt="folder-open" title="Open file"> <img src="../../images/save.svg" alt="save" title="save"> ● <img src="../../images/draft.svg" alt="draft" title="draft"> <img src="../../images/recalc.svg" alt="recalc" title="recalc"> <img src="../../images/header.svg" alt="header" title="header"> <img src="../../images/printer.svg" alt="printer" title="printer"></td>
+<td style="text-align: left;">Document operations:<br>Navigate…, Open file…, Save file…, Set decimal format, Draft mode, Recalculate all, Create print header, Print…</td>
+</tr>
+<tr>
+<td style="text-align: left;"><img src="../../images/undo.svg" alt="undo" title="undo">  <img src="../../images/redo.svg" alt="redo" title="redo"></td>
+<td style="text-align: left;">Editing: Undo, Redo</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>B</strong>  <strong><em>I</em></strong>  <img src="../../images/embed.svg" alt="embed" title="embed"> <strong>X<sub>2</sub></strong>  <strong>X<sup>2</sup></strong> <img src="../../images/strikethrough.svg" alt="strikethrough" title="strikethrough">  <strong><u>U</u></strong></td>
+<td style="text-align: left;">Character styles:<br>Bold, Italic, Code, Subscript, Superscript, Strikethrough, Underline</td>
+</tr>
+<tr>
+<td style="text-align: left;"><img src="../../images/link.svg" alt="link" title="link"> <strong>—</strong> <img src="../../images/upload.svg" alt="upload" title="upload"> <img src="../../images/image.svg" alt="image" title="image"> <img src="../../images/plus.svg" alt="plus" title="plus"> <img src="../../images/integral.svg" alt="integral" title="integral"></td>
+<td style="text-align: left;">Insert:<br>Link…, Horizontal rule, Uploaded image…, Link to image…, Hurmet calculation…, TeX…</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>¶</strong> <img src="../../images/embed.svg" alt="embed" title="embed"> <strong>H1 H2</strong> <img src="../../images/indent.svg" alt="indent" title="indent"> <img src="../../images/noprint.svg" alt="noprint" title="no printer"> <img src="../../images/list.svg" alt="list" title="list"> <img src="../../images/list-numbered.svg" alt="list-numbered" title="ordered list"> <img src="../../images/quotes.svg" alt="quotes" title="quotes"></td>
+<td style="text-align: left;">Block styles:<br>Plain paragraph, Code block, Headings, Indent, Non-printing paragraph, List, Ordered list, Block quote</td>
+</tr>
+<tr>
+<td style="text-align: left;"><img src="../../images/table.svg" alt="table" title="table"> <img src="../../images/insert-row.svg" alt="insert-row" title="insert row"> <img src="../../images/insert-column.svg" alt="insert-column" title="insert column"> <img src="../../images/delete-table.svg" alt="delete-table" title="delete table"> <img src="../../images/delete-row.svg" alt="delete-row" title="delete row"> <img src="../../images/delete-column.svg" alt="delete-column" title="delete column"> <img src="../../images/merge.svg" alt="merge" title="merge"> <img src="../../images/align-left.svg" alt="align-left" title="align left"> <img src="../../images/align-center.svg" alt="align-center" title="align center"> <img src="../../images/align-right.svg" alt="align-right" title="align-right"> Tbl Style</td>
+<td style="text-align: left;">Table:<br>Insert table, Insert row, Insert column, Delete table, Delete row, Delete column, Toggle cell merge, Align left, Align center, Align right, Set table style</td>
+</tr>
+<tr>
+<td style="text-align: left;"><img src="../../images/info.svg" alt="info" title="information"></td>
+<td style="text-align: left;">Information</td>
+</tr>
+</tbody></table>
+<p>Hurmet’s foremost feature is its calculation cells. The rest of this document is about them. But first note that Hurmet also has cells that emulate the math mode of <span class='tex'>\TeX</span>. These cells display, but do not calculate, math. You can insert a TeX cell by clicking the <img src="../../images/integral.svg" alt="integral" title="integral"> button. Type <strong>Shift-Enter</strong> to save the cell.</p>
+<p>For more information about TeX and LaTeX, good places to start are the Wikibooks pages for writing <a href="https://en.wikibooks.org/wiki/LaTeX/Mathematics">math</a> and <a href="https://en.wikibooks.org/wiki/LaTeX/Advanced_Mathematics">advanced math</a>; and the KaTeX <a href="https://katex.org/">home page</a> and <a href="https://katex.org/docs/supported.html">supported-functions</a> page.</p>
+<p>Hurmet calculation cells use a different syntax than TeX. In calculation cells, the syntax is more akin to a programming language, yet it renders like mathematics.</p>
+<h2 id="tutorial">Tutorial</h2>
+<dl>
+
+<dt id="create-a-cell">Create a cell</dt>
+<dd>
+
+<p>Hurmet calculation cells display math and perform numeric calculations. To create a calculation cell in  Hurmet.io, select a spot in the document, then click the <img src="../../images/plus.svg" alt="plus" title="plus"> button or type <strong>Alt c</strong>. Save the cell by hitting the <strong>Shift-Enter</strong> keys. You can escape any changes by hitting the <strong>Esc</strong> key  or by clicking elsewhere in the document.</p>
+<p>The demonstration box to the lower-left mimics a Hurmet.io calculation cell. It can do one calculation at a time. Use it to practice the material in this tutorial.</p>
+</dd>
+
+<dt id="statements">Statements</dt>
+<dd><p>Inside a calculation cell, we can write an statement and get a numeric result. In the demonstration box to the lower-left, try replacing the text with <code>2 + 2 = ?</code> . Hurmet will render the math and write the result where you place the <code>?</code> mark.</p></dd>
+
+<dt id="numbers">Numbers</dt>
+<dd><p>Numbers can be written as integers (33), decimals (2.45), or mixed fractions (3 ⁷⁄₈). There is a more detailed description <a href="#number">below</a>. </p></dd>
+
+<dt id="arithmetic">Arithmetic</dt>
+<dd><p>The symbols: <code>+ - × / ^ √</code> are some of Hurmet’s arithmetic operators. Try an equation such as <code>22 + 3^2/7 = ?</code>. Play with changes to the values and operators to see how they work. See <a href="#operators">here</a> for more operators.</p></dd>
+
+<dt id="multiplication">Multiplication</dt>
+<dd>
+
+<p>Hurmet accepts several multiplication syntaxes. If <span class='tex'>a = 7.1</span>, then the following all give the same result:</p>
+<div class="indented">
+
+<p><span class='tex'>2 × 7.1</span><br><span class='tex'>2 * 7.1</span><br><span class='tex'>2 ⋅ 7.1</span><br><span class='tex'>2 \, a</span><br><span class='tex'>(2)(7.1)</span></p>
+</div>
+
+<p>To obtain the character <span class='tex'>×</span>, type xx and hit the space bar. Auto-correct will give you an <span class='tex'>×</span>.</p>
+<p>A space between variables acts as a multiplication operator.</p>
+</dd>
+
+<dt id="roots">Roots</dt>
+<dd><p>Type <code>sqrt</code> and hit the spacebar to auto-correct into <span class='tex'>\sqrt{~}</span><br><code>root 3</code> and <code>root 4</code> will also auto-correct into roots.</p></dd>
+
+<dt id="function">Function</dt>
+<dd><p>Hurmet treats a word as a function name if it is placed directly before an open parenthesis. Example: <span class='tex'>\sin\left(\frac{π}{6}\right)= 0.5</span>. Hurmet has many <a href="#functions">built-in functions</a>.</p></dd>
+
+<dt id="variables">Variables</dt>
+<dd>
+
+<p><span class='tex'>L = 3.1</span>   ← That kind of statement will assign a value to a variable. Subsequent cells can then use the variable.<br>Example: <code>2 L = ?</code> will result in: <span class='tex'>2 \, L = \color{blue}(2)(3.1)\color{black}= 6.2</span></p>
+<p>A variable name must be a valid <a href="#identifiers">identifier</a>.</p>
+<p>An assignment statement can also contain a calculation expression. Example:<br>
+<code>b = 2 L = ?</code> will result in <span class='tex'>b = 2 \, L = \color{blue}(2)(3.1)\color{black}= 6.2</span></p>
+<dt id="subscripts">Subscripts</dt>
+<dd><p>An underscore signals the beginning of a subscript. Examples: <code>x_left</code> and <code>y_(i+1)</code> result in <span class='tex'>x_\mathrm{left}</span> and <span class='tex'>y_{i + 1}</span>.</p></dd>
+
+<dt id="greek-letters">Greek letters</dt>
+<dd><p>To write a Greek letter, write the name of the letter and hit the space bar. So, <code>alpha</code> ↦ α and <code>beta</code> ↦ β. More detail <a href="#auto-correct">here</a>.</p></dd>
+
+<dt id="accents-and-primes">Accents and Primes</dt>
+<dd>
+
+<p>To write an accent above a single-letter variable, write the accent name and hit the space bar for an auto-correction. Examples:</p>
+<div class="indented">
+
+<p><code>y bar</code> ↦ <span class='tex'>\bar{y}</span><br><code>θ hat</code> ↦ <span class='tex'>\hat{θ}</span><br><code>P vec</code> ↦ <span class='tex'>\vec{P}</span><br><code>x dot</code> ↦ <span class='tex'>\dot{x}</span></p>
+</div>
+
+<p>More detail <a href="#identifiers">here</a>.</p>
+<p>To write a prime, type two apostrophes (aka single quotation marks) and hit the space bar. So, <code>f&#39;&#39;</code> will result in <span class='tex'>f'</span></p>
+</dd>
+
+<dt id="quantities">Quantities</dt>
+<dd><p>A Hurmet <em>quantity</em> contains both a magnitude and a unit of measure. Write a quantity between two single quotation marks, like this: <code>&#39;3.1 m&#39;</code></p></dd>
+
+<dt id="unit-aware-calcs">Unit-Aware Calcs</dt>
+<dd>
+
+<p>Hurmet can automatically handle unit conversions of quantities. To call for a unit-aware calculations, write <code>??</code> instead of <code>?</code> where you want the result to appear.<br>Example:<br><code>2 × &#39;2 m&#39; = ?? ft</code> results in <span class='tex'>2 × (2\; {\text{m}})= 13.1233595800525 \, \,\mathrm{ft}</span>.</p>
+<p>This is covered in more detail <a href="#unit-aware-calculations">below</a>.</p>
+</dd>
+</dl>
+
+<h2 id="quick-reference">Quick Reference</h2>
+<h4 id="markup">Markup</h4>
+<div class="table-markup"></div>
+
+<table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Renders as:</th>
+<th>Input</th>
+<th>Renders or<br>calculates as:</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>12/25.2</code></td>
+<td><span class='tex'>\dfrac{12}{25.2}</span></td>
+<td><code>x</code></td>
+<td><span class='tex'>x</span></td>
+</tr>
+<tr>
+<td><code>(a + b)/c</code></td>
+<td><span class='tex'>\dfrac{a + b}{c}</span></td>
+<td><code>longVarName</code></td>
+<td><span class='tex'>\mathrm{longVarName}</span></td>
+</tr>
+<tr>
+<td><code>a//b</code></td>
+<td><span class='tex'>\frac{a}{b}</span></td>
+<td><code>&quot;A string.&quot;</code></td>
+<td><span class='tex'>\text{A string.}</span></td>
+</tr>
+<tr>
+<td><code>a///b</code></td>
+<td><span class='tex'>a / b</span></td>
+<td><code>&#39;5 N.m/s2&#39;</code></td>
+<td><span class='tex'>5\; {\text{N}\mkern1mu{\cdot}\mkern1mu\text{m/s}^{2}}</span></td>
+</tr>
+<tr>
+<td><code>x^23</code></td>
+<td><span class='tex'>x^{23}</span></td>
+<td><code>(a, b; c, d)</code></td>
+<td><span class='tex'>\begin{pmatrix}a & b \\ c & d \end{pmatrix}</span></td>
+</tr>
+<tr>
+<td><code>x^(a+b)</code></td>
+<td><span class='tex'>x^{a + b}</span></td>
+<td><code>[a, b; c, d]</code></td>
+<td><span class='tex'>\begin{bmatrix}a & b \\ c & d \end{bmatrix}</span></td>
+</tr>
+<tr>
+<td><code>x_subscript</code></td>
+<td><span class='tex'>x_\mathrm{subscript}</span></td>
+<td><code>[1:4]</code></td>
+<td><span class='tex'>\begin{bmatrix}1 & 2 & 3 & 4 \end{bmatrix}</span></td>
+</tr>
+<tr>
+<td><code>x_(a+b)</code></td>
+<td><span class='tex'>x_{a + b}</span></td>
+<td><code>[1:2:5]</code></td>
+<td><span class='tex'>\begin{bmatrix}1 & 3 & 5 \end{bmatrix}</span></td>
+</tr>
+<tr>
+<td><code>x′</code></td>
+<td><span class='tex'>x'</span></td>
+<td><code>{&quot;w&quot;: 24, &quot;h&quot;: 30}</code></td>
+<td><span class='tex'>\{\text{w}:24 ,\: \text{h}:30 \}</span></td>
+</tr>
+<tr>
+<td><code>A--&gt;note B</code></td>
+<td><span class='tex'>A \xrightarrow{\mathrm{note}}B</span></td>
+<td><code>|x|   ‖x‖</code></td>
+<td><span class='tex'>\lvert x \rvert</span>   <span class='tex'>\lVert x \rVert</span></td>
+</tr>
+<tr>
+<td><code>\red(&quot;ng&quot;)</code></td>
+<td><span class='tex'>\red{\text{ng}}</span></td>
+<td><code>{a if b;</code><br><code>c otherwise}</code></td>
+<td><span class='tex'>\begin{cases}a &\mathrel{\mathrm{if}}b \\ c &\mathrel{\mathrm{otherwise}}\end{cases}</span></td>
+</tr>
+</tbody></table>
+<p>Calculation cells also support many of the math-mode TeX functions <a href="https://katex.org/docs/supported.html">supported by KaTeX</a>. Put function arguments between parentheses, not braces, as in <code>\cancel(5)</code> instead of <code>\cancel{5}</code>.</p>
+<p>TeX functions are provided for use in displaying math. Not all of them are valid in calculations.</p>
+<p>A few color functions are valid in calculations, but only if their argument is a string. These are: <code>\blue</code>, <code>\gray</code>, <code>\green</code>, <code>\orange</code>, <code>\pink</code>, <code>\purple</code>, and <code>\red</code>. </p>
+<h4 id="auto-correct">Auto-correct</h4>
+<p>Auto-correct kicks in when you type a space.</p>
+<div class="table-auto-correct"></div>
+
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Get</th>
+<th>Type</th>
+<th>Get</th>
+<th>Type</th>
+<th>Get</th>
+<th>Type</th>
+<th>Get</th>
+<th>Type</th>
+<th>Get</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>///</code></td>
+<td>∕</td>
+<td>xx</td>
+<td>×</td>
+<td>sqrt</td>
+<td>√</td>
+<td>Gamma</td>
+<td>Γ</td>
+<td>alpha</td>
+<td>α</td>
+</tr>
+<tr>
+<td><code>&lt;=</code></td>
+<td>≤</td>
+<td>.</td>
+<td>·</td>
+<td>root 3</td>
+<td>∛</td>
+<td>Delta</td>
+<td>Δ</td>
+<td>beta</td>
+<td>β</td>
+</tr>
+<tr>
+<td><code>&gt;=</code></td>
+<td>≥</td>
+<td>&#39; &#39;</td>
+<td>′</td>
+<td>x^2</td>
+<td>x²</td>
+<td>Theta</td>
+<td>Θ</td>
+<td>gamma</td>
+<td>γ</td>
+</tr>
+<tr>
+<td><code>!=</code></td>
+<td>≠</td>
+<td>&quot; &quot;</td>
+<td>ʺ</td>
+<td>bb M</td>
+<td>𝐌</td>
+<td>Lambda</td>
+<td>Λ</td>
+<td>delta</td>
+<td>δ</td>
+</tr>
+<tr>
+<td><code>&lt;&gt;</code></td>
+<td>≠</td>
+<td>oo</td>
+<td>∞</td>
+<td>bbb E</td>
+<td>𝔼</td>
+<td>Xi</td>
+<td>Ξ</td>
+<td>epsilon</td>
+<td>ε</td>
+</tr>
+<tr>
+<td>~=</td>
+<td>≅</td>
+<td>ooo</td>
+<td>°</td>
+<td>cc P</td>
+<td><span class='tex'>\mathcal{P}</span></td>
+<td>Pi</td>
+<td>Π</td>
+<td>zeta</td>
+<td>ζ</td>
+</tr>
+<tr>
+<td>~~</td>
+<td>≈</td>
+<td>ii</td>
+<td><span class='tex'>\sqrt{\text{-}1}</span></td>
+<td>ff f</td>
+<td>𝖿</td>
+<td>Sigma</td>
+<td>Σ</td>
+<td>eta</td>
+<td>η</td>
+</tr>
+<tr>
+<td>\in</td>
+<td>∈</td>
+<td><code>&lt;&lt;</code></td>
+<td>⟨</td>
+<td>y bar</td>
+<td>y̅</td>
+<td>Phi</td>
+<td>Φ</td>
+<td>theta</td>
+<td>θ</td>
+</tr>
+<tr>
+<td>\notin</td>
+<td>∉</td>
+<td><code>&gt;&gt;</code></td>
+<td>⟩</td>
+<td>θ hat</td>
+<td><span class='tex'>\hat{θ}</span></td>
+<td>Psi</td>
+<td>Ψ</td>
+<td>iota</td>
+<td>ι</td>
+</tr>
+<tr>
+<td>-=</td>
+<td>≡</td>
+<td>^^</td>
+<td>∧</td>
+<td>P vec</td>
+<td><span class='tex'>\vec{P}</span></td>
+<td>Omega</td>
+<td>Ω</td>
+<td>kappa</td>
+<td>κ</td>
+</tr>
+<tr>
+<td>:=</td>
+<td>≔</td>
+<td>vv</td>
+<td>∨</td>
+<td>P harpoon</td>
+<td><span class='tex'>\overrightharpoon{P}</span></td>
+<td>AA</td>
+<td>∀</td>
+<td>lambda</td>
+<td>λ</td>
+</tr>
+<tr>
+<td>-:</td>
+<td>÷</td>
+<td>vvv</td>
+<td>⋁</td>
+<td>a dot</td>
+<td>ȧ</td>
+<td>EE</td>
+<td>∃</td>
+<td>mu</td>
+<td>μ</td>
+</tr>
+<tr>
+<td>+-</td>
+<td>±</td>
+<td>nn</td>
+<td>∩</td>
+<td>a ddot</td>
+<td>ä</td>
+<td>CC</td>
+<td>ℂ</td>
+<td>nu</td>
+<td>ν</td>
+</tr>
+<tr>
+<td>-+</td>
+<td>∓</td>
+<td>nnn</td>
+<td>⋂</td>
+<td>a grave</td>
+<td>à</td>
+<td>HH</td>
+<td>ℍ</td>
+<td>xi</td>
+<td>ξ</td>
+</tr>
+<tr>
+<td><code>-&gt;</code></td>
+<td>→</td>
+<td>uu</td>
+<td>∪</td>
+<td>a acute</td>
+<td>á</td>
+<td>NN</td>
+<td>ℕ</td>
+<td>pi</td>
+<td>π</td>
+</tr>
+<tr>
+<td><code>&lt;-</code></td>
+<td>←</td>
+<td>uuu</td>
+<td>⋃</td>
+<td>a tilde</td>
+<td>ã</td>
+<td>OO</td>
+<td><span class='tex'>O ︀</span></td>
+<td>rho</td>
+<td>ρ</td>
+</tr>
+<tr>
+<td><code>&lt;-&gt;</code></td>
+<td>↔</td>
+<td>\ceil</td>
+<td>⎾⏋</td>
+<td>a ring</td>
+<td>å</td>
+<td>QQ</td>
+<td>ℚ</td>
+<td>sigma</td>
+<td>σ</td>
+</tr>
+<tr>
+<td><code>=&gt;</code></td>
+<td>⇒</td>
+<td>\floor</td>
+<td>⎿⏌</td>
+<td>\checkmark</td>
+<td>✓</td>
+<td>RR</td>
+<td>ℝ</td>
+<td>tau</td>
+<td>τ</td>
+</tr>
+<tr>
+<td>\circ</td>
+<td>∘</td>
+<td>\not</td>
+<td>¬</td>
+<td></td>
+<td></td>
+<td>ZZ</td>
+<td>ℤ</td>
+<td>upsilon</td>
+<td>υ</td>
+</tr>
+<tr>
+<td>\|</td>
+<td>¦</td>
+<td>\xor</td>
+<td>⊻</td>
+<td></td>
+<td></td>
+<td>\hbar</td>
+<td>ℏ</td>
+<td>phi</td>
+<td>ϕ</td>
+</tr>
+<tr>
+<td>||</td>
+<td>‖</td>
+<td>\sum</td>
+<td>∑</td>
+<td></td>
+<td></td>
+<td>\ell</td>
+<td>ℓ</td>
+<td>chi</td>
+<td>χ</td>
+</tr>
+<tr>
+<td>/_</td>
+<td>∠</td>
+<td>\int</td>
+<td>∫</td>
+<td></td>
+<td></td>
+<td>\euro</td>
+<td>€</td>
+<td>psi</td>
+<td>ψ</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>\iint</td>
+<td>∬</td>
+<td></td>
+<td></td>
+<td>\yen</td>
+<td>¥</td>
+<td>omega</td>
+<td>ω</td>
+</tr>
+</tbody></table>
+<p>The font corrections, e.g., <code>bb …</code> work on any letter from A to Z or a to z.</p>
+<p><code>--&gt;</code>, <code>&lt;--</code>, and <code>&lt;--&gt;</code> will auto correct into extensible arrows, as in: <span class='tex'>A \xrightarrow{\text{note}}B</span>.</p>
+<p><code>\&lt;space&gt;</code> auto-corrects to <code>˽</code> in the text editor, which renders as a space.</p>
+<h4 id="display-selectors">Display Selectors</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Display selector</th>
+<th style="text-align: center;">Display Selector for Unit-Aware Calculation</th>
+<th>Displays:</th>
+</tr>
+</thead>
+<tbody><tr>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">??</td>
+<td>Entire calculation, including a blue echo of the expression displaying the value plugged in to each variable.</td>
+</tr>
+<tr>
+<td style="text-align: center;">!</td>
+<td style="text-align: center;">!!</td>
+<td>Calculates and holds, but does not display, the blue echo or the result.</td>
+</tr>
+<tr>
+<td style="text-align: center;">%</td>
+<td style="text-align: center;">%%</td>
+<td>Omits blue echo.</td>
+</tr>
+<tr>
+<td style="text-align: center;">@</td>
+<td style="text-align: center;">@@</td>
+<td>Displays only the result, like a spreadsheet cell.</td>
+</tr>
+</tbody></table>
+<h2 id="calculation-forms">Calculation Forms</h2>
+<p>Hurmet calculation cells don’t just display math; they compute numerical results.</p>
+<p>It’s quite simple to assign a value to a variable:</p>
+<table>
+  <tr><th>Form</th>  <th>Examples</th></tr>
+  <tr>
+    <td rowspan="3"><img src="../../images/assignment-railroad.svg" alt="identifier = value"></td>
+    <td><code>x = 5</code></td>
+  </tr>
+  <tr><td><code>L = '5 meters'</code></td></tr>
+  <tr><td><code>name = "James"</code></td></tr>
+</table>
+
+<p>To calulate an <span id="expression">expression</span> that contains a variable, a function, or an operator; write a <code>?</code> or <code>%</code> or <code>@</code> to indicate where the result should appear. Here are some examples:</p>
+<div class="table-no-wrap"></div>
+
+<table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Renders as:</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>2 + 2 = ?</code></td>
+<td><span class='tex'>2 + 2 = 4</span></td>
+</tr>
+<tr>
+<td><code>2 + 2 = @</code></td>
+<td><span class='tex'>4</span></td>
+</tr>
+<tr>
+<td><code>A = 2 × 4 = ?</code></td>
+<td><span class='tex'>A = 2 × 4 = 8</span></td>
+</tr>
+<tr>
+<td><code>x = 2 A = ?</code></td>
+<td><span class='tex'>x = 2 \, A = \color{blue}(2)(8)\color{black}= 16</span></td>
+</tr>
+<tr>
+<td><code>x = 2 A = %</code></td>
+<td><span class='tex'>x = 2 \, A = 16</span></td>
+</tr>
+<tr>
+<td><code>A = &#39;2 m&#39; × &#39;4 feet&#39; = ?? m²</code></td>
+<td><span class='tex'>A = 2\; {\text{m}}× (4\; {\text{feet}})= 2.4384\; {\text{m}^{2}}</span></td>
+</tr>
+</tbody></table>
+<p>The expression form is more precisely defined as:</p>
+<p><img src="../../images/statement-railroad.svg" alt="optional identifier = expression = optional currency symbol (display selector) unit name"></p>
+<p>At the beginning of the statement, you can write an optional variable name. The result of the calculation will be assigned to that variable. Expressions later in the document can call the variable. Variable names must qualify as valid <a href="#identifiers">identifiers</a>. They are case-sensitive and bold-sensitive. A search for variable <em>E</em> will not find <em>e</em>. A search for <strong>M</strong> will not find <em>M</em>.</p>
+<p>You can define a unit for the result with a leading currency symbol or a trailing unit name, but not both in the same statement.</p>
+<h4 id="display-selector">Display Selector</h4>
+<p>Near the end of the statement is the display selector, i.e., <code>?</code>, <code>??</code>, etc. It determines how much of the calculation is displayed.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Display selector</th>
+<th style="text-align: center;">Display Selector for Unit-Aware Calculation</th>
+<th>Displays:</th>
+</tr>
+</thead>
+<tbody><tr>
+<td style="text-align: center;">?</td>
+<td style="text-align: center;">??</td>
+<td>Entire calculation, including a blue echo of the expression that displays the value plugged in to each variable.</td>
+</tr>
+<tr>
+<td style="text-align: center;">!</td>
+<td style="text-align: center;">!!</td>
+<td>Calculates and holds, but does not display, the blue echo or the result.</td>
+</tr>
+<tr>
+<td style="text-align: center;">%</td>
+<td style="text-align: center;">%%</td>
+<td>Omits blue echo.</td>
+</tr>
+<tr>
+<td style="text-align: center;">@</td>
+<td style="text-align: center;">@@</td>
+<td>Displays only the result, like a spreadsheet cell.</td>
+</tr>
+</tbody></table>
+<p>For an engineer like me, the most common display selector is <strong>??</strong>. I almost always want to see the entire calculation. Seeing the expression and the plugged-in values helps me to avoid the kind of unseen <a href="http://www.eusprig.org/horror-stories.htm">errors</a> that creep into spreadsheet calculations. And it makes the calculation reviewable by a second set of eyes.</p>
+<p>A doubled selector will prompt a <a href="#unit-aware-calculations">unit-aware calculation</a>. After you try them, you may wonder how you ever did without them.</p>
+<p>I use the <strong>!</strong> selector mostly when I am assigning a <a href="#data-table">chunk of data</a> to a variable.</p>
+<p>I try to resist the temptation to overuse the <strong>%</strong> selector. When I review work done by another engineer, I can do without the blue echo if variable values are assigned directly above the equation where they are used. Otherwise I get grumpy. You don’t want a grumpy reviewer.</p>
+<p>One last variation is possible when assigning values from a <a href="#dictionary">dictionary</a>. You can assign such values to more than one variable at a time, like this:</p>
+<pre><code>A, I, w_self = beam[&quot;A&quot;, &quot;Ix&quot;, &quot;weight&quot;] = !!</code></pre><p>Multiple assignment statements must suppress the result display.</p>
+<h2 id="identifiers">Identifiers</h2>
+<p>Variable names and function names must be written in the form of a valid <em>identifier</em>.</p>
+<ul>
+<li>Identifiers may be multiple characters long.</li>
+<li>The first character must be a letter from the Latin or Greek alphabet. It may be bold or capitalized calligraphic Latin, or ℏ, or ℓ.</li>
+<li>Subsequent characters may be letters or numerals (0123456789).</li>
+<li>An under-score within an identifier is allowed and will be interpreted to mean the start of a subscript.</li>
+<li>If an identifier has only one letter, then an accent character may be written after it. Hurmet will render the accent above the letter, as in <span class='tex'>\hat{θ}</span>.</li>
+<li>Primes may be appended to the very end, as in: <span class='tex'>f_\mathrm{c}'</span>.</li>
+<li>The following keywords may not be used as variable names: <code>π</code>, <code>ℏ</code>, <code>true</code>, <code>false</code>, <code>root</code>, <code>if</code>, <code>otherwise</code>, <code>and</code>, <code>or</code>, <code>modulo</code>, <code>in</code>, <code>to</code>.</li>
+</ul>
+<div class="indented">
+
+<p><img src="../../images/identifier-railroad.svg" alt="letter letter-or-digit-or-accent prime"></p>
+</div>
+
+<p>The names of those accents are:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;"></th>
+<th style="text-align: center;"></th>
+<th style="text-align: center;"></th>
+<th style="text-align: center;"></th>
+</tr>
+</thead>
+<tbody><tr>
+<td style="text-align: center;">grave</td>
+<td style="text-align: center;">acute</td>
+<td style="text-align: center;">hat</td>
+<td style="text-align: center;">tilde</td>
+</tr>
+<tr>
+<td style="text-align: center;">bar</td>
+<td style="text-align: center;">breve</td>
+<td style="text-align: center;">dot</td>
+<td style="text-align: center;">ddot</td>
+</tr>
+<tr>
+<td style="text-align: center;">ring</td>
+<td style="text-align: center;">check</td>
+<td style="text-align: center;">ul</td>
+<td style="text-align: center;">leftharpoon</td>
+</tr>
+<tr>
+<td style="text-align: center;">harpoon</td>
+<td style="text-align: center;">leftvec</td>
+<td style="text-align: center;">vec</td>
+<td style="text-align: center;">leftrightvec</td>
+</tr>
+</tbody></table>
+<p>Hurmet’s auto-correct can help create identifiers.</p>
+<table>
+<thead>
+<tr>
+<th>To create:</th>
+<th>… do this and hit the space bar</th>
+<th>Example input</th>
+<th>Example result</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Greek letter</td>
+<td>Type the name of the letter.</td>
+<td>gamma</td>
+<td>γ</td>
+</tr>
+<tr>
+<td>Capital Greek letter</td>
+<td>Capitalize the name’s first letter.</td>
+<td>Gamma</td>
+<td>Γ</td>
+</tr>
+<tr>
+<td>Bold letter</td>
+<td>Type “bb”, then space, then the desired letter.</td>
+<td>bb M</td>
+<td>𝐌</td>
+</tr>
+<tr>
+<td>Calligraphic capital letter</td>
+<td>Type “cc”, then space, then the desired letter.</td>
+<td>cc P</td>
+<td>𝒫</td>
+</tr>
+<tr>
+<td>Accent</td>
+<td>Type the name of the accent.</td>
+<td>y bar</td>
+<td><span class='tex'>\bar{y}</span></td>
+</tr>
+<tr>
+<td>Prime</td>
+<td>Type two apostrophes.</td>
+<td>&#39;&#39;</td>
+<td>′</td>
+</tr>
+</tbody></table>
+<p>Hurmet will render single Latin letter variable names in <em>italic</em>. Function names and multi-letter variable names are rendered in upright font. As a convention, I personally use <strong>bold</strong> letters for variables that contain vectors or matrices.</p>
+<h2 id="data-types">Data Types</h2>
+<dl>
+
+<dt id="boolean">Boolean</dt>
+<dd><p><code>true</code> or <code>false</code></p></dd>
+
+<dt id="string">String</dt>
+<dd>
+A _string_ literal is a string of text characters enclosed by a pair of straight double quotation marks. The string may include any Unicode character except a straight double quotation mark.
+
+<pre><code>&quot;This is a string.&quot;</code></pre><p>You can call a subset of any string with an index or range in brackets. Hurmet indices are one-based. Examples:</p>
+<pre><code>a = &quot;abcdefg&quot;
+a[2]     ## returns &quot;b&quot;
+a[2:4]   ## returns &quot;bcd&quot;
+a[5:]    ## returns &quot;efg&quot;</code></pre></dd>
+
+<dt id="number">Number</dt>
+<dd>
+
+<p>Enter as integers (33), decimals (2.45), scientific notation (3.1e4), or mixed fractions (3 ⁷⁄₈).</p>
+<p><img src="../../images/NumberRailroad.svg" alt="optional minus 0-9 repeated optional decimal 0-9 repeated optional scientific notation or 0-9 repeated space 0-9 repeated / 0-9 repeated"></p>
+<p>Notice that a number literal must begin and end with a numeral, not a decimal symbol. Hurmet will not recognize <code>5.</code> as a number.</p>
+<p>Hurmet’s default decimal symbol is a dot. You can choose instead to enter numbers with a decimal comma via a drop-down menu labeled “●”. Numbers are never entered with a thousands separator, but they can be <em>displayed</em> with one. The ● menu also controls that display.</p>
+<p>Hurmet always saves a decimal symbol as a dot. It’s only the display that changes.</p>
+<p>While calculations are underway, Hurmet holds every number in memory in rational number format. The numerator and denominator are each integers of arbitrary length. So Hurmet can work precisely with numbers like 0.1 and 0¹⁄₃. Trignonometry and roots are done in double-precision floating point, good to about 15 significant digits.</p>
+</dd>
+
+<!-- Integers may also be written as a hexadecimal literal:
+
+![0x 0-9 or af](../../images/hex-railroad.svg) -->
+
+<dt id="quantity">Quantity</dt>
+<dd>
+
+<p>A Hurmet <em>quantity</em> contains both a numeric magnitude and a unit of measure. Quantity literals are written between apostrophes, aka single straight quotation marks. Examples:</p>
+<table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Renders as</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>&#39;4.2 meters&#39;</code></td>
+<td><span class='tex'>4.2\; {\text{meters}}</span></td>
+</tr>
+<tr>
+<td><code>&#39;-$25.10&#39;</code></td>
+<td><span class='tex'>\text{-}\$25.10</span></td>
+</tr>
+<tr>
+<td><code>&#39;30°&#39;</code></td>
+<td><span class='tex'>30 {\text{°}}</span></td>
+</tr>
+<tr>
+<td><code>&#39;10 N·m/s&#39;</code></td>
+<td><span class='tex'>10\; {\text{N}\mkern1mu{\cdot}\mkern1mu\text{m/s}}</span></td>
+</tr>
+<tr>
+<td><code>&#39;[2.1; 15.3] feet&#39;</code></td>
+<td><span class='tex'>\begin{bmatrix}2.1 \\ 15.3 \end{bmatrix}\; {\text{feet}}</span></td>
+</tr>
+</tbody></table>
+<p><img src="../../images/quantity-railroad.svg" alt="single quote number or matrix or map unit-name single quote"></p>
+<p>Quantities are useful in <a href="#unit-aware-calculations">unit-aware calculations</a> which do automatic unit conversion and also check for unit compatibility.</p>
+<p>Hurmet has many built-in <a href="unit-definitions.html">unit definitions</a>. You can write any one of them into a quantity. SI (metric) prefixes are valid on the appropriate unit names.</p>
+<p>You can also create compound units on the fly. That is, you can raise any unit to a power, and these powers-of-units can be multiplied (or divided) together into products. Example:</p>
+<table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Renders as</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>&#39;4 kW.hr/m2&#39;</code></td>
+<td><span class='tex'>4\; {\text{kW}\mkern1mu{\cdot}\mkern1mu\text{hr/m}^{2}}</span></td>
+</tr>
+</tbody></table>
+<p>Note that within the quantity literal, it is not necessary to write <code>^</code> to indicate a numeric exponent. Also, a dot or a hyphen within a compound unit name will be rendered as a half-high dot.</p>
+<p>Only one division solidus, <strong>/</strong>, may be written into a compound unit.</p>
+</dd>
+
+<dt id="matrix">Matrix</dt>
+<dd>
+
+<p>A Hurmet <em>matrix</em> is a one or two dimensional arrangement of matrix elements. A Hurmet matrix element can be a number, a string, <code>true</code>, <code>false</code>, or an exprression that resolves to one of those simple types.</p>
+<p>A Hurmet <em>vector</em> is a one dimensional matrix, either a row vector or a column vector.</p>
+<p>A matrix literal is written between delimiters, either <code>( )</code> or <code>[ ]</code>. Matrix elements are separated by commas. Matrix rows are separated by semi-colons. Be sure to write a space after comma separators so they are not confused with decimals inside a number. Here are some matrix examples:</p>
+<table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Renders as</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>(1, 0; 0, 1)</code></td>
+<td><span class='tex'>\begin{pmatrix}1 & 0 \\ 0 & 1 \end{pmatrix}</span></td>
+</tr>
+<tr>
+<td><code>[2.1; -15.3]</code></td>
+<td><span class='tex'>\begin{bmatrix}2.1 \\ \text{-}15.3 \end{bmatrix}</span></td>
+</tr>
+</tbody></table>
+<p>Another way to create a Hurmet vector is to write a range of numbers between brackets; the form is <span style="white-space: nowrap;"><code>[start:step:end]</code></span>. A Hurmet calculation of that form will return a row vector with every number in the range. The step size is optional (default = 1). Examples:</p>
+<table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>[2:5] = ?</code></td>
+<td><span class='tex'>[2 :5]= \begin{bmatrix}2 & 3 & 4 & 5 \end{bmatrix}</span></td>
+</tr>
+<tr>
+<td><code>[1:2:5] = ?</code></td>
+<td><span class='tex'>[1 :2 :5]= \begin{bmatrix}1 & 3 & 5 \end{bmatrix}</span></td>
+</tr>
+</tbody></table>
+<p>You can call individual elements with index integers between brackets, as in <code>𝐕[5]</code> or <code>𝐌[1, 3]</code>. You can use a variable name for the index if the variable returns an integer.</p>
+<p>You can access a sub-matrix using the range operator, “:”, as in <code>𝐌[2:5, 1]</code>. Entire rows or columns can be called by omitting an index, as in <code>𝐌[2,]</code> or <code>𝐌[,1]</code>. Hurmet indexes are one-based.</p>
+</dd>
+
+<dt id="matrix-operations">Matrix Operations</dt>
+<dd>
+
+<p>All the usual math operators can be applied to a numeric matrix. The operators mostly work in an element-wise fashion. If you add a scalar to a matrix, or pass a matrix to most functions, Hurmet will do an element-by-element calculation and return a matrix, as in:</p>
+<div class="indented">
+
+<p><span class='tex'>𝐡 = \begin{bmatrix}5 \\ 10 \\ 15 \end{bmatrix}</span></p>
+<p><span class='tex'>𝐱 = 2 \, 𝐡 + 1 = \color{blue}2 \begin{bmatrix}5 \\ 10 \\ 15 \end{bmatrix}+ 1 \color{black}= \begin{bmatrix}11 \\ 21 \\ 31 \end{bmatrix}</span></p>
+</div>
+
+<p>Spreadsheet calculations can often be replaced by calulations using vectors, as above. When you really need to get things right, it’s great to be able to see the expression and all the plugged-in values.</p>
+<div id="matrix-mult"></div>
+
+<p>Multiplication of two matrices is different than other operations. Mathematicians have several ways to multiply matrices. In Hurmet, you choose the type of multiplication by your choice of multiplication operator:</p>
+<p><span class='tex'>𝐀 * 𝐁</span> ↦ element-wise product, <span class='tex'>(𝐀 * 𝐁)_{\mathrm{ij}}= \mathrm{𝐀_\mathrm{ij}} × \mathrm{𝐁_\mathrm{ij}}</span></p>
+<p><span class='tex'>𝐀 𝐁</span> ↦ <a href="http://www.intmath.com/matrices-determinants/4-multiplying-matrices.php/">matrix product</a>, <span class='tex'>(𝐀 𝐁)_{\mathrm{ij}}= ∑_{k = 1}^{m} \,\mathrm{𝐀_\mathrm{i}} \,\mathrm{𝐁_\mathrm{kj}}</span></p>
+<p><span class='tex'>𝐀 × 𝐁</span> ↦ <a href="http://www.intmath.com/vectors/8-cross-product-vectors.php/">cross product</a> of a pair of three-vectors<br>       = <span class='tex'>\lvert 𝐀 \rVert 𝐁 \lvert \sin(θ) 𝐧 \rvert</span></p>
+<p><span class='tex'>𝐀 ⋅ 𝐁</span> ↦ dot product = <span class='tex'>∑_{i = 1}^{n} (\mathrm{𝐀_\mathrm{i}} \, \,\mathrm{𝐁_\mathrm{i}})</span></p>
+<p>Here are more of Hurmet’s matrix operations:</p>
+<p><span class='tex'>𝐀^{T}</span> ↦ a transposed matrix.</p>
+<p><span class='tex'>𝐀^{\text{-}1}</span> ↦ an inverted matrix, if <span class='tex'>𝐀</span> is square.</p>
+<p><span class='tex'>\lvert 𝐀 \rvert</span> ↦ <span class='tex'>\begin{cases}\mathrm{determinant} &\mathrel{\mathrm{if}}\text{𝐀 is square}\\ \mathrm{magnitude} &\mathrel{\mathrm{otherwise}}\end{cases}</span></p>
+<p><span class='tex'>\operatorname{abs}(𝐀)</span> ↦ element-wise absolute values</p>
+<p><span class='tex'>\lVert 𝐀 \rVert</span> ↦ <span class='tex'>\begin{cases}\sqrt{x_\mathrm{1}^{2}+ ⋯ + x_\mathrm{n}^{2}}&\mathrel{\mathrm{if}}\text{𝐀 is a vector}\\ \sqrt{∑_{i}∑_{j} A_\mathrm{ij}^{2}}&\mathrel{\mathrm{if}}\text{𝐀 is a matrix}\end{cases}</span></p>
+<p>Functions will mostly work element-wise on an matrix. Exception: functions <code>min()</code> and <code>max()</code> will find the minimum or maximum of the elements in the matrix.</p>
+<p>If you want to write a comma or a semi-colon inside parentheses and not create an matrix, use <code>\,</code> or <code>\;</code>.</p>
+</dd>
+
+<dt id="dictionary">Dictionary</dt>
+<dd>
+
+<p>A <em>dictionary</em> is a data structure in which you can store values and access each one with a unique name. Put another way, a dictionary is a collection of key:value pairs.</p>
+<p>Dictionary literals are written between <code>{ }</code> delimiters. Each key must be a string, i.e., between double quotation marks. Keys are separated from values by a colon and key:value pairs are separated from each other by commas or semi-colons (but not both commas and semi-colons in the same dictionary).</p>
+<p>Example:  <code>barArea = {&quot;#4&quot;: 0.22, &quot;#5&quot;: 0.31}</code></p>
+<p>A value may be any Hurmet data type except a data frame or a nested dictionary.</p>
+<p>Besides a dictionary literal, the other, possibly more common, way to create a dictionary is to call one row of a <a href="#data-frame">data frame</a>. </p>
+<p>Call individual values from a dictionary with a key in brackets, as in <code>A = barArea[&quot;#3&quot;]</code>. This notation also enables one to use a variable name for the key. Or, if the key qualifies as a valid <a href="#identifiers">identifier</a>, you can use dot notation, as in <code>W8X31.weight</code></p>
+<p>You can assign multiple values from a dictionary in one statement using bracket notation, like this:</p>
+<pre><code>A, I, w_self = W8X31[&quot;A&quot;, &quot;Ix&quot;, &quot;weight&quot;] = !!</code></pre><p>Multiple assignment statements must have the result display suppressed.</p>
+</dd>
+
+<dt id="map">Map</dt>
+<dd>
+
+<p>A Hurmet <em>map</em> is a dictionary in which every value is the same data type and, if numeric, carries the same unit-of-measure. Maps can be the numeric part of a quantity. </p>
+<pre><code>barArea = &#39;{&quot;#4&quot;: 0.22, &quot;#5&quot;: 0.31} in2&#39;</code></pre><p>You can do arithmetic on maps and run them through functions. The operation will be done on each value in the map. For instance, a beam calculation can break the loads down into dead load, live load, snow load, etc.:</p>
+<p><span class='tex'>w = \begin{Bmatrix}\text{D}:20 \\ \text{L}:40 \\ \text{S}:30 \end{Bmatrix}\; {\text{lbf/ft}}</span>        <span class='tex'>L = 12\; {\text{ft}}</span></p>
+<p><span class='tex'>M = \frac{1}{8}\, w L^{2}= \color{blue}\dfrac{1}{8}\, \left(\begin{Bmatrix}\text{D}:20 \\ \text{L}:40 \\ \text{S}:30 \end{Bmatrix}\; {\text{lbf/ft}}\right)(12\; {\text{ft}})^{2}\color{black}= \{\text{D}:0.54 ,\: \text{L}:0.72 ,\: \text{S}:0.36 \}\; {\text{k}\mkern1mu{\cdot}\mkern1mu\text{ft}}</span></p>
+<p>Dictionaries with values of varying units-of-measure can be multiplied by a unit-less scalar. No other math operations are supported for non-map dictionaries.</p>
+</dd>
+
+<dt id="data-frame">Data Frame</dt>
+<dd>
+
+<p>A <em>data frame</em> is a two dimensional data structure that can be accessed with row names and column names or by row indices and column indices.</p>
+<p>Each datum can be a number, a string, <code>true</code>, or <code>false</code>. A missing item will be taken to be <code>undefined</code>. All data in a column must be of the same data type. A column of numbers can be assigned a unit of measure. </p>
+<p>Data frame literals are written between backtick <code>` `</code> delimiters. The text between the backticks must be written in CSV format. Numbers must use a dot decimal. The second row will define units of measure if “unit” is the first word of the second row. The first column will be indexed if the first word is “name” or “index”.</p>
+<p>Here’s an example of CSV input:</p>
+<pre><code>rebar = `name,diameter,area
+unit,in ,in²
+#3,0.375,0.11
+#4,0.5  ,0.2
+#5,0.625,0.31
+#6,0.75 ,0.44`</code></pre><p>… which renders as:</p>
+<p><span class="tex">\mathrm{rebar} = \begin{array}{l|c c}\text{name}&amp;\mathrm{diameter}&amp;\mathrm{area} \\ &amp;{\text{in}}&amp;{\text{in}^{2}} \\ \hline\text{\#3}&amp;0.375 &amp;0.11  \\ \text{\#4}&amp;0.5 &amp;0.2  \\ \text{\#5}&amp;0.625 &amp;0.31  \\ \text{\#6}&amp;0.75 &amp;0.44\end{array}</span></p>
+
+<p>Data frames can be quite large, so Hurmet gives you two ways to define them inconspicuously:</p>
+<ol>
+<li>A variable that contains a data frame can be called before it is defined. So you can make that assignment at the end of a document.</li>
+<li>The <code>fetch(url)</code> function is available to load data from a remote CSV file into a data frame. Since Hurmet runs in a browser, the url must begin with <code>http:</code> or <code>https:</code></li>
+</ol>
+<p>A fetch example:</p>
+<pre><code>wideFlanges = fetch(&quot;https://Hurmet.io/data/example.csv&quot;) = !</code></pre><p>That example loads in this data:</p>
+<p><span class="tex">\begin{array}{l|c c c c c c c c c c}\text{name}&amp;\mathrm{weight}&amp;\mathrm{area}&amp;d&amp;\mathrm{bf}&amp;\mathrm{tw}&amp;\mathrm{tf}&amp;\mathrm{Ix}&amp;\mathrm{Sx}&amp;\mathrm{Iy}&amp;\mathrm{Sy} \\ \;&amp;{\text{lbf/ft}}&amp;{\text{in}^{2}}&amp;{\text{in}}&amp;{\text{in}}&amp;{\text{in}}&amp;{\text{in}}&amp;{\text{in}^{4}}&amp;{\text{in}^{3}}&amp;{\text{in}^{4}}&amp;{\text{in}^{3}} \\ \hline\text{W14X90}&amp;90 &amp;26.5 &amp;14 &amp;14.5 &amp;0.44 &amp;0.71 &amp;999 &amp;143 &amp;362 &amp;49.9  \\ \text{W12X65}&amp;65 &amp;19.1 &amp;12.1 &amp;12 &amp;0.39 &amp;0.605 &amp;533 &amp;87.9 &amp;174 &amp;29.1  \\ \text{W10X49}&amp;49 &amp;14.4 &amp;10 &amp;10 &amp;0.34 &amp;0.56 &amp;272 &amp;54.6 &amp;93.4 &amp;18.7  \\ \text{W8X31}&amp;31 &amp;9.13 &amp;8 &amp;8 &amp;0.285 &amp;0.435 &amp;110 &amp;27.5 &amp;37.1 &amp;9.27  \\ \text{W8X18}&amp;18 &amp;5.26 &amp;8.14 &amp;5.25 &amp;0.23 &amp;0.33 &amp;61.9 &amp;15.2 &amp;7.97 &amp;3.04  \\ \text{W6X15}&amp;15 &amp;4.43 &amp;5.99 &amp;5.99 &amp;0.23 &amp;0.26 &amp;29.1 &amp;9.72 &amp;9.32 &amp;3.11  \\ \text{W4X13}&amp;13 &amp;3.83 &amp;4.16 &amp;4.06 &amp;0.28 &amp;0.345 &amp;11.3 &amp;5.46 &amp;3.86 &amp;1.9\end{array}</span></p>
+
+<p>As data frames go, that example is still pretty small. When I assign a data frame to a variable, I usually suppress its display by using the <strong>!</strong> display selector.</p>
+<p>You can call a row or a column with single index. You can call a single cell or a range of cells with a pair of indices within brackets. The index can be either a number or a string. Examples:</p>
+<div class="table-no-wrap"></div>
+
+<table>
+<thead>
+<tr>
+<th>This call:</th>
+<th>… will return:</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>wideFlanges[&quot;W10X49&quot;, &quot;area&quot;]</code></td>
+<td><span class='tex'>14.4\; {\text{in}^{2}}</span></td>
+</tr>
+<tr>
+<td><code>wideFlanges.W10X49.area</code></td>
+<td><span class='tex'>14.4\; {\text{in}^{2}}</span></td>
+</tr>
+<tr>
+<td><code>wideFlanges[&quot;W10X49&quot;][&quot;area&quot;]</code></td>
+<td><span class='tex'>14.4\; {\text{in}^{2}}</span></td>
+</tr>
+<tr>
+<td><code>wideFlanges[&quot;W10X49&quot;, 1:2]</code></td>
+<td><span class='tex'>\{\text{name}:\text{W10X49},\: \text{weight}:49\; {\text{lbf/ft}}\}</span></td>
+</tr>
+<tr>
+<td><code>wideFlanges[&quot;W10X49&quot;, [&quot;area&quot;, &quot;weight&quot;]]</code></td>
+<td><span class='tex'>\{\text{area}:14.4\; {\text{in}^{2}},\: \text{weight}:49\; {\text{lbf/ft}}\}</span></td>
+</tr>
+<tr>
+<td><code>wideFlanges.W10X49[&quot;area&quot;, &quot;weight&quot;]</code></td>
+<td><span class='tex'>\{\text{area}:14.4\; {\text{in}^{2}},\: \text{weight}:49\; {\text{lbf/ft}}\}</span></td>
+</tr>
+<tr>
+<td><code>wideFlanges[&quot;W10X49&quot;][&quot;area&quot;, &quot;weight&quot;]</code></td>
+<td><span class='tex'>\{\text{area}:14.4\; {\text{in}^{2}},\: \text{weight}:49\; {\text{lbf/ft}}\}</span></td>
+</tr>
+<tr>
+<td><code>wideFlanges[1:2, &quot;area&quot;]</code></td>
+<td><span class='tex'>\begin{bmatrix}26.5 \\ 19.1 \end{bmatrix}</span></td>
+</tr>
+<tr>
+<td><code>wideFlanges[[&quot;W8X31&quot;; &quot;W10X49&quot;], &quot;area&quot;]</code></td>
+<td><span class='tex'>\begin{bmatrix}0.13 \\ 14.4 \end{bmatrix}</span></td>
+</tr>
+</tbody></table>
+<p>Hurmet will return a <br> <span class='tex'>\begin{cases}\text{simple type}&\mathrel{\mathrm{if}}\text{you call a single cell, as in df[1, 2]}\\ \text{column vector}&\mathrel{\mathrm{if}}\text{you call a column, as in df[,2]}\\ \text{dictionary}&\mathrel{\mathrm{if}}\text{you call a row, as in df[3,]}\\ \text{data frame}&\mathrel{\mathrm{otherwise}}\end{cases}</span></p>
+<p>You can also use dot notation to call a row, as in <code>wideFlanges.W10X49</code></p>
+<p>Similar to a dictionary, a call to a data frame can return multiple values. As in:<br>
+    <code>A, S_x = wideFlanges.W8X31[&quot;area&quot;, &quot;Sx&quot;] = !!</code>, or<br>
+    <code>A, S_x = wideFlanges[&quot;W8X31&quot;][&quot;area&quot;, &quot;Sx&quot;] = !!</code>, or<br>
+    <code>A, S_x = wideFlanges[&quot;W10X49&quot;, [&quot;area&quot;, &quot;Sx&quot;]] = !!</code><br>
+Multiple returns must use the <code>!!</code> display selector, for now.</p>
+</dd>
+</dl>
+
+<h2 id="expressions">Expressions</h2>
+<p>Hurmet calculations are meant to be recognizeable to anyone familiar with standard math notation. That is a broad statement. Here are many nuances:</p>
+<h2 id="constants">Constants</h2>
+<dl>
+
+<dt id="π">π</dt>
+<dd><p>If you write <span class='tex'>π</span> into an expression, Hurmet uses a value of 3.14159265358979323846264338327950288419716939937510582097494.</p></dd>
+
+<dt id="e">e</dt>
+<dd><p>Hurmet will treat <span class='tex'>e</span> just like any other variable most of the time. But if <span class='tex'>e</span> is the base of an exponent, for example: <span class='tex'>e^{x}</span>, then Hurmet will perform the function <span class='tex'>\exp(x)</span>.</p></dd>
+
+<dt id="ℏ">ℏ</dt>
+<dd><p>For ℏ, Hurmet uses a value of 1.054571817 × 10⁻³⁴ J·s.</p></dd>
+
+</dl>
+
+<h2 id="operators">Operators</h2>
+<div style="width:35em;">
+
+<div class="table-grid"></div>
+
+<table>
+<thead>
+<tr>
+<th>Operator</th>
+<th>auto<br>correct</th>
+<th>Example</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>=</td>
+<td></td>
+<td><em>x</em> = 15</td>
+<td>Assign a value to a variable.</td>
+</tr>
+<tr>
+<td>=</td>
+<td></td>
+<td><span class='tex'>\mathrel{\mathrm{if}}x = 15</span></td>
+<td>Equality test if in a comparison position.<br>That is, “=” tests for equality if there is something other than a identifier to the left of it or a display selector to the right of it.</td>
+</tr>
+<tr>
+<td>+</td>
+<td></td>
+<td><span class='tex'>2 + 2</span></td>
+<td>Addition</td>
+</tr>
+<tr>
+<td>–</td>
+<td></td>
+<td><span class='tex'>5 - 3</span></td>
+<td>Subtraction</td>
+</tr>
+<tr>
+<td>-</td>
+<td></td>
+<td><span class='tex'>\text{-}4</span></td>
+<td>Unary minus</td>
+</tr>
+<tr>
+<td>*</td>
+<td></td>
+<td><span class='tex'>2 * 4</span></td>
+<td>Multiplication of numbers.<br>Element-wise product of matrices.</td>
+</tr>
+<tr>
+<td>×</td>
+<td>xx</td>
+<td><span class='tex'>2 × 4</span></td>
+<td>Multiplication of numbers.<br>Cross product of three-vectors.</td>
+</tr>
+<tr>
+<td>·</td>
+<td><strong>.</strong></td>
+<td><span class='tex'>a ⋅ b</span></td>
+<td>Multiplication of numbers.<br>Dot product of matrices.</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><span class='tex'>(2)(4)</span></td>
+<td>Multiplication</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><code>a b</code></td>
+<td>Multiplication. (A space acts as an operator when between variables.)</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><span class='tex'>2 \, a</span></td>
+<td>Multiplication</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><span class='tex'>\mathrm{a2}</span></td>
+<td>Not a multiplication if no space.<br>Hurmet reads “a2” as an identifier.</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><span class='tex'>\sin(2)</span></td>
+<td>Function</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>a (2)</td>
+<td>Multiplication if a space exists before the open paren.</td>
+</tr>
+<tr>
+<td>/</td>
+<td></td>
+<td><span class='tex'>\dfrac{8}{2}</span></td>
+<td>Division</td>
+</tr>
+<tr>
+<td>//</td>
+<td></td>
+<td><span class='tex'>\frac{8}{2}</span></td>
+<td>Case fraction</td>
+</tr>
+<tr>
+<td>///</td>
+<td></td>
+<td><span class='tex'>8 / 2</span></td>
+<td>Division displayed inline</td>
+</tr>
+<tr>
+<td>÷</td>
+<td>-:</td>
+<td><span class='tex'>8 ÷ 2</span></td>
+<td>Inline division</td>
+</tr>
+<tr>
+<td>^</td>
+<td></td>
+<td><span class='tex'>3^{2}</span></td>
+<td>Exponent</td>
+</tr>
+<tr>
+<td>&amp;</td>
+<td></td>
+<td></td>
+<td>Concatenate strings or vectors, or concatenate numbers onto vectors</td>
+</tr>
+<tr>
+<td>√</td>
+<td>sqrt</td>
+<td><span class='tex'>\sqrt{4}</span></td>
+<td>Square root</td>
+</tr>
+<tr>
+<td><span class='tex'>\sqrt[3]{}</span></td>
+<td>root n</td>
+<td><span class='tex'>\sqrt[3]{8}</span></td>
+<td>nth-root</td>
+</tr>
+<tr>
+<td>| |</td>
+<td></td>
+<td><span class='tex'>\lvert \text{-}4 \rvert</span></td>
+<td>Absolute value of a scalar, determinant of a matrix, or magnitude of a vector.</td>
+</tr>
+<tr>
+<td>|| ||</td>
+<td></td>
+<td><span class='tex'>\ \Vert x \ \Vert</span></td>
+<td><span class='tex'>\sqrt{x_\mathrm{1}^{2}+ ⋯ + x_\mathrm{n}^{2}}</span> if the argument is a vector of reals</td>
+</tr>
+<tr>
+<td>|| ||</td>
+<td></td>
+<td><span class='tex'>\ \Vert x \ \Vert</span></td>
+<td><span class='tex'>\sqrt{∑_{i}∑_{j} A_{i ,\: j}^{2}}</span> if the argument is a 2-D matrix</td>
+</tr>
+<tr>
+<td>⌊ ⌋</td>
+<td>floor</td>
+<td><span class='tex'>\lfloor 4.5 \rfloor</span></td>
+<td>Floor. Always rounds down.</td>
+</tr>
+<tr>
+<td>⌈ ⌉</td>
+<td>ceil</td>
+<td><span class='tex'>\lceil 4.5 \rceil</span></td>
+<td>Ceiling. Always rounds up.</td>
+</tr>
+<tr>
+<td>%</td>
+<td></td>
+<td><span class='tex'>10 \%</span></td>
+<td>Percent</td>
+</tr>
+<tr>
+<td>‰</td>
+<td></td>
+<td><span class='tex'>10 ‰</span></td>
+<td>Per thousand</td>
+</tr>
+<tr>
+<td>!</td>
+<td></td>
+<td><span class='tex'>5!</span></td>
+<td><a href="https://en.wikipedia.org/wiki/Factorial/">Factorial</a><br>precision = <span class='tex'>\begin{cases}100 \%&\mathrel{\mathrm{if}}n ≤ 100 \\ 15 \, \,\mathrm{digits} &\mathrel{\mathrm{otherwise}}\end{cases}</span></td>
+</tr>
+<tr>
+<td>modulo</td>
+<td></td>
+<td><code>10</code> <code>modulo</code> <code>5</code></td>
+<td>Always returns a positive remainder.</td>
+</tr>
+<tr>
+<td><span class='tex'>\left({{n}\atop{k}}\right)</span></td>
+<td>(<em>n</em> \atop <em>k</em>)</td>
+<td><span class='tex'>\left({{5}\atop{3}}\right)</span></td>
+<td>Binomial coefficient. <span class='tex'>\left({{n}\atop{k}}\right)= \dfrac{n!}{n!(n!- k!)}</span></td>
+</tr>
+<tr>
+<td>=</td>
+<td></td>
+<td><span class='tex'>\mathrel{\mathrm{if}}x = 15</span></td>
+<td>Equality comparison</td>
+</tr>
+<tr>
+<td>≠</td>
+<td><code>!=</code> or <code>&lt;&gt;</code></td>
+<td><span class='tex'>\mathrel{\mathrm{if}}b ≠ c</span></td>
+<td>Inequality comparison</td>
+</tr>
+<tr>
+<td><code>&lt;</code></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>&gt;</code></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>≤</td>
+<td><code>&lt;=</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>≥</td>
+<td><code>&gt;=</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>∈</td>
+<td>\in</td>
+<td>c ∈ s</td>
+<td>Is an element of (a matrix or string)</td>
+</tr>
+<tr>
+<td>∉</td>
+<td>\notin</td>
+<td>c ∉ s</td>
+<td>Is not an element of</td>
+</tr>
+<tr>
+<td>⋐</td>
+<td>\Subset</td>
+<td>c ⋐ s</td>
+<td>Is a proper subset of</td>
+</tr>
+<tr>
+<td>and</td>
+<td></td>
+<td>if <em>a</em> and <em>b</em></td>
+<td>Logical and</td>
+</tr>
+<tr>
+<td>or</td>
+<td></td>
+<td></td>
+<td>Logical or</td>
+</tr>
+<tr>
+<td>∧</td>
+<td>^^</td>
+<td></td>
+<td>Logical and</td>
+</tr>
+<tr>
+<td>∨</td>
+<td>vv</td>
+<td></td>
+<td>Logical or</td>
+</tr>
+<tr>
+<td>⊻</td>
+<td>xor</td>
+<td></td>
+<td>Logical xor</td>
+</tr>
+<tr>
+<td>¬</td>
+<td>not</td>
+<td>if ¬ <em>a</em></td>
+<td>Logical not</td>
+</tr>
+<tr>
+<td>:</td>
+<td></td>
+<td>{&quot;a&quot;: 10}<br>𝐕[2:3]<br>for <em>i</em> in 1:3</td>
+<td>Key:value separator if within a dictionary. Range separator otherwise.</td>
+</tr>
+</tbody></table>
+</div>
+
+<h2 id="functions">Functions</h2>
+<p>Hurmet treats an <a href="#identifiers">identifier</a> as a function name if it is placed directly before an open parenthesis. So a term like <span class='tex'>\sinh(x)</span> is a function.</p>
+<p>Hurmet’s built-in functions are described below. Unless noted otherwise, they can operate on any real number or any matrix containing real numbers. (Complex numbers are coming).</p>
+<p>Transcendental functions, like trigonometry and logarithms, are done to 15 digits precision.</p>
+<hr>
+<div id="function-list">
+<dl>
+
+<dt id="abs">abs(x)</dt>
+<dd><p>Absolute value of a real number</p></dd>
+
+<dt id="acos">acos(<em>x</em>), asin(<em>x</em>), atan(<em>x</em>), asec(<em>x</em>), acsc(<em>x</em>), acot(<em>x</em>)</dt>
+<dd><p>Inverse trigonometry functions. One can also call an inverse trigonometry function with a superscript, as in <span class='tex'>\cos^{\text{-}1}{x}</span>.</p></dd>
+
+<dt id="atan2">atan2(<em>x</em>, <em>y</em>)</dt>
+<dd><p>An <em>atan</em> function that returns an angle in the proper quadrant. Given a point defined by real coordinates <em>x</em> and <em>y</em>, <em>atan2</em> returns the angle between that point and the positive <em>x</em>-axis of a plane.</p></dd>
+
+<dt id="chr">chr(<em>n</em>)</dt>
+<dd><p>Takes an integer as a argument, treats it as a Unicode code point, and returns the corresponding string character.<br><code>chr(34)</code> returns a double quotation mark.</p></dd>
+
+<dt id="cos">cos(𝜃), sin(𝜃), tan(𝜃), sec(𝜃), csc(𝜃), cot(𝜃)</dt>
+<dd>
+
+<p>Trigonometry functions.</p>
+<p>The trig functions listed above will assume that the argument is in radians unless you tell it otherwise. You can tell it otherwise by just writing in a unit, as in: <code>tan(&#39;45°&#39;)</code> and running a unit-aware calculation.</p>
+<p>A positive integer written as a superscript after a trig function name will return the function result raised to a power. <br>So that: <span class='tex'>\sin^{2}{θ}= (\sin{θ})^{2}</span>.</p>
+<p>A superscript <sup>-1</sup> indicates an inverse function. In other words, <span class='tex'>\cos^{\text{-}1}{x}= \operatorname{acos}(x)</span>.</p>
+<p>Three functions: <code>sin</code>, <code>cos</code>, and <code>tan</code>, do not require parentheses around their arguments.</p>
+</dd>
+
+<dt id="cos<sub>d</sub>">cos<sub>d</sub>(𝜃), sin<sub>d</sub>(𝜃), tan<sub>d</sub>(𝜃), sec<sub>d</sub>(𝜃), csc<sub>d</sub>(𝜃), cot<sub>d</sub>(𝜃)</dt>
+<dd><p>The trigonometry functions listed just above will assume that the argument is in degrees. Hurmet will subscript the “d” for you.</p></dd>
+
+<dt id="cosh">cosh(<em>x</em>), sinh(<em>x</em>), tanh(<em>x</em>), sech(<em>x</em>), csch(<em>x</em>), coth(<em>x</em>)</dt>
+<dd><p><a href="https://en.wikipedia.org/wiki/Hyperbolic_function">Hyperbolic functions</a>. Notation for inverse functions is similar to trigonometry.</p></dd>
+
+<dt id="exp">exp(<em>x</em>)</dt>
+<dd><p><span class='tex'>e^{x}</span></p></dd>
+
+<dt id="fetch">fetch(<em>url</em>)</dt>
+<dd><p>Fetches the contents of a remote file. It will return<br><span class='tex'>\begin{cases}\text{currencies}&\mathrel{\mathrm{if}}\text{assigned to variable:\,}\mathrm{currencies} \\ \text{a data range}&\mathrel{\mathrm{if}}\text{the file extension is .csv.txt}\\ \text{a module}&\mathrel{\mathrm{if}}\text{the file extension is hrms}\end{cases}</span>.<br>Fetch functions must be stand-alone expressions.</p></dd>
+
+<dt id="gcd">gcd(<em>m</em>, <em>n</em>)</dt>
+<dd><p>Greatest common divisor of two integers.</p></dd>
+
+<dt id="isnan">isNaN(<em>x</em>)</dt>
+<dd><p>Indicates if the argument is not numeric.</p></dd>
+
+<dt id="length">length(a)</dt>
+<dd><p>The length of a string or the number of elements in a matrix or vector.</p></dd>
+
+<dt id="lerp">lerp(<strong>X</strong>, <strong>Y</strong>, index)</dt>
+<dd><p>Linear interplolation. Locates real index within the vector <strong>X</strong> and returns a real number interpolated from the vector <strong>Y</strong>. <strong>X</strong> must contain values in ascending order.</p></dd>
+
+<dt id="log">log(<em>x</em>), ln(<em>x</em>)</dt>
+<dd><p>Natural (base <em>e</em>) logarithm of <em>x</em>.</p></dd>
+
+<dt id="log<sub>10</sub>">log<sub>10</sub>(<em>x</em>)</dt>
+<dd><p>Base 10 logarithm. Hurmet will subscript the numerals for you.</p></dd>
+
+<dt id="log">log(<em>b</em>, <em>x</em>)</dt>
+<dd><p>Base <em>b</em> logarithm.</p></dd>
+
+<dt id="<span-class='tex'>\min"><span class='tex'>\min(a ,\: b ,\: c ,\: …),\: \max(a ,\: b ,\: c ,\: …)</span></dt>
+<dd><p>Minimum or maximum of a list or array. Real numbers only.</p></dd>
+
+<dt id="random">random()</dt>
+<dd><p>A pseudo-random number in the range from 0 to 1 (inclusive of 0, but not 1). Good for Monte-Carlo modeling. Not sufficiently random for crypto.</p></dd>
+
+<dt id="round">round(<em>x</em>, <em>spec</em>)</dt>
+<dd><p>Rounds a real number <em>x</em>.<br>To round to an integer, omit the spec.<br>To round to <em>n</em> significant digits, write the spec as &quot;r<em>n</em>&quot;, e.g., &quot;r3&quot;.<br>To round to <em>n</em> places after the decimal, write the spec as &quot;f<em>n</em>&quot;.</p></dd>
+
+<dt id="sign">sign(<em>x</em>)</dt>
+<dd><p>Returns <span class='tex'>\begin{cases}1 &\mathrel{\mathrm{if}}x \gt 0 \\ \text{-}1 &\mathrel{\mathrm{if}}x \lt 0 \\ 0 &\mathrel{\mathrm{otherwise}}\end{cases}</span><br>Real numbers only.</p></dd>
+
+<dt id="sum">sum(<em>a</em>, <em>b</em>, <em>c</em>, …), product(<em>a</em>, <em>b</em>, <em>c</em>, …), length(<em>a</em>, <em>b</em>, <em>c</em>, …), range(<em>a</em>, <em>b</em>, <em>c</em>, …), mean(<em>a</em>, <em>b</em>, <em>c</em>, …), variance(<em>a</em>, <em>b</em>, <em>c</em>, …), stddev(<em>a</em>, <em>b</em>, <em>c</em>, …)</dt>
+<dd><p>Functions that accumulate a result from a list of arguments.</p></dd>
+
+<dt id="zeros">zeros(<em>m</em>, <em>n</em>)</dt>
+<dd><p>Returns a <em>m</em> × <em>n</em> matrix filled with zeros.</p></dd>
+
+<dt id="γ">Γ(<em>z</em>)</dt>
+<dd><p><a href="http://en.wikipedia.org/wiki/Gamma_function">Gamma function</a><br>precision = <span class='tex'>\begin{cases}100 \%&\mathrel{\mathrm{if}}z \text{ is a positive integer ≤ 100}\\ 15 \, \,\mathrm{digits} &\mathrel{\mathrm{otherwise}}\end{cases}</span></p></dd>
+
+</dl>
+</div> <!-- end of function definitions -->
+
+<h2 id="operator-precedence">Operator Precedence</h2>
+<p>What is the result of the expression <span class='tex'>3 + 4 × 2</span> ?</p>
+<p>It depends on whether one does the addition first or the multiplication first. So the answer could be <span class='tex'>(3 + 4)(2)= 14</span> or it could be <span class='tex'>3 + (4 × 2)= 11</span>.</p>
+<p>To resolve this ambiguity, Hurmet performs operations with the following precedence:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>! %</td>
+<td>Factorials and percents are done first.</td>
+</tr>
+<tr>
+<td>^</td>
+<td>Then exponents, from right to left.</td>
+</tr>
+<tr>
+<td>√</td>
+<td>Roots</td>
+</tr>
+<tr>
+<td>-</td>
+<td>Unary minus, for example: -4</td>
+</tr>
+<tr>
+<td>∠</td>
+<td>To write a complex number in <em>r</em>∠θ notation. (Coming later this year)</td>
+</tr>
+<tr>
+<td>× · / ÷</td>
+<td>Multiplication or division, from left to right.</td>
+</tr>
+<tr>
+<td>+ – &amp;</td>
+<td>Addition or subtraction or concatenation, from left to right.</td>
+</tr>
+<tr>
+<td>&lt; &gt; ≤ ≥ = ≠</td>
+<td>Comparisons (for <a href="#if-expressions">If Expressions</a>)</td>
+</tr>
+<tr>
+<td>∧ ∨ ¬ ⊻</td>
+<td>Logical operators (<a href="#if-expressions">ditto</a>)</td>
+</tr>
+<tr>
+<td>:</td>
+<td>Separator for a range of integers, as in <strong>V</strong>[2:3].</td>
+</tr>
+<tr>
+<td>, ;</td>
+<td>Argument separators or row separators for functions, matrices, dictionaries, or If Expressions.</td>
+</tr>
+<tr>
+<td>( ) [ ]</td>
+<td>All conventions are over-ridden by parentheses or brackets.</td>
+</tr>
+</tbody></table>
+<p>Now let’s return to the question that opened this section. We now know that multiplication has a higher precedence than addition, so the answer to our question above is: <span class='tex'>3 + (4 × 2)= 11</span></p>
+<h2 id="if-expressions">If Expressions</h2>
+<p>Hurmet If Expressions enable you to choose between expressions, based upon one or more conditions, as in:</p>
+  <div class="indented">
+
+<p><span class='tex'>β_\mathrm{1} = \begin{cases}0.85 &\mathrel{\mathrm{if}}f_\mathrm{c}' ≤ 4{,}000 \\ 0.65 &\mathrel{\mathrm{if}}f_\mathrm{c}' ≥ 8{,}000 \\ 0.85 - \frac{f_\mathrm{c}' - 4{,}000}{20{,}000}&\mathrel{\mathrm{otherwise}}\end{cases}</span></p>
+  </div>
+
+<p>This sort of expression is written between the delimiters: <code>{ }</code><br>The row separator symbol is <strong>;</strong><br>Hurmet will automatically align the logic words <strong>if</strong> and <strong>otherwise</strong>.  
+So the example above can be coded this way:</p>
+<pre><code>β_1 = {
+    0.85                         if f_c′ ≤ 4000 ;
+    0.65                         if f_c′ ≥ 8000 ;
+    0.85 - (f_c′ - 4000)/20000   otherwise
+}</code></pre><p>The spaces in that code example are not significant. Hurmet always aligns the words <code>if</code> and <code>otherwise</code>. In fact, that example could also be coded all onto one line. To be precise, the form is:</p>
+<p><img src="../../images/if-railroad.svg" alt="#{expression if condition; expression otherwise}"></p>
+<p>Conditions may contain logical operators:  and or not ∧  ∨  ¬  ⊻</p>
+<p><span class='tex'>x = \begin{cases}2 \, a &\mathrel{\mathrm{if}}a \lt b \mathrel{\mathrm{and}}b = 4 \\ a^{2}&\mathrel{\mathrm{otherwise}}\end{cases}</span></p>
+<p>Chained comparisons are okay.</p>
+<p><span class='tex'>x = \begin{cases}1.0 &\mathrel{\mathrm{if}}a \lt b \lt 5 \lt d \\ 1.2 &\mathrel{\mathrm{otherwise}}\end{cases}</span></p>
+<p>The word “otherwise” is optional.</p>
+<h2 id="overloading">Overloading</h2>
+<p>Overloading summary. That is, Hurmet  math operators and functions will work on all the data types tablulated below. They also work on a Hurmet quantity that takes any of these shapes:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;"></th>
+<th style="text-align: center;">scalar</th>
+<th style="text-align: center;">vector</th>
+<th style="text-align: center;">matrix</th>
+<th style="text-align: center;">map</th>
+<th style="text-align: center;">map with<br>vector values</th>
+</tr>
+</thead>
+<tbody><tr>
+<td style="text-align: left;">scalar</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: left;">vector</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">matrix</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">map</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: left;">map with<br>vector values</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+</tbody></table>
+<p>There are a few operators that also work on dictionaries. For instance, a unit-less number can be multiplied times a dictionary that has numeric values.</p>
+<h2 id="unit-aware-calculations">Unit-Aware Calculations</h2>
+<p>Hurmet has a data type called a <a href="#quantity">quantity</a> that contains both a numeric magnitude and a unit of measure. In a Hurmet math editing box, you write quantity literals between single quotation marks. Examples:</p>
+<table class="nogrid">
+   <tr>
+     <td><pre><code>'4 meters'</code></pre></td>
+     <td><pre><code>'7.1 ft3/s'</code></pre></td>
+     <td><pre><code>'11 N·m'</code></pre></td>
+   </tr>
+</table>
+
+
+<p>Hurmet has a <strong>unit-aware</strong> calculation mode that automatically handles unit conversions on quantities and also checks that the operands are unit-compatible. You specify unit-aware mode by writing two question marks instead of one in the place where you want a result to appear. So if you open a Hurmet calculation cell and write:</p>
+<pre><code>&#39;4 ft&#39; + &#39;3 yards&#39; = ?? m</code></pre><p>… the result will render as:</p>
+<p><span class='tex'>4\; {\text{ft}}+ 3\; {\text{yards}}= 3.9624\; {\text{m}}</span></p>
+<p>You can create composite units on the fly and Hurmet will still convert them automatically.</p>
+<p><span class='tex'>\dfrac{3\; {\text{kW}\mkern1mu{\cdot}\mkern1mu\text{hr}}× (20\; {\text{min}})}{800\; {\text{lbf}}× (1\; {\text{h}})}= 1.0116402439486971731\; {\text{km}}</span></p>
+<p>If you try to add quantities with non-compatible units, Hurmet will return an error message:</p>
+<p><span class='tex'>3\; {\text{m}}+ 2\; {\text{V}}= \color{firebrick}\text{Error. Adding incompatible units.}</span></p>
+<p>If the calculated units are non-compatible with the units specified for the result display, Hurmet will return an error message:</p>
+<p><span class='tex'>3\; {\text{m}}+ 2\; {\text{ft}}= \color{firebrick}\text{Error. Calculated units are not compatible with the desired result unit:},\: \text{V}</span></p>
+<p>If you assign a quantity to a variable, a unit-aware calculation will call the variable’s entire quantity, not just the numeric value.</p>
+<p><span class='tex'>L = 3\; {\text{ft}}</span></p>
+<p><span class='tex'>L_\mathrm{2} = 2 \, L = \color{blue}2 (3\; {\text{ft}})\color{black}= 1.8288\; {\text{m}}</span></p>
+<p>If you assign a quantity to a variable, you can still call the variable from a non-unit-aware calculation. Such a calculation will call the scalar value, not the quantity.</p>
+<p><span class='tex'>L_\mathrm{unaware} = 2 \, L = \color{blue}2 (3)\color{black}= \ ,\: 6</span></p>
+<p>You’re welcome to view all of Hurmet’s built-in <a href="unit-definitions.html" title="Unit Definitions">unit definitions</a>.</p>
+<h4 id="custom-units">Custom Units</h4>
+<p>If the Hurmet built-in unit definitions are not sufficient, you can define a set of custom units in a dictionary like this:</p>
+<pre><code>units = { &quot;smoot&quot;: &#39;67 inches&#39;, &quot;sol&quot;: &#39;24.6229622 hours&#39; }</code></pre><h4 id="currencies">Currencies</h4>
+<p>Currency exchange rates change, so Hurmet treats them differently than other conversion factors. <span class="dim">If you do unit-aware calculations with more than one currency in the same document,</span> Before you can use a currency unit, you must first load currency exchange rates into a dictionary named <strong>currencies</strong>. Such a statement might be coded like this:</p>
+<pre><code>currencies = { &quot;USD&quot;: 1, &quot;CAD&quot;: 1.33 }</code></pre><p>The keys in that dictionary are standard three-letter <a href="https://www.xe.com/iso4217.php">currrency codes</a>. If writing such a dictionary is too much trouble, you can also fetch exchange rates with the following statement:</p>
+<pre><code>currencies = fetch(&quot;https://api.exchangeratesapi.io/latest?base=USD&quot;) = !</code></pre><p>That statement will fetch exchange rates published at <a href="https://exchangeratesapi.io" title="exchangeratesapi.io">exchangeratesapi.io</a> which gets them in turn from the <a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html" title="Exchange Rates">European Central Bank</a>. The rates are updated once per day.</p>
+<p>The variable name <strong>currencies</strong> may not be used for any other purpose.</p>
+<h4 id="traditional-units">Traditional Units</h4>
+<p>Many traditional units have had more than one historical definition. Hurmet currently has the following default treatment of certain traditional units:</p>
+<ul>
+<li><strong>pound</strong> is treated as a mass, not a force. (<strong>lbf</strong> and <strong>lbm</strong> are un-ambiguous alternatives.)</li>
+<li><strong>psf</strong> and <strong>psi</strong>, on the other hand, are treated as force per area.</li>
+<li><strong>ton</strong> is treated as a mass, and is the U.S. customary unit. I also put in a <strong>tonf</strong>, 2000 lbf.</li>
+<li><strong>gallon</strong>, <strong>fl oz</strong>, <strong>pint</strong>, <strong>quart</strong>, and <strong>bushel</strong> are the U.S. customary units.</li>
+<li>Weights are avoirdupois, unless specifically noted as a troy weight.</li>
+<li><strong>point</strong> is the adobe point = ¹∕₇₂ inch. <strong>TeX point</strong> is also available.</li>
+<li><strong>barrel</strong> and <strong>bbl</strong> are an oil barrel = 42 US gallons.</li>
+</ul>
+<h2 id="numeral-display">Numeral display</h2>
+<p>There are two aspects to how numbers are displayed: (1) decimal separators, and (2) rounding format for results.</p>
+<h3 id="decimal-separator">Decimal separator</h3>
+<p>In some countries, the usual decimal separator symbol is a dot. Other countries use a comma. Hurmet allows the reader (not the document author) to select which display they prefer. Just use the use the drop-down menu labeled “●”.</p>
+<p>The same menu choice also selects how Hurmet displays thousands separators.</p>
+<p>This menu choice changes nothing internally. It changes only the display. All Hurmet documents are saved with numbers that have a dot decimal and no thousands separator.</p>
+<h3 id="rounding-of-results">Rounding of Results</h3>
+<p>Hurmet stores numbers internally as rational numbers in arbitrary precision, but its default result display is a decimal fraction with up to 15 significant digits. You can command Hurmet to <em>display</em> results differently. Just write a format statement into a Hurmet calculation cell. The specified format will apply to every calculation result below that statement (until another format statement). Here’s a format statement example:</p>
+<pre><code>format = &quot;f2&quot;</code></pre><p>That statement specifies a fixed decimal format. Results after it will display exactly two digits after the decimal. If you would rather specify the number of significant digits, I suggest one of these statements:</p>
+<pre><code>format = &quot;r3&quot;
+format = &quot;h3&quot;</code></pre><p><code>&quot;r3&quot;</code> will display a result rounded to exactly three significant digits. If your client freaks out because integer values have been rounded and look “wrong”, the <code>&quot;h3&quot;</code> format will round only the fractional part of a number.</p>
+<p>That was the short explanation. Now the long one. The rounding format specification string must take the form: &quot;<strong>TN</strong>&quot;, where:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Specification<br>Letter</th>
+<th style="text-align: left;">Description</th>
+<th style="text-align: left;">Use one of:</th>
+<th style="text-align: center;">Default</th>
+</tr>
+</thead>
+<tbody><tr>
+<td style="text-align: center;">T</td>
+<td style="text-align: left;">Type of rounding</td>
+<td style="text-align: left;">bEefhkNnprSstx%</td>
+<td style="text-align: center;">h</td>
+</tr>
+<tr>
+<td style="text-align: center;">N</td>
+<td style="text-align: left;">Number of digits</td>
+<td style="text-align: left;">[0-9]+</td>
+<td style="text-align: center;">15</td>
+</tr>
+</tbody></table>
+<h4 id="type-of-rounding">Type of rounding</h4>
+<p>Let <em>N</em> be the number of digits specified. Then:</p>
+<div style="width:40em;">
+ <table class="grid">
+   <thead>
+     <tr>
+       <th rowspan="2">Type</th>
+       <th rowspan="2">Description</th>
+       <th colspan="3">Examples</th>
+     </tr>
+     <tr>
+       <th>If the number to be formatted is:</th>
+       <th>and the format spec is:</th>
+       <th>the result display will be:</th>
+     </tr>
+   </thead>
+   <tbody>
+     <tr>
+       <td>b</td>
+       <td>Binary</td>
+       <td>5</td>
+       <td>b</td>
+       <td>0b101</td>
+     </tr>
+     <tr>
+       <td rowspan="2">e  or  E</td>
+       <td rowspan="2">A programmer’s version of scientific notation. Rounds to <em>N</em> significant digits.</td>
+       <td rowspan="2">22,000</td>
+       <td>e3</td>
+       <td>2.20e4</td>
+     </tr>
+     <tr>
+       <td>E3</td>
+       <td>2.20E4</td>
+     </tr>
+     <tr>
+       <td rowspan="3">f</td>
+       <td rowspan="3">Rounds to exactly <em>N</em> places after the decimal.</td>
+       <td rowspan="3">3.236</td>
+       <td>f0</td>
+       <td>3</td>
+     </tr>
+     <tr>
+       <td>f2</td>
+       <td>3.24</td>
+     </tr>
+     <tr>
+       <td>f4</td>
+       <td>3.2360</td>
+     </tr>
+     <tr>
+       <td rowspan="3">h</td>
+       <td rowspan="3">
+         Hurmet’s default format will round a decimal fraction to display <em>N</em> significant digits and omit trailing zeros, but it will not round an integer.
+       </td>
+       <td>31.345</td>
+       <td>h3</td>
+       <td>31.3</td>
+     </tr>
+     <tr>
+       <td>65,809</td>
+       <td>h3</td>
+       <td>65,809</td>
+     </tr>
+     <tr>
+       <td>1.1000</td>
+       <td>h3</td>
+       <td>1.1</td>
+     </tr>
+     <tr>
+       <td>k</td>
+       <td>Abbreviated and followed by a symbol from the SI prefixes. Rounds to <em>N</em> significant digits.</td>
+       <td>22,000</td>
+       <td>k3</td>
+       <td>22.0k</td>
+     </tr>
+<!--     <tr>
+       <td rowspan="2">m</td>
+       <td rowspan="2">Mixed fraction. If <em>N</em> is specified, fraction is displayed with denominator no larger than <em>N</em>.</td>
+       <td>2.25</td>
+       <td>m</td>
+       <td>2 ¹⁄₄</td>
+     </tr>
+     <tr>
+       <td>5.1874</td>
+       <td>m16</td>
+       <td>5 ³⁄₁₆</td>
+     </tr> -->
+     <tr>
+       <td rowspan="2">n  or  N</td>
+       <td rowspan="2">Engineering notation, i.e. scientific notation with exponents that are even multiples of 3. Rounds to <em>N</em> significant digits.</td>
+       <td rowspan="2">22,000</td>
+       <td>n3</td>
+       <td>22.0·10³</td>
+     </tr>
+     <tr>
+       <td>N3</td>
+       <td>22.0×10³</td>
+     </tr>
+     <tr>
+       <td rowspan="2">r</td>
+       <td rowspan="2">Rounds to <em>N</em> significant digits.</td>
+       <td>31.345</td>
+       <td>r3</td>
+       <td>31.3</td>
+     </tr>
+     <tr>
+       <td>65,809</td>
+       <td>r3</td>
+       <td>65,800</td>
+     </tr>
+     <tr>
+       <td rowspan="2">s  or  S</td>
+       <td rowspan="2">Scientific notation. Rounds to <em>N</em> significant digits.</td>
+       <td rowspan="2">22,000</td>
+       <td>s3</td>
+       <td>2.20·10⁴</td>
+     </tr>
+     <tr>
+       <td>S3</td>
+       <td>2.20×10⁴</td>
+     </tr>
+     <tr>
+       <td rowspan="2">p  or  %</td>
+       <td rowspan="2">Percentage display.<br>“%” is fixed to exactly <em>N</em> places after the decimal.<br>“p” rounds to <em>N</em> significant digits.</td>
+       <td>0.2812</td>
+       <td>%1</td>
+       <td>28.1%</td>
+     </tr>
+     <tr>
+       <td>1.28</td>
+       <td>p2</td>
+       <td>130%</td>
+     </tr>
+     <tr>
+       <td>t</td>
+       <td>Truncates to a whole number.</td>
+       <td>31.6</td>
+       <td>t</td>
+       <td>31</td>
+     </tr>
+     <tr>
+       <td rowspan="2">x or X</td>
+       <td rowspan="2">Hexadecimal</td>
+       <td rowspan="2">62</td>
+       <td>x</td>
+       <td>0x3e</td>
+     </tr>
+     <tr>
+       <td>X</td>
+       <td>0x3E</td>
+     </tr>
+   </tbody>
+ </table>
+</div>
+
+<p>Numeric result display types <strong>f</strong> and <strong>%</strong> can be set to any non-negative integer. The significant digit display types are limited to no more than 15 significant digits. </p>
+<h2 id="user-defined-functions">User Defined Functions</h2>
+<p>If Hurmet’s <a href="#functions">built-in functions</a> do not satisfy your needs, it is possible to write your own functions. Example:</p>
+<pre><code>function multiply(a, b)
+    return a × b</code></pre><p>Other Hurmet calculation cells can then call the function:</p>
+<p><span class='tex'>n = \operatorname{multiply}(2 ,\: 4)= 8</span></p>
+<p>The function can have any number of arguments, or none, separated by commas. So the form of the first line is:</p>
+<p><img src="../../images/function-railroad.svg" alt="functionName open paren arguments close paren"></p>
+<p>The function name and each argument (if any) must be valid identifiers.</p>
+<p>Function statements end at a line ending, unless the last character is one of: <strong>( [ { , ; + -</strong> or the following line begins with one of: <strong>} ] )</strong></p>
+<p>Comments can be written after <code>#</code>. A space must precede the <code>#</code>.</p>
+<p>Variables created inside a user-defined function are local and their values will not be available outside the function. A user-defined function returns only the result of the expression in a <code>return</code> statement.</p>
+<p>If you omit any arguments when you call a function, Hurmet will fill out the argument list with values of <code>undefined</code> when it executes the function.</p>
+<p>Functions can be called before they are defined. You can write your functions at the end of the document.</p>
+<p>Hurmet does not support function recursion.</p>
+<h4 id="code-blocks">Code Blocks</h4>
+<p>Inside a user-defined function, Hurmet supports code blocks and some additional control words. That is, words such as <em>if</em> and <em>else</em> can control execution of a <em>block</em> of statements, not just one expression. A code block is distinguished from other code by its indentation. That is, in a block, the beginning of every logical line is indented by the same amount. Example:</p>
+<pre><code>if a ≤ b
+    x = a + b²
+    y = 2 x</code></pre><p>Indentation may be done with only with spaces, not with tabs. I usually indent by four spaces.</p>
+<p>A decrease in indentation is treated by Hurmet as equivalent to an <code>end</code> statement in some languages.</p>
+<dl>
+
+<dt id="if​​…else">if​​…else</dt>
+<dd>
+
+<p><em>if​​…else</em> control words make the execution of code blocks dependent on a condition. Example:</p>
+<pre><code>    if a ≤ 4000
+        b = 0.85
+    else if a ≥ 8000
+        b = 0.65
+    else
+        b = 0.85 - (a - 4000)/20000</code></pre></dd>
+
+<dt id="while">while</dt>
+<dd>
+
+<p>A <em>while</em> loop executes a code block repeatedly, as long as a condition holds true. Example:</p>
+<pre><code>    while b ≠ 0
+        h = b
+        b = a modulo b
+        a = h</code></pre></dd>
+
+<dt id="for">for</dt>
+<dd>
+
+<p>A <em>for</em> loop iterates, executing a code block once with each element of a range or collection.</p>
+<p>Examples:</p>
+<table class="grid">
+  <tr>
+    <td><pre><code>sum = 0
+for i in 1:10
+    sum = sum + i</code></pre>
+    </td>
+    <td><pre><code>reverse = ""
+for ch in "abcdef"
+    reverse = ch & reverse</code></pre>
+    </td>
+  </tr>
+</table>
+
+<p><img src="../../images/for-loop-railroad.svg" alt="for index variable in range or matrix or string"></p>
+<p>The index variable of a <em>for</em> loop will iterate through each of the numbers in a range, the elements in a matrix, or the characters in a string.</p>
+</dd>
+
+<dt id="break">break</dt>
+<dd>
+A loop can be terminated early via the _break_ keyword. Example:
+
+<pre><code>    for i in 1:1000000
+        if i ≥ 2
+            break</code></pre></dd>
+
+<dt id="return">return</dt>
+<dd>
+A _return_ statement terminates the function.
+
+<p><img src="../../images/return-railroad.svg" alt="return optional expression"></p>
+<p>If the optional <em>expression</em> is present, the function will return its result. If not, the function will return <code>undefined</code>.</p>
+</dd>
+
+<dt id="raise">raise</dt>
+<dd>
+
+<p>A <em>raise</em> statement terminates the function and returns an optional error message.</p>
+<p><img src="../../images/raise-railroad.svg" alt="raise optional string"></p>
+</dd>
+
+<dt id="echo">echo</dt>
+<dd>
+
+<p>A <em>echo</em> statement writes a message to the browser’s console. You can type <strong>Ctrl Shift I</strong> to see it. Such a message can be very useful while debugging a function.</p>
+<p><img src="../../images/echo-railroad.svg" alt="echo string"></p>
+</dd>
+</dl>
+
+<h2 id="remote-modules">Remote modules</h2>
+<p>Hurmet modules enable you to access remote assignments and functions. Remote modules are written in plain text files, like this:</p>
+<pre><code>f_c′ = &#39;4500 psi&#39;
+E_s = &#39;29000 ksi&#39;
+
+divideBy(a, b)
+    return a / b</code></pre><p>Modules can assign a literal value to a variable. Modules can not do calculations except within functions.</p>
+<p>The word <code>private</code> may be written before a function. Private functions cannot be called from outside the module.</p>
+<pre><code>private function waterDensity()
+    return &#39;62.4 lbf/ft³&#39;</code></pre><p>A Hurmet document can load an entire module into a variable with a fetch statement, like this:</p>
+<pre><code>lib = fetch(&quot;http://Hurmet.io/functions/arithmetic.hrms.txt&quot;) = !</code></pre><p>To use modules, one writes the module name and variable/function name in dot notation, as in:</p>
+<p><span class='tex'>f_\mathrm{r} = 7.5 \, \sqrt{\mathrm{lib} {.} f_\mathrm{c}'}= \color{blue}7.5 \, \sqrt{4{,}500}\color{black}= 503 \, \,\mathrm{psi}</span></p>
+<p><span class='tex'>x = \mathrm{lib} {.} \operatorname{divideBy}(10 ,\: 5)= 2</span></p>
+<p>One can do multiple assignments (not functions) in one statement:</p>
+<pre><code>f_c′, E_s = lib[&quot;f_c′&quot;, &quot;E_s&quot;] = !!</code></pre><h2 id="troubleshooting">Troubleshooting</h2>
+<h4 id="typing-lag">Typing lag</h4>
+<p>A big document with a lot of math may cause typing lag. You can regain some speed by using Firefox instead of Chrome or Edge, and gain more speed by clicking on the Draft Mode toggle button, <img src="../../images/draft.svg" alt="draft" title="draft">. It will render math as plain text and omit the blue echos.</p>
+<p>I expect that Chrome and Edge will get a performance boost later this year when they support MathML and fix <a href="https://bugs.chromium.org/p/chromium/issues/detail?id=1076718">this bug</a>.</p>
+<h4 id="matrix-multiplication">Matrix multiplication</h4>
+<p>To get element-wise multiplication of two matrices, the operator symbol must be <a href="#matrix-mult">explicitly</a> written as <code>*</code>.</p>
+<h4 id="safari">Safari</h4>
+<p>Hurmet will run in the Safari browser as soon as it supports a BigInt data type. It is <a href="https://bugs.webkit.org/show_bug.cgi?id=179001">nearly there</a>.</p>
+<h2 id="coming-attractions">Coming Attractions</h2>
+<ul>
+<li>Save files via Ctrl+S</li>
+<li>Image captions</li>
+<li>Charts</li>
+<li>Import/Export to Markdown</li>
+<li>A <code>distribution</code> data type, to enable calculations with uncertainty</li>
+<li>A <code>date</code> data type</li>
+<li>Complex numbers</li>
+</ul>
+<h2 id="other-resources">Other Resources</h2>
+<p>Civil and structural engineers may also find these items useful:</p>
+<ul>
+<li>Concrete Column Interaction <a href="https://observablehq.com/@ronkok/concrete-column-interaction-diagram">Diagram</a></li>
+<li>fetchable CSV files with steel shape data: <a href="https://gist.githubusercontent.com/ronkok/3757b66d1866e0ad3edd921c9b57e8f6/raw/d15e9911c979112f3880f947e0621d91a0f73047/AISC-v15-wideflanges.csv" title="wideFlanges">wide flanges</a>, <a href="https://gist.githubusercontent.com/ronkok/24987345bc31878e624edc39bfa08827/raw/b1a0d6a0cb28544055a4764524cf0666f628cfde/AISC-v15-channels.csv" title="channels">channels</a>, </li>
+<li>Module with functions for steel member strength.</li>
+</ul>
+<h2 id="credits">Credits</h2>
+<p>I’m Ron Kok and I created Hurmet because I want practicing engineers to have the tools they need to write calculations that are clear, complete, and reviewable.</p>
+<p>Hurmet is built with the aid of several open source libraries and resources, for which I am very grateful.</p>
+<ul>
+<li><a href="http://prosemirror.net">ProseMirror</a>, an extendable rich-text editor by Marijn Haverbeke.</li>
+<li><a href="https://katex.org" title="KaTeX">KaTeX</a>, fast math rendering on the web, by Khan Academy and volunteer contributors.</li>
+<li><a href="https://codemirror.net/">CodeMirror</a>, a text editor, also by Marijn Haverbeke.</li>
+<li><a href="https://exchangeratesapi.io" title="exchangeratesapi.io">exchangeratesapi.io</a>, currency exchange rates updated daily, by Madis Väin.</li>
+<li>Many of Hurmet’s menu buttons show images from <a href="https://icomoon.io" title="icomoon">icomoon</a>.</li>
+<li>This document’s railroad diagrams are modified versions of images created with <a href="https://regexper.com">regexper.com</a>, by Jeff Avalone.</li>
+<li>This document is written in Markdown format and converted to HTML by <a href="https://marked.js.org/#/README.md">Marked.js</a>.</li>
+</ul>
+<br>
+
+<p><span class="reduced">Copyright © 2020 Ron Kok. Released under the <a href="https://opensource.org/licenses/MIT">MIT License</a></span></p>
+<br>
+
+</main>
+
+<nav>
+<div id="sidebar">
+<h3><a href="#top">Contents</a></h3>
+
+<ul class="toc">
+<li><a href="#introduction">Introduction</a></li>
+<li>
+<details><summary>Tutorial</summary>
+
+<ul>
+<li><a href="#create-a-cell">Create a cell</a></li>
+<li><a href="#statements">Statements</a></li>
+<li><a href="#multiplication">Multiplication</a></li>
+<li><a href="#roots">Roots</a></li>
+<li><a href="#function">Functions</a></li>
+<li><a href="#variables">Variables</a></li>
+<li><a href="#subscripts">Subscripts</a></li>
+<li><a href="#greek-letters">Greek letters</a></li>
+<li><a href="#accents-and-primes">Accents and Primes</a></li>
+<li><a href="#quantities">Quantities</a></li>
+<li><a href="#unit-aware-calcs">Unit-Aware Calcs</a></li>
+</ul>
+</details>
+</li>
+<li>
+<details><summary>Quick Reference</summary>
+
+<ul>
+<li><a href="#markup">Markup</a></li>
+<li><a href="#auto-correct">Auto-correct</a></li>
+<li><a href="#display-selectors">Display Selectors</a></li>
+</ul>
+</details>
+</li>
+<li><a href="#calculation-forms">Calculation Forms</a></li>
+<li><a href="#identifiers">Identifiers</a></li>
+<li>
+<details><summary>Data Types</summary>
+
+<ul>
+<li><a href="#boolean">Boolean</a></li>
+<li><a href="#string">String</a></li>
+<li><a href="#number">Number</a></li>
+<li><a href="#quantity">Quantity</a></li>
+<li><a href="#matrix">Matrix</a></li>
+<li><a href="#dictionary">Dictionary</a></li>
+<li><a href="#map">Map</a></li>
+<li><a href="#data-frame">Data Frame</a></li>
+</ul>
+</details>
+</li>
+<li>
+<details><summary>Expressions</summary>
+
+<ul>
+<li><a href="#expressions">General</a></li>
+<li><a href="#constants">Constants</a></li>
+<li><a href="#operators">Operators</a></li>
+<li><a href="#functions">Functions</a></li>
+<li><a href="#operator-precedence">Operator Precedence</a></li>
+<li><a href="#if-expressions">If Expressions</a></li>
+<li><a href="#overloading">Overloading</a></li>
+</ul>
+</details>
+</li>
+<li>
+<details><summary>Units</summary>
+
+<ul>
+<li><a href="#unit-aware-calculations">Unit-Aware Calcs</a></li>
+<li><a href="#custom-units">Custom Units</a></li>
+<li><a href="#currencies">Currencies</a></li>
+<li><a href="#traditional-units">Traditional Units</a></li>
+</ul>
+</details>
+</li>
+<li><a href="#numeral-display">Numeral Display</a></li>
+<li>
+<details><summary>UDFs</summary>
+<ul>
+<li><a href="#user-defined-functions">User-Defined Functions</a></li>
+<li><a href="#code-blocks">Code blocks</a></li>
+<li>
+<details><summary>Control Flow</summary>
+
+<ul>
+<li><a href="#ifelse">if…else</a></li>
+<li><a href="#while">while loops</a></li>
+<li><a href="#for">for loops</a></li>
+<li><a href="#break">break</a></li>
+<li><a href="#return">return</a></li>
+<li><a href="#raise">raise</a></li>
+<li><a href="#echo">echo</a></li>
+</ul>
+</details>
+</li>
+<li><a href="#remote-modules">Modules</a></li>
+</ul>
+</details>
+</li>
+<li>
+<details><summary>End notes</summary>
+
+<ul>
+<li><a href="#troubleshooting">Troubleshooting</a></li>
+<li><a href="#coming-attractions">Coming Attractions</a></li>
+<li><a href="#other-resources">Other Resources</a></li>
+<li><a href="#credits">Credits</a></li>
+</ul>
+</details>
+</li>
+</ul>
+
+<br>
+
+<div id="demo">
+
+<p><em>w</em> = 100 lbf/ft<br><em>L</em> = 3.1 m</p>
+<div>Try an expression:</div>
+<div id="input-container"><form><textarea id="demo-input"></textarea></form></div>
+<div>See the result:</div>
+<div id="demo-output"></div>
+</div> <!-- demo -->
+
+</div>  <!-- sidebar -->
+</nav>
+
+<div id="mobile-nav">
+  <!--On very small screens, the sidebar TOC is replaced by a button with a drop-down menu. -->
+  <div id="navicon">
+    <details><summary><img src="../../images/navicon.svg" alt="≡" width="24" height="24"></summary>
+      <ul class="mobile-menu">
+        <li><a href="#top">Top</a></li>
+        <li><a href="#math-editor">Calculation</a></li>
+        <li><a href="#identifiers">Identifiers</a></li>
+        <li><a href="#data-types">Data Types</a></li>
+        <li><a href="#expressions">Expressions</a></li>
+        <li><a href="#unit-aware-calculations">Units</a></li>
+        <li><a href="#numeral-display">Numeral Display</a></li>
+        <li><a href="#user-defined-functions">UDFs</a></li>
+        <li><a href="#remote-modules">Modules</a></li>
+      </ul>
+    </details>
+  </div>
+</div>
+
+
+<script>
+  // Render math via KaTeX.
+  const texSpans = document.getElementById("main").getElementsByClassName("tex");
+  const isFF = 'MozAppearance' in document.documentElement.style;
+  [...texSpans].forEach(span => {
+     const tex = span.textContent.trim().replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+     katex.render(tex, span, { strict: false, throwOnError: false, output: isFF ? "mathml" : "htmlAndMathml" })
+  })
+
+  // Start the demonstration editor
+  demonstration.startEditor()
+</script>
+
+</body>
+</html>
