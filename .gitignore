@@ -3,3 +3,5 @@ src/altParser.js
 src/complex.js
 preview/hurmet.js
 preview/prosemirror.js
+site/hurmet.min.js
+site/prosemirror.min.js

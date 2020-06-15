@@ -309,6 +309,15 @@ export function updateCalculations(
 ) {
   const doc = view.state.doc
 
+  if (!(isCalcAll || nodeAttrs.name || nodeAttrs.rpn)) {
+    // No calculation is required. Just render the node and get out.
+    const tr = view.state.tr
+    tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs))
+    view.dispatch(tr)
+    view.focus()
+    return
+  }
+
   // Create an object in which we'll hold variable values.
   const hurmetVars = Object.create(null)
   hurmetVars.format = { value: "h15" } // default rounding format
