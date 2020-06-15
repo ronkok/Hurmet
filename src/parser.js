@@ -595,7 +595,7 @@ export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
             tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + 2)
             op.closeDelim = delim.close
           } else if (delim.isPrecededByDiv && delim.delimType === dPAREN &&
-              delim.name === "(" && (/^[^^_!%]/.test(str) || str.length === 0)) {
+              delim.name === "(" && (/^[^^_!%⁻²³¹⁰⁴⁵⁶⁷⁸⁹]/.test(str) || str.length === 0)) {
             // The parens surround a denominator. Delete them.
             tex = tex.substring(0, op.pos) + tex.substring(op.pos + 1)
             op.closeDelim = ""
