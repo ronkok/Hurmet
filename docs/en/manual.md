@@ -670,7 +670,7 @@ e
 | ⌈ ⌉            | ceil   | ¢⎾4.5⏋¢                 | Ceiling. Always rounds up.
 | %              |        | ¢10%¢                   | Percent
 | ‰              |        | ¢10‰¢                   | Per thousand
-| \!             |        | ¢5!¢                    | [Factorial](https://en.wikipedia.org/wiki/Factorial/)<br>precision = ¢{100% if n ≤ 100; 15 digits otherwise}¢
+| \!             |        | ¢5!¢                    | [Factorial](https://en.wikipedia.org/wiki/Factorial)<br>precision = ¢{100% if n ≤ 100; 15 digits otherwise}¢
 | modulo         |        | `10` `modulo` `5`       | Always returns a positive remainder.
 | ¢(n \atop k)¢  | (*n* \atop *k*) | ¢(5 \atop 3)¢  | Binomial coefficient. ¢(n \atop k) = n!/(n!(n!-k!))¢
 | =        |              | ¢if x = 15 ¢            | Equality comparison
