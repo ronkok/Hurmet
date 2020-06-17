@@ -24,7 +24,7 @@
 <h2 id="introduction">Introduction</h2>
 <p><em>Hurmet</em> is a rich-text editor that gives you the ability to create high quality calculation documents using standard math notation.</p>
 <p>Hurmet calculations are much easier to read and check than spreadsheet calculations. Hurmet does not hide the active expressions and intermediate values of a calculation. They’re all open for review in the displayed document.</p>
-<p>You are welcome to use the <a href="../../index.html">Hurmet.io</a> web page under terms of the <a href="https://opensource.org/licenses/MIT/">MIT License</a>. The source code is available in Hurmet’s GitHub <a href="https://github.com/ronkok/Hurmet" target="_blank">repository</a>.</p>
+<p>You are welcome to use the <a href="../../index.html">Hurmet.app</a> web page under terms of the <a href="https://opensource.org/licenses/MIT/">MIT License</a>. The source code is available in Hurmet’s GitHub <a href="https://github.com/ronkok/Hurmet" target="_blank">repository</a>.</p>
 <p>Hurmet is in active development. You are free to use it, but be aware that there may be bugs and that I have plans for <a href="#coming-attractions">more features</a>. As I add those features, it’s possible that some of the existing features may break.</p>
 <h2 id="editor-basics">Editor Basics</h2>
 <p>Hurmet provides rich-text editing capabilities. You can apply styles to a document range by selecting text, then clicking one of the menu bar buttons:</p>
@@ -73,8 +73,8 @@
 <dt id="create-a-cell">Create a cell</dt>
 <dd>
 
-<p>Hurmet calculation cells display math and perform numeric calculations. To create a calculation cell in  Hurmet.io, select a spot in the document, then click the <img src="../../images/plus.svg" alt="plus" title="plus"> button or type <strong>Alt c</strong>. Save the cell by hitting the <strong>Shift-Enter</strong> keys. You can escape any changes by hitting the <strong>Esc</strong> key  or by clicking elsewhere in the document.</p>
-<p>The demonstration box to the lower-left mimics a Hurmet.io calculation cell. It can do one calculation at a time. Use it to practice the material in this tutorial.</p>
+<p>Hurmet calculation cells display math and perform numeric calculations. To create a calculation cell in  Hurmet.app, select a spot in the document, then click the <img src="../../images/plus.svg" alt="plus" title="plus"> button or type <strong>Alt c</strong>. Save the cell by hitting the <strong>Shift-Enter</strong> keys. You can escape any changes by hitting the <strong>Esc</strong> key  or by clicking elsewhere in the document.</p>
+<p>The demonstration box to the lower-left mimics a Hurmet.app calculation cell. It can do one calculation at a time. Use it to practice the material in this tutorial.</p>
 </dd>
 
 <dt id="statements">Statements</dt>
@@ -1209,7 +1209,7 @@ Multiple returns must use the <code>!!</code> display selector, for now.</p>
 <td>!</td>
 <td></td>
 <td><span class='tex'>5!</span></td>
-<td><a href="https://en.wikipedia.org/wiki/Factorial/">Factorial</a><br>precision = <span class='tex'>\begin{cases}100 \%&\mathrel{\mathrm{if}}n ≤ 100 \\ 15 \, \,\mathrm{digits} &\mathrel{\mathrm{otherwise}}\end{cases}</span></td>
+<td><a href="https://en.wikipedia.org/wiki/Factorial">Factorial</a><br>precision = <span class='tex'>\begin{cases}100 \%&\mathrel{\mathrm{if}}n ≤ 100 \\ 15 \, \,\mathrm{digits} &\mathrel{\mathrm{otherwise}}\end{cases}</span></td>
 </tr>
 <tr>
 <td>modulo</td>
@@ -1592,7 +1592,7 @@ So the example above can be coded this way:</p>
 <h2 id="numeral-display">Numeral display</h2>
 <p>There are two aspects to how numbers are displayed: (1) decimal separators, and (2) rounding format for results.</p>
 <h3 id="decimal-separator">Decimal separator</h3>
-<p>In some countries, the usual decimal separator symbol is a dot. Other countries use a comma. Hurmet allows the reader (not the document author) to select which display they prefer. Just use the use the drop-down menu labeled “●”.</p>
+<p>In some countries, the usual decimal separator symbol is a dot. Other countries use a comma. Hurmet starts up with a decimal separator based upon the browser’s language setting. Hurmet also allows the reader (not the document author) to select which display they prefer. Just use the use the drop-down menu labeled “●”.</p>
 <p>The same menu choice also selects how Hurmet displays thousands separators.</p>
 <p>This menu choice changes nothing internally. It changes only the display. All Hurmet documents are saved with numbers that have a dot decimal and no thousands separator.</p>
 <h3 id="rounding-of-results">Rounding of Results</h3>

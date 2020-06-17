@@ -28,11 +28,11 @@ _Hurmet_ is a rich-text editor that gives you the ability to create high quality
 
 Hurmet calculations are much easier to read and check than spreadsheet calculations. Hurmet does not hide the active expressions and intermediate values of a calculation. They’re all open for review in the displayed document.
 
-You are welcome to use the [Hurmet.io] web page under terms of the [MIT License]. The source code is available in Hurmet’s GitHub <a href="https://github.com/ronkok/Hurmet" target="_blank">repository</a>.
+You are welcome to use the [Hurmet.app] web page under terms of the [MIT License]. The source code is available in Hurmet’s GitHub <a href="https://github.com/ronkok/Hurmet" target="_blank">repository</a>.
 
 Hurmet is in active development. You are free to use it, but be aware that there may be bugs and that I have plans for [more features]. As I add those features, it’s possible that some of the existing features may break.
 
-[Hurmet.io]: ../../index.html
+[Hurmet.app]: ../../index.html
 [MIT License]: https://opensource.org/licenses/MIT/
 [more features]: #coming-attractions
 
@@ -98,9 +98,9 @@ Hurmet calculation cells use a different syntax than TeX. In calculation cells, 
 Create a cell
 <dd>
 
-Hurmet calculation cells display math and perform numeric calculations. To create a calculation cell in  Hurmet.io, select a spot in the document, then click the ![plus] button or type __Alt c__. Save the cell by hitting the __Shift-Enter__ keys. You can escape any changes by hitting the __Esc__ key  or by clicking elsewhere in the document.
+Hurmet calculation cells display math and perform numeric calculations. To create a calculation cell in  Hurmet.app, select a spot in the document, then click the ![plus] button or type __Alt c__. Save the cell by hitting the __Shift-Enter__ keys. You can escape any changes by hitting the __Esc__ key  or by clicking elsewhere in the document.
 
-The demonstration box to the lower-left mimics a Hurmet.io calculation cell. It can do one calculation at a time. Use it to practice the material in this tutorial.
+The demonstration box to the lower-left mimics a Hurmet.app calculation cell. It can do one calculation at a time. Use it to practice the material in this tutorial.
 </dd>
 
 Statements
@@ -967,7 +967,7 @@ There are two aspects to how numbers are displayed: (1) decimal separators, and 
 
 ### Decimal separator
 
-In some countries, the usual decimal separator symbol is a dot. Other countries use a comma. Hurmet allows the reader (not the document author) to select which display they prefer. Just use the use the drop-down menu labeled “●”.
+In some countries, the usual decimal separator symbol is a dot. Other countries use a comma. Hurmet starts up with a decimal separator based upon the browser’s language setting. Hurmet also allows the reader (not the document author) to select which display they prefer. Just use the use the drop-down menu labeled “●”.
 
 The same menu choice also selects how Hurmet displays thousands separators.
 

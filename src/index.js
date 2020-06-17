@@ -44,6 +44,25 @@ window.view = new view.EditorView(document.querySelector("#editor"), {
     tex(node, view) { return new TexView(node, view) }
   }
 })
+
+// Set decimal separator display per the language selected for the browser.
+const userLanguageTag = navigator.language || navigator.userLanguage
+console.log(userLanguageTag)
+const parts = userLanguageTag.match(/([A-Za-z]{1,2})-(\w{1,3})(?:-(\w{2,3}))?/)
+const userLanguage = parts[1];
+const userRegion = parts[3] ? parts[3] : parts[2];
+if (["BD", "IN", "LK", "MV", "MP", "PK"].includes(userRegion)) {
+  window.view.state.doc.attrs.decimalFormat = "1,00,000."  // south Asia
+} else if (userLanguage === "en" ||
+  ["BN", "BU", "BW", "DO", "EG", "ET", "GH", "GT", "GY", "HN", "IE", "IL", "JO", "JP", "KE",
+    "KH", "KP", "KR", "LB", "LY", "MM", "MN", "MT", "MX", "MY", "NG", "NI", "PA", "PH", "PR",
+    "QA", "PS", "SG", "SV", "TH", "TW", "TZ", "UG", "ZW"].includes(userRegion)) {
+  window.view.state.doc.attrs.decimalFormat = "1,000,000."
+} else if (userLanguage === "zh") {
+  window.view.state.doc.attrs.decimalFormat = "1,0000,0000."  // China
+}
+// default is 1.000.000,
+
 const fix = fixTables(window.view.state)
 if (fix) { window.view.state = window.view.state.apply(fix.setMeta("addToHistory", false)) }
 
