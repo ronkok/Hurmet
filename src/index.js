@@ -45,9 +45,8 @@ window.view = new view.EditorView(document.querySelector("#editor"), {
   }
 })
 
-// Set decimal separator display per the language selected for the browser.
+// Set decimal separator display per the browser language.
 const userLanguageTag = navigator.language || navigator.userLanguage
-console.log(userLanguageTag)
 const parts = userLanguageTag.match(/([A-Za-z]{1,2})-(\w{1,3})(?:-(\w{2,3}))?/)
 const userLanguage = parts[1];
 const userRegion = parts[3] ? parts[3] : parts[2];
