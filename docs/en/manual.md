@@ -21,7 +21,7 @@
 <main id="main">
 
 # Hurmet Reference Manual
-  
+
 ## Introduction
 
 _Hurmet_ is a rich-text editor that gives you the ability to create high quality calculation documents using standard math notation.
@@ -93,30 +93,29 @@ For more information about TeX and LaTeX, good places to start are the Wikibooks
 Hurmet calculation cells use a different syntax than TeX. In calculation cells, the syntax is more akin to a programming language, yet it renders like mathematics.
 
 ## Tutorial
-<dl>
 
-Create a cell
-<dd>
+###### Create a cell
+<div>
 
 Hurmet calculation cells display math and perform numeric calculations. To create a calculation cell in  Hurmet.app, select a spot in the document, then click the ![plus] button or type __Alt c__. Save the cell by hitting the __Shift-Enter__ keys. You can escape any changes by hitting the __Esc__ key  or by clicking elsewhere in the document.
 
 The demonstration box to the lower-left mimics a Hurmet.app calculation cell. It can do one calculation at a time. Use it to practice the material in this tutorial.
-</dd>
+</div>
 
-Statements
+###### Statements
 
-: Inside a calculation cell, we can write an statement and get a numeric result. In the demonstration box to the lower-left, try replacing the text with `2 + 2 = ?` . Hurmet will render the math and write the result where you place the `?` mark.
+Inside a calculation cell, we can write an statement and get a numeric result. In the demonstration box to the lower-left, try replacing the text with `2 + 2 = ?` . Hurmet will render the math and write the result where you place the `?` mark.
 
-Numbers
+###### Numbers
 
-: Numbers can be written as integers (33), decimals (2.45), or mixed fractions (3 ⁷⁄₈). There is a more detailed description [below](#number). 
+Numbers can be written as integers (33), decimals (2.45), or mixed fractions (3 ⁷⁄₈). There is a more detailed description [below](#number). 
 
-Arithmetic
+###### Arithmetic
 
-: The symbols: `+ - × / ^ √` are some of Hurmet’s arithmetic operators. Try an equation such as `22 + 3^2/7 = ?`. Play with changes to the values and operators to see how they work. See [here](#operators) for more operators.
+The symbols: `+ - × / ^ √` are some of Hurmet’s arithmetic operators. Try an equation such as `22 + 3^2/7 = ?`. Play with changes to the values and operators to see how they work. See [here](#operators) for more operators.
 
-Multiplication
-<dd>
+###### Multiplication
+<div>
 
 Hurmet accepts several multiplication syntaxes. If ¢a = 7.1¢, then the following all give the same result:
 <div class="indented">
@@ -131,18 +130,18 @@ Hurmet accepts several multiplication syntaxes. If ¢a = 7.1¢, then the followi
 To obtain the character ¢×¢, type xx and hit the space bar. Auto-correct will give you an ¢×¢.
 
 A space between variables acts as a multiplication operator.
-</dd>
+</div>
 
-Roots
+###### Roots
 
-: Type `sqrt` and hit the spacebar to auto-correct into ¢√˽¢<br>`root 3` and `root 4` will also auto-correct into roots.
+Type `sqrt` and hit the spacebar to auto-correct into ¢√˽¢<br>`root 3` and `root 4` will also auto-correct into roots.
 
-Function
+###### Function
 
-: Hurmet treats a word as a function name if it is placed directly before an open parenthesis. Example: ¢sin(π//6) = 0.5¢. Hurmet has many [built-in functions](#functions).
+Hurmet treats a word as a function name if it is placed directly before an open parenthesis. Example: ¢sin(π//6) = 0.5¢. Hurmet has many [built-in functions](#functions).
 
-Variables
-<dd>
+###### Variables
+<div>
 
 ¢L = 3.1¢   ← That kind of statement will assign a value to a variable. Subsequent cells can then use the variable.<br>Example: `2 L = ?` will result in: ¢2 L = \color(blue)((2))(3.1) \color(black)= 6.2¢
 
@@ -150,17 +149,18 @@ A variable name must be a valid [identifier](#identifiers).
 
 An assignment statement can also contain a calculation expression. Example:<br>
 `b = 2 L = ?` will result in ¢b = 2 L = \color(blue)((2))(3.1) \color(black)= 6.2¢
+</div>
 
-Subscripts
+###### Subscripts
 
-: An underscore signals the beginning of a subscript. Examples: `x_left` and `y_(i+1)` result in ¢x_left¢ and ¢y_(i+1)¢.
+An underscore signals the beginning of a subscript. Examples: `x_left` and `y_(i+1)` result in ¢x_left¢ and ¢y_(i+1)¢.
 
-Greek letters
+###### Greek letters
 
-: To write a Greek letter, write the name of the letter and hit the space bar. So, `alpha` ↦ α and `beta` ↦ β. More detail [here](#auto-correct).
+To write a Greek letter, write the name of the letter and hit the space bar. So, `alpha` ↦ α and `beta` ↦ β. More detail [here](#auto-correct).
 
-Accents and Primes
-<dd>
+###### Accents and Primes
+<div>
 
 To write an accent above a single-letter variable, write the accent name and hit the space bar for an auto-correction. Examples:
 <div class="indented">
@@ -174,20 +174,19 @@ To write an accent above a single-letter variable, write the accent name and hit
 More detail [here](#identifiers).
 
 To write a prime, type two apostrophes (aka single quotation marks) and hit the space bar. So, `f''` will result in ¢f′¢
-</dd>
+</div>
 
-Quantities
+###### Quantities
 
-: A Hurmet *quantity* contains both a magnitude and a unit of measure. Write a quantity between two single quotation marks, like this: `'3.1 m'`
+A Hurmet *quantity* contains both a magnitude and a unit of measure. Write a quantity between two single quotation marks, like this: `'3.1 m'`
 
-Unit-Aware Calcs
-<dd>
+###### Unit-Aware Calcs
+<div>
 
 Hurmet can automatically handle unit conversions of quantities. To call for a unit-aware calculations, write `??` instead of `?` where you want the result to appear.<br>Example:<br>`2 × '2 m' = ?? ft` results in ¢2 × ('2 m') = 13.1233595800525 ft¢.
 
 This is covered in more detail [below](#unit-aware-calculations).
-</dd>
-</dl>
+</div>
 
 ## Quick Reference
 
@@ -366,14 +365,13 @@ Hurmet’s auto-correct can help create identifiers.
 Hurmet will render single Latin letter variable names in *italic*. Function names and multi-letter variable names are rendered in upright font. As a convention, I personally use __bold__ letters for variables that contain vectors or matrices.
 
 ## Data Types
-<dl>
 
-Boolean
+###### Boolean
 
-: `true` or `false`
+`true` or `false`
 
-String
-<dd>
+###### String
+<div>
 A _string_ literal is a string of text characters enclosed by a pair of straight double quotation marks. The string may include any Unicode character except a straight double quotation mark.
 
     "This is a string."
@@ -384,10 +382,10 @@ You can call a subset of any string with an index or range in brackets. Hurmet i
     a[2]     ## returns "b"
     a[2:4]   ## returns "bcd"
     a[5:]    ## returns "efg"
-</dd>
+</div>
 
-Number
-<dd>
+###### Number
+<div>
 
 Enter as integers (33), decimals (2.45), scientific notation (3.1e4), or mixed fractions (3 ⁷⁄₈).
 
@@ -400,14 +398,14 @@ Hurmet’s default decimal symbol is a dot. You can choose instead to enter numb
 Hurmet always saves a decimal symbol as a dot. It’s only the display that changes.
 
 While calculations are underway, Hurmet holds every number in memory in rational number format. The numerator and denominator are each integers of arbitrary length. So Hurmet can work precisely with numbers like 0.1 and 0¹⁄₃. Trignonometry and roots are done in double-precision floating point, good to about 15 significant digits.
-</dd>
+</div>
 
 <!-- Integers may also be written as a hexadecimal literal:
 
 ![0x 0-9 or af](../../images/hex-railroad.svg) -->
 
-Quantity
-<dd>
+###### Quantity
+<div>
 
 A Hurmet _quantity_ contains both a numeric magnitude and a unit of measure. Quantity literals are written between apostrophes, aka single straight quotation marks. Examples:
 
@@ -434,10 +432,10 @@ You can also create compound units on the fly. That is, you can raise any unit t
 Note that within the quantity literal, it is not necessary to write `^` to indicate a numeric exponent. Also, a dot or a hyphen within a compound unit name will be rendered as a half-high dot.
 
 Only one division solidus, **/**, may be written into a compound unit.
-</dd>
+</div>
 
-Matrix
-<dd>
+###### Matrix
+<div>
 
 A Hurmet *matrix* is a one or two dimensional arrangement of matrix elements. A Hurmet matrix element can be a number, a string, `true`, `false`, or an exprression that resolves to one of those simple types.
 
@@ -460,10 +458,10 @@ Another way to create a Hurmet vector is to write a range of numbers between bra
 You can call individual elements with index integers between brackets, as in `𝐕[5]` or `𝐌[1, 3]`. You can use a variable name for the index if the variable returns an integer.
 
 You can access a sub-matrix using the range operator, “:”, as in `𝐌[2:5, 1]`. Entire rows or columns can be called by omitting an index, as in `𝐌[2,]` or `𝐌[,1]`. Hurmet indexes are one-based.
-</dd>
+</div>
 
-Matrix Operations
-<dd>
+###### Matrix Operations
+<div>
 
 All the usual math operators can be applied to a numeric matrix. The operators mostly work in an element-wise fashion. If you add a scalar to a matrix, or pass a matrix to most functions, Hurmet will do an element-by-element calculation and return a matrix, as in:
 
@@ -472,8 +470,6 @@ All the usual math operators can be applied to a numeric matrix. The operators m
 ¢𝐡 = [5; 10; 15]¢
 
 ¢𝐱 = 2 𝐡 + 1 = \color(blue)(2) [5; 10; 15] + 1 \color(black) = [11; 21; 31]¢
-
-</div>
 
 Spreadsheet calculations can often be replaced by calulations using vectors, as above. When you really need to get things right, it’s great to be able to see the expression and all the plugged-in values.
 
@@ -508,10 +504,10 @@ Here are more of Hurmet’s matrix operations:
 Functions will mostly work element-wise on an matrix. Exception: functions `min()` and `max()` will find the minimum or maximum of the elements in the matrix.
 
 If you want to write a comma or a semi-colon inside parentheses and not create an matrix, use `\,` or `\;`.
-</dd>
+</div>
 
-Dictionary
-<dd>
+###### Dictionary
+<div>
 
 A _dictionary_ is a data structure in which you can store values and access each one with a unique name. Put another way, a dictionary is a collection of key:value pairs.
 
@@ -530,10 +526,10 @@ You can assign multiple values from a dictionary in one statement using bracket 
     A, I, w_self = W8X31["A", "Ix", "weight"] = !!
 
 Multiple assignment statements must have the result display suppressed.
-</dd>
+</div>
 
-Map
-<dd>
+###### Map
+<div>
 
 A Hurmet *map* is a dictionary in which every value is the same data type and, if numeric, carries the same unit-of-measure. Maps can be the numeric part of a quantity. 
 
@@ -546,10 +542,10 @@ You can do arithmetic on maps and run them through functions. The operation will
 ¢M = 1//8 w L^2  = \color(blue)(1/8 ('{"D": 20; "L": 40; "S": 30} lbf/ft')('12 ft')^2) \color(black) = '{"D": 0.54, "L": 0.72, "S": 0.36} k·ft'¢
 
 Dictionaries with values of varying units-of-measure can be multiplied by a unit-less scalar. No other math operations are supported for non-map dictionaries.
-</dd>
+</div>
 
-Data Frame
-<dd>
+###### Data Frame
+<div>
 
 A *data frame* is a two dimensional data structure that can be accessed with row names and column names or by row indices and column indices.
 
@@ -610,28 +606,25 @@ Similar to a dictionary, a call to a data frame can return multiple values. As i
     `A, S_x = wideFlanges["W8X31"]["area", "Sx"] = !!`, or<br>
     `A, S_x = wideFlanges["W10X49", ["area", "Sx"]] = !!`<br>
 Multiple returns must use the `!!` display selector, for now.
-</dd>
-</dl>
+</div>
 
 ## Expressions
 
 Hurmet calculations are meant to be recognizeable to anyone familiar with standard math notation. That is a broad statement. Here are many nuances:
 
 ## Constants
-<dl>
 
-π
+*π*
 
 : If you write ¢π¢ into an expression, Hurmet uses a value of 3.14159265358979323846264338327950288419716939937510582097494.
 
-e
+*e*
 
 : Hurmet will treat ¢e¢ just like any other variable most of the time. But if ¢e¢ is the base of an exponent, for example: ¢e^x¢, then Hurmet will perform the function ¢exp(x)¢.
 
 ℏ
 
 : For ℏ, Hurmet uses a value of 1.054571817 × 10⁻³⁴ J·s.
-</dl>
 
 ## Operators
   
@@ -702,9 +695,6 @@ Transcendental functions, like trigonometry and logarithms, are done to 15 digit
 
 * * *
 
-<div id="function-list">
-<dl>
-
 abs(x)
 
 : Absolute value of a real number
@@ -722,18 +712,16 @@ chr(*n*)
 : Takes an integer as a argument, treats it as a Unicode code point, and returns the corresponding string character.<br>`chr(34)` returns a double quotation mark.
 
 cos(𝜃), sin(𝜃), tan(𝜃), sec(𝜃), csc(𝜃), cot(𝜃)
-<dd>
 
-Trigonometry functions.
+: Trigonometry functions.
 
-The trig functions listed above will assume that the argument is in radians unless you tell it otherwise. You can tell it otherwise by just writing in a unit, as in: `tan('45°')` and running a unit-aware calculation.
+  The trig functions listed above will assume that the argument is in radians unless you tell it otherwise. You can tell it otherwise by just writing in a unit, as in: `tan('45°')` and running a unit-aware calculation.
 
-A positive integer written as a superscript after a trig function name will return the function result raised to a power. <br>So that: ¢sin^2 θ = (sin θ)^2¢.
+  A positive integer written as a superscript after a trig function name will return the function result raised to a power. <br>So that: ¢sin^2 θ = (sin θ)^2¢.
 
-A superscript <sup>-1</sup> indicates an inverse function. In other words, ¢cos^(-1) x = acos(x)¢.
+  A superscript <sup>-1</sup> indicates an inverse function. In other words, ¢cos^(-1) x = acos(x)¢.
 
-Three functions: `sin`, `cos`, and `tan`, do not require parentheses around their arguments.
-</dd>
+  Three functions: `sin`, `cos`, and `tan`, do not require parentheses around their arguments.
 
 cos<sub>d</sub>(𝜃), sin<sub>d</sub>(𝜃), tan<sub>d</sub>(𝜃), sec<sub>d</sub>(𝜃), csc<sub>d</sub>(𝜃), cot<sub>d</sub>(𝜃)
 
@@ -806,8 +794,7 @@ zeros(_m_, _n_)
 Γ(*z*)
 
 : [Gamma function](http://en.wikipedia.org/wiki/Gamma_function)<br>precision = ¢{100% if z" is a positive integer ≤ 100"; 15 digits otherwise}¢
-</dl>
-</div> <!-- end of function definitions -->
+
 
 ## Operator Precedence
 
@@ -1195,10 +1182,9 @@ Inside a user-defined function, Hurmet supports code blocks and some additional 
 Indentation may be done with only with spaces, not with tabs. I usually indent by four spaces.
 
 A decrease in indentation is treated by Hurmet as equivalent to an `end` statement in some languages.
-<dl>
 
-if​​…else
-<dd>
+###### if​​ else
+<div>
 
 _if​​…else_ control words make the execution of code blocks dependent on a condition. Example:
 
@@ -1208,10 +1194,10 @@ _if​​…else_ control words make the execution of code blocks dependent on a
             b = 0.65
         else
             b = 0.85 - (a - 4000)/20000
-</dd>
+</div>
 
-while
-<dd>
+###### while
+<div>
 
 A _while_ loop executes a code block repeatedly, as long as a condition holds true. Example:
 
@@ -1219,10 +1205,10 @@ A _while_ loop executes a code block repeatedly, as long as a condition holds tr
             h = b
             b = a modulo b
             a = h
-</dd>
+</div>
 
-for
-<dd>
+###### for
+<div>
 
 A _for_ loop iterates, executing a code block once with each element of a range or collection.
 
@@ -1244,42 +1230,41 @@ for ch in "abcdef"
 ![for index variable in range or matrix or string](../../images/for-loop-railroad.svg)
 
 The index variable of a *for* loop will iterate through each of the numbers in a range, the elements in a matrix, or the characters in a string.
-</dd>
+</div>
 
-break
-<dd>
+###### break
+<div>
 A loop can be terminated early via the _break_ keyword. Example:
 
         for i in 1:1000000
             if i ≥ 2
                 break
-</dd>
+</div>
 
-return
-<dd>
+###### return
+<div>
 A _return_ statement terminates the function.
 
 ![return optional expression](../../images/return-railroad.svg)
 
 If the optional _expression_ is present, the function will return its result. If not, the function will return `undefined`.
-</dd>
+</div>
 
-raise
-<dd>
+###### raise
+<div>
 
 A *raise* statement terminates the function and returns an optional error message.
 
 ![raise optional string](../../images/raise-railroad.svg)
-</dd>
+</div>
 
-echo
-<dd>
+###### echo
+<div>
 
 A *echo* statement writes a message to the browser’s console. You can type __Ctrl Shift I__ to see it. Such a message can be very useful while debugging a function.
 
 ![echo string](../../images/echo-railroad.svg)
-</dd>
-</dl>
+</div>
 
 ## Remote modules
 
@@ -1343,7 +1328,7 @@ Hurmet will run in the Safari browser as soon as it supports a BigInt data type.
 Civil and structural engineers may also find these items useful:
 
 * Concrete Column Interaction [Diagram](https://observablehq.com/@ronkok/concrete-column-interaction-diagram)
-* fetchable CSV files with steel shape data: [wide flanges], [channels], 
+* Fetchable CSV files with steel shape data: [wide flanges], [channels], 
 * Module with functions for steel member strength.
 
 [wide flanges]: https://gist.githubusercontent.com/ronkok/3757b66d1866e0ad3edd921c9b57e8f6/raw/d15e9911c979112f3880f947e0621d91a0f73047/AISC-v15-wideflanges.csv "wideFlanges"
@@ -1361,7 +1346,7 @@ Hurmet is built with the aid of several open source libraries and resources, for
 *   [exchangeratesapi.io](https://exchangeratesapi.io "exchangeratesapi.io"), currency exchange rates updated daily, by Madis Väin.
 *   Many of Hurmet’s menu buttons show images from [icomoon](https://icomoon.io "icomoon").
 *   This document’s railroad diagrams are modified versions of images created with [regexper.com](https://regexper.com), by Jeff Avalone.
-*   This document is written in Markdown format and converted to HTML by [Marked.js](https://marked.js.org/#/README.md).
+*   This document is written in Markdown format and converted to HTML by [markdown-it](https://markdown-it.github.io/).
 
 <br>
 
@@ -1451,7 +1436,7 @@ Hurmet is built with the aid of several open source libraries and resources, for
 <li>
 <details><summary>Control Flow</summary>
 
-* [if…else](#ifelse)
+* [if…else](#if-else)
 * [while loops](#while)
 * [for loops](#for)
 * [break](#break)

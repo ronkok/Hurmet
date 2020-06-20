@@ -241,6 +241,11 @@ doctrine@^3.0.0:
   dependencies:
     esutils "^2.0.2"
 
+"emoji-regex@>=6.0.0 <=6.1.1":
+  version "6.1.1"
+  resolved "https://registry.yarnpkg.com/emoji-regex/-/emoji-regex-6.1.1.tgz#c6cd0ec1b0642e2a3c67a1137efc5e796da4f88e"
+  integrity sha1-xs0OwbBkLio8Z6ETfvxeeW2k+I4=
+
 emoji-regex@^7.0.1:
   version "7.0.3"
   resolved "https://registry.yarnpkg.com/emoji-regex/-/emoji-regex-7.0.3.tgz#933a04052860c85e83c122479c4748a8e4c72156"
@@ -433,6 +438,13 @@ functional-red-black-tree@^1.0.1:
   resolved "https://registry.yarnpkg.com/functional-red-black-tree/-/functional-red-black-tree-1.0.1.tgz#1b0ab3bd553b2a0d6399d29c0e3ea0b252078327"
   integrity sha1-GwqzvVU7Kg1jmdKcDj6gslIHgyc=
 
+github-slugger@^1.1.1:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/github-slugger/-/github-slugger-1.3.0.tgz#9bd0a95c5efdfc46005e82a906ef8e2a059124c9"
+  integrity sha512-gwJScWVNhFYSRDvURk/8yhcFBee6aFjye2a7Lhb2bUyRulpIoek9p0I9Kt7PT67d/nUlZbFu8L9RLiA0woQN8Q==
+  dependencies:
+    emoji-regex ">=6.0.0 <=6.1.1"
+
 glob-parent@^5.0.0:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/glob-parent/-/glob-parent-5.1.1.tgz#b6c1ef417c4e5663ea498f1c45afac6916bbc229"
@@ -468,6 +480,11 @@ has-flag@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/has-flag/-/has-flag-4.0.0.tgz#944771fd9c81c81265c4d6941860da06bb59479b"
   integrity sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==
+
+html-entities@^1.2.0:
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/html-entities/-/html-entities-1.3.1.tgz#fb9a1a4b5b14c5daba82d3e34c6ae4fe701a0e44"
+  integrity sha512-rhE/4Z3hIhzHAUKbW8jVcCyuT5oJCXXqhN/6mXXVCpzTmvJnoH2HL/bt3EZ6p55jbFJBeAe1ZNpL5BugLujxNA==
 
 iconv-lite@^0.4.24:
   version "0.4.24"
@@ -506,6 +523,13 @@ inherits@2:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.4.tgz#0fa2c64f932917c3433a0ded55363aae37416b7c"
   integrity sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==
+
+innertext@^1.0.1:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/innertext/-/innertext-1.0.3.tgz#f1a8767592bcdcce2ea94e686ed41a86ba4e8df0"
+  integrity sha512-ZC410b7IbrTrmt8bQb27xUOJgXkJu+XL6MVncb9FGyxjRIHyQqNjpSDY20zvSUttkAiYj0dait/67/sXyWvwYg==
+  dependencies:
+    html-entities "^1.2.0"
 
 inquirer@^7.0.0:
   version "7.1.0"
@@ -607,6 +631,14 @@ magic-string@^0.25.2:
   integrity sha512-4CrMT5DOHTDk4HYDlzmwu4FVCcIYI8gauveasrdCu2IKIFOJ3f0v/8MDGJCDL9oD2ppz/Av1b0Nj345H9M+XIA==
   dependencies:
     sourcemap-codec "^1.4.4"
+
+markdown-it-github-headings@2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/markdown-it-github-headings/-/markdown-it-github-headings-2.0.0.tgz#f8d21ed438c4921d594e32c285ecb58b638615ce"
+  integrity sha512-7ET0QiS2UWCM4hZraWVT9Df0PzuTQwK//3XM1q8vtXImUCRNGwG4bapa6ToDL8M4jkPeYSMrTiTvdJqwJifC4Q==
+  dependencies:
+    github-slugger "^1.1.1"
+    innertext "^1.0.1"
 
 mimic-fn@^2.1.0:
   version "2.1.0"

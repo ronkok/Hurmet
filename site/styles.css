@@ -70,6 +70,7 @@ h3 { font-size: 100%; margin-top: 1em; }
 h4 { font-size: 100%; margin: 1em 0 1em 0; font-weight: bold; }
 h5 { font-size: 110%; text-align: center; }
 h6 { font-size: 90%; font-weight: bold;  margin: 1em 0 1em 0; }
+h6 + p { margin-left: 2.5em; line-height: 1.35; }
 
 #title {
   font-family: Tahoma, Calibri, san-serif;

@@ -114,13 +114,12 @@ div.table-auto-correct + table tr td:nth-child(8) { border-right: 1px solid #aaa
 
 div.table-no-wrap + table { white-space: nowrap; }
 
-dt { font-size: 100%; font-weight: bold;  margin-top: 0.8em; }
-dd { margin-left: 2.5em; line-height: 1.35; }
+h6 { font-size: 100%; font-weight: bold;  margin-top: 0.8em; }
+h6 + p { margin-left: 2.5em; line-height: 1.35; }
+h6 + div { margin-left: 2.5em; line-height: 1.35; }
 
-h5 { font-size: 100%; font-weight: bold;  margin-top: 0.8em; }
-#function-list dt { font-weight: normal; }
-h5 + p { margin-left: 2.5em; line-height: 1.35; }
-h5 + div { margin-left: 2.5em; line-height: 1.35; }
+dt { font-size: 100%; font-weight: normal;  margin-top: 0.8em; }
+dd { margin-left: 2.5em; line-height: 1.35; }
 
 ol li { position: relative; left: 2.2em; width:88%; line-height: 1.35; margin-top: 0.5em;}
 ul li { list-style-type: disc; line-height: 1.35; margin-top: 0.5em; position: relative; left: 1.8em; }
