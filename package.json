@@ -47,7 +47,7 @@
     "docs": "node utils/buildDocs.js",
     "pm": "rollup --config utils/rollup.prosemirror.config.js && node utils/editPM.js",
     "minify": "uglifyjs preview/prosemirror.js -o site/prosemirror.min.js -m && uglifyjs preview/hurmet.js -o site/hurmet.min.js -m",
-    "build": "yarn pm && yarn math && yarn docs && yarn minify",
+    "build": "yarn pm && yarn math && yarn minify && yarn docs",
     "test": "yarn test:lint && node test/test.js",
     "test:lint": "eslint src",
     "test:unit": "node test/test.js"

@@ -1,5 +1,5 @@
 'use strict'
-const hurmet = require('../hurmet.min.js')
+const hurmet = require('../hurmet.js')
 
 // I use a modified version of markdown-it.
 // I added one character, ¢, to the list of terminator characters in
