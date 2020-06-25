@@ -197,7 +197,7 @@ export const nodes = {
     group: "block",
     attrs: { class: { default: 'grid' } },
     parseDOM: [{tag: "table", getAttrs(dom) {
-      return { class: dom.getAttribute('class') }
+      return { class: dom.getAttribute('class') || "grid" }
     }}],
     toDOM(node) {
       return ['table', { class: node.attrs.class }, ["tbody", 0]]
@@ -396,10 +396,10 @@ export const marks = {
     toDOM() { return ["sup"] }
   },
 
-  // :: MarkSpec superscript mark. Represented as a `<s>` element.
+  // :: MarkSpec strikethru mark. Represented as a `<del>` element.
   strikethru: {
-	  parseDOM: [{tag: "s"}],
-    toDOM() { return ["s"] }
+	  parseDOM: [{tag: "del"}],
+    toDOM() { return ["del"] }
   },
 
     // :: MarkSpec superscript mark. Represented as a `<u>` element.

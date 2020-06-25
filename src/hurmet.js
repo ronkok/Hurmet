@@ -5,7 +5,6 @@ import { prepareResult } from "./prepareResult"
 import { evaluate } from "./evaluate"
 import { updateCalculations } from "./updateCalculations"
 import { calculate } from "./calculate"
-import { readHurmetFile } from "./openfile"
 
 /*
  * This file bundles together and exposes the calculation parts of Hurmet.
@@ -41,6 +40,5 @@ export {
   prepareStatement,
   prepareResult,
   evaluate,
-  updateCalculations,
-  readHurmetFile
+  updateCalculations
 }

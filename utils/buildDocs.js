@@ -1,19 +1,11 @@
 const fs = require("fs")  // Node.js file system
-const hurmetMD = require("../site/markdown/markdown-it-hurmet.js")
-const defList = require("./markdown-it-deflist.min.js")
-const md = require('../site/markdown/markdown-it.min.js')({ html: true })
-    .use(
-      require('markdown-it-github-headings'),
-      { prefixHeadingIds: false, enableHeadingLinkIcons: false }
-    )
-    .use(defList)
-    .use(hurmetMD)
+const marked = require("./marked.js")
 
 // This file builds the Hurmet documentation.
 // Start by translating the reference manual from Markdown to HTML.
 let manual = fs.readFileSync('docs/en/manual.md').toString('utf8')
 // convert Markdown to HTML
-manual =  md.render(manual)
+manual =  marked(manual)
 fs.writeFileSync('site/docs/en/manual.html', manual)
 
 // Now translate the unit-definitions file from Markdown to HTML.
@@ -22,7 +14,7 @@ let units = fs.readFileSync('docs/en/unit-definitions.md').toString('utf8')
 units = units.replace("| L  | M  | Ti | E  | Te | # | LI | $ | SA |",
   "| length | mass | time | electric<br>current | temp | amount | luminous<br>intensity " +
   "| money | solid<br>angle |")
-units =  md.render(units)
+units =  marked(units)
 
 // In the unit-definition file, replace factor fractions with stacked fractions.
 const fractionRegEx = /<td>([\d.]+)\/([\d.]+)<\/td>/g

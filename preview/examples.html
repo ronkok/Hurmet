@@ -19,6 +19,7 @@
 <script src="../site/lib/simple.js"></script>
 <script src="../site/katex/katex.min.js"></script>
 <script src="../site/katex/mhchem.min.js"></script>
+<script src="../site/marked.js"></script>
 <script src="../site/chart.min.js"></script>
 <script src="hurmet.js"></script>
 </head>
@@ -72,7 +73,7 @@
 <p>This page contains examples of Hurmet features. You can edit them. Calculations will update if you close a calculation cell with <strong>Shift-Enter</strong>.</p>
 
 <h2>Print Header</h2>
-<p>At the top of this document is a print header. You can create a print header in any document by clicking the <img src="./images/header.svg" alt="Header" width="20" class="20"> button. Then, when you click the <img src="./images/printer.svg" alt="Printer" width="20" class="20"> button, the header will be printed at the top of every page. Always keep three columns in a print header. Otherwise, edit it any way you want.</p>
+<p>At the top of this document is a print header. You can create a print header in any document by clicking the <img src="../site/images/header.svg" alt="Header" width="20" class="20"> button. Then, when you click the <img src="../site/images/printer.svg" alt="Printer" width="20" class="20"> button, the header will be printed at the top of every page. Always keep three columns in a print header. Otherwise, edit it any way you want.</p>
 <p></p>
 
 <h2>Rounding Results</h2>
@@ -91,7 +92,7 @@
 <p></p>
 
 <h2>Vectors</h2>
-<p>Calculations<img src="images/IsoTankCourses.svg" alt="Tank Iso" width="230" class="right"> can be done on vectors. Say that we want to build a cylindrical water tank in 5 foot tall courses.
+<p>Calculations<img src="../site/images/IsoTankCourses.svg" alt="Tank Iso" width="230" class="right"> can be done on vectors. Say that we want to build a cylindrical water tank in 5 foot tall courses.
 <table class="nogrid"><tbody>
   <tr>
     <td data-colwidth="204"><p><span class="hurmet-calc" data-entry="D = '25 ft'"></span>, tank diameter</p></td>
@@ -116,7 +117,7 @@
 <p><span class="hurmet-calc" data-entry="wideFlanges = fetch(&quot;https://gist.githubusercontent.com/ronkok/3757b66d1866e0ad3edd921c9b57e8f6/raw/d15e9911c979112f3880f947e0621d91a0f73047/AISC-v15-wideflanges.csv&quot;) = !"></span></p>
 <p>From that, we can load data into variables for individual dimensions.</p>
 
-<h4>Beam properties<img src="images/EndPlateConnection.svg" alt="End Plate Connection" width="250" class="right">:</h4>
+<h4>Beam properties<img src="../site/images/EndPlateConnection.svg" alt="End Plate Connection" width="250" class="right">:</h4>
 <p><span class="hurmet-calc" data-entry="b_bf, t_bf, t_bw, d_b = wideFlanges.W16X57[&quot;bf&quot;, &quot;tf&quot;, &quot;tw&quot;, &quot;d&quot;] = !"></span></p>
 
 <h4>Column properties:</h4>

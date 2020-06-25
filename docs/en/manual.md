@@ -86,11 +86,27 @@ Hurmet provides rich-text editing capabilities. You can apply styles to a docume
 [align-right]: ../../images/align-right.svg "align-right"
 [info]: ../../images/info.svg "information"
 
-Hurmet’s foremost feature is its calculation cells. The rest of this document is about them. But first note that Hurmet also has cells that emulate the math mode of ¢\TeX¢. These cells display, but do not calculate, math. You can insert a TeX cell by clicking the ![integral] button. Type __Shift-Enter__ to save the cell.
+Hurmet’s foremost feature is its calculation cells. The rest of this document is about them. But first I'll note two other features:
+
+#### TeX
+
+Besides its calculation cells, Hurmet also has cells that emulate the math mode of ¢\TeX¢. These cells display, but do not calculate, math. You can insert a TeX cell by clicking the ![integral] button. Type __Shift-Enter__ to save the cell.
 
 For more information about TeX and LaTeX, good places to start are the Wikibooks pages for writing [math] and [advanced math]; and the KaTeX [home page] and [supported-functions] page.
 
 Hurmet calculation cells use a different syntax than TeX. In calculation cells, the syntax is more akin to a programming language, yet it renders like mathematics.
+
+#### Markdown
+
+Hurmet can export or import a document in [Markdown](https://guides.github.com/features/mastering-markdown/ "Markdown") format. This is useful for collaboration
+
+Say that you have written a calculation. It’s awesome and you want to share it so that others can use it as a template. An easy way to share work is via a GitHub [Gist](https://gist.github.com/ "Gist"). Then anyone can view it, download it, or comment on it. If it is in Markdown format, you can read the Gist right there on GitHub. Here’s an [example](https://gist.github.com/ronkok/7fec7d11f6fb6a031e5a0827e3531d68).
+
+Hurmet’s version of Markdown adds two extensions that GitHub does not recognize, those being TeX math content between `$…$` delimiters and calculation cells between `¢…¢` delimiters. It’s okay to write math into your document. It’s just that GitHub will not render it as math. Instead, GitHub will display the raw code. You can still read it.
+
+GitHub Gists work best for simple content. Markdown does not recognize indented paragraphs or table styles. Markdown table cells cannot be merged and cannot contain lists or multiple paragraphs.
+
+And now, on to the main event, Hurmet’s calculations.
 
 ## Tutorial
 
@@ -665,7 +681,7 @@ Hurmet calculations are meant to be recognizeable to anyone familiar with standa
 | ‰              |        | ¢10‰¢                   | Per thousand
 | \!             |        | ¢5!¢                    | [Factorial](https://en.wikipedia.org/wiki/Factorial)<br>precision = ¢{100% if n ≤ 100; 15 digits otherwise}¢
 | modulo         |        | `10` `modulo` `5`       | Always returns a positive remainder.
-| ¢(n \atop k)¢  | (*n* \atop *k*) | ¢(5 \atop 3)¢  | Binomial coefficient. ¢(n \atop k) = n!/(n!(n!-k!))¢
+| ¢(n \atop k)¢  | (*n* \atop *k*) | ¢(5 \atop 3)¢  | Binomial coefficient. ¢(n \atop k) = n!//(n!(n!-k!))¢
 | =        |              | ¢if x = 15 ¢            | Equality comparison
 | ≠              | `!=` or `<>` | ¢if b ≠ c¢        | Inequality comparison
 | `<`            |        |                         |
@@ -694,6 +710,7 @@ Hurmet’s built-in functions are described below. Unless noted otherwise, they 
 Transcendental functions, like trigonometry and logarithms, are done to 15 digits precision.
 
 * * *
+<dl>
 
 abs(x)
 
@@ -712,16 +729,18 @@ chr(*n*)
 : Takes an integer as a argument, treats it as a Unicode code point, and returns the corresponding string character.<br>`chr(34)` returns a double quotation mark.
 
 cos(𝜃), sin(𝜃), tan(𝜃), sec(𝜃), csc(𝜃), cot(𝜃)
+<dd>
 
-: Trigonometry functions.
+Trigonometry functions.
 
-  The trig functions listed above will assume that the argument is in radians unless you tell it otherwise. You can tell it otherwise by just writing in a unit, as in: `tan('45°')` and running a unit-aware calculation.
+The trig functions listed above will assume that the argument is in radians unless you tell it otherwise. You can tell it otherwise by just writing in a unit, as in: `tan('45°')` and running a unit-aware calculation.
 
-  A positive integer written as a superscript after a trig function name will return the function result raised to a power. <br>So that: ¢sin^2 θ = (sin θ)^2¢.
+A positive integer written as a superscript after a trig function name will return the function result raised to a power. <br>So that: ¢sin^2 θ = (sin θ)^2¢.
 
-  A superscript <sup>-1</sup> indicates an inverse function. In other words, ¢cos^(-1) x = acos(x)¢.
+A superscript <sup>-1</sup> indicates an inverse function. In other words, ¢cos^(-1) x = acos(x)¢.
 
-  Three functions: `sin`, `cos`, and `tan`, do not require parentheses around their arguments.
+Three functions: `sin`, `cos`, and `tan`, do not require parentheses around their arguments.
+</dd>
 
 cos<sub>d</sub>(𝜃), sin<sub>d</sub>(𝜃), tan<sub>d</sub>(𝜃), sec<sub>d</sub>(𝜃), csc<sub>d</sub>(𝜃), cot<sub>d</sub>(𝜃)
 
@@ -794,7 +813,7 @@ zeros(_m_, _n_)
 Γ(*z*)
 
 : [Gamma function](http://en.wikipedia.org/wiki/Gamma_function)<br>precision = ¢{100% if z" is a positive integer ≤ 100"; 15 digits otherwise}¢
-
+</dl>
 
 ## Operator Precedence
 
@@ -1318,7 +1337,6 @@ Hurmet will run in the Safari browser as soon as it supports a BigInt data type.
 *   Save files via Ctrl+S
 *   Image captions
 *   Charts
-*   Import/Export to Markdown
 *   A `distribution` data type, to enable calculations with uncertainty
 *   A `date` data type
 *   Complex numbers
@@ -1343,10 +1361,10 @@ Hurmet is built with the aid of several open source libraries and resources, for
 *   [ProseMirror](http://prosemirror.net), an extendable rich-text editor by Marijn Haverbeke.
 *   [KaTeX](https://katex.org "KaTeX"), fast math rendering on the web, by Khan Academy and volunteer contributors.
 *   [CodeMirror](https://codemirror.net/), a text editor, also by Marijn Haverbeke.
+*   [Marked.js](https://marked.js.org/), for light-weight Markdown parsing, by the [Marked team](https://marked.js.org/#/AUTHORS.md).
 *   [exchangeratesapi.io](https://exchangeratesapi.io "exchangeratesapi.io"), currency exchange rates updated daily, by Madis Väin.
 *   Many of Hurmet’s menu buttons show images from [icomoon](https://icomoon.io "icomoon").
 *   This document’s railroad diagrams are modified versions of images created with [regexper.com](https://regexper.com), by Jeff Avalone.
-*   This document is written in Markdown format and converted to HTML by [markdown-it](https://markdown-it.github.io/).
 
 <br>
 

@@ -4,6 +4,3 @@ site/*
 schema.js
 keymap.js
 inputrules.js
-rational.js
-marked.js
-complex.js

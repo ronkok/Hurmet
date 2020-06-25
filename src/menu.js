@@ -22,6 +22,8 @@ import { isInTable, addColumnBefore, deleteColumn,
   TableMap } from "prosemirror-tables"
 
 import { draftMode } from "./draftMode"
+import { hurmetMarkdownSerializer } from "./to_markdown"
+import { readFile } from "./openfile"
 import { saveAs } from "filesaver.js-npm"
 
 // Menu icons that are not included in node-module menu.js
@@ -361,44 +363,47 @@ const getSelectionRect = selection => {
   )
 }
 
-const pruneHurmet = object => {
-  // Traverse the document tree and delete non-entry Hurmet properties
-  for (const item in object) {
-    let value = object[item]
-    if (value !== null && typeof value === 'object') {
-      if (Array.isArray(value)) {
-        for (let i = value.length - 1; i >= 0; i -= 1) {
+const pruneHurmet = node => {
+  // Traverse the document tree and delete non-entry Hurmet attributes
+  for (const item in node) {
+    let child = node[item]
+    if (child !== null && typeof child === 'object') {
+      if (Array.isArray(child)) {
+        for (let i = child.length - 1; i >= 0; i -= 1) {
           // Test if the paragraph contains any empty Hurmet calculation cells.
-          if (value[i].hasOwnProperty("type")
-              && (value[i].type === "calculation" || value[i].type === "tex")
-              && value[i].attrs.entry.length === 0) {
-            // Remove the empty cell from the paragraph array
-            if (i === value.length) {
-              value.pop()
-            } else if (i === 0) {
-              value.shift()
-            } else {
-              value = value.slice[0, 1]
+          if (child[i].hasOwnProperty("type")
+              && (child[i].type === "calculation" || child[i].type === "tex")) {
+            if ((child[i].type === "calculation" && child[i].attrs.entry.length === 0) ||
+                (child[i].type === "tex" && child[i].attrs.tex.length === 0)) {          
+              // Remove the empty cell from the paragraph array
+              if (i === child.length) {
+                child.pop()
+              } else if (i === 0) {
+                child.shift()
+              } else {
+                child = child.slice[0, 1]
+              }
             }
           }
         }
-        if (value.length > 0) {
-          pruneHurmet(value)  // recurse into a paragraph
+        if (child.length > 0) {
+          pruneHurmet(child)  // recurse into a paragraph
         }
-      } else if (value.type) {
-        if (value.type === "calculation") {
-          value.attrs = { entry: value.attrs.entry }
-        } else if (value.type === "tex") {
-          value.attrs = { tex: value.attrs.tex }
+      } else if (child.type) {
+        if (child.type === "calculation") {
+          // Prune the attributes. Keep only the entry.
+          child.attrs = { entry: child.attrs.entry }
+        } else if (child.type === "tex") {
+          // Do nothing.
         } else {
-          pruneHurmet(value);
+          pruneHurmet(child);
         }
       } else {
-        pruneHurmet(value);
+        pruneHurmet(child);
       }  	      
     }
   }
-  return object
+  return node
 }
 
 function saveFile(state) {
@@ -410,9 +415,9 @@ function saveFile(state) {
     },
     run(state) {
       // Get a copy of the document
-      const docObj = state.doc.toJSON()
+      const docJSON = state.doc.toJSON()
       // Prune the Hurmet math parts down to just the entry. Then stringify it.
-      const str = JSON.stringify(pruneHurmet(docObj), null, 2)
+      const str = JSON.stringify(pruneHurmet(docJSON), null, 2)
       // Save the result
       const blob = new Blob([str], {type: "text/plain;charset=utf-8"})
       saveAs(blob, "HurmetFile.hurmet");
@@ -420,7 +425,23 @@ function saveFile(state) {
   })
 }
 
-export function openFile() {
+function exportMarkdownFile(state) {
+  return new MenuItem({
+    title: "Export Markdown...",
+    label: "Export Markdown...",
+    enable(state) {
+      return true
+    },
+    run(state) {
+      const str = hurmetMarkdownSerializer.serialize(state.doc)
+      // Save the result
+      const blob = new Blob([str], {type: "text/plain;charset=utf-8"})
+      saveAs(blob, "HurmetMarkdown.md", { autoBom : false });
+    }
+  })
+}
+
+function openFile() {
   return new MenuItem({
     title: "Open file...",
     icon: hurmetIcons["folder-open"],
@@ -428,7 +449,20 @@ export function openFile() {
       return true
     },
     run(state, _, view) {
-      hurmet.readHurmetFile(state, _, view, schema)
+      readFile(state, _, view, schema, "hurmet")
+    }
+  })
+}
+
+function importMarkdownFile() {
+  return new MenuItem({
+    title: "Import Markdown...",
+    label: "Import Markdown...",
+    enable() {
+      return true
+    },
+    run(state, _, view) {
+      readFile(state, _, view, schema, "markdown")
     }
   })
 }
@@ -446,11 +480,14 @@ function uploadImage(nodeType) {
       input.accept = ".gif,.jpg,.jpeg,.png,.svg"
       input.onchange = _ => {
         const file = input.files[0]
+        const alt = file.name.replace(/\..+$/, "")
         const reader = new FileReader()
         reader.onload = function(evt) {
           const url = evt.target.result
           const pos = view.state.selection.from
-          view.dispatch(view.state.tr.replaceWith(pos, pos, schema.nodes.image.create({src: url})))
+          view.dispatch(view.state.tr.replaceWith(pos, pos, schema.nodes.image.create(
+            { src: url, alt }
+          )))
         }
         reader.readAsDataURL(file)
       }
@@ -793,6 +830,9 @@ export function buildMenuItems(schema) {
   r.apostrophecomma = setDecimalFormat("1’000’000,")
   r.dotcomma = setDecimalFormat("1.000.000,")
 
+  r.exportMarkdown = exportMarkdownFile()
+  r.importMarkdownFile = importMarkdownFile()
+
   r.toggleDraftMode = toggleDraftMode()
   r.recalcAll = reCalcAll(schema)
   r.print = print()
@@ -946,10 +986,12 @@ export function buildMenuItems(schema) {
   let cut = arr => arr.filter(x => x)
   
   r.separators = new Dropdown([r.dot, r.commadot, r.lakh, r.cn, r.comma, r.spacecomma, r.apostrophecomma, r.dotcomma], {title: "Set decimal format", label: "●"})
+  r.markdown = new Dropdown([r.exportMarkdown, r.importMarkdownFile], {title: "Markdown", label: "M"})
   r.fileMenu = [[
     r.navigate,
     r.openFile,
     r.saveFile,
+    r.markdown,
     r.separators,
     r.toggleDraftMode,
     r.recalcAll,
