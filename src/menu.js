@@ -3,10 +3,8 @@ import {
   wrapItem,
   blockTypeItem,
   Dropdown,
-  DropdownSubmenu,
   joinUpItem,
-  liftItem,
-  selectParentNodeItem,
+  DropdownSubmenu,
   undoItem,
   redoItem,
   icons,
@@ -14,7 +12,7 @@ import {
 } from "prosemirror-menu"
 import { NodeSelection, TextSelection } from "prosemirror-state"
 import { insertPoint } from "prosemirror-transform"
-import { toggleMark } from "prosemirror-commands"
+import { lift, selectParentNode, toggleMark } from "prosemirror-commands"
 import { schema, wrapInList } from "./schema"
 import { TextField, TextAreaField, openPrompt } from "./prompt"
 import { openNavPrompt } from "./navprompt"
@@ -663,6 +661,24 @@ function tableStyle(title, className, icon) {
     } 
   })
 }
+
+// :: MenuItem
+// Menu item for the `lift` command.
+const liftItem = new MenuItem({
+  title: "Lift out of enclosing block",
+  run: lift,
+  enable: state => lift(state),
+  icon: icons.lift
+})
+
+// :: MenuItem
+// Menu item for the `selectParentNode` command.
+const selectParentNodeItem = new MenuItem({
+  title: "Select parent node",
+  run: selectParentNode,
+  enable: state => selectParentNode(state),
+  icon: icons.selectParentNode
+})
 
 function linkItem(markType) {
   return new MenuItem({
