@@ -4,7 +4,7 @@ import * as state from "prosemirror-state"
 import * as view from "prosemirror-view"
 import { history } from "prosemirror-history"
 //import { dropCursor } from "../node_modules/prosemirror-dropcursor/dist/dropcursor"
-//import { GapCursor } from "../node_modules/prosemirror-gapcursor/dist/gapcursor"
+import { gapCursor } from "prosemirror-gapcursor"
 import { baseKeymap } from "prosemirror-commands"
 import { columnResizing, tableEditing } from "prosemirror-tables"
 import * as keymap from "prosemirror-keymap"
@@ -25,7 +25,7 @@ function pmSetup(options) {
     keymap.keymap(buildKeymap(options.schema, options.mapKeys)),
     keymap.keymap(baseKeymap),
 //    dropCursor(),
-//    GapCursor(),
+    gapCursor(),
     menu.menuBar({ floating: true, content: buildMenuItems(options.schema).fullMenu }),
     history(),
     columnResizing(),

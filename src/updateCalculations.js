@@ -313,6 +313,7 @@ export function updateCalculations(
     // No calculation is required. Just render the node and get out.
     const tr = view.state.tr
     tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs))
+    tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)))
     view.dispatch(tr)
     view.focus()
     return
