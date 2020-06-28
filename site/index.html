@@ -58,17 +58,23 @@
 
 <p>This week’s example:</p>
 
-<h3>Simple span beam</h3>
+<h3>Probability of a virus carrier</h3>
 
-<p><span class="hurmet-calc" data-entry="L = '12 feet'"></span>, length</p>
+<p>Say that an event attracts a number of people. What’s the probability that at least one of the attendees is a carrier?</p>
 
-<p><span class="hurmet-calc" data-entry="w = '110 lbf/ft'"></span>, uniform line load</p>
+<p><span class="hurmet-calc" data-entry="format = &quot;r2&quot;"></span>. Round results to 2 significant digits.</p>
 
-<p><span class="hurmet-calc" data-entry="P = '1000 lbf'"></span>, mid-span point load</p>
+<p><span class="hurmet-calc" data-entry="p = 222000"></span>, population of my home county</p>
 
-<p><span class="hurmet-calc" data-entry="V = (w L)/2 + P/2 = ?? lbf"></span>, maximum shear</p>
+<p><span class="hurmet-calc" data-entry="c = 200"></span>, estimated number of currently infectious carriers circulating in the population</p>
 
-<p><span class="hurmet-calc" data-entry="M = (w L^2)/8 + (P L)/4 = ?? lbf-ft"></span>, max bending moment</p>
+<p><span class="hurmet-calc" data-entry="g = 5"></span>, group size</p>
+
+<p>Find the probability that at least one of the attendees is a carrier. (<a href="https://marginalrevolution.com/marginalrevolution/2020/03/covid-19-event-risk-assessment-planner.html" title="Exposure probability">Ref</a>)</p>
+
+<p><span class="hurmet-calc" data-entry="P_carrier = 1 - (1 - c/p)^g = ?"></span> = <span class="hurmet-calc" data-entry="P_carrier*100 = @"></span>%</p>
+
+<p>If you do a few what-if changes, you’ll find that exposure probability is driven to a large extent by group size, not just by the number of carriers.</p>
 
 </div> <!-- editor -->
 
