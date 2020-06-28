@@ -33,8 +33,7 @@
     "prosemirror-tables": "^1.0.0",
     "prosemirror-transform": "^1.2.3",
     "prosemirror-view": "^1.14.2",
-    "uglify-es": "^3.3.9",
-    "markdown-it-github-headings": "2.0.0"
+    "uglify-es": "^3.3.9"
   },
   "devDependencies": {
     "eslint": "^7.0.0",
