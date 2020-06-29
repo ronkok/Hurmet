@@ -517,9 +517,9 @@ function insertImage(nodeType) {
             label: "Description",
             value: attrs ? attrs.alt : state.doc.textBetween(from, to, " ")
           }),
-          width: new TextField({ label: "Width", value: attrs && attrs.width }),
-          class: new TextField({ label: "Class", value: attrs && attrs.class })
+          width: new TextField({ label: "Width", value: attrs && attrs.width })
         },
+        radioButtons: { name: "position", labels: ["left", "inline", "right"] },
         callback(attrs) {
           view.dispatch(view.state.tr.replaceSelectionWith(nodeType.createAndFill(attrs)))
           view.focus()

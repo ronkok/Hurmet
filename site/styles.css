@@ -138,6 +138,14 @@ th p { line-height: 1.6; }
   color: gray;
 }
 
+.ProseMirror-prompt input[type="radio"] {
+  margin-left: 8px;
+}
+
+.ProseMirror-prompt label {
+  margin-left: 2px;
+}
+
 /* Code highlighting styles */
 .hl-keyword, .fn {color: #708;}
 .hl-atom {color: #219;}

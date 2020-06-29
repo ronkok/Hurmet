@@ -35,6 +35,23 @@ export function openPrompt(options) {
     form.appendChild(document.createElement("div")).appendChild(field)
   })
 
+  if (options.radioButtons) {
+    const radioGroup = document.createElement("div")
+    options.radioButtons.labels.forEach(label => {
+      const button = document.createElement("input")
+      button.type = "radio"
+      button.name = options.radioButtons.name
+      button.value = label
+      button.setAttribute('id', label)
+      const labelTag = document.createElement("label")
+      labelTag.setAttribute("for", label)
+      labelTag.appendChild(document.createTextNode(label))
+      radioGroup.appendChild(button)
+      radioGroup.appendChild(labelTag)
+    })
+    form.appendChild(radioGroup)
+  }
+
   const buttons = form.appendChild(document.createElement("div"))
   buttons.className = prefix + "-buttons"
   buttons.appendChild(submitButton)
@@ -52,6 +69,7 @@ export function openPrompt(options) {
 
   const submit = () => {
     const params = getValues(options.fields, domFields)
+    if (options.radioButtons) { params.class = form[options.radioButtons.name].value }
     if (params) {
       close()
       options.callback(params)
