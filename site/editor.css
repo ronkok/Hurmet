@@ -270,6 +270,7 @@ li.ProseMirror-selectednode:after {
 
 .ProseMirror-prompt input[type="text"],
 .ProseMirror-prompt textarea {
+  width: 210px;
   background: #eee;
   border: none;
   outline: none;

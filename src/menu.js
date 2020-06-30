@@ -521,7 +521,7 @@ function insertImage(nodeType) {
         },
         radioButtons: {
           name: "position",
-          labels: ["left", "inline", "right"],
+          labels: ["inline", "left", "center", "right"],
           current: attrs ? attrs.class : "inline"
         },
         callback(attrs) {
