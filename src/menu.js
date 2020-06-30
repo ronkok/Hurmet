@@ -519,7 +519,11 @@ function insertImage(nodeType) {
           }),
           width: new TextField({ label: "Width", value: attrs && attrs.width })
         },
-        radioButtons: { name: "position", labels: ["left", "inline", "right"] },
+        radioButtons: {
+          name: "position",
+          labels: ["left", "inline", "right"],
+          current: attrs ? attrs.class : "inline"
+        },
         callback(attrs) {
           view.dispatch(view.state.tr.replaceSelectionWith(nodeType.createAndFill(attrs)))
           view.focus()

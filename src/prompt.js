@@ -36,13 +36,16 @@ export function openPrompt(options) {
   })
 
   if (options.radioButtons) {
+    // Create buttons for image placement.
     const radioGroup = document.createElement("div")
+    const current = options.radioButtons.current
     options.radioButtons.labels.forEach(label => {
       const button = document.createElement("input")
       button.type = "radio"
       button.name = options.radioButtons.name
       button.value = label
       button.setAttribute('id', label)
+      if (label === current) { button.setAttribute("checked", null) }
       const labelTag = document.createElement("label")
       labelTag.setAttribute("for", label)
       labelTag.appendChild(document.createTextNode(label))
