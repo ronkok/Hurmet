@@ -243,10 +243,10 @@ Auto-correct kicks in when you type a space.
 | `>=`     | ≥   | ' '    | ′     | x^2    | x²   | Theta  | Θ   | gamma   | γ   |
 | `!=`     | ≠   | " "    | ʺ     | bb M   | 𝐌    | Lambda | Λ   | delta   | δ   |
 | `<>`     | ≠   | oo     | ∞     | bbb E  | 𝔼    |Xi     | Ξ   | epsilon | ε   |
-| \~=      | ≅   | ooo    | °     | cc P   | ¢𝒫¢  | Pi     | Π   | zeta    | ζ   |
+| \~=      | ≅   | ooo    | °     | cc P   | 𝒫    | Pi     | Π   | zeta    | ζ   |
 | \~\~     | ≈   | ii     |¢√(-1)¢| ff f   | 𝖿    | Sigma  | Σ   | eta     | η   |
 | \\in     | ∈   | `<<`   | ⟨     | y bar   | y̅   | Phi    | Φ   | theta   | θ   |
-| \\notin  | ∉   | `>>`   | ⟩     | θ hat   | ¢θ̂ ¢ | Psi    | Ψ   | iota    | ι   |
+| \\notin  | ∉   | `>>`   | ⟩     | θ hat   | ¢θ̂¢ | Psi    | Ψ   | iota    | ι   |
 | \-=      | ≡  |  ^^    | ∧     | P vec  | ¢P⃗¢ | Omega  | Ω   | kappa   | κ   |
 | :=       | ≔   |  vv    | ∨    |P harpoon| ¢P⃑¢ | AA     | ∀   | lambda  | λ   |
 | \-:      | ÷   | vvv    | ⋁     | a dot  | ȧ    | EE     | ∃   | mu      | μ   |
