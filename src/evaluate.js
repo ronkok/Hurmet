@@ -414,7 +414,10 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const o1 = stack.pop()
           let property
           if (o1.dtype & dt.DICT) {
-            for (let j = 0; j < numArgs; j++) { args[j] = args[j].value }
+            for (let j = 0; j < numArgs; j++) {
+              if (args[j].dtype === dt.RATIONAL) { return errorOprnd("NUM_KEY") }
+              args[j] = args[j].value
+            }
             property = Dictionary.toValue(o1, args, unitAware)
 
           } else if (o1.dtype & dt.DATAFRAME) {
@@ -423,7 +426,10 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
               : DataFrame.range(o1, args[0], args[1], vars, unitAware)
 
           } else if (o1.dtype & dt.MAP) {
-            for (let j = 0; j < numArgs; j++) { args[j] = args[j].value }
+            for (let j = 0; j < numArgs; j++) {
+              if (args[j].dtype === dt.RATIONAL) { return errorOprnd("NUM_KEY") }
+              args[j] = args[j].value
+            }
             property = map.valueFromMap(o1, args, unitAware)
 
           } else if (o1.dtype & dt.STRING) {

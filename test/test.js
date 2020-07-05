@@ -301,6 +301,7 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     [`barArea.area = @`, `¿barArea "area" .`, "0.44"],
     [`wideFlanges[["W8X31"; "W10X49"], "area"] = @`, `¿wideFlanges "W8X31" "W10X49" matrix 2 1 "area" [] 2`, "[9.13; 14.4]"],
     ["wideFlanges.W8X31 = @", `¿wideFlanges "W8X31" .`, "{name: W8X31, weight: 31 lbf/ft, area: 9.13 in^2, d: 8 in, bf: 8 in, tw: 0.285 in, tf: 0.435 in, Ix: 110 in^4, Sx: 27.5 in^3, rx: 3.47 in, Iy: 37.1 in^4, Sy: 9.27 in^3, ry: 2.02 in}"],
+    ["wideFlanges[2] = @", `¿wideFlanges ▸2/1 [] 1`, "{name: W8X31, weight: 31 lbf/ft, area: 9.13 in^2, d: 8 in, bf: 8 in, tw: 0.285 in, tf: 0.435 in, Ix: 110 in^4, Sx: 27.5 in^3, rx: 3.47 in, Iy: 37.1 in^4, Sy: 9.27 in^3, ry: 2.02 in}"],
     ["wideFlanges.W8X31.area = @", `¿wideFlanges "W8X31" . "area" .`, "9.13"],
     ['"ab" & "cd" = @', `"ab" "cd" &`, 'abcd'],
     [`1.2 & 3.4 = @`, `▸12/10 ▸34/10 &`, "[1.2, 3.4]"],

@@ -278,6 +278,20 @@ The font corrections, e.g., `bb …` work on any letter from A to Z or a to z.
 |        %         |       %%     | Omits blue echo.
 |        @         |      @@      | Displays only the result, like a spreadsheet cell.
 
+#### Accessors
+
+<div class="table-grid"></div>
+
+| Data Type and Example                       | Accessor                         | Returns      |
+|:--------------------------------------------|:---------------------------------|:-------------|
+| string<br>s = "abcde"                       | s[2]<br>s[2:4]<br>s[3:]          | b<br>bce<br>cde
+| Vector<br>𝐕 = ¢[1, 2, 3, 4, 5]¢             | 𝐕[2]<br>𝐕[2:4]<br>𝐕[3:]          | 2<br>¢[2, 3, 4]¢<br>¢[3, 4, 5]¢
+| Matrix<br>𝐌 = ¢(1, 2, 3; 4, 5, 6; 7, 8, 9)¢ | 𝐌[2, 3]<br>𝐌[3,]<br>𝐌[2:3, 1:2] | 6<br>¢[7, 8, 9]¢<br>¢[4, 5; 7, 8]¢
+| Dictionary<br>D = ¢{ "w": 31, "h": 9.13 }¢    | D.h<br>D["h"]<br>D["h", "w"]     | 9.13<br>9\.13<br>9\.13, 31
+| Data Frame<br><img src="../../images/dataframe.png" alt="dataframe" width="180"/> | DF.B<br>DF["B"]<br>DF.area<br>DF.B.area<br>DF["B"].area<br>DF["B", "area"]| An entire row<br>An entire row<br>Column vector<br>22 in²<br>22 in²<br>22 in²
+
+Dot notation can be used only if the property name is a valid [identifier](#identifiers).
+
 ## Calculation Forms
 
 Hurmet calculation cells don’t just display math; they compute numerical results.
@@ -487,6 +501,8 @@ All the usual math operators can be applied to a numeric matrix. The operators m
 
 ¢𝐱 = 2 𝐡 + 1 = \color(blue)(2) [5; 10; 15] + 1 \color(black) = [11; 21; 31]¢
 
+</div>
+
 Spreadsheet calculations can often be replaced by calulations using vectors, as above. When you really need to get things right, it’s great to be able to see the expression and all the plugged-in values.
 
 <div id="matrix-mult"></div>
@@ -651,12 +667,12 @@ Hurmet calculations are meant to be recognizeable to anyone familiar with standa
 | Operator | auto<br>correct | Example              | Description                              |
 | -------- | --------------- | -------------------- | ---------------------------------------- |
 | =        |              | *x* = 15                | Assign a value to a variable.
-| =        |              | ¢if x = 15 ¢            | Equality test if in a comparison position.<br>That is, “=” tests for equality if there is something other than a identifier to the left of it or a display selector to the right of it.
-| \+       |              | ¢2 + 2 ¢                | Addition
-| –        |              | ¢5 - 3 ¢                | Subtraction
-| \-       |              | ¢-4 ¢                   | Unary minus
-| \*       |              | ¢2 * 4 ¢                | Multiplication of numbers.<br>Element-wise product of matrices.
-| ×        | xx           | ¢2 × 4 ¢                | Multiplication of numbers.<br>Cross product of three-vectors.
+| =        |              | if *x* = 15             | Equality test if in a comparison position.<br>That is, “=” tests for equality if there is something other than a identifier to the left of it or a display selector to the right of it.
+| \+       |              |  2 + 2                  | Addition
+| –        |              |  5 - 3                  | Subtraction
+| \-       |              | ¢-4¢                   | Unary minus
+| \*       |              | ¢2 * 4¢                | Multiplication of numbers.<br>Element-wise product of matrices.
+| ×        | xx           |  2 × 4                  | Multiplication of numbers.<br>Cross product of three-vectors.
 | ·        |  **.**       | ¢a ⋅ b¢                 | Multiplication of numbers.<br>Dot product of matrices.
 |          |              | ¢(2)(4)¢                | Multiplication
 |          |              | `a b`                   | Multiplication. (A space acts as an operator when between variables.)
@@ -665,13 +681,13 @@ Hurmet calculations are meant to be recognizeable to anyone familiar with standa
 |          |              | ¢sin(2)¢                | Function
 |                |        | a (2)                   | Multiplication if a space exists before the open paren.
 | /              |        | ¢8/2¢                   | Division
-| //             |        | ¢8//2 ¢                 | Case fraction
-| ///            |        | ¢8///2 ¢                | Division displayed inline
-| ÷              | -:     | ¢8 ÷ 2 ¢                | Inline division
-| ^              |        | ¢3^2 ¢                  | Exponent
+| //             |        | ¢8//2¢                  | Case fraction
+| ///            |        | ¢8///2¢                 | Division displayed inline
+| ÷              | -:     | ¢8 ÷ 2¢                 | Inline division
+| ^              |        | ¢3^2¢                   | Exponent
 | &              |        |                         | Concatenate strings or vectors, or concatenate numbers onto vectors
-| √              | sqrt   | ¢√4 ¢                   | Square root
-| ¢root 3 ()¢    | root n | ¢root 3 8 ¢             | nth-root
+| √              | sqrt   | ¢√¢                     | Square root
+| ¢root 3 ()¢    | root n | ¢root 3 8¢              | nth-root
 | \| \|          |        | ¢\|-4\|¢                | Absolute value of a scalar, determinant of a matrix, or magnitude of a vector.
 | \|\| \|\|      |        | ¢\\Vert x \\Vert¢       | ¢√(x_1^2 + ⋯ + x_n^2)¢ if the argument is a vector of reals
 | \|\| \|\|      |        | ¢\\Vert x \\Vert¢       | ¢√(∑_i ∑_j A_(i, j)^2)¢ if the argument is a 2-D matrix
@@ -682,7 +698,7 @@ Hurmet calculations are meant to be recognizeable to anyone familiar with standa
 | \!             |        | ¢5!¢                    | [Factorial](https://en.wikipedia.org/wiki/Factorial)<br>precision = ¢{100% if n ≤ 100; 15 digits otherwise}¢
 | modulo         |        | `10` `modulo` `5`       | Always returns a positive remainder.
 | ¢(n \atop k)¢  | (*n* \atop *k*) | ¢(5 \atop 3)¢  | Binomial coefficient. ¢(n \atop k) = n!//(n!(n!-k!))¢
-| =        |              | ¢if x = 15 ¢            | Equality comparison
+| =        |              | ¢if x = 15¢             | Equality comparison
 | ≠              | `!=` or `<>` | ¢if b ≠ c¢        | Inequality comparison
 | `<`            |        |                         |
 | `>` |              |                              |
@@ -817,9 +833,9 @@ zeros(_m_, _n_)
 
 ## Operator Precedence
 
-What is the result of the expression ¢3 + 4 × 2 ¢ ?
+What is the result of the expression ¢3 + 4 × 2¢ ?
 
-It depends on whether one does the addition first or the multiplication first. So the answer could be ¢(3 + 4)(2)= 14 ¢ or it could be ¢3 + (4 × 2)= 11 ¢.
+It depends on whether one does the addition first or the multiplication first. So the answer could be ¢(3 + 4)(2)= 14¢ or it could be ¢3 + (4 × 2)= 11¢.
 
 To resolve this ambiguity, Hurmet performs operations with the following precedence:
 
@@ -838,7 +854,7 @@ To resolve this ambiguity, Hurmet performs operations with the following precede
 | , ;           | Argument separators or row separators for functions, matrices, dictionaries, or If Expressions.  |
 | ( ) \[ \]     | All conventions are over-ridden by parentheses or brackets.                                 |
 
-Now let’s return to the question that opened this section. We now know that multiplication has a higher precedence than addition, so the answer to our question above is: ¢3 + (4 × 2)= 11 ¢
+Now let’s return to the question that opened this section. We now know that multiplication has a higher precedence than addition, so the answer to our question above is: ¢3 + (4 × 2)= 11¢
 
 ## If Expressions
 
@@ -908,7 +924,7 @@ Hurmet has a **unit-aware** calculation mode that automatically handles unit con
 
 … the result will render as:
 
-¢ '4 ft' + '3 yards' = '3.9624 m'¢
+¢'4 ft' + '3 yards' = '3.9624 m'¢
 
 You can create composite units on the fly and Hurmet will still convert them automatically.
 
@@ -930,7 +946,7 @@ If you assign a quantity to a variable, a unit-aware calculation will call the v
 
 If you assign a quantity to a variable, you can still call the variable from a non-unit-aware calculation. Such a calculation will call the scalar value, not the quantity.
 
-¢L_unaware = 2 L = \color(blue)(2) (3) \color(black) =\\, 6 ¢
+¢L_unaware = 2 L = \color(blue)(2) (3) \color(black) =\\, 6¢
 
 You’re welcome to view all of Hurmet’s built-in [unit definitions](unit-definitions.html "Unit Definitions").
 
@@ -1403,6 +1419,7 @@ Hurmet is built with the aid of several open source libraries and resources, for
 * [Markup](#markup)
 * [Auto-correct](#auto-correct)
 * [Display Selectors](#display-selectors)
+* [Accessors](#accessors)
 
 </details>
 </li>

@@ -20,7 +20,11 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
   let iEnd
   let columnList = []
   let unitMap
-  if (columnIndicator === undefined && rowIndicator.dtype === dt.STRING) {
+  if (columnIndicator === undefined && rowIndicator.dtype === dt.RATIONAL) {
+    iStart = Rnl.toNumber(rowIndicator.value) - 1
+    iEnd = iStart
+    columnList = columnListFromRange(0, oprnd.value.data.length - 1)
+  } else if (columnIndicator === undefined && rowIndicator.dtype === dt.STRING) {
     // Only one indicator has been given.
     // Check both the rowMap and the columnMap.
     if (rowIndicator.value in oprnd.value.rowMap) {
