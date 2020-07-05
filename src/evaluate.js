@@ -307,7 +307,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             stack.push({ value: str1 + str2, unit: null, dtype: dt.STRING })
           } else if (Matrix.isVector(o1)) {
             if (Matrix.isVector(o2)) {
-              o1.value.splice(o1.value.length, 0, o2.value)
+              o1.value.splice(o1.value.length, 0, ...o2.value)
             } else {
               o1.value.push(o2.value)
             }

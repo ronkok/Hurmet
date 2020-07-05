@@ -59,23 +59,27 @@
 
 <p>This week’s example:</p>
 
-<h3>Probability of a virus carrier</h3>
+<h3>Dog Years</h3>
 
-<p>Say that an event attracts a number of people. What’s the probability that at least one of the attendees is a carrier?</p>
+<p>Humans and dogs develop at different rates. A common rule of thumb is that they differ by a factor of seven. But a recent paper looks at the ages when common changes occur. The paper finds a logarithmic relation and gives this equation as its best approximation:</p>
 
-<p><span class="hurmet-calc" data-entry="format = &quot;r2&quot;"></span>. Round results to 2 significant digits.</p>
+<blockquote><span class="hurmet-calc" data-entry="human_age = 16 ln(dog_age) + 31"></span></blockquote>
 
-<p><span class="hurmet-calc" data-entry="p = 222000"></span>, population of my home county</p>
+<p>Let’s look at that. First we create a vector to serve as the input:</p>
 
-<p><span class="hurmet-calc" data-entry="c = 200"></span>, estimated number of currently infectious carriers circulating in the population</p>
+<p><span class="hurmet-calc" data-entry="dog_age = [0.25, 0.5, 0.75] &amp; [1:12] = ?"></span></p>
 
-<p><span class="hurmet-calc" data-entry="g = 5"></span>, group size</p>
+<p>Fix the rounding at one digit after the decimal: <span class="hurmet-calc" data-entry="format = &quot;f1&quot;"></span></p>
 
-<p>Find the probability that at least one of the attendees is a carrier. (<a href="https://marginalrevolution.com/marginalrevolution/2020/03/covid-19-event-risk-assessment-planner.html" title="Exposure probability">Ref</a>)</p>
+<p>Do the calculation:</p>
 
-<p><span class="hurmet-calc" data-entry="P_carrier = 1 - (1 - c/p)^g = ?"></span> = <span class="hurmet-calc" data-entry="P_carrier*100 = @"></span>%</p>
+<p><span class="hurmet-calc" data-entry="human_age = 16 ln(dog_age) + 31 = ?"></span></p>
 
-<p>If you do a few what-if changes, you’ll find that exposure probability is driven to a large extent by group size, not just by the number of carriers.</p>
+<p>Finally, we use the two vectors to plot the relation:</p>
+
+<p><span class="hurmet-calc" data-entry='lineChart(dog_age, human_age, "Dog Years", "Dog age", "Human age") = @'></span></p>
+
+<p>Ref: https://www.cell.com/cell-systems/pdf/S2405-4712(20)30203-9.pdf</p>
 
 </div> <!-- editor -->
 
