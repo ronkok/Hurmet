@@ -304,10 +304,15 @@ export const nodes = {
         // Before writing to DOM, I filter out most of the run-time info in node.attrs.
         dom.dataset.entry = node.attrs.entry
       } else {
-        dom = document.createElement('canvas')
-        dom.classList = "hurmet-calc"
+        dom = document.createElement('span')
+        dom.classList = "chart-container hurmet-calc"
+        dom.dataset.entry = node.attrs.entry
+        const cnvs = document.createElement('canvas')
+        dom.append(cnvs)
         const config = node.attrs.value
-        const ctx = dom.getContext('2d')
+        dom.style.width = config.width
+        dom.height = config.height
+        const ctx = cnvs.getContext('2d')
         const aChart = new Chart(ctx, config)
       }
       return dom

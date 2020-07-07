@@ -2,7 +2,7 @@ import { dt } from "./constants"
 import { Rnl } from "./rational"
 
 export const lineChart = (args) => {
-  const [xOp, yOp, title, xLabel, yLabel] = args
+  const [xOp, yOp, title, xLabel, yLabel, width, height] = args
   const x = xOp.value
   const y = yOp.value
   const config = {
@@ -36,7 +36,9 @@ export const lineChart = (args) => {
           }
         }]
       }
-    }
+    },
+    width: width || "600px",
+    height: height || "300px"
   }
   let datasets
   if (Rnl.isRational(y[0])) {

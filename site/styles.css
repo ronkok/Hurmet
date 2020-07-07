@@ -146,6 +146,11 @@ th p { line-height: 1.6; }
   margin-left: 2px;
 }
 
+.chart-container {
+  display: inline-block;
+  position: relative;
+}
+
 /* Code highlighting styles */
 .hl-keyword, .fn {color: #708;}
 .hl-atom {color: #219;}
