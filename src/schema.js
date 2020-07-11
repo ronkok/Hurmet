@@ -337,7 +337,9 @@ export const nodes = {
       if (node.attrs.isSelected) {
         dom.innerText = tex
       } else {
-        katex.render(tex, dom, { displayMode: false, strict: false, throwOnError: false })
+        const isFF = 'MozAppearance' in document.documentElement.style
+        katex.render(tex, dom, { displayMode: false, strict: false, throwOnError: false,
+          output: isFF ? "mathml" : "htmlAndMathml" })
       }
       return dom
     }
