@@ -30,6 +30,7 @@ import { functionRegEx } from "./module"
 const dataFrameRegEx = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′* *= *`/
 const fetchRegEx = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′* *= *fetch\(/
 const fileErrorRegEx = /^Error while reading file. Status Code: \d*$/
+const lineChartRegEx = /^lineChart/
 
 const isNameOfAnImmutableVariable = (name, hurmetVars) => {
   if (!name) { return false }
@@ -180,7 +181,7 @@ const proceedAfterFetch = (
       const dtype = node.attrs.dtype
       if (!(node.attrs.isFetch || dtype === dt.MODULE || dtype === dt.DATAFRAME)) {
         const entry = node.attrs.entry
-        let attrs = isCalcAll
+        let attrs = isCalcAll || lineChartRegEx.test(entry)
           ? prepareStatement(entry, decimalFormat)
           : clone(node.attrs)
         if (!isNameOfAnImmutableVariable(attrs.name, hurmetVars)) {
