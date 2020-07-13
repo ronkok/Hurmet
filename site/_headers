@@ -1,0 +1,2 @@
+data/*
+  Access-Control-Allow-Methods: GET
