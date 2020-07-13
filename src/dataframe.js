@@ -5,7 +5,7 @@ import { unitFromUnitName } from "./units"
 import { addTextEscapes } from "./lexer"
 import { errorOprnd } from "./error"
 import { parse } from "./parser"
-import { isVector } from "./matrix"
+import { Matrix } from "./matrix"
 
 const columnListFromRange = (start, end) => {
   const columnList = []
@@ -20,18 +20,20 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
   let iEnd
   let columnList = []
   let unitMap
-  if (columnIndicator === undefined && rowIndicator.dtype === dt.RATIONAL) {
+  if ((!columnIndicator || (columnIndicator.dtype === 1 &&
+      Rnl.isZero(columnIndicator.value))) && rowIndicator.dtype === dt.RATIONAL) {
     iStart = Rnl.toNumber(rowIndicator.value) - 1
     iEnd = iStart
     columnList = columnListFromRange(0, oprnd.value.data.length - 1)
-  } else if (columnIndicator === undefined && rowIndicator.dtype === dt.STRING) {
+  } else if ((!columnIndicator || (columnIndicator.dtype === 1 &&
+      Rnl.isZero(columnIndicator.value))) && rowIndicator.dtype === dt.STRING) {
     // Only one indicator has been given.
     // Check both the rowMap and the columnMap.
-    if (rowIndicator.value in oprnd.value.rowMap) {
+    if (oprnd.value.rowMap && rowIndicator.value in oprnd.value.rowMap) {
       iStart = oprnd.value.rowMap[rowIndicator.value]
       iEnd = iStart
       columnList = columnListFromRange(0, oprnd.value.data.length - 1)
-    } else if (rowIndicator.value in oprnd.value.columnMap) {
+    } else if (oprnd.value.columnMap && rowIndicator.value in oprnd.value.columnMap) {
       iStart = 0
       iEnd = oprnd.value.data[0].length - 1
       columnList.push(oprnd.value.columnMap[rowIndicator.value])
@@ -57,7 +59,7 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
     } else if (rowIndicator.dtype === dt.RANGE) {
       iStart = Rnl.toNumber(rowIndicator.value[0]) - 1
       iEnd = Rnl.toNumber(rowIndicator.value[2]) - 1
-    } else if (isVector(rowIndicator)) {
+    } else if (Matrix.isVector(rowIndicator)) {
       // iStart and iEnd aren't relevant.
     } else {
       // TODO: Write an error message.
@@ -82,7 +84,7 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
       const jStart = Rnl.toNumber(columnIndicator.value[0]) - 1
       const jEnd = Rnl.toNumber(columnIndicator.value[2]) - 1
       columnList = columnListFromRange(jStart, jEnd)
-    } else if (isVector(columnIndicator)) {
+    } else if (Matrix.isVector(columnIndicator)) {
       columnList = columnIndicator.value.map(e => {
         return Rnl.isRational(e) ? Rnl.toNumber(e - 1) : oprnd.value.columnMap[e]
       })
@@ -91,7 +93,7 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
     }
   }
 
-  if (isVector(rowIndicator) && columnList.length === 1) {
+  if (Matrix.isVector(rowIndicator) && columnList.length === 1) {
     // Return a vector of values
     // TODO: This vector section is wrong and must be fixed.
     const j = columnList[0]
@@ -147,9 +149,17 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
   } else if (columnList.length === 1) {
     // Return data from one column, in a column vector or a quantity
     const j = columnList[0]
-    const unit = oprnd.value.units[j] ? oprnd.value.units[j] : null
-    const value = oprnd.value.data[JSON].slice(iStart, iEnd + 1)
-    return { value, unit, dtype: oprnd.value.dtype[j] + dt.COLUMNVECTOR }
+    const unitName = oprnd.value.units[j] ? oprnd.value.units[j] : null
+    const unit = oprnd.unit[unitName]
+    const value = oprnd.value.data[j].slice(iStart, iEnd + 1)
+    const dtype = oprnd.value.dtype[j] + dt.COLUMNVECTOR
+    const newOprnd = { value, unit, dtype }
+    if (unitAware) {
+      const newVal = Matrix.convertToBaseUnits(newOprnd, unit.gauge, unit.factor)
+      return { value: newVal, unit: unit.expos, dtype: dt.RATIONAL + dt.COLUMNVECTOR }
+    } else {
+      return newOprnd
+    }
 
   } else {
     // Return a data frame.
@@ -197,8 +207,6 @@ const dataFrameFromCSV = (str, vars) => {
   const pos = /^ï»¿/.test(str) ? 3 : 0  // Check for a BOM
   let row = 0
   let col = 0
-  let gotUnits = false
-  let firstDataRow = 1
 
   // Before we start loading data, let's write a closed function, to share variable scope.
   const harvest = (datum) => {
@@ -208,13 +216,10 @@ const dataFrameFromCSV = (str, vars) => {
     if (row === 0) {
       columns.push(datum)
       columnMap[datum] = col
-    } else if (row === 1 && col === 0 && /^[Uu]nit$/.test(datum)) {
-      gotUnits = true
-      units.push("")
-      firstDataRow = 2
-    } else if (row === 1 && col > 0 && gotUnits) {
+    } else if (row === 1) {
       // This is the unit row
       units.push(datum)
+      if (col === 0 && /^[Uu]nit$/.test(datum)) { return }
       if (datum.length > 0) {
         if (!unitMap[datum]) {
           const unit = unitFromUnitName(datum, vars)
@@ -226,7 +231,7 @@ const dataFrameFromCSV = (str, vars) => {
         }
       }
     } else {
-      if (row === firstDataRow) { data.push([]) }
+      if (row === 2) { data.push([]) } // First data row.
       const value = (datum === "true")
         ? true
         : datum === "false"
@@ -238,7 +243,7 @@ const dataFrameFromCSV = (str, vars) => {
         : datum
       data[col].push(value)
       if (rowMap && col === 0) {
-        rowMap[datum] = row - (gotUnits ? 2 : 1)
+        rowMap[datum] = row - 2
       }
     }
   }

@@ -372,7 +372,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
 
           } else if (o1.dtype & dt.DATAFRAME) {
             const colIndicator = { value: Rnl.zero, unit: allZeros, dtype: dt.RATIONAL }
-            property = DataFrame.range(o1, o2, colIndicator, vars)
+            property = DataFrame.range(o1, o2, colIndicator, vars, unitAware)
 
           } else if ((o1.dtype === dt.STRING || (o1.dtype & dt.ARRAY)) &&
             o2.dtype === dt.RATIONAL) {

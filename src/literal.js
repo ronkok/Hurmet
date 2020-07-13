@@ -52,7 +52,7 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
     const pos = str.indexOf('`', 1)
     str = str.slice(1, pos).trim()
     const dataFrame = DataFrame.dataFrameFromCSV(str, {})
-    return [dataFrame.value, undefined, dt.DATAFRAME, DataFrame.display(dataFrame.value)]
+    return [dataFrame.value, dataFrame.unit, dt.DATAFRAME, DataFrame.display(dataFrame.value)]
 
   } else if (str.match(numberRegEx)) {
     // str is a number.

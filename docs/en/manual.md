@@ -583,12 +583,12 @@ A *data frame* is a two dimensional data structure that can be accessed with row
 
 Each datum can be a number, a string, `true`, or `false`. A missing item will be taken to be `undefined`. All data in a column must be of the same data type. A column of numbers can be assigned a unit of measure. 
 
-Data frame literals are written between backtick `` ` ` `` delimiters. The text between the backticks must be written in CSV format. Numbers must use a dot decimal. The second row will define units of measure if “unit” is the first word of the second row. The first column will be indexed if the first word is “name” or “index”.
+Data frame literals are written between backtick `` ` ` `` delimiters. The text between the backticks must be written in CSV format. Numbers must use a dot decimal. The second row must contain units of measure. The first column will be indexed if the first word is “name” or “index”.
 
 Here’s an example of CSV input:
 
     rebar = `name,diameter,area
-    unit,in ,in²
+    ,in ,in²
     #3,0.375,0.11
     #4,0.5  ,0.2
     #5,0.625,0.31
