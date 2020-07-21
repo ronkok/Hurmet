@@ -15,7 +15,7 @@ const ninety = [BigInt(90), BigInt(1)]
 const functionExpos = (functionName, args) => {
   const numArgs = args.length
 
-  let x = numArgs === 1 ? args[0].unit : null
+  const expos  = numArgs === 1 ? args[0].unit.expos : null
 
   switch (functionName) {
     case "abs":
@@ -25,7 +25,7 @@ const functionExpos = (functionName, args) => {
     case "sign":
     case "trace":
     case "fetch":
-      return x
+      return expos
 
     case "cos":
     case "sin":
@@ -58,7 +58,7 @@ const functionExpos = (functionName, args) => {
     case "acscd":
     case "acotd":
     case "gud":
-      if (!unitsAreCompatible(x, allZeros)) {
+      if (!unitsAreCompatible(expos, allZeros)) {
         return errorOprnd("UNIT_IN", functionName)
       }
       return allZeros
@@ -83,14 +83,14 @@ const functionExpos = (functionName, args) => {
     case "acoth":
     case "binomial":
     case "gamma":
-      if (!unitsAreCompatible(x, allZeros)) {
+      if (!unitsAreCompatible(expos, allZeros)) {
         return errorOprnd("UNIT_IN", functionName)
       }
       return allZeros
 
     case "gcd":
     case "mht":
-      if (!unitsAreCompatible(x, allZeros)) {
+      if (!unitsAreCompatible(expos, allZeros)) {
         return errorOprnd("UNIT_IN", functionName)
       }
       return functionName === "hmt" ? [1, 0, 0, 0, 0, 0, 0, 0, 0] : [0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -104,23 +104,26 @@ const functionExpos = (functionName, args) => {
     case "max":
     case "range":
     case "stddev":
-    case "variance":
-      x = args[0].unit
+    case "variance": {
+      const x = args[0].unit.expos
       for (let i = 1; i < args.length; i++) {
-        const y = args[i].unit
+        const y = args[i].unit.expos
         if (x.length !== y.length) { return errorOprnd("UNIT_ARG", functionName) }
         for (let j = 0; j < x.length; j++) {
           if (x[j] !== y[j]) { return errorOprnd("UNIT_ARG", functionName) }
         }
       }
       return x
+    }
 
-    case "product":
+    case "product": {
+      const expos = clone(args[0].unit.expos)
       for (let i = 1; i < args.length; i++) {
-        const p = args[i].unit
-        args[0].unit.map((e, j) => e + p[j])
+        const p = args[i].unit.expos
+        expos.map((e, j) => e + p[j])
       }
-      return args[0]
+      return expos
+    }
 
     default:
       return errorOprnd("F_NAME", functionName)
@@ -482,6 +485,11 @@ const lerp = (args, unitAware) => {
     if (args[1].expos !== args[2].expos) { return errorOprnd("") }
     expos = args[0].expose
   }
+  const output = Object.create(null)
+  output.unit = Object.create(null)
+  output.unit.expos = expos
+  output.dtype = dt.RATIONAL
+
   const v0 = args[0].value  // a vector
   const v1 = args[1].value  // another vector
   const x = args[2].value   // the input value
@@ -490,8 +498,8 @@ const lerp = (args, unitAware) => {
     if (Rnl.lessThanOrEqualTo(v0[i], x) & Rnl.lessThanOrEqualTo(x, v0[i + 1])) {
       const slope = Rnl.divide((Rnl.subtract(v1[i + 1], v1[i])),
         (Rnl.subtract(v0[i + 1], v0[i])))
-      const value = Rnl.add(v1[i], Rnl.multiply(slope, (Rnl.subtract(x, v0[i]))))
-      return { value, unit: expos, dtype: dt.RATIONAL }
+      output.value = Rnl.add(v1[i], Rnl.multiply(slope, (Rnl.subtract(x, v0[i]))))
+      return Object.freeze(output)
     }
   }
 }

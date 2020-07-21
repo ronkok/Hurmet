@@ -1,7 +1,5 @@
-import { dt, allZeros } from "./constants"
-import { clone } from "./utils"
+import { dt } from "./constants"
 import { errorOprnd } from "./error"
-import { isMatrix } from "./matrix"
 
 /*
  * Hurmet operands often have numeric values. Sometimes they are the numbers originally
@@ -35,19 +33,23 @@ import { isMatrix } from "./matrix"
  * A `resultdisplay` string is always in a MAP's cell attrs and sometimes in an operand.
  *
  * DICT operand: { value: { key1: { value: plain, unit: unitName, dtype: dtype },
- *                            key2: { value: plain, unit: unitName, dtype: dtype },
- *                            etc
- *                          },
- *                   unit: { unitName1: unitData1, unitName2: unitData2, etc },
- *                   dtype: DICT
- *                  }
+ *                          key2: { value: plain, unit: unitName, dtype: dtype },
+ *                          etc
+ *                        },
+ *                 unit: { unitName1: unitData1, unitName2: unitData2, etc },
+ *                 dtype: DICT
+ *               }
  * A `resultdisplay` string is always in a DICT's cell attrs and sometimes in an operand.
  *
  * ERROR operand: { value: error message, unit: undefined, dtype: ERROR }
  *
+ * When this module creates Hurmet operands, it does not make defensive copies of
+ * cell attributes. The deep data is referenced. So Hurmet evaluate.js must copy whenever
+ * operators or functions might change a cell attribute.
+ *
  */
 
-const fromAssignment = (cellAttrs, unitAware) => {
+export const fromAssignment = (cellAttrs, unitAware) => {
   // Get the value that was assigned to a variable. Load it into an operand.
   if (cellAttrs.value === null || cellAttrs.value === undefined) {
     // No value assigned to variable. Return an error message.
@@ -55,59 +57,44 @@ const fromAssignment = (cellAttrs, unitAware) => {
     return errorOprnd("NULL", insert)
   }
 
-  if (cellAttrs.dtype === dt.RATIONAL) {
-    return clone(cellAttrs)
+  const oprnd = Object.create(null)
+  oprnd.dtype = cellAttrs.dtype
+  oprnd.name = cellAttrs.name
 
-  } else if (cellAttrs.dtype & dt.BOOLEAN) {
-    return clone(cellAttrs)
+  // Get the unit data.
+  if (cellAttrs.dtype === dt.STRING || cellAttrs.dtype === dt.BOOLEAN) {
+    oprnd.unit = null
+  } else if (cellAttrs.dtype & dt.MAP) {
+    oprnd.unit = Object.freeze(cellAttrs.unit)
+  } else if (cellAttrs.dtype === dt.DICT || cellAttrs.dtype === dt.DATAFRAME) {
+    const unit = Object.create(null)
+    unit.map = cellAttrs.unit
+    oprnd.unit = Object.freeze(unit)
+  } else {
+    oprnd.unit = Object.create(null)
+    if (cellAttrs.unit)  { oprnd.unit.name = cellAttrs.unit }
+    if (cellAttrs.expos) { oprnd.unit.expos = cellAttrs.expos }
+  }
+
+  // Get the value.
+  if (cellAttrs.dtype & dt.QUANTITY) {
+    // Here we discard some of the cellAttrs information. In a unit-aware calculation,
+    // number, matrix, and map operands contain only the value.inBaseUnits.
+    oprnd.value = Object.freeze(unitAware
+      ? cellAttrs.value.inBaseUnits
+      : cellAttrs.value.plain
+    )
+    oprnd.dtype = cellAttrs.dtype - dt.QUANTITY
 
   } else if (cellAttrs.dtype === dt.STRING) {
-    return fromString(cellAttrs.value)
-
-  } else if (cellAttrs.dtype === dt.DATAFRAME) {
-    // No defensive copy here. Data frames are immutable.
-    return  { value: cellAttrs.value, unit: cellAttrs.unit, dtype: dt.DATAFRAME }
-
-  } else if (cellAttrs.dtype & dt.DICT) {
-    return clone(cellAttrs)
-
-  } else if (cellAttrs.dtype & dt.QUANTITY) {
-    // Here we discard some of the cellAttrs information. In a unit-aware calculation,
-    // number and matrix operands contain only the value.inBaseUnits and the unit exponents.
-    // In the non-unit aware case, cellAttrs.unit is returned in case they are needed
-    // to build a dictionary out of some assembled operands.
-    const dtype = cellAttrs.dtype - dt.QUANTITY
-    const value = clone(unitAware ? cellAttrs.value.inBaseUnits : cellAttrs.value.plain)
-    return { value, unit: clone(unitAware ? cellAttrs.expos : allZeros), dtype }
-
-  } else if (isMatrix(cellAttrs)) {
-    const expos = (cellAttrs.dtype & dt.RATIONAL) ? allZeros : null
-    return clone({ value: cellAttrs.value, unit: expos, dtype: cellAttrs.dtype })
-
-  } else if (cellAttrs.dtype & dt.MAP) {
-    const unit = (cellAttrs.dtype & dt.RATIONAL) ? allZeros : null
-    return clone({ value: cellAttrs.value, unit, dtype: cellAttrs.dtype })
-
-  } else if (cellAttrs.dtype === dt.MODULE) {
-    return { value: cellAttrs.value, unit: null, dtype: dt.MODULE }
+    const str = cellAttrs.value
+    const ch = str.charAt(0)
+    const chEnd = str.charAt(str.length - 1)
+    oprnd.value = ch === '"' && chEnd === '"' ? str.slice(1, -1).trim() : str.trim()
 
   } else {
-    const insert = (cellAttrs.name) ? cellAttrs.name : "?"
-    return errorOprnd("BAD_TYPE", insert)
+    oprnd.value = cellAttrs.value
   }
-}
 
-const fromString = (str) => {
-  const ch = str.charAt(0)
-  const chEnd = str.charAt(str.length - 1)
-  return {
-    value: ch === '"' && chEnd === '"' ? str.slice(1, -1).trim() : str.trim(),
-    unit: null,
-    dtype: dt.STRING
-  }
+  return Object.freeze(oprnd)
 }
-
-export const Operand = Object.freeze({
-  fromAssignment,
-  fromString
-})

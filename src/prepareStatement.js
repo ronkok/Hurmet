@@ -33,7 +33,7 @@ import { functionRegEx, scanModule } from "./module"
  */
 
 const containsOperator = /[+\-×·*∘⌧/^%‰&√!¡|‖&=<>≟≠≤≥∈∉⋐∧∨⊻¬]|\xa0(modulo|\\atop|root|\?{}|%|⎾⏋|⎿⏌|\[\]|\(\))\xa0/
-const mustDoCalculation = /^(!{1,2}|[$$£¥\u20A0-\u20CF]?(\?{1,2}|@{1,2}|%{1,2})[^=!(?@%!{})]*)$/
+const mustDoCalculation = /^([$$£¥\u20A0-\u20CF]?(\?{1,2}|@{1,2}|%{1,2}|!{1,2})[^=!(?@%!{})]*)$/
 const currencyRegEx = /^[$£¥\u20A0-\u20CF]/
 const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/
 const isKeyWord = /^(π|true|false|root|if|else|and|or|otherwise|modulo|for|while|break|return|raise)$/
@@ -91,7 +91,7 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
     if (mustDoCalculation.test(trailStr)) {
       // trailStr contains a ? or a @ or a % or a !. In other words,
       // input has form:  mainStr = something [?@%!] something
-      // The ? or @ or % or ! signals that the author wants a calculation done.
+      // The [?@%!] signals that the author wants a calculation done.
       isCalc = true
 
       // A ! tells us to calculate and save the result, but to NOT display the result.
@@ -163,7 +163,6 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
     if (/^\s*fetch\(/.test(expression)) {
       // fetch() functions are handled in updateCalculations.js, not here.
       // It's easier from there to send a fetch() callback to a ProseMirror transaction.
-      isCalc = false
       echo = ""
 
     } else {
@@ -195,24 +194,25 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
     unit = trailStr.charAt(0)
   }
 
-  if (suppressResultDisplay) {
-    resultDisplay = "!"
-
-  } else if (isCalc) {
-    // trailStr contains a placeholder for a calculation result display.
+  if (isCalc) {
+    // trailStr contains a display selector.
     value = null
 
     if (!leadsWithCurrency) {
       // Check for a unit, even if it isn't a unit-aware calculation
-      unit = trailStr.replace(/[?@%']/g, "").trim()
+      unit = trailStr.replace(/[?@%!']/g, "").trim()
     }
 
-    if (unit) {
-      resultDisplay = parse("'" + trailStr.replace(/'/g, "").trim() + "'", decimalFormat)
+    if (suppressResultDisplay) {
+      resultDisplay = "!"
     } else {
-      resultDisplay = parse(trailStr, decimalFormat).replace(/\\%/g, "%")
+      if (unit) {
+        resultDisplay = parse("'" + trailStr.replace(/'/g, "").trim() + "'", decimalFormat)
+      } else {
+        resultDisplay = parse(trailStr, decimalFormat).replace(/\\%/g, "%")
+      }
+      resultDisplay = resultDisplay.replace(/\\text\{(\?\??|%%?)\}/, "$1")
     }
-    resultDisplay = resultDisplay.replace(/\\text\{(\?\??|%%?)\}/, "$1")
 
   } else {
     // trailStr may be a static value in an assignment statement.
@@ -258,7 +258,13 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
   }
   if (rpn) { attrs.rpn = rpn }
   if (value) { attrs.value = value }
-  if (unit) { attrs.unit = unit }
+  if (unit) {
+    if (Array.isArray(unit)) {
+      attrs.expos = unit
+    } else {
+      attrs.unit = unit
+    }
+  }
 
   return attrs
 }

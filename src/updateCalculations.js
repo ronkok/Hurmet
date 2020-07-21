@@ -73,14 +73,14 @@ export function insertOneHurmetVar(hurmetVars, attrs) {
       let i = 0
       for (const value of attrs.value.values()) {
         const result = clone(value)
-        if (typeof result.unit === "string") {
+        if (result.unit && result.unit.name) {
           // A quantity. Get the value in both plain and base units.
           const plain = result.value
-          const unit = attrs.unit[result.unit]
+          const unit = attrs.unit[result.unit.name]
           const inBaseUnits = Rnl.multiply(Rnl.add(plain, unit.gauge), unit.factor)
           result.value = { plain, inBaseUnits }
           result.expos = unit.expos
-          result.resultdisplay = parse("'" + format(plain) + " " + result.unit + "'")
+          result.resultdisplay = parse("'" + format(plain) + " " + result.unit.name + "'")
         } else if (Rnl.isRational(result.value)) {
           result.expos = result.unit
           result.resultdisplay = parse(format(result.value))
@@ -163,7 +163,6 @@ const proceedAfterFetch = (
     if (!fetchRegEx.test(nodeAttrs.entry)) {
       // This is the typical calculation statement. We'll evalutate it.
       let attrs = clone(nodeAttrs) // prepareStatement was already run in mathprompt.js.
-
       // The mathPrompt dialog box did not have accesss to hurmetVars, so it
       // did not do unit conversions on the result template. Do that first.
       prepareResult(attrs, hurmetVars)
@@ -215,7 +214,7 @@ const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
   const attrs = Object.create(null)
   attrs.entry = entry
   attrs.name = entry.replace(/=.+$/, "").trim()
-  attrs.tex = parse(entry.replace(/s*=\s*(!{1,2}|¡{1,2})\s*$/, ""), decimalFormat)
+  attrs.tex = parse(entry.replace(/s*=\s*[$$£¥\u20A0-\u20CF]?(!{1,2}).$/, ""), decimalFormat)
   attrs.alt = entry
   if (text === "File not found." || fileErrorRegEx.test(text)) {
     attrs.dtype = dt.ERROR

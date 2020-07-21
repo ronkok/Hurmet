@@ -22,8 +22,8 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
     // str is a QUANTITY
     const [tex, rpn] = parse(str, decimalFormat, true)
     const oprnd = evalRpn(rpn, {}, decimalFormat, false, {})
-    oprnd.dtype += dt.QUANTITY
-    return [oprnd.value, oprnd.unit, oprnd.dtype, tex]
+    const unit = (oprnd.dtype & dt.MAP) ? oprnd.unit : oprnd.unit.name
+    return [oprnd.value, unit, oprnd.dtype + dt.QUANTITY, tex]
 
   } else if (/^\x22.+\x22/.test(str)) {
     // str contains text between quotation marks
@@ -38,13 +38,15 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
     // We're processing a matrix
     const [tex, rpn] = parse(str, decimalFormat, true)
     const oprnd = evalRpn(rpn, {}, decimalFormat, false, {})
-    return [oprnd.value, oprnd.dtype, oprnd.dtype, tex]
+    const unit = (oprnd.dtype & dt.RATIONAL) ? allZeros : null
+    return [oprnd.value, unit, oprnd.dtype, tex]
 
   } else if (/^(\{)/.test(str)) {
     // We're assigning a dictionary.
     const [tex, rpn] = parse(str, decimalFormat, true)
     const oprnd = evalRpn(rpn, {}, decimalFormat, false, {})
-    return [oprnd.value, oprnd.unit, oprnd.dtype, tex]
+    const unit = (oprnd.dtype & dt.MAP) ? oprnd.unit : oprnd.unit.map
+    return [oprnd.value, unit, oprnd.dtype, tex]
 
   } else if (str.charAt(0) === "`") {
     // A CSV between back ticks.

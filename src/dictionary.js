@@ -10,14 +10,17 @@ import { errorOprnd } from "./error"
 const fromTokenStack = (stack, numPairs, vars) => {
   const targetStackLength = stack.length -  (2 * numPairs)
   const lastType = stack[stack.length - 1].dtype
-  const lastUnit = stack[stack.length - 1].unit
 
   // A Hurmet hash map is a dictionary whose values all have the same data type and unit.
   let isRegular = isIn(lastType, [dt.RATIONAL, dt.BOOLEAN, dt.STRING])
   if (isRegular) {
     for (let j = stack.length -  (2 * numPairs) + 1; j < stack.length; j += 2) {
       if (stack[j].dtype !== lastType) { isRegular = false; break }
-      if (stack[j].unit !== lastUnit) { isRegular = false; break }
+      if (lastType === dt.RATIONAL) {
+        if (stack[j].unit.expos !== allZeros) { isRegular = false; break }
+      } else {
+        if (stack[j].unit !== null) { isRegular = false; break }
+      }
     }
   }
 
@@ -26,13 +29,18 @@ const fromTokenStack = (stack, numPairs, vars) => {
     // We only save unit and dtype info once, at the top level.
     const map = Object.create(null)
     map.dtype = lastType + dt.MAP
-    map.unit = lastType === dt.RATIONAL ? allZeros : null
+    map.unit = Object.create(null)
+    if (lastType === dt.RATIONAL) {
+      map.unit.expos = allZeros
+    } else {
+      map.unit = null
+    }
     map.value = new Map()
     while (stack.length > targetStackLength) {
       const value = stack.pop().value
       map.value.set(stack.pop().value, value)
     }
-    return map
+    return Object.freeze(map)
   } else {
     // This data structure is more complex than a hash map.
     // Each key:value pair has its own unit and dtype inside dictionary.value
@@ -51,7 +59,12 @@ const fromTokenStack = (stack, numPairs, vars) => {
       }
       dictionary.set(key, { value: oprnd.value, unit: unitName, dtype: oprnd.dtype })
     }
-    return { value: dictionary, unit: unitMap, dtype: dt.DICT }
+    const dict = Object.create(null)
+    dict.value = Object.freeze(dictionary)
+    dict.unit = Object.create(null)
+    dict.unit.map = Object.freeze(unitMap)
+    dict.dtype = dt.DICT
+    return Object.freeze(dict)
   }
 }
 
@@ -61,7 +74,11 @@ const fromTokenStack = (stack, numPairs, vars) => {
 export const dictMap = (dictionaryValue, fn) => {
   const newMap = new Map()
   for (const [key, oprnd] of dictionaryValue.entries()) {
-    newMap.set(key, { value: fn(oprnd.value), unit: oprnd.unit, dtype: oprnd.dtype })
+    const value = Object.create(null)
+    value.value = fn(oprnd.value)
+    value.unit = oprnd.unit
+    value.dtype = oprnd.dtype
+    newMap.set(key, Object.freeze(value))
   }
   return newMap
 }
@@ -96,7 +113,11 @@ const toValue = (dictionary, keys, unitAware) => {
       return property
     }
   }
-  return { value: properties, unit: dictionary.unit, dtype: dt.DICT }
+  const output = Object.create(null)
+  output.value = Object.freeze(properties)
+  output.unit = dictionary.unit
+  output.dtype = dt.DICT
+  return Object.freeze(output)
 }
 
 const display = (dictionary, formatSpec, decimalFormat) => {
@@ -109,7 +130,7 @@ const display = (dictionary, formatSpec, decimalFormat) => {
       : val.dtype === dt.RATIONAL
       ? format(val.value, formatSpec, decimalFormat)
       : val.dtype === dt.RATIONAL + dt.QUANTITY
-      ? format(val.value, formatSpec, decimalFormat) + "\\," + unitTeXFromString(val.unit)
+      ? format(val.value, formatSpec, decimalFormat) + "\\," + unitTeXFromString(val.unit.name)
       : val.dtype === dt.STRING
       ? "\\text{" + addTextEscapes(val.value) + "}"
       : "\\text{" + addTextEscapes(String(val.value)) + "}"
@@ -128,7 +149,7 @@ const displayAlt = (dictionary, formatSpec, decimalFormat) => {
       : val.dtype === dt.RATIONAL
       ? format(val.value, formatSpec, decimalFormat)
       : val.dtype === dt.RATIONAL + dt.QUANTITY
-      ? format(val.value, formatSpec, decimalFormat).replace("{,}", ",") + " " + val.unit
+      ? format(val.value, formatSpec, decimalFormat).replace("{,}", ",") + " " + val.unit.name
       : val.dtype === dt.STRING
       ? val.value
       : String(val.value)

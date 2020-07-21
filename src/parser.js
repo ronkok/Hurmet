@@ -801,7 +801,7 @@ export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
         if (prevToken.ttype === tt.MULT || followedByFactor) {
           token = surroundWithParens(token)
         }
-        if (isCalc) { rpn += tokenSep + qtyRPN }
+        if (isCalc) { rpn += qtyRPN }
         tex += token.output
         if (/\\begin|\\frac/.test(token.output)) { delims[delims.length - 1].isTall = true }
         okToAppend = true

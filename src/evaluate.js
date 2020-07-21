@@ -1,7 +1,7 @@
 ﻿import { dt, allZeros } from "./constants"
-import { mapMap, arrayOfRegExMatches } from "./utils"
+import { clone, mapMap, arrayOfRegExMatches } from "./utils"
 import { plugValsIntoEcho } from "./echo"
-import { Operand } from "./operand.js"
+import { fromAssignment } from "./operand.js"
 import { Functions, multivarFunction } from "./functions"
 import { Operators, isDivByZero } from "./operations"
 import { unitFromUnitName, unitsAreCompatible } from "./units"
@@ -120,33 +120,44 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
 
     if (ch === "▸") {
       // A rational number. The triangle is just a marker.
-      const num = new Array(2)
+      const r = new Array(2)
       const pos = tkn.indexOf("/")
-      num[0] = BigInt(tkn.slice(1, pos))   // numerator
-      num[1] = BigInt(tkn.slice(pos + 1))  // denominator
-      stack.push({ value: num, unit: allZeros, dtype: dt.RATIONAL })
+      r[0] = BigInt(tkn.slice(1, pos))   // numerator
+      r[1] = BigInt(tkn.slice(pos + 1))  // denominator
+      const num = Object.create(null)
+      num.value = r
+      num.unit = Object.create(null)
+      num.unit.expos = allZeros
+      num.dtype = dt.RATIONAL
+      stack.push(Object.freeze(num))
 
     } else if (ch === "¿") {
       // A variable. Get the value from vars
       const varName = tkn.substring(1)
-      let oprnd
+      let oprnd = Object.create(null)
       if (varName === "undefined") {
-        oprnd = { value: undefined, unit: null, dtype: 0 }
+        oprnd.value = undefined
+        oprnd.unit = null
+        oprnd.dtype = 0
       } else if (varName === "T" && nextToken(tokens, i) === "^" &&
         stack.length > 0 && isMatrix(stack[stack.length - 1])) {
         // Transpose a matrix.
-        oprnd = { value: "T", unit: null, dtype: dt.RATIONAL }
+        oprnd.value = "T"
+        oprnd.unit = null
+        oprnd.dtype = dt.RATIONAL
       } else {
         const cellAttrs = vars[varName]
         if (!cellAttrs) { return errorOprnd("V_NAME", varName) }
-        oprnd = Operand.fromAssignment(cellAttrs, unitAware)
+        oprnd = fromAssignment(cellAttrs, unitAware)
         if (oprnd.dtype === dt.ERROR) { return oprnd }
       }
-      stack.push(oprnd)
+      stack.push(Object.freeze(oprnd))
 
     } else if (ch === '"') {
       // A string literal.
-      stack.push(Operand.fromString(tkn))
+      const chEnd = tkn.charAt(tkn.length - 1)
+      const str = ch === '"' && chEnd === '"' ? tkn.slice(1, -1).trim() : tkn.trim()
+      stack.push(Object.freeze({ value: str, unit: null, dtype: dt.STRING }))
 
     } else if (ch === "`") {
       stack.push(DataFrame.dataFrameFromCSV(tkn.slice(1, -1).trim(), {}))
@@ -154,25 +165,44 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
     } else {
       switch (tkn) {
         case "true":
-        case "false":
-          stack.push({ value: (tkn === "true"), unit: null, dtype: dt.BOOLEAN })
+        case "false": {
+          const bool = Object.create(null)
+          bool.value = tkn === "true"
+          bool.unit = null
+          bool.dtype = dt.BOOLEAN
+          stack.push(Object.freeze(bool))
           break
+        }
 
-        case "π":
-          stack.push({ value: Rnl.pi, unit: allZeros, dtype: dt.RATIONAL })
+        case "π": {
+          const pi = Object.create(null)
+          pi.value = Rnl.pi
+          pi.dtype = dt.RATIONAL
+          pi.unit = Object.create(null)
+          pi.unit.expos = allZeros
+          stack.push(Object.freeze(pi))
           break
+        }
 
-        case "e":
-          stack.push({ value: "e", unit: allZeros, dtype: dt.RATIONAL })
+        case "e": {
+          const e = Object.create(null)
+          e.value = "e"
+          e.dtype = dt.RATIONAL
+          e.unit = Object.create(null)
+          e.unit.expos = allZeros
+          stack.push(Object.freeze(e))
           break
+        }
 
-        case "ℏ":
-          stack.push({
-            value: Rnl.hbar,
-            unit: unitAware ? [2, 1, -1, 0, 0, 0, 0, 0, 0] : allZeros,
-            dtype: dt.RATIONAL
-          })
+        case "ℏ": {
+          const hbar = Object.create(null)
+          hbar.value = Rnl.hbar
+          hbar.dtype = dt.RATIONAL
+          hbar.unit = Object.create(null)
+          hbar.unit.expos = Object.freeze(unitAware ? [2, 1, -1, 0, 0, 0, 0, 0, 0] : allZeros)
+          stack.push(Object.freeze(hbar))
           break
+        }
 
         case "+":
         case "-": {
@@ -183,17 +213,18 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             return errorOprnd("NAN_OP")
           }
           if (unitAware) {
-            if (!unitsAreCompatible(o1.unit, o2.unit)) {
+            if (!unitsAreCompatible(o1.unit.expos, o2.unit.expos)) {
               return errorOprnd("UNIT_ADD")
             }
           }
           const [shape1, shape2, _] = binaryShapesOf(o1, o2)
+          const sum = Object.create(null)
           // See file operations.js for an explanation of what goes on in the next line.
-          o1.value = Operators.binary[shape1][shape2][op](o1.value, o2.value)
-          if (o1.value.dtype && o1.value.dtype === dt.ERROR) { return o1.value }
-
-          o1.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype)
-          stack.push(o1)
+          sum.value = Operators.binary[shape1][shape2][op](o1.value, o2.value)
+          if (sum.value.dtype && sum.value.dtype === dt.ERROR) { return sum.value }
+          sum.unit = o1.unit
+          sum.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype)
+          stack.push(Object.freeze(sum))
           break
         }
 
@@ -201,11 +232,12 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           // Unary minus
           const o1 = stack.pop()
           if (!(o1.dtype & dt.RATIONAL)) { return errorOprnd("NAN_OP") }
-
-          o1.value = Operators.unary[shapeOf(o1)]["negate"](o1.value)
-          if (o1.value.dtype && o1.value.dtype === dt.ERROR) { return o1.value }
-
-          stack.push(o1)
+          const neg = Object.create(null)
+          neg.value = Operators.unary[shapeOf(o1)]["negate"](o1.value)
+          if (neg.value.dtype && neg.value.dtype === dt.ERROR) { return neg.value }
+          neg.unit = o1.unit
+          neg.dtype = o1.dtype
+          stack.push(Object.freeze(neg))
           break
         }
 
@@ -219,19 +251,25 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             ((o2.dtype & dt.RATIONAL) || (o2.dtype === dt.DICT)))) {
             return errorOprnd("NAN_OP")
           }
+          const product = Object.create(null)
+          const unit = Object.create(null)
           if (unitAware) {
-            o1.unit = o1.dtype === dt.DICT && o2.dtype === dt.RATIONAL
-              ? o1.unit
+            unit.expos = o1.dtype === dt.DICT && o2.dtype === dt.RATIONAL
+              ? o1.unit.expos
               : o1.dtype === dt.RATIONAL && o2.dtype === dt.DICT
-              ? o2.unit
-              : o1.unit.map((e, j) => e + o2.unit[j])
+              ? o2.unit.expos
+              : o1.unit.expos.map((e, j) => e + o2.unit.expos[j])
+          } else {
+            unit.expos = allZeros
           }
+          product.unit = Object.freeze(unit)
+
           const [shape1, shape2, needsMultBreakdown] = binaryShapesOf(o1, o2)
           const op = needsMultBreakdown
             ? { "×": "cross", "·": "dot", "*": "asterisk", "⌧": "multiply" }[tkn]
             : "multiply"
 
-          o1.dtype = (tkn === "*" || shape1 === "scalar" || shape1 === "map" ||
+          product.dtype = (tkn === "*" || shape1 === "scalar" || shape1 === "map" ||
             shape2 === "scalar" || shape2 === "map")
             ? Operators.dtype[shape1][shape2](o1.dtype, o2.dtype)
             : tkn === "·"
@@ -240,10 +278,10 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             ? dt.COLUMNVECTOR
             : Matrix.multResultType(o1, o2)
 
-          o1.value = Operators.binary[shape1][shape2][op](o1.value, o2.value)
-          if (o1.value.dtype && o1.value.dtype === dt.ERROR) { return o1.value }
+          product.value = Operators.binary[shape1][shape2][op](o1.value, o2.value)
+          if (product.value.dtype) { return product.value } // Error
 
-          stack.push(o1)
+          stack.push(Object.freeze(product))
           break
         }
 
@@ -257,14 +295,17 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           if (!((o1.dtype & dt.RATIONAL) & (o2.dtype & dt.RATIONAL))) {
             return errorOprnd("NAN_OP")
           }
-          if (unitAware) {
-            o1.unit = o1.unit.map((e, j) => e - o2.unit[j])
-          }
+          const quotient = Object.create(null)
+          const unit = Object.create(null)
+          unit.expos = unitAware
+            ? o1.unit.expos.map((e, j) => e - o2.unit.expos[j])
+            : allZeros
+          quotient.unit = Object.freeze(unit)
           const [shape1, shape2, _] = binaryShapesOf(o1, o2)
-          o1.value = Operators.binary[shape1][shape2]["divide"](o1.value, o2.value)
-          o1.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype)
-          if (isDivByZero(o1.value, shapeOf(o1))) { return errorOprnd("DIV") }
-          stack.push(o1)
+          quotient.value = Operators.binary[shape1][shape2]["divide"](o1.value, o2.value)
+          quotient.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype)
+          if (isDivByZero(quotient.value, shapeOf(quotient))) { return errorOprnd("DIV") }
+          stack.push(Object.freeze(quotient))
           break
         }
 
@@ -275,25 +316,29 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             (isMatrix(o1) && o2.value === "T")) ) {
             return errorOprnd("NAN_OP")
           }
+          const power = Object.create(null)
+          const unit = Object.create(null)
+          unit.expos = allZeros
           if (unitAware) {
             // TODO: lots to do here
             const d = typeof o2.unit === "number" ? o2.unit : Rnl.toNumber(o2.value)
-            o1.unit = o1.unit.map(e => e * d)
+            unit.expos = o1.unit.expos.map(e => e * d)
           }
+          power.unit = Object.freeze(unit)
+
           if (Matrix.isVector(o1) && o2.value === "T") {
             // Transpose a vector
-            o1.dtype += (o1.dtype & dt.ROWVECTOR)
+            power.value = o1.value
+            power.dtype = o1.dtype + ((o1.dtype & dt.ROWVECTOR)
               ? dt.COLUMNVECTOR - dt.ROWVECTOR
-              : dt.ROWVECTOR - dt.COLUMNVECTOR
+              : dt.ROWVECTOR - dt.COLUMNVECTOR)
           } else {
             const [shape1, shape2, _] = binaryShapesOf(o1, o2)
-
-            o1.value = Operators.binary[shape1][shape2]["power"](o1.value, o2.value)
-            if (o1.value.dtype && o1.value.dtype === dt.ERROR) { return o1.value }
-
-            o1.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype)
+            power.value = Operators.binary[shape1][shape2]["power"](o1.value, o2.value)
+            if (power.value.dtype) { return o1.value } // Error
+            power.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype)
           }
-          stack.push(o1)
+          stack.push(Object.freeze(power))
           break
         }
 
@@ -301,43 +346,58 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           // Concatenation
           const o2 = stack.pop()
           const o1 = stack.pop()
+          let o3 = Object.create(null)
           if (o1.dtype === dt.STRING && o1.dtype === dt.STRING) {
             const str1 = stringFromOperand(o1, decimalFormat)
             const str2 = stringFromOperand(o2, decimalFormat)
-            stack.push({ value: str1 + str2, unit: null, dtype: dt.STRING })
+            o3.value = str1 + str2
+            o3.unit = null
+            o3.dtype = dt.STRING
+          } else if ((o1.dtype & dt.DATAFRAME) && (o2.dtype & dt.COLUMNVECTOR)) {
+            o3 = DataFrame.append(o1, o2, vars)
+            if (o3.dtype === dt.ERROR) { return o3 }
           } else if (Matrix.isVector(o1)) {
+            o3.unit = o1.unit
+            o3.dtype = o1.dtype
+            o3.value = clone(o1.value)
             if (Matrix.isVector(o2)) {
-              o1.value.splice(o1.value.length, 0, ...o2.value)
+              o3.value.splice(o3.value.length, 0, ...o2.value)
             } else {
-              o1.value.push(o2.value)
+              o3.value.push(o2.value)
             }
-            stack.push(o1)
           } else if (Matrix.isVector(o2)) {
-            o2.value.unshift(o1.value)
-            stack.push(o2)
+            o3.unit = o2.unit
+            o3.dtype = o2.dtype
+            o3.value = clone(o2.value)
+            o3.value.unshift(o1.value)
           } else {
-            stack.push({ value: [o1.value, o2.value], unit: o1.unit,
-              dtype: o1.dtype + dt.ROWVECTOR })
+            o3.value = Object.freeze([o1.value, o2.value])
+            o3.unit = o1.unit
+            o3.dtype = o1.dtype + dt.ROWVECTOR
           }
-          // TODO: Concatenate an element to a vector or concantenate two vectors.
+          stack.push(Object.freeze(o3))
           break
         }
 
         case "√":
         case "∛":
         case "∜": {
-          const root = tkn.charCodeAt(0) - 8728
-          const pow = [BigInt(1), BigInt(root)]
+          const index = tkn.charCodeAt(0) - 8728
+          const pow = [BigInt(1), BigInt(index)]
           const o1 = stack.pop()
           if (!(o1.dtype & dt.RATIONAL)) { return errorOprnd("NAN_OP") }
-          if (unitAware) { o1.unit = o1.unit.map(e => e / root) }
+          const root = Object.create(null)
+          const unit = Object.create(null)
+          unit.expos = allZeros
+          if (unitAware) { unit.expos = o1.unit.expos.map(e => e / index) }
+          root.unit = Object.freeze(unit)
+
           const shape1 = shapeOf(o1)
+          root.value = Operators.binary[shape1]["scalar"]["power"](o1.value, pow)
+          if (root.value.dtype && root.value.dtype === dt.ERROR) { return root.value }
 
-          o1.value = Operators.binary[shape1]["scalar"]["power"](o1.value, pow)
-          if (o1.value.dtype && o1.value.dtype === dt.ERROR) { return o1.value }
-
-          o1.dtype = Operators.dtype[shape1]["scalar"](o1.dtype, dt.RATIONAL)
-          stack.push(o1)
+          root.dtype = Operators.dtype[shape1]["scalar"](o1.dtype, dt.RATIONAL)
+          stack.push(Object.freeze(root))
           break
         }
 
@@ -347,15 +407,19 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           if (!((o1.dtype & dt.RATIONAL) & (o2.dtype & dt.RATIONAL))) {
             return errorOprnd("NAN_OP")
           }
-          if (unitAware) { o2.unit = o2.unit.map(e => e / Number(o1.value[0])) }
+          const root = Object.create(null)
+          const unit = Object.create(null)
+          unit.expos = allZeros
+          if (unitAware) { unit.expos = o2.unit.expos.map(e => e / Number(o1.value[0])) }
+          root.unit = Object.freeze(unit)
+
           const pow = Rnl.reciprocal(o1.value)
           const shape1 = shapeOf(o1)
+          root.value = Operators.binary[shape1]["scalar"]["power"](o2.value, pow)
+          if (root.value.dtype && root.value.dtype === dt.ERROR) { return root.value }
 
-          o1.value = Operators.binary[shape1]["scalar"]["power"](o2.value, pow)
-          if (o1.value.dtype && o1.value.dtype === dt.ERROR) { return o1.value }
-
-          o1.dtype = Operators.dtype[shape1]["scalar"](o1.dtype, dt.RATIONAL)
-          stack.push(o2)
+          root.dtype = Operators.dtype[shape1]["scalar"](o1.dtype, dt.RATIONAL)
+          stack.push(Object.freeze(root))
           break
         }
 
@@ -363,7 +427,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           // Accessor of a dictionary's property in dot notation
           const o2 = stack.pop()
           const o1 = stack.pop()
-          let property
+          let property = Object.create(null)
           if (o1.dtype & dt.MAP) {
             property = map.valueFromMap(o1, [o2.value], unitAware)
 
@@ -371,21 +435,23 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             property = Dictionary.toValue(o1, [o2.value], unitAware)
 
           } else if (o1.dtype & dt.DATAFRAME) {
-            const colIndicator = { value: Rnl.zero, unit: allZeros, dtype: dt.RATIONAL }
+            const colIndicator = { value: Rnl.zero, unit: null, dtype: dt.RATIONAL }
             property = DataFrame.range(o1, o2, colIndicator, vars, unitAware)
 
           } else if ((o1.dtype === dt.STRING || (o1.dtype & dt.ARRAY)) &&
             o2.dtype === dt.RATIONAL) {
             const index = Rnl.toNumber(o2.value)
-            property = { unit: o1.unit, dtype: o1.dtype }
             property.value = o1.value.slice(index - 1, index)
+            property.unit = o1.unit
+            property.dtype = o1.dtype
 
           } else if ((o1.dtype === dt.STRING || (o1.dtype & dt.ARRAY)) &&
             o2.dtype === dt.RANGE) {
             const start = o2.value[0] - 1
             const step = o2.value[1]
             const end = (o2.value[2] === "∞") ? o1.value.length : o2.value[2]
-            property = { unit: o1.unit, dtype: o1.dtype }
+            property.unit = o1.unit
+            property.dtype = o1.dtype
             if (step === 1) {
               property.value = o1.value.slice(start, end)
             } else {
@@ -397,11 +463,11 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
 
           } else if (o1.dtype === dt.MODULE) {
             // o1 is a module and o2 has a value assigned to it.
-            property = Operand.fromAssignment(o1.value[o2.value], unitAware)
+            property = fromAssignment(o1.value[o2.value], unitAware)
 
           }
           if (property.dtype === dt.ERROR) { return property }
-          stack.push(property)
+          stack.push(Object.freeze(property))
           break
         }
 
@@ -437,12 +503,12 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
 
           } else if (o1.dtype === dt.MODULE) {
             if (numArgs === 1) {
-              property = Operand.fromAssignment(o1.value[args[0].value], unitAware)
+              property = fromAssignment(o1.value[args[0].value], unitAware)
             } else {
               // Multiple assignment.
               property = []
               for (let j = 0; j < args.length; j++) {
-                property.push(Operand.fromAssignment(o1.value[args[j].value], unitAware))
+                property.push(fromAssignment(o1.value[args[j].value], unitAware))
               }
             }
 
@@ -457,7 +523,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
               : Matrix.submatrix(o1, rowIndex, colIndex)
           }
           if (property.dtype === dt.ERROR) { return property }
-          stack.push(property)
+          stack.push(Object.freeze(property))
           break
         }
 
@@ -465,15 +531,16 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           // range separator used internally to distinguish it from ":" in dictionaries
           const end = stack.pop()
           const o1 = stack.pop()
-          if (o1.dtype === dt.RATIONAL) {
-            stack.push({ value: [o1.value, Rnl.one, end.value], unit: null, dtype: dt.RANGE })
-          } else if (o1.dtype === dt.RANGE) {
-            o1.value.splice(1, 1)
-            o1.value.push(end.value)
-            stack.push(o1)
-          } else {
+          if (!(o1.dtype === dt.RATIONAL || o1.dtype === dt.RANGE)) {
             return errorOprnd("NAN_OP")
           }
+          const range = Object.create(null)
+          range.unit = null
+          range.dtype = dt.RANGE
+          range.value = o1.dtype === dt.RATIONAL
+            ? [o1.value, Rnl.one, end.value]
+            : [o1.value[0], o1.value[2], end.value];
+          stack.push((Object.freeze(range)))
           break
         }
 
@@ -495,13 +562,16 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const o1 = stack.pop()
           if (!(o1.dtype & dt.RATIONAL)) { return errorOprnd("NAN_OP") }
           if (unitAware) {
-            if (!unitsAreCompatible(o1.unit, allZeros)) { return errorOprnd("FACT") }
+            if (!unitsAreCompatible(o1.unit.expos, allZeros)) { return errorOprnd("FACT") }
           }
           const x = o1.value
           if (!Rnl.isInteger(x) || Rnl.isNegative(x)) { return errorOprnd("FACT") }
-          o1.value = Operators.unary[shapeOf(o1)]["factorial"](o1.value)
-          if (o1.value.dtype && o1.value.dtype === dt.ERROR) { return o1.value }
-          stack.push(o1)
+          const factorial = Object.create(null)
+          factorial.unit = allZeros
+          factorial.dtype = dt.RATIONAL
+          factorial.value = Operators.unary[shapeOf(o1)]["factorial"](x)
+          if (factorial.value.dtype) { return factorial.value } // Error
+          stack.push(Object.freeze(factorial))
           break
         }
 
@@ -509,11 +579,12 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           // TODO: per thousand, ‰
           const o1 = stack.pop()
           if (!(o1.dtype & dt.RATIONAL)) { return errorOprnd("NAN_OP") }
-
-          o1.value = Operators.unary[shapeOf(o1)]["percent"](o1.value)
-          if (o1.value.dtype && o1.value.dtype === dt.ERROR) { return o1.value }
-
-          stack.push(o1)
+          const percentage = Object.create(null)
+          percentage.unit = o1.unit
+          percentage.dtype = o1.dtype
+          percentage.value = Operators.unary[shapeOf(o1)]["percent"](o1.value)
+          if (percentage.value) { return percentage.value } // Error
+          stack.push(Object.freeze(percentage))
           break
         }
 
@@ -523,12 +594,12 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const o1 = stack.pop()
           if (!(o1.dtype & dt.RATIONAL)) { return errorOprnd("NAN_OP") }
           const op = tkn === "|" ? "abs" : "norm"
-
-          o1.value = Operators.unary[shapeOf(o1)][op](o1.value)
-          if (o1.value.dtype && o1.value.dtype === dt.ERROR) { return o1.value }
-
-          o1.dtype = dt.RATIONAL
-          stack.push(o1)
+          const abs = Object.create(null)
+          abs.unit = o1.unit
+          abs.dtype = dt.RATIONAL
+          abs.value = Operators.unary[shapeOf(o1)][op](o1.value)
+          if (abs.value.dtype && abs.value.dtype === dt.ERROR) { return abs.value }
+          stack.push(Object.freeze(abs))
           break
         }
 
@@ -601,8 +672,11 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const arg = stack.pop()
           if (!(arg.dtype & dt.RATIONAL)) { return errorOprnd("UNREAL", tkn) }
 
-          const unit = unitAware ? Functions.functionExpos(tkn, [arg]) : allZeros
-          if (unit.dtype && unit.dtype === dt.ERROR) { return unit }
+          const output = Object.create(null)
+          const unit = Object.create(null)
+          unit.expos = unitAware ? Functions.functionExpos(tkn, [arg]) : allZeros
+          if (unit.expos.dtype && unit.expos.dtype === dt.ERROR) { return unit.expos }
+          output.unit = Object.freeze(unit)
 
           const value = ((arg.dtype & dt.MAP) && Matrix.isVector(arg))
             // eslint-disable-next-line max-len
@@ -615,10 +689,11 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             ? mapMap(arg.value, val => Functions.unary[tkn](val))
             : Functions.unary[tkn](arg.value)
           if (value.dtype && value.dtype === dt.ERROR) { return value }
+          output.value = Object.freeze(value)
 
-          const dtype = tkn === "chr" ? arg.dtype - dt.RATIONAL + dt.STRING : arg.dtype
+          output.dtype = tkn === "chr" ? arg.dtype - dt.RATIONAL + dt.STRING : arg.dtype
 
-          stack.push({ value, unit, dtype })
+          stack.push(Object.freeze(output))
           break
         }
 
@@ -636,11 +711,16 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           if (!(args[0].dtype & dt.RATIONAL)) { return errorOprnd("") }
           if (!(args[1].dtype & dt.RATIONAL)) { return errorOprnd("") }
 
-          const unit = unitAware ? Functions.functionExpos(tkn, args) : allZeros
+          const output = Object.create(null)
+          const unit = Object.create(null)
+          unit.expos = unitAware ? Functions.functionExpos(tkn, args) : allZeros
           if (unit.dtype && unit.dtype === dt.ERROR) { return unit }
+          output.unit = Object.freeze(unit)
 
           const [value, dtype] = multivarFunction("binary", tkn, args)
-          stack.push({ value, unit, dtype })
+          output.value = Object.freeze(value)
+          output.dtype = dtype
+          stack.push(Object.freeze(output))
           break
         }
 
@@ -663,7 +743,12 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             ? mapMap(num.value, val => Functions.binary[funcName]([val, n]))
             : Functions.binary[funcName]([num.value, n])
           if (value.dtype && value.dtype === dt.ERROR) { return value }
-          stack.push({ value, unit: num.unit, dtype: num.dtype })
+          const output = Object.create(null)
+          output.value = Object.freeze(value)
+          output.unit = num.unit
+          output.dtype = num.dtype
+          if (num.name) { output.name = num.name }
+          stack.push(Object.freeze(output))
           break
         }
 
@@ -687,28 +772,37 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             args.unshift(datum)
           }
 
-          const unit = unitAware ? Functions.functionExpos(tkn, args) : allZeros
+          const output = Object.create(null)
+          const unit = Object.create(null)
+          unit.expos = unitAware ? Functions.functionExpos(tkn, args) : allZeros
           if (unit.dtype && unit.dtype === dt.ERROR) { return errorOprnd("") }
+          output.unit = Object.freeze(unit)
 
           const [value, dtype] = multivarFunction("reduce", tkn, args)
-          stack.push({ value, unit, dtype })
+          output.value = Object.freeze(value)
+          output.dtype = dtype
+          stack.push(Object.freeze(output))
           break
         }
 
         case "random": {
           // No arguments
-          const value = Rnl.fromNumber(Math.random())
-          stack.push({ value, unit: allZeros, dtype: dt.RATIONAL })
+          const num = Object.create(null)
+          num.value = Rnl.fromNumber(Math.random())
+          num.unit = Object.create(null)
+          num.unit.expos = allZeros
+          num.dtype = dt.RATIONAL
+          stack.push(Object.freeze(num))
           break
         }
 
         case "isNaN": {
           const oprnd = stack.pop()
-          stack.push({
-            value: !(oprnd.dtype & dt.RATIONAL),
-            unit: allZeros,
-            dtype: dt.BOOLEAN
-          })
+          const output = Object.create(null)
+          output.value = !(oprnd.dtype & dt.RATIONAL)
+          output.unit = null
+          output.dtype = dt.BOOLEAN
+          stack.push(Object.freeze(output))
           break
         }
 
@@ -724,7 +818,12 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             : ((arg.dtype & dt.DICT) || (arg.dtype & dt.MAP))
             ? arg.keys().value.length
             : 0
-          stack.push({ value: Rnl.fromNumber(length), unit: allZeros, dtype: dt.RATIONAL })
+          const output = Object.create(null)
+          output.value = Object.freeze(Rnl.fromNumber(length))
+          output.unit = Object.create(null)
+          output.unit.expos = allZeros
+          output.dtype = dt.RATIONAL
+          stack.push(Object.freeze(output))
           break
         }
 
@@ -829,24 +928,27 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const o1 = stack.pop()
           if (unitAware && !(o1.dtype === dt.STRING && o2.dtype === dt.STRING) &&
             !(tkn === "≟" || tkn === "==")) {
-            if (!unitsAreCompatible(o1.unit, o2.unit)) { return errorOprnd("UNIT_COMP") }
+            if (!unitsAreCompatible(o1.unit.expos, o2.unit.expos)) {
+              return errorOprnd("UNIT_COMP")
+            }
           }
+          const bool = Object.create(null)
+          bool.unit = null
+
           const [shape1, shape2, _] = binaryShapesOf(o1, o2)
-
           const prevValue = (o1.dtype & dt.BOOLEANFROMCOMPARISON) ? oPrev.value : undefined
-          const value1 = o1.value
-          const value2 = o2.value
-          o1.value = Operators.relations[shape1][shape2].relate(tkn, value1, value2, prevValue)
-          if (o1.value.dtype && o1.value.dtype === dt.ERROR) { return o1.value }
+          bool.value = Operators.relations[shape1][shape2].relate(tkn, o1.value,
+            o2.value, prevValue)
+          if (bool.value.dtype && bool.value.dtype === dt.ERROR) { return bool.value }
 
-          o1.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype)
+          bool.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype)
           if (o1.dtype & dt.RATIONAL) {
-            o1.dtype += dt.BOOLEANFROMCOMPARISON - dt.RATIONAL
+            bool.dtype += dt.BOOLEANFROMCOMPARISON - dt.RATIONAL
           } else if (o1.dtype & dt.STRING) {
-            o1.dtype += dt.BOOLEANFROMCOMPARISON - dt.STRING
+            bool.dtype += dt.BOOLEANFROMCOMPARISON - dt.STRING
           }
           oPrev = o2
-          stack.push(o1)
+          stack.push(Object.freeze(bool))
           break
         }
 
@@ -863,11 +965,13 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const op = { "and": "and", "or": "or", "∧": "and", "∨": "or", "⊻": "xor" }[tkn]
           const [shape1, shape2, _] = binaryShapesOf(o1, o2)
 
-          o1.value = Operators.binary[shape1][shape2][op](o1.value, o2.value)
-          if (o1.value.dtype && o1.value.dtype === dt.ERROR) { return o1.value }
+          const bool = Object.create(null)
+          bool.unit = null
+          bool.value = Operators.binary[shape1][shape2][op](o1.value, o2.value)
+          if (bool.value.dtype && bool.value.dtype === dt.ERROR) { return bool.value }
 
-          o1.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype)
-          stack.push(o1)
+          bool.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype)
+          stack.push(Object.freeze(bool))
           break
         }
 
@@ -875,10 +979,12 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "¬": {
           const o1 = stack.pop()
           if (!(o1.dtype & dt.BOOLEAN)) { return errorOprnd("LOGIC", tkn) }
-
-          o1.value = Operators.unary[shapeOf(o1)]["not"](o1.value)
-          if (o1.value.dtype && o1.value.dtype === dt.ERROR) { return o1.value }
-          stack.push(o1)
+          const bool = Object.create(null)
+          bool.unit = null
+          bool.value = Operators.unary[shapeOf(o1)]["not"](o1.value)
+          if (bool.value.dtype && bool.value.dtype === dt.ERROR) { return bool.value }
+          bool.dtype = dt.BOOLEAN
+          stack.push(Object.freeze(bool))
           break
         }
 
@@ -916,25 +1022,32 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           if (!(o1.dtype & dt.RATIONAL)) { return errorOprnd("QUANT_NUM") }
           const unitName = tokens[i + 1]
           i += 1
+          const output = Object.create(null)
+          output.unit = Object.create(null)
+          output.dtype = o1.dtype
           if (!unitAware) {
-            o1.unit = (o1.dtype & dt.MAP)
-              ? unitFromUnitName(unitName, vars)
-              : unitName
+            output.value = o1.value
+            if (o1.dtype & dt.MAP) {
+              output.unit = unitFromUnitName(unitName, vars)
+            } else {
+              output.unit.name = unitName
+            }
           } else {
             // Convert the magnitude to base units.
             const unit = unitFromUnitName(unitName, vars)
             if (unit.dtype && unit.dtype === dt.ERROR) { return errorOprnd("UNIT_NAME") }
             if (isMatrix(o1)) {
-              o1.unit = o1.unit.map((e, j) => e + unit.expos[j])
+              output.unit.expos = o1.unit.expos.map((e, j) => e + unit.expos[j])
               o1.value = Matrix.convertToBaseUnits(o1, unit.gauge, unit.factor)
             } else if (o1.dtype & dt.MAP) {
-              o1.unit = unitFromUnitName(o1.unit)
+              output.unit = unitFromUnitName(o1.unit)
+              output.value = o1.value
             } else {
-              o1.unit = o1.unit.map((e, j) => e + unit.expos[j])
-              o1.value = Rnl.multiply(Rnl.add(o1.value, unit.gauge), unit.factor)
+              output.unit.expos = o1.unit.expos.map((e, j) => e + unit.expos[j])
+              output.value = Rnl.multiply(Rnl.add(o1.value, unit.gauge), unit.factor)
             }
           }
-          stack.push(o1)
+          stack.push(Object.freeze(output))
           break
         }
 
@@ -945,12 +1058,13 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             return errorOprnd("NAN_OP")
           }
           const [shape1, shape2, _] = binaryShapesOf(o1, o2)
-
-          o1.value = Operators.binary[shape1][shape2]["modulo"](o1.value, o2.value)
-          if (o1.value.dtype && o1.value.dtype === dt.ERROR) { return o1.value }
-
-          o1.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype)
-          stack.push(o1)
+          const mod = Object.create(null)
+          mod.unit = Object.create(null)
+          mod.unit.expos = allZeros
+          mod.value = Operators.binary[shape1][shape2]["modulo"](o1.value, o2.value)
+          if (mod.value.dtype && mod.value.dtype === dt.ERROR) { return mod.value }
+          mod.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype)
+          stack.push(Object.freeze(mod))
           break
         }
 
@@ -960,16 +1074,18 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const o1 = stack.pop()
           if (!(o1.dtype & dt.RATIONAL)) { return errorOprnd("NAN_OP") }
           if (unitAware) {
-            if (!unitsAreCompatible(o1.unit, allZeros)) {
+            if (!unitsAreCompatible(o1.unit.expos, allZeros)) {
               // TODO: Write an error message.
               { return errorOprnd("") }
             }
           }
           const op = tkn === "⎾⏋" ? "ceil" : "floor"
-
-          o1.value = Operators.unary[shapeOf(o1)][op](o1.value)
-          if (o1.value.dtype && o1.value.dtype === dt.ERROR) { return o1.value }
-          stack.push(o1)
+          const output = Object.create(null)
+          output.value = Operators.unary[shapeOf(o1)][op](o1.value)
+          if (output.value.dtype && output.value.dtype === dt.ERROR) { return output.value }
+          output.unit = o1.unit
+          output.dtype = o1.dtype
+          stack.push(Object.freeze(output))
           break
         }
 
@@ -979,13 +1095,18 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           args.unshift(stack.pop())
           args.unshift(stack.pop())
           if (unitAware) {
-            if (!unitsAreCompatible(args[0].unit, allZeros) ||
-              !unitsAreCompatible(args[1].unit, allZeros)) {
+            if (!unitsAreCompatible(args[0].unit.expos, allZeros) ||
+              !unitsAreCompatible(args[1].unit.expos, allZeros)) {
               return errorOprnd("BINOM")
             }
           }
+          const binom = Object.create(null)
+          binom.unit = Object.create(null)
+          binom.unit.expos = allZeros
           const [value, dtype] = multivarFunction("binary", "binomial", args)
-          stack.push({ value, unit: allZeros, dtype })
+          binom.value = value
+          binom.dtype = dtype
+          stack.push(Object.freeze(binom))
           break
         }
 
@@ -996,9 +1117,9 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "\\pink":
         case "\\purple":
         case "\\red": {
-          const o1 = stack.pop()
-          if (o1.dtype === dt.STRING) { o1.unit = tkn }
-          stack.push(o1)
+          const color = clone(stack.pop())
+          if (color.dtype === dt.STRING) { color.unit = tkn }
+          stack.push(color)
           break
         }
 
@@ -1277,14 +1398,18 @@ export const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
     }
   }
 
-  let result
+  let result = Object.create(null)
   if (stmt.rpn) {
-    result = evalRpn(stmt.rpn, vars, decimalFormat, isUnitAware)
+    const oprnd = evalRpn(stmt.rpn, vars, decimalFormat, isUnitAware)
+    if (oprnd.dtype === dt.ERROR) { return errorResult(stmt, oprnd)}
+    result.value = clone(oprnd.value)
+    result.unit = clone(oprnd.unit)
+    result.dtype = oprnd.dtype
 
     if (result.dtype !== dt.ERROR && isUnitAware &&
-      (stmt.expos || (result.unit && Array.isArray(result.unit)))) {
+      (stmt.expos || (result.unit && result.unit.expos && Array.isArray(result.unit.expos)))) {
       const expos = (stmt.expos) ? stmt.expos : allZeros
-      if (!unitsAreCompatible(result.unit, expos)) {
+      if (!unitsAreCompatible(result.unit.expos, expos)) {
         const message = stmt.expos ? "UNIT_RES" : "UNIT_MISS"
         result = errorOprnd(message)
       }
@@ -1301,7 +1426,7 @@ export const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
     if (result.dtype & dt.DICT) {
       stmt.unit = result.unit
     } else if (isUnitAware && (result.dtype & dt.RATIONAL)) {
-      if (!unitInResultSpec & unitsAreCompatible(result.unit, allZeros)) {
+      if (!unitInResultSpec & unitsAreCompatible(result.unit.expos, allZeros)) {
         stmt.factor = Rnl.one; stmt.gauge = Rnl.zero; stmt.expos = allZeros;
       }
       result.value = {
@@ -1317,7 +1442,7 @@ export const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
         inBaseUnits: result.value
       }
       stmt.dtype += dt.QUANTITY
-      stmt.unit = result.unit
+      stmt.expos = result.unit.expos
     } else if (unitInResultSpec) {
       // A non-unit aware calculation, but with a unit attached to the result.
       result.value = {
@@ -1339,10 +1464,10 @@ export const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
           : Rnl.multiply(Rnl.add(result.value, stmt.gauge), stmt.factor)
       }
       stmt.dtype += dt.QUANTITY
-      stmt.unit = result.unit
+
     } else if (result.dtype & dt.RATIONAL) {
       // A numeric result with no unit specified.
-      stmt.unit = allZeros
+      stmt.expos = allZeros
     }
 
     stmt = formatResult(stmt, result, formatSpec, decimalFormat, isUnitAware)

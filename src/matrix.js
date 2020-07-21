@@ -17,26 +17,28 @@ export const isVector = oprnd => {
 }
 
 const convertFromBaseUnits = (oprnd, gauge, factor) => {
-  oprnd.value = (isVector(oprnd))
+  let conversion = (isVector(oprnd))
     ? oprnd.value.map((e) => Rnl.divide(e, factor))
     : oprnd.value.map(row => row.map(e => Rnl.divide(e, factor)))
   if (!Rnl.isZero(gauge)) {
-    oprnd.value = (isVector(oprnd))
+    conversion = (isVector(oprnd))
       ? oprnd.value.map((e) => Rnl.subtract(e, gauge))
       : oprnd.value.map(row => row.map(e => Rnl.subtract(e, gauge)))
   }
-  return oprnd.value
+  return Object.freeze(conversion)
 }
 
 const convertToBaseUnits = (oprnd, gauge, factor) => {
+  let conversion = clone(oprnd.value)
   if (!Rnl.isZero(gauge)) {
-    oprnd.value = (isVector(oprnd))
+    conversion = (isVector(oprnd))
       ? oprnd.value.map((e) => Rnl.add(e, gauge))
       : oprnd.value.map(row => row.map(e => Rnl.add(e, gauge)))
   }
-  return (isVector(oprnd))
-  ? oprnd.value.map((e) => Rnl.multiply(e, factor))
-  : oprnd.value.map(row => row.map(e => Rnl.multiply(e, factor)))
+  conversion = (isVector(oprnd))
+    ? conversion.map((e) => Rnl.multiply(e, factor))
+    : conversion.map(row => row.map(e => Rnl.multiply(e, factor)))
+  return Object.freeze(conversion)
 }
 
 const display = (m, formatSpec, decimalFormat) => {
@@ -168,7 +170,7 @@ const displayAltMapOfVectors = (value, formatSpec, decimalFormat) => {
 }
 
 
-const identity = (num) => {
+const identity = (num, mutable) => {
   const n = Rnl.isRational(num) ? Rnl.toNumber(num) : num
   if (n === 1) {
     return  [Rnl.one]
@@ -178,7 +180,7 @@ const identity = (num) => {
       M.push(new Array(n).fill(Rnl.zero))
       M[i][i] = Rnl.one
     }
-    return M
+    return mutable ? M : Object.freeze(M)
   }
 }
 
@@ -197,7 +199,7 @@ const invert = (matrix, returnDeterminant) => {
   let determinant = Rnl.one
 
   const C = clone(matrix)
-  const I = identity(dim)
+  const I = identity(dim, true)
 
   for (i = 0; i < dim; i += 1) {
     // get the element temp on the diagonal
@@ -262,9 +264,9 @@ const invert = (matrix, returnDeterminant) => {
     }
   }
 
-  // We've done all operations; C should be the identity matrix.
+  // We've finished. C should be the identity matrix.
   // Matrix I should be the inverse.
-  return I
+  return Object.freeze(I)
 }
 
 
@@ -272,7 +274,8 @@ const submatrix = (oprnd, index, colIndex) => {
   if (!((index.dtype & dt.RATIONAL) || (index.dtype & dt.RANGE))) {
     return errorOprnd("BAD_INDEX")
   }
-  const result = { value: [], unit: oprnd.unit, dtype: oprnd.dtype }
+  let value = []
+  let dtype = oprnd.dtype
 
   // Get the row index
   let start = 0
@@ -297,17 +300,18 @@ const submatrix = (oprnd, index, colIndex) => {
     // Skip the column index. Proceed directly to load values into the result.
     if (start === end) {
       // return a scalar
-      result.value = oprnd.value[start - 1]
-      result.dtype = oprnd.dtype - (oprnd.dtype & dt.ROWVECTOR) -
+      value = oprnd.value[start - 1]
+      dtype = oprnd.dtype - (oprnd.dtype & dt.ROWVECTOR) -
         (oprnd.dtype & dt.COLUMNVECTOR)
     } else if (step === 1) {
-      result.value = oprnd.value.slice(start - 1, end)
+      value = oprnd.value.slice(start - 1, end)
     } else {
       for (let i = start - 1; i < end; i += step) {
-        result.value.push(oprnd.value[i])
+        value.push(oprnd.value[i])
       }
     }
-    return result
+    Object.freeze(value)
+    return Object.freeze({ value, unit: oprnd.unit, dtype })
   }
 
   // Get the column index
@@ -334,43 +338,43 @@ const submatrix = (oprnd, index, colIndex) => {
   // Now load values into the result
   if (start === end && colStart === colEnd) {
     // return a scalar
-    result.value = oprnd.value[start - 1][colStart - 1]
-    result.dtype -= dt.MATRIX
+    value = oprnd.value[start - 1][colStart - 1]
+    dtype -= dt.MATRIX
 
   } else if (start === end) {
     // return a row vector
     if (colStep === 1) {
-      result.value = oprnd.value[start - 1].slice(colStart - 1, colEnd)
+      value = oprnd.value[start - 1].slice(colStart - 1, colEnd)
     } else {
       for (let j = colStart - 1; j < colEnd; j += colStep) {
-        result.value.push(oprnd.value[start - 1][j])
+        value.push(oprnd.value[start - 1][j])
       }
     }
-    result.dtype = result.dtype - dt.MATRIX + dt.ROWVECTOR
+    dtype = dtype - dt.MATRIX + dt.ROWVECTOR
 
   } else if (colStart === colEnd) {
     // return a column vector
     for (let i = start - 1; i < end; i += step) {
-      result.value.push(oprnd.value[i][colStart - 1])
+      value.push(oprnd.value[i][colStart - 1])
     }
-    result.dtype = result.dtype - dt.MATRIX + dt.COLUMNVECTOR
+    dtype = dtype - dt.MATRIX + dt.COLUMNVECTOR
 
   } else if (colStep === 1) {
     for (let i = start - 1; i < end; i += step) {
-      result.value.push([])
-      result.value[result.value.length - 1] = oprnd.value[i].slice(colStart - 1, colEnd)
+      value.push([])
+      value[value.length - 1] = oprnd.value[i].slice(colStart - 1, colEnd)
     }
 
   } else {
     for (let i = start - 1; i < end; i += step) {
-      result.value.push([])
+      value.push([])
       for (let j = colStart - 1; j < colEnd; j += colStep) {
-        result.value[result.value.length - 1].push(oprnd[i][j])
+        value[value.length - 1].push(oprnd[i][j])
       }
     }
   }
-
-  return result
+  Object.freeze(value)
+  return Object.freeze({ value, unit: oprnd.unit, dtype })
 }
 
 const multResultType = (o1, o2) => {
@@ -405,7 +409,12 @@ const operandFromRange = range => {
   if (!Rnl.areEqual(array[array.length - 1], range[2])) {
     array.push(range[2])
   }
-  return { value: array, unit: allZeros, dtype: dt.RATIONAL + dt.ROWVECTOR }
+  Object.freeze(array)
+  return Object.freeze({
+    value: array,
+    unit: { expos: allZeros },
+    dtype: dt.RATIONAL + dt.ROWVECTOR
+  })
 }
 
 const operandFromTokenStack = (tokenStack, numRows, numCols) => {
@@ -423,7 +432,12 @@ const operandFromTokenStack = (tokenStack, numRows, numCols) => {
     for (let j = numArgs - 1; j >= 0; j--) {
       array[j] = tokenStack.pop().value
     }
-    return { value: array, unit: (dtype & dt.RATIONAL) ? allZeros : null, dtype }
+    Object.freeze((array))
+    return Object.freeze({
+      value: array,
+      unit: (dtype & dt.RATIONAL) ? { expos: allZeros } : null,
+      dtype
+    })
 
   } else {
     // 2D matrix
@@ -437,7 +451,12 @@ const operandFromTokenStack = (tokenStack, numRows, numCols) => {
         array[k][j] =  tokenStack.pop().value
       }
     }
-    return { value: array, unit: (dtype & dt.RATIONAL) ? allZeros : null, dtype }
+    Object.freeze((array))
+    return Object.freeze({
+      value: array,
+      unit: (dtype & dt.RATIONAL) ? { expos: allZeros } : null,
+      dtype
+    })
   }
 }
 
@@ -459,7 +478,12 @@ const zeros = (m, n) => {
     for (let i = 0; i < m; i++) {
       value.push(new Array(n).fill(Rnl.zero))
     }
-    return { value: value, unit: allZeros, dtype: dt.RATIONAL + dt.MATRIX }
+    Object.freeze(value)
+    return Object.freeze({
+      value: value,
+      unit: { expos: allZeros },
+      dtype: dt.RATIONAL + dt.MATRIX
+    })
   }
 }
 

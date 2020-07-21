@@ -30,13 +30,10 @@ import { errorOprnd } from "./error"
  *      solid angle (sr)
  */
 
-export const unitsAreCompatible = (a, b, unitMap) => {
+export const unitsAreCompatible = (a, b) => {
   // Do a compatibility check on the unit-checking exponents  a and b.
   if (a == null && b == null) { return true }
   if (a == null || b == null) { return false }
-  // Get the unit-checking exponents for each unit.
-  a = Array.isArray(a) ? a : unitMap[a].expos
-  b = Array.isArray(b) ? b : unitMap[b].expos
   if (!Array.isArray(a) || !Array.isArray(b)) { return false }
   // Compare the exponents in the arrays.
   if (a.length !== b.length) { return false }
@@ -656,7 +653,7 @@ const unitFromWord = (inputStr, currencies, customUnits) => {
 
   if (gotMatch) {
     u.gauge = Rnl.fromString(unitArray[2])
-    u.expos = unitArray[4]
+    u.expos = Object.freeze(unitArray[4])
     if (u.expos[7] === 1) {
       if (currencies) {
         u.factor = Rnl.reciprocal(currencies[unitArray[3]])
@@ -684,7 +681,7 @@ const unitFromWord = (inputStr, currencies, customUnits) => {
     return errorOprnd("UNIT_NAME", str)
   }
 
-  return u
+  return Object.freeze(u)
 }
 
 const opOrNumRegEx = /[0-9·\-⁰¹²³\u2074-\u2079⁻/^()]/
@@ -848,7 +845,7 @@ export const unitFromUnitName = (inputStr, vars) => {
   }
 
   if (word === u.name) {
-    return simpleUnit
+    return Object.freeze(simpleUnit)
   }
 
   // All the input characters have been addresssed. Clear the opStack.
@@ -915,8 +912,8 @@ export const unitFromUnitName = (inputStr, vars) => {
     }
   }
 
-  u.factor = factors.pop()
-  u.expos = expoStack.pop()
-  return u
+  u.factor = Object.freeze(factors.pop())
+  u.expos = Object.freeze(expoStack.pop())
+  return Object.freeze(u)
 }
 

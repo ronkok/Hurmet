@@ -88,6 +88,9 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAwar
           altResultDisplay = resultDisplay.replace("{,}", ",")
         }
 
+      } else if (result.dtype === dt.IMAGE) {
+        return stmt
+
       } else {
         resultDisplay = result.value
         altResultDisplay = resultDisplay

@@ -20,6 +20,7 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
   let iEnd
   let columnList = []
   let unitMap
+  let unit = Object.create(null)
   if ((!columnIndicator || (columnIndicator.dtype === 1 &&
       Rnl.isZero(columnIndicator.value))) && rowIndicator.dtype === dt.RATIONAL) {
     iStart = Rnl.toNumber(rowIndicator.value) - 1
@@ -99,12 +100,12 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
     const j = columnList[0]
     let dtype = oprnd.value.dtype[j]
     dtype += (rowIndicator.dtype & dt.COLUMNVECTOR) ? dt.COLUMNVECTOR : dt.ROWVECTOR
-    let unit = (dtype & dt.RATIONAL) ? allZeros : null
+    unit.expos = (dtype & dt.RATIONAL) ? allZeros : null
     let value = rowIndicator.value.map(e => oprnd.value.data[j][oprnd.value.rowMap[e]])
     if (unitAware && (dtype & dt.QUANTITY)) {
       const unitName = oprnd.value.units[j] ? oprnd.value.units[j] : undefined
       const unitObj = unitFromUnitName(unitName, vars)
-      unit = unitObj.expos
+      unit.expos = unitObj.expos
       value = value.map(e => Rnl.multiply(Rnl.add(e, unitObj.gauge), unitObj.factor))
     }
     return { value, unit, dtype }
@@ -115,12 +116,12 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
     if (dtype & dt.QUANTITY) { dtype -= dt.QUANTITY }
     const j = columnList[0]
     let value = oprnd.value.data[j][iStart]
-    let unit = (dtype & dt.RATIONAL) ? allZeros : null
+    unit.expos = (dtype & dt.RATIONAL) ? allZeros : null
     if (unitAware && oprnd.value.units[j]) {
       const unitName = oprnd.value.units[j] ? oprnd.value.units[j] : undefined
       const unitObj = unitFromUnitName(unitName, vars)
       value = Rnl.multiply(Rnl.add(value, unitObj.gauge), unitObj.factor)
-      unit = unitObj.expos
+      unit.expos = unitObj.expos
     }
     return { value, unit, dtype }
 
@@ -140,7 +141,7 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
       }
       value.set(oprnd.value.columns[columnList[j]], {
         value: localValue,
-        unit: unitName,
+        unit: { name: unitName },
         dtype: oprnd.value.dtype[columnList[j]]
       })
     }
@@ -150,13 +151,17 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
     // Return data from one column, in a column vector or a quantity
     const j = columnList[0]
     const unitName = oprnd.value.units[j] ? oprnd.value.units[j] : null
-    const unit = oprnd.unit[unitName]
+    unit = oprnd.unit.map[unitName]
     const value = oprnd.value.data[j].slice(iStart, iEnd + 1)
     const dtype = oprnd.value.dtype[j] + dt.COLUMNVECTOR
     const newOprnd = { value, unit, dtype }
     if (unitAware) {
       const newVal = Matrix.convertToBaseUnits(newOprnd, unit.gauge, unit.factor)
-      return { value: newVal, unit: unit.expos, dtype: dt.RATIONAL + dt.COLUMNVECTOR }
+      return {
+        value: newVal,
+        unit: { expos: unit.expos },
+        dtype: dt.RATIONAL + dt.COLUMNVECTOR
+      }
     } else {
       return newOprnd
     }
@@ -185,7 +190,7 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
         units: units,
         dtype: dtype
       },
-      unit: unitMap,
+      unit: { map: unitMap },
       dtype: dt.DATAFRAME
     })
   }
@@ -332,6 +337,22 @@ const dataFrameFromCSV = (str, vars) => {
   }
 }
 
+const append = (o1, o2, vars) => {
+  const numRows = o1.value.data[0].length
+  if (o2.value.length !== numRows) { return errorOprnd("") }
+  const oprnd = clone(o1)
+  oprnd.value.columns.push(o2.name)
+  oprnd.value.columnMap[o2.name] = o1.value.columns.length - 1
+  oprnd.value.data.push(o2.value)
+  oprnd.value.dtype.push(o2.dtype - dt.COLUMNVECTOR)
+  oprnd.value.units.push(o2.unit.name || null)
+  if (o2.unit.name && !oprnd.unit.map[o2.unit.name]) {
+    const unit = unitFromUnitName(o2.unit.name, vars)
+    oprnd.unit.map[o2.unit.name] = unit
+  }
+  return oprnd
+}
+
 const display = df => {
   const numRows = df.data[0].length
   const numCols = df.data.length
@@ -426,6 +447,7 @@ const displayAlt = df => {
 }
 
 export const DataFrame = Object.freeze({
+  append,
   dataFrameFromCSV,
   display,
   displayAlt,

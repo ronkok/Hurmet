@@ -36,7 +36,7 @@
     "uglify-es": "^3.3.9"
   },
   "devDependencies": {
-    "eslint": "^7.0.0",
+    "eslint": "^7.5.0",
     "rollup": "^1.13.0",
     "rollup-plugin-commonjs": "^10.0.0",
     "rollup-plugin-node-resolve": "^5.0.1"

@@ -49,13 +49,6 @@ export const prepareResult = (attrs, vars) => {
       const inBaseUnits = map.convertToBaseUnits(plain, unit.gauge, unit.factor)
       attrs.value = { plain, inBaseUnits }
 
-    } else if (attrs.dtype & dt.DICT) {
-      attrs.unit = {}
-      for (const property in attrs.value) {
-        if (!attrs.unit[property.unit]) {
-          attrs.unit[property.unit] = unitFromUnitName(property.unit, vars)
-        }
-      }
     }
   }
   if (attrs.rpn && !attrs.value) {

@@ -310,7 +310,9 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     ["2 dictionary = @", `▸2/1 ¿dictionary ⌧`, `{"area": 0.88, "#5": 0.62, "#4": 0.44}`],
     [`(2)(4) + 1 = @`, `▸2/1 ▸4/1 ⌧ ▸1/1 +`, "9"],
     [`(2) (4) + 1 = @`, `▸2/1 ▸4/1 ⌧ ▸1/1 +`, "9"],
-    ["{ 5 if n = 10; 0 otherwise } = @", `¿n ▸10/1 = true cases 2 ▸5/1 ▸0/1`, "5"]
+    ["{ 5 if n = 10; 0 otherwise } = @", `¿n ▸10/1 = true cases 2 ▸5/1 ▸0/1`, "5"],
+    ["√4 = @", `▸4/1 √`, "2"],
+    ["[1:3] = @", `▸1/1 ▸3/1 .. matrix 1 1`, "[1, 2, 3]"]
 	]
 
   console.log("Now testing calculations…")
@@ -327,7 +329,7 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
       numErrors += 1
       console.log("input:   " + inputStr)
       console.log("expected RPN: " + expectedRPN)
-      console.log("actual RPN:   " + output)
+      console.log("actual RPN:   " + rpn)
       console.log("expected result: " + expectedOutput)
       console.log("actual result:   " + output)
       console.log("")

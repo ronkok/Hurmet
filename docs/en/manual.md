@@ -685,7 +685,7 @@ Hurmet calculations are meant to be recognizeable to anyone familiar with standa
 | ///            |        | ¢8///2¢                 | Division displayed inline
 | ÷              | -:     | ¢8 ÷ 2¢                 | Inline division
 | ^              |        | ¢3^2¢                   | Exponent
-| &              |        |                         | Concatenate strings or vectors, or concatenate numbers onto vectors
+| &              |        |                         | Concatenate strings or vectors, or concatenate numbers onto vectors, or append column vectors to data frames
 | √              | sqrt   | ¢√¢                     | Square root
 | ¢root 3 ()¢    | root n | ¢root 3 8¢              | nth-root
 | \| \|          |        | ¢\|-4\|¢                | Absolute value of a scalar, determinant of a matrix, or magnitude of a vector.

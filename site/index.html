@@ -13,14 +13,14 @@
 <link rel="stylesheet" href="tables.css">
 <link rel="stylesheet" media="print" href="print.css">
 
-<script src="lib/codemirror.js"></script>
-<script src="lib/closebrackets.js"></script>
-<script src="lib/matchbrackets.js"></script>
-<script src="lib/simple.js"></script>
+<script src="lib/codemirror.js" defer></script>
+<script src="lib/closebrackets.js" defer></script>
+<script src="lib/matchbrackets.js" defer></script>
+<script src="lib/simple.js" defer></script>
 <script src="katex/katex.min.js"></script>
-<script src="katex/mhchem.min.js"></script>
-<script src="marked.js"></script>
-<script src="chart.min.js"></script>
+<script src="katex/mhchem.min.js" defer></script>
+<script src="marked.js" defer></script>
+<script src="chart.min.js" async></script>
 <script src="hurmet.min.js"></script>
 </head>
 
@@ -59,27 +59,42 @@
 
 <p>This week’s example:</p>
 
-<h3>Dog Years</h3>
+<h3>Fireworks!</h3>
 
-<p>Humans and dogs develop at different rates. A common rule of thumb is that they differ by a factor of seven. But a recent paper looks at the ages when common changes occur. The paper finds a logarithmic relation and gives this equation as its best approximation:</p>
+<p>Say we wanted to make some aerial fireworks. How long should the fuse be? How high will it fly?</p><p>Here’s some data from &nbsp;<a href="http://pyroinnovations.com/display-fireworks-facts.html">pyroinnovations.com</a> that gives exit velocities for various size mortars:</p>
 
-<blockquote><span class="hurmet-calc" data-entry="human_age = 16 ln(dog_age) + 31"></span></blockquote>
+<p><span class="hurmet-calc" data-entry="mortar = `caliber,velocity
+inch,fps
+2,117.5
+3,144.0
+4,166.0
+5,186.0
+6,203.5
+8,235.0
+10,263.0
+12,287.5
+24,393.0
+36,481.0`"></span></p>
 
-<p>Let’s look at that. First we create a vector to serve as the input:</p>
+<p>We want the shell to explode at its apogee (highest point).</p>
 
-<p><span class="hurmet-calc" data-entry="dog_age = [0.25, 0.5, 0.75] &amp; [1:12] = ?"></span></p>
+<p><span class="hurmet-calc" data-entry="θ = '85°'"></span>, angle to vertical</p>
 
-<p>Fix the rounding at one digit after the decimal: <span class="hurmet-calc" data-entry="format = &quot;f1&quot;"></span></p>
+<p><span class="hurmet-calc" data-entry="g = '9.80665 m/s²'"></span>, acceleration due to gravity.</p>
 
-<p>Do the calculation:</p>
+<p><span class="hurmet-calc" data-entry="𝐯 = mortar.velocity = !! fps"></span>. Store the column vector in variable <span class="hurmet-calc" data-entry="𝐯"></span>.</p>
 
-<p><span class="hurmet-calc" data-entry="human_age = 16 ln(dog_age) + 31 = ?"></span></p>
+<p>Now we’ll do two calculations, but suppress the result display.</p>
 
-<p>Finally, we use the two vectors to plot the relation:</p>
+<p><span class="hurmet-calc" data-entry="𝐭 = (𝐯 sin θ)/g = !! sec"></span>, time to apogee</p>
 
-<p><span class="hurmet-calc" data-entry='lineChart(dog_age, human_age, "Dog Years", "Dog age", "Human age") = @'></span></p>
+<p><span class="hurmet-calc" data-entry="𝐡 = 𝐯*𝐭 sin θ - 1//2 g 𝐭^2 = !! ft"></span>, height at apogee</p>
 
-<p>Ref: https://www.cell.com/cell-systems/pdf/S2405-4712(20)30203-9.pdf</p>
+<p>We can present our results nicely by appending them to the original data.</p>
+
+<p><span class="hurmet-calc" data-entry="mortar &amp; round(𝐭, &quot;r3&quot;) &amp; round(𝐡, &quot;r3&quot;) = %"></span></p>
+
+<p>This toy example ignores the effect of drag on the shell. Professionals probably do a more accurate calculation. This example came from: <a href="https://datagenetics.com/blog/july12020/index.html">https://datagenetics.com/blog/july12020/index.html</a>.</p>
 
 </div> <!-- editor -->
 
