@@ -252,13 +252,14 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             return errorOprnd("NAN_OP")
           }
           const product = Object.create(null)
-          const unit = Object.create(null)
+          let unit = Object.create(null)
           if (unitAware) {
-            unit.expos = o1.dtype === dt.DICT && o2.dtype === dt.RATIONAL
-              ? o1.unit.expos
-              : o1.dtype === dt.RATIONAL && o2.dtype === dt.DICT
-              ? o2.unit.expos
-              : o1.unit.expos.map((e, j) => e + o2.unit.expos[j])
+            if ((o1.dtype === dt.DICT && o2.dtype === dt.RATIONAL) ||
+                (o1.dtype === dt.RATIONAL && o2.dtype === dt.DICT)) {
+              unit = o1.dtype === dt.DICT ? o1.unit : o2.unit
+            } else {
+              unit.expos = o1.unit.expos.map((e, j) => e + o2.unit.expos[j])
+            }
           } else {
             unit.expos = allZeros
           }
