@@ -393,7 +393,8 @@ const display = df => {
       str += datum === undefined
         ? "&"
         : (df.dtype[j] & dt.RATIONAL)
-        ? Rnl.toString(datum, Math.log10(Number(datum[1]))).replace(",", "{,}") + " &"
+        ? Rnl.toString(datum, Math.floor(Math.log10(Number(datum[1]))))
+            .replace(",", "{,}") + " &"
         : (df.dtype[j] & dt.STRING)
         ? "\\text{" + addTextEscapes(datum) + "}&"
         : (df.dtype[j] & dt.BOOLEAN)
@@ -435,7 +436,8 @@ const displayAlt = df => {
     for (let j = 0; j < numCols; j++) {
       const datum = df.data[j][i]
       str += (df.dtype[j] & dt.RATIONAL)
-        ? Rnl.toString(datum, Math.log10(Number(datum[1]))).replace(",", "{,}") + ","
+        ? Rnl.toString(datum, Math.floor(Math.log10(Number(datum[1]))))
+            .replace(",", "{,}") + ","
         : datum + ","
     }
     str = str.slice(0, -1) + "\n"
