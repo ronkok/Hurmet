@@ -180,7 +180,7 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
         // The expression calls a variable.
         // If it also contains an operator or a function, then we need to show the echo.
         if (containsOperator.test("\xa0" + rpn + "\xa0")) {
-          echo = "{\\color{blue}" + echo + "}"
+          echo = "\\color{blue}" + echo + "\\color{black}"
         } else {
           echo = ""
         }
