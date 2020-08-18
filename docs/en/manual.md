@@ -256,7 +256,7 @@ Auto-correct kicks in when you type a space.
 | `<-`     | ←   | uuu    | ⋃     | a tilde| ã    | OO     | ¢O︀¢ | rho     | ρ   |
 | `<->`    | ↔   | \\ceil | ⎾⏋    | a ring | å    | QQ     | ℚ   | sigma   | σ   |
 | `=>`     | ⇒   |\\floor | ⎿⏌    | \checkmark | ✓| RR     | ℝ   | tau     | τ   |
-| \\circ   | ∘   | \\not  | ¬     |        |      | ZZ     | ℤ   | upsilon | υ   |
+| \\circ   | ∘   | \\not  | ¬     | \o     |  ø   | ZZ     | ℤ   | upsilon | υ   |
 | \\\|     | ¦   | \\xor  | ⊻     |        |      | \hbar  | ℏ   | phi     | ϕ   |
 | \|\|     | ‖   | \\sum  | ∑     |        |      | \ell   | ℓ   | chi     | χ   |
 | /_       | ∠   | \\int  | ∫     |        |      | \euro  | €   | psi     | ψ   |
