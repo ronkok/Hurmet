@@ -356,9 +356,10 @@ const append = (o1, o2, vars) => {
 const display = df => {
   const numRows = df.data[0].length
   const numCols = df.data.length
+  const numColsInHeading = numCols + (df.rowMap ? 0 : 1)
   let str = "\\begin{array}{"
   str += df.rowMap ? "l|" : "r|"
-  for (let j = 1; j < numCols; j++) {
+  for (let j = 1; j < numColsInHeading; j++) {
     str += "c "
   }
   str = str.slice(0, -1) + "}"
