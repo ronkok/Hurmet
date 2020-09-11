@@ -276,7 +276,7 @@ export const parseQuantityLiteral = (str, decimalFormat, tokenSep, isCalc) => {
   return [tex, rpn]
 }
 
-const factors = /[0-9A-Za-zøØıȷ(\u0391-\u03A9\u03B1-\u03C9ϕℎℏ¨ˆˉ˙˜\uD835\uDC34-\uDC67\uDEE2-\uDF14ℂℇ\u210A-\u2113\u2118-\u211D\u2124-\u2126\u2128-\u212D\u212F-\u2138\u213D-\u2149\u2183\u2184\u2206\u221A-\u221C\u221E]/
+const factors = /^[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133\uD835]/
 
 const setUpIf = (rpn, tokenInput, exprStack, delim) => {
   // The Hurmet CASES expression acts lazily. To accommodate that, push the
@@ -1369,7 +1369,7 @@ export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
               if (rpnOp.symbol === "\\lfloor") { rpn += tokenSep + "⎿⏌" }
               if (rpnOp.symbol === "\\lceil") { rpn += tokenSep + "⎾⏋" }
           }
-          if ((token.input === ")" && /^[([]/.test(str)) ||
+          if ((token.input === ")" && /^[([]/.test(str) || factors.test(str) ) ||
             (token.input === "]" && /^\(/.test(str))) {
             // Implicit multiplication between parens, as in (2)(3)
             // Not between square brackets, as in dict[row][property]
