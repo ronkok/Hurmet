@@ -1,5 +1,7 @@
 .ProseMirror {
   position: relative;
+  content-visibility: auto;
+  contain-intrinsic-size: 1000px;
 }
 
 .ProseMirror {

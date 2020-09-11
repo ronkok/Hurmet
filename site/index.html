@@ -59,42 +59,18 @@
 
 <p>This week’s example:</p>
 
-<h3>Fireworks!</h3>
+<h3>Simple span beam</h3>
 
-<p>Say we wanted to make some aerial fireworks. How long should the fuse be? How high will it fly?</p><p>Here’s some data from &nbsp;<a href="http://pyroinnovations.com/display-fireworks-facts.html">pyroinnovations.com</a> that gives exit velocities for various size mortars:</p>
+<p><span class="hurmet-calc" data-entry="L = '12 feet'"></span>, length</p>
 
-<p><span class="hurmet-calc" data-entry="mortar = `caliber,velocity
-inch,fps
-2,117.5
-3,144.0
-4,166.0
-5,186.0
-6,203.5
-8,235.0
-10,263.0
-12,287.5
-24,393.0
-36,481.0`"></span></p>
+<p><span class="hurmet-calc" data-entry="w = '110 lbf/ft'"></span>, uniform line load</p>
 
-<p>We want the shell to explode at its apogee (highest point).</p>
+<p><span class="hurmet-calc" data-entry="P = '1000 lbf'"></span>, mid-span point load</p>
 
-<p><span class="hurmet-calc" data-entry="θ = '85°'"></span>, angle to vertical</p>
+<p><span class="hurmet-calc" data-entry="V = (w L)/2 + P/2 = ?? lbf"></span>, maximum shear</p>
 
-<p><span class="hurmet-calc" data-entry="g = '9.80665 m/s²'"></span>, acceleration due to gravity.</p>
+<p><span class="hurmet-calc" data-entry="M = (w L^2)/8 + (P L)/4 = ?? lbf-ft"></span>, max bending moment</p>
 
-<p><span class="hurmet-calc" data-entry="𝐯 = mortar.velocity = !! fps"></span>. Store the column vector in variable <span class="hurmet-calc" data-entry="𝐯"></span>.</p>
-
-<p>Now we’ll do two calculations, but suppress the result display.</p>
-
-<p><span class="hurmet-calc" data-entry="𝐭 = (𝐯 sin θ)/g = !! sec"></span>, time to apogee</p>
-
-<p><span class="hurmet-calc" data-entry="𝐡 = 𝐯*𝐭 sin θ - 1//2 g 𝐭^2 = !! ft"></span>, height at apogee</p>
-
-<p>We can present our results nicely by appending them to the original data.</p>
-
-<p><span class="hurmet-calc" data-entry="mortar &amp; round(𝐭, &quot;r3&quot;) &amp; round(𝐡, &quot;r3&quot;) = %"></span></p>
-
-<p>This toy example ignores the effect of drag on the shell. Professionals probably do a more accurate calculation. This example came from: <a href="https://datagenetics.com/blog/july12020/index.html">https://datagenetics.com/blog/july12020/index.html</a>.</p>
 
 </div> <!-- editor -->
 
