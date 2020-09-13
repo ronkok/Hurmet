@@ -276,7 +276,7 @@ export const parseQuantityLiteral = (str, decimalFormat, tokenSep, isCalc) => {
   return [tex, rpn]
 }
 
-const factors = /^[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133\uD835√∛∜]/
+const factors = /^[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133\uD835]/
 
 const setUpIf = (rpn, tokenInput, exprStack, delim) => {
   // The Hurmet CASES expression acts lazily. To accommodate that, push the
@@ -383,19 +383,19 @@ const testForImplicitMult = (prevToken, texStack, str) => {
       }
     }
   }
-  if (isPreceededByFactor && nextCharIsFactor(str, prevToken)) { return true }
+  if (isPreceededByFactor && nextCharIsFactor(str, prevToken.ttype)) { return true }
   return false
 }
 
-const nextCharIsFactor = (str, token) => {
+const nextCharIsFactor = (str, tokenType) => {
   const fc = str.charAt(0)
 
   let fcMeetsTest = false
   if (str.length > 0) {
     if (fc === "|" || fc === "‖") {
       // TODO: Work out left/right
-    } else if (/^#?[({[]/.test(str) &&
-      (isIn(token.ttype, [tt.ORD, tt.NUM, tt.RIGHTBRACKET, tt.QUANTITY]))) {
+    } else if (/^#?[({[√∛∜]/.test(str) &&
+      (isIn(tokenType, [tt.ORD, tt.NUM, tt.RIGHTBRACKET, tt.QUANTITY]))) {
       return true
     } else {
       if (factors.test(fc)) {
@@ -681,7 +681,7 @@ export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
       str = str.substring(token.input.length)
       isFollowedBySpace = leadingSpaceRegEx.test(str)
       str = str.replace(leadingSpaceRegEx, "")
-      followedByFactor = nextCharIsFactor(str, token)
+      followedByFactor = nextCharIsFactor(str, token.ttype)
     }
 
     switch (token.ttype) {
@@ -1369,7 +1369,7 @@ export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
               if (rpnOp.symbol === "\\lfloor") { rpn += tokenSep + "⎿⏌" }
               if (rpnOp.symbol === "\\lceil") { rpn += tokenSep + "⎾⏋" }
           }
-          if ((token.input === ")" && /^[([]/.test(str) || factors.test(str) ) ||
+          if ((token.input === ")" && nextCharIsFactor(str, tt.RIGHTBRACKET)) ||
             (token.input === "]" && /^\(/.test(str))) {
             // Implicit multiplication between parens, as in (2)(3)
             // Not between square brackets, as in dict[row][property]
