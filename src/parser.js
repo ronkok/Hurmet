@@ -276,7 +276,7 @@ export const parseQuantityLiteral = (str, decimalFormat, tokenSep, isCalc) => {
   return [tex, rpn]
 }
 
-const factors = /^[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133\uD835√∛∜]/
+const factors = /^[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133\uD835({√∛∜]/
 
 const setUpIf = (rpn, tokenInput, exprStack, delim) => {
   // The Hurmet CASES expression acts lazily. To accommodate that, push the
@@ -394,8 +394,8 @@ const nextCharIsFactor = (str, tokenType) => {
   if (str.length > 0) {
     if (fc === "|" || fc === "‖") {
       // TODO: Work out left/right
-    } else if (/^#?[({[√∛∜]/.test(str) &&
-      (isIn(tokenType, [tt.ORD, tt.NUM, tt.RIGHTBRACKET, tt.QUANTITY]))) {
+    } else if (/^[({[√∛∜]/.test(str) &&
+      (isIn(tokenType, [tt.ORD, tt.VAR, tt.NUM, tt.LONGVAR, tt.RIGHTBRACKET, tt.QUANTITY]))) {
       return true
     } else {
       if (factors.test(fc)) {

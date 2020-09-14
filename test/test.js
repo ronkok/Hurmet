@@ -54,7 +54,7 @@ const parserTests = [
   ["x = (-b +- sqrt(b^2-4a c))/(2 a)", "x = \\dfrac{\\text{-} b ± \\sqrt{b^{2}- 4 a c}}{2 \\, a}"],
   [
     `f(x) = \\int_(-∞)^∞ \\hat f (ξ)  e^(2 π i ξ x)  "d" ξ`,
-    "f(x)= \\int_{\\text{-} ∞}^{∞}\\hat{f}(ξ) e^{2 \\, π i ξ x}\\text{d}ξ"
+    "f(x)= \\int_{\\text{-} ∞}^{∞}\\hat{f} (ξ) e^{2 \\, π i ξ x}\\text{d}ξ"
   ],
   ["\\int_(-∞)^∞ \\hat f", "\\int_{\\text{-} ∞}^{∞}\\hat{f}"],
   [
@@ -79,7 +79,7 @@ const parserTests = [
   ["M = \\mathcal O(a b)/5", "M = \\dfrac{\\mathcal{O}{(a b)}}{5}"],
   [
     "c_s = (n_c A_s)/b (√(1 + (2 b d)/(n_c A_s))-1)",
-    "c_\\mathrm{s} = \\dfrac{n_\\mathrm{c} A_\\mathrm{s}}{b}\\left(\\sqrt{1 + \\dfrac{2 \\, b d}{n_\\mathrm{c} A_\\mathrm{s}}}- 1 \\right)"
+    "c_\\mathrm{s} = \\dfrac{n_\\mathrm{c} A_\\mathrm{s}}{b} \\left(\\sqrt{1 + \\dfrac{2 \\, b d}{n_\\mathrm{c} A_\\mathrm{s}}}- 1 \\right)"
   ],
   ['A --> "heat" B', "A \\xrightarrow{\\text{heat}}B"],
   [
@@ -87,7 +87,7 @@ const parserTests = [
     "i \\mathbf{ℏ}\\dfrac{∂}{∂ t}\\lvert ψ (t)⟩= \\hat{𝐇}\\lvert ψ (t)⟩"
   ],
   ["⟨ϕ|", "⟨ϕ \\rvert"],
-  ["(n \\atop k) = n!/(n! (n - k)!)", "\\left({{n}\\atop{k}}\\right)= \\dfrac{n!}{n!(n - k)!}"],
+  ["(n \\atop k) = n!/(n! (n - k)!)", "\\left({{n}\\atop{k}}\\right)= \\dfrac{n!}{n! (n - k)!}"],
   [
     "δ I (y\\; v) = \\lim_(ε→0)(I [y+ε v]-I [y])/ε ≡ \\left. d/(d ε) I [y + ε v] |_(ε=0)",
     "δ I (y ;\\: v)= \\lim_{ε → 0}\\dfrac{I [y + ε v]- I [y]}{ε}≡ \\left.\\dfrac{d}{d ε} I [y + ε v]\\right|_{ε = 0}"
@@ -314,7 +314,9 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     ["√4 = @", `▸4/1 √`, "2"],
     ["[1:3] = @", `▸1/1 ▸3/1 .. matrix 1 1`, "[1, 2, 3]"],
     ["num³ √9 = @", `¿num ▸3/1 ^ ▸9/1 √ ⌧`, "222.264"],
-    [`abs(0.5) num = @`, `▸5/10 abs ¿num ⌧`, "2.1"]
+    [`abs(0.5) num = @`, `▸5/10 abs ¿num ⌧`, "2.1"],
+    [`num (1/4) = @`, `¿num ▸1/1 ▸4/1 / ⌧`, "1.05"],
+    [`num² (1/4) = @`, `¿num ▸2/1 ^ ▸1/1 ▸4/1 / ⌧`, "4.41"]
 	]
 
   console.log("Now testing calculations…")
