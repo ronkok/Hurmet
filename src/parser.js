@@ -276,7 +276,7 @@ export const parseQuantityLiteral = (str, decimalFormat, tokenSep, isCalc) => {
   return [tex, rpn]
 }
 
-const factors = /^[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133\uD835]/
+const factors = /^[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133\uD835√∛∜]/
 
 const setUpIf = (rpn, tokenInput, exprStack, delim) => {
   // The Hurmet CASES expression acts lazily. To accommodate that, push the
@@ -1375,6 +1375,7 @@ export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
             // Not between square brackets, as in dict[row][property]
             rpn += tokenSep
             rpnStack.push({ prec: rpnPrecFromType[tt.MULT], symbol: "⌧" })
+            isFollowedBySpace = false
           }
         }
 

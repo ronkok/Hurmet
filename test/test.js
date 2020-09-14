@@ -312,7 +312,9 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     [`(2) (4) + 1 = @`, `▸2/1 ▸4/1 ⌧ ▸1/1 +`, "9"],
     ["{ 5 if n = 10; 0 otherwise } = @", `¿n ▸10/1 = true cases 2 ▸5/1 ▸0/1`, "5"],
     ["√4 = @", `▸4/1 √`, "2"],
-    ["[1:3] = @", `▸1/1 ▸3/1 .. matrix 1 1`, "[1, 2, 3]"]
+    ["[1:3] = @", `▸1/1 ▸3/1 .. matrix 1 1`, "[1, 2, 3]"],
+    ["num³ √9 = @", `¿num ▸3/1 ^ ▸9/1 √ ⌧`, "222.264"],
+    [`abs(0.5) num = @`, `▸5/10 abs ¿num ⌧`, "2.1"]
 	]
 
   console.log("Now testing calculations…")
