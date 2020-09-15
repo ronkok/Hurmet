@@ -611,6 +611,9 @@ Here are calls that can return multiple values:<br>
     `A, S_x = wideFlanges["W8X31"]["A", "Sx"] = !!`, or<br>
     `A, S_x = wideFlanges["W10X49", ["A", "Sx"]] = !!`<br>
 Multiple returns must use the `!!` display selector, for now.
+
+For structural engineers, I’ve put some useful data frames on GitHub. There are links [below](#other-resources).
+
 </div>
 
 ###### Dictionary
