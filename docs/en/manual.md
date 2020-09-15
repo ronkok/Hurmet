@@ -538,44 +538,6 @@ Functions will mostly work element-wise on an matrix. Exception: functions `min(
 If you want to write a comma or a semi-colon inside parentheses and not create an matrix, use `\,` or `\;`.
 </div>
 
-###### Dictionary
-<div>
-
-A _dictionary_ is a data structure in which you can store values and access each one with a unique name. Put another way, a dictionary is a collection of key:value pairs.
-
-Dictionary literals are written between `{ }` delimiters. Each key must be a string, i.e., between double quotation marks. Keys are separated from values by a colon and key:value pairs are separated from each other by commas or semi-colons (but not both commas and semi-colons in the same dictionary).
-
-Example:  `barArea = {"#4": 0.22, "#5": 0.31}`
-
-A value may be any Hurmet data type except a data frame or a nested dictionary.
-
-Besides a dictionary literal, the other, possibly more common, way to create a dictionary is to call one row of a [data frame](#data-frame). 
-
-Call individual values from a dictionary with a key in brackets, as in `A = barArea["#3"]`. This notation also enables one to use a variable name for the key. Or, if the key qualifies as a valid [identifier](#identifiers), you can use dot notation, as in `W8X31.weight`
-
-You can assign multiple values from a dictionary in one statement using bracket notation, like this:
-
-    A, I, w_self = W8X31["A", "Ix", "weight"] = !!
-
-Multiple assignment statements must have the result display suppressed.
-</div>
-
-###### Map
-<div>
-
-A Hurmet *map* is a dictionary in which every value is the same data type and, if numeric, carries the same unit-of-measure. Maps can be the numeric part of a quantity. 
-
-    barArea = '{"#4": 0.22, "#5": 0.31} in2'
-
-You can do arithmetic on maps and run them through functions. The operation will be done on each value in the map. For instance, a beam calculation can break the loads down into dead load, live load, snow load, etc.:
-
-¢w = '{"D": 20; "L": 40; "S": 30} lbf/ft'¢        ¢L = '12 ft'¢
-
-¢M = 1//8 w L^2  = \color(blue)(1/8 ('{"D": 20; "L": 40; "S": 30} lbf/ft')('12 ft')^2) \color(black) = '{"D": 0.54, "L": 0.72, "S": 0.36} k·ft'¢
-
-Dictionaries with values of varying units-of-measure can be multiplied by a unit-less scalar. No other math operations are supported for non-map dictionaries.
-</div>
-
 ###### Data Frame
 <div>
 
@@ -583,7 +545,7 @@ A *data frame* is a two dimensional data structure that can be accessed with row
 
 Each datum can be a number, a string, `true`, or `false`. A missing item will be taken to be `undefined`. All data in a column must be of the same data type. A column of numbers can be assigned a unit of measure. 
 
-Data frame literals are written between backtick `` ` ` `` delimiters. The text between the backticks must be written in CSV format. Numbers must use a dot decimal. The second row must contain units of measure. The first column will be indexed if the first word is “name” or “index”.
+Data frame literals are written between backtick `` ` ` `` delimiters. The text between the backticks must be written in CSV (comma-separated values) format. Numbers must use a dot decimal. The second row must contain units of measure. The first column will be indexed if the first word is “name” or “index”.
 
 Here’s an example of CSV input:
 
@@ -609,35 +571,82 @@ A fetch example:
 
 That example loads in this data:
 
-<p><span class="tex">\begin{array}{l|c c c c c c c c c c}\text{name}&amp;\mathrm{weight}&amp;\mathrm{area}&amp;d&amp;\mathrm{bf}&amp;\mathrm{tw}&amp;\mathrm{tf}&amp;\mathrm{Ix}&amp;\mathrm{Sx}&amp;\mathrm{Iy}&amp;\mathrm{Sy} \\ \;&amp;{\text{lbf/ft}}&amp;{\text{in}^{2}}&amp;{\text{in}}&amp;{\text{in}}&amp;{\text{in}}&amp;{\text{in}}&amp;{\text{in}^{4}}&amp;{\text{in}^{3}}&amp;{\text{in}^{4}}&amp;{\text{in}^{3}} \\ \hline\text{W14X90}&amp;90 &amp;26.5 &amp;14 &amp;14.5 &amp;0.44 &amp;0.71 &amp;999 &amp;143 &amp;362 &amp;49.9  \\ \text{W12X65}&amp;65 &amp;19.1 &amp;12.1 &amp;12 &amp;0.39 &amp;0.605 &amp;533 &amp;87.9 &amp;174 &amp;29.1  \\ \text{W10X49}&amp;49 &amp;14.4 &amp;10 &amp;10 &amp;0.34 &amp;0.56 &amp;272 &amp;54.6 &amp;93.4 &amp;18.7  \\ \text{W8X31}&amp;31 &amp;9.13 &amp;8 &amp;8 &amp;0.285 &amp;0.435 &amp;110 &amp;27.5 &amp;37.1 &amp;9.27  \\ \text{W8X18}&amp;18 &amp;5.26 &amp;8.14 &amp;5.25 &amp;0.23 &amp;0.33 &amp;61.9 &amp;15.2 &amp;7.97 &amp;3.04  \\ \text{W6X15}&amp;15 &amp;4.43 &amp;5.99 &amp;5.99 &amp;0.23 &amp;0.26 &amp;29.1 &amp;9.72 &amp;9.32 &amp;3.11  \\ \text{W4X13}&amp;13 &amp;3.83 &amp;4.16 &amp;4.06 &amp;0.28 &amp;0.345 &amp;11.3 &amp;5.46 &amp;3.86 &amp;1.9\end{array}</span></p>
+<p><span class="tex">\begin{array}{l|c c c c c c c c c c}\text{name}&amp;\mathrm{weight}&amp;\mathrm{A}&amp;d&amp;\mathrm{bf}&amp;\mathrm{tw}&amp;\mathrm{tf}&amp;\mathrm{Ix}&amp;\mathrm{Sx}&amp;\mathrm{Iy}&amp;\mathrm{Sy} \\ \;&amp;{\text{lbf/ft}}&amp;{\text{in}^{2}}&amp;{\text{in}}&amp;{\text{in}}&amp;{\text{in}}&amp;{\text{in}}&amp;{\text{in}^{4}}&amp;{\text{in}^{3}}&amp;{\text{in}^{4}}&amp;{\text{in}^{3}} \\ \hline\text{W14X90}&amp;90 &amp;26.5 &amp;14 &amp;14.5 &amp;0.44 &amp;0.71 &amp;999 &amp;143 &amp;362 &amp;49.9  \\ \text{W12X65}&amp;65 &amp;19.1 &amp;12.1 &amp;12 &amp;0.39 &amp;0.605 &amp;533 &amp;87.9 &amp;174 &amp;29.1  \\ \text{W10X49}&amp;49 &amp;14.4 &amp;10 &amp;10 &amp;0.34 &amp;0.56 &amp;272 &amp;54.6 &amp;93.4 &amp;18.7  \\ \text{W8X31}&amp;31 &amp;9.13 &amp;8 &amp;8 &amp;0.285 &amp;0.435 &amp;110 &amp;27.5 &amp;37.1 &amp;9.27  \\ \text{W8X18}&amp;18 &amp;5.26 &amp;8.14 &amp;5.25 &amp;0.23 &amp;0.33 &amp;61.9 &amp;15.2 &amp;7.97 &amp;3.04  \\ \text{W6X15}&amp;15 &amp;4.43 &amp;5.99 &amp;5.99 &amp;0.23 &amp;0.26 &amp;29.1 &amp;9.72 &amp;9.32 &amp;3.11  \\ \text{W4X13}&amp;13 &amp;3.83 &amp;4.16 &amp;4.06 &amp;0.28 &amp;0.345 &amp;11.3 &amp;5.46 &amp;3.86 &amp;1.9\end{array}</span></p>
 
 As data frames go, that example is still pretty small. When I assign a data frame to a variable, I usually suppress its display by using the __!__ display selector.
 
-You can call a row or a column with single index. You can call a single cell or a range of cells with a pair of indices within brackets. The index can be either a number or a string. Examples:
+I use a data frame most commonly by calling a row from it, like this:
+
+`beam = wideFlanges.W10X49 = !!` or  
+`beam = wideFlanges["W10X49"] = !!`
+
+That returns a Hurmet [dictionary](#dictionary). Then I can call individual properties, like this:
+
+`A = beam.A = !!` or  
+`A = beam["A"] = !!` or  
+`A = wideFlanges.W10X49.A = !!`
+
+You can also call an individual element, a column, or a group of elements. The index can be either a number or a string. Examples:
 
 <div class="table-no-wrap"></div>
 
 | This call:                      | … will return:                             |
 | ------------------------------- | ------------------------------------------ |
-| `wideFlanges["W10X49", "area"]` | ¢'14.4 in2'¢
-| `wideFlanges.W10X49.area`       | ¢'14.4 in2'¢
-| `wideFlanges["W10X49"]["area"]` | ¢'14.4 in2'¢
+| `wideFlanges["W10X49", "A"]` | ¢'14.4 in2'¢
+| `wideFlanges.W10X49.A`       | ¢'14.4 in2'¢
+| `wideFlanges["W10X49"]["A"]` | ¢'14.4 in2'¢
 | `wideFlanges["W10X49", 1:2]`    | ¢{"name": "W10X49", "weight": '49 lbf/ft'}¢
-| `wideFlanges["W10X49", ["area", "weight"]]` | ¢{"area": '14.4 in2', "weight": '49 lbf/ft'}¢
-| `wideFlanges.W10X49["area", "weight"]`      | ¢{"area": '14.4 in2', "weight": '49 lbf/ft'}¢
-| `wideFlanges["W10X49"]["area", "weight"]`   | ¢{"area": '14.4 in2', "weight": '49 lbf/ft'}¢
-| `wideFlanges[1:2, "area"]`                  | ¢[26.5; 19.1]¢
-|`wideFlanges[["W8X31"; "W10X49"], "area"]`   | ¢[0.13;14.4]¢
+| `wideFlanges["W10X49", ["A", "weight"]]` | ¢{"A": '14.4 in2', "weight": '49 lbf/ft'}¢
+| `wideFlanges.W10X49["A", "weight"]`      | ¢{"A": '14.4 in2', "weight": '49 lbf/ft'}¢
+| `wideFlanges["W10X49"]["A", "weight"]`   | ¢{"A": '14.4 in2', "weight": '49 lbf/ft'}¢
+| `wideFlanges[1:2, "A"]`                  | ¢[26.5; 19.1]¢
+|`wideFlanges[["W8X31"; "W10X49"], "A"]`   | ¢[0.13;14.4]¢
 
 Hurmet will return a <br> ¢{"simple type" if "you call a single cell, as in df[1, 2]"; "column vector" if "you call a column, as in df[,2]"; "dictionary" if "you call a row, as in df[3,]"; "data frame" otherwise}¢
 
-You can also use dot notation to call a row, as in `wideFlanges.W10X49`
+Dot notation, as in `wideFlanges.W10X49`, can be used only if the property name is a valid [identifier](#identifiers).
 
-Similar to a dictionary, a call to a data frame can return multiple values. As in:<br>
-    `A, S_x = wideFlanges.W8X31["area", "Sx"] = !!`, or<br>
-    `A, S_x = wideFlanges["W8X31"]["area", "Sx"] = !!`, or<br>
-    `A, S_x = wideFlanges["W10X49", ["area", "Sx"]] = !!`<br>
+Here are calls that can return multiple values:<br>
+    `A, S_x = wideFlanges.W8X31["A", "Sx"] = !!`, or<br>
+    `A, S_x = wideFlanges["W8X31"]["A", "Sx"] = !!`, or<br>
+    `A, S_x = wideFlanges["W10X49", ["A", "Sx"]] = !!`<br>
 Multiple returns must use the `!!` display selector, for now.
+</div>
+
+###### Dictionary
+<div>
+
+A _dictionary_ is a data structure in which you can store values and access each one with a unique name. Put another way, a dictionary is a collection of key:value pairs. It’s what Hurmet returns when you call one row of a data frame.
+
+Dictionary literals are written between `{ }` delimiters. Each key must be a string, i.e., between double quotation marks. Keys are separated from values by a colon and key:value pairs are separated from each other by commas or semi-colons (but not both commas and semi-colons in the same dictionary).
+
+Example:  `barArea = {"#4": 0.22, "#5": 0.31}`
+
+A value may be any Hurmet data type except a data frame or a nested dictionary.
+
+Call individual values from a dictionary with a key in brackets, as in `A = barArea["#3"]`. This notation also enables one to use a variable name for the key. Or, if the key qualifies as a valid [identifier](#identifiers), you can use dot notation, as in `W8X31.weight`
+
+You can assign multiple values from a dictionary in one statement using bracket notation, like this:
+
+    A, I, w_self = W8X31["A", "Ix", "weight"] = !!
+
+Multiple assignment statements must have the result display suppressed.
+</div>
+
+###### Map
+<div>
+
+A Hurmet *map* is a dictionary in which every value is the same data type and, if numeric, carries the same unit-of-measure. Maps can be the numeric part of a quantity. 
+
+    barArea = '{"#4": 0.22, "#5": 0.31} in2'
+
+You can do arithmetic on maps and run them through functions. The operation will be done on each value in the map. For instance, a beam calculation can break the loads down into dead load, live load, snow load, etc.:
+
+¢w = '{"D": 20; "L": 40; "S": 30} lbf/ft'¢        ¢L = '12 ft'¢
+
+¢M = 1//8 w L^2  = \color(blue)(1/8 ('{"D": 20; "L": 40; "S": 30} lbf/ft')('12 ft')^2) \color(black) = '{"D": 0.54, "L": 0.72, "S": 0.36} k·ft'¢
+
+Dictionaries with values of varying units-of-measure can be multiplied by a unit-less scalar. No other math operations are supported for non-map dictionaries.
 </div>
 
 ## Expressions
@@ -1433,9 +1442,9 @@ Hurmet is built with the aid of several open source libraries and resources, for
 * [Number](#number)
 * [Quantity](#quantity)
 * [Matrix](#matrix)
+* [Data Frame](#data-frame)
 * [Dictionary](#dictionary)
 * [Map](#map)
-* [Data Frame](#data-frame)
 
 </details>
 </li>
