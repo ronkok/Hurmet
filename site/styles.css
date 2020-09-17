@@ -16,7 +16,7 @@ body {
 }
 
 nav {
-  max-width: 720px;
+  max-width: 780px;
   margin: 0 auto;
   background: #fff;
   font-size: 14px;
@@ -48,7 +48,7 @@ nav  a {
 }
 
 article, #title {
-  max-width: 720px;
+  max-width: 780px;
   margin: 0 auto;
 }
 
@@ -93,7 +93,7 @@ article {
 }
 
 #copyright {
-  max-width: 720px;
+  max-width: 780px;
   margin: 0 auto;
   font-family: Arial, sans-serif;
   font-size: 10px;
