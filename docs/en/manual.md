@@ -402,7 +402,7 @@ Hurmet will render single Latin letter variable names in *italic*. Function name
 
 ###### String
 <div>
-A _string_ literal is a string of text characters enclosed by a pair of straight double quotation marks. The string may include any Unicode character except a straight double quotation mark.
+A *string* literal is a string of text characters enclosed by a pair of straight double quotation marks. The string may include any Unicode character except a straight double quotation mark.
 
     "This is a string."
 
@@ -582,9 +582,9 @@ I use a data frame most commonly by calling a row from it, like this:
 
 That returns a Hurmet [dictionary](#dictionary). Then I can call individual properties, like this:
 
-`A = beam.A = !!` or  
-`A = beam["A"] = !!` or  
-`A = wideFlanges.W10X49.A = !!`
+`A = beam.A = ?? in2` or  
+`A = beam["A"] = ?? in2` or  
+`A = wideFlanges.W10X49.A = ?? in2`
 
 You can also call an individual element, a column, or a group of elements. The index can be either a number or a string. Examples:
 
@@ -861,7 +861,7 @@ To resolve this ambiguity, Hurmet performs operations with the following precede
 | × · / ÷       | Multiplication or division, from left to right.                                             |
 | \+ – &        | Addition or subtraction or concatenation, from left to right.                               |
 | < > ≤ ≥ = ≠   | Comparisons (for [If Expressions](#if-expressions))                                         |
-| ∧ ∨ ¬ ⊻       | Logical operators ([ditto](#if-expressions))                                                |
+| ∧ ∨ ¬ ⊻       | Logical operators (ditto)                                                |
 | :             | Separator for a range of integers, as in **V**\[2:3\].                                      |
 | , ;           | Argument separators or row separators for functions, matrices, dictionaries, or If Expressions.  |
 | ( ) \[ \]     | All conventions are over-ridden by parentheses or brackets.                                 |
@@ -919,7 +919,7 @@ There are a few operators that also work on dictionaries. For instance, a unit-l
 
 ## Unit-Aware Calculations
 
-Hurmet has a data type called a [quantity](#quantity) that contains both a numeric magnitude and a unit of measure. In a Hurmet math editing box, you write quantity literals between single quotation marks. Examples:
+Hurmet has a data type called a [quantity](#quantity) that contains both a numeric magnitude and a unit of measure. In a Hurmet calculation editing box, you write quantity literals between single quotation marks. Examples:
 
 <table class="nogrid">
    <tr>
