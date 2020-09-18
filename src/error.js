@@ -68,7 +68,8 @@ const errorMessages = Object.freeze({
     IMMUT_UDF: `Error. Variable @ already contains a user-defined function.
                 Hurmet cannot assign a different value to @.`,
     IMMUT_DF:  `Error. Variable @ already contains a data frame.
-                Hurmet cannot assign a different value to @.`
+                Hurmet cannot assign a different value to @.`,
+    NO_PROP:   `Error. Cannot call a property from variable "@" because it has no properties.`
   }
 })
 

@@ -466,6 +466,8 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             // o1 is a module and o2 has a value assigned to it.
             property = fromAssignment(o1.value[o2.value], unitAware)
 
+          } else {
+            return errorOprnd("NO_PROP", o1.name)
           }
           if (property.dtype === dt.ERROR) { return property }
           stack.push(Object.freeze(property))

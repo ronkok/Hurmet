@@ -316,7 +316,8 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     ["num³ √9 = @", `¿num ▸3/1 ^ ▸9/1 √ ⌧`, "222.264"],
     [`abs(0.5) num = @`, `▸5/10 abs ¿num ⌧`, "2.1"],
     [`num (1/4) = @`, `¿num ▸1/1 ▸4/1 / ⌧`, "1.05"],
-    [`num² (1/4) = @`, `¿num ▸2/1 ^ ▸1/1 ▸4/1 / ⌧`, "4.41"]
+    [`num² (1/4) = @`, `¿num ▸2/1 ^ ▸1/1 ▸4/1 / ⌧`, "4.41"],
+    [`num.name = @`, `¿num "name" .`, "Error. Cannot call a property from variable \"num\" because it has no properties."]
 	]
 
   console.log("Now testing calculations…")
