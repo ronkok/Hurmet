@@ -100,10 +100,11 @@ const toValue = (dictionary, keys, unitAware) => {
       properties.set(key, property)
     } else {
       // Return one value. Prep it similar to operands.js.
-      property.unit = Object.create(null)
-      if (typeof property.unit === "string") {
+      if (property.unit.name && (property.dtype & dt.RATIONAL)) {
+        const unitName = property.unit.name
+        property.unit = Object.create(null)
         if (unitAware) {
-          const unit = dictionary.unit[property.unit]
+          const unit = dictionary.unit[unitName]
           property.value = Rnl.multiply(Rnl.add(property.value, unit.gauge), unit.factor)
           property.unit.expos = unit.expos
         } else {

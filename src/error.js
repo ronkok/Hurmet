@@ -69,7 +69,9 @@ const errorMessages = Object.freeze({
                 Hurmet cannot assign a different value to @.`,
     IMMUT_DF:  `Error. Variable @ already contains a data frame.
                 Hurmet cannot assign a different value to @.`,
-    NO_PROP:   `Error. Cannot call a property from variable "@" because it has no properties.`
+    NO_PROP:   `Error. Cannot call a property from variable "@" because it has no properties.`,
+    NOT_ARRAY: `Error. Cannot check if an element is in the second operand because
+ the second operand is not an array.`
   }
 })
 

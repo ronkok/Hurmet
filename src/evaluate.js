@@ -1,5 +1,5 @@
 ﻿import { dt, allZeros } from "./constants"
-import { clone, mapMap, arrayOfRegExMatches } from "./utils"
+import { clone, isIn, mapMap, arrayOfRegExMatches } from "./utils"
 import { plugValsIntoEcho } from "./echo"
 import { fromAssignment } from "./operand.js"
 import { Functions, multivarFunction } from "./functions"
@@ -10,6 +10,7 @@ import { Dictionary } from "./dictionary"
 import { map } from "./map"
 import { DataFrame } from "./dataframe"
 import { textRange } from "./text"
+import { compare } from "./compare"
 import { lineChart } from "./graphics"
 import { errorOprnd } from "./error"
 import { Rnl } from "./rational"
@@ -929,27 +930,26 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "⋐": {
           const o2 = stack.pop()
           const o1 = stack.pop()
-          if (unitAware && !(o1.dtype === dt.STRING && o2.dtype === dt.STRING) &&
-            !(tkn === "≟" || tkn === "==")) {
+          if (unitAware &&
+            !((o1.dtype & dt.STRING) || (o2.dtype & dt.STRING) ||
+               o1.dtype === dt.NULL || o2.dtype === dt.NULL)) {
             if (!unitsAreCompatible(o1.unit.expos, o2.unit.expos)) {
               return errorOprnd("UNIT_COMP")
             }
           }
           const bool = Object.create(null)
           bool.unit = null
-
-          const [shape1, shape2, _] = binaryShapesOf(o1, o2)
           const prevValue = (o1.dtype & dt.BOOLEANFROMCOMPARISON) ? oPrev.value : undefined
-          bool.value = Operators.relations[shape1][shape2].relate(tkn, o1.value,
-            o2.value, prevValue)
-          if (bool.value.dtype && bool.value.dtype === dt.ERROR) { return bool.value }
 
-          bool.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype)
-          if (o1.dtype & dt.RATIONAL) {
-            bool.dtype += dt.BOOLEANFROMCOMPARISON - dt.RATIONAL
-          } else if (o1.dtype & dt.STRING) {
-            bool.dtype += dt.BOOLEANFROMCOMPARISON - dt.STRING
+          if (isIn(tkn, ["∈", "∉", "⋐"])) {
+            bool.value = compare(tkn, o1.value, o2.value, prevValue)
+          } else {
+            const [shape1, shape2, _] = binaryShapesOf(o1, o2)
+            bool.value = Operators.relations[shape1][shape2].relate(tkn, o1.value,
+              o2.value, prevValue)
           }
+          if (bool.value.dtype && bool.value.dtype === dt.ERROR) { return bool.value }
+          bool.dtype = dt.BOOLEANFROMCOMPARISON
           oPrev = o2
           stack.push(Object.freeze(bool))
           break
@@ -1113,6 +1113,9 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
+        case "raise":
+          return { value: stack.pop().value, unit: null, dtype: dt.ERROR }
+
         case "\\blue":
         case "\\gray":
         case "\\green":
@@ -1205,15 +1208,24 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
           const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib)
           if (result.dtype === dt.ERROR) { return result }
           if (statement.name) {
-            if (Array.isArray(result)) {
+            if (result.dtype === dt.DICT) {
               // Accommodate a multiple assignment.
-              const name = statement.name.split(/, */g)
-              for (let j = 0; j < result.length; j++) {
-                vars[name[j]] = {
-                  value: result[j].value,
-                  unit: result[j].unit,
-                  dtype: result[j].dtype
+              const names = statement.name.split(/, */g)
+              for (let j = 0; j < names.length; j++) {
+                const name = names[j].trim()
+                const oprnd = clone(result.value.get(name))
+                if (oprnd.dtype & dt.QUANTITY) {
+                  if (isUnitAware) {
+                    oprnd.dtype -= dt.QUANTITY
+                    const unit = result.unit[oprnd.unit.name];
+                    oprnd.value = Rnl.multiply(Rnl.add(oprnd.value, unit.gauge), unit.factor)
+                    oprnd.unit.expos = unit.expos
+                  } else {
+                    oprnd.dtype -= dt.QUANTITY
+                    oprnd.unit.expos = allZeros
+                  }
                 }
+                vars[name] = oprnd
               }
             } else {
               vars[statement.name] = result

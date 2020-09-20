@@ -6,12 +6,12 @@
    <title>Hurmet Manual</title>
    <link rel="shortcut icon" href="../../images/equal-sign.ico">
    <link rel="stylesheet" media="print" href="../../print.css">
-   <link rel="stylesheet" href="../../lib/codemirror.css">
+   <link rel="stylesheet" href="../../cm/codemirror.css">
    <link rel="stylesheet" href="../docstyles.css">
    <link rel="stylesheet" href="../../katex/katex.min.css">
-   <script src="../../lib/codemirror.js"></script>
-   <script src="../../lib/closebrackets.js"></script>
-   <script src="../../lib/matchbrackets.js"></script>
+   <script src="../../cm/codemirror.js"></script>
+   <script src="../../cm/closebrackets.js"></script>
+   <script src="../../cm/matchbrackets.js"></script>
    <script src="../../katex/katex.min.js"></script>
    <script src="../../hurmet.min.js"></script>
    <script src="../demonstration.js"></script>
@@ -1332,16 +1332,11 @@ The word `private` may be written before a function. Private functions cannot be
 
 A Hurmet document can load an entire module into a variable with a fetch statement, like this:
 
+steel = fetch("under-construction") = !
 
 To use modules, one writes the module name and variable/function name in dot notation, as in:
 
-¢f_r = 7.5 √lib.f_c′ = \color(blue)7.5 √4500 \color(black) = 503 psi¢
-    
-¢x = lib.divideBy(10, 5) = 2¢
-
-One can do multiple assignments (not functions) in one statement:
-
-    f_c′, E_s = lib["f_c′", "E_s"] = !!
+`ϕP_n = steel.Ps("W8X31", '50 ksi', '11 ft') = ?? kips`
     
 
 ## Troubleshooting
@@ -1379,7 +1374,7 @@ Civil and structural engineers may also find these items useful:
 
 * Concrete Column Interaction [Diagram](https://observablehq.com/@ronkok/concrete-column-interaction-diagram)
 * Fetchable CSV files with steel shape data: [wide flanges], [channels], 
-* Module with functions for steel member strength.
+* [Module](https://gist.githubusercontent.com/ronkok/d42b0efdc66dc4f6135fee3b8d22a83e/raw/da3195993e3255c9b9b7f0b64788bc3664d6534d/steelStrengthPerAISC360-16.hrms) with functions for steel member strength.
 
 [wide flanges]: https://gist.githubusercontent.com/ronkok/3757b66d1866e0ad3edd921c9b57e8f6/raw/d15e9911c979112f3880f947e0621d91a0f73047/AISC-v15-wideflanges.csv "wideFlanges"
 [channels]: https://gist.githubusercontent.com/ronkok/24987345bc31878e624edc39bfa08827/raw/b1a0d6a0cb28544055a4764524cf0666f628cfde/AISC-v15-channels.csv "channels"

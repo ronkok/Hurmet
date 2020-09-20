@@ -1,5 +1,6 @@
 import { dt } from "./constants"
 import { errorOprnd } from "./error"
+import { clone } from "./utils"
 
 /*
  * Hurmet operands often have numeric values. Sometimes they are the numbers originally
@@ -51,8 +52,8 @@ import { errorOprnd } from "./error"
 
 export const fromAssignment = (cellAttrs, unitAware) => {
   // Get the value that was assigned to a variable. Load it into an operand.
-  if (cellAttrs.value === null || cellAttrs.value === undefined) {
-    // No value assigned to variable. Return an error message.
+  if (cellAttrs.value === null) {
+    // Return an error message.
     const insert = (cellAttrs.name) ? cellAttrs.name : "?"
     return errorOprnd("NULL", insert)
   }
@@ -62,14 +63,15 @@ export const fromAssignment = (cellAttrs, unitAware) => {
   oprnd.name = cellAttrs.name
 
   // Get the unit data.
-  if (cellAttrs.dtype === dt.STRING || cellAttrs.dtype === dt.BOOLEAN) {
+  if (cellAttrs.dtype === dt.STRING || cellAttrs.dtype === dt.BOOLEAN ||
+      cellAttrs.dtype === dt.NULL) {
     oprnd.unit = null
   } else if (cellAttrs.dtype & dt.MAP) {
     oprnd.unit = Object.freeze(cellAttrs.unit)
   } else if (cellAttrs.dtype === dt.DICT || cellAttrs.dtype === dt.DATAFRAME) {
-    const unit = Object.create(null)
-    unit.map = cellAttrs.unit
-    oprnd.unit = Object.freeze(unit)
+    oprnd.unit = Object.freeze(cellAttrs.unit)
+  } else if (cellAttrs.unit && cellAttrs.unit.expos) {
+    oprnd.unit = clone(cellAttrs.unit)
   } else {
     oprnd.unit = Object.create(null)
     if (cellAttrs.unit)  { oprnd.unit.name = cellAttrs.unit }

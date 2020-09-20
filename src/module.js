@@ -5,7 +5,7 @@ import { valueFromLiteral } from "./literal.js"
 import { prepareResult } from "./prepareResult"
 import { errorOprnd } from "./error.js"
 
-const statementRegEx = /^(([A-Za-zıȷ\u0391-\u03C9\u03D5\u212C\u2130\u2131\u210B\u2110\u2112\u2133\u211B\u212F\u210A\u2113\u2134]|\uD835[\uDC00-\udc33\udc9c-\udccf])([A-Za-z0-9_\u0391-\u03C9\u03D5\u212C\u2130\u2131\u210B\u2110\u2112\u2133\u211B\u212F\u210A\u2113\u2134\uD835\uDC00-\udc33\udc9c-\udccf]*|[\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]))′*\s*=/
+const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/
 const keywordRegEx = /^(if|else|else if|return|raise|while|for|break|echo)\b/
 
 // If you change functionRegEx, then also change it in mathprompt.js.
@@ -13,6 +13,20 @@ const keywordRegEx = /^(if|else|else if|return|raise|while|for|break|echo)\b/
 export const functionRegEx = /^(?:private +)?function (?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*\(/
 
 const lexRegEx = /"[^"]*"|`[^`]*`|'[^']*'|#|[^"`'#]+/g
+
+const testForStatement = str => {
+  const pos = str.indexOf("=")
+  if (pos === -1) { return false }
+  const leadStr = str.slice(0, pos).trim()
+  if (isValidIdentifier.test(leadStr)) { return true }
+  if (leadStr.indexOf(",") === -1) { return false }
+  let result = true
+  const arry = leadStr.split(",")
+  arry.forEach(e => {
+    if (!isValidIdentifier.test(e.trim())) { result = false }
+  })
+  return result
+}
 
 const stripComment = str => {
   // Strip the comment, if any, from the end of a code line.
@@ -63,7 +77,7 @@ export const scanModule = (str, decimalFormat) => {
       const [funcObj, endLineNum] = scanFunction(lines, decimalFormat, i)
       parent[funcObj.name] = funcObj
       i = endLineNum
-    } else if (statementRegEx.test(line)) {
+    } else if (testForStatement(line)) {
       // An assignment to a variable of a boolean, string, number, matrix, or dictionary.
       const posEq = line.indexOf("=")
       const varName = line.slice(0, posEq).trim()
@@ -191,7 +205,7 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
       }
 
     } else {
-      if (statementRegEx.test(line)) {
+      if (testForStatement(line)) {
         // We have an "=" assignment operator.
         const posEq = line.indexOf("=")
         name = line.slice(0, posEq - 1).trim()
