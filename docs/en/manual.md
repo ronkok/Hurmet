@@ -402,7 +402,7 @@ Hurmet will render single Latin letter variable names in *italic*. Function name
 
 ###### String
 <div>
-A *string* literal is a string of text characters enclosed by a pair of straight double quotation marks. The string may include any Unicode character except a straight double quotation mark.
+A *string* literal is a string of text characters enclosed by a pair of straight double quotation marks. The string may include any Unicode character except a straight double quotation mark, a newline, or a carriage return.
 
     "This is a string."
 
