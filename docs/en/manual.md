@@ -1323,11 +1323,6 @@ Hurmet modules enable you to access remote functions. Remote modules are written
     divideBy(a, b)
         return a / b
     
-    private function waterDensity()
-        return '62.4 lbf/ft³'
-
-The word `private` may be written before a function. Private functions cannot be called from outside the module.
-
 A Hurmet document can load an entire module into a variable with a fetch statement, like this:
 
 steel = fetch("under-construction") = !
