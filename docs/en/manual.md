@@ -1315,20 +1315,18 @@ A *echo* statement writes a message to the browser’s console. You can type __C
 
 ## Remote modules
 
-Hurmet modules enable you to access remote assignments and functions. Remote modules are written in plain text files, like this:
+Hurmet modules enable you to access remote functions. Remote modules are written in plain text files, like this:
 
-    f_c′ = '4500 psi'
-    E_s = '29000 ksi'
-
+    multiply(a, b)
+        return a × b
+    
     divideBy(a, b)
         return a / b
-
-Modules can assign a literal value to a variable. Modules can not do calculations except within functions.
-
-The word `private` may be written before a function. Private functions cannot be called from outside the module.
-
+    
     private function waterDensity()
         return '62.4 lbf/ft³'
+
+The word `private` may be written before a function. Private functions cannot be called from outside the module.
 
 A Hurmet document can load an entire module into a variable with a fetch statement, like this:
 
@@ -1337,7 +1335,6 @@ steel = fetch("under-construction") = !
 To use modules, one writes the module name and variable/function name in dot notation, as in:
 
 `ϕP_n = steel.Ps("W8X31", '50 ksi', '11 ft') = ?? kips`
-    
 
 ## Troubleshooting
 
