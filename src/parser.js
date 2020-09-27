@@ -1,5 +1,5 @@
-﻿import { isIn } from "./utils"
-import { tt, lex, addTextEscapes, texFromNumStr } from "./lexer"
+﻿import { isIn, addTextEscapes } from "./utils"
+import { tt, lex, texFromNumStr } from "./lexer"
 import { exponentRegEx, numeralFromSuperScript } from "./units"
 import { Rnl } from "./rational"
 
@@ -16,8 +16,8 @@ import { Rnl } from "./rational"
 const builtInFunctions = [
   "Gamma", "abs", "acos", "acosd", "acot", "acotd", "acsc", "acscd",
   "asec", "asecd", "asin", "asind", "atan", "atan2", "atand", "binomial", "chr", "cos", "cosd",
-  "cosh", "cosh", "cot", "cotd", "coth", "coth", "csc", "cscd", "csch", "csch", "exp", "fetch",
-  "format", "gcd", "hypot", "isNaN", "length", "lerp", "ln", "log", "log10", "log2",
+  "cosh", "cosh", "cot", "cotd", "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp",
+  "fetch", "format", "gcd", "hypot", "isNaN", "length", "lerp", "ln", "log", "log10", "log2",
   "logFactorial", "logGamma", "logn", "logΓ", "random", "rms", "round", "roundSig", "roundn",
   "sec", "secd", "sech", "sech", "sign", "sin", "sind", "sinh", "sinh", "tan", "tand", "tanh",
   "tanh", "trace", "transpose", "zeros", "Γ"

@@ -1,9 +1,8 @@
 import { dt, allZeros } from "./constants"
-import { clone, isIn } from "./utils"
+import { clone, isIn, addTextEscapes } from "./utils"
 import { Rnl } from "./rational"
 import { unitFromUnitName } from "./units"
 import { format } from "./format"
-import { addTextEscapes } from "./lexer"
 import { unitTeXFromString } from "./parser"
 import { errorOprnd } from "./error"
 

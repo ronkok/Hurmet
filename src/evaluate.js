@@ -831,6 +831,23 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
+        case "count": {
+          const pattern = stack.pop()
+          const str = stack.pop()
+          if (pattern.dtype !== dt.STRING || str.dtype !== dt.STRING) {
+            return errorOprnd("COUNT")
+          }
+          const output = Object.create(null)
+          output.value = Object.freeze(
+            Rnl.fromNumber(str.value.split(pattern.value).length - 1)
+          )
+          output.unit = Object.create(null)
+          output.unit.expos = allZeros
+          output.dtype = dt.RATIONAL
+          stack.push(Object.freeze(output))
+          break
+        }
+
         case "format": {
           const formatSpec = parseFormatSpec(stack.pop())
           if (formatSpec.dtype && formatSpec.dtype === dt.ERROR) { return formatSpec }
@@ -886,7 +903,8 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           let oprnd
           if (nextToken(tokens, i) === ".") {
             // Function from a module
-            const lib = stack.pop().value
+            let lib = stack.pop().value         // remote module
+            if (lib.value) { lib = lib.value }  // local module
             const udf = lib[functionName]
             if (udf.dtype === dt.ERROR) { return udf }
             if (udf.isPrivate) { return errorOprnd("PRIVATE", functionName) }
@@ -1183,6 +1201,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
   }
 
   // Populate the function parameters.
+  if (args.length > udf.parameters.length) { return errorOprnd("NUMARGS", udf.name) }
   const vars = Object.create(null)
   for (let i = 0; i < args.length; i++) {
     vars[udf.parameters[i]] = args[i]
@@ -1211,7 +1230,28 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
             if (result.dtype === dt.DICT) {
               // Accommodate a multiple assignment.
               const names = statement.name.split(/, */g)
-              for (let j = 0; j < names.length; j++) {
+              if (names.length !== result.value.size) {
+                return errorOprnd("MULT_MIS")
+              }
+              let j = 0
+              for (const v of result.value.values()) {
+                const name = names[j].trim()
+                const oprnd = clone(v)
+                if (oprnd.dtype & dt.QUANTITY) {
+                  if (isUnitAware) {
+                    oprnd.dtype -= dt.QUANTITY
+                    const unit = result.unit[oprnd.unit.name];
+                    oprnd.value = Rnl.multiply(Rnl.add(oprnd.value, unit.gauge), unit.factor)
+                    oprnd.unit.expos = unit.expos
+                  } else {
+                    oprnd.dtype -= dt.QUANTITY
+                    oprnd.unit.expos = allZeros
+                  }
+                  vars[name] = oprnd
+                }
+                j += 1
+              }
+              /*for (let j = 0; j < names.length; j++) {
                 const name = names[j].trim()
                 const oprnd = clone(result.value.get(name))
                 if (oprnd.dtype & dt.QUANTITY) {
@@ -1224,9 +1264,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
                     oprnd.dtype -= dt.QUANTITY
                     oprnd.unit.expos = allZeros
                   }
-                }
-                vars[name] = oprnd
-              }
+                } */
             } else {
               vars[statement.name] = result
             }

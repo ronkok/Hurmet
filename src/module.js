@@ -1,17 +1,15 @@
 import { dt } from "./constants.js"
 import { arrayOfRegExMatches } from "./utils"
 import { parse } from "./parser.js"
-import { valueFromLiteral } from "./literal.js"
-import { prepareResult } from "./prepareResult"
 import { errorOprnd } from "./error.js"
 
 const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/
 const keywordRegEx = /^(if|else|else if|return|raise|while|for|break|echo)\b/
 
-// If you change functionRegEx, then also change it in mathprompt.js.
+// If you change functionRegEx or moduleRegEx, then also change it in mathprompt.js.
 // It isn't called from there in order to avoid duplicating Hurmet code inside ProseMirror.js.
 export const functionRegEx = /^(?:private +)?function (?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*\(/
-
+export const moduleRegEx = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′* *= * module\b/
 const lexRegEx = /"[^"]*"|`[^`]*`|'[^']*'|#|[^"`'#]+/g
 
 const testForStatement = str => {
@@ -47,27 +45,9 @@ export const scanModule = (str, decimalFormat) => {
   const parent = {}
 
   // Statements end at a newline.
-  let lines = str.split(/\r?\n/g)
+  const lines = str.split(/\r?\n/g)
 
-  // Check each line to see if we split at an invalid newline (a newline inside a string).
-  let i = 0
-  while (i < lines.length) {
-    let numQuoteMarks = 0
-    let pos = lines[i].indexOf('"')
-    while (pos > -1) {
-      numQuoteMarks += 1
-      pos = lines[i].indexOf('"', pos + 1)
-    }
-    if (numQuoteMarks % 2 !== 0) {
-      // Oops, we split on an invalid newline.
-      lines[i] = lines[i] + lines[i + 1]
-      lines = lines.slice(0, i + 1).concat(lines.slice(i + 2, lines.length))
-    } else {
-      i += 1
-    }
-  }
-
-  for (i = 0; i < lines.length; i++) {
+  for (let i = 0; i < lines.length; i++) {
     // Get a single line of code and strip off any comments.
     const line = stripComment(lines[i])
     if (line.length === 0) { continue }
@@ -77,37 +57,10 @@ export const scanModule = (str, decimalFormat) => {
       const [funcObj, endLineNum] = scanFunction(lines, decimalFormat, i)
       parent[funcObj.name] = funcObj
       i = endLineNum
-    } else if (testForStatement(line)) {
-      // An assignment to a variable of a boolean, string, number, matrix, or dictionary.
-      const posEq = line.indexOf("=")
-      const varName = line.slice(0, posEq).trim()
-      const isCSV = (/^`/.test(line.slice(posEq + 1).trim()))
-      // eslint-disable-next-line prefer-const
-      let [literalStr, endLineNo] = scanStatement(lines, i, isCSV)
-      literalStr = literalStr.slice(posEq + 1).trim()
-      const [value, unit, dtype, _] = valueFromLiteral(literalStr, varName, decimalFormat)
-      const attrs = { name: varName, value, unit, dtype }
-      prepareResult(attrs, {})
-      parent[varName] = { value: attrs.value, unit: attrs.unit,
-        expos: attrs.expos, dtype: attrs.dtype }
-      i = endLineNo
     }
   }
   return { value: parent, unit: null, dtype: dt.MODULE }
 
-}
-
-const scanStatement = (lines, startLineNum, isCSV) => {
-  let literalStr = ""
-  for (let i = startLineNum; i < lines.length; i++) {
-    const line = stripComment(lines[i])
-    if (line.length === 0) { continue }
-    literalStr += line
-    if (isCSV && line.slice(-1) === "`") { return [literalStr, i] }
-    if (isCSV || /[{([,;]$/.test(line)) { continue }
-    if (lines.length > i + 1 && /^\s*[+\-)\]}]/.test(lines[i + 1])) { continue }
-    return [literalStr, i]
-  }
 }
 
 const handleCSV = (expression, lines, startLineNum) => {
@@ -252,5 +205,4 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
 
   }
   return [funcObj, lines.length]
-
 }

@@ -1,4 +1,5 @@
 import { dt } from "./constants";
+import { addTextEscapes } from "./utils"
 
 const errorMessages = Object.freeze({
   EN: {
@@ -71,7 +72,9 @@ const errorMessages = Object.freeze({
                 Hurmet cannot assign a different value to @.`,
     NO_PROP:   `Error. Cannot call a property from variable "@" because it has no properties.`,
     NOT_ARRAY: `Error. Cannot check if an element is in the second operand because
- the second operand is not an array.`
+ the second operand is not an array.`,
+    MULT_MIS:  "Error. Mismatch in number of multiple assignment.",
+    COUNT:     "Error. The count() function works only on strings."
   }
 })
 
@@ -80,6 +83,7 @@ export const errorOprnd = (errorCode, messageInsert) => {
   let msg = errorMessages["EN"][errorCode]
   if (msg === undefined) { return { value: "Error", unit: null, dtype: dt.ERROR } }
   if (messageInsert) {
+    messageInsert = addTextEscapes(messageInsert)
     msg = msg.replace(/@/g, messageInsert)
   } else {
     msg = msg.replace(/@ ?/, "")

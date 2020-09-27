@@ -67,6 +67,8 @@ export const compare = (op, x, y, yPrev) => {
           if (equals(x, y[i])) { return true }
         }
         return false
+      } else if (y instanceof Map) {
+        return y.has(x)
       } else {
         return errorOprnd("NOT_ARRAY")
       }
@@ -97,8 +99,10 @@ export const compare = (op, x, y, yPrev) => {
           if (x === y[i]) { return false }
         }
         return true
+      } else if (y instanceof Map) {
+        return !y.has(x)
       } else {
         return errorOprnd("NOT_ARRAY")
       }
-    }
+  }
 }

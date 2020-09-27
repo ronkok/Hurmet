@@ -10,7 +10,7 @@ function Ps(section, Fy, kLx, kLy)
 
 function Pas(section, Fy, kLx, kLy)
     # Service level allowable axial strength of a steel member, per AISC 360-16 sections B & E
-    P_cr = criticalAxialStrength(section, Fy, kLx, kLy)
+    Pcr = criticalAxialStrength(section, Fy, kLx, kLy)
     return Pcr / 1.67
 
 
@@ -31,7 +31,7 @@ function Mas(section, Fy, Lb, Cb, axis)
     if Cb = undefined
         Cb = 1
     Mcr = criticalBendingStrength(section, Fy, Lb, Cb, axis)
-    return 0.9 × Mcr
+    return Mcr / 1.67
 
 
 private function criticalAxialStrength(section, Fy, kLx, kLy)
@@ -59,9 +59,12 @@ private function criticalAxialStrength(section, Fy, kLx, kLy)
             raise "Error. Undefined kLy" otherwise
         }
 
+    if max(kLx, kLy) = '0 ft'
+        return A Fy
+
     # Get critical compressive stress, Fcr, per Section E3
     Lc_over_r = max(kLx / rx, kLy / ry)
-    Fe = π² E / Lc_over_r                                 # Eqn E3-4, Euler buckling
+    Fe = π² E / Lc_over_r²                                 # Eqn E3-4, Euler buckling
     Fcr = {
         0.658^(Fy/Fe) × Fy  if Lc_over_r ≤ 4.71  √(E / Fy) ;   # Eqn E3-2
         0.877 Fe            otherwise                          # Eqn E3-3
@@ -110,7 +113,7 @@ private function shapeOf(section)
     s1 = name[1]
     s2 = name[1:2]
     return {
-        "round"   if s2 = "Pi" or (s2 = "HS" and "x" ∉ name) ;
+        "round"   if s2 ="Pi" or (s2 = "HS" and count(name, "X") = 2) ;
         "HSS"     if s2 = "HS" ;
         "tee"     if s2 ∈ ["WT", "MT", "ST"] ;
         "channel" if s1 = "C" or s2 = "MC" ;
@@ -286,8 +289,8 @@ private function criticalBendingStrength(section, Fy, Lb, Cb, axis)
 
     # The rest of this function deals with I-shapes and channels
     
-    λpf = 0.38 × √(E / Fy)        # Table B4-1.b case 10, compact limit for flanges
-    λrf = 0.56 × √(E / Fy)        # ditto, slender limit
+    λpf = 0.38 × sqrE_over_Fy        # Table B4-1.b case 10, compact limit for flanges
+    λrf = 1.00 × sqrE_over_Fy        # ditto, slender limit
 
     if axis ∉ "xX"
         # Minor axis. Use section F6
@@ -302,49 +305,86 @@ private function criticalBendingStrength(section, Fy, Lb, Cb, axis)
         # slender flange
         Fcr = 0.69 E / (b / tf)²
         return Fcr Sy
+    
+    # What remains is major-axis bending.
 
     G = '12000 ksi'
-    Sx, Zx, d, bf, tw, tf, k, J, Cw, rt = section["Sx", "Zx", "d", "bf", "tf", "kdes", "J", "Cw", "rts"]
+    Sx, Zx, Iy, d, bf, tw, tf, k, J, Cw, rt = section["Sx", "Zx", "Iy", "d", "bf", "tw", "tf", "kdes", "J", "Cw", "rts"]
     b = { bf if shape = "channel"; bf / 2 otherwise }
     λf = b / tf
     h = d - 2 k
     ho = d - tf
     λw = h / tw
-    λpw = 3.76 × √(E / Fy)        # Table B4-1.b case 15, compact limit
-    λrw = 5.79 × √(E / Fy)        # ditto, slender limit
+    λpw = 3.76 × sqrE_over_Fy        # Table B4-1.b case 15, compact limit
+    λrw = 5.79 × sqrE_over_Fy        # ditto, non-compact limit
     Mp = Fy Zx
+    Lp = 1.1 rt sqrE_over_Fy         # Eqn F4-7
+    Lr = 1.95 rt (E/(0.7 Fy)) × √(J/(Sx ho) + √((J/(Sx ho))² + 6.76 ((0.7 Fy)/E)²)) # Eqn F2-6
     
     if λf ≤ λpf and λw ≤ λpw
         # Compact section. Use section F2.
-        Mcr = Cb π/Lb √(E Iy G J + ((π E)/Lb)² Iy Cw)
-        return min(Mp, Mcr)
+        c = {1 if shape = "I"; ho/2 × √(Iy/Cw) otherwise }      # Eqn F2-8b
+        Mn = {
+            Mp                                             if Lb ≤ Lp ;
+            Cb (Mp - (Mp - 0.7 Fy Sx)((Lb-Lp) / (Lr-Lp)))  if Lb ≤ Lr ;
+            (Cb π² E) / (Lb/rt)² × √(1 + 0.078 ((J c) / (Sx ho))(Lb/rt)²) × Sx otherwise
+        }
+        return min(Mp, Mn)
     
     if shape = "channel"
         raise "This function does not handle non-compact channels. All current channels are compact per user note in AISC 360 section F2."
     
-    # The remaining cases are non-compact I-sections bent on their major axis.
-    # This function uses AISC 360 section F5 instead of F4. So we're conservative.
-
-    # Check compression flange yielding. F5.1
-    aw = (h tw) / (bf tf)                                                # Eqn F4-12
-    Rpg = min(1, 1 - aw / (1200 + 300 aw) × (h/tw - 5.7 sqrE_over_Fy))   # Eqn F5-6
-    Mn1 = Rpg Fy Sx
-
-    # Check lateral-torsional buckling. F5.2
-    Lp = (Cb π² E) / (Lb/rt)² × √(1 + 0.078 × J / (Sx ho) × (Lb/rt)²)     # Eqn F4-7
-    Lr = π rt × √(E / (0.7 Fy))
-    Mn2 = {
-        Mp                                                        if Lb < Lp ;
-        min(Fy, Cb (Fy - (0.3 Fy)((Lb - Lp) / (Lr - Lp)))) × Sx   if Lb < Lr ;   # Eqn F5-3
-        min(Fy, (Cb π² E) / (Lb/rt)²) × Sx                        otherwise ;    # Eqn F5-4
-    }
-
-    # Check compression flange local buckling. F5.3
-    kc = 4 / √(h / tw)
-    Mn3 = {
-        Mp                                               if λf ≤ λpf ;
-        (Fy - (0.3 Fy) ((λf - λpf) / (λrf - λpf))) × Sx  if λf ≤ λrf ;   # Eqn F5-8
-        ((0.9 E kc) / (bf / (2 tf))²) × Sx               otherwise       # Eqn F5-9
-    }
+    # The remaining cases are non-compact I or C sections bent on their major axis. 
     
+    if shape = "I"
+        # See section F4 for I sections bent on major axis
+        # Check compression flange yielding. F4.1
+        λ = h / tw
+        My = Fy Sx
+        Rpc = {
+            Mp/My                                                    if λ ≤ λpw ;  # Eqn F4-9a
+            min(Mp/My, Mp/My - (Mp/My - 1)((λ - λpw) / (λrw - λpw))) otherwise     # Eqn F4-9b
+        }
+        Mn1 = Rpc My
+
+        # Check lateral-torsional buckling. F4.2
+        if Lb ≤ Lp
+            Mn2 = Mp
+        else if Lb ≤ Lr
+            Mn2 = Cb (Rpc My - (Rpc My - 0.7 Fy Sx)((Lb - Lp) / (Lr - Lp)))  # Eqn F4-2
+        else
+            Fcr = (Cb π² E) / (Lb/rt)² × √(1 + 0.078 (J/(Sx ho))(Lb/rt)²)    # Eqn F4.5
+            Mn2 = min(Fcr Sx, Rpc My)                                        # Eqn F4.3
+
+        # Check compression flange local buckling. F4.3
+        kc = 4 / √(h / tw)
+        Mn3 = {
+            Mp                                                        if λf ≤ λpf ;
+            Rpc My - (Rpc My - 0.7 Fy Sx) ((λf - λpf) / (λrf - λpf))  if λf ≤ λrf ;   # Eqn F4-13
+            (0.9 E kc Sx) / (bf / (2 tf))²                            otherwise       # Eqn F5-14
+        }
+    
+    else
+        # See section F5 for channels bent on major axis
+        # Check compression flange yielding. F5.1
+        aw = min(10, (h tw) / (bf tf))                                       # Eqn F4-12
+        Rpg = min(1, 1 - aw / (1200 + 300 aw) × (h/tw - 5.7 sqrE_over_Fy))   # Eqn F5-6
+        Mn1 = Rpg Fy Sx
+
+        # Check lateral-torsional buckling. F5.2
+        Lr = π rt × √(E / (0.7 Fy))    # Eqn F5.5
+        Mn2 = {
+            Mp                                                             if Lb < Lp ;
+            min(Fy, Cb (Fy - (0.3 Fy)((Lb - Lp) / (Lr - Lp)))) × Rpg × Sx  if Lb < Lr ;   # Eqn F5-3
+            min(Fy, (Cb π² E) / (Lb/rt)²) × Rpg × Sx                       otherwise ;    # Eqn F5-4
+        }
+
+        # Check compression flange local buckling. F5.3
+        kc = 4 / √(h / tw)
+        Mn3 = {
+            Mp                                               if λf ≤ λpf ;
+            (Fy - (0.3 Fy) ((λf - λpf) / (λrf - λpf))) × Sx  if λf ≤ λrf ;   # Eqn F5-8
+            ((0.9 E kc) / (bf / (2 tf))²) × Sx               otherwise       # Eqn F5-9
+        }
+
     return min(Mp, Mn1, Mn2, Mn3)

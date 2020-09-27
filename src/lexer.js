@@ -1,4 +1,4 @@
-﻿import { isIn, arrayOfRegExMatches } from "./utils"
+﻿import { isIn, addTextEscapes } from "./utils"
 import { Rnl } from "./rational"
 import { formattedDecimal, texFromMixedFraction } from "./format"
 
@@ -518,35 +518,6 @@ const texREL = Object.freeze([
 
 const superRegEx = /^⁻?[²³¹⁰⁴⁵⁶⁷⁸⁹]+/
 
-export const addTextEscapes = str => {
-  // Insert escapes for # $ & % _ ~ ^ \ { }
-  // TODO: \textbackslash.
-  // TODO: How to escape { } without messing up Lex?
-  if (str.length > 1) {
-    const matches = arrayOfRegExMatches(/[#$&%_~^]/g, str)
-    const L = matches.length
-    if (L > 0) {
-      for (let i = L - 1; i >= 0; i--) {
-        const match = matches[i]
-        const pos = match.index
-        if (match.value === "~") {
-          str = str.slice(0, pos) + "\\textasciitilde " + str.slice(pos + 1)
-        } else if (match.value === "^") {
-          str = str.slice(0, pos) + "\\textasciicircum " + str.slice(pos + 1)
-        } else if (pos === 0) {
-          str = "\\" + str
-        } else {
-          const pc = str.substr(pos - 1, 1)
-          if (pc !== "\\") {
-            str = str.slice(0, pos) + "\\" + str.slice(pos)
-          }
-        }
-      }
-    }
-  }
-  return str
-}
-
 const cloneToken = tkn => [tkn[0], tkn[1], tkn[2], tkn[3]]
 
 const accentFromChar = Object.freeze({
@@ -669,10 +640,11 @@ export const lex = (str, decimalFormat, prevToken) => {
     // String between double quotation marks. Parser will convert it to \text{…}
     pos = str.indexOf('"', 1)
     if (pos > 0) {
-      st = str.substring(1, pos)
+      // Disallow \r or \n by truncating the string.
+      st = str.substring(1, pos).replace(/\r?\n.*/, "")
       return ['"' + st + '"', st, tt.STRING, ""]
     } else {
-      return [str, str, tt.STRING, ""]
+      return [str, str.replace(/\r?\n.*/, ""), tt.STRING, ""]
     }
   }
 

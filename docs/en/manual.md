@@ -716,7 +716,7 @@ Hurmet calculations are meant to be recognizeable to anyone familiar with standa
 | `>` |              |                              |
 | ≤   | `<=`         |                              |
 | ≥   | `>=`         |                              |
-| ∈   | \\in         | c ∈ s                        | Is an element of (a matrix or string)
+| ∈   | \\in         | c ∈ s                        | Is an element of a matrix or is a character of a string, or is a property of a dictionary
 | ∉   | \\notin      | c ∉ s                        | Is not an element of
 | ⋐   | \\Subset     | c ⋐ s                        | Is a proper subset of
 | and |              | if *a* and *b*               | Logical and
@@ -777,6 +777,10 @@ cos<sub>d</sub>(𝜃), sin<sub>d</sub>(𝜃), tan<sub>d</sub>(𝜃), sec<sub>d</
 cosh(*x*), sinh(*x*), tanh(*x*), sech(*x*), csch(*x*), coth(*x*)
 
 : [Hyperbolic functions](https://en.wikipedia.org/wiki/Hyperbolic_function). Notation for inverse functions is similar to trigonometry.
+
+count(*str*, *pattern*)
+
+: The number of times string *pattern* occurs in string *str*.
 
 exp(*x*)
 

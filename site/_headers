@@ -1,4 +1,0 @@
-/data/*
-  Access-Control-Allow-Methods: GET
-/lib/*
-  Access-Control-Allow-Methods: GET

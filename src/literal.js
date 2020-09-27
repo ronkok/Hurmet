@@ -44,6 +44,7 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
   } else if (/^(\{)/.test(str)) {
     // We're assigning a dictionary.
     const [tex, rpn] = parse(str, decimalFormat, true)
+    if (!/\xa0dictionary\xa0\d+$/.test(rpn)) { return [0, null, dt.ERROR, ""]  }
     const oprnd = evalRpn(rpn, {}, decimalFormat, false, {})
     const unit = (oprnd.dtype & dt.MAP) ? oprnd.unit : oprnd.unit.map
     return [oprnd.value, unit, oprnd.dtype, tex]

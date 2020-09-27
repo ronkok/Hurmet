@@ -1,7 +1,7 @@
 import { dt } from "./constants"
 import { Rnl } from "./rational"
 import { format } from "./format"
-import { addTextEscapes } from "./lexer"
+import { addTextEscapes } from "./utils"
 import { Matrix, isMatrix } from "./matrix"
 import { DataFrame } from "./dataframe"
 import { map } from "./map"

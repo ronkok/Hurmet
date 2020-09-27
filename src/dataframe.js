@@ -1,8 +1,7 @@
 import { dt, allZeros } from "./constants" // operand type enumeration
 import { Rnl } from "./rational"
-import { clone } from "./utils"
+import { clone, addTextEscapes } from "./utils"
 import { unitFromUnitName } from "./units"
-import { addTextEscapes } from "./lexer"
 import { errorOprnd } from "./error"
 import { parse } from "./parser"
 import { Matrix } from "./matrix"

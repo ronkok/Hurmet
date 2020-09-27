@@ -1,7 +1,7 @@
 ﻿import { parse } from "./parser"
 import { dt } from "./constants"
 import { valueFromLiteral } from "./literal"
-import { functionRegEx, scanModule } from "./module"
+import { functionRegEx, moduleRegEx, scanModule } from "./module"
 
 /*  prepareStatement.js
  *
@@ -39,6 +39,7 @@ const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\
 const isKeyWord = /^(π|true|false|root|if|else|and|or|otherwise|modulo|for|while|break|return|raise)$/
 
 const shortcut = (str, decimalFormat) => {
+  // No calculation in str. Parse it just for presentation.
   const tex = parse(str, decimalFormat)
   return { entry: str, tex, alt: str }
 }
@@ -63,15 +64,28 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
   let dtype
   let str = ""
 
-  if (functionRegEx.test(inputStr)) {
-    // This cell contains a custom function.
-    const posFn = inputStr.indexOf("function")
-    const posParen = inputStr.indexOf("(")
-    name = inputStr.slice(posFn + 8, posParen).trim()
+  if (functionRegEx.test(inputStr) || moduleRegEx.test(inputStr)) {
+    // This cell contains a custom function or a module.
+    let name = ""
+    let str = ""
+    const isModule = moduleRegEx.test(inputStr)
+    if (isModule) {
+      name = inputStr.slice(0, inputStr.indexOf("=")).trim()
+      str = inputStr.slice(inputStr.indexOf("module") + 6)
+    } else {
+      const posFn = inputStr.indexOf("function")
+      const posParen = inputStr.indexOf("(")
+      name = inputStr.slice(posFn + 8, posParen).trim()
+      str = inputStr
+    }
+    const moduleValue = isModule
+      ? scanModule(str, decimalFormat)
+      : scanModule(str, decimalFormat).value[name]
+    if (moduleValue.dtype && moduleValue.dtype === dt.ERROR) { return moduleValue }
     const attrs = {
       entry: inputStr,
       name,
-      value: scanModule(inputStr, decimalFormat).value[name],
+      value: moduleValue,
       // TODO: what to do with comma decimals?
       dtype: dt.MODULE,
       error: false

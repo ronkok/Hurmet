@@ -214,7 +214,15 @@ const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
   const attrs = Object.create(null)
   attrs.entry = entry
   attrs.name = entry.replace(/=.+$/, "").trim()
-  attrs.tex = parse(entry.replace(/s*=\s*[$$£¥\u20A0-\u20CF]?(!{1,2}).$/, ""), decimalFormat)
+  attrs.tex = parse(
+    entry.replace(/\s*=\s*[$$£¥\u20A0-\u20CF]?(!{1,2}).*$/, ""),
+    decimalFormat
+  )
+  if (/https:\/\/gist\.githubusercontent\.com/.test(attrs.tex)) {
+    // Display a short alias for GitHub Gist raw url.
+    attrs.tex = attrs.tex.replace("gist.githubusercontent.com", "gist.github.com")
+    attrs.tex = attrs.tex.replace(/[^/]+\/raw\/[^/]+\//, "")
+  }
   attrs.alt = entry
   if (text === "File not found." || fileErrorRegEx.test(text)) {
     attrs.dtype = dt.ERROR

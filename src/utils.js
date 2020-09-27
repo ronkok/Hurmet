@@ -96,3 +96,32 @@ export const arrayOfRegExMatches = (regex, text) => {
 
   return result
 }
+
+export const addTextEscapes = str => {
+  // Insert escapes for # $ & % _ ~ ^ \ { }
+  // TODO: \textbackslash.
+  // TODO: How to escape { } without messing up Lex?
+  if (str.length > 1) {
+    const matches = arrayOfRegExMatches(/[#$&%_~^]/g, str)
+    const L = matches.length
+    if (L > 0) {
+      for (let i = L - 1; i >= 0; i--) {
+        const match = matches[i]
+        const pos = match.index
+        if (match.value === "~") {
+          str = str.slice(0, pos) + "\\textasciitilde " + str.slice(pos + 1)
+        } else if (match.value === "^") {
+          str = str.slice(0, pos) + "\\textasciicircum " + str.slice(pos + 1)
+        } else if (pos === 0) {
+          str = "\\" + str
+        } else {
+          const pc = str.substr(pos - 1, 1)
+          if (pc !== "\\") {
+            str = str.slice(0, pos) + "\\" + str.slice(pos)
+          }
+        }
+      }
+    }
+  }
+  return str
+}
