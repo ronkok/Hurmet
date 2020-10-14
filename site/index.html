@@ -59,45 +59,17 @@
 
 <p>This week’s example:</p>
 
-<h3>Steel Strength</h3>
+<h3>Simple span beam</h3>
 
-<p>Let’s determine the strength of a couple of steel members. First we’ll fetch steel dimensional data from a remote source:</p>
+<p><span class="hurmet-calc" data-entry="L = '12 feet'"></span>, length</p>
 
-<p><span class="hurmet-calc" data-entry="wideFlanges = fetch(&quot;https://gist.githubusercontent.com/ronkok/a9f465e08be54cb4b46449768511acec/raw/a40be6025b135220235b70ca4a3378cdcef4a4c0/AISC-v15-wideFlanges.csv&quot;) = !"></span></p>
+<p><span class="hurmet-calc" data-entry="w = '110 lbf/ft'"></span>, uniform line load</p>
 
-<p>Next, load a remote module with code that carries out the provisions of <a href="https://www.aisc.org/globalassets/aisc/publications/standards/a360-16-spec-and-commentary_june-2018.pdf" title="AISC 360-16">AISC 360-16</a>.</p>
+<p><span class="hurmet-calc" data-entry="P = '1000 lbf'"></span>, mid-span point load</p>
 
-<p><span class="hurmet-calc" data-entry="steel = fetch(&quot;https://gist.githubusercontent.com/ronkok/d42b0efdc66dc4f6135fee3b8d22a83e/raw/4eca170d5a2b40620cbfca9d5bdcde571268fb2d/steelStrengthPerAISC360-16.hrms&quot;) = !"></span></p>
+<p><span class="hurmet-calc" data-entry="V = (w L)/2 + P/2 = ?? lbf"></span>, maximum shear</p>
 
-<p>Now we can use the information to find strength of steel members. </p>
-
-<p><span class="hurmet-calc" data-entry="format = &quot;h3&quot;"></span>, round result fractions to 3 significant digits</p>
-
-<p><span class="hurmet-calc" data-entry="F_y = '50 ksi'"></span>, steel yield strength</p>
-
-<p>Let’s try a column.</p><p><span class="hurmet-calc" data-entry="L_x = '14 ft'"></span>, effective unbraced length on major axis</p>
-
-<p><span class="hurmet-calc" data-entry=""><code></code></span><span class="hurmet-calc" data-entry="L_y = '14 ft'"></span>, effective unbraced length on minor axis</p>
-
-<p><span class="hurmet-calc" data-entry="ϕP_n = steel.Ps(wideFlanges.W10X49, F_y, L_x, L_y) = ?? kips"></span></p>
-
-<p>Now let’s get a beam strength</p><p><span class="hurmet-calc" data-entry="C_b = 1"></span>, beam load </p>
-
-<p><span class="hurmet-calc" data-entry="L_b = '12 ft'"></span>, unbraced length</p>
-
-<p><span class="hurmet-calc" data-entry="ϕM_n = steel.Ms(wideFlanges.W8X31, '50 ksi', L_b, C_b, &quot;x&quot;) = ?? k-ft"></span></p>
-
-<p>The steel module code can be viewed at <a href="https://gist.github.com/ronkok/d42b0efdc66dc4f6135fee3b8d22a83e">https://gist.github.com/ronkok/d42b0efdc66dc4f6135fee3b8d22a83e</a></p>
-
-<p>It exposes four functions:</p>
-
-<pre><code>Ps(section, Fy, kLx, kLy) returns LRFD column strength
-Pas(section, Fy, kLx, kLy) returns service level allowable column strength
-Ms(section, Fy, Lb, Cb, axis) returns LRFD beam strength
-Mas(section, Fy, Lb, Cb, axis) returns service level allowable beam strength
-</code></pre>
-
-<p>All four functions must be invoked in unit-aware mode.</p>
+<p><span class="hurmet-calc" data-entry="M = (w L^2)/8 + (P L)/4 = ?? lbf-ft"></span>, max bending moment</p>
 
 </div> <!-- editor -->
 
