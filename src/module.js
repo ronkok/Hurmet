@@ -1,4 +1,6 @@
 import { dt } from "./constants.js"
+import { valueFromLiteral } from "./literal"
+import { prepareResult } from "./prepareResult"
 import { arrayOfRegExMatches } from "./utils"
 import { parse } from "./parser.js"
 import { errorOprnd } from "./error.js"
@@ -56,6 +58,11 @@ export const scanModule = (str, decimalFormat) => {
       // This line starts a new function.
       const [funcObj, endLineNum] = scanFunction(lines, decimalFormat, i)
       parent[funcObj.name] = funcObj
+      i = endLineNum
+    } else if (testForStatement(line)) {
+      // This line starts a Hurmet assignment.
+      const [stmt, endLineNum] = scanAssignment(lines, decimalFormat, i)
+      parent[stmt.name] = stmt
       i = endLineNum
     }
   }
@@ -205,4 +212,41 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
 
   }
   return [funcObj, lines.length]
+}
+
+const scanAssignment = (lines, decimalFormat, iStart) => {
+  let prevLineEndedInContinuation = false
+  let str = ""
+  let iEnd = iStart
+  for (let i = iStart; i < lines.length; i++) {
+    const line = stripComment(lines[i])
+    if (line.length === 0) { continue }
+
+    if (prevLineEndedInContinuation) {
+      // Check if the previous character is a semi-colon just before a matrix literal closes.
+      str = str.slice(-1) === ";" && "})]".indexOf(line.charAt(0)) > -1
+        ? str.slice(0, -1).trim() + line
+        : str + line
+    } else {
+      str = line
+    }
+
+    // Line continuation characters are: { ( [ , ; + -
+    if (/[{([,;]$/.test(str)) {
+      prevLineEndedInContinuation = true
+    } else if (lines.length > i + 1 && /^\s*[+\-)\]}]/.test(lines[i + 1])) {
+      prevLineEndedInContinuation = true
+    } else {
+      iEnd = i
+      break
+    }
+  }
+
+  const posEquals = str.indexOf("=")
+  const name = str.slice(0, posEquals).trim()
+  const trailStr = str.slice(posEquals + 1).trim()
+  const [value, unit, dtype, resultDisplay] = valueFromLiteral(trailStr, name, decimalFormat)
+  const stmt = { name, value, unit, dtype, resultDisplay }
+  prepareResult(stmt, {})
+  return [stmt, iEnd]
 }

@@ -91,6 +91,19 @@ export function insertOneHurmetVar(hurmetVars, attrs) {
         i += 1
       }
     }
+  }  else if (attrs.dtype === dt.MODULE) {
+    // multiple assignment from a module
+    if (attrs.name.length !== attrs.value.length) {
+      // TODO: Error
+      // Multiple assignments don't print a result, so this is awkward.
+    } else {
+      let i = 0
+      for (const value of attrs.value.values()) {
+        const result = clone(value)
+        hurmetVars[attrs.name[i]] = result
+        i += 1
+      }
+    }
   } else {
     // TODO: Write an error message.
   }

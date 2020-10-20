@@ -36,7 +36,7 @@ function setCellAttrs(node, extraAttrs) {
   return attrs
 }
 
-const fetchRegEx = /= *fetch\(/
+const functionRegEx = / *function /
 
 /* function setHurmetAttrs(node) {
   let attrs = {}
@@ -302,7 +302,7 @@ export const nodes = {
         dom = document.createElement('span')
         dom.classList = "hurmet-calc"
         if (node.attrs.dtype && node.attrs.dtype === dt.MODULE &&
-          !fetchRegEx.test(node.attrs.entry)) {
+          functionRegEx.test(node.attrs.entry)) {
           dom.appendChild(document.createElement('pre'))
           dom.firstChild.appendChild(document.createElement('code'))
           dom.firstChild.firstChild.textContent = node.attrs.entry

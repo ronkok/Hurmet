@@ -510,9 +510,9 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
               property = fromAssignment(o1.value[args[0].value], unitAware)
             } else {
               // Multiple assignment.
-              property = []
+              property = { value: [], unit: null, dtype: dt.MODULE}
               for (let j = 0; j < args.length; j++) {
-                property.push(fromAssignment(o1.value[args[j].value], unitAware))
+                property.value.push(fromAssignment(o1.value[args[j].value], unitAware))
               }
             }
 
