@@ -125,7 +125,7 @@ const colorSpecRegEx = /^(#([a-f0-9]{6}|[a-f0-9]{3})|[a-z]+|\([^)]+\))/i
 
 const midDotRegEx = /^(\*|·|\.|-[A-Za-z])/
 
-const unitRegEx = /^[A-Za-z0-9_\-⁰¹²³\u2074-\u2079⁻/·*.°′″‴ΩΩµμ]+/
+const unitRegEx = /^[A-Za-z0-9_\-⁰¹²³\u2074-\u2079⁻/^·*.°′″‴ΩΩµμ]+/
 
 export const unitTeXFromString = str => {
   // This function supports function parseQuantityLiteral()
