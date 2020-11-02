@@ -135,7 +135,8 @@ const proceedAfterFetch = (
         : pos === curPos
         ? false
         : node.attrs.name && node.attrs.dtype &&
-          (node.attrs.dtype === dt.MODULE || node.attrs.dtype === dt.DATAFRAME)
+          (node.attrs.dtype === dt.MODULE || node.attrs.dtype === dt.DATAFRAME ||
+            node.attrs.isFetch)
       if (getsHoisted) {
         const attrs = isCalcAll
           ? prepareStatement(entry, decimalFormat)

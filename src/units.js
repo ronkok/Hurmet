@@ -7,12 +7,16 @@ import { errorOprnd } from "./error"
 /*
  *  Unit-aware calculation is a core feature of Hurmet.
  *  Dimensional analysis is used to verify that a calculation contains compatible units.
- *  Example: Check unit compatibility for:  L = '145 N·m'/'15.2 lbf' = ?? ft
- *  Analysis: first operand:  N·m →  mass¹·length²·time⁻²
- *            2nd  operand:  lbf →  mass¹·length¹·time⁻²
- *            calculated unit exponents:
- *                mass^(1-1)∙length^(2-1)∙time^(-2-(-2))= mass⁰·length¹·time⁰ = length¹
- *            Unit exponents for desired unit, feet → length¹. That checks.
+ *  Example: Check unit compatibility for:  L = '145 N·m'/'15.2 lbf' = ?? feet
+ *  Analysis step 1: first operand:  N·m →  mass¹·length²·time⁻²
+ *                   2nd  operand:  lbf →  mass¹·length¹·time⁻²
+ *  Note the exponents of those two operands. When terms multiply, we add exponents.
+ *  When terms divide, we subtract exponents. As in step 2, next line:
+ *                   mass^(1-1)∙length^(2-1)∙time^(-2-(-2)) = mass⁰·length¹·time⁰ = length¹
+ *  In the example, the exponents for mass and time both zero'd out.
+ *  Only length has a non-zero exponent. In fact, the result dimension = length¹.
+ *  This matches the desired result dimension (feet is a length), so this example checks out.
+ *
  *  Hurmet automates this process of checking unit compatibility.
  *  Each instance of a Hurmet quantity operand contains an array of unit-checking exponents.
  *  Each element of that array contains an exponent of one of the Hurmet base dimensions.
@@ -656,7 +660,10 @@ const unitFromWord = (inputStr, currencies, customUnits) => {
     u.expos = Object.freeze(unitArray[4])
     if (u.expos[7] === 1) {
       if (currencies) {
-        u.factor = Rnl.reciprocal(currencies[unitArray[3]])
+        const factor = currencies instanceof Map
+          ? currencies.get(unitArray[3])               // from user-written Hurmet dictionary
+          : Rnl.fromNumber(currencies[unitArray[3]])   // from fetched JSON
+        u.factor = Rnl.reciprocal(factor)
       } else {
         return errorOprnd("CURRENCY")
       }
