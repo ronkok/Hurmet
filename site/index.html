@@ -59,39 +59,26 @@
 
 <p>This week’s example:</p>
 
-<h3>Shared Variables</h3>
+<h3>Foreign Exchange</h3>
 
-<p>Say that you are working on a large project. For this project, you and your team will prepare several calculation packages and there a several variables that ought to contain the same values in each document.</p>
+<p>Hurmet’s unit-aware calculations can handle foreign exchange. Start by fetching the current exchange rates, like this:</p>
 
-<p>With Hurmet, you can define those values in one document. In my own engineering practice, we call them “parent files”, because the other documents inherit the parent’s values. Then each of your calculation documents can import the shared values in two lines of code. </p>
+<p><span class="hurmet-calc" data-entry="currencies = fetch(&quot;https://api.exchangeratesapi.io/latest?base=USD&quot;) = !"></span></p>
 
-<p>Here’s how it can work.</p>
+<p>That statement fetches exchange rates published by the European Central Bank. The rates are updated once per day.  For a professional bond trader, that would not be adequate, but it is good enough for the rest of us when we want to estimate the cost of a trip.</p>
 
-<p>First, create a text file that sets your values. I’ve put an example of such a file, containing some structural engineering values, at https://gist.githubusercontent.com/ronkok/cbbf6cde15ac1b4c1e65cc338970043a/raw/a8b6bc59a7ee0176c34d646ad539a555a5816ee3/ParentTrial.hrms.</p>
+<p>With our currency rates loaded, we can do unit-aware calculations:</p>
 
-<p>Then, in each calculation document, write two lines of code in Hurmet calculation zones. The first line fetches the parent values. In our example, that line would be written as:</p>
+<p><span class="hurmet-calc" data-entry="format = &quot;f2&quot;"></span></p>
 
-<pre><code>projectParameters = fetch("https://gist.githubusercontent.com/ronkok/cbbf6cde15ac1b4c1e65cc338970043a/raw/1701022ed4d571b82fd0afcac182e0b430fa17c5/ParentTrial.hrms") = !</code></pre>
+<p><span class="hurmet-calc" data-entry="'1000 USD' = ?? CAD"></span></p>
 
-<p></p>
-<p>Note the “= !” at the end of the statement. That will force an evaluation and suppress the value display.</p>
+<p><span class="hurmet-calc" data-entry="'1000 EUR' = ?? USD"></span></p>
 
-<p>Next, we write a line that assigns values to individual variables. An individual calculation document might use only some of the parent values. A document concerned with concrete design might be written like this:</p>
+<p><span class="hurmet-calc" data-entry="'1000 AUD' = ?? JPY"></span></p>
 
-<pre><code>f_c′, f_c′′, f_yr, ρ_0, ρ_max, E_c, n_c = projectParameters["f_c′", "f_c′′", "f_yr", "ρ_0", "ρ_max", "E_c", "n_c"] = !</code></pre>
+<p>A list of the standard three-letter currency codes can be found at: https://www.xe.com/iso4217.php</p>
 
-<p></p>
-<p>Hurmet will render those two lines of code this way:</p>
-
-<p><span class="hurmet-calc" data-entry="projectParameters = fetch(&quot;https://gist.githubusercontent.com/ronkok/cbbf6cde15ac1b4c1e65cc338970043a/raw/1701022ed4d571b82fd0afcac182e0b430fa17c5/ParentTrial.hrms&quot;) = !"></span></p>
-
-<p><span class="hurmet-calc" data-entry="f_c′, f_c′′, f_yr, ρ_0, ρ_max, E_c, n_c = projectParameters[&quot;f_c′&quot;, &quot;f_c′′&quot;, &quot;f_yr&quot;, &quot;ρ_0&quot;, &quot;ρ_max&quot;, &quot;E_c&quot;, &quot;n_c&quot;] = !"></span></p>
-
-<p>Now the variables can be called:</p>
-
-<p><span class="hurmet-calc" data-entry="f_c′ = ? psi"><code>f_c′ = ? psi</code></span></p>
-
-<p><span class="hurmet-calc" data-entry="E_c = ? ksi"><code>E_c = ? ksi</code></span></p>
 <p></p>
 </div> <!-- editor -->
 

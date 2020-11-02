@@ -35,7 +35,8 @@ const lineChartRegEx = /^lineChart/
 const isNameOfAnImmutableVariable = (name, hurmetVars) => {
   if (!name) { return false }
   const variable = hurmetVars[name]
-  return variable && (variable.dtype === dt.MODULE || variable.dtype === dt.DATAFRAME)
+  return variable && (variable.dtype === dt.MODULE || variable.dtype === dt.DATAFRAME ||
+    variable.isFetch)
 }
 
 const immutableErrorAttrs = (attrs) => {
@@ -130,32 +131,38 @@ const proceedAfterFetch = (
   doc.nodesBetween(0, doc.content.size, function(node, pos) {
     if (node.type.name === "calculation") {
       const entry = node.attrs.entry
-      const getsHoisted = isCalcAll
-        ? functionRegEx.test(entry) || dataFrameRegEx.test(entry)
-        : pos === curPos
-        ? false
-        : node.attrs.name && node.attrs.dtype &&
-          (node.attrs.dtype === dt.MODULE || node.attrs.dtype === dt.DATAFRAME ||
-            node.attrs.isFetch)
-      if (getsHoisted) {
-        const attrs = isCalcAll
-          ? prepareStatement(entry, decimalFormat)
-          : clone(node.attrs)
-        if (isCalcAll && isNameOfAnImmutableVariable(attrs.name, hurmetVars)) {
-          if (pos in immutablePositions) {
-            // We addressed this node in the fetches above. Don't re-evaluate it here.
+      const provisionalName = /^[^=]+/.exec(entry)[0]
+      if ((pos in immutablePositions) &&
+        isNameOfAnImmutableVariable(provisionalName, hurmetVars)) {
+          //We addressed this node in the fetches above. Don't re-evaluate it here.
+      } else {
+        const getsHoisted = isCalcAll
+          ? functionRegEx.test(entry) || dataFrameRegEx.test(entry)
+          : pos === curPos
+          ? false
+          : node.attrs.name && node.attrs.dtype &&
+            (node.attrs.dtype === dt.MODULE || node.attrs.dtype === dt.DATAFRAME ||
+              node.attrs.isFetch)
+        if (getsHoisted) {
+          const attrs = isCalcAll
+            ? prepareStatement(entry, decimalFormat)
+            : clone(node.attrs)
+          if (isCalcAll && isNameOfAnImmutableVariable(attrs.name, hurmetVars)) {
+            if (pos in immutablePositions) {
+              // We addressed this node in the fetches above. Don't re-evaluate it here.
+            } else {
+              // A UDF or data frame has already been assigned to this variable.
+              // Write an error message.
+              node.attrs = immutableErrorAttrs(attrs)
+              tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs))
+            }
           } else {
-            // A UDF or data frame has already been assigned to this variable.
-            // Write an error message.
-            node.attrs = immutableErrorAttrs(attrs)
-            tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs))
+            if (isCalcAll) {
+              tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs))
+            }
+            insertOneHurmetVar(hurmetVars, attrs)
+            immutablePositions.push(pos)
           }
-        } else {
-          if (isCalcAll) {
-            tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs))
-          }
-          insertOneHurmetVar(hurmetVars, attrs)
-          immutablePositions.push(pos)
         }
       }
     }
@@ -310,9 +317,7 @@ const workAsync = (
       tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs))
       if (attrs.name) {
         insertOneHurmetVar(hurmetVars, attrs)
-        if (attrs.dtype === dt.MODULE || attrs.dtype === dt.DATAFRAME) {
-          immutablePositions.push(pos)
-        }
+        immutablePositions.push(pos)
       }
     }
     // There. Fetches are done and are loaded into the document.
