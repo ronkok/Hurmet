@@ -131,7 +131,7 @@ const proceedAfterFetch = (
   doc.nodesBetween(0, doc.content.size, function(node, pos) {
     if (node.type.name === "calculation") {
       const entry = node.attrs.entry
-      const provisionalName = /^[^=]+/.exec(entry)[0]
+      const provisionalName = entry === "" ? "" : /^[^=]+/.exec(entry)[0]
       if ((pos in immutablePositions) &&
         isNameOfAnImmutableVariable(provisionalName, hurmetVars)) {
           //We addressed this node in the fetches above. Don't re-evaluate it here.
