@@ -59,25 +59,17 @@
 
 <p>This week’s example:</p>
 
-<h3>Foreign Exchange</h3>
+<h3>Simple span beam</h3>
 
-<p>Hurmet’s unit-aware calculations can handle foreign exchange. Start by fetching the current exchange rates, like this:</p>
+<p><span class="hurmet-calc" data-entry="L = '12 feet'"></span>, length</p>
 
-<p><span class="hurmet-calc" data-entry="currencies = fetch(&quot;https://api.exchangeratesapi.io/latest?base=USD&quot;) = !"></span></p>
+<p><span class="hurmet-calc" data-entry="w = '110 lbf/ft'"></span>, uniform line load</p>
 
-<p>That statement fetches exchange rates published by the European Central Bank. The rates are updated once per day.  For a professional bond trader, that would not be adequate, but it is good enough for the rest of us when we want to estimate the cost of a trip.</p>
+<p><span class="hurmet-calc" data-entry="P = '1000 lbf'"></span>, mid-span point load</p>
 
-<p>With our currency rates loaded, we can do unit-aware calculations:</p>
+<p><span class="hurmet-calc" data-entry="V = (w L)/2 + P/2 = ?? lbf"></span>, maximum shear</p>
 
-<p><span class="hurmet-calc" data-entry="format = &quot;f2&quot;"></span></p>
-
-<p><span class="hurmet-calc" data-entry="'1000 USD' = ?? CAD"></span></p>
-
-<p><span class="hurmet-calc" data-entry="'1000 EUR' = ?? USD"></span></p>
-
-<p><span class="hurmet-calc" data-entry="'1000 AUD' = ?? JPY"></span></p>
-
-<p>A list of the standard three-letter currency codes can be found at: https://www.xe.com/iso4217.php</p>
+<p><span class="hurmet-calc" data-entry="M = (w L^2)/8 + (P L)/4 = ?? lbf-ft"></span>, max bending moment</p>
 
 <p></p>
 </div> <!-- editor -->
