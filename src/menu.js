@@ -376,14 +376,7 @@ const pruneHurmet = node => {
             if ((child[i].type === "calculation" && child[i].attrs.entry.length === 0) ||
                 (child[i].type === "tex" && child[i].attrs.tex.length === 0)) {          
               // Remove the empty cell from the paragraph array
-              if (i === child.length - 1) {
-                child.pop()
-              } else if (i === 0) {
-                child.shift()
-                break
-              } else {
-                child.splice(i, 1)
-              }
+              child.splice(i, 1)
             }
           }
         }
