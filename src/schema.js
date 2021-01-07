@@ -312,8 +312,12 @@ export const nodes = {
         } else {
           const tex = node.attrs.tex
           const isFF = 'MozAppearance' in document.documentElement.style
-          katex.render(tex, dom, { displayMode: false, strict: false, throwOnError: false,
-              output: isFF ? "mathml" : "htmlAndMathml", minRuleThickness: 0.06 })
+          if (isFF) {
+            temml.render(tex, dom, { displayMode: false })
+          } else {
+            katex.render(tex, dom, { displayMode: false, strict: false, throwOnError: false,
+              minRuleThickness: 0.06 })
+          }
         }
         // Before writing to DOM, I filter out most of the run-time info in node.attrs.
         dom.dataset.entry = node.attrs.entry

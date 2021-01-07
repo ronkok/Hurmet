@@ -1,3 +1,5 @@
+@namespace m url('http://www.w3.org/1998/Math/MathML');
+
 .ProseMirror {
   position: relative;
   content-visibility: auto;
@@ -406,5 +408,4 @@ li.ProseMirror-selectednode:after {
 .ProseMirror p.indented { margin-left: 2em; }
 
 .katex { font-size: 1em; }
-
-math { font-family: "Cambria Math", "Times New Roman", serif; }
+m|math.temml { font-size: 1em; }
