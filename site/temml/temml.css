@@ -7,22 +7,11 @@
   font-style: normal;
 }
 
-@font-face {
-  font-family: Latin Modern Math;
-  src: local('Latin Modern Math'),
-       local('LatinModernMath-Regular'),
-       url('latinmodern-math.woff2');
-}
-
 m|math.temml {
   font-family: "Cambria Math", "Times New Roman", serif;
   font-size: 1.15em;
   line-height: 1.2;
   text-indent: 0;
-}
-
-.latin-modern m|math.temml {
-  font-family: "Latin Modern Math";
 }
 
 m|math.temml .script {
