@@ -1391,7 +1391,7 @@ Hurmet is built with the aid of several open source libraries and resources, for
 
 <br>
 
-<span class="reduced">Copyright © 2020 Ron Kok. Released under the [MIT License](https://opensource.org/licenses/MIT)</span>
+<span class="reduced">Copyright © 2020-2021 Ron Kok. Released under the [MIT License](https://opensource.org/licenses/MIT)</span>
 
 <br>
 
