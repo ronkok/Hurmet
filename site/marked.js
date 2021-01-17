@@ -7,7 +7,6 @@
 
  /** 
   * This file is lightly edited in order to parse Hurmet math between ¢…¢ or $…$ delimiters.
-  * It also adds partial support for definition lists.
   * To find the edited lines, search for "¢" or "hurmet".
  */
 

@@ -426,8 +426,8 @@ export class MarkdownSerializerState {
     }
     const colWidth = new Array(numCols).fill(0)
     let tableState = new MarkdownSerializerState(hurmetNodes, hurmetMarks)
-    const startRow = hasHeadings ? 0 : 1
-    for (let i = startRow; i < rows.length; i++) {
+//    const startRow = hasHeadings ? 0 : 1
+    for (let i = 0; i < rows.length; i++) {
       for (let j = 0; j < numCols; j++) {
         const graf = rows[i].content.content[j].content.content[0] 
         if (graf.content.content.length > 0) {
