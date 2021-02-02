@@ -1,5 +1,3 @@
-@namespace m url('http://www.w3.org/1998/Math/MathML');
-
 @font-face {
   font-family: 'KaTeX_Script';
   src: url('KaTeX_Script-Regular.woff2') format('woff2');
@@ -7,19 +5,36 @@
   font-style: normal;
 }
 
-m|math.temml {
-  font-family: "Cambria Math", "Times New Roman", serif;
-  font-size: 1.15em;
-  line-height: 1.2;
+temml {
+  font-family: serif;
+  font-style: normal;
+  font-weight: normal;
+  line-height: normal;
+  font-size-adjust: none;
   text-indent: 0;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  direction: ltr;
+  border-color: currentColor;
 }
 
-m|math.temml .script {
+temml .script {
   font-family: "KaTeX_Script", serif;
 }
 
-m|math.temml .oldstylenums {
+temml .oldstylenums {
   font-family: Cambria, "Times New Roman", serif;
   font-variant-numeric: oldstyle-nums;
   font-feature-settings: 'onum';
+}
+
+/* AMS environment auto-numbering via CSS counter. */
+.tml-eqn::before {
+  counter-increment: tmlEqnNo;
+  content: "(" counter(tmlEqnNo) ")";
+}
+
+body {
+  counter-reset: tmlEqnNo;
 }
