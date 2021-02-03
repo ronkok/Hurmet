@@ -356,8 +356,12 @@ export const nodes = {
         dom.innerText = tex
       } else {
         const isFF = 'MozAppearance' in document.documentElement.style
-        katex.render(tex, dom, { displayMode: false, strict: false, throwOnError: false,
-          output: isFF ? "mathml" : "htmlAndMathml", minRuleThickness: 0.06 })
+        if (isFF) {
+          temml.render(tex, dom, { displayMode: false })
+        } else {
+          katex.render(tex, dom, { displayMode: false, strict: false, throwOnError: false,
+            minRuleThickness: 0.06 })
+        }
       }
       return dom
     }
