@@ -747,6 +747,7 @@ export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
         popTexTokens(2, okToAppend)
         const ch = token.input.charAt(0)
         if (isCalc) { rpn += ch + token.output + ch }  // Keep before addTextEscapes()
+        if (isPrecededBySpace) { posOfPrevRun = tex.length }
         token.output = addTextEscapes(token.output)
         token.output = token.output.replace(/ +$/, "\\,") // Prevent loss of trailing space
         tex += "\\text{" + token.output + "}"
