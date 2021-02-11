@@ -1059,7 +1059,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             if (unit.dtype && unit.dtype === dt.ERROR) { return errorOprnd("UNIT_NAME") }
             if (isMatrix(o1)) {
               output.unit.expos = o1.unit.expos.map((e, j) => e + unit.expos[j])
-              o1.value = Matrix.convertToBaseUnits(o1, unit.gauge, unit.factor)
+              output.value = Matrix.convertToBaseUnits(o1, unit.gauge, unit.factor)
             } else if (o1.dtype & dt.MAP) {
               output.unit = unitFromUnitName(o1.unit)
               output.value = o1.value
