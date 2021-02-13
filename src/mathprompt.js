@@ -146,7 +146,7 @@ export function openMathPrompt(options) {
       try {
         const isFF = 'MozAppearance' in document.documentElement.style
         // eslint-disable-next-line no-undef
-        katex.render(tex, mathDisplay, { displayMode: false, strict: false,
+        katex.render(tex, mathDisplay, { displayMode: options.attrs.displayMode, strict: false,
           output: isFF ? "mathml" : "htmlAndMathml" })
       } catch (err) {
         while (mathDisplay.lastChild) {
@@ -179,6 +179,7 @@ export function openMathPrompt(options) {
       ? { tex: mathString }
       // eslint-disable-next-line no-undef
       : hurmet.prepareStatement(mathString, options.decimalFormat)
+    params.displayMode = options.attrs.displayMode
     close()
     options.callback(params)
   }

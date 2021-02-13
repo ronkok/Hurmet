@@ -96,6 +96,10 @@ const hurmetNodes =  {
     state.renderInline(node)
     state.closeBlock(node)
   },
+  centered_paragraph(state, node) {
+    state.renderInline(node)
+    state.closeBlock(node)
+  },
   hidden_paragraph(state, node) {
     state.renderInline(node)
     state.closeBlock(node)
@@ -123,12 +127,14 @@ const hurmetNodes =  {
     state.text(node.text)
   },
   tex(state, node) {
-    state.write("$" + node.attrs.tex.trim() + "$")
+    const delimiter = node.attrs.displayMode ? "$$" : "$"
+    state.write(delimiter + node.attrs.tex.trim() + delimiter)
   },
   calculation(state, node) {
     const entry = node.attrs.entry.trim()
+    const delimiter = node.attrs.displayMode ? "¢¢" : "¢"
     if (entry.indexOf("\n") === -1) {
-      state.write("¢" + entry + "¢")
+      state.write(delimiter + entry + delimiter)
     } else {
       state.write("```hurmetCalc\n")
       state.text(entry, false)

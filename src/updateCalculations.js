@@ -147,6 +147,7 @@ const proceedAfterFetch = (
           const attrs = isCalcAll
             ? prepareStatement(entry, decimalFormat)
             : clone(node.attrs)
+          attrs.displayMode = node.attrs.displayMode
           if (isCalcAll && isNameOfAnImmutableVariable(attrs.name, hurmetVars)) {
             if (pos in immutablePositions) {
               // We addressed this node in the fetches above. Don't re-evaluate it here.
@@ -190,6 +191,7 @@ const proceedAfterFetch = (
       // Now proceed to do the calculation of the cell.
       if (attrs.rpn) { attrs = evaluate(attrs, hurmetVars, decimalFormat) }
       if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs) }
+      attrs.displayMode = nodeAttrs.displayMode
       tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(attrs))
     }
   }
@@ -204,6 +206,7 @@ const proceedAfterFetch = (
         let attrs = isCalcAll || lineChartRegEx.test(entry)
           ? prepareStatement(entry, decimalFormat)
           : clone(node.attrs)
+        attrs.displayMode = node.attrs.displayMode
         if (!isNameOfAnImmutableVariable(attrs.name, hurmetVars)) {
           if (isCalcAll) { prepareResult(attrs, hurmetVars) }
           if (attrs.rpn) { attrs = evaluate(attrs, hurmetVars, decimalFormat) }

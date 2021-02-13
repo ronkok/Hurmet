@@ -385,8 +385,12 @@ const pruneHurmet = node => {
         }
       } else if (child.type) {
         if (child.type === "calculation") {
-          // Prune the attributes. Keep only the entry.
-          child.attrs = { entry: child.attrs.entry }
+          // Prune the attributes. Keep only the entry and the displayMode.
+          if (child.attrs.displayMode) {
+            child.attrs = { entry: child.attrs.entry, displayMode: true }
+          } else {
+            child.attrs = { entry: child.attrs.entry }
+          }
         } else if (child.type === "tex") {
           // Do nothing.
         } else {
@@ -537,6 +541,11 @@ export function insertMath(state, view, encoding) {
   }
   const tr = view.state.tr
   const pos = tr.selection.from
+
+  // Check f the cell should be type set as display mode.
+  const parent = state.doc.resolve(pos).parent
+  if (parent.type.name === "centered_paragraph") { attrs.displayMode = true }
+
   tr.replaceSelectionWith(nodeType.createAndFill(attrs))
   tr.setSelection(NodeSelection.create(tr.doc, pos))
   view.dispatch(tr)
@@ -544,7 +553,7 @@ export function insertMath(state, view, encoding) {
 
 function mathMenuItem(nodeType, encoding) {
   return new MenuItem({
-    title: "Insert " + ((encoding === "calculation") ? "a calculation cell  Alt-C" : "a LaTeX cell"),
+    title: "Insert " + ((encoding === "calculation") ? "a calculation cell  Alt-C" : "a TeX cell"),
     icon: (encoding === "calculation") ? hurmetIcons.plus : hurmetIcons.integral,
     enable(state) { return canInsert(state, nodeType) },
     run(state, _, view) {
@@ -888,7 +897,12 @@ export function buildMenuItems(schema) {
       title: "Indent paragraph",
       icon: hurmetIcons.indent
     })
-    if ((type = schema.nodes.hidden_paragraph))
+  if ((type = schema.nodes.centered_paragraph))
+    r.wrapCentered = blockTypeItem(type, {
+      title: "Centered paragraph",
+      icon: hurmetIcons["align-center"]
+    })
+  if ((type = schema.nodes.hidden_paragraph))
     r.wrapHidden = blockTypeItem(type, {
       title: "Unprinted paragraph",
       icon: hurmetIcons.noprint
@@ -1014,6 +1028,7 @@ export function buildMenuItems(schema) {
       r.makeCodeBlock,
       r.makeHead1, r.makeHead2, r.makeHead3, r.makeHead4, r.makeHead5, r.makeHead6,
       r.wrapIndent,
+      r.wrapCentered,
       r.wrapHidden
     ])]
 

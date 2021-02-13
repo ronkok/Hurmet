@@ -82,6 +82,14 @@ export const nodes = {
     parseDOM: [{tag: "p.indented"}],
   },
 
+  //:: NodeSpec A center-aligned paragraph.
+  centered_paragraph: {
+    group: "block",
+    content: "inline*",
+    toDOM () { return ['p', { class: 'centered' }, 0] },
+    parseDOM: [{tag: "p.centered"}],
+  },
+
   //:: NodeSpec A paragraph that does not get printed.
   hidden_paragraph: {
     group: "block",
@@ -273,6 +281,7 @@ export const nodes = {
       // (What isn't saved cannot break a document.)
       // When a document is re-opened, all but the entries must be recalculated.
       entry: { default: "" }, //          Raw string input by the author, edited for decimal.
+      displayMode: { default: false }, // Type set in TeX display mode if true.
       name: {default: null}, //           Name of cell, as in "x" from x = 12
       tex: {default: ""}, //              The string I pass to KaTeX for final rendering.
       alt: {default: ""}, //              The string I render when in draft mode.
@@ -294,7 +303,8 @@ export const nodes = {
       error: {default: false} //          boolean. True if calculation resulted in an error.
     },
     parseDOM: [{tag: "span.hurmet-calc",  getAttrs(dom) {
-      return { entry: dom.getAttribute('data-entry') }
+      const displayMode = Boolean(dom.getAttribute('data-display')) || false
+      return { entry: dom.getAttribute('data-entry'), displayMode }
     }}],
     toDOM(node) {
       let dom
@@ -313,14 +323,15 @@ export const nodes = {
           const tex = node.attrs.tex
           const isFF = 'MozAppearance' in document.documentElement.style
           if (isFF) {
-            temml.render(tex, dom, { displayMode: false })
+            temml.render(tex, dom, { displayMode: node.attrs.displayMode })
           } else {
-            katex.render(tex, dom, { displayMode: false, strict: false, throwOnError: false,
-              minRuleThickness: 0.06 })
+            katex.render(tex, dom, { displayMode: node.attrs.displayMode, strict: false,
+              throwOnError: false, minRuleThickness: 0.06 })
           }
         }
         // Before writing to DOM, I filter out most of the run-time info in node.attrs.
         dom.dataset.entry = node.attrs.entry
+        if (node.attrs.displayMode) { dom.dataset.display = "true" }
       } else {
         dom = document.createElement('span')
         dom.classList = "chart-container hurmet-calc"
@@ -343,25 +354,23 @@ export const nodes = {
     marks: "",
     group: "inline",
     inline: true,
-    attrs: { tex: {default: "" }, isSelected: {default: false} },
+    attrs: { tex: {default: ""}, displayMode: { default: false } },
     parseDOM: [{tag: "span.hurmet-tex",  getAttrs(dom) {
-      return { tex: dom.getAttribute('data-tex') }
+      const displayMode = Boolean(dom.getAttribute('data-display')) || false
+      return { tex: dom.getAttribute('data-tex'), displayMode }
     }}],
     toDOM(node) {
       const dom = document.createElement('span')
       dom.classList = "hurmet-tex"
       const tex = node.attrs.tex
       dom.dataset.tex = tex
-      if (node.attrs.isSelected) {
-        dom.innerText = tex
+      if (node.attrs.displayMode) { dom.dataset.display = "true" }
+      const isFF = 'MozAppearance' in document.documentElement.style
+      if (isFF) {
+        temml.render(tex, dom, { displayMode: node.attrs.displayMode })
       } else {
-        const isFF = 'MozAppearance' in document.documentElement.style
-        if (isFF) {
-          temml.render(tex, dom, { displayMode: false })
-        } else {
-          katex.render(tex, dom, { displayMode: false, strict: false, throwOnError: false,
-            minRuleThickness: 0.06 })
-        }
+        katex.render(tex, dom, { displayMode: node.attrs.displayMode, strict: false,
+          throwOnError: false, minRuleThickness: 0.06 })
       }
       return dom
     }

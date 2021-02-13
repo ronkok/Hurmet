@@ -42,7 +42,7 @@ Hurmet provides rich-text editing capabilities. You can apply styles to a docume
 
 |||
 |:--------------------------------------------------------|:-----------------------------------|
-|__≡__ ![folder-open] ![save] ● ![draft] ![recalc] ![header] ![printer]| Document operations:<br>Navigate…, Open file…, Save file…, Set decimal format, Draft mode, Recalculate all, Create print header, Print…
+|__≡__ ![folder-open] ![save] **M** ● ![draft] ![recalc] ![header] ![printer]| Document operations:<br>Navigate…, Open file…, Save file…, Import/Export to Markdown, Set decimal format, Draft mode, Recalculate all, Create print header, Print…
 |![undo]  ![redo]                                         | Editing: Undo, Redo
 |__B__  __*I*__  ![embed] __X<sub>2</sub>__  __X<sup>2</sup>__ ![strikethrough]  __<u>U</u>__ | Character styles:<br>Bold, Italic, Code, Subscript, Superscript, Strikethrough, Underline
 |![link] __—__ ![upload] ![image] ![plus] ![integral]     | Insert:<br>Link…, Horizontal rule, Uploaded image…, Link to image…, Hurmet calculation…, TeX…
@@ -86,25 +86,17 @@ Hurmet provides rich-text editing capabilities. You can apply styles to a docume
 [align-right]: ../../images/align-right.svg "align-right"
 [info]: ../../images/info.svg "information"
 
-Hurmet’s foremost feature is its calculation cells. The rest of this document is about them. But first I'll note two other features:
+Hurmet’s foremost feature is its calculation cells. The rest of this document is about them. But first I'll note one other feature:
 
 #### TeX
 
 Besides its calculation cells, Hurmet also has cells that emulate the math mode of ¢\TeX¢. These cells display, but do not calculate, math. You can insert a TeX cell by clicking the ![integral] button. Type __Shift-Enter__ to save the cell.
 
+To create a cell in TeX display mode, first change the paragraph format to center-justified, then create the cell.
+
 For more information about TeX and LaTeX, good places to start are the Wikibooks pages for writing [math] and [advanced math]; and the KaTeX [home page] and [supported-functions] page.
 
 Hurmet calculation cells use a different syntax than TeX. In calculation cells, the syntax is more akin to a programming language, yet it renders like mathematics.
-
-#### Markdown
-
-Hurmet can export or import a document in [Markdown](https://guides.github.com/features/mastering-markdown/ "Markdown") format. This is useful for collaboration
-
-Say that you have written a calculation. It’s awesome and you want to share it so that others can use it as a template. An easy way to share work is via a GitHub [Gist](https://gist.github.com/ "Gist"). Then anyone can view it, download it, or comment on it. If it is in Markdown format, you can read the Gist right there on GitHub. Here’s an [example](https://gist.github.com/ronkok/7fec7d11f6fb6a031e5a0827e3531d68).
-
-Hurmet’s version of Markdown adds two extensions that GitHub does not recognize, those being TeX math content between `$…$` delimiters and calculation cells between `¢…¢` delimiters. It’s okay to write math into your document. It’s just that GitHub will not render it as math. Instead, GitHub will display the raw code. You can still read it.
-
-GitHub Gists work best for simple content. Markdown does not recognize indented paragraphs or table styles. Markdown table cells cannot be merged and cannot contain lists or multiple paragraphs.
 
 And now, on to the main event, Hurmet’s calculations.
 
@@ -402,6 +394,7 @@ Hurmet will render single Latin letter variable names in *italic*. Function name
 
 ###### String
 <div>
+
 A *string* literal is a string of text characters enclosed by a pair of straight double quotation marks. The string may include any Unicode character except a straight double quotation mark, a newline, or a carriage return.
 
     "This is a string."
@@ -409,9 +402,9 @@ A *string* literal is a string of text characters enclosed by a pair of straight
 You can call a subset of any string with an index or range in brackets. Hurmet indices are one-based. Examples:
 
     a = "abcdefg"
-    a[2]     ## returns "b"
-    a[2:4]   ## returns "bcd"
-    a[5:]    ## returns "efg"
+    a[2]     # returns "b"
+    a[2:4]   # returns "bcd"
+    a[5:]    # returns "efg"
 </div>
 
 ###### Number
@@ -1294,6 +1287,7 @@ A loop can be terminated early via the _break_ keyword. Example:
 
 ###### return
 <div>
+
 A _return_ statement terminates the function.
 
 ![return optional expression](../../images/return-railroad.svg)
@@ -1354,6 +1348,16 @@ Hurmet will run in the Safari browser as soon as it supports a BigInt data type.
 #### Saving files
 
 Tired of saving files to the Download folder? You can pick the folder where you save files, but first you have to change a browser setting.  In Chrome and Edge, go to ⋯ | Settings | Advanced | Downloads and in Firefox, go to ≡ | Options | Downloads.
+
+## Markdown
+
+Hurmet can export or import a document in [Markdown](https://guides.github.com/features/mastering-markdown/ "Markdown") format. This is useful for collaboration
+
+Say that you have written a calculation. It’s awesome and you want to share it so that others can use it as a template. An easy way to share work is via a GitHub [Gist](https://gist.github.com/ "Gist"). Then anyone can view it, download it, or comment on it. If it is in Markdown format, you can read the Gist right there on GitHub. Here’s an [example](https://gist.github.com/ronkok/7fec7d11f6fb6a031e5a0827e3531d68).
+
+Hurmet’s version of Markdown adds two extensions that GitHub does not recognize, those being TeX math content between `$…$` delimiters and calculation cells between `¢…¢` delimiters. It’s okay to write math into your document. It’s just that GitHub will not render it as math. Instead, GitHub will display the raw code. You can still read it.
+
+GitHub Gists work best for simple content. Markdown does not recognize indented paragraphs or table styles. Markdown table cells cannot be merged and cannot contain lists or multiple paragraphs.
 
 ## Coming Attractions
 
@@ -1496,6 +1500,7 @@ Hurmet is built with the aid of several open source libraries and resources, for
 <details><summary>End notes</summary>
 
 * [Troubleshooting](#troubleshooting)
+* [Markdown](#markdown)
 * [Coming Attractions](#coming-attractions)
 * [Other Resources](#other-resources)
 * [Credits](#credits)
