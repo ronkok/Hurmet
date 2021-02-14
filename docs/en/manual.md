@@ -46,7 +46,7 @@ Hurmet provides rich-text editing capabilities. You can apply styles to a docume
 |![undo]  ![redo]                                         | Editing: Undo, Redo
 |__B__  __*I*__  ![embed] __X<sub>2</sub>__  __X<sup>2</sup>__ ![strikethrough]  __<u>U</u>__ | Character styles:<br>Bold, Italic, Code, Subscript, Superscript, Strikethrough, Underline
 |![link] __—__ ![upload] ![image] ![plus] ![integral]     | Insert:<br>Link…, Horizontal rule, Uploaded image…, Link to image…, Hurmet calculation…, TeX…
-|__¶__ ![embed] __H1 H2__ ![indent] ![noprint] ![list] ![list-numbered] ![quotes] |Block styles:<br>Plain paragraph, Code block, Headings, Indent, Non-printing paragraph, List, Ordered list, Block quote
+|__¶__ ![embed] __H1 H2__ ![align-center] ![indent] ![noprint] ![list] ![list-numbered] ![quotes] |Block styles:<br>Plain paragraph, Code block, Headings, Centered paragraph, Indent, Non-printing paragraph, List, Ordered list, Block quote
 |![table] ![insert-row] ![insert-column] ![delete-table] ![delete-row] ![delete-column] ![merge] ![align-left] ![align-center] ![align-right] Tbl Style | Table:<br>Insert table, Insert row, Insert column, Delete table, Delete row, Delete column, Toggle cell merge, Align left, Align center, Align right, Set table style
 |![info]   | Information
 
@@ -195,6 +195,10 @@ Hurmet can automatically handle unit conversions of quantities. To call for a un
 
 This is covered in more detail [below](#unit-aware-calculations).
 </div>
+
+###### Display Mode
+
+Display mode centers a calculation cell and enlarges summation symbols and integration symbols. To get display mode, first set a paragraph to centered, then create the cell.
 
 ## Quick Reference
 
@@ -774,6 +778,10 @@ cosh(*x*), sinh(*x*), tanh(*x*), sech(*x*), csch(*x*), coth(*x*)
 count(*str*, *pattern*)
 
 : The number of times string *pattern* occurs in string *str*.
+
+dataframe(**a**, **b**, …)
+
+: Takes vectors as arguments and returns a dataframe.
 
 exp(*x*)
 
@@ -1421,6 +1429,7 @@ Hurmet is built with the aid of several open source libraries and resources, for
 * [Accents and Primes](#accents-and-primes)
 * [Quantities](#quantities)
 * [Unit-Aware Calcs](#unit-aware-calcs)
+* [Display Mode](#display-mode)
 
 </details>
 </li>

@@ -336,7 +336,52 @@ const dataFrameFromCSV = (str, vars) => {
   }
 }
 
+const dataFrameFromVectors = (vectors, vars) => {
+  // Take an array of vectors and return a dataframe.
+  const data = []
+  const columns = []
+  const columnMap = Object.create(null)
+  const units = []
+  const dtype = []
+  const unitMap = Object.create(null)
+  for (let j = 0; j < vectors.length; j++) {
+    const vector = vectors[j]
+    const vectorType = (vector.dtype & dt.ROWVECTOR)
+      ? dt.ROWVECTOR
+      : (vector.dtype & dt.COLUMNVECTOR)
+      ? dt.COLUMNVECTOR
+      : dt.ERROR
+    if (vectorType === dt.ERROR) { return errorOprnd("NOT_VECTOR") }
+    columns.push(vector.name)
+    columnMap[vector.name] = j
+    data.push(vector.value)
+    dtype.push(vector.dtype - vectorType)
+    if (vector.unit.name) {
+      units.push(vector.unit.name)
+      if (!unitMap[vector.unit.name]) {
+        const unit = unitFromUnitName(vector.unit.name, vars)
+        unitMap[vector.unit.name] = unit
+      }
+    } else {
+      units.push(null)
+    }
+  }
+  return {
+    value: {
+      data: data,
+      columns: columns,
+      columnMap: columnMap,
+      rowMap: false,
+      units: units,
+      dtype: dtype
+    },
+    unit: unitMap,
+    dtype: dt.DATAFRAME
+  }
+}
+
 const append = (o1, o2, vars) => {
+  // Append a vector to a dataframe.
   const numRows = o1.value.data[0].length
   if (o2.value.length !== numRows) { return errorOprnd("") }
   const oprnd = clone(o1)
@@ -451,6 +496,7 @@ const displayAlt = df => {
 export const DataFrame = Object.freeze({
   append,
   dataFrameFromCSV,
+  dataFrameFromVectors,
   display,
   displayAlt,
   range

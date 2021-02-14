@@ -74,7 +74,8 @@ const errorMessages = Object.freeze({
     NOT_ARRAY: `Error. Cannot check if an element is in the second operand because
  the second operand is not an array.`,
     MULT_MIS:  "Error. Mismatch in number of multiple assignment.",
-    COUNT:     "Error. The count() function works only on strings."
+    COUNT:     "Error. The count() function works only on strings.",
+    NOT_VECTOR:"Error. Arguments to dataframe() must be vectors."
   }
 })
 

@@ -23,7 +23,7 @@ const builtInFunctions = [
   "tanh", "trace", "transpose", "zeros", "Γ"
 ]
 
-const builtInReducerFunctions = [
+const builtInReducerFunctions = ["dataframe",
   "lineChart", "max", "mean", "median", "min", "product", "range", "stddev", "sum", "variance"
 ]
 

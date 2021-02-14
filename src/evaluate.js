@@ -756,6 +756,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
+        case "dataframe":
         case "max":
         case "min":
         case "sum":
@@ -774,6 +775,13 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             const datum = stack.pop()
             if (!(datum.dtype & dt.RATIONAL)) { return errorOprnd("") }
             args.unshift(datum)
+          }
+
+          if (tkn === "dataframe") {
+            const df = DataFrame.dataFrameFromVectors(args, vars)
+            if (df.dtype && df.dtype === dt.ERROR) { return df }
+            stack.push(df)
+            break
           }
 
           const output = Object.create(null)
