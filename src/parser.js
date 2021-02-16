@@ -893,7 +893,7 @@ export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
         if (token.input === "//") {
           // case fraction
           texStack.push({ prec: 2, pos: op.pos, ttype: tt.DIV, closeDelim: "}" })
-          tex = tex.substring(0, op.pos) + "\\frac{" + tex.substring(op.pos) + "}{"
+          tex = tex.substring(0, op.pos) + "\\tfrac{" + tex.substring(op.pos) + "}{"
         } else if (token.input === "/") {
           // displaystyle fraction
           texStack.push({ prec: 2, pos: op.pos, ttype: tt.DIV, closeDelim: "}" })
