@@ -46,8 +46,8 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAwar
         )
 
       } else if (result.dtype === dt.DATAFRAME) {
-        resultDisplay = DataFrame.display(result.value)
-        altResultDisplay = DataFrame.displayAlt(result.value)
+        resultDisplay = DataFrame.display(result.value, formatSpec, decimalFormat)
+        altResultDisplay = DataFrame.displayAlt(result.value, formatSpec, decimalFormat)
 
       } else if (result.dtype & dt.MAP) {
         resultDisplay = map.display(

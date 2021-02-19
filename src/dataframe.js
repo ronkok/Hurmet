@@ -5,6 +5,7 @@ import { unitFromUnitName } from "./units"
 import { errorOprnd } from "./error"
 import { parse } from "./parser"
 import { Matrix } from "./matrix"
+import { format } from "./format"
 
 const columnListFromRange = (start, end) => {
   const columnList = []
@@ -397,7 +398,7 @@ const append = (o1, o2, vars) => {
   return oprnd
 }
 
-const display = df => {
+const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.") => {
   const numRows = df.data[0].length
   const numCols = df.data.length
   const numColsInHeading = numCols + (df.rowMap ? 0 : 1)
@@ -432,14 +433,13 @@ const display = df => {
 
   // Write the data
   for (let i = 0; i < numRows; i++) {
-    if (!df.rowMap) { str += String(i + 1) + " &" }
+    if (!df.rowMap) { str += String(i + 1) + " & " }
     for (let j = 0; j < numCols; j++) {
       const datum = df.data[j][i]
       str += datum === undefined
         ? "&"
         : (df.dtype[j] & dt.RATIONAL)
-        ? Rnl.toString(datum, Math.floor(Math.log10(Number(datum[1]))))
-            .replace(",", "{,}") + " &"
+        ? format(datum, formatSpec, decimalFormat) + "&"
         : (df.dtype[j] & dt.STRING)
         ? "\\text{" + addTextEscapes(datum) + "}&"
         : (df.dtype[j] & dt.BOOLEAN)
