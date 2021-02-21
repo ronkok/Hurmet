@@ -61,27 +61,26 @@
 
 <p>This week’s example:</p>
 
-<h3>Simple span beam</h3>
-
-<p><span class="hurmet-calc" data-entry="L = '12 feet'"></span>, length</p>
-
-<p><span class="hurmet-calc" data-entry="w = '110 lbf/ft'"></span>, uniform line load</p>
-
-<p><span class="hurmet-calc" data-entry="P = '1000 lbf'"></span>, mid-span point load</p>
-
-<p><span class="hurmet-calc" data-entry="V = (w L)/2 + P/2 = ?? lbf"></span>, maximum shear</p>
-
-<p><span class="hurmet-calc" data-entry="M = (w L^2)/8 + (P L)/4 = ?? lbf-ft"></span>, max bending moment</p>
-
-<h3>New Features</h3>
-
-<p>This week, Hurmet has three new features:</p>
-
-<ol>
-  <li>Centered paragraphs. Available via the <img src="images/align-center.svg" alt="align-center"> button.</li>
-  <li>Math in display mode, which centers the cell and enlarges integration symbols. Get display mode by first setting a paragraph to centered, then creating a calculation cell or a TeX cell.</li>
-  <li>New function <em>dataframe(a, b, …)</em>. Takes vectors as arguments and returns a dataframe.</li>
-</ol>
+<h3>Herd Immunity Countdown</h3>
+<p>John D. Cook recently posted a <a href="https://www.johndcook.com/blog/2021/02/19/herd-immunity-countdown/" title="Estimate of time to herd immuniity">calculation</a> to estimate the time to SARS-COV-2 herd immunity. He wrote his example in Python. Let’s see how it looks in Hurmet.</p>
+<p><span class="hurmet-calc" data-entry="format = &quot;h2&quot;"></span>, display decimal fractions as rounded to two significant digits.</p>
+<p><span class="hurmet-calc" data-entry="N_US = 330000000"></span>, approximate US population</p>
+<p><span class="hurmet-calc" data-entry="N_vaccinated = 40000000"></span>, number vaccinated</p>
+<p><span class="hurmet-calc" data-entry="N_infected = 50000000"></span>, number who have been infected. Estimates of this number vary widely.</p>
+<p><span class="hurmet-calc" data-entry="E = 0.9"></span>, vaccine efficacy</p>
+<p><span class="hurmet-calc" data-entry="P_HE = 0.7"></span>, herd immunity portion.</p>
+<p><span class="hurmet-calc" data-entry="P_preImmune = 0.4"></span>, portion who were pre-immune. Estimates range from 0.1 to 0.6. </p>
+<p><span class="hurmet-calc" data-entry="N_preImmune = P_preImmune × N_US = ?"></span>, number of pre-immune</p>
+<p>Adjust for vaccines given to people who are already immune.</p>
+<p><span class="hurmet-calc" data-entry="P_atRisk = 1.0 - (N_preImmune + N_infected)/N_US = ?"></span>, portion at risk.</p>
+<p><span class="hurmet-calc" data-entry="N_newlyImmune = N_vaccinated × E × P_atRisk = ?"></span></p>
+<p><span class="hurmet-calc" data-entry="N_immune = N_preImmune + N_newlyImmune = ?"></span>, number immune at present</p>
+<p><span class="hurmet-calc" data-entry="N_target = P_HE × N_US = ?"></span>, herd immunity target</p>
+<p><span class="hurmet-calc" data-entry="N_needed = N_target - N_immune = ?"></span></p>
+<p><span class="hurmet-calc" data-entry="rate = 1800000"></span>, number of vaccinations per day.</p>
+<p><span class="hurmet-calc" data-entry="T_HE = N_needed/rate = ?"></span>, estimated number of days to herd immunity.</p>
+<p>“Herd immunity” does not mean absolutely zero existence of COVID. It means that infection rates become low enough to allow life to get back to something like normal.</p>
+<p>Many of these numbers are estimates, some with wide ranges. Feel free to plug in your own estimated values and check sensitivity to changes.</p>
 
 <p></p>
 </div> <!-- editor -->
