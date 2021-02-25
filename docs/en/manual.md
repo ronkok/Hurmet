@@ -1349,9 +1349,13 @@ I expect that Chrome and Edge will get a performance boost later this year when 
 
 To get element-wise multiplication of two matrices, the operator symbol must be [explicitly](#matrix-mult) written as `*`.
 
+#### Word wrap
+
+Hurmet soft line breaks occur after *top level* binary operators and relation operators. An operator inside a paren does not qualify. If a calculation runs past the edge of the page, try to rearrange it so less of it is inside parens.
+
 #### Safari
 
-Hurmet will run in the Safari browser as soon as it supports a BigInt data type. It is [nearly there](https://bugs.webkit.org/show_bug.cgi?id=179001).
+Hurmet will run in the Safari browser as soon as it supports a BigInt data type. It is currently working in Safari's Technology Preview version.
 
 #### Saving files
 
