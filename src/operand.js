@@ -67,15 +67,15 @@ export const fromAssignment = (cellAttrs, unitAware) => {
       cellAttrs.dtype === dt.NULL) {
     oprnd.unit = null
   } else if (cellAttrs.dtype & dt.MAP) {
-    oprnd.unit = Object.freeze(cellAttrs.unit)
+    oprnd.unit = Object.freeze(clone(cellAttrs.unit))
   } else if (cellAttrs.dtype === dt.DICT || cellAttrs.dtype === dt.DATAFRAME) {
-    oprnd.unit = Object.freeze(cellAttrs.unit)
+    oprnd.unit = Object.freeze(clone(cellAttrs.unit))
   } else if (cellAttrs.unit && cellAttrs.unit.expos) {
     oprnd.unit = clone(cellAttrs.unit)
   } else {
     oprnd.unit = Object.create(null)
     if (cellAttrs.unit)  { oprnd.unit.name = cellAttrs.unit }
-    if (cellAttrs.expos) { oprnd.unit.expos = cellAttrs.expos }
+    if (cellAttrs.expos) { oprnd.unit.expos = clone(cellAttrs.expos) }
   }
 
   // Get the value.
@@ -83,8 +83,8 @@ export const fromAssignment = (cellAttrs, unitAware) => {
     // Here we discard some of the cellAttrs information. In a unit-aware calculation,
     // number, matrix, and map operands contain only the value.inBaseUnits.
     oprnd.value = Object.freeze(unitAware
-      ? cellAttrs.value.inBaseUnits
-      : cellAttrs.value.plain
+      ? clone(cellAttrs.value.inBaseUnits)
+      : clone(cellAttrs.value.plain)
     )
     oprnd.dtype = cellAttrs.dtype - dt.QUANTITY
 
@@ -95,7 +95,7 @@ export const fromAssignment = (cellAttrs, unitAware) => {
     oprnd.value = ch === '"' && chEnd === '"' ? str.slice(1, -1).trim() : str.trim()
 
   } else {
-    oprnd.value = cellAttrs.value
+    oprnd.value = clone(cellAttrs.value)
   }
 
   return Object.freeze(oprnd)

@@ -85,8 +85,7 @@ export const plugValsIntoEcho = (str, vars, unitAware) => {
       let displaySansUnits = hvar.resultdisplay
       const posUnit = hvar.resultdisplay.lastIndexOf("{\\text{")
       if (posUnit > -1) {
-        displaySansUnits = hvar.resultdisplay.slice(0, posUnit) +
-          hvar.resultdisplay.slice(posUnit).replace(/\{\\text\{[^}]*\}\}/, "").trim()
+        displaySansUnits = hvar.resultdisplay.slice(0, posUnit).trim()
         displaySansUnits = displaySansUnits.replace(/\\; *$/, "").trim()
       }
       display = needsParens ? "\\left(" + displaySansUnits + "\\right)" : displaySansUnits
