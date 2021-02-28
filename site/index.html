@@ -61,26 +61,31 @@
 
 <p>This week’s example:</p>
 
-<h3>Herd Immunity Countdown</h3>
-<p>John D. Cook recently posted a calculation to estimate the time to SARS-COV-2 herd immunity. (https://www.johndcook.com/blog/2021/02/19/herd-immunity-countdown/) He wrote his example in Python. Let’s see how it looks in Hurmet.</p>
-<p><span class="hurmet-calc" data-entry="format = &quot;h2&quot;"></span>, display decimal fractions as rounded to two significant digits.</p>
-<p><span class="hurmet-calc" data-entry="N_US = 330000000"></span>, approximate US population</p>
-<p><span class="hurmet-calc" data-entry="N_vaccinated = 40000000"></span>, number vaccinated</p>
-<p><span class="hurmet-calc" data-entry="N_infected = 50000000"></span>, number who have been infected. Estimates of this number vary widely.</p>
-<p><span class="hurmet-calc" data-entry="E = 0.9"></span>, vaccine efficacy</p>
-<p><span class="hurmet-calc" data-entry="P_HE = 0.7"></span>, herd immunity portion.</p>
-<p><span class="hurmet-calc" data-entry="P_preImmune = 0.4"></span>, portion who were pre-immune. Estimates range from 0.1 to 0.6. </p>
-<p><span class="hurmet-calc" data-entry="N_preImmune = P_preImmune × N_US = ?"></span>, number of pre-immune</p>
-<p>Adjust for vaccines given to people who are already immune.</p>
-<p><span class="hurmet-calc" data-entry="P_atRisk = 1.0 - (N_preImmune + N_infected)/N_US = ?"></span>, portion at risk.</p>
-<p><span class="hurmet-calc" data-entry="N_newlyImmune = N_vaccinated × E × P_atRisk = ?"></span></p>
-<p><span class="hurmet-calc" data-entry="N_immune = N_preImmune + N_newlyImmune = ?"></span>, number immune at present</p>
-<p><span class="hurmet-calc" data-entry="N_target = P_HE × N_US = ?"></span>, herd immunity target</p>
-<p><span class="hurmet-calc" data-entry="N_needed = N_target - N_immune = ?"></span></p>
-<p><span class="hurmet-calc" data-entry="rate = 1800000"></span>, number of vaccinations per day.</p>
-<p><span class="hurmet-calc" data-entry="T_HE = N_needed/rate = ?"></span>, estimated number of days to herd immunity.</p>
-<p>“Herd immunity” does not mean absolutely zero existence of COVID. It means that infection rates become low enough to allow life to get back to something like normal.</p>
-<p>Many of these numbers are estimates, some with wide ranges. Feel free to plug in your own estimated values and check sensitivity to changes.</p>
+<h3>Peanuts Algebra</h3>
+<p>In Tuesday’s Peanuts strip, Peppermint Patty was given a story problem. Let’s do the algebra.</p>
+<blockquote>
+   <p>A man has twenty coins consisting of dimes and quarters.</p>
+</blockquote>
+<p class="indented"><span class="hurmet-calc" data-entry="d + q = 20"></span></p>
+<blockquote>
+   <p>If the dimes were quarters and the quarters were dimes, he would have ninety cents more than he has now.</p>
+</blockquote>
+<p class="indented"><span class="hurmet-calc" data-entry="10 d + 25 q + 90 = 25 d + 10 q"></span></p>
+<blockquote>
+   <p>How many dimes and quarters does he have?</p>
+</blockquote>
+<p><span class="hurmet-calc" data-entry="d + q = 20"></span>, so we know that <span class="hurmet-calc" data-entry="q = 20 - d."></span> Substitute that form of <span class="hurmet-calc" data-entry="q"></span> into the second equation, like this:</p>
+<p class="indented"><span class="hurmet-calc" data-entry="10 d + 25(20-d) + 90 = 25 d + 10(20 - d)"></span></p>
+<p>Do the multiplication on both sides:</p>
+<p class="indented"><span class="hurmet-calc" data-entry="590 - 15 d = 15 d + 200"></span></p>
+<p>Add <span class="hurmet-calc" data-entry="15 d"></span> to both sides and subtract <span class="hurmet-calc" data-entry="200"></span> from both sides:</p>
+<p class="indented"><span class="hurmet-calc" data-entry="390 = 30 d"></span></p>
+<p class="indented"><span class="hurmet-calc" data-entry="d = 390/30 = ?"></span>, thirteen dimes</p>
+<p class="indented"><span class="hurmet-calc" data-entry="q= 20 - d = ?"></span>, seven quarters</p>
+<p>Check the result:</p>
+<p><span class="hurmet-calc" data-entry="actualValue = 10 d + 25 q  = ?"></span></p>
+<p><span class="hurmet-calc" data-entry="counterfactual = 25 d + 10 q = ?"></span></p>
+<p><span class="hurmet-calc" data-entry="difference = counterfactual - actualValue = ?"></span>, okay ✓</p>
 
 <p></p>
 </div> <!-- editor -->
