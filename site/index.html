@@ -61,31 +61,32 @@
 
 <p>This week’s example:</p>
 
-<h3>Peanuts Algebra</h3>
-<p>In Tuesday’s Peanuts strip, Peppermint Patty was given a story problem. Let’s do the algebra.</p>
+<h3>Ergodicity Economics</h3>
+
+<p>In a paper titled <em>Ergodicity Economics</em>, Ole Peters and Alexander Adamou write of a hypothetical game:</p>
 <blockquote>
-   <p>A man has twenty coins consisting of dimes and quarters.</p>
+   <p><sup> </sup>Imagine we offer you the following game: we toss a coin, and if it comes up heads we increase your monetary wealth by 50%; if it comes up tails we reduce your wealth by 40%. We’re not only doing this once, we will do it many times, for example once per week for the rest of your life. Would you accept the rules of our game? Would you submit your wealth to the dynamic our game will impose on it?</p>
 </blockquote>
-<p class="indented"><span class="hurmet-calc" data-entry="d + q = 20"></span></p>
-<blockquote>
-   <p>If the dimes were quarters and the quarters were dimes, he would have ninety cents more than he has now.</p>
-</blockquote>
-<p class="indented"><span class="hurmet-calc" data-entry="10 d + 25 q + 90 = 25 d + 10 q"></span></p>
-<blockquote>
-   <p>How many dimes and quarters does he have?</p>
-</blockquote>
-<p><span class="hurmet-calc" data-entry="d + q = 20"></span>, so we know that <span class="hurmet-calc" data-entry="q = 20 - d."></span> Substitute that form of <span class="hurmet-calc" data-entry="q"></span> into the second equation, like this:</p>
-<p class="indented"><span class="hurmet-calc" data-entry="10 d + 25(20-d) + 90 = 25 d + 10(20 - d)"></span></p>
-<p>Do the multiplication on both sides:</p>
-<p class="indented"><span class="hurmet-calc" data-entry="590 - 15 d = 15 d + 200"></span></p>
-<p>Add <span class="hurmet-calc" data-entry="15 d"></span> to both sides and subtract <span class="hurmet-calc" data-entry="200"></span> from both sides:</p>
-<p class="indented"><span class="hurmet-calc" data-entry="390 = 30 d"></span></p>
-<p class="indented"><span class="hurmet-calc" data-entry="d = 390/30 = ?"></span>, thirteen dimes</p>
-<p class="indented"><span class="hurmet-calc" data-entry="q= 20 - d = ?"></span>, seven quarters</p>
-<p>Check the result:</p>
-<p><span class="hurmet-calc" data-entry="actualValue = 10 d + 25 q  = ?"></span></p>
-<p><span class="hurmet-calc" data-entry="counterfactual = 25 d + 10 q = ?"></span></p>
-<p><span class="hurmet-calc" data-entry="difference = counterfactual - actualValue = ?"></span>, okay ✓</p>
+<p>Let’s restate that. Once per week, we would multiply your wealth by a factor, <span class="hurmet-calc" data-entry="k"></span>. </p>
+<p><span class="hurmet-tex" data-tex="k = \begin{cases}0.6 &amp; \text{with probability 1/2} \\ 1.5 &amp; \text{with probability 1/2}\end{cases}"></span></p>
+<p>Would you take that proposition? The economics textbook concept of Expected Value works out to: <span class="hurmet-calc" data-entry="EV = (1//2)(1.5) + (1//2)(0.6) = ?"></span>. That’s greater than one, so EV tells you that each iteration is a good trade.</p>
+<p>Not so fast. Let’s create a function that simulates the game.</p>
+<p><span class="hurmet-calc" data-entry="function game(W, numberOfIterations)
+   for i in 1:numberOfIterations
+      if random() ≥ 0.5
+         W = 1.5 × W
+      else
+         W = 0.6 × W
+   return W"></span></p>
+<p>Now let’s run the simulation.</p>
+<p><span class="hurmet-calc" data-entry="N = 1000"></span>, number of iterations</p>
+<p><span class="hurmet-calc" data-entry="W =  10000"></span>, starting wealth</p>
+<p><span class="hurmet-calc" data-entry="result = game(W, N) = ?"></span></p>
+<p>Whoa, we just turned 10,000 into a tiny, tiny number. </p>
+<p>The game is set up so that almost everyone who plays will lose and a very few, very lucky players will come out way ahead. Expected value is the wrong criterion to use for this decision.</p>
+<p>“Ergodic” is a term from physics and the kinematic theory of gases. Peters and Adamou use it in economics to distinguish a certain kind of process. Say that a process, like the game, is applied many times. If many people each undergo the process once, then the average is an <em>ensemble</em> average. If one person undergoes the process many times in sequence, then the average is a <em>time-series</em> average. A process is <em>ergodic</em> if the ensemble average is equal to  the time-series average.</p>
+<p>The game is not ergodic and that is why the normal definition of expected value does not apply. Our simulation is a more robust evaluation tool than expected value.</p>
+<p>Note that you can play the simulation many times. It involves a random process, so it will give a different number every time. But in almost every case, the result will be a very small number.</p>
 
 <p></p>
 </div> <!-- editor -->
