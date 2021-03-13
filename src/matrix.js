@@ -384,11 +384,11 @@ const multResultType = (o1, o2) => {
   if ((o1.dtype & dt.ROWVECTOR) && (o2.dtype & dt.COLUMNVECTOR)) {
     return dt.RATIONAL
   } else if ((o1.dtype & dt.MATRIX) && (o2.dtype & dt.COLUMNVECTOR)) {
-    return dt.COLUMNVECTOR
+    return o2.dtype
   } else if ((o1.dtype & dt.ROWVECTOR) && (o2.dtype & dt.MATRIX)) {
-    return dt.ROWVECTOR
+    return o1.dtype
   } else {
-    return dt.MATRIX
+    return dt.MATRIX + dt.RATIONAL
   }
 }
 

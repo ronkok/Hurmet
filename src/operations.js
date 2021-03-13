@@ -130,7 +130,7 @@ const dtype = {
   matrix: {
     scalar(t0, t1) { return t0 },
     rowVector(t0, t1) { return t0 },
-    columnVector(t0, t1) { return t0 },
+    columnVector(t0, t1) { return t1 },
     matrix(t0, t1) { return t0 },
     map(t0, t1)    { return 0 }
   },
@@ -584,7 +584,11 @@ const binary = {
 
     },
     columnVector: {
-
+      multiply(m, v) {
+        // Multiply a matrix times a column vector
+        if (m[0].length !== v.length) { return errorOprnd("MIS_ELNUM") }
+        return m.map(row => dotProduct(row, v))
+      }
     },
     matrix: {
       // Binary operations on two 2-D matrices.
