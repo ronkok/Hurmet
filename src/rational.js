@@ -189,7 +189,9 @@ const power = (a, b) => {
     return [iOne, iOne]
   } else {
     b = normalize(b)
-    return isInteger(b)
+    return isInteger(b) && isNegative(b)
+      ? [a[1] ** (BigInt(-1) * b[0]), a[0] ** (BigInt(-1) * b[0])]
+      : isInteger(b)
       ? [a[0] ** b[0], a[1] ** b[0]]
       : isPositive(a) || greaterThan(b, one) || lessThan(b, negate(one))
       ? fromNumber(toNumber(a) ** toNumber(b))
