@@ -36,6 +36,7 @@ const containsOperator = /[+\-×·*∘⌧/^%‰&√!¡|‖&=<>≟≠≤≥∈∉
 const mustDoCalculation = /^([$$£¥\u20A0-\u20CF]?(\?{1,2}|@{1,2}|%{1,2}|!{1,2})[^=!(?@%!{})]*)$/
 const currencyRegEx = /^[$£¥\u20A0-\u20CF]/
 const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/
+const matrixOfNames = /^[([](?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*[,;].+[)\]]$/
 const isKeyWord = /^(π|true|false|root|if|else|and|or|otherwise|modulo|for|while|break|return|raise)$/
 
 const shortcut = (str, decimalFormat) => {
@@ -124,8 +125,9 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
         // Input has form:  name = expression = trailStr, or
         //                  name1, name2, = expression = trailStr
         expression = mainStr.substring(posOfFirstEquals).trim()
-        if (leadStr.indexOf(",") > -1) {
-          const potentialIdentifiers = leadStr.split(",")
+        if (matrixOfNames.test(leadStr)) { leadStr = leadStr.slice(1, -1).trim() }
+        if (/[,;]/.test(leadStr)) {
+          const potentialIdentifiers = leadStr.split(/[,;]/)
           for (let i = 0; i < potentialIdentifiers.length; i++) {
             const candidate = potentialIdentifiers[i].trim()
             if (isKeyWord.test(candidate) || !isValidIdentifier.test(candidate)) {

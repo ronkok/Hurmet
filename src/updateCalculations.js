@@ -10,6 +10,7 @@ import { errorOprnd } from "./error"
 import { format } from "./format"
 import { Rnl } from "./rational"
 import { functionRegEx } from "./module"
+import { isMatrix } from "./matrix"
 
 /*
  *  This module is called to update Hurmet calculation cells.
@@ -63,6 +64,53 @@ export function insertOneHurmetVar(hurmetVars, attrs) {
   } else if (attrs.value === null) {
     for (let i = 0; i < attrs.name.length; i++) {
       hurmetVars[attrs.name[i]] = { value: null }
+    }
+  } else if (isMatrix(attrs)) {
+    // Assign to a matrix of names
+    const isQuantity = Boolean(dtype & dt.QUANTITY)
+    if (attrs.dtype & dt.MATRIX) {
+      // A 2 dimensional matrix.
+      const dtype = attrs.dtype - dt.MATRIX
+      const numRows = isQuantity ? attrs.value.plain.length : attrs.value.length
+      const numCols = attrs.name.length / numRows
+      let iName = 0
+      for (let i = 0; i < numRows; i++) {
+        for (let j = 0; j < numCols; j++) {
+          const value = isQuantity
+            ? { plain: attrs.value.plain[i][j], inBaseUnits: attrs.value.inBaseUnits[i][j] }
+            : attrs.value[i][j]
+          hurmetVars[attrs.name[i]] = {
+            name: attrs.name[iName],
+            value,
+            resultdisplay: isQuantity
+              ? parse("'" + format(attrs.value.plain[i][j]) + " " + attrs.unit + "'")
+              : attrs.value[i][j],
+            expos: attrs.expos,
+            unit: isQuantity ? attrs.unit : undefined,
+            dtype
+          }
+          iName += 1
+        }
+      }
+    } else {
+      // A vector.
+      const isColumn = Boolean(attrs.dtype & dt.COLUMNVECTOR)
+      const dtype = attrs.dtype - (isColumn ? dt.COLUMNVECTOR : dt.ROWVECTOR)
+      for (let i = 0; i < attrs.name.length; i++) {
+        const value = isQuantity
+          ? { plain: attrs.value.plain[i], inBaseUnits: attrs.value.inBaseUnits[i] }
+          : attrs.value[i]
+        hurmetVars[attrs.name[i]] = {
+          name: attrs.name[i],
+          value,
+          resultdisplay: isQuantity
+            ? parse("'" + format(attrs.value.plain[i]) + " " + attrs.unit + "'")
+            : attrs.value[i],
+          expos: attrs.expos,
+          unit: isQuantity ? attrs.unit : undefined,
+          dtype
+        }
+      }
     }
 
   } else if (attrs.dtype === dt.DICT) {
