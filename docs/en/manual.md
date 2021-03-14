@@ -214,11 +214,12 @@ Display mode centers a calculation cell and enlarges summation symbols and integ
 | `a///b`       | ¢a///b¢       | `'5 N.m/s2'`                 | ¢'5 N.m/s2'¢                 |
 | `x^23`        | ¢x^23¢        | `(a, b; c, d)`               | ¢(a, b; c, d)}¢              |
 | `x^(a+b)`     | ¢x^(a+b)¢     | `[a, b; c, d]`               | ¢[a, b; c, d]¢               |
-| `x_subscript` | ¢x_subscript¢ | `[1:4]`                      | ¢[1, 2, 3, 4]¢               |
-| `x_(a+b)`     | ¢x_(a+b)¢     | `[1:2:5]`                    | ¢[1, 3, 5]¢                  |
-| `x′`          | ¢x′¢          | `{"w": 24, "h": 30}`         | ¢{"w": 24, "h": 30}¢         |
-| `A-->note B`  | ¢A-->note B¢  | `\|x\|   ‖x‖`                | ¢\|x\|¢   ¢‖x‖¢              |
-| `\red("ng")`  | ¢\red("ng")¢  | `{a if b;`<br>`c otherwise}` | ¢{a if b;c otherwise}¢       |
+| `x_subscript` | ¢x_subscript¢ | `{:a, b; c, d:}`             | ¢{:a, b; c, d:}¢             |
+| `x_(a+b)`     | ¢x_(a+b)¢     | `[1:4]`                      | ¢[1, 2, 3, 4]¢               |
+| `x′`          | ¢x′¢          | `[1:2:5]`                    | ¢[1, 3, 5]¢                  |
+| `A-->note B`  | ¢A-->note B¢  | `{"w": 24, "h": 30}`         | ¢{"w": 24, "h": 30}¢         |
+| `\red("ng")`  | ¢\red("ng")¢  | `|x|   ‖x‖`                  | ¢|x|¢   ¢‖x‖¢                |
+|               |               | `{a if b;`<br>`c otherwise}` | ¢{a if b;c otherwise}¢       |
 
 Calculation cells also support many of the math-mode TeX functions [supported by KaTeX](https://katex.org/docs/supported.html). Put function arguments between parentheses, not braces, as in `\cancel(5)` instead of `\cancel{5}`.
 
@@ -468,12 +469,13 @@ A Hurmet *matrix* is a one or two dimensional arrangement of matrix elements. A 
 
 A Hurmet *vector* is a one dimensional matrix, either a row vector or a column vector.
 
-A matrix literal is written between delimiters, either `( )` or `[ ]`. Matrix elements are separated by commas. Matrix rows are separated by semi-colons. Be sure to write a space after comma separators so they are not confused with decimals inside a number. Here are some matrix examples:
+A matrix literal is written between delimiters, either `( )` or `[ ]` or `{: :}`. Matrix elements are separated by commas. Matrix rows are separated by semi-colons. Be sure to write a space after comma separators so they are not confused with decimals inside a number. Here are some matrix examples:
 
 | Input           | Renders as     |
 | --------------- | -------------- |
 | `(1, 0; 0, 1)`  | ¢(1, 0; 0, 1)¢ |
 | `[2.1; -15.3]`  | ¢[2.1; -15.3]¢ |
+| `{:1, 0; 0, 1:}` | ¢{:1, 0; 0, 1:}¢ |
 
 Another way to create a Hurmet vector is to write a range of numbers between brackets; the form is <span style="white-space: nowrap;">`[start:step:end]`</span>. A Hurmet calculation of that form will return a row vector with every number in the range. The step size is optional (default = 1). Examples:
 
