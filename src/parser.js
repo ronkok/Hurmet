@@ -1236,7 +1236,13 @@ export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
           if (delim.delimType === dPAREN &&
             !(token.input === "," && delim.name === "{")) {
             delim.delimType = dMATRIX
-            const ch = delim.name === "[" ? "b" : delim.name === "(" ? "p" : "B"
+            const ch = delim.name === "["
+              ? "b"
+              : delim.name === "("
+              ? "p"
+              : delim.name === "{:"
+              ? ""
+              : "B"
             delim.open = `\\begin{${ch}matrix}`
             delim.close = `\\end{${ch}matrix}`
             delim.isTall = true
