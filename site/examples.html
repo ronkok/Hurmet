@@ -169,21 +169,8 @@
 <h3><strong>Matrix Inversion</strong></h3>
 
 <p>Hurmet can solve a system of linear equations via matrix inversion.</p>
-<p>The system:   <span class="hurmet-tex" data-tex="\begin{aligned}
-3x + 2y + z &amp;= 39 \\
-2x + 3y + z &amp;= 34 \\
-x + 2y + 3z &amp;= 26\end{aligned}"></span>  restated in matrix format is:  <span class="hurmet-tex" data-tex="\begin{pmatrix}
-3 &amp; 2 &amp; 1 \\
-2 &amp; 3 &amp; 1 \\
-1 &amp; 2 &amp; 3
-\end{pmatrix}
-\begin{bmatrix}
-x \\ y \\ z
-\end{bmatrix} =
-\begin{bmatrix}
-39 \\ 34 \\ 26
-\end{bmatrix}"></span></p>
-<p>Now invert the first matrix and multiply it times both sides. That solves for each variable.</p>
+<p>The system:   <span class="hurmet-calc" data-entry="{:3x + 2y + z = 39;2x + 3y + z = 34;x + 2y + 3z = 26:}"></span>   when restated in matrix format is:   <span class="hurmet-calc" data-entry="(3, 2, 1; 2, 3, 1; 1, 2, 3) [x; y; z] = [39; 34; 26]"></span></p>
+<p>So we can invert the first matrix and multiply it times both sides. That solves for each variable.</p>
 <p><span class="hurmet-calc" data-entry="[x; y; z] = (3, 2, 1; 2, 3, 1; 1, 2, 3)⁻¹ [39; 34; 26] = ?"></span></p>
 
 <p></p>
