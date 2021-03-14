@@ -57,36 +57,29 @@
 </div>
 
 <div id=editor style="margin-bottom: 23px"></div>
-<div style="display: none" id="content"><p>This is editable text. You can focus it and start typing. All calculations will update if you press <strong>Shift-Enter</strong> to close a calculation cell.</p>
+<div style="display: none" id="content"><p>This is editable text. You can focus it and start typing. All calculations will update if you press <strong>Shift-Enter</strong> to close a calculation cell. You can <em>create</em> a calculation cell by pressing <strong>Alt-C</strong>.</p>
 
 <p>This week’s example:</p>
 
-<h3>Ergodicity Economics</h3>
+<h3><strong>Matrix Inversion</strong></h3>
 
-<p>In a paper titled <em>Ergodicity Economics</em>, Ole Peters and Alexander Adamou write of a hypothetical game:</p>
-<blockquote>
-   <p><sup> </sup>Imagine we offer you the following game: we toss a coin, and if it comes up heads we increase your monetary wealth by 50%; if it comes up tails we reduce your wealth by 40%. We’re not only doing this once, we will do it many times, for example once per week for the rest of your life. Would you accept the rules of our game? Would you submit your wealth to the dynamic our game will impose on it?</p>
-</blockquote>
-<p>Let’s restate that. Once per week, we would multiply your wealth by a factor, <span class="hurmet-calc" data-entry="k"></span>. </p>
-<p><span class="hurmet-tex" data-tex="k = \begin{cases}0.6 &amp; \text{with probability 1/2} \\ 1.5 &amp; \text{with probability 1/2}\end{cases}"></span></p>
-<p>Would you take that proposition? The economics textbook concept of Expected Value works out to: <span class="hurmet-calc" data-entry="EV = (1//2)(1.5) + (1//2)(0.6) = ?"></span>. That’s greater than one, so EV tells you that each iteration is a good trade.</p>
-<p>Not so fast. Let’s create a function that simulates the game.</p>
-<p><span class="hurmet-calc" data-entry="function game(W, numberOfIterations)
-   for i in 1:numberOfIterations
-      if random() ≥ 0.5
-         W = 1.5 × W
-      else
-         W = 0.6 × W
-   return W"></span></p>
-<p>Now let’s run the simulation.</p>
-<p><span class="hurmet-calc" data-entry="N = 1000"></span>, number of iterations</p>
-<p><span class="hurmet-calc" data-entry="W =  10000"></span>, starting wealth</p>
-<p><span class="hurmet-calc" data-entry="result = game(W, N) = ?"></span></p>
-<p>Whoa, we just turned 10,000 into a tiny, tiny number. </p>
-<p>The game is set up so that almost everyone who plays will lose and a very few, very lucky players will come out way ahead. Expected value is the wrong criterion to use for this decision.</p>
-<p>“Ergodic” is a term from physics and the kinematic theory of gases. Peters and Adamou use it in economics to distinguish a certain kind of process. Say that a process, like the game, is applied many times. If many people each undergo the process once, then the average is an <em>ensemble</em> average. If one person undergoes the process many times in sequence, then the average is a <em>time-series</em> average. A process is <em>ergodic</em> if the ensemble average is equal to  the time-series average.</p>
-<p>The game is not ergodic and that is why the normal definition of expected value does not apply. Our simulation is a more robust evaluation tool than expected value.</p>
-<p>Note that you can play the simulation many times. It involves a random process, so it will give a different number every time. But in almost every case, the result will be a very small number.</p>
+<p>Two thousand years ago in China, a mathematician wrote a book called <em>Nine Chapters on the Art of Calculation</em>. It contained a story problem involving three baskets and three types of grain. We’ll skip the words and write the implied system of linear equations, like this:</p>
+
+<p><span class="hurmet-calc" data-entry="3x + 2y + z = 39
+2x + 3y + z = 34
+x + 2y + 3z = 26"></span></p>
+   
+<p><em>Nine Chapters</em> solved it for <span class="hurmet-calc" data-entry="x"></span>, <span class="hurmet-calc" data-entry="y"></span>, and <span class="hurmet-calc" data-entry="z"></span>. Cool! We will also solve it but we’ll use a different method because we want Hurmet to do most of the work. The first step is to re-write the system in matrix format:</p>
+
+<p><span class="hurmet-calc" data-entry="(3, 2, 1; 2, 3, 1; 1, 2, 3) [x; y; z] = [39; 34; 26]"></span></p>
+
+<p>Note that we have not changed the underlying problem. We have just re-written it in a different format. Why do that? To make it easy to solve! Now we can tell Hurmet to invert the first matrix and multiply it times both sides.</p>
+
+<p><span class="hurmet-calc" data-entry="[x; y; z] = (3, 2, 1; 2, 3, 1; 1, 2, 3)⁻¹ [39; 34; 26] = ?"></span></p>
+
+<p>Hurmet did the calculation and assigned the resulting values to the variables on the left-hand side. We can can now call those variables in subsequent calculations.</p>
+
+<p><span class="hurmet-calc" data-entry="3x + 2y + z = ?"></span></p>
 
 <p></p>
 </div> <!-- editor -->

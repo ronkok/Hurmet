@@ -67,7 +67,7 @@ export function insertOneHurmetVar(hurmetVars, attrs) {
     }
   } else if (isMatrix(attrs)) {
     // Assign to a matrix of names
-    const isQuantity = Boolean(dtype & dt.QUANTITY)
+    const isQuantity = Boolean(attrs.dtype & dt.QUANTITY)
     if (attrs.dtype & dt.MATRIX) {
       // A 2 dimensional matrix.
       const dtype = attrs.dtype - dt.MATRIX
@@ -84,7 +84,7 @@ export function insertOneHurmetVar(hurmetVars, attrs) {
             value,
             resultdisplay: isQuantity
               ? parse("'" + format(attrs.value.plain[i][j]) + " " + attrs.unit + "'")
-              : attrs.value[i][j],
+              : format(attrs.value[i][j]),
             expos: attrs.expos,
             unit: isQuantity ? attrs.unit : undefined,
             dtype
@@ -105,7 +105,7 @@ export function insertOneHurmetVar(hurmetVars, attrs) {
           value,
           resultdisplay: isQuantity
             ? parse("'" + format(attrs.value.plain[i]) + " " + attrs.unit + "'")
-            : attrs.value[i],
+            : format(attrs.value[i]),
           expos: attrs.expos,
           unit: isQuantity ? attrs.unit : undefined,
           dtype
