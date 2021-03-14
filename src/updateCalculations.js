@@ -70,7 +70,7 @@ export function insertOneHurmetVar(hurmetVars, attrs) {
     const isQuantity = Boolean(attrs.dtype & dt.QUANTITY)
     let resultDisplay = attrs.resultdisplay
     resultDisplay = resultDisplay.replace(/\\(begin|end){[bp]matrix}/g, "").trim()
-    const displays = resultDisplay.split(/(&|\\\\)/)
+    const displays = resultDisplay.split(/&|\\\\/)
     if (attrs.dtype & dt.MATRIX) {
       // A 2 dimensional matrix.
       const dtype = attrs.dtype - dt.MATRIX
