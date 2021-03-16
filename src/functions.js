@@ -148,6 +148,23 @@ const gamma = (z) => {
   }
 }
 
+const logΓ = r => {
+  // logGamma function. Returns natural logarithm of the Gamma function.
+  // Ref: https://www.johndcook.com/blog/2010/08/16/how-to-compute-log-factorial/
+  if (Rnl.isZero(r)) { return errorOprnd("Γ0") }
+  if (Rnl.isNegative(r)) { return errorOprnd("LOGΓ") }
+  if (Rnl.areEqual(r, Rnl.one) || Rnl.areEqual(r, Rnl.two)) { return Rnl.zero }
+  if (Rnl.lessThanOrEqualTo(r, Rnl.fromNumber(14))) {
+    return Rnl.fromNumber(Math.log(Rnl.toNumber(gamma(r))))
+  } else {
+    const x = Rnl.toNumber(r)
+    // eslint-disable-next-line max-len
+    const y = (x - 0.5) * Math.log(x) - x + 0.5 * Math.log(2 * Math.PI) + 1 / (12 * x) - 1 / (360 * x ** 3) + 1 / (1260 * x ** 5) - 1 / (1680 * x ** 7) + 5 / (540 * x ** 9)
+    //  Error bounded by: -691/(360360 * x^11), 16 significant digits
+    return Rnl.fromNumber(y)
+  }
+}
+
 const binomial = (n, k) => {
   // (n \atop k) = n! / (k! (n - k)!)
   //             = exp(log!(n) - [log!(k) + log!(n - k)])
@@ -335,17 +352,10 @@ const unary = {
   Γ(x) {
     return gamma(x)
   },
-//  logGamma(x) {
-//    if (Rnl.isNegative(x) || Rnl.isZero(x)) { return errorOprnd("LOGΓ") }
-//    return logGamma(x)
-//  },
-//  logΓ(x) {
-//    if (Rnl.isNegative(x) || Rnl.isZero(x)) { return errorOprnd("LOGΓ") }
-//    return logGamma(x)
-//  },
-//  logFactorial(x) {
-//    return logFactorial(x)
-//  },
+  logΓ(x) {
+    if (Rnl.isNegative(x) || Rnl.isZero(x)) { return errorOprnd("LOGΓ") }
+    return logΓ(x)
+  },
   sign(x) {
     return Rnl.isPositive(x) ? Rnl.one : Rnl.isZero ? Rnl.zero : negativeOne
   },

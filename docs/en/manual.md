@@ -821,6 +821,10 @@ log(*b*, *x*)
 
 : Base _b_ logarithm.
 
+logΓ(*x*)
+
+: Returns the natural logarithm of the Gamma function, Γ(*x*). For now, Hurmet's logΓ(*x*) function only works on positive rational numbers.
+
 ¢min(a,b,c,…),max(a,b,c,…)¢
 
 : Minimum or maximum of a list or array. Real numbers only.

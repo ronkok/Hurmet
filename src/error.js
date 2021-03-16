@@ -26,7 +26,7 @@ const errorMessages = Object.freeze({
     LOGF:      "Error. Argument to log!() must be a non-negative integer.",
     Γ0:        "Error. Γ(0) is infinite.",
     ΓPOLE:     "Error. Γ() of a negative integer is infinite.",
-    LOGΓ:      "Error. Argument to logΓ() must be a positive number, for now.",
+    LOGΓ:      "Error. Argument to Hurmet logΓ() must be a positive number.",
     TAN90:     "Error. tan($@$) is infinite.",
     ATRIG:     "Error. Input to @ must be between -1 and 1.",
     COT:       "Error. Input to @ must not be zero.",
