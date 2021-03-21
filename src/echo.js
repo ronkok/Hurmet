@@ -28,6 +28,10 @@ export const plugValsIntoEcho = (str, vars, unitAware) => {
     if (!vars[varName] && varName === "T") {
       // Transposed matrix
       hvar = { dtype: dt.RATIONAL, resultdisplay: "\\text{T}" }
+    } else if (varName === "e" && /^^/.test(str.slice(pos + 4).trim())) {
+      // e^x
+      str = str.substring(0, pos) + "e" + str.substring(pos + matchLength);
+      continue
     } else if (!vars[varName]) {
       return errorOprnd("V_NAME", varName)
     } else {

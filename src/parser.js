@@ -930,6 +930,11 @@ export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
 
       case tt.SUP: // ^
         if (isCalc) {
+          if (/¿e$/.test(rpn)) {
+            // e^3. Replace e with 2.7182818284590452353602874713527
+            // eslint-disable-next-line max-len
+            rpn = rpn.slice(0, -2) + "▸27182818284590452353602874713527/10000000000000000000000000000000"
+          }
           rpn += tokenSep
           popRpnTokens(13)
         }
@@ -946,6 +951,11 @@ export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
 
       case tt.SUPCHAR: { //  ²³¹⁰⁴⁵⁶⁷⁸⁹⁻
         if (isCalc) {
+          if (/¿e$/.test(rpn)) {
+            // e^3. Replace e with 2.7182818284590452353602874713527
+            // eslint-disable-next-line max-len
+            rpn = rpn.slice(0, -2) + "▸27182818284590452353602874713527/10000000000000000000000000000000"
+          }
           rpn += tokenSep
           popRpnTokens(13)
         }
@@ -1326,9 +1336,13 @@ export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
           switch (topDelim.delimType) {
             case dFUNCTION: {
               let symbol = rpnStack.pop().symbol
+              const regEx = new RegExp(tokenSep + '!$')
               if (numArgs === 2) {
                 if (symbol === "log") { symbol = "logn" }
                 if (symbol === "round") { symbol = "roundn" }
+              } else if (symbol === "log" && regEx.test(rpn)) {
+                rpn = rpn.slice(0, rpn.length - 1) + "logFactorial"
+                break
               }
               rpn += (symbol.slice(-1) === "^")
                 ? firstSep + symbol

@@ -663,7 +663,7 @@ Hurmet calculations are meant to be recognizeable to anyone familiar with standa
 
 *e*
 
-: Hurmet will treat ¢e¢ just like any other variable most of the time. But if ¢e¢ is the base of an exponent, for example: ¢e^x¢, then Hurmet will perform the function ¢exp(x)¢.
+: Hurmet will treat ¢e¢ just like any other variable most of the time. But if ¢e¢ is the base of an exponent, for example: ¢e^x¢, then Hurmet will take ¢e¢ to mean 2.7182818284590452353602874713527.
 
 ℏ
 
@@ -820,6 +820,10 @@ log<sub>10</sub>(*x*)
 log(*b*, *x*)
 
 : Base _b_ logarithm.
+
+logFactorial(*n*)
+
+: Returns the natural logarithm of the factorial of the argument. Valid only for non-negative integers. Note that `log(n!)` is a valid alias for `logFactorial(n)`.
 
 logΓ(*x*)
 

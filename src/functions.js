@@ -83,6 +83,9 @@ const functionExpos = (functionName, args) => {
     case "acoth":
     case "binomial":
     case "gamma":
+    case "Γ":
+    case "logΓ":
+    case "logFactorial":
       if (!unitsAreCompatible(expos, allZeros)) {
         return errorOprnd("UNIT_IN", functionName)
       }
@@ -355,6 +358,10 @@ const unary = {
   logΓ(x) {
     if (Rnl.isNegative(x) || Rnl.isZero(x)) { return errorOprnd("LOGΓ") }
     return logΓ(x)
+  },
+  logFactorial(x) {
+    if (Rnl.isNegative(x) || !Rnl.isInteger(x)) { return errorOprnd("FACT") }
+    return logΓ(Rnl.add(x, Rnl.one))
   },
   sign(x) {
     return Rnl.isPositive(x) ? Rnl.one : Rnl.isZero ? Rnl.zero : negativeOne
