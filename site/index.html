@@ -61,25 +61,25 @@
 
 <p>This week’s example:</p>
 
-<h3><strong>Matrix Inversion</strong></h3>
+<h3>Birthday Problem</h3>
 
-<p>Two thousand years ago in China, a mathematician wrote a book called <em>Nine Chapters on the Art of Calculation</em>. It contained a story problem involving three baskets and three types of grain. We’ll skip the words and write the implied system of linear equations, like this:</p>
+<p>A room has 30 people in it. What is the probability that at least two of them share a birthday?</p>
 
-<p><span class="hurmet-calc" data-entry="3x + 2y + z = 39
-2x + 3y + z = 34
-x + 2y + 3z = 26"></span></p>
-   
-<p><em>Nine Chapters</em> solved it for <span class="hurmet-calc" data-entry="x"></span>, <span class="hurmet-calc" data-entry="y"></span>, and <span class="hurmet-calc" data-entry="z"></span>. Cool! We will also solve it but we’ll use a different method because we want Hurmet to do most of the work. The first step is to re-write the system in matrix format:</p>
+<p>It’s more likely than most people think. Let’s simplify the problem a little and assume that (1) there are no leap years, so every year has 365 days, and (2) each day is equally likely to be a birthday. Then the probability, <span class="hurmet-calc" data-entry="p"></span>, is:</p>
 
-<p><span class="hurmet-calc" data-entry="(3, 2, 1; 2, 3, 1; 1, 2, 3) [x; y; z] = [39; 34; 26]"></span></p>
+<p><span class="hurmet-calc" data-entry="d = 365"></span>, number of days</p>
+<p><span class="hurmet-calc" data-entry="n = 30"></span>, number of people</p>
+<p><span class="hurmet-calc" data-entry="p = 1 - d!/(d - n)! × 1/d^n = 1 - 365!/(365 - 30)! × 1/365^30"></span> </p>
 
-<p>Note that we have not changed the underlying problem. We have just re-written it in a different format. Why do that? To make it easy to solve! Now we can tell Hurmet to invert the first matrix and multiply it times both sides.</p>
+<p>Few calculators can successfully do that calculation. Even Hurmet chokes on it. The intermediate values are larger than what a computer can typically handle. But we can overcome that. Instead of using factorials directly, we’ll use the function <span class="hurmet-calc" data-entry="log(n!)"></span>. It returns the natural logarithm of the factorial. That’s a much smaller number, one that will not overflow.</p>
 
-<p><span class="hurmet-calc" data-entry="[x; y; z] = (3, 2, 1; 2, 3, 1; 1, 2, 3)⁻¹ [39; 34; 26] = ?"></span></p>
+<p>Since we’re dealing with logarithms, the division becomes a subtraction.  After doing the subtraction, we wrap up by taking <span class="hurmet-calc" data-entry="e^x"></span> of the result. The equation then becomes:</p>
 
-<p>Hurmet did the calculation and assigned the resulting values to the variables on the left-hand side. We can can now call those variables in subsequent calculations.</p>
+<p> <span class="hurmet-calc" data-entry="p = 1 - exp(log(d!) - log((d-n)!)) × 1/d^n = ?"></span></p>
 
-<p><span class="hurmet-calc" data-entry="3x + 2y + z = ?"></span></p>
+<p>There’s your result. Given 30 people, the chance that at least two of them share a birthday is about 70%.</p>
+
+<p>Combinatoric problems often have a fraction whose numerator and denominator each contain one or more factorials. All such problems can be worked using the <span class="hurmet-calc" data-entry="log(n!)"></span> function.</p>
 
 <p></p>
 </div> <!-- editor -->
