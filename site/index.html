@@ -61,25 +61,37 @@
 
 <p>This week’s example:</p>
 
-<h3>Birthday Problem</h3>
+<h3>Distance Using Latitude and Longitude</h3>
 
-<p>A room has 30 people in it. What is the probability that at least two of them share a birthday?</p>
+<p>Given the latitude and longitude of any two points on earth, we can calculate the air distance between them.  Let’s calculate the distance from the Space Needle in Seattle to the Eiffel Tower in Paris.</p>
+<p>We will assume that the earth is a perfect sphere, which is not quite correct. This method below can thus be imprecise by up to 100 meters.</p>
+<p><span class="hurmet-calc" data-entry="r = '3960 miles'"></span>. radius of the earth.</p>
+<p>Seattle’s Space Needle:</p>
+<p><span class="hurmet-calc" data-entry="lat_1 = '47.620529°'"></span></p>
+<p><span class="hurmet-calc" data-entry="long_1 = '-122.349297°'"></span></p>
+<p>We’ll use that latitude and longitude to calculate two angles:</p>
+<ul>
+   <li>
+      <p><span class="hurmet-calc" data-entry="θ"></span>, the angle east of the prime meridian</p>
+   </li>
+   <li>
+      <p><span class="hurmet-calc" data-entry="ϕ"></span>, the angle to the north pole</p>
+   </li>
+</ul>
+<p><span class="hurmet-calc" data-entry="θ_1 = {long_1 if long_1 > 0; 360 + long_1 otherwise} = ?°"></span></p>
+<p><span class="hurmet-calc" data-entry="ϕ_1 = 90 - lat_1 = ?°"></span></p>
 
-<p>It’s more likely than most people think. Let’s simplify the problem a little and assume that (1) there are no leap years, so every year has 365 days, and (2) each day is equally likely to be a birthday. Then the probability, <span class="hurmet-calc" data-entry="p"></span>, is:</p>
-
-<p><span class="hurmet-calc" data-entry="d = 365"></span>, number of days</p>
-<p><span class="hurmet-calc" data-entry="n = 30"></span>, number of people</p>
-<p><span class="hurmet-calc" data-entry="p = 1 - d!/(d - n)! × 1/d^n = 1 - 365!/(365 - 30)! × 1/365^30"></span> </p>
-
-<p>Few calculators can successfully do that calculation. Even Hurmet chokes on it. The intermediate values are larger than what a computer can typically handle. But we can overcome that. Instead of using factorials directly, we’ll use the function <span class="hurmet-calc" data-entry="log(n!)"></span>. It returns the natural logarithm of the factorial. That’s a much smaller number, one that will not overflow.</p>
-
-<p>Since we’re dealing with logarithms, the division becomes a subtraction.  After doing the subtraction, we wrap up by taking <span class="hurmet-calc" data-entry="e^x"></span> of the result. The equation then becomes:</p>
-
-<p> <span class="hurmet-calc" data-entry="p = 1 - exp(log(d!) - log((d-n)!)) × 1/d^n = ?"></span></p>
-
-<p>There’s your result. Given 30 people, the chance that at least two of them share a birthday is about 70%.</p>
-
-<p>Combinatoric problems often have a fraction whose numerator and denominator each contain one or more factorials. All such problems can be worked using the <span class="hurmet-calc" data-entry="log(n!)"></span> function.</p>
+<p>Similarly for the Eiffel Tower:</p>
+<p><span class="hurmet-calc" data-entry="lat_2 = '48.858242°'"></span></p>
+<p><span class="hurmet-calc" data-entry="long_2 = '2.294938°'"></span></p>
+<p><span class="hurmet-calc" data-entry="θ_2 = {long_2 if long_2 > 0; 360 + long_2 otherwise} = ?°"></span></p>
+<p><span class="hurmet-calc" data-entry="ϕ_2 = 90 - lat_2 = ?°"></span></p>
+<p></p>
+<p>With those angles, we can find the arc, <span class="hurmet-calc" data-entry="ψ"></span>, between the two points. And we’ll let Hurmet return the result in radians.</p>
+<p><span class="hurmet-calc" data-entry="ψ = acos(sin ϕ_1 sin ϕ_2 cos(θ_1 - θ_2) + cos ϕ_1 cos ϕ_2) = ?? radians"></span></p>
+<p>Set the rounding format to the nearest integer: <span class="hurmet-calc" data-entry="format = &quot;f0&quot;"></span>,</p>
+<p>And finally get the air distance by multiplying the radius times the arc:</p>
+<p><span class="hurmet-calc" data-entry="L = r ψ = ?? miles"></span></p>
 
 <p></p>
 </div> <!-- editor -->
