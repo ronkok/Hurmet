@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beam Analysis</title>
+<link rel="stylesheet" href="beam.css">
+<script src="beamAnalysis.js"></script>
+</head>
+
+<body>
+<div id="centerer">
+<div class='wrapper'>
+  <h1>Beam Analysis Diagram</h1>
+  <div class='row'>
+    <div class='column'>
+      <div class='left'>
+        <div>
+          <input type="button" value="Clear input" onclick="beam.clear()" style="width: 8em;">
+        </div>
+        <p style="margin-top: 1em;">Beam Parameters</p>
+        <table class="grid centered" id="parameters">
+          <tr>
+            <th title="Modulus of elasticity">E<br><span class="plain" id="E_unit">ksi</span></th>
+            <th title="Optional section name">Section</th>
+            <th title="Second moment of area">I<br><span class="plain" id="I_unit">in⁴</span></th>
+            <th title="Spring constant for nodes that are springs.">k<br><span class="plain" id="k_unit">kips/in</span></th>
+            <th>Load<br>Combinations</th>
+          </tr>
+          <tr>
+            <td><input type="text" id="E" value="29,000"></td>
+            <td><input type="text" id="section" value="W8X31" style="width: 8em;"></td>
+            <td><input type="text" id="I" value=""></td>
+            <td><input type="text" id="k" value=""></td>
+            <td>
+              <select id="combinations" onchange="beam.updateLoadCombinations()">
+                <option value="service">service</option>
+                <option value="ASCE 7-16">ASCE 7-16</option>
+                <option value="ASCE 7-16 ASD">ASCE 7-16 ASD</option>
+                <option value="2018 IBC">2018 IBC</option>
+                <option value="2018 IBC ASD">2018 IBC ASD</option>
+                <option value="2015 NBCC">2015 NBCC</option>
+              </select>
+            </td>
+          </tr>
+        </table>
+        <div>
+          &nbsp;&nbsp;<input type="checkbox" id="convention" class="checkbox" onchange="beam.updateDiagram()" checked>
+          <label for="convention">Plot +M on comp. side.</label>&nbsp;&nbsp;&nbsp;&nbsp;
+          <input type="checkbox" id="SI" class="checkbox" onchange="beam.toggleUnits()">
+          <label for="SI">SI units</label>&nbsp;&nbsp;&nbsp;&nbsp;
+          <input type="checkbox" id="patterns" class="checkbox" onchange="beam.updateDiagram()" checked>
+          <label for="patterns">Patterned live loads.</label>
+        </div>
+        
+        <p>Node Types and Span Lengths (in <span id="spanUnit">feet</span>)</p>
+        <div style="height: 3em;; width: 500px;  overflow-x: scroll;">
+        <table class="grid centered" id="geometry">
+          <tr>
+            <td><select id="N0" onchange="beam.showGeometry()">
+              <option value="none" label=" "> </option>
+              <option value="p">p</option>
+              <option value="f" selected="selected">f</option>
+              <option value="h">h</option>
+              <option value="ph">ph</option>
+              <option value="s">s</option>
+            </select></td>
+            <td><input type="text" id="L0" value="12.5" onchange="beam.showGeometry()"></td>
+            <td><select id="N1" onchange="beam.showGeometry()">
+              <option value="none" label=" "> </option>
+              <option value="p" selected="selected">p</option>
+              <option value="f">f</option>
+              <option value="h">h</option>
+              <option value="ph">ph</option>
+              <option value="s">s</option>
+            </select></td>
+            <td><input type="text" id="L1" value="3.125" onchange="beam.showGeometry()"></td>
+            <td><select id="N2" onchange="beam.showGeometry()">
+              <option value="none" label=" "> </option>
+              <option value="p">p</option>
+              <option value="f">f</option>
+              <option value="h">h</option>
+              <option value="ph">ph</option>
+              <option value="s">s</option>
+            </select></td>
+            <td><input type="text" id="L2" onchange="beam.showGeometry()"></td>
+            <td><select id="N3" onchange="beam.showGeometry()">
+              <option value="none" label=" "> </option>
+              <option value="p">p</option>
+              <option value="f">f</option>
+              <option value="h">h</option>
+              <option value="ph">ph</option>
+              <option value="s">s</option>
+            </select></td>
+            <td><input type="text" id="L3" onchange="beam.showGeometry()"></td>
+            <td><select id="N4" onchange="beam.showGeometry()">
+              <option value="none" label=" "> </option>
+              <option value="p">p</option>
+              <option value="f">f</option>
+              <option value="h">h</option>
+              <option value="ph">ph</option>
+              <option value="s">s</option>
+            </select></td>
+            <td><input type="text" id="L4" onchange="beam.showGeometry()"></td>
+            <td><select id="N5" onchange="beam.showGeometry()">
+              <option value="none" label=" "> </option>
+              <option value="p">p</option>
+              <option value="f">f</option>
+              <option value="h">h</option>
+              <option value="ph">ph</option>
+              <option value="s">s</option>
+            </select></td>
+            <td><input type="text" id="L5" onchange="beam.showGeometry()"></td>
+            <td><select id="N6" onchange="beam.showGeometry()">
+              <option value="none" label=" "> </option>
+              <option value="p">p</option>
+              <option value="f">f</option>
+              <option value="h">h</option>
+              <option value="ph">ph</option>
+              <option value="s">s</option>
+            </select></td>
+          </tr>
+        </table>
+        </div>
+
+<!--        <p style="margin-top: 20px;">&nbsp;&nbsp;Optional: Request output detail at x = <input type="text" id="detail0" value=""> and/or <input type="text" id="detail1" value=""></p>-->
+    </div>
+  </div>
+    
+    <div class='column'>
+      <div class='right-col'>
+        <p>Loads</p>
+        <table class="grid centered" id="loads">
+          <tr>
+            <th>Shape</th>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Unit</th>
+            <th>From<br><span class="plain" id="fromUnit">feet</span></th>
+            <th>To<br><span class="plain" id="toUnit">feet</span></th>
+          </tr>
+          <tr>
+            <td>
+              <select id="loadShape0" onchange="beam.updateLoadShape(0)">
+                <option value="none" label=" "> </option>
+                <option value="w" selected="selected">Distributed</option>
+                <option value="P">Point force</option>
+                <option value="M">Moment</option>
+              </select>
+            </td>
+            <td>
+              <select id="loadType0">
+                <option value="D">Dead</option>
+                <option value="L">Live</option>
+                <option value="Lr">Roof live</option>
+                <option value="S">Snow</option>
+                <option value="W">Wind</option>
+                <option value="E">EQ</option>
+                <option value="F">Fluid</option>
+                <option value="H">Horiz</option>
+                <option value="R">Rain</option>
+                <option value="none" label=" "> </option>
+              </select>
+            </td>
+            <td><input type="text" id="amount0" value="-0.031" style="width: 8em;" onchange="beam.showGeometry()"></td>
+            <td id="unit0">kips/ft</td>
+            <td><input type="text" id="from0" style="width: 4em;" onchange="beam.showGeometry()"></td>
+            <td><input type="text" id="to0" style="width: 4em;" onchange="beam.showGeometry()"></td>
+          </tr>
+          <tr>
+            <td>
+              <select id="loadShape1" onchange="beam.updateLoadShape(1)">
+                <option value="none" label=" "> </option>
+                <option value="w" selected="selected">Distributed</option>
+                <option value="P">Point force</option>
+                <option value="M">Moment</option>
+              </select>
+            </td>
+            <td>
+              <select id="loadType1">
+                <option value="D">Dead</option>
+                <option value="L" selected="selected">Live</option>
+                <option value="Lr">Roof live</option>
+                <option value="S">Snow</option>
+                <option value="W">Wind</option>
+                <option value="E">EQ</option>
+                <option value="F">Fluid</option>
+                <option value="H">Horiz</option>
+                <option value="R">Rain</option>
+                <option value="none" label=" "> </option>
+              </select>
+            </td>
+            <td><input type="text" id="amount1" value="-0.1  -0.2" style="width: 8em;" onchange="beam.showGeometry()"></td>
+            <td id="unit1">kips/ft</td>
+            <td><input type="text" id="from1" style="width: 4em;" value="0" onchange="beam.showGeometry()"></td>
+            <td><input type="text" id="to1" style="width: 4em;" value="-1" onchange="beam.showGeometry()"></td>
+          </tr>
+          <tr>
+            <td>
+              <select id="loadShape2" onchange="beam.updateLoadShape(2)">
+                <option value="none" label=" "> </option>
+                <option value="w">Distributed</option>
+                <option value="P"  selected="selected">Point force</option>
+                <option value="M">Moment</option>
+              </select>
+            </td>
+            <td>
+              <select id="loadType2">
+                <option value="D">Dead</option>
+                <option value="L" selected="selected">Live</option>
+                <option value="Lr">Roof live</option>
+                <option value="S">Snow</option>
+                <option value="W">Wind</option>
+                <option value="E">EQ</option>
+                <option value="F">Fluid</option>
+                <option value="H">Horiz</option>
+                <option value="R">Rain</option>
+                <option value="none" label=" "> </option>
+              </select>
+            </td>
+            <td><input type="text" id="amount2" value="-2" style="width: 8em;" onchange="beam.showGeometry()"></td>
+            <td id="unit2">kips</td>
+            <td><input type="text" id="from2" style="width: 4em;" value="3" onchange="beam.showGeometry()"></td>
+            <td><input type="text" id="to2" style="width: 4em;" onchange="beam.showGeometry()" disabled></td>
+          </tr>
+          <tr>
+            <td>
+              <select id="loadShape3" onchange="beam.updateLoadShape(3)">
+                <option value="none" label=" "> </option>
+                <option value="w">Distributed</option>
+                <option value="P">Point force</option>
+                <option value="M">Moment</option>
+              </select>
+            </td>
+            <td>
+              <select id="loadType3">
+                <option value="none" label=" "> </option>
+                <option value="D">Dead</option>
+                <option value="L">Live</option>
+                <option value="Lr">Roof live</option>
+                <option value="S">Snow</option>
+                <option value="W">Wind</option>
+                <option value="E">EQ</option>
+                <option value="F">Fluid</option>
+                <option value="H">Horiz</option>
+                <option value="R">Rain</option>
+              </select>
+            </td>
+            <td><input type="text" id="amount3" style="width: 8em;" onchange="beam.showGeometry()"></td>
+            <td id="unit3"></td>
+            <td><input type="text" id="from3" style="width: 4em;" onchange="beam.showGeometry()" disabled></td>
+            <td><input type="text" id="to3" style="width: 4em;" onchange="beam.showGeometry()" disabled></td>
+          </tr>
+          <tr>
+            <td>
+              <select id="loadShape4" onchange="beam.updateLoadShape(4)">
+                <option value="none" label=" "> </option>
+                <option value="w">Distributed</option>
+                <option value="P">Point force</option>
+                <option value="M">Moment</option>
+              </select>
+            </td>
+            <td>
+              <select id="loadType4">
+                <option value="none" label=" "> </option>
+                <option value="D">Dead</option>
+                <option value="L">Live</option>
+                <option value="Lr">Roof live</option>
+                <option value="S">Snow</option>
+                <option value="W">Wind</option>
+                <option value="E">EQ</option>
+                <option value="F">Fluid</option>
+                <option value="H">Horiz</option>
+                <option value="R">Rain</option>
+              </select>
+            </td>
+            <td><input type="text" id="amount4" style="width: 8em;" onchange="beam.showGeometry()"></td>
+            <td id="unit4"></td>
+            <td><input type="text" id="from4" style="width: 4em;" onchange="beam.showGeometry()" disabled></td>
+            <td><input type="text" id="to4" style="width: 4em;" onchange="beam.showGeometry()" disabled></td>
+          </tr>
+          <tr>
+            <td>
+              <select id="loadShape5" onchange="beam.updateLoadShape(5)">
+                <option value="none" label=" "> </option>
+                <option value="w">Distributed</option>
+                <option value="P">Point force</option>
+                <option value="M">Moment</option>
+              </select>
+            </td>
+            <td>
+              <select id="loadType5">
+                <option value="none" label=" "> </option>
+                <option value="D">Dead</option>
+                <option value="L">Live</option>
+                <option value="Lr">Roof live</option>
+                <option value="S">Snow</option>
+                <option value="W">Wind</option>
+                <option value="E">EQ</option>
+                <option value="F">Fluid</option>
+                <option value="H">Horiz</option>
+                <option value="R">Rain</option>
+              </select>
+            </td>
+            <td><input type="text" id="amount5" style="width: 8em;" onchange="beam.showGeometry()"></td>
+            <td id="unit5"></td>
+            <td><input type="text" id="from5" style="width: 4em;" onchange="beam.showGeometry()" disabled></td>
+            <td><input type="text" id="to5" style="width: 4em;" onchange="beam.showGeometry()" disabled></td>
+          </tr>
+          <tr>
+            <td>
+              <select id="loadShape6" onchange="beam.updateLoadShape(6)">
+                <option value="none" label=" "> </option>
+                <option value="w">Distributed</option>
+                <option value="P">Point force</option>
+                <option value="M">Moment</option>
+              </select>
+            </td>
+            <td>
+              <select id="loadType6">
+                <option value="none" label=" "> </option>
+                <option value="D">Dead</option>
+                <option value="L">Live</option>
+                <option value="Lr">Roof live</option>
+                <option value="S">Snow</option>
+                <option value="W">Wind</option>
+                <option value="E">EQ</option>
+                <option value="F">Fluid</option>
+                <option value="H">Horiz</option>
+                <option value="R">Rain</option>
+              </select>
+            </td>
+            <td><input type="text" id="amount6" style="width: 8em;" onchange="beam.showGeometry()"></td>
+            <td id="unit6"></td>
+            <td><input type="text" id="from6" style="width: 4em;" onchange="beam.showGeometry()" disabled></td>
+            <td><input type="text" id="to6" style="width: 4em;" onchange="beam.showGeometry()" disabled></td>
+          </tr>
+          <tr>
+            <td>
+              <select id="loadShape7" onchange="beam.updateLoadShape(6)">
+                <option value="none" label=" "> </option>
+                <option value="w">Distributed</option>
+                <option value="P">Point force</option>
+                <option value="M">Moment</option>
+              </select>
+            </td>
+            <td>
+              <select id="loadType7">
+                <option value="none" label=" "> </option>
+                <option value="D">Dead</option>
+                <option value="L">Live</option>
+                <option value="Lr">Roof live</option>
+                <option value="S">Snow</option>
+                <option value="W">Wind</option>
+                <option value="E">EQ</option>
+                <option value="F">Fluid</option>
+                <option value="H">Horiz</option>
+                <option value="R">Rain</option>
+              </select>
+            </td>
+            <td><input type="text" id="amount7" style="width: 8em;" onchange="beam.showGeometry()"></td>
+            <td id="unit7"></td>
+            <td><input type="text" id="from7" style="width: 4em;" onchange="beam.showGeometry()" disabled></td>
+            <td><input type="text" id="to7" style="width: 4em;" onchange="beam.showGeometry()" disabled></td>
+          </tr>
+          <tr>
+            <td>
+              <select id="loadShape8" onchange="beam.updateLoadShape(6)">
+                <option value="none" label=" "> </option>
+                <option value="w">Distributed</option>
+                <option value="P">Point force</option>
+                <option value="M">Moment</option>
+              </select>
+            </td>
+            <td>
+              <select id="loadType8">
+                <option value="none" label=" "> </option>
+                <option value="D">Dead</option>
+                <option value="L">Live</option>
+                <option value="Lr">Roof live</option>
+                <option value="S">Snow</option>
+                <option value="W">Wind</option>
+                <option value="E">EQ</option>
+                <option value="F">Fluid</option>
+                <option value="H">Horiz</option>
+                <option value="R">Rain</option>
+              </select>
+            </td>
+            <td><input type="text" id="amount8" style="width: 8em;" onchange="beam.showGeometry()"></td>
+            <td id="unit8"></td>
+            <td><input type="text" id="from8" style="width: 4em;" onchange="beam.showGeometry()" disabled></td>
+            <td><input type="text" id="to8" style="width: 4em;" onchange="beam.showGeometry()" disabled></td>
+          </tr>
+        </table>
+        <p style="margin-top: 5px;">&nbsp;&nbsp;<span title="Factor for complimentary live loads.">LLF</span>: <select id="LLF" disabled>
+          <option value="1.0">1.0</option>
+          <option value="0.5">0.5</option>
+        </select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span title="Seismic spectral response acceleration parameter">S<sub>DS</sub></span>: 
+        <input type="text" id="SDS" style="width: 4em;" value="0.0" disabled></p>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<div class="wrapper notes">
+  <div>
+    <button type="button" id="analyze"><strong>Analyze</strong></button>&nbsp;&nbsp;&nbsp;&nbsp;
+    <input type="button" value="Clear Diagram" onclick="beam.showGeometry()" style="width: 8em;">&nbsp;&nbsp;&nbsp;&nbsp;
+    <input type="button" value="Select results" onclick="beam.selectResults()" style="width: 8em;">
+  </div>
+  <div style="height: 12px"></div>
+  <div id="diagram-wrapper"></div>
+</div>
+
+<h3 style="clear:both">Notes:</h3>
+
+<div class='wrapper notes'>
+  <div class='row'>
+    <div class='column'>
+      <div class='left'>
+    <p>When setting beam parameters:</p>
+    <div class="indented">
+    <p>Section name is optional.  </p>
+    <p>Modulus of inertia, <strong>I</strong>, can be omitted if you use an AISC section name.</p>
+    <!--<p>Shear area, <strong>A<sub>v</sub></strong>, is optional. If shear area is undefined, Beam Analysis will analyze the beam without consideration of shear deflection.</p>-->
+    <p>Spring Constant, <strong>k</strong>, can be left blank if no nodes are springs.</p>
+    <p>If <em>E</em> and <em>I</em> are omitted, Beam Analysis will omit a deflection diagram but will still plot shear and bending diagrams.</p>
+    <p>Patterned live loads, if checked, will apply or withhold live load to each individual span in all possible patterns. The diagram will then display all the patterns that have at least one envelope point.</p>
+    </div>
+    
+    <p>When defining nodes and spans, write node types and span distances into alternating cells.</p>
+    <p>To define many spans in one input box, a span definition can take the form <strong>n</strong> x <strong>d</strong>, where <strong>n</strong> is the number of times to repeat a span and <strong>d</strong> is the length of each span.</p>
+    <p>The supported node types are:</p>
+    <table class="one-rule">
+      <tr> <td>blank</td>   <td>beam continuity</td>  </tr>
+      <tr> <td>p</td>       <td>pin</td>              </tr>
+      <tr> <td>f</td>       <td>fixed</td>           </tr>
+      <tr> <td>h</td>       <td>hinge</td>            </tr>
+      <tr> <td>ph</td>      <td>propped hinge</td>    </tr>
+      <tr> <td>s</td>       <td>spring</td>           </tr>
+    </table>
+
+    <p>Code for this page can be found at https://github.com/ronkok/BeamAnalysis<p>
+
+      </div>
+    </div>
+
+    <div class='column'>
+      <div class='right-col'>
+    <p>When defining loads:</p>
+    <div class="indented">
+    <p>Sign convention: A negative load is a downward load. Positive is upward. A positive moment is counter-clockwise.</p>
+    <p>A <em>kip</em> is 1000 lbf.</p>
+    <p>A service load analysis may leave the load types blank. Otherwise you must pick a load type for each load.</p>
+    <p>Distributed loads are written as numbers (-0.25) to get a uniform load. To get a non-uniform load, write a pair of numbers (-0.1   -0.25).</p>
+    <p>If the Section name is an AISC steel section, then “-self” is a valid distributed load.</p>
+    <p>The From and To fields set the x-coordinate of the load’s start and end points. If From and To are blank, the load is applied to the entire beam.</p>
+    <p>A negative number in the <em>To</em> field will set the right end of the distributed load at that distance from the right end of the beam.</p>
+    </div>
+
+    <h3>Load combinations</h3>
+    <p>Beam Analysis always does one service load analysis for deflection, that includes all load types.</p>
+    <p>Then Beam Analysis examines each line in the load combinations listed below. If any of the load types listed as “REQD” are present, Beam Analysis will perform a load combination with the factors listed on that line. It finds shears and moments for each such combination and if any point in the combination are part of the envelope, that combination is plotted onto the diagram.</p>
+      <p>Notation: D=Dead, F=Fluid, L=Live, H=Horizontal, Lr=Roof Live<br>
+       <span style="display: inline-block; width:4em;"></span>S=Snow, R=Rain,  W=Wind, E=Earthquake</p>
+<details>
+<summary>ASCE 7-16</summary>
+<pre><code>
+  REQD  |Eqn  D             F           L    H    Lr   S    R    W    E
+  ---------------------------------------------------------------------
+  D F H | 1  1.4          1.4           0  1.6    0    0    0    0    0
+  L     | 2  1.2          1.2         1.6  1.6    0    0    0    0    0
+  L Lr  | 2  1.2          1.2         1.6  1.6  0.5    0    0    0    0
+  L S   | 2  1.2          1.2         1.6  1.6    0  0.5    0    0    0
+  L R   | 2  1.2          1.2         1.6  1.6    0    0  0.5    0    0
+  Lr    | 3  1.2          1.2           0  1.6  1.6    0    0    0    0
+  Lr L  | 3  1.2          1.2         LLF  1.6  1.6    0    0    0    0
+  Lr W  | 3  1.2          1.2           0  1.6  1.6    0    0  0.5    0
+  S     | 3  1.2          1.2           0  1.6    0  1.6    0    0    0
+  S L   | 3  1.2          1.2         LLF  1.6    0  1.6    0    0    0
+  S W   | 3  1.2          1.2           0  1.6    0  1.6    0  0.5    0
+  R     | 3  1.2          1.2           0  1.6    0    0  1.6    0    0
+  R L   | 3  1.2          1.2         LLF  1.6    0    0  1.6    0    0
+  R W   | 3  1.2          1.2           0  1.6    0    0  1.6  0.5    0
+  W     | 4  1.2          1.2           0  1.6    0    0    0  1.0    0
+  W L   | 4  1.2          1.2         LLF  1.6    0    0    0  1.0    0
+  W Lr  | 4  1.2          1.2           0  1.6  0.5    0    0  1.0    0
+  W L Lr| 4  1.2          1.2         LLF  1.6  0.5    0    0  1.0    0
+  W S   | 4  1.2          1.2           0  1.6    0  0.5    0  1.0    0
+  W L S | 4  1.2          1.2         LLF  1.6    0  0.5    0  1.0    0
+  W R   | 4  1.2          1.2           0  1.6    0    0  0.5  1.0    0
+  W L R | 4  1.2          1.2         LLF  1.6    0    0  0.5  1.0    0
+  W     | 6  0.9          0             0  1.6    0    0    0  1.0    0
+  E     | 6  1.2+0.2×SDS  1.2+0.2×SDS   1  1.6    0  0.2    0    0    1
+  E     | 7  0.9-0.2×SDS  0.9-0.2×SDS   0  1.6    0    0    0    0    1
+</code></pre>
+</details>
+
+<details>
+<summary>ASCE 7-16 ASD</summary>
+<pre><code>
+  REQD  |Eqn  D             F           L    H    Lr   S    R    W    E
+  ---------------------------------------------------------------------
+  D F   | 1   1             1           0    1    0    0    0    0    0
+  L     | 2   1             1           1    1    0    0    0    0    0
+  Lr    | 3   1             1           0    1    1    0    0    0    0
+  S     | 3   1             1           0    1    0    1    0    0    0
+  R     | 3   1             1           0    1    0    0    1    0    0
+  L Lr  | 4   1             1         0.75   1   0.75  0    0    0    0
+  L S   | 4   1             1         0.75   1    0   0.75  0    0    0
+  L R   | 4   1             1         0.75   1    0    0   0.75  0    0
+  W     | 5   1             1           0    1    0    0    0   0.6   0
+  L W   | 6   1             1         0.75   1    0    0    0   0.45  0
+  Lr W  | 6   1             1           0    1   0.75  0    0   0.45  0
+  S W   | 6   1             1           0    1    0  0.75   0   0.45  0
+  R W   | 6   1             1           0    1    0    0  0.75  0.45  0
+  L Lr W| 6   1             1         0.75   1   0.75  0    0   0.45  0
+  L S W | 6   1             1         0.75   1    0  0.75   0   0.45  0
+  L R W | 6   1             1         0.75   1    0    0  0.75  0.45  0
+  W     | 7  0.6            0           0    1    0    0    0   0.6   0
+  E     | 8  1+0.14×SDS   1+0.14×SDS    0    1    0    0    0    0    0.7
+  E     | 9  1+0.105×SDS  1+0.105×SDS  0.75  1    0  0.75   0    0    0.525
+  E     |10  0.6-0.14×SDS 0.6-0.14×SDS  0    0    0    0    0    0    0.7
+</code></pre>
+</details>
+
+<details>
+<summary>2018 IBC</summary>
+<pre><code>
+  REQD|Eqn  D    F    L    H    Lr   S    R    W    E
+  ------------------------------------------------------
+  D F | 1  1.4  1.4   0    0    0    0    0    0    0
+  L H | 2  1.2  1.2   1    1    0    0    0    0    0
+  L H | 2  1.2  1.2   1    1   0.5   0    0    0    0
+  L H | 2  1.2  1.2   1    1    0   0.5   0    0    0
+  L H | 2  1.2  1.2   1    1    0    0   0.5   0    0
+  Lr  | 3  1.2  1.2  LLF  1.6   1    0    0    0    0
+  S   | 3  1.2  1.2  LLF  1.6   0    1    0    0    0
+  R   | 3  1.2  1.2  LLF  1.6   0    0    1    0    0
+  Lr  | 3  1.2  1.2   0   1.6   1    0    0   0.5   0
+  S   | 3  1.2  1.2   0   1.6   0    1    0   0.5   0
+  R   | 3  1.2  1.2   0   1.6   0    0    1   0.5   0
+  W   | 4  1.2  1.2  LLF  1.6  0.5   0    0    1    0
+  W   | 4  1.2  1.2  LLF  1.6   0   0.5   0    1    0
+  W   | 4  1.2  1.2  LLF  1.6   0    0   0.5   1    0
+  E   | 5  1.2  1.2  LLF  1.6   0   0.7   0    0    1
+  W   | 6  0.9   0    0   1.6   0    0    0    1    0
+  E   | 7  0.9   0    0   1.6   0    0    0    0    1
+</code></pre>
+</details>
+
+<details>
+<summary>2018 IBC ASD</summary>
+<pre><code>
+  REQD | Eqn  D    F    L    H    Lr   S    R    W    E
+  -------------------------------------------------------
+  D F  |  8   1    1    0    0    0    0    0    0    0
+  L H  |  9   1    1    1    0    0    0    0    0    0
+  Lr   | 10   1    1    0    1    1    0    0    0    0
+  S    | 10   1    1    0    1    0    1    0    0    0
+  R    | 10   1    1    0    1    0    0    1    0    0
+  Lr   | 11   1    1  0.75   1  0.75   0    0    0    0
+  S    | 11   1    1  0.75   1    0  0.75   0    0    0
+  R    | 11   1    1  0.75   1    0    0  0.75   0    0
+  W    | 12   1    1    0    1    0    0    0   0.6   0
+  E    | 12   1    1    0    1    0    0    0    0    0.7
+  W Lr | 13   1    1  0.75   1  0.75   0    0  0.45   0
+  W S  | 13   1    1  0.75   1    0  0.75   0  0.45   0
+  W Lr | 13   1    1  0.75   1    0    0  0.75 0.45   0
+  E    | 14   1    1  0.75   1    0  0.75   0    0    0.525
+  E    | 15  0.6  0.6   0    1    0    0    0    0    0.7
+</code></pre>
+</details>
+
+<details>
+<summary>2015 NBCC</summary>
+<pre><code>
+   REQD  | Eqn  D      F    L     H    Lr   S    R    W    E
+  -------|---------------------------------------------------
+    D    | 1  1.4     0    0     0    0    0    0    0    0
+  L Lr F | 2  1.25  1.25  1.5    0   1.5   0    0    0    0
+  L Lr F | 2  0.9   1.25  1.5    0   1.5   0    0    0    0
+  L Lr F | 2  1.25  1.25  1.5    0   1.5  0.5   0    0    0
+  L Lr F | 2  0.9   1.25  1.5    0   1.5  0.5   0    0    0
+  L Lr F | 2  1.25  1.25  1.5    0   1.5   0    0   0.4   0
+  L Lr F | 2  0.9   1.25  1.5    0   1.5   0    0   0.4   0
+    S    | 3  1.25    0    0     0    0   1.5   0    0    0
+    S    | 3  0.9     0    0     0    0   1.5   0    0    0
+    S    | 3  1.25   LLF  LLF    0   LLF  1.5   0    0    0
+    S    | 3  0.9    LLF  LLF    0   LLF  1.5   0    0    0
+    S    | 3  1.25    0    0     0    0   1.5   0   0.4   0
+    S    | 3  0.9     0    0     0    0   1.5   0   0.4   0
+    W    | 4  1.25    0    0     0    0    0    0   1.4   0
+    W    | 4  0.9     0    0     0    0    0    0   1.4   0
+    W    | 4  1.25   LLF  LLF    0   LLF   0    0   1.4   0
+    W    | 4  0.9    LLF  LLF    0   LLF   0    0   1.4   0
+    W    | 4  1.25    0    0     0    0   0.5   0   1.4   0
+    W    | 4  0.9     0    0     0    0   0.5   0   1.4   0
+    E    | 5  1.25    0    0     0    0    0    0    0    1
+    E    | 5  0.9     0    0     0    0    0    0    0    1
+    E    | 5  1.25   LLF  LLF    0   LLF   0    0    0    1
+    E    | 5  0.9    LLF  LLF    0   LLF   0    0    0    1
+    E    | 5  1.25    0    0     0    0   0.2   0    0    1
+    E    | 5  0.9     0    0     0    0   0.2   0    0    1
+</code></pre>
+</details>
+
+</div>
+    </div>
+  </div>
+</div>      
+
+<div id="copyright">Copyright © 2021 Ron Kok. Released subject to terms of the <a href="https://opensource.org/licenses/MIT">MIT License</a></div>
+</div>
+<script>
+  document.getElementById("analyze").addEventListener("click", function(event) { beam.analyze() } , true);
+  beam.showGeometry()
+</script>
+
+</body>
