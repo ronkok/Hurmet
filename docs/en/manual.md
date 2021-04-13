@@ -1394,6 +1394,7 @@ GitHub Gists work best for simple content. Markdown does not recognize indented 
 
 Civil and structural engineers may also find these items useful:
 
+* Beam Analysis [Diagram](https://hurmet.app/ce/beamanalysis.html)
 * Concrete Column Interaction [Diagram](https://observablehq.com/@ronkok/concrete-column-interaction-diagram)
 * Fetchable CSV files with steel shape data: [wide flanges], [channels], 
 * [Module](https://gist.githubusercontent.com/ronkok/d42b0efdc66dc4f6135fee3b8d22a83e/raw/da3195993e3255c9b9b7f0b64788bc3664d6534d/steelStrengthPerAISC360-16.hrms) with functions for steel member strength.
