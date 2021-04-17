@@ -1262,8 +1262,8 @@ export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
           } else if (delim.delimType === dDICTIONARY && token.input === ";") {
             token.output = "\\\\"
             if (!delim.open.length < 5) {
-              delim.open = "\\begin{Bmatrix}"
-              delim.close = "\\end{Bmatrix}"
+              delim.open = "\\left\\{\\begin{array}{l}"
+              delim.close = "\\end{array}\\right\\}"
               delim.isTall = true
             }
           } else if (delim.delimType > 3 && token.input === ";") {

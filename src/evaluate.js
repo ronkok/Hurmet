@@ -5,7 +5,7 @@ import { fromAssignment } from "./operand.js"
 import { Functions, multivarFunction } from "./functions"
 import { Operators, isDivByZero } from "./operations"
 import { unitFromUnitName, unitsAreCompatible } from "./units"
-import { Matrix, isMatrix } from "./matrix"
+import { Matrix, isMatrix, isVector } from "./matrix"
 import { Dictionary } from "./dictionary"
 import { map } from "./map"
 import { DataFrame } from "./dataframe"
@@ -1178,14 +1178,14 @@ const elementFromIterable = (iterable, index, step) => {
     value = index
     nextIndex = Rnl.add(index, step)
     dtype = dt.RATIONAL
-  } else if ((iterable.dtype & dt.STRING) &&
+  } else if ((iterable.dtype === dt.STRING) &&
     iterable.value[Rnl.fromNumber(index)] === "\uD835") {
     value = Rnl.fromNumber(iterable.value[index] + iterable.value[index + 1])
     nextIndex = Rnl.add(index, 2)
     dtype = dt.STRING
 //  } else if (iterable.dtype === dt.DICT) {
   } else {
-    value = iterable.value[Rnl.fromNumber(index)]
+    value = iterable.value[Rnl.toNumber(index)]
     dtype = (iterable.dtype & dt.STRING)
       ? dt.STRING
       : (iterable.dtype & dt.ROWVECTOR)
