@@ -883,7 +883,7 @@ export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
             rpn += '"∞"' // slice of the form: identifier[n:]
           }
         }
-        tex += token.output
+        tex += isKeyValueSeparator ? "\\mathpunct{:}" : token.output
         break
       }
 
