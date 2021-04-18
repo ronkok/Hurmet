@@ -1340,6 +1340,7 @@ export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
               if (numArgs === 2) {
                 if (symbol === "log") { symbol = "logn" }
                 if (symbol === "round") { symbol = "roundn" }
+                if (symbol === "atan") { symbol = "atan2" }
               } else if (symbol === "log" && regEx.test(rpn)) {
                 rpn = rpn.slice(0, rpn.length - 1) + "logFactorial"
                 break

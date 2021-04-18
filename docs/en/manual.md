@@ -747,9 +747,9 @@ acos(*x*), asin(*x*), atan(*x*), asec(*x*), acsc(*x*), acot(*x*)
 
 : Inverse trigonometry functions. One can also call an inverse trigonometry function with a superscript, as in ¢cos^(-1) x¢.
 
-atan2(*x*, *y*)
+atan(*x*, *y*)
 
-: An _atan_ function that returns an angle in the proper quadrant. Given a point defined by real coordinates *x* and *y*, *atan2* returns the angle between that point and the positive *x*-axis of a plane.
+: When _atan_ is called with two arguments, it returns an angle in the proper quadrant. Given a point defined by real coordinates *x* and *y*, *atan* returns the angle between that point and the positive *x*-axis of a plane.
 
 chr(*n*)
 
