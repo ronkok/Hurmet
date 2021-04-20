@@ -686,13 +686,11 @@ export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
     }
 
     switch (token.ttype) {
-      case tt.ACCESSOR: //   dot between a dictionary name and a property, as in r.PROPERTY
       case tt.PUNCT: //      spaces and newlines
       case tt.BIN: //        infix math operators that render but don't calc, e.g. \bowtie
       case tt.ADD: //        infix add/subtract operators, + -
       case tt.MULT: //       infix mult/divide operators, × * · // ÷
       case tt.REL: //        relational operators, e.g  < →
-      case tt.ANGLE: //      \angle. Used as a separator for complex numbers in polar notation
       case tt.UNDEROVER: { // int, sum, lim, etc
         if (token.output.length > 0 && "- +".indexOf(token.output) > -1) {
           token = checkForUnaryMinus(token, prevToken)
@@ -707,9 +705,7 @@ export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
         const texPrec = texPrecFromType[token.ttype]
         popTexTokens(texPrec, okToAppend)
         tex += token.output + " "
-        if (token.ttype !== tt.ACCESSOR && token.ttype !== tt.ANGLE) {
-          posOfPrevRun = tex.length
-        }
+        posOfPrevRun = tex.length
 
         if (token.ttype === tt.UNDEROVER && delims.length > 1) {
           delims[delims.length - 1].isTall = true
@@ -720,6 +716,20 @@ export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
         okToAppend = true
         break
       }
+
+      case tt.ACCESSOR:  //   dot between a dictionary name and a property, as in r.PROPERTY
+      case tt.ANGLE:    // \angle. Used as a separator for complex numbers in polar notation
+        token = checkForUnaryMinus(token, prevToken)
+        if (isCalc) {
+          rpn += tokenSep
+          rpnPrec = rpnPrecFromType[token.ttype]
+          popRpnTokens(rpnPrec)
+          rpnStack.push({ prec: rpnPrec, symbol: token.input })
+        }
+        popTexTokens(texPrecFromType[token.ttype], okToAppend)
+        tex += isCalc ? token.input : token.output + " "
+        okToAppend = true
+        break
 
       case tt.NUM:
       case tt.ORD:
@@ -777,7 +787,7 @@ export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
           rpn += '"' + token.input + '"' // a loop index variable name.
         } else {
           // We're in the echo of a Hurmet calculation.
-          if (str.charAt(0) === ".") {
+          if (str.charAt(0) === "[") {
             token.output = token.ttype === tt.LONGVAR
               ? "\\mathrm{" + token.output + "}"
               : token.output
@@ -788,7 +798,7 @@ export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
           rpn += "¿" + token.input
         }
 
-        tex += token.output + " "
+        tex += token.output + (str.charAt(0) === "." ? "" : " ")
         if (isCalc) {
           // The variable's value may be tall. We don't know.
           delims[delims.length - 1].isTall = true
@@ -825,7 +835,10 @@ export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
         popTexTokens(15, okToAppend)
         if (isCalc) { rpn += '"' + token.output + '"' }
         const pos = token.input.indexOf("_")
-        if (pos > -1) {
+        if (isCalc) {
+          tex += `\\mathrm{${token.output}}`
+          if (str.charAt(0) !== ".") { tex += " " }
+        } else if (pos > -1) {
           tex += token.input.substring(0, pos) + "_\\mathrm{" +
             token.input.substring(pos + 1) + "}"
         } else {

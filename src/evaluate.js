@@ -9,6 +9,7 @@ import { Matrix, isMatrix } from "./matrix"
 import { Dictionary } from "./dictionary"
 import { map } from "./map"
 import { DataFrame } from "./dataframe"
+import { propertyFromDotAccessor } from "./property"
 import { textRange } from "./text"
 import { compare } from "./compare"
 import { lineChart } from "./graphics"
@@ -426,50 +427,10 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         }
 
         case ".": {
-          // Accessor of a dictionary's property in dot notation
+          // Accessor of a object's property in dot notation
           const o2 = stack.pop()
           const o1 = stack.pop()
-          let property = Object.create(null)
-          if (o1.dtype & dt.MAP) {
-            property = map.valueFromMap(o1, [o2.value], unitAware)
-
-          } else if (o1.dtype & dt.DICT) {
-            property = Dictionary.toValue(o1, [o2.value], unitAware)
-
-          } else if (o1.dtype & dt.DATAFRAME) {
-            const colIndicator = { value: Rnl.zero, unit: null, dtype: dt.RATIONAL }
-            property = DataFrame.range(o1, o2, colIndicator, vars, unitAware)
-
-          } else if ((o1.dtype === dt.STRING || (o1.dtype & dt.ARRAY)) &&
-            o2.dtype === dt.RATIONAL) {
-            const index = Rnl.toNumber(o2.value)
-            property.value = o1.value.slice(index - 1, index)
-            property.unit = o1.unit
-            property.dtype = o1.dtype
-
-          } else if ((o1.dtype === dt.STRING || (o1.dtype & dt.ARRAY)) &&
-            o2.dtype === dt.RANGE) {
-            const start = o2.value[0] - 1
-            const step = o2.value[1]
-            const end = (o2.value[2] === "∞") ? o1.value.length : o2.value[2]
-            property.unit = o1.unit
-            property.dtype = o1.dtype
-            if (step === 1) {
-              property.value = o1.value.slice(start, end)
-            } else {
-              property.value = []
-              for (let j = start; j < end; j += step) {
-                property.value.push(o1.value[j])
-              }
-            }
-
-          } else if (o1.dtype === dt.MODULE) {
-            // o1 is a module and o2 has a value assigned to it.
-            property = fromAssignment(o1.value[o2.value], unitAware)
-
-          } else {
-            return errorOprnd("NO_PROP", o1.name)
-          }
+          const property = propertyFromDotAccessor(o1, o2, vars, unitAware)
           if (property.dtype === dt.ERROR) { return property }
           stack.push(Object.freeze(property))
           break
@@ -1451,7 +1412,8 @@ export const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
   const formatSpec = vars.format ? vars.format.value : "h15"
 
   if (stmt.tex.indexOf("〖") > -1) {
-    const eqnWithVals = plugValsIntoEcho(stmt.tex, vars, isUnitAware)
+    // eslint-disable-next-line max-len
+    const eqnWithVals = plugValsIntoEcho(stmt.tex, vars, isUnitAware, formatSpec, decimalFormat)
     if (eqnWithVals.dtype && eqnWithVals.dtype === dt.ERROR) {
       return errorResult(stmt, eqnWithVals)
     } else {

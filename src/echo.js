@@ -1,6 +1,8 @@
 import { dt } from "./constants"
+import { propertyFromDotAccessor } from "./property"
 import { isMatrix } from "./matrix"
 import { errorOprnd } from "./error"
+import { formatResult } from "./result"
 
 /*
  *  This module receives a TeX template string and a object containing Hurmet variables.
@@ -16,7 +18,7 @@ const isRecordIsh = oprnd => ((oprnd.dtype & dt.DICT) || (oprnd.dtype & dt.MAP) 
   (oprnd.dtype & dt.DATAFRAME))
 const openParenRegEx = /([([{|‖]|[^\\][,;:])$/
 
-export const plugValsIntoEcho = (str, vars, unitAware) => {
+export const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat) => {
   // For each variable name in the echo string, substitute a value.
   // The parser surrounded those names with 〖〗 delimiters.
   let match
@@ -25,7 +27,22 @@ export const plugValsIntoEcho = (str, vars, unitAware) => {
     let matchLength = match[0].length
     let pos = match.index
     let hvar
-    if (!vars[varName] && varName === "T") {
+
+    if (varName.indexOf(".") > -1) {
+      // Object with a dot accessor.
+      const names = varName.split(".")
+      const parentName = names[0]
+      if (!vars[parentName]) { return errorOprnd("V_NAME", parentName) }
+      hvar = vars[parentName]
+      for (let i = 1; i < names.length; i++) {
+        const propName = names[i].replace("}", "").replace("\\mathrm{", "").trim()
+        const indexOprnd = { value: propName, unit: null, dtype: dt.STRING }
+        hvar = propertyFromDotAccessor(hvar, indexOprnd, vars, unitAware)
+        if (!hvar) { return errorOprnd("V_NAME", propName) }
+        const stmt = { resulttemplate: "@", altresulttemplate: "@" }
+        hvar.resultdisplay = formatResult(stmt, hvar, formatSpec, decimalFormat).resultdisplay
+      }
+    } else if (!vars[varName] && varName === "T") {
       // Transposed matrix
       hvar = { dtype: dt.RATIONAL, resultdisplay: "\\text{T}" }
     } else if (varName === "e" && /^^/.test(str.slice(pos + 4).trim())) {
@@ -42,7 +59,7 @@ export const plugValsIntoEcho = (str, vars, unitAware) => {
       }
     }
 
-    let displayVarNameOnly = false
+/*    let displayVarNameOnly = false
     if ((isRecordIsh(hvar) || isMatrix(hvar) || (hvar.dtype & dt.STRING))
       && /^(?:\\left)?[.[]/.test(str.slice(pos + match[0].length).trim())) {
       // The variable is a dictionary, map, or data frame, followed by an index or key.
@@ -54,7 +71,7 @@ export const plugValsIntoEcho = (str, vars, unitAware) => {
       matchLength = pos - posAtStartOfName
       pos = posAtStartOfName
       continue
-    }
+    } */
 
     if (!hvar || !hvar.resultdisplay) {
       const insert = (varName) ? varName : "?"
@@ -81,9 +98,10 @@ export const plugValsIntoEcho = (str, vars, unitAware) => {
 
     let display = ""
 
-    if (displayVarNameOnly) {
-      display = "\\text{" + varName + "}"
-    } else if (unitAware) {
+//    if (displayVarNameOnly) {
+//      display = "\\text{" + varName + "}"
+//    } else 
+    if (unitAware) {
       display = needsParens ? "\\left(" + hvar.resultdisplay + "\\right)" : hvar.resultdisplay
     } else {
       let displaySansUnits = hvar.resultdisplay
