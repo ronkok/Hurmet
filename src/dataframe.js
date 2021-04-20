@@ -151,7 +151,7 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
     // Return data from one column, in a column vector or a quantity
     const j = columnList[0]
     const unitName = oprnd.value.units[j] ? oprnd.value.units[j] : null
-    unit = oprnd.unit.map[unitName]
+    unit = (oprnd.unit.map) ? oprnd.unit.map[unitName] : { expos: null }
     const value = oprnd.value.data[j].slice(iStart, iEnd + 1)
     const dtype = oprnd.value.dtype[j] + dt.COLUMNVECTOR
     const newOprnd = { value, unit, dtype }

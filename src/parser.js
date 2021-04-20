@@ -707,7 +707,9 @@ export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
         const texPrec = texPrecFromType[token.ttype]
         popTexTokens(texPrec, okToAppend)
         tex += token.output + " "
-        posOfPrevRun = tex.length
+        if (token.ttype !== tt.ACCESSOR && token.ttype !== tt.ANGLE) {
+          posOfPrevRun = tex.length
+        }
 
         if (token.ttype === tt.UNDEROVER && delims.length > 1) {
           delims[delims.length - 1].isTall = true
