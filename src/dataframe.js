@@ -398,6 +398,13 @@ const append = (o1, o2, vars) => {
   return oprnd
 }
 
+const isNotEmptyStrings = row => {
+  for (let i = 0; i < row.length; i++) {
+    if (row[i] !== "") { return true }
+  }
+  return false
+}
+
 const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.") => {
   const numRows = df.data[0].length
   const numCols = df.data.length
@@ -417,7 +424,7 @@ const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.") => {
   str = str.slice(0, -1) + " \\\\ "
 
   // Write the unit names
-  if ( df.units.length > 0) {
+  if (isNotEmptyStrings(df.units)) {
     if (!df.rowMap) { str += "&" }
     for (let j = 0; j < numCols; j++) {
       let rowTex = ""
@@ -467,7 +474,7 @@ const displayAlt = df => {
   str = str.slice(0, -1) + "\n"
 
   // Write the unit names
-  if ( df.units.length > 0) {
+  if (isNotEmptyStrings(df.units)) {
     if (!df.rowMap) { str += "," }
     for (let j = 0; j < numCols; j++) {
       str += df.units[j] + ","
