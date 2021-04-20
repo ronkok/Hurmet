@@ -160,7 +160,7 @@ export const parseFormatSpec = str => {
   // Do the RegEx once, at compile time, not every time a number is formatted.
   //
   // str ≔ "Tn", where:
-  //    T = type, [bEefhkmNnprSstx%%], default: "h"
+  //    T = type, [bEefhkmNnprSstx%], default: "h"
   //    n = number of digits, [0-9]+, default: 15
   //
   //    Possible future additions: complex number format [√∠°]
@@ -171,7 +171,7 @@ export const parseFormatSpec = str => {
     return [str, undefined, dt.ERROR, "\\text{" + message + "}"]
   }
 
-  const ftype = match[1] || "h"
+  let ftype = match[1] || "h"
   let N = Number(match[2] || "15")
 
   // Check the specified number of digits
@@ -193,6 +193,7 @@ export const parseFormatSpec = str => {
       }
   }
 
+  if (ftype === "%") { ftype = "\\%" }
   return [str, undefined, dt.STRING, "\\text{" + ftype + String(N) + "}" ]
 }
 
@@ -221,7 +222,7 @@ export const format = (num, specStr = "h3", decimalFormat = "1,000,000.") => {
       return formattedInteger(numStr, decimalFormat)
     case "%":
     case "p":
-      return formattedDecimal(numStr, decimalFormat) + "%"
+      return formattedDecimal(numStr, decimalFormat) + "\\%"
     case "m":
     case "b":
     case "x":
