@@ -316,7 +316,7 @@ const dataFrameFromCSV = (str, vars) => {
       dtype.push(
         Rnl.isRational(datum)
         ? dt.RATIONAL + ((units.length > 0 && units[j].length > 0) ? dt.QUANTITY : 0)
-        : (datum === "true" || datum === "false")
+        : (datum === true || datum === false)
         ? dt.BOOLEAN
         : dt.STRING
       )
