@@ -15,7 +15,7 @@ import { compare } from "./compare"
 import { lineChart } from "./graphics"
 import { errorOprnd } from "./error"
 import { Rnl } from "./rational"
-import { parseFormatSpec, format } from "./format"
+import { format } from "./format"
 import { formatResult } from "./result"
 
 // evaluate.js
@@ -818,9 +818,9 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         }
 
         case "format": {
-          const formatSpec = parseFormatSpec(stack.pop())
-          if (formatSpec.dtype && formatSpec.dtype === dt.ERROR) { return formatSpec }
-          stack.push(format(stack.pop(), formatSpec))
+          const formatSpec = stack.pop().value
+          const str = format(stack.pop().value, formatSpec)
+          stack.push({ value: str, unit: null, dtype: dt.STRING })
           break
         }
 
