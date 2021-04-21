@@ -23,6 +23,7 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAwar
         // Suppress display of the result
         resultDisplay = ""
         altResultDisplay = ""
+        return stmt
 
       } else if (result.dtype === dt.DICT) {
         resultDisplay = Dictionary.display(result.value, formatSpec, decimalFormat)
@@ -104,9 +105,20 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAwar
       if (stmt.resulttemplate.indexOf("@") > -1) {
         stmt.tex = stmt.resultdisplay
         stmt.alt = stmt.altresulttemplate.replace(/@@?/, altResultDisplay)
-      } else {
-        stmt.tex = stmt.tex.replace(/[?%] *[?%]|[?%]/, resultDisplay)
-        stmt.alt = stmt.alt.replace(/[?%] *[?%]|[?%]/, altResultDisplay)
+      } else if (stmt.resulttemplate.indexOf("?") > -1) {
+        let pos = stmt.tex.lastIndexOf("?")
+        let startPos = stmt.tex.charAt(pos - 1) === "?" ? pos - 1 : pos
+        stmt.tex = stmt.tex.slice(0, startPos) + resultDisplay + stmt.tex.slice(pos + 1)
+        pos = stmt.alt.lastIndexOf("?")
+        startPos = stmt.alt.charAt(pos - 1) === "?" ? pos - 1 : pos
+        stmt.alt = stmt.alt.slice(0, startPos) + resultDisplay + stmt.alt.slice(pos + 1)
+      } else if (stmt.resulttemplate.indexOf("%") > -1) {
+        let pos = stmt.tex.lastIndexOf("?")
+        let startPos = stmt.tex.charAt(pos - 1) === "%" ? pos - 1 : pos
+        stmt.tex = stmt.tex.slice(0, startPos) + resultDisplay + stmt.tex.slice(pos + 1)
+        pos = stmt.alt.lastIndexOf("%")
+        startPos = stmt.alt.charAt(pos - 1) === "&" ? pos - 1 : pos
+        stmt.alt = stmt.alt.slice(0, startPos) + resultDisplay + stmt.alt.slice(pos + 1)
       }
     }
   }

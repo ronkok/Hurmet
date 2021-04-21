@@ -27,16 +27,17 @@ const hbar = [BigInt(1054571817),
 const intAbs = i => i >= iZero ? i : BigInt(-1) * i  // absolute value of a BigInt
 
 // eslint-disable-next-line max-len
-const numberPattern = "^(-?)(?:([0-9]+)(?: ([0-9]+)\\/([0-9]+)|(?:\\.([0-9]+))?(?:e([+-]?[0-9]+))?)|(0x[0-9A-Fa-f]+))"
+const numberPattern = "^(-?)(?:(0x[0-9A-Fa-f]+)|([0-9]+)(?: ([0-9]+)\\/([0-9]+)|(?:\\.([0-9]+))?(?:e([+-]?[0-9]+)|(%))?))"
 const numberRegEx = new RegExp(numberPattern)
 // Capturing groups:
 //    [1] sign
-//    [2] integer part
-//    [3] numerator of a mixed fraction
-//    [4] denominator of a mixed fraction
-//    [5] decimal fraction of significand, not including decimal point
-//    [6] exponent of a number in scientific notation
-//    [7] hexadecimal integer
+//    [2] hexadecimal integer
+//    [3] integer part
+//    [4] numerator of a mixed fraction
+//    [5] denominator of a mixed fraction
+//    [6] decimal fraction of significand, not including decimal point
+//    [7] exponent of a number in scientific notation
+//    [8] percentage sign
 
 const fromNumber = num => {
   // Convert a JavaScript Number to a rational.
@@ -44,17 +45,17 @@ const fromNumber = num => {
     return [BigInt(num), iOne]
   } else {
     const parts = num.toExponential().match(numberRegEx)
-    const decimalFrac = parts[5] || ""
-    const exp = BigInt(parts[6]) - BigInt(decimalFrac.length)
+    const decimalFrac = parts[6] || ""
+    const exp = BigInt(parts[7]) - BigInt(decimalFrac.length)
     if (exp < 0) {
-      return [BigInt(parts[1] + parts[2] + decimalFrac), BigInt(10) ** -exp]
-    } else if (parts[4]) {
-      const denominator = BigInt(parts[4])
+      return [BigInt(parts[1] + parts[3] + decimalFrac), BigInt(10) ** -exp]
+    } else if (parts[5]) {
+      const denominator = BigInt(parts[5])
       return normalize(
-        [BigInt(parts[1] + parts[2]) * denominator + BigInt(parts[3]) ], denominator
+        [BigInt(parts[1] + parts[3]) * denominator + BigInt(parts[4]) ], denominator
       )
     } else {
-      return normalize([BigInt(parts[1] + parts[2] + decimalFrac) * BigInt(10) ** exp, iOne])
+      return normalize([BigInt(parts[1] + parts[3] + decimalFrac) * BigInt(10) ** exp, iOne])
     }
   }
 }
@@ -67,31 +68,27 @@ const fromString = str => {
     // TODO: write an error message.
   }
   if (parts[5]) {
-    // decimal
-    const decimalFrac = parts[5] || ""
-    const expoStr = parts[6] || "0"
-    const exp = BigInt(expoStr) - BigInt(decimalFrac.length)
-    const numerator = BigInt(parts[2] + decimalFrac)
-    r = (exp < 0)
-      ? [numerator, BigInt(10) ** -exp]
-      : normalize([numerator * BigInt(10) ** exp, iOne])
-
-  } else if (parts[4]) {
     // mixed fraction
-    const denominator = BigInt(parts[4])
-    const numerator = BigInt(parts[1] + parts[2]) * denominator + BigInt(parts[3])
+    const denominator = BigInt(parts[5])
+    const numerator = BigInt(parts[1] + parts[3]) * denominator + BigInt(parts[4])
     r = normalize([numerator, denominator])
 
   } else if (parts[2]) {
-    // Integer
+    // hexadecimal
     r = [BigInt(parts[2]), iOne]
 
-  } else if (parts[7]) {
-    // hexadecimal
-    r = [BigInt(str), iOne]
-
   } else {
-    // TODO: return an error.
+    // decimal
+    const decimalFrac = parts[6] || ""
+    const numerator = BigInt(parts[3] + decimalFrac)
+    const exp = parts[7]
+      ? BigInt(parts[7]) - BigInt(decimalFrac.length)  // scientific notation.
+      : parts[8]
+      ? BigInt(-2) - BigInt(decimalFrac.length)  // percentage.
+      : BigInt(0) - BigInt(decimalFrac.length)
+    r = (exp < 0)
+      ? [numerator, BigInt(10) ** -exp]
+      : normalize([numerator * BigInt(10) ** exp, iOne])
   }
   if (parts[1]) { r = negate(r) }
   return r

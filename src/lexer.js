@@ -56,21 +56,23 @@ const numberRegEx = new RegExp(Rnl.numberPattern)
 
 export const texFromNumStr = (numParts, decimalFormat) => {
   let num = ""
-  if (numParts[7]) {
+  if (numParts[2]) {
     // Hexadecimal
-    num = "\\mathrm{" & numParts[7] & "}"
-  } else if (numParts[4]) {
+    num = "\\mathrm{" + numParts[2] + "}"
+  } else if (numParts[5]) {
     return texFromMixedFraction(numParts)
   } else {
     // Decimal
-    num = numParts[2]
-    if (numParts[5]) { num += "." + numParts[5] }
+    num = numParts[3]
+    if (numParts[6]) { num += "." + numParts[6] }
     num = formattedDecimal(num, decimalFormat)
-    if (numParts[6]) {
-      if (numParts[6].charAt(0) === "-") {
-        return num + "\\text{e-}" + numParts[6].slice(1)
+    if (numParts[8]) {
+      num += "\\%"
+    } else if (numParts[7]) {
+      if (numParts[7].charAt(0) === "-") {
+        num += "\\text{e-}" + numParts[7].slice(1)
       } else {
-        return num + "\\text{e}" + numParts[6]
+        num += "\\text{e}" + numParts[7]
       }
     }
   }

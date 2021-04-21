@@ -15,11 +15,6 @@ const columnListFromRange = (start, end) => {
   return columnList
 }
 
-const columnIndicator = (oprnd, propName) => {
-  return oprnd.columnMap[propName]
-}
-
-
 const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
   let iStart
   let iEnd
@@ -507,7 +502,6 @@ const displayAlt = df => {
 
 export const DataFrame = Object.freeze({
   append,
-  columnIndicator,
   dataFrameFromCSV,
   dataFrameFromVectors,
   display,

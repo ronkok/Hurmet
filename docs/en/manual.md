@@ -415,9 +415,9 @@ You can call a subset of any string with an index or range in brackets. Hurmet i
 ###### Number
 <div>
 
-Enter as integers (33), decimals (2.45), scientific notation (3.1e4), or mixed fractions (3 ⁷⁄₈).
+Enter as integers (33), decimals (2.45), percentages (3.2%), scientific notation (3.1e4), mixed fractions (3 ⁷⁄₈) or hexadecimal (0x2A).
 
-![optional minus 0-9 repeated optional decimal 0-9 repeated optional scientific notation or 0-9 repeated space 0-9 repeated / 0-9 repeated](../../images/NumberRailroad.svg)
+![integers, decimals, percentages, scientific notation, mixed fractions, or hexadecimal](../../images/NumberRailroad.svg)
 
 Notice that a number literal must begin and end with a numeral, not a decimal symbol. Hurmet will not recognize `5.` as a number.
 
