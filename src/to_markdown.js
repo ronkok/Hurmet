@@ -133,15 +133,7 @@ const hurmetNodes =  {
   calculation(state, node) {
     const entry = node.attrs.entry.trim()
     const delimiter = node.attrs.displayMode ? "¢¢" : "¢"
-    if (entry.indexOf("\n") === -1) {
-      state.write(delimiter + entry + delimiter)
-    } else {
-      state.write("```hurmetCalc\n")
-      state.text(entry, false)
-      state.ensureNewLine()
-      state.write("```")
-      state.closeBlock(node)  
-    }
+    state.write(delimiter + entry + delimiter)
   }
 }
 

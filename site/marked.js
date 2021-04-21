@@ -551,8 +551,8 @@ var inline = {
   nolink: /^!?\[(?!\s*\])((?:\[[^\[\]]*\]|\\[\[\]]|[^\[\]])*)\](?:\[\])?/,
   strong: /^__([^\s_])__(?!_)|^\*\*([^\s*])\*\*(?!\*)|^__([^\s][\s\S]*?[^\s])__(?!_)|^\*\*([^\s][\s\S]*?[^\s])\*\*(?!\*)/,
   em: /^_([^\s_])_(?!_)|^\*([^\s*<\[])\*(?!\*)|^_([^\s<][\s\S]*?[^\s_])_(?!_|[^\spunctuation])|^_([^\s_<][\s\S]*?[^\s])_(?!_|[^\spunctuation])|^\*([^\s<"][\s\S]*?[^\s\*])\*(?!\*|[^\spunctuation])|^\*([^\s*"<\[][\s\S]*?[^\s])\*(?!\*)/,
-  hurmet: /^¢¢?((?:[^\s\\])|(?:\S.*?[^\s\\]))¢¢?/,
-  latex: /^\$\$?((?:[^\s\\])|(?:\S.*?[^\s{\\]))\$\$?(?=(?:$|[^0-9}]))/,
+  hurmet: /^¢¢?((?:[^\s\\])|(?:\S(?:.|\n)*?[^\s\\]))¢¢?/,
+  latex: /^\$\$?((?:[^\s\\])|(?:\S(?:.|\n)*?[^\s{\\]))\$\$?(?=(?:$|[^0-9}]))/,
   code: /^(`+)([^`]|[^`][\s\S]*?[^`])\1(?!`)/,
   br: /^( {2,}|\\)\n(?!\s*$)/,
   del: noop,
@@ -974,10 +974,6 @@ Renderer.prototype.code = function(code, infostring, escaped) {
     return '<pre><code>'
       + (escaped ? code : escape(code, true))
       + '</code></pre>';
-  }
-
-  if (lang === "hurmetCalc") {
-    return `<span class="hurmet-calc" data-entry="${code}"></span>\n`;
   }
 
   return '<pre><code class="'
