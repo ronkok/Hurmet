@@ -53,6 +53,7 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
   let suppressResultDisplay = false
   let displayResultOnly = false
   let omitEcho = false
+  let mustAlign = false
   let posOfFirstEquals = 0
   let expression = ""
   let echo = ""
@@ -100,7 +101,9 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
 
   if (posOfLastEquals > 1) {
     // input has form:  mainStr = trailStr
-    mainStr = str.substring(0, posOfLastEquals - 1).trim()
+    mainStr = str.substring(0, posOfLastEquals - 1).replace(/ +$/, "")
+    mustAlign = mainStr.length > 0 && mainStr.slice(-1) === "\n"
+    mainStr = mainStr.trim()
     trailStr = str.substring(posOfLastEquals).trim()
 
     if (mustDoCalculation.test(trailStr)) {
@@ -144,7 +147,8 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
             name = leadStr
           } else {
             // The "=" sign is inside an expression. There is no lead identifier.
-            // // input has form:  expression = trailStr
+            // This statement does not assign a value to a variable. But it may do a calc.
+            // input has form:  expression = trailStr
             expression = mainStr
           }
         }
@@ -243,14 +247,21 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
   let altEqn = ""
   if (!displayResultOnly) {
     eqn = parse(mainStr, decimalFormat)
+    if (mustAlign) {
+      eqn = "\\begin{aligned}" + eqn
+      const pos = eqn.indexOf("=")
+      eqn = eqn.slice(0, pos) + "&" + eqn.slice(pos)
+    }
+    const alignChar = mustAlign ? "\\\\ &" : ""
     altEqn = mainStr
     if (echo.length > 0 && !omitEcho) {
-      eqn += " = " + echo
+      eqn += ` ${alignChar}= ` + echo
     }
     if (!suppressResultDisplay) {
       eqn += " = " + resultDisplay
       altEqn += " = " + trailStr
     }
+    if (mustAlign) { eqn += "\\end{aligned}" }
   }
 
   // Populate the object to be returned.

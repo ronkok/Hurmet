@@ -47,7 +47,7 @@ export const tt = Object.freeze({
   KEYWORD: 34, //     keywords: for in while
   PROPERTY: 36, //    property name after a dot accessor
   COMMENT: 37,
-  RETURN: 38,
+  RETURN: 38,  // A return statement inside a user-defined function.
   TO: 39
 })
 

@@ -491,6 +491,7 @@ export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
   let token = {}
   let prevToken = { input: "", output: "", ttype: 50 }
   let mustLex = true
+  let mustAlign = false
   let posOfPrevRun = 0
   let isPrecededBySpace = false
   let isFollowedBySpace = false
@@ -654,7 +655,11 @@ export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
         popTexTokens(0, true)
         tex += "\\\\ "
         const matchObj = /^ +/.exec(str)
-        if (matchObj) {
+        str = str.replace(/^ */, "")
+        if (str.length > 0 && str.charAt(0) === "=" & tex.indexOf("=") > -1) {
+          mustAlign = true // We'll use the TeX {aligned} environment to align = signs.
+          tex += "&"
+        } else if (matchObj) {
           tex += "\\quad ".repeat(matchObj[0].length - 1)
         }
       }
@@ -1525,6 +1530,11 @@ export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
   tex = tex.replace(/ {2,}/g, " ") // Replace multiple spaces with single space.
   tex = tex.replace(/\s+(?=[_^'!)}\]〗])/g, "") // Delete spaces before right delims
   tex = tex.replace(/\s+$/, "") //                 Delete trailing space
+
+  if (mustAlign) {
+    const pos = tex.indexOf("=")
+    tex = "\\begin{aligned}" + tex.slice(0, pos) + "&" + tex.slice(pos) + "\\end{aligned}"
+  }
 
   // I use the next two lines when debugging.
 //  if (isCalc) { console.log(tex) }
