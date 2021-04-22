@@ -249,6 +249,7 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
     eqn = parse(mainStr, decimalFormat)
     if (mustAlign) {
       eqn = "\\begin{aligned}" + eqn
+      const pos = eqn.indexOf("=")
       eqn = eqn.slice(0, pos) + "&" + eqn.slice(pos)
     }
     const alignChar = mustAlign ? "\\\\ &" : ""
