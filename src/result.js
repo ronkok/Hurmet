@@ -77,7 +77,7 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAwar
           resultDisplay = "\\color{firebrick}\\text{" + resultDisplay.value + "}"
           altResultDisplay = resultDisplay.value
         } else {
-          altResultDisplay = resultDisplay.replace("{,}", ",")
+          altResultDisplay = resultDisplay.replace("{,}", ",").replace("\\", "")
         }
 
       } else if (Rnl.isRational(result.value)) {
@@ -86,7 +86,7 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAwar
           resultDisplay = "\\color{firebrick}\\text{" + resultDisplay.value + "}"
           altResultDisplay = resultDisplay.value
         } else {
-          altResultDisplay = resultDisplay.replace("{,}", ",")
+          altResultDisplay = resultDisplay.replace("{,}", ",").replace("\\", "")
         }
 
       } else if (result.dtype === dt.IMAGE) {
@@ -111,14 +111,14 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAwar
         stmt.tex = stmt.tex.slice(0, startPos) + resultDisplay + stmt.tex.slice(pos + 1)
         pos = stmt.alt.lastIndexOf("?")
         startPos = stmt.alt.charAt(pos - 1) === "?" ? pos - 1 : pos
-        stmt.alt = stmt.alt.slice(0, startPos) + resultDisplay + stmt.alt.slice(pos + 1)
+        stmt.alt = stmt.alt.slice(0, startPos) + altResultDisplay + stmt.alt.slice(pos + 1)
       } else if (stmt.resulttemplate.indexOf("%") > -1) {
         let pos = stmt.tex.lastIndexOf("?")
         let startPos = stmt.tex.charAt(pos - 1) === "%" ? pos - 1 : pos
         stmt.tex = stmt.tex.slice(0, startPos) + resultDisplay + stmt.tex.slice(pos + 1)
         pos = stmt.alt.lastIndexOf("%")
         startPos = stmt.alt.charAt(pos - 1) === "&" ? pos - 1 : pos
-        stmt.alt = stmt.alt.slice(0, startPos) + resultDisplay + stmt.alt.slice(pos + 1)
+        stmt.alt = stmt.alt.slice(0, startPos) + altResultDisplay + stmt.alt.slice(pos + 1)
       }
     }
   }
