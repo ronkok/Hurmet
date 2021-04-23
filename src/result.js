@@ -113,7 +113,7 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAwar
         startPos = stmt.alt.charAt(pos - 1) === "?" ? pos - 1 : pos
         stmt.alt = stmt.alt.slice(0, startPos) + altResultDisplay + stmt.alt.slice(pos + 1)
       } else if (stmt.resulttemplate.indexOf("%") > -1) {
-        let pos = stmt.tex.lastIndexOf("?")
+        let pos = stmt.tex.lastIndexOf("%")
         let startPos = stmt.tex.charAt(pos - 1) === "%" ? pos - 1 : pos
         stmt.tex = stmt.tex.slice(0, startPos) + resultDisplay + stmt.tex.slice(pos + 1)
         pos = stmt.alt.lastIndexOf("%")
