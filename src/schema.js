@@ -66,15 +66,8 @@ export const nodes = {
     }
   },
 
-  // :: NodeSpec A plain paragraph textblock. Represented in the DOM as a `<p>` element.
-  paragraph: {
-    content: "inline*",
-    group: "block",
-    parseDOM: [{tag: "p"}],
-    toDOM() { return ["p", 0] }
-  },
-
   //:: NodeSpec A paragraph indented from its parent.
+  // This must written before the plain <p> NodeSpec in order for parseDOM to work.
   indented_paragraph: {
     group: "block",
     content: "inline*",
@@ -96,6 +89,14 @@ export const nodes = {
     content: "inline*",
     toDOM () { return ['p', { class: 'hidden' }, 0] },
     parseDOM: [{tag: "p.hidden"}],
+  },
+
+  // :: NodeSpec A plain paragraph textblock. Represented in the DOM as a `<p>` element.
+  paragraph: {
+    content: "inline*",
+    group: "block",
+    parseDOM: [{tag: "p"}],
+    toDOM() { return ["p", 0] }
   },
 
   // :: NodeSpec A blockquote (`<blockquote>`) wrapping one or more blocks.
