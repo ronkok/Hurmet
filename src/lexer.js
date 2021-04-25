@@ -1,6 +1,7 @@
 ﻿import { isIn, addTextEscapes } from "./utils"
 import { Rnl } from "./rational"
 import { formattedDecimal, texFromMixedFraction } from "./format"
+import { DataFrame } from "./dataframe"
 
 /*
  * lexer.js
@@ -48,7 +49,8 @@ export const tt = Object.freeze({
   PROPERTY: 36, //    property name after a dot accessor
   COMMENT: 37,
   RETURN: 38,  // A return statement inside a user-defined function.
-  TO: 39
+  TO: 39,
+  DATAFRAME: 40
 })
 
 const minusRegEx = /^-(?![-=<>:])/
@@ -631,7 +633,7 @@ const lexOneWord = (str, prevToken) => {
   }
 }
 
-export const lex = (str, decimalFormat, prevToken) => {
+export const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
   // Get the next token in str. Return an array with the token's information:
   // [input, TeX output, type, associated close delimiter]
   let pos = 0
@@ -667,12 +669,15 @@ export const lex = (str, decimalFormat, prevToken) => {
   if (str.charAt(0) === "`") {
     // inline CSV string between back ticks, a data frame literal.
     pos = str.indexOf("`", 1)
-    if (pos > 0) {
-      st = str.slice(1, pos)
-      return ["`" + st + "`", st, tt.STRING, ""]
+    const st = (pos > 0 ? str.slice(1, pos) : str.slice(1)).trim()
+    let tex = ""
+    if (inRealTime) {
+      tex = DataFrame.quickDisplay(st)
     } else {
-      return [str, str, tt.STRING, ""]
+      const dataFrame = DataFrame.dataFrameFromCSV(st, {})
+      tex = DataFrame.display(dataFrame.value, "h3", decimalFormat)
     }
+    return ["`" + st + "`", tex, tt.DATAFRAME, ""]
   }
 
   if (str.charAt(0) === "'") {

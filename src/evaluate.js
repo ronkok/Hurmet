@@ -734,7 +734,9 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const args = []
           for (let j = 0; j < numArgs; j++) {
             const datum = stack.pop()
-            if (!(datum.dtype & dt.RATIONAL)) { return errorOprnd("") }
+            if (tkn !== "dataframe" && !(datum.dtype & dt.RATIONAL)) {
+              return errorOprnd("NANARG", tkn)
+            }
             args.unshift(datum)
           }
 

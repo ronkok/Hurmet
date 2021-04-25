@@ -125,3 +125,61 @@ export const addTextEscapes = str => {
   }
   return str
 }
+
+export const numeralFromSuperScript = ch => {
+  // convert a superscript character, ⁰¹²³ etc, to the regular numeral equivalent.
+  switch (ch) {
+    case "²":
+      return "2"
+    case "³":
+      return "3"
+    case "⁻":
+      return "-"
+    case "¹":
+      return "1"
+    case "⁰":
+      return "0"
+    default:
+      return String.fromCharCode(ch.charCodeAt(0) - 0x2040)
+  }
+}
+
+const midDotRegEx = /^(\*|·|\.|-[A-Za-z])/
+export const exponentRegEx = /[⁰¹²³\u2074-\u2079⁻]/
+
+export const unitTeXFromString = str => {
+  // This function supports function parseQuantityLiteral()
+
+  // I wrap a unit name with an extra pair of braces {}.
+  // Tt's a hint so that plugValsIntoEcho() can easily remove a unit name.
+  let unit = " {\\text{"
+  let inExponent = false
+
+  for (let i = 0; i < str.length; i++) {
+    let ch = str.charAt(i)
+    if (exponentRegEx.test(ch)) {
+      ch = numeralFromSuperScript(ch)
+    }
+    if (midDotRegEx.test(str.slice(i))) {
+      unit += "}\\mkern1mu{\\cdot}\\mkern1mu\\text{"
+    } else if (/[0-9-]/.test(ch)) {
+      ch = ch === "-" ? "\\text{-}" : ch
+      if (inExponent) {
+        unit += ch
+      } else {
+        unit += "}^{" + ch
+        inExponent = true
+      }
+    } else if (ch === "^") {
+      unit += "}^{"
+      inExponent = true
+    } else if (inExponent) {
+      unit += "}\\text{" + ch
+      inExponent = false
+    } else {
+      unit += ch
+    }
+  }
+
+  return unit + "}}"
+}

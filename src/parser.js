@@ -1,6 +1,5 @@
-﻿import { isIn, addTextEscapes } from "./utils"
+﻿import { isIn, addTextEscapes, unitTeXFromString, numeralFromSuperScript } from "./utils"
 import { tt, lex, texFromNumStr } from "./lexer"
-import { exponentRegEx, numeralFromSuperScript } from "./units"
 import { Rnl } from "./rational"
 
 /*
@@ -123,46 +122,7 @@ const numFromSupChars = str => {
 
 const colorSpecRegEx = /^(#([a-f0-9]{6}|[a-f0-9]{3})|[a-z]+|\([^)]+\))/i
 
-const midDotRegEx = /^(\*|·|\.|-[A-Za-z])/
-
 const unitRegEx = /^[A-Za-z0-9_\-⁰¹²³\u2074-\u2079⁻/^·*.°′″‴ΩΩµμ]+/
-
-export const unitTeXFromString = str => {
-  // This function supports function parseQuantityLiteral()
-
-  // I wrap a unit name with an extra pair of braces {}.
-  // Tt's a hint so that plugValsIntoEcho() can easily remove a unit name.
-  let unit = " {\\text{"
-  let inExponent = false
-
-  for (let i = 0; i < str.length; i++) {
-    let ch = str.charAt(i)
-    if (exponentRegEx.test(ch)) {
-      ch = numeralFromSuperScript(ch)
-    }
-    if (midDotRegEx.test(str.slice(i))) {
-      unit += "}\\mkern1mu{\\cdot}\\mkern1mu\\text{"
-    } else if (/[0-9-]/.test(ch)) {
-      ch = ch === "-" ? "\\text{-}" : ch
-      if (inExponent) {
-        unit += ch
-      } else {
-        unit += "}^{" + ch
-        inExponent = true
-      }
-    } else if (ch === "^") {
-      unit += "}^{"
-      inExponent = true
-    } else if (inExponent) {
-      unit += "}\\text{" + ch
-      inExponent = false
-    } else {
-      unit += ch
-    }
-  }
-
-  return unit + "}}"
-}
 
 const currencyRegEx = /^-?[$$£¥\u20A0-\u20CF]/
 
@@ -438,7 +398,7 @@ const rpnPrecFromType = [
        6,  7,  5,  4,  1,
       -1, 16, 15, -1, 14,
       13,  9,  3,  2, 10,
-      -1, -1,  4, 3
+      -1, -1,  4,  3, -1
 ]
 
 const texPrecFromType = [
@@ -449,7 +409,7 @@ const texPrecFromType = [
        2,  2,  1,  1,  1,
        2, -1, 15,  2, 14,
       13,  9, -1,  1, -1,
-      15, -1,  1,  -1
+      15, -1,  1,  -1, 2
 ]
 /* eslint-enable indent-legacy */
 
@@ -484,7 +444,12 @@ const dCASES = 7 //           { a if b; c otherwise }
 const dSUBSCRIPT = 8 //       Parens around a subscript do not get converted into matrices.
 const dDISTRIB = 9 //         A probability distribution defined by a confidence interval.
 
-export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
+export const parse = (
+  str,
+  decimalFormat = "1,000,000.",
+  isCalc = false,
+  inRealTime = false
+) => {
   // Variable definitions
   let tex = ""
   let rpn = ""
@@ -682,7 +647,7 @@ export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
     }
 
     if (mustLex) {
-      const tkn = lex(str, decimalFormat, prevToken)
+      const tkn = lex(str, decimalFormat, prevToken, inRealTime)
       token = { input: tkn[0], output: tkn[1], ttype: tkn[2], closeDelim: tkn[3] }
       str = str.substring(token.input.length)
       isFollowedBySpace = leadingSpaceRegEx.test(str)
@@ -772,6 +737,13 @@ export const parse = (str, decimalFormat = "1,000,000.", isCalc = false) => {
         okToAppend = true
         break
       }
+
+      case tt.DATAFRAME:
+        popTexTokens(2, okToAppend)
+        posOfPrevRun = tex.length
+        tex += token.output
+        okToAppend = true
+        break
 
       case tt.VAR: //      variable name, one letter long
       case tt.LONGVAR: // multi-letter variable name

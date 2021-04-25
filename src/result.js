@@ -77,7 +77,7 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAwar
           resultDisplay = "\\color{firebrick}\\text{" + resultDisplay.value + "}"
           altResultDisplay = resultDisplay.value
         } else {
-          altResultDisplay = resultDisplay.replace("{,}", ",").replace("\\", "")
+          altResultDisplay = resultDisplay.replace(/{,}/g, ",").replace("\\", "")
         }
 
       } else if (Rnl.isRational(result.value)) {
@@ -86,7 +86,7 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAwar
           resultDisplay = "\\color{firebrick}\\text{" + resultDisplay.value + "}"
           altResultDisplay = resultDisplay.value
         } else {
-          altResultDisplay = resultDisplay.replace("{,}", ",").replace("\\", "")
+          altResultDisplay = resultDisplay.replace(/{,}/g, ",").replace("\\", "")
         }
 
       } else if (result.dtype === dt.IMAGE) {
@@ -99,7 +99,7 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAwar
       }
 
       // Write the string to be plugged into echos of dependent nodes
-      stmt.resultdisplay = stmt.resulttemplate.replace(/(\? *\??|@@?|%%?)/, resultDisplay)
+      stmt.resultdisplay = stmt.resulttemplate.replace(/(\? *\??|@ *@?|%%?)/, resultDisplay)
 
       // Write the TeX for this node
       if (stmt.resulttemplate.indexOf("@") > -1) {

@@ -28,7 +28,6 @@ import { isMatrix } from "./matrix"
  *   This module's main exported function is updateCalculations(…)
  */
 
-const dataFrameRegEx = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′* *= *`/
 const fetchRegEx = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′* *= *fetch\(/
 const fileErrorRegEx = /^Error while reading file. Status Code: \d*$/
 const lineChartRegEx = /^lineChart/
@@ -36,13 +35,11 @@ const lineChartRegEx = /^lineChart/
 const isNameOfAnImmutableVariable = (name, hurmetVars) => {
   if (!name) { return false }
   const variable = hurmetVars[name]
-  return variable && (variable.dtype === dt.MODULE || variable.dtype === dt.DATAFRAME ||
-    variable.isFetch)
+  return variable && (variable.dtype === dt.MODULE || variable.isFetch)
 }
 
 const immutableErrorAttrs = (attrs) => {
-  const errCode = attrs.dtype === dt.MODULE ? "IMMUT_UDF" : "IMMUT_DF"
-  const text = errorOprnd(errCode, attrs.name).value
+  const text = errorOprnd("IMMUT_UDF", attrs.name).value
   attrs.dtype = dt.ERROR
   attrs.tex += ` = \\red{\\text{${text}}}`
   attrs.alt = " = " + text
@@ -177,7 +174,7 @@ const proceedAfterFetch = (
   const doc = view.state.doc
   const decimalFormat = doc.attrs.decimalFormat
 
-  // UDFs and data frames are hoisted from anywhere in the document.
+  // UDFs are hoisted from anywhere in the document.
   // So we make one pass thru the document just for them.
   doc.nodesBetween(0, doc.content.size, function(node, pos) {
     if (node.type.name === "calculation") {
@@ -188,12 +185,11 @@ const proceedAfterFetch = (
           //We addressed this node in the fetches above. Don't re-evaluate it here.
       } else {
         const getsHoisted = isCalcAll
-          ? functionRegEx.test(entry) || dataFrameRegEx.test(entry)
+          ? functionRegEx.test(entry)
           : pos === curPos
           ? false
           : node.attrs.name && node.attrs.dtype &&
-            (node.attrs.dtype === dt.MODULE || node.attrs.dtype === dt.DATAFRAME ||
-              node.attrs.isFetch)
+            (node.attrs.dtype === dt.MODULE || node.attrs.isFetch)
         if (getsHoisted) {
           const attrs = isCalcAll
             ? prepareStatement(entry, decimalFormat)
@@ -203,7 +199,7 @@ const proceedAfterFetch = (
             if (pos in immutablePositions) {
               // We addressed this node in the fetches above. Don't re-evaluate it here.
             } else {
-              // A UDF or data frame has already been assigned to this variable.
+              // A UDF has already been assigned to this variable.
               // Write an error message.
               node.attrs = immutableErrorAttrs(attrs)
               tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs))
@@ -226,7 +222,7 @@ const proceedAfterFetch = (
       if (node.type.name === "calculation") {
         const attrs = node.attrs
         if (attrs.name && !attrs.isFetch &&
-            !(attrs.dtype === dt.MODULE || attrs.dtype === dt.DATAFRAME)) {
+            !(attrs.dtype === dt.MODULE)) {
           insertOneHurmetVar(hurmetVars, attrs)
         }
       }
@@ -252,7 +248,7 @@ const proceedAfterFetch = (
   doc.nodesBetween(startPos, doc.content.size, function(node, pos) {
     if (node.type.name === "calculation") {
       const dtype = node.attrs.dtype
-      if (!(node.attrs.isFetch || dtype === dt.MODULE || dtype === dt.DATAFRAME)) {
+      if (!(node.attrs.isFetch || dtype === dt.MODULE)) {
         const entry = node.attrs.entry
         let attrs = isCalcAll || lineChartRegEx.test(entry)
           ? prepareStatement(entry, decimalFormat)

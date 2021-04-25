@@ -88,7 +88,7 @@ const displayAlt = (m, formatSpec, decimalFormat) => {
     const numCols = m.value[1].length
     for (let i = 0; i < numRows; i++) {
       for (let j = 0; j < numCols; j++) {
-        str += format(m.value[i][j], formatSpec, decimalFormat).replace("{,}", ",") + ", "
+        str += format(m.value[i][j], formatSpec, decimalFormat).replace(/{,}/g, ",") + ", "
       }
       str = str.slice(0, -2) + "; "
     }
@@ -100,14 +100,14 @@ const displayAlt = (m, formatSpec, decimalFormat) => {
     if (m.value.plain) {
       const numArgs = m.value.plain.length
       for (let i = 0; i < numArgs; i++) {
-        str += format(m.value.plain[i], formatSpec, decimalFormat).replace("{,}", ",") +
+        str += format(m.value.plain[i], formatSpec, decimalFormat).replace(/{,}/g, ",") +
            ((i < numArgs - 1) ? argSep : "")
       }
     } else {
       const numArgs = m.value.length
       for (let i = 0; i < numArgs; i++) {
         const elementDisplay = (m.dtype & dt.RATIONAL)
-          ? format(m.value[i], formatSpec, decimalFormat).replace("{,}", ",")
+          ? format(m.value[i], formatSpec, decimalFormat).replace(/{,}/g, ",")
           : m.value[i]
         str += elementDisplay + ((i < numArgs - 1) ? argSep : "")
       }
@@ -154,12 +154,12 @@ const displayAltMapOfVectors = (value, formatSpec, decimalFormat) => {
     if (vector.plain) {
       for (let i = 0; i < numArgs; i++) {
         str += format(vector.plain[i], formatSpec, decimalFormat) +
-        ((i < numArgs - 1) ? ", " : "").replace("{,}", ",") + " "
+        ((i < numArgs - 1) ? ", " : "").replace(/{,}/g, ",") + " "
       }
     } else {
       for (let i = 0; i < numArgs; i++) {
         const elementDisplay = Rnl.isRational(vector[i])
-          ? format(vector[i], formatSpec, decimalFormat).replace("{,}", ",") + " "
+          ? format(vector[i], formatSpec, decimalFormat).replace(/{,}/g, ",") + " "
           : String(vector[i]) + "}"
         str += elementDisplay + ((i < numArgs - 1) ? " " : "")
       }

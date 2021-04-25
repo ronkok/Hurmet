@@ -1,9 +1,8 @@
 import { dt, allZeros } from "./constants" // operand type enumeration
 import { Rnl } from "./rational"
-import { clone, addTextEscapes } from "./utils"
+import { clone, addTextEscapes, unitTeXFromString } from "./utils"
 import { unitFromUnitName } from "./units"
 import { errorOprnd } from "./error"
-import { parse } from "./parser"
 import { Matrix } from "./matrix"
 import { format } from "./format"
 
@@ -13,6 +12,30 @@ const columnListFromRange = (start, end) => {
     columnList.push(i)
   }
   return columnList
+}
+
+const valueFromDatum = datum => {
+  return datum === "true"
+  ? true
+  : datum === "false"
+  ? false
+  : numberRegEx.test(datum)
+  ? Rnl.fromString(datum)
+  : datum === ""
+  ? undefined
+  : datum
+}
+
+const datumFromValue = (value, dtype) => {
+  return value === true
+    ? "true"
+    : value === false
+    ? "false"
+    : value = undefined
+    ? ""
+    : (dtype === dt.RATIONAL)
+    ? "0 " + String(value[0]) + "/" + String(value[1])
+    : value
 }
 
 const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
@@ -101,7 +124,9 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
     let dtype = oprnd.value.dtype[j]
     dtype += (rowIndicator.dtype & dt.COLUMNVECTOR) ? dt.COLUMNVECTOR : dt.ROWVECTOR
     unit.expos = (dtype & dt.RATIONAL) ? allZeros : null
-    let value = rowIndicator.value.map(e => oprnd.value.data[j][oprnd.value.rowMap[e]])
+    let value = rowIndicator.value.map(e => {
+      return valueFromDatum(oprnd.value.data[j][oprnd.value.rowMap[e]])
+    })
     if (unitAware && (dtype & dt.QUANTITY)) {
       const unitName = oprnd.value.units[j] ? oprnd.value.units[j] : undefined
       const unitObj = unitFromUnitName(unitName, vars)
@@ -115,7 +140,7 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
     let dtype = oprnd.value.dtype[columnList[0]]
     if (dtype & dt.QUANTITY) { dtype -= dt.QUANTITY }
     const j = columnList[0]
-    let value = oprnd.value.data[j][iStart]
+    let value = valueFromDatum(oprnd.value.data[j][iStart])
     unit.expos = (dtype & dt.RATIONAL) ? allZeros : null
     if (unitAware && oprnd.value.units[j]) {
       const unitName = oprnd.value.units[j] ? oprnd.value.units[j] : undefined
@@ -130,7 +155,7 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
     const value = new Map()
     unitMap = Object.create(null)
     for (let j = 0; j < columnList.length; j++) {
-      const localValue = oprnd.value.data[columnList[j]][iStart]
+      const localValue = valueFromDatum(oprnd.value.data[columnList[j]][iStart])
       const unitName = oprnd.value.units[columnList[j]]
         ? oprnd.value.units[columnList[j]]
         : undefined
@@ -152,13 +177,15 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
     const j = columnList[0]
     const unitName = oprnd.value.units[j] ? oprnd.value.units[j] : null
     unit = (oprnd.unit.map) ? oprnd.unit.map[unitName] : { expos: null }
-    const value = oprnd.value.data[j].slice(iStart, iEnd + 1)
+    const value = oprnd.value.data[j].slice(iStart, iEnd + 1).map(e => valueFromDatum(e))
     const dtype = oprnd.value.dtype[j] + dt.COLUMNVECTOR
-    const newOprnd = { value, unit, dtype }
+    const newOprnd = { value, name: oprnd.value.columns[j], unit, dtype }
     if (unitAware) {
+      if (!unit.gauge) { return errorOprnd("UNIT_COL", oprnd.value.columns[j]) }
       const newVal = Matrix.convertToBaseUnits(newOprnd, unit.gauge, unit.factor)
       return {
         value: newVal,
+        name: oprnd.value.columns[j],
         unit: { expos: unit.expos },
         dtype: dt.RATIONAL + dt.COLUMNVECTOR
       }
@@ -197,6 +224,7 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
 }
 
 const numberRegEx = new RegExp(Rnl.numberPattern + "$")
+const mixedFractionRegEx = /^-?(?:[0-9]+(?: [0-9]+\/[0-9]+))$/
 
 const dataFrameFromCSV = (str, vars) => {
   // Load a CSV string into a data frame.
@@ -221,34 +249,45 @@ const dataFrameFromCSV = (str, vars) => {
     if (row === 0) {
       columns.push(datum)
       columnMap[datum] = col
-    } else if (row === 1) {
-      // This is the unit row
-      units.push(datum)
-      if (col === 0 && /^[Uu]nit$/.test(datum)) { return }
-      if (datum.length > 0) {
-        if (!unitMap[datum]) {
-          const unit = unitFromUnitName(datum, vars)
-          if (unit) {
-            unitMap[datum] = unit
-          } else {
-            return errorOprnd("DF_UNIT", datum)
+    } else {
+      if (row === 1) { data.push([]) } // First data row.
+      data[col].push(datum)
+      if (rowMap && col === 0) {
+        rowMap[datum] = row - 1
+      }
+    }
+
+    // Determine if there is a row for unit names.
+    let gotUnits = false
+    let gotAnswer = false
+    for (let iCol = 0; iCol < data.length; iCol++) {
+      if (numberRegEx.test(data[iCol][0])) { gotAnswer = true; break }
+    }
+    if (!gotAnswer) {
+      for (let iCol = 0; iCol < data.length; iCol++) {
+        if (numberRegEx.test(data[iCol][1])) { gotUnits = true; break }
+      }
+    }
+    if (gotUnits) {
+      // Shift the top row of data into units.
+      for (let iCol = 0; iCol < data.length; iCol++) {
+        const unitName = data[iCol].shift()
+        units.push(unitName)
+        if (unitName.length > 0) {
+          if (!unitMap[unitName]) {
+            const unit = unitFromUnitName(unitName, vars)
+            if (unit) {
+              unitMap[unitName] = unit
+            } else {
+              return errorOprnd("DF_UNIT", unitName)
+            }
           }
         }
       }
-    } else {
-      if (row === 2) { data.push([]) } // First data row.
-      const value = (datum === "true")
-        ? true
-        : datum === "false"
-        ? false
-        : numberRegEx.test(datum)
-        ? Rnl.fromString(datum)
-        : datum === ""
-        ? undefined
-        : datum
-      data[col].push(value)
-      if (rowMap && col === 0) {
-        rowMap[datum] = row - 2
+      if (rowMap) {
+        Object.entries(rowMap).forEach(([key, value]) => {
+          rowMap[key] = value - 1
+        })
       }
     }
   }
@@ -312,11 +351,11 @@ const dataFrameFromCSV = (str, vars) => {
   for (let j = 0; j < data.length; j++) {
     for (let i = 0; i < data[0].length; i++) {
       const datum = data[j][i]
-      if (datum === undefined) { continue }
+      if (datum === "") { continue } // undefined datum.
       dtype.push(
-        Rnl.isRational(datum)
+        numberRegEx.test(datum)
         ? dt.RATIONAL + ((units.length > 0 && units[j].length > 0) ? dt.QUANTITY : 0)
-        : (datum === true || datum === false)
+        : (datum === "true" || datum === "false")
         ? dt.BOOLEAN
         : dt.STRING
       )
@@ -345,6 +384,7 @@ const dataFrameFromVectors = (vectors, vars) => {
   const units = []
   const dtype = []
   const unitMap = Object.create(null)
+  const rowMap = (vectors[0].name && vectors[0].name === "name") ? Object.create(null) : false
   for (let j = 0; j < vectors.length; j++) {
     const vector = vectors[j]
     const vectorType = (vector.dtype & dt.ROWVECTOR)
@@ -355,8 +395,9 @@ const dataFrameFromVectors = (vectors, vars) => {
     if (vectorType === dt.ERROR) { return errorOprnd("NOT_VECTOR") }
     columns.push(vector.name)
     columnMap[vector.name] = j
-    data.push(vector.value)
-    dtype.push(vector.dtype - vectorType)
+    const colDtype = vector.dtype - vectorType
+    data.push(vector.value.map(e => datumFromValue(e, colDtype)))
+    dtype.push(colDtype)
     if (vector.unit.name) {
       units.push(vector.unit.name)
       if (!unitMap[vector.unit.name]) {
@@ -366,13 +407,19 @@ const dataFrameFromVectors = (vectors, vars) => {
     } else {
       units.push(null)
     }
+    if (rowMap) {
+      const nameVector = vectors[0].value
+      for (let i = 0; i < nameVector.length; i++) {
+        rowMap[nameVector[i]] = i
+      }
+    }
   }
   return {
     value: {
       data: data,
       columns: columns,
       columnMap: columnMap,
-      rowMap: false,
+      rowMap: rowMap,
       units: units,
       dtype: dtype
     },
@@ -388,24 +435,122 @@ const append = (o1, o2, vars) => {
   const oprnd = clone(o1)
   oprnd.value.columns.push(o2.name)
   oprnd.value.columnMap[o2.name] = o1.value.columns.length - 1
-  oprnd.value.data.push(o2.value)
-  oprnd.value.dtype.push(o2.dtype - dt.COLUMNVECTOR)
+  const dtype = o2.dtype - dt.COLUMNVECTOR
+  oprnd.value.data.push(o2.value.map(e => datumFromValue(e, dtype)))
+  oprnd.value.dtype.push(dtype)
   oprnd.value.units.push(o2.unit.name || null)
-  if (o2.unit.name && !oprnd.unit.map[o2.unit.name]) {
+  if (o2.unit.name && !oprnd.unit[o2.unit.name]) {
     const unit = unitFromUnitName(o2.unit.name, vars)
-    oprnd.unit.map[o2.unit.name] = unit
+    oprnd.unit[o2.unit.name] = unit
   }
   return oprnd
 }
 
-const isNotEmptyStrings = row => {
+const quickDisplay = str => {
+  // This is called from the lexer for a display that changes with every keystroke.
+  // It is a quick, rough approximation of a CSV parser.
+  // I use this partly for speed, partly because it is more tolerant of badly formatted CSV
+  // while the author is composing the CSV. This function doesn't spit up many error messages.
+  // Final rendering of a data frame does not use this function.
+  // Final rendering calls dataFrameFromCSV() and display() for accurate CSV parsing.
+  if (str === "") { return "" }
+  str = addTextEscapes(str.trim())
+  const lines = str.split(/\r?\n/g)
+  let tex = ""
+  if (lines.length < 3) {
+    tex = "\\begin{matrix}\\text{"
+    for (let i = 0; i < lines.length; i++) {
+      tex += lines[i].trim().replace(/ *, */g, "} & \\text{") + "} \\\\ \\text{"
+    }
+    tex = tex.slice(0, -10) + "\\end{matrix}"
+  } else {
+    tex = "\\begin{array}"
+    const cells = new Array(lines.length)
+    for (let i = 0; i < lines.length; i++) {
+      cells[i] = lines[i].trim().split(/ *, */)
+    }
+
+    const gotNames = cells[0][1] === "name"
+    tex += gotNames ? "{1|cccccccccccccccccccccccc}\\text" : "{c}\\text{"
+
+    let gotUnits = false
+    let gotAnswer = false
+    for (let j = 0; j < cells[1].length; j++) {
+      if (numberRegEx.test(cells[1][j])) { gotAnswer = true; break }
+    }
+    if (!gotAnswer) {
+      // line[1] had no numbers. If any numbers are ine line[2] then line[1] is units.
+      for (let j = 0; j < cells[2].length; j++) {
+        if (numberRegEx.test(cells[2][j])) { gotUnits = true; break }
+      }
+    }
+
+    for (let i = 0; i < lines.length; i++) {
+      tex += lines[i].trim().replace(/ *, */g, "} & \\text{")
+      tex += ((gotUnits && i === 1) || (!gotUnits && i === 0))
+        ? "} \\\\ \\hline \\text{"
+        : "} \\\\ \\text{"
+    }
+
+    tex = tex.slice(0, -10) + "\\end{array}"
+  }
+  return tex
+}
+
+// The next 40 lines contain helper functions for display().
+const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/
+const accentRegEx = /^([^\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]+)([\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1])(.+)?/
+const subscriptRegEx = /([^_]+)(_[^']+)?(.*)?/
+const accentFromChar = Object.freeze({
+  "\u0300": "\\grave",
+  "\u0301": "\\acute",
+  "\u0302": "\\hat",
+  "\u0303": "\\tilde",
+  "\u0304": "\\bar",
+  "\u0305": "\\bar",
+  "\u0307": "\\dot",
+  "\u0308": "\\ddot",
+  "\u030A": "\\mathring",
+  "\u030C": "\\check",
+  "\u0332": "\\underline",
+  "\u20d0": "\\overleftharpoon",
+  "\u20d1": "\\overrightharpoon",
+  "\u20d6": "\\overleftarrow",
+  "\u20d7": "\\vec",
+  "\u20e1": "\\overleftrightarrow"
+})
+const formatColumnName = str => {
+  // We can't call parse(str) because that would be a circular dependency.
+  // So this module needs its own function to format dataframe column names.
+  if (!isValidIdentifier.test(str)) {
+    return "\\text{" + addTextEscapes(str) + "}"
+  } else {
+    // Format it like a Hurmet identifier.
+    str = str.replace(/′/g, "'") // primes
+    let parts = str.match(accentRegEx)
+    if (parts) {
+      str = accentFromChar[parts[2]] + "{" + parts[1] + "}"
+      return str + (parts[3] ? parts[3] : "")
+    } else {
+      parts = str.match(subscriptRegEx)
+      let result = parts[1].length > 1 ? `\\text{${parts[1]}}` : parts[1]
+      if (parts[2]) {
+        result += "_" + `\\text{${parts[2].slice(1)}}`
+      }
+      return result + (parts[3] ? parts[3] : "")
+    }
+  }
+}
+
+const isNotEmpty = row => {
   for (let i = 0; i < row.length; i++) {
-    if (row[i] !== "") { return true }
+    if (row[i] !== "" && row[i] !== null) { return true }
   }
   return false
 }
 
 const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.") => {
+  if (df.data.length === 0) { return "" }
   const numRows = df.data[0].length
   const numCols = df.data.length
   const numColsInHeading = numCols + (df.rowMap ? 0 : 1)
@@ -418,40 +563,43 @@ const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.") => {
 
   // Write the column names
   if (!df.rowMap) { str += "&" }
-  for (let j = 0; j < numCols; j++) {
-    str += parse(df.columns[j]) + "&"
+  str += df.columns[0] === "name"
+    ? "&"
+    : "{" + formatColumnName(df.columns[0]) + "}&"
+  for (let j = 1; j < numCols; j++) {
+    str += "{" + formatColumnName(df.columns[j]) + "}&"
   }
   str = str.slice(0, -1) + " \\\\ "
 
   // Write the unit names
-  if (isNotEmptyStrings(df.units)) {
+  if (isNotEmpty(df.units)) {
     if (!df.rowMap) { str += "&" }
     for (let j = 0; j < numCols; j++) {
       let rowTex = ""
-      if (df.units[j].length > 0) {
-        const unitTex = parse("'" + df.units[j] + "'")
+      if (df.units[j] && df.units[j].length > 0) {
+        const unitTex = unitTeXFromString(df.units[j])
         rowTex = unitTex.replace("\\;\\, ", "")
+      } else {
+        rowTex = ""
       }
       str += rowTex + "&"
     }
     str = str.slice(0, -1) + " \\\\ "
   }
-  str += "\\hline"
+  str += "\\hline "
 
   // Write the data
   for (let i = 0; i < numRows; i++) {
     if (!df.rowMap) { str += String(i + 1) + " & " }
     for (let j = 0; j < numCols; j++) {
       const datum = df.data[j][i]
-      str += datum === undefined
+      str += mixedFractionRegEx.test(datum)
+        ? format(Rnl.fromString(datum), formatSpec, decimalFormat) + "&"
+        : numberRegEx.test(datum)
+        ? datum.replace("%", "\\%") + "&"
+        : datum === ""
         ? "&"
-        : (df.dtype[j] & dt.RATIONAL)
-        ? format(datum, formatSpec, decimalFormat) + "&"
-        : (df.dtype[j] & dt.STRING)
-        ? "\\text{" + addTextEscapes(datum) + "}&"
-        : (df.dtype[j] & dt.BOOLEAN)
-        ? "\\text{" + datum + "}&"
-        : datum + " &"
+        : "\\text{" + addTextEscapes(datum) + "}&"
     }
     str = str.slice(0, -1) + " \\\\ "
   }
@@ -461,20 +609,22 @@ const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.") => {
   return str
 }
 
-const displayAlt = df => {
+const displayAlt = (df, formatSpec = "h3", decimalFormat = "1,000,000.") => {
+  if (df.data.length === 0) { return "" }
   const numRows = df.data[0].length
   const numCols = df.data.length
   let str = "`"
 
   // Write the column names
   if (!df.rowMap) { str += "," }
-  for (let j = 0; j < numCols; j++) {
+  str += ( df.columns[0] === "name" ? "" : df.columns[0]) + ","
+  for (let j = 1; j < numCols; j++) {
     str += df.columns[j] + ","
   }
   str = str.slice(0, -1) + "\n"
 
   // Write the unit names
-  if (isNotEmptyStrings(df.units)) {
+  if (isNotEmpty(df.units)) {
     if (!df.rowMap) { str += "," }
     for (let j = 0; j < numCols; j++) {
       str += df.units[j] + ","
@@ -487,15 +637,16 @@ const displayAlt = df => {
     if (!df.rowMap) { str += String(i + 1) + "," }
     for (let j = 0; j < numCols; j++) {
       const datum = df.data[j][i]
-      str += (df.dtype[j] & dt.RATIONAL)
-        ? Rnl.toString(datum, Math.floor(Math.log10(Number(datum[1]))))
-            .replace(",", "{,}") + ","
-        : datum + ","
+      if (mixedFractionRegEx.test(datum)) {
+        str += format(Rnl.fromString(datum), formatSpec, "100000.") + ","
+      } else {
+        str += datum + ","
+      }
     }
     str = str.slice(0, -1) + "\n"
   }
 
-  str = str.slice(0, 2).trim()
+  str = str.slice(0, -1).trim()
   str += "`"
   return str
 }
@@ -506,5 +657,6 @@ export const DataFrame = Object.freeze({
   dataFrameFromVectors,
   display,
   displayAlt,
+  quickDisplay,
   range
 })

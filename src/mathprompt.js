@@ -137,7 +137,7 @@ export function openMathPrompt(options) {
       isUDF = functionRegEx.test(tex) || moduleRegEx.test(tex)
       if (!isUDF) {
         // eslint-disable-next-line no-undef
-        tex = hurmet.parse(tex, options.decimalFormat)
+        tex = hurmet.parse(tex, options.decimalFormat, false, true)
       }
     } else {
       tex = mathDoc.getValue()

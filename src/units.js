@@ -1,4 +1,5 @@
 ﻿import { dt, allZeros } from "./constants" // operand type enumeration
+import { exponentRegEx, numeralFromSuperScript } from "./utils"
 import { Rnl } from "./rational"
 import { errorOprnd } from "./error"
 
@@ -693,25 +694,6 @@ const unitFromWord = (inputStr, currencies, customUnits) => {
 
 const opOrNumRegEx = /[0-9·\-⁰¹²³\u2074-\u2079⁻/^()]/
 const numeralRegEx = /[0-9-]/
-export const exponentRegEx = /[⁰¹²³\u2074-\u2079⁻]/
-
-export const numeralFromSuperScript = ch => {
-  // convert a superscript character, ⁰¹²³ etc, to the regular numeral equivalent.
-  switch (ch) {
-    case "²":
-      return "2"
-    case "³":
-      return "3"
-    case "⁻":
-      return "-"
-    case "¹":
-      return "1"
-    case "⁰":
-      return "0"
-    default:
-      return String.fromCharCode(ch.charCodeAt(0) - 0x2040)
-  }
-}
 
 export const unitFromUnitName = (inputStr, vars) => {
 

@@ -62,7 +62,7 @@ export const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat
     }
 
     let needsParens = true // default
-    if (isMatrix(hvar)) { needsParens = false }
+    if (isMatrix(hvar) || (hvar.dtype & dt.DATAFRAME)) { needsParens = false }
     if (unitAware && (hvar.dtype & dt.QUANTITY)) { needsParens = true }
 
     let isParened = false // Is the match already nested inside parens?
@@ -79,7 +79,9 @@ export const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat
 
     let display = ""
 
-    if (unitAware) {
+    if (hvar.dtype === dt.DATAFRAME) {
+      display = hvar.resultdisplay
+    } else if (unitAware) {
       display = needsParens ? "\\left(" + hvar.resultdisplay + "\\right)" : hvar.resultdisplay
     } else {
       let displaySansUnits = hvar.resultdisplay
@@ -89,7 +91,6 @@ export const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat
         displaySansUnits = displaySansUnits.replace(/\\; *$/, "").trim()
       }
       display = needsParens ? "\\left(" + displaySansUnits + "\\right)" : displaySansUnits
-
     }
     str = str.substring(0, pos) + display + str.substring(pos + matchLength)
   }

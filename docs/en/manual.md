@@ -544,7 +544,7 @@ A *data frame* is a two dimensional data structure that can be accessed with row
 
 Each datum can be a number, a string, `true`, or `false`. A missing item will be taken to be `undefined`. All data in a column must be of the same data type. A column of numbers can be assigned a unit of measure. 
 
-Data frame literals are written between backtick `` ` ` `` delimiters. The text between the backticks must be written in CSV (comma-separated values) format. Numbers must use a dot decimal. The second row must contain units of measure. The first column will be indexed if the first word is “name” or “index”.
+Data frame literals are written between backtick `` ` ` `` delimiters. The text between the backticks must be written in CSV (comma-separated values) format. Numbers must use a dot decimal. The second row may contain units of measure. The first column will be indexed if the first word is “name” or “index”.
 
 Here’s an example of CSV input:
 
@@ -559,10 +559,7 @@ Here’s an example of CSV input:
 
 <p><span class="tex">\mathrm{rebar} = \begin{array}{l|c c}\text{name}&amp;\mathrm{diameter}&amp;\mathrm{area} \\ &amp;{\text{in}}&amp;{\text{in}^{2}} \\ \hline\text{\#3}&amp;0.375 &amp;0.11  \\ \text{\#4}&amp;0.5 &amp;0.2  \\ \text{\#5}&amp;0.625 &amp;0.31  \\ \text{\#6}&amp;0.75 &amp;0.44\end{array}</span></p>
 
-Data frames can be quite large, so Hurmet gives you two ways to define them inconspicuously:
-
-1. A variable that contains a data frame can be called before it is defined. So you can make that assignment at the end of a document.
-2. The `fetch(url)` function is available to load data from a remote CSV file into a data frame. Since Hurmet runs in a browser, the url must begin with `http:` or `https:`
+Data frames can be quite large, so Hurmet has a`fetch(url)` function to load data from a remote CSV file into a data frame. Since Hurmet runs in a browser, the url must begin with `http:` or `https:`
 
 A fetch example:
 

@@ -8,6 +8,7 @@ const errorMessages = Object.freeze({
     BAD_FUN_NM:"Error. Unrecognized function name \"@\".",
     DIV:       "Error. Divide by zero.",
     NAN:       "Error. Value of $@$ is not a numeric.",
+    NANARG:    "Error. Argument to function $@$ must be numeric.",
     NULL:      "Error. Missing value for $@$.", // $@$ will be italic in TeX
     V_NAME:    "Error. Variable $@$ not found.",
     F_NAME:    "Error. Function @ not found.",
@@ -18,6 +19,7 @@ const errorMessages = Object.freeze({
     UNIT_MISS: "Error. No units specified for the result.",
     UNIT_IN:   "Error. Incorrect unit for input to function @.",
     UNIT_ARG:  "Error. Unit mis-match between arguments to function @.",
+    UNIT_COL:  "Error. Data frame column @ has no units. Do not make a unit-aware call to it.",
     DATE:      "Error. Date required.",
     LOGIC:     "Error. Logic operation “@” on a non-boolean value.",
     FACT:      "Error. Factorial may be applied only to a unit-less non-negative integer.",
@@ -57,18 +59,17 @@ const errorMessages = Object.freeze({
     UNREAL:    "Error. Argument to function \"@\" must be a real number.",
     BIGINDEX:  "Error. Index too large.",
     MIS_ELNUM: "Error. Mis-matched number of elements",
-    CROSS:     "Error. Cross product can be performed only on three-vectors.",
+    // eslint-disable-next-line max-len
+    CROSS:     "Error. Cross product can be performed only on three-vectors. Use * if you want element-wise multiplication.",
     QUANT_NUM: "Error. A Quantity must include a numeric magnitude.",
     CURRENCY:  "Error. Currency exchange rates must be defined before using a monetary unit.",
     DF_UNIT:   "Invalid unit \"&\" in data frame.",
     FORM_FRAC: "Error. Hurmet can do binary or hexadecimal format only on integers.",
-    PRIVATE:    "Error. Function @ is not private.",
+    PRIVATE:   "Error. Function @ is not private.",
     GCD:       "Error. The gcd function can take only integers as arguments.",
     BAD_KEY:   "Error. Dictionary does not contain key \"@\".",
     NUM_KEY:   "Error. A key must be a string, not a number.",
     IMMUT_UDF: `Error. Variable @ already contains a user-defined function.
-                Hurmet cannot assign a different value to @.`,
-    IMMUT_DF:  `Error. Variable @ already contains a data frame.
                 Hurmet cannot assign a different value to @.`,
     NO_PROP:   `Error. Cannot call a property from variable "@" because it has no properties.`,
     NOT_ARRAY: `Error. Cannot check if an element is in the second operand because
