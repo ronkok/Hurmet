@@ -1113,7 +1113,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "\\purple":
         case "\\red": {
           const color = clone(stack.pop())
-          if (color.dtype === dt.STRING) { color.unit = tkn }
+          if (color.dtype === dt.STRING) { color.unit = tkn.slice(1) }
           stack.push(color)
           break
         }

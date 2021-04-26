@@ -64,7 +64,10 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAwar
 
       } else if (result.dtype & dt.STRING) {
         resultDisplay = "\\text{" + addTextEscapes(result.value) + "}"
-        if (result.unit) { resultDisplay = `${result.unit}{${resultDisplay}}` }
+        if (result.unit) {
+          // This is a hack to return a color
+          resultDisplay = `\\textcolor{${result.unit}}{${resultDisplay}}`
+        }
         altResultDisplay = result.value
 
       } else if (result.dtype & dt.BOOLEAN) {
