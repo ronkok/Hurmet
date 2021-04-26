@@ -707,7 +707,7 @@ export const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
       return [match, match, tt.UNARY, ""]
     }
     if (isIn(st, colors)) {
-      return [match, "\\textcolor{" + match.slice(1) + "}", tt.UNARY, ""]
+      return [match, "\\textcolor{" + st + "}", tt.UNARY, ""]
     }
     if (isIn(st, binaries)) {
       return [match, match, tt.BINARY, ""]
