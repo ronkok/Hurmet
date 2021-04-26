@@ -421,26 +421,29 @@ const mathOperators = Object.freeze([
   "th"
 ])
 
+const colors = Object.freeze([
+  "blue",
+  "gray",
+  "green",
+  "orange",
+  "pink",
+  "purple",
+  "red"
+])
+
 const unaries = Object.freeze([
   "bcancel",
-  "blue",
   "boxed",
   "cancel",
   // Hurmet does not support \ce.
   "clap",
   "color",
-  "gray",
-  "green",
   "llap",
   "mathclap",
   "not",
   "operatorname",
-  "orange",
   "phantom",
-  "pink",
   "pu",
-  "purple",
-  "red",
   "rlap",
   "sout",
   "sqrt",
@@ -702,6 +705,9 @@ export const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
     }
     if (isIn(st, unaries)) {
       return [match, match, tt.UNARY, ""]
+    }
+    if (isIn(st, colors)) {
+      return [match, "\\textcolor{" + match.slice(1) + "}", tt.UNARY, ""]
     }
     if (isIn(st, binaries)) {
       return [match, match, tt.BINARY, ""]
