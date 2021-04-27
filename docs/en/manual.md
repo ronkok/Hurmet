@@ -1368,9 +1368,13 @@ Hurmet will run in the Safari browser as soon as it supports a BigInt data type.
 
 Tired of saving files to the Download folder? You can pick the folder where you save files, but first you have to change a browser setting.  In Chrome and Edge, go to ⋯ | Settings | Advanced | Downloads and in Firefox, go to ≡ | Options | Downloads.
 
+#### Printing page numbers
+
+Browsers will print page numbers only if you check the *Headers and footers* box. Unfortunately, that will usually include other unwanted information. Firefox is the only browser that enables you to customize the print header and footer. Here are the [complicated instructions](https://support.mozilla.org/en-US/questions/1323433). 
+
 ## Markdown
 
-Hurmet can export or import a document in [Markdown](https://guides.github.com/features/mastering-markdown/ "Markdown") format. This is useful for collaboration
+Hurmet can export or import a document in [Markdown](https://guides.github.com/features/mastering-markdown/ "Markdown") format. This is useful for collaboration.
 
 Say that you have written a calculation. It’s awesome and you want to share it so that others can use it as a template. An easy way to share work is via a GitHub [Gist](https://gist.github.com/ "Gist"). Then anyone can view it, download it, or comment on it. If it is in Markdown format, you can read the Gist right there on GitHub. Here’s an [example](https://gist.github.com/ronkok/7fec7d11f6fb6a031e5a0827e3531d68).
 
