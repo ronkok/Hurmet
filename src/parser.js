@@ -348,19 +348,20 @@ const testForImplicitMult = (prevToken, texStack, str) => {
 }
 
 const nextCharIsFactor = (str, tokenType) => {
-  const fc = str.charAt(0)
+  const st = str.replace(leadingLaTeXSpaceRegEx, "")
+  const fc = st.charAt(0)
 
   let fcMeetsTest = false
-  if (str.length > 0) {
+  if (st.length > 0) {
     if (fc === "|" || fc === "‖") {
       // TODO: Work out left/right
-    } else if (/^[({[√∛∜]/.test(str) &&
+    } else if (/^[({[√∛∜]/.test(st) &&
       (isIn(tokenType, [tt.ORD, tt.VAR, tt.NUM, tt.LONGVAR, tt.RIGHTBRACKET,
         tt.QUANTITY, tt.SUPCHAR]))) {
       return true
     } else {
       if (factors.test(fc)) {
-        fcMeetsTest = !/^(if|and|atop|or|else|modulo|otherwise|not|for|in|while)\b/.test(str)
+        fcMeetsTest = !/^(if|and|atop|or|else|modulo|otherwise|not|for|in|while)\b/.test(st)
       }
     }
   }
@@ -388,6 +389,7 @@ const cloneToken = token => {
 // The RegEx below is equal to /^\s+/ except it omits \n and the no-break space \xa0.
 // I use \xa0 to precede the combining arrow accent character \u20D7.
 export const leadingSpaceRegEx = /^[ \f\r\t\v\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]+/
+const leadingLaTeXSpaceRegEx = /^(˽|\\quad|\\qquad)+/
 
 /* eslint-disable indent-legacy */
 const rpnPrecFromType = [
@@ -447,8 +449,8 @@ const dDISTRIB = 9 //         A probability distribution defined by a confidence
 export const parse = (
   str,
   decimalFormat = "1,000,000.",
-  isCalc = false,
-  inRealTime = false
+  isCalc = false,     // true when parsing the blue echo of an expression
+  inRealTime = false  // true when updating a rendering with every keystroke in the editor.
 ) => {
   // Variable definitions
   let tex = ""
@@ -604,7 +606,7 @@ export const parse = (
     }
   }
 
-  // With the closed functions out of the way, we execute the main parse loop.
+  // With the closed functions out of the way, execute the main parse loop.
   str = str.replace(leadingSpaceRegEx, "") //       trim leading white space from string
   str = str.replace(/\s+$/, "") //                  trim trailing white space
 
@@ -650,13 +652,13 @@ export const parse = (
       const tkn = lex(str, decimalFormat, prevToken, inRealTime)
       token = { input: tkn[0], output: tkn[1], ttype: tkn[2], closeDelim: tkn[3] }
       str = str.substring(token.input.length)
-      isFollowedBySpace = leadingSpaceRegEx.test(str)
+      isFollowedBySpace = leadingSpaceRegEx.test(str) || /^(˽|\\quad|\\qquad)+/.test(str)
       str = str.replace(leadingSpaceRegEx, "")
       followedByFactor = nextCharIsFactor(str, token.ttype)
     }
 
     switch (token.ttype) {
-      case tt.PUNCT: //      spaces and newlines
+      case tt.SPACE: //      spaces and newlines
       case tt.BIN: //        infix math operators that render but don't calc, e.g. \bowtie
       case tt.ADD: //        infix add/subtract operators, + -
       case tt.MULT: //       infix mult/divide operators, × * · // ÷
@@ -666,7 +668,7 @@ export const parse = (
           token = checkForUnaryMinus(token, prevToken)
         }
 
-        if (isCalc && token.ttype !== tt.PUNCT) {
+        if (isCalc && token.ttype !== tt.SPACE) {
           if (token.output !== "\\text{-}") { rpn += tokenSep }
           rpnPrec = rpnPrecFromType[token.ttype]
           popRpnTokens(rpnPrec)

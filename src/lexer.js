@@ -24,7 +24,7 @@ export const tt = Object.freeze({
   ORD: 9,
   VAR: 10,   // variable name, one letter long
   NUM: 11,
-  PUNCT: 12,
+  SPACE: 12,
   LONGVAR: 13,
   LEFTBRACKET: 14,
   RIGHTBRACKET: 15,
@@ -285,7 +285,7 @@ const miscSymbols = Object.freeze({
 
   "\u2220": ["\u2220", "\u2220", tt.ANGLE, ""],
   "✓": ["✓", "✓", tt.ORD, ""],
-  "˽": ["˽", "~", tt.PUNCT, ""],
+  "˽": ["˽", "~", tt.SPACE, ""],  // "~" is a no-break space in LaTeX.
   "\\,": ["\\,", ",\\:", tt.SEP, ""], // escape character to enable non-matrix comma in parens
   "\\;": ["\\;", ";\\:", tt.SEP, ""],
 
@@ -325,8 +325,8 @@ const texFunctions = Object.freeze({
   "\\oiiint": ["\\oiiint", "\\oiiint", tt.UNDEROVER, ""],
   "\\sum": ["\\sum", "\\sum", tt.UNDEROVER, ""],
   "\\prod": ["\\prod", "\\prod", tt.UNDEROVER, ""],
-  "\\quad": ["\\quad", "\\quad", tt.PUNCT, ""],
-  "\\qquad": ["\\qquad", "\\qquad", tt.PUNCT, ""]
+  "\\quad": ["\\quad", "\\quad", tt.SPACE, ""],
+  "\\qquad": ["\\qquad", "\\qquad", tt.SPACE, ""]
 })
 
 const accents = Object.freeze([
