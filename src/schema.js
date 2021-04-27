@@ -37,6 +37,7 @@ function setCellAttrs(node, extraAttrs) {
 }
 
 const functionRegEx = / *function /
+const paraClasses = ["indented", "centered", "hidden"]
 
 /* function setHurmetAttrs(node) {
   let attrs = {}
@@ -66,22 +67,21 @@ export const nodes = {
     }
   },
 
-  // :: NodeSpec A plain paragraph textblock. Represented in the DOM as a `<p>` element.
+// :: NodeSpec A plain paragraph textblock. Represented in the DOM as a `<p>` element.
   paragraph: {
     content: "inline*",
     group: "block",
-    parseDOM: [{tag: "p"}],
+    parseDOM: [{tag: "p"}], // priority is the default, 50
     toDOM() { return ["p", 0] }
   },
 
   //:: NodeSpec A paragraph indented from its parent.
-  // This must written before the plain <p> NodeSpec in order for parseDOM to work.
   indented_paragraph: {
     group: "block",
     content: "inline*",
     toDOM () { return ['p', { class: 'indented' }, 0] },
-    parseDOM: [{tag: "p.indented"}],
-    priority: 20
+    // Set priority higher than 50, or an HTML page won't get to this rule.
+    parseDOM: [{tag: "p.indented", priority: 80}]
   },
 
   //:: NodeSpec A center-aligned paragraph.
@@ -89,7 +89,7 @@ export const nodes = {
     group: "block",
     content: "inline*",
     toDOM () { return ['p', { class: 'centered' }, 0] },
-    parseDOM: [{tag: "p.centered"}],
+    parseDOM: [{tag: "p.centered", priority: 80}],
   },
 
   //:: NodeSpec A paragraph that does not get printed.
@@ -97,7 +97,7 @@ export const nodes = {
     group: "block",
     content: "inline*",
     toDOM () { return ['p', { class: 'hidden' }, 0] },
-    parseDOM: [{tag: "p.hidden"}],
+    parseDOM: [{tag: "p.hidden", priority: 80}],
   },
 
   // :: NodeSpec A blockquote (`<blockquote>`) wrapping one or more blocks.
