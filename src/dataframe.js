@@ -180,8 +180,7 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
     const value = oprnd.value.data[j].slice(iStart, iEnd + 1).map(e => valueFromDatum(e))
     const dtype = oprnd.value.dtype[j] + dt.COLUMNVECTOR
     const newOprnd = { value, name: oprnd.value.columns[j], unit, dtype }
-    if (unitAware) {
-      if (!unit.gauge) { return errorOprnd("UNIT_COL", oprnd.value.columns[j]) }
+    if (unitAware && unit.gauge) {
       const newVal = Matrix.convertToBaseUnits(newOprnd, unit.gauge, unit.factor)
       return {
         value: newVal,
