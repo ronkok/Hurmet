@@ -87,7 +87,12 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
   const isPrivate = /^private /.test(line1)
   const parameterList =  line1.slice(posParen + 1, -1).trim()
   const parameters = parameterList.length === 0 ? [] : parameterList.split(/, */g)
-  const funcObj = { name: functionName, isPrivate, parameters, statements: [] }
+  const funcObj = {
+    name: functionName,
+    dtype: dt.MODULE,
+    isPrivate, parameters,
+    statements: []
+  }
 
   let level = 1 // nesting level of the code blocks
   let indent = /^ */.exec(lines[startLineNum])[0].length

@@ -36,6 +36,7 @@ const rationalRPN = numStr => {
 }
 
 const numberRegEx = new RegExp(Rnl.numberPattern)
+const propRegEx = /^[A-Za-zıȷ_.\u0391-\u03C9\u03D5\u210B-\u2131\u2133\uD835\uDC00-\udc33\udc9c-\udcb5\u0300-\u030C\u0332\u20d0-\u20d7\u20e1′]*\[/
 
 const calligraphicRegEx = /^(:?\uD835[\uDC9C-\uDCCF]|[\udc9d\udca0\udca1\udca3\udca4\udca7\udca8\udcad\udcba\udcbc\udcc1\udcc4])/
 
@@ -83,6 +84,7 @@ const checkForUnaryMinus = (token, prevToken) => {
     case tt.VAR:
     case tt.RIGHTBRACKET:
     case tt.LONGVAR:
+    case tt.PROPERTY:
     case tt.QUANTITY:
     case tt.SUPCHAR:
     case tt.PRIME:
@@ -766,7 +768,9 @@ export const parse = (
           rpn += '"' + token.input + '"' // a loop index variable name.
         } else {
           // We're in the echo of a Hurmet calculation.
-          if (str.charAt(0) === "[") {
+          if (propRegEx.test(str)) {
+            // When the blue echo has an index in a bracket, e.g., varName[indes], it renders
+            // the name of the variable, not the value. The value of the value of the index.
             token.output = token.ttype === tt.LONGVAR
               ? "\\mathrm{" + token.output + "}"
               : token.output
@@ -812,7 +816,15 @@ export const parse = (
         // A word after a dot ACCESSOR operator. I.e., A property in dot notation
         // Treat somewhat similarly to tt.STRING
         popTexTokens(15, okToAppend)
-        if (isCalc) { rpn += '"' + token.output + '"' }
+        if (isCalc) {
+          if (/\xa0\[\]\xa01\xa0$/.test(rpn)) {
+            // Compiler magic so that varName[prop1].prop2 parses as varName[prop1, "prop2"]
+            rpn = rpn.slice(0, -5) + '"' + token.output + '"\xa0[]\xa02'
+            rpnStack.pop()
+          } else {
+            rpn += '"' + token.output + '"'
+          }
+        }
         const pos = token.input.indexOf("_")
         if (isCalc) {
           tex += `\\mathrm{${token.output}}`
@@ -1491,12 +1503,17 @@ export const parse = (
     while (rpnStack.length > 0) {
       rpn += tokenSep + rpnStack.pop().symbol
     }
-    const varRegEx = /〖[^ ]+/g
+    const varRegEx = /〖[^ ()]+/g
     let arr
     while ((arr = varRegEx.exec(tex)) !== null) {
       if ("¨ˆˉ˙˜".indexOf(arr[0][1]) === -1) {
         const pos = arr.index + arr[0].length
-        tex = tex.substring(0, pos) + "〗" + tex.substring(pos)
+        if (tex.length > pos && tex.charAt(pos) === "(") {
+          // We found a method, not a data index. Delete the 〖
+          tex = tex.slice(0, arr.index) + tex.slice(arr.index + 1)
+        } else {
+          tex = tex.substring(0, pos) + "〗" + tex.substring(pos)
+        }
       }
     }
   }
@@ -1509,10 +1526,6 @@ export const parse = (
     const pos = tex.indexOf("=")
     tex = "\\begin{aligned}" + tex.slice(0, pos) + "&" + tex.slice(pos) + "\\end{aligned}"
   }
-
-  // I use the next two lines when debugging.
-//  if (isCalc) { console.log(tex) }
-//  if (isCalc) { console.log(rpn) }
 
   return isCalc ? [tex, rpn] : tex
 }

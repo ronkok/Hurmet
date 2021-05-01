@@ -41,15 +41,16 @@ const datumFromValue = (value, dtype) => {
 const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
   let iStart
   let iEnd
+  const rowList = []
   let columnList = []
   let unitMap
   let unit = Object.create(null)
-  if ((!columnIndicator || (columnIndicator.dtype === 1 &&
+  if ((columnIndicator === undefined || (columnIndicator.dtype === 1 &&
       Rnl.isZero(columnIndicator.value))) && rowIndicator.dtype === dt.RATIONAL) {
     iStart = Rnl.toNumber(rowIndicator.value) - 1
     iEnd = iStart
     columnList = columnListFromRange(0, oprnd.value.data.length - 1)
-  } else if ((!columnIndicator || (columnIndicator.dtype === 1 &&
+  } else if ((columnIndicator === undefined || (columnIndicator.dtype === 1 &&
       Rnl.isZero(columnIndicator.value))) && rowIndicator.dtype === dt.STRING) {
     // Only one indicator has been given.
     // Check both the rowMap and the columnMap.
@@ -64,6 +65,12 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
     } else {
       return errorOprnd("BAD_ROW_NAME", rowIndicator.value)
     }
+  } else if (columnIndicator === undefined && rowIndicator.dtype === dt.STRING + dt.COLUMNVECTOR) {
+    // A vector of row names
+    for (const rowName of rowIndicator.value) {
+      rowList.push(rowName)
+    }
+    columnList = columnListFromRange(0, oprnd.value.data.length - 1) // All the columns.
   } else {
     if (rowIndicator.dtype === dt.STRING) {
       iStart = oprnd.value.rowMap[rowIndicator.value]
@@ -135,7 +142,7 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
     }
     return { value, unit, dtype }
 
-  } else if (iStart === iEnd && columnList.length === 1) {
+  } else if (rowList.length === 0 && iStart === iEnd && columnList.length === 1) {
     // Return one value.
     let dtype = oprnd.value.dtype[columnList[0]]
     if (dtype & dt.QUANTITY) { dtype -= dt.QUANTITY }
@@ -150,7 +157,7 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
     }
     return { value, unit, dtype }
 
-  } else if (iStart === iEnd) {
+  } else if (iStart === iEnd && rowList.length === 0) {
     // Get data from one row. Return it in a dictionary.
     const value = new Map()
     unitMap = Object.create(null)
@@ -175,15 +182,14 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
   } else if (columnList.length === 1) {
     // Return data from one column, in a column vector or a quantity
     const j = columnList[0]
-    const unitName = oprnd.value.units[j] ? oprnd.value.units[j] : null
-    unit = (oprnd.unit.map) ? oprnd.unit.map[unitName] : { expos: null }
+    const unitName = oprnd.value.units[j] ? oprnd.value.units[j] : {}
+    unit = (oprnd.unit && oprnd.unit[unitName]) ? oprnd.unit[unitName] : { expos: null }
     const value = oprnd.value.data[j].slice(iStart, iEnd + 1).map(e => valueFromDatum(e))
     const dtype = oprnd.value.dtype[j] + dt.COLUMNVECTOR
     const newOprnd = { value, name: oprnd.value.columns[j], unit, dtype }
     if (unitAware && unit.gauge) {
-      const newVal = Matrix.convertToBaseUnits(newOprnd, unit.gauge, unit.factor)
       return {
-        value: newVal,
+        value: Matrix.convertToBaseUnits(newOprnd, unit.gauge, unit.factor),
         name: oprnd.value.columns[j],
         unit: { expos: unit.expos },
         dtype: dt.RATIONAL + dt.COLUMNVECTOR
@@ -200,12 +206,23 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
     const data = []
     const columnMap = Object.create(null)
     const unitMap = Object.create(null)
+    const rowMap = rowList.length === 0 ? false : Object.create(null)
     for (let j = 0; j < columnList.length; j++) {
-      columns.push(oprnd.columns[columnList[j]])
-      units.push(oprnd.units[columnList[j]])
-      dtype.push(oprnd.dtype[columnList[j]])
-      data.push(oprnd.data[columnList[j]].slice(iStart, iEnd + 1))
-      columnMap[oprnd.columns[j]] = j
+      columns.push(oprnd.value.columns[columnList[j]])
+      units.push(oprnd.value.units[columnList[j]])
+      dtype.push(oprnd.value.dtype[columnList[j]])
+      columnMap[oprnd.value.columns[j]] = j
+      if (rowList.length > 0) {
+        const elements = []
+        for (let i = 0; i < rowList.length; i++) {
+          const rowName = rowList[i]
+          elements.push(oprnd.value.data[columnList[j]][oprnd.value.rowMap[rowName]])
+          rowMap[rowName] = i
+        }
+        data.push(elements)
+      } else {
+        data.push(oprnd.value.data[columnList[j]].slice(iStart, iEnd + 1))
+      }
     }
     return clone({
       value: {
@@ -427,7 +444,7 @@ const dataFrameFromVectors = (vectors, vars) => {
   }
 }
 
-const append = (o1, o2, vars) => {
+const append = (o1, o2, vars, unitAware) => {
   // Append a vector to a dataframe.
   const numRows = o1.value.data[0].length
   if (o2.value.length !== numRows) { return errorOprnd("") }
@@ -435,13 +452,22 @@ const append = (o1, o2, vars) => {
   oprnd.value.columns.push(o2.name)
   oprnd.value.columnMap[o2.name] = o1.value.columns.length - 1
   const dtype = o2.dtype - dt.COLUMNVECTOR
-  oprnd.value.data.push(o2.value.map(e => datumFromValue(e, dtype)))
-  oprnd.value.dtype.push(dtype)
-  oprnd.value.units.push(o2.unit.name || null)
-  if (o2.unit.name && !oprnd.unit[o2.unit.name]) {
+  if (o2.unit.name && o2.unit.name.length > 0) {
+    oprnd.value.units.push(o2.unit.name)
     const unit = unitFromUnitName(o2.unit.name, vars)
-    oprnd.unit[o2.unit.name] = unit
+    if (!oprnd.unit[o2.unit.name]) {
+      oprnd.unit[o2.unit.name] = unit
+    }
+    if (unitAware) {
+      const v = Matrix.convertFromBaseUnits(o2, unit.gauge, unit.factor)
+      oprnd.value.data.push(v.map(e => datumFromValue(e, dtype)))
+    } else {
+      oprnd.value.data.push(o2.value.map(e => datumFromValue(e, dtype)))
+    }
+  } else {
+    oprnd.value.units.push(null)
   }
+  oprnd.value.dtype.push(dtype)
   return oprnd
 }
 

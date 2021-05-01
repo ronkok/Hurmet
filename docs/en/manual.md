@@ -1336,11 +1336,15 @@ Hurmet modules enable you to access remote functions. Remote modules are written
     divideBy(a, b)
         return a / b
     
-A Hurmet document can load an entire module into a variable with a fetch statement, like this:
+A Hurmet document can load an entire module into a variable with a fetch statement. I've written an example that finds the strength of structural steel members. The code to fetch that module is:
 
-steel = fetch("under-construction") = !
+    steel = fetch("https://gist.githubusercontent.com/ronkok/d42b0efdc66dc4f6135fee3b8d22a83e/raw/da3195993e3255c9b9b7f0b64788bc3664d6534d/steelStrengthPerAISC360-16.hrms") = !
 
-To use modules, one writes the module name and variable/function name in dot notation, as in:
+That's a bit verbose, so it will render in the document as:
+
+¢steel = fetch("https://gist.github.com/ronkok/steelStrengthPerAISC360-16.hrms")¢
+
+After a module has been fetched and loaded into a variable, its functions can be called by writing the module name and variable/function name in dot notation, as in:
 
 `ϕP_n = steel.Ps("W8X31", '50 ksi', '11 ft') = ?? kips`
 
@@ -1398,7 +1402,7 @@ Civil and structural engineers may also find these items useful:
 * Beam Analysis [Diagram](https://hurmet.app/ce/beamanalysis.html)
 * Concrete Column Interaction [Diagram](https://observablehq.com/@ronkok/concrete-column-interaction-diagram)
 * Fetchable CSV files with steel shape data: [wide flanges], [channels], 
-* [Module](https://gist.githubusercontent.com/ronkok/d42b0efdc66dc4f6135fee3b8d22a83e/raw/da3195993e3255c9b9b7f0b64788bc3664d6534d/steelStrengthPerAISC360-16.hrms) with functions for steel member strength.
+* [Module](https://gist.githubusercontent.com/ronkok/d42b0efdc66dc4f6135fee3b8d22a83e/raw/4eca170d5a2b40620cbfca9d5bdcde571268fb2d/steelStrengthPerAISC360-16.hrms) with functions for steel member strength.
 
 [wide flanges]: https://gist.githubusercontent.com/ronkok/3757b66d1866e0ad3edd921c9b57e8f6/raw/d15e9911c979112f3880f947e0621d91a0f73047/AISC-v15-wideflanges.csv "wideFlanges"
 [channels]: https://gist.githubusercontent.com/ronkok/24987345bc31878e624edc39bfa08827/raw/b1a0d6a0cb28544055a4764524cf0666f628cfde/AISC-v15-channels.csv "channels"

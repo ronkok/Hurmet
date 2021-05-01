@@ -7,7 +7,7 @@ import { formatResult } from "./result"
 /*
  *  This module receives a TeX template string and a object containing Hurmet variables.
  *  At each location where the template contains a variable, this module plugs in a TeX string
- *  for display in the Hurmet blue echo..
+ *  of the variable's value, for display in the Hurmet blue echo..
  */
 
 const varRegEx = /〖[^〗]*〗/
