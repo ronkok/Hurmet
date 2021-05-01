@@ -110,18 +110,14 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAwar
         stmt.alt = stmt.altresulttemplate.replace(/@@?/, altResultDisplay)
       } else if (stmt.resulttemplate.indexOf("?") > -1) {
         let pos = stmt.tex.lastIndexOf("?")
-        let startPos = stmt.tex.charAt(pos - 1) === "?" ? pos - 1 : pos
-        stmt.tex = stmt.tex.slice(0, startPos) + resultDisplay + stmt.tex.slice(pos + 1)
+        stmt.tex = stmt.tex.slice(0, pos).replace(/\? *$/, "") + resultDisplay + stmt.tex.slice(pos + 1)
         pos = stmt.alt.lastIndexOf("?")
-        startPos = stmt.alt.charAt(pos - 1) === "?" ? pos - 1 : pos
-        stmt.alt = stmt.alt.slice(0, startPos) + altResultDisplay + stmt.alt.slice(pos + 1)
+        stmt.alt = stmt.alt.slice(0, pos).replace(/\? *$/, "") + altResultDisplay + stmt.alt.slice(pos + 1)
       } else if (stmt.resulttemplate.indexOf("%") > -1) {
         let pos = stmt.tex.lastIndexOf("%")
-        let startPos = stmt.tex.charAt(pos - 1) === "%" ? pos - 1 : pos
-        stmt.tex = stmt.tex.slice(0, startPos) + resultDisplay + stmt.tex.slice(pos + 1)
+        stmt.tex = stmt.tex.slice(0, pos).replace(/% *$/, "") + resultDisplay + stmt.tex.slice(pos + 1)
         pos = stmt.alt.lastIndexOf("%")
-        startPos = stmt.alt.charAt(pos - 1) === "&" ? pos - 1 : pos
-        stmt.alt = stmt.alt.slice(0, startPos) + altResultDisplay + stmt.alt.slice(pos + 1)
+        stmt.alt = stmt.alt.slice(0, pos).replace(/% *$/, "") + altResultDisplay + stmt.alt.slice(pos + 1)
       }
     }
   }
