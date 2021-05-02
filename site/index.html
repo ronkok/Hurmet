@@ -61,87 +61,29 @@
 
 <p>This week’s example:</p>
 
-<h3>COVID Risk Calculator</h3>
-<p>Say that there is an upcoming gathering of your extended family. What are the COVID risks if you attend?</p>
-<p>Emily Oster has recently written a post that addresses that question. The answer has two parts:</p>
+<h3>Magic Square of Squares</h3>
+<p>A “magic square” is a matrix whose rows and columns and diagonals each sum to the same number. Allen William Johnson has discovered a magic square whose elements are all squares.</p>
+<p><span class="hurmet-calc" data-entry="𝐌 = (30^2, 246^2, 172^2,  45^2;
+   93^2, 116^2,  66^2, 258^2;
+   126^2, 138^2, 237^2,  44^2;
+   260^2,   3^2,  54^2, 150^2) = ?"></span></p>
+<p>Let’s verify that this is a magic square.</p>
+<p><span class="hurmet-calc" data-entry="sum(𝐌[1,]) = ?"></span>        <span class="hurmet-calc" data-entry="sum(𝐌[,1]) = ?"></span></p>
+<p><span class="hurmet-calc" data-entry="sum(𝐌[2, ]) = ?"></span>        <span class="hurmet-calc" data-entry="sum(𝐌[,2]) = ?"></span></p>
+<p><span class="hurmet-calc" data-entry="sum(𝐌[3, ]) = ?"></span>        <span class="hurmet-calc" data-entry="sum(𝐌[,3]) = ?"></span></p>
+<p><span class="hurmet-calc" data-entry="sum(𝐌[4, ]) = ?"></span>        <span class="hurmet-calc" data-entry="sum(𝐌[,4]) = ?"></span></p>
+<p><span class="hurmet-calc" data-entry="𝐌[1, 1] + 𝐌[2, 2] + 𝐌[3, 3] + 𝐌[4, 4] = ?"></span></p>
+<p><span class="hurmet-calc" data-entry="𝐌[4, 1] + 𝐌[3, 2] + 𝐌[2, 3] + 𝐌[1, 4] = ?"></span></p>
+<p>Yep. <span class="hurmet-calc" data-entry="✓"></span></p>
+<p>References</p>
 <ol>
    <li>
-      <p>For anyone who is fully vaccinated, the risk is so small that you can treat it like many other tiny risks that you ignore every day.</p>
+      <p>Allen William Johnson. Journal of Recreational Mathematics. 22 (1990), 38</p>
    </li>
    <li>
-      <p>For everyone else, Oster provides a calculation framework in a spreadsheet format.</p>
+      <p>https://www.johndcook.com/blog/2021/04/20/magic-square-of-squares/</p>
    </li>
 </ol>
-<p>Oster’s post is at: https://emilyoster.substack.com/p/what-can-i-do-a-calculator. I encourage you to read it. It’s quite insightful. What we are going to do here is rewrite the calculation. In Hurmet format, the calculation is easier to read and understand than in the spreadsheet original.</p>
-<p>Note that all the numbers given below are estimates and some of them have wide confidence intervals. The calculations are also somewhat less than rigorous. The results are a rough estimate, not a precise estimate.</p>
-<p><span class="hurmet-calc" data-entry="format = &quot;r2&quot;"></span>. Round the display of the following results to two significant digits.</p>
-<p></p>
-<p>Givens:</p>
-<p class="indented"><span class="hurmet-calc" data-entry="t_indoor = 12%"></span>, indoor transmission risk</p>
-<p class="indented"><span class="hurmet-calc" data-entry="r_pc = 20"></span>, ratio of <span class="hurmet-calc" data-entry="prevalence/(known cases)"></span></p>
-<p class="indented"><span class="hurmet-calc" data-entry="d_test = 50%"></span>, share of cases detected by a test.</p>
-<p></p>
-<p>We’ll write data customized for each unvaccinated person at the gathering. You can edit this table with your own data.</p>
-<p><span class="hurmet-calc" data-entry="person = `name, localRate, localVac, tested, risk, hospitalization, deathRisk
-   kid1,   0.0142%,     27.7%,     0,   1,       0.1%,    0.004%
-   kid2,   0.0194%,     26.6%,     0,   1,         1%,    0.1%
-   adult1, 0.0194%,     26.6%,     1,  1.2,        3%,    0.3%`"></span></p>
-<p class="indented"><em>localRate</em> is the daily case rate in the person’s home area. A good source is: https://covidactnow.org/</p>
-<p class="indented"><em>localVac</em> is the local share of people who are fully vaccinated.</p>
-<p class="indented"><em>tested</em> is 1 if the person has just been tested, otherwise 0.</p>
-<p class="indented"><em>risk</em> is a factor for subjective adjustment of a person’s risk relative to their region’s localRate.</p>
-<p class="indented"><em>hospitalization</em> is the share of COVID cases that need hospital care. Varies with age and other factors. </p>
-<p class="indented"><em>deathRisk</em> is the share of COVID cases that die. Varies with age and other factors.</p>
-<p></p>
-<p>The rest of this post does calculations based upon the data above.<br>Each vector element is a value for a specific person. Calculations are done element-wise on each vector.</p>
-<p>Find each person’s risk for transmitting the virus.</p>
-<p class="indented"><span class="hurmet-calc" data-entry="risk_prevalence = person.localRate/person.localVac × r_pc * (1 - d_test × person.tested) * person.risk 
-   = ?"></span></p>
-<p class="indented"><span class="hurmet-calc" data-entry="risk_transmission = risk_prevalence × t_indoor = ?"></span></p>
-<p>Find infection risk for each un-vaccinated person. First, sum up all the transmission risks.</p>
-<p class="indented"><span class="hurmet-calc" data-entry="sum = sum(risk_transmission) = %"></span></p>
-<p>You can’t infect yourself, so the risk for each person is:</p>
-<p class="indented"><span class="hurmet-calc" data-entry="risk_infection = sum - risk_transmission = ?"></span></p>
-<p>Find the odds of infection or worse.</p>
-<p class="indented"><span class="hurmet-calc" data-entry="odds_infection = 1/risk_infection = %"></span> : 1.</p>
-<p class="indented"><span class="hurmet-calc" data-entry="odds_hospitalization = 1/(risk_infection * person.hospitalization) = %"></span> : 1</p>
-<p class="indented"><span class="hurmet-calc" data-entry="odds_death = 1/(risk_infection * person.deathRisk) = %"></span> : 1</p>
-<p></p>
-<p>Tabulate the results:</p>
-<p class="indented"><span class="hurmet-calc" data-entry="dataframe(person.name, odds_infection, odds_hospitalization, odds_death) = @"></span></p>
-<p>For comparison, the&nbsp;death rate&nbsp;from drowning for children 1 to 4 is about 1 in 33,000.</p>
-<p>We each have a different tolerance for risk. With this calculation, you can at least make an informed choice.</p>
-<p></p>
-<p>References:</p>
-<ol>
-   <li>
-      <p>Emily Oster’s post:           https://emilyoster.substack.com/p/what-can-i-do-a-calculator</p>
-   </li>
-   <li>
-      <p>Local case rates:               https://covidactnow.org/</p>
-   </li>
-   <li>
-      <p>Hospitalization risk:         https://riskcalc.org/COVID19Hospitalization/</p>
-   </li>
-   <li>
-      <p>Death risk:                         https://covid19risktools.com:8443/riskcalculator</p>
-   </li>
-   <li>
-      <p>Deaths, second source:  https://ourworldindata.org/mortality-risk-covid</p>
-   </li>
-</ol>
-<p></p>
-<p>Approximate Hospitalization and Death Numbers<br>(Drawn from data sources, but please reference those for your own calculations and circumstances)</p>
-<p><span class="hurmet-calc" data-entry="`Age, Hosp. Risk (White), Hosp Risk (Black), Death Risk
-   5, 0.60%, 0.80%, 0.0040%
-   15, 1%, 1.20%, 0.10%
-   25, 1.60%, 2%, 0.20%
-   35, 2.60%, 3.10%, 0.20%
-   45, 4%, 4.80%, 0.30%
-   55, 5.60%, 6.60%, 0.40%
-   65, 6.90%, 8.20%, 2%
-   75, 7.90%, 9.30%, 8%
-   85, 8.70%, 10.30%, 16%`"></span></p>
 
 <p></p>
 </div> <!-- editor -->
