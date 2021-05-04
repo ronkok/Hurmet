@@ -19,6 +19,10 @@
   white-space: pre-wrap;
 }
 
+.ProseMirror .hurmet-calc pre {
+  margin-bottom: 0;
+}
+
 .ProseMirror li {
   position: relative;
 }
