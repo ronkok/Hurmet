@@ -218,7 +218,7 @@ Display mode centers a calculation cell and enlarges summation symbols and integ
 | `x_(a+b)`     | ¢x_(a+b)¢     | `[1:4]`                      | ¢[1, 2, 3, 4]¢               |
 | `x′`          | ¢x′¢          | `[1:2:5]`                    | ¢[1, 3, 5]¢                  |
 | `A-->note B`  | ¢A ⟶note B¢  | `{"w": 24, "h": 30}`         | ¢{"w": 24, "h": 30}¢         |
-| `\red("ng")`  | ¢\red("ng")¢  | `|x|   ‖x‖`                  | ¢|x|¢   ¢‖x‖¢                |
+| `\red("ng")`  | ¢\red("ng")¢  | `\|x\|   ‖x‖`                | ¢\|x\|¢   ¢‖x‖¢                |
 |               |               | `{a if b;`<br>`c otherwise}` | ¢{a if b;c otherwise}¢       |
 
 Calculation cells also support many of the math-mode TeX functions [supported by KaTeX](https://katex.org/docs/supported.html). Put function arguments between parentheses, not braces, as in `\cancel(5)` instead of `\cancel{5}`.
