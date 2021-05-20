@@ -59,6 +59,20 @@
 <div id=editor style="margin-bottom: 23px"></div>
 <div style="display: none" id="content"><p>This is editable text. You can focus it and start typing. You can open a calculation cell by clicking on it. All calculations will update if you press <strong>Shift-Enter</strong> to close a calculation cell. You can <em>create</em> a calculation cell by pressing <strong>Alt-C</strong>.</p>
 
+<h3>Breaking Change</h3>
+
+<p>Henceforward, a delimited matrix literal must be preceded by a “\” character.</p>
+
+<p><code>\(1, 2; 3, 4)</code>  <span class="hurmet-calc" data-entry="\implies"></span>  <span class="hurmet-calc" data-entry="\(1, 2;3, 4)"></span></p>
+
+<p><code>\[a; b; c]</code> <span class="hurmet-calc" data-entry="\implies"></span><span class="hurmet-calc" data-entry="\[a;b;c]"></span></p>
+
+<p>I do this because otherwise it was impossible to write a math interval, as in <span class="hurmet-calc" data-entry="(1, 10)"></span> or <span class="hurmet-calc" data-entry="[1, 5]"></span>.</p>
+
+<p>I will try hard to avoid any further breaking changes in Hurmet syntax.</p>
+
+<br>
+
 <p>This week’s example:</p>
 
 <h3>Simple span beam</h3>

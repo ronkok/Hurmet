@@ -42,7 +42,7 @@ Hurmet provides rich-text editing capabilities. You can apply styles to a docume
 
 |||
 |:--------------------------------------------------------|:-----------------------------------|
-|__≡__ ![folder-open] ![save] **M** ● ![draft] ![recalc] ![header] ![printer] | Document operations:<br>Navigate…, Open file…, Save file…, Import/Export to Markdown, Set decimal format, Draft mode, Recalculate all, Create print header, Print…
+|__≡__ ![folder-open] ![save] **M** ● ![draft] ![recalc] ![header] ![printer]| Document operations:<br>Navigate…, Open file…, Save file…, Import/Export to Markdown, Set decimal format, Draft mode, Recalculate all, Create print header, Print…
 |![undo]  ![redo]                                         | Editing: Undo, Redo
 |__B__  __*I*__  ![embed] __X<sub>2</sub>__  __X<sup>2</sup>__ ![strikethrough]  __<u>U</u>__ | Character styles:<br>Bold, Italic, Code, Subscript, Superscript, Strikethrough, Underline
 |![link] __—__ ![upload] ![image] ![plus] ![integral]     | Insert:<br>Link…, Horizontal rule, Uploaded image…, Link to image…, Hurmet calculation…, TeX…
@@ -206,19 +206,19 @@ Display mode centers a calculation cell and enlarges summation symbols and integ
 
 <div class="table-markup"></div>
 
-| Input         | Renders as:   | Input                         | Renders or<br>calculates as: |
-| ------------- | ------------- | ----------------------------- | ----------------------------|
+| Input         | Renders as:   | Input                        | Renders or<br>calculates as: |
+| ------------- | ------------- | ---------------------------- | -----------------------------|
 | `12/25.2`     | ¢12/25.2¢     | `x`                          | ¢x¢                          |
 | `(a + b)/c`   | ¢(a + b)/c¢   | `longVarName`                | ¢longVarName¢                |
 | `a//b`        | ¢a//b¢        | `"A string."`                | ¢"A string."¢                |
 | `a///b`       | ¢a///b¢       | `'5 N.m/s2'`                 | ¢'5 N.m/s2'¢                 |
-| `x^23`        | ¢x^23¢        | `(a, b; c, d)`               | ¢(a, b; c, d)}¢              |
-| `x^(a+b)`     | ¢x^(a+b)¢     | `[a, b; c, d]`               | ¢[a, b; c, d]¢               |
+| `x^23`        | ¢x^23¢        | `\(a, b; c, d)`              | ¢\(a, b; c, d)}¢             |
+| `x^(a+b)`     | ¢x^(a+b)¢     | `\[a, b; c, d]`              | ¢\[a, b; c, d]¢              |
 | `x_subscript` | ¢x_subscript¢ | `{:a, b; c, d:}`             | ¢{:a, b; c, d:}¢             |
 | `x_(a+b)`     | ¢x_(a+b)¢     | `[1:4]`                      | ¢[1, 2, 3, 4]¢               |
 | `x′`          | ¢x′¢          | `[1:2:5]`                    | ¢[1, 3, 5]¢                  |
 | `A-->note B`  | ¢A ⟶note B¢  | `{"w": 24, "h": 30}`         | ¢{"w": 24, "h": 30}¢         |
-| `\red("ng")`  | ¢\red("ng")¢  | `\|x\|   ‖x‖`                | ¢\|x\|¢   ¢‖x‖¢                |
+| `\red("ng")`  | ¢\red("ng")¢  | `\|x\|   ‖x‖`                | ¢\|x\|¢   ¢‖x‖¢              |
 |               |               | `{a if b;`<br>`c otherwise}` | ¢{a if b;c otherwise}¢       |
 
 Calculation cells also support many of the math-mode TeX functions [supported by KaTeX](https://katex.org/docs/supported.html). Put function arguments between parentheses, not braces, as in `\cancel(5)` instead of `\cancel{5}`.
@@ -270,8 +270,8 @@ The font corrections, e.g., `bb …` work on any letter from A to Z or a to z.
 
 | Display selector | Display Selector for Unit-Aware Calculation    | Displays:             |
 |:----------------:|:----------------------------------------------:| --------------------- |
-|        ?         |       ??     | Entire calculation, including a blue echo of the expression displaying the value plugged in to each variable.
-|        !         |       !!     | Calculates and holds, but does not display, the blue echo or the result.
+|        ?         |       ??     | Entire calculation, including the result and a blue echo of the expression displaying the value plugged in to each variable.
+|        !         |       !!     | Omits the blue echo and the result.
 |        %         |       %%     | Omits blue echo.
 |        @         |      @@      | Displays only the result, like a spreadsheet cell.
 
@@ -282,8 +282,8 @@ The font corrections, e.g., `bb …` work on any letter from A to Z or a to z.
 | Data Type and Example                       | Accessor                         | Returns      |
 |:--------------------------------------------|:---------------------------------|:-------------|
 | string<br>s = "abcde"                       | s[2]<br>s[2:4]<br>s[3:]          | b<br>bce<br>cde
-| Vector<br>𝐕 = ¢[1, 2, 3, 4, 5]¢             | 𝐕[2]<br>𝐕[2:4]<br>𝐕[3:]          | 2<br>¢[2, 3, 4]¢<br>¢[3, 4, 5]¢
-| Matrix<br>𝐌 = ¢(1, 2, 3; 4, 5, 6; 7, 8, 9)¢ | 𝐌[2, 3]<br>𝐌[3,]<br>𝐌[2:3, 1:2] | 6<br>¢[7, 8, 9]¢<br>¢[4, 5; 7, 8]¢
+| Vector<br>𝐕 = ¢\[1, 2, 3, 4, 5]¢             | 𝐕[2]<br>𝐕[2:4]<br>𝐕[3:]          | 2<br>¢[2, 3, 4]¢<br>¢[3, 4, 5]¢
+| Matrix<br>𝐌 = ¢\(1, 2, 3; 4, 5, 6; 7, 8, 9)¢ | 𝐌[2, 3]<br>𝐌[3,]<br>𝐌[2:3, 1:2] | 6<br>¢\[7, 8, 9]¢<br>¢\[4, 5; 7, 8]¢
 | Dictionary<br>D = ¢{ "w": 31, "h": 9.13 }¢    | D.h<br>D["h"]<br>D["h", "w"]     | 9.13<br>9\.13<br>9\.13, 31
 | Data Frame<br><img src="../../images/dataframe.png" alt="dataframe" width="180"/> | DF.B<br>DF["B"]<br>DF.area<br>DF.B.area<br>DF["B"].area<br>DF["B", "area"]| An entire row<br>An entire row<br>Column vector<br>22 in²<br>22 in²<br>22 in²
 
@@ -332,8 +332,8 @@ Near the end of the statement is the display selector, i.e., `?`, `??`, etc. It 
 
 | Display selector | Display Selector for Unit-Aware Calculation    | Displays:             |
 |:----------------:|:----------------------------------------------:| --------------------- |
-|        ?         |       ??     | Entire calculation, including a blue echo of the expression that displays the value plugged in to each variable.
-|        !         |       !!     | Calculates and holds, but does not display, the blue echo or the result.
+|        ?         |       ??     | Entire calculation, including the result and a blue echo of the expression that displays the value plugged in to each variable.
+|        !         |       !!     | Omits the blue echo and the result.
 |        %         |       %%     | Omits blue echo.
 |        @         |      @@      | Displays only the result, like a spreadsheet cell.
 
@@ -443,7 +443,7 @@ A Hurmet _quantity_ contains both a numeric magnitude and a unit of measure. Qua
 | `'-$25.10'`           | ¢'-$25.10'¢
 | `'30°'`               | ¢'30°'¢
 | `'10 N·m/s'`          | ¢'10 N·m/s'¢
-| `'[2.1; 15.3] feet'`  | ¢'[2.1; 15.3] feet'¢
+| `'\[2.1; 15.3] feet'`  | ¢'\[2.1; 15.3] feet'¢
 
 ![single quote number or matrix or map unit-name single quote](../../images/quantity-railroad.svg)
 
@@ -469,20 +469,20 @@ A Hurmet *matrix* is a one or two dimensional arrangement of matrix elements. A 
 
 A Hurmet *vector* is a one dimensional matrix, either a row vector or a column vector.
 
-A matrix literal is written between delimiters, either `( )` or `[ ]` or `{: :}`. Matrix elements are separated by commas. Matrix rows are separated by semi-colons. Be sure to write a space after comma separators so they are not confused with decimals inside a number. Here are some matrix examples:
+A matrix literal is written between delimiters, either `\( )` or `\[ ]` or `{: }`. Matrix elements are separated by commas. Matrix rows are separated by semi-colons. Be sure to write a space after comma separators so they are not confused with decimals inside a number. Here are some matrix examples:
 
 | Input           | Renders as     |
 | --------------- | -------------- |
-| `(1, 0; 0, 1)`  | ¢(1, 0; 0, 1)¢ |
-| `[2.1; -15.3]`  | ¢[2.1; -15.3]¢ |
-| `{:1, 0; 0, 1:}` | ¢{:1, 0; 0, 1:}¢ |
+| `\(1, 0; 0, 1)`  | ¢\(1, 0; 0, 1)¢ |
+| `\[2.1; -15.3]`  | ¢\[2.1; -15.3]¢ |
+| `{:1, 0; 0, 1}` | ¢{:1, 0; 0, 1}¢ |
 
 Another way to create a Hurmet vector is to write a range of numbers between brackets; the form is <span style="white-space: nowrap;">`[start:step:end]`</span>. A Hurmet calculation of that form will return a row vector with every number in the range. The step size is optional (default = 1). Examples:
 
 |    Input      |       Result           |
 | ------------- | ---------------------- |
-| `[2:5] = ?`   | ¢[2:5] = [2, 3, 4, 5]¢ |
-| `[1:2:5] = ?` | ¢[1:2:5] = [1, 3, 5]¢  |
+| `[2:5] = ?`   | ¢[2:5] = \[2, 3, 4, 5]¢ |
+| `[1:2:5] = ?` | ¢[1:2:5] = \[1, 3, 5]¢  |
 
 You can call individual elements with index integers between brackets, as in `𝐕[5]` or `𝐌[1, 3]`. You can use a variable name for the index if the variable returns an integer.
 
@@ -496,9 +496,9 @@ All the usual math operators can be applied to a numeric matrix. The operators m
 
 <div class="indented">
 
-¢𝐡 = [5; 10; 15]¢
+¢𝐡 = \[5; 10; 15]¢
 
-¢𝐱 = 2 𝐡 + 1 = \color(blue)(2) [5; 10; 15] + 1 \color(black) = [11; 21; 31]¢
+¢𝐱 = 2 𝐡 + 1 = \color(blue)(2) \[5; 10; 15] + 1 \color(black) = \[11; 21; 31]¢
 
 </div>
 
@@ -595,8 +595,8 @@ You can also call an individual element, a column, or a group of elements. The i
 | `wideFlanges["W10X49", ["A", "weight"]]` | ¢{"A": '14.4 in2', "weight": '49 lbf/ft'}¢
 | `wideFlanges.W10X49["A", "weight"]`      | ¢{"A": '14.4 in2', "weight": '49 lbf/ft'}¢
 | `wideFlanges["W10X49"]["A", "weight"]`   | ¢{"A": '14.4 in2', "weight": '49 lbf/ft'}¢
-| `wideFlanges[1:2, "A"]`                  | ¢[26.5; 19.1]¢
-|`wideFlanges[["W8X31"; "W10X49"], "A"]`   | ¢[0.13;14.4]¢
+| `wideFlanges[1:2, "A"]`                  | ¢\[26.5; 19.1]¢
+|`wideFlanges[["W8X31"; "W10X49"], "A"]`   | ¢\[0.13;14.4]¢
 
 Hurmet will return a <br> ¢{"simple type" if "you call a single cell, as in df[1, 2]"; "column vector" if "you call a column, as in df[,2]"; "dictionary" if "you call a row, as in df[3,]"; "data frame" otherwise}¢
 

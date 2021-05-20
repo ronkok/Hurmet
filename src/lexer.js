@@ -235,9 +235,12 @@ const miscSymbols = Object.freeze({
   "\u2211": ["\u2211", "\u2211", tt.UNDEROVER, ""], // \sum
 
   "(": ["(", "(", tt.LEFTBRACKET, ")"],
+  "\\(": ["\\(", "\\begin{pmatrix}", tt.LEFTBRACKET, "\\end{pmatrix}"],
   "[": ["[", "[", tt.LEFTBRACKET, "]"],
+  "\\[": ["\\[", "\\begin{bmatrix}", tt.LEFTBRACKET, "\\end{bmatrix}"],
   "{": ["{", "\\{", tt.LEFTBRACKET, "\\}"],
-  "{:": ["{:", "{", tt.LEFTBRACKET, "}"],
+  "\\{": ["\\{", "\\begin{Bmatrix}", tt.LEFTBRACKET, "\\end{Bmatrix}"],
+  "{:": ["{:", "\\begin{matrix}", tt.LEFTBRACKET, "\\end{matrix}"],
   "⟨": ["⟨", "⟨", tt.LEFTBRACKET, "⟩"],
   ")": [")", ")", tt.RIGHTBRACKET, ""],
   "]": ["]", "]", tt.RIGHTBRACKET, ""],

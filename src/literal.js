@@ -34,7 +34,7 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
       return [str, undefined, dt.STRING, tex]
     }
 
-  } else if (/^[([]/.test(str)) {
+  } else if (/^\\[([]/.test(str)) {
     // We're processing a matrix
     const [tex, rpn] = parse(str, decimalFormat, true)
     const oprnd = evalRpn(rpn, {}, decimalFormat, false, {})
