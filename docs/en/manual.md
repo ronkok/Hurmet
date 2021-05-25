@@ -1404,7 +1404,7 @@ Civil and structural engineers may also find these items useful:
 * Fetchable CSV files with steel shape data: [wide flanges], [channels], 
 * [Module](https://gist.githubusercontent.com/ronkok/d42b0efdc66dc4f6135fee3b8d22a83e/raw/4eca170d5a2b40620cbfca9d5bdcde571268fb2d/steelStrengthPerAISC360-16.hrms) with functions for steel member strength.
 
-[wide flanges]: https://gist.githubusercontent.com/ronkok/3757b66d1866e0ad3edd921c9b57e8f6/raw/d15e9911c979112f3880f947e0621d91a0f73047/AISC-v15-wideflanges.csv "wideFlanges"
+[wide flanges]: https://gist.githubusercontent.com/ronkok/a9f465e08be54cb4b46449768511acec/raw/a40be6025b135220235b70ca4a3378cdcef4a4c0/AISC-v15-wideFlanges.csv "wideFlanges"
 [channels]: https://gist.githubusercontent.com/ronkok/24987345bc31878e624edc39bfa08827/raw/b1a0d6a0cb28544055a4764524cf0666f628cfde/AISC-v15-channels.csv "channels"
 
 ## Credits
