@@ -65,7 +65,8 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
     } else {
       return errorOprnd("BAD_ROW_NAME", rowIndicator.value)
     }
-  } else if (columnIndicator === undefined && rowIndicator.dtype === dt.STRING + dt.COLUMNVECTOR) {
+  } else if (columnIndicator === undefined &&
+    rowIndicator.dtype === dt.STRING + dt.COLUMNVECTOR) {
     // A vector of row names
     for (const rowName of rowIndicator.value) {
       rowList.push(rowName)

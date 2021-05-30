@@ -372,8 +372,15 @@ const workAsync = (
     }
     // There. Fetches are done and are loaded into the document.
     // Now proceed to the rest of the work.
-    proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs,
-                      curPos, hurmetVars, tr, immutablePositions)
+    try {
+      proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs,
+                        curPos, hurmetVars, tr, immutablePositions)
+    } catch (err) {
+      tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs))
+      tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)))
+      view.dispatch(tr)
+      view.focus()
+    }
   })
 }
 
@@ -389,10 +396,15 @@ export function updateCalculations(
   if (!(isCalcAll || nodeAttrs.name || nodeAttrs.rpn)) {
     // No calculation is required. Just render the node and get out.
     const tr = view.state.tr
-    tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs))
-    tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)))
-    view.dispatch(tr)
-    view.focus()
+    try {
+      tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs))
+      tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)))
+    } catch (err) {
+      // nada
+    } finally {
+      view.dispatch(tr)
+      view.focus()
+    }
     return
   }
 
@@ -432,6 +444,13 @@ export function updateCalculations(
   } else {
     // Skip the fetches and go directly to work that we can do synchronously.
     const tr = view.state.tr
-    proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr, [])
+    try {
+      proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr, [])
+    } catch (err) {
+      tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs))
+      tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)))
+      view.dispatch(tr)
+      view.focus()
+    }
   }
 }
