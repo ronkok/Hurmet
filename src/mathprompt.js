@@ -191,13 +191,15 @@ export function openMathPrompt(options) {
 
   form.addEventListener("keydown", e => {
     if (e.keyCode === 27) {
+      // Esc. Close without updating.
       e.preventDefault()
       close()
-    } else if (e.keyCode === 13 && e.shiftKey) {
-      // Submit upon Shift-Enter
+    } else if (e.keyCode === 13 && !e.shiftKey) {
+      // Submit upon Enter. (Shift-Enter creates a newline.)
       e.preventDefault()
       submit()
     } else if (e.keyCode === 9) {
+      // tab
       window.setTimeout(() => {
         if (!wrapper.contains(document.activeElement)) { close() }
       }, 500)

@@ -105,7 +105,13 @@ And now, on to the main event, Hurmet’s calculations.
 ###### Create a cell
 <div>
 
-Hurmet calculation cells display math and perform numeric calculations. To create a calculation cell in  Hurmet.app, select a spot in the document, then click the ![plus] button or type __Alt c__. Save the cell by hitting the __Shift-Enter__ keys. You can escape any changes by hitting the __Esc__ key  or by clicking elsewhere in the document.
+Hurmet calculation cells display math and perform numeric calculations. To create a calculation cell in  Hurmet.app, select a spot in the document, then click the ![plus] button or type __Alt c__.
+
+While in a cell,<br>
+      __Enter__ will close and update the cell.<br>
+      __Shift-Enter__ will create a newline inside the cell.<br>
+      __Esc__ will close the cell without updating it.<br>
+      Clicking elsewhere will also close the cell.
 
 The demonstration box to the lower-left mimics a Hurmet.app calculation cell. It can do one calculation at a time. Use it to practice the material in this tutorial.
 </div>
