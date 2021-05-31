@@ -49,11 +49,11 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
     const unit = (oprnd.dtype & dt.MAP) ? oprnd.unit : oprnd.unit.map
     return [oprnd.value, unit, oprnd.dtype, tex]
 
-  } else if (str.charAt(0) === "`") {
-    // A CSV between back ticks.
+  } else if (/^``/.test(str)) {
+    // A CSV between double back ticks.
     // Read the CSV into a data frame.
-    const pos = str.indexOf('`', 1)
-    str = str.slice(1, pos).trim()
+    const pos = str.indexOf('`', 2)
+    str = str.slice(2, pos).trim()
     const dataFrame = DataFrame.dataFrameFromCSV(str, {})
     return [dataFrame.value, dataFrame.unit, dt.DATAFRAME,
       DataFrame.display(dataFrame.value, "h3", decimalFormat)]

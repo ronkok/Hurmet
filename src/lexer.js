@@ -50,7 +50,8 @@ export const tt = Object.freeze({
   COMMENT: 37,
   RETURN: 38,  // A return statement inside a user-defined function.
   TO: 39,
-  DATAFRAME: 40
+  DATAFRAME: 40,
+  RICHTEXT: 41
 })
 
 const minusRegEx = /^-(?![-=<>:])/
@@ -672,10 +673,10 @@ export const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
     return [`#${st}`, `\\text{\\texttt{ \\#${st}}}`, tt.COMMENT, ""]
   }
 
-  if (str.charAt(0) === "`") {
-    // inline CSV string between back ticks, a data frame literal.
-    pos = str.indexOf("`", 1)
-    const st = (pos > 0 ? str.slice(1, pos) : str.slice(1)).trim()
+  if (/^``/.test(str)) {
+    // inline CSV string between double back ticks, a data frame literal.
+    pos = str.indexOf("`", 2)
+    const st = (pos > 0 ? str.slice(2, pos) : str.slice(2)).trim()
     let tex = ""
     if (inRealTime) {
       tex = DataFrame.quickDisplay(st)
@@ -683,7 +684,20 @@ export const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
       const dataFrame = DataFrame.dataFrameFromCSV(st, {})
       tex = DataFrame.display(dataFrame.value, "h3", decimalFormat)
     }
-    return ["`" + st + "`", tex, tt.DATAFRAME, ""]
+    return ["``" + st + "``", tex, tt.DATAFRAME, ""]
+  }
+
+  if (str.charAt(0) === '`') {
+    // Rich text string. Usually a return from a calculation.
+    // String between double quotation marks. Parser will convert it to \text{…}
+    pos = str.indexOf('`', 1)
+    if (pos > 0) {
+      // Disallow \r or \n by truncating the string.
+      st = str.substring(1, pos).replace(/\r?\n.*/, "")
+      return ['`' + st + '`', st, tt.RICHTEXT, ""]
+    } else {
+      return [str, str.replace(/\r?\n.*/, ""), tt.RICHTEXT, ""]
+    }
   }
 
   if (str.charAt(0) === "'") {

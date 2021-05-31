@@ -161,8 +161,14 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
       const str = ch === '"' && chEnd === '"' ? tkn.slice(1, -1).trim() : tkn.trim()
       stack.push(Object.freeze({ value: str, unit: null, dtype: dt.STRING }))
 
-    } else if (ch === "`") {
+    } else if (/^``/.test(tkn)) {
       stack.push(DataFrame.dataFrameFromCSV(tkn.slice(1, -1).trim(), {}))
+
+    } else if (ch === '`') {
+      // A rich text literal
+      const chEnd = tkn.charAt(tkn.length - 1)
+      const str = ch === '`' && chEnd === '`' ? tkn.slice(1, -1).trim() : tkn.trim()
+      stack.push(Object.freeze({ value: str, unit: null, dtype: dt.RICHTEXT }))
 
     } else {
       switch (tkn) {

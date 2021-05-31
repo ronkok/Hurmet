@@ -101,9 +101,9 @@ export function openMathPrompt(options) {
   // eslint-disable-next-line no-undef
   const mathEditor = CodeMirror.fromTextArea(field, {
     mode: (isCalculation ? "hurmet" : null),
-    indentUnit: 3,
-    smartIndent: false,
-    tabSize: 3,
+    indentUnit: 4,
+    smartIndent: true,
+    tabSize: 4,
     autoCloseBrackets: true,
     autofocus: true,
     lineWrapping: true,
@@ -158,9 +158,8 @@ export function openMathPrompt(options) {
   }
   if (mathDoc.getValue().length > 0) { renderMath() }
 
-  mathEditor.on('change', function() {
-    renderMath()
-  })
+  mathEditor.setOption("extraKeys", { Enter: () => {}, Tab: () => {} }); // Do nothing.
+  mathEditor.on('change', () => { renderMath() }) // Re-render the math in the inset.
 
   const submit = _ => {
     // Get the string that the user typed into the prompt box.
@@ -198,11 +197,6 @@ export function openMathPrompt(options) {
       // Submit upon Enter. (Shift-Enter creates a newline.)
       e.preventDefault()
       submit()
-    } else if (e.keyCode === 9) {
-      // tab
-      window.setTimeout(() => {
-        if (!wrapper.contains(document.activeElement)) { close() }
-      }, 500)
     }
   })
 

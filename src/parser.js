@@ -403,7 +403,8 @@ const rpnPrecFromType = [
        6,  7,  5,  4,  1,
       -1, 16, 15, -1, 14,
       13,  9,  3,  2, 10,
-      -1, -1,  4,  3, -1
+      -1, -1,  4,  3, -1,
+      -1
 ]
 
 const texPrecFromType = [
@@ -414,7 +415,8 @@ const texPrecFromType = [
        2,  2,  1,  1,  1,
        2, -1, 15,  2, 14,
       13,  9, -1,  1, -1,
-      15, -1,  1,  -1, 2
+      15, -1,  1,  -1, 2,
+       2
 ]
 /* eslint-enable indent-legacy */
 
@@ -738,6 +740,17 @@ export const parse = (
         token.output = addTextEscapes(token.output)
         token.output = token.output.replace(/ +$/, "\\,") // Prevent loss of trailing space
         tex += "\\text{" + token.output + "}"
+        okToAppend = true
+        break
+      }
+
+      case tt.RICHTEXT: {
+        popTexTokens(2, okToAppend)
+        const ch = token.input.charAt(0)
+        if (isCalc) { rpn += ch + token.output + ch }
+        if (isPrecededBySpace) { posOfPrevRun = tex.length }
+        token.output = parse(token.output, decimalFormat, false)
+        tex += "{" + token.output + "}"
         okToAppend = true
         break
       }

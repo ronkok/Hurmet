@@ -1,5 +1,6 @@
 import { dt } from "./constants"
 import { Rnl } from "./rational"
+import { parse } from "./parser"
 import { format } from "./format"
 import { addTextEscapes } from "./utils"
 import { Matrix, isMatrix } from "./matrix"
@@ -68,6 +69,10 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAwar
           // This is a hack to return a color
           resultDisplay = `\\textcolor{${result.unit}}{${resultDisplay}}`
         }
+        altResultDisplay = result.value
+
+      } else if (result.dtype & dt.RICHTEXT) {
+        resultDisplay = parse(result.value, decimalFormat, false)
         altResultDisplay = result.value
 
       } else if (result.dtype & dt.BOOLEAN) {

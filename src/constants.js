@@ -26,5 +26,6 @@ export const dt = Object.freeze({
   MODULE: 32768, // contains user-defined functions
   ERROR: 65536,
   UNIT: 131072, // User-defined units.
-  IMAGE: 262144
+  IMAGE: 262144,
+  RICHTEXT: 524288
 })

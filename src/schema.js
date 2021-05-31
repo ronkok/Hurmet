@@ -62,7 +62,7 @@ export const nodes = {
     // can not reach doc.attrs. So any user change to document metadata will be
     // outside the undo stack.
     attrs: {
-      decimalFormat: {default: '1.000.000,' },
+      decimalFormat: {default: '1,000,000.' },
       inDraftMode: { default: false },
       recentUndo: { default: false }
     }

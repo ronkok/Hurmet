@@ -12,7 +12,7 @@ const keywordRegEx = /^(if|else|else if|return|raise|while|for|break|echo)\b/
 // It isn't called from there in order to avoid duplicating Hurmet code inside ProseMirror.js.
 export const functionRegEx = /^(?:private +)?function (?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*\(/
 export const moduleRegEx = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′* *= * module\b/
-const lexRegEx = /"[^"]*"|`[^`]*`|'[^']*'|#|[^"`'#]+/g
+const lexRegEx = /"[^"]*"|``.*|`[^`]*`|'[^']*'|#|[^"`'#]+/g
 
 const testForStatement = str => {
   const pos = str.indexOf("=")
@@ -75,7 +75,7 @@ const handleCSV = (expression, lines, startLineNum) => {
     const line = lines[i].trim()
     if (line.length === 0) { continue }
     expression += "\n" + line
-    if (line.slice(-1) === "`") { return [expression, i] }
+    if (line.slice(-2) === "``") { return [expression, i] }
   }
 }
 
@@ -163,7 +163,7 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
     if (keyword) {
       name = keyword[0]
       expression = line.slice(name.length).trim()
-      if (expression.charAt(0) === "`") { [expression, i] = handleCSV(expression, lines, i) }
+      if (/^``/.test(expression)) { [expression, i] = handleCSV(expression, lines, i) }
       if ("ifwhileforelse if".indexOf(name) > -1) {
         level += 1
         pendingIndent = true
@@ -175,7 +175,7 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
         const posEq = line.indexOf("=")
         name = line.slice(0, posEq - 1).trim()
         expression = line.slice(posEq + 1).trim()
-        if (expression.charAt(0) === "`") { [expression, i] = handleCSV(expression, lines, i) }
+        if (/^``/.test(expression)) { [expression, i] = handleCSV(expression, lines, i) }
         isStatement = true
       } else {
         // TODO: We shouldn't get here. Write an error.

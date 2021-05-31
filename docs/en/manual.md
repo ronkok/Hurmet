@@ -416,6 +416,10 @@ You can call a subset of any string with an index or range in brackets. Hurmet i
     a[2]     # returns "b"
     a[2:4]   # returns "bcd"
     a[5:]    # returns "efg"
+
+__Math String__
+
+Strings will be rendered as math if they are delimited with single backticks instead of double quotes. So somthing like `` `M_n` `` will return as ¢M_n¢. This is useful mostly when a calculation checks a condition and reports whether some computed variable can be accepted.
 </div>
 
 ###### Number
@@ -550,16 +554,16 @@ A *data frame* is a two dimensional data structure that can be accessed with row
 
 Each datum can be a number, a string, `true`, or `false`. A missing item will be taken to be `undefined`. All data in a column must be of the same data type. A column of numbers can be assigned a unit of measure. 
 
-Data frame literals are written between backtick `` ` ` `` delimiters. The text between the backticks must be written in CSV (comma-separated values) format. Numbers must use a dot decimal. The second row may contain units of measure. The first column will be indexed if the first word is “name” or “index”.
+Data frame literals are written between double backtick delimiters. The text between the backticks must be written in CSV (comma-separated values) format. Numbers must use a dot decimal. The second row may contain units of measure. The first column will be indexed if the first word is “name” or “index”.
 
 Here’s an example of CSV input:
 
-    rebar = `name,diameter,area
+    rebar = ``name,diameter,area
     ,in ,in²
     #3,0.375,0.11
     #4,0.5  ,0.2
     #5,0.625,0.31
-    #6,0.75 ,0.44`
+    #6,0.75 ,0.44``
 
 … which renders as:
 
