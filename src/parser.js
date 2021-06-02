@@ -489,7 +489,9 @@ export const parse = (
     if (isCalc && rpnPrec >= 0) {
       // Pop operators off the rpnStack and append them to the rpn string
       while (rpnStack.length > 0) {
-        if (rpnStack[rpnStack.length - 1].prec < rpnPrec) { break }
+        const topPrec = rpnStack[rpnStack.length - 1].prec
+        //                         exponents, from right to left.
+        if (topPrec < rpnPrec || (topPrec === 13 && rpnPrec === 13)) { break }
         rpn += rpnStack.pop().symbol + tokenSep
       }
     }
@@ -524,7 +526,9 @@ export const parse = (
 
     //  Pop operators whose precedence ≥ texPrec. Append a close delimiter for each.
     let delim = {}
-    while (texStack[texStack.length - 1].prec >= texPrec) {
+    while (texStack[texStack.length - 1].prec >= texPrec &&
+      // Also handle exponents, from right to left, as in 3^4^5
+      !(texStack[texStack.length - 1].prec === 13 && texPrec === 13)) {
       op = texStack.pop()
 
       // Before we append braces, check if we must hide a pair of parens.
