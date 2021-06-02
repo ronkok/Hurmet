@@ -253,6 +253,7 @@ const dataFrameFromCSV = (str, vars) => {
   const units = []                     // array of unit names, one for each column
   const dtype = []                     // each column's Hurmet operand type
   const unitMap = Object.create(null)  // map from unit names to unit data
+  let gotUnits = false
 
   const pos = /^ï»¿/.test(str) ? 3 : 0  // Check for a BOM
   let row = 0
@@ -263,6 +264,41 @@ const dataFrameFromCSV = (str, vars) => {
     // Load a datum into the dataTable
     datum = datum.trim()
 
+    if (row === 3 && col === 0) {
+      // Determine if there is a row for unit names.
+      let gotAnswer = false
+      for (let iCol = 0; iCol < data.length; iCol++) {
+        if (numberRegEx.test(data[iCol][0])) { gotAnswer = true; break }
+      }
+      if (!gotAnswer) {
+        for (let iCol = 0; iCol < data.length; iCol++) {
+          if (numberRegEx.test(data[iCol][1])) { gotUnits = true; break }
+        }
+      }
+      if (gotUnits) {
+        // Shift the top row of data into units.
+        for (let iCol = 0; iCol < data.length; iCol++) {
+          const unitName = data[iCol].shift()
+          units.push(unitName)
+          if (unitName.length > 0) {
+            if (!unitMap[unitName]) {
+              const unit = unitFromUnitName(unitName, vars)
+              if (unit) {
+                unitMap[unitName] = unit
+              } else {
+                return errorOprnd("DF_UNIT", unitName)
+              }
+            }
+          }
+        }
+        if (rowMap) {
+          Object.entries(rowMap).forEach(([key, value]) => {
+            rowMap[key] = value - 1
+          })
+        }
+      }
+    }
+
     if (row === 0) {
       columns.push(datum)
       columnMap[datum] = col
@@ -270,41 +306,7 @@ const dataFrameFromCSV = (str, vars) => {
       if (row === 1) { data.push([]) } // First data row.
       data[col].push(datum)
       if (rowMap && col === 0) {
-        rowMap[datum] = row - 1
-      }
-    }
-
-    // Determine if there is a row for unit names.
-    let gotUnits = false
-    let gotAnswer = false
-    for (let iCol = 0; iCol < data.length; iCol++) {
-      if (numberRegEx.test(data[iCol][0])) { gotAnswer = true; break }
-    }
-    if (!gotAnswer) {
-      for (let iCol = 0; iCol < data.length; iCol++) {
-        if (numberRegEx.test(data[iCol][1])) { gotUnits = true; break }
-      }
-    }
-    if (gotUnits) {
-      // Shift the top row of data into units.
-      for (let iCol = 0; iCol < data.length; iCol++) {
-        const unitName = data[iCol].shift()
-        units.push(unitName)
-        if (unitName.length > 0) {
-          if (!unitMap[unitName]) {
-            const unit = unitFromUnitName(unitName, vars)
-            if (unit) {
-              unitMap[unitName] = unit
-            } else {
-              return errorOprnd("DF_UNIT", unitName)
-            }
-          }
-        }
-      }
-      if (rowMap) {
-        Object.entries(rowMap).forEach(([key, value]) => {
-          rowMap[key] = value - 1
-        })
+        rowMap[datum] = row - 1 - (gotUnits ? 1 : 0)
       }
     }
   }
