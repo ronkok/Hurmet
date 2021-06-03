@@ -86,7 +86,9 @@ export const fromAssignment = (cellAttrs, unitAware) => {
       ? clone(cellAttrs.value.inBaseUnits)
       : clone(cellAttrs.value.plain)
     )
-    oprnd.dtype = cellAttrs.dtype - dt.QUANTITY
+    if (!(oprnd.dtype & dt.MAP)) {
+      oprnd.dtype = cellAttrs.dtype - dt.QUANTITY
+    }
 
   } else if (cellAttrs.dtype === dt.STRING) {
     const str = cellAttrs.value

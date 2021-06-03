@@ -59,7 +59,7 @@ const valueFromMap = (map, keys, unitAware) => {
   // `keys` is an array. It contains > 1 key if the author wants multiple assignment
   // as in A, B = map[a, b]
   const isNumeric = (map.dtype & dt.RATIONAL)
-  const treatAsUnitAware = (unitAware && (map.dtype & dt.QUANTITY))
+  const treatAsUnitAware = (unitAware && (map.dtype & dt.QUANTITY) > 0)
   if (keys.length === 1) {
     const key = keys[0]
     const value = clone(map.value.get(key))
@@ -68,8 +68,7 @@ const valueFromMap = (map, keys, unitAware) => {
 
     } else if (treatAsUnitAware) {
       const dtype = map.dtype - dt.MAP - dt.QUANTITY
-      const adjustedValue = valueInBaseUnits({ value, dtype: dt.RATIONAL }, map.unit)
-      return { value: adjustedValue, unit: map.unit.expos, dtype: dtype }
+      return { value, unit: { expos: map.unit.expos }, dtype: dtype }
 
     } else {
       return { value, unit: allZeros, dtype: map.dtype - dt.MAP - (map.dtype & dt.QUANTITY) }

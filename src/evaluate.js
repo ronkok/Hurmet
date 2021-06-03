@@ -1016,7 +1016,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
 
         case "applyUnit": {
           // Pop a magnitude off the stack and apply a unit.
-          // This happerns where a user writes a QUANTITY literal.
+          // This happens where a user writes a QUANTITY literal.
           const o1 = stack.pop()
           if (!(o1.dtype & dt.RATIONAL)) { return errorOprnd("QUANT_NUM") }
           const unitName = tokens[i + 1]
