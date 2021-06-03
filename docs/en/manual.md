@@ -113,20 +113,23 @@ While in a cell,<br>
       __Esc__ will close the cell without updating it.<br>
       Clicking elsewhere will also close the cell.
 
-The demonstration box to the lower-left mimics a Hurmet.app calculation cell. It can do one calculation at a time. Use it to practice the material in this tutorial.
 </div>
+<div id="statement-container">
 
 ###### Statements
 
 Inside a calculation cell, we can write an statement and get a numeric result. In the demonstration box to the lower-left, try replacing the text with `2 + 2 = ?` . Hurmet will render the math and write the result where you place the `?` mark.
+</div>
 
 ###### Numbers
 
 Numbers can be written as integers (33), decimals (2.45), or mixed fractions (3 ⁷⁄₈). There is a more detailed description [below](#number). 
+<div id="arithmetic-container">
 
 ###### Arithmetic
 
-The symbols: `+ - × / ^ √` are some of Hurmet’s arithmetic operators. Try an equation such as `22 + 3^2/7 = ?`. Play with changes to the values and operators to see how they work. See [here](#operators) for more operators.
+The symbols: `+ - × / ^ √` are some of Hurmet’s arithmetic operators. Try an equation such as `2 × 4 + 3^2/7 = ?`. Play with changes to the values and operators to see how they work. See [here](#operators) for more operators.
+</div>
 
 ###### Multiplication
 <div>
@@ -153,6 +156,7 @@ Type `sqrt` and hit the spacebar to auto-correct into ¢√˽¢<br>`root 3` and 
 ###### Function
 
 Hurmet treats a word as a function name if it is placed directly before an open parenthesis. Example: ¢sin(π//6) = 0.5¢. Hurmet has many [built-in functions](#functions).
+<div id="variable-container">
 
 ###### Variables
 <div>
@@ -164,10 +168,12 @@ A variable name must be a valid [identifier](#identifiers).
 An assignment statement can also contain a calculation expression. Example:<br>
 `b = 2 L = ?` will result in ¢b = 2 L = \color(blue)((2))(3.1) \color(black)= 6.2¢
 </div>
+</div>
 
 ###### Subscripts
 
 An underscore signals the beginning of a subscript. Examples: `x_left` and `y_(i+1)` result in ¢x_left¢ and ¢y_(i+1)¢.
+<div id="greek-container">
 
 ###### Greek letters
 
@@ -189,6 +195,8 @@ More detail [here](#identifiers).
 
 To write a prime, type two apostrophes (aka single quotation marks) and hit the space bar. So, `f''` will result in ¢f′¢
 </div>
+</div>
+<div id="q-container">
 
 ###### Quantities
 
@@ -197,10 +205,19 @@ A Hurmet *quantity* contains both a magnitude and a unit of measure. Write a qua
 ###### Unit-Aware Calcs
 <div>
 
-Hurmet can automatically handle unit conversions of quantities. To call for a unit-aware calculations, write `??` instead of `?` where you want the result to appear.<br>Example:<br>`2 × '2 m' = ?? ft` results in ¢2 × ('2 m') = 13.1233595800525 ft¢.
+Hurmet can automatically handle unit conversions of quantities. To call for a unit-aware calculations, write `??` instead of `?` where you want the result to appear.<br>Example:<br>`2 × '3.1 m' = ?? ft` results in ¢2 × ('3.1 m') = 13.1 ft¢.
 
 This is covered in more detail [below](#unit-aware-calculations).
 </div>
+</div>
+
+###### Result Rounding
+
+To specify how results are to be rounded, use the format statement. Examples:<br>
+`format = "f2"`   fixed to 2 places after decimal.<br>
+`format = "r3"`   rounded to 3 significant digits.<br>
+`format = "h3"`   like "r3", but doesn’t round integers.<br>
+More details [below](#rounding-of-results).
 
 ###### Display Mode
 
@@ -221,8 +238,8 @@ Display mode centers a calculation cell and enlarges summation symbols and integ
 | `x^23`        | ¢x^23¢        | `\(a, b; c, d)`              | ¢\(a, b; c, d)}¢             |
 | `x^(a+b)`     | ¢x^(a+b)¢     | `\[a, b; c, d]`              | ¢\[a, b; c, d]¢              |
 | `x_subscript` | ¢x_subscript¢ | `{:a, b; c, d:}`             | ¢{:a, b; c, d:}¢             |
-| `x_(a+b)`     | ¢x_(a+b)¢     | `[1:4]`                      | ¢[1, 2, 3, 4]¢               |
-| `x′`          | ¢x′¢          | `[1:2:5]`                    | ¢[1, 3, 5]¢                  |
+| `x_(a+b)`     | ¢x_(a+b)¢     | `[1:4] = ?`                  | ¢[1, 2, 3, 4]¢               |
+| `x′`          | ¢x′¢          | `[1:2:5] = ?`                | ¢[1, 3, 5]¢                  |
 | `A-->note B`  | ¢A ⟶note B¢  | `{"w": 24, "h": 30}`         | ¢{"w": 24, "h": 30}¢         |
 | `\red("ng")`  | ¢\red("ng")¢  | `\|x\|   ‖x‖`                | ¢\|x\|¢   ¢‖x‖¢              |
 |               |               | `{a if b;`<br>`c otherwise}` | ¢{a if b;c otherwise}¢       |
@@ -239,31 +256,36 @@ Auto-correct kicks in when you type a space.
 
 <div class="table-auto-correct"></div>
 
-| Type     | Get | Type   | Get   | Type   | Get  | Type   | Get | Type    | Get |
-| -------- | --- | ------ | ----- | ------ | ---- | ------ | --- | ------- | --- |
-| `///`    | ∕   | xx     | ×     | sqrt   | √    | Gamma  | Γ   | alpha   | α   |
-| `<=`     | ≤   | .      | ·     | root 3 | ∛    | Delta  | Δ   | beta    | β   |
-| `>=`     | ≥   | ' '    | ′     | x^2    | x²   | Theta  | Θ   | gamma   | γ   |
-| `!=`     | ≠   | " "    | ʺ     | bb M   | 𝐌    | Lambda | Λ   | delta   | δ   |
-| `<>`     | ≠   | oo     | ∞     | bbb E  | 𝔼    |Xi     | Ξ   | epsilon | ε   |
-| \~=      | ≅   | ooo    | °     | cc P   | 𝒫    | Pi     | Π   | zeta    | ζ   |
-| \~\~     | ≈   | ii     |¢√(-1)¢| ff f   | 𝖿    | Sigma  | Σ   | eta     | η   |
-| \\in     | ∈   | `<<`   | ⟨     | y bar   | y̅   | Phi    | Φ   | theta   | θ   |
-| \\notin  | ∉   | `>>`   | ⟩     | θ hat   | ¢θ̂¢ | Psi    | Ψ   | iota    | ι   |
-| \-=      | ≡  |  ^^    | ∧     | P vec  | ¢P⃗¢ | Omega  | Ω   | kappa   | κ   |
-| :=       | ≔   |  vv    | ∨    |P harpoon| ¢P⃑¢ | AA     | ∀   | lambda  | λ   |
-| \-:      | ÷   | vvv    | ⋁     | a dot  | ȧ    | EE     | ∃   | mu      | μ   |
-| \+-      | ±   | nn     | ∩     | a ddot | ä    | CC     | ℂ   | nu      | ν   |
-| \-+      | ∓   | nnn    | ⋂     | a grave| à    | HH     | ℍ   | xi      | ξ   |
-| `->`     | →   | uu     | ∪     | a acute| á    | NN     | ℕ   | pi      | π   |
-| `<-`     | ←   | uuu    | ⋃     | a tilde| ã    | OO     | ¢O︀¢ | rho     | ρ   |
-| `<->`    | ↔   | \\ceil | ⎾⏋    | a ring | å    | QQ     | ℚ   | sigma   | σ   |
-| `=>`     | ⇒   |\\floor | ⎿⏌    | \checkmark | ✓| RR     | ℝ   | tau     | τ   |
-| \\circ   | ∘   | \\not  | ¬     | \o     |  ø   | ZZ     | ℤ   | upsilon | υ   |
-| \|\|\|   | ¦   | \\xor  | ⊻     |        |      | \hbar  | ℏ   | phi     | ϕ   |
-| \|\|     | ‖   | \\sum  | ∑     |        |      | \ell   | ℓ   | chi     | χ   |
-| /_       | ∠   | \\int  | ∫     |        |      | \euro  | €   | psi     | ψ   |
-|          |     | \\iint | ∬     |        |      | \yen   | ¥   | omega   | ω   |
+| Type    | Get | Type        | Get     | Type      | Get  | Type    | Get |
+|:--------|:----|:------------|:--------|:----------|:-----|:--------|:----|
+| xx      | ×   | sqrt        | √       | Gamma     | Γ    | alpha   | α   |
+| .       | ·   | root 3      | ∛       | Delta     | Δ    | beta    | β   |
+| ' '     | ′   | x^2         | x²      | Theta     | Θ    | gamma   | γ   |
+| oo      | ∞   | bb M        | 𝐌      | Lambda    | Λ    | delta   | δ   |
+| ooo     | °   | bbb E       | 𝔼      | Xi        | Ξ    | epsilon | ε   |
+| `///`   | ∕   | cc P        | 𝒫      | Pi        | Π    | zeta    | ζ   |
+| `<=`    | ≤   | \\ceil      | ⎾⏋      | Sigma     | Σ    | eta     | η   |
+| `>=`    | ≥   | \\floor     | ⎿⏌      | Phi       | Φ    | theta   | θ   |
+| `!=`    | ≠   | `<<`        | ⟨       | Psi       | Ψ    | iota    | ι   |
+| `<>`    | ≠   | `>>`        | ⟩       | Omega     | Ω    | kappa   | κ   |
+| \~=     | ≅   | ^^          | ∧       | y bar     | y̅   | lambda  | λ   |
+| \~\~    | ≈   | vv          | ∨       | θ hat     | ¢θ̂¢ | mu      | μ   |
+| \\in    | ∈   | vvv         | ⋁       | P vec     | ¢P⃗¢ | nu      | ν   |
+| \\notin | ∉   | nn          | ∩       | P harpoon | ¢P⃑¢ | xi      | ξ   |
+| -=      | ≡   | nnn         | ⋂       | a dot     | ȧ   | pi      | π   |
+| :=      | ≔   | uu          | ∪       | a ddot    | ä   | rho     | ρ   |
+| -:      | ÷   | uuu         | ⋃       | a grave   | à   | sigma   | σ   |
+| +-      | ±   | \\checkmark | ✓       | a acute   | á   | tau     | τ   |
+| -+      | ∓   | \\o         | ø       | a tilde   | ã   | upsilon | υ   |
+| `->`    | →   | \\not       | ¬       | a ring    | å   | phi     | ϕ   |
+| `<-`    | ←   | \\xor       | ⊻       | AA        | ∀    | chi     | χ   |
+| `<->`   | ↔   | \\sum       | ∑       | EE        | ∃    | psi     | ψ   |
+| `=>`    | ⇒   | \\int       | ∫       | CC        | ℂ    | omega   | ω   |
+| \\circ  | ∘   | \\iint      | ∬       | HH        | ℍ    | \\hbar  | ℏ   |
+| \|\|\|  | ¦   | ii          | ¢√(-1)¢ | NN        | ℕ    | \\ell   | ℓ   |
+| \|\|    | ‖   | OO          | ¢O︀¢    | QQ        | ℚ    | \\euro  | €   |
+| /_      | ∠   |             |         | RR        | ℝ    | \\yen   | ¥   |
+|         |     |             |         | ZZ        | ℤ    |         |     |
 
 The font corrections, e.g., `bb …` work on any letter from A to Z or a to z.
 
@@ -281,6 +303,8 @@ The font corrections, e.g., `bb …` work on any letter from A to Z or a to z.
 |        %         |       %%     | Omits blue echo.
 |        @         |      @@      | Displays only the result, like a spreadsheet cell.
 
+<div id="accessor-container">
+
 #### Accessors
 
 <div class="table-grid"></div>
@@ -293,6 +317,8 @@ The font corrections, e.g., `bb …` work on any letter from A to Z or a to z.
 | Dictionary<br>D = ¢{ "w": 31, "h": 9.13 }¢    | D.h<br>D["h"]<br>D["h", "w"]     | 9.13<br>9\.13<br>9\.13, 31
 | Data Frame<br><img src="../../images/dataframe.png" alt="dataframe" width="180"/> | DF.B<br>DF["B"]<br>DF.area<br>DF.B.area<br>DF["B"].area<br>DF["B", "area"]| An entire row<br>An entire row<br>Column vector<br>22 in²<br>22 in²<br>22 in²
 
+</div>
+
 Dot notation can be used only if the property name is a valid [identifier](#identifiers).
 
 ## Calculation Forms
@@ -304,10 +330,11 @@ It’s quite simple to assign a value to a variable:
 <table>
   <tr><th>Form</th>  <th>Examples</th></tr>
   <tr>
-    <td rowspan="3"><img src="../../images/assignment-railroad.svg" alt="identifier = value"></td>
+    <td rowspan="4"><img src="../../images/assignment-railroad.svg" alt="identifier = value"></td>
     <td><code>x = 5</code></td>
   </tr>
-  <tr><td><code>L = '5 meters'</code></td></tr>
+  <tr><td><code>L = '3.1 m'</code></td></tr>
+  <tr><td><code>w = '100 lbf/ft'</code></td></tr>
   <tr><td><code>name = "James"</code></td></tr>
 </table>
 
@@ -326,7 +353,7 @@ To calulate an <span id="expression">expression</span> that contains a variable,
 
 The expression form is more precisely defined as:
 
-![optional identifier = expression = optional currency symbol (display selector) unit name](../../images/statement-railroad.svg)
+![optional identifier = expression = (display selector) unit name](../../images/statement-railroad.svg)
 
 At the beginning of the statement, you can write an optional variable name. The result of the calculation will be assigned to that variable. Expressions later in the document can call the variable. Variable names must qualify as valid [identifiers](#identifiers). They are case-sensitive and bold-sensitive. A search for variable *E* will not find *e*. A search for __M__ will not find *M*.
 
@@ -386,6 +413,8 @@ The names of those accents are:
 
 Hurmet’s auto-correct can help create identifiers.
 
+<div id="identi-correct"></div>
+
 | To create:           | … do this and hit the space bar                 | Example input | Example result |
 | -------------------- | ----------------------------------------------- | ------------- | -------------- |
 | Greek letter         | Type the name of the letter.                    | gamma         | γ
@@ -423,12 +452,12 @@ Strings will be rendered as math if they are delimited with single backticks ins
 </div>
 
 ###### Number
-<div>
 
 Enter as integers (33), decimals (2.45), percentages (3.2%), scientific notation (3.1e4), mixed fractions (3 ⁷⁄₈) or hexadecimal (0x2A).
 
-![integers, decimals, percentages, scientific notation, mixed fractions, or hexadecimal](../../images/NumberRailroad.svg)
+<img src="../../images/NumberRailroad.svg" alt="integers, decimals, percentages, scientific notation, mixed fractions, or hexadecimal" height="275" style="margin-left: -1em;">
 
+<div class="indented">
 Notice that a number literal must begin and end with a numeral, not a decimal symbol. Hurmet will not recognize `5.` as a number.
 
 Hurmet’s default decimal symbol is a dot. You can choose instead to enter numbers with a decimal comma via a drop-down menu labeled “●”. Numbers are never entered with a thousands separator, but they can be *displayed* with one. The ● menu also controls that display.
@@ -514,13 +543,13 @@ All the usual math operators can be applied to a numeric matrix. The operators m
 
 Spreadsheet calculations can often be replaced by calulations using vectors, as above. When you really need to get things right, it’s great to be able to see the expression and all the plugged-in values.
 
-<div id="matrix-mult"></div>
+<div id="matrix-mult">
 
 Multiplication of two matrices is different than other operations. Mathematicians have several ways to multiply matrices. In Hurmet, you choose the type of multiplication by your choice of multiplication operator:
 
 ¢𝐀 * 𝐁¢ ↦ element-wise product, ¢(𝐀 * 𝐁)_ij = 𝐀_ij × 𝐁_ij¢
 
-¢𝐀 𝐁¢ ↦ [matrix product], ¢(𝐀 𝐁)_ij = ∑_(k = 1)^m 𝐀_i) 𝐁_kj¢
+¢𝐀˽𝐁¢ ↦ [matrix product], ¢(𝐀 𝐁)_ij = ∑_(k = 1)^m 𝐀_i) 𝐁_kj¢
 
 ¢𝐀 × 𝐁¢ ↦ [cross product] of a pair of three-vectors  
        = ¢|𝐀||𝐁|sin(θ) 𝐧¢
@@ -529,6 +558,7 @@ Multiplication of two matrices is different than other operations. Mathematician
 [cross product]: http://www.intmath.com/vectors/8-cross-product-vectors.php/
 
 ¢𝐀 ⋅ 𝐁¢ ↦ dot product = ¢∑_(i = 1)^n (𝐀_i 𝐁_i)¢
+</div>
 
 Here are more of Hurmet’s matrix operations:
 
@@ -567,17 +597,17 @@ Here’s an example of CSV input:
 
 … which renders as:
 
-<p><span class="tex">\mathrm{rebar} = \begin{array}{l|c c}\text{name}&amp;\mathrm{diameter}&amp;\mathrm{area} \\ &amp;{\text{in}}&amp;{\text{in}^{2}} \\ \hline\text{\#3}&amp;0.375 &amp;0.11  \\ \text{\#4}&amp;0.5 &amp;0.2  \\ \text{\#5}&amp;0.625 &amp;0.31  \\ \text{\#6}&amp;0.75 &amp;0.44\end{array}</span></p>
+<p><span class="tex">\mathrm{rebar} = \begin{array}{l|c c}&amp;\mathrm{diameter}&amp;\mathrm{area} \\ &amp;{\text{in}}&amp;{\text{in}^{2}} \\ \hline\text{\#3}&amp;0.375 &amp;0.11  \\ \text{\#4}&amp;0.5 &amp;0.2  \\ \text{\#5}&amp;0.625 &amp;0.31  \\ \text{\#6}&amp;0.75 &amp;0.44\end{array}</span></p>
 
 Data frames can be quite large, so Hurmet has a`fetch(url)` function to load data from a remote CSV file into a data frame. Since Hurmet runs in a browser, the url must begin with `http:` or `https:`
 
 A fetch example:
 
-    wideFlanges = fetch("https://hurmet.app/data/example.csv") = !
+    wideFlanges = fetch("https://hurmet.app/example.csv") = !
 
 That example loads in this data:
 
-<p><span class="tex">\begin{array}{l|c c c c c c c c c c}\text{name}&amp;\mathrm{weight}&amp;\mathrm{A}&amp;d&amp;\mathrm{bf}&amp;\mathrm{tw}&amp;\mathrm{tf}&amp;\mathrm{Ix}&amp;\mathrm{Sx}&amp;\mathrm{Iy}&amp;\mathrm{Sy} \\ \;&amp;{\text{lbf/ft}}&amp;{\text{in}^{2}}&amp;{\text{in}}&amp;{\text{in}}&amp;{\text{in}}&amp;{\text{in}}&amp;{\text{in}^{4}}&amp;{\text{in}^{3}}&amp;{\text{in}^{4}}&amp;{\text{in}^{3}} \\ \hline\text{W14X90}&amp;90 &amp;26.5 &amp;14 &amp;14.5 &amp;0.44 &amp;0.71 &amp;999 &amp;143 &amp;362 &amp;49.9  \\ \text{W12X65}&amp;65 &amp;19.1 &amp;12.1 &amp;12 &amp;0.39 &amp;0.605 &amp;533 &amp;87.9 &amp;174 &amp;29.1  \\ \text{W10X49}&amp;49 &amp;14.4 &amp;10 &amp;10 &amp;0.34 &amp;0.56 &amp;272 &amp;54.6 &amp;93.4 &amp;18.7  \\ \text{W8X31}&amp;31 &amp;9.13 &amp;8 &amp;8 &amp;0.285 &amp;0.435 &amp;110 &amp;27.5 &amp;37.1 &amp;9.27  \\ \text{W8X18}&amp;18 &amp;5.26 &amp;8.14 &amp;5.25 &amp;0.23 &amp;0.33 &amp;61.9 &amp;15.2 &amp;7.97 &amp;3.04  \\ \text{W6X15}&amp;15 &amp;4.43 &amp;5.99 &amp;5.99 &amp;0.23 &amp;0.26 &amp;29.1 &amp;9.72 &amp;9.32 &amp;3.11  \\ \text{W4X13}&amp;13 &amp;3.83 &amp;4.16 &amp;4.06 &amp;0.28 &amp;0.345 &amp;11.3 &amp;5.46 &amp;3.86 &amp;1.9\end{array}</span></p>
+<p><span class="tex">\begin{array}{l|c c c c c c c c}&amp;{\text{weight}}&amp;{A}&amp;{d}&amp;{\text{bf}}&amp;{\text{tw}}&amp;{\text{Ix}}&amp;{\text{Sx}}&amp;{\text{rx}} \\  {\text{unit}}&amp; {\text{lbf/ft}}&amp; {\text{in}^{2}}&amp; {\text{in}}&amp; {\text{in}}&amp; {\text{in}}&amp; {\text{in}^{4}}&amp; {\text{in}^{3}}&amp; {\text{in}} \\ \hline \text{W14X90}&amp;90&amp;26.5&amp;14&amp;14.5&amp;0.44&amp;999&amp;143&amp;6.14 \\ \text{W12X65}&amp;65&amp;19.1&amp;12.1&amp;12&amp;0.39&amp;533&amp;87.9&amp;5.28 \\ \text{W10X49}&amp;49&amp;14.4&amp;10&amp;10&amp;0.34&amp;272&amp;54.6&amp;4.35 \\ \text{W8X31}&amp;31&amp;9.13&amp;8&amp;8&amp;0.285&amp;110&amp;27.5&amp;3.47 \\ \text{W8X18}&amp;18&amp;5.26&amp;8.14&amp;5.25&amp;0.23&amp;61.9&amp;15.2&amp;3.43 \\ \text{W6X15}&amp;15&amp;4.43&amp;5.99&amp;5.99&amp;0.23&amp;29.1&amp;9.72&amp;2.56 \\ \text{W4X13}&amp;13&amp;3.83&amp;4.16&amp;4.06&amp;0.28&amp;11.3&amp;5.46&amp;1.72\end{array}</span></p>
 
 As data frames go, that example is still pretty small. When I assign a data frame to a variable, I usually suppress its display by using the __!__ display selector.
 
@@ -596,17 +626,13 @@ You can also call an individual element, a column, or a group of elements. The i
 
 <div class="table-no-wrap"></div>
 
-| This call:                      | … will return:                             |
-| ------------------------------- | ------------------------------------------ |
-| `wideFlanges["W10X49", "A"]` | ¢'14.4 in2'¢
+| This call:                   | … will return:                             |
+| ---------------------------- | ------------------------------------------ |
 | `wideFlanges.W10X49.A`       | ¢'14.4 in2'¢
 | `wideFlanges["W10X49"]["A"]` | ¢'14.4 in2'¢
-| `wideFlanges["W10X49", 1:2]`    | ¢{"name": "W10X49", "weight": '49 lbf/ft'}¢
-| `wideFlanges["W10X49", ["A", "weight"]]` | ¢{"A": '14.4 in2', "weight": '49 lbf/ft'}¢
-| `wideFlanges.W10X49["A", "weight"]`      | ¢{"A": '14.4 in2', "weight": '49 lbf/ft'}¢
-| `wideFlanges["W10X49"]["A", "weight"]`   | ¢{"A": '14.4 in2', "weight": '49 lbf/ft'}¢
-| `wideFlanges[1:2, "A"]`                  | ¢\[26.5; 19.1]¢
-|`wideFlanges[["W8X31"; "W10X49"], "A"]`   | ¢\[0.13;14.4]¢
+| `wideFlanges["W10X49", "A"]` | ¢'14.4 in2'¢
+| `wideFlanges["W10X49", 1:2]` | ¢{"name": "W10X49"; "weight": '49 lbf/ft'}¢
+| `wideFlanges[1:2, "A"]`      | ¢\[26.5; 19.1]¢
 
 Hurmet will return a <br> ¢{"simple type" if "you call a single cell, as in df[1, 2]"; "column vector" if "you call a column, as in df[,2]"; "dictionary" if "you call a row, as in df[3,]"; "data frame" otherwise}¢
 
@@ -615,7 +641,7 @@ Dot notation, as in `wideFlanges.W10X49`, can be used only if the property name 
 Here are calls that can return multiple values:<br>
     `A, S_x = wideFlanges.W8X31["A", "Sx"] = !!`, or<br>
     `A, S_x = wideFlanges["W8X31"]["A", "Sx"] = !!`, or<br>
-    `A, S_x = wideFlanges["W10X49", ["A", "Sx"]] = !!`<br>
+    `A, S_x = wideFlanges["W10X49", \["A", "Sx"]] = !!`<br>
 Multiple returns must use the `!!` display selector, for now.
 
 For structural engineers, I’ve put some useful data frames on GitHub. There are links [below](#other-resources).
@@ -666,7 +692,7 @@ Hurmet calculations are meant to be recognizeable to anyone familiar with standa
 
 *π*
 
-: If you write ¢π¢ into an expression, Hurmet uses a value of 3.14159265358979323846264338327950288419716939937510582097494.
+: If you write ¢π¢ into an expression, Hurmet uses a value of 3.1415926535897932384626433832795028841971693993751.
 
 *e*
 
@@ -680,58 +706,58 @@ Hurmet calculations are meant to be recognizeable to anyone familiar with standa
   
 <div style="width:35em;">
 
-<div class="table-grid"></div>
+<div class="table-grid" id="op-table"></div>
   
-| Operator | auto<br>correct | Example              | Description                              |
-| -------- | --------------- | -------------------- | ---------------------------------------- |
-| =        |              | *x* = 15                | Assign a value to a variable.
-| =        |              | if *x* = 15             | Equality test if in a comparison position.<br>That is, “=” tests for equality if there is something other than a identifier to the left of it or a display selector to the right of it.
-| \+       |              |  2 + 2                  | Addition
-| –        |              |  5 - 3                  | Subtraction
-| \-       |              | ¢-4¢                   | Unary minus
-| \*       |              | ¢2 * 4¢                | Multiplication of numbers.<br>Element-wise product of matrices.
-| ×        | xx           |  2 × 4                  | Multiplication of numbers.<br>Cross product of three-vectors.
-| ·        |  **.**       | ¢a ⋅ b¢                 | Multiplication of numbers.<br>Dot product of matrices.
-|          |              | ¢(2)(4)¢                | Multiplication
-|          |              | `a b`                   | Multiplication. (A space acts as an operator when between variables.)
-|          |              | ¢2 a¢                   | Multiplication
-|          |              | ¢a2¢                    | Not a multiplication if no space.<br>Hurmet reads “a2” as an identifier.
-|          |              | ¢sin(2)¢                | Function
-|                |        | a (2)                   | Multiplication if a space exists before the open paren.
-| /              |        | ¢8/2¢                   | Division
-| //             |        | ¢8//2¢                  | Case fraction
-| ///            |        | ¢8///2¢                 | Division displayed inline
-| ÷              | -:     | ¢8 ÷ 2¢                 | Inline division
-| ^              |        | ¢3^2¢                   | Exponent
-| &              |        |                         | Concatenate strings or vectors, or concatenate numbers onto vectors, or append column vectors to data frames
-| √              | sqrt   | ¢√¢                     | Square root
-| ¢root 3 ()¢    | root n | ¢root 3 8¢              | nth-root
-| \| \|          |        | ¢\|-4\|¢                | Absolute value of a scalar, determinant of a matrix, or magnitude of a vector.
-| \|\| \|\|      |        | ¢\\Vert x \\Vert¢       | ¢√(x_1^2 + ⋯ + x_n^2)¢ if the argument is a vector of reals
-| \|\| \|\|      |        | ¢\\Vert x \\Vert¢       | ¢√(∑_i ∑_j A_(i, j)^2)¢ if the argument is a 2-D matrix
-| ⌊ ⌋            | floor  | ¢⎿4.5⏌¢                 | Floor. Always rounds down.
-| ⌈ ⌉            | ceil   | ¢⎾4.5⏋¢                 | Ceiling. Always rounds up.
-| %              |        | ¢10%¢                   | Percent
-| ‰              |        | ¢10‰¢                   | Per thousand
-| \!             |        | ¢5!¢                    | [Factorial](https://en.wikipedia.org/wiki/Factorial)<br>precision = ¢{100% if n ≤ 100; 15 digits otherwise}¢
-| modulo         |        | `10` `modulo` `5`       | Always returns a positive remainder.
-| ¢(n \atop k)¢  | (*n* \atop *k*) | ¢(5 \atop 3)¢  | Binomial coefficient. ¢(n \atop k) = n!//(n!(n!-k!))¢
-| =        |              | ¢if x = 15¢             | Equality comparison
-| ≠              | `!=` or `<>` | ¢if b ≠ c¢        | Inequality comparison
-| `<`            |        |                         |
-| `>` |              |                              |
-| ≤   | `<=`         |                              |
-| ≥   | `>=`         |                              |
-| ∈   | \\in         | c ∈ s                        | Is an element of a matrix or is a character of a string, or is a property of a dictionary
-| ∉   | \\notin      | c ∉ s                        | Is not an element of
-| ⋐   | \\Subset     | c ⋐ s                        | Is a proper subset of
-| and |              | if *a* and *b*               | Logical and
-| or  |              |                              | Logical or
-| ∧   | ^^           |                              | Logical and
-| ∨   | vv           |                              | Logical or
-| ⊻   | xor          |                              | Logical xor
-| ¬   | not          | if ¬ *a*                     | Logical not
-| :   |              | {"a": 10}<br>𝐕\[2:3\]<br>for *i* in 1:3 | Key:value separator if within a dictionary. Range separator otherwise.
+| Operator | Example              | Description                              |
+| -------- | -------------------- | ---------------------------------------- |
+| =        | *x* = 15                | Assign a value to a variable.
+| =        | if *x* = 15             | Equality test if in a comparison position.<br>That is, “=” tests for equality if there is something other than a identifier to the left of it or a display selector to the right of it.
+| \+       |  2 + 2                  | Addition
+| –        |  5 - 3                  | Subtraction
+| \-       | ¢-4¢                   | Unary minus
+| \*       | ¢2 * 4¢                | Multiplication of numbers.<br>Element-wise product of matrices.
+| ×        |  2 × 4                  | Multiplication of numbers.<br>Cross product of three-vectors.<br>auto-correct: **xx**
+| ·        | ¢a ⋅ b¢                 | Multiplication of numbers.<br>Dot product of matrices.<br>auto-correct: dot between two spaces.
+|          | ¢(2)(4)¢                | Multiplication
+|          | `a b`                   | Multiplication. (A space acts as an operator when between variables.)
+|          | ¢2 a¢                   | Multiplication
+|          | ¢a2¢                    | Not a multiplication if no space.<br>Hurmet reads “a2” as an identifier.
+|          | ¢sin(2)¢                | Function
+|          | a (2)                   | Multiplication if a space exists before the open paren.
+| /        | ¢8/2¢                   | Division
+| //       | ¢8//2¢                  | Case fraction
+| ///      | ¢8///2¢                 | Division displayed inline
+| ÷        | ¢8 ÷ 2¢                 | Inline division<br>auto-correct: -:
+| ^        | ¢3^2¢                   | Exponent
+| &        |                         | Concatenate strings or vectors, or concatenate numbers onto vectors, or append column vectors to data frames
+| √        | ¢√¢                     | Square root<br>auto-correct: sqrt
+| ¢root 3 ()¢ | ¢root 3 8¢           | nth-root<br>auto-correct: root n
+| \| \|    | ¢\|-4\|¢                | Absolute value of a scalar, determinant of a matrix, or magnitude of a vector.
+| \|\| \|\|   | ¢\\Vert x \\Vert¢    | ¢√(x_1^2 + ⋯ + x_n^2)¢ if the argument is a vector of reals
+| \|\| \|\|   | ¢\\Vert x \\Vert¢    | ¢√(∑_i ∑_j A_(i, j)^2)¢ if the argument is a 2-D matrix
+| ⌊ ⌋      | ¢⎿4.5⏌¢                | Floor. Always rounds down.<br>auto-correct: floor
+| ⌈ ⌉      | ¢⎾4.5⏋¢                | Ceiling. Always rounds up.<br>auto-correct: ceil
+| %       | ¢10%¢                   | Percent
+| ‰       | ¢10‰¢                   | Per thousand
+| \!      | ¢5!¢                    | [Factorial](https://en.wikipedia.org/wiki/Factorial)<br>precision = ¢{100% if n ≤ 100; 15 digits otherwise}¢
+| modulo  | `10` `modulo` `5`       | Always returns a positive remainder.
+| ¢(n \atop k)¢ | (5 \atop 3)       | Binomial coefficient. ¢(n \atop k) = n!//(n!(n!-k!))¢
+| =       | ¢if x = 15¢             | Equality comparison
+| ≠       | ¢if b ≠ c¢              | Inequality comparison<br>auto-correct: != or <>
+| `<`     |                         |
+| `>`     |                         |
+| ≤       |                         | auto-correct: <=
+| ≥       |                         | auto-correct: >=
+| ∈       | ¢c ∈ s¢                 | Is an element of a matrix or is a character of a string, or is a property of a dictionary<br>auto-correct: \in
+| ∉       | ¢c ∉ s¢                 | Is not an element of<br>auto-correct: \notin
+| ⋐      | ¢c ⋐ s¢                  | Is a proper subset of<br>auto-correct: \Subset
+| and     | if *a* and *b*          | Logical and
+| or      |                         | Logical or
+| ∧       |                         | Logical and.      auto-correct: ^^
+| ∨       |                         | Logical or.        auto-correct: vv
+| ⊻       |                         | Logical xor
+| ¬       |  if ¬ *a*               | Logical not
+| :       | {"a": 10}<br>𝐕\[2:3\]<br>for *i* in 1:3 | Key:value separator if within a dictionary. Range separator otherwise.
 
 </div>
 
@@ -923,8 +949,6 @@ Chained comparisons are okay.
 
 ¢x = {1.0 if a < b < 5 < d; 1.2 otherwise}¢
 
-The word “otherwise” is optional.
-
 ## Overloading
 
 Overloading summary. That is, Hurmet  math operators and functions will work on all the data types tablulated below. They also work on a Hurmet quantity that takes any of these shapes:
@@ -1054,7 +1078,7 @@ That was the short explanation. Now the long one. The rounding format specificat
 
 Let _N_ be the number of digits specified. Then:
     
-<div style="width:40em;">
+<div style="width:30em;">
  <table class="grid">
    <thead>
      <tr>
@@ -1063,9 +1087,9 @@ Let _N_ be the number of digits specified. Then:
        <th colspan="3">Examples</th>
      </tr>
      <tr>
-       <th>If the number to be formatted is:</th>
-       <th>and the format spec is:</th>
-       <th>the result display will be:</th>
+       <th>Number</th>
+       <th>Format spec</th>
+       <th>Result display</th>
      </tr>
    </thead>
    <tbody>
@@ -1347,8 +1371,10 @@ Hurmet modules enable you to access remote functions. Remote modules are written
         return a / b
     
 A Hurmet document can load an entire module into a variable with a fetch statement. I've written an example that finds the strength of structural steel members. The code to fetch that module is:
+<div style="width: 30em; overflow-x: scroll">
 
     steel = fetch("https://gist.githubusercontent.com/ronkok/d42b0efdc66dc4f6135fee3b8d22a83e/raw/da3195993e3255c9b9b7f0b64788bc3664d6534d/steelStrengthPerAISC360-16.hrms") = !
+</div>
 
 That's a bit verbose, so it will render in the document as:
 
@@ -1459,6 +1485,7 @@ Hurmet is built with the aid of several open source libraries and resources, for
 * [Accents and Primes](#accents-and-primes)
 * [Quantities](#quantities)
 * [Unit-Aware Calcs](#unit-aware-calcs)
+* [Result Rounding](#result-rounding)
 * [Display Mode](#display-mode)
 
 </details>
@@ -1548,18 +1575,6 @@ Hurmet is built with the aid of several open source libraries and resources, for
 </li>
 </ul>
   
-<br>
-  
-<div id="demo">
-
-_w_ = 100 lbf/ft<br>_L_ = 3.1 m
-
-<div>Try an expression:</div>
-<div id="input-container"><form><textarea id="demo-input"></textarea></form></div>
-<div>See the result:</div>
-<div id="demo-output"></div>
-</div> <!-- demo -->
-
 </div>  <!-- sidebar -->
 </nav>
 
@@ -1582,6 +1597,14 @@ _w_ = 100 lbf/ft<br>_L_ = 3.1 m
   </div>
 </div>
 
+<div id="demo">
+<p>format = "<input type="text" id="formatBox" value="h3" onchange="updateFormat()" style="width: 1.5em;">"</p>
+<p></p>
+<div>Give it a try.</div>
+<div id="input-container"><form><textarea id="demo-input"></textarea></form></div>
+<div id="demo-output"></div>
+</div> <!-- demo -->
+
 
 <script>
   // Render math via KaTeX.
@@ -1593,7 +1616,53 @@ _w_ = 100 lbf/ft<br>_L_ = 3.1 m
   })
   
   // Start the demonstration editor
-  demonstration.startEditor()
+  const editor = CodeMirror.fromTextArea(document.getElementById("demo-input"), {
+    autoCloseBrackets: true,
+    lineWrapping: true,
+    matchBrackets: true
+  });
+  const demoOutput = document.getElementById("demo-output");
+  editor.on('change', () => demonstration.renderMath(editor.doc, demoOutput))
+  editor.doc.setValue("Hi!")
+
+  // The next line is called by the format input box.
+  updateFormat = () => demonstration.renderMath(editor.doc, document.getElementById("demo-output"))
+
+  // Change the content of the demonstration box to match the currently scrolled topic.
+  var observer = new IntersectionObserver(function(entries) {
+    for (const entry of entries) {
+      if (entry.intersectionRatio === 1.0) {
+	      editor.doc.setValue(demonstration.prompts[entry.target.id])
+        break
+      }
+    }
+  }, {
+  root: null,
+  rootMargin: '0px',
+  threshold: 1.0
+});
+
+  observer.observe(document.getElementById("statement-container"))
+  observer.observe(document.getElementById("arithmetic-container"))
+  observer.observe(document.getElementById("variable-container"))
+  observer.observe(document.getElementById("greek-container"))
+  observer.observe(document.getElementById("q-container"))
+  observer.observe(document.getElementById("markup"))
+  observer.observe(document.getElementById("auto-correct"))
+  observer.observe(document.getElementById("display-selectors"))
+  observer.observe(document.getElementById("accessor-container"))
+  observer.observe(document.getElementById("calculation-forms"))
+  observer.observe(document.getElementById("identi-correct"))
+  observer.observe(document.getElementById("data-types"))
+  observer.observe(document.getElementById("quantity"))
+  observer.observe(document.getElementById("matrix"))
+  observer.observe(document.getElementById("matrix-mult"))
+  observer.observe(document.getElementById("data-frame"))
+  observer.observe(document.getElementById("dictionary"))
+  observer.observe(document.getElementById("functions"))
+  observer.observe(document.getElementById("if-expressions"))
+  observer.observe(document.getElementById("unit-aware-calculations"))
+
 </script>
 
 </body>
