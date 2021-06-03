@@ -324,9 +324,9 @@ const binary = {
       cross(x, y) {
         if (x.length !== 3 || y.length !== 3) { return errorOprnd("CROSS") }
         const v = [Rnl.zero, Rnl.zero, Rnl.zero]
-        v[0] = Rnl.multiply(Rnl.subtract(Rnl.multiply(x[1], y[2]), x[2], y[1]))
-        v[1] = Rnl.multiply(Rnl.subtract(Rnl.multiply(x[2], y[0]), x[0], y[2]))
-        v[2] = Rnl.multiply(Rnl.subtract(Rnl.multiply(x[0], y[1]), x[1], y[0]))
+        v[0] = Rnl.subtract(Rnl.multiply(x[1], y[2]), Rnl.multiply(x[2], y[1]))
+        v[1] = Rnl.subtract(Rnl.multiply(x[2], y[0]), Rnl.multiply(x[0], y[2]))
+        v[2] = Rnl.subtract(Rnl.multiply(x[0], y[1]), Rnl.multiply(x[1], y[0]))
         return v
       },
       multiply(x, y) {
@@ -377,9 +377,9 @@ const binary = {
       cross(x, y) {
         if (x.length !== 3 || y.length !== 3) { return errorOprnd("CROSS") }
         const v = [Rnl.zero, Rnl.zero, Rnl.zero]
-        v[0] = Rnl.multiply(Rnl.subtract(Rnl.multiply(x[1], y[2]), x[2], y[1]))
-        v[1] = Rnl.multiply(Rnl.subtract(Rnl.multiply(x[2], y[0]), x[0], y[2]))
-        v[2] = Rnl.multiply(Rnl.subtract(Rnl.multiply(x[0], y[1]), x[1], y[0]))
+        v[0] = Rnl.subtract(Rnl.multiply(x[1], y[2]), Rnl.multiply(x[2], y[1]))
+        v[1] = Rnl.subtract(Rnl.multiply(x[2], y[0]), Rnl.multiply(x[0], y[2]))
+        v[2] = Rnl.subtract(Rnl.multiply(x[0], y[1]), Rnl.multiply(x[1], y[0]))
         return v
       },
       multiply(x, y) {
@@ -444,9 +444,9 @@ const binary = {
       cross(x, y) {
         if (x.length !== 3 || y.length !== 3) { return errorOprnd("CROSS") }
         const v = [Rnl.zero, Rnl.zero, Rnl.zero]
-        v[0] = Rnl.multiply(Rnl.subtract(Rnl.multiply(x[1], y[2]), x[2], y[1]))
-        v[1] = Rnl.multiply(Rnl.subtract(Rnl.multiply(x[2], y[0]), x[0], y[2]))
-        v[2] = Rnl.multiply(Rnl.subtract(Rnl.multiply(x[0], y[1]), x[1], y[0]))
+        v[0] = Rnl.subtract(Rnl.multiply(x[1], y[2]), Rnl.multiply(x[2], y[1]))
+        v[1] = Rnl.subtract(Rnl.multiply(x[2], y[0]), Rnl.multiply(x[0], y[2]))
+        v[2] = Rnl.subtract(Rnl.multiply(x[0], y[1]), Rnl.multiply(x[1], y[0]))
         return v
       },
       multiply(x, y) {
@@ -500,9 +500,9 @@ const binary = {
       cross(x, y) {
         if (x.length !== 3 || y.length !== 3) { return errorOprnd("CROSS") }
         const v = [Rnl.zero, Rnl.zero, Rnl.zero]
-        v[0] = Rnl.multiply(Rnl.subtract(Rnl.multiply(x[1], y[2]), x[2], y[1]))
-        v[1] = Rnl.multiply(Rnl.subtract(Rnl.multiply(x[2], y[0]), x[0], y[2]))
-        v[2] = Rnl.multiply(Rnl.subtract(Rnl.multiply(x[0], y[1]), x[1], y[0]))
+        v[0] = Rnl.subtract(Rnl.multiply(x[1], y[2]), Rnl.multiply(x[2], y[1]))
+        v[1] = Rnl.subtract(Rnl.multiply(x[2], y[0]), Rnl.multiply(x[0], y[2]))
+        v[2] = Rnl.subtract(Rnl.multiply(x[0], y[1]), Rnl.multiply(x[1], y[0]))
         return v
       },
       multiply(x, y) {
