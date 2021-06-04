@@ -315,7 +315,7 @@ The font corrections, e.g., `bb …` work on any letter from A to Z or a to z.
 | Vector<br>𝐕 = ¢\[1, 2, 3, 4, 5]¢             | 𝐕[2]<br>𝐕[2:4]<br>𝐕[3:]          | 2<br>¢[2, 3, 4]¢<br>¢[3, 4, 5]¢
 | Matrix<br>𝐌 = ¢\(1, 2, 3; 4, 5, 6; 7, 8, 9)¢ | 𝐌[2, 3]<br>𝐌[3,]<br>𝐌[2:3, 1:2] | 6<br>¢\[7, 8, 9]¢<br>¢\[4, 5; 7, 8]¢
 | Dictionary<br>D = ¢{ "w": 31, "h": 9.13 }¢    | D.h<br>D["h"]<br>D["h", "w"]     | 9.13<br>9\.13<br>9\.13, 31
-| Data Frame<br><img src="../../images/dataframe.png" alt="dataframe" width="180"/> | DF.B<br>DF["B"]<br>DF.area<br>DF.B.area<br>DF["B"].area<br>DF["B", "area"]| An entire row<br>An entire row<br>Column vector<br>22 in²<br>22 in²<br>22 in²
+| Data Frame<br><img src="../../images/dataframe.png" alt="dataframe" width="180"/> | DF.B<br>DF["B"]<br>DF.area<br>DF.B.area<br>DF["B"].area<br>DF["B", "area"]<br>DF.w[1]| An entire row<br>An entire row<br>Column vector<br>22<br>22<br>22<br>4
 
 </div>
 
@@ -455,9 +455,10 @@ Strings will be rendered as math if they are delimited with single backticks ins
 
 Enter as integers (33), decimals (2.45), percentages (3.2%), scientific notation (3.1e4), mixed fractions (3 ⁷⁄₈) or hexadecimal (0x2A).
 
-<img src="../../images/NumberRailroad.svg" alt="integers, decimals, percentages, scientific notation, mixed fractions, or hexadecimal" height="275" style="margin-left: -1em;">
+<img src="../../images/NumberRailroad.svg" alt="integers, decimals, percentages, scientific notation, mixed fractions, or hexadecimal" height="275" style="margin-left: -1em;" id="number-rr">
 
 <div class="indented">
+
 Notice that a number literal must begin and end with a numeral, not a decimal symbol. Hurmet will not recognize `5.` as a number.
 
 Hurmet’s default decimal symbol is a dot. You can choose instead to enter numbers with a decimal comma via a drop-down menu labeled “●”. Numbers are never entered with a thousands separator, but they can be *displayed* with one. The ● menu also controls that display.
@@ -1398,7 +1399,7 @@ To get element-wise multiplication of two matrices, the operator symbol must be 
 
 #### Word wrap
 
-Hurmet soft line breaks occur after *top level* binary operators and relation operators. An operator inside a paren does not qualify. If a calculation runs past the edge of the page, try to rearrange it so less of it is inside parens.
+Hurmet soft line breaks occur after top level binary operators and relation operators. An operator inside a paren does not qualify. If a calculation runs past the edge of the page, try to rearrange it so less of it is inside parens.
 
 #### Safari
 
@@ -1652,8 +1653,10 @@ Hurmet is built with the aid of several open source libraries and resources, for
   observer.observe(document.getElementById("display-selectors"))
   observer.observe(document.getElementById("accessor-container"))
   observer.observe(document.getElementById("calculation-forms"))
+  observer.observe(document.getElementById("identifiers"))
   observer.observe(document.getElementById("identi-correct"))
   observer.observe(document.getElementById("data-types"))
+  observer.observe(document.getElementById("number-rr"))
   observer.observe(document.getElementById("quantity"))
   observer.observe(document.getElementById("matrix"))
   observer.observe(document.getElementById("matrix-mult"))

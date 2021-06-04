@@ -56,9 +56,11 @@ const demonstration = (function(exports) {
     "display-selectors": "b = 2 L = ?? ft",
     "accessor-container": "𝐕[2] = ?",
     "calculation-forms": "x = 2 A = ?",
-    "identi-correct": "bb M != theta bar + f''",
-    "data-types": `"a string" ≠ 2.3 + 3 3/8`,
-    "quantity": "'10 N·m/s'",
+    "identifiers": "f_c′ = 4500",
+    "identi-correct": "bb M != h_sub +  theta bar + f''",
+    "data-types": `"a string" ≠ 2.3`,
+    "number-rr": "33 / 2.45 × 3.2% + 3 7/8 + 3.1e1 = ?",
+    "quantity": "'9.807 m/s²' = ?? ft/s²",
     "matrix": "\\[2.1; -15.3]",
     "matrix-mult": "\\[1, 2, 3] \\[3; 2; 1] = ?",
     "data-frame": "wideFlanges.W10X49.A = ?? in2",
@@ -66,7 +68,6 @@ const demonstration = (function(exports) {
     "functions": "sin(π/6) = ?",
     "if-expressions": `x = {1 if 12 < 30; 0 otherwise} = ?`,
     "unit-aware-calculations": "'4 ft' + '3 yards' = ?? m"
-
   }
 
   return exports
