@@ -112,7 +112,7 @@ const stringFromOperand = (oprnd, decimalFormat) => {
 }
 
 export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
-  // This the function that does calculations with the rpn string.
+  // This is the function that does calculations with the rpn string.
   const tokens = rpn.split("\u00A0")
   const stack = []
   let oPrev

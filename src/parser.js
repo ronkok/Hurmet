@@ -192,6 +192,7 @@ export const parseQuantityLiteral = (str, decimalFormat, tokenSep, isCalc) => {
     if (numParts) {
       numStr = numParts[0]
       rpn = rationalRPN(numStr)
+      if (isNegated) { rpn = "-" + rpn + "\xa0" + "~"}
       tex = currencySymbol + texFromNumStr(numParts, decimalFormat)
     } else {
       // TODO: Error message.
@@ -199,8 +200,7 @@ export const parseQuantityLiteral = (str, decimalFormat, tokenSep, isCalc) => {
   }
 
   if (currencySymbol.length > 0) {
-    rpn = numStr + "\xa0" + "applyUnit" + "\xa0" + currencyRPN
-    if (isNegated) { rpn = "-" + rpn }
+    rpn = rpn + "\xa0" + "applyUnit" + "\xa0" + currencyRPN
     return [tex, rpn]
   }
 
