@@ -8,7 +8,6 @@ export class CalcView {
     this.node = node
     this.outerView = view
     this.dom = schema.nodes.calculation.spec.toDOM(node)
-    this.decimalFormat = view.state.doc.attrs.decimalFormat
   }
 
   selectNode() {
@@ -42,7 +41,6 @@ export class CalcView {
       attrs: attrs,
       outerView: this.outerView,
       dom: this.dom,
-      decimalFormat: this.decimalFormat,
       callback(attrs) {
         // eslint-disable-next-line no-undef
         hurmet.updateCalculations(this.outerView, schema.nodes.calculation, false, attrs, pos)

@@ -1,7 +1,7 @@
 import { TextField } from "./prompt"
 
-const commaRegEx = /"[^"]*"|[0-9]+,[0-9]+|[A-Za-zıȷ\u0391-\u03D5\uD835][A-Za-z0-9_ıȷ\u0391-\u03D5\uD835\uDC00-\uDFFF]/
-const dotRegEx = /"[^"]*"|[0-9]+\.[0-9]+|[A-Za-zıȷ\u0391-\u03D5\uD835][A-Za-z0-9_ıȷ\u0391-\u03D5\uD835\uDC00-\uDFFF]/
+const commaRegEx = /"[^"]*"|[0-9]+,[0-9]+|[A-Za-zıȷ\u0391-\u03D5\uD835][A-Za-z0-9_ıȷ\u0391-\u03D5\uD835\uDC00-\uDFFF]/g
+const dotRegEx = /"[^"]*"|[0-9]+\.[0-9]+|[A-Za-zıȷ\u0391-\u03D5\uD835][A-Za-z0-9_ıȷ\u0391-\u03D5\uD835\uDC00-\uDFFF]/g
 const functionRegEx = /^(?:private +)?function (?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*\(/
 const moduleRegEx = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′* *= * module\b/
 
@@ -9,7 +9,7 @@ const dotFromCommaForStorage = (str) => {
   // Lex for strings, numbers, and identifiers
   let match
   // eslint-disable-next-line no-cond-assign
-  while (match = commaRegEx.exec(str)) {
+  while ((match = commaRegEx.exec(str)) != null) {
     if ("0123456789".indexOf(match[0].charAt(0)) > -1) {
       // Change comma decimal to dot decimal.
       const pos = match.index + match[0].indexOf(",")
@@ -22,7 +22,7 @@ const dotFromCommaForStorage = (str) => {
 const commaFromDotForDisplay = (str) => {
   let match
   // eslint-disable-next-line no-cond-assign
-  while (match = dotRegEx.exec(str)) {
+  while ((match = dotRegEx.exec(str)) !== null) {
     if ("0123456789".indexOf(match[0].charAt(0)) > -1) {
       // Change dot decimal to comma decimal.
       const pos = match.index + match[0].indexOf(".")
@@ -57,7 +57,9 @@ export function openMathPrompt(options) {
 
   const isCalculation = (options.encoding === "HurmetMath")
   const isTex = !isCalculation
-  const decimalSymbol = isCalculation ? options.decimalFormat.slice(-1) : ""
+  const decimalSymbol = isCalculation
+    ? options.outerView.state.doc.attrs.decimalFormat.slice(-1)
+    : ""
 
   const form = wrapper.appendChild(document.createElement("form"))
   const field = (new TextField({ required: true, value: "" })).render()
