@@ -77,7 +77,6 @@ const valueFromMap = (map, keys, unitAware) => {
   } else {
     const value = new Map()
     for (let i = 0; i < keys.length; i++) {
-      if (!Number.isNaN(keys[i])) { return errorOprnd("NUM_KEY") }
       value.set(keys[i], clone(map.value.get(keys[i])))
     }
     return { value, unit: clone(map.unit), dtype: map.dtype }

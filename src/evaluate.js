@@ -1438,7 +1438,7 @@ export const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
     result.unit = clone(oprnd.unit)
     result.dtype = oprnd.dtype
 
-    if (result.dtype !== dt.ERROR && isUnitAware &&
+    if (result.dtype !== dt.ERROR && isUnitAware && stmt.resultdisplay.indexOf("!") === -1 &&
       (stmt.expos || (result.unit && result.unit.expos && Array.isArray(result.unit.expos)))) {
       const expos = (stmt.expos) ? stmt.expos : allZeros
       if (!unitsAreCompatible(result.unit.expos, expos)) {
@@ -1455,7 +1455,8 @@ export const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
 
     // If unit-aware, convert result to desired result units.
     const unitInResultSpec = (stmt.factor && (stmt.factor !== 1 || stmt.gauge))
-    if ((result.dtype & dt.DICT) || (result.dtype & dt.DATAFRAME)) {
+    if ((result.dtype & dt.DICT) || (result.dtype & dt.DATAFRAME) ||
+      stmt.resultdisplay.indexOf("!") > -1) {
       stmt.unit = result.unit
     } else if (isUnitAware && (result.dtype & dt.RATIONAL)) {
       if (!unitInResultSpec & unitsAreCompatible(result.unit.expos, allZeros)) {

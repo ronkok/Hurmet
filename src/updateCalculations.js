@@ -47,6 +47,23 @@ const immutableErrorAttrs = (attrs) => {
   return attrs
 }
 
+const processResult = (result, attrs) => {
+  if (result.unit && result.unit.name) {
+    // A quantity. Get the value in both plain and base units.
+    const plain = result.value
+    const unit = attrs.unit[result.unit.name]
+    const inBaseUnits = Rnl.multiply(Rnl.add(plain, unit.gauge), unit.factor)
+    result.value = { plain, inBaseUnits }
+    result.expos = unit.expos
+    result.resultdisplay = parse("'" + format(plain) + " " + result.unit.name + "'")
+  } else if (Rnl.isRational(result.value)) {
+    result.expos = result.unit
+    result.resultdisplay = parse(format(result.value))
+  } else {
+    result.resultdisplay = result.value
+  }
+}
+
 export function insertOneHurmetVar(hurmetVars, attrs) {
   // hurmetVars is a key:value store of variable names and attributes.
   // As this module works its way thru the doc, each time a variable assignment is encountered,
@@ -138,6 +155,31 @@ export function insertOneHurmetVar(hurmetVars, attrs) {
         }
         hurmetVars[attrs.name[i]] = result
         i += 1
+      }
+    }
+  } else if (attrs.dtype & dt.MAP) {
+    if (attrs.name.length !== attrs.value.size) {
+      // TODO: Error
+      // Multiple assignments don't print a result, so this is awkward.
+    } else {
+      for (const [key, value] of attrs.value) {
+        const result = { value }
+        if (attrs.unit && attrs.unit.name) {
+          // A quantity. Get the value in both plain and base units.
+          const inBaseUnits = value
+          const unit = attrs.unit
+          const plain = Rnl.subtract(Rnl.divide(inBaseUnits, unit.factor), unit.gauge)
+          result.value = { plain, inBaseUnits }
+          result.expos = unit.expos
+          result.resultdisplay = parse("'" + format(plain) + " " + unit.name + "'")
+        } else if (Rnl.isRational(result.value)) {
+          result.expos = attrs.unit
+          result.resultdisplay = parse(format(result.value))
+        } else {
+          result.resultdisplay = result.value
+        }
+        result.dtype = attrs.dtype - dt.MAP
+        hurmetVars[key] = result
       }
     }
   }  else if (attrs.dtype === dt.MODULE) {
