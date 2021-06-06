@@ -1374,7 +1374,7 @@ Hurmet modules enable you to access remote functions. Remote modules are written
 A Hurmet document can load an entire module into a variable with a fetch statement. I've written an example that finds the strength of structural steel members. The code to fetch that module is:
 <div style="width: 30em; overflow-x: scroll">
 
-    steel = fetch("https://gist.githubusercontent.com/ronkok/d42b0efdc66dc4f6135fee3b8d22a83e/raw/da3195993e3255c9b9b7f0b64788bc3664d6534d/steelStrengthPerAISC360-16.hrms") = !
+    steel = fetch("https://gist.githubusercontent.com/ronkok/d42b0efdc66dc4f6135fee3b8d22a83e/raw/c752ab866edd2d23dc72b079386a2e4d596ffabf/steelStrengthPerAISC360-16.hrms") = !
 </div>
 
 That's a bit verbose, so it will render in the document as:
@@ -1439,7 +1439,7 @@ Civil and structural engineers may also find these items useful:
 * Beam Analysis [Diagram](https://hurmet.app/ce/beamanalysis.html)
 * Concrete Column Interaction [Diagram](https://observablehq.com/@ronkok/concrete-column-interaction-diagram)
 * Fetchable CSV files with steel shape data: [wide flanges], [channels], 
-* [Module](https://gist.githubusercontent.com/ronkok/d42b0efdc66dc4f6135fee3b8d22a83e/raw/4eca170d5a2b40620cbfca9d5bdcde571268fb2d/steelStrengthPerAISC360-16.hrms) with functions for steel member strength.
+* [Module](https://gist.githubusercontent.com/ronkok/d42b0efdc66dc4f6135fee3b8d22a83e/raw/c752ab866edd2d23dc72b079386a2e4d596ffabf/steelStrengthPerAISC360-16.hrms) with functions for steel member strength.
 
 [wide flanges]: https://gist.githubusercontent.com/ronkok/a9f465e08be54cb4b46449768511acec/raw/a40be6025b135220235b70ca4a3378cdcef4a4c0/AISC-v15-wideFlanges.csv "wideFlanges"
 [channels]: https://gist.githubusercontent.com/ronkok/24987345bc31878e624edc39bfa08827/raw/b1a0d6a0cb28544055a4764524cf0666f628cfde/AISC-v15-channels.csv "channels"
