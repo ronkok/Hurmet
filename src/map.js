@@ -1,9 +1,7 @@
 import { dt, allZeros } from "./constants"
 import { Rnl } from "./rational"
-import { Matrix, isMatrix } from "./matrix"
-import { mapMap, clone } from "./utils"
+import { mapMap, clone, addTextEscapes } from "./utils"
 import { format } from "./format"
-import { errorOprnd } from "./error"
 
 /*
  * This file deals with Hurmet maps, which are similar to hash maps.
@@ -29,7 +27,7 @@ const convertToBaseUnits = (map, gauge, factor) => {
 const display = (map, formatSpec, decimalFormat) => {
   let str = "\\{"
   for (const [key, value] of map.entries()) {
-    str += "\\text{" + key + "}: "
+    str += "\\text{" + addTextEscapes(key) + "}: "
     str += format(value, formatSpec, decimalFormat) + ",\\:"
   }
   return str.slice(0, -3) + "\\}"
@@ -42,16 +40,6 @@ const displayAlt = (map, formatSpec, decimalFormat) => {
     str += format(value, formatSpec, decimalFormat) + ", "
   }
   return str.slice(0, -2) + "}"
-}
-
-const valueInBaseUnits = (oprnd, unit) => {
-  // This function is called when Hurmet encounters a QUANTITY.
-  return (isMatrix(oprnd))
-    ? Matrix.convertToBaseUnits({ value: oprnd.value, dtype: oprnd.dtype },
-        unit.gauge, unit.factor).value
-    : (oprnd.dtype & dt.DICT)
-    ? oprnd.value
-    : Rnl.multiply(Rnl.add(oprnd.value, unit.gauge), unit.factor)
 }
 
 const valueFromMap = (map, keys, unitAware) => {
