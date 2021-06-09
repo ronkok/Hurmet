@@ -299,9 +299,9 @@ The font corrections, e.g., `bb …` work on any letter from A to Z or a to z.
 | Display selector | Display Selector for Unit-Aware Calculation    | Displays:             |
 |:----------------:|:----------------------------------------------:| --------------------- |
 |        ?         |       ??     | Entire calculation, including the result and a blue echo of the expression displaying the value plugged in to each variable.
-|        !         |       !!     | Omits the blue echo and the result.
 |        %         |       %%     | Omits blue echo.
 |        @         |      @@      | Displays only the result, like a spreadsheet cell.
+|        !         |       !!     | Omits the blue echo and the result.<br>Valid only when the result is a data frame or a dictionary.
 
 <div id="accessor-container">
 
@@ -366,9 +366,9 @@ Near the end of the statement is the display selector, i.e., `?`, `??`, etc. It 
 | Display selector | Display Selector for Unit-Aware Calculation    | Displays:             |
 |:----------------:|:----------------------------------------------:| --------------------- |
 |        ?         |       ??     | Entire calculation, including the result and a blue echo of the expression that displays the value plugged in to each variable.
-|        !         |       !!     | Omits the blue echo and the result.
 |        %         |       %%     | Omits blue echo.
 |        @         |      @@      | Displays only the result, like a spreadsheet cell.
+|        !         |       !!     | Omits the blue echo and the result.<br>Valid only when the result is a data frame or a dictionary.
 
 For an engineer like me, the most common display selector is **??**. I almost always want to see the entire calculation. Seeing the expression and the plugged-in values helps me to avoid the kind of unseen [errors](http://www.eusprig.org/horror-stories.htm) that creep into spreadsheet calculations. And it makes the calculation reviewable by a second set of eyes.
 

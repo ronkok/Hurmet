@@ -1438,6 +1438,7 @@ export const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
     result.unit = clone(oprnd.unit)
     result.dtype = oprnd.dtype
 
+    // Check unit compatibility.
     if (result.dtype !== dt.ERROR && isUnitAware && stmt.resultdisplay.indexOf("!") === -1 &&
       (stmt.expos || (result.unit && result.unit.expos && Array.isArray(result.unit.expos)))) {
       const expos = (stmt.expos) ? stmt.expos : allZeros
@@ -1447,6 +1448,13 @@ export const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
       }
     }
     if (result.dtype === dt.ERROR) { return errorResult(stmt, result)}
+
+    // Check for a valid display indicator.
+    if (stmt.resulttemplate.indexOf("!") > -1 &&
+      (result.dtype === dt.DATAFRAME || result.dtype === dt.DICT ||
+        (result.dtype & dt.MAP))) {
+      return errorResult(stmt, errorOprnd("BAD_DISPLAY"))
+    }
 
     result.value = result.dtype === dt.RATIONAL
       ? Rnl.normalize(result.value)
