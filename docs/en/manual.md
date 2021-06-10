@@ -1601,7 +1601,7 @@ Hurmet is built with the aid of several open source libraries and resources, for
 <div id="demo">
 <p>format = "<input type="text" id="formatBox" value="h3" onchange="updateFormat()" style="width: 1.5em;">"</p>
 <p></p>
-<div>Give it a try.</div>
+<div>Give it a try. (It’s interactive.)</div>
 <div id="input-container"><form><textarea id="demo-input"></textarea></form></div>
 <div id="demo-output"></div>
 </div> <!-- demo -->
