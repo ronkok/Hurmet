@@ -173,6 +173,8 @@ const binomial = (n, k) => {
   //             = exp(log!(n) - [log!(k) + log!(n - k)])
   if (Rnl.areEqual(n, k)) { return Rnl.one }
   if (Rnl.isZero(n)) { return Rnl.zero }
+  if (Rnl.isNegative(k)) { return Rnl.zero }
+  if (Rnl.lessThan(n, k)) { return Rnl.zero }
 
   if (Rnl.isInteger(n) && Rnl.isInteger(k) && Rnl.isPositive(n) && Rnl.isPositive(k)) {
     // positive integers

@@ -448,8 +448,9 @@ const dMATRIX = 4 //          [1; 2] or (1, 2; 3, 4) or {1, 2}
 const dVECTORFROMRANGE = 5 // [start:end] or [start:step:end]
 const dDICTIONARY = 6 //      { key:value, key:value } or { key:value; key:value }
 const dCASES = 7 //           { a if b; c otherwise }
-const dSUBSCRIPT = 8 //       Parens around a subscript do not get converted into matrices.
-const dDISTRIB = 9 //         A probability distribution defined by a confidence interval.
+const dBINOMIAL = 8
+const dSUBSCRIPT = 9 //       Parens around a subscript do not get converted into matrices.
+const dDISTRIB = 10 //         A probability distribution defined by a confidence interval.
 
 export const parse = (
   str,
@@ -926,10 +927,13 @@ export const parse = (
           // atop, for binomials
           texStack.push({ prec: 2, pos: op.pos, ttype: tt.DIV, closeDelim: "}}" })
           tex = tex.substring(0, op.pos) + "{{" + tex.substring(op.pos) + "}\\atop{"
+          if (delims[delims.length - 1].name === "(") {
+            delims[delims.length - 1].delimType = dBINOMIAL
+          }
         }
         if (isCalc) {
           if (token.input === "\\atop") {
-            if (delims[delims.length - 1].delimType === dPAREN) {
+            if (delims[delims.length - 1].delimType === dBINOMIAL) {
               rpnStack.push({ prec: 7, symbol: "()" })
             }
           } else {
