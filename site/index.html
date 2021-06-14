@@ -63,29 +63,28 @@
 
 <p>This week’s example:</p>
 
-<h3>The Biles</h3>
+<h3>Special Relativity</h3>
 
-<p>Simone Biles has an awesome new maneuver.  You can see it in slow motion at https://twitter.com/bubbaprog/status/1401010235251298309</p>
-<p>There is a paper explaining the physics at <br>http://shura.shu.ac.uk/14332/1/McInerney%20-%20Simone%20Biles%20%28AM%29.pdf</p>
-<p>The paper is a good read and they explain the physics well. I encourage you to read it. Here, we’ll jump to calculations of her takeoff energy and her landing force</p>
-<p><span class="hurmet-calc" data-entry="format = &quot;r3&quot;"></span>, We’ll round our results to 3 significant digits.</p>
-<p><span class="hurmet-calc" data-entry="m = '47 kg'"></span>, Simone’s estimated mass</p>
-<p><span class="hurmet-calc" data-entry="l = '1.47 m'"></span> = <span class="hurmet-calc" data-entry="l = @@ ft"></span>, her height</p>
-<p><span class="hurmet-calc" data-entry="r = '25 cm'"></span> = <span class="hurmet-calc" data-entry="r = @@ inches"></span>, an approximation of radius, using the distance from her spine to her shoulder.</p>
-<p>The paper derives some velocities:</p>
-<p><span class="hurmet-calc" data-entry="v_vert = '4.6 m/s'"></span>, vertical speed at takeoff</p>
-<p><span class="hurmet-calc" data-entry="v_horiz = '3 m/s'"></span>, horizontal speed at takeoff</p>
-<p><span class="hurmet-calc" data-entry="ω_somersault = '720 deg/s'"></span>, rotational velocity</p>
-<p><span class="hurmet-calc" data-entry="ω_twist = '720 deg/s'"></span></p>
-<p>Now we calculate her total takeoff energy:</p>
-<p><span class="hurmet-calc" data-entry="E_kTotal = m//2 (v_vert² + v_horiz² + ((3 r²+ l²) ω_somersault²)//12 + (r² ω_twist²)//2) 
-   = ?? Joules"></span></p>
-<p>And we can find the force she exerts to stop her movement at the landing,</p>
-<p><span class="hurmet-calc" data-entry="v_final = '0 m/s'"></span> after the landing</p>
-<p><span class="hurmet-calc" data-entry="t_landing = '0.2 s'"></span>, time during which she decelerates</p>
-<p><span class="hurmet-calc" data-entry="F = m (v_final - √(v_vert² + v_horiz²))/t_landing = ?? N"></span> = <span class="hurmet-calc" data-entry="F = @@ lbf"></span></p>
-<p>That landing force is about three times her body weight. (And we did not take into account the rotation velocity.)</p>
+<p>In Feynman’s <em>Lectures on Physics</em>, volume I, Chapter 15, Richard Feynman notes that Newton’s Second Law can be written as </p>
+<p><span class="hurmet-calc" data-entry="F = (&quot;d&quot; (m v))/(&quot;d&quot;t)" data-display="true"></span>with the tacit assumption that mass <em>m</em> is a constant. But in Einstein’s corrected formula, <em>m</em> increases with velocity and has the value</p>
+<p><span class="hurmet-calc" data-entry="m = m_0/√(1 - v²∕c²)" data-display="true"></span>where:</p>
+<p class="indented"><span class="hurmet-calc" data-entry="m_0"></span> is the mass at rest<br><span class="hurmet-calc" data-entry="v"></span>&nbsp;&nbsp;&nbsp;&nbsp;is the velocity of the mass, and<br><span class="hurmet-calc" data-entry="c = '186000 miles/sec'"></span>&nbsp;&nbsp;&nbsp;is the speed of light,</p>
+<p>Feynman then goes on to say that </p>
+
+<blockquote>
+   <p>For those who want to learn just enough about it so they can solve problems, that is all there is to the theory of relativity—it just changes Newton’s laws by introducing a correction factor to the mass.</p>
+</blockquote>
+
+<p>Just how big is that correction factor? Let’s try something that moves fast, like a satellite.</p>
+<p><span class="hurmet-calc" data-entry="v = '5 miles/sec'"></span></p>
+<p><span class="hurmet-calc" data-entry="k = √(1 - v²/c²) = ??"></span>, correction factor</p>
+<p>That difference is so small, we’re going to need scientific notation.</p>
+<p><span class="hurmet-calc" data-entry="format = &quot;s3&quot;"></span></p>
+<p><span class="hurmet-calc" data-entry="1/(1 - k) = ?"></span>.</p>
+<p>Put another way, the difference for a satellite is about 2.77 parts per billion.</p>
+
 <p></p>
+<p>Reference: https://www.feynmanlectures.caltech.edu/I_15.html</p>
 
 </div> <!-- editor -->
 
