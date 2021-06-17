@@ -1,0 +1,46 @@
+# Material data and load criteria for project xxxxx.
+
+# Concrete data
+f_c′ = '4500 psi'     # Concrete specified compressive strength
+f_c′′ = '4500 psi²'   # Ditto for use when ACI 318 calls for √f_c′
+f_yr = '60000 psi'    # Reinforcement yield strength
+β_1 = 0.825
+ρ_0 = 0.0197          # Maximum reinforcement ratio that may use 0.9 for bending ϕ
+ρ_max = 0.0206        # Maximum reinforcement ratio
+E_c = '3824 ksi'      # Modulus of elasticity
+G_c = '946 ksi'       # Shear modulus
+
+# Steel data
+E = '29000 ksi'       # Modulus of elasticity
+G = '12000 ksi'       # Shear modulus
+
+# F_y, F_u, and R_y vary with section type, so they are specified in each section.
+
+n_c = 7.58            # E/E_c, for strain compatibility evaluation
+
+# Soil data
+σ_a = '3000 psf'      # Allowable soil net bearing pressure
+σ_as = '4000 psf'     # Short duration net bearing pressure
+μ_s = 0.45            # Coefficient of friction
+σ_p = '400 psf'       # Allowable passive pressure
+
+# Platform live load
+p_pL = '75 psf'
+
+# Snow
+p_g = '25 psf'
+C_e = 1.0
+I_s = 1.0
+
+# Wind
+V_w = '115 mph'       # Basic wind speed
+EC = "C"              # Exposure category
+K_zt = 1              # Topographic factor
+α = 9.5               # Factor for use in determining K_z
+z_g = '900 ft'        # Ditto
+
+# Seismic
+SC = "D"              # Site soil class
+S_DS = 0.505
+S_D1 = 0.272
+I_E = 1.26            # Seismic importance factor
