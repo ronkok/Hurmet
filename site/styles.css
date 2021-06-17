@@ -137,6 +137,16 @@ th p { line-height: 1.6; }
   color: gray;
 }
 
+.folded {
+  height: 1.2em;
+  overflow-y: hidden;
+}
+.folded pre {
+  position: absolute;
+  height: 1.2em;
+  overflow-y: hidden;
+}
+
 .ProseMirror-prompt input[type="radio"] {
   margin-left: 8px;
 }

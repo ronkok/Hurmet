@@ -38,19 +38,6 @@ function setCellAttrs(node, extraAttrs) {
 
 const functionRegEx = / *function /
 const paraClasses = ["indented", "centered", "hidden"]
-
-/* function setHurmetAttrs(node) {
-  let attrs = {}
-  if (node.attrs.colspan != 1) attrs.colspan = node.attrs.colspan
-  if (node.attrs.rowspan != 1) attrs.rowspan = node.attrs.rowspan
-  if (node.attrs.colwidth)
-    attrs["data-colwidth"] = node.attrs.colwidth.join(",")
-  for (let prop in extraAttrs) {
-    let setter = extraAttrs[prop].setDOMAttr
-    if (setter) setter(node.attrs[prop], attrs)
-  }
-  return attrs
-} */
  
 // :: Object
 // [Specs](#model.NodeSpec) for the nodes defined in this schema.
@@ -91,6 +78,14 @@ export const nodes = {
     content: "inline*",
     toDOM () { return ['p', { class: 'centered' }, 0] },
     parseDOM: [{tag: "p.centered", priority: 80}],
+  },
+
+  //:: NodeSpec A paragraph that is folded to disploy only its first line.
+  folded_paragraph: {
+    group: "block",
+    content: "inline*",
+    toDOM () { return ['p', { class: 'folded' }, 0] },
+    parseDOM: [{tag: "p.folded", priority: 80}],
   },
 
   //:: NodeSpec A paragraph that does not get printed.

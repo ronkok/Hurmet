@@ -147,6 +147,11 @@ const hurmetIcons = {
     height: 24,
     path: "M13.2546893,15 C12.8333806,15.6040072 12.5048858,16.2775651 12.2898787,17 L5,17 C2.23857625,17 3.38176876e-16,14.7614237 0,12 C-1.2263553e-15,9.23857625 2.23857625,7 5,7 L19,7 C21.7614237,7 24,9.23857625 24,12 C24,12.6294813 23.8836754,13.2317936 23.6713497,13.7866134 C23.1547532,13.3234155 22.5689168,12.9358807 21.9312708,12.6414391 C21.9762852,12.4347751 22,12.220157 22,12 C22,10.3431458 20.6568542,9 19,9 L5,9 C3.34314575,9 2,10.3431458 2,12 C2,13.6568542 3.34314575,15 5,15 L13.2546893,15 Z M19,14 C21.7600532,14.0033061 23.9966939,16.2399468 24,19 C24,21.7614237 21.7614237,24 19,24 C16.2385763,24 14,21.7614237 14,19 C14,16.2385763 16.2385763,14 19,14 Z M16.5,19.9375 L21.5,19.9375 C22.017767,19.9375 22.4375,19.517767 22.4375,19 C22.4375,18.482233 22.017767,18.0625 21.5,18.0625 L16.5,18.0625 C15.982233,18.0625 15.5625,18.482233 15.5625,19 C15.5625,19.517767 15.982233,19.9375 16.5,19.9375 Z"
   },
+  fold: {
+    width: 16,
+    height: 16,
+    path: "m 3,5.5 -2,5 2,5.5 H 15 L 13,10.5 15,5.5 13,0 H 1 Z M 2.277,10 3.877,6 h 9.846 l -1.6,4 z M 3.7,15 2.245,11 h 9.872 l 1.454,4 H 3.699 Z M 12.3,1 13.755,5 H 3.883 L 2.428,1 Z"
+  },
   grid: {
     width: 16,
     height: 16,
@@ -902,6 +907,11 @@ export function buildMenuItems(schema) {
       title: "Centered paragraph",
       icon: hurmetIcons["align-center"]
     })
+  if ((type = schema.nodes.folded_paragraph))
+  r.wrapFold = blockTypeItem(type, {
+    title: "Folded paragraph",
+    icon: hurmetIcons.fold
+  })
   if ((type = schema.nodes.hidden_paragraph))
     r.wrapHidden = blockTypeItem(type, {
       title: "Unprinted paragraph",
@@ -1029,7 +1039,8 @@ export function buildMenuItems(schema) {
       r.makeHead1, r.makeHead2, r.makeHead3, r.makeHead4,
       r.wrapIndent,
       r.wrapCentered,
-      r.wrapHidden
+      r.wrapHidden,
+      r.wrapFold
     ])]
 
   r.blockMenu = [

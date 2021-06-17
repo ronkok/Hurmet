@@ -20,6 +20,13 @@ const demonstration = (function(exports) {
   hurmet.calculate(`wideFlanges =` + wideFlanges, hurmetVars)
   const dict = `'{"#4": 0.22, "#5": 0.31} in2'`
   hurmet.calculate(`barArea =` + dict, hurmetVars)
+  const module = `E = '29000 ksi'
+
+  v = \\[4, 6, 8]
+  
+  function multiply(a, b)
+      return a × b`
+  hurmetVars["mod"] = hurmet.scanModule(module)
 
   const renderMath = (doc, demoOutput) => {
     hurmet.autoCorrect(doc)
@@ -67,7 +74,8 @@ const demonstration = (function(exports) {
     "dictionary": 'A = barArea["#4"] = ?',
     "functions": "sin(π/6) = ?",
     "if-expressions": `x = {1 if 12 < 30; 0 otherwise} = ?`,
-    "unit-aware-calculations": "'4 ft' + '3 yards' = ?? m"
+    "unit-aware-calculations": "'4 ft' + '3 yards' = ?? m",
+    "remote-modules": "mod.E = ?? psi"
   }
 
   return exports

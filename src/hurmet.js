@@ -3,6 +3,7 @@ import { parse } from "./parser"
 import { prepareStatement } from "./prepareStatement"
 import { prepareResult } from "./prepareResult"
 import { evaluate } from "./evaluate"
+import { scanModule } from "./module"
 import { updateCalculations } from "./updateCalculations"
 import { calculate } from "./calculate"
 
@@ -40,5 +41,6 @@ export {
   prepareStatement,
   prepareResult,
   evaluate,
+  scanModule,
   updateCalculations
 }

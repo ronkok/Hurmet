@@ -1,7 +1,7 @@
 ﻿import { parse } from "./parser"
 import { dt } from "./constants"
 import { valueFromLiteral } from "./literal"
-import { functionRegEx, moduleRegEx, scanModule } from "./module"
+import { functionRegEx, scanModule } from "./module"
 
 /*  prepareStatement.js
  *
@@ -66,23 +66,13 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
   let dtype
   let str = ""
 
-  if (functionRegEx.test(inputStr) || moduleRegEx.test(inputStr)) {
-    // This cell contains a custom function or a module.
+  if (functionRegEx.test(inputStr)) {
+    // This cell contains a custom function.
     let name = ""
-    let str = ""
-    const isModule = moduleRegEx.test(inputStr)
-    if (isModule) {
-      name = inputStr.slice(0, inputStr.indexOf("=")).trim()
-      str = inputStr.slice(inputStr.indexOf("module") + 6)
-    } else {
-      const posFn = inputStr.indexOf("function")
-      const posParen = inputStr.indexOf("(")
-      name = inputStr.slice(posFn + 8, posParen).trim()
-      str = inputStr
-    }
-    const moduleValue = isModule
-      ? scanModule(str, decimalFormat)
-      : scanModule(str, decimalFormat).value[name]
+    const posFn = inputStr.indexOf("function")
+    const posParen = inputStr.indexOf("(")
+    name = inputStr.slice(posFn + 8, posParen).trim()
+    const moduleValue = scanModule(inputStr, decimalFormat).value[name]
     if (moduleValue.dtype && moduleValue.dtype === dt.ERROR) { return moduleValue }
     const attrs = {
       entry: inputStr,
@@ -258,7 +248,7 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
       eqn += ` ${alignChar}= ` + echo
     }
     if (!suppressResultDisplay) {
-      eqn += " = " + resultDisplay
+      eqn += " " + (mustAlign ? "\\\\&" : "") + "= " + resultDisplay
       altEqn += " = " + trailStr
     }
     if (mustAlign) { eqn += "\\end{aligned}" }

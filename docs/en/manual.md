@@ -1363,27 +1363,58 @@ A *echo* statement writes a message to the browser’s console. You can type __C
 
 ## Remote modules
 
-Hurmet modules enable you to access remote functions. Remote modules are written in plain text files, like this:
+If some Hurmet code is used repeatedly, it makes sense to write that code once and import it into other documents. Hurmet modules are text files that serve that purpose. Modules can contain functions and statements that assign literal values to a variable. Such a module would have text that might look like this:
 
-    multiply(a, b)
+    E = '29000 ksi'
+
+    v = \[4, 6, 8]
+
+    function multiply(a, b)
         return a × b
     
-    divideBy(a, b)
-        return a / b
-    
-A Hurmet document can load an entire module into a variable with a fetch statement. I've written an example that finds the strength of structural steel members. The code to fetch that module is:
-<div style="width: 30em; overflow-x: scroll">
+A Hurmet document can load an entire module into one variable with a import statement. The following statement will import a file that contains the text above.
 
-    steel = fetch("https://gist.githubusercontent.com/ronkok/d42b0efdc66dc4f6135fee3b8d22a83e/raw/c752ab866edd2d23dc72b079386a2e4d596ffabf/steelStrengthPerAISC360-16.hrms") = !
+    mod = import("https://hurmet.app/smallModule.txt") = !
+
+After a module has been imported and loaded into a variable, its functions and values can be called by writing the module name and variable/function name in dot notation, as in:
+
+    E = mod.E = ?? psi
+
+    n = mod.multiply(2, 4) = ?
+
+#### Imported Parameters
+
+The Hurmet variable name `importedParameters` has a special purpose. It loads module values into multiple variables instead of into one variable. An example of such an import is:
+
+    importedParameters = import("https://hurmet.app/parent.txt") = !
+
+That statement will render like this:
+
+<div style="font-size: 16px;">
+
+¢{:f_c′, f_c′′, f_yr, β_1, ρ_0;
+ρ_max, E_c, G_c,  E, G;
+n_c, σ_a, σ_as, μ_s, σ_p;
+p_pl, ρ_g, C_e, I_s, V_w;
+EC, k_zt, α, z_g, SC;
+S_DS, S_D1, I_E,,} = import("https://hurmet.app/parent.txt")¢
+
 </div>
 
-That's a bit verbose, so it will render in the document as:
+Such a statement is handy in a big project, where you break the calculations into several documents. Since any big project often has several common variables, you want a way to keep them synchronized. Put an `importedParameters` statement into each of the documents and you’re good. As an added benefit, a reviewer can see what you are doing.
 
-¢steel = fetch("https://gist.github.com/ronkok/steelStrengthPerAISC360-16.hrms")¢
+#### Gists
 
-After a module has been fetched and loaded into a variable, its functions can be called by writing the module name and variable/function name in dot notation, as in:
+Hurmet is a web app, so it can import text files only from addresses that begin with `http` or `https`. An easy way to create such a file is a Github [Gist](https://gist.github.com/ "Gist"). I've written two example modules in Gists:
 
-`ϕP_n = steel.Ps("W8X31", '50 ksi', '11 ft') = ?? kips`
+<div style="width: 30em; overflow-x: scroll">
+
+*  https://gist.githubusercontent.com/ronkok/d42b0efdc66dc4f6135fee3b8d22a83e/raw/ which finds the structural strength of steel members per AISC 360-16.
+
+*  https://gist.githubusercontent.com/ronkok/cbbf6cde15ac1b4c1e65cc338970043a/raw/ which duplicates the parent file above.
+</div>
+
+If you create your own Gists, you'll see that the addresses of the raw files are longer than my links. If you want a permalink to your file, delete everything after "/raw/". Github keeps a copy of every draft of your file and the part after "/raw/" is the revision ID.
 
 ## Troubleshooting
 
@@ -1439,10 +1470,10 @@ Civil and structural engineers may also find these items useful:
 * Beam Analysis [Diagram](https://hurmet.app/ce/beamanalysis.html)
 * Concrete Column Interaction [Diagram](https://observablehq.com/@ronkok/concrete-column-interaction-diagram)
 * Fetchable CSV files with steel shape data: [wide flanges], [channels], 
-* [Module](https://gist.githubusercontent.com/ronkok/d42b0efdc66dc4f6135fee3b8d22a83e/raw/c752ab866edd2d23dc72b079386a2e4d596ffabf/steelStrengthPerAISC360-16.hrms) with functions for steel member strength.
+* [Module](https://gist.githubusercontent.com/ronkok/d42b0efdc66dc4f6135fee3b8d22a83e/raw/steelStrengthPerAISC360-16.hrms) with functions for steel member strength.
 
-[wide flanges]: https://gist.githubusercontent.com/ronkok/a9f465e08be54cb4b46449768511acec/raw/a40be6025b135220235b70ca4a3378cdcef4a4c0/AISC-v15-wideFlanges.csv "wideFlanges"
-[channels]: https://gist.githubusercontent.com/ronkok/24987345bc31878e624edc39bfa08827/raw/b1a0d6a0cb28544055a4764524cf0666f628cfde/AISC-v15-channels.csv "channels"
+[wide flanges]: https://gist.githubusercontent.com/ronkok/a9f465e08be54cb4b46449768511acec/raw/AISC-v15-wideFlanges.csv "wideFlanges"
+[channels]: https://gist.githubusercontent.com/ronkok/24987345bc31878e624edc39bfa08827/raw/AISC-v15-channels.csv "channels"
 
 ## Credits
 
@@ -1559,10 +1590,10 @@ Hurmet is built with the aid of several open source libraries and resources, for
 
 </details>
 </li>
-<li><a href="#remote-modules">Modules</a></li>
 </ul>
 </details>
 </li>
+<li><a href="#remote-modules">Modules</a></li>
 <li>
 <details><summary>End notes</summary>
 
@@ -1665,6 +1696,7 @@ Hurmet is built with the aid of several open source libraries and resources, for
   observer.observe(document.getElementById("functions"))
   observer.observe(document.getElementById("if-expressions"))
   observer.observe(document.getElementById("unit-aware-calculations"))
+  observer.observe(document.getElementById("remote-modules"))
 
 </script>
 

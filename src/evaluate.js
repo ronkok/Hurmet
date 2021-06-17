@@ -1451,8 +1451,8 @@ export const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
 
     // Check for a valid display indicator.
     if (stmt.resulttemplate.indexOf("!") > -1 &&
-      (result.dtype === dt.DATAFRAME || result.dtype === dt.DICT ||
-        (result.dtype & dt.MAP))) {
+      !(result.dtype === dt.DATAFRAME || result.dtype === dt.DICT ||
+        (result.dtype & dt.MAP) || isMatrix(result))) {
       return errorResult(stmt, errorOprnd("BAD_DISPLAY"))
     }
 

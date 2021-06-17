@@ -1,4 +1,5 @@
 import { parse } from "./parser"
+import { insertOneHurmetVar } from "./insertOneHurmetVar"
 import { prepareStatement } from "./prepareStatement"
 import { prepareResult } from "./prepareResult"
 import { evaluate } from "./evaluate"
@@ -7,10 +8,7 @@ import { DataFrame } from "./dataframe"
 import { dt, allZeros } from "./constants"
 import { clone } from "./utils"
 import { errorOprnd } from "./error"
-import { format } from "./format"
-import { Rnl } from "./rational"
 import { functionRegEx } from "./module"
-import { isMatrix } from "./matrix"
 
 /*
  *  This module is called to update Hurmet calculation cells.
@@ -28,277 +26,10 @@ import { isMatrix } from "./matrix"
  *   This module's main exported function is updateCalculations(…)
  */
 
-const fetchRegEx = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′* *= *fetch\(/
+const fetchRegEx = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′* *= *(?:fetch|import)\(/
+const importRegEx = /^[^=]+= *import/
 const fileErrorRegEx = /^Error while reading file. Status Code: \d*$/
 const lineChartRegEx = /^lineChart/
-
-const isNameOfAnImmutableVariable = (name, hurmetVars) => {
-  if (!name) { return false }
-  const variable = hurmetVars[name]
-  return variable && (variable.dtype === dt.MODULE || variable.isFetch)
-}
-
-const immutableErrorAttrs = (attrs) => {
-  const text = errorOprnd("IMMUT_UDF", attrs.name).value
-  attrs.dtype = dt.ERROR
-  attrs.tex += ` = \\red{\\text{${text}}}`
-  attrs.alt = " = " + text
-  attrs.value = null
-  return attrs
-}
-
-export function insertOneHurmetVar(hurmetVars, attrs) {
-  // hurmetVars is a key:value store of variable names and attributes.
-  // As this module works its way thru the doc, each time a variable assignment is encountered,
-  // this function is called to insert the assignment into hurmetVars.
-
-  // Then, when Hurmet evaluates an expression, it gets variables values from hurmetVars.
-
-  if (!Array.isArray(attrs.name)) {
-    // This is the typical case.
-    hurmetVars[attrs.name] = attrs
-
-  } else if (attrs.value === null) {
-    for (let i = 0; i < attrs.name.length; i++) {
-      hurmetVars[attrs.name[i]] = { value: null }
-    }
-  } else if (isMatrix(attrs)) {
-    // Assign to a matrix of names
-    const isQuantity = Boolean(attrs.dtype & dt.QUANTITY)
-    let resultDisplay = attrs.resultdisplay
-    resultDisplay = resultDisplay.replace(/\\(begin|end){[bp]matrix}/g, "").trim()
-    const displays = resultDisplay.split(/&|\\\\/)
-    if (attrs.dtype & dt.MATRIX) {
-      // A 2 dimensional matrix.
-      const dtype = attrs.dtype - dt.MATRIX
-      const numRows = isQuantity ? attrs.value.plain.length : attrs.value.length
-      const numCols = attrs.name.length / numRows
-      let iName = 0
-      for (let i = 0; i < numRows; i++) {
-        for (let j = 0; j < numCols; j++) {
-          const value = isQuantity
-            ? { plain: attrs.value.plain[i][j], inBaseUnits: attrs.value.inBaseUnits[i][j] }
-            : attrs.value[i][j]
-          hurmetVars[attrs.name[i]] = {
-            name: attrs.name[iName],
-            value,
-            resultdisplay: isQuantity
-              ? parse("'" + displays[iName].trim() + " " + attrs.unit + "'")
-              : displays[iName].trim(),
-            expos: attrs.expos,
-            unit: isQuantity ? attrs.unit : undefined,
-            dtype
-          }
-          iName += 1
-        }
-      }
-    } else {
-      // A vector.
-      const isColumn = Boolean(attrs.dtype & dt.COLUMNVECTOR)
-      const dtype = attrs.dtype - (isColumn ? dt.COLUMNVECTOR : dt.ROWVECTOR)
-      for (let i = 0; i < attrs.name.length; i++) {
-        const value = isQuantity
-          ? { plain: attrs.value.plain[i], inBaseUnits: attrs.value.inBaseUnits[i] }
-          : attrs.value[i]
-        hurmetVars[attrs.name[i]] = {
-          name: attrs.name[i],
-          value,
-          resultdisplay: isQuantity
-            ? parse("'" + displays[i].trim() + " " + attrs.unit + "'")
-            : displays[i].trim(),
-          expos: attrs.expos,
-          unit: isQuantity ? attrs.unit : undefined,
-          dtype
-        }
-      }
-    }
-
-  } else if (attrs.dtype === dt.DICT) {
-    // multiple assignment from a dictionary
-    if (attrs.name.length !== attrs.value.size) {
-      // TODO: Error
-      // Multiple assignments don't print a result, so this is awkward.
-    } else {
-      let i = 0
-      for (const value of attrs.value.values()) {
-        const result = clone(value)
-        if (result.unit && result.unit.name) {
-          // A quantity. Get the value in both plain and base units.
-          const plain = result.value
-          const unit = attrs.unit[result.unit.name]
-          const inBaseUnits = Rnl.multiply(Rnl.add(plain, unit.gauge), unit.factor)
-          result.value = { plain, inBaseUnits }
-          result.expos = unit.expos
-          result.resultdisplay = parse("'" + format(plain) + " " + result.unit.name + "'")
-        } else if (Rnl.isRational(result.value)) {
-          result.expos = result.unit
-          result.resultdisplay = parse(format(result.value))
-        } else {
-          result.resultdisplay = result.value
-        }
-        hurmetVars[attrs.name[i]] = result
-        i += 1
-      }
-    }
-  } else if (attrs.dtype & dt.MAP) {
-    if (attrs.name.length !== attrs.value.size) {
-      // TODO: Error
-      // Multiple assignments don't print a result, so this is awkward.
-    } else {
-      for (const [key, value] of attrs.value) {
-        const result = { value }
-        if (attrs.unit && attrs.unit.name) {
-          // A quantity. Get the value in both plain and base units.
-          const inBaseUnits = value
-          const unit = attrs.unit
-          const plain = Rnl.subtract(Rnl.divide(inBaseUnits, unit.factor), unit.gauge)
-          result.value = { plain, inBaseUnits }
-          result.expos = unit.expos
-          result.resultdisplay = parse("'" + format(plain) + " " + unit.name + "'")
-        } else if (Rnl.isRational(result.value)) {
-          result.expos = attrs.unit
-          result.resultdisplay = parse(format(result.value))
-        } else {
-          result.resultdisplay = result.value
-        }
-        result.dtype = attrs.dtype - dt.MAP
-        hurmetVars[key] = result
-      }
-    }
-  }  else if (attrs.dtype === dt.MODULE) {
-    // multiple assignment from a module
-    if (attrs.name.length !== attrs.value.length) {
-      // TODO: Error
-      // Multiple assignments don't print a result, so this is awkward.
-    } else {
-      let i = 0
-      for (const value of attrs.value.values()) {
-        const result = clone(value)
-        hurmetVars[attrs.name[i]] = result
-        i += 1
-      }
-    }
-  } else {
-    // TODO: Write an error message.
-  }
-}
-
-const proceedAfterFetch = (
-  view,
-  calcNodeSchema,
-  isCalcAll,
-  nodeAttrs,
-  curPos,
-  hurmetVars,
-  tr,
-  immutablePositions
-) => {
-  // This function happens either
-  //   1. After remote, fetched data has been processed, or
-  //   2. After we know that no fetch statements need be processed.
-  const doc = view.state.doc
-  const decimalFormat = doc.attrs.decimalFormat
-
-  // UDFs are hoisted from anywhere in the document.
-  // So we make one pass thru the document just for them.
-  doc.nodesBetween(0, doc.content.size, function(node, pos) {
-    if (node.type.name === "calculation") {
-      const entry = node.attrs.entry
-      const provisionalName = entry === "" ? "" : /^[^=]+/.exec(entry)[0]
-      if ((pos in immutablePositions) &&
-        isNameOfAnImmutableVariable(provisionalName, hurmetVars)) {
-          //We addressed this node in the fetches above. Don't re-evaluate it here.
-      } else {
-        const getsHoisted = isCalcAll
-          ? functionRegEx.test(entry)
-          : pos === curPos
-          ? false
-          : node.attrs.name && node.attrs.dtype &&
-            (node.attrs.dtype === dt.MODULE || node.attrs.isFetch)
-        if (getsHoisted) {
-          const attrs = isCalcAll
-            ? prepareStatement(entry, decimalFormat)
-            : clone(node.attrs)
-          attrs.displayMode = node.attrs.displayMode
-          if (isCalcAll && isNameOfAnImmutableVariable(attrs.name, hurmetVars)) {
-            if (pos in immutablePositions) {
-              // We addressed this node in the fetches above. Don't re-evaluate it here.
-            } else {
-              // A UDF has already been assigned to this variable.
-              // Write an error message.
-              node.attrs = immutableErrorAttrs(attrs)
-              tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs))
-            }
-          } else {
-            if (isCalcAll) {
-              tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs))
-            }
-            insertOneHurmetVar(hurmetVars, attrs)
-            immutablePositions.push(pos)
-          }
-        }
-      }
-    }
-  })
-
-  if (!isCalcAll && (nodeAttrs.name || nodeAttrs.rpn)) {
-    // Load hurmetVars with values from earlier in the document.
-    doc.nodesBetween(0, curPos, function(node) {
-      if (node.type.name === "calculation") {
-        const attrs = node.attrs
-        if (attrs.name && !attrs.isFetch &&
-            !(attrs.dtype === dt.MODULE)) {
-          insertOneHurmetVar(hurmetVars, attrs)
-        }
-      }
-    })
-
-    // Calculate the current node.
-    if (!fetchRegEx.test(nodeAttrs.entry)) {
-      // This is the typical calculation statement. We'll evalutate it.
-      let attrs = clone(nodeAttrs) // prepareStatement was already run in mathprompt.js.
-      // The mathPrompt dialog box did not have accesss to hurmetVars, so it
-      // did not do unit conversions on the result template. Do that first.
-      prepareResult(attrs, hurmetVars)
-      // Now proceed to do the calculation of the cell.
-      if (attrs.rpn) { attrs = evaluate(attrs, hurmetVars, decimalFormat) }
-      if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs) }
-      attrs.displayMode = nodeAttrs.displayMode
-      tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(attrs))
-    }
-  }
-
-  // Finally, update calculations in the non-hoisted cells after startPos.
-  const startPos = isCalcAll ? 0 : (curPos + 1)
-  doc.nodesBetween(startPos, doc.content.size, function(node, pos) {
-    if (node.type.name === "calculation") {
-      const dtype = node.attrs.dtype
-      if (!(node.attrs.isFetch || dtype === dt.MODULE)) {
-        const entry = node.attrs.entry
-        let attrs = isCalcAll || lineChartRegEx.test(entry)
-          ? prepareStatement(entry, decimalFormat)
-          : clone(node.attrs)
-        attrs.displayMode = node.attrs.displayMode
-        if (!isNameOfAnImmutableVariable(attrs.name, hurmetVars)) {
-          if (isCalcAll) { prepareResult(attrs, hurmetVars) }
-          if (attrs.rpn) { attrs = evaluate(attrs, hurmetVars, decimalFormat) }
-          if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs) }
-          if (isCalcAll || attrs.rpn) {
-            tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs))
-          }
-        }
-      }
-    }
-  })
-
-  // All the steps are now loaded into the transaction.
-  // Dispatch the transaction to ProseMirror, which will re-render the document.
-  if (!isCalcAll) {
-    tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)))
-  }
-  view.dispatch(tr)
-  view.focus()
-}
 
 const urlFromEntry = entry => {
   // Get the URL from the entry input string.
@@ -314,11 +45,6 @@ const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
     entry.replace(/\s*=\s*[$$£¥\u20A0-\u20CF]?(!{1,2}).*$/, ""),
     decimalFormat
   )
-  if (/https:\/\/gist\.githubusercontent\.com/.test(attrs.tex)) {
-    // Display a short alias for GitHub Gist raw url.
-//    attrs.tex = attrs.tex.replace("gist.githubusercontent.com", "gist.github.com")
-//    attrs.tex = attrs.tex.replace(/[^/]+\/raw\//, "")
-  }
   attrs.alt = entry
   if (text === "File not found." || fileErrorRegEx.test(text)) {
     attrs.dtype = dt.ERROR
@@ -327,17 +53,33 @@ const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
     attrs.value = null
     return attrs
   }
-  const data = (/\.csv/i.test(entry))
-    ? DataFrame.dataFrameFromCSV(text, hurmetVars)
+  const data = importRegEx.test(entry)
+    ? scanModule(text, decimalFormat)
     : attrs.name === "currencies"
     ? { value: JSON.parse(text).rates, unit: allZeros, dtype: dt.MAP }
-    : scanModule(text, decimalFormat)
+    : DataFrame.dataFrameFromCSV(text, hurmetVars)
 
   // Append the data to attrs
   attrs.value = data.value
   attrs.dtype = data.dtype
   attrs.unit = data.unit
   attrs.isFetch = true
+  if (data.dtype === dt.MODULE && /^importedParameters *=/.test(entry)) {
+    // Assign to multiple variables, not one namespace.
+    let nameTex = "\\begin{matrix}"
+    let i = 0
+    Object.entries(data.value).forEach(([key, value]) => {
+      hurmetVars[key] =  value
+      nameTex += parse(value.name) + " & "
+      i += 1
+      if (i === 5) {
+        nameTex = nameTex.slice(0, -1) + "\\\\ "
+        i = 0
+      }
+    })
+    nameTex = nameTex.slice(0, (i === 0 ? -2 : -1)) + "\\end{matrix}"
+    attrs.tex = attrs.tex.replace("\\mathrm{importedParameters}", nameTex)
+  }
   return attrs
 }
 
@@ -374,12 +116,10 @@ const workAsync = (
       return r.text()
     }))
   }).then((texts) => {
-    // At this point, we have the text of each Hurmet fetch.
-
+    // At this point, we have the text of each Hurmet fetch and import.
     // Create a ProseMirror transacation.
     // Each node update below will be one step in the transaction.
     const tr = view.state.tr
-    const immutablePositions = []
 
     // Load in the data from the fetch statements
     for (let i = 0; i < texts.length; i++) {
@@ -392,14 +132,13 @@ const workAsync = (
       tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs))
       if (attrs.name) {
         insertOneHurmetVar(hurmetVars, attrs)
-        immutablePositions.push(pos)
       }
     }
     // There. Fetches are done and are loaded into the document.
     // Now proceed to the rest of the work.
     try {
       proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs,
-                        curPos, hurmetVars, tr, immutablePositions)
+                        curPos, hurmetVars, tr)
     } catch (err) {
       tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs))
       tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)))
@@ -407,6 +146,79 @@ const workAsync = (
       view.focus()
     }
   })
+}
+
+const proceedAfterFetch = (
+  view,
+  calcNodeSchema,
+  isCalcAll,
+  nodeAttrs,
+  curPos,
+  hurmetVars,
+  tr
+) => {
+  // This function happens either
+  //   1. After remote, fetched data has been processed, or
+  //   2. After we know that no fetch statements need be processed.
+  const doc = view.state.doc
+  const decimalFormat = doc.attrs.decimalFormat
+
+  if (!isCalcAll && (nodeAttrs.name || nodeAttrs.rpn)) {
+    // Load hurmetVars with values from earlier in the document.
+    doc.nodesBetween(0, curPos, function(node) {
+      if (node.type.name === "calculation") {
+        const attrs = node.attrs
+        if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs) }
+      }
+    })
+
+    // Calculate the current node.
+    if (!fetchRegEx.test(nodeAttrs.entry)) {
+      // This is the typical calculation statement. We'll evalutate it.
+      let attrs = clone(nodeAttrs) // prepareStatement was already run in mathprompt.js.
+      // The mathPrompt dialog box did not have accesss to hurmetVars, so it
+      // did not do unit conversions on the result template. Do that first.
+      prepareResult(attrs, hurmetVars)
+      // Now proceed to do the calculation of the cell.
+      if (attrs.rpn) { attrs = evaluate(attrs, hurmetVars, decimalFormat) }
+      if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs) }
+      attrs.displayMode = nodeAttrs.displayMode
+      tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(attrs))
+    }
+  }
+
+  // Finally, update calculations after startPos.
+  const startPos = isCalcAll ? 0 : (curPos + 1)
+  doc.nodesBetween(startPos, doc.content.size, function(node, pos) {
+    if (node.type.name === "calculation") {
+      const mustCalc = isCalcAll ? !fetchRegEx.test(node.attrs.entry) : !node.attrs.isFetch
+      if (mustCalc) {
+        const entry = node.attrs.entry
+        let attrs = isCalcAll || lineChartRegEx.test(entry)
+          ? prepareStatement(entry, decimalFormat)
+          : clone(node.attrs)
+        attrs.displayMode = node.attrs.displayMode
+        if (isCalcAll || (attrs.name && !(hurmetVars[attrs.name]?.isFetch))) {
+          if (isCalcAll) { prepareResult(attrs, hurmetVars) }
+          if (attrs.rpn) { attrs = evaluate(attrs, hurmetVars, decimalFormat) }
+          if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs) }
+          if (isCalcAll || attrs.rpn) {
+            tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs))
+          }
+        } else if (attrs.name && !(isCalcAll && attrs.isFetch)) {
+          insertOneHurmetVar(hurmetVars, attrs)
+        }
+      }
+    }
+  })
+
+  // All the steps are now loaded into the transaction.
+  // Dispatch the transaction to ProseMirror, which will re-render the document.
+  if (!isCalcAll) {
+    tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)))
+  }
+  view.dispatch(tr)
+  view.focus()
 }
 
 export function updateCalculations(
@@ -470,7 +282,7 @@ export function updateCalculations(
     // Skip the fetches and go directly to work that we can do synchronously.
     const tr = view.state.tr
     try {
-      proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr, [])
+      proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr)
     } catch (err) {
       tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs))
       tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)))
