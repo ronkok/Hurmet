@@ -1,0 +1,6 @@
+E = '29000 ksi'
+
+v = \[4, 6, 8]
+
+function multiply(a, b)
+    return a × b
