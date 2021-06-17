@@ -1,6 +1,6 @@
-example.csv
+/example.csv
   Access-Control-Allow-Methods: GET
-smallModule.txt
+/smallModule.txt
   Access-Control-Allow-Methods: GET
-parent.txt
+/parent.txt
   Access-Control-Allow-Methods: GET
