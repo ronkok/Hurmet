@@ -198,7 +198,8 @@ const proceedAfterFetch = (
           ? prepareStatement(entry, decimalFormat)
           : clone(node.attrs)
         attrs.displayMode = node.attrs.displayMode
-        if (isCalcAll || (attrs.name && !(hurmetVars[attrs.name]?.isFetch))) {
+        if (isCalcAll || (attrs.name && !(hurmetVars[attrs.name] &&
+          hurmetVars[attrs.name].isFetch))) {
           if (isCalcAll) { prepareResult(attrs, hurmetVars) }
           if (attrs.rpn) { attrs = evaluate(attrs, hurmetVars, decimalFormat) }
           if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs) }
