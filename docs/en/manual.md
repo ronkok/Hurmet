@@ -1261,8 +1261,6 @@ Variables created inside a user-defined function are local and their values will
 
 If you omit any arguments when you call a function, Hurmet will fill out the argument list with values of `undefined` when it executes the function.
 
-Functions can be called before they are defined. You can write your functions at the end of the document.
-
 Hurmet does not support function recursion.
 
 #### Code Blocks
