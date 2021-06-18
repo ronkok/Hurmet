@@ -172,7 +172,7 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
         if (unitData.dtype & unitData.dtype === dt.ERROR) { return unitData }
         if (unitData && !unitMap[unitName]) { unitMap[unitName] = unitData }
       }
-      value.set(oprnd.value.columns[columnList[j]], {
+      value.set(oprnd.value.headings[columnList[j]], {
         value: localValue,
         unit: { name: unitName },
         dtype: oprnd.value.dtype[columnList[j]]
@@ -187,11 +187,11 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
     unit = (oprnd.unit && oprnd.unit[unitName]) ? oprnd.unit[unitName] : { expos: null }
     const value = oprnd.value.data[j].slice(iStart, iEnd + 1).map(e => valueFromDatum(e))
     const dtype = oprnd.value.dtype[j] + dt.COLUMNVECTOR
-    const newOprnd = { value, name: oprnd.value.columns[j], unit, dtype }
+    const newOprnd = { value, name: oprnd.value.headings[j], unit, dtype }
     if (unitAware && unit.gauge) {
       return {
         value: Matrix.convertToBaseUnits(newOprnd, unit.gauge, unit.factor),
-        name: oprnd.value.columns[j],
+        name: oprnd.value.headings[j],
         unit: { expos: unit.expos },
         dtype: dt.RATIONAL + dt.COLUMNVECTOR
       }
@@ -201,7 +201,7 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
 
   } else {
     // Return a data frame.
-    const columns = []
+    const headings = []
     const units = []
     const dtype = []
     const data = []
@@ -209,10 +209,10 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
     const unitMap = Object.create(null)
     const rowMap = rowList.length === 0 ? false : Object.create(null)
     for (let j = 0; j < columnList.length; j++) {
-      columns.push(oprnd.value.columns[columnList[j]])
+      headings.push(oprnd.value.headings[columnList[j]])
       units.push(oprnd.value.units[columnList[j]])
       dtype.push(oprnd.value.dtype[columnList[j]])
-      columnMap[oprnd.value.columns[j]] = j
+      columnMap[oprnd.value.headings[j]] = j
       if (rowList.length > 0) {
         const elements = []
         for (let i = 0; i < rowList.length; i++) {
@@ -228,7 +228,7 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
     return clone({
       value: {
         data: data,
-        columns: columns,
+        headings: headings,
         columnMap: columnMap,
         rowMap: false,
         units: units,
@@ -247,7 +247,7 @@ const dataFrameFromCSV = (str, vars) => {
   // Load a CSV string into a data frame.
   // Data frames are loaded column-wise. The subordinate data structures are:
   const data = []    // where the main data lives, not including column names or units.
-  const columns = []                    // An array containing the column names
+  const headings = []                    // An array containing the column names
   const columnMap = Object.create(null) // map of column names to column index numbers
   const rowMap = /^(?:[Nn]ame|[Ii]ndex)\s*,/.test(str) ? Object.create(null) : false
   const units = []                     // array of unit names, one for each column
@@ -300,7 +300,7 @@ const dataFrameFromCSV = (str, vars) => {
     }
 
     if (row === 0) {
-      columns.push(datum)
+      headings.push(datum)
       columnMap[datum] = col
     } else {
       if (row === 1) { data.push([]) } // First data row.
@@ -384,7 +384,7 @@ const dataFrameFromCSV = (str, vars) => {
   return {
     value: {
       data: data,
-      columns: columns,
+      headings: headings,
       columnMap: columnMap,
       rowMap: rowMap,
       units: units,
@@ -398,7 +398,7 @@ const dataFrameFromCSV = (str, vars) => {
 const dataFrameFromVectors = (vectors, vars) => {
   // Take an array of vectors and return a dataframe.
   const data = []
-  const columns = []
+  const headings = []
   const columnMap = Object.create(null)
   const units = []
   const dtype = []
@@ -412,7 +412,7 @@ const dataFrameFromVectors = (vectors, vars) => {
       ? dt.COLUMNVECTOR
       : dt.ERROR
     if (vectorType === dt.ERROR) { return errorOprnd("NOT_VECTOR") }
-    columns.push(vector.name)
+    headings.push(vector.name)
     columnMap[vector.name] = j
     const colDtype = vector.dtype - vectorType
     data.push(vector.value.map(e => datumFromValue(e, colDtype)))
@@ -436,7 +436,7 @@ const dataFrameFromVectors = (vectors, vars) => {
   return {
     value: {
       data: data,
-      columns: columns,
+      headings: headings,
       columnMap: columnMap,
       rowMap: rowMap,
       units: units,
@@ -452,8 +452,8 @@ const append = (o1, o2, vars, unitAware) => {
   const numRows = o1.value.data[0].length
   if (o2.value.length !== numRows) { return errorOprnd("") }
   const oprnd = clone(o1)
-  oprnd.value.columns.push(o2.name)
-  oprnd.value.columnMap[o2.name] = o1.value.columns.length - 1
+  oprnd.value.headings.push(o2.name)
+  oprnd.value.columnMap[o2.name] = o1.value.headings.length - 1
   const dtype = o2.dtype - dt.COLUMNVECTOR
   if (o2.unit.name && o2.unit.name.length > 0) {
     oprnd.value.units.push(o2.unit.name)
@@ -591,11 +591,11 @@ const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.") => {
 
   // Write the column names
   if (!df.rowMap) { str += "&" }
-  str += df.columns[0] === "name"
+  str += df.headings[0] === "name"
     ? "&"
-    : "{" + formatColumnName(df.columns[0]) + "}&"
+    : "{" + formatColumnName(df.headings[0]) + "}&"
   for (let j = 1; j < numCols; j++) {
-    str += "{" + formatColumnName(df.columns[j]) + "}&"
+    str += "{" + formatColumnName(df.headings[j]) + "}&"
   }
   str = str.slice(0, -1) + " \\\\ "
 
@@ -645,9 +645,9 @@ const displayAlt = (df, formatSpec = "h3", decimalFormat = "1,000,000.") => {
 
   // Write the column names
   if (!df.rowMap) { str += "," }
-  str += ( df.columns[0] === "name" ? "" : df.columns[0]) + ","
+  str += ( df.headings[0] === "name" ? "" : df.headings[0]) + ","
   for (let j = 1; j < numCols; j++) {
-    str += df.columns[j] + ","
+    str += df.headings[j] + ","
   }
   str = str.slice(0, -1) + "\n"
 
