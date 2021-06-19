@@ -1,7 +1,7 @@
 import { autoCorrect } from "./autocorrect"
 import { parse } from "./parser"
 import { prepareStatement } from "./prepareStatement"
-import { prepareResult } from "./prepareResult"
+import { improveQuantities } from "./improveQuantities"
 import { evaluate } from "./evaluate"
 import { scanModule } from "./module"
 import { updateCalculations } from "./updateCalculations"
@@ -39,7 +39,7 @@ export {
   calculate,
   autoCorrect,
   prepareStatement,
-  prepareResult,
+  improveQuantities,
   evaluate,
   scanModule,
   updateCalculations

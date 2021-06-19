@@ -1,14 +1,12 @@
 import { parse } from "./parser"
 import { insertOneHurmetVar } from "./insertOneHurmetVar"
 import { prepareStatement } from "./prepareStatement"
-import { prepareResult } from "./prepareResult"
+import { improveQuantities } from "./improveQuantities"
 import { evaluate } from "./evaluate"
 import { scanModule } from "./module"
 import { DataFrame } from "./dataframe"
 import { dt, allZeros } from "./constants"
 import { clone } from "./utils"
-import { errorOprnd } from "./error"
-import { functionRegEx } from "./module"
 
 /*
  *  This module is called to update Hurmet calculation cells.
@@ -178,7 +176,7 @@ const proceedAfterFetch = (
       let attrs = clone(nodeAttrs) // prepareStatement was already run in mathprompt.js.
       // The mathPrompt dialog box did not have accesss to hurmetVars, so it
       // did not do unit conversions on the result template. Do that first.
-      prepareResult(attrs, hurmetVars)
+      improveQuantities(attrs, hurmetVars)
       // Now proceed to do the calculation of the cell.
       if (attrs.rpn) { attrs = evaluate(attrs, hurmetVars, decimalFormat) }
       if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs) }
@@ -186,6 +184,18 @@ const proceedAfterFetch = (
       tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(attrs))
     }
   }
+
+/*  const evaluateTable = (attrs, hurmetVars, decimalFormat) => {
+    for (let i = 0; i < attrs.value.attrs.length; i++) {
+      const cell = attrs.value.attrs[i]
+      for (let j = cell.col; j <= cell.col + cell.num; j++) {
+        let cellAttrs = clone(cell)
+        cellAttrs.rpn = cellAttrs.rpn.replace(/ŧ/g, String(j))
+        cellAttrs = evaluate(cellAttrs, hurmetVars, decimalFormat)
+        attrs.value.data[cell.col][cell.row] = cellAttrs.resultdisplay
+      }
+    }
+  } */
 
   // Finally, update calculations after startPos.
   const startPos = isCalcAll ? 0 : (curPos + 1)
@@ -200,8 +210,11 @@ const proceedAfterFetch = (
         attrs.displayMode = node.attrs.displayMode
         if (isCalcAll || (attrs.name && !(hurmetVars[attrs.name] &&
           hurmetVars[attrs.name].isFetch))) {
-          if (isCalcAll) { prepareResult(attrs, hurmetVars) }
+          if (isCalcAll) { improveQuantities(attrs, hurmetVars) }
           if (attrs.rpn) { attrs = evaluate(attrs, hurmetVars, decimalFormat) }
+          /*if (attrs.dtype === dt.DATAFRAME && attrs.value.attrs.length > 0) {
+            attrs = evaluateTable(attrs, hurmetVars, decimalFormat)
+          } */
           if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs) }
           if (isCalcAll || attrs.rpn) {
             tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs))

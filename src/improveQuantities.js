@@ -12,7 +12,7 @@ import { Rnl } from "./rational"
  *  Here we process literal values of assignment statements.
  */
 
-export const prepareResult = (attrs, vars) => {
+export const improveQuantities = (attrs, vars) => {
   if (attrs.name && attrs.value && (attrs.dtype & dt.QUANTITY)) {
     // Assignment of a quantity. Get it in base units
     const unit = (attrs.unit === undefined)

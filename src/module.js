@@ -1,6 +1,6 @@
 import { dt } from "./constants.js"
 import { valueFromLiteral } from "./literal"
-import { prepareResult } from "./prepareResult"
+import { improveQuantities } from "./improveQuantities"
 import { arrayOfRegExMatches } from "./utils"
 import { parse } from "./parser.js"
 import { errorOprnd } from "./error.js"
@@ -251,6 +251,6 @@ const scanAssignment = (lines, decimalFormat, iStart) => {
   const trailStr = str.slice(posEquals + 1).trim()
   const [value, unit, dtype, resultDisplay] = valueFromLiteral(trailStr, name, decimalFormat)
   const stmt = { name, value, unit, dtype, resultDisplay }
-  prepareResult(stmt, {})
+  improveQuantities(stmt, {})
   return [stmt, iEnd]
 }

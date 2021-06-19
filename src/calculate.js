@@ -1,6 +1,6 @@
 import { insertOneHurmetVar } from "./insertOneHurmetVar"
 import { prepareStatement } from "./prepareStatement"
-import { prepareResult } from "./prepareResult"
+import { improveQuantities } from "./improveQuantities"
 import { evaluate } from "./evaluate"
 import { scanModule } from "./module"
 import { clone } from "./utils"
@@ -15,7 +15,7 @@ export const calculate = (
   decimalFormat = "1,000,000."
 ) => {
   let attrs = prepareStatement(entry, decimalFormat)
-  prepareResult(attrs, vars)
+  improveQuantities(attrs, vars)
   if (attrs.rpn) {
     attrs = evaluate(clone(attrs), vars, decimalFormat)
   }
