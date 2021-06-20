@@ -61,35 +61,24 @@
 
 <p>This is editable text. You can focus it and start typing. A calculation cell will open if you click on it. All calculations will update if you press <strong>Enter</strong> to close a calculation cell.</p>
 
-<h3>Breaking Change</h3>
-
-<p>Functions can no longer be called before they are defined.<br>
-Modules are now called with an <em>import</em> function instead of a fetch function. Calling a data frame CSV file still uses a fetch function.</p>
-
 <p>This week’s example:</p>
 
-<h3>Special Relativity</h3>
+<h3>Imported Parameters</h3>
 
-<p>In Feynman’s <em>Lectures on Physics</em>, volume I, Chapter 15, Richard Feynman notes that Newton’s Second Law can be written as </p>
-<p><span class="hurmet-calc" data-entry="F = (&quot;d&quot; (m v))/(&quot;d&quot;t)" data-display="true"></span>with the tacit assumption that mass <em>m</em> is a constant. But in Einstein’s corrected formula, <em>m</em> increases with velocity and has the value</p>
-<p><span class="hurmet-calc" data-entry="m = m_0/√(1 - v²∕c²)" data-display="true"></span>where:</p>
-<p class="indented"><span class="hurmet-calc" data-entry="m_0"></span> is the mass at rest<br><span class="hurmet-calc" data-entry="v"></span>&nbsp;&nbsp;&nbsp;&nbsp;is the velocity of the mass, and<br><span class="hurmet-calc" data-entry="c = '186000 miles/sec'"></span>&nbsp;&nbsp;&nbsp;is the speed of light,</p>
-<p>Feynman then goes on to say that </p>
+<p>The calculations for a big project are often broken up into several documents. But there are always a few parameters that are common to the entire project. Hurmet enables you to define those parameters once, in a module, and then import them into each of the calculation documents.</p>
 
-<blockquote>
-   <p>For those who want to learn just enough about it so they can solve problems, that is all there is to the theory of relativity—it just changes Newton’s laws by introducing a correction factor to the mass.</p>
-</blockquote>
+<p>Such an import statement is written this way:</p>
 
-<p>Just how big is that correction factor? Let’s try something that moves fast, like a satellite.</p>
-<p><span class="hurmet-calc" data-entry="v = '5 miles/sec'"></span></p>
-<p><span class="hurmet-calc" data-entry="k = √(1 - v²/c²) = ??"></span>, correction factor</p>
-<p>That difference is so small, we’re going to need scientific notation.</p>
-<p><span class="hurmet-calc" data-entry="format = &quot;s3&quot;"></span></p>
-<p><span class="hurmet-calc" data-entry="1/(1 - k) = ?"></span>.</p>
-<p>Put another way, the difference for a satellite is about 2.77 parts per billion.</p>
+<pre><code>importedParameters = import("https://hurmet.app/parent.txt") = !</code></pre>
 
-<p></p>
-<p>Reference: https://www.feynmanlectures.caltech.edu/I_15.html</p>
+<p>That statement will render like this:</p>
+<p><span class="hurmet-calc" data-entry="importedParameters = import(&quot;https://hurmet.app/parent.txt&quot;) = !"></span></p>
+
+<p>“importedParameters” is a special variable name in Hurmet. When used, the imported module will not be assigned to one variable but instead each value in the module will be assigned to its own variable name.  Those variables can then be used in subsequent Hurmet statements.</p>
+
+<p><span class="hurmet-calc" data-entry="f_c′ = ?? psi"></span></p>
+
+<p>The variables thus stay synchronized throughout the project and anyone who reads the document has a clear way to see how the variables are defined.</p>
 
 </div> <!-- editor -->
 

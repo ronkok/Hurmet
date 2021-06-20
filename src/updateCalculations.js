@@ -166,7 +166,15 @@ const proceedAfterFetch = (
     doc.nodesBetween(0, curPos, function(node) {
       if (node.type.name === "calculation") {
         const attrs = node.attrs
-        if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs) }
+        if (attrs.name) {
+          if (attrs.name === "importedParameters") {
+            Object.entries(attrs.value).forEach(([key, value]) => {
+              hurmetVars[key] =  value
+            })
+          } else {
+            insertOneHurmetVar(hurmetVars, attrs)
+          }
+        }
       }
     })
 
@@ -177,6 +185,9 @@ const proceedAfterFetch = (
       // The mathPrompt dialog box did not have accesss to hurmetVars, so it
       // did not do unit conversions on the result template. Do that first.
       improveQuantities(attrs, hurmetVars)
+/*      if (attrs.dtype === dt.DATAFRAME && attrs.value.attrs.length > 0) {
+        attrs = prepareTable(attrs, decimalFormat)
+      } */
       // Now proceed to do the calculation of the cell.
       if (attrs.rpn) { attrs = evaluate(attrs, hurmetVars, decimalFormat) }
       if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs) }
