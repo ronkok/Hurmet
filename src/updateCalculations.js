@@ -231,7 +231,15 @@ const proceedAfterFetch = (
             tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs))
           }
         } else if (attrs.name && !(isCalcAll && attrs.isFetch)) {
-          insertOneHurmetVar(hurmetVars, attrs)
+          if (attrs.name) {
+            if (attrs.name === "importedParameters") {
+              Object.entries(attrs.value).forEach(([key, value]) => {
+                hurmetVars[key] =  value
+              })
+            } else {
+              insertOneHurmetVar(hurmetVars, attrs)
+            }
+          }
         }
       }
     }
