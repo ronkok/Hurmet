@@ -118,7 +118,7 @@ While in a cell,<br>
 
 ###### Statements
 
-Inside a calculation cell, we can write an statement and get a numeric result. In the demonstration box to the lower-left, try replacing the text with `2 + 2 = ?` . Hurmet will render the math and write the result where you place the `?` mark.
+Inside a calculation cell, we can write an statement and get a numeric result. In the demonstration box to the right, try replacing the text with `2 + 2 = ?` . Hurmet will render the math and write the result where you place the `?` mark.
 </div>
 
 ###### Numbers
@@ -589,7 +589,7 @@ Data frame literals are written between double backtick delimiters. The text bet
 
 Here’s an example of CSV input:
 
-    rebar = ``name,diameter,area
+    rebar = ``,diameter,area
     ,in ,in²
     #3,0.375,0.11
     #4,0.5  ,0.2
@@ -608,7 +608,7 @@ A fetch example:
 
 That example loads in this data:
 
-<p><span class="tex">\begin{array}{l|c c c c c c c c}&amp;{\text{weight}}&amp;{A}&amp;{d}&amp;{\text{bf}}&amp;{\text{tw}}&amp;{\text{Ix}}&amp;{\text{Sx}}&amp;{\text{rx}} \\  {\text{unit}}&amp; {\text{lbf/ft}}&amp; {\text{in}^{2}}&amp; {\text{in}}&amp; {\text{in}}&amp; {\text{in}}&amp; {\text{in}^{4}}&amp; {\text{in}^{3}}&amp; {\text{in}} \\ \hline \text{W14X90}&amp;90&amp;26.5&amp;14&amp;14.5&amp;0.44&amp;999&amp;143&amp;6.14 \\ \text{W12X65}&amp;65&amp;19.1&amp;12.1&amp;12&amp;0.39&amp;533&amp;87.9&amp;5.28 \\ \text{W10X49}&amp;49&amp;14.4&amp;10&amp;10&amp;0.34&amp;272&amp;54.6&amp;4.35 \\ \text{W8X31}&amp;31&amp;9.13&amp;8&amp;8&amp;0.285&amp;110&amp;27.5&amp;3.47 \\ \text{W8X18}&amp;18&amp;5.26&amp;8.14&amp;5.25&amp;0.23&amp;61.9&amp;15.2&amp;3.43 \\ \text{W6X15}&amp;15&amp;4.43&amp;5.99&amp;5.99&amp;0.23&amp;29.1&amp;9.72&amp;2.56 \\ \text{W4X13}&amp;13&amp;3.83&amp;4.16&amp;4.06&amp;0.28&amp;11.3&amp;5.46&amp;1.72\end{array}</span></p>
+<p><span class="tex">\begin{array}{l|c c c c c c c c}&amp;{\text{weight}}&amp;{A}&amp;{d}&amp;{\text{bf}}&amp;{\text{tw}}&amp;{\text{Ix}}&amp;{\text{Sx}}&amp;{\text{rx}} \\  &amp; {\text{lbf/ft}}&amp; {\text{in}^{2}}&amp; {\text{in}}&amp; {\text{in}}&amp; {\text{in}}&amp; {\text{in}^{4}}&amp; {\text{in}^{3}}&amp; {\text{in}} \\ \hline \text{W14X90}&amp;90&amp;26.5&amp;14&amp;14.5&amp;0.44&amp;999&amp;143&amp;6.14 \\ \text{W12X65}&amp;65&amp;19.1&amp;12.1&amp;12&amp;0.39&amp;533&amp;87.9&amp;5.28 \\ \text{W10X49}&amp;49&amp;14.4&amp;10&amp;10&amp;0.34&amp;272&amp;54.6&amp;4.35 \\ \text{W8X31}&amp;31&amp;9.13&amp;8&amp;8&amp;0.285&amp;110&amp;27.5&amp;3.47 \\ \text{W8X18}&amp;18&amp;5.26&amp;8.14&amp;5.25&amp;0.23&amp;61.9&amp;15.2&amp;3.43 \\ \text{W6X15}&amp;15&amp;4.43&amp;5.99&amp;5.99&amp;0.23&amp;29.1&amp;9.72&amp;2.56 \\ \text{W4X13}&amp;13&amp;3.83&amp;4.16&amp;4.06&amp;0.28&amp;11.3&amp;5.46&amp;1.72\end{array}</span></p>
 
 As data frames go, that example is still pretty small. When I assign a data frame to a variable, I usually suppress its display by using the __!__ display selector.
 
@@ -825,7 +825,7 @@ exp(*x*)
 
 fetch(*url*)
 
-: Fetches the contents of a remote file. It will return<br>¢{"currencies" if "assigned to variable: " currencies; "a data range" if "the file extension is .csv.txt"; "a module" if "the file extension is hrms"}¢.<br>Fetch functions must be stand-alone expressions.
+: Fetches the contents of a remote file. It expects the file to be in CSV format and will return a data range. Fetch functions must be stand-alone expressions.
 
 gcd(*m*, *n*)
 
@@ -1017,15 +1017,11 @@ If the Hurmet built-in unit definitions are not sufficient, you can define a set
 
 #### Currencies
 
-Currency exchange rates change, so Hurmet treats them differently than other conversion factors. <span class="dim">If you do unit-aware calculations with more than one currency in the same document,</span> Before you can use a currency unit, you must first load currency exchange rates into a dictionary named **currencies**. Such a statement might be coded like this:
+Currency exchange rates change, so Hurmet’s exchange rates are updated with [data from the European Central Bank](https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml). That update occurs only once per week. For many purposes, such rates are insufficiently accurate, so you can override them and define your own exchange rates in a dictionary named **currencies**. Such a statement might be coded like this:
 
-    currencies = { "USD": 1, "CAD": 1.33 }
+    currencies = { "USD": 1, "CAD": 1.25 }
 
-The keys in that dictionary are standard three-letter [currrency codes](https://www.xe.com/iso4217.php). If writing such a dictionary is too much trouble, you can also fetch exchange rates with the following statement:
-
-    currencies = fetch("https://api.exchangeratesapi.io/latest?base=USD") = !
-
-That statement will fetch exchange rates published at [exchangeratesapi.io](https://exchangeratesapi.io "exchangeratesapi.io") which gets them in turn from the [European Central Bank](https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html "Exchange Rates"). The rates are updated once per day.
+The keys in that dictionary are standard three-letter [currrency codes](https://www.xe.com/iso4217.php). 
 
 The variable name **currencies** may not be used for any other purpose.
 
@@ -1041,6 +1037,7 @@ Many traditional units have had more than one historical definition. Hurmet curr
 *   __point__ is the adobe point = ¹∕₇₂ inch. __TeX point__ is also available.
 *   __barrel__ and __bbl__ are an oil barrel = 42 US gallons.
 
+If you are curious about some of the more unusual units, such as “survey foot” or “nautical mile”, I recommend Russ Rowlett’s [dictionary of units of measurement](http://www.ibiblio.org/units/).
 
 ## Numeral display
 

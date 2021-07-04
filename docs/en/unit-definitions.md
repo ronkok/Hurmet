@@ -12,7 +12,7 @@
 
 The values in columns *length* through *solid angle* are exponents that Hurmet uses to check unit compatibility. For instance, a liter is a measure of volume, or *length*<sup>3</sup>, so the table’s “length” column shows a 3 for liters.
 
-The monetary factors in this table are just a placeholder to be replaced with currency rates that are fetched at runtime.
+The currency exchange rates in this table are only placeholders. Hurmet actually uses [data from the European Central Bank](https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml). This data is updated once per week. You can [define your own](./manual.html#currencies), more accurate exchange rates to override the default rates.
 
 If you are curious about some of the more unusual units, such as “survey foot” or “nautical mile”, I recommend Russ Rowlett’s [dictionary of units of measurement](http://www.ibiblio.org/units/).
 
@@ -38,7 +38,7 @@ If you are curious about some of the more unusual units, such as “survey foot�
 | CAD                   | 1                              | 0       | CAD      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | 0  | C$                               |
 | CCF                   | 2.8316846592                   | 0       | 0        | 3  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | 0  | 100 cubic feet                   |
 | CHF                   | 1                              | 0       | CHF      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | 0  | Swiss franc                      |
-| CNY                   | 1                              | 0       | CNY      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | 0  | Chinese Yuan                     |
+| CNY                   | 1                              | 0       | CNY      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | 0  | Chinese Yuan Renminbi                     |
 | CY                    | 0.764554857984                 | 0       | 0        | 3  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | 0  | cu yard                          |
 | Calorie               | 4186.8                         | 0       | 0        | 2  | 1  | -2 | 0  | 0  | 0 | 0  | 0 | 0  | food calorie                     |
 | Canadian dollar       | 1                              | 0       | CAD      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | 0  |                                  |
@@ -70,6 +70,7 @@ If you are curious about some of the more unusual units, such as “survey foot�
 | HP                    | 745.69987158227                | 0       | 0        | 2  | 1  | -3 | 0  | 0  | 0 | 0  | 0 | 0  | horsepower                       |
 | Hong Kong dollar      | 1                              | 0       | HKD      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | 0  |                                  |
 | Hz                    | 1                              | 0       | siSymbol | 0  | 0  | -1 | 0  | 0  | 0 | 0  | 0 | 0  | hertz                            |
+| ILS                   | 1                              | 0       | ILS      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | 0  |                                  |
 | INR                   | 1                              | 0       | INR      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | 0  |                                  |
 | Indian Rupee          | 1                              | 0       | INR      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | 0  |                                  |
 | Israeli New Shekel    | 1                              | 0       | ILS      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | 0  |                                  |
@@ -80,6 +81,7 @@ If you are curious about some of the more unusual units, such as “survey foot�
 | Julian year           | 31557600                       | 0       | 0        | 0  | 0  | 1  | 0  | 0  | 0 | 0  | 0 | 0  | 365.24 days                      |
 | Jy                    | 1e-26                          | 0       | siSymbol | 0  | 1  | -2 | 0  | 0  | 0 | 0  | 0 | 0  | jansky                           |
 | K                     | 1                              | 0       | 0        | 0  | 0  | 0  | 0  | 1  | 0 | 0  | 0 | 0  | kelvin                           |
+| KRW                   | 1                              | 0       | KRW      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | 0  |                                  |
 | KiB                   | 8192                           | 0       | 0        | 0  | 0  | 0  | 0  | 0  | 1 | 0  | 0 | 0  | kilobyte = 8 × 2^10 bits         |
 | L                     | 0.001                          | 0       | siSymbol | 3  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | 0  | liter                            |
 | Lego stud             | 0.008                          | 0       | siSymbol | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | 0  | 8 mm                             |
@@ -109,6 +111,7 @@ If you are curious about some of the more unusual units, such as “survey foot�
 | R                     | 0.000258                       | 0       | siSymbol | 0  | -1 | 1  | 1  | 0  | 0 | 0  | 0 | 0  | roentgen                         |
 | R$                    | 1                              | 0       | BRL      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | 0  | Brazil real                      |
 | RT                    | 3516.8532                      | 0       | 0        | 2  | 1  | -3 | 0  | 0  | 0 | 0  | 0 | 0  | ton refrig'n                     |
+| RUB                   | 1                              | 0       | RUB      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | 0  | Russion rouble                |
 | S                     | 1                              | 0       | siSymbol | -2 | -1 | 3  | 2  | 0  | 0 | 0  | 0 | 0  | siemen                           |
 | SF                    | 0.09290304                     | 0       | 0        | 2  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | 0  | square feet                      |
 | SY                    | 0.83612736                     | 0       | 0        | 2  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | 0  | square yards                     |
@@ -116,6 +119,7 @@ If you are curious about some of the more unusual units, such as “survey foot�
 | Swiss Franc           | 1                              | 0       | CHF      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | 0  |                                  |
 | T                     | 1                              | 0       | siSymbol | -2 | -2 | -2 | -1 | 0  | 0 | 0  | 0 | 0  | tesla (flux density)             |
 | TB                    | 8796093022208                  | 0       | 0        | 0  | 0  | 0  | 0  | 0  | 1 | 0  | 0 | 0  | terabyte = 8×2^40 bits           |
+| TWD                   | 1                              | 0       | TWD      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | 0  | New Taiwan Dollar                |
 | TeX point             | 0.0003515                      | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | 0  | ~inch/72.27                      |
 | TiB                   | 8796093022208                  | 0       | 0        | 0  | 0  | 0  | 0  | 0  | 1 | 0  | 0 | 0  | tebibyte = 8×2^40 bits           |
 | US$                   | 1                              | 0       | USD      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | 0  | US dollar                        |
