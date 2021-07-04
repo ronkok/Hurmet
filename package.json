@@ -43,6 +43,7 @@
   },
   "scripts": {
     "math": "rollup --config utils/rollup.hurmet.config.js",
+    "rates": "node utils/updateExchangeRates.js",
     "docs": "node utils/buildDocs.js",
     "pm": "rollup --config utils/rollup.prosemirror.config.js && node utils/editPM.js",
     "minify": "terser preview/prosemirror.js -o site/prosemirror.min.js -m && terser preview/hurmet.js -o site/hurmet.min.js -m",
