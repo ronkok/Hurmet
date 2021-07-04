@@ -4,20 +4,14 @@ let unitModule = fs.readFileSync('src/units.js').toString('utf8')
 
 const rateRegEx = /currency="([^"]+)" rate="([^"]+)"/g
 
-const matchArray = []
-let match = null
+let match;
 while ((match = rateRegEx.exec(ecbData)) !== null) {
-  matchArray.push({
-    currencyCode: match[1],
-    rate: match[2]
-  })
-}
-
-for (let i = matchArray.length - 1; i >= 0; i--) {
-  const posDef = unitModule.indexOf('"' + matchArray[i].currencyCode + `":`)
-  if (posDef > -1) {
-    const str = unitModule.slice(posDef + 5)
-    unitModule = unitModule.slice(0, posDef + 5) + str.replace(/"[^"]+/, '"' + matchArray[i].rate)
+  const currencyCode = match[1]
+  const rate = match[2]
+  const pos = unitModule.indexOf('"' + currencyCode + `":`)
+  if (pos > -1) {
+    const str = unitModule.slice(pos + 5)
+    unitModule = unitModule.slice(0, pos + 5) + str.replace(/"[^"]+/, '"' + rate)
   }
 }
 
