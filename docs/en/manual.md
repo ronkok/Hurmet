@@ -1480,7 +1480,6 @@ Hurmet is built with the aid of several open source libraries and resources, for
 *   [KaTeX](https://katex.org "KaTeX"), fast math rendering on the web, by Khan Academy and volunteer contributors.
 *   [CodeMirror](https://codemirror.net/), a text editor, also by Marijn Haverbeke.
 *   [Marked.js](https://marked.js.org/), for light-weight Markdown parsing, by the [Marked team](https://marked.js.org/#/AUTHORS.md).
-*   [exchangeratesapi.io](https://exchangeratesapi.io "exchangeratesapi.io"), currency exchange rates updated daily, by Madis Väin.
 *   Many of Hurmet’s menu buttons show images from [icomoon](https://icomoon.io "icomoon").
 *   This document’s railroad diagrams are modified versions of images created with [regexper.com](https://regexper.com), by Jeff Avalone.
 
