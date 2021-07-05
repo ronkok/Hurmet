@@ -271,7 +271,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           } else {
             unit.expos = allZeros
           }
-          product.unit = Object.freeze(unit)
+          product.unit = o2.dtype === dt.DICT ? clone(o2.unit) : Object.freeze(unit)
 
           const [shape1, shape2, needsMultBreakdown] = binaryShapesOf(o1, o2)
           const op = needsMultBreakdown
