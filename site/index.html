@@ -72,20 +72,22 @@
 <p><span class="hurmet-calc" data-entry="format = &quot;h3&quot;"></span></p>
 <p><span class="hurmet-calc" data-entry="V = '3.1 kips'"></span></p>
 <p><span class="hurmet-calc" data-entry="dist = 
-   ``Floor|  W   | h  |  W × h  |       F        | V_i
-   | kips | ft | kip·ft  |      kips      | kips
-   &quot;3&quot; | 1.2  | 20 | = W × h |=: V×Wh / Wh.Sum| = F
-   &quot;2&quot; | 2.3  | 11 |         |                | = F + V_i′
-   &quot;1&quot; | 4.0  |  0 |         |                |
-   Sum |=sum()|    | =sum()  |      =sum()    | = V_i′``"></span></p>
+   ``Level|  W   | h  |  W × h  |        F         | V_i
+          | kips | ft | kip·ft  |       kips       | kips
+        4 | 1.2  | 20 | = W × h |=: V × Wh / Wh.Sum| = F
+        3 | 2.2  | 22 |         |                  | = F + V_i′
+        2 | 2.3  | 11 |         |                  |
+        1 | 4.0  |  0 |         |                  |
+      Sum |=sum()|    | =sum()  |       =sum()     | = V_i′``"></span></p>
 <p>Remember that a data frame is written as pipe-separated values. Those values can be cell formulas. So the content of that calculation zone looks like this:</p>
 <pre><code>dist = 
-``Floor|  W | h  |  W × h  |       F        | V_i
-     | kips | ft | kip·ft  |      kips      | kips
- "3" | 1.2  | 20 | = W × h |=: V×Wh / Wh.Sum| = F
- "2" | 2.3  | 11 |         |                | = F + V_i′
- "1" | 4.0  |  0 |         |                |
- Sum |=sum()|    | =sum()  |      =sum()    | = V_i′``</code></pre>
+``Level|  W   | h  |  W × h  |        F         | V_i
+       | kips | ft | kip·ft  |       kips       | kips
+    4  | 1.2  | 22 | = W × h |=: V × Wh / Wh.Sum| = F
+    3  | 2.2  | 22 |         |                  | = F + V_i′
+    2  | 2.3  | 11 |         |                  |
+    1  | 4.0  |  0 |         |                  |
+   Sum |=sum()|    | =sum()  |       =sum()     | = V_i′``</code></pre>
 <p>Notice some details:</p>
 <ol>
    <li>

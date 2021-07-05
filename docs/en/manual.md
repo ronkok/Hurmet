@@ -1241,7 +1241,7 @@ A Hurmet data frame can contain formulas somewhat similar to a spreadsheet. Here
 
 ¢V = '3.1 kips'¢
 
-<p><span class="tex">\mathrm{dist} =\begin{array}{l|r r r r r}{\text{Floor}}&amp;{W}&amp;{h}&amp;{\text{W × h}}&amp;{F}&amp;{V_\text{i}} \\ &amp; {\text{kips}}&amp; {\text{ft}}&amp; {\text{kip}\mkern1mu{\cdot}\mkern1mu\text{ft}}&amp; {\text{kips}}&amp; {\text{kips}} \\ \hline 3\phantom{}&amp;1.2&amp;20\phantom{}&amp;24\phantom{.0}&amp;1.51&amp;1.51 \\ 2\phantom{}&amp;2.3&amp;11\phantom{}&amp;25.3&amp;1.59&amp;3.1\phantom{0} \\ 1\phantom{}&amp;4.0&amp;0\phantom{}&amp;0\phantom{.0}&amp;0\phantom{.00}&amp;3.1\phantom{0} \\\hline \text{Sum}&amp;7.5&amp;&amp;49.3&amp;3.1\phantom{0}&amp;3.1\phantom{0}\end{array}</span></p>
+<p><span class="tex">\mathrm{dist} =\begin{array}{l|r r r r r}{\text{Level}}&amp;{W}&amp;{h}&amp;{\text{W × h}}&amp;{F}&amp;{V_\text{i}} \\ &amp; {\text{kips}}&amp; {\text{ft}}&amp; {\text{kip}\mkern1mu{\cdot}\mkern1mu\text{ft}}&amp; {\text{kips}}&amp; {\text{kips}} \\ \hline 4\phantom{}&amp;1.2&amp;20\phantom{}&amp;24\phantom{.0}&amp;0.762&amp;0.762 \\ 3\phantom{}&amp;2.2&amp;22\phantom{}&amp;48.4&amp;1.54\phantom{0}&amp;2.3\phantom{00} \\ 2\phantom{}&amp;2.3&amp;11\phantom{}&amp;25.3&amp;0.803&amp;3.1\phantom{00} \\ 1\phantom{}&amp;4.0&amp;0\phantom{}&amp;0\phantom{.0}&amp;0\phantom{.000}&amp;3.1\phantom{00} \\\hline \text{Sum}&amp;9.7&amp;&amp;97.7&amp;3.1\phantom{00}&amp;3.1\phantom{00}\end{array}</span></p>
 
 Remember that a data frame is written as pipe-separated values. A cell can contain a formula. So the content of that calculation zone looks like this:
 
@@ -1249,9 +1249,10 @@ Remember that a data frame is written as pipe-separated values. A cell can conta
 dist = 
 ``Floor|  W   | h  |  W × h  |        F         | V_i
        | kips | ft | kip·ft  |       kips       | kips
-   "3" | 1.2  | 20 | = W × h |=: V × Wh / Wh.Sum| = F
-   "2" | 2.3  | 11 |         |                  | = F + V_i′
-   "1" | 4.0  |  0 |         |                  |
+    4  | 1.2  | 33 | = W × h |=: V × Wh / Wh.Sum| = F
+    3  | 2.2  | 22 |         |                  | = F + V_i′
+    2  | 2.3  | 11 |         |                  |
+    1  | 4.0  |  0 |         |                  |
    Sum |=sum()|    | =sum()  |       =sum()     | = V_i′``
 ```
 
