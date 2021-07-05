@@ -61,24 +61,78 @@
 
 <p>This is editable text. You can focus it and start typing. A calculation cell will open if you click on it. All calculations will update if you press <strong>Enter</strong> to close a calculation cell.</p>
 
+<h4>Breaking Change</h4>
+
+<p>The source code for data frames must now be pipe-separated values, not comma-separated values.</p>
+
 <p>This week’s example:</p>
 
-<h3>Imported Parameters</h3>
-
-<p>In a big project, the calculations are often broken up into several documents. But there are always a few parameters that are common to the entire project. Hurmet enables you to define those parameters once, in a module, and then import them into each of the calculation documents.</p>
-
-<p>Such an import statement is written this way:</p>
-
-<pre><code>importedParameters = import("https://hurmet.app/parent.txt") = !</code></pre>
-
-<p>That statement will render like this:</p>
-<p><span class="hurmet-calc" data-entry="importedParameters = import(&quot;https://hurmet.app/parent.txt&quot;) = !"></span></p>
-
-<p>“importedParameters” is a special variable name in Hurmet. When used, the imported module will not be assigned to one variable but instead each value in the module will be assigned to its own variable name.  Those variables can then be used in subsequent Hurmet statements.</p>
-
-<p><span class="hurmet-calc" data-entry="f_c′ = ?? psi"></span></p>
-
-<p>The variables thus stay synchronized throughout the project and anyone who reads the document has a clear way to see how the variables are defined.</p>
+<h3>Active Tables</h3>
+<p>A Hurmet data frame can contain formulas somewhat similar to a spreadsheet. Here’s an example:</p>
+<p><span class="hurmet-calc" data-entry="format = &quot;h3&quot;"></span></p>
+<p><span class="hurmet-calc" data-entry="V = '3.1 kips'"></span></p>
+<p><span class="hurmet-calc" data-entry="dist = 
+   ``Floor|  W   | h  |  W × h  |       F        | V_i
+   | kips | ft | kip·ft  |      kips      | kips
+   &quot;3&quot; | 1.2  | 20 | = W × h |=: V×Wh / Wh.Sum| = F
+   &quot;2&quot; | 2.3  | 11 |         |                | = F + V_i′
+   &quot;1&quot; | 4.0  |  0 |         |                |
+   Sum |=sum()|    | =sum()  |      =sum()    | = V_i′``"></span></p>
+<p>Remember that a data frame is written as pipe-separated values. Those values can be cell formulas. So the content of that calculation zone looks like this:</p>
+<pre><code>dist = 
+``Floor|  W | h  |  W × h  |       F        | V_i
+     | kips | ft | kip·ft  |      kips      | kips
+ "3" | 1.2  | 20 | = W × h |=: V×Wh / Wh.Sum| = F
+ "2" | 2.3  | 11 |         |                | = F + V_i′
+ "1" | 4.0  |  0 |         |                |
+ Sum |=sum()|    | =sum()  |      =sum()    | = V_i′``</code></pre>
+<p>Notice some details:</p>
+<ol>
+   <li>
+      <p>A table formula</p>
+      <ul>
+         <li>
+            <p>begins with a “=” just like a spreadsheet.</p>
+         </li>
+         <li>
+            <p>has variable names that are column headings, not “A1” type references. </p>
+         </li>
+         <li>
+            <p>returns a result not only to its own cell, but also to every non-formula cell below it.</p>
+         </li>
+         <li>
+            <p>begins with “=:” if the formula is unit-aware.</p>
+         </li>
+      </ul>
+   </li>
+   <li>
+      <p>In a table’s bottom row, a <code>sum()</code> function is valid with no arguments. It will return the sum of the column.</p>
+   </li>
+   <li>
+      <p>An active table can have units-of-measure. Just write unit names in row 2 of the pipe-separated input.</p>
+   </li>
+   <li>
+      <p>Data in any one column must all be the same data type and carry the same unit-of-measure.</p>
+   </li>
+   <li>
+      <p>A table variable can:</p>
+      <ul>
+         <li>
+            <p>… omit spaces and characters that are invalid for identifiers. So “<code>Wh</code>” will call column “W × h”</p>
+         </li>
+      </ul>
+      <ul>
+         <li>
+            <p>… call a value from outside the table, such as <code>V</code>.</p>
+         </li>
+         <li>
+            <p>… call a cell from the previous row by appending a prime to a column heading, as in <code>V_i′</code>.</p>
+         </li>
+      </ul>
+   </li>
+</ol>
+<p>Table calculations proceed column-wise. Subject to that constraint, you can call individual cells via dot notation, such as <code>Wh.Sum</code>.</p>
+<p>Other calculation cells can call data from inside a table, using the same accessor notation as a data frame. The left column values can be used as keys to access data in the table.</p>
 
 </div> <!-- editor -->
 

@@ -33,7 +33,8 @@ import { functionRegEx, scanModule } from "./module"
  */
 
 const containsOperator = /[+\-×·*∘⌧/^%‰&√!¡|‖&=<>≟≠≤≥∈∉⋐∧∨⊻¬]|\xa0(function|modulo|\\atop|root|sum|\?{}|%|⎾⏋|⎿⏌|\[\]|\(\))\xa0/
-const mustDoCalculation = /^([$$£¥\u20A0-\u20CF]?(\?{1,2}|@{1,2}|%{1,2}|!{1,2})[^=!(?@%!{})]*)$/
+const mustDoCalculation = /^(``.+``|[$$£¥\u20A0-\u20CF]?(\?{1,2}|@{1,2}|%{1,2}|!{1,2})[^=!(?@%!{})]*)$/
+const assignDataFrameRegEx = /^[^=]+=\s*``/
 const currencyRegEx = /^[$£¥\u20A0-\u20CF]/
 const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/
 const matrixOfNames = /^\\[([](?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*[,;].+[)\]]$/
@@ -87,7 +88,10 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
 
   str = inputStr
 
-  const posOfLastEquals = str.lastIndexOf("=") + 1
+  const isDataFrameAssigment = assignDataFrameRegEx.test(str)
+  const posOfLastEquals = isDataFrameAssigment
+    ? str.indexOf("=") + 1
+    : str.lastIndexOf("=") + 1
 
   if (posOfLastEquals > 1) {
     // input has form:  mainStr = trailStr
@@ -147,6 +151,9 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
         // input has form:  expression = trailStr
         expression = mainStr
       }
+    } else if (isDataFrameAssigment) {
+      name = mainStr
+      expression = trailStr
     } else  if (isValidIdentifier.test(mainStr) && !isKeyWord.test(mainStr)) {
       // No calculation display selector is present,
       // but there is one "=" and a valid idendtifier.

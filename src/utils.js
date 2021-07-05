@@ -176,6 +176,8 @@ export const unitTeXFromString = str => {
     } else if (inExponent) {
       unit += "}\\text{" + ch
       inExponent = false
+    } else if (ch === "$") {
+      unit += "\\$"
     } else {
       unit += ch
     }

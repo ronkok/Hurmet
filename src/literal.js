@@ -52,7 +52,7 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
   } else if (/^``/.test(str)) {
     // A CSV between double back ticks.
     // Read the CSV into a data frame.
-    const pos = str.indexOf('`', 2)
+    const pos = str.indexOf('`', (str.charAt(2) === "`" ? 3 : 2))
     str = str.slice(2, pos).trim()
     const dataFrame = DataFrame.dataFrameFromCSV(str, {})
     return [dataFrame.value, dataFrame.unit, dt.DATAFRAME,

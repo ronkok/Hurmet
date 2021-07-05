@@ -67,7 +67,9 @@ const display = (m, formatSpec, decimalFormat) => {
     } else {
       const numArgs = m.value.length
       for (let i = 0; i < numArgs; i++) {
-        const elementDisplay = (m.dtype & dt.RATIONAL)
+        const elementDisplay = m.value[i] === undefined
+          ? ""
+          : (m.dtype & dt.RATIONAL)
           ? format(m.value[i], formatSpec, decimalFormat)
           : (m.dtype & dt.BOOLEAN) || (m.dtype & dt.STRING)
           ? "\\text{" + m.value[i] + "}"
@@ -106,7 +108,9 @@ const displayAlt = (m, formatSpec, decimalFormat) => {
     } else {
       const numArgs = m.value.length
       for (let i = 0; i < numArgs; i++) {
-        const elementDisplay = (m.dtype & dt.RATIONAL)
+        const elementDisplay = m.value[i] === undefined
+          ? ""
+          : (m.dtype & dt.RATIONAL)
           ? format(m.value[i], formatSpec, decimalFormat).replace(/{,}/g, ",")
           : m.value[i]
         str += elementDisplay + ((i < numArgs - 1) ? argSep : "")

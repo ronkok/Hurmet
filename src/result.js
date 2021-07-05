@@ -2,7 +2,7 @@ import { dt } from "./constants"
 import { Rnl } from "./rational"
 import { parse } from "./parser"
 import { format } from "./format"
-import { addTextEscapes } from "./utils"
+import { addTextEscapes, clone } from "./utils"
 import { Matrix, isMatrix } from "./matrix"
 import { DataFrame } from "./dataframe"
 import { map } from "./map"
@@ -49,7 +49,7 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAwar
 
       } else if (result.dtype === dt.DATAFRAME) {
         resultDisplay = DataFrame.display(result.value, formatSpec, decimalFormat)
-        altResultDisplay = DataFrame.displayAlt(result.value, formatSpec, decimalFormat)
+        altResultDisplay = DataFrame.displayAlt(result.value, formatSpec)
 
       } else if (result.dtype & dt.MAP) {
         resultDisplay = map.display(

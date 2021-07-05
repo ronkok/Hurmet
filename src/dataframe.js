@@ -4,7 +4,7 @@ import { clone, addTextEscapes, unitTeXFromString } from "./utils"
 import { unitFromUnitName } from "./units"
 import { errorOprnd } from "./error"
 import { Matrix } from "./matrix"
-import { format } from "./format"
+import { format, formattedDecimal } from "./format"
 
 const columnListFromRange = (start, end) => {
   const columnList = []
@@ -240,7 +240,8 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
   }
 }
 
-const numberRegEx = new RegExp(Rnl.numberPattern + "$")
+// const numberRegEx = new RegExp(Rnl.numberPattern + "$")
+const numberRegEx = new RegExp("^(?:=|" + Rnl.numberPattern.slice(1) + "$)")
 const mixedFractionRegEx = /^-?(?:[0-9]+(?: [0-9]+\/[0-9]+))$/
 
 const dataFrameFromCSV = (str, vars) => {
@@ -249,13 +250,14 @@ const dataFrameFromCSV = (str, vars) => {
   const data = []    // where the main data lives, not including column names or units.
   const headings = []                    // An array containing the column names
   const columnMap = Object.create(null) // map of column names to column index numbers
-  const rowMap = /^(?:[Nn]ame|[Ii]ndex)\s*,/.test(str) ? Object.create(null) : false
+  const rowMap = str.charAt(0) === "`" ? false : Object.create(null) // ditto for rows.
   const units = []                     // array of unit names, one for each column
   const dtype = []                     // each column's Hurmet operand type
+  const attrs = []                     // array of Hurmet live table expressions.
   const unitMap = Object.create(null)  // map from unit names to unit data
   let gotUnits = false
 
-  const pos = /^ï»¿/.test(str) ? 3 : 0  // Check for a BOM
+  if (str.charAt(0) === "`") { str = str.slice(1) }
   let row = 0
   let col = 0
 
@@ -292,9 +294,7 @@ const dataFrameFromCSV = (str, vars) => {
           }
         }
         if (rowMap) {
-          Object.entries(rowMap).forEach(([key, value]) => {
-            rowMap[key] = value - 1
-          })
+          Object.entries(rowMap).forEach(([key, value]) => { rowMap[key] = value - 1 })
         }
       }
     }
@@ -304,7 +304,12 @@ const dataFrameFromCSV = (str, vars) => {
       columnMap[datum] = col
     } else {
       if (row === 1) { data.push([]) } // First data row.
-      data[col].push(datum)
+      if (datum.charAt(0) === "=") {
+        attrs.push({ row: row - 1, "col": col, entry: datum })
+        data[col].push("")
+      } else {
+        data[col].push(datum)
+      }
       if (rowMap && col === 0) {
         rowMap[datum] = row - 1 - (gotUnits ? 1 : 0)
       }
@@ -318,7 +323,7 @@ const dataFrameFromCSV = (str, vars) => {
     for (const line of lines) {
       if (line.length > 0) {
         col = 0
-        const items = line.split(",")
+        const items = line.split("|")
         for (const item of items) { harvest(item.trim()); col++ }
         row += 1
       }
@@ -330,7 +335,7 @@ const dataFrameFromCSV = (str, vars) => {
     let datum = ""
     let inQuote = false  // true means we're inside a quoted field
     // iterate over each character, keep track of current row and column
-    for (let c = pos; c < str.length; c++) {
+    for (let c = 0; c < str.length; c++) {
       const cc = str[c]       // current character
       const nc = str[c + 1]   // next character
 
@@ -343,7 +348,7 @@ const dataFrameFromCSV = (str, vars) => {
       if (cc === '"') { inQuote = !inQuote; continue; }
 
       // If it's a comma and we're not in a quoted field, harvest the datum
-      if (cc === ',' && !inQuote) { harvest(datum); datum = ""; ++col; continue }
+      if (cc === '|' && !inQuote) { harvest(datum); datum = ""; ++col; continue }
 
       // If it's a CRLF and we're not in a quoted field, skip the next character,
       // harvest the datum, and move on to the next row and move to column 0 of that new row
@@ -381,15 +386,31 @@ const dataFrameFromCSV = (str, vars) => {
       break
     }
   }
+  for (let i = 0; i < attrs.length; i++) {
+    if (gotUnits) { attrs[i].row -= 1 }
+    if (attrs[i].row === 0) {
+      dtype[attrs[i].col] = dt.RATIONAL
+      if ((units.length > 0 && units[attrs[i].col].length > 0)) {
+        dtype[attrs[i].col] += dt.QUANTITY
+      }
+    }
+  }
+
+  if (attrs.length > 0) {
+    attrs.sort((a, b) => a.col === b.col ? a.row - b.row : a.col - b.col)
+    const extraCharsRegEx = /[ ×·+-/]/g
+    Object.entries(columnMap).forEach(([key, value]) => {
+      const altKey = key.replace(extraCharsRegEx, "")
+      if (altKey !== key) { columnMap[altKey] = value }
+    })
+    Object.entries(rowMap).forEach(([key, value]) => {
+      const altKey = key.replace(extraCharsRegEx, "")
+      if (altKey !== key) { rowMap[altKey] = value }
+    })
+  }
+
   return {
-    value: {
-      data: data,
-      headings: headings,
-      columnMap: columnMap,
-      rowMap: rowMap,
-      units: units,
-      dtype: dtype
-    },
+    value: { data, headings, columnMap, rowMap, units, attrs, dtype },
     unit: unitMap,
     dtype: dt.DATAFRAME
   }
@@ -454,7 +475,9 @@ const append = (o1, o2, vars, unitAware) => {
   const oprnd = clone(o1)
   oprnd.value.headings.push(o2.name)
   oprnd.value.columnMap[o2.name] = o1.value.headings.length - 1
-  const dtype = o2.dtype - dt.COLUMNVECTOR
+  const dtype = (o2.dtype & dt.COLUMNVECTOR)
+    ? o2.dtype - dt.COLUMNVECTOR
+    : o2.dtype - dt.ROWVECTOR
   if (o2.unit.name && o2.unit.name.length > 0) {
     oprnd.value.units.push(o2.unit.name)
     const unit = unitFromUnitName(o2.unit.name, vars)
@@ -488,18 +511,15 @@ const quickDisplay = str => {
   if (lines.length < 3) {
     tex = "\\begin{matrix}\\text{"
     for (let i = 0; i < lines.length; i++) {
-      tex += lines[i].trim().replace(/ *, */g, "} & \\text{") + "} \\\\ \\text{"
+      tex += lines[i].trim().replace(/ *\| */g, "} & \\text{") + "} \\\\ \\text{"
     }
     tex = tex.slice(0, -10) + "\\end{matrix}"
   } else {
-    tex = "\\begin{array}"
+    tex = "\\begin{array}{l|cccccccccccccccccccccccc}\\text{"
     const cells = new Array(lines.length)
     for (let i = 0; i < lines.length; i++) {
-      cells[i] = lines[i].trim().split(/ *, */)
+      cells[i] = lines[i].trim().split(/ *\| */)
     }
-
-    const gotNames = cells[0][1] === "name"
-    tex += gotNames ? "{1|cccccccccccccccccccccccc}\\text" : "{c}\\text{"
 
     let gotUnits = false
     let gotAnswer = false
@@ -514,7 +534,7 @@ const quickDisplay = str => {
     }
 
     for (let i = 0; i < lines.length; i++) {
-      tex += lines[i].trim().replace(/ *, */g, "} & \\text{")
+      tex += lines[i].trim().replace(/ *\| */g, "} & \\text{")
       tex += ((gotUnits && i === 1) || (!gotUnits && i === 0))
         ? "} \\\\ \\hline \\text{"
         : "} \\\\ \\text{"
@@ -522,6 +542,7 @@ const quickDisplay = str => {
 
     tex = tex.slice(0, -10) + "\\end{array}"
   }
+  tex = tex.replace(/·/g, "$·$")
   return tex
 }
 
@@ -577,6 +598,47 @@ const isNotEmpty = row => {
   return false
 }
 
+const getNumInfo =  df => {
+  // Gather info for in setting numbers on a decimal tab.
+  const numCols = df.data.length
+  const colInfo = new Array(numCols)
+  const cellInfo = new Array(numCols)
+  for (let j = 0; j < numCols; j++) {
+    if (df.dtype[j] & dt.RATIONAL) {
+      colInfo[j] = { hasAlignChar: false, maxLenAfterAlignChar: 0 }
+      cellInfo[j] = []
+      for (let i = 0; i < df.data[0].length; i++) {
+        const datum = df.data[j][i]
+        const pos = datum.indexOf(".")
+        const hasAlignChar = pos > -1
+        const lenAfterAlignChar = hasAlignChar ? datum.length - pos - 1 : 0
+        cellInfo[j].push({ hasAlignChar, lenAfterAlignChar })
+        if (hasAlignChar) {
+          colInfo[j].hasAlignChar = true
+          if (lenAfterAlignChar > colInfo[j].maxLenAfterAlignChar) {
+            colInfo[j].maxLenAfterAlignChar = lenAfterAlignChar
+          }
+        }
+      }
+    }
+  }
+  return [colInfo, cellInfo]
+}
+
+const displayNum = (datum, colInfo, cellInfo, decimalFormat) => {
+  let str = formattedDecimal(datum, decimalFormat)
+  const n = colInfo.maxLenAfterAlignChar - cellInfo.lenAfterAlignChar
+  if (n > 0 || !cellInfo.hasAlignChar) {
+    str += "\\phantom{"
+    if (colInfo.hasAlignChar && !cellInfo.hasAlignChar) {
+      str += decimalFormat.slice(-1) === "." ? "." : "{,}"
+    }
+    if (n > 0) { str += "0".repeat(n) }
+    str += "}"
+  }
+  return str
+}
+
 const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.") => {
   if (df.data.length === 0) { return "" }
   const numRows = df.data[0].length
@@ -585,16 +647,13 @@ const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.") => {
   let str = "\\begin{array}{"
   str += df.rowMap ? "l|" : "r|"
   for (let j = 1; j < numColsInHeading; j++) {
-    str += "c "
+    str += (df.dtype[j] & dt.RATIONAL ? "r " : "l " )
   }
   str = str.slice(0, -1) + "}"
 
   // Write the column names
   if (!df.rowMap) { str += "&" }
-  str += df.headings[0] === "name"
-    ? "&"
-    : "{" + formatColumnName(df.headings[0]) + "}&"
-  for (let j = 1; j < numCols; j++) {
+  for (let j = 0; j < numCols; j++) {
     str += "{" + formatColumnName(df.headings[j]) + "}&"
   }
   str = str.slice(0, -1) + " \\\\ "
@@ -616,6 +675,8 @@ const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.") => {
   }
   str += "\\hline "
 
+  const [colInfo, cellInfo] = getNumInfo(df)
+
   // Write the data
   for (let i = 0; i < numRows; i++) {
     if (!df.rowMap) { str += String(i + 1) + " & " }
@@ -624,7 +685,8 @@ const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.") => {
       str += mixedFractionRegEx.test(datum)
         ? format(Rnl.fromString(datum), formatSpec, decimalFormat) + "&"
         : numberRegEx.test(datum)
-        ? datum.replace("%", "\\%") + "&"
+        ? displayNum(datum, colInfo[j], cellInfo[j][i], decimalFormat) + "&"
+//        ? formattedDecimal(datum, decimalFormat) + "&"
         : datum === ""
         ? "&"
         : "\\text{" + addTextEscapes(datum) + "}&"
@@ -637,11 +699,11 @@ const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.") => {
   return str
 }
 
-const displayAlt = (df, formatSpec = "h3", decimalFormat = "1,000,000.") => {
+const displayAlt = (df, formatSpec = "h3") => {
   if (df.data.length === 0) { return "" }
   const numRows = df.data[0].length
   const numCols = df.data.length
-  let str = "`"
+  let str = "``"
 
   // Write the column names
   if (!df.rowMap) { str += "," }
@@ -675,7 +737,7 @@ const displayAlt = (df, formatSpec = "h3", decimalFormat = "1,000,000.") => {
   }
 
   str = str.slice(0, -1).trim()
-  str += "`"
+  str += "``"
   return str
 }
 

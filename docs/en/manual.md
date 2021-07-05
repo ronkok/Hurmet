@@ -585,16 +585,17 @@ A *data frame* is a two dimensional data structure that can be accessed with row
 
 Each datum can be a number, a string, `true`, or `false`. A missing item will be taken to be `undefined`. All data in a column must be of the same data type. A column of numbers can be assigned a unit of measure. 
 
-Data frame literals are written between double backtick delimiters. The text between the backticks must be written in CSV (comma-separated values) format. Numbers must use a dot decimal. The second row may contain units of measure. The first column will be indexed if the first word is “name” or “index”.
+Data frame literals are written between double backtick delimiters. The text between the backticks must be written in CSV (which once meant comma-separated values, but Hurmet uses pipe-separated values) format. Numbers must use a dot decimal. The second row may contain units of measure. The first column will be indexed if the first word is “name” or “index”.
 
 Here’s an example of CSV input:
 
-    rebar = ``,diameter,area
-    ,in ,in²
-    #3,0.375,0.11
-    #4,0.5  ,0.2
-    #5,0.625,0.31
-    #6,0.75 ,0.44``
+    rebar =
+    ``|diameter|area
+      |in      |in²
+    #3|0.375   |0.11
+    #4|0.5     |0.2
+    #5|0.625   |0.31
+    #6|0.75    |0.44``
 
 … which renders as:
 
@@ -1232,6 +1233,55 @@ Let _N_ be the number of digits specified. Then:
 
 Numeric result display types __f__ and __%__ can be set to any non-negative integer. The significant digit display types are limited to no more than 15 significant digits. 
 
+## Active Tables
+
+A Hurmet data frame can contain formulas somewhat similar to a spreadsheet. Here’s an example:
+
+¢V = '3.1 kips'¢
+
+<p><span class="tex">\mathrm{dist} =\begin{array}{l|r r r r r}{\text{Floor}}&amp;{W}&amp;{h}&amp;{\text{W × h}}&amp;{F}&amp;{V_\text{i}} \\ &amp; {\text{kips}}&amp; {\text{ft}}&amp; {\text{kip}\mkern1mu{\cdot}\mkern1mu\text{ft}}&amp; {\text{kips}}&amp; {\text{kips}} \\ \hline 3\phantom{}&amp;1.2&amp;20\phantom{}&amp;24\phantom{.0}&amp;1.51&amp;1.51 \\ 2\phantom{}&amp;2.3&amp;11\phantom{}&amp;25.3&amp;1.59&amp;3.1\phantom{0} \\ 1\phantom{}&amp;4.0&amp;0\phantom{}&amp;0\phantom{.0}&amp;0\phantom{.00}&amp;3.1\phantom{0} \\\hline \text{Sum}&amp;7.5&amp;&amp;49.3&amp;3.1\phantom{0}&amp;3.1\phantom{0}\end{array}</span></p>
+
+Remember that a data frame is written as pipe-separated values. A cell can contain a formula. So the content of that calculation zone looks like this:
+
+```
+dist = 
+``Floor|  W   | h  |  W × h  |        F         | V_i
+       | kips | ft | kip·ft  |       kips       | kips
+   "3" | 1.2  | 20 | = W × h |=: V × Wh / Wh.Sum| = F
+   "2" | 2.3  | 11 |         |                  | = F + V_i′
+   "1" | 4.0  |  0 |         |                  |
+   Sum |=sum()|    | =sum()  |       =sum()     | = V_i′``
+```
+
+Notice some details:
+
+1. A table formula
+
+   * begins with a “=” just like a spreadsheet.
+
+   * has variable names that are column headings, not “A1” type references. 
+
+   * returns a result not only to its own cell, but also to every non-formula cell below it.
+
+   * begins with “=:” if the formula is unit-aware.
+
+2. In a table’s bottom row, a `sum()` function is valid with no arguments. It will return the sum of the column.
+
+3. An active table can have units-of-measure. Just write unit names in row 2 of the pipe-separated input.
+
+4. Data in any one column must all be the same data type and carry the same unit-of-measure.
+
+5. A table variable can:
+
+   * … omit spaces and characters that are invalid for identifiers. So “`Wh`” will call column “W × h”
+
+   * … call a value from outside the table, such as `V`.
+
+   * … call a cell from the previous row by appending a prime to a column heading, as in `V_i′`.
+
+Table calculations proceed column-wise. Subject to that constraint, you can call individual cells via dot notation, such as `Wh.Sum`.
+
+Other calculation cells can call data from inside a table, using the same accessor notation as a data frame. The left column values can be used as keys to access data in the table.
 
 ## User Defined Functions
 
@@ -1566,6 +1616,7 @@ Hurmet is built with the aid of several open source libraries and resources, for
 </details>
 </li>
 <li><a href="#numeral-display">Numeral Display</a></li>
+<li><a href="#active-tables">Active Tables</a></li>
 <li>
 <details><summary>UDFs</summary>
 <ul>

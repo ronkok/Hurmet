@@ -675,8 +675,9 @@ export const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
 
   if (/^``/.test(str)) {
     // inline CSV string between double back ticks, a data frame literal.
-    pos = str.indexOf("`", 2)
-    const st = (pos > 0 ? str.slice(2, pos) : str.slice(2)).trim()
+    pos = str.indexOf("`", (str.charAt(2) === "`" ? 3 : 2))
+    const inputStr = (pos > 0 ? str.slice(2, pos) : str.slice(2))
+    const st = inputStr.trim()
     let tex = ""
     if (inRealTime) {
       tex = DataFrame.quickDisplay(st)
@@ -684,7 +685,7 @@ export const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
       const dataFrame = DataFrame.dataFrameFromCSV(st, {})
       tex = DataFrame.display(dataFrame.value, "h3", decimalFormat)
     }
-    return ["``" + st + "``", tex, tt.DATAFRAME, ""]
+    return ["``" + inputStr + "``", tex, tt.DATAFRAME, ""]
   }
 
   if (str.charAt(0) === '`') {

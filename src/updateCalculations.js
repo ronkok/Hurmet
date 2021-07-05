@@ -5,6 +5,7 @@ import { improveQuantities } from "./improveQuantities"
 import { evaluate } from "./evaluate"
 import { scanModule } from "./module"
 import { DataFrame } from "./dataframe"
+import { Tbl } from "./table"
 import { dt, allZeros } from "./constants"
 import { clone } from "./utils"
 
@@ -52,10 +53,8 @@ const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
     return attrs
   }
   const data = importRegEx.test(entry)
-    ? scanModule(text, decimalFormat)
-    : attrs.name === "currencies"
-    ? { value: JSON.parse(text).rates, unit: allZeros, dtype: dt.MAP }
-    : DataFrame.dataFrameFromCSV(text, hurmetVars)
+    ? scanModule(text, decimalFormat)               // import code
+    : DataFrame.dataFrameFromCSV(text, hurmetVars)  // fetch data
 
   // Append the data to attrs
   attrs.value = data.value
@@ -185,28 +184,18 @@ const proceedAfterFetch = (
       // The mathPrompt dialog box did not have accesss to hurmetVars, so it
       // did not do unit conversions on the result template. Do that first.
       improveQuantities(attrs, hurmetVars)
-/*      if (attrs.dtype === dt.DATAFRAME && attrs.value.attrs.length > 0) {
-        attrs = prepareTable(attrs, decimalFormat)
-      } */
       // Now proceed to do the calculation of the cell.
-      if (attrs.rpn) { attrs = evaluate(attrs, hurmetVars, decimalFormat) }
+      if (attrs.dtype === dt.DATAFRAME && attrs.value.attrs && attrs.value.attrs.length > 0) {
+        attrs = Tbl.prepare(attrs, decimalFormat)
+        attrs = Tbl.evaluate(attrs, hurmetVars, decimalFormat)
+      } else if (attrs.rpn) {
+        attrs = evaluate(attrs, hurmetVars, decimalFormat)
+      }
       if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs) }
       attrs.displayMode = nodeAttrs.displayMode
       tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(attrs))
     }
   }
-
-/*  const evaluateTable = (attrs, hurmetVars, decimalFormat) => {
-    for (let i = 0; i < attrs.value.attrs.length; i++) {
-      const cell = attrs.value.attrs[i]
-      for (let j = cell.col; j <= cell.col + cell.num; j++) {
-        let cellAttrs = clone(cell)
-        cellAttrs.rpn = cellAttrs.rpn.replace(/ŧ/g, String(j))
-        cellAttrs = evaluate(cellAttrs, hurmetVars, decimalFormat)
-        attrs.value.data[cell.col][cell.row] = cellAttrs.resultdisplay
-      }
-    }
-  } */
 
   // Finally, update calculations after startPos.
   const startPos = isCalcAll ? 0 : (curPos + 1)
@@ -222,10 +211,13 @@ const proceedAfterFetch = (
         if (isCalcAll || (attrs.name && !(hurmetVars[attrs.name] &&
           hurmetVars[attrs.name].isFetch))) {
           if (isCalcAll) { improveQuantities(attrs, hurmetVars) }
-          if (attrs.rpn) { attrs = evaluate(attrs, hurmetVars, decimalFormat) }
-          /*if (attrs.dtype === dt.DATAFRAME && attrs.value.attrs.length > 0) {
-            attrs = evaluateTable(attrs, hurmetVars, decimalFormat)
-          } */
+          if (attrs.dtype === dt.DATAFRAME && attrs.value.attrs &&
+              attrs.value.attrs.length > 0) {
+            attrs = Tbl.prepare(attrs, decimalFormat)
+            attrs = Tbl.evaluate(attrs, hurmetVars, decimalFormat)
+          } else if (attrs.rpn) {
+            attrs = evaluate(attrs, hurmetVars, decimalFormat)
+          }
           if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs) }
           if (isCalcAll || attrs.rpn) {
             tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs))

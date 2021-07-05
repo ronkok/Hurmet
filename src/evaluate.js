@@ -362,7 +362,8 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             o3.value = str1 + str2
             o3.unit = null
             o3.dtype = dt.STRING
-          } else if ((o1.dtype & dt.DATAFRAME) && (o2.dtype & dt.COLUMNVECTOR)) {
+          } else if ((o1.dtype & dt.DATAFRAME) &&
+              ((o2.dtype & dt.COLUMNVECTOR) || (o2.dtype & dt.ROWVECTOR))) {
             o3 = DataFrame.append(o1, o2, vars, unitAware)
             if (o3.dtype === dt.ERROR) { return o3 }
           } else if (Matrix.isVector(o1)) {
@@ -1416,7 +1417,7 @@ const errorResult = (stmt, result) => {
 export const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
   stmt.tex = stmt.template
   stmt.alt = stmt.altTemplate
-  const isUnitAware = /\?\?|!!|%%|@@|¡¡/.test(stmt.entry)
+  const isUnitAware = /\?\?|!!|%%|@@|¡¡/.test(stmt.resulttemplate)
 
   const formatSpec = vars.format ? vars.format.value : "h15"
 
