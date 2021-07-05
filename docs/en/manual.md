@@ -601,6 +601,8 @@ Here’s an example of CSV input:
 
 <p><span class="tex">\mathrm{rebar} = \begin{array}{l|c c}&amp;\mathrm{diameter}&amp;\mathrm{area} \\ &amp;{\text{in}}&amp;{\text{in}^{2}} \\ \hline\text{\#3}&amp;0.375 &amp;0.11  \\ \text{\#4}&amp;0.5 &amp;0.2  \\ \text{\#5}&amp;0.625 &amp;0.31  \\ \text{\#6}&amp;0.75 &amp;0.44\end{array}</span></p>
 
+Normally, the first column of a Hurmet data frame contains keys. You can use a key to access a row of the data frame. If you do not want the first column to be treated as keys, then begin the CSV with three back-ticks instead of two.
+
 Data frames can be quite large, so Hurmet has a`fetch(url)` function to load data from a remote CSV file into a data frame. Since Hurmet runs in a browser, the url must begin with `http:` or `https:`
 
 A fetch example:
