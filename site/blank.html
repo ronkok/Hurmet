@@ -1,0 +1,91 @@
+﻿
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hurmet.app</title>
+
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="cm/codemirror.css">
+<link rel="stylesheet" href="katex/katex.min.css">
+<link rel="stylesheet" href="temml/temml.css">
+<link rel="stylesheet" href="editor.css">
+<link rel="stylesheet" href="tables.css">
+<link rel="stylesheet" media="print" href="print.css">
+
+<script src="cm/codemirror.js" defer></script>
+<script src="cm/closebrackets.js" defer></script>
+<script src="cm/matchbrackets.js" defer></script>
+<script src="cm/simple.js" defer></script>
+<script src="katex/katex.min.js"></script>
+<script src="temml/temml.min.js"></script>
+<script src="katex/mhchem.min.js" defer></script>
+<script src="marked.js" defer></script>
+<script src="chart.min.js" async></script>
+<script src="hurmet.min.js"></script>
+</head>
+
+<body>
+<nav>
+   <ul>
+     <li><a href="https://github.com/ronkok/Hurmet" target="_blank">GitHub</a></li>
+     <li><a href="./docs/en/manual.html#tutorial" target="_blank">Tutorial</a></li>
+     <li><a href="./docs/en/manual.html" target="_blank">Documentation</a></li>
+     <li><a href="./examples.html" target="_blank">Examples</a></li>
+   </ul>
+</nav>
+
+<div id="title">Hurmet</div>
+ 
+<article>
+
+<div id="slogan"><h4>Calculate and communicate</h4></div>
+
+<p id="browser-support"></p>
+
+<div class="prosemirror">
+<table class="nogrid editor-wrap" id="wrap-table">
+<thead><tr>
+   <th></th>
+   <th></th>
+   <th></th>
+</tr>
+<tr><th></th><th></th><th></th></tr>
+</thead>
+<tbody><tr><td colspan="3">
+</div>
+
+<div id=editor style="margin-bottom: 23px"></div>
+<div style="display: none" id="content">
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+</div> <!-- editor -->
+
+</td></tr></tbody>
+</table>
+</article>
+
+<div id="copyright">Copyright © 2020-2021 Ron Kok. Released under the <a href="https://opensource.org/licenses/MIT">MIT License</a></div>
+
+<script>
+  // Write a warning if the browser does not support BigInt.
+  const warningGraf = document.getElementById("browser-support")
+  try { BigInt(2) }
+  catch(error) {
+     warningGraf.textContent = "Hurmet does not work in this browser because it does not support big integers. Chrome, Edge, Firefox, Opera, Vivaldi, and Brave all support BigInt. Safari BigInt is in development."
+   }
+    
+  window.addEventListener('beforeunload', function (e) {
+	// If changes have been made, put up a dialog box to warn the user.
+	// The content of this dialog box is a browser standard. We can't change its content here.
+	e.preventDefault()
+	e.returnValue = ''
+  })
+</script>
+<script src="prosemirror.min.js"></script>
+  
+</body>
+</html>

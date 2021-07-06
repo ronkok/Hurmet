@@ -74,7 +74,7 @@
 <p><span class="hurmet-calc" data-entry="dist = 
    ``Level|  W   | h  |  W × h  |        F         | V_i
           | kips | ft | kip·ft  |       kips       | kips
-        4 | 1.2  | 20 | = W × h |=: V × Wh / Wh.Sum| = F
+        4 | 1.2  | 33 | = W × h |=: V × Wh / Wh.Sum| = F
         3 | 2.2  | 22 |         |                  | = F + V_i′
         2 | 2.3  | 11 |         |                  |
         1 | 4.0  |  0 |         |                  |
@@ -83,58 +83,29 @@
 <pre><code>dist = 
 ``Level|  W   | h  |  W × h  |        F         | V_i
        | kips | ft | kip·ft  |       kips       | kips
-    4  | 1.2  | 22 | = W × h |=: V × Wh / Wh.Sum| = F
+    4  | 1.2  | 33 | = W × h |=: V × Wh / Wh.Sum| = F
     3  | 2.2  | 22 |         |                  | = F + V_i′
     2  | 2.3  | 11 |         |                  |
     1  | 4.0  |  0 |         |                  |
    Sum |=sum()|    | =sum()  |       =sum()     | = V_i′``</code></pre>
-<p>Notice some details:</p>
-<ol>
-   <li>
-      <p>A table formula</p>
-      <ul>
-         <li>
-            <p>begins with a “=” just like a spreadsheet.</p>
-         </li>
-         <li>
-            <p>has variable names that are column headings, not “A1” type references. </p>
-         </li>
-         <li>
-            <p>returns a result not only to its own cell, but also to every non-formula cell below it.</p>
-         </li>
-         <li>
-            <p>begins with “=:” if the formula is unit-aware.</p>
-         </li>
-      </ul>
-   </li>
-   <li>
-      <p>In a table’s bottom row, a <code>sum()</code> function is valid with no arguments. It will return the sum of the column.</p>
-   </li>
-   <li>
-      <p>An active table can have units-of-measure. Just write unit names in row 2 of the pipe-separated input.</p>
-   </li>
-   <li>
-      <p>Data in any one column must all be the same data type and carry the same unit-of-measure.</p>
-   </li>
-   <li>
-      <p>A table variable can:</p>
-      <ul>
-         <li>
-            <p>… omit spaces and characters that are invalid for identifiers. So “<code>Wh</code>” will call column “W × h”</p>
-         </li>
-      </ul>
-      <ul>
-         <li>
-            <p>… call a value from outside the table, such as <code>V</code>.</p>
-         </li>
-         <li>
-            <p>… call a cell from the previous row by appending a prime to a column heading, as in <code>V_i′</code>.</p>
-         </li>
-      </ul>
-   </li>
-</ol>
-<p>Table calculations proceed column-wise. Subject to that constraint, you can call individual cells via dot notation, such as <code>Wh.Sum</code>.</p>
-<p>Other calculation cells can call data from inside a table, using the same accessor notation as a data frame. The left column values can be used as keys to access data in the table.</p>
+   <p>A table formula:</p>
+   <ul>
+      <li>begins with a “=” just like a spreadsheet.</li>
+      <li>has variable names that are column headings, not “A1” type references.</li>
+      <li>returns a result not only to its own cell, but also to every non-formula cell below it.</li>
+      <li>begins with “=:” if the formula is unit-aware.</li>
+   </ul>
+   <p>In a table’s bottom row, a <code>sum()</code> function is valid with no arguments. It will return the sum of the column.</p>
+   <p>An active table can have units-of-measure. Just write unit names in row 2 of the pipe-separated input.</p>
+   <p>Data in any one column must all be the same data type and carry the same unit-of-measure.</p>
+   <p>A table variable can:</p>
+   <ul>
+      <li>omit spaces and characters that are invalid for identifiers. So “<code>Wh</code>” will call column “W × h”</li>
+      <li>… call a value from outside the table, such as <code>V</code>.</li>
+      <li>… call a cell from the previous row by appending a prime to a column heading, as in <code>V_i′</code>.</li>
+   </ul>
+   <p>Table calculations proceed column-wise. Subject to that constraint, you can call individual cells via dot notation, such as <code>Wh.Sum</code>.</p>
+   <p>Other calculation cells can call data from inside a table, using the same accessor notation as a data frame. The left column values can be used as keys to access data in the table.</p>
 
 </div> <!-- editor -->
 
