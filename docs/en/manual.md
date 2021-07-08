@@ -394,7 +394,7 @@ Variable names and function names must be written in the form of a valid _identi
 *   An under-score within an identifier is allowed and will be interpreted to mean the start of a subscript.
 *   If an identifier has only one letter, then an accent character may be written after it. Hurmet will render the accent above the letter, as in ¢θ̂¢.
 *   Primes may be appended to the very end, as in: ¢f_c′¢.
-*   The following keywords may not be used as variable names: `π`, `ℏ`, `true`, `false`, `root`, `if`, `otherwise`, `and`, `or`, `modulo`, `in`, `to`.
+*   The following keywords may not be used as variable names: `π`, `j`, `ℏ`, `true`, `false`, `root`, `if`, `otherwise`, `and`, `or`, `modulo`, `in`, `to`.
 
 <div class="indented">
 
@@ -701,6 +701,10 @@ Hurmet calculations are meant to be recognizeable to anyone familiar with standa
 *e*
 
 : Hurmet will treat ¢e¢ just like any other variable most of the time. But if ¢e¢ is the base of an exponent, for example: ¢e^x¢, then Hurmet will take ¢e¢ to mean 2.7182818284590452353602874713527.
+
+*j*
+
+: I'm working on complex numbers. Soon, ¢j¢ will be equal to ¢√(-1)¢. In the meantime, don't use it.
 
 ℏ
 

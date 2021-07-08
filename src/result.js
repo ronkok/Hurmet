@@ -79,6 +79,12 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAwar
         resultDisplay = "\\text{" + result.value + "}"
         altResultDisplay = String(result.value)
 
+      } else if (result.dtype === dt.COMPLEX) {
+        const real = format(result.value[0], formatSpec, decimalFormat)
+        const im = format(result.value[1], formatSpec, decimalFormat)
+        resultDisplay = real + " + j" + im
+        altResultDisplay = real + " + j" + im
+
       } else if (result.value.plain) {
         resultDisplay = format(result.value.plain, formatSpec, decimalFormat)
         if (resultDisplay.dtype && resultDisplay.dtype === dt.ERROR) {

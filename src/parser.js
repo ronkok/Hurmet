@@ -358,7 +358,7 @@ const nextCharIsFactor = (str, tokenType) => {
   if (st.length > 0) {
     if (fc === "|" || fc === "‖") {
       // TODO: Work out left/right
-    } else if (/^([{√∛∜]|\\[([])/.test(st) &&
+    } else if (/^([{√∛∜0-9]|\\[([])/.test(st) &&
       (isIn(tokenType, [tt.ORD, tt.VAR, tt.NUM, tt.LONGVAR, tt.RIGHTBRACKET,
         tt.QUANTITY, tt.SUPCHAR]))) {
       return true
@@ -434,7 +434,7 @@ TeX  RPN
  10   10    -            unary minus
  12   12    sqrt sin     unary functions, math functions, and binary functions (e.g. root 3 x)
  13   13    ^            superscript, i.e. exponent
- 14   14    ! % ‰        factorial, percent, permil
+ 14   14    ! % ‰ °      factorial, percent, permil, degree
  15   15    _ ' .        subscript, prime, dot notation property accessor
  16   16    hat bb       accent and font
 */
@@ -573,7 +573,7 @@ export const parse = (
             tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + 2)
             op.closeDelim = delim.close
           } else if (delim.isPrecededByDiv && delim.delimType === dPAREN &&
-              delim.name === "(" && (/^[^^_!%⁻²³¹⁰⁴⁵⁶⁷⁸⁹]/.test(str) || str.length === 0)) {
+              delim.name === "(" && (/^[^^_!%°⁻²³¹⁰⁴⁵⁶⁷⁸⁹]/.test(str) || str.length === 0)) {
             // The parens surround a denominator. Delete them.
             tex = tex.substring(0, op.pos) + tex.substring(op.pos + 1)
             op.closeDelim = ""
@@ -728,12 +728,16 @@ export const parse = (
         tex += token.output + " "
         okToAppend = true
 
-        if (isCalc && !isFollowedBySpace && followedByFactor) {
-          // We've encountered something like the expression "2a".
-          rpn += tokenSep
-          popTexTokens(2, okToAppend)
-          popRpnTokens(7)
-          rpnStack.push({ prec: rpnPrecFromType[tt.MULT], symbol: "⌧" })
+        if (isCalc) {
+          if (false) {
+            rpn += tokenSep
+          } else if (!isFollowedBySpace && followedByFactor) {
+            // We've encountered something like the expression "2a".
+            rpn += tokenSep
+            popTexTokens(2, okToAppend)
+            popRpnTokens(7)
+            rpnStack.push({ prec: rpnPrecFromType[tt.MULT], symbol: "⌧" })
+          }
         }
         break
 

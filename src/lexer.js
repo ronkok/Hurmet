@@ -102,12 +102,13 @@ const isUnary = (prevToken) => {
   }
 }
 
-const wordRegEx = /^(?:(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u212C\u2130\u2131\u210B\u2110\u2112\u2133\u211B\u212F\u210A\u2113\u2134]|(?:\uD835[\uDC00-\udc33\udc9c-\udccf]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*|!in|-->|->|left\.|right\.|log10|log2)/
+const wordRegEx = /^(?:(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u212C\u2130\u2131\u210B\u2110\u2112\u2133\u211B\u212F\u210A\u2113\u2134]|(?:\uD835[\uDC00-\udc33\udc9c-\udccf]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*|!in|-->|->|left\.|right\.|log10|log2)′*/
 
 const words = Object.freeze({
   //       input,    tex output,               type, closeDelim
   "true": ["true", "\\mathord{\\text{true}}", tt.ORD, ""],
   "false": ["false", "\\mathord{\\text{false}}", tt.ORD, ""],
+  j: ["j", "j", tt.ORD, ""],
   cos: ["cos", "\\cos", tt.FUNCTION, ""],
   cosd: ["cosd", "\\operatorname{\\cos_d}", tt.FUNCTION, ""],
   if: ["if", "\\mathrel{\\mathrm{if}}", tt.LOGIC, ""],
@@ -147,7 +148,7 @@ const words = Object.freeze({
   "<-->": ["<-->", "\\xrightleftarrows", tt.UNARY, ""]
 })
 
-const miscRegEx = /^([/÷\u2215_:,;^+\\\-–−*×∘⊗⦼⊙√∛∜·.%∘|╏‖¦><=≟≠≡≤≥≅∈∉⋐!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃∫∬∮∑([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7]+)/
+const miscRegEx = /^([/÷\u2215_:,;^+\\\-–−*×∘⊗⦼⊙√∛∜·.%°∘|╏‖¦><=≟≠≡≤≥≅∈∉⋐!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃∫∬∮∑([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7]+)/
 
 const miscSymbols = Object.freeze({
   //    input, output, type,  closeDelim
@@ -175,6 +176,7 @@ const miscSymbols = Object.freeze({
   "·": ["·", "\u22C5", tt.MULT, ""], // dot operator
   "...": ["...", "\\dots", tt.ORD, ""],
   "%": ["%", "\\%", tt.FACTORIAL, ""],
+  "°": ["°", "°", tt.FACTORIAL, ""],
   "-:": ["-:", "÷", tt.MULT, ""],
   "=": ["=", "=", tt.REL, ""],
   "==": ["==", "==", tt.REL, ""],

@@ -60,7 +60,9 @@ const needsMap = (...args) => {
 }
 
 const shapeOf = oprnd => {
-  return oprnd.dtype < 128
+  return oprnd.dtype === dt.COMPLEX
+    ? "complex"
+    : oprnd.dtype < 128
     ? "scalar"
     : Matrix.isVector(oprnd)
     ? "vector"
@@ -202,7 +204,19 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
+        case "j": {
+          // j = √(-1)
+          const j = Object.create(null)
+          j.value = [Rnl.zero, Rnl.one]
+          j.unit = Object.create(null)
+          j.unit.expos = allZeros
+          j.dtype = dt.COMPLEX
+          stack.push(Object.freeze(j))
+          break
+        }
+
         case "ℏ": {
+          // Reduced Plank constant
           const hbar = Object.create(null)
           hbar.value = Rnl.hbar
           hbar.dtype = dt.RATIONAL
@@ -212,12 +226,31 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
+        case "∠": {
+          // Complex number in polar notation.
+          const o2 = stack.pop()
+          const o1 = stack.pop()
+          if (o1.dtype !== dt.RATIONAL || o2.dtype !== dt.RATIONAL) { return errorOprnd("NAN_OP") }
+          const theta = Rnl.toNumber(o2.value)
+          const z = Object.create(null)
+          z.value = [
+            Rnl.multiply(o1.value, Rnl.fromNumber(Math.cos(theta))), // real part
+            Rnl.multiply(o1.value, Rnl.fromNumber(Math.sin(theta)))  // imaginary part 
+          ];
+          z.unit = Object.create(null)
+          z.unit.expos = allZeros
+          z.dtype = dt.COMPLEX
+          stack.push(Object.freeze(z))
+          break
+        }
+
         case "+":
         case "-": {
           const o2 = stack.pop()
           const o1 = stack.pop()
           const op = tkn === "+" ? "add" : "subtract"
-          if (!((o1.dtype & dt.RATIONAL) & (o2.dtype & dt.RATIONAL))) {
+          if (!(((o1.dtype & dt.RATIONAL) || (o1.dtype & dt.COMPLEX)) &
+                ((o1.dtype & dt.RATIONAL) || (o2.dtype & dt.COMPLEX)))) {
             return errorOprnd("NAN_OP")
           }
           if (unitAware) {
@@ -255,8 +288,8 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "⌧": {
           const o2 = stack.pop()
           const o1 = stack.pop()
-          if (!((o1.dtype & dt.RATIONAL) &&
-            ((o2.dtype & dt.RATIONAL) || (o2.dtype === dt.DICT)))) {
+          if (!(((o1.dtype & dt.RATIONAL) || (o1.dtype & dt.COMPLEX)) &&
+            ((o2.dtype & dt.RATIONAL) || (o2.dtype & dt.COMPLEX) || (o2.dtype === dt.DICT)))) {
             return errorOprnd("NAN_OP")
           }
           const product = Object.create(null)
@@ -278,8 +311,8 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             ? { "×": "cross", "·": "dot", "*": "asterisk", "⌧": "multiply" }[tkn]
             : "multiply"
 
-          product.dtype = (tkn === "*" || shape1 === "scalar" || shape1 === "map" ||
-            shape2 === "scalar" || shape2 === "map")
+          product.dtype = (tkn === "*" || shape1 === "scalar" || shape1 === "map" || shape1 === "complex" ||
+            shape2 === "scalar" || shape2 === "map" || shape2 === "complex")
             ? Operators.dtype[shape1][shape2](o1.dtype, o2.dtype)
             : tkn === "·"
             ? dt.RATIONAL
@@ -557,6 +590,18 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           percentage.value = Operators.unary[shapeOf(o1)]["percent"](o1.value)
           if (percentage.value) { return percentage.value } // Error
           stack.push(Object.freeze(percentage))
+          break
+        }
+
+        case "°": {
+          const o1 = stack.pop()
+          if (o1.dtype !== dt.RATIONAL) { return errorOprnd("NAN_OP") }
+          const num = Object.create(null)
+          num.unit = Object.create(null)
+          num.unit.expos = allZeros
+          num.dtype = o1.dtype
+          num.value = Rnl.divide(Rnl.multiply(Rnl.multiply(o1.value, Rnl.pi), Rnl.two), Rnl.fromNumber(180))
+          stack.push(Object.freeze(num))
           break
         }
 
@@ -1459,6 +1504,8 @@ export const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
 
     result.value = result.dtype === dt.RATIONAL
       ? Rnl.normalize(result.value)
+      : result.dtype === dt.COMPLEX
+      ? [Rnl.normalize(result.value[0]), Rnl.normalize(result.value[1])]
       : result.value  // TODO: matrices
     stmt.dtype = result.dtype
 
@@ -1507,7 +1554,7 @@ export const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
       }
       stmt.dtype += dt.QUANTITY
 
-    } else if (result.dtype & dt.RATIONAL) {
+    } else if ((result.dtype & dt.RATIONAL) || (result.dtype & dt.COMPLEX) ) {
       // A numeric result with no unit specified.
       stmt.expos = allZeros
     }

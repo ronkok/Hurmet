@@ -107,11 +107,16 @@ const dtype = {
   // return the resulting data type.
   scalar: {
     scalar(t0, t1)     { return t0 },
+    complex(t0, t1)    { return t1 },
     vector(t0, t1)     { return t1 },
     matrix(t0, t1)     { return t1 },
     dictionary(t0, t1) { return t1 },
     map(t0, t1)        { return t1 },
     mapWithVectorValues(t0, t1) { return t1 }
+  },
+  complex: {
+    scalar(t0, t1)  { return t0 },
+    complex(t0, t1) { return t0 }
   },
   vector: {
     scalar(t0, t1) { return t0 },
@@ -162,6 +167,17 @@ const binary = {
       and(x, y)      { return x && y },
       or(x, y)       { return x || y },
       xor(x, y)      { return x !== y }
+    },
+    complex: {
+      add(x, z)      { return [Rnl.add(x, z[0]), z[1]] },
+      subtract(x, z) { return [Rnl.subtract(x, z[0]), Rnl.negate(z[1])] },
+      multiply(x, z) { return Rnl.multiply(x, z) },
+      divide(x, z)   { return Rnl.divide(x, z) },
+      power(x, z)    { return Rnl.power(x, z) },
+      modulo(x, z)   { return errorOprnd("NA_COMPL_OP", "modulo") },
+      and(x, z)      { return errorOprnd("NA_COMPL_OP", "and") },
+      or(x, z)       { return errorOprnd("NA_COMPL_OP", "or") },
+      xor(x, z)      { return errorOprnd("NA_COMPL_OP", "xor") }
     },
     vector: {
       // Binary operations with a scalar and a vector.
@@ -252,6 +268,32 @@ const binary = {
       xor(scalar, map) {
         return mapMap(map, array => array.map(e => scalar !== e))
       }
+    }
+  },
+
+  complex: {
+    scalar: {
+      add(z, y)      { return [Rnl.add(z[0], y), z[1]] },
+      subtract(z, y) { return [Rnl.subtract(z[0], y), z[1]] },
+      multiply(z, y) { return [Rnl.multiply(z[0], y), Rnl.multiply(z[1], y) ] },
+      divide(z, y)   { return Rnl.divide(z, y) },
+      power(z, y)    { return Rnl.power(z, y) },
+      modulo(z, y)   { return errorOprnd("NA_COMPL_OP", "modulo") },
+      and(z, y)      { return errorOprnd("NA_COMPL_OP", "and") },
+      or(z, y)       { return errorOprnd("NA_COMPL_OP", "or") },
+      xor(z, y)      { return errorOprnd("NA_COMPL_OP", "xor") }
+    },
+    complex: {
+      add(x, y)      { return [Rnl.add(x, z[0]), z[1]] },
+      subtract(x, y) { return [Rnl.subtract(x, z[0]), Rnl.negate(z[1])] },
+      multiply(x, y) { return Rnl.multiply(x, y) },
+      divide(x, y)   { return Rnl.divide(x, y) },
+      power(x, y)    { return Rnl.power(x, y) },
+      modulo(x, y)   { return errorOprnd("NA_COMPL_OP", "modulo") },
+      and(x, y)      { return errorOprnd("NA_COMPL_OP", "and") },
+      or(x, y)       { return errorOprnd("NA_COMPL_OP", "or") },
+      xor(x, y)      { return errorOprnd("NA_COMPL_OP", "xor") }
+
     }
   },
 

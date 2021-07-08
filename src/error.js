@@ -77,7 +77,8 @@ const errorMessages = Object.freeze({
     MULT_MIS:  "Error. Mismatch in number of multiple assignment.",
     COUNT:     "Error. The count() function works only on strings.",
     NOT_VECTOR:"Error. Arguments to dataframe() must be vectors.",
-    BAD_DISPLAY:"Error. Result may not be suppressed. Use '?' display selector."
+    BAD_DISPLAY:"Error. Result may not be suppressed. Use '?' display selector.",
+    NA_COMPL_OP:"Error. \"@\" cannot be performed on a complex number."
   }
 })
 
