@@ -264,27 +264,27 @@ Auto-correct kicks in when you type a space.
 | oo      | ∞   | bb M        | 𝐌      | Lambda    | Λ    | delta   | δ   |
 | ooo     | °   | bbb E       | 𝔼      | Xi        | Ξ    | epsilon | ε   |
 | `///`   | ∕   | cc P        | 𝒫      | Pi        | Π    | zeta    | ζ   |
-| `<=`    | ≤   | \\ceil      | ⎾⏋      | Sigma     | Σ    | eta     | η   |
-| `>=`    | ≥   | \\floor     | ⎿⏌      | Phi       | Φ    | theta   | θ   |
-| `!=`    | ≠   | `<<`        | ⟨       | Psi       | Ψ    | iota    | ι   |
-| `<>`    | ≠   | `>>`        | ⟩       | Omega     | Ω    | kappa   | κ   |
-| \~=     | ≅   | ^^          | ∧       | y bar     | y̅   | lambda  | λ   |
-| \~\~    | ≈   | vv          | ∨       | θ hat     | ¢θ̂¢ | mu      | μ   |
-| \\in    | ∈   | vvv         | ⋁       | P vec     | ¢P⃗¢ | nu      | ν   |
-| \\notin | ∉   | nn          | ∩       | P harpoon | ¢P⃑¢ | xi      | ξ   |
-| -=      | ≡   | nnn         | ⋂       | a dot     | ȧ   | pi      | π   |
-| :=      | ≔   | uu          | ∪       | a ddot    | ä   | rho     | ρ   |
-| -:      | ÷   | uuu         | ⋃       | a grave   | à   | sigma   | σ   |
-| +-      | ±   | \\checkmark | ✓       | a acute   | á   | tau     | τ   |
-| -+      | ∓   | \\o         | ø       | a tilde   | ã   | upsilon | υ   |
-| `->`    | →   | \\not       | ¬       | a ring    | å   | phi     | ϕ   |
-| `<-`    | ←   | \\xor       | ⊻       | AA        | ∀    | chi     | χ   |
-| `<->`   | ↔   | \\sum       | ∑       | EE        | ∃    | psi     | ψ   |
-| `=>`    | ⇒   | \\int       | ∫       | CC        | ℂ    | omega   | ω   |
-| \\circ  | ∘   | \\iint      | ∬       | HH        | ℍ    | \\hbar  | ℏ   |
-| \|\|\|  | ¦   | ii          | ¢√(-1)¢ | NN        | ℕ    | \\ell   | ℓ   |
-| \|\|    | ‖   | OO          | ¢O︀¢    | QQ        | ℚ    | \\euro  | €   |
-| /_      | ∠   |             |         | RR        | ℝ    | \\yen   | ¥   |
+| `<=`    | ≤   | kk          | ()      | Sigma     | Σ    | eta     | η   |
+| `>=`    | ≥   | \\ceil      | ⎾⏋      | Phi       | Φ    | theta   | θ   |
+| `!=`    | ≠   | \\floor     | ⎿⏌      | Psi       | Ψ    | iota    | ι   |
+| `<>`    | ≠   | `<<`        | ⟨       | Omega     | Ω    | kappa   | κ   |
+| \~=     | ≅   | `>>`        | ⟩       | y bar     | y̅   | lambda  | λ   |
+| \~\~    | ≈   | ^^          | ∧       | θ hat     | ¢θ̂¢ | mu      | μ   |
+| \\in    | ∈   | vv          | ∨       | P vec     | ¢P⃗¢ | nu      | ν   |
+| \\notin | ∉   | vvv         | ⋁       | P harpoon | ¢P⃑¢ | xi      | ξ   |
+| -=      | ≡   | nn          | ∩       | a dot     | ȧ   | pi      | π   |
+| :=      | ≔   | nnn         | ⋂       | a ddot    | ä   | rho     | ρ   |
+| -:      | ÷   | uu          | ∪       | a grave   | à   | sigma   | σ   |
+| +-      | ±   | uuu         | ⋃       | a acute   | á   | tau     | τ   |
+| -+      | ∓   | \\checkmark | ✓       | a tilde   | ã   | upsilon | υ   |
+| `->`    | →   | \\o         | ø       | a ring    | å   | phi     | ϕ   |
+| `<-`    | ←   | \\not       | ¬       | AA        | ∀    | chi     | χ   |
+| `<->`   | ↔   | \\xor       | ⊻       | EE        | ∃    | psi     | ψ   |
+| `=>`    | ⇒   | \\sum       | ∑       | CC        | ℂ    | omega   | ω   |
+| \\circ  | ∘   | \\int       | ∫       | HH        | ℍ    | \\hbar  | ℏ   |
+| \|\|\|  | ¦   | \\iint      | ∬       | NN        | ℕ    | \\ell   | ℓ   |
+| \|\|    | ‖   | ii          | ¢√(-1)¢ | QQ        | ℚ    | \\euro  | €   |
+| /_      | ∠   | OO          | ¢O︀¢    | RR        | ℝ    | \\yen   | ¥   |
 |         |     |             |         | ZZ        | ℤ    |         |     |
 
 The font corrections, e.g., `bb …` work on any letter from A to Z or a to z.

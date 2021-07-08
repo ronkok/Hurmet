@@ -79,6 +79,7 @@ const autoCorrections = {
   ii: "√(-1)",
   oo: "∞", // infinity
   ooo: "°",
+  kk: "()",
   not: "¬",
   "-:": "÷",
   "\\ ": "˽",  // space
@@ -292,6 +293,7 @@ export const autoCorrect = doc => {
           const newStr = str.slice(0, -matches[0].length) + correction
           doc.setValue(newStr + doc.getValue().slice(str.length))
           const newPos = { line: pos.line, ch: pos.ch - matches[0].length + correction.length }
+          if (["()", "\u23BF\u23CC", "\u23BE\u23CB"].includes(correction)) { newPos.ch -= 1 }
           doc.setCursor(newPos)
         }
       }
