@@ -326,6 +326,7 @@ li.ProseMirror-selectednode:after {
 
 .math-code {
   display: inline-block;
+  max-width: 760px;
 }
 .math-code pre {margin-left: 0}
 .math-code .CodeMirror {
