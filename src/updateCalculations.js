@@ -6,7 +6,7 @@ import { evaluate } from "./evaluate"
 import { scanModule } from "./module"
 import { DataFrame } from "./dataframe"
 import { Tbl } from "./table"
-import { dt, allZeros } from "./constants"
+import { dt } from "./constants"
 import { clone } from "./utils"
 
 /*
