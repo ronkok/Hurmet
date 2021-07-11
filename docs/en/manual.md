@@ -1464,7 +1464,7 @@ Hurmet is a web app, so it can import text files only from addresses that begin 
 *  https://gist.githubusercontent.com/ronkok/cbbf6cde15ac1b4c1e65cc338970043a/raw/ which duplicates the parent file above.
 </div>
 
-If you create your own Gists, you'll see that the addresses of the raw files are longer than my links. If you want a permalink to your file, delete everything after "/raw/". Github keeps a copy of every draft of your file and the part after "/raw/" is the revision ID.
+If you create your own Gists, you'll see that the addresses of the raw files are longer than my links. If you want a permalink to your file, delete the 40 random characters after "/raw/". Github keeps a copy of every draft of your file and the part after "/raw/" is the revision ID.
 
 ## Troubleshooting
 

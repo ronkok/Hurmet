@@ -43,7 +43,7 @@ const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
   attrs.name = entry.replace(/=.+$/, "").trim()
   let str = parse(entry.replace(/\s*=\s*[$$£¥\u20A0-\u20CF]?(?:!{1,2}).*$/, ""), decimalFormat)
   const url = urlFromEntry(entry)
-  if (/\.csv$/.test(url)) {
+  if (/\.(?:csv|hrms)$/.test(url)) {
     // Shorten the URL. Provide a clickable link.
     const fileName = url.replace(/.+\//, "")
     const match = textRegEx.exec(str)
