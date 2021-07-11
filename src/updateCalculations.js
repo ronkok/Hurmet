@@ -7,7 +7,7 @@ import { scanModule } from "./module"
 import { DataFrame } from "./dataframe"
 import { Tbl } from "./table"
 import { dt } from "./constants"
-import { clone } from "./utils"
+import { clone, addTextEscapes } from "./utils"
 
 /*
  *  This module is called to update Hurmet calculation cells.
@@ -28,6 +28,7 @@ import { clone } from "./utils"
 const fetchRegEx = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′* *= *(?:fetch|import)\(/
 const importRegEx = /^[^=]+= *import/
 const fileErrorRegEx = /^Error while reading file. Status Code: \d*$/
+const textRegEx = /\\text{[^}]+}/
 const lineChartRegEx = /^lineChart/
 
 const urlFromEntry = entry => {
@@ -40,10 +41,16 @@ const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
   const attrs = Object.create(null)
   attrs.entry = entry
   attrs.name = entry.replace(/=.+$/, "").trim()
-  attrs.tex = parse(
-    entry.replace(/\s*=\s*[$$£¥\u20A0-\u20CF]?(!{1,2}).*$/, ""),
-    decimalFormat
-  )
+  let str = parse(entry.replace(/\s*=\s*[$$£¥\u20A0-\u20CF]?(?:!{1,2}).*$/, ""), decimalFormat)
+  const url = urlFromEntry(entry)
+  if (/\.csv$/.test(url)) {
+    // Shorten the URL. Provide a clickable link.
+    const fileName = url.replace(/.+\//, "")
+    const match = textRegEx.exec(str)
+    str = str.slice(0, match.index) + "\\href{" + url + "}{\\text{" +
+          addTextEscapes(fileName) + "}}" + str.slice(match.index + match[0].length)
+  }
+  attrs.tex = str
   attrs.alt = entry
   if (text === "File not found." || fileErrorRegEx.test(text)) {
     attrs.dtype = dt.ERROR

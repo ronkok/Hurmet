@@ -321,10 +321,14 @@ export const nodes = {
           const tex = node.attrs.tex
           const isFF = 'MozAppearance' in document.documentElement.style
           if (isFF) {
-            temml.render(tex, dom, { displayMode: node.attrs.displayMode })
+            temml.render(tex, dom, { displayMode: node.attrs.displayMode, trust: true })
           } else {
-            katex.render(tex, dom, { displayMode: node.attrs.displayMode, strict: false,
-              throwOnError: false, minRuleThickness: 0.06 })
+            katex.render(tex, dom, {
+              displayMode: node.attrs.displayMode,
+              strict: false,
+              throwOnError: false,
+              minRuleThickness: 0.06,
+              trust: true })
           }
         }
         // Before writing to DOM, I filter out most of the run-time info in node.attrs.
