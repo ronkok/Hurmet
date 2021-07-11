@@ -15,4 +15,4 @@ while ((match = rateRegEx.exec(ecbData)) !== null) {
   }
 }
 
-fs.writeFileSync('units.js', unitModule)
+fs.writeFileSync('src/units.js', unitModule)
