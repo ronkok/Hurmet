@@ -1,5 +1,5 @@
  // unit exponents of a number with no unit.
-export const allZeros = Object.freeze([0, 0, 0, 0, 0, 0, 0, 0, 0])
+export const allZeros = Object.freeze([0, 0, 0, 0, 0, 0, 0, 0])
 
 // Data types
 // Some operands will be two types at the same time, e.g. RATIONAL + MATRIX.

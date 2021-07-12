@@ -221,7 +221,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           hbar.value = Rnl.hbar
           hbar.dtype = dt.RATIONAL
           hbar.unit = Object.create(null)
-          hbar.unit.expos = Object.freeze(unitAware ? [2, 1, -1, 0, 0, 0, 0, 0, 0] : allZeros)
+          hbar.unit.expos = Object.freeze(unitAware ? [2, 1, -1, 0, 0, 0, 0, 0] : allZeros)
           stack.push(Object.freeze(hbar))
           break
         }

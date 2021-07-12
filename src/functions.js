@@ -502,7 +502,7 @@ const lerp = (args, unitAware) => {
   if (unitAware) {
     if (args[0].expos !== args[1].expos) { return errorOprnd("") }
     if (args[1].expos !== args[2].expos) { return errorOprnd("") }
-    expos = args[0].expose
+    expos = args[0].expos
   }
   const output = Object.create(null)
   output.unit = Object.create(null)

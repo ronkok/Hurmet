@@ -53,7 +53,7 @@ table th {
 }
 
 table tbody tr td:nth-child(1) { text-align: left }
-table tbody tr td:nth-child(14) { text-align: left }
+table tbody tr td:nth-child(13) { text-align: left }
 
 /* Use flex box to stack fractions in the Factors column */
 .fraction {

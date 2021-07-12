@@ -11,9 +11,9 @@ fs.writeFileSync('site/docs/en/manual.html', manual)
 // Now translate the unit-definitions file from Markdown to HTML.
 let units = fs.readFileSync('docs/en/unit-definitions.md').toString('utf8')
 // Substitute some headings.
-units = units.replace("| L  | M  | Ti | E  | Te | # | LI | $ | SA |",
+units = units.replace("| L  | M  | Ti | E  | Te | # | LI | $ |",
   "| length | mass | time | electric<br>current | temp | amount | luminous<br>intensity " +
-  "| money | solid<br>angle |")
+  "| money |")
 units =  marked(units)
 
 // In the unit-definition file, replace factor fractions with stacked fractions.
