@@ -580,11 +580,18 @@ const groupSubscript = word => {
 
 const checkForTrailingAccent = word => {
   const ch = word.slice(-1)
-  return (!(/[\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]/.test(ch)))
-    ? word
-    : (word.length === 2)
-    ? accentFromChar[ch] + "{" + word.slice(0, -1) + "}"
-    : wideAccentFromChar[ch] + "{" + word.slice(0, -1) + "}"
+  if (/[\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]/.test(ch)) {
+    word = word.slice(0, -1)
+    return word === "i"
+      ? accentFromChar[ch] + "{ı}"  // dotless i
+      : word === "j"
+      ? accentFromChar[ch] + "{ȷ}"  // dotless j
+      : word.length === 1
+      ? accentFromChar[ch] + "{" + word + "}"
+      : wideAccentFromChar[ch] + "{" + word.slice(0, -1) + "}"
+  } else {
+    return word
+  }
 }
 
 const lexOneWord = (str, prevToken) => {
