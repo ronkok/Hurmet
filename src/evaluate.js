@@ -600,7 +600,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           num.unit = Object.create(null)
           num.unit.expos = allZeros
           num.dtype = o1.dtype
-          num.value = Rnl.divide(Rnl.multiply(Rnl.multiply(o1.value, Rnl.pi), Rnl.two), Rnl.fromNumber(180))
+          num.value = Rnl.divide(Rnl.multiply(o1.value, Rnl.pi), Rnl.fromNumber(180))
           stack.push(Object.freeze(num))
           break
         }

@@ -229,6 +229,7 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
         resultDisplay = parse(trailStr, decimalFormat).replace(/\\%/g, "%")
       }
       resultDisplay = resultDisplay.replace(/\\text\{(\?\??|%%?)\}/, "$1")
+      resultDisplay = resultDisplay.replace(/([?%]) ([?%])/, "$1" + "$2")
     }
 
   } else {
