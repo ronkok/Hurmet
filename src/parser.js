@@ -728,12 +728,14 @@ export const parse = (
         tex += token.output + " "
         okToAppend = true
 
-        if (isCalc && !isFollowedBySpace && followedByFactor) {
+        if (!isFollowedBySpace && followedByFactor) {
           // We've encountered something like the expression "2a".
-          rpn += tokenSep
           popTexTokens(2, okToAppend)
-          popRpnTokens(7)
-          rpnStack.push({ prec: rpnPrecFromType[tt.MULT], symbol: "⌧" })
+          if (isCalc) {
+            rpn += tokenSep
+            popRpnTokens(7)
+            rpnStack.push({ prec: rpnPrecFromType[tt.MULT], symbol: "⌧" })
+          }
         }
         break
 
