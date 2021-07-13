@@ -588,7 +588,7 @@ const checkForTrailingAccent = word => {
       ? accentFromChar[ch] + "{ȷ}"  // dotless j
       : word.length === 1
       ? accentFromChar[ch] + "{" + word + "}"
-      : wideAccentFromChar[ch] + "{" + word.slice(0, -1) + "}"
+      : wideAccentFromChar[ch] + "{" + word + "}"
   } else {
     return word
   }
