@@ -23,7 +23,7 @@ export const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat
     const pos = match.index
     let hvar
 
-    if (varName.indexOf(".") > -1) {
+    /*if (varName.indexOf(".") > -1) {
       // Object with a dot accessor.
       const names = varName.split(".")
       const parentName = names[0]
@@ -37,7 +37,8 @@ export const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat
         const stmt = { resulttemplate: "@", altresulttemplate: "@" }
         hvar.resultdisplay = formatResult(stmt, hvar, formatSpec, decimalFormat).resultdisplay
       }
-    } else if (!vars[varName] && varName === "T") {
+    } else */
+    if (!vars[varName] && varName === "T") {
       // Transposed matrix
       hvar = { dtype: dt.RATIONAL, resultdisplay: "\\text{T}" }
     } else if (varName === "e" && /^^/.test(str.slice(pos + 4).trim())) {
@@ -80,7 +81,7 @@ export const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat
     let display = ""
 
     if (hvar.dtype === dt.DATAFRAME || hvar.dtype === dt.DICT || (hvar.dtype & dt.MAP)) {
-      display = hvar.resultdisplay
+      display = "\\mathrm{" + vars[varName].name + "}"
     } else if (unitAware) {
       display = needsParens ? "\\left(" + hvar.resultdisplay + "\\right)" : hvar.resultdisplay
     } else {
