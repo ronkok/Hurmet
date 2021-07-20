@@ -22,6 +22,7 @@ export const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat
     const matchLength = match[0].length
     const pos = match.index
     let hvar
+    let display = ""
 
     if (varName.indexOf(".") > -1) {
       // Object with a dot accessor.
@@ -29,13 +30,22 @@ export const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat
       const parentName = names[0]
       if (!vars[parentName]) { return errorOprnd("V_NAME", parentName) }
       hvar = vars[parentName]
-      for (let i = 1; i < names.length; i++) {
-        const propName = names[i].replace("}", "").replace("\\mathrm{", "").trim()
-        const indexOprnd = { value: propName, unit: null, dtype: dt.STRING }
-        hvar = propertyFromDotAccessor(hvar, indexOprnd, vars, unitAware)
-        if (!hvar) { return errorOprnd("V_NAME", propName) }
-        const stmt = { resulttemplate: "@", altresulttemplate: "@" }
-        hvar.resultdisplay = formatResult(stmt, hvar, formatSpec, decimalFormat).resultdisplay
+      if (hvar.dtype === dt.DATAFRAME && names.length === 2) {
+        // This is a dataframe.dict. I don't want to write an entire dictionary into
+        // a blue echo, so display just the names.
+        display = "\\mathrm{" + vars[names[0]].name + "{.}\\mathrm{" + names[1] + "}"
+        return str.substring(0, pos) + display + str.substring(pos + matchLength)
+      } else {
+        // we want to display the property value.
+        for (let i = 1; i < names.length; i++) {
+          const propName = names[i].replace("}", "").replace("\\mathrm{", "").trim()
+          const indexOprnd = { value: propName, unit: null, dtype: dt.STRING }
+          hvar = propertyFromDotAccessor(hvar, indexOprnd, vars, unitAware)
+          if (!hvar) { return errorOprnd("V_NAME", propName) }
+          const stmt = { resulttemplate: "@", altresulttemplate: "@" }
+          hvar.resultdisplay = formatResult(stmt, hvar, formatSpec,
+                decimalFormat).resultdisplay
+        }
       }
     } else if (!vars[varName] && varName === "T") {
       // Transposed matrix
@@ -77,10 +87,8 @@ export const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat
     }
     needsParens = needsParens && !isParened
 
-    let display = ""
-
     if (hvar.dtype === dt.DATAFRAME || hvar.dtype === dt.DICT || (hvar.dtype & dt.MAP)) {
-      display = hvar.resultdisplay
+      display = "\\mathrm{" + vars[varName].name + "}"
     } else if (unitAware) {
       display = needsParens ? "\\left(" + hvar.resultdisplay + "\\right)" : hvar.resultdisplay
     } else {
