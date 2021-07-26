@@ -722,7 +722,7 @@ Hurmet calculations are meant to be recognizeable to anyone familiar with standa
 
 *j*
 
-: ¢j¢ ≡ ¢√(-1)¢.
+: ¢j¢ = ¢√(-1)¢.
 
 ℏ
 
