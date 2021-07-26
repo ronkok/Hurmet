@@ -63,17 +63,34 @@
 
 <p>This week’s example:</p>
 
-<h3>Simple span beam</h3>
-
-<p><span class="hurmet-calc" data-entry="L = '12 feet'"></span>, length</p>
-
-<p><span class="hurmet-calc" data-entry="w = '110 lbf/ft'"></span>, uniform line load</p>
-
-<p><span class="hurmet-calc" data-entry="P = '1000 lbf'"></span>, mid-span point load</p>
-
-<p><span class="hurmet-calc" data-entry="V = (w L)/2 + P/2 = ?? lbf"></span>, maximum shear</p>
-
-<p><span class="hurmet-calc" data-entry="M = (w L^2)/8 + (P L)/4 = ?? lbf-ft"></span>, max bending moment</p>
+<h3>Complex Numbers</h3>
+<p>Hurmet now supports complex numbers. You can write a complex number in two forms.</p>
+<ul>
+   <li>
+      <p><span class="hurmet-calc" data-entry="a + j\ b :"></span>  The letter “<span class="hurmet-calc" data-entry="j"></span>“ is now identical to <span class="hurmet-calc" data-entry="√(-1)"></span> by Hurmet definition. Be sure to write a space after <span class="hurmet-calc" data-entry="j"></span>.</p>
+   </li>
+   <li>
+      <p><span class="hurmet-calc" data-entry="r∠θ :"></span> The characters  will auto-correct into ∠ and <span class="hurmet-calc" data-entry="θ"></span> is in radians.</p>
+   </li>
+</ul>
+<p>Also, the character <strong>°</strong> is now an operator that multiplies the previous number by <span class="hurmet-calc" data-entry="π//180"></span>. So one can also write a polar notation as <span class="hurmet-calc" data-entry="r∠θ°"></span>.  The characters  will auto-correct into °</p>
+<p>Variable assignments can now look like this:</p>
+<p class="indented"><span class="hurmet-calc" data-entry="z_1 = 2 + j 3"></span></p>
+<p class="indented"><span class="hurmet-calc" data-entry="z_2 = 4∠30°"></span></p>
+<p>The basic arithmetic operations are all supported.</p>
+<p class="indented"><span class="hurmet-calc" data-entry="format = &quot;h3&quot;"></span></p>
+<p class="indented"><span class="hurmet-calc" data-entry="z = z_1 + z_2  = ?"></span></p>
+<p>To get results in polar format, write either ∠ or ° as the third character in a format definition. </p>
+<p class="indented"><span class="hurmet-calc" data-entry="format = &quot;h3°&quot;"></span></p>
+<p class="indented"><span class="hurmet-calc" data-entry="z = ?"></span></p>
+<p>Hurmet’s operator for a complex conjugate is: ^*. The norm can be called via <span class="hurmet-calc" data-entry="|z|"></span>.</p>
+<p class="indented"><span class="hurmet-calc" data-entry="z_c = z^* = ?"></span></p>
+<p class="indented"><span class="hurmet-calc" data-entry="|z| = ?"></span></p>
+<p>Many Hurmet functions will now accept a complex argument. These include <em>log()</em>, <em>exp()</em>, and all the trigonometry functions. And there are three new functions:</p>
+<p class="indented"><span class="hurmet-calc" data-entry="Re(z) = ?"></span>, returns the real part of a complex number.</p>
+<p class="indented"><span class="hurmet-calc" data-entry="Im(z) = ?"></span>, returns the imaginary part of a complex number.</p>
+<p class="indented"><span class="hurmet-calc" data-entry="argument(z) = ??°"></span>, returns the phase angle of a complex number.</p>
+<p>Complex number support is just beginning. Matrices, dictionaries, and Hurmet quantities can not yet contain complex numbers. Those will be added in the upcoming weeks.</p>
 
 </div> <!-- editor -->
 

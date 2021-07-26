@@ -67,6 +67,7 @@ const demonstration = (function(exports) {
     "identi-correct": "bb M != h_sub +  theta bar + f''",
     "data-types": `"a string" ≠ 2.3`,
     "number-rr": "33 / 2.45 × 3.2% + 3 7/8 + 3.1e1 = ?",
+    "complex-number": "4∠30° = ?",
     "quantity": "'9.807 m/s²' = ?? ft/s²",
     "matrix": "\\[2.1; -15.3]",
     "matrix-mult": "\\[1, 2, 3] \\[3; 2; 1] = ?",

@@ -1,16 +1,18 @@
 import { dt, allZeros } from "./constants"
 import { Rnl } from "./rational"
+import { Cpx } from "./complex"
 import { clone } from "./utils"
 import { unitsAreCompatible } from "./units"
 import { Matrix } from "./matrix"
 import { errorOprnd } from "./error"
 
-const negativeOne = Rnl.negate(Rnl.one)
+const negativeOne = Object.freeze(Rnl.negate(Rnl.one))
 const oneHalf = [BigInt(1), BigInt(2)]
 const thirty = [BigInt(30), BigInt(1)]
 const fortyFive = [BigInt(45), BigInt(1)]
 const sixty = [BigInt(60), BigInt(1)]
 const ninety = [BigInt(90), BigInt(1)]
+const halfPi = Object.freeze(Rnl.divide(Rnl.pi, Rnl.two))
 
 const functionExpos = (functionName, args) => {
   const numArgs = args.length
@@ -19,7 +21,6 @@ const functionExpos = (functionName, args) => {
 
   switch (functionName) {
     case "abs":
-    case "real":
     case "round":
     case "roundn":
     case "sign":
@@ -96,8 +97,9 @@ const functionExpos = (functionName, args) => {
       if (!unitsAreCompatible(expos, allZeros)) {
         return errorOprnd("UNIT_IN", functionName)
       }
-      return functionName === "hmt" ? [1, 0, 0, 0, 0, 0, 0, 0, 0] : [0, 0, 0, 0, 0, 0, 0, 0, 0]
+      return functionName === "hmt" ? [1, 0, 0, 0, 0, 0, 0, 0] : allZeros
 
+    case "atan2":
     case "hypot":
     case "rms":
     case "sum":
@@ -116,8 +118,13 @@ const functionExpos = (functionName, args) => {
           if (x[j] !== y[j]) { return errorOprnd("UNIT_ARG", functionName) }
         }
       }
-      return x
+      return functionName === "atan2" ? allZeros : x
     }
+
+    case "Re":
+    case "Im":
+    case "argument":
+      return allZeros
 
     case "product": {
       const expos = clone(args[0].unit.expos)
@@ -133,21 +140,19 @@ const functionExpos = (functionName, args) => {
   }
 }
 
-const gamma = (z) => {
-  // TODO: complex inputs
-
-  if (Rnl.isZero(z)) {
+const gamma = x => {
+  if (Rnl.isZero(x)) {
     return errorOprnd("Γ0")
-  } else if (Rnl.isPositive(z) && Rnl.isInteger(z) && Rnl.toNumber(z) < 101) {
-    return Rnl.factorial(Rnl.subtract(z, Rnl.one))
-  } else if (Rnl.isNegative(z) && Rnl.isInteger(z)) {
+  } else if (Rnl.isPositive(x) && Rnl.isInteger(x) && Rnl.lessThan(x, Rnl.fromNumber(101))) {
+    return Rnl.factorial(Rnl.subtract(x, Rnl.one))
+  } else if (Rnl.isNegative(x) && Rnl.isInteger(x)) {
     return errorOprnd("ΓPOLE")
-  } else if (Rnl.lessThan(z, oneHalf)) {
+  } else if (Rnl.lessThan(x, oneHalf)) {
     // reflection formula
-    return Rnl.fromNumber(Math.PI / (Math.sin(Math.PI * Rnl.toNumber(z)))
-      * Rnl.toNumber(gamma(Rnl.subtract(Rnl.one, z))))
+    return Rnl.fromNumber(Math.PI / (Math.sin(Math.PI * Rnl.toNumber(x)))
+      * Rnl.toNumber(gamma(Rnl.subtract(Rnl.one, x))))
   } else {
-    return Rnl.lanczos(z)
+    return Rnl.lanczos(x)
   }
 }
 
@@ -212,213 +217,309 @@ const multiset = (n, k) => {
 const piOver180 = Rnl.divide(Rnl.pi, [BigInt(180), BigInt(1)])
 
 const unary = {
-  // Functions that take one real argument.
-  abs(x) {
-    return Rnl.abs(x)
-  },
-  cos(x) {
-    return Rnl.areEqual(x, Rnl.divide(Rnl.pi, Rnl.two))
-       ? Rnl.zero
-       : Rnl.fromNumber(Math.cos(Rnl.toNumber(x)))
-  },
-  sin(x) {
-    return Rnl.fromNumber(Math.sin(Rnl.toNumber(x)))
-  },
-  tan(x) {
-    if (Rnl.areEqual(x, Rnl.divide(Rnl.pi, Rnl.two))) {
-      return errorOprnd("TAN90", "π/2")
+  scalar: {
+    // Functions that take one real argument.
+    abs(x)  { return Rnl.abs(x) },
+    argument(x) { return errorOprnd("NA_REAL", "argument") },
+    Re(x)   { return errorOprnd("NA_REAL", "Re") },
+    Im(x)   { return errorOprnd("NA_REAL", "Im") },
+    cos(x)  { return Rnl.cos(x) },
+    sin(x)  { return Rnl.sin(x) },
+    tan(x)  { return Rnl.tan(x) },
+    cosh(x) { return Rnl.cosh(x) },
+    sinh(x) { return Rnl.sinh(x) },
+    tanh(x) { return Rnl.tanh(x) },
+    acos(x) {
+      if (Rnl.greaterThan(Rnl.abs(x), Rnl.one)) { return errorOprnd("ATRIG", "acos") }
+      return Rnl.fromNumber(Math.acos(Rnl.toNumber(x)))
+    },
+    asin(x) {
+      if (Rnl.greaterThan(Rnl.abs(x), Rnl.one)) { return errorOprnd("ATRIG", "asin") }
+      return Rnl.fromNumber(Math.asin(Rnl.toNumber(x)))
+    },
+    atan(x) {
+      return Rnl.fromNumber(Math.atan(Rnl.toNumber(x)))
+    },
+    sec(x) {
+      return Rnl.fromNumber(1 / Math.cos(Rnl.toNumber(x)))
+    },
+    csc(x) {
+      return Rnl.fromNumber(1 / Math.sin(Rnl.toNumber(x)))
+    },
+    cot(x) {
+      if (Rnl.isZero(x)) { return errorOprnd("COT", "cotangent") }
+      return  Rnl.fromNumber(1 / Math.tan(Rnl.toNumber(x)))
+    },
+    asec(x) {
+      if (Rnl.greaterThanOrEqualTo(Rnl.abs(x), Rnl.one)) {
+        return errorOprnd("ASEC", "arcecant")
+      }
+      const temp = Math.atn(Math.sqrt(Rnl.toNumber(Rnl.decrement(Rnl.multiply(x, x)))))
+      return  (Rnl.isPositive(x))
+        ? Rnl.fromNumber(temp)
+        : Rnl.fromNumber(temp - Math.PI)
+    },
+    acot(x) {
+      if (Rnl.greaterThanOrEqualTo(Rnl.abs(x), Rnl.one)) {
+        return errorOprnd("ASEC", "acot")
+      }
+      const temp = Math.atn(1 / (Math.sqrt(Rnl.toNumber(Rnl.decrement(Rnl.multiply(x, x))))))
+      return (Rnl.isPositive(x))
+        ? Rnl.fromNumber(temp)
+        : Rnl.fromNumber(temp - Math.PI)
+    },
+    acsc(x) {
+      return Rnl.fromNumber(Math.atn(-Rnl.toNumber(x)) + Math.PI)
+    },
+    exp(x) {
+      return Rnl.exp(x)
+    },
+    log(x) {
+      return Rnl.fromNumber(Math.log(Rnl.toNumber(x)))
+    },
+    ln(x) {
+      return Rnl.fromNumber(Math.log(Rnl.toNumber(x)))
+    },
+    log10(x) {
+      return Rnl.fromNumber(Math.log10(Rnl.toNumber(x)))
+    },
+    log2(x) {
+      return Rnl.fromNumber(Math.log2(Rnl.toNumber(x)))
+    },
+    sech(x) {
+      // sech(n) = 2 / (eⁿ + e⁻ⁿ)
+      const num = Rnl.toNumber(x)
+      return Rnl.fromNumber(2 / (Math.exp(num) + Math.exp(-num)))
+    },
+    csch(x) {
+      // csch(n) = 2 / (eⁿ - e⁻ⁿ)
+      const num = Rnl.toNumber(x)
+      return Rnl.fromNumber(2 / (Math.exp(num) - Math.exp(-num)))
+    },
+    coth(x) {
+      // coth(n) = (eⁿ + e⁻ⁿ) / (eⁿ - e⁻ⁿ)
+      const num = Rnl.toNumber(x)
+      return Rnl.fromNumber(
+        (Math.exp(num) + Math.exp(-num)) / (Math.exp(num) - Math.exp(-num))
+      )
+    },
+    acosh(x) {
+      // acosh(x) = log( x + sqrt(x - 1) × sqrt(x + 1) )
+      const num = Rnl.toNumber(x)
+      return Rnl.fromNumber(Math.log( num + Math.sqrt(num - 1) * Math.sqrt(num + 1) ))
+    },
+    asinh(x) {
+      // asinh(x) = log(x + sqrt(x² + 1))
+      const num = Rnl.toNumber(x)
+      return Rnl.fromNumber(Math.log(num + Math.sqrt(Math.pow(num, 2) + 1)))
+    },
+    atanh(x) {
+      // atanh(x) = [ log(1+x) - log(1-x) ] / 2
+      const num = Rnl.toNumber(x)
+      return Rnl.fromNumber((Math.log(1 + num) - Math.log(1 - num) ) / 2)
+    },
+    asech(x) {
+      // asech(x) = log( [sqrt(-x * x + 1) + 1] / x )
+      if (Rnl.isZero(x)) { return errorOprnd("DIV") }
+      const num = Rnl.toNumber(x)
+      return Rnl.fromNumber(Math.log((Math.sqrt(-num * num + 1) + 1) / num))
+    },
+    ascsh(x) {
+      // acsch(x) = log( sqrt(1 + 1/x²) + 1/x )
+      if (Rnl.isZero(x)) { return errorOprnd("DIV") }
+      const num = Rnl.toNumber(x)
+      return Rnl.fromNumber(Math.log(Math.sqrt(1 + 1 / Math.pow(num, 2)) + 1 / num))
+    },
+    acoth(x) {
+      // acoth(x) = [ log(1 + 1/x) - log(1 - 1/x) ] / 2
+      if (Rnl.isZero(x)) { return errorOprnd("DIV") }
+      const num = Rnl.toNumber(x)
+      return Rnl.fromNumber((Math.log(1 + 1 / num) - Math.log(1 - 1 / num)) / 2)
+    },
+    Gamma(x) {
+      return gamma(x)
+    },
+    Γ(x) {
+      return gamma(x)
+    },
+    logΓ(x) {
+      if (Rnl.isNegative(x) || Rnl.isZero(x)) { return errorOprnd("LOGΓ") }
+      return logΓ(x)
+    },
+    logFactorial(x) {
+      if (Rnl.isNegative(x) || !Rnl.isInteger(x)) { return errorOprnd("FACT") }
+      return logΓ(Rnl.add(x, Rnl.one))
+    },
+    sign(x) {
+      return Rnl.isPositive(x) ? Rnl.one : Rnl.isZero ? Rnl.zero : negativeOne
+    },
+    cosd(x) {
+      if (Rnl.areEqual(x, ninety)) { return Rnl.zero }
+      if (Rnl.areEqual(x, sixty)) { return oneHalf }
+      return this.cos(Rnl.multiply(x, piOver180))
+    },
+    sind(x) {
+      if (Rnl.areEqual(x, thirty)) { return oneHalf }
+      return this.sin(Rnl.multiply(x, piOver180))
+    },
+    tand(x) {
+      if (Rnl.areEqual(x, fortyFive)) { return Rnl.one }
+      if (Rnl.areEqual(x, ninety)) { return errorOprnd("TAN90", "90°") }
+      return this.tan(Rnl.multiply(x, piOver180))
+    },
+    cotd(x) {
+      return this.cot(Rnl.multiply(x, piOver180))
+    },
+    cscd(x) {
+      return this.csc(Rnl.multiply(x, piOver180))
+    },
+    secd(x) {
+      return this.sec(Rnl.multiply(x, piOver180))
+    },
+    acosd(x) {
+      const y = this.acos(x)
+      return y.dtype ? y : Rnl.divide(y, piOver180)
+    },
+    asind(x) {
+      const y = this.asin(x)
+      return y.dtype ? y : Rnl.divide(y, piOver180)
+    },
+    atand(x) {
+      return Rnl.divide(this.atan(x), piOver180)
+    },
+    acotd(x) {
+      const y = this.acot(x)
+      return y.dtype ? y : Rnl.divide(y, piOver180)
+    },
+    acscd(x) {
+      const y = this.acsc(x)
+      return y.dtype ? y : Rnl.divide(y, piOver180)
+    },
+    asecd(x) {
+      const y = this.asec(x)
+      return y.dtype ? y : Rnl.divide(y, piOver180)
+    },
+    chr(x) {
+      return String.fromCodePoint(Number(x))
+    },
+    round(x) {
+      return Rnl.fromString(Rnl.toString(x, 0))
     }
-    return Rnl.fromNumber(Math.tan(Rnl.toNumber(x)))
   },
-  acos(x) {
-    if (Rnl.greaterThan(Rnl.abs(x), Rnl.one)) { return errorOprnd("ATRIG", "acos") }
-    return Rnl.fromNumber(Math.acos(Rnl.toNumber(x)))
-  },
-  asin(x) {
-    if (Rnl.greaterThan(Rnl.abs(x), Rnl.one)) { return errorOprnd("ATRIG", "asin") }
-    return Rnl.fromNumber(Math.asin(Rnl.toNumber(x)))
-  },
-  atan(x) {
-    return Rnl.fromNumber(Math.atan(Rnl.toNumber(x)))
-  },
-  sec(x) {
-    return Rnl.fromNumber(1 / Math.cos(Rnl.toNumber(x)))
-  },
-  csc(x) {
-    return Rnl.fromNumber(1 / Math.sin(Rnl.toNumber(x)))
-  },
-  cot(x) {
-    if (Rnl.isZero(x)) { return errorOprnd("COT", "cotangent") }
-    return  Rnl.fromNumber(1 / Math.tan(Rnl.toNumber(x)))
-  },
-  asec(x) {
-    if (Rnl.greaterThanOrEqualTo(Rnl.abs(x), Rnl.one)) {
-      return errorOprnd("ASEC", "arcecant")
+  complex: {
+    // Functions that take one complex argument.
+    abs(z)      { return Cpx.abs(z) },
+    argument(z) { return Cpx.argument(z) },
+    Re(z)       { return z[0] },
+    Im(z)       { return z[1] },
+    cos(z)      { return Cpx.cos(z) },
+    sin(z)      { return Cpx.sin(z) },
+    asin(z)     { return Cpx.asin(z) },
+    atan(z)     { return Cpx.atan(z) },
+    acos(z)     { return Cpx.subtract([halfPi, Rnl.zero], Cpx.asin(z))}, // π/2 - arcsin(z)
+    tan(z)      { return Cpx.divide(Cpx.sin(z), Cpx.cos(z)) },
+    cot(z)      { return Cpx.divide(Cpx.cos(z), Cpx.sin(z)) },
+    sec(z) {
+      const c = Cpx.cos(z)
+      return c.dtype ? c : Cpx.inverse(c)
+    },
+    csc(z) {
+      const s = Cpx.sin(z)
+      return s.dtype ? s : Cpx.inverse(s)
+    },
+    asec(z) {
+      // acos(inverse(z))
+      const inv = Cpx.inverse(z)
+      return Cpx.subtract([halfPi, Rnl.zero], Cpx.asin(inv))
+    },
+    acot(z) { return Cpx.atan(Cpx.inverse(z)) },
+    acsc(z) {
+      return Cpx.asin(Cpx.inverse(z))
+    },
+    exp(z) {
+      return Cpx.exp(z)
+    },
+    log(z) {
+      return Cpx.log(z)
+    },
+    ln(z) {
+      return Cpx.log(z)
+    },
+    log10(z) {
+      return Rnl.fromNumber(Math.log10(Rnl.toNumber(z)))
+    },
+    log2(z) {
+      return Rnl.fromNumber(Math.log2(Rnl.toNumber(z)))
+    },
+    cosh(z) {
+      // cosh(z) = (eᶻ + e⁻ᶻ) / 2
+      return Cpx.divide(Cpx.add(Cpx.exp(z), Cpx.exp(Cpx.negate(z))), [Rnl.two, Rnl.zero])
+    },
+    sinh(z) {
+      // sinh(z) = (eᶻ - e⁻ᶻ) / 2
+      return Cpx.divide(Cpx.subtract(Cpx.exp(z), Cpx.exp(Cpx.negate(z))), [Rnl.two, Rnl.zero])
+    },
+    tanh(z) {
+      // tanh(z) = (eᶻ - e⁻ᶻ) / (eᶻ + e⁻ᶻ)
+      const ez = Cpx.exp(z)
+      const eMinuxZ = Cpx.exp(Cpx.negate(z))
+      return Cpx.divide(Cpx.subtract(ez, eMinuxZ), Cpx.add(ez, eMinuxZ))
+    },
+    sech(z) {
+      // sech(z) = 2 / (eᶻ + e⁻ᶻ)
+      return Cpx.divide([Rnl.two, Rnl.zero], Cpx.add(Cpx.exp(z), Cpx.exp(Cpx.negate(z))))
+    },
+    csch(z) {
+      // csch(z) = 2 / (eᶻ - e⁻ᶻ)
+      return Cpx.divide([Rnl.two, Rnl.zero], Cpx.subtract(Cpx.exp(z), Cpx.exp(Cpx.negate(z))))
+    },
+    coth(z) {
+      // coth(z) = (eᶻ + e⁻ᶻ) / (eᶻ - e⁻ᶻ)
+      const ez = Cpx.exp(z)
+      const eMinuxZ = Cpx.exp(Cpx.negate(z))
+      return Cpx.divide(Cpx.add(ez, eMinuxZ), Cpx.subtract(ez, eMinuxZ))
+    },
+    acosh(z) {
+      return Cpx.acosh(z)
+    },
+    asinh(z) {
+      return Cpx.asinh(z)
+    },
+    atanh(z) {
+      return Cpx.atanh(z)
+    },
+    asech(z) {
+      return Cpx.acosh(Cpx.inverse(z))
+    },
+    acsch(z) {
+      return Cpx.asinh(Cpx.inverse(z))
+    },
+    acoth(z) {
+      return Cpx.atanh(Cpx.inverse(z))
+    },
+    Gamma(z) {
+      return Cpx.gamma(z)
+    },
+    Γ(z) {
+      return Cpx.gamma(z)
+    },
+    logΓ(z) {
+      // TODO: complex logΓ
+      return errorOprnd("NA_COMPL_OP", "logΓ")
+    },
+    sign(z) {
+      if (Rnl.isZero(z[1]) && Rnl.isPositive(z[0])) {
+        return Rnl.one
+      } else if (Rnl.isZero(z[1]) && Rnl.isNegative(z[0])) {
+        return Rnl.negate(Rnl.one)
+      } else {
+        return Cpx.divide(z, [Cpx.abs(z), Rnl.zero])
+      }
+    },
+    round(z) {
+      // TODO: complex round function
+      return errorOprnd("NA_COMPL_OP", "round")
     }
-    const temp = Math.atn(Math.sqrt(Rnl.toNumber(Rnl.decrement(Rnl.multiply(x, x)))))
-    return  (Rnl.isPositive(x))
-      ? Rnl.fromNumber(temp)
-      : Rnl.fromNumber(temp - Math.PI)
-  },
-  acot(x) {
-    if (Rnl.greaterThanOrEqualTo(Rnl.abs(x), Rnl.one)) {
-      return errorOprnd("ASEC", "acot")
-    }
-    const temp = Math.atn(1 / (Math.sqrt(Rnl.toNumber(Rnl.decrement(Rnl.multiply(x, x))))))
-    return (Rnl.isPositive(x))
-      ? Rnl.fromNumber(temp)
-      : Rnl.fromNumber(temp - Math.PI)
-  },
-  acsc(x) {
-    return Rnl.fromNumber(Math.atn(-Rnl.toNumber(x)) + Math.PI)
-  },
-  exp(x) {
-    return Rnl.exp(x)
-  },
-  log(x) {
-    return Rnl.fromNumber(Math.log(Rnl.toNumber(x)))
-  },
-  ln(x) {
-    return Rnl.fromNumber(Math.log(Rnl.toNumber(x)))
-  },
-  log10(x) {
-    return Rnl.fromNumber(Math.log10(Rnl.toNumber(x)))
-  },
-  log2(x) {
-    return Rnl.fromNumber(Math.log2(Rnl.toNumber(x)))
-  },
-  cosh(x) {
-    // cosh(n) = (eⁿ + e⁻ⁿ) / 2
-    const num = Rnl.toNumber(x)
-    return Rnl.fromNumber((Math.exp(num) + Math.exp(-num)) / 2)
-  },
-  sinh(x) {
-    // sinh(n) = (eⁿ - e⁻ⁿ) / 2
-    const num = Rnl.toNumber(x)
-    return Rnl.fromNumber((Math.exp(num) - Math.exp(-num)) / 2)
-  },
-  tanh(x) {
-    // tanh(n) = (eⁿ - e⁻ⁿ) / (eⁿ + e⁻ⁿ)
-    const num = Rnl.toNumber(x)
-    return Rnl.fromNumber(
-      (Math.exp(num) - Math.exp(-num)) / (Math.exp(num) + Math.exp(-num))
-    )
-  },
-  sech(x) {
-    // sech(n) = 2 / (eⁿ + e⁻ⁿ)
-    const num = Rnl.toNumber(x)
-    return Rnl.fromNumber(2 / (Math.exp(num) + Math.exp(-num)))
-  },
-  csch(x) {
-    // csch(n) = 2 / (eⁿ - e⁻ⁿ)
-    const num = Rnl.toNumber(x)
-    return Rnl.fromNumber(2 / (Math.exp(num) - Math.exp(-num)))
-  },
-  coth(x) {
-    // coth(n) = (eⁿ + e⁻ⁿ) / (eⁿ - e⁻ⁿ)
-    const num = Rnl.toNumber(x)
-    return Rnl.fromNumber(
-      (Math.exp(num) + Math.exp(-num)) / (Math.exp(num) - Math.exp(-num))
-    )
-  },
-  acosh(x) {
-    // acosh(x) = log( x + sqrt(x - 1) × sqrt(x + 1) )
-    const num = Rnl.toNumber(x)
-    return Rnl.fromNumber(Math.log( num + Math.sqrt(num - 1) * Math.sqrt(num + 1) ))
-  },
-  asinh(x) {
-    // asinh(x) = log(x + sqrt(x² + 1))
-    const num = Rnl.toNumber(x)
-    return Rnl.fromNumber(Math.log(num + Math.sqrt(Math.pow(num, 2) + 1)))
-  },
-  atanh(x) {
-    // atanh(x) = [ log(1+x) - log(1-x) ] / 2
-    const num = Rnl.toNumber(x)
-    return Rnl.fromNumber((Math.log(1 + num) - Math.log(1 - num) ) / 2)
-  },
-  asech(x) {
-    // asech(x) = log( [sqrt(-x * x + 1) + 1] / x )
-    const num = Rnl.toNumber(x)
-    return Rnl.fromNumber(Math.log((Math.sqrt(-num * num + 1) + 1) / num))
-  },
-  ascsh(x) {
-    // acsch(x) = log( sqrt(1 + 1/x²) + 1/x )
-    const num = Rnl.toNumber(x)
-    return Rnl.fromNumber(Math.log(Math.sqrt(1 + 1 / Math.pow(num, 2)) + 1 / num))
-  },
-  asoth(x) {
-    // acoth(x) = [ log(1 + 1/x) - log(1 - 1/x) ] / 2
-    const num = Rnl.toNumber(x)
-    return Rnl.fromNumber((Math.log(1 + 1 / num) - Math.log(1 - 1 / num)) / 2)
-  },
-  Gamma(x) {
-    return gamma(x)
-  },
-  Γ(x) {
-    return gamma(x)
-  },
-  logΓ(x) {
-    if (Rnl.isNegative(x) || Rnl.isZero(x)) { return errorOprnd("LOGΓ") }
-    return logΓ(x)
-  },
-  logFactorial(x) {
-    if (Rnl.isNegative(x) || !Rnl.isInteger(x)) { return errorOprnd("FACT") }
-    return logΓ(Rnl.add(x, Rnl.one))
-  },
-  sign(x) {
-    return Rnl.isPositive(x) ? Rnl.one : Rnl.isZero ? Rnl.zero : negativeOne
-  },
-  cosd(x) {
-    if (Rnl.areEqual(x, ninety)) { return Rnl.zero }
-    if (Rnl.areEqual(x, sixty)) { return oneHalf }
-    return this.cos(Rnl.multiply(x, piOver180))
-  },
-  sind(x) {
-    if (Rnl.areEqual(x, thirty)) { return oneHalf }
-    return this.sin(Rnl.multiply(x, piOver180))
-  },
-  tand(x) {
-    if (Rnl.areEqual(x, fortyFive)) { return Rnl.one }
-    if (Rnl.areEqual(x, ninety)) { return errorOprnd("TAN90", "90°") }
-    return this.tan(Rnl.multiply(x, piOver180))
-  },
-  cotd(x) {
-    return this.cot(Rnl.multiply(x, piOver180))
-  },
-  cscd(x) {
-    return this.csc(Rnl.multiply(x, piOver180))
-  },
-  secd(x) {
-    return this.sec(Rnl.multiply(x, piOver180))
-  },
-  acosd(x) {
-    const y = this.acos(x)
-    return y.dtype ? y : Rnl.divide(y, piOver180)
-  },
-  asind(x) {
-    const y = this.asin(x)
-    return y.dtype ? y : Rnl.divide(y, piOver180)
-  },
-  atand(x) {
-    return Rnl.divide(this.atan(x), piOver180)
-  },
-  acotd(x) {
-    const y = this.acot(x)
-    return y.dtype ? y : Rnl.divide(y, piOver180)
-  },
-  acscd(x) {
-    const y = this.acsc(x)
-    return y.dtype ? y : Rnl.divide(y, piOver180)
-  },
-  asecd(x) {
-    const y = this.asec(x)
-    return y.dtype ? y : Rnl.divide(y, piOver180)
-  },
-  chr(x) {
-    return String.fromCodePoint(Number(x))
-  },
-  round(x) {
-    return Rnl.fromString(Rnl.toString(x, 0))
   }
 }
 

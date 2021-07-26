@@ -177,6 +177,7 @@ const miscSymbols = Object.freeze({
   "...": ["...", "\\dots", tt.ORD, ""],
   "%": ["%", "\\%", tt.FACTORIAL, ""],
   "°": ["°", "°", tt.FACTORIAL, ""],
+  "^*": ["^*", "^*", tt.FACTORIAL, ""],
   "-:": ["-:", "÷", tt.MULT, ""],
   "=": ["=", "=", tt.REL, ""],
   "==": ["==", "==", tt.REL, ""],

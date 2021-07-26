@@ -2,11 +2,12 @@ import { dt } from "./constants"
 import { Rnl } from "./rational"
 import { parse } from "./parser"
 import { format } from "./format"
-import { addTextEscapes, clone } from "./utils"
+import { addTextEscapes } from "./utils"
 import { Matrix, isMatrix } from "./matrix"
 import { DataFrame } from "./dataframe"
 import { map } from "./map"
 import { Dictionary } from "./dictionary"
+import { Cpx } from "./complex"
 
 // A result has been sent here from evaluate.js or updateCalculations.js.
 // Format the result for display.
@@ -80,10 +81,25 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAwar
         altResultDisplay = String(result.value)
 
       } else if (result.dtype === dt.COMPLEX) {
-        const real = format(result.value[0], formatSpec, decimalFormat)
-        const im = format(result.value[1], formatSpec, decimalFormat)
-        resultDisplay = real + " + j" + im
-        altResultDisplay = real + " + j" + im
+        const z = result.value
+        const complexSpec = /[j∠°]/.test(formatSpec) ? formatSpec.slice(-1) : "j"
+        if (complexSpec === "j") {
+          const real = format(z[0], formatSpec, decimalFormat)
+          let im = format(z[1], formatSpec, decimalFormat)
+          if (im.charAt(0) === "-") { im = "(" + im + ")" }
+          resultDisplay = real + " + j" + im
+          altResultDisplay = real + " + j" + im
+        } else {
+          const mag = Rnl.hypot(z[0], z[1])
+          let angle = Cpx.argument(result.value)
+          if (complexSpec === "°") {
+            angle = Rnl.divide(Rnl.multiply(angle, Rnl.fromNumber(180)), Rnl.pi)
+          }
+          resultDisplay = format(mag, formatSpec, decimalFormat) + "∠" +
+                          format(angle, formatSpec, decimalFormat) +
+                          (complexSpec === "°" ? "°" : "")
+          altResultDisplay = resultDisplay
+        }
 
       } else if (result.value.plain) {
         resultDisplay = format(result.value.plain, formatSpec, decimalFormat)

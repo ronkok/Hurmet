@@ -212,6 +212,16 @@ const reciprocal = r => {
   return [numerator, denominator]
 }
 
+const hypot = (a, b) => {
+  // Ref: https://www.johndcook.com/blog/2010/06/02/whats-so-hard-about-finding-a-hypotenuse/
+  const absA = abs(a)
+  const absB = abs(b)
+  const maximum = max(absA, absB)
+  const minimum = min(absA, absB)
+  const r = Rnl.divide(minimum, maximum)
+  return Rnl.multiply(maximum, sqrt(Rnl.increment(Rnl.multiply(r, r))))
+}
+
 const modulo = (a, b) => {
   const quotient = divide(normalize(a), normalize(b))
   return [intAbs(quotient[0] % quotient[1]), iOne]
@@ -242,6 +252,41 @@ const greaterThanOrEqualTo = (a, b) => greaterThan(a, b) || areEqual(a, b)
 const max = (a, b) => greaterThan(a, b) ? [a[0], a[1]] : [b[0], b[1]]
 
 const min = (a, b) => lessThan(a, b) ? [a[0], a[1]] : [b[0], b[1]]
+
+const cos = x => {
+  return areEqual(x, divide(pi, two))
+    ? zero
+    : fromNumber(Math.cos(toNumber(x)))
+}
+
+const sin = x => fromNumber(Math.sin(toNumber(x)))
+
+const tan = x => {
+  if (areEqual(x, divide(pi, two))) {
+    return errorOprnd("TAN90", "π/2")
+  }
+  return fromNumber(Math.tan(toNumber(x)))
+}
+
+const cosh = x => {
+  // cosh(n) = (eⁿ + e⁻ⁿ) / 2
+  const num = toNumber(x)
+  return fromNumber((Math.exp(num) + Math.exp(-num)) / 2)
+}
+
+const sinh = x => {
+  // sinh(n) = (eⁿ - e⁻ⁿ) / 2
+  const num = toNumber(x)
+  return fromNumber((Math.exp(num) - Math.exp(-num)) / 2)
+}
+
+const tanh = x => {
+  // tanh(n) = (eⁿ - e⁻ⁿ) / (eⁿ + e⁻ⁿ)
+  const num = toNumber(x)
+  return fromNumber(
+    (Math.exp(num) - Math.exp(-num)) / (Math.exp(num) + Math.exp(-num))
+  )
+}
 
 const toNumber = r => {
   // Return a JavaScript Number
@@ -311,15 +356,15 @@ const factorial = (n) => {
   }
 }
 
-const lanczos = x => {
+const lanczos = xPlusOne => {
   // Lanczos approximation of Gamma function.
   // Coefficients are from 2004 PhD thesis by Glendon Pugh.
   // *An Analysis of the Lanczos Gamma Approximation*
   // The following equation is from p. 116 of the Pugh thesis:
-  // Γ(z+1) ≈ 2 * Sqr(e / π) * ((z + 10.900511 + 0.5) / e) ^ (z + 0.5) * sum
-  const z = subtract(x, one)
+  // Γ(x+1) ≈ 2 * √(e / π) * ((x + 10.900511 + 0.5) / e) ^ (x + 0.5) * sum
+  const x = subtract(xPlusOne, one)
   const term1 = multiply(two, sqrt(divide(e, pi)))
-  const term2 = power(divide(add(z, fromNumber(11.400511)), e), add(z, [iOne, iTwo]))
+  const term2 = power(divide(add(x, fromNumber(11.400511)), e), add(x, [iOne, iTwo]))
 
   // Coefficients from Pugh, Table 8.5
   const d = ["2.48574089138753565546e-5", "1.05142378581721974210",
@@ -328,10 +373,10 @@ const lanczos = x => {
     "-0.000571926117404305781283", "0.00000463399473359905636708",
     "-0.00000000271994908488607703910"]
 
-  // sum = d_0 + ∑_(k=1)^10 d_k/(z+k)
+  // sum = d_0 + ∑_(k=1)^10 d_k/(x+k)
   let sum = fromString(d[0])
   for (let k = 1; k <= 10; k++) {
-    sum = add(sum, divide(fromString(d[k]), add(z, fromNumber(k))))
+    sum = add(sum, divide(fromString(d[k]), add(x, fromNumber(k))))
   }
 
   return multiply(multiply(term1, term2), sum)
@@ -361,11 +406,18 @@ export const Rnl = Object.freeze({
   gcd,
   hbar,
   modulo,
+  hypot,
   one,
   pi,
   power,
   sqrt,
   two,
+  cos,
+  sin,
+  tan,
+  cosh,
+  sinh,
+  tanh,
   areEqual,
   lessThan,
   greaterThan,

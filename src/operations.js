@@ -2,6 +2,7 @@ import { dt } from "./constants"
 import { mapMap, clone } from "./utils"
 import { errorOprnd } from "./error"
 import { Rnl } from "./rational"
+import { Cpx } from "./complex"
 import { Matrix } from "./matrix"
 import { dictMap } from "./dictionary"
 import { compare } from "./compare"
@@ -35,6 +36,19 @@ const unary = {
     percent(x)   { return Rnl.multiply(oneTenth, x) },
     factorial(x) { return Rnl.factorial(x) },
     not(x)       { return !x }
+  },
+
+  complex: {
+    abs(z)       { return Cpx.abs(z) },
+    norm(z)      { return Cpx.abs(z) },
+    conjugate(z) { return Cpx.conjugate(z) },
+    negate(z)    { return Cpx.negate(z) },
+    exp(z)       { return Cpx.exp(z) },
+    floor(z)     { return errorOprnd("NA_COMPL_OP", "floor") },
+    ceil(z)      { return errorOprnd("NA_COMPL_OP", "ceil") },
+    percent(z)   { return errorOprnd("NA_COMPL_OP", "percent") },
+    factorial(z) { return errorOprnd("NA_COMPL_OP", "factorial") },
+    not(z)       { return errorOprnd("NA_COMPL_OP", "not") }
   },
 
   vector: {
@@ -162,7 +176,13 @@ const binary = {
       subtract(x, y) { return Rnl.subtract(x, y) },
       multiply(x, y) { return Rnl.multiply(x, y) },
       divide(x, y)   { return Rnl.divide(x, y) },
-      power(x, y)    { return Rnl.power(x, y) },
+      power(x, y)    {
+        // eslint-disable-next-line max-len
+        return Cpx.isComplex(x) || (Rnl.isNegative(x) && Rnl.isPositive(y) && Rnl.lessThan(y, Rnl.one))
+          ? Cpx.power([x, Rnl.zero], y)
+          : Rnl.power(x, y)
+      },
+      hypot(x, y)    { return Rnl.hypot(x, y) },
       modulo(x, y)   { return Rnl.modulo(x, y) },
       and(x, y)      { return x && y },
       or(x, y)       { return x || y },
@@ -171,9 +191,9 @@ const binary = {
     complex: {
       add(x, z)      { return [Rnl.add(x, z[0]), z[1]] },
       subtract(x, z) { return [Rnl.subtract(x, z[0]), Rnl.negate(z[1])] },
-      multiply(x, z) { return Rnl.multiply(x, z) },
-      divide(x, z)   { return Rnl.divide(x, z) },
-      power(x, z)    { return Rnl.power(x, z) },
+      multiply(x, z) { return [Rnl.multiply(x, z[0]), Rnl.multiply(x, z[1])] },
+      divide(x, z)   { return Cpx.divide([x, Rnl.zero], z) },
+      power(x, z)    { return Cpx.power([x, Rnl.zero], z) },
       modulo(x, z)   { return errorOprnd("NA_COMPL_OP", "modulo") },
       and(x, z)      { return errorOprnd("NA_COMPL_OP", "and") },
       or(x, z)       { return errorOprnd("NA_COMPL_OP", "or") },
@@ -276,19 +296,19 @@ const binary = {
       add(z, y)      { return [Rnl.add(z[0], y), z[1]] },
       subtract(z, y) { return [Rnl.subtract(z[0], y), z[1]] },
       multiply(z, y) { return [Rnl.multiply(z[0], y), Rnl.multiply(z[1], y) ] },
-      divide(z, y)   { return Rnl.divide(z, y) },
-      power(z, y)    { return Rnl.power(z, y) },
+      divide(z, y)   { return Cpx.divide(z, [y, Rnl.zero]) },
+      power(z, y)    { return Cpx.power(z, [y, Rnl.zero]) },
       modulo(z, y)   { return errorOprnd("NA_COMPL_OP", "modulo") },
       and(z, y)      { return errorOprnd("NA_COMPL_OP", "and") },
       or(z, y)       { return errorOprnd("NA_COMPL_OP", "or") },
       xor(z, y)      { return errorOprnd("NA_COMPL_OP", "xor") }
     },
     complex: {
-      add(x, y)      { return [Rnl.add(x, z[0]), z[1]] },
-      subtract(x, y) { return [Rnl.subtract(x, z[0]), Rnl.negate(z[1])] },
-      multiply(x, y) { return Rnl.multiply(x, y) },
-      divide(x, y)   { return Rnl.divide(x, y) },
-      power(x, y)    { return Rnl.power(x, y) },
+      add(x, y)      { return [Rnl.add(x[0], y[0]), Rnl.add(x[1], y[1])] },
+      subtract(x, y) { return [Rnl.subtract(x[0], y[0]), Rnl.subtract(x[1], y[1])] },
+      multiply(x, y) { return Cpx.multiply(x, y) },
+      divide(x, y)   { return Cpx.divide(x, y) },
+      power(x, y)    { return Cpx.power(x, y) },
       modulo(x, y)   { return errorOprnd("NA_COMPL_OP", "modulo") },
       and(x, y)      { return errorOprnd("NA_COMPL_OP", "and") },
       or(x, y)       { return errorOprnd("NA_COMPL_OP", "or") },

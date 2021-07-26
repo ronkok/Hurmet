@@ -10,7 +10,7 @@ const groupByFourRegEx = /\B(?=(\d{4})+$)/g  // use sometimes in China
 // Grouping as common in south Asia: 10,10,000
 const groupByLakhCroreRegEx = /(\d)(?=(\d\d)+\d$)/g
 
-const formatRegEx = /^([beEfhkmprsStx%])?(-?[\d]+)?$/
+const formatRegEx = /^([beEfhkmprsStx%])?(-?[\d]+)?([j∠°])?$/
 
 const superscript = str => {
   // Convert a numeral string to Unicode superscript characters.
@@ -173,13 +173,14 @@ export const parseFormatSpec = str => {
 
   let ftype = match[1] || "h"
   let N = Number(match[2] || "15")
+  const ctype = match[3]  || ""
 
   // Check the specified number of digits
   switch (ftype) {
     case "b":
     case "x":
     case "X":
-      return [str, undefined, dt.STRING, "\\text{" + ftype + "}" ]
+      return [str, undefined, dt.STRING, "\\text{" + ftype + ctype + "}" ]
     case "t":
       N = 0
       break
@@ -194,13 +195,14 @@ export const parseFormatSpec = str => {
   }
 
   if (ftype === "%") { ftype = "\\%" }
-  return [str, undefined, dt.STRING, "\\text{" + ftype + String(N) + "}" ]
+  return [str, undefined, dt.STRING, "\\text{" + ftype + String(N) + ctype + "}" ]
 }
 
 export const format = (num, specStr = "h3", decimalFormat = "1,000,000.") => {
   if (Rnl.isZero(num)) { return "0" }
 
   const spec = { ftype: specStr.charAt(0) }
+  if (/[j∠°]$/.test(specStr)) { specStr = specStr.slice(0, -1) }
   if (specStr.length > 1) { spec.numDigits = Number(specStr.slice(1)) }
 
   if (spec.ftype === "%" || spec.ftype === "p") { num[0] = num[0] * BigInt(100) }

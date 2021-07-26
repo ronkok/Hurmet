@@ -10,11 +10,14 @@ import { dt } from "./constants"
 import { clone, addTextEscapes } from "./utils"
 
 /*
- *  This module is called to update Hurmet calculation cells.
- *  More specifically, it is called:
- *    1. When an author submits one calculation cell.
- *    2. When a new Hurmet.app instance has opened. (from index.js)
- *    3. When a user has opened a new file.         (from openFile.js)
+ *  This module mostly organizes one or two passes through the data structure of a Hurmet
+ *  document, calling for a calculation to be done on each Hurmet calculation cell.
+ *  If you are looking for the calculation itself, look at evaluate.js.
+ *
+ *  To be more precise, this module is called:
+ *    1. When an author submits one calculation cell, or
+ *    2. When a new Hurmet.app instance has opened (from index.js), or
+ *    3. When a user has opened a new file         (from openFile.js), or
  *    4. When a recalculate-all has been called, possibly after a paste. (from menu.js)
  *
  *  Cases 2 thru 4 re-calculate the entire document. I.e., isCalcAll is set to true.
@@ -37,6 +40,7 @@ const urlFromEntry = entry => {
   return str.replace(/"?\).*$/, "").trim()
 }
 
+// Helper function.
 const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
   const attrs = Object.create(null)
   attrs.entry = entry
@@ -144,6 +148,8 @@ const workAsync = (
       proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs,
                         curPos, hurmetVars, tr)
     } catch (err) {
+      const pos = nodeAttrs.template.indexOf(nodeAttrs.resultdisplay)
+      nodeAttrs.tex = nodeAttrs.template.slice(0, pos) + "\\text{" + err + "}"
       tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs))
       tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)))
       view.dispatch(tr)
@@ -316,6 +322,8 @@ export function updateCalculations(
     try {
       proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr)
     } catch (err) {
+      const pos = nodeAttrs.template.indexOf(nodeAttrs.resultdisplay)
+      nodeAttrs.tex = nodeAttrs.template.slice(0, pos) + "\\text{" + err + "}"
       tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs))
       tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)))
       view.dispatch(tr)

@@ -17,6 +17,7 @@ import { errorOprnd } from "./error"
 import { Rnl } from "./rational"
 import { format } from "./format"
 import { formatResult } from "./result"
+import { Cpx } from "./complex"
 
 // evaluate.js
 
@@ -101,6 +102,9 @@ const nextToken = (tokens, i) => {
   return tokens[i + 1]
 }
 
+// array of function names that return a real number from a complex argument.
+const arfn = ["abs", "argument", "Im", "Re", "Γ"]
+
 const stringFromOperand = (oprnd, decimalFormat) => {
   return oprnd.dtype === dt.STRING
     ? oprnd.value
@@ -122,8 +126,8 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
     const tkn = tokens[i]
     const ch = tkn.charAt(0)
 
-    if (ch === "▸") {
-      // A rational number. The triangle is just a marker.
+    if (ch === "®") {
+      // A rational number.
       const r = new Array(2)
       const pos = tkn.indexOf("/")
       r[0] = BigInt(tkn.slice(1, pos))   // numerator
@@ -133,6 +137,19 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
       num.unit = Object.create(null)
       num.unit.expos = allZeros
       num.dtype = dt.RATIONAL
+      stack.push(Object.freeze(num))
+
+    } else if (ch === "©") {
+      // A complex number.
+      const ints = tkn.slice(1).split(",")
+      const z = new Array(2)
+      z[0] = [BigInt(ints[0]), BigInt(ints[1])]  // real part
+      z[1] = [BigInt(ints[2]), BigInt(ints[3])]  // imaginary part
+      const num = Object.create(null)
+      num.value = z
+      num.unit = Object.create(null)
+      num.unit.expos = allZeros
+      num.dtype = dt.COMPLEX
       stack.push(Object.freeze(num))
 
     } else if (ch === "¿") {
@@ -230,12 +247,14 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           // Complex number in polar notation.
           const o2 = stack.pop()
           const o1 = stack.pop()
-          if (o1.dtype !== dt.RATIONAL || o2.dtype !== dt.RATIONAL) { return errorOprnd("NAN_OP") }
+          if (o1.dtype !== dt.RATIONAL || o2.dtype !== dt.RATIONAL) {
+            return errorOprnd("NAN_OP")
+          }
           const theta = Rnl.toNumber(o2.value)
           const z = Object.create(null)
           z.value = [
             Rnl.multiply(o1.value, Rnl.fromNumber(Math.cos(theta))), // real part
-            Rnl.multiply(o1.value, Rnl.fromNumber(Math.sin(theta)))  // imaginary part 
+            Rnl.multiply(o1.value, Rnl.fromNumber(Math.sin(theta)))  // imaginary part
           ];
           z.unit = Object.create(null)
           z.unit.expos = allZeros
@@ -272,7 +291,9 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "~": {
           // Unary minus
           const o1 = stack.pop()
-          if (!(o1.dtype & dt.RATIONAL)) { return errorOprnd("NAN_OP") }
+          if (!((o1.dtype & dt.RATIONAL) || o1.dtype === dt.COMPLEX)) {
+            return errorOprnd("NAN_OP")
+          }
           const neg = Object.create(null)
           neg.value = Operators.unary[shapeOf(o1)]["negate"](o1.value)
           if (neg.value.dtype && neg.value.dtype === dt.ERROR) { return neg.value }
@@ -311,8 +332,9 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             ? { "×": "cross", "·": "dot", "*": "asterisk", "⌧": "multiply" }[tkn]
             : "multiply"
 
-          product.dtype = (tkn === "*" || shape1 === "scalar" || shape1 === "map" || shape1 === "complex" ||
-            shape2 === "scalar" || shape2 === "map" || shape2 === "complex")
+          product.dtype = (tkn === "*" || shape1 === "scalar" || shape1 === "map" ||
+            shape1 === "complex" || shape2 === "scalar" ||
+            shape2 === "map" || shape2 === "complex")
             ? Operators.dtype[shape1][shape2](o1.dtype, o2.dtype)
             : tkn === "·"
             ? dt.RATIONAL
@@ -334,7 +356,8 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "\u2215": {
           const o2 = stack.pop()
           const o1 = stack.pop()
-          if (!((o1.dtype & dt.RATIONAL) & (o2.dtype & dt.RATIONAL))) {
+          if (!(((o1.dtype & dt.RATIONAL) || o1.dtype === dt.COMPLEX) &&
+                ((o2.dtype & dt.RATIONAL) || o2.dtype === dt.COMPLEX))) {
             return errorOprnd("NAN_OP")
           }
           const quotient = Object.create(null)
@@ -354,8 +377,9 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "^": {
           const o2 = stack.pop()
           const o1 = stack.pop()
-          if (!((o1.dtype & dt.RATIONAL) & (o2.dtype & dt.RATIONAL) ||
-            (isMatrix(o1) && o2.value === "T")) ) {
+          if (!(((o1.dtype & dt.RATIONAL) || o1.dtype === dt.COMPLEX) &&
+                ((o2.dtype & dt.RATIONAL) || o2.dtype === dt.COMPLEX) ||
+                (isMatrix(o1) && o2.value === "T"))) {
             return errorOprnd("NAN_OP")
           }
           const power = Object.create(null)
@@ -378,9 +402,24 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             const [shape1, shape2, _] = binaryShapesOf(o1, o2)
             power.value = Operators.binary[shape1][shape2]["power"](o1.value, o2.value)
             if (power.value.dtype) { return o1.value } // Error
-            power.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype)
+            power.dtype = Cpx.isComplex(power.value)
+              ? dt.COMPLEX
+              : Operators.dtype[shape1][shape2](o1.dtype, o2.dtype)
           }
           stack.push(Object.freeze(power))
+          break
+        }
+
+        case "^*": {
+          // complex conjugate
+          const oprnd = stack.pop()
+          if (!(oprnd.dtype & dt.COMPLEX)) { return errorOprnd("NA_REAL"), "conjugate" }
+          const o2 = {
+            value: Cpx.conjugate(oprnd.value),
+            unit: oprnd.unit,
+            dtype: oprnd.dtype
+          }
+          stack.push(Object.freeze(o2))
           break
         }
 
@@ -439,7 +478,10 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           root.value = Operators.binary[shape1]["scalar"]["power"](o1.value, pow)
           if (root.value.dtype && root.value.dtype === dt.ERROR) { return root.value }
 
-          root.dtype = Operators.dtype[shape1]["scalar"](o1.dtype, dt.RATIONAL)
+          root.dtype = Cpx.isComplex(root.value)
+            ? dt.COMPLEX
+            : Operators.dtype[shape1]["scalar"](o1.dtype, dt.RATIONAL)
+
           stack.push(Object.freeze(root))
           break
         }
@@ -609,7 +651,9 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "‖": {
             // Find |x| or ‖x‖
           const o1 = stack.pop()
-          if (!(o1.dtype & dt.RATIONAL)) { return errorOprnd("NAN_OP") }
+          if (!((o1.dtype & dt.RATIONAL) || o1.dtype === dt.COMPLEX)) {
+            return errorOprnd("NAN_OP")
+          }
           const op = tkn === "|" ? "abs" : "norm"
           const abs = Object.create(null)
           abs.unit = o1.unit
@@ -682,12 +726,17 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "asecd":
         case "acscd":
         case "acotd":
+        case "Re":
+        case "Im":
+        case "argument":
         case "chr":
         case "round":
         case "sign": {
-          // Functions with one real argument.
+          // Functions with one real or complex argument.
           const arg = stack.pop()
-          if (!(arg.dtype & dt.RATIONAL)) { return errorOprnd("UNREAL", tkn) }
+          if (!((arg.dtype & dt.RATIONAL) || (arg.dtype & dt.COMPLEX))) {
+            return errorOprnd("UNREAL", tkn)
+          }
 
           const output = Object.create(null)
           const unit = Object.create(null)
@@ -695,20 +744,25 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           if (unit.expos.dtype && unit.expos.dtype === dt.ERROR) { return unit.expos }
           output.unit = Object.freeze(unit)
 
+          const shape = (arg.dtype & dt.RATIONAL) ? "scalar" : "complex"
           const value = ((arg.dtype & dt.MAP) && Matrix.isVector(arg))
             // eslint-disable-next-line max-len
-            ? mapMap(arg.value, array => array.map(e => Functions.unary[tkn](e)))
+            ? mapMap(arg.value, array => array.map(e => Functions.unary[shape][tkn](e)))
             : Matrix.isVector(arg)
-            ? arg.value.map(e => Functions.unary[tkn](e))
+            ? arg.value.map(e => Functions.unary[shape][tkn](e))
             : isMatrix(arg)
-            ? arg.value.map(row => row.map(e => Functions.unary[tkn](e)))
+            ? arg.value.map(row => row.map(e => Functions.unary[shape][tkn](e)))
             : needsMap(arg)
-            ? mapMap(arg.value, val => Functions.unary[tkn](val))
-            : Functions.unary[tkn](arg.value)
+            ? mapMap(arg.value, val => Functions.unary[shape][tkn](val))
+            : Functions.unary[shape][tkn](arg.value)
           if (value.dtype && value.dtype === dt.ERROR) { return value }
           output.value = Object.freeze(value)
 
-          output.dtype = tkn === "chr" ? arg.dtype - dt.RATIONAL + dt.STRING : arg.dtype
+          output.dtype = tkn === "chr"
+            ? arg.dtype - dt.RATIONAL + dt.STRING
+            : (arg.dtype & dt.COMPLEX) && arfn.includes(tkn)
+            ? arg.dtype - dt.COMPLEX + dt.RATIONAL
+            : arg.dtype
 
           stack.push(Object.freeze(output))
           break
@@ -726,7 +780,6 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           args.push(stack.pop())
           args.unshift(stack.pop())
           if (!(args[0].dtype & dt.RATIONAL)) { return errorOprnd("") }
-          if (!(args[1].dtype & dt.RATIONAL)) { return errorOprnd("") }
 
           const output = Object.create(null)
           const unit = Object.create(null)

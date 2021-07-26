@@ -468,9 +468,27 @@ Hurmet always saves a decimal symbol as a dot. It’s only the display that chan
 While calculations are underway, Hurmet holds every number in memory in rational number format. The numerator and denominator are each integers of arbitrary length. So Hurmet can work precisely with numbers like 0.1 and 0¹⁄₃. Trignonometry and roots are done in double-precision floating point, good to about 15 significant digits.
 </div>
 
-<!-- Integers may also be written as a hexadecimal literal:
+###### Complex Number
+<div>
 
-![0x 0-9 or af](../../images/hex-railroad.svg) -->
+One can write a complex number in two forms:
+
+* ¢a + j\ b¢    The letter “¢j¢” is now identical to ¢√(-1)¢ by Hurmet definition. Be sure to write a space after ¢j¢.
+
+* ¢r∠θ¢    The characters `/_` will auto-correct into ∠ and ¢θ¢ is in radians.
+
+Also, the character **°** is now an operator that multiplies the previous number by ¢π//180¢. So one can also write a polar notation as ¢r∠θ°¢.  The characters `ooo` will auto-correct into °
+
+Examples:
+<div class="indented">
+
+¢z_1 = 2 + j 3¢
+
+¢z_2 = 4∠30°¢
+
+¢z = z_1 + z_2  = \blue((2 + j 3) + ( 4∠30°)) = 5.46 + j5¢
+</div>
+</div>
 
 ###### Quantity
 <div>
@@ -704,7 +722,7 @@ Hurmet calculations are meant to be recognizeable to anyone familiar with standa
 
 *j*
 
-: I'm working on complex numbers. Soon, ¢j¢ will be equal to ¢√(-1)¢. In the meantime, don't use it.
+: ¢j¢ ≡ ¢√(-1)¢.
 
 ℏ
 
@@ -737,10 +755,11 @@ Hurmet calculations are meant to be recognizeable to anyone familiar with standa
 | ///      | ¢8///2¢                 | Division displayed inline
 | ÷        | ¢8 ÷ 2¢                 | Inline division<br>auto-correct: -:
 | ^        | ¢3^2¢                   | Exponent
+| ^*       | ¢z^*¢                   | Complex conjugate
 | &        |                         | Concatenate strings or vectors, or concatenate numbers onto vectors, or append column vectors to data frames
 | √        | ¢√¢                     | Square root<br>auto-correct: sqrt
 | ¢root 3 ()¢ | ¢root 3 8¢           | nth-root<br>auto-correct: root n
-| \| \|    | ¢\|-4\|¢                | Absolute value of a scalar, determinant of a matrix, or magnitude of a vector.
+| \| \|    | ¢\|-4\|¢                | Absolute value of a scalar, determinant of a matrix, or magnitude of a vector or a complex number.
 | \|\| \|\|   | ¢\\Vert x \\Vert¢    | ¢√(x_1^2 + ⋯ + x_n^2)¢ if the argument is a vector of reals
 | \|\| \|\|   | ¢\\Vert x \\Vert¢    | ¢√(∑_i ∑_j A_(i, j)^2)¢ if the argument is a 2-D matrix
 | ⌊ ⌋      | ¢⎿4.5⏌¢                | Floor. Always rounds down.<br>auto-correct: floor
@@ -773,24 +792,28 @@ Hurmet calculations are meant to be recognizeable to anyone familiar with standa
 
 Hurmet treats an [identifier](#identifiers) as a function name if it is placed directly before an open parenthesis. So a term like ¢sinh(x)¢ is a function.
 
-Hurmet’s built-in functions are described below. Unless noted otherwise, they can operate on any real number or any matrix containing real numbers. (Complex numbers are coming).
+Hurmet’s built-in functions are described below. Unless noted otherwise, they can operate on any real or complex number or any matrix containing real numbers.
 
-Transcendental functions, like trigonometry and logarithms, are done to 15 digits precision.
+Transcendental functions such as trigonometry or logarithms are done to 15 digits precision.
 
 * * *
 <dl>
 
-abs(x)
+abs(z)
 
-: Absolute value of a real number
+: Absolute value of a real number. Magnitude of a complex number.
 
-acos(*x*), asin(*x*), atan(*x*), asec(*x*), acsc(*x*), acot(*x*)
+acos(*z*), asin(*z*), atan(*z*), asec(*z*), acsc(*z*), acot(*z*)
 
 : Inverse trigonometry functions. One can also call an inverse trigonometry function with a superscript, as in ¢cos^(-1) x¢.
 
 atan(*x*, *y*)
 
-: When _atan_ is called with two arguments, it returns an angle in the proper quadrant. Given a point defined by real coordinates *x* and *y*, *atan* returns the angle between that point and the positive *x*-axis of a plane.
+: When _atan_ is called with two arguments, it returns an angle in the proper quadrant. Given a point defined by real coordinates *x* and *y*, *atan* returns the angle between that point and the positive *x*-axis of a plane. Real numbers only.
+
+argument(*z*)
+
+: Phase angle of a complex number.
 
 chr(*n*)
 
@@ -801,7 +824,9 @@ cos(𝜃), sin(𝜃), tan(𝜃), sec(𝜃), csc(𝜃), cot(𝜃)
 
 Trigonometry functions.
 
-The trig functions listed above will assume that the argument is in radians unless you tell it otherwise. You can tell it otherwise by just writing in a unit, as in: `tan('45°')` and running a unit-aware calculation.
+The trig functions listed above will assume that a real argument is in radians unless you tell it otherwise. You can tell it otherwise by just writing in a unit, as in: `tan('45°')` and running a unit-aware calculation.
+
+Complex numbers are also valid arguments.
 
 A positive integer written as a superscript after a trig function name will return the function result raised to a power. <br>So that: ¢sin^2 θ = (sin θ)^2¢.
 
@@ -812,11 +837,11 @@ Three functions: `sin`, `cos`, and `tan`, do not require parentheses around thei
 
 cos<sub>d</sub>(𝜃), sin<sub>d</sub>(𝜃), tan<sub>d</sub>(𝜃), sec<sub>d</sub>(𝜃), csc<sub>d</sub>(𝜃), cot<sub>d</sub>(𝜃)
 
-: The trigonometry functions listed just above will assume that the argument is in degrees. Hurmet will subscript the “d” for you.
+: The trigonometry functions listed just above will assume that the argument is in degrees. Real numbers only. Hurmet will subscript the “d” for you.
 
-cosh(*x*), sinh(*x*), tanh(*x*), sech(*x*), csch(*x*), coth(*x*)
+cosh(*z*), sinh(*z*), tanh(*z*), sech(*z*), csch(*z*), coth(*z*)
 
-: [Hyperbolic functions](https://en.wikipedia.org/wiki/Hyperbolic_function). Notation for inverse functions is similar to trigonometry.
+: [Hyperbolic functions](https://en.wikipedia.org/wiki/Hyperbolic_function) or real or complex numbers. Notation for inverse functions is similar to trigonometry.
 
 count(*str*, *pattern*)
 
@@ -826,9 +851,9 @@ dataframe(**a**, **b**, …)
 
 : Takes vectors as arguments and returns a dataframe.
 
-exp(*x*)
+exp(*z*)
 
-: ¢e^x¢
+: ¢e^z¢
 
 fetch(*url*)
 
@@ -837,6 +862,14 @@ fetch(*url*)
 gcd(*m*, *n*)
 
 : Greatest common divisor of two integers.
+
+hypot(*x*, *y*)
+
+: ¢√(x² + y²)¢   …done in a way that avoids overflow. Real numbers only.
+
+Im(*z*)
+
+: Imaginary part of a complex number.
 
 isNaN(*x*)
 
@@ -848,23 +881,23 @@ length(a)
 
 lerp(__X__, __Y__, index)
 
-: Linear interplolation. Locates real index within the vector __X__ and returns a real number interpolated from the vector __Y__. __X__ must contain values in ascending order.
+: Linear interplolation. Locates real index within the vector __X__ and returns a real number interpolated from the vector __Y__. __X__ must contain values in ascending order. Real numbers only.
 
-log(*x*), ln(*x*)
+log(*z*), ln(*z*)
 
-: Natural (base _e_) logarithm of _x_.
+: Natural (base _e_) logarithm of real or complex number _z_.
 
 log<sub>10</sub>(*x*)
 
-: Base 10 logarithm. Hurmet will subscript the numerals for you.
+: Base 10 logarithm. Real numbers only. Hurmet will subscript the numerals for you.
 
 log(*b*, *x*)
 
-: Base _b_ logarithm.
+: Base _b_ logarithm. Real numbers only.
 
 logFactorial(*n*)
 
-: Returns the natural logarithm of the factorial of the argument. Valid only for non-negative integers. Note that `log(n!)` is a valid alias for `logFactorial(n)`.
+: Returns the natural logarithm of the factorial of the argument. Valid only for non-negative integers. Note that `log(n!)` is a valid alias for `logFactorial(n)`. Real numbers only.
 
 logΓ(*x*)
 
@@ -878,6 +911,10 @@ random()
 
 : A pseudo-random number in the range from 0 to 1 (inclusive of 0, but not 1). Good for Monte-Carlo modeling. Not sufficiently random for crypto.
 
+Re(*z*)
+
+: Real part of a complex number.
+
 round(_x_, _spec_)
 
 : Rounds a real number _x_.<br>To round to an integer, omit the spec.<br>To round to _n_ significant digits, write the spec as "r*n*", e.g., "r3".<br>To round to _n_ places after the decimal, write the spec as "f*n*".
@@ -888,11 +925,11 @@ sign(_x_)
 
 sum(_a_, _b_, _c_, …), product(_a_, _b_, _c_, …), length(_a_, _b_, _c_, …), range(_a_, _b_, _c_, …), mean(_a_, _b_, _c_, …), variance(_a_, _b_, _c_, …), stddev(_a_, _b_, _c_, …)
 
-: Functions that accumulate a result from a list of arguments.
+: Functions that accumulate a result from a list of arguments. Real numbers only.
 
 zeros(_m_, _n_)
 
-: Returns a _m_ × _n_ matrix filled with zeros.
+: Returns a _m_ × _n_ matrix filled with zeros.  Real numbers only.
 
 Γ(*z*)
 
@@ -1071,13 +1108,13 @@ That statement specifies a fixed decimal format. Results after it will display e
 
 `"r3"` will display a result rounded to exactly three significant digits. If your client freaks out because integer values have been rounded and look “wrong”, the `"h3"` format will round only the fractional part of a number.
 
-That was the short explanation. Now the long one. The rounding format specification string must take the form: "**TN**", where:
+That was the short explanation. Now the long one. The rounding format specification string must take the form: "**TN∠**", where:
 
 | Specification<br>Letter | Description         | Use one of:      | Default |
 |:-----------------------:|:------------------- |:---------------- |:-------:|
 | T                       | Type of rounding    | bEefhkNnprSstx%  | h       |
 | N                       | Number of digits    | \[0-9\]+         | 15      |
-
+| ∠                       | Optional polar      | ∠ °              |         |
 
 #### Type of rounding
 
@@ -1232,6 +1269,21 @@ Let _N_ be the number of digits specified. Then:
      <tr>
        <td>X</td>
        <td>0x3E</td>
+     </tr>
+     <tr>
+       <td rowspan="3">∠ or °</td>
+       <td rowspan="3">Polar notation of complex numbers</td>
+       <td rowspan="3">2 + <em>j</em> 3</td>
+       <td>h3</td>
+       <td>2 + <em>j</em>3</td>
+     </tr>
+     <tr>
+       <td>h3∠</td>
+       <td>3.61∠0.983</td>
+     </tr>
+     <tr>
+       <td>h3°</td>
+       <td>3.61∠56.3°</td>
      </tr>
    </tbody>
  </table>
@@ -1589,6 +1641,7 @@ Hurmet is built with the aid of several open source libraries and resources, for
 * [Boolean](#boolean)
 * [String](#string)
 * [Number](#number)
+* [Complex Number](#complex-number)
 * [Quantity](#quantity)
 * [Matrix](#matrix)
 * [Data Frame](#data-frame)
@@ -1680,7 +1733,7 @@ Hurmet is built with the aid of several open source libraries and resources, for
 </div>
 
 <div id="demo">
-<p>format = "<input type="text" id="formatBox" value="h3" onchange="updateFormat()" style="width: 1.5em;">"</p>
+<p>format = "<input type="text" id="formatBox" value="h3" onchange="updateFormat()" style="width: 2em;">"</p>
 <p></p>
 <div>Give it a try. (It’s interactive.)</div>
 <div id="input-container"><form><textarea id="demo-input"></textarea></form></div>
@@ -1738,6 +1791,7 @@ Hurmet is built with the aid of several open source libraries and resources, for
   observer.observe(document.getElementById("identi-correct"))
   observer.observe(document.getElementById("data-types"))
   observer.observe(document.getElementById("number-rr"))
+  observer.observe(document.getElementById("complex-number"))
   observer.observe(document.getElementById("quantity"))
   observer.observe(document.getElementById("matrix"))
   observer.observe(document.getElementById("matrix-mult"))

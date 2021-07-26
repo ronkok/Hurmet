@@ -13,12 +13,13 @@ import { Rnl } from "./rational"
 
 // Keep the next three lists sorted, so that the isIn() binary search will work properly.
 const builtInFunctions = [
-  "Gamma", "abs", "acos", "acosd", "acot", "acotd", "acsc", "acscd",
-  "asec", "asecd", "asin", "asind", "atan", "atan2", "atand", "binomial", "chr", "cos", "cosd",
+  "Gamma", "Im", "Re", "abs", "acos", "acosd", "acosh", "acot", "acotd", "acoth", "acsc",
+  "acscd", "acsch", "argument", "asec", "asecd", "asech", "asin", "asind", "asinh", "atan",
+  "atan2", "atand", "atanh", "binomial", "chr", "cos", "cosd",
   "cosh", "cosh", "cot", "cotd", "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp",
   "fetch", "format", "gcd", "hypot", "isNaN", "length", "lerp", "ln", "log", "log10", "log2",
   "logFactorial", "logGamma", "logn", "logΓ", "random", "rms", "round", "roundSig", "roundn",
-  "sec", "secd", "sech", "sech", "sign", "sin", "sind", "sinh", "sinh", "tan", "tand", "tanh",
+  "sec", "secd", "sech", "sech", "sign", "sin", "sind", "sinh", "tan", "tand", "tanh",
   "tanh", "trace", "transpose", "zeros", "Γ"
 ]
 
@@ -32,7 +33,7 @@ const trigFunctions = ["cos", "cosd", "cot", "cotd", "csc", "cscd", "sec", "secd
 const rationalRPN = numStr => {
   // Return a representation of a rational number that is recognized by evalRPN().
   const num = Rnl.fromString(numStr)
-  return "▸" + String(num[0]) + "/" + String(num[1])
+  return "®" + String(num[0]) + "/" + String(num[1])
 }
 
 const numberRegEx = new RegExp(Rnl.numberPattern)
@@ -962,7 +963,7 @@ export const parse = (
           if (/¿e$/.test(rpn)) {
             // e^3. Replace e with 2.7182818284590452353602874713527
             // eslint-disable-next-line max-len
-            rpn = rpn.slice(0, -2) + "▸27182818284590452353602874713527/10000000000000000000000000000000"
+            rpn = rpn.slice(0, -2) + "®27182818284590452353602874713527/10000000000000000000000000000000"
           }
           rpn += tokenSep
           popRpnTokens(13)
@@ -983,7 +984,7 @@ export const parse = (
           if (/¿e$/.test(rpn)) {
             // e^3. Replace e with 2.7182818284590452353602874713527
             // eslint-disable-next-line max-len
-            rpn = rpn.slice(0, -2) + "▸27182818284590452353602874713527/10000000000000000000000000000000"
+            rpn = rpn.slice(0, -2) + "®27182818284590452353602874713527/10000000000000000000000000000000"
           }
           rpn += tokenSep
           popRpnTokens(13)
@@ -1010,7 +1011,7 @@ export const parse = (
         // Is there an exponent on the function name?
         if (functionExpoRegEx.test(str)) {
           const [expoInput, expoTex, expoRPN] = exponentOfFunction(str, decimalFormat, isCalc)
-          if (isCalc && expoRPN === `▸1/1${tokenSep}~` && isIn(token.input, trigFunctions)) {
+          if (isCalc && expoRPN === `®1/1${tokenSep}~` && isIn(token.input, trigFunctions)) {
             // Inverse trig function.
             token.input = "a" + token.input
             token.output = "\\a" + token.output.slice(1)
@@ -1295,7 +1296,7 @@ export const parse = (
           }
           if (isCalc) {
             if (prevToken.ttype === tt.LEFTBRACKET && delim.delimType === dACCESSOR) {
-              rpn += "▸0/1"
+              rpn += "®0/1"
             }
             rpn += tokenSep
             popRpnTokens(1)
@@ -1320,7 +1321,7 @@ export const parse = (
               if (delim.numRows === 1) {
                 if (token.input === ","  ||
                     (token.input === " " && (delim.delimType === dMATRIX))) {
-                  if (str.charAt(0) === "]") { rpn += "▸0/1" }
+                  if (str.charAt(0) === "]") { rpn += "®0/1" }
                 }
               }
               delim.numArgs += 1
