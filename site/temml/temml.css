@@ -16,17 +16,10 @@ temml {
   letter-spacing: normal;
   word-wrap: normal;
   direction: ltr;
+}
+
+temml * {
   border-color: currentColor;
-}
-
-temml .script {
-  font-family: "KaTeX_Script", serif;
-}
-
-temml .oldstylenums {
-  font-family: Cambria, "Times New Roman", serif;
-  font-variant-numeric: oldstyle-nums;
-  font-feature-settings: 'onum';
 }
 
 /* AMS environment auto-numbering via CSS counter. */
