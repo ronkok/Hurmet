@@ -80,7 +80,8 @@ const errorMessages = Object.freeze({
     BAD_DISPLAY:"Error. Result may not be suppressed. Use '?' display selector.",
     NA_COMPL_OP:"Error. \"@\" cannot be performed on a complex number.",
     NA_REAL:    "Error. \"@\" can be performed only a complex number.",
-    ORIGIN:     "Error. Function \"@\" is undefined at the origin."
+    ORIGIN:     "Error. Function \"@\" is undefined at the origin.",
+    LOG_ZERO:   "Error. Logarithm of zero is negative infinity."
   }
 })
 

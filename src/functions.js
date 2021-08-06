@@ -275,16 +275,20 @@ const unary = {
       return Rnl.exp(x)
     },
     log(x) {
-      return Rnl.fromNumber(Math.log(Rnl.toNumber(x)))
+      return Rnl.isZero(x) ? errorOprnd("LOG_ZERO") : Rnl.fromNumber(Math.log(Rnl.toNumber(x)))
     },
     ln(x) {
-      return Rnl.fromNumber(Math.log(Rnl.toNumber(x)))
+      return Rnl.isZero(x) ? errorOprnd("LOG_ZERO") : Rnl.fromNumber(Math.log(Rnl.toNumber(x)))
     },
     log10(x) {
-      return Rnl.fromNumber(Math.log10(Rnl.toNumber(x)))
+      return Rnl.isZero(x)
+        ? errorOprnd("LOG_ZERO")
+        : Rnl.fromNumber(Math.log10(Rnl.toNumber(x)))
     },
     log2(x) {
-      return Rnl.fromNumber(Math.log2(Rnl.toNumber(x)))
+      return Rnl.isZero(x)
+        ? errorOprnd("LOG_ZERO")
+        : Rnl.fromNumber(Math.log2(Rnl.toNumber(x)))
     },
     sech(x) {
       // sech(n) = 2 / (eⁿ + e⁻ⁿ)
