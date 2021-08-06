@@ -139,6 +139,7 @@ export const parseQuantityLiteral = (str, decimalFormat, tokenSep, isCalc) => {
   let rpn = ""
   let numStr = ""
   let isNegated = false
+  const isDelimited = /^'.+'$/.test(str)
 
   str = str.replace(/'/g, "")
 
@@ -217,19 +218,17 @@ export const parseQuantityLiteral = (str, decimalFormat, tokenSep, isCalc) => {
     }
 
     const unitMatch = unitRegEx.exec(str)
-    if (unitMatch) {
-      str = unitMatch[0]
-      if (isCalc) { rpn += "\xa0" + "applyUnit" + "\xa0" + str }
-      const posViniculum = str.indexOf("//")
-      if (posViniculum >= 0) {
-        // A stacked fraction.
-        const numerator = str.slice(0, posViniculum)
-        const denominator = str.slice(posViniculum + 2)
-        unitTex = "\\frac{" + unitTeXFromString(numerator) + "}{" +
-          unitTeXFromString(denominator) + "}"
-      } else {
-        unitTex = unitTeXFromString(str)
-      }
+    str = isDelimited ? str : unitMatch ? unitMatch[0] : str
+    if (isCalc) { rpn += "\xa0" + "applyUnit" + "\xa0" + str }
+    const posViniculum = str.indexOf("//")
+    if (posViniculum >= 0) {
+      // A stacked fraction.
+      const numerator = str.slice(0, posViniculum)
+      const denominator = str.slice(posViniculum + 2)
+      unitTex = "\\frac{" + unitTeXFromString(numerator) + "}{" +
+        unitTeXFromString(denominator) + "}"
+    } else {
+      unitTex = unitTeXFromString(str)
     }
     if (unitTex.length > 0 && numStr.length === 0) {
       unitTex = "\\," + unitTex
