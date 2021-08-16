@@ -11,7 +11,7 @@ const sumRegEx = /\bsum\xa00(?:\xa0|$)/
 
 // attrs: [row, col, entry, rpn, tex, template, altTemplate , numRows]
 
-const prepare = (attrs, decimalFormat) => {
+const prepare = (attrs, vars, decimalFormat) => {
   for (let i = 0; i < attrs.value.attrs.length; i++) {
     const j = attrs.value.attrs[i].col
     attrs.value.attrs[i].tex = ""
@@ -40,7 +40,7 @@ const prepare = (attrs, decimalFormat) => {
     for (let j = matches.length - 1; j >= 0; j--) {
       let varName = matches[j].value.slice(1)
       const trailStr = rpn.slice(matches[j].index + matches[j].length)
-      if (dotPropRegEx.test(trailStr)) {
+      if (!vars[varName] && dotPropRegEx.test(trailStr)) {
         const posDot = trailStr.indexOf("\xa0.")
         const varName2 = trailStr.slice(2, posDot - 1)
         rpn = rpn.slice(0, matches[j].index) + "¿" + attrs.name + `\xa0"` + varName2

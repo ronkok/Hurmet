@@ -335,7 +335,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           product.dtype = (tkn === "*" || shape1 === "scalar" || shape1 === "map" ||
             shape1 === "complex" || shape2 === "scalar" ||
             shape2 === "map" || shape2 === "complex")
-            ? Operators.dtype[shape1][shape2](o1.dtype, o2.dtype)
+            ? Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, op)
             : tkn === "·"
             ? dt.RATIONAL
             : tkn === "×"
@@ -367,9 +367,9 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             : allZeros
           quotient.unit = Object.freeze(unit)
           const [shape1, shape2, _] = binaryShapesOf(o1, o2)
-          quotient.value = Operators.binary[shape1][shape2]["divide"](o1.value, o2.value)
-          quotient.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype)
           if (isDivByZero(quotient.value, shapeOf(quotient))) { return errorOprnd("DIV") }
+          quotient.value = Operators.binary[shape1][shape2]["divide"](o1.value, o2.value)
+          quotient.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, "divide")
           stack.push(Object.freeze(quotient))
           break
         }
@@ -377,6 +377,15 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "^": {
           const o2 = stack.pop()
           const o1 = stack.pop()
+          if (Matrix.isVector(o1) && o2.value === "T") {
+            // Transpose a vector
+            const oprnd = clone(o1)
+            oprnd.dtype = o1.dtype + ((o1.dtype & dt.ROWVECTOR)
+              ? dt.COLUMNVECTOR - dt.ROWVECTOR
+              : dt.ROWVECTOR - dt.COLUMNVECTOR)
+            stack.push(Object.freeze(oprnd))
+            break
+          }
           if (!(((o1.dtype & dt.RATIONAL) || o1.dtype === dt.COMPLEX) &&
                 ((o2.dtype & dt.RATIONAL) || o2.dtype === dt.COMPLEX) ||
                 (isMatrix(o1) && o2.value === "T"))) {
@@ -391,21 +400,12 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             unit.expos = o1.unit.expos.map(e => e * d)
           }
           power.unit = Object.freeze(unit)
-
-          if (Matrix.isVector(o1) && o2.value === "T") {
-            // Transpose a vector
-            power.value = o1.value
-            power.dtype = o1.dtype + ((o1.dtype & dt.ROWVECTOR)
-              ? dt.COLUMNVECTOR - dt.ROWVECTOR
-              : dt.ROWVECTOR - dt.COLUMNVECTOR)
-          } else {
-            const [shape1, shape2, _] = binaryShapesOf(o1, o2)
-            power.value = Operators.binary[shape1][shape2]["power"](o1.value, o2.value)
-            if (power.value.dtype) { return o1.value } // Error
-            power.dtype = Cpx.isComplex(power.value)
-              ? dt.COMPLEX
-              : Operators.dtype[shape1][shape2](o1.dtype, o2.dtype)
-          }
+          const [shape1, shape2, _] = binaryShapesOf(o1, o2)
+          power.value = Operators.binary[shape1][shape2]["power"](o1.value, o2.value)
+          if (power.value.dtype) { return o1.value } // Error
+          power.dtype = Cpx.isComplex(power.value)
+            ? dt.COMPLEX
+            : Operators.dtype[shape1][shape2](o1.dtype, o2.dtype)
           stack.push(Object.freeze(power))
           break
         }
@@ -938,6 +938,16 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           args[1] = stack.pop()
           args[0] = stack.pop()
           const result = Functions.lerp(args, unitAware)
+          if (result.dtype === dt.ERROR) { return result }
+          stack.push(result)
+          break
+        }
+
+        case "matrix2table": {
+          const colNames = stack.pop()
+          const rowNames = stack.pop()
+          const matrix = stack.pop()
+          const result = DataFrame.matrix2table(matrix, rowNames, colNames, vars)
           if (result.dtype === dt.ERROR) { return result }
           stack.push(result)
           break

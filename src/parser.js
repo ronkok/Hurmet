@@ -18,9 +18,9 @@ const builtInFunctions = [
   "atan2", "atand", "atanh", "binomial", "chr", "cos", "cosd",
   "cosh", "cosh", "cot", "cotd", "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp",
   "fetch", "format", "gcd", "hypot", "isNaN", "length", "lerp", "ln", "log", "log10", "log2",
-  "logFactorial", "logGamma", "logn", "logΓ", "random", "rms", "round", "roundSig", "roundn",
-  "sec", "secd", "sech", "sech", "sign", "sin", "sind", "sinh", "tan", "tand", "tanh",
-  "tanh", "trace", "transpose", "zeros", "Γ"
+  "logFactorial", "logGamma", "logn", "logΓ", "matrix2table", "random", "rms", "round",
+  "roundSig", "roundn", "sec", "secd", "sech", "sech", "sign", "sin", "sind", "sinh", "tan",
+  "tand", "tanh", "tanh", "trace", "transpose", "zeros", "Γ"
 ]
 
 const builtInReducerFunctions = ["dataframe",

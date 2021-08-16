@@ -142,7 +142,13 @@ const dtype = {
     matrix(t0, t1) { return t1 }
   },
   columnVector: {
-    rowVector(t0, t1) { return t0 },
+    rowVector(t0, t1, op) {
+      return op === "dot"
+      ? dt.RATIONAL
+      : op === "cross"
+      ? t0
+      : t0 - dt.COLUMNVECTOR + dt.MATRIX
+    },
     columnVector(t0, t1) { return t0 },
     matrix(t0, t1) { return t1 }
   },
@@ -514,6 +520,9 @@ const binary = {
       multiply(x, y) {
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
         return dotProduct(x, y)
+      },
+      divide(x, y) {
+        return x.map(m => y.map(e => Rnl.divide(m, e)))
       },
       asterisk(x, y) {
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }

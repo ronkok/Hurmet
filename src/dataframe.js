@@ -273,6 +273,9 @@ const dataFrameFromCSV = (str, vars) => {
         if (numberRegEx.test(data[iCol][0])) { gotAnswer = true; break }
       }
       if (!gotAnswer) {
+        for (const attr of attrs) {
+          if (attr.row === 1) { gotUnits = true; break }
+        }
         for (let iCol = 0; iCol < data.length; iCol++) {
           if (numberRegEx.test(data[iCol][1])) { gotUnits = true; break }
         }
@@ -463,6 +466,43 @@ const dataFrameFromVectors = (vectors, vars) => {
       units: units,
       dtype: dtype
     },
+    unit: unitMap,
+    dtype: dt.DATAFRAME
+  }
+}
+
+const matrix2table = (matrix, rowNames, columnNames, vars) => {
+  // Use the contents of a matrix to create a dataframe.
+  const data = []
+  for (let i = 0; i <= matrix.value[0].length; i++) { data.push([]) }
+  const headings = columnNames.value
+  headings.unshift("")
+  const columnMap = Object.create(null)
+  for (let i = 1; i < columnNames.value[0].length; i++) { columnMap[headings[i]] = i }
+  const colDtype = dt.RATIONAL + (matrix.unit ? dt.QUANTITY : 0)
+  const dtype = Array(matrix.value[0].length).fill(colDtype)
+  dtype.unshift(null)
+  let units = []
+  const unitMap = Object.create(null)
+  if (matrix.unit.name) {
+    units = Array(matrix.value[0].length).fill(matrix.unit.name)
+    units.unshift("")
+    unitMap[matrix.unit.name] = unitFromUnitName(matrix.unit.name, vars)
+  }
+
+  const rowMap = Object.create(null)
+  data[0] = rowNames.value
+  const formatSpec = vars.format ? vars.format.value : "h15"
+  for (let i = 0; i < rowNames.value.length; i++) { rowMap[data[0][i]] = i }
+  for (let i = 0; i < matrix.value.length; i++) {
+    for (let j = 0; j < matrix.value[0].length; j++) {
+      const value = matrix.value[i][j];
+      data[j + 1].push(format(value, formatSpec, "1000000."))
+    }
+  }
+
+  return {
+    value: { data, headings, columnMap, rowMap, units, dtype },
     unit: unitMap,
     dtype: dt.DATAFRAME
   }
@@ -745,6 +785,7 @@ export const DataFrame = Object.freeze({
   append,
   dataFrameFromCSV,
   dataFrameFromVectors,
+  matrix2table,
   display,
   displayAlt,
   quickDisplay,

@@ -903,6 +903,10 @@ logΓ(*x*)
 
 : Returns the natural logarithm of the Gamma function, Γ(*x*). For now, Hurmet's logΓ(*x*) function only works on positive rational numbers.
 
+matrix2table(*matrix*, *rowNames*, *columnNames*)
+
+: Returns a data frame with the contents of the matrix. *rowNames* and *columnNames* must each be a vector of strings.
+
 ¢min(a,b,c,…),max(a,b,c,…)¢
 
 : Minimum or maximum of a list or array. Real numbers only.

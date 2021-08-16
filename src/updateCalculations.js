@@ -199,7 +199,7 @@ const proceedAfterFetch = (
       improveQuantities(attrs, hurmetVars)
       // Now proceed to do the calculation of the cell.
       if (attrs.dtype === dt.DATAFRAME && attrs.value.attrs && attrs.value.attrs.length > 0) {
-        attrs = Tbl.prepare(attrs, decimalFormat)
+        attrs = Tbl.prepare(attrs, hurmetVars, decimalFormat)
         attrs = Tbl.evaluate(attrs, hurmetVars, decimalFormat)
       } else if (attrs.rpn) {
         attrs = evaluate(attrs, hurmetVars, decimalFormat)
