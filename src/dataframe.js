@@ -746,31 +746,31 @@ const displayAlt = (df, formatSpec = "h3") => {
   let str = "``"
 
   // Write the column names
-  if (!df.rowMap) { str += "," }
-  str += ( df.headings[0] === "name" ? "" : df.headings[0]) + ","
+  if (!df.rowMap) { str += "|" }
+  str += ( df.headings[0] === "name" ? "" : df.headings[0]) + "|"
   for (let j = 1; j < numCols; j++) {
-    str += df.headings[j] + ","
+    str += df.headings[j] + "|"
   }
   str = str.slice(0, -1) + "\n"
 
   // Write the unit names
   if (isNotEmpty(df.units)) {
-    if (!df.rowMap) { str += "," }
+    if (!df.rowMap) { str += "|" }
     for (let j = 0; j < numCols; j++) {
-      str += df.units[j] + ","
+      str += df.units[j] + "|"
     }
     str = str.slice(0, -1) + "\n"
   }
 
   // Write the data
   for (let i = 0; i < numRows; i++) {
-    if (!df.rowMap) { str += String(i + 1) + "," }
+    if (!df.rowMap) { str += String(i + 1) + "|" }
     for (let j = 0; j < numCols; j++) {
       const datum = df.data[j][i]
       if (mixedFractionRegEx.test(datum)) {
-        str += format(Rnl.fromString(datum), formatSpec, "100000.") + ","
+        str += format(Rnl.fromString(datum), formatSpec, "100000.") + "|"
       } else {
-        str += datum + ","
+        str += datum + "|"
       }
     }
     str = str.slice(0, -1) + "\n"
