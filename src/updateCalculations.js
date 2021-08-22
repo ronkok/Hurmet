@@ -20,13 +20,39 @@ import { clone, addTextEscapes } from "./utils"
  *    3. When a user has opened a new file         (from openFile.js), or
  *    4. When a recalculate-all has been called, possibly after a paste. (from menu.js)
  *
- *  Cases 2 thru 4 re-calculate the entire document. I.e., isCalcAll is set to true.
  *  Case 1 calculates the submitted cell and all dependent calculation cells.
+ *  Cases 2 thru 4 re-calculate the entire document. I.e., isCalcAll is set to true.
  *  After calculation is complete, we send the results to ProseMirror to be
  *  rendered in the document.
  *
  *   This module's main exported function is updateCalculations(…)
  */
+
+/*
+* Note 1: state.selection shenanigans
+*
+* Before creating a ProseMirror (PM) transaction, this module first changes `state.selection`.
+* That is to say, I change the PM state without running that change thru a PM transaction.
+* PM docs advise against that, so I want to explain why I do so.
+*
+* For Undo purposes, a calculation should be atomic.
+* An Undo of a calculation should return the doc to the condition before the
+* calculation cell was edited. That will feel natural to people accustomed to Excel.
+* When a calculation is submitted, Hurmet creates a single PM transaction and into it,
+* Hurmet collects all the changes that the calculation makes to the original cell and
+* also all the changes to dependent cells.
+* When a user submits a calculation, the cell is open, so a PM Undo would ordinarily return
+* the state to a condition that once again has the cell open.
+*
+* But now consider a user who wants to Undo twice. The first Undo retreats to a condition in
+* which a cell is open. The user thinks a second Undo will change the PM document. But no!
+* Because the cell is open, the CodeMirror plain text editor is active and the Undo is captured
+* by CodeMirror. An Undo affects CodeMirror but not the outer document. It's very confusing!
+* So the Undo should return to a condition in which the cell is closed. That's why I change
+* the PM state.selection object _before_ I create the PM transaction. I don't want an Undo to
+* open that cell and so I don't want the Undo to finish with the selection point inside the
+* cell. Before creating the transaction, I move the selection point to just after the cell.
+*/
 
 const fetchRegEx = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′* *= *(?:fetch|import)\(/
 const importRegEx = /^[^=]+= *import/
@@ -127,7 +153,12 @@ const workAsync = (
     // At this point, we have the text of each Hurmet fetch and import.
     // Create a ProseMirror transacation.
     // Each node update below will be one step in the transaction.
-    const tr = view.state.tr
+    const state = view.state
+    if (state.selection.to === curPos + 1) {
+      // See Note 1 above for an explanation of the state.selection shenanigans.
+      state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1))
+    }
+    const tr = state.tr
 
     // Load in the data from the fetch statements
     for (let i = 0; i < texts.length; i++) {
@@ -270,10 +301,14 @@ export function updateCalculations(
 
   if (!(isCalcAll || nodeAttrs.name || nodeAttrs.rpn)) {
     // No calculation is required. Just render the node and get out.
-    const tr = view.state.tr
+    const state = view.state
+    if (state.selection.to === curPos + 1) {
+      // See Note 1 above for an explanation of the state.selection shenanigans.
+      state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1))
+    }
+    const tr = state.tr
     try {
       tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs))
-      tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)))
     } catch (err) {
       // nada
     } finally {
@@ -318,7 +353,12 @@ export function updateCalculations(
               hurmetVars, urls, fetchPositions)
   } else {
     // Skip the fetches and go directly to work that we can do synchronously.
-    const tr = view.state.tr
+    const state = view.state
+    if (state.selection.to === curPos + 1) {
+      // See Note 1 above for an explanation of the state.selection shenanigans.
+      state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1))
+    }
+    const tr = state.tr
     try {
       proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr)
     } catch (err) {

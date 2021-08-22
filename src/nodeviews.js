@@ -12,25 +12,6 @@ export class CalcView {
 
   selectNode() {
     this.dom.classList.add("ProseMirror-selectednode")
-
-    // ProseMirror is built to undo things keystroke by keystroke.
-    // It wants an Undo to open the calc cell, to enable further undos
-    // of keystrokes done inside the cell.
-    // But I want an Undo to jump to the condition before the previous
-    // edit of the cell. That is how Excel works, and it feels natural.
-    // To simulate my desired behavior, I decline to open a calc cell just
-    // after an Undo event. It's a horrible hack. After an Undo, authors can not
-    // open the most recently edited cell by selecting it because it is already
-    // selected. They have to select something else, then come back and
-    // select the cell. Not good. but I can't think of anything better.
-    if (this.outerView.state.history$.prevTime === 0) {
-      if (!this.outerView.state.doc.attrs.recentUndo) {
-        this.outerView.state.doc.attrs.recentUndo = true
-        return
-      }
-    }
-    this.outerView.state.doc.attrs.recentUndo = false
-
     const attrs = this.node.attrs
     const pos = this.outerView.state.selection.from
     // A CalcView node is a ProseMirror atom. It does not enable direct ProseMirror editing.
@@ -63,13 +44,6 @@ export class TexView {
 
   selectNode() {
     this.dom.classList.add("ProseMirror-selectednode")
-    if (this.outerView.state.history$.prevTime === 0) {
-      if (!this.outerView.state.doc.attrs.recentUndo) {
-        this.outerView.state.doc.attrs.recentUndo = true
-        return
-      }
-    }
-    this.outerView.state.doc.attrs.recentUndo = false
     const attrs = this.node.attrs
     openMathPrompt({
       // Create a user interface for TeX that is similar to CalcView.
