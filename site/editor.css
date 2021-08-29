@@ -251,6 +251,14 @@ li.ProseMirror-selectednode:after {
   padding-left: 30px;
 }
 
+.ProseMirror ol ol li {
+  list-style-type:lower-alpha;
+}
+
+.ProseMirror ol ol ol li {
+  list-style-type: lower-roman;
+}
+
 .ProseMirror blockquote {
   padding-left: 1em;
   border-left: 3px solid #eee;
