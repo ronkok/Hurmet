@@ -37,7 +37,7 @@ function setCellAttrs(node, extraAttrs) {
 }
 
 const functionRegEx = / *function /
-const paraClasses = ["indented", "centered", "hidden"]
+const paraClasses = ["indented", "centered", "hidden", "folded"]
  
 // :: Object
 // [Specs](#model.NodeSpec) for the nodes defined in this schema.
@@ -445,6 +445,12 @@ export const marks = {
   underline: {
 	  parseDOM: [{tag: "u"}],
     toDOM() { return ["u"] }
+  },
+
+  // :: MarkSpec highlight mark. Represented as a `<mark>` element.
+  highlight: {
+    parseDOM: [{tag: "mark"}],
+    toDOM() { return ["mark"] }
   }
 }
 

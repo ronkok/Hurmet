@@ -72,6 +72,7 @@ const hurmetIcons = {
     path:
       "M704 64h128v416c0 159.058-143.268 288-320 288-176.73 0-320-128.942-320-288v-416h128v416c0 40.166 18.238 78.704 51.354 108.506 36.896 33.204 86.846 51.494 140.646 51.494s103.75-18.29 140.646-51.494c33.116-29.802 51.354-68.34 51.354-108.506v-416zM192 832h640v128h-640z"
   },
+  highlight: { text: "🟨" },
   paragraph: {
     width: 24,
     height: 24,
@@ -875,6 +876,11 @@ export function buildMenuItems(schema) {
       title: "Toggle underline  Ctrl-u",
       icon: hurmetIcons.underline
     })
+  if ((type = schema.marks.highlight))
+  r.toggleHighlight = markItem(type, {
+    title: "Toggle highlight",
+    icon: hurmetIcons.highlight
+  })
   if ((type = schema.marks.link)) r.toggleLink = linkItem(type)
 
   if ((type = schema.nodes.image)) r.imageUpload = uploadImage(type)
@@ -1028,7 +1034,8 @@ export function buildMenuItems(schema) {
     r.toggleSubscript,
     r.toggleSuperscript,
     r.toggleStrikethru,
-    r.toggleUnderline
+    r.toggleUnderline,
+    r.toggleHighlight
   ]]
 
   r.insertMenu = [[r.toggleLink, r.insertHorizontalRule, r.imageUpload, r.imageLink, r.insertCalclation, r.insertTeX]]
