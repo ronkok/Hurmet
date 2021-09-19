@@ -63,25 +63,26 @@
 
 <p>This week’s example:</p>
 
-<h3>Approximations of Pi</h3>
-<p>Over time, we have increased the accuracy of our approximations of <span class="hurmet-calc" data-entry="π"></span>. The ancients used 3 (Babylon) or 3.16 (ancient Egypt).</p>
-<p>Archimedes, in 250 BC, invented the polygon method:<img src="data:image/svg+xml;utf8,%3Csvg width='244.531' height='244.531' viewBox='-1.274 -1.274 2.547 2.547' xmlns='http://www.w3.org/2000/svg' style='stroke-linecap:round;stroke-linejoin:round;fill:none'%3E%3Cg transform='scale(1 -1)'%3E%3Ccircle r='1.125' style='stroke:%23a44646;stroke-width:.02'/%3E%3Cpath d='M-.884.884-1.25 0M-1.25 0l.366-.884M-.884-.884 0-1.25M0-1.25l.884.366M.884-.884 1.25 0M1.25 0 .884.884M.884.884 0 1.25M0 1.25-.884.884M-.795.795-1.125 0M-1.125 0l.33-.795M-.795-.795 0-1.125M0-1.125l.795.33M.795-.795l.33.795M1.125 0l-.33.795M.795.795 0 1.125M0 1.125l-.795-.33' style='stroke:%23000;stroke-width:.0098'/%3E%3C/g%3E%3C/svg%3E" alt="Polygon sketch" width="150" class="right"> Take a polygon. Then take a slightly larger polygon. One can inscribe a circle between the two polygons. You can calculate the perimeter of each polygon via the Pythagorean theorem. Then you know that the circumference of the circle is between those two values.</p>
-<p>The polygon method was the state of the art for 1900 years. Archimedes himself applied the method to a 96-sided polygon and found <span class="hurmet-calc" data-entry="π ≈ 22//7 ≈ 3.14"></span>. Others gradually increased the accuracy until Ludolph van Ceulen reached 30 significant digits in 1615.</p>
-<p>After Newton and Leibnitz invented calculus, the polygon method was augmented by the Taylor series for arctangent at 1: <span class="hurmet-calc" data-entry="π//4 = 1 - 1//3 + 1//5 - 1//7 \cdots"></span> That series can be continued to any required accuracy and was used with hand-calculations to gradually increase accuracy up to 808 decimal places in 1947.</p>
-<p>Then computer calculations and elliptic functions took over. The current record is 50,000,000,000,000 digits.</p>
-<p>The Taylor series is not a quick way to compute <span class="hurmet-calc" data-entry="π"></span>.  It converges very slowly. What I find more interesting is an infinite series developed by Francois Viète in 1597, before calculus. From the Archimedes polygon method, he derived this series:</p>
-<p><span class="hurmet-calc" data-entry="2/π = √2/2 · (√(2+ √2))/2 · √(2 + √(2+ √2))/2 \cdots"></span></p>
-<p>That converges much faster than the Taylor series. Let’s demonstrate that by calculating ten terms:</p>
-<p>
-<span class="hurmet-calc" data-entry="function viete(n)
-    product = 1
-    radicand = 0
-    for i in 1:n
-        radicand = √(2.0 + radicand)
-        product = product × (radicand / 2)
-    return product">
+<h3>Approximations of e</h3>
+<p>Last week, we calculated an approximation of <span class="hurmet-calc" data-entry="π"></span>. Now let’s do the same for <span class="hurmet-calc" data-entry="e"></span>.</p>
+<p>If <em>n</em> is very small, the value of <span class="hurmet-calc" data-entry="(1 + n)^(1∕n)"></span> approaches the value of <span class="hurmet-calc" data-entry="e"></span>.</p>
+<p class="indented"><span class="hurmet-calc" data-entry="n = 0.0000000001"></span>, trial value</p>
+<p class="indented"><span class="hurmet-calc" data-entry="firstApproximation = (1 + n)^(1∕n) = %"></span>, good to 6 significant digits. Not bad.</p>
+<p>Isaac Newton, in 1667, wrote what is now known as the Maclaurin infinite series:</p>
+<p class="indented"><span class="hurmet-calc" data-entry="e = \displaystyle ∑_(n=0)^∞ 1/n!"></span></p>
+<p>In 2004, Harlan Brothers published a consolidation of its terms to make the series converge more quickly.</p>
+<p class="indented"><span class="hurmet-calc" data-entry="e = \displaystyle ∑_(n=0)^∞ (2n + 2) / (2n + 1)!"></span></p>
+<p>Like last week, we’ll calculate ten terms.</p>
+<p><span class="hurmet-calc" data-entry="function brothers(upperLimit)
+  sum = 0
+  for n in 0:upperLimit
+      sum = sum + (2n + 2) / (2n + 1)!
+  return sum">
 </span></p>
-<p><span class="hurmet-calc" data-entry="approximation = 2/viete(10) = ?"></span>, good to 6 significant digits. Not bad for only 10 terms.</p>
+<p class="indented"><span class="hurmet-calc" data-entry="format = &quot;f18&quot;"></span></p>
+<p class="indented"><span class="hurmet-calc" data-entry="approximation = brothers(9) = ?"></span>, good to 19 significant digits. Impressive.</p>
+<p>References:</p>
+<p class="indented">https://www.intmath.com/exponential-logarithmic-functions/calculating-e.php<br>http://www.brotherstechnology.com/docs/Improving_Convergence_(CMJ-2004-01).pdf</p>
 
 </div> <!-- editor -->
 
