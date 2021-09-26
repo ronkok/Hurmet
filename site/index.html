@@ -63,26 +63,25 @@
 
 <p>This week’s example:</p>
 
-<h3>Approximations of e</h3>
-<p>Last week, we calculated an approximation of <span class="hurmet-calc" data-entry="π"></span>. Now let’s do the same for <span class="hurmet-calc" data-entry="e"></span>.</p>
-<p>If <em>n</em> is very small, the value of <span class="hurmet-calc" data-entry="(1 + n)^(1∕n)"></span> approaches the value of <span class="hurmet-calc" data-entry="e"></span>.</p>
-<p class="indented"><span class="hurmet-calc" data-entry="n = 0.0000000001"></span>, trial value</p>
-<p class="indented"><span class="hurmet-calc" data-entry="firstApproximation = (1 + n)^(1∕n) = %"></span>, good to 6 significant digits. Not bad.</p>
-<p>Isaac Newton, in 1667, wrote what is now known as the Maclaurin infinite series:</p>
-<p class="indented"><span class="hurmet-calc" data-entry="e = \displaystyle ∑_(n=0)^∞ 1/n!"></span></p>
-<p>In 2004, Harlan Brothers published a consolidation of its terms to make the series converge more quickly.</p>
-<p class="indented"><span class="hurmet-calc" data-entry="e = \displaystyle ∑_(n=0)^∞ (2n + 2) / (2n + 1)!"></span></p>
-<p>Like last week, we’ll calculate ten terms.</p>
-<p><span class="hurmet-calc" data-entry="function brothers(upperLimit)
-  sum = 0
-  for n in 0:upperLimit
-      sum = sum + (2n + 2) / (2n + 1)!
-  return sum">
-</span></p>
-<p class="indented"><span class="hurmet-calc" data-entry="format = &quot;f18&quot;"></span></p>
-<p class="indented"><span class="hurmet-calc" data-entry="approximation = brothers(9) = ?"></span>, good to 19 significant digits. Impressive.</p>
-<p>References:</p>
-<p class="indented">https://www.intmath.com/exponential-logarithmic-functions/calculating-e.php<br>http://www.brotherstechnology.com/docs/Improving_Convergence_(CMJ-2004-01).pdf</p>
+<h3>Unit-Handling</h3>
+<p>I remember the exact moment when I realized that Hurmet must handle units. I had completed a calculation package and passed it to another engineer for review. He found two unit-conversion errors.</p>
+<p>Do you believe that? Two errors! Two errors in MY calculation package! Well, that had to stop.</p>
+<p>So Hurmet can do automatic unit conversions and unit compatibility checks.</p>
+<p>First, automatic unit conversion: Every quantity is converted into its SI base unit. Then the units are dropped and the calculation is done with the scalar numbers. At the end of the calculation, the final scalar is converted from SI base units into the units that you have specified for the result.</p>
+<p>Example</p>
+<p><span class="hurmet-calc" data-entry="'30 lbf' / '2 ft²' = '133.446648457815 N'/'0.18580608 m²' ⇒ 133.446648457815 / 0.18580608 = 718.2038847050376 ⇒ '0.10417 psi'"></span></p>
+<p>That last step applies a unit factor to a number, assuming that the number carries the compatible base unit<sup>[1]</sup>. But what if that assumption is wrong? What if you specified an incompatible unit for the result?  To prevent such an error, Hurmet does a unit-compatibility check.</p>
+<p>With each unit-aware calculation, Hurmet does a parallel calculation on the units within each quantity. First, each unit is broken down into its base dimensions. Hurmet’s base dimensions are:  length,  mass,   time,  electric current,  temperature,  amount,  luminous intensity,  money.</p>
+<p>For example, a unit of <em>volume</em> is treated as <em>length</em><sup>3</sup>.  A <em>force</em> is treated as: <em>mass</em><sup>1</sup> · <em>length</em><sup>1</sup> · <em>time</em><sup>-2</sup>. Hurmet’s built-in unit data<sup>[2]</sup> contains not only conversion factors, but also the unit-checking exponents for each built-in unit.</p>
+<p>In a unit-aware calculation, each arithmetic operation is accompanied by 8 more operations, one on each unit-checking exponent. Since these are exponents, we apply the logarithms of the original operations. When the calculation multiplies, the unit-checking exponents are added. When the calculation adds, the unit-checking exponents are compared. They must be identical at an addition, or a unit error is indicated.</p>
+<p>Example</p>
+<p><span class="hurmet-calc" data-entry="'30 lbf' / '2 ft²' ⇒ (mass¹·length¹·time⁻²) / length² = mass¹·length⁻¹·time⁻²"></span></p>
+<p>The base dimensions for psi are also <em>mass</em><sup>1</sup> · <em>length</em><sup>-1</sup> · <em>time</em><sup>-2</sup>. So this calculation checks out as okay. If those exponents do not agree, Hurmet will return an error message.</p>
+<p><span class="hurmet-calc" data-entry="'30 lbf' / '2 ft²' = ?? volts"></span></p>
+<p>In my own work, I find automatic unit-handling to be extremely useful. Once you try it, you may wonder how you ever did without it.</p>
+<p></p>
+<p>[1]: Hurmet base units are the SI base units, with two exceptions: <em>Amount</em>‘s base is <em>1 unit</em>. SI uses <em>1 mole</em>,  which is just silly. For money, Hurmet’s base is the Euro. Hurmet’s exchange rate data is updated once per week with data from the European Central bank.</p>
+<p>[2]: Hurmet’s built-in unit data is tabulated at: https://hurmet.app/docs/en/unit-definitions.html<br>       The source code is at: https://github.com/ronkok/Hurmet/blob/master/src/units.js</p>
 
 </div> <!-- editor -->
 
