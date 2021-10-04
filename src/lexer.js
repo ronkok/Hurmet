@@ -422,6 +422,7 @@ const mathOperators = Object.freeze([
   "sin",
   "sinh",
   "sh",
+  "sqrt",
   "sup",
   "tan",
   "tanh",

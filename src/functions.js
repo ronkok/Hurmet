@@ -17,7 +17,7 @@ const halfPi = Object.freeze(Rnl.divide(Rnl.pi, Rnl.two))
 const functionExpos = (functionName, args) => {
   const numArgs = args.length
 
-  const expos  = numArgs === 1 ? args[0].unit.expos : null
+  const expos = numArgs === 1 ? args[0].unit.expos : null
 
   switch (functionName) {
     case "abs":
@@ -91,6 +91,9 @@ const functionExpos = (functionName, args) => {
         return errorOprnd("UNIT_IN", functionName)
       }
       return allZeros
+
+    case "sqrt":
+      return expos.map(e => e / 2)
 
     case "gcd":
     case "mht":
@@ -405,6 +408,12 @@ const unary = {
     },
     chr(x) {
       return String.fromCodePoint(Number(x))
+    },
+    sqrt(x) {
+      const y = [BigInt(1), BigInt(2)]
+      return Cpx.isComplex(x) || (Rnl.isNegative(x))
+          ? Cpx.power([x, Rnl.zero], y)
+          : Rnl.power(x, y)
     },
     round(x) {
       return Rnl.fromString(Rnl.toString(x, 0))

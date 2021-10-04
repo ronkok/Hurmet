@@ -731,6 +731,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "argument":
         case "chr":
         case "round":
+        case "sqrt":
         case "sign": {
           // Functions with one real or complex argument.
           const arg = stack.pop()
