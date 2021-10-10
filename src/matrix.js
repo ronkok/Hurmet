@@ -1,5 +1,6 @@
 import { dt, allZeros } from "./constants"
 import { Rnl } from "./rational"
+import { Cpx } from "./complex"
 import { clone } from "./utils"
 import { format } from "./format"
 import { errorOprnd } from "./error"
@@ -71,6 +72,8 @@ const display = (m, formatSpec, decimalFormat) => {
           ? ""
           : (m.dtype & dt.RATIONAL)
           ? format(m.value[i], formatSpec, decimalFormat)
+          : (m.dtype & dt.COMPLEX)
+          ? Cpx.display(m.value[i], formatSpec, decimalFormat)[0]
           : (m.dtype & dt.BOOLEAN) || (m.dtype & dt.STRING)
           ? "\\text{" + m.value[i] + "}"
           : m.value[i]
@@ -112,6 +115,8 @@ const displayAlt = (m, formatSpec, decimalFormat) => {
           ? ""
           : (m.dtype & dt.RATIONAL)
           ? format(m.value[i], formatSpec, decimalFormat).replace(/{,}/g, ",")
+          : (m.dtype & dt.COMPLEX)
+          ? Cpx.display(m.value[i], formatSpec, decimalFormat)[1].replace(/{,}/g, ",")
           : m.value[i]
         str += elementDisplay + ((i < numArgs - 1) ? argSep : "")
       }

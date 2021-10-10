@@ -268,8 +268,8 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const o2 = stack.pop()
           const o1 = stack.pop()
           const op = tkn === "+" ? "add" : "subtract"
-          if (!(((o1.dtype & dt.RATIONAL) || (o1.dtype & dt.COMPLEX)) &
-                ((o1.dtype & dt.RATIONAL) || (o2.dtype & dt.COMPLEX)))) {
+          if (!(((o1.dtype & dt.RATIONAL) || (o1.dtype & dt.COMPLEX)) &&
+                ((o2.dtype & dt.RATIONAL) || (o2.dtype & dt.COMPLEX)))) {
             return errorOprnd("NAN_OP")
           }
           if (unitAware) {
@@ -467,7 +467,9 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const index = tkn.charCodeAt(0) - 8728
           const pow = [BigInt(1), BigInt(index)]
           const o1 = stack.pop()
-          if (!(o1.dtype & dt.RATIONAL)) { return errorOprnd("NAN_OP") }
+          if (!((o1.dtype & dt.RATIONAL) || (o1.dtype & dt.COMPLEX))) {
+            return errorOprnd("NAN_OP")
+          }
           const root = Object.create(null)
           const unit = Object.create(null)
           unit.expos = allZeros
@@ -1547,6 +1549,11 @@ export const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
     result.value = clone(oprnd.value)
     result.unit = clone(oprnd.unit)
     result.dtype = oprnd.dtype
+
+    if (result.dtype === dt.COMPLEX && Rnl.isZero(Cpx.im(result.value))) {
+      result.value = Cpx.re(result.value)
+      result.dtype = 1
+    }
 
     // Check unit compatibility.
     if (result.dtype !== dt.ERROR && isUnitAware && stmt.resultdisplay.indexOf("!") === -1 &&

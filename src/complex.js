@@ -1,6 +1,7 @@
 /* eslint-disable */
 import { dt, allZeros } from "./constants"
 import { Rnl } from "./rational"
+import { format } from "./format"
 import {errorOprnd} from "./error"
 
 /*
@@ -18,8 +19,8 @@ const isComplex = a => {
     && Rnl.isRational(a[0]) && Rnl.isRational(a[1])
 }
 
-const Re = z => z[0]
-const Im = z => z[1]
+const re = z => z[0]
+const im = z => z[1]
 const abs = z => Rnl.hypot(z[0], z[1])
 const negate = z => [Rnl.negate(z[0]), Rnl.negate(z[1])]
 const conjugate = z => [z[0], Rnl.negate(z[1])]
@@ -255,10 +256,34 @@ const lanczos = zPlusOne => {
   return multiply(multiply(term1, term2), sum)
 }
 
+const display = (z, formatSpec, decimalFormat) => {
+  const complexSpec = /[j∠°]/.test(formatSpec) ? formatSpec.slice(-1) : "j"
+  let resultDisplay = ""
+  let altResultDisplay = ""
+  if (complexSpec === "j") {
+    const real = format(z[0], formatSpec, decimalFormat)
+    let im = format(z[1], formatSpec, decimalFormat)
+    if (im.charAt(0) === "-") { im = "(" + im + ")" }
+    resultDisplay = real + " + j" + im
+    altResultDisplay = real + " + j" + im
+  } else {
+    const mag = Rnl.hypot(z[0], z[1])
+    let angle = Cpx.argument(result.value)
+    if (complexSpec === "°") {
+      angle = Rnl.divide(Rnl.multiply(angle, Rnl.fromNumber(180)), Rnl.pi)
+    }
+    resultDisplay = format(mag, formatSpec, decimalFormat) + "∠" +
+                    format(angle, formatSpec, decimalFormat) +
+                    (complexSpec === "°" ? "°" : "")
+    altResultDisplay = resultDisplay
+  }
+  return [resultDisplay, altResultDisplay]
+}
+
 export const Cpx = Object.freeze({
   j,
-  Re,
-  Im,
+  re,
+  im,
   abs,
   conjugate,
   argument,
@@ -282,5 +307,6 @@ export const Cpx = Object.freeze({
   acosh,
   asinh,
   atanh,
-  lanczos
+  lanczos,
+  display
 })

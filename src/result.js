@@ -81,8 +81,9 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAwar
         altResultDisplay = String(result.value)
 
       } else if (result.dtype === dt.COMPLEX) {
-        const z = result.value
-        const complexSpec = /[j∠°]/.test(formatSpec) ? formatSpec.slice(-1) : "j"
+        const z = result.value;
+        [resultDisplay, altResultDisplay] = Cpx.display(z, formatSpec, decimalFormat)
+/*        const complexSpec = /[j∠°]/.test(formatSpec) ? formatSpec.slice(-1) : "j"
         if (complexSpec === "j") {
           const real = format(z[0], formatSpec, decimalFormat)
           let im = format(z[1], formatSpec, decimalFormat)
@@ -99,7 +100,7 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAwar
                           format(angle, formatSpec, decimalFormat) +
                           (complexSpec === "°" ? "°" : "")
           altResultDisplay = resultDisplay
-        }
+        } */
 
       } else if (result.value.plain) {
         resultDisplay = format(result.value.plain, formatSpec, decimalFormat)
