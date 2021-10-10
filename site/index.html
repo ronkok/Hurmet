@@ -63,25 +63,32 @@
 
 <p>This week’s example:</p>
 
-<h3>Unit-Handling</h3>
-<p>I remember the exact moment when I realized that Hurmet must handle units. I had completed a calculation package and passed it to another engineer for review. He found two unit-conversion errors.</p>
-<p>Do you believe that? Two errors! Two errors in MY calculation package! Well, that had to stop.</p>
-<p>So Hurmet can do automatic unit conversions and unit compatibility checks.</p>
-<p>First, automatic unit conversion: Every quantity is converted into its SI base unit. Then the units are dropped and the calculation is done with the scalar numbers. At the end of the calculation, the final scalar is converted from SI base units into the units that you have specified for the result.</p>
-<p>Example</p>
-<p><span class="hurmet-calc" data-entry="'30 lbf' / '2 ft²' = '133.446648457815 N'/'0.18580608 m²' ⇒ 133.446648457815 / 0.18580608 = 718.2038847050376 ⇒ '0.10417 psi'"></span></p>
-<p>That last step applies a unit factor to a number, assuming that the number carries the compatible base unit<sup>[1]</sup>. But what if that assumption is wrong? What if you specified an incompatible unit for the result?  To prevent such an error, Hurmet does a unit-compatibility check.</p>
-<p>With each unit-aware calculation, Hurmet does a parallel calculation on the units within each quantity. First, each unit is broken down into its base dimensions. Hurmet’s base dimensions are:  length,  mass,   time,  electric current,  temperature,  amount,  luminous intensity,  money.</p>
-<p>For example, a unit of <em>volume</em> is treated as <em>length</em><sup>3</sup>.  A <em>force</em> is treated as: <em>mass</em><sup>1</sup> · <em>length</em><sup>1</sup> · <em>time</em><sup>-2</sup>. Hurmet’s built-in unit data<sup>[2]</sup> contains not only conversion factors, but also the unit-checking exponents for each built-in unit.</p>
-<p>In a unit-aware calculation, each arithmetic operation is accompanied by 8 more operations, one on each unit-checking exponent. Since these are exponents, we apply the logarithms of the original operations. When the calculation multiplies, the unit-checking exponents are added. When the calculation adds, the unit-checking exponents are compared. They must be identical at an addition, or a unit error is indicated.</p>
-<p>Example</p>
-<p><span class="hurmet-calc" data-entry="'30 lbf' / '2 ft²' ⇒ (mass¹·length¹·time⁻²) / length² = mass¹·length⁻¹·time⁻²"></span></p>
-<p>The base dimensions for psi are also <em>mass</em><sup>1</sup> · <em>length</em><sup>-1</sup> · <em>time</em><sup>-2</sup>. So this calculation checks out as okay. If those exponents do not agree, Hurmet will return an error message.</p>
-<p><span class="hurmet-calc" data-entry="'30 lbf' / '2 ft²' = ?? volts"></span></p>
-<p>In my own work, I find automatic unit-handling to be extremely useful. Once you try it, you may wonder how you ever did without it.</p>
-<p></p>
-<p>[1]: Hurmet base units are the SI base units, with two exceptions: <em>Amount</em>‘s base is <em>1 unit</em>. SI uses <em>1 mole</em>,  which is just silly. For money, Hurmet’s base is the Euro. Hurmet’s exchange rate data is updated once per week with data from the European Central bank.</p>
-<p>[2]: Hurmet’s built-in unit data is tabulated at: https://hurmet.app/docs/en/unit-definitions.html<br>       The source code is at: https://github.com/ronkok/Hurmet/blob/master/src/units.js</p>
+<h3>Solving a Cubic Polynomial</h3>
+<p>You probably remember the quadratic equation from high school algebra. The cubic polynomial equation also has a general solution. You might think that algebra courses would cover the cubic solution directly after the quadratic equation. They don’t, because the cubic solution often involves complex numbers. </p>
+<p>Since Hurmet handles complex numbers, let’s solve a cubic polynomial.</p>
+<p><span class="hurmet-calc" data-entry="format = &quot;h4&quot;"></span></p>
+<p>The general cubic polynomial has the form: <span class="hurmet-calc" data-entry="a x³ + b x² + c x + d = 0"></span></p>
+<p>We’ll calculate solutions for an example: <span class="hurmet-calc" data-entry="x³ - 3 x² - 144 x + 432 = 0"></span><br>In other words:  <span class="hurmet-calc" data-entry="a = 1"></span>,  <span class="hurmet-calc" data-entry="b = -3"></span>,  <span class="hurmet-calc" data-entry="c = -144"></span>,  <span class="hurmet-calc" data-entry="d = 432"></span></p>
+<p>The depressed cubic, <span class="hurmet-calc" data-entry="y³ + p y + q = 0"></span> results when one substitutes <span class="hurmet-calc" data-entry="x = y - b/(3 a)"></span></p>
+<p><span class="hurmet-calc" data-entry="p = (3 a c - b²)/(3 a²) = ?"></span></p>
+<p><span class="hurmet-calc" data-entry="q = (2 b³ - 9 a b c + 27 a² d) / (27 a³) = ?"></span></p>
+<p>A couple of intermediate values:</p>
+<p><span class="hurmet-calc" data-entry="u = ∛(- q/2 - √((q/2)² + (p/3)³)) = ?"></span></p>
+<p><span class="hurmet-calc" data-entry="v = ∛(- q/2 + √((q/2)² + (p/3)³)) = ?"></span></p>
+<p>At this point, let’s pause and note that the three cube roots of 1 are 1 itself and:</p>
+<p><span class="hurmet-calc" data-entry="ω_0 = (-1 + √(-3))/2 = ?"></span></p>
+<p><span class="hurmet-calc" data-entry="ω_1 = (-1 - √(-3))/2 = ?"></span></p>
+<p>Find the roots of the depressed cubic equation.</p>
+<p><span class="hurmet-calc" data-entry="y_0 = u + v = ?"></span>, from Cardano, <em>Ars Magna</em>, circa 1545</p>
+<p><span class="hurmet-calc" data-entry="y_1 = u × ω_0 + v × ω_1 = ?"></span></p>
+<p><span class="hurmet-calc" data-entry="y_2 = u × ω_1 + v × ω_0 = ?"></span> </p>
+<p>Now find the roots of the original cubic equation.</p>
+<p><span class="hurmet-calc" data-entry="x = \[y_0; y_1; y_2] - b/(3 a) = ?"></span></p>
+<p>Check the solutions.</p>
+<p><span class="hurmet-calc" data-entry="x³ - 3 x² - 144 x + 432 = ?"></span></p>
+<p>Those results are close enough to zero to count as correct in a numerical environment.</p>
+<hr>
+<p>Ref: https://en.wikipedia.org/wiki/Cubic_equation</p>
 
 </div> <!-- editor -->
 
