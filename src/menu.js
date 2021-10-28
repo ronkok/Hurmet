@@ -148,11 +148,6 @@ const hurmetIcons = {
     height: 24,
     path: "M13.2546893,15 C12.8333806,15.6040072 12.5048858,16.2775651 12.2898787,17 L5,17 C2.23857625,17 3.38176876e-16,14.7614237 0,12 C-1.2263553e-15,9.23857625 2.23857625,7 5,7 L19,7 C21.7614237,7 24,9.23857625 24,12 C24,12.6294813 23.8836754,13.2317936 23.6713497,13.7866134 C23.1547532,13.3234155 22.5689168,12.9358807 21.9312708,12.6414391 C21.9762852,12.4347751 22,12.220157 22,12 C22,10.3431458 20.6568542,9 19,9 L5,9 C3.34314575,9 2,10.3431458 2,12 C2,13.6568542 3.34314575,15 5,15 L13.2546893,15 Z M19,14 C21.7600532,14.0033061 23.9966939,16.2399468 24,19 C24,21.7614237 21.7614237,24 19,24 C16.2385763,24 14,21.7614237 14,19 C14,16.2385763 16.2385763,14 19,14 Z M16.5,19.9375 L21.5,19.9375 C22.017767,19.9375 22.4375,19.517767 22.4375,19 C22.4375,18.482233 22.017767,18.0625 21.5,18.0625 L16.5,18.0625 C15.982233,18.0625 15.5625,18.482233 15.5625,19 C15.5625,19.517767 15.982233,19.9375 16.5,19.9375 Z"
   },
-  fold: {
-    width: 16,
-    height: 16,
-    path: "m 3,5.5 -2,5 2,5.5 H 15 L 13,10.5 15,5.5 13,0 H 1 Z M 2.277,10 3.877,6 h 9.846 l -1.6,4 z M 3.7,15 2.245,11 h 9.872 l 1.454,4 H 3.699 Z M 12.3,1 13.755,5 H 3.883 L 2.428,1 Z"
-  },
   grid: {
     width: 16,
     height: 16,
@@ -198,11 +193,6 @@ const hurmetIcons = {
     width: 16,
     height: 16,
     path: "M4 1h8v2h-8v-2zM15 4h-14c-0.55 0-1 0.45-1 1v5c0 0.55 0.45 1 1 1h3v4h8v-4h3c0.55 0 1-0.45 1-1v-5c0-0.55-0.45-1-1-1zM2 7c-0.552 0-1-0.448-1-1s0.448-1 1-1 1 0.448 1 1-0.448 1-1 1zM11 14h-6v-5h6v5z"
-  },
-  eyeBlocked: {
-    width: 16,
-    height: 16,
-    path: "M14.78 0.22c-0.293-0.293-0.768-0.293-1.061 0l-3.159 3.159c-0.812-0.246-1.671-0.378-2.561-0.378-3.489 0-6.514 2.032-8 5 0.643 1.283 1.573 2.391 2.703 3.236l-2.484 2.484c-0.293 0.293-0.293 0.768 0 1.061 0.146 0.146 0.338 0.22 0.53 0.22s0.384-0.073 0.53-0.22l13.5-13.5c0.293-0.293 0.293-0.768 0-1.061zM6.5 5c0.66 0 1.22 0.426 1.421 1.019l-1.902 1.902c-0.592-0.201-1.019-0.761-1.019-1.421 0-0.828 0.672-1.5 1.5-1.5zM1.721 8c0.598-0.946 1.395-1.749 2.335-2.348 0.061-0.039 0.123-0.077 0.185-0.114-0.156 0.427-0.241 0.888-0.241 1.369 0 0.858 0.27 1.652 0.73 2.303l-0.952 0.952c-0.819-0.576-1.519-1.311-2.057-2.162z M12 6.906c0-0.424-0.066-0.833-0.189-1.217l-5.028 5.028c0.384 0.123 0.793 0.189 1.217 0.189 2.209 0 4-1.791 4-4z M12.969 4.531l-1.084 1.084c0.020 0.012 0.040 0.024 0.059 0.037 0.94 0.6 1.737 1.403 2.335 2.348-0.598 0.946-1.395 1.749-2.335 2.348-1.181 0.753-2.545 1.152-3.944 1.152-0.604 0-1.202-0.074-1.781-0.219l-1.201 1.201c0.933 0.335 1.937 0.518 2.982 0.518 3.489 0 6.514-2.032 8-5-0.703-1.405-1.752-2.6-3.031-3.469z"
   },
   cog: {
     width: 16,
@@ -421,7 +411,7 @@ function saveFile(state) {
       // Get a copy of the document
       const docJSON = state.doc.toJSON()
       // Prune the Hurmet math parts down to just the entry. Then stringify it.
-      const str = JSON.stringify(pruneHurmet(docJSON), null, 2)
+      const str = JSON.stringify(pruneHurmet(docJSON))
       // Save the result
       const blob = new Blob([str], {type: "text/plain;charset=utf-8"})
       saveAs(blob, "HurmetFile.hurmet");
@@ -437,7 +427,7 @@ function exportMarkdownFile(state) {
       return true
     },
     run(state) {
-      const str = hurmetMarkdownSerializer.serialize(state.doc)
+      const str = hurmetMarkdownSerializer.serialize(state.doc, new Map())
       // Save the result
       const blob = new Blob([str], {type: "text/plain;charset=utf-8"})
       saveAs(blob, "HurmetMarkdown.md", { autoBom : false });
@@ -903,25 +893,15 @@ export function buildMenuItems(schema) {
       title: "Wrap in block quote",
       icon: icons.blockquote
     })
-  if ((type = schema.nodes.indented_paragraph))
-    r.wrapIndent = blockTypeItem(type, {
-      title: "Indent paragraph",
-      icon: hurmetIcons.indent
-    })
-  if ((type = schema.nodes.centered_paragraph))
-    r.wrapCentered = blockTypeItem(type, {
-      title: "Centered paragraph",
+  if ((type = schema.nodes.centered_div))
+    r.wrapCentered = wrapItem(type, {
+      title: "Center block",
       icon: hurmetIcons["align-center"]
     })
-  if ((type = schema.nodes.folded_paragraph))
-  r.wrapFold = blockTypeItem(type, {
-    title: "Folded paragraph",
-    icon: hurmetIcons.fold
-  })
-  if ((type = schema.nodes.hidden_paragraph))
-    r.wrapHidden = blockTypeItem(type, {
-      title: "Unprinted paragraph",
-      icon: hurmetIcons.eyeBlocked
+  if ((type = schema.nodes.indented_div))
+    r.wrapIndent = wrapItem(type, {
+      title: "Indent block",
+      icon: hurmetIcons.indent
     })
   if ((type = schema.nodes.paragraph))
     r.makeParagraph = blockTypeItem(type, {
@@ -1043,11 +1023,7 @@ export function buildMenuItems(schema) {
   r.typeMenu = [cut([
       r.makeParagraph,
       r.makeCodeBlock,
-      r.makeHead1, r.makeHead2, r.makeHead3, r.makeHead4,
-      r.wrapIndent,
-      r.wrapCentered,
-      r.wrapHidden,
-      r.wrapFold
+      r.makeHead1, r.makeHead2, r.makeHead3, r.makeHead4
     ])]
 
   r.blockMenu = [
@@ -1055,6 +1031,8 @@ export function buildMenuItems(schema) {
       r.wrapBulletList,
       r.wrapOrderedList,
       r.wrapBlockQuote,
+      r.wrapCentered,
+      r.wrapIndent,
       joinUpItem,
       liftItem,
       selectParentNodeItem
