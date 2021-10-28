@@ -96,7 +96,10 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
   if (posOfLastEquals > 1) {
     // input has form:  mainStr = trailStr
     mainStr = str.substring(0, posOfLastEquals - 1).replace(/ +$/, "")
-    mustAlign = mainStr.length > 0 && mainStr.slice(-1) === "\n"
+    if (mainStr.length > 0 && /;\s*$/.test(mainStr)) {
+      mustAlign = true
+      mainStr = mainStr.replace(/;\s*$/, "")
+    }
     mainStr = mainStr.trim()
     trailStr = str.substring(posOfLastEquals).trim()
 

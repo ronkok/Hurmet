@@ -53,7 +53,21 @@ article, #title {
 }
 
 code {
-  font-family: Consolas, Cambria, monospace;
+  padding: .125rem .3125rem .0625rem;
+  background-color: #e6e6e6;
+  font-family: Consolas,"Liberation Mono",Courier,monospace;
+  font-weight: 400;
+  color: #0a0a0a;
+}
+
+pre {
+  padding: 10px;
+}
+
+pre code {
+  background-color: #f6f8fa;
+  font-weight: normal;
+  font-size: 0.9em;
 }
 
 h1, h2, h3, h5 {
@@ -135,16 +149,6 @@ th p { line-height: 1.6; }
 
 .hidden {
   color: gray;
-}
-
-.folded {
-  height: 1.2em;
-  overflow-y: hidden;
-}
-.folded pre {
-  position: absolute;
-  height: 1.2em;
-  overflow-y: hidden;
 }
 
 .ProseMirror-prompt input[type="radio"] {

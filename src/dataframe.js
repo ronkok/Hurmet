@@ -668,7 +668,7 @@ const getNumInfo =  df => {
 const displayNum = (datum, colInfo, cellInfo, decimalFormat) => {
   let str = formattedDecimal(datum, decimalFormat)
   const n = colInfo.maxLenAfterAlignChar - cellInfo.lenAfterAlignChar
-  if (n > 0 || !cellInfo.hasAlignChar) {
+  if (colInfo.hasAlignChar && (n > 0 || !cellInfo.hasAlignChar)) {
     str += "\\phantom{"
     if (colInfo.hasAlignChar && !cellInfo.hasAlignChar) {
       str += decimalFormat.slice(-1) === "." ? "." : "{,}"

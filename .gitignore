@@ -6,3 +6,4 @@ site/hurmet.min.js
 site/prosemirror.min.js
 site/docs/en/manual.html
 utils/ECB Exchange Rates.xml
+utils/hurmetMark.cjs

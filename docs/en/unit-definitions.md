@@ -10,7 +10,7 @@
 
 # Hurmet Units
 
-The values in columns *length* through *money* are exponents that Hurmet uses to check unit compatibility. For instance, a liter is a measure of volume, or *length*<sup>3</sup>, so the table’s “length” column shows a 3 for liters.
+The values in columns _length_ through _money_ are exponents that Hurmet uses to check unit compatibility. For instance, a liter is a measure of volume, or _length_<sup>3</sup>, so the table’s “length” column shows a 3 for liters.
 
 The currency exchange rates in this table are only placeholders. Hurmet actually uses [data from the European Central Bank](https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml). This data is updated once per week. You can [define your own](./manual.html#currencies), more accurate exchange rates to override the default rates.
 

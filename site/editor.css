@@ -420,8 +420,8 @@ li.ProseMirror-selectednode:after {
   display: block;
 }
 
-.ProseMirror p.indented { margin-left: 2em; }
-.ProseMirror p.centered { text-align: center; }
+.ProseMirror div.indented { margin-left: 2em; }
+.ProseMirror div.centered { text-align: center; }
 
 .katex { font-size: 1em; }
 math.temml { font-size: 1em; }

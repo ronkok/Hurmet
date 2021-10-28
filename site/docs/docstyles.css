@@ -92,39 +92,53 @@ table th { font-size: 95%;
            line-height: 1.05;
            border-bottom: 1px solid #ccc; }
 
-table.horiz-lined { margin-left: 0; }
-table.horiz-lined tr { border-bottom: 1px solid #ccc; }
-table.horiz-lined th, table.horiz-lined td { vertical-align: middle; }
-
-div.table-grid + table {margin-left: 0;}
-div.table-grid + table th, div.table-grid + table td { border: 1px solid #aaa; vertical-align: middle; }
+table.grid {margin-left: 0;}
+table.grid th, table.grid td { border: 1px solid #aaa; vertical-align: middle; }
 
 table.grid {margin-left: 0; }
 table.grid th, table.grid td { border: 1px solid #aaa; vertical-align: middle; }
 
-div.table-markup + table { margin-left: 0; white-space: nowrap; }
-div.table-markup + table tr th:nth-child(2),
-div.table-markup + table tr td:nth-child(2) { border-right: 1px solid #aaa; }
+table.markup { margin-left: 0; white-space: nowrap; }
+table.markup tr th:nth-child(2),
+table.markup tr td:nth-child(2) { border-right: 1px solid #aaa; }
 
-div.table-auto-correct + table { width: 28em; white-space: nowrap; margin: 0 0 0 -0.5em; }
-div.table-auto-correct + table tr th:nth-child(2),
-div.table-auto-correct + table tr th:nth-child(4),
-div.table-auto-correct + table tr th:nth-child(6),
-div.table-auto-correct + table tr th:nth-child(8),
-div.table-auto-correct + table tr td:nth-child(2),
-div.table-auto-correct + table tr td:nth-child(4),
-div.table-auto-correct + table tr td:nth-child(6),
-div.table-auto-correct + table tr td:nth-child(8) { border-right: 1px solid #aaa; }
+table.auto-correct { width: 28em; white-space: nowrap; margin: 0 0 0 -0.5em; }
+table.auto-correct tr th:nth-child(2),
+table.auto-correct tr th:nth-child(4),
+table.auto-correct tr th:nth-child(6),
+table.auto-correct tr th:nth-child(8),
+table.auto-correct tr td:nth-child(2),
+table.auto-correct tr td:nth-child(4),
+table.auto-correct tr td:nth-child(6),
+table.auto-correct tr td:nth-child(8) { border-right: 1px solid #aaa; }
 
-div.table-no-wrap + table { white-space: nowrap; }
+table.table-no-wrap { white-space: nowrap; }
 
 div#op-table + table { width: 30em; }
 
-h6 { font-size: 100%; font-weight: bold;  margin-top: 0.8em; }
-h6 + p { margin-left: 2.5em; line-height: 1.35; }
-h6 + div { margin-left: 2.5em; line-height: 1.35; }
+/* Column alignment. Apply these classes to the table node. */
+.c1r td:nth-child(1), .c1r th:nth-child(1),
+.c2r td:nth-child(2), .c2r th:nth-child(2),
+.c3r td:nth-child(3), .c3r th:nth-child(3),
+.c4r td:nth-child(4), .c4r th:nth-child(4),
+.c5r td:nth-child(5), .c5r th:nth-child(5),
+.c6r td:nth-child(6), .c6r th:nth-child(6),
+.c7r td:nth-child(7), .c7r th:nth-child(7),
+.c8r td:nth-child(8), .c8r th:nth-child(8),
+.c9r td:nth-child(9), .c9r th:nth-child(9) { text-align:right }
+
+.c1c td:nth-child(1), .c1c th:nth-child(1),
+.c2c td:nth-child(2), .c2c th:nth-child(2),
+.c3c td:nth-child(3), .c3c th:nth-child(3),
+.c4c td:nth-child(4), .c4c th:nth-child(4),
+.c5c td:nth-child(5), .c5c th:nth-child(5),
+.c6c td:nth-child(6), .c6c th:nth-child(6),
+.c7c td:nth-child(7), .c7c th:nth-child(7),
+.c8c td:nth-child(8), .c8c th:nth-child(8),
+.c9c td:nth-child(9), .c9c th:nth-child(9) { text-align:center }
 
 dt { font-size: 100%; font-weight: normal;  margin-top: 0.8em; }
+dl.bold-term dt { font-size: 100%; font-weight: bold;  margin-top: 0.8em; }
 dd { margin-left: 2.5em; line-height: 1.35; }
 
 ol li { position: relative; left: 2.2em; width:88%; line-height: 1.35; margin-top: 0.5em;}

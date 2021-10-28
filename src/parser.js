@@ -37,7 +37,6 @@ const rationalRPN = numStr => {
 }
 
 const numberRegEx = new RegExp(Rnl.numberPattern)
-const propRegEx = /^[A-Za-zıȷ_.\u0391-\u03C9\u03D5\u210B-\u2131\u2133\uD835\uDC00-\udc33\udc9c-\udcb5\u0300-\u030C\u0332\u20d0-\u20d7\u20e1′]*\[/
 
 const calligraphicRegEx = /^(:?\uD835[\uDC9C-\uDCCF]|[\udc9d\udca0\udca1\udca3\udca4\udca7\udca8\udcad\udcba\udcbc\udcc1\udcc4])/
 
@@ -788,7 +787,7 @@ export const parse = (
           rpn += '"' + token.input + '"' // a loop index variable name.
         } else {
           // We're in the echo of a Hurmet calculation.
-          if (propRegEx.test(str)) {
+          if (/^[.[]/.test(str)) {
             // When the blue echo has an index in a bracket, e.g., varName[indes], it renders
             // the name of the variable, not the value. The value of the value of the index.
             token.output = token.ttype === tt.LONGVAR

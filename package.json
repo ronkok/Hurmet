@@ -1,6 +1,6 @@
 {
   "name": "hurmet",
-  "version": "2020.06.14",
+  "version": "2021.10.28",
   "description": "Rich text editor on the web, featuring live calculations.",
   "homepage": "https://hurmet.app",
   "license": "MIT",
@@ -46,10 +46,12 @@
     "rates": "node utils/updateExchangeRates.js",
     "docs": "node utils/buildDocs.js",
     "pm": "rollup --config utils/rollup.prosemirror.config.js && node utils/editPM.js",
+    "md": "rollup --config utils/rollup.markdown.config.js",
     "minify": "terser preview/prosemirror.js -o site/prosemirror.min.js -m && terser preview/hurmet.js -o site/hurmet.min.js -m",
     "build": "yarn pm && yarn math && yarn minify && yarn docs",
     "test": "yarn test:lint && node test/test.js",
     "test:lint": "eslint src",
-    "test:unit": "node test/test.js"
+    "test:unit": "node test/test.js",
+    "test:hmd": "node utils/testHmd.js"
   }
 }

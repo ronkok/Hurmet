@@ -1,6 +1,4 @@
-import { DOMParser as pmDomParser } from "prosemirror-model"
-
-const emptyTableHead = /<thead>\n<tr>\n(?:<th style="text-align: left;"><\/th>\n)+<\/tr>\n<\/thead>\n/g
+import { md2ast } from "./md2ast"
 
 export function readFile(state, _, view, schema, format) {
   // Open a dialog box.
@@ -23,14 +21,18 @@ export function readFile(state, _, view, schema, format) {
       let doc
 
       if (format === "hurmet") {
+        str = str.replace(/(?:indented_paragraph|folded_paragraph)/g, "paragraph")
         doc = JSON.parse(str)
       } else if (format === "markdown") {
-        // eslint-disable-next-line no-undef
-        let html = marked(str)
-        html = html.replace(emptyTableHead, "")
-        const domparser = new DOMParser()
-        const dom = domparser.parseFromString(html, "text/html")
-        doc = pmDomParser.fromSchema(schema).parse(dom)
+        const ast = md2ast(str)
+        doc = {
+          type: "doc",
+          "attrs": {
+            "decimalFormat": "1,000,000.",
+            "inDraftMode": false
+          },
+          "content": ast
+        }
         doc = JSON.parse(JSON.stringify(doc))
       }
 

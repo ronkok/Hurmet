@@ -46,16 +46,39 @@ export class MarkdownSerializer {
   // :: (Node, ?Object) → string
   // Serialize the content of the given node to
   // [CommonMark](http://commonmark.org/).
-  serialize(content, options) {
-    let state = new MarkdownSerializerState(this.nodes, this.marks, options)
+  serialize(content, paths, options) {
+    let state = new MarkdownSerializerState(this.nodes, this.marks, paths)
     state.renderContent(content)
+    // Write the link and image paths.
+    for (const [key, value] of state.paths.entries()) {
+      state.write("\n[" + key + "]: " + value + "\n")
+    }
     return state.out
   }
+}
+
+const BACKTICK_R = /`+/g
+const maxBacktickCount = str => {
+  let max = 0
+  let arr
+  while ((arr = BACKTICK_R.exec(str)) !== null) {
+    if (arr[0].length > max) { max = arr[0].length }
+  }
+  return max  
 }
 
 const hurmetNodes =  {
   blockquote(state, node) {
     state.wrapBlock("> ", null, node, () => state.renderContent(node))
+  },
+  indented_div(state, node) {
+    state.wrapBlock("   ", "i> ", node, () => state.renderContent(node))
+  },
+  centered_div(state, node) {
+    state.wrapBlock("   ", "C> ", node, () => state.renderContent(node))
+  },
+  header(state, node) {
+    state.wrapBlock("   ", "H> ", node, () => state.renderContent(node))
   },
   code_block(state, node) {
     state.write("```" + (node.attrs.params || "") + "\n")
@@ -70,11 +93,11 @@ const hurmetNodes =  {
     state.closeBlock(node)
   },
   horizontal_rule(state, node) {
-    state.write(node.attrs.markup || "---")
+    state.write(node.attrs.markup || "------")
     state.closeBlock(node)
   },
   bullet_list(state, node) {
-    state.renderList(node, "  ", () => (node.attrs.bullet || "*") + " ")
+    state.renderList(node, "  ", () => (node.attrs.bullet || "+") + " ")
   },
   ordered_list(state, node) {
     let start = node.attrs.order || 1
@@ -89,32 +112,34 @@ const hurmetNodes =  {
     state.renderContent(node)
   },
   paragraph(state, node) {
+    const prevLength = state.out.length
     state.renderInline(node)
-    state.closeBlock(node)
-  },
-  indented_paragraph(state, node) {
-    state.renderInline(node)
-    state.closeBlock(node)
-  },
-  centered_paragraph(state, node) {
-    state.renderInline(node)
-    state.closeBlock(node)
-  },
-  hidden_paragraph(state, node) {
-    state.renderInline(node)
+    state.out = limitLineLength(state.out, prevLength, state.delim, state.lineLimit)
     state.closeBlock(node)
   },
   table(state, node) {
-    state.renderTable(node)
-    state.closeBlock(node)
-  },
-  header(state, node) {
-    state.renderTable(node.content.content[0])
+    state.renderTable(node, state.delim)
     state.closeBlock(node)
   },
   image(state, node) {
-    state.write("![" + state.esc(node.attrs.alt || "") + "](" + state.esc(node.attrs.src) +
-                (node.attrs.title ? " " + state.quote(node.attrs.title) : "") + ")")
+    let path = state.esc(node.attrs.src)
+    if (node.attrs.class || node.attrs.width || node.attrs.alt) {
+      path += "\n{"
+      if (node.attrs.class) { path += "." + state.esc(node.attrs.class) }
+      if (node.attrs.width && !isNaN(node.attrs.width)) { path += " width=" + node.attrs.width }
+      if (node.attrs.alt) { path += ' alt="' + state.esc(node.attrs.alt) + '"' }
+      path += "}"
+    }
+    // We use reference links and defer the image paths to the end of the document.
+    const ref = getRef(node, state)
+    state.paths.set(ref, path)
+    const caption = node.attrs.caption || ""
+    if (ref === node.attrs.alt) {
+      state.write(`![${node.attrs.alt}][]`)
+    } else {
+      state.write(`![${node.attrs.alt}][${ref}]`)
+    }
+    
   },
   hard_break(state, node, parent, index) {
     for (let i = index + 1; i < parent.childCount; i++)
@@ -127,26 +152,42 @@ const hurmetNodes =  {
     state.text(node.text)
   },
   tex(state, node) {
-    const delimiter = node.attrs.displayMode ? "$$" : "$"
-    state.write(delimiter + node.attrs.tex.trim() + delimiter)
+    const tex = node.attrs.tex.trim().replace(/\n/gm, "\n" + state.delim)
+    if (node.attrs.displayMode) {
+      state.write("$$\n" + tex + "\n$$")
+    } else {
+      const backticks = "`".repeat(maxBacktickCount(tex) + 1) 
+      state.write("$" + backticks + " " + tex + " " + backticks)
+    }
   },
   calculation(state, node) {
-    const entry = node.attrs.entry.trim()
-    const delimiter = node.attrs.displayMode ? "¢¢" : "¢"
-    state.write(delimiter + entry + delimiter)
+    const entry = node.attrs.entry.trim().replace(/\n(?: *\n)+/g, "\n").replace(/\n/gm, "\n" + state.delim)
+    if (node.attrs.displayMode) {
+      state.write("¢¢\n" + entry + "\n¢¢")
+    } else {
+      const backticks = "`".repeat(maxBacktickCount(entry) + 1) 
+      state.write("¢" + backticks + " " + entry + " " + backticks)
+    }
   }
 }
 
 const hurmetMarks = {
-  em: {open: "*", close: "*", mixable: true, expelEnclosingWhitespace: true},
+  em: {open: "_", close: "_", mixable: true, expelEnclosingWhitespace: true},
   strong: {open: "**", close: "**", mixable: true, expelEnclosingWhitespace: true},
   link: {
     open(_state, mark, parent, index) {
       return isPlainURL(mark, parent, index, 1) ? "<" : "["
     },
     close(state, mark, parent, index) {
-      return isPlainURL(mark, parent, index, -1) ? ">"
-        : "](" + state.esc(mark.attrs.href) + (mark.attrs.title ? " " + state.quote(mark.attrs.title) : "") + ")"
+      if (isPlainURL(mark, parent, index, -1)) {
+        return ">"
+      } else {
+        // We use reference links and defer the image paths to the end of the document.
+        const ref = getRef(mark, state)
+        state.paths.set(ref, state.esc(mark.attrs.href))
+        let display = parent.child(index - 1).text
+        return "][" + (display === ref ? "" : ref) + "]"
+      }
     }
   },
   code: {open(_state, _mark, parent, index) { return backticksFor(parent.child(index), -1) },
@@ -155,12 +196,13 @@ const hurmetMarks = {
   superscript: {open: "<sup>", close: "</sup>", expelEnclosingWhitespace: true},
   subscript: {open: "<sub>", close: "</sub>", expelEnclosingWhitespace: true},
   strikethru: {open: "~~", close: "~~", mixable: true, expelEnclosingWhitespace: true},
-  underline: {open: "<u>", close: "</u>", expelEnclosingWhitespace: true}
+  underline: {open: "<u>", close: "</u>", expelEnclosingWhitespace: true},
+  highlight: {open: "<mark>", close: "</mark>", expelEnclosingWhitespace: true}
 }
 
 // :: MarkdownSerializer
 // A serializer for the schema.
-export const hurmetMarkdownSerializer = new MarkdownSerializer(hurmetNodes, hurmetMarks)
+export const hurmetMarkdownSerializer = new MarkdownSerializer(hurmetNodes, hurmetMarks, new Map())
 
 function backticksFor(node, side) {
   let ticks = /`+/g, m, len = 0
@@ -180,27 +222,75 @@ function isPlainURL(link, parent, index, side) {
   return !link.isInSet(next.marks)
 }
 
+const getRef = (node, state) => {
+  // We use reference links and defer the image paths to the end of the document.
+  const ref = node.type.name === "image" ? node.attrs.alt : node.attrs.title
+  const num = isNaN(state.paths.size) ? "1" : String(state.paths.size + 1)
+  if (ref) {
+    // Determine if ref has already been used
+    for (const key of state.paths.keys()) {
+      if (key === ref) { return num }
+    }
+    return ref
+  } else {
+    return num
+  }
+}
+
+// Do not line-break on any space that would indicate a heading, list item, etc.
+const blockRegEx = /^(?:[>*+-] |#+ |\d+[.)] |[A-B]\. |\-\-\-|```|[iCFHhITWADE]> )/
+
+function limitLineLength(str, prevLength, delim, limit) {
+  let graf = str.slice(prevLength)
+  if (graf.length <= limit) { return str }
+  if (/``|¢` ffunction/.test(graf)) { return str }
+
+  const leading = "\n" + delim
+  let result = ""
+  let i = 0
+  while (graf.length > limit) {
+    const posNewLine = graf.indexOf("\n")
+    const localLimit = limit - (i > 0 ? leading.length : 0)
+    if (posNewLine > -1) {
+      let chunk = graf.slice(0, posNewLine + 1)
+      while (chunk.length > localLimit && chunk.lastIndexOf(" ", localLimit) > -1) {
+        const pos = chunk.lastIndexOf(" ", localLimit)
+        result += chunk.slice(0, pos) + "\n"
+        chunk = chunk.slice(pos + 1)
+      } 
+      result += chunk
+      graf = graf.slice(posNewLine + 1)
+    } else {
+      let pos = graf.lastIndexOf(" ", localLimit)
+      if (pos === -1) { break }
+      while (blockRegEx.test(graf.slice(pos + 1))) {
+        pos = graf.lastIndexOf(" ", pos - 1)
+        if (pos === -1) { break }
+      }
+      if (pos === -1 || (graf.length - pos < 7 && limit === 80)) { break }
+      result += (i > 0 ? leading : "") + graf.slice(0, pos)
+      graf = graf.slice(pos + 1)
+      i += 1
+    }
+  }
+  result += (i > 0 ?  leading : "") + graf
+
+  return str.slice(0, prevLength) + result
+}
+
 const justifyRegEx = /c(\d)([cr])/g
 
 // ::- This is an object used to track state and expose
 // methods related to markdown serialization. Instances are passed to
 // node and mark serialization methods (see `toMarkdown`).
 export class MarkdownSerializerState {
-  constructor(nodes, marks, options) {
+  constructor(nodes, marks, paths) {
     this.nodes = nodes
     this.marks = marks
+    this.paths = paths
     this.delim = this.out = ""
     this.closed = false
-    this.inTightList = false
-    // :: Object
-    // The options passed to the serializer.
-    //   tightLists:: ?bool
-    //   Whether to render lists in a tight style. This can be overridden
-    //   on a node level by specifying a tight attribute on the node.
-    //   Defaults to false.
-    this.options = options || {}
-    if (typeof this.options.tightLists == "undefined")
-      this.options.tightLists = false
+    this.lineLimit = 80
   }
 
   flushClose(size) {
@@ -384,17 +474,12 @@ export class MarkdownSerializerState {
   renderList(node, delim, firstDelim) {
     if (this.closed && this.closed.type == node.type)
       this.flushClose(3)
-    else if (this.inTightList)
-      this.flushClose(1)
 
-    let isTight = typeof node.attrs.tight != "undefined" ? node.attrs.tight : this.options.tightLists
-    let prevTight = this.inTightList
-    this.inTightList = isTight
+    let isTight = typeof node.attrs.tight != "undefined" ? node.attrs.tight : false
     node.forEach((child, _, i) => {
       if (i && isTight) this.flushClose(1)
       this.wrapBlock(delim, firstDelim(i), node, () => this.render(child, node, i))
     })
-    this.inTightList = prevTight
   }
 
   paddedCell(str, justify, colWidth) {
@@ -402,62 +487,140 @@ export class MarkdownSerializerState {
     return justify === "r" ? (pad + str) : (str + pad)
   }
 
-  renderTable(node) {
+  renderTable(node, delim) {
     const rows = node.content.content
-    const numCols = rows[0].content.content.length
-    const hasHeadings = rows[0].content.content[0].type.name === "table_header"
+    let numCols = rows[0].content.content.length
+    for (let i = 1; i < rows.length; i++) {
+      numCols = Math.max(numCols, rows[i].content.content.length)
+    }
+    let numRowsInHeading = 0
+    for (let i = 0; i < rows.length; i++) {
+      if (rows[i].content.content[0].type.name === "table_header") {
+        numRowsInHeading += 1
+      } else {
+        break
+      }
+    }
     const tblClasses = node.attrs.class
-    const justify = new Array(numCols).fill("L")
+    const justify = new Array(numCols).fill("L") // default. Will change later.
     let regExResults
     while ((regExResults = justifyRegEx.exec(tblClasses)) !== null) {
       justify[Number(regExResults[1]) - 1] = regExResults[2]
     }
 
-    // I want the pipe table cells to be padded in a way that aligns the pipes.
-    // So we're going to make two passes thru the table.
+    // We're going to make three passes thru the table.
     // The first pass will get the content of each cell and load it into an array.
     // To do that, we'll create a temporary MarkdownSerializerState just for the table.
-    // The second pass will pad each cell with spaces and create the final state.
     const table = new Array(rows.length)
+    const rowSpan = new Array(rows.length)
+    const colSpan = new Array(rows.length)
     for (let i = 0; i < rows.length; i++) {
       table[i] = new Array(numCols).fill("")
+      rowSpan[i] = new Array(numCols).fill(1)
+      colSpan[i] = new Array(numCols).fill(1)
     }
     const colWidth = new Array(numCols).fill(0)
-    let tableState = new MarkdownSerializerState(hurmetNodes, hurmetMarks)
-    for (let i = 0; i < rows.length; i++) {
+    const mergedCells = [];
+    // Do we need a reStructuredText grid table? Or is a GFM pipe table enough?
+    let isRst = numRowsInHeading !== 1;
+    let tableState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths)
+    tableState.lineLimit = 25
+    let i = 0
+    let j = 0
+    let jPM = 0
+    while (i < rows.length) {
+      while (j < numCols) {
+        if (rowSpan[i][j] === 0 || colSpan[i][j] === 0) { j += 1; continue }
+        const cell = rows[i].content.content[jPM]
+        if (!cell) { colSpan[i][j] = 0; j += 1; continue }
+        if (cell.attrs.rowspan > 1) {
+          rowSpan[i][j] = cell.attrs.rowspan
+          for (let ii = i + 1; ii < i + cell.attrs.rowspan; ii++) {
+            rowSpan[ii][j] = 0
+            colSpan[ii][j] = 0
+          }
+        }
+        if (cell.attrs.colspan > 1) {
+          colSpan[i][j] = cell.attrs.colspan
+          for (let jj = j + 1; jj < j + cell.attrs.colspan; jj++) {
+            colSpan[i][jj] = 0
+          }
+        }
+
+        if (cell.content.content.length > 0) {
+          if (cell.attrs.colspan > 1) {
+            mergedCells.push([i, j, jPM])
+          } else {
+            const L = tableState.out.length
+            tableState.renderContent(cell)
+            // Each table cell contains an array of strings.
+            const cellContent = tableState.out.slice(L).replace(/^\n+/, "").split("\n")
+            table[i][j] = cellContent
+            if (cellContent.length > 1) { isRst = true }
+            // Get width of cell.
+            if (colSpan[i][j] === 1) {
+              for (let line of table[i][j]) {
+                if (line.length > colWidth[j]) {
+                  colWidth[j] = line.length
+                }
+              }
+            }
+          }
+        }
+        j += cell.attrs.colspan
+        jPM += cell.attrs.colspan
+      }
+      i += 1
+      j = 0
+      jPM = 0
+    }
+
+    // Now we know the column widths, so get the horizontally merged cells.
+    for (const c of mergedCells) {
+      const i = c[0]
+      const j = c[1]
+      const jPM = c[2]
+      const cell = rows[i].content.content[jPM]
+      let width = colWidth[j]
+      for (let m = 1; m < colSpan[i][j]; m++) { width += colWidth[j + m] + 3 }
+      tableState.lineLimit = width
+      const L = tableState.out.length
+      tableState.renderContent(cell)
+      table[i][j] = tableState.out.slice(L).replace(/^\n+/, "").split("\n")
+    }
+
+    // The second pass. Pad each cell w/spaces.
+    for (let i = 0; i < table.length; i++) {
       for (let j = 0; j < numCols; j++) {
-        const graf = rows[i].content.content[j].content.content[0] 
-        if (graf.content.content.length > 0) {
-          const L = tableState.out.length
-          tableState.renderInline(graf)
-          table[i][j] = tableState.out.slice(L)
-          if (table[i][j].length > colWidth[j]) { colWidth[j] = table[i][j].length }
+        if (rowSpan[i][j] > 0 && colSpan[i][j] > 0) {
+          let width = colWidth[j]
+          for (let m = 1; m < colSpan[i][j]; m++) { width += colWidth[j + m] + 3 }
+          for (let k = 0; k < table[i][j].length; k++) {
+            // Pad the line with spaces
+            table[i][j][k] += " ".repeat(width - table[i][j][k].length)
+          }
         }
       }
     }
 
-    // Write the top row
-    if (hasHeadings) {
-      this.write("|")
-      for (let j = 0; j < numCols; j++) {
-        this.write(" " + this.paddedCell(table[0][j], justify[j], colWidth[j]) + " |")
-      }
-    } else {
-      this.write("|".repeat(numCols + 1))
-    }
-    // Write the second row, with column justification
-    this.write("\n|")
-    for (let j = 0; j < numCols; j++) {
-      const ju = justify[j]
-      this.write((ju === "r" ? "-" : ":") + "-".repeat(colWidth[j]) + (ju === "L" ? "-" : ":") + "|")
-    }
-    // Write the body of the table.
-    for (let i = (hasHeadings ? 1 : 0); i < rows.length; i++) {
-      this.write("\n|")
-      for (let j = 0; j < numCols; j++) {
-        this.write(" " + this.paddedCell(table[i][j], justify[j], colWidth[j]) + " |")
+    // Now the third pass, in which we write output.
+    this.write(isRst
+      ? gridTable(table, numCols, numRowsInHeading, rowSpan, colSpan, colWidth, justify, delim)
+      : pipeTable(table, numCols, colWidth, justify, delim)
+    )
+    // Write the table's class name and column widths.
+    let colWidths = ""
+    for (let i = 0; i < rows.length; i++) {
+      if (rows[i].content.content.length === numCols) {
+        for (const col of rows[i].content.content) {
+          const w = col.attrs.colwidth ? col.attrs.colwidth[0] : null
+          colWidths += " " + String(w)
+        }
+        break
       }
     }
+    const className = node.attrs.class.replace(/ c\d+[cr]/g, "") // remove column justification
+    this.write(`\n${delim}{.${className} colWidths="${colWidths.trim()}"}\n`)
   }
 
   // :: (string, ?bool) → string
@@ -465,8 +628,11 @@ export class MarkdownSerializerState {
   // content. If `startOfLine` is true, also escape characters that
   // has special meaning only at the start of the line.
   esc(str, startOfLine) {
-    str = str.replace(/[`*\\~\[\]]/g, "\\$&")
-    if (startOfLine) str = str.replace(/^[:#\-*+]/, "\\$&").replace(/^(\d+)\./, "$1\\.")
+    str = str.replace(/[`\\¢\[\]]/g, "\\$&")
+    str = str.replace(/(\*\*|\$\$|¢¢|~~)/g, "\\$1")
+    if (startOfLine) {
+      str = str.replace(/^(\#+|:|\-|\*|\+) /, "\\$1").replace(/^(\d+)\./, "$1\\.")
+    }
     return str
   }
 
@@ -501,4 +667,120 @@ export class MarkdownSerializerState {
       trailing: (text.match(/(\s+)$/) || [])[0]
     }
   }
+}
+
+const pipeTable = (table, numCols, colWidth, justify, delim) => {
+  // Write a GFM pipe table
+  let str = ""
+  for (let i = 0; i < table.length; i++) {
+    // Write a table row.
+    str += "\n" + (i === 0 ? "" : delim) + "|"
+    for (let j = 0; j < numCols; j++) {
+      str +=" " + table[i][j][0] + " |"
+    }
+    if (i === 0) {
+      //
+      str += "\n|"
+      for (let j = 0; j < numCols; j++) {
+        let border = justify[j] === "c" ? ":" : "-"
+        border += "-".repeat(colWidth[j])
+        border += ("cr".indexOf(justify[j]) > -1 ? ":" : "-") + "|"
+        str += border
+      }
+    }
+  }
+  return str
+}
+
+const gridTable = (table, numCols, numRowsInHeading, rowSpan, colSpan, colWidth, justify, delim) => {
+  // Write a reStrucuredText grid table.
+
+  // Start by writing the top border. It differs slightly from rst.
+  let topBorder = "+"
+  for (let j = 0; j < numCols; j++) {
+    // Set column justification with ":" characters, as in pipe tables.
+    topBorder += justify[j] === "c" ? ":" : "-"
+    topBorder += "-".repeat(colWidth[j])
+    // Either "+" or "┴" indicates a column border location.
+    // We use "┴" if the top row has a horizontally merged cell.
+    const corner = (j === numCols - 1) ? "+" : (colSpan[0][j + 1] === 0) ? "┴" : "+"
+    topBorder += ("cr".indexOf(justify[j]) > -1 ? ":" : "-") + corner
+  }
+
+  // Set pointers frome the the grid table current location to the array of table content.
+  const current = []
+  for (let j = 0; j < numCols; j++) {
+    current.push({ row: 0, line: 0 }) // One reference for each column.
+  }
+
+  const rowIsEmptied = new Array(table.length).fill(false) // Have we written all the row's contents?
+  let highestUnemptiedRow = 0
+  const rowIsReadyForBorder = new Array(table.length).fill(false)
+  const lines = [topBorder]
+
+  while (current[0].row < table.length) {
+    // Each pass in this loop writes one line of the grid table output.
+    rowIsEmptied[highestUnemptiedRow] = true // Provisional value. Likely to change.
+    let str = delim + "|"
+    for (let j = 0; j < numCols; j++) {
+      if (rowSpan[current[j].row][j] === 0) { continue }
+      if (colSpan[current[j].row][j] === 0) { continue }
+      const endRow = current[j].row + rowSpan[current[j].row][j] - 1
+      if (table[current[j].row][j].length > current[j].line) {
+        // Write one line from one cell.
+        str += " " + table[current[j].row][j][current[j].line] + " |"
+        current[j].line += 1
+        if (current[j].line < table[current[j].row][j].length) {
+          rowIsEmptied[endRow] = false
+        } else if (colSpan[current[j].row][j] > 1) {
+          // We're in a wide cell.
+          // Check for a collision between a text "|" and a cell border.
+          let posBorder = 0
+          for (let k = 0; k < j + colSpan[current[j].row][j] - 1; k++) {
+            posBorder += colWidth[k] + 3
+            if (k >= j && str.charAt(posBorder) === "|") {
+              rowIsEmptied[endRow] = false
+              break
+            }
+          }
+        }
+      } else if (rowIsReadyForBorder[endRow]) {
+        // Write a border under one cell.
+        if (j === 0) {
+          str = delim + "+"
+        } else if (str.charAt(delim.length) === "|") {
+          // Character "┤" indicates a row border location.
+          str = delim + "┤" + str.slice(delim.length + 1)
+        }
+        const isHeading = numRowsInHeading === endRow + 1
+        let border = "+"
+        for (let k = 0; k < colSpan[current[j].row][j]; k++) {
+          border +=  (isHeading ? "=" : "-").repeat(colWidth[j + k] + 2) + "+"
+        }
+        str = str.slice(0, -1) + border
+      } else {
+        // Other columns are still writing content from this table row.
+        // We can't write a bottom border yet, so write a blank line into one cell.
+        for (let k = 0; k < colSpan[current[j].row][j]; k++) {
+          const corner = k === colSpan[current[j].row][j] - 1 ? "|" : " "
+          str += " ".repeat(colWidth[j + k] + 2) + corner
+        }
+      }
+    }
+    if (rowIsReadyForBorder[highestUnemptiedRow]){
+      // We just wrote a bottom border. Change the references to the next table row.
+      for (let j = 0; j < numCols; j++) {
+        if (current[j].row + rowSpan[current[j].row][j] - 1 === highestUnemptiedRow) {
+          current[j].line = 0
+          current[j].row += rowSpan[current[j].row][j]
+        }
+      }
+      highestUnemptiedRow += 1
+    } else if (rowIsEmptied[highestUnemptiedRow]) {
+      // The next pass will write a bottom border.
+      rowIsReadyForBorder[highestUnemptiedRow] = true
+    }
+    lines.push(str)
+  }
+  return lines.join("\n")
 }
