@@ -1,3 +1,4 @@
+import { dt } from "./constants"
 import { parse } from "./parser"
 import { insertOneHurmetVar } from "./insertOneHurmetVar"
 import { prepareStatement } from "./prepareStatement"
@@ -6,7 +7,6 @@ import { evaluate } from "./evaluate"
 import { scanModule } from "./module"
 import { DataFrame } from "./dataframe"
 import { Tbl } from "./table"
-import { dt } from "./constants"
 import { clone, addTextEscapes } from "./utils"
 
 /*
@@ -221,6 +221,13 @@ const proceedAfterFetch = (
       }
     })
 
+    // Hoist any user-defined functions located below the selection.
+    doc.nodesBetween(curPos + 1, doc.content.size, function(node, pos) {
+      if (node.type.name === "calculation" && node.attrs.dtype === dt.MODULE) {
+        insertOneHurmetVar(hurmetVars, node.attrs)
+      }
+    })
+
     // Calculate the current node.
     if (!fetchRegEx.test(nodeAttrs.entry)) {
       // This is the typical calculation statement. We'll evalutate it.
@@ -340,8 +347,11 @@ export function updateCalculations(
         if (fetchRegEx.test(entry)) {
           urls.push(urlFromEntry(entry))
           fetchPositions.push(pos)
+        } else if (/^function /.test(entry)) {
+          node.attrs = prepareStatement(entry, doc.attrs.decimalFormat)
+          insertOneHurmetVar(hurmetVars, node.attrs)
         }
-      } else if (node.attrs.isFetch) {
+      } else if (node.attrs.isFetch || (node.attrs.dtype && node.attrs.dtype === dt.MODULE)) {
         insertOneHurmetVar(hurmetVars, node.attrs)
       }
     })
