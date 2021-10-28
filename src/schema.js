@@ -37,7 +37,6 @@ function setCellAttrs(node, extraAttrs) {
 }
 
 const functionRegEx = / *function /
-const paraClasses = ["indented", "centered", "hidden", "folded"]
  
 // :: Object
 // [Specs](#model.NodeSpec) for the nodes defined in this schema.
@@ -62,37 +61,22 @@ export const nodes = {
     toDOM() { return ["p", 0] }
   },
 
-  //:: NodeSpec A paragraph indented from its parent.
-  indented_paragraph: {
+  // An indented div.
+  indented_div: {
+    content: "block+",
     group: "block",
-    content: "inline*",
-    toDOM () { return ['p', { class: 'indented' }, 0] },
-    // Set priority higher than 50, or an HTML page won't get to this rule.
-    parseDOM: [{tag: "p.indented", priority: 80}]
+    defining: true,
+	  parseDOM: [{tag: "div.indented"}],
+    toDOM() { return ['div', { class: 'indented' }, 0] }
   },
 
-  //:: NodeSpec A center-aligned paragraph.
-  centered_paragraph: {
+  //:: NodeSpec An center-aligned div.
+  centered_div: {
+    content: "block+",
     group: "block",
-    content: "inline*",
-    toDOM () { return ['p', { class: 'centered' }, 0] },
-    parseDOM: [{tag: "p.centered", priority: 80}],
-  },
-
-  //:: NodeSpec A paragraph that is folded to disploy only its first line.
-  folded_paragraph: {
-    group: "block",
-    content: "inline*",
-    toDOM () { return ['p', { class: 'folded' }, 0] },
-    parseDOM: [{tag: "p.folded", priority: 80}],
-  },
-
-  //:: NodeSpec A paragraph that does not get printed.
-  hidden_paragraph: {
-    group: "block",
-    content: "inline*",
-    toDOM () { return ['p', { class: 'hidden' }, 0] },
-    parseDOM: [{tag: "p.hidden", priority: 80}],
+    defining: true,
+    parseDOM: [{tag: "div.centered"}],
+    toDOM () { return ['div', { class: 'centered' }, 0] },
   },
 
   // :: NodeSpec A blockquote (`<blockquote>`) wrapping one or more blocks.
