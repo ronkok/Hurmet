@@ -279,6 +279,8 @@ const TABLES = (function() {
     };
   };
 
+  const headerRegEx = /^\+:?=/
+
   const parseGridTable = function() {
     return function(capture, state) {
       const topBorder = capture[2]
@@ -290,7 +292,7 @@ const TABLES = (function() {
       let headerExists = false
       let headerSepLine = lines.length + 10
       for (let i = 0; i < lines.length; i++) {
-        if (lines[i].charAt(0) === "+" && lines[i].indexOf("=") > -1) {
+        if (headerRegEx.test(lines[i])) {
           headerExists = true
           headerSepLine = i
           break
@@ -467,7 +469,7 @@ const parseTextMark = (capture, state, mark) => {
   return text
 }
 
-const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<!--[\w,. ]*-->[^\n]*\n|<\/?(?:body|details|div(?: [^>]+)?|!DOCTYPE[a-z ]*|html[a-z ="]*|br|dl(?: class="[a-z-]+")?|li|main|nav|ol|ul(?: class="[a-z-]+")?)\/?>[^\n]*?(?:\n|$))/
+const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<!--[\w,. ]*-->[^\n]*\n|<\/?(?:body|details|div(?: [^>]+)?|!DOCTYPE[a-z ]*|html[a-z ="]*|br|dl(?: class="[a-z-]+")?|li|main[a-z\- ="]*|nav|ol|ul(?: [^>]+)?)\/?>[^\n]*?(?:\n|$))/
 const divType = { C: "centered_div", H: "header", "i": "indented_div" }
 
 // Rules must be applied in a specific order, so use a Map instead of an object.
@@ -702,7 +704,7 @@ rules.set("calculation", {
 });
 rules.set("tex", {
   isLeaf: true,
-  match: anyScopeRegex(/^(?:\$(`+)([\s\S]*?[^`])\1(?!`)|\$\$\n((?:\\[\s\S]|[^\\])+?)\n\$\$)/),
+  match: anyScopeRegex(/^(?:\$(`+)([\s\S]*?[^`])\1(?!`)|\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$)/),
   parse: function(capture, state) {
     if (capture[2]) {
       const tex = capture[2].trim().replace(/\n/g, " ")
@@ -757,6 +759,18 @@ rules.set("refimage", {
     });
   }
 });
+rules.set("code", {
+  isLeaf: true,
+  match: inlineRegex(/^(`+)([\s\S]*?[^`])\1(?!`)/),
+  parse: function(capture, state) {
+    const text = capture[2].trim()
+    return [{ type: "text", text, marks: [{ type: "code" }] }]
+/*    state.inCode = true
+    const code = parseTextMark(text, state, "code" )
+    state.inCode = false
+    return code */
+  }
+});
 rules.set("em", {
   isLeaf: true,
   match: inlineRegex(/^_((?:\\[\s\S]|[^\\])+?)_/),
@@ -804,17 +818,6 @@ rules.set("highlight", {
   match: inlineRegex(/^<mark>([\s\S]*?)<\/mark>/),
   parse: function(capture, state) {
     return parseTextMark(capture[1], state, "highlight" )
-  }
-});
-rules.set("code", {
-  isLeaf: true,
-  match: inlineRegex(/^(`+)([\s\S]*?[^`])\1(?!`)/),
-  parse: function(capture, state) {
-    const text = capture[2].trim()
-    state.inCode = true
-    const code = parseTextMark(text, state, "code" )
-    state.inCode = false
-    return code
   }
 });
 rules.set("hard_break", {

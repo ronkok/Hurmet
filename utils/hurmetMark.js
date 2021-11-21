@@ -80,7 +80,7 @@ const nodes = {
     let tag = "h" + node.attrs.level
     tag = htmlTag(tag, text)
     // Add id so others can link to it.
-    tag = tag.slice(0, 3) + " id='" + text.toLowerCase().replace(/\s+/g, '-') + "'" + tag.slice(3)
+    tag = tag.slice(0, 3) + " id='" + text.toLowerCase().replace(/,/g, "").replace(/\s+/g, '-') + "'" + tag.slice(3)
     return tag + "\n"
   },
   paragraph(node)  { return htmlTag("p", output(node.content)) + "\n" },
