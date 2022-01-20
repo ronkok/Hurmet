@@ -297,8 +297,8 @@ Display Mode
 | `(a + b)/c`   | ¢`(a + b)/c`   | `longVarName`                | ¢`longVarName`                |
 | `a//b`        | ¢`a//b`        | `"A string."`                | ¢`"A string."`                |
 | `a///b`       | ¢`a///b`       | `'5 N.m/s2'`                 | ¢`'5 N.m/s2'`                 |
-| `x^23`        | ¢`x^23`        | `\(a, b; c, d)`              | ¢`\(a, b; c, d)}`             |
-| `x^(a+b)`     | ¢`x^(a+b)`     | `\[a, b; c, d]`              | ¢`\[a, b; c, d]`              |
+| `x^23`        | ¢`x^23`        | `\\(a, b; c, d)`             | ¢`\\(a, b; c, d)}`            |
+| `x^(a+b)`     | ¢`x^(a+b)`     | `\\[a, b; c, d]`             | ¢`\\[a, b; c, d]`             |
 | `x_subscript` | ¢`x_subscript` | `{:a, b; c, d:}`             | ¢`{:a, b; c, d:}`             |
 | `x_(a+b)`     | ¢`x_(a+b)`     | `[1:4] = ?`                  | ¢`[1, 2, 3, 4]`               |
 | `x′`          | ¢`x′`          | `[1:2:5] = ?`                | ¢`[1, 3, 5]`                  |
@@ -398,8 +398,8 @@ The font corrections, e.g., `bb …` work on any letter from A to Z or a to z.
 |                                      | s[3:]                 | cde               |
 +--------------------------------------+-----------------------+-------------------+
 | Vector\                              | 𝐕[2]\                | 2\                |
-| 𝐕 = ¢`\[1, 2, 3, 4, 5]`             | 𝐕[2:4]\              | ¢`[2, 3, 4]`\     |
-|                                      | 𝐕[3:]                | ¢`[3, 4, 5]`      |
+| 𝐕 = ¢`\[1, 2, 3, 4, 5]`             | 𝐕[2:4]\              | ¢`\[2, 3, 4]`\    |
+|                                      | 𝐕[3:]                | ¢`\[3, 4, 5]`     |
 +--------------------------------------+-----------------------+-------------------+
 | Matrix\                              | 𝐌[2, 3]\             | 6\                |
 | 𝐌 = ¢`\(1, 2, 3; 4, 5, 6; 7, 8, 9)` | 𝐌[3,]\               | ¢`\[7, 8, 9]`\    |
@@ -666,13 +666,13 @@ Quantity
     Quantity literals are written between apostrophes, aka single straight
     quotation marks. Examples:
 
-    | Input                 | Renders as              |
-    |-----------------------|-------------------------|
-    | `'4.2 meters'`        | ¢`'4.2 meters'`         |
-    | `'-$25.10'`           | ¢`'-$25.10'`            |
-    | `'30°'`               | ¢`'30°'`                |
-    | `'10 N·m/s'`          | ¢`'10 N·m/s'`           |
-    | `'\[2.1; 15.3] feet'` | ¢`'\[2.1; 15.3] feet'`  |
+    | Input                  | Renders as              |
+    |------------------------|-------------------------|
+    | `'4.2 meters'`         | ¢`'4.2 meters'`         |
+    | `'-$25.10'`            | ¢`'-$25.10'`            |
+    | `'30°'`                | ¢`'30°'`                |
+    | `'10 N·m/s'`           | ¢`'10 N·m/s'`           |
+    | `'\\[2.1; 15.3] feet'` | ¢`'\[2.1; 15.3] feet'`  |
 
     ![single quote number or matrix or map unit-name single quote][quantity]
 
@@ -707,19 +707,19 @@ Matrix
 
     A Hurmet _vector_ is a one dimensional matrix, either a row vector or a column vector.
 
-    A matrix literal is written between delimiters, either `\( )` or `\[ ]` or
+    A matrix literal is written between delimiters, either `\\( )` or `\\[ ]` or
     `{: }`. Matrix elements are separated by commas. Matrix rows are separated by
     semi-colons. Be sure to write a space after comma separators so they are not
     confused with decimals inside a number. Here are some matrix examples:
 
-    | Input           | Renders as       |
-    |-----------------|------------------|
-    | `\(1, 0; 0, 1)` | ¢`\(1, 0; 0, 1)` |
-    | `\[2.1; -15.3]` | ¢`\[2.1; -15.3]` |
-    | `{:1, 0; 0, 1}` | ¢`{:1, 0; 0, 1}` |
+    | Input            | Renders as       |
+    |------------------|------------------|
+    | `\\(1, 0; 0, 1)` | ¢`\(1, 0; 0, 1)` |
+    | `\\[2.1; -15.3]` | ¢`\[2.1; -15.3]` |
+    | `{:1, 0; 0, 1}`  | ¢`{:1, 0; 0, 1}` |
 
     Another way to create a Hurmet vector is to write a range of numbers between
-    brackets; the form is <span style="white-space: nowrap">`[start:step:end]`</span>.
+    brackets; the form is `[start:step:end]`.
     A Hurmet calculation of that form will return a row vector with every number
     in the range. The step size is optional (default = 1). Examples:
 
@@ -875,7 +875,7 @@ Data Frame
     | This call:                   | … will return:                               |
     |------------------------------|----------------------------------------------|
     | `wideFlanges.W10X49.A`       | ¢`'14.4 in2'`                                |
-    | `wideFlanges\["W10X49"]["A"]`| ¢`'14.4 in2'`                                |
+    | `wideFlanges["W10X49"]["A"]` | ¢`'14.4 in2'`                                |
     | `wideFlanges["W10X49", "A"]` | ¢`'14.4 in2'`                                |
     | `wideFlanges["W10X49", 1:2]` | ¢`{"name": "W10X49"; "weight": '49 lbf/ft'}` |
     | `wideFlanges[1:2, "A"]`      | ¢`\[26.5; 19.1]`                             |
@@ -889,9 +889,9 @@ Data Frame
     is a valid [identifier](#identifiers).
 
     Here are calls that can return multiple values:\
-        `A, S_x = wideFlanges.W8X31["A", "Sx"] = !!`, or\
-        `A, S_x = wideFlanges["W8X31"]["A", "Sx"] = !!`, or\
-        `A, S_x = wideFlanges["W10X49", \["A", "Sx"]] = !!`\
+        `A, S\_x = wideFlanges.W8X31["A", "Sx"] = !!`, or\
+        `A, S\_x = wideFlanges\["W8X31"]["A", "Sx"] = !!`, or\
+        `A, S\_x = wideFlanges["W10X49", \\["A", "Sx"]] = !!`\
     Multiple returns must use the `!!` display selector, for now.
 
     For structural engineers, I’ve put some useful data frames on GitHub. There are
@@ -1114,7 +1114,7 @@ _j_
 | ¬             |  if ¬ _a_            | Logical not                                 |
 +---------------+----------------------+---------------------------------------------+
 | :             | {"a": 10}\           | Key:value separator if within a dictionary. |
-|               | 𝐕\[2:3\]             | Range separator otherwise.                  |
+|               | 𝐕\[2:3\]            | Range separator otherwise.                  |
 |               | for _i_ in 1:3       |                                             |
 +---------------+----------------------+---------------------------------------------+
 {#op-table .grid width=35em}
