@@ -872,13 +872,13 @@ Data Frame
     You can also call an individual element, a column, or a group of elements. The
     index can be either a number or a string. Examples:
 
-    | This call:                   | … will return:                               |
-    |------------------------------|----------------------------------------------|
-    | `wideFlanges.W10X49.A`       | ¢`'14.4 in2'`                                |
-    | `wideFlanges["W10X49"]["A"]` | ¢`'14.4 in2'`                                |
-    | `wideFlanges["W10X49", "A"]` | ¢`'14.4 in2'`                                |
-    | `wideFlanges["W10X49", 1:2]` | ¢`{"name": "W10X49"; "weight": '49 lbf/ft'}` |
-    | `wideFlanges[1:2, "A"]`      | ¢`\[26.5; 19.1]`                             |
+    | This call:                    | … will return:                               |
+    |-------------------------------|----------------------------------------------|
+    | `wideFlanges.W10X49.A`        | ¢`'14.4 in2'`                                |
+    | `wideFlanges\["W10X49"]["A"]` | ¢`'14.4 in2'`                                |
+    | `wideFlanges["W10X49", "A"]`  | ¢`'14.4 in2'`                                |
+    | `wideFlanges["W10X49", 1:2]`  | ¢`{"name": "W10X49"; "weight": '49 lbf/ft'}` |
+    | `wideFlanges[1:2, "A"]`       | ¢`\[26.5; 19.1]`                             |
     {.table-no-wrap}
 
     Hurmet will return a <br> ¢`{"simple type" if "you call a single cell, as in
