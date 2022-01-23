@@ -88,7 +88,7 @@ const display = (m, formatSpec, decimalFormat) => {
 const displayAlt = (m, formatSpec, decimalFormat) => {
   let str = ""
   if (m.dtype & dt.MATRIX) {
-    str += "\\("
+    str += "("
     const numRows = m.value.length
     const numCols = m.value[1].length
     for (let i = 0; i < numRows; i++) {
@@ -100,7 +100,7 @@ const displayAlt = (m, formatSpec, decimalFormat) => {
     str = str.slice(0, -2).trim()
     str += ")"
   } else {
-    str += "\\["
+    str += "["
     const argSep = (m.dtype & dt.ROWVECTOR) ? ", " : "; "
     if (m.value.plain) {
       const numArgs = m.value.plain.length

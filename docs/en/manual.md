@@ -297,8 +297,8 @@ Display Mode
 | `(a + b)/c`   | ¢`(a + b)/c`   | `longVarName`                | ¢`longVarName`                |
 | `a//b`        | ¢`a//b`        | `"A string."`                | ¢`"A string."`                |
 | `a///b`       | ¢`a///b`       | `'5 N.m/s2'`                 | ¢`'5 N.m/s2'`                 |
-| `x^23`        | ¢`x^23`        | `\\(a, b; c, d)`             | ¢`\\(a, b; c, d)}`            |
-| `x^(a+b)`     | ¢`x^(a+b)`     | `\\[a, b; c, d]`             | ¢`\\[a, b; c, d]`             |
+| `x^23`        | ¢`x^23`        | `(a, b; c, d)`               | ¢`(a, b; c, d)}`              |
+| `x^(a+b)`     | ¢`x^(a+b)`     | `[a, b; c, d]`               | ¢`[a, b; c, d]`               |
 | `x_subscript` | ¢`x_subscript` | `{:a, b; c, d:}`             | ¢`{:a, b; c, d:}`             |
 | `x_(a+b)`     | ¢`x_(a+b)`     | `[1:4] = ?`                  | ¢`[1, 2, 3, 4]`               |
 | `x′`          | ¢`x′`          | `[1:2:5] = ?`                | ¢`[1, 3, 5]`                  |
@@ -398,12 +398,12 @@ The font corrections, e.g., `bb …` work on any letter from A to Z or a to z.
 |                                      | s[3:]                 | cde               |
 +--------------------------------------+-----------------------+-------------------+
 | Vector\                              | 𝐕[2]\                | 2\                |
-| 𝐕 = ¢`\[1, 2, 3, 4, 5]`             | 𝐕[2:4]\              | ¢`\[2, 3, 4]`\    |
-|                                      | 𝐕[3:]                | ¢`\[3, 4, 5]`     |
+| 𝐕 = ¢`[1, 2, 3, 4, 5]`              | 𝐕[2:4]\              | ¢`[2, 3, 4]`\     |
+|                                      | 𝐕[3:]                | ¢`[3, 4, 5]`      |
 +--------------------------------------+-----------------------+-------------------+
 | Matrix\                              | 𝐌[2, 3]\             | 6\                |
-| 𝐌 = ¢`\(1, 2, 3; 4, 5, 6; 7, 8, 9)` | 𝐌[3,]\               | ¢`\[7, 8, 9]`\    |
-|                                      | 𝐌[2:3, 1:2]          | ¢`\[4, 5; 7, 8]`  |
+| 𝐌 = ¢`\(1, 2, 3; 4, 5, 6; 7, 8, 9)` | 𝐌[3,]\               | ¢`[7, 8, 9]`\     |
+|                                      | 𝐌[2:3, 1:2]          | ¢`[4, 5; 7, 8]`   |
 +--------------------------------------+-----------------------+-------------------+
 | Dictionary\                          | D.h\                  | 9\.13\            |
 | D = ¢`{ "w": 31, "h": 9.13 }`        | D["h"]\               | 9\.13\            |
@@ -672,7 +672,7 @@ Quantity
     | `'-$25.10'`            | ¢`'-$25.10'`            |
     | `'30°'`                | ¢`'30°'`                |
     | `'10 N·m/s'`           | ¢`'10 N·m/s'`           |
-    | `'\\[2.1; 15.3] feet'` | ¢`'\[2.1; 15.3] feet'`  |
+    | `'[2.1; 15.3] feet'`   | ¢`'[2.1; 15.3] feet'`   |
 
     ![single quote number or matrix or map unit-name single quote][quantity]
 
@@ -707,15 +707,15 @@ Matrix
 
     A Hurmet _vector_ is a one dimensional matrix, either a row vector or a column vector.
 
-    A matrix literal is written between delimiters, either `\\( )` or `\\[ ]` or
+    A matrix literal is written between delimiters, either `( )` or `[ ]` or
     `{: }`. Matrix elements are separated by commas. Matrix rows are separated by
     semi-colons. Be sure to write a space after comma separators so they are not
     confused with decimals inside a number. Here are some matrix examples:
 
     | Input            | Renders as       |
     |------------------|------------------|
-    | `\\(1, 0; 0, 1)` | ¢`\(1, 0; 0, 1)` |
-    | `\\[2.1; -15.3]` | ¢`\[2.1; -15.3]` |
+    | `(1, 0; 0, 1)`   | ¢`(1, 0; 0, 1)` |
+    | `[2.1; -15.3]`   | ¢`[2.1; -15.3]` |
     | `{:1, 0; 0, 1}`  | ¢`{:1, 0; 0, 1}` |
 
     Another way to create a Hurmet vector is to write a range of numbers between
@@ -725,8 +725,8 @@ Matrix
 
     |    Input      |       Result             |
     |---------------|--------------------------|
-    | `[2:5] = ?`   | ¢`[2:5] = \[2, 3, 4, 5]` |
-    | `[1:2:5] = ?` | ¢`[1:2:5] = \[1, 3, 5]`  |
+    | `[2:5] = ?`   | ¢`[2:5] = [2, 3, 4, 5]` |
+    | `[1:2:5] = ?` | ¢`[1:2:5] = [1, 3, 5]`  |
 
     You can call individual elements with index integers between brackets, as in
     `𝐕[5]` or `𝐌[1, 3]`. You can use a variable name for the index if the variable
@@ -736,6 +736,9 @@ Matrix
     Entire rows or columns can be called by omitting an index, as in `𝐌[2,]` or
     `𝐌[,1]`. Hurmet indexes are one-based.
 
+    To write a numeric interval instead of a matrix, write the same thing, but with
+    no spaces: `[1,2,3…10]`
+
 Matrix Operations
 
 :   All the usual math operators can be applied to a numeric matrix. The operators
@@ -743,9 +746,9 @@ Matrix Operations
     pass a matrix to most functions, Hurmet will do an element-by-element calculation
     and return a matrix, as in:
 
-    i> ¢`𝐡 = \[5; 10; 15]`
+    i> ¢`𝐡 = [5; 10; 15]`
 
-       ¢`𝐱 = 2 𝐡 + 1 = \color(blue)(2) \[5; 10; 15] + 1 \color(black) = \[11; 21; 31]`
+       ¢`𝐱 = 2 𝐡 + 1 = \color(blue)(2) [5; 10; 15] + 1 \color(black) = [11; 21; 31]`
 
     Spreadsheet calculations can often be replaced by calulations using vectors, as
     above. When you really need to get things right, it’s great to be able to see
@@ -878,7 +881,7 @@ Data Frame
     | `wideFlanges\["W10X49"]["A"]` | ¢`'14.4 in2'`                                |
     | `wideFlanges["W10X49", "A"]`  | ¢`'14.4 in2'`                                |
     | `wideFlanges["W10X49", 1:2]`  | ¢`{"name": "W10X49"; "weight": '49 lbf/ft'}` |
-    | `wideFlanges[1:2, "A"]`       | ¢`\[26.5; 19.1]`                             |
+    | `wideFlanges[1:2, "A"]`       | ¢`[26.5; 19.1]`                              |
     {.table-no-wrap}
 
     Hurmet will return a <br> ¢`{"simple type" if "you call a single cell, as in
@@ -891,7 +894,7 @@ Data Frame
     Here are calls that can return multiple values:\
         `A, S\_x = wideFlanges.W8X31["A", "Sx"] = !!`, or\
         `A, S\_x = wideFlanges\["W8X31"]["A", "Sx"] = !!`, or\
-        `A, S\_x = wideFlanges["W10X49", \\["A", "Sx"]] = !!`\
+        `A, S\_x = wideFlanges["W10X49", ["A", "Sx"]] = !!`\
     Multiple returns must use the `!!` display selector, for now.
 
     For structural engineers, I’ve put some useful data frames on GitHub. There are
@@ -1818,7 +1821,7 @@ values to a variable. Such a module would have text that might look like this:
 ```
 E = '29000 ksi'
 
-v = \[4, 6, 8]
+v = [4, 6, 8]
 
 function multiply(a, b)
     return a × b

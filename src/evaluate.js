@@ -367,9 +367,9 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             : allZeros
           quotient.unit = Object.freeze(unit)
           const [shape1, shape2, _] = binaryShapesOf(o1, o2)
-          if (isDivByZero(quotient.value, shapeOf(quotient))) { return errorOprnd("DIV") }
           quotient.value = Operators.binary[shape1][shape2]["divide"](o1.value, o2.value)
           quotient.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, "divide")
+          if (isDivByZero(quotient.value, shapeOf(quotient))) { return errorOprnd("DIV") }
           stack.push(Object.freeze(quotient))
           break
         }

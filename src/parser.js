@@ -165,14 +165,13 @@ export const parseQuantityLiteral = (str, decimalFormat, tokenSep, isCalc) => {
     numStr = str.substring(0, str.charAt(1) === c0 ? 2 : 1)
     tex = currencySymbol + "\\text{" + numStr + "}"
 
-  } else if (/^({|\\[([])/.test(str)) {
+  } else if ("([{".indexOf(c0) > -1) {
     // A matrix or dictionary occupies the place normally held by a number.
-    const c1 = str.slice(1, 2)
     const endChar = c0 === "{"
       ? "}"
-      : c1 === "["
+      : c0 === "["
       ? "]"
-      : c1 === "("
+      : c0 === "("
       ? ")"
       : "}"
     const pos = str.indexOf(endChar)
@@ -357,7 +356,7 @@ const nextCharIsFactor = (str, tokenType) => {
   if (st.length > 0) {
     if (fc === "|" || fc === "‖") {
       // TODO: Work out left/right
-    } else if (/^([{√∛∜0-9]|\\[([])/.test(st) &&
+    } else if (/^[({[√∛∜0-9]/.test(st) &&
       (isIn(tokenType, [tt.ORD, tt.VAR, tt.NUM, tt.LONGVAR, tt.RIGHTBRACKET,
         tt.QUANTITY, tt.SUPCHAR]))) {
       return true
@@ -559,6 +558,7 @@ export const parse = (
           if (op.closeDelim === "\\rvert " && closeDelim) { op.closeDelim = closeDelim }
 
           if (delim.delimType === dMATRIX) {
+            tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + 1)
             op.closeDelim = delim.close
           } else if (delim.delimType === dCASES) {
             tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + 2)
@@ -1191,7 +1191,6 @@ export const parse = (
         popTexTokens(2, okToAppend)
         const isPrecededByDiv = prevToken.ttype === tt.DIV
         let isFuncParen = false
-        const isMatrixDelim = ["\\(", "\\[", "\\{", "{:"].includes(token.input)
 
         const texStackItem = {
           prec: 0,
@@ -1206,11 +1205,6 @@ export const parse = (
           texStackItem.closeDelim = ""
         } else if (token.input === "(" && op.ttype === tt.BINARY) {
           texStackItem.closeDelim = ""
-        } else if (isMatrixDelim) {
-          tex += token.output
-          if (delims.length > 0) {
-            delims[delims.length - 1].isTall = true
-          }
         } else {
           texStackItem.closeDelim = token.closeDelim
           isFuncParen = (token.input === "(" || token.input === "[") &&
@@ -1243,8 +1237,6 @@ export const parse = (
         if (isFuncParen) {
           delim.delimType = dFUNCTION
           delim.name = pendingFunctionName
-        } else if (isMatrixDelim) {
-          delim.delimType = dMATRIX
         } else if (prevToken.ttype === tt.SUB) {
           delim.delimType = dSUBSCRIPT
           delim.name = "("
@@ -1280,7 +1272,22 @@ export const parse = (
           tex += token.output + " "
         } else {
           const delim = delims[delims.length - 1]
-          if (delim.delimType === dMATRIX && token.input === ",") {
+          if (delim.delimType === dPAREN && isFollowedBySpace &&
+            !(token.input === "," && delim.name === "{")) {
+            delim.delimType = dMATRIX
+            const ch = delim.name === "["
+              ? "b"
+              : delim.name === "("
+              ? "p"
+              : delim.name === "{:"
+              ? ""
+              : "B"
+            delim.open = `\\begin{${ch}matrix}`
+            delim.close = `\\end{${ch}matrix}`
+            delim.isTall = true
+            token.output = token.input === "," ? "&" : "\\\\"
+          } else if (delim.delimType === dMATRIX && token.input === ",") {
+//          if (delim.delimType === dMATRIX && token.input === ",") {
             token.output = "&"
           } else if (delim.delimType === dDICTIONARY && token.input === ";") {
             token.output = "\\\\"

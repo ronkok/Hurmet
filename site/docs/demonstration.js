@@ -10,8 +10,8 @@ const demonstration = (function(exports) {
   hurmet.calculate(`L = '3.1 m'`, hurmetVars)
   hurmet.calculate(`name = "James"`, hurmetVars)
   hurmet.calculate(`s = "abcde"`, hurmetVars)
-  hurmet.calculate(`𝐕 = \\[1, 2, 3, 4, 5]`, hurmetVars)
-  hurmet.calculate(`𝐌 = \\(1, 2, 3; 4, 5, 6; 7, 8, 9)`, hurmetVars)
+  hurmet.calculate(`𝐕 = [1, 2, 3, 4, 5]`, hurmetVars)
+  hurmet.calculate(`𝐌 = (1, 2, 3; 4, 5, 6; 7, 8, 9)`, hurmetVars)
   hurmet.calculate(`D = {"w": 31, "h": 9.13}`, hurmetVars)
   const df = "``" + `name,w,area\n,in,in²\nA,4,10\nB,6,22` + "``"
   hurmet.calculate(`DF =` + df, hurmetVars)
@@ -22,7 +22,7 @@ const demonstration = (function(exports) {
   hurmet.calculate(`barArea =` + dict, hurmetVars)
   const module = `E = '29000 ksi'
 
-  v = \\[4, 6, 8]
+  v = [4, 6, 8]
   
   function multiply(a, b)
       return a × b`
@@ -58,7 +58,7 @@ const demonstration = (function(exports) {
     "variable-container": "b = 2 L = ?",
     "greek-container": "theta + x dot + f''",
     "q-container": "2 × '3.1 m' = ?? ft",
-    "markup": "\\(a, b; c, d)",
+    "markup": "(a, b; c, d)",
     "auto-correct": "theta hat <= bb M xx sqrt 3 . f''",
     "display-selectors": "b = 2 L = ?? ft",
     "accessor-container": "𝐕[2] = ?",
@@ -69,8 +69,8 @@ const demonstration = (function(exports) {
     "number-rr": "33 / 2.45 × 3.2% + 3 7/8 + 3.1e1 = ?",
     "complex-number": "4∠30° = ?",
     "quantity": "'9.807 m/s²' = ?? ft/s²",
-    "matrix": "\\[2.1; -15.3]",
-    "matrix-mult": "\\[1, 2, 3] \\[3; 2; 1] = ?",
+    "matrix": "[2.1; -15.3]",
+    "matrix-mult": "[1, 2, 3] [3; 2; 1] = ?",
     "data-frame": "wideFlanges.W10X49.A = ?? in2",
     "dictionary": 'A = barArea["#4"] = ?',
     "functions": "sin(π/6) = ?",

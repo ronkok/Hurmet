@@ -240,12 +240,9 @@ const miscSymbols = Object.freeze({
   "\u2211": ["\u2211", "\u2211", tt.UNDEROVER, ""], // \sum
 
   "(": ["(", "(", tt.LEFTBRACKET, ")"],
-  "\\(": ["\\(", "\\begin{pmatrix}", tt.LEFTBRACKET, "\\end{pmatrix}"],
   "[": ["[", "[", tt.LEFTBRACKET, "]"],
-  "\\[": ["\\[", "\\begin{bmatrix}", tt.LEFTBRACKET, "\\end{bmatrix}"],
   "{": ["{", "\\{", tt.LEFTBRACKET, "\\}"],
-  "\\{": ["\\{", "\\begin{Bmatrix}", tt.LEFTBRACKET, "\\end{Bmatrix}"],
-  "{:": ["{:", "\\begin{matrix}", tt.LEFTBRACKET, "\\end{matrix}"],
+  "{:": ["{:", "{", tt.LEFTBRACKET, "}"],
   "⟨": ["⟨", "⟨", tt.LEFTBRACKET, "⟩"],
   ")": [")", ")", tt.RIGHTBRACKET, ""],
   "]": ["]", "]", tt.RIGHTBRACKET, ""],
@@ -296,6 +293,7 @@ const miscSymbols = Object.freeze({
   "˽": ["˽", "~", tt.SPACE, ""],  // "~" is a no-break space in LaTeX.
   "\\,": ["\\,", ",\\:", tt.SEP, ""], // escape character to enable non-matrix comma in parens
   "\\;": ["\\;", ";\\:", tt.SEP, ""],
+  "…": ["…", "…", tt.ORD, ""],
 
   ":": [":", ":", tt.COLON, ""], // key:value or range separator
   ",": [",", ",\\:", tt.SEP, ""], // function argument separator
