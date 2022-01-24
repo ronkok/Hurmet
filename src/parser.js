@@ -1287,7 +1287,6 @@ export const parse = (
             delim.isTall = true
             token.output = token.input === "," ? "&" : "\\\\"
           } else if (delim.delimType === dMATRIX && token.input === ",") {
-//          if (delim.delimType === dMATRIX && token.input === ",") {
             token.output = "&"
           } else if (delim.delimType === dDICTIONARY && token.input === ";") {
             token.output = "\\\\"
