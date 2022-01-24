@@ -806,8 +806,7 @@ Data Frame
     values.)
     
     Instead of commas, Hurmet data is separated by either tabs or pipes, i.e., `|`.
-    Numbers must use a dot decimal. The second row may contain units of measure. The
-    first column will be indexed if the first word is “name” or “index”.
+    Numbers must use a dot decimal. The second row may contain units of measure.
 
     Here’s an example of CSV input:
 
