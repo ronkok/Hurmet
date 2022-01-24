@@ -182,6 +182,7 @@
     iHigh = length(array)
     if iHigh = 0
         return false
+    end
     iLow = 1
     while iLow < iHigh
         i = ⎿(iLow + iHigh) / 2⏌
@@ -189,7 +190,9 @@
             iLow = i + 1
         else
             iHigh = i
-    return item = array[iLow]"></span>
+        end
+    return item = array[iLow]
+end"></span>
 <p></p>
 <p>After the function is defined, you can call it like any other function.</p>
 <p><span class="hurmet-calc" data-entry="b = isIn(5, [1, 3, 5, 8, 9]) = ?"></span></p>

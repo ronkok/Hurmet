@@ -76,7 +76,7 @@ export function openMathPrompt(options) {
           token: ["keyword", null, "variable-2"] },
         { regex: /(')([$£¥₨₪€])?(-?(?:[0-9]+(?: [0-9]+\/[0-9]+|(?:\.[0-9]+)?(?:e[+-]?[0-9]+)?)?|0x[0-9A-Fa-f]+)) *([^']*)(')/,
           token: ["attribute", "attribute", "number", "attribute", "attribute"] },
-        { regex: /(?:function|export|return|if|for|in|while|else|otherwise|and|or|modulo|break|echo|raise)\b/,
+        { regex: /(?:function|export|return|if|for|in|while|else|otherwise|and|or|modulo|break|echo|raise|end)\b/,
           token: "keyword" },
         { regex: /π|ℏ|j|true|false/, token: "atom" },
         { regex: /(-?)(?:([0-9]+)(?: ([0-9]+)\/([0-9]+)|(?:\.([0-9]+))?(?:e([+-]?[0-9]+))?)|(0x[0-9A-Fa-f]+))/,

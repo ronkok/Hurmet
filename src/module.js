@@ -6,7 +6,7 @@ import { parse } from "./parser.js"
 import { errorOprnd } from "./error.js"
 
 const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/
-const keywordRegEx = /^(if|else|else if|return|raise|while|for|break|echo)\b/
+const keywordRegEx = /^(if|else|else if|return|raise|while|for|break|echo|end)\b/
 
 // If you change functionRegEx, then also change it in mathprompt.js.
 // It isn't called from there in order to avoid duplicating Hurmet code inside ProseMirror.js.
@@ -41,7 +41,6 @@ const stripComment = str => {
 
 export const scanModule = (str, decimalFormat) => {
   // Scan the code and break it down into individual lines of code.
-  // Keep track of indentation and write a "end" stype when indentation decreases.
   // Assemble the lines into functions and assign each function to parent.
   const parent = Object.create(null)
 
@@ -93,17 +92,10 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
     statements: []
   }
 
-  let level = 1 // nesting level of the code blocks
-  let indent = /^ */.exec(lines[startLineNum])[0].length
-  const indentAtLevel = []
-  indentAtLevel.push(indent) // The indentation at level 0.
-  let pendingIndent = true
   const stackOfCtrls = []
-
   let expression = ""
   let prevLineEndedInContinuation = false
   let prevLine = ""
-  let prevIndent = 0
   let name = ""
   let isStatement = false
 
@@ -116,8 +108,6 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
       line = prevLine.slice(-1) === ";" && "})]".indexOf(line.charAt(0)) > -1
         ? prevLine.slice(0, -1).trim() + line
         : prevLine + line
-    } else {
-      indent = /^ */.exec(lines[i])[0].length
     }
 
     // Line continuation characters are: { ( [ , ; + -
@@ -131,43 +121,14 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
       continue
     }
 
-    if (indent < prevIndent) {
-      while (indent < indentAtLevel[level]) {
-        funcObj.statements.push({ name: "", rpn: "", stype: "end" })
-        indentAtLevel.pop()
-        level -= 1
-        if (stackOfCtrls.length > 0) {
-          const ctrl = stackOfCtrls[stackOfCtrls.length - 1]
-          if (indent < ctrl.indent || (indent === ctrl.indent &&
-              ctrl.type === "while" || ctrl.type === "for" ||
-              (ctrl.type === "if" && !/^\s*else\b/.test(line)))) {
-            funcObj.statements[ctrl.statementNum].endOfBlock = funcObj.statements.length - 1
-            stackOfCtrls.pop()
-          }
-        }
-      }
-      if (level === 0) {
-        return [funcObj, i - 1] // Finished the current function.
-      }
-    }
-
-    if (pendingIndent) {
-      // We're in the first line of code after a for/while/if statement.
-      // Get the current indent.
-      indentAtLevel.push(indent)
-      pendingIndent = false
-    }
 
     const keyword = keywordRegEx.exec(line)
     if (keyword) {
       name = keyword[0]
       expression = line.slice(name.length).trim()
-      if (/^``/.test(expression)) { [expression, i] = handleCSV(expression, lines, i) }
-      if ("ifwhileforelse if".indexOf(name) > -1) {
-        level += 1
-        pendingIndent = true
+      if (expression.length > 0 && /^``/.test(expression)) {
+        [expression, i] = handleCSV(expression, lines, i)
       }
-
     } else {
       if (testForStatement(line)) {
         // We have an "=" assignment operator.
@@ -189,32 +150,23 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
     const stype = isStatement ? "statement" : name
     funcObj.statements.push({ name: name, rpn: rpn, stype: stype })
     if (stype === "if" || stype === "while" || stype === "for") {
-      stackOfCtrls.push({ indent, type: stype, statementNum: funcObj.statements.length - 1 })
+      stackOfCtrls.push({ type: stype, statementNum: funcObj.statements.length - 1 })
+    } else if (stype === "end") {
+      if (stackOfCtrls.length > 0) {
+        const ctrl = stackOfCtrls[stackOfCtrls.length - 1]
+        funcObj.statements[ctrl.statementNum].endOfBlock = funcObj.statements.length - 1
+        stackOfCtrls.pop()
+      }
     }
 
     // Reset for next statement
     isStatement = false
     prevLineEndedInContinuation = false
     prevLine = ""
-    prevIndent = indent
     name = ""
     expression = ""
-
   }
 
-  // We've reached the end of the file.
-  while (indentAtLevel.length > 0) {
-    funcObj.statements.push({ name: "", rpn: "", stype: "end" })
-    indent = indentAtLevel.pop()
-    if (stackOfCtrls.length > 0) {
-      const ctrl = stackOfCtrls[stackOfCtrls.length - 1]
-      if (indent < ctrl.indent) {
-        funcObj.statements[ctrl.statementNum].endOfBlock = funcObj.statements.length - 1
-        stackOfCtrls.pop()
-      }
-    }
-
-  }
   return [funcObj, lines.length]
 }
 
