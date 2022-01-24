@@ -542,7 +542,7 @@ Variable names and function names must be written in the form of a valid _identi
     written after it. Hurmet will render the accent above the letter, as in ¢`θ̂`.
 *   Primes may be appended to the very end, as in: ¢`f_c′`.
 *   The following keywords may not be used as variable names: `π`, `j`, `ℏ`,
-    `true`, `false`, `root`, `if`, `otherwise`, `and`, `or`, `modulo`, `in`, `to`.
+    `true`, `false`, `root`, `if`, `else`, `otherwise`, `end`, `and`, `or`, `modulo`, `in`, `to`.
 
 i> ![letter letter-or-digit-or-accent prime][identifier]
 
@@ -802,10 +802,12 @@ Data Frame
     A column of numbers can be assigned a unit of measure. 
 
     Data frame literals are written between double backtick delimiters. The text
-    between the backticks must be written in CSV (which once meant comma-separated
-    values, but Hurmet uses pipe-separated values) format. Numbers must use a dot
-    decimal. The second row may contain units of measure. The first column will be
-    indexed if the first word is “name” or “index”.
+    between the backticks must be written in CSV format. (CSV once meant comma-separated
+    values.)
+    
+    Instead of commas, Hurmet data is separated by either tabs or pipes, i.e., `|`.
+    Numbers must use a dot decimal. The second row may contain units of measure. The
+    first column will be indexed if the first word is “name” or “index”.
 
     Here’s an example of CSV input:
 
@@ -1676,7 +1678,8 @@ possible to write your own functions. Example:
 
 ```
 function multiply(a, b)
-    return a × b
+  return a × b
+end
 ```
 
 Other Hurmet calculation cells can then call the function:
@@ -1711,21 +1714,18 @@ Hurmet does not support function recursion.
 
 Inside a user-defined function, Hurmet supports code blocks and some
 additional control words. That is, words such as _if_ and _else_ can control
-execution of a _block_ of statements, not just one expression. A code block is
-distinguished from other code by its indentation. That is, in a block, the
-beginning of every logical line is indented by the same amount. Example:
+execution of a _block_ of statements, not just one expression. Statements
+between the `if` statement and an `end` statement are in the block. Example:
 
 ```
 if a ≤ b
-    x = a + b²
-    y = 2 x
+  x = a + b²
+  y = 2 x
+end
 ```
 
-Indentation may be done with only with spaces, not with tabs. I usually indent
-by four spaces.
-
-A decrease in indentation is treated by Hurmet as equivalent to an `end`
-statement in some languages.
+Indentation is not significant to the parser but is very useful to humans
+reading the code. I usually indent by two spaces.
 
 <dl class="bold-term">
 
@@ -1736,11 +1736,12 @@ if else
 
     ```
     if a ≤ 4000
-        b = 0.85
+      b = 0.85
     else if a ≥ 8000
-        b = 0.65
+      b = 0.65
     else
-        b = 0.85 - (a - 4000)/20000
+      b = 0.85 - (a - 4000)/20000
+    end
     ```
 
 while
@@ -1750,9 +1751,10 @@ while
 
     ```
     while b ≠ 0
-        h = b
-        b = a modulo b
-        a = h
+      h = b
+      b = a modulo b
+      a = h
+    end
     ```
 
 for
@@ -1762,13 +1764,14 @@ for
 
     Examples:
 
-    +-------------------+----------------------------+
-    | ```               | ```                        |
-    | sum = sum + i     | reverse = ""               |
-    | for i in 1:10     | for ch in "abcdef"         |
-    |     sum = sum + i |     reverse = ch & reverse |
-    | ```               | ```                        |
-    +-------------------+----------------------------+
+    +-----------------+--------------------------+
+    | ```             | ```                      |
+    | sum = sum + i   | reverse = ""             |
+    | for i in 1:10   | for ch in "abcdef"       |
+    |   sum = sum + i |   reverse = ch & reverse |
+    | end             | ebd                      |
+    | ```             | ```                      |
+    +-----------------+--------------------------+
     {.grid}
 
     ![for index variable in range or matrix or string](../../images/for-loop-railroad.svg)
@@ -1782,8 +1785,10 @@ break
 
     ```
     for i in 1:1000000
-        if i ≥ 2
-            break
+      if i ≥ 2
+        break
+      end
+    end
     ```
 
 return
@@ -1824,7 +1829,8 @@ E = '29000 ksi'
 v = [4, 6, 8]
 
 function multiply(a, b)
-    return a × b
+  return a × b
+end
 ```
 
 A Hurmet document can load an entire module into one variable with a import
