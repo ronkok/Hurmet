@@ -1,4 +1,4 @@
-﻿import { isIn, addTextEscapes } from "./utils"
+﻿import { isIn, addTextEscapes, tablessTrim } from "./utils"
 import { Rnl } from "./rational"
 import { formattedDecimal, texFromMixedFraction } from "./format"
 import { DataFrame } from "./dataframe"
@@ -687,7 +687,7 @@ export const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
     // inline CSV string between double back ticks, a data frame literal.
     pos = str.indexOf("`", (str.charAt(2) === "`" ? 3 : 2))
     const inputStr = (pos > 0 ? str.slice(2, pos) : str.slice(2))
-    const st = inputStr.trim()
+    const st = tablessTrim(inputStr)
     let tex = ""
     if (inRealTime) {
       tex = DataFrame.quickDisplay(st)

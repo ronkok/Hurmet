@@ -1,6 +1,6 @@
 import { dt, allZeros } from "./constants" // operand type enumeration
 import { Rnl } from "./rational"
-import { clone, addTextEscapes, unitTeXFromString } from "./utils"
+import { clone, addTextEscapes, unitTeXFromString, tablessTrim } from "./utils"
 import { unitFromUnitName } from "./units"
 import { errorOprnd } from "./error"
 import { Matrix } from "./matrix"
@@ -256,6 +256,8 @@ const dataFrameFromCSV = (str, vars) => {
   const attrs = []                     // array of Hurmet live table expressions.
   const unitMap = Object.create(null)  // map from unit names to unit data
   let gotUnits = false
+  // Determine if the file is tab separated or pipe separated
+  const sepChar = str.indexOf("\t") > -1 ? "\t" : "|"
 
   if (str.charAt(0) === "`") { str = str.slice(1) }
   let row = 0
@@ -326,7 +328,7 @@ const dataFrameFromCSV = (str, vars) => {
     for (const line of lines) {
       if (line.length > 0) {
         col = 0
-        const items = line.split("|")
+        const items = line.split(sepChar)
         for (const item of items) { harvest(item.trim()); col++ }
         row += 1
       }
@@ -350,8 +352,8 @@ const dataFrameFromCSV = (str, vars) => {
       // If it's just one quotation mark, begin/end quoted field
       if (cc === '"') { inQuote = !inQuote; continue; }
 
-      // If it's a comma and we're not in a quoted field, harvest the datum
-      if (cc === '|' && !inQuote) { harvest(datum); datum = ""; ++col; continue }
+      // If it's a separator character and we're not in a quoted field, harvest the datum
+      if (cc === sepChar && !inQuote) { harvest(datum); datum = ""; ++col; continue }
 
       // If it's a CRLF and we're not in a quoted field, skip the next character,
       // harvest the datum, and move on to the next row and move to column 0 of that new row
@@ -546,19 +548,22 @@ const quickDisplay = str => {
   // Final rendering calls dataFrameFromCSV() and display() for accurate CSV parsing.
   if (str === "") { return "" }
   str = addTextEscapes(str.trim())
+  const sepRegEx = str.indexOf("\t") > -1
+    ? / *\t */g
+    : / *\| */g
   const lines = str.split(/\r?\n/g)
   let tex = ""
   if (lines.length < 3) {
     tex = "\\begin{matrix}\\text{"
     for (let i = 0; i < lines.length; i++) {
-      tex += lines[i].trim().replace(/ *\| */g, "} & \\text{") + "} \\\\ \\text{"
+      tex += tablessTrim(lines[i]).replace(sepRegEx, "} & \\text{") + "} \\\\ \\text{"
     }
     tex = tex.slice(0, -10) + "\\end{matrix}"
   } else {
     tex = "\\begin{array}{l|cccccccccccccccccccccccc}\\text{"
     const cells = new Array(lines.length)
     for (let i = 0; i < lines.length; i++) {
-      cells[i] = lines[i].trim().split(/ *\| */)
+      cells[i] = tablessTrim(lines[i]).split(sepRegEx)
     }
 
     let gotUnits = false
@@ -574,7 +579,7 @@ const quickDisplay = str => {
     }
 
     for (let i = 0; i < lines.length; i++) {
-      tex += lines[i].trim().replace(/ *\| */g, "} & \\text{")
+      tex += tablessTrim(lines[i]).replace(sepRegEx, "} & \\text{")
       tex += ((gotUnits && i === 1) || (!gotUnits && i === 0))
         ? "} \\\\ \\hline \\text{"
         : "} \\\\ \\text{"

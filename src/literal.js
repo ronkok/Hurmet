@@ -1,4 +1,5 @@
 import { dt, allZeros } from "./constants"
+import { tablessTrim } from "./utils"
 import { parse } from "./parser"
 import { evalRpn } from "./evaluate"
 import { Rnl } from "./rational"
@@ -66,7 +67,7 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
     // A CSV between double back ticks.
     // Read the CSV into a data frame.
     const pos = str.indexOf('`', (str.charAt(2) === "`" ? 3 : 2))
-    str = str.slice(2, pos).trim()
+    str = tablessTrim(str.slice(2, pos))
     const dataFrame = DataFrame.dataFrameFromCSV(str, {})
     return [dataFrame.value, dataFrame.unit, dt.DATAFRAME,
       DataFrame.display(dataFrame.value, "h3", decimalFormat)]

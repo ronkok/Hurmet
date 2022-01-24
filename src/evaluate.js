@@ -1,5 +1,5 @@
 ﻿import { dt, allZeros } from "./constants"
-import { clone, isIn, mapMap, arrayOfRegExMatches } from "./utils"
+import { clone, isIn, mapMap, arrayOfRegExMatches, tablessTrim } from "./utils"
 import { plugValsIntoEcho } from "./echo"
 import { fromAssignment } from "./operand.js"
 import { Functions, multivarFunction } from "./functions"
@@ -181,7 +181,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
       stack.push(Object.freeze({ value: str, unit: null, dtype: dt.STRING }))
 
     } else if (/^``/.test(tkn)) {
-      stack.push(DataFrame.dataFrameFromCSV(tkn.slice(1, -1).trim(), {}))
+      stack.push(DataFrame.dataFrameFromCSV(tablessTrim(tkn.slice(2, -2)), {}))
 
     } else if (ch === '`') {
       // A rich text literal

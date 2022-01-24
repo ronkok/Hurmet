@@ -144,6 +144,13 @@ export const numeralFromSuperScript = ch => {
   }
 }
 
+// Trim spaces except for tabs. This is used to read tab-delimited CSV.
+const leadingSpaceRegEx = /^[ \r\n\f]+/
+const trailingSpaceRegEx = /[ \r\n\f]+$/
+export const tablessTrim = str => {
+  return str.replace(leadingSpaceRegEx, "").replace(trailingSpaceRegEx, "")
+}
+
 const midDotRegEx = /^(\*|·|\.|-[A-Za-z])/
 export const exponentRegEx = /[⁰¹²³\u2074-\u2079⁻]/
 
