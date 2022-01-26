@@ -104,12 +104,18 @@ const nodes = {
     const attributes = {}
     if (node.attrs.colspan !== 1) { attributes.colspan = node.attrs.colspan }
     if (node.attrs.rowspan !== 1) { attributes.rowspan = node.attrs.rowspan }
+    if (node.attrs.colwidth !== null && !isNaN(node.attrs.colwidth) ) {
+      attributes.style = `width: ${node.attrs.colwidth}px`
+    }
     return htmlTag("th", output(node.content), attributes) + "\n"
   },
   table_cell(node) {
     const attributes = {}
     if (node.attrs.colspan !== 1) { attributes.colspan = node.attrs.colspan }
     if (node.attrs.rowspan !== 1) { attributes.rowspan = node.attrs.rowspan }
+    if (node.attrs.colwidth !== null && !isNaN(node.attrs.colwidth) ) {
+      attributes.style = `width: ${node.attrs.colwidth}px`
+    }
     return htmlTag("td", output(node.content), attributes)
   },
   link(node) {

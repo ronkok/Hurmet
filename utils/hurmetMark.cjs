@@ -31,7 +31,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
  * 4. Pipe tables as per GFM.
  * 5. Grid tables as per reStructuredText, with two exceptions:
  *    a. The top border contains ":" characters to indicate column justtification.
- *    b. Top & left borders contain "┴" & "┤" characters to indicate the location
+ *    b. Top & left borders contain "+" & "*" characters to indicate the location
  *       of a table column or rows boundary.
  * 6. Implicit reference links [title][] and implicit reference images ![alt][]
  *    ⋮
@@ -193,7 +193,7 @@ const TABLES = (function() {
     // Inspect ":" characters to set column justification.
     // Return class names that specify center or right justification on specific columns.
     source = source.replace(TABLE_ROW_SEPARATOR_TRIM, "");
-    const alignArr = source.trim().split(/[|+┴]/);
+    const alignArr = source.trim().split(/[|+*]/);
     let alignStr = "";
     for (let i = 0; i < alignArr.length; i++) {
       alignStr += TABLE_CENTER_ALIGN.test(alignArr[i])
@@ -282,6 +282,8 @@ const TABLES = (function() {
     };
   };
 
+  const headerRegEx = /^\+:?=/;
+
   const parseGridTable = function() {
     return function(capture, state) {
       const topBorder = capture[2];
@@ -293,7 +295,7 @@ const TABLES = (function() {
       let headerExists = false;
       let headerSepLine = lines.length + 10;
       for (let i = 0; i < lines.length; i++) {
-        if (lines[i].charAt(0) === "+" && lines[i].indexOf("=") > -1) {
+        if (headerRegEx.test(lines[i])) {
           headerExists = true;
           headerSepLine = i;
           break
@@ -304,15 +306,15 @@ const TABLES = (function() {
       const xCorners = [0];
       for (let j = 1; j < topBorder.length; j++) {
         const ch = topBorder.charAt(j);
-        // A "┴" character indicates a column border, but the top row
+        // A "*" character indicates a column border, but the top row
         // contains a merged cell, so the column border does not extend
         // all the way to the top of the table.
-        if (ch === "+" || ch === "┴") { xCorners.push(j); }
+        if (ch === "+" || ch === "*") { xCorners.push(j); }
       }
       const yCorners = [0];
       for (let i = 1; i < lines.length; i++) {
         const ch = lines[i].charAt(0);
-        if (ch === "+" || ch === "┤") { yCorners.push(i); }
+        if (ch === "+" || ch === "*") { yCorners.push(i); }
       }
 
       const numCols = xCorners.length - 1;
@@ -413,7 +415,7 @@ const TABLES = (function() {
     parsePipeTable: parsePipeTable(),
     PIPE_TABLE_REGEX: /^(\|.+)\n\|([-:]+[-| :]*)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
     parseGridTable: parseGridTable(),
-    GRID_TABLE_REGEX: /^((\+(?:[-:┴=]+\+)+)\n(?:[+|┤][^\n]+[+|]\n)+)(?:\{([^\n}]+)\}\n)?\n*/
+    GRID_TABLE_REGEX: /^((\+(?:[-:*=]+\+)+)\n(?:[+|*][^\n]+[+|]\n)+)(?:\{([^\n}]+)\}\n)?\n*/
   };
 })();
 
@@ -470,7 +472,7 @@ const parseTextMark = (capture, state, mark) => {
   return text
 };
 
-const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<!--[\w,. ]*-->[^\n]*\n|<\/?(?:body|details|div(?: [^>]+)?|!DOCTYPE[a-z ]*|html[a-z ="]*|br|dl(?: class="[a-z-]+")?|li|main|nav|ol|ul(?: class="[a-z-]+")?)\/?>[^\n]*?(?:\n|$))/;
+const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<!--[^>]+-->[^\n]*\n|<\/?(?:body|details|(div|input|label)(?: [^>]+)?|!DOCTYPE[a-z ]*|html[a-z ="]*|br|dl(?: class="[a-z-]+")?|li|main[a-z\- ="]*|nav|ol|ul(?: [^>]+)?)\/?>[^\n]*?(?:\n|$))/;
 const divType = { C: "centered_div", H: "header", "i": "indented_div" };
 
 // Rules must be applied in a specific order, so use a Map instead of an object.
@@ -705,7 +707,7 @@ rules.set("calculation", {
 });
 rules.set("tex", {
   isLeaf: true,
-  match: anyScopeRegex(/^(?:\$(`+)([\s\S]*?[^`])\1(?!`)|\$\$\n((?:\\[\s\S]|[^\\])+?)\n\$\$)/),
+  match: anyScopeRegex(/^(?:\$(`+)([\s\S]*?[^`])\1(?!`)|\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$)/),
   parse: function(capture, state) {
     if (capture[2]) {
       const tex = capture[2].trim().replace(/\n/g, " ");
@@ -760,6 +762,18 @@ rules.set("refimage", {
     });
   }
 });
+rules.set("code", {
+  isLeaf: true,
+  match: inlineRegex(/^(`+)([\s\S]*?[^`])\1(?!`)/),
+  parse: function(capture, state) {
+    const text = capture[2].trim();
+    return [{ type: "text", text, marks: [{ type: "code" }] }]
+/*    state.inCode = true
+    const code = parseTextMark(text, state, "code" )
+    state.inCode = false
+    return code */
+  }
+});
 rules.set("em", {
   isLeaf: true,
   match: inlineRegex(/^_((?:\\[\s\S]|[^\\])+?)_/),
@@ -807,17 +821,6 @@ rules.set("highlight", {
   match: inlineRegex(/^<mark>([\s\S]*?)<\/mark>/),
   parse: function(capture, state) {
     return parseTextMark(capture[1], state, "highlight" )
-  }
-});
-rules.set("code", {
-  isLeaf: true,
-  match: inlineRegex(/^(`+)([\s\S]*?[^`])\1(?!`)/),
-  parse: function(capture, state) {
-    const text = capture[2].trim();
-    state.inCode = true;
-    const code = parseTextMark(text, state, "code" );
-    state.inCode = false;
-    return code
   }
 });
 rules.set("hard_break", {
@@ -1034,7 +1037,7 @@ const nodes = {
     let tag = "h" + node.attrs.level;
     tag = htmlTag(tag, text);
     // Add id so others can link to it.
-    tag = tag.slice(0, 3) + " id='" + text.toLowerCase().replace(/\s+/g, '-') + "'" + tag.slice(3);
+    tag = tag.slice(0, 3) + " id='" + text.toLowerCase().replace(/,/g, "").replace(/\s+/g, '-') + "'" + tag.slice(3);
     return tag + "\n"
   },
   paragraph(node)  { return htmlTag("p", output(node.content)) + "\n" },
