@@ -1282,6 +1282,8 @@ const elementFromIterable = (iterable, index, step) => {
   return [oprnd, nextIndex]
 }
 
+const loopTypes = ["while", "for"];
+
 const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
   // UDF stands for "user-defined function"
   // lib is short for library. If not omitted, it contains a module with more functions.
@@ -1306,11 +1308,11 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
   // There will be nested flow of control, of course. So we'll create a
   // "control" stack. The topmost element contains info about the control
   // that applies to the current nesting level.
-  let level = 0
-  const control = [{ type: "if", condition: true }]
+  const control = [{ type: "if", condition: true, endOfBlock: udf.statements.length - 1 }]
   for (let i = 0; i < udf.statements.length; i++) {
     const statement = udf.statements[i]
     const stype = statement.stype
+    const level = control.length - 1
     switch (stype) {
       case "statement": {
         if (control[level].condition) {
@@ -1372,7 +1374,6 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
             condition: result.value,
             endOfBlock: statement.endOfBlock
           })
-          level += 1
         } else {
           // Skip this block
           i = statement.endOfBlock
@@ -1381,25 +1382,39 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
       }
 
       case "else if": {
-        const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib)
-        if (result.dtype === dt.ERROR) { return result }
-        control[control.length - 1].condition = result.value
+        if (control[level].type === "if" && control[level].condition) {
+          i = control[level].endOfBlock
+          control.pop()
+        } else {
+          const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib)
+          if (result.dtype === dt.ERROR) { return result }
+          control[control.length - 1].condition = result.value
+        }
         break
       }
 
       case "else":
-        control[level].condition = true
+        if (control[level].type === "if" && control[level].condition) {
+          i = control[level].endOfBlock
+          control.pop()
+        } else {
+          control[level].condition = true
+        }
         break
 
       case "while": {
         if (control[level].condition) {
-          const cntrl = { type: "while", startStatement: i, rpn: statement.rpn }
+          const cntrl = {
+            type: "while",
+            startStatement: i,
+            rpn: statement.rpn,
+            endOfBlock: statement.endOfBlock
+          }
           const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib)
           if (result.dtype === dt.ERROR) { return result }
           cntrl.condition = result.value
           if (cntrl.condition === true) {
             control.push(cntrl)
-            level += 1
           } else {
             i = statement.endOfBlock
           }
@@ -1410,7 +1425,12 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
       }
 
       case "for": {
-        const ctrl = { type: "for", condition: true, startStatement: i }
+        const ctrl = {
+          type: "for",
+          condition: true,
+          startStatement: i,
+          endOfBlock: statement.endOfBlock
+        }
         const tokens = statement.rpn.split("\u00A0")
         tokens.pop() // Discard the "for"
         ctrl.dummyVariable = tokens.shift().slice(1)
@@ -1425,7 +1445,22 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
         ctrl.iterable = iterable
         control.push(ctrl)
         vars[ctrl.dummyVariable] = oprnd
-        level += 1
+        break
+      }
+
+      case "break": {
+        if (control[level].condition) {
+          // Find the enclosing loop and pop out of it.
+          for (let j = control.length - 1; j > 0; j--) {
+            if (loopTypes.includes(control[j].type) || j === 0) {
+              i = control[j].endOfBlock
+              control.pop()
+              break
+            } else {
+              control.pop()
+            }
+          }
+        }
         break
       }
 
@@ -1433,12 +1468,10 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
         // end of code block
         if (control[level].type === "if" && i >= control[level].endOfBlock) {
           control.pop()
-          level -= 1
         } else if (control[level].type === "if" && control[level].condition) {
           // Jump ahead to end of if block
           if (i < control[level].endOfBlock) { i = control[level].endOfBlock }
           control.pop()
-          level -= 1
         } else if (control[level].type === "while") {
           const result = evalRpn(control[level].rpn, vars, decimalFormat, isUnitAware, lib)
           if (result.dtype === dt.ERROR) { return result }
@@ -1447,7 +1480,6 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
             i = control[level].startStatement
           } else {
             control.pop()
-            level -= 1
           }
         } else if (control[level].type === "for") {
           control[level].index = control[level].nextIndex
@@ -1464,7 +1496,6 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
             i = control[level].startStatement
           } else {
             control.pop()
-            level -= 1
           }
         }
         break
@@ -1497,7 +1528,12 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
 
       case "raise":
         if (control[level].condition) {
-          return { value: statement.rpn, unit: null, dtype: dt.ERROR }
+          if (statement.rpn) {
+            const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib)
+            return { value: result.value, unit: null, dtype: dt.ERROR }
+          } else {
+            return { value: statement.rpn, unit: null, dtype: dt.ERROR }
+          }
         }
         break
 

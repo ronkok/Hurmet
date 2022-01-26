@@ -81,7 +81,8 @@ const errorMessages = Object.freeze({
     NA_COMPL_OP:"Error. \"@\" cannot be performed on a complex number.",
     NA_REAL:    "Error. \"@\" can be performed only a complex number.",
     ORIGIN:     "Error. Function \"@\" is undefined at the origin.",
-    LOG_ZERO:   "Error. Logarithm of zero is negative infinity."
+    LOG_ZERO:   "Error. Logarithm of zero is negative infinity.",
+    END_MISS:   "Error. Too few END statments in function @."
   }
 })
 

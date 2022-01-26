@@ -177,21 +177,22 @@
 <h2>User-Defined Functions</h2>
 <p>You can write your own functions. The one below does a binary search on a sorted array.</p>
 <p><span class="hurmet-calc" data-entry="function isIn(item, array)
-    # Binary search to see if an item is in an array.
-    # This works only if the array is sorted.
-    iHigh = length(array)
-    if iHigh = 0
-        return false
-    end
-    iLow = 1
-    while iLow < iHigh
-        i = ⎿(iLow + iHigh) / 2⏌
-        if item > array[i]
-            iLow = i + 1
-        else
-            iHigh = i
-        end
-    return item = array[iLow]
+   # Binary search to see if an item is in an array.
+   # This works only if the array is sorted.
+   iHigh = length(array)
+   if iHigh = 0
+      return false
+   end
+   iLow = 1
+   while iLow < iHigh
+      i = ⎿(iLow + iHigh) / 2⏌
+      if item > array[i]
+         iLow = i + 1
+      else
+         iHigh = i
+      end
+   end
+   return (item = array[iLow])
 end"></span>
 <p></p>
 <p>After the function is defined, you can call it like any other function.</p>

@@ -254,15 +254,76 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     }
   }
 
+  // Write a couple of functions into the vars object, so they can be tested.
+  hurmet.calculate(`function isIn(item, array)
+  # Binary search to see if an item is in an array.
+  # This works only if the array is sorted.
+  iHigh = length(array)
+  if iHigh = 0
+     return false
+  end
+  iLow = 1
+  while iLow < iHigh
+     i = ⎿(iLow + iHigh) / 2⏌
+     if item > array[i]
+        iLow = i + 1
+     else
+        iHigh = i
+     end
+  end
+  return (item = array[iLow])
+end`, vars)
+
+hurmet.calculate(`function testFor(a, b)
+   sum = 0
+   for i in a:b
+      sum = sum + i
+   end
+   return sum
+end`, vars)
+
+hurmet.calculate(`function testWhile(b)
+   sum = 0
+   i = 1
+   while i <= b
+      sum = sum + i
+      i = i + 1
+   end
+   return sum
+end`, vars)
+
+hurmet.calculate(`function testBreak()
+   echo "This is an echo test."
+   sum = 0
+   for i in 1:100
+      if i > 3
+         break
+      end
+      sum = sum + i
+   end
+   return sum
+end`, vars)
+
+hurmet.calculate(`function testRaise()
+   sum = 0
+   for i in 1:100
+      if i > 3
+         raise "Error."
+      end
+      sum = sum + i
+   end
+   return sum
+end`, vars)
+
   // Calculations.
   const calcTests = [
     // input string, expected RPN, expected result
     ["b = @", "¿b", "true"],
-    ["str[2] = @", "¿str ▸2/1 [] 1", "b"],
-    ["str[2:4] = @", "¿str ▸2/1 ▸4/1 .. [] 1", "bcd"],
-    ["str[3:] = @", `¿str ▸3/1 "∞" .. [] 1`, "cdef"],
-    ["1/0 = @", "▸1/1 ▸0/1 /", "Error. Divide by zero."],
-    ["(w L^2)/8 + (P L)/4 = @@ lbf·ft", "¿w ¿L ▸2/1 ^ ⌧ ▸8/1 / ¿P ¿L ⌧ ▸4/1 / +", "4,980 lbf·ft"],
+    ["str[2] = @", "¿str ®2/1 [] 1", "b"],
+    ["str[2:4] = @", "¿str ®2/1 ®4/1 .. [] 1", "bcd"],
+    ["str[3:] = @", `¿str ®3/1 "∞" .. [] 1`, "cdef"],
+    ["1/0 = @", "®1/1 ®0/1 /", "Error. Divide by zero."],
+    ["(w L^2)/8 + (P L)/4 = @@ lbf·ft", "¿w ¿L ®2/1 ^ ⌧ ®8/1 / ¿P ¿L ⌧ ®4/1 / +", "4,980 lbf·ft"],
     ["sin(θ) = @", "¿θ sin", "0.5"],
     ["cos(θ) = @", "¿θ cos", "0.866025403784439"],
     ["tan(θ) = @", "¿θ tan", "0.577350269189626"],
@@ -273,27 +334,27 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     ["acos(half) = @", "¿half acos", "1.0471975511966"],
     ["atan(half) = @", "¿half atan", "0.463647609000806"],
 //    ["sin(degAngle) = @@", "¿degAngle sin", "0.5"],
-    ["2 + 2 = @", "▸2/1 ▸2/1 +", "4"],
-    ["1 - 0.9999375^1000 = @", "▸1/1 ▸9999375/10000000 ▸1000/1 ^ -", "0.0605887720523238"],
-    ["(3 num)/2 = @", "▸3/1 ¿num ⌧ ▸2/1 /", "6.3"],
+    ["2 + 2 = @", "®2/1 ®2/1 +", "4"],
+    ["1 - 0.9999375^1000 = @", "®1/1 ®9999375/10000000 ®1000/1 ^ -", "0.0605887720523238"],
+    ["(3 num)/2 = @", "®3/1 ¿num ⌧ ®2/1 /", "6.3"],
     [`rebar["#3", "area"] =@`, `¿rebar "#3" "area" [] 2`, "0.11"],
-    [`{ 5 if n ≤ 4; 2 if n ≥ 12; 5 - (n - 4)/20 otherwise } =@`, "¿n ▸4/1 ≤ ¿n ▸12/1 ≥ true cases 3 ▸5/1 ▸2/1 ▸5/1§¿n§▸4/1§-§▸20/1§/§-", "4.7"],
-    ["[2:5] = @", "▸2/1 ▸5/1 .. matrix 1 1", "[2, 3, 4, 5]"],
-    ["[1:2:5] = @", "▸1/1 ▸2/1 .. ▸5/1 .. matrix 1 1", "[1, 3, 5]"],
-    ["vector[2] = @", "¿vector ▸2/1 [] 1", "-15.3"],
-    ["vector[1:2] = @", "¿vector ▸1/1 ▸2/1 .. [] 1", "[2.1; -15.3]"],
-    ["vector[1:] = @", `¿vector ▸1/1 "∞" .. [] 1`, "[2.1; -15.3]"],
-    ["matrix[1, 2] = @", "¿matrix ▸1/1 ▸2/1 [] 2", "7.5"],
-    ["matrix[1:2, 2] = @", "¿matrix ▸1/1 ▸2/1 .. ▸2/1 [] 2", "[7.5; 33]"],
-    ["matrix[1, 1:2] = @", "¿matrix ▸1/1 ▸1/1 ▸2/1 .. [] 2", "[2.1, 7.5]"],
-    ["matrix[1,] = @", "¿matrix ▸1/1 ▸0/1 [] 2", "[2.1, 7.5]"],
-    ["matrix[, 1:2] = @", "¿matrix ▸0/1 ▸1/1 ▸2/1 .. [] 2", "(2.1, 7.5; -15.3, 33)"],
-    ["matrix[, 1:] = @", `¿matrix ▸0/1 ▸1/1 "∞" .. [] 2`, "(2.1, 7.5; -15.3, 33)"],
-    ["2 vector = @", "▸2/1 ¿vector ⌧", "[4.2; -30.6]"],
+    [`{ 5 if n ≤ 4; 2 if n ≥ 12; 5 - (n - 4)/20 otherwise } =@`, "¿n ®4/1 ≤ ¿n ®12/1 ≥ true cases 3 ®5/1 ®2/1 ®5/1§¿n§®4/1§-§®20/1§/§-", "4.7"],
+    ["[2:5] = @", "®2/1 ®5/1 .. matrix 1 1", "[2, 3, 4, 5]"],
+    ["[1:2:5] = @", "®1/1 ®2/1 .. ®5/1 .. matrix 1 1", "[1, 3, 5]"],
+    ["vector[2] = @", "¿vector ®2/1 [] 1", "-15.3"],
+    ["vector[1:2] = @", "¿vector ®1/1 ®2/1 .. [] 1", "[2.1; -15.3]"],
+    ["vector[1:] = @", `¿vector ®1/1 "∞" .. [] 1`, "[2.1; -15.3]"],
+    ["matrix[1, 2] = @", "¿matrix ®1/1 ®2/1 [] 2", "7.5"],
+    ["matrix[1:2, 2] = @", "¿matrix ®1/1 ®2/1 .. ®2/1 [] 2", "[7.5; 33]"],
+    ["matrix[1, 1:2] = @", "¿matrix ®1/1 ®1/1 ®2/1 .. [] 2", "[2.1, 7.5]"],
+    ["matrix[1,] = @", "¿matrix ®1/1 ®0/1 [] 2", "[2.1, 7.5]"],
+    ["matrix[, 1:2] = @", "¿matrix ®0/1 ®1/1 ®2/1 .. [] 2", "(2.1, 7.5; -15.3, 33)"],
+    ["matrix[, 1:] = @", `¿matrix ®0/1 ®1/1 "∞" .. [] 2`, "(2.1, 7.5; -15.3, 33)"],
+    ["2 vector = @", "®2/1 ¿vector ⌧", "[4.2; -30.6]"],
     ["vector·vector = @", "¿vector ¿vector ·", "238.5"],
     ["vector*vector = @", "¿vector ¿vector *", "[4.41; 234.09]"],
     ["vector^T = @", "¿vector ¿T ^", "[2.1, -15.3]"],
-    ["matrix⁻¹ = @", "¿matrix ▸-1/1 ^", "(0.179299103504482, -0.0407497962510187; 0.0831295843520782, 0.0114099429502852)"],
+    ["matrix⁻¹ = @", "¿matrix ®-1/1 ^", "(0.179299103504482, -0.0407497962510187; 0.0831295843520782, 0.0114099429502852)"],
     ["|matrix| = @", "¿matrix |", "0.0054333061668025"],
     ["|vector| = @", "¿vector |", "15.4434452114805"],
     ["abs(vector) = @", "¿vector abs", "[2.1; 15.3]"],
@@ -303,22 +364,22 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     [`barArea.area = @`, `¿barArea "area" .`, "0.44"],
 //    [`wideFlanges[["W8X31"; "W10X49"], "area"] = @`, `¿wideFlanges "W8X31" "W10X49" matrix 2 1 "area" [] 2`, "[9.13; 14.4]"],
     ["wideFlanges.W8X31 = @", `¿wideFlanges "W8X31" .`, "{name: W8X31, weight: 31 lbf/ft, area: 9.13 in^2, d: 8 in, bf: 8 in, tw: 0.285 in, tf: 0.435 in, Ix: 110 in^4, Sx: 27.5 in^3, rx: 3.47 in, Iy: 37.1 in^4, Sy: 9.27 in^3, ry: 2.02 in}"],
-    ["wideFlanges[2] = @", `¿wideFlanges ▸2/1 [] 1`, "{name: W8X31, weight: 31 lbf/ft, area: 9.13 in^2, d: 8 in, bf: 8 in, tw: 0.285 in, tf: 0.435 in, Ix: 110 in^4, Sx: 27.5 in^3, rx: 3.47 in, Iy: 37.1 in^4, Sy: 9.27 in^3, ry: 2.02 in}"],
+    ["wideFlanges[2] = @", `¿wideFlanges ®2/1 [] 1`, "{name: W8X31, weight: 31 lbf/ft, area: 9.13 in^2, d: 8 in, bf: 8 in, tw: 0.285 in, tf: 0.435 in, Ix: 110 in^4, Sx: 27.5 in^3, rx: 3.47 in, Iy: 37.1 in^4, Sy: 9.27 in^3, ry: 2.02 in}"],
     ["wideFlanges.W8X31.area = @", `¿wideFlanges "W8X31" . "area" .`, "9.13"],
     ['"ab" & "cd" = @', `"ab" "cd" &`, 'abcd'],
-    [`1.2 & 3.4 = @`, `▸12/10 ▸34/10 &`, "[1.2, 3.4]"],
-    [`[1, 2] & 3.6 = @`, `▸1/1 ▸2/1 matrix 1 2 ▸36/10 &`, "[1, 2, 3.6]"],
-    [`1.2 & [2.5, 3.6] = @`, `▸12/10 ▸25/10 ▸36/10 matrix 1 2 &`, "[1.2, 2.5, 3.6]"],
-    ["2 dictionary = @", `▸2/1 ¿dictionary ⌧`, `{"area": 0.88, "#5": 0.62, "#4": 0.44}`],
-    [`(2)(4) + 1 = @`, `▸2/1 ▸4/1 ⌧ ▸1/1 +`, "9"],
-    [`(2) (4) + 1 = @`, `▸2/1 ▸4/1 ⌧ ▸1/1 +`, "9"],
-    ["{ 5 if n = 10; 0 otherwise } = @", `¿n ▸10/1 = true cases 2 ▸5/1 ▸0/1`, "5"],
-    ["√4 = @", `▸4/1 √`, "2"],
-    ["[1:3] = @", `▸1/1 ▸3/1 .. matrix 1 1`, "[1, 2, 3]"],
-    ["num³ √9 = @", `¿num ▸3/1 ^ ▸9/1 √ ⌧`, "222.264"],
-    [`abs(0.5) num = @`, `▸5/10 abs ¿num ⌧`, "2.1"],
-    [`num (1/4) = @`, `¿num ▸1/1 ▸4/1 / ⌧`, "1.05"],
-    [`num² (1/4) = @`, `¿num ▸2/1 ^ ▸1/1 ▸4/1 / ⌧`, "4.41"],
+    [`1.2 & 3.4 = @`, `®12/10 ®34/10 &`, "[1.2, 3.4]"],
+    [`[1, 2] & 3.6 = @`, `®1/1 ®2/1 matrix 1 2 ®36/10 &`, "[1, 2, 3.6]"],
+    [`1.2 & [2.5, 3.6] = @`, `®12/10 ®25/10 ®36/10 matrix 1 2 &`, "[1.2, 2.5, 3.6]"],
+    ["2 dictionary = @", `®2/1 ¿dictionary ⌧`, `{"area": 0.88, "#5": 0.62, "#4": 0.44}`],
+    [`(2)(4) + 1 = @`, `®2/1 ®4/1 ⌧ ®1/1 +`, "9"],
+    [`(2) (4) + 1 = @`, `®2/1 ®4/1 ⌧ ®1/1 +`, "9"],
+    ["{ 5 if n = 10; 0 otherwise } = @", `¿n ®10/1 = true cases 2 ®5/1 ®0/1`, "5"],
+    ["√4 = @", `®4/1 √`, "2"],
+    ["[1:3] = @", `®1/1 ®3/1 .. matrix 1 1`, "[1, 2, 3]"],
+    ["num³ √9 = @", `¿num ®3/1 ^ ®9/1 √ ⌧`, "222.264"],
+    [`abs(0.5) num = @`, `®5/10 abs ¿num ⌧`, "2.1"],
+    [`num (1/4) = @`, `¿num ®1/1 ®4/1 / ⌧`, "1.05"],
+    [`num² (1/4) = @`, `¿num ®2/1 ^ ®1/1 ®4/1 / ⌧`, "4.41"],
     [`num.name = @`, `¿num "name" .`, "Error. Cannot call a property from variable \"num\" because it has no properties."],
     [`Re(z1) = @`, `¿z1 Re`, "2.34"],
     [`Im(z1) = @`, `¿z1 Im`, "-5.67"],
@@ -332,8 +393,8 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     [`z1 / z2 = @`, `¿z1 ¿z2 /`, `-0.399082568807339 + j0.180275229357798`],
     [`exp(z1) = @`, `¿z1 exp`, "8.48997358364912 + j5.9741460578346"],
     [`z1^z2 = @`, `¿z1 ¿z2 ^`, `-0.000298758431332015 + j(-0.000701551058304068)`],
-    [`e^z1 = @`, `e ¿z1 ^`, `8.48997358364912 + j5.9741460578346`],
-    [`z1^2 = @`, `¿z1 2 ^`, `-26.6733 + j(-26.5356)`],
+    [`e^z1 = @`, `®27182818284590452353602874713527/10000000000000000000000000000000 ¿z1 ^`, `8.48997358364912 + j5.9741460578346`],
+    [`z1^2 = @`, `¿z1 ®2/1 ^`, `-26.6733 + j(-26.5356)`],
     [`log(z1) = @`, `¿z1 log`, "1.8138277169721 + j(-1.17939119866969)"],
     [`sin(z1) = @`, `¿z1 sin`, `104.191039452235 + j100.867493660997`],
     [`cos(z1) = @`, `¿z1 cos`, `-100.869891869637 + j104.188562282423`],
@@ -355,7 +416,15 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     [`atanh(z1) = @`, `¿z1 atanh`, `0.0608824294425492 + j(-1.42066283698233)`],
     [`asech(z1) = @`, `¿z1 asech`, `0.150417594430335 + j1.50926098758867`],
     [`acsch(z1) = @`, `¿z1 acsch`, `0.0628676963183102 + j0.150975247719299`],
-    [`acoth(z1) = @`, `¿z1 acoth`, `0.0608824294425491 + j0.150133489812563`]
+    [`acoth(z1) = @`, `¿z1 acoth`, `0.0608824294425491 + j0.150133489812563`],
+    [`⎿33.2⏌ = @`, `®332/10 ⎿⏌`, `33`],
+    [`isIn(5, [1, 3, 5]) = @`, `®5/1 ®1/1 ®3/1 ®5/1 matrix 1 3 function isIn 2`, `true`],
+    [`isIn(6, [1, 3, 5]) = @`, `®6/1 ®1/1 ®3/1 ®5/1 matrix 1 3 function isIn 2`, `false`],
+    [`isIn(6, []) = @`, `®6/1 matrix 0 0 function isIn 2`, `false`],
+    [`testFor(1, 3) = @`, `®1/1 ®3/1 function testFor 2`, `6`],
+    [`testWhile(3) = @`, `®3/1 function testWhile 1`, `6`],
+    [`testBreak() = @`, `function testBreak 0`, `6`],
+    [`testRaise() = @`, `function testRaise 0`, `Error.`]
 	]
 
   console.log("Now testing calculations…")
@@ -368,7 +437,7 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     const pos = inputStr.lastIndexOf("=")
     const [_, rpn] = hurmet.parse(inputStr.slice(0, pos).trim(), "1,000,000.", true)
     const output = hurmet.calculate(inputStr, vars, true)
-    if (output !== expectedOutput) { // || rpn !== expectedRPN
+    if (output !== expectedOutput || rpn !== expectedRPN) {
       numErrors += 1
       console.log("input:   " + inputStr)
       console.log("expected RPN: " + expectedRPN)

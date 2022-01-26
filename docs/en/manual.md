@@ -806,7 +806,8 @@ Data Frame
     values.)
     
     Instead of commas, Hurmet data is separated by either tabs or pipes, i.e., `|`.
-    Numbers must use a dot decimal. The second row may contain units of measure.
+    (Both not both tabs and pipes in the same file.) Numbers must use a dot decimal.
+    The second row may contain units of measure.
 
     Here’s an example of CSV input:
 
@@ -1677,7 +1678,7 @@ possible to write your own functions. Example:
 
 ```
 function multiply(a, b)
-  return a × b
+   return a × b
 end
 ```
 
@@ -1718,13 +1719,13 @@ between the `if` statement and an `end` statement are in the block. Example:
 
 ```
 if a ≤ b
-  x = a + b²
-  y = 2 x
+   x = a + b²
+   y = 2 x
 end
 ```
 
 Indentation is not significant to the parser but is very useful to humans
-reading the code. I usually indent by two spaces.
+reading the code. I usually indent by three spaces.
 
 <dl class="bold-term">
 
@@ -1735,11 +1736,11 @@ if else
 
     ```
     if a ≤ 4000
-      b = 0.85
+       b = 0.85
     else if a ≥ 8000
-      b = 0.65
+       b = 0.65
     else
-      b = 0.85 - (a - 4000)/20000
+       b = 0.85 - (a - 4000)/20000
     end
     ```
 
@@ -1750,9 +1751,9 @@ while
 
     ```
     while b ≠ 0
-      h = b
-      b = a modulo b
-      a = h
+       h = b
+       b = a modulo b
+       a = h
     end
     ```
 
@@ -1763,14 +1764,14 @@ for
 
     Examples:
 
-    +-----------------+--------------------------+
-    | ```             | ```                      |
-    | sum = sum + i   | reverse = ""             |
-    | for i in 1:10   | for ch in "abcdef"       |
-    |   sum = sum + i |   reverse = ch & reverse |
-    | end             | ebd                      |
-    | ```             | ```                      |
-    +-----------------+--------------------------+
+    +------------------+---------------------------+
+    | ```              | ```                       |
+    | sum = sum + i    | reverse = ""              |
+    | for i in 1:10    | for ch in "abcdef"        |
+    |    sum = sum + i |    reverse = ch & reverse |
+    | end              | end                       |
+    | ```              | ```                       |
+    +------------------+---------------------------+
     {.grid}
 
     ![for index variable in range or matrix or string](../../images/for-loop-railroad.svg)
@@ -1784,9 +1785,9 @@ break
 
     ```
     for i in 1:1000000
-      if i ≥ 2
-        break
-      end
+       if i ≥ 2
+          break
+       end
     end
     ```
 
@@ -1828,7 +1829,7 @@ E = '29000 ksi'
 v = [4, 6, 8]
 
 function multiply(a, b)
-  return a × b
+   return a × b
 end
 ```
 

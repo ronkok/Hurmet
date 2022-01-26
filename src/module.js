@@ -6,7 +6,7 @@ import { parse } from "./parser.js"
 import { errorOprnd } from "./error.js"
 
 const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/
-const keywordRegEx = /^(if|else|else if|return|raise|while|for|break|echo|end)\b/
+const keywordRegEx = /^(if|else if|else|return|raise|while|for|break|echo|end)\b/
 
 // If you change functionRegEx, then also change it in mathprompt.js.
 // It isn't called from there in order to avoid duplicating Hurmet code inside ProseMirror.js.
@@ -55,6 +55,7 @@ export const scanModule = (str, decimalFormat) => {
     if (functionRegEx.test(line)) {
       // This line starts a new function.
       const [funcObj, endLineNum] = scanFunction(lines, decimalFormat, i)
+      if (funcObj.dtype && funcObj.dtype === dt.ERROR) { return funcObj }
       parent[funcObj.name] = funcObj
       i = endLineNum
     } else if (testForStatement(line)) {
@@ -152,11 +153,10 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
     if (stype === "if" || stype === "while" || stype === "for") {
       stackOfCtrls.push({ type: stype, statementNum: funcObj.statements.length - 1 })
     } else if (stype === "end") {
-      if (stackOfCtrls.length > 0) {
-        const ctrl = stackOfCtrls[stackOfCtrls.length - 1]
-        funcObj.statements[ctrl.statementNum].endOfBlock = funcObj.statements.length - 1
-        stackOfCtrls.pop()
-      }
+      if (stackOfCtrls.length === 0) { return [funcObj, i] } // Finished the current function.
+      const ctrl = stackOfCtrls[stackOfCtrls.length - 1]
+      funcObj.statements[ctrl.statementNum].endOfBlock = funcObj.statements.length - 1
+      stackOfCtrls.pop()
     }
 
     // Reset for next statement
@@ -166,8 +166,7 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
     name = ""
     expression = ""
   }
-
-  return [funcObj, lines.length]
+  return [errorOprnd("END_MISS", functionName), 0]
 }
 
 const scanAssignment = (lines, decimalFormat, iStart) => {

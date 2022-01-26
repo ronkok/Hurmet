@@ -73,15 +73,19 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
     const posFn = inputStr.indexOf("function")
     const posParen = inputStr.indexOf("(")
     name = inputStr.slice(posFn + 8, posParen).trim()
-    const moduleValue = scanModule(inputStr, decimalFormat).value[name]
-    if (moduleValue.dtype && moduleValue.dtype === dt.ERROR) { return moduleValue }
+    const module = scanModule(inputStr, decimalFormat)
+    const isError = module.dtype && module.dtype === dt.ERROR
+    if (isError) {
+      // eslint-disable-next-line no-alert
+      window.alert(module.value)
+    }
     const attrs = {
       entry: inputStr,
       name,
-      value: moduleValue,
+      value: isError ? module.value : module.value[name],
       // TODO: what to do with comma decimals?
-      dtype: dt.MODULE,
-      error: false
+      dtype: isError ? dt.ERROR : dt.MODULE,
+      error: isError
     }
     return attrs
   }

@@ -25,7 +25,7 @@ const demonstration = (function(exports) {
   v = [4, 6, 8]
   
   function multiply(a, b)
-    return a × b
+     return a × b
   end`
   hurmetVars["mod"] = hurmet.scanModule(module)
 
