@@ -428,7 +428,9 @@ const operandFromRange = range => {
 
 const operandFromTokenStack = (tokenStack, numRows, numCols) => {
   // TODO: Get dtype correct for matrices that contain strings or booleans.
-  if (numRows === 1 && numCols === 1) {
+  if (numRows === 0 && numCols === 0) {
+    return Object.freeze({ value: new Array(0), unit: null, dtype: dt.ROWVECTOR })
+  } else if (numRows === 1 && numCols === 1) {
     // One element. Return a scalar.
     return tokenStack.pop()
 

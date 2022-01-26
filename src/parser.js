@@ -1418,6 +1418,12 @@ export const parse = (
               break
 
             default:
+              if (numArgs === 0 && topDelim.open === "[") {
+                // Treat as an empty matrix
+                rpn += "matrix" + tokenSep + 0 + tokenSep + 0
+              } else if (numArgs === 1 && topDelim.open === "[") {
+                rpn += tokenSep + "matrix" + tokenSep + 1 + tokenSep + 1
+              }
               if (rpnOp.symbol === "\\lfloor") { rpn += tokenSep + "⎿⏌" }
               if (rpnOp.symbol === "\\lceil") { rpn += tokenSep + "⎾⏋" }
           }
