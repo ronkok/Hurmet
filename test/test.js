@@ -59,14 +59,14 @@ const parserTests = [
   ["\\int_(-∞)^∞ \\hat f", "\\int_{\\text{-} ∞}^{∞}\\hat{f}"],
   [
     "r = 1/((|cos θ|^p + |sin θ|^p)^(1///p))",
-    "r = \\dfrac{1}{(\\lvert \\cos{θ}\\rvert^{p}+ \\lvert \\sin{θ}\\rvert^{p})^{1 / p}}"
+    "r = \\dfrac{1}{(\\vert \\cos{θ}\\vert^{p}+ \\vert \\sin{θ}\\vert^{p})^{1 / p}}"
   ],
   [
     'b \\uarr n = \\underbrace(b·b·b \\cdots b)_(n " copies of " b) =',
     "b \\uarr n = \\underbrace{b ⋅ b ⋅ b ⋯ b}_{n \\text{ copies of\\,}b}="
   ],
   ["\\underbrace(b·b)_(n)", "\\underbrace{b ⋅ b}_{n}"],
-  ["|y^n|/3", "\\dfrac{\\lvert y^{n}\\rvert}{3}"],
+  ["|y^n|/3", "\\dfrac{\\vert y^{n}\\vert}{3}"],
   ["A_0^n n/k", "A_\\mathrm{0}^{n} \\dfrac{n}{k}"],
   ["C = <<n \\atop k>>", "C = \\left\u27E8{{n}\\atop{k}}\\right\u27E9"],
   ["(exp(-exp(u)))/((u+γ)^2+π^2)", "\\dfrac{\\exp(\\text{-} \\exp(u))}{(u + γ)^{2}+ π^{2}}"],
@@ -84,9 +84,9 @@ const parserTests = [
   ['A --> "heat" B', "A \\xrightarrow{\\text{heat}}B"],
   [
     "i \\mathbf ℏ ∂/(∂t) |ψ (t)⟩ = \\hat 𝐇 |ψ (t)⟩",
-    "i \\mathbf{ℏ}\\dfrac{∂}{∂ t}\\lvert ψ (t)⟩= \\hat{𝐇}\\lvert ψ (t)⟩"
+    "i \\mathbf{ℏ}\\dfrac{∂}{∂ t}\\vert ψ (t)⟩= \\hat{𝐇}\\vert ψ (t)⟩"
   ],
-  ["⟨ϕ|", "⟨ϕ \\rvert"],
+  ["⟨ϕ|", "⟨ϕ \\vert"],
   ["(n \\atop k) = n!/(n! (n - k)!)", "\\left({{n}\\atop{k}}\\right)= \\dfrac{n!}{n! (n - k)!}"],
   [
     "δ I (y\\; v) = \\lim_(ε→0)(I [y+ε v]-I [y])/ε ≡ \\left. d/(d ε) I [y + ε v] |_(ε=0)",

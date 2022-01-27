@@ -439,7 +439,7 @@ TeX  RPN
 
 // Delimiter types
 const dNOTHING = 0
-const dPAREN = 1 //           () or [] or {} w/o internal , ; : |
+const dPAREN = 1 //           () or [] or {}, but not one of the use cases below
 const dFUNCTION = 2 //        sin(x)
 const dACCESSOR = 3 //        identifier[index] or identifier[start:step:end]
 const dMATRIX = 4 //          [1; 2] or (1, 2; 3, 4) or {1, 2}
@@ -466,6 +466,7 @@ export const parse = (
   let posOfPrevRun = 0
   let isPrecededBySpace = false
   let isFollowedBySpace = false
+  let isFollowedBySpaceOrNewline = false
   let isImplicitMult = false
   let followedByFactor = false
   let op
@@ -553,9 +554,6 @@ export const parse = (
               delim = delims[delims.length - 1]
             }
           }
-
-          // The next line enables |ϕ⟩ notation.
-          if (op.closeDelim === "\\rvert " && closeDelim) { op.closeDelim = closeDelim }
 
           if (delim.delimType === dMATRIX) {
             tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + 1)
@@ -653,6 +651,7 @@ export const parse = (
         ttype: tt.MULT
       }
       isFollowedBySpace = false
+      isFollowedBySpaceOrNewline = false
       mustLex = false
     }
 
@@ -661,6 +660,7 @@ export const parse = (
       token = { input: tkn[0], output: tkn[1], ttype: tkn[2], closeDelim: tkn[3] }
       str = str.substring(token.input.length)
       isFollowedBySpace = leadingSpaceRegEx.test(str) || /^(˽|\\quad|\\qquad)+/.test(str)
+      isFollowedBySpaceOrNewline = /^[ \n]/.test(str)
       str = str.replace(leadingSpaceRegEx, "")
       followedByFactor = nextCharIsFactor(str, token.ttype)
     }
@@ -1231,7 +1231,8 @@ export const parse = (
           numRows: numArgs,
           rpnPos: rpn.length,
           isPrecededByDiv,
-          isFuncParen
+          isFuncParen,
+          isControlWordParen: prevToken.ttype < 5
         }
 
         if (isFuncParen) {
@@ -1272,7 +1273,7 @@ export const parse = (
           tex += token.output + " "
         } else {
           const delim = delims[delims.length - 1]
-          if (delim.delimType === dPAREN && isFollowedBySpace &&
+          if (delim.delimType === dPAREN && isFollowedBySpaceOrNewline &&
             !(token.input === "," && delim.name === "{")) {
             delim.delimType = dMATRIX
             const ch = delim.name === "["
@@ -1339,6 +1340,12 @@ export const parse = (
       case tt.RIGHTBRACKET: {
         popTexTokens(0, true, token.output)
         const topDelim = delims.pop()
+
+        if (topDelim.delimType === dPAREN && (!topDelim.isControlWordParen)
+            && topDelim.close !== token.output) {
+          // Enable unmatched delims, such as (1.2] or |ϕ⟩
+          tex = tex.slice(0, -1 * topDelim.close.length) + token.output
+        }
 
         if (topDelim.isTall && delims.length > 1) {
           // If the inner parens are tall, then the outer parens must also be tall.
@@ -1457,7 +1464,7 @@ export const parse = (
         }
         if (isRightDelim) {
           // Treat as a right delimiter
-          topDelim.close = token.input === "|" ? "\\rvert " : "\\rVert "
+          topDelim.close = token.input === "|" ? "\\vert " : "\\vert "
           texStack[texStack.length - 1].closeDelim = topDelim.close
           popTexTokens(0, okToAppend)
           delims.pop()
@@ -1478,15 +1485,15 @@ export const parse = (
             prec: 0,
             pos: tex.length,
             ttype: tt.LEFTRIGHT,
-            closeDelim: token.input === "|" ? "\\rvert " : "\\rVert "
+            closeDelim: token.input === "|" ? "\\vert " : "\\vert "
           })
 
           delims.push({
             delimType: dPAREN,
             name: token.input,
             isTall: false,
-            open: token.input === "|" ? "\\lvert " : "\\lVert ",
-            close: token.input === "|" ? "\\rvert " : "\\rVert ",
+            open: token.input === "|" ? "\\vert " : "\\vert ",
+            close: token.input === "|" ? "\\vert " : "\\vert ",
             numArgs: 1,
             numRows: 1,
             rpnPos: rpn.length,
@@ -1497,7 +1504,7 @@ export const parse = (
             rpnStack.push({ prec: 0, symbol: token.output })
           }
 
-          tex += token.input === "|" ? "\\lvert " : "\\lVert "
+          tex += token.input === "|" ? "\\vert " : "\\vert "
           posOfPrevRun = tex.length
           okToAppend = false
         }
