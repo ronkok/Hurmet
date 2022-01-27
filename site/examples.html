@@ -83,11 +83,12 @@
 <p></p>
 
 <h2>Unit-Aware Calculations</h2>
-<p>Physical units can be a part of your calculations. Hurmet can automatically convert the units and also do a unit-compatibility check.</p>
+<p>Physical units can be a part of your calculations. Hurmet can automatically convert the units.</p>
 <p><span class="hurmet-calc" data-entry="P = '10000 V'·'20 amps' = ?? kW"></span></p>
-<p><span class="hurmet-calc" data-entry="L = '4 acres'//'100 feet' = ?? m"></span></p>
+<p><span class="hurmet-calc" data-entry="L = '4 acres'/'100 feet' = ?? m"></span></p>
 <p><span class="hurmet-calc" data-entry="L_side = √'4 acres' = ?? m"></span></p>
 <p><span class="hurmet-calc" data-entry="F = '200 lbf/ft'·'100 m/min'·'2 hrs' = ? kN"></span></p>
+<p>It also does a unit-compatibility check.</p>
 <p><span class="hurmet-calc" data-entry="oops = '3 m' + '2 hours' = ??"></span></p>
 <p></p>
 <p></p>
@@ -161,14 +162,13 @@
 
 <p>Hurmet can handle bigger numbers than many languages: </p>
 <p><span class="hurmet-calc" data-entry="569936821221962380720³+ (-569936821113563493509)³ + (-472715493453327032)³= ?"></span></p>
-<p>Reference: https://www.quantamagazine.org/why-the-sum-of-three-cubes-is-a-hard-math-problem-20191105/</p>
 
 <p></p>
 
 <h3><strong>Matrix Inversion</strong></h3>
 
 <p>Hurmet can solve a system of linear equations via matrix inversion.</p>
-<p>The system:   <span class="hurmet-calc" data-entry="{:3x + 2y + z = 39;2x + 3y + z = 34;x + 2y + 3z = 26}"></span>   when restated in matrix format is:   <span class="hurmet-calc" data-entry="(3, 2, 1; 2, 3, 1; 1, 2, 3) [x; y; z] = [39; 34; 26]"></span></p>
+<p>The system:   <span class="hurmet-calc" data-entry="{:3x + 2y + z = 39; 2x + 3y + z = 34; x + 2y + 3z = 26}"></span>   when restated in matrix format is:   <span class="hurmet-calc" data-entry="(3, 2, 1; 2, 3, 1; 1, 2, 3) [x; y; z] = [39; 34; 26]"></span></p>
 <p>So we can invert the first matrix and multiply it times both sides. That solves for each variable.</p>
 <p><span class="hurmet-calc" data-entry="[x; y; z] = (3, 2, 1; 2, 3, 1; 1, 2, 3)⁻¹ [39; 34; 26] = ?"></span></p>
 
@@ -179,20 +179,20 @@
 <p><span class="hurmet-calc" data-entry="function isIn(item, array)
    # Binary search to see if an item is in an array.
    # This works only if the array is sorted.
-   iHigh = length(array)
-   if iHigh = 0
+   highIndex = length(array)
+   if highIndex = 0
       return false
    end
-   iLow = 1
-   while iLow < iHigh
-      i = ⎿(iLow + iHigh) / 2⏌
+   lowIndex = 1
+   while lowIndex < highIndex
+      i = ⎿(lowIndex + highIndex) / 2⏌
       if item > array[i]
-         iLow = i + 1
+         lowIndex = i + 1
       else
-         iHigh = i
+         highIndex = i
       end
    end
-   return (item = array[iLow])
+   return (item = array[lowIndex])
 end"></span>
 <p></p>
 <p>After the function is defined, you can call it like any other function.</p>
