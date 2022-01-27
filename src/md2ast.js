@@ -28,8 +28,8 @@
  * 4. Pipe tables as per GFM.
  * 5. Grid tables as per reStructuredText, with two exceptions:
  *    a. The top border contains ":" characters to indicate column justtification.
- *    b. Top & left borders contain "+" & "*" characters to indicate the location
- *       of a table column or rows boundary.
+ *    b. Top & left borders contain "*" characters at locations where a merged
+ *       cell prevents a border from extending to the tables outer edge.
  * 6. Implicit reference links [title][] and implicit reference images ![alt][]
  *    ⋮
  *    [alt]: path
