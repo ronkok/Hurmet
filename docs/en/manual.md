@@ -35,10 +35,6 @@ You are welcome to use the [Hurmet.app][] web page under terms of the
 [MIT License][]. The source code is available in Hurmet’s GitHub
 [repository][].
 
-Hurmet is in active development. You are free to use it, but be aware that
-there may be bugs and that I have plans for [more features][]. As I add those
-features, it’s possible that some of the existing features may break.
-
 [Hurmet.app]: ../../index.html
 [MIT License]: https://opensource.org/licenses/MIT/
 [more features]: #coming-attractions
