@@ -1,22 +1,45 @@
 /*
-XITS is released under the SIL Open Font License. See the files in this
-directory for details. The font can be obtained from several TeX distributions
+The Latin Modern fonts are released under the GUST font license, which is
+legally equivalent to the LaTeX Project Public License. See the files in this
+directory for details. The fonts can be obtained from several TeX distributions
 or package managers.
 
-The WOFF fonts have been obtained from
-http://mirrors.ctan.org/fonts/
+The Latin Modern WOFF fonts have been obtained from
+http://www.gust.org.pl/projects/e-foundry/
+
+The Temml.woff2 is a clone of KaTeX_Script-Regular, except that the code points
+have been changed from ASCII to Unicode Mathematical Alphanumeric Symbols Script capitals,
+Unicode range 1D49C to 1D4B5.
 */
 
 @font-face {
-  font-family: XITS Math;
-  src: local('XITS Math'), local('XITSMath-Regular'),
-       url('./xits-math.woff2');
+  font-family: 'Temml';
+  src: url('Temml.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* Latin Modern Roman has various sizes. We use the generic name
+   "Latin Modern Roman" for the local versions and "LMRoman12" for the Web font.
+*/
+@font-face {
+  font-family: LMRoman12;
+  src: url('./lmroman12-regular.woff2');
 }
 @font-face {
-  font-family: XITS Math;
-  src: local('XITS Math Bold'), local('XITSMath-Bold'),
-       url('./xits-mathbold.woff2');
+  font-family: LMRoman12;
+  src: url('./lmroman12-bold.woff2');
   font-weight: bold;
+}
+@font-face {
+  font-family: LMRoman12;
+  src: url('./lmroman12-italic.woff2');
+  font-style: italic;
+}
+@font-face {
+  font-family: Latin Modern Math;
+  src: local('Latin Modern Math'), local('LatinModernMath-Regular'),
+       url('./latinmodern-math.woff2');
 }
 
 math {
@@ -35,16 +58,20 @@ math * {
   border-color: currentColor;
 }
 
+.latin-modern math {
+  font-family: "Latin Modern Math", "Times New Roman", math;
+}
+
 mtext {
-  font-family: XITS;
+  font-family: Latin Modern Roman, LMRoman12;
 }
 
 math {
-  font-family: XITS Math, math;
+  font-family: Latin Modern Math;
 }
 
-*.mathcal {
-  font-feature-settings: 'ss01';
+*.mathscr {
+  font-family: "Temml";
 }
 
 .oldstylenums {
