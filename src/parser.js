@@ -912,7 +912,7 @@ export const parse = (
         break
       }
 
-      case tt.DIV:  // ///  / or \atop
+      case tt.DIV:  //  / or \atop
         if (isCalc) { rpn += tokenSep }
         popTexTokens(2, true)
         popRpnTokens(7)
@@ -920,7 +920,7 @@ export const parse = (
           // case fraction
           texStack.push({ prec: 2, pos: op.pos, ttype: tt.DIV, closeDelim: "}" })
           tex = tex.substring(0, op.pos) + "\\tfrac{" + tex.substring(op.pos) + "}{"
-        } else if (token.input === "/") {
+        } else if (token.input === "/" || token.input === "\\over") {
           // displaystyle fraction
           texStack.push({ prec: 2, pos: op.pos, ttype: tt.DIV, closeDelim: "}" })
           tex = tex.substring(0, op.pos) + "\\dfrac{" + tex.substring(op.pos) + "}{"
@@ -1439,6 +1439,7 @@ export const parse = (
             // Implicit multiplication between parens, as in (2)(3)
             // Not between square brackets, as in dict[row][property]
             rpn += tokenSep
+            popRpnTokens(rpnPrecFromType[tt.MULT])
             rpnStack.push({ prec: rpnPrecFromType[tt.MULT], symbol: "⌧" })
             isFollowedBySpace = false
           }
