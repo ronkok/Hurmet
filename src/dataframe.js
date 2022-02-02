@@ -512,9 +512,9 @@ const matrix2table = (matrix, rowNames, columnNames, vars) => {
 
 const append = (o1, o2, vars, unitAware) => {
   // Append a vector to a dataframe.
-  const numRows = o1.value.data[0].length
-  if (o2.value.length !== numRows) { return errorOprnd("") }
   const oprnd = clone(o1)
+  const numRows = o1.value.data[0].length
+  if (numRows !== o2.value.length) { return errorOprnd("BAD_CONCAT") }
   oprnd.value.headings.push(o2.name)
   oprnd.value.columnMap[o2.name] = o1.value.headings.length - 1
   const dtype = (o2.dtype & dt.COLUMNVECTOR)

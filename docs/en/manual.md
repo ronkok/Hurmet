@@ -1039,9 +1039,12 @@ _j_
 +---------------+----------------------+---------------------------------------------+
 | ^*            | ¢`z^*`               | Complex conjugate                           |
 +---------------+----------------------+---------------------------------------------+
-| &             |                      | Concatenate strings or vectors, or          |
-|               |                      | concatenate numbers onto vectors, or append |
-|               |                      | column vectors to data frames               |
+| &             | ¢`s_1 & s_2`         | Concatenate strings or vectors, or          |
+|               |                      | append numbers onto vectors, or append a    |
+|               |                      | column vector to a data frame               |
++---------------+----------------------+---------------------------------------------+
+| &\_           | ¢`𝐚 &_ 𝐛`            | Append the second operand to the bottom     |
+|               |                      | of the first operand.                       |
 +---------------+----------------------+---------------------------------------------+
 | √             | ¢`√`                 | Square root\                                |
 |               |                      | auto-correct: sqrt                          |
@@ -1762,7 +1765,7 @@ for
 
     +------------------+---------------------------+
     | ```              | ```                       |
-    | sum = sum + i    | reverse = ""              |
+    | sum = 0          | reverse = ""              |
     | for i in 1:10    | for ch in "abcdef"        |
     |    sum = sum + i |    reverse = ch & reverse |
     | end              | end                       |

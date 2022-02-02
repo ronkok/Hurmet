@@ -120,26 +120,26 @@ const dtype = {
   // Given the shapes which are operands to a binary operator,
   // return the resulting data type.
   scalar: {
-    scalar(t0, t1)     { return t0 },
-    complex(t0, t1)    { return t1 },
-    vector(t0, t1)     { return t1 },
-    matrix(t0, t1)     { return t1 },
-    dictionary(t0, t1) { return t1 },
-    map(t0, t1)        { return t1 },
-    mapWithVectorValues(t0, t1) { return t1 }
+    scalar(t0, t1, tkn)     { return t0 },
+    complex(t0, t1, tkn)    { return t1 },
+    vector(t0, t1, tkn)     { return t1 },
+    matrix(t0, t1, tkn)     { return t1 },
+    dictionary(t0, t1, tkn) { return t1 },
+    map(t0, t1, tkn)        { return t1 },
+    mapWithVectorValues(t0, t1, tkn) { return t1 }
   },
   complex: {
-    scalar(t0, t1)  { return t0 },
-    complex(t0, t1) { return t0 }
+    scalar(t0, t1, tkn)  { return t0 },
+    complex(t0, t1, tkn) { return t0 }
   },
   vector: {
-    scalar(t0, t1) { return t0 },
-    map(t0, t1)    { return t1 + (t0 & dt.ROWVECTOR) + (t0 & dt.COLUMNVECTOR) }
+    scalar(t0, t1, tkn) { return t0 },
+    map(t0, t1, tkn)    { return t1 + (t0 & dt.ROWVECTOR) + (t0 & dt.COLUMNVECTOR) }
   },
   rowVector: {
-    rowVector(t0, t1) { return t0 },
-    columnVector(t0, t1) { return t0 },
-    matrix(t0, t1) { return t1 }
+    rowVector(t0, t1, tkn) { return t0 },
+    columnVector(t0, t1, tkn) { return t0 },
+    matrix(t0, t1, tkn) { return tkn === "&_" ? t1 : t0 }
   },
   columnVector: {
     rowVector(t0, t1, op) {
@@ -149,24 +149,24 @@ const dtype = {
       ? t0
       : t0 - dt.COLUMNVECTOR + dt.MATRIX
     },
-    columnVector(t0, t1) { return t0 },
-    matrix(t0, t1) { return t1 }
+    columnVector(t0, t1, tkn) { return t0 },
+    matrix(t0, t1, tkn) { return t1 }
   },
   matrix: {
-    scalar(t0, t1) { return t0 },
-    rowVector(t0, t1) { return t0 },
-    columnVector(t0, t1) { return t1 },
-    matrix(t0, t1) { return t0 },
-    map(t0, t1)    { return 0 }
+    scalar(t0, t1, tkn) { return t0 },
+    rowVector(t0, t1, tkn) { return t0 },
+    columnVector(t0, t1, tkn) { return tkn === "&" ? t0 : t1 },
+    matrix(t0, t1, tkn) { return t0 },
+    map(t0, t1, tkn)    { return 0 }
   },
   map: {
-    scalar(t0, t1) { return t0 },
-    vector(t0, t1) { return t0 + (t1 & dt.ROWVECTOR) + (t1 & dt.COLUMNVECTOR) },
-    matrix(t0, t1) { return 0 },
-    map(t0, t1)    { return t0 }
+    scalar(t0, t1, tkn) { return t0 },
+    vector(t0, t1, tkn) { return t0 + (t1 & dt.ROWVECTOR) + (t1 & dt.COLUMNVECTOR) },
+    matrix(t0, t1, tkn) { return 0 },
+    map(t0, t1, tkn)    { return t0 }
   },
   mapWithVectorValues: {
-    scalar(t0, t1) { return t0 }
+    scalar(t0, t1, tkn) { return t0 }
   }
 }
 
@@ -192,7 +192,9 @@ const binary = {
       modulo(x, y)   { return Rnl.modulo(x, y) },
       and(x, y)      { return x && y },
       or(x, y)       { return x || y },
-      xor(x, y)      { return x !== y }
+      xor(x, y)      { return x !== y },
+      concat(x, y)   { return [x, y] },
+      unshift(x, y)  { return [x, y] }
     },
     complex: {
       add(x, z)      { return [Rnl.add(x, z[0]), z[1]] },
@@ -216,7 +218,8 @@ const binary = {
       modulo(x, v)   { return v.map(e => Rnl.modulo(x, e)) },
       and(x, v)      { return v.map(e => x && e) },
       or(x, v)       { return v.map(e => x || e) },
-      xor(x, v)      { return v.map(e => x !== e) }
+      xor(x, v)      { return v.map(e => x !== e) },
+      concat(x, v)   { return [x, ...v] }
     },
     matrix: {
       // Binary operations with a scalar and a matrix.
@@ -229,7 +232,8 @@ const binary = {
       modulo(x, m)   { return m.map(row => row.map(e => Rnl.modulo(x, e))) },
       and(x, m)      { return m.map(row => row.map(e => x && e)) },
       or(x, m)       { return m.map(row => row.map(e => x || e)) },
-      xor(x, m)      { return m.map(row => row.map(e => x !== e)) }
+      xor(x, m)      { return m.map(row => row.map(e => x !== e)) },
+      concat(x, m)   { return errorOprnd("BAD_CONCAT") }
     },
     dictionary: {
       multiply(scalar, dict) { return dictMap(dict, value => Rnl.multiply(scalar, value)) },
@@ -335,7 +339,8 @@ const binary = {
       modulo(v, x)   { return v.map(e => Rnl.modulo(e, x)) },
       and(v, x)      { return v.map(e => e && x) },
       or(v, x)       { return v.map(e => e || x) },
-      xor(v, x)      { return v.map(e => e !== x) }
+      xor(v, x)      { return v.map(e => e !== x) },
+      concat(v, x)   { return [...v, x]}
     },
     map: {
       // Binary operations with a vector and a map
@@ -425,7 +430,9 @@ const binary = {
       xor(x, y) {
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
         return x.map((e, i) => e !== y[i])
-      }
+      },
+      concat(x, y) { return x.concat(y) },
+      unshift(x, y) { return [x, y] }
     },
     columnVector: {
       // Binary operations on a row vector and a column vector.
@@ -477,7 +484,9 @@ const binary = {
       xor(x, y) {
         if (x.length === 1 && y.length === 1) { return [x[0] !== y[0]] }
         return errorOprnd("MIS_ELNUM")
-      }
+      },
+      concat(x, y)  { return "BAD_CONCAT" },
+      unshift(x, y) { return "BAD_CONCAT" }
     },
     matrix: {
       // Binary operations on a row vector and a 2-D matrix.
@@ -489,6 +498,14 @@ const binary = {
       subtract(v, m) {
         if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
         return m.map(row => row.map((e, i) => Rnl.subtract(v[i], e)))
+      },
+      concat(v, m) {
+        if (v.length !== m[0].length) { return errorOprnd("BAD_CONCAT") }
+        return m.map((row, i) => [v[i], ...row])
+      },
+      unshift(v, m) {
+        if (v.length !== m.length) { return errorOprnd("BAD_CONCAT") }
+        return [v, ...m]
       }
     }
   },
@@ -547,7 +564,9 @@ const binary = {
       xor(x, y) {
         if (x.length === 1 && y.length === 1) { return [x[0] !== y[0]] }
         return errorOprnd("MIS_ELNUM")
-      }
+      },
+      concat(x, y)  { return "BAD_CONCAT" },
+      unshift(x, y) { return "BAD_CONCAT" }
     },
     columnVector: {
       // Binary operations on two column vectors.
@@ -604,7 +623,12 @@ const binary = {
       xor(x, y) {
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
         return x.map((e, i) => e !== y[i])
-      }
+      },
+      concat(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => [e, y[i]])
+      },
+      unshift(x, y) { return x.concat(y) }
     },
 
     matrix: {
@@ -630,7 +654,12 @@ const binary = {
           }
         }
         return result
-      }
+      },
+      concat(v, m) {
+        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
+        return m.map((row, i) => [v[i], ...row])
+      },
+      unshift(x, y) { return "BAD_CONCAT" }
     }
   },
 
@@ -652,13 +681,20 @@ const binary = {
       modulo(m, x)   { return m.map(row => row.map(e => Rnl.modulo(e, x))) }
     },
     rowVector: {
-
+      unshift(m, v) {
+        if (m[0].length !== v.length) { return errorOprnd("MIS_ELNUM") }
+        return [...m, v]
+      }
     },
     columnVector: {
       multiply(m, v) {
         // Multiply a matrix times a column vector
         if (m[0].length !== v.length) { return errorOprnd("MIS_ELNUM") }
         return m.map(row => dotProduct(row, v))
+      },
+      concat(m, v) {
+        if (m.length !== v.length) { return errorOprnd("MIS_ELNUM") }
+        return m.map((row, i) => [...row, v[i]])
       }
     },
     matrix: {
@@ -719,6 +755,14 @@ const binary = {
         if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
         if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
         return x.map((m, i) => m.map((n, j) => n !== y[i][j]))
+      },
+      concat(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((row, i) => row.concat(y[i]))
+      },
+      unshift(x, y) {
+        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
+        return x.concat(y)
       }
     },
     map: {

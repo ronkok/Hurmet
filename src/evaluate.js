@@ -283,7 +283,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           sum.value = Operators.binary[shape1][shape2][op](o1.value, o2.value)
           if (sum.value.dtype && sum.value.dtype === dt.ERROR) { return sum.value }
           sum.unit = o1.unit
-          sum.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype)
+          sum.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn)
           stack.push(Object.freeze(sum))
           break
         }
@@ -402,10 +402,10 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           power.unit = Object.freeze(unit)
           const [shape1, shape2, _] = binaryShapesOf(o1, o2)
           power.value = Operators.binary[shape1][shape2]["power"](o1.value, o2.value)
-          if (power.value.dtype) { return o1.value } // Error
+          if (power.value.dtype) { return power.value } // Error
           power.dtype = Cpx.isComplex(power.value)
             ? dt.COMPLEX
-            : Operators.dtype[shape1][shape2](o1.dtype, o2.dtype)
+            : Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn)
           stack.push(Object.freeze(power))
           break
         }
@@ -423,10 +423,12 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
-        case "&": {
+        case "&":
+        case "&_": {
           // Concatenation
           const o2 = stack.pop()
           const o1 = stack.pop()
+          const opName = tkn === "&" ? "concat" : "unshift"
           let o3 = Object.create(null)
           if (o1.dtype === dt.STRING && o1.dtype === dt.STRING) {
             const str1 = stringFromOperand(o1, decimalFormat)
@@ -434,28 +436,30 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             o3.value = str1 + str2
             o3.unit = null
             o3.dtype = dt.STRING
-          } else if ((o1.dtype & dt.DATAFRAME) &&
-              ((o2.dtype & dt.COLUMNVECTOR) || (o2.dtype & dt.ROWVECTOR))) {
+          } else if ((o1.dtype & dt.DATAFRAME) && Matrix.isVector(o2) && tkn === "&") {
             o3 = DataFrame.append(o1, o2, vars, unitAware)
             if (o3.dtype === dt.ERROR) { return o3 }
-          } else if (Matrix.isVector(o1)) {
-            o3.unit = o1.unit
-            o3.dtype = o1.dtype
-            o3.value = clone(o1.value)
-            if (Matrix.isVector(o2)) {
-              o3.value.splice(o3.value.length, 0, ...o2.value)
-            } else {
-              o3.value.push(o2.value)
-            }
-          } else if (Matrix.isVector(o2)) {
-            o3.unit = o2.unit
-            o3.dtype = o2.dtype
-            o3.value = clone(o2.value)
-            o3.value.unshift(o1.value)
           } else {
-            o3.value = Object.freeze([o1.value, o2.value])
+            if (unitAware) {
+              if (!unitsAreCompatible(o1.unit.expos, o2.unit.expos)) {
+                return errorOprnd("UNIT_ADD")
+              }
+            }
+            const [shape1, shape2, _] = binaryShapesOf(o1, o2)
+            o3.value = Operators.binary[shape1][shape2][opName](o1.value, o2.value)
+            if (o3.value.dtype) { return o3.value } // Error
+            if (o1.dtype === dt.RATIONAL && o2.dtype === dt.RATIONAL) {
+              o3.dtype = dt.RATIONAL + (tkn === "&" ? dt.ROWVECTOR : dt.COLUMNVECTOR )
+            } else if ((o1.dtype & dt.ROWVECTOR) && (o2.dtype & dt.ROWVECTOR)
+                && tkn === "&_") {
+              o3.dtype = o1.dtype - dt.ROWVECTOR + dt.MATRIX
+            } else if ((o1.dtype & dt.COLUMNVECTOR) && (o2.dtype & dt.COLUMNVECTOR)
+                && tkn === "&") {
+              o3.dtype = o2.dtype - dt.COLUMNVECTOR + dt.MATRIX
+            } else {
+              o3.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn)
+            }
             o3.unit = o1.unit
-            o3.dtype = o1.dtype + dt.ROWVECTOR
           }
           stack.push(Object.freeze(o3))
           break
@@ -482,7 +486,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
 
           root.dtype = Cpx.isComplex(root.value)
             ? dt.COMPLEX
-            : Operators.dtype[shape1]["scalar"](o1.dtype, dt.RATIONAL)
+            : Operators.dtype[shape1]["scalar"](o1.dtype, dt.RATIONAL, tkn)
 
           stack.push(Object.freeze(root))
           break
@@ -505,7 +509,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           root.value = Operators.binary[shape1]["scalar"]["power"](o2.value, pow)
           if (root.value.dtype && root.value.dtype === dt.ERROR) { return root.value }
 
-          root.dtype = Operators.dtype[shape1]["scalar"](o1.dtype, dt.RATIONAL)
+          root.dtype = Operators.dtype[shape1]["scalar"](o1.dtype, dt.RATIONAL, tkn)
           stack.push(Object.freeze(root))
           break
         }
@@ -1081,7 +1085,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           bool.value = Operators.binary[shape1][shape2][op](o1.value, o2.value)
           if (bool.value.dtype && bool.value.dtype === dt.ERROR) { return bool.value }
 
-          bool.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype)
+          bool.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn)
           stack.push(Object.freeze(bool))
           break
         }
@@ -1174,7 +1178,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           mod.unit.expos = allZeros
           mod.value = Operators.binary[shape1][shape2]["modulo"](o1.value, o2.value)
           if (mod.value.dtype && mod.value.dtype === dt.ERROR) { return mod.value }
-          mod.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype)
+          mod.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn)
           stack.push(Object.freeze(mod))
           break
         }

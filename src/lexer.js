@@ -153,9 +153,9 @@ const miscRegEx = /^([/÷\u2215_:,;^+\\\-–−*×∘⊗⦼⊙√∛∜·.%°∘
 const miscSymbols = Object.freeze({
   //    input, output, type,  closeDelim
   "#": ["#", "#", tt.COMMENT, ""],
-  "/": ["/", "\\frac{", tt.DIV, ""],
-  "//": ["//", "\\dfrac{", tt.DIV, ""], // display style fraction
-  "///": ["///", "/", tt.MULT, ""], // inline (shilling) fraction
+  "/": ["/", "\\dfrac{", tt.DIV, ""],   // displaystyle fraction
+  "//": ["//", "\\tfrac{", tt.DIV, ""], // textstyle fraction
+  "///": ["///", "/", tt.MULT, ""],     // inline (shilling) fraction
   "\u2215": ["\u2215", "\u2215", tt.MULT, ""], // inline (shilling) fraction
   "÷": ["÷", "÷", tt.MULT, ""],
   "_": ["_", "_", tt.SUB, ""],
@@ -222,6 +222,7 @@ const miscSymbols = Object.freeze({
   "!!": ["!!", "!!", tt.FACTORIAL, ""],
   "¡": ["¡", "¡", tt.FACTORIAL, ""],
   "&": ["&", "\\mathbin{\\&}", tt.ADD, ""], // string concatenator
+  "&_": ["&_", "\\mathbin{\\underline{\\&}}", tt.ADD, ""], // concatenate to bottom
   "′": ["′", "'", tt.PRIME, ""],
   "″": ["″", "''", tt.PRIME, ""],
   "′′": ["′′", "''", tt.PRIME, ""],
@@ -329,6 +330,7 @@ const texFunctions = Object.freeze({
   "\\oint": ["\\oint", "\\oint", tt.UNDEROVER, ""],
   "\\oiint": ["\\oiint", "\\oiint", tt.UNDEROVER, ""],
   "\\oiiint": ["\\oiiint", "\\oiiint", tt.UNDEROVER, ""],
+  "\\over": ["\\over", "\\dfrac{", tt.DIV],
   "\\sum": ["\\sum", "\\sum", tt.UNDEROVER, ""],
   "\\prod": ["\\prod", "\\prod", tt.UNDEROVER, ""],
   "\\quad": ["\\quad", "\\quad", tt.SPACE, ""],
@@ -367,7 +369,6 @@ const accents = Object.freeze([
   "overleftharpoon",
   "overleftrightarrow",
   "overline",
-  "overlinesegment",
   "overrightarrow",
   "overrightharpoon",
   "textbf",
@@ -381,7 +382,6 @@ const accents = Object.freeze([
   "underleftarrow",
   "underleftrightarrow",
   "underline",
-  "underlinesegment",
   "underrightarrow",
   "utilde",
   "vec",

@@ -227,6 +227,7 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     ["vector = [2.1; -15.3]", "vector = @", "[2.1; -15.3]"],
     ["matrix = (2.1, 7.5; -15.3, 33)", "matrix = @", ""],
     [`dictionary = {"#4": 0.22, "#5": 0.31, "area": 0.44}`, "dictionary = @", ""],
+    ["radius = '[0.375; 0.25; 0.3125; 0.375] in'", "radius = @", ""],
     [`barArea = '{"#4": 0.22, "#5": 0.31, "area": 0.44} in2'`, "barArea = @", ""],
     ["rebar = ``name|diameter|area\nunit|in |in²\n#3|0.375|0.11\n#4|0.5|0.2\n#5|0.625|0.31\n#6|0.75 |0.44``", "rebar = @", ""],
     ["wideFlanges = ``name|weight|area|d|bf|tw|tf|Ix|Sx|rx|Iy|Sy|ry\nunit|lbf/ft|in^2|in|in|in|in|in^4|in^3|in|in^4|in^3|in\nW10X49|49|14.4|10|10|0.34|0.56|272|54.6|4.35|93.4|18.7|2.54\nW8X31|31|9.13|8|8|0.285|0.435|110|27.5|3.47|37.1|9.27|2.02\nW8X18|18|5.26|8.14|5.25|0.23|0.33|61.9|15.2|3.43|7.97|3.04|1.23``", "wideFlanges = @", ""]
@@ -254,7 +255,7 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     }
   }
 
-  // Write a couple of functions into the vars object, so they can be tested.
+  // Write a few functions into the vars object, so they can be tested.
   hurmet.calculate(`function isIn(item, array)
   # Binary search to see if an item is in an array.
   # This works only if the array is sorted.
@@ -368,8 +369,19 @@ end`, vars)
     ["wideFlanges.W8X31.area = @", `¿wideFlanges "W8X31" . "area" .`, "9.13"],
     ['"ab" & "cd" = @', `"ab" "cd" &`, 'abcd'],
     [`1.2 & 3.4 = @`, `®12/10 ®34/10 &`, "[1.2, 3.4]"],
-    [`[1, 2] & 3.6 = @`, `®1/1 ®2/1 matrix 1 2 ®36/10 &`, "[1, 2, 3.6]"],
-    [`1.2 & [2.5, 3.6] = @`, `®12/10 ®25/10 ®36/10 matrix 1 2 &`, "[1.2, 2.5, 3.6]"],
+    [`vector & 3.6 = @`, `¿vector ®36/10 &`, "[2.1; -15.3; 3.6]"],
+    [`1.2 & vector = @`, `®12/10 ¿vector &`, "[1.2; 2.1; -15.3]"],
+    [`vector & vector = @`, `¿vector ¿vector &`, "(2.1, 2.1; -15.3, -15.3)"],
+    [`vector &_ vector = @`, `¿vector ¿vector &_`, "[2.1; -15.3; 2.1; -15.3]"],
+    [`vector^T & vector^T = @`, `¿vector ¿T ^ ¿vector ¿T ^ &`, "[2.1, -15.3, 2.1, -15.3]"],
+    [`vector^T &_ vector^T = @`, `¿vector ¿T ^ ¿vector ¿T ^ &_`, "(2.1, -15.3; 2.1, -15.3)"],
+    [`matrix & vector = @`, `¿matrix ¿vector &`, "(2.1, 7.5, 2.1; -15.3, 33, -15.3)"],
+    [`matrix &_ vector^T = @`, `¿matrix ¿vector ¿T ^ &_`, "(2.1, 7.5; -15.3, 33; 2.1, -15.3)"],
+    [`vector & matrix  = @`, `¿vector ¿matrix &`, "(2.1, 2.1, 7.5; -15.3, -15.3, 33)"],
+    [`vector^T &_ matrix  = @`, `¿vector ¿T ^ ¿matrix &_`, "(2.1, -15.3; 2.1, 7.5; -15.3, 33)"],
+    [`matrix & matrix = @`, `¿matrix ¿matrix &`, "(2.1, 7.5, 2.1, 7.5; -15.3, 33, -15.3, 33)"],
+    [`matrix &_ matrix = @`, `¿matrix ¿matrix &_`, "(2.1, 7.5; -15.3, 33; 2.1, 7.5; -15.3, 33)"],
+    [`rebar & radius = @`, `¿rebar ¿radius &`, "``|diameter|area|radius\nunit|in|in²|in\n#3|0.375|0.11|0.375\n#4|0.5|0.2|0.25\n#5|0.625|0.31|0.3125\n#6|0.75|0.44|0.375``"],
     ["2 dictionary = @", `®2/1 ¿dictionary ⌧`, `{"area": 0.88, "#5": 0.62, "#4": 0.44}`],
     [`(2)(4) + 1 = @`, `®2/1 ®4/1 ⌧ ®1/1 +`, "9"],
     [`(2) (4) + 1 = @`, `®2/1 ®4/1 ⌧ ®1/1 +`, "9"],
