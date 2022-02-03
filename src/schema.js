@@ -306,7 +306,7 @@ export const nodes = {
           if (isFF) {
             temml.render(tex, dom, {
               displayMode: node.attrs.displayMode,
-              trust: (context) => context.command === '\\style'
+              trust: (context) => context.command === '\\style' && context.style === "font-family:'Times New Roman'"
             })
           } else {
             katex.render(tex, dom, {
@@ -315,7 +315,7 @@ export const nodes = {
               macros: {"\\style": "\\htmlStyle"},
               throwOnError: false,
               minRuleThickness: 0.06,
-              trust: (context) => context.command === '\\htmlStyle'
+              trust: (context) => context.command === '\\htmlStyle' && context.style === "font-family:'Times New Roman'"
             })
           }
         }

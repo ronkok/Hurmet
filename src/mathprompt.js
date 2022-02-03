@@ -149,7 +149,8 @@ export function openMathPrompt(options) {
         // eslint-disable-next-line no-undef
         katex.render(tex, mathDisplay, { displayMode: options.attrs.displayMode, strict: false,
           macros: { "\\style": "\\htmlStyle" },
-          trust: (context) => context.command === '\\htmlStyle',
+          trust: (context) => context.command === '\\htmlStyle' &&
+                              context.style === "font-family:'Times New Roman'",
           output: isFF ? "mathml" : "htmlAndMathml" })
       } catch (err) {
         while (mathDisplay.lastChild) {

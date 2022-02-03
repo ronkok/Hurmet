@@ -38,8 +38,14 @@ const demonstration = (function(exports) {
 
     try {
       const isFF = 'MozAppearance' in document.documentElement.style
-      katex.render(tex, demoOutput, { strict: false, throwOnError: false,
-        output: isFF ? "mathml" : "htmlAndMathml" })
+      const command = isFF ? "\\style" : "\\htmlStyle"
+      katex.render(tex, demoOutput, {
+        strict: false,
+        macros: isFF ? {} : {"\\style": "\\htmlStyle"},
+        trust: (context) => context.command === command && context.style === "font-family:'Times New Roman'",
+        throwOnError: false,
+        output: isFF ? "mathml" : "htmlAndMathml"
+      })
     } catch(err) {
       while(demoOutput.lastChild) {
         demoOutput.removeChild(demoOutput.lastChild);
