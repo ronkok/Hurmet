@@ -79,7 +79,6 @@ const autoCorrections = {
   ii: "√(-1)",
   oo: "∞", // infinity
   ooo: "°",
-  kk: "()",
   not: "¬",
   "-:": "÷",
   "\\ ": "˽",  // space
