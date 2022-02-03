@@ -71,14 +71,20 @@
 </tr></tbody></table>
 </header>
 
-<p>This page contains examples of Hurmet features. You can edit them. Calculations will update if you close a calculation cell with <strong>Shift-Enter</strong>.</p>
+<p>This page contains examples of Hurmet features. You can edit them. Calculations will
+update if you close a calculation cell with <strong>Shift-Enter</strong>.</p>
 
 <h2>Print Header</h2>
-<p>At the top of this document is a print header. You can create a print header in any document by clicking the <img src="./images/header.svg" alt="Header" width="20" class="20"> button. Then, when you click the <img src="./images/printer.svg" alt="Printer" width="20" class="20"> button, the header will be printed at the top of every page. Always keep three columns in a print header. Otherwise, edit it any way you want.</p>
+<p>At the top of this document is a print header. You can create a print header in any
+document by clicking the <img src="./images/header.svg" alt="Header" width="20" class="20">
+button. Later, when you click the <img src="./images/printer.svg" alt="Printer" width="20" class="20">
+button, the header will be printed at the top of every page. Always keep three columns
+in a print header. Otherwise, edit it any way you want.</p>
 <p></p>
 
 <h2>Rounding Results</h2>
-<p>You can define how numeric results are rounded. The next line specifies that decimal fractions will be rounded so that no more than 3 significant digits appear.</p>
+<p>You can define how numeric results are rounded. The next line specifies that decimal
+fractions will be rounded so that no more than 3 significant digits appear.</p>
 <p><span class="hurmet-calc" data-entry="format = &quot;h3&quot;"></span></p>
 <p></p>
 
@@ -94,7 +100,8 @@
 <p></p>
 
 <h2>Vectors</h2>
-<p>Calculations<img src="images/IsoTankCourses.svg" alt="Tank Iso" width="230" class="right"> can be done on vectors. Say that we want to build a cylindrical water tank in 5 foot tall courses.
+<p>Calculations<img src="images/IsoTankCourses.svg" alt="Tank Iso" width="230" class="right"> can be done on vectors.
+Say that we want to build a cylindrical water tank in 5-foot courses.
 <table class="nogrid"><tbody>
   <tr>
     <td data-colwidth="204"><p><span class="hurmet-calc" data-entry="D = '25 ft'"></span>, tank diameter</p></td>
@@ -112,11 +119,20 @@
 <p><span class="hurmet-calc" data-entry="𝐭_h= 𝐩_hydro D = ?? kips/ft"></span>, hoop tension in each course</p>
 <p>Vectors can replace many spreadsheet calculations. Then all of the expressions and values are open to view. That extra information helps you to avoid the errors that creep into spreadsheets.</p>
 <p></p>
-<p></p>
+
+<h2>Data Frames</h2>
+<p>Data can be stored in a tabular format:            <span class="hurmet-calc" data-entry="rebar = ``
+  |diameter|area
+  |in      |in²
+#3|0.375   |0.11
+#4|0.5     |0.2
+#5|0.625   |0.31
+#6|0.75    |0.44``"></span></p>
+<p>Later, you can access the data:<br><span class="hurmet-calc" data-entry='A = rebar["#3"].area = ?'></span></p>
 
 <h2>Remote Data</h2>
-<p>Hurmet can fetch text from a remote file. Say that we want to engineer a steel end-plate connection. The calculation could begin by fetching a chunk of data about steel shapes and loading that data into a variable, like this:</p>
-<p><span class="hurmet-calc" data-entry="wideFlanges = fetch(&quot;https://gist.githubusercontent.com/ronkok/a9f465e08be54cb4b46449768511acec/raw/&quot;) = !"></span></p>
+<p>Such data can be stored in a remote file. Say that we want to engineer a steel end-plate connection. The calculation could begin by fetching a chunk of data about steel shapes and loading that data into a variable, like this:</p>
+<p><span class="hurmet-calc" data-entry="wideFlanges = fetch(&quot;https://gist.githubusercontent.com/ronkok/a9f465e08be54cb4b46449768511acec/raw/AISC-v15-wideFlanges.csv&quot;) = !"></span></p>
 <p>From that, we can load data into variables for individual dimensions.</p>
 
 <h4>Beam properties<img src="images/EndPlateConnection.svg" alt="End Plate Connection" width="250" class="right">:</h4>
@@ -169,7 +185,7 @@
 
 <p>Hurmet can solve a system of linear equations via matrix inversion.</p>
 <p>The system:   <span class="hurmet-calc" data-entry="{:3x + 2y + z = 39; 2x + 3y + z = 34; x + 2y + 3z = 26}"></span>   when restated in matrix format is:   <span class="hurmet-calc" data-entry="(3, 2, 1; 2, 3, 1; 1, 2, 3) [x; y; z] = [39; 34; 26]"></span></p>
-<p>So we can invert the first matrix and multiply it times both sides. That solves for each variable.</p>
+<p>We can invert the first matrix and multiply it times both sides. That solves for each variable.</p>
 <p><span class="hurmet-calc" data-entry="[x; y; z] = (3, 2, 1; 2, 3, 1; 1, 2, 3)⁻¹ [39; 34; 26] = ?"></span></p>
 
 <p></p>
