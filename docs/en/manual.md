@@ -782,6 +782,10 @@ Matrix Operations
 
     ¢`‖𝐀‖` ↦ ¢`{√(x_1^2 + ⋯ + x_n^2) if "𝐀 is a vector"; √(∑_i ∑_j A_ij^2) if "𝐀 is a matrix"`
 
+    ¢`𝐀 & 𝐁` ↦ concatenate 𝐀 and 𝐁 horizontally
+
+    ¢`𝐀 &_ 𝐁` ↦ concatenate 𝐀 and 𝐁 vertically
+
     Functions will mostly work element-wise on an matrix. Exception: functions
     `min()` and `max()` will find the minimum or maximum of the elements in the matrix.
 
