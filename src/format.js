@@ -41,7 +41,8 @@ const subscript = str => {
 
 export const texFromMixedFraction = (numParts) => {
   return (numParts[1] ? "-" : "") +
-    numParts[3] + "\\," + superscript(numParts[4]) + "\u2044" + subscript(numParts[5])
+    numParts[3] + "\\,\\style{font-family:'Times New Roman'}{\\text{" +
+    superscript(numParts[4]) + "\u2044" + subscript(numParts[5]) + "}}"
 }
 
 const intAbs = i => i >= BigInt(0) ? i : BigInt(-1) * i  // absolute value of a BigInt
