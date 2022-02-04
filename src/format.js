@@ -41,7 +41,7 @@ const subscript = str => {
 
 export const texFromMixedFraction = (numParts) => {
   return (numParts[1] ? "-" : "") +
-    numParts[3] + "\\,\\style{font-family:'Times New Roman'}{\\text{" +
+    numParts[3] + "\\,\\class{special-fraction}{\\text{" +
     superscript(numParts[4]) + "\u2044" + subscript(numParts[5]) + "}}"
 }
 

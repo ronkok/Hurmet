@@ -424,4 +424,5 @@ li.ProseMirror-selectednode:after {
 .ProseMirror div.centered { text-align: center; }
 
 .katex { font-size: 1em; }
-math.temml { font-size: 1em; }
+math   { font-size: 1em; }
+math .special-fraction { font-family: "Times New Roman"; }

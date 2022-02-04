@@ -37,14 +37,11 @@ const demonstration = (function(exports) {
     const tex = hurmet.calculate(entry, hurmetVars)
 
     try {
-      const isFF = 'MozAppearance' in document.documentElement.style
-      const command = isFF ? "\\style" : "\\htmlStyle"
       katex.render(tex, demoOutput, {
         strict: false,
-        macros: isFF ? {} : {"\\style": "\\htmlStyle"},
-        trust: (context) => context.command === command && context.style === "font-family:'Times New Roman'",
-        throwOnError: false,
-        output: isFF ? "mathml" : "htmlAndMathml"
+        macros: {"\\class": "\\htmlClass"},
+        trust: (context) => context.command === "\\htmlClass" && context.class === "special-fraction",
+        throwOnError: false
       })
     } catch(err) {
       while(demoOutput.lastChild) {

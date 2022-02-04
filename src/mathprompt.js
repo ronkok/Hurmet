@@ -148,9 +148,9 @@ export function openMathPrompt(options) {
         const isFF = 'MozAppearance' in document.documentElement.style
         // eslint-disable-next-line no-undef
         katex.render(tex, mathDisplay, { displayMode: options.attrs.displayMode, strict: false,
-          macros: { "\\style": "\\htmlStyle" },
-          trust: (context) => context.command === '\\htmlStyle' &&
-                              context.style === "font-family:'Times New Roman'",
+          macros: { "\\class": "\\htmlClass" },
+          trust: (context) => context.command === '\\htmlClass' &&
+                              context.class === "special-fraction",
           output: isFF ? "mathml" : "htmlAndMathml" })
       } catch (err) {
         while (mathDisplay.lastChild) {

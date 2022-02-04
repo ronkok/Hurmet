@@ -306,16 +306,16 @@ export const nodes = {
           if (isFF) {
             temml.render(tex, dom, {
               displayMode: node.attrs.displayMode,
-              trust: (context) => context.command === '\\style' && context.style === "font-family:'Times New Roman'"
+              trust: (context) => context.command === '\\class' && context.class === "special-fraction"
             })
           } else {
             katex.render(tex, dom, {
               displayMode: node.attrs.displayMode,
               strict: false,
-              macros: {"\\style": "\\htmlStyle"},
+              macros: {"\\class": "\\htmlClass"},
               throwOnError: false,
               minRuleThickness: 0.06,
-              trust: (context) => context.command === '\\htmlStyle' && context.style === "font-family:'Times New Roman'"
+              trust: (context) => context.command === '\\htmlClass' && context.class === "special-fraction"
             })
           }
         }
