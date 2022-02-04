@@ -596,6 +596,7 @@ export class MarkdownSerializerState {
           let width = colWidth[j]
           for (let m = 1; m < colSpan[i][j]; m++) { width += colWidth[j + m] + 3 }
           for (let k = 0; k < table[i][j].length; k++) {
+            if (table[i][j][k].indexOf("|") > -1) { isRst = true }
             // Pad the line with spaces
             table[i][j][k] += " ".repeat(width - table[i][j][k].length)
           }
