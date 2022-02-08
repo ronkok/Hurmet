@@ -597,6 +597,16 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
+        case ":": {
+          const o2 = stack.pop()
+          const key = stack.pop()
+          if (key.dtype !== dt.STRING) { return errorOprnd("BAD_KEYSTR") }
+          stack.push(Object.freeze({
+            name: key.value, value: o2.value, unit: o2.unit, dtype: o2.dtype
+          }))
+          break
+        }
+
         case "normal":
         case "uniform":
         case "lognormal": {

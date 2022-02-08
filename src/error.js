@@ -83,7 +83,8 @@ const errorMessages = Object.freeze({
     ORIGIN:     "Error. Function \"@\" is undefined at the origin.",
     LOG_ZERO:   "Error. Logarithm of zero is negative infinity.",
     END_MISS:   "Error. Too few END statments in function @.",
-    BAD_CONCAT: "Error. Unmatched dimensions."
+    BAD_CONCAT: "Error. Unmatched dimensions.",
+    BAD_KEYSTR: "Error. The key in a key:value pair must be a string."
   }
 })
 

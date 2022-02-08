@@ -555,8 +555,12 @@ export const parse = (
             }
           }
 
-          if (delim.delimType === dMATRIX) {
-            tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + 1)
+          if (delim.delimType === dDICTIONARY && delim.open.length > 3) {
+            tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + 2)
+            op.closeDelim = delim.close
+          } else if (delim.delimType === dMATRIX) {
+            const inc = tex.slice(op.pos, op.pos + 1) === "\\" ? 2 : 1
+            tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + inc)
             op.closeDelim = delim.close
           } else if (delim.delimType === dCASES) {
             tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + 2)
@@ -566,9 +570,6 @@ export const parse = (
             // The parens surround a numerator. Delete them.
             tex = tex.substring(0, op.pos) + tex.substring(op.pos + 1)
             op.closeDelim = ""
-          } else if (delim.delimType === dDICTIONARY && delim.open.length > 3) {
-            tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + 2)
-            op.closeDelim = delim.close
           } else if (delim.isPrecededByDiv && delim.delimType === dPAREN &&
               delim.name === "(" && (/^[^^_!%°⁻²³¹⁰⁴⁵⁶⁷⁸⁹]/.test(str) || str.length === 0)) {
             // The parens surround a denominator. Delete them.
@@ -1273,20 +1274,23 @@ export const parse = (
           tex += token.output + " "
         } else {
           const delim = delims[delims.length - 1]
-          if (delim.delimType === dPAREN && isFollowedBySpaceOrNewline &&
-            !(token.input === "," && delim.name === "{")) {
-            delim.delimType = dMATRIX
-            const ch = delim.name === "["
-              ? "b"
-              : delim.name === "("
-              ? "p"
-              : delim.name === "{:"
-              ? ""
-              : "B"
-            delim.open = `\\begin{${ch}matrix}`
-            delim.close = `\\end{${ch}matrix}`
-            delim.isTall = true
-            token.output = token.input === "," ? "&" : "\\\\"
+          if (delim.delimType === dPAREN && isFollowedBySpaceOrNewline) {
+            if (token.input === "," && delim.name === "{") {
+              delim.delimType = dDICTIONARY
+            } else {
+              delim.delimType = delim.name === "{" ? dDICTIONARY : dMATRIX
+              const ch = delim.name === "["
+                ? "b"
+                : delim.name === "("
+                ? "p"
+                : delim.name === "{:"
+                ? ""
+                : "B"
+              delim.open = `\\begin{${ch}matrix}`
+              delim.close = `\\end{${ch}matrix}`
+              delim.isTall = true
+              token.output = token.input === "," ? "&" : "\\\\"
+            }
           } else if (delim.delimType === dMATRIX && token.input === ",") {
             token.output = "&"
           } else if (delim.delimType === dDICTIONARY && token.input === ";") {

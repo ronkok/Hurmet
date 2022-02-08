@@ -436,7 +436,9 @@ end`, vars)
     [`testFor(1, 3) = @`, `®1/1 ®3/1 function testFor 2`, `6`],
     [`testWhile(3) = @`, `®3/1 function testWhile 1`, `6`],
     [`testBreak() = @`, `function testBreak 0`, `6`],
-    [`testRaise() = @`, `function testRaise 0`, `Error.`]
+    [`testRaise() = @`, `function testRaise 0`, `Error.`],
+    [`{num, "yup": 5} = @`, `¿num "yup" ®5/1 : dictionary 2`, "{yup: 5, num: 4.2}"],
+    ["{num, str} = @", `¿num ¿str dictionary 2`, `{str: abcdef, num: 4.2}`]
 	]
 
   console.log("Now testing calculations…")

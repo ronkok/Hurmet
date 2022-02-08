@@ -60,8 +60,7 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
     const [tex, rpn] = parse(str, decimalFormat, true)
     if (!/\xa0dictionary\xa0\d+$/.test(rpn)) { return [0, null, dt.ERROR, ""]  }
     const oprnd = evalRpn(rpn, {}, decimalFormat, false, {})
-    const unit = (oprnd.dtype & dt.MAP) ? oprnd.unit : oprnd.unit.map
-    return [oprnd.value, unit, oprnd.dtype, tex]
+    return [oprnd.value, oprnd.unit, oprnd.dtype, tex]
 
   } else if (/^``/.test(str)) {
     // A CSV between double back ticks.

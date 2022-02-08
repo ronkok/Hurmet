@@ -6,13 +6,14 @@ import { format } from "./format"
 import { errorOprnd } from "./error"
 
 const fromTokenStack = (stack, numPairs, vars) => {
-  const targetStackLength = stack.length -  (2 * numPairs)
+  const targetStackLength = stack.length - numPairs
   const lastType = stack[stack.length - 1].dtype
 
-  // A Hurmet hash map is a dictionary whose values all have the same data type and unit.
+  // A Hurmet map is a dictionary whose values all have the same data type and unit.
+  // Check if this set of tokens is a map.
   let isRegular = isIn(lastType, [dt.RATIONAL, dt.BOOLEAN, dt.STRING])
   if (isRegular) {
-    for (let j = stack.length -  (2 * numPairs) + 1; j < stack.length; j += 2) {
+    for (let j = stack.length - numPairs; j < stack.length; j++) {
       if (stack[j].dtype !== lastType) { isRegular = false; break }
       if (lastType === dt.RATIONAL) {
         if (stack[j].unit.expos !== allZeros) { isRegular = false; break }
@@ -23,7 +24,7 @@ const fromTokenStack = (stack, numPairs, vars) => {
   }
 
   if (isRegular) {
-    // We hold a hash map in a data structure that is simpler than a more varied dictionary.
+    // We hold a map in a data structure that is simpler than a more varied dictionary.
     // We only save unit and dtype info once, at the top level.
     const map = Object.create(null)
     map.dtype = lastType + dt.MAP
@@ -35,19 +36,19 @@ const fromTokenStack = (stack, numPairs, vars) => {
     }
     map.value = new Map()
     while (stack.length > targetStackLength) {
-      const value = stack.pop().value
-      map.value.set(stack.pop().value, value)
+      const oprnd = stack.pop()
+      map.value.set(oprnd.name, oprnd.value)
     }
     return Object.freeze(map)
   } else {
-    // This data structure is more complex than a hash map.
+    // This data structure is more complex than a map.
     // Each key:value pair has its own unit and dtype inside dictionary.value
     const dictionary = new Map()
     const unitMap = Object.create(null)
     while (stack.length > targetStackLength) {
       const oprnd = stack.pop()
-      const key = stack.pop().value
-      const unitName = oprnd.unit
+      const key = oprnd.name
+      const unitName = (oprnd.unit) ? oprnd.unit.name : null
       if (typeof unitName === "string") {
         if (!unitMap[unitName]) {
           const unit = unitFromUnitName(unitName, vars)
@@ -59,8 +60,7 @@ const fromTokenStack = (stack, numPairs, vars) => {
     }
     const dict = Object.create(null)
     dict.value = Object.freeze(dictionary)
-    dict.unit = Object.create(null)
-    dict.unit.map = Object.freeze(unitMap)
+    dict.unit = Object.freeze(unitMap)
     dict.dtype = dt.DICT
     return Object.freeze(dict)
   }
@@ -98,8 +98,8 @@ const toValue = (dictionary, keys, unitAware) => {
       properties.set(key, property)
     } else {
       // Return one value. Prep it similar to operands.js.
-      if (property.unit && property.unit.name && (property.dtype & dt.RATIONAL)) {
-        const unitName = property.unit.name
+      if (property.unit && (property.dtype & dt.RATIONAL)) {
+        const unitName = property.unit
         property.unit = Object.create(null)
         if (unitAware) {
           const unit = dictionary.unit[unitName]

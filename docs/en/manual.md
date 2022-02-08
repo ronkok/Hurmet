@@ -917,6 +917,11 @@ Dictionary
 
     A value may be any Hurmet data type except a data frame or a nested dictionary.
 
+    A pre-existing variable can be one of the key:value pairs.
+    As in `dict = {"a": '4 ft²', A} = !`\
+    The display selector is necessary because this is not just an assignment of a
+    literal. A calculation has to run in order to get the value of the variable `A`.
+
     Call individual values from a dictionary with a key in brackets, as in
     `A = barArea["#3"]`. This notation also enables one to use a variable name for
     the key. Or, if the key qualifies as a valid [identifier](#identifiers), you
