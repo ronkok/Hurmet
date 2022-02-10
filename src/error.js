@@ -15,6 +15,7 @@ const errorMessages = Object.freeze({
     NAN_OP:    "Error. Arithmetic operation on a non-numeric value.",
     UNIT_ADD:  "Error. Adding incompatible units.",
     UNIT_COMP: "Error. Comparing incompatible units.",
+    UNIT_APEND:"Error. Apppending incompatible units.",
     UNIT_RES:  "Error. Calculated units are not compatible with the desired result unit:",
     UNIT_MISS: "Error. No units specified for the result.",
     UNIT_IN:   "Error. Incorrect unit for input to function @.",
@@ -84,7 +85,9 @@ const errorMessages = Object.freeze({
     LOG_ZERO:   "Error. Logarithm of zero is negative infinity.",
     END_MISS:   "Error. Too few END statments in function @.",
     BAD_CONCAT: "Error. Unmatched dimensions.",
-    BAD_KEYSTR: "Error. The key in a key:value pair must be a string."
+    BAD_KEYSTR: "Error. The key in a key:value pair must be a string.",
+    BAD_APPEND: "Error. Can not append a @",
+    MAP_APPEND: "Error. Can not append. Wrong data type."
   }
 })
 

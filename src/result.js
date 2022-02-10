@@ -53,16 +53,8 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAwar
         altResultDisplay = DataFrame.displayAlt(result.value, formatSpec)
 
       } else if (result.dtype & dt.MAP) {
-        resultDisplay = map.display(
-          result.value.plain ? result.value.plain : result.value,
-          formatSpec,
-          decimalFormat
-        )
-        altResultDisplay = map.displayAlt(
-          result.value.plain ? result.value.plain : result.value,
-          formatSpec,
-          decimalFormat
-        )
+        resultDisplay = map.display(result, formatSpec, decimalFormat)
+        altResultDisplay = map.displayAlt(result, formatSpec, decimalFormat)
 
       } else if (result.dtype & dt.STRING) {
         resultDisplay = "\\text{" + addTextEscapes(result.value) + "}"

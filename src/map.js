@@ -1,13 +1,54 @@
 import { dt, allZeros } from "./constants"
 import { Rnl } from "./rational"
-import { mapMap, clone, addTextEscapes } from "./utils"
+import { mapMap, clone, addTextEscapes, unitTeXFromString } from "./utils"
 import { format } from "./format"
+import { errorOprnd } from "./error"
 
 /*
  * This file deals with Hurmet maps, which are similar to hash maps.
  * In a map, every value is of the same data type and has the same unit-of-measure.
- *
  */
+
+const checkUnitEquality = (u1, u2) => {
+  let x
+  let y
+  if (u1.expos && u2.expos) {
+    x = u1.expos
+    y = u2.expos
+  } else {
+    x = u1
+    y = u2
+  }
+  if (Array.isArray(x)) {
+    if (Array.isArray(y)) {
+      if (x.length !== y.length) { return false }
+      x.forEach((e, i) => { if (e !== y[i]) { return false } })
+      return true
+    } else {
+      return false
+    }
+  } else {
+    return x === y
+  }
+}
+
+const append = (o1, o2, shape1, shape2) => {
+  let map
+  let scalar
+  if (o1.dtype & dt.MAP) {
+    if (shape2 !== "scalar") { return errorOprnd("BAD_APPEND", shape2) }
+    map = o1
+    scalar = o2
+  } else {
+    if (shape1 !== "scalar") { return errorOprnd("BAD_APPEND", shape1) }
+    map = o2
+    scalar = o1
+  }
+  if (!(map.dtype & scalar.dtype)) { errorOprnd("MAP_APPEND") }
+  if (!checkUnitEquality(map.unit, scalar.unit)) { errorOprnd("UNIT_APEND") }
+  map.value.set(scalar.name, scalar.value)
+  return map
+}
 
 const convertFromBaseUnits = (map, gauge, factor) => {
   map = mapMap( map, value =>  Rnl.divide(value, factor))
@@ -24,22 +65,32 @@ const convertToBaseUnits = (map, gauge, factor) => {
   return mapMap(map, value => Rnl.multiply(value, factor))
 }
 
-const display = (map, formatSpec, decimalFormat) => {
+const display = (result, formatSpec, decimalFormat) => {
+  const mapValue = result.value.plain ? result.value.plain : result.value
   let str = "\\{"
-  for (const [key, value] of map.entries()) {
+  for (const [key, value] of mapValue.entries()) {
     str += "\\text{" + addTextEscapes(key) + "}: "
     str += format(value, formatSpec, decimalFormat) + ",\\:"
   }
-  return str.slice(0, -3) + "\\}"
+  str = str.slice(0, -3) + "\\}"
+  if (result.unit.name) {
+    str += "\\," + unitTeXFromString(result.unit.name)
+  }
+  return str
 }
 
-const displayAlt = (map, formatSpec, decimalFormat) => {
+const displayAlt = (result, formatSpec, decimalFormat) => {
+  const mapValue = result.value.plain ? result.value.plain : result.value
   let str = "{"
-  for (const [key, value] of map.entries()) {
+  for (const [key, value] of mapValue.entries()) {
     str += '"' + key + '": '
     str += format(value, formatSpec, decimalFormat) + ", "
   }
-  return str.slice(0, -2) + "}"
+  str = str.slice(0, -2) + "}"
+  if (result.unit.name) {
+    str = `'${str} ${result.unit.name}'`
+  }
+  return str
 }
 
 const valueFromMap = (map, keys, unitAware) => {
@@ -72,6 +123,7 @@ const valueFromMap = (map, keys, unitAware) => {
 }
 
 export const map = Object.freeze({
+  append,
   convertFromBaseUnits,
   convertToBaseUnits,
   display,

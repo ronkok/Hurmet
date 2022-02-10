@@ -313,7 +313,7 @@ valid in calculations.
 
 A few color functions are valid in calculations, but only if their argument is
 a string. These are: `\blue`, `\gray`, `\green`, `\orange`, `\pink`, `\purple`,
-and `\red`. 
+and `\red`.
 
 #### Auto-correct
 
@@ -760,7 +760,7 @@ Matrix Operations
 
     ¢`𝐀˽𝐁` ↦ [matrix product][], ¢`(𝐀 𝐁)_ij = ∑_(k = 1)^m 𝐀_i) 𝐁_kj`
 
-    ¢`𝐀 × 𝐁` ↦ [cross product][] of a pair of three-vectors  
+    ¢`𝐀 × 𝐁` ↦ [cross product][] of a pair of three-vectors
            = ¢`|𝐀||𝐁|sin(θ) 𝐧`
 
     [matrix product]: http://www.intmath.com/matrices-determinants/4-multiplying-matrices.php/
@@ -799,12 +799,12 @@ Data Frame
 
     Each datum can be a number, a string, `true`, or `false`. A missing item will
     be taken to be `undefined`. All data in a column must be of the same data type.
-    A column of numbers can be assigned a unit of measure. 
+    A column of numbers can be assigned a unit of measure.
 
     Data frame literals are written between double backtick delimiters. The text
     between the backticks must be written in CSV format. (CSV once meant comma-separated
     values.)
-    
+
     Instead of commas, Hurmet data is separated by either tabs or pipes, i.e., `|`.
     (Both not both tabs and pipes in the same file.) Numbers must use a dot decimal.
     The second row may contain units of measure.
@@ -894,9 +894,9 @@ Data Frame
     is a valid [identifier](#identifiers).
 
     Here are calls that can return multiple values:\
-        `A, S\_x = wideFlanges.W8X31["A", "Sx"] = !!`, or\
-        `A, S\_x = wideFlanges\["W8X31"]["A", "Sx"] = !!`, or\
-        `A, S\_x = wideFlanges["W10X49", ["A", "Sx"]] = !!`\
+        `A, S_x = wideFlanges.W8X31["A", "Sx"] = !!`, or\
+        `A, S_x = wideFlanges\["W8X31"]["A", "Sx"] = !!`, or\
+        `A, S_x = wideFlanges["W10X49", ["A", "Sx"]] = !!`\
     Multiple returns must use the `!!` display selector, for now.
 
     For structural engineers, I’ve put some useful data frames on GitHub. There are
@@ -907,6 +907,8 @@ Dictionary
 :   A _dictionary_ is a data structure in which you can store values and access
     each one with a unique name. Put another way, a dictionary is a collection of
     key:value pairs. It’s what Hurmet returns when you call one row of a data frame.
+
+    Dictionaries are often created by calling one row of a data frame, as described above.
 
     Dictionary literals are written between `{ }` delimiters. Each key must be a
     string, i.e., between double quotation marks. Keys are separated from values by
@@ -919,8 +921,9 @@ Dictionary
 
     A pre-existing variable can be one of the key:value pairs.
     As in `dict = {"a": '4 ft²', A} = !`\
-    The display selector is necessary because this is not just an assignment of a
-    literal. A calculation has to run in order to get the value of the variable `A`.
+    The display selector is necessary in this case because this is not just an
+    assignment of a literal. A calculation has to run in order to get the value
+    of the variable `A`.
 
     Call individual values from a dictionary with a key in brackets, as in
     `A = barArea["#3"]`. This notation also enables one to use a variable name for
@@ -940,7 +943,7 @@ Map
 
 :   A Hurmet _map_ is a dictionary in which every value is the same data type and,
     if numeric, carries the same unit-of-measure. Maps can be the numeric part of
-    a quantity. 
+    a quantity.
 
     ```
     barArea = '{"#4": 0.22, "#5": 0.31} in2'
@@ -991,7 +994,7 @@ _j_
 </dl>
 
 ## Operators
-  
+
 +---------------+----------------------+---------------------------------------------+
 | Operator      | Example              | Description                                 |
 +===============+======================+=============================================+
@@ -1049,11 +1052,11 @@ _j_
 | ^*            | ¢`z^*`               | Complex conjugate                           |
 +---------------+----------------------+---------------------------------------------+
 | &             | ¢`s_1 & s_2`         | Concatenate strings or vectors, or          |
-|               |                      | append numbers onto vectors, or append a    |
+|               |                      | append numbers onto vectors, or variables   |
+|               |                      | into a dictionary or map, or append a       |
 |               |                      | column vector to a data frame               |
 +---------------+----------------------+---------------------------------------------+
-| &\_           | ¢`𝐚 &_ 𝐛`            | Append the second operand to the bottom     |
-|               |                      | of the first operand.                       |
+| &\_           | ¢`𝐚 &_ 𝐛`          | Append matrices or vectors vertically.      |
 +---------------+----------------------+---------------------------------------------+
 | √             | ¢`√`                 | Square root\                                |
 |               |                      | auto-correct: sqrt                          |
@@ -1360,9 +1363,9 @@ Hurmet If Expressions enable you to choose between expressions, based upon one o
 
 i> ¢`β_1 = {0.85 if f_c′ ≤ 4000; 0.65 if f_c′ ≥ 8000; 0.85 - (f_c′ - 4000)//20000 otherwise}`
 
-This sort of expression is written between the delimiters: `{ }`  
-The row separator symbol is **;**  
-Hurmet will automatically align the logic words **if** and **otherwise**.  
+This sort of expression is written between the delimiters: `{ }`
+The row separator symbol is **;**
+Hurmet will automatically align the logic words **if** and **otherwise**.
 So the example above can be coded this way:
 
 ```
@@ -1478,7 +1481,7 @@ like this:
 
 currencies = { "USD": 1, "CAD": 1.25 }
 
-The keys in that dictionary are standard three-letter [currrency codes](https://www.xe.com/iso4217.php). 
+The keys in that dictionary are standard three-letter [currrency codes](https://www.xe.com/iso4217.php).
 
 The variable name **currencies** may not be used for any other purpose.
 
@@ -1623,7 +1626,7 @@ Let _N_ be the number of digits specified. Then:
 
 Numeric result display types **f** and **%** can be set to any non-negative
 integer. The significant digit display types are limited to no more than 15
-significant digits. 
+significant digits.
 
 ## Active Tables
 
@@ -1638,7 +1641,7 @@ Remember that a data frame is written as pipe-separated values. A cell can
 contain a formula. So the content of that calculation zone looks like this:
 
 ```
-dist = 
+dist =
 ``Level|  W   | h  |  W × h  |        F         | V_i
    | kips | ft | kip·ft  |       kips       | kips
 4  | 1.2  | 33 | = W × h |=: V × Wh / Wh.Sum| = F
@@ -1941,7 +1944,7 @@ go to ⋯ | Settings | Advanced | Downloads and in Firefox, go to ≡ | Options 
 Browsers will print page numbers only if you check the _Headers and footers_
 box. Unfortunately, that will usually include other unwanted information.
 Firefox is the only browser that enables you to customize the print header and
-footer. Here are the [complicated instructions](https://support.mozilla.org/en-US/questions/1323433). 
+footer. Here are the [complicated instructions](https://support.mozilla.org/en-US/questions/1323433).
 
 ## Markdown
 
@@ -2157,7 +2160,7 @@ Copyright © 2020-2021 Ron Kok. Released under the [MIT License](https://opensou
     const tex = span.dataset.tex.trim().replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
     katex.render(tex, span, { strict: false, throwOnError: false, output: isFF ? "mathml" : "htmlAndMathml" })
   })
-  
+
   // Start the demonstration editor
   const editor = CodeMirror.fromTextArea(document.getElementById("demo-input"), {
     autoCloseBrackets: true,

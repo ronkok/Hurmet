@@ -96,9 +96,19 @@ export const fromAssignment = (cellAttrs, unitAware) => {
     const chEnd = str.charAt(str.length - 1)
     oprnd.value = ch === '"' && chEnd === '"' ? str.slice(1, -1).trim() : str.trim()
 
+  } else if (cellAttrs.dtype === dt.DATAFRAME) {
+    // For data frames, Hurmet employs copy-on-write tactics.
+    // So at this point, we can pass a reference to the value
+    oprnd.value = cellAttrs.value
+
+    // Note the only operations on data frames are: (1) access, and (2) concatenate.
+    // That's where the copy-on-write takes place.
+
   } else {
+    // For all other data types, we employ copy-on-read. So we return a deep copy from here.
     oprnd.value = clone(cellAttrs.value)
   }
 
   return Object.freeze(oprnd)
 }
+

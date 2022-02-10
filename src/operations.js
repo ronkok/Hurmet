@@ -120,7 +120,11 @@ const dtype = {
   // Given the shapes which are operands to a binary operator,
   // return the resulting data type.
   scalar: {
-    scalar(t0, t1, tkn)     { return t0 },
+    scalar(t0, t1, tkn)     {
+      return (tkn === "&" || tkn === "&_")
+        ? t0 + (tkn === "&" ? dt.ROWVECTOR : dt.COLUMNVECTOR )
+        : t0
+    },
     complex(t0, t1, tkn)    { return t1 },
     vector(t0, t1, tkn)     { return t1 },
     matrix(t0, t1, tkn)     { return t1 },
@@ -137,7 +141,7 @@ const dtype = {
     map(t0, t1, tkn)    { return t1 + (t0 & dt.ROWVECTOR) + (t0 & dt.COLUMNVECTOR) }
   },
   rowVector: {
-    rowVector(t0, t1, tkn) { return t0 },
+    rowVector(t0, t1, tkn) { return tkn === "&_" ? t0 - dt.ROWVECTOR + dt.MATRIX : t0 },
     columnVector(t0, t1, tkn) { return t0 },
     matrix(t0, t1, tkn) { return tkn === "&_" ? t1 : t0 }
   },
@@ -149,7 +153,7 @@ const dtype = {
       ? t0
       : t0 - dt.COLUMNVECTOR + dt.MATRIX
     },
-    columnVector(t0, t1, tkn) { return t0 },
+    columnVector(t0, t1, tkn) { return tkn === "&" ? t0 - dt.COLUMNVECTOR + dt.MATRIX : t0 },
     matrix(t0, t1, tkn) { return t1 }
   },
   matrix: {
@@ -158,6 +162,9 @@ const dtype = {
     columnVector(t0, t1, tkn) { return tkn === "&" ? t0 : t1 },
     matrix(t0, t1, tkn) { return t0 },
     map(t0, t1, tkn)    { return 0 }
+  },
+  dictionary: {
+    scalar(t0, t1, tkn) { return t0 }
   },
   map: {
     scalar(t0, t1, tkn) { return t0 },

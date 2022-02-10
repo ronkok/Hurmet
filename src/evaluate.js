@@ -429,6 +429,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const o2 = stack.pop()
           const o1 = stack.pop()
           const opName = tkn === "&" ? "concat" : "unshift"
+          const [shape1, shape2, _] = binaryShapesOf(o1, o2)
           let o3 = Object.create(null)
           if (o1.dtype === dt.STRING && o1.dtype === dt.STRING) {
             const str1 = stringFromOperand(o1, decimalFormat)
@@ -439,26 +440,21 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           } else if ((o1.dtype & dt.DATAFRAME) && Matrix.isVector(o2) && tkn === "&") {
             o3 = DataFrame.append(o1, o2, vars, unitAware)
             if (o3.dtype === dt.ERROR) { return o3 }
+          } else if (o1.dtype === dt.DICT || o2.dtype === dt.DICT) {
+            o3 = Dictionary.append(o1, o2, shape1, shape2, vars)
+            if (o3.dtype === dt.ERROR) { return o3 }
+          } else if ((o1.dtype & dt.MAP) || (o2.dtype & dt.MAP)) {
+            o3 = map.append(o1, o2, shape1, shape2, vars)
+            if (o3.dtype === dt.ERROR) { return o3 }
           } else {
             if (unitAware) {
               if (!unitsAreCompatible(o1.unit.expos, o2.unit.expos)) {
                 return errorOprnd("UNIT_ADD")
               }
             }
-            const [shape1, shape2, _] = binaryShapesOf(o1, o2)
             o3.value = Operators.binary[shape1][shape2][opName](o1.value, o2.value)
             if (o3.value.dtype) { return o3.value } // Error
-            if (o1.dtype === dt.RATIONAL && o2.dtype === dt.RATIONAL) {
-              o3.dtype = dt.RATIONAL + (tkn === "&" ? dt.ROWVECTOR : dt.COLUMNVECTOR )
-            } else if ((o1.dtype & dt.ROWVECTOR) && (o2.dtype & dt.ROWVECTOR)
-                && tkn === "&_") {
-              o3.dtype = o1.dtype - dt.ROWVECTOR + dt.MATRIX
-            } else if ((o1.dtype & dt.COLUMNVECTOR) && (o2.dtype & dt.COLUMNVECTOR)
-                && tkn === "&") {
-              o3.dtype = o2.dtype - dt.COLUMNVECTOR + dt.MATRIX
-            } else {
-              o3.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn)
-            }
+            o3.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn)
             o3.unit = o1.unit
           }
           stack.push(Object.freeze(o3))
@@ -1280,6 +1276,7 @@ const elementFromIterable = (iterable, index, step) => {
     nextIndex = Rnl.add(index, 2)
     dtype = dt.STRING
 //  } else if (iterable.dtype === dt.DICT) {
+  // TODO: Remember to make a defensive copy. Dictionaries are copy-on-write.
   } else {
     value = iterable.value[Rnl.toNumber(index)]
     dtype = (iterable.dtype & dt.STRING)

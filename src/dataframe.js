@@ -138,7 +138,7 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
     if (unitAware && (dtype & dt.QUANTITY)) {
       const unitName = oprnd.value.units[j] ? oprnd.value.units[j] : undefined
       const unitObj = unitFromUnitName(unitName, vars)
-      unit.expos = unitObj.expos
+      unit.expos = clone(unitObj.expos)
       value = value.map(e => Rnl.multiply(Rnl.add(e, unitObj.gauge), unitObj.factor))
     }
     return { value, unit, dtype }
@@ -192,7 +192,7 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
       return {
         value: Matrix.convertToBaseUnits(newOprnd, unit.gauge, unit.factor),
         name: oprnd.value.headings[j],
-        unit: { expos: unit.expos },
+        unit: { expos: clone(unit.expos) },
         dtype: dt.RATIONAL + dt.COLUMNVECTOR
       }
     } else {
@@ -225,7 +225,7 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
         data.push(oprnd.value.data[columnList[j]].slice(iStart, iEnd + 1))
       }
     }
-    return clone({
+    return {
       value: {
         data: data,
         headings: headings,
@@ -234,9 +234,9 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
         units: units,
         dtype: dtype
       },
-      unit: { map: unitMap },
+      unit: { map: clone(unitMap) },
       dtype: dt.DATAFRAME
-    })
+    }
   }
 }
 
@@ -512,7 +512,7 @@ const matrix2table = (matrix, rowNames, columnNames, vars) => {
 
 const append = (o1, o2, vars, unitAware) => {
   // Append a vector to a dataframe.
-  const oprnd = clone(o1)
+  const oprnd = clone(o1) // We employ copy-on-write for data frames.
   const numRows = o1.value.data[0].length
   if (numRows !== o2.value.length) { return errorOprnd("BAD_CONCAT") }
   oprnd.value.headings.push(o2.name)

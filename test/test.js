@@ -382,7 +382,7 @@ end`, vars)
     [`matrix & matrix = @`, `¿matrix ¿matrix &`, "(2.1, 7.5, 2.1, 7.5; -15.3, 33, -15.3, 33)"],
     [`matrix &_ matrix = @`, `¿matrix ¿matrix &_`, "(2.1, 7.5; -15.3, 33; 2.1, 7.5; -15.3, 33)"],
     [`rebar & radius = @`, `¿rebar ¿radius &`, "``|diameter|area|radius\nunit|in|in²|in\n#3|0.375|0.11|0.375\n#4|0.5|0.2|0.25\n#5|0.625|0.31|0.3125\n#6|0.75|0.44|0.375``"],
-    ["2 dictionary = @", `®2/1 ¿dictionary ⌧`, `{"area": 0.88, "#5": 0.62, "#4": 0.44}`],
+    ["2 dictionary = @", `®2/1 ¿dictionary ⌧`, `{"#4": 0.44, "#5": 0.62, "area": 0.88}`],
     [`(2)(4) + 1 = @`, `®2/1 ®4/1 ⌧ ®1/1 +`, "9"],
     [`(2) (4) + 1 = @`, `®2/1 ®4/1 ⌧ ®1/1 +`, "9"],
     ["{ 5 if n = 10; 0 otherwise } = @", `¿n ®10/1 = true cases 2 ®5/1 ®0/1`, "5"],
@@ -437,8 +437,8 @@ end`, vars)
     [`testWhile(3) = @`, `®3/1 function testWhile 1`, `6`],
     [`testBreak() = @`, `function testBreak 0`, `6`],
     [`testRaise() = @`, `function testRaise 0`, `Error.`],
-    [`{num, "yup": 5} = @`, `¿num "yup" ®5/1 : dictionary 2`, "{yup: 5, num: 4.2}"],
-    ["{num, str} = @", `¿num ¿str dictionary 2`, `{str: abcdef, num: 4.2}`]
+    [`{num, "yup": 5} = @`, `¿num "yup" ®5/1 : dictionary 2`, "{num: 4.2, yup: 5}"],
+    ["{num, str} = @", `¿num ¿str dictionary 2`, `{num: 4.2, str: abcdef}`]
 	]
 
   console.log("Now testing calculations…")

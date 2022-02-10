@@ -1,11 +1,12 @@
 import { dt, allZeros } from "./constants"
-import { clone, isIn, addTextEscapes, unitTeXFromString } from "./utils"
+import { isIn, addTextEscapes, unitTeXFromString } from "./utils"
 import { Rnl } from "./rational"
 import { unitFromUnitName } from "./units"
 import { format } from "./format"
 import { errorOprnd } from "./error"
 
 const fromTokenStack = (stack, numPairs, vars) => {
+  // Create a dictionary or map from a stack of tokens.
   const targetStackLength = stack.length - numPairs
   const lastType = stack[stack.length - 1].dtype
 
@@ -23,6 +24,11 @@ const fromTokenStack = (stack, numPairs, vars) => {
     }
   }
 
+  const localStack = []
+  while (stack.length > targetStackLength) {
+    localStack.push(stack.pop())
+  }
+
   if (isRegular) {
     // We hold a map in a data structure that is simpler than a more varied dictionary.
     // We only save unit and dtype info once, at the top level.
@@ -35,8 +41,8 @@ const fromTokenStack = (stack, numPairs, vars) => {
       map.unit = null
     }
     map.value = new Map()
-    while (stack.length > targetStackLength) {
-      const oprnd = stack.pop()
+    while (localStack.length > 0) {
+      const oprnd = localStack.pop()
       map.value.set(oprnd.name, oprnd.value)
     }
     return Object.freeze(map)
@@ -45,8 +51,8 @@ const fromTokenStack = (stack, numPairs, vars) => {
     // Each key:value pair has its own unit and dtype inside dictionary.value
     const dictionary = new Map()
     const unitMap = Object.create(null)
-    while (stack.length > targetStackLength) {
-      const oprnd = stack.pop()
+    while (localStack.length > 0) {
+      const oprnd = localStack.pop()
       const key = oprnd.name
       const unitName = (oprnd.unit) ? oprnd.unit.name : null
       if (typeof unitName === "string") {
@@ -70,8 +76,9 @@ const fromTokenStack = (stack, numPairs, vars) => {
 // Each Hurmet dictionary contains a Javascript Map of key:value pairs.
 // Each of those nested values is an object containing: { value, unit: unitName, dtype }
 export const dictMap = (dictionaryValue, fn) => {
+  const dictVal = dictionaryValue
   const newMap = new Map()
-  for (const [key, oprnd] of dictionaryValue.entries()) {
+  for (const [key, oprnd] of dictVal.entries()) {
     const value = Object.create(null)
     value.value = fn(oprnd.value)
     value.unit = oprnd.unit
@@ -91,7 +98,7 @@ const toValue = (dictionary, keys, unitAware) => {
   // Load in the values
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i]
-    const property = clone(dictionary.value.get(key))
+    const property = dictionary.value.get(key)
     if (property === undefined) { return errorOprnd("BAD_KEY", key) }
 
     if (keys.length > 1) {
@@ -118,6 +125,33 @@ const toValue = (dictionary, keys, unitAware) => {
   output.unit = dictionary.unit
   output.dtype = dt.DICT
   return Object.freeze(output)
+}
+
+const append = (o1, o2, shape1, shape2) => {
+  let dict
+  let scalar
+  if (o1.dtype === dt.DICT) {
+    if (shape2 !== "scalar") { return errorOprnd("BAD_APPEND", shape2) }
+    dict = o1
+    scalar = o2
+  } else {
+    if (shape1 !== "scalar") { return errorOprnd("BAD_APPEND", shape1) }
+    dict = o2
+    scalar = o1
+  }
+  const value = Object.create(null)
+  value.value = scalar.value
+  value.unit = (scalar.unit.name)
+    ? scalar.unit.name
+    : typeof scalar.unit === "string"
+    ? scalar.unit
+    : null
+  value.dtype = scalar.dtype
+  dict.set(scalar.name, Object.freeze(value))
+  if (value.unit && !dict.unit[value.unit]) {
+    dict.unit[value.unit] = unitFromUnitName(value.unit)
+  }
+  return dict
 }
 
 const display = (dictionary, formatSpec, decimalFormat) => {
@@ -160,6 +194,7 @@ const displayAlt = (dictionary, formatSpec, decimalFormat) => {
 
 export const Dictionary = Object.freeze({
   fromTokenStack,
+  append,
   display,
   displayAlt,
   toValue

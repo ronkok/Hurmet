@@ -339,6 +339,9 @@ const TABLES = (function() {
           for (let k = j + 1; k < xCorners.length; k++) {
             if (lastTextRow.charAt(xCorners[k]) === "|") { break }
             cell.colspan += 1;
+            if (!row[k]) {
+              console.log("Error in table " + gridTable[0][0].blob + " row " + i)
+            }
             row[k].rowspan = 0;
           }
           for (let k = i + 1; k < yCorners.length; k++) {
