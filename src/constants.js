@@ -8,7 +8,7 @@ export const allZeros = Object.freeze([0, 0, 0, 0, 0, 0, 0, 0])
 export const dt = Object.freeze({
   NULL: 0,
   RATIONAL: 1,
-  COMPLEX: 2, //   Not currently used.
+  COMPLEX: 2,
   BOOLEAN: 4,
   FROMCOMPARISON: 8,
   BOOLEANFROMCOMPARISON: 12, // 4 + 8, useful for chained comparisons
