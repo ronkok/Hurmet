@@ -629,7 +629,7 @@ const lexOneWord = (str, prevToken) => {
         for (let i = segments.length - 1; i >= 0; i--) {
           segments[i] = checkForTrailingAccent(segments[i])
           if (i > 0) {
-            segments[i] = "_\\mathrm{" + segments[i] + "}"
+            segments[i] = "_\\text{" + segments[i] + "}"
           }
         }
         identifier = segments.join("")

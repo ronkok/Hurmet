@@ -906,7 +906,7 @@ Dictionary
 
 :   A _dictionary_ is a data structure in which you can store values and access
     each one with a unique name. Put another way, a dictionary is a collection of
-    key:value pairs. It’s what Hurmet returns when you call one row of a data frame.
+    key:value pairs.
 
     Dictionaries are often created by calling one row of a data frame, as described above.
 
@@ -917,18 +917,22 @@ Dictionary
 
     Example:  `barArea = {"#4": 0.22, "#5": 0.31}`
 
+    The quotation marks around a key may be omitted if the key is a valid
+    [identifier](#identifiers). Example:   `dict = {a: 4, b: 7}`
+
     A value may be any Hurmet data type except a data frame or a nested dictionary.
 
-    A pre-existing variable can be one of the key:value pairs.
-    As in `dict = {"a": '4 ft²', A} = !`\
-    The display selector is necessary in this case because this is not just an
-    assignment of a literal. A calculation has to run in order to get the value
-    of the variable `A`.
+    A pre-existing variable can be one of the key:value pairs. So if you have
+    previously assigned values to variables _a_, _b_, and _c_, a dictionary
+    can be defined this way: `dict = {a, b c} = !`\
+    The display selector, `!`, is necessary in this case because this is not just an
+    assignment of a literal. A calculation has to run in order to fetch the value
+    of the variable `a`.
 
     Call individual values from a dictionary with a key in brackets, as in
-    `A = barArea["#3"]`. This notation also enables one to use a variable name for
-    the key. Or, if the key qualifies as a valid [identifier](#identifiers), you
-    can use dot notation, as in `W8X31.weight`
+    `A = barArea["#3"]`. This notation also enables one to use a variable name
+    for the key. Or, if the key qualifies as a valid identifier, you can use
+    dot notation, as in `W8X31.weight`
 
     You can assign multiple values from a dictionary in one statement using bracket
     notation, like this:
@@ -941,8 +945,8 @@ Dictionary
 
 Map
 
-:   A Hurmet _map_ is a dictionary in which every value is the same data type and,
-    if numeric, carries the same unit-of-measure. Maps can be the numeric part of
+:   A Hurmet _map_ is a dictionary in which every value is the same data type,
+    either boolean, string, or number. Maps can be the numeric part of
     a quantity.
 
     ```

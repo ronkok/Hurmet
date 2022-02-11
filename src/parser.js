@@ -128,6 +128,8 @@ const unitRegEx = /^[A-Za-z0-9_\-⁰¹²³\u2074-\u2079⁻/^·*.°′″‴ΩΩ
 
 const currencyRegEx = /^-?[$$£¥\u20A0-\u20CF]/
 
+const dictSepRegEx = /^(?:′+ *)?:/
+
 export const parseQuantityLiteral = (str, decimalFormat, tokenSep, isCalc) => {
   // In Hurmet, a string delimited by single quotation marks, '…',
   // is a QUANTITY literal, which includes a magnitude and a unit of measure.
@@ -769,8 +771,8 @@ export const parse = (
         okToAppend = true
         break
 
-      case tt.VAR: //      variable name, one letter long
-      case tt.LONGVAR: // multi-letter variable name
+      case tt.VAR:         // variable name, one letter long
+      case tt.LONGVAR: {   // multi-letter variable name
         if (token.ttype === tt.LONGVAR && prevToken.input === "⌧") {
           tex += "\\," // Place a space before a long variable name.
         }
@@ -778,14 +780,25 @@ export const parse = (
         popTexTokens(7, okToAppend)
         if (isPrecededBySpace) { posOfPrevRun = tex.length }
 
+        let isKey = false
+        if (dictSepRegEx.test(str)) {
+          const topDelim = delims[delims.length - 1]
+          if (topDelim.delimType === dDICTIONARY
+              || (topDelim.delimType === dPAREN && topDelim.name === "{")) {
+            isKey = true
+          }
+        }
         token.output = assertCalligraphic(token.output)
 
         if (!isCalc) {
-          if (token.ttype === tt.LONGVAR) {
+          if (token.ttype === tt.LONGVAR || isKey) {
             token.output = "\\mathrm{" + token.output + "}"
           }
         } else if (prevToken.input === "for") {
           rpn += '"' + token.input + '"' // a loop index variable name.
+        } else if (isKey) {
+          token.output = "\\mathrm{" + token.output + "}"
+          rpn += `"${token.input}"`
         } else {
           // We're in the echo of a Hurmet calculation.
           if (/^[.[]/.test(str)) {
@@ -808,6 +821,7 @@ export const parse = (
         }
         okToAppend = true
         break
+      }
 
       case tt.QUANTITY: { //  e.g.  '10 meters'
         popTexTokens(2, okToAppend)
@@ -1061,7 +1075,19 @@ export const parse = (
 
       case tt.PRIME:
         popTexTokens(15, true)
-        if (isCalc) { rpn += token.input }
+        if (isCalc) {
+          const topDelimType = delims[delims.length - 1].delimType
+          const isAccessor = rpnStack.length > 0 &&
+                             rpnStack[rpnStack.length - 1].symbol === "."
+          if (isAccessor || (topDelimType === dDICTIONARY && rpn.length > 0 &&
+              rpn.charAt(rpn.length - 1) === '"' && str.length > 0 && str.charAt(0) === ":")) {
+            // prevToken is a dictionary key that the user wrote w/o surrounding quote marks.
+            // The quote marks were appended above. Slip the prime into the string.
+            rpn = rpn.slice(0, -1) + token.input + '"'
+          } else {
+            rpn += token.input
+          }
+        }
         tex = tex.trim() + token.output + " "
         okToAppend = true
         break

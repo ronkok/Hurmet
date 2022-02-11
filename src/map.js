@@ -101,6 +101,7 @@ const valueFromMap = (map, keys, unitAware) => {
   const treatAsUnitAware = (unitAware && (map.dtype & dt.QUANTITY) > 0)
   if (keys.length === 1) {
     const key = keys[0]
+    if (!map.value.has(key)) { return errorOprnd("BAD_KEY", key) }
     const value = clone(map.value.get(key))
     if (!isNumeric) {
       return { value, unit: undefined, dtype: map.dtype - dt.MAP }

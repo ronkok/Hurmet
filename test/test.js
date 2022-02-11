@@ -29,7 +29,7 @@ const parserTests = [
     "{a if b; c if d}",
     "\\begin{cases}a &\\mathrel{\\mathrm{if}}b \\\\ c &\\mathrel{\\mathrm{if}}d \\end{cases}"
   ],
-  ['f_c′=4500 " psi"', "f_\\mathrm{c}' = 4{,}500 \\text{ psi}"],
+  ['f_c′=4500 " psi"', "f_\\text{c}' = 4{,}500 \\text{ psi}"],
   ["root 3 x", "\\sqrt[3]{x}"],
   ["sqrt(a b)", "\\sqrt{a b}"],
   ["sin^2 x", "\\sin^{2}{x}"],
@@ -37,19 +37,19 @@ const parserTests = [
   ["log10 x", "\\log_{10}{x}"],
   ["v_(x=0)/n", "\\dfrac{v_{x = 0}}{n}"],
   ["w^sin x y", "w^{\\sin{x}} y"],
-  ["x_wind L", "x_\\mathrm{wind} L"],
+  ["x_wind L", "x_\\text{wind} L"],
   ["root 3 (a + b)", "\\sqrt[3]{a + b}"],
   ["sin^(a+b) x", "\\sin^{a + b}{x}"],
   ["(π (D - I))/4", "\\dfrac{π (D - I)}{4}"],
-  ["f_c′/200", "\\dfrac{f_\\mathrm{c}'}{200}"],
+  ["f_c′/200", "\\dfrac{f_\\text{c}'}{200}"],
   ["(b^2/2)", "\\left(\\dfrac{b^{2}}{2}\\right)"],
-  ["sqrt f_c′", "\\sqrt{f_\\mathrm{c}'}"],
+  ["sqrt f_c′", "\\sqrt{f_\\text{c}'}"],
   ["sqrt \\hat θ^2", "\\sqrt{\\hat{θ}^{2}}"],
   ["sin^2 \\hat θ", "\\sin^{2}{\\hat{θ}}"],
   ["((n (n+1))/2)", "\\left(\\dfrac{n (n + 1)}{2}\\right)"],
   [
     "β_1 = {0.85 if f_c′ <= 4000; 0.65 if f_c′ >= 8000; 0.85 - f_c′/20000 otherwise}",
-    "β_\\mathrm{1} = \\begin{cases}0.85 &\\mathrel{\\mathrm{if}}f_\\mathrm{c}' ≤ 4{,}000 \\\\ 0.65 &\\mathrel{\\mathrm{if}}f_\\mathrm{c}' ≥ 8{,}000 \\\\ 0.85 - \\dfrac{f_\\mathrm{c}'}{20{,}000}&\\mathrel{\\mathrm{otherwise}}\\end{cases}"
+    "β_\\text{1} = \\begin{cases}0.85 &\\mathrel{\\mathrm{if}}f_\\text{c}' ≤ 4{,}000 \\\\ 0.65 &\\mathrel{\\mathrm{if}}f_\\text{c}' ≥ 8{,}000 \\\\ 0.85 - \\dfrac{f_\\text{c}'}{20{,}000}&\\mathrel{\\mathrm{otherwise}}\\end{cases}"
   ],
   ["x = (-b +- sqrt(b^2-4a c))/(2 a)", "x = \\dfrac{\\text{-} b ± \\sqrt{b^{2}- 4 a c}}{2 \\, a}"],
   [
@@ -67,19 +67,19 @@ const parserTests = [
   ],
   ["\\underbrace(b·b)_(n)", "\\underbrace{b ⋅ b}_{n}"],
   ["|y^n|/3", "\\dfrac{\\vert y^{n}\\vert}{3}"],
-  ["A_0^n n/k", "A_\\mathrm{0}^{n} \\dfrac{n}{k}"],
+  ["A_0^n n/k", "A_\\text{0}^{n} \\dfrac{n}{k}"],
   ["C = <<n \\atop k>>", "C = \\left\u27E8{{n}\\atop{k}}\\right\u27E9"],
   ["(exp(-exp(u)))/((u+γ)^2+π^2)", "\\dfrac{\\exp(\\text{-} \\exp(u))}{(u + γ)^{2}+ π^{2}}"],
   [
     "α = {B:7.0, C:9.5, D:11.5}[C_exp]",
-    "α = \\{B \\mathpunct{:}7.0 ,\\: C \\mathpunct{:}9.5 ,\\: D \\mathpunct{:}11.5 \\}[C_\\mathrm{exp}]"
+    "α = \\{\\mathrm{B} \\mathpunct{:}7.0 ,\\: \\mathrm{C} \\mathpunct{:}9.5 ,\\: \\mathrm{D} \\mathpunct{:}11.5 \\}[C_\\text{exp}]"
   ],
   ["H^2 = \\dot a/a", "H^{2}= \\dfrac{\\dot{a}}{a}"],
   ["P = (1.2(D/H))", "P = \\left(1.2 \\left(\\dfrac{D}{H}\\right)\\right)"],
   ["M = \\mathcal O(a b)/5", "M = \\dfrac{\\mathcal{O}{(a b)}}{5}"],
   [
     "c_s = (n_c A_s)/b (√(1 + (2 b d)/(n_c A_s))-1)",
-    "c_\\mathrm{s} = \\dfrac{n_\\mathrm{c} A_\\mathrm{s}}{b} \\left(\\sqrt{1 + \\dfrac{2 \\, b d}{n_\\mathrm{c} A_\\mathrm{s}}}- 1 \\right)"
+    "c_\\text{s} = \\dfrac{n_\\text{c} A_\\text{s}}{b} \\left(\\sqrt{1 + \\dfrac{2 \\, b d}{n_\\text{c} A_\\text{s}}}- 1 \\right)"
   ],
   ['A --> "heat" B', "A \\xrightarrow{\\text{heat}}B"],
   [
@@ -101,7 +101,7 @@ const parserTests = [
   ],
   [
     "σ^2 = 1/(n (n-1)) (n ∑_(i=1)^n x_i^2 - (∑_(i=1)^n x_k)^2)",
-    "σ^{2}= \\dfrac{1}{n (n - 1)}\\left(n ∑_{i = 1}^{n} x_\\mathrm{i}^{2}- \\left(∑_{i = 1}^{n} x_\\mathrm{k} \\right)^{2}\\right)"
+    "σ^{2}= \\dfrac{1}{n (n - 1)}\\left(n ∑_{i = 1}^{n} x_\\text{i}^{2}- \\left(∑_{i = 1}^{n} x_\\text{k} \\right)^{2}\\right)"
   ],
   ["(2n)!!/(2n+1)^2", "\\dfrac{(2 n)!!}{(2 n + 1)^{2}}"],
   ["(1, 2; 3, 4)", "\\begin{pmatrix}1 & 2 \\\\ 3 & 4 \\end{pmatrix}"]
@@ -230,7 +230,8 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     ["radius = '[0.375; 0.25; 0.3125; 0.375] in'", "radius = @", ""],
     [`barArea = '{"#4": 0.22, "#5": 0.31, "area": 0.44} in2'`, "barArea = @", ""],
     ["rebar = ``name|diameter|area\nunit|in |in²\n#3|0.375|0.11\n#4|0.5|0.2\n#5|0.625|0.31\n#6|0.75 |0.44``", "rebar = @", ""],
-    ["wideFlanges = ``name|weight|area|d|bf|tw|tf|Ix|Sx|rx|Iy|Sy|ry\nunit|lbf/ft|in^2|in|in|in|in|in^4|in^3|in|in^4|in^3|in\nW10X49|49|14.4|10|10|0.34|0.56|272|54.6|4.35|93.4|18.7|2.54\nW8X31|31|9.13|8|8|0.285|0.435|110|27.5|3.47|37.1|9.27|2.02\nW8X18|18|5.26|8.14|5.25|0.23|0.33|61.9|15.2|3.43|7.97|3.04|1.23``", "wideFlanges = @", ""]
+    ["wideFlanges = ``name|weight|area|d|bf|tw|tf|Ix|Sx|rx|Iy|Sy|ry\nunit|lbf/ft|in^2|in|in|in|in|in^4|in^3|in|in^4|in^3|in\nW10X49|49|14.4|10|10|0.34|0.56|272|54.6|4.35|93.4|18.7|2.54\nW8X31|31|9.13|8|8|0.285|0.435|110|27.5|3.47|37.1|9.27|2.02\nW8X18|18|5.26|8.14|5.25|0.23|0.33|61.9|15.2|3.43|7.97|3.04|1.23``", "wideFlanges = @", ""],
+    ["dict = {a: 4, b_a: 5}", "dict = @", `{"a": 4, "b_a": 5}`]
   ]
 
   console.log("Now testing assignments…")
@@ -361,6 +362,7 @@ end`, vars)
     ["abs(vector) = @", "¿vector abs", "[2.1; 15.3]"],
     [`dictionary["#4"] =@`, `¿dictionary "#4" [] 1`, "0.22"],
     [`dictionary.area = @`, `¿dictionary "area" .`, "0.44"],
+    ["dict.a = @", `¿dict "a" .`, "4"],
     [`barArea["#4"] = @`, `¿barArea "#4" [] 1`, "0.22"],
     [`barArea.area = @`, `¿barArea "area" .`, "0.44"],
 //    [`wideFlanges[["W8X31"; "W10X49"], "area"] = @`, `¿wideFlanges "W8X31" "W10X49" matrix 2 1 "area" [] 2`, "[9.13; 14.4]"],
