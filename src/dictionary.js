@@ -106,7 +106,7 @@ const toValue = (dictionary, keys, unitAware) => {
     } else {
       // Return one value. Prep it similar to operands.js.
       if (property.unit && (property.dtype & dt.RATIONAL)) {
-        const unitName = property.unit
+        const unitName = property.unit.name
         property.unit = Object.create(null)
         if (unitAware) {
           const unit = dictionary.unit[unitName]
