@@ -244,6 +244,10 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
 const numberRegEx = new RegExp("^(?:=|" + Rnl.numberPattern.slice(1) + "$)")
 const mixedFractionRegEx = /^-?(?:[0-9]+(?: [0-9]+\/[0-9]+))$/
 
+const maybeUnitNames = (data, row, col, attrs) => {
+
+}
+
 const dataFrameFromCSV = (str, vars) => {
   // Load a CSV string into a data frame.
   // Data frames are loaded column-wise. The subordinate data structures are:
@@ -263,46 +267,48 @@ const dataFrameFromCSV = (str, vars) => {
   let row = 0
   let col = 0
 
-  // Before we start loading data, let's write a closed function, to share variable scope.
+  // Before we start loading data, let's write two closed functions, to share variable scope.
+  const checkForUnitRow = _ => {
+    // Determine if there is a row for unit names.
+    let gotAnswer = false
+    for (let iCol = 0; iCol < data.length; iCol++) {
+      if (numberRegEx.test(data[iCol][0])) { gotAnswer = true; break }
+    }
+    if (!gotAnswer) {
+      for (const attr of attrs) {
+        if (attr.row === 1) { gotUnits = true; break }
+      }
+      for (let iCol = 0; iCol < data.length; iCol++) {
+        if (numberRegEx.test(data[iCol][1])) { gotUnits = true; break }
+      }
+    }
+    if (gotUnits) {
+      // Shift the top row of data into units.
+      for (let iCol = 0; iCol < data.length; iCol++) {
+        const unitName = data[iCol].shift()
+        units.push(unitName)
+        if (unitName.length > 0) {
+          if (!unitMap[unitName]) {
+            const unit = unitFromUnitName(unitName, vars)
+            if (unit) {
+              unitMap[unitName] = unit
+            } else {
+              return errorOprnd("DF_UNIT", unitName)
+            }
+          }
+        }
+      }
+      if (rowMap) {
+        Object.entries(rowMap).forEach(([key, value]) => { rowMap[key] = value - 1 })
+      }
+    }
+  }
+
   const harvest = (datum) => {
     // Load a datum into the dataTable
     datum = datum.trim()
 
-    if (row === 3 && col === 0) {
-      // Determine if there is a row for unit names.
-      let gotAnswer = false
-      for (let iCol = 0; iCol < data.length; iCol++) {
-        if (numberRegEx.test(data[iCol][0])) { gotAnswer = true; break }
-      }
-      if (!gotAnswer) {
-        for (const attr of attrs) {
-          if (attr.row === 1) { gotUnits = true; break }
-        }
-        for (let iCol = 0; iCol < data.length; iCol++) {
-          if (numberRegEx.test(data[iCol][1])) { gotUnits = true; break }
-        }
-      }
-      if (gotUnits) {
-        // Shift the top row of data into units.
-        for (let iCol = 0; iCol < data.length; iCol++) {
-          const unitName = data[iCol].shift()
-          units.push(unitName)
-          if (unitName.length > 0) {
-            if (!unitMap[unitName]) {
-              const unit = unitFromUnitName(unitName, vars)
-              if (unit) {
-                unitMap[unitName] = unit
-              } else {
-                return errorOprnd("DF_UNIT", unitName)
-              }
-            }
-          }
-        }
-        if (rowMap) {
-          Object.entries(rowMap).forEach(([key, value]) => { rowMap[key] = value - 1 })
-        }
-      }
-    }
+    if (row === 3 && col === 0) { checkForUnitRow() }
 
     if (row === 0) {
       headings.push(datum)
@@ -333,6 +339,7 @@ const dataFrameFromCSV = (str, vars) => {
         row += 1
       }
     }
+    if (row === 3) { checkForUnitRow() }
 
   } else {
     // The string contains at least one quotation mark, so we can't rely on splits.
@@ -374,6 +381,7 @@ const dataFrameFromCSV = (str, vars) => {
       datum += cc
     }
     if (datum.length > 0) { harvest(datum) }
+    if (row === 2) { checkForUnitRow() }
   }
 
   // Data is loaded in. Finish by determining the operand type of each column
