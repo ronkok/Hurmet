@@ -1632,60 +1632,6 @@ Numeric result display types **f** and **%** can be set to any non-negative
 integer. The significant digit display types are limited to no more than 15
 significant digits.
 
-## Active Tables
-
-A Hurmet data frame can contain formulas somewhat similar to a spreadsheet.
-Here’s an example:
-
-¢`V = '3.1 kips'`
-
-<p><span class="tex" data-tex="\mathrm{dist} =\begin{array}{l|r r r r r}{\text{Level}}&amp;{W}&amp;{h}&amp;{\text{W × h}}&amp;{F}&amp;{V_\text{i}} \\ &amp; {\text{kips}}&amp; {\text{ft}}&amp; {\text{kip}\mkern1mu{\cdot}\mkern1mu\text{ft}}&amp; {\text{kips}}&amp; {\text{kips}} \\ \hline 4\phantom{}&amp;1.2&amp;33\phantom{}&amp;39.6&amp;1.09\phantom{0}&amp;1.09 \\ 3\phantom{}&amp;2.2&amp;22\phantom{}&amp;48.4&amp;1.33\phantom{0}&amp;2.42 \\ 2\phantom{}&amp;2.3&amp;11\phantom{}&amp;25.3&amp;0.694&amp;3.11 \\ 1\phantom{}&amp;4.0&amp;0\phantom{}&amp;0\phantom{.0}&amp;0\phantom{.000}&amp;3.11 \\\hline \text{Sum}&amp;9.7&amp;&amp;113\phantom{.0}&amp;3.11\phantom{0}&amp;3.11\end{array}"></span></p>
-
-Remember that a data frame is written as pipe-separated values. A cell can
-contain a formula. So the content of that calculation zone looks like this:
-
-```
-dist =
-``Level|  W   | h  |  W × h  |        F         | V_i
-   | kips | ft | kip·ft  |       kips       | kips
-4  | 1.2  | 33 | = W × h |=: V × Wh / Wh.Sum| = F
-3  | 2.2  | 22 |         |                  | = F + V_i′
-2  | 2.3  | 11 |         |                  |
-1  | 4.0  |  0 |         |                  |
-Sum |=sum()|    | =sum()  |       =sum()     | = V_i′``
-```
-
-A table formula:
-
-* begins with a “=” just like a spreadsheet.
-
-* has variable names that are column headings, not “A1” type references.
-
-* returns a result not only to its own cell, but also to every non-formula cell below it.
-
-* begins with “=:” if the formula is unit-aware.
-
-In a table’s bottom row, a `sum()` function is valid with no arguments. It will return the sum of the column.
-
-An active table can have units-of-measure. Just write unit names in row 2 of the pipe-separated input.
-
-Data in any one column must all be the same data type and carry the same unit-of-measure.
-
-A table variable can:
-
-* … omit spaces and characters that are invalid for identifiers. So “`Wh`” will call column “W × h”
-
-* … call a value from outside the table, such as `V`.
-
-* … call a cell from the previous row by appending a prime to a column heading, as in `V_i′`.
-
-Table calculations proceed column-wise. Subject to that constraint, you can
-call individual cells via dot notation, such as `Wh.Sum`.
-
-Other calculation cells can call data from inside a table, using the same
-accessor notation as a data frame. The left column values can be used as keys
-to access data in the table.
-
 ## User Defined Functions
 
 If Hurmet’s [built-in functions](#functions) do not satisfy your needs, it is
@@ -2090,7 +2036,6 @@ Copyright © 2020-2021 Ron Kok. Released under the [MIT License](https://opensou
 </details>
 </li>
 <li><a href="#numeral-display">Numeral Display</a></li>
-<li><a href="#active-tables">Active Tables</a></li>
 <li>
 <details><summary>UDFs</summary>
 <ul>

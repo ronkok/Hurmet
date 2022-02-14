@@ -6,7 +6,6 @@ import { improveQuantities } from "./improveQuantities"
 import { evaluate } from "./evaluate"
 import { scanModule } from "./module"
 import { DataFrame } from "./dataframe"
-import { Tbl } from "./table"
 import { clone, addTextEscapes } from "./utils"
 
 /*
@@ -235,10 +234,7 @@ const proceedAfterFetch = (
       // did not do unit conversions on the result template. Do that first.
       improveQuantities(attrs, hurmetVars)
       // Now proceed to do the calculation of the cell.
-      if (attrs.dtype === dt.DATAFRAME && attrs.value.attrs && attrs.value.attrs.length > 0) {
-        attrs = Tbl.prepare(attrs, hurmetVars, decimalFormat)
-        attrs = Tbl.evaluate(attrs, hurmetVars, decimalFormat)
-      } else if (attrs.rpn) {
+      if (attrs.rpn) {
         attrs = evaluate(attrs, hurmetVars, decimalFormat)
       }
       if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs) }
@@ -261,11 +257,7 @@ const proceedAfterFetch = (
         if (isCalcAll || attrs.rpn || (attrs.name && !(hurmetVars[attrs.name] &&
           hurmetVars[attrs.name].isFetch))) {
           if (isCalcAll) { improveQuantities(attrs, hurmetVars) }
-          if (attrs.dtype === dt.DATAFRAME && attrs.value.attrs &&
-              attrs.value.attrs.length > 0) {
-            attrs = Tbl.prepare(attrs, decimalFormat)
-            attrs = Tbl.evaluate(attrs, hurmetVars, decimalFormat)
-          } else if (attrs.rpn) {
+          if (attrs.rpn) {
             attrs = evaluate(attrs, hurmetVars, decimalFormat)
           }
           if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs) }
