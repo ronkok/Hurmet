@@ -244,10 +244,6 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
 const numberRegEx = new RegExp("^(?:=|" + Rnl.numberPattern.slice(1) + "$)")
 const mixedFractionRegEx = /^-?(?:[0-9]+(?: [0-9]+\/[0-9]+))$/
 
-const maybeUnitNames = (data, row, col, attrs) => {
-
-}
-
 const dataFrameFromCSV = (str, vars) => {
   // Load a CSV string into a data frame.
   // Data frames are loaded column-wise. The subordinate data structures are:
