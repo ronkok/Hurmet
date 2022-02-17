@@ -194,7 +194,7 @@ export const parseQuantityLiteral = (str, decimalFormat, tokenSep, isCalc) => {
     if (numParts) {
       numStr = numParts[0]
       rpn = rationalRPN(numStr)
-      if (isNegated) { rpn = "-" + rpn + "\xa0" + "~"}
+      if (isNegated) { rpn = "-" + rpn + tokenSep + "~"}
       tex = currencySymbol + texFromNumStr(numParts, decimalFormat)
     } else {
       // TODO: Error message.
@@ -202,7 +202,7 @@ export const parseQuantityLiteral = (str, decimalFormat, tokenSep, isCalc) => {
   }
 
   if (currencySymbol.length > 0) {
-    rpn = rpn + "\xa0" + "applyUnit" + "\xa0" + currencyRPN
+    rpn = rpn + tokenSep + "applyUnit" + tokenSep + currencyRPN
     return [tex, rpn]
   }
 
@@ -219,7 +219,7 @@ export const parseQuantityLiteral = (str, decimalFormat, tokenSep, isCalc) => {
 
     const unitMatch = unitRegEx.exec(str)
     str = isDelimited ? str : unitMatch ? unitMatch[0] : str
-    if (isCalc) { rpn += "\xa0" + "applyUnit" + "\xa0" + str }
+    if (isCalc) { rpn += tokenSep + "applyUnit" + tokenSep + str }
     const posViniculum = str.indexOf("//")
     if (posViniculum >= 0) {
       // A stacked fraction.
