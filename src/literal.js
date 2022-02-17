@@ -7,6 +7,7 @@ import { parseFormatSpec } from "./format"
 import { DataFrame } from "./dataframe"
 
 const numberRegEx = new RegExp(Rnl.numberPattern)
+const unitRegEx = /('[^']+'|[°ΩÅK])$/
 /* eslint-disable max-len */
 
 const numStr = "(-?(?:0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?)))"
@@ -24,6 +25,11 @@ const complexRegEx = new RegExp("^" + numStr + "(?: *([+-]) *j +" + nonNegNumStr
 export const valueFromLiteral = (str, name, decimalFormat) => {
   // Read a literal string and return a value
   // The return should take the form: [value, unit, dtype, resultDisplay]
+
+  // Start by checking for a unit
+  const unitMatch = unitRegEx.exec(str)
+  const unitName = (unitMatch) ? unitMatch[0].replace(/'/g, "").trim() : undefined
+
   if (/^[({[].* to /.test(str)) {
     // str defines a quantity distribution, (a to b). That is handled by calculation.js.
     // This is not a valid literal.
@@ -32,13 +38,13 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
   } else if (str === "true" || str === "false") {
     return [Boolean(str), null, dt.BOOLEAN, `\\mathord{\\text{${str}}}`]
 
-  } else if (/^'.+'/.test(str)) {
+/*  } else if (/^'.+'/.test(str)) {
     // str is a QUANTITY
     const [tex, rpn] = parse(str, decimalFormat, true)
     const oprnd = evalRpn(rpn, {}, decimalFormat, false, {})
     const unit = (oprnd.dtype & dt.MAP) ? oprnd.unit : oprnd.unit.name
     return [oprnd.value, unit, oprnd.dtype + dt.QUANTITY, tex]
-
+*/
   } else if (/^\x22.+\x22/.test(str)) {
     // str contains text between quotation marks
     if (name === "format") {
@@ -95,7 +101,11 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
   } else if (str.match(numberRegEx)) {
     // str is a number.
     const resultDisplay = parse(str, decimalFormat)
-    return [Rnl.fromString(str), allZeros, dt.RATIONAL, resultDisplay]
+    if (unitName) {
+      return [Rnl.fromString(str), unitName, dt.RATIONAL + dt.QUANTITY, resultDisplay]
+    } else {
+      return [Rnl.fromString(str), allZeros, dt.RATIONAL, resultDisplay]
+    }
 
   } else {
     return [0, null, dt.ERROR, ""]

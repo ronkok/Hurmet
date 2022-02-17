@@ -252,16 +252,17 @@ Accents and Primes
 
 <div id="q-container">
 
-Quantities
+Units
 
-: A Hurmet _quantity_ contains both a magnitude and a unit of measure. Write a
-  quantity between two single quotation marks, like this: `'3.1 m'`
+: After a number, write a Hurmet _unit_ between two single quotation marks,
+  like this: `5 'meters'`. Or, prepend a currency symbol to a number, e.g. `$30`.
 
 Unit-Aware Calcs
 
 : Hurmet can automatically handle unit conversions of quantities. To call for a
   unit-aware calculations, write `??` instead of `?` where you want the result to
-  appear.<br>Example:<br>`2 × '3.1 m' = ?? ft` results in ¢`2 × ('3.1 m') = 13.1 ft`.
+  appear. Example:\
+  `2 × 3.1 'm' = ?? ft` results in ¢`2 × (3.1 'm') = 13.1 ft`.
 
   This is covered in more detail [below](#unit-aware-calculations).
 
@@ -656,19 +657,27 @@ Complex Number
 
         ¢`z = z_1 + z_2  = \blue((2 + j 3) + ( 4∠30°)) = 5.46 + j5`
 
-Quantity
+Unit
+
+: A Humet _unit_ can be applied to a number to form a Hurmet _quantity_.
+  Hurmet quantities can then be used in [unit-aware calculations][#unit-aware-calcs],
+  in which Hurmet does automatic unit conversions and unit-compatibility checks.
+
+  There are two ways to write a Hurmet unit.
+
+  1. A unit name between apostrophes, aka single straight quotation marks,
+     appended to a numeric value.
+  2. A currency symbol prepended to a non-negative number.
 
 :   A Hurmet _quantity_ contains both a numeric magnitude and a unit of measure.
-    Quantity literals are written between apostrophes, aka single straight
-    quotation marks. Examples:
 
     | Input                  | Renders as              |
     |------------------------|-------------------------|
-    | `'4.2 meters'`         | ¢`'4.2 meters'`         |
-    | `'-$25.10'`            | ¢`'-$25.10'`            |
-    | `'30°'`                | ¢`'30°'`                |
-    | `'10 N·m/s'`           | ¢`'10 N·m/s'`           |
-    | `'[2.1; 15.3] feet'`   | ¢`'[2.1; 15.3] feet'`   |
+    | `4.2 'meters'`         | ¢`4.2 'meters'`         |
+    | `-$25.10`              | ¢`-$25.10`              |
+    | `30°`                  | ¢`30°`                  |
+    | `10 'N·m/s'`           | ¢`10 'N·m/s'`           |
+    | `[2.1; 15.3] 'feet'`   | ¢`[2.1; 15.3] 'feet'`   |
 
     ![single quote number or matrix or map unit-name single quote][quantity]
 
@@ -687,9 +696,9 @@ Quantity
 
     | Input          | Renders as      |
     |----------------|-----------------|
-    | `'4 kW.hr/m2'` | ¢`'4 kW.hr/m2'` |
+    | `4 'kW.hr/m2'` | ¢`4 'kW.hr/m2'` |
 
-    Note that within the quantity literal, it is not necessary to write `^` to
+    Note that within the unit literal, it is not necessary to write `^` to
     indicate a numeric exponent. Also, a dot or a hyphen within a compound unit
     name will be rendered as a half-high dot.
 
@@ -1978,7 +1987,7 @@ Copyright © 2020-2021 Ron Kok. Released under the [MIT License](https://opensou
 * [Subscripts](#subscripts)
 * [Greek letters](#greek-letters)
 * [Accents and Primes](#accents-and-primes)
-* [Quantities](#quantities)
+* [Units](#units)
 * [Unit-Aware Calcs](#unit-aware-calcs)
 * [Result Rounding](#result-rounding)
 * [Display Mode](#display-mode)
@@ -2004,7 +2013,7 @@ Copyright © 2020-2021 Ron Kok. Released under the [MIT License](https://opensou
 * [String](#string)
 * [Number](#number)
 * [Complex Number](#complex-number)
-* [Quantity](#quantity)
+* [Unit](#unit)
 * [Matrix](#matrix)
 * [Data Frame](#data-frame)
 * [Dictionary](#dictionary)

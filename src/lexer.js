@@ -20,7 +20,7 @@ export const tt = Object.freeze({
   UNARYMINUS: 5,
   DIV: 6, //    stacked division: / \atop
   PRIME: 7,
-  //  tt.PROPERTY: 8,
+  CURRENCY: 8, // currency symbol: $,£,¥,€, etc. Precedes its number.
   ORD: 9,
   VAR: 10,   // variable name, one letter long
   NUM: 11,
@@ -31,7 +31,7 @@ export const tt = Object.freeze({
   UNDEROVER: 16,
   LEFTRIGHT: 17, //   |
   STRING: 18,
-  QUANTITY: 19, // physical quantity, with both magnitude and unit, e.g., '5 meters'
+  UNIT: 19, //    unit-of-measure, e.g., 'meters' or °
   BIN: 20, //     binary infix operators that render but don't calculate, e.g., ± \cdots
   ADD: 21, //     binary infix addition or subtraction operator: + -
   MULT: 22, //    binary infix multiplication or division operator: × * · // ÷
@@ -56,6 +56,7 @@ export const tt = Object.freeze({
 
 const minusRegEx = /^-(?![-=<>:])/
 const numberRegEx = new RegExp(Rnl.numberPattern)
+const unitRegEx = /^(?:'[^']+'|[°ΩÅK])/
 
 export const texFromNumStr = (numParts, decimalFormat) => {
   let num = ""
@@ -92,7 +93,7 @@ const isUnary = (prevToken) => {
     case tt.VAR:
     case tt.RIGHTBRACKET:
     case tt.LONGVAR:
-    case tt.QUANTITY:
+    case tt.CURRENCY:
     case tt.SUPCHAR:
     case tt.PRIME:
     case tt.FACTORIAL:
@@ -148,7 +149,7 @@ const words = Object.freeze({
   "<-->": ["<-->", "\\xrightleftarrows", tt.UNARY, ""]
 })
 
-const miscRegEx = /^([/÷\u2215_:,;^+\\\-–−*×∘⊗⦼⊙√∛∜·.%°∘|╏‖¦><=≈≟≠≡≤≥≅∈∉⋐!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃∫∬∮∑([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7]+)/
+const miscRegEx = /^([/÷\u2215_:,;^+\\\-–−*×∘⊗⦼⊙√∛∜·.%°∘|╏‖¦><=≈≟≠≡≤≥≅∈∉⋐!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃∫∬∮∑([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7$£¥€₨₩₪]+)/
 
 const miscSymbols = Object.freeze({
   //    input, output, type,  closeDelim
@@ -176,7 +177,6 @@ const miscSymbols = Object.freeze({
   "·": ["·", "\u22C5", tt.MULT, ""], // dot operator
   "...": ["...", "\\dots", tt.ORD, ""],
   "%": ["%", "\\%", tt.FACTORIAL, ""],
-  "°": ["°", "°", tt.FACTORIAL, ""],
   "^*": ["^*", "^*", tt.FACTORIAL, ""],
   "-:": ["-:", "÷", tt.MULT, ""],
   "=": ["=", "=", tt.REL, ""],
@@ -298,7 +298,15 @@ const miscSymbols = Object.freeze({
 
   ":": [":", ":", tt.COLON, ""], // key:value or range separator
   ",": [",", ",\\:", tt.SEP, ""], // function argument separator
-  ";": [";", ";\\:", tt.SEP] // row separator
+  ";": [";", ";\\:", tt.SEP, ""], // row separator
+
+  "$": ["$", "\\$", tt.CURRENCY, ""],
+  "£": ["£", "£", tt.CURRENCY, ""],
+  "¥": ["¥", "¥", tt.CURRENCY, ""],
+  "€": ["€", "€", tt.CURRENCY, ""],
+  "₨": ["₨", "₨", tt.CURRENCY, ""],
+  "₩": ["₩", "₩", tt.CURRENCY, ""],
+  "₪": ["₪", "₪", tt.CURRENCY, ""]
 })
 
 const texFunctionRegEx = /^(\\[A-Za-z]+\.?|\\([:.!\u0020]|'+))/
@@ -711,14 +719,14 @@ export const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
     }
   }
 
-  if (str.charAt(0) === "'") {
-    // String between single quotation marks. That signals a tt.QUANTITY.
+  if (unitRegEx.test(str)) {
+    // String between single quotation marks. That signals a tt.UNIT.
     pos = str.indexOf("'", 1)
     if (pos > 0) {
       st = str.substring(1, pos)
-      return ["'" + st + "'", st, tt.QUANTITY, ""]
+      return ["'" + st + "'", st, tt.UNIT, ""]
     } else {
-      return [str, str, tt.PRIME, ""]
+      return [str.charAt(0), str.charAt(0), tt.UNIT, ""]
     }
   }
 

@@ -85,7 +85,7 @@ const checkForUnaryMinus = (token, prevToken) => {
     case tt.RIGHTBRACKET:
     case tt.LONGVAR:
     case tt.PROPERTY:
-    case tt.QUANTITY:
+    case tt.UNIT:
     case tt.SUPCHAR:
     case tt.PRIME:
     case tt.FACTORIAL:
@@ -130,7 +130,7 @@ const currencyRegEx = /^-?[$$£¥\u20A0-\u20CF]/
 
 const dictSepRegEx = /^(?:′+ *)?:/
 
-export const parseQuantityLiteral = (str, decimalFormat, tokenSep, isCalc) => {
+const parseQuantityLiteral = (str, decimalFormat, tokenSep, isCalc) => {
   // In Hurmet, a string delimited by single quotation marks, '…',
   // is a QUANTITY literal, which includes a magnitude and a unit of measure.
   // Examples: '10 lbf'  '-$50'   '30°'  '10 N⋅m/s'
@@ -336,7 +336,7 @@ const testForImplicitMult = (prevToken, texStack, str) => {
         case tt.SUPCHAR:
         case tt.SUB:
         case tt.PROPERTY:
-        case tt.QUANTITY:
+        case tt.UNIT:
         case tt.RIGHTBRACKET:
         case tt.FACTORIAL:
           isPreceededByFactor = true
@@ -360,11 +360,11 @@ const nextCharIsFactor = (str, tokenType) => {
       // TODO: Work out left/right
     } else if (/^[({[√∛∜0-9]/.test(st) &&
       (isIn(tokenType, [tt.ORD, tt.VAR, tt.NUM, tt.LONGVAR, tt.RIGHTBRACKET,
-        tt.QUANTITY, tt.SUPCHAR]))) {
+        tt.CURRENCY, tt.SUPCHAR]))) {
       return true
     } else {
       if (factors.test(fc)) {
-        fcMeetsTest = !/^(if|and|atop|or|else|modulo|otherwise|not|for|in|while)\b/.test(st)
+        fcMeetsTest = !/^(if|and|atop|or|else|modulo|otherwise|not|for|in|while|end)\b/.test(st)
       }
     }
   }
@@ -397,9 +397,9 @@ const leadingLaTeXSpaceRegEx = /^(˽|\\quad|\\qquad)+/
 /* eslint-disable indent-legacy */
 const rpnPrecFromType = [
   12, 12, 15, 13, 16, 10,
-       7, 15, -1, -1, -1,
+       7, 10, -1, -1, -1,
       -1,  1, -1,  0,  0,
-      -1,  0, -1, -1,  0,
+      -1,  0, -1, 14,  0,
        6,  7,  5,  4,  1,
       -1, 16, 15, -1, 14,
       13,  9,  3,  2, 10,
@@ -409,9 +409,9 @@ const rpnPrecFromType = [
 
 const texPrecFromType = [
   12, 12, 15, 13, 16, 10,
-       2, 15, -1,  2,  2,
+       2, 10, -1,  2,  2,
        2,  1,  2,  2,  0,
-       1,  1,  2,  2,  1,
+       1,  1,  2, 14,  1,
        2,  2,  1,  1,  1,
        2, -1, 15,  2, 14,
       13,  9, -1,  1, -1,
@@ -820,6 +820,28 @@ export const parse = (
           delims[delims.length - 1].isTall = true
         }
         okToAppend = true
+        break
+      }
+
+      case tt.UNIT: {  //  e.g.  'meters'
+        popTexTokens(14, true)
+        texStack.push({ prec: 14, pos: op.pos, ttype: tt.UNIT, closeDelim: "" })
+        if (isCalc) {
+          popRpnTokens(14)
+          rpn += tokenSep + "applyUnit" + tokenSep + token.output
+        }
+        if (token.input !== "°") { tex += "\\," }
+        tex += unitTeXFromString(token.output)
+        if (prevToken.ttype === tt.MULT || followedByFactor) {
+          // TODO: Fix the next line.
+          token = surroundWithParens(token)
+        }
+        if (/\\frac/.test(token.output)) { delims[delims.length - 1].isTall = true }
+        okToAppend = true
+        break
+      }
+
+      case tt.CURRENCY: {
         break
       }
 
