@@ -21,6 +21,7 @@ const errorMessages = Object.freeze({
     UNIT_IN:   "Error. Incorrect unit for input to function @.",
     UNIT_ARG:  "Error. Unit mis-match between arguments to function @.",
     UNIT_COL:  "Error. Data frame column @ has no units. Do not make a unit-aware call to it.",
+    UNIT_AWARE: "Error. Calculation must be unit-aware in order to apply unit @",
     DATE:      "Error. Date required.",
     LOGIC:     "Error. Logic operation “@” on a non-boolean value.",
     FACT:      "Error. Factorial may be applied only to a unit-less non-negative integer.",

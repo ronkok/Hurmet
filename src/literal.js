@@ -5,6 +5,7 @@ import { evalRpn } from "./evaluate"
 import { Rnl } from "./rational"
 import { parseFormatSpec } from "./format"
 import { DataFrame } from "./dataframe"
+import { unitFromUnitName } from "./units"
 
 const numberRegEx = new RegExp(Rnl.numberPattern)
 const unitRegEx = /('[^']+'|[°ΩÅK])$/
@@ -27,8 +28,12 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
   // The return should take the form: [value, unit, dtype, resultDisplay]
 
   // Start by checking for a unit
+  let unitName = ""
   const unitMatch = unitRegEx.exec(str)
-  const unitName = (unitMatch) ? unitMatch[0].replace(/'/g, "").trim() : undefined
+  if (unitMatch) {
+    unitName = unitMatch[0].replace(/'/g, "").trim()
+    str = str.slice(0, -unitMatch[0].length).trim()
+  }
 
   if (/^[({[].* to /.test(str)) {
     // str defines a quantity distribution, (a to b). That is handled by calculation.js.
@@ -51,15 +56,26 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
     // We're processing a matrix
     const [tex, rpn] = parse(str, decimalFormat, true)
     const oprnd = evalRpn(rpn, {}, decimalFormat, false, {})
-    const unit = (oprnd.dtype & dt.RATIONAL) ? allZeros : null
-    return [oprnd.value, unit, oprnd.dtype, tex]
+    let unit = (oprnd.dtype & dt.RATIONAL) ? allZeros : null
+    let dtype = oprnd.dtype
+    if (unitName) {
+      unit = unitName
+      dtype += dt.QUANTITY
+    }
+    return [oprnd.value, unit, dtype, tex]
 
   } else if (/^(\{)/.test(str)) {
     // We're assigning a dictionary.
     const [tex, rpn] = parse(str, decimalFormat, true)
     if (!/\xa0dictionary\xa0\d+$/.test(rpn)) { return [0, null, dt.ERROR, ""]  }
     const oprnd = evalRpn(rpn, {}, decimalFormat, false, {})
-    return [oprnd.value, oprnd.unit, oprnd.dtype, tex]
+    let unit = oprnd.unit
+    let dtype = oprnd.dtype
+    if (unitName) {
+      unit = unitFromUnitName(unitName, {})
+      dtype += dt.QUANTITY
+    }
+    return [oprnd.value, unit, dtype, tex]
 
   } else if (/^``/.test(str)) {
     // A CSV between double back ticks.

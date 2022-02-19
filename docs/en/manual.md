@@ -645,8 +645,8 @@ Complex Number
 
     * ¢`r∠θ`    The characters `/_` will auto-correct into ∠ and ¢`θ` is in radians.
 
-    Also, the character **°** is now an operator that multiplies the previous
-    number by ¢`π//180`. So one can also write a polar notation as ¢`r∠θ°`.
+    Also, the character **°** is now a unit name. So one can also write a polar
+    notation as ¢`r∠θ°` and the phase angle will be unit-aware.
     The characters `ooo` will auto-correct into °
 
     Examples:
@@ -659,30 +659,27 @@ Complex Number
 
 Unit
 
-:   A Humet _unit_ can be applied to a number to form a Hurmet _quantity_.
-    Hurmet quantities can then be used in [unit-aware calculations][#unit-aware-calcs],
-    in which Hurmet does automatic unit conversions and unit-compatibility checks.
-
-    There are two ways to write a Hurmet unit.
+:   A Humet _unit_ can be applied to a numberic value.
+    There are three ways to write a Hurmet unit.
 
     1. A unit name between apostrophes, aka single straight quotation marks,
-       appended to a numeric value.
-    2. A currency symbol prepended to a non-negative number.
-
-    A Hurmet _quantity_ contains both a numeric magnitude and a unit of measure.
+       written after a numeric value.
+    2. A unit symbol written after a numeric value.
+    3. A currency symbol written before a non-negative number.
 
     | Input                  | Renders as              |
     |------------------------|-------------------------|
     | `4.2 'meters'`         | ¢`4.2 'meters'`         |
-    | `-$25.10`              | ¢`-$25.10`              |
     | `30°`                  | ¢`30°`                  |
+    | `$25.10`               | ¢`$25.10`               |
     | `10 'N·m/s'`           | ¢`10 'N·m/s'`           |
     | `[2.1; 15.3] 'feet'`   | ¢`[2.1; 15.3] 'feet'`   |
 
-    ![single quote number or matrix or map unit-name single quote][quantity]
+    ![number or matrix or map apostrophe unit-name apostrophe][unit]
 
-    [quantity]: ../../images/quantity-railroad.svg
+    [unit]: ../../images/unit-railroad.svg
 
+    A Hurmet treats the number and the unit together as a single _quantity_.
     Quantities are useful in [unit-aware calculations](#unit-aware-calculations)
     which do automatic unit conversion and also check for unit compatibility.
 
@@ -833,8 +830,7 @@ Data Frame
     … which renders as:
 
     ¢```
-    rebar =
-    ``|diameter|area
+    rebar = ``|diameter|area
       |in      |in²
     #3|0.375   |0.11
     #4|0.5     |0.2
@@ -889,7 +885,7 @@ Data Frame
     | This call:                    | … will return:                               |
     |-------------------------------|----------------------------------------------|
     | `wideFlanges.W10X49.A`        | ¢`14.4 'in2'`                                |
-    | `wideFlanges\["W10X49"]["A"]` | ¢`14.4 'in2'`                                |
+    | `wideFlanges["W10X49"]["A"]`  | ¢`14.4 'in2'`                                |
     | `wideFlanges["W10X49", "A"]`  | ¢`14.4 'in2'`                                |
     | `wideFlanges["W10X49", 1:2]`  | ¢`{"name": "W10X49"; "weight": 49 'lbf/ft'}` |
     | `wideFlanges[1:2, "A"]`       | ¢`[26.5; 19.1]`                              |
@@ -1198,7 +1194,7 @@ cos(𝜃), sin(𝜃), tan(𝜃), sec(𝜃), csc(𝜃), cot(𝜃)
 
   The trig functions listed above will assume that a real argument is in
   radians unless you tell it otherwise. You can tell it otherwise by just
-  writing in a unit, as in: `tan('45°')` and running a unit-aware calculation.
+  writing in a unit, as in: `tan(45°)` and running a unit-aware calculation.
 
   Complex numbers are also valid arguments.
 
@@ -1963,7 +1959,7 @@ for which I am very grateful.
 
 <br>
 
-Copyright © 2020-2021 Ron Kok. Released under the [MIT License](https://opensource.org/licenses/MIT)
+Copyright © 2020-2022 Ron Kok. Released under the [MIT License](https://opensource.org/licenses/MIT)
 
 <br>
 
@@ -2161,7 +2157,7 @@ Copyright © 2020-2021 Ron Kok. Released under the [MIT License](https://opensou
   observer.observe(document.getElementById("data-types"))
   observer.observe(document.getElementById("number-rr"))
   observer.observe(document.getElementById("complex-number"))
-  observer.observe(document.getElementById("quantity"))
+  observer.observe(document.getElementById("unit"))
   observer.observe(document.getElementById("matrix"))
   observer.observe(document.getElementById("matrix-mult"))
   observer.observe(document.getElementById("data-frame"))

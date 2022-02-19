@@ -232,9 +232,9 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
     } else {
       if (unit) {
         resultDisplay = trailStr.trim().replace(/([^ ?!@%]+)$/, "'" + "$1" + "'")
-        resultDisplay = parse(resultDisplay, decimalFormat).replace(/\\%/g, "%")
+        resultDisplay = parse(resultDisplay, decimalFormat).replace(/\\%/g, "%").replace("@ @", "@@")
       } else {
-        resultDisplay = parse(trailStr, decimalFormat).replace(/\\%/g, "%")
+        resultDisplay = parse(trailStr, decimalFormat).replace(/\\%/g, "%").replace("@ @", "@@")
       }
       resultDisplay = resultDisplay.replace(/\\text\{(\?\??|%%?)\}/, "$1")
       resultDisplay = resultDisplay.replace(/([?%]) ([?%])/, "$1" + "$2")

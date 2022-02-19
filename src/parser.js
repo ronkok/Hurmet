@@ -1,5 +1,5 @@
-﻿import { isIn, addTextEscapes, unitTeXFromString, numeralFromSuperScript } from "./utils"
-import { tt, lex, texFromNumStr } from "./lexer"
+﻿import { isIn, addTextEscapes, numeralFromSuperScript } from "./utils"
+import { tt, lex } from "./lexer"
 import { Rnl } from "./rational"
 
 /*
@@ -35,8 +35,6 @@ const rationalRPN = numStr => {
   const num = Rnl.fromString(numStr)
   return "®" + String(num[0]) + "/" + String(num[1])
 }
-
-const numberRegEx = new RegExp(Rnl.numberPattern)
 
 const calligraphicRegEx = /^(:?\uD835[\uDC9C-\uDCCF]|[\udc9d\udca0\udca1\udca3\udca4\udca7\udca8\udcad\udcba\udcbc\udcc1\udcc4])/
 
@@ -708,7 +706,7 @@ export const parse = (
           popRpnTokens(14)
           rpn += tokenSep + "applyUnit" + tokenSep + token.input.replace(/'/g, "")
         }
-        if (token.input !== "°") { tex += "\\," }
+        if (token.input !== "°") { tex += "\\;" }
         tex += token.output
         okToAppend = true
         break

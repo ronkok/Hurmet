@@ -647,18 +647,6 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
-        case "°": {
-          const o1 = stack.pop()
-          if (o1.dtype !== dt.RATIONAL) { return errorOprnd("NAN_OP") }
-          const num = Object.create(null)
-          num.unit = Object.create(null)
-          num.unit.expos = allZeros
-          num.dtype = o1.dtype
-          num.value = Rnl.divide(Rnl.multiply(o1.value, Rnl.pi), Rnl.fromNumber(180))
-          stack.push(Object.freeze(num))
-          break
-        }
-
         case "|":
         case "‖": {
             // Find |x| or ‖x‖
@@ -1139,6 +1127,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "applyUnit": {
           // Pop a magnitude off the stack and apply a unit.
           // This happens where a user writes a QUANTITY literal.
+          if (!unitAware) { return errorOprnd("UNIT_AWARE", tokens[i + 1]) }
           const o1 = stack.pop()
           if (!(o1.dtype & dt.RATIONAL)) { return errorOprnd("QUANT_NUM") }
           const unitName = tokens[i + 1]
