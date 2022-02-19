@@ -1,4 +1,4 @@
-﻿import { isIn, addTextEscapes, tablessTrim } from "./utils"
+﻿import { isIn, addTextEscapes, tablessTrim, unitTeXFromString } from "./utils"
 import { Rnl } from "./rational"
 import { formattedDecimal, texFromMixedFraction } from "./format"
 import { DataFrame } from "./dataframe"
@@ -724,8 +724,9 @@ export const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
     pos = str.indexOf("'", 1)
     if (pos > 0) {
       st = str.substring(1, pos)
-      return ["'" + st + "'", st, tt.UNIT, ""]
+      return ["'" + st + "'", unitTeXFromString(st), tt.UNIT, ""]
     } else {
+      // One of the unambiguous unit symbols, like ° or Å
       return [str.charAt(0), str.charAt(0), tt.UNIT, ""]
     }
   }

@@ -231,7 +231,8 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
       resultDisplay = "!"
     } else {
       if (unit) {
-        resultDisplay = parse("'" + trailStr.replace(/'/g, "").trim() + "'", decimalFormat)
+        resultDisplay = trailStr.trim().replace(/([^ ?!@%]+)$/, "'" + "$1" + "'")
+        resultDisplay = parse(resultDisplay, decimalFormat).replace(/\\%/g, "%")
       } else {
         resultDisplay = parse(trailStr, decimalFormat).replace(/\\%/g, "%")
       }

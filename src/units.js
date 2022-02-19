@@ -59,6 +59,7 @@ export const currencySymbols = "$£¥₨₪€"
 const unitTable = Object.freeze(JSON.parse(`{
 "#":["0.45359237", "1","0","0",[0,1,0,0,0,0,0,0]],
 "$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
+"£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
 "AUD":["1.4872","1","0","AUD",[0,0,0,0,0,0,0,1]],
@@ -699,11 +700,16 @@ const unitFromWord = (inputStr, currencies, customUnits) => {
     if (u.expos[7] === 1) {
       const currencyCode = (synonyms[word] ? synonyms[word] : word)
       if (currencies && currencies[currencyCode]) {
+        // User defined currency exchange rate.
         u.factor = Rnl.reciprocal(currencies[currencyCode].factor)
-      } else if (unitArray[0] === "0") {
-        return errorOprnd("CURRENCY")
       } else {
-        u.factor = Rnl.reciprocal(Rnl.fromString(unitArray[0]))
+        // Read the line whose key is the standard 3-letter currency code.
+        unitArray = unitTable[currencyCode]
+        if (unitArray[0] === "0") {
+          return errorOprnd("CURRENCY")
+        } else {
+          u.factor = Rnl.reciprocal(Rnl.fromString(unitArray[0]))
+        }
       }
     } else {
       // TODO: Change factor table to integers and use BigInt() instead of Rnl.fromString

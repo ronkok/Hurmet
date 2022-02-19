@@ -90,12 +90,12 @@ fractions will be rounded so that no more than 3 significant digits appear.</p>
 
 <h2>Unit-Aware Calculations</h2>
 <p>Physical units can be a part of your calculations. Hurmet can automatically convert the units.</p>
-<p><span class="hurmet-calc" data-entry="P = '10000 V'·'20 amps' = ?? kW"></span></p>
-<p><span class="hurmet-calc" data-entry="L = '4 acres'/'100 feet' = ?? m"></span></p>
-<p><span class="hurmet-calc" data-entry="L_side = √'4 acres' = ?? m"></span></p>
-<p><span class="hurmet-calc" data-entry="F = '200 lbf/ft'·'100 m/min'·'2 hrs' = ? kN"></span></p>
+<p><span class="hurmet-calc" data-entry="P = 10000 'V'·20 'amps' = ?? kW"></span></p>
+<p><span class="hurmet-calc" data-entry="L = 4 'acres'/100 'feet' = ?? m"></span></p>
+<p><span class="hurmet-calc" data-entry="L_side = √4 'acres' = ?? m"></span></p>
+<p><span class="hurmet-calc" data-entry="F = 200 'lbf/ft'· 100 'm/min'· 2 'hrs' = ? kN"></span></p>
 <p>It also does a unit-compatibility check.</p>
-<p><span class="hurmet-calc" data-entry="oops = '3 m' + '2 hours' = ??"></span></p>
+<p><span class="hurmet-calc" data-entry="oops = 3 'm' + 2 'hours' = ??"></span></p>
 <p></p>
 <p></p>
 
@@ -104,12 +104,12 @@ fractions will be rounded so that no more than 3 significant digits appear.</p>
 Say that we want to build a cylindrical water tank in 5-foot courses.
 <table class="nogrid"><tbody>
   <tr>
-    <td data-colwidth="204"><p><span class="hurmet-calc" data-entry="D = '25 ft'"></span>, tank diameter</p></td>
-    <td><p><span class="hurmet-calc" data-entry="h = '5 ft'"></span>, course height</p></td>
+    <td data-colwidth="204"><p><span class="hurmet-calc" data-entry="D = 25 'ft'"></span>, tank diameter</p></td>
+    <td><p><span class="hurmet-calc" data-entry="h = 5 'ft'"></span>, course height</p></td>
   </tr>
   <tr>
-    <td data-colwidth="204"><p><span class="hurmet-calc" data-entry="H = '20 ft'"></span>, tank height</p></td>
-    <td><p><span class="hurmet-calc" data-entry="γ_w = '62.4 lbf/ft3'"></span>, water density</p></td>
+    <td data-colwidth="204"><p><span class="hurmet-calc" data-entry="H = 20 'ft'"></span>, tank height</p></td>
+    <td><p><span class="hurmet-calc" data-entry="γ_w = 62.4 'lbf/ft3'"></span>, water density</p></td>
   </tr>
 </tbody></table>
 <p>We’ll calculate values for each course, all at once, using vectors. Each vector element represents one course. </p>
@@ -148,15 +148,15 @@ Say that we want to build a cylindrical water tank in 5-foot courses.
     <th><p><strong>Factored reactions at end of beam (from analysis results)</strong></p></th>
   </tr>
   <tr>
-    <td data-colwidth="296"><p><span class="hurmet-calc" data-entry="F_y = '50 ksi'"></span>, yield strength</p></td>
-    <td><p><span class="hurmet-calc" data-entry="P = '15 kips'"></span>, axial force</p></td>
+    <td data-colwidth="296"><p><span class="hurmet-calc" data-entry="F_y = 50 'ksi'"></span>, yield strength</p></td>
+    <td><p><span class="hurmet-calc" data-entry="P = 15 'kips'"></span>, axial force</p></td>
   </tr>
   <tr>
-    <td data-colwidth="296"><p><span class="hurmet-calc" data-entry="E = '29000 ksi'"></span>, modulus of elasticity</p></td>
-    <td><p><span class="hurmet-calc" data-entry="V = '150 kips'"></span>, shear</p></td>
+    <td data-colwidth="296"><p><span class="hurmet-calc" data-entry="E = 29000 'ksi'"></span>, modulus of elasticity</p></td>
+    <td><p><span class="hurmet-calc" data-entry="V = 150 'kips'"></span>, shear</p></td>
   </tr>
   <tr>
-    <td data-colwidth="296"><p></p></td><td><p><span class="hurmet-calc" data-entry="M = '220 k·ft'"></span>, bending moment</p></td>
+    <td data-colwidth="296"><p></p></td><td><p><span class="hurmet-calc" data-entry="M = 220 'k·ft'"></span>, bending moment</p></td>
   </tr>
 </tbody></table>
 
@@ -167,9 +167,10 @@ Say that we want to build a cylindrical water tank in 5-foot courses.
 
 <h4>Check panel zone</h4>
 <p><span class="hurmet-calc" data-entry="F_u = M/(0.95 d_c) = ?? kips"></span>, panel zone shear demand</p>
-<p><span class="hurmet-calc" data-entry="P_r = '142 kips'"></span>, axial load demand in column from structural analysis</p>
+<p><span class="hurmet-calc" data-entry="P_r = 142 'kips'"></span>, axial load demand in column from structural analysis</p>
 <p><span class="hurmet-calc" data-entry="P_c = 0.6 F_y A_c = ?? kips"></span></p>
-<p><span class="hurmet-calc" data-entry="ϕR_n = {0.9 × 0.6 F_y d_c t_cw if P_r ≤ 0.4 P_c; 0.9 × 0.6 F_y d_c t_cw (1.4 - P_r//P_c) otherwise} = %% kips"></span> <span class="hurmet-calc" data-entry='{">  Fᵤ , ok" if ϕR_n > F_u; \red("<  Fᵤ, ng, doubler plates required") otherwise} = @'></span> </p>
+<p><span class="hurmet-calc" data-entry="ϕR_n = {0.9 × 0.6 F_y d_c t_cw if P_r ≤ 0.4 P_c; 0.9 × 0.6 F_y d_c t_cw (1.4 - P_r//P_c) otherwise} = %% kips"></span>
+   <span class="hurmet-calc" data-entry='{">  Fᵤ , ok" if ϕR_n > F_u; \red("<  Fᵤ, ng, doubler plates required") otherwise} = @'></span> </p>
 <p></p>
 
 <h2>Rational Numbers</h2>

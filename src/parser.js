@@ -124,120 +124,7 @@ const numFromSupChars = str => {
 
 const colorSpecRegEx = /^(#([a-f0-9]{6}|[a-f0-9]{3})|[a-z]+|\([^)]+\))/i
 
-const unitRegEx = /^[A-Za-z0-9_\-⁰¹²³\u2074-\u2079⁻/^·*.°′″‴ΩΩµμ]+/
-
-const currencyRegEx = /^-?[$$£¥\u20A0-\u20CF]/
-
 const dictSepRegEx = /^(?:′+ *)?:/
-
-const parseQuantityLiteral = (str, decimalFormat, tokenSep, isCalc) => {
-  // In Hurmet, a string delimited by single quotation marks, '…',
-  // is a QUANTITY literal, which includes a magnitude and a unit of measure.
-  // Examples: '10 lbf'  '-$50'   '30°'  '10 N⋅m/s'
-  // The magnitude can be a number, a vector, a matrix, or a map.
-
-  let tex = ""
-  let rpn = ""
-  let numStr = ""
-  let isNegated = false
-  const isDelimited = /^'.+'$/.test(str)
-
-  str = str.replace(/'/g, "")
-
-  let currencySymbol = ""
-  let currencyRPN = ""
-  const currencyMatch = currencyRegEx.exec(str)
-  if (currencyMatch) {
-    currencySymbol = currencyMatch[0]
-    currencyRPN = currencySymbol
-    str = str.slice(currencySymbol.length).trim()
-    if (currencySymbol.charAt(0) === "-") {
-      isNegated = true
-      currencySymbol = "\\text{-}" + currencySymbol.slice(1)
-      currencyRPN = currencyRPN.slice(1)
-    }
-    currencySymbol = currencySymbol.replace("$", "\\$")
-  }
-
-  const c0 = str.charAt(0)
-  if (c0 === "?" || c0 === "@" || c0 === "!" || c0 === "%") {
-    // We're here because parse() has been called from prepareStatement().
-    // It wants us to return a resultTemplate with a TeX version of the
-    // statement's trail string. Put the display selector inside \text{}.
-    numStr = str.substring(0, str.charAt(1) === c0 ? 2 : 1)
-    tex = currencySymbol + "\\text{" + numStr + "}"
-
-  } else if ("([{".indexOf(c0) > -1) {
-    // A matrix or dictionary occupies the place normally held by a number.
-    const endChar = c0 === "{"
-      ? "}"
-      : c0 === "["
-      ? "]"
-      : c0 === "("
-      ? ")"
-      : "}"
-    const pos = str.indexOf(endChar)
-    numStr =  str.slice(0, pos + 1)
-
-    if (isCalc) {
-      [tex, rpn] = parse(numStr, decimalFormat, true)
-      if (tokenSep !== "\xa0") {
-        // We're inside a ternary expression. Use a different token separator.
-        rpn = rpn.replace(/\xa0/g, tokenSep)
-      }
-    } else {
-      tex = parse(numStr, decimalFormat, false)
-    }
-
-  } else {
-    const numParts = str.match(numberRegEx)
-    if (numParts) {
-      numStr = numParts[0]
-      rpn = rationalRPN(numStr)
-      if (isNegated) { rpn = "-" + rpn + tokenSep + "~"}
-      tex = currencySymbol + texFromNumStr(numParts, decimalFormat)
-    } else {
-      // TODO: Error message.
-    }
-  }
-
-  if (currencySymbol.length > 0) {
-    rpn = rpn + tokenSep + "applyUnit" + tokenSep + currencyRPN
-    return [tex, rpn]
-  }
-
-  tex += "\\;"
-
-  if (numStr.length < str.length) {
-    str = str.slice(numStr.length)
-    str = str.replace(/^\s*/, "")
-    let unitTex = ""
-
-    if ("°′″".indexOf(str.charAt(0)) > -1) {
-      tex = tex.replace(/\\;$/, "")
-    }
-
-    const unitMatch = unitRegEx.exec(str)
-    str = isDelimited ? str : unitMatch ? unitMatch[0] : str
-    if (isCalc) { rpn += tokenSep + "applyUnit" + tokenSep + str }
-    const posViniculum = str.indexOf("//")
-    if (posViniculum >= 0) {
-      // A stacked fraction.
-      const numerator = str.slice(0, posViniculum)
-      const denominator = str.slice(posViniculum + 2)
-      unitTex = "\\frac{" + unitTeXFromString(numerator) + "}{" +
-        unitTeXFromString(denominator) + "}"
-    } else {
-      unitTex = unitTeXFromString(str)
-    }
-    if (unitTex.length > 0 && numStr.length === 0) {
-      unitTex = "\\," + unitTex
-    }
-    tex += unitTex
-  }
-
-  return [tex, rpn]
-}
 
 const factors = /^[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133\uD835[({√∛∜]/
 
@@ -371,15 +258,6 @@ const nextCharIsFactor = (str, tokenType) => {
   return fcMeetsTest
 }
 
-const surroundWithParens = (token) => {
-  if (token.output.indexOf("\\frac{") > -1) {
-    token.output = "\\left(" + token.output + "\\right)"
-  } else {
-    token.output = "(" + token.output + ")"
-  }
-  return token
-}
-
 const cloneToken = token => {
   return {
     input: token.input,
@@ -397,7 +275,7 @@ const leadingLaTeXSpaceRegEx = /^(˽|\\quad|\\qquad)+/
 /* eslint-disable indent-legacy */
 const rpnPrecFromType = [
   12, 12, 15, 13, 16, 10,
-       7, 10, -1, -1, -1,
+       7, 10, 12, -1, -1,
       -1,  1, -1,  0,  0,
       -1,  0, -1, 14,  0,
        6,  7,  5,  4,  1,
@@ -409,7 +287,7 @@ const rpnPrecFromType = [
 
 const texPrecFromType = [
   12, 12, 15, 13, 16, 10,
-       2, 10, -1,  2,  2,
+       2, 10, 12,  2,  2,
        2,  1,  2,  2,  0,
        1,  1,  2, 14,  1,
        2,  2,  1,  1,  1,
@@ -725,7 +603,7 @@ export const parse = (
         if (isPrecededBySpace) { posOfPrevRun = tex.length }
         if (isCalc &&
           (prevToken.ttype === tt.MULT || (followedByFactor && prevToken.ttype !== tt.DIV))) {
-          token = surroundWithParens(token)
+          token.output = "(" + token.output + ")"
         }
         tex += token.output + " "
         okToAppend = true
@@ -828,43 +706,11 @@ export const parse = (
         texStack.push({ prec: 14, pos: op.pos, ttype: tt.UNIT, closeDelim: "" })
         if (isCalc) {
           popRpnTokens(14)
-          rpn += tokenSep + "applyUnit" + tokenSep + token.output
+          rpn += tokenSep + "applyUnit" + tokenSep + token.input.replace(/'/g, "")
         }
         if (token.input !== "°") { tex += "\\," }
-        tex += unitTeXFromString(token.output)
-        if (prevToken.ttype === tt.MULT || followedByFactor) {
-          // TODO: Fix the next line.
-          token = surroundWithParens(token)
-        }
-        if (/\\frac/.test(token.output)) { delims[delims.length - 1].isTall = true }
-        okToAppend = true
-        break
-      }
-
-      case tt.CURRENCY: {
-        break
-      }
-
-      case tt.QUANTITY: { //  e.g.  '10 meters'
-        popTexTokens(2, okToAppend)
-        if (isPrecededBySpace) { posOfPrevRun = tex.length }
-        const [qtyTex, qtyRPN] = parseQuantityLiteral(token.input,
-          decimalFormat, tokenSep, isCalc)
-        token.output = qtyTex
-        if (prevToken.ttype === tt.MULT || followedByFactor) {
-          token = surroundWithParens(token)
-        }
-        if (isCalc) { rpn += qtyRPN }
         tex += token.output
-        if (/\\begin|\\frac/.test(token.output)) { delims[delims.length - 1].isTall = true }
         okToAppend = true
-        if (isCalc && !isFollowedBySpace && followedByFactor) {
-          // We've encountered something like the expression "2a".
-          rpn += tokenSep
-          popTexTokens(2, okToAppend)
-          popRpnTokens(7)
-          rpnStack.push({ prec: rpnPrecFromType[tt.MULT], symbol: "⌧" })
-        }
         break
       }
 
@@ -1126,14 +972,26 @@ export const parse = (
         break
       }
 
+      case tt.CURRENCY: {  // e.g. $, £, etc
+        popTexTokens(1, okToAppend)
+        posOfPrevRun = tex.length
+        texStack.push({ prec: 12, pos: tex.length, ttype: tt.CURRENCY, closeDelim: "" })
+        if (isCalc) {
+          rpnStack.push({ prec: 12, symbol: "applyUnit" + tokenSep + token.input })
+          if (prevToken.input === "⌧") { tex += "×" }
+        }
+        tex += token.output
+        okToAppend = false
+        break
+      }
+
       case tt.UNARY: // e.g. bb, hat, or sqrt, or xrightarrow, hides parens
         popTexTokens(1, okToAppend)
         posOfPrevRun = tex.length
         texStack.push({ prec: 12, pos: tex.length, ttype: tt.UNARY, closeDelim: "}" })
-        if (isCalc) { rpnStack.push({ prec: 12, symbol: token.input }) }
-        if (isCalc && prevToken.input === "⌧") {
-          // preceded by implicit multiplication
-          tex += "×"
+        if (isCalc) {
+          rpnStack.push({ prec: 12, symbol: token.input })
+          if (prevToken.input === "⌧") { tex += "×" }
         }
         tex += token.output
 

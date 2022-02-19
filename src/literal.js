@@ -38,13 +38,6 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
   } else if (str === "true" || str === "false") {
     return [Boolean(str), null, dt.BOOLEAN, `\\mathord{\\text{${str}}}`]
 
-/*  } else if (/^'.+'/.test(str)) {
-    // str is a QUANTITY
-    const [tex, rpn] = parse(str, decimalFormat, true)
-    const oprnd = evalRpn(rpn, {}, decimalFormat, false, {})
-    const unit = (oprnd.dtype & dt.MAP) ? oprnd.unit : oprnd.unit.name
-    return [oprnd.value, unit, oprnd.dtype + dt.QUANTITY, tex]
-*/
   } else if (/^\x22.+\x22/.test(str)) {
     // str contains text between quotation marks
     if (name === "format") {

@@ -155,8 +155,6 @@ const midDotRegEx = /^(\*|·|\.|-[A-Za-z])/
 export const exponentRegEx = /[⁰¹²³\u2074-\u2079⁻]/
 
 export const unitTeXFromString = str => {
-  // This function supports function parseQuantityLiteral()
-
   // I wrap a unit name with an extra pair of braces {}.
   // Tt's a hint so that plugValsIntoEcho() can easily remove a unit name.
   let unit = " {\\text{"

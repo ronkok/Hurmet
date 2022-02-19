@@ -434,9 +434,9 @@ It’s quite simple to assign a value to a variable:
 +===================================+====================+
 | ![identifier = value][assignment] | `x = 5`            |
 *                                   +--------------------+
-|                                   | `L = '3.1 m'`      |
+|                                   | `L = 3.1 'm'`      |
 *                                   +--------------------+
-|                                   | `w = '100 lbf/ft'` |
+|                                   | `w = 100 'lbf/ft'` |
 *                                   +--------------------+
 |                                   | name = "James"     |
 +-----------------------------------+--------------------+
@@ -454,7 +454,7 @@ result should appear. Here are some examples:
 | `A = 2 × 4 = ?`                | ¢`A = 2 × 4 = 8`                                     |
 | `x = 2 A = ?`                  | ¢`x = 2 A = \color(blue)((2)(8)) \color(black) = 16` |
 | `x = 2 A = %`                  | ¢`x = 2 A = 16`                                      |
-| `A = '2 m' × '4 feet' = ?? m²` | ¢`A = '2m' × ('4 feet') = '2.4384 m²'`               |
+| `A = 2 'm' × 4 'feet' = ?? m²` | ¢`A = 2'm' × 4 'feet' = 2.4384 'm²'`                 |
 {.table-no-wrap}
 
 The expression form is more precisely defined as:
@@ -659,17 +659,17 @@ Complex Number
 
 Unit
 
-: A Humet _unit_ can be applied to a number to form a Hurmet _quantity_.
-  Hurmet quantities can then be used in [unit-aware calculations][#unit-aware-calcs],
-  in which Hurmet does automatic unit conversions and unit-compatibility checks.
+:   A Humet _unit_ can be applied to a number to form a Hurmet _quantity_.
+    Hurmet quantities can then be used in [unit-aware calculations][#unit-aware-calcs],
+    in which Hurmet does automatic unit conversions and unit-compatibility checks.
 
-  There are two ways to write a Hurmet unit.
+    There are two ways to write a Hurmet unit.
 
-  1. A unit name between apostrophes, aka single straight quotation marks,
-     appended to a numeric value.
-  2. A currency symbol prepended to a non-negative number.
+    1. A unit name between apostrophes, aka single straight quotation marks,
+       appended to a numeric value.
+    2. A currency symbol prepended to a non-negative number.
 
-:   A Hurmet _quantity_ contains both a numeric magnitude and a unit of measure.
+    A Hurmet _quantity_ contains both a numeric magnitude and a unit of measure.
 
     | Input                  | Renders as              |
     |------------------------|-------------------------|
@@ -888,10 +888,10 @@ Data Frame
 
     | This call:                    | … will return:                               |
     |-------------------------------|----------------------------------------------|
-    | `wideFlanges.W10X49.A`        | ¢`'14.4 in2'`                                |
-    | `wideFlanges\["W10X49"]["A"]` | ¢`'14.4 in2'`                                |
-    | `wideFlanges["W10X49", "A"]`  | ¢`'14.4 in2'`                                |
-    | `wideFlanges["W10X49", 1:2]`  | ¢`{"name": "W10X49"; "weight": '49 lbf/ft'}` |
+    | `wideFlanges.W10X49.A`        | ¢`14.4 'in2'`                                |
+    | `wideFlanges\["W10X49"]["A"]` | ¢`14.4 'in2'`                                |
+    | `wideFlanges["W10X49", "A"]`  | ¢`14.4 'in2'`                                |
+    | `wideFlanges["W10X49", 1:2]`  | ¢`{"name": "W10X49"; "weight": 49 'lbf/ft'}` |
     | `wideFlanges[1:2, "A"]`       | ¢`[26.5; 19.1]`                              |
     {.table-no-wrap}
 
@@ -966,10 +966,10 @@ Map
     will be done on each value in the map. For instance, a beam calculation can
     break the loads down into dead load, live load, snow load, etc.:
 
-    ¢`w = '{"D": 20; "L": 40; "S": 30} lbf/ft'`        ¢`L = '12 ft'`
+    ¢`w = {"D": 20; "L": 40; "S": 30} 'lbf/ft'`        ¢`L = 12 'ft'`
 
-    ¢`M = 1//8 w L^2  = \color(blue)(1/8 ('{"D": 20; "L": 40; "S": 30} lbf/ft')('12 ft')^2)
-    \color(black) = '{"D": 0.54, "L": 0.72, "S": 0.36} k·ft'`
+    ¢`M = 1//8 w L^2  = \color(blue)(1/8 ({"D": 20; "L": 40; "S": 30} 'lbf/ft')(12 'ft')^2)
+    \color(black) = {"D": 0.54, "L": 0.72, "S": 0.36} 'k·ft'`
 
     Dictionaries with values of varying units-of-measure can be multiplied by a
     unit-less scalar. No other math operations are supported for non-map dictionaries.
@@ -1429,7 +1429,7 @@ numeric magnitude and a unit of measure. In a Hurmet calculation editing box,
 you write quantity literals between single quotation marks. Examples:
 
 +--------------+---------------+------------+
-| `'4 meters'` | `'7.1 ft3/s'` | `'11 N·m'` |
+| `4 'meters'` | `7.1 'ft3/s'` | `11 'N·m'` |
 +--------------+---------------+------------+
 {.nogrid}
 
@@ -1439,40 +1439,40 @@ unit-compatible. You specify unit-aware mode by writing two question marks
 instead of one in the place where you want a result to appear. So if you open
 a Hurmet calculation cell and write:
 
-'4 ft' + '3 yards' = ?? m
+`4 'ft' + 3 'yards' = ?? m`
 
 … the result will render as:
 
-¢`'4 ft' + '3 yards' = '3.9624 m'`
+¢`4 'ft' + 3 'yards' = 3.9624 'm'`
 
 You can create composite units on the fly and Hurmet will still convert them
 automatically.
 
-¢`('3 kW·hr' × ('20 min')) / ('800 lbf' × '1 h') = '1.0116402439486971731 km'`
+¢`(3 'kW·hr' × (20 'min')) / (800 'lbf' × 1 'h') = 1.0116402439486971731 'km'`
 
 If you try to add quantities with non-compatible units, Hurmet will return an
 error message:
 
-¢`'3 m' + '2 V' = \color(firebrick) "Error. Adding incompatible units."`
+¢`3 'm' + 2 'V' = \color(firebrick) "Error. Adding incompatible units."`
 
 If the calculated units are non-compatible with the units specified for the
 result display, Hurmet will return an error message:
 
-¢`'3 m' + '2 ft' = \color(firebrick) "Error. Calculated units are not
+¢`3 'm' + 2 'ft' = \color(firebrick) "Error. Calculated units are not
 compatible with the desired result unit:"\, "V"`
 
 If you assign a quantity to a variable, a unit-aware calculation will call the
 variable’s entire quantity, not just the numeric value.
 
-¢`L = '3 ft'`
+¢`L = 3 'ft'`
 
-¢`L_2 = 2 L = \color(blue)(2) ('3 ft') \color(black) = '1.8288 m'`
+¢`L_2 = 2 L = \color(blue)(2) (3 'ft') \color(black) = 1.8288 'm'`
 
 If you assign a quantity to a variable, you can still call the variable from a
 non-unit-aware calculation. Such a calculation will call the scalar value, not
 the quantity.
 
-¢`L_unaware = 2 L = \color(blue)(2) (3) \color(black) =\\, 6`
+¢`L_unaware = 2 L = \color(blue)(2) (3) \color(black) = 6`
 
 You’re welcome to view all of Hurmet’s built-in [unit definitions](unit-definitions.html).
 
@@ -1481,7 +1481,7 @@ You’re welcome to view all of Hurmet’s built-in [unit definitions](unit-defi
 If the Hurmet built-in unit definitions are not sufficient, you can define a
 set of custom units in a dictionary like this:
 
-`units = { "smoot": '67 inches', "sol": '24.6229622 hours' }`
+`units = { "smoot": 67 'inches', "sol": 24.6229622 'hours' }`
 
 #### Currencies
 

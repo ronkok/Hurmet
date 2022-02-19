@@ -38,7 +38,7 @@ export function insertOneHurmetVar(hurmetVars, attrs) {
             name: attrs.name[iName],
             value,
             resultdisplay: isQuantity
-              ? parse("'" + displays[iName].trim() + " " + attrs.unit + "'")
+              ? parse(displays[iName].trim() + " '" + attrs.unit + "'")
               : displays[iName].trim(),
             expos: attrs.expos,
             unit: isQuantity ? attrs.unit : undefined,
@@ -59,7 +59,7 @@ export function insertOneHurmetVar(hurmetVars, attrs) {
           name: attrs.name[i],
           value,
           resultdisplay: isQuantity
-            ? parse("'" + displays[i].trim() + " " + attrs.unit + "'")
+            ? parse(displays[i].trim() + " '" + attrs.unit + "'")
             : displays[i].trim(),
           expos: attrs.expos,
           unit: isQuantity ? attrs.unit : undefined,
@@ -84,7 +84,7 @@ export function insertOneHurmetVar(hurmetVars, attrs) {
           const inBaseUnits = Rnl.multiply(Rnl.add(plain, unit.gauge), unit.factor)
           result.value = { plain, inBaseUnits }
           result.expos = unit.expos
-          result.resultdisplay = parse("'" + format(plain) + " " + result.unit.name + "'")
+          result.resultdisplay = parse(format(plain) + " '" + result.unit.name + "'")
         } else if (Rnl.isRational(result.value)) {
           result.expos = result.unit
           result.resultdisplay = parse(format(result.value))
@@ -109,7 +109,7 @@ export function insertOneHurmetVar(hurmetVars, attrs) {
           const plain = Rnl.subtract(Rnl.divide(inBaseUnits, unit.factor), unit.gauge)
           result.value = { plain, inBaseUnits }
           result.expos = unit.expos
-          result.resultdisplay = parse("'" + format(plain) + " " + unit.name + "'")
+          result.resultdisplay = parse(format(plain) + " '" + unit.name + "'")
         } else if (Rnl.isRational(result.value)) {
           result.expos = attrs.unit
           result.resultdisplay = parse(format(result.value))
