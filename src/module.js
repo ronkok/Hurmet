@@ -149,6 +149,9 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
       [, rpn] = parse(expression, decimalFormat, true)
     }
     const stype = isStatement ? "statement" : name
+    if (isStatement && /[,;]/.test(name)) {
+      name = name.split(/[,;]/).map(e => e.trim())
+    }
     funcObj.statements.push({ name: name, rpn: rpn, stype: stype })
     if (stype === "if" || stype === "while" || stype === "for") {
       stackOfCtrls.push({ type: stype, statementNum: funcObj.statements.length - 1 })
@@ -198,7 +201,10 @@ const scanAssignment = (lines, decimalFormat, iStart) => {
   }
 
   const posEquals = str.indexOf("=")
-  const name = str.slice(0, posEquals).trim()
+  let name = str.slice(0, posEquals).trim()
+  if (/[,;]/.test(name)) {
+    name = name.split(/[,;]/).map(e => e.trim())
+  }
   const trailStr = str.slice(posEquals + 1).trim()
   const [value, unit, dtype, resultDisplay] = valueFromLiteral(trailStr, name, decimalFormat)
   const stmt = { name, value, unit, dtype, resultDisplay }

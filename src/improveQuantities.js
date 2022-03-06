@@ -48,7 +48,7 @@ export const improveQuantities = (attrs, vars) => {
       const plain = clone(attrs.value)
       const inBaseUnits = map.convertToBaseUnits(plain, unit.gauge, unit.factor)
       attrs.value = { plain, inBaseUnits }
-
+      attrs.unit = { expos: unit.expos }
     }
   }
   if (attrs.rpn && !attrs.value) {

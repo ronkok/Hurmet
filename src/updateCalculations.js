@@ -168,7 +168,7 @@ const workAsync = (
       attrs.inDraftMode = inDraftMode
       tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs))
       if (attrs.name) {
-        insertOneHurmetVar(hurmetVars, attrs)
+        insertOneHurmetVar(hurmetVars, attrs, decimalFormat)
       }
     }
     // There. Fetches are done and are loaded into the document.
@@ -213,7 +213,7 @@ const proceedAfterFetch = (
               hurmetVars[key] =  value
             })
           } else {
-            insertOneHurmetVar(hurmetVars, attrs)
+            insertOneHurmetVar(hurmetVars, attrs, decimalFormat)
           }
         }
       }
@@ -222,7 +222,7 @@ const proceedAfterFetch = (
     // Hoist any user-defined functions located below the selection.
     doc.nodesBetween(curPos + 1, doc.content.size, function(node, pos) {
       if (node.type.name === "calculation" && node.attrs.dtype === dt.MODULE) {
-        insertOneHurmetVar(hurmetVars, node.attrs)
+        insertOneHurmetVar(hurmetVars, node.attrs, decimalFormat)
       }
     })
 
@@ -237,7 +237,7 @@ const proceedAfterFetch = (
       if (attrs.rpn) {
         attrs = evaluate(attrs, hurmetVars, decimalFormat)
       }
-      if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs) }
+      if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, decimalFormat) }
       attrs.displayMode = nodeAttrs.displayMode
       tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(attrs))
     }
@@ -260,7 +260,7 @@ const proceedAfterFetch = (
           if (attrs.rpn) {
             attrs = evaluate(attrs, hurmetVars, decimalFormat)
           }
-          if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs) }
+          if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, decimalFormat) }
           if (isCalcAll || attrs.rpn) {
             tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs))
           }
@@ -271,7 +271,7 @@ const proceedAfterFetch = (
                 hurmetVars[key] =  value
               })
             } else {
-              insertOneHurmetVar(hurmetVars, attrs)
+              insertOneHurmetVar(hurmetVars, attrs, decimalFormat)
             }
           }
         }
@@ -340,10 +340,10 @@ export function updateCalculations(
           fetchPositions.push(pos)
         } else if (/^function /.test(entry)) {
           node.attrs = prepareStatement(entry, doc.attrs.decimalFormat)
-          insertOneHurmetVar(hurmetVars, node.attrs)
+          insertOneHurmetVar(hurmetVars, node.attrs, doc.attrs.decimalFormat)
         }
       } else if (node.attrs.isFetch || (node.attrs.dtype && node.attrs.dtype === dt.MODULE)) {
-        insertOneHurmetVar(hurmetVars, node.attrs)
+        insertOneHurmetVar(hurmetVars, node.attrs, doc.attrs.decimalFormat)
       }
     })
   }

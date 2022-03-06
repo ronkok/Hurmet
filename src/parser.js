@@ -122,8 +122,6 @@ const numFromSupChars = str => {
 
 const colorSpecRegEx = /^(#([a-f0-9]{6}|[a-f0-9]{3})|[a-z]+|\([^)]+\))/i
 
-const dictSepRegEx = /^(?:′+ *)?:/
-
 const factors = /^[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133\uD835[({√∛∜]/
 
 const setUpIf = (rpn, tokenInput, exprStack, delim) => {
@@ -299,7 +297,7 @@ const texPrecFromType = [
 /* Operator Precedence
 TeX  RPN
   0    0    ( [ {        delimiters
-  1    1    , ;  :       separators for arguments, elements, rows, and key:value pairs
+  1    1    , ;  :       separators for arguments, elements, rows, and ranges
   1    2    for in while loop keywords
   1    3    :            range separator
   1    4    if ∧ ∨       logical operators, return
@@ -322,7 +320,6 @@ const dFUNCTION = 2 //        sin(x)
 const dACCESSOR = 3 //        identifier[index] or identifier[start:step:end]
 const dMATRIX = 4 //          [1; 2] or (1, 2; 3, 4) or {1, 2}
 const dVECTORFROMRANGE = 5 // [start:end] or [start:step:end]
-const dDICTIONARY = 6 //      { key:value, key:value } or { key:value; key:value }
 const dCASES = 7 //           { a if b; c otherwise }
 const dBINOMIAL = 8
 const dSUBSCRIPT = 9 //       Parens around a subscript do not get converted into matrices.
@@ -433,10 +430,7 @@ export const parse = (
             }
           }
 
-          if (delim.delimType === dDICTIONARY && delim.open.length > 3) {
-            tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + 2)
-            op.closeDelim = delim.close
-          } else if (delim.delimType === dMATRIX) {
+          if (delim.delimType === dMATRIX) {
             const inc = tex.slice(op.pos, op.pos + 1) === "\\" ? 2 : 1
             tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + inc)
             op.closeDelim = delim.close
@@ -576,7 +570,7 @@ export const parse = (
         break
       }
 
-      case tt.ACCESSOR:  //   dot between a dictionary name and a property, as in r.PROPERTY
+      case tt.ACCESSOR:  //   dot between a map name and a property, as in r.PROPERTY
       case tt.ANGLE:    // \angle. Used as a separator for complex numbers in polar notation
         token = checkForUnaryMinus(token, prevToken)
         if (isCalc) {
@@ -634,7 +628,7 @@ export const parse = (
         const ch = token.input.charAt(0)
         if (isCalc) { rpn += ch + token.output + ch }
         if (isPrecededBySpace) { posOfPrevRun = tex.length }
-        token.output = parse(token.output, decimalFormat, false)
+        token.output = token.output === "`" ? "`" : parse(token.output, decimalFormat, false)
         tex += "{" + token.output + "}"
         okToAppend = true
         break
@@ -655,26 +649,14 @@ export const parse = (
         // variables get appended directly onto rpn.
         popTexTokens(7, okToAppend)
         if (isPrecededBySpace) { posOfPrevRun = tex.length }
-
-        let isKey = false
-        if (dictSepRegEx.test(str)) {
-          const topDelim = delims[delims.length - 1]
-          if (topDelim.delimType === dDICTIONARY
-              || (topDelim.delimType === dPAREN && topDelim.name === "{")) {
-            isKey = true
-          }
-        }
         token.output = assertCalligraphic(token.output)
 
         if (!isCalc) {
-          if (token.ttype === tt.LONGVAR || isKey) {
+          if (token.ttype === tt.LONGVAR) {
             token.output = "\\mathrm{" + token.output + "}"
           }
         } else if (prevToken.input === "for") {
           rpn += '"' + token.input + '"' // a loop index variable name.
-        } else if (isKey) {
-          token.output = "\\mathrm{" + token.output + "}"
-          rpn += `"${token.input}"`
         } else {
           // We're in the echo of a Hurmet calculation.
           if (/^[.[]/.test(str)) {
@@ -716,17 +698,9 @@ export const parse = (
         // A word after a dot ACCESSOR operator. I.e., A property in dot notation
         // Treat somewhat similarly to tt.STRING
         popTexTokens(15, okToAppend)
-        if (isCalc) {
-          if (/\xa0\[\]\xa01\xa0$/.test(rpn)) {
-            // Compiler magic so that varName[prop1].prop2 parses as varName[prop1, "prop2"]
-            rpn = rpn.slice(0, -5) + '"' + token.output + '"\xa0[]\xa02'
-            rpnStack.pop()
-          } else {
-            rpn += '"' + token.output + '"'
-          }
-        }
         const pos = token.input.indexOf("_")
         if (isCalc) {
+          rpn += '"' + token.output + '"'
           tex += `\\mathrm{${token.output}}`
           if (str.charAt(0) !== ".") { tex += " " }
         } else if (pos > -1) {
@@ -763,33 +737,21 @@ export const parse = (
       }
 
       case tt.COLON: {
-        //   range separator, as in 1:n, or key:value separator
-        let isKeyValueSeparator = false
-        const topDelim = delims[delims.length - 1]
-        if (topDelim.delimType === dDICTIONARY) {
-          isKeyValueSeparator = true
-        } else if (topDelim.delimType === dPAREN && topDelim.name === "{") {
-          topDelim.delimType = dDICTIONARY
-          isKeyValueSeparator = true
-        } else if (topDelim.delimType === dPAREN && topDelim.name === "[")  {
-          topDelim.delimType = dVECTORFROMRANGE
-        }
-        rpnPrec = isKeyValueSeparator ? 1 : 3
-
+        //   range separator, as in 1:n
         if (isCalc) {
           rpn += tokenSep
-          popRpnTokens(rpnPrec)
+          popRpnTokens(3)
         }
         popTexTokens(1, okToAppend)
         posOfPrevRun = tex.length
 
         if (isCalc) {
-          rpnStack.push({ prec: rpnPrec, symbol: isKeyValueSeparator ? ":" : ".." })
-          if (str.charAt(0) === "]" && !isKeyValueSeparator) {
+          rpnStack.push({ prec: 3, symbol: ".." })
+          if (str.charAt(0) === "]") {
             rpn += '"∞"' // slice of the form: identifier[n:]
           }
         }
-        tex += isKeyValueSeparator ? "\\mathpunct{:}" : token.output
+        tex += token.output
         break
       }
 
@@ -941,19 +903,7 @@ export const parse = (
 
       case tt.PRIME:
         popTexTokens(15, true)
-        if (isCalc) {
-          const topDelimType = delims[delims.length - 1].delimType
-          const isAccessor = rpnStack.length > 0 &&
-                             rpnStack[rpnStack.length - 1].symbol === "."
-          if (isAccessor || (topDelimType === dDICTIONARY && rpn.length > 0 &&
-              rpn.charAt(rpn.length - 1) === '"' && str.length > 0 && str.charAt(0) === ":")) {
-            // prevToken is a dictionary key that the user wrote w/o surrounding quote marks.
-            // The quote marks were appended above. Slip the prime into the string.
-            rpn = rpn.slice(0, -1) + token.input + '"'
-          } else {
-            rpn += token.input
-          }
-        }
+        if (isCalc) { rpn += token.input }
         tex = tex.trim() + token.output + " "
         okToAppend = true
         break
@@ -1147,7 +1097,7 @@ export const parse = (
           delim.delimType = dSUBSCRIPT
           delim.name = "("
         } else if (token.input === "{") {
-          // This may change to a dDICTIONARY or a CASES.
+          // This may change to a CASES.
           delim.delimType = dPAREN
           delim.rpnLength = rpn.length
         } else if (token.input === "[" &&
@@ -1179,31 +1129,20 @@ export const parse = (
         } else {
           const delim = delims[delims.length - 1]
           if (delim.delimType === dPAREN && isFollowedBySpaceOrNewline) {
-            if (token.input === "," && delim.name === "{") {
-              delim.delimType = dDICTIONARY
-            } else {
-              delim.delimType = delim.name === "{" ? dDICTIONARY : dMATRIX
-              const ch = delim.name === "["
-                ? "b"
-                : delim.name === "("
-                ? "p"
-                : delim.name === "{:"
-                ? ""
-                : "B"
-              delim.open = `\\begin{${ch}matrix}`
-              delim.close = `\\end{${ch}matrix}`
-              delim.isTall = true
-              token.output = token.input === "," ? "&" : "\\\\"
-            }
+            delim.delimType = dMATRIX
+            const ch = delim.name === "["
+              ? "b"
+              : delim.name === "("
+              ? "p"
+              : delim.name === "{:"
+              ? ""
+              : "B"
+            delim.open = `\\begin{${ch}matrix}`
+            delim.close = `\\end{${ch}matrix}`
+            delim.isTall = true
+            token.output = token.input === "," ? "&" : "\\\\"
           } else if (delim.delimType === dMATRIX && token.input === ",") {
             token.output = "&"
-          } else if (delim.delimType === dDICTIONARY && token.input === ";") {
-            token.output = "\\\\"
-            if (!delim.open.length < 5) {
-              delim.open = "\\left\\{\\begin{array}{l}"
-              delim.close = "\\end{array}\\right\\}"
-              delim.isTall = true
-            }
           } else if (delim.delimType > 3 && token.input === ";") {
             token.output = "\\\\"
           }
@@ -1318,10 +1257,6 @@ export const parse = (
               rpn = rpn.slice(0, -1)
               break
 
-            case dDICTIONARY:
-              rpn += firstSep + "dictionary" + tokenSep + numArgs
-              break
-
             case dVECTORFROMRANGE:
               // [start:step:end]
               rpn += tokenSep + "matrix" + tokenSep + "1" + tokenSep + "1"
@@ -1373,7 +1308,7 @@ export const parse = (
         }
         if (isRightDelim) {
           // Treat as a right delimiter
-          topDelim.close = token.input === "|" ? "\\vert " : "\\vert "
+          topDelim.close = token.input === "|" ? "\\vert " : "\\Vert "
           texStack[texStack.length - 1].closeDelim = topDelim.close
           popTexTokens(0, okToAppend)
           delims.pop()
@@ -1394,15 +1329,15 @@ export const parse = (
             prec: 0,
             pos: tex.length,
             ttype: tt.LEFTRIGHT,
-            closeDelim: token.input === "|" ? "\\vert " : "\\vert "
+            closeDelim: token.input === "|" ? "\\vert " : "\\Vert "
           })
 
           delims.push({
             delimType: dPAREN,
             name: token.input,
             isTall: false,
-            open: token.input === "|" ? "\\vert " : "\\vert ",
-            close: token.input === "|" ? "\\vert " : "\\vert ",
+            open: token.input === "|" ? "\\vert " : "\\Vert ",
+            close: token.input === "|" ? "\\vert " : "\\Vert ",
             numArgs: 1,
             numRows: 1,
             rpnPos: rpn.length,
@@ -1413,7 +1348,7 @@ export const parse = (
             rpnStack.push({ prec: 0, symbol: token.output })
           }
 
-          tex += token.input === "|" ? "\\vert " : "\\vert "
+          tex += token.input === "|" ? "\\vert " : "\\Vert "
           posOfPrevRun = tex.length
           okToAppend = false
         }

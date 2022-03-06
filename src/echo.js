@@ -87,7 +87,7 @@ export const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat
     }
     needsParens = needsParens && !isParened
 
-    if (hvar.dtype === dt.DATAFRAME || hvar.dtype === dt.DICT || (hvar.dtype & dt.MAP)) {
+    if (hvar.dtype === dt.DATAFRAME || (hvar.dtype & dt.MAP)) {
       display = "\\mathrm{" + vars[varName].name + "}"
     } else if (unitAware) {
       display = needsParens ? "\\left(" + hvar.resultdisplay + "\\right)" : hvar.resultdisplay

@@ -1,13 +1,15 @@
 import { parse } from "./parser"
 import { dt } from "./constants"
-import { clone } from "./utils"
+import { clone, unitTeXFromString } from "./utils"
 import { format } from "./format"
 import { Rnl } from "./rational"
 import { isMatrix } from "./matrix"
+import { errorOprnd } from "./error"
 
-export function insertOneHurmetVar(hurmetVars, attrs) {
+export function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
   // hurmetVars is a key:value store of variable names and attributes.
   // This function is called to insert an assignment into hurmetVars.
+  const formatSpec = hurmetVars.format ? hurmetVars.format.value : "h15"
 
   if (!Array.isArray(attrs.name)) {
     // This is the typical case.
@@ -17,6 +19,7 @@ export function insertOneHurmetVar(hurmetVars, attrs) {
     for (let i = 0; i < attrs.name.length; i++) {
       hurmetVars[attrs.name[i]] = { value: null }
     }
+
   } else if (isMatrix(attrs)) {
     // Assign to a matrix of names
     const isQuantity = Boolean(attrs.dtype & dt.QUANTITY)
@@ -48,7 +51,7 @@ export function insertOneHurmetVar(hurmetVars, attrs) {
         }
       }
     } else {
-      // A vector.
+      // Assign to a vector of names.
       const isColumn = Boolean(attrs.dtype & dt.COLUMNVECTOR)
       const dtype = attrs.dtype - (isColumn ? dt.COLUMNVECTOR : dt.ROWVECTOR)
       for (let i = 0; i < attrs.name.length; i++) {
@@ -68,63 +71,71 @@ export function insertOneHurmetVar(hurmetVars, attrs) {
       }
     }
 
-  } else if (attrs.dtype === dt.DICT) {
-    // multiple assignment from a dictionary
-    if (attrs.name.length !== attrs.value.size) {
-      // TODO: Error
-      // Multiple assignments don't print a result, so this is awkward.
-    } else {
-      let i = 0
-      for (const value of attrs.value.values()) {
-        const result = clone(value)
-        if (result.unit && result.unit.name) {
-          // A quantity. Get the value in both plain and base units.
-          const plain = result.value
-          const unit = attrs.unit[result.unit.name]
-          const inBaseUnits = Rnl.multiply(Rnl.add(plain, unit.gauge), unit.factor)
-          result.value = { plain, inBaseUnits }
-          result.expos = unit.expos
-          result.resultdisplay = parse(format(plain) + " '" + result.unit.name + "'")
-        } else if (Rnl.isRational(result.value)) {
-          result.expos = result.unit
-          result.resultdisplay = parse(format(result.value))
-        } else {
-          result.resultdisplay = result.value
+  // From this point forward, we're dealing with multiple assignment
+  } else if (attrs.dtype & dt.MAP) {
+    const unit = attrs.value.unit
+    const unitName = unit && unit.name ? unit.name : undefined
+    const dtype = attrs.dtype - dt.MAP
+    let i = 0
+    if (attrs.dtype & dt.QUANTITY) {
+      for (const value of attrs.value.plain.values()) {
+        const result = {
+          value: { plain: value },
+          expos: attrs.expos,
+          factor: attrs.factor,
+          dtype
         }
+        result.resultdisplay = format(value, formatSpec, decimalFormat)
+        if (unitName) { result.resultdisplay += " " + unitTeXFromString(unitName) }
+        hurmetVars[attrs.name[i]] = result
+        i += 1
+      }
+      i = 0
+      for (const value of attrs.value.inBaseUnits.values()) {
+        hurmetVars[attrs.name[i]].value.inBaseUnits = value
+        i += 1
+      }
+    } else {
+      for (const value of attrs.value.values()) {
+        const result = { value, expos: attrs.expos, factor: attrs.factor, dtype }
+        result.resultdisplay = Rnl.isRational(value)
+          ? format(value, formatSpec, decimalFormat)
+          : String(value)
+        if (unitName) { result.resultdisplay += " " + unitTeXFromString(unitName) }
         hurmetVars[attrs.name[i]] = result
         i += 1
       }
     }
-  } else if (attrs.dtype & dt.MAP) {
-    if (attrs.name.length !== attrs.value.size) {
-      // TODO: Error
-      // Multiple assignments don't print a result, so this is awkward.
-    } else {
-      for (const [key, value] of attrs.value) {
-        const result = { value }
-        if (attrs.unit && attrs.unit.name) {
-          // A quantity. Get the value in both plain and base units.
-          const inBaseUnits = value
-          const unit = attrs.unit
-          const plain = Rnl.subtract(Rnl.divide(inBaseUnits, unit.factor), unit.gauge)
-          result.value = { plain, inBaseUnits }
-          result.expos = unit.expos
-          result.resultdisplay = parse(format(plain) + " '" + unit.name + "'")
-        } else if (Rnl.isRational(result.value)) {
-          result.expos = attrs.unit
-          result.resultdisplay = parse(format(result.value))
-        } else {
-          result.resultdisplay = result.value
-        }
-        result.dtype = attrs.dtype - dt.MAP
-        hurmetVars[key] = result
+  } else if (attrs.dtype === dt.DATAFRAME) {
+    for (let i = 0; i < attrs.name.length; i++) {
+      const datum = attrs.value.data[i][0]
+      const dtype = attrs.value.dtype[i]
+      const val = (dtype & dt.RATIONAL) ? Rnl.fromString(datum) : datum
+      const result = {
+        value: val,
+        unit: attrs.unit[attrs.value.units[i]],
+        dtype,
+        resultdisplay: (dtype & dt.RATIONAL) ? parse(format(val)) : parse(val)
       }
+      if (attrs.value.units[i]) {
+        result.value = { plain: result.value }
+        const unit = attrs.unit[attrs.value.units[i]]
+        result.value.inBaseUnits =
+          Rnl.multiply(Rnl.add(result.value.plain, unit.gauge), unit.factor)
+        result.expos = unit.expos
+        result.resultdisplay += " " + unitTeXFromString(result.unit.name)
+      }
+      hurmetVars[attrs.name[i]] = result
     }
-  }  else if (attrs.dtype === dt.MODULE) {
-    // multiple assignment from a module
+  } else if (attrs.dtype === dt.TUPLE) {
+    let i = 0
+    for (const value of attrs.value.values()) {
+      hurmetVars[attrs.name[i]] = value
+      i += 1
+    }
+  } else if (attrs.dtype === dt.MODULE) {
     if (attrs.name.length !== attrs.value.length) {
-      // TODO: Error
-      // Multiple assignments don't print a result, so this is awkward.
+      return errorOprnd("MULT_MIS")
     } else {
       let i = 0
       for (const value of attrs.value.values()) {
@@ -134,6 +145,6 @@ export function insertOneHurmetVar(hurmetVars, attrs) {
       }
     }
   } else {
-    // TODO: Write an error message.
+    // TODO: Return an error
   }
 }

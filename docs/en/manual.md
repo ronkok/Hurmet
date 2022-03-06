@@ -288,20 +288,35 @@ Display Mode
 
 #### Markup
 
-| Input         | Renders as:    | Input                        | Renders or<br>calculates as:  |
-|---------------|----------------|------------------------------|-------------------------------|
-| `12/25.2`     | ¢`12/25.2`     | `x`                          | ¢`x`                          |
-| `(a + b)/c`   | ¢`(a + b)/c`   | `longVarName`                | ¢`longVarName`                |
-| `a//b`        | ¢`a//b`        | `"A string."`                | ¢`"A string."`                |
-| `a///b`       | ¢`a///b`       | `'5 N.m/s2'`                 | ¢`'5 N.m/s2'`                 |
-| `x^23`        | ¢`x^23`        | `(a, b; c, d)`               | ¢`(a, b; c, d)}`              |
-| `x^(a+b)`     | ¢`x^(a+b)`     | `[a, b; c, d]`               | ¢`[a, b; c, d]`               |
-| `x_subscript` | ¢`x_subscript` | `{:a, b; c, d:}`             | ¢`{:a, b; c, d:}`             |
-| `x_(a+b)`     | ¢`x_(a+b)`     | `[1:4] = ?`                  | ¢`[1, 2, 3, 4]`               |
-| `x′`          | ¢`x′`          | `[1:2:5] = ?`                | ¢`[1, 3, 5]`                  |
-| `A-->note B`  | ¢`A ⟶note B`  | `{"w": 24, "h": 30}`         | ¢`{"w": 24, "h": 30}`         |
-| `\red("ng")`  | ¢`\red("ng")`  | `|x|   ‖x‖`                  | ¢`\|x\|`   ¢`‖x‖`             |
-|               |                | `{a if b;`<br>`c otherwise}` | ¢`{a if b;c otherwise}`       |
++---------------+-----------------+------------------------------+-------------------------------+
+| Input         | Renders as:     | Input                        | Renders or<br>calculates as:  |
++===============+=================+==============================+===============================+
+| `12/25.2`     | ¢`12/25.2`      | `x`                          | ¢`x`                          |
++---------------+-----------------+------------------------------+-------------------------------+
+| `(a + b)/c`   | ¢`(a + b)/c`    | `longVarName`                | ¢`longVarName`                |
++---------------+-----------------+------------------------------+-------------------------------+
+| `a//b`        | ¢`a//b`         | `"A string."`                | ¢`"A string."`                |
++---------------+-----------------+------------------------------+-------------------------------+
+| `a///b`       | ¢`a///b`        | `'5 N.m/s2'`                 | ¢`'5 N.m/s2'`                 |
++---------------+-----------------+------------------------------+-------------------------------+
+| `x^23`        | ¢`x^23`         | `(a, b; c, d)`               | ¢`(a, b; c, d)}`              |
++---------------+-----------------+------------------------------+-------------------------------+
+| `x^(a+b)`     | ¢`x^(a+b)`      | `[a, b; c, d]`               | ¢`[a, b; c, d]`               |
++---------------+-----------------+------------------------------+-------------------------------+
+| `x_subscript` | ¢`x_subscript`  | `{:a, b; c, d:}`             | ¢`{:a, b; c, d:}`             |
++---------------+-----------------+------------------------------+-------------------------------+
+| `x_(a+b)`     | ¢`x_(a+b)`      | `[1:4] = ?`                  | ¢`[1, 2, 3, 4]`               |
++---------------+-----------------+------------------------------+-------------------------------+
+| `x′`          | ¢`x′`           | `[1:2:5] = ?`                | ¢`[1, 3, 5]`                  |
++---------------+-----------------+------------------------------+-------------------------------+
+| `|x|  ‖x‖`    | ¢`|x|˽˽˽‖x‖`    | `{a if b;` \                 | ¢`{a if b; c otherwise}`      |
+|               |                 | `c otherwise}`               |                               |
++---------------+-----------------+------------------------------+-------------------------------+
+| `A-->note B`  | ¢`A-->note B`   | ``` `` | dia | area ``` \    | ¢``` `` | dia | area          |
++---------------+-----------------+ ``    | in | in² `` \        |     | in | in²                |
+| `\red("ng")`  | ¢`\red("ng")`   | `` #3 | 0.375 | 0.11 `` \    |  #3 | 0.375 | 0.11            |
+|               |                 | ``` #4 | 0.5   | 0.2 `` ```  | #4 | 0.5   | 0.2 `` ```       |
++---------------+-----------------+------------------------------+-------------------------------+
 {.markup}
 
 Calculation cells also support many of the math-mode TeX functions
@@ -380,7 +395,7 @@ The font corrections, e.g., `bb …` work on any letter from A to Z or a to z.
 +------------------+------------------------+--------------------------------------+
 |        !         |       !!               | Omits the blue echo and the result.\ |
 |                  |                        | Valid only when the result is a data |
-|                  |                        | frame or a dictionary.               |
+|                  |                        | frame.                               |
 +------------------+------------------------+--------------------------------------+
 
 <div id="accessor-container">
@@ -401,10 +416,6 @@ The font corrections, e.g., `bb …` work on any letter from A to Z or a to z.
 | Matrix\                              | 𝐌[2, 3]\             | 6\                |
 | 𝐌 = ¢`\(1, 2, 3; 4, 5, 6; 7, 8, 9)` | 𝐌[3,]\               | ¢`[7, 8, 9]`\     |
 |                                      | 𝐌[2:3, 1:2]          | ¢`[4, 5; 7, 8]`   |
-+--------------------------------------+-----------------------+-------------------+
-| Dictionary\                          | D.h\                  | 9\.13\            |
-| D = ¢`{ "w": 31, "h": 9.13 }`        | D["h"]\               | 9\.13\            |
-|                                      | D["h", "w"]           | 9\.13, 31         |
 +--------------------------------------+-----------------------+-------------------+
 | Data Frame\                          | DF.B\                 | An entire row\    |
 | ![dataframe][]                       | DF["B"]\              | An entire row\    |
@@ -497,7 +508,7 @@ It determines how much of the calculation is displayed.
 +------------------+------------------------+--------------------------------------+
 |        !         |       !!               | Omits the blue echo and the result.\ |
 |                  |                        | Valid only when the result is a data |
-|                  |                        | frame or a dictionary.               |
+|                  |                        | frame.                               |
 +------------------+------------------------+--------------------------------------+
 
 For an engineer like me, the most common display selector is **??**. I almost
@@ -509,21 +520,19 @@ calculations. And it makes the calculation reviewable by a second set of eyes.
 A doubled selector will prompt a [unit-aware calculation](#unit-aware-calculations).
 After you try them, you may wonder how you ever did without them.
 
-I use the **!** selector mostly when I am assigning a [chunk of data](#data-table) to a variable.
+I use the **!** selector mostly when I am assigning a [chunk of data](#data-frame) to a variable.
 
 I try to resist the temptation to overuse the **%** selector. When I review work
 done by another engineer, I can do without the blue echo if variable values are
 assigned directly above the equation where they are used. Otherwise I get grumpy.
 You don’t want a grumpy reviewer.
 
-One last variation is possible when assigning values from a [dictionary](#dictionary).
+One last variation is possible when assigning values from a single-row data frame.
 You can assign such values to more than one variable at a time, like this:
 
 ```
 A, I, w_self = beam["A", "Ix", "weight"] = !!
 ```
-
-Multiple assignment statements must suppress the result display.
 
 ## Identifiers
 
@@ -812,7 +821,7 @@ Data Frame
     values.)
 
     Instead of commas, Hurmet data is separated by either tabs or pipes, i.e., `|`.
-    (Both not both tabs and pipes in the same file.) Numbers must use a dot decimal.
+    (But not both tabs and pipes in the same file.) Numbers must use a dot decimal.
     The second row may contain units of measure.
 
     Here’s an example of CSV input:
@@ -838,11 +847,10 @@ Data Frame
     #6|0.75    |0.44``
     ```
 
-    Normally, the first column of a Hurmet data frame contains keys. You can use a
-    key to access a row of the data frame. If you do not want the first column to
-    be treated as keys, then begin the CSV with three back-ticks instead of two.
+    Hurmet will use the first column as keys to the rest of each row if you leave
+    the top left cell blank, or if the content of the top left cell is “name”.
 
-    Data frames can be quite large, so Hurmet has a`fetch(url)` function to load
+    Data frames can be quite large, so Hurmet has a `fetch(url)` function to load
     data from a remote CSV file into a data frame. Since Hurmet runs in a browser,
     the url must begin with `http:` or `https:`
 
@@ -872,103 +880,51 @@ Data Frame
     `beam = wideFlanges.W10X49 = !!` or\
     `beam = wideFlanges["W10X49"] = !!`
 
-    That returns a Hurmet [dictionary](#dictionary). Then I can call individual
+    That returns a single-row data frame. Then I can call individual
     properties, like this:
 
     `A = beam.A = ?? in2` or\
     `A = beam["A"] = ?? in2` or\
     `A = wideFlanges.W10X49.A = ?? in2`
 
-    You can also call an individual element, a column, or a group of elements. The
-    index can be either a number or a string. Examples:
-
-    | This call:                    | … will return:                               |
-    |-------------------------------|----------------------------------------------|
-    | `wideFlanges.W10X49.A`        | ¢`14.4 'in2'`                                |
-    | `wideFlanges["W10X49"]["A"]`  | ¢`14.4 'in2'`                                |
-    | `wideFlanges["W10X49", "A"]`  | ¢`14.4 'in2'`                                |
-    | `wideFlanges["W10X49", 1:2]`  | ¢`{"name": "W10X49"; "weight": 49 'lbf/ft'}` |
-    | `wideFlanges[1:2, "A"]`       | ¢`[26.5; 19.1]`                              |
-    {.table-no-wrap}
-
     Hurmet will return a <br> ¢`{"simple type" if "you call a single cell, as in
-    df[1, 2]"; "column vector" if "you call a column, as in df[,2]"; "dictionary"
-    if "you call a row, as in df[3,]"; "data frame" otherwise}`
+    df[1, 2]"; "column vector" if "you call a column, as in df[,2]"; "data frame" otherwise}`
 
     Dot notation, as in `wideFlanges.W10X49`, can be used only if the property name
     is a valid [identifier](#identifiers).
 
     Here are calls that can return multiple values:\
         `A, S_x = wideFlanges.W8X31["A", "Sx"] = !!`, or\
-        `A, S_x = wideFlanges\["W8X31"]["A", "Sx"] = !!`, or\
-        `A, S_x = wideFlanges["W10X49", ["A", "Sx"]] = !!`\
+        `A, S_x = wideFlanges["W8X31"]["A", "Sx"] = !!`
     Multiple returns must use the `!!` display selector, for now.
+
+    If the data frame has only one row of data, a single accessor will call a datum.\
+    Say the data frame is ¢```aBar =``| diameter | area
+       | in  |in2
+    #4 | 0.5 | 0.2`` ```
+    Then one can call ¢`A = aBar.area = 0.2 'in2'`
+
+    Numeric cata frames can be multiplied by a unit-less scalar.
+    No other math operations are supported for data frames.
 
     For structural engineers, I’ve put some useful data frames on GitHub. There are
     links [below](#other-resources).
 
-Dictionary
-
-:   A _dictionary_ is a data structure in which you can store values and access
-    each one with a unique name. Put another way, a dictionary is a collection of
-    key:value pairs.
-
-    Dictionaries are often created by calling one row of a data frame, as described above.
-
-    Dictionary literals are written between `{ }` delimiters. Each key must be a
-    string, i.e., between double quotation marks. Keys are separated from values by
-    a colon and key:value pairs are separated from each other by commas or
-    semi-colons (but not both commas and semi-colons in the same dictionary).
-
-    Example:  `barArea = {"#4": 0.22, "#5": 0.31}`
-
-    The quotation marks around a key may be omitted if the key is a valid
-    [identifier](#identifiers). Example:   `dict = {a: 4, b: 7}`
-
-    A value may be any Hurmet data type except a data frame or a nested dictionary.
-
-    A pre-existing variable can be one of the key:value pairs. So if you have
-    previously assigned values to variables _a_, _b_, and _c_, a dictionary
-    can be defined this way: `dict = {a, b c} = !`\
-    The display selector, `!`, is necessary in this case because this is not just an
-    assignment of a literal. A calculation has to run in order to fetch the value
-    of the variable `a`.
-
-    Call individual values from a dictionary with a key in brackets, as in
-    `A = barArea["#3"]`. This notation also enables one to use a variable name
-    for the key. Or, if the key qualifies as a valid identifier, you can use
-    dot notation, as in `W8X31.weight`
-
-    You can assign multiple values from a dictionary in one statement using bracket
-    notation, like this:
-
-    ```
-    A, I, w_self = W8X31["A", "Ix", "weight"] = !!
-    ```
-
-    Multiple assignment statements must have the result display suppressed.
-
 Map
 
-:   A Hurmet _map_ is a dictionary in which every value is the same data type,
-    either boolean, string, or number. Maps can be the numeric part of
+:   A Hurmet _map_ is a single-row data frame in which every value is the same
+    data type, either boolean, string, or number. Maps can be the numeric part of
     a quantity.
 
-    ```
-    barArea = '{"#4": 0.22, "#5": 0.31} in2'
-    ```
+    ¢```w = ``dead | live | snow
+    30 | 70 | 40`` 'lbf/ft' ```
 
     You can do arithmetic on maps and run them through functions. The operation
     will be done on each value in the map. For instance, a beam calculation can
     break the loads down into dead load, live load, snow load, etc.:
 
-    ¢`w = {"D": 20; "L": 40; "S": 30} 'lbf/ft'`        ¢`L = 12 'ft'`
-
-    ¢`M = 1//8 w L^2  = \color(blue)(1/8 ({"D": 20; "L": 40; "S": 30} 'lbf/ft')(12 'ft')^2)
-    \color(black) = {"D": 0.54, "L": 0.72, "S": 0.36} 'k·ft'`
-
-    Dictionaries with values of varying units-of-measure can be multiplied by a
-    unit-less scalar. No other math operations are supported for non-map dictionaries.
+    ¢`M = 1//8 w L^2  = ``dead | live | snow
+    0.375 | 0.875 | 0.5`` 'k·ft'`
 
 </dl>
 
@@ -1008,9 +964,9 @@ _j_
 | Operator      | Example              | Description                                 |
 +===============+======================+=============================================+
 | =             | _x_ = 15             | Assign a value to a variable.               |
-+---------------+----------------------+---------------------------------------------+
-| =             | if _x_ = 15          | Equality test if in a comparison position.\ |
-|               |                      | That is, “=” tests for equality if there.   |
+*               +----------------------+---------------------------------------------+
+|               | if _x_ = 15          | Equality test if in a comparison position.\ |
+|               |                      | That is, “=” tests for equality if there    |
 |               |                      | is something other than a identifier to the |
 |               |                      | left of it or a display selector to the     |
 |               |                      | right of it.                                |
@@ -1062,7 +1018,7 @@ _j_
 +---------------+----------------------+---------------------------------------------+
 | &             | ¢`s_1 & s_2`         | Concatenate strings or vectors, or          |
 |               |                      | append numbers onto vectors, or variables   |
-|               |                      | into a dictionary or map, or append a       |
+|               |                      | into a map, or append a                     |
 |               |                      | column vector to a data frame               |
 +---------------+----------------------+---------------------------------------------+
 | &\_           | ¢`𝐚 &_ 𝐛`          | Append matrices or vectors vertically.      |
@@ -1079,9 +1035,9 @@ _j_
 +---------------+----------------------+---------------------------------------------+
 | ||  ||        | ¢`\\Vert x \\Vert`   | ¢`√(x_1^2 + ⋯ + x_n^2)` if the argument is  |
 |               |                      | a vector of reals                           |
-+---------------+----------------------+---------------------------------------------+
-| ||  ||        | ¢`\\Vert x \\Vert`   | ¢`√(∑_i ∑_j A_(i, j)^2)` if the argument is |
-|               |                      | a 2-D matrix                                |
+*                                      +---------------------------------------------+
+|                                      | ¢`√(∑_i ∑_j A_(i, j)^2)` if the argument is |
+|                                      | a 2-D matrix                                |
 +---------------+----------------------+---------------------------------------------+
 | ⌊  ⌋          | ¢`⎿4.5⏌`             | Floor. Always rounds down.\                 |
 |               |                      | auto-correct: floor                         |
@@ -1117,7 +1073,7 @@ _j_
 +---------------+----------------------+---------------------------------------------+
 | ∈             | ¢`c ∈ s`             | Is an element of a matrix or is a character |
 |               |                      | of a string, or is a property of a          |
-|               |                      | dictionary\                                 |
+|               |                      | single-row data frame\                      |
 |               |                      | auto-correct: \in                           |
 +---------------+----------------------+---------------------------------------------+
 | ∉             | ¢`c ∉ s`             | Is not an element of\                       |
@@ -1130,16 +1086,15 @@ _j_
 +---------------+----------------------+---------------------------------------------+
 | or            |                      | Logical or                                  |
 +---------------+----------------------+---------------------------------------------+
-| ∧             |                      | Logical and.      auto-correct: ^^          |
+| ∧             |                      | Logical and. <br>auto-correct: ^^           |
 +---------------+----------------------+---------------------------------------------+
-| ∨             |                      | Logical or.        auto-correct: vv         |
+| ∨             |                      | Logical or.  <br>auto-correct: vv           |
 +---------------+----------------------+---------------------------------------------+
 | ⊻             |                      | Logical xor                                 |
 +---------------+----------------------+---------------------------------------------+
 | ¬             |  if ¬ _a_            | Logical not                                 |
 +---------------+----------------------+---------------------------------------------+
-| :             | {"a": 10}\           | Key:value separator if within a dictionary. |
-|               | 𝐕\[2:3\]            | Range separator otherwise.                  |
+| :             | 𝐕\[2:3\] \          | Range separator                             |
 |               | for _i_ in 1:3       |                                             |
 +---------------+----------------------+---------------------------------------------+
 {#op-table .grid width=35em}
@@ -1415,14 +1370,14 @@ takes any of these shapes:
 | map                       | ✓      | ✓      |        |     |                           |
 | map with<br>vector values | ✓      |        |        |     |                           |
 
-There are a few operators that also work on dictionaries. For instance, a unit-less
-number can be multiplied times a dictionary that has numeric values.
+Also, a unit-less number can be multiplied times a data frame that has numeric values.
 
 ## Unit-Aware Calculations
 
 Hurmet has a data type called a [quantity](#quantity) that contains both a
 numeric magnitude and a unit of measure. In a Hurmet calculation editing box,
-you write quantity literals between single quotation marks. Examples:
+you transform a number into a quantity literal by appending a unit name between
+single quotation marks. Examples:
 
 +--------------+---------------+------------+
 | `4 'meters'` | `7.1 'ft3/s'` | `11 'N·m'` |
@@ -1475,9 +1430,11 @@ You’re welcome to view all of Hurmet’s built-in [unit definitions](unit-defi
 #### Custom Units
 
 If the Hurmet built-in unit definitions are not sufficient, you can define a
-set of custom units in a dictionary like this:
+set of custom units in a single-row data frame like this:
 
-`units = { "smoot": 67 'inches', "sol": 24.6229622 'hours' }`
+¢```units = ``smoot | sol
+inches | hours
+67     | 24.6229622`` ```
 
 #### Currencies
 
@@ -1485,12 +1442,13 @@ Currency exchange rates change, so Hurmet’s exchange rates are updated with
 [data from the European Central Bank](https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml).
 That update occurs only once per week. For many purposes, such rates are
 insufficiently accurate, so you can override them and define your own exchange
-rates in a dictionary named **currencies**. Such a statement might be coded
+rates in a map named **currencies**. Such a statement might be coded
 like this:
 
-currencies = { "USD": 1, "CAD": 1.25 }
+¢```currencies = ``USD | CAD
+   1  | 1.25`` ```
 
-The keys in that dictionary are standard three-letter [currrency codes](https://www.xe.com/iso4217.php).
+The keys in that map are standard three-letter [currrency codes](https://www.xe.com/iso4217.php).
 
 The variable name **currencies** may not be used for any other purpose.
 
@@ -2012,7 +1970,6 @@ Copyright © 2020-2022 Ron Kok. Released under the [MIT License](https://opensou
 * [Unit](#unit)
 * [Matrix](#matrix)
 * [Data Frame](#data-frame)
-* [Dictionary](#dictionary)
 * [Map](#map)
 
 </details>
@@ -2161,7 +2118,6 @@ Copyright © 2020-2022 Ron Kok. Released under the [MIT License](https://opensou
   observer.observe(document.getElementById("matrix"))
   observer.observe(document.getElementById("matrix-mult"))
   observer.observe(document.getElementById("data-frame"))
-  observer.observe(document.getElementById("dictionary"))
   observer.observe(document.getElementById("functions"))
   observer.observe(document.getElementById("if-expressions"))
   observer.observe(document.getElementById("unit-aware-calculations"))

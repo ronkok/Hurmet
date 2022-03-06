@@ -1,5 +1,4 @@
 import { dt } from "./constants"
-import { Dictionary } from "./dictionary"
 import { map } from "./map"
 import { DataFrame } from "./dataframe"
 import { fromAssignment } from "./operand.js"
@@ -9,14 +8,10 @@ import { Rnl } from "./rational"
 export function propertyFromDotAccessor(parent, index, vars, unitAware) {
   const property = Object.create(null)
   if (parent.dtype & dt.MAP) {
-    return map.valueFromMap(parent, [index.value], unitAware)
-
-  } else if (parent.dtype & dt.DICT) {
-    return Dictionary.toValue(parent, [index.value], unitAware)
+    return map.valueFromMap(parent, [index], unitAware)
 
   } else if (parent.dtype & dt.DATAFRAME) {
-    const colIndicator = { value: Rnl.zero, unit: null, dtype: dt.RATIONAL }
-    return DataFrame.range(parent, index, colIndicator, vars, unitAware)
+    return DataFrame.range(parent, [index], vars, unitAware)
 
   } else if ((parent.dtype === dt.STRING || (parent.dtype & dt.ARRAY)) &&
     index.dtype === dt.RATIONAL) {

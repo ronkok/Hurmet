@@ -1,11 +1,11 @@
 import { dt, allZeros } from "./constants"
-import { tablessTrim } from "./utils"
+import { tablessTrim, unitTeXFromString } from "./utils"
 import { parse } from "./parser"
 import { evalRpn } from "./evaluate"
 import { Rnl } from "./rational"
 import { parseFormatSpec } from "./format"
 import { DataFrame } from "./dataframe"
-import { unitFromUnitName } from "./units"
+import { map } from "./map"
 
 const numberRegEx = new RegExp(Rnl.numberPattern)
 const unitRegEx = /('[^']+'|[°ΩÅK])$/
@@ -29,10 +29,12 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
 
   // Start by checking for a unit
   let unitName = ""
+  let unitDisplay = ""
   const unitMatch = unitRegEx.exec(str)
   if (unitMatch) {
     unitName = unitMatch[0].replace(/'/g, "").trim()
     str = str.slice(0, -unitMatch[0].length).trim()
+    unitDisplay = unitTeXFromString(unitName)
   }
 
   if (/^[({[].* to /.test(str)) {
@@ -61,30 +63,28 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
     if (unitName) {
       unit = unitName
       dtype += dt.QUANTITY
+      return [oprnd.value, unit, dtype, tex + "\\," + unitDisplay]
+    } else {
+      return [oprnd.value, unit, dtype, tex]
     }
-    return [oprnd.value, unit, dtype, tex]
-
-  } else if (/^(\{)/.test(str)) {
-    // We're assigning a dictionary.
-    const [tex, rpn] = parse(str, decimalFormat, true)
-    if (!/\xa0dictionary\xa0\d+$/.test(rpn)) { return [0, null, dt.ERROR, ""]  }
-    const oprnd = evalRpn(rpn, {}, decimalFormat, false, {})
-    let unit = oprnd.unit
-    let dtype = oprnd.dtype
-    if (unitName) {
-      unit = unitFromUnitName(unitName, {})
-      dtype += dt.QUANTITY
-    }
-    return [oprnd.value, unit, dtype, tex]
 
   } else if (/^``/.test(str)) {
     // A CSV between double back ticks.
     // Read the CSV into a data frame.
-    const pos = str.indexOf('`', (str.charAt(2) === "`" ? 3 : 2))
-    str = tablessTrim(str.slice(2, pos))
-    const dataFrame = DataFrame.dataFrameFromCSV(str, {})
-    return [dataFrame.value, dataFrame.unit, dt.DATAFRAME,
-      DataFrame.display(dataFrame.value, "h3", decimalFormat)]
+    str = tablessTrim(str.slice(2, -2))
+    const dataStructure = DataFrame.dataFrameFromCSV(str, {})
+    if (dataStructure.dtype === dt.DATAFRAME) {
+      return [dataStructure.value, dataStructure.unit, dt.DATAFRAME,
+        DataFrame.display(dataStructure.value, "h3", decimalFormat)]
+    } else {
+      // It's a Hurmet Map
+      if (unitName) {
+        dataStructure.unit = unitName
+        dataStructure.dtype = dt.MAP + dt.RATIONAL + dt.QUANTITY
+      }
+      return [dataStructure.value, dataStructure.unit, dataStructure.dtype,
+        map.display(dataStructure, "h3", decimalFormat) + "\\;" + unitDisplay]
+    }
 
   } else if (complexRegEx.test(str)) {
     // str is a complex number.
@@ -111,7 +111,8 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
     // str is a number.
     const resultDisplay = parse(str, decimalFormat)
     if (unitName) {
-      return [Rnl.fromString(str), unitName, dt.RATIONAL + dt.QUANTITY, resultDisplay]
+      return [Rnl.fromString(str), unitName, dt.RATIONAL + dt.QUANTITY,
+        resultDisplay + "\\;" + unitDisplay]
     } else {
       return [Rnl.fromString(str), allZeros, dt.RATIONAL, resultDisplay]
     }

@@ -23,24 +23,14 @@ import { clone } from "./utils"
  * RATIONAL + ROWVECTOR + QUANTITY is the same as RATIONAL + QUANTITY except values are arrays.
  * COLUMNVECTOR is the same as ROWVECTOR exept that they are treated differently by operators.
  * MATRIX indicates that values are each an array of row vectors.
- *
- * MAP and DICT both implement a key:value store. They look the same to the user.
- * We don't save values inBaseUnits in either one.
- * If a unit-aware calculation calls a value from a dictionary, we convert on the fly.
- *
+ * *
  * A MAP's values are all the same data type and all have the same unit of measure.
- * MAP oprnd: { value: {key1: plain, key2: plain, etc}, unit: unitData, dtype: MAP + RATIONAL }
- *    where: unitData is an object containing { name, factor, gauge, expos }
+ * MAP oprnd: {name, value: see below, unit: {name, factor, gauge, expos}, dtype: dMAP + ...}
+ *    where: value is: {name1: value, name2: value} or
+ *    where value is: {plain: {name1: value, name2: value},
+ *                     inBaseUnits: {name1: value, name2: value},
+ *                     etc}
  * A `resultdisplay` string is always in a MAP's cell attrs and sometimes in an operand.
- *
- * DICT operand: { value: { key1: { value: plain, unit: unitName, dtype: dtype },
- *                          key2: { value: plain, unit: unitName, dtype: dtype },
- *                          etc
- *                        },
- *                 unit: { unitName1: unitData1, unitName2: unitData2, etc },
- *                 dtype: DICT
- *               }
- * A `resultdisplay` string is always in a DICT's cell attrs and sometimes in an operand.
  *
  * ERROR operand: { value: error message, unit: undefined, dtype: ERROR }
  *
@@ -66,10 +56,9 @@ export const fromAssignment = (cellAttrs, unitAware) => {
   if (cellAttrs.dtype === dt.STRING || cellAttrs.dtype === dt.BOOLEAN ||
       cellAttrs.dtype === dt.NULL) {
     oprnd.unit = null
-  } else if (cellAttrs.dtype & dt.MAP) {
+  } else if (cellAttrs.dtype === dt.DATAFRAME || (cellAttrs.dtype & dt.MAP)) {
     oprnd.unit = Object.freeze(clone(cellAttrs.unit))
-  } else if (cellAttrs.dtype === dt.DICT || cellAttrs.dtype === dt.DATAFRAME) {
-    oprnd.unit = Object.freeze(clone(cellAttrs.unit))
+
   } else if (cellAttrs.unit && cellAttrs.unit.expos) {
     oprnd.unit = clone(cellAttrs.unit)
   } else {
@@ -86,9 +75,7 @@ export const fromAssignment = (cellAttrs, unitAware) => {
       ? clone(cellAttrs.value.inBaseUnits)
       : clone(cellAttrs.value.plain)
     )
-    if (!(oprnd.dtype & dt.MAP)) {
-      oprnd.dtype = cellAttrs.dtype - dt.QUANTITY
-    }
+    oprnd.dtype = cellAttrs.dtype - dt.QUANTITY
 
   } else if (cellAttrs.dtype === dt.STRING) {
     const str = cellAttrs.value

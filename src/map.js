@@ -1,8 +1,9 @@
 import { dt, allZeros } from "./constants"
 import { Rnl } from "./rational"
-import { mapMap, clone, addTextEscapes, unitTeXFromString } from "./utils"
+import { mapMap, clone, unitTeXFromString } from "./utils"
 import { format } from "./format"
 import { errorOprnd } from "./error"
+import { formatColumnName } from "./dataframe"
 
 /*
  * This file deals with Hurmet maps, which are similar to hash maps.
@@ -65,61 +66,73 @@ const convertToBaseUnits = (map, gauge, factor) => {
   return mapMap(map, value => Rnl.multiply(value, factor))
 }
 
-const display = (result, formatSpec, decimalFormat) => {
+const display = (result, formatSpec, decimalFormat, omitHeading = false) => {
   const mapValue = result.value.plain ? result.value.plain : result.value
-  let str = "\\{"
+  let topRow = ""
+  let botRow = ""
   for (const [key, value] of mapValue.entries()) {
-    str += "\\text{" + addTextEscapes(key) + "}: "
-    str += format(value, formatSpec, decimalFormat) + ",\\:"
+    topRow += formatColumnName(key) + " & "
+    botRow += format(value, formatSpec, decimalFormat) + " & "
   }
-  str = str.slice(0, -3) + "\\}"
-  if (result.unit.name) {
-    str += "\\," + unitTeXFromString(result.unit.name)
+  topRow = topRow.slice(0, -3)
+  botRow = botRow.slice(0, -3)
+  let str = "\\begin{array}{c}"
+  if (!omitHeading) { str += topRow + " \\\\ \\hline " }
+  str += botRow + "\\end{array}"
+  if (result.unit && result.unit.name) {
+    str += "\\;" + unitTeXFromString(result.unit.name)
   }
   return str
 }
 
-const displayAlt = (result, formatSpec, decimalFormat) => {
+const displayAlt = (result, formatSpec, decimalFormat, omitHeading = false) => {
   const mapValue = result.value.plain ? result.value.plain : result.value
-  let str = "{"
+  let topRow = ""
+  let botRow = ""
   for (const [key, value] of mapValue.entries()) {
-    str += '"' + key + '": '
-    str += format(value, formatSpec, decimalFormat) + ", "
+    topRow += key + ' | '
+    botRow += format(value, formatSpec, decimalFormat) + " | "
   }
-  str = str.slice(0, -2) + "}"
-  if (result.unit.name) {
-    str = `'${str} ${result.unit.name}'`
+  topRow = topRow.slice(0, -3)
+  botRow = botRow.slice(0, -3)
+  let str = "``"
+  if (!omitHeading) { str += topRow + "\n" }
+  str += botRow + "``"
+  if (result.unit && result.unit.name) {
+    str = `${str} '${result.unit.name}'`
   }
   return str
+}
+
+const singleValueFromMap = (map, key, isNumeric, unitAware) => {
+  if (!map.value.has(key)) { return errorOprnd("BAD_KEY", key) }
+  const value = clone(map.value.get(key))
+  if (!isNumeric) {
+    return { value, unit: map.unit, dtype: map.dtype - dt.MAP }
+  } else if (unitAware) {
+    return { value, unit: { expos: map.unit.expos }, dtype: map.dtype - dt.MAP }
+  } else {
+    return { value, unit: allZeros, dtype: map.dtype - dt.MAP }
+  }
 }
 
 const valueFromMap = (map, keys, unitAware) => {
   // Return the value of a map's key/value pair.
-  // `keys` is an array. It contains > 1 key if the author wants multiple assignment
-  // as in A, B = map[a, b]
-  const isNumeric = (map.dtype & dt.RATIONAL)
-  const treatAsUnitAware = (unitAware && (map.dtype & dt.QUANTITY) > 0)
+  // `keys` is an array.
+  for (let j = 0; j < keys.length; j++) {
+    if (keys[j].dtype === dt.RATIONAL) { return errorOprnd("NUM_KEY") }
+    keys[j] = keys[j].value
+  }
   if (keys.length === 1) {
-    const key = keys[0]
-    if (!map.value.has(key)) { return errorOprnd("BAD_KEY", key) }
-    const value = clone(map.value.get(key))
-    if (!isNumeric) {
-      return { value, unit: undefined, dtype: map.dtype - dt.MAP }
-
-    } else if (treatAsUnitAware) {
-      const dtype = map.dtype - dt.MAP - dt.QUANTITY
-      return { value, unit: { expos: map.unit.expos }, dtype: dtype }
-
-    } else {
-      return { value, unit: allZeros, dtype: map.dtype - dt.MAP - (map.dtype & dt.QUANTITY) }
-    }
-
+    const isNumeric = (map.dtype & dt.RATIONAL)
+    const treatAsUnitAware = keys.length > 1 || unitAware
+    return singleValueFromMap(map, keys[0], isNumeric, treatAsUnitAware)
   } else {
     const value = new Map()
     for (let i = 0; i < keys.length; i++) {
-      value.set(keys[i], clone(map.value.get(keys[i])))
+      value.set(keys[i], map.value.get(keys[i]))
     }
-    return { value, unit: clone(map.unit), dtype: map.dtype }
+    return { value, unit: map.unit, dtype: map.dtype }
   }
 }
 

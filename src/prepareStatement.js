@@ -228,7 +228,7 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
     }
 
     if (suppressResultDisplay) {
-      resultDisplay = "!"
+      resultDisplay = trailStr
     } else {
       if (unit) {
         resultDisplay = trailStr.trim().replace(/([^ ?!@%]+)$/, "'" + "$1" + "'")
@@ -246,6 +246,7 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
     [value, unit, dtype, resultDisplay] = valueFromLiteral(trailStr, name, decimalFormat)
 
     if (dtype === dt.ERROR) { return shortcut(str, decimalFormat) }
+    rpn = ""
   }
 
   // Assemble the equation to display

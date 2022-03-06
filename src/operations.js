@@ -4,7 +4,6 @@ import { errorOprnd } from "./error"
 import { Rnl } from "./rational"
 import { Cpx } from "./complex"
 import { Matrix } from "./matrix"
-import { dictMap } from "./dictionary"
 import { compare } from "./compare"
 
 // Hurmet math operators are overloaded to handle operands of various shapes.
@@ -85,14 +84,6 @@ const unary = {
     not(m)       { return m.map(row => row.map(e => !e)) }
   },
 
-  dictionary: {
-    abs(dict)       { return dictMap(dict, value => Rnl.abs(value)) },
-    negate(dict)    { return dictMap(dict, value => Rnl.negate(value)) },
-    floor(dict)     { return dictMap(dict, value => Rnl.floor(value)) },
-    ceil(dict)      { return dictMap(dict, value => Rnl.ceil(value)) },
-    percent(dict)   { return dictMap(dict, value => Rnl.multiply(oneTenth, value)) }
-  },
-
   map: {
     abs(map)       { return mapMap(map, value => Rnl.abs(value)) },
     negate(map)    { return mapMap(map, value => Rnl.negate(value)) },
@@ -128,7 +119,7 @@ const dtype = {
     complex(t0, t1, tkn)    { return t1 },
     vector(t0, t1, tkn)     { return t1 },
     matrix(t0, t1, tkn)     { return t1 },
-    dictionary(t0, t1, tkn) { return t1 },
+    dataFrame(t0, t1, tkn)  { return t1 },
     map(t0, t1, tkn)        { return t1 },
     mapWithVectorValues(t0, t1, tkn) { return t1 }
   },
@@ -163,7 +154,7 @@ const dtype = {
     matrix(t0, t1, tkn) { return t0 },
     map(t0, t1, tkn)    { return 0 }
   },
-  dictionary: {
+  dataFrame: {
     scalar(t0, t1, tkn) { return t0 }
   },
   map: {
@@ -242,9 +233,23 @@ const binary = {
       xor(x, m)      { return m.map(row => row.map(e => x !== e)) },
       concat(x, m)   { return errorOprnd("BAD_CONCAT") }
     },
-    dictionary: {
-      multiply(scalar, dict) { return dictMap(dict, value => Rnl.multiply(scalar, value)) },
-      divide(scalar, dict)   { return dictMap(dict, value => Rnl.divide(scalar, value)) }
+    dataFrame: {
+      multiply(x, df) {
+        df.data = df.data.map(col => isNaN(col[0]) ? col : col.map(e => {
+          let L = e.length
+          if (e.indexOf(".")) { L -= 1 }
+          return Rnl.toStringSignificant(Rnl.multiply(x, Rnl.fromString(e)), L)
+        }))
+        return df
+      },
+      divide(x, df) {
+        df.data = df.data.map(col => isNaN(col[0]) ? col : col.map(e => {
+          let L = e.length
+          if (e.indexOf(".")) { L -= 1 }
+          return Rnl.toStringSignificant(Rnl.divide(x, Rnl.fromString(e)), L)
+        }))
+        return df
+      }
     },
     map: {
       // Binary operations with a scalar and a map.
@@ -777,10 +782,22 @@ const binary = {
     }
   },
 
-  dictionary: {
-    scalar: {
-      multiply(dict, scalar) { return dictMap(dict, value => Rnl.multiply(value, scalar)) },
-      divide(dict, scalar)   { return dictMap(dict, value => Rnl.divide(value, scalar)) }
+  dataFrame: {
+    multiply(df, scalar) {
+      df.data = df.data.map(col => isNaN(col[0]) ? col : col.map(e => {
+        let L = e.length
+        if (e.indexOf(".")) { L -= 1 }
+        return Rnl.toStringSignificant(Rnl.multiply(scalar, Rnl.fromString(e)), L)
+      }))
+      return df
+    },
+    divide(df, scalar) {
+      df.data = df.data.map(col => isNaN(col[0]) ? col : col.map(e => {
+        let L = e.length
+        if (e.indexOf(".")) { L -= 1 }
+        return Rnl.toStringSignificant(Rnl.divide(scalar, Rnl.fromString(e)), L)
+      }))
+      return df
     }
   },
 

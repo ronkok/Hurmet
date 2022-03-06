@@ -6,7 +6,6 @@ import { Functions, multivarFunction } from "./functions"
 import { Operators, isDivByZero } from "./operations"
 import { unitFromUnitName, unitsAreCompatible } from "./units"
 import { Matrix, isMatrix } from "./matrix"
-import { Dictionary } from "./dictionary"
 import { map } from "./map"
 import { DataFrame } from "./dataframe"
 import { propertyFromDotAccessor } from "./property"
@@ -16,6 +15,7 @@ import { lineChart } from "./graphics"
 import { errorOprnd } from "./error"
 import { Rnl } from "./rational"
 import { format } from "./format"
+import { insertOneHurmetVar } from "./insertOneHurmetVar"
 import { formatResult } from "./result"
 import { Cpx } from "./complex"
 
@@ -69,8 +69,8 @@ const shapeOf = oprnd => {
     ? "vector"
     : (oprnd.dtype & dt.MATRIX)
     ? "matrix"
-    : (oprnd.dtype & dt.DICT)
-    ? "dictionary"
+    : oprnd.dtype === dt.DATAFRAME
+    ? "dataFrame"
     : ((oprnd.dtype & dt.MAP) &&
        ((oprnd.dtype & dt.ROWVECTOR) || (oprnd.dtype & dt.COLUMNVECTOR)))
     ? "mapWithVectorValues"
@@ -307,25 +307,27 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "·":
         case "*":
         case "⌧": {
-          const o2 = stack.pop()
+          const oprnd2 = stack.pop()
+          const o2 = oprnd2.dtype === dt.DATAFRAME ? clone(oprnd2) : oprnd2
           const o1 = stack.pop()
           if (!(((o1.dtype & dt.RATIONAL) || (o1.dtype & dt.COMPLEX)) &&
-            ((o2.dtype & dt.RATIONAL) || (o2.dtype & dt.COMPLEX) || (o2.dtype === dt.DICT)))) {
+            ((o2.dtype & dt.RATIONAL) || (o2.dtype & dt.COMPLEX) ||
+            o2.dtype === dt.DATAFRAME))) {
             return errorOprnd("NAN_OP")
           }
           const product = Object.create(null)
           let unit = Object.create(null)
           if (unitAware) {
-            if ((o1.dtype === dt.DICT && o2.dtype === dt.RATIONAL) ||
-                (o1.dtype === dt.RATIONAL && o2.dtype === dt.DICT)) {
-              unit = o1.dtype === dt.DICT ? o1.unit : o2.unit
+            if ((o1.dtype === dt.DATAFRAME && o2.dtype === dt.RATIONAL) ||
+                (o1.dtype === dt.RATIONAL && o2.dtype === dt.DATAFRAME)) {
+              unit = o1.dtype === dt.DATAFRAME ? o1.unit : o2.unit
             } else {
               unit.expos = o1.unit.expos.map((e, j) => e + o2.unit.expos[j])
             }
           } else {
             unit.expos = allZeros
           }
-          product.unit = o2.dtype === dt.DICT ? clone(o2.unit) : Object.freeze(unit)
+          product.unit = o2.dtype === dt.DATAFRAME ? clone(o2.unit) : Object.freeze(unit)
 
           const [shape1, shape2, needsMultBreakdown] = binaryShapesOf(o1, o2)
           const op = needsMultBreakdown
@@ -343,7 +345,9 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             : Matrix.multResultType(o1, o2)
 
           product.value = Operators.binary[shape1][shape2][op](o1.value, o2.value)
-          if (product.value.dtype) { return product.value } // Error
+          if (product.value.dtype && product.value.dtype === dt.ERROR) {
+            return product.value
+          }
 
           stack.push(Object.freeze(product))
           break
@@ -440,9 +444,6 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           } else if ((o1.dtype & dt.DATAFRAME) && Matrix.isVector(o2) && tkn === "&") {
             o3 = DataFrame.append(o1, o2, vars, unitAware)
             if (o3.dtype === dt.ERROR) { return o3 }
-          } else if (o1.dtype === dt.DICT || o2.dtype === dt.DICT) {
-            o3 = Dictionary.append(o1, o2, shape1, shape2, vars)
-            if (o3.dtype === dt.ERROR) { return o3 }
           } else if ((o1.dtype & dt.MAP) || (o2.dtype & dt.MAP)) {
             o3 = map.append(o1, o2, shape1, shape2, vars)
             if (o3.dtype === dt.ERROR) { return o3 }
@@ -521,30 +522,17 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         }
 
         case "[]": {
-          // Bracket accessor to a dictionary, matrix, string, data frame, or module.
+          // Bracket accessor to a data frame, matrix, string, data frame, or module.
           const numArgs = Number(tokens[i + 1])
           i += 1
           const args = []
           for (let j = 0; j < numArgs; j++) { args.unshift(stack.pop()) }
           const o1 = stack.pop()
           let property
-          if (o1.dtype & dt.DICT) {
-            for (let j = 0; j < numArgs; j++) {
-              if (args[j].dtype === dt.RATIONAL) { return errorOprnd("NUM_KEY") }
-              args[j] = args[j].value
-            }
-            property = Dictionary.toValue(o1, args, unitAware)
-
-          } else if (o1.dtype & dt.DATAFRAME) {
-            property = args.length === 1
-              ? DataFrame.range(o1, args[0], undefined, vars, unitAware)
-              : DataFrame.range(o1, args[0], args[1], vars, unitAware)
+          if (o1.dtype & dt.DATAFRAME) {
+            property = DataFrame.range(o1, args, vars, unitAware)
 
           } else if (o1.dtype & dt.MAP) {
-            for (let j = 0; j < numArgs; j++) {
-              if (args[j].dtype === dt.RATIONAL) { return errorOprnd("NUM_KEY") }
-              args[j] = args[j].value
-            }
             property = map.valueFromMap(o1, args, unitAware)
 
           } else if (o1.dtype & dt.STRING) {
@@ -555,9 +543,10 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
               property = fromAssignment(o1.value[args[0].value], unitAware)
             } else {
               // Multiple assignment.
-              property = { value: [], unit: null, dtype: dt.MODULE }
+              property = { value: new Map(), unit: null, dtype: dt.TUPLE }
               for (let j = 0; j < args.length; j++) {
-                property.value.push(fromAssignment(o1.value[args[j].value], unitAware))
+                const name = args[j].value
+                property.value.set(name, fromAssignment(o1.value[name], unitAware))
               }
             }
 
@@ -577,7 +566,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         }
 
         case "..": {
-          // range separator used internally to distinguish it from ":" in dictionaries
+          // range separator.
           const end = stack.pop()
           const o1 = stack.pop()
           if (!(o1.dtype === dt.RATIONAL || o1.dtype === dt.RANGE)) {
@@ -896,7 +885,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             ? value.length * value[0].length
             : (arg.dtype === dt.STRING)
             ? value.length - arrayOfRegExMatches(/[\uD800-\uD8FF\uFE00\uFE01]/g, value).length
-            : ((arg.dtype & dt.DICT) || (arg.dtype & dt.MAP))
+            : (arg.dtype & dt.MAP)
             ? arg.keys().value.length
             : 0
           const output = Object.create(null)
@@ -1011,13 +1000,6 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           }
           if (oprnd.dtype === dt.ERROR) { return oprnd }
           stack.push(oprnd)
-          break
-        }
-
-        case "dictionary": {
-          const numPairs = Number(tokens[i + 1])
-          i += 1
-          stack.push(Dictionary.fromTokenStack(stack, numPairs, vars))
           break
         }
 
@@ -1264,8 +1246,6 @@ const elementFromIterable = (iterable, index, step) => {
     value = Rnl.fromNumber(iterable.value[index] + iterable.value[index + 1])
     nextIndex = Rnl.add(index, 2)
     dtype = dt.STRING
-//  } else if (iterable.dtype === dt.DICT) {
-  // TODO: Remember to make a defensive copy. Dictionaries are copy-on-write.
   } else {
     value = iterable.value[Rnl.toNumber(index)]
     dtype = (iterable.dtype & dt.STRING)
@@ -1274,9 +1254,7 @@ const elementFromIterable = (iterable, index, step) => {
       ? iterable.dtype - dt.ROWVECTOR
       : (iterable.dtype & dt.COLUMNVECTOR)
       ? iterable.dtype - dt.COLUMNVECTOR
-      : (iterable.dtype & dt.MATRIX)
-      ? iterable.dtype - dt.MATRIX
-      : iterable.dtype - dt.DICT
+      : iterable.dtype - dt.MATRIX
   }
   const oprnd = { value: value, unit: iterable.unit, dtype: dtype }
   return [oprnd, nextIndex]
@@ -1319,47 +1297,9 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
           const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib)
           if (result.dtype === dt.ERROR) { return result }
           if (statement.name) {
-            if (result.dtype === dt.DICT) {
-              // Accommodate a multiple assignment.
-              const names = statement.name.split(/, */g)
-              if (names.length !== result.value.size) {
-                return errorOprnd("MULT_MIS")
-              }
-              let j = 0
-              for (const v of result.value.values()) {
-                const name = names[j].trim()
-                const oprnd = clone(v)
-                if (oprnd.dtype & dt.QUANTITY) {
-                  if (isUnitAware) {
-                    oprnd.dtype -= dt.QUANTITY
-                    const unit = result.unit[oprnd.unit.name];
-                    oprnd.value = Rnl.multiply(Rnl.add(oprnd.value, unit.gauge), unit.factor)
-                    oprnd.unit.expos = unit.expos
-                  } else {
-                    oprnd.dtype -= dt.QUANTITY
-                    oprnd.unit.expos = allZeros
-                  }
-                  vars[name] = oprnd
-                }
-                j += 1
-              }
-              /*for (let j = 0; j < names.length; j++) {
-                const name = names[j].trim()
-                const oprnd = clone(result.value.get(name))
-                if (oprnd.dtype & dt.QUANTITY) {
-                  if (isUnitAware) {
-                    oprnd.dtype -= dt.QUANTITY
-                    const unit = result.unit[oprnd.unit.name];
-                    oprnd.value = Rnl.multiply(Rnl.add(oprnd.value, unit.gauge), unit.factor)
-                    oprnd.unit.expos = unit.expos
-                  } else {
-                    oprnd.dtype -= dt.QUANTITY
-                    oprnd.unit.expos = allZeros
-                  }
-                } */
-            } else {
-              vars[statement.name] = result
-            }
+            statement.resultdisplay = "!"
+            const [stmt, _] = conditionResult(statement, result, isUnitAware)
+            insertOneHurmetVar(vars, stmt, decimalFormat)
           }
         }
         break
@@ -1561,6 +1501,94 @@ const errorResult = (stmt, result) => {
   return stmt
 }
 
+const conditionResult = (stmt, oprnd, unitAware) => {
+  let result = Object.create(null)
+  result.value = clone(oprnd.value)
+  result.unit = clone(oprnd.unit)
+  result.dtype = oprnd.dtype
+
+  if (result.dtype === dt.COMPLEX && Rnl.isZero(Cpx.im(result.value))) {
+    result.value = Cpx.re(result.value)
+    result.dtype = 1
+  }
+
+  // Check unit compatibility.
+  if (result.dtype !== dt.ERROR && unitAware && stmt.resultdisplay.indexOf("!") === -1 &&
+    (stmt.expos || (result.unit && result.unit.expos && Array.isArray(result.unit.expos)))) {
+    const expos = (stmt.expos) ? stmt.expos : allZeros
+    if (!unitsAreCompatible(result.unit.expos, expos)) {
+      const message = stmt.expos ? "UNIT_RES" : "UNIT_MISS"
+      result = errorOprnd(message)
+    }
+  }
+  if (result.dtype === dt.ERROR) { return errorResult(stmt, result)}
+
+  // Check for a valid display indicator.
+  if (stmt.resulttemplate && stmt.resulttemplate.indexOf("!") > -1 &&
+    !(result.dtype === dt.DATAFRAME || (result.dtype & dt.MAP) || isMatrix(result)
+    || (result.dtype & dt.TUPLE))) {
+    return errorResult(stmt, errorOprnd("BAD_DISPLAY"))
+  }
+
+  result.value = result.dtype === dt.RATIONAL
+    ? Rnl.normalize(result.value)
+    : result.dtype === dt.COMPLEX
+    ? [Rnl.normalize(result.value[0]), Rnl.normalize(result.value[1])]
+    : result.value  // TODO: matrices
+  stmt.dtype = result.dtype
+
+  // If unit-aware, convert result to desired result units.
+  const unitInResultSpec = (stmt.factor && (stmt.factor !== 1 || stmt.gauge))
+  if ((result.dtype & dt.DATAFRAME) || stmt.resultdisplay.indexOf("!") > -1) {
+    stmt.unit = result.unit
+  } else if (unitAware && (result.dtype & dt.RATIONAL)) {
+    if (!unitInResultSpec & unitsAreCompatible(result.unit.expos, allZeros)) {
+      stmt.factor = Rnl.one; stmt.gauge = Rnl.zero; stmt.expos = allZeros;
+    }
+    result.value = {
+      plain: (isMatrix(result))
+        ? Matrix.convertFromBaseUnits(
+          { value: result.value, dtype: result.dtype },
+          stmt.gauge,
+          stmt.factor
+          )
+        : (result.dtype & dt.MAP)
+        ? map.convertFromBaseUnits(result.value, stmt.gauge, stmt.factor)
+        : Rnl.subtract(Rnl.divide(result.value, stmt.factor), stmt.gauge),
+      inBaseUnits: result.value
+    }
+    stmt.dtype += dt.QUANTITY
+    stmt.expos = result.unit.expos
+  } else if (unitInResultSpec) {
+    // A non-unit aware calculation, but with a unit attached to the result.
+    result.value = {
+      plain: result.value,
+      inBaseUnits: (isMatrix(result) && (result.dtype & dt.MAP))
+        ? mapMap(result.value, val => {
+          return val.map(e => Rnl.multiply(Rnl.add(e, stmt.gauge), stmt.factor))
+        })
+        : (isMatrix(result))
+        ? Matrix.convertToBaseUnits(
+          { value: result.value, dtype: result.dtype },
+          stmt.gauge,
+          stmt.factor
+          )
+        : (result.dtype & dt.MAP)
+        ? mapMap(result.value, val => {
+          return Rnl.multiply(Rnl.add(val, stmt.gauge), stmt.factor)
+        })
+        : Rnl.multiply(Rnl.add(result.value, stmt.gauge), stmt.factor)
+    }
+    stmt.dtype += dt.QUANTITY
+
+  } else if ((result.dtype & dt.RATIONAL) || (result.dtype & dt.COMPLEX) ) {
+    // A numeric result with no unit specified.
+    stmt.expos = allZeros
+  }
+  if (result.value)  { stmt.value = result.value }
+  return [stmt, result]
+}
+
 export const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
   stmt.tex = stmt.template
   stmt.alt = stmt.altTemplate
@@ -1578,94 +1606,11 @@ export const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
     }
   }
 
-  let result = Object.create(null)
   if (stmt.rpn) {
     const oprnd = evalRpn(stmt.rpn, vars, decimalFormat, isUnitAware)
     if (oprnd.dtype === dt.ERROR) { return errorResult(stmt, oprnd)}
-    result.value = clone(oprnd.value)
-    result.unit = clone(oprnd.unit)
-    result.dtype = oprnd.dtype
-
-    if (result.dtype === dt.COMPLEX && Rnl.isZero(Cpx.im(result.value))) {
-      result.value = Cpx.re(result.value)
-      result.dtype = 1
-    }
-
-    // Check unit compatibility.
-    if (result.dtype !== dt.ERROR && isUnitAware && stmt.resultdisplay.indexOf("!") === -1 &&
-      (stmt.expos || (result.unit && result.unit.expos && Array.isArray(result.unit.expos)))) {
-      const expos = (stmt.expos) ? stmt.expos : allZeros
-      if (!unitsAreCompatible(result.unit.expos, expos)) {
-        const message = stmt.expos ? "UNIT_RES" : "UNIT_MISS"
-        result = errorOprnd(message)
-      }
-    }
-    if (result.dtype === dt.ERROR) { return errorResult(stmt, result)}
-
-    // Check for a valid display indicator.
-    if (stmt.resulttemplate.indexOf("!") > -1 &&
-      !(result.dtype === dt.DATAFRAME || result.dtype === dt.DICT ||
-        (result.dtype & dt.MAP) || isMatrix(result))) {
-      return errorResult(stmt, errorOprnd("BAD_DISPLAY"))
-    }
-
-    result.value = result.dtype === dt.RATIONAL
-      ? Rnl.normalize(result.value)
-      : result.dtype === dt.COMPLEX
-      ? [Rnl.normalize(result.value[0]), Rnl.normalize(result.value[1])]
-      : result.value  // TODO: matrices
-    stmt.dtype = result.dtype
-
-    // If unit-aware, convert result to desired result units.
-    const unitInResultSpec = (stmt.factor && (stmt.factor !== 1 || stmt.gauge))
-    if ((result.dtype & dt.DICT) || (result.dtype & dt.DATAFRAME) ||
-      stmt.resultdisplay.indexOf("!") > -1) {
-      stmt.unit = result.unit
-    } else if (isUnitAware && (result.dtype & dt.RATIONAL)) {
-      if (!unitInResultSpec & unitsAreCompatible(result.unit.expos, allZeros)) {
-        stmt.factor = Rnl.one; stmt.gauge = Rnl.zero; stmt.expos = allZeros;
-      }
-      result.value = {
-        plain: (isMatrix(result))
-          ? Matrix.convertFromBaseUnits(
-            { value: result.value, dtype: result.dtype },
-            stmt.gauge,
-            stmt.factor
-            )
-          : (result.dtype & dt.MAP)
-          ? map.convertFromBaseUnits(result.value, stmt.gauge, stmt.factor)
-          : Rnl.subtract(Rnl.divide(result.value, stmt.factor), stmt.gauge),
-        inBaseUnits: result.value
-      }
-      stmt.dtype += dt.QUANTITY
-      stmt.expos = result.unit.expos
-    } else if (unitInResultSpec) {
-      // A non-unit aware calculation, but with a unit attached to the result.
-      result.value = {
-        plain: result.value,
-        inBaseUnits: (isMatrix(result) && (result.dtype & dt.MAP))
-          ? mapMap(result.value, val => {
-            return val.map(e => Rnl.multiply(Rnl.add(e, stmt.gauge), stmt.factor))
-          })
-          : (isMatrix(result))
-          ? Matrix.convertToBaseUnits(
-            { value: result.value, dtype: result.dtype },
-            stmt.gauge,
-            stmt.factor
-            )
-          : (result.dtype & dt.MAP)
-          ? mapMap(result.value, val => {
-            return Rnl.multiply(Rnl.add(val, stmt.gauge), stmt.factor)
-          })
-          : Rnl.multiply(Rnl.add(result.value, stmt.gauge), stmt.factor)
-      }
-      stmt.dtype += dt.QUANTITY
-
-    } else if ((result.dtype & dt.RATIONAL) || (result.dtype & dt.COMPLEX) ) {
-      // A numeric result with no unit specified.
-      stmt.expos = allZeros
-    }
-
+    let result
+    [stmt, result] = conditionResult(stmt, oprnd, isUnitAware)
     stmt = formatResult(stmt, result, formatSpec, decimalFormat, isUnitAware)
   }
   return stmt

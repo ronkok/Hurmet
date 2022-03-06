@@ -275,7 +275,7 @@ export const nodes = {
       altTemplate: {default: ""}, //      Ditto, but in draft mode.
       value: {default: null},  //         Value passed to other calculations.
       unit: {default: ""}, //             Unit specified by user, in which to display the result.
-      //                                    Hurmet maps and dicts save a data structure, not a name.
+      //                                    Hurmet maps and data frame save a data structure, not a name.
       expos: {default: null}, //          Unit exponents of result, for checking unit compatibility.
       factor: {default: null}, //         Factor for converting value.inBaseUnits to result units
       gauge: {default: null}, //          Unit gauge, for ditto

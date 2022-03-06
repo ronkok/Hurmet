@@ -668,11 +668,12 @@ const unitFromWord = (inputStr, currencies, customUnits) => {
       }
     }
 
-    if ((customUnits) && (customUnits.value[word])) {
+    if ((customUnits) && (Object.hasOwnProperty.call(customUnits.value.columnMap, word))) {
       // User-defined unit
-      const unit = customUnits.unit[customUnits.value[word].unit]
-      u.factor = Rnl.multiply(customUnits.value[word].value, unit.factor)
-      u.expos = unit.expos
+      const n = customUnits.value.columnMap[word]
+      const baseUnit = customUnits.unit[customUnits.value.units[n]];
+      u.factor = Rnl.multiply(Rnl.fromString(customUnits.value.data[n][0]), baseUnit.factor)
+      u.expos = baseUnit.expos
       return u
     }
 
@@ -699,9 +700,9 @@ const unitFromWord = (inputStr, currencies, customUnits) => {
     u.expos = Object.freeze(unitArray[4])
     if (u.expos[7] === 1) {
       const currencyCode = (synonyms[word] ? synonyms[word] : word)
-      if (currencies && currencies[currencyCode]) {
+      if (currencies && currencies.value.has(currencyCode)) {
         // User defined currency exchange rate.
-        u.factor = Rnl.reciprocal(currencies[currencyCode].factor)
+        u.factor = Rnl.reciprocal(currencies.value.get(currencyCode))
       } else {
         // Read the line whose key is the standard 3-letter currency code.
         unitArray = unitTable[currencyCode]

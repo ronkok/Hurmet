@@ -2,6 +2,8 @@
 import { Rnl } from "./rational"
 import { formattedDecimal, texFromMixedFraction } from "./format"
 import { DataFrame } from "./dataframe"
+import { map } from "./map"
+import { dt } from "./constants"
 
 /*
  * lexer.js
@@ -39,12 +41,12 @@ export const tt = Object.freeze({
   LOGIC: 24, //   if and or xor else otherwise
   SEP: 25, //     argument separators, cell separators and row separators: , ;
   FUNCTION: 26,
-  ACCESSOR: 28, //   dot between a dictionary name and a property, as in r.prop
+  ACCESSOR: 28, //   dot between a data frame name and a property, as in r.prop
   ENVIRONMENT: 29,
   FACTORIAL: 30,
   SUPCHAR: 31,
   ANGLE: 32,
-  COLON: 33, //       separator for ranges (1:n) or key:value pairs
+  COLON: 33, //       separator for ranges (1:n)
   KEYWORD: 34, //     keywords: for in while
   PROPERTY: 36, //    property name after a dot accessor
   COMMENT: 37,
@@ -296,7 +298,7 @@ const miscSymbols = Object.freeze({
   "\\;": ["\\;", ";\\:", tt.SEP, ""],
   "…": ["…", "…", tt.ORD, ""],
 
-  ":": [":", ":", tt.COLON, ""], // key:value or range separator
+  ":": [":", ":", tt.COLON, ""], // range separator
   ",": [",", ",\\:", tt.SEP, ""], // function argument separator
   ";": [";", ";\\:", tt.SEP, ""], // row separator
 
@@ -700,8 +702,12 @@ export const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
     if (inRealTime) {
       tex = DataFrame.quickDisplay(st)
     } else {
-      const dataFrame = DataFrame.dataFrameFromCSV(st, {})
-      tex = DataFrame.display(dataFrame.value, "h3", decimalFormat)
+      const dataStructure = DataFrame.dataFrameFromCSV(st, {})
+      if (dataStructure.dtype === dt.DATAFRAME) {
+        tex = DataFrame.display(dataStructure.value, "h3", decimalFormat)
+      } else {
+        tex = map.display(dataStructure, "h3", decimalFormat)
+      }
     }
     return ["``" + inputStr + "``", tex, tt.DATAFRAME, ""]
   }

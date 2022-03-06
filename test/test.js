@@ -71,8 +71,8 @@ const parserTests = [
   ["C = <<n \\atop k>>", "C = \\left\u27E8{{n}\\atop{k}}\\right\u27E9"],
   ["(exp(-exp(u)))/((u+γ)^2+π^2)", "\\dfrac{\\exp(\\text{-} \\exp(u))}{(u + γ)^{2}+ π^{2}}"],
   [
-    "α = {B:7.0, C:9.5, D:11.5}[C_exp]",
-    "α = \\{\\mathrm{B} \\mathpunct{:}7.0 ,\\: \\mathrm{C} \\mathpunct{:}9.5 ,\\: \\mathrm{D} \\mathpunct{:}11.5 \\}[C_\\text{exp}]"
+    "α = ``B | C | D\n 7.0 | 9.5 | 11.5``[C_exp]",
+    "α = \\begin{array}{c}B & C & D \\\\ \\hline 7 & 9.5 & 11.5\\end{array}[C_\\text{exp}]"
   ],
   ["H^2 = \\dot a/a", "H^{2}= \\dfrac{\\dot{a}}{a}"],
   ["P = (1.2(D/H))", "P = \\left(1.2 \\left(\\dfrac{D}{H}\\right)\\right)"],
@@ -226,12 +226,11 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     ["𝐏q = [10; 15] 'kips'", "𝐏q = @", "[10; 15]"],
     ["vector = [2.1; -15.3]", "vector = @", "[2.1; -15.3]"],
     ["matrix = (2.1, 7.5; -15.3, 33)", "matrix = @", ""],
-    [`dictionary = {"#4": 0.22, "#5": 0.31, "area": 0.44}`, "dictionary = @", ""],
+    ['frameRow = ``#4 | #5 | area\n 0.22 | 0.31 | 0.44``', "frameRow = @", "``#4 | #5 | area\n0.22 | 0.31 | 0.44``"],
     ["radius = [0.375; 0.25; 0.3125; 0.375] 'in'", "radius = @", ""],
-    [`barArea = {"#4": 0.22, "#5": 0.31, "area": 0.44} 'in2'`, "barArea = @", ""],
+    ["barArea = ``#4 | #5 | area\n 0.22 | 0.31 | 0.44`` 'in2'", "barArea = @", ""],
     ["rebar = ``name|diameter|area\nunit|in |in²\n#3|0.375|0.11\n#4|0.5|0.2\n#5|0.625|0.31\n#6|0.75 |0.44``", "rebar = @", ""],
-    ["wideFlanges = ``name|weight|area|d|bf|tw|tf|Ix|Sx|rx|Iy|Sy|ry\nunit|lbf/ft|in^2|in|in|in|in|in^4|in^3|in|in^4|in^3|in\nW10X49|49|14.4|10|10|0.34|0.56|272|54.6|4.35|93.4|18.7|2.54\nW8X31|31|9.13|8|8|0.285|0.435|110|27.5|3.47|37.1|9.27|2.02\nW8X18|18|5.26|8.14|5.25|0.23|0.33|61.9|15.2|3.43|7.97|3.04|1.23``", "wideFlanges = @", ""],
-    ["dict = {a: 4, b_a: 5}", "dict = @", `{"a": 4, "b_a": 5}`]
+    ["wideFlanges = ``name|weight|area|d|bf|tw|tf|Ix|Sx|rx|Iy|Sy|ry\nunit|lbf/ft|in^2|in|in|in|in|in^4|in^3|in|in^4|in^3|in\nW10X49|49|14.4|10|10|0.34|0.56|272|54.6|4.35|93.4|18.7|2.54\nW8X31|31|9.13|8|8|0.285|0.435|110|27.5|3.47|37.1|9.27|2.02\nW8X18|18|5.26|8.14|5.25|0.23|0.33|61.9|15.2|3.43|7.97|3.04|1.23``", "wideFlanges = @", ""]
   ]
 
   console.log("Now testing assignments…")
@@ -339,7 +338,7 @@ end`, vars)
     ["2 + 2 = @", "®2/1 ®2/1 +", "4"],
     ["1 - 0.9999375^1000 = @", "®1/1 ®9999375/10000000 ®1000/1 ^ -", "0.0605887720523238"],
     ["(3 num)/2 = @", "®3/1 ¿num ⌧ ®2/1 /", "6.3"],
-    [`rebar["#3", "area"] =@`, `¿rebar "#3" "area" [] 2`, "0.11"],
+    [`rebar["#3"]["area"] =@`, `¿rebar "#3" [] 1 "area" [] 1`, "0.11"],
     [`{ 5 if n ≤ 4; 2 if n ≥ 12; 5 - (n - 4)/20 otherwise } =@`, "¿n ®4/1 ≤ ¿n ®12/1 ≥ true cases 3 ®5/1 ®2/1 ®5/1§¿n§®4/1§-§®20/1§/§-", "4.7"],
     ["[2:5] = @", "®2/1 ®5/1 .. matrix 1 1", "[2, 3, 4, 5]"],
     ["[1:2:5] = @", "®1/1 ®2/1 .. ®5/1 .. matrix 1 1", "[1, 3, 5]"],
@@ -360,14 +359,12 @@ end`, vars)
     ["|matrix| = @", "¿matrix |", "0.0054333061668025"],
     ["|vector| = @", "¿vector |", "15.4434452114805"],
     ["abs(vector) = @", "¿vector abs", "[2.1; 15.3]"],
-    [`dictionary["#4"] =@`, `¿dictionary "#4" [] 1`, "0.22"],
-    [`dictionary.area = @`, `¿dictionary "area" .`, "0.44"],
-    ["dict.a = @", `¿dict "a" .`, "4"],
+    [`frameRow["#4"] =@`, `¿frameRow "#4" [] 1`, "0.22"],
+    [`frameRow.area = @`, `¿frameRow "area" .`, "0.44"],
     [`barArea["#4"] = @`, `¿barArea "#4" [] 1`, "0.22"],
     [`barArea.area = @`, `¿barArea "area" .`, "0.44"],
-//    [`wideFlanges[["W8X31"; "W10X49"], "area"] = @`, `¿wideFlanges "W8X31" "W10X49" matrix 2 1 "area" [] 2`, "[9.13; 14.4]"],
-    ["wideFlanges.W8X31 = @", `¿wideFlanges "W8X31" .`, "{name: W8X31, weight: 31 lbf/ft, area: 9.13 in^2, d: 8 in, bf: 8 in, tw: 0.285 in, tf: 0.435 in, Ix: 110 in^4, Sx: 27.5 in^3, rx: 3.47 in, Iy: 37.1 in^4, Sy: 9.27 in^3, ry: 2.02 in}"],
-    ["wideFlanges[2] = @", `¿wideFlanges ®2/1 [] 1`, "{name: W8X31, weight: 31 lbf/ft, area: 9.13 in^2, d: 8 in, bf: 8 in, tw: 0.285 in, tf: 0.435 in, Ix: 110 in^4, Sx: 27.5 in^3, rx: 3.47 in, Iy: 37.1 in^4, Sy: 9.27 in^3, ry: 2.02 in}"],
+    ["wideFlanges.W8X31 = @", `¿wideFlanges "W8X31" .`, "``|weight|area|d|bf|tw|tf|Ix|Sx|rx|Iy|Sy|ry\nunit|lbf/ft|in^2|in|in|in|in|in^4|in^3|in|in^4|in^3|in\nW8X31|31|9.13|8|8|0.285|0.435|110|27.5|3.47|37.1|9.27|2.02``"],
+    ["wideFlanges[2] = @", `¿wideFlanges ®2/1 [] 1`, "``|weight|area|d|bf|tw|tf|Ix|Sx|rx|Iy|Sy|ry\nunit|lbf/ft|in^2|in|in|in|in|in^4|in^3|in|in^4|in^3|in\nW8X31|31|9.13|8|8|0.285|0.435|110|27.5|3.47|37.1|9.27|2.02``"],
     ["wideFlanges.W8X31.area = @", `¿wideFlanges "W8X31" . "area" .`, "9.13"],
     ['"ab" & "cd" = @', `"ab" "cd" &`, 'abcd'],
     [`1.2 & 3.4 = @`, `®12/10 ®34/10 &`, "[1.2, 3.4]"],
@@ -384,7 +381,7 @@ end`, vars)
     [`matrix & matrix = @`, `¿matrix ¿matrix &`, "(2.1, 7.5, 2.1, 7.5; -15.3, 33, -15.3, 33)"],
     [`matrix &_ matrix = @`, `¿matrix ¿matrix &_`, "(2.1, 7.5; -15.3, 33; 2.1, 7.5; -15.3, 33)"],
     [`rebar & radius = @`, `¿rebar ¿radius &`, "``|diameter|area|radius\nunit|in|in²|in\n#3|0.375|0.11|0.375\n#4|0.5|0.2|0.25\n#5|0.625|0.31|0.3125\n#6|0.75|0.44|0.375``"],
-    ["2 dictionary = @", `®2/1 ¿dictionary ⌧`, `{"#4": 0.44, "#5": 0.62, "area": 0.88}`],
+    ["2 frameRow = @", `®2/1 ¿frameRow ⌧`, "``#4 | #5 | area\n0.44 | 0.62 | 0.88``"],
     [`(2)(4) + 1 = @`, `®2/1 ®4/1 ⌧ ®1/1 +`, "9"],
     [`(2) (4) + 1 = @`, `®2/1 ®4/1 ⌧ ®1/1 +`, "9"],
     ["{ 5 if n = 10; 0 otherwise } = @", `¿n ®10/1 = true cases 2 ®5/1 ®0/1`, "5"],
@@ -438,9 +435,7 @@ end`, vars)
     [`testFor(1, 3) = @`, `®1/1 ®3/1 function testFor 2`, `6`],
     [`testWhile(3) = @`, `®3/1 function testWhile 1`, `6`],
     [`testBreak() = @`, `function testBreak 0`, `6`],
-    [`testRaise() = @`, `function testRaise 0`, `Error.`],
-    [`{num, "yup": 5} = @`, `¿num "yup" ®5/1 : dictionary 2`, "{num: 4.2, yup: 5}"],
-    ["{num, str} = @", `¿num ¿str dictionary 2`, `{num: 4.2, str: abcdef}`]
+    [`testRaise() = @`, `function testRaise 0`, `Error.`]
 	]
 
   console.log("Now testing calculations…")

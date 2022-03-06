@@ -69,7 +69,7 @@ const errorMessages = Object.freeze({
     FORM_FRAC: "Error. Hurmet can do binary or hexadecimal format only on integers.",
     PRIVATE:   "Error. Function @ is not private.",
     GCD:       "Error. The gcd function can take only integers as arguments.",
-    BAD_KEY:   "Error. Dictionary does not contain key \"@\".",
+    BAD_KEY:   "Error. Data structure does not contain key \"@\".",
     NUM_KEY:   "Error. A key must be a string, not a number.",
     IMMUT_UDF: `Error. Variable @ already contains a user-defined function.
                 Hurmet cannot assign a different value to @.`,

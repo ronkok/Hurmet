@@ -38,165 +38,109 @@ const datumFromValue = (value, dtype) => {
     : value
 }
 
-const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
+const range = (df, args, vars, unitAware) => {
   let iStart
   let iEnd
   const rowList = []
   let columnList = []
-  let unitMap
   let unit = Object.create(null)
-  if ((columnIndicator === undefined || (columnIndicator.dtype === 1 &&
-      Rnl.isZero(columnIndicator.value))) && rowIndicator.dtype === dt.RATIONAL) {
-    iStart = Rnl.toNumber(rowIndicator.value) - 1
+
+  // Find what must be returned. I.e. populate rowList and columnList
+  if (df.value.data[0].length === 1) {
+    // The source is a single-row data frame. Each argument calls a column.
+    iStart = 0
+    iEnd = 0
+    for (let i = 0; i < args.length; i++) {
+      if (args[i].dtype === dt.STRING) {
+        columnList.push(df.value.columnMap[args[i].value])
+      } else if (args[i].dtype === dt.RATIONAL) {
+        columnList.push(Rnl.toNumber(args[i].value))
+      } else if (args[i].dtype === dt.RANGE) {
+        const jStart = Rnl.toNumber(args[i].value[0])
+        const jEnd = Rnl.toNumber(args[i].value[1])
+        for (let j = jStart; j <= jEnd; j++) {
+          columnList.push(j)
+        }
+      }
+    }
+  } else if (args.length === 1 && args[0].dtype === dt.RATIONAL) {
+    iStart = Rnl.toNumber(args[0].value) - 1
     iEnd = iStart
-    columnList = columnListFromRange(0, oprnd.value.data.length - 1)
-  } else if ((columnIndicator === undefined || (columnIndicator.dtype === 1 &&
-      Rnl.isZero(columnIndicator.value))) && rowIndicator.dtype === dt.STRING) {
+    columnList = columnListFromRange(0, df.value.data.length - 1)
+  } else if (args.length === 1 && args[0].dtype === dt.RANGE) {
+    iStart = Rnl.toNumber(args[0].value[0]) - 1
+    iEnd = Rnl.toNumber(args[0].value[1]) - 1
+    columnList = columnListFromRange(0, df.value.data.length - 1)
+  } else if (args.length === 1 && args[0].dtype === dt.STRING) {
     // Only one indicator has been given.
     // Check both the rowMap and the columnMap.
-    if (oprnd.value.rowMap && rowIndicator.value in oprnd.value.rowMap) {
-      iStart = oprnd.value.rowMap[rowIndicator.value]
+    if (df.value.rowMap && args[0].value in df.value.rowMap) {
+      // Return a row
+      iStart = df.value.rowMap[args[0].value]
       iEnd = iStart
-      columnList = columnListFromRange(0, oprnd.value.data.length - 1)
-    } else if (oprnd.value.columnMap && rowIndicator.value in oprnd.value.columnMap) {
+      columnList = columnListFromRange(0, df.value.data.length - 1)
+    } else if (df.value.columnMap && args[0].value in df.value.columnMap) {
+      // Return a column vector
       iStart = 0
-      iEnd = oprnd.value.data[0].length - 1
-      columnList.push(oprnd.value.columnMap[rowIndicator.value])
+      iEnd = df.value.data[0].length - 1
+      columnList.push(df.value.columnMap[args[0].value])
     } else {
-      return errorOprnd("BAD_ROW_NAME", rowIndicator.value)
+      return errorOprnd("BAD_ROW_NAME", args[0].value)
     }
-  } else if (columnIndicator === undefined &&
-    rowIndicator.dtype === dt.STRING + dt.COLUMNVECTOR) {
+  } else if (args.length === 1 && args[0].dtype === dt.STRING + dt.COLUMNVECTOR) {
     // A vector of row names
-    for (const rowName of rowIndicator.value) {
+    for (const rowName of args[0].value) {
       rowList.push(rowName)
     }
-    columnList = columnListFromRange(0, oprnd.value.data.length - 1) // All the columns.
-  } else {
-    if (rowIndicator.dtype === dt.STRING) {
-      iStart = oprnd.value.rowMap[rowIndicator.value]
-      if (isNaN(iStart)) {
-        return errorOprnd("BAD_ROW_NAME", rowIndicator.value)
-      }
-      iEnd = iStart
-    } else if (rowIndicator.dtype === dt.RATIONAL) {
-      if (Rnl.toNumber(rowIndicator.value) === 0) {
-        // Return all the rows, in a column vector
-        iStart = 0
-        iEnd = oprnd.value.data[0].length - 1
-      } else {
-        iStart = Rnl.toNumber(rowIndicator.value) - 1
-        iEnd = iStart
-      }
-    } else if (rowIndicator.dtype === dt.RANGE) {
-      iStart = Rnl.toNumber(rowIndicator.value[0]) - 1
-      iEnd = Rnl.toNumber(rowIndicator.value[2]) - 1
-    } else if (Matrix.isVector(rowIndicator)) {
-      // iStart and iEnd aren't relevant.
-    } else {
-      // TODO: Write an error message.
+    columnList = columnListFromRange(0, df.value.data.length - 1) // All the columns.
+  } else if (args.length === 1 && args[0].dtype === dt.STRING + dt.ROWVECTOR) {
+    // A vector of column names
+    iStart = 0
+    iEnd = df.value.data[0].length
+    for (const colName of args[0].value) {
+      columnList.push(df.columnIndicator[colName])
     }
-
-    // Populate an array with a list of the desired columns
-    if (columnIndicator.dtype === dt.STRING) {
-      const j = oprnd.value.columnMap[columnIndicator.value]
-      if (isNaN(j)) {
-        return errorOprnd("BAD_COLUMN_NAME", columnIndicator.value)
-      }
-      columnList.push(j)
-    } else if (columnIndicator.dtype === dt.RATIONAL) {
-      if (Rnl.isZero(columnIndicator.value)) {
-        // Get all the columns.
-        columnList = columnListFromRange(0, oprnd.value.data.length - 1)
-      } else {
-        const j = Rnl.toNumber(columnIndicator.value) - 1
-        columnList = columnListFromRange(j, j)
-      }
-    } else if (columnIndicator.dtype === dt.RANGE) {
-      const jStart = Rnl.toNumber(columnIndicator.value[0]) - 1
-      const jEnd = Rnl.toNumber(columnIndicator.value[2]) - 1
-      columnList = columnListFromRange(jStart, jEnd)
-    } else if (Matrix.isVector(columnIndicator)) {
-      columnList = columnIndicator.value.map(e => {
-        return Rnl.isRational(e) ? Rnl.toNumber(e - 1) : oprnd.value.columnMap[e]
-      })
-    } else {
-      // TODO: Write an error message
-    }
+  } else if (args.length === 2 && args[0].dtype === dt.STRING && df.value.rowMap
+    && args[0].value in df.value.rowMap && args[1].dtype === dt.STRING &&
+    df.value.columnMap && args[0].value in df.value.columnMap) {
+    // Return a single cell value
+    iStart = df.value.rowMap[args[0].value]
+    iEnd = iStart
+    columnList.push(df.value.columnMap[args[0].value])
   }
 
-  if (Matrix.isVector(rowIndicator) && columnList.length === 1) {
-    // Return a vector of values
-    // TODO: This vector section is wrong and must be fixed.
-    const j = columnList[0]
-    let dtype = oprnd.value.dtype[j]
-    dtype += (rowIndicator.dtype & dt.COLUMNVECTOR) ? dt.COLUMNVECTOR : dt.ROWVECTOR
-    unit.expos = (dtype & dt.RATIONAL) ? allZeros : null
-    let value = rowIndicator.value.map(e => {
-      return valueFromDatum(oprnd.value.data[j][oprnd.value.rowMap[e]])
-    })
-    if (unitAware && (dtype & dt.QUANTITY)) {
-      const unitName = oprnd.value.units[j] ? oprnd.value.units[j] : undefined
-      const unitObj = unitFromUnitName(unitName, vars)
-      unit.expos = clone(unitObj.expos)
-      value = value.map(e => Rnl.multiply(Rnl.add(e, unitObj.gauge), unitObj.factor))
-    }
-    return { value, unit, dtype }
-
-  } else if (rowList.length === 0 && iStart === iEnd && columnList.length === 1) {
+  if (rowList.length === 0 && iStart === iEnd && columnList.length === 1) {
     // Return one value.
-    let dtype = oprnd.value.dtype[columnList[0]]
+    let dtype = df.value.dtype[columnList[0]]
     if (dtype & dt.QUANTITY) { dtype -= dt.QUANTITY }
     const j = columnList[0]
-    let value = valueFromDatum(oprnd.value.data[j][iStart])
+    let value = valueFromDatum(df.value.data[j][iStart])
     unit.expos = (dtype & dt.RATIONAL) ? allZeros : null
-    if (unitAware && oprnd.value.units[j]) {
-      const unitName = oprnd.value.units[j] ? oprnd.value.units[j] : undefined
+    if (unitAware && df.value.units[j]) {
+      const unitName = df.value.units[j] ? df.value.units[j] : undefined
       const unitObj = unitFromUnitName(unitName, vars)
       value = Rnl.multiply(Rnl.add(value, unitObj.gauge), unitObj.factor)
       unit.expos = unitObj.expos
     }
     return { value, unit, dtype }
 
-  } else if (iStart === iEnd && rowList.length === 0) {
-    // Get data from one row. Return it in a dictionary.
-    const value = new Map()
-    unitMap = Object.create(null)
-    for (let j = 0; j < columnList.length; j++) {
-      const localValue = valueFromDatum(oprnd.value.data[columnList[j]][iStart])
-      const unitName = oprnd.value.units[columnList[j]]
-        ? oprnd.value.units[columnList[j]]
-        : undefined
-      if (unitName) {
-        const unitData = unitFromUnitName(unitName, vars)
-        if (unitData.dtype & unitData.dtype === dt.ERROR) { return unitData }
-        if (unitData && !unitMap[unitName]) { unitMap[unitName] = unitData }
-      }
-      value.set(oprnd.value.headings[columnList[j]], {
-        value: localValue,
-        unit: { name: unitName },
-        dtype: oprnd.value.dtype[columnList[j]]
-      })
-    }
-    return { value, unit: unitMap, dtype: dt.DICT }
-
   } else if (columnList.length === 1) {
     // Return data from one column, in a column vector or a quantity
     const j = columnList[0]
-    const unitName = oprnd.value.units[j] ? oprnd.value.units[j] : {}
-    unit = (oprnd.unit && oprnd.unit[unitName]) ? oprnd.unit[unitName] : { expos: null }
-    const value = oprnd.value.data[j].slice(iStart, iEnd + 1).map(e => valueFromDatum(e))
-    const dtype = oprnd.value.dtype[j] + dt.COLUMNVECTOR
-    const newOprnd = { value, name: oprnd.value.headings[j], unit, dtype }
+    const unitName = df.value.units[j] ? df.value.units[j] : {}
+    unit = (df.unit && df.unit[unitName]) ? df.unit[unitName] : { expos: null }
+    const value = df.value.data[j].slice(iStart, iEnd + 1).map(e => valueFromDatum(e))
+    const dtype = df.value.dtype[j] + dt.COLUMNVECTOR
+    const newdf = { value, name: df.value.headings[j], unit, dtype }
     if (unitAware && unit.gauge) {
       return {
-        value: Matrix.convertToBaseUnits(newOprnd, unit.gauge, unit.factor),
-        name: oprnd.value.headings[j],
+        value: Matrix.convertToBaseUnits(newdf, unit.gauge, unit.factor),
+        name: df.value.headings[j],
         unit: { expos: clone(unit.expos) },
         dtype: dt.RATIONAL + dt.COLUMNVECTOR
       }
     } else {
-      return newOprnd
+      return newdf
     }
 
   } else {
@@ -209,20 +153,22 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
     const unitMap = Object.create(null)
     const rowMap = rowList.length === 0 ? false : Object.create(null)
     for (let j = 0; j < columnList.length; j++) {
-      headings.push(oprnd.value.headings[columnList[j]])
-      units.push(oprnd.value.units[columnList[j]])
-      dtype.push(oprnd.value.dtype[columnList[j]])
-      columnMap[oprnd.value.headings[j]] = j
+      headings.push(df.value.headings[columnList[j]])
+      const unitName = df.value.units[columnList[j]]
+      units.push(unitName)
+      if (unitName && !unitMap[unitName]) { unitMap[unitName] = df.unit[unitName] }
+      dtype.push(df.value.dtype[columnList[j]])
+      columnMap[df.value.headings[j]] = j
       if (rowList.length > 0) {
         const elements = []
         for (let i = 0; i < rowList.length; i++) {
           const rowName = rowList[i]
-          elements.push(oprnd.value.data[columnList[j]][oprnd.value.rowMap[rowName]])
+          elements.push(df.value.data[columnList[j]][df.value.rowMap[rowName]])
           rowMap[rowName] = i
         }
         data.push(elements)
       } else {
-        data.push(oprnd.value.data[columnList[j]].slice(iStart, iEnd + 1))
+        data.push(df.value.data[columnList[j]].slice(iStart, iEnd + 1))
       }
     }
     return {
@@ -234,7 +180,7 @@ const range = (oprnd, rowIndicator, columnIndicator, vars, unitAware) => {
         units: units,
         dtype: dtype
       },
-      unit: { map: clone(unitMap) },
+      unit: clone(unitMap),
       dtype: dt.DATAFRAME
     }
   }
@@ -248,13 +194,12 @@ const dataFrameFromCSV = (str, vars) => {
   // Load a CSV string into a data frame.
   // Data frames are loaded column-wise. The subordinate data structures are:
   const data = []    // where the main data lives, not including column names or units.
-  const headings = []                    // An array containing the column names
+  const headings = []                   // An array containing the column names
   const columnMap = Object.create(null) // map of column names to column index numbers
-  const rowMap = str.charAt(0) === "`" ? false : Object.create(null) // ditto for rows.
-  const units = []                     // array of unit names, one for each column
-  const dtype = []                     // each column's Hurmet operand type
-  const attrs = []                     // array of Hurmet live table expressions.
-  const unitMap = Object.create(null)  // map from unit names to unit data
+  let rowMap =  false                   // ditto for rows.
+  const units = []                      // array of unit names, one for each column
+  const dtype = []                      // each column's Hurmet operand type
+  const unitMap = Object.create(null)   // map from unit names to unit data
   let gotUnits = false
   // Determine if the file is tab separated or pipe separated
   const sepChar = str.indexOf("\t") > -1 ? "\t" : "|"
@@ -271,9 +216,6 @@ const dataFrameFromCSV = (str, vars) => {
       if (numberRegEx.test(data[iCol][0])) { gotAnswer = true; break }
     }
     if (!gotAnswer) {
-      for (const attr of attrs) {
-        if (attr.row === 1) { gotUnits = true; break }
-      }
       for (let iCol = 0; iCol < data.length; iCol++) {
         if (numberRegEx.test(data[iCol][1])) { gotUnits = true; break }
       }
@@ -309,14 +251,12 @@ const dataFrameFromCSV = (str, vars) => {
     if (row === 0) {
       headings.push(datum)
       columnMap[datum] = col
+      if (col === 0 && (datum.length === 0 || datum === "name" || datum === "label")) {
+        rowMap = Object.create(null)
+      }
     } else {
       if (row === 1) { data.push([]) } // First data row.
-      if (datum.charAt(0) === "=") {
-        attrs.push({ row: row - 1, "col": col, entry: datum })
-        data[col].push("")
-      } else {
-        data[col].push(datum)
-      }
+      data[col].push(datum)
       if (rowMap && col === 0) {
         rowMap[datum] = row - 1 - (gotUnits ? 1 : 0)
       }
@@ -395,33 +335,33 @@ const dataFrameFromCSV = (str, vars) => {
       break
     }
   }
-  for (let i = 0; i < attrs.length; i++) {
-    if (gotUnits) { attrs[i].row -= 1 }
-    if (attrs[i].row === 0) {
-      dtype[attrs[i].col] = dt.RATIONAL
-      if ((units.length > 0 && units[attrs[i].col].length > 0)) {
-        dtype[attrs[i].col] += dt.QUANTITY
-      }
+
+  // Check if this data qualifies as a Hurmet Map.
+  let isMap = false
+  if (data[0].length === 1 && Object.keys(unitMap).length === 0) {
+    isMap = true
+    for (let i = 1; i < dtype.length; i++) {
+      if (dtype[i] !== dtype[0]) { isMap = false; break }
     }
   }
 
-  if (attrs.length > 0) {
-    attrs.sort((a, b) => a.col === b.col ? a.row - b.row : a.col - b.col)
-    const extraCharsRegEx = /[ ×·+-/]/g
-    Object.entries(columnMap).forEach(([key, value]) => {
-      const altKey = key.replace(extraCharsRegEx, "")
-      if (altKey !== key) { columnMap[altKey] = value }
-    })
-    Object.entries(rowMap).forEach(([key, value]) => {
-      const altKey = key.replace(extraCharsRegEx, "")
-      if (altKey !== key) { rowMap[altKey] = value }
-    })
-  }
-
-  return {
-    value: { data, headings, columnMap, rowMap, units, attrs, dtype },
-    unit: unitMap,
-    dtype: dt.DATAFRAME
+  if (isMap) {
+    const value = new Map()
+    const keys = Object.keys(columnMap)
+    for (let i = 0; i < keys.length; i++) {
+      value.set(keys[i], valueFromDatum(data[i][0]))
+    }
+    return {
+      value,
+      unit: (dtype[0] === dt.RATIONAL ? allZeros : null),
+      dtype: dt.MAP + dtype[0]
+    }
+  } else {
+    return {
+      value: { data, headings, columnMap, rowMap, units, dtype },
+      unit: unitMap,
+      dtype: dt.DATAFRAME
+    }
   }
 }
 
@@ -617,7 +557,7 @@ const accentFromChar = Object.freeze({
   "\u20d7": "\\vec",
   "\u20e1": "\\overleftrightarrow"
 })
-const formatColumnName = str => {
+export const formatColumnName = str => {
   // We can't call parse(str) because that would be a circular dependency.
   // So this module needs its own function to format dataframe column names.
   if (!isValidIdentifier.test(str)) {
@@ -688,28 +628,35 @@ const displayNum = (datum, colInfo, cellInfo, decimalFormat) => {
   return str
 }
 
-const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.") => {
+const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHeading = false) => {
   if (df.data.length === 0) { return "" }
   const numRows = df.data[0].length
   const numCols = df.data.length
-  const numColsInHeading = numCols + (df.rowMap ? 0 : 1)
+  const writeRowNums = numRows > 5 && !df.rowMap
+  const numColsInHeading = numCols + (writeRowNums ? 1 : 0)
   let str = "\\begin{array}{"
-  str += df.rowMap ? "l|" : "r|"
+  str += df.rowMap
+    ? "l|"
+    : writeRowNums
+    ? "r|"
+    : ""
   for (let j = 1; j < numColsInHeading; j++) {
     str += (df.dtype[j] & dt.RATIONAL ? "r " : "l " )
   }
   str = str.slice(0, -1) + "}"
 
-  // Write the column names
-  if (!df.rowMap) { str += "&" }
-  for (let j = 0; j < numCols; j++) {
-    str += "{" + formatColumnName(df.headings[j]) + "}&"
+  if (!omitHeading) {
+    // Write the column names
+    if (writeRowNums) { str += "&" }
+    for (let j = 0; j < numCols; j++) {
+      str += "{" + formatColumnName(df.headings[j]) + "}&"
+    }
+    str = str.slice(0, -1) + " \\\\ "
   }
-  str = str.slice(0, -1) + " \\\\ "
 
   // Write the unit names
   if (isNotEmpty(df.units)) {
-    if (!df.rowMap) { str += "&" }
+    if (writeRowNums) { str += "&" }
     for (let j = 0; j < numCols; j++) {
       let rowTex = ""
       if (df.units[j] && df.units[j].length > 0) {
@@ -728,7 +675,7 @@ const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.") => {
 
   // Write the data
   for (let i = 0; i < numRows; i++) {
-    if (!df.rowMap) { str += String(i + 1) + " & " }
+    if (writeRowNums) { str += String(i + 1) + " & " }
     for (let j = 0; j < numCols; j++) {
       const datum = df.data[j][i]
       str += mixedFractionRegEx.test(datum)
@@ -748,23 +695,26 @@ const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.") => {
   return str
 }
 
-const displayAlt = (df, formatSpec = "h3") => {
+const displayAlt = (df, formatSpec = "h3", omitHeading = false) => {
   if (df.data.length === 0) { return "" }
   const numRows = df.data[0].length
   const numCols = df.data.length
+  const writeRowNums = numRows > 5 && !df.rowMap
   let str = "``"
 
-  // Write the column names
-  if (!df.rowMap) { str += "|" }
-  str += ( df.headings[0] === "name" ? "" : df.headings[0]) + "|"
-  for (let j = 1; j < numCols; j++) {
-    str += df.headings[j] + "|"
+  if (!omitHeading) {
+    // Write the column names
+    if (writeRowNums) { str += "|" }
+    str += ( df.headings[0] === "name" ? "" : df.headings[0]) + "|"
+    for (let j = 1; j < numCols; j++) {
+      str += df.headings[j] + "|"
+    }
+    str = str.slice(0, -1) + "\n"
   }
-  str = str.slice(0, -1) + "\n"
 
   // Write the unit names
   if (isNotEmpty(df.units)) {
-    if (!df.rowMap) { str += "|" }
+    if (writeRowNums) { str += "|" }
     for (let j = 0; j < numCols; j++) {
       str += df.units[j] + "|"
     }
@@ -773,7 +723,7 @@ const displayAlt = (df, formatSpec = "h3") => {
 
   // Write the data
   for (let i = 0; i < numRows; i++) {
-    if (!df.rowMap) { str += String(i + 1) + "|" }
+    if (writeRowNums) { str += String(i + 1) + "|" }
     for (let j = 0; j < numCols; j++) {
       const datum = df.data[j][i]
       if (mixedFractionRegEx.test(datum)) {

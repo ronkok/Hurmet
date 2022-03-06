@@ -50,8 +50,10 @@ export function openMathPrompt(options) {
   setTimeout(() => window.addEventListener("mousedown", mouseOutside), 500)
   const close = () => {
     window.removeEventListener("mousedown", mouseOutside)
-    wrapper.parentNode.firstChild.style.display = "inline-block"
-    if (wrapper.parentNode) { wrapper.parentNode.removeChild(wrapper) }
+    if (wrapper.parentNode) {
+      wrapper.parentNode.firstChild.style.display = "inline-block"
+      wrapper.parentNode.removeChild(wrapper)
+    }
   }
 
   const isCalculation = (options.encoding === "HurmetMath")

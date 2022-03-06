@@ -16,16 +16,15 @@ export const dt = Object.freeze({
   QUANTITY: 32, // Contains both a magnitude and a unit-of-measure
   DATE: 64, //     Not currently used
   RANGE: 128, //   as in:  1:10
-  TUPLE: 256, //   Not currently used.
-  DICT: 512, //    Dictionary
-  MAP: 1024,  //   A dictionary whose values are all the same data type and carry the same unit
-  ROWVECTOR: 2048,
-  COLUMNVECTOR: 4096,
-  MATRIX: 8192, // two dimensional
-  DATAFRAME: 16384,
-  MODULE: 32768, // contains user-defined functions
-  ERROR: 65536,
-  UNIT: 131072, // User-defined units.
-  IMAGE: 262144,
-  RICHTEXT: 524288
+  TUPLE: 256, //   Used for multiple assignment from a module.
+  MAP: 512,  //    A key:value store with all the same data type the same unit
+  ROWVECTOR: 1024,
+  COLUMNVECTOR: 2048,
+  MATRIX: 4096, // two dimensional
+  DATAFRAME: 8192,
+  MODULE: 16384, // contains user-defined functions
+  ERROR: 32768,
+  UNIT: 65536, // User-defined units.
+  IMAGE: 131072,
+  RICHTEXT: 262144
 })
