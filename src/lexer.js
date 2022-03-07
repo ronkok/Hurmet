@@ -46,7 +46,7 @@ export const tt = Object.freeze({
   FACTORIAL: 30,
   SUPCHAR: 31,
   ANGLE: 32,
-  COLON: 33, //       separator for ranges (1:n)
+  ELLIPSIS: 33, //       separator for ranges (1:n)
   KEYWORD: 34, //     keywords: for in while
   PROPERTY: 36, //    property name after a dot accessor
   COMMENT: 37,
@@ -298,7 +298,7 @@ const miscSymbols = Object.freeze({
   "\\;": ["\\;", ";\\:", tt.SEP, ""],
   "…": ["…", "…", tt.ORD, ""],
 
-  ":": [":", ":", tt.COLON, ""], // range separator
+  "..": ["..", "..", tt.RANGE, ""], // range separator
   ",": [",", ",\\:", tt.SEP, ""], // function argument separator
   ";": [";", ";\\:", tt.SEP, ""], // row separator
 

@@ -1297,7 +1297,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
           const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib)
           if (result.dtype === dt.ERROR) { return result }
           if (statement.name) {
-            statement.resultdisplay = "!"
+            statement.resultdisplay = isUnitAware ? "!!" : "!"
             const [stmt, _] = conditionResult(statement, result, isUnitAware)
             insertOneHurmetVar(vars, stmt, decimalFormat)
           }

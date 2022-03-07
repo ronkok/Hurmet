@@ -229,6 +229,7 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     ['frameRow = ``#4 | #5 | area\n 0.22 | 0.31 | 0.44``', "frameRow = @", "``#4 | #5 | area\n0.22 | 0.31 | 0.44``"],
     ["radius = [0.375; 0.25; 0.3125; 0.375] 'in'", "radius = @", ""],
     ["barArea = ``#4 | #5 | area\n 0.22 | 0.31 | 0.44`` 'in2'", "barArea = @", ""],
+    ["unitLessBarArea = ``#4 | #5 | area\n 0.22 | 0.31 | 0.44``", "unitLessBarArea = @", ""],
     ["rebar = ``name|diameter|area\nunit|in |in²\n#3|0.375|0.11\n#4|0.5|0.2\n#5|0.625|0.31\n#6|0.75 |0.44``", "rebar = @", ""],
     ["wideFlanges = ``name|weight|area|d|bf|tw|tf|Ix|Sx|rx|Iy|Sy|ry\nunit|lbf/ft|in^2|in|in|in|in|in^4|in^3|in|in^4|in^3|in\nW10X49|49|14.4|10|10|0.34|0.56|272|54.6|4.35|93.4|18.7|2.54\nW8X31|31|9.13|8|8|0.285|0.435|110|27.5|3.47|37.1|9.27|2.02\nW8X18|18|5.26|8.14|5.25|0.23|0.33|61.9|15.2|3.43|7.97|3.04|1.23``", "wideFlanges = @", ""]
   ]
@@ -277,7 +278,7 @@ end`, vars)
 
 hurmet.calculate(`function testFor(a, b)
    sum = 0
-   for i in a:b
+   for i in a..b
       sum = sum + i
    end
    return sum
@@ -296,7 +297,7 @@ end`, vars)
 hurmet.calculate(`function testBreak()
    echo "This is an echo test."
    sum = 0
-   for i in 1:100
+   for i in 1..100
       if i > 3
          break
       end
@@ -307,7 +308,7 @@ end`, vars)
 
 hurmet.calculate(`function testRaise()
    sum = 0
-   for i in 1:100
+   for i in 1..100
       if i > 3
          raise "Error."
       end
@@ -321,8 +322,8 @@ end`, vars)
     // input string, expected RPN, expected result
     ["b = @", "¿b", "true"],
     ["str[2] = @", "¿str ®2/1 [] 1", "b"],
-    ["str[2:4] = @", "¿str ®2/1 ®4/1 .. [] 1", "bcd"],
-    ["str[3:] = @", `¿str ®3/1 "∞" .. [] 1`, "cdef"],
+    ["str[2..4] = @", "¿str ®2/1 ®4/1 .. [] 1", "bcd"],
+    ["str[3..] = @", `¿str ®3/1 "∞" .. [] 1`, "cdef"],
     ["1/0 = @", "®1/1 ®0/1 /", "Error. Divide by zero."],
     ["(w L^2)/8 + (P L)/4 = @@ lbf·ft", "¿w ¿L ®2/1 ^ ⌧ ®8/1 / ¿P ¿L ⌧ ®4/1 / +", "4,980 lbf·ft"],
     ["sin(θ) = @", "¿θ sin", "0.5"],
@@ -340,17 +341,17 @@ end`, vars)
     ["(3 num)/2 = @", "®3/1 ¿num ⌧ ®2/1 /", "6.3"],
     [`rebar["#3"]["area"] =@`, `¿rebar "#3" [] 1 "area" [] 1`, "0.11"],
     [`{ 5 if n ≤ 4; 2 if n ≥ 12; 5 - (n - 4)/20 otherwise } =@`, "¿n ®4/1 ≤ ¿n ®12/1 ≥ true cases 3 ®5/1 ®2/1 ®5/1§¿n§®4/1§-§®20/1§/§-", "4.7"],
-    ["[2:5] = @", "®2/1 ®5/1 .. matrix 1 1", "[2, 3, 4, 5]"],
-    ["[1:2:5] = @", "®1/1 ®2/1 .. ®5/1 .. matrix 1 1", "[1, 3, 5]"],
+    ["[2..5] = @", "®2/1 ®5/1 .. matrix 1 1", "[2, 3, 4, 5]"],
+    ["[1..2..5] = @", "®1/1 ®2/1 .. ®5/1 .. matrix 1 1", "[1, 3, 5]"],
     ["vector[2] = @", "¿vector ®2/1 [] 1", "-15.3"],
-    ["vector[1:2] = @", "¿vector ®1/1 ®2/1 .. [] 1", "[2.1; -15.3]"],
-    ["vector[1:] = @", `¿vector ®1/1 "∞" .. [] 1`, "[2.1; -15.3]"],
+    ["vector[1..2] = @", "¿vector ®1/1 ®2/1 .. [] 1", "[2.1; -15.3]"],
+    ["vector[1..] = @", `¿vector ®1/1 "∞" .. [] 1`, "[2.1; -15.3]"],
     ["matrix[1, 2] = @", "¿matrix ®1/1 ®2/1 [] 2", "7.5"],
-    ["matrix[1:2, 2] = @", "¿matrix ®1/1 ®2/1 .. ®2/1 [] 2", "[7.5; 33]"],
-    ["matrix[1, 1:2] = @", "¿matrix ®1/1 ®1/1 ®2/1 .. [] 2", "[2.1, 7.5]"],
+    ["matrix[1..2, 2] = @", "¿matrix ®1/1 ®2/1 .. ®2/1 [] 2", "[7.5; 33]"],
+    ["matrix[1, 1..2] = @", "¿matrix ®1/1 ®1/1 ®2/1 .. [] 2", "[2.1, 7.5]"],
     ["matrix[1,] = @", "¿matrix ®1/1 ®0/1 [] 2", "[2.1, 7.5]"],
-    ["matrix[, 1:2] = @", "¿matrix ®0/1 ®1/1 ®2/1 .. [] 2", "(2.1, 7.5; -15.3, 33)"],
-    ["matrix[, 1:] = @", `¿matrix ®0/1 ®1/1 "∞" .. [] 2`, "(2.1, 7.5; -15.3, 33)"],
+    ["matrix[, 1..2] = @", "¿matrix ®0/1 ®1/1 ®2/1 .. [] 2", "(2.1, 7.5; -15.3, 33)"],
+    ["matrix[, 1..] = @", `¿matrix ®0/1 ®1/1 "∞" .. [] 2`, "(2.1, 7.5; -15.3, 33)"],
     ["2 vector = @", "®2/1 ¿vector ⌧", "[4.2; -30.6]"],
     ["vector·vector = @", "¿vector ¿vector ·", "238.5"],
     ["vector*vector = @", "¿vector ¿vector *", "[4.41; 234.09]"],
@@ -363,9 +364,12 @@ end`, vars)
     [`frameRow.area = @`, `¿frameRow "area" .`, "0.44"],
     [`barArea["#4"] = @`, `¿barArea "#4" [] 1`, "0.22"],
     [`barArea.area = @`, `¿barArea "area" .`, "0.44"],
+    [`unitLessBarArea["#4"] = @`, `¿unitLessBarArea "#4" [] 1`, "0.22"],
+    [`unitLessBarArea.area = @`, `¿unitLessBarArea "area" .`, "0.44"],
     ["wideFlanges.W8X31 = @", `¿wideFlanges "W8X31" .`, "``|weight|area|d|bf|tw|tf|Ix|Sx|rx|Iy|Sy|ry\nunit|lbf/ft|in^2|in|in|in|in|in^4|in^3|in|in^4|in^3|in\nW8X31|31|9.13|8|8|0.285|0.435|110|27.5|3.47|37.1|9.27|2.02``"],
     ["wideFlanges[2] = @", `¿wideFlanges ®2/1 [] 1`, "``|weight|area|d|bf|tw|tf|Ix|Sx|rx|Iy|Sy|ry\nunit|lbf/ft|in^2|in|in|in|in|in^4|in^3|in|in^4|in^3|in\nW8X31|31|9.13|8|8|0.285|0.435|110|27.5|3.47|37.1|9.27|2.02``"],
     ["wideFlanges.W8X31.area = @", `¿wideFlanges "W8X31" . "area" .`, "9.13"],
+    ["wideFlanges.W8X31.area = @@ in²", `¿wideFlanges "W8X31" . "area" .`, "9.13 in²"],
     ['"ab" & "cd" = @', `"ab" "cd" &`, 'abcd'],
     [`1.2 & 3.4 = @`, `®12/10 ®34/10 &`, "[1.2, 3.4]"],
     [`vector & 3.6 = @`, `¿vector ®36/10 &`, "[2.1; -15.3; 3.6]"],
@@ -386,7 +390,7 @@ end`, vars)
     [`(2) (4) + 1 = @`, `®2/1 ®4/1 ⌧ ®1/1 +`, "9"],
     ["{ 5 if n = 10; 0 otherwise } = @", `¿n ®10/1 = true cases 2 ®5/1 ®0/1`, "5"],
     ["√4 = @", `®4/1 √`, "2"],
-    ["[1:3] = @", `®1/1 ®3/1 .. matrix 1 1`, "[1, 2, 3]"],
+    ["[1..3] = @", `®1/1 ®3/1 .. matrix 1 1`, "[1, 2, 3]"],
     ["num³ √9 = @", `¿num ®3/1 ^ ®9/1 √ ⌧`, "222.264"],
     [`abs(0.5) num = @`, `®5/10 abs ¿num ⌧`, "2.1"],
     [`num (1/4) = @`, `¿num ®1/1 ®4/1 / ⌧`, "1.05"],

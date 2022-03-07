@@ -520,7 +520,7 @@ export const parse = (
       const prevType = prevToken.ttype
       token = {
         input: "⌧",
-        output: prevType === tt.LONGVAR || prevType === tt.NUM ? "\\," : "",
+        output: [tt.LONGVAR, tt.NUM, tt.UNIT].includes(prevType) ? "\\," : "",
         ttype: tt.MULT
       }
       isFollowedBySpace = false
@@ -736,18 +736,16 @@ export const parse = (
         break
       }
 
-      case tt.COLON: {
-        //   range separator, as in 1:n
-        if (isCalc) {
-          rpn += tokenSep
-          popRpnTokens(3)
-        }
+      case tt.RANGE: {
+        //   range separator, as in 1..n
         popTexTokens(1, okToAppend)
         posOfPrevRun = tex.length
 
         if (isCalc) {
+          rpn += tokenSep
+          popRpnTokens(3)
           rpnStack.push({ prec: 3, symbol: ".." })
-          if (str.charAt(0) === "]") {
+          if (str.charAt(0) === "]" || str.length === 0) {
             rpn += '"∞"' // slice of the form: identifier[n:]
           }
         }

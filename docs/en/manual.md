@@ -406,16 +406,16 @@ The font corrections, e.g., `bb …` work on any letter from A to Z or a to z.
 | Data Type and Example                | Accessor              | Returns           |
 +======================================+=======================+===================+
 | string\                              | s[2]\                 | b\                |
-| s = "abcde"                          | s[2:4]\               | bce\              |
-|                                      | s[3:]                 | cde               |
+| s = "abcde"                          | s[2..4]\              | bce\              |
+|                                      | s[3..]                | cde               |
 +--------------------------------------+-----------------------+-------------------+
 | Vector\                              | 𝐕[2]\                | 2\                |
-| 𝐕 = ¢`[1, 2, 3, 4, 5]`              | 𝐕[2:4]\              | ¢`[2, 3, 4]`\     |
-|                                      | 𝐕[3:]                | ¢`[3, 4, 5]`      |
+| 𝐕 = ¢`[1, 2, 3, 4, 5]`              | 𝐕[2..4]\             | ¢`[2, 3, 4]`\     |
+|                                      | 𝐕[3..]               | ¢`[3, 4, 5]`      |
 +--------------------------------------+-----------------------+-------------------+
 | Matrix\                              | 𝐌[2, 3]\             | 6\                |
 | 𝐌 = ¢`\(1, 2, 3; 4, 5, 6; 7, 8, 9)` | 𝐌[3,]\               | ¢`[7, 8, 9]`\     |
-|                                      | 𝐌[2:3, 1:2]          | ¢`[4, 5; 7, 8]`   |
+|                                      | 𝐌[2..3, 1:2]         | ¢`[4, 5; 7, 8]`   |
 +--------------------------------------+-----------------------+-------------------+
 | Data Frame\                          | DF.B\                 | An entire row\    |
 | ![dataframe][]                       | DF["B"]\              | An entire row\    |
@@ -608,8 +608,8 @@ String
     ```
     a = "abcdefg"
     a[2]     # returns "b"
-    a[2:4]   # returns "bcd"
-    a[5:]    # returns "efg"
+    a[2..4]   # returns "bcd"
+    a[5..]    # returns "efg"
     ```
 
     **Math String**
@@ -734,16 +734,16 @@ Matrix
     A Hurmet calculation of that form will return a row vector with every number
     in the range. The step size is optional (default = 1). Examples:
 
-    |    Input      |       Result             |
-    |---------------|--------------------------|
-    | `[2:5] = ?`   | ¢`[2:5] = [2, 3, 4, 5]` |
-    | `[1:2:5] = ?` | ¢`[1:2:5] = [1, 3, 5]`  |
+    |    Input        |       Result              |
+    |-----------------|---------------------------|
+    | `[2..5] = ?`    | ¢`[2..5] = [2, 3, 4, 5]`  |
+    | `[1..2..5] = ?` | ¢`[1..2..5] = [1, 3, 5]`  |
 
     You can call individual elements with index integers between brackets, as in
     `𝐕[5]` or `𝐌[1, 3]`. You can use a variable name for the index if the variable
     returns an integer.
 
-    You can access a sub-matrix using the range operator, “:”, as in `𝐌[2:5, 1]`.
+    You can access a sub-matrix using the range operator, “..”, as in `𝐌[2..5, 1]`.
     Entire rows or columns can be called by omitting an index, as in `𝐌[2,]` or
     `𝐌[,1]`. Hurmet indexes are one-based.
 
@@ -1094,8 +1094,8 @@ _j_
 +---------------+----------------------+---------------------------------------------+
 | ¬             |  if ¬ _a_            | Logical not                                 |
 +---------------+----------------------+---------------------------------------------+
-| :             | 𝐕\[2:3\] \          | Range separator                             |
-|               | for _i_ in 1:3       |                                             |
+| :             | 𝐕\[2..3\] \         | Range separator                             |
+|               | for _i_ in 1..3      |                                             |
 +---------------+----------------------+---------------------------------------------+
 {#op-table .grid width=35em}
 
@@ -1691,7 +1691,7 @@ for
     +------------------+---------------------------+
     | ```              | ```                       |
     | sum = 0          | reverse = ""              |
-    | for i in 1:10    | for ch in "abcdef"        |
+    | for i in 1..10   | for ch in "abcdef"        |
     |    sum = sum + i |    reverse = ch & reverse |
     | end              | end                       |
     | ```              | ```                       |
@@ -1708,7 +1708,7 @@ break
 :   A loop can be terminated early via the _break_ keyword. Example:
 
     ```
-    for i in 1:1000000
+    for i in 1..1000000
        if i ≥ 2
           break
        end
