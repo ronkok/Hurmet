@@ -236,6 +236,8 @@ const miscSymbols = Object.freeze({
   "∨": ["∨", "∨", tt.LOGIC, ""],
   "⊻": ["⊻", "⊻", tt.LOGIC, ""], // xor
   "¬": ["¬", "¬", tt.UNARY, ""], // logical not
+  // calculations do not use a ":"" token. But LOGIC is the right precedence for display.
+  ":": [":", ":", tt.LOGIC, ""],
 
   "\u222B": ["\u222B", "\u222B", tt.UNDEROVER, ""], // \int
   "\u222C": ["\u222C", "\u222C", tt.UNDEROVER, ""], // \iint

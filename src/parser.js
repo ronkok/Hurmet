@@ -1024,6 +1024,9 @@ export const parse = (
         if (topDelim.delimType === dCASES && isIn(token.input, ["if", "otherwise"])) {
           tex += "&"
         }
+        if (token.input === ":"  && topDelim.delimType === dPAREN && topDelim.symbol === "{") {
+          token.output = "\\colon"
+        }
         tex += token.output
         if (isCalc) {
           if (topDelim.delimType === dCASES &&
