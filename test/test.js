@@ -29,7 +29,7 @@ const parserTests = [
     "{a if b; c if d}",
     "\\begin{cases}a &\\mathrel{\\mathrm{if}}b \\\\ c &\\mathrel{\\mathrm{if}}d \\end{cases}"
   ],
-  ["f_c′=4500 'psi'", "f{_\\text{c}′} = 4{,}500 \\; {\\text{psi}}"],
+  ["f_c′=4500 'psi'", "f{_\\text{c}'} = 4{,}500 \\; {\\text{psi}}"],
   ["root 3 x", "\\sqrt[3]{x}"],
   ["sqrt(a b)", "\\sqrt{a b}"],
   ["sin^2 x", "\\sin^{2}{x}"],
@@ -41,15 +41,15 @@ const parserTests = [
   ["root 3 (a + b)", "\\sqrt[3]{a + b}"],
   ["sin^(a+b) x", "\\sin^{a + b}{x}"],
   ["(π (D - I))/4", "\\dfrac{π (D - I)}{4}"],
-  ["f_c′/200", "\\dfrac{f{_\\text{c}′}}{200}"],
+  ["f_c′/200", "\\dfrac{f{_\\text{c}'}}{200}"],
   ["(b^2/2)", "\\left(\\dfrac{b^{2}}{2}\\right)"],
-  ["sqrt f_c′", "\\sqrt{f{_\\text{c}′}}"],
+  ["sqrt f_c′", "\\sqrt{f{_\\text{c}'}}"],
   ["sqrt \\hat θ^2", "\\sqrt{\\hat{θ}^{2}}"],
   ["sin^2 \\hat θ", "\\sin^{2}{\\hat{θ}}"],
   ["((n (n+1))/2)", "\\left(\\dfrac{n (n + 1)}{2}\\right)"],
   [
     "β_1 = {0.85 if f_c′ <= 4000; 0.65 if f_c′ >= 8000; 0.85 - f_c′/20000 otherwise}",
-    "β{_\\text{1}} = \\begin{cases}0.85 &\\mathrel{\\mathrm{if}}f{_\\text{c}′} ≤ 4{,}000 \\\\ 0.65 &\\mathrel{\\mathrm{if}}f{_\\text{c}′} ≥ 8{,}000 \\\\ 0.85 - \\dfrac{f{_\\text{c}′}}{20{,}000}&\\mathrel{\\mathrm{otherwise}}\\end{cases}"
+    "β{_\\text{1}} = \\begin{cases}0.85 &\\mathrel{\\mathrm{if}}f{_\\text{c}'} ≤ 4{,}000 \\\\ 0.65 &\\mathrel{\\mathrm{if}}f{_\\text{c}'} ≥ 8{,}000 \\\\ 0.85 - \\dfrac{f{_\\text{c}'}}{20{,}000}&\\mathrel{\\mathrm{otherwise}}\\end{cases}"
   ],
   ["x = (-b +- sqrt(b^2-4a c))/(2 a)", "x = \\dfrac{\\text{-} b ± \\sqrt{b^{2}- 4 a c}}{2 \\, a}"],
   [

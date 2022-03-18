@@ -648,7 +648,7 @@ const lexOneWord = (str, prevToken) => {
         const primes = /^′*/.exec(str.slice(match.length))
         if (primes) {
           match += primes[0]
-          identifier += primes[0]
+          identifier += "'".repeat(primes[0].length)
         }
         const pos = identifier.indexOf("_")
         if (pos > -1) {
