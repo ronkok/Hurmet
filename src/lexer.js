@@ -610,7 +610,7 @@ const checkForTrailingAccent = word => {
 const lexOneWord = (str, prevToken) => {
   const matchObj = wordRegEx.exec(str)
   if (matchObj) {
-    const match = matchObj[0].replace(/_*$/, "") // drop trailing underscores
+    let match = matchObj[0].replace(/_*$/, "") // drop trailing underscores
 
     // Get the immediately following character
     const fc = str.charAt(match.length)
@@ -645,6 +645,17 @@ const lexOneWord = (str, prevToken) => {
           }
         }
         identifier = segments.join("")
+        const primes = /^′*/.exec(str.slice(match.length))
+        if (primes) {
+          match += primes[0]
+          identifier += primes[0]
+        }
+        const pos = identifier.indexOf("_")
+        if (pos > -1) {
+          // Cramp subscript placement by wrapping it with braces.
+          // This helps Cambria Math to supply the correct size radical.
+          identifier = identifier.slice(0, pos) + "{" + identifier.slice(pos) + "}"
+        }
         return [match, identifier, (segments[0].length > 1) ? tt.LONGVAR : tt.VAR, ""]
       }
     } else if (match.length === 2 & match.charAt(0) === "\uD835") {
