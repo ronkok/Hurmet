@@ -59,6 +59,18 @@
 <div style="display: none" id="content">
 
   <p>This is editable text. You can focus it and start typing. All calculations will update if you press <strong>Enter</strong> to close a calculation cell.</p>
+  <h3 data-pm-slice="1 3 []">Breaking Changes</h3>
+  <ol>
+    <li>
+        <p>Write single quotation marks around unit names, e.g., <code>'meters'</code>. Previously, the quotes enclosed both the number and unit name.</p>
+    </li>
+    <li>
+        <p>The dictionary data type has been removed from Hurmet. A single-row data frame contains the same information as a dictionary, so dictionaries were superfluous. </p>
+    </li>
+    <li>
+        <p>Hurmet data frames briefly had a quasi-spreadsheet functionality. It was clumsy and I’ve removed it.</p>
+    </li>
+  </ol>
   <p>This week’s example:</p>
   <h3>Simple span beam</h3>
   <p><span class="hurmet-calc" data-entry="L = 12 'feet'"></span>, length</p>
