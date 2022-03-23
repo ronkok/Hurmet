@@ -1,6 +1,4 @@
-﻿import { isIn } from "./utils"
-
-// autocorrect.js
+﻿// autocorrect.js
 
 const autoCorrectRegEx = /([!?:<>\-~/_]=| \.|~~|\+-|-\+|<-->|<->|<>|<--|<-|-->|->|=>|-:|\^\^|\|\||\/\/\/|\b(bar|hat|vec|tilde|dot|ddot|ul)|\b(bb|bbb|cc|ff|ss) [A-Za-z]|\\?[A-Za-z]{2,}|\\ |\\o|root [234]|<<|>>|\^-?[0-9]+|\|\|\||\/_|''|""|00)\s$/
 
@@ -240,7 +238,7 @@ const accentedChar = str => {
       if (accentName === "cc" && isSmall && code !== 0x006c) { return null }
       if (code > 0x005a && accentName === "bbb") { return null }
       const lowSurrogate = code + lowSurrogateDiff[accentName][isSmall]
-      if (isIn(lowSurrogate, wideExceptions)) {
+      if (wideExceptions.includes(lowSurrogate)) {
         newChar = accentName === "bbb" ? bbb[ch] : calligraphic[ch]
       } else {
         newChar = "\uD835" + String.fromCharCode(lowSurrogate)
@@ -253,48 +251,43 @@ const accentedChar = str => {
   }
 }
 
-const docStart = { line: 0, ch: 0 }
-
-export const autoCorrect = doc => {
+export const autoCorrect = (jar, preText, postText) => {
   // Auto-correct math in real time.
-  // doc is an instance of a CodeMirror editing box.
-  const pos = doc.getCursor()
-  if (pos.ch > 0) {
-    // Try an auto-correct
-    const str = doc.getRange(docStart, pos) // str is what precedes the selection point.
-    if (str.slice(-1) === " ") {
-      // Auto-correct only after the user hits the space bar.
-      const matches = autoCorrectRegEx.exec(str)
-      if (matches) {
-        const word = matches[0].slice(0, -1) // Trim the final space.
-        let correction
-        const accent = accents[word]
-        if (accent) {
-          const newStr = str.slice(0, -(matches[0].length + 1)) + accent
-          doc.setValue(newStr + doc.getValue().slice(str.length))
-          const newPos = { line: pos.line, ch: pos.ch - matches[0].length + accent.length }
-          doc.setCursor(newPos)
-        } else {
-          correction = autoCorrections[word] // Check for a match in the lookup table.
-          if (!correction) {
-            // No perfect match in the lookup table. Try for a superscript or an accent.
-            if (word.charAt(0) === "^") {
-              correction = superscript(word) // e.g. x²
-            } else {
-              if (word.indexOf(" ") > 0) {
-                // accented char or Unicode character. E.g. bar y   or   bb M
-                correction = accentedChar(word)
-              }
+  // jar is an instance of a CodeJar editing box.
+//  const pos = doc.getCursor()
+  if (preText.length > 0 && preText.slice(-1) === " ") {
+    // Auto-correct only after the user hits the space bar.
+    const matches = autoCorrectRegEx.exec(preText)
+    if (matches) {
+      const word = matches[0].slice(0, -1) // Trim the final space.
+      let correction
+      const accent = accents[word]
+      if (accent) {
+        const newStr = preText.slice(0, -(matches[0].length + 1)) + accent
+        jar.updateCode(newStr + postText)
+        // Move the cursur to the correct location
+        const L = newStr.length
+        jar.restore({ start: L, end: L, dir: undefined })
+      } else {
+        correction = autoCorrections[word] // Check for a match in the lookup table.
+        if (!correction) {
+          // No perfect match in the lookup table. Try for a superscript or an accent.
+          if (word.charAt(0) === "^") {
+            correction = superscript(word) // e.g. x²
+          } else {
+            if (word.indexOf(" ") > 0) {
+              // accented char or Unicode character. E.g. bar y   or   bb M
+              correction = accentedChar(word)
             }
           }
         }
-        if (correction) {
-          const newStr = str.slice(0, -matches[0].length) + correction
-          doc.setValue(newStr + doc.getValue().slice(str.length))
-          const newPos = { line: pos.line, ch: pos.ch - matches[0].length + correction.length }
-          if (["()", "\u23BF\u23CC", "\u23BE\u23CB"].includes(correction)) { newPos.ch -= 1 }
-          doc.setCursor(newPos)
-        }
+      }
+      if (correction) {
+        const newStr = preText.slice(0, -matches[0].length) + correction
+        jar.updateCode(newStr + postText)
+        // Move the cursur to the correct location
+        const L = newStr.length
+        jar.restore({ start: L, end: L, dir: undefined })
       }
     }
   }

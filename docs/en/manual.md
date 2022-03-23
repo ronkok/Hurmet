@@ -6,12 +6,8 @@
    <title>Hurmet Manual</title>
    <link rel="shortcut icon" href="../../images/equal-sign.ico">
    <link rel="stylesheet" media="print" href="../../print.css">
-   <link rel="stylesheet" href="../../cm/codemirror.css">
    <link rel="stylesheet" href="../docstyles.css">
    <link rel="stylesheet" href="../../katex/katex.min.css">
-   <script src="../../cm/codemirror.js"></script>
-   <script src="../../cm/closebrackets.js"></script>
-   <script src="../../cm/matchbrackets.js"></script>
    <script src="../../katex/katex.min.js"></script>
    <script src="../../hurmet.min.js"></script>
    <script src="../demonstration.js"></script>
@@ -1909,7 +1905,7 @@ for which I am very grateful.
 
 *   [KaTeX](https://katex.org), fast math rendering on the web, by Khan Academy and volunteer contributors.
 
-*   [CodeMirror](https://codemirror.net/), a text editor, also by Marijn Haverbeke.
+*   [CodeJar](https://medv.io/codejar/), a light-weight text editor, by Anton Medvedev.
 
 *   Many of Hurmet’s menu buttons show images from [icomoon](https://icomoon.io).
 
@@ -2058,7 +2054,7 @@ Copyright © 2020-2022 Ron Kok. Released under the [MIT License](https://opensou
 <p>format = "<input type="text" id="formatBox" value="h3" onchange="updateFormat()" style="width: 2em;">"</p>
 <p></p>
 <div>Give it a try. (It’s interactive.)</div>
-<div id="input-container"><form><textarea id="demo-input"></textarea></form></div>
+<div id="input-container"><form><div id="demo-input"></div></form></div>
 <div id="demo-output"></div>
 </div> <!-- demo -->
 
@@ -2073,23 +2069,24 @@ Copyright © 2020-2022 Ron Kok. Released under the [MIT License](https://opensou
   })
 
   // Start the demonstration editor
-  const editor = CodeMirror.fromTextArea(document.getElementById("demo-input"), {
-    autoCloseBrackets: true,
-    lineWrapping: true,
-    matchBrackets: true
-  });
+  const editor = document.getElementById("demo-input")
+  const jar = demonstration.codeJar(editor, false)
   const demoOutput = document.getElementById("demo-output");
-  editor.on('change', () => demonstration.renderMath(editor.doc, demoOutput))
-  editor.doc.setValue("Hi!")
+  editor.addEventListener("input", e => {
+    demonstration.renderMath(jar, demoOutput)
+  })
+  jar.updateCode("Hi!")
+  demonstration.renderMath(jar, demoOutput)
 
   // The next line is called by the format input box.
-  updateFormat = () => demonstration.renderMath(editor.doc, document.getElementById("demo-output"))
+  updateFormat = () => demonstration.renderMath(jar, demoOutput)
 
   // Change the content of the demonstration box to match the currently scrolled topic.
   var observer = new IntersectionObserver(function(entries) {
     for (const entry of entries) {
       if (entry.intersectionRatio === 1.0) {
-        editor.doc.setValue(demonstration.prompts[entry.target.id])
+        jar.updateCode(demonstration.prompts[entry.target.id])
+        demonstration.renderMath(jar, demoOutput)
         break
       }
     }

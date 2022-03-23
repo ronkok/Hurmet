@@ -1,4 +1,4 @@
-import { TextField } from "./prompt"
+import { codeJar, selectedText, textBeforeCursor, textAfterCursor } from "./codejar"
 
 const commaRegEx = /"[^"]*"|[0-9]+,[0-9]+|[A-Za-zıȷ\u0391-\u03D5\uD835][A-Za-z0-9_ıȷ\u0391-\u03D5\uD835\uDC00-\uDFFF]/g
 const dotRegEx = /"[^"]*"|[0-9]+\.[0-9]+|[A-Za-zıȷ\u0391-\u03D5\uD835][A-Za-z0-9_ıȷ\u0391-\u03D5\uD835\uDC00-\uDFFF]/g
@@ -63,79 +63,37 @@ export function openMathPrompt(options) {
     : ""
 
   const form = wrapper.appendChild(document.createElement("form"))
-  const field = (new TextField({ required: true, value: "" })).render()
-  form.appendChild(field)
+  const editor = form.appendChild(document.createElement("div"))
+  const jar = codeJar(editor, true)
 
-  if (isCalculation) {
-    // Define syntax highlighting for Hurmet calculation cells.
-    // eslint-disable-next-line no-undef
-    CodeMirror.defineSimpleMode("hurmet", {
-      // The start state contains the rules that are intially used
-      start: [
-        // The regex matches the token, the token property contains the type
-        { regex: /"[^"]*"|`[^`]*`/, token: "string" },
-        { regex: /(function)(\s+)((?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u212C\u2130\u2131\u210B\u2110\u2112\u2133\u211B\u212F\u210A\u2113\u2134]|(?:\uD835[\uDC00-\udc33\udc9c-\udccf]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′)/,
-          token: ["keyword", null, "variable-2"] },
-        { regex: /(')([$£¥₨₪€])?(-?(?:[0-9]+(?: [0-9]+\/[0-9]+|(?:\.[0-9]+)?(?:e[+-]?[0-9]+)?)?|0x[0-9A-Fa-f]+)) *([^']*)(')/,
-          token: ["attribute", "attribute", "number", "attribute", "attribute"] },
-        { regex: /(?:function|export|return|if|for|in|while|else|otherwise|and|or|modulo|break|echo|raise|end)\b/,
-          token: "keyword" },
-        { regex: /π|ℏ|j|true|false/, token: "atom" },
-        { regex: /(-?)(?:([0-9]+)(?: ([0-9]+)\/([0-9]+)|(?:\.([0-9]+))?(?:e([+-]?[0-9]+))?)|(0x[0-9A-Fa-f]+))/,
-          token: "number" },
-        { regex: /#.*/, token: "comment" },
-        { regex: /\\[A-Za-z]+/, token: "variable-3" },
-        { regex: /[-+/*×·∘⊗⌧^%‰&√!¡|‖&=<>≟≠≅≤≥∈∉⋐∧∨⊻¬]+/, token: "operator" },
-        // indent and dedent properties guide autoindentation
-        { regex: /[{[(]/, indent: true },
-        { regex: /[}\])]/, dedent: true },
-        { regex: /(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u212C\u2130\u2131\u210B\u2110\u2112\u2133\u211B\u212F\u210A\u2113\u2134]|(?:\uD835[\uDC00-\udc33\udc9c-\udccf]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*(?=\()/,
-          token: "builtin" },
-        { regex: /(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u212C\u2130\u2131\u210B\u2110\u2112\u2133\u211B\u212F\u210A\u2113\u2134]|(?:\uD835[\uDC00-\udc33\udc9c-\udccf]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*/,
-          token: "variable" }
-      ],
-      meta: {
-        dontIndentStates: ["comment"],
-        lineComment: "//"
-      }
-    })
-  }
-
-  // eslint-disable-next-line no-undef
-  const mathEditor = CodeMirror.fromTextArea(field, {
-    mode: (isCalculation ? "hurmet" : null),
-    indentUnit: 4,
-    smartIndent: true,
-    tabSize: 4,
-    autoCloseBrackets: true,
-    autofocus: true,
-    lineWrapping: true,
-    electricChars: false,
-    matchBrackets: true
-  })
-
-  const mathDoc = mathEditor.doc  // The CodeMirror document object.
+  // Populate the editor.
   if (options.attrs) {
     if (isCalculation && options.attrs.entry) {
       let math = options.attrs.entry
       if (decimalSymbol === ",") { math = commaFromDotForDisplay(math) }
-      mathDoc.setValue(math)
+      jar.updateCode(math)
     } else if (options.attrs.tex) {
-      mathDoc.setValue(options.attrs.tex)
+      jar.updateCode(options.attrs.tex)
     }
   }
+  // Place the cursor at the end of the editor.
+  const L = jar.toString().length
+  jar.restore({ start: L, end: L, dir: undefined })
 
-  mathDoc.setCursor(mathDoc.lineCount(), 0);
   const mathDisplay = form.appendChild(document.createElement("div"))
   mathDisplay.setAttribute("class", "math-display")
 
-  const renderMath = function() {
+  const renderMath = function(code) {
     let tex = ""
     let isUDF = false
     if (isCalculation) {
-      // eslint-disable-next-line no-undef
-      hurmet.autoCorrect(mathDoc)
-      tex = (mathDoc.getValue())
+      // Check if an auto-correct is needed (after a user types a space.)
+      const selText = selectedText(editor)
+      if (selText.length === 0) {
+        // eslint-disable-next-line no-undef
+        hurmet.autoCorrect(jar, textBeforeCursor(editor), textAfterCursor(editor))
+      }
+      tex = jar.toString()
       if (decimalSymbol === ",") { tex = dotFromCommaForStorage(tex) }
       isUDF = functionRegEx.test(tex)
       if (!isUDF) {
@@ -143,7 +101,7 @@ export function openMathPrompt(options) {
         tex = hurmet.parse(tex, options.decimalFormat, false, true)
       }
     } else {
-      tex = mathDoc.getValue()
+      tex = code
     }
     if (!isUDF) {
       try {
@@ -162,14 +120,15 @@ export function openMathPrompt(options) {
       }
     }
   }
-  if (mathDoc.getValue().length > 0) { renderMath() }
+  if (jar.toString().length > 0) { renderMath(jar.toString()) }
 
-  mathEditor.setOption("extraKeys", { Enter: () => {}, Tab: () => {} }); // Do nothing.
-  mathEditor.on('change', () => { renderMath() }) // Re-render the math in the inset.
+  editor.addEventListener("input", e => {
+    renderMath(jar.toString())
+  })
 
   const submit = _ => {
     // Get the string that the user typed into the prompt box.
-    let mathString = mathDoc.getValue()
+    let mathString = jar.toString()
     // Strip leading spaces and trailing spaces
     mathString = mathString.replace(/^[\s\u200b]+/, "")
     mathString = mathString.replace(/[\s\u200b]+$/, "")

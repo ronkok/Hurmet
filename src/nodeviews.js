@@ -11,6 +11,7 @@ export class CalcView {
   }
 
   selectNode() {
+    if (this.dom.children.length > 1) { return }
     this.dom.classList.add("ProseMirror-selectednode")
     const attrs = this.node.attrs
     const pos = this.outerView.state.selection.from

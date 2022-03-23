@@ -10,11 +10,11 @@ import { calculate } from "./calculate"
 /*
  * This file bundles together and exposes the calculation parts of Hurmet.
  * I use Rollup to create a UMD module from this code.
- * That way, one file can expose the same functionality to (1) the Hurmet.net web page,
+ * That way, one file can expose the same functionality to (1) the Hurmet.app web page,
  * (2) the REPL in the reference manual, (3) the script that transpiles
  * the Hurmet reference manual from Markdown to HTML, and (4) unit testing.
  *
- * Some of Hurmet’s exported functions are valuable only to the Hurmet.net web page.
+ * Some of Hurmet’s exported functions are valuable only to the Hurmet.app web page.
  * If you wish to use Hurmet’s math parsing and/or calculation abilities,
  * the two functions you want are:
  *   parse(entry: string, decimalFormat?: string)
