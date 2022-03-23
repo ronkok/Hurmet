@@ -1,9 +1,9 @@
 const fs = require("fs")
 
-// I edit ProseMirror to accomplish two things:
+// I edit ProseMirror to accomplish three things:
 // 1. Enable table classes.
 // 2. Enable a mouse click on a calculation cell to open the cell.
-// I'll delete this step after I find a more elegant way to accomplish those things.
+// 3. Insert a Hurmet Recalc-All command after each paste event.
 
 let str = fs.readFileSync('preview/prosemirror.js').toString('utf8')
 let match = /    this\.colgroup/.exec(str)
@@ -17,4 +17,11 @@ str = str.slice(0, L) + "\n    table.className = node.attrs.class" + str.slice(L
 
 match = /&& !this\.ignoreSelectionChange\(sel\)/.exec(str)
 str = str.slice(0, match.index) + str.slice(match.index + match[0].length)
+
+// Insert a Hurmet Recalc-All command after each paste event.
+match = /"paste"\)\);/.exec(str)
+str = str.slice(0, match.index + match[0].length)
+  + "\n    hurmet.updateCalculations(view, view.state.schema.nodes.calculation, true);\n"
+  + str.slice(match.index + match[0].length + 1);
+
 fs.writeFileSync('preview/prosemirror.js', str)
