@@ -62,8 +62,7 @@ export function openMathPrompt(options) {
     ? options.outerView.state.doc.attrs.decimalFormat.slice(-1)
     : ""
 
-  const form = wrapper.appendChild(document.createElement("form"))
-  const editor = form.appendChild(document.createElement("div"))
+  const editor = wrapper.appendChild(document.createElement("div"))
   const jar = codeJar(editor, true)
 
   // Populate the editor.
@@ -80,7 +79,7 @@ export function openMathPrompt(options) {
   const L = jar.toString().length
   jar.restore({ start: L, end: L, dir: undefined })
 
-  const mathDisplay = form.appendChild(document.createElement("div"))
+  const mathDisplay = wrapper.appendChild(document.createElement("div"))
   mathDisplay.setAttribute("class", "math-display")
 
   const renderMath = function(code) {
@@ -148,12 +147,12 @@ export function openMathPrompt(options) {
     options.callback(params)
   }
 
-  form.addEventListener("submit", e => {
+  editor.addEventListener("submit", e => {
     e.preventDefault()
     submit()
   })
 
-  form.addEventListener("keydown", e => {
+  editor.addEventListener("keydown", e => {
     if (e.keyCode === 27) {
       // Esc. Close without updating.
       e.preventDefault()
@@ -165,6 +164,6 @@ export function openMathPrompt(options) {
     }
   })
 
-  const input = form.elements[0]
+  const input = editor.elements[0]
   if (input) { input.focus() }
 }

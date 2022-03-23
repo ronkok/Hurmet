@@ -17,6 +17,12 @@
   white-space: pre-wrap;
 }
 
+.ProseMirror .hurmet-calc,
+.ProseMirror .hurmet-tex {
+  white-space: normal;
+  padding: 4px;
+}
+
 .ProseMirror .hurmet-calc pre,
 .ProseMirror .hurmet-tex pre {
   margin-bottom: 0;
