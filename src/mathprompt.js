@@ -163,7 +163,4 @@ export function openMathPrompt(options) {
       submit()
     }
   })
-
-  const input = editor.elements[0]
-  if (input) { input.focus() }
 }
