@@ -49,7 +49,8 @@ export const nodes = {
     // outside the undo stack.
     attrs: {
       decimalFormat: {default: '1,000,000.' },
-      inDraftMode: { default: false }
+      inDraftMode: { default: false },
+      fileHandle: { default: null }
     }
   },
 

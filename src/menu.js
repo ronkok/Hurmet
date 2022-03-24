@@ -400,7 +400,16 @@ const pruneHurmet = node => {
   return node
 }
 
-function saveFile(state) {
+async function writeFile(fileHandle, contents) {
+  // Create a FileSystemWritableFileStream to write to.
+  const writable = await fileHandle.createWritable();
+  // Write the contents of the file to the stream.
+  await writable.write(contents);
+  // Close the file and write the contents to disk.
+  await writable.close();
+}
+
+export function saveFile(state) {
   return new MenuItem({
     title: "Save file...",
     icon: hurmetIcons["save"],
@@ -412,9 +421,14 @@ function saveFile(state) {
       const docJSON = state.doc.toJSON()
       // Prune the Hurmet math parts down to just the entry. Then stringify it.
       const str = JSON.stringify(pruneHurmet(docJSON))
-      // Save the result
-      const blob = new Blob([str], {type: "text/plain;charset=utf-8"})
-      saveAs(blob, "HurmetFile.hurmet");
+      if (window.showOpenFilePicker && state.doc.attrs.fileHandle) {
+        // Use the Chromium File System Access API, so users can Ctrl-S to save a document.
+        writeFile(state.doc.attrs.fileHandle, str)
+      } else {
+        // Legacy method for Firefox and Safari
+        const blob = new Blob([str], {type: "text/plain;charset=utf-8"})
+        saveAs(blob, "HurmetFile.hurmet");
+      }
     }
   })
 }
