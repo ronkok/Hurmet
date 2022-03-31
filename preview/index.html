@@ -35,8 +35,6 @@
 
 <div id="slogan"><h4>Getting calculations right</h4></div>
 
-<p id="browser-support"></p>
-
 <div class="prosemirror">
 <table class="nogrid editor-wrap" id="wrap-table">
 <thead><tr>
@@ -70,13 +68,6 @@
 <div id="copyright">Copyright © 2020-2021 Ron Kok. Released under the <a href="https://opensource.org/licenses/MIT">MIT License</a></div>
 
 <script>
-  // Write a warning if the browser does not support BigInt.
-  const warningGraf = document.getElementById("browser-support")
-  try { BigInt(2) }
-  catch(error) {
-     warningGraf.textContent = "Hurmet does not work in this browser because it does not support big integers. Chrome, Edge, Firefox, Opera, Vivaldi, and Brave all support BigInt. Safari BigInt is in development."
-   }
-    
   window.addEventListener('beforeunload', function (e) {
 	// If changes have been made, put up a dialog box to warn the user.
 	// The content of this dialog box is a browser standard. We can't change its content here.
