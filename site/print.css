@@ -11,8 +11,6 @@ img     { max-width: 100%; }
 ul, img { page-break-inside: avoid; }
 
 body {
-  font-family: "Times New Roman", serif;
-  font-size: 10pt;
   background: #fff;
   color: #000;
 }

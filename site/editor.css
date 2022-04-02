@@ -432,6 +432,6 @@ li.ProseMirror-selectednode:after {
 .ProseMirror div.indented { margin-left: 2em; }
 .ProseMirror div.centered { text-align: center; }
 
-.katex { font-size: 1em; }
+.katex { font-size: 12pt; }
 math   { font-size: 1em; }
 math .special-fraction { font-family: "Times New Roman"; }
