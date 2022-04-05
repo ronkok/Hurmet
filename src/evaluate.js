@@ -1498,7 +1498,7 @@ const errorResult = (stmt, result) => {
     stmt.tex = stmt.tex.replace(/[?%] *[?%]|[?%]/, stmt.resultDisplay)
     stmt.alt = stmt.alt.replace(/[?%] *[?%]|[?%]/, stmt.altResultDisplay)
   }
-  return stmt
+  return [stmt, result]
 }
 
 const conditionResult = (stmt, oprnd, unitAware) => {
@@ -1521,7 +1521,7 @@ const conditionResult = (stmt, oprnd, unitAware) => {
       result = errorOprnd(message)
     }
   }
-  if (result.dtype === dt.ERROR) { return errorResult(stmt, result)}
+  if (result.dtype === dt.ERROR) { return errorResult(stmt, result) }
 
   // Check for a valid display indicator.
   if (stmt.resulttemplate && stmt.resulttemplate.indexOf("!") > -1 &&
@@ -1611,6 +1611,7 @@ export const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
     if (oprnd.dtype === dt.ERROR) { return errorResult(stmt, oprnd)}
     let result
     [stmt, result] = conditionResult(stmt, oprnd, isUnitAware)
+    if (stmt.error) { return stmt }
     stmt = formatResult(stmt, result, formatSpec, decimalFormat, isUnitAware)
   }
   return stmt
