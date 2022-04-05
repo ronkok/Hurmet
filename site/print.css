@@ -1,12 +1,13 @@
 @media print {
   
-#title, nav, header, #slogan, #copyright, .ProseMirror-menubar, .hidden {
+#title, nav, header, #slogan, #editor, #content, #copyright, .hidden {
   display: none;
 }
 
-h1      { break-before: page; }
-#editor { border: none; }
-@page   { margin: 16mm 20mm 16mm 20mm; }
+@page   {
+  margin: 16mm 20mm 16mm 20mm;
+  font-size: 12pt;
+}
 img     { max-width: 100%; }
 ul, img { page-break-inside: avoid; }
 
@@ -15,9 +16,6 @@ body {
   color: #000;
 }
 
-thead { display: table-header-group; }
-thead table p { line-height: 1.6; margin: 2px 0 2px 0; }
-tfoot { display: table-footer-group; }
 th    { break-inside: avoid; }
 
 }

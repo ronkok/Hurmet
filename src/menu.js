@@ -252,7 +252,7 @@ export function insertHeader(state, dispatch) {
 "content":[{"type":"table_row","content":[{"type":"table_header","content":[
 {"type":"paragraph","content":[{"type":"text","text":"left"}]}]},
 {"type":"table_header","content":[{"type":"paragraph","content":[{"type":"text","text":"center"}]}]},
-{"type":"table_header","content":[{"type":"paragraph","content":[{"type":"text","text":"right"}]}]}]}]}]}`
+{"type":"table_header","content":[{"type":"paragraph","content":[{"type":"text","text":"$PAGE"}]}]}]}]}]}`
       ))))
     }
   })
@@ -308,31 +308,30 @@ const print = () => {
     title: "Print",
     icon: hurmetIcons.printer,
     run(state) {
-      // Copy contents of the doc's <header> element into the outer <thead>.
+      // Copy document contents of the doc's <header> element into the outer <thead>.
       // Browsers will print a <thead> on each page of a printed document.
-      const printRow = document.getElementById("wrap-table").children[0].children[0]
+      const [sourceElement] = document.getElementsByClassName("ProseMirror-example-setup-style")
+      const source = sourceElement.cloneNode(true)
+      const destination = document.getElementById("print-table").children[0]
       if (state.doc.nodeAt(0).type.name === "header") {
-        const sourceTable = document.getElementsByTagName("header")[0].children[0].children[0]
-        const classes = sourceTable.className
-        const sourceRow = sourceTable.getElementsByTagName("tr")[0]
+        const headerTable = document.getElementsByTagName("header")[0].children[0].children[0]
+        const classes = headerTable.className
+        const headerSourceRow = headerTable.getElementsByTagName("tr")[0]
         for (let i = 0; i < 3; i++) {
-          printRow.children[i].innerHTML = sourceRow.children[i].innerHTML
+          // Reserve the right header cell for a page number
+          headerRow.children[i].innerHTML = headerSourceRow.children[i].innerHTML
           if (classes.indexOf("one-rule") > -1) {
-            printRow.children[i].classList.add("header-rule")
+            headerRow.children[i].classList.add("header-rule")
           } else {
-            printRow.children[i].classList.remove("header-rule")
+            headerRow.children[i].classList.remove("header-rule")
           }
         }
-        printRow.children[1].style.textAlign = (classes.indexOf("c2c") > -1) ? "center" : "left"
-        printRow.children[2].style.textAlign = (classes.indexOf("c3r") > -1) ? "right" : "left"
+        headerRow.children[1].style.textAlign = (classes.indexOf("c2c") > -1) ? "center" : "left"
       } else {
-        for (let i = 0; i < 3; i++) {
-          printRow.children[i].innerHTML = ""
-          printRow.children[i].classList.remove("header-rule")
-        }
+        destination.innerHTML = "<tr><td colspan='3'></td></tr>"
+        destination.children[0].children[0].append(source)
       }
       window.print()
-      
     }
   })
 } 
