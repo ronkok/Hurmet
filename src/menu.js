@@ -303,6 +303,8 @@ const findParentNode = predicate => selection => {
   }
 }
 
+const headings = ["H1", "H2", "H3", "H4", "H5", "H6"]
+
 const print = () => {
   return new MenuItem({
     title: "Print",
@@ -312,24 +314,46 @@ const print = () => {
       // Browsers will print a <thead> on each page of a printed document.
       const [sourceElement] = document.getElementsByClassName("ProseMirror-example-setup-style")
       const source = sourceElement.cloneNode(true)
-      const destination = document.getElementById("print-table").children[0]
+      const destination = document.getElementById("print-div")
       if (state.doc.nodeAt(0).type.name === "header") {
-        const headerTable = document.getElementsByTagName("header")[0].children[0].children[0]
-        const classes = headerTable.className
-        const headerSourceRow = headerTable.getElementsByTagName("tr")[0]
-        for (let i = 0; i < 3; i++) {
-          // Reserve the right header cell for a page number
-          headerRow.children[i].innerHTML = headerSourceRow.children[i].innerHTML
-          if (classes.indexOf("one-rule") > -1) {
-            headerRow.children[i].classList.add("header-rule")
-          } else {
-            headerRow.children[i].classList.remove("header-rule")
+        destination.innerHTML = ""
+        const frag = document.createDocumentFragment()
+        const header = document.getElementsByTagName("header")[0].childNodes[0].childNodes[0].cloneNode(true)
+        header.classList.add("header")
+        header.innerHTML = header.innerHTML.replace("$PAGE", '<span class="page-display"></span>')
+        let iStart = 1
+        let iEnd = 0
+        let pageNum = 0
+        const numEls = source.childNodes.length
+        const headerRect = header.getBoundingClientRect()
+        const L = 11 * 96 - (2 * 0.5 * 96) -  (headerRect.bottom - headerRect.top)
+        while (iStart < numEls) {
+          const top = sourceElement.children[iStart].getBoundingClientRect().top
+          for (let i = iStart + 1; i < numEls; i++) {
+            const bottom = sourceElement.children[i].getBoundingClientRect().bottom
+            if (bottom - top > L) {
+              iEnd = headings.includes(sourceElement.children[i - 1].tagName) ? i - 2 : i - 1
+              break
+            }
           }
+          if (iEnd === iStart - 1) { iEnd = numEls - 1 }
+          // Append a header
+          if (pageNum > 0) {
+            frag.append(header.cloneNode(true))
+          }
+          // Create a body div
+          const div = document.createElement("div")
+          div.className = "print-body"
+          for (let i = iStart; i <= iEnd; i++) {
+            div.append(source.children[i].cloneNode(true))
+          }
+          frag.append(div)
+          iStart = iEnd + 1
+          pageNum += 1
         }
-        headerRow.children[1].style.textAlign = (classes.indexOf("c2c") > -1) ? "center" : "left"
+        destination.append(frag)
       } else {
-        destination.innerHTML = "<tr><td colspan='3'></td></tr>"
-        destination.children[0].children[0].append(source)
+        destination.append(source)
       }
       window.print()
     }

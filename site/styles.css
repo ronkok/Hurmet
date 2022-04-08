@@ -13,6 +13,7 @@ body {
   font-family: Calibri, 'Helvetica Neue', Arial, Cambria, sans-serif;
   font-size: 12pt;
   position: relative;
+  counter-reset: pageNum;
 }
 
 nav {
@@ -104,10 +105,6 @@ article {
   padding: 10px 3px 100px;
 }
 
-#print-table {
-  font-size: 12pt;
-}
-
 #copyright {
   max-width: 780px;
   margin: 0 auto;
@@ -122,10 +119,11 @@ article {
 
 /* A header for printed documents */
 @media screen {
-  #print-table { display: none; }
+/*  #print-div { display: none; } */
 }
-table #print-table { border-collapse: collapse; width: 780px; }
-#header table p { line-height: 1.6; margin: 2px 0 2px 0; }
+div .print-div { width: 780px; font-size: 12pt; }
+.header { break-before: page; counter-increment: pageNum; }
+.page-display::after { content: counter(pageNum) }
 th {
   font-weight: normal;
   text-align:left;
