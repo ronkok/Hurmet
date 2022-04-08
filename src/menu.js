@@ -330,6 +330,12 @@ const print = () => {
         while (iStart < numEls) {
           const top = sourceElement.children[iStart].getBoundingClientRect().top
           for (let i = iStart + 1; i < numEls; i++) {
+            if (sourceElement.children[i].tagName === "H1" && 
+            sourceElement.children[i].getBoundingClientRect().top - top > 0.75 * L) {
+              // Prevent a H! near the bottom of a page.
+              iEnd = i - 1
+              break
+            }
             const bottom = sourceElement.children[i].getBoundingClientRect().bottom
             if (bottom - top > L) {
               iEnd = headings.includes(sourceElement.children[i - 1].tagName) ? i - 2 : i - 1
