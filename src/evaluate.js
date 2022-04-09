@@ -1127,7 +1127,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           } else {
             // Convert the magnitude to base units.
             const unit = unitFromUnitName(unitName, vars)
-            if (unit.dtype && unit.dtype === dt.ERROR) { return errorOprnd("UNIT_NAME") }
+            if (unit.dtype && unit.dtype === dt.ERROR) { return unit }
             if (isMatrix(o1)) {
               output.unit.expos = o1.unit.expos.map((e, j) => e + unit.expos[j])
               output.value = Matrix.convertToBaseUnits(o1, unit.gauge, unit.factor)
@@ -1600,15 +1600,16 @@ export const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
     // eslint-disable-next-line max-len
     const eqnWithVals = plugValsIntoEcho(stmt.tex, vars, isUnitAware, formatSpec, decimalFormat)
     if (eqnWithVals.dtype && eqnWithVals.dtype === dt.ERROR) {
-      return errorResult(stmt, eqnWithVals)
+      const [newStmt, _] = errorResult(stmt, eqnWithVals)
+      return newStmt
     } else {
       stmt.tex = eqnWithVals
     }
   }
 
   if (stmt.rpn) {
-    const oprnd = evalRpn(stmt.rpn, vars, decimalFormat, isUnitAware)
-    if (oprnd.dtype === dt.ERROR) { return errorResult(stmt, oprnd)}
+    let oprnd = evalRpn(stmt.rpn, vars, decimalFormat, isUnitAware)
+    if (oprnd.dtype === dt.ERROR) { [stmt, oprnd] = errorResult(stmt, oprnd); return stmt}
     let result
     [stmt, result] = conditionResult(stmt, oprnd, isUnitAware)
     if (stmt.error) { return stmt }
