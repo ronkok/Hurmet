@@ -326,7 +326,7 @@ const print = () => {
         let pageNum = 0
         const numEls = source.childNodes.length
         const headerRect = header.getBoundingClientRect()
-        const L = 11 * 96 - (2 * 0.5 * 96) -  (headerRect.bottom - headerRect.top)
+        const L = 11 * 96 - 121 /*margins*/  -  (headerRect.bottom - headerRect.top)
         while (iStart < numEls) {
           const top = sourceElement.children[iStart].getBoundingClientRect().top
           for (let i = iStart + 1; i < numEls; i++) {

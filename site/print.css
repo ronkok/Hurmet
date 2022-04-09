@@ -5,8 +5,7 @@
 }
 
 @page   {
-  margin: 16mm 20mm 16mm 20mm;
-  font-size: 12pt;
+  margin: 16mm 18mm 16mm 18mm;
 }
 img     { max-width: 100%; }
 ul, img { page-break-inside: avoid; }
