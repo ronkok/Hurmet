@@ -16,12 +16,18 @@ const handleContents = (view, schema, str, format) => {
       "attrs": {
         "decimalFormat": "1,000,000.",
         "inDraftMode": false,
+        "fontSize": 12,
         "fileHandle": null
       },
       "content": ast
     }
     doc = JSON.parse(JSON.stringify(doc))
   }
+  const fontSize = (doc.attrs.fontSize) ? doc.attrs.fontSize : 12
+  document.getElementById("editor").className = fontSize === 12 ? "pica" : "long-primer"
+  document.getElementById("print-div").className = fontSize === 12
+    ? "ProseMirror pica"
+    : "ProseMirror long-primer"
 
   // Write the document with just the entries.
   // If a Hurmet error occurs later, the document is at least loaded and rendered.

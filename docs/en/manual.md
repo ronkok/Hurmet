@@ -43,11 +43,11 @@ document range by selecting text, then clicking one of the menu bar buttons:
 
 +:-------------------------------------+:-----------------------------------+
 | **≡** ![open file][] ![save][]       | Document operations:\              |
-| **M** ● ![draft][] ![recalc][]       | Navigate…, Open file…, Save file…, |
+| **M** ℱ ● ![draft][] ![recalc][]     | Navigate…, Open file…, Save file…, |
 | ![header][] ![printer][]             | Import/Export to Markdown, Set     |
-|                                      | decimal format, Draft mode,        |
-|                                      | Recalculate all, Create print      |
-|                                      | header, Print…                     |
+|                                      | font size, Set decimal format,     |
+|                                      | Draft mode, Recalculate all,       |
+|                                      | Create print  header, Print…       |
 +--------------------------------------+------------------------------------+
 | ![undo][]  ![redo][]                 | Editing: Undo, Redo                |
 +--------------------------------------+------------------------------------+
@@ -293,7 +293,7 @@ Display Mode
 +---------------+-----------------+------------------------------+-------------------------------+
 | `a//b`        | ¢`a//b`         | `"A string."`                | ¢`"A string."`                |
 +---------------+-----------------+------------------------------+-------------------------------+
-| `a///b`       | ¢`a///b`        | `'5 N.m/s2'`                 | ¢`'5 N.m/s2'`                 |
+| `a///b`       | ¢`a///b`        | `5 'N.m/s2'`                 | ¢`5 'N.m/s2'`                 |
 +---------------+-----------------+------------------------------+-------------------------------+
 | `x^23`        | ¢`x^23`         | `(a, b; c, d)`               | ¢`(a, b; c, d)}`              |
 +---------------+-----------------+------------------------------+-------------------------------+

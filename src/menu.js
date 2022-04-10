@@ -194,6 +194,11 @@ const hurmetIcons = {
     height: 16,
     path: "M4 1h8v2h-8v-2zM15 4h-14c-0.55 0-1 0.45-1 1v5c0 0.55 0.45 1 1 1h3v4h8v-4h3c0.55 0 1-0.45 1-1v-5c0-0.55-0.45-1-1-1zM2 7c-0.552 0-1-0.448-1-1s0.448-1 1-1 1 0.448 1 1-0.448 1-1 1zM11 14h-6v-5h6v5z"
   },
+  fontsize: {
+    width: 16,
+    height: 16,
+    path: "M1 8h6v2h-2v6h-2v-6h-2zM15 4h-3.934v12h-2.133v-12h-3.934v-2h10z"
+  },
   cog: {
     width: 16,
     height: 16,
@@ -699,6 +704,17 @@ function setDecimalFormat(label) {
   })
 }
 
+function setFontSize(size) {
+  return new MenuItem({
+    label: String(size) + " pt",
+    run(state, _, view) {
+      state.doc.attrs.fontSize = size
+      document.getElementById("editor").className = size === 12 ? "pica" : "long-primer"
+      document.getElementById("print-div").className = size === 12 ? "ProseMirror pica" : "ProseMirror long-primer"
+    }
+  })
+}
+
 function tableStyle(title, className, icon) {
   return new MenuItem({
     title: title,
@@ -878,6 +894,8 @@ export function buildMenuItems(schema) {
 
   r.exportMarkdown = exportMarkdownFile()
   r.importMarkdownFile = importMarkdownFile()
+  r.pica = setFontSize(12)
+  r.longprimer = setFontSize(10)
 
   r.toggleDraftMode = toggleDraftMode()
   r.recalcAll = reCalcAll(schema)
@@ -1038,11 +1056,13 @@ export function buildMenuItems(schema) {
   
   r.separators = new Dropdown([r.dot, r.commadot, r.lakh, r.cn, r.comma, r.spacecomma, r.apostrophecomma, r.dotcomma], {title: "Set decimal format", label: "●"})
   r.markdown = new Dropdown([r.exportMarkdown, r.importMarkdownFile], {title: "Markdown", label: "M"})
+  r.fontsize = new Dropdown([r.pica, r.longprimer], { title: "Font size", label: "ℱ" })
   r.fileMenu = [[
     r.navigate,
     r.openFile,
     r.saveFile,
     r.markdown,
+    r.fontsize,
     r.separators,
     r.toggleDraftMode,
     r.recalcAll,

@@ -313,6 +313,7 @@ li.ProseMirror-selectednode:after {
   content: "âœ•";
   font-size: 12px;
 }
+.long-primer .ProseMirror-prompt-close:after { font-size: 10px }
 
 .ProseMirror-prompt-button {
   display: block;
@@ -346,6 +347,7 @@ li.ProseMirror-selectednode:after {
   color: black;
   direction: ltr;
 }
+.long-primer .math-code { font-size: 12px; }
 .math-code form {
   padding: 4px;
 }
@@ -434,4 +436,6 @@ li.ProseMirror-selectednode:after {
 
 .katex { font-size: 12pt; }
 math   { font-size: 12pt; }
+.long-primer .katex { font-size: 10pt; }
+.long-primer math   { font-size: 12pt; }
 math .special-fraction { font-family: "Times New Roman"; }

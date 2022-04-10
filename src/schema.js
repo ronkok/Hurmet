@@ -50,7 +50,8 @@ export const nodes = {
     attrs: {
       decimalFormat: {default: '1,000,000.' },
       inDraftMode: { default: false },
-      fileHandle: { default: null }
+      fileHandle: { default: null },
+      fontSize: { default: 12 }
     }
   },
 
