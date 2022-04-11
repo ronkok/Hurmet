@@ -118,7 +118,7 @@ article {
   color: inherit;
 }
 
-/* A header for printed documents */
+/* For printed documents */
 @media screen {
   #print-div { display: none; }
 }
@@ -132,9 +132,9 @@ th {
   padding: 3px;
   min-height: 1em;
 }
-.header-rule { border-bottom: 2px solid black; }
 th p { line-height: 1.6; }
 
+/* Image placement */
 .inline {
   display: inline;
 }
@@ -149,10 +149,6 @@ th p { line-height: 1.6; }
 .center {
   display: block;
   margin: 0 auto;
-}
-
-.hidden {
-  color: gray;
 }
 
 .ProseMirror-prompt input[type="radio"] {
