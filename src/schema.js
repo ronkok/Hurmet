@@ -291,36 +291,36 @@ export const nodes = {
     }}],
     toDOM(node) {
       let dom
-      if (node.attrs.dtype !== dt.IMAGE) {
-        dom = document.createElement('span')
-        dom.classList = "hurmet-calc"
-        if (node.attrs.dtype && node.attrs.dtype === dt.MODULE &&
-          functionRegEx.test(node.attrs.entry)) {
-          dom.appendChild(document.createElement('pre'))
-          dom.firstChild.appendChild(document.createElement('code'))
-          dom.firstChild.firstChild.textContent = node.attrs.entry
-        } else if (node.attrs.inDraftMode || !node.attrs.tex) {
-          dom.appendChild(document.createElement('code'))
-          dom.firstChild.textContent = node.attrs.alt ? node.attrs.alt : node.attrs.entry
-        } else {
-          const tex = node.attrs.tex
-          /*temml.render(tex, dom, {
-            displayMode: node.attrs.displayMode,
-            trust: (context) => context.command === '\\class' && context.class === "special-fraction"
-          })*/
-          katex.render(tex, dom, {
-            displayMode: node.attrs.displayMode,
-            strict: false,
-            macros: {"\\class": "\\htmlClass"},
-            throwOnError: false,
-            minRuleThickness: 0.06,
-            trust: (context) => context.command === '\\htmlClass' && context.class === "special-fraction"
-          })
-        }
-        // Before writing to DOM, I filter out most of the run-time info in node.attrs.
-        dom.dataset.entry = node.attrs.entry
-        if (node.attrs.displayMode) { dom.dataset.display = "true" }
+      //if (node.attrs.dtype !== dt.IMAGE) {
+      dom = document.createElement('span')
+      dom.classList = "hurmet-calc"
+      if (node.attrs.dtype && node.attrs.dtype === dt.MODULE &&
+        functionRegEx.test(node.attrs.entry)) {
+        dom.appendChild(document.createElement('pre'))
+        dom.firstChild.appendChild(document.createElement('code'))
+        dom.firstChild.firstChild.textContent = node.attrs.entry
+      } else if (node.attrs.inDraftMode || !node.attrs.tex) {
+        dom.appendChild(document.createElement('code'))
+        dom.firstChild.textContent = node.attrs.alt ? node.attrs.alt : node.attrs.entry
       } else {
+        const tex = node.attrs.tex
+        /*temml.render(tex, dom, {
+          displayMode: node.attrs.displayMode,
+          trust: (context) => context.command === '\\class' && context.class === "special-fraction"
+        })*/
+        katex.render(tex, dom, {
+          displayMode: node.attrs.displayMode,
+          strict: false,
+          macros: {"\\class": "\\htmlClass"},
+          throwOnError: false,
+          minRuleThickness: 0.06,
+          trust: (context) => context.command === '\\htmlClass' && context.class === "special-fraction"
+        })
+      }
+      // Before writing to DOM, I filter out most of the run-time info in node.attrs.
+      dom.dataset.entry = node.attrs.entry
+      if (node.attrs.displayMode) { dom.dataset.display = "true" }
+      /*} else {
         dom = document.createElement('span')
         dom.classList = "chart-container hurmet-calc"
         dom.dataset.entry = node.attrs.entry
@@ -331,7 +331,7 @@ export const nodes = {
         dom.height = config.height
         const ctx = cnvs.getContext('2d')
         const aChart = new Chart(ctx, config)
-      }
+      }*/
       return dom
     }
   },
