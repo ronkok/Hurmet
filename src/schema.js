@@ -304,22 +304,18 @@ export const nodes = {
           dom.firstChild.textContent = node.attrs.alt ? node.attrs.alt : node.attrs.entry
         } else {
           const tex = node.attrs.tex
-          const isFF = 'MozAppearance' in document.documentElement.style
-          if (isFF) {
-            temml.render(tex, dom, {
-              displayMode: node.attrs.displayMode,
-              trust: (context) => context.command === '\\class' && context.class === "special-fraction"
-            })
-          } else {
-            katex.render(tex, dom, {
-              displayMode: node.attrs.displayMode,
-              strict: false,
-              macros: {"\\class": "\\htmlClass"},
-              throwOnError: false,
-              minRuleThickness: 0.06,
-              trust: (context) => context.command === '\\htmlClass' && context.class === "special-fraction"
-            })
-          }
+          /*temml.render(tex, dom, {
+            displayMode: node.attrs.displayMode,
+            trust: (context) => context.command === '\\class' && context.class === "special-fraction"
+          })*/
+          katex.render(tex, dom, {
+            displayMode: node.attrs.displayMode,
+            strict: false,
+            macros: {"\\class": "\\htmlClass"},
+            throwOnError: false,
+            minRuleThickness: 0.06,
+            trust: (context) => context.command === '\\htmlClass' && context.class === "special-fraction"
+          })
         }
         // Before writing to DOM, I filter out most of the run-time info in node.attrs.
         dom.dataset.entry = node.attrs.entry
@@ -357,13 +353,8 @@ export const nodes = {
       const tex = node.attrs.tex
       dom.dataset.tex = tex
       if (node.attrs.displayMode) { dom.dataset.display = "true" }
-      const isFF = 'MozAppearance' in document.documentElement.style
-      if (isFF) {
-        temml.render(tex, dom, { displayMode: node.attrs.displayMode })
-      } else {
-        katex.render(tex, dom, { displayMode: node.attrs.displayMode, strict: false,
-          throwOnError: false, minRuleThickness: 0.06 })
-      }
+      katex.render(tex, dom, { displayMode: node.attrs.displayMode, strict: false,
+        throwOnError: false, minRuleThickness: 0.06 })
       return dom
     }
   }
