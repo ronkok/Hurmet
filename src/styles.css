@@ -1,4 +1,182 @@
-.ProseMirror {
+/* This file contains the CSS for Hurmet.app
+ * Parts of this file were once in separate files.
+ * That being the ProseMirror editor section and tables section.
+ * These are now all combined in this one file to reduce the number of HTML
+ * requests and to make it easier to minify all the CSS.
+ */
+
+* { margin:0; padding:0; }  /* reset */
+
+html {
+  background: black;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0 0 5px;
+  line-height: 1.45;
+  background: white;
+  font-family: Calibri, 'Helvetica Neue', Arial, Cambria, sans-serif;
+  font-size: 12pt;
+  position: relative;
+  counter-reset: pageNum;
+}
+.long-primer { font-size: 10pt; }
+
+nav {
+  max-width: 780px;
+  margin: 0 auto;
+  background: #fff;
+  font-size: 14px;
+  height: 66px
+}
+
+nav * {
+  font-family: Arial, sans-serif;
+}
+
+nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  float: right;
+}
+
+nav ul li {
+  display: inline-block;
+  padding-top: 27px;
+  text-decoration: none
+}
+
+nav  a {
+  padding: 33px 0 0 18px;
+  text-decoration: none;
+  color: inherit;
+}
+
+article, #title {
+  max-width: 780px;
+  margin: 0 auto;
+}
+
+code {
+  padding: .125rem .3125rem .0625rem;
+  background-color: #e6e6e6;
+  font-family: Consolas,"Liberation Mono",Courier,monospace;
+  font-weight: 400;
+  color: #0a0a0a;
+}
+
+pre {
+  padding: 10px;
+}
+
+pre code {
+  background-color: #f6f8fa;
+  font-weight: normal;
+  font-size: 0.9em;
+}
+
+h1, h2, h3, h5 {
+  font-family: Verdana, sans-serif;
+  font-variant: small-caps;
+  letter-spacing: 0.05em;
+  font-weight: bold;
+  margin: 1em 0 1em 0;
+}
+			 
+h1 { font-size: 120%; margin-top: 3em; }
+h2 { font-size: 105%; margin-top: 2em; }
+h3 { font-size: 100%; margin-top: 1em; }
+h4 { font-size: 100%; margin: 1em 0 1em 0; font-weight: bold; }
+h5 { font-size: 110%; text-align: center; }
+h6 { font-size: 90%; font-weight: bold;  margin: 1em 0 1em 0; }
+
+#title {
+  font-family: Tahoma, Calibri, san-serif;
+  font-weight: bold;
+  font-size: 32px;
+  padding: 12px 3px 0;
+}
+
+#slogan {
+  font-family: Bahnschrift, Calibri, san-serif;
+  font-weight: bold;
+  font-size: 20px;
+  padding: 20px 3px 30px;
+}
+
+strong { font-weight: bold; }
+
+article {
+  padding: 10px 3px 100px;
+}
+
+#copyright {
+  max-width: 780px;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  text-align: center;
+}
+
+#copyright a {
+  color: inherit;
+}
+
+/* For printed documents */
+@media screen {
+  #print-div { display: none; }
+}
+div #print-div { width: 780px; font-size: 12pt; }
+div #print-div .long-primer { font-size: 10 pt; }
+.header { break-before: page; counter-increment: pageNum; }
+.page-display::after { content: counter(pageNum) }
+th {
+  font-weight: normal;
+  text-align:left;
+  padding: 3px;
+  min-height: 1em;
+}
+th p { line-height: 1.6; }
+
+/* Image placement */
+.inline {
+  display: inline;
+}
+.right {
+  display: block;
+  float: right
+}
+.left {
+  display: block;
+  float: left
+}
+.center {
+  display: block;
+  margin: 0 auto;
+}
+
+.ProseMirror-prompt input[type="radio"] {
+  margin-left: 8px;
+}
+
+.ProseMirror-prompt label {
+  margin-left: 2px;
+}
+
+.chart-container {
+  display: inline-block;
+  position: relative;
+}
+
+/*
+ * The section below pertains to the editor.
+ * Most of this section comes from ProseMirror sources
+ */
+
+ .ProseMirror {
   position: relative;
   content-visibility: auto;
   contain-intrinsic-size: 1000px;
@@ -439,3 +617,142 @@ math   { font-size: 12pt; }
 .long-primer .katex { font-size: 10pt; }
 .long-primer math   { font-size: 12pt; }
 math .special-fraction { font-family: "Times New Roman"; }
+
+/*
+ * This section contains CSS for tables.
+ * Tables were developed separately from ProseMirror and are maintained by Atlassian.
+ */
+
+ .ProseMirror .tableWrapper {
+  overflow-x: auto;
+}
+.ProseMirror table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  overflow: hidden;
+  margin-bottom: 1em;
+}
+.ProseMirror td, .ProseMirror th {
+  vertical-align: center;
+  box-sizing: border-box;
+  position: relative;
+  min-width: 1em;
+  padding: 2px 3px;
+}
+.ProseMirror table p { line-height: 1.2; margin: 2px 0 2px 0; }
+.ProseMirror header table p  { line-height: 1.6; }
+.ProseMirror td > *, .ProseMirror th > *,
+.ProseMirror td > *:first-child {
+  margin-top: 2px;
+  margin-bottom: 3px;
+}
+.ProseMirror th > *:first-child {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+.ProseMirror .column-resize-handle {
+  position: absolute;
+  right: -2px; top: 0; bottom: 0;
+  width: 4px;
+  z-index: 20;
+  background-color: #adf;
+  pointer-events: none;
+}
+.ProseMirror.resize-cursor {
+  cursor: ew-resize;
+  cursor: col-resize;
+}
+/* Give selected cells a blue overlay */
+.ProseMirror .selectedCell:after {
+  z-index: 2;
+  position: absolute;
+  content: "";
+  left: 0; right: 0; top: 0; bottom: 0;
+  background: rgba(200, 200, 255, 0.4);
+  pointer-events: none;
+}
+
+/* Table styles */
+.ProseMirror table.grid td, .ProseMirror table.grid th {
+  border: 1px solid #ddd;
+}
+.ProseMirror table.grid th { font-weight: 600 }
+
+.ProseMirror table.nogrid td, .ProseMirror table.nogrid th {
+  border: none;
+}
+.ProseMirror table.rules td, .ProseMirror table.rules th {
+  border-bottom: 2px solid #ddd;
+}
+.ProseMirror table.rules tr:last-child td { border-bottom: none; }
+
+.ProseMirror table.one-rule th {
+  border-bottom: 1px solid #111111;  
+}
+.ProseMirror table.one-rule td {
+  border: none;
+}
+
+.ProseMirror table.two-rules th { border-bottom: 1px solid #111111; }
+.ProseMirror table.two-rules tr:last-child td { border-top: 1px solid #111111; }
+
+.ProseMirror table.three-rules th { border-top: 2px solid #111111; border-bottom: 1px solid #111111; }
+.ProseMirror table.three-rules tr:last-child td { border-bottom: 2px solid #111111; }
+
+.ProseMirror table.four-rules th { border-top: 2px solid #111111; border-bottom: 1px solid #111111; }
+.ProseMirror table.four-rules tr:nth-child(5n) td { padding-bottom: 1em; }
+.ProseMirror table.four-rules tr:last-child td { border-top: 1px solid #111111; border-bottom: 2px solid #111111; }
+
+.ProseMirror table.striped th, .ProseMirror table.striped td { border: 1px solid #ddd }
+.ProseMirror table.striped tbody tr:nth-child(even) {
+   background-color: #f6f8fa;
+}
+.ProseMirror table.striped th { font-weight: 600 }
+
+/* Column alignment. Apply these classes to the table node. */
+/* This is not Atlassian CSS. It's specific to Hurmet. */
+.c1r td:nth-child(1), .c1r th:nth-child(1),
+.c2r td:nth-child(2), .c2r th:nth-child(2),
+.c3r td:nth-child(3), .c3r th:nth-child(3),
+.c4r td:nth-child(4), .c4r th:nth-child(4),
+.c5r td:nth-child(5), .c5r th:nth-child(5),
+.c6r td:nth-child(6), .c6r th:nth-child(6),
+.c7r td:nth-child(7), .c7r th:nth-child(7),
+.c8r td:nth-child(8), .c8r th:nth-child(8),
+.c9r td:nth-child(9), .c9r th:nth-child(9) { text-align:right }
+
+.c1c td:nth-child(1), .c1c th:nth-child(1),
+.c2c td:nth-child(2), .c2c th:nth-child(2),
+.c3c td:nth-child(3), .c3c th:nth-child(3),
+.c4c td:nth-child(4), .c4c th:nth-child(4),
+.c5c td:nth-child(5), .c5c th:nth-child(5),
+.c6c td:nth-child(6), .c6c th:nth-child(6),
+.c7c td:nth-child(7), .c7c th:nth-child(7),
+.c8c td:nth-child(8), .c8c th:nth-child(8),
+.c9c td:nth-child(9), .c9c th:nth-child(9) { text-align:center }
+
+/*
+ * This section deals with CSS for the printed page.
+ */
+
+@media print {
+  
+  #title, nav, header, #slogan, #editor, #content, #copyright, .hidden {
+    display: none;
+  }
+  
+  @page   {
+    margin: 16mm 18mm 16mm 18mm;
+  }
+  img     { max-width: 100%; }
+  ul, img { page-break-inside: avoid; }
+  
+  body {
+    background: #fff;
+    color: #000;
+  }
+  
+  th    { break-inside: avoid; }
+  
+}

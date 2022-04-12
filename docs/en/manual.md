@@ -5,7 +5,6 @@
    <meta name="viewport" content="width=device-width, initial-scale=1">
    <title>Hurmet Manual</title>
    <link rel="shortcut icon" href="../../images/equal-sign.ico">
-   <link rel="stylesheet" media="print" href="../../print.css">
    <link rel="stylesheet" href="../docstyles.css">
    <link rel="stylesheet" href="../../katex/katex.min.css">
    <script src="../../katex/katex.min.js"></script>
