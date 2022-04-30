@@ -560,13 +560,13 @@ export function convertWord(state, view) {
   const doc = state.doc
   const tr = state.tr
   const calcNode = schema.nodes.calculation
-  const RegExCalc = /\$`[^`]+`/
+  const RegExCalc = /\$`[^`]+`/g
   const calcs = [];
   doc.nodesBetween(0, doc.content.size, function(node, pos) {
     if (node.type.name === "text") {
       const str = node.text
-      const match = RegExCalc.exec(str)
-      if (match) {
+      const matches = str.matchAll(RegExCalc)
+      for (const match of matches) {
         const start = pos + match.index
         const end = start + match[0].length
         const entry = match[0].slice(2, -1).trim()
