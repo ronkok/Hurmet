@@ -59,6 +59,9 @@ article, #title {
   max-width: 780px;
   margin: 0 auto;
 }
+.show-hint article {
+  margin: 0 calc((100% - 880px) / 2);
+}
 
 code {
   padding: .125rem .3125rem .0625rem;
@@ -563,6 +566,17 @@ li.ProseMirror-selectednode:after {
   margin-bottom: 23px;
   width: 780px;
   overflow-x: hidden;
+}
+#hint {
+  visibility: hidden;
+  position: absolute;
+  top: 80px;
+  left: calc(780px + ((100% - 880px) / 2));
+  width: 200px;
+  height: 500px;
+}
+.show-hint #hint {
+  visibility: inherit;
 }
 
 .ProseMirror p:first-child,

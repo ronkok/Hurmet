@@ -1024,6 +1024,22 @@ export function buildMenuItems(schema) {
       window.open("docs/en/manual.html")
     } 
   })
+  r.hint = blockTypeItem(type, {
+    title: "Math Quick Reference",
+    label: "Q",
+    enable() {
+      return true
+    },
+    run() {
+      const body = document.getElementsByTagName("body")[0]
+      if (body.className === "show-hint") {
+        body.className = ""
+      } else {
+        body.className = "show-hint"
+        document.getElementById("hint").style.top = String(window.scrollY + 40) + "px"
+      }
+    } 
+  })
 
   // Now that the menu buttons are created, assemble them into the menu.
   
@@ -1099,7 +1115,7 @@ export function buildMenuItems(schema) {
     r.typeMenu,
     r.blockMenu,
     r.tableMenu,
-    [[r.help]]
+    [[r.help, r.hint]]
   )
 
   return r
