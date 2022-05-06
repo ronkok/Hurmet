@@ -439,7 +439,8 @@ end`, vars)
     [`testFor(1, 3) = @`, `®1/1 ®3/1 function testFor 2`, `6`],
     [`testWhile(3) = @`, `®3/1 function testWhile 1`, `6`],
     [`testBreak() = @`, `function testBreak 0`, `6`],
-    [`testRaise() = @`, `function testRaise 0`, `Error.`]
+    [`testRaise() = @`, `function testRaise 0`, `Error.`],
+    [`2 'ft' + 3 'inch' = @@ V`, `®2/1 applyUnit ft ®3/1 applyUnit inch +`, 'Error. Calculated units are not compatible with the desired result unit: V']
 	]
 
   console.log("Now testing calculations…")
