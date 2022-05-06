@@ -228,6 +228,7 @@ const TABLES = (function() {
     }
     let j = -1
     tableRow.forEach(function(node, i) {
+      if (node.type === "text") { node.text = node.text.trim() }
       if (node.type === "tableSeparator") {
         if (i !== tableRow.length - 1) {  // Filter out the row's  last table separator
           // Create a new cell
