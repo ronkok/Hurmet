@@ -25,7 +25,7 @@ body {
 .long-primer { font-size: 10pt; }
 
 nav {
-  max-width: 780px;
+  max-width: 680px;
   margin: 0 auto;
   background: #fff;
   font-size: 14px;
@@ -56,7 +56,7 @@ nav  a {
 }
 
 article, #title {
-  max-width: 780px;
+  max-width: 680px;
   margin: 0 auto;
 }
 .show-hint article {
@@ -117,7 +117,7 @@ article {
 }
 
 #copyright {
-  max-width: 780px;
+  max-width: 680px;
   margin: 0 auto;
   font-family: Arial, sans-serif;
   font-size: 10px;
@@ -587,14 +587,14 @@ ul.toc span + span {
   border: 2px solid rgba(0, 0, 0, 0.2);
   padding: 5px 0;
   margin-bottom: 23px;
-  width: 780px;
+  width: 680px;
   overflow-x: hidden;
 }
 #hint {
   visibility: hidden;
   position: absolute;
   top: 80px;
-  left: calc(780px + ((100% - 880px) / 2));
+  left: calc(680px + ((100% - 780px) / 2));
   width: 200px;
   height: 500px;
 }
