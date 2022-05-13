@@ -31,6 +31,11 @@ export function openPrompt(options) {
   if (options.title) {
     form.appendChild(document.createElement("h5")).textContent = options.title
   }
+  if (options.note) {
+    const note = document.createElement("p")
+    note.textContent = options.note
+    form.append(note)
+  }
   domFields.forEach(field => {
     form.appendChild(document.createElement("div")).appendChild(field)
   })

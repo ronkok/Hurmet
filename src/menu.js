@@ -25,7 +25,7 @@ import { draftMode } from "./draftMode"
 import { hurmetMarkdownSerializer } from "./to_markdown"
 import { readFile } from "./openfile"
 import { saveAs } from "filesaver.js-npm"
-import { printDoc } from "./print.js"
+import { findPageBreaks, forToC, forPrint } from "./print.js"
 
 // Menu icons that are not included in node-module menu.js
 const hurmetIcons = {
@@ -313,8 +313,9 @@ const print = () => {
   return new MenuItem({
     title: "Print",
     icon: hurmetIcons.printer,
-    run(state) {
-      printDoc(state.doc.nodeAt(0).type.name === "header")
+    run(state, _, view) {
+      findPageBreaks(view, state, forPrint, schema.nodes.toc)
+      window.print()
     }
   })
 } 
@@ -517,6 +518,48 @@ function insertImage(nodeType) {
         callback(attrs) {
           view.dispatch(view.state.tr.replaceSelectionWith(nodeType.createAndFill(attrs)))
           view.focus()
+        }
+      })
+    }
+  })
+}
+
+const validateTocEntry = str => {
+  
+}
+
+function insertToC(nodeType) {
+  // Table of Contents
+  return new MenuItem({
+    title: "Insert or edit a Table of Contents",
+    label: "ToC",
+    enable(state) {
+      return canInsert(state, nodeType)
+    },
+    run(state, dispatch, view) {
+      let { from, to } = state.selection,
+        attrs = null
+      if (state.selection instanceof NodeSelection && state.selection.node.type == nodeType)
+        attrs = state.selection.node.attrs
+      if (!attrs) { attrs = { start: 1, end: 2, body: [] } }
+      openPrompt({
+        title: "Table of Contents",
+        note: "Set a range of heading levels:",
+        fields: {
+          start: new TextField({ label: "Start", required: true, value: attrs && attrs.start,
+            validate(str) { if (!/^[1-6]$/.test(str)) { return "Input must be an integer between 1 and 6." }  }
+          }),
+          end: new TextField({ label: "End", required: true, value: attrs && attrs.end,
+            validate(str) { if (!/^[1-6]$/.test(str)) { return "Input must be an integer between 1 and 6." }  }
+          }),
+        },
+        callback(attrs) {
+          const {$from, to} = state.selection
+          const same = $from.sharedDepth(to)
+          const startPos = same !== 0 ? $from.before(same) : $from.pos
+          const endPos = same !== 0 ? $from.after(same) : startPos + 1
+          attrs.body = findPageBreaks(view, state, forToC, schema.nodes.toc, attrs.start, attrs.end)
+          dispatch(state.tr.replaceWith(startPos, endPos, nodeType.createAndFill(attrs)))
         }
       })
     }
@@ -911,6 +954,7 @@ export function buildMenuItems(schema) {
 
   if ((type = schema.nodes.image)) r.imageUpload = uploadImage(type)
   if ((type = schema.nodes.image)) r.imageLink = insertImage(type)
+  if ((type = schema.nodes.toc)) r.toc = insertToC(type)
   if ((type = schema.nodes.calculation)) r.insertCalclation = mathMenuItem(type, "calculation")
   if ((type = schema.nodes.tex)) r.insertTeX = mathMenuItem(type, "tex")
 
@@ -1072,7 +1116,7 @@ export function buildMenuItems(schema) {
     r.toggleHighlight
   ]]
 
-  r.insertMenu = [[r.toggleLink, r.insertHorizontalRule, r.imageUpload, r.imageLink, r.insertCalclation, r.insertTeX]]
+  r.insertMenu = [[r.toggleLink, r.insertHorizontalRule, r.imageUpload, r.imageLink, r.toc, r.insertCalclation, r.insertTeX]]
 
   r.typeMenu = [cut([
       r.makeParagraph,

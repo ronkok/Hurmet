@@ -132,7 +132,7 @@ article {
 @media screen {
   #print-div { display: none; }
 }
-div #print-div { width: 780px; font-size: 12pt; }
+div #print-div { width: 785px; font-size: 12pt; }
 div #print-div .long-primer { font-size: 10 pt; }
 .header { break-before: page; counter-increment: pageNum; }
 .page-display::after { content: counter(pageNum) }
@@ -517,6 +517,29 @@ li.ProseMirror-selectednode:after {
   display: none;
 }
 
+ul.toc {
+  width: 70%;
+  max-width: 40em;
+  margin: auto auto 1.5em auto;
+  padding: 0;
+  overflow-x: hidden;
+  list-style: none;
+}
+ul.toc li:before {
+  float: left;
+  width: 0;
+  white-space: nowrap;
+  content: ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . "
+}
+ul.toc span:first-child {
+  padding-right: 0.33em;
+    background: white;
+}
+ul.toc span + span {
+  float: right;
+  padding-left: 0.33em;
+  background: white
+}
 
 .math-code {
   display: inline-block;
@@ -752,7 +775,7 @@ math .special-fraction { font-family: "Times New Roman"; }
 
 @media print {
   
-  #title, nav, header, #slogan, #editor, #content, #copyright, .hidden {
+  #title, nav, header, #slogan, #editor, #content, #copyright, #hint, .hidden {
     display: none;
   }
   

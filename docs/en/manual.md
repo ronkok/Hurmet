@@ -56,9 +56,10 @@ document range by selecting text, then clicking one of the menu bar buttons:
 |                                      | Underline                          |
 +--------------------------------------+------------------------------------+
 | ![link][] **—** ![upload][]          | Insert:\                           |
-| ![image][] ![plus][] ![integral][]   | Link…, Horizontal rule, Uploaded   |
-|                                      | image…, Link to image…, Hurmet     |
-|                                      | calculation…, TeX…                 |
+| ![image][] ToC ![plus][]             | Link…, Horizontal rule, Uploaded   |
+| ![integral][]                        | image…, Link to image…, Table of   |
+|                                      | Contents…, Hurmet calculation…,    |
+|                                      | TeX…                               |
 +--------------------------------------+------------------------------------+
 | **¶** ![embed][] **H1 H2**           | Block styles:\                     |
 | ![align-center][] ![indent][]        | Plain paragraph, Code block,       |

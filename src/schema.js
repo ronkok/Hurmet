@@ -2,6 +2,7 @@
 import {Schema} from "prosemirror-model"
 import {findWrapping, liftTarget, canSplit, ReplaceAroundStep} from "prosemirror-transform"
 import {Slice, Fragment, NodeRange} from "prosemirror-model"
+import { renderToC, tocLevels } from "./print"
 import {dt} from "./constants"
 
 // Helpers for creating a schema that supports tables.
@@ -156,6 +157,30 @@ export const nodes = {
       }
     }}],
     toDOM(node) { return ["img", node.attrs] }
+  },
+
+  // Tale of contents
+  toc: {
+    atom: true,
+    attrs: {
+      start: { default: 1 },
+      end:   { default: 2 },
+      body:  { default: [] }
+    },
+    group: "block",
+    draggable: true,
+    parseDOM: [{tag: "ul.toc",  getAttrs(dom) {
+      const [start, end] = tocLevels(dom.getAttribute('data-levels'))
+      const body = JSON.parse(dom.getAttribute('data-body'))
+      return { start, end, body }
+    }}],
+    toDOM(node) {
+      const dom = document.createElement('ul')
+      dom.dataset.levels = String(node.attrs.start) + ".." + String(node.attrs.end)
+      dom.dataset.body = JSON.stringify(node.attrs.body)
+      renderToC(node.attrs.body, dom)
+      return dom
+     }
   },
 
   ordered_list: {
