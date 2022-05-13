@@ -91,15 +91,12 @@ export const findPageBreaks = (view, state, purpose, tocSchema, startLevel, endL
   }
 
   const numPasses = purpose === forPrint ? 2 : 1
-  let iStart = 1
-  let iEnd = 0
-  let pageNum = 0
   const numEls = source.childNodes.length
   for (let iPass = 0; iPass < numPasses; iPass++) {
     destination.innerHTML = ""
-    iStart = 1
-    iEnd = 0
-    pageNum = 0
+    let iStart = headerExists ? 1 : 0
+    let iEnd = 0
+    let pageNum = 0
     while (iStart < numEls) {
       const top = editor.children[iStart].getBoundingClientRect().top
       // Iterate on the top level elements. Check the bottom coordinate of each.
