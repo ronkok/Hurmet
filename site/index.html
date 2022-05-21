@@ -38,31 +38,39 @@
 
   <p>This is editable text. You can focus it and start typing. All calculations will update if you press <strong>Enter</strong> to close a calculation cell.</p>
   <p>This week’s example:</p>
-  <h3>Cold Ball</h3>
-  <p>A friend asked me what would happen if he pressurized a <span class="hurmet-calc" data-entry="2 1/2′′"></span> hollow stainless steel ball to 50 psi and then cooled it with liquid nitrogen (-262 °F). Will it collapse? Let run the numbers.</p>
-  <p> <span class="hurmet-calc" data-entry="format = &quot;h3&quot;"></span>, round to 3 significant figures.</p>
-  <p>Ideal Gas Law</p>
+  <h3>Exhaustive Sampling</h3>
+  <p>This week’s topic follows up on a post<sup>1</sup> from John D. Cook.</p>
+  <blockquote>
+     <p>Suppose you have a standard deck of 52 cards. You pull out a card, put it back in the deck, shuffle, and pull out another card. How long would you expect to do this until you’ve seen every card?</p>
+     <p>Here’s a variation on the same problem. Suppose you’re a park ranger keeping data on tagged wolves in a national park. Each day you catch a wolf at random, collect some data, and release it. If there are 100 wolves in the park, how long until you’ve seen every wolf at least once?</p>
+  </blockquote>
+  <p>Cook goes on to present an exact solution. </p>
+  <blockquote>
+     <p>Suppose we have a desk of&nbsp;<em>N</em>&nbsp;cards … the probability of having seen each card at least once after selecting&nbsp;<em>M</em>&nbsp;cards randomly with replacement is</p>
+     <p><span class="hurmet-calc" data-entry="(N!&nbsp;S(M,&nbsp;N)) /&nbsp;N^M"></span></p>
+  </blockquote>
+  <p>Where <span class="hurmet-calc" data-entry="S(M, N)"></span> is the Stirling function of the second kind:</p>
   <div class="indented">
-     <p><span class="hurmet-calc" data-entry="P V = n R T"></span></p>
+     <p><span class="hurmet-calc" data-entry="\displaystyle S(n, k) = 1/k! \sum_(i=0)^k (-1)^i (k \atop i) (k-1)^n"></span></p>
   </div>
-  <p><span class="hurmet-calc" data-entry="n"></span> and <span class="hurmet-calc" data-entry="R"></span> are the same both before and after the ball is cooled.  So treat them as a constant.</p>
+  <p>
+     Let’s implement that. <br>
+  <span class="hurmet-calc" data-entry="function probabilityOfSeeingAll(M, N)
+     sum = 0
+     for i in 0..N
+        sum = sum + (-1)^i × (N \atop i)×(N-i)^M
+     end
+     return sum / N^M
+  end"></span></p>
+  <p>If there are 100 wolves and our ranger catches and releases 500 times, the probability of having seen every wolf is: </p>
   <div class="indented">
-     <p><span class="hurmet-calc" data-entry="P V = k T"></span></p>
+     <p><span class="hurmet-calc" data-entry="format = &quot;h3&quot;"></span>, round to 3 significant digits.</p>
   </div>
-  <p>Examine the ball at ambient temperature and calculate <span class="hurmet-calc" data-entry="k"></span></p>
   <div class="indented">
-     <p><span class="hurmet-calc" data-entry="r = (1//2)(2.5 'in') = ?? in"></span>, radius</p>
-     <p><span class="hurmet-calc" data-entry="V = 4//3 π r³ = ?? in³"></span>, volume</p>
-     <p><span class="hurmet-calc" data-entry="T = 100 '°F' = ?? °K"></span>, ambient temperature, conservative</p>
-     <p><span class="hurmet-calc" data-entry="P = 50 'psig' = ?? psi"></span>, internal pressure of ball at starting (ambient) condition</p>
-     <p><span class="hurmet-calc" data-entry="k = (P V)/T = ?? lbf-in/°K"></span></p>
+     <p><span class="hurmet-calc" data-entry="P = probabilityOfSeeingAll(500, 100) = ?"></span></p>
   </div>
-  <p>Now find the cold condition</p>
-  <div class="indented">
-     <p><span class="hurmet-calc" data-entry="T_2 = -262 '°F' = ?? °K"></span></p>
-     <p><span class="hurmet-calc" data-entry="P = (k T_2)/V = ?? psi"></span>= <span class="hurmet-calc" data-entry="P = @@ psig"></span>, internal pressure when cold.</p>
-  </div>
-  <p>That’s greater than zero. When cold, it still has more internal pressure than atmospheric. It’s okay.</p>
+  <p>So the median number of catch and release cycles is somewhere around 500.</p>
+  <p>[1] https://www.johndcook.com/blog/2022/05/14/exhaustive-sampling/</p>
     
 </div> <!-- editor -->
 
