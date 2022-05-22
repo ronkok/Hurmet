@@ -1745,7 +1745,7 @@ that purpose. Modules can contain functions and statements that assign literal
 values to a variable. Such a module would have text that might look like this:
 
 ```
-E = '29000 ksi'
+E = 29000 'ksi'
 
 v = [4, 6, 8]
 
@@ -1757,7 +1757,7 @@ end
 A Hurmet document can load an entire module into one variable with a import
 statement. The following statement will import a file that contains the text above.
 
-mod = import("https://hurmet.app/smallModule.txt") = !
+`mod = import("https://hurmet.app/smallModule.txt") = !`
 
 After a module has been imported and loaded into a variable, its functions and
 values can be called by writing the module name and variable/function name in
@@ -1798,22 +1798,19 @@ an added benefit, a reviewer can see what you are doing.
 
 Hurmet is a web app, so it can import text files only from addresses that begin
 with `http` or `https`. An easy way to create such a file is a Github
-[Gist](https://gist.github.com/). I've written two example modules in Gists:
+[Gist](https://gist.github.com/). I've written an example Gist for imported
+parameters:
 
 <div style="width: 30em; overflow-x: scroll">
 
-+  https://gist.githubusercontent.com/ronkok/d42b0efdc66dc4f6135fee3b8d22a83e/raw/ which
-   finds the structural strength of steel members per AISC 360-16.
-
-+  https://gist.githubusercontent.com/ronkok/cbbf6cde15ac1b4c1e65cc338970043a/raw/ which
-   duplicates the parent file above.
+`https://gist.githubusercontent.com/ronkok/c6c564cf162008cccf03ab8afeb09a83/raw/ParentFileExample.txt`
 
 </div>
 
 If you create your own Gists, you'll see that the addresses of the raw files
-are longer than my links. If you want a permalink to your file, delete the 40
+are very long. If you want a permalink to your file, delete the 40
 random characters after "/raw/". Github keeps a copy of every draft of your
-file and the part after "/raw/" is the revision ID.
+file and the random part after "/raw/" is the revision ID.
 
 ## Troubleshooting
 
@@ -1824,37 +1821,18 @@ speed by using Firefox instead of Chrome or Edge, and gain more speed by
 clicking on the Draft Mode toggle button, ![draft][]. It will render math as
 plain text and omit the blue echos.
 
-I expect that Chrome and Edge will get a performance boost later this year when
-they support MathML and fix [this bug](https://bugs.chromium.org/p/chromium/issues/detail?id=1076718).
+I expect that Chrome and Edge will get a performance boost when they support MathML.
 
 #### Matrix multiplication
 
 To get element-wise multiplication of two matrices, the operator symbol must be
 [explicitly](#matrix-mult) written as `*`.
 
-#### Word wrap
-
-Hurmet soft line breaks occur after top level binary operators and relation
-operators. An operator inside a paren does not qualify. If a calculation runs
-past the edge of the page, try to rearrange it so less of it is inside parens.
-
-#### Safari
-
-Hurmet will run in the Safari browser as soon as it supports a BigInt data type.
-It is currently working in Safari's Technology Preview version.
-
 #### Saving files
 
 Tired of saving files to the Download folder? You can pick the folder where you
 save files, but first you have to change a browser setting.  In Chrome and Edge,
 go to ⋯ | Settings | Advanced | Downloads and in Firefox, go to ≡ | Options | Downloads.
-
-#### Printing page numbers
-
-Browsers will print page numbers only if you check the _Headers and footers_
-box. Unfortunately, that will usually include other unwanted information.
-Firefox is the only browser that enables you to customize the print header and
-footer. Here are the [complicated instructions](https://support.mozilla.org/en-US/questions/1323433).
 
 ## Markdown
 
@@ -1865,17 +1843,12 @@ format. This is useful for collaboration.
 Say that you have written a calculation. It’s awesome and you want to share it
 so that others can use it as a template. An easy way to share work is via a
 GitHub [Gist](https://gist.github.com/ "Gist"). Then anyone can view it,
-download it, or comment on it. If it is in Markdown format, you can read the
+download it, or comment on it. If it is in Markdown format, you can read thes
 Gist right there on GitHub. Here’s an
 [example](https://gist.github.com/ronkok/7fec7d11f6fb6a031e5a0827e3531d68).
 
-Hurmet’s version of Markdown adds two extensions that GitHub does not recognize,
-those being TeX math content between `` $`…` `` delimiters and calculation cells
-between ``¢`…` `` delimiters.
-
-GitHub Gists work best for simple content. Markdown does not recognize indented
-paragraphs or table styles. Markdown table cells cannot be merged and cannot
-contain lists or multiple paragraphs.
+Hurmet’s version of Markdown adds some extensions that GitHub does not recognize,
+such as calculation cells, indented paragraphs, and merged cells in tables.
 
 ## Coming Attractions
 
@@ -1891,8 +1864,18 @@ Civil and structural engineers may also find these items useful:
 
 * Beam Analysis [Diagram](https://hurmet.app/ce/beamanalysis.html)
 * Concrete Column Interaction [Diagram](https://observablehq.com/@ronkok/concrete-column-interaction-diagram)
-* Fetchable CSV files with steel shape data: [wide flanges](https://gist.githubusercontent.com/ronkok/a9f465e08be54cb4b46449768511acec/raw/AISC-v15-wideFlanges.csv), [channels](https://gist.githubusercontent.com/ronkok/24987345bc31878e624edc39bfa08827/raw/AISC-v15-channels.csv)
-* [Module](https://gist.githubusercontent.com/ronkok/d42b0efdc66dc4f6135fee3b8d22a83e/raw/steelStrengthPerAISC360-16.hrms) with functions for steel member strength.
+* Fetchable CSV files with steel shape data: [wide flanges][], [channels][], [HSS][], [pipes][], [tees][],
+  [double angles][], [HP][], and [MS][].
+* Importable [Module](https://hurmet.app/ce/steelStrengthPerAISC360-16.hrms) with functions for steel member strength.
+
+[wide flanges]: https://hurmet.app/ce/AISC-v15-wideFlanges.csv
+[channels]: https://hurmet.app/ce/AISC-v15-channels.csv
+[HSS]: https://hurmet.app/ce/AISC-v15-HSS.csv
+[pipes]: https://hurmet.app/ce/AISC-v15-pipes.csv
+[tees]: https://hurmet.app/ce/AISC-v15-tees.csv
+[double angles]: https://hurmet.app/ce/AISC-v15-2L.csv
+[HP]: https://hurmet.app/ce/AISC-v15-HP.csv
+[MS]: https://hurmet.app/ce/AISC-v15-MS.csv
 
 ## Credits
 
