@@ -1866,7 +1866,7 @@ Civil and structural engineers may also find these items useful:
 * Concrete Column Interaction [Diagram](https://observablehq.com/@ronkok/concrete-column-interaction-diagram)
 * Fetchable CSV files with steel shape data: [wide flanges][], [channels][], [HSS][], [pipes][], [tees][],
   [double angles][], [HP][], and [MS][].
-* Importable [Module](https://hurmet.app/ce/steelStrengthPerAISC360-16.hrms) with functions for steel member strength.
+* Importable [Module](https://hurmet.app/ce/steelStrengthPerAISC360-16.txt) with functions for steel member strength.
 
 [wide flanges]: https://hurmet.app/ce/AISC-v15-wideFlanges.csv
 [channels]: https://hurmet.app/ce/AISC-v15-channels.csv
