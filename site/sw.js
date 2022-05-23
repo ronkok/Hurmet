@@ -5,7 +5,7 @@
  * https://gomakethings.com/sw.js | (c) 2022 Chris Ferdinandi | MIT License
  */
 
-const version = 'hurmet_2022-05-22-2';
+const version = 'hurmet_2022-05-23';
 // Cache IDs
 const pageID = version + '_pages'; // HTML
 const codeID = version + '_code';  // JavaScript, CSS, & txt
@@ -22,8 +22,6 @@ const codeFiles = [
   'https://hurmet.app/katex/katex.min.js',
   'https://hurmet.app/katex/katex.css',
   'https://hurmet.app/docs/demonstration.js',
-  'https://hurmet.app/docs/docstyles.css',
-  'https://hurmet.app/docs/unit-table.css',
   'https://hurmet.app/parent.txt',
   'https://hurmet.app/smallModule.txt',
   'https://hurmet.app/ce/steelStrengthPerAISC360-16.txt'
