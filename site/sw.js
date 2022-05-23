@@ -5,7 +5,7 @@
  * https://gomakethings.com/sw.js | (c) 2022 Chris Ferdinandi | MIT License
  */
 
-const version = 'hurmet_2022-05-22';
+const version = 'hurmet_2022-05-22-2';
 // Cache IDs
 const pageID = version + '_pages'; // HTML
 const codeID = version + '_code';  // JavaScript, CSS, & txt
@@ -48,6 +48,7 @@ const trimPages = function() {
 
 // On install, cache code: Javascript, CSS, & txt
 self.addEventListener('install', function(event) {
+  self.skipWaiting()
   event.waitUntil(caches.open(codeID).then(function(cache) {
     cache.add(new Request('/offline/'));
     codeFiles.forEach(function(file) {
