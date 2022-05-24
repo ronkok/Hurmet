@@ -5,11 +5,11 @@
  * https://gomakethings.com/sw.js | (c) 2022 Chris Ferdinandi | MIT License
  */
 
-const version = 'hurmet_2022-05-23';
+const version = 'hurmet_2022-05-24';
 // Cache IDs
 const pageID = version + '_pages'; // HTML
-const codeID = version + '_code';  // JavaScript, CSS, & txt
-const assetsID = version + '_assets'; // images, fonts, & CSV
+const codeID = version + '_code';  // JavaScript & CSS
+const assetsID = version + '_assets'; // images, fonts, CSV, & txt
 const cacheIDs = [codeID, pageID, assetsID];
 
 const codeFiles = [
@@ -21,10 +21,7 @@ const codeFiles = [
   'https://hurmet.app/temml/Temml.woff2',
   'https://hurmet.app/katex/katex.min.js',
   'https://hurmet.app/katex/katex.css',
-  'https://hurmet.app/docs/demonstration.js',
-  'https://hurmet.app/parent.txt',
-  'https://hurmet.app/smallModule.txt',
-  'https://hurmet.app/ce/steelStrengthPerAISC360-16.txt'
+  'https://hurmet.app/docs/demonstration.js'
 ];
 
 
@@ -105,11 +102,10 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
-  // Code: CSS, JavaScript, & txt
+  // Code: CSS & JavaScript
   // Offline-first, pre-cached
   if (request.headers.get('Accept').includes('text/css') ||
-      request.headers.get('Accept').includes('text/javascript') ||
-      request.headers.get('Accept').includes('text/plain')) {
+      request.headers.get('Accept').includes('text/javascript')) {
     event.respondWith(
       caches.match(request).then(function(response) {
         return response || fetch(request).then(function(response) {
@@ -123,11 +119,12 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
-  // Assets: Images, fonts, & csv
+  // Assets: Images, fonts, csv, & txt
   // Offline-first, cache as you browse
   if (request.headers.get('Accept').includes('image') ||
       request.headers.get('Accept').includes('font/woff2') ||
-      request.headers.get('Accept').includes('text/csv')) {
+      request.headers.get('Accept').includes('text/csv') ||
+      request.headers.get('Accept').includes('text/plain')) {
     event.respondWith(
       caches.match(request).then(function(response) {
         return response || fetch(request).then(function(response) {
