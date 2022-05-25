@@ -121,6 +121,8 @@ Display:
 </script>
 <script>
    window.addEventListener('load', () => {
+     const t = document.getElementById("title")
+     t.style.fontFamily = "Arial"
      if (navigator.serviceWorker.controller != null) {
        navigator.serviceWorker.controller.postMessage({'command': 'trimCaches'});
      }
