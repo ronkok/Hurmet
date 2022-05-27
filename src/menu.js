@@ -24,7 +24,6 @@ import { isInTable, addColumnBefore, deleteColumn,
 import { draftMode } from "./draftMode"
 import { hurmetMarkdownSerializer } from "./to_markdown"
 import { readFile } from "./openfile"
-import { saveAs } from "filesaver.js-npm"
 import { findPageBreaks, forToC, forPrint } from "./print.js"
 
 // Menu icons that are not included in node-module menu.js
@@ -405,7 +404,7 @@ export function saveFile(state) {
       // Prune the Hurmet math parts down to just the entry. Then stringify it.
       const str = JSON.stringify(pruneHurmet(docJSON))
       if (window.showOpenFilePicker && state.doc.attrs.fileHandle) {
-        // Use the Chromium File System Access API, so users can Ctrl-S to save a document.
+        // Use the Chromium File System Access API, so users can click to save a document.
         writeFile(state.doc.attrs.fileHandle, str)
       } else {
         // Legacy method for Firefox and Safari
