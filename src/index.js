@@ -17,6 +17,7 @@ import { buildMenuItems } from "./menu"
 import { buildKeymap } from "./keymap"
 import { buildInputRules } from "./inputrules"
 import { CalcView, TexView } from "./nodeviews"
+import { hurmet } from "./hurmet"
 
 // Bundle together the plugins.
 function pmSetup(options) {

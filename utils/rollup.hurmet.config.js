@@ -1,4 +1,10 @@
-export default {
-  input: "./src/hurmet.js",
-  output: { format: "umd", name: "hurmet", sourcemap: false, file: "preview/hurmet.js" }
-};
+export default [
+  {
+    input: "./src/hurmet.js",
+    output: { format: "es", name: "hurmet", exports: "auto", file: "./utils/hurmet.mjs" }
+  },
+  {
+    input: "./src/hurmet.js",
+    output: { format: "cjs", name: "hurmet", file: "./test/hurmet.cjs" }
+  }
+]

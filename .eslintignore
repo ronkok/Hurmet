@@ -1,6 +1,7 @@
 **/node_modules/*
 site/*
-**/*.min.js
+**/*.min.mjs
 schema.js
 keymap.js
 inputrules.js
+currencyRates.js

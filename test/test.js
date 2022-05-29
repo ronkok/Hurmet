@@ -2,7 +2,7 @@
 /* eslint-disable comma-spacing */
 /* eslint-disable indent-legacy */
 /* eslint-disable no-console */
-const hurmet = require("../preview/hurmet.js")
+const NS = require("./hurmet.cjs")
 
 /* Unit tests.
  * For unit tests, I merely check if module outputs match their expected output.
@@ -114,7 +114,7 @@ let numErrors = 0
 for (let i = 0; i < parserTests.length; i++) {
   numTests += 1
   const input = parserTests[i][0]
-  const output = hurmet.parse(input)
+  const output =   NS.hurmet.parse(input)
   const expectedOutput = parserTests[i][1]
   if (output !== expectedOutput) {
     numErrors += 1
@@ -187,7 +187,7 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
   const decimalFormat = resultFormatterTests[i][2] || "1,000,000."
   const expectedOutput = resultFormatterTests[i][3]
   const formatVars = { format: { value: formatSpec } }
-  const output = hurmet.calculate(numStr + "= @", formatVars, false, decimalFormat)
+  const output =   NS.hurmet.calculate(numStr + "= @", formatVars, false, decimalFormat)
   if (output !== expectedOutput) {
     numErrors += 1
     console.log("input numStr:    " + numStr)
@@ -241,8 +241,8 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     const entry = assignmentTests[i][0];
     const template = assignmentTests[i][1];
     const expectedValue = assignmentTests[i][2];
-    hurmet.calculate(entry, vars)
-    const value = hurmet.calculate(template, vars, true)
+      NS.hurmet.calculate(entry, vars)
+    const value =   NS.hurmet.calculate(template, vars, true)
     if (expectedValue.length > 0) {
       if (value !== expectedValue) {
         numErrors += 1
@@ -257,7 +257,7 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
   }
 
   // Write a few functions into the vars object, so they can be tested.
-  hurmet.calculate(`function isIn(item, array)
+    NS.hurmet.calculate(`function isIn(item, array)
   # Binary search to see if an item is in an array.
   # This works only if the array is sorted.
   iHigh = length(array)
@@ -276,7 +276,7 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
   return (item = array[iLow])
 end`, vars)
 
-hurmet.calculate(`function testFor(a, b)
+  NS.hurmet.calculate(`function testFor(a, b)
    sum = 0
    for i in a..b
       sum = sum + i
@@ -284,7 +284,7 @@ hurmet.calculate(`function testFor(a, b)
    return sum
 end`, vars)
 
-hurmet.calculate(`function testWhile(b)
+  NS.hurmet.calculate(`function testWhile(b)
    sum = 0
    i = 1
    while i <= b
@@ -294,7 +294,7 @@ hurmet.calculate(`function testWhile(b)
    return sum
 end`, vars)
 
-hurmet.calculate(`function testBreak()
+  NS.hurmet.calculate(`function testBreak()
    echo "This is an echo test."
    sum = 0
    for i in 1..100
@@ -306,7 +306,7 @@ hurmet.calculate(`function testBreak()
    return sum
 end`, vars)
 
-hurmet.calculate(`function testRaise()
+  NS.hurmet.calculate(`function testRaise()
    sum = 0
    for i in 1..100
       if i > 3
@@ -451,8 +451,8 @@ end`, vars)
     const expectedRPN = calcTests[i][1];
     const expectedOutput = calcTests[i][2];
     const pos = inputStr.lastIndexOf("=")
-    const [_, rpn] = hurmet.parse(inputStr.slice(0, pos).trim(), "1,000,000.", true)
-    const output = hurmet.calculate(inputStr, vars, true)
+    const [_, rpn] =   NS.hurmet.parse(inputStr.slice(0, pos).trim(), "1,000,000.", true)
+    const output =   NS.hurmet.calculate(inputStr, vars, true)
     if (output !== expectedOutput || rpn !== expectedRPN) {
       numErrors += 1
       console.log("input:   " + inputStr)

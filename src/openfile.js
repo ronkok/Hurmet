@@ -1,4 +1,5 @@
 import { md2ast } from "./md2ast"
+import { hurmet } from "./hurmet"
 
 const handleContents = (view, schema, str, format) => {
   // Strip the BOM, if any, from the beginning of the result string.

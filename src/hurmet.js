@@ -34,7 +34,7 @@ import { calculate } from "./calculate"
  *         vars is updated with new variable data each time calculate() is called.
  */
 
-export {
+export const hurmet = Object.freeze({
   parse,
   calculate,
   autoCorrect,
@@ -43,4 +43,4 @@ export {
   evaluate,
   scanModule,
   updateCalculations
-}
+})

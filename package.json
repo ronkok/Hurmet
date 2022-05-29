@@ -48,7 +48,7 @@
     "pm": "rollup --config utils/rollup.prosemirror.config.js && node utils/editPM.js",
     "md": "rollup --config utils/rollup.markdown.config.js",
     "demo": "rollup --config utils/rollup.demo.config.js",
-    "minify": "terser preview/prosemirror.js -o preview/prosemirror.min.js -m && terser preview/hurmet.js -o preview/hurmet.min.js -m",
+    "minify": "terser preview/prosemirror.mjs -o site/prosemirror.min.mjs -m && terser preview/demo.mjs -o site/docs/demo.min.mjs -m",
     "build": "yarn pm && yarn math && yarn demo && yarn minify && yarn docs",
     "test": "yarn test:lint && node test/test.js",
     "test:lint": "eslint src",

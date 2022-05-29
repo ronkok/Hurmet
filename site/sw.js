@@ -5,17 +5,16 @@
  * https://gomakethings.com/sw.js | (c) 2022 Chris Ferdinandi | MIT License
  */
 
-const version = 'hurmet_2022-05-27-4';
+const version = 'hurmet_2022-05-29';
 // Cache IDs
 const coreID = version + '_core';  // JavaScript & CSS
-const assetsID = version + '_assets'; // images, fonts, CSV, & txt
-const cacheIDs = [coreID, assetsID];
+const pageID = version + '_pages'  // HTML & txt
+const assetsID = version + '_assets'; // images, fonts, & CSV
+const cacheIDs = [coreID, pageID, assetsID];
 
 const coreFiles = [
-  'https://hurmet.app/index.html',
-  'https://hurmet.app/examples.html',
-  'https://hurmet.app/docs/en/manual.html',
-  'https://hurmet.app/docs/en/unit-definitions.html',
+  'https://hurmet.app/prosemirror.min.mjs',
+  'https://hurmet.app/docs/demo.min.mjs',
   'https://hurmet.app/styles.min.css',
   'https://hurmet.app/temml/temml.css',
   'https://hurmet.app/katex/katex.css'
@@ -25,7 +24,7 @@ const coreFiles = [
 // Event Listeners
 //
 
-// On install, cache CSS
+// On install, cache Javascript & CSS
 self.addEventListener('install', function(event) {
   self.skipWaiting()
   event.waitUntil(caches.open(coreID).then(function(cache) {
@@ -58,10 +57,9 @@ self.addEventListener('fetch', function(event) {
   // Ignore non-GET requests
   if (request.method !== 'GET') { return }
 
-  // core: HTML & CSS
+  // core: Javascript & CSS
   // Offline-first, pre-cached
-  if (request.headers.get('Accept').includes('text/html') ||
-      request.headers.get('Accept').includes('text/css') ||
+  if (request.headers.get('Accept').includes('text/css') ||
       request.headers.get('Accept').includes('text/javascript')) {
     event.respondWith(
       caches.match(request).then(function(response) {
@@ -76,12 +74,33 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
-  // Assets: Images, fonts, csv, & txt
+  // HTML & txt files
+  // Network-first
+  if (request.headers.get('Accept').includes('text/html') ||
+  request.headers.get('Accept').includes('text/plain')) {
+    event.respondWith(
+      fetch(request).then(function(response) {
+        if (response.type !== 'opaque') {
+          const copy = response.clone();
+          event.waitUntil(caches.open(pageID).then(function(cache) {
+            return cache.put(request, copy);
+          }));
+        }
+        return response;
+      }).catch(function(error) {
+        return caches.match(request).then(function(response) {
+          return response || caches.match('/offline/');
+        });
+      })
+    );
+    return;
+  }
+
+  // Assets: Images, fonts, & csv
   // Offline-first, cache as you browse
   if (request.headers.get('Accept').includes('image') ||
       request.headers.get('Accept').includes('font/woff2') ||
-      request.headers.get('Accept').includes('text/csv') ||
-      request.headers.get('Accept').includes('text/plain')) {
+      request.headers.get('Accept').includes('text/csv')) {
     event.respondWith(
       caches.match(request).then(function(response) {
         return response || fetch(request).then(function(response) {

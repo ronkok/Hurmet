@@ -5,10 +5,10 @@ const fs = require("fs")
 // 2. Enable a mouse click on a calculation cell to open the cell.
 // 3. Insert a Hurmet Recalc-All command after each paste event.
 
-let str = fs.readFileSync('preview/prosemirror.js').toString('utf8')
-let match = /    this\.colgroup/.exec(str)
+let str = fs.readFileSync('preview/prosemirror.mjs').toString('utf8')
+let match = /  this\.colgroup/.exec(str)
 str = str.slice(0, match.index)
-  + "    this.table.className = node.attrs.class;\n"
+  + "  this.table.className = node.attrs.class;\n"
   + str.slice(match.index + 1);
 
 match = /table\.style\.minWidth = totalWidth \+ "px";\s+}/.exec(str)
@@ -24,4 +24,4 @@ str = str.slice(0, match.index + match[0].length)
   + "\n    hurmet.updateCalculations(view, view.state.schema.nodes.calculation, true);\n"
   + str.slice(match.index + match[0].length + 1);
 
-fs.writeFileSync('preview/prosemirror.js', str)
+fs.writeFileSync('preview/prosemirror.mjs', str)

@@ -1,4 +1,4 @@
-const hurmet = require("../preview/hurmet.js")
+import { hurmet } from "./hurmet.mjs"
 import { md2ast } from "../src/md2ast"
 
 const sanitizeUrl = function(url) {

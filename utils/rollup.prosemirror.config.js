@@ -4,10 +4,10 @@ import resolve from 'rollup-plugin-node-resolve';
 export default {
   input: "./src/index.js",
   output: {
-    format: "iife",
+    format: "es",
     name: "prosemirror",
     sourcemap: false,
-    file: "preview/prosemirror.js"
+    file: "preview/prosemirror.mjs"
   },
   plugins: [resolve(), commonjs()]
 };

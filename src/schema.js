@@ -4,6 +4,8 @@ import {findWrapping, liftTarget, canSplit, ReplaceAroundStep} from "prosemirror
 import {Slice, Fragment, NodeRange} from "prosemirror-model"
 import { renderToC, tocLevels } from "./print"
 import {dt} from "./constants"
+import { katex } from "./katex.mjs"
+import { temml } from "./temml.mjs"
 
 // Helpers for creating a schema that supports tables.
 
