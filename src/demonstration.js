@@ -94,23 +94,23 @@ const isFF = 'MozAppearance' in document.documentElement.style;
 
 // Start the demonstration editor
 const editor = document.getElementById("demo-input")
-const jar = demonstration.codeJar(editor, false)
+const jar = codeJar(editor, false)
 const demoOutput = document.getElementById("demo-output");
 editor.addEventListener("input", e => {
-  demonstration.renderMath(jar, demoOutput)
+  hurmet.renderMath(jar, demoOutput)
 })
 jar.updateCode("Hi!")
-demonstration.renderMath(jar, demoOutput)
+hurmet.renderMath(jar, demoOutput)
 
 // The next line is called by the format input box.
-updateFormat = () => demonstration.renderMath(jar, demoOutput)
+updateFormat = () => hurmet.renderMath(jar, demoOutput)
 
 // Change the content of the demonstration box to match the currently scrolled topic.
 var observer = new IntersectionObserver(function(entries) {
   for (const entry of entries) {
     if (entry.intersectionRatio === 1.0) {
-      jar.updateCode(demonstration.prompts[entry.target.id])
-      demonstration.renderMath(jar, demoOutput)
+      jar.updateCode(prompts[entry.target.id])
+      hurmet.renderMath(jar, demoOutput)
       break
     }
   }
@@ -128,18 +128,18 @@ observer.observe(document.getElementById("q-container"))
 observer.observe(document.getElementById("markup"))
 observer.observe(document.getElementById("auto-correct"))
 observer.observe(document.getElementById("display-selectors"))
-  observer.observe(document.getElementById("accessor-container"))
-  observer.observe(document.getElementById("calculation-forms"))
-  observer.observe(document.getElementById("identifiers"))
-  observer.observe(document.getElementById("identi-correct"))
-  observer.observe(document.getElementById("data-types"))
-  observer.observe(document.getElementById("number-rr"))
-  observer.observe(document.getElementById("complex-number"))
-  observer.observe(document.getElementById("unit"))
-  observer.observe(document.getElementById("matrix"))
-  observer.observe(document.getElementById("matrix-mult"))
-  observer.observe(document.getElementById("data-frame"))
-  observer.observe(document.getElementById("functions"))
-  observer.observe(document.getElementById("if-expressions"))
-  observer.observe(document.getElementById("unit-aware-calculations"))
-  observer.observe(document.getElementById("remote-modules"))
+observer.observe(document.getElementById("accessor-container"))
+observer.observe(document.getElementById("calculation-forms"))
+observer.observe(document.getElementById("identifiers"))
+observer.observe(document.getElementById("identi-correct"))
+observer.observe(document.getElementById("data-types"))
+observer.observe(document.getElementById("number-rr"))
+observer.observe(document.getElementById("complex-number"))
+observer.observe(document.getElementById("unit"))
+observer.observe(document.getElementById("matrix"))
+observer.observe(document.getElementById("matrix-mult"))
+observer.observe(document.getElementById("data-frame"))
+observer.observe(document.getElementById("functions"))
+observer.observe(document.getElementById("if-expressions"))
+observer.observe(document.getElementById("unit-aware-calculations"))
+observer.observe(document.getElementById("remote-modules"))
