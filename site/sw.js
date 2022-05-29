@@ -5,18 +5,14 @@
  * https://gomakethings.com/sw.js | (c) 2022 Chris Ferdinandi | MIT License
  */
 
-const version = 'hurmet_2022-05-29-2';
+const version = 'hurmet_2022-05-29-4';
 // Cache IDs
-const coreID = version + '_core';  // HTML, JavaScript & CSS
-const pageID = version + '_pages'  // txt
+const coreID = version + '_core';  // JavaScript & CSS
+const pageID = version + '_pages'  // HTML & txt
 const assetsID = version + '_assets'; // images, fonts, & CSV
 const cacheIDs = [coreID, pageID, assetsID];
 
 const coreFiles = [
-  'https://hurmet.app/index.html',
-  'https://hurmet.app/examples.html',
-  'https://hurmet.app/docs/en/manual.html',
-  'https://hurmet.app/ce/beamanalysis.html',
   'https://hurmet.app/prosemirror.min.mjs',
   'https://hurmet.app/docs/demo.min.mjs',
   'https://hurmet.app/styles.min.css',
@@ -61,10 +57,9 @@ self.addEventListener('fetch', function(event) {
   // Ignore non-GET requests
   if (request.method !== 'GET') { return }
 
-  // core: HTML, Javascript & CSS
+  // core: Javascript & CSS
   // Offline-first, pre-cached
-  if (request.headers.get('Accept').includes('text/html') ||
-      request.headers.get('Accept').includes('text/css') ||
+  if (request.headers.get('Accept').includes('text/css') ||
       request.headers.get('Accept').includes('text/javascript')) {
     event.respondWith(
       caches.match(request).then(function(response) {
@@ -79,9 +74,10 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
-  // txt files
+  // HTML & txt files
   // Network-first
-  if (request.headers.get('Accept').includes('text/plain')) {
+  if (request.headers.get('Accept').includes('text/html') ||
+  request.headers.get('Accept').includes('text/plain')) {
     event.respondWith(
       fetch(request).then(function(response) {
         if (response.type !== 'opaque') {
