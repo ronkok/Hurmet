@@ -2181,6 +2181,6 @@ Copyright © 2020-2022 Ron Kok. Released under the [MIT License](https://opensou
 <div id="demo-output"></div>
 </div> <!-- demo -->
 
-<script type="module" src="../demo.mjs"></script>
+<script type="module" src="../demo.min.mjs"></script>
 </body>
 </html>
