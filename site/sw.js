@@ -1,7 +1,7 @@
 
 // Service worker for Hurmet
 
-const version = 'hurmet_2022-05-30-4';
+const version = 'hurmet_2022-05-30-5';
 // Cache IDs
 const coreID = version + '_core';  // JavaScript & CSS
 const assetsID = version + '_assets'; // images, fonts, CSV, & txt
@@ -69,6 +69,22 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
+  // HTML from network
+  if (event.request.mode === 'navigate') {
+    event.respondWith((async() => {
+      try {
+        const networkResponse = await fetch(event.request);
+        return networkResponse;
+      } catch (error) {
+        // catch is only triggered if an exception is thrown, which is likely
+        // due to a network error.
+        const cache = await caches.open(coreID);
+        const cachedResponse = await cache.match("https://hurmet.app/offline.html");
+        return cachedResponse;
+      }
+    })());
+  }
+
   // Assets: Images, fonts, csv, & txt
   // Offline-first, cache as you browse
   if (request.headers.get('Accept').includes('image') ||
@@ -90,22 +106,6 @@ self.addEventListener('fetch', function(event) {
         });
       })
     );
-  }
-
-  // HTML from network
-  if (event.request.mode === 'navigate') {
-    event.respondWith((async() => {
-      try {
-        const networkResponse = await fetch(event.request);
-        return networkResponse;
-      } catch (error) {
-        // catch is only triggered if an exception is thrown, which is likely
-        // due to a network error.
-        const cache = await caches.open(coreID);
-        const cachedResponse = await cache.match("https://hurmet.app/offline.html");
-        return cachedResponse;
-      }
-    })());
   }
 
 });
