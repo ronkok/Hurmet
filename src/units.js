@@ -706,13 +706,11 @@ const unitFromWord = (inputStr, currencies, customUnits) => {
         u.factor = Rnl.reciprocal(currencies.value.get(currencyCode))
       } else {
         // Read the line whose key is the standard 3-letter currency code.
-        // This value comes from a <script> tag in the Hurmet index.html page.
-        // eslint-disable-next-line no-undef
-        const rate = currencyRates[currencyCode]
-        if (!rate) {
+        unitArray = unitTable[currencyCode]
+        if (unitArray[0] === "0") {
           return errorOprnd("CURRENCY")
         } else {
-          u.factor = Rnl.reciprocal(Rnl.fromString(rate))
+          u.factor = Rnl.reciprocal(Rnl.fromString(unitArray[0]))
         }
       }
     } else {
