@@ -5,7 +5,7 @@
  * https://gomakethings.com/sw.js | (c) 2022 Chris Ferdinandi | MIT License
  */
 
-const version = 'hurmet_2022-05-29-8';
+const version = 'hurmet_2022-05-29-9';
 // Cache IDs
 const coreID = version + '_core';  // JavaScript & CSS
 const pageID = version + '_pages'  // HTML & txt
