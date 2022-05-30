@@ -5,12 +5,12 @@
  * https://gomakethings.com/sw.js | (c) 2022 Chris Ferdinandi | MIT License
  */
 
-const version = 'hurmet_2022-05-30';
+const version = 'hurmet_2022-05-30-2';
 // Cache IDs
 const coreID = version + '_core';  // JavaScript & CSS
-const pageID = version + '_pages'  // HTML
+//const pageID = version + '_pages'  // HTML
 const assetsID = version + '_assets'; // images, fonts, CSV, & txt
-const cacheIDs = [coreID, pageID, assetsID];
+const cacheIDs = [coreID, assetsID];
 
 const coreFiles = [
   'https://hurmet.app/offline.html',
@@ -76,6 +76,25 @@ self.addEventListener('fetch', function(event) {
 
   // HTML
   // Network-first
+  if (event.request.mode === 'navigate') {
+    event.respondWith((async () => {
+      try {
+        const networkResponse = await fetch(event.request);
+        return networkResponse;
+      } catch (error) {
+        // catch is only triggered if an exception is thrown, which is likely
+        // due to a network error.
+        // If fetch() returns a valid HTTP response with a response code in
+        // the 4xx or 5xx range, the catch() will NOT be called.
+        console.log('Fetch failed; returning offline page instead.', error);
+
+        const cache = await caches.open(coreID);
+        const cachedResponse = await cache.match("https://hurmet.app/offline.html");
+        return cachedResponse;
+      }
+    })());
+  }
+  /*
   if (request.headers.get('Accept').includes('text/html')) {
     event.respondWith(
       fetch(request).then(function(response) {
@@ -93,7 +112,7 @@ self.addEventListener('fetch', function(event) {
       })
     );
     return;
-  }
+  } */
 
   // Assets: Images, fonts, csv, & txt
   // Offline-first, cache as you browse
