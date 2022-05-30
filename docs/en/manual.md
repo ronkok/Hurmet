@@ -108,6 +108,11 @@ document range by selecting text, then clicking one of the menu bar buttons:
 [align-right]: ../../images/align-right.svg
 [information]: ../../images/info.svg
 
+### Offline
+
+Hurmet has a offline page which works even if you are not connected to the
+internet.
+
 ### Save/Open
 
 You can save your work using the ![save][] button. Then reopen it using the
@@ -1947,6 +1952,12 @@ plain text and omit the blue echos.
 
 I expect that Chrome and Edge will get a performance boost when they support MathML.
 
+#### Offline use
+
+In order for Hurmet to work offline, you must allow Hurmet to store a cookie on
+your computer. Don’t worry, it is not a tracking cookie. Hurmet just stores a
+copy of the offline page, so it can always be available.
+
 #### Matrix multiplication
 
 To get element-wise multiplication of two matrices, the operator symbol must be
@@ -2038,6 +2049,7 @@ Copyright © 2020-2022 Ron Kok. Released under the [MIT License](https://opensou
 <details><summary>Editor</summary>
 
 * [Basics](#editor-basics)
+* [Offline](#offline)
 * [Save/Open](#save/open)
 * [Print Header](#print-header)
 * [Table of Contents](#table-of-contents)
