@@ -3,8 +3,10 @@ src/altParser.js
 preview/prosemirror.mjs
 preview/demo.mjs
 preview/styles.min.css
-preview/katex/
-preview/temml/
+preview/katex.min.css
+preview/fonts/
+preview/Temml.woff2
+preview/temml.min.css
 test/hurmet.cjs
 utils/ECB Exchange Rates.xml
 site/prosemirror.min.mjs

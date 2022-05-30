@@ -5,19 +5,20 @@
  * https://gomakethings.com/sw.js | (c) 2022 Chris Ferdinandi | MIT License
  */
 
-const version = 'hurmet_2022-05-29-9';
+const version = 'hurmet_2022-05-30';
 // Cache IDs
 const coreID = version + '_core';  // JavaScript & CSS
-const pageID = version + '_pages'  // HTML & txt
-const assetsID = version + '_assets'; // images, fonts, & CSV
+const pageID = version + '_pages'  // HTML
+const assetsID = version + '_assets'; // images, fonts, CSV, & txt
 const cacheIDs = [coreID, pageID, assetsID];
 
 const coreFiles = [
+  'https://hurmet.app/offline.html',
   'https://hurmet.app/prosemirror.min.mjs',
   'https://hurmet.app/docs/demo.min.mjs',
   'https://hurmet.app/styles.min.css',
-  'https://hurmet.app/temml/temml.css',
-  'https://hurmet.app/katex/katex.css'
+  'https://hurmet.app/temml.css',
+  'https://hurmet.app/katex.css'
 ];
 
 //
@@ -28,7 +29,6 @@ const coreFiles = [
 self.addEventListener('install', function(event) {
   self.skipWaiting()
   event.waitUntil(caches.open(coreID).then(function(cache) {
-    cache.add(new Request('/offline/'));
     coreFiles.forEach(function(file) {
       cache.add(new Request(file));
     });
@@ -74,10 +74,9 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
-  // HTML & txt files
+  // HTML
   // Network-first
-  if (request.headers.get('Accept').includes('text/html') ||
-  request.headers.get('Accept').includes('text/plain')) {
+  if (request.headers.get('Accept').includes('text/html')) {
     event.respondWith(
       fetch(request).then(function(response) {
         if (response.type !== 'opaque') {
@@ -89,18 +88,19 @@ self.addEventListener('fetch', function(event) {
         return response;
       }).catch(function(error) {
         return caches.match(request).then(function(response) {
-          return response || caches.match('https://hurmet.app/');
+          return response || caches.match(/offline/);
         });
       })
     );
     return;
   }
 
-  // Assets: Images, fonts, & csv
+  // Assets: Images, fonts, csv, & txt
   // Offline-first, cache as you browse
   if (request.headers.get('Accept').includes('image') ||
       request.headers.get('Accept').includes('font/woff2') ||
-      request.headers.get('Accept').includes('text/csv')) {
+      request.headers.get('Accept').includes('text/csv') ||
+      request.headers.get('Accept').includes('text/plain')) {
     event.respondWith(
       caches.match(request).then(function(response) {
         return response || fetch(request).then(function(response) {
