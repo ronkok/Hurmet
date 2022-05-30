@@ -5,7 +5,7 @@
  * https://gomakethings.com/sw.js | (c) 2022 Chris Ferdinandi | MIT License
  */
 
-const version = 'hurmet_2022-05-29-7';
+const version = 'hurmet_2022-05-29-8';
 // Cache IDs
 const coreID = version + '_core';  // JavaScript & CSS
 const pageID = version + '_pages'  // HTML & txt
@@ -89,7 +89,7 @@ self.addEventListener('fetch', function(event) {
         return response;
       }).catch(function(error) {
         return caches.match(request).then(function(response) {
-          return response || caches.match('/offline/');
+          return response || caches.match('https://hurmet.app/');
         });
       })
     );
