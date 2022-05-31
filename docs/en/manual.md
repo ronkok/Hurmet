@@ -2002,16 +2002,16 @@ Civil and structural engineers may also find these items useful:
 * Concrete Column Interaction [Diagram](https://observablehq.com/@ronkok/concrete-column-interaction-diagram)
 * Fetchable CSV files with steel shape data: [wide flanges][], [channels][], [HSS][], [pipes][], [tees][],
   [double angles][], [HP][], and [MS][].
-* Importable [Module](https://hurmet.app/ce/steelStrengthPerAISC360-16.txt) with functions for steel member strength.
+* Importable [Module](https://gist.githubusercontent.com/ronkok/f4d93a4921ebd24c9a40578831d926b7/raw/steelStrengthPerAISC360-16.txt) with functions for steel member strength.
 
-[wide flanges]: https://hurmet.app/ce/AISC-v15-wideFlanges.csv
-[channels]: https://hurmet.app/ce/AISC-v15-channels.csv
-[HSS]: https://hurmet.app/ce/AISC-v15-HSS.csv
-[pipes]: https://hurmet.app/ce/AISC-v15-pipes.csv
-[tees]: https://hurmet.app/ce/AISC-v15-tees.csv
-[double angles]: https://hurmet.app/ce/AISC-v15-2L.csv
-[HP]: https://hurmet.app/ce/AISC-v15-HP.csv
-[MS]: https://hurmet.app/ce/AISC-v15-MS.csv
+[wide flanges]: https://gist.githubusercontent.com/ronkok/a9f465e08be54cb4b46449768511acec/raw/AISC-v15-wideFlanges.csv
+[channels]: https://gist.githubusercontent.com/ronkok/24987345bc31878e624edc39bfa08827/raw/AISC-v15-channels.csv
+[HSS]: https://gist.githubusercontent.com/ronkok/b027d7c53951995db459989dca4d028c/raw/AISC-v15-HSS.csv
+[pipes]: https://gist.githubusercontent.com/ronkok/0d5d5f487e7f59724d04345418e90c59/raw/AISC-v15-pipes.csv
+[tees]: https://gist.githubusercontent.com/ronkok/114013103c77f9d318d60a808b673001/raw/AISC-v15-tees.csv
+[double angles]: https://gist.githubusercontent.com/ronkok/2b886eb65012f2100fea4841e32d7eab/raw/AISC-v15-2L.csv
+[HP]: https://gist.githubusercontent.com/ronkok/e395e8ea5a2bee21f271e7c18098b69f/raw/AISC-v15-HP.csv
+[MS]: https://gist.githubusercontent.com/ronkok/4573be80587ef802131269ae5a829a01/raw/AISC-v15-MS.csv
 
 ## Credits
 
