@@ -1,6 +1,7 @@
 /* This file contains the CSS for Hurmet.app
  * Parts of this file were once in separate files.
  * That being the ProseMirror editor section and tables section.
+ * temml.css is included here as well.
  * These are now all combined in this one file to reduce the number of HTML
  * requests and to make it easier to minify all the CSS.
  */
@@ -649,6 +650,59 @@ ul.toc span + span {
 .ProseMirror div.indented { margin-left: 2em; }
 .ProseMirror div.centered { text-align: center; }
 
+/*
+ * This section contains the CSS for Temml math rendering.
+ */
+
+ /*
+Temml.woff2 is a clone of KaTeX_Script-Regular, except that the code points
+have been changed from ASCII to Unicode Mathematical Alphanumeric Symbols Script capitals,
+Unicode range 1D49C to 1D4B5.
+*/
+
+@font-face {
+  font-family: 'Temml';
+  src: url('Temml.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+math {
+  font-family: "Cambria Math", "Times New Roman", math;
+  font-style: normal;
+  font-weight: normal;
+  line-height: normal;
+  font-size-adjust: none;
+  text-indent: 0;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  direction: ltr;
+}
+
+math * {
+  border-color: currentColor;
+}
+
+math .mathscr {
+  font-family: "Temml";
+}
+
+math .oldstylenums {
+  font-feature-settings: 'onum';
+}
+
+/* AMS environment auto-numbering via CSS counter. */
+.tml-eqn::before {
+  counter-increment: tmlEqnNo;
+  content: "(" counter(tmlEqnNo) ")";
+}
+
+body {
+  counter-reset: tmlEqnNo;
+}
+
+/* This section set math sizes for katex and temml */
 .katex { font-size: 1em; }
 math   { font-size: 1em; }
 math .special-fraction { font-family: "Times New Roman"; }
