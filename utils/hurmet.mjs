@@ -5457,7 +5457,7 @@ const parse = (
           rpn += '"' + token.input + '"'; // a loop index variable name.
         } else {
           // We're in the echo of a Hurmet calculation.
-          if (/^[.[]/.test(str)) {
+          if (/^(\.[^.]|\[)/.test(str)) {
             // When the blue echo has an index in a bracket, e.g., varName[indes], it renders
             // the name of the variable, not the value. The value of the value of the index.
             token.output = token.ttype === tt.LONGVAR
@@ -6182,7 +6182,7 @@ const parse = (
     while (rpnStack.length > 0) {
       rpn += tokenSep + rpnStack.pop().symbol;
     }
-    const varRegEx = /〖[^ ()]+/g;
+    const varRegEx = /〖[^ ().]+/g;
     let arr;
     while ((arr = varRegEx.exec(tex)) !== null) {
       if ("¨ˆˉ˙˜".indexOf(arr[0][1]) === -1) {
