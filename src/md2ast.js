@@ -22,7 +22,7 @@
  *
  * 1. Hurmet inline calculation is delimited ¢`…`.
  *    Hurmet display calculation is fenced ¢¢\n … \n¢¢.
- * 2. LaTeX inline math is delimited $`…`.
+ * 2. LaTeX inline math is delimited $…$. $ and \\ are escaped \$ & \\\\.
  *    LaTeX display math is fenced  $$\n … \n$$.
  * 3. ~~strikethrough~~
  * 4. Pipe tables as per GFM.
@@ -706,13 +706,14 @@ rules.set("calculation", {
 });
 rules.set("tex", {
   isLeaf: true,
-  match: anyScopeRegex(/^(?:\$(`+)([\s\S]*?[^`])\1(?!`)|\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$)/),
+  match: anyScopeRegex(/^(?:\$((?:\\[\s\S]|[^\\])+?)\$|\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$)/),
   parse: function(capture, state) {
-    if (capture[2]) {
-      const tex = capture[2].trim().replace(/\n/g, " ")
+    if (capture[1]) {
+      const tex = capture[1].trim().replace(/\n/g, " ").replace(/\\\\\\\\/g, "\\\\").replace(/\\\$/g, "$")
       return { content: "", attrs: { tex } }
     } else {
-      return { content: "", attrs: { tex: capture[3].trim(), displayMode: true } }
+      const tex = capture[2].trim().replace(/\\\\\\\\/g, "\\\\").replace(/\\\$/g, "$")
+      return { content: "", attrs: { tex, displayMode: true } }
     }
   }
 });

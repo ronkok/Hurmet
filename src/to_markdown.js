@@ -152,12 +152,14 @@ const hurmetNodes =  {
     state.text(node.text)
   },
   tex(state, node) {
-    const tex = node.attrs.tex.trim().replace(/\n/gm, "\n" + state.delim)
+    const tex = node.attrs.tex.trim()
+      .replace(/\n/gm, "\n" + state.delim)
+      .replace(/\\\\/gm, "\\\\\\\\")
+      .replace(/\$/gm, "\\$")
     if (node.attrs.displayMode) {
       state.write("$$\n" + tex + "\n$$")
     } else {
-      const backticks = "`".repeat(maxBacktickCount(tex) + 1) 
-      state.write("$" + backticks + " " + tex + " " + backticks)
+      state.write("$ " + tex + " $")
     }
   },
   calculation(state, node) {
@@ -629,7 +631,7 @@ export class MarkdownSerializerState {
   // content. If `startOfLine` is true, also escape characters that
   // has special meaning only at the start of the line.
   esc(str, startOfLine) {
-    str = str.replace(/[`\\¢\[\]]/g, "\\$&")
+    str = str.replace(/[`\\¢\$\[\]]/g, "\\$&")
     str = str.replace(/(\*\*|\$\$|¢¢|~~)/g, "\\$1")
     if (startOfLine) {
       str = str.replace(/^(\#+|:|\-|\*|\+) /, "\\$1").replace(/^(\d+)\./, "$1\\.")
