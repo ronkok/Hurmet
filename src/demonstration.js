@@ -97,20 +97,20 @@ const editor = document.getElementById("demo-input")
 const jar = codeJar(editor, false)
 const demoOutput = document.getElementById("demo-output");
 editor.addEventListener("input", e => {
-  hurmet.renderMath(jar, demoOutput)
+  renderMath(jar, demoOutput)
 })
 jar.updateCode("Hi!")
-hurmet.renderMath(jar, demoOutput)
+renderMath(jar, demoOutput)
 
 // The next line is called by the format input box.
-updateFormat = () => hurmet.renderMath(jar, demoOutput)
+updateFormat = () => renderMath(jar, demoOutput);
 
 // Change the content of the demonstration box to match the currently scrolled topic.
 var observer = new IntersectionObserver(function(entries) {
   for (const entry of entries) {
     if (entry.intersectionRatio === 1.0) {
       jar.updateCode(prompts[entry.target.id])
-      hurmet.renderMath(jar, demoOutput)
+      renderMath(jar, demoOutput)
       break
     }
   }

@@ -7,6 +7,8 @@ let manual = fs.readFileSync('docs/en/manual.md').toString('utf8')
 // convert Markdown to HTML
 manual =  hurmetMark.hmd.md2html(manual, true)
 fs.writeFileSync('site/docs/en/manual.html', manual)
+manual = manual.replace("../demo.min.mjs", "demo.mjs")
+fs.writeFileSync('preview/manual.html', manual)
 
 // Now translate the unit-definitions file from Markdown to HTML.
 let units = fs.readFileSync('docs/en/unit-definitions.md').toString('utf8')
