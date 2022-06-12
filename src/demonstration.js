@@ -86,10 +86,9 @@ const prompts = {
 
 // Render math via KaTeX.
 const texSpans = document.getElementsByClassName("tex");
-const isFF = 'MozAppearance' in document.documentElement.style;
 [...texSpans].forEach(span => {
   const tex = span.dataset.tex.trim().replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
-  katex.render(tex, span, { strict: false, throwOnError: false, output: isFF ? "mathml" : "htmlAndMathml" })
+  katex.render(tex, span, { strict: false, throwOnError: false })
 })
 
 // Start the demonstration editor
@@ -103,7 +102,7 @@ jar.updateCode("Hi!")
 renderMath(jar, demoOutput)
 
 // The next line is called by the format input box.
-updateFormat = () => renderMath(jar, demoOutput);
+const updateFormat = () => renderMath(jar, demoOutput);
 
 // Change the content of the demonstration box to match the currently scrolled topic.
 var observer = new IntersectionObserver(function(entries) {
