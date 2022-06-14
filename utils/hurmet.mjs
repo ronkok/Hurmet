@@ -11334,15 +11334,15 @@ const proceedAfterFetch = (
           if (isCalcAll || attrs.rpn) {
             tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs));
           }
-        } else if (attrs.name && !(isCalcAll && attrs.isFetch)) {
-          if (attrs.name) {
-            if (attrs.name === "importedParameters") {
-              Object.entries(attrs.value).forEach(([key, value]) => {
-                hurmetVars[key] =  value;
-              });
-            } else {
-              insertOneHurmetVar(hurmetVars, attrs, decimalFormat);
-            }
+        }
+      } else if (node.attrs.name && !(isCalcAll && node.attrs.isFetch)) {
+        if (node.attrs.name) {
+          if (node.attrs.name === "importedParameters") {
+            Object.entries(node.attrs.value).forEach(([key, value]) => {
+              hurmetVars[key] =  value;
+            });
+          } else {
+            insertOneHurmetVar(hurmetVars, node.attrs, decimalFormat);
           }
         }
       }
