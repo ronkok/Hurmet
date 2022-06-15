@@ -78,16 +78,16 @@ export const findPageBreaks = (view, state, purpose, tocSchema, startLevel, endL
   const destination = document.getElementById("print-div")
   const frag = document.createDocumentFragment()
   let header
-  let pageHeight = 0
+  let pageHeight = doc.attrs.pageSize === "letter" ? 11 * 96 : 297 / 25.4 * 96
   if (headerExists) {
     // eslint-disable-next-line max-len
     header = document.getElementsByTagName("header")[0].childNodes[0].childNodes[0].cloneNode(true)
     header.classList.add("header")
     header.innerHTML = header.innerHTML.replace("$PAGE", '<span class="page-display"></span>')
     const headerRect = document.getElementsByTagName("header")[0].getBoundingClientRect()
-    pageHeight = 11 * 96 - 137 /*margins*/  -  (headerRect.bottom - headerRect.top)
+    pageHeight = pageHeight - 137 /*margins*/  -  (headerRect.bottom - headerRect.top)
   } else {
-    pageHeight = 11 * 96 - 137
+    pageHeight = pageHeight - 137
   }
 
   const numPasses = purpose === forPrint ? 2 : 1

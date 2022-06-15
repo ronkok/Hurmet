@@ -35,30 +35,15 @@ const hurmetIcons = {
     height: 16,
     path: "M3 4h10v1.5h-20z M3 8h10v1.5h-20z M3 12h10v1.5h-20z"
   },
-  "folder-open": {
-    width: 16,
-    height: 16,
-    path: "M13 15l3-8h-13l-3 8zM2 6l-2 9v-13h4.5l2 2h6.5v2z"
-  },
   save: {
     width: 16,
     height: 16,
     path: "M 8.5,5.5 v -5 h 2 v 5 h 2 l -3,3 -3,-3 z m 8,10 h -13 l -3,-6 h 3 v -6 h 4 v 1 h -3 v 5 h 9 l 2,4 v -9 h -4 v -1 h 5 z"
   },
-  draft: {
-    width: 16,
-    height: 16,
-    path: "M13.5 0h-12c-0.825 0-1.5 0.675-1.5 1.5v13c0 0.825 0.675 1.5 1.5 1.5h12c0.825 0 1.5-0.675 1.5-1.5v-13c0-0.825-0.675-1.5-1.5-1.5zM13.5 14.5h-12v-13h12v13zM6.1 9.736l-.386.42s-.358.39-.725.781c-.12.129-.226.24-.336.354l-.715-1.148-.848.529 1.237 1.984.353-.088c.135-.033.147-.06.172-.078a1.662 1.662 0 00.14-.117c.057-.053.122-.12.198-.197a52.59 52.59 0 00.875-.926l1.19 1.42 1.455-1.168 1.4.73 1.12-.58.267.213.62-.783-.775-.615-1.232.638-1.518-.793-1.2.965zM5.5 6.607l-1.14.963-.282-.799-.943.334.764 2.163 1.644-1.39.899.66 1.197-.544.654.344.465-.885-1.086-.57-1.111.502zM6.1 2.736l-.386.42s-.358.39-.725.781c-.12.129-.226.24-.336.354l-.715-1.148-.848.529 1.237 1.984.353-.088c.135-.033.147-.06.172-.078a1.662 1.662 0 00.14-.117c.057-.053.122-.12.198-.197a52.59 52.59 0 00.875-.926l1.19 1.42 1.455-1.168 1.4.73 1.12-.58.267.213.62-.783-.775-.615-1.232.638-1.518-.793-1.2.965z"
-  },
   recalc: {
     width: 16,
     height: 16,
     path: "M0 9c0 2.389 1.048 4.534 2.709 6l1.323-1.5c-1.246-1.099-2.031-2.708-2.031-4.5 0-3.314 2.686-6 6-6 1.657 0 3.157 0.672 4.243 1.757l-2.243 2.243h6v-6l-2.343 2.343c-1.448-1.448-3.448-2.343-5.657-2.343-4.418 0-8 3.582-8 8z"
-  },
-  header: {
-    width: 16,
-    height: 16,
-    path: "M14.341 3.579c-0.347-0.473-0.831-1.027-1.362-1.558s-1.085-1.015-1.558-1.362c-0.806-0.591-1.197-0.659-1.421-0.659h-7.75c-0.689 0-1.25 0.561-1.25 1.25v13.5c0 0.689 0.561 1.25 1.25 1.25h11.5c0.689 0 1.25-0.561 1.25-1.25v-9.75c0-0.224-0.068-0.615-0.659-1.421v0zM12.271 2.729c0.48 0.48 0.856 0.912 1.134 1.271h-2.406v-2.405c0.359 0.278 0.792 0.654 1.271 1.134v0zM14 14.75c0 0.136-0.114 0.25-0.25 0.25h-11.5c-0.135 0-0.25-0.114-0.25-0.25v-13.5c0-0.135 0.115-0.25 0.25-0.25 0 0 7.749-0 7.75 0v3.5c0 0.276 0.224 0.5 0.5 0.5h3.5v9.75zM2 5 v-1 h8 v0.5c0 0.276 0.224 0.5 0.5 0.5zM4 3v-1h4v1z"
   },
   subscript: { text: "X₂", css: "font-weight: bold" },
   superscript: { text: "X²", css: "font-weight: bold" },
@@ -186,21 +171,6 @@ const hurmetIcons = {
     height: 16,
     path: "M0 1h16v3h-16zM0 9h16v3h-16z"
   },
-  header: {
-    width: 16,
-    height: 16,
-    path: "M14.341 3.579c-0.347-0.473-0.831-1.027-1.362-1.558s-1.085-1.015-1.558-1.362c-0.806-0.591-1.197-0.659-1.421-0.659h-7.75c-0.689 0-1.25 0.561-1.25 1.25v13.5c0 0.689 0.561 1.25 1.25 1.25h11.5c0.689 0 1.25-0.561 1.25-1.25v-9.75c0-0.224-0.068-0.615-0.659-1.421v0zM12.271 2.729c0.48 0.48 0.856 0.912 1.134 1.271h-2.406v-2.405c0.359 0.278 0.792 0.654 1.271 1.134v0zM14 14.75c0 0.136-0.114 0.25-0.25 0.25h-11.5c-0.135 0-0.25-0.114-0.25-0.25v-13.5c0-0.135 0.115-0.25 0.25-0.25 0 0 7.749-0 7.75 0v3.5c0 0.276 0.224 0.5 0.5 0.5h3.5v9.75zM2 5 v-1 h8 v0.5c0 0.276 0.224 0.5 0.5 0.5zM4 3v-1h4v1z"
-  },
-  printer: {
-    width: 16,
-    height: 16,
-    path: "M4 1h8v2h-8v-2zM15 4h-14c-0.55 0-1 0.45-1 1v5c0 0.55 0.45 1 1 1h3v4h8v-4h3c0.55 0 1-0.45 1-1v-5c0-0.55-0.45-1-1-1zM2 7c-0.552 0-1-0.448-1-1s0.448-1 1-1 1 0.448 1 1-0.448 1-1 1zM11 14h-6v-5h6v5z"
-  },
-  fontsize: {
-    width: 16,
-    height: 16,
-    path: "M1 8h6v2h-2v6h-2v-6h-2zM15 4h-3.934v12h-2.133v-12h-3.934v-2h10z"
-  },
   cog: {
     width: 16,
     height: 16,
@@ -243,7 +213,7 @@ function canInsert(state, nodeType) {
 export function insertHeader(state, dispatch) {
   return new MenuItem({
     title: "Insert a print header",
-    icon: hurmetIcons["header"],
+    label: "Print header",
     enable() {
       return true
     },
@@ -313,7 +283,7 @@ const findParentNode = predicate => selection => {
 const print = () => {
   return new MenuItem({
     title: "Print",
-    icon: hurmetIcons.printer,
+    label: "Print…",
     run(state, _, view) {
       findPageBreaks(view, state, forPrint, schema.nodes.toc)
       window.print()
@@ -393,6 +363,10 @@ async function writeFile(fileHandle, contents) {
   await writable.close();
 }
 
+function sleep (time) {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
+
 export function saveFile(state) {
   return new MenuItem({
     title: "Save file...",
@@ -407,7 +381,13 @@ export function saveFile(state) {
       const str = JSON.stringify(pruneHurmet(docJSON))
       if (window.showOpenFilePicker && state.doc.attrs.fileHandle) {
         // Use the Chromium File System Access API, so users can click to save a document.
+        const button = document.getElementById("editor").firstChild.firstChild.children[2]
+        // Blink the button, so the author knows that a save takes place.
+        button.classList.add("ProseMirror-menu-active")
         writeFile(state.doc.attrs.fileHandle, str)
+        sleep(500).then(() => {
+          button.classList.remove("ProseMirror-menu-active")
+        });
       } else {
         // Legacy method for Firefox and Safari
         const blob = new Blob([str], {type: "text/plain;charset=utf-8"})
@@ -436,7 +416,7 @@ function exportMarkdownFile(state) {
 function openFile() {
   return new MenuItem({
     title: "Open file...",
-    icon: hurmetIcons["folder-open"],
+    label: "Open…",
     enable() {
       return true
     },
@@ -681,7 +661,7 @@ function markItem(markType, options) {
 function toggleDraftMode() {
   return new MenuItem({
     title: "Toggle draft mode",
-    icon: hurmetIcons.draft,
+    label: "Draft mode",
     enable() { return true },
     active(state) {return state.doc.attrs.inDraftMode},
     run(state, dispatch) {
@@ -730,6 +710,19 @@ function setFontSize(size) {
       state.doc.attrs.fontSize = size
       document.getElementById("editor").className = size === 12 ? "pica" : "long-primer"
       document.getElementById("print-div").className = size === 12 ? "ProseMirror pica" : "ProseMirror long-primer"
+    }
+  })
+}
+
+function setPageSize(size) {
+  return new MenuItem({
+    label: size,
+    run(state, _, view) {
+      state.doc.attrs.pageSize = size
+      const style = document.getElementById("pageStyle")
+      style.innerHTML = size === "letter"
+        ? `@media print {@page{size: letter; margin: 16mm 0.75in 16mm 0.75in;}}`
+        : `@media print {@page{size: A4; margin: 16mm 16.1mm 16mm 16.1mm;}}`
     }
   })
 }
@@ -915,6 +908,8 @@ export function buildMenuItems(schema) {
   r.importMarkdownFile = importMarkdownFile()
   r.pica = setFontSize(12)
   r.longprimer = setFontSize(10)
+  r.letter = setPageSize("letter")
+  r.A4 = setPageSize("A4")
 
   r.toggleDraftMode = toggleDraftMode()
   r.recalcAll = reCalcAll(schema)
@@ -1090,20 +1085,27 @@ export function buildMenuItems(schema) {
   
   let cut = arr => arr.filter(x => x)
   
+  r.fontsize = new DropdownSubmenu([r.pica, r.longprimer], { label: "Font size" })
+  r.pagesize = new DropdownSubmenu([r.letter, r.A4], { label: "Page size" })
   r.separators = new Dropdown([r.dot, r.commadot, r.lakh, r.cn, r.comma, r.spacecomma, r.apostrophecomma, r.dotcomma], {title: "Set decimal format", label: "●"})
-  r.markdown = new Dropdown([r.exportMarkdown, r.importMarkdownFile], {title: "Markdown", label: "M"})
-  r.fontsize = new Dropdown([r.pica, r.longprimer], { title: "Font size", label: "ℱ" })
+  r.fileDropDown = new Dropdown([
+    r.openFile,
+    r.fontsize,
+    r.toggleDraftMode,
+    r.insertHeader,
+    r.exportMarkdown,
+    r.importMarkdownFile,
+    r.pagesize,
+    r.print
+  ],
+  { label: "File" }
+  )
   r.fileMenu = [[
     r.navigate,
-    r.openFile,
+    r.fileDropDown,
     r.saveFile,
-    r.markdown,
-    r.fontsize,
     r.separators,
-    r.toggleDraftMode,
     r.recalcAll,
-    r.insertHeader,
-    r.print
   ]]
 
   r.inlineMenu = [[
