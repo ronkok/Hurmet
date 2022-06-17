@@ -28,7 +28,7 @@
  * 4. Pipe tables as per GFM.
  * 5. Grid tables as per reStructuredText, with two exceptions:
  *    a. The top border contains ":" characters to indicate column justtification.
- *    b. Top & left borders contain "*" characters at locations where a merged
+ *    b. Top & left borders contain "+" characters at locations where a merged
  *       cell prevents a border from extending to the tables outer edge.
  * 6. Implicit reference links [title][] and implicit reference images ![alt][]
  *    ⋮
@@ -304,15 +304,13 @@ const TABLES = (function() {
       const xCorners = [0]
       for (let j = 1; j < topBorder.length; j++) {
         const ch = topBorder.charAt(j)
-        // A "*" character indicates a column border, but the top row
-        // contains a merged cell, so the column border does not extend
-        // all the way to the top of the table.
-        if (ch === "+" || ch === "*") { xCorners.push(j) }
+        // A "+" character indicates a column border.
+        if (ch === "+") { xCorners.push(j) }
       }
       const yCorners = [0]
       for (let i = 1; i < lines.length; i++) {
         const ch = lines[i].charAt(0)
-        if (ch === "+" || ch === "*") { yCorners.push(i) }
+        if (ch === "+") { yCorners.push(i) }
       }
 
       const numCols = xCorners.length - 1
@@ -354,7 +352,7 @@ const TABLES = (function() {
           const yEnd = yCorners[i + cell.rowspan]
           let str = ""
           for (let ii = yStart; ii < yEnd; ii++) {
-            str += lines[ii].slice(xStart, xEnd).replace(/ +$/, "") + "\n"
+            str += lines[ii].slice(xStart - 1, xEnd).replace(/ +$/, "") + "\n"
           }
           cell.blob = str.slice(0, -1).replace(/^\n+/, "")
 
@@ -413,7 +411,7 @@ const TABLES = (function() {
     parsePipeTable: parsePipeTable(),
     PIPE_TABLE_REGEX: /^(\|.+)\n\|([-:]+[-| :]*)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
     parseGridTable: parseGridTable(),
-    GRID_TABLE_REGEX: /^((\+(?:[-:*=]+\+)+)\n(?:[+|*][^\n]+[+|]\n)+)(?:\{([^\n}]+)\}\n)?\n*/
+    GRID_TABLE_REGEX: /^((\+(?:[-:=]+\+)+)\n(?:[+|*][^\n]+[+|]\n)+)(?:\{([^\n}]+)\}\n)?\n*/
   };
 })();
 

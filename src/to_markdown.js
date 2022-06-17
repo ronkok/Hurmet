@@ -570,7 +570,7 @@ export class MarkdownSerializerState {
           }
         }
         j += cell.attrs.colspan
-        jPM += cell.attrs.colspan
+        jPM += 1
       }
       i += 1
       j = 0
@@ -704,10 +704,7 @@ const gridTable = (table, numCols, numRowsInHeading, rowSpan, colSpan, colWidth,
     // Set column justification with ":" characters, as in pipe tables.
     topBorder += justify[j] === "c" ? ":" : "-"
     topBorder += "-".repeat(colWidth[j])
-    // Either "+" or "*" indicates a column border location.
-    // We use "*" if the top row has a horizontally merged cell.
-    const corner = (j === numCols - 1) ? "+" : (colSpan[0][j + 1] === 0) ? "*" : "+"
-    topBorder += ("cr".indexOf(justify[j]) > -1 ? ":" : "-") + corner
+    topBorder += ("cr".indexOf(justify[j]) > -1 ? ":" : "-") + "+"
   }
 
   // Set pointers frome the the grid table current location to the array of table content.
@@ -752,8 +749,8 @@ const gridTable = (table, numCols, numRowsInHeading, rowSpan, colSpan, colWidth,
         if (j === 0) {
           str = delim + "+"
         } else if (str.charAt(delim.length) === "|") {
-          // Character "*" indicates a row border location.
-          str = delim + "*" + str.slice(delim.length + 1)
+          // Character "+" indicates a row border location.
+          str = delim + "+" + str.slice(delim.length + 1)
         }
         const isHeading = numRowsInHeading === endRow + 1
         let border = "+"
