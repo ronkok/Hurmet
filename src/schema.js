@@ -341,6 +341,7 @@ export const nodes = {
         } else {
           katex.render(tex, dom, {
             displayMode: node.attrs.displayMode,
+            output: "html",
             strict: false,
             macros: {"\\class": "\\htmlClass"},
             throwOnError: false,
@@ -386,7 +387,7 @@ export const nodes = {
       dom.dataset.tex = tex
       if (node.attrs.displayMode) { dom.dataset.display = "true" }
       katex.render(tex, dom, { displayMode: node.attrs.displayMode, strict: false,
-        throwOnError: false, minRuleThickness: 0.06 })
+        output: "html", throwOnError: false, minRuleThickness: 0.06 })
       return dom
     }
   }

@@ -210,6 +210,10 @@ th p { line-height: 1.6; }
   margin-bottom: 0;
 }
 
+.ProseMirror .hurmet-calc code {
+  background-color: transparent;
+}
+
 .ProseMirror li {
   position: relative;
 }
