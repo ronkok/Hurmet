@@ -1947,8 +1947,8 @@ file and the random part after "/raw/" is the revision ID.
 
 A big document with a lot of math may cause typing lag. You can regain some
 speed by using Firefox instead of Chrome or Edge, and gain more speed by
-clicking on the Draft Mode toggle button, ![draft][]. It will render math as
-plain text and omit the blue echos.
+clicking on the Draft Mode toggle button at **File | Draft mode**. It will
+render math as plain text and omit the blue echos.
 
 I expect that Chrome and Edge will get a performance boost when they support MathML.
 
