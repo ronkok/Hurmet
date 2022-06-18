@@ -69,14 +69,15 @@ print &#x27;3&#x27;</code></pre></td></tr>
 |---------|----------|---------|
 | datum 1 | datum 2  | datum 3 |
 | datum 4 | datum 5  | datum 6 |</code></pre><p>Grid tables</p>
-<pre><code>+----------+----------+---------+
-| Head 1   |  Head 2  | Head 3  |
-+----------+----------+---------+
-| datum 1  | merged cell        |
-+----------+----------+---------+
-| datum 2  | two-line | datum 3 |
-|          | cell     |         |
-+----------+----------+---------+
+<pre><code>+----------+---------------+---------+
+| Head 1   |  Head 2       | Head 3  |
++==========+===============+=========+
+| datum 1  | merged cell             |
++----------+---------------+---------+
+| datum 2  | 1st paragraph | datum 3 |
+|          |               |         | 
+|          | 2nd paragraph |         |
++----------+---------------+---------+
 </code></pre></details>
 <h3 id='tex'>TeX</h3>
 <p>Besides its calculation cells, Hurmet also has cells that emulate the math mode of <span class="tex" data-tex="\TeX"></span> (pronounced <em>tech</em>). These cells display, but do not calculate, math. You can create a TeX cell by clicking the <img src="../../images/integral.svg" alt="integral"> button. Type <strong>Enter</strong> to save the cell.</p>
