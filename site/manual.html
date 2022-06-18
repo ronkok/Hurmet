@@ -4,9 +4,9 @@
    <meta charset="utf-8">
    <meta name="viewport" content="width=device-width, initial-scale=1">
    <title>Hurmet Manual</title>
-   <link rel="shortcut icon" href="../../images/equal-sign.ico">
-   <link rel="stylesheet" href="../../katex.min.css">
-   <style>*{margin:0;padding:0}body{font-family:"Times New Roman", Cambria, "Cambria Math", Georgia, serif}@media all{body{font-size:20px}}@media (max-width:830px){body{font-size:18px}}@media (max-width:740px){body{font-size:16px}}main{position:absolute;top:0;padding:0 2.5px}#sidebar{position:fixed;top:0;margin:0 2.5px;overflow:fixed}#demo{position:fixed;top:30%;width:280px;margin:0 2.5px 0 920px;overflow:fixed}.CodeMirror{width:250px}@media all{#sidebar{left:30px;width:230px}main{left:280px;width:580px}#demo{display:block}}@media (max-width:880px){#sidebar{left:0;width:20%}main{left:24%;width:75%}#demo{display:none}}@media (max-width:670px){#sidebar{left:0;width:5%}main{left:7%;width:90%}#demo{display:none}}h1,h2,h3{font-family:Verdana, sans-serif;font-variant:small-caps;letter-spacing:0.05em;margin-top:3em}h1{font-size:140%;margin-top:1em}h2{font-size:110%;margin-bottom:0.5em}h3{font-size:110%;margin-bottom:0.5em;margin-top:0.8em}h4{margin-bottom:0.5em;margin-top:0.8em}p{margin-top:1em;line-height:1.35;text-align:justify}hr{margin:1em}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sup{top:-0.5em}sub{bottom:-0.25em}.reduced{font-size:80%}.dim{color:gray}.katex{font-size:1em !important}.indented{margin-left:2.5em}p.indented{margin-top:0.25em;text-align:left}.indented p{margin-top:0.5em;text-align:left}table{font-size:inherit;margin-left:1.5em;border-collapse:collapse;width:auto}div > table{margin-left:0}table td{padding:0.3em 0.8em;vertical-align:middle;hyphens:none}table th{font-size:95%;padding:0.3rem 0.5rem;line-height:1.05;border-bottom:1px solid #ccc}table.grid{margin-left:0}table.grid td,table.grid th{border:1px solid #aaa;vertical-align:middle}table.grid{margin-left:0}table.grid td,table.grid th{border:1px solid #aaa;vertical-align:middle}table.markup{margin-left:0;white-space:nowrap}table.markup tr td:nth-child(2),table.markup tr th:nth-child(2){border-right:1px solid #aaa}table.auto-correct{width:28em;white-space:nowrap;margin:0 0 0 -0.5em}table.auto-correct tr td:nth-child(2),table.auto-correct tr td:nth-child(4),table.auto-correct tr td:nth-child(6),table.auto-correct tr td:nth-child(8),table.auto-correct tr th:nth-child(2),table.auto-correct tr th:nth-child(4),table.auto-correct tr th:nth-child(6),table.auto-correct tr th:nth-child(8){border-right:1px solid #aaa}table.table-no-wrap{white-space:nowrap}div#op-table + table{width:30em}.c1r td:nth-child(1),.c1r th:nth-child(1),.c2r td:nth-child(2),.c2r th:nth-child(2),.c3r td:nth-child(3),.c3r th:nth-child(3),.c4r td:nth-child(4),.c4r th:nth-child(4),.c5r td:nth-child(5),.c5r th:nth-child(5),.c6r td:nth-child(6),.c6r th:nth-child(6),.c7r td:nth-child(7),.c7r th:nth-child(7),.c8r td:nth-child(8),.c8r th:nth-child(8),.c9r td:nth-child(9),.c9r th:nth-child(9){text-align:right}.c1c td:nth-child(1),.c1c th:nth-child(1),.c2c td:nth-child(2),.c2c th:nth-child(2),.c3c td:nth-child(3),.c3c th:nth-child(3),.c4c td:nth-child(4),.c4c th:nth-child(4),.c5c td:nth-child(5),.c5c th:nth-child(5),.c6c td:nth-child(6),.c6c th:nth-child(6),.c7c td:nth-child(7),.c7c th:nth-child(7),.c8c td:nth-child(8),.c8c th:nth-child(8),.c9c td:nth-child(9),.c9c th:nth-child(9){text-align:center}dt{font-size:100%;font-weight:normal;margin-top:0.8em}dl.bold-term dt{font-size:100%;font-weight:bold;margin-top:0.8em}dd{margin-left:2.5em;line-height:1.35}ol li{position:relative;left:2.2em;width:88%;line-height:1.35;margin-top:0.5em}ul li{list-style-type:disc;line-height:1.35;margin-top:0.5em;position:relative;left:1.8em}a{text-decoration:underline;color:inherit}pre{margin:0;padding:12px;line-height:1.5;display:block;overflow:visible}code{font-family:Consolas,"Courier New",Courier,monospace;font-size:85%;background-color:rgba(27, 31, 35, 0.05)}pre > code,td code{background-color:transparent}#input-container{font-size:0.9em;width:100%;height:3em;border-radius:4px;border:1px solid rgb(200, 200, 200);display:inline-block;padding:0.5em;vertical-align:top;resize:none;overflow:hidden}#demo-output{font-size:0.9em;width:100%;height:5em;padding:1em;vertical-align:top}summary{outline:none;cursor:pointer}.mobile-menu{position:absolute;background:#fff;border:1px solid #aaa;padding-right:3em}.mobile-menu summary:after{content:none}.toc{cursor:pointer;font-family:Calibri, sans-serif;padding-top:0.5em;background:#fff}.toc li{list-style:none;line-height:1.35;position:relative;margin-top:0;left:0}.toc ul li{left:1.4em;margin-top:0;width:88%}#sidebar a{text-decoration:none;color:inherit}#mobile-nav{display:none;position:fixed}@media screen and (max-width: 670px){#mobile-nav{display:block}#sidebar{display:none}.margin-note{position:absolute;top:-9999px;left:-9999px;color:black;display:block}.margin-indicator:focus .margin-note{position:inherit}.margin-note:hover{position:inherit}.margin-note:focus{position:inherit}}#mobile-nav li{list-style:none;margin:0;padding:0.2em}#mobile-nav li a{width:60px}#mobile-nav a{text-decoration:none;color:inherit}</style>
+   <link rel="shortcut icon" href="images/equal-sign.ico">
+   <link rel="stylesheet" href="katex.min.css">
+   <link rel="stylesheet" href="styles.min.css">
 </head>
 <body>
 <main>
@@ -14,23 +14,23 @@
 <h2 id='introduction'>Introduction</h2>
 <p><em>Hurmet</em> is a rich-text editor that gives you the ability to create high quality calculation documents using standard math notation.</p>
 <p>Hurmet calculations are much easier to read and check than spreadsheet calculations. Hurmet does not hide the active expressions and intermediate values of a calculation. They’re all open for review in the displayed document.</p>
-<p>You are welcome to use the <a href='../../index.html'>Hurmet.app</a> web page under terms of the <a href='https://opensource.org/licenses/MIT/'>MIT License</a>. The source code is available in Hurmet’s GitHub <a href='https://github.com/ronkok/Hurmet'>repository</a>.</p>
+<p>You are welcome to use the <a href='index.html'>Hurmet.app</a> web page under terms of the <a href='https://opensource.org/licenses/MIT/'>MIT License</a>. The source code is available in Hurmet’s GitHub <a href='https://github.com/ronkok/Hurmet'>repository</a>.</p>
 <h3 id='editor-basics'>Editor Basics</h3>
 <p>Hurmet provides rich-text editing capabilities. You can apply styles to a document range by selecting text, then clicking one of the menu bar buttons:</p>
-<table><tr><td><strong>≡</strong> <img src="../../images/folder-open.svg" alt="open file"> <img src="../../images/save.svg" alt="save"> <strong>M</strong> ℱ ● <img src="../../images/draft.svg" alt="draft"> <img src="../../images/recalc.svg" alt="recalc"> <img src="../../images/header.svg" alt="header"> <img src="http://hurmet.app/images/printer.svg" alt="printer" class="inline">   </td><td>Document operations:<br>Navigate…, Open file…, Save file…, Import/Export to Markdown, Set  font size, Set decimal format, Draft mode, Recalculate all, Create print  header, Print…</td></tr>
-<tr><td><img src="../../images/undo.svg" alt="undo">  <img src="../../images/redo.svg" alt="redo"></td><td>Editing: Undo, Redo</td></tr>
-<tr><td><strong>B</strong>  <strong><em>I</em></strong>  <img src="../../images/embed.svg" alt="embed"> <strong>X</strong><sub>2</sub>  <strong>X</strong><sup>2</sup> <img src="../../images/strikethrough.svg" alt="strikethrough">  <strong><u>U</u></strong> </td><td>Character styles:<br>Bold, Italic, Code, Subscript, Superscript, Strikethrough, Underline</td></tr>
-<tr><td><img src="../../images/link.svg" alt="link"> <strong>—</strong> <img src="../../images/upload.svg" alt="upload"> <img src="../../images/image.svg" alt="image"> ToC <img src="../../images/plus.svg" alt="plus"> <img src="../../images/integral.svg" alt="integral"> </td><td>Insert:<br>Link…, Horizontal rule, Uploaded image…, Link to image…, Table of Contents…, Calculation…, LaTeX…</td></tr>
-<tr><td><strong>¶</strong> <img src="../../images/embed.svg" alt="embed"> <strong>H1 H2</strong> <img src="../../images/align-center.svg" alt="align-center"> <img src="../../images/indent.svg" alt="indent"> <img src="../../images/list.svg" alt="list"> <img src="../../images/list-numbered.svg" alt="numbered list"> <img src="../../images/quotes.svg" alt="quotes"> </td><td>Block styles:<br>Plain paragraph, Code block, Headings, Centered paragraph, Indent, List, Ordered list, Block quote</td></tr>
-<tr><td><img src="../../images/table.svg" alt="table"> <img src="../../images/insert-row.svg" alt="insert-row"> <img src="../../images/insert-column.svg" alt="insert-column"> <img src="../../images/delete-table.svg" alt="delete-table"> <img src="../../images/delete-row.svg" alt="delete-row"> <img src="../../images/delete-column.svg" alt="delete-column"> <img src="../../images/merge.svg" alt="merge"> <img src="../../images/align-left.svg" alt="align-left"> <img src="../../images/align-center.svg" alt="align-center"> <img src="../../images/align-right.svg" alt="align-right"> Tbl Style</td><td>Table:<br>Insert table, Insert row, Insert column, Delete table, Delete row, Delete column, Toggle cell merge, Align left, Align center, Align  right, Set table style</td></tr>
-<tr><td><img src="../../images/info.svg" alt="information">  <strong>Q</strong></td><td>Information, Quick Reference</td></tr>
+<table><tr><td><strong>≡</strong> <img src="images/folder-open.svg" alt="open file"> <img src="images/save.svg" alt="save"> <strong>M</strong> ℱ ● <img src="images/draft.svg" alt="draft"> <img src="images/recalc.svg" alt="recalc"> <img src="images/header.svg" alt="header"> <img src="http://hurmet.app/images/printer.svg" alt="printer" class="inline">   </td><td>Document operations:<br>Navigate…, Open file…, Save file…, Import/Export to Markdown, Set  font size, Set decimal format, Draft mode, Recalculate all, Create print  header, Print…</td></tr>
+<tr><td><img src="images/undo.svg" alt="undo">  <img src="images/redo.svg" alt="redo"></td><td>Editing: Undo, Redo</td></tr>
+<tr><td><strong>B</strong>  <strong><em>I</em></strong>  <img src="images/embed.svg" alt="embed"> <strong>X</strong><sub>2</sub>  <strong>X</strong><sup>2</sup> <img src="images/strikethrough.svg" alt="strikethrough">  <strong><u>U</u></strong> </td><td>Character styles:<br>Bold, Italic, Code, Subscript, Superscript, Strikethrough, Underline</td></tr>
+<tr><td><img src="images/link.svg" alt="link"> <strong>—</strong> <img src="images/upload.svg" alt="upload"> <img src="images/image.svg" alt="image"> ToC <img src="images/plus.svg" alt="plus"> <img src="images/integral.svg" alt="integral"> </td><td>Insert:<br>Link…, Horizontal rule, Uploaded image…, Link to image…, Table of Contents…, Calculation…, LaTeX…</td></tr>
+<tr><td><strong>¶</strong> <img src="images/embed.svg" alt="embed"> <strong>H1 H2</strong> <img src="images/align-center.svg" alt="align-center"> <img src="images/indent.svg" alt="indent"> <img src="images/list.svg" alt="list"> <img src="images/list-numbered.svg" alt="numbered list"> <img src="images/quotes.svg" alt="quotes"> </td><td>Block styles:<br>Plain paragraph, Code block, Headings, Centered paragraph, Indent, List, Ordered list, Block quote</td></tr>
+<tr><td><img src="images/table.svg" alt="table"> <img src="images/insert-row.svg" alt="insert-row"> <img src="images/insert-column.svg" alt="insert-column"> <img src="images/delete-table.svg" alt="delete-table"> <img src="images/delete-row.svg" alt="delete-row"> <img src="images/delete-column.svg" alt="delete-column"> <img src="images/merge.svg" alt="merge"> <img src="images/align-left.svg" alt="align-left"> <img src="images/align-center.svg" alt="align-center"> <img src="images/align-right.svg" alt="align-right"> Tbl Style</td><td>Table:<br>Insert table, Insert row, Insert column, Delete table, Delete row, Delete column, Toggle cell merge, Align left, Align center, Align  right, Set table style</td></tr>
+<tr><td><img src="images/info.svg" alt="information">  <strong>Q</strong></td><td>Information, Quick Reference</td></tr>
 </table>
 <h3 id='offline'>Offline</h3>
 <p>Hurmet has a offline page which works even if you are not connected to the internet.</p>
 <h3 id='save/open'>Save/Open</h3>
-<p>You can save your work using the <img src="../../images/save.svg" alt="save"> button. Then reopen it using the <img src="../../images/folder-open.svg" alt="open file"> button. In Chrome and Edge, the save button is smart enough to re-save your work to the same file you opened earlier. In Firefox and Safari, the save button always works like a Save As… button.</p>
+<p>You can save your work using the <img src="images/save.svg" alt="save"> button. Then reopen it using the <img src="images/folder-open.svg" alt="open file"> button. In Chrome and Edge, the save button is smart enough to re-save your work to the same file you opened earlier. In Firefox and Safari, the save button always works like a Save As… button.</p>
 <h3 id='print-header'>Print Header</h3>
-<p>You can create a print header in any document by clicking the <img src="../../images/header.svg" alt="header"> button. Later, when you click the <img src="http://hurmet.app/images/printer.svg" alt="printer" class="inline"> button, the header will be printed at the top of every page (except the cover page). The header is a table and it should remain a table. Otherwise, edit it any way you want.</p>
+<p>You can create a print header in any document by clicking the <img src="images/header.svg" alt="header"> button. Later, when you click the <img src="http://hurmet.app/images/printer.svg" alt="printer" class="inline"> button, the header will be printed at the top of every page (except the cover page). The header is a table and it should remain a table. Otherwise, edit it any way you want.</p>
 <p>If you write <code>$PAGE</code> into a print header, Hurmet will print page numbers at that location.</p>
 <h3 id='table-of-contents'>Table of Contents</h3>
 <p>The <strong>ToC</strong> button creates a Table of Contents at the selection point. The table will be built from Headings in your document. In the ToC dialog box, you can choose which heading levels to include.</p>
@@ -45,15 +45,15 @@
 <tr><td style="width: 392px">_Italic_</td><td style="width: 177px"><em>Italic</em></td></tr>
 <tr><td style="width: 392px">**Bold**</td><td style="width: 177px"><strong>Bold</strong></td></tr>
 <tr><td style="width: 392px">`inline code`</td><td style="width: 177px"><code>inline code</code></td></tr>
-<tr><td style="width: 392px">¢`2 + 2 = ?`</td><td style="width: 177px"><span class="tex" data-tex="2 + 2 = 4"></span></td></tr>
+<tr><td style="width: 392px">¢`2 + 2 = ?` </td><td style="width: 177px"><span class="tex" data-tex="2 + 2 = 4"></span><br>(calculation zone)</td></tr>
 <tr><td style="width: 392px">$ \TeX$</td><td style="width: 177px"><span class="tex" data-tex="\TeX"></span></td></tr>
 <tr><td style="width: 392px">~~strikethrough~~</td><td style="width: 177px"><del>strikethrough</del></td></tr>
 <tr><td style="width: 392px"># Heading 1</td><td style="width: 177px"><strong>Heading 1</strong></td></tr>
 <tr><td style="width: 392px">## Heading 2</td><td style="width: 177px"><em>Heading 2</em></td></tr>
 <tr><td style="width: 392px">[Link](http://a.com)</td><td style="width: 177px"><a href='http://a.com'>Link</a></td></tr>
 <tr><td style="width: 392px">[Link][]<br>⋮<br>[Link]: http://a.com</td><td style="width: 177px"><a href='http://a.com' title='2''>Link</a>  </td></tr>
-<tr><td style="width: 392px">![image](http://url/image.svg)</td><td style="width: 177px"><img src="../../images/image.svg" alt="image"></td></tr>
-<tr><td style="width: 392px">![image][]<br>⋮<br>[image]: http://url/image.svg</td><td style="width: 177px"><img src="../../images/image.svg" alt="image">  </td></tr>
+<tr><td style="width: 392px">![image](http://url/image.svg)</td><td style="width: 177px"><img src="images/image.svg" alt="image"></td></tr>
+<tr><td style="width: 392px">![image][]<br>⋮<br>[image]: http://url/image.svg</td><td style="width: 177px"><img src="images/image.svg" alt="image">  </td></tr>
 <tr><td style="width: 392px">&gt; Blockquote</td><td style="width: 177px">| Blockquote</td></tr>
 <tr><td style="width: 392px">* List<br>* List<br>* List</td><td style="width: 177px">• List<br>• List<br>• List</td></tr>
 <tr><td style="width: 392px">1. One<br>2. Two<br>3. Three</td><td style="width: 177px">1. One<br>2. Two<br>3. Three</td></tr>
@@ -80,7 +80,7 @@ print &#x27;3&#x27;</code></pre></td></tr>
 +----------+---------------+---------+
 </code></pre></details>
 <h3 id='tex'>TeX</h3>
-<p>Besides its calculation cells, Hurmet also has cells that emulate the math mode of <span class="tex" data-tex="\TeX"></span> (pronounced <em>tech</em>). These cells display, but do not calculate, math. You can create a TeX cell by clicking the <img src="../../images/integral.svg" alt="integral"> button. Type <strong>Enter</strong> to save the cell.</p>
+<p>Besides its calculation cells, Hurmet also has cells that emulate the math mode of <span class="tex" data-tex="\TeX"></span> (pronounced <em>tech</em>). These cells display, but do not calculate, math. You can create a TeX cell by clicking the <img src="images/integral.svg" alt="integral"> button. Type <strong>Enter</strong> to save the cell.</p>
 <p>To create a cell in TeX display mode, first change the paragraph format to center-justified, then create the cell.</p>
 <p>For more information about TeX and LaTeX, good places to start are the Wikibooks pages for writing <a href='https://en.wikibooks.org/wiki/LaTeX/Mathematics'>math</a> and <a href='https://en.wikibooks.org/wiki/LaTeX/Advanced_Mathematics'>advanced math</a>; and the KaTeX <a href='https://katex.org/'>home page</a> and <a href='https://katex.org/docs/supported.html'>supported-functions</a> page.</p>
 <p>Hurmet calculation cells use a different syntax than TeX. In calculation cells, the syntax is more akin to a programming language, yet it renders like mathematics.</p>
@@ -88,7 +88,7 @@ print &#x27;3&#x27;</code></pre></td></tr>
 <h2 id='tutorial'>Tutorial</h2>
 <dl class="bold-term">
 <dt id='create-a-cell'>Create a cell</dt>
-<dd><p>Hurmet calculation cells display math and perform numeric calculations. To create a calculation cell in  Hurmet.app, select a spot in the document, then click the <img src="../../images/plus.svg" alt="plus"> button or type <strong>Alt c</strong>.</p>
+<dd><p>Hurmet calculation cells display math and perform numeric calculations. To create a calculation cell in  Hurmet.app, select a spot in the document, then click the <img src="images/plus.svg" alt="plus"> button or type <strong>Alt c</strong>.</p>
 <p>While in a cell,<br>        <strong>Enter</strong> will close and update the cell.<br>        <strong>Shift-Enter</strong> will create a newline inside the cell.<br>        <strong>Esc</strong> will close the cell without updating it.<br>        Clicking elsewhere will also close the cell.</p>
 </dd>
 <div id="statement-container">
@@ -244,7 +244,7 @@ print &#x27;3&#x27;</code></pre></td></tr>
 <tr><td>string<br>s = &quot;abcde&quot; </td><td>s[2]<br>s[2..4]<br>s[3..]</td><td>b<br>bce<br>cde</td></tr>
 <tr><td>Vector<br>𝐕 = <span class="tex" data-tex="\begin{bmatrix}1 &amp; 2 &amp; 3 &amp; 4 &amp; 5 \end{bmatrix}"></span> </td><td>𝐕[2]<br>𝐕[2..4]<br>𝐕[3..]</td><td>2<br><span class="tex" data-tex="\begin{bmatrix}2 &amp; 3 &amp; 4 \end{bmatrix}"></span><br><span class="tex" data-tex="\begin{bmatrix}3 &amp; 4 &amp; 5 \end{bmatrix}"></span></td></tr>
 <tr><td>Matrix<br>𝐌 = <span class="tex" data-tex="\ \begin{pmatrix}1 &amp; 2 &amp; 3 \\ 4 &amp; 5 &amp; 6 \\ 7 &amp; 8 &amp; 9 \end{pmatrix}"></span> </td><td>𝐌[2, 3]<br>𝐌[3,]<br>𝐌[2..3, 1:2]</td><td>6<br><span class="tex" data-tex="\begin{bmatrix}7 &amp; 8 &amp; 9 \end{bmatrix}"></span><br><span class="tex" data-tex="\begin{bmatrix}4 &amp; 5 \\ 7 &amp; 8 \end{bmatrix}"></span></td></tr>
-<tr><td>Data Frame<br><img src="../../images/dataframe.png" alt="dataframe" width="200">     </td><td>DF.B<br>DF[&quot;B&quot;]<br>DF.area<br>DF.B.area<br>DF[&quot;B&quot;].area<br>DF[&quot;B&quot;, &quot;area&quot;]<br>DF.w[1]</td><td>An entire row<br>An entire row<br>Column vector<br>22<br>22<br>22<br>4</td></tr>
+<tr><td>Data Frame<br><img src="images/dataframe.png" alt="dataframe" width="200">     </td><td>DF.B<br>DF[&quot;B&quot;]<br>DF.area<br>DF.B.area<br>DF[&quot;B&quot;].area<br>DF[&quot;B&quot;, &quot;area&quot;]<br>DF.w[1]</td><td>An entire row<br>An entire row<br>Column vector<br>22<br>22<br>22<br>4</td></tr>
 </table>
 </div>
 <p>Dot notation can be used only if the property name is a valid <a href='#identifiers'>identifier</a>.</p>
@@ -254,7 +254,7 @@ print &#x27;3&#x27;</code></pre></td></tr>
 <table><tr><th>Form</th>
 <th>Examples</th>
 </tr>
-<tr><td rowspan="4"><img src="../../images/assignment-railroad.svg" alt="identifier = value">      </td><td><code>x = 5</code></td></tr>
+<tr><td rowspan="4"><img src="images/assignment-railroad.svg" alt="identifier = value">      </td><td><code>x = 5</code></td></tr>
 <tr><td><code>L = 3.1 &#x27;m&#x27;</code></td></tr>
 <tr><td><code>w = 100 &#x27;lbf/ft&#x27;</code></td></tr>
 <tr><td>name = &quot;James&quot;</td></tr>
@@ -271,7 +271,7 @@ print &#x27;3&#x27;</code></pre></td></tr>
 <tr><td><code>A = 2 &#x27;m&#x27; × 4 &#x27;feet&#x27; = ?? m²</code></td><td><span class="tex" data-tex="A = 2 \; {\text{m}}× 4 \; {\text{feet}}= 2.4384 \; {\text{m}^{2}}"></span></td></tr>
 </table>
 <p>The expression form is more precisely defined as:</p>
-<p><img src="../../images/statement-railroad.svg" alt="optional identifier equals expression equals display selector unit name"></p>
+<p><img src="images/statement-railroad.svg" alt="optional identifier equals expression equals display selector unit name"></p>
 <p>At the beginning of the statement, you can write an optional variable name. The result of the calculation will be assigned to that variable. Expressions later in the document can call the variable. Variable names must qualify as valid <a href='#identifiers'>identifiers</a>. They are case-sensitive and bold-sensitive. A search for variable <em>E</em> will not find <em>e</em>. A search for <strong>M</strong> will not find <em>M</em>.</p>
 <p>You can define a unit for the result with a leading currency symbol or a trailing unit name, but not both in the same statement.</p>
 <p>You can also slip in a <code>;</code> character just before the final <code>=</code> sign in a statement. That will create a multiple line statement, with aligned <code>=</code> signs.</p>
@@ -301,7 +301,7 @@ print &#x27;3&#x27;</code></pre></td></tr>
 <li>Primes may be appended to the very end, as in: <span class="tex" data-tex="f{_\text{c}&#x27;}"></span>.</li>
 <li>The following keywords may not be used as variable names: <code>π</code>, <code>j</code>, <code>ℏ</code>, <code>true</code>, <code>false</code>, <code>root</code>, <code>if</code>, <code>else</code>, <code>otherwise</code>, <code>end</code>, <code>and</code>, <code>or</code>, <code>modulo</code>, <code>in</code>, <code>to</code>.</li>
 </ul>
-<div class="indented"><p><img src="../../images/identifier-railroad.svg" alt="letter letter-or-digit-or-accent prime"></p>
+<div class="indented"><p><img src="images/identifier-railroad.svg" alt="letter letter-or-digit-or-accent prime"></p>
 </div><p>The names of those accents are:</p>
 <table><tr><td>grave</td><td>acute</td><td>hat</td><td>tilde</td></tr>
 <tr><td>bar</td><td>breve</td><td>dot</td><td>ddot</td></tr>
@@ -340,7 +340,7 @@ a[5..]    # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong><
 <dt id='number'>Number</dt>
 <dd><p>Enter as integers (33), decimals (2.45), percentages (3.2%), scientific notation (3.1e4), mixed fractions (3 ⁷⁄₈) or hexadecimal (0x2A).</p>
 </dd>
-<p><img src="../../images/NumberRailroad.svg" alt="integers, decimals, percentages, scientific notation, mixed fractions, or hexadecimal" id="number-rr" width="650"></p>
+<p><img src="images/NumberRailroad.svg" alt="integers, decimals, percentages, scientific notation, mixed fractions, or hexadecimal" id="number-rr" width="650"></p>
 <div class="indented"><p>Notice that a number literal must begin and end with a numeral, not a decimal symbol. Hurmet will not recognize <code>5.</code> as a number.</p>
 <p>Hurmet’s default decimal symbol is a dot. You can choose instead to enter numbers with a decimal comma via a drop-down menu labeled “●”. Numbers are never entered with a thousands separator, but they can be <em>displayed</em> with one. The ● menu also controls that display.</p>
 <p>Hurmet always saves a decimal symbol as a dot. It’s only the display that changes.</p>
@@ -373,7 +373,7 @@ a[5..]    # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong><
 <tr><td><code>10 &#x27;N·m/s&#x27;</code></td><td><span class="tex" data-tex="10 \; {\text{N}\mkern1mu{\cdot}\mkern1mu\text{m/s}}"></span></td></tr>
 <tr><td><code>[2.1; 15.3] &#x27;feet&#x27;</code></td><td><span class="tex" data-tex="\begin{bmatrix}2.1 \\ 15.3 \end{bmatrix}\; {\text{feet}}"></span></td></tr>
 </table>
-<p><img src="../../images/unit-railroad.svg" alt="number or matrix or map apostrophe unit-name apostrophe"></p>
+<p><img src="images/unit-railroad.svg" alt="number or matrix or map apostrophe unit-name apostrophe"></p>
 <p>A Hurmet treats the number and the unit together as a single <em>quantity</em>. Quantities are useful in <a href='#unit-aware-calculations'>unit-aware calculations</a> which do automatic unit conversion and also check for unit compatibility.</p>
 <p>Hurmet has many built-in <a href='unit-definitions.html'>unit definitions</a>. You can write any one of them into a quantity. SI (metric) prefixes are valid on the appropriate unit names.</p>
 <p>You can also create compound units on the fly. That is, you can raise any unit to a power, and these powers-of-units can be multiplied (or divided) together into products. Example:</p>
@@ -677,7 +677,7 @@ a[5..]    # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong><
     0.65                         if f_c′ ≥ 8000 ;
     0.85 - (f_c′ - 4000)/20000   otherwise
 }</code></pre><p>The spaces in that code example are not significant. Hurmet always aligns the words <code>if</code> and <code>otherwise</code>. In fact, that example could also be coded all onto one line. To be precise, the form is:</p>
-<p><img src="../../images/if-railroad.svg" alt="expression if condition; expression otherwise"></p>
+<p><img src="images/if-railroad.svg" alt="expression if condition; expression otherwise"></p>
 <p>Conditions may contain logical operators:  and or not ∧  ∨  ¬  ⊻</p>
 <p><span class="tex" data-tex="x = \begin{cases}2 \, a &amp;\mathrel{\mathrm{if}}a \lt b \mathrel{\mathrm{and}}b = 4 \\ a^{2}&amp;\mathrel{\mathrm{otherwise}}\end{cases}"></span></p>
 <p>Chained comparisons are okay.</p>
@@ -803,7 +803,7 @@ end</code></pre><p>Other Hurmet calculation cells can then call the function:</p
 <p><span class="tex" data-tex="n = \operatorname{multiply}(2 ,\: 4)= 8"></span></p>
 <p>Unlike other Hurmet assignments, user defined functions can be placed at the end of the document and still be called by other expressions.</p>
 <p>The function can have any number of arguments, or none, separated by commas. So the form of the first line is:</p>
-<p><img src="../../images/function-railroad.svg" alt="functionName open paren arguments close paren"></p>
+<p><img src="images/function-railroad.svg" alt="functionName open paren arguments close paren"></p>
 <p>The function name and each argument (if any) must be valid identifiers.</p>
 <p>Function statements end at a line ending, unless the last character is one of: <strong>( [ { , ; + -</strong> or the following line begins with one of: <strong>} ] )</strong></p>
 <p>Comments can be written after <code>#</code>. A space must precede the <code>#</code>.</p>
@@ -844,7 +844,7 @@ for ch in &quot;abcdef&quot;
    reverse = ch &amp; reverse
 end</code></pre></td></tr>
 </table>
-<p><img src="../../images/for-loop-railroad.svg" alt="for index variable in range or matrix or string"></p>
+<p><img src="images/for-loop-railroad.svg" alt="for index variable in range or matrix or string"></p>
 <p>The index variable of a <em>for</em> loop will iterate through each of the numbers in a range, the elements in a matrix, or the characters in a string.</p>
 </dd>
 <dt id='break'>break</dt>
@@ -856,16 +856,16 @@ end</code></pre></td></tr>
 end</code></pre></dd>
 <dt id='return'>return</dt>
 <dd><p>A <em>return</em> statement terminates the function.</p>
-<p><img src="../../images/return-railroad.svg" alt="return optional expression"></p>
+<p><img src="images/return-railroad.svg" alt="return optional expression"></p>
 <p>If the optional <em>expression</em> is present, the function will return its result. If not, the function will return <code>undefined</code>.</p>
 </dd>
 <dt id='raise'>raise</dt>
 <dd><p>A <em>raise</em> statement terminates the function and returns an optional error message.</p>
-<p><img src="../../images/raise-railroad.svg" alt="raise optional string"></p>
+<p><img src="images/raise-railroad.svg" alt="raise optional string"></p>
 </dd>
 <dt id='echo'>echo</dt>
 <dd><p>A <em>echo</em> statement writes a message to the browser’s console. You can type <strong>Ctrl Shift I</strong> to see it. Such a message can be very useful while debugging a function.</p>
-<p><img src="../../images/echo-railroad.svg" alt="echo string"></p>
+<p><img src="images/echo-railroad.svg" alt="echo string"></p>
 </dd>
 </dl>
 <h2 id='remote-modules'>Remote modules</h2>
@@ -1060,7 +1060,7 @@ end</code></pre><p>A Hurmet document can load an entire module into one variable
 </nav>
 <div id="mobile-nav">
 <div id="navicon">
-<details><summary><img src="../../images/navicon.svg" alt="≡" width="24" height="24"></summary>
+<details><summary><img src="images/navicon.svg" alt="≡" width="24" height="24"></summary>
   <ul class="mobile-menu">
     <li><a href="#top">Top</a></li>
     <li><a href="#math-editor">Calculation</a></li>

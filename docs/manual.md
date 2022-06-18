@@ -4,9 +4,9 @@
    <meta charset="utf-8">
    <meta name="viewport" content="width=device-width, initial-scale=1">
    <title>Hurmet Manual</title>
-   <link rel="shortcut icon" href="../../images/equal-sign.ico">
-   <link rel="stylesheet" href="../../katex.min.css">
-   <style>*{margin:0;padding:0}body{font-family:"Times New Roman", Cambria, "Cambria Math", Georgia, serif}@media all{body{font-size:20px}}@media (max-width:830px){body{font-size:18px}}@media (max-width:740px){body{font-size:16px}}main{position:absolute;top:0;padding:0 2.5px}#sidebar{position:fixed;top:0;margin:0 2.5px;overflow:fixed}#demo{position:fixed;top:30%;width:280px;margin:0 2.5px 0 920px;overflow:fixed}.CodeMirror{width:250px}@media all{#sidebar{left:30px;width:230px}main{left:280px;width:580px}#demo{display:block}}@media (max-width:880px){#sidebar{left:0;width:20%}main{left:24%;width:75%}#demo{display:none}}@media (max-width:670px){#sidebar{left:0;width:5%}main{left:7%;width:90%}#demo{display:none}}h1,h2,h3{font-family:Verdana, sans-serif;font-variant:small-caps;letter-spacing:0.05em;margin-top:3em}h1{font-size:140%;margin-top:1em}h2{font-size:110%;margin-bottom:0.5em}h3{font-size:110%;margin-bottom:0.5em;margin-top:0.8em}h4{margin-bottom:0.5em;margin-top:0.8em}p{margin-top:1em;line-height:1.35;text-align:justify}hr{margin:1em}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sup{top:-0.5em}sub{bottom:-0.25em}.reduced{font-size:80%}.dim{color:gray}.katex{font-size:1em !important}.indented{margin-left:2.5em}p.indented{margin-top:0.25em;text-align:left}.indented p{margin-top:0.5em;text-align:left}table{font-size:inherit;margin-left:1.5em;border-collapse:collapse;width:auto}div > table{margin-left:0}table td{padding:0.3em 0.8em;vertical-align:middle;hyphens:none}table th{font-size:95%;padding:0.3rem 0.5rem;line-height:1.05;border-bottom:1px solid #ccc}table.grid{margin-left:0}table.grid td,table.grid th{border:1px solid #aaa;vertical-align:middle}table.grid{margin-left:0}table.grid td,table.grid th{border:1px solid #aaa;vertical-align:middle}table.markup{margin-left:0;white-space:nowrap}table.markup tr td:nth-child(2),table.markup tr th:nth-child(2){border-right:1px solid #aaa}table.auto-correct{width:28em;white-space:nowrap;margin:0 0 0 -0.5em}table.auto-correct tr td:nth-child(2),table.auto-correct tr td:nth-child(4),table.auto-correct tr td:nth-child(6),table.auto-correct tr td:nth-child(8),table.auto-correct tr th:nth-child(2),table.auto-correct tr th:nth-child(4),table.auto-correct tr th:nth-child(6),table.auto-correct tr th:nth-child(8){border-right:1px solid #aaa}table.table-no-wrap{white-space:nowrap}div#op-table + table{width:30em}.c1r td:nth-child(1),.c1r th:nth-child(1),.c2r td:nth-child(2),.c2r th:nth-child(2),.c3r td:nth-child(3),.c3r th:nth-child(3),.c4r td:nth-child(4),.c4r th:nth-child(4),.c5r td:nth-child(5),.c5r th:nth-child(5),.c6r td:nth-child(6),.c6r th:nth-child(6),.c7r td:nth-child(7),.c7r th:nth-child(7),.c8r td:nth-child(8),.c8r th:nth-child(8),.c9r td:nth-child(9),.c9r th:nth-child(9){text-align:right}.c1c td:nth-child(1),.c1c th:nth-child(1),.c2c td:nth-child(2),.c2c th:nth-child(2),.c3c td:nth-child(3),.c3c th:nth-child(3),.c4c td:nth-child(4),.c4c th:nth-child(4),.c5c td:nth-child(5),.c5c th:nth-child(5),.c6c td:nth-child(6),.c6c th:nth-child(6),.c7c td:nth-child(7),.c7c th:nth-child(7),.c8c td:nth-child(8),.c8c th:nth-child(8),.c9c td:nth-child(9),.c9c th:nth-child(9){text-align:center}dt{font-size:100%;font-weight:normal;margin-top:0.8em}dl.bold-term dt{font-size:100%;font-weight:bold;margin-top:0.8em}dd{margin-left:2.5em;line-height:1.35}ol li{position:relative;left:2.2em;width:88%;line-height:1.35;margin-top:0.5em}ul li{list-style-type:disc;line-height:1.35;margin-top:0.5em;position:relative;left:1.8em}a{text-decoration:underline;color:inherit}pre{margin:0;padding:12px;line-height:1.5;display:block;overflow:visible}code{font-family:Consolas,"Courier New",Courier,monospace;font-size:85%;background-color:rgba(27, 31, 35, 0.05)}pre > code,td code{background-color:transparent}#input-container{font-size:0.9em;width:100%;height:3em;border-radius:4px;border:1px solid rgb(200, 200, 200);display:inline-block;padding:0.5em;vertical-align:top;resize:none;overflow:hidden}#demo-output{font-size:0.9em;width:100%;height:5em;padding:1em;vertical-align:top}summary{outline:none;cursor:pointer}.mobile-menu{position:absolute;background:#fff;border:1px solid #aaa;padding-right:3em}.mobile-menu summary:after{content:none}.toc{cursor:pointer;font-family:Calibri, sans-serif;padding-top:0.5em;background:#fff}.toc li{list-style:none;line-height:1.35;position:relative;margin-top:0;left:0}.toc ul li{left:1.4em;margin-top:0;width:88%}#sidebar a{text-decoration:none;color:inherit}#mobile-nav{display:none;position:fixed}@media screen and (max-width: 670px){#mobile-nav{display:block}#sidebar{display:none}.margin-note{position:absolute;top:-9999px;left:-9999px;color:black;display:block}.margin-indicator:focus .margin-note{position:inherit}.margin-note:hover{position:inherit}.margin-note:focus{position:inherit}}#mobile-nav li{list-style:none;margin:0;padding:0.2em}#mobile-nav li a{width:60px}#mobile-nav a{text-decoration:none;color:inherit}</style>
+   <link rel="shortcut icon" href="images/equal-sign.ico">
+   <link rel="stylesheet" href="katex.min.css">
+   <link rel="stylesheet" href="docStyles.css">
 </head>
 
 <body>
@@ -27,7 +27,7 @@ You are welcome to use the [Hurmet.app][] web page under terms of the
 [MIT License][]. The source code is available in Hurmet’s GitHub
 [repository][].
 
-[Hurmet.app]: ../../index.html
+[Hurmet.app]: index.html
 [MIT License]: https://opensource.org/licenses/MIT/
 [more features]: #coming-attractions
 [repository]: https://github.com/ronkok/Hurmet
@@ -73,40 +73,40 @@ document range by selecting text, then clicking one of the menu bar buttons:
 | ![information][]  **Q**              | Information, Quick Reference       |
 +--------------------------------------+------------------------------------+
 
-[open file]: ../../images/folder-open.svg
-[save]: ../../images/save.svg
-[header]: ../../images/header.svg
-[draft]: ../../images/draft.svg
-[recalc]: ../../images/recalc.svg
-[printer]: ../../images/printer.svg
-[undo]: ../../images/undo.svg
-[redo]: ../../images/redo.svg
-[embed]: ../../images/embed.svg
-[strikethrough]: ../../images/strikethrough.svg
-[link]: ../../images/link.svg
-[upload]: ../../images/upload.svg
-[image]: ../../images/image.svg
-[plus]: ../../images/plus.svg
-[integral]: ../../images/integral.svg
+[open file]: images/folder-open.svg
+[save]: images/save.svg
+[header]: images/header.svg
+[draft]: images/draft.svg
+[recalc]: images/recalc.svg
+[printer]: images/printer.svg
+[undo]: images/undo.svg
+[redo]: images/redo.svg
+[embed]: images/embed.svg
+[strikethrough]: images/strikethrough.svg
+[link]: images/link.svg
+[upload]: images/upload.svg
+[image]: images/image.svg
+[plus]: images/plus.svg
+[integral]: images/integral.svg
 [math]: https://en.wikibooks.org/wiki/LaTeX/Mathematics
 [advanced math]: https://en.wikibooks.org/wiki/LaTeX/Advanced_Mathematics
 [home page]: https://katex.org/
 [supported-functions]: https://katex.org/docs/supported.html
-[indent]: ../../images/indent.svg
-[list]: ../../images/list.svg
-[numbered list]: ../../images/list-numbered.svg
-[quotes]: ../../images/quotes.svg
-[table]: ../../images/table.svg
-[insert-row]: ../../images/insert-row.svg
-[insert-column]: ../../images/insert-column.svg
-[delete-table]: ../../images/delete-table.svg
-[delete-row]: ../../images/delete-row.svg
-[delete-column]: ../../images/delete-column.svg
-[merge]: ../../images/merge.svg
-[align-left]: ../../images/align-left.svg
-[align-center]: ../../images/align-center.svg
-[align-right]: ../../images/align-right.svg
-[information]: ../../images/info.svg
+[indent]: images/indent.svg
+[list]: images/list.svg
+[numbered list]: images/list-numbered.svg
+[quotes]: images/quotes.svg
+[table]: images/table.svg
+[insert-row]: images/insert-row.svg
+[insert-column]: images/insert-column.svg
+[delete-table]: images/delete-table.svg
+[delete-row]: images/delete-row.svg
+[delete-column]: images/delete-column.svg
+[merge]: images/merge.svg
+[align-left]: images/align-left.svg
+[align-center]: images/align-center.svg
+[align-right]: images/align-right.svg
+[information]: images/info.svg
 
 ### Offline
 
@@ -149,58 +149,59 @@ calculations, indented paragraphs, and tables with merged cells.
 Paragraphs and lists are preceded by a blank line.\
 A newline is indicated by a backslash, `\`, at the end of a line.
 
-+------------------------------------------+-------------------+
-| Type                                     | To get…           |
-+==========================================+===================+
-| \_Italic\_                               | _Italic_          |
-+------------------------------------------+-------------------+
-| \**Bold\**                               | **Bold**          |
-+------------------------------------------+-------------------+
-| \`inline code\`                          | `inline code`     |
-+------------------------------------------+-------------------+
-| \¢\`2 + 2 = ?\`                          | ¢` 2 + 2 = 4 `    |
-+------------------------------------------+-------------------+
-| \$ \\TeX\$                               | ¢` \TeX `         |
-+------------------------------------------+-------------------+
-| \~~strikethrough\~~                      | ~~strikethrough~~ |
-+------------------------------------------+-------------------+
-| \# Heading 1                             | **Heading 1**     |
-+------------------------------------------+-------------------+
-| \## Heading 2                            | _Heading 2_       |
-+------------------------------------------+-------------------+
-| \[Link\](http://a.com)                   | [Link][]          |
-+------------------------------------------+-------------------+
-| \[Link\]\[\]\                            | [Link][2]         |
-| ⋮\                                       |                   |
-| \[Link\]: http://a.com                   |                   |
-+------------------------------------------+-------------------+
-| !\[image\](http://url/image.svg)         | ![image][]        |
-+------------------------------------------+-------------------+
-| !\[image\]\[\]\                          | ![image][]        |
-| ⋮\                                       |                   |
-| \[image\]: http://url/image.svg          |                   |
-+------------------------------------------+-------------------+
-| > Blockquote                             | | Blockquote      |
-+------------------------------------------+-------------------+
-| \* List\                                 | • List\           |
-| \* List\                                 | • List\           |
-| \* List                                  | • List            |
-+------------------------------------------+-------------------+
-| 1\. One\                                 | 1. One\           |
-| 2\. Two\                                 | 2. Two\           |
-| 3\. Three                                | 3. Three          |
-+------------------------------------------+-------------------+
-| \`\`\`\                                  | ```               |
-| \#code block\                            | # code block      |
-| print '3 '\                              | print '3'         |
-| \`\`\`                                   | ```               |
-+------------------------------------------+-------------------+
-| i> indented block                        | indented block    |
-+------------------------------------------+-------------------+
-| C> Centered block                        | Centered block    |
-+------------------------------------------+-------------------+
-| H> print header                          |                   |
-+------------------------------------------+-------------------+
++------------------------------------------+--------------------+
+| Type                                     | To get…            |
++==========================================+====================+
+| \_Italic\_                               | _Italic_           |
++------------------------------------------+--------------------+
+| \**Bold\**                               | **Bold**           |
++------------------------------------------+--------------------+
+| \`inline code\`                          | `inline code`      |
++------------------------------------------+--------------------+
+| \¢\`2 + 2 = ?\`                          | ¢` 2 + 2 = 4 `\    |
+|                                          | (calculation zone) |
++------------------------------------------+--------------------+
+| \$ \\TeX\$                               | ¢` \TeX `          |
++------------------------------------------+--------------------+
+| \~~strikethrough\~~                      | ~~strikethrough~~  |
++------------------------------------------+--------------------+
+| \# Heading 1                             | **Heading 1**      |
++------------------------------------------+--------------------+
+| \## Heading 2                            | _Heading 2_        |
++------------------------------------------+--------------------+
+| \[Link\](http://a.com)                   | [Link][]           |
++------------------------------------------+--------------------+
+| \[Link\]\[\]\                            | [Link][2]          |
+| ⋮\                                       |                    |
+| \[Link\]: http://a.com                   |                    |
++------------------------------------------+--------------------+
+| !\[image\](http://url/image.svg)         | ![image][]         |
++------------------------------------------+--------------------+
+| !\[image\]\[\]\                          | ![image][]         |
+| ⋮\                                       |                    |
+| \[image\]: http://url/image.svg          |                    |
++------------------------------------------+--------------------+
+| > Blockquote                             | | Blockquote       |
++------------------------------------------+--------------------+
+| \* List\                                 | • List\            |
+| \* List\                                 | • List\            |
+| \* List                                  | • List             |
++------------------------------------------+--------------------+
+| 1\. One\                                 | 1. One\            |
+| 2\. Two\                                 | 2. Two\            |
+| 3\. Three                                | 3. Three           |
++------------------------------------------+--------------------+
+| \`\`\`\                                  | ```                |
+| \#code block\                            | # code block       |
+| print '3 '\                              | print '3'          |
+| \`\`\`                                   | ```                |
++------------------------------------------+--------------------+
+| i> indented block                        | indented block     |
++------------------------------------------+--------------------+
+| C> Centered block                        | Centered block     |
++------------------------------------------+--------------------+
+| H> print header                          |                    |
++------------------------------------------+--------------------+
 {.grid colWidths="392 177"}
 
 Begin a line with `*****` to get a horzontal rule.
@@ -554,7 +555,7 @@ The font corrections, e.g., `bb …` work on any letter from A to Z or a to z.
 +--------------------------------------+-----------------------+-------------------+
 {.grid}
 
-[dataframe]: ../../images/dataframe.png
+[dataframe]: images/dataframe.png
 {width=200}
 
 </div>
@@ -579,7 +580,7 @@ It’s quite simple to assign a value to a variable:
 |                                   | name = "James"     |
 +-----------------------------------+--------------------+
 
-[assignment]: ../../images/assignment-railroad.svg
+[assignment]: images/assignment-railroad.svg
 
 To calulate an <span id="expression">expression</span> that contains a variable,
 a function, or an operator; write a `?` or `%` or `@` to indicate where the
@@ -599,7 +600,7 @@ The expression form is more precisely defined as:
 
 ![optional identifier equals expression equals display selector unit name][statement]
 
-[statement]: ../../images/statement-railroad.svg
+[statement]: images/statement-railroad.svg
 
 At the beginning of the statement, you can write an optional variable name.
 The result of the calculation will be assigned to that variable. Expressions
@@ -679,7 +680,7 @@ Variable names and function names must be written in the form of a valid _identi
 
 i> ![letter letter-or-digit-or-accent prime][identifier]
 
-[identifier]: ../../images/identifier-railroad.svg
+[identifier]: images/identifier-railroad.svg
 
 The names of those accents are:
 
@@ -753,7 +754,7 @@ Number
 
 ![integers, decimals, percentages, scientific notation, mixed fractions, or hexadecimal][number]
 
-[number]: ../../images/NumberRailroad.svg
+[number]: images/NumberRailroad.svg
 {width=650 #number-rr}
 
 i>  Notice that a number literal must begin and end with a numeral, not a decimal
@@ -813,7 +814,7 @@ Unit
 
     ![number or matrix or map apostrophe unit-name apostrophe][unit]
 
-    [unit]: ../../images/unit-railroad.svg
+    [unit]: images/unit-railroad.svg
 
     A Hurmet treats the number and the unit together as a single _quantity_.
     Quantities are useful in [unit-aware calculations](#unit-aware-calculations)
@@ -1473,7 +1474,7 @@ one line. To be precise, the form is:
 
 ![expression if condition; expression otherwise][if]
 
-[if]: ../../images/if-railroad.svg
+[if]: images/if-railroad.svg
 
 Conditions may contain logical operators:  and or not ∧  ∨  ¬  ⊻
 
@@ -1743,7 +1744,7 @@ end of the document and still be called by other expressions.
 The function can have any number of arguments, or none, separated by commas. So
 the form of the first line is:
 
-![functionName open paren arguments close paren](../../images/function-railroad.svg)
+![functionName open paren arguments close paren](images/function-railroad.svg)
 
 The function name and each argument (if any) must be valid identifiers.
 
@@ -1825,7 +1826,7 @@ for
     +------------------+---------------------------+
     {.grid}
 
-    ![for index variable in range or matrix or string](../../images/for-loop-railroad.svg)
+    ![for index variable in range or matrix or string](images/for-loop-railroad.svg)
 
     The index variable of a _for_ loop will iterate through each of the numbers in
     a range, the elements in a matrix, or the characters in a string.
@@ -1846,7 +1847,7 @@ return
 
 :   A _return_ statement terminates the function.
 
-    ![return optional expression](../../images/return-railroad.svg)
+    ![return optional expression](images/return-railroad.svg)
 
     If the optional _expression_ is present, the function will return its result.
     If not, the function will return `undefined`.
@@ -1855,7 +1856,7 @@ raise
 
 :   A _raise_ statement terminates the function and returns an optional error message.
 
-    ![raise optional string](../../images/raise-railroad.svg)
+    ![raise optional string](images/raise-railroad.svg)
 
 echo
 
@@ -1863,7 +1864,7 @@ echo
     **Ctrl Shift I** to see it. Such a message can be very useful while debugging
     a function.
 
-    ![echo string](../../images/echo-railroad.svg)
+    ![echo string](images/echo-railroad.svg)
 
 </dl>
 
@@ -2169,7 +2170,7 @@ Copyright © 2020-2022 Ron Kok. Released under the [MIT License](https://opensou
 
 <div id="mobile-nav">
 <div id="navicon">
-<details><summary><img src="../../images/navicon.svg" alt="≡" width="24" height="24"></summary>
+<details><summary><img src="images/navicon.svg" alt="≡" width="24" height="24"></summary>
   <ul class="mobile-menu">
     <li><a href="#top">Top</a></li>
     <li><a href="#math-editor">Calculation</a></li>

@@ -3,15 +3,15 @@ const hurmetMark = require("./hurmetMark.cjs")
 
 // This file builds the Hurmet documentation.
 // Start by translating the reference manual from Markdown to HTML.
-let manual = fs.readFileSync('docs/en/manual.md').toString('utf8')
+let manual = fs.readFileSync('docs/manual.md').toString('utf8')
 // convert Markdown to HTML
 manual =  hurmetMark.hmd.md2html(manual, true)
-fs.writeFileSync('site/docs/en/manual.html', manual)
+fs.writeFileSync('site/manual.html', manual)
 manual = manual.replace("../demo.min.mjs", "demo.mjs")
 fs.writeFileSync('preview/manual.html', manual)
 
 // Now translate the unit-definitions file from Markdown to HTML.
-let units = fs.readFileSync('docs/en/unit-definitions.md').toString('utf8')
+let units = fs.readFileSync('docs/unit-definitions.md').toString('utf8')
 // Substitute some headings.
 units = units.replace("| L  | M  | Ti | E  | Te | # | LI | $ |",
   "| length | mass | time | electric<br>current | temp | amount | luminous<br>intensity " +
@@ -28,4 +28,4 @@ while ((parts = fractionRegEx.exec(units)) !== null) {
     + "<span>" + parts[2] + "</span></span></td>"
     + units.slice(parts.index + parts[0].length)
 }
-fs.writeFileSync('site/docs/en/unit-definitions.html', units)
+fs.writeFileSync('site/unit-definitions.html', units)
