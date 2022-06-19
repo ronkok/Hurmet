@@ -238,10 +238,10 @@ Grid tables
 
 [2]: http://a.com
 
-[Printer]: http://hurmet.app/images/printer.svg
+[Printer]: https://hurmet.app/images/printer.svg
 {.inline alt="Printer"}
 
-[printer]: http://hurmet.app/images/printer.svg
+[printer]: https://hurmet.app/images/printer.svg
 {.inline alt="printer"}
 
 </details>
