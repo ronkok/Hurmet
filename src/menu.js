@@ -397,15 +397,15 @@ export function saveFile(state) {
   })
 }
 
-function exportMarkdownFile(state) {
+function exportMarkdownFile(isGFM) {
   return new MenuItem({
-    title: "Export Markdown...",
-    label: "Export Markdown...",
+    title: isGFM ? "Export GFM…" : "Export Markdown…",
+    label: isGFM ? "Export GFM…" : "Export Markdown…",
     enable(state) {
       return true
     },
     run(state) {
-      const str = hurmetMarkdownSerializer.serialize(state.doc, new Map())
+      const str = hurmetMarkdownSerializer.serialize(state.doc, new Map(), isGFM)
       // Save the result
       const blob = new Blob([str], {type: "text/plain;charset=utf-8"})
       saveAs(blob, "HurmetMarkdown.md", { autoBom : false });
@@ -904,7 +904,8 @@ export function buildMenuItems(schema) {
   r.apostrophecomma = setDecimalFormat("1’000’000,")
   r.dotcomma = setDecimalFormat("1.000.000,")
 
-  r.exportMarkdown = exportMarkdownFile()
+  r.exportMarkdown = exportMarkdownFile(false)
+  r.exportGFM = exportMarkdownFile(true)
   r.importMarkdownFile = importMarkdownFile()
   r.pica = setFontSize(12)
   r.longprimer = setFontSize(10)
@@ -1094,6 +1095,7 @@ export function buildMenuItems(schema) {
     r.toggleDraftMode,
     r.insertHeader,
     r.exportMarkdown,
+    r.exportGFM,
     r.importMarkdownFile,
     r.pagesize,
     r.print

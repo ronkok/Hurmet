@@ -138,9 +138,13 @@ choose which heading levels to include.
 
 ### Markdown
 
-Using the **M▾** button, you can import or export files in _Markdown_, a
+In the **File▾** menu, you can import or export files in _Markdown_, a
 lightweight markup format. Hurmet's version of Markdown is extended to enable
-calculations, indented paragraphs, and tables with merged cells.
+calculations, indented paragraphs, centered paragraphs, and tables with merged
+cells or multiple paragraphs in a cell.
+
+…or you can export GFM (Github Flavored Markdown), which does not have Hurmet’s
+extensions and which converts calculation zones to TeX.
 
 <details><summary>Click for more…</summary>
 
