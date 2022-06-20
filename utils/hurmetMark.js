@@ -48,7 +48,10 @@ const htmlTag = (tagName, content, attributes = {}, isClosed = true) => {
       const attribute = attributes[attr];
     // Removes falsey attributes
       if (attribute) {
-        attributeString += " " + sanitizeText(attr) + '="' + sanitizeText(attribute) + '"';
+        const sanitizedAttribute = attr === "src"
+          ? attribute.replace(/</g, "%3C").replace(/>/g, "%3E")
+          : sanitizeText(attribute)
+        attributeString += " " + sanitizeText(attr) + '="' + sanitizedAttribute + '"';
       }
     }
   }
@@ -123,7 +126,7 @@ const nodes = {
     return htmlTag("a", output(node.content), attributes);
   },
   image(node) {
-    const attributes = { src: sanitizeUrl(node.attrs.src), alt: node.attrs.alt };
+    const attributes = { src: node.attrs.src, alt: node.attrs.alt };
     if (node.attrs.class) { attributes.class = node.attrs.class }
     if (node.attrs.id)    { attributes.id = node.attrs.id }
     if (node.attrs.width) { attributes.width = node.attrs.width }

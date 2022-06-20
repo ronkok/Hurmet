@@ -145,7 +145,7 @@ export const nodes = {
       src: {},
       alt: {default: null},
 //      title: {default: null},
-      width: {default: "100"},
+      width: {default: null},
       class: {default: "inline"}
     },
     group: "inline",

@@ -399,7 +399,7 @@ export function saveFile(state) {
 
 function exportMarkdownFile(isGFM) {
   return new MenuItem({
-    title: isGFM ? "Export GFM…" : "Export Markdown…",
+    title: isGFM ? "Export GitHub Flavored Markdown…" : "Export Markdown…",
     label: isGFM ? "Export GFM…" : "Export Markdown…",
     enable(state) {
       return true

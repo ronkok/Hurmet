@@ -1387,11 +1387,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.5039","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["1","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.3824","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -1400,10 +1400,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.3631","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["1","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["1","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["1.0105","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.0308","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -1423,7 +1423,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.85500","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1431,23 +1431,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.2314","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["3.6112","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["81.8710","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["141.21","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1356.27","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1458,7 +1458,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["21.4474","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -1488,7 +1488,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0486","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -2031,13 +2031,11 @@ const unitFromWord = (inputStr, currencies, customUnits) => {
         u.factor = Rnl.reciprocal(currencies.value.get(currencyCode));
       } else {
         // Read the line whose key is the standard 3-letter currency code.
-        // This value comes from a <script> tag in the Hurmet index.html page.
-        // eslint-disable-next-line no-undef
-        const rate = currencyRates[currencyCode];
-        if (!rate) {
+        unitArray = unitTable[currencyCode];
+        if (unitArray[0] === "0") {
           return errorOprnd("CURRENCY")
         } else {
-          u.factor = Rnl.reciprocal(Rnl.fromString(rate));
+          u.factor = Rnl.reciprocal(Rnl.fromString(unitArray[0]));
         }
       }
     } else {
@@ -5463,7 +5461,7 @@ const parse = (
           rpn += '"' + token.input + '"'; // a loop index variable name.
         } else {
           // We're in the echo of a Hurmet calculation.
-          if (/^[.[]/.test(str)) {
+          if (/^(\.[^.]|\[)/.test(str)) {
             // When the blue echo has an index in a bracket, e.g., varName[indes], it renders
             // the name of the variable, not the value. The value of the value of the index.
             token.output = token.ttype === tt.LONGVAR
@@ -6188,7 +6186,7 @@ const parse = (
     while (rpnStack.length > 0) {
       rpn += tokenSep + rpnStack.pop().symbol;
     }
-    const varRegEx = /〖[^ ()]+/g;
+    const varRegEx = /〖[^ ().]+/g;
     let arr;
     while ((arr = varRegEx.exec(tex)) !== null) {
       if ("¨ˆˉ˙˜".indexOf(arr[0][1]) === -1) {
@@ -11340,15 +11338,15 @@ const proceedAfterFetch = (
           if (isCalcAll || attrs.rpn) {
             tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs));
           }
-        } else if (attrs.name && !(isCalcAll && attrs.isFetch)) {
-          if (attrs.name) {
-            if (attrs.name === "importedParameters") {
-              Object.entries(attrs.value).forEach(([key, value]) => {
-                hurmetVars[key] =  value;
-              });
-            } else {
-              insertOneHurmetVar(hurmetVars, attrs, decimalFormat);
-            }
+        }
+      } else if (node.attrs.name && !(isCalcAll && node.attrs.isFetch)) {
+        if (node.attrs.name) {
+          if (node.attrs.name === "importedParameters") {
+            Object.entries(node.attrs.value).forEach(([key, value]) => {
+              hurmetVars[key] =  value;
+            });
+          } else {
+            insertOneHurmetVar(hurmetVars, node.attrs, decimalFormat);
           }
         }
       }
@@ -11530,13 +11528,13 @@ const hurmet = Object.freeze({
  *
  * 1. Hurmet inline calculation is delimited ¢`…`.
  *    Hurmet display calculation is fenced ¢¢\n … \n¢¢.
- * 2. LaTeX inline math is delimited $`…`.
+ * 2. LaTeX inline math is delimited $…$. $ and \\ are escaped \$ & \\\\.
  *    LaTeX display math is fenced  $$\n … \n$$.
  * 3. ~~strikethrough~~
  * 4. Pipe tables as per GFM.
  * 5. Grid tables as per reStructuredText, with two exceptions:
  *    a. The top border contains ":" characters to indicate column justtification.
- *    b. Top & left borders contain "*" characters at locations where a merged
+ *    b. Top & left borders contain "+" characters at locations where a merged
  *       cell prevents a border from extending to the tables outer edge.
  * 6. Implicit reference links [title][] and implicit reference images ![alt][]
  *    ⋮
@@ -11812,15 +11810,13 @@ const TABLES = (function() {
       const xCorners = [0];
       for (let j = 1; j < topBorder.length; j++) {
         const ch = topBorder.charAt(j);
-        // A "*" character indicates a column border, but the top row
-        // contains a merged cell, so the column border does not extend
-        // all the way to the top of the table.
-        if (ch === "+" || ch === "*") { xCorners.push(j); }
+        // A "+" character indicates a column border.
+        if (ch === "+") { xCorners.push(j); }
       }
       const yCorners = [0];
       for (let i = 1; i < lines.length; i++) {
         const ch = lines[i].charAt(0);
-        if (ch === "+" || ch === "*") { yCorners.push(i); }
+        if (ch === "+") { yCorners.push(i); }
       }
 
       const numCols = xCorners.length - 1;
@@ -11862,7 +11858,7 @@ const TABLES = (function() {
           const yEnd = yCorners[i + cell.rowspan];
           let str = "";
           for (let ii = yStart; ii < yEnd; ii++) {
-            str += lines[ii].slice(xStart, xEnd).replace(/ +$/, "") + "\n";
+            str += lines[ii].slice(xStart - 1, xEnd).replace(/ +$/, "") + "\n";
           }
           cell.blob = str.slice(0, -1).replace(/^\n+/, "");
 
@@ -11921,7 +11917,7 @@ const TABLES = (function() {
     parsePipeTable: parsePipeTable(),
     PIPE_TABLE_REGEX: /^(\|.+)\n\|([-:]+[-| :]*)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
     parseGridTable: parseGridTable(),
-    GRID_TABLE_REGEX: /^((\+(?:[-:*=]+\+)+)\n(?:[+|*][^\n]+[+|]\n)+)(?:\{([^\n}]+)\}\n)?\n*/
+    GRID_TABLE_REGEX: /^((\+(?:[-:=]+\+)+)\n(?:[+|*][^\n]+[+|]\n)+)(?:\{([^\n}]+)\}\n)?\n*/
   };
 })();
 
@@ -12214,13 +12210,14 @@ rules.set("calculation", {
 });
 rules.set("tex", {
   isLeaf: true,
-  match: anyScopeRegex(/^(?:\$(`+)([\s\S]*?[^`])\1(?!`)|\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$)/),
+  match: anyScopeRegex(/^(?:\$((?:\\[\s\S]|[^\\])+?)\$|\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$)/),
   parse: function(capture, state) {
-    if (capture[2]) {
-      const tex = capture[2].trim().replace(/\n/g, " ");
+    if (capture[1]) {
+      const tex = capture[1].trim().replace(/\n/g, " ").replace(/\\\\\\\\/g, "\\\\").replace(/\\\$/g, "$");
       return { content: "", attrs: { tex } }
     } else {
-      return { content: "", attrs: { tex: capture[3].trim(), displayMode: true } }
+      const tex = capture[2].trim().replace(/\\\\\\\\/g, "\\\\").replace(/\\\$/g, "$");
+      return { content: "", attrs: { tex, displayMode: true } }
     }
   }
 });
@@ -12510,7 +12507,10 @@ const htmlTag = (tagName, content, attributes = {}, isClosed = true) => {
       const attribute = attributes[attr];
     // Removes falsey attributes
       if (attribute) {
-        attributeString += " " + sanitizeText(attr) + '="' + sanitizeText(attribute) + '"';
+        const sanitizedAttribute = attr === "src"
+          ? attribute.replace(/</g, "%3C").replace(/>/g, "%3E")
+          : sanitizeText(attribute);
+        attributeString += " " + sanitizeText(attr) + '="' + sanitizedAttribute + '"';
       }
     }
   }
@@ -12585,7 +12585,7 @@ const nodes = {
     return htmlTag("a", output(node.content), attributes);
   },
   image(node) {
-    const attributes = { src: sanitizeUrl(node.attrs.src), alt: node.attrs.alt };
+    const attributes = { src: node.attrs.src, alt: node.attrs.alt };
     if (node.attrs.class) { attributes.class = node.attrs.class; }
     if (node.attrs.id)    { attributes.id = node.attrs.id; }
     if (node.attrs.width) { attributes.width = node.attrs.width; }

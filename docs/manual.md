@@ -38,12 +38,14 @@ Hurmet provides rich-text editing capabilities. You can apply styles to a
 document range by selecting text, then clicking one of the menu bar buttons:
 
 +:-------------------------------------+:-----------------------------------+
-| **≡** ![open file][] ![save][]       | Document operations:\              |
-| **M** ℱ ● ![draft][] ![recalc][]     | Navigate…, Open file…, Save file…, |
-| ![header][] ![printer][]             | Import/Export to Markdown, Set     |
-|                                      | font size, Set decimal format,     |
-|                                      | Draft mode, Recalculate all,       |
-|                                      | Create print  header, Print…       |
+| \                                    | Document operations:\              |
+| **≡**\                               | Navigate…,\                        |
+| \                                    | File: Open…, Set font size,\       |
+| **File▾**\                           |   Draft Mode, Import/Export to     |
+| \                                    |   Markdown/GFM,\                   |
+| ![save][]  ●  ![recalc][]            |   Set Page Size, Print,\           |
+|                                      | Save File…, Set decimal format,    |
+|                                      | Recalculate all                    |
 +--------------------------------------+------------------------------------+
 | ![undo][]  ![redo][]                 | Editing: Undo, Redo                |
 +--------------------------------------+------------------------------------+
@@ -73,40 +75,36 @@ document range by selecting text, then clicking one of the menu bar buttons:
 | ![information][]  **Q**              | Information, Quick Reference       |
 +--------------------------------------+------------------------------------+
 
-[open file]: images/folder-open.svg
-[save]: images/save.svg
-[header]: images/header.svg
-[draft]: images/draft.svg
-[recalc]: images/recalc.svg
-[printer]: images/printer.svg
-[undo]: images/undo.svg
-[redo]: images/redo.svg
-[embed]: images/embed.svg
-[strikethrough]: images/strikethrough.svg
-[link]: images/link.svg
-[upload]: images/upload.svg
-[image]: images/image.svg
+[save]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M8.5 5.5v-5h2v5h2l-3 3-3-3zm8 10h-13l-3-6h3v-6h4v1h-3v5h9l2 4v-9h-4v-1h5z'/%3E%3C/svg%3E
+[recalc]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 9a7.982 7.982 0 0 0 2.709 6l1.323-1.5a6 6 0 1 1 8.212-8.743L10.001 7h6V1l-2.343 2.343A8 8 0 0 0 .001 9z'/%3E%3C/svg%3E
+[undo]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M11.904 16C13.681 12.781 13.98 7.87 7 8.034V12L1 6l6-6v3.881c8.359-.218 9.29 7.378 4.904 12.119z'/%3E%3C/svg%3E
+[redo]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M9 3.881V0l6 6-6 6V8.034C2.02 7.87 2.319 12.781 4.096 16-.29 11.259.641 3.663 9 3.881z'/%3E%3C/svg%3E
+[embed]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='m9 11.5 1.5 1.5 5-5-5-5L9 4.5 12.5 8zM7 4.5 5.5 3l-5 5 5 5L7 11.5 3.5 8z'/%3E%3C/svg%3E
+[strikethrough]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M16 8v1h-3.664c.43.602.664 1.292.664 2 0 1.107-.573 2.172-1.572 2.921C10.501 14.617 9.283 15 8 15s-2.501-.383-3.428-1.079C3.573 13.172 3 12.107 3 11h2c0 1.084 1.374 2 3 2s3-.916 3-2-1.374-2-3-2H0V8h4.68a3.003 3.003 0 0 1-.108-.079C3.573 7.172 3 6.107 3 5s.573-2.172 1.572-2.921C5.499 1.383 6.717 1 8 1s2.501.383 3.428 1.079C12.427 2.828 13 3.893 13 5h-2c0-1.084-1.374-2-3-2s-3 .916-3 2 1.374 2 3 2c1.234 0 2.407.354 3.32 1H16z'/%3E%3C/svg%3E
+[link]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M6.879 9.934a.81.81 0 0 1-.575-.238 3.818 3.818 0 0 1 0-5.392l3-3C10.024.584 10.982.187 12 .187s1.976.397 2.696 1.117a3.818 3.818 0 0 1 0 5.392l-1.371 1.371a.813.813 0 0 1-1.149-1.149l1.371-1.371A2.19 2.19 0 0 0 12 1.812c-.584 0-1.134.228-1.547.641l-3 3a2.19 2.19 0 0 0 0 3.094.813.813 0 0 1-.575 1.387z'/%3E%3Cpath d='M4 15.813a3.789 3.789 0 0 1-2.696-1.117 3.818 3.818 0 0 1 0-5.392l1.371-1.371a.813.813 0 0 1 1.149 1.149l-1.371 1.371A2.19 2.19 0 0 0 4 14.188c.585 0 1.134-.228 1.547-.641l3-3a2.19 2.19 0 0 0 0-3.094.813.813 0 0 1 1.149-1.149 3.818 3.818 0 0 1 0 5.392l-3 3A3.789 3.789 0 0 1 4 15.813z'/%3E%3C/svg%3E
+[upload]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M7 9h2V5h3L8 1 4 5h3zm3-2.25v1.542L14.579 10 8 12.453 1.421 10 6 8.292V6.75L0 9v4l8 3 8-3V9z'/%3E%3C/svg%3E
+[image]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='m14.998 2 .002.002v11.996l-.002.002H1.002L1 13.998V2.002L1.002 2h13.996zM15 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h14c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1z'/%3E%3Cpath d='M13 4.5a1.5 1.5 0 1 1-3.001-.001A1.5 1.5 0 0 1 13 4.5zM14 13H2v-2l3.5-6 4 5h1L14 7z'/%3E%3C/svg%3E
 [plus]: images/plus.svg
-[integral]: images/integral.svg
+[integral]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 511.247 881.285' height='18' width='18'%3E%3Cpath d='M190.028 157.945c16.43-48.954 53.42-96.347 90.062-123.328C316.73 7.637 353.024 1.07 392.542.12c39.522-.949 82.27 3.72 102.958 14.197 20.684 10.476 19.31 26.758 5.604 40.3-13.708 13.542-39.744 24.341-62.734 28.375-22.99 4.033-42.932 1.3-60.886-3.427-17.952-4.726-33.92-11.446-46.358-12.602-12.436-1.154-21.346 3.255-28.362 9.272-7.016 6.016-12.136 13.64-12.326 32.56-.19 18.92 4.55 49.14 8.766 77.193 4.216 28.053 7.904 53.941 12.844 118.142 4.94 64.2 11.132 166.713 16.242 243.227 5.112 76.513 9.14 127.027-7.288 175.982-16.428 48.954-53.312 96.348-89.9 123.33-36.588 26.98-72.88 33.547-112.4 34.496-39.52.95-82.268-3.72-102.954-14.197-20.686-10.476-19.312-26.759-5.604-40.3 13.706-13.542 39.744-24.34 62.732-28.376 22.99-4.033 42.932-1.3 60.886 3.428 17.952 4.726 33.92 11.446 46.358 12.602 12.438 1.154 21.346-3.256 28.364-9.273 7.014-6.015 12.134-13.639 12.324-32.56.192-18.92-4.55-49.138-8.766-77.192-4.214-28.053-7.902-53.942-12.844-118.142-4.94-64.2-11.132-166.713-16.298-243.227-5.162-76.513-9.298-127.028 7.128-175.983z'/%3E%3C/svg%3E
 [math]: https://en.wikibooks.org/wiki/LaTeX/Mathematics
 [advanced math]: https://en.wikibooks.org/wiki/LaTeX/Advanced_Mathematics
 [home page]: https://katex.org/
 [supported-functions]: https://katex.org/docs/supported.html
-[indent]: images/indent.svg
-[list]: images/list.svg
-[numbered list]: images/list-numbered.svg
-[quotes]: images/quotes.svg
-[table]: images/table.svg
-[insert-row]: images/insert-row.svg
-[insert-column]: images/insert-column.svg
-[delete-table]: images/delete-table.svg
-[delete-row]: images/delete-row.svg
-[delete-column]: images/delete-column.svg
-[merge]: images/merge.svg
-[align-left]: images/align-left.svg
-[align-center]: images/align-center.svg
-[align-right]: images/align-right.svg
-[information]: images/info.svg
+[indent]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 1h16v2H0zm6 3h10v2H6zm0 3h10v2H6zm0 3h10v2H6zm-6 3h16v2H0zm0-2V5l4 3z'/%3E%3C/svg%3E
+[list]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 0h4v4H0zm6 1h10v2H6zM0 6h4v4H0zm6 1h10v2H6zm-6 5h4v4H0zm6 1h10v2H6z'/%3E%3C/svg%3E
+[numbered list]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M6 13h10v2H6zm0-6h10v2H6zm0-6h10v2H6zM3 0v4H2V1H1V0zM2 8.219V9h2v1H1V7.719l2-.938V6H1V5h3v2.281zM4 11v5H1v-1h2v-1H1v-1h2v-1H1v-1z'/%3E%3C/svg%3E
+[quotes]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M3.516 7a3.5 3.5 0 1 1-3.5 3.5L0 10a7 7 0 0 1 7-7v2a4.97 4.97 0 0 0-3.536 1.464 5.01 5.01 0 0 0-.497.578c.179-.028.362-.043.548-.043zm9 0a3.5 3.5 0 1 1-3.5 3.5L9 10a7 7 0 0 1 7-7v2a4.97 4.97 0 0 0-3.536 1.464 5.01 5.01 0 0 0-.497.578c.179-.028.362-.043.549-.043z'/%3E%3C/svg%3E
+[table]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath d='M17 17v5h2a3 3 0 0 0 3-3v-2h-5Zm-2 0H9v5h6v-5Zm2-2h5V9h-5v6Zm-2 0V9H9v6h6Zm2-8h5V5a3 3 0 0 0-3-3h-2v5Zm-2 0V2H9v5h6Zm9 9.177V19a5 5 0 0 1-5 5H5a5 5 0 0 1-5-5V5a5 5 0 0 1 5-5h14a5 5 0 0 1 5 5v2.823a.843.843 0 0 1 0 .354v7.646a.843.843 0 0 1 0 .354ZM7 2H5a3 3 0 0 0-3 3v2h5V2ZM2 9v6h5V9H2Zm0 8v2a3 3 0 0 0 3 3h2v-5H2Z'/%3E%3C/svg%3E
+[insert-row]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath d='M19 14a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm2.5 5.938a.937.937 0 1 0 0-1.875h-1.25a.312.312 0 0 1-.313-.313V16.5a.937.937 0 1 0-1.875 0v1.25c0 .173-.14.313-.312.313H16.5a.937.937 0 1 0 0 1.875h1.25c.173 0 .313.14.313.312v1.25a.937.937 0 1 0 1.875 0v-1.25c0-.173.14-.313.312-.313h1.25ZM5 2a3 3 0 1 0 0 6h14a3 3 0 0 0 0-6H5Zm0-2h14a5 5 0 0 1 0 10H5A5 5 0 1 1 5 0Z'/%3E%3C/svg%3E
+[insert-column]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath d='M19 14a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm2.5 5.938a.937.937 0 1 0 0-1.875h-1.25a.312.312 0 0 1-.313-.313V16.5a.937.937 0 1 0-1.875 0v1.25c0 .173-.14.313-.312.313H16.5a.937.937 0 1 0 0 1.875h1.25c.173 0 .313.14.313.312v1.25a.937.937 0 1 0 1.875 0v-1.25c0-.173.14-.313.312-.313h1.25ZM2 19a3 3 0 0 0 6 0V5a3 3 0 1 0-6 0v14Zm-2 0V5a5 5 0 1 1 10 0v14a5 5 0 0 1-10 0Z'/%3E%3C/svg%3E
+[delete-table]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath d='M19 14a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm-2.5 5.938h5a.937.937 0 1 0 0-1.875h-5a.937.937 0 1 0 0 1.875ZM12.29 17H9v5h3.674c.356.75.841 1.426 1.427 2H5a5 5 0 0 1-5-5V5a5 5 0 0 1 5-5h14a5 5 0 0 1 5 5v2.823a.843.843 0 0 1 0 .354V14.1a7.018 7.018 0 0 0-2-1.427V9h-5v3.29a6.972 6.972 0 0 0-2 .965V9H9v6h4.255a6.972 6.972 0 0 0-.965 2ZM17 7h5V5a3 3 0 0 0-3-3h-2v5Zm-2 0V2H9v5h6ZM7 2H5a3 3 0 0 0-3 3v2h5V2ZM2 9v6h5V9H2Zm0 8v2a3 3 0 0 0 3 3h2v-5H2Z'/%3E%3C/svg%3E
+[delete-row]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath d='M13.255 15a6.972 6.972 0 0 0-.965 2H5A5 5 0 0 1 5 7h14a5 5 0 0 1 4.671 6.787 7.01 7.01 0 0 0-1.74-1.146A3 3 0 0 0 19 9H5a3 3 0 0 0 0 6h8.255ZM19 14a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm-2.5 5.938h5a.937.937 0 1 0 0-1.875h-5a.937.937 0 1 0 0 1.875Z'/%3E%3C/svg%3E
+[delete-column]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath d='M12.641 21.931a7.01 7.01 0 0 0 1.146 1.74A5 5 0 0 1 7 19V5a5 5 0 1 1 10 0v7.29a6.972 6.972 0 0 0-2 .965V5a3 3 0 0 0-6 0v14a3 3 0 0 0 3.641 2.931ZM19 14a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm-2.5 5.938h5a.937.937 0 1 0 0-1.875h-5a.937.937 0 1 0 0 1.875Z'/%3E%3C/svg%3E
+[merge]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath d='M2 19a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V5a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v14Zm-2 0V5a5 5 0 0 1 5-5h14a5 5 0 0 1 5 5v14a5 5 0 0 1-5 5H5a5 5 0 0 1-5-5Zm12-9a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0v-2a1 1 0 0 1 1-1Zm0 6a1 1 0 0 1 1 1v3a1 1 0 0 1-2 0v-3a1 1 0 0 1 1-1Zm0-13a1 1 0 0 1 1 1v3a1 1 0 0 1-2 0V4a1 1 0 0 1 1-1Z'/%3E%3C/svg%3E
+[align-left]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 1h16v2H0zm0 3h10v2H0zm0 6h10v2H0zm0-3h16v2H0zm0 6h16v2H0z'/%3E%3C/svg%3E
+[align-center]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 1h16v2H0zm3 3h10v2H3zm0 6h10v2H3zM0 7h16v2H0zm0 6h16v2H0z'/%3E%3C/svg%3E
+[align-right]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 1h16v2H0zm6 3h10v2H6zm0 6h10v2H6zM0 7h16v2H0zm0 6h16v2H0z'/%3E%3C/svg%3E
+[information]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M7 4.75c0-.412.338-.75.75-.75h.5c.412 0 .75.338.75.75v.5c0 .412-.338.75-.75.75h-.5A.753.753 0 0 1 7 5.25v-.5zM10 12H6v-1h1V8H6V7h3v4h1z'/%3E%3Cpath d='M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm0 14.5a6.5 6.5 0 1 1 0-13 6.5 6.5 0 0 1 0 13z'/%3E%3C/svg%3E
 
 ### Offline
 
@@ -116,14 +114,14 @@ internet.
 ### Save/Open
 
 You can save your work using the ![save][] button. Then reopen it using the
-![open file][] button. In Chrome and Edge, the save button is smart enough to
+File | Open… menu choice. In Chrome and Edge, the save button is smart enough to
 re-save your work to the same file you opened earlier. In Firefox and Safari,
 the save button always works like a Save As… button.
 
 ### Print Header
 
-You can create a print header in any document by clicking the ![header][] button.
-Later, when you click the ![printer][] button, the header will be printed at the
+You can create a print header in any document by clicking the File | Print Header menu choice.
+Later, when you click the File | Print… menu choice, the header will be printed at the
 top of every page (except the cover page). The header is a table and it should
 remain a table. Otherwise, edit it any way you want.
 
@@ -237,12 +235,6 @@ Grid tables
 [Link]: http://a.com
 
 [2]: http://a.com
-
-[Printer]: https://hurmet.app/images/printer.svg
-{.inline alt="Printer"}
-
-[printer]: https://hurmet.app/images/printer.svg
-{.inline alt="printer"}
 
 </details>
 
