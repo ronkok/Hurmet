@@ -28,4 +28,5 @@ while ((parts = fractionRegEx.exec(units)) !== null) {
     + "<span>" + parts[2] + "</span></span></td>"
     + units.slice(parts.index + parts[0].length)
 }
+fs.writeFileSync('preview/unit-definitions.html', units)
 fs.writeFileSync('site/unit-definitions.html', units)

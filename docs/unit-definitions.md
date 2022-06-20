@@ -10,11 +10,16 @@
 
 # Hurmet Units
 
-The values in columns _length_ through _money_ are exponents that Hurmet uses to check unit compatibility. For instance, a liter is a measure of volume, or _length_<sup>3</sup>, so the table’s “length” column shows a 3 for liters.
+The values in columns _length_ through _money_ are exponents that Hurmet uses to check unit compatibility.
+For instance, a liter is a measure of volume, or _length_<sup>3</sup>, so the table’s “length” column shows a 3 for liters.
 
-The currency exchange rates in this table are only placeholders. Hurmet actually uses [data from the European Central Bank](https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml). This data is updated once per week. You can [define your own](./manual.html#currencies), more accurate exchange rates to override the default rates.
+The currency exchange rates in this table are only placeholders.
+Hurmet actually uses [data from the European Central Bank](https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml).
+This data is updated once per week. You can [define your own](./manual.html#currencies),
+more accurate exchange rates to override the default rates.
 
-If you are curious about some of the more unusual units, such as “survey foot” or “nautical mile”, I recommend Russ Rowlett’s [dictionary of units of measurement](http://www.ibiblio.org/units/).
+If you are curious about some of the more unusual units, such as “survey foot” or “nautical mile”,
+I recommend Russ Rowlett’s [dictionary of units of measurement](http://www.ibiblio.org/units/).
 
 | Unit                  | Factor                         | Gauge   | Misc     | L  | M  | Ti | E  | Te | # | LI | $ | Comment                          |
 |-----------------------|--------------------------------|---------|----------|----|----|----|----|----|---|----|---|----------------------------------|
