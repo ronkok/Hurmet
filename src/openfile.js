@@ -18,7 +18,8 @@ const handleContents = (view, schema, str, format) => {
         "decimalFormat": "1,000,000.",
         "inDraftMode": false,
         "fontSize": 12,
-        "fileHandle": null
+        "fileHandle": null,
+        "pageSize": "letter"
       },
       "content": ast
     }
@@ -29,6 +30,11 @@ const handleContents = (view, schema, str, format) => {
   document.getElementById("print-div").className = fontSize === 12
     ? "ProseMirror pica"
     : "ProseMirror long-primer"
+  const pageSize = (doc.attrs.pageSize) ? doc.attrs.pageSize : "letter"
+  const style = document.getElementById("pageStyle")
+  style.innerHTML = pageSize === "letter"
+  ? `@media print {@page{size: letter; margin: 16mm 0.75in 16mm 0.75in;}}`
+  : `@media print {@page{size: A4; margin: 16mm 16.1mm 16mm 16.1mm;}}`
 
   // Write the document with just the entries.
   // If a Hurmet error occurs later, the document is at least loaded and rendered.
