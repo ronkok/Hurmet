@@ -72,30 +72,6 @@ Display:
 <div id="copyright">Copyright © 2020-2022 Ron Kok. Released under the <a href="https://opensource.org/licenses/MIT">MIT License</a></div>
 
 <script type="module" src="./prosemirror.min.mjs"></script>
-<!--
-<script>
-  const hash = location.hash
-  if (hash && hash.length > 1) {
-    const url = decodeURIComponent(hash.slice(1))
-    const str = fetch
-    const ast = md2ast(str)
-    doc = {
-      type: "doc",
-      "attrs": {
-        "decimalFormat": "1,000,000.",
-        "inDraftMode": false,
-        "fontSize": 12,
-        "fileHandle": null,
-        "pageSize": "letter"
-      },
-      "content": ast
-    }
-    doc = JSON.parse(JSON.stringify(doc))
-
-
-  }
-</script>
--->
 <script>
   window.addEventListener('beforeunload', function (e) {
 	// If changes have been made, put up a dialog box to warn the user.
