@@ -55,8 +55,8 @@ document range by selecting text, then clicking one of the menu bar buttons:
 |                                      | Underline                          |
 +--------------------------------------+------------------------------------+
 | ![link][] **—** ![upload][]          | Insert:\                           |
-| ![image][] ToC ![plus][]             | Link…, Horizontal rule, Uploaded   |
-| ![integral][]                        | image…, Link to image…, Table of   |
+| ![image][] ToC ![C][]                | Link…, Horizontal rule, Uploaded   |
+| ![T][]                               | image…, Link to image…, Table of   |
 |                                      | Contents…, Calculation…, LaTeX…    |
 +--------------------------------------+------------------------------------+
 | **¶** ![embed][] **H1 H2**           | Block styles:\                     |
@@ -84,8 +84,8 @@ document range by selecting text, then clicking one of the menu bar buttons:
 [link]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M6.879 9.934a.81.81 0 0 1-.575-.238 3.818 3.818 0 0 1 0-5.392l3-3C10.024.584 10.982.187 12 .187s1.976.397 2.696 1.117a3.818 3.818 0 0 1 0 5.392l-1.371 1.371a.813.813 0 0 1-1.149-1.149l1.371-1.371A2.19 2.19 0 0 0 12 1.812c-.584 0-1.134.228-1.547.641l-3 3a2.19 2.19 0 0 0 0 3.094.813.813 0 0 1-.575 1.387z'/%3E%3Cpath d='M4 15.813a3.789 3.789 0 0 1-2.696-1.117 3.818 3.818 0 0 1 0-5.392l1.371-1.371a.813.813 0 0 1 1.149 1.149l-1.371 1.371A2.19 2.19 0 0 0 4 14.188c.585 0 1.134-.228 1.547-.641l3-3a2.19 2.19 0 0 0 0-3.094.813.813 0 0 1 1.149-1.149 3.818 3.818 0 0 1 0 5.392l-3 3A3.789 3.789 0 0 1 4 15.813z'/%3E%3C/svg%3E
 [upload]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M7 9h2V5h3L8 1 4 5h3zm3-2.25v1.542L14.579 10 8 12.453 1.421 10 6 8.292V6.75L0 9v4l8 3 8-3V9z'/%3E%3C/svg%3E
 [image]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='m14.998 2 .002.002v11.996l-.002.002H1.002L1 13.998V2.002L1.002 2h13.996zM15 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h14c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1z'/%3E%3Cpath d='M13 4.5a1.5 1.5 0 1 1-3.001-.001A1.5 1.5 0 0 1 13 4.5zM14 13H2v-2l3.5-6 4 5h1L14 7z'/%3E%3C/svg%3E
-[plus]: images/plus.svg
-[integral]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 511.247 881.285' height='18' width='18'%3E%3Cpath d='M190.028 157.945c16.43-48.954 53.42-96.347 90.062-123.328C316.73 7.637 353.024 1.07 392.542.12c39.522-.949 82.27 3.72 102.958 14.197 20.684 10.476 19.31 26.758 5.604 40.3-13.708 13.542-39.744 24.341-62.734 28.375-22.99 4.033-42.932 1.3-60.886-3.427-17.952-4.726-33.92-11.446-46.358-12.602-12.436-1.154-21.346 3.255-28.362 9.272-7.016 6.016-12.136 13.64-12.326 32.56-.19 18.92 4.55 49.14 8.766 77.193 4.216 28.053 7.904 53.941 12.844 118.142 4.94 64.2 11.132 166.713 16.242 243.227 5.112 76.513 9.14 127.027-7.288 175.982-16.428 48.954-53.312 96.348-89.9 123.33-36.588 26.98-72.88 33.547-112.4 34.496-39.52.95-82.268-3.72-102.954-14.197-20.686-10.476-19.312-26.759-5.604-40.3 13.706-13.542 39.744-24.34 62.732-28.376 22.99-4.033 42.932-1.3 60.886 3.428 17.952 4.726 33.92 11.446 46.358 12.602 12.438 1.154 21.346-3.256 28.364-9.273 7.014-6.015 12.134-13.639 12.324-32.56.192-18.92-4.55-49.138-8.766-77.192-4.214-28.053-7.902-53.942-12.844-118.142-4.94-64.2-11.132-166.713-16.298-243.227-5.162-76.513-9.298-127.028 7.128-175.983z'/%3E%3C/svg%3E
+[C]: images/C.svg
+[T]: data:image/svg+xml;utf8,%3Csvg height='16' width='16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M.8 4.5V.3c.1-.5.6-.2 1-.3h12.8c.4.2.2.7.3 1v3.5c-.4.7-1.1-.1-1-.7a4 4 0 0 0-2.7-2.7C10.8 1 9.8.6 9.7 1v12.8c0 .8.3 1.5 1.2 1.3.6-.2 1.6.5.8.9H3.9c-.8-.6.4-1 1-.9 1 .2 1-.8 1-1.6V.8c-1.2.2-2.6.5-3.4 1.5-.7.7-.8 1.6-1 2.4-.2.2-.6.1-.7-.2ZM2.6 1c.4-.2.3-.2 0-.2h-1V2ZM9 7.8v-7H6.8l-.1 13.5c.1.4-.4 1 .2.9H9c-.3-.5.1-1.2 0-1.7Zm4.8-6.1c.1 0 .4.5.3 0V.9h-1.3l1 .9z'/%3E%3C/svg%3E
 [math]: https://en.wikibooks.org/wiki/LaTeX/Mathematics
 [advanced math]: https://en.wikibooks.org/wiki/LaTeX/Advanced_Mathematics
 [home page]: https://katex.org/
@@ -242,7 +242,7 @@ Grid tables
 
 Besides its calculation cells, Hurmet also has cells that emulate the math mode
 of ¢` \TeX ` (pronounced _tech_). These cells display, but do not calculate, math.
-You can create a TeX cell by clicking the ![integral][] button. Type **Enter** to
+You can create a TeX cell by clicking the ![T][] button. Type **Enter** to
 save the cell.
 
 To create a cell in TeX display mode, first change the paragraph format to
