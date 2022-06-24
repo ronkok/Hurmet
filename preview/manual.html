@@ -4,7 +4,7 @@
    <meta charset="utf-8">
    <meta name="viewport" content="width=device-width, initial-scale=1">
    <title>Hurmet Manual</title>
-   <link rel="shortcut icon" href="images/equal-sign.ico">
+   <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
    <link rel="stylesheet" href="katex.min.css">
    <link rel="stylesheet" href="docStyles.css">
 </head>
