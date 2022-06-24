@@ -1062,7 +1062,7 @@ export function buildMenuItems(schema) {
       return true
     },
     run() {
-      window.open("docs/en/manual.html")
+      window.open("manual.html")
     } 
   })
   r.hint = blockTypeItem(type, {
