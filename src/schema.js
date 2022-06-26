@@ -162,7 +162,7 @@ export const nodes = {
     toDOM(node) { return ["img", node.attrs] }
   },
 
-  // Tale of contents
+  // Table of contents
   toc: {
     atom: true,
     attrs: {
