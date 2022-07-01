@@ -352,7 +352,7 @@ const TABLES = (function() {
           const yEnd = yCorners[i + cell.rowspan]
           let str = ""
           for (let ii = yStart; ii < yEnd; ii++) {
-            str += lines[ii].slice(xStart - 1, xEnd).replace(/ +$/, "") + "\n"
+            str += lines[ii].slice(xStart, xEnd).replace(/ +$/, "") + "\n"
           }
           cell.blob = str.slice(0, -1).replace(/^\n+/, "")
 
