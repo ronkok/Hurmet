@@ -1,7 +1,7 @@
 
 // Service worker for Hurmet
 
-const version = 'hurmet_2022-06-24';
+const version = 'hurmet_2022-07-09';
 // Cache IDs
 const coreID = version + '_core';  // JavaScript & CSS
 const assetsID = version + '_assets'; // images, fonts, CSV, & txt
