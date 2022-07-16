@@ -1,7 +1,7 @@
 ﻿import { parse } from "./parser"
 import { dt } from "./constants"
 import { valueFromLiteral } from "./literal"
-import { functionRegEx, scanModule } from "./module"
+import { functionRegEx, drawRegEx, scanModule } from "./module"
 
 /*  prepareStatement.js
  *
@@ -67,12 +67,14 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
   let dtype
   let str = ""
 
-  if (functionRegEx.test(inputStr)) {
+  if (functionRegEx.test(inputStr) || drawRegEx.test(inputStr)) {
     // This cell contains a custom function.
     let name = ""
-    const posFn = inputStr.indexOf("function")
-    const posParen = inputStr.indexOf("(")
-    name = inputStr.slice(posFn + 8, posParen).trim()
+    if (inputStr.charAt(0) !== "d") {
+      const posFn = inputStr.indexOf("function")
+      const posParen = inputStr.indexOf("(")
+      name = inputStr.slice(posFn + 8, posParen).trim()
+    }
     const module = scanModule(inputStr, decimalFormat)
     const isError = module.dtype && module.dtype === dt.ERROR
     if (isError) {
@@ -82,9 +84,9 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
     const attrs = {
       entry: inputStr,
       name,
-      value: isError ? module.value : module.value[name],
+      value: (isError || name === "") ? module.value : module.value[name],
       // TODO: what to do with comma decimals?
-      dtype: isError ? dt.ERROR : dt.MODULE,
+      dtype: isError ? dt.ERROR : name === "" ? dt.DRAWING : dt.MODULE,
       error: isError
     }
     return attrs

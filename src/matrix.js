@@ -435,13 +435,27 @@ const operandFromTokenStack = (tokenStack, numRows, numCols) => {
     return tokenStack.pop()
 
   } else if (numRows === 1 || numCols === 1) {
-    // Vector
     const numArgs = Math.max(numRows, numCols)
-    const array = new Array(numArgs)
+    let array
     let dtype = tokenStack[tokenStack.length - 1].dtype
-    dtype += numRows === 1 ? dt.ROWVECTOR : dt.COLUMNVECTOR
-    for (let j = numArgs - 1; j >= 0; j--) {
-      array[j] = tokenStack.pop().value
+    if (numRows === 1 && (dtype & dt.COLUMNVECTOR)) {
+      // Matrix composed of column vectors appended side by side
+      dtype = dtype - dt.COLUMNVECTOR + dt.MATRIX
+      array = new Array(tokenStack[0].value.length)
+      for (let i = 0; i < tokenStack[0].value.length; i++) {
+        array[i] = []
+        for (let j = 0; j < numArgs; j++) {
+          array[i][j] = tokenStack[j].value[i]
+        }
+      }
+      for (let i = 0; i < numArgs; i++) { tokenStack.pop() }
+    } else  {
+      // Vector
+      array = new Array(numArgs)
+      dtype += numRows === 1 ? dt.ROWVECTOR : dt.COLUMNVECTOR
+      for (let j = numArgs - 1; j >= 0; j--) {
+        array[j] = tokenStack.pop().value
+      }
     }
     Object.freeze((array))
     return Object.freeze({

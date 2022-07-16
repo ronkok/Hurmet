@@ -693,12 +693,19 @@ const binary = {
       modulo(m, x)   { return m.map(row => row.map(e => Rnl.modulo(e, x))) }
     },
     rowVector: {
+      add(m, v)      { return m.map(row => row.map((e, i) => Rnl.add(e, v[i]) )) },
+      subtract(m, v) { return m.map(row => row.map((e, i) => Rnl.subtract(e, v[i]) )) },
+      multiply(m, v) { return m.map(row => row.map((e, i) => Rnl.multiply(e, v[i]) )) },
+      divide(m, v)   { return m.map(row => row.map((e, i) => Rnl.divide(e, v[i]) )) },
+      power(m, v)    { return m.map(row => row.map((e, i) => Rnl.power(e, v[i]) )) },
       unshift(m, v) {
         if (m[0].length !== v.length) { return errorOprnd("MIS_ELNUM") }
         return [...m, v]
       }
     },
     columnVector: {
+      add(m, v)      { return m.map(row => row.map((e, i) => Rnl.add(e, v[i]) )) },
+      subtract(m, v) { return m.map(row => row.map((e, i) => Rnl.subtract(e, v[i]) )) },
       multiply(m, v) {
         // Multiply a matrix times a column vector
         if (m[0].length !== v.length) { return errorOprnd("MIS_ELNUM") }

@@ -7,10 +7,12 @@ import { errorOprnd } from "./error.js"
 
 const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/
 const keywordRegEx = /^(if|else if|else|return|raise|while|for|break|echo|end)\b/
+const drawCommandRegEx = /^(title|frame|view|axes|grid|stroke|strokewidth|strokedasharray|fill|fontsize|fontweight|fontstyle|fontfamily|marker|line|path|plot|curve|rect|circle|ellipse|arc|text|dot)\(/
 
 // If you change functionRegEx, then also change it in mathprompt.js.
 // It isn't called from there in order to avoid duplicating Hurmet code inside ProseMirror.js.
 export const functionRegEx = /^(?:private +)?function (?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*\(/
+export const drawRegEx = /^draw\(/
 const lexRegEx = /"[^"]*"|``.*|`[^`]*`|'[^']*'|#|[^"`'#]+/g
 
 const testForStatement = str => {
@@ -52,7 +54,7 @@ export const scanModule = (str, decimalFormat) => {
     const line = stripComment(lines[i])
     if (line.length === 0) { continue }
 
-    if (functionRegEx.test(line)) {
+    if (functionRegEx.test(line) || drawRegEx.test(line)) {
       // This line starts a new function.
       const [funcObj, endLineNum] = scanFunction(lines, decimalFormat, i)
       if (funcObj.dtype && funcObj.dtype === dt.ERROR) { return funcObj }
@@ -80,16 +82,23 @@ const handleCSV = (expression, lines, startLineNum) => {
 
 const scanFunction = (lines, decimalFormat, startLineNum) => {
   const line1 = stripComment(lines[startLineNum])
-  const posFn = line1.indexOf("function")
+  const isDraw = line1.charAt(0) === "d"
   const posParen = line1.indexOf("(")
-  const functionName = line1.slice(posFn + 8, posParen).trim()
+  let functionName = ""
+  if (isDraw) {
+    functionName = "draw"
+  } else {
+    const posFn = line1.indexOf("function")
+    functionName = line1.slice(posFn + 8, posParen).trim()
+  }
   const isPrivate = /^private /.test(line1)
   const parameterList =  line1.slice(posParen + 1, -1).trim()
   const parameters = parameterList.length === 0 ? [] : parameterList.split(/, */g)
   const funcObj = {
     name: functionName,
-    dtype: dt.MODULE,
-    isPrivate, parameters,
+    dtype: isDraw ? dt.DRAWING : dt.MODULE,
+    isPrivate,
+    parameters,
     statements: []
   }
 
@@ -122,7 +131,6 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
       continue
     }
 
-
     const keyword = keywordRegEx.exec(line)
     if (keyword) {
       name = keyword[0]
@@ -130,6 +138,10 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
       if (expression.length > 0 && /^``/.test(expression)) {
         [expression, i] = handleCSV(expression, lines, i)
       }
+    } else if (isDraw && drawCommandRegEx.test(line)) {
+      name = "svg_"
+      expression = line.replace("(", (line.indexOf("()") > -1 ? "(svg_" : "(svg_, "))
+      isStatement = true
     } else {
       if (testForStatement(line)) {
         // We have an "=" assignment operator.
@@ -156,7 +168,13 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
     if (stype === "if" || stype === "while" || stype === "for") {
       stackOfCtrls.push({ type: stype, statementNum: funcObj.statements.length - 1 })
     } else if (stype === "end") {
-      if (stackOfCtrls.length === 0) { return [funcObj, i] } // Finished the current function.
+      if (stackOfCtrls.length === 0) {
+        // Finished the current function.
+        if (isDraw) {
+          funcObj.statements.splice(-1, 0, { name: "return", rpn: "¿svg_", stype: "return" })
+        }
+        return [funcObj, i]
+      }
       const ctrl = stackOfCtrls[stackOfCtrls.length - 1]
       funcObj.statements[ctrl.statementNum].endOfBlock = funcObj.statements.length - 1
       stackOfCtrls.pop()

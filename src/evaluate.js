@@ -5,19 +5,19 @@ import { fromAssignment } from "./operand.js"
 import { Functions, multivarFunction } from "./functions"
 import { Operators, isDivByZero } from "./operations"
 import { unitFromUnitName, unitsAreCompatible } from "./units"
-import { Matrix, isMatrix } from "./matrix"
+import { Matrix, isMatrix, isVector } from "./matrix"
 import { map } from "./map"
 import { DataFrame } from "./dataframe"
 import { propertyFromDotAccessor } from "./property"
 import { textRange } from "./text"
 import { compare } from "./compare"
-import { lineChart } from "./graphics"
 import { errorOprnd } from "./error"
 import { Rnl } from "./rational"
 import { format } from "./format"
 import { insertOneHurmetVar } from "./insertOneHurmetVar"
 import { formatResult } from "./result"
 import { Cpx } from "./complex"
+import { Draw } from "./draw"
 
 // evaluate.js
 
@@ -535,7 +535,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           } else if (o1.dtype & dt.MAP) {
             property = map.valueFromMap(o1, args, unitAware)
 
-          } else if (o1.dtype & dt.STRING) {
+          } else if (o1.dtype === dt.STRING) {
             property = textRange(o1.value, args[0])
 
           } else if (o1.dtype === dt.MODULE) {
@@ -555,6 +555,8 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             const rowIndex = args[0]
             const colIndex = (numArgs === 2)
               ? args[1]
+              : isVector(o1)
+              ? null
               : { value: Rnl.zero, unit: allZeros, dtype: dt.RATIONAL }
             property = (o1.dtype & dt.DATAFRAME)
               ? DataFrame.range(o1, rowIndex, colIndex, vars, unitAware)
@@ -957,16 +959,6 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           // So if control flow get here, we have an error.
           return errorOprnd("FETCH")
 
-        case "lineChart": {
-          const numArgs = Number(tokens[i + 1])
-          i += 1
-          const args = new Array(numArgs)
-          for (let j = numArgs - 1; j >= 0; j--) {
-            args[j] = stack.pop()
-          }
-          return lineChart(args)
-        }
-
         case "function": {
           // User defined function.
           const functionName = tokens[i + 1]
@@ -977,7 +969,14 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             args[j] = stack.pop()
           }
           let oprnd
-          if (nextToken(tokens, i) === ".") {
+          if (vars.svg_ && (functionName === "plot" || (Draw.functions[functionName]))) {
+            if (functionName === "plot") {
+              args.splice(1, 0, decimalFormat)
+              oprnd = plot(...args)
+            } else {
+              oprnd = Draw.functions[functionName](...args)
+            }
+          } else if (nextToken(tokens, i) === ".") {
             // Function from a module
             let lib = stack.pop().value         // remote module
             if (lib.value) { lib = lib.value }  // local module
@@ -1232,6 +1231,40 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
   return oprnd
 }
 
+const plot = (svg, decimalFormat, fun, numPoints, xMin, xMax) => {
+  // Plot a function.
+  // To avoid a circular reference, this function has to be here instead of in draw.js.
+  const attrs = svg.value.temp
+  numPoints = (numPoints == null) ? Rnl.fromNumber(250) : numPoints.value
+  const min = (xMin == null) ? Rnl.fromNumber(attrs.xmin) : xMin.value
+  const max = (xMax == null) ? Rnl.fromNumber(attrs.xmax) : xMax.value
+  // Vectorize the evaluation. Start by finding a vector of the input.
+  const step = Rnl.divide(Rnl.subtract(max, min), numPoints)
+  const rowVector = Matrix.operandFromRange([min, step, max])
+  // Transpose the row vector into a column vector.
+  const arg = { value: rowVector.value, unit: null, dtype: dt.COLUMNVECTOR + dt.RATIONAL }
+  // Run the function on the vector.
+  let funResult
+  let pathValue
+  if (fun.value.dtype && fun.value.dtype === dt.MODULE) {
+    funResult = evalCustomFunction(fun.value, [arg], decimalFormat, false)
+    pathValue = arg.value.map((e, i) => [e, funResult.value[i]])
+  } else if (fun.dtype === dt.STRING) {
+    if (/§matrix§1§2$/.test(fun.value)) {
+      arg.name = "t"
+      pathValue = evalRpn(fun.value.replace(/§/g, "\xa0"), { t: arg }, decimalFormat, false).value
+    } else {
+      arg.name = "x"
+      funResult = evalRpn(fun.value.replace(/§/g, "\xa0"), { x: arg }, decimalFormat, false)
+      pathValue = arg.value.map((e, i) => [e, funResult.value[i]])
+    }
+  } else {
+    //TODO: error message.
+  }
+  const pth = { value: pathValue, unit: null, dtype: dt.MATRIX + dt.RATIONAL }
+  return Draw.functions.path(svg, pth, "L")
+}
+
 const elementFromIterable = (iterable, index, step) => {
   // A helper function. This is called by `for` loops in evalCustomFunction()
   let value
@@ -1280,6 +1313,9 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
     for (let i = args.length; i < udf.parameters.length; i++) {
       vars[udf.parameters[i]] = { value: undefined, unit: null, dtype: 0 }
     }
+  }
+  if (udf.dtype === dt.DRAWING) {
+    vars["svg_"] = { value: Draw.defaultSvg(), unit: null, dtype: dt.DRAWING }
   }
 
   // Execute the function statements.
@@ -1587,6 +1623,18 @@ const conditionResult = (stmt, oprnd, unitAware) => {
   }
   if (result.value)  { stmt.value = result.value }
   return [stmt, result]
+}
+
+export const evaluateDrawing = (stmt, vars, decimalFormat = "1,000,000.") => {
+  const udf = stmt.value.draw
+  const args = [];
+  for (let i = 0; i < udf.parameters.length; i++) {
+    const argName = udf.parameters[i]
+    args.push(evalRpn("¿" + argName, vars, decimalFormat, false, {}))
+  }
+  stmt.resultdisplay = evalCustomFunction(udf, args, decimalFormat, false, {}).value
+  delete stmt.resultdisplay.temp
+  return stmt
 }
 
 export const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {

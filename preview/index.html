@@ -38,6 +38,35 @@
    <p><span class="hurmet-calc" data-entry="V = (w L)/2 + P/2 = ?? lbf"></span>, maximum shear</p>
    <p><span class="hurmet-calc" data-entry="M = (w L^2)/8 + (P L)/4 = ?? lbf-ft"></span>, max bending moment</p>
 
+   <h2>Drawings</h2>
+
+  <p>Hurmet’s <em>draw</em> environment enables function plotting. For instance, to get a sine wave, one can write the following code into a math zone:</p>
+
+  <table class="nogrid">
+  <tbody>
+  <tr>
+  <td data-colwidth="298"><pre><code>draw()
+    title("sin x")
+    frame(250, 150)
+    view(-5, 5, -3)
+    axes(2, 1, "labels")
+    strokewidth(2)
+    plot(sin(x), 51)
+    text([1.6, 1.35], "sin x")
+  end</code></pre></td>
+  <td><p><span class="hurmet-calc" data-entry="draw()
+    title(&quot;sin x&quot;)
+    frame(250, 150)
+    view(-5, 5)
+    axes(2, 1, &quot;labels&quot;)
+    strokewidth(2)
+    plot(sin(x), 51)
+    text([1.6, 1.35], &quot;sin x&quot;)
+  end"></span></p></td>
+  </tr>
+  </tbody>
+  </table>
+
 </div> <!-- editor -->
 
 <div id="print-div" class="ProseMirror pica"></div>
@@ -74,7 +103,7 @@ Display:
   % no echo, ! no result</code></pre>
 </div>
 
-<div id="copyright">Copyright © 2020-2021 Ron Kok. Released under the <a href="https://opensource.org/licenses/MIT">MIT License</a></div>
+<div id="copyright">Copyright © 2020-2022 Ron Kok. Released under the <a href="https://opensource.org/licenses/MIT">MIT License</a></div>
 
 <script type="module" src="prosemirror.mjs"></script>
 <script>

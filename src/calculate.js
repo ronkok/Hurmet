@@ -1,7 +1,8 @@
+import { dt } from "./constants"
 import { insertOneHurmetVar } from "./insertOneHurmetVar"
 import { prepareStatement } from "./prepareStatement"
 import { improveQuantities } from "./improveQuantities"
-import { evaluate } from "./evaluate"
+import { evaluate, evaluateDrawing } from "./evaluate"
 import { scanModule } from "./module"
 import { clone } from "./utils"
 
@@ -18,11 +19,17 @@ export const calculate = (
   improveQuantities(attrs, vars)
   if (attrs.rpn) {
     attrs = evaluate(clone(attrs), vars, decimalFormat)
+  } else if (attrs.dtype && attrs.dtype === dt.DRAWING) {
+    attrs = evaluateDrawing(attrs, vars, decimalFormat)
   }
   if (attrs.name) {
     insertOneHurmetVar(vars, attrs)
   }
-  return inDraftMode ? attrs.alt : attrs.tex
+  return attrs.dtype && attrs.dtype === dt.DRAWING
+   ? attrs
+   : inDraftMode
+   ? attrs.alt
+   : attrs.tex
 }
 
 export const scan = entry => {

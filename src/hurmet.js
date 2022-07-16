@@ -1,4 +1,5 @@
 import { autoCorrect } from "./autocorrect"
+import { dt } from "./constants"
 import { parse } from "./parser"
 import { prepareStatement } from "./prepareStatement"
 import { improveQuantities } from "./improveQuantities"
@@ -6,6 +7,7 @@ import { evaluate } from "./evaluate"
 import { scanModule } from "./module"
 import { updateCalculations } from "./updateCalculations"
 import { calculate } from "./calculate"
+import { Draw } from "./draw"
 
 /*
  * This file bundles together and exposes the calculation parts of Hurmet.
@@ -35,6 +37,7 @@ import { calculate } from "./calculate"
  */
 
 export const hurmet = Object.freeze({
+  dt,
   parse,
   calculate,
   autoCorrect,
@@ -42,5 +45,6 @@ export const hurmet = Object.freeze({
   improveQuantities,
   evaluate,
   scanModule,
-  updateCalculations
+  updateCalculations,
+  Draw
 })

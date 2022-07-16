@@ -3,7 +3,7 @@ import { parse } from "./parser"
 import { insertOneHurmetVar } from "./insertOneHurmetVar"
 import { prepareStatement } from "./prepareStatement"
 import { improveQuantities } from "./improveQuantities"
-import { evaluate } from "./evaluate"
+import { evaluate, evaluateDrawing } from "./evaluate"
 import { scanModule } from "./module"
 import { DataFrame } from "./dataframe"
 import { clone, addTextEscapes } from "./utils"
@@ -57,7 +57,6 @@ const fetchRegEx = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u
 const importRegEx = /^[^=]+= *import/
 const fileErrorRegEx = /^Error while reading file. Status Code: \d*$/
 const textRegEx = /\\text{[^}]+}/
-const lineChartRegEx = /^lineChart/
 
 const urlFromEntry = entry => {
   // Get the URL from the entry input string.
@@ -202,7 +201,8 @@ const proceedAfterFetch = (
   const doc = view.state.doc
   const decimalFormat = doc.attrs.decimalFormat
 
-  if (!isCalcAll && (nodeAttrs.name || nodeAttrs.rpn)) {
+  if (!isCalcAll && (nodeAttrs.name || nodeAttrs.rpn ||
+    (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING))) {
     // Load hurmetVars with values from earlier in the document.
     doc.nodesBetween(0, curPos, function(node) {
       if (node.type.name === "calculation") {
@@ -234,8 +234,10 @@ const proceedAfterFetch = (
       // did not do unit conversions on the result template. Do that first.
       improveQuantities(attrs, hurmetVars)
       // Now proceed to do the calculation of the cell.
-      if (attrs.rpn) {
-        attrs = evaluate(attrs, hurmetVars, decimalFormat)
+      if (attrs.rpn || (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING)) {
+        attrs = attrs.dtype && attrs.dtype === dt.DRAWING
+          ? evaluateDrawing(attrs, hurmetVars, decimalFormat)
+          : evaluate(attrs, hurmetVars, decimalFormat)
       }
       if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, decimalFormat) }
       attrs.displayMode = nodeAttrs.displayMode
@@ -250,18 +252,22 @@ const proceedAfterFetch = (
       const mustCalc = isCalcAll ? !fetchRegEx.test(node.attrs.entry) : !node.attrs.isFetch
       if (mustCalc) {
         const entry = node.attrs.entry
-        let attrs = isCalcAll || lineChartRegEx.test(entry)
+        let attrs = isCalcAll
           ? prepareStatement(entry, decimalFormat)
           : clone(node.attrs)
         attrs.displayMode = node.attrs.displayMode
-        if (isCalcAll || attrs.rpn || (attrs.name && !(hurmetVars[attrs.name] &&
+        const mustRedraw = attrs.dtype && attrs.dtype === dt.DRAWING &&
+                           (attrs.value.draw.parameters.length > 0 || isCalcAll)
+        if (isCalcAll || attrs.rpn || mustRedraw || (attrs.name && !(hurmetVars[attrs.name] &&
           hurmetVars[attrs.name].isFetch))) {
           if (isCalcAll) { improveQuantities(attrs, hurmetVars) }
-          if (attrs.rpn) {
-            attrs = evaluate(attrs, hurmetVars, decimalFormat)
+          if (attrs.rpn || mustRedraw) {
+            attrs = attrs.dtype && attrs.dtype === dt.DRAWING
+              ? evaluateDrawing(attrs, hurmetVars, decimalFormat)
+              : evaluate(attrs, hurmetVars, decimalFormat)
           }
           if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, decimalFormat) }
-          if (isCalcAll || attrs.rpn) {
+          if (isCalcAll || attrs.rpn || mustRedraw) {
             tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs))
           }
         }
@@ -297,7 +303,8 @@ export function updateCalculations(
 ) {
   const doc = view.state.doc
 
-  if (!(isCalcAll || nodeAttrs.name || nodeAttrs.rpn)) {
+  if (!(isCalcAll || nodeAttrs.name || nodeAttrs.rpn ||
+      (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING))) {
     // No calculation is required. Just render the node and get out.
     const state = view.state
     if (state.selection.to === curPos + 1) {

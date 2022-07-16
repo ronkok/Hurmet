@@ -322,6 +322,9 @@ summary {
     outline: none;
     cursor: pointer;
 }
+.optional {
+    color: orange
+}
 .mobile-menu {
     position: absolute;
     background: #fff;

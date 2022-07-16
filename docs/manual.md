@@ -1939,6 +1939,175 @@ are very long. If you want a permalink to your file, delete the 40
 random characters after "/raw/". Github keeps a copy of every draft of your
 file and the random part after "/raw/" is the revision ID.
 
+## Drawings
+
+Hurmet’s _draw_ environment can plot functions and render simple sketches. For a
+sine wave, you can open a math zone and type the following code…
+
+```
+draw()
+  title("sin x")
+  frame(250, 150)
+  view(-5, 5, -3)
+  axes(2, 1, "labels")
+  strokewidth(2)
+  plot(sin(x), 51)
+  text([1.6, 1.35], "sin x")
+end
+```
+
+… which will result in this plot …
+
+![sin x](images/sinx.svg)
+
+Always use _x_ as the variable of a single function. For parametric plots, use
+_t_ as the variable and put the two expressions into a row vector, like the
+code below.
+
+```
+draw()
+   title("spiral")
+   frame(200, 200)
+   view(-8, 8)
+   axes()
+   plot([t*cos(π t), t * sin(π t)], 251, 0, 8)
+end
+```
+
+… which results in this plot …
+
+![spiral](images/spiral.svg)
+
+You can pass variables into a draw environment. And a draw environment can
+execute the same statements as a user-defined function. So you can create
+drawings that change dynamically in reaction to the rest of your document.
+
+I’ll write up an example next week.
+
+### Draw environment commands
+
+In the following list, optional arguments are written in
+<span class="optional">orange</span>.
+
+<dl>
+
+title("_string_")
+
+: Title of the drawing, for accessibility.
+
+frame(_width_, _height_<span class="optional">, position</span>)
+
+: _width_ and _height_, in px, define the size of the drawing in the document.
+  _position_ can be "inline", "left", or "right".\
+  This command must come before anything is drawn.
+
+view(_x_<sub>min</sub>, _x_<sub>max</sub><span class="optional">, yₘᵢₙ, yₘₐₓ,</span>)
+
+: This command is usually written directly after `frame`. The arguments set the
+  coordinate system. If _y_<sub>min</sub> is omitted, the x-axis is placed in
+  the middle of the picture. If _y_<sub>max</sub> is omitted, the scales along
+  the x-axis and y-axis are the same.
+
+axes(_dx_, _dy_<span class="optional">, "labels"</span>)
+
+: Draws coordinate axes.
+
+grid(_dx_, _dy_<span class="optional">, "labels"</span>)
+
+: Draws a background grid.
+
+stroke("_color_")
+
+: Sets the default color for lines, paths, curves and outlines of solid figures.
+  Can be any of the [standard HTML predefined color names](https://www.w3schools.com/colors/colors_names.asp).
+
+strokewidth(_pixelvalue_)
+
+: Sets the width of lines, paths, and shape outlines.
+
+strokedasharray("_dashpixel_ _spacepixel_")
+
+: Set a pattern of dashes and gaps for lines and paths. Default = null.
+
+fill("_color_")
+
+: Sets the default color for filling in the inside of solid figures.
+
+fontfamily("sansserif"|"serif"|"fixed"|"monotype")
+
+: Sets the font type.
+
+fontsize(_pixelvalue_)
+
+: Sets the font size in px. Default = 10.
+
+fontstyle("normal" | "italic")
+
+: Set the font style.
+
+fontweight("normal" | "bold")
+
+: Sets the font weight.
+
+marker("none" | "dot" | "arrow" | "arrowdot")
+
+: Sets the default marker symbol that is drawn at the endpoints of lines and paths.
+  Dots are also set along the intermediate points of paths and curves. 
+
+line( [_x_, _y_; _u_, _v_] )
+
+: Draws a straight line from coordinate point _x_, _y_ to coordinate point _u_, _v_.
+
+path( [_x₁_, _y₁_; _x₂_, _y₂_; …; _xₙ_, _yₙ_]<span class="optional">, "L", or "T", or [r₁; r₂; …; rₙ]</span>)
+
+: Draws a path connecting all the points in the matrix. The second (optional)
+  argument defines the type of line segments. "L" will draw straight segments.
+  "T" will fit a curve to the points. A vector of numbers will define arc 
+  radii for each segment (**0** indicates a straight line segment).
+
+curve( [_x₁_, _y₁_; _x₂_, _y₂_; …; _xₙ_, _yₙ_] )
+
+: Fits a quadratic bezier curve to each point.
+  
+circle( [_x_, _y_], _r_ )
+
+: Draws a circle of radius _r_, centered at point _x_, _y_.
+
+dot( [_x_, _y_]<span class="optional">, "open" | "closed", "label", position</span> )
+
+: Draws a dot with an optional appended label.  _position_ can be: "above"|"below"|"left"|"right"|"aboveleft"|"aboveright"
+  |"belowleft"|"belowright"|null
+
+ellipse( [_x_, _y_], _rx_, _ry_ )
+
+: Draws an ellipse of radii _rx_ and _ry_, centered at point _x_, _y_.
+
+arc( [_x_, _y_; _u_, _v_], _r_ or [_rx_, _ry_] )
+
+: Draws an arc in anticlockwise direction from point _x_, _y_ to point _u_, _v_.
+  It will be either a circular arc of radius _r_ or an elliptical arc of radius [_rx_, _ry_].
+
+rect( [_x_, _y_; _u_, _v_]<span class="optional">, r</span> )
+
+: Draws a rectangle with corners at points _x_, _y_ and _u_, _v_. The optional _r_
+  argument defines the corner radius of a rounded rectangle.
+
+text( [_x_, _y_], "_string_"<span class="optional">, position</span> )
+
+: Writes the string at a point keyed to coordinates _x_, _y_. _position_ can be
+  "above", "below", "middle", "left", "right", "aboveleft", "aboveright",
+  "belowleft", or "belowright". The default is "middle".
+
+plot( _f_ | [_g_, _h_]<span class="optional">, 𝑛, xₘᵢₙ, xₘₐₓ</span> )
+
+: Plots a function or a pair of parametric equations. A single function _f()_
+  should be written with _x_ as its variable. A pair of parametric equations
+  should be written with _t_ as their variable.\
+  Values will be plotted from _x_ₘᵢₙ to _x_ₘₐₓ. _n_ determines the
+  number of points to be plotted. (Default = 250)
+
+</dl>
+
 ## Troubleshooting
 
 #### Typing lag
@@ -1986,8 +2155,6 @@ such as calculation cells, indented paragraphs, and merged cells in tables.
 ## Coming Attractions
 
 *   Image captions
-*   Github-flavored Markdown
-*   Charts
 *   A `distribution` data type, to enable calculations with uncertainty
 *   A `date` data type
 *   Permalinks
@@ -2148,6 +2315,7 @@ Copyright © 2020-2022 Ron Kok. Released under the [MIT License](https://opensou
 </details>
 </li>
 <li><a href="#remote-modules">Modules</a></li>
+<li><a href="#drawings">Drawings</a></li>
 <li>
 <details><summary>End notes</summary>
 

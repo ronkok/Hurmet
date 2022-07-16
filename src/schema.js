@@ -4,6 +4,7 @@ import {findWrapping, liftTarget, canSplit, ReplaceAroundStep} from "prosemirror
 import {Slice, Fragment, NodeRange} from "prosemirror-model"
 import { renderToC, tocLevels } from "./print"
 import {dt} from "./constants"
+import { Draw } from "./draw"
 import { katex } from "./katex.mjs"
 import { temml } from "./temml.mjs"
 
@@ -322,7 +323,10 @@ export const nodes = {
       //if (node.attrs.dtype !== dt.IMAGE) {
       dom = document.createElement('span')
       dom.classList = "hurmet-calc"
-      if (node.attrs.dtype && node.attrs.dtype === dt.MODULE &&
+      if (node.attrs.dtype && node.attrs.dtype === dt.DRAWING) {
+        dom = document.createElement('span')
+        dom.appendChild(Draw.renderSVG(node.attrs.resultdisplay))
+      } else if (node.attrs.dtype && node.attrs.dtype === dt.MODULE &&
         functionRegEx.test(node.attrs.entry)) {
         dom.appendChild(document.createElement('pre'))
         dom.firstChild.appendChild(document.createElement('code'))
@@ -353,18 +357,6 @@ export const nodes = {
       // Before writing to DOM, I filter out most of the run-time info in node.attrs.
       dom.dataset.entry = node.attrs.entry
       if (node.attrs.displayMode) { dom.dataset.display = "true" }
-      /*} else {
-        dom = document.createElement('span')
-        dom.classList = "chart-container hurmet-calc"
-        dom.dataset.entry = node.attrs.entry
-        const cnvs = document.createElement('canvas')
-        dom.append(cnvs)
-        const config = node.attrs.value
-        dom.style.width = config.width
-        dom.height = config.height
-        const ctx = cnvs.getContext('2d')
-        const aChart = new Chart(ctx, config)
-      }*/
       return dom
     }
   },

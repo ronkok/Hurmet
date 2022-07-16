@@ -39,12 +39,16 @@ const renderMath = (jar, demoOutput) => {
   const tex = hurmet.calculate(entry, hurmetVars)
 
   try {
-    katex.render(tex, demoOutput, {
-      strict: false,
-      macros: {"\\class": "\\htmlClass"},
-      trust: (context) => context.command === "\\htmlClass" && context.class === "special-fraction",
-      throwOnError: false
-    })
+    if (typeof tex === "object" && tex.dtype && tex.dtype === hurmet.dt.DRAWING) {
+      demoOutput.appendChild(hurmet.Draw.renderSVG(tex.resultdisplay))
+    } else {
+      katex.render(tex, demoOutput, {
+        strict: false,
+        macros: {"\\class": "\\htmlClass"},
+        trust: (context) => context.command === "\\htmlClass" && context.class === "special-fraction",
+        throwOnError: false
+      })
+    }
   } catch(err) {
     while(demoOutput.lastChild) {
       demoOutput.removeChild(demoOutput.lastChild);

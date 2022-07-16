@@ -24,7 +24,7 @@ const builtInFunctions = [
 ]
 
 const builtInReducerFunctions = ["dataframe",
-  "lineChart", "max", "mean", "median", "min", "product", "range", "stddev", "sum", "variance"
+  "max", "mean", "median", "min", "product", "range", "stddev", "sum", "variance"
 ]
 
 const trigFunctions = ["cos", "cosd", "cot", "cotd", "csc", "cscd", "sec", "secd",
@@ -1174,7 +1174,15 @@ export const parse = (
               if (delim.numRows === 1) {
                 if (token.input === ","  ||
                     (token.input === " " && (delim.delimType === dMATRIX))) {
-                  if (str.charAt(0) === "]") { rpn += "®0/1" }
+                  if (str.charAt(0) === "]") {
+                    rpn += "®0/1"
+                  } else if (token.input === "," && delim.delimType === dFUNCTION &&
+                             delim.numArgs === 2 && delim.name === "plot" ) {
+                    // The literal function for a plot() statment inside a draw()
+                    // Wrap the rpn in quotation marks.
+                    rpn = rpn.slice(0, delim.rpnPos + 6) + '"'
+                        + rpn.slice(delim.rpnPos + 6, -1).replace(/\u00a0/g, "§") + '"' + tokenSep
+                  }
                 }
               }
               delim.numArgs += 1
@@ -1225,6 +1233,9 @@ export const parse = (
                 if (symbol === "log") { symbol = "logn" }
                 if (symbol === "round") { symbol = "roundn" }
                 if (symbol === "atan") { symbol = "atan2" }
+                if (symbol === "plot") {
+                  rpn = rpn.slice(0, 6) + '"' + rpn.slice(6).replace(/\u00a0/g, "§") + '"'
+                }
               } else if (symbol === "log" && regEx.test(rpn)) {
                 rpn = rpn.slice(0, rpn.length - 1) + "logFactorial"
                 break

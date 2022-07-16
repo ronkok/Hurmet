@@ -53,18 +53,20 @@ export const fromAssignment = (cellAttrs, unitAware) => {
   oprnd.name = cellAttrs.name
 
   // Get the unit data.
-  if (cellAttrs.dtype === dt.STRING || cellAttrs.dtype === dt.BOOLEAN ||
-      cellAttrs.dtype === dt.NULL) {
+  const dtype = cellAttrs.dtype
+  if (dtype === dt.STRING || dtype === dt.BOOLEAN || dtype === dt.DRAWING ||
+      dtype === dt.MODULE || dtype === dt.NULL) {
     oprnd.unit = null
-  } else if (cellAttrs.dtype === dt.DATAFRAME || (cellAttrs.dtype & dt.MAP)) {
+  } else if (dtype === dt.DATAFRAME || (dtype & dt.MAP)) {
     oprnd.unit = Object.freeze(clone(cellAttrs.unit))
-
   } else if (cellAttrs.unit && cellAttrs.unit.expos) {
     oprnd.unit = clone(cellAttrs.unit)
-  } else {
+  } else if (cellAttrs.unit) {
     oprnd.unit = Object.create(null)
     if (cellAttrs.unit)  { oprnd.unit.name = cellAttrs.unit }
     if (cellAttrs.expos) { oprnd.unit.expos = clone(cellAttrs.expos) }
+  } else {
+    oprnd.unit = null
   }
 
   // Get the value.
