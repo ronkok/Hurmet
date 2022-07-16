@@ -6297,6 +6297,8 @@ const fromAssignment = (cellAttrs, unitAware) => {
     oprnd.unit = Object.create(null);
     if (cellAttrs.unit)  { oprnd.unit.name = cellAttrs.unit; }
     if (cellAttrs.expos) { oprnd.unit.expos = clone(cellAttrs.expos); }
+  } else if (cellAttrs.expos && Array.isArray(cellAttrs.expos)) {
+    oprnd.unit = { expos: clone(cellAttrs.expos) };
   } else {
     oprnd.unit = null;
   }
