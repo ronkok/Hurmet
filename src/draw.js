@@ -543,7 +543,41 @@ const functions = {
         )
     }
     return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  leader(svgOprnd, plistOprnd, label) {
+    const marker = svgOprnd.value.temp.marker
+    svgOprnd.value.temp.marker = "arrow"
+    plistOprnd.value.reverse()
+    svgOprnd = this.path(svgOprnd, plistOprnd, "L")
+    const p = plistOprnd.value[0]
+    const svg = textLocal(
+      svgOprnd.value,
+      [Rnl.toNumber(p.value[0]), Rnl.toNumber(p.value[1])],
+      label.value,
+      "right",
+      null
+      )
+    svg.temp.marker = marker
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  dimension(svgOprnd, plistOprnd, label) {
+    const p1 = [Rnl.toNumber(plistOprnd.value[0][0]), Rnl.toNumber(plistOprnd.value[0][1])]
+    const p2 = [Rnl.toNumber(plistOprnd.value[1][0]), Rnl.toNumber(plistOprnd.value[1][1])]
+    const p3 = [Rnl.toNumber(plistOprnd.value[2][0]), Rnl.toNumber(plistOprnd.value[2][1])];
+    const origstrokewidth = svgOprnd.value.temp.strokewidth
+    svgOprnd.value.temp.strokewidth = 1
+    const four = Rnl.fromNumber(4)
+    svgOprnd = this.line(svgOprnd, [[p1[0] + 4, p1[1]], [p3[0] + 4, p1[1]]])
+    svgOprnd = this.line(svgOprnd, [[p2[0] + 4, p2[1]], [p3[0] + 4, p2[1]]])
+    svgOprnd.value.temp.marker = "arrow"
+    const svg = this.textLocal(plistOprnd.value, p3, label, "right")
+    svg.temp.strokewidth = origstrokewidth
+    svg.temp.marker = "none"
+    return { value: svg, unit: null, dtype: dt.DRAWING }
   }
+
 }
 
 const renderSVG = dwg => {
