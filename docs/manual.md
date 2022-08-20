@@ -2130,12 +2130,6 @@ copy of the offline page, so it can always be available.
 To get element-wise multiplication of two matrices, the operator symbol must be
 [explicitly](#matrix-mult) written as `*`.
 
-#### Saving files
-
-Tired of saving files to the Download folder? You can pick the folder where you
-save files, but first you have to change a browser setting.  In Chrome and Edge,
-go to ⋯ | Settings | Advanced | Downloads and in Firefox, go to ≡ | Options | Downloads.
-
 ## Gists
 
 Hurmet can export or import a document in

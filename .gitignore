@@ -1,3 +1,4 @@
+.yarn
 node_modules
 src/altParser.js
 preview/prosemirror.mjs
