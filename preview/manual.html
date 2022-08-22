@@ -899,22 +899,22 @@ end</code></pre><p>A Hurmet document can load an entire module into one variable
 <h2 id='drawings'>Drawings</h2>
 <p>Hurmet’s <em>draw</em> environment can plot functions and render simple sketches. For a sine wave, you can open a math zone and type the following code…</p>
 <pre><code>draw()
-  title(&quot;sin x&quot;)
-  frame(250, 150)
-  view(-5, 5, -3)
-  axes(2, 1, &quot;labels&quot;)
-  strokewidth(2)
-  plot(sin(x), 51)
-  text([1.6, 1.35], &quot;sin x&quot;)
+    title &quot;sin x&quot;
+    frame 250, 150
+    view -5, 5, -3
+    axes 2, 1, &quot;labels&quot;
+    strokewidth 2
+    plot sin(x), 51
+    text [1.6, 1.35], &quot;sin x&quot;
 end</code></pre><p>… which will result in this plot …</p>
 <p><img src="images/sinx.svg" alt="sin x"></p>
 <p>Always use <em>x</em> as the variable of a single function. For parametric plots, use <em>t</em> as the variable and put the two expressions into a row vector, like the code below.</p>
 <pre><code>draw()
-   title(&quot;spiral&quot;)
-   frame(200, 200)
-   view(-8, 8)
-   axes()
-   plot([t*cos(π t), t * sin(π t)], 251, 0, 8)
+   title &quot;spiral&quot; 
+   frame 200, 200 
+   view -8, 8 
+   axes
+   plot [t*cos(π t), t * sin(π t)], 251, 0, 8 
 end</code></pre><p>… which results in this plot …</p>
 <p><img src="images/spiral.svg" alt="spiral"></p>
 <p>You can pass variables into a draw environment. And a draw environment can execute the same statements as a user-defined function. So you can create drawings that change dynamically in reaction to the rest of your document.</p>
@@ -922,76 +922,76 @@ end</code></pre><p>… which results in this plot …</p>
 <h3 id='draw-environment-commands'>Draw environment commands</h3>
 <p>In the following list, optional arguments are written in <span class="optional">orange</span>.</p>
 <dl>
-<dt id='title'>title(&quot;<em>string</em>&quot;)</dt>
+<dt id='title-&quot;<em>string</em>&quot;'>title &quot;<em>string</em>&quot;</dt>
 <dd><p>Title of the drawing, for accessibility.</p>
 </dd>
-<dt id='frame'>frame(<em>width</em>, <em>height</em><span class="optional">, position</span>)</dt>
+<dt id='frame-<em>width</em>,-<em>height</em><span-class="optional">,-position</span>'>frame <em>width</em>, <em>height</em><span class="optional">, position</span></dt>
 <dd><p><em>width</em> and <em>height</em>, in px, define the size of the drawing in the document. <em>position</em> can be &quot;inline&quot;, &quot;left&quot;, or &quot;right&quot;.<br>This command must come before anything is drawn.</p>
 </dd>
-<dt id='view'>view(<em>x</em><sub>min</sub>, <em>x</em><sub>max</sub><span class="optional">, yₘᵢₙ, yₘₐₓ,</span>)</dt>
+<dt id='view-<em>x</em><sub>min</sub>,-<em>x</em><sub>max</sub><span-class="optional">,-yₘᵢₙ,-yₘₐₓ,</span>'>view <em>x</em><sub>min</sub>, <em>x</em><sub>max</sub><span class="optional">, yₘᵢₙ, yₘₐₓ,</span></dt>
 <dd><p>This command is usually written directly after <code>frame</code>. The arguments set the coordinate system. If <em>y</em><sub>min</sub> is omitted, the x-axis is placed in the middle of the picture. If <em>y</em><sub>max</sub> is omitted, the scales along the x-axis and y-axis are the same.</p>
 </dd>
-<dt id='axes'>axes(<em>dx</em>, <em>dy</em><span class="optional">, "labels"</span>)</dt>
+<dt id='axes-<em>dx</em>,-<em>dy</em><span-class="optional">,-"labels"</span>'>axes <em>dx</em>, <em>dy</em><span class="optional">, "labels"</span></dt>
 <dd><p>Draws coordinate axes.</p>
 </dd>
-<dt id='grid'>grid(<em>dx</em>, <em>dy</em><span class="optional">, "labels"</span>)</dt>
+<dt id='grid-<em>dx</em>,-<em>dy</em><span-class="optional">,-"labels"</span>'>grid <em>dx</em>, <em>dy</em><span class="optional">, "labels"</span></dt>
 <dd><p>Draws a background grid.</p>
 </dd>
-<dt id='stroke'>stroke(&quot;<em>color</em>&quot;)</dt>
+<dt id='stroke-&quot;<em>color</em>&quot;'>stroke &quot;<em>color</em>&quot;</dt>
 <dd><p>Sets the default color for lines, paths, curves and outlines of solid figures. Can be any of the <a href='https://www.w3schools.com/colors/colors_names.asp'>standard HTML predefined color names</a>.</p>
 </dd>
-<dt id='strokewidth'>strokewidth(<em>pixelvalue</em>)</dt>
+<dt id='strokewidth-<em>pixelvalue</em>'>strokewidth <em>pixelvalue</em></dt>
 <dd><p>Sets the width of lines, paths, and shape outlines.</p>
 </dd>
-<dt id='strokedasharray'>strokedasharray(&quot;<em>dashpixel</em> <em>spacepixel</em>&quot;)</dt>
+<dt id='strokedasharray-&quot;<em>dashpixel</em>-<em>spacepixel</em>&quot;'>strokedasharray &quot;<em>dashpixel</em> <em>spacepixel</em>&quot;</dt>
 <dd><p>Set a pattern of dashes and gaps for lines and paths. Default = null.</p>
 </dd>
-<dt id='fill'>fill(&quot;<em>color</em>&quot;)</dt>
+<dt id='fill-&quot;<em>color</em>&quot;'>fill &quot;<em>color</em>&quot;</dt>
 <dd><p>Sets the default color for filling in the inside of solid figures.</p>
 </dd>
-<dt id='fontfamily'>fontfamily(&quot;sansserif&quot;|&quot;serif&quot;|&quot;fixed&quot;|&quot;monotype&quot;)</dt>
+<dt id='fontfamily-&quot;sansserif&quot;|&quot;serif&quot;|&quot;fixed&quot;|&quot;monotype&quot;'>fontfamily &quot;sansserif&quot;|&quot;serif&quot;|&quot;fixed&quot;|&quot;monotype&quot;</dt>
 <dd><p>Sets the font type.</p>
 </dd>
-<dt id='fontsize'>fontsize(<em>pixelvalue</em>)</dt>
+<dt id='fontsize-<em>pixelvalue</em>'>fontsize <em>pixelvalue</em></dt>
 <dd><p>Sets the font size in px. Default = 10.</p>
 </dd>
-<dt id='fontstyle'>fontstyle(&quot;normal&quot; | &quot;italic&quot;)</dt>
+<dt id='fontstyle-&quot;normal&quot;-|-&quot;italic&quot;'>fontstyle &quot;normal&quot; | &quot;italic&quot;</dt>
 <dd><p>Set the font style.</p>
 </dd>
-<dt id='fontweight'>fontweight(&quot;normal&quot; | &quot;bold&quot;)</dt>
+<dt id='fontweight-&quot;normal&quot;-|-&quot;bold&quot;'>fontweight &quot;normal&quot; | &quot;bold&quot;</dt>
 <dd><p>Sets the font weight.</p>
 </dd>
-<dt id='marker'>marker(&quot;none&quot; | &quot;dot&quot; | &quot;arrow&quot; | &quot;arrowdot&quot;)</dt>
-<dd><p>Sets the default marker symbol that is drawn at the endpoints of lines and paths. Dots are also set along the intermediate points of paths and curves. </p>
+<dt id='marker-&quot;none&quot;-|-&quot;dot&quot;-|-&quot;arrow&quot;-|-&quot;arrowdot&quot;'>marker &quot;none&quot; | &quot;dot&quot; | &quot;arrow&quot; | &quot;arrowdot&quot;</dt>
+<dd><p>Sets the default marker symbol that is drawn at the endpoints of lines and paths. Dots are also set along the intermediate points of paths and curves.</p>
 </dd>
-<dt id='line'>line( [<em>x</em>, <em>y</em>; <em>u</em>, <em>v</em>] )</dt>
+<dt id='lin-'>lin ( [<em>x</em>, <em>y</em>; <em>u</em>, <em>v</em>]</dt>
 <dd><p>Draws a straight line from coordinate point <em>x</em>, <em>y</em> to coordinate point <em>u</em>, <em>v</em>.</p>
 </dd>
-<dt id='path'>path( [<em>x₁</em>, <em>y₁</em>; <em>x₂</em>, <em>y₂</em>; …; <em>xₙ</em>, <em>yₙ</em>]<span class="optional">, "L", or "T", or [r₁; r₂; …; rₙ]</span>)</dt>
-<dd><p>Draws a path connecting all the points in the matrix. The second (optional) argument defines the type of line segments. &quot;L&quot; will draw straight segments. &quot;T&quot; will fit a curve to the points. A vector of numbers will define arc  radii for each segment (<strong>0</strong> indicates a straight line segment).</p>
+<dt id='path-[<em>x₁</em>,-<em>y₁</em>;-<em>x₂</em>,-<em>y₂</em>;-…;-<em>xₙ</em>,-<em>yₙ</em>]<span-class="optional">,-"l",-or-"t",-or-[r₁;-r₂;-…;-rₙ]</span>'>path  [<em>x₁</em>, <em>y₁</em>; <em>x₂</em>, <em>y₂</em>; …; <em>xₙ</em>, <em>yₙ</em>]<span class="optional">, "L", or "T", or [r₁; r₂; …; rₙ]</span></dt>
+<dd><p>Draws a path connecting all the points in the matrix. The second (optional) argument defines the type of line segments. &quot;L&quot; will draw straight segments. &quot;T&quot; will fit a curve to the points. A vector of numbers will define arc radii for each segment (<strong>0</strong> indicates a straight line segment).</p>
 </dd>
-<dt id='curve'>curve( [<em>x₁</em>, <em>y₁</em>; <em>x₂</em>, <em>y₂</em>; …; <em>xₙ</em>, <em>yₙ</em>] )</dt>
+<dt id='curve-[<em>x₁</em>,-<em>y₁</em>;-<em>x₂</em>,-<em>y₂</em>;-…;-<em>xₙ</em>,-<em>yₙ</em>]'>curve  [<em>x₁</em>, <em>y₁</em>; <em>x₂</em>, <em>y₂</em>; …; <em>xₙ</em>, <em>yₙ</em>]</dt>
 <dd><p>Fits a quadratic bezier curve to each point.</p>
-<dt id='circle'>circle( [<em>x</em>, <em>y</em>], <em>r</em> )</dt>
+</dd>
+<dt id='circle-[<em>x</em>,-<em>y</em>],-<em>r</em>'>circle  [<em>x</em>, <em>y</em>], <em>r</em></dt>
 <dd><p>Draws a circle of radius <em>r</em>, centered at point <em>x</em>, <em>y</em>.</p>
 </dd>
-</dd>
-<dt id='dot'>dot( [<em>x</em>, <em>y</em>]<span class="optional">, "open" | "closed", "label", position</span> )</dt>
+<dt id='dot-[<em>x</em>,-<em>y</em>]<span-class="optional">,-"open"-|-"closed",-"label",-position</span>'>dot  [<em>x</em>, <em>y</em>]<span class="optional">, "open" | "closed", "label", position</span></dt>
 <dd><p>Draws a dot with an optional appended label.  <em>position</em> can be: &quot;above&quot;|&quot;below&quot;|&quot;left&quot;|&quot;right&quot;|&quot;aboveleft&quot;|&quot;aboveright&quot; |&quot;belowleft&quot;|&quot;belowright&quot;|null</p>
 </dd>
-<dt id='ellipse'>ellipse( [<em>x</em>, <em>y</em>], <em>rx</em>, <em>ry</em> )</dt>
+<dt id='ellipse-[<em>x</em>,-<em>y</em>],-<em>rx</em>,-<em>ry</em>'>ellipse  [<em>x</em>, <em>y</em>], <em>rx</em>, <em>ry</em></dt>
 <dd><p>Draws an ellipse of radii <em>rx</em> and <em>ry</em>, centered at point <em>x</em>, <em>y</em>.</p>
 </dd>
-<dt id='arc'>arc( [<em>x</em>, <em>y</em>; <em>u</em>, <em>v</em>], <em>r</em> or [<em>rx</em>, <em>ry</em>] )</dt>
+<dt id='arc-[<em>x</em>,-<em>y</em>;-<em>u</em>,-<em>v</em>],-<em>r</em>-or-[<em>rx</em>,-<em>ry</em>]'>arc  [<em>x</em>, <em>y</em>; <em>u</em>, <em>v</em>], <em>r</em> or [<em>rx</em>, <em>ry</em>]</dt>
 <dd><p>Draws an arc in anticlockwise direction from point <em>x</em>, <em>y</em> to point <em>u</em>, <em>v</em>. It will be either a circular arc of radius <em>r</em> or an elliptical arc of radius [<em>rx</em>, <em>ry</em>].</p>
 </dd>
-<dt id='rect'>rect( [<em>x</em>, <em>y</em>; <em>u</em>, <em>v</em>]<span class="optional">, r</span> )</dt>
+<dt id='rect-[<em>x</em>,-<em>y</em>;-<em>u</em>,-<em>v</em>]<span-class="optional">,-r</span>'>rect  [<em>x</em>, <em>y</em>; <em>u</em>, <em>v</em>]<span class="optional">, r</span></dt>
 <dd><p>Draws a rectangle with corners at points <em>x</em>, <em>y</em> and <em>u</em>, <em>v</em>. The optional <em>r</em> argument defines the corner radius of a rounded rectangle.</p>
 </dd>
-<dt id='text'>text( [<em>x</em>, <em>y</em>], &quot;<em>string</em>&quot;<span class="optional">, position</span> )</dt>
+<dt id='text-[<em>x</em>,-<em>y</em>],-&quot;<em>string</em>&quot;<span-class="optional">,-position</span>'>text  [<em>x</em>, <em>y</em>], &quot;<em>string</em>&quot;<span class="optional">, position</span></dt>
 <dd><p>Writes the string at a point keyed to coordinates <em>x</em>, <em>y</em>. <em>position</em> can be &quot;above&quot;, &quot;below&quot;, &quot;middle&quot;, &quot;left&quot;, &quot;right&quot;, &quot;aboveleft&quot;, &quot;aboveright&quot;, &quot;belowleft&quot;, or &quot;belowright&quot;. The default is &quot;middle&quot;.</p>
 </dd>
-<dt id='plot'>plot( <em>f</em> | [<em>g</em>, <em>h</em>]<span class="optional">, 𝑛, xₘᵢₙ, xₘₐₓ</span> )</dt>
+<dt id='plot-<em>f</em>-|-[<em>g</em>,-<em>h</em>]<span-class="optional">,-𝑛,-xₘᵢₙ,-xₘₐₓ</span>'>plot  <em>f</em> | [<em>g</em>, <em>h</em>]<span class="optional">, 𝑛, xₘᵢₙ, xₘₐₓ</span></dt>
 <dd><p>Plots a function or a pair of parametric equations. A single function <em>f()</em> should be written with <em>x</em> as its variable. A pair of parametric equations should be written with <em>t</em> as their variable.<br>Values will be plotted from <em>x</em>ₘᵢₙ to <em>x</em>ₘₐₓ. <em>n</em> determines the number of points to be plotted. (Default = 250)</p>
 </dd>
 </dl>
