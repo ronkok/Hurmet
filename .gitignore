@@ -10,7 +10,4 @@ preview/Temml.woff2
 preview/temml.min.css
 test/hurmet.cjs
 utils/ECB Exchange Rates.xml
-site/prosemirror.min.mjs
-site/docs/en/demo.min.mjs
-site/docs/en/manual.html
 site/server.js
