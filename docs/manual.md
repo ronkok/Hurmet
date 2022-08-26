@@ -2033,7 +2033,7 @@ fill "_color_"
 
 : Sets the default color for filling in the inside of solid figures.
 
-fontfamily "sansserif"|"serif"|"fixed"|"monotype"
+fontfamily "sansserif" | "serif" | "fixed" | "monotype"
 
 : Sets the font type.
 
@@ -2098,7 +2098,16 @@ text  [_x_, _y_], "_string_"<span class="optional">, position</span>
   "above", "below", "middle", "left", "right", "aboveleft", "aboveright",
   "belowleft", or "belowright". The default is "middle".
 
-plot  _f_ | [_g_, _h_]<span class="optional">, 𝑛, xₘᵢₙ, xₘₐₓ</span>
+leader [_x₁_, _y₁_; _x₂_, _y₂_<span class="optional">; x₃, y₃; etc</span>], "_note_"
+
+: Writes a note with an arrow pointing to a location.
+
+dimension [_x₁_, _y₁_; _x₂_, _y₂_; <span class="optional">x₃, y₃; etc;</span> _xLabel_, _yLabel_], "_label_" or ["_label₁_", "_label₂_", etc.]
+
+: Writes a string of dimensions. _xLabel_ and _yLabel_ locate the labels. The
+  other points each define a witness line.
+
+plot  _f_ or [_g_, _h_]<span class="optional">, 𝑛, xₘᵢₙ, xₘₐₓ</span>
 
 : Plots a function or a pair of parametric equations. A single function _f()_
   should be written with _x_ as its variable. A pair of parametric equations

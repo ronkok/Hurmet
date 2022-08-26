@@ -949,7 +949,7 @@ end</code></pre><p>… which results in this plot …</p>
 <dt id='fill-&quot;<em>color</em>&quot;'>fill &quot;<em>color</em>&quot;</dt>
 <dd><p>Sets the default color for filling in the inside of solid figures.</p>
 </dd>
-<dt id='fontfamily-&quot;sansserif&quot;|&quot;serif&quot;|&quot;fixed&quot;|&quot;monotype&quot;'>fontfamily &quot;sansserif&quot;|&quot;serif&quot;|&quot;fixed&quot;|&quot;monotype&quot;</dt>
+<dt id='fontfamily-&quot;sansserif&quot;-|-&quot;serif&quot;-|-&quot;fixed&quot;-|-&quot;monotype&quot;'>fontfamily &quot;sansserif&quot; | &quot;serif&quot; | &quot;fixed&quot; | &quot;monotype&quot;</dt>
 <dd><p>Sets the font type.</p>
 </dd>
 <dt id='fontsize-<em>pixelvalue</em>'>fontsize <em>pixelvalue</em></dt>
@@ -991,7 +991,13 @@ end</code></pre><p>… which results in this plot …</p>
 <dt id='text-[<em>x</em>,-<em>y</em>],-&quot;<em>string</em>&quot;<span-class="optional">,-position</span>'>text  [<em>x</em>, <em>y</em>], &quot;<em>string</em>&quot;<span class="optional">, position</span></dt>
 <dd><p>Writes the string at a point keyed to coordinates <em>x</em>, <em>y</em>. <em>position</em> can be &quot;above&quot;, &quot;below&quot;, &quot;middle&quot;, &quot;left&quot;, &quot;right&quot;, &quot;aboveleft&quot;, &quot;aboveright&quot;, &quot;belowleft&quot;, or &quot;belowright&quot;. The default is &quot;middle&quot;.</p>
 </dd>
-<dt id='plot-<em>f</em>-|-[<em>g</em>,-<em>h</em>]<span-class="optional">,-𝑛,-xₘᵢₙ,-xₘₐₓ</span>'>plot  <em>f</em> | [<em>g</em>, <em>h</em>]<span class="optional">, 𝑛, xₘᵢₙ, xₘₐₓ</span></dt>
+<dt id='leader-[<em>x₁</em>,-<em>y₁</em>;-<em>x₂</em>,-<em>y₂</em><span-class="optional">;-x₃,-y₃;-etc</span>],-&quot;<em>note</em>&quot;'>leader [<em>x₁</em>, <em>y₁</em>; <em>x₂</em>, <em>y₂</em><span class="optional">; x₃, y₃; etc</span>], &quot;<em>note</em>&quot;</dt>
+<dd><p>Writes a note with an arrow pointing to a location.</p>
+</dd>
+<dt id='dimension-[<em>x₁</em>,-<em>y₁</em>;-<em>x₂</em>,-<em>y₂</em>;-<span-class="optional">x₃,-y₃;-etc;</span>-<em>xlabel</em>,-<em>ylabel</em>],-&quot;<em>label</em>&quot;-or-[&quot;<em>label₁</em>&quot;,-&quot;<em>label₂</em>&quot;,-etc.]'>dimension [<em>x₁</em>, <em>y₁</em>; <em>x₂</em>, <em>y₂</em>; <span class="optional">x₃, y₃; etc;</span> <em>xLabel</em>, <em>yLabel</em>], &quot;<em>label</em>&quot; or [&quot;<em>label₁</em>&quot;, &quot;<em>label₂</em>&quot;, etc.]</dt>
+<dd><p>Writes a string of dimensions. <em>xLabel</em> and <em>yLabel</em> locate the labels. The other points each define a witness line.</p>
+</dd>
+<dt id='plot-<em>f</em>-or-[<em>g</em>,-<em>h</em>]<span-class="optional">,-𝑛,-xₘᵢₙ,-xₘₐₓ</span>'>plot  <em>f</em> or [<em>g</em>, <em>h</em>]<span class="optional">, 𝑛, xₘᵢₙ, xₘₐₓ</span></dt>
 <dd><p>Plots a function or a pair of parametric equations. A single function <em>f()</em> should be written with <em>x</em> as its variable. A pair of parametric equations should be written with <em>t</em> as their variable.<br>Values will be plotted from <em>x</em>ₘᵢₙ to <em>x</em>ₘₐₓ. <em>n</em> determines the number of points to be plotted. (Default = 250)</p>
 </dd>
 </dl>

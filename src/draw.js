@@ -1,4 +1,5 @@
 import { dt } from "./constants"
+import { clone } from "./utils"
 import { isVector } from "./matrix"
 import { Rnl } from "./rational"
 
@@ -39,7 +40,8 @@ const defaultSvg = _ => {
       marker: "none",
       dotradius: 4,
       axesstroke: "black",
-      gridstroke: "grey"
+      gridstroke: "grey",
+      isDim: false
     }
   }
 }
@@ -82,17 +84,22 @@ const arrowhead = (svg, p, q) => { // draw arrowhead at q (in units)
              p[1] * attrs.yunitlength - attrs.origin[1]];
   const w = [q[0] * attrs.xunitlength + attrs.origin[0], attrs.height -
              q[1] * attrs.yunitlength - attrs.origin[1]];
-  let u = [w[0] - v[0], w[1] - v[1]];
-  const d = Math.sqrt(u[0] * u[0] + u[1] * u[1]);
+  let u = [w[0] - v[0], w[1] - v[1]]
+  const d = Math.sqrt(u[0] * u[0] + u[1] * u[1])
   if (d > 0.00000001) {
     u = [u[0] / d, u[1] / d];
+    const z = attrs.marker === "markerdot" ? 3 : attrs.isDim ? 0 : 1
     const up = [-u[1], u[0]];
     const node = { tag: "path", attrs: {} }
-    node.attrs.d = "M " + (w[0] - 15 * u[0] - 4 * up[0]) + "," +
-      (w[1] - 15 * u[1] - 4 * up[1]) + " L " + (w[0] - 3 * u[0]) + "," + (w[1] - 3 * u[1]) +
-      " L " + (w[0] - 15 * u[0] + 4 * up[0]) + "," + (w[1] - 15 * u[1] + 4 * up[1]) + " z"
-    node.attrs["stroke-width"] = attrs.markerstrokewidth
-    node.attrs.stroke = attrs.stroke
+    node.attrs.d = "M " + (w[0] - 12.5 * u[0] - 3 * up[0]) + "," +
+      (w[1] - 12.5 * u[1] - 3 * up[1]) + " L " + (w[0] - z * u[0]) + "," + (w[1] - z * u[1]) +
+      " L " + (w[0] - 12.5 * u[0] + 3 * up[0]) + "," + (w[1] - 12.5 * u[1] + 3 * up[1]) + " z"
+    if (attrs.isDim) {
+      node.attrs.stroke = "none"
+    } else {
+      node.attrs["stroke-width"] = attrs.markerstrokewidth
+      node.attrs.stroke = attrs.stroke
+    }
     node.attrs.fill = attrs.stroke
     svg.children.push(node)
   }
@@ -548,33 +555,81 @@ const functions = {
   leader(svgOprnd, plistOprnd, label) {
     const marker = svgOprnd.value.temp.marker
     svgOprnd.value.temp.marker = "arrow"
-    plistOprnd.value.reverse()
-    svgOprnd = this.path(svgOprnd, plistOprnd, "L")
-    const p = plistOprnd.value[0]
-    const svg = textLocal(
-      svgOprnd.value,
-      [Rnl.toNumber(p.value[0]), Rnl.toNumber(p.value[1])],
-      label.value,
-      "right",
-      null
-      )
+    svgOprnd.value.temp.isDim = true
+    const plistCopy = clone(plistOprnd)
+    plistCopy.value.reverse()
+    svgOprnd = this.path(svgOprnd, plistCopy, "L")
+    const p = plistCopy.value[0].map(e => Rnl.toNumber(e))
+    const q = plistCopy.value[1].map(e => Rnl.toNumber(e))
+    let pos = "right"
+    if (Math.abs(p[0] - q[0]) >= Math.abs(p[1] - q[1])) {
+      pos = p[0] >= q[0] ? "right" : "left"
+    } else {
+      pos = p[1] < q[1] ? "below" : "above"
+    }
+    const svg = textLocal(svgOprnd.value, p, label.value, pos, null)
     svg.temp.marker = marker
+    svg.temp.isDim = false
     return { value: svg, unit: null, dtype: dt.DRAWING }
   },
 
   dimension(svgOprnd, plistOprnd, label) {
-    const p1 = [Rnl.toNumber(plistOprnd.value[0][0]), Rnl.toNumber(plistOprnd.value[0][1])]
-    const p2 = [Rnl.toNumber(plistOprnd.value[1][0]), Rnl.toNumber(plistOprnd.value[1][1])]
-    const p3 = [Rnl.toNumber(plistOprnd.value[2][0]), Rnl.toNumber(plistOprnd.value[2][1])];
+    const p = clone(plistOprnd.value)
+    const q = p.pop()
     const origstrokewidth = svgOprnd.value.temp.strokewidth
     svgOprnd.value.temp.strokewidth = 1
-    const four = Rnl.fromNumber(4)
-    svgOprnd = this.line(svgOprnd, [[p1[0] + 4, p1[1]], [p3[0] + 4, p1[1]]])
-    svgOprnd = this.line(svgOprnd, [[p2[0] + 4, p2[1]], [p3[0] + 4, p2[1]]])
-    svgOprnd.value.temp.marker = "arrow"
-    const svg = this.textLocal(plistOprnd.value, p3, label, "right")
+    svgOprnd.value.temp.isDim = true // set small arrowhead
+    let six = Rnl.fromNumber(6 / svgOprnd.value.temp.xunitlength)
+    const pEnd = p[p.length - 1]
+    let svg
+    if (Rnl.lessThan(p[1][0], q[1]) && Rnl.lessThan(q[1], pEnd[1])) {
+      if (!Rnl.lessThan(pEnd[0], q[0])) { six = Rnl.negate(six) }
+      p.forEach(e => {
+        svgOprnd = this.line(svgOprnd, { value: [
+          [Rnl.add(e[0], six), e[1]],
+          [Rnl.add(q[0], six), e[1]]
+        ] })
+      });
+      svgOprnd.value.temp.marker = "arrow"
+      const pos = Rnl.lessThanOrEqualTo(pEnd[0], q[0]) ? "right" : "left"
+      for (let i = 0; i < p.length - 1; i++) {
+        svgOprnd = this.line(svgOprnd, { value : [[q[0], p[i][1]], [q[0], p[i + 1][1]]],
+          unit: null, dtype: dt.MATRIX })
+        svgOprnd = this.line(svgOprnd, { value : [[q[0], p[i + 1][1]], [q[0], p[i][1]]],
+          unit: null, dtype: dt.MATRIX })
+        const p3 = [
+          Rnl.toNumber(q[0]),
+          (Rnl.toNumber(p[i][1]) + Rnl.toNumber(p[i + 1][1])) / 2
+        ];
+        const str = p.length === 2 ? label.value : label.value[i];
+        svg = textLocal(svgOprnd.value, p3, str, pos)
+      }
+    } else {
+      if (!Rnl.lessThan(pEnd[1], q[1])) { six = Rnl.negate(six) }
+      p.forEach(e => {
+        svgOprnd = this.line(svgOprnd, { value: [
+          [e[0], Rnl.add(e[1], six)],
+          [e[0], Rnl.add(q[1], six)]
+        ] })
+      });
+      svgOprnd.value.temp.marker = "arrow"
+      const pos = Rnl.lessThanOrEqualTo(pEnd[1], q[1]) ? "above" : "below"
+      for (let i = 0; i < p.length - 1; i++) {
+        svgOprnd = this.line(svgOprnd, { value: [ [p[i][0], q[1]], [ p[i + 1][0], q[1]] ],
+          unit: null, dtype: dt.MATRIX })
+        svgOprnd = this.line(svgOprnd, { value: [ [ p[i + 1][0], q[1]], [p[i][0], q[1]] ],
+          unit: null, dtype: dt.MATRIX })
+        const p3 = [
+          (Rnl.toNumber(p[i][0]) + Rnl.toNumber(p[i + 1][0])) / 2,
+          Rnl.toNumber(q[1])
+        ];
+        const str = p.length === 2 ? label.value : label.value[i];
+        svg = textLocal(svgOprnd.value, p3, str, pos)
+      }
+    }
     svg.temp.strokewidth = origstrokewidth
     svg.temp.marker = "none"
+    svg.temp.isDim = false
     return { value: svg, unit: null, dtype: dt.DRAWING }
   }
 

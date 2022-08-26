@@ -176,6 +176,7 @@ const workAsync = (
       proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs,
                         curPos, hurmetVars, tr)
     } catch (err) {
+      console.log(err) // eslint-disable-line no-console
       const pos = nodeAttrs.template.indexOf(nodeAttrs.resultdisplay)
       nodeAttrs.tex = nodeAttrs.template.slice(0, pos) + "\\text{" + err + "}"
       tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs))
@@ -370,6 +371,7 @@ export function updateCalculations(
     try {
       proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr)
     } catch (err) {
+      console.log(err) // eslint-disable-line no-console
       const pos = nodeAttrs.template.indexOf(nodeAttrs.resultdisplay)
       nodeAttrs.tex = nodeAttrs.template.slice(0, pos) + "\\text{" + err + "}"
       tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs))

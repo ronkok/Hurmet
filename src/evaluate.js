@@ -1632,8 +1632,16 @@ export const evaluateDrawing = (stmt, vars, decimalFormat = "1,000,000.") => {
     const argName = udf.parameters[i]
     args.push(evalRpn("¿" + argName, vars, decimalFormat, false, {}))
   }
-  stmt.resultdisplay = evalCustomFunction(udf, args, decimalFormat, false, {}).value
-  delete stmt.resultdisplay.temp
+  const funcResult = evalCustomFunction(udf, args, decimalFormat, false, {})
+  if (funcResult.dtype === dt.ERROR) {
+    stmt.error = true
+    stmt.tex = "\\color{firebrick}\\text{" + funcResult.value + "}"
+    stmt.value = null
+    stmt.dtype = dt.ERROR
+  } else {
+    stmt.resultdisplay = funcResult.value
+    delete stmt.resultdisplay.temp
+  }
   return stmt
 }
 
