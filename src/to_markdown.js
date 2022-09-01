@@ -105,6 +105,9 @@ const hurmetNodes =  {
     state.renderInline(node)
     state.closeBlock(node)
   },
+  toc(state, node) {
+    state.write("\n\n") // No support, but at least avoid a crash.
+  },
   horizontal_rule(state, node) {
     state.write(node.attrs.markup || "------")
     state.closeBlock(node)

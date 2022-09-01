@@ -2,7 +2,7 @@
 /**
  * # hurmetMark.js
  *
- * Hurmet.app uses a version of Markdown as a plain text file format.
+ * Hurmet.app can export to its own flavor of Markdown.
  * This version of Markdown is stricter in some ways than CommonMark or
  * Gruber's original Markdown. So the parser can be considerably simplified.
  * md2ast() returns an AST that matches the memory structure  of a Hurmet.app document.
@@ -16,7 +16,7 @@
  * 4. A blank line must precede the beginning of a list, even a nested list.
  * 5. A hard line break is indicated when a line ends with "\". Double spaces do not count.
  * 6. "Shortcut" reference links [ref] are not recognized.
- *    See below for implicit reference links.
+ *    Implicit reference links are recognized and are expanded, see below.
  *
  * ## Extensions
  *
@@ -25,11 +25,11 @@
  * 2. LaTeX inline math is delimited $…$. $ and \\ are escaped \$ & \\\\.
  *    LaTeX display math is fenced  $$\n … \n$$.
  * 3. ~~strikethrough~~
- * 4. Pipe tables as per GFM.
+ * 4. Pipe tables as per Github Flavored Markdown (GFM).
  * 5. Grid tables as per reStructuredText, with two exceptions:
  *    a. The top border contains ":" characters to indicate column justtification.
- *    b. Top & left borders contain "+" characters at locations where a merged
- *       cell prevents a border from extending to the tables outer edge.
+ *    b. Top & left borders contain "+" characters at border locations, even where
+ *       a merged cell prevents a border from extending to the tables outer edge.
  * 6. Implicit reference links [title][] and implicit reference images ![alt][]
  *    ⋮
  *    [alt]: path
