@@ -505,10 +505,6 @@ function insertImage(nodeType) {
   })
 }
 
-const validateTocEntry = str => {
-  
-}
-
 function insertToC(nodeType) {
   // Table of Contents
   return new MenuItem({
