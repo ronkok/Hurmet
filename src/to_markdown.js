@@ -262,7 +262,7 @@ const blockRegEx = /^(?:[>*+-] |#+ |\d+[.)] |[A-B]\. |\-\-\-|```|[iCFHhITWADE]> 
 function limitLineLength(str, prevLength, delim, limit) {
   let graf = str.slice(prevLength)
   if (graf.length <= limit) { return str }
-  if (/``|¢` ffunction/.test(graf)) { return str }
+  if (/``|¢` (?:function|draw\()/.test(graf)) { return str }
 
   const leading = "\n" + delim
   let result = ""
