@@ -265,7 +265,7 @@ const autoCorrect = (jar, preText, postText) => {
       if (accent) {
         const newStr = preText.slice(0, -(matches[0].length + 1)) + accent;
         jar.updateCode(newStr + postText);
-        // Move the cursur to the correct location
+        // Move the cursor to the correct location
         const L = newStr.length;
         jar.restore({ start: L, end: L, dir: undefined });
       } else {
@@ -285,7 +285,7 @@ const autoCorrect = (jar, preText, postText) => {
       if (correction) {
         const newStr = preText.slice(0, -matches[0].length) + correction;
         jar.updateCode(newStr + postText);
-        // Move the cursur to the correct location
+        // Move the cursor to the correct location
         const L = newStr.length;
         jar.restore({ start: L, end: L, dir: undefined });
       }
@@ -423,13 +423,30 @@ const arrayOfRegExMatches = (regex, text) => {
   return result
 };
 
+const textAccent = {
+  "\u0300": "`",
+  "\u0301": "'",
+  "\u0302": "^",
+  "\u0303": "~",
+  "\u0304": "=",
+  "\u0305": "=",
+  "\u0306": "u",
+  "\u0307": ".",
+  "\u0308": '"',
+  "\u030A": 'r',
+  "\u030c": "v",
+};
+
+const escapeRegEx = /[#$&%_~^]/g;
+const accentRegEx = /[\u0300-\u0308\u030A\u030c]/g;
+
 const addTextEscapes = str => {
   // Insert escapes for # $ & % _ ~ ^ \ { }
   // TODO: \textbackslash.
   // TODO: How to escape { } without messing up Lex?
   if (str.length > 1) {
-    const matches = arrayOfRegExMatches(/[#$&%_~^]/g, str);
-    const L = matches.length;
+    let matches = arrayOfRegExMatches(escapeRegEx, str);
+    let L = matches.length;
     if (L > 0) {
       for (let i = L - 1; i >= 0; i--) {
         const match = matches[i];
@@ -445,6 +462,18 @@ const addTextEscapes = str => {
           if (pc !== "\\") {
             str = str.slice(0, pos) + "\\" + str.slice(pos);
           }
+        }
+      }
+    }
+    matches = arrayOfRegExMatches(accentRegEx, str);
+    L = matches.length;
+    if (L > 0) {
+      for (let i = L - 1; i >= 0; i--) {
+        const match = matches[i];
+        const pos = match.index;
+        if (pos > 0) {
+          str = str.slice(0, pos - 1) + "\\" + textAccent[match.value]
+              + str.slice(pos - 1, pos) + str.slice(pos + 1);
         }
       }
     }
@@ -3632,7 +3661,7 @@ const quickDisplay = str => {
 
 // The next 40 lines contain helper functions for display().
 const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/;
-const accentRegEx = /^([^\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]+)([\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1])(.+)?/;
+const accentRegEx$1 = /^([^\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]+)([\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1])(.+)?/;
 const subscriptRegEx = /([^_]+)(_[^']+)?(.*)?/;
 const accentFromChar = Object.freeze({
   "\u0300": "\\grave",
@@ -3660,7 +3689,7 @@ const formatColumnName = str => {
   } else {
     // Format it like a Hurmet identifier.
     str = str.replace(/′/g, "'"); // primes
-    let parts = str.match(accentRegEx);
+    let parts = str.match(accentRegEx$1);
     if (parts) {
       str = accentFromChar[parts[2]] + "{" + parts[1] + "}";
       return str + (parts[3] ? parts[3] : "")
@@ -8794,16 +8823,16 @@ const defaultSvg = _ => {
       xmax: 5,
       ymin: 0,
       ymax: 5,
-      xunitlength: 20,  // pixels
-      yunitlength: 20,  // pixels
-      origin: [0, 0],   // in pixels (default is bottom left corner)
+      xunitlength: 20,  // px
+      yunitlength: 20,  // px
+      origin: [0, 0],   // in px (default is bottom left corner)
       stroke: "black",
       strokewidth: 1,
       strokedasharray: null,
       fill: "none",
       fontstyle: "normal",
       fontfamily: "sans-serif",
-      fontsize: 12,
+      fontsize: 13.33, // px, ~10 pt
       fontweight: "normal",
       markerstrokewidth: 1,
       markerstroke: "black",
@@ -9349,12 +9378,14 @@ const functions = {
     const p = clone(plistOprnd.value);
     const q = p.pop();
     const origstrokewidth = svgOprnd.value.temp.strokewidth;
-    svgOprnd.value.temp.strokewidth = 1;
+    svgOprnd.value.temp.strokewidth = 0.5;
     svgOprnd.value.temp.isDim = true; // set small arrowhead
     let six = Rnl.fromNumber(6 / svgOprnd.value.temp.xunitlength);
     const pEnd = p[p.length - 1];
     let svg;
-    if (Rnl.lessThan(p[1][0], q[1]) && Rnl.lessThan(q[1], pEnd[1])) {
+    // Is the label y-coord between the y-coords of the end points?
+    if ((Rnl.lessThan(p[0][1], q[1]) && Rnl.lessThan(q[1], pEnd[1])) ||
+        (Rnl.lessThan(pEnd[1], q[1]) && Rnl.lessThan(q[1], p[0][1]))) {
       if (!Rnl.lessThan(pEnd[0], q[0])) { six = Rnl.negate(six); }
       p.forEach(e => {
         svgOprnd = this.line(svgOprnd, { value: [
