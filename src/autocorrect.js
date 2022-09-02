@@ -265,7 +265,7 @@ export const autoCorrect = (jar, preText, postText) => {
       if (accent) {
         const newStr = preText.slice(0, -(matches[0].length + 1)) + accent
         jar.updateCode(newStr + postText)
-        // Move the cursur to the correct location
+        // Move the cursor to the correct location
         const L = newStr.length
         jar.restore({ start: L, end: L, dir: undefined })
       } else {
@@ -285,7 +285,7 @@ export const autoCorrect = (jar, preText, postText) => {
       if (correction) {
         const newStr = preText.slice(0, -matches[0].length) + correction
         jar.updateCode(newStr + postText)
-        // Move the cursur to the correct location
+        // Move the cursor to the correct location
         const L = newStr.length
         jar.restore({ start: L, end: L, dir: undefined })
       }
