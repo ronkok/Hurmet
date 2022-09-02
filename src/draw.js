@@ -22,16 +22,16 @@ const defaultSvg = _ => {
       xmax: 5,
       ymin: 0,
       ymax: 5,
-      xunitlength: 20,  // pixels
-      yunitlength: 20,  // pixels
-      origin: [0, 0],   // in pixels (default is bottom left corner)
+      xunitlength: 20,  // px
+      yunitlength: 20,  // px
+      origin: [0, 0],   // in px (default is bottom left corner)
       stroke: "black",
       strokewidth: 1,
       strokedasharray: null,
       fill: "none",
       fontstyle: "normal",
       fontfamily: "sans-serif",
-      fontsize: 12,
+      fontsize: 13.33, // px, ~10 pt
       fontweight: "normal",
       markerstrokewidth: 1,
       markerstroke: "black",
@@ -577,12 +577,14 @@ const functions = {
     const p = clone(plistOprnd.value)
     const q = p.pop()
     const origstrokewidth = svgOprnd.value.temp.strokewidth
-    svgOprnd.value.temp.strokewidth = 1
+    svgOprnd.value.temp.strokewidth = 0.5
     svgOprnd.value.temp.isDim = true // set small arrowhead
     let six = Rnl.fromNumber(6 / svgOprnd.value.temp.xunitlength)
     const pEnd = p[p.length - 1]
     let svg
-    if (Rnl.lessThan(p[1][0], q[1]) && Rnl.lessThan(q[1], pEnd[1])) {
+    // Is the label y-coord between the y-coords of the end points?
+    if ((Rnl.lessThan(p[0][1], q[1]) && Rnl.lessThan(q[1], pEnd[1])) ||
+        (Rnl.lessThan(pEnd[1], q[1]) && Rnl.lessThan(q[1], p[0][1]))) {
       if (!Rnl.lessThan(pEnd[0], q[0])) { six = Rnl.negate(six) }
       p.forEach(e => {
         svgOprnd = this.line(svgOprnd, { value: [
