@@ -97,13 +97,30 @@ export const arrayOfRegExMatches = (regex, text) => {
   return result
 }
 
+const textAccent = {
+  "\u0300": "`",
+  "\u0301": "'",
+  "\u0302": "^",
+  "\u0303": "~",
+  "\u0304": "=",
+  "\u0305": "=",
+  "\u0306": "u",
+  "\u0307": ".",
+  "\u0308": '"',
+  "\u030A": 'r',
+  "\u030c": "v",
+}
+
+const escapeRegEx = /[#$&%_~^]/g
+const accentRegEx = /[\u0300-\u0308\u030A\u030c]/g
+
 export const addTextEscapes = str => {
   // Insert escapes for # $ & % _ ~ ^ \ { }
   // TODO: \textbackslash.
   // TODO: How to escape { } without messing up Lex?
   if (str.length > 1) {
-    const matches = arrayOfRegExMatches(/[#$&%_~^]/g, str)
-    const L = matches.length
+    let matches = arrayOfRegExMatches(escapeRegEx, str)
+    let L = matches.length
     if (L > 0) {
       for (let i = L - 1; i >= 0; i--) {
         const match = matches[i]
@@ -119,6 +136,18 @@ export const addTextEscapes = str => {
           if (pc !== "\\") {
             str = str.slice(0, pos) + "\\" + str.slice(pos)
           }
+        }
+      }
+    }
+    matches = arrayOfRegExMatches(accentRegEx, str)
+    L = matches.length
+    if (L > 0) {
+      for (let i = L - 1; i >= 0; i--) {
+        const match = matches[i]
+        const pos = match.index
+        if (pos > 0) {
+          str = str.slice(0, pos - 1) + "\\" + textAccent[match.value]
+              + str.slice(pos - 1, pos) + str.slice(pos + 1)
         }
       }
     }
