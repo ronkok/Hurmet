@@ -26,7 +26,7 @@ import { draftMode } from "./draftMode"
 import { hurmetMarkdownSerializer } from "./to_markdown"
 import { readFile } from "./openfile"
 import { saveAs } from "filesaver.js-npm"
-import { findPageBreaks, forToC, forPrint } from "./print.js"
+import { findPageBreaks, forToC, forPrint } from "./paginate.js"
 
 // Menu icons that are not included in node-module menu.js
 const hurmetIcons = {

@@ -2,7 +2,7 @@
 import {Schema} from "prosemirror-model"
 import {findWrapping, liftTarget, canSplit, ReplaceAroundStep} from "prosemirror-transform"
 import {Slice, Fragment, NodeRange} from "prosemirror-model"
-import { renderToC, tocLevels } from "./print"
+import { renderToC, tocLevels } from "./paginate"
 import {dt} from "./constants"
 import { Draw } from "./draw"
 import { katex } from "./katex.mjs"

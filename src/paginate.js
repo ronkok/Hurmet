@@ -1,4 +1,4 @@
-// Items related to printing and Table of Contents
+// Items related to pagination and Table of Contents
 
 const headingsRegEx = /^H[1-6]$/
 const levelRegEx = /(\d+)(?:[^\d]+(\d+))?/
@@ -44,10 +44,10 @@ export const renderToC = (tocArray, ul) => {
   }
 }
 
-const pushToToC = (element, tocArray, targetRegEx, iPass, startLevel, pageNum) => {
+const pushToToC = (element, tocArray, targetRegEx, iPass, startLevel, pageNum, elNum) => {
   if (iPass === 0 && targetRegEx && targetRegEx.test(element.tagName)) {
     const level = Number(element.tagName.slice(1)) - startLevel
-    tocArray.push([element.textContent, level, pageNum])
+    tocArray.push([element.textContent, level, pageNum, elNum])
   }
 }
 
@@ -106,14 +106,14 @@ export const findPageBreaks = (view, state, purpose, tocSchema, startLevel, endL
           element.getBoundingClientRect().top - top > 0.75 * pageHeight) {
           // Prevent a H! near the bottom of a page.
           iEnd = i - 1
-          pushToToC(element, tocArray, targetRegEx, iPass, startLevel, pageNum + 1)
+          pushToToC(element, tocArray, targetRegEx, iPass, startLevel, pageNum + 1, i)
           break
         }
         if (element.tagName === "H2" &&
           element.getBoundingClientRect().top - top > 0.85 * pageHeight) {
           // Prevent a H! near the bottom of a page.
           iEnd = i - 1
-          pushToToC(element, tocArray, targetRegEx, iPass, startLevel, pageNum + 1)
+          pushToToC(element, tocArray, targetRegEx, iPass, startLevel, pageNum + 1, i)
           break
         }
         let bottom = element.getBoundingClientRect().bottom
@@ -122,15 +122,20 @@ export const findPageBreaks = (view, state, purpose, tocSchema, startLevel, endL
           bottom = Math.max(bottom, images[j].getBoundingClientRect().bottom)
         }
         if (bottom - top > pageHeight) {
+          const iLast = tocArray.length === 0
+            ? 0
+            : tocArray[tocArray.length - 1][3]
           iEnd = (headingsRegEx.test(editor.children[i - 1].tagName) ||
                   element.className === "indented")
             ? i - 2
             : i - 1
-          pushToToC(editor.children[iEnd + 1], tocArray, targetRegEx,
-              iPass, startLevel, pageNum + 1)
-          break
+          if (iEnd + 1 !== iLast) {
+            pushToToC(editor.children[iEnd + 1], tocArray, targetRegEx,
+              iPass, startLevel, pageNum + 1, iEnd + 1)
+            break
+          }
         }
-        pushToToC(element, tocArray, targetRegEx, iPass, startLevel, pageNum)
+        pushToToC(element, tocArray, targetRegEx, iPass, startLevel, pageNum, i)
       }
       // The loop has found enough elements to fill a page.
       if (iEnd === iStart - 1) { iEnd = numEls - 1 }
