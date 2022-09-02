@@ -2039,7 +2039,7 @@ fontfamily "sansserif" | "serif" | "fixed" | "monotype"
 
 fontsize _pixelvalue_
 
-: Sets the font size in px. Default = 10.
+: Sets the font size in px. Default = 13.33 (~10 pt).
 
 fontstyle "normal" | "italic"
 
@@ -2060,10 +2060,12 @@ lin ( [_x_, _y_; _u_, _v_]
 
 path  [_x₁_, _y₁_; _x₂_, _y₂_; …; _xₙ_, _yₙ_]<span class="optional">, "L", or "T", or [r₁; r₂; …; rₙ]</span>
 
-: Draws a path connecting all the points in the matrix. The second (optional)
-  argument defines the type of line segments. "L" will draw straight segments.
-  "T" will fit a curve to the points. A vector of numbers will define arc
-  radii for each segment (**0** indicates a straight line segment).
+: Draws a path connecting all the points in the matrix.
+  
+  The second (optional) argument defines the type of line segments. "L" will
+  draw straight segments. "T" will fit a curve to the points. A vector of
+  numbers will define arc radii for each segment (**0** indicates a straight
+  line segment).
 
 curve  [_x₁_, _y₁_; _x₂_, _y₂_; …; _xₙ_, _yₙ_]
 
