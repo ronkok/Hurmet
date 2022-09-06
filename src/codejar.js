@@ -37,8 +37,12 @@ export const codeJar = (editor, isMathPrompt) => {
   }
 
   ;on("keydown", event => {
-    // The next line is Hurmet customization. Not part of vanilla CodeJar.
+    // The five lines are Hurmet customization. Not part of vanilla CodeJar.
     if (isMathPrompt && event.keyCode === 13 && !event.shiftKey) return
+    if (event.keyCode === 65 && event.ctrlKey ) {
+      window.getSelection().selectAllChildren(editor)
+      event.preventDefault()
+    }
     if (event.defaultPrevented) return
     if (options.preserveIdent) handleNewLine(event)
     else legacyNewLineFix(event)
