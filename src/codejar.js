@@ -37,7 +37,7 @@ export const codeJar = (editor, isMathPrompt) => {
   }
 
   ;on("keydown", event => {
-    // The five lines are Hurmet customization. Not part of vanilla CodeJar.
+    // The next five lines are Hurmet customization. Not part of vanilla CodeJar.
     if (isMathPrompt && event.keyCode === 13 && !event.shiftKey) return
     if (event.keyCode === 65 && event.ctrlKey ) {
       window.getSelection().selectAllChildren(editor)
