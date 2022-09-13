@@ -4863,8 +4863,8 @@ const builtInFunctions = [
   "cosh", "cosh", "cot", "cotd", "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp",
   "fetch", "format", "gcd", "hypot", "isNaN", "length", "lerp", "ln", "log", "log10", "log2",
   "logFactorial", "logGamma", "logn", "logΓ", "matrix2table", "random", "rms", "round",
-  "roundSig", "roundn", "sec", "secd", "sech", "sech", "sign", "sin", "sind", "sinh", "tan",
-  "tand", "tanh", "tanh", "trace", "transpose", "zeros", "Γ"
+  "roundSig", "roundn", "sec", "secd", "sech", "sech", "sign", "sin", "sind", "sinh", "string",
+  "tan", "tand", "tanh", "tanh", "trace", "transpose", "zeros", "Γ"
 ];
 
 const builtInReducerFunctions = ["dataframe",
@@ -7275,6 +7275,12 @@ const binary = {
   },
   roundSignificant([x, n]) {
     return Rnl.fromString(Rnl.toStringSignificant(x, n))
+  },
+  stringFixed([x, n]) {
+    return Rnl.toString(x, n)
+  },
+  stringSignificant([x, n]) {
+    return Rnl.toStringSignificant(x, n)
   },
   atan2([x, y]) {
     return Rnl.fromNumber(Math.atan2(Rnl.toNumber(y), Rnl.toNumber(x)))
@@ -10027,8 +10033,13 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const range = Object.create(null);
           range.unit = null;
           range.dtype = dt.RANGE;
+          const step = o1.dtype !== dt.RATIONAL
+            ? o1.value[2]
+            : Rnl.lessThan(o1.value, end.value)
+            ? Rnl.one
+            : Rnl.negate(Rnl.one);
           range.value = o1.dtype === dt.RATIONAL
-            ? [o1.value, Rnl.one, end.value]
+            ? [o1.value, step, end.value]
             : [o1.value[0], o1.value[2], end.value];
           stack.push((Object.freeze(range)));
           break
@@ -10236,14 +10247,25 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
-        case "roundn": {
+        case "roundn":
+        case "string": {
           // Round a numeric value.
           const spec = stack.pop();
           const num = stack.pop();
           if (!(num.dtype & dt.RATIONAL)) { return errorOprnd("") }
           if (!(spec.dtype & dt.STRING)) { return errorOprnd("") }
           if (!/(?:f-?|r)\d+/.test(spec.value)) { return errorOprnd("") }
-          const funcName = spec.value.charAt() === "f" ? "roundFixed" : "roundSignificant";
+          let funcName = "";
+          const output = Object.create(null);
+          if (tkn === "string") {
+            funcName = spec.value.charAt() === "f" ? "stringFixed" : "stringSignificant";
+            output.unit = null;
+            output.dtype = num.dtype - dt.RATIONAL + dt.STRING;
+          } else {
+            funcName = spec.value.charAt() === "f" ? "roundFixed" : "roundSignificant";
+            output.unit = num.unit;
+            output.dtype = num.dtype;
+          }
           const n = Number(spec.value.slice(1));
           const value = ((num.dtype & dt.MAP) && Matrix.isVector(num))
             ? mapMap(num.value, array => array.map(e => Functions.binary[funcName]([e, n])))
@@ -10255,10 +10277,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             ? mapMap(num.value, val => Functions.binary[funcName]([val, n]))
             : Functions.binary[funcName]([num.value, n]);
           if (value.dtype && value.dtype === dt.ERROR) { return value }
-          const output = Object.create(null);
           output.value = Object.freeze(value);
-          output.unit = num.unit;
-          output.dtype = num.dtype;
           if (num.name) { output.name = num.name; }
           stack.push(Object.freeze(output));
           break
@@ -10906,7 +10925,10 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
         } else if (control[level].type === "for") {
           control[level].index = control[level].nextIndex;
           const proceed = Rnl.isRational(control[level].index)
+            && Rnl.isPositive(control[level].step)
             ? Rnl.lessThanOrEqualTo(control[level].index, control[level].endIndex)
+            : Rnl.isRational(control[level].index)
+            ? Rnl.greaterThanOrEqualTo(control[level].index, control[level].endIndex)
             : control[level].index <= control[level].endIndex;
           if (proceed) {
             const [oprnd, nextIndex] = elementFromIterable(
@@ -11404,8 +11426,11 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
 
     if (prevLineEndedInContinuation) {
       // Check if the previous character is a semi-colon just before a matrix literal closes.
-      line = prevLine.slice(-1) === ";" && "})]".indexOf(line.charAt(0)) > -1
+      const lastChar = prevLine.slice(-1);
+      line = lastChar === ";" && "})]".indexOf(line.charAt(0)) > -1
         ? prevLine.slice(0, -1).trim() + line
+        : lastChar === ";" || lastChar === ","
+        ? prevLine + " " + line
         : prevLine + line;
     }
 
