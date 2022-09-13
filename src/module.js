@@ -115,8 +115,11 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
 
     if (prevLineEndedInContinuation) {
       // Check if the previous character is a semi-colon just before a matrix literal closes.
-      line = prevLine.slice(-1) === ";" && "})]".indexOf(line.charAt(0)) > -1
+      const lastChar = prevLine.slice(-1)
+      line = lastChar === ";" && "})]".indexOf(line.charAt(0)) > -1
         ? prevLine.slice(0, -1).trim() + line
+        : lastChar === ";" || lastChar === ","
+        ? prevLine + " " + line
         : prevLine + line
     }
 

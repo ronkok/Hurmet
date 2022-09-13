@@ -577,8 +577,13 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const range = Object.create(null)
           range.unit = null
           range.dtype = dt.RANGE
+          const step = o1.dtype !== dt.RATIONAL
+            ? o1.value[2]
+            : Rnl.lessThan(o1.value, end.value)
+            ? Rnl.one
+            : Rnl.negate(Rnl.one)
           range.value = o1.dtype === dt.RATIONAL
-            ? [o1.value, Rnl.one, end.value]
+            ? [o1.value, step, end.value]
             : [o1.value[0], o1.value[2], end.value];
           stack.push((Object.freeze(range)))
           break
@@ -786,14 +791,25 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
-        case "roundn": {
+        case "roundn":
+        case "string": {
           // Round a numeric value.
           const spec = stack.pop()
           const num = stack.pop()
           if (!(num.dtype & dt.RATIONAL)) { return errorOprnd("") }
           if (!(spec.dtype & dt.STRING)) { return errorOprnd("") }
           if (!/(?:f-?|r)\d+/.test(spec.value)) { return errorOprnd("") }
-          const funcName = spec.value.charAt() === "f" ? "roundFixed" : "roundSignificant"
+          let funcName = ""
+          const output = Object.create(null)
+          if (tkn === "string") {
+            funcName = spec.value.charAt() === "f" ? "stringFixed" : "stringSignificant"
+            output.unit = null
+            output.dtype = num.dtype - dt.RATIONAL + dt.STRING
+          } else {
+            funcName = spec.value.charAt() === "f" ? "roundFixed" : "roundSignificant"
+            output.unit = num.unit
+            output.dtype = num.dtype
+          }
           const n = Number(spec.value.slice(1))
           const value = ((num.dtype & dt.MAP) && Matrix.isVector(num))
             ? mapMap(num.value, array => array.map(e => Functions.binary[funcName]([e, n])))
@@ -805,10 +821,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             ? mapMap(num.value, val => Functions.binary[funcName]([val, n]))
             : Functions.binary[funcName]([num.value, n])
           if (value.dtype && value.dtype === dt.ERROR) { return value }
-          const output = Object.create(null)
           output.value = Object.freeze(value)
-          output.unit = num.unit
-          output.dtype = num.dtype
           if (num.name) { output.name = num.name }
           stack.push(Object.freeze(output))
           break
@@ -1460,7 +1473,10 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
         } else if (control[level].type === "for") {
           control[level].index = control[level].nextIndex
           const proceed = Rnl.isRational(control[level].index)
+            && Rnl.isPositive(control[level].step)
             ? Rnl.lessThanOrEqualTo(control[level].index, control[level].endIndex)
+            : Rnl.isRational(control[level].index)
+            ? Rnl.greaterThanOrEqualTo(control[level].index, control[level].endIndex)
             : control[level].index <= control[level].endIndex
           if (proceed) {
             const [oprnd, nextIndex] = elementFromIterable(
