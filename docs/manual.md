@@ -1389,6 +1389,12 @@ sign(_x_)
 
 : Returns ¢`{1 if x > 0; -1 if x < 0; 0 otherwise}`<br>Real numbers only.
 
+string(_x_, _spec_)
+
+: Takes a number, _x_, and returns a string. _spec_ is a rounding specification.
+  It can round to a fixed number of digits after the decimal, e.g., "f2", or
+  round to a specified number of digits, e.g., "r3".
+
 sum(_a_, _b_, _c_, …), product(_a_, _b_, _c_, …), length(_a_, _b_, _c_, …), range(_a_, _b_, _c_, …), mean(_a_, _b_, _c_, …), variance(_a_, _b_, _c_, …), stddev(_a_, _b_, _c_, …)
 
 : Functions that accumulate a result from a list of arguments. Real numbers only.
@@ -2054,7 +2060,7 @@ marker "none" | "dot" | "arrow" | "arrowdot"
 : Sets the default marker symbol that is drawn at the endpoints of lines and paths.
   Dots are also set along the intermediate points of paths and curves.
 
-lin ( [_x_, _y_; _u_, _v_]
+line [_x_, _y_; _u_, _v_]
 
 : Draws a straight line from coordinate point _x_, _y_ to coordinate point _u_, _v_.
 

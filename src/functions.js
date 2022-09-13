@@ -546,6 +546,12 @@ const binary = {
   roundSignificant([x, n]) {
     return Rnl.fromString(Rnl.toStringSignificant(x, n))
   },
+  stringFixed([x, n]) {
+    return Rnl.toString(x, n)
+  },
+  stringSignificant([x, n]) {
+    return Rnl.toStringSignificant(x, n)
+  },
   atan2([x, y]) {
     return Rnl.fromNumber(Math.atan2(Rnl.toNumber(y), Rnl.toNumber(x)))
   },

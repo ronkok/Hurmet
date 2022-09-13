@@ -641,6 +641,9 @@ a[5..]    # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong><
 <dt id='sign'>sign(<em>x</em>)</dt>
 <dd><p>Returns <span class="tex" data-tex="\begin{cases}1 &amp;\mathrel{\mathrm{if}}x \gt 0 \\ \text{-}1 &amp;\mathrel{\mathrm{if}}x \lt 0 \\ 0 &amp;\mathrel{\mathrm{otherwise}}\end{cases}"></span><br>Real numbers only.</p>
 </dd>
+<dt id='string'>string(<em>x</em>, <em>spec</em>)</dt>
+<dd><p>Takes a number, <em>x</em>, and returns a string. <em>spec</em> is a rounding specification. It can round to a fixed number of digits after the decimal, e.g., &quot;f2&quot;, or round to a specified number of digits, e.g., &quot;r3&quot;.</p>
+</dd>
 <dt id='sum'>sum(<em>a</em>, <em>b</em>, <em>c</em>, …), product(<em>a</em>, <em>b</em>, <em>c</em>, …), length(<em>a</em>, <em>b</em>, <em>c</em>, …), range(<em>a</em>, <em>b</em>, <em>c</em>, …), mean(<em>a</em>, <em>b</em>, <em>c</em>, …), variance(<em>a</em>, <em>b</em>, <em>c</em>, …), stddev(<em>a</em>, <em>b</em>, <em>c</em>, …)</dt>
 <dd><p>Functions that accumulate a result from a list of arguments. Real numbers only.</p>
 </dd>
@@ -964,7 +967,7 @@ end</code></pre><p>… which results in this plot …</p>
 <dt id='marker-&quot;none&quot;-|-&quot;dot&quot;-|-&quot;arrow&quot;-|-&quot;arrowdot&quot;'>marker &quot;none&quot; | &quot;dot&quot; | &quot;arrow&quot; | &quot;arrowdot&quot;</dt>
 <dd><p>Sets the default marker symbol that is drawn at the endpoints of lines and paths. Dots are also set along the intermediate points of paths and curves.</p>
 </dd>
-<dt id='lin-'>lin ( [<em>x</em>, <em>y</em>; <em>u</em>, <em>v</em>]</dt>
+<dt id='line-[<em>x</em>,-<em>y</em>;-<em>u</em>,-<em>v</em>]'>line [<em>x</em>, <em>y</em>; <em>u</em>, <em>v</em>]</dt>
 <dd><p>Draws a straight line from coordinate point <em>x</em>, <em>y</em> to coordinate point <em>u</em>, <em>v</em>.</p>
 </dd>
 <dt id='path-[<em>x₁</em>,-<em>y₁</em>;-<em>x₂</em>,-<em>y₂</em>;-…;-<em>xₙ</em>,-<em>yₙ</em>]<span-class="optional">,-"l",-or-"t",-or-[r₁;-r₂;-…;-rₙ]</span>'>path  [<em>x₁</em>, <em>y₁</em>; <em>x₂</em>, <em>y₂</em>; …; <em>xₙ</em>, <em>yₙ</em>]<span class="optional">, "L", or "T", or [r₁; r₂; …; rₙ]</span></dt>
