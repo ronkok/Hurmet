@@ -690,7 +690,9 @@ export const multivarFunction = (arity, functionName, args) => {
     }
     const list = args.map(e => e.value)
     if (!gotVector) {
-      return [ Functions[arity][functionName](list), args[0].dtype ]
+      const result = Functions[arity][functionName](list)
+      dtype = functionName === "zeros" ? result.dtype :args[0].dtype
+      return [ result.value, dtype ]
 
     } else {
       const listClone = clone(list)

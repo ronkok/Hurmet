@@ -1582,11 +1582,15 @@ const conditionResult = (stmt, oprnd, unitAware) => {
     return errorResult(stmt, errorOprnd("BAD_DISPLAY"))
   }
 
-  result.value = result.dtype === dt.RATIONAL
-    ? Rnl.normalize(result.value)
-    : result.dtype === dt.COMPLEX
-    ? [Rnl.normalize(result.value[0]), Rnl.normalize(result.value[1])]
-    : result.value  // TODO: matrices
+  if (result.dtype & dt.RATIONAL) {
+    result.value = isVector(result)
+      ? result.value.map(e => Rnl.normalize(e))
+      : isMatrix(result)
+      ? result.value.map(row => row.map(e => Rnl.normalize(e)))
+      : Rnl.normalize(result.value)
+  } else if (result.dtype === dt.COMPLEX) {
+    result.value = [Rnl.normalize(result.value[0]), Rnl.normalize(result.value[1])]
+  }
   stmt.dtype = result.dtype
 
   // If unit-aware, convert result to desired result units.
