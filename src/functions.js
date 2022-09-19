@@ -358,7 +358,7 @@ const unary = {
       return logΓ(Rnl.add(x, Rnl.one))
     },
     sign(x) {
-      return Rnl.isPositive(x) ? Rnl.one : Rnl.isZero ? Rnl.zero : negativeOne
+      return Rnl.isPositive(x) ? Rnl.one : Rnl.isZero(x) ? Rnl.zero : negativeOne
     },
     cosd(x) {
       if (Rnl.areEqual(x, ninety)) { return Rnl.zero }
@@ -691,8 +691,9 @@ export const multivarFunction = (arity, functionName, args) => {
     const list = args.map(e => e.value)
     if (!gotVector) {
       const result = Functions[arity][functionName](list)
-      dtype = functionName === "zeros" ? result.dtype :args[0].dtype
-      return [ result.value, dtype ]
+      return functionName === "zeros"
+        ? [result.value, result.dtype]
+        : [result, args[0].dtype]
 
     } else {
       const listClone = clone(list)

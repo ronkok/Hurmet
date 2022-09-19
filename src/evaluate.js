@@ -1511,6 +1511,10 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
             if (result.dtype === dt.ERROR) { return result }
             const msg = result.dtype === dt.RATIONAL
               ? Rnl.toNumber(result.value)
+              : result.dtype === dt.STRING
+              ? result.value
+              : result.dtype === dt.MATRIX + dt.RATIONAL
+              ? result.value.map(row => row.map(e => Rnl.toNumber(e)))
               : result.value
             // eslint-disable-next-line no-console
             console.log(msg)
@@ -1587,7 +1591,9 @@ const conditionResult = (stmt, oprnd, unitAware) => {
       ? result.value.map(e => Rnl.normalize(e))
       : isMatrix(result)
       ? result.value.map(row => row.map(e => Rnl.normalize(e)))
-      : Rnl.normalize(result.value)
+      : result.dtype === dt.RATIONAL
+      ? Rnl.normalize(result.value)
+      : result.value
   } else if (result.dtype === dt.COMPLEX) {
     result.value = [Rnl.normalize(result.value[0]), Rnl.normalize(result.value[1])]
   }
