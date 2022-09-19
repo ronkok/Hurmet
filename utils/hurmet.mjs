@@ -7088,7 +7088,7 @@ const unary = {
       return logΓ(Rnl.add(x, Rnl.one))
     },
     sign(x) {
-      return Rnl.isPositive(x) ? Rnl.one : Rnl.isZero ? Rnl.zero : negativeOne
+      return Rnl.isPositive(x) ? Rnl.one : Rnl.isZero(x) ? Rnl.zero : negativeOne
     },
     cosd(x) {
       if (Rnl.areEqual(x, ninety)) { return Rnl.zero }
@@ -7420,7 +7420,10 @@ const multivarFunction = (arity, functionName, args) => {
     }
     const list = args.map(e => e.value);
     if (!gotVector) {
-      return [ Functions[arity][functionName](list), args[0].dtype ]
+      const result = Functions[arity][functionName](list);
+      return functionName === "zeros"
+        ? [result.value, result.dtype]
+        : [result, args[0].dtype]
 
     } else {
       const listClone = clone(list);
@@ -10963,6 +10966,10 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
             if (result.dtype === dt.ERROR) { return result }
             const msg = result.dtype === dt.RATIONAL
               ? Rnl.toNumber(result.value)
+              : result.dtype === dt.STRING
+              ? result.value
+              : result.dtype === dt.MATRIX + dt.RATIONAL
+              ? result.value.map(row => row.map(e => Rnl.toNumber(e)))
               : result.value;
             // eslint-disable-next-line no-console
             console.log(msg);
@@ -11032,11 +11039,17 @@ const conditionResult = (stmt, oprnd, unitAware) => {
     return errorResult(stmt, errorOprnd("BAD_DISPLAY"))
   }
 
-  result.value = result.dtype === dt.RATIONAL
-    ? Rnl.normalize(result.value)
-    : result.dtype === dt.COMPLEX
-    ? [Rnl.normalize(result.value[0]), Rnl.normalize(result.value[1])]
-    : result.value;  // TODO: matrices
+  if (result.dtype & dt.RATIONAL) {
+    result.value = isVector(result)
+      ? result.value.map(e => Rnl.normalize(e))
+      : isMatrix(result)
+      ? result.value.map(row => row.map(e => Rnl.normalize(e)))
+      : result.dtype === dt.RATIONAL
+      ? Rnl.normalize(result.value)
+      : result.value;
+  } else if (result.dtype === dt.COMPLEX) {
+    result.value = [Rnl.normalize(result.value[0]), Rnl.normalize(result.value[1])];
+  }
   stmt.dtype = result.dtype;
 
   // If unit-aware, convert result to desired result units.
