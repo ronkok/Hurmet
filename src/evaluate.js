@@ -675,6 +675,10 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
+        case "startSvg":
+          stack.push({ value: Draw.startSvg(), unit: null, dtype: dt.DRAWING })
+          break
+
         case "abs":
         case "cos":
         case "sin":
@@ -982,7 +986,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             args[j] = stack.pop()
           }
           let oprnd
-          if (vars.svg_ && (functionName === "plot" || (Draw.functions[functionName]))) {
+          if (vars.svg && (functionName === "plot" || (Draw.functions[functionName]))) {
             if (functionName === "plot") {
               args.splice(1, 0, decimalFormat)
               oprnd = plot(...args)
@@ -1328,7 +1332,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
     }
   }
   if (udf.dtype === dt.DRAWING) {
-    vars["svg_"] = { value: Draw.defaultSvg(), unit: null, dtype: dt.DRAWING }
+    vars["svg"] = { value: Draw.startSvg(), unit: null, dtype: dt.DRAWING }
   }
 
   // Execute the function statements.

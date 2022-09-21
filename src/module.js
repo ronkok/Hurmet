@@ -13,6 +13,7 @@ const drawCommandRegEx = /^(title|frame|view|axes|grid|stroke|strokewidth|stroke
 // It isn't called from there in order to avoid duplicating Hurmet code inside ProseMirror.js.
 export const functionRegEx = /^(?:private +)?function (?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*\(/
 export const drawRegEx = /^draw\(/
+const startSvgRegEx = /^startSvg\(\)/
 const lexRegEx = /"[^"]*"|``.*|`[^`]*`|'[^']*'|#|[^"`'#]+/g
 
 const testForStatement = str => {
@@ -82,7 +83,7 @@ const handleCSV = (expression, lines, startLineNum) => {
 
 const scanFunction = (lines, decimalFormat, startLineNum) => {
   const line1 = stripComment(lines[startLineNum])
-  const isDraw = line1.charAt(0) === "d"
+  let isDraw = line1.charAt(0) === "d"
   const posParen = line1.indexOf("(")
   let functionName = ""
   if (isDraw) {
@@ -142,10 +143,10 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
         [expression, i] = handleCSV(expression, lines, i)
       }
     } else if (isDraw && drawCommandRegEx.test(line)) {
-      name = "svg_"
+      name = "svg"
       expression = line.indexOf(" ") === -1
-        ? line + "(svg_)"
-        : line.replace(" ", "(svg_, ") + ")"
+        ? line + "(svg)"
+        : line.replace(" ", "(svg, ") + ")"
       isStatement = true
     } else {
       if (testForStatement(line)) {
@@ -154,6 +155,7 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
         name = line.slice(0, posEq - 1).trim()
         expression = line.slice(posEq + 1).trim()
         if (/^``/.test(expression)) { [expression, i] = handleCSV(expression, lines, i) }
+        if (startSvgRegEx.test(expression)) { isDraw = true }
         isStatement = true
       } else {
         // TODO: We shouldn't get here. Write an error.
@@ -176,7 +178,7 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
       if (stackOfCtrls.length === 0) {
         // Finished the current function.
         if (isDraw) {
-          funcObj.statements.splice(-1, 0, { name: "return", rpn: "¿svg_", stype: "return" })
+          funcObj.statements.splice(-1, 0, { name: "return", rpn: "¿svg", stype: "return" })
         }
         return [funcObj, i]
       }

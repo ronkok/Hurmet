@@ -4859,12 +4859,12 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
 const builtInFunctions = [
   "Gamma", "Im", "Re", "abs", "acos", "acosd", "acosh", "acot", "acotd", "acoth", "acsc",
   "acscd", "acsch", "argument", "asec", "asecd", "asech", "asin", "asind", "asinh", "atan",
-  "atan2", "atand", "atanh", "binomial", "chr", "cos", "cosd",
-  "cosh", "cosh", "cot", "cotd", "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp",
+  "atan2", "atand", "atanh", "binomial", "chr", "cos", "cosd", "cosh", "cosh", "cot", "cotd",
+  "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp",
   "fetch", "format", "gcd", "hypot", "isNaN", "length", "lerp", "ln", "log", "log10", "log2",
   "logFactorial", "logGamma", "logn", "logΓ", "matrix2table", "random", "rms", "round",
-  "roundSig", "roundn", "sec", "secd", "sech", "sech", "sign", "sin", "sind", "sinh", "string",
-  "tan", "tand", "tanh", "tanh", "trace", "transpose", "zeros", "Γ"
+  "roundSig", "roundn", "sec", "secd", "sech", "sech", "sign", "sin", "sind", "sinh",
+  "startSvg", "string", "tan", "tand", "tanh", "tanh", "trace", "transpose", "zeros", "Γ"
 ];
 
 const builtInReducerFunctions = ["dataframe",
@@ -6019,10 +6019,10 @@ const parse = (
                     rpn += "®0/1";
                   } else if (token.input === "," && delim.delimType === dFUNCTION &&
                              delim.numArgs === 2 && delim.name === "plot" ) {
-                    // The literal function for a plot() statment inside a draw()
+                    // The literal function for a plot() statement inside a draw()
                     // Wrap the rpn in quotation marks.
-                    rpn = rpn.slice(0, delim.rpnPos + 6) + '"'
-                        + rpn.slice(delim.rpnPos + 6, -1).replace(/\u00a0/g, "§") + '"' + tokenSep;
+                    rpn = rpn.slice(0, delim.rpnPos + 5) + '"'
+                        + rpn.slice(delim.rpnPos + 5, -1).replace(/\u00a0/g, "§") + '"' + tokenSep;
                   }
                 }
               }
@@ -6483,6 +6483,12 @@ const numMisMatchError = _ => {
 
 const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAware) => {
   if (!result) { return stmt }
+
+  if (result.dtype === dt.DRAWING) {
+    stmt.resultdisplay = result.value;
+    delete stmt.resultdisplay.temp;
+    return stmt
+  }
 
   const numNames = !stmt.name
     ? 0
@@ -8815,7 +8821,7 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
 
 // This module is heavily influenced by ASCIIsvg.js, by Peter Jipsen
 
-const defaultSvg = _ => {
+const startSvg = _ => {
   return {
     tag: 'svg',
     children: [],
@@ -9473,7 +9479,7 @@ const renderSVG = dwg => {
 };
 
 const Draw = Object.freeze({
-  defaultSvg,
+  startSvg,
   functions,
   renderSVG
 });
@@ -10134,6 +10140,10 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
+        case "startSvg":
+          stack.push({ value: Draw.startSvg(), unit: null, dtype: dt.DRAWING });
+          break
+
         case "abs":
         case "cos":
         case "sin":
@@ -10441,7 +10451,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             args[j] = stack.pop();
           }
           let oprnd;
-          if (vars.svg_ && (functionName === "plot" || (Draw.functions[functionName]))) {
+          if (vars.svg && (functionName === "plot" || (Draw.functions[functionName]))) {
             if (functionName === "plot") {
               args.splice(1, 0, decimalFormat);
               oprnd = plot(...args);
@@ -10783,7 +10793,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
     }
   }
   if (udf.dtype === dt.DRAWING) {
-    vars["svg_"] = { value: Draw.defaultSvg(), unit: null, dtype: dt.DRAWING };
+    vars["svg"] = { value: Draw.startSvg(), unit: null, dtype: dt.DRAWING };
   }
 
   // Execute the function statements.
@@ -11337,6 +11347,7 @@ const drawCommandRegEx = /^(title|frame|view|axes|grid|stroke|strokewidth|stroke
 // It isn't called from there in order to avoid duplicating Hurmet code inside ProseMirror.js.
 const functionRegEx = /^(?:private +)?function (?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*\(/;
 const drawRegEx = /^draw\(/;
+const startSvgRegEx = /^startSvg\(\)/;
 const lexRegEx = /"[^"]*"|``.*|`[^`]*`|'[^']*'|#|[^"`'#]+/g;
 
 const testForStatement = str => {
@@ -11406,7 +11417,7 @@ const handleCSV = (expression, lines, startLineNum) => {
 
 const scanFunction = (lines, decimalFormat, startLineNum) => {
   const line1 = stripComment(lines[startLineNum]);
-  const isDraw = line1.charAt(0) === "d";
+  let isDraw = line1.charAt(0) === "d";
   const posParen = line1.indexOf("(");
   let functionName = "";
   if (isDraw) {
@@ -11466,10 +11477,10 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
         [expression, i] = handleCSV(expression, lines, i);
       }
     } else if (isDraw && drawCommandRegEx.test(line)) {
-      name = "svg_";
+      name = "svg";
       expression = line.indexOf(" ") === -1
-        ? line + "(svg_)"
-        : line.replace(" ", "(svg_, ") + ")";
+        ? line + "(svg)"
+        : line.replace(" ", "(svg, ") + ")";
       isStatement = true;
     } else {
       if (testForStatement(line)) {
@@ -11478,6 +11489,7 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
         name = line.slice(0, posEq - 1).trim();
         expression = line.slice(posEq + 1).trim();
         if (/^``/.test(expression)) { [expression, i] = handleCSV(expression, lines, i); }
+        if (startSvgRegEx.test(expression)) { isDraw = true; }
         isStatement = true;
       } else {
         // TODO: We shouldn't get here. Write an error.
@@ -11500,7 +11512,7 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
       if (stackOfCtrls.length === 0) {
         // Finished the current function.
         if (isDraw) {
-          funcObj.statements.splice(-1, 0, { name: "return", rpn: "¿svg_", stype: "return" });
+          funcObj.statements.splice(-1, 0, { name: "return", rpn: "¿svg", stype: "return" });
         }
         return [funcObj, i]
       }

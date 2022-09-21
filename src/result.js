@@ -20,6 +20,12 @@ const numMisMatchError = _ => {
 export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAware) => {
   if (!result) { return stmt }
 
+  if (result.dtype === dt.DRAWING) {
+    stmt.resultdisplay = result.value
+    delete stmt.resultdisplay.temp
+    return stmt
+  }
+
   const numNames = !stmt.name
     ? 0
     : !Array.isArray(stmt.name)

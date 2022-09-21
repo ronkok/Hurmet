@@ -15,12 +15,12 @@ import { Rnl } from "./rational"
 const builtInFunctions = [
   "Gamma", "Im", "Re", "abs", "acos", "acosd", "acosh", "acot", "acotd", "acoth", "acsc",
   "acscd", "acsch", "argument", "asec", "asecd", "asech", "asin", "asind", "asinh", "atan",
-  "atan2", "atand", "atanh", "binomial", "chr", "cos", "cosd",
-  "cosh", "cosh", "cot", "cotd", "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp",
+  "atan2", "atand", "atanh", "binomial", "chr", "cos", "cosd", "cosh", "cosh", "cot", "cotd",
+  "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp",
   "fetch", "format", "gcd", "hypot", "isNaN", "length", "lerp", "ln", "log", "log10", "log2",
   "logFactorial", "logGamma", "logn", "logΓ", "matrix2table", "random", "rms", "round",
-  "roundSig", "roundn", "sec", "secd", "sech", "sech", "sign", "sin", "sind", "sinh", "string",
-  "tan", "tand", "tanh", "tanh", "trace", "transpose", "zeros", "Γ"
+  "roundSig", "roundn", "sec", "secd", "sech", "sech", "sign", "sin", "sind", "sinh",
+  "startSvg", "string", "tan", "tand", "tanh", "tanh", "trace", "transpose", "zeros", "Γ"
 ]
 
 const builtInReducerFunctions = ["dataframe",
@@ -1178,10 +1178,10 @@ export const parse = (
                     rpn += "®0/1"
                   } else if (token.input === "," && delim.delimType === dFUNCTION &&
                              delim.numArgs === 2 && delim.name === "plot" ) {
-                    // The literal function for a plot() statment inside a draw()
+                    // The literal function for a plot() statement inside a draw()
                     // Wrap the rpn in quotation marks.
-                    rpn = rpn.slice(0, delim.rpnPos + 6) + '"'
-                        + rpn.slice(delim.rpnPos + 6, -1).replace(/\u00a0/g, "§") + '"' + tokenSep
+                    rpn = rpn.slice(0, delim.rpnPos + 5) + '"'
+                        + rpn.slice(delim.rpnPos + 5, -1).replace(/\u00a0/g, "§") + '"' + tokenSep
                   }
                 }
               }

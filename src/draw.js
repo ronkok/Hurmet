@@ -5,7 +5,7 @@ import { Rnl } from "./rational"
 
 // This module is heavily influenced by ASCIIsvg.js, by Peter Jipsen
 
-const defaultSvg = _ => {
+const startSvg = _ => {
   return {
     tag: 'svg',
     children: [],
@@ -663,7 +663,7 @@ const renderSVG = dwg => {
 }
 
 export const Draw = Object.freeze({
-  defaultSvg,
+  startSvg,
   functions,
   renderSVG
 })
