@@ -796,14 +796,14 @@ rules.set("strikethru", {
 });
 rules.set("superscript", {
   isLeaf: true,
-  match: inlineRegex(/^~((?:\\[\s\S]|[^\\])+?)~/),
+  match: inlineRegex(/^<sup>([\s\S]*?)<\/sup>/),
   parse: function(capture, state) {
     return parseTextMark(capture[1], state, "superscript" )
   }
 });
 rules.set("subscript", {
   isLeaf: true,
-  match: inlineRegex(/^<sub>([\s\S]*?)<\/sub>/),
+  match: inlineRegex(/^~((?:\\[\s\S]|[^\\])+?)~/),
   parse: function(capture, state) {
     return parseTextMark(capture[1], state, "subscript" )
   }

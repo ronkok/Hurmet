@@ -269,7 +269,7 @@ const autoCorrect = (jar, preText, postText) => {
       if (accent) {
         const newStr = preText.slice(0, -(matches[0].length + 1)) + accent;
         jar.updateCode(newStr + postText);
-        // Move the cursur to the correct location
+        // Move the cursor to the correct location
         const L = newStr.length;
         jar.restore({ start: L, end: L, dir: undefined });
       } else {
@@ -289,13 +289,44 @@ const autoCorrect = (jar, preText, postText) => {
       if (correction) {
         const newStr = preText.slice(0, -matches[0].length) + correction;
         jar.updateCode(newStr + postText);
-        // Move the cursur to the correct location
+        // Move the cursor to the correct location
         const L = newStr.length;
         jar.restore({ start: L, end: L, dir: undefined });
       }
     }
   }
 };
+
+// unit exponents of a number with no unit.
+const allZeros = Object.freeze([0, 0, 0, 0, 0, 0, 0, 0]);
+
+// Data types
+// Some operands will be two types at the same time, e.g. RATIONAL + MATRIX.
+// So we'll enumerate data types in powers of two.
+// That way, we can use a bit-wise "&" operator to test for an individual type.
+const dt = Object.freeze({
+  NULL: 0,
+  RATIONAL: 1,
+  COMPLEX: 2,
+  BOOLEAN: 4,
+  FROMCOMPARISON: 8,
+  BOOLEANFROMCOMPARISON: 12, // 4 + 8, useful for chained comparisons
+  STRING: 16,
+  QUANTITY: 32, // Contains both a magnitude and a unit-of-measure
+  DATE: 64, //     Not currently used
+  RANGE: 128, //   as in:  1:10
+  TUPLE: 256, //   Used for multiple assignment from a module.
+  MAP: 512,  //    A key:value store with all the same data type the same unit
+  ROWVECTOR: 1024,
+  COLUMNVECTOR: 2048,
+  MATRIX: 4096, // two dimensional
+  DATAFRAME: 8192,
+  MODULE: 16384, // contains user-defined functions
+  ERROR: 32768,
+  UNIT: 65536, // User-defined units.
+  DRAWING: 131072,
+  RICHTEXT: 262144
+});
 
 /*
  * Hurmet, copyright (c) by Ron Kok
@@ -396,13 +427,30 @@ const arrayOfRegExMatches = (regex, text) => {
   return result
 };
 
+const textAccent = {
+  "\u0300": "`",
+  "\u0301": "'",
+  "\u0302": "^",
+  "\u0303": "~",
+  "\u0304": "=",
+  "\u0305": "=",
+  "\u0306": "u",
+  "\u0307": ".",
+  "\u0308": '"',
+  "\u030A": 'r',
+  "\u030c": "v",
+};
+
+const escapeRegEx = /[#$&%_~^]/g;
+const accentRegEx = /[\u0300-\u0308\u030A\u030c]/g;
+
 const addTextEscapes = str => {
   // Insert escapes for # $ & % _ ~ ^ \ { }
   // TODO: \textbackslash.
   // TODO: How to escape { } without messing up Lex?
   if (str.length > 1) {
-    const matches = arrayOfRegExMatches(/[#$&%_~^]/g, str);
-    const L = matches.length;
+    let matches = arrayOfRegExMatches(escapeRegEx, str);
+    let L = matches.length;
     if (L > 0) {
       for (let i = L - 1; i >= 0; i--) {
         const match = matches[i];
@@ -418,6 +466,18 @@ const addTextEscapes = str => {
           if (pc !== "\\") {
             str = str.slice(0, pos) + "\\" + str.slice(pos);
           }
+        }
+      }
+    }
+    matches = arrayOfRegExMatches(accentRegEx, str);
+    L = matches.length;
+    if (L > 0) {
+      for (let i = L - 1; i >= 0; i--) {
+        const match = matches[i];
+        const pos = match.index;
+        if (pos > 0) {
+          str = str.slice(0, pos - 1) + "\\" + textAccent[match.value]
+              + str.slice(pos - 1, pos) + str.slice(pos + 1);
         }
       }
     }
@@ -489,37 +549,6 @@ const unitTeXFromString = str => {
 
   return unit + "}}"
 };
-
-// unit exponents of a number with no unit.
-const allZeros = Object.freeze([0, 0, 0, 0, 0, 0, 0, 0]);
-
-// Data types
-// Some operands will be two types at the same time, e.g. RATIONAL + MATRIX.
-// So we'll enumerate data types in powers of two.
-// That way, we can use a bit-wise "&" operator to test for an individual type.
-const dt = Object.freeze({
-  NULL: 0,
-  RATIONAL: 1,
-  COMPLEX: 2,
-  BOOLEAN: 4,
-  FROMCOMPARISON: 8,
-  BOOLEANFROMCOMPARISON: 12, // 4 + 8, useful for chained comparisons
-  STRING: 16,
-  QUANTITY: 32, // Contains both a magnitude and a unit-of-measure
-  DATE: 64, //     Not currently used
-  RANGE: 128, //   as in:  1:10
-  TUPLE: 256, //   Used for multiple assignment from a module.
-  MAP: 512,  //    A key:value store with all the same data type the same unit
-  ROWVECTOR: 1024,
-  COLUMNVECTOR: 2048,
-  MATRIX: 4096, // two dimensional
-  DATAFRAME: 8192,
-  MODULE: 16384, // contains user-defined functions
-  ERROR: 32768,
-  UNIT: 65536, // User-defined units.
-  IMAGE: 131072,
-  RICHTEXT: 262144
-});
 
 const errorMessages = Object.freeze({
   EN: {
@@ -1387,11 +1416,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.5248","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.4704","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.4851","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.2087","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -1400,10 +1429,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.3657","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.3070","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["1.0072","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.0478","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9657","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["6.9543","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -1423,7 +1452,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.85773","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.86860","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1431,23 +1460,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.2609","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["7.8871","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["3.6210","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["82.3985","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["3.4416","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["79.9685","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["142.19","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["143.30","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1364.09","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1384.64","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1458,7 +1487,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["20.9901","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["19.9910","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -1488,7 +1517,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.0524","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0049","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -3013,13 +3042,27 @@ const operandFromTokenStack = (tokenStack, numRows, numCols) => {
     return tokenStack.pop()
 
   } else if (numRows === 1 || numCols === 1) {
-    // Vector
     const numArgs = Math.max(numRows, numCols);
-    const array = new Array(numArgs);
+    let array;
     let dtype = tokenStack[tokenStack.length - 1].dtype;
-    dtype += numRows === 1 ? dt.ROWVECTOR : dt.COLUMNVECTOR;
-    for (let j = numArgs - 1; j >= 0; j--) {
-      array[j] = tokenStack.pop().value;
+    if (numRows === 1 && (dtype & dt.COLUMNVECTOR)) {
+      // Matrix composed of column vectors appended side by side
+      dtype = dtype - dt.COLUMNVECTOR + dt.MATRIX;
+      array = new Array(tokenStack[0].value.length);
+      for (let i = 0; i < tokenStack[0].value.length; i++) {
+        array[i] = [];
+        for (let j = 0; j < numArgs; j++) {
+          array[i][j] = tokenStack[j].value[i];
+        }
+      }
+      for (let i = 0; i < numArgs; i++) { tokenStack.pop(); }
+    } else  {
+      // Vector
+      array = new Array(numArgs);
+      dtype += numRows === 1 ? dt.ROWVECTOR : dt.COLUMNVECTOR;
+      for (let j = numArgs - 1; j >= 0; j--) {
+        array[j] = tokenStack.pop().value;
+      }
     }
     Object.freeze((array));
     return Object.freeze({
@@ -3622,7 +3665,7 @@ const quickDisplay = str => {
 
 // The next 40 lines contain helper functions for display().
 const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/;
-const accentRegEx = /^([^\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]+)([\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1])(.+)?/;
+const accentRegEx$1 = /^([^\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]+)([\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1])(.+)?/;
 const subscriptRegEx = /([^_]+)(_[^']+)?(.*)?/;
 const accentFromChar = Object.freeze({
   "\u0300": "\\grave",
@@ -3650,7 +3693,7 @@ const formatColumnName = str => {
   } else {
     // Format it like a Hurmet identifier.
     str = str.replace(/′/g, "'"); // primes
-    let parts = str.match(accentRegEx);
+    let parts = str.match(accentRegEx$1);
     if (parts) {
       str = accentFromChar[parts[2]] + "{" + parts[1] + "}";
       return str + (parts[3] ? parts[3] : "")
@@ -4820,16 +4863,16 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
 const builtInFunctions = [
   "Gamma", "Im", "Re", "abs", "acos", "acosd", "acosh", "acot", "acotd", "acoth", "acsc",
   "acscd", "acsch", "argument", "asec", "asecd", "asech", "asin", "asind", "asinh", "atan",
-  "atan2", "atand", "atanh", "binomial", "chr", "cos", "cosd",
-  "cosh", "cosh", "cot", "cotd", "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp",
+  "atan2", "atand", "atanh", "binomial", "chr", "cos", "cosd", "cosh", "cosh", "cot", "cotd",
+  "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp",
   "fetch", "format", "gcd", "hypot", "isNaN", "length", "lerp", "ln", "log", "log10", "log2",
   "logFactorial", "logGamma", "logn", "logΓ", "matrix2table", "random", "rms", "round",
-  "roundSig", "roundn", "sec", "secd", "sech", "sech", "sign", "sin", "sind", "sinh", "tan",
-  "tand", "tanh", "tanh", "trace", "transpose", "zeros", "Γ"
+  "roundSig", "roundn", "sec", "secd", "sech", "sech", "sign", "sin", "sind", "sinh",
+  "startSvg", "string", "tan", "tand", "tanh", "tanh", "trace", "transpose", "zeros", "Γ"
 ];
 
 const builtInReducerFunctions = ["dataframe",
-  "lineChart", "max", "mean", "median", "min", "product", "range", "stddev", "sum", "variance"
+  "max", "mean", "median", "min", "product", "range", "stddev", "sum", "variance"
 ];
 
 const trigFunctions = ["cos", "cosd", "cot", "cotd", "csc", "cscd", "sec", "secd",
@@ -5976,7 +6019,15 @@ const parse = (
               if (delim.numRows === 1) {
                 if (token.input === ","  ||
                     (token.input === " " && (delim.delimType === dMATRIX))) {
-                  if (str.charAt(0) === "]") { rpn += "®0/1"; }
+                  if (str.charAt(0) === "]") {
+                    rpn += "®0/1";
+                  } else if (token.input === "," && delim.delimType === dFUNCTION &&
+                             delim.numArgs === 2 && delim.name === "plot" ) {
+                    // The literal function for a plot() statement inside a draw()
+                    // Wrap the rpn in quotation marks.
+                    rpn = rpn.slice(0, delim.rpnPos + 5) + '"'
+                        + rpn.slice(delim.rpnPos + 5, -1).replace(/\u00a0/g, "§") + '"' + tokenSep;
+                  }
                 }
               }
               delim.numArgs += 1;
@@ -6027,6 +6078,9 @@ const parse = (
                 if (symbol === "log") { symbol = "logn"; }
                 if (symbol === "round") { symbol = "roundn"; }
                 if (symbol === "atan") { symbol = "atan2"; }
+                if (symbol === "plot") {
+                  rpn = rpn.slice(0, 6) + '"' + rpn.slice(6).replace(/\u00a0/g, "§") + '"';
+                }
               } else if (symbol === "log" && regEx.test(rpn)) {
                 rpn = rpn.slice(0, rpn.length - 1) + "logFactorial";
                 break
@@ -6264,18 +6318,22 @@ const fromAssignment = (cellAttrs, unitAware) => {
   oprnd.name = cellAttrs.name;
 
   // Get the unit data.
-  if (cellAttrs.dtype === dt.STRING || cellAttrs.dtype === dt.BOOLEAN ||
-      cellAttrs.dtype === dt.NULL) {
+  const dtype = cellAttrs.dtype;
+  if (dtype === dt.STRING || dtype === dt.BOOLEAN || dtype === dt.DRAWING ||
+      dtype === dt.MODULE || dtype === dt.NULL) {
     oprnd.unit = null;
-  } else if (cellAttrs.dtype === dt.DATAFRAME || (cellAttrs.dtype & dt.MAP)) {
+  } else if (dtype === dt.DATAFRAME || (dtype & dt.MAP)) {
     oprnd.unit = Object.freeze(clone(cellAttrs.unit));
-
   } else if (cellAttrs.unit && cellAttrs.unit.expos) {
     oprnd.unit = clone(cellAttrs.unit);
-  } else {
+  } else if (cellAttrs.unit) {
     oprnd.unit = Object.create(null);
     if (cellAttrs.unit)  { oprnd.unit.name = cellAttrs.unit; }
     if (cellAttrs.expos) { oprnd.unit.expos = clone(cellAttrs.expos); }
+  } else if (cellAttrs.expos && Array.isArray(cellAttrs.expos)) {
+    oprnd.unit = { expos: clone(cellAttrs.expos) };
+  } else {
+    oprnd.unit = null;
   }
 
   // Get the value.
@@ -6429,6 +6487,12 @@ const numMisMatchError = _ => {
 
 const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAware) => {
   if (!result) { return stmt }
+
+  if (result.dtype === dt.DRAWING) {
+    stmt.resultdisplay = result.value;
+    delete stmt.resultdisplay.temp;
+    return stmt
+  }
 
   const numNames = !stmt.name
     ? 0
@@ -7034,7 +7098,7 @@ const unary = {
       return logΓ(Rnl.add(x, Rnl.one))
     },
     sign(x) {
-      return Rnl.isPositive(x) ? Rnl.one : Rnl.isZero ? Rnl.zero : negativeOne
+      return Rnl.isPositive(x) ? Rnl.one : Rnl.isZero(x) ? Rnl.zero : negativeOne
     },
     cosd(x) {
       if (Rnl.areEqual(x, ninety)) { return Rnl.zero }
@@ -7222,6 +7286,12 @@ const binary = {
   roundSignificant([x, n]) {
     return Rnl.fromString(Rnl.toStringSignificant(x, n))
   },
+  stringFixed([x, n]) {
+    return Rnl.toString(x, n)
+  },
+  stringSignificant([x, n]) {
+    return Rnl.toStringSignificant(x, n)
+  },
   atan2([x, y]) {
     return Rnl.fromNumber(Math.atan2(Rnl.toNumber(y), Rnl.toNumber(x)))
   },
@@ -7360,7 +7430,10 @@ const multivarFunction = (arity, functionName, args) => {
     }
     const list = args.map(e => e.value);
     if (!gotVector) {
-      return [ Functions[arity][functionName](list), args[0].dtype ]
+      const result = Functions[arity][functionName](list);
+      return functionName === "zeros"
+        ? [result.value, result.dtype]
+        : [result, args[0].dtype]
 
     } else {
       const listClone = clone(list);
@@ -8165,12 +8238,19 @@ const binary$1 = {
       modulo(m, x)   { return m.map(row => row.map(e => Rnl.modulo(e, x))) }
     },
     rowVector: {
+      add(m, v)      { return m.map(row => row.map((e, i) => Rnl.add(e, v[i]) )) },
+      subtract(m, v) { return m.map(row => row.map((e, i) => Rnl.subtract(e, v[i]) )) },
+      multiply(m, v) { return m.map(row => row.map((e, i) => Rnl.multiply(e, v[i]) )) },
+      divide(m, v)   { return m.map(row => row.map((e, i) => Rnl.divide(e, v[i]) )) },
+      power(m, v)    { return m.map(row => row.map((e, i) => Rnl.power(e, v[i]) )) },
       unshift(m, v) {
         if (m[0].length !== v.length) { return errorOprnd("MIS_ELNUM") }
         return [...m, v]
       }
     },
     columnVector: {
+      add(m, v)      { return m.map(row => row.map((e, i) => Rnl.add(e, v[i]) )) },
+      subtract(m, v) { return m.map(row => row.map((e, i) => Rnl.subtract(e, v[i]) )) },
       multiply(m, v) {
         // Multiply a matrix times a column vector
         if (m[0].length !== v.length) { return errorOprnd("MIS_ELNUM") }
@@ -8602,67 +8682,6 @@ const textRange = (str, index) => {
   return { value, unit: null, dtype: dt.STRING }
 };
 
-const lineChart = (args) => {
-  const [xOp, yOp, title, xLabel, yLabel, width, height] = args;
-  const x = xOp.value;
-  const y = yOp.value;
-  const config = {
-    type: "line",
-    data: {  datasets: undefined },
-    options: {
-      responsive: true,
-      legend: false,
-      title: {
-        display: true,
-        text: title.value
-      },
-      tooltips: {
-        mode: 'index'
-      },
-      scales: {
-        xAxes: [{
-          type: "linear",
-          display: true,
-          scaleLabel: {
-            display: true,
-            labelString: xLabel.value
-          }
-        }],
-        yAxes: [{
-          type: "linear",
-          display: true,
-          scaleLabel: {
-            display: true,
-            labelString: yLabel.value
-          }
-        }]
-      }
-    },
-    width: width || "600px",
-    height: height || "300px"
-  };
-  let datasets;
-  if (Rnl.isRational(y[0])) {
-    datasets = new Array(1);
-    const data = new Array(x.length);
-    for (let i = 0; i < y.length; i++) {
-      data[i] = { x: Rnl.toNumber(x[i]), y: Rnl.toNumber(y[i]) };
-    }
-    datasets[0] = { data: data, fill: false, borderColor: "#000", borderWiidth: 2 };
-  } else {
-    datasets = new Array(y.length);
-    for (let i = 0; i < y.length; i++) {
-      const data = new Array(x.length);
-      for (let j = 0; j < x.length; j++) {
-        data[j] = { x: Rnl.toNumber(x[j]), y: Rnl.toNumber(y[i][j]) };
-      }
-      datasets[i] = { data: data, fill: false, borderColor: "#000", borderWiidth: 2 };
-    }
-  }
-  config.data.datasets = datasets;
-  return { value: config, unit: undefined, dtype: dt.IMAGE }
-};
-
 function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
   // hurmetVars is a key:value store of variable names and attributes.
   // This function is called to insert an assignment into hurmetVars.
@@ -8803,6 +8822,671 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
     }
   }
 }
+
+// This module is heavily influenced by ASCIIsvg.js, by Peter Jipsen
+
+const startSvg = _ => {
+  return {
+    tag: 'svg',
+    children: [],
+    attrs: {
+      xmlns: "http://www.w3.org/2000/svg",
+      width: 250,
+      height: 250,
+      style: "display: inline;"
+    },
+    temp: {
+      width: 250,
+      height: 250,
+      xmin: 0,
+      xmax: 5,
+      ymin: 0,
+      ymax: 5,
+      xunitlength: 20,  // px
+      yunitlength: 20,  // px
+      origin: [0, 0],   // in px (default is bottom left corner)
+      stroke: "black",
+      strokewidth: 1,
+      strokedasharray: null,
+      fill: "none",
+      fontstyle: "normal",
+      fontfamily: "sans-serif",
+      fontsize: 13.33, // px, ~10 pt
+      fontweight: "normal",
+      markerstrokewidth: 1,
+      markerstroke: "black",
+      markerfill: "yellow",
+      markersize: 4,
+      marker: "none",
+      dotradius: 4,
+      axesstroke: "black",
+      gridstroke: "grey",
+      isDim: false
+    }
+  }
+};
+
+// Helpers
+const setStrokeAndFill = (node, attrs) => {
+  node.attrs["stroke-width"] = attrs.strokewidth;
+  node.attrs.stroke = attrs.stroke;
+  node.attrs.fill = attrs.fill;
+};
+
+const pointZeroRegEx = /\.0+$/;
+const chopZ = str => {
+  const k = str.indexOf(".");
+  if (k === -1) { return str }
+  if (pointZeroRegEx.test(str)) { return str.replace(pointZeroRegEx, "") }
+  let i;
+  for (i = str.length - 1; i > k && str.charAt(i) === "0"; i--) {
+    if (i === k) { i--; }
+  }
+  return str.slice(0, i + 1)
+};
+
+const markerDot = (center, attrs, s, f) => { // coordinates in units, radius in pixel
+  if (s == null) { s = attrs.stroke; }
+  if (f == null) { f = attrs.fill; }
+  const node = { tag: "circle", attrs: {} };
+  node.attrs.cx = center[0] * attrs.xunitlength + attrs.origin[0];
+  node.attrs.cy = attrs.height - center[1] * attrs.yunitlength - attrs.origin[1];
+  node.attrs.r = attrs.markersize;
+  node.attrs["stroke-width"] = attrs.strokewidth;
+  node.attrs.stroke = s;
+  node.attrs.fill = f;
+  return node
+};
+
+const arrowhead = (svg, p, q) => { // draw arrowhead at q (in units)
+  const attrs = svg.temp;
+  const v = [p[0] * attrs.xunitlength + attrs.origin[0], attrs.height -
+             p[1] * attrs.yunitlength - attrs.origin[1]];
+  const w = [q[0] * attrs.xunitlength + attrs.origin[0], attrs.height -
+             q[1] * attrs.yunitlength - attrs.origin[1]];
+  let u = [w[0] - v[0], w[1] - v[1]];
+  const d = Math.sqrt(u[0] * u[0] + u[1] * u[1]);
+  if (d > 0.00000001) {
+    u = [u[0] / d, u[1] / d];
+    const z = attrs.marker === "markerdot" ? 3 : attrs.isDim ? 0 : 1;
+    const up = [-u[1], u[0]];
+    const node = { tag: "path", attrs: {} };
+    node.attrs.d = "M " + (w[0] - 12.5 * u[0] - 3 * up[0]) + "," +
+      (w[1] - 12.5 * u[1] - 3 * up[1]) + " L " + (w[0] - z * u[0]) + "," + (w[1] - z * u[1]) +
+      " L " + (w[0] - 12.5 * u[0] + 3 * up[0]) + "," + (w[1] - 12.5 * u[1] + 3 * up[1]) + " z";
+    if (attrs.isDim) {
+      node.attrs.stroke = "none";
+    } else {
+      node.attrs["stroke-width"] = attrs.markerstrokewidth;
+      node.attrs.stroke = attrs.stroke;
+    }
+    node.attrs.fill = attrs.stroke;
+    svg.children.push(node);
+  }
+};
+
+const textLocal = (svg, p, str, pos, fontsty) => {
+  const attrs = svg.temp;
+  let textanchor = "middle";
+  let dx = 0;
+  let dy = attrs.fontsize / 3;
+  if (pos != null) {
+    if (pos.slice(0, 5) === "above") { dy = -attrs.fontsize / 2; }
+    if (pos.slice(0, 5) === "below") { dy = 1.25 * attrs.fontsize; }
+    if (pos.slice(0, 5) === "right" || pos.slice(5, 10) === "right") {
+      textanchor = "start";
+      dx = attrs.fontsize / 2;
+    }
+    if (pos.slice(0, 4) === "left" || pos.slice(5, 9) === "left") {
+      textanchor = "end";
+      dx = -attrs.fontsize / 2;
+    }
+  }
+  const node = { tag: "text", attrs: {} };
+  node.attrs["text"] = str;
+  node.attrs.x = p[0] * attrs.xunitlength + attrs.origin[0] + dx;
+  node.attrs.y = attrs.height - p[1] * attrs.yunitlength - attrs.origin[1] + dy;
+  node.attrs["font-style"] = (fontsty != null ? fontsty : attrs.fontstyle);
+  node.attrs["font-family"] = attrs.fontfamily;
+  node.attrs["font-size"] = attrs.fontsize;
+  node.attrs["font-weight"] = attrs.fontweight;
+  node.attrs["text-anchor"] = textanchor;
+  svg.children.push(node);
+  return svg
+};
+
+const functions = {
+  // Set attributes
+  stroke(svgOprnd, color) {
+    svgOprnd.value.temp.stroke = color.value;
+    return svgOprnd
+  },
+
+  strokewidth(svgOprnd, num) {
+    svgOprnd.value.temp.strokewidth = Rnl.toNumber(num.value);
+    return svgOprnd
+  },
+
+  strokedasharray(svgOprnd, str) {
+    svgOprnd.value.temp.strokedasharray = str.value;
+    return svgOprnd
+  },
+
+  fill(svgOprnd, color) {
+    svgOprnd.value.temp.fill = color.value;
+    return svgOprnd
+  },
+
+  fontsize(svgOprnd, size) {
+    svgOprnd.value.temp.fontsize = Rnl.toNumber(size.value);
+    return svgOprnd
+  },
+
+  fontweight(svgOprnd, str) {
+    svgOprnd.value.temp.fontweight = str.value; // "normal" | "bold"
+    return svgOprnd
+  },
+
+  fontstyle(svgOprnd, str) {
+    svgOprnd.value.temp.fontstyle = str.value; // "normal" | "italic"
+    return svgOprnd
+  },
+
+  fontfamily(svgOprnd, str) {
+    svgOprnd.value.temp.fontfamily = str.value; // "sansserif"|"serif"|"fixed"|"monotype"
+    return svgOprnd
+  },
+
+  marker(svgOprnd, str) {
+    svgOprnd.value.temp.marker = str.value; // "none" | "dot" | "arrow" | "arrowdot"
+    return svgOprnd
+  },
+
+  // Initialize the svg.
+
+  title(svgOprnd, strOprnd) {
+    svgOprnd.value.children.push( { tag: "title", attrs: { text: strOprnd.value } });
+    return svgOprnd
+  },
+
+  frame(svgOprnd, width = 250, height = 250, position = "inline") {
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    attrs.width = typeof width === "number" ? width : Rnl.toNumber(width.value);
+    svg.attrs.width = attrs.width;
+    attrs.height = typeof height === "number" ? height : Rnl.toNumber(height.value);
+    svg.attrs.height = attrs.height;
+    if (typeof position !== "string") { position = position.value; }
+    svg.attrs.style = `float: ${position}`;
+    attrs.xunitlength = attrs.width / (attrs.xmax - attrs.xmin);
+    attrs.yunitlength = attrs.height / (attrs.ymax - attrs.ymin);
+    attrs.origin = [-attrs.xmin * attrs.xunitlength, -attrs.ymin * attrs.yunitlength];
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  view(svgOprnd, xmin = 0, xmax = 5, ymin, ymax) {
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    attrs.xmin = typeof xmin === "number" ? xmin : Rnl.toNumber(xmin.value);
+    attrs.xmax = typeof xmax === "number" ? xmax : Rnl.toNumber(xmax.value);
+    attrs.xunitlength = attrs.width / (attrs.xmax - attrs.xmin);
+    attrs.yunitlength = attrs.xunitlength; // This may change below.
+    if (ymin == null) {
+      attrs.origin = [-attrs.xmin * attrs.xunitlength, attrs.height / 2];
+      attrs.ymin = -attrs.height / (2 * attrs.yunitlength);
+      attrs.ymax = -attrs.ymin;
+    } else {
+      attrs.ymin = Rnl.toNumber(ymin.value);
+      if (ymax != null) {
+        attrs.ymax = Rnl.toNumber(ymax.value);
+        attrs.yunitlength = attrs.height / (attrs.ymax - attrs.ymin);
+      } else {
+        attrs.ymax = attrs.height / attrs.yunitlength + attrs.ymin;
+      }
+      attrs.origin = [-attrs.xmin * attrs.xunitlength, -attrs.ymin * attrs.yunitlength];
+    }
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  // Draw things
+
+  grid(svgOprnd, gdx, gdy, isLocal) {
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    gdx = gdx == null ? attrs.xunitlength : Rnl.toNumber(gdx.value) * attrs.xunitlength;
+    gdy = gdy == null ? gdx : Rnl.toNumber(gdy.value) * attrs.yunitlength;
+    const pnode = { tag: "path", attrs: {} };
+    let str = "";
+    for (let x = attrs.origin[0]; x < attrs.width; x += gdx) {
+      str += " M" + x + ",0 " + x + "," + attrs.height;
+    }
+    for (let x = attrs.origin[0] - gdx; x > 0; x -= gdx) {
+      str += " M" + x + ",0 " + x + "," + attrs.height;
+    }
+    for (let y = attrs.height - attrs.origin[1]; y < attrs.height; y += gdy) {
+      str += " M0," + y + " " + attrs.width + "," + y;
+    }
+    for (let y = attrs.height - attrs.origin[1] - gdy; y > 0; y -= gdy) {
+      str += " M0," + y + " " + attrs.width + "," + y;
+    }
+    pnode.attrs.d = str;
+    pnode.attrs["stroke-width"] = 0.5;
+    pnode.attrs.stroke = attrs.gridstroke;
+    pnode.attrs.fill = attrs.fill;
+    svg.children.push(pnode);
+    if (!isLocal) {
+      return { value: svg, unit: null, dtype: dt.DRAWING }
+    }
+  },
+
+  axes(svgOprnd, dx, dy, labels, gdx, gdy) {
+    let svg = svgOprnd.value;
+    const attrs = svg.temp;
+    dx = (dx == null ? attrs.xunitlength : Rnl.toNumber(dx.value) * attrs.xunitlength);
+    dy = (dy == null ? dx : Rnl.toNumber(dy.value) * attrs.yunitlength);
+    const parentFontsize = attrs.fontsize;
+    attrs.fontsize = Math.min(dx / 2, dy / 2, 10);
+    const ticklength = attrs.fontsize / 4;
+    if (gdx != null) {
+      this.grid(svgOprnd, gdx, gdy, true);
+    }
+    const pnode = { tag: "path", attrs: {} };
+    let str = "M0," + (attrs.height - attrs.origin[1]) + " " + attrs.width + "," +
+      (attrs.height - attrs.origin[1]) + " M" + attrs.origin[0] + ",0 " +
+      attrs.origin[0] + "," + attrs.height;
+    for (let x = attrs.origin[0] + dx; x < attrs.width; x += dx) {
+      str += " M" + x + " " + (attrs.height - attrs.origin[1] + ticklength) + " " + x
+            + "," + (attrs.height - attrs.origin[1] - ticklength);
+    }
+    for (let x = attrs.origin[0] - dx; x > 0; x -= dx) {
+      str += " M" + x + "," + (attrs.height - attrs.origin[1] + ticklength) + " " + x
+            + "," + (attrs.height - attrs.origin[1] - ticklength);
+    }
+    for (let y = attrs.height - attrs.origin[1] + dy; y < attrs.height; y += dy) {
+      str += " M" + (attrs.origin[0] + ticklength) + "," + y + " " +
+                   (attrs.origin[0] - ticklength) + "," + y;
+    }
+    for (let y = attrs.height - attrs.origin[1] - dy; y > 0; y -= dy) {
+      str += " M" + (attrs.origin[0] + ticklength) + "," + y + " " +
+                   (attrs.origin[0] - ticklength) + "," + y;
+    }
+    if (labels != null) {
+      const ldx = dx / attrs.xunitlength;
+      const ldy = dy / attrs.yunitlength;
+      const lx = (attrs.xmin > 0 || attrs.xmax < 0 ? attrs.xmin : 0);
+      const ly = (attrs.ymin > 0 || attrs.ymax < 0 ? attrs.ymin : 0);
+      const lxp = (ly === 0 ? "below" : "above");
+      const lyp = (lx === 0 ? "left" : "right");
+      const ddx = Math.floor(1.1 - Math.log(ldx) / Math.log(10)) + 1;
+      const ddy = Math.floor(1.1 - Math.log(ldy) / Math.log(10)) + 1;
+      for (let x = ldx; x <= attrs.xmax; x += ldx) {
+        svg = textLocal(svg, [x, ly], chopZ(x.toFixed(ddx)), lxp);
+      }
+      for (let x = -ldx; attrs.xmin <= x; x -= ldx) {
+        svg = textLocal(svg, [x, ly], chopZ(x.toFixed(ddx)), lxp);
+      }
+      for (let y = ldy; y <= attrs.ymax; y += ldy) {
+        svg = textLocal(svg, [lx, y], chopZ(y.toFixed(ddy)), lyp);
+      }
+      for (let y = -ldy; attrs.ymin <= y; y -= ldy) {
+        svg = textLocal(svg, [lx, y], chopZ(y.toFixed(ddy)), lyp);
+      }
+    }
+    pnode.attrs.d = str;
+    pnode.attrs["stroke-width"] = 0.5;
+    pnode.attrs.stroke = attrs.axesstroke;
+    pnode.attrs.fill = attrs.fill;
+    svg.temp.fontsize = parentFontsize;
+    svg.children.push(pnode);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  line(svgOprnd, m) { // segment connecting points p,q (coordinates in units)
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const node = { tag: "path", attrs: {} };
+    const p = [Rnl.toNumber(m.value[0][0]), Rnl.toNumber(m.value[0][1])];
+    const q = [Rnl.toNumber(m.value[1][0]), Rnl.toNumber(m.value[1][1])];
+    node.attrs.d = "M" + (p[0] * attrs.xunitlength + attrs.origin[0]) + "," +
+      (attrs.height - p[1] * attrs.yunitlength - attrs.origin[1]) + " " +
+      (q[0] * attrs.xunitlength + attrs.origin[0]) + "," + (attrs.height -
+       q[1] * attrs.yunitlength - attrs.origin[1]);
+    if (attrs.strokedasharray != null) {
+      node["stroke-dasharray"] = attrs.strokedasharray;
+    }
+    setStrokeAndFill(node, attrs);
+    svg.children.push(node);
+    if (attrs.marker === "dot" || attrs.marker === "arrowdot") {
+      svg.children.push(markerDot(p, attrs, attrs.markerstroke, attrs.markerfill));
+      if (attrs.marker === "arrowdot") { arrowhead(svg, p, q); }
+      svg.children.push(markerDot(q, attrs, attrs.markerstroke, attrs.markerfill));
+    } else if (attrs.marker === "arrow") {
+      arrowhead(svg, p, q);
+    }
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  path(svgOprnd, plistOprnd, c) {
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const node = { tag: "path", attrs: {} };
+    // Get the "d" attribute of a path
+    let str = "";
+    let plist;
+    if (typeof plistOprnd === "string") {
+      str = plistOprnd.value;
+    } else {
+      plist = plistOprnd.value.map(row => row.map(e => Rnl.toNumber(e)));
+      if (c == null) {
+        c = new Array(plist.length).fill("L");
+        c[0] = "M";
+      } else if (c.dtype === dt.STRING) {
+        c = new Array(plist.length).fill(c.value);
+        c[0] = "M";
+      } else if (typeof c === "string") {
+        c = new Array(plist.length).fill(c);
+        c[0] = "M";
+      } else if ((c.dtype & dt.ROWVECTOR) || (c.dtype & dt.COLUMNVECTOR)) {
+        c = c.value.map(e => {
+          if (Rnl.isZero(e)) { return "L" }
+          const radius = Rnl.toNumber(e) * attrs.xunitlength;
+          return `A${radius} ${radius} 0 0 0 `
+        });
+        c.unshift("M");
+      } else {
+        c = new Array(plist.length).fill("L");
+        c[0] = "M";
+      }
+      for (let i = 0; i < plist.length; i++) {
+        str += c[i] + (plist[i][0] * attrs.xunitlength + attrs.origin[0]) + ","
+            + (attrs.height - plist[i][1] * attrs.yunitlength - attrs.origin[1]) + " ";
+      }
+    }
+    node.attrs.d = str;
+    node.attrs["stroke-width"] = attrs.strokewidth;
+    if (attrs.strokedasharray != null) {
+      node.attrs["stroke-dasharray"] = attrs.strokedasharray;
+    }
+    node.attrs.stroke = attrs.stroke;
+    node.attrs.fill = attrs.fill;
+    if (attrs.marker === "dot" || attrs.marker === "arrowdot") {
+      for (let i = 0; i < plist.length; i++) {
+        if (c !== "C" && c !== "T" || i !== 1 && i !== 2) {
+          svg.children.push(markerDot(plist[i], attrs, attrs.markerstroke, attrs.markerfill));
+        }
+      }
+    } else if (attrs.marker === "arrow") {
+      arrowhead(svg, plist[plist.length - 2], plist[plist.length - 1]);
+    }
+    svg.children.push(node);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  curve(svgOprnd, plist) {
+    return functions.path(svgOprnd, plist, "T")
+  },
+
+  rect(svgOprnd, m, r) { // opposite corners in units, rounded by radius
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const node = { tag: "rect", attrs: {} };
+    const p = [Rnl.toNumber(m.value[0][0]), Rnl.toNumber(m.value[0][1])];
+    const q = [Rnl.toNumber(m.value[1][0]), Rnl.toNumber(m.value[1][1])];
+    node.attrs.x = p[0] * attrs.xunitlength + attrs.origin[0];
+    node.attrs.y = attrs.height - q[1] * attrs.yunitlength - attrs.origin[1];
+    node.attrs.width = (q[0] - p[0]) * attrs.xunitlength;
+    node.attrs.height = (q[1] - p[1]) * attrs.yunitlength;
+    if (r != null) {
+      const rNum = Rnl.toNumber(r.value) * attrs.xunitlength;
+      node.attrs.rx = rNum;
+      node.attrs.ry = rNum;
+    }
+    setStrokeAndFill(node, attrs);
+    svg.children.push(node);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  circle(svgOprnd, center, radius) { // coordinates in units
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const node = { tag: "circle", attrs: {} };
+    node.attrs.cx = Rnl.toNumber(center.value[0]) * attrs.xunitlength + attrs.origin[0];
+    node.attrs.cy = attrs.height - Rnl.toNumber(center.value[1]) * attrs.yunitlength
+                  - attrs.origin[1];
+    node.attrs.r = Rnl.toNumber(radius.value) * attrs.xunitlength;
+    setStrokeAndFill(node, attrs);
+    svg.children.push(node);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  ellipse(svgOprnd, center, rx, ry) { // coordinates in units
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const node = { tag: "ellipse", attrs: {} };
+    node.attrs.cx = Rnl.toNumber(center.value[0]) * attrs.xunitlength + attrs.origin[0];
+    node.attrs.cy = attrs.height - Rnl.toNumber(center.value[1]) * attrs.yunitlength
+                    - attrs.origin[1];
+    node.attrs.rx = Rnl.toNumber(rx.value) * attrs.xunitlength;
+    node.attrs.ry = Rnl.toNumber(ry.value) * attrs.yunitlength;
+    if (attrs.strokedasharray != null) {
+      node.attrs["stroke-dasharray"] = attrs.strokedasharray;
+    }
+    setStrokeAndFill(node, attrs);
+    svg.children.push(node);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  arc(svgOprnd, m, radius) { // coordinates in units
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const node = { tag: "path", attrs: {} };
+    const start = [Rnl.toNumber(m.value[0][0]), Rnl.toNumber(m.value[0][1])];
+    const end = [Rnl.toNumber(m.value[1][0]), Rnl.toNumber(m.value[1][1])];
+    if (radius == null) {
+      const v = [end[0] - start[0], end[1] - start[1]];
+      radius = (Math.sqrt(v[0] * v[0] + v[1] * v[1])) * attrs.yunitlength;
+    } else if (isVector(radius)) {
+      radius = radius.value.map(e => Rnl.toNumber(e) * attrs.yunitlength);
+    } else {
+      radius = Rnl.toNumber(radius.value) * attrs.yunitlength;
+    }
+    let str = "M" + (start[0] * attrs.xunitlength + attrs.origin[0]) + "," +
+      (attrs.height - start[1] * attrs.yunitlength - attrs.origin[1]) + " A";
+    str += Array.isArray(radius) ? radius[0] + "," + radius[1] : radius + "," + radius;
+    str += " 0 0,0 " + (end[0] * attrs.xunitlength + attrs.origin[0]) + "," +
+      (attrs.height - end[1] * attrs.yunitlength - attrs.origin[1]);
+    node.attrs.d = str;
+    if (attrs.strokedasharray != null) {
+      node.attrs["stroke-dasharray"] = attrs.strokedasharray;
+    }
+    setStrokeAndFill(node, attrs);
+    let v = 0;
+    if (attrs.marker === "arrow" || attrs.marker === "arrowdot") {
+      const u = [(end[1] - start[1]) / 4, (start[0] - end[0]) / 4];
+      v = [(end[0] - start[0]) / 2, (end[1] - start[1]) / 2];
+      v = [start[0] + v[0] + u[0], start[1] + v[1] + u[1]];
+    } else {
+      v = [start[0], start[1]];
+    }
+    if (attrs.marker === "dot" || attrs.marker === "arrowdot") {
+      svg.children.push(markerDot(start, attrs, attrs.markerstroke, attrs.markerfill));
+      if (attrs.marker === "arrowdot") { arrowhead(svg,  v, end); }
+      svg.children.push(markerDot(end, attrs, attrs.markerstroke, attrs.markerfill));
+    } else if (attrs.marker === "arrow") {
+      arrowhead(svg, v, end);
+    }
+    svg.children.push(node);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  text(svgOprnd, p, str, pos, fontsty) {
+    const svg = textLocal(
+      svgOprnd.value,
+      [Rnl.toNumber(p.value[0]), Rnl.toNumber(p.value[1])],
+      str.value,
+      pos == null ? null : pos.value,
+      fontsty == null ? null : fontsty.value
+      );
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  dot(svgOprnd, center, typ, label, pos) {
+    let svg = svgOprnd.value;
+    const attrs = svg.temp;
+    let node;
+    const cx = Rnl.toNumber(center.value[0]) * attrs.xunitlength + attrs.origin[0];
+    const cy = attrs.height - Rnl.toNumber(center.value[1]) * attrs.yunitlength
+             - attrs.origin[1];
+    if (typ.value === "+" || typ.value === "-" || typ.value === "|") {
+      node = { tag: "path", attrs: {} };
+      if (typ.value === "+") {
+        node.attrs.d = " M " + (cx - attrs.ticklength) + "," + cy
+                    + " L " + ( cx + attrs.ticklength) + "," + cy
+                    + " M " + cx + "," + (cy - attrs.ticklength) + " L " + cx
+                    + "," + (cy + attrs.ticklength);
+        node.attrs["stroke-width"] = 0.5;
+        node.attrs.stroke = attrs.axesstroke;
+      } else {
+        if (typ.value === "-") {
+          node.attrs.d = " M " + (cx - attrs.ticklength) + "," + cy
+                       + " L " + (cx + attrs.ticklength) + "," + cy;
+        } else {
+          node.attrs.d = " M " + cx + "," + (cy - attrs.ticklength)
+                       + " L " + cx + "," + (cy + attrs.ticklength);
+        }
+        node.attrs["stroke-width"] = attrs.strokewidth;
+        node.attrs["stroke"] = attrs.stroke;
+      }
+    } else {
+      node = { tag: "circle", attrs: {} };
+      node.attrs.cx = cx;
+      node.attrs.cy = cy;
+      node.attrs.r = attrs.dotradius;
+      node.attrs["stroke-width"] = attrs.strokewidth;
+      node.attrs.stroke = attrs.stroke;
+      node.attrs.fill =  (typ.value === "open" ? "white" : attrs.stroke);
+    }
+    svg.children.push(node);
+    if (label != null) {
+      svg = textLocal(
+        svg,
+        [Rnl.toNumber(center.value[0]), Rnl.toNumber(center.value[1])],
+        label.value,
+        (pos == null ? "below" : pos.value)
+        );
+    }
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  leader(svgOprnd, plistOprnd, label) {
+    const marker = svgOprnd.value.temp.marker;
+    svgOprnd.value.temp.marker = "arrow";
+    svgOprnd.value.temp.isDim = true;
+    const plistCopy = clone(plistOprnd);
+    plistCopy.value.reverse();
+    svgOprnd = this.path(svgOprnd, plistCopy, "L");
+    const p = plistCopy.value[0].map(e => Rnl.toNumber(e));
+    const q = plistCopy.value[1].map(e => Rnl.toNumber(e));
+    let pos = "right";
+    if (Math.abs(p[0] - q[0]) >= Math.abs(p[1] - q[1])) {
+      pos = p[0] >= q[0] ? "right" : "left";
+    } else {
+      pos = p[1] < q[1] ? "below" : "above";
+    }
+    const svg = textLocal(svgOprnd.value, p, label.value, pos, null);
+    svg.temp.marker = marker;
+    svg.temp.isDim = false;
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  dimension(svgOprnd, plistOprnd, label) {
+    const p = clone(plistOprnd.value);
+    const q = p.pop();
+    const origstrokewidth = svgOprnd.value.temp.strokewidth;
+    svgOprnd.value.temp.strokewidth = 0.5;
+    svgOprnd.value.temp.isDim = true; // set small arrowhead
+    let six = Rnl.fromNumber(6 / svgOprnd.value.temp.xunitlength);
+    const pEnd = p[p.length - 1];
+    let svg;
+    // Is the label y-coord between the y-coords of the end points?
+    if ((Rnl.lessThan(p[0][1], q[1]) && Rnl.lessThan(q[1], pEnd[1])) ||
+        (Rnl.lessThan(pEnd[1], q[1]) && Rnl.lessThan(q[1], p[0][1]))) {
+      if (!Rnl.lessThan(pEnd[0], q[0])) { six = Rnl.negate(six); }
+      p.forEach(e => {
+        svgOprnd = this.line(svgOprnd, { value: [
+          [Rnl.add(e[0], six), e[1]],
+          [Rnl.add(q[0], six), e[1]]
+        ] });
+      });
+      svgOprnd.value.temp.marker = "arrow";
+      const pos = Rnl.lessThanOrEqualTo(pEnd[0], q[0]) ? "right" : "left";
+      for (let i = 0; i < p.length - 1; i++) {
+        svgOprnd = this.line(svgOprnd, { value : [[q[0], p[i][1]], [q[0], p[i + 1][1]]],
+          unit: null, dtype: dt.MATRIX });
+        svgOprnd = this.line(svgOprnd, { value : [[q[0], p[i + 1][1]], [q[0], p[i][1]]],
+          unit: null, dtype: dt.MATRIX });
+        const p3 = [
+          Rnl.toNumber(q[0]),
+          (Rnl.toNumber(p[i][1]) + Rnl.toNumber(p[i + 1][1])) / 2
+        ];
+        const str = p.length === 2 ? label.value : label.value[i];
+        svg = textLocal(svgOprnd.value, p3, str, pos);
+      }
+    } else {
+      if (!Rnl.lessThan(pEnd[1], q[1])) { six = Rnl.negate(six); }
+      p.forEach(e => {
+        svgOprnd = this.line(svgOprnd, { value: [
+          [e[0], Rnl.add(e[1], six)],
+          [e[0], Rnl.add(q[1], six)]
+        ] });
+      });
+      svgOprnd.value.temp.marker = "arrow";
+      const pos = Rnl.lessThanOrEqualTo(pEnd[1], q[1]) ? "above" : "below";
+      for (let i = 0; i < p.length - 1; i++) {
+        svgOprnd = this.line(svgOprnd, { value: [ [p[i][0], q[1]], [ p[i + 1][0], q[1]] ],
+          unit: null, dtype: dt.MATRIX });
+        svgOprnd = this.line(svgOprnd, { value: [ [ p[i + 1][0], q[1]], [p[i][0], q[1]] ],
+          unit: null, dtype: dt.MATRIX });
+        const p3 = [
+          (Rnl.toNumber(p[i][0]) + Rnl.toNumber(p[i + 1][0])) / 2,
+          Rnl.toNumber(q[1])
+        ];
+        const str = p.length === 2 ? label.value : label.value[i];
+        svg = textLocal(svgOprnd.value, p3, str, pos);
+      }
+    }
+    svg.temp.strokewidth = origstrokewidth;
+    svg.temp.marker = "none";
+    svg.temp.isDim = false;
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  }
+
+};
+
+const renderSVG = dwg => {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  Object.keys(dwg.attrs).forEach(key => {
+    svg.setAttribute(key, dwg.attrs[key]);
+  });
+  dwg.children.forEach(el => {
+    const node = document.createElementNS("http://www.w3.org/2000/svg", el.tag);
+    Object.keys(el.attrs).forEach(attr => {
+      if (attr === "text" || attr === "title") {
+        node.appendChild(document.createTextNode(el.attrs["text"]));
+      } else {
+        node.setAttribute(attr, el.attrs[attr]);
+      }
+    });
+    svg.appendChild(node);
+  });
+  return svg
+};
+
+const Draw = Object.freeze({
+  startSvg,
+  functions,
+  renderSVG
+});
 
 // evaluate.js
 
@@ -9320,7 +10004,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           } else if (o1.dtype & dt.MAP) {
             property = map.valueFromMap(o1, args, unitAware);
 
-          } else if (o1.dtype & dt.STRING) {
+          } else if (o1.dtype === dt.STRING) {
             property = textRange(o1.value, args[0]);
 
           } else if (o1.dtype === dt.MODULE) {
@@ -9340,6 +10024,8 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             const rowIndex = args[0];
             const colIndex = (numArgs === 2)
               ? args[1]
+              : isVector(o1)
+              ? null
               : { value: Rnl.zero, unit: allZeros, dtype: dt.RATIONAL };
             property = (o1.dtype & dt.DATAFRAME)
               ? DataFrame.range(o1, rowIndex, colIndex, vars, unitAware)
@@ -9360,8 +10046,13 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const range = Object.create(null);
           range.unit = null;
           range.dtype = dt.RANGE;
+          const step = o1.dtype !== dt.RATIONAL
+            ? o1.value[2]
+            : Rnl.lessThan(o1.value, end.value)
+            ? Rnl.one
+            : Rnl.negate(Rnl.one);
           range.value = o1.dtype === dt.RATIONAL
-            ? [o1.value, Rnl.one, end.value]
+            ? [o1.value, step, end.value]
             : [o1.value[0], o1.value[2], end.value];
           stack.push((Object.freeze(range)));
           break
@@ -9452,6 +10143,10 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           }
           break
         }
+
+        case "startSvg":
+          stack.push({ value: Draw.startSvg(), unit: null, dtype: dt.DRAWING });
+          break
 
         case "abs":
         case "cos":
@@ -9569,14 +10264,25 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
-        case "roundn": {
+        case "roundn":
+        case "string": {
           // Round a numeric value.
           const spec = stack.pop();
           const num = stack.pop();
           if (!(num.dtype & dt.RATIONAL)) { return errorOprnd("") }
           if (!(spec.dtype & dt.STRING)) { return errorOprnd("") }
           if (!/(?:f-?|r)\d+/.test(spec.value)) { return errorOprnd("") }
-          const funcName = spec.value.charAt() === "f" ? "roundFixed" : "roundSignificant";
+          let funcName = "";
+          const output = Object.create(null);
+          if (tkn === "string") {
+            funcName = spec.value.charAt() === "f" ? "stringFixed" : "stringSignificant";
+            output.unit = null;
+            output.dtype = num.dtype - dt.RATIONAL + dt.STRING;
+          } else {
+            funcName = spec.value.charAt() === "f" ? "roundFixed" : "roundSignificant";
+            output.unit = num.unit;
+            output.dtype = num.dtype;
+          }
           const n = Number(spec.value.slice(1));
           const value = ((num.dtype & dt.MAP) && Matrix.isVector(num))
             ? mapMap(num.value, array => array.map(e => Functions.binary[funcName]([e, n])))
@@ -9588,10 +10294,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             ? mapMap(num.value, val => Functions.binary[funcName]([val, n]))
             : Functions.binary[funcName]([num.value, n]);
           if (value.dtype && value.dtype === dt.ERROR) { return value }
-          const output = Object.create(null);
           output.value = Object.freeze(value);
-          output.unit = num.unit;
-          output.dtype = num.dtype;
           if (num.name) { output.name = num.name; }
           stack.push(Object.freeze(output));
           break
@@ -9742,16 +10445,6 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           // So if control flow get here, we have an error.
           return errorOprnd("FETCH")
 
-        case "lineChart": {
-          const numArgs = Number(tokens[i + 1]);
-          i += 1;
-          const args = new Array(numArgs);
-          for (let j = numArgs - 1; j >= 0; j--) {
-            args[j] = stack.pop();
-          }
-          return lineChart(args)
-        }
-
         case "function": {
           // User defined function.
           const functionName = tokens[i + 1];
@@ -9762,7 +10455,14 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             args[j] = stack.pop();
           }
           let oprnd;
-          if (nextToken(tokens, i) === ".") {
+          if (vars.svg && (functionName === "plot" || (Draw.functions[functionName]))) {
+            if (functionName === "plot") {
+              args.splice(1, 0, decimalFormat);
+              oprnd = plot(...args);
+            } else {
+              oprnd = Draw.functions[functionName](...args);
+            }
+          } else if (nextToken(tokens, i) === ".") {
             // Function from a module
             let lib = stack.pop().value;         // remote module
             if (lib.value) { lib = lib.value; }  // local module
@@ -10015,6 +10715,38 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
   return oprnd
 };
 
+const plot = (svg, decimalFormat, fun, numPoints, xMin, xMax) => {
+  // Plot a function.
+  // To avoid a circular reference, this function has to be here instead of in draw.js.
+  const attrs = svg.value.temp;
+  numPoints = (numPoints == null) ? Rnl.fromNumber(250) : numPoints.value;
+  const min = (xMin == null) ? Rnl.fromNumber(attrs.xmin) : xMin.value;
+  const max = (xMax == null) ? Rnl.fromNumber(attrs.xmax) : xMax.value;
+  // Vectorize the evaluation. Start by finding a vector of the input.
+  const step = Rnl.divide(Rnl.subtract(max, min), numPoints);
+  const rowVector = Matrix.operandFromRange([min, step, max]);
+  // Transpose the row vector into a column vector.
+  const arg = { value: rowVector.value, unit: null, dtype: dt.COLUMNVECTOR + dt.RATIONAL };
+  // Run the function on the vector.
+  let funResult;
+  let pathValue;
+  if (fun.value.dtype && fun.value.dtype === dt.MODULE) {
+    funResult = evalCustomFunction(fun.value, [arg], decimalFormat, false);
+    pathValue = arg.value.map((e, i) => [e, funResult.value[i]]);
+  } else if (fun.dtype === dt.STRING) {
+    if (/§matrix§1§2$/.test(fun.value)) {
+      arg.name = "t";
+      pathValue = evalRpn(fun.value.replace(/§/g, "\xa0"), { t: arg }, decimalFormat, false).value;
+    } else {
+      arg.name = "x";
+      funResult = evalRpn(fun.value.replace(/§/g, "\xa0"), { x: arg }, decimalFormat, false);
+      pathValue = arg.value.map((e, i) => [e, funResult.value[i]]);
+    }
+  }
+  const pth = { value: pathValue, unit: null, dtype: dt.MATRIX + dt.RATIONAL };
+  return Draw.functions.path(svg, pth, "L")
+};
+
 const elementFromIterable = (iterable, index, step) => {
   // A helper function. This is called by `for` loops in evalCustomFunction()
   let value;
@@ -10063,6 +10795,9 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
     for (let i = args.length; i < udf.parameters.length; i++) {
       vars[udf.parameters[i]] = { value: undefined, unit: null, dtype: 0 };
     }
+  }
+  if (udf.dtype === dt.DRAWING) {
+    vars["svg"] = { value: Draw.startSvg(), unit: null, dtype: dt.DRAWING };
   }
 
   // Execute the function statements.
@@ -10207,7 +10942,10 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
         } else if (control[level].type === "for") {
           control[level].index = control[level].nextIndex;
           const proceed = Rnl.isRational(control[level].index)
+            && Rnl.isPositive(control[level].step)
             ? Rnl.lessThanOrEqualTo(control[level].index, control[level].endIndex)
+            : Rnl.isRational(control[level].index)
+            ? Rnl.greaterThanOrEqualTo(control[level].index, control[level].endIndex)
             : control[level].index <= control[level].endIndex;
           if (proceed) {
             const [oprnd, nextIndex] = elementFromIterable(
@@ -10242,6 +10980,10 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
             if (result.dtype === dt.ERROR) { return result }
             const msg = result.dtype === dt.RATIONAL
               ? Rnl.toNumber(result.value)
+              : result.dtype === dt.STRING
+              ? result.value
+              : result.dtype === dt.MATRIX + dt.RATIONAL
+              ? result.value.map(row => row.map(e => Rnl.toNumber(e)))
               : result.value;
             // eslint-disable-next-line no-console
             console.log(msg);
@@ -10311,11 +11053,17 @@ const conditionResult = (stmt, oprnd, unitAware) => {
     return errorResult(stmt, errorOprnd("BAD_DISPLAY"))
   }
 
-  result.value = result.dtype === dt.RATIONAL
-    ? Rnl.normalize(result.value)
-    : result.dtype === dt.COMPLEX
-    ? [Rnl.normalize(result.value[0]), Rnl.normalize(result.value[1])]
-    : result.value;  // TODO: matrices
+  if (result.dtype & dt.RATIONAL) {
+    result.value = isVector(result)
+      ? result.value.map(e => Rnl.normalize(e))
+      : isMatrix(result)
+      ? result.value.map(row => row.map(e => Rnl.normalize(e)))
+      : result.dtype === dt.RATIONAL
+      ? Rnl.normalize(result.value)
+      : result.value;
+  } else if (result.dtype === dt.COMPLEX) {
+    result.value = [Rnl.normalize(result.value[0]), Rnl.normalize(result.value[1])];
+  }
   stmt.dtype = result.dtype;
 
   // If unit-aware, convert result to desired result units.
@@ -10368,6 +11116,26 @@ const conditionResult = (stmt, oprnd, unitAware) => {
   }
   if (result.value)  { stmt.value = result.value; }
   return [stmt, result]
+};
+
+const evaluateDrawing = (stmt, vars, decimalFormat = "1,000,000.") => {
+  const udf = stmt.value.draw;
+  const args = [];
+  for (let i = 0; i < udf.parameters.length; i++) {
+    const argName = udf.parameters[i];
+    args.push(evalRpn("¿" + argName, vars, decimalFormat, false, {}));
+  }
+  const funcResult = evalCustomFunction(udf, args, decimalFormat, false, {});
+  if (funcResult.dtype === dt.ERROR) {
+    stmt.error = true;
+    stmt.tex = "\\color{firebrick}\\text{" + funcResult.value + "}";
+    stmt.value = null;
+    stmt.dtype = dt.ERROR;
+  } else {
+    stmt.resultdisplay = funcResult.value;
+    delete stmt.resultdisplay.temp;
+  }
+  return stmt
 };
 
 const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
@@ -10577,10 +11345,13 @@ const improveQuantities = (attrs, vars) => {
 
 const isValidIdentifier$1 = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/;
 const keywordRegEx = /^(if|else if|else|return|raise|while|for|break|echo|end)\b/;
+const drawCommandRegEx = /^(title|frame|view|axes|grid|stroke|strokewidth|strokedasharray|fill|fontsize|fontweight|fontstyle|fontfamily|marker|line|path|plot|curve|rect|circle|ellipse|arc|text|dot|leader|dimension)\b/;
 
 // If you change functionRegEx, then also change it in mathprompt.js.
 // It isn't called from there in order to avoid duplicating Hurmet code inside ProseMirror.js.
 const functionRegEx = /^(?:private +)?function (?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*\(/;
+const drawRegEx = /^draw\(/;
+const startSvgRegEx = /^startSvg\(\)/;
 const lexRegEx = /"[^"]*"|``.*|`[^`]*`|'[^']*'|#|[^"`'#]+/g;
 
 const testForStatement = str => {
@@ -10622,7 +11393,7 @@ const scanModule = (str, decimalFormat) => {
     const line = stripComment(lines[i]);
     if (line.length === 0) { continue }
 
-    if (functionRegEx.test(line)) {
+    if (functionRegEx.test(line) || drawRegEx.test(line)) {
       // This line starts a new function.
       const [funcObj, endLineNum] = scanFunction(lines, decimalFormat, i);
       if (funcObj.dtype && funcObj.dtype === dt.ERROR) { return funcObj }
@@ -10650,16 +11421,23 @@ const handleCSV = (expression, lines, startLineNum) => {
 
 const scanFunction = (lines, decimalFormat, startLineNum) => {
   const line1 = stripComment(lines[startLineNum]);
-  const posFn = line1.indexOf("function");
+  let isDraw = line1.charAt(0) === "d";
   const posParen = line1.indexOf("(");
-  const functionName = line1.slice(posFn + 8, posParen).trim();
+  let functionName = "";
+  if (isDraw) {
+    functionName = "draw";
+  } else {
+    const posFn = line1.indexOf("function");
+    functionName = line1.slice(posFn + 8, posParen).trim();
+  }
   const isPrivate = /^private /.test(line1);
   const parameterList =  line1.slice(posParen + 1, -1).trim();
   const parameters = parameterList.length === 0 ? [] : parameterList.split(/, */g);
   const funcObj = {
     name: functionName,
-    dtype: dt.MODULE,
-    isPrivate, parameters,
+    dtype: isDraw ? dt.DRAWING : dt.MODULE,
+    isPrivate,
+    parameters,
     statements: []
   };
 
@@ -10676,8 +11454,11 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
 
     if (prevLineEndedInContinuation) {
       // Check if the previous character is a semi-colon just before a matrix literal closes.
-      line = prevLine.slice(-1) === ";" && "})]".indexOf(line.charAt(0)) > -1
+      const lastChar = prevLine.slice(-1);
+      line = lastChar === ";" && "})]".indexOf(line.charAt(0)) > -1
         ? prevLine.slice(0, -1).trim() + line
+        : lastChar === ";" || lastChar === ","
+        ? prevLine + " " + line
         : prevLine + line;
     }
 
@@ -10692,7 +11473,6 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
       continue
     }
 
-
     const keyword = keywordRegEx.exec(line);
     if (keyword) {
       name = keyword[0];
@@ -10700,6 +11480,12 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
       if (expression.length > 0 && /^``/.test(expression)) {
         [expression, i] = handleCSV(expression, lines, i);
       }
+    } else if (isDraw && drawCommandRegEx.test(line)) {
+      name = "svg";
+      expression = line.indexOf(" ") === -1
+        ? line + "(svg)"
+        : line.replace(" ", "(svg, ") + ")";
+      isStatement = true;
     } else {
       if (testForStatement(line)) {
         // We have an "=" assignment operator.
@@ -10707,6 +11493,7 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
         name = line.slice(0, posEq - 1).trim();
         expression = line.slice(posEq + 1).trim();
         if (/^``/.test(expression)) { [expression, i] = handleCSV(expression, lines, i); }
+        if (startSvgRegEx.test(expression)) { isDraw = true; }
         isStatement = true;
       } else {
         // TODO: We shouldn't get here. Write an error.
@@ -10726,7 +11513,13 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
     if (stype === "if" || stype === "while" || stype === "for") {
       stackOfCtrls.push({ type: stype, statementNum: funcObj.statements.length - 1 });
     } else if (stype === "end") {
-      if (stackOfCtrls.length === 0) { return [funcObj, i] } // Finished the current function.
+      if (stackOfCtrls.length === 0) {
+        // Finished the current function.
+        if (isDraw) {
+          funcObj.statements.splice(-1, 0, { name: "return", rpn: "¿svg", stype: "return" });
+        }
+        return [funcObj, i]
+      }
       const ctrl = stackOfCtrls[stackOfCtrls.length - 1];
       funcObj.statements[ctrl.statementNum].endOfBlock = funcObj.statements.length - 1;
       stackOfCtrls.pop();
@@ -10846,12 +11639,14 @@ const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
   let dtype;
   let str = "";
 
-  if (functionRegEx.test(inputStr)) {
+  if (functionRegEx.test(inputStr) || drawRegEx.test(inputStr)) {
     // This cell contains a custom function.
     let name = "";
-    const posFn = inputStr.indexOf("function");
-    const posParen = inputStr.indexOf("(");
-    name = inputStr.slice(posFn + 8, posParen).trim();
+    if (inputStr.charAt(0) !== "d") {
+      const posFn = inputStr.indexOf("function");
+      const posParen = inputStr.indexOf("(");
+      name = inputStr.slice(posFn + 8, posParen).trim();
+    }
     const module = scanModule(inputStr, decimalFormat);
     const isError = module.dtype && module.dtype === dt.ERROR;
     if (isError) {
@@ -10861,9 +11656,9 @@ const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
     const attrs = {
       entry: inputStr,
       name,
-      value: isError ? module.value : module.value[name],
+      value: (isError || name === "") ? module.value : module.value[name],
       // TODO: what to do with comma decimals?
-      dtype: isError ? dt.ERROR : dt.MODULE,
+      dtype: isError ? dt.ERROR : name === "" ? dt.DRAWING : dt.MODULE,
       error: isError
     };
     return attrs
@@ -11131,7 +11926,6 @@ const fetchRegEx = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u
 const importRegEx = /^[^=]+= *import/;
 const fileErrorRegEx = /^Error while reading file. Status Code: \d*$/;
 const textRegEx = /\\text{[^}]+}/;
-const lineChartRegEx = /^lineChart/;
 
 const urlFromEntry = entry => {
   // Get the URL from the entry input string.
@@ -11251,6 +12045,7 @@ const workAsync = (
       proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs,
                         curPos, hurmetVars, tr);
     } catch (err) {
+      console.log(err); // eslint-disable-line no-console
       const pos = nodeAttrs.template.indexOf(nodeAttrs.resultdisplay);
       nodeAttrs.tex = nodeAttrs.template.slice(0, pos) + "\\text{" + err + "}";
       tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs));
@@ -11276,7 +12071,8 @@ const proceedAfterFetch = (
   const doc = view.state.doc;
   const decimalFormat = doc.attrs.decimalFormat;
 
-  if (!isCalcAll && (nodeAttrs.name || nodeAttrs.rpn)) {
+  if (!isCalcAll && (nodeAttrs.name || nodeAttrs.rpn ||
+    (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING))) {
     // Load hurmetVars with values from earlier in the document.
     doc.nodesBetween(0, curPos, function(node) {
       if (node.type.name === "calculation") {
@@ -11308,8 +12104,10 @@ const proceedAfterFetch = (
       // did not do unit conversions on the result template. Do that first.
       improveQuantities(attrs, hurmetVars);
       // Now proceed to do the calculation of the cell.
-      if (attrs.rpn) {
-        attrs = evaluate(attrs, hurmetVars, decimalFormat);
+      if (attrs.rpn || (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING)) {
+        attrs = attrs.dtype && attrs.dtype === dt.DRAWING
+          ? evaluateDrawing(attrs, hurmetVars, decimalFormat)
+          : evaluate(attrs, hurmetVars, decimalFormat);
       }
       if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, decimalFormat); }
       attrs.displayMode = nodeAttrs.displayMode;
@@ -11324,18 +12122,22 @@ const proceedAfterFetch = (
       const mustCalc = isCalcAll ? !fetchRegEx.test(node.attrs.entry) : !node.attrs.isFetch;
       if (mustCalc) {
         const entry = node.attrs.entry;
-        let attrs = isCalcAll || lineChartRegEx.test(entry)
+        let attrs = isCalcAll
           ? prepareStatement(entry, decimalFormat)
           : clone(node.attrs);
         attrs.displayMode = node.attrs.displayMode;
-        if (isCalcAll || attrs.rpn || (attrs.name && !(hurmetVars[attrs.name] &&
+        const mustRedraw = attrs.dtype && attrs.dtype === dt.DRAWING &&
+                           (attrs.value.draw.parameters.length > 0 || isCalcAll);
+        if (isCalcAll || attrs.rpn || mustRedraw || (attrs.name && !(hurmetVars[attrs.name] &&
           hurmetVars[attrs.name].isFetch))) {
           if (isCalcAll) { improveQuantities(attrs, hurmetVars); }
-          if (attrs.rpn) {
-            attrs = evaluate(attrs, hurmetVars, decimalFormat);
+          if (attrs.rpn || mustRedraw) {
+            attrs = attrs.dtype && attrs.dtype === dt.DRAWING
+              ? evaluateDrawing(attrs, hurmetVars, decimalFormat)
+              : evaluate(attrs, hurmetVars, decimalFormat);
           }
           if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, decimalFormat); }
-          if (isCalcAll || attrs.rpn) {
+          if (isCalcAll || attrs.rpn || mustRedraw) {
             tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs));
           }
         }
@@ -11371,7 +12173,8 @@ function updateCalculations(
 ) {
   const doc = view.state.doc;
 
-  if (!(isCalcAll || nodeAttrs.name || nodeAttrs.rpn)) {
+  if (!(isCalcAll || nodeAttrs.name || nodeAttrs.rpn ||
+      (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING))) {
     // No calculation is required. Just render the node and get out.
     const state = view.state;
     if (state.selection.to === curPos + 1) {
@@ -11437,6 +12240,7 @@ function updateCalculations(
     try {
       proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr);
     } catch (err) {
+      console.log(err); // eslint-disable-line no-console
       const pos = nodeAttrs.template.indexOf(nodeAttrs.resultdisplay);
       nodeAttrs.tex = nodeAttrs.template.slice(0, pos) + "\\text{" + err + "}";
       tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs));
@@ -11460,11 +12264,17 @@ const calculate = (
   improveQuantities(attrs, vars);
   if (attrs.rpn) {
     attrs = evaluate(clone(attrs), vars, decimalFormat);
+  } else if (attrs.dtype && attrs.dtype === dt.DRAWING) {
+    attrs = evaluateDrawing(attrs, vars, decimalFormat);
   }
   if (attrs.name) {
     insertOneHurmetVar(vars, attrs);
   }
-  return inDraftMode ? attrs.alt : attrs.tex
+  return attrs.dtype && attrs.dtype === dt.DRAWING
+   ? attrs
+   : inDraftMode
+   ? attrs.alt
+   : attrs.tex
 };
 
 /*
@@ -11495,6 +12305,7 @@ const calculate = (
  */
 
 const hurmet = Object.freeze({
+  dt,
   parse,
   calculate,
   autoCorrect,
@@ -11502,13 +12313,14 @@ const hurmet = Object.freeze({
   improveQuantities,
   evaluate,
   scanModule,
-  updateCalculations
+  updateCalculations,
+  Draw
 });
 
 /**
  * # hurmetMark.js
  *
- * Hurmet.app uses a version of Markdown as a plain text file format.
+ * Hurmet.app can export to its own flavor of Markdown.
  * This version of Markdown is stricter in some ways than CommonMark or
  * Gruber's original Markdown. So the parser can be considerably simplified.
  * md2ast() returns an AST that matches the memory structure  of a Hurmet.app document.
@@ -11522,7 +12334,7 @@ const hurmet = Object.freeze({
  * 4. A blank line must precede the beginning of a list, even a nested list.
  * 5. A hard line break is indicated when a line ends with "\". Double spaces do not count.
  * 6. "Shortcut" reference links [ref] are not recognized.
- *    See below for implicit reference links.
+ *    Implicit reference links are recognized and are expanded, see below.
  *
  * ## Extensions
  *
@@ -11530,13 +12342,14 @@ const hurmet = Object.freeze({
  *    Hurmet display calculation is fenced ¢¢\n … \n¢¢.
  * 2. LaTeX inline math is delimited $…$. $ and \\ are escaped \$ & \\\\.
  *    LaTeX display math is fenced  $$\n … \n$$.
- * 3. ~~strikethrough~~
- * 4. Pipe tables as per GFM.
- * 5. Grid tables as per reStructuredText, with two exceptions:
+ * 3. ~subscript~
+ * 4. ~~strikethrough~~
+ * 5. Pipe tables as per Github Flavored Markdown (GFM).
+ * 6. Grid tables as per reStructuredText, with two exceptions:
  *    a. The top border contains ":" characters to indicate column justtification.
- *    b. Top & left borders contain "+" characters at locations where a merged
- *       cell prevents a border from extending to the tables outer edge.
- * 6. Implicit reference links [title][] and implicit reference images ![alt][]
+ *    b. Top & left borders contain "+" characters at border locations, even where
+ *       a merged cell prevents a border from extending to the tables outer edge.
+ * 7. Implicit reference links [title][] and implicit reference images ![alt][]
  *    ⋮
  *    [alt]: path
  *    Reference images can have captions and directives. Format is:
@@ -11544,14 +12357,14 @@ const hurmet = Object.freeze({
  *      ⋮
  *    [ref]: filepath
  *    {.class #id width=number}
- * 7. Table directives. They are placed on the line after the table. The format is:
+ * 8. Table directives. They are placed on the line after the table. The format is:
  *    {.class #id width=num widths="num1 num2 …"}
- * 8. Lists that allow the user to pick list ordering.
+ * 9. Lists that allow the user to pick list ordering.
  *      1. →  1. 2. 3.  etc.
  *      A. →  A. B. C.  etc. (future)
  *      a) →  (a) (b) (c)  etc. (future)
- * 9. Definition lists, per Pandoc.  (future)
- * 10. Blurbs set an attribute on a block element, as in Markua.
+ * 10. Definition lists, per Pandoc.  (future)
+ * 11. Blurbs set an attribute on a block element, as in Markua.
  *     Blurbs are denoted by a symbol in the left margin.
  *     Subsequent indented text blocks are children of the blurb.
  *     Blurb symbols:
@@ -11562,11 +12375,11 @@ const hurmet = Object.freeze({
  *       W> Warning admonition (future)
  *       T> Tip admonition (future)
  *       c> Comment admonition (future)
- * 11. [^1] is a reference to a footnote. (future)
+ * 12. [^1] is a reference to a footnote. (future)
  *     [^1]: The body of the footnote is deferred, similar to reference links.
- * 12. [#1] is a reference to a citation. (future)
+ * 13. [#1] is a reference to a citation. (future)
  *     [#1]: The body of the citation is deferred, similar to reference links.
- * 13. Line blocks begin with "| ", as per Pandoc. (future)
+ * 14. Line blocks begin with "| ", as per Pandoc. (future)
  *
  * hurmetMark.js copyright (c) 2021, 2022 Ron Kok
  *
@@ -11917,7 +12730,7 @@ const TABLES = (function() {
     parsePipeTable: parsePipeTable(),
     PIPE_TABLE_REGEX: /^(\|.+)\n\|([-:]+[-| :]*)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
     parseGridTable: parseGridTable(),
-    GRID_TABLE_REGEX: /^((\+(?:[-:=]+\+)+)\n(?:[+|*][^\n]+[+|]\n)+)(?:\{([^\n}]+)\}\n)?\n*/
+    GRID_TABLE_REGEX: /^((\+(?:[-:=]+\+)+)\n(?:[+|][^\n]+[+|]\n)+)(?:\{([^\n}]+)\}\n)?\n*/
   };
 })();
 
@@ -12308,7 +13121,7 @@ rules.set("superscript", {
 });
 rules.set("subscript", {
   isLeaf: true,
-  match: inlineRegex(/^<sub>([\s\S]*?)<\/sub>/),
+  match: inlineRegex(/^~((?:\\[\s\S]|[^\\])+?)~/),
   parse: function(capture, state) {
     return parseTextMark(capture[1], state, "subscript" )
   }
