@@ -218,7 +218,6 @@ const hurmetMarks = {
     close(state) { return state.isGFM ? "</sub>" : "~" },
     expelEnclosingWhitespace: true
   },
-//  subscript: {open: "<sub>", close: "</sub>", expelEnclosingWhitespace: true},
   strikethru: {open: "~~", close: "~~", mixable: true, expelEnclosingWhitespace: true},
   underline: {open: "<u>", close: "</u>", expelEnclosingWhitespace: true},
   highlight: {open: "<mark>", close: "</mark>", expelEnclosingWhitespace: true}
