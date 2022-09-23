@@ -24,13 +24,14 @@
  *    Hurmet display calculation is fenced ¢¢\n … \n¢¢.
  * 2. LaTeX inline math is delimited $…$. $ and \\ are escaped \$ & \\\\.
  *    LaTeX display math is fenced  $$\n … \n$$.
- * 3. ~~strikethrough~~
- * 4. Pipe tables as per Github Flavored Markdown (GFM).
- * 5. Grid tables as per reStructuredText, with two exceptions:
+ * 3. ~subscript~
+ * 4. ~~strikethrough~~
+ * 5. Pipe tables as per Github Flavored Markdown (GFM).
+ * 6. Grid tables as per reStructuredText, with two exceptions:
  *    a. The top border contains ":" characters to indicate column justtification.
  *    b. Top & left borders contain "+" characters at border locations, even where
  *       a merged cell prevents a border from extending to the tables outer edge.
- * 6. Implicit reference links [title][] and implicit reference images ![alt][]
+ * 7. Implicit reference links [title][] and implicit reference images ![alt][]
  *    ⋮
  *    [alt]: path
  *    Reference images can have captions and directives. Format is:
@@ -38,14 +39,14 @@
  *      ⋮
  *    [ref]: filepath
  *    {.class #id width=number}
- * 7. Table directives. They are placed on the line after the table. The format is:
+ * 8. Table directives. They are placed on the line after the table. The format is:
  *    {.class #id width=num widths="num1 num2 …"}
- * 8. Lists that allow the user to pick list ordering.
+ * 9. Lists that allow the user to pick list ordering.
  *      1. →  1. 2. 3.  etc.
  *      A. →  A. B. C.  etc. (future)
  *      a) →  (a) (b) (c)  etc. (future)
- * 9. Definition lists, per Pandoc.  (future)
- * 10. Blurbs set an attribute on a block element, as in Markua.
+ * 10. Definition lists, per Pandoc.  (future)
+ * 11. Blurbs set an attribute on a block element, as in Markua.
  *     Blurbs are denoted by a symbol in the left margin.
  *     Subsequent indented text blocks are children of the blurb.
  *     Blurb symbols:
@@ -56,11 +57,11 @@
  *       W> Warning admonition (future)
  *       T> Tip admonition (future)
  *       c> Comment admonition (future)
- * 11. [^1] is a reference to a footnote. (future)
+ * 12. [^1] is a reference to a footnote. (future)
  *     [^1]: The body of the footnote is deferred, similar to reference links.
- * 12. [#1] is a reference to a citation. (future)
+ * 13. [#1] is a reference to a citation. (future)
  *     [#1]: The body of the citation is deferred, similar to reference links.
- * 13. Line blocks begin with "| ", as per Pandoc. (future)
+ * 14. Line blocks begin with "| ", as per Pandoc. (future)
  *
  * hurmetMark.js copyright (c) 2021, 2022 Ron Kok
  *
@@ -795,7 +796,7 @@ rules.set("strikethru", {
 });
 rules.set("superscript", {
   isLeaf: true,
-  match: inlineRegex(/^<sup>([\s\S]*?)<\/sup>/),
+  match: inlineRegex(/^~((?:\\[\s\S]|[^\\])+?)~/),
   parse: function(capture, state) {
     return parseTextMark(capture[1], state, "superscript" )
   }
