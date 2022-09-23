@@ -51,6 +51,9 @@ const setStrokeAndFill = (node, attrs) => {
   node.attrs["stroke-width"] = attrs.strokewidth
   node.attrs.stroke = attrs.stroke
   node.attrs.fill = attrs.fill
+  if (attrs.strokedasharray != null && attrs.strokedasharray !== "none") {
+    node.attrs["stroke-dasharray"] = attrs.strokedasharray
+  }
 }
 
 const pointZeroRegEx = /\.0+$/
@@ -331,9 +334,6 @@ const functions = {
       (attrs.height - p[1] * attrs.yunitlength - attrs.origin[1]) + " " +
       (q[0] * attrs.xunitlength + attrs.origin[0]) + "," + (attrs.height -
        q[1] * attrs.yunitlength - attrs.origin[1]);
-    if (attrs.strokedasharray != null) {
-      node["stroke-dasharray"] = attrs.strokedasharray
-    }
     setStrokeAndFill(node, attrs)
     svg.children.push(node)
     if (attrs.marker === "dot" || attrs.marker === "arrowdot") {
@@ -448,9 +448,6 @@ const functions = {
                     - attrs.origin[1];
     node.attrs.rx = Rnl.toNumber(rx.value) * attrs.xunitlength
     node.attrs.ry = Rnl.toNumber(ry.value) * attrs.yunitlength
-    if (attrs.strokedasharray != null) {
-      node.attrs["stroke-dasharray"] = attrs.strokedasharray
-    }
     setStrokeAndFill(node, attrs)
     svg.children.push(node)
     return { value: svg, unit: null, dtype: dt.DRAWING }
@@ -476,9 +473,6 @@ const functions = {
     str += " 0 0,0 " + (end[0] * attrs.xunitlength + attrs.origin[0]) + "," +
       (attrs.height - end[1] * attrs.yunitlength - attrs.origin[1])
     node.attrs.d = str
-    if (attrs.strokedasharray != null) {
-      node.attrs["stroke-dasharray"] = attrs.strokedasharray
-    }
     setStrokeAndFill(node, attrs)
     let v = 0
     if (attrs.marker === "arrow" || attrs.marker === "arrowdot") {
