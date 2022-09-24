@@ -2,6 +2,7 @@ import { dt } from "./constants"
 import { clone } from "./utils"
 import { isVector } from "./matrix"
 import { Rnl } from "./rational"
+import { md2ast } from "./md2ast"
 
 // This module is heavily influenced by ASCIIsvg.js, by Peter Jipsen
 
@@ -108,7 +109,15 @@ const arrowhead = (svg, p, q) => { // draw arrowhead at q (in units)
   }
 }
 
-const textLocal = (svg, p, str, pos, fontsty) => {
+const markAttribute = {
+  em:         ["font-style", "italic"],
+  strong:     ["font-weight", "bold"],
+  code:       ["font-family", "monospace"],
+  strikethru: ["text-decoration", "line-through"],
+  subscript:  ["font-size", "0.8em"]
+}
+
+const textLocal = (svg, p, str, pos) => {
   const attrs = svg.temp
   let textanchor = "middle"
   let dx = 0
@@ -125,16 +134,40 @@ const textLocal = (svg, p, str, pos, fontsty) => {
       dx = -attrs.fontsize / 2
     }
   }
-  const node = { tag: "text", attrs: {} }
-  node.attrs["text"] = str
-  node.attrs.x = p[0] * attrs.xunitlength + attrs.origin[0] + dx
-  node.attrs.y = attrs.height - p[1] * attrs.yunitlength - attrs.origin[1] + dy
-  node.attrs["font-style"] = (fontsty != null ? fontsty : attrs.fontstyle)
-  node.attrs["font-family"] = attrs.fontfamily
-  node.attrs["font-size"] = attrs.fontsize
-  node.attrs["font-weight"] = attrs.fontweight
-  node.attrs["text-anchor"] = textanchor
-  svg.children.push(node)
+  const textNode = { tag: "text", children: [], attrs: {} }
+  textNode.attrs["text"] = str
+  textNode.attrs.x = p[0] * attrs.xunitlength + attrs.origin[0] + dx
+  textNode.attrs.y = attrs.height - p[1] * attrs.yunitlength - attrs.origin[1] + dy
+  textNode.attrs["font-family"] = attrs.fontfamily
+  textNode.attrs["font-size"] = attrs.fontsize
+  textNode.attrs["text-anchor"] = textanchor
+  // Load Markdown into an AST
+  const ast = md2ast(str)[0].content
+  // Load content of AST into <tspan> nodes.
+  if (Array.isArray(ast)) {
+    let prevNodeContainedSubscript = false
+    for (const markNode of ast) {
+      const tspan = { tag: "tspan", text: markNode.text }
+      let currentNodeContainsSubscript = false
+      if (markNode.marks) {
+        tspan.attrs = {}
+        for (const mark of markNode.marks) {
+          const markAttr = markAttribute[mark.type]
+          tspan.attrs[markAttr[0]] = markAttr[1]
+          if (mark.type === "subscript") { currentNodeContainsSubscript = true }
+        }
+      }
+      if (currentNodeContainsSubscript) {
+        if (!prevNodeContainedSubscript) { tspan.attrs.dy  = "2" }
+      } else if (prevNodeContainedSubscript) {
+        if (!markNode.marks) { tspan.attrs = {} }
+        tspan.attrs.dy  = "-2"
+      }
+      prevNodeContainedSubscript = currentNodeContainsSubscript
+      textNode.children.push(tspan)
+    }
+  }
+  svg.children.push(textNode)
   return svg
 }
 
@@ -162,16 +195,6 @@ const functions = {
 
   fontsize(svgOprnd, size) {
     svgOprnd.value.temp.fontsize = Rnl.toNumber(size.value)
-    return svgOprnd
-  },
-
-  fontweight(svgOprnd, str) {
-    svgOprnd.value.temp.fontweight = str.value // "normal" | "bold"
-    return svgOprnd
-  },
-
-  fontstyle(svgOprnd, str) {
-    svgOprnd.value.temp.fontstyle = str.value // "normal" | "italic"
     return svgOprnd
   },
 
@@ -493,13 +516,12 @@ const functions = {
     return { value: svg, unit: null, dtype: dt.DRAWING }
   },
 
-  text(svgOprnd, p, str, pos, fontsty) {
+  text(svgOprnd, p, str, pos) {
     const svg = textLocal(
       svgOprnd.value,
       [Rnl.toNumber(p.value[0]), Rnl.toNumber(p.value[1])],
       str.value,
-      pos == null ? null : pos.value,
-      fontsty == null ? null : fontsty.value
+      pos == null ? null : pos.value
       )
     return { value: svg, unit: null, dtype: dt.DRAWING }
   },
@@ -645,12 +667,25 @@ const renderSVG = dwg => {
   dwg.children.forEach(el => {
     const node = document.createElementNS("http://www.w3.org/2000/svg", el.tag)
     Object.keys(el.attrs).forEach(attr => {
-      if (attr === "text" || attr === "title") {
+      node.setAttribute(attr, el.attrs[attr])
+      if (attr === "title") {
         node.appendChild(document.createTextNode(el.attrs["text"]))
       } else {
         node.setAttribute(attr, el.attrs[attr])
       }
     })
+    if (el.tag === "text") {
+      el.children.forEach(child => {
+        const tspan = document.createElementNS("http://www.w3.org/2000/svg", "tspan")
+        if (child.attrs) {
+          Object.keys(child.attrs).forEach(mark => {
+            tspan.setAttribute(mark, child.attrs[mark])
+          })
+        }
+        tspan.appendChild(document.createTextNode(child.text))
+        node.appendChild(tspan)
+      })
+    }
     svg.appendChild(node)
   })
   return svg

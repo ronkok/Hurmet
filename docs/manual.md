@@ -2047,14 +2047,6 @@ fontsize _pixelvalue_
 
 : Sets the font size in px. Default = 13.33 (~10 pt).
 
-fontstyle "normal" | "italic"
-
-: Set the font style.
-
-fontweight "normal" | "bold"
-
-: Sets the font weight.
-
 marker "none" | "dot" | "arrow" | "arrowdot"
 
 : Sets the default marker symbol that is drawn at the endpoints of lines and paths.
@@ -2102,9 +2094,13 @@ rect  [_x_, _y_; _u_, _v_]<span class="optional">, r</span>
 
 text  [_x_, _y_], "_string_"<span class="optional">, position</span>
 
-: Writes the string at a point keyed to coordinates _x_, _y_. _position_ can be
-  "above", "below", "middle", "left", "right", "aboveleft", "aboveright",
-  "belowleft", or "belowright". The default is "middle".
+: Writes the string at a point keyed to coordinates _x_, _y_.
+  
+  _position_ can be "above", "below", "middle", "left", "right", "aboveleft",
+  "aboveright", "belowleft", or "belowright". The default is "middle".
+
+  The string can be styled with Markdown inline styles: \__italic_\_, \*\***bold**\*\*,
+  \``code`\`, `~`~subscript~`~`, and `~~`~~strikethrough~~`~~`.
 
 leader [_x₁_, _y₁_; _x₂_, _y₂_<span class="optional">; x₃, y₃; etc</span>], "_note_"
 

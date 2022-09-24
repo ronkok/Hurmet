@@ -958,12 +958,6 @@ end</code></pre><p>… which results in this plot …</p>
 <dt id='fontsize-<em>pixelvalue</em>'>fontsize <em>pixelvalue</em></dt>
 <dd><p>Sets the font size in px. Default = 13.33 (~10 pt).</p>
 </dd>
-<dt id='fontstyle-&quot;normal&quot;-|-&quot;italic&quot;'>fontstyle &quot;normal&quot; | &quot;italic&quot;</dt>
-<dd><p>Set the font style.</p>
-</dd>
-<dt id='fontweight-&quot;normal&quot;-|-&quot;bold&quot;'>fontweight &quot;normal&quot; | &quot;bold&quot;</dt>
-<dd><p>Sets the font weight.</p>
-</dd>
 <dt id='marker-&quot;none&quot;-|-&quot;dot&quot;-|-&quot;arrow&quot;-|-&quot;arrowdot&quot;'>marker &quot;none&quot; | &quot;dot&quot; | &quot;arrow&quot; | &quot;arrowdot&quot;</dt>
 <dd><p>Sets the default marker symbol that is drawn at the endpoints of lines and paths. Dots are also set along the intermediate points of paths and curves.</p>
 </dd>
@@ -993,7 +987,9 @@ end</code></pre><p>… which results in this plot …</p>
 <dd><p>Draws a rectangle with corners at points <em>x</em>, <em>y</em> and <em>u</em>, <em>v</em>. The optional <em>r</em> argument defines the corner radius of a rounded rectangle.</p>
 </dd>
 <dt id='text-[<em>x</em>,-<em>y</em>],-&quot;<em>string</em>&quot;<span-class="optional">,-position</span>'>text  [<em>x</em>, <em>y</em>], &quot;<em>string</em>&quot;<span class="optional">, position</span></dt>
-<dd><p>Writes the string at a point keyed to coordinates <em>x</em>, <em>y</em>. <em>position</em> can be &quot;above&quot;, &quot;below&quot;, &quot;middle&quot;, &quot;left&quot;, &quot;right&quot;, &quot;aboveleft&quot;, &quot;aboveright&quot;, &quot;belowleft&quot;, or &quot;belowright&quot;. The default is &quot;middle&quot;.</p>
+<dd><p>Writes the string at a point keyed to coordinates <em>x</em>, <em>y</em>.</p>
+<p><em>position</em> can be &quot;above&quot;, &quot;below&quot;, &quot;middle&quot;, &quot;left&quot;, &quot;right&quot;, &quot;aboveleft&quot;, &quot;aboveright&quot;, &quot;belowleft&quot;, or &quot;belowright&quot;. The default is &quot;middle&quot;.</p>
+<p>The string can be styled with Markdown inline styles: _<em>italic</em>_, **<strong>bold</strong>**, `<code>code</code>`, <code>~</code><sub>subscript</sub><code>~</code>, and <code>~~</code><del>strikethrough</del><code>~~</code>.</p>
 </dd>
 <dt id='leader-[<em>x₁</em>,-<em>y₁</em>;-<em>x₂</em>,-<em>y₂</em><span-class="optional">;-x₃,-y₃;-etc</span>],-&quot;<em>note</em>&quot;'>leader [<em>x₁</em>, <em>y₁</em>; <em>x₂</em>, <em>y₂</em><span class="optional">; x₃, y₃; etc</span>], &quot;<em>note</em>&quot;</dt>
 <dd><p>Writes a note with an arrow pointing to a location.</p>
