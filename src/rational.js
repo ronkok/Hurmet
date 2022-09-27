@@ -297,7 +297,7 @@ const tanh = x => {
 const toNumber = r => {
   // Return a JavaScript Number
   const num = Number(r[0]) / Number(r[1])  // May be imprecise.
-  if (!isNaN(num)) { return num }
+  if (!isNaN(num) && num !== Infinity ) { return num }
   const numStr = toStringSignificant(r, 20)
   return Number(numStr)
 }
