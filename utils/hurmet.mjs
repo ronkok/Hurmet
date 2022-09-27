@@ -943,7 +943,7 @@ const tanh = x => {
 const toNumber = r => {
   // Return a JavaScript Number
   const num = Number(r[0]) / Number(r[1]);  // May be imprecise.
-  if (!isNaN(num)) { return num }
+  if (!isNaN(num) && num !== Infinity ) { return num }
   const numStr = toStringSignificant(r, 20);
   return Number(numStr)
 };
@@ -11962,6 +11962,8 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
               ? Rnl.toNumber(result.value)
               : result.dtype === dt.STRING
               ? result.value
+              : isVector(result) && (result.dtype & dt.RATIONAL)
+              ? result.value.map(e => Rnl.toNumber(e))
               : result.dtype === dt.MATRIX + dt.RATIONAL
               ? result.value.map(row => row.map(e => Rnl.toNumber(e)))
               : result.value;
