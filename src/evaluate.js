@@ -1517,6 +1517,8 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
               ? Rnl.toNumber(result.value)
               : result.dtype === dt.STRING
               ? result.value
+              : isVector(result) && (result.dtype & dt.RATIONAL)
+              ? result.value.map(e => Rnl.toNumber(e))
               : result.dtype === dt.MATRIX + dt.RATIONAL
               ? result.value.map(row => row.map(e => Rnl.toNumber(e)))
               : result.value
