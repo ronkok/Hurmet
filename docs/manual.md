@@ -141,9 +141,6 @@ lightweight markup format. Hurmet's version of Markdown is extended to enable
 calculations, indented paragraphs, centered paragraphs, and tables with merged
 cells or multiple paragraphs in a cell.
 
-…or you can export GFM (Github Flavored Markdown), which does not have Hurmet’s
-extensions and which converts calculation zones to TeX.
-
 <details><summary>Click for more…</summary>
 
 #### Hurmet-flavored Markdown
@@ -158,6 +155,8 @@ A newline is indicated by a backslash, `\`, at the end of a line.
 +------------------------------------------+--------------------+
 | \**Bold\**                               | **Bold**           |
 +------------------------------------------+--------------------+
+| \~subscript\~                            | ~subscript~        |
++------------------------------------------+--------------------+
 | \`inline code\`                          | `inline code`      |
 +------------------------------------------+--------------------+
 | \¢\`2 + 2 = ?\`                          | ¢` 2 + 2 = 4 `\    |
@@ -165,7 +164,7 @@ A newline is indicated by a backslash, `\`, at the end of a line.
 +------------------------------------------+--------------------+
 | \$ \\TeX\$                               | ¢` \TeX `          |
 +------------------------------------------+--------------------+
-| \~~strikethrough\~~                      | ~~strikethrough~~  |
+| \~\~strikethrough\~\~                    | ~~strikethrough~~  |
 +------------------------------------------+--------------------+
 | \# Heading 1                             | **Heading 1**      |
 +------------------------------------------+--------------------+
@@ -237,6 +236,9 @@ Grid tables
 [2]: http://a.com
 
 </details>
+
+…or you can export GFM (Github Flavored Markdown), which does not have Hurmet’s
+extensions and which converts calculation zones to TeX.
 
 ### TeX
 
@@ -1725,226 +1727,6 @@ Numeric result display types **f** and **%** can be set to any non-negative
 integer. The significant digit display types are limited to no more than 15
 significant digits.
 
-## User Defined Functions
-
-If Hurmet’s [built-in functions](#functions) do not satisfy your needs, it is
-possible to write your own functions. Example:
-
-```
-function multiply(a, b)
-   return a × b
-end
-```
-
-Other Hurmet calculation cells can then call the function:
-
-¢`n = multiply(2, 4) = 8`
-
-Unlike other Hurmet assignments, user defined functions can be placed at the
-end of the document and still be called by other expressions.
-
-The function can have any number of arguments, or none, separated by commas. So
-the form of the first line is:
-
-![functionName open paren arguments close paren](images/function-railroad.svg)
-
-The function name and each argument (if any) must be valid identifiers.
-
-Function statements end at a line ending, unless the last character is one of:
-**( [ { , ; + -** or the following line begins with one of: **} ] )**
-
-Comments can be written after `#`. A space must precede the `#`.
-
-Variables created inside a user-defined function are local and their values
-will not be available outside the function. A user-defined function returns
-only the result of the expression in a `return` statement.
-
-If you omit any arguments when you call a function, Hurmet will fill out the
-argument list with values of `undefined` when it executes the function.
-
-Hurmet does not support function recursion.
-
-#### Code Blocks
-
-Inside a user-defined function, Hurmet supports code blocks and some
-additional control words. That is, words such as _if_ and _else_ can control
-execution of a _block_ of statements, not just one expression. Statements
-between the `if` statement and an `end` statement are in the block. Example:
-
-```
-if a ≤ b
-   x = a + b²
-   y = 2 x
-end
-```
-
-Indentation is not significant to the parser but is very useful to humans
-reading the code. I usually indent by three spaces.
-
-<dl class="bold-term">
-
-if else
-
-:   _if​​…else_ control words make the execution of code blocks dependent on a
-    condition. Example:
-
-    ```
-    if a ≤ 4000
-       b = 0.85
-    else if a ≥ 8000
-       b = 0.65
-    else
-       b = 0.85 - (a - 4000)/20000
-    end
-    ```
-
-while
-
-:   A _while_ loop executes a code block repeatedly, as long as a condition holds
-    true. Example:
-
-    ```
-    while b ≠ 0
-       h = b
-       b = a modulo b
-       a = h
-    end
-    ```
-
-for
-
-:   A _for_ loop iterates, executing a code block once with each element of a
-    range or collection.
-
-    Examples:
-
-    +------------------+---------------------------+
-    | ```              | ```                       |
-    | sum = 0          | reverse = ""              |
-    | for i in 1..10   | for ch in "abcdef"        |
-    |    sum = sum + i |    reverse = ch & reverse |
-    | end              | end                       |
-    | ```              | ```                       |
-    +------------------+---------------------------+
-    {.grid}
-
-    ![for index variable in range or matrix or string](images/for-loop-railroad.svg)
-
-    The index variable of a _for_ loop will iterate through each of the numbers in
-    a range, the elements in a matrix, or the characters in a string.
-
-break
-
-:   A loop can be terminated early via the _break_ keyword. Example:
-
-    ```
-    for i in 1..1000000
-       if i ≥ 2
-          break
-       end
-    end
-    ```
-
-return
-
-:   A _return_ statement terminates the function.
-
-    ![return optional expression](images/return-railroad.svg)
-
-    If the optional _expression_ is present, the function will return its result.
-    If not, the function will return `undefined`.
-
-raise
-
-:   A _raise_ statement terminates the function and returns an optional error message.
-
-    ![raise optional string](images/raise-railroad.svg)
-
-echo
-
-:   A _echo_ statement writes a message to the browser’s console. You can type
-    **Ctrl Shift I** to see it. Such a message can be very useful while debugging
-    a function.
-
-    ![echo string](images/echo-railroad.svg)
-
-</dl>
-
-## Remote modules
-
-If some Hurmet code is used repeatedly, it makes sense to write that code once
-and import it into other documents. Hurmet modules are text files that serve
-that purpose. Modules can contain functions and statements that assign literal
-values to a variable. Such a module would have text that might look like this:
-
-```
-E = 29000 'ksi'
-
-v = [4, 6, 8]
-
-function multiply(a, b)
-   return a × b
-end
-```
-
-A Hurmet document can load an entire module into one variable with a import
-statement. The following statement will import a file that contains the text above.
-
-`mod = import("https://hurmet.app/smallModule.txt") = !`
-
-After a module has been imported and loaded into a variable, its functions and
-values can be called by writing the module name and variable/function name in
-dot notation, as in:
-
-`E = mod.E = ?? psi`
-
-`n = mod.multiply(2, 4) = ?`
-
-#### Imported Parameters
-
-The Hurmet variable name `importedParameters` has a special purpose. It loads
-module values into multiple variables instead of into one variable. An example
-of such an import is:
-
-`importedParameters = import("https://hurmet.app/parent.txt") = !`
-
-That statement will render like this:
-
-<div style="font-size: 16px">
-
-¢` {:f_c′, f_c′′, f_yr, β_1, ρ_0;
-ρ_max, E_c, G_c,  E, G;
-n_c, σ_a, σ_as, μ_s, σ_p;
-p_pl, ρ_g, C_e, I_s, V_w;
-EC, k_zt, α, z_g, SC;
-S_DS, S_D1, I_E,,} = import("https://hurmet.app/parent.txt") `
-
-</div>
-
-Such a statement is handy in a big project, where you break the calculations
-into several documents. Since any big project often has several common
-variables, you want a way to keep them synchronized. Put an
-`importedParameters` statement into each of the documents and you’re good. As
-an added benefit, a reviewer can see what you are doing.
-
-**Gists**
-
-Hurmet is a web app, so it can import text files only from addresses that begin
-with `http` or `https`. An easy way to create such a file is a Github
-[Gist](https://gist.github.com/). I've written an example Gist for imported
-parameters:
-
-<div style="width: 30em; overflow-x: scroll">
-
-`https://gist.githubusercontent.com/ronkok/c6c564cf162008cccf03ab8afeb09a83/raw/ParentFileExample.txt`
-
-</div>
-
-If you create your own Gists, you'll see that the addresses of the raw files
-are very long. If you want a permalink to your file, delete the 40
-random characters after "/raw/". Github keeps a copy of every draft of your
-file and the random part after "/raw/" is the revision ID.
-
 ## Drawings
 
 Hurmet’s _draw_ environment can plot functions and render simple sketches. For a
@@ -2121,6 +1903,237 @@ plot  _f_ or [_g_, _h_]<span class="optional">, 𝑛, xₘᵢₙ, xₘₐₓ</sp
 
 </dl>
 
+## User Defined Functions
+
+If Hurmet’s [built-in functions](#functions) do not satisfy your needs, it is
+possible to write your own functions. Example:
+
+```
+function multiply(a, b)
+   return a × b
+end
+```
+
+Other Hurmet calculation cells can then call the function:
+
+¢`n = multiply(2, 4) = 8`
+
+Unlike other Hurmet assignments, user defined functions can be placed at the
+end of the document and still be called by other expressions.
+
+The function can have any number of arguments, or none, separated by commas. So
+the form of the first line is:
+
+![functionName open paren arguments close paren](images/function-railroad.svg)
+
+The function name and each argument (if any) must be valid identifiers.
+
+Function statements end at a line ending, unless the last character is one of:
+**( [ { , ; + -** or the following line begins with one of: **} ] )**
+
+Comments can be written after `#`. A space must precede the `#`.
+
+Variables created inside a user-defined function are local and their values
+will not be available outside the function. A user-defined function returns
+only the result of the expression in a `return` statement.
+
+If you omit any arguments when you call a function, Hurmet will fill out the
+argument list with values of `undefined` when it executes the function.
+
+Hurmet does not support function recursion.
+
+#### Code Blocks
+
+Inside a user-defined function, Hurmet supports code blocks and some
+additional control words. That is, words such as _if_ and _else_ can control
+execution of a _block_ of statements, not just one expression. Statements
+between the `if` statement and an `end` statement are in the block. Example:
+
+```
+if a ≤ b
+   x = a + b²
+   y = 2 x
+end
+```
+
+Indentation is not significant to the parser but is very useful to humans
+reading the code. I usually indent by three spaces.
+
+<dl class="bold-term">
+
+if else
+
+:   _if​​…else_ control words make the execution of code blocks dependent on a
+    condition. Example:
+
+    ```
+    if a ≤ 4000
+       b = 0.85
+    else if a ≥ 8000
+       b = 0.65
+    else
+       b = 0.85 - (a - 4000)/20000
+    end
+    ```
+
+while
+
+:   A _while_ loop executes a code block repeatedly, as long as a condition holds
+    true. Example:
+
+    ```
+    while b ≠ 0
+       h = b
+       b = a modulo b
+       a = h
+    end
+    ```
+
+for
+
+:   A _for_ loop iterates, executing a code block once with each element of a
+    range or collection.
+
+    Examples:
+
+    +------------------+---------------------------+
+    | ```              | ```                       |
+    | sum = 0          | reverse = ""              |
+    | for i in 1..10   | for ch in "abcdef"        |
+    |    sum = sum + i |    reverse = ch & reverse |
+    | end              | end                       |
+    | ```              | ```                       |
+    +------------------+---------------------------+
+    {.grid}
+
+    ![for index variable in range or matrix or string](images/for-loop-railroad.svg)
+
+    The index variable of a _for_ loop will iterate through each of the numbers in
+    a range, the elements in a matrix, or the characters in a string.
+
+break
+
+:   A loop can be terminated early via the _break_ keyword. Example:
+
+    ```
+    for i in 1..1000000
+       if i ≥ 2
+          break
+       end
+    end
+    ```
+
+return
+
+:   A _return_ statement terminates the function.
+
+    ![return optional expression](images/return-railroad.svg)
+
+    If the optional _expression_ is present, the function will return its result.
+    If not, the function will return `undefined`.
+
+raise
+
+:   A _raise_ statement terminates the function and returns an optional error message.
+
+    ![raise optional string](images/raise-railroad.svg)
+
+echo
+
+:   A _echo_ statement writes a message to the browser’s console. You can type
+    **Ctrl Shift I** to see it. Such a message can be very useful while debugging
+    a function.
+
+    ![echo string](images/echo-railroad.svg)
+
+</dl>
+
+#### startSvg
+
+A user-defined function can also operate as a draw envronment. To initiate a
+draw environement, write the following line of code into a function:
+
+```
+svg = startSvg()
+```
+
+After that line is written, all the draw environment commands are valid.
+
+## Remote modules
+
+If some Hurmet code is used repeatedly, it makes sense to write that code once
+and import it into other documents. Hurmet modules are text files that serve
+that purpose. Modules can contain functions and statements that assign literal
+values to a variable. Such a module would have text that might look like this:
+
+```
+E = 29000 'ksi'
+
+v = [4, 6, 8]
+
+function multiply(a, b)
+   return a × b
+end
+```
+
+A Hurmet document can load an entire module into one variable with a import
+statement. The following statement will import a file that contains the text above.
+
+`mod = import("https://hurmet.app/smallModule.txt") = !`
+
+After a module has been imported and loaded into a variable, its functions and
+values can be called by writing the module name and variable/function name in
+dot notation, as in:
+
+`E = mod.E = ?? psi`
+
+`n = mod.multiply(2, 4) = ?`
+
+#### Imported Parameters
+
+The Hurmet variable name `importedParameters` has a special purpose. It loads
+module values into multiple variables instead of into one variable. An example
+of such an import is:
+
+`importedParameters = import("https://hurmet.app/parent.txt") = !`
+
+That statement will render like this:
+
+<div style="font-size: 16px">
+
+¢` {:f_c′, f_c′′, f_yr, β_1, ρ_0;
+ρ_max, E_c, G_c,  E, G;
+n_c, σ_a, σ_as, μ_s, σ_p;
+p_pl, ρ_g, C_e, I_s, V_w;
+EC, k_zt, α, z_g, SC;
+S_DS, S_D1, I_E,,} = import("https://hurmet.app/parent.txt") `
+
+</div>
+
+Such a statement is handy in a big project, where you break the calculations
+into several documents. Since any big project often has several common
+variables, you want a way to keep them synchronized. Put an
+`importedParameters` statement into each of the documents and you’re good. As
+an added benefit, a reviewer can see what you are doing.
+
+**Gists**
+
+Hurmet is a web app, so it can import text files only from addresses that begin
+with `http` or `https`. An easy way to create such a file is a Github
+[Gist](https://gist.github.com/). I've written an example Gist for imported
+parameters:
+
+<div style="width: 30em; overflow-x: scroll">
+
+`https://gist.githubusercontent.com/ronkok/c6c564cf162008cccf03ab8afeb09a83/raw/ParentFileExample.txt`
+
+</div>
+
+If you create your own Gists, you'll see that the addresses of the raw files
+are very long. If you want a permalink to your file, delete the 40
+random characters after "/raw/". Github keeps a copy of every draft of your
+file and the random part after "/raw/" is the revision ID.
+
 ## Troubleshooting
 
 #### Typing lag
@@ -2152,7 +2165,7 @@ format. This is useful for collaboration.
 Say that you have written a calculation. It’s awesome and you want to share it
 so that others can use it as a template. An easy way to share work is via a
 GitHub [Gist](https://gist.github.com/ "Gist"). Then anyone can view it,
-download it, or comment on it. If it is in Markdown format, you can read thes
+download it, or comment on it. If it is in Markdown format, you can read the
 Gist right there on GitHub. Here’s an
 [example](https://gist.github.com/ronkok/7fec7d11f6fb6a031e5a0827e3531d68).
 
@@ -2300,6 +2313,7 @@ Copyright © 2020-2022 Ron Kok. Released under the [MIT License](https://opensou
 </details>
 </li>
 <li><a href="#numeral-display">Numeral Display</a></li>
+<li><a href="#drawings">Drawings</a></li>
 <li>
 <details><summary>UDFs</summary>
 <ul>
@@ -2318,11 +2332,11 @@ Copyright © 2020-2022 Ron Kok. Released under the [MIT License](https://opensou
 
 </details>
 </li>
+<li><a href="#startsvg">startSvg</a></li>
 </ul>
 </details>
 </li>
 <li><a href="#remote-modules">Modules</a></li>
-<li><a href="#drawings">Drawings</a></li>
 <li>
 <details><summary>End notes</summary>
 
