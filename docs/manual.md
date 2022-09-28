@@ -267,7 +267,7 @@ Create a cell
 
 : Hurmet calculation cells display math and perform numeric calculations. To create
   a calculation cell in  Hurmet.app, select a spot in the document, then click the
-  ![plus][] button or type **Alt c**.
+  ![C][] button or type **Alt c**.
 
   While in a cell,\
         **Enter** will close and update the cell.\
