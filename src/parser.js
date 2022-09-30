@@ -688,7 +688,7 @@ export const parse = (
           popRpnTokens(14)
           rpn += tokenSep + "applyUnit" + tokenSep + token.input.replace(/'/g, "")
         }
-        if (token.input !== "°") { tex += "\\;" }
+        if (!/^'?°'?$/.test(token.input)) { tex += "\\;" }
         tex += token.output
         okToAppend = true
         break
