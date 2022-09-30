@@ -510,6 +510,7 @@ I recommend Russ Rowlett’s [dictionary of units of measurement](http://www.ibi
 | tropical year         | 31556925.9747                  | 0       | 0        | 0  | 0  | 1  | 0  | 0  | 0 | 0  | 0 |                                  |
 | troy ounce            | 0.0311034768                   | 0       | 0        | 0  | 1  | 0  | 0  | 0  | 0 | 0  | 0 |                                  |
 | tsp                   | 0.003785411784/768             | 0       | 0        | 3  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | teaspoon                         |
+| turn                  | 6.28318530717958               | 0       | 0        | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | 2 π radians                      |
 | twip                  | 0.0254/1440                    | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | 20th of an adobe point           |
 | unit                  | 1                              | 0       | 0        | 0  | 0  | 0  | 0  | 0  | 1 | 0  | 0 |                                  |
 | vapeur                | 735.49875                      | 0       | 0        | 2  | 1  | -3 | 0  | 0  | 0 | 0  | 0 | metric hp                        |
