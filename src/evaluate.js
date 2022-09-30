@@ -1607,7 +1607,8 @@ const conditionResult = (stmt, oprnd, unitAware) => {
 
   // If unit-aware, convert result to desired result units.
   const unitInResultSpec = (stmt.factor && (stmt.factor !== 1 || stmt.gauge))
-  if ((result.dtype & dt.DATAFRAME) || stmt.resultdisplay.indexOf("!") > -1) {
+  if ((result.dtype & dt.DATAFRAME) ||
+      (typeof stmt.resultdisplay === "string" && stmt.resultdisplay.indexOf("!") > -1)) {
     stmt.unit = result.unit
   } else if (unitAware && (result.dtype & dt.RATIONAL)) {
     if (!unitInResultSpec & unitsAreCompatible(result.unit.expos, allZeros)) {

@@ -258,14 +258,14 @@ const proceedAfterFetch = (
           : clone(node.attrs)
         attrs.displayMode = node.attrs.displayMode
         const mustRedraw = attrs.dtype && attrs.dtype === dt.DRAWING &&
-                           (attrs.value.parameters.length > 0 || isCalcAll)
+          (attrs.rpn || (attrs.value.parameters.length > 0 || isCalcAll))
         if (isCalcAll || attrs.rpn || mustRedraw || (attrs.name && !(hurmetVars[attrs.name] &&
           hurmetVars[attrs.name].isFetch))) {
           if (isCalcAll) { improveQuantities(attrs, hurmetVars) }
           if (attrs.rpn || mustRedraw) {
-            attrs = attrs.dtype && attrs.dtype === dt.DRAWING
-              ? evaluateDrawing(attrs, hurmetVars, decimalFormat)
-              : evaluate(attrs, hurmetVars, decimalFormat)
+            attrs = attrs.rpn // attrs.dtype && attrs.dtype === dt.DRAWING
+              ? evaluate(attrs, hurmetVars, decimalFormat)
+              : evaluateDrawing(attrs, hurmetVars, decimalFormat)
           }
           if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, decimalFormat) }
           if (isCalcAll || attrs.rpn || mustRedraw) {
