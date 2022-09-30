@@ -258,7 +258,7 @@ const proceedAfterFetch = (
           : clone(node.attrs)
         attrs.displayMode = node.attrs.displayMode
         const mustRedraw = attrs.dtype && attrs.dtype === dt.DRAWING &&
-                           (attrs.value.draw.parameters.length > 0 || isCalcAll)
+                           (attrs.value.parameters.length > 0 || isCalcAll)
         if (isCalcAll || attrs.rpn || mustRedraw || (attrs.name && !(hurmetVars[attrs.name] &&
           hurmetVars[attrs.name].isFetch))) {
           if (isCalcAll) { improveQuantities(attrs, hurmetVars) }

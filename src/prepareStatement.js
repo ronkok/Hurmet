@@ -67,10 +67,13 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
   let dtype
   let str = ""
 
-  if (functionRegEx.test(inputStr) || drawRegEx.test(inputStr)) {
+  const isDraw = drawRegEx.test(inputStr)
+  if (functionRegEx.test(inputStr) || isDraw) {
     // This cell contains a custom function.
     let name = ""
-    if (inputStr.charAt(0) !== "d") {
+    if (isDraw) {
+      name = "draw"
+    } else {
       const posFn = inputStr.indexOf("function")
       const posParen = inputStr.indexOf("(")
       name = inputStr.slice(posFn + 8, posParen).trim()
@@ -84,9 +87,9 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
     const attrs = {
       entry: inputStr,
       name,
-      value: (isError || name === "") ? module.value : module.value[name],
+      value: (isError) ? module.value : module.value[name],
       // TODO: what to do with comma decimals?
-      dtype: isError ? dt.ERROR : name === "" ? dt.DRAWING : dt.MODULE,
+      dtype: isError ? dt.ERROR : name === "draw" ? dt.DRAWING : dt.MODULE,
       error: isError
     }
     return attrs

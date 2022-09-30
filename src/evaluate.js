@@ -1658,7 +1658,8 @@ const conditionResult = (stmt, oprnd, unitAware) => {
 }
 
 export const evaluateDrawing = (stmt, vars, decimalFormat = "1,000,000.") => {
-  const udf = stmt.value.draw
+  // eslint-disable-next-line no-prototype-builtins
+  const udf = stmt.value
   const args = [];
   for (let i = 0; i < udf.parameters.length; i++) {
     const argName = udf.parameters[i]
