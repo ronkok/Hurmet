@@ -96,7 +96,7 @@ export const findPageBreaks = (view, state, purpose, tocSchema, startLevel, endL
     destination.innerHTML = ""
     let iStart = headerExists ? 1 : 0
     let iEnd = 0
-    let pageNum = 0
+    let pageNum = 1  // Loop will increment pageNum. Odd numbers will be on recto side.
     while (iStart < numEls) {
       const top = editor.children[iStart].getBoundingClientRect().top
       // Iterate on the top level elements. Check the bottom coordinate of each.
@@ -141,7 +141,7 @@ export const findPageBreaks = (view, state, purpose, tocSchema, startLevel, endL
       if (iEnd === iStart - 1) { iEnd = numEls - 1 }
       if (purpose === forPrint) {
         // Copy the identified elements to the destination div.
-        if (headerExists && pageNum > 0) {
+        if (headerExists && pageNum > 1) {
           frag.append(header.cloneNode(true))
         }
         // Create a body div
