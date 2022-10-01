@@ -88,7 +88,8 @@ const errorMessages = Object.freeze({
     BAD_CONCAT: "Error. Unmatched dimensions.",
     BAD_KEYSTR: "Error. The key in a key:value pair must be a string.",
     BAD_APPEND: "Error. Can not append a @",
-    MAP_APPEND: "Error. Can not append. Wrong data type."
+    MAP_APPEND: "Error. Can not append. Wrong data type.",
+    BAD_J:      "Error. Do not use j for a loop index. In Hurmet, j = √(-1)"
   }
 })
 

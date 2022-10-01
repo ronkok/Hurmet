@@ -174,6 +174,7 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
     funcObj.statements.push({ name: name, rpn: rpn, stype: stype })
     if (stype === "if" || stype === "while" || stype === "for") {
       stackOfCtrls.push({ type: stype, statementNum: funcObj.statements.length - 1 })
+      if (stype === "for" && rpn.indexOf("j\u00a0") === 0) { return [errorOprnd("BAD_J")] }
     } else if (stype === "end") {
       if (stackOfCtrls.length === 0) {
         // Finished the current function.
