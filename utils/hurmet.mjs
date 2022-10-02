@@ -633,7 +633,8 @@ const errorMessages = Object.freeze({
     BAD_CONCAT: "Error. Unmatched dimensions.",
     BAD_KEYSTR: "Error. The key in a key:value pair must be a string.",
     BAD_APPEND: "Error. Can not append a @",
-    MAP_APPEND: "Error. Can not append. Wrong data type."
+    MAP_APPEND: "Error. Can not append. Wrong data type.",
+    BAD_J:      "Error. Do not use j for a loop index. In Hurmet, j = √(-1)"
   }
 });
 
@@ -1412,11 +1413,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.4828","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.5076","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.0456","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.2584","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -1425,10 +1426,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.3177","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.3401","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9565","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["6.9442","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9561","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["6.9368","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -1448,7 +1449,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.88201","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.88300","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1456,23 +1457,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["7.6567","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["7.6521","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["3.4152","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["79.0705","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["3.4759","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["79.4250","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["139.43","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["141.01","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1381.97","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1400.69","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1483,7 +1484,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["19.5708","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["19.6393","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -1513,7 +1514,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["0.9754","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["0.9748","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -1896,6 +1897,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "tropical year":["31556925.9747","1","0","0",[0,0,1,0,0,0,0,0]],
 "troy ounce":["0.0311034768","1","0","0",[0,1,0,0,0,0,0,0]],
 "tsp":["0.003785411784","768","0","0",[3,0,0,0,0,0,0,0]],
+"turn":["6.28318530717958","1","0","0",[0,0,0,0,0,0,0,0]],
 "twip":["0.0254","1440","0","0",[1,0,0,0,0,0,0,0]],
 "unit":["1","1","0","0",[0,0,0,0,0,1,0,0]],
 "vapeur":["735.49875","1","0","0",[2,1,-3,0,0,0,0,0]],
@@ -5529,7 +5531,7 @@ const parse = (
           popRpnTokens(14);
           rpn += tokenSep + "applyUnit" + tokenSep + token.input.replace(/'/g, "");
         }
-        if (token.input !== "°") { tex += "\\;"; }
+        if (!/^'?°'?$/.test(token.input)) { tex += "\\;"; }
         tex += token.output;
         okToAppend = true;
         break
@@ -6687,7 +6689,7 @@ const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat) => {
     } else if (!vars[varName] && varName === "T") {
       // Transposed matrix
       hvar = { dtype: dt.RATIONAL, resultdisplay: "\\text{T}" };
-    } else if (varName === "e" && /^^/.test(str.slice(pos + 4).trim())) {
+    } else if (varName === "e" && /^\^/.test(str.slice(pos + 3).trim())) {
       // e^x
       str = str.substring(0, pos) + "e" + str.substring(pos + matchLength);
       continue
@@ -12050,7 +12052,8 @@ const conditionResult = (stmt, oprnd, unitAware) => {
 
   // If unit-aware, convert result to desired result units.
   const unitInResultSpec = (stmt.factor && (stmt.factor !== 1 || stmt.gauge));
-  if ((result.dtype & dt.DATAFRAME) || stmt.resultdisplay.indexOf("!") > -1) {
+  if ((result.dtype & dt.DATAFRAME) ||
+      (typeof stmt.resultdisplay === "string" && stmt.resultdisplay.indexOf("!") > -1)) {
     stmt.unit = result.unit;
   } else if (unitAware && (result.dtype & dt.RATIONAL)) {
     if (!unitInResultSpec & unitsAreCompatible(result.unit.expos, allZeros)) {
@@ -12101,7 +12104,8 @@ const conditionResult = (stmt, oprnd, unitAware) => {
 };
 
 const evaluateDrawing = (stmt, vars, decimalFormat = "1,000,000.") => {
-  const udf = stmt.value.draw;
+  // eslint-disable-next-line no-prototype-builtins
+  const udf = stmt.value;
   const args = [];
   for (let i = 0; i < udf.parameters.length; i++) {
     const argName = udf.parameters[i];
@@ -12494,6 +12498,7 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
     funcObj.statements.push({ name: name, rpn: rpn, stype: stype });
     if (stype === "if" || stype === "while" || stype === "for") {
       stackOfCtrls.push({ type: stype, statementNum: funcObj.statements.length - 1 });
+      if (stype === "for" && rpn.indexOf("j\u00a0") === 0) { return [errorOprnd("BAD_J")] }
     } else if (stype === "end") {
       if (stackOfCtrls.length === 0) {
         // Finished the current function.
@@ -12621,10 +12626,13 @@ const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
   let dtype;
   let str = "";
 
-  if (functionRegEx.test(inputStr) || drawRegEx.test(inputStr)) {
+  const isDraw = drawRegEx.test(inputStr);
+  if (functionRegEx.test(inputStr) || isDraw) {
     // This cell contains a custom function.
     let name = "";
-    if (inputStr.charAt(0) !== "d") {
+    if (isDraw) {
+      name = "draw";
+    } else {
       const posFn = inputStr.indexOf("function");
       const posParen = inputStr.indexOf("(");
       name = inputStr.slice(posFn + 8, posParen).trim();
@@ -12638,9 +12646,9 @@ const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
     const attrs = {
       entry: inputStr,
       name,
-      value: (isError || name === "") ? module.value : module.value[name],
+      value: (isError) ? module.value : module.value[name],
       // TODO: what to do with comma decimals?
-      dtype: isError ? dt.ERROR : name === "" ? dt.DRAWING : dt.MODULE,
+      dtype: isError ? dt.ERROR : name === "draw" ? dt.DRAWING : dt.MODULE,
       error: isError
     };
     return attrs
@@ -13109,14 +13117,14 @@ const proceedAfterFetch = (
           : clone(node.attrs);
         attrs.displayMode = node.attrs.displayMode;
         const mustRedraw = attrs.dtype && attrs.dtype === dt.DRAWING &&
-                           (attrs.value.draw.parameters.length > 0 || isCalcAll);
+          (attrs.rpn || (attrs.value.parameters.length > 0 || isCalcAll));
         if (isCalcAll || attrs.rpn || mustRedraw || (attrs.name && !(hurmetVars[attrs.name] &&
           hurmetVars[attrs.name].isFetch))) {
           if (isCalcAll) { improveQuantities(attrs, hurmetVars); }
           if (attrs.rpn || mustRedraw) {
-            attrs = attrs.dtype && attrs.dtype === dt.DRAWING
-              ? evaluateDrawing(attrs, hurmetVars, decimalFormat)
-              : evaluate(attrs, hurmetVars, decimalFormat);
+            attrs = attrs.rpn // attrs.dtype && attrs.dtype === dt.DRAWING
+              ? evaluate(attrs, hurmetVars, decimalFormat)
+              : evaluateDrawing(attrs, hurmetVars, decimalFormat);
           }
           if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, decimalFormat); }
           if (isCalcAll || attrs.rpn || mustRedraw) {
