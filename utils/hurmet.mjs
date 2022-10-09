@@ -1,6 +1,6 @@
 // autocorrect.js
 
-const autoCorrectRegEx = /([!?:<>\-~/_]=| \.|~~|\+-|-\+|<-->|<->|<>|<--|<-|-->|->|=>|-:|\^\^|\|\||\/\/\/|\b(bar|hat|vec|tilde|dot|ddot|ul)|\b(bb|bbb|cc|ff|ss) [A-Za-z]|\\?[A-Za-z]{2,}|\\ |\\o|root [234]|<<|>>|\^-?[0-9]+|\|\|\||\/_|''|""|00)\s$/;
+const autoCorrectRegEx = /([!?:<>\-~/_]=| \.|~~|\+-|-\+|<-->|<->|<>|<--|<-|-->|->|=>|-:|\^\^|\|\||\/\/\/|\b(bar|hat|vec|tilde|dot|ddot|ul)|\b(bb|bbb|cc|ff|ss) [A-Za-z]|\\?[A-Za-z]{2,}|\\c|\\ |\\o|root [234]|<<|>>|\^-?[0-9]+|\|\|\||\/_|''|""|00)\s$/;
 
 const accents = {
   acute: "\u0301",
@@ -80,6 +80,7 @@ const autoCorrections = {
   not: "¬",
   "-:": "÷",
   "\\ ": "˽",  // space
+  "\\c": "¢",
   "\\cdots": "\u22ef",
   "\\vdots": "\u22ee",
   "\\ddots": "\u22f1",
@@ -1413,11 +1414,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.5076","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.5266","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.2584","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.1075","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -1426,10 +1427,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.3401","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.3437","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9561","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["6.9368","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9700","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["6.9715","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -1449,7 +1450,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.88300","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.87383","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1457,23 +1458,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["7.6521","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["7.6906","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["3.4759","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["79.4250","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["3.4477","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["80.5460","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["141.01","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["141.92","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1400.69","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1381.42","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1484,7 +1485,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["19.6393","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["19.6430","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -1514,7 +1515,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["0.9748","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["0.9797","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -8842,7 +8843,7 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
  *
  * ## Extensions
  *
- * 1. Hurmet inline calculation is delimited ¢`…`.
+ * 1. Hurmet inline calculation is delimited ¢…¢.
  *    Hurmet display calculation is fenced ¢¢\n … \n¢¢.
  * 2. LaTeX inline math is delimited $…$. $ and \\ are escaped \$ & \\\\.
  *    LaTeX display math is fenced  $$\n … \n$$.
@@ -9284,10 +9285,12 @@ const parseTextMark = (capture, state, mark) => {
   const text = parseInline(capture, state);
   if (Array.isArray(text) && text.length === 0) { return text }
   consolidate(text);
-  if (text[0].marks) {
-    text[0].marks.push({ type: mark });
-  } else {
-    text[0].marks = [{ type: mark }];
+  for (const range of text) {
+    if (range.marks) {
+      range.marks.push({ type: mark });
+    } else {
+      range.marks = [{ type: mark }];
+    }
   }
   return text
 };
@@ -9461,6 +9464,13 @@ rules.set("def", {
     };
   }
 });
+rules.set("toc", {
+  isLeaf: true,
+  match: blockRegex(/^{\.toc start=(\d) end=(\d)}\n/),
+  parse: function(capture, state) {
+    return { attrs: { start: Number(capture[1]), end: Number(capture[2]), body: [] } }
+  }
+});
 rules.set("pipeTable", {
   isLeaf: false,
   match: blockRegex(TABLES.PIPE_TABLE_REGEX),
@@ -9511,16 +9521,16 @@ rules.set("tableSeparator", {
 });
 rules.set("calculation", {
   isLeaf: true,
-  match: anyScopeRegex(/^(?:¢(`+)([\s\S]*?[^`])\1(?!`)|¢¢\n((?:\\[\s\S]|[^\\])+?)\n¢¢)/),
+  match: anyScopeRegex(/^(?:¢((?:\\[\s\S]|[^\\])+?)¢|¢¢\n?((?:\\[\s\S]|[^\\])+?)\n?¢¢)/),
   parse: function(capture, state) {
-    if (capture[2]) {
-      let entry = capture[2].trim();
-      if (!/^function/.test(entry) && entry.indexOf("``") === -1) {
+    if (capture[1]) {
+      let entry = capture[1].trim();
+      if (!/^(?:function|draw\()/.test(entry) && entry.indexOf("``") === -1) {
         entry = entry.replace(/\n/g, " ");
       }
       return { content: "", attrs: { entry } }
     } else {
-      const entry = capture[3].trim();
+      const entry = capture[2].trim();
       return { content: "", attrs: { entry, displayMode: true } }
     }
   }
@@ -9771,9 +9781,36 @@ const consolidate = arr => {
   }
 };
 
+const populateTOC = ast => {
+  let tocNode;
+  for (const node of ast) {
+    if (node.type === "toc") { tocNode = node; break }
+  }
+  if (!tocNode) { return }
+  const start = tocNode.attrs.start;
+  const end = tocNode.attrs.end;
+  for (const node of ast) {
+    if (node.type === "heading") {
+      const level = node.attrs.level;
+      if (start <= level && level <= end) {
+        const tocEntry = [];
+        let str = "";
+        for (const range of node.content) { str += range.text; }
+        tocEntry.push(str);
+        tocEntry.push(level);
+        tocEntry.push(0); // page number unknown
+        tocEntry.push(0); // element number unknown
+        tocNode.attrs.body.push(tocEntry);
+      }
+    }
+  }
+};
+
 const md2ast = (md, inHtml = false) => {
   const ast = parse$1(md, { inline: false, inHtml });
+  if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") { ast.shift(); }
   consolidate(ast);
+  populateTOC(ast);
   return ast
 };
 
