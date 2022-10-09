@@ -15,7 +15,6 @@ hurmet.calculate(`name = "James"`, hurmetVars)
 hurmet.calculate(`s = "abcde"`, hurmetVars)
 hurmet.calculate(`𝐕 = [1, 2, 3, 4, 5]`, hurmetVars)
 hurmet.calculate(`𝐌 = (1, 2, 3; 4, 5, 6; 7, 8, 9)`, hurmetVars)
-hurmet.calculate(`D = {"w": 31, "h": 9.13}`, hurmetVars)
 const df = "``" + `name,w,area\n,in,in²\nA,4,10\nB,6,22` + "``"
 hurmet.calculate(`DF =` + df, hurmetVars)
 hurmet.calculate(`A = 8`, hurmetVars)
