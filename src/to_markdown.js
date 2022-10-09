@@ -106,7 +106,7 @@ const hurmetNodes =  {
     state.closeBlock(node)
   },
   toc(state, node) {
-    state.write("\n\n") // No support, but at least avoid a crash.
+    state.write(`{.toc start=${node.attrs.start} end=${node.attrs.end}}\n\n`)
   },
   horizontal_rule(state, node) {
     state.write(node.attrs.markup || "------")
@@ -183,8 +183,7 @@ const hurmetNodes =  {
       if (node.attrs.displayMode) {
         state.write("¢¢\n" + entry + "\n¢¢")
       } else {
-        const backticks = "`".repeat(maxBacktickCount(entry) + 1) 
-        state.write("¢" + backticks + " " + entry + " " + backticks)
+        state.write("¢ " + entry + " ¢")
       }
     }
   }
@@ -266,7 +265,7 @@ const blockRegEx = /^(?:[>*+-] |#+ |\d+[.)] |[A-B]\. |\-\-\-|```|[iCFHhITWADE]> 
 function limitLineLength(str, prevLength, delim, limit) {
   let graf = str.slice(prevLength)
   if (graf.length <= limit) { return str }
-  if (/``|¢` (?:function|draw\()/.test(graf)) { return str }
+  if (/``|¢ *(?:function|draw\()/.test(graf)) { return str }
 
   const leading = "\n" + delim
   let result = ""
@@ -666,7 +665,7 @@ export class MarkdownSerializerState {
   // content. If `startOfLine` is true, also escape characters that
   // has special meaning only at the start of the line.
   esc(str, startOfLine) {
-    str = str.replace(/[`\\¢\$\[\]]/g, "\\$&")
+    str = str.replace(/[`\\~¢\$\[\]]/g, "\\$&")
     str = str.replace(/(\*\*|\$\$|¢¢|~~)/g, "\\$1")
     if (startOfLine) {
       str = str.replace(/^(\#+|:|\-|\*|\+) /, "\\$1").replace(/^(\d+)\./, "$1\\.")

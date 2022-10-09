@@ -20,7 +20,7 @@
  *
  * ## Extensions
  *
- * 1. Hurmet inline calculation is delimited ¢`…`.
+ * 1. Hurmet inline calculation is delimited ¢…¢.
  *    Hurmet display calculation is fenced ¢¢\n … \n¢¢.
  * 2. LaTeX inline math is delimited $…$. $ and \\ are escaped \$ & \\\\.
  *    LaTeX display math is fenced  $$\n … \n$$.
@@ -45,8 +45,10 @@
  *      1. →  1. 2. 3.  etc.
  *      A. →  A. B. C.  etc. (future)
  *      a) →  (a) (b) (c)  etc. (future)
- * 10. Definition lists, per Pandoc.  (future)
- * 11. Blurbs set an attribute on a block element, as in Markua.
+ * 10. Table of Contents
+ *     {.toc start=N end=N}
+ * 11. Definition lists, per Pandoc.  (future)
+ * 12. Blurbs set an attribute on a block element, as in Markua.
  *     Blurbs are denoted by a symbol in the left margin.
  *     Subsequent indented text blocks are children of the blurb.
  *     Blurb symbols:
@@ -57,11 +59,11 @@
  *       W> Warning admonition (future)
  *       T> Tip admonition (future)
  *       c> Comment admonition (future)
- * 12. [^1] is a reference to a footnote. (future)
+ * 13. [^1] is a reference to a footnote. (future)
  *     [^1]: The body of the footnote is deferred, similar to reference links.
- * 13. [#1] is a reference to a citation. (future)
+ * 14. [#1] is a reference to a citation. (future)
  *     [#1]: The body of the citation is deferred, similar to reference links.
- * 14. Line blocks begin with "| ", as per Pandoc. (future)
+ * 15. Line blocks begin with "| ", as per Pandoc. (future)
  *
  * hurmetMark.js copyright (c) 2021, 2022 Ron Kok
  *
@@ -462,10 +464,12 @@ const parseTextMark = (capture, state, mark) => {
   const text = parseInline(capture, state)
   if (Array.isArray(text) && text.length === 0) { return text }
   consolidate(text)
-  if (text[0].marks) {
-    text[0].marks.push({ type: mark })
-  } else {
-    text[0].marks = [{ type: mark }]
+  for (const range of text) {
+    if (range.marks) {
+      range.marks.push({ type: mark })
+    } else {
+      range.marks = [{ type: mark }]
+    }
   }
   return text
 }
@@ -639,6 +643,13 @@ rules.set("def", {
     };
   }
 });
+rules.set("toc", {
+  isLeaf: true,
+  match: blockRegex(/^{\.toc start=(\d) end=(\d)}\n/),
+  parse: function(capture, state) {
+    return { attrs: { start: Number(capture[1]), end: Number(capture[2]), body: [] } }
+  }
+});
 rules.set("pipeTable", {
   isLeaf: false,
   match: blockRegex(TABLES.PIPE_TABLE_REGEX),
@@ -689,16 +700,16 @@ rules.set("tableSeparator", {
 });
 rules.set("calculation", {
   isLeaf: true,
-  match: anyScopeRegex(/^(?:¢(`+)([\s\S]*?[^`])\1(?!`)|¢¢\n((?:\\[\s\S]|[^\\])+?)\n¢¢)/),
+  match: anyScopeRegex(/^(?:¢((?:\\[\s\S]|[^\\])+?)¢|¢¢\n?((?:\\[\s\S]|[^\\])+?)\n?¢¢)/),
   parse: function(capture, state) {
-    if (capture[2]) {
-      let entry = capture[2].trim()
-      if (!/^function/.test(entry) && entry.indexOf("``") === -1) {
+    if (capture[1]) {
+      let entry = capture[1].trim()
+      if (!/^(?:function|draw\()/.test(entry) && entry.indexOf("``") === -1) {
         entry = entry.replace(/\n/g, " ")
       }
       return { content: "", attrs: { entry } }
     } else {
-      const entry = capture[3].trim()
+      const entry = capture[2].trim()
       return { content: "", attrs: { entry, displayMode: true } }
     }
   }
@@ -949,8 +960,35 @@ const consolidate = arr => {
   }
 }
 
+const populateTOC = ast => {
+  let tocNode
+  for (const node of ast) {
+    if (node.type === "toc") { tocNode = node; break }
+  }
+  if (!tocNode) { return }
+  const start = tocNode.attrs.start
+  const end = tocNode.attrs.end
+  for (const node of ast) {
+    if (node.type === "heading") {
+      const level = node.attrs.level
+      if (start <= level && level <= end) {
+        const tocEntry = [];
+        let str = ""
+        for (const range of node.content) { str += range.text }
+        tocEntry.push(str)
+        tocEntry.push(level)
+        tocEntry.push(0) // page number unknown
+        tocEntry.push(0) // element number unknown
+        tocNode.attrs.body.push(tocEntry)
+      }
+    }
+  }
+}
+
 export const md2ast = (md, inHtml = false) => {
   const ast = parse(md, { inline: false, inHtml })
+  if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") { ast.shift() }
   consolidate(ast)
+  populateTOC(ast)
   return ast
 }
