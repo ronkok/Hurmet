@@ -48,7 +48,12 @@ const handleContents = (view, schema, str, format) => {
 }
 
 async function getFile(view, schema, format) {
-  const [fileHandle] = await window.showOpenFilePicker()
+  const pickerOpts = {
+    types: [{ description: 'Text', accept: { 'text/*': ['.hurmet'] } }],
+    excludeAcceptAllOption: true,
+    multiple: false
+  };
+  const [fileHandle] = await window.showOpenFilePicker(pickerOpts)
   const file = await fileHandle.getFile()
   const contents = await file.text()
   // doc.attrs is not updated by a ProseMirror transaction. Update fileHandle separately.
