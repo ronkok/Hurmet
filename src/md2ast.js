@@ -716,13 +716,13 @@ rules.set("calculation", {
 });
 rules.set("tex", {
   isLeaf: true,
-  match: anyScopeRegex(/^(?:\$((?:\\[\s\S]|[^\\])+?)\$|\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$)/),
+  match: anyScopeRegex(/^(?:\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$|\$((?:\\[\s\S]|[^\\])+?)\$)/),
   parse: function(capture, state) {
-    if (capture[1]) {
-      const tex = capture[1].trim().replace(/\n/g, " ").replace(/\\\\\\\\/g, "\\\\").replace(/\\\$/g, "$")
+    if (capture[2]) {
+      const tex = capture[2].trim().replace(/\n/g, " ").replace(/\\\\\\\\/g, "\\\\").replace(/\\\$/g, "$")
       return { content: "", attrs: { tex } }
     } else {
-      const tex = capture[2].trim().replace(/\\\\\\\\/g, "\\\\").replace(/\\\$/g, "$")
+      const tex = capture[1].trim().replace(/\\\\\\\\/g, "\\\\").replace(/\\\$/g, "$")
       return { content: "", attrs: { tex, displayMode: true } }
     }
   }

@@ -5,7 +5,7 @@ const hurmetMark = require("./hurmetMark.cjs")
 // Start by translating the reference manual from Markdown to HTML.
 let manual = fs.readFileSync('docs/manual.md').toString('utf8')
 // convert Markdown to HTML
-manual =  hurmetMark.hmd.md2html(manual, true)
+manual =  hurmetMark.md2html(manual, true)
 fs.writeFileSync('site/manual.html', manual)
 manual = manual.replace("../demo.min.mjs", "demo.mjs")
 fs.writeFileSync('preview/manual.html', manual)
@@ -16,7 +16,7 @@ let units = fs.readFileSync('docs/unit-definitions.md').toString('utf8')
 units = units.replace("| L  | M  | Ti | E  | Te | # | LI | $ |",
   "| length | mass | time | electric<br>current | temp | amount | luminous<br>intensity " +
   "| money |")
-units =  hurmetMark.hmd.md2html(units, true)
+units =  hurmetMark.md2html(units, true)
 
 // In the unit-definition file, replace factor fractions with stacked fractions.
 const fractionRegEx = /<td>([\d.]+)\/([\d.]+)<\/td>/g

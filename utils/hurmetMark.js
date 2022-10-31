@@ -192,7 +192,7 @@ const md2html = (md, inHtml = false) => {
   return output(ast)
 }
 
-export const hmd = {
+export default {
   md2ast,
   md2html
 }

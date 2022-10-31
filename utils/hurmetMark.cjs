@@ -1,7 +1,5 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', { value: true });
-
 // autocorrect.js
 
 const autoCorrectRegEx = /([!?:<>\-~/_]=| \.|~~|\+-|-\+|<-->|<->|<>|<--|<-|-->|->|=>|-:|\^\^|\|\||\/\/\/|\b(bar|hat|vec|tilde|dot|ddot|ul)|\b(bb|bbb|cc|ff|ss) [A-Za-z]|\\?[A-Za-z]{2,}|\\c|\\ |\\o|root [234]|<<|>>|\^-?[0-9]+|\|\|\||\/_|''|""|00)\s$/;
@@ -13394,8 +13392,10 @@ const hurmet = Object.freeze({
  *      1. →  1. 2. 3.  etc.
  *      A. →  A. B. C.  etc. (future)
  *      a) →  (a) (b) (c)  etc. (future)
- * 10. Definition lists, per Pandoc.  (future)
- * 11. Blurbs set an attribute on a block element, as in Markua.
+ * 10. Table of Contents
+ *     {.toc start=N end=N}
+ * 11. Definition lists, per Pandoc.  (future)
+ * 12. Blurbs set an attribute on a block element, as in Markua.
  *     Blurbs are denoted by a symbol in the left margin.
  *     Subsequent indented text blocks are children of the blurb.
  *     Blurb symbols:
@@ -13406,11 +13406,11 @@ const hurmet = Object.freeze({
  *       W> Warning admonition (future)
  *       T> Tip admonition (future)
  *       c> Comment admonition (future)
- * 12. [^1] is a reference to a footnote. (future)
+ * 13. [^1] is a reference to a footnote. (future)
  *     [^1]: The body of the footnote is deferred, similar to reference links.
- * 13. [#1] is a reference to a citation. (future)
+ * 14. [#1] is a reference to a citation. (future)
  *     [#1]: The body of the citation is deferred, similar to reference links.
- * 14. Line blocks begin with "| ", as per Pandoc. (future)
+ * 15. Line blocks begin with "| ", as per Pandoc. (future)
  *
  * hurmetMark.js copyright (c) 2021, 2022 Ron Kok
  *
@@ -14063,13 +14063,13 @@ rules$1.set("calculation", {
 });
 rules$1.set("tex", {
   isLeaf: true,
-  match: anyScopeRegex$1(/^(?:\$((?:\\[\s\S]|[^\\])+?)\$|\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$)/),
+  match: anyScopeRegex$1(/^(?:\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$|\$((?:\\[\s\S]|[^\\])+?)\$)/),
   parse: function(capture, state) {
-    if (capture[1]) {
-      const tex = capture[1].trim().replace(/\n/g, " ").replace(/\\\\\\\\/g, "\\\\").replace(/\\\$/g, "$");
+    if (capture[2]) {
+      const tex = capture[2].trim().replace(/\n/g, " ").replace(/\\\\\\\\/g, "\\\\").replace(/\\\$/g, "$");
       return { content: "", attrs: { tex } }
     } else {
-      const tex = capture[2].trim().replace(/\\\\\\\\/g, "\\\\").replace(/\\\$/g, "$");
+      const tex = capture[1].trim().replace(/\\\\\\\\/g, "\\\\").replace(/\\\$/g, "$");
       return { content: "", attrs: { tex, displayMode: true } }
     }
   }
@@ -14531,9 +14531,9 @@ const md2html = (md, inHtml = false) => {
   return output(ast)
 };
 
-const hmd = {
+var hurmetMark = {
   md2ast: md2ast$1,
   md2html
 };
 
-exports.hmd = hmd;
+module.exports = hurmetMark;
