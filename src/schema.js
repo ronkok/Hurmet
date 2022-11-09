@@ -7,6 +7,7 @@ import {dt} from "./constants"
 import { Draw } from "./draw"
 import { katex } from "./katex.mjs"
 import { temml } from "./temml.mjs"
+import { renderMD } from "./renderMD"
 
 // Helpers for creating a schema that supports tables.
 
@@ -381,6 +382,30 @@ export const nodes = {
       katex.render(tex, dom, { displayMode: node.attrs.displayMode, strict: false,
         output: "html", throwOnError: false, minRuleThickness: 0.06 })
       return dom
+    }
+  },
+
+  comment: {
+    atom: true,
+    marks: "",
+    group: "inline",
+    inline: true,
+    attrs: { comment: { default: "" } },
+    parseDOM: [{ tag: "span.hurmet-comment", getAttrs(dom) {
+      return { comment: dom.getAttribute('data-comment') }
+    }}],
+    toDOM(node) {
+      const container = document.createElement('span')
+      container.className = "hurmet-comment"
+      container.dataset.comment = node.attrs.comment
+      const triangle = document.createElement('span')
+      triangle.className = "left-triangle"
+      container.appendChild(triangle)
+      const dom = document.createElement('span')
+      dom.className = "comment-payload"
+      dom.appendChild(renderMD(node.attrs.comment))
+      container.appendChild(dom)
+      return container
     }
   }
 

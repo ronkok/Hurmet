@@ -173,6 +173,9 @@ const hurmetNodes =  {
     const tex = node.attrs.tex.trim()
     writeTex(state, node.displayMode, tex)
   },
+  comment(state, node) {
+    state.write(`©${node.attrs.comment.trim()}©`)
+  },
   calculation(state, node) {
     const entry = node.attrs.entry.trim().replace(/\n(?: *\n)+/g, "\n").replace(/\n/gm, "\n" + state.delim)
     if (state.isGFM) {

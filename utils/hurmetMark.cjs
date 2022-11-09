@@ -8851,12 +8851,13 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
  *    LaTeX display math is fenced  $$\n … \n$$.
  * 3. ~subscript~
  * 4. ~~strikethrough~~
- * 5. Pipe tables as per Github Flavored Markdown (GFM).
- * 6. Grid tables as per reStructuredText, with two exceptions:
+ * 5. ©comment©
+ * 6. Pipe tables as per Github Flavored Markdown (GFM).
+ * 7. Grid tables as per reStructuredText, with two exceptions:
  *    a. The top border contains ":" characters to indicate column justtification.
  *    b. Top & left borders contain "+" characters at border locations, even where
  *       a merged cell prevents a border from extending to the tables outer edge.
- * 7. Implicit reference links [title][] and implicit reference images ![alt][]
+ * 8. Implicit reference links [title][] and implicit reference images ![alt][]
  *    ⋮
  *    [alt]: path
  *    Reference images can have captions and directives. Format is:
@@ -8864,14 +8865,16 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
  *      ⋮
  *    [ref]: filepath
  *    {.class #id width=number}
- * 8. Table directives. They are placed on the line after the table. The format is:
+ * 9. Table directives. They are placed on the line after the table. The format is:
  *    {.class #id width=num widths="num1 num2 …"}
- * 9. Lists that allow the user to pick list ordering.
- *      1. →  1. 2. 3.  etc.
- *      A. →  A. B. C.  etc. (future)
- *      a) →  (a) (b) (c)  etc. (future)
- * 10. Definition lists, per Pandoc.  (future)
- * 11. Blurbs set an attribute on a block element, as in Markua.
+ * 10. Lists that allow the user to pick list ordering.
+ *       1. →  1. 2. 3.  etc.
+ *       A. →  A. B. C.  etc. (future)
+ *       a) →  (a) (b) (c)  etc. (future)
+ * 11. Table of Contents
+ *     {.toc start=N end=N}
+ * 12. Definition lists, per Pandoc.  (future)
+ * 13. Blurbs set an attribute on a block element, as in Markua.
  *     Blurbs are denoted by a symbol in the left margin.
  *     Subsequent indented text blocks are children of the blurb.
  *     Blurb symbols:
@@ -8882,11 +8885,11 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
  *       W> Warning admonition (future)
  *       T> Tip admonition (future)
  *       c> Comment admonition (future)
- * 12. [^1] is a reference to a footnote. (future)
+ * 14. [^1] is a reference to a footnote. (future)
  *     [^1]: The body of the footnote is deferred, similar to reference links.
- * 13. [#1] is a reference to a citation. (future)
+ * 15. [#1] is a reference to a citation. (future)
  *     [#1]: The body of the citation is deferred, similar to reference links.
- * 14. Line blocks begin with "| ", as per Pandoc. (future)
+ * 16. Line blocks begin with "| ", as per Pandoc. (future)
  *
  * hurmetMark.js copyright (c) 2021, 2022 Ron Kok
  *
@@ -9539,15 +9542,22 @@ rules.set("calculation", {
 });
 rules.set("tex", {
   isLeaf: true,
-  match: anyScopeRegex(/^(?:\$((?:\\[\s\S]|[^\\])+?)\$|\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$)/),
+  match: anyScopeRegex(/^(?:\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$|\$((?:\\[\s\S]|[^\\])+?)\$)/),
   parse: function(capture, state) {
-    if (capture[1]) {
-      const tex = capture[1].trim().replace(/\n/g, " ").replace(/\\\\\\\\/g, "\\\\").replace(/\\\$/g, "$");
+    if (capture[2]) {
+      const tex = capture[2].trim().replace(/\n/g, " ").replace(/\\\\\\\\/g, "\\\\").replace(/\\\$/g, "$");
       return { content: "", attrs: { tex } }
     } else {
-      const tex = capture[2].trim().replace(/\\\\\\\\/g, "\\\\").replace(/\\\$/g, "$");
+      const tex = capture[1].trim().replace(/\\\\\\\\/g, "\\\\").replace(/\\\$/g, "$");
       return { content: "", attrs: { tex, displayMode: true } }
     }
+  }
+});
+rules.set("comment", {
+  isLeaf: true,
+  match: anyScopeRegex(/^©((?:\\[\s\S]|[^\\])+?)©/),
+  parse: function(capture, state) {
+    return { content: "", attrs: { comment: capture[1] } }
   }
 });
 rules.set("link", {
@@ -13373,12 +13383,13 @@ const hurmet = Object.freeze({
  *    LaTeX display math is fenced  $$\n … \n$$.
  * 3. ~subscript~
  * 4. ~~strikethrough~~
- * 5. Pipe tables as per Github Flavored Markdown (GFM).
- * 6. Grid tables as per reStructuredText, with two exceptions:
+ * 5. ©comment©
+ * 6. Pipe tables as per Github Flavored Markdown (GFM).
+ * 7. Grid tables as per reStructuredText, with two exceptions:
  *    a. The top border contains ":" characters to indicate column justtification.
  *    b. Top & left borders contain "+" characters at border locations, even where
  *       a merged cell prevents a border from extending to the tables outer edge.
- * 7. Implicit reference links [title][] and implicit reference images ![alt][]
+ * 8. Implicit reference links [title][] and implicit reference images ![alt][]
  *    ⋮
  *    [alt]: path
  *    Reference images can have captions and directives. Format is:
@@ -13386,16 +13397,16 @@ const hurmet = Object.freeze({
  *      ⋮
  *    [ref]: filepath
  *    {.class #id width=number}
- * 8. Table directives. They are placed on the line after the table. The format is:
+ * 9. Table directives. They are placed on the line after the table. The format is:
  *    {.class #id width=num widths="num1 num2 …"}
- * 9. Lists that allow the user to pick list ordering.
- *      1. →  1. 2. 3.  etc.
- *      A. →  A. B. C.  etc. (future)
- *      a) →  (a) (b) (c)  etc. (future)
- * 10. Table of Contents
+ * 10. Lists that allow the user to pick list ordering.
+ *       1. →  1. 2. 3.  etc.
+ *       A. →  A. B. C.  etc. (future)
+ *       a) →  (a) (b) (c)  etc. (future)
+ * 11. Table of Contents
  *     {.toc start=N end=N}
- * 11. Definition lists, per Pandoc.  (future)
- * 12. Blurbs set an attribute on a block element, as in Markua.
+ * 12. Definition lists, per Pandoc.  (future)
+ * 13. Blurbs set an attribute on a block element, as in Markua.
  *     Blurbs are denoted by a symbol in the left margin.
  *     Subsequent indented text blocks are children of the blurb.
  *     Blurb symbols:
@@ -13406,11 +13417,11 @@ const hurmet = Object.freeze({
  *       W> Warning admonition (future)
  *       T> Tip admonition (future)
  *       c> Comment admonition (future)
- * 13. [^1] is a reference to a footnote. (future)
+ * 14. [^1] is a reference to a footnote. (future)
  *     [^1]: The body of the footnote is deferred, similar to reference links.
- * 14. [#1] is a reference to a citation. (future)
+ * 15. [#1] is a reference to a citation. (future)
  *     [#1]: The body of the citation is deferred, similar to reference links.
- * 15. Line blocks begin with "| ", as per Pandoc. (future)
+ * 16. Line blocks begin with "| ", as per Pandoc. (future)
  *
  * hurmetMark.js copyright (c) 2021, 2022 Ron Kok
  *
@@ -14072,6 +14083,13 @@ rules$1.set("tex", {
       const tex = capture[1].trim().replace(/\\\\\\\\/g, "\\\\").replace(/\\\$/g, "$");
       return { content: "", attrs: { tex, displayMode: true } }
     }
+  }
+});
+rules$1.set("comment", {
+  isLeaf: true,
+  match: inlineRegex$1(/^©((?:\\[\s\S]|[^\\])+?)©/),
+  parse: function(capture, state) {
+    return { content: "", attrs: { comment: capture[1] } }
   }
 });
 rules$1.set("link", {

@@ -90,6 +90,11 @@ const hurmetIcons = {
     height: 16,
     path: "M14.8 12.3c.9.2 0 1.1-.4 1.4-.7.6-1.4 1-2.2 1.5-1.8.8-3.8 1-5.8.5a7 7 0 0 1-4.3-2.9 8 8 0 0 1-1.2-5c-.1-2.2.8-4.6 2.6-6.1A8 8 0 0 1 8 0a6 6 0 0 1 2.7.4c.8.4 1.8.6 2.7.6.5-.2.4-1.4 1.1-.9.2.4 0 .8.1 1.1v3.7c-.4.8-1-.3-1.1-.8A6.3 6.3 0 0 0 9.6 1c-1-.2-2.3-.1-3 .7-1.4 1.4-1.7 3.4-1.9 5.2-.1 2.1.1 4.3 1 6.1.7 1.2 2 2 3.3 1.9 2 0 4-1 5.5-2.5l.3-.1ZM5.5 1.7c.4-.3.3-.5-.1-.2-1.5.7-2.7 1.9-3.3 3.4a8.5 8.5 0 0 0-.2 5.3 6 6 0 0 0 3.2 4.2c.4.2 1.3.7.7 0-1.2-1.2-1.6-3-1.8-4.6V6c.3-1.5.6-3 1.5-4.2Zm8 1c.2.3.4.3.3 0v-1c-.3.2-.7 0-1 .1.1.4.4.6.7.9z"
   },
+  comment: {
+    width: 1024,
+    height: 1024,
+    path: "M512 219q-116 0-218 39t-161 107-59 145q0 64 40 122t115 100l49 28-15 54q-13 52-40 98 86-36 157-97l24-21 32 3q39 4 74 4 116 0 218-39t161-107 59-145-59-145-161-107-218-39zM1024 512q0 99-68 183t-186 133-257 48q-40 0-82-4-113 100-262 138-28 8-65 12h-2q-8 0-15-6t-9-15v-0q-1-2-0-6t1-5 2-5l3-5t4-4 4-5q4-4 17-19t19-21 17-22 18-29 15-33 14-43q-89-50-141-125t-51-160q0-99 68-183t186-133 257-48 257 48 186 133 68 183z"
+  },
   table: {
     width: 24,
     height: 24,
@@ -354,6 +359,30 @@ const pruneHurmet = node => {
   return node
 }
 
+export function deleteComments(state, dispatch) {
+  return new MenuItem({
+    title: "Delete all comments",
+    label: "Delete all comments",
+    enable() {
+      return true
+    },
+    run(state, dispatch) {
+      // Traverse the document tree and locate all comment nodes
+      const positions = []
+      state.doc.nodesBetween(0, state.doc.content.size, function(node, pos) {
+        if (node.type.name === "comment") { positions.push(pos) }
+      })
+      // Delete the comments
+      const tr = state.tr
+      for (let i = positions.length - 1; i >=0; i--) {
+        const pos = positions[i];
+        tr.delete(pos, pos + 1)
+      }
+      dispatch(tr)
+    }
+  })
+}
+
 async function writeFile(fileHandle, contents) {
   // Create a FileSystemWritableFileStream to write to.
   const writable = await fileHandle.createWritable();
@@ -505,6 +534,35 @@ function insertImage(nodeType) {
   })
 }
 
+function insertComment(nodeType) {
+  return new MenuItem({
+    title: "Insert comment",
+    icon: hurmetIcons.comment,
+    enable(state) {
+      return canInsert(state, nodeType)
+    },
+    run(state, _, view) {
+      let attrs = null
+      if (state.selection instanceof NodeSelection && state.selection.node.type.name == "comment")
+        attrs = state.selection.node.attrs
+      openPrompt({
+        title: "Insert comment",
+        fields: {
+          comment: new TextAreaField({ label: "Enter your comment", required: true, value: attrs && attrs.comment }),
+        },
+        callback(attrs) {
+          const pos = view.state.selection.from
+          const endPos = state.selection instanceof NodeSelection && state.selection.node.type.name == "comment"
+            ? pos + 1
+            : pos
+          view.dispatch(view.state.tr.replaceWith(pos, endPos, nodeType.createAndFill(attrs)))
+          view.focus()
+        }
+      })
+    }
+  })
+}
+
 function insertToC(nodeType) {
   // Table of Contents
   return new MenuItem({
@@ -554,7 +612,7 @@ export function insertMath(state, view, encoding) {
   const tr = view.state.tr
   const pos = tr.selection.from
 
-  // Check f the cell should be type set as display mode.
+  // Check if the cell should be type set as display mode.
   const parent = state.doc.resolve(pos).parent
   if (parent.type.name === "centered_paragraph") { attrs.displayMode = true }
 
@@ -910,6 +968,7 @@ export function buildMenuItems(schema) {
 
   r.toggleDraftMode = toggleDraftMode()
   r.recalcAll = reCalcAll(schema)
+  r.deleteComments = deleteComments()
   r.print = print()
 
   if ((type = schema.marks.strong))
@@ -950,6 +1009,7 @@ export function buildMenuItems(schema) {
   if ((type = schema.nodes.toc)) r.toc = insertToC(type)
   if ((type = schema.nodes.calculation)) r.insertCalclation = mathMenuItem(type, "calculation")
   if ((type = schema.nodes.tex)) r.insertTeX = mathMenuItem(type, "tex")
+  if ((type = schema.nodes.comment)) r.insertComment = insertComment(type)
 
   if ((type = schema.nodes.bullet_list))
     r.wrapBulletList = wrapListItem(type, {
@@ -1093,6 +1153,7 @@ export function buildMenuItems(schema) {
     r.exportMarkdown,
     r.exportGFM,
     r.importMarkdownFile,
+    r.deleteComments,
     r.pagesize,
     r.print
   ],
@@ -1117,7 +1178,16 @@ export function buildMenuItems(schema) {
     r.toggleHighlight
   ]]
 
-  r.insertMenu = [[r.toggleLink, r.insertHorizontalRule, r.imageUpload, r.imageLink, r.toc, r.insertCalclation, r.insertTeX]]
+  r.insertMenu = [[
+    r.toggleLink,
+    r.insertHorizontalRule,
+    r.imageUpload,
+    r.imageLink,
+    r.toc,
+    r.insertCalclation,
+    r.insertTeX,
+    r.insertComment
+  ]]
 
   r.typeMenu = [cut([
       r.makeParagraph,

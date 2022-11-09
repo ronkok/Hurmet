@@ -56,8 +56,9 @@ document range by selecting text, then clicking one of the menu bar buttons:
 +--------------------------------------+------------------------------------+
 | ![link][] **—** ![upload][]          | Insert:\                           |
 | ![image][] ToC ![C][]                | Link…, Horizontal rule, Uploaded   |
-| ![T][]                               | image…, Link to image…, Table of   |
-|                                      | Contents…, Calculation…, LaTeX…    |
+| ![T][]  ![comment][]                 | image…, Link to image…, Table of   |
+|                                      | Contents…, Calculation…, LaTeX…,   |
+|                                      | Comment                            |
 +--------------------------------------+------------------------------------+
 | **¶** ![embed][] **H1 H2**           | Block styles:\                     |
 | ![align-center][] ![indent][]        | Plain paragraph, Code block,       |
@@ -94,6 +95,7 @@ document range by selecting text, then clicking one of the menu bar buttons:
 [list]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 0h4v4H0zm6 1h10v2H6zM0 6h4v4H0zm6 1h10v2H6zm-6 5h4v4H0zm6 1h10v2H6z'/%3E%3C/svg%3E
 [numbered list]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M6 13h10v2H6zm0-6h10v2H6zm0-6h10v2H6zM3 0v4H2V1H1V0zM2 8.219V9h2v1H1V7.719l2-.938V6H1V5h3v2.281zM4 11v5H1v-1h2v-1H1v-1h2v-1H1v-1z'/%3E%3C/svg%3E
 [quotes]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M3.516 7a3.5 3.5 0 1 1-3.5 3.5L0 10a7 7 0 0 1 7-7v2a4.97 4.97 0 0 0-3.536 1.464 5.01 5.01 0 0 0-.497.578c.179-.028.362-.043.548-.043zm9 0a3.5 3.5 0 1 1-3.5 3.5L9 10a7 7 0 0 1 7-7v2a4.97 4.97 0 0 0-3.536 1.464 5.01 5.01 0 0 0-.497.578c.179-.028.362-.043.549-.043z'/%3E%3C/svg%3E
+[comment]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 1024 1024'%3E%3Cpath d='M512 219q-116 0-218 39t-161 107-59 145q0 64 40 122t115 100l49 28-15 54q-13 52-40 98 86-36 157-97l24-21 32 3q39 4 74 4 116 0 218-39t161-107 59-145-59-145-161-107-218-39zM1024 512q0 99-68 183t-186 133-257 48q-40 0-82-4-113 100-262 138-28 8-65 12h-2q-8 0-15-6t-9-15v-0q-1-2-0-6t1-5 2-5l3-5t4-4 4-5q4-4 17-19t19-21 17-22 18-29 15-33 14-43q-89-50-141-125t-51-160q0-99 68-183t186-133 257-48 257 48 186 133 68 183z'/%3E%3C/svg%3E
 [table]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath d='M17 17v5h2a3 3 0 0 0 3-3v-2h-5Zm-2 0H9v5h6v-5Zm2-2h5V9h-5v6Zm-2 0V9H9v6h6Zm2-8h5V5a3 3 0 0 0-3-3h-2v5Zm-2 0V2H9v5h6Zm9 9.177V19a5 5 0 0 1-5 5H5a5 5 0 0 1-5-5V5a5 5 0 0 1 5-5h14a5 5 0 0 1 5 5v2.823a.843.843 0 0 1 0 .354v7.646a.843.843 0 0 1 0 .354ZM7 2H5a3 3 0 0 0-3 3v2h5V2ZM2 9v6h5V9H2Zm0 8v2a3 3 0 0 0 3 3h2v-5H2Z'/%3E%3C/svg%3E
 [insert-row]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath d='M19 14a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm2.5 5.938a.937.937 0 1 0 0-1.875h-1.25a.312.312 0 0 1-.313-.313V16.5a.937.937 0 1 0-1.875 0v1.25c0 .173-.14.313-.312.313H16.5a.937.937 0 1 0 0 1.875h1.25c.173 0 .313.14.313.312v1.25a.937.937 0 1 0 1.875 0v-1.25c0-.173.14-.313.312-.313h1.25ZM5 2a3 3 0 1 0 0 6h14a3 3 0 0 0 0-6H5Zm0-2h14a5 5 0 0 1 0 10H5A5 5 0 1 1 5 0Z'/%3E%3C/svg%3E
 [insert-column]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath d='M19 14a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm2.5 5.938a.937.937 0 1 0 0-1.875h-1.25a.312.312 0 0 1-.313-.313V16.5a.937.937 0 1 0-1.875 0v1.25c0 .173-.14.313-.312.313H16.5a.937.937 0 1 0 0 1.875h1.25c.173 0 .313.14.313.312v1.25a.937.937 0 1 0 1.875 0v-1.25c0-.173.14-.313.312-.313h1.25ZM2 19a3 3 0 0 0 6 0V5a3 3 0 1 0-6 0v14Zm-2 0V5a5 5 0 1 1 10 0v14a5 5 0 0 1-10 0Z'/%3E%3C/svg%3E
@@ -105,6 +107,8 @@ document range by selecting text, then clicking one of the menu bar buttons:
 [align-center]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 1h16v2H0zm3 3h10v2H3zm0 6h10v2H3zM0 7h16v2H0zm0 6h16v2H0z'/%3E%3C/svg%3E
 [align-right]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 1h16v2H0zm6 3h10v2H6zm0 6h10v2H6zM0 7h16v2H0zm0 6h16v2H0z'/%3E%3C/svg%3E
 [information]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M7 4.75c0-.412.338-.75.75-.75h.5c.412 0 .75.338.75.75v.5c0 .412-.338.75-.75.75h-.5A.753.753 0 0 1 7 5.25v-.5zM10 12H6v-1h1V8H6V7h3v4h1z'/%3E%3Cpath d='M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm0 14.5a6.5 6.5 0 1 1 0-13 6.5 6.5 0 0 1 0 13z'/%3E%3C/svg%3E
+[bubble]: commentBubble.png
+{.right}
 
 ### Offline
 
@@ -127,6 +131,15 @@ remain a table. Otherwise, edit it any way you want.
 
 If you write `$PAGE` into a print header, Hurmet will print page numbers at
 that location.
+
+### Comments
+
+The ![comment][] button enables you to write a comment regarding the nearby text.
+The comment will look like this:\
+![bubble][]
+
+Comments can be styled with Markdown inline styles: \__italic_\_, \*\***bold**\*\*,
+\``code`\`, `~`~subscript~`~`, `~~`~~strikethrough~~`~~`, \$¢\TeX¢\$, and \¢¢calcu/lation¢\¢.
 
 ### Table of Contents
 
@@ -256,7 +269,7 @@ the syntax is more akin to a programming language, yet it renders like mathemati
 
 And now, on to the main event, Hurmet’s calculations.
 
-## Tutorial
+## Calculation Tutorial
 
 <dl class="bold-term">
 
@@ -2234,6 +2247,7 @@ Copyright © 2020-2022 Ron Kok. Released under the [MIT License](https://opensou
 * [Offline](#offline)
 * [Save/Open](#save/open)
 * [Print Header](#print-header)
+* [Comments](#comments)
 * [Table of Contents](#table-of-contents)
 * [Markdown](#markdown)
 * [TeX](#tex)
@@ -2243,7 +2257,7 @@ Copyright © 2020-2022 Ron Kok. Released under the [MIT License](https://opensou
 <li>
 <details><summary>Tutorial</summary>
 
-* [Create a cell](#create-a-cell)
+* [Create a cell](#calculation-tutorial)
 * [Statements](#statements)
 * [Multiplication](#multiplication)
 * [Roots](#roots)
