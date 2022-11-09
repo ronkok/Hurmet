@@ -135,8 +135,11 @@ that location.
 ### Comments
 
 The ![comment][] button enables you to write a comment regarding the nearby text.
-The comment will look like this:\
-![bubble][]
+The comment will look like this:
+
+<div><span class="hurmet-comment" data-comment="A comment"><span class="left-triangle"></span><span class="comment-payload"><span><span>A comment</span></span></span></span></div>
+
+<br>
 
 Comments can be styled with Markdown inline styles: \__italic_\_, \*\***bold**\*\*,
 \``code`\`, `~`~subscript~`~`, `~~`~~strikethrough~~`~~`, \$¢\TeX¢\$, and \¢¢calcu/lation¢\¢.
