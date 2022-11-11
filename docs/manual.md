@@ -38,16 +38,19 @@ Hurmet provides rich-text editing capabilities. You can apply styles to a
 document range by selecting text, then clicking one of the menu bar buttons:
 
 +:-------------------------------------+:-----------------------------------+
-| \                                    | Document operations:\              |
-| **≡**\                               | Navigate…,\                        |
-| \                                    | File: Open…, Set font size,\       |
-| **File▾**\                           |   Draft Mode, Import/Export to     |
-| \                                    |   Markdown/GFM,\                   |
-| ![save][]  ●  ![recalc][]            |   Set Page Size, Print,\           |
-|                                      | Save File…, Set decimal format,    |
-|                                      | Recalculate all                    |
+| **≡**                                | Navigate…                          |
 +--------------------------------------+------------------------------------+
-| ![undo][]  ![redo][]                 | Editing: Undo, Redo                |
+| \                                    | Open…, Save…, \                    |
+| **File▾**\                           | Import/Export to Markdown or GFM,\ |
+|                                      | Set Page Size, Print               |
++--------------------------------------+------------------------------------+
+| \                                    | Set Decimal, Font size, \          |
+| **Doc▾**\                            | Draft Mode, Print header, \        |
+|                                      | Delete all comments                |
++--------------------------------------+------------------------------------+
+| ![recalc][]                          | Recalculate all                    |
++--------------------------------------+------------------------------------+
+| ![undo][]  ![redo][]                 | Undo, Redo                         |
 +--------------------------------------+------------------------------------+
 | **B**  **_I_**  ![embed][]           | Character styles:\                 |
 | **X~2~**  **X<sup>2</sup>**          | Bold, Italic, Code, Subscript,     |
@@ -76,7 +79,6 @@ document range by selecting text, then clicking one of the menu bar buttons:
 | ![information][]  **Q**              | Information, Quick Reference       |
 +--------------------------------------+------------------------------------+
 
-[save]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M8.5 5.5v-5h2v5h2l-3 3-3-3zm8 10h-13l-3-6h3v-6h4v1h-3v5h9l2 4v-9h-4v-1h5z'/%3E%3C/svg%3E
 [recalc]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 9a7.982 7.982 0 0 0 2.709 6l1.323-1.5a6 6 0 1 1 8.212-8.743L10.001 7h6V1l-2.343 2.343A8 8 0 0 0 .001 9z'/%3E%3C/svg%3E
 [undo]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M11.904 16C13.681 12.781 13.98 7.87 7 8.034V12L1 6l6-6v3.881c8.359-.218 9.29 7.378 4.904 12.119z'/%3E%3C/svg%3E
 [redo]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M9 3.881V0l6 6-6 6V8.034C2.02 7.87 2.319 12.781 4.096 16-.29 11.259.641 3.663 9 3.881z'/%3E%3C/svg%3E
@@ -107,8 +109,6 @@ document range by selecting text, then clicking one of the menu bar buttons:
 [align-center]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 1h16v2H0zm3 3h10v2H3zm0 6h10v2H3zM0 7h16v2H0zm0 6h16v2H0z'/%3E%3C/svg%3E
 [align-right]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 1h16v2H0zm6 3h10v2H6zm0 6h10v2H6zM0 7h16v2H0zm0 6h16v2H0z'/%3E%3C/svg%3E
 [information]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M7 4.75c0-.412.338-.75.75-.75h.5c.412 0 .75.338.75.75v.5c0 .412-.338.75-.75.75h-.5A.753.753 0 0 1 7 5.25v-.5zM10 12H6v-1h1V8H6V7h3v4h1z'/%3E%3Cpath d='M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm0 14.5a6.5 6.5 0 1 1 0-13 6.5 6.5 0 0 1 0 13z'/%3E%3C/svg%3E
-[bubble]: ./images/commentBubble.png
-{.right}
 
 ### Offline
 
@@ -117,10 +117,10 @@ internet.
 
 ### Save/Open
 
-You can save your work using the ![save][] button. Then reopen it using the
-File | Open… menu choice. In Chrome and Edge, the save button is smart enough to
-re-save your work to the same file you opened earlier. In Firefox and Safari,
-the save button always works like a Save As… button.
+You can save your work using **Ctrl-S** or the save command in the File menu.
+Then reopen it using the File | Open… menu choice. In Chrome and Edge, the
+save button is smart enough to re-save your work to the same file you opened earlier. 
+In Firefox and Safari, the save button always works like a Save As… button.
 
 ### Print Header
 
@@ -137,7 +137,7 @@ that location.
 The ![comment][] button enables you to write a comment regarding the nearby text.
 The comment will look like this:
 
-<div><span class="hurmet-comment" data-comment="A comment"><span class="left-triangle"></span><span class="comment-payload"><span><span>A comment</span></span></span></span></div>
+<div><span class="hurmet-comment" data-comment="Citation needed"><span class="left-triangle"></span><span class="comment-payload"><span><span>Citation needed</span></span></span></span></div>
 
 <br>
 

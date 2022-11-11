@@ -6,12 +6,12 @@ import {
   exitCode,
   joinUp,
   joinDown,
-  lift,
+  lift
 } from "prosemirror-commands"
 import { wrapInList, splitListItem, liftListItem, sinkListItem } from "prosemirror-schema-list"
 import { undo, redo } from "prosemirror-history"
 import { undoInputRule } from "prosemirror-inputrules"
-import { insertMath, convertWord } from "./menu"
+import { insertMath, convertWord, saveFileAsJSON } from "./menu"
 import { goToNextCell } from "prosemirror-tables"
 
 const mac = typeof navigator != "undefined" ? /Mac/.test(navigator.platform) : false
@@ -59,6 +59,7 @@ export function buildKeymap(schema, mapKeys) {
     keys[key] = cmd
   }
 
+  bind("Ctrl-s", (state, _, view) => { saveFileAsJSON(state); return true })
   bind("Mod-z", undo)
   bind("Shift-Mod-z", redo)
   bind("Backspace", undoInputRule)

@@ -35,11 +35,6 @@ const hurmetIcons = {
     height: 16,
     path: "M3 4h10v1.5h-20z M3 8h10v1.5h-20z M3 12h10v1.5h-20z"
   },
-  save: {
-    width: 16,
-    height: 16,
-    path: "M 8.5,5.5 v -5 h 2 v 5 h 2 l -3,3 -3,-3 z m 8,10 h -13 l -3,-6 h 3 v -6 h 4 v 1 h -3 v 5 h 9 l 2,4 v -9 h -4 v -1 h 5 z"
-  },
   recalc: {
     width: 16,
     height: 16,
@@ -396,32 +391,37 @@ function sleep (time) {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
 
-export function saveFile(state) {
+// Export saveFileAsJSON so that it is available in keymap.js
+export function saveFileAsJSON(state) {
+  // Get a copy of the document
+  const docJSON = state.doc.toJSON()
+  // Prune the Hurmet math parts down to just the entry. Then stringify it.
+  const str = JSON.stringify(pruneHurmet(docJSON))
+  if (window.showOpenFilePicker && state.doc.attrs.fileHandle) {
+    // Use the Chromium File System Access API, so users can click to save a document.
+    const button = document.getElementsByClassName("ProseMirror-menubar").item(0).children[2]
+    // Blink the button, so the author knows that a save takes place.
+    button.classList.add("ProseMirror-menu-active")
+    writeFile(state.doc.attrs.fileHandle, str)
+    sleep(500).then(() => {
+      button.classList.remove("ProseMirror-menu-active")
+    });
+  } else {
+    // Legacy method for Firefox and Safari
+    const blob = new Blob([str], {type: "text/plain;charset=utf-8"})
+    saveAs(blob, "HurmetFile.hurmet");
+  }
+}
+
+function saveFile(state) {
   return new MenuItem({
     title: "Save file...",
-    icon: hurmetIcons["save"],
+    label: "Save...",
     enable(state) {
       return true
     },
     run(state) {
-      // Get a copy of the document
-      const docJSON = state.doc.toJSON()
-      // Prune the Hurmet math parts down to just the entry. Then stringify it.
-      const str = JSON.stringify(pruneHurmet(docJSON))
-      if (window.showOpenFilePicker && state.doc.attrs.fileHandle) {
-        // Use the Chromium File System Access API, so users can click to save a document.
-        const button = document.getElementsByClassName("ProseMirror-menubar").item(0).children[2]
-        // Blink the button, so the author knows that a save takes place.
-        button.classList.add("ProseMirror-menu-active")
-        writeFile(state.doc.attrs.fileHandle, str)
-        sleep(500).then(() => {
-          button.classList.remove("ProseMirror-menu-active")
-        });
-      } else {
-        // Legacy method for Firefox and Safari
-        const blob = new Blob([str], {type: "text/plain;charset=utf-8"})
-        saveAs(blob, "HurmetFile.hurmet");
-      }
+      saveAsJSON(state)
     }
   })
 }
@@ -1144,26 +1144,34 @@ export function buildMenuItems(schema) {
   
   r.fontsize = new DropdownSubmenu([r.pica, r.longprimer], { label: "Font size" })
   r.pagesize = new DropdownSubmenu([r.letter, r.A4], { label: "Page size" })
-  r.separators = new Dropdown([r.dot, r.commadot, r.lakh, r.cn, r.comma, r.spacecomma, r.apostrophecomma, r.dotcomma], {title: "Set decimal format", label: "●"})
+  r.separators = new DropdownSubmenu(
+    [r.dot, r.commadot, r.lakh, r.cn, r.comma, r.spacecomma, r.apostrophecomma, r.dotcomma],
+    {title: "Set decimal format", label: "Set Decimal"}
+  )
   r.fileDropDown = new Dropdown([
     r.openFile,
-    r.fontsize,
-    r.toggleDraftMode,
-    r.insertHeader,
+    r.saveFile,
     r.exportMarkdown,
     r.exportGFM,
     r.importMarkdownFile,
-    r.deleteComments,
     r.pagesize,
     r.print
   ],
   { label: "File" }
   )
+  r.documentDropDown = new Dropdown([
+    r.separators,
+    r.fontsize,
+    r.toggleDraftMode,
+    r.insertHeader,
+    r.deleteComments
+  ],
+  { label: "Doc" }
+  )
   r.fileMenu = [[
     r.navigate,
     r.fileDropDown,
-    r.saveFile,
-    r.separators,
+    r.documentDropDown,
     r.recalcAll,
   ]]
 
