@@ -415,7 +415,7 @@ export function saveFileAsJSON(state) {
 
 function saveFile(state) {
   return new MenuItem({
-    title: "Save file...",
+    title: "Save file...   Ctrl-S",
     label: "Save...",
     enable(state) {
       return true
@@ -536,7 +536,7 @@ function insertImage(nodeType) {
 
 function insertComment(nodeType) {
   return new MenuItem({
-    title: "Insert comment",
+    title: "Insert or edit a comment",
     icon: hurmetIcons.comment,
     enable(state) {
       return canInsert(state, nodeType)
