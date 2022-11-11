@@ -132,9 +132,6 @@ sub {
 .dim {
     color: gray;
 }
-.right {
-    float: right;
-}
 .katex {
     font-size: 1em !important;
 }
