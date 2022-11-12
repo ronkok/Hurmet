@@ -41,6 +41,8 @@ const handleContents = (view, schema, str, format) => {
   view.dispatch(
     view.state.tr.replaceWith(0, view.state.doc.content.size, schema.nodeFromJSON(doc))
   )
+  view.state.doc.attrs.fontSize = fontSize
+  view.state.doc.attrs.pageSize = pageSize
 
   // Update all the calculation nodes and refresh the document display.
   // eslint-disable-next-line no-undef
