@@ -415,7 +415,7 @@ export function saveFileAsJSON(state) {
 function saveFile(state) {
   return new MenuItem({
     title: "Save file...   Ctrl-S",
-    label: "Save...",
+    label: "Save",
     enable(state) {
       return true
     },
