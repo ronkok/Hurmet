@@ -18,7 +18,7 @@
 <h3 id='editor-basics'>Editor Basics</h3>
 <p>Hurmet provides rich-text editing capabilities. You can apply styles to a document range by selecting text, then clicking one of the menu bar buttons:</p>
 <table><tr><td><strong>≡</strong></td><td>Navigate…</td></tr>
-<tr><td><br><strong>File▾</strong><br></td><td>Open…, Save…, <br>Import/Export to Markdown or GFM,<br>Set Page Size, Print</td></tr>
+<tr><td><br><strong>File▾</strong><br> </td><td>Open…, Save…, <br>Import/Export to Markdown or GFM,<br>Take a snapshot, Show diff, <br>Set Page Size, Print</td></tr>
 <tr><td><br><strong>Doc▾</strong><br></td><td>Set Decimal, Font size, <br>Draft Mode, Print header, <br>Delete all comments</td></tr>
 <tr><td><img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 9a7.982 7.982 0 0 0 2.709 6l1.323-1.5a6 6 0 1 1 8.212-8.743L10.001 7h6V1l-2.343 2.343A8 8 0 0 0 .001 9z'/%3E%3C/svg%3E" alt="recalc"></td><td>Recalculate all</td></tr>
 <tr><td><img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M11.904 16C13.681 12.781 13.98 7.87 7 8.034V12L1 6l6-6v3.881c8.359-.218 9.29 7.378 4.904 12.119z'/%3E%3C/svg%3E" alt="undo">  <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M9 3.881V0l6 6-6 6V8.034C2.02 7.87 2.319 12.781 4.096 16-.29 11.259.641 3.663 9 3.881z'/%3E%3C/svg%3E" alt="redo"></td><td>Undo, Redo</td></tr>
@@ -32,6 +32,13 @@
 <p>Hurmet has a offline page which works even if you are not connected to the internet.</p>
 <h3 id='save/open'>Save/Open</h3>
 <p>You can save your work using <strong>Ctrl-S</strong> or the save command in the File menu. Then reopen it using the File | Open… menu choice. In Chrome and Edge, the save button is smart enough to re-save your work to the same file you opened earlier.  In Firefox and Safari, the save button always works like a Save As… button.</p>
+<h3 id='tracking-changes'>Tracking Changes</h3>
+<p>The <strong>File…</strong> menu contains commands that enable you to track changes:</p>
+<ul><li><em>Take a snapshot…</em> will store a snapshot of the current document (not including embedded images)</li>
+<li><em>Show diff…</em> will display the differences between a chosen snapshot and the current document.</li>
+<li><em>Delete all snapshots…</em>, for when you no longer need to track changes.</li>
+</ul>
+<p>Snapshots and diffs are displayed in Markdown format.</p>
 <h3 id='print-header'>Print Header</h3>
 <p>You can create a print header in any document by clicking the File | Print Header menu choice. Later, when you click the File | Print… menu choice, the header will be printed at the top of every page (except the cover page). The header is a table and it should remain a table. Otherwise, edit it any way you want.</p>
 <p>If you write <code>$PAGE</code> into a print header, Hurmet will print page numbers at that location.</p>
@@ -180,8 +187,8 @@ return 3</code></pre></td></tr>
 <tr><td><code>x^23</code></td><td><span class="tex" data-tex="x^{23}"></span></td><td><code>(a, b; c, d)</code></td><td><span class="tex" data-tex="\begin{pmatrix}a &amp; b \\ c &amp; d \end{pmatrix}"></span></td></tr>
 <tr><td><code>x^(a+b)</code></td><td><span class="tex" data-tex="x^{a + b}"></span></td><td><code>[a, b; c, d]</code></td><td><span class="tex" data-tex="\begin{bmatrix}a &amp; b \\ c &amp; d \end{bmatrix}"></span></td></tr>
 <tr><td><code>x_subscript</code></td><td><span class="tex" data-tex="x{_\text{subscript}}"></span></td><td><code>{:a, b; c, d:}</code></td><td><span class="tex" data-tex="\begin{matrix}a &amp; b \\ c &amp; d \end{matrix}"></span></td></tr>
-<tr><td><code>x_(a+b)</code></td><td><span class="tex" data-tex="x_{a + b}"></span></td><td><code>[1:4] = ?</code></td><td><span class="tex" data-tex="\begin{bmatrix}1 &amp; 2 &amp; 3 &amp; 4 \end{bmatrix}"></span></td></tr>
-<tr><td><code>x′</code></td><td><span class="tex" data-tex="x&#x27;"></span></td><td><code>[1:2:5] = ?</code></td><td><span class="tex" data-tex="\begin{bmatrix}1 &amp; 3 &amp; 5 \end{bmatrix}"></span></td></tr>
+<tr><td><code>x_(a+b)</code></td><td><span class="tex" data-tex="x_{a + b}"></span></td><td><code>[1..4] = ?</code></td><td><span class="tex" data-tex="\begin{bmatrix}1 &amp; 2 &amp; 3 &amp; 4 \end{bmatrix}"></span></td></tr>
+<tr><td><code>x′</code></td><td><span class="tex" data-tex="x&#x27;"></span></td><td><code>[1..2..5] = ?</code></td><td><span class="tex" data-tex="\begin{bmatrix}1 &amp; 3 &amp; 5 \end{bmatrix}"></span></td></tr>
 <tr><td><code>|x|  ‖x‖</code> </td><td><span class="tex" data-tex="\vert x \vert ~ ~ ~ \Vert x \Vert"></span> </td><td><code>{a if b;</code> <br><code>c otherwise}</code></td><td><span class="tex" data-tex="\begin{cases}a &amp;\mathrel{\mathrm{if}}b \\ c &amp;\mathrel{\mathrm{otherwise}}\end{cases}"></span> </td></tr>
 <tr><td><code>A--&gt;note B</code></td><td><span class="tex" data-tex="A \xrightarrow{\mathrm{note}}B"></span></td><td rowspan="2"><p><code>`` | dia | area</code> <br><code>| in | in²</code> <br><code>#3 | 0.375 | 0.11</code> <br><code>#4 | 0.5   | 0.2 ``</code></p>
 </td><td rowspan="2"><span class="tex" data-tex="\begin{array}{l|r r}{\text{}}&amp;{\text{dia}}&amp;{\text{area}} \\ &amp; {\text{in}}&amp; {\text{in}^{2}} \\ \hline \text{\#3}&amp;0.375&amp;0.11 \\ \text{\#4}&amp;0.5\phantom{00}&amp;0.2\phantom{0}\end{array}"></span></td></tr>
@@ -1065,6 +1072,7 @@ end</code></pre><p>A Hurmet document can load an entire module into one variable
 <ul><li><a href='#editor-basics'>Basics</a></li>
 <li><a href='#offline'>Offline</a></li>
 <li><a href='#save/open'>Save/Open</a></li>
+<li><a href='#tracking-changes'>Tracking Changes</a></li>
 <li><a href='#print-header'>Print Header</a></li>
 <li><a href='#comments'>Comments</a></li>
 <li><a href='#table-of-contents'>Table of Contents</a></li>

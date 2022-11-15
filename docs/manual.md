@@ -42,6 +42,7 @@ document range by selecting text, then clicking one of the menu bar buttons:
 +--------------------------------------+------------------------------------+
 | \                                    | Open…, Save…, \                    |
 | **File▾**\                           | Import/Export to Markdown or GFM,\ |
+|                                      | Take a snapshot, Show diff, \      |
 |                                      | Set Page Size, Print               |
 +--------------------------------------+------------------------------------+
 | \                                    | Set Decimal, Font size, \          |
@@ -121,6 +122,16 @@ You can save your work using **Ctrl-S** or the save command in the File menu.
 Then reopen it using the File | Open… menu choice. In Chrome and Edge, the
 save button is smart enough to re-save your work to the same file you opened earlier. 
 In Firefox and Safari, the save button always works like a Save As… button.
+
+### Tracking Changes
+
+The **File…** menu contains commands that enable you to track changes:
+
+*   _Take a snapshot…_ will store a snapshot of the current document (not including embedded images)
+*   _Show diff…_ will display the differences between a chosen snapshot and the current document.
+*   _Delete all snapshots…_, for when you no longer need to track changes.
+
+Snapshots and diffs are displayed in Markdown format.
 
 ### Print Header
 
@@ -444,9 +455,9 @@ Display Mode
 +---------------+-----------------+------------------------------+-------------------------------+
 | `x_subscript` | ¢x_subscript¢   | `{:a, b; c, d:}`             | ¢{:a, b; c, d:}¢              |
 +---------------+-----------------+------------------------------+-------------------------------+
-| `x_(a+b)`     | ¢x_(a+b)¢       | `[1:4] = ?`                  | ¢[1, 2, 3, 4]¢                |
+| `x_(a+b)`     | ¢x_(a+b)¢       | `[1..4] = ?`                 | ¢[1, 2, 3, 4]¢                |
 +---------------+-----------------+------------------------------+-------------------------------+
-| `x′`          | ¢x′¢            | `[1:2:5] = ?`                | ¢[1, 3, 5]¢                   |
+| `x′`          | ¢x′¢            | `[1..2..5] = ?`              | ¢[1, 3, 5]¢                   |
 +---------------+-----------------+------------------------------+-------------------------------+
 | `|x|  ‖x‖`    | ¢|x|˽˽˽‖x‖¢     | `{a if b;` \                 | ¢{a if b; c otherwise}¢       |
 |               |                 | `c otherwise}`               |                               |
@@ -2249,6 +2260,7 @@ Copyright © 2020-2022 Ron Kok. Released under the [MIT License](https://opensou
 * [Basics](#editor-basics)
 * [Offline](#offline)
 * [Save/Open](#save/open)
+* [Tracking Changes](#tracking-changes)
 * [Print Header](#print-header)
 * [Comments](#comments)
 * [Table of Contents](#table-of-contents)

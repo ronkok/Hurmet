@@ -57,7 +57,8 @@ export const nodes = {
       inDraftMode: { default: false }, // boolean
       fileHandle: { default: null },
       fontSize: { default: 12 },       // 12 | 10
-      pageSize: { default: "letter" }  // letter | A4
+      pageSize: { default: "letter" }, // letter | A4
+      snapshots: { default: [] }
     }
   },
 

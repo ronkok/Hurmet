@@ -15,7 +15,7 @@ import { insertPoint } from "prosemirror-transform"
 import { lift, selectParentNode, toggleMark } from "prosemirror-commands"
 import { schema, wrapInList } from "./schema"
 import { TextField, TextAreaField, openPrompt } from "./prompt"
-import { openNavPrompt } from "./navprompt"
+import { openSelectPrompt } from "./selectprompt"
 import { isInTable, addColumnBefore, deleteColumn,
   addRowBefore, deleteRow, mergeCells, splitCell,
   toggleHeaderColumn, deleteTable, CellSelection,
@@ -27,6 +27,7 @@ import { hurmetMarkdownSerializer } from "./to_markdown"
 import { readFile } from "./openfile"
 import { saveAs } from "filesaver.js-npm"
 import { findPageBreaks, forToC, forPrint } from "./paginate.js"
+import { diff_match_patch } from "./diffMatchPatch"
 
 // Menu icons that are not included in node-module menu.js
 const hurmetIcons = {
@@ -241,26 +242,24 @@ const navigate = () => {
     icon: hurmetIcons.navicon,
     run(state, _, view) {
       // Get an array of the h1 nodes
-      const headings = []
+      const buttons = [{ textContent: "Top", pos: 0 }]
       const bottom = view.dom.getBoundingClientRect().bottom - 320
       state.doc.nodesBetween(0, state.doc.content.size, function(node, pos) {
         if (node.type.name === "heading" && (node.attrs.level === 1 || node.attrs.level === 2)) {
-          headings.push({textContent: (node.attrs.level === 1)
+          buttons.push({textContent: (node.attrs.level === 1)
             ? node.textContent
             : "\xa0\xa0\xa0\xa0" + node.textContent,
             pos: pos})
         }
       })
+      buttons.push({ textContent: "Bottom", pos: bottom })
       // Open a dialog box and populate with buttons
-      openNavPrompt({
-        buttons: headings,
-        bottom: bottom,
-        callback(pos) {
-          const headingTop = view.coordsAtPos(pos).top
-          const boundingTop = view.dom.getBoundingClientRect().top
-          window.scrollTo(0, headingTop - boundingTop + 180)
-        }
-      })
+      const callback = pos => {
+        const headingTop = view.coordsAtPos(pos).top
+        const boundingTop = view.dom.getBoundingClientRect().top
+        window.scrollTo(0, headingTop - boundingTop + 180)
+      }
+      openSelectPrompt("Scroll to…", buttons, callback)
     }
   })
 }
@@ -421,7 +420,7 @@ function saveFile(state) {
       return true
     },
     run(state) {
-      saveAsJSON(state)
+      saveFileAsJSON(state)
     }
   })
 }
@@ -557,6 +556,90 @@ function insertComment(nodeType) {
             : pos
           view.dispatch(view.state.tr.replaceWith(pos, endPos, nodeType.createAndFill(attrs)))
           view.focus()
+        }
+      })
+    }
+  })
+}
+
+function takeSnapshot() {
+  return new MenuItem({
+    title: "Take and save a snapshot of the current document",
+    label: "Take a snapshot...",
+    run(state, _, view) {
+      const attrs = {}
+      openPrompt({
+        title: "Snapshot",
+        fields: { message: new TextField({ label: "Commit message", required: true }) },
+        callback(attrs) {
+          const dateStr = new Date().toISOString().replace(/T.+/, "")
+          let md = hurmetMarkdownSerializer.serialize(state.doc, new Map())
+          // ISgnore embedded images
+          md = md.replace(/\n\n\[[^\]]+\\: .+/, "")
+          state.doc.attrs.snapshots.push({ message: attrs.message, date: dateStr, content: md })
+        }
+      })
+    }
+  })
+}
+
+function showDiff() {
+  return new MenuItem({
+    label: "Show diff...",
+    run(state, _, view) {
+      const title = "Show the difference since:"
+      const buttons = [];
+      const snapshots = state.doc.attrs.snapshots
+      if (state.doc.attrs.snapshots.length === 0) {
+        alert('There are no snapshots to diff.')
+        return
+      }
+      for (let i = 0; i < state.doc.attrs.snapshots.length; i++) {
+        buttons.push({
+          textContent: snapshots[i].date + " " + snapshots[i].message,
+          pos: i
+        })
+      }
+      const callback = pos => {
+        const dmp = new diff_match_patch()
+        const text1 = state.doc.attrs.snapshots[pos].content
+        let text2 = hurmetMarkdownSerializer.serialize(state.doc, new Map())
+        text2 = text2.replace(/\n\n\[[^\]]+\\: .+/, "")
+        dmp.Diff_Timeout = 2
+        dmp.Diff_EditCost = 4
+        let d = dmp.diff_main(text1, text2)
+        dmp.diff_cleanupSemantic(d);
+        const ds = dmp.diff_prettyHtml(d)
+        const wrapper = document.body.appendChild(document.createElement("div"))
+        wrapper.className = "ProseMirror-prompt"
+        wrapper.style = "width: 550px; max-height: 500px; overflow: scroll;"
+        wrapper.id = ""
+        wrapper.innerHTML = ds
+        const button = document.createElement("button")
+        button.type = "button"
+        button.className = "ProseMirror-prompt-cancel"
+        button.textContent = "Close"
+        button.onclick = function(e) { wrapper.parentNode.removeChild(wrapper) }
+        wrapper.appendChild(button)
+        const box = wrapper.getBoundingClientRect()
+        wrapper.style.top = ((window.innerHeight - box.height) / 2) + "px"
+        wrapper.style.left = ((window.innerWidth - box.width) / 2) + "px"
+      }
+      openSelectPrompt(title, buttons, callback)
+    }
+  })
+}
+
+function deleteSnapshots() {
+  return new MenuItem({
+    label: "Delete all snapshots...",
+    run(state, _, view) {
+      openPrompt({
+        title: "Delete Snapshots",
+        note: "This will delete all snapshots. It cannot be undone.",
+        useOkButton: true,
+        callback() {
+          state.doc.attrs.snapshots = [];
         }
       })
     }
@@ -969,6 +1052,9 @@ export function buildMenuItems(schema) {
   r.toggleDraftMode = toggleDraftMode()
   r.recalcAll = reCalcAll(schema)
   r.deleteComments = deleteComments()
+  r.takeSnapshot = takeSnapshot()
+  r.showDiff = showDiff()
+  r.deleteSnapshots = deleteSnapshots()
   r.print = print()
 
   if ((type = schema.marks.strong))
@@ -1154,6 +1240,9 @@ export function buildMenuItems(schema) {
     r.exportMarkdown,
     r.exportGFM,
     r.importMarkdownFile,
+    r.takeSnapshot,
+    r.showDiff,
+    r.deleteSnapshots,
     r.pagesize,
     r.print
   ],
