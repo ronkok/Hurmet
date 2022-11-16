@@ -242,6 +242,8 @@ const dataFrameFromCSV = (str, vars) => {
     }
   }
 
+  const keyRegEx = /^(?:[Nn]ame|[Ii]tem|[Ll]able)$/
+
   const harvest = (datum) => {
     // Load a datum into the dataTable
     datum = datum.trim()
@@ -251,7 +253,7 @@ const dataFrameFromCSV = (str, vars) => {
     if (row === 0) {
       headings.push(datum)
       columnMap[datum] = col
-      if (col === 0 && (datum.length === 0 || datum === "name" || datum === "label")) {
+      if (col === 0 && (datum.length === 0 || keyRegEx.test(datum))) {
         rowMap = Object.create(null)
       }
     } else {
@@ -705,7 +707,9 @@ const displayAlt = (df, formatSpec = "h3", omitHeading = false) => {
   if (!omitHeading) {
     // Write the column names
     if (writeRowNums) { str += "|" }
-    str += ( df.headings[0] === "name" ? "" : df.headings[0]) + "|"
+    str += ( (df.headings[0] === "name" || df.headings[0] === "item")
+      ? ""
+      : df.headings[0]) + "|"
     for (let j = 1; j < numCols; j++) {
       str += df.headings[j] + "|"
     }
