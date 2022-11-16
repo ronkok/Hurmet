@@ -243,6 +243,7 @@ const dataFrameFromCSV = (str, vars) => {
   }
 
   const keyRegEx = /^(?:[Nn]ame|[Ii]tem|[Ll]able)$/
+  const sumAboveRegEx = /^(?:= *)?sumAbove\(\)$/
 
   const harvest = (datum) => {
     // Load a datum into the dataTable
@@ -258,6 +259,15 @@ const dataFrameFromCSV = (str, vars) => {
       }
     } else {
       if (row === 1) { data.push([]) } // First data row.
+      if (sumAboveRegEx.test(datum)) {
+        let sum = Rnl.zero
+        for (const num of data[col]) {
+          if (!isNaN(num)) {
+            sum = Rnl.add(sum, Rnl.fromString(num))
+          }
+        }
+        datum = String(Rnl.toNumber(sum))
+      }
       data[col].push(datum)
       if (rowMap && col === 0) {
         rowMap[datum] = row - 1 - (gotUnits ? 1 : 0)
@@ -630,6 +640,8 @@ const displayNum = (datum, colInfo, cellInfo, decimalFormat) => {
   return str
 }
 
+const totalRegEx = /^(?:total|sum)/i
+
 const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHeading = false) => {
   if (df.data.length === 0) { return "" }
   const numRows = df.data[0].length
@@ -677,6 +689,7 @@ const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHeadin
 
   // Write the data
   for (let i = 0; i < numRows; i++) {
+    if (i === numRows - 1 && totalRegEx.test(df.data[0][i])) { str += "\\hline " }
     if (writeRowNums) { str += String(i + 1) + " & " }
     for (let j = 0; j < numCols; j++) {
       const datum = df.data[j][i]
