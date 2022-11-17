@@ -243,7 +243,6 @@ const dataFrameFromCSV = (str, vars) => {
   }
 
   const keyRegEx = /^(?:[Nn]ame|[Ii]tem|[Ll]able)$/
-  const sumAboveRegEx = /^(?:= *)?sumAbove\(\)$/
 
   const harvest = (datum) => {
     // Load a datum into the dataTable
@@ -259,7 +258,7 @@ const dataFrameFromCSV = (str, vars) => {
       }
     } else {
       if (row === 1) { data.push([]) } // First data row.
-      if (sumAboveRegEx.test(datum)) {
+      if (datum === "sumAbove()") {
         let sum = Rnl.zero
         for (const num of data[col]) {
           if (!isNaN(num)) {
