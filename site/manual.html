@@ -259,7 +259,7 @@ return 3</code></pre></td></tr>
 </tr>
 <tr><td>string<br>s = &quot;abcde&quot; </td><td>s[2]<br>s[2..4]<br>s[3..]</td><td>b<br>bce<br>cde</td></tr>
 <tr><td>Vector<br>𝐕 = <span class="tex" data-tex="\begin{bmatrix}1 &amp; 2 &amp; 3 &amp; 4 &amp; 5 \end{bmatrix}"></span> </td><td>𝐕[2]<br>𝐕[2..4]<br>𝐕[3..]</td><td>2<br><span class="tex" data-tex="\begin{bmatrix}2 &amp; 3 &amp; 4 \end{bmatrix}"></span> <br><span class="tex" data-tex="\begin{bmatrix}3 &amp; 4 &amp; 5 \end{bmatrix}"></span></td></tr>
-<tr><td>Matrix<br>𝐌 = <span class="tex" data-tex="\ \begin{pmatrix}1 &amp; 2 &amp; 3 \\ 4 &amp; 5 &amp; 6 \\ 7 &amp; 8 &amp; 9 \end{pmatrix}"></span> </td><td>𝐌[2, 3]<br>𝐌[3,]<br>𝐌[2..3, 1:2]</td><td>6<br><span class="tex" data-tex="\begin{bmatrix}7 &amp; 8 &amp; 9 \end{bmatrix}"></span> <br><span class="tex" data-tex="\begin{bmatrix}4 &amp; 5 \\ 7 &amp; 8 \end{bmatrix}"></span></td></tr>
+<tr><td>Matrix<br>𝐌 = <span class="tex" data-tex="\ \begin{pmatrix}1 &amp; 2 &amp; 3 \\ 4 &amp; 5 &amp; 6 \\ 7 &amp; 8 &amp; 9 \end{pmatrix}"></span> </td><td>𝐌[2, 3]<br>𝐌[3,]<br>𝐌[2..3, 1..2]</td><td>6<br><span class="tex" data-tex="\begin{bmatrix}7 &amp; 8 &amp; 9 \end{bmatrix}"></span> <br><span class="tex" data-tex="\begin{bmatrix}4 &amp; 5 \\ 7 &amp; 8 \end{bmatrix}"></span></td></tr>
 <tr><td>Data Frame<br><img src="images/dataframe.png" alt="dataframe" width="200">     </td><td>DF.B<br>DF[&quot;B&quot;]<br>DF.area<br>DF.B.area<br>DF[&quot;B&quot;].area<br>DF[&quot;B&quot;, &quot;area&quot;]<br>DF.w[1]</td><td>An entire row<br>An entire row<br>Column vector<br>22<br>22<br>22<br>4</td></tr>
 </table>
 </div>
@@ -460,7 +460,17 @@ a[5..]    # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong><
 #5|0.625   |0.31
 #6|0.75    |0.44``</code></pre><p>… which renders as:</p>
 <p><span class="tex" data-tex="\mathrm{rebar} = \begin{array}{l|r r}{\text{}}&amp;{\text{diameter}}&amp;{\text{area}} \\ &amp; {\text{in}}&amp; {\text{in}^{2}} \\ \hline \text{\#3}&amp;0.375&amp;0.11 \\ \text{\#4}&amp;0.5\phantom{00}&amp;0.2\phantom{0} \\ \text{\#5}&amp;0.625&amp;0.31 \\ \text{\#6}&amp;0.75\phantom{0}&amp;0.44\end{array}"></span></p>
-<p>Hurmet will use the first column as keys to the rest of each row if you leave the top left cell blank, or if the content of the top left cell is “name”.</p>
+<p>Hurmet will use the first column as keys to the rest of each row if you leave the top left cell blank, or if the content of the top left cell is “name” or “item”.</p>
+<p>A dataframe literal can also show totals on the bottom line, via the <code>sumAbove()</code> function. So this input:</p>
+<pre><code>roof = ``Item               | weight
+                            | psf
+2 layers asphalt shingles   | 8.0
+1/2 inch plywood            | 1.5
+insulation, R19 fiberglass  | 0.6
+trusses at 16 inch o.c.     | 2.5
+5/8 inch gypsum board       | 2.5
+lights, HVAC, miscellaneous | 1.5
+total                       | sumAbove()``</code></pre><p>will render like this:<br><span class="tex" data-tex="\mathrm{roof} = \begin{array}{l|r}{\text{Item}}&amp;{\text{weight}} \\ &amp; {\text{psf}} \\ \hline \text{2 layers asphalt shingles}&amp;8.0 \\ \text{1/2 inch plywood}&amp;1.5 \\ \text{insulation, R19 fiberglass}&amp;0.6 \\ \text{trusses at 16 inch o.c.}&amp;2.5 \\ \text{5/8 inch gypsum board}&amp;2.5 \\ \text{lights, HVAC, miscellaneous}&amp;1.5 \\ \hline \text{total}&amp;16.6\end{array}"></span></p>
 <p>Data frames can be quite large, so Hurmet has a <code>fetch(url)</code> function to load data from a remote CSV file into a data frame. Since Hurmet runs in a browser, the url must begin with <code>http:</code> or <code>https:</code></p>
 <p>A fetch example:</p>
 <pre><code>wideFlanges = fetch(&quot;https://hurmet.app/example.csv&quot;) = !</code></pre><p>That example loads in this data:</p>
@@ -481,7 +491,7 @@ a[5..]    # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong><
 <dd><p>A Hurmet <em>map</em> is a single-row data frame in which every value is the same data type, either boolean, string, or number. Maps can be the numeric part of a quantity.</p>
 <p><span class="tex" data-tex="w = \begin{array}{c}\text{dead} &amp; \text{live} &amp; \text{snow} \\ \hline 30 &amp; 70 &amp; 40\end{array}\; {\text{lbf/ft}}"></span></p>
 <p>You can do arithmetic on maps and run them through functions. The operation will be done on each value in the map. For instance, a beam calculation can break the loads down into dead load, live load, snow load, etc.:</p>
-<p><span class="tex" data-tex="M = \tfrac{1}{8}\, w L^{2}="></span>dead | live | snow 0.375 | 0.875 | 0.5`` &#x27;k·ft&#x27;¢</p>
+<p><span class="tex" data-tex="M = \tfrac{1}{8}\, w L^{2}="></span> <span class="tex" data-tex="\begin{array}{c}\text{dead} &amp; \text{live} &amp; \text{snow} \\ \hline 0.375 &amp; 0.875 &amp; 0.5\end{array}\; {\text{k}\mkern1mu{\cdot}\mkern1mu\text{ft}}"></span></p>
 </dd>
 </dl>
 <h2 id='expressions'>Expressions</h2>

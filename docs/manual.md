@@ -998,7 +998,33 @@ Data Frame
     ¢
 
     Hurmet will use the first column as keys to the rest of each row if you leave
-    the top left cell blank, or if the content of the top left cell is “name”.
+    the top left cell blank, or if the content of the top left cell is “name” or “item”.
+
+    A dataframe literal can also show totals on the bottom line, via the
+    `sumAbove()` function. So this input:
+
+    ```
+    roof = ``Item               | weight
+                                | psf
+    2 layers asphalt shingles   | 8.0
+    1/2 inch plywood            | 1.5
+    insulation, R19 fiberglass  | 0.6
+    trusses at 16 inch o.c.     | 2.5
+    5/8 inch gypsum board       | 2.5
+    lights, HVAC, miscellaneous | 1.5
+    total                       | sumAbove()``
+    ```
+
+    will render like this:\
+    ¢ roof = ``Item             | weight
+                                | psf
+    2 layers asphalt shingles   | 8.0
+    1/2 inch plywood            | 1.5
+    insulation, R19 fiberglass  | 0.6
+    trusses at 16 inch o.c.     | 2.5
+    5/8 inch gypsum board       | 2.5
+    lights, HVAC, miscellaneous | 1.5
+    total                       | sumAbove()`` ¢
 
     Data frames can be quite large, so Hurmet has a `fetch(url)` function to load
     data from a remote CSV file into a data frame. Since Hurmet runs in a browser,
@@ -1073,7 +1099,7 @@ Map
     will be done on each value in the map. For instance, a beam calculation can
     break the loads down into dead load, live load, snow load, etc.:
 
-    ¢M = 1//8 w L^2  = ¢dead | live | snow
+    ¢ M = 1//8 w L^2  = ¢ ¢``dead | live | snow
     0.375 | 0.875 | 0.5`` 'k·ft'¢
 
 </dl>

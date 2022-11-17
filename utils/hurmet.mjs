@@ -3369,6 +3369,9 @@ const dataFrameFromCSV = (str, vars) => {
     }
   };
 
+  const keyRegEx = /^(?:[Nn]ame|[Ii]tem|[Ll]able)$/;
+  const sumAboveRegEx = /^(?:= *)?sumAbove\(\)$/;
+
   const harvest = (datum) => {
     // Load a datum into the dataTable
     datum = datum.trim();
@@ -3378,11 +3381,20 @@ const dataFrameFromCSV = (str, vars) => {
     if (row === 0) {
       headings.push(datum);
       columnMap[datum] = col;
-      if (col === 0 && (datum.length === 0 || datum === "name" || datum === "label")) {
+      if (col === 0 && (datum.length === 0 || keyRegEx.test(datum))) {
         rowMap = Object.create(null);
       }
     } else {
       if (row === 1) { data.push([]); } // First data row.
+      if (sumAboveRegEx.test(datum)) {
+        let sum = Rnl.zero;
+        for (const num of data[col]) {
+          if (!isNaN(num)) {
+            sum = Rnl.add(sum, Rnl.fromString(num));
+          }
+        }
+        datum = String(Rnl.toNumber(sum));
+      }
       data[col].push(datum);
       if (rowMap && col === 0) {
         rowMap[datum] = row - 1 - (gotUnits ? 1 : 0);
@@ -3755,6 +3767,8 @@ const displayNum = (datum, colInfo, cellInfo, decimalFormat) => {
   return str
 };
 
+const totalRegEx = /^(?:total|sum)/i;
+
 const display$2 = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHeading = false) => {
   if (df.data.length === 0) { return "" }
   const numRows = df.data[0].length;
@@ -3802,6 +3816,7 @@ const display$2 = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHead
 
   // Write the data
   for (let i = 0; i < numRows; i++) {
+    if (i === numRows - 1 && totalRegEx.test(df.data[0][i])) { str += "\\hline "; }
     if (writeRowNums) { str += String(i + 1) + " & "; }
     for (let j = 0; j < numCols; j++) {
       const datum = df.data[j][i];
@@ -3832,7 +3847,9 @@ const displayAlt$1 = (df, formatSpec = "h3", omitHeading = false) => {
   if (!omitHeading) {
     // Write the column names
     if (writeRowNums) { str += "|"; }
-    str += ( df.headings[0] === "name" ? "" : df.headings[0]) + "|";
+    str += ( (df.headings[0] === "name" || df.headings[0] === "item")
+      ? ""
+      : df.headings[0]) + "|";
     for (let j = 1; j < numCols; j++) {
       str += df.headings[j] + "|";
     }
