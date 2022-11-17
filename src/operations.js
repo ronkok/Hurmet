@@ -107,6 +107,21 @@ const unary = {
   }
 }
 
+const condition = {
+  // Deal with booleans. Return a single value, true or false.
+  // If a vector or matrix is received, all elements must be
+  // true in order to return a true. Otherwise return a false.
+  scalar(x) { return x },
+  vector(v) { return v.reduce((prev, curr) => prev && curr, true) },
+  matrix(m) {
+    const row = new Array(m.length)
+    for (let i = 0; i < m.length; i++) {
+      row[i] = m[i].reduce((prev, curr) => prev && curr, true)
+    }
+    return row.reduce((prev, curr) => prev && curr, true)
+  }
+}
+
 const dtype = {
   // Given the shapes which are operands to a binary operator,
   // return the resulting data type.
@@ -1059,5 +1074,6 @@ export const Operators = Object.freeze({
   unary,
   binary,
   relations,
+  condition,
   dtype
 })

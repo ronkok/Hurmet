@@ -1113,7 +1113,8 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             if ((conditions[j].dtype & dt.BOOLEAN) === 0) {
               return errorOprnd("LOGIC", "if")
             }
-            if (conditions[j].value) {
+            const val = Operators.condition[shapeOf(conditions[j])](conditions[j].value)
+            if (val) {
               const rpnLocal = tokens[i + j + 1].replace(/§/g, "\u00A0")
               const oprnd = evalRpn(rpnLocal, vars, decimalFormat, unitAware, lib)
               if (oprnd.dtype === dt.ERROR) { return oprnd }
@@ -1365,9 +1366,10 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
         if (control[level].condition) {
           const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib)
           if (result.dtype === dt.ERROR) { return result }
+          const val = Operators.condition[shapeOf(result)](result.value)
           control.push({
             type: "if",
-            condition: result.value,
+            condition: val,
             endOfBlock: statement.endOfBlock
           })
         } else {
@@ -1384,7 +1386,8 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
         } else {
           const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib)
           if (result.dtype === dt.ERROR) { return result }
-          control[control.length - 1].condition = result.value
+          const val = Operators.condition[shapeOf(result)](result.value)
+          control[control.length - 1].condition = val
         }
         break
       }
@@ -1408,7 +1411,8 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
           }
           const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib)
           if (result.dtype === dt.ERROR) { return result }
-          cntrl.condition = result.value
+          const val = Operators.condition[shapeOf(result)](result.value)
+          cntrl.condition = val
           if (cntrl.condition === true) {
             control.push(cntrl)
           } else {
