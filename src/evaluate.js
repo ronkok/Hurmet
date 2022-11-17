@@ -579,7 +579,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           range.dtype = dt.RANGE
           const step = o1.dtype !== dt.RATIONAL
             ? o1.value[2]
-            : Rnl.lessThan(o1.value, end.value)
+            : end.value === "∞" || Rnl.lessThan(o1.value, end.value)
             ? Rnl.one
             : Rnl.negate(Rnl.one)
           range.value = o1.dtype === dt.RATIONAL
@@ -840,7 +840,8 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "mean":
         case "median":
         case "variance":
-        case "stddev": {
+        case "stddev":
+        case "accumulate": {
           // Functions that reduce multiple arguments to one result.
           // TODO: unit-aware reducing functions.
           const numArgs = Number(tokens[i + 1])

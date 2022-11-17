@@ -610,6 +610,14 @@ const reduce = {
   stddev(list) {
     const variance = this.variance(list)
     return Rnl.power(variance, oneHalf)
+  },
+  accumulate(list) {
+    const v = new Array(list.length).fill(0)
+    v[0] = list[0]
+    for (let i = 1; i < list.length; i++) {
+      v[i] = Rnl.add(v[i - 1], list[i])
+    }
+    return v
   }
 }
 
@@ -665,7 +673,7 @@ export const multivarFunction = (arity, functionName, args) => {
     const value = Functions[arity][functionName](list)
 
     let dtype = args[0].dtype
-    if (arity === "reduce") {
+    if (arity === "reduce" && functionName !== "accumulate") {
       // Mask off any matrix or vector indicator from the dtype
       if (dtype & dt.MATRIX) { dtype -= dt.MATRIX }
       if (dtype & dt.ROWVECTOR) { dtype -= dt.ROWVECTOR }

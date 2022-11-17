@@ -23,7 +23,7 @@ const builtInFunctions = [
   "startSvg", "string", "tan", "tand", "tanh", "tanh", "trace", "transpose", "zeros", "Γ"
 ]
 
-const builtInReducerFunctions = ["dataframe",
+const builtInReducerFunctions = ["accumulate", "dataframe",
   "max", "mean", "median", "min", "product", "range", "stddev", "sum", "variance"
 ]
 
@@ -746,7 +746,7 @@ export const parse = (
           popRpnTokens(3)
           rpnStack.push({ prec: 3, symbol: ".." })
           if (str.charAt(0) === "]" || str.length === 0) {
-            rpn += '"∞"' // slice of the form: identifier[n:]
+            rpn += '"∞"' // slice of the form: identifier[n..]
           }
         }
         tex += token.output
