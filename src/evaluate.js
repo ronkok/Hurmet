@@ -1053,7 +1053,10 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
               o2.value, prevValue)
           }
           if (bool.value.dtype && bool.value.dtype === dt.ERROR) { return bool.value }
-          bool.dtype = dt.BOOLEANFROMCOMPARISON
+          bool.dtype = o1.dtype + dt.BOOLEANFROMCOMPARISON
+          if (bool.dtype & dt.RATIONAL) { bool.dtype -= dt.RATIONAL }
+          if (bool.dtype & dt.COMPLEX) { bool.dtype -= dt.COMPLEX }
+          if (bool.dtype & dt.STRING) { bool.dtype -= dt.STRING }
           oPrev = o2
           stack.push(Object.freeze(bool))
           break
