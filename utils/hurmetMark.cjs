@@ -437,7 +437,7 @@ const textAccent = {
   "\u0307": ".",
   "\u0308": '"',
   "\u030A": 'r',
-  "\u030c": "v",
+  "\u030c": "v"
 };
 
 const escapeRegEx = /[#$&%_~^]/g;
@@ -3372,7 +3372,6 @@ const dataFrameFromCSV = (str, vars) => {
   };
 
   const keyRegEx = /^(?:[Nn]ame|[Ii]tem|[Ll]able)$/;
-  const sumAboveRegEx = /^(?:= *)?sumAbove\(\)$/;
 
   const harvest = (datum) => {
     // Load a datum into the dataTable
@@ -3388,7 +3387,7 @@ const dataFrameFromCSV = (str, vars) => {
       }
     } else {
       if (row === 1) { data.push([]); } // First data row.
-      if (sumAboveRegEx.test(datum)) {
+      if (datum === "sumAbove()") {
         let sum = Rnl.zero;
         for (const num of data[col]) {
           if (!isNaN(num)) {
@@ -4889,7 +4888,7 @@ const builtInFunctions = [
   "startSvg", "string", "tan", "tand", "tanh", "tanh", "trace", "transpose", "zeros", "Γ"
 ];
 
-const builtInReducerFunctions = ["dataframe",
+const builtInReducerFunctions = ["accumulate", "dataframe",
   "max", "mean", "median", "min", "product", "range", "stddev", "sum", "variance"
 ];
 
@@ -5609,7 +5608,7 @@ const parse = (
           popRpnTokens(3);
           rpnStack.push({ prec: 3, symbol: ".." });
           if (str.charAt(0) === "]" || str.length === 0) {
-            rpn += '"∞"'; // slice of the form: identifier[n:]
+            rpn += '"∞"'; // slice of the form: identifier[n..]
           }
         }
         tex += token.output;
@@ -7368,6 +7367,14 @@ const reduce = {
   stddev(list) {
     const variance = this.variance(list);
     return Rnl.power(variance, oneHalf)
+  },
+  accumulate(list) {
+    const v = new Array(list.length).fill(0);
+    v[0] = list[0];
+    for (let i = 1; i < list.length; i++) {
+      v[i] = Rnl.add(v[i - 1], list[i]);
+    }
+    return v
   }
 };
 
@@ -7423,7 +7430,7 @@ const multivarFunction = (arity, functionName, args) => {
     const value = Functions[arity][functionName](list);
 
     let dtype = args[0].dtype;
-    if (arity === "reduce") {
+    if (arity === "reduce" && functionName !== "accumulate") {
       // Mask off any matrix or vector indicator from the dtype
       if (dtype & dt.MATRIX) { dtype -= dt.MATRIX; }
       if (dtype & dt.ROWVECTOR) { dtype -= dt.ROWVECTOR; }
@@ -7667,6 +7674,21 @@ const unary$1 = {
     percent(map)   { return mapMap(map, array => array.map(e => Rnl.multiply(oneTenth, e))) },
     factorial(map) { return mapMap(map, array => array.map(e => Rnl.factorial(e))) },
     not(map)       { return mapMap(map, array => array.map(e => !e)) }
+  }
+};
+
+const condition = {
+  // Deal with booleans. Return a single value, true or false.
+  // If a vector or matrix is received, all elements must be
+  // true in order to return a true. Otherwise return a false.
+  scalar(x) { return x },
+  vector(v) { return v.reduce((prev, curr) => prev && curr, true) },
+  matrix(m) {
+    const row = new Array(m.length);
+    for (let i = 0; i < m.length; i++) {
+      row[i] = m[i].reduce((prev, curr) => prev && curr, true);
+    }
+    return row.reduce((prev, curr) => prev && curr, true)
   }
 };
 
@@ -8614,6 +8636,7 @@ const Operators = Object.freeze({
   unary: unary$1,
   binary: binary$1,
   relations,
+  condition,
   dtype
 });
 
@@ -11096,7 +11119,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           range.dtype = dt.RANGE;
           const step = o1.dtype !== dt.RATIONAL
             ? o1.value[2]
-            : Rnl.lessThan(o1.value, end.value)
+            : end.value === "∞" || Rnl.lessThan(o1.value, end.value)
             ? Rnl.one
             : Rnl.negate(Rnl.one);
           range.value = o1.dtype === dt.RATIONAL
@@ -11357,7 +11380,8 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "mean":
         case "median":
         case "variance":
-        case "stddev": {
+        case "stddev":
+        case "accumulate": {
           // Functions that reduce multiple arguments to one result.
           // TODO: unit-aware reducing functions.
           const numArgs = Number(tokens[i + 1]);
@@ -11570,7 +11594,10 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
               o2.value, prevValue);
           }
           if (bool.value.dtype && bool.value.dtype === dt.ERROR) { return bool.value }
-          bool.dtype = dt.BOOLEANFROMCOMPARISON;
+          bool.dtype = o1.dtype + dt.BOOLEANFROMCOMPARISON;
+          if (bool.dtype & dt.RATIONAL) { bool.dtype -= dt.RATIONAL; }
+          if (bool.dtype & dt.COMPLEX) { bool.dtype -= dt.COMPLEX; }
+          if (bool.dtype & dt.STRING) { bool.dtype -= dt.STRING; }
           oPrev = o2;
           stack.push(Object.freeze(bool));
           break
@@ -11627,7 +11654,8 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             if ((conditions[j].dtype & dt.BOOLEAN) === 0) {
               return errorOprnd("LOGIC", "if")
             }
-            if (conditions[j].value) {
+            const val = Operators.condition[shapeOf(conditions[j])](conditions[j].value);
+            if (val) {
               const rpnLocal = tokens[i + j + 1].replace(/§/g, "\u00A0");
               const oprnd = evalRpn(rpnLocal, vars, decimalFormat, unitAware, lib);
               if (oprnd.dtype === dt.ERROR) { return oprnd }
@@ -11875,9 +11903,10 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
         if (control[level].condition) {
           const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib);
           if (result.dtype === dt.ERROR) { return result }
+          const val = Operators.condition[shapeOf(result)](result.value);
           control.push({
             type: "if",
-            condition: result.value,
+            condition: val,
             endOfBlock: statement.endOfBlock
           });
         } else {
@@ -11894,7 +11923,8 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
         } else {
           const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib);
           if (result.dtype === dt.ERROR) { return result }
-          control[control.length - 1].condition = result.value;
+          const val = Operators.condition[shapeOf(result)](result.value);
+          control[control.length - 1].condition = val;
         }
         break
       }
@@ -11918,7 +11948,8 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
           };
           const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib);
           if (result.dtype === dt.ERROR) { return result }
-          cntrl.condition = result.value;
+          const val = Operators.condition[shapeOf(result)](result.value);
+          cntrl.condition = val;
           if (cntrl.condition === true) {
             control.push(cntrl);
           } else {

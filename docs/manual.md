@@ -1298,6 +1298,12 @@ abs(z)
 
 : Absolute value of a real number. Magnitude of a complex number.
 
+accumulate(𝐕)
+
+: Takes a vector, 𝐕, and returns a new vector whose elements are each
+  the sum of the preceding elements in 𝐕.\
+  Example: ¢accumulate([2, 4, 1]) = [2, 6, 7]¢
+
 acos(_z_), asin(_z_), atan(_z_), asec(_z_), acsc(_z_), acot(_z_)
 
 : Inverse trigonometry functions. One can also call an inverse trigonometry
