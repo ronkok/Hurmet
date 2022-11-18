@@ -108,7 +108,7 @@ const textAccent = {
   "\u0307": ".",
   "\u0308": '"',
   "\u030A": 'r',
-  "\u030c": "v",
+  "\u030c": "v"
 }
 
 const escapeRegEx = /[#$&%_~^]/g
