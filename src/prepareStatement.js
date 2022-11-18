@@ -32,7 +32,7 @@ import { functionRegEx, drawRegEx, scanModule } from "./module"
  *    7. Return the result. Hurmet will attach it to ProseMirror "attrs" of that node.
  */
 
-const containsOperator = /[+\-×·*∘⌧/^%‰&√!¡|‖&=<>≟≠≤≥∈∉⋐∧∨⊻¬]|\xa0(function|modulo|\\atop|root|sum|\?{}|%|⎾⏋|⎿⏌|\[\]|\(\))\xa0/
+const containsOperator = /[+\-×·*∘⌧/^%‰&√!¡|‖&=<>≟≠≤≥∈∉⋐∧∨⊻¬]|\xa0(function|modulo|\\atop|root|sum|abs|cos|sin|tan|acos|asin|atan|sec|csc|cot|asec|acsc|acot|exp|log|ln|log10|log2|cosh|sinh|tanh|sech|csch|coth|acosh|asinh|atanh|asech|acsch|acoth|Gamma|Γ|logGamma|logΓ|logFactorial|cosd|sind|tand|acosd|asind|atand|secd|cscd|cotd|asecd|acscd|acotd|Re|Im|argument|chr|round|sqrt|sign|\?{}|%|⎾⏋|⎿⏌|\[\]|\(\))\xa0/
 const mustDoCalculation = /^(``.+``|[$$£¥\u20A0-\u20CF]?(\?{1,2}|@{1,2}|%{1,2}|!{1,2})[^=!(?@%!{})]*)$/
 const assignDataFrameRegEx = /^[^=]+=\s*``/
 const currencyRegEx = /^[$£¥\u20A0-\u20CF]/
