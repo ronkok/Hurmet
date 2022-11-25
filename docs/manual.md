@@ -61,8 +61,8 @@ document range by selecting text, then clicking one of the menu bar buttons:
 | ![link][] **—** ![upload][]          | Insert:\                           |
 | ![image][] ToC ![C][]                | Link…, Horizontal rule, Uploaded   |
 | ![T][]  ![comment][]                 | image…, Link to image…, Table of   |
-|                                      | Contents…, Calculation…, LaTeX…,   |
-|                                      | Comment                            |
+|                                      | Contents…, Calculation…, TeX…,     |
+|                                      | Comment…                           |
 +--------------------------------------+------------------------------------+
 | **¶** ![embed][] **H1 H2**           | Block styles:\                     |
 | ![align-center][] ![indent][]        | Plain paragraph, Code block,       |
