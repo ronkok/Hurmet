@@ -467,6 +467,7 @@ const unaries = Object.freeze([
   "textmd",
   "textnormal",
   "textrm",
+  "textsc",
   "textsf",
   "texttt",
   "textup",
