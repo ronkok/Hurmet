@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="katex.min.css">
 <link rel="stylesheet" href="styles.css">
 <style id="pageStyle">@media print {@page{size: letter; margin: 16mm 0.75in 16mm 0.75in;}}</style>
+<script type="module" src="prosemirror.mjs" defer></script>
 </head>
 
 <body>
@@ -105,7 +106,6 @@ Display:
 
 <div id="copyright">Copyright © 2020-2022 Ron Kok. Released under the <a href="https://opensource.org/licenses/MIT">MIT License</a></div>
 
-<script type="module" src="prosemirror.mjs"></script>
 <script>
   window.addEventListener('beforeunload', function (e) {
 	// If changes have been made, put up a dialog box to warn the user.
