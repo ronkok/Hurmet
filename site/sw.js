@@ -1,34 +1,34 @@
 
 // Service worker for Hurmet
 
-const version = 'hurmet_2022-12-02';
+const version = 'hurmet_2022-12-02-02';
 
 const assets = [
-  './offline.html',
-  './prosemirror.min.mjs',
-  './styles.min.css',
-  './katex.min.css',
-  './images/favicon.ico',
-  './fonts/KaTeX_AMS-Regular.woff2',
-  './fonts/KaTeX_Caligraphic-Bold.woff2',
-  './fonts/KaTeX_Caligraphic-Regular.woff2',
-  './fonts/KaTeX_Fraktur-Bold.woff2',
-  './fonts/KaTeX_Fraktur-Regular.woff2',
-  './fonts/KaTeX_Main-Bold.woff2',
-  './fonts/KaTeX_Main-BoldItalic.woff2',
-  './fonts/KaTeX_Main-Italic.woff2',
-  './fonts/KaTeX_Main-Regular.woff2',
-  './fonts/KaTeX_Math-BoldItalic.woff2',
-  './fonts/KaTeX_Math-Italic.woff2',
-  './fonts/KaTeX_SansSerif-Bold.woff2',
-  './fonts/KaTeX_SansSerif-Italic.woff2',
-  './fonts/KaTeX_SansSerif-Regular.woff2',
-  './fonts/KaTeX_Script-Regular.woff2',
-  './fonts/KaTeX_Size1-Regular.woff2',
-  './fonts/KaTeX_Size2-Regular.woff2',
-  './fonts/KaTeX_Size3-Regular.woff2',
-  './fonts/KaTeX_Size4-Regular.woff2',
-  './fonts/KaTeX_Typewriter-Regular.woff2'
+  'https://hurmet.app/offline.html',
+  'https://hurmet.app/prosemirror.min.mjs',
+  'https://hurmet.app/styles.min.css',
+  'https://hurmet.app/katex.min.css',
+  'https://hurmet.app/images/favicon.ico',
+  'https://hurmet.app/fonts/KaTeX_AMS-Regular.woff2',
+  'https://hurmet.app/fonts/KaTeX_Caligraphic-Bold.woff2',
+  'https://hurmet.app/fonts/KaTeX_Caligraphic-Regular.woff2',
+  'https://hurmet.app/fonts/KaTeX_Fraktur-Bold.woff2',
+  'https://hurmet.app/fonts/KaTeX_Fraktur-Regular.woff2',
+  'https://hurmet.app/fonts/KaTeX_Main-Bold.woff2',
+  'https://hurmet.app/fonts/KaTeX_Main-BoldItalic.woff2',
+  'https://hurmet.app/fonts/KaTeX_Main-Italic.woff2',
+  'https://hurmet.app/fonts/KaTeX_Main-Regular.woff2',
+  'https://hurmet.app/fonts/KaTeX_Math-BoldItalic.woff2',
+  'https://hurmet.app/fonts/KaTeX_Math-Italic.woff2',
+  'https://hurmet.app/fonts/KaTeX_SansSerif-Bold.woff2',
+  'https://hurmet.app/fonts/KaTeX_SansSerif-Italic.woff2',
+  'https://hurmet.app/fonts/KaTeX_SansSerif-Regular.woff2',
+  'https://hurmet.app/fonts/KaTeX_Script-Regular.woff2',
+  'https://hurmet.app/fonts/KaTeX_Size1-Regular.woff2',
+  'https://hurmet.app/fonts/KaTeX_Size2-Regular.woff2',
+  'https://hurmet.app/fonts/KaTeX_Size3-Regular.woff2',
+  'https://hurmet.app/fonts/KaTeX_Size4-Regular.woff2',
+  'https://hurmet.app/fonts/KaTeX_Typewriter-Regular.woff2'
 ];
 
 self.addEventListener("install", event => {
@@ -60,7 +60,7 @@ self.addEventListener("fetch", event => {
   if (event.request.url === "https://hurmet.app/") {
     event.respondWith(
       fetch(event.request).catch(err =>
-        self.cache.open(version).then(cache => cache.match("/offline.html"))
+        self.cache.open(version).then(cache => cache.match("https://hurmet.app/offline.html"))
       )
     )
   } else {
