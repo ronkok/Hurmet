@@ -1,40 +1,57 @@
 
 // Service worker for Hurmet
 
-const version = 'hurmet_2022-11-29';
+const version = 'hurmet_2022-11-16';
 // Cache IDs
 const coreID = version + '_core';  // JavaScript & CSS
 const assetsID = version + '_assets'; // images, fonts, CSV, & txt
 const cacheIDs = [coreID, assetsID];
 
-const coreFiles = [
+const assets = [
   'https://hurmet.app/offline.html',
   'https://hurmet.app/prosemirror.min.mjs',
-  'https://hurmet.app/docs/demo.min.mjs',
   'https://hurmet.app/styles.min.css',
-  'https://hurmet.app/katex.css'
+  'https://hurmet.app/katex.min.css',
+  'https://hurmet.app/images/favicon.ico',
+  'https://hurmet.app/fonts/KaTeX_AMS-Regular.woff2',
+  'https://hurmet.app/fonts/KaTeX_Caligraphic-Bold.woff2',
+  'https://hurmet.app/fonts/KaTeX_Caligraphic-Regular.woff2',
+  'https://hurmet.app/fonts/KaTeX_Fraktur-Bold.woff2',
+  'https://hurmet.app/fonts/KaTeX_Fraktur-Regular.woff2',
+  'https://hurmet.app/fonts/KaTeX_Main-Bold.woff2',
+  'https://hurmet.app/fonts/KaTeX_Main-BoldItalic.woff2',
+  'https://hurmet.app/fonts/KaTeX_Main-Italic.woff2',
+  'https://hurmet.app/fonts/KaTeX_Main-Regular.woff2',
+  'https://hurmet.app/fonts/KaTeX_Math-BoldItalic.woff2',
+  'https://hurmet.app/fonts/KaTeX_Math-Italic.woff2',
+  'https://hurmet.app/fonts/KaTeX_SansSerif-Bold.woff2',
+  'https://hurmet.app/fonts/KaTeX_SansSerif-Italic.woff2',
+  'https://hurmet.app/fonts/KaTeX_SansSerif-Regular.woff2',
+  'https://hurmet.app/fonts/KaTeX_Script-Regular.woff2',
+  'https://hurmet.app/fonts/KaTeX_Size1-Regular.woff2',
+  'https://hurmet.app/fonts/KaTeX_Size2-Regular.woff2',
+  'https://hurmet.app/fonts/KaTeX_Size3-Regular.woff2',
+  'https://hurmet.app/fonts/KaTeX_Size4-Regular.woff2',
+  'https://hurmet.app/fonts/KaTeX_Typewriter-Regular.woff2'
 ];
 
-//
-// Event Listeners
-//
-
-// On install, cache Javascript & CSS
-self.addEventListener('install', function(event) {
-  self.skipWaiting()
-  event.waitUntil(caches.open(coreID).then(function(cache) {
-    coreFiles.forEach(function(file) {
-      cache.add(new Request(file));
-    });
-    return cache;
-  }));
+self.addEventListener("install", event => {
+  console.log("installing...");
+  event.waitUntil(
+    caches
+      .open(version)
+      .then(cache => {
+        return cache.addAll(assets);
+      })
+      .catch(err => console.log(err))
+  );
 });
 
 // On version update, remove old cached files
 self.addEventListener('activate', function(event) {
   event.waitUntil(caches.keys().then(function(keys) {
     return Promise.all(keys.filter(function(key) {
-      return !cacheIDs.includes(key);
+      return key !== version
     }).map(function(key) {
       return caches.delete(key);
     }));
@@ -43,68 +60,18 @@ self.addEventListener('activate', function(event) {
   }));
 });
 
-self.addEventListener('fetch', function(event) {
-
-  // Get the request
-  const request = event.request;
-
-  // Ignore non-GET requests
-  if (request.method !== 'GET') { return }
-
-  // core: Javascript & CSS
-  // Offline-first, pre-cached
-  if (request.headers.get('Accept').includes('text/css') ||
-      request.headers.get('Accept').includes('text/javascript')) {
+self.addEventListener("fetch", event => {
+  if (event.request.url === "https://hurmet.app/") {
     event.respondWith(
-      caches.match(request).then(function(response) {
-        return response || fetch(request).then(function(response) {
-
-          // Return the response
-          return response;
-
-        });
-      })
-    );
-    return;
-  }
-
-  // HTML from network
-  if (event.request.mode === 'navigate') {
-    event.respondWith((async() => {
-      try {
-        const networkResponse = await fetch(event.request);
-        return networkResponse;
-      } catch (error) {
-        // catch is only triggered if an exception is thrown, which is likely
-        // due to a network error.
-        const cache = await caches.open(coreID);
-        const cachedResponse = await cache.match("https://hurmet.app/offline.html");
-        return cachedResponse;
-      }
-    })());
-  }
-
-  // Assets: Images, fonts, csv, & txt
-  // Offline-first, cache as you browse
-  if (request.headers.get('Accept').includes('image') ||
-      request.headers.get('Accept').includes('font/woff2') ||
-      request.headers.get('Accept').includes('text/csv') ||
-      request.headers.get('Accept').includes('text/plain')) {
+      fetch(event.request).catch(err =>
+        self.cache.open(version).then(cache => cache.match("https://hurmet.app/offline.html"))
+      )
+    )
+  } else {
     event.respondWith(
-      caches.match(request).then(function(response) {
-        return response || fetch(request).then(function(response) {
-
-          const copy = response.clone();
-          event.waitUntil(caches.open(assetsID).then(function(cache) {
-            return cache.put(request, copy);
-          }));
-
-          // Return the requested file
-          return response;
-
-        });
-      })
+      fetch(event.request).catch(err =>
+        caches.match(event.request).then(response => response)
+      )
     );
   }
-
 });
