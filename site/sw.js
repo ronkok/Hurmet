@@ -1,14 +1,18 @@
 
 // Service worker for Hurmet
 
-const version = 'hurmet_2022-12-01-05';
+const version = 'hurmet_2022-12-01-06';
 // Cache IDs
-const coreID = version + '_core';  // HTML
-const assetsID = version + '_assets'; // JS, CSS, images, fonts, CSV, & txt
+const coreID = version + '_core';  // JavaScript & CSS
+const assetsID = version + '_assets'; // images, fonts, CSV, & txt
 const cacheIDs = [coreID, assetsID];
 
 const coreFiles = [
   'https://hurmet.app/offline.html',
+  'https://hurmet.app/prosemirror.min.mjs',
+  'https://hurmet.app/docs/demo.min.mjs',
+  'https://hurmet.app/styles.min.css',
+  'https://hurmet.app/katex.min.css',
   'https://hurmet.app/images/favicon.ico'
 ];
 
@@ -16,7 +20,7 @@ const coreFiles = [
 // Event Listeners
 //
 
-// On install, cache Javascript
+// On install, cache Javascript & CSS
 self.addEventListener('install', function(event) {
   self.skipWaiting()
   event.waitUntil(caches.open(coreID).then(function(cache) {
@@ -48,10 +52,10 @@ self.addEventListener('fetch', function(event) {
   // Ignore non-GET requests
   if (request.method !== 'GET') { return }
 
-  /*
   // core: Javascript & CSS
   // Offline-first, pre-cached
-  if (request.headers.get('Accept').includes('text/javascript')) {
+  if (request.headers.get('Accept').includes('text/css') ||
+      request.headers.get('Accept').includes('text/javascript')) {
     event.respondWith(
       caches.match(request).then(function(response) {
         console.log(request)
@@ -64,7 +68,7 @@ self.addEventListener('fetch', function(event) {
       })
     );
     return;
-  } */
+  }
 
   // HTML from network
   if (event.request.mode === 'navigate') {
@@ -84,9 +88,7 @@ self.addEventListener('fetch', function(event) {
 
   // Assets: Images, fonts, csv, & txt
   // Offline-first, cache as you browse
-  if (request.headers.get('Accept').includes('text/javascript') ||
-      request.headers.get('Accept').includes('text/css') ||
-      request.headers.get('Accept').includes('image') ||
+  if (request.headers.get('Accept').includes('image') ||
       request.headers.get('Accept').includes('font/woff2') ||
       request.headers.get('Accept').includes('text/csv') ||
       request.headers.get('Accept').includes('text/plain')) {
