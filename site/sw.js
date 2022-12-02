@@ -1,11 +1,7 @@
 
 // Service worker for Hurmet
 
-const version = 'hurmet_2022-11-16';
-// Cache IDs
-const coreID = version + '_core';  // JavaScript & CSS
-const assetsID = version + '_assets'; // images, fonts, CSV, & txt
-const cacheIDs = [coreID, assetsID];
+const version = 'hurmet_2022-12-02-03';
 
 const assets = [
   'https://hurmet.app/offline.html',
@@ -36,7 +32,6 @@ const assets = [
 ];
 
 self.addEventListener("install", event => {
-  console.log("installing...");
   event.waitUntil(
     caches
       .open(version)
