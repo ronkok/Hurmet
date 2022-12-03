@@ -1,5 +1,5 @@
-import { hurmet } from "./hurmet.mjs"
-import { md2ast } from "../src/md2ast"
+import { hurmet } from "./hurmet.js"
+import { md2ast } from "../src/md2ast.js"
 
 const sanitizeUrl = function(url) {
   if (url == null) {

@@ -2,7 +2,9 @@
 /* eslint-disable comma-spacing */
 /* eslint-disable indent-legacy */
 /* eslint-disable no-console */
-const NS = require("./hurmet.cjs")
+import * as NS from '../utils/hurmetMark.js'
+
+//const NS = require("./hurmet.cjs")
 
 /* Unit tests.
  * For unit tests, I merely check if module outputs match their expected output.

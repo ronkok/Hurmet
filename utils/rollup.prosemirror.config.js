@@ -7,7 +7,7 @@ export default {
     format: "es",
     name: "prosemirror",
     sourcemap: false,
-    file: "preview/prosemirror.mjs"
+    file: "preview/prosemirror.js"
   },
   plugins: [resolve(), commonjs()]
 };

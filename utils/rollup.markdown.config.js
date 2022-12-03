@@ -1,4 +1,4 @@
 export default {
   input: "./utils/hurmetMark.js",
-  output: { format: "cjs", name: "hurmetMark", exports: "auto", file: "./utils/hurmetMark.cjs" }
+  output: { format: "es", name: "hurmetMd", exports: "auto", file: "./utils/hurmetMd.js" }
 }

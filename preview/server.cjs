@@ -10,9 +10,9 @@ var fs = require('fs');
 // Port number to use
 var port = process.argv[2] || 8000;
 // Colors for CLI output
-var WHT = '\033[39m';
-var RED = '\033[91m';
-var GRN = '\033[32m';
+var WHT = '\x1b[39m';
+var RED = '\x1b[91m';
+var GRN = '\x1b[32m';
 
 // Create the server
 http.createServer(function (request, response) {
@@ -27,7 +27,6 @@ http.createServer(function (request, response) {
         '.html': 'text/html',
         '.css':  'text/css',
         '.js':   'text/javascript',
-        '.mjs':  'text/javascript',
         '.json': 'text/json',
         '.svg':  'image/svg+xml'
     };
