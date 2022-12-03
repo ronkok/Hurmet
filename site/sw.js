@@ -1,7 +1,7 @@
 
 // Service worker for Hurmet
 
-const version = 'hurmet_2022-12-02-05';
+const version = 'hurmet_2022-12-02-06';
 // Cache IDs
 const coreID = version + '_core';  // JavaScript & CSS
 const assetsID = version + '_assets'; // images, fonts, CSV, & txt
@@ -58,7 +58,6 @@ self.addEventListener('fetch', function(event) {
       request.headers.get('Accept').includes('text/javascript')) {
     event.respondWith(
       caches.match(request).then(function(response) {
-        console.log(request)
         return response || fetch(request).then(function(response) {
 
           // Return the response
