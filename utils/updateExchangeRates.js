@@ -1,4 +1,4 @@
-const fs = require("fs")  // Node.js file system
+import * as fs from 'fs';  // Node.js file system
 const ecbData = fs.readFileSync('utils/ECB Exchange Rates.xml').toString('utf8')
 let unitModule = fs.readFileSync('src/units.js').toString('utf8')
 
