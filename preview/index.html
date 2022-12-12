@@ -5,19 +5,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hurmet.app</title>
+<link rel="icon" type="image/png" href="../site/images/favicon.png">
 
-<link rel="stylesheet" href="katex.min.css">
+<link rel="stylesheet" href="katex.min.css" defer>
 <link rel="stylesheet" href="styles.css">
 <style id="pageStyle">@media print {@page{size: letter; margin: 16mm 0.75in 16mm 0.75in;}}</style>
-<script type="module" src="prosemirror.js" defer></script>
 </head>
 
 <body>
 <nav>
    <ul>
     <li><a href="./examples.html" target="_blank">Examples</a></li>
-     <li><a href="./docs/en/manual.html" target="_blank">Documentation</a></li>
-     <li><a href="https://github.com/ronkok/Hurmet" target="_blank">GitHub</a></li>
+     <li><a href="./manual.html" target="_blank">Documentation</a></li>
+     <li><a href="https://github.com/ronkok/Hurmet" target="_blank" style="color:#000">GitHub</a></li>
    </ul>
 </nav>
 
@@ -106,6 +106,7 @@ Display:
 
 <div id="copyright">Copyright © 2020-2022 Ron Kok. Released under the <a href="https://opensource.org/licenses/MIT">MIT License</a></div>
 
+<script src="prosemirror.js"></script>
 <script>
   window.addEventListener('beforeunload', function (e) {
 	// If changes have been made, put up a dialog box to warn the user.

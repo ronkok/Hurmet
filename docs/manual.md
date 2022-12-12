@@ -4,7 +4,7 @@
    <meta charset="utf-8">
    <meta name="viewport" content="width=device-width, initial-scale=1">
    <title>Hurmet Manual</title>
-   <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+   <link rel="icon" type="image/png" href="./images/favicon.png">
    <link rel="stylesheet" href="katex.min.css">
    <link rel="stylesheet" href="docStyles.css">
 </head>
@@ -2437,6 +2437,6 @@ Copyright © 2020-2022 Ron Kok. Released under the [MIT License](https://opensou
 <div id="demo-output"></div>
 </div> <!-- demo -->
 
-<script type="module" src="../demo.min.js"></script>
+<script src="../demo.min.js"></script>
 </body>
 </html>
