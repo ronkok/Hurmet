@@ -8,7 +8,6 @@ const handleContents = (view, schema, str, format) => {
   let doc
 
   if (format === "hurmet") {
-    str = str.replace(/(?:indented_paragraph|folded_paragraph)/g, "paragraph")
     doc = JSON.parse(str)
   } else if (format === "markdown") {
     const ast = md2ast(str)
