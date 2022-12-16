@@ -1,7 +1,7 @@
 
 // Service worker for Hurmet
 
-const version = 'hurmet_2022-12-16-05';
+const version = 'hurmet_2022-12-16-06';
 // Cache IDs
 const coreID = version + '_core';  // JavaScript & CSS
 const assetsID = version + '_assets'; // images, fonts, CSV, & txt
@@ -15,7 +15,6 @@ const coreFiles = [
   'https://hurmet.app/prosemirror.min.js',
   'https://hurmet.app/demo.js',
   'https://hurmet.app/katex.min.css',
-  'https://hurmet.app/temml.min.css',
   'https://hurmet.app/styles.min.css',
   'https://hurmet.app/docStyles.min.css'
 ];
