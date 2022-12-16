@@ -1,7 +1,5 @@
 /* eslint-disable */
-import { hurmet } from "./hurmet"
 import { codeJar, selectedText, textBeforeCursor, textAfterCursor } from "./codejar"
-import { katex } from "./katex"
 
 'use strict'
 

@@ -1,6 +1,6 @@
 export default [
   {
     input: "./src/hurmet.js",
-    output: { format: "es", name: "hurmet", exports: "auto", file: "./utils/hurmet.js" }
+    output: { format: "umd", name: "hurmet", sourcemap: false, file: "preview/hurmet.js" }
   }
 ]

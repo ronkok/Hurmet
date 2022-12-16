@@ -720,10 +720,10 @@ rules.set("tex", {
   match: anyScopeRegex(/^(?:\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$|\$((?:\\[\s\S]|[^\\])+?)\$)/),
   parse: function(capture, state) {
     if (capture[2]) {
-      const tex = capture[2].trim().replace(/\n/g, " ").replace(/\\\\\\\\/g, "\\\\").replace(/\\\$/g, "$")
+      const tex = capture[2].trim().replace(/\n/g, " ")
       return { content: "", attrs: { tex } }
     } else {
-      const tex = capture[1].trim().replace(/\\\\\\\\/g, "\\\\").replace(/\\\$/g, "$")
+      const tex = capture[1].trim()
       return { content: "", attrs: { tex, displayMode: true } }
     }
   }
@@ -873,6 +873,24 @@ rules.set("text", {
 });
 
 const doNotEscape = ["calculation", "code", "tex"]
+const textModeRegEx = /\\(ce|text|hbox|raisebox|fbox)\{/
+
+const identifyTeX = (source) => {
+  // In TeX, a pair of $…$ delimiters can be nested inside \text{…}.
+  // Parse the string and do not end on a $ inside a {} group.
+  let prevChar = "$"
+  let groupLevel = 0
+  for (let i = 1; i < source.length; i++) {
+    const ch = source.charAt(i)
+    if (ch === "{" && prevChar !== "\\") { groupLevel += 1 }
+    if (ch === "}" && prevChar !== "\\") { groupLevel -= 1 }
+    if (ch === "$" && prevChar !== "\\" && groupLevel === 0) {
+      return [source.slice(0, i + 1), null, source.slice(1, i)]
+    }
+    prevChar = ch
+  }
+  return [source, null, source.slice(1, -1)]
+}
 
 const parse = (source, state) => {
   if (!state.inline) { source += "\n\n"; }
@@ -891,6 +909,9 @@ const parse = (source, state) => {
         ruleName = currRuleName;
         break
       }
+    }
+    if (ruleName === "tex" && capture[2] && textModeRegEx.test(capture[2])) {
+      capture = identifyTeX(source)  // Check a TeX string for nested $
     }
     const parsed = rule.parse(capture, state);
     if (Array.isArray(parsed)) {

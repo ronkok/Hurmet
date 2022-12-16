@@ -3,11 +3,6 @@ import {Schema} from "prosemirror-model"
 import {findWrapping, liftTarget, canSplit, ReplaceAroundStep} from "prosemirror-transform"
 import {Slice, Fragment, NodeRange} from "prosemirror-model"
 import { renderToC, tocLevels } from "./paginate"
-import {dt} from "./constants"
-import { Draw } from "./draw"
-import { katex } from "./katex.mjs"
-import { temml } from "./temml.mjs"
-import { renderMD } from "./renderMD"
 
 // Helpers for creating a schema that supports tables.
 
@@ -325,10 +320,10 @@ export const nodes = {
       //if (node.attrs.dtype !== dt.IMAGE) {
       dom = document.createElement('span')
       dom.classList = "hurmet-calc"
-      if (node.attrs.dtype && node.attrs.dtype === dt.DRAWING) {
+      if (node.attrs.dtype && node.attrs.dtype === hurmet.dt.DRAWING) {
         dom = document.createElement('span')
-        dom.appendChild(Draw.renderSVG(node.attrs.resultdisplay))
-      } else if (node.attrs.dtype && node.attrs.dtype === dt.MODULE &&
+        dom.appendChild(hurmet.draw.renderSVG(node.attrs.resultdisplay))
+      } else if (node.attrs.dtype && node.attrs.dtype === hurmet.dt.MODULE &&
         functionRegEx.test(node.attrs.entry)) {
         dom.appendChild(document.createElement('pre'))
         dom.firstChild.appendChild(document.createElement('code'))
@@ -404,7 +399,7 @@ export const nodes = {
       container.appendChild(triangle)
       const dom = document.createElement('span')
       dom.className = "comment-payload"
-      dom.appendChild(renderMD(node.attrs.comment))
+      dom.appendChild(hurmet.renderMD(node.attrs.comment))
       container.appendChild(dom)
       return container
     }

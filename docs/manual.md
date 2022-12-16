@@ -5,8 +5,11 @@
    <meta name="viewport" content="width=device-width, initial-scale=1">
    <title>Hurmet Manual</title>
    <link rel="icon" type="image/png" href="./images/favicon.png">
+   <script src="katex.min.js"></script>
    <link rel="stylesheet" href="katex.min.css">
    <link rel="stylesheet" href="docStyles.css">
+   <script src="katex.min.js"></script>
+   <script src="hurmet.min.js"></script>
 </head>
 
 <body>
@@ -783,9 +786,8 @@ i>  Notice that a number literal must begin and end with a numeral, not a decima
     symbol. Hurmet will not recognize `5.` as a number.
 
     Hurmet’s default decimal symbol is a dot. You can choose instead to enter
-    numbers with a decimal comma via a drop-down menu labeled “●”. Numbers are
+    numbers with a decimal comma via a drop-down menu in the **Doc** menu. Numbers are
     never entered with a thousands separator, but they can be _displayed_ with one.
-    The ● menu also controls that display.
 
     Hurmet always saves a decimal symbol as a dot. It’s only the display that changes.
 
@@ -818,7 +820,7 @@ Complex Number
 
 Unit
 
-:   A Humet _unit_ can be applied to a numberic value.
+:   A Humet _unit_ can be applied to a numeric value.
     There are three ways to write a Hurmet unit.
 
     1. A unit name between apostrophes, aka single straight quotation marks,
@@ -2437,6 +2439,6 @@ Copyright © 2020-2022 Ron Kok. Released under the [MIT License](https://opensou
 <div id="demo-output"></div>
 </div> <!-- demo -->
 
-<script src="../demo.min.js"></script>
+<script src="demo.js"></script>
 </body>
 </html>

@@ -4,8 +4,6 @@ import { isVector } from "./matrix"
 import { Rnl } from "./rational"
 import { md2ast } from "./md2ast"
 
-// This module is heavily influenced by ASCIIsvg.js, by Peter Jipsen
-
 const startSvg = _ => {
   return {
     tag: 'svg',
@@ -691,7 +689,7 @@ const renderSVG = dwg => {
   return svg
 }
 
-export const Draw = Object.freeze({
+export const draw = Object.freeze({
   startSvg,
   functions,
   renderSVG

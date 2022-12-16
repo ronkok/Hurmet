@@ -1,6 +1,5 @@
 import { schema } from "./schema"
 import { openMathPrompt } from "./mathprompt"
-import { hurmet } from "./hurmet"
 
 // nodeviews.js
 

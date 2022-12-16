@@ -1,8 +1,4 @@
 import { codeJar, selectedText, textBeforeCursor, textAfterCursor } from "./codejar"
-import { autoCorrect } from "./autoCorrect"
-import { parse } from "./parser"
-import { prepareStatement } from "./prepareStatement"
-import { katex } from "./katex.mjs"
 
 const commaRegEx = /"[^"]*"|[0-9]+,[0-9]+|[A-Za-zıȷ\u0391-\u03D5\uD835][A-Za-z0-9_ıȷ\u0391-\u03D5\uD835\uDC00-\uDFFF]/g
 const dotRegEx = /"[^"]*"|[0-9]+\.[0-9]+|[A-Za-zıȷ\u0391-\u03D5\uD835][A-Za-z0-9_ıȷ\u0391-\u03D5\uD835\uDC00-\uDFFF]/g
@@ -94,14 +90,14 @@ export function openMathPrompt(options) {
       const selText = selectedText(editor)
       if (selText.length === 0) {
         // eslint-disable-next-line no-undef
-        autoCorrect(jar, textBeforeCursor(editor), textAfterCursor(editor))
+        hurmet.autoCorrect(jar, textBeforeCursor(editor), textAfterCursor(editor))
       }
       tex = jar.toString()
       if (decimalSymbol === ",") { tex = dotFromCommaForStorage(tex) }
       isUDF = functionRegEx.test(tex)
       if (!isUDF) {
         // eslint-disable-next-line no-undef
-        tex = parse(tex, options.decimalFormat, false, true)
+        tex = hurmet.parse(tex, options.decimalFormat, false, true)
       }
     } else {
       tex = code
@@ -145,7 +141,7 @@ export function openMathPrompt(options) {
     const params = (isTex)
       ? { tex: mathString }
       // eslint-disable-next-line no-undef
-      : prepareStatement(mathString, options.decimalFormat)
+      : hurmet.prepareStatement(mathString, options.decimalFormat)
     params.displayMode = options.attrs.displayMode
     close()
     options.callback(params)

@@ -7,7 +7,8 @@ import { evaluate } from "./evaluate"
 import { scanModule } from "./module"
 import { updateCalculations } from "./updateCalculations"
 import { calculate } from "./calculate"
-import { Draw } from "./draw"
+import { draw } from "./draw"
+import { md2ast } from "./md2ast"
 
 /*
  * This file bundles together and exposes the calculation parts of Hurmet.
@@ -36,15 +37,16 @@ import { Draw } from "./draw"
  *         vars is updated with new variable data each time calculate() is called.
  */
 
-export const hurmet = Object.freeze({
+export default {
   dt,
   parse,
   calculate,
   autoCorrect,
   prepareStatement,
   improveQuantities,
+  draw,
   evaluate,
+  md2ast,
   scanModule,
-  updateCalculations,
-  Draw
-})
+  updateCalculations
+}

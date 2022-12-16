@@ -7,8 +7,6 @@ let manual = fs.readFileSync('docs/manual.md').toString('utf8')
 // convert Markdown to HTML
 manual =  hurmetMD.md2html(manual, true)
 fs.writeFileSync('site/manual.html', manual)
-manual = manual.replace("../demo.min.js", "demo.js")
-fs.writeFileSync('preview/manual.html', manual)
 
 // Now translate the unit-definitions file from Markdown to HTML.
 let units = fs.readFileSync('docs/unit-definitions.md').toString('utf8')
@@ -28,5 +26,4 @@ while ((parts = fractionRegEx.exec(units)) !== null) {
     + "<span>" + parts[2] + "</span></span></td>"
     + units.slice(parts.index + parts[0].length)
 }
-fs.writeFileSync('preview/unit-definitions.html', units)
 fs.writeFileSync('site/unit-definitions.html', units)

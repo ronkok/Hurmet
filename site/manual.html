@@ -4,9 +4,12 @@
    <meta charset="utf-8">
    <meta name="viewport" content="width=device-width, initial-scale=1">
    <title>Hurmet Manual</title>
-   <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+   <link rel="icon" type="image/png" href="./images/favicon.png">
+   <script src="katex.min.js"></script>
    <link rel="stylesheet" href="katex.min.css">
    <link rel="stylesheet" href="docStyles.css">
+   <script src="katex.min.js"></script>
+   <script src="hurmet.min.js"></script>
 </head>
 <body>
 <main>
@@ -358,7 +361,7 @@ a[5..]    # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong><
 </dd>
 <p><img src="images/NumberRailroad.svg" alt="integers, decimals, percentages, scientific notation, mixed fractions, or hexadecimal" id="number-rr" width="650"></p>
 <div class="indented"><p>Notice that a number literal must begin and end with a numeral, not a decimal symbol. Hurmet will not recognize <code>5.</code> as a number.</p>
-<p>Hurmet’s default decimal symbol is a dot. You can choose instead to enter numbers with a decimal comma via a drop-down menu labeled “●”. Numbers are never entered with a thousands separator, but they can be <em>displayed</em> with one. The ● menu also controls that display.</p>
+<p>Hurmet’s default decimal symbol is a dot. You can choose instead to enter numbers with a decimal comma via a drop-down menu in the <strong>Doc</strong> menu. Numbers are never entered with a thousands separator, but they can be <em>displayed</em> with one.</p>
 <p>Hurmet always saves a decimal symbol as a dot. It’s only the display that changes.</p>
 <p>While calculations are underway, Hurmet holds every number in memory in rational number format. The numerator and denominator are each integers of arbitrary length. So Hurmet can work precisely with numbers like 0.1 and 0¹⁄₃. Trignonometry and roots are done in double-precision floating point, good to about 15 significant digits.</p>
 </div><dt id='complex-number'>Complex Number</dt>
@@ -375,7 +378,7 @@ a[5..]    # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong><
 <p><span class="tex" data-tex="z = z{_\text{1}} + z{_\text{2}} = \textcolor{blue}{(2 + j 3)+ (4 ∠ 30 °)}= 5.46 + \mathrm{j5}"></span></p>
 </div></dd>
 <dt id='unit'>Unit</dt>
-<dd><p>A Humet <em>unit</em> can be applied to a numberic value. There are three ways to write a Hurmet unit.</p>
+<dd><p>A Humet <em>unit</em> can be applied to a numeric value. There are three ways to write a Hurmet unit.</p>
 <ol><li>A unit name between apostrophes, aka single straight quotation marks, written after a numeric value.</li>
 <li>A unit symbol written after a numeric value.</li>
 <li>A currency symbol written before a non-negative number.</li>
@@ -1219,6 +1222,6 @@ end</code></pre><p>A Hurmet document can load an entire module into one variable
 <div id="input-container"><form><div id="demo-input"></div></form></div>
 <div id="demo-output"></div>
 </div> <!-- demo -->
-<script type="module" src="../demo.min.js"></script>
+<script src="demo.js"></script>
 </body>
 </html>

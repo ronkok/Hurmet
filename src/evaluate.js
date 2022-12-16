@@ -17,7 +17,7 @@ import { format } from "./format"
 import { insertOneHurmetVar } from "./insertOneHurmetVar"
 import { formatResult } from "./result"
 import { Cpx } from "./complex"
-import { Draw } from "./draw"
+import { draw } from "./draw"
 
 // evaluate.js
 
@@ -676,7 +676,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         }
 
         case "startSvg":
-          stack.push({ value: Draw.startSvg(), unit: null, dtype: dt.DRAWING })
+          stack.push({ value: draw.startSvg(), unit: null, dtype: dt.DRAWING })
           break
 
         case "abs":
@@ -987,12 +987,12 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             args[j] = stack.pop()
           }
           let oprnd
-          if (vars.svg && (functionName === "plot" || (Draw.functions[functionName]))) {
+          if (vars.svg && (functionName === "plot" || (draw.functions[functionName]))) {
             if (functionName === "plot") {
               args.splice(1, 0, decimalFormat)
               oprnd = plot(...args)
             } else {
-              oprnd = Draw.functions[functionName](...args)
+              oprnd = draw.functions[functionName](...args)
             }
           } else if (nextToken(tokens, i) === ".") {
             // Function from a module
@@ -1284,7 +1284,7 @@ const plot = (svg, decimalFormat, fun, numPoints, xMin, xMax) => {
     //TODO: error message.
   }
   const pth = { value: pathValue, unit: null, dtype: dt.MATRIX + dt.RATIONAL }
-  return Draw.functions.path(svg, pth, "L")
+  return draw.functions.path(svg, pth, "L")
 }
 
 const elementFromIterable = (iterable, index, step) => {
@@ -1337,7 +1337,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
     }
   }
   if (udf.dtype === dt.DRAWING) {
-    vars["svg"] = { value: Draw.startSvg(), unit: null, dtype: dt.DRAWING }
+    vars["svg"] = { value: draw.startSvg(), unit: null, dtype: dt.DRAWING }
   }
 
   // Execute the function statements.

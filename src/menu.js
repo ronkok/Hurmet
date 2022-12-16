@@ -21,7 +21,6 @@ import { isInTable, addColumnBefore, deleteColumn,
   toggleHeaderColumn, deleteTable, CellSelection,
   TableMap } from "prosemirror-tables"
 
-import { hurmet } from "./hurmet"
 import { draftMode } from "./draftMode"
 import { hurmetMarkdownSerializer } from "./to_markdown"
 import { readFile } from "./openfile"

@@ -17,8 +17,6 @@ import { buildMenuItems } from "./menu"
 import { buildKeymap } from "./keymap"
 import { buildInputRules } from "./inputrules"
 import { CalcView, TexView } from "./nodeviews"
-import { hurmet } from "./hurmet"
-import { md2ast } from "./md2ast"
 
 // Bundle together the plugins.
 function pmSetup(options) {
@@ -77,7 +75,8 @@ const tidyUp = _ => {
 }
 
 const loadRemoteFile = md => {
-  const ast = md2ast(md)
+  // eslint-disable-next-line no-undef
+  const ast = hurmet.md2ast(md)
   let doc = {
     type: "doc",
     "attrs": {
