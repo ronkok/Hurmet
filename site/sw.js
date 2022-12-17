@@ -1,22 +1,22 @@
 
 // Service worker for Hurmet
 
-const version = 'hurmet_2022-12-16-07';
+const version = 'hurmet_2022-12-16-09';
 // Cache IDs
 const coreID = version + '_core';  // JavaScript & CSS
 const assetsID = version + '_assets'; // images, fonts, CSV, & txt
 const cacheIDs = [coreID, assetsID];
 
 const coreFiles = [
-  'https://hurmet.app/offline.html',
-  'https://hurmet.app/katex.min.js',
-  'https://hurmet.app/temml.min.js',
-  'https://hurmet.app/hurmet.min.js',
-  'https://hurmet.app/prosemirror.min.js',
-  'https://hurmet.app/demo.js',
-  'https://hurmet.app/katex.min.css',
-  'https://hurmet.app/styles.min.css',
-  'https://hurmet.app/docStyles.min.css'
+  './offline.html',
+  './katex.min.js',
+  './temml.min.js',
+  './hurmet.min.js',
+  './prosemirror.min.js',
+  './demo.js',
+  './katex.min.css',
+  './styles.min.css',
+  './docStyles.min.css'
 ];
 
 //
@@ -25,7 +25,6 @@ const coreFiles = [
 
 // On install, cache Javascript & CSS
 self.addEventListener('install', function(event) {
-  self.skipWaiting()
   event.waitUntil(caches.open(coreID).then(function(cache) {
     coreFiles.forEach(function(file) {
       cache.add(new Request(file));
@@ -82,7 +81,7 @@ self.addEventListener('fetch', function(event) {
         // catch is only triggered if an exception is thrown, which is likely
         // due to a network error.
         const cache = await caches.open(coreID);
-        const cachedResponse = await cache.match("https://hurmet.app/offline.html");
+        const cachedResponse = await cache.match("./offline.html");
         return cachedResponse;
       }
     })());

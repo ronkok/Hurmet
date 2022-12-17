@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hurmet Examples</title>
-<link rel="icon" type="image/png" href="https://hurmet.app/images/favicon.png">
-<script src="https://hurmet.app/katex.min.js"></script>
-<script src="https://hurmet.app/temml.min.js"></script>
-<script src="https://hurmet.app/hurmet.min.js"></script>
-<link rel="stylesheet" href="https://hurmet.app/katex.min.css">
-<link rel="stylesheet" href="https://hurmet.app/styles.min.css">
+<link rel="icon" type="image/png" href="./images/favicon.png">
+<script src="./katex.min.js"></script>
+<script src="./temml.min.js"></script>
+<script src="./hurmet.min.js"></script>
+<link rel="stylesheet" href="./katex.min.css">
+<link rel="stylesheet" href="./styles.min.css">
 <style id="pageStyle">@media print {@page{size: letter; margin: 16mm 0.75in 16mm 0.75in;}}</style>
 </head>
 
@@ -18,7 +18,7 @@
 <nav>
   <ul>
     <li><a href="https://hurmet.app" target="_blank">Home</a></li>
-    <li><a href="https://hurmet.app/manual.html" target="_blank">Documentation</a></li>
+    <li><a href="./manual.html" target="_blank">Documentation</a></li>
     <li><a href="https://github.com/ronkok/Hurmet" target="_blank">GitHub</a></li>
   </ul>
 </nav>
@@ -68,7 +68,7 @@ Display:
 <p>This is a live text editor. You can click anywhere and start typing. The calculation cells are also live. You can click on one and edit it. They will all update if you close a calculation cell with <strong>Enter</strong>.</p>
 
 <h2>Calculations</h2>
-<p>To create a calculation cell, select a spot and type <strong>Alt+C</strong> or hit the <img src="https://hurmet.app/images/C.svg" alt="C" class="inline"> button. Write your calculation into the cell and write a “?” sign where the result should appear. Hit the <strong>Enter</strong> key and a completed calculation will appear, like these:</p>
+<p>To create a calculation cell, select a spot and type <strong>Alt+C</strong> or hit the <img src="./images/C.svg" alt="C" class="inline"> button. Write your calculation into the cell and write a “?” sign where the result should appear. Hit the <strong>Enter</strong> key and a completed calculation will appear, like these:</p>
 <p><span class="hurmet-calc" data-entry="1//8 × 0.375 × 13.5² = ?"></span></p>
 <p>You can assign a result to a variable:</p>
 <p><span class="hurmet-calc" data-entry="L = 24 + 17/2 = ?"></span></p>
@@ -234,7 +234,7 @@ end"></span></p></td>
 
 <div id="copyright">Copyright © 2020-2022 Ron Kok. Released under the <a href="https://opensource.org/licenses/MIT">MIT License</a></div>
 
-<script type="module" src="https://hurmet.app/prosemirror.min.js"></script>
+<script type="module" src="./prosemirror.min.js"></script>
 <script>
   window.addEventListener('beforeunload', function (e) {
 	// If changes have been made, put up a dialog box to warn the user.

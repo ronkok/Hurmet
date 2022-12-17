@@ -2,25 +2,24 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Hurmet.app</title>
-<link rel="icon" type="image/png" href="https://hurmet.app/images/favicon.png">
-
-<script>if ("serviceWorker" in navigator && !navigator.serviceWorker.controller) { navigator.serviceWorker.register("./sw.js") }</script>
-<script src="https://hurmet.app/katex.min.js"></script>
-<script src="https://hurmet.app/temml.min.js"></script>
-<script src="https://hurmet.app/hurmet.min.js"></script>
-<link rel="stylesheet" href="https://hurmet.app/katex.min.css" defer>
-<link rel="stylesheet" href="https://hurmet.app/styles.min.css">
-<style id="pageStyle">@media print {@page{size: letter; margin: 16mm 0.75in 16mm 0.75in;}}</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hurmet.app</title>
+  <link rel="icon" type="image/png" href="./images/favicon.png">
+  <script src="./katex.min.js"></script>
+  <script src="./temml.min.js"></script>
+  <script src="./hurmet.min.js"></script>
+  <link rel="stylesheet" href="./katex.min.css" defer>
+  <link rel="stylesheet" href="./styles.min.css">
+  <script>if ("serviceWorker" in navigator && !navigator.serviceWorker.controller) { navigator.serviceWorker.register("./sw.js") }</script>
+  <style id="pageStyle">@media print {@page{size: letter; margin: 16mm 0.75in 16mm 0.75in;}}</style>
 </head>
 
 <body>
 <nav>
    <ul>
-     <li><a href="https://hurmet.app/examples.html" target="_blank">Examples</a></li>
-     <li><a href="https://hurmet.app/manual.html" target="_blank">Documentation</a></li>
+     <li><a href="./examples.html" target="_blank">Examples</a></li>
+     <li><a href="./manual.html" target="_blank">Documentation</a></li>
      <li><a href="https://github.com/ronkok/Hurmet" target="_blank">GitHub</a></li>
    </ul>
 </nav>
@@ -75,7 +74,7 @@ Display:
 
 <div id="copyright">Copyright © 2020-2022 Ron Kok. Released under the <a href="https://opensource.org/licenses/MIT">MIT License</a></div>
 
-<script src="https://hurmet.app/prosemirror.min.js"></script>
+<script src="./prosemirror.min.js"></script>
 <script>
   window.addEventListener('beforeunload', function (e) {
 	// If changes have been made, put up a dialog box to warn the user.
