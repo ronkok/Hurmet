@@ -1,113 +1,66 @@
+// A service worker to enable offline use of Hurmet.app
 
-// Service worker for Hurmet
+const version = "hurmet-2022-12-17"
 
-const version = 'hurmet_2022-12-16-09';
-// Cache IDs
-const coreID = version + '_core';  // JavaScript & CSS
-const assetsID = version + '_assets'; // images, fonts, CSV, & txt
-const cacheIDs = [coreID, assetsID];
+const addResourcesToCache = async (resources) => {
+  const cache = await caches.open(version)
+  await cache.addAll(resources)
+};
 
-const coreFiles = [
-  './offline.html',
-  './katex.min.js',
-  './temml.min.js',
-  './hurmet.min.js',
-  './prosemirror.min.js',
-  './demo.js',
-  './katex.min.css',
-  './styles.min.css',
-  './docStyles.min.css'
-];
-
-//
-// Event Listeners
-//
-
-// On install, cache Javascript & CSS
-self.addEventListener('install', function(event) {
-  event.waitUntil(caches.open(coreID).then(function(cache) {
-    coreFiles.forEach(function(file) {
-      cache.add(new Request(file));
-    });
-    return cache;
-  }));
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    addResourcesToCache([
+      "/",
+      '/index.html',
+      '/manual.html',
+      '/katex.min.js',
+      '/temml.min.js',
+      '/hurmet.min.js',
+      '/prosemirror.min.js',
+      '/demo.js',
+      '/katex.min.css',
+      '/styles.min.css',
+      '/docStyles.min.css',
+      '/images/favicon.png',
+      '/fonts/KaTeX_AMS-Regular.woff2',
+      '/fonts/KaTeX_Caligraphic-Regular.woff2',
+      '/fonts/KaTeX_Main-Bold.woff2',
+      '/fonts/KaTeX_Main-BoldItalic.woff2',
+      '/fonts/KaTeX_Main-Italic.woff2',
+      '/fonts/KaTeX_Main-Regular.woff2',
+      '/fonts/KaTeX_Math-BoldItalic.woff2',
+      '/fonts/KaTeX_Math-Italic.woff2',
+      '/fonts/KaTeX_Size1-Regular.woff2',
+      '/fonts/KaTeX_Size2-Regular.woff2',
+      '/fonts/KaTeX_Size3-Regular.woff2',
+      '/fonts/KaTeX_Size4-Regular.woff2'
+    ])
+  );
 });
 
-// On version update, remove old cached files
-self.addEventListener('activate', function(event) {
-  event.waitUntil(caches.keys().then(function(keys) {
-    return Promise.all(keys.filter(function(key) {
-      return !cacheIDs.includes(key);
-    }).map(function(key) {
-      return caches.delete(key);
-    }));
-  }).then(function() {
-    return self.clients.claim();
-  }));
-});
-
-self.addEventListener('fetch', function(event) {
-
-  // Get the request
-  const request = event.request;
-
-  // Ignore non-GET requests
-  if (request.method !== 'GET') { return }
-
-  // core: Javascript & CSS
-  // Offline-first, pre-cached
-  if (request.headers.get('Accept').includes('text/css') ||
-      request.headers.get('Accept').includes('text/javascript')) {
-    event.respondWith(
-      caches.match(request).then(function(response) {
-        return response || fetch(request).then(function(response) {
-
-          // Return the response
-          return response;
-
-        });
-      })
-    );
-    return;
+const cacheFirst = async (request) => {
+  const responseFromCache = await caches.match(request)
+  if (responseFromCache) {
+    return responseFromCache
   }
+  return fetch(request)
+};
 
-  // HTML from network
-  if (event.request.mode === 'navigate') {
-    event.respondWith((async() => {
-      try {
-        const networkResponse = await fetch(event.request);
-        return networkResponse;
-      } catch (error) {
-        // catch is only triggered if an exception is thrown, which is likely
-        // due to a network error.
-        const cache = await caches.open(coreID);
-        const cachedResponse = await cache.match("./offline.html");
-        return cachedResponse;
-      }
-    })());
-  }
+self.addEventListener("fetch", (event) => {
+  event.respondWith(cacheFirst(event.request))
+})
 
-  // Assets: Images, fonts, csv, & txt
-  // Offline-first, cache as you browse
-  if (request.headers.get('Accept').includes('image') ||
-      request.headers.get('Accept').includes('font/woff2') ||
-      request.headers.get('Accept').includes('text/csv') ||
-      request.headers.get('Accept').includes('text/plain')) {
-    event.respondWith(
-      caches.match(request).then(function(response) {
-        return response || fetch(request).then(function(response) {
+const deleteCache = async (key) => {
+  await caches.delete(key)
+}
 
-          const copy = response.clone();
-          event.waitUntil(caches.open(assetsID).then(function(cache) {
-            return cache.put(request, copy);
-          }));
+const deleteOldCaches = async () => {
+  const cacheKeepList = [version];
+  const keyList = await caches.keys()
+  const cachesToDelete = keyList.filter((key) => !cacheKeepList.includes(key))
+  await Promise.all(cachesToDelete.map(deleteCache))
+};
 
-          // Return the requested file
-          return response;
-
-        });
-      })
-    );
-  }
-
-});
+self.addEventListener("activate", (event) => {
+  event.waitUntil(deleteOldCaches())
+})
