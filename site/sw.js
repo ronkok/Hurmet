@@ -1,6 +1,6 @@
 // A service worker to enable offline use of Hurmet.app
 
-const version = "hurmet-2022-12-17-06"
+const version = "hurmet-2022-12-17-07"
 
 const coreFiles = [
 /*  '/index.html',
@@ -9,11 +9,11 @@ const coreFiles = [
   '/temml.min.js',
   '/hurmet.min.js',
   '/prosemirror.min.js',
-  '/demo.js',
+  '/demo.js',*/
   '/katex.min.css',
   '/styles.min.css',
   '/docStyles.min.css',
-  '/images/favicon.png',*/
+  '/images/favicon.png',
   '/fonts/KaTeX_AMS-Regular.woff2',
   '/fonts/KaTeX_Caligraphic-Regular.woff2',
   '/fonts/KaTeX_Main-Bold.woff2',
@@ -30,6 +30,7 @@ const coreFiles = [
 
 // On install, cache Javascript & CSS
 self.addEventListener('install', function(event) {
+  console.log(version)
   event.waitUntil(caches.open(version).then(function(cache) {
     coreFiles.forEach(function(file) {
       cache.add(new Request(file));
