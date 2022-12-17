@@ -1,6 +1,6 @@
 // A service worker to enable offline use of Hurmet.app
 
-const version = "hurmet-2022-12-17-07"
+const version = "hurmet-2022-12-17-08"
 
 const coreFiles = [
 /*  '/index.html',
@@ -13,7 +13,7 @@ const coreFiles = [
   '/katex.min.css',
   '/styles.min.css',
   '/docStyles.min.css',
-  '/images/favicon.png',
+//  '/images/favicon.png',
   '/fonts/KaTeX_AMS-Regular.woff2',
   '/fonts/KaTeX_Caligraphic-Regular.woff2',
   '/fonts/KaTeX_Main-Bold.woff2',
