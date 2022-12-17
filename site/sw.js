@@ -1,6 +1,6 @@
 // A service worker to enable offline use of Hurmet.app
 
-const version = "hurmet-2022-12-17-03"
+const version = "hurmet-2022-12-17-04"
 
 const addResourcesToCache = async(resources) => {
   const cache = await caches.open(version)
@@ -13,11 +13,11 @@ self.addEventListener("install", (event) => {
       "/",
       '/index.html',
       '/manual.html',
-      '/katex.min.js',
+/*      '/katex.min.js',
       '/temml.min.js',
       '/hurmet.min.js',
       '/prosemirror.min.js',
-      '/demo.js',
+      '/demo.js',*/
       '/katex.min.css',
       '/styles.min.css',
       '/docStyles.min.css',
