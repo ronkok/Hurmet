@@ -1,5 +1,7 @@
 /* eslint-disable */
 import { codeJar, selectedText, textBeforeCursor, textAfterCursor } from "./codejar"
+import { hurmet } from "./hurmet.js"
+import katex from "./katex.js"
 
 'use strict'
 

@@ -27,6 +27,7 @@ import { readFile } from "./openfile"
 import { saveAs } from "filesaver.js-npm"
 import { findPageBreaks, forToC, forPrint } from "./paginate.js"
 import { diff_match_patch } from "./diffMatchPatch"
+import { hurmet } from "./hurmet"
 
 // Menu icons that are not included in node-module menu.js
 const hurmetIcons = {

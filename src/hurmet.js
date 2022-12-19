@@ -38,7 +38,7 @@ import { renderMD } from "./renderMD"
  *         vars is updated with new variable data each time calculate() is called.
  */
 
-export default {
+export const hurmet = {
   dt,
   parse,
   calculate,

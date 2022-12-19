@@ -10,4 +10,4 @@ preview/Temml.woff2
 preview/temml.min.css
 test/hurmet.cjs
 utils/ECB Exchange Rates.xml
-site/server.js
+site/server.cjs

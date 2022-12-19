@@ -1,4 +1,4 @@
 export default {
   input: "./src/demonstration.js",
-  output: { format: "es", sourcemap: false, file: "site/demo.js" }
+  output: { format: "es", sourcemap: false, file: "preview/demo.js" }
 }

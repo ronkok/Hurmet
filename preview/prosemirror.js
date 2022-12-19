@@ -1,3 +1,6 @@
+import katex from './katex.js';
+import temml from './temml.js';
+
 // ::- Persistent data structure representing an ordered mapping from
 // strings to values, with some convenient update methods.
 function OrderedMap(content) {
@@ -15826,813 +15829,332 @@ const findPageBreaks = (view, state, purpose, tocSchema, startLevel, endLevel = 
   }
 };
 
-/* eslint-disable */
+// autocorrect.js
 
-// Helpers for creating a schema that supports tables.
+const autoCorrectRegEx = /([!?:<>\-~/_]=| \.|~~|\+-|-\+|<-->|<->|<>|<--|<-|-->|->|=>|-:|\^\^|\|\||\/\/\/|\b(bar|hat|vec|tilde|dot|ddot|ul)|\b(bb|bbb|cc|ff|ss) [A-Za-z]|\\?[A-Za-z]{2,}|\\c|\\ |\\o|root [234]|<<|>>|\^-?[0-9]+|\|\|\||\/_|''|""|00)\s$/;
 
-function getCellAttrs(dom, extraAttrs) {
-  let widthAttr = dom.getAttribute("data-colwidth");
-  let widths = widthAttr && /^\d+(,\d+)*$/.test(widthAttr) ? widthAttr.split(",").map(s => Number(s)) : null;
-  let colspan = Number(dom.getAttribute("colspan") || 1);
-  let result = {
-    colspan,
-    rowspan: Number(dom.getAttribute("rowspan") || 1),
-    colwidth: widths && widths.length == colspan ? widths : null
-  };
-  for (let prop in extraAttrs) {
-    let getter = extraAttrs[prop].getFromDOM;
-    let value = getter && getter(dom);
-    if (value != null) result[prop] = value;
+const accents = {
+  acute: "\u0301",
+  bar: "\u0305",
+  breve: "\u0306",
+  check: "\u030c",
+  dot: "\u0307",
+  ddot: "\u0308",
+  grave: "\u0300",
+  hat: "\u0302",
+  harpoon: "\u20d1",
+  leftharpoon: "\u20d0",
+  leftrightvec: "\u20e1",
+  leftvec: "\u20d6",
+  ring: "\u030a",
+  tilde: "\u0303",
+  vec: "\u20d7",
+  ul: "\u0332"
+};
+
+const autoCorrections = {
+  alpha: "α",
+  beta: "β",
+  chi: "χ",
+  delta: "δ",
+  Delta: "Δ",
+  epsilon: "ε",
+  varepsilon: "\u025B",
+  eta: "\u03B7",
+  gamma: "γ",
+  Gamma: "Γ",
+  iota: "\u03B9",
+  kappa: "\u03BA",
+  lambda: "λ",
+  Lambda: "Λ",
+  mu: "μ",
+  nu: "\u03BD",
+  omega: "ω",
+  Omega: "Ω",
+  phi: "\u03D5",
+  varphi: "\u03C6",
+  Phi: "\u03A6",
+  pi: "π",
+  Pi: "Π",
+  psi: "ψ",
+  Psi: "Ψ",
+  rho: "ρ",
+  sigma: "σ",
+  Sigma: "Σ",
+  tau: "τ",
+  theta: "θ",
+  vartheta: "\u03D1",
+  Theta: "Θ",
+  upsilon: "\u03C5",
+  xi: "\u03BE",
+  Xi: "\u039E",
+  zeta: "\u03B6",
+  prime: "ʹ",
+  ee: "ε",
+  ll: "λ",
+  sqrt: "√",
+  "root 2": "\u221A",
+  "root 3": "\u221B",
+  "root 4": "\u221C",
+  AA: "∀",
+  CC: "\u2102",
+  EE: "∃",
+  HH: "\u210D",
+  NN: "\u2115",
+  QQ: "\u211A",
+  RR: "\u211D",
+  ZZ: "\u2124",
+  OO: "𝒪",
+  ii: "√(-1)",
+  oo: "∞", // infinity
+  ooo: "°",
+  not: "¬",
+  "-:": "÷",
+  "\\ ": "˽",  // space
+  "\\c": "¢",
+  "\\cdots": "\u22ef",
+  "\\vdots": "\u22ee",
+  "\\ddots": "\u22f1",
+  "\\floor": "\u23BF\u23CC",
+  "\\ceil": "\u23BE\u23CB",
+  xx: "×",
+  "\\int": "∫",
+  "\\iint": "∬",
+  "\\oint": "∮",
+  "\\sum": "∑",
+  nn: "∩", // cap
+  nnn: "⋂",
+  uu: "∪", // cup
+  uuu: "⋃",
+  "\\del": "∂",
+  "\\grad": "∇",
+  "\\hbar": "ℏ",
+  "\\ell": "ℓ",
+  "\\nabla": "∇",
+  "\\alef": "ℵ",
+  "\\subset": "⊂",
+  "\\supset": "⊃",
+  "\\Subset": "⋐",
+  "\\forall": "∀",
+  "\\therefore": "∴",
+  "\\mapsto": "↦",
+  "\\checkmark": "✓",
+  bar: "\u02C9",
+  dot: "\u02D9",
+  ddot: "\u00A8",
+  hat: "\u02C6",
+  tilde: "\u02DC",
+  vec: "\u00A0\u20D7",
+  "\\land": "∧",
+  "\\lor": "∨",
+  "\\not": "¬",
+  "\\notin": "∉",
+  "\\euro": "€",
+  "\\pound": "£",
+  "\\yen": "¥",
+  "\\o": "ø",
+  "^^": "∧",
+  vv: "∨",
+  vvv: "⋁",
+  "\\xor": "⊻",
+  "\\in": "\u2208",
+  "!=": "≠",
+  "<>": "≠",
+  ":=": "≔",
+  "?=": "≟",
+  "<=": "≤",
+  ">=": "≥",
+  "-=": "≡",
+  "~=": "≅",
+  "_=": "≡",
+  "~~": "≈",
+  "+-": "±",
+  "-+": "∓",
+  "<<": "\u27E8",
+  ">>": "\u27E9",
+  "///": "\u2215",
+  "<->": "\u2194",
+  "<-": "\u2190",
+  "<--": "\u27F5",
+  "-->": "⟶",
+  "->": "→",
+  "=>": "⇒",
+  "<-->": "\\xrightleftarrows",
+  "\\circ": "∘",
+  "\\otimes": "⊗",
+  "|||": "¦",
+  "||": "‖",
+  "/_": "∠",
+  " .": "\u00B7", // half-high dot
+  "''": "\u2032", // two apostrophes → prime
+  '""': "\u2033" // double prime
+};
+
+const supCharFromNum = {
+  "^": "",
+  "-": "⁻",
+  "2": "²",
+  "3": "³",
+  "1": "¹",
+  "0": "⁰",
+  "4": "⁴",
+  "5": "⁵",
+  "6": "⁶",
+  "7": "⁷",
+  "8": "⁸",
+  "9": "⁹",
+  "(": "",
+  ")": ""
+};
+
+const superscript = str => {
+  let superChar = "";
+  for (const ch of str) {
+    superChar += supCharFromNum[ch];
   }
-  return result
-}
+  return superChar
+};
 
-function setCellAttrs(node, extraAttrs) {
-  let attrs = {};
-  if (node.attrs.colspan != 1) attrs.colspan = node.attrs.colspan;
-  if (node.attrs.rowspan != 1) attrs.rowspan = node.attrs.rowspan;
-  if (node.attrs.colwidth)
-    attrs["data-colwidth"] = node.attrs.colwidth.join(",");
-  for (let prop in extraAttrs) {
-    let setter = extraAttrs[prop].setDOMAttr;
-    if (setter) setter(node.attrs[prop], attrs);
-  }
-  return attrs
-}
+const lowSurrogateDiff = {
+  // captital diff, lower case diff
+  bb: [0xdbbf, 0xdbb9], //  bold
+  bbb: [0xdcf7, 0xdcf1], // blackboard bold
+  cc: [0xdc5b, 0xdc55], // calligraphic
+  ff: [0xdd5f, 0xdd59] //   sans-serif
+};
 
-const functionRegEx = / *function /;
- 
-// :: Object
-// [Specs](#model.NodeSpec) for the nodes defined in this schema.
-const nodes = {
-  // :: NodeSpec The top level document node.
-  doc: {
-    content: "block+",
-    // Hurmet uses doc.attrs for document metadata, but ProseMirror transacations
-    // can not reach doc.attrs. So any user change to document metadata will be
-    // outside the undo stack.
-    attrs: {
-      decimalFormat: {default: '1,000,000.' },
-      inDraftMode: { default: false }, // boolean
-      fileHandle: { default: null },
-      fontSize: { default: 12 },       // 12 | 10
-      pageSize: { default: "letter" }, // letter | A4
-      snapshots: { default: [] }
-    }
-  },
+// 7 blackboard bold characters (ℂ, ℍ, ℕ, ℙ, ℚ, ℝ, ℤ) have Unicode code points in the
+// basic multi-lingual plane. So they must be treated differently than the other
+// blackboard bold characters. Eleven calligraphic characters work the same way.
+const wideExceptions = [0xdd3a, 0xdd3f, 0xdd45, 0xdd47, 0xdd48, 0xdd49, 0xdd51, // bbb
+  0xdc9d, 0xdca0, 0xdca1, 0xdca3, 0xdca4, 0xdca7, 0xdca8, // calligraphic
+  0xdcad, 0xdcba, 0xdcbc, 0xdcc1, 0xdcc4];
 
-// :: NodeSpec A plain paragraph textblock. Represented in the DOM as a `<p>` element.
-  paragraph: {
-    content: "inline*",
-    group: "block",
-    parseDOM: [{tag: "p"}], // priority is the default, 50
-    toDOM() { return ["p", 0] }
-  },
+const bbb = {
+  C: "\u2102",
+  H: "\u210D",
+  N: "\u2115",
+  P: "\u2119",
+  Q: "\u211A",
+  R: "\u211D",
+  Z: "\u2124"
+};
+const calligraphic = {
+  B: "\u212C",
+  E: "\u2130",
+  F: "\u2131",
+  H: "\u210B",
+  I: "\u2110",
+  L: "\u2112",
+  M: "\u2133",
+  R: "\u211B",
+  e: "\u212F",
+  g: "\u210A",
+  l: "\u2113",
+  o: "\u2134"
+};
 
-  // An indented div.
-  indented_div: {
-    content: "block+",
-    group: "block",
-    defining: true,
-	  parseDOM: [{tag: "div.indented"}],
-    toDOM() { return ['div', { class: 'indented' }, 0] }
-  },
-
-  //:: NodeSpec An center-aligned div.
-  centered_div: {
-    content: "block+",
-    group: "block",
-    defining: true,
-    parseDOM: [{tag: "div.centered"}],
-    toDOM () { return ['div', { class: 'centered' }, 0] },
-  },
-
-  // :: NodeSpec A blockquote (`<blockquote>`) wrapping one or more blocks.
-  blockquote: {
-    content: "block+",
-    group: "block",
-    defining: true,
-    parseDOM: [{tag: "blockquote"}],
-    toDOM() { return ["blockquote", 0] }
-  },
-
-  // :: NodeSpec A horizontal rule (`<hr>`).
-  horizontal_rule: {
-    group: "block",
-    parseDOM: [{tag: "hr"}],
-    toDOM() { return ["hr"] }
-  },
-
-  // :: NodeSpec A heading textblock, with a `level` attribute that
-  // should hold the number 1 to 6. Parsed and serialized as `<h1>` to
-  // `<h6>` elements.
-  heading: {
-    attrs: {level: {default: 1}},
-    content: "inline*",
-    group: "block",
-    defining: true,
-    parseDOM: [{tag: "h1", attrs: {level: 1}},
-               {tag: "h2", attrs: {level: 2}},
-               {tag: "h3", attrs: {level: 3}},
-               {tag: "h4", attrs: {level: 4}},
-               {tag: "h5", attrs: {level: 5}},
-               {tag: "h6", attrs: {level: 6}}],
-    toDOM(node) { return ["h" + node.attrs.level, 0] }
-  },
-
-  // :: NodeSpec A code listing. Disallows marks or non-text inline
-  // nodes by default. Represented as a `<pre>` element with a
-  // `<code>` element inside of it.
-  code_block: {
-    content: "text*",
-    marks: "",
-    group: "block",
-    code: true,
-    defining: true,
-    parseDOM: [{tag: "pre", preserveWhitespace: "full"}],
-    toDOM() { return ["pre", ["code", 0]] }
-  },
-
-  // :: NodeSpec The text node.
-  text: {
-    group: "inline"
-  },
-
-  // :: NodeSpec An inline image (`<img>`) node. Supports `src`,
-  // `alt`, and `href` attributes. The latter two default to the empty
-  // string.
-  image: {
-    inline: true,
-    attrs: {
-      src: {},
-      alt: {default: null},
-//      title: {default: null},
-      width: {default: null},
-      class: {default: "inline"}
-    },
-    group: "inline",
-    draggable: true,
-    parseDOM: [{tag: "img[src]", getAttrs(dom) {
-      return {
-        src: dom.getAttribute("src"),
-//        title: dom.getAttribute("title"),
-        alt: dom.getAttribute("alt"),
-        width: dom.getAttribute("width"),
-        class: dom.getAttribute("class")
-      }
-    }}],
-    toDOM(node) { return ["img", node.attrs] }
-  },
-
-  // Table of contents
-  toc: {
-    atom: true,
-    attrs: {
-      start: { default: 1 },
-      end:   { default: 2 },
-      body:  { default: [] }
-    },
-    group: "block",
-    draggable: true,
-    parseDOM: [{tag: "ul.toc",  getAttrs(dom) {
-      const [start, end] = tocLevels(dom.getAttribute('data-levels'));
-      const body = JSON.parse(dom.getAttribute('data-body'));
-      return { start, end, body }
-    }}],
-    toDOM(node) {
-      const dom = document.createElement('ul');
-      dom.dataset.levels = String(node.attrs.start) + ".." + String(node.attrs.end);
-      dom.dataset.body = JSON.stringify(node.attrs.body);
-      renderToC(node.attrs.body, dom);
-      return dom
-     }
-  },
-
-  ordered_list: {
-    attrs: {order: {default: 1}},
-	content: "list_item+",
-	group: "block",
-    parseDOM: [{tag: "ol", getAttrs(dom) {
-      return {order: dom.hasAttribute("start") ? +dom.getAttribute("start") : 1}
-    }}],
-    toDOM(node) {
-      return node.attrs.order == 1 ? ["ol", 0] : ["ol", {start: node.attrs.order}, 0]
-    }
-  },
-  
-  // A bullet list node spec, represented in the DOM as `<ul>`.
-  bullet_list: {
-    content: "list_item+",
-	group: "block",
-	parseDOM: [{tag: "ul"}],
-    toDOM() { return ["ul", 0] }
-  },
-
-  // A list item (`<li>`) spec.
-  list_item: {
-    content: "paragraph block*",
-	  parseDOM: [{tag: "li"}],
-    toDOM() { return ["li", 0] },
-    defining: true
-  },
-
-  // :: NodeSpec A hard line break, represented in the DOM as `<br>`.
-  hard_break: {
-    inline: true,
-    group: "inline",
-    selectable: false,
-    parseDOM: [{tag: "br"}],
-    toDOM() { return ["br"] }
-  },
-
-  table: {
-    content: "table_row+",
-    tableRole: "table",
-    group: "block",
-    attrs: { class: { default: 'grid' } },
-    parseDOM: [{tag: "table", getAttrs(dom) {
-      return { class: dom.getAttribute('class') || "grid" }
-    }}],
-    toDOM(node) {
-      return ['table', { class: node.attrs.class }, ["tbody", 0]]
-    }
-  },
-  table_row: {
-    content: "(table_cell | table_header)*",
-    tableRole: "row",
-    parseDOM: [{tag: "tr"}],
-    toDOM() { return ["tr", 0] }
-  },
-  table_cell: {
-    content: "block+",
-    attrs: {
-      colspan: {default: 1},
-      rowspan: {default: 1},
-      colwidth: {default: null},
-      background: {default: null}
-    },
-    tableRole: "cell",
-    isolating: true,
-    parseDOM: [{tag: "td", getAttrs: dom => getCellAttrs(dom, [])}],
-    toDOM(node) { return ["td", setCellAttrs(node, []), 0] }
-  },
-  table_header: {
-    content: "block+",
-    attrs: {
-      colspan: {default: 1},
-      rowspan: {default: 1},
-      colwidth: {default: null},
-      background: {default: null}
-    },
-    tableRole: "header_cell",
-    isolating: true,
-    parseDOM: [{tag: "th", getAttrs: dom => getCellAttrs(dom, [])}],
-    toDOM(node) { return ["th", setCellAttrs(node, []), 0] }
-  },
-
-  // Hurmet uses the <header> element for print-headers
-  header: {
-    content: "table",
-    group: "block",
-    defining: true,
-    parseDOM: [{tag: "header"}],
-    toDOM() { return ["header", 0] }
-  },
-
-  calculation: {
-    atom: true, // No direct editing. Instead, edit via CalcView in file nodeviews.js.
-    defining: false,
-    marks: "",
-    group: "inline",
-    inline: true,
-    attrs: {
-      // I cache several items with each Hurmet calculation cell.
-      // By keeping this data when the author submits a cell, I avoid having to
-      // redo the work each time a cell calculation is updated with a new variable value.
-      // Most of this info is kept only during run-time.
-      // When the author saves a file, I write only the entry input.
-      // (What isn't saved cannot break a document.)
-      // When a document is re-opened, all but the entries must be recalculated.
-      entry: { default: "" }, //          Raw string input by the author, edited for decimal.
-      displayMode: { default: false }, // Type set in TeX display mode if true.
-      name: {default: null}, //           Name of cell, as in "x" from x = 12
-      tex: {default: ""}, //              The string I pass to KaTeX for final rendering.
-      alt: {default: ""}, //              The string I render when in draft mode.
-      rpn: {default: null}, //            RPN from parser.js, for calculation.
-      inDraftMode: {default: false},
-      resulttemplate: {default: null}, // String with units, but waiting for a value.
-      altresulttemplate: {default: null}, // Ditto, but in draft mode.
-      resultdisplay: {default: null}, //  Result after unit conversions and rounding.
-      template: {default: null}, //       tex, including echo, but waiting for plugged-in values.
-      altTemplate: {default: ""}, //      Ditto, but in draft mode.
-      value: {default: null},  //         Value passed to other calculations.
-      unit: {default: ""}, //             Unit specified by user, in which to display the result.
-      //                                    Hurmet maps and data frame save a data structure, not a name.
-      expos: {default: null}, //          Unit exponents of result, for checking unit compatibility.
-      factor: {default: null}, //         Factor for converting value.inBaseUnits to result units
-      gauge: {default: null}, //          Unit gauge, for ditto
-      dtype: {default: 0}, //             Data type of the result. See constants.js.
-      isFetch: {default: false}, //       Identifies cells that need async treatment.
-      error: {default: false} //          boolean. True if calculation resulted in an error.
-    },
-    parseDOM: [{tag: "span.hurmet-calc",  getAttrs(dom) {
-      const displayMode = Boolean(dom.getAttribute('data-display')) || false;
-      return { entry: dom.getAttribute('data-entry'), displayMode }
-    }}],
-    toDOM(node) {
-      let dom;
-      //if (node.attrs.dtype !== dt.IMAGE) {
-      dom = document.createElement('span');
-      dom.classList = "hurmet-calc";
-      if (node.attrs.dtype && node.attrs.dtype === hurmet.dt.DRAWING) {
-        dom = document.createElement('span');
-        dom.appendChild(hurmet.draw.renderSVG(node.attrs.resultdisplay));
-      } else if (node.attrs.dtype && node.attrs.dtype === hurmet.dt.MODULE &&
-        functionRegEx.test(node.attrs.entry)) {
-        dom.appendChild(document.createElement('pre'));
-        dom.firstChild.appendChild(document.createElement('code'));
-        dom.firstChild.firstChild.textContent = node.attrs.entry;
-      } else if (node.attrs.inDraftMode || !node.attrs.tex) {
-        dom.appendChild(document.createElement('code'));
-        dom.firstChild.textContent = node.attrs.alt ? node.attrs.alt : node.attrs.entry;
+const accentedChar = str => {
+  const posSpace = str.indexOf(" ");
+  const ch = str.substring(posSpace + 1);
+  const accentName = str.substring(0, posSpace);
+  switch (accentName) {
+    case "bb": // bold
+    case "bbb": // blackboard bold
+    case "cc": // caligraphic
+    case "ff": { // sans-serif
+      const code = ch.charCodeAt(0);
+      let newChar = "";
+      if (code < 0x0041 || code > 0x007a) { return null }
+      const isSmall = code < 0x005b ? 0 : 1;
+      if (accentName === "cc" && isSmall && code !== 0x006c) { return null }
+      if (code > 0x005a && accentName === "bbb") { return null }
+      const lowSurrogate = code + lowSurrogateDiff[accentName][isSmall];
+      if (wideExceptions.includes(lowSurrogate)) {
+        newChar = accentName === "bbb" ? bbb[ch] : calligraphic[ch];
       } else {
-        const tex = node.attrs.tex;
-        const isFF = 'MozAppearance' in document.documentElement.style;
-        if (isFF) {
-          temml.render(tex, dom, {
-            displayMode: node.attrs.displayMode,
-            trust: (context) => context.command === '\\class' && context.class === "special-fraction"
-          });
-        } else {
-          katex.render(tex, dom, {
-            displayMode: node.attrs.displayMode,
-            output: "html",
-            strict: false,
-            macros: {"\\class": "\\htmlClass"},
-            throwOnError: false,
-            minRuleThickness: 0.06,
-            trust: (context) => context.command === '\\htmlClass' && context.class === "special-fraction"
-          });
+        newChar = "\uD835" + String.fromCharCode(lowSurrogate);
+      }
+      return newChar
+    }
+
+    default:
+      return null
+  }
+};
+
+const autoCorrect = (jar, preText, postText) => {
+  // Auto-correct math in real time.
+  // jar is an instance of a CodeJar editing box.
+//  const pos = doc.getCursor()
+  if (preText.length > 0 && preText.slice(-1) === " ") {
+    // Auto-correct only after the user hits the space bar.
+    const matches = autoCorrectRegEx.exec(preText);
+    if (matches) {
+      const word = matches[0].slice(0, -1); // Trim the final space.
+      let correction;
+      const accent = accents[word];
+      if (accent) {
+        const newStr = preText.slice(0, -(matches[0].length + 1)) + accent;
+        jar.updateCode(newStr + postText);
+        // Move the cursor to the correct location
+        const L = newStr.length;
+        jar.restore({ start: L, end: L, dir: undefined });
+      } else {
+        correction = autoCorrections[word]; // Check for a match in the lookup table.
+        if (!correction) {
+          // No perfect match in the lookup table. Try for a superscript or an accent.
+          if (word.charAt(0) === "^") {
+            correction = superscript(word); // e.g. x²
+          } else {
+            if (word.indexOf(" ") > 0) {
+              // accented char or Unicode character. E.g. bar y   or   bb M
+              correction = accentedChar(word);
+            }
+          }
         }
       }
-      // Before writing to DOM, I filter out most of the run-time info in node.attrs.
-      dom.dataset.entry = node.attrs.entry;
-      if (node.attrs.displayMode) { dom.dataset.display = "true"; }
-      return dom
+      if (correction) {
+        const newStr = preText.slice(0, -matches[0].length) + correction;
+        jar.updateCode(newStr + postText);
+        // Move the cursor to the correct location
+        const L = newStr.length;
+        jar.restore({ start: L, end: L, dir: undefined });
+      }
     }
-  },
-
-  tex: {
-    // For display of LaTeX math.
-    atom: true,  // No direct editing. See TexView in nodeviews.js
-    marks: "",
-    group: "inline",
-    inline: true,
-    attrs: { tex: {default: ""}, displayMode: { default: false } },
-    parseDOM: [{tag: "span.hurmet-tex",  getAttrs(dom) {
-      const displayMode = Boolean(dom.getAttribute('data-display')) || false;
-      return { tex: dom.getAttribute('data-tex'), displayMode }
-    }}],
-    toDOM(node) {
-      const dom = document.createElement('span');
-      dom.classList = "hurmet-tex";
-      const tex = node.attrs.tex;
-      dom.dataset.tex = tex;
-      if (node.attrs.displayMode) { dom.dataset.display = "true"; }
-      katex.render(tex, dom, { displayMode: node.attrs.displayMode, strict: false,
-        output: "html", throwOnError: false, minRuleThickness: 0.06 });
-      return dom
-    }
-  },
-
-  comment: {
-    atom: true,
-    marks: "",
-    group: "inline",
-    inline: true,
-    attrs: { comment: { default: "" } },
-    parseDOM: [{ tag: "span.hurmet-comment", getAttrs(dom) {
-      return { comment: dom.getAttribute('data-comment') }
-    }}],
-    toDOM(node) {
-      const container = document.createElement('span');
-      container.className = "hurmet-comment";
-      container.dataset.comment = node.attrs.comment;
-      const triangle = document.createElement('span');
-      triangle.className = "left-triangle";
-      container.appendChild(triangle);
-      const dom = document.createElement('span');
-      dom.className = "comment-payload";
-      dom.appendChild(hurmet.renderMD(node.attrs.comment));
-      container.appendChild(dom);
-      return container
-    }
-  }
-
-};
-
-// :: Object [Specs](#model.MarkSpec) for the marks in the schema.
-const marks = {
-  // :: MarkSpec A link. Has `href` and `title` attributes. `title`
-  // defaults to the empty string. Rendered and parsed as an `<a>`
-  // element.
-  link: {
-    attrs: {
-      href: {},
-      title: {default: null}
-    },
-    inclusive: false,
-    parseDOM: [{tag: "a[href]", getAttrs(dom) {
-      return {href: dom.getAttribute("href"), title: dom.getAttribute("title")}
-    }}],
-    toDOM(node) { return ["a", node.attrs] }
-  },
-
-  // :: MarkSpec An emphasis mark. Rendered as an `<em>` element.
-  // Has parse rules that also match `<i>` and `font-style: italic`.
-  em: {
-    parseDOM: [{tag: "i"}, {tag: "em"}, {style: "font-style=italic"}],
-    toDOM() { return ["em"] }
-  },
-
-  // :: MarkSpec A strong mark. Rendered as `<strong>`, parse rules
-  // also match `<b>` and `font-weight: bold`.
-  strong: {
-    parseDOM: [{tag: "strong"},
-               // This works around a Google Docs misbehavior where
-               // pasted content will be inexplicably wrapped in `<b>`
-               // tags with a font-weight normal.
-               {tag: "b", getAttrs: node => node.style.fontWeight != "normal" && null},
-               {style: "font-weight", getAttrs: value => /^(bold(er)?|[5-9]\d{2,})$/.test(value) && null}],
-    toDOM() { return ["strong"] }
-  },
-
-  // :: MarkSpec Code font mark. Represented as a `<code>` element.
-  code: {
-    parseDOM: [{tag: "code"}],
-    toDOM() { return ["code"] }
-  },
-
-  // :: MarkSpec subscript mark. Represented as a `<sub>` element.
-  subscript: {
-    excludes: "superscript",
-	  parseDOM: [{tag: "sub"}],
-    toDOM() { return ["sub"] }
-  },
-
-  // :: MarkSpec superscript mark. Represented as a `<sup>` element.
-  superscript: {
-    excludes: "subscript",
-	  parseDOM: [{tag: "sup"}],
-    toDOM() { return ["sup"] }
-  },
-
-  // :: MarkSpec strikethru mark. Represented as a `<del>` element.
-  strikethru: {
-	  parseDOM: [{tag: "del"}],
-    toDOM() { return ["del"] }
-  },
-
-    // :: MarkSpec superscript mark. Represented as a `<u>` element.
-  underline: {
-	  parseDOM: [{tag: "u"}],
-    toDOM() { return ["u"] }
-  },
-
-  // :: MarkSpec highlight mark. Represented as a `<mark>` element.
-  highlight: {
-    parseDOM: [{tag: "mark"}],
-    toDOM() { return ["mark"] }
   }
 };
 
+// unit exponents of a number with no unit.
+const allZeros = Object.freeze([0, 0, 0, 0, 0, 0, 0, 0]);
 
-// :: (NodeType, ?Object) ? (state: EditorState, dispatch: ?(tr: Transaction)) ? bool
-// Returns a command function that wraps the selection in a list with
-// the given type an attributes. If `dispatch` is null, only return a
-// value to indicate whether this is possible, but don't actually
-// perform the change.
-function wrapInList(listType, attrs) {
-  return function(state, dispatch) {
-    let {$from, $to} = state.selection;
-    let range = $from.blockRange($to), doJoin = false, outerRange = range;
-    if (!range) return false
-    // This is at the top of an existing list item
-    if (range.depth >= 2 && $from.node(range.depth - 1).type.compatibleContent(listType) && range.startIndex == 0) {
-      // Don't do anything if this is the top of the list
-      if ($from.index(range.depth - 1) == 0) return false
-      let $insert = state.doc.resolve(range.start - 2);
-      outerRange = new NodeRange($insert, $insert, range.depth);
-      if (range.endIndex < range.parent.childCount)
-        range = new NodeRange($from, state.doc.resolve($to.end(range.depth)), range.depth);
-      doJoin = true;
-    }
-    let wrap = findWrapping(outerRange, listType, attrs, range);
-    if (!wrap) return false
-    if (dispatch) dispatch(doWrapInList(state.tr, range, wrap, doJoin, listType).scrollIntoView());
-    return true
-  }
-}
-
-function doWrapInList(tr, range, wrappers, joinBefore, listType) {
-  let content = Fragment.empty;
-  for (let i = wrappers.length - 1; i >= 0; i--)
-    content = Fragment.from(wrappers[i].type.create(wrappers[i].attrs, content));
-
-  tr.step(new ReplaceAroundStep(range.start - (joinBefore ? 2 : 0), range.end, range.start, range.end,
-                                new Slice(content, 0, 0), wrappers.length, true));
-
-  let found = 0;
-  for (let i = 0; i < wrappers.length; i++) if (wrappers[i].type == listType) found = i + 1;
-  let splitDepth = wrappers.length - found;
-
-  let splitPos = range.start + wrappers.length - (joinBefore ? 2 : 0), parent = range.parent;
-  for (let i = range.startIndex, e = range.endIndex, first = true; i < e; i++, first = false) {
-    if (!first && canSplit(tr.doc, splitPos, splitDepth)) {
-      tr.split(splitPos, splitDepth);
-      splitPos += 2 * splitDepth;
-    }
-    splitPos += parent.child(i).nodeSize;
-  }
-  return tr
-}
-
-// :: Schema
-// This schema rougly corresponds to the document schema used by
-// [CommonMark](http://commonmark.org/), minus the list elements,
-// which are defined in the [`prosemirror-schema-list`](#schema-list)
-// module.
-//
-// To reuse elements from this schema, extend or read from its
-// `spec.nodes` and `spec.marks` [properties](#model.Schema.spec).
-const schema = new Schema({nodes, marks});
-
-const prefix$3 = "ProseMirror-prompt";
-
-function openPrompt(options) {
-  const wrapper = document.body.appendChild(document.createElement("div"));
-  wrapper.className = prefix$3;
-
-  const mouseOutside = e => { if (!wrapper.contains(e.target)) { close(); } };
-  setTimeout(() => window.addEventListener("mousedown", mouseOutside), 50);
-  const close = () => {
-    window.removeEventListener("mousedown", mouseOutside);
-    if (wrapper.parentNode) { wrapper.parentNode.removeChild(wrapper); }
-  };
-
-  const domFields = [];
-  for (const name in options.fields) {
-    if (!(name === "src" && options.fields.src.options.value)) {
-      domFields.push(options.fields[name].render());
-    }
-  }
-  const submitButton = document.createElement("button");
-  submitButton.type = "submit";
-  submitButton.className = prefix$3 + "-submit";
-  submitButton.textContent = "OK";
-  const cancelButton = document.createElement("button");
-  cancelButton.type = "button";
-  cancelButton.className = prefix$3 + "-cancel";
-  cancelButton.textContent = "Cancel";
-  cancelButton.addEventListener("click", close);
-
-  const form = wrapper.appendChild(document.createElement("form"));
-  if (options.title) {
-    form.appendChild(document.createElement("h5")).textContent = options.title;
-  }
-  if (options.note) {
-    const note = document.createElement("p");
-    note.textContent = options.note;
-    form.append(note);
-  }
-  domFields.forEach(field => {
-    form.appendChild(document.createElement("div")).appendChild(field);
-  });
-
-  if (options.radioButtons) {
-    // Create buttons for image placement.
-    const radioGroup = document.createElement("div");
-    const current = options.radioButtons.current;
-    options.radioButtons.labels.forEach(label => {
-      const button = document.createElement("input");
-      button.type = "radio";
-      button.name = options.radioButtons.name;
-      button.value = label;
-      button.setAttribute('id', label);
-      if (label === current) { button.setAttribute("checked", null); }
-      const labelTag = document.createElement("label");
-      labelTag.setAttribute("for", label);
-      labelTag.appendChild(document.createTextNode(label));
-      radioGroup.appendChild(button);
-      radioGroup.appendChild(labelTag);
-    });
-    form.appendChild(radioGroup);
-  }
-
-  const buttons = form.appendChild(document.createElement("div"));
-  buttons.className = prefix$3 + "-buttons";
-  buttons.appendChild(submitButton);
-  buttons.appendChild(document.createTextNode(" "));
-  buttons.appendChild(cancelButton);
-
-  if (options.useOkButton) {
-    buttons.lastChild.style.float = "right";
-    buttons.style.display = "block";
-  }
-
-  const box = wrapper.getBoundingClientRect();
-  wrapper.style.top = ((window.innerHeight - box.height) / 2) + "px";
-  wrapper.style.left = ((window.innerWidth - box.width) / 2) + "px";
-
-  const submit = () => {
-    const params = getValues(options.fields, domFields);
-    if (options.radioButtons) { params.class = form[options.radioButtons.name].value; }
-    if (params) {
-      close();
-      options.callback(params);
-    }
-  };
-
-  form.addEventListener("submit", e => {
-    e.preventDefault();
-    submit();
-  });
-
-  form.addEventListener("keydown", e => {
-    if (e.keyCode === 27) {
-      e.preventDefault();
-      close();
-    } else if (e.keyCode === 13) {
-      const doSubmit = (options.useOkButton && e.shiftKey)
-        ? true
-        : !options.useOkButton && !(e.ctrlKey || e.metaKey || e.shiftKey)
-        ? true
-        : false;
-      if (doSubmit) {
-        e.preventDefault();
-        submit();
-      }
-    } else if (e.keyCode === 9) {
-      window.setTimeout(() => {
-        if (!wrapper.contains(document.activeElement)) { close(); }
-      }, 500);
-    }
-  });
-
-  const input = form.elements[0];
-  if (input) { input.focus(); }
-}
-
-function getValues(fields, domFields) {
-  const result = Object.create(null);
-  let i = 0;
-  for (const name in fields) {
-    if (name === "src" && fields.src.options.value) {
-      result.src = fields.src.options.value;
-    } else {
-      const field = fields[name];
-      const dom = domFields[i++];
-      const value = field.read(dom);
-      const bad = field.validate(value);
-      if (bad) {
-        reportInvalid(dom, bad);
-        return null
-      }
-      result[name] = field.clean(value);
-    }
-  }
-  return result
-}
-
-function reportInvalid(dom, message) {
-  // FIXME this is awful and needs a lot more work
-  const parent = dom.parentNode;
-  const msg = parent.appendChild(document.createElement("div"));
-  msg.style.left = (dom.offsetLeft + dom.offsetWidth + 2) + "px";
-  msg.style.top = (dom.offsetTop - 5) + "px";
-  msg.className = "ProseMirror-invalid";
-  msg.textContent = message;
-  setTimeout(() => parent.removeChild(msg), 1500);
-}
-
-// ::- The type of field that `FieldPrompt` expects to be passed to it.
-class Field {
-  // :: (Object)
-  // Create a field with the given options. Options support by all
-  // field types are:
-  //
-  // **`value`**`: ?any`
-  //   : The starting value for the field.
-  //
-  // **`label`**`: string`
-  //   : The label for the field.
-  //
-  // **`required`**`: ?bool`
-  //   : Whether the field is required.
-  //
-  // **`validate`**`: ?(any) → ?string`
-  //   : A function to validate the given value. Should return an
-  //     error message if it is not valid.
-  constructor(options) { this.options = options; }
-
-  // render:: (state: EditorState, props: Object) → dom.Node
-  // Render the field to the DOM. Should be implemented by all subclasses.
-
-  // :: (dom.Node) → any
-  // Read the field's value from its DOM node.
-  read(dom) { return dom.value }
-
-  // :: (any) → ?string
-  // A field-type-specific validation function.
-  validateType(_value) {}
-
-  validate(value) {
-    if (!value && this.options.required) {
-      return "Required field"
-    }
-    return this.validateType(value) || (this.options.validate && this.options.validate(value))
-  }
-
-  clean(value) {
-    return this.options.clean ? this.options.clean(value) : value
-  }
-}
-
-// ::- A field class for single-line text fields.
-class TextField extends Field {
-  render() {
-    const input = document.createElement("input");
-    input.type = "text";
-    input.placeholder = this.options.label;
-    input.value = this.options.value || "";
-    input.autocomplete = "off";
-    return input
-  }
-}
-
-class TextAreaField extends Field {
-  render() {
-    const input = document.createElement('textarea');
-    input.maxLength = 5000;
-    input.cols = 80;
-    input.rows = 4;
-    input.placeholder = this.options.label;
-    input.value = this.options.value;
-    input.autocomplete = "off";
-    return input
-  }
-}
-
-const prefix$4 = "ProseMirror-prompt";
-
-function openSelectPrompt(title, buttons, callback) {
-  const wrapper = document.body.appendChild(document.createElement("div"));
-  wrapper.className = prefix$4;
-
-  const mouseOutside = e => { if (!wrapper.contains(e.target)) { close(); } };
-  setTimeout(() => window.addEventListener("mousedown", mouseOutside), 50);
-  const close = () => {
-    window.removeEventListener("mousedown", mouseOutside);
-    if (wrapper.parentNode) { wrapper.parentNode.removeChild(wrapper); }
-  };
-
-  const form = wrapper.appendChild(document.createElement("form"));
-  form.appendChild(document.createElement("h5")).textContent = title;
-
-  for (let i = 0; i < buttons.length; i++) {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = prefix$4 + "-button";
-    button.textContent = buttons[i].textContent;
-    button.dataset.pos = buttons[i].pos;
-    button.onclick = function(e) {
-      const pos = e.target.dataset.pos;
-      close();
-      callback(pos);
-    };
-    form.appendChild(button);
-  }
-
-  const box = wrapper.getBoundingClientRect();
-  wrapper.style.top = ((window.innerHeight - box.height) / 2) + "px";
-  wrapper.style.left = ((window.innerWidth - box.width) / 2) + "px";
-}
-
-function draftMode(state, dispatch, calcNode) {
-  // Toggle the document's draft mode.
-  // When in draft mode, Hurmet displays calc zones in plain text and omits the blue echo.
-  const inDraftMode = !state.doc.attrs.inDraftMode;
-  state.doc.attrs.inDraftMode = inDraftMode;
-  const tr = state.tr;  // Create a ProseMirror transacation.
-  state.doc.nodesBetween(0, state.doc.content.size, function(node, pos) {
-    if (node.type.name === "calculation") {
-      const attrs = Object.assign({}, node.attrs);
-      attrs.inDraftMode = inDraftMode;
-      tr.replaceWith(pos, pos + 1, calcNode.createAndFill(attrs));
-    }
-  });
-  dispatch(tr);
-}
+// Data types
+// Some operands will be two types at the same time, e.g. RATIONAL + MATRIX.
+// So we'll enumerate data types in powers of two.
+// That way, we can use a bit-wise "&" operator to test for an individual type.
+const dt = Object.freeze({
+  NULL: 0,
+  RATIONAL: 1,
+  COMPLEX: 2,
+  BOOLEAN: 4,
+  FROMCOMPARISON: 8,
+  BOOLEANFROMCOMPARISON: 12, // 4 + 8, useful for chained comparisons
+  STRING: 16,
+  QUANTITY: 32, // Contains both a magnitude and a unit-of-measure
+  DATE: 64, //     Not currently used
+  RANGE: 128, //   as in:  1:10
+  TUPLE: 256, //   Used for multiple assignment from a module.
+  MAP: 512,  //    A key:value store with all the same data type the same unit
+  ROWVECTOR: 1024,
+  COLUMNVECTOR: 2048,
+  MATRIX: 4096, // two dimensional
+  DATAFRAME: 8192,
+  MODULE: 16384, // contains user-defined functions
+  ERROR: 32768,
+  UNIT: 65536, // User-defined units.
+  DRAWING: 131072,
+  RICHTEXT: 262144
+});
 
 /*
  * Hurmet, copyright (c) by Ron Kok
@@ -16855,37 +16377,6 @@ const unitTeXFromString = str => {
 
   return unit + "}}"
 };
-
-// unit exponents of a number with no unit.
-const allZeros = Object.freeze([0, 0, 0, 0, 0, 0, 0, 0]);
-
-// Data types
-// Some operands will be two types at the same time, e.g. RATIONAL + MATRIX.
-// So we'll enumerate data types in powers of two.
-// That way, we can use a bit-wise "&" operator to test for an individual type.
-const dt = Object.freeze({
-  NULL: 0,
-  RATIONAL: 1,
-  COMPLEX: 2,
-  BOOLEAN: 4,
-  FROMCOMPARISON: 8,
-  BOOLEANFROMCOMPARISON: 12, // 4 + 8, useful for chained comparisons
-  STRING: 16,
-  QUANTITY: 32, // Contains both a magnitude and a unit-of-measure
-  DATE: 64, //     Not currently used
-  RANGE: 128, //   as in:  1:10
-  TUPLE: 256, //   Used for multiple assignment from a module.
-  MAP: 512,  //    A key:value store with all the same data type the same unit
-  ROWVECTOR: 1024,
-  COLUMNVECTOR: 2048,
-  MATRIX: 4096, // two dimensional
-  DATAFRAME: 8192,
-  MODULE: 16384, // contains user-defined functions
-  ERROR: 32768,
-  UNIT: 65536, // User-defined units.
-  DRAWING: 131072,
-  RICHTEXT: 262144
-});
 
 const errorMessages = Object.freeze({
   EN: {
@@ -17436,7 +16927,9 @@ const groupByFourRegEx = /\B(?=(\d{4})+$)/g;  // use sometimes in China
 // Grouping as common in south Asia: 10,10,000
 const groupByLakhCroreRegEx = /(\d)(?=(\d\d)+\d$)/g;
 
-const superscript = str => {
+const formatRegEx = /^([beEfhkmprsStx%])?(-?[\d]+)?([j∠°])?$/;
+
+const superscript$1 = str => {
   // Convert a numeral string to Unicode superscript characters.
   // Used for denominator in mixed fractions/
   let result = "";
@@ -17466,7 +16959,7 @@ const subscript = str => {
 const texFromMixedFraction = (numParts) => {
   return (numParts[1] ? "-" : "") +
     numParts[3] + "\\,\\class{special-fraction}{\\text{" +
-    superscript(numParts[4]) + "\u2044" + subscript(numParts[5]) + "}}"
+    superscript$1(numParts[4]) + "\u2044" + subscript(numParts[5]) + "}}"
 };
 
 const intAbs$1 = i => i >= BigInt(0) ? i : BigInt(-1) * i;  // absolute value of a BigInt
@@ -17519,7 +17012,7 @@ const roundedString = (r, spec) => {
           // Mixed fraction
           const quotientStr = String(numerator / denominator);
           const remainder = numerator % denominator;
-          return sign + quotientStr + "\u00a0" + superscript(remainder) +
+          return sign + quotientStr + "\u00a0" + superscript$1(remainder) +
             "⁄" + subscript(denominator)
         }
 
@@ -17579,6 +17072,48 @@ const formattedDecimal = (numStr, decimalFormat, truncateTrailingZeros) => {
     if (truncateTrailingZeros) { frac = frac.replace(/(\.|{,})?0+$/, ""); }
     return formattedInteger(intStr, decimalFormat) + frac
   }
+};
+
+const parseFormatSpec = str => {
+  // Do the RegEx once, at compile time, not every time a number is formatted.
+  //
+  // str ≔ "Tn", where:
+  //    T = type, [bEefhkmNnprSstx%], default: "h"
+  //    n = number of digits, [0-9]+, default: 15
+  //
+  //    Possible future additions: complex number format [√∠°]
+
+  const match = formatRegEx.exec(str);
+  if (!match) {
+    const message = errorOprnd("BAD_FORMAT", str).value;
+    return [str, undefined, dt.ERROR, "\\text{" + message + "}"]
+  }
+
+  let ftype = match[1] || "h";
+  let N = Number(match[2] || "15");
+  const ctype = match[3]  || "";
+
+  // Check the specified number of digits
+  switch (ftype) {
+    case "b":
+    case "x":
+    case "X":
+      return [str, undefined, dt.STRING, "\\text{" + ftype + ctype + "}" ]
+    case "t":
+      N = 0;
+      break
+    case "f":
+    case "%":
+      break
+    default:
+      if (N < 1 || N > 15) {
+        const message = "\\text{" + errorOprnd("BAD_PREC").value + "}";
+        return [str, undefined, dt.ERROR, message]
+      }
+  }
+
+  if (ftype === "%") { ftype = "\\%"; }
+  return [str, undefined, dt.STRING, "\\text{" + ftype + String(N) + ctype + "}" ]
 };
 
 const format = (num, specStr = "h3", decimalFormat = "1,000,000.") => {
@@ -17653,6 +17188,50 @@ const format = (num, specStr = "h3", decimalFormat = "1,000,000.") => {
   }
 };
 
+// units.js
+
+/*
+ *  Unit-aware calculation is a core feature of Hurmet.
+ *  Dimensional analysis is used to verify that a calculation contains compatible units.
+ *  Example: Check unit compatibility for:  L = '145 N·m'/'15.2 lbf' = ?? feet
+ *  Analysis step 1: first operand:  N·m →  mass¹·length²·time⁻²
+ *                   2nd  operand:  lbf →  mass¹·length¹·time⁻²
+ *  Note the exponents of those two operands. When terms multiply, we add exponents.
+ *  When terms divide, we subtract exponents. As in step 2, next line:
+ *                   mass^(1-1)∙length^(2-1)∙time^(-2-(-2)) = mass⁰·length¹·time⁰ = length¹
+ *  In the example, the exponents for mass and time both zero'd out.
+ *  Only length has a non-zero exponent. In fact, the result dimension = length¹.
+ *  This matches the desired result dimension (feet is a length), so this example checks out.
+ *
+ *  Hurmet automates this process of checking unit compatibility.
+ *  Each instance of a Hurmet quantity operand contains an array of unit-checking exponents.
+ *  Each element of that array contains an exponent of one of the Hurmet base dimensions.
+ *  Those exponent values come from the unitTable, below.
+ *
+ *  The Hurmet base dimensions and standard units are, in order of array values:
+ *      length (meter)
+ *      mass (kg)
+ *      time (second)
+ *      electrical current (ampere)
+ *      temperature (Kelvin)
+ *      finite amount (1 unit)   (Yes, I know that SI uses a mole. That's just silly.)
+ *      luminous intensity (cd)
+ *      money (Euro)   (A user can redefine the default to some other currency)
+ */
+
+const unitsAreCompatible = (a, b) => {
+  // Do a compatibility check on the unit-checking exponents  a and b.
+  if (a == null && b == null) { return true }
+  if (a == null || b == null) { return false }
+  if (!Array.isArray(a) || !Array.isArray(b)) { return false }
+  // Compare the exponents in the arrays.
+  if (a.length !== b.length) { return false }
+  for (let i = 0; i < a.length; ++i) {
+    if (a[i] !== b[i]) { return false }
+  }
+  return true
+};
+
 // JSON.parse() is faster than a big object literal
 // eslint-disable-next-line max-len
 const prefixFactor = JSON.parse('{"Y":1e24,"yotta":1e24,"Z":1e21,"zetta":1e21,"E":1e18,"exa":1e18,"P":1e15,"peta":1e15,"T":1e12,"tera":1e12,"G":1e9,"giga":1e9,"M":1e6,"mega":1e6,"k":1000,"kilo":1000,"h":100,"hecto":100,"deka":10,"d":0.1,"deci":0.1,"c":0.01,"centi":0.01,"m":0.001,"milli":0.001,"µ":1e-6,"\u00B5":1e-6,"micro":1e-6,"n":1e-9,"nano":1e-9,"p":1e-12,"pico":1e-12,"f":1e-15,"femto":1e-15,"a":1e-18,"atto":1e-18,"z":1e-21,"zepto":1e-21,"y":1e-24,"yocto":1e-24,"Ki":1024,"kibi":1024,"Mi":1048576,"mebi":1048576,"Gi":1073741824,"gibi":1073741824,"Ti":1099511627776,"tebi":1099511627776}');
@@ -17666,11 +17245,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.5553","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.5794","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.5457","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.6327","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -17679,10 +17258,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4380","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4472","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9856","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.3475","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9884","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.3901","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -17702,7 +17281,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.85950","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.87118","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -17710,23 +17289,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.2169","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.2428","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["3.6128","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["86.9535","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["3.6551","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["87.5321","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["143.30","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["144.65","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1373.94","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1377.17","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -17737,7 +17316,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["20.8490","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["20.9743","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -17767,7 +17346,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.0559","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0598","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -18863,6 +18442,14 @@ const Cpx = Object.freeze({
   display
 });
 
+// Two helper functions
+const isMatrix = oprnd => {
+  return (
+    (oprnd.dtype & dt.ROWVECTOR) ||
+    (oprnd.dtype & dt.COLUMNVECTOR) ||
+    (oprnd.dtype & dt.MATRIX)
+  )
+};
 const isVector = oprnd => {
   return (((oprnd.dtype & dt.ROWVECTOR) || (oprnd.dtype & dt.COLUMNVECTOR)) > 0)
 };
@@ -20622,7 +20209,7 @@ const texFunctions = Object.freeze({
   "\\qquad": ["\\qquad", "\\qquad", tt.SPACE, ""]
 });
 
-const accents = Object.freeze([
+const accents$1 = Object.freeze([
   "Bbb",
   "Overrightarrow",
   "acute",
@@ -21033,7 +20620,7 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
     // TeX control word, starting with backslash. e.g. \, or \circ
     const match = matchObj[0];
     st = match.substring(1);
-    if (isIn(st, accents)) {
+    if (isIn(st, accents$1)) {
       return [match, match, tt.ACCENT, ""]
     }
     if (isIn(st, unaries)) {
@@ -22527,6 +22114,8024 @@ const parse = (
   return isCalc ? [tex, rpn] : tex
 };
 
+/*
+ * Hurmet operands often have numeric values. Sometimes they are the numbers originally
+ * input by the writer, henceforward known as "plain". Sometimes we work instead with
+ * values that have been converted to SI base units. It turns out that operands inside
+ * evalRpn() can often get by with less information than in the original cell assignment attrs.
+ * Some details for various data types:
+ *
+ * RATIONAL operand: { value: plain, unit: allZeros, dtype: RATIONAL }
+ * RATIONAL cell attrs: ditto.
+ * Note: "allZeros" is the array of unit-checking exponents for a number: [0,0,0,0,0,0,0,0,0]
+ *
+ * RATIONAL + QUANTITY unit-unaware operand: same as RATIONAL.
+ * RATIONAL + QUANTITY unit-AWARE oprnd: {
+ *   value: inBaseUnits, unit: expos, dtype: RATIONAL + QUANTITY
+ * }
+ * RATIONAL + QUANTITY cell attrs include both of the above and also a `resultdisplay` string.
+ *
+ * RATIONAL + ROWVECTOR is the same as RATIONAL except the value is an array of plains.
+ * RATIONAL + ROWVECTOR + QUANTITY is the same as RATIONAL + QUANTITY except values are arrays.
+ * COLUMNVECTOR is the same as ROWVECTOR exept that they are treated differently by operators.
+ * MATRIX indicates that values are each an array of row vectors.
+ * *
+ * A MAP's values are all the same data type and all have the same unit of measure.
+ * MAP oprnd: {name, value: see below, unit: {name, factor, gauge, expos}, dtype: dMAP + ...}
+ *    where: value is: {name1: value, name2: value} or
+ *    where value is: {plain: {name1: value, name2: value},
+ *                     inBaseUnits: {name1: value, name2: value},
+ *                     etc}
+ * A `resultdisplay` string is always in a MAP's cell attrs and sometimes in an operand.
+ *
+ * ERROR operand: { value: error message, unit: undefined, dtype: ERROR }
+ *
+ * When this module creates Hurmet operands, it does not make defensive copies of
+ * cell attributes. The deep data is referenced. So Hurmet evaluate.js must copy whenever
+ * operators or functions might change a cell attribute.
+ *
+ */
+
+const fromAssignment = (cellAttrs, unitAware) => {
+  // Get the value that was assigned to a variable. Load it into an operand.
+  if (cellAttrs.value === null) {
+    // Return an error message.
+    const insert = (cellAttrs.name) ? cellAttrs.name : "?";
+    return errorOprnd("NULL", insert)
+  }
+
+  const oprnd = Object.create(null);
+  oprnd.dtype = cellAttrs.dtype;
+  oprnd.name = cellAttrs.name;
+
+  // Get the unit data.
+  const dtype = cellAttrs.dtype;
+  if (dtype === dt.STRING || dtype === dt.BOOLEAN || dtype === dt.DRAWING ||
+      dtype === dt.MODULE || dtype === dt.NULL) {
+    oprnd.unit = null;
+  } else if (dtype === dt.DATAFRAME || (dtype & dt.MAP)) {
+    oprnd.unit = Object.freeze(clone(cellAttrs.unit));
+  } else if (cellAttrs.unit && cellAttrs.unit.expos) {
+    oprnd.unit = clone(cellAttrs.unit);
+  } else if (cellAttrs.unit) {
+    oprnd.unit = Object.create(null);
+    if (cellAttrs.unit)  { oprnd.unit.name = cellAttrs.unit; }
+    if (cellAttrs.expos) { oprnd.unit.expos = clone(cellAttrs.expos); }
+  } else if (cellAttrs.expos && Array.isArray(cellAttrs.expos)) {
+    oprnd.unit = { expos: clone(cellAttrs.expos) };
+  } else {
+    oprnd.unit = null;
+  }
+
+  // Get the value.
+  if (cellAttrs.dtype & dt.QUANTITY) {
+    // Here we discard some of the cellAttrs information. In a unit-aware calculation,
+    // number, matrix, and map operands contain only the value.inBaseUnits.
+    oprnd.value = Object.freeze(unitAware
+      ? clone(cellAttrs.value.inBaseUnits)
+      : clone(cellAttrs.value.plain)
+    );
+    oprnd.dtype = cellAttrs.dtype - dt.QUANTITY;
+
+  } else if (cellAttrs.dtype === dt.STRING) {
+    const str = cellAttrs.value;
+    const ch = str.charAt(0);
+    const chEnd = str.charAt(str.length - 1);
+    oprnd.value = ch === '"' && chEnd === '"' ? str.slice(1, -1).trim() : str.trim();
+
+  } else if (cellAttrs.dtype === dt.DATAFRAME) {
+    // For data frames, Hurmet employs copy-on-write tactics.
+    // So at this point, we can pass a reference to the value
+    oprnd.value = cellAttrs.value;
+
+    // Note the only operations on data frames are: (1) access, and (2) concatenate.
+    // That's where the copy-on-write takes place.
+
+  } else {
+    // For all other data types, we employ copy-on-read. So we return a deep copy from here.
+    oprnd.value = clone(cellAttrs.value);
+  }
+
+  return Object.freeze(oprnd)
+};
+
+function propertyFromDotAccessor(parent, index, vars, unitAware) {
+  const property = Object.create(null);
+  if (parent.dtype & dt.MAP) {
+    return map.valueFromMap(parent, [index], unitAware)
+
+  } else if (parent.dtype & dt.DATAFRAME) {
+    return DataFrame.range(parent, [index], vars, unitAware)
+
+  } else if ((parent.dtype === dt.STRING || (parent.dtype & dt.ARRAY)) &&
+    index.dtype === dt.RATIONAL) {
+    const indexVal = Rnl.toNumber(index.value);
+    property.value = parent.value.slice(indexVal - 1, indexVal);
+    property.unit = parent.unit;
+    property.dtype = parent.dtype;
+    return property
+
+  } else if ((parent.dtype === dt.STRING || (parent.dtype & dt.ARRAY)) &&
+        index.dtype === dt.RANGE) {
+    const start = index.value[0] - 1;
+    const step = index.value[1];
+    const end = (index.value[2] === "∞") ? parent.value.length : index.value[2];
+    property.unit = parent.unit;
+    property.dtype = parent.dtype;
+    if (step === 1) {
+      property.value = parent.value.slice(start, end);
+    } else {
+      property.value = [];
+      for (let j = start; j < end; j += step) {
+        property.value.push(parent.value[j]);
+      }
+    }
+    return property
+
+  } else if (parent.dtype === dt.MODULE) {
+    // parent is a module and index has a value assigned to it.
+    return fromAssignment(parent.value[index.value], unitAware)
+
+  } else {
+    return errorOprnd("NO_PROP", parent.name)
+  }
+}
+
+const display$4 = (tuple, formatSpec = "h3", decimalFormat = "1,000,000.") => {
+  if (tuple.size === 0) { return "" }
+  let str = "\\begin{array}{c}";
+
+  let haveUnits = false;
+  for (const attrs of tuple.values()) {
+    if (attrs.unit && attrs.unit.name) { haveUnits = true; break }
+  }
+
+  // Write the unit names
+  if (haveUnits) {
+    let rowTex = "";
+    for (const attrs of tuple.values()) {
+      if (attrs.unit && attrs.unit.name) {
+        rowTex += unitTeXFromString(attrs.unit.name).replace("\\;\\, ", "");
+      }
+      rowTex += "&";
+    }
+    str += rowTex.slice(0, -1) + " \\\\ ";
+    str += "\\hline ";
+  }
+
+  // Write the data
+  let botRow = "";
+  for (const attrs of tuple.values()) {
+    botRow += format(attrs.value, formatSpec, decimalFormat) + " & ";
+  }
+  str += botRow.slice(0, -1);
+  str += "\\end{array}";
+  return str
+};
+
+const displayAlt$3 = (tuple, formatSpec = "h3") => {
+  if (tuple.size === 0) { return "" }
+  let str = "``";
+
+  let haveUnits = false;
+  for (const attrs of tuple.values()) {
+    if (attrs.unit && attrs.unit.name) { haveUnits = true; break }
+  }
+
+  // Write the unit names
+  if (haveUnits) {
+    let rowTex = "";
+    for (const attrs of tuple.values()) {
+      if (attrs.unit && attrs.unit.name) {
+        rowTex += attrs.unit.name;
+      }
+      rowTex += " | ";
+    }
+    str += rowTex.slice(0, -3) + "\n";
+  }
+
+  // Write the data
+  let botRow = "";
+  for (const attrs of tuple.values()) {
+    botRow += format(attrs.value, formatSpec, "100000.") + " | ";
+  }
+  str = botRow.slice(0, -3);
+  return str + "``"
+};
+
+const Tuple = Object.freeze({
+  display: display$4,
+  displayAlt: displayAlt$3
+});
+
+// A result has been sent here from evaluate.js or updateCalculations.js.
+// Format the result for display.
+
+const numMisMatchError = _ => {
+  const str = "Error. Mismatch in number of multiple assignment.";
+  return [`\\color{firebrick}\\text{${str}}`, str]
+};
+
+const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAware) => {
+  if (!result) { return stmt }
+
+  if (result.dtype === dt.DRAWING) {
+    stmt.resultdisplay = result.value;
+    delete stmt.resultdisplay.temp;
+    return stmt
+  }
+
+  const numNames = !stmt.name
+    ? 0
+    : !Array.isArray(stmt.name)
+    ? 1
+    : stmt.name.length;
+
+  if (stmt.resulttemplate.indexOf("?") > -1 ||
+      stmt.resulttemplate.indexOf("!") > -1 ||
+      stmt.resulttemplate.indexOf("@") > -1 ||
+      stmt.resulttemplate.indexOf("%") > -1) {
+    stmt.value = result.value;
+    let resultDisplay = "";
+    let altResultDisplay = "";
+    if (stmt.resulttemplate.indexOf("!") > -1) {
+      // Suppress display of the result
+      resultDisplay = "";
+      altResultDisplay = "";
+      return stmt
+
+    } else if (isMatrix(result) && (result.dtype & dt.MAP)) {
+      resultDisplay = Matrix.displayMapOfVectors(result.value, formatSpec, decimalFormat);
+      altResultDisplay = Matrix.displayAltMapOfVectors(result.value,
+        formatSpec, decimalFormat);
+
+    } else if (isMatrix(result)) {
+      resultDisplay = Matrix.display(
+        isUnitAware ? { value: result.value.plain, dtype: result.dtype } : result,
+        formatSpec,
+        decimalFormat
+      );
+      altResultDisplay = Matrix.displayAlt(
+        isUnitAware ? { value: result.value.plain, dtype: result.dtype } : result,
+        formatSpec,
+        decimalFormat
+      );
+
+    } else if (result.dtype === dt.DATAFRAME) {
+      if (numNames > 1 && numNames !== result.value.data.length) {
+        [resultDisplay, altResultDisplay] = numMisMatchError();
+      } else {
+        const omitHeading = stmt.name && Array.isArray(stmt.name) && stmt.name.length > 1;
+        resultDisplay = DataFrame.display(result.value, formatSpec,
+                                          decimalFormat, omitHeading);
+        altResultDisplay = DataFrame.displayAlt(result.value, formatSpec, omitHeading);
+      }
+
+    } else if (result.dtype & dt.MAP) {
+      const mapSize = (stmt.dtype & dt.QUANTITY) ? result.value.plain.size : result.value.size;
+      if (numNames > 1 && numNames !== mapSize) {
+        [resultDisplay, altResultDisplay] = numMisMatchError();
+      } else {
+        const omitHeading = stmt.name && Array.isArray(stmt.name) && stmt.name.length > 1;
+        resultDisplay = map.display(result, formatSpec, decimalFormat, omitHeading);
+        altResultDisplay = map.displayAlt(result, formatSpec, decimalFormat, omitHeading);
+      }
+
+    } else if (result.dtype === dt.TUPLE) {
+      if (numNames > 1 && numNames !== result.length) {
+        [resultDisplay, altResultDisplay] = numMisMatchError();
+      } else {
+        resultDisplay = Tuple.display(result.value, formatSpec, decimalFormat);
+        altResultDisplay = Tuple.displayAlt(result.value, formatSpec);
+      }
+
+    } else if (result.dtype & dt.STRING) {
+      resultDisplay = "\\text{" + addTextEscapes(result.value) + "}";
+      if (result.unit) {
+        // This is a hack to return a color
+        resultDisplay = `\\textcolor{${result.unit}}{${resultDisplay}}`;
+      }
+      altResultDisplay = result.value;
+
+    } else if (result.dtype & dt.RICHTEXT) {
+      resultDisplay = parse(result.value, decimalFormat, false);
+      altResultDisplay = result.value;
+
+    } else if (result.dtype & dt.BOOLEAN) {
+      resultDisplay = "\\text{" + result.value + "}";
+      altResultDisplay = String(result.value);
+
+    } else if (result.dtype === dt.COMPLEX) {
+      const z = result.value;
+      [resultDisplay, altResultDisplay] = Cpx.display(z, formatSpec, decimalFormat);
+/*        const complexSpec = /[j∠°]/.test(formatSpec) ? formatSpec.slice(-1) : "j"
+      if (complexSpec === "j") {
+        const real = format(z[0], formatSpec, decimalFormat)
+        let im = format(z[1], formatSpec, decimalFormat)
+        if (im.charAt(0) === "-") { im = "(" + im + ")" }
+        resultDisplay = real + " + j" + im
+        altResultDisplay = real + " + j" + im
+      } else {
+        const mag = Rnl.hypot(z[0], z[1])
+        let angle = Cpx.argument(result.value)
+        if (complexSpec === "°") {
+          angle = Rnl.divide(Rnl.multiply(angle, Rnl.fromNumber(180)), Rnl.pi)
+        }
+        resultDisplay = format(mag, formatSpec, decimalFormat) + "∠" +
+                        format(angle, formatSpec, decimalFormat) +
+                        (complexSpec === "°" ? "°" : "")
+        altResultDisplay = resultDisplay
+      } */
+
+    } else if (result.value.plain) {
+      resultDisplay = format(result.value.plain, formatSpec, decimalFormat);
+      if (resultDisplay.dtype && resultDisplay.dtype === dt.ERROR) {
+        resultDisplay = "\\color{firebrick}\\text{" + resultDisplay.value + "}";
+        altResultDisplay = resultDisplay.value;
+      } else {
+        altResultDisplay = resultDisplay.replace(/{,}/g, ",").replace("\\", "");
+      }
+
+    } else if (Rnl.isRational(result.value)) {
+      resultDisplay = format(result.value, formatSpec, decimalFormat);
+      if (resultDisplay.dtype && resultDisplay.dtype === dt.ERROR) {
+        resultDisplay = "\\color{firebrick}\\text{" + resultDisplay.value + "}";
+        altResultDisplay = resultDisplay.value;
+      } else {
+        altResultDisplay = resultDisplay.replace(/{,}/g, ",").replace("\\", "");
+      }
+
+    } else if (result.dtype === dt.IMAGE) {
+      return stmt
+
+    } else {
+      resultDisplay = result.value;
+      altResultDisplay = resultDisplay;
+
+    }
+
+    // Write the string to be plugged into echos of dependent nodes
+    stmt.resultdisplay = stmt.resulttemplate.replace(/(\? *\??|@ *@?|%%?)/, resultDisplay);
+
+    // Write the TeX for this node
+    if (stmt.resulttemplate.indexOf("@") > -1) {
+      stmt.tex = stmt.resultdisplay;
+      stmt.alt = stmt.altresulttemplate.replace(/@@?/, altResultDisplay);
+    } else if (stmt.resulttemplate.indexOf("?") > -1) {
+      let pos = stmt.tex.lastIndexOf("?");
+      stmt.tex = stmt.tex.slice(0, pos).replace(/\? *$/, "") + resultDisplay + stmt.tex.slice(pos + 1);
+      pos = stmt.alt.lastIndexOf("?");
+      stmt.alt = stmt.alt.slice(0, pos).replace(/\? *$/, "") + altResultDisplay + stmt.alt.slice(pos + 1);
+    } else if (stmt.resulttemplate.indexOf("%") > -1) {
+      let pos = stmt.tex.lastIndexOf("%");
+      stmt.tex = stmt.tex.slice(0, pos).replace(/% *$/, "") + resultDisplay + stmt.tex.slice(pos + 1);
+      pos = stmt.alt.lastIndexOf("%");
+      stmt.alt = stmt.alt.slice(0, pos).replace(/% *$/, "") + altResultDisplay + stmt.alt.slice(pos + 1);
+    }
+  }
+  return stmt
+};
+
+/*
+ *  This module receives a TeX template string and a object containing Hurmet variables.
+ *  At each location where the template contains a variable, this module plugs in a TeX string
+ *  of the variable's value, for display in the Hurmet blue echo..
+ */
+
+const varRegEx = /〖[^〗]*〗/;
+const openParenRegEx$1 = /([([{|‖]|[^\\][,;:])$/;
+
+const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat) => {
+  // For each variable name in the echo string, substitute a value.
+  // The parser surrounded those names with 〖〗 delimiters.
+  let match;
+  while ((match = varRegEx.exec(str)) !== null) {
+    const varName = match[0].replace(/[〖〗()]/g, "").trim().replace(/'/g, "′");
+    const matchLength = match[0].length;
+    const pos = match.index;
+    let hvar;
+    let display = "";
+
+    if (varName.indexOf(".") > -1) {
+      // Object with a dot accessor.
+      const names = varName.split(".");
+      const parentName = names[0];
+      if (!vars[parentName]) { return errorOprnd("V_NAME", parentName) }
+      hvar = vars[parentName];
+      if (hvar.dtype === dt.DATAFRAME && names.length === 2) {
+        // This is a dataframe.dict. I don't want to write an entire dictionary into
+        // a blue echo, so display just the names.
+        display = "\\mathrm{" + vars[names[0]].name + "{.}\\mathrm{" + names[1] + "}";
+        return str.substring(0, pos) + display + str.substring(pos + matchLength)
+      } else {
+        // we want to display the property value.
+        for (let i = 1; i < names.length; i++) {
+          const propName = names[i].replace("}", "").replace("\\mathrm{", "").trim();
+          const indexOprnd = { value: propName, unit: null, dtype: dt.STRING };
+          hvar = propertyFromDotAccessor(hvar, indexOprnd, vars, unitAware);
+          if (!hvar) { return errorOprnd("V_NAME", propName) }
+          const stmt = { resulttemplate: "@", altresulttemplate: "@" };
+          hvar.resultdisplay = formatResult(stmt, hvar, formatSpec,
+                decimalFormat).resultdisplay;
+        }
+      }
+    } else if (!vars[varName] && varName === "T") {
+      // Transposed matrix
+      hvar = { dtype: dt.RATIONAL, resultdisplay: "\\text{T}" };
+    } else if (varName === "e" && /^\^/.test(str.slice(pos + 3).trim())) {
+      // e^x
+      str = str.substring(0, pos) + "e" + str.substring(pos + matchLength);
+      continue
+    } else if (!vars[varName]) {
+      return errorOprnd("V_NAME", varName)
+    } else {
+      // Get a clone in order to avoid mutating the inner properties of vars.
+      hvar = {
+        dtype: vars[varName].dtype,
+        resultdisplay: vars[varName].resultdisplay
+      };
+    }
+
+    if (!hvar || !hvar.resultdisplay) {
+      const insert = (varName) ? varName : "?";
+      return errorOprnd("NULL", insert)
+    } else if (hvar.error) {
+      return errorOprnd("NULL", varName)
+    }
+
+    let needsParens = true; // default
+    if (isMatrix(hvar) || (hvar.dtype & dt.DATAFRAME)) { needsParens = false; }
+    if (unitAware && (hvar.dtype & dt.QUANTITY)) { needsParens = true; }
+
+    let isParened = false; // Is the match already nested inside parens?
+    if (pos > 0) {
+      const pStr = str.slice(0, pos).trim();
+      if (openParenRegEx$1.test(pStr)) {
+        const fStr = str.slice(pos + varName.length + 2).trim();
+        isParened = fStr.length > 0 && /^([)|‖\]},;:]|\\right)/.test(fStr);
+      } else if (/^\\begin{[bp]matrix}/.test(hvar.resultdisplay)) {
+        isParened = /\\end{[bp]matrix}$/.test(hvar.resultdisplay);
+      }
+    }
+    needsParens = needsParens && !isParened;
+
+    if (hvar.dtype === dt.DATAFRAME || (hvar.dtype & dt.MAP)) {
+      display = "\\mathrm{" + vars[varName].name + "}";
+    } else if (unitAware) {
+      display = needsParens ? "\\left(" + hvar.resultdisplay + "\\right)" : hvar.resultdisplay;
+    } else {
+      let displaySansUnits = hvar.resultdisplay;
+      const posUnit = hvar.resultdisplay.lastIndexOf("{\\text{");
+      if (posUnit > -1) {
+        displaySansUnits = hvar.resultdisplay.slice(0, posUnit).trim();
+        displaySansUnits = displaySansUnits.replace(/\\; *$/, "").trim();
+      }
+      display = needsParens ? "\\left(" + displaySansUnits + "\\right)" : displaySansUnits;
+    }
+    str = str.substring(0, pos) + display + str.substring(pos + matchLength);
+  }
+  return str
+};
+
+const negativeOne = Object.freeze(Rnl.negate(Rnl.one));
+const oneHalf = [BigInt(1), BigInt(2)];
+const thirty = [BigInt(30), BigInt(1)];
+const fortyFive = [BigInt(45), BigInt(1)];
+const sixty = [BigInt(60), BigInt(1)];
+const ninety = [BigInt(90), BigInt(1)];
+const halfPi = Object.freeze(Rnl.divide(Rnl.pi, Rnl.two));
+
+const functionExpos = (functionName, args) => {
+  const numArgs = args.length;
+
+  const expos = numArgs === 1 ? args[0].unit.expos : null;
+
+  switch (functionName) {
+    case "abs":
+    case "round":
+    case "roundn":
+    case "sign":
+    case "trace":
+    case "fetch":
+      return expos
+
+    case "cos":
+    case "sin":
+    case "tan":
+    case "sec":
+    case "csc":
+    case "cot":
+    case "acos":
+    case "arccos":
+    case "asin":
+    case "arcsin":
+    case "atan":
+    case "arctan":
+    case "asec":
+    case "arcsec":
+    case "acsc":
+    case "arccsc":
+    case "acot":
+    case "arccot":
+    case "cosd":
+    case "sind":
+    case "tand":
+    case "secd":
+    case "cscd":
+    case "cotd":
+    case "acosd":
+    case "asind":
+    case "atand":
+    case "asecd":
+    case "acscd":
+    case "acotd":
+    case "gud":
+      if (!unitsAreCompatible(expos, allZeros)) {
+        return errorOprnd("UNIT_IN", functionName)
+      }
+      return allZeros
+
+    case "exp":
+    case "log":
+    case "ln":
+    case "log10":
+    case "log2":
+    case "logn":
+    case "cosh":
+    case "sinh":
+    case "tanh":
+    case "sech":
+    case "csch":
+    case "coth":
+    case "acosh":
+    case "asinh":
+    case "atanh":
+    case "asech":
+    case "acsch":
+    case "acoth":
+    case "binomial":
+    case "gamma":
+    case "Γ":
+    case "logΓ":
+    case "logFactorial":
+      if (!unitsAreCompatible(expos, allZeros)) {
+        return errorOprnd("UNIT_IN", functionName)
+      }
+      return allZeros
+
+    case "sqrt":
+      return expos.map(e => e / 2)
+
+    case "gcd":
+    case "mht":
+      if (!unitsAreCompatible(expos, allZeros)) {
+        return errorOprnd("UNIT_IN", functionName)
+      }
+      return functionName === "hmt" ? [1, 0, 0, 0, 0, 0, 0, 0] : allZeros
+
+    case "atan2":
+    case "hypot":
+    case "rms":
+    case "sum":
+    case "mean":
+    case "median":
+    case "min":
+    case "max":
+    case "range":
+    case "stddev":
+    case "variance": {
+      const x = args[0].unit.expos;
+      for (let i = 1; i < args.length; i++) {
+        const y = args[i].unit.expos;
+        if (x.length !== y.length) { return errorOprnd("UNIT_ARG", functionName) }
+        for (let j = 0; j < x.length; j++) {
+          if (x[j] !== y[j]) { return errorOprnd("UNIT_ARG", functionName) }
+        }
+      }
+      return functionName === "atan2" ? allZeros : x
+    }
+
+    case "Re":
+    case "Im":
+    case "argument":
+      return allZeros
+
+    case "product": {
+      const expos = clone(args[0].unit.expos);
+      for (let i = 1; i < args.length; i++) {
+        const p = args[i].unit.expos;
+        expos.map((e, j) => e + p[j]);
+      }
+      return expos
+    }
+
+    default:
+      return errorOprnd("F_NAME", functionName)
+  }
+};
+
+const gamma = x => {
+  if (Rnl.isZero(x)) {
+    return errorOprnd("Γ0")
+  } else if (Rnl.isPositive(x) && Rnl.isInteger(x) && Rnl.lessThan(x, Rnl.fromNumber(101))) {
+    return Rnl.factorial(Rnl.subtract(x, Rnl.one))
+  } else if (Rnl.isNegative(x) && Rnl.isInteger(x)) {
+    return errorOprnd("ΓPOLE")
+  } else if (Rnl.lessThan(x, oneHalf)) {
+    // reflection formula
+    return Rnl.fromNumber(Math.PI / (Math.sin(Math.PI * Rnl.toNumber(x)))
+      * Rnl.toNumber(gamma(Rnl.subtract(Rnl.one, x))))
+  } else {
+    return Rnl.lanczos(x)
+  }
+};
+
+const logΓ = r => {
+  // logGamma function. Returns natural logarithm of the Gamma function.
+  // Ref: https://www.johndcook.com/blog/2010/08/16/how-to-compute-log-factorial/
+  if (Rnl.isZero(r)) { return errorOprnd("Γ0") }
+  if (Rnl.isNegative(r)) { return errorOprnd("LOGΓ") }
+  if (Rnl.areEqual(r, Rnl.one) || Rnl.areEqual(r, Rnl.two)) { return Rnl.zero }
+  if (Rnl.lessThanOrEqualTo(r, Rnl.fromNumber(14))) {
+    return Rnl.fromNumber(Math.log(Rnl.toNumber(gamma(r))))
+  } else {
+    const x = Rnl.toNumber(r);
+    // eslint-disable-next-line max-len
+    const y = (x - 0.5) * Math.log(x) - x + 0.5 * Math.log(2 * Math.PI) + 1 / (12 * x) - 1 / (360 * x ** 3) + 1 / (1260 * x ** 5) - 1 / (1680 * x ** 7) + 5 / (540 * x ** 9);
+    //  Error bounded by: -691/(360360 * x^11), 16 significant digits
+    return Rnl.fromNumber(y)
+  }
+};
+
+const binomial = (n, k) => {
+  // (n \atop k) = n! / (k! (n - k)!)
+  //             = exp(log!(n) - [log!(k) + log!(n - k)])
+  if (Rnl.areEqual(n, k)) { return Rnl.one }
+  if (Rnl.isZero(n)) { return Rnl.zero }
+  if (Rnl.isNegative(k)) { return Rnl.zero }
+  if (Rnl.lessThan(n, k)) { return Rnl.zero }
+
+  if (Rnl.isInteger(n) && Rnl.isInteger(k) && Rnl.isPositive(n) && Rnl.isPositive(k)) {
+    // positive integers
+//    if (Rnl.lessThan(n, twenty)) {
+    return Rnl.divide(Rnl.factorial(n),
+      Rnl.multiply(Rnl.factorial(k), Rnl.factorial(Rnl.subtract(n, k))))
+//    } else {
+//      return Rnl.fromNumber(Math.round(Math.exp(Rnl.toNumber(
+//        Rnl.subtract(logFactorial(n),
+//          Rnl.add(logFactorial(k), logFactorial(Rnl.subtract(n, k))))))))
+//    }
+
+  } else if (Rnl.isInteger(n) && Rnl.isInteger(k) && Rnl.isPositive(k)) {
+    // negative integer n
+    // (-n \atop k) = (-1)^k * multiset(n, k)
+    return Rnl.multiply(Rnl.power(negativeOne, k), multiset(Rnl.negate(n), k))
+
+  } else {
+    // generalized for real or complex arguments
+    // (x \atop y) = Γ(x+1) / ( Γ(y+1) Γ(x-y+1) )
+    return Rnl.divide(
+      gamma(Rnl.increment(n)),
+      Rnl.multiply(gamma(Rnl.increment(k)), gamma(Rnl.increment(Rnl.subtract(n, k))))
+    )
+
+  }
+};
+
+const multiset = (n, k) => {
+  // ((n \atop k)) = ((n+k-1) \atop k)
+  // multiset(n, k) = binomial(n+k-1, k)
+  return binomial(Rnl.add(n, Rnl.decrement(k)), k)
+};
+
+const piOver180 = Rnl.divide(Rnl.pi, [BigInt(180), BigInt(1)]);
+
+const unary = {
+  scalar: {
+    // Functions that take one real argument.
+    abs(x)  { return Rnl.abs(x) },
+    argument(x) { return errorOprnd("NA_REAL", "argument") },
+    Re(x)   { return errorOprnd("NA_REAL", "Re") },
+    Im(x)   { return errorOprnd("NA_REAL", "Im") },
+    cos(x)  { return Rnl.cos(x) },
+    sin(x)  { return Rnl.sin(x) },
+    tan(x)  { return Rnl.tan(x) },
+    cosh(x) { return Rnl.cosh(x) },
+    sinh(x) { return Rnl.sinh(x) },
+    tanh(x) { return Rnl.tanh(x) },
+    acos(x) {
+      if (Rnl.greaterThan(Rnl.abs(x), Rnl.one)) { return errorOprnd("ATRIG", "acos") }
+      return Rnl.fromNumber(Math.acos(Rnl.toNumber(x)))
+    },
+    asin(x) {
+      if (Rnl.greaterThan(Rnl.abs(x), Rnl.one)) { return errorOprnd("ATRIG", "asin") }
+      return Rnl.fromNumber(Math.asin(Rnl.toNumber(x)))
+    },
+    atan(x) {
+      return Rnl.fromNumber(Math.atan(Rnl.toNumber(x)))
+    },
+    sec(x) {
+      return Rnl.fromNumber(1 / Math.cos(Rnl.toNumber(x)))
+    },
+    csc(x) {
+      return Rnl.fromNumber(1 / Math.sin(Rnl.toNumber(x)))
+    },
+    cot(x) {
+      if (Rnl.isZero(x)) { return errorOprnd("COT", "cotangent") }
+      return  Rnl.fromNumber(1 / Math.tan(Rnl.toNumber(x)))
+    },
+    asec(x) {
+      if (Rnl.greaterThanOrEqualTo(Rnl.abs(x), Rnl.one)) {
+        return errorOprnd("ASEC", "arcecant")
+      }
+      const temp = Math.atn(Math.sqrt(Rnl.toNumber(Rnl.decrement(Rnl.multiply(x, x)))));
+      return  (Rnl.isPositive(x))
+        ? Rnl.fromNumber(temp)
+        : Rnl.fromNumber(temp - Math.PI)
+    },
+    acot(x) {
+      if (Rnl.greaterThanOrEqualTo(Rnl.abs(x), Rnl.one)) {
+        return errorOprnd("ASEC", "acot")
+      }
+      const temp = Math.atn(1 / (Math.sqrt(Rnl.toNumber(Rnl.decrement(Rnl.multiply(x, x))))));
+      return (Rnl.isPositive(x))
+        ? Rnl.fromNumber(temp)
+        : Rnl.fromNumber(temp - Math.PI)
+    },
+    acsc(x) {
+      return Rnl.fromNumber(Math.atn(-Rnl.toNumber(x)) + Math.PI)
+    },
+    exp(x) {
+      return Rnl.exp(x)
+    },
+    log(x) {
+      return Rnl.isZero(x) ? errorOprnd("LOG_ZERO") : Rnl.fromNumber(Math.log(Rnl.toNumber(x)))
+    },
+    ln(x) {
+      return Rnl.isZero(x) ? errorOprnd("LOG_ZERO") : Rnl.fromNumber(Math.log(Rnl.toNumber(x)))
+    },
+    log10(x) {
+      return Rnl.isZero(x)
+        ? errorOprnd("LOG_ZERO")
+        : Rnl.fromNumber(Math.log10(Rnl.toNumber(x)))
+    },
+    log2(x) {
+      return Rnl.isZero(x)
+        ? errorOprnd("LOG_ZERO")
+        : Rnl.fromNumber(Math.log2(Rnl.toNumber(x)))
+    },
+    sech(x) {
+      // sech(n) = 2 / (eⁿ + e⁻ⁿ)
+      const num = Rnl.toNumber(x);
+      return Rnl.fromNumber(2 / (Math.exp(num) + Math.exp(-num)))
+    },
+    csch(x) {
+      // csch(n) = 2 / (eⁿ - e⁻ⁿ)
+      const num = Rnl.toNumber(x);
+      return Rnl.fromNumber(2 / (Math.exp(num) - Math.exp(-num)))
+    },
+    coth(x) {
+      // coth(n) = (eⁿ + e⁻ⁿ) / (eⁿ - e⁻ⁿ)
+      const num = Rnl.toNumber(x);
+      return Rnl.fromNumber(
+        (Math.exp(num) + Math.exp(-num)) / (Math.exp(num) - Math.exp(-num))
+      )
+    },
+    acosh(x) {
+      // acosh(x) = log( x + sqrt(x - 1) × sqrt(x + 1) )
+      const num = Rnl.toNumber(x);
+      return Rnl.fromNumber(Math.log( num + Math.sqrt(num - 1) * Math.sqrt(num + 1) ))
+    },
+    asinh(x) {
+      // asinh(x) = log(x + sqrt(x² + 1))
+      const num = Rnl.toNumber(x);
+      return Rnl.fromNumber(Math.log(num + Math.sqrt(Math.pow(num, 2) + 1)))
+    },
+    atanh(x) {
+      // atanh(x) = [ log(1+x) - log(1-x) ] / 2
+      const num = Rnl.toNumber(x);
+      return Rnl.fromNumber((Math.log(1 + num) - Math.log(1 - num) ) / 2)
+    },
+    asech(x) {
+      // asech(x) = log( [sqrt(-x * x + 1) + 1] / x )
+      if (Rnl.isZero(x)) { return errorOprnd("DIV") }
+      const num = Rnl.toNumber(x);
+      return Rnl.fromNumber(Math.log((Math.sqrt(-num * num + 1) + 1) / num))
+    },
+    ascsh(x) {
+      // acsch(x) = log( sqrt(1 + 1/x²) + 1/x )
+      if (Rnl.isZero(x)) { return errorOprnd("DIV") }
+      const num = Rnl.toNumber(x);
+      return Rnl.fromNumber(Math.log(Math.sqrt(1 + 1 / Math.pow(num, 2)) + 1 / num))
+    },
+    acoth(x) {
+      // acoth(x) = [ log(1 + 1/x) - log(1 - 1/x) ] / 2
+      if (Rnl.isZero(x)) { return errorOprnd("DIV") }
+      const num = Rnl.toNumber(x);
+      return Rnl.fromNumber((Math.log(1 + 1 / num) - Math.log(1 - 1 / num)) / 2)
+    },
+    Gamma(x) {
+      return gamma(x)
+    },
+    Γ(x) {
+      return gamma(x)
+    },
+    logΓ(x) {
+      if (Rnl.isNegative(x) || Rnl.isZero(x)) { return errorOprnd("LOGΓ") }
+      return logΓ(x)
+    },
+    logFactorial(x) {
+      if (Rnl.isNegative(x) || !Rnl.isInteger(x)) { return errorOprnd("FACT") }
+      return logΓ(Rnl.add(x, Rnl.one))
+    },
+    sign(x) {
+      return Rnl.isPositive(x) ? Rnl.one : Rnl.isZero(x) ? Rnl.zero : negativeOne
+    },
+    cosd(x) {
+      if (Rnl.areEqual(x, ninety)) { return Rnl.zero }
+      if (Rnl.areEqual(x, sixty)) { return oneHalf }
+      return this.cos(Rnl.multiply(x, piOver180))
+    },
+    sind(x) {
+      if (Rnl.areEqual(x, thirty)) { return oneHalf }
+      return this.sin(Rnl.multiply(x, piOver180))
+    },
+    tand(x) {
+      if (Rnl.areEqual(x, fortyFive)) { return Rnl.one }
+      if (Rnl.areEqual(x, ninety)) { return errorOprnd("TAN90", "90°") }
+      return this.tan(Rnl.multiply(x, piOver180))
+    },
+    cotd(x) {
+      return this.cot(Rnl.multiply(x, piOver180))
+    },
+    cscd(x) {
+      return this.csc(Rnl.multiply(x, piOver180))
+    },
+    secd(x) {
+      return this.sec(Rnl.multiply(x, piOver180))
+    },
+    acosd(x) {
+      const y = this.acos(x);
+      return y.dtype ? y : Rnl.divide(y, piOver180)
+    },
+    asind(x) {
+      const y = this.asin(x);
+      return y.dtype ? y : Rnl.divide(y, piOver180)
+    },
+    atand(x) {
+      return Rnl.divide(this.atan(x), piOver180)
+    },
+    acotd(x) {
+      const y = this.acot(x);
+      return y.dtype ? y : Rnl.divide(y, piOver180)
+    },
+    acscd(x) {
+      const y = this.acsc(x);
+      return y.dtype ? y : Rnl.divide(y, piOver180)
+    },
+    asecd(x) {
+      const y = this.asec(x);
+      return y.dtype ? y : Rnl.divide(y, piOver180)
+    },
+    chr(x) {
+      return String.fromCodePoint(Number(x))
+    },
+    sqrt(x) {
+      const y = [BigInt(1), BigInt(2)];
+      return Cpx.isComplex(x) || (Rnl.isNegative(x))
+          ? Cpx.power([x, Rnl.zero], y)
+          : Rnl.power(x, y)
+    },
+    round(x) {
+      return Rnl.fromString(Rnl.toString(x, 0))
+    }
+  },
+  complex: {
+    // Functions that take one complex argument.
+    abs(z)      { return Cpx.abs(z) },
+    argument(z) { return Cpx.argument(z) },
+    Re(z)       { return z[0] },
+    Im(z)       { return z[1] },
+    cos(z)      { return Cpx.cos(z) },
+    sin(z)      { return Cpx.sin(z) },
+    asin(z)     { return Cpx.asin(z) },
+    atan(z)     { return Cpx.atan(z) },
+    acos(z)     { return Cpx.subtract([halfPi, Rnl.zero], Cpx.asin(z))}, // π/2 - arcsin(z)
+    tan(z)      { return Cpx.divide(Cpx.sin(z), Cpx.cos(z)) },
+    cot(z)      { return Cpx.divide(Cpx.cos(z), Cpx.sin(z)) },
+    sec(z) {
+      const c = Cpx.cos(z);
+      return c.dtype ? c : Cpx.inverse(c)
+    },
+    csc(z) {
+      const s = Cpx.sin(z);
+      return s.dtype ? s : Cpx.inverse(s)
+    },
+    asec(z) {
+      // acos(inverse(z))
+      const inv = Cpx.inverse(z);
+      return Cpx.subtract([halfPi, Rnl.zero], Cpx.asin(inv))
+    },
+    acot(z) { return Cpx.atan(Cpx.inverse(z)) },
+    acsc(z) {
+      return Cpx.asin(Cpx.inverse(z))
+    },
+    exp(z) {
+      return Cpx.exp(z)
+    },
+    log(z) {
+      return Cpx.log(z)
+    },
+    ln(z) {
+      return Cpx.log(z)
+    },
+    log10(z) {
+      return Rnl.fromNumber(Math.log10(Rnl.toNumber(z)))
+    },
+    log2(z) {
+      return Rnl.fromNumber(Math.log2(Rnl.toNumber(z)))
+    },
+    cosh(z) {
+      // cosh(z) = (eᶻ + e⁻ᶻ) / 2
+      return Cpx.divide(Cpx.add(Cpx.exp(z), Cpx.exp(Cpx.negate(z))), [Rnl.two, Rnl.zero])
+    },
+    sinh(z) {
+      // sinh(z) = (eᶻ - e⁻ᶻ) / 2
+      return Cpx.divide(Cpx.subtract(Cpx.exp(z), Cpx.exp(Cpx.negate(z))), [Rnl.two, Rnl.zero])
+    },
+    tanh(z) {
+      // tanh(z) = (eᶻ - e⁻ᶻ) / (eᶻ + e⁻ᶻ)
+      const ez = Cpx.exp(z);
+      const eMinuxZ = Cpx.exp(Cpx.negate(z));
+      return Cpx.divide(Cpx.subtract(ez, eMinuxZ), Cpx.add(ez, eMinuxZ))
+    },
+    sech(z) {
+      // sech(z) = 2 / (eᶻ + e⁻ᶻ)
+      return Cpx.divide([Rnl.two, Rnl.zero], Cpx.add(Cpx.exp(z), Cpx.exp(Cpx.negate(z))))
+    },
+    csch(z) {
+      // csch(z) = 2 / (eᶻ - e⁻ᶻ)
+      return Cpx.divide([Rnl.two, Rnl.zero], Cpx.subtract(Cpx.exp(z), Cpx.exp(Cpx.negate(z))))
+    },
+    coth(z) {
+      // coth(z) = (eᶻ + e⁻ᶻ) / (eᶻ - e⁻ᶻ)
+      const ez = Cpx.exp(z);
+      const eMinuxZ = Cpx.exp(Cpx.negate(z));
+      return Cpx.divide(Cpx.add(ez, eMinuxZ), Cpx.subtract(ez, eMinuxZ))
+    },
+    acosh(z) {
+      return Cpx.acosh(z)
+    },
+    asinh(z) {
+      return Cpx.asinh(z)
+    },
+    atanh(z) {
+      return Cpx.atanh(z)
+    },
+    asech(z) {
+      return Cpx.acosh(Cpx.inverse(z))
+    },
+    acsch(z) {
+      return Cpx.asinh(Cpx.inverse(z))
+    },
+    acoth(z) {
+      return Cpx.atanh(Cpx.inverse(z))
+    },
+    Gamma(z) {
+      return Cpx.gamma(z)
+    },
+    Γ(z) {
+      return Cpx.gamma(z)
+    },
+    logΓ(z) {
+      // TODO: complex logΓ
+      return errorOprnd("NA_COMPL_OP", "logΓ")
+    },
+    sign(z) {
+      if (Rnl.isZero(z[1]) && Rnl.isPositive(z[0])) {
+        return Rnl.one
+      } else if (Rnl.isZero(z[1]) && Rnl.isNegative(z[0])) {
+        return Rnl.negate(Rnl.one)
+      } else {
+        return Cpx.divide(z, [Cpx.abs(z), Rnl.zero])
+      }
+    },
+    round(z) {
+      // TODO: complex round function
+      return errorOprnd("NA_COMPL_OP", "round")
+    }
+  }
+};
+
+const binary = {
+  logn([n, x]) {
+    return Rnl.fromNumber(Math.log(Rnl.toNumber(x)) / Math.log(Rnl.toNumber(n)))
+  },
+  roundFixed([x, n]) {
+    return Rnl.fromString(Rnl.toString(x, n))
+  },
+  roundSignificant([x, n]) {
+    return Rnl.fromString(Rnl.toStringSignificant(x, n))
+  },
+  stringFixed([x, n]) {
+    return Rnl.toString(x, n)
+  },
+  stringSignificant([x, n]) {
+    return Rnl.toStringSignificant(x, n)
+  },
+  atan2([x, y]) {
+    return Rnl.fromNumber(Math.atan2(Rnl.toNumber(y), Rnl.toNumber(x)))
+  },
+  hypot([x, y]) {
+    // sqrt(x^2)
+    // https://www.johndcook.com/blog/2010/06/02/whats-so-hard-about-finding-a-hypotenuse/
+    const max = Rnl.max(x, y);
+    const r = Rnl.divide(Rnl.min(x, y), max);
+    return Rnl.multiply(max, Rnl.sqrt(Rnl.increment(Rnl.multiply(r, r))))
+  },
+  gcd([m, n]) {
+    return Rnl.gcd(m, n)
+  },
+  rms([x, y]) {
+    return this.hypot(x, y)
+  },
+  binomial([x, y]) {
+    return binomial(x, y)
+  },
+  zeros([m, n]) {
+    return Matrix.zeros(Rnl.toNumber(m), Rnl.toNumber(n))
+  }
+};
+
+const reduce = {
+  max(list) {
+    return list.reduce((max, e) => Rnl.max(max, e))
+  },
+  min(list) {
+    return list.reduce((min, e) => Rnl.min(min, e))
+  },
+  sum(list) {
+    return list.reduce((sum, e) => Rnl.add(sum, e))
+  },
+  product(list) {
+    return list.reduce((sum, e) => Rnl.multiply(sum, e))
+  },
+  mean(list) {
+    const sum = this.sum(list);
+    return Rnl.divide(sum, Rnl.fromNumber(list.length))
+  },
+  median(list) {
+    const max = this.max(list);
+    const min = this.min(list);
+    return Rnl.divide(Rnl.add(max, min), Rnl.two)
+  },
+  range(list) {
+    return Rnl.subtract(this.max(list), this.min(list))
+  },
+  variance(list) {
+    const sum = this.sum(list);
+    const mean = Rnl.divide(sum, Rnl.fromNumber(list.length));
+    const num = list.reduce((num, e) => Rnl.add(num, Rnl.pow(Rnl.subtract(e, mean), Rnl.two)));
+    return Rnl.divide(num, Rnl.subtract(Rnl.fromNumber(list.length), Rnl.one))
+  },
+  stddev(list) {
+    const variance = this.variance(list);
+    return Rnl.power(variance, oneHalf)
+  },
+  accumulate(list) {
+    const v = new Array(list.length).fill(0);
+    v[0] = list[0];
+    for (let i = 1; i < list.length; i++) {
+      v[i] = Rnl.add(v[i - 1], list[i]);
+    }
+    return v
+  }
+};
+
+const lerp = (args, unitAware) => {
+  // linear interpolation
+  for (let i = 0; i < 3; i++) {
+    if (!(args[i].dtype & dt.RATIONAL)) { return errorOprnd("") }
+  }
+  let expos = allZeros;
+  if (unitAware) {
+    if (args[0].expos !== args[1].expos) { return errorOprnd("") }
+    if (args[1].expos !== args[2].expos) { return errorOprnd("") }
+    expos = args[0].expos;
+  }
+  const output = Object.create(null);
+  output.unit = Object.create(null);
+  output.unit.expos = expos;
+  output.dtype = dt.RATIONAL;
+
+  const v0 = args[0].value;  // a vector
+  const v1 = args[1].value;  // another vector
+  const x = args[2].value;   // the input value
+  // TODO: Use binary search
+  for (let i = 0; i < v0.length - 1; i++) {
+    if (Rnl.lessThanOrEqualTo(v0[i], x) & Rnl.lessThanOrEqualTo(x, v0[i + 1])) {
+      const slope = Rnl.divide((Rnl.subtract(v1[i + 1], v1[i])),
+        (Rnl.subtract(v0[i + 1], v0[i])));
+      output.value = Rnl.add(v1[i], Rnl.multiply(slope, (Rnl.subtract(x, v0[i]))));
+      return Object.freeze(output)
+    }
+  }
+};
+
+const Functions = Object.freeze({
+  functionExpos,
+  unary,
+  binary,
+  reduce,
+  lerp
+});
+
+const multivarFunction = (arity, functionName, args) => {
+  // Deal with a function that may have multiple arguments.
+
+  if (args.length === 1) {
+    const list = Matrix.isVector(args[0])
+      ? args[0].value
+      : (args.dtype & dt.MATRIX)
+      // TODO: fix the next line.
+      ? args[0].value.flat()
+      : args[0].value;
+
+    const value = Functions[arity][functionName](list);
+
+    let dtype = args[0].dtype;
+    if (arity === "reduce" && functionName !== "accumulate") {
+      // Mask off any matrix or vector indicator from the dtype
+      if (dtype & dt.MATRIX) { dtype -= dt.MATRIX; }
+      if (dtype & dt.ROWVECTOR) { dtype -= dt.ROWVECTOR; }
+      if (dtype & dt.COLUMNVECTOR) { dtype -= dt.COLUMNVECTOR; }
+    }
+
+    return [value, dtype]
+
+  } else {
+    // We have multiple arguments.
+    // Is one of them a vector?
+    let iArg = 0;
+    let gotVector = false;
+    let dtype = args[0].dtype;
+
+    for (iArg = 0; iArg < args.length; iArg++) {
+      if (Matrix.isVector(args[iArg])) {
+        gotVector = true;
+        dtype = args[iArg].dtype;
+        break
+      }
+    }
+    const list = args.map(e => e.value);
+    if (!gotVector) {
+      const result = Functions[arity][functionName](list);
+      return functionName === "zeros"
+        ? [result.value, result.dtype]
+        : [result, args[0].dtype]
+
+    } else {
+      const listClone = clone(list);
+      const result = [];
+      for (let i = 0; i < list[iArg].length; i++) {
+        listClone[iArg] = list[iArg][i];
+        result.push(Functions[arity][functionName](listClone));
+      }
+      return [ result, dtype ]
+    }
+  }
+};
+
+// compare.js
+
+const equals = (x, y) => {
+  if (Rnl.isRational(x) && Rnl.isRational(y)) {
+    return Rnl.areEqual(x, y)
+  } else {
+    return x === y
+  }
+};
+
+const compare = (op, x, y, yPrev) => {
+  // If yPrev is defined, then this is part of a chained comparison, e.g.: a < b < c
+  if (x === false && yPrev) { return false }  // The chain is false if any part is false.
+  if (x === true && yPrev) { x = yPrev; }  // Compare this link in the chain.
+
+  switch (op) {
+    case "=":
+      return equals(x, y)
+
+    case "≠":
+    case "!=":
+    case "/=":
+      if (Rnl.isRational(x) && Rnl.isRational(y)) {
+        return !Rnl.areEqual(x, y)
+      } else {
+        return x !== y
+      }
+
+    case ">":
+      if (Rnl.isRational(x) && Rnl.isRational(y)) {
+        return Rnl.greaterThan(x, y)
+      } else {
+        return x > y
+      }
+
+    case "<":
+      if (Rnl.isRational(x) && Rnl.isRational(y)) {
+        return Rnl.lessThan(x, y)
+      } else {
+        return x < y
+      }
+
+    case "≥":
+    case ">=":
+      if (Rnl.isRational(x) && Rnl.isRational(y)) {
+        return Rnl.greaterThanOrEqualTo(x, y)
+      } else {
+        return x >= y
+      }
+
+    case "≤":
+    case "<=":
+      if (Rnl.isRational(x) && Rnl.isRational(y)) {
+        return Rnl.lessThanOrEqualTo(x, y)
+      } else {
+        return x <= y
+      }
+
+    case "∈":
+      if (typeof x === "string" && typeof y === "string") {
+        return y.indexOf(x) > -1
+      } else if (Array.isArray(y) && !Array.isArray(x)) {
+        for (let i = 0; i < y.length; i++) {
+          if (equals(x, y[i])) { return true }
+        }
+        return false
+      } else if (y instanceof Map) {
+        return y.has(x)
+      } else {
+        return errorOprnd("NOT_ARRAY")
+      }
+
+    case "⋐":
+      if (typeof x === "string" && typeof y === "string") {
+        return y.indexOf(x) > -1
+      } else if (Array.isArray(x) && Array.isArray(y)) {
+        for (let i = 0; i < y.length; i++) {
+          if (equals(x[0], y[i])) {
+            if (i + x.length > y.length) { return false }
+            for (let j = 1; j < x.length; j++) {
+              if (!equals(x[j], y[i + j])) { return false }
+            }
+            return true
+          }
+        }
+        return false
+      } else {
+        return errorOprnd("NOT_ARRAY")
+      }
+
+    case "∉":
+      if (typeof x === "string" && typeof y === "string") {
+        return y.indexOf(x) === -1
+      } else if (Array.isArray(y)) {
+        for (let i = 0; i < y.length; i++) {
+          if (x === y[i]) { return false }
+        }
+        return true
+      } else if (y instanceof Map) {
+        return !y.has(x)
+      } else {
+        return errorOprnd("NOT_ARRAY")
+      }
+  }
+};
+
+// Hurmet math operators are overloaded to handle operands of various shapes.
+// Those shapes being scalars, vectors, matrices, and maps.
+// This file implements the overloading.
+
+// Some helper functions
+const transpose2D = a => a[0].map((x, i) => a.map(y => y[i]));
+const dotProduct = (a, b) => {
+  return a.map((e, j) => Rnl.multiply(e, b[j])).reduce((m, n) => Rnl.add(m, n))
+};
+const sumOfSquares = vector => {
+  return vector.map((e) => Rnl.multiply(e, e)).reduce((m, n) => Rnl.add(m, n))
+};
+const oneTenth = [BigInt(1), BigInt(100)];
+
+// From the object below, calculations.js will call operators using statements
+// that look like this:
+// resultValue = Operations.unary[shape][operator](inputValue)
+
+const unary$1 = {
+  scalar: {
+    abs(x)       { return Rnl.abs(x) },
+    norm(x)      { return Rnl.abs(x) },
+    negate(x)    { return Rnl.negate(x) },
+    exp(x)       { return Rnl.exp(x) },
+    floor(x)     { return Rnl.floor(x) },
+    ceil(x)      { return Rnl.ceil(x) },
+    percent(x)   { return Rnl.multiply(oneTenth, x) },
+    factorial(x) { return Rnl.factorial(x) },
+    not(x)       { return !x }
+  },
+
+  complex: {
+    abs(z)       { return Cpx.abs(z) },
+    norm(z)      { return Cpx.abs(z) },
+    conjugate(z) { return Cpx.conjugate(z) },
+    negate(z)    { return Cpx.negate(z) },
+    exp(z)       { return Cpx.exp(z) },
+    floor(z)     { return errorOprnd("NA_COMPL_OP", "floor") },
+    ceil(z)      { return errorOprnd("NA_COMPL_OP", "ceil") },
+    percent(z)   { return errorOprnd("NA_COMPL_OP", "percent") },
+    factorial(z) { return errorOprnd("NA_COMPL_OP", "factorial") },
+    not(z)       { return errorOprnd("NA_COMPL_OP", "not") }
+  },
+
+  vector: {
+    abs(v)       { return Rnl.sqrt(sumOfSquares(v)) },   // magnitude of a vector
+    norm(v)      { return Rnl.sqrt(sumOfSquares(v)) },   // ditto
+    negate(v)    { return v.map(e => Rnl.negate(e)) },
+    exp(v)       { return v.map(e => Rnl.exp(e)) },
+    floor(v)     { return v.map(e => Rnl.floor(e)) },
+    ceil(v)      { return v.map(e => Rnl.ceil(e)) },
+    percent(v)   { return v.map(e => Rnl.multiply(oneTenth, e)) },
+    factorial(v) { return v.map(e => Rnl.factorial(e)) },
+    not(v)       { return v.map(e => !e) }
+  },
+
+  matrix: {
+    abs(m) { return Matrix.invert(m, true) },
+    norm(m) {
+      if (m.length === m[0].length) {
+        let sum = Rnl.zero;
+        for (let i = 0; i < m.length; i++) {
+          sum = Rnl.add(sum, sumOfSquares(m[i]));
+        }
+        return sum.sqrt()
+      }
+    },
+    negate(m)    { return m.map(row => row.map(e => Rnl.negate(e))) },
+    exp(m)       { return m.map(row => row.map(e => Rnl.exp(e))) },
+    floor(m)     { return m.map(row => row.map(e => Rnl.floor(e))) },
+    ceil(m)      { return m.map(row => row.map(e => Rnl.ceil(e))) },
+    percent(m)   { return m.map(row => row.map(e => Rnl.multiply(oneTenth, e))) },
+    factorial(m) { return m.map(row => row.map(e => Rnl.factorial(e))) },
+    not(m)       { return m.map(row => row.map(e => !e)) }
+  },
+
+  map: {
+    abs(map)       { return mapMap(map, value => Rnl.abs(value)) },
+    negate(map)    { return mapMap(map, value => Rnl.negate(value)) },
+    exp(map)       { return mapMap(map, value => Rnl.exp(value)) },
+    floor(map)     { return mapMap(map, value => Rnl.floor(value)) },
+    ceil(map)      { return mapMap(map, value => Rnl.ceil(value)) },
+    percent(map)   { return mapMap(map, value => Rnl.multiply(oneTenth, value)) },
+    factorial(map) { return mapMap(map, value => Rnl.factorial(value)) },
+    not(map)       { return mapMap(map, value => !value) }
+  },
+
+  mapWithVectorValues: {
+    abs(map)       { return mapMap(map, array => array.map(e => Rnl.abs(e))) },
+    negate(map)    { return mapMap(map, array => array.map(e => Rnl.negate(e))) },
+    exp(map)       { return mapMap(map, array => array.map(e => Rnl.exp(e)))},
+    floor(map)     { return mapMap(map, array => array.map(e => Rnl.floor(e))) },
+    ceil(map)      { return mapMap(map, array => array.map(e => Rnl.ceil(e))) },
+    percent(map)   { return mapMap(map, array => array.map(e => Rnl.multiply(oneTenth, e))) },
+    factorial(map) { return mapMap(map, array => array.map(e => Rnl.factorial(e))) },
+    not(map)       { return mapMap(map, array => array.map(e => !e)) }
+  }
+};
+
+const condition = {
+  // Deal with booleans. Return a single value, true or false.
+  // If a vector or matrix is received, all elements must be
+  // true in order to return a true. Otherwise return a false.
+  scalar(x) { return x },
+  vector(v) { return v.reduce((prev, curr) => prev && curr, true) },
+  matrix(m) {
+    const row = new Array(m.length);
+    for (let i = 0; i < m.length; i++) {
+      row[i] = m[i].reduce((prev, curr) => prev && curr, true);
+    }
+    return row.reduce((prev, curr) => prev && curr, true)
+  }
+};
+
+const dtype = {
+  // Given the shapes which are operands to a binary operator,
+  // return the resulting data type.
+  scalar: {
+    scalar(t0, t1, tkn)     {
+      return (tkn === "&" || tkn === "&_")
+        ? t0 + (tkn === "&" ? dt.ROWVECTOR : dt.COLUMNVECTOR )
+        : t0
+    },
+    complex(t0, t1, tkn)    { return t1 },
+    vector(t0, t1, tkn)     { return t1 },
+    matrix(t0, t1, tkn)     { return t1 },
+    dataFrame(t0, t1, tkn)  { return t1 },
+    map(t0, t1, tkn)        { return t1 },
+    mapWithVectorValues(t0, t1, tkn) { return t1 }
+  },
+  complex: {
+    scalar(t0, t1, tkn)  { return t0 },
+    complex(t0, t1, tkn) { return t0 }
+  },
+  vector: {
+    scalar(t0, t1, tkn) { return t0 },
+    map(t0, t1, tkn)    { return t1 + (t0 & dt.ROWVECTOR) + (t0 & dt.COLUMNVECTOR) }
+  },
+  rowVector: {
+    rowVector(t0, t1, tkn) { return tkn === "&_" ? t0 - dt.ROWVECTOR + dt.MATRIX : t0 },
+    columnVector(t0, t1, tkn) { return t0 },
+    matrix(t0, t1, tkn) { return tkn === "&_" ? t1 : t0 }
+  },
+  columnVector: {
+    rowVector(t0, t1, op) {
+      return op === "dot"
+      ? dt.RATIONAL
+      : op === "cross"
+      ? t0
+      : t0 - dt.COLUMNVECTOR + dt.MATRIX
+    },
+    columnVector(t0, t1, tkn) { return tkn === "&" ? t0 - dt.COLUMNVECTOR + dt.MATRIX : t0 },
+    matrix(t0, t1, tkn) { return t1 }
+  },
+  matrix: {
+    scalar(t0, t1, tkn) { return t0 },
+    rowVector(t0, t1, tkn) { return t0 },
+    columnVector(t0, t1, tkn) { return tkn === "&" ? t0 : t1 },
+    matrix(t0, t1, tkn) { return t0 },
+    map(t0, t1, tkn)    { return 0 }
+  },
+  dataFrame: {
+    scalar(t0, t1, tkn) { return t0 }
+  },
+  map: {
+    scalar(t0, t1, tkn) { return t0 },
+    vector(t0, t1, tkn) { return t0 + (t1 & dt.ROWVECTOR) + (t1 & dt.COLUMNVECTOR) },
+    matrix(t0, t1, tkn) { return 0 },
+    map(t0, t1, tkn)    { return t0 }
+  },
+  mapWithVectorValues: {
+    scalar(t0, t1, tkn) { return t0 }
+  }
+};
+
+
+// The binary operators below are called like this:
+// resultValue = Operations.binary[shape_0][shape_1][operator](input_0, input_1)
+
+const binary$1 = {
+  scalar: {
+    scalar: {
+      // Binary operations on two scalars
+      add(x, y)      { return Rnl.add(x, y) },
+      subtract(x, y) { return Rnl.subtract(x, y) },
+      multiply(x, y) { return Rnl.multiply(x, y) },
+      divide(x, y)   { return Rnl.divide(x, y) },
+      power(x, y)    {
+        // eslint-disable-next-line max-len
+        return Cpx.isComplex(x) || (Rnl.isNegative(x) && Rnl.isPositive(y) && Rnl.lessThan(y, Rnl.one))
+          ? Cpx.power([x, Rnl.zero], y)
+          : Rnl.power(x, y)
+      },
+      hypot(x, y)    { return Rnl.hypot(x, y) },
+      modulo(x, y)   { return Rnl.modulo(x, y) },
+      and(x, y)      { return x && y },
+      or(x, y)       { return x || y },
+      xor(x, y)      { return x !== y },
+      concat(x, y)   { return [x, y] },
+      unshift(x, y)  { return [x, y] }
+    },
+    complex: {
+      add(x, z)      { return [Rnl.add(x, z[0]), z[1]] },
+      subtract(x, z) { return [Rnl.subtract(x, z[0]), Rnl.negate(z[1])] },
+      multiply(x, z) { return [Rnl.multiply(x, z[0]), Rnl.multiply(x, z[1])] },
+      divide(x, z)   { return Cpx.divide([x, Rnl.zero], z) },
+      power(x, z)    { return Cpx.power([x, Rnl.zero], z) },
+      modulo(x, z)   { return errorOprnd("NA_COMPL_OP", "modulo") },
+      and(x, z)      { return errorOprnd("NA_COMPL_OP", "and") },
+      or(x, z)       { return errorOprnd("NA_COMPL_OP", "or") },
+      xor(x, z)      { return errorOprnd("NA_COMPL_OP", "xor") }
+    },
+    vector: {
+      // Binary operations with a scalar and a vector.
+      // Perform element-wise operations.
+      add(x, v)      { return v.map(e => Rnl.add(x, e)) },
+      subtract(x, v) { return v.map(e => Rnl.subtract(x, e)) },
+      multiply(x, v) { return v.map(e => Rnl.multiply(x, e)) },
+      divide(x, v)   { return v.map(e => Rnl.divide(x, e)) },
+      power(x, v)    { return v.map(e => Rnl.power(x, e)) },
+      modulo(x, v)   { return v.map(e => Rnl.modulo(x, e)) },
+      and(x, v)      { return v.map(e => x && e) },
+      or(x, v)       { return v.map(e => x || e) },
+      xor(x, v)      { return v.map(e => x !== e) },
+      concat(x, v)   { return [x, ...v] }
+    },
+    matrix: {
+      // Binary operations with a scalar and a matrix.
+      // Perform element-wise operations.
+      add(x, m)      { return m.map(row => row.map(e => Rnl.add(x, e))) },
+      subtract(x, m) { return m.map(row => row.map(e => Rnl.subtract(x, e))) },
+      multiply(x, m) { return m.map(row => row.map(e => Rnl.multiply(x, e))) },
+      divide(x, m)   { return m.map(row => row.map(e => Rnl.divide(x, e))) },
+      power(x, m)    { return m.map(row => row.map(e => Rnl.power(x, e))) },
+      modulo(x, m)   { return m.map(row => row.map(e => Rnl.modulo(x, e))) },
+      and(x, m)      { return m.map(row => row.map(e => x && e)) },
+      or(x, m)       { return m.map(row => row.map(e => x || e)) },
+      xor(x, m)      { return m.map(row => row.map(e => x !== e)) },
+      concat(x, m)   { return errorOprnd("BAD_CONCAT") }
+    },
+    dataFrame: {
+      multiply(x, df) {
+        df.data = df.data.map(col => isNaN(col[0]) ? col : col.map(e => {
+          let L = e.length;
+          if (e.indexOf(".")) { L -= 1; }
+          return Rnl.toStringSignificant(Rnl.multiply(x, Rnl.fromString(e)), L)
+        }));
+        return df
+      },
+      divide(x, df) {
+        df.data = df.data.map(col => isNaN(col[0]) ? col : col.map(e => {
+          let L = e.length;
+          if (e.indexOf(".")) { L -= 1; }
+          return Rnl.toStringSignificant(Rnl.divide(x, Rnl.fromString(e)), L)
+        }));
+        return df
+      }
+    },
+    map: {
+      // Binary operations with a scalar and a map.
+      // Perform element-wise operations.
+      add(scalar, map) {
+        return mapMap(map, value => Rnl.add(scalar, value))
+      },
+      subtract(scalar, map) {
+        return mapMap(map, value => Rnl.subtract(scalar, value))
+      },
+      multiply(scalar, map) {
+        return mapMap(map, value => Rnl.multiply(scalar, value))
+      },
+      divide(scalar, map) {
+        return mapMap(map, value => Rnl.divide(scalar, value))
+      },
+      power(scalar, map) {
+        return mapMap(map, value => Rnl.power(scalar, value))
+      },
+      modulo(scalar, map) {
+        return mapMap(map, value => Rnl.modulo(scalar, value))
+      },
+      and(scalar, map) {
+        return mapMap(map, value => scalar && value)
+      },
+      or(scalar, map) {
+        return mapMap(map, value => scalar || value)
+      },
+      xor(scalar, map) {
+        return mapMap(map, value => scalar !== value)
+      }
+    },
+    mapWithVectorValues: {
+      add(scalar, map) {
+        return mapMap(map, array => array.map(e => Rnl.add(scalar, e)))
+      },
+      subtract(scalar, map) {
+        return mapMap(map, array => array.map(e => Rnl.subtract(scalar, e)))
+      },
+      multiply(scalar, map) {
+        return mapMap(map, array => array.map(e => Rnl.multiply(scalar, e)))
+      },
+      divide(scalar, map) {
+        return mapMap(map, array => array.map(e => Rnl.divide(scalar, e)))
+      },
+      power(scalar, map) {
+        return mapMap(map, array => array.map(e => Rnl.power(scalar, e)))
+      },
+      modulo(scalar, map) {
+        return mapMap(map, array => array.map(e => Rnl.modulo(scalar, e)))
+      },
+      and(scalar, map) {
+        return mapMap(map, array => array.map(e => scalar && e))
+      },
+      or(scalar, map) {
+        return mapMap(map, array => array.map(e => scalar || e))
+      },
+      xor(scalar, map) {
+        return mapMap(map, array => array.map(e => scalar !== e))
+      }
+    }
+  },
+
+  complex: {
+    scalar: {
+      add(z, y)      { return [Rnl.add(z[0], y), z[1]] },
+      subtract(z, y) { return [Rnl.subtract(z[0], y), z[1]] },
+      multiply(z, y) { return [Rnl.multiply(z[0], y), Rnl.multiply(z[1], y) ] },
+      divide(z, y)   { return Cpx.divide(z, [y, Rnl.zero]) },
+      power(z, y)    { return Cpx.power(z, [y, Rnl.zero]) },
+      modulo(z, y)   { return errorOprnd("NA_COMPL_OP", "modulo") },
+      and(z, y)      { return errorOprnd("NA_COMPL_OP", "and") },
+      or(z, y)       { return errorOprnd("NA_COMPL_OP", "or") },
+      xor(z, y)      { return errorOprnd("NA_COMPL_OP", "xor") }
+    },
+    complex: {
+      add(x, y)      { return [Rnl.add(x[0], y[0]), Rnl.add(x[1], y[1])] },
+      subtract(x, y) { return [Rnl.subtract(x[0], y[0]), Rnl.subtract(x[1], y[1])] },
+      multiply(x, y) { return Cpx.multiply(x, y) },
+      divide(x, y)   { return Cpx.divide(x, y) },
+      power(x, y)    { return Cpx.power(x, y) },
+      modulo(x, y)   { return errorOprnd("NA_COMPL_OP", "modulo") },
+      and(x, y)      { return errorOprnd("NA_COMPL_OP", "and") },
+      or(x, y)       { return errorOprnd("NA_COMPL_OP", "or") },
+      xor(x, y)      { return errorOprnd("NA_COMPL_OP", "xor") }
+
+    }
+  },
+
+  vector: {
+    scalar: {
+      // Binary operations with a vector and a scalar.
+      // Perform element-wise operations.
+      add(v, x)      { return v.map(e => Rnl.add(e, x)) },
+      subtract(v, x) { return v.map(e => Rnl.subtract(e, x)) },
+      multiply(v, x) { return v.map(e => Rnl.multiply(e, x)) },
+      divide(v, x)   { return v.map(e => Rnl.divide(e, x)) },
+      power(v, x)    { return v.map(e => Rnl.power(e, x)) },
+      modulo(v, x)   { return v.map(e => Rnl.modulo(e, x)) },
+      and(v, x)      { return v.map(e => e && x) },
+      or(v, x)       { return v.map(e => e || x) },
+      xor(v, x)      { return v.map(e => e !== x) },
+      concat(v, x)   { return [...v, x]}
+    },
+    map: {
+      // Binary operations with a vector and a map
+      add(vector, map) {
+        return mapMap(map, val => vector.map(e => Rnl.add(val, e)))
+      },
+      subtract(vector, map) {
+        return mapMap(map, val => vector.map(e => Rnl.subtract(val, e)))
+      },
+      multiply(vector, map) {
+        return mapMap(map, val => vector.map(e => Rnl.multiply(val, e)))
+      },
+      divide(vector, map) {
+        return mapMap(map, val => vector.map(e => Rnl.divide(val, e)))
+      },
+      power(vector, map) {
+        return mapMap(map, val => vector.map(e => Rnl.power(val, e)))
+      },
+      modulo(vector, map) {
+        return mapMap(map, val => vector.map(e => Rnl.modulo(val, e)))
+      },
+      and(vector, map) {
+        return mapMap(map, val => vector.map(e => val && e))
+      },
+      or(vector, map) {
+        return mapMap(map, val => vector.map(e => val || e))
+      },
+      xor(vector, map) {
+        return mapMap(map, val => vector.map(e => val !== e))
+      }
+    }
+  },
+
+  rowVector: {
+    rowVector: {
+      // Binary operations on two row vectors.
+      add(x, y) {
+        // element-wise addition
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.add(e, y[i]))
+      },
+      subtract(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.subtract(e, y[i]))
+      },
+      divide(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.divide(e, y[i]))
+      },
+      dot(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return dotProduct(x, y)
+      },
+      cross(x, y) {
+        if (x.length !== 3 || y.length !== 3) { return errorOprnd("CROSS") }
+        const v = [Rnl.zero, Rnl.zero, Rnl.zero];
+        v[0] = Rnl.subtract(Rnl.multiply(x[1], y[2]), Rnl.multiply(x[2], y[1]));
+        v[1] = Rnl.subtract(Rnl.multiply(x[2], y[0]), Rnl.multiply(x[0], y[2]));
+        v[2] = Rnl.subtract(Rnl.multiply(x[0], y[1]), Rnl.multiply(x[1], y[0]));
+        return v
+      },
+      multiply(x, y) {
+        if (x.length === 1 && y.length === 1) { return [Rnl.multiply(x[0], y[0])] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      asterisk(x, y) {
+        // Element-wise multiplication
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.multiply(e, y[i]))
+      },
+      power(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.power(e, y[i]))
+      },
+      modulo(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.modulo(e, y[i]))
+      },
+      and(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => e && y[i])
+      },
+      or(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => e || y[i])
+      },
+      xor(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => e !== y[i])
+      },
+      concat(x, y) { return x.concat(y) },
+      unshift(x, y) { return [x, y] }
+    },
+    columnVector: {
+      // Binary operations on a row vector and a column vector.
+      // Except for multiplication, these work only if both vectors have only one element.
+      add(x, y) {
+        if (x.length === 1 && y.length === 1) { return [Rnl.add(x[0], y[0])] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      subtract(x, y) {
+        if (x.length === 1 && y.length === 1) { return [Rnl.subtract(x[0], y[0])] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      dot(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return dotProduct(x, y)
+      },
+      cross(x, y) {
+        if (x.length !== 3 || y.length !== 3) { return errorOprnd("CROSS") }
+        const v = [Rnl.zero, Rnl.zero, Rnl.zero];
+        v[0] = Rnl.subtract(Rnl.multiply(x[1], y[2]), Rnl.multiply(x[2], y[1]));
+        v[1] = Rnl.subtract(Rnl.multiply(x[2], y[0]), Rnl.multiply(x[0], y[2]));
+        v[2] = Rnl.subtract(Rnl.multiply(x[0], y[1]), Rnl.multiply(x[1], y[0]));
+        return v
+      },
+      multiply(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return dotProduct(x, y)
+      },
+      asterisk(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.multiply(e, y[i]))
+      },
+      power(x, y) {
+        if (x.length === 1 && y.length === 1) { return [Rnl.power(x[0], y[0])] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      modulo(x, y) {
+        if (x.length === 1 && y.length === 1) { return [Rnl.modulo(x[0], y[0])] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      and(x, y) {
+        if (x.length === 1 && y.length === 1) { return [x[0] && y[0]] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      or(x, y) {
+        if (x.length === 1 && y.length === 1) { return [x[0] || y[0]] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      xor(x, y) {
+        if (x.length === 1 && y.length === 1) { return [x[0] !== y[0]] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      concat(x, y)  { return "BAD_CONCAT" },
+      unshift(x, y) { return "BAD_CONCAT" }
+    },
+    matrix: {
+      // Binary operations on a row vector and a 2-D matrix.
+      add(v, m) {
+        // Add the row vector to each row in the matrix
+        if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
+        return m.map(row => row.map((e, i) => Rnl.add(v[i], e)))
+      },
+      subtract(v, m) {
+        if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
+        return m.map(row => row.map((e, i) => Rnl.subtract(v[i], e)))
+      },
+      concat(v, m) {
+        if (v.length !== m[0].length) { return errorOprnd("BAD_CONCAT") }
+        return m.map((row, i) => [v[i], ...row])
+      },
+      unshift(v, m) {
+        if (v.length !== m.length) { return errorOprnd("BAD_CONCAT") }
+        return [v, ...m]
+      }
+    }
+  },
+
+  columnVector: {
+    rowVector: {
+      // Binary operations on a column vector and a row vector.
+      // Except for multiplication, these work only if both vectors have only one element.
+      add(x, y) {
+        if (x.length === 1 && y.length === 1) { return [Rnl.add(x[0], y[0])] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      subtract(x, y) {
+        if (x.length === 1 && y.length === 1) { return [Rnl.subtract(x[0], y[0])] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      dot(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return dotProduct(x, y)
+      },
+      cross(x, y) {
+        if (x.length !== 3 || y.length !== 3) { return errorOprnd("CROSS") }
+        const v = [Rnl.zero, Rnl.zero, Rnl.zero];
+        v[0] = Rnl.subtract(Rnl.multiply(x[1], y[2]), Rnl.multiply(x[2], y[1]));
+        v[1] = Rnl.subtract(Rnl.multiply(x[2], y[0]), Rnl.multiply(x[0], y[2]));
+        v[2] = Rnl.subtract(Rnl.multiply(x[0], y[1]), Rnl.multiply(x[1], y[0]));
+        return v
+      },
+      multiply(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return dotProduct(x, y)
+      },
+      divide(x, y) {
+        return x.map(m => y.map(e => Rnl.divide(m, e)))
+      },
+      asterisk(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.multiply(e, y[i]))
+      },
+      power(x, y) {
+        if (x.length === 1 && y.length === 1) { return [Rnl.power(x[0], y[0])] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      modulo(x, y) {
+        if (x.length === 1 && y.length === 1) { return [Rnl.modulo(x[0], y[0])] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      and(x, y) {
+        if (x.length === 1 && y.length === 1) { return [x[0] && y[0]] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      or(x, y) {
+        if (x.length === 1 && y.length === 1) { return [x[0] || y[0]] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      xor(x, y) {
+        if (x.length === 1 && y.length === 1) { return [x[0] !== y[0]] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      concat(x, y)  { return "BAD_CONCAT" },
+      unshift(x, y) { return "BAD_CONCAT" }
+    },
+    columnVector: {
+      // Binary operations on two column vectors.
+      add(x, y) {
+        // element-wise addition
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.add(e, y[i]))
+      },
+      subtract(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.subtract(e, y[i]))
+      },
+      divide(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.divide(e, y[i]))
+      },
+      dot(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return dotProduct(x, y)
+      },
+      cross(x, y) {
+        if (x.length !== 3 || y.length !== 3) { return errorOprnd("CROSS") }
+        const v = [Rnl.zero, Rnl.zero, Rnl.zero];
+        v[0] = Rnl.subtract(Rnl.multiply(x[1], y[2]), Rnl.multiply(x[2], y[1]));
+        v[1] = Rnl.subtract(Rnl.multiply(x[2], y[0]), Rnl.multiply(x[0], y[2]));
+        v[2] = Rnl.subtract(Rnl.multiply(x[0], y[1]), Rnl.multiply(x[1], y[0]));
+        return v
+      },
+      multiply(x, y) {
+        if (x.length === 1 && y.length === 1) { return [Rnl.multiply(x[0], y[0])] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      asterisk(x, y) {
+        // Element-wise multiplication
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.multiply(e, y[i]))
+      },
+      power(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.power(e, y[i]))
+      },
+      modulo(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.modulo(e, y[i]))
+      },
+      and(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => e && y[i])
+      },
+      or(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => e || y[i])
+      },
+      xor(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => e !== y[i])
+      },
+      concat(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => [e, y[i]])
+      },
+      unshift(x, y) { return x.concat(y) }
+    },
+
+    matrix: {
+      // Binary operations on a column vector and a 2-D matrix.
+      add(v, m) {
+        // Add the column vector to each column of the matrix
+        const result = clone(m);
+        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
+        for (let i = 0; i < m.length; i++) {
+          for (let j = 0; j < m[0].length; j++) {
+            result[i][j] = Rnl.add(m[i][j], v[j]);
+          }
+        }
+        return result
+      },
+      subtract(v, m) {
+        // Add the column vector to each column of the matrix
+        const result = clone(m);
+        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
+        for (let i = 0; i < m.length; i++) {
+          for (let j = 0; j < m[0].length; j++) {
+            result[i][j] = Rnl.subtract(m[i][j], v[j]);
+          }
+        }
+        return result
+      },
+      concat(v, m) {
+        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
+        return m.map((row, i) => [v[i], ...row])
+      },
+      unshift(x, y) { return "BAD_CONCAT" }
+    }
+  },
+
+  matrix: {
+    scalar: {
+      // Binary operations with a matrix and a scalar.
+      // Perform element-wise operations.
+      add(m, x)      { return m.map(row => row.map(e => Rnl.add(e, x))) },
+      subtract(m, x) { return m.map(row => row.map(e => Rnl.subtract(e, x))) },
+      multiply(m, x) { return m.map(row => row.map(e => Rnl.multiply(e, x))) },
+      divide(m, x)   { return m.map(row => row.map(e => Rnl.divide(e, x))) },
+      power(m, x)    {
+        if (x === "T") { return transpose2D(m) }
+        if (m.length === m[0].length && Rnl.areEqual(x, [BigInt(-1), BigInt(1)])) {
+          return Matrix.invert(m)
+        }
+        return m.map(row => row.map(e => Rnl.power(e, x)))
+      },
+      modulo(m, x)   { return m.map(row => row.map(e => Rnl.modulo(e, x))) }
+    },
+    rowVector: {
+      add(m, v)      { return m.map(row => row.map((e, i) => Rnl.add(e, v[i]) )) },
+      subtract(m, v) { return m.map(row => row.map((e, i) => Rnl.subtract(e, v[i]) )) },
+      multiply(m, v) { return m.map(row => row.map((e, i) => Rnl.multiply(e, v[i]) )) },
+      divide(m, v)   { return m.map(row => row.map((e, i) => Rnl.divide(e, v[i]) )) },
+      power(m, v)    { return m.map(row => row.map((e, i) => Rnl.power(e, v[i]) )) },
+      unshift(m, v) {
+        if (m[0].length !== v.length) { return errorOprnd("MIS_ELNUM") }
+        return [...m, v]
+      }
+    },
+    columnVector: {
+      add(m, v)      { return m.map(row => row.map((e, i) => Rnl.add(e, v[i]) )) },
+      subtract(m, v) { return m.map(row => row.map((e, i) => Rnl.subtract(e, v[i]) )) },
+      multiply(m, v) {
+        // Multiply a matrix times a column vector
+        if (m[0].length !== v.length) { return errorOprnd("MIS_ELNUM") }
+        return m.map(row => dotProduct(row, v))
+      },
+      concat(m, v) {
+        if (m.length !== v.length) { return errorOprnd("MIS_ELNUM") }
+        return m.map((row, i) => [...row, v[i]])
+      }
+    },
+    matrix: {
+      // Binary operations on two 2-D matrices.
+      add(x, y) {
+        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
+        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((m, i) => m.map((n, j) => Rnl.add(n, y[i][j])))
+      },
+      subtract(x, y) {
+        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
+        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((m, i) => m.map((n, j) => Rnl.subtract(n, y[i][j])))
+      },
+      dot(x, y) {
+        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
+        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((row, i) => dotProduct(row, y[i])).reduce((m, n) => Rnl.add(m, n))
+      },
+      cross(x, y) {
+        return errorOprnd("CROSS")
+      },
+      multiply(x, y) {
+
+      },
+      asterisk(x, y) {
+        // Element-wise multiplication
+        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
+        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((m, i) => m.map((n, j) => Rnl.multiply(n, y[i][j])))
+      },
+      divide(x, y) {
+        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
+        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((m, i) => m.map((n, j) => Rnl.divide(n, y[i][j])))
+      },
+      power(x, y) {
+        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
+        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((m, i) => m.map((n, j) => Rnl.power(n, y[i][j])))
+      },
+      modulo(x, y) {
+        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
+        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((m, i) => m.map((n, j) => Rnl.modulo(n, y[i][j])))
+      },
+      and(x, y) {
+        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
+        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((m, i) => m.map((n, j) => n && y[i][j]))
+      },
+      or(x, y) {
+        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
+        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((m, i) => m.map((n, j) => n || y[i][j]))
+      },
+      xor(x, y) {
+        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
+        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((m, i) => m.map((n, j) => n !== y[i][j]))
+      },
+      concat(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((row, i) => row.concat(y[i]))
+      },
+      unshift(x, y) {
+        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
+        return x.concat(y)
+      }
+    },
+    map: {
+
+    }
+  },
+
+  dataFrame: {
+    multiply(df, scalar) {
+      df.data = df.data.map(col => isNaN(col[0]) ? col : col.map(e => {
+        let L = e.length;
+        if (e.indexOf(".")) { L -= 1; }
+        return Rnl.toStringSignificant(Rnl.multiply(scalar, Rnl.fromString(e)), L)
+      }));
+      return df
+    },
+    divide(df, scalar) {
+      df.data = df.data.map(col => isNaN(col[0]) ? col : col.map(e => {
+        let L = e.length;
+        if (e.indexOf(".")) { L -= 1; }
+        return Rnl.toStringSignificant(Rnl.divide(scalar, Rnl.fromString(e)), L)
+      }));
+      return df
+    }
+  },
+
+  map: {
+    scalar: {
+      // Binary opertions on a map and a scalar
+      add(map, scalar) {
+        return mapMap(map, value => Rnl.add(value, scalar))
+      },
+      subtract(map, scalar) {
+        return mapMap(map, value => Rnl.subtract(value, scalar))
+      },
+      multiply(map, scalar) {
+        return mapMap(map, value => Rnl.multiply(value, scalar))
+      },
+      divide(map, scalar) {
+        return mapMap(map, value => Rnl.divide(value, scalar))
+      },
+      power(map, scalar) {
+        return mapMap(map, value => Rnl.power(value, scalar))
+      },
+      modulo(map, scalar) {
+        return mapMap(map, value => Rnl.modulo(value, scalar))
+      },
+      and(map, scalar) {
+        return mapMap(map, value => value && scalar)
+      },
+      or(map, scalar) {
+        return mapMap(map, value => value || scalar)
+      },
+      xor(map, scalar) {
+        return mapMap(map, value => value !== scalar)
+      }
+    },
+    vector: {
+      add(map, array) {
+        return mapMap(map, value => array.map(e => Rnl.add(value, e)))
+      },
+      subtract(map, array) {
+        return mapMap(map, value => array.map(e => Rnl.subtract(value, e)))
+      },
+      multiply(map, array) {
+        return mapMap(map, value => array.map(e => Rnl.multiply(value, e)))
+      },
+      divide(map, array) {
+        return mapMap(map, value => array.map(e => Rnl.divide(value, e)))
+      },
+      power(map, array) {
+        return mapMap(map, value => array.map(e => Rnl.power(value, e)))
+      },
+      modulo(map, array) {
+        return mapMap(map, value => array.map(e => Rnl.modulo(value, e)))
+      },
+      and(map, array) {
+        return mapMap(map, value => array.map(e => value && e))
+      },
+      or(map, array) {
+        return mapMap(map, value => array.map(e => value || e))
+      },
+      xor(map, array) {
+        return mapMap(map, value => array.map(e => value !== e))
+      }
+    },
+    matrix: {
+
+    },
+    map: {
+
+    }
+  },
+  mapWithVectorValues: {
+    scalar: {
+      add(map, scalar) {
+        return mapMap(map, array => array.map(e => Rnl.add(e, scalar)))
+      },
+      subtract(map, scalar) {
+        return mapMap(map, array => array.map(e => Rnl.subtract(e, scalar)))
+      },
+      multiply(map, scalar) {
+        return mapMap(map, array => array.map(e => Rnl.multiply(e, scalar)))
+      },
+      divide(map, scalar) {
+        return mapMap(map, array => array.map(e => Rnl.divide(e, scalar)))
+      },
+      power(map, scalar) {
+        return mapMap(map, array => array.map(e => Rnl.power(e, scalar)))
+      },
+      modulo(map, scalar) {
+        return mapMap(map, array => array.map(e => Rnl.modulo(e, scalar)))
+      },
+      and(map, scalar) {
+        return mapMap(map, array => array.map(e => e && scalar))
+      },
+      or(map, scalar) {
+        return mapMap(map, array => array.map(e => e || scalar))
+      },
+      xor(map, scalar) {
+        return mapMap(map, array => array.map(e => e !== scalar))
+      }
+
+    },
+    vector: {
+
+    },
+    matrix: {
+
+    },
+    map: {
+
+    },
+    mapWithVectorValues: {
+
+    }
+  }
+};
+
+// Binary relations get their own object, separate from other binary operations.
+// That's because Hurmet allows chained comparisons, as in  a < b < c.
+// So we have to pass yPrev as well as the two current operands.
+
+const relations = {
+  scalar: {
+    scalar: {
+      relate(op, x, y, yPrev) { return compare(op, x, y, yPrev) }
+    },
+    vector: {
+      relate(op, x, v, yPrev) {
+        if (yPrev === undefined) {
+          return v.map(e => compare(op, x, e, undefined))
+        } else if (typeof yPrev !== "object") {
+          return v.map(e => compare(op, x, e, yPrev))
+        } else if (Array.isArray(yPrev)) {
+          return v.map((e, i) => compare(op, x, e, yPrev[i]))
+        }
+      }
+    },
+    matrix: {
+      relate(op, x, m, yPrev) {
+        if (yPrev === undefined) {
+          return m.map(row => row.map(e => compare(op, x, e, undefined)))
+        } else if (typeof yPrev !== "object") {
+          return m.map(row => row.map(e => compare(op, x, e, yPrev)))
+        } else if (Array.isArray(yPrev)) {
+          return m.map((row, i) => row.map((e, j) => compare(op, x, e, yPrev[i][j])))
+        }
+      }
+    },
+    map: {
+      relate(op, x, map, yPrev) {
+        if (yPrev === undefined) {
+          return mapMap(map, value => compare(op, x, value, undefined))
+        } else if (typeof yPrev !== "object") {
+          return mapMap(map, value => compare(op, x, value, yPrev))
+        } else {
+          const newMap = new Map();
+          for (const [key, value] of map.entries()) {
+            newMap.set(key,  compare(op, x, value, yPrev[key]));
+          }
+          return newMap
+        }
+      }
+    }
+  },
+  vector: {
+    scalar: {
+      relate(op, v, y, yPrev) {
+        if (yPrev === undefined) {
+          return v.map(e => compare(op, e, y, undefined))
+        } else if (typeof yPrev !== "object") {
+          return v.map(e => compare(op, e, y, yPrev))
+        } else if (Array.isArray(yPrev)) {
+          return v.map((e, i) => compare(op, e, y, yPrev[i]))
+        }
+      }
+    }
+  },
+  rowVector: {
+    rowVector: {
+      relate(op, x, y, yPrev) {
+        if (yPrev === undefined) {
+          return x.map((e, i) => compare(op, e, y[i], undefined))
+        }
+      }
+    }
+  },
+  columnVector: {
+    columnVector: {
+      relate(op, x, y, yPrev) {
+        if (yPrev === undefined) {
+          return x.map((e, i) => compare(op, e, y[i], undefined))
+        }
+      }
+    }
+  },
+  matrix: {
+    scalar: {
+      relate(op, m, y, yPrev) {
+        if (yPrev === undefined) {
+          return m.map(row => row.map(e => compare(op, e, y, undefined)))
+        } else if (typeof yPrev !== "object") {
+          return m.map(row => row.map(e => compare(op, e, y, yPrev)))
+        } else if (Array.isArray(yPrev)) {
+          return m.map((row, i) => row.map((e, j) => compare(op, e, y, yPrev[i][j])))
+        }
+      }
+    }
+  }
+};
+
+const isDivByZero = (quotient, shape) => {
+  switch (shape) {
+    case "scalar":
+      return quotient[1] === BigInt(0)
+    case "vector":
+      for (let i = 0; i < quotient.length; i++) {
+        if (quotient[i][1] === BigInt(0)) { return true }
+      }
+      return false
+    case "matrix":
+      for (let i = 0; i < quotient.length; i++) {
+        for (let j = 0; j < quotient[0].length; j++) {
+          if (quotient[i][j][1] === BigInt(0)) { return true }
+        }
+      }
+      return false
+    case "map":
+      for (const [_, value] of Object.entries(quotient)) {
+        if (value[1] === BigInt(0)) { return true }
+      }
+      return false
+    case "mapWithVectorValues":
+      for (const [_, value] of Object.entries(quotient)) {
+        for (let i = 0; i < value.length; i++) {
+          if (value[i][1] === BigInt(0)) { return true }
+        }
+      }
+      return false
+    default:
+      return false
+  }
+};
+
+const Operators = Object.freeze({
+  unary: unary$1,
+  binary: binary$1,
+  relations,
+  condition,
+  dtype
+});
+
+const wideCharRegEx = /[\uD800-\uDBFF][\uDC00-\uDFFF][\uFE00\uFE01]?/g;
+
+const textRange$1 = (str, index) => {
+  // Find a range of the string str
+  if (index.dtype !== dt.RATIONAL && index.dtype !== dt.RANGE) {
+    return errorOprnd("STR_INDEX")
+  }
+
+  const wideCharMatches = arrayOfRegExMatches(wideCharRegEx, str);
+  let value = "";
+
+  if (wideCharMatches.length === 0) {
+    // No surrogate pairs were found.
+    // Each text character is one UTF-16 code unit.
+    // So do a naive access of the string.
+    if (index.dtype === dt.RATIONAL) {
+      value = str.charAt(Rnl.toNumber(index.value) - 1);
+    } else if (index.dtype === dt.RANGE) {
+      const start = Rnl.toNumber(index.value[0]);
+      const step = Rnl.toNumber(index.value[1]);
+      const end = index.value[2] === "∞"
+        ? str.length
+        : Rnl.toNumber(index.value[2]);
+      if (step === 1) {
+        // No step size specified.
+        value = str.slice(start - 1, end);
+      } else {
+        for (let i = start - 1; i < end; i += step) {
+          value += str.charAt(i);
+        }
+      }
+    }
+  } else {
+    // We must account for surrogate pairs and variation selectors.
+    let discardLength = 0;
+    let endOfPrevWideChar = 0;
+    let cleanString = "";
+    let start = 0;
+    let step = 0;
+    let end = 0;
+    if (index.dtype === dt.RATIONAL) {
+      // Return one character.
+      start = Rnl.toNumber(index.value);
+      step = 1;
+      end = start;
+    } else {
+      // index is a range and str contains at least one surrogate pair.
+      start = Rnl.toNumber(index.value[0]);
+      step = Rnl.toNumber(index.value[1]);
+      end = Rnl.toNumber(index.value[2]);
+    }
+    let realIndex = start;
+
+    for (let i = 0; i < wideCharMatches.length; i++) {
+      const posWideChar = wideCharMatches[i].index;
+      cleanString = str.slice(endOfPrevWideChar, posWideChar);
+      while (realIndex <= end && discardLength + cleanString.length >= realIndex) {
+        value += cleanString[realIndex - discardLength - 1];
+        realIndex += step;
+      }
+      if (realIndex <= end && discardLength + cleanString.length === realIndex - 1) {
+        value += wideCharMatches[i].value;
+        realIndex += step;
+      }
+      if (realIndex > end) {
+        return { value, unit: null, dtype: dt.STRING }
+      }
+      discardLength += cleanString.length + 1;
+      endOfPrevWideChar = posWideChar + wideCharMatches[i].length;
+    }
+    if (realIndex >= discardLength && realIndex <= end) {
+      cleanString = str.slice(endOfPrevWideChar);
+      while (realIndex <= end && discardLength + cleanString.length >= realIndex) {
+        value += cleanString[realIndex - discardLength - 1];
+        realIndex += step;
+      }
+    } else {
+      return errorOprnd("BIGINDEX")
+    }
+  }
+  return { value, unit: null, dtype: dt.STRING }
+};
+
+function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
+  // hurmetVars is a key:value store of variable names and attributes.
+  // This function is called to insert an assignment into hurmetVars.
+  const formatSpec = hurmetVars.format ? hurmetVars.format.value : "h15";
+
+  if (!Array.isArray(attrs.name)) {
+    // This is the typical case.
+    hurmetVars[attrs.name] = attrs;
+
+  } else if (attrs.value === null) {
+    for (let i = 0; i < attrs.name.length; i++) {
+      hurmetVars[attrs.name[i]] = { value: null };
+    }
+
+  } else if (isMatrix(attrs)) {
+    // Assign to a matrix of names
+    const isQuantity = Boolean(attrs.dtype & dt.QUANTITY);
+    let resultDisplay = attrs.resultdisplay;
+    resultDisplay = resultDisplay.replace(/\\(begin|end){[bp]matrix}/g, "").trim();
+    const displays = resultDisplay.split(/&|\\\\/);
+    if (attrs.dtype & dt.MATRIX) {
+      // A 2 dimensional matrix.
+      const dtype = attrs.dtype - dt.MATRIX;
+      const numRows = isQuantity ? attrs.value.plain.length : attrs.value.length;
+      const numCols = attrs.name.length / numRows;
+      let iName = 0;
+      for (let i = 0; i < numRows; i++) {
+        for (let j = 0; j < numCols; j++) {
+          const value = isQuantity
+            ? { plain: attrs.value.plain[i][j], inBaseUnits: attrs.value.inBaseUnits[i][j] }
+            : attrs.value[i][j];
+          hurmetVars[attrs.name[i]] = {
+            name: attrs.name[iName],
+            value,
+            resultdisplay: isQuantity
+              ? parse(displays[iName].trim() + " '" + attrs.unit + "'")
+              : displays[iName].trim(),
+            expos: attrs.expos,
+            unit: isQuantity ? attrs.unit : undefined,
+            dtype
+          };
+          iName += 1;
+        }
+      }
+    } else {
+      // Assign to a vector of names.
+      const isColumn = Boolean(attrs.dtype & dt.COLUMNVECTOR);
+      const dtype = attrs.dtype - (isColumn ? dt.COLUMNVECTOR : dt.ROWVECTOR);
+      for (let i = 0; i < attrs.name.length; i++) {
+        const value = isQuantity
+          ? { plain: attrs.value.plain[i], inBaseUnits: attrs.value.inBaseUnits[i] }
+          : attrs.value[i];
+        hurmetVars[attrs.name[i]] = {
+          name: attrs.name[i],
+          value,
+          resultdisplay: isQuantity
+            ? parse(displays[i].trim() + " '" + attrs.unit + "'")
+            : displays[i].trim(),
+          expos: attrs.expos,
+          unit: isQuantity ? attrs.unit : undefined,
+          dtype
+        };
+      }
+    }
+
+  // From this point forward, we're dealing with multiple assignment
+  } else if (attrs.dtype & dt.MAP) {
+    const unit = attrs.value.unit;
+    const unitName = unit && unit.name ? unit.name : undefined;
+    const dtype = attrs.dtype - dt.MAP;
+    let i = 0;
+    if (attrs.dtype & dt.QUANTITY) {
+      for (const value of attrs.value.plain.values()) {
+        const result = {
+          value: { plain: value },
+          expos: attrs.expos,
+          factor: attrs.factor,
+          dtype
+        };
+        result.resultdisplay = format(value, formatSpec, decimalFormat);
+        if (unitName) { result.resultdisplay += " " + unitTeXFromString(unitName); }
+        hurmetVars[attrs.name[i]] = result;
+        i += 1;
+      }
+      i = 0;
+      for (const value of attrs.value.inBaseUnits.values()) {
+        hurmetVars[attrs.name[i]].value.inBaseUnits = value;
+        i += 1;
+      }
+    } else {
+      for (const value of attrs.value.values()) {
+        const result = { value, expos: attrs.expos, factor: attrs.factor, dtype };
+        result.resultdisplay = Rnl.isRational(value)
+          ? format(value, formatSpec, decimalFormat)
+          : String(value);
+        if (unitName) { result.resultdisplay += " " + unitTeXFromString(unitName); }
+        hurmetVars[attrs.name[i]] = result;
+        i += 1;
+      }
+    }
+  } else if (attrs.dtype === dt.DATAFRAME) {
+    for (let i = 0; i < attrs.name.length; i++) {
+      const datum = attrs.value.data[i][0];
+      const dtype = attrs.value.dtype[i];
+      const val = (dtype & dt.RATIONAL) ? Rnl.fromString(datum) : datum;
+      const result = {
+        value: val,
+        unit: attrs.unit[attrs.value.units[i]],
+        dtype,
+        resultdisplay: (dtype & dt.RATIONAL) ? parse(format(val)) : parse(val)
+      };
+      if (attrs.value.units[i]) {
+        result.value = { plain: result.value };
+        const unit = attrs.unit[attrs.value.units[i]];
+        result.value.inBaseUnits =
+          Rnl.multiply(Rnl.add(result.value.plain, unit.gauge), unit.factor);
+        result.expos = unit.expos;
+        result.resultdisplay += " " + unitTeXFromString(result.unit.name);
+      }
+      hurmetVars[attrs.name[i]] = result;
+    }
+  } else if (attrs.dtype === dt.TUPLE) {
+    let i = 0;
+    for (const value of attrs.value.values()) {
+      hurmetVars[attrs.name[i]] = value;
+      i += 1;
+    }
+  } else if (attrs.dtype === dt.MODULE) {
+    if (attrs.name.length !== attrs.value.length) {
+      return errorOprnd("MULT_MIS")
+    } else {
+      let i = 0;
+      for (const value of attrs.value.values()) {
+        const result = clone(value);
+        hurmetVars[attrs.name[i]] = result;
+        i += 1;
+      }
+    }
+  }
+}
+
+/**
+ * # hurmetMark.js
+ *
+ * Hurmet.app can export to its own flavor of Markdown.
+ * This version of Markdown is stricter in some ways than CommonMark or
+ * Gruber's original Markdown. So the parser can be considerably simplified.
+ * md2ast() returns an AST that matches the memory structure  of a Hurmet.app document.
+ *
+ * ## Ways in which this syntax is more strict than Markdown.
+ *
+ * 1. Emphasis: _emphasis_ only. Asterisks do not create standard emphasis.
+ * 2. Strong emphasis: **strong emphasis** only. Underlines do not create strong emphasis.
+ * 3. Code blocks must be fenced by triple backticks.
+ *    Indented text does not indicate a code block.
+ * 4. A blank line must precede the beginning of a list, even a nested list.
+ * 5. A hard line break is indicated when a line ends with "\". Double spaces do not count.
+ * 6. "Shortcut" reference links [ref] are not recognized.
+ *    Implicit reference links are recognized and are expanded, see below.
+ *
+ * ## Extensions
+ *
+ * 1. Hurmet inline calculation is delimited ¢…¢.
+ *    Hurmet display calculation is fenced ¢¢\n … \n¢¢.
+ * 2. LaTeX inline math is delimited $…$. $ and \\ are escaped \$ & \\\\.
+ *    LaTeX display math is fenced  $$\n … \n$$.
+ * 3. ~subscript~
+ * 4. ~~strikethrough~~
+ * 5. ©comment©
+ * 6. Pipe tables as per Github Flavored Markdown (GFM).
+ * 7. Grid tables as per reStructuredText, with two exceptions:
+ *    a. The top border contains ":" characters to indicate column justtification.
+ *    b. Top & left borders contain "+" characters at border locations, even where
+ *       a merged cell prevents a border from extending to the tables outer edge.
+ * 8. Implicit reference links [title][] and implicit reference images ![alt][]
+ *    ⋮
+ *    [alt]: path
+ *    Reference images can have captions and directives. Format is:
+ *    ![alt text][ref]{caption}   or [alt][]{caption}
+ *      ⋮
+ *    [ref]: filepath
+ *    {.class #id width=number}
+ * 9. Table directives. They are placed on the line after the table. The format is:
+ *    {.class #id width=num widths="num1 num2 …"}
+ * 10. Lists that allow the user to pick list ordering.
+ *       1. →  1. 2. 3.  etc.
+ *       A. →  A. B. C.  etc. (future)
+ *       a) →  (a) (b) (c)  etc. (future)
+ * 11. Table of Contents
+ *     {.toc start=N end=N}
+ * 12. Definition lists, per Pandoc.  (future)
+ * 13. Blurbs set an attribute on a block element, as in Markua.
+ *     Blurbs are denoted by a symbol in the left margin.
+ *     Subsequent indented text blocks are children of the blurb.
+ *     Blurb symbols:
+ *       i> indented block
+ *       C> Centered block
+ *       H> print header element, <header>
+ *       I> Information admonition (future)
+ *       W> Warning admonition (future)
+ *       T> Tip admonition (future)
+ *       c> Comment admonition (future)
+ * 14. [^1] is a reference to a footnote. (future)
+ *     [^1]: The body of the footnote is deferred, similar to reference links.
+ * 15. [#1] is a reference to a citation. (future)
+ *     [#1]: The body of the citation is deferred, similar to reference links.
+ * 16. Line blocks begin with "| ", as per Pandoc. (future)
+ *
+ * hurmetMark.js copyright (c) 2021, 2022 Ron Kok
+ *
+ * This file has been adapted (and heavily modified) from Simple-Markdown.
+ * Simple-Markdown copyright (c) 2014-2019 Khan Academy & Aria Buckles.
+ *
+ * Portions of Simple-Markdown were adapted from marked.js copyright (c) 2011-2014
+ * Christopher Jeffrey (https://github.com/chjj/).
+ *
+ * LICENSE (MIT):
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+
+const CR_NEWLINE_R = /\r\n?/g;
+const TAB_R = /\t/g;
+const FORMFEED_R = /\f/g;
+const CLASS_R = /(?:^| )\.([a-z-]+)(?: |$)/;
+const WIDTH_R = /(?:^| )width="?([\d.a-z]+"?)(?: |$)/;
+const COL_WIDTHS_R = /(?:^| )colWidths="([^"]*)"/;
+const ID_R = /(?:^| )#([a-z-]+)(?: |$)/;
+
+// Turn various whitespace into easy-to-process whitespace
+const preprocess = function(source) {
+  return source.replace(CR_NEWLINE_R, "\n").replace(FORMFEED_R, "").replace(TAB_R, "    ");
+};
+
+// Creates a match function for an inline scoped element from a regex
+const inlineRegex = function(regex) {
+  const match = function(source, state) {
+    return state.inline ? regex.exec(source) : null
+  };
+  match.regex = regex;
+  return match;
+};
+
+// Creates a match function for a block scoped element from a regex
+const blockRegex = function(regex) {
+  const match = function(source, state) {
+    return state.inline ? null : regex.exec(source)
+  };
+  match.regex = regex;
+  return match;
+};
+
+// Creates a match function from a regex, ignoring block/inline scope
+const anyScopeRegex = function(regex) {
+  const match = function(source, state) {
+    return regex.exec(source);
+  };
+  match.regex = regex;
+  return match;
+};
+
+const UNESCAPE_URL_R = /\\([^0-9A-Za-z\s])/g;
+const unescapeUrl = function(rawUrlString) {
+  return rawUrlString.replace(UNESCAPE_URL_R, "$1");
+};
+
+const parseList = (str, state) => {
+  const items = str.replace(LIST_BLOCK_END_R, "\n").match(LIST_ITEM_R);
+  const isTight = state.inHtml && !/\n\n(?!$)/.test(str);
+  const itemContent = items.map(function(item, i) {
+    // We need to see how far indented this item is:
+    const prefixCapture = LIST_ITEM_PREFIX_R.exec(item);
+    const space = prefixCapture ? prefixCapture[0].length : 0;
+    // And then we construct a regex to "unindent" the subsequent
+    // lines of the items by that amount:
+    const spaceRegex = new RegExp("^ {1," + space + "}", "gm");
+
+    // Before processing the item, we need a couple things
+    const content = item
+      // remove indents on trailing lines:
+      .replace(spaceRegex, "")
+      // remove the bullet:
+      .replace(LIST_ITEM_PREFIX_R, "");
+
+    // backup our state for restoration afterwards. We're going to
+    // want to set state._list to true, and state.inline depending
+    // on our list's looseness.
+    const oldStateInline = state.inline;
+    const oldStateList = state._list;
+    state._list = true;
+    const oldStateTightness = state.isTight;
+    state.isTight = isTight;
+
+    // Parse the list item
+    state.inline = isTight;
+    const adjustedContent = content.replace(LIST_ITEM_END_R, "");
+    const result = isTight
+      ? { type: "list_item", content: parseInline(adjustedContent, state) }
+      : { type: "list_item", content: parse$1(adjustedContent, state) };
+
+    // Restore our state before returning
+    state.inline = oldStateInline;
+    state._list = oldStateList;
+    state.isTight = oldStateTightness;
+    return result;
+  });
+
+  return itemContent
+};
+
+const TABLES = (function() {
+  const TABLE_ROW_SEPARATOR_TRIM = /^ *\| *| *\| *$/g;
+  const TABLE_RIGHT_ALIGN = /^[-=]+:$/;
+  const TABLE_CENTER_ALIGN = /^:[-=]+:$/;
+
+  const parseTableAlign = function(source) {
+    // Inspect ":" characters to set column justification.
+    // Return class names that specify center or right justification on specific columns.
+    source = source.replace(TABLE_ROW_SEPARATOR_TRIM, "");
+    const alignArr = source.trim().split(/[|+*]/);
+    let alignStr = "";
+    for (let i = 0; i < alignArr.length; i++) {
+      alignStr += TABLE_CENTER_ALIGN.test(alignArr[i])
+        ? ` c${String(i + 1)}c`
+        : (TABLE_RIGHT_ALIGN.test(alignArr[i])
+        ? ` c${String(i + 1)}r`
+        : "");
+    }
+    return alignStr.trim()
+  };
+
+  const tableDirectives = (directives, align) => {
+    // Get CSS class, ID, and column widths, if any.
+    if (!directives && align === "") { return ["", "", null] }
+    const userDefClass = CLASS_R.exec(directives);
+    let myClass = (userDefClass) ? userDefClass[1] : "";
+    if (align.length > 0) { myClass += (myClass.length > 0 ? " " : "") + align; }
+    const userDefId = ID_R.exec(directives);
+    const myID = (userDefId) ? userDefId[1] : "";
+    const colWidthMatch = COL_WIDTHS_R.exec(directives);
+    const colWidths = (colWidthMatch) ? colWidthMatch[1].split(" ") : null;
+    return [myClass, myID, colWidths]
+  };
+
+  const parsePipeTableRow = function(source, parse, state, colWidths, inHeader) {
+    const prevInTable = state.inTable;
+    state.inTable = true;
+    const tableRow = parse(source.trim(), state);
+    consolidate(tableRow);
+    state.inTable = prevInTable;
+
+    const row = {
+      type: "table_row",
+      content: []
+    };
+    let j = -1;
+    tableRow.forEach(function(node, i) {
+      if (node.type === "text") { node.text = node.text.trim(); }
+      if (node.type === "tableSeparator") {
+        if (i !== tableRow.length - 1) {  // Filter out the row's  last table separator
+          // Create a new cell
+          j += 1;
+          row.content.push({
+            "type": inHeader ? "table_header" : "table_cell",
+            "attrs": {
+              "colspan": 1,
+              "rowspan": 1,
+              "colwidth": (colWidths) ? [Number(colWidths[j])] : null,
+              "background": null
+            },
+            content: (state.inHtml ? [] : [{ "type": "paragraph", "content": [] }])
+          });
+        }
+      } else if (state.inHtml) {
+        // For direct to HTML, write the inline contents directly into the <td> element.
+        // row   cell    content      text
+        row.content[j].content.push(node);
+      } else {
+        // Hurmet.app table cells always contain a paragraph.
+        // row   cell  paragraph  content      text
+        row.content[j].content[0].content.push(node);
+      }
+    });
+
+    return row;
+  };
+
+  const parsePipeTable = function() {
+    return function(capture, state) {
+      state.inline = true;
+      const align = parseTableAlign(capture[2]);
+      const [myClass, myID, colWidths] = tableDirectives(capture[4], align);
+      const table = {
+        type: "table",
+        attrs: {},
+        content: []
+      };
+      if (myID) { table.attrs.id = myID; }
+      if (myClass) { table.attrs.class = myClass; }
+      table.content.push(parsePipeTableRow(capture[1], parse$1, state, colWidths, true));
+      const tableBody = capture[3].trim().split("\n");
+      tableBody.forEach(row => {
+        table.content.push(parsePipeTableRow(row, parse$1, state, colWidths, false));
+      });
+      state.inline = false;
+      return table
+    };
+  };
+
+  const headerRegEx = /^\+:?=/;
+
+  const parseGridTable = function() {
+    return function(capture, state) {
+      const topBorder = capture[2];
+      const align = parseTableAlign(topBorder.slice(1));
+      const [myClass, myID, colWidths] = tableDirectives(capture[3], align);
+      const lines = capture[1].slice(0, -1).split("\n");
+
+      // Does the grid table contain a line separating header from table body?
+      let headerExists = false;
+      let headerSepLine = lines.length + 10;
+      for (let i = 0; i < lines.length; i++) {
+        if (headerRegEx.test(lines[i])) {
+          headerExists = true;
+          headerSepLine = i;
+          break
+        }
+      }
+
+      // Read the top & left borders to find the locations of the cell corners.
+      const xCorners = [0];
+      for (let j = 1; j < topBorder.length; j++) {
+        const ch = topBorder.charAt(j);
+        // A "+" character indicates a column border.
+        if (ch === "+") { xCorners.push(j); }
+      }
+      const yCorners = [0];
+      for (let i = 1; i < lines.length; i++) {
+        const ch = lines[i].charAt(0);
+        if (ch === "+") { yCorners.push(i); }
+      }
+
+      const numCols = xCorners.length - 1;
+      const numRows = yCorners.length - 1;
+      const gridTable = [];
+
+      // Create default rows and cells. They may be merged later.
+      for (let i = 0; i < numRows; i++) {
+        const row = new Array(numCols);
+        for (let j = 0; j < numCols; j++) { row[j] = { rowspan: 1 }; }
+        gridTable.push(row);
+      }
+
+      for (let i = 0; i < numRows; i++) {
+        const row = gridTable[i];
+        // Determine the actual rowspan and colspan of each cell.
+        for (let j = 0; j < numCols; j++) {
+          const cell = row[j];
+          if (cell.rowspan === 0) { continue }
+          cell.colspan = 1;
+          const lastTextRow = lines[yCorners[i + 1] - 1];
+          for (let k = j + 1; k < xCorners.length; k++) {
+            if (lastTextRow.charAt(xCorners[k]) === "|") { break }
+            cell.colspan += 1;
+            row[k].rowspan = 0;
+          }
+          for (let k = i + 1; k < yCorners.length; k++) {
+            const ch = lines[yCorners[k]].charAt(xCorners[j] + 1);
+            if (ch === "-" || ch === "=") { break }
+            cell.rowspan += 1;
+            for (let jj = 0; jj < cell.colspan; jj++) {
+              gridTable[k][j + jj].rowspan = 0;
+            }
+          }
+          // Now that we know the cell extents, get the cell contents.
+          const xStart = xCorners[j] + 2;
+          const xEnd = xCorners[j + cell.colspan] - 1;
+          const yStart = yCorners[i] + 1;
+          const yEnd = yCorners[i + cell.rowspan];
+          let str = "";
+          for (let ii = yStart; ii < yEnd; ii++) {
+            str += lines[ii].slice(xStart, xEnd).replace(/ +$/, "") + "\n";
+          }
+          cell.blob = str.slice(0, -1).replace(/^\n+/, "");
+
+          cell.inHeader = (headerExists && yStart < headerSepLine);
+
+          if (colWidths) {
+            // Set an attribute used by ProseMirror.
+            let cellWidth = 0;
+            for (let k = 0; k < cell.colspan; k++) {
+              cellWidth += Number(colWidths[j + k]);
+            }
+            cell.width = cellWidth;
+          }
+        }
+      }
+
+      const table = {
+        type: "table",
+        attrs: {},
+        content: []
+      };
+      if (myID) { table.attrs.id = myID; }
+      if (myClass) { table.attrs.class = myClass; }
+      for (let i = 0; i < numRows; i++) {
+        table.content.push({ type: "table_row", content: [] } );
+        for (let j = 0; j < numCols; j++) {
+          if (gridTable[i][j].rowspan === 0) { continue }
+          const cell = gridTable[i][j];
+          state.inline = false;
+          let content = state.inHtml && cell.blob.indexOf("```") === -1 && !/\n\n/.test(cell.blob.replace(/\n+$/g, ""))
+            ? parseInline(cell.blob, state) // Write inline content directly into each <td>
+            : parse$1(cell.blob, state);       // Hurmet.app has a paragraph in each cell.
+          if (content.length === 1 && content[0].type === "null") {
+            content = state.inHtml
+              ? [{ type: "text", text: "" }]
+              : [{ type: "paragraph", content: [] }];
+          }
+          table.content[i].content.push({
+            "type": cell.inHeader ? "table_header" : "table_cell",
+            "attrs": {
+              "colspan": cell.colspan,
+              "rowspan": cell.rowspan,
+              "colwidth": (colWidths) ? [cell.width] : null,
+              "background": null
+            },
+            content: content
+          });
+        }
+      }
+      state.inline = false;
+      return table
+    };
+  };
+
+  return {
+    parsePipeTable: parsePipeTable(),
+    PIPE_TABLE_REGEX: /^(\|.+)\n\|([-:]+[-| :]*)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
+    parseGridTable: parseGridTable(),
+    GRID_TABLE_REGEX: /^((\+(?:[-:=]+\+)+)\n(?:[+|][^\n]+[+|]\n)+)(?:\{([^\n}]+)\}\n)?\n*/
+  };
+})();
+
+const LINK_INSIDE = "(?:\\[[^\\]]*\\]|[^\\[\\]]|\\](?=[^\\[]*\\]))*";
+const LINK_HREF_AND_TITLE =
+  "\\s*<?((?:\\([^)]*\\)|[^\\s\\\\]|\\\\.)*?)>?(?:\\s+['\"]([\\s\\S]*?)['\"])?\\s*";
+
+const linkIndex = marks => {
+  for (let i = 0; i < marks.length; i++) {
+    if (marks[i].type === "link") { return i }
+  }
+};
+
+const parseRef = function(capture, state, refNode) {
+  let ref = capture[2] ? capture[2] : capture[1];
+  ref = ref.replace(/\s+/g, " ");
+
+  // We store information about previously seen defs on
+  // state._defs (_ to deconflict with client-defined
+  // state). If the def for this reflink/refimage has
+  // already been seen, we can use its target/source
+  // and title here:
+  if (state._defs && state._defs[ref]) {
+    const def = state._defs[ref];
+    if (refNode.type === "image") {
+      refNode.attrs.src = def.target;
+      refNode.attrs.width = null;
+    } else {
+      // refNode is a link
+      refNode.attrs.href = def.target;
+    }
+  }
+
+  // In case we haven't seen our def yet (or if someone
+  // overwrites that def later on), we add this node
+  // to the list of ref nodes for that def. Then, when
+  // we find the def, we can modify this link/image AST
+  // node :).
+  state._refs = state._refs || {};
+  state._refs[ref] = state._refs[ref] || [];
+  state._refs[ref].push(refNode);
+
+  return refNode;
+};
+
+const parseTextMark = (capture, state, mark) => {
+  const text = parseInline(capture, state);
+  if (Array.isArray(text) && text.length === 0) { return text }
+  consolidate(text);
+  for (const range of text) {
+    if (range.marks) {
+      range.marks.push({ type: mark });
+    } else {
+      range.marks = [{ type: mark }];
+    }
+  }
+  return text
+};
+
+const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<!--[^>]+-->[^\n]*\n|<\/?(?:body|details|(div|input|label)(?: [^>]+)?|!DOCTYPE[a-z ]*|html[a-z ="]*|br|dl(?: class="[a-z-]+")?|li|main[a-z\- ="]*|nav|ol|ul(?: [^>]+)?)\/?>[^\n]*?(?:\n|$))/;
+const divType = { C: "centered_div", H: "header", "i": "indented_div" };
+
+// Rules must be applied in a specific order, so use a Map instead of an object.
+const rules = new Map();
+rules.set("html", {
+  isLeaf: true,
+  match: blockRegex(BLOCK_HTML),
+  parse: function(capture, state) {
+    if (!state.inHtml) { return null }
+    return { type: "html", text: capture[0] }
+  }
+});
+rules.set("heading", {
+  isLeaf: false,
+  match: blockRegex(/^ *(#{1,6})([^\n]+?)#* *(?:\n *)+\n/),
+  parse: function(capture, state) {
+    return {
+      attrs: { level: capture[1].length },
+      content: parseInline(capture[2].trim(), state)
+    };
+  }
+});
+rules.set("dt", {  // description term
+  isLeaf: false,
+  match: blockRegex(/^(([^\n]*)\n)(?=<dd>|\n:)/),
+  parse: function(capture, state) {
+    return { content: parseInline(capture[2].trim(), state) }
+  }
+});
+rules.set("horizontal_rule", {
+  isLeaf: true,
+  match: blockRegex(/^( *[-*_]){3,} *(?:\n *)+\n/),
+  parse: function(capture, parse, state) {
+    return { type: "horizontal_rule" };
+  }
+});
+rules.set("lheading", {
+  isLeaf: false,
+  match: blockRegex(/^([^\n]+)\n *(=|-){3,} *(?:\n *)+\n/),
+  parse: function(capture, parse, state) {
+    return {
+      type: "heading",
+      level: capture[2] === '=' ? 1 : 2,
+      content: parseInline(parse, capture[1])
+    };
+  }
+});
+rules.set("fence", {
+  isLeaf: true,
+  match: blockRegex(/^(`{3,}) *(?:(\S+) *)?\n([\s\S]+?)\n?\1 *(?:\n *)+\n/),
+  parse: function(capture, state) {
+    return {
+      type: "code_block",
+//      lang: capture[2] || undefined,
+      content: [{ type: "text", text: capture[3] }]
+    };
+  }
+});
+rules.set("blockquote", {
+  isLeaf: false,
+  match: blockRegex(/^( *>[^\n]+(\n[^\n]+)*\n*)+\n{2,}/),
+  parse: function(capture, state) {
+    const content = capture[0].replace(/^ *> ?/gm, "");
+    return { content: parse$1(content, state) };
+  }
+});
+rules.set("ordered_list", {
+  isLeaf: false,
+  match: blockRegex(/^( {0,3})(\d{1,9}\.) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:\d{1,9}\.) )\n*|\s*$)/),
+  parse: function(capture, state) {
+    const start = Number(capture[2].trim());
+    return { attrs: { order: start }, content: parseList(capture[0], state, capture[1]) }
+  }
+});
+rules.set("bullet_list", {
+  isLeaf: false,
+  match: blockRegex(/^( {0,3})([*+-]) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:[*+-]) )\n*|\s*$)/),
+  parse: function(capture, state) {
+    return { content: parseList(capture[0], state, capture[1]) }
+  }
+});
+rules.set("dd", {  // description details
+  isLeaf: false,
+  match: blockRegex(/^:( +)[\s\S]+?(?:\n{2,}(?! |:)(?!\1)\n*|\s*$)/),
+  parse: function(capture, state) {
+    let div = " " + capture[0].slice(1);
+    const indent = 1 + capture[1].length;
+    const spaceRegex = new RegExp("^ {" + indent + "," + indent + "}", "gm");
+    div = div.replace(spaceRegex, ""); // remove indents on trailing lines:
+    return { content: parse$1(div, state) };
+  }
+});
+rules.set("special_div", {
+  isLeaf: false,
+  match: blockRegex(/^(C|H|i)>( {1,})[\s\S]+?(?:\n{2,}(?! {2,2}\2)\n*|\s*$)/),
+  parse: function(capture, state) {
+    const type = divType[capture[1]];
+    let div = "  " + capture[0].slice(2);
+    const indent = 2 + capture[2].length;
+    const spaceRegex = new RegExp("^ {" + indent + "," + indent + "}", "gm");
+    div = div.replace(spaceRegex, ""); // remove indents on trailing lines:
+    return { type, content: parse$1(div, state) };
+  }
+});
+rules.set("def", {
+  // TODO(aria): This will match without a blank line before the next
+  // block element, which is inconsistent with most of the rest of
+  // simple-markdown.
+  isLeaf: true,
+  match: blockRegex(/^\[([^\]]+)\]: *<?([^\n>]*)>? *\n(?:\{([^\n}]*)\}\n)?/),
+  parse: function(capture, state) {
+    const def = capture[1].replace(/\s+/g, " ");
+    const target = capture[2];
+    const directives = capture[3] || "";
+    const attrs = {};
+
+    // Look for previous links/images using this def
+    // If any links/images using this def have already been declared,
+    // they will have added themselves to the state._refs[def] list
+    // (_ to deconflict with client-defined state). We look through
+    // that list of reflinks for this def, and modify those AST nodes
+    // with our newly found information now.
+    // Sorry :(.
+    if (state._refs && state._refs[def]) {
+      // `refNode` can be a link or an image
+      state._refs[def].forEach(function(refNode) {
+        if (refNode.type === "image") {
+          refNode.attrs.src = target;
+          if (directives) {
+            const matchClass = CLASS_R.exec(directives);
+            if (matchClass) {
+              refNode.attrs.class = matchClass[1];
+              attrs.class = matchClass[1];
+            }
+            const matchWidth = WIDTH_R.exec(directives);
+            if (matchWidth) {
+              refNode.attrs.width = matchWidth[1];
+              attrs.width = matchWidth[1];
+            }
+            const matchID = ID_R.exec(directives);
+            if (matchID) {
+              refNode.attrs.id = matchID[1];
+              attrs.id = matchID[1];
+            }
+          }
+        } else {
+          refNode.attrs.href = target;
+        }
+      });
+    }
+
+    // Add this def to our map of defs for any future links/images
+    // In case we haven't found any or all of the refs referring to
+    // this def yet, we add our def to the table of known defs, so
+    // that future reflinks can modify themselves appropriately with
+    // this information.
+    state._defs = state._defs || {};
+    state._defs[def] = { target, attrs };
+
+    // return the relevant parsed information
+    // for debugging only.
+    return {
+      def: def,
+      target: target,
+      directives: directives
+    };
+  }
+});
+rules.set("toc", {
+  isLeaf: true,
+  match: blockRegex(/^{\.toc start=(\d) end=(\d)}\n/),
+  parse: function(capture, state) {
+    return { attrs: { start: Number(capture[1]), end: Number(capture[2]), body: [] } }
+  }
+});
+rules.set("pipeTable", {
+  isLeaf: false,
+  match: blockRegex(TABLES.PIPE_TABLE_REGEX),
+  parse: TABLES.parsePipeTable
+});
+rules.set("gridTable", {
+  isLeaf: false,
+  match: blockRegex(TABLES.GRID_TABLE_REGEX),
+  parse: TABLES.parseGridTable
+});
+rules.set("newline", {
+  isLeaf: true,
+  match: blockRegex(/^(?:\n *)*\n/),
+  parse: function() { return { type: "null" } }
+});
+rules.set("paragraph", {
+  isLeaf: false,
+  match: blockRegex(/^((?:[^\n]|\n(?! *\n))+)(?:\n *)+\n/),
+  parse: function(capture, state) {
+    return { content: parseInline(capture[1], state) };
+  }
+});
+rules.set("escape", {
+  // We don't allow escaping numbers, letters, or spaces here so that
+  // backslashes used in plain text still get rendered. But allowing
+  // escaping anything else provides a very flexible escape mechanism,
+  // regardless of how this grammar is extended.
+  isLeaf: true,
+  match: inlineRegex(/^\\([^0-9A-Za-z\s])/),
+  parse: function(capture, state) {
+    return {
+      type: "text",
+      text: capture[1]
+    };
+  }
+});
+rules.set("tableSeparator", {
+  isLeaf: true,
+  match: function(source, state) {
+    if (!state.inTable) {
+      return null;
+    }
+    return /^ *\| */.exec(source);
+  },
+  parse: function() {
+    return { type: "tableSeparator" };
+  }
+});
+rules.set("calculation", {
+  isLeaf: true,
+  match: anyScopeRegex(/^(?:¢((?:\\[\s\S]|[^\\])+?)¢|¢¢\n?((?:\\[\s\S]|[^\\])+?)\n?¢¢)/),
+  parse: function(capture, state) {
+    if (capture[1]) {
+      let entry = capture[1].trim();
+      if (!/^(?:function|draw\()/.test(entry) && entry.indexOf("``") === -1) {
+        entry = entry.replace(/\n/g, " ");
+      }
+      return { content: "", attrs: { entry } }
+    } else {
+      const entry = capture[2].trim();
+      return { content: "", attrs: { entry, displayMode: true } }
+    }
+  }
+});
+rules.set("tex", {
+  isLeaf: true,
+  match: anyScopeRegex(/^(?:\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$|\$((?:\\[\s\S]|[^\\])+?)\$)/),
+  parse: function(capture, state) {
+    if (capture[2]) {
+      const tex = capture[2].trim().replace(/\n/g, " ");
+      return { content: "", attrs: { tex } }
+    } else {
+      const tex = capture[1].trim();
+      return { content: "", attrs: { tex, displayMode: true } }
+    }
+  }
+});
+rules.set("comment", {
+  isLeaf: true,
+  match: inlineRegex(/^©((?:\\[\s\S]|[^\\])+?)©/),
+  parse: function(capture, state) {
+    return { content: "", attrs: { comment: capture[1] } }
+  }
+});
+rules.set("link", {
+  isLeaf: true,
+  match: inlineRegex(
+    new RegExp("^\\[(" + LINK_INSIDE + ")\\]\\(" + LINK_HREF_AND_TITLE + "\\)")
+  ),
+  parse: function(capture, state) {
+    const textNode = parseTextMark(capture[1], state, "link" )[0];
+    const i = linkIndex(textNode.marks);
+    textNode.marks[i].attrs = { href: unescapeUrl(capture[2]) };
+    return textNode
+  }
+});
+rules.set("image", {
+  isLeaf: true,
+  match: inlineRegex(
+    new RegExp("^!\\[(" + LINK_INSIDE + ")\\]\\(" + LINK_HREF_AND_TITLE + "\\)")
+  ),
+  parse: function(capture, state) {
+    return { attrs: { alt: capture[1], src: unescapeUrl(capture[2]) } }
+  }
+});
+rules.set("reflink", {
+  isLeaf: true,
+  match: inlineRegex(/^\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]/),
+  parse: function(capture, state) {
+    const textNode = parseTextMark(capture[1], state, "link" )[0];
+    const i = linkIndex(textNode.marks);
+    textNode.marks[i].attrs = { href: null };
+    if (capture[2]) {
+      textNode.marks[i].attrs.title = capture[2];
+    }
+    parseRef(capture, state, textNode.marks[i]);
+    return textNode
+  }
+});
+rules.set("refimage", {
+  isLeaf: true,
+  match: inlineRegex(/^!\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]/),
+  parse: function(capture, state) {
+    return parseRef(capture, state, {
+      type: "image",
+      attrs: { alt: capture[1] }
+    });
+  }
+});
+rules.set("code", {
+  isLeaf: true,
+  match: inlineRegex(/^(`+)([\s\S]*?[^`])\1(?!`)/),
+  parse: function(capture, state) {
+    const text = capture[2].trim();
+    return [{ type: "text", text, marks: [{ type: "code" }] }]
+/*    state.inCode = true
+    const code = parseTextMark(text, state, "code" )
+    state.inCode = false
+    return code */
+  }
+});
+rules.set("em", {
+  isLeaf: true,
+  match: inlineRegex(/^_((?:\\[\s\S]|[^\\])+?)_/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "em" )
+  }
+});
+rules.set("strong", {
+  isLeaf: true,
+  match: inlineRegex(/^\*\*(?=\S)((?:\\[\s\S]|\*(?!\*)|[^\s*\\]|\s(?!\*\*))+?)\*\*/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "strong" )
+  }
+});
+rules.set("strikethru", {
+  isLeaf: true,
+  match: inlineRegex(/^~~(?=\S)((?:\\[\s\S]|~(?!~)|[^\s~\\]|\s(?!~~))+?)~~/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "strikethru" )
+  }
+});
+rules.set("superscript", {
+  isLeaf: true,
+  match: inlineRegex(/^<sup>([\s\S]*?)<\/sup>/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "superscript" )
+  }
+});
+rules.set("subscript", {
+  isLeaf: true,
+  match: inlineRegex(/^~((?:\\[\s\S]|[^\\])+?)~/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "subscript" )
+  }
+});
+rules.set("underline", {
+  isLeaf: true,
+  match: inlineRegex(/^<u>([\s\S]*?)<\/u>/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "underline" )
+  }
+});
+rules.set("highlight", {
+  isLeaf: true,
+  match: inlineRegex(/^<mark>([\s\S]*?)<\/mark>/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "highlight" )
+  }
+});
+rules.set("hard_break", {
+  isLeaf: true,
+  match: anyScopeRegex(/^\\\n/),
+  parse: function() { return { text: "\n" } }
+});
+rules.set("inline_break", {
+  isLeaf: true,
+  match: anyScopeRegex(/^<br>/),
+  parse: function() { return { type: "hard_break", text: "\n" } }
+});
+rules.set("span", {
+  isLeaf: true,
+  match: inlineRegex(/^<span [a-z =":]+>[^<]+<\/span>/),
+  parse: function(capture, state) {
+    return !state.inHtml ? null : { type: "html", text: capture[0] }
+  }
+});
+rules.set("text", {
+  // Here we look for anything followed by non-symbols,
+  // double newlines, or double-space-newlines
+  // We break on any symbol characters so that this grammar
+  // is easy to extend without needing to modify this regex
+  isLeaf: true,
+  match: anyScopeRegex(/^[\s\S]+?(?=[^0-9A-Za-z\s\u00c0-\uffff]|\n\n| {2,}\n|\w+:\S|$)/),
+  parse: function(capture, state) {
+    return {
+      text: capture[0].replace(/\n/g, " ")
+    };
+  }
+});
+
+const doNotEscape = ["calculation", "code", "tex"];
+const textModeRegEx = /\\(ce|text|hbox|raisebox|fbox)\{/;
+
+const identifyTeX = (source) => {
+  // In TeX, a pair of $…$ delimiters can be nested inside \text{…}.
+  // Parse the string and do not end on a $ inside a {} group.
+  let prevChar = "$";
+  let groupLevel = 0;
+  for (let i = 1; i < source.length; i++) {
+    const ch = source.charAt(i);
+    if (ch === "{" && prevChar !== "\\") { groupLevel += 1; }
+    if (ch === "}" && prevChar !== "\\") { groupLevel -= 1; }
+    if (ch === "$" && prevChar !== "\\" && groupLevel === 0) {
+      return [source.slice(0, i + 1), null, source.slice(1, i)]
+    }
+    prevChar = ch;
+  }
+  return [source, null, source.slice(1, -1)]
+};
+
+const parse$1 = (source, state) => {
+  if (!state.inline) { source += "\n\n"; }
+  source = preprocess(source);
+  const result = [];
+  while (source) {
+    // store the best match and its rule:
+    let capture = null;
+    let ruleName = null;
+    let rule = null;
+    for (const [currRuleName, currRule] of rules) {
+      if (state.inCode && doNotEscape.includes(currRuleName)) { continue }
+      capture = currRule.match(source, state);
+      if (capture) {
+        rule = currRule;
+        ruleName = currRuleName;
+        break
+      }
+    }
+    if (ruleName === "tex" && capture[2] && textModeRegEx.test(capture[2])) {
+      capture = identifyTeX(source);  // Check a TeX string for nested $
+    }
+    const parsed = rule.parse(capture, state);
+    if (Array.isArray(parsed)) {
+      Array.prototype.push.apply(result, parsed);
+    } else {
+      if (parsed.type == null) { parsed.type = ruleName; }
+      result.push(parsed);
+    }
+    source = source.substring(capture[0].length);
+  }
+  return result
+};
+
+
+
+/**
+ * Parse some content with the parser `parse`, with state.inline
+ * set to true. Useful for block elements; not generally necessary
+ * to be used by inline elements (where state.inline is already true.
+ */
+const parseInline = function(content, state) {
+  const isCurrentlyInline = state.inline || false;
+  state.inline = true;
+  const result = parse$1(content, state);
+  state.inline = isCurrentlyInline;
+  return result;
+};
+
+
+// recognize a `*` `-`, `+`, `1.`, `2.`... list bullet
+const LIST_BULLET = "(?:[*+-]|\\d+\\.)";
+// recognize the start of a list item:
+// leading space plus a bullet plus a space (`   * `)
+const LIST_ITEM_PREFIX = "( *)(" + LIST_BULLET + ") +";
+const LIST_ITEM_PREFIX_R = new RegExp("^" + LIST_ITEM_PREFIX);
+// recognize an individual list item:
+//  * hi
+//    this is part of the same item
+//
+//    as is this, which is a new paragraph in the same item
+//
+//  * but this is not part of the same item
+const LIST_ITEM_R = new RegExp(
+  LIST_ITEM_PREFIX + "[^\\n]*(?:\\n" + "(?!\\1" + LIST_BULLET + " )[^\\n]*)*(\n|$)",
+  "gm"
+);
+const BLOCK_END_R = /\n{2,}$/;
+// recognize the end of a paragraph block inside a list item:
+// two or more newlines at end end of the item
+const LIST_BLOCK_END_R = BLOCK_END_R;
+const LIST_ITEM_END_R = / *\n+$/;
+
+const ignore = ["def", "newline", "null"];
+
+const consolidate = arr => {
+  if (Array.isArray(arr) && arr.length > 0) {
+    // Group any text nodes together into a single string output.
+    for (let i = arr.length - 1; i > 0; i--) {
+      const node = arr[i];
+      const prevNode = arr[i - 1];
+      if (node.type === 'text' && prevNode.type === 'text' &&
+          !node.marks && !prevNode.marks) {
+        prevNode.text += node.text;
+        arr.splice(i, 1);
+      } else if (ignore.includes(node.type)) {
+        arr.splice(i, 1);
+      } else if (!rules.has(node.type) || !rules.get(node.type).isLeaf) {
+        consolidate(node.content);
+      }
+    }
+
+    if (!rules.has(arr[0].type) || !rules.get(arr[0].type).isLeaf) {
+      consolidate(arr[0].content);
+    }
+  }
+};
+
+const populateTOC = ast => {
+  let tocNode;
+  for (const node of ast) {
+    if (node.type === "toc") { tocNode = node; break }
+  }
+  if (!tocNode) { return }
+  const start = tocNode.attrs.start;
+  const end = tocNode.attrs.end;
+  for (const node of ast) {
+    if (node.type === "heading") {
+      const level = node.attrs.level;
+      if (start <= level && level <= end) {
+        const tocEntry = [];
+        let str = "";
+        for (const range of node.content) { str += range.text; }
+        tocEntry.push(str);
+        tocEntry.push(level);
+        tocEntry.push(0); // page number unknown
+        tocEntry.push(0); // element number unknown
+        tocNode.attrs.body.push(tocEntry);
+      }
+    }
+  }
+};
+
+const md2ast = (md, inHtml = false) => {
+  const ast = parse$1(md, { inline: false, inHtml });
+  if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") { ast.shift(); }
+  consolidate(ast);
+  populateTOC(ast);
+  return ast
+};
+
+const startSvg = _ => {
+  return {
+    tag: 'svg',
+    children: [],
+    attrs: {
+      xmlns: "http://www.w3.org/2000/svg",
+      width: 250,
+      height: 250,
+      style: "display: inline;"
+    },
+    temp: {
+      width: 250,
+      height: 250,
+      xmin: 0,
+      xmax: 5,
+      ymin: 0,
+      ymax: 5,
+      xunitlength: 20,  // px
+      yunitlength: 20,  // px
+      origin: [0, 0],   // in px (default is bottom left corner)
+      stroke: "black",
+      strokewidth: 1,
+      strokedasharray: null,
+      fill: "none",
+      fontstyle: "normal",
+      fontfamily: "sans-serif",
+      fontsize: 13.33, // px, ~10 pt
+      fontweight: "normal",
+      markerstrokewidth: 1,
+      markerstroke: "black",
+      markerfill: "yellow",
+      markersize: 4,
+      marker: "none",
+      dotradius: 4,
+      axesstroke: "black",
+      gridstroke: "grey",
+      isDim: false
+    }
+  }
+};
+
+// Helpers
+const setStrokeAndFill = (node, attrs) => {
+  node.attrs["stroke-width"] = attrs.strokewidth;
+  node.attrs.stroke = attrs.stroke;
+  node.attrs.fill = attrs.fill;
+  if (attrs.strokedasharray != null && attrs.strokedasharray !== "none") {
+    node.attrs["stroke-dasharray"] = attrs.strokedasharray;
+  }
+};
+
+const pointZeroRegEx = /\.0+$/;
+const chopZ = str => {
+  const k = str.indexOf(".");
+  if (k === -1) { return str }
+  if (pointZeroRegEx.test(str)) { return str.replace(pointZeroRegEx, "") }
+  let i;
+  for (i = str.length - 1; i > k && str.charAt(i) === "0"; i--) {
+    if (i === k) { i--; }
+  }
+  return str.slice(0, i + 1)
+};
+
+const markerDot = (center, attrs, s, f) => { // coordinates in units, radius in pixel
+  if (s == null) { s = attrs.stroke; }
+  if (f == null) { f = attrs.fill; }
+  const node = { tag: "circle", attrs: {} };
+  node.attrs.cx = center[0] * attrs.xunitlength + attrs.origin[0];
+  node.attrs.cy = attrs.height - center[1] * attrs.yunitlength - attrs.origin[1];
+  node.attrs.r = attrs.markersize;
+  node.attrs["stroke-width"] = attrs.strokewidth;
+  node.attrs.stroke = s;
+  node.attrs.fill = f;
+  return node
+};
+
+const arrowhead = (svg, p, q) => { // draw arrowhead at q (in units)
+  const attrs = svg.temp;
+  const v = [p[0] * attrs.xunitlength + attrs.origin[0], attrs.height -
+             p[1] * attrs.yunitlength - attrs.origin[1]];
+  const w = [q[0] * attrs.xunitlength + attrs.origin[0], attrs.height -
+             q[1] * attrs.yunitlength - attrs.origin[1]];
+  let u = [w[0] - v[0], w[1] - v[1]];
+  const d = Math.sqrt(u[0] * u[0] + u[1] * u[1]);
+  if (d > 0.00000001) {
+    u = [u[0] / d, u[1] / d];
+    const z = attrs.marker === "markerdot" ? 3 : attrs.isDim ? 0 : 1;
+    const up = [-u[1], u[0]];
+    const node = { tag: "path", attrs: {} };
+    node.attrs.d = "M " + (w[0] - 12.5 * u[0] - 3 * up[0]) + "," +
+      (w[1] - 12.5 * u[1] - 3 * up[1]) + " L " + (w[0] - z * u[0]) + "," + (w[1] - z * u[1]) +
+      " L " + (w[0] - 12.5 * u[0] + 3 * up[0]) + "," + (w[1] - 12.5 * u[1] + 3 * up[1]) + " z";
+    if (attrs.isDim) {
+      node.attrs.stroke = "none";
+    } else {
+      node.attrs["stroke-width"] = attrs.markerstrokewidth;
+      node.attrs.stroke = attrs.stroke;
+    }
+    node.attrs.fill = attrs.stroke;
+    svg.children.push(node);
+  }
+};
+
+const markAttribute = {
+  em:         ["font-style", "italic"],
+  strong:     ["font-weight", "bold"],
+  code:       ["font-family", "monospace"],
+  strikethru: ["text-decoration", "line-through"],
+  subscript:  ["font-size", "0.8em"]
+};
+
+const textLocal = (svg, p, str, pos) => {
+  const attrs = svg.temp;
+  let textanchor = "middle";
+  let dx = 0;
+  let dy = attrs.fontsize / 3;
+  if (pos != null) {
+    if (pos.slice(0, 5) === "above") { dy = -attrs.fontsize / 2; }
+    if (pos.slice(0, 5) === "below") { dy = 1.25 * attrs.fontsize; }
+    if (pos.slice(0, 5) === "right" || pos.slice(5, 10) === "right") {
+      textanchor = "start";
+      dx = attrs.fontsize / 2;
+    }
+    if (pos.slice(0, 4) === "left" || pos.slice(5, 9) === "left") {
+      textanchor = "end";
+      dx = -attrs.fontsize / 2;
+    }
+  }
+  const textNode = { tag: "text", children: [], attrs: {} };
+  textNode.attrs["text"] = str;
+  textNode.attrs.x = p[0] * attrs.xunitlength + attrs.origin[0] + dx;
+  textNode.attrs.y = attrs.height - p[1] * attrs.yunitlength - attrs.origin[1] + dy;
+  textNode.attrs["font-family"] = attrs.fontfamily;
+  textNode.attrs["font-size"] = attrs.fontsize;
+  textNode.attrs["text-anchor"] = textanchor;
+  // Load Markdown into an AST
+  const ast = md2ast(str)[0].content;
+  // Load content of AST into <tspan> nodes.
+  if (Array.isArray(ast)) {
+    let prevNodeContainedSubscript = false;
+    for (const markNode of ast) {
+      const tspan = { tag: "tspan", text: markNode.text };
+      let currentNodeContainsSubscript = false;
+      if (markNode.marks) {
+        tspan.attrs = {};
+        for (const mark of markNode.marks) {
+          const markAttr = markAttribute[mark.type];
+          tspan.attrs[markAttr[0]] = markAttr[1];
+          if (mark.type === "subscript") { currentNodeContainsSubscript = true; }
+        }
+      }
+      if (currentNodeContainsSubscript) {
+        if (!prevNodeContainedSubscript) { tspan.attrs.dy  = "2"; }
+      } else if (prevNodeContainedSubscript) {
+        if (!markNode.marks) { tspan.attrs = {}; }
+        tspan.attrs.dy  = "-2";
+      }
+      prevNodeContainedSubscript = currentNodeContainsSubscript;
+      textNode.children.push(tspan);
+    }
+  }
+  svg.children.push(textNode);
+  return svg
+};
+
+const functions = {
+  // Set attributes
+  stroke(svgOprnd, color) {
+    svgOprnd.value.temp.stroke = color.value;
+    return svgOprnd
+  },
+
+  strokewidth(svgOprnd, num) {
+    svgOprnd.value.temp.strokewidth = Rnl.toNumber(num.value);
+    return svgOprnd
+  },
+
+  strokedasharray(svgOprnd, str) {
+    svgOprnd.value.temp.strokedasharray = str.value;
+    return svgOprnd
+  },
+
+  fill(svgOprnd, color) {
+    svgOprnd.value.temp.fill = color.value;
+    return svgOprnd
+  },
+
+  fontsize(svgOprnd, size) {
+    svgOprnd.value.temp.fontsize = Rnl.toNumber(size.value);
+    return svgOprnd
+  },
+
+  fontfamily(svgOprnd, str) {
+    svgOprnd.value.temp.fontfamily = str.value; // "sansserif"|"serif"|"fixed"|"monotype"
+    return svgOprnd
+  },
+
+  marker(svgOprnd, str) {
+    svgOprnd.value.temp.marker = str.value; // "none" | "dot" | "arrow" | "arrowdot"
+    return svgOprnd
+  },
+
+  // Initialize the svg.
+
+  title(svgOprnd, strOprnd) {
+    svgOprnd.value.children.push( { tag: "title", attrs: { text: strOprnd.value } });
+    return svgOprnd
+  },
+
+  frame(svgOprnd, width = 250, height = 250, position = "inline") {
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    attrs.width = typeof width === "number" ? width : Rnl.toNumber(width.value);
+    svg.attrs.width = attrs.width;
+    attrs.height = typeof height === "number" ? height : Rnl.toNumber(height.value);
+    svg.attrs.height = attrs.height;
+    if (typeof position !== "string") { position = position.value; }
+    svg.attrs.style = `float: ${position}`;
+    attrs.xunitlength = attrs.width / (attrs.xmax - attrs.xmin);
+    attrs.yunitlength = attrs.height / (attrs.ymax - attrs.ymin);
+    attrs.origin = [-attrs.xmin * attrs.xunitlength, -attrs.ymin * attrs.yunitlength];
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  view(svgOprnd, xmin = 0, xmax = 5, ymin, ymax) {
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    attrs.xmin = typeof xmin === "number" ? xmin : Rnl.toNumber(xmin.value);
+    attrs.xmax = typeof xmax === "number" ? xmax : Rnl.toNumber(xmax.value);
+    attrs.xunitlength = attrs.width / (attrs.xmax - attrs.xmin);
+    attrs.yunitlength = attrs.xunitlength; // This may change below.
+    if (ymin == null) {
+      attrs.origin = [-attrs.xmin * attrs.xunitlength, attrs.height / 2];
+      attrs.ymin = -attrs.height / (2 * attrs.yunitlength);
+      attrs.ymax = -attrs.ymin;
+    } else {
+      attrs.ymin = Rnl.toNumber(ymin.value);
+      if (ymax != null) {
+        attrs.ymax = Rnl.toNumber(ymax.value);
+        attrs.yunitlength = attrs.height / (attrs.ymax - attrs.ymin);
+      } else {
+        attrs.ymax = attrs.height / attrs.yunitlength + attrs.ymin;
+      }
+      attrs.origin = [-attrs.xmin * attrs.xunitlength, -attrs.ymin * attrs.yunitlength];
+    }
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  // Draw things
+
+  grid(svgOprnd, gdx, gdy, isLocal) {
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    gdx = gdx == null ? attrs.xunitlength : Rnl.toNumber(gdx.value) * attrs.xunitlength;
+    gdy = gdy == null ? gdx : Rnl.toNumber(gdy.value) * attrs.yunitlength;
+    const pnode = { tag: "path", attrs: {} };
+    let str = "";
+    for (let x = attrs.origin[0]; x < attrs.width; x += gdx) {
+      str += " M" + x + ",0 " + x + "," + attrs.height;
+    }
+    for (let x = attrs.origin[0] - gdx; x > 0; x -= gdx) {
+      str += " M" + x + ",0 " + x + "," + attrs.height;
+    }
+    for (let y = attrs.height - attrs.origin[1]; y < attrs.height; y += gdy) {
+      str += " M0," + y + " " + attrs.width + "," + y;
+    }
+    for (let y = attrs.height - attrs.origin[1] - gdy; y > 0; y -= gdy) {
+      str += " M0," + y + " " + attrs.width + "," + y;
+    }
+    pnode.attrs.d = str;
+    pnode.attrs["stroke-width"] = 0.5;
+    pnode.attrs.stroke = attrs.gridstroke;
+    pnode.attrs.fill = attrs.fill;
+    svg.children.push(pnode);
+    if (!isLocal) {
+      return { value: svg, unit: null, dtype: dt.DRAWING }
+    }
+  },
+
+  axes(svgOprnd, dx, dy, labels, gdx, gdy) {
+    let svg = svgOprnd.value;
+    const attrs = svg.temp;
+    dx = (dx == null ? attrs.xunitlength : Rnl.toNumber(dx.value) * attrs.xunitlength);
+    dy = (dy == null ? dx : Rnl.toNumber(dy.value) * attrs.yunitlength);
+    const parentFontsize = attrs.fontsize;
+    attrs.fontsize = Math.min(dx / 2, dy / 2, 10);
+    const ticklength = attrs.fontsize / 4;
+    if (gdx != null) {
+      this.grid(svgOprnd, gdx, gdy, true);
+    }
+    const pnode = { tag: "path", attrs: {} };
+    let str = "M0," + (attrs.height - attrs.origin[1]) + " " + attrs.width + "," +
+      (attrs.height - attrs.origin[1]) + " M" + attrs.origin[0] + ",0 " +
+      attrs.origin[0] + "," + attrs.height;
+    for (let x = attrs.origin[0] + dx; x < attrs.width; x += dx) {
+      str += " M" + x + " " + (attrs.height - attrs.origin[1] + ticklength) + " " + x
+            + "," + (attrs.height - attrs.origin[1] - ticklength);
+    }
+    for (let x = attrs.origin[0] - dx; x > 0; x -= dx) {
+      str += " M" + x + "," + (attrs.height - attrs.origin[1] + ticklength) + " " + x
+            + "," + (attrs.height - attrs.origin[1] - ticklength);
+    }
+    for (let y = attrs.height - attrs.origin[1] + dy; y < attrs.height; y += dy) {
+      str += " M" + (attrs.origin[0] + ticklength) + "," + y + " " +
+                   (attrs.origin[0] - ticklength) + "," + y;
+    }
+    for (let y = attrs.height - attrs.origin[1] - dy; y > 0; y -= dy) {
+      str += " M" + (attrs.origin[0] + ticklength) + "," + y + " " +
+                   (attrs.origin[0] - ticklength) + "," + y;
+    }
+    if (labels != null) {
+      const ldx = dx / attrs.xunitlength;
+      const ldy = dy / attrs.yunitlength;
+      const lx = (attrs.xmin > 0 || attrs.xmax < 0 ? attrs.xmin : 0);
+      const ly = (attrs.ymin > 0 || attrs.ymax < 0 ? attrs.ymin : 0);
+      const lxp = (ly === 0 ? "below" : "above");
+      const lyp = (lx === 0 ? "left" : "right");
+      const ddx = Math.floor(1.1 - Math.log(ldx) / Math.log(10)) + 1;
+      const ddy = Math.floor(1.1 - Math.log(ldy) / Math.log(10)) + 1;
+      for (let x = ldx; x <= attrs.xmax; x += ldx) {
+        svg = textLocal(svg, [x, ly], chopZ(x.toFixed(ddx)), lxp);
+      }
+      for (let x = -ldx; attrs.xmin <= x; x -= ldx) {
+        svg = textLocal(svg, [x, ly], chopZ(x.toFixed(ddx)), lxp);
+      }
+      for (let y = ldy; y <= attrs.ymax; y += ldy) {
+        svg = textLocal(svg, [lx, y], chopZ(y.toFixed(ddy)), lyp);
+      }
+      for (let y = -ldy; attrs.ymin <= y; y -= ldy) {
+        svg = textLocal(svg, [lx, y], chopZ(y.toFixed(ddy)), lyp);
+      }
+    }
+    pnode.attrs.d = str;
+    pnode.attrs["stroke-width"] = 0.5;
+    pnode.attrs.stroke = attrs.axesstroke;
+    pnode.attrs.fill = attrs.fill;
+    svg.temp.fontsize = parentFontsize;
+    svg.children.push(pnode);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  line(svgOprnd, m) { // segment connecting points p,q (coordinates in units)
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const node = { tag: "path", attrs: {} };
+    const p = [Rnl.toNumber(m.value[0][0]), Rnl.toNumber(m.value[0][1])];
+    const q = [Rnl.toNumber(m.value[1][0]), Rnl.toNumber(m.value[1][1])];
+    node.attrs.d = "M" + (p[0] * attrs.xunitlength + attrs.origin[0]) + "," +
+      (attrs.height - p[1] * attrs.yunitlength - attrs.origin[1]) + " " +
+      (q[0] * attrs.xunitlength + attrs.origin[0]) + "," + (attrs.height -
+       q[1] * attrs.yunitlength - attrs.origin[1]);
+    setStrokeAndFill(node, attrs);
+    svg.children.push(node);
+    if (attrs.marker === "dot" || attrs.marker === "arrowdot") {
+      svg.children.push(markerDot(p, attrs, attrs.markerstroke, attrs.markerfill));
+      if (attrs.marker === "arrowdot") { arrowhead(svg, p, q); }
+      svg.children.push(markerDot(q, attrs, attrs.markerstroke, attrs.markerfill));
+    } else if (attrs.marker === "arrow") {
+      arrowhead(svg, p, q);
+    }
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  path(svgOprnd, plistOprnd, c) {
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const node = { tag: "path", attrs: {} };
+    // Get the "d" attribute of a path
+    let str = "";
+    let plist;
+    if (typeof plistOprnd === "string") {
+      str = plistOprnd.value;
+    } else {
+      plist = plistOprnd.value.map(row => row.map(e => Rnl.toNumber(e)));
+      if (c == null) {
+        c = new Array(plist.length).fill("L");
+        c[0] = "M";
+      } else if (c.dtype === dt.STRING) {
+        c = new Array(plist.length).fill(c.value);
+        c[0] = "M";
+      } else if (typeof c === "string") {
+        c = new Array(plist.length).fill(c);
+        c[0] = "M";
+      } else if ((c.dtype & dt.ROWVECTOR) || (c.dtype & dt.COLUMNVECTOR)) {
+        c = c.value.map(e => {
+          if (Rnl.isZero(e)) { return "L" }
+          const radius = Rnl.toNumber(e) * attrs.xunitlength;
+          return `A${radius} ${radius} 0 0 0 `
+        });
+        c.unshift("M");
+      } else {
+        c = new Array(plist.length).fill("L");
+        c[0] = "M";
+      }
+      for (let i = 0; i < plist.length; i++) {
+        str += c[i] + (plist[i][0] * attrs.xunitlength + attrs.origin[0]) + ","
+            + (attrs.height - plist[i][1] * attrs.yunitlength - attrs.origin[1]) + " ";
+      }
+    }
+    node.attrs.d = str;
+    node.attrs["stroke-width"] = attrs.strokewidth;
+    if (attrs.strokedasharray != null) {
+      node.attrs["stroke-dasharray"] = attrs.strokedasharray;
+    }
+    node.attrs.stroke = attrs.stroke;
+    node.attrs.fill = attrs.fill;
+    if (attrs.marker === "dot" || attrs.marker === "arrowdot") {
+      for (let i = 0; i < plist.length; i++) {
+        if (c !== "C" && c !== "T" || i !== 1 && i !== 2) {
+          svg.children.push(markerDot(plist[i], attrs, attrs.markerstroke, attrs.markerfill));
+        }
+      }
+    } else if (attrs.marker === "arrow") {
+      arrowhead(svg, plist[plist.length - 2], plist[plist.length - 1]);
+    }
+    svg.children.push(node);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  curve(svgOprnd, plist) {
+    return functions.path(svgOprnd, plist, "T")
+  },
+
+  rect(svgOprnd, m, r) { // opposite corners in units, rounded by radius
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const node = { tag: "rect", attrs: {} };
+    const p = [Rnl.toNumber(m.value[0][0]), Rnl.toNumber(m.value[0][1])];
+    const q = [Rnl.toNumber(m.value[1][0]), Rnl.toNumber(m.value[1][1])];
+    node.attrs.x = p[0] * attrs.xunitlength + attrs.origin[0];
+    node.attrs.y = attrs.height - q[1] * attrs.yunitlength - attrs.origin[1];
+    node.attrs.width = (q[0] - p[0]) * attrs.xunitlength;
+    node.attrs.height = (q[1] - p[1]) * attrs.yunitlength;
+    if (r != null) {
+      const rNum = Rnl.toNumber(r.value) * attrs.xunitlength;
+      node.attrs.rx = rNum;
+      node.attrs.ry = rNum;
+    }
+    setStrokeAndFill(node, attrs);
+    svg.children.push(node);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  circle(svgOprnd, center, radius) { // coordinates in units
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const node = { tag: "circle", attrs: {} };
+    node.attrs.cx = Rnl.toNumber(center.value[0]) * attrs.xunitlength + attrs.origin[0];
+    node.attrs.cy = attrs.height - Rnl.toNumber(center.value[1]) * attrs.yunitlength
+                  - attrs.origin[1];
+    node.attrs.r = Rnl.toNumber(radius.value) * attrs.xunitlength;
+    setStrokeAndFill(node, attrs);
+    svg.children.push(node);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  ellipse(svgOprnd, center, rx, ry) { // coordinates in units
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const node = { tag: "ellipse", attrs: {} };
+    node.attrs.cx = Rnl.toNumber(center.value[0]) * attrs.xunitlength + attrs.origin[0];
+    node.attrs.cy = attrs.height - Rnl.toNumber(center.value[1]) * attrs.yunitlength
+                    - attrs.origin[1];
+    node.attrs.rx = Rnl.toNumber(rx.value) * attrs.xunitlength;
+    node.attrs.ry = Rnl.toNumber(ry.value) * attrs.yunitlength;
+    setStrokeAndFill(node, attrs);
+    svg.children.push(node);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  arc(svgOprnd, m, radius) { // coordinates in units
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const node = { tag: "path", attrs: {} };
+    const start = [Rnl.toNumber(m.value[0][0]), Rnl.toNumber(m.value[0][1])];
+    const end = [Rnl.toNumber(m.value[1][0]), Rnl.toNumber(m.value[1][1])];
+    if (radius == null) {
+      const v = [end[0] - start[0], end[1] - start[1]];
+      radius = (Math.sqrt(v[0] * v[0] + v[1] * v[1])) * attrs.yunitlength;
+    } else if (isVector(radius)) {
+      radius = radius.value.map(e => Rnl.toNumber(e) * attrs.yunitlength);
+    } else {
+      radius = Rnl.toNumber(radius.value) * attrs.yunitlength;
+    }
+    let str = "M" + (start[0] * attrs.xunitlength + attrs.origin[0]) + "," +
+      (attrs.height - start[1] * attrs.yunitlength - attrs.origin[1]) + " A";
+    str += Array.isArray(radius) ? radius[0] + "," + radius[1] : radius + "," + radius;
+    str += " 0 0,0 " + (end[0] * attrs.xunitlength + attrs.origin[0]) + "," +
+      (attrs.height - end[1] * attrs.yunitlength - attrs.origin[1]);
+    node.attrs.d = str;
+    setStrokeAndFill(node, attrs);
+    let v = 0;
+    if (attrs.marker === "arrow" || attrs.marker === "arrowdot") {
+      const u = [(end[1] - start[1]) / 4, (start[0] - end[0]) / 4];
+      v = [(end[0] - start[0]) / 2, (end[1] - start[1]) / 2];
+      v = [start[0] + v[0] + u[0], start[1] + v[1] + u[1]];
+    } else {
+      v = [start[0], start[1]];
+    }
+    if (attrs.marker === "dot" || attrs.marker === "arrowdot") {
+      svg.children.push(markerDot(start, attrs, attrs.markerstroke, attrs.markerfill));
+      if (attrs.marker === "arrowdot") { arrowhead(svg,  v, end); }
+      svg.children.push(markerDot(end, attrs, attrs.markerstroke, attrs.markerfill));
+    } else if (attrs.marker === "arrow") {
+      arrowhead(svg, v, end);
+    }
+    svg.children.push(node);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  text(svgOprnd, p, str, pos) {
+    const svg = textLocal(
+      svgOprnd.value,
+      [Rnl.toNumber(p.value[0]), Rnl.toNumber(p.value[1])],
+      str.value,
+      pos == null ? null : pos.value
+      );
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  dot(svgOprnd, center, typ, label, pos) {
+    let svg = svgOprnd.value;
+    const attrs = svg.temp;
+    let node;
+    const cx = Rnl.toNumber(center.value[0]) * attrs.xunitlength + attrs.origin[0];
+    const cy = attrs.height - Rnl.toNumber(center.value[1]) * attrs.yunitlength
+             - attrs.origin[1];
+    if (typ.value === "+" || typ.value === "-" || typ.value === "|") {
+      node = { tag: "path", attrs: {} };
+      if (typ.value === "+") {
+        node.attrs.d = " M " + (cx - attrs.ticklength) + "," + cy
+                    + " L " + ( cx + attrs.ticklength) + "," + cy
+                    + " M " + cx + "," + (cy - attrs.ticklength) + " L " + cx
+                    + "," + (cy + attrs.ticklength);
+        node.attrs["stroke-width"] = 0.5;
+        node.attrs.stroke = attrs.axesstroke;
+      } else {
+        if (typ.value === "-") {
+          node.attrs.d = " M " + (cx - attrs.ticklength) + "," + cy
+                       + " L " + (cx + attrs.ticklength) + "," + cy;
+        } else {
+          node.attrs.d = " M " + cx + "," + (cy - attrs.ticklength)
+                       + " L " + cx + "," + (cy + attrs.ticklength);
+        }
+        node.attrs["stroke-width"] = attrs.strokewidth;
+        node.attrs["stroke"] = attrs.stroke;
+      }
+    } else {
+      node = { tag: "circle", attrs: {} };
+      node.attrs.cx = cx;
+      node.attrs.cy = cy;
+      node.attrs.r = attrs.dotradius;
+      node.attrs["stroke-width"] = attrs.strokewidth;
+      node.attrs.stroke = attrs.stroke;
+      node.attrs.fill =  (typ.value === "open" ? "white" : attrs.stroke);
+    }
+    svg.children.push(node);
+    if (label != null) {
+      svg = textLocal(
+        svg,
+        [Rnl.toNumber(center.value[0]), Rnl.toNumber(center.value[1])],
+        label.value,
+        (pos == null ? "below" : pos.value)
+        );
+    }
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  leader(svgOprnd, plistOprnd, label) {
+    const marker = svgOprnd.value.temp.marker;
+    svgOprnd.value.temp.marker = "arrow";
+    svgOprnd.value.temp.isDim = true;
+    const plistCopy = clone(plistOprnd);
+    plistCopy.value.reverse();
+    svgOprnd = this.path(svgOprnd, plistCopy, "L");
+    const p = plistCopy.value[0].map(e => Rnl.toNumber(e));
+    const q = plistCopy.value[1].map(e => Rnl.toNumber(e));
+    let pos = "right";
+    if (Math.abs(p[0] - q[0]) >= Math.abs(p[1] - q[1])) {
+      pos = p[0] >= q[0] ? "right" : "left";
+    } else {
+      pos = p[1] < q[1] ? "below" : "above";
+    }
+    const svg = textLocal(svgOprnd.value, p, label.value, pos);
+    svg.temp.marker = marker;
+    svg.temp.isDim = false;
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  dimension(svgOprnd, plistOprnd, label) {
+    const p = clone(plistOprnd.value);
+    const q = p.pop();
+    const origstrokewidth = svgOprnd.value.temp.strokewidth;
+    svgOprnd.value.temp.strokewidth = 0.5;
+    svgOprnd.value.temp.isDim = true; // set small arrowhead
+    let six = Rnl.fromNumber(6 / svgOprnd.value.temp.xunitlength);
+    const pEnd = p[p.length - 1];
+    let svg;
+    // Is the label y-coord between the y-coords of the end points?
+    if ((Rnl.lessThan(p[0][1], q[1]) && Rnl.lessThan(q[1], pEnd[1])) ||
+        (Rnl.lessThan(pEnd[1], q[1]) && Rnl.lessThan(q[1], p[0][1]))) {
+      if (!Rnl.lessThan(pEnd[0], q[0])) { six = Rnl.negate(six); }
+      p.forEach(e => {
+        svgOprnd = this.line(svgOprnd, { value: [
+          [Rnl.add(e[0], six), e[1]],
+          [Rnl.add(q[0], six), e[1]]
+        ] });
+      });
+      svgOprnd.value.temp.marker = "arrow";
+      const pos = Rnl.lessThanOrEqualTo(pEnd[0], q[0]) ? "right" : "left";
+      for (let i = 0; i < p.length - 1; i++) {
+        svgOprnd = this.line(svgOprnd, { value : [[q[0], p[i][1]], [q[0], p[i + 1][1]]],
+          unit: null, dtype: dt.MATRIX });
+        svgOprnd = this.line(svgOprnd, { value : [[q[0], p[i + 1][1]], [q[0], p[i][1]]],
+          unit: null, dtype: dt.MATRIX });
+        const p3 = [
+          Rnl.toNumber(q[0]),
+          (Rnl.toNumber(p[i][1]) + Rnl.toNumber(p[i + 1][1])) / 2
+        ];
+        const str = p.length === 2 ? label.value : label.value[i];
+        svg = textLocal(svgOprnd.value, p3, str, pos);
+      }
+    } else {
+      if (!Rnl.lessThan(pEnd[1], q[1])) { six = Rnl.negate(six); }
+      p.forEach(e => {
+        svgOprnd = this.line(svgOprnd, { value: [
+          [e[0], Rnl.add(e[1], six)],
+          [e[0], Rnl.add(q[1], six)]
+        ] });
+      });
+      svgOprnd.value.temp.marker = "arrow";
+      const pos = Rnl.lessThanOrEqualTo(pEnd[1], q[1]) ? "above" : "below";
+      for (let i = 0; i < p.length - 1; i++) {
+        svgOprnd = this.line(svgOprnd, { value: [ [p[i][0], q[1]], [ p[i + 1][0], q[1]] ],
+          unit: null, dtype: dt.MATRIX });
+        svgOprnd = this.line(svgOprnd, { value: [ [ p[i + 1][0], q[1]], [p[i][0], q[1]] ],
+          unit: null, dtype: dt.MATRIX });
+        const p3 = [
+          (Rnl.toNumber(p[i][0]) + Rnl.toNumber(p[i + 1][0])) / 2,
+          Rnl.toNumber(q[1])
+        ];
+        const str = p.length === 2 ? label.value : label.value[i];
+        svg = textLocal(svgOprnd.value, p3, str, pos);
+      }
+    }
+    svg.temp.strokewidth = origstrokewidth;
+    svg.temp.marker = "none";
+    svg.temp.isDim = false;
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  }
+
+};
+
+const renderSVG = dwg => {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  Object.keys(dwg.attrs).forEach(key => {
+    svg.setAttribute(key, dwg.attrs[key]);
+  });
+  dwg.children.forEach(el => {
+    const node = document.createElementNS("http://www.w3.org/2000/svg", el.tag);
+    Object.keys(el.attrs).forEach(attr => {
+      node.setAttribute(attr, el.attrs[attr]);
+      if (attr === "title") {
+        node.appendChild(document.createTextNode(el.attrs["text"]));
+      } else {
+        node.setAttribute(attr, el.attrs[attr]);
+      }
+    });
+    if (el.tag === "text") {
+      el.children.forEach(child => {
+        const tspan = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
+        if (child.attrs) {
+          Object.keys(child.attrs).forEach(mark => {
+            tspan.setAttribute(mark, child.attrs[mark]);
+          });
+        }
+        tspan.appendChild(document.createTextNode(child.text));
+        node.appendChild(tspan);
+      });
+    }
+    svg.appendChild(node);
+  });
+  return svg
+};
+
+const draw = Object.freeze({
+  startSvg,
+  functions,
+  renderSVG
+});
+
+// evaluate.js
+
+/*
+ *  This module receives an RPN string and a object containing Hurmet variables.
+ *  It does the calculation, doing unit-compatibility checks along the way.
+ *  It returns a result in two formats: (1) a TeX string that can be displayed and
+ *  (2) numeric and unit data that can used for calculations by other cells.
+ *
+ *  Hurmet does automatic unit conversions and checks for unit compatibility.
+ *  Compatibility checks are done by keeping track of the unit exponents.
+ *  So for instance if we divide an area by a length, the unit exponent calculation runs as:
+ *     LENGTH^2 / LENGTH^1 = LENGTH^(2-1) = LENGTH^1
+ *  We keep track of unit exponents for each of 9 base dimensions. That's why
+ *  you see an array of 9 integers occuring in the code below.
+ *
+ *  Inside evalRpn(), Hurmet operands are each an object with three fields:
+ *     value: the value of the operand
+ *     unit:  holds unit info, either unit name, an array of exponents, or a unitMap
+ *     dtype: an integer indicating data type.
+ *
+ *     Note that an operand can be two data types at once, such as RATIONAL and MATRIX.
+ *     In such cases, dtype is the sum of the two underlying integers.
+ *     So, in constants.js, we have enumerated the data types in powers of two.
+ *     That way, we can use a bit-wise "&" operator to test for an individual type.
+ *
+ *     Numeric matrices and numeric maps can have math operations done to them.
+ *     We distinguish numeric matrices from other matrices by the fact that
+ *     (oprnd.dtype & dt.RATIONAL) returns a true if the matrix is numeric.
+ *
+ *     File operands.js contains further explanation of Hurmet operands.
+ */
+
+// Some helper functions
+
+const needsMap = (...args) => {
+  for (let i = 0; i < args.length; i++) {
+    if ((args[i].dtype & dt.MAP) && (args[i].dtype & dt.RATIONAL)) { return true }
+  }
+  return false
+};
+
+const shapeOf = oprnd => {
+  return oprnd.dtype === dt.COMPLEX
+    ? "complex"
+    : oprnd.dtype < 128
+    ? "scalar"
+    : Matrix.isVector(oprnd)
+    ? "vector"
+    : (oprnd.dtype & dt.MATRIX)
+    ? "matrix"
+    : oprnd.dtype === dt.DATAFRAME
+    ? "dataFrame"
+    : ((oprnd.dtype & dt.MAP) &&
+       ((oprnd.dtype & dt.ROWVECTOR) || (oprnd.dtype & dt.COLUMNVECTOR)))
+    ? "mapWithVectorValues"
+    : (oprnd.dtype & dt.MAP)
+    ? "map"
+    : "other"
+};
+
+const binaryShapesOf = (o1, o2) => {
+  let shape1 = shapeOf(o1);
+  let shape2 = shapeOf(o2);
+  let needsMultBreakdown = false;
+  if (isMatrix(o1) && isMatrix(o2)) {
+    // If both operands are matrices, we need to return more information.
+    // That enables the various ways to multiply two matrices.
+    needsMultBreakdown = true;
+    if (shape1 === "vector") {
+      shape1 = (o1.dtype & dt.ROWVECTOR) ? "rowVector" : "columnVector";
+    }
+    if (shape2 === "vector") {
+      shape2 = (o2.dtype & dt.ROWVECTOR) ? "rowVector" : "columnVector";
+    }
+  }
+  return [shape1, shape2, needsMultBreakdown]
+};
+
+const nextToken = (tokens, i) => {
+  if (tokens.length < i + 2) { return undefined }
+  return tokens[i + 1]
+};
+
+// array of function names that return a real number from a complex argument.
+const arfn = ["abs", "argument", "Im", "Re", "Γ"];
+
+const stringFromOperand = (oprnd, decimalFormat) => {
+  return oprnd.dtype === dt.STRING
+    ? oprnd.value
+    : oprnd.dtype === dt.RATIONAL
+    ? format(oprnd.value, "h15", decimalFormat)
+    : isMatrix(oprnd.dtype)
+    ? Matrix.displayAlt(oprnd, "h15", decimalFormat)
+    : (oprnd.dtype & dt.MAP)
+    ? map.displayAlt(oprnd.value, "h15", decimalFormat)
+    : oprnd.value
+};
+
+const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
+  // This is the function that does calculations with the rpn string.
+  const tokens = rpn.split("\u00A0");
+  const stack = [];
+  let oPrev;
+  for (let i = 0; i < tokens.length; i++) {
+    const tkn = tokens[i];
+    const ch = tkn.charAt(0);
+
+    if (ch === "®") {
+      // A rational number.
+      const r = new Array(2);
+      const pos = tkn.indexOf("/");
+      r[0] = BigInt(tkn.slice(1, pos));   // numerator
+      r[1] = BigInt(tkn.slice(pos + 1));  // denominator
+      const num = Object.create(null);
+      num.value = r;
+      num.unit = Object.create(null);
+      num.unit.expos = allZeros;
+      num.dtype = dt.RATIONAL;
+      stack.push(Object.freeze(num));
+
+    } else if (ch === "©") {
+      // A complex number.
+      const ints = tkn.slice(1).split(",");
+      const z = new Array(2);
+      z[0] = [BigInt(ints[0]), BigInt(ints[1])];  // real part
+      z[1] = [BigInt(ints[2]), BigInt(ints[3])];  // imaginary part
+      const num = Object.create(null);
+      num.value = z;
+      num.unit = Object.create(null);
+      num.unit.expos = allZeros;
+      num.dtype = dt.COMPLEX;
+      stack.push(Object.freeze(num));
+
+    } else if (ch === "¿") {
+      // A variable. Get the value from vars
+      const varName = tkn.substring(1);
+      let oprnd = Object.create(null);
+      if (varName === "undefined") {
+        oprnd.value = undefined;
+        oprnd.unit = null;
+        oprnd.dtype = 0;
+      } else if (varName === "T" && nextToken(tokens, i) === "^" &&
+        stack.length > 0 && isMatrix(stack[stack.length - 1])) {
+        // Transpose a matrix.
+        oprnd.value = "T";
+        oprnd.unit = null;
+        oprnd.dtype = dt.RATIONAL;
+      } else {
+        const cellAttrs = vars[varName];
+        if (!cellAttrs) { return errorOprnd("V_NAME", varName) }
+        oprnd = fromAssignment(cellAttrs, unitAware);
+        if (oprnd.dtype === dt.ERROR) { return oprnd }
+      }
+      stack.push(Object.freeze(oprnd));
+
+    } else if (ch === '"') {
+      // A string literal.
+      const chEnd = tkn.charAt(tkn.length - 1);
+      const str = ch === '"' && chEnd === '"' ? tkn.slice(1, -1).trim() : tkn.trim();
+      stack.push(Object.freeze({ value: str, unit: null, dtype: dt.STRING }));
+
+    } else if (/^``/.test(tkn)) {
+      stack.push(DataFrame.dataFrameFromCSV(tablessTrim(tkn.slice(2, -2)), {}));
+
+    } else if (ch === '`') {
+      // A rich text literal
+      const chEnd = tkn.charAt(tkn.length - 1);
+      const str = ch === '`' && chEnd === '`' ? tkn.slice(1, -1).trim() : tkn.trim();
+      stack.push(Object.freeze({ value: str, unit: null, dtype: dt.RICHTEXT }));
+
+    } else {
+      switch (tkn) {
+        case "true":
+        case "false": {
+          const bool = Object.create(null);
+          bool.value = tkn === "true";
+          bool.unit = null;
+          bool.dtype = dt.BOOLEAN;
+          stack.push(Object.freeze(bool));
+          break
+        }
+
+        case "π": {
+          const pi = Object.create(null);
+          pi.value = Rnl.pi;
+          pi.dtype = dt.RATIONAL;
+          pi.unit = Object.create(null);
+          pi.unit.expos = allZeros;
+          stack.push(Object.freeze(pi));
+          break
+        }
+
+        case "e": {
+          const e = Object.create(null);
+          e.value = "e";
+          e.dtype = dt.RATIONAL;
+          e.unit = Object.create(null);
+          e.unit.expos = allZeros;
+          stack.push(Object.freeze(e));
+          break
+        }
+
+        case "j": {
+          // j = √(-1)
+          const j = Object.create(null);
+          j.value = [Rnl.zero, Rnl.one];
+          j.unit = Object.create(null);
+          j.unit.expos = allZeros;
+          j.dtype = dt.COMPLEX;
+          stack.push(Object.freeze(j));
+          break
+        }
+
+        case "ℏ": {
+          // Reduced Plank constant
+          const hbar = Object.create(null);
+          hbar.value = Rnl.hbar;
+          hbar.dtype = dt.RATIONAL;
+          hbar.unit = Object.create(null);
+          hbar.unit.expos = Object.freeze(unitAware ? [2, 1, -1, 0, 0, 0, 0, 0] : allZeros);
+          stack.push(Object.freeze(hbar));
+          break
+        }
+
+        case "∠": {
+          // Complex number in polar notation.
+          const o2 = stack.pop();
+          const o1 = stack.pop();
+          if (o1.dtype !== dt.RATIONAL || o2.dtype !== dt.RATIONAL) {
+            return errorOprnd("NAN_OP")
+          }
+          const theta = Rnl.toNumber(o2.value);
+          const z = Object.create(null);
+          z.value = [
+            Rnl.multiply(o1.value, Rnl.fromNumber(Math.cos(theta))), // real part
+            Rnl.multiply(o1.value, Rnl.fromNumber(Math.sin(theta)))  // imaginary part
+          ];
+          z.unit = Object.create(null);
+          z.unit.expos = allZeros;
+          z.dtype = dt.COMPLEX;
+          stack.push(Object.freeze(z));
+          break
+        }
+
+        case "+":
+        case "-": {
+          const o2 = stack.pop();
+          const o1 = stack.pop();
+          const op = tkn === "+" ? "add" : "subtract";
+          if (!(((o1.dtype & dt.RATIONAL) || (o1.dtype & dt.COMPLEX)) &&
+                ((o2.dtype & dt.RATIONAL) || (o2.dtype & dt.COMPLEX)))) {
+            return errorOprnd("NAN_OP")
+          }
+          if (unitAware) {
+            if (!unitsAreCompatible(o1.unit.expos, o2.unit.expos)) {
+              return errorOprnd("UNIT_ADD")
+            }
+          }
+          const [shape1, shape2, _] = binaryShapesOf(o1, o2);
+          const sum = Object.create(null);
+          // See file operations.js for an explanation of what goes on in the next line.
+          sum.value = Operators.binary[shape1][shape2][op](o1.value, o2.value);
+          if (sum.value.dtype && sum.value.dtype === dt.ERROR) { return sum.value }
+          sum.unit = o1.unit;
+          sum.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn);
+          stack.push(Object.freeze(sum));
+          break
+        }
+
+        case "~": {
+          // Unary minus
+          const o1 = stack.pop();
+          if (!((o1.dtype & dt.RATIONAL) || o1.dtype === dt.COMPLEX)) {
+            return errorOprnd("NAN_OP")
+          }
+          const neg = Object.create(null);
+          neg.value = Operators.unary[shapeOf(o1)]["negate"](o1.value);
+          if (neg.value.dtype && neg.value.dtype === dt.ERROR) { return neg.value }
+          neg.unit = o1.unit;
+          neg.dtype = o1.dtype;
+          stack.push(Object.freeze(neg));
+          break
+        }
+
+        case "×":
+        case "·":
+        case "*":
+        case "⌧": {
+          const oprnd2 = stack.pop();
+          const o2 = oprnd2.dtype === dt.DATAFRAME ? clone(oprnd2) : oprnd2;
+          const o1 = stack.pop();
+          if (!(((o1.dtype & dt.RATIONAL) || (o1.dtype & dt.COMPLEX)) &&
+            ((o2.dtype & dt.RATIONAL) || (o2.dtype & dt.COMPLEX) ||
+            o2.dtype === dt.DATAFRAME))) {
+            return errorOprnd("NAN_OP")
+          }
+          const product = Object.create(null);
+          let unit = Object.create(null);
+          if (unitAware) {
+            if ((o1.dtype === dt.DATAFRAME && o2.dtype === dt.RATIONAL) ||
+                (o1.dtype === dt.RATIONAL && o2.dtype === dt.DATAFRAME)) {
+              unit = o1.dtype === dt.DATAFRAME ? o1.unit : o2.unit;
+            } else {
+              unit.expos = o1.unit.expos.map((e, j) => e + o2.unit.expos[j]);
+            }
+          } else {
+            unit.expos = allZeros;
+          }
+          product.unit = o2.dtype === dt.DATAFRAME ? clone(o2.unit) : Object.freeze(unit);
+
+          const [shape1, shape2, needsMultBreakdown] = binaryShapesOf(o1, o2);
+          const op = needsMultBreakdown
+            ? { "×": "cross", "·": "dot", "*": "asterisk", "⌧": "multiply" }[tkn]
+            : "multiply";
+
+          product.dtype = (tkn === "*" || shape1 === "scalar" || shape1 === "map" ||
+            shape1 === "complex" || shape2 === "scalar" ||
+            shape2 === "map" || shape2 === "complex")
+            ? Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, op)
+            : tkn === "·"
+            ? dt.RATIONAL
+            : tkn === "×"
+            ? dt.COLUMNVECTOR
+            : Matrix.multResultType(o1, o2);
+
+          product.value = Operators.binary[shape1][shape2][op](o1.value, o2.value);
+          if (product.value.dtype && product.value.dtype === dt.ERROR) {
+            return product.value
+          }
+
+          stack.push(Object.freeze(product));
+          break
+        }
+
+        case "/":
+        case "//":
+        case "÷":
+        case "///":
+        case "\u2215": {
+          const o2 = stack.pop();
+          const o1 = stack.pop();
+          if (!(((o1.dtype & dt.RATIONAL) || o1.dtype === dt.COMPLEX) &&
+                ((o2.dtype & dt.RATIONAL) || o2.dtype === dt.COMPLEX))) {
+            return errorOprnd("NAN_OP")
+          }
+          const quotient = Object.create(null);
+          const unit = Object.create(null);
+          unit.expos = unitAware
+            ? o1.unit.expos.map((e, j) => e - o2.unit.expos[j])
+            : allZeros;
+          quotient.unit = Object.freeze(unit);
+          const [shape1, shape2, _] = binaryShapesOf(o1, o2);
+          quotient.value = Operators.binary[shape1][shape2]["divide"](o1.value, o2.value);
+          quotient.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, "divide");
+          if (isDivByZero(quotient.value, shapeOf(quotient))) { return errorOprnd("DIV") }
+          stack.push(Object.freeze(quotient));
+          break
+        }
+
+        case "^": {
+          const o2 = stack.pop();
+          const o1 = stack.pop();
+          if (Matrix.isVector(o1) && o2.value === "T") {
+            // Transpose a vector
+            const oprnd = clone(o1);
+            oprnd.dtype = o1.dtype + ((o1.dtype & dt.ROWVECTOR)
+              ? dt.COLUMNVECTOR - dt.ROWVECTOR
+              : dt.ROWVECTOR - dt.COLUMNVECTOR);
+            stack.push(Object.freeze(oprnd));
+            break
+          }
+          if (!(((o1.dtype & dt.RATIONAL) || o1.dtype === dt.COMPLEX) &&
+                ((o2.dtype & dt.RATIONAL) || o2.dtype === dt.COMPLEX) ||
+                (isMatrix(o1) && o2.value === "T"))) {
+            return errorOprnd("NAN_OP")
+          }
+          const power = Object.create(null);
+          const unit = Object.create(null);
+          unit.expos = allZeros;
+          if (unitAware) {
+            // TODO: lots to do here
+            const d = typeof o2.unit === "number" ? o2.unit : Rnl.toNumber(o2.value);
+            unit.expos = o1.unit.expos.map(e => e * d);
+          }
+          power.unit = Object.freeze(unit);
+          const [shape1, shape2, _] = binaryShapesOf(o1, o2);
+          power.value = Operators.binary[shape1][shape2]["power"](o1.value, o2.value);
+          if (power.value.dtype) { return power.value } // Error
+          power.dtype = Cpx.isComplex(power.value)
+            ? dt.COMPLEX
+            : Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn);
+          stack.push(Object.freeze(power));
+          break
+        }
+
+        case "^*": {
+          // complex conjugate
+          const oprnd = stack.pop();
+          if (!(oprnd.dtype & dt.COMPLEX)) { return errorOprnd("NA_REAL"), "conjugate" }
+          const o2 = {
+            value: Cpx.conjugate(oprnd.value),
+            unit: oprnd.unit,
+            dtype: oprnd.dtype
+          };
+          stack.push(Object.freeze(o2));
+          break
+        }
+
+        case "&":
+        case "&_": {
+          // Concatenation
+          const o2 = stack.pop();
+          const o1 = stack.pop();
+          const opName = tkn === "&" ? "concat" : "unshift";
+          const [shape1, shape2, _] = binaryShapesOf(o1, o2);
+          let o3 = Object.create(null);
+          if (o1.dtype === dt.STRING && o1.dtype === dt.STRING) {
+            const str1 = stringFromOperand(o1, decimalFormat);
+            const str2 = stringFromOperand(o2, decimalFormat);
+            o3.value = str1 + str2;
+            o3.unit = null;
+            o3.dtype = dt.STRING;
+          } else if ((o1.dtype & dt.DATAFRAME) && Matrix.isVector(o2) && tkn === "&") {
+            o3 = DataFrame.append(o1, o2, vars, unitAware);
+            if (o3.dtype === dt.ERROR) { return o3 }
+          } else if ((o1.dtype & dt.MAP) || (o2.dtype & dt.MAP)) {
+            o3 = map.append(o1, o2, shape1, shape2, vars);
+            if (o3.dtype === dt.ERROR) { return o3 }
+          } else {
+            if (unitAware) {
+              if (!unitsAreCompatible(o1.unit.expos, o2.unit.expos)) {
+                return errorOprnd("UNIT_ADD")
+              }
+            }
+            o3.value = Operators.binary[shape1][shape2][opName](o1.value, o2.value);
+            if (o3.value.dtype) { return o3.value } // Error
+            o3.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn);
+            o3.unit = o1.unit;
+          }
+          stack.push(Object.freeze(o3));
+          break
+        }
+
+        case "√":
+        case "∛":
+        case "∜": {
+          const index = tkn.charCodeAt(0) - 8728;
+          const pow = [BigInt(1), BigInt(index)];
+          const o1 = stack.pop();
+          if (!((o1.dtype & dt.RATIONAL) || (o1.dtype & dt.COMPLEX))) {
+            return errorOprnd("NAN_OP")
+          }
+          const root = Object.create(null);
+          const unit = Object.create(null);
+          unit.expos = allZeros;
+          if (unitAware) { unit.expos = o1.unit.expos.map(e => e / index); }
+          root.unit = Object.freeze(unit);
+
+          const shape1 = shapeOf(o1);
+          root.value = Operators.binary[shape1]["scalar"]["power"](o1.value, pow);
+          if (root.value.dtype && root.value.dtype === dt.ERROR) { return root.value }
+
+          root.dtype = Cpx.isComplex(root.value)
+            ? dt.COMPLEX
+            : Operators.dtype[shape1]["scalar"](o1.dtype, dt.RATIONAL, tkn);
+
+          stack.push(Object.freeze(root));
+          break
+        }
+
+        case "root": {
+          const o2 = stack.pop();
+          const o1 = stack.pop();
+          if (!((o1.dtype & dt.RATIONAL) & (o2.dtype & dt.RATIONAL))) {
+            return errorOprnd("NAN_OP")
+          }
+          const root = Object.create(null);
+          const unit = Object.create(null);
+          unit.expos = allZeros;
+          if (unitAware) { unit.expos = o2.unit.expos.map(e => e / Number(o1.value[0])); }
+          root.unit = Object.freeze(unit);
+
+          const pow = Rnl.reciprocal(o1.value);
+          const shape1 = shapeOf(o1);
+          root.value = Operators.binary[shape1]["scalar"]["power"](o2.value, pow);
+          if (root.value.dtype && root.value.dtype === dt.ERROR) { return root.value }
+
+          root.dtype = Operators.dtype[shape1]["scalar"](o1.dtype, dt.RATIONAL, tkn);
+          stack.push(Object.freeze(root));
+          break
+        }
+
+        case ".": {
+          // Accessor of a object's property in dot notation
+          const o2 = stack.pop();
+          const o1 = stack.pop();
+          const property = propertyFromDotAccessor(o1, o2, vars, unitAware);
+          if (property.dtype === dt.ERROR) { return property }
+          stack.push(Object.freeze(property));
+          break
+        }
+
+        case "[]": {
+          // Bracket accessor to a data frame, matrix, string, data frame, or module.
+          const numArgs = Number(tokens[i + 1]);
+          i += 1;
+          const args = [];
+          for (let j = 0; j < numArgs; j++) { args.unshift(stack.pop()); }
+          const o1 = stack.pop();
+          let property;
+          if (o1.dtype & dt.DATAFRAME) {
+            property = DataFrame.range(o1, args, vars, unitAware);
+
+          } else if (o1.dtype & dt.MAP) {
+            property = map.valueFromMap(o1, args, unitAware);
+
+          } else if (o1.dtype === dt.STRING) {
+            property = textRange$1(o1.value, args[0]);
+
+          } else if (o1.dtype === dt.MODULE) {
+            if (numArgs === 1) {
+              property = fromAssignment(o1.value[args[0].value], unitAware);
+            } else {
+              // Multiple assignment.
+              property = { value: new Map(), unit: null, dtype: dt.TUPLE };
+              for (let j = 0; j < args.length; j++) {
+                const name = args[j].value;
+                property.value.set(name, fromAssignment(o1.value[name], unitAware));
+              }
+            }
+
+          } else {
+            // o1 is a matrix or a data frame
+            const rowIndex = args[0];
+            const colIndex = (numArgs === 2)
+              ? args[1]
+              : isVector(o1)
+              ? null
+              : { value: Rnl.zero, unit: allZeros, dtype: dt.RATIONAL };
+            property = (o1.dtype & dt.DATAFRAME)
+              ? DataFrame.range(o1, rowIndex, colIndex, vars, unitAware)
+              : Matrix.submatrix(o1, rowIndex, colIndex);
+          }
+          if (property.dtype === dt.ERROR) { return property }
+          stack.push(Object.freeze(property));
+          break
+        }
+
+        case "..": {
+          // range separator.
+          const end = stack.pop();
+          const o1 = stack.pop();
+          if (!(o1.dtype === dt.RATIONAL || o1.dtype === dt.RANGE)) {
+            return errorOprnd("NAN_OP")
+          }
+          const range = Object.create(null);
+          range.unit = null;
+          range.dtype = dt.RANGE;
+          const step = o1.dtype !== dt.RATIONAL
+            ? o1.value[2]
+            : end.value === "∞" || Rnl.lessThan(o1.value, end.value)
+            ? Rnl.one
+            : Rnl.negate(Rnl.one);
+          range.value = o1.dtype === dt.RATIONAL
+            ? [o1.value, step, end.value]
+            : [o1.value[0], o1.value[2], end.value];
+          stack.push((Object.freeze(range)));
+          break
+        }
+
+        case ":": {
+          const o2 = stack.pop();
+          const key = stack.pop();
+          if (key.dtype !== dt.STRING) { return errorOprnd("BAD_KEYSTR") }
+          stack.push(Object.freeze({
+            name: key.value, value: o2.value, unit: o2.unit, dtype: o2.dtype
+          }));
+          break
+        }
+
+        case "normal":
+        case "uniform":
+        case "lognormal": {
+          // eslint-disable-next-line no-unused-vars
+          const high = stack.pop();
+          // eslint-disable-next-line no-unused-vars
+          const low = stack.pop();
+          // low and high define a probablility distribution. They are the ends of a
+          // uniform distribution or they mark the 90% confidence interval of (log)normal.
+          // TODO: Implement probability distributions as a data type.
+          break
+        }
+
+        case "!": {
+          // TODO: "!!" and "¡"
+          const o1 = stack.pop();
+          if (!(o1.dtype & dt.RATIONAL)) { return errorOprnd("NAN_OP") }
+          if (unitAware) {
+            if (!unitsAreCompatible(o1.unit.expos, allZeros)) { return errorOprnd("FACT") }
+          }
+          const x = o1.value;
+          if (!Rnl.isInteger(x) || Rnl.isNegative(x)) { return errorOprnd("FACT") }
+          const factorial = Object.create(null);
+          factorial.unit = allZeros;
+          factorial.dtype = dt.RATIONAL;
+          factorial.value = Operators.unary[shapeOf(o1)]["factorial"](x);
+          if (factorial.value.dtype) { return factorial.value } // Error
+          stack.push(Object.freeze(factorial));
+          break
+        }
+
+        case "%": {
+          // TODO: per thousand, ‰
+          const o1 = stack.pop();
+          if (!(o1.dtype & dt.RATIONAL)) { return errorOprnd("NAN_OP") }
+          const percentage = Object.create(null);
+          percentage.unit = o1.unit;
+          percentage.dtype = o1.dtype;
+          percentage.value = Operators.unary[shapeOf(o1)]["percent"](o1.value);
+          if (percentage.value) { return percentage.value } // Error
+          stack.push(Object.freeze(percentage));
+          break
+        }
+
+        case "|":
+        case "‖": {
+            // Find |x| or ‖x‖
+          const o1 = stack.pop();
+          if (!((o1.dtype & dt.RATIONAL) || o1.dtype === dt.COMPLEX)) {
+            return errorOprnd("NAN_OP")
+          }
+          const op = tkn === "|" ? "abs" : "norm";
+          const abs = Object.create(null);
+          abs.unit = o1.unit;
+          abs.dtype = dt.RATIONAL;
+          abs.value = Operators.unary[shapeOf(o1)][op](o1.value);
+          if (abs.value.dtype && abs.value.dtype === dt.ERROR) { return abs.value }
+          stack.push(Object.freeze(abs));
+          break
+        }
+
+        case "matrix": {
+          // matrix
+          const numRows = Number(tokens[i + 1]);
+          const numCols = Number(tokens[i + 2]);
+          i += 2;
+
+          if (stack[stack.length - 1].dtype === dt.RANGE) {
+            // Input was [start:step:end]
+            stack.push(Matrix.operandFromRange(stack.pop().value));
+          } else {
+            stack.push(Matrix.operandFromTokenStack(stack, numRows, numCols));
+          }
+          break
+        }
+
+        case "startSvg":
+          stack.push({ value: draw.startSvg(), unit: null, dtype: dt.DRAWING });
+          break
+
+        case "abs":
+        case "cos":
+        case "sin":
+        case "tan":
+        case "acos":
+        case "asin":
+        case "atan":
+        case "sec":
+        case "csc":
+        case "cot":
+        case "asec":
+        case "acsc":
+        case "acot":
+        case "exp":
+        case "log":
+        case "ln":
+        case "log10":
+        case "log2":
+        case "cosh":
+        case "sinh":
+        case "tanh":
+        case "sech":
+        case "csch":
+        case "coth":
+        case "acosh":
+        case "asinh":
+        case "atanh":
+        case "asech":
+        case "acsch":
+        case "acoth":
+        case "Gamma":
+        case "Γ":
+        case "logGamma":
+        case "logΓ":
+        case "logFactorial":
+        case "cosd":
+        case "sind":
+        case "tand":
+        case "acosd":
+        case "asind":
+        case "atand":
+        case "secd":
+        case "cscd":
+        case "cotd":
+        case "asecd":
+        case "acscd":
+        case "acotd":
+        case "Re":
+        case "Im":
+        case "argument":
+        case "chr":
+        case "round":
+        case "sqrt":
+        case "sign": {
+          // Functions with one real or complex argument.
+          const arg = stack.pop();
+          if (!((arg.dtype & dt.RATIONAL) || (arg.dtype & dt.COMPLEX))) {
+            return errorOprnd("UNREAL", tkn)
+          }
+
+          const output = Object.create(null);
+          const unit = Object.create(null);
+          unit.expos = unitAware ? Functions.functionExpos(tkn, [arg]) : allZeros;
+          if (unit.expos.dtype && unit.expos.dtype === dt.ERROR) { return unit.expos }
+          output.unit = Object.freeze(unit);
+
+          const shape = (arg.dtype & dt.RATIONAL) ? "scalar" : "complex";
+          const value = ((arg.dtype & dt.MAP) && Matrix.isVector(arg))
+            // eslint-disable-next-line max-len
+            ? mapMap(arg.value, array => array.map(e => Functions.unary[shape][tkn](e)))
+            : Matrix.isVector(arg)
+            ? arg.value.map(e => Functions.unary[shape][tkn](e))
+            : isMatrix(arg)
+            ? arg.value.map(row => row.map(e => Functions.unary[shape][tkn](e)))
+            : needsMap(arg)
+            ? mapMap(arg.value, val => Functions.unary[shape][tkn](val))
+            : Functions.unary[shape][tkn](arg.value);
+          if (value.dtype && value.dtype === dt.ERROR) { return value }
+          output.value = Object.freeze(value);
+
+          output.dtype = tkn === "chr"
+            ? arg.dtype - dt.RATIONAL + dt.STRING
+            : (arg.dtype & dt.COMPLEX) && arfn.includes(tkn)
+            ? arg.dtype - dt.COMPLEX + dt.RATIONAL
+            : arg.dtype;
+
+          stack.push(Object.freeze(output));
+          break
+        }
+
+        case "logn":
+        case "atan2":
+        case "hypot":
+        case "gcd":
+        case "rms":
+        case "binomial":
+        case "zeros": {
+          // Functions with two real arguments.
+          const args = [];
+          args.push(stack.pop());
+          args.unshift(stack.pop());
+          if (!(args[0].dtype & dt.RATIONAL)) { return errorOprnd("") }
+
+          const output = Object.create(null);
+          const unit = Object.create(null);
+          unit.expos = unitAware ? Functions.functionExpos(tkn, args) : allZeros;
+          if (unit.dtype && unit.dtype === dt.ERROR) { return unit }
+          output.unit = Object.freeze(unit);
+
+          const [value, dtype] = multivarFunction("binary", tkn, args);
+          output.value = Object.freeze(value);
+          output.dtype = dtype;
+          stack.push(Object.freeze(output));
+          break
+        }
+
+        case "roundn":
+        case "string": {
+          // Round a numeric value.
+          const spec = stack.pop();
+          const num = stack.pop();
+          if (!(num.dtype & dt.RATIONAL)) { return errorOprnd("") }
+          if (!(spec.dtype & dt.STRING)) { return errorOprnd("") }
+          if (!/(?:f-?|r)\d+/.test(spec.value)) { return errorOprnd("") }
+          let funcName = "";
+          const output = Object.create(null);
+          if (tkn === "string") {
+            funcName = spec.value.charAt() === "f" ? "stringFixed" : "stringSignificant";
+            output.unit = null;
+            output.dtype = num.dtype - dt.RATIONAL + dt.STRING;
+          } else {
+            funcName = spec.value.charAt() === "f" ? "roundFixed" : "roundSignificant";
+            output.unit = num.unit;
+            output.dtype = num.dtype;
+          }
+          const n = Number(spec.value.slice(1));
+          const value = ((num.dtype & dt.MAP) && Matrix.isVector(num))
+            ? mapMap(num.value, array => array.map(e => Functions.binary[funcName]([e, n])))
+            : Matrix.isVector(num)
+            ? num.value.map(e => Functions.binary[funcName]([e, n]))
+            : isMatrix(num)
+            ? num.value.map(row => row.map(e => Functions.binary[funcName]([e, n])))
+            : needsMap(num)
+            ? mapMap(num.value, val => Functions.binary[funcName]([val, n]))
+            : Functions.binary[funcName]([num.value, n]);
+          if (value.dtype && value.dtype === dt.ERROR) { return value }
+          output.value = Object.freeze(value);
+          if (num.name) { output.name = num.name; }
+          stack.push(Object.freeze(output));
+          break
+        }
+
+        case "dataframe":
+        case "max":
+        case "min":
+        case "sum":
+        case "product":
+        case "range":
+        case "mean":
+        case "median":
+        case "variance":
+        case "stddev":
+        case "accumulate": {
+          // Functions that reduce multiple arguments to one result.
+          // TODO: unit-aware reducing functions.
+          const numArgs = Number(tokens[i + 1]);
+          i += 1;
+          const args = [];
+          for (let j = 0; j < numArgs; j++) {
+            const datum = stack.pop();
+            if (tkn !== "dataframe" && !(datum.dtype & dt.RATIONAL)) {
+              return errorOprnd("NANARG", tkn)
+            }
+            args.unshift(datum);
+          }
+
+          if (tkn === "dataframe") {
+            const df = DataFrame.dataFrameFromVectors(args, vars);
+            if (df.dtype && df.dtype === dt.ERROR) { return df }
+            stack.push(df);
+            break
+          }
+
+          const output = Object.create(null);
+          const unit = Object.create(null);
+          unit.expos = unitAware ? Functions.functionExpos(tkn, args) : allZeros;
+          if (unit.dtype && unit.dtype === dt.ERROR) { return errorOprnd("") }
+          output.unit = Object.freeze(unit);
+
+          const [value, dtype] = multivarFunction("reduce", tkn, args);
+          output.value = Object.freeze(value);
+          output.dtype = dtype;
+          stack.push(Object.freeze(output));
+          break
+        }
+
+        case "random": {
+          // No arguments
+          const num = Object.create(null);
+          num.value = Rnl.fromNumber(Math.random());
+          num.unit = Object.create(null);
+          num.unit.expos = allZeros;
+          num.dtype = dt.RATIONAL;
+          stack.push(Object.freeze(num));
+          break
+        }
+
+        case "isNaN": {
+          const oprnd = stack.pop();
+          const output = Object.create(null);
+          output.value = !(oprnd.dtype & dt.RATIONAL);
+          output.unit = null;
+          output.dtype = dt.BOOLEAN;
+          stack.push(Object.freeze(output));
+          break
+        }
+
+        case "length": {
+          const arg = stack.pop();
+          const value = arg.value;
+          const length = Matrix.isVector(arg)
+            ? value.length
+            : (arg.dtype & dt.MATRIX)
+            ? value.length * value[0].length
+            : (arg.dtype === dt.STRING)
+            ? value.length - arrayOfRegExMatches(/[\uD800-\uD8FF\uFE00\uFE01]/g, value).length
+            : (arg.dtype & dt.MAP)
+            ? arg.keys().value.length
+            : 0;
+          const output = Object.create(null);
+          output.value = Object.freeze(Rnl.fromNumber(length));
+          output.unit = Object.create(null);
+          output.unit.expos = allZeros;
+          output.dtype = dt.RATIONAL;
+          stack.push(Object.freeze(output));
+          break
+        }
+
+        case "count": {
+          const pattern = stack.pop();
+          const str = stack.pop();
+          if (pattern.dtype !== dt.STRING || str.dtype !== dt.STRING) {
+            return errorOprnd("COUNT")
+          }
+          const output = Object.create(null);
+          output.value = Object.freeze(
+            Rnl.fromNumber(str.value.split(pattern.value).length - 1)
+          );
+          output.unit = Object.create(null);
+          output.unit.expos = allZeros;
+          output.dtype = dt.RATIONAL;
+          stack.push(Object.freeze(output));
+          break
+        }
+
+        case "format": {
+          const formatSpec = stack.pop().value;
+          const str = format(stack.pop().value, formatSpec);
+          stack.push({ value: str, unit: null, dtype: dt.STRING });
+          break
+        }
+
+        case "lerp": {
+          // linear interpolation function
+          const args = new Array(3);
+          args[2] = stack.pop();
+          args[1] = stack.pop();
+          args[0] = stack.pop();
+          const result = Functions.lerp(args, unitAware);
+          if (result.dtype === dt.ERROR) { return result }
+          stack.push(result);
+          break
+        }
+
+        case "matrix2table": {
+          const colNames = stack.pop();
+          const rowNames = stack.pop();
+          const matrix = stack.pop();
+          const result = DataFrame.matrix2table(matrix, rowNames, colNames, vars);
+          if (result.dtype === dt.ERROR) { return result }
+          stack.push(result);
+          break
+        }
+
+        case "transpose":
+          stack.push(Matrix.transpose(stack.pop()));
+          break
+
+        case "trace":
+          stack.push(Matrix.trace(stack.pop()));
+          break
+
+        case "fetch":
+          // fetch() is handled in updateCalculations.js.
+          // It's easier from there to coordinate an async function with ProseMirror.
+          // So if control flow get here, we have an error.
+          return errorOprnd("FETCH")
+
+        case "function": {
+          // User defined function.
+          const functionName = tokens[i + 1];
+          const numArgs = Number(tokens[i + 2]);
+          i += 2;
+          const args = new Array(numArgs);
+          for (let j = numArgs - 1; j >= 0; j--) {
+            args[j] = stack.pop();
+          }
+          let oprnd;
+          if (vars.svg && (functionName === "plot" || (draw.functions[functionName]))) {
+            if (functionName === "plot") {
+              args.splice(1, 0, decimalFormat);
+              oprnd = plot(...args);
+            } else {
+              oprnd = draw.functions[functionName](...args);
+            }
+          } else if (nextToken(tokens, i) === ".") {
+            // Function from a module
+            let lib = stack.pop().value;         // remote module
+            if (lib.value) { lib = lib.value; }  // local module
+            const udf = lib[functionName];
+            if (udf === undefined) { return errorOprnd("F_NAME", functionName) }
+            if (udf.dtype === dt.ERROR) { return udf }
+            if (udf.isPrivate) { return errorOprnd("PRIVATE", functionName) }
+            oprnd = evalCustomFunction(udf, args, decimalFormat, unitAware, lib);
+            i += 1;
+          } else if (lib && lib[functionName]) {
+            // A module, "lib", was passed to this instance of evalRpn().
+            const udf = lib[functionName];
+            oprnd = evalCustomFunction(udf, args, decimalFormat, unitAware, lib);
+          } else if (vars[functionName] && vars[functionName].dtype === dt.MODULE) {
+            // User-defined function from a calculation node.
+            const udf = vars[functionName]["value"];
+            oprnd = evalCustomFunction(udf, args, decimalFormat, unitAware);
+          } else {
+            return errorOprnd("BAD_FUN_NM", functionName)
+          }
+          if (oprnd.dtype === dt.ERROR) { return oprnd }
+          stack.push(oprnd);
+          break
+        }
+
+        case "=":
+        case "==":
+        case "<":
+        case ">":
+        case "<=":
+        case "≤":
+        case ">=":
+        case "≥":
+        case "≠":
+        case "!=":
+        case "∈":
+        case "∉":
+        case "⋐": {
+          const o2 = stack.pop();
+          const o1 = stack.pop();
+          if (unitAware &&
+            !((o1.dtype & dt.STRING) || (o2.dtype & dt.STRING) ||
+               o1.dtype === dt.NULL || o2.dtype === dt.NULL)) {
+            if (!unitsAreCompatible(o1.unit.expos, o2.unit.expos)) {
+              return errorOprnd("UNIT_COMP")
+            }
+          }
+          const bool = Object.create(null);
+          bool.unit = null;
+          const prevValue = (o1.dtype & dt.BOOLEANFROMCOMPARISON) ? oPrev.value : undefined;
+
+          if (isIn(tkn, ["∈", "∉", "⋐"])) {
+            bool.value = compare(tkn, o1.value, o2.value, prevValue);
+          } else {
+            const [shape1, shape2, _] = binaryShapesOf(o1, o2);
+            bool.value = Operators.relations[shape1][shape2].relate(tkn, o1.value,
+              o2.value, prevValue);
+          }
+          if (bool.value.dtype && bool.value.dtype === dt.ERROR) { return bool.value }
+          bool.dtype = o1.dtype + dt.BOOLEANFROMCOMPARISON;
+          if (bool.dtype & dt.RATIONAL) { bool.dtype -= dt.RATIONAL; }
+          if (bool.dtype & dt.COMPLEX) { bool.dtype -= dt.COMPLEX; }
+          if (bool.dtype & dt.STRING) { bool.dtype -= dt.STRING; }
+          oPrev = o2;
+          stack.push(Object.freeze(bool));
+          break
+        }
+
+        case "and":
+        case "or":
+        case "∧":
+        case "∨":
+        case "⊻": {
+          const o2 = stack.pop();
+          const o1 = stack.pop();
+          if (!(o1.dtype & dt.BOOLEAN) || !(o2.dtype & dt.BOOLEAN)) {
+            return errorOprnd("LOGIC", tokens[i])
+          }
+          const op = { "and": "and", "or": "or", "∧": "and", "∨": "or", "⊻": "xor" }[tkn];
+          const [shape1, shape2, _] = binaryShapesOf(o1, o2);
+
+          const bool = Object.create(null);
+          bool.unit = null;
+          bool.value = Operators.binary[shape1][shape2][op](o1.value, o2.value);
+          if (bool.value.dtype && bool.value.dtype === dt.ERROR) { return bool.value }
+
+          bool.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn);
+          stack.push(Object.freeze(bool));
+          break
+        }
+
+        case "not":
+        case "¬": {
+          const o1 = stack.pop();
+          if (!(o1.dtype & dt.BOOLEAN)) { return errorOprnd("LOGIC", tkn) }
+          const bool = Object.create(null);
+          bool.unit = null;
+          bool.value = Operators.unary[shapeOf(o1)]["not"](o1.value);
+          if (bool.value.dtype && bool.value.dtype === dt.ERROR) { return bool.value }
+          bool.dtype = dt.BOOLEAN;
+          stack.push(Object.freeze(bool));
+          break
+        }
+
+        case "cases": {
+          // A multi-line cases expression. Hurmet's ternary expression.
+          const numArgs = Number(tokens[i + 1]);
+          i += 1;
+          // We evaluate cases expressions lazily. Pop the conditions into an array.
+          const conditions = new Array(numArgs);
+          for (let j = numArgs - 1; j >= 0; j--) {
+            conditions[j] = stack.pop();
+          }
+          // Check each condition.
+          // When we reach the first true condition, evaluate the corresponding expression.
+          for (let j = 0; j < numArgs; j++) {
+            if ((conditions[j].dtype & dt.BOOLEAN) === 0) {
+              return errorOprnd("LOGIC", "if")
+            }
+            const val = Operators.condition[shapeOf(conditions[j])](conditions[j].value);
+            if (val) {
+              const rpnLocal = tokens[i + j + 1].replace(/§/g, "\u00A0");
+              const oprnd = evalRpn(rpnLocal, vars, decimalFormat, unitAware, lib);
+              if (oprnd.dtype === dt.ERROR) { return oprnd }
+              stack.push(oprnd);
+              break
+            }
+          }
+          i += numArgs;  // Discard the unused expressions
+          break
+        }
+
+        case "applyUnit": {
+          // Pop a magnitude off the stack and apply a unit.
+          // This happens where a user writes a QUANTITY literal.
+          if (!unitAware) { return errorOprnd("UNIT_AWARE", tokens[i + 1]) }
+          const o1 = stack.pop();
+          if (!(o1.dtype & dt.RATIONAL)) { return errorOprnd("QUANT_NUM") }
+          const unitName = tokens[i + 1];
+          i += 1;
+          const output = Object.create(null);
+          output.unit = Object.create(null);
+          output.dtype = o1.dtype;
+          if (!unitAware) {
+            output.value = o1.value;
+            if (o1.dtype & dt.MAP) {
+              output.unit = unitFromUnitName(unitName, vars);
+            } else {
+              output.unit.name = unitName;
+            }
+          } else {
+            // Convert the magnitude to base units.
+            const unit = unitFromUnitName(unitName, vars);
+            if (unit.dtype && unit.dtype === dt.ERROR) { return unit }
+            if (isMatrix(o1)) {
+              output.unit.expos = o1.unit.expos.map((e, j) => e + unit.expos[j]);
+              output.value = Matrix.convertToBaseUnits(o1, unit.gauge, unit.factor);
+            } else if (o1.dtype & dt.MAP) {
+              output.unit = unitFromUnitName(o1.unit);
+              output.value = o1.value;
+            } else {
+              output.unit.expos = o1.unit.expos.map((e, j) => e + unit.expos[j]);
+              output.value = Rnl.multiply(Rnl.add(o1.value, unit.gauge), unit.factor);
+            }
+          }
+          stack.push(Object.freeze(output));
+          break
+        }
+
+        case "modulo": {
+          const o2 = stack.pop();
+          const o1 = stack.pop();
+          if (!((o1.dtype & dt.RATIONAL) & (o2.dtype & dt.RATIONAL))) {
+            return errorOprnd("NAN_OP")
+          }
+          const [shape1, shape2, _] = binaryShapesOf(o1, o2);
+          const mod = Object.create(null);
+          mod.unit = Object.create(null);
+          mod.unit.expos = allZeros;
+          mod.value = Operators.binary[shape1][shape2]["modulo"](o1.value, o2.value);
+          if (mod.value.dtype && mod.value.dtype === dt.ERROR) { return mod.value }
+          mod.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn);
+          stack.push(Object.freeze(mod));
+          break
+        }
+
+        case "⎾⏋":
+        case "⎿⏌": {
+          // ceiling or floor
+          const o1 = stack.pop();
+          if (!(o1.dtype & dt.RATIONAL)) { return errorOprnd("NAN_OP") }
+          if (unitAware) {
+            if (!unitsAreCompatible(o1.unit.expos, allZeros)) {
+              // TODO: Write an error message.
+              { return errorOprnd("") }
+            }
+          }
+          const op = tkn === "⎾⏋" ? "ceil" : "floor";
+          const output = Object.create(null);
+          output.value = Operators.unary[shapeOf(o1)][op](o1.value);
+          if (output.value.dtype && output.value.dtype === dt.ERROR) { return output.value }
+          output.unit = o1.unit;
+          output.dtype = o1.dtype;
+          stack.push(Object.freeze(output));
+          break
+        }
+
+        case "()": {
+          // binomial
+          const args = [];
+          args.unshift(stack.pop());
+          args.unshift(stack.pop());
+          if (unitAware) {
+            if (!unitsAreCompatible(args[0].unit.expos, allZeros) ||
+              !unitsAreCompatible(args[1].unit.expos, allZeros)) {
+              return errorOprnd("BINOM")
+            }
+          }
+          const binom = Object.create(null);
+          binom.unit = Object.create(null);
+          binom.unit.expos = allZeros;
+          const [value, dtype] = multivarFunction("binary", "binomial", args);
+          binom.value = value;
+          binom.dtype = dtype;
+          stack.push(Object.freeze(binom));
+          break
+        }
+
+        case "raise":
+          return { value: stack.pop().value, unit: null, dtype: dt.ERROR }
+
+        case "\\blue":
+        case "\\gray":
+        case "\\green":
+        case "\\orange":
+        case "\\pink":
+        case "\\purple":
+        case "\\red": {
+          const color = clone(stack.pop());
+          if (color.dtype === dt.STRING) { color.unit = tkn.slice(1); }
+          stack.push(color);
+          break
+        }
+          // TODO: Write an error message
+      }
+    }
+  } // next i
+
+  const oprnd = stack.pop();
+  if (stack.length > 0) {
+    return errorOprnd("ERROR")
+  }
+
+  return oprnd
+};
+
+const plot = (svg, decimalFormat, fun, numPoints, xMin, xMax) => {
+  // Plot a function.
+  // To avoid a circular reference, this function has to be here instead of in draw.js.
+  const attrs = svg.value.temp;
+  numPoints = (numPoints == null) ? Rnl.fromNumber(250) : numPoints.value;
+  const min = (xMin == null) ? Rnl.fromNumber(attrs.xmin) : xMin.value;
+  const max = (xMax == null) ? Rnl.fromNumber(attrs.xmax) : xMax.value;
+  // Vectorize the evaluation. Start by finding a vector of the input.
+  const step = Rnl.divide(Rnl.subtract(max, min), numPoints);
+  const rowVector = Matrix.operandFromRange([min, step, max]);
+  // Transpose the row vector into a column vector.
+  const arg = { value: rowVector.value, unit: null, dtype: dt.COLUMNVECTOR + dt.RATIONAL };
+  // Run the function on the vector.
+  let funResult;
+  let pathValue;
+  if (fun.value.dtype && fun.value.dtype === dt.MODULE) {
+    funResult = evalCustomFunction(fun.value, [arg], decimalFormat, false);
+    pathValue = arg.value.map((e, i) => [e, funResult.value[i]]);
+  } else if (fun.dtype === dt.STRING) {
+    if (/§matrix§1§2$/.test(fun.value)) {
+      arg.name = "t";
+      pathValue = evalRpn(fun.value.replace(/§/g, "\xa0"), { t: arg }, decimalFormat, false).value;
+    } else {
+      arg.name = "x";
+      funResult = evalRpn(fun.value.replace(/§/g, "\xa0"), { x: arg }, decimalFormat, false);
+      pathValue = arg.value.map((e, i) => [e, funResult.value[i]]);
+    }
+  }
+  const pth = { value: pathValue, unit: null, dtype: dt.MATRIX + dt.RATIONAL };
+  return draw.functions.path(svg, pth, "L")
+};
+
+const elementFromIterable = (iterable, index, step) => {
+  // A helper function. This is called by `for` loops in evalCustomFunction()
+  let value;
+  let nextIndex = Rnl.increment(index);
+  let dtype = 0;
+  if (iterable.dtype === dt.RANGE) {
+    value = index;
+    nextIndex = Rnl.add(index, step);
+    dtype = dt.RATIONAL;
+  } else if ((iterable.dtype === dt.STRING) &&
+    iterable.value[Rnl.fromNumber(index)] === "\uD835") {
+    value = Rnl.fromNumber(iterable.value[index] + iterable.value[index + 1]);
+    nextIndex = Rnl.add(index, 2);
+    dtype = dt.STRING;
+  } else {
+    value = iterable.value[Rnl.toNumber(index)];
+    dtype = (iterable.dtype & dt.STRING)
+      ? dt.STRING
+      : (iterable.dtype & dt.ROWVECTOR)
+      ? iterable.dtype - dt.ROWVECTOR
+      : (iterable.dtype & dt.COLUMNVECTOR)
+      ? iterable.dtype - dt.COLUMNVECTOR
+      : iterable.dtype - dt.MATRIX;
+  }
+  const oprnd = { value: value, unit: iterable.unit, dtype: dtype };
+  return [oprnd, nextIndex]
+};
+
+const loopTypes = ["while", "for"];
+
+const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
+  // UDF stands for "user-defined function"
+  // lib is short for library. If not omitted, it contains a module with more functions.
+
+  if (udf.dtype === dt.ERROR) {
+    return udf
+  }
+
+  // Populate the function parameters.
+  if (args.length > udf.parameters.length) { return errorOprnd("NUMARGS", udf.name) }
+  const vars = Object.create(null);
+  for (let i = 0; i < args.length; i++) {
+    vars[udf.parameters[i]] = args[i];
+  }
+  if (udf.parameters.length > args.length) {
+    for (let i = args.length; i < udf.parameters.length; i++) {
+      vars[udf.parameters[i]] = { value: undefined, unit: null, dtype: 0 };
+    }
+  }
+  if (udf.dtype === dt.DRAWING) {
+    vars["svg"] = { value: draw.startSvg(), unit: null, dtype: dt.DRAWING };
+  }
+
+  // Execute the function statements.
+  // There will be nested flow of control, of course. So we'll create a
+  // "control" stack. The topmost element contains info about the control
+  // that applies to the current nesting level.
+  const control = [{ type: "if", condition: true, endOfBlock: udf.statements.length - 1 }];
+  for (let i = 0; i < udf.statements.length; i++) {
+    const statement = udf.statements[i];
+    const stype = statement.stype;
+    const level = control.length - 1;
+    switch (stype) {
+      case "statement": {
+        if (control[level].condition) {
+          const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib);
+          if (result.dtype === dt.ERROR) { return result }
+          if (statement.name) {
+            statement.resultdisplay = isUnitAware ? "!!" : "!";
+            const [stmt, _] = conditionResult(statement, result, isUnitAware);
+            insertOneHurmetVar(vars, stmt, decimalFormat);
+          }
+        }
+        break
+      }
+
+      case "if": {
+        if (control[level].condition) {
+          const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib);
+          if (result.dtype === dt.ERROR) { return result }
+          const val = Operators.condition[shapeOf(result)](result.value);
+          control.push({
+            type: "if",
+            condition: val,
+            endOfBlock: statement.endOfBlock
+          });
+        } else {
+          // Skip this block
+          i = statement.endOfBlock;
+        }
+        break
+      }
+
+      case "else if": {
+        if (control[level].type === "if" && control[level].condition) {
+          i = control[level].endOfBlock;
+          control.pop();
+        } else {
+          const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib);
+          if (result.dtype === dt.ERROR) { return result }
+          const val = Operators.condition[shapeOf(result)](result.value);
+          control[control.length - 1].condition = val;
+        }
+        break
+      }
+
+      case "else":
+        if (control[level].type === "if" && control[level].condition) {
+          i = control[level].endOfBlock;
+          control.pop();
+        } else {
+          control[level].condition = true;
+        }
+        break
+
+      case "while": {
+        if (control[level].condition) {
+          const cntrl = {
+            type: "while",
+            startStatement: i,
+            rpn: statement.rpn,
+            endOfBlock: statement.endOfBlock
+          };
+          const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib);
+          if (result.dtype === dt.ERROR) { return result }
+          const val = Operators.condition[shapeOf(result)](result.value);
+          cntrl.condition = val;
+          if (cntrl.condition === true) {
+            control.push(cntrl);
+          } else {
+            i = statement.endOfBlock;
+          }
+        } else {
+          i = statement.endOfBlock;
+        }
+        break
+      }
+
+      case "for": {
+        const ctrl = {
+          type: "for",
+          condition: true,
+          startStatement: i,
+          endOfBlock: statement.endOfBlock
+        };
+        const tokens = statement.rpn.split("\u00A0");
+        tokens.pop(); // Discard the "for"
+        ctrl.dummyVariable = tokens.shift().slice(1);
+        const iterable = evalRpn(tokens.join("\u00A0"), vars, decimalFormat, isUnitAware, lib);
+        ctrl.index = (iterable.dtype & dt.RANGE) ? iterable.value[0] : Rnl.fromNumber(0);
+        ctrl.step = (iterable.dtype & dt.RANGE) ? iterable.value[1] : Rnl.fromNumber(0);
+        ctrl.endIndex = (iterable.dtype & dt.RANGE)
+          ? iterable.value[2]
+          : Rnl.fromNumber(iterable.value.length - 1);
+        const [oprnd, nextIndex] = elementFromIterable(iterable, ctrl.index, ctrl.step);
+        ctrl.nextIndex = nextIndex;
+        ctrl.iterable = iterable;
+        control.push(ctrl);
+        vars[ctrl.dummyVariable] = oprnd;
+        break
+      }
+
+      case "break": {
+        if (control[level].condition) {
+          // Find the enclosing loop and pop out of it.
+          for (let j = control.length - 1; j > 0; j--) {
+            if (loopTypes.includes(control[j].type) || j === 0) {
+              i = control[j].endOfBlock;
+              control.pop();
+              break
+            } else {
+              control.pop();
+            }
+          }
+        }
+        break
+      }
+
+      case "end": {
+        // end of code block
+        if (control[level].type === "if" && i >= control[level].endOfBlock) {
+          control.pop();
+        } else if (control[level].type === "if" && control[level].condition) {
+          // Jump ahead to end of if block
+          if (i < control[level].endOfBlock) { i = control[level].endOfBlock; }
+          control.pop();
+        } else if (control[level].type === "while") {
+          const result = evalRpn(control[level].rpn, vars, decimalFormat, isUnitAware, lib);
+          if (result.dtype === dt.ERROR) { return result }
+          control[level].condition = result.value;
+          if (control[level].condition) {
+            i = control[level].startStatement;
+          } else {
+            control.pop();
+          }
+        } else if (control[level].type === "for") {
+          control[level].index = control[level].nextIndex;
+          const proceed = Rnl.isRational(control[level].index)
+            && Rnl.isPositive(control[level].step)
+            ? Rnl.lessThanOrEqualTo(control[level].index, control[level].endIndex)
+            : Rnl.isRational(control[level].index)
+            ? Rnl.greaterThanOrEqualTo(control[level].index, control[level].endIndex)
+            : control[level].index <= control[level].endIndex;
+          if (proceed) {
+            const [oprnd, nextIndex] = elementFromIterable(
+              control[level].iterable,
+              control[level].index, control[level].step
+            );
+            vars[control[level].dummyVariable] = oprnd;
+            control[level].nextIndex = nextIndex;
+            i = control[level].startStatement;
+          } else {
+            control.pop();
+          }
+        }
+        break
+      }
+
+      case "return":
+        if (control[level].condition) {
+          if (statement.rpn) {
+            const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib);
+            return result
+          } else {
+            return { value: Rnl.zero, unit: allZeros, dtype: dt.RATIONAL }
+          }
+        }
+        break
+
+      case "echo":
+        if (control[level].condition) {
+          if (statement.rpn) {
+            const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib);
+            if (result.dtype === dt.ERROR) { return result }
+            const msg = result.dtype === dt.RATIONAL
+              ? Rnl.toNumber(result.value)
+              : result.dtype === dt.STRING
+              ? result.value
+              : isVector(result) && (result.dtype & dt.RATIONAL)
+              ? result.value.map(e => Rnl.toNumber(e))
+              : result.dtype === dt.MATRIX + dt.RATIONAL
+              ? result.value.map(row => row.map(e => Rnl.toNumber(e)))
+              : result.value;
+            // eslint-disable-next-line no-console
+            console.log(msg);
+          }
+        }
+        break
+
+      case "raise":
+        if (control[level].condition) {
+          if (statement.rpn) {
+            const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib);
+            return { value: result.value, unit: null, dtype: dt.ERROR }
+          } else {
+            return { value: statement.rpn, unit: null, dtype: dt.ERROR }
+          }
+        }
+        break
+        // TODO: Error message.
+    }
+  }
+};
+
+const errorResult = (stmt, result) => {
+  stmt.value = null;
+  stmt.resultDisplay = "\\color{firebrick}\\text{" + result.value + "}";
+  stmt.altResultDisplay = result.value;
+  stmt.error = true;
+  if (stmt.resulttemplate.indexOf("!") > -1) {
+    stmt.tex += "= " + stmt.resultDisplay;
+    stmt.alt += result.value;
+  } else if (stmt.resulttemplate.indexOf("@") > -1) {
+    stmt.tex = stmt.resulttemplate.replace(/@@?/, stmt.resultDisplay);
+    stmt.alt = stmt.altresulttemplate.replace(/@@?/, stmt.altResultDisplay);
+  } else {
+    stmt.tex = stmt.tex.replace(/[?%] *[?%]|[?%]/, stmt.resultDisplay);
+    stmt.alt = stmt.alt.replace(/[?%] *[?%]|[?%]/, stmt.altResultDisplay);
+  }
+  return [stmt, result]
+};
+
+const conditionResult = (stmt, oprnd, unitAware) => {
+  let result = Object.create(null);
+  result.value = clone(oprnd.value);
+  result.unit = clone(oprnd.unit);
+  result.dtype = oprnd.dtype;
+
+  if (result.dtype === dt.COMPLEX && Rnl.isZero(Cpx.im(result.value))) {
+    result.value = Cpx.re(result.value);
+    result.dtype = 1;
+  }
+
+  // Check unit compatibility.
+  if (result.dtype !== dt.ERROR && unitAware && stmt.resultdisplay.indexOf("!") === -1 &&
+    (stmt.expos || (result.unit && result.unit.expos && Array.isArray(result.unit.expos)))) {
+    const expos = (stmt.expos) ? stmt.expos : allZeros;
+    if (!unitsAreCompatible(result.unit.expos, expos)) {
+      const message = stmt.expos ? "UNIT_RES" : "UNIT_MISS";
+      result = errorOprnd(message);
+    }
+  }
+  if (result.dtype === dt.ERROR) { return errorResult(stmt, result) }
+
+  // Check for a valid display indicator.
+  if (stmt.resulttemplate && stmt.resulttemplate.indexOf("!") > -1 &&
+    !(result.dtype === dt.DATAFRAME || (result.dtype & dt.MAP) || isMatrix(result)
+    || (result.dtype & dt.TUPLE))) {
+    return errorResult(stmt, errorOprnd("BAD_DISPLAY"))
+  }
+
+  if (result.dtype & dt.RATIONAL) {
+    result.value = isVector(result)
+      ? result.value.map(e => Rnl.normalize(e))
+      : isMatrix(result)
+      ? result.value.map(row => row.map(e => Rnl.normalize(e)))
+      : result.dtype === dt.RATIONAL
+      ? Rnl.normalize(result.value)
+      : result.value;
+  } else if (result.dtype === dt.COMPLEX) {
+    result.value = [Rnl.normalize(result.value[0]), Rnl.normalize(result.value[1])];
+  }
+  stmt.dtype = result.dtype;
+
+  // If unit-aware, convert result to desired result units.
+  const unitInResultSpec = (stmt.factor && (stmt.factor !== 1 || stmt.gauge));
+  if ((result.dtype & dt.DATAFRAME) ||
+      (typeof stmt.resultdisplay === "string" && stmt.resultdisplay.indexOf("!") > -1)) {
+    stmt.unit = result.unit;
+  } else if (unitAware && (result.dtype & dt.RATIONAL)) {
+    if (!unitInResultSpec & unitsAreCompatible(result.unit.expos, allZeros)) {
+      stmt.factor = Rnl.one; stmt.gauge = Rnl.zero; stmt.expos = allZeros;
+    }
+    result.value = {
+      plain: (isMatrix(result))
+        ? Matrix.convertFromBaseUnits(
+          { value: result.value, dtype: result.dtype },
+          stmt.gauge,
+          stmt.factor
+          )
+        : (result.dtype & dt.MAP)
+        ? map.convertFromBaseUnits(result.value, stmt.gauge, stmt.factor)
+        : Rnl.subtract(Rnl.divide(result.value, stmt.factor), stmt.gauge),
+      inBaseUnits: result.value
+    };
+    stmt.dtype += dt.QUANTITY;
+    stmt.expos = result.unit.expos;
+  } else if (unitInResultSpec) {
+    // A non-unit aware calculation, but with a unit attached to the result.
+    result.value = {
+      plain: result.value,
+      inBaseUnits: (isMatrix(result) && (result.dtype & dt.MAP))
+        ? mapMap(result.value, val => {
+          return val.map(e => Rnl.multiply(Rnl.add(e, stmt.gauge), stmt.factor))
+        })
+        : (isMatrix(result))
+        ? Matrix.convertToBaseUnits(
+          { value: result.value, dtype: result.dtype },
+          stmt.gauge,
+          stmt.factor
+          )
+        : (result.dtype & dt.MAP)
+        ? mapMap(result.value, val => {
+          return Rnl.multiply(Rnl.add(val, stmt.gauge), stmt.factor)
+        })
+        : Rnl.multiply(Rnl.add(result.value, stmt.gauge), stmt.factor)
+    };
+    stmt.dtype += dt.QUANTITY;
+
+  } else if ((result.dtype & dt.RATIONAL) || (result.dtype & dt.COMPLEX) ) {
+    // A numeric result with no unit specified.
+    stmt.expos = allZeros;
+  }
+  if (result.value)  { stmt.value = result.value; }
+  return [stmt, result]
+};
+
+const evaluateDrawing = (stmt, vars, decimalFormat = "1,000,000.") => {
+  // eslint-disable-next-line no-prototype-builtins
+  const udf = stmt.value;
+  const args = [];
+  for (let i = 0; i < udf.parameters.length; i++) {
+    const argName = udf.parameters[i];
+    args.push(evalRpn("¿" + argName, vars, decimalFormat, false, {}));
+  }
+  const funcResult = evalCustomFunction(udf, args, decimalFormat, false, {});
+  if (funcResult.dtype === dt.ERROR) {
+    stmt.error = true;
+    stmt.tex = "\\color{firebrick}\\text{" + funcResult.value + "}";
+    stmt.value = null;
+    stmt.dtype = dt.ERROR;
+  } else {
+    stmt.resultdisplay = funcResult.value;
+    delete stmt.resultdisplay.temp;
+  }
+  return stmt
+};
+
+const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
+  stmt.tex = stmt.template;
+  stmt.alt = stmt.altTemplate;
+  const isUnitAware = /\?\?|!!|%%|@@|¡¡/.test(stmt.resulttemplate);
+
+  const formatSpec = vars.format ? vars.format.value : "h15";
+
+  if (stmt.tex.indexOf("〖") > -1) {
+    // eslint-disable-next-line max-len
+    const eqnWithVals = plugValsIntoEcho(stmt.tex, vars, isUnitAware, formatSpec, decimalFormat);
+    if (eqnWithVals.dtype && eqnWithVals.dtype === dt.ERROR) {
+      const [newStmt, _] = errorResult(stmt, eqnWithVals);
+      return newStmt
+    } else {
+      stmt.tex = eqnWithVals;
+    }
+  }
+
+  if (stmt.rpn) {
+    let oprnd = evalRpn(stmt.rpn, vars, decimalFormat, isUnitAware);
+    if (oprnd.dtype === dt.ERROR) { [stmt, oprnd] = errorResult(stmt, oprnd); return stmt}
+    let result;
+    [stmt, result] = conditionResult(stmt, oprnd, isUnitAware);
+    if (stmt.error) { return stmt }
+    stmt = formatResult(stmt, result, formatSpec, decimalFormat, isUnitAware);
+  }
+  return stmt
+};
+
+const numberRegEx$3 = new RegExp(Rnl.numberPattern);
+const unitRegEx$1 = /('[^']+'|[°ΩÅK])$/;
+/* eslint-disable max-len */
+
+const numStr = "(-?(?:0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?)))";
+const nonNegNumStr = "(0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?))";
+const complexRegEx = new RegExp("^" + numStr + "(?: *([+-]) *j +" + nonNegNumStr + "|∠" + numStr + "(°)?)");
+// const complexRegEx = /^(number)(?: *([+-]) *j +(non-negative number)|∠(number)(°)?)/
+/* eslint-enable max-len */
+// Capturing groups:
+//    [1] First number, either a in a + j b, or r in r∠θ
+//    [2] + or -. Gives the sign of the imaginary part in an a + j b.
+//    [3] b, the imaginary part in an a + j b expression
+//    [4] theta, the argument (phase angle ) of an r∠θ expression
+//    [5] °, optional trailing degree sign in an r∠θ expression
+
+const valueFromLiteral = (str, name, decimalFormat) => {
+  // Read a literal string and return a value
+  // The return should take the form: [value, unit, dtype, resultDisplay]
+
+  // Start by checking for a unit
+  let unitName = "";
+  let unitDisplay = "";
+  const unitMatch = unitRegEx$1.exec(str);
+  if (unitMatch) {
+    unitName = unitMatch[0].replace(/'/g, "").trim();
+    str = str.slice(0, -unitMatch[0].length).trim();
+    unitDisplay = unitTeXFromString(unitName);
+  }
+
+  if (/^[({[].* to /.test(str)) {
+    // str defines a quantity distribution, (a to b). That is handled by calculation.js.
+    // This is not a valid literal.
+    return [0, null, dt.ERROR, ""]
+
+  } else if (str === "true" || str === "false") {
+    return [Boolean(str), null, dt.BOOLEAN, `\\mathord{\\text{${str}}}`]
+
+  } else if (/^\x22.+\x22/.test(str)) {
+    // str contains text between quotation marks
+    if (name === "format") {
+      return parseFormatSpec(str.slice(1, -1).trim())
+    } else {
+      const tex = parse(str, decimalFormat);
+      return [str, undefined, dt.STRING, tex]
+    }
+
+  } else if (/^[([]/.test(str)) {
+    // We're processing a matrix
+    const [tex, rpn] = parse(str, decimalFormat, true);
+    const oprnd = evalRpn(rpn, {}, decimalFormat, false, {});
+    let unit = (oprnd.dtype & dt.RATIONAL) ? allZeros : null;
+    let dtype = oprnd.dtype;
+    if (unitName) {
+      unit = unitName;
+      dtype += dt.QUANTITY;
+      return [oprnd.value, unit, dtype, tex + "\\," + unitDisplay]
+    } else {
+      return [oprnd.value, unit, dtype, tex]
+    }
+
+  } else if (/^``/.test(str)) {
+    // A CSV between double back ticks.
+    // Read the CSV into a data frame.
+    str = tablessTrim(str.slice(2, -2));
+    const dataStructure = DataFrame.dataFrameFromCSV(str, {});
+    if (dataStructure.dtype === dt.DATAFRAME) {
+      return [dataStructure.value, dataStructure.unit, dt.DATAFRAME,
+        DataFrame.display(dataStructure.value, "h3", decimalFormat)]
+    } else {
+      // It's a Hurmet Map
+      if (unitName) {
+        dataStructure.unit = unitName;
+        dataStructure.dtype = dt.MAP + dt.RATIONAL + dt.QUANTITY;
+      }
+      return [dataStructure.value, dataStructure.unit, dataStructure.dtype,
+        map.display(dataStructure, "h3", decimalFormat) + "\\;" + unitDisplay]
+    }
+
+  } else if (complexRegEx.test(str)) {
+    // str is a complex number.
+    const resultDisplay = parse(str, decimalFormat);
+    const parts = str.match(complexRegEx);
+    let real;
+    let im;
+    if (parts[3]) {
+      // a + j b expression
+      real = Rnl.fromString(parts[1]);
+      im = Rnl.fromString(parts[3]);
+      if (parts[2] === "-") { im = Rnl.negate(im); }
+    } else {
+      // r∠θ expression
+      const r = Rnl.fromString(parts[1]);
+      let theta = Rnl.fromString(parts[4]);
+      if (parts[5]) { theta = Rnl.divide(Rnl.multiply(theta, Rnl.pi), Rnl.fromNumber(180)); }
+      real = Rnl.multiply(r, Rnl.fromNumber(Math.cos(Rnl.toNumber(theta))));
+      im = Rnl.multiply(r, Rnl.fromNumber(Math.sin(Rnl.toNumber(theta))));
+    }
+    return [[real, im], allZeros, dt.COMPLEX, resultDisplay]
+
+  } else if (str.match(numberRegEx$3)) {
+    // str is a number.
+    const resultDisplay = parse(str, decimalFormat);
+    if (unitName) {
+      return [Rnl.fromString(str), unitName, dt.RATIONAL + dt.QUANTITY,
+        resultDisplay + "\\;" + unitDisplay]
+    } else {
+      return [Rnl.fromString(str), allZeros, dt.RATIONAL, resultDisplay]
+    }
+
+  } else {
+    return [0, null, dt.ERROR, ""]
+
+  }
+};
+
+/*  This module, like prepareStatement.js, is called only when
+ *  (1) an author submits a Hurmet calculation dialog box, or
+ *  (2) when a new document is opened, or (3) when recalculate-all is called.
+ *  Here we process literal values of assignment statements.
+ */
+
+const improveQuantities = (attrs, vars) => {
+  if (attrs.name && attrs.value && (attrs.dtype & dt.QUANTITY)) {
+    // Assignment of a quantity. Get it in base units
+    const unit = (attrs.unit === undefined)
+      ? {
+        name: "",
+        factor: Rnl.one,
+        gauge: Rnl.zero,
+        log: "",
+        expos: allZeros
+      }
+      : typeof attrs.unit === "string"
+      ? unitFromUnitName(attrs.unit, vars)
+      : attrs.unit; // unit from a MAP is already expanded.
+
+    if (unit.dtype && unit.dtype === dt.ERROR) {
+      attrs.tex += "\u00a0\\color{firebrick}{\\text{" + unit.value + "}}";
+      attrs.alt += unit.value;
+      return attrs
+    }
+
+    attrs.expos = unit.expos;
+    if (Rnl.isRational(attrs.value)) {
+      attrs.value = {
+        plain: attrs.value,
+        inBaseUnits: Rnl.multiply(Rnl.add(attrs.value, unit.gauge), unit.factor)
+      };
+    } else if (isMatrix(attrs)) {
+      attrs.value = {
+        plain: attrs.value,
+        inBaseUnits: Matrix.convertToBaseUnits(attrs, unit.gauge, unit.factor)
+      };
+    } else if (attrs.dtype & dt.MAP) {
+      const plain = clone(attrs.value);
+      const inBaseUnits = map.convertToBaseUnits(plain, unit.gauge, unit.factor);
+      attrs.value = { plain, inBaseUnits };
+      attrs.unit = { expos: unit.expos };
+    }
+  }
+  if (attrs.rpn && !attrs.value) {
+    if (attrs.unit) {
+      const unit = (attrs.unit)
+        ? unitFromUnitName(attrs.unit, vars)
+        : { factor: 1, gauge: 0, expos: allZeros };
+      // We save factor and gauge with the cell attrs so that the result of
+      // a later calculation can be converted into the desired display units.
+      attrs.factor = unit.factor;
+      attrs.gauge = unit.gauge;
+      attrs.expos = unit.expos;
+    }
+  }
+
+};
+
+const isValidIdentifier$1 = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/;
+const keywordRegEx = /^(if|else if|else|return|raise|while|for|break|echo|end)\b/;
+const drawCommandRegEx = /^(title|frame|view|axes|grid|stroke|strokewidth|strokedasharray|fill|fontsize|fontweight|fontstyle|fontfamily|marker|line|path|plot|curve|rect|circle|ellipse|arc|text|dot|leader|dimension)\b/;
+
+// If you change functionRegEx, then also change it in mathprompt.js.
+// It isn't called from there in order to avoid duplicating Hurmet code inside ProseMirror.js.
+const functionRegEx = /^(?:private +)?function (?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*\(/;
+const drawRegEx = /^draw\(/;
+const startSvgRegEx = /^startSvg\(\)/;
+const lexRegEx = /"[^"]*"|``.*|`[^`]*`|'[^']*'|#|[^"`'#]+/g;
+
+const testForStatement = str => {
+  const pos = str.indexOf("=");
+  if (pos === -1) { return false }
+  const leadStr = str.slice(0, pos).trim();
+  if (isValidIdentifier$1.test(leadStr)) { return true }
+  if (leadStr.indexOf(",") === -1) { return false }
+  let result = true;
+  const arry = leadStr.split(",");
+  arry.forEach(e => {
+    if (!isValidIdentifier$1.test(e.trim())) { result = false; }
+  });
+  return result
+};
+
+const stripComment = str => {
+  // Strip the comment, if any, from the end of a code line.
+  const matches = arrayOfRegExMatches(lexRegEx, str);
+  for (let i = 0; i < matches.length; i++) {
+    if (matches[i].value === "#") {
+      str = str.slice(0, matches[i].index);
+      break
+    }
+  }
+  return str.trim()
+};
+
+const scanModule = (str, decimalFormat) => {
+  // Scan the code and break it down into individual lines of code.
+  // Assemble the lines into functions and assign each function to parent.
+  const parent = Object.create(null);
+
+  // Statements end at a newline.
+  const lines = str.split(/\r?\n/g);
+
+  for (let i = 0; i < lines.length; i++) {
+    // Get a single line of code and strip off any comments.
+    const line = stripComment(lines[i]);
+    if (line.length === 0) { continue }
+
+    if (functionRegEx.test(line) || drawRegEx.test(line)) {
+      // This line starts a new function.
+      const [funcObj, endLineNum] = scanFunction(lines, decimalFormat, i);
+      if (funcObj.dtype && funcObj.dtype === dt.ERROR) { return funcObj }
+      parent[funcObj.name] = funcObj;
+      i = endLineNum;
+    } else if (testForStatement(line)) {
+      // This line starts a Hurmet assignment.
+      const [stmt, endLineNum] = scanAssignment(lines, decimalFormat, i);
+      parent[stmt.name] = stmt;
+      i = endLineNum;
+    }
+  }
+  return { value: parent, unit: null, dtype: dt.MODULE }
+
+};
+
+const handleCSV = (expression, lines, startLineNum) => {
+  for (let i = startLineNum + 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (line.length === 0) { continue }
+    expression += "\n" + line;
+    if (line.slice(-2) === "``") { return [expression, i] }
+  }
+};
+
+const scanFunction = (lines, decimalFormat, startLineNum) => {
+  const line1 = stripComment(lines[startLineNum]);
+  let isDraw = line1.charAt(0) === "d";
+  const posParen = line1.indexOf("(");
+  let functionName = "";
+  if (isDraw) {
+    functionName = "draw";
+  } else {
+    const posFn = line1.indexOf("function");
+    functionName = line1.slice(posFn + 8, posParen).trim();
+  }
+  const isPrivate = /^private /.test(line1);
+  const parameterList =  line1.slice(posParen + 1, -1).trim();
+  const parameters = parameterList.length === 0 ? [] : parameterList.split(/, */g);
+  const funcObj = {
+    name: functionName,
+    dtype: isDraw ? dt.DRAWING : dt.MODULE,
+    isPrivate,
+    parameters,
+    statements: []
+  };
+
+  const stackOfCtrls = [];
+  let expression = "";
+  let prevLineEndedInContinuation = false;
+  let prevLine = "";
+  let name = "";
+  let isStatement = false;
+
+  for (let i = startLineNum + 1; i < lines.length; i++) {
+    let line = stripComment(lines[i]);
+    if (line.length === 0) { continue }
+
+    if (prevLineEndedInContinuation) {
+      // Check if the previous character is a semi-colon just before a matrix literal closes.
+      const lastChar = prevLine.slice(-1);
+      line = lastChar === ";" && "})]".indexOf(line.charAt(0)) > -1
+        ? prevLine.slice(0, -1).trim() + line
+        : lastChar === ";" || lastChar === ","
+        ? prevLine + " " + line
+        : prevLine + line;
+    }
+
+    // Line continuation characters are: { ( [ , ; + -
+    if (/[{([,;]$/.test(line)) {
+      prevLineEndedInContinuation = true;
+      prevLine = line;
+      continue
+    } else if (lines.length > i + 1 && /^\s*[+\-)\]}]/.test(lines[i + 1])) {
+      prevLineEndedInContinuation = true;
+      prevLine = line;
+      continue
+    }
+
+    const keyword = keywordRegEx.exec(line);
+    if (keyword) {
+      name = keyword[0];
+      expression = line.slice(name.length).trim();
+      if (expression.length > 0 && /^``/.test(expression)) {
+        [expression, i] = handleCSV(expression, lines, i);
+      }
+    } else if (isDraw && drawCommandRegEx.test(line)) {
+      name = "svg";
+      expression = line.indexOf(" ") === -1
+        ? line + "(svg)"
+        : line.replace(" ", "(svg, ") + ")";
+      isStatement = true;
+    } else {
+      if (testForStatement(line)) {
+        // We have an "=" assignment operator.
+        const posEq = line.indexOf("=");
+        name = line.slice(0, posEq - 1).trim();
+        expression = line.slice(posEq + 1).trim();
+        if (/^``/.test(expression)) { [expression, i] = handleCSV(expression, lines, i); }
+        if (startSvgRegEx.test(expression)) { isDraw = true; }
+        isStatement = true;
+      } else {
+        // TODO: We shouldn't get here. Write an error.
+        return [errorOprnd("FUNC_LINE", functionName + ", line " + (i + 1)), i]
+      }
+    }
+
+    let rpn = "";
+    if (expression) {
+      [, rpn] = parse(expression, decimalFormat, true);
+    }
+    const stype = isStatement ? "statement" : name;
+    if (isStatement && /[,;]/.test(name)) {
+      name = name.split(/[,;]/).map(e => e.trim());
+    }
+    funcObj.statements.push({ name: name, rpn: rpn, stype: stype });
+    if (stype === "if" || stype === "while" || stype === "for") {
+      stackOfCtrls.push({ type: stype, statementNum: funcObj.statements.length - 1 });
+      if (stype === "for" && rpn.indexOf("j\u00a0") === 0) { return [errorOprnd("BAD_J")] }
+    } else if (stype === "end") {
+      if (stackOfCtrls.length === 0) {
+        // Finished the current function.
+        if (isDraw) {
+          funcObj.statements.splice(-1, 0, { name: "return", rpn: "¿svg", stype: "return" });
+        }
+        return [funcObj, i]
+      }
+      const ctrl = stackOfCtrls[stackOfCtrls.length - 1];
+      funcObj.statements[ctrl.statementNum].endOfBlock = funcObj.statements.length - 1;
+      stackOfCtrls.pop();
+    }
+
+    // Reset for next statement
+    isStatement = false;
+    prevLineEndedInContinuation = false;
+    prevLine = "";
+    name = "";
+    expression = "";
+  }
+  return [errorOprnd("END_MISS", functionName), 0]
+};
+
+const scanAssignment = (lines, decimalFormat, iStart) => {
+  let prevLineEndedInContinuation = false;
+  let str = "";
+  let iEnd = iStart;
+  for (let i = iStart; i < lines.length; i++) {
+    const line = stripComment(lines[i]);
+    if (line.length === 0) { continue }
+
+    if (prevLineEndedInContinuation) {
+      // Check if the previous character is a semi-colon just before a matrix literal closes.
+      str = str.slice(-1) === ";" && "})]".indexOf(line.charAt(0)) > -1
+        ? str.slice(0, -1).trim() + line
+        : str + line;
+    } else {
+      str = line;
+    }
+
+    // Line continuation characters are: { ( [ , ; + -
+    if (/[{([,;]$/.test(str)) {
+      prevLineEndedInContinuation = true;
+    } else if (lines.length > i + 1 && /^\s*[+\-)\]}]/.test(lines[i + 1])) {
+      prevLineEndedInContinuation = true;
+    } else {
+      iEnd = i;
+      break
+    }
+  }
+
+  const posEquals = str.indexOf("=");
+  let name = str.slice(0, posEquals).trim();
+  if (/[,;]/.test(name)) {
+    name = name.split(/[,;]/).map(e => e.trim());
+  }
+  const trailStr = str.slice(posEquals + 1).trim();
+  const [value, unit, dtype, resultDisplay] = valueFromLiteral(trailStr, name, decimalFormat);
+  const stmt = { name, value, unit, dtype, resultDisplay };
+  improveQuantities(stmt, {});
+  return [stmt, iEnd]
+};
+
+/*  prepareStatement.js
+ *
+ *  This module is called when: (1) an author submits a Hurmet calculation dialog box, or
+ *  (2) when a new document is opened, or (3) when recalculate-all is called.
+ *  Here we do some preparation in a calculation cell prior to calculation.
+ *
+ *  This module does NOT calculate the result of an expression. It stops just short of that.
+ *  How do we choose where to draw the line between tasks done here and tasks done later?
+ *  We do as much here as we can without knowing the values that other cells have assigned
+ *  to variables. The goal is to minimize the amount of work done by each dependent cell
+ *  when an author changes an assigned value.  Later, calculation updates will not have to
+ *  repeat the work done in this module, so updates will be faster.
+ *
+ *  Variable inputStr contains the string that an author wrote into the dialog box.
+ *
+ *  From that entry this module will:
+ *    1. Determine the name of the cell, as in "x" from "x = 12"
+ *    2. Parse the entry string into TeX, to be passed later to KaTeX for rendering.
+ *    3. If the input asks for a calculation:
+ *       a. Parse the expression into an echo string (in TeX) with placeholders that will be
+ *          filled in later with values when the calculation is done.
+ *       b. Parse the expression into RPN (postfix) to be passed later to evaluate().
+ *       c. Process the unit of measure, if any, of the result. Save it for later calculation.
+ *    4. If an assigned value is static, not calculated, find its value.
+ *    5. If a unit has been defined in a staic assignment, find the value in Hurmet base units.
+ *    6. Append all the display strings together.
+ *    7. Return the result. Hurmet will attach it to ProseMirror "attrs" of that node.
+ */
+
+const containsOperator = /[+\-×·*∘⌧/^%‰&√!¡|‖&=<>≟≠≤≥∈∉⋐∧∨⊻¬]|\xa0(function|modulo|\\atop|root|sum|abs|cos|sin|tan|acos|asin|atan|sec|csc|cot|asec|acsc|acot|exp|log|ln|log10|log2|cosh|sinh|tanh|sech|csch|coth|acosh|asinh|atanh|asech|acsch|acoth|Gamma|Γ|logGamma|logΓ|logFactorial|cosd|sind|tand|acosd|asind|atand|secd|cscd|cotd|asecd|acscd|acotd|Re|Im|argument|chr|round|sqrt|sign|\?{}|%|⎾⏋|⎿⏌|\[\]|\(\))\xa0/;
+const mustDoCalculation = /^(``.+``|[$$£¥\u20A0-\u20CF]?(\?{1,2}|@{1,2}|%{1,2}|!{1,2})[^=!(?@%!{})]*)$/;
+const assignDataFrameRegEx = /^[^=]+=\s*``/;
+const currencyRegEx = /^[$£¥\u20A0-\u20CF]/;
+const isValidIdentifier$2 = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/;
+const matrixOfNames = /^[([](?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*[,;].+[)\]]$/;
+const isKeyWord = /^(π|true|false|root|if|else|and|or|otherwise|modulo|for|while|break|return|raise)$/;
+
+const shortcut = (str, decimalFormat) => {
+  // No calculation in str. Parse it just for presentation.
+  const tex = parse(str, decimalFormat);
+  return { entry: str, tex, alt: str }
+};
+
+const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
+  let leadStr = "";
+  let mainStr = "";
+  let trailStr = "";
+  let isCalc = false;
+  let suppressResultDisplay = false;
+  let displayResultOnly = false;
+  let omitEcho = false;
+  let mustAlign = false;
+  let posOfFirstEquals = 0;
+  let expression = "";
+  let echo = "";
+  let rpn = "";
+  let resultDisplay = "";
+  let name = "";
+  let leadsWithCurrency = false;
+  let value;
+  let unit;
+  let dtype;
+  let str = "";
+
+  const isDraw = drawRegEx.test(inputStr);
+  if (functionRegEx.test(inputStr) || isDraw) {
+    // This cell contains a custom function.
+    let name = "";
+    if (isDraw) {
+      name = "draw";
+    } else {
+      const posFn = inputStr.indexOf("function");
+      const posParen = inputStr.indexOf("(");
+      name = inputStr.slice(posFn + 8, posParen).trim();
+    }
+    const module = scanModule(inputStr, decimalFormat);
+    const isError = module.dtype && module.dtype === dt.ERROR;
+    if (isError) {
+      // eslint-disable-next-line no-alert
+      window.alert(module.value);
+    }
+    const attrs = {
+      entry: inputStr,
+      name,
+      value: (isError) ? module.value : module.value[name],
+      // TODO: what to do with comma decimals?
+      dtype: isError ? dt.ERROR : name === "draw" ? dt.DRAWING : dt.MODULE,
+      error: isError
+    };
+    return attrs
+  }
+
+  str = inputStr;
+
+  const isDataFrameAssigment = assignDataFrameRegEx.test(str);
+  const posOfLastEquals = isDataFrameAssigment
+    ? str.indexOf("=") + 1
+    : str.lastIndexOf("=") + 1;
+
+  if (posOfLastEquals > 1) {
+    // input has form:  mainStr = trailStr
+    mainStr = str.substring(0, posOfLastEquals - 1).replace(/ +$/, "");
+    if (mainStr.length > 0 && /;\s*$/.test(mainStr)) {
+      mustAlign = true;
+      mainStr = mainStr.replace(/;\s*$/, "");
+    }
+    mainStr = mainStr.trim();
+    trailStr = str.substring(posOfLastEquals).trim();
+
+    if (mustDoCalculation.test(trailStr)) {
+      // trailStr contains a ? or a @ or a % or a !. In other words,
+      // input has form:  mainStr = something [?@%!] something
+      // The [?@%!] signals that the author wants a calculation done.
+      isCalc = true;
+
+      // A ! tells us to calculate and save the result, but to NOT display the result.
+      suppressResultDisplay = trailStr.indexOf("!") > -1;
+
+      // A @ tells us to display only the result.
+      displayResultOnly = trailStr.indexOf("@") > -1;
+
+      omitEcho = trailStr.indexOf("%") > -1;
+
+      posOfFirstEquals = mainStr.indexOf("=") + 1;
+      if (posOfFirstEquals) {
+        // input has form:  leadStr = something = trailStr
+        leadStr = mainStr.slice(0, posOfFirstEquals - 1).trim();
+
+        // Input has form:  name = expression = trailStr, or
+        //                  name1, name2, = expression = trailStr
+        expression = mainStr.substring(posOfFirstEquals).trim();
+        if (matrixOfNames.test(leadStr)) { leadStr = leadStr.slice(1, -1).trim(); }
+        if (/[,;]/.test(leadStr)) {
+          const potentialIdentifiers = leadStr.split(/[,;]/);
+          for (let i = 0; i < potentialIdentifiers.length; i++) {
+            const candidate = potentialIdentifiers[i].trim();
+            if (isKeyWord.test(candidate) || !isValidIdentifier$2.test(candidate)) {
+              // leadStr is not a list of valid identifiers.
+              // So this isn't a valid calculation statement. Let's finish early.
+              return shortcut(str, decimalFormat)
+            }
+          }
+          // multiple assignment.
+          name = potentialIdentifiers.map(e => e.trim());
+
+        } else {
+          if (isValidIdentifier$2.test(leadStr) && !isKeyWord.test(leadStr)) {
+            name = leadStr;
+          } else {
+            // The "=" sign is inside an expression. There is no lead identifier.
+            // This statement does not assign a value to a variable. But it may do a calc.
+            // input has form:  expression = trailStr
+            expression = mainStr;
+          }
+        }
+      } else {
+        // This calculation string contains only one "=" character.
+        // input has form:  expression = trailStr
+        expression = mainStr;
+      }
+    } else if (isDataFrameAssigment) {
+      name = mainStr;
+      expression = trailStr;
+    } else  if (isValidIdentifier$2.test(mainStr) && !isKeyWord.test(mainStr)) {
+      // No calculation display selector is present,
+      // but there is one "=" and a valid idendtifier.
+      // It may be an assignment statement.
+      // input has form:  name = trailStr
+      name = mainStr;
+      if (trailStr === "") {
+        const tex = parse(str, decimalFormat);
+        return { entry: str, tex, alt: str }
+      }
+    } else {
+      // input has form:  mainStr = trailStr.
+      // It almost works as an assignment statment, but mainStr is not a valid identifier.
+      // So we'll finish early.
+      return shortcut(str, decimalFormat)
+    }
+  } else {
+    // str contains no "=" character. Let's fnish early.
+    return shortcut(str, decimalFormat)
+  }
+
+  if (expression.length > 0) {
+    // The author may want a calculaltion done on the expression.
+    if (/^\s*fetch\(/.test(expression)) {
+      // fetch() functions are handled in updateCalculations.js, not here.
+      // It's easier from there to send a fetch() callback to a ProseMirror transaction.
+      echo = "";
+
+    } else {
+      // Parse the expression. Stop short of doing the calculation.
+      [echo, rpn] = parse(expression, decimalFormat, true);
+
+      // Shoulld we display an echo of the expression, with values shown for each variable?
+      if (suppressResultDisplay || displayResultOnly || echo.indexOf("〖") === -1
+          || /\u00a0for\u00a0/.test(rpn)) {
+        // No.
+        echo = "";
+      } else if (omitEcho) {
+        echo = "";
+      } else {
+        // The expression calls a variable.
+        // If it also contains an operator or a function, then we need to show the echo.
+        if (containsOperator.test("\xa0" + rpn + "\xa0")) {
+          echo = "{\\color{#0000ff}" + echo + "}";
+        } else {
+          echo = "";
+        }
+      }
+    }
+  }
+
+  // Now let's turn our attention from the expression to the trailStr.
+  if (currencyRegEx.test(trailStr)) {
+    leadsWithCurrency = true;
+    unit = trailStr.charAt(0);
+  }
+
+  if (isCalc) {
+    // trailStr contains a display selector.
+    value = null;
+
+    if (!leadsWithCurrency) {
+      // Check for a unit, even if it isn't a unit-aware calculation
+      unit = trailStr.replace(/[?@%!']/g, "").trim();
+    }
+
+    if (suppressResultDisplay) {
+      resultDisplay = trailStr;
+    } else {
+      if (unit) {
+        resultDisplay = trailStr.trim().replace(/([^ ?!@%]+)$/, "'" + "$1" + "'");
+        resultDisplay = parse(resultDisplay, decimalFormat).replace(/\\%/g, "%").replace("@ @", "@@");
+      } else {
+        resultDisplay = parse(trailStr, decimalFormat).replace(/\\%/g, "%").replace("@ @", "@@");
+      }
+      resultDisplay = resultDisplay.replace(/\\text\{(\?\??|%%?)\}/, "$1");
+      resultDisplay = resultDisplay.replace(/([?%]) ([?%])/, "$1" + "$2");
+    }
+
+  } else {
+    // trailStr may be a static value in an assignment statement.
+    // Check if trailStr is a valid literal.
+    [value, unit, dtype, resultDisplay] = valueFromLiteral(trailStr, name, decimalFormat);
+
+    if (dtype === dt.ERROR) { return shortcut(str, decimalFormat) }
+    rpn = "";
+  }
+
+  // Assemble the equation to display
+  let eqn = "";
+  let altEqn = "";
+  if (!displayResultOnly) {
+    eqn = parse(mainStr, decimalFormat);
+    if (mustAlign) {
+      eqn = "\\begin{aligned}" + eqn;
+      const pos = eqn.indexOf("=");
+      eqn = eqn.slice(0, pos) + "&" + eqn.slice(pos);
+    }
+    const alignChar = mustAlign ? "\\\\ &" : "";
+    altEqn = mainStr;
+    if (echo.length > 0 && !omitEcho) {
+      eqn += ` ${alignChar}= ` + echo;
+    }
+    if (!suppressResultDisplay) {
+      eqn += " " + (mustAlign ? "\\\\&" : "") + "= " + resultDisplay;
+      altEqn += " = " + trailStr;
+    }
+    if (mustAlign) { eqn += "\\end{aligned}"; }
+  }
+
+  // Populate the object to be returned.
+  // It will eventually be attached to ProseMirror schema attrs, so call it "attrs".
+  const attrs = {
+    entry: str,
+    template: eqn,
+    altTemplate: altEqn,
+    resultdisplay: resultDisplay,
+    dtype: dtype,
+    error: false
+  };
+
+  if (name) { attrs.name = name; }
+  if (isCalc) {
+    attrs.resulttemplate = resultDisplay;
+    attrs.altresulttemplate = trailStr;
+  } else {
+    attrs.tex = eqn;
+    attrs.alt = altEqn;
+  }
+  if (rpn) { attrs.rpn = rpn; }
+  if (value) { attrs.value = value; }
+  if (unit) {
+    if (Array.isArray(unit)) {
+      attrs.expos = unit;
+    } else {
+      attrs.unit = unit;
+    }
+  }
+
+  return attrs
+};
+
+/*
+ *  This module mostly organizes one or two passes through the data structure of a Hurmet
+ *  document, calling for a calculation to be done on each Hurmet calculation cell.
+ *  If you are looking for the calculation itself, look at evaluate.js.
+ *
+ *  To be more precise, this module is called:
+ *    1. When an author submits one calculation cell, or
+ *    2. When a new Hurmet.app instance has opened (from index.js), or
+ *    3. When a user has opened a new file         (from openFile.js), or
+ *    4. When a recalculate-all has been called, possibly after a paste. (from menu.js)
+ *
+ *  Case 1 calculates the submitted cell and all dependent calculation cells.
+ *  Cases 2 thru 4 re-calculate the entire document. I.e., isCalcAll is set to true.
+ *  After calculation is complete, we send the results to ProseMirror to be
+ *  rendered in the document.
+ *
+ *   This module's main exported function is updateCalculations(…)
+ */
+
+/*
+* Note 1: state.selection shenanigans
+*
+* Before creating a ProseMirror (PM) transaction, this module first changes `state.selection`.
+* That is to say, I change the PM state without running that change thru a PM transaction.
+* PM docs advise against that, so I want to explain why I do so.
+*
+* For Undo purposes, a calculation should be atomic.
+* An Undo of a calculation should return the doc to the condition before the
+* calculation cell was edited. That will feel natural to people accustomed to Excel.
+* When a calculation is submitted, Hurmet creates a single PM transaction and into it,
+* Hurmet collects all the changes that the calculation makes to the original cell and
+* also all the changes to dependent cells.
+* When a user submits a calculation, the cell is open, so a PM Undo would ordinarily return
+* the state to a condition that once again has the cell open.
+*
+* But now consider a user who wants to Undo twice. The first Undo retreats to a condition in
+* which a cell is open. The user thinks a second Undo will change the PM document. But no!
+* Because the cell is open, the CodeMirror plain text editor is active and the Undo is captured
+* by CodeMirror. An Undo affects CodeMirror but not the outer document. It's very confusing!
+* So the Undo should return to a condition in which the cell is closed. That's why I change
+* the PM state.selection object _before_ I create the PM transaction. I don't want an Undo to
+* open that cell and so I don't want the Undo to finish with the selection point inside the
+* cell. Before creating the transaction, I move the selection point to just after the cell.
+*/
+
+const fetchRegEx = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′* *= *(?:fetch|import)\(/;
+const importRegEx = /^[^=]+= *import/;
+const fileErrorRegEx = /^Error while reading file. Status Code: \d*$/;
+const textRegEx = /\\text{[^}]+}/;
+
+const urlFromEntry = entry => {
+  // Get the URL from the entry input string.
+  const str = entry.replace(/^[^()]+\("?/, "");
+  return str.replace(/"?\).*$/, "").trim()
+};
+
+// Helper function.
+const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
+  const attrs = Object.create(null);
+  attrs.entry = entry;
+  attrs.name = entry.replace(/=.+$/, "").trim();
+  let str = parse(entry.replace(/\s*=\s*[$$£¥\u20A0-\u20CF]?(?:!{1,2}).*$/, ""), decimalFormat);
+  const url = urlFromEntry(entry);
+  if (/\.(?:csv|txt)$/.test(url)) {
+    // Shorten the URL.
+    const fileName = url.replace(/.+\//, "");
+    const match = textRegEx.exec(str);
+    str = str.slice(0, match.index) + "\\text{" + addTextEscapes(fileName) + "})";
+  }
+  attrs.tex = str;
+  attrs.alt = entry;
+  if (text === "File not found." || fileErrorRegEx.test(text)) {
+    attrs.dtype = dt.ERROR;
+    attrs.tex += ` = \\red{\\text{${text}}}`;
+    attrs.alt = " = " + text;
+    attrs.value = null;
+    return attrs
+  }
+  const data = importRegEx.test(entry)
+    ? scanModule(text, decimalFormat)               // import code
+    : DataFrame.dataFrameFromCSV(text, hurmetVars);  // fetch data
+
+  // Append the data to attrs
+  attrs.value = data.value;
+  attrs.dtype = data.dtype;
+  attrs.unit = data.unit;
+  attrs.isFetch = true;
+  if (data.dtype === dt.MODULE && /^importedParameters *=/.test(entry)) {
+    // Assign to multiple variables, not one namespace.
+    let nameTex = "\\begin{matrix}";
+    let i = 0;
+    Object.entries(data.value).forEach(([key, value]) => {
+      hurmetVars[key] =  value;
+      nameTex += parse(value.name) + " & ";
+      i += 1;
+      if (i === 5) {
+        nameTex = nameTex.slice(0, -1) + "\\\\ ";
+        i = 0;
+      }
+    });
+    nameTex = nameTex.slice(0, (i === 0 ? -2 : -1)) + "\\end{matrix}";
+    attrs.tex = attrs.tex.replace("\\mathrm{importedParameters}", nameTex);
+  }
+  return attrs
+};
+
+const workAsync = (
+  view,
+  calcNodeSchema,
+  isCalcAll,
+  nodeAttrs,
+  curPos,
+  hurmetVars,
+  urls,
+  fetchPositions
+) => {
+
+  // Here we fetch the remote data.
+  const doc = view.state.doc;
+  const inDraftMode = doc.attrs.inDraftMode;
+  const decimalFormat = doc.attrs.decimalFormat;
+
+  Promise.all(
+    urls.map(url => fetch(url, {
+      method: "GET",
+      headers: { "Content-Type": "text/plain;charset=UTF-8" },
+      mode: "cors"
+    }))
+  ).then(fetchResponses => {
+    // The fetch promises have resolved. Now we extract their text.
+    return Promise.all(fetchResponses.map(r => {
+      if (r.status !== 200 && r.status !== 0) {
+        return r.status === 404
+          ? 'File not found.'
+          : 'Error while reading file. Status Code: ' + r.status
+      }
+      return r.text()
+    }))
+  }).then((texts) => {
+    // At this point, we have the text of each Hurmet fetch and import.
+    // Create a ProseMirror transacation.
+    // Each node update below will be one step in the transaction.
+    const state = view.state;
+    if (state.selection.to === curPos + 1) {
+      // See Note 1 above for an explanation of the state.selection shenanigans.
+      state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1));
+    }
+    const tr = state.tr;
+
+    // Load in the data from the fetch statements
+    for (let i = 0; i < texts.length; i++) {
+      const pos = fetchPositions[i];
+      const entry = isCalcAll
+        ? doc.nodeAt(pos).attrs.entry
+        : nodeAttrs.entry;
+      const attrs = processFetchedString(entry, texts[i], hurmetVars, decimalFormat);
+      attrs.inDraftMode = inDraftMode;
+      tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs));
+      if (attrs.name) {
+        insertOneHurmetVar(hurmetVars, attrs, decimalFormat);
+      }
+    }
+    // There. Fetches are done and are loaded into the document.
+    // Now proceed to the rest of the work.
+    try {
+      proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs,
+                        curPos, hurmetVars, tr);
+    } catch (err) {
+      console.log(err); // eslint-disable-line no-console
+      const pos = nodeAttrs.template.indexOf(nodeAttrs.resultdisplay);
+      nodeAttrs.tex = nodeAttrs.template.slice(0, pos) + "\\text{" + err + "}";
+      tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs));
+      tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)));
+      view.dispatch(tr);
+      view.focus();
+    }
+  });
+};
+
+const proceedAfterFetch = (
+  view,
+  calcNodeSchema,
+  isCalcAll,
+  nodeAttrs,
+  curPos,
+  hurmetVars,
+  tr
+) => {
+  // This function happens either
+  //   1. After remote, fetched data has been processed, or
+  //   2. After we know that no fetch statements need be processed.
+  const doc = view.state.doc;
+  const decimalFormat = doc.attrs.decimalFormat;
+
+  if (!isCalcAll && (nodeAttrs.name || nodeAttrs.rpn ||
+    (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING))) {
+    // Load hurmetVars with values from earlier in the document.
+    doc.nodesBetween(0, curPos, function(node) {
+      if (node.type.name === "calculation") {
+        const attrs = node.attrs;
+        if (attrs.name) {
+          if (attrs.name === "importedParameters") {
+            Object.entries(attrs.value).forEach(([key, value]) => {
+              hurmetVars[key] =  value;
+            });
+          } else {
+            insertOneHurmetVar(hurmetVars, attrs, decimalFormat);
+          }
+        }
+      }
+    });
+
+    // Hoist any user-defined functions located below the selection.
+    doc.nodesBetween(curPos + 1, doc.content.size, function(node, pos) {
+      if (node.type.name === "calculation" && node.attrs.dtype === dt.MODULE) {
+        insertOneHurmetVar(hurmetVars, node.attrs, decimalFormat);
+      }
+    });
+
+    // Calculate the current node.
+    if (!fetchRegEx.test(nodeAttrs.entry)) {
+      // This is the typical calculation statement. We'll evalutate it.
+      let attrs = clone(nodeAttrs); // prepareStatement was already run in mathprompt.js.
+      // The mathPrompt dialog box did not have accesss to hurmetVars, so it
+      // did not do unit conversions on the result template. Do that first.
+      improveQuantities(attrs, hurmetVars);
+      // Now proceed to do the calculation of the cell.
+      if (attrs.rpn || (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING)) {
+        attrs = attrs.dtype && attrs.dtype === dt.DRAWING
+          ? evaluateDrawing(attrs, hurmetVars, decimalFormat)
+          : evaluate(attrs, hurmetVars, decimalFormat);
+      }
+      if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, decimalFormat); }
+      attrs.displayMode = nodeAttrs.displayMode;
+      tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(attrs));
+    }
+  }
+
+  // Finally, update calculations after startPos.
+  const startPos = isCalcAll ? 0 : (curPos + 1);
+  doc.nodesBetween(startPos, doc.content.size, function(node, pos) {
+    if (node.type.name === "calculation") {
+      const mustCalc = isCalcAll ? !fetchRegEx.test(node.attrs.entry) : !node.attrs.isFetch;
+      if (mustCalc) {
+        const entry = node.attrs.entry;
+        let attrs = isCalcAll
+          ? prepareStatement(entry, decimalFormat)
+          : clone(node.attrs);
+        attrs.displayMode = node.attrs.displayMode;
+        const mustRedraw = attrs.dtype && attrs.dtype === dt.DRAWING &&
+          (attrs.rpn || (attrs.value.parameters.length > 0 || isCalcAll));
+        if (isCalcAll || attrs.rpn || mustRedraw || (attrs.name && !(hurmetVars[attrs.name] &&
+          hurmetVars[attrs.name].isFetch))) {
+          if (isCalcAll) { improveQuantities(attrs, hurmetVars); }
+          if (attrs.rpn || mustRedraw) {
+            attrs = attrs.rpn // attrs.dtype && attrs.dtype === dt.DRAWING
+              ? evaluate(attrs, hurmetVars, decimalFormat)
+              : evaluateDrawing(attrs, hurmetVars, decimalFormat);
+          }
+          if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, decimalFormat); }
+          if (isCalcAll || attrs.rpn || mustRedraw) {
+            tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs));
+          }
+        }
+      } else if (node.attrs.name && !(isCalcAll && node.attrs.isFetch)) {
+        if (node.attrs.name) {
+          if (node.attrs.name === "importedParameters") {
+            Object.entries(node.attrs.value).forEach(([key, value]) => {
+              hurmetVars[key] =  value;
+            });
+          } else {
+            insertOneHurmetVar(hurmetVars, node.attrs, decimalFormat);
+          }
+        }
+      }
+    }
+  });
+
+  // All the steps are now loaded into the transaction.
+  // Dispatch the transaction to ProseMirror, which will re-render the document.
+  if (!isCalcAll) {
+    tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)));
+  }
+  view.dispatch(tr);
+  view.focus();
+};
+
+function updateCalculations(
+  view,
+  calcNodeSchema,
+  isCalcAll = false,
+  nodeAttrs,
+  curPos
+) {
+  const doc = view.state.doc;
+
+  if (!(isCalcAll || nodeAttrs.name || nodeAttrs.rpn ||
+      (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING))) {
+    // No calculation is required. Just render the node and get out.
+    const state = view.state;
+    if (state.selection.to === curPos + 1) {
+      // See Note 1 above for an explanation of the state.selection shenanigans.
+      state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1));
+    }
+    const tr = state.tr;
+    try {
+      tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs));
+    } catch (err) {
+      // nada
+    } finally {
+      view.dispatch(tr);
+      view.focus();
+    }
+    return
+  }
+
+  // Create an object in which we'll hold variable values.
+  const hurmetVars = Object.create(null);
+  hurmetVars.format = { value: "h15" }; // default rounding format
+
+  // Get an array of all the URLs called by fetch statements.
+  const urls = [];
+  const fetchPositions = [];
+  if (!isCalcAll) {
+    // The author has submitted a single calculation cell.
+    const entry = nodeAttrs.entry;
+    if (fetchRegEx.test(entry)) {
+      urls.push(urlFromEntry(entry));
+      fetchPositions.push(curPos);
+    }
+  } else {
+    // We're updating the entire document.
+    doc.nodesBetween(0, doc.content.size, function(node, pos) {
+      if (node.type.name === "calculation" && !node.attrs.value) {
+        const entry = node.attrs.entry;
+        if (fetchRegEx.test(entry)) {
+          urls.push(urlFromEntry(entry));
+          fetchPositions.push(pos);
+        } else if (/^function /.test(entry)) {
+          node.attrs = prepareStatement(entry, doc.attrs.decimalFormat);
+          insertOneHurmetVar(hurmetVars, node.attrs, doc.attrs.decimalFormat);
+        }
+      } else if (node.attrs.isFetch || (node.attrs.dtype && node.attrs.dtype === dt.MODULE)) {
+        insertOneHurmetVar(hurmetVars, node.attrs, doc.attrs.decimalFormat);
+      }
+    });
+  }
+
+  if (urls.length > 0) {
+    // We have to fetch some remote data. Asynchronous work ahead.
+    workAsync(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos,
+              hurmetVars, urls, fetchPositions);
+  } else {
+    // Skip the fetches and go directly to work that we can do synchronously.
+    const state = view.state;
+    if (state.selection.to === curPos + 1) {
+      // See Note 1 above for an explanation of the state.selection shenanigans.
+      state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1));
+    }
+    const tr = state.tr;
+    try {
+      proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr);
+    } catch (err) {
+      console.log(err); // eslint-disable-line no-console
+      const pos = nodeAttrs.template.indexOf(nodeAttrs.resultdisplay);
+      nodeAttrs.tex = nodeAttrs.template.slice(0, pos) + "\\text{" + err + "}";
+      tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs));
+      tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)));
+      view.dispatch(tr);
+      view.focus();
+    }
+  }
+}
+
+// This function is not used by the Hurmet.app page.
+// It is provided for use by unit tests.
+// If you are looking for the app's main calculation module, try evaluate.js.
+const calculate = (
+  entry,
+  vars = {},
+  inDraftMode = false,
+  decimalFormat = "1,000,000."
+) => {
+  let attrs = prepareStatement(entry, decimalFormat);
+  improveQuantities(attrs, vars);
+  if (attrs.rpn) {
+    attrs = evaluate(clone(attrs), vars, decimalFormat);
+  } else if (attrs.dtype && attrs.dtype === dt.DRAWING) {
+    attrs = evaluateDrawing(attrs, vars, decimalFormat);
+  }
+  if (attrs.name) {
+    insertOneHurmetVar(vars, attrs);
+  }
+  return attrs.dtype && attrs.dtype === dt.DRAWING
+   ? attrs
+   : inDraftMode
+   ? attrs.alt
+   : attrs.tex
+};
+
+/* Render inline Markdown, given an AST */
+
+const tagName = {
+  em: "em",
+  strong: "strong",
+  code: "code",
+  strikethru: "del",
+  subscript: "sub",
+  superscript: "sup",
+  underline: "u",
+  highlight: "mark"
+};
+
+const nodes = {
+  calculation(node) {
+    const tex = parse(node.attrs.entry);
+    const dom = document.createElement('span');
+    const isFF = 'MozAppearance' in document.documentElement.style;
+    if (isFF) {
+      temml.render(tex, dom);
+    } else {
+      katex.render(tex, dom, {
+        output: "html",
+        strict: false,
+        throwOnError: false,
+        minRuleThickness: 0.06
+      });
+    }
+    return dom
+  },
+  tex(node) {
+    const dom = document.createElement('span');
+    dom.classList = "hurmet-tex";
+    katex.render(node.attrs.tex, dom, { strict: false,
+      throwOnError: false, minRuleThickness: 0.06 });
+    return dom
+  },
+  text(node) {
+    let dom = document.createTextNode(node.text);
+    if (!node.marks) {
+      return document.createElement('span').appendChild(dom)
+    } else {
+      for (const mark of node.marks) {
+        const oldDom = dom.cloneNode(true);
+        dom = document.createElement(tagName[mark.type]);
+        dom.appendChild(oldDom);
+      }
+      return dom
+    }
+  }
+};
+
+const output = ast => {
+  const dom = document.createElement("span");
+  if (Array.isArray(ast)) {
+    for (let i = 0; i < ast.length; i++) {
+      dom.appendChild(output(ast[i]));
+    }
+  } else if (ast.type !== "null") {
+    dom.appendChild(nodes[ast.type](ast));
+  }
+  return dom
+};
+
+const renderMD = md => {
+  const ast = md2ast(md)[0].content;
+  return output(ast)
+};
+
+/*
+ * This file bundles together and exposes the calculation parts of Hurmet.
+ * I use Rollup to create a UMD module from this code.
+ * That way, one file can expose the same functionality to (1) the Hurmet.app web page,
+ * (2) the REPL in the reference manual, (3) the script that transpiles
+ * the Hurmet reference manual from Markdown to HTML, and (4) unit testing.
+ *
+ * Some of Hurmet’s exported functions are valuable only to the Hurmet.app web page.
+ * If you wish to use Hurmet’s math parsing and/or calculation abilities,
+ * the two functions you want are:
+ *   parse(entry: string, decimalFormat?: string)
+ *   calculate(entry: string, vars?: Object, draftMode?: boolean, decimalFormat?: string)
+ *
+ *   parse() returns a TeX string.
+ *   calculate() returns either a TeX string or a string in Hurmet calculation syntax.
+ *
+ * The parameters of those two function are:
+ *   entry: The string that a user types into a calculation editing box.
+ *   draftMode: Determines if result is in TeX or in Hurmet calculation syntax.
+ *   decimalFormat: A string containing one of the options available in the Hurmet ● menu.
+ *   vars: If you want to evaluate several statements, the variable "vars" holds variable data.
+ *         Initialize it as: vars = {}
+ *         Or, if you want to specify a rounding format, initialize it as:
+ *             vars = { format: { value: "h3" } }
+ *         vars is updated with new variable data each time calculate() is called.
+ */
+
+const hurmet = {
+  dt,
+  parse,
+  calculate,
+  autoCorrect,
+  prepareStatement,
+  improveQuantities,
+  draw,
+  evaluate,
+  md2ast,
+  renderMD,
+  scanModule,
+  updateCalculations
+};
+
+/* eslint-disable */
+
+// Helpers for creating a schema that supports tables.
+
+function getCellAttrs(dom, extraAttrs) {
+  let widthAttr = dom.getAttribute("data-colwidth");
+  let widths = widthAttr && /^\d+(,\d+)*$/.test(widthAttr) ? widthAttr.split(",").map(s => Number(s)) : null;
+  let colspan = Number(dom.getAttribute("colspan") || 1);
+  let result = {
+    colspan,
+    rowspan: Number(dom.getAttribute("rowspan") || 1),
+    colwidth: widths && widths.length == colspan ? widths : null
+  };
+  for (let prop in extraAttrs) {
+    let getter = extraAttrs[prop].getFromDOM;
+    let value = getter && getter(dom);
+    if (value != null) result[prop] = value;
+  }
+  return result
+}
+
+function setCellAttrs(node, extraAttrs) {
+  let attrs = {};
+  if (node.attrs.colspan != 1) attrs.colspan = node.attrs.colspan;
+  if (node.attrs.rowspan != 1) attrs.rowspan = node.attrs.rowspan;
+  if (node.attrs.colwidth)
+    attrs["data-colwidth"] = node.attrs.colwidth.join(",");
+  for (let prop in extraAttrs) {
+    let setter = extraAttrs[prop].setDOMAttr;
+    if (setter) setter(node.attrs[prop], attrs);
+  }
+  return attrs
+}
+
+const functionRegEx$1 = / *function /;
+ 
+// :: Object
+// [Specs](#model.NodeSpec) for the nodes defined in this schema.
+const nodes$1 = {
+  // :: NodeSpec The top level document node.
+  doc: {
+    content: "block+",
+    // Hurmet uses doc.attrs for document metadata, but ProseMirror transacations
+    // can not reach doc.attrs. So any user change to document metadata will be
+    // outside the undo stack.
+    attrs: {
+      decimalFormat: {default: '1,000,000.' },
+      inDraftMode: { default: false }, // boolean
+      fileHandle: { default: null },
+      fontSize: { default: 12 },       // 12 | 10
+      pageSize: { default: "letter" }, // letter | A4
+      snapshots: { default: [] }
+    }
+  },
+
+// :: NodeSpec A plain paragraph textblock. Represented in the DOM as a `<p>` element.
+  paragraph: {
+    content: "inline*",
+    group: "block",
+    parseDOM: [{tag: "p"}], // priority is the default, 50
+    toDOM() { return ["p", 0] }
+  },
+
+  // An indented div.
+  indented_div: {
+    content: "block+",
+    group: "block",
+    defining: true,
+	  parseDOM: [{tag: "div.indented"}],
+    toDOM() { return ['div', { class: 'indented' }, 0] }
+  },
+
+  //:: NodeSpec An center-aligned div.
+  centered_div: {
+    content: "block+",
+    group: "block",
+    defining: true,
+    parseDOM: [{tag: "div.centered"}],
+    toDOM () { return ['div', { class: 'centered' }, 0] },
+  },
+
+  // :: NodeSpec A blockquote (`<blockquote>`) wrapping one or more blocks.
+  blockquote: {
+    content: "block+",
+    group: "block",
+    defining: true,
+    parseDOM: [{tag: "blockquote"}],
+    toDOM() { return ["blockquote", 0] }
+  },
+
+  // :: NodeSpec A horizontal rule (`<hr>`).
+  horizontal_rule: {
+    group: "block",
+    parseDOM: [{tag: "hr"}],
+    toDOM() { return ["hr"] }
+  },
+
+  // :: NodeSpec A heading textblock, with a `level` attribute that
+  // should hold the number 1 to 6. Parsed and serialized as `<h1>` to
+  // `<h6>` elements.
+  heading: {
+    attrs: {level: {default: 1}},
+    content: "inline*",
+    group: "block",
+    defining: true,
+    parseDOM: [{tag: "h1", attrs: {level: 1}},
+               {tag: "h2", attrs: {level: 2}},
+               {tag: "h3", attrs: {level: 3}},
+               {tag: "h4", attrs: {level: 4}},
+               {tag: "h5", attrs: {level: 5}},
+               {tag: "h6", attrs: {level: 6}}],
+    toDOM(node) { return ["h" + node.attrs.level, 0] }
+  },
+
+  // :: NodeSpec A code listing. Disallows marks or non-text inline
+  // nodes by default. Represented as a `<pre>` element with a
+  // `<code>` element inside of it.
+  code_block: {
+    content: "text*",
+    marks: "",
+    group: "block",
+    code: true,
+    defining: true,
+    parseDOM: [{tag: "pre", preserveWhitespace: "full"}],
+    toDOM() { return ["pre", ["code", 0]] }
+  },
+
+  // :: NodeSpec The text node.
+  text: {
+    group: "inline"
+  },
+
+  // :: NodeSpec An inline image (`<img>`) node. Supports `src`,
+  // `alt`, and `href` attributes. The latter two default to the empty
+  // string.
+  image: {
+    inline: true,
+    attrs: {
+      src: {},
+      alt: {default: null},
+//      title: {default: null},
+      width: {default: null},
+      class: {default: "inline"}
+    },
+    group: "inline",
+    draggable: true,
+    parseDOM: [{tag: "img[src]", getAttrs(dom) {
+      return {
+        src: dom.getAttribute("src"),
+//        title: dom.getAttribute("title"),
+        alt: dom.getAttribute("alt"),
+        width: dom.getAttribute("width"),
+        class: dom.getAttribute("class")
+      }
+    }}],
+    toDOM(node) { return ["img", node.attrs] }
+  },
+
+  // Table of contents
+  toc: {
+    atom: true,
+    attrs: {
+      start: { default: 1 },
+      end:   { default: 2 },
+      body:  { default: [] }
+    },
+    group: "block",
+    draggable: true,
+    parseDOM: [{tag: "ul.toc",  getAttrs(dom) {
+      const [start, end] = tocLevels(dom.getAttribute('data-levels'));
+      const body = JSON.parse(dom.getAttribute('data-body'));
+      return { start, end, body }
+    }}],
+    toDOM(node) {
+      const dom = document.createElement('ul');
+      dom.dataset.levels = String(node.attrs.start) + ".." + String(node.attrs.end);
+      dom.dataset.body = JSON.stringify(node.attrs.body);
+      renderToC(node.attrs.body, dom);
+      return dom
+     }
+  },
+
+  ordered_list: {
+    attrs: {order: {default: 1}},
+	content: "list_item+",
+	group: "block",
+    parseDOM: [{tag: "ol", getAttrs(dom) {
+      return {order: dom.hasAttribute("start") ? +dom.getAttribute("start") : 1}
+    }}],
+    toDOM(node) {
+      return node.attrs.order == 1 ? ["ol", 0] : ["ol", {start: node.attrs.order}, 0]
+    }
+  },
+  
+  // A bullet list node spec, represented in the DOM as `<ul>`.
+  bullet_list: {
+    content: "list_item+",
+	group: "block",
+	parseDOM: [{tag: "ul"}],
+    toDOM() { return ["ul", 0] }
+  },
+
+  // A list item (`<li>`) spec.
+  list_item: {
+    content: "paragraph block*",
+	  parseDOM: [{tag: "li"}],
+    toDOM() { return ["li", 0] },
+    defining: true
+  },
+
+  // :: NodeSpec A hard line break, represented in the DOM as `<br>`.
+  hard_break: {
+    inline: true,
+    group: "inline",
+    selectable: false,
+    parseDOM: [{tag: "br"}],
+    toDOM() { return ["br"] }
+  },
+
+  table: {
+    content: "table_row+",
+    tableRole: "table",
+    group: "block",
+    attrs: { class: { default: 'grid' } },
+    parseDOM: [{tag: "table", getAttrs(dom) {
+      return { class: dom.getAttribute('class') || "grid" }
+    }}],
+    toDOM(node) {
+      return ['table', { class: node.attrs.class }, ["tbody", 0]]
+    }
+  },
+  table_row: {
+    content: "(table_cell | table_header)*",
+    tableRole: "row",
+    parseDOM: [{tag: "tr"}],
+    toDOM() { return ["tr", 0] }
+  },
+  table_cell: {
+    content: "block+",
+    attrs: {
+      colspan: {default: 1},
+      rowspan: {default: 1},
+      colwidth: {default: null},
+      background: {default: null}
+    },
+    tableRole: "cell",
+    isolating: true,
+    parseDOM: [{tag: "td", getAttrs: dom => getCellAttrs(dom, [])}],
+    toDOM(node) { return ["td", setCellAttrs(node, []), 0] }
+  },
+  table_header: {
+    content: "block+",
+    attrs: {
+      colspan: {default: 1},
+      rowspan: {default: 1},
+      colwidth: {default: null},
+      background: {default: null}
+    },
+    tableRole: "header_cell",
+    isolating: true,
+    parseDOM: [{tag: "th", getAttrs: dom => getCellAttrs(dom, [])}],
+    toDOM(node) { return ["th", setCellAttrs(node, []), 0] }
+  },
+
+  // Hurmet uses the <header> element for print-headers
+  header: {
+    content: "table",
+    group: "block",
+    defining: true,
+    parseDOM: [{tag: "header"}],
+    toDOM() { return ["header", 0] }
+  },
+
+  calculation: {
+    atom: true, // No direct editing. Instead, edit via CalcView in file nodeviews.js.
+    defining: false,
+    marks: "",
+    group: "inline",
+    inline: true,
+    attrs: {
+      // I cache several items with each Hurmet calculation cell.
+      // By keeping this data when the author submits a cell, I avoid having to
+      // redo the work each time a cell calculation is updated with a new variable value.
+      // Most of this info is kept only during run-time.
+      // When the author saves a file, I write only the entry input.
+      // (What isn't saved cannot break a document.)
+      // When a document is re-opened, all but the entries must be recalculated.
+      entry: { default: "" }, //          Raw string input by the author, edited for decimal.
+      displayMode: { default: false }, // Type set in TeX display mode if true.
+      name: {default: null}, //           Name of cell, as in "x" from x = 12
+      tex: {default: ""}, //              The string I pass to KaTeX for final rendering.
+      alt: {default: ""}, //              The string I render when in draft mode.
+      rpn: {default: null}, //            RPN from parser.js, for calculation.
+      inDraftMode: {default: false},
+      resulttemplate: {default: null}, // String with units, but waiting for a value.
+      altresulttemplate: {default: null}, // Ditto, but in draft mode.
+      resultdisplay: {default: null}, //  Result after unit conversions and rounding.
+      template: {default: null}, //       tex, including echo, but waiting for plugged-in values.
+      altTemplate: {default: ""}, //      Ditto, but in draft mode.
+      value: {default: null},  //         Value passed to other calculations.
+      unit: {default: ""}, //             Unit specified by user, in which to display the result.
+      //                                    Hurmet maps and data frame save a data structure, not a name.
+      expos: {default: null}, //          Unit exponents of result, for checking unit compatibility.
+      factor: {default: null}, //         Factor for converting value.inBaseUnits to result units
+      gauge: {default: null}, //          Unit gauge, for ditto
+      dtype: {default: 0}, //             Data type of the result. See constants.js.
+      isFetch: {default: false}, //       Identifies cells that need async treatment.
+      error: {default: false} //          boolean. True if calculation resulted in an error.
+    },
+    parseDOM: [{tag: "span.hurmet-calc",  getAttrs(dom) {
+      const displayMode = Boolean(dom.getAttribute('data-display')) || false;
+      return { entry: dom.getAttribute('data-entry'), displayMode }
+    }}],
+    toDOM(node) {
+      let dom;
+      //if (node.attrs.dtype !== dt.IMAGE) {
+      dom = document.createElement('span');
+      dom.classList = "hurmet-calc";
+      if (node.attrs.dtype && node.attrs.dtype === hurmet.dt.DRAWING) {
+        dom = document.createElement('span');
+        dom.appendChild(hurmet.draw.renderSVG(node.attrs.resultdisplay));
+      } else if (node.attrs.dtype && node.attrs.dtype === hurmet.dt.MODULE &&
+        functionRegEx$1.test(node.attrs.entry)) {
+        dom.appendChild(document.createElement('pre'));
+        dom.firstChild.appendChild(document.createElement('code'));
+        dom.firstChild.firstChild.textContent = node.attrs.entry;
+      } else if (node.attrs.inDraftMode || !node.attrs.tex) {
+        dom.appendChild(document.createElement('code'));
+        dom.firstChild.textContent = node.attrs.alt ? node.attrs.alt : node.attrs.entry;
+      } else {
+        const tex = node.attrs.tex;
+        const isFF = 'MozAppearance' in document.documentElement.style;
+        if (isFF) {
+          temml.render(tex, dom, {
+            displayMode: node.attrs.displayMode,
+            trust: (context) => context.command === '\\class' && context.class === "special-fraction"
+          });
+        } else {
+          katex.render(tex, dom, {
+            displayMode: node.attrs.displayMode,
+            output: "html",
+            strict: false,
+            macros: {"\\class": "\\htmlClass"},
+            throwOnError: false,
+            minRuleThickness: 0.06,
+            trust: (context) => context.command === '\\htmlClass' && context.class === "special-fraction"
+          });
+        }
+      }
+      // Before writing to DOM, I filter out most of the run-time info in node.attrs.
+      dom.dataset.entry = node.attrs.entry;
+      if (node.attrs.displayMode) { dom.dataset.display = "true"; }
+      return dom
+    }
+  },
+
+  tex: {
+    // For display of LaTeX math.
+    atom: true,  // No direct editing. See TexView in nodeviews.js
+    marks: "",
+    group: "inline",
+    inline: true,
+    attrs: { tex: {default: ""}, displayMode: { default: false } },
+    parseDOM: [{tag: "span.hurmet-tex",  getAttrs(dom) {
+      const displayMode = Boolean(dom.getAttribute('data-display')) || false;
+      return { tex: dom.getAttribute('data-tex'), displayMode }
+    }}],
+    toDOM(node) {
+      const dom = document.createElement('span');
+      dom.classList = "hurmet-tex";
+      const tex = node.attrs.tex;
+      dom.dataset.tex = tex;
+      if (node.attrs.displayMode) { dom.dataset.display = "true"; }
+      katex.render(tex, dom, { displayMode: node.attrs.displayMode, strict: false,
+        output: "html", throwOnError: false, minRuleThickness: 0.06 });
+      return dom
+    }
+  },
+
+  comment: {
+    atom: true,
+    marks: "",
+    group: "inline",
+    inline: true,
+    attrs: { comment: { default: "" } },
+    parseDOM: [{ tag: "span.hurmet-comment", getAttrs(dom) {
+      return { comment: dom.getAttribute('data-comment') }
+    }}],
+    toDOM(node) {
+      const container = document.createElement('span');
+      container.className = "hurmet-comment";
+      container.dataset.comment = node.attrs.comment;
+      const triangle = document.createElement('span');
+      triangle.className = "left-triangle";
+      container.appendChild(triangle);
+      const dom = document.createElement('span');
+      dom.className = "comment-payload";
+      dom.appendChild(hurmet.renderMD(node.attrs.comment));
+      container.appendChild(dom);
+      return container
+    }
+  }
+
+};
+
+// :: Object [Specs](#model.MarkSpec) for the marks in the schema.
+const marks = {
+  // :: MarkSpec A link. Has `href` and `title` attributes. `title`
+  // defaults to the empty string. Rendered and parsed as an `<a>`
+  // element.
+  link: {
+    attrs: {
+      href: {},
+      title: {default: null}
+    },
+    inclusive: false,
+    parseDOM: [{tag: "a[href]", getAttrs(dom) {
+      return {href: dom.getAttribute("href"), title: dom.getAttribute("title")}
+    }}],
+    toDOM(node) { return ["a", node.attrs] }
+  },
+
+  // :: MarkSpec An emphasis mark. Rendered as an `<em>` element.
+  // Has parse rules that also match `<i>` and `font-style: italic`.
+  em: {
+    parseDOM: [{tag: "i"}, {tag: "em"}, {style: "font-style=italic"}],
+    toDOM() { return ["em"] }
+  },
+
+  // :: MarkSpec A strong mark. Rendered as `<strong>`, parse rules
+  // also match `<b>` and `font-weight: bold`.
+  strong: {
+    parseDOM: [{tag: "strong"},
+               // This works around a Google Docs misbehavior where
+               // pasted content will be inexplicably wrapped in `<b>`
+               // tags with a font-weight normal.
+               {tag: "b", getAttrs: node => node.style.fontWeight != "normal" && null},
+               {style: "font-weight", getAttrs: value => /^(bold(er)?|[5-9]\d{2,})$/.test(value) && null}],
+    toDOM() { return ["strong"] }
+  },
+
+  // :: MarkSpec Code font mark. Represented as a `<code>` element.
+  code: {
+    parseDOM: [{tag: "code"}],
+    toDOM() { return ["code"] }
+  },
+
+  // :: MarkSpec subscript mark. Represented as a `<sub>` element.
+  subscript: {
+    excludes: "superscript",
+	  parseDOM: [{tag: "sub"}],
+    toDOM() { return ["sub"] }
+  },
+
+  // :: MarkSpec superscript mark. Represented as a `<sup>` element.
+  superscript: {
+    excludes: "subscript",
+	  parseDOM: [{tag: "sup"}],
+    toDOM() { return ["sup"] }
+  },
+
+  // :: MarkSpec strikethru mark. Represented as a `<del>` element.
+  strikethru: {
+	  parseDOM: [{tag: "del"}],
+    toDOM() { return ["del"] }
+  },
+
+    // :: MarkSpec superscript mark. Represented as a `<u>` element.
+  underline: {
+	  parseDOM: [{tag: "u"}],
+    toDOM() { return ["u"] }
+  },
+
+  // :: MarkSpec highlight mark. Represented as a `<mark>` element.
+  highlight: {
+    parseDOM: [{tag: "mark"}],
+    toDOM() { return ["mark"] }
+  }
+};
+
+
+// :: (NodeType, ?Object) ? (state: EditorState, dispatch: ?(tr: Transaction)) ? bool
+// Returns a command function that wraps the selection in a list with
+// the given type an attributes. If `dispatch` is null, only return a
+// value to indicate whether this is possible, but don't actually
+// perform the change.
+function wrapInList(listType, attrs) {
+  return function(state, dispatch) {
+    let {$from, $to} = state.selection;
+    let range = $from.blockRange($to), doJoin = false, outerRange = range;
+    if (!range) return false
+    // This is at the top of an existing list item
+    if (range.depth >= 2 && $from.node(range.depth - 1).type.compatibleContent(listType) && range.startIndex == 0) {
+      // Don't do anything if this is the top of the list
+      if ($from.index(range.depth - 1) == 0) return false
+      let $insert = state.doc.resolve(range.start - 2);
+      outerRange = new NodeRange($insert, $insert, range.depth);
+      if (range.endIndex < range.parent.childCount)
+        range = new NodeRange($from, state.doc.resolve($to.end(range.depth)), range.depth);
+      doJoin = true;
+    }
+    let wrap = findWrapping(outerRange, listType, attrs, range);
+    if (!wrap) return false
+    if (dispatch) dispatch(doWrapInList(state.tr, range, wrap, doJoin, listType).scrollIntoView());
+    return true
+  }
+}
+
+function doWrapInList(tr, range, wrappers, joinBefore, listType) {
+  let content = Fragment.empty;
+  for (let i = wrappers.length - 1; i >= 0; i--)
+    content = Fragment.from(wrappers[i].type.create(wrappers[i].attrs, content));
+
+  tr.step(new ReplaceAroundStep(range.start - (joinBefore ? 2 : 0), range.end, range.start, range.end,
+                                new Slice(content, 0, 0), wrappers.length, true));
+
+  let found = 0;
+  for (let i = 0; i < wrappers.length; i++) if (wrappers[i].type == listType) found = i + 1;
+  let splitDepth = wrappers.length - found;
+
+  let splitPos = range.start + wrappers.length - (joinBefore ? 2 : 0), parent = range.parent;
+  for (let i = range.startIndex, e = range.endIndex, first = true; i < e; i++, first = false) {
+    if (!first && canSplit(tr.doc, splitPos, splitDepth)) {
+      tr.split(splitPos, splitDepth);
+      splitPos += 2 * splitDepth;
+    }
+    splitPos += parent.child(i).nodeSize;
+  }
+  return tr
+}
+
+// :: Schema
+// This schema rougly corresponds to the document schema used by
+// [CommonMark](http://commonmark.org/), minus the list elements,
+// which are defined in the [`prosemirror-schema-list`](#schema-list)
+// module.
+//
+// To reuse elements from this schema, extend or read from its
+// `spec.nodes` and `spec.marks` [properties](#model.Schema.spec).
+const schema = new Schema({nodes: nodes$1, marks});
+
+const prefix$3 = "ProseMirror-prompt";
+
+function openPrompt(options) {
+  const wrapper = document.body.appendChild(document.createElement("div"));
+  wrapper.className = prefix$3;
+
+  const mouseOutside = e => { if (!wrapper.contains(e.target)) { close(); } };
+  setTimeout(() => window.addEventListener("mousedown", mouseOutside), 50);
+  const close = () => {
+    window.removeEventListener("mousedown", mouseOutside);
+    if (wrapper.parentNode) { wrapper.parentNode.removeChild(wrapper); }
+  };
+
+  const domFields = [];
+  for (const name in options.fields) {
+    if (!(name === "src" && options.fields.src.options.value)) {
+      domFields.push(options.fields[name].render());
+    }
+  }
+  const submitButton = document.createElement("button");
+  submitButton.type = "submit";
+  submitButton.className = prefix$3 + "-submit";
+  submitButton.textContent = "OK";
+  const cancelButton = document.createElement("button");
+  cancelButton.type = "button";
+  cancelButton.className = prefix$3 + "-cancel";
+  cancelButton.textContent = "Cancel";
+  cancelButton.addEventListener("click", close);
+
+  const form = wrapper.appendChild(document.createElement("form"));
+  if (options.title) {
+    form.appendChild(document.createElement("h5")).textContent = options.title;
+  }
+  if (options.note) {
+    const note = document.createElement("p");
+    note.textContent = options.note;
+    form.append(note);
+  }
+  domFields.forEach(field => {
+    form.appendChild(document.createElement("div")).appendChild(field);
+  });
+
+  if (options.radioButtons) {
+    // Create buttons for image placement.
+    const radioGroup = document.createElement("div");
+    const current = options.radioButtons.current;
+    options.radioButtons.labels.forEach(label => {
+      const button = document.createElement("input");
+      button.type = "radio";
+      button.name = options.radioButtons.name;
+      button.value = label;
+      button.setAttribute('id', label);
+      if (label === current) { button.setAttribute("checked", null); }
+      const labelTag = document.createElement("label");
+      labelTag.setAttribute("for", label);
+      labelTag.appendChild(document.createTextNode(label));
+      radioGroup.appendChild(button);
+      radioGroup.appendChild(labelTag);
+    });
+    form.appendChild(radioGroup);
+  }
+
+  const buttons = form.appendChild(document.createElement("div"));
+  buttons.className = prefix$3 + "-buttons";
+  buttons.appendChild(submitButton);
+  buttons.appendChild(document.createTextNode(" "));
+  buttons.appendChild(cancelButton);
+
+  if (options.useOkButton) {
+    buttons.lastChild.style.float = "right";
+    buttons.style.display = "block";
+  }
+
+  const box = wrapper.getBoundingClientRect();
+  wrapper.style.top = ((window.innerHeight - box.height) / 2) + "px";
+  wrapper.style.left = ((window.innerWidth - box.width) / 2) + "px";
+
+  const submit = () => {
+    const params = getValues(options.fields, domFields);
+    if (options.radioButtons) { params.class = form[options.radioButtons.name].value; }
+    if (params) {
+      close();
+      options.callback(params);
+    }
+  };
+
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    submit();
+  });
+
+  form.addEventListener("keydown", e => {
+    if (e.keyCode === 27) {
+      e.preventDefault();
+      close();
+    } else if (e.keyCode === 13) {
+      const doSubmit = (options.useOkButton && e.shiftKey)
+        ? true
+        : !options.useOkButton && !(e.ctrlKey || e.metaKey || e.shiftKey)
+        ? true
+        : false;
+      if (doSubmit) {
+        e.preventDefault();
+        submit();
+      }
+    } else if (e.keyCode === 9) {
+      window.setTimeout(() => {
+        if (!wrapper.contains(document.activeElement)) { close(); }
+      }, 500);
+    }
+  });
+
+  const input = form.elements[0];
+  if (input) { input.focus(); }
+}
+
+function getValues(fields, domFields) {
+  const result = Object.create(null);
+  let i = 0;
+  for (const name in fields) {
+    if (name === "src" && fields.src.options.value) {
+      result.src = fields.src.options.value;
+    } else {
+      const field = fields[name];
+      const dom = domFields[i++];
+      const value = field.read(dom);
+      const bad = field.validate(value);
+      if (bad) {
+        reportInvalid(dom, bad);
+        return null
+      }
+      result[name] = field.clean(value);
+    }
+  }
+  return result
+}
+
+function reportInvalid(dom, message) {
+  // FIXME this is awful and needs a lot more work
+  const parent = dom.parentNode;
+  const msg = parent.appendChild(document.createElement("div"));
+  msg.style.left = (dom.offsetLeft + dom.offsetWidth + 2) + "px";
+  msg.style.top = (dom.offsetTop - 5) + "px";
+  msg.className = "ProseMirror-invalid";
+  msg.textContent = message;
+  setTimeout(() => parent.removeChild(msg), 1500);
+}
+
+// ::- The type of field that `FieldPrompt` expects to be passed to it.
+class Field {
+  // :: (Object)
+  // Create a field with the given options. Options support by all
+  // field types are:
+  //
+  // **`value`**`: ?any`
+  //   : The starting value for the field.
+  //
+  // **`label`**`: string`
+  //   : The label for the field.
+  //
+  // **`required`**`: ?bool`
+  //   : Whether the field is required.
+  //
+  // **`validate`**`: ?(any) → ?string`
+  //   : A function to validate the given value. Should return an
+  //     error message if it is not valid.
+  constructor(options) { this.options = options; }
+
+  // render:: (state: EditorState, props: Object) → dom.Node
+  // Render the field to the DOM. Should be implemented by all subclasses.
+
+  // :: (dom.Node) → any
+  // Read the field's value from its DOM node.
+  read(dom) { return dom.value }
+
+  // :: (any) → ?string
+  // A field-type-specific validation function.
+  validateType(_value) {}
+
+  validate(value) {
+    if (!value && this.options.required) {
+      return "Required field"
+    }
+    return this.validateType(value) || (this.options.validate && this.options.validate(value))
+  }
+
+  clean(value) {
+    return this.options.clean ? this.options.clean(value) : value
+  }
+}
+
+// ::- A field class for single-line text fields.
+class TextField extends Field {
+  render() {
+    const input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = this.options.label;
+    input.value = this.options.value || "";
+    input.autocomplete = "off";
+    return input
+  }
+}
+
+class TextAreaField extends Field {
+  render() {
+    const input = document.createElement('textarea');
+    input.maxLength = 5000;
+    input.cols = 80;
+    input.rows = 4;
+    input.placeholder = this.options.label;
+    input.value = this.options.value;
+    input.autocomplete = "off";
+    return input
+  }
+}
+
+const prefix$4 = "ProseMirror-prompt";
+
+function openSelectPrompt(title, buttons, callback) {
+  const wrapper = document.body.appendChild(document.createElement("div"));
+  wrapper.className = prefix$4;
+
+  const mouseOutside = e => { if (!wrapper.contains(e.target)) { close(); } };
+  setTimeout(() => window.addEventListener("mousedown", mouseOutside), 50);
+  const close = () => {
+    window.removeEventListener("mousedown", mouseOutside);
+    if (wrapper.parentNode) { wrapper.parentNode.removeChild(wrapper); }
+  };
+
+  const form = wrapper.appendChild(document.createElement("form"));
+  form.appendChild(document.createElement("h5")).textContent = title;
+
+  for (let i = 0; i < buttons.length; i++) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = prefix$4 + "-button";
+    button.textContent = buttons[i].textContent;
+    button.dataset.pos = buttons[i].pos;
+    button.onclick = function(e) {
+      const pos = e.target.dataset.pos;
+      close();
+      callback(pos);
+    };
+    form.appendChild(button);
+  }
+
+  const box = wrapper.getBoundingClientRect();
+  wrapper.style.top = ((window.innerHeight - box.height) / 2) + "px";
+  wrapper.style.left = ((window.innerWidth - box.width) / 2) + "px";
+}
+
+function draftMode(state, dispatch, calcNode) {
+  // Toggle the document's draft mode.
+  // When in draft mode, Hurmet displays calc zones in plain text and omits the blue echo.
+  const inDraftMode = !state.doc.attrs.inDraftMode;
+  state.doc.attrs.inDraftMode = inDraftMode;
+  const tr = state.tr;  // Create a ProseMirror transacation.
+  state.doc.nodesBetween(0, state.doc.content.size, function(node, pos) {
+    if (node.type.name === "calculation") {
+      const attrs = Object.assign({}, node.attrs);
+      attrs.inDraftMode = inDraftMode;
+      tr.replaceWith(pos, pos + 1, calcNode.createAndFill(attrs));
+    }
+  });
+  dispatch(tr);
+}
+
 /* eslint-disable */
 // ::- A specification for serializing a ProseMirror document as
 // Markdown/CommonMark text.
@@ -23349,7 +30954,6 @@ const handleContents = (view, schema, str, format) => {
   if (format === "hurmet") {
     doc = JSON.parse(str);
   } else if (format === "markdown") {
-    // eslint-disable-next-line no-undef
     const ast = hurmet.md2ast(str);
     doc = {
       type: "doc",
@@ -27330,7 +34934,7 @@ function textAfterCursor(editor) {
 
 const commaRegEx = /"[^"]*"|[0-9]+,[0-9]+|[A-Za-zıȷ\u0391-\u03D5\uD835][A-Za-z0-9_ıȷ\u0391-\u03D5\uD835\uDC00-\uDFFF]/g;
 const dotRegEx = /"[^"]*"|[0-9]+\.[0-9]+|[A-Za-zıȷ\u0391-\u03D5\uD835][A-Za-z0-9_ıȷ\u0391-\u03D5\uD835\uDC00-\uDFFF]/g;
-const functionRegEx$1 = /^(?:private +)?function (?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*\(/;
+const functionRegEx$2 = /^(?:private +)?function (?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*\(/;
 
 const dotFromCommaForStorage = (str) => {
   // Lex for strings, numbers, and identifiers
@@ -27422,7 +35026,7 @@ function openMathPrompt(options) {
       }
       tex = jar.toString();
       if (decimalSymbol === ",") { tex = dotFromCommaForStorage(tex); }
-      isUDF = functionRegEx$1.test(tex);
+      isUDF = functionRegEx$2.test(tex);
       if (!isUDF) {
         // eslint-disable-next-line no-undef
         tex = hurmet.parse(tex, options.decimalFormat, false, true);

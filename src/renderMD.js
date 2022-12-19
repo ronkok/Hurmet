@@ -1,5 +1,7 @@
 import { parse } from "./parser"
 import { md2ast } from "./md2ast"
+import katex from "./katex.js"
+import temml from "./temml.js"
 
 /* Render inline Markdown, given an AST */
 
@@ -20,10 +22,8 @@ const nodes = {
     const dom = document.createElement('span')
     const isFF = 'MozAppearance' in document.documentElement.style
     if (isFF) {
-      // eslint-disable-next-line no-undef
       temml.render(tex, dom)
     } else {
-      // eslint-disable-next-line no-undef
       katex.render(tex, dom, {
         output: "html",
         strict: false,
@@ -36,7 +36,6 @@ const nodes = {
   tex(node) {
     const dom = document.createElement('span')
     dom.classList = "hurmet-tex"
-    // eslint-disable-next-line no-undef
     katex.render(node.attrs.tex, dom, { strict: false,
       throwOnError: false, minRuleThickness: 0.06 })
     return dom

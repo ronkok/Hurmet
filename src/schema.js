@@ -3,6 +3,9 @@ import {Schema} from "prosemirror-model"
 import {findWrapping, liftTarget, canSplit, ReplaceAroundStep} from "prosemirror-transform"
 import {Slice, Fragment, NodeRange} from "prosemirror-model"
 import { renderToC, tocLevels } from "./paginate"
+import { hurmet } from "./hurmet.js"
+import katex from "./katex.js"
+import temml from "./temml.js"
 
 // Helpers for creating a schema that supports tables.
 
