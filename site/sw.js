@@ -1,36 +1,16 @@
 
 // Service worker for Hurmet
 
-const version = 'hurmet_2022-12-16-10';
+const version = 'hurmet_2022-12-16-11';
 // Cache IDs
-const coreID = version + '_core';  // offline.html & CSS & fonts
+const coreID = version + '_core';  // offline.html & CSS
 const assetsID = version + '_assets'; // images
 const cacheIDs = [coreID, assetsID];
 
 const coreFiles = [
   '/offline.html',
   '/styles.min.css',
-  '/docStyles.min.css',
-  '/fonts/KaTeX_AMS-Regular.woff2',
-  '/fonts/KaTeX_Caligraphic-Bold.woff2',
-  '/fonts/KaTeX_Caligraphic-Regular.woff2',
-  '/fonts/KaTeX_Fraktur-Bold.woff2',
-  '/fonts/KaTeX_Fraktur-Regular.woff2',
-  '/fonts/KaTeX_Main-Bold.woff2',
-  '/fonts/KaTeX_Main-BoldItalic.woff2',
-  '/fonts/KaTeX_Main-Italic.woff2',
-  '/fonts/KaTeX_Main-Regular.woff2',
-  '/fonts/KaTeX_Math-BoldItalic.woff2',
-  '/fonts/KaTeX_Math-Italic.woff2',
-  '/fonts/KaTeX_SansSerif-Bold.woff2',
-  '/fonts/KaTeX_SansSerif-Italic.woff2',
-  '/fonts/KaTeX_SansSerif-Regular.woff2',
-  '/fonts/KaTeX_Script-Regular.woff2',
-  '/fonts/KaTeX_Size1-Regular.woff2',
-  '/fonts/KaTeX_Size2-Regular.woff2',
-  '/fonts/KaTeX_Size3-Regular.woff2',
-  '/fonts/KaTeX_Size4-Regular.woff2',
-  '/fonts/KaTeX_Typewriter-Regular.woff2'
+  '/docStyles.min.css'
 ];
 
 //
@@ -70,8 +50,7 @@ self.addEventListener('fetch', function(event) {
 
   // CSS
   // Offline-first, pre-cached
-  if (request.headers.get('Accept').includes('text/css') ||
-      request.headers.get('Accept').includes('font/woff2')) {
+  if (request.headers.get('Accept').includes('text/css')) {
     event.respondWith(
       caches.match(request).then(function(response) {
         return response || fetch(request).then(function(response) {
@@ -101,9 +80,10 @@ self.addEventListener('fetch', function(event) {
     })());
   }
 
-  // Assets: Images
+  // Assets: Images & fonts
   // Offline-first, cache as you browse
-  if (request.headers.get('Accept').includes('image')) {
+  if (request.headers.get('Accept').includes('image') ||
+      request.headers.get('Accept').includes('font/woff2')) {
     event.respondWith(
       caches.match(request).then(function(response) {
         return response || fetch(request).then(function(response) {
