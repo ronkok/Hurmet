@@ -110,11 +110,6 @@ document range by selecting text, then clicking one of the menu bar buttons:
 [align-right]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 1h16v2H0zm6 3h10v2H6zm0 6h10v2H6zM0 7h16v2H0zm0 6h16v2H0z'/%3E%3C/svg%3E
 [information]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M7 4.75c0-.412.338-.75.75-.75h.5c.412 0 .75.338.75.75v.5c0 .412-.338.75-.75.75h-.5A.753.753 0 0 1 7 5.25v-.5zM10 12H6v-1h1V8H6V7h3v4h1z'/%3E%3Cpath d='M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm0 14.5a6.5 6.5 0 1 1 0-13 6.5 6.5 0 0 1 0 13z'/%3E%3C/svg%3E
 
-### Offline
-
-Hurmet has a offline page which works even if you are not connected to the
-internet.
-
 ### Save/Open
 
 You can save your work using **Ctrl-S** or the save command in the File menu.
@@ -2199,12 +2194,6 @@ render math as plain text and omit the blue echos.
 
 I expect that Chrome and Edge will get a performance boost when they support MathML.
 
-#### Offline use
-
-In order for Hurmet to work offline, you must allow Hurmet to store a cookie on
-your computer. Don’t worry, it is not a tracking cookie. Hurmet just stores a
-copy of the offline page, so it can always be available.
-
 #### Matrix multiplication
 
 To get element-wise multiplication of two matrices, the operator symbol must be
@@ -2288,7 +2277,6 @@ Copyright © 2020-2022 Ron Kok. Released under the [MIT License](https://opensou
 <details><summary>Editor</summary>
 
 * [Basics](#editor-basics)
-* [Offline](#offline)
 * [Save/Open](#save/open)
 * [Tracking Changes](#tracking-changes)
 * [Print Header](#print-header)
