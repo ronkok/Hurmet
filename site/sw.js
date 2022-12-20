@@ -1,21 +1,21 @@
 // A service worker to enable offline use of Hurmet.app
 
-const version = "hurmet-2022-12-19-06"
+const version = "hurmet-2022-12-19-07"
 
-const coreFiles = [
-  '/offline.html',
-  '/styles.min.css',
-  '/docStyles.min.css'
-];
+const addResourcesToCache = async(resources) => {
+  const cache = await caches.open(version)
+  await cache.addAll(resources)
+}
 
-self.addEventListener('install', function(event) {
-  event.waitUntil(caches.open(version).then(function(cache) {
-    coreFiles.forEach(function(file) {
-      cache.add(new Request(file));
-    });
-    return cache;
-  }));
-});
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    addResourcesToCache([
+      '/offline.html',
+      '/styles.min.css',
+      '/docStyles.min.css'
+    ])
+  )
+})
 
 const cacheFirst = async(request) => {
   const responseFromCache = await caches.match(request)
@@ -23,7 +23,7 @@ const cacheFirst = async(request) => {
     return responseFromCache
   }
   return fetch(request)
-};
+}
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== 'GET') { return }
@@ -53,7 +53,7 @@ const deleteOldCaches = async() => {
   const keyList = await caches.keys()
   const cachesToDelete = keyList.filter((key) => !cacheKeepList.includes(key))
   await Promise.all(cachesToDelete.map(deleteCache))
-};
+}
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(deleteOldCaches())
