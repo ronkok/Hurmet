@@ -5,3 +5,5 @@ schema.js
 keymap.js
 inputrules.js
 currencyRates.js
+katex.js
+temml.js

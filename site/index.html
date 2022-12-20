@@ -12,11 +12,10 @@
       try {
         const registration = await navigator.serviceWorker.register("/sw.js", { scope: "/", })
       } catch (error) {
-        console.error(`Registration failed with ${error}`);
+        console.error(`Registration failed with ${error}`)
       }
     }
-  };
-    
+  }
   registerServiceWorker();</script>
   <style id="pageStyle">@media print {@page{size: letter; margin: 16mm 0.75in 16mm 0.75in;}}</style>
 </head>
