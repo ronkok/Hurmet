@@ -39,9 +39,9 @@ self.addEventListener("fetch", (event) => {
         return cachedResponse;
       }
     })());
+  } else {
+    event.respondWith(cacheFirst(event.request))
   }
-
-  event.respondWith(cacheFirst(event.request))
 })
 
 const deleteCache = async(key) => {
