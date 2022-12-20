@@ -1,6 +1,6 @@
 // A service worker to enable offline use of Hurmet.app
 
-const version = "hurmet-2022-12-19-05"
+const version = "hurmet-2022-12-19-06"
 
 const coreFiles = [
   '/offline.html',
