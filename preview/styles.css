@@ -6,8 +6,6 @@
  * requests and to make it easier to minify all the CSS.
  */
 
-* { margin:0; padding:0; }  /* reset */
-
 /*
  * This section contains the CSS for KaTeX math rendering.
  */

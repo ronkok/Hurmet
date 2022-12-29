@@ -531,7 +531,7 @@ const binary = {
         return m.map((row, i) => [v[i], ...row])
       },
       unshift(v, m) {
-        if (v.length !== m.length) { return errorOprnd("BAD_CONCAT") }
+        if (v.length !== m[0].length) { return errorOprnd("BAD_CONCAT") }
         return [v, ...m]
       }
     }
