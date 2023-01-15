@@ -2266,7 +2266,7 @@ for which I am very grateful.
 
 <br>
 
-Copyright © 2020-2022 Ron Kok. Released under the [MIT License](https://opensource.org/licenses/MIT)
+Copyright © 2020-2023 Ron Kok. Released under the [MIT License](https://opensource.org/licenses/MIT)
 
 <br>
 
