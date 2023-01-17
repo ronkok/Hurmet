@@ -53,28 +53,6 @@ const bmpCalligraphic = {
   "\u2134": "o"
 }
 
-const assertCalligraphic = str => {
-  // The Unicode code points for "fancy" letters do not distinguish between script
-  // and calligraphic. Hurmet takes them to be calligraphic.
-  // That currently comes naturally to MathML if the system font in use is Cambria Math.
-  // For KaTeX HTML, we have to assert it, which we do here.
-  // I may have to revisit this and also assert in MathML, depending on how
-  // https://github.com/mathml-refresh/mathml/issues/61 is resolved.
-  // I do not append \uFE00 as Murray Sargent proposes, at least not yet.
-  // Ref: https://blogs.msdn.microsoft.com/murrays/2016/02/05/unicode-math-calligraphic-alphabets/
-  const match = calligraphicRegEx.exec(str)
-  if (!match) { return str }
-  let ch = ""
-  if (str.charAt(0) === "\uD835") {
-    const codePoint = str.charCodeAt(1)
-    ch = String.fromCharCode(codePoint - (codePoint <= 0xdcb5 ? 0xdc5b : 0xdc55))
-  } else {
-    // Characters in the Unicode Basic Multilingual Plane
-    ch = bmpCalligraphic[str.charAt(0)]
-  }
-  return `\\mathcal{${ch}}` + str.slice(match[0].length)
-}
-
 const checkForUnaryMinus = (token, prevToken) => {
   switch (prevToken.ttype) {
     case tt.NUM:
@@ -649,7 +627,6 @@ export const parse = (
         // variables get appended directly onto rpn.
         popTexTokens(7, okToAppend)
         if (isPrecededBySpace) { posOfPrevRun = tex.length }
-        token.output = assertCalligraphic(token.output)
 
         if (!isCalc) {
           if (token.ttype === tt.LONGVAR) {

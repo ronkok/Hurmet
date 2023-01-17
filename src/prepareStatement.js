@@ -20,7 +20,7 @@ import { functionRegEx, drawRegEx, scanModule } from "./module"
  *
  *  From that entry this module will:
  *    1. Determine the name of the cell, as in "x" from "x = 12"
- *    2. Parse the entry string into TeX, to be passed later to KaTeX for rendering.
+ *    2. Parse the entry string into TeX, to be passed later to Temml for rendering.
  *    3. If the input asks for a calculation:
  *       a. Parse the expression into an echo string (in TeX) with placeholders that will be
  *          filled in later with values when the calculation is done.

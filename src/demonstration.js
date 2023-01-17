@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { codeJar, selectedText, textBeforeCursor, textAfterCursor } from "./codejar"
 import { hurmet } from "./hurmet.js"
-import katex from "./katex.js"
+import temml from "./temml.js"
 
 'use strict'
 
@@ -41,11 +41,9 @@ const renderMath = (jar, demoOutput) => {
     if (typeof tex === "object" && tex.dtype && tex.dtype === hurmet.dt.DRAWING) {
       demoOutput.appendChild(hurmet.Draw.renderSVG(tex.resultdisplay))
     } else {
-      katex.render(tex, demoOutput, {
-        strict: false,
-        macros: {"\\class": "\\htmlClass"},
-        trust: (context) => context.command === "\\htmlClass" && context.class === "special-fraction",
-        throwOnError: false
+      temml.render(tex, demoOutput, {
+        trust: (context) => context.command === "\\class" && context.class === "special-fraction",
+        wrap: "="
       })
     }
   } catch(err) {
@@ -86,13 +84,6 @@ const prompts = {
   "unit-aware-calculations": "4 'ft' + 3 'yards' = ?? m",
   "remote-modules": "mod.E = ?? psi"
 }
-
-// Render math via KaTeX.
-const texSpans = document.getElementsByClassName("tex");
-[...texSpans].forEach(span => {
-  const tex = span.dataset.tex.trim().replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
-  katex.render(tex, span, { strict: false, throwOnError: false })
-})
 
 // Start the demonstration editor
 const editor = document.getElementById("demo-input")

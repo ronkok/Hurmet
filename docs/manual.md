@@ -91,8 +91,8 @@ document range by selecting text, then clicking one of the menu bar buttons:
 [T]: data:image/svg+xml;utf8,%3Csvg height='16' width='16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M.8 4.5V.3c.1-.5.6-.2 1-.3h12.8c.4.2.2.7.3 1v3.5c-.4.7-1.1-.1-1-.7a4 4 0 0 0-2.7-2.7C10.8 1 9.8.6 9.7 1v12.8c0 .8.3 1.5 1.2 1.3.6-.2 1.6.5.8.9H3.9c-.8-.6.4-1 1-.9 1 .2 1-.8 1-1.6V.8c-1.2.2-2.6.5-3.4 1.5-.7.7-.8 1.6-1 2.4-.2.2-.6.1-.7-.2ZM2.6 1c.4-.2.3-.2 0-.2h-1V2ZM9 7.8v-7H6.8l-.1 13.5c.1.4-.4 1 .2.9H9c-.3-.5.1-1.2 0-1.7Zm4.8-6.1c.1 0 .4.5.3 0V.9h-1.3l1 .9z'/%3E%3C/svg%3E
 [math]: https://en.wikibooks.org/wiki/LaTeX/Mathematics
 [advanced math]: https://en.wikibooks.org/wiki/LaTeX/Advanced_Mathematics
-[home page]: https://katex.org/
-[supported-functions]: https://katex.org/docs/supported.html
+[home page]: https://temml.org/
+[supported-functions]: https://temml.org/docs/en/supported.html
 [indent]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 1h16v2H0zm6 3h10v2H6zm0 3h10v2H6zm0 3h10v2H6zm-6 3h16v2H0zm0-2V5l4 3z'/%3E%3C/svg%3E
 [list]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 0h4v4H0zm6 1h10v2H6zM0 6h4v4H0zm6 1h10v2H6zm-6 5h4v4H0zm6 1h10v2H6z'/%3E%3C/svg%3E
 [numbered list]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M6 13h10v2H6zm0-6h10v2H6zm0-6h10v2H6zM3 0v4H2V1H1V0zM2 8.219V9h2v1H1V7.719l2-.938V6H1V5h3v2.281zM4 11v5H1v-1h2v-1H1v-1h2v-1H1v-1z'/%3E%3C/svg%3E
@@ -274,7 +274,7 @@ To create a cell in TeX display mode, first change the paragraph format to
 center-justified, then create the cell.
 
 For more information about TeX and LaTeX, good places to start are the Wikibooks
-pages for writing [math][] and [advanced math][]; and the KaTeX [home page][]
+pages for writing [math][] and [advanced math][]; and the Temml [home page][]
 and [supported-functions][] page.
 
 Hurmet calculation cells use a different syntax than TeX. In calculation cells,
@@ -341,7 +341,7 @@ Multiplication
 
 Roots
 
-: Type `sqrt` and hit the spacebar to auto-correct into ¢√˽¢<br>`root 3` and
+: Type `sqrt` and hit the spacebar to auto-correct into $√$<br>`root 3` and
   `root 4` will also auto-correct into roots.
 
 Function
@@ -468,10 +468,9 @@ Display Mode
 +---------------+-----------------+------------------------------+-------------------------------+
 {.markup}
 
-Calculation cells also support many of the math-mode TeX functions
-[supported by KaTeX](https://katex.org/docs/supported.html). Put function
-arguments between parentheses, not braces, as in `\cancel(5)` instead of
-`\cancel{5}`.
+Calculation cells also support many of the math-mode TeX functions supported
+by [Temml](https://temml.org/docs/en/supported.html). Put function arguments
+between parentheses, not braces, as in `\cancel(5)` instead of `\cancel{5}`.
 
 TeX functions are provided for use in displaying math. Not all of them are
 valid in calculations.
@@ -2192,12 +2191,9 @@ file and the random part after "/raw/" is the revision ID.
 
 #### Typing lag
 
-A big document with a lot of math may cause typing lag. You can regain some
-speed by using Firefox instead of Chrome or Edge, and gain more speed by
+A big document with a lot of math may cause typing lag. You can regain speed by
 clicking on the Draft Mode toggle button at **File | Draft mode**. It will
 render math as plain text and omit the blue echos.
-
-I expect that Chrome and Edge will get a performance boost when they support MathML.
 
 #### Matrix multiplication
 
@@ -2256,7 +2252,7 @@ for which I am very grateful.
 
 *   [ProseMirror](http://prosemirror.net), an extendable rich-text editor by Marijn Haverbeke.
 
-*   [KaTeX](https://katex.org), fast math rendering on the web, by Khan Academy and volunteer contributors.
+*   [Temml](https://temml.org/), a LaTeX-to-MathML library.
 
 *   [CodeJar](https://medv.io/codejar/), a light-weight text editor, by Anton Medvedev.
 

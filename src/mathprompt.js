@@ -1,6 +1,6 @@
 import { codeJar, selectedText, textBeforeCursor, textAfterCursor } from "./codejar"
 import { hurmet } from "./hurmet.js"
-import katex from "./katex.js"
+import temml from "./temml.js"
 
 const commaRegEx = /"[^"]*"|[0-9]+,[0-9]+|[A-Za-zıȷ\u0391-\u03D5\uD835][A-Za-z0-9_ıȷ\u0391-\u03D5\uD835\uDC00-\uDFFF]/g
 const dotRegEx = /"[^"]*"|[0-9]+\.[0-9]+|[A-Za-zıȷ\u0391-\u03D5\uD835][A-Za-z0-9_ıȷ\u0391-\u03D5\uD835\uDC00-\uDFFF]/g
@@ -53,7 +53,6 @@ export function openMathPrompt(options) {
   const close = () => {
     window.removeEventListener("mousedown", mouseOutside)
     if (wrapper.parentNode) {
-      wrapper.parentNode.firstChild.style.display = "inline-block"
       wrapper.parentNode.removeChild(wrapper)
     }
   }
@@ -98,7 +97,6 @@ export function openMathPrompt(options) {
       if (decimalSymbol === ",") { tex = dotFromCommaForStorage(tex) }
       isUDF = functionRegEx.test(tex)
       if (!isUDF) {
-        // eslint-disable-next-line no-undef
         tex = hurmet.parse(tex, options.decimalFormat, false, true)
       }
     } else {
@@ -106,13 +104,12 @@ export function openMathPrompt(options) {
     }
     if (!isUDF) {
       try {
-        const isFF = 'MozAppearance' in document.documentElement.style
-        // eslint-disable-next-line no-undef
-        katex.render(tex, mathDisplay, { displayMode: options.attrs.displayMode, strict: false,
-          macros: { "\\class": "\\htmlClass" },
-          trust: (context) => context.command === '\\htmlClass' &&
+        temml.render(tex, mathDisplay, {
+          displayMode: options.attrs.displayMode,
+          trust: (context) => context.command === '\\class' &&
                               context.class === "special-fraction",
-          output: isFF ? "mathml" : "htmlAndMathml" })
+          wrap: "="
+        })
       } catch (err) {
         while (mathDisplay.lastChild) {
           mathDisplay.removeChild(mathDisplay.lastChild)

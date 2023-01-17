@@ -1,4 +1,5 @@
 import { hurmet } from "./hurmet.js"
+import temml from "../src/temml.js"
 import { md2ast } from "../src/md2ast.js"
 
 const sanitizeUrl = function(url) {
@@ -134,10 +135,16 @@ const nodes = {
   },
   calculation(node) {
     const tex = hurmet.parse(node.attrs.entry)
-    return htmlTag("span", "", { class: "tex", "data-tex": tex })
+    return temml.renderToString(
+      tex,
+      { trust: true, displayMode: (node.attrs.displayMode || false) }
+    )
   },
   tex(node) {
-    return htmlTag("span", "", { class: "hurmet-tex", "data-tex": node.tex })
+    return temml.renderToString(
+      node.attrs.tex,
+      { trust: true, displayMode: (node.attrs.displayMode || false) }
+    )
   },
   indented_div(node)    { return htmlTag("div", output(node.content), { class: 'indented' }) },
   centered_div(node)    {

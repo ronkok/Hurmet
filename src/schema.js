@@ -4,7 +4,6 @@ import {findWrapping, liftTarget, canSplit, ReplaceAroundStep} from "prosemirror
 import {Slice, Fragment, NodeRange} from "prosemirror-model"
 import { renderToC, tocLevels } from "./paginate"
 import { hurmet } from "./hurmet.js"
-import katex from "./katex.js"
 import temml from "./temml.js"
 
 // Helpers for creating a schema that supports tables.
@@ -295,7 +294,7 @@ export const nodes = {
       entry: { default: "" }, //          Raw string input by the author, edited for decimal.
       displayMode: { default: false }, // Type set in TeX display mode if true.
       name: {default: null}, //           Name of cell, as in "x" from x = 12
-      tex: {default: ""}, //              The string I pass to KaTeX for final rendering.
+      tex: {default: ""}, //              The string I pass to Temml for final rendering.
       alt: {default: ""}, //              The string I render when in draft mode.
       rpn: {default: null}, //            RPN from parser.js, for calculation.
       inDraftMode: {default: false},
@@ -336,23 +335,11 @@ export const nodes = {
         dom.firstChild.textContent = node.attrs.alt ? node.attrs.alt : node.attrs.entry
       } else {
         const tex = node.attrs.tex
-        const isFF = 'MozAppearance' in document.documentElement.style
-        if (isFF) {
-          temml.render(tex, dom, {
-            displayMode: node.attrs.displayMode,
-            trust: (context) => context.command === '\\class' && context.class === "special-fraction"
-          })
-        } else {
-          katex.render(tex, dom, {
-            displayMode: node.attrs.displayMode,
-            output: "html",
-            strict: false,
-            macros: {"\\class": "\\htmlClass"},
-            throwOnError: false,
-            minRuleThickness: 0.06,
-            trust: (context) => context.command === '\\htmlClass' && context.class === "special-fraction"
-          })
-        }
+        temml.render(tex, dom, {
+          displayMode: node.attrs.displayMode,
+          trust: (context) => context.command === '\\class' && context.class === "special-fraction",
+          wrap: "="
+        })
       }
       // Before writing to DOM, I filter out most of the run-time info in node.attrs.
       dom.dataset.entry = node.attrs.entry
@@ -378,8 +365,7 @@ export const nodes = {
       const tex = node.attrs.tex
       dom.dataset.tex = tex
       if (node.attrs.displayMode) { dom.dataset.display = "true" }
-      katex.render(tex, dom, { displayMode: node.attrs.displayMode, strict: false,
-        output: "html", throwOnError: false, minRuleThickness: 0.06 })
+      temml.render(tex, dom, { displayMode: node.attrs.displayMode, wrap: "=" })
       return dom
     }
   },
