@@ -1,6 +1,6 @@
 // A service worker to enable offline use of Hurmet.app
 
-const version = "hurmet-2023-01-19-02"
+const version = "hurmet-2023-01-19-03"
 
 const addResourcesToCache = async(resources) => {
   const cache = await caches.open(version)
@@ -10,6 +10,10 @@ const addResourcesToCache = async(resources) => {
 self.addEventListener("install", (event) => {
   event.waitUntil(
     addResourcesToCache([
+      '/',
+      '/examples.html',
+      '/manual.html',
+      '/unit-definitions.html',
       '/offline.html',
       '/styles.min.css',
       '/docStyles.min.css',
@@ -31,8 +35,9 @@ const cacheFirst = async(request) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== 'GET') { return }
+  event.respondWith(cacheFirst(event.request))
 
-  if (event.request.mode === 'navigate') {
+/*  if (event.request.mode === 'navigate') {
     console.log(event.request)
     event.respondWith((async() => {
       try {
@@ -47,7 +52,7 @@ self.addEventListener("fetch", (event) => {
     })());
   } else {
     event.respondWith(cacheFirst(event.request))
-  }
+  } */
 })
 
 const deleteCache = async(key) => {
