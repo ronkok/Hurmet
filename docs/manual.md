@@ -4,7 +4,7 @@
    <meta charset="utf-8">
    <meta name="viewport" content="width=device-width, initial-scale=1">
    <title>Hurmet Manual</title>
-   <link rel="icon" type="image/png" href="./images/favicon.png">
+   <link rel="manifest" href="/manifest.json" />
    <link rel="stylesheet" href="/docStyles.min.css">
 </head>
 

@@ -1,6 +1,6 @@
 // A service worker to enable offline use of Hurmet.app
 
-const version = "hurmet-2023-01-19-04"
+const version = "hurmet-2023-01-20"
 
 const addResourcesToCache = async(resources) => {
   const cache = await caches.open(version)
@@ -11,6 +11,7 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     addResourcesToCache([
       '/',
+      '/index.html',
       '/examples.html',
       '/manual.html',
       '/unit-definitions.html',
@@ -20,7 +21,11 @@ self.addEventListener("install", (event) => {
       '/demo.min.js',
       '/prosemirror.min.js',
       '/latinmodernmath.woff2',
-      '/Temml.woff2'
+      '/Temml.woff2',
+      '/manifest.json',
+      '/favicon.svg',
+      '/favicon-192.png',
+      '/favicon-512.png'
     ])
   )
 })
@@ -41,38 +46,6 @@ self.addEventListener("fetch", (e) => {
     })()
   );
 });
-
-/*
-const cacheFirst = async(request) => {
-  const responseFromCache = await caches.match(request)
-  if (responseFromCache) {
-    return responseFromCache
-  }
-  return fetch(request)
-}
-
-self.addEventListener("fetch", (event) => {
-  if (event.request.method !== 'GET') { return }
-  event.respondWith(cacheFirst(event.request))
-
-  if (event.request.mode === 'navigate') {
-    console.log(event.request)
-    event.respondWith((async() => {
-      try {
-        const networkResponse = await fetch(event.request);
-        return networkResponse;
-      } catch (error) {
-        console.log(error)
-        const cache = await caches.open(version);
-        const cachedResponse = await cache.match("/offline.html");
-        return cachedResponse;
-      }
-    })());
-  } else {
-    event.respondWith(cacheFirst(event.request))
-  }
-})
-*/
 
 const deleteCache = async(key) => {
   await caches.delete(key)
