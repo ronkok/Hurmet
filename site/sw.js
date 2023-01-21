@@ -1,6 +1,6 @@
 // A service worker to enable offline use of Hurmet.app
 
-const version = "hurmet-2023-01-20"
+const version = "hurmet-2023-01-21"
 
 const addResourcesToCache = async(resources) => {
   const cache = await caches.open(version)
@@ -10,8 +10,6 @@ const addResourcesToCache = async(resources) => {
 self.addEventListener("install", (event) => {
   event.waitUntil(
     addResourcesToCache([
-      '/',
-      '/index.html',
       '/examples.html',
       '/manual.html',
       '/unit-definitions.html',
@@ -30,9 +28,18 @@ self.addEventListener("install", (event) => {
   )
 })
 
+const homeRegEx = /hurmet\.app\/$/
+
 self.addEventListener("fetch", (e) => {
   e.respondWith(
     (async() => {
+      if (!navigator.onLine) {
+        console.log("offline")
+        if (homeRegEx.test(e.request.url)) {
+          const offline = await caches.match("/offline/")
+          if (offline) { return offline }
+        }
+      }
       const r = await caches.match(e.request);
       console.log(`[Service Worker] Fetching resource: ${e.request.url}`);
       if (r) {
