@@ -35,8 +35,9 @@ self.addEventListener("fetch", (e) => {
     (async() => {
       if (!navigator.onLine) {
         console.log("offline")
+        console.log(e.request.url)
         if (homeRegEx.test(e.request.url)) {
-          const offline = await caches.match("/offline/")
+          const offline = await caches.match("/offline.html")
           if (offline) { return offline }
         }
       }
