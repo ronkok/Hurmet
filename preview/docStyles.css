@@ -289,6 +289,9 @@ dd {
     margin-left: 2.5em;
     line-height: 1.35;
 }
+ul {
+    padding: 0;
+}
 ol li {
     position: relative;
     left: 2.2em;
