@@ -48135,7 +48135,8 @@ function openMathPrompt(options) {
           displayMode: options.attrs.displayMode,
           trust: (context) => context.command === '\\class' &&
                               context.class === "special-fraction",
-          wrap: "="
+          wrap: "=",
+          errorColor: "#fff"
         });
       } catch (err) {
         while (mathDisplay.lastChild) {
