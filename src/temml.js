@@ -1759,125 +1759,102 @@ for (let i = 0; i < 10; i++) {
  * much of this module.
  */
 
-function setLineBreaks(expression, wrapMode, isDisplayMode, color) {
-  if (color === undefined && wrapMode !== "none") {
-    // First, make one pass through the expression and split any color nodes.
-    const upperLimit = expression.length - 1;
-    for (let i = upperLimit; i >= 0; i--) {
-      const node = expression[i];
-      if (node.type === "mstyle" && node.attributes.mathcolor) {
-        const color = node.attributes.mathcolor;
-        const fragment = setLineBreaks(node.children, wrapMode, isDisplayMode, color);
-        if (!(fragment.type && fragment.type !== "mtable")) {
-          expression.splice(i, 1, ...fragment.children);
-        }
-      }
-    }
-  }
-
-  const tagName = color ? "mstyle" : "mrow";
-
+function setLineBreaks(expression, wrapMode, isDisplayMode) {
   const mtrs = [];
   let mrows = [];
   let block = [];
   let numTopLevelEquals = 0;
   let canBeBIN = false; // The first node cannot be an infix binary operator.
-  for (let i = 0; i < expression.length; i++) {
-    const node = expression[i];
-    if (node.type && node.type === "mstyle" && node.attributes.mathcolor) {
-      if (block.length > 0) {
-        // Start a new block. (Insert a soft linebreak.)
-        mrows.push(new mathMLTree.MathNode(tagName, block));
-      }
-      // Insert the mstyle
-      mrows.push(node);
-      block = [];
-      continue
+  let i = 0;
+  while (i < expression.length) {
+    while (expression[i] instanceof DocumentFragment) {
+      expression.splice(i, 1, ...expression[i].children); // Expand the fragment.
     }
+    const node = expression[i];
     if (node.attributes && node.attributes.linebreak &&
       node.attributes.linebreak === "newline") {
       // A hard line break. Create a <mtr> for the current block.
       if (block.length > 0) {
-        const element = new mathMLTree.MathNode(tagName, block);
-        if (color) { element.setAttribute("mathcolor", color); }
-        mrows.push(new mathMLTree.MathNode(tagName, block));
+        mrows.push(new mathMLTree.MathNode("mrow", block));
       }
       mrows.push(node);
       block = [];
       const mtd = new mathMLTree.MathNode("mtd", mrows);
+      mtd.style.textAlign = "left";
       mtrs.push(new mathMLTree.MathNode("mtr", [mtd]));
       mrows = [];
+      i += 1;
       continue
     }
     block.push(node);
-    if (node.type && node.type === "mo" && wrapMode === "=") {
-      if (node.children.length === 1 && node.children[0].text === "=") {
+    if (node.type && node.type === "mo" && node.children.length === 1) {
+      if (wrapMode === "=" && node.children[0].text === "=") {
         numTopLevelEquals += 1;
         if (numTopLevelEquals > 1) {
           block.pop();
           // Start a new block. (Insert a soft linebreak.)
-          const element = new mathMLTree.MathNode(tagName, block);
-          if (color) { element.setAttribute("mathcolor", color); }
+          const element = new mathMLTree.MathNode("mrow", block);
           mrows.push(element);
           block = [node];
         }
-      }
-    } else if (node.type && node.type === "mo" && wrapMode === "tex") {
-      // This may be a place for a soft line break.
-      if (canBeBIN && !node.attributes.form) {
-        // Check if the following node is a \nobreak text node, e.g. "~""
-        const next = i < expression.length - 1 ? expression[i + 1] : null;
-        let glueIsFreeOfNobreak = true;
-        if (
-          !(
-            next &&
-            next.type === "mtext" &&
-            next.attributes.linebreak &&
-            next.attributes.linebreak === "nobreak"
-          )
-        ) {
-          // We may need to start a new block.
-          // First, put any post-operator glue on same line as operator.
-          for (let j = i + 1; j < expression.length; j++) {
-            const nd = expression[j];
-            if (
-              nd.type &&
-              nd.type === "mspace" &&
-              !(nd.attributes.linebreak && nd.attributes.linebreak === "newline")
-            ) {
-              block.push(nd);
-              i += 1;
+      } else if (wrapMode === "tex") {
+        // This may be a place for a soft line break.
+        if (canBeBIN && !node.attributes.form) {
+          // Check if the following node is a \nobreak text node, e.g. "~""
+          const next = i < expression.length - 1 ? expression[i + 1] : null;
+          let glueIsFreeOfNobreak = true;
+          if (
+            !(
+              next &&
+              next.type === "mtext" &&
+              next.attributes.linebreak &&
+              next.attributes.linebreak === "nobreak"
+            )
+          ) {
+            // We may need to start a new block.
+            // First, put any post-operator glue on same line as operator.
+            for (let j = i + 1; j < expression.length; j++) {
+              const nd = expression[j];
               if (
-                nd.attributes &&
-                nd.attributes.linebreak &&
-                nd.attributes.linebreak === "nobreak"
+                nd.type &&
+                nd.type === "mspace" &&
+                !(nd.attributes.linebreak && nd.attributes.linebreak === "newline")
               ) {
-                glueIsFreeOfNobreak = false;
+                block.push(nd);
+                i += 1;
+                if (
+                  nd.attributes &&
+                  nd.attributes.linebreak &&
+                  nd.attributes.linebreak === "nobreak"
+                ) {
+                  glueIsFreeOfNobreak = false;
+                }
+              } else {
+                break;
               }
-            } else {
-              break;
             }
           }
+          if (glueIsFreeOfNobreak) {
+            // Start a new block. (Insert a soft linebreak.)
+            const element = new mathMLTree.MathNode("mrow", block);
+            mrows.push(element);
+            block = [];
+          }
+          canBeBIN = false;
         }
-        if (glueIsFreeOfNobreak) {
-          // Start a new block. (Insert a soft linebreak.)
-          const element = new mathMLTree.MathNode(tagName, block);
-          if (color) { element.setAttribute("mathcolor", color); }
-          mrows.push(element);
-          block = [];
-        }
-        canBeBIN = false;
+        const isOpenDelimiter = node.attributes.form && node.attributes.form === "prefix";
+        // Any operator that follows an open delimiter is unary.
+        canBeBIN = !(node.attributes.separator || isOpenDelimiter);
+      } else {
+        canBeBIN = true;
       }
-      const isOpenDelimiter = node.attributes.form && node.attributes.form === "prefix";
-      // Any operator that follows an open delimiter is unary.
-      canBeBIN = !(node.attributes.separator || isOpenDelimiter);
     } else {
       canBeBIN = true;
     }
+    i += 1;
   }
   if (block.length > 0) {
-    const element = new mathMLTree.MathNode(tagName, block);
-    if (color) { element.setAttribute("mathcolor", color); }
+    const element = new mathMLTree.MathNode("mrow", block);
     mrows.push(element);
   }
   if (mtrs.length > 0) {
@@ -1964,6 +1941,48 @@ const consolidateText = mrow => {
   return mtext
 };
 
+const numberRegEx$1 = /^[0-9]$/;
+const isCommaOrDot = node => {
+  return (node.type === "atom" && node.text === ",") ||
+         (node.type === "textord" && node.text === ".")
+};
+const consolidateNumbers = expression => {
+  // Consolidate adjacent numbers. We want to return <mn>1,506.3</mn>,
+  // not <mn>1</mn><mo>,</mo><mn>5</mn><mn>0</mn><mn>6</mn><mi>.</mi><mn>3</mn>
+  if (expression.length < 2) { return }
+  const nums = [];
+  let inNum = false;
+  // Find adjacent numerals
+  for (let i = 0; i < expression.length; i++) {
+    const node = expression[i];
+    if (node.type === "textord" && numberRegEx$1.test(node.text)) {
+      if (!inNum) { nums.push({ start: i }); }
+      inNum = true;
+    } else {
+      if (inNum) { nums[nums.length - 1].end = i - 1; }
+      inNum = false;
+    }
+  }
+  if (inNum) { nums[nums.length - 1].end = expression.length - 1; }
+
+  // Determine if numeral groups are separated by a comma or dot.
+  for (let i = nums.length - 1; i > 0; i--) {
+    if (nums[i - 1].end === nums[i].start - 2 && isCommaOrDot(expression[nums[i].start - 1])) {
+      // Merge the two groups.
+      nums[i - 1].end = nums[i].end;
+      nums.splice(i, 1);
+    }
+  }
+
+  // Consolidate the number nodes
+  for (let i = nums.length - 1; i >= 0; i--) {
+    for (let j = nums[i].start + 1; j <= nums[i].end; j++) {
+      expression[nums[i].start].text += expression[j].text;
+    }
+    expression.splice(nums[i].start + 1, nums[i].end - nums[i].start);
+  }
+};
+
 /**
  * Wrap the given array of nodes in an <mrow> node if needed, i.e.,
  * unless the array has length 1.  Always returns a single node.
@@ -1998,6 +2017,8 @@ const buildExpression = function(expression, style, isOrdgroup) {
     }
     return [group];
   }
+
+  consolidateNumbers(expression);
 
   const groups = [];
   for (let i = 0; i < expression.length; i++) {
@@ -3036,11 +3057,15 @@ const validateColor = (color, macros, token) => {
 };
 
 const mathmlBuilder$9 = (group, style) => {
-  const inner = buildExpression(group.body, style.withColor(group.color));
-  // Wrap with an <mstyle> element.
-  const node = wrapWithMstyle(inner);
-  node.setAttribute("mathcolor", group.color);
-  return node
+  // In LaTeX, color is not supposed to change the spacing of any node.
+  // So instead of wrapping the group in an <mstyle>, we apply
+  // the color individually to each node and return a document fragment.
+  let expr = buildExpression(group.body, style.withColor(group.color));
+  expr = expr.map(e => {
+    e.style.color = group.color;
+    return e
+  });
+  return mathMLTree.newDocumentFragment(expr)
 };
 
 defineFunction({
@@ -7641,7 +7666,7 @@ const smallCaps = Object.freeze({
 // "mathord" and "textord" ParseNodes created in Parser.js from symbol Groups in
 // src/symbols.js.
 
-const numberRegEx$1 = /^\d(?:[\d,.]*\d)?$/;  // Keep in sync with numberRegEx in Parser.js
+const numberRegEx = /^\d(?:[\d,.]*\d)?$/;
 const latinRegEx = /[A-Ba-z]/;
 
 const italicNumber = (text, variant, tag) => {
@@ -7695,7 +7720,7 @@ defineFunctionBuilders({
     const variant = getVariant(group, style) || "normal";
 
     let node;
-    if (numberRegEx$1.test(group.text)) {
+    if (numberRegEx.test(group.text)) {
       const tag = group.mode === "text" ? "mtext" : "mn";
       if (variant === "italic" || variant === "bold-italic") {
         return italicNumber(text, variant, tag)
@@ -8008,8 +8033,7 @@ const combiningDiacriticalMarksEndRegex = new RegExp(`${combiningDiacriticalMark
 const tokenRegexString =
   `(${spaceRegexString}+)|` + // whitespace
   `${controlSpaceRegexString}|` +  // whitespace
-  "(number" +         // numbers (in non-strict mode)
-  "|[!-\\[\\]-\u2027\u202A-\uD7FF\uF900-\uFFFF]" + // single codepoint
+  "([!-\\[\\]-\u2027\u202A-\uD7FF\uF900-\uFFFF]" + // single codepoint
   `${combiningDiacriticalMarkString}*` + // ...plus accents
   "|[\uD800-\uDBFF][\uDC00-\uDFFF]" + // surrogate pair
   `${combiningDiacriticalMarkString}*` + // ...plus accents
@@ -8024,12 +8048,7 @@ class Lexer {
     // Separate accents from characters
     this.input = input;
     this.settings = settings;
-    this.tokenRegex = new RegExp(
-      // Strict Temml, like TeX, lexes one numeral at a time.
-      // Default Temml lexes contiguous numerals into a single <mn> element.
-      tokenRegexString.replace("number|", settings.strict ? "" : "\\d(?:[\\d,.]*\\d)?|"),
-      "g"
-    );
+    this.tokenRegex = new RegExp(tokenRegexString, 'g');
     // Category codes. The lexer only supports comment characters (14) for now.
     // MacroExpander additionally distinguishes active (13).
     this.catcodes = {
@@ -11797,8 +11816,6 @@ var unicodeSymbols = {
 
 /* eslint no-constant-condition:0 */
 
-const numberRegEx = /^\d(?:[\d,.]*\d)?$/;  // Keep in sync with numberRegEx in symbolsOrd.js
-
 /**
  * This file contains the parser used to parse out a TeX expression from the
  * input. Since TeX isn't context-free, standard parsers don't work particularly
@@ -12720,15 +12737,6 @@ class Parser {
         };
       }
       symbol = s;
-    } else if (!this.strict && numberRegEx.test(text)) {
-      // A number. Wrap in a <mn> if in math mode; <mtext> otherwise.
-      this.consume();
-      return {
-        type: "textord",
-        mode: this.mode,
-        loc: SourceLocation.range(nucleus),
-        text
-      }
     } else if (text.charCodeAt(0) >= 0x80) {
       // no symbol for e.g. ^
       if (this.settings.strict) {
@@ -12968,7 +12976,7 @@ class Style {
  * https://mit-license.org/
  */
 
-const version = "0.10.2";
+const version = "0.10.5";
 
 function postProcess(block) {
   const labelMap = {};

@@ -53,6 +53,7 @@ export function openMathPrompt(options) {
   const close = () => {
     window.removeEventListener("mousedown", mouseOutside)
     if (wrapper.parentNode) {
+      wrapper.parentNode.firstChild.removeAttribute("style")
       wrapper.parentNode.removeChild(wrapper)
     }
   }
