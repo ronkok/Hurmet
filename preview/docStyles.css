@@ -429,7 +429,15 @@ summary {
  */
 
 /*
-Temml.woff2 is a clone of KaTeX_Script-Regular, except that the code points
+The Latin Modern fonts are released under the GUST font license, which is
+legally equivalent to the LaTeX Project Public License. See the files in this
+directory for details. The fonts can be obtained from several TeX distributions
+or package managers.
+
+The Latin Modern WOFF font has been obtained from
+http://www.gust.org.pl/projects/e-foundry/
+
+The Temml.woff2 is a clone of KaTeX_Script-Regular, except that the code points
 have been changed from ASCII to Unicode Mathematical Alphanumeric Symbols Script capitals,
 Unicode range 1D49C to 1D4B5.
 */
@@ -443,11 +451,10 @@ Unicode range 1D49C to 1D4B5.
 
 @font-face {
   font-family: Latin Modern Math;
-  src: url('latinmodernmath.woff2');
+  src: url('./latinmodernmath.woff2');
 }
 
 math {
-  font-family: "Cambria Math", 'STIXTwoMath-Regular', "Times New Roman", math;
   font-style: normal;
   font-weight: normal;
   line-height: normal;
@@ -459,15 +466,15 @@ math {
   direction: ltr;
 }
 
-.hurmet-tex math {
-  font-family: Latin Modern Math, math;
-}
-
 math * {
   border-color: currentColor;
 }
 
-math .mathscr {
+math {
+  font-family: "Latin Modern Math", "Times New Roman", math;
+}
+
+*.mathscr {
   font-family: "Temml";
 }
 
@@ -477,20 +484,20 @@ mo.tml-prime {
 
 /* flex-wrap for line-breaking in Chromium */
 math {
-    display: inline-flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-  }
-  math > mrow {
-    padding: 0.5ex 0ex;
-  }
-  
-  /* Avoid flex-wrap in Firefox */
-  @supports (-moz-appearance:meterbar) and (display:flex) {
-    math { display: inline; }
-    math > mrow { padding: 0 }
-  }
-  
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+math > mrow {
+  padding: 0.5ex 0ex;
+}
+
+/* Avoid flex-wrap in Firefox */
+@supports (-moz-appearance:meterbar) and (display:flex) {
+  math { display: inline; }
+  math > mrow { padding: 0 }
+}
+
 /* AMS environment auto-numbering via CSS counter. */
 .tml-eqn::before {
   counter-increment: tmlEqnNo;
@@ -536,7 +543,8 @@ mtable.tml-aligned > mtr > mtd:nth-child(even) {
 
 mtable.tml-align > mtr > mtd:nth-child(even),
 mtable.tml-alignat > mtr > mtd:nth-child(even),
-mtable.tml-aligned > mtr > mtd:nth-child(odd) {
+mtable.tml-aligned > mtr > mtd:nth-child(odd),
+mtable.tml-align-star > mtr > mtd:nth-child(odd) {
   text-align: -webkit-right;
   text-align: -moz-right;
 }
@@ -647,6 +655,6 @@ menclose.xcancel {
           rgba(0,0,0,0) 100%);
 }
 
-/* This section set math sizes */
+/* This section sets math sizes */
 math   { font-size: 1em; }
 math .special-fraction { font-family: "Times New Roman"; }
