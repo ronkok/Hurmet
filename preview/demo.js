@@ -15755,10 +15755,8 @@ const consolidateNumbers = expression => {
  * unless the array has length 1.  Always returns a single node.
  */
 const makeRow = function(body) {
-  if (body.length === 1) {
-    return body[0] instanceof DocumentFragment
-      ? body[0]
-      : new mathMLTree.MathNode("mrow", body);
+  if (body.length === 1 && !(body[0] instanceof DocumentFragment)) {
+    return body[0];
   } else {
     return new mathMLTree.MathNode("mrow", body);
   }
@@ -26727,7 +26725,7 @@ class Style {
  * https://mit-license.org/
  */
 
-const version = "0.10.6";
+const version = "0.10.7";
 
 function postProcess(block) {
   const labelMap = {};
