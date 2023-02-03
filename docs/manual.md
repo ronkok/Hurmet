@@ -611,7 +611,7 @@ result should appear. Here are some examples:
 | `A = 2 'm' × 4 'feet' = ?? m²` | ¢A = 2'm' × 4 'feet' = 2.4384 'm²'¢                  |
 {.table-no-wrap}
 
-The expression form is more precisely defined as:
+The statement form is more precisely defined as:
 
 ![optional identifier equals expression equals display selector unit name][statement]
 
@@ -865,11 +865,11 @@ Matrix
     semi-colons. Be sure to write a space after comma separators so they are not
     confused with decimals inside a number. Here are some matrix examples:
 
-    | Input            | Renders as       |
-    |------------------|------------------|
+    | Input            | Renders as      |
+    |------------------|-----------------|
     | `(1, 0; 0, 1)`   | ¢(1, 0; 0, 1)¢  |
     | `[2.1; -15.3]`   | ¢[2.1; -15.3]¢  |
-    | `{:1, 0; 0, 1}`  | ¢{:1, 0; 0, 1}¢  |
+    | `{:1, 0; 0, 1}`  | ¢{:1, 0; 0, 1}¢ |
 
     Another way to create a Hurmet vector is to write a range of numbers between
     brackets; the form is `[start:step:end]`.

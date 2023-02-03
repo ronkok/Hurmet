@@ -36,23 +36,6 @@ const rationalRPN = numStr => {
   return "®" + String(num[0]) + "/" + String(num[1])
 }
 
-const calligraphicRegEx = /^(:?\uD835[\uDC9C-\uDCCF]|[\udc9d\udca0\udca1\udca3\udca4\udca7\udca8\udcad\udcba\udcbc\udcc1\udcc4])/
-
-const bmpCalligraphic = {
-  "\u212C": "B",
-  "\u2130": "E",
-  "\u2131": "F",
-  "\u210B": "H",
-  "\u2110": "I",
-  "\u2112": "L",
-  "\u2133": "M",
-  "\u211B": "R",
-  "\u212F": "e",
-  "\u210A": "g",
-  "\u2113": "l",
-  "\u2134": "o"
-}
-
 const checkForUnaryMinus = (token, prevToken) => {
   switch (prevToken.ttype) {
     case tt.NUM:

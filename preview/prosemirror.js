@@ -17242,11 +17242,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.5611","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.5407","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.5607","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.4859","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -17255,10 +17255,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4547","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4602","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9998","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.3473","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9992","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.3878","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -17278,7 +17278,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.88595","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.89289","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -17286,23 +17286,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.4807","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.6183","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["3.7021","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["88.5770","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["3.7577","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["90.3015","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["139.50","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["141.12","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1343.50","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1345.90","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -17313,7 +17313,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["20.3994","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["20.4050","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -17343,7 +17343,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.0843","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0988","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -31031,6 +31031,7 @@ function setLineBreaks(expression, wrapMode, isDisplayMode) {
   }
   if (mtrs.length > 0) {
     const mtd = new mathMLTree.MathNode("mtd", mrows);
+    mtd.style.textAlign = "left";
     const mtr = new mathMLTree.MathNode("mtr", [mtd]);
     mtrs.push(mtr);
     const mtable = new mathMLTree.MathNode("mtable", mtrs);
@@ -31160,7 +31161,7 @@ const consolidateNumbers = expression => {
  * unless the array has length 1.  Always returns a single node.
  */
 const makeRow = function(body) {
-  if (body.length === 1) {
+  if (body.length === 1 && !(body[0] instanceof DocumentFragment)) {
     return body[0];
   } else {
     return new mathMLTree.MathNode("mrow", body);
@@ -31275,7 +31276,6 @@ function buildMathML(tree, texExpression, style, settings) {
 
   const n1 = expression.length === 0 ? null : expression[0];
   let wrapper = expression.length === 1 && tag === null && (n1 instanceof MathNode)
-          && !(n1.type === "mstyle" && n1.attributes.mathcolor)
       ? expression[0]
       : setLineBreaks(expression, wrap, settings.displayMode);
 
@@ -32202,7 +32202,7 @@ const colorFromSpec = (model, spec) => {
     spec.split(",").map(e => {
       const num = Number(e.trim());
       if (num > 1) { throw new ParseError("Color rgb input must be < 1.") }
-      color += toHex((num * 255));
+      color += toHex(Number((num * 255).toFixed(0)));
     });
   }
   if (color.charAt(0) !== "#") { color = "#" + color; }
@@ -32889,7 +32889,7 @@ defineFunction({
     if (group.right === "\u2216" || group.right.indexOf("arrow") > -1) {
       rightNode.setAttribute("stretchy", "true");
     }
-    if (group.rightColor) { rightNode.setAttribute("mathcolor", group.rightColor); }
+    if (group.rightColor) { rightNode.style.color =  group.rightColor; }
     inner.push(rightNode);
 
     return makeRow(inner);
@@ -34073,7 +34073,6 @@ const mathmlBuilder$6 = (group, style) => {
   for (let i = 1; i < mathGroup.children.length; i++) {
     mi.children.push(mathGroup.children[i].children[0]);
   }
-  if (mathGroup.attributes.mathcolor) { mi.attributes.mathcolor = mathGroup.attributes.mathcolor; }
   if (mi.attributes.mathvariant && mi.attributes.mathvariant === "normal") {
     // Workaround for a Firefox bug that renders spurious space around
     // a <mi mathvariant="normal">
@@ -42132,7 +42131,7 @@ class Style {
  * https://mit-license.org/
  */
 
-const version = "0.10.5";
+const version = "0.10.8";
 
 function postProcess(block) {
   const labelMap = {};
@@ -46904,7 +46903,7 @@ function buildMenuItems(schema) {
       icon: icons.code
     });
   if ((type = schema.nodes.heading))
-    for (let i = 1; i <= 4; i++)
+    for (let i = 1; i <= 6; i++)
       r["makeHead" + i] = blockTypeItem(type, {
         title: "Change to heading " + i,
         label: "\xa0H" + i + "\xa0",
@@ -47055,10 +47054,17 @@ function buildMenuItems(schema) {
     r.insertComment
   ]];
 
+  r.headingDropDown = new Dropdown([
+    r.makeHead4,
+    r.makeHead5,
+    r.makeHead6,
+  ],
+  { label: "H*" }
+  );
   r.typeMenu = [cut([
       r.makeParagraph,
       r.makeCodeBlock,
-      r.makeHead1, r.makeHead2, r.makeHead3, r.makeHead4
+      r.makeHead1, r.makeHead2, r.makeHead3, r.headingDropDown
     ])];
 
   r.blockMenu = [

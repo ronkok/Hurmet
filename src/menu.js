@@ -1133,7 +1133,7 @@ export function buildMenuItems(schema) {
       icon: icons.code
     })
   if ((type = schema.nodes.heading))
-    for (let i = 1; i <= 4; i++)
+    for (let i = 1; i <= 6; i++)
       r["makeHead" + i] = blockTypeItem(type, {
         title: "Change to heading " + i,
         label: "\xa0H" + i + "\xa0",
@@ -1286,10 +1286,17 @@ export function buildMenuItems(schema) {
     r.insertComment
   ]]
 
+  r.headingDropDown = new Dropdown([
+    r.makeHead4,
+    r.makeHead5,
+    r.makeHead6,
+  ],
+  { label: "H*" }
+  )
   r.typeMenu = [cut([
       r.makeParagraph,
       r.makeCodeBlock,
-      r.makeHead1, r.makeHead2, r.makeHead3, r.makeHead4
+      r.makeHead1, r.makeHead2, r.makeHead3, r.headingDropDown
     ])]
 
   r.blockMenu = [
