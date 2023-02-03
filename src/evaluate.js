@@ -1032,7 +1032,8 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "!=":
         case "∈":
         case "∉":
-        case "⋐": {
+        case "⊆":
+        case "⊈": {
           const o2 = stack.pop()
           const o1 = stack.pop()
           if (unitAware &&
@@ -1046,7 +1047,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           bool.unit = null
           const prevValue = (o1.dtype & dt.BOOLEANFROMCOMPARISON) ? oPrev.value : undefined
 
-          if (isIn(tkn, ["∈", "∉", "⋐"])) {
+          if (isIn(tkn, ["∈", "∉", "⊆", "⊈"])) {
             bool.value = compare(tkn, o1.value, o2.value, prevValue)
           } else {
             const [shape1, shape2, _] = binaryShapesOf(o1, o2)

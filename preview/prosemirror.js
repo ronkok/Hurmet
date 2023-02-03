@@ -15931,7 +15931,9 @@ const autoCorrections = {
   "\\alef": "ℵ",
   "\\subset": "⊂",
   "\\supset": "⊃",
-  "\\Subset": "⋐",
+  "\\subseteq": "⊆",
+  "\\nsubset": "⊄",
+  "\\nsubseteq": "⊈",
   "\\forall": "∀",
   "\\therefore": "∴",
   "\\mapsto": "↦",
@@ -20008,7 +20010,7 @@ const words = Object.freeze({
   "<-->": ["<-->", "\\xrightleftarrows", tt.UNARY, ""]
 });
 
-const miscRegEx = /^([/÷\u2215_:,;^+\\\-–−*×∘⊗⦼⊙√∛∜·.%∘|╏‖¦><=≈≟≠≡≤≥≅∈∉⋐!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃∫∬∮∑([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7$£¥€₨₩₪]+)/;
+const miscRegEx = /^([/÷\u2215_:,;^+\\\-–−*×∘⊗⦼⊙√∛∜·.%∘|╏‖¦><=≈≟≠≡≤≥≅∈∉⊂⊄⊆⊈!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃∫∬∮∑([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7$£¥€₨₩₪]+)/;
 
 const miscSymbols = Object.freeze({
   //    input, output, type,  closeDelim
@@ -20073,7 +20075,8 @@ const miscSymbols = Object.freeze({
   "|==": ["|==", "\\models", tt.REL, ""],
   "∈": ["∈", "∈", tt.REL, ""],
   "∉": ["∉", "∉", tt.REL, ""],
-  "⋐": ["⋐", "⋐", tt.REL, ""],
+  "⊆": ["⊆", "⊆", tt.REL, ""],
+  "⊈": ["⊈", "⊈", tt.REL, ""],
   "▪": ["▪", "\\mathrel{▪}", tt.REL, ""],
 
   "!": ["!", "!", tt.FACTORIAL, ""],
@@ -20187,7 +20190,10 @@ const texFunctions = Object.freeze({
   "\\lor": ["\\lor", "\\lor", tt.BIN, ""],
   "\\in": ["\\in", "∈", tt.REL, ""],
   "\\notin": ["\\notin", "∉", tt.REL, ""],
-  "\\Subset": ["\\Subset", "⋐", tt.REL, ""],
+  "\\subset": ["\\subset", "⊂", tt.REL, ""],
+  "\\subseteq": ["\\subseteq", "⊆", tt.REL, ""],
+  "\\nsubset": ["\\nsubset", "⊄", tt.REL, ""],
+  "\\nsubseteq": ["\\nsubseteq", "⊈", tt.REL, ""],
   "\\left.": ["\\left.", "\\left.", tt.LEFTBRACKET, "\\right."],
   "\\right.": ["\\right.", "\\right.", tt.RIGHTBRACKET, ""],
   "\\mod": ["\\mod", "\\mod", tt.BIN, ""],
@@ -20393,7 +20399,7 @@ const texREL = Object.freeze([
   "rightarrow", "rightarrowtail", "rightharpoondown", "rightharpoonup", "rightleftarrows",
   "rightleftharpoons", "rightrightarrows", "rightsquigarrow", "risingdotseq", "searrow",
   "shortmid", "shortparallel", "sim", "simeq", "smallfrown", "smallsmile", "smile",
-  "sqsubset", "sqsubseteq", "sqsupset", "sqsupseteq", "sub", "sube", "subset", "subseteq",
+  "sqsubset", "sqsubseteq", "sqsupset", "sqsupseteq", "sub", "sube",
   "subseteqq", "subsetneq", "subsetneqq", "succ", "succapprox", "succcurlyeq", "succeq",
   "succnapprox", "succneqq", "succnsim", "succsim", "supe", "supset", "supseteq", "supseteqq",
   "supsetneq", "supsetneqq", "swarrow", "thickapprox", "thicksim", "to", "trianglelefteq",
@@ -23331,11 +23337,12 @@ const compare = (op, x, y, yPrev) => {
         return errorOprnd("NOT_ARRAY")
       }
 
-    case "⋐":
+    case "⊆":
       if (typeof x === "string" && typeof y === "string") {
         return y.indexOf(x) > -1
       } else if (Array.isArray(x) && Array.isArray(y)) {
         for (let i = 0; i < y.length; i++) {
+          // We test for a contiguous subset
           if (equals(x[0], y[i])) {
             if (i + x.length > y.length) { return false }
             for (let j = 1; j < x.length; j++) {
@@ -23362,6 +23369,31 @@ const compare = (op, x, y, yPrev) => {
       } else {
         return errorOprnd("NOT_ARRAY")
       }
+
+    case "⊈":
+      if (typeof x === "string" && typeof y === "string") {
+        return y.indexOf(x) === -1
+      } else if (Array.isArray(x) && Array.isArray(y)) {
+        // We test for a contiguous subset
+        for (let i = 0; i < y.length; i++) {
+          if (equals(x[0], y[i])) {
+            if (i + x.length > y.length) { continue }
+            let provisional = true;
+            for (let j = 1; j < x.length; j++) {
+              if (!equals(x[j], y[i + j])) {
+                provisional = false;
+                continue
+              }
+            }
+            if (!provisional) { continue }
+            return true
+          }
+        }
+        return false
+      } else {
+        return errorOprnd("NOT_ARRAY")
+      }
+
   }
 };
 
@@ -27378,7 +27410,8 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "!=":
         case "∈":
         case "∉":
-        case "⋐": {
+        case "⊆":
+        case "⊈": {
           const o2 = stack.pop();
           const o1 = stack.pop();
           if (unitAware &&
@@ -27392,7 +27425,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           bool.unit = null;
           const prevValue = (o1.dtype & dt.BOOLEANFROMCOMPARISON) ? oPrev.value : undefined;
 
-          if (isIn(tkn, ["∈", "∉", "⋐"])) {
+          if (isIn(tkn, ["∈", "∉", "⊆", "⊈"])) {
             bool.value = compare(tkn, o1.value, o2.value, prevValue);
           } else {
             const [shape1, shape2, _] = binaryShapesOf(o1, o2);
@@ -40615,7 +40648,7 @@ const asciiFromScript = Object.freeze({
   "\ud835\udca5": "J",
   "\ud835\udca6": "K",
   "\u2112": "L",
-  "\u2113": "M",
+  "\u2133": "M",
   "\ud835\udca9": "N",
   "\ud835\udcaa": "O",
   "\ud835\udcab": "P",
@@ -42131,7 +42164,7 @@ class Style {
  * https://mit-license.org/
  */
 
-const version = "0.10.8";
+const version = "0.10.9";
 
 function postProcess(block) {
   const labelMap = {};

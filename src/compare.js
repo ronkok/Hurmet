@@ -73,11 +73,12 @@ export const compare = (op, x, y, yPrev) => {
         return errorOprnd("NOT_ARRAY")
       }
 
-    case "⋐":
+    case "⊆":
       if (typeof x === "string" && typeof y === "string") {
         return y.indexOf(x) > -1
       } else if (Array.isArray(x) && Array.isArray(y)) {
         for (let i = 0; i < y.length; i++) {
+          // We test for a contiguous subset
           if (equals(x[0], y[i])) {
             if (i + x.length > y.length) { return false }
             for (let j = 1; j < x.length; j++) {
@@ -104,5 +105,30 @@ export const compare = (op, x, y, yPrev) => {
       } else {
         return errorOprnd("NOT_ARRAY")
       }
+
+    case "⊈":
+      if (typeof x === "string" && typeof y === "string") {
+        return y.indexOf(x) === -1
+      } else if (Array.isArray(x) && Array.isArray(y)) {
+        // We test for a contiguous subset
+        for (let i = 0; i < y.length; i++) {
+          if (equals(x[0], y[i])) {
+            if (i + x.length > y.length) { continue }
+            let provisional = true
+            for (let j = 1; j < x.length; j++) {
+              if (!equals(x[j], y[i + j])) {
+                provisional = false
+                continue
+              }
+            }
+            if (!provisional) { continue }
+            return true
+          }
+        }
+        return false
+      } else {
+        return errorOprnd("NOT_ARRAY")
+      }
+
   }
 }

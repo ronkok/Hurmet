@@ -151,7 +151,7 @@ const words = Object.freeze({
   "<-->": ["<-->", "\\xrightleftarrows", tt.UNARY, ""]
 })
 
-const miscRegEx = /^([/÷\u2215_:,;^+\\\-–−*×∘⊗⦼⊙√∛∜·.%∘|╏‖¦><=≈≟≠≡≤≥≅∈∉⋐!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃∫∬∮∑([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7$£¥€₨₩₪]+)/
+const miscRegEx = /^([/÷\u2215_:,;^+\\\-–−*×∘⊗⦼⊙√∛∜·.%∘|╏‖¦><=≈≟≠≡≤≥≅∈∉⊂⊄⊆⊈!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃∫∬∮∑([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7$£¥€₨₩₪]+)/
 
 const miscSymbols = Object.freeze({
   //    input, output, type,  closeDelim
@@ -216,7 +216,8 @@ const miscSymbols = Object.freeze({
   "|==": ["|==", "\\models", tt.REL, ""],
   "∈": ["∈", "∈", tt.REL, ""],
   "∉": ["∉", "∉", tt.REL, ""],
-  "⋐": ["⋐", "⋐", tt.REL, ""],
+  "⊆": ["⊆", "⊆", tt.REL, ""],
+  "⊈": ["⊈", "⊈", tt.REL, ""],
   "▪": ["▪", "\\mathrel{▪}", tt.REL, ""],
 
   "!": ["!", "!", tt.FACTORIAL, ""],
@@ -330,7 +331,10 @@ const texFunctions = Object.freeze({
   "\\lor": ["\\lor", "\\lor", tt.BIN, ""],
   "\\in": ["\\in", "∈", tt.REL, ""],
   "\\notin": ["\\notin", "∉", tt.REL, ""],
-  "\\Subset": ["\\Subset", "⋐", tt.REL, ""],
+  "\\subset": ["\\subset", "⊂", tt.REL, ""],
+  "\\subseteq": ["\\subseteq", "⊆", tt.REL, ""],
+  "\\nsubset": ["\\nsubset", "⊄", tt.REL, ""],
+  "\\nsubseteq": ["\\nsubseteq", "⊈", tt.REL, ""],
   "\\left.": ["\\left.", "\\left.", tt.LEFTBRACKET, "\\right."],
   "\\right.": ["\\right.", "\\right.", tt.RIGHTBRACKET, ""],
   "\\mod": ["\\mod", "\\mod", tt.BIN, ""],
@@ -536,7 +540,7 @@ const texREL = Object.freeze([
   "rightarrow", "rightarrowtail", "rightharpoondown", "rightharpoonup", "rightleftarrows",
   "rightleftharpoons", "rightrightarrows", "rightsquigarrow", "risingdotseq", "searrow",
   "shortmid", "shortparallel", "sim", "simeq", "smallfrown", "smallsmile", "smile",
-  "sqsubset", "sqsubseteq", "sqsupset", "sqsupseteq", "sub", "sube", "subset", "subseteq",
+  "sqsubset", "sqsubseteq", "sqsupset", "sqsupseteq", "sub", "sube",
   "subseteqq", "subsetneq", "subsetneqq", "succ", "succapprox", "succcurlyeq", "succeq",
   "succnapprox", "succneqq", "succnsim", "succsim", "supe", "supset", "supseteq", "supseteqq",
   "supsetneq", "supsetneqq", "swarrow", "thickapprox", "thicksim", "to", "trianglelefteq",
