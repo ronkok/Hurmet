@@ -32,16 +32,16 @@
  *    a. The top border contains ":" characters to indicate column justtification.
  *    b. Top & left borders contain "+" characters at border locations, even where
  *       a merged cell prevents a border from extending to the tables outer edge.
- * 8. Implicit reference links [title][] and implicit reference images ![alt][]
+ * 8. Implicit reference links [title][<ref>] & implicit reference images ![alt|caption][<ref>]
  *    ⋮
  *    [alt]: path
  *    Reference images can have captions and directives. Format is:
- *    ![alt text][ref]{caption}   or [alt][]{caption}
+ *    ![alt text][<ref>]   or \n!![caption][]
  *      ⋮
- *    [ref]: filepath
+ *    [def]: target
  *    {.class #id width=number}
  * 9. Table directives. They are placed on the line after the table. The format is:
- *    {.class #id width=num widths="num1 num2 …"}
+ *    {.class #id width="num1 num2 …" caption}
  * 10. Lists that allow the user to pick list ordering.
  *       1. →  1. 2. 3.  etc.
  *       A. →  A. B. C.  etc. (future)
@@ -386,13 +386,9 @@ const TABLES = (function() {
           if (gridTable[i][j].rowspan === 0) { continue }
           const cell = gridTable[i][j]
           state.inline = false
-          let content = state.inHtml && cell.blob.indexOf("```") === -1 && !/\n\n/.test(cell.blob.replace(/\n+$/g, ""))
-            ? parseInline(cell.blob, state) // Write inline content directly into each <td>
-            : parse(cell.blob, state)       // Hurmet.app has a paragraph in each cell.
-          if (content.length === 1 && content[0].type === "null") {
-            content = state.inHtml
-              ? [{ type: "text", text: "" }]
-              : [{ type: "paragraph", content: [] }]
+          let content = parse(cell.blob, state)
+          if (state.inHtml && content.length === 1 && content[0].type === "paragraph") {
+            content = content[0].content
           }
           table.content[i].content.push({
             "type": cell.inHeader ? "table_header" : "table_cell",
@@ -430,19 +426,25 @@ const linkIndex = marks => {
 }
 
 const parseRef = function(capture, state, refNode) {
+  // Handle implicit refs: [title][<ref>], ![alt][<ref>], and  \n!![caption][<ref>]
   let ref = capture[2] ? capture[2] : capture[1]
   ref = ref.replace(/\s+/g, " ");
 
-  // We store information about previously seen defs on
-  // state._defs (_ to deconflict with client-defined
-  // state). If the def for this reflink/refimage has
-  // already been seen, we can use its target/source
-  // and title here:
+  // We store information about previously seen defs in state._defs
+  // (_ to deconflict with client-defined state).
   if (state._defs && state._defs[ref]) {
+    // The def for this reflink/refimage has already been seen.
+    // in rules.set("def", ).  We can use its target/source here:
     const def = state._defs[ref];
-    if (refNode.type === "image") {
+    if (refNode.type === "figure") {
+      refNode = { type: "figure", content: [
+        { type: "figimg", attrs: def.attrs },
+        { type: "figcaption", content: parseInline(refNode.attrs.alt, state) }
+      ] }
+      refNode.content[0].attrs.src = def.target
+    } else if (refNode.type === "image") {
       refNode.attrs.src = def.target
-      refNode.attrs.width = null
+      refNode.attrs = def.attrs
     } else {
       // refNode is a link
       refNode.attrs.href = def.target;
@@ -580,48 +582,66 @@ rules.set("special_div", {
     return { type, content: parse(div, state) };
   }
 });
-rules.set("def", {
-  // TODO(aria): This will match without a blank line before the next
-  // block element, which is inconsistent with most of the rest of
-  // simple-markdown.
+rules.set("figure", {
   isLeaf: true,
-  match: blockRegex(/^\[([^\]]+)\]: *<?([^\n>]*)>? *\n(?:\{([^\n}]*)\}\n)?/),
+  match: blockRegex(/^!!\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]\s*(?:\n+|$)/),
+  parse: function(capture, state) {
+    return parseRef(capture, state, {
+      type: "figure",
+      attrs: { alt: capture[1] }
+    });
+  }
+});
+rules.set("def", {
+  // Handle (link|image) definition
+  // [def]: target
+  // {.class #id width=number}
+
+  isLeaf: true,
+  // TODO(ron): Need to enable a escaped right bracket inside capture[1], the def
+  match: blockRegex(/^\[((?:\\[\s\S]|[^\\])+?)\]: *<?([^\n>]*)>? *\n(?:\{([^\n}]*)\}\n)?/),
   parse: function(capture, state) {
     const def = capture[1].replace(/\s+/g, " ")
     const target = capture[2];
     const directives = capture[3] || "";
-    const attrs = {};
+
+    const attrs = { alt: def };
+    if (directives) {
+      const matchClass = CLASS_R.exec(directives)
+      const matchWidth = WIDTH_R.exec(directives)
+      const matchID = ID_R.exec(directives)
+      if (matchClass) { attrs.class = matchClass[1] }
+      if (matchWidth) { attrs.width = matchWidth[1] }
+      if (matchID)    { attrs.id = matchID[1] }
+    }
 
     // Look for previous links/images using this def
-    // If any links/images using this def have already been declared,
+    // If any links/images using this def have already been declared in parseRef(),
     // they will have added themselves to the state._refs[def] list
     // (_ to deconflict with client-defined state). We look through
     // that list of reflinks for this def, and modify those AST nodes
     // with our newly found information now.
-    // Sorry :(.
     if (state._refs && state._refs[def]) {
       // `refNode` can be a link or an image
       state._refs[def].forEach(function(refNode) {
-        if (refNode.type === "image") {
-          refNode.attrs.src = target
-          if (directives) {
-            const matchClass = CLASS_R.exec(directives)
-            if (matchClass) {
-              refNode.attrs.class = matchClass[1]
-              attrs.class = matchClass[1]
+        if (refNode.type === "figure" || refNode.type === "image") {
+          const type = refNode.type === "figure" ? "figimg" : "image"
+          const imgNode = { type, attrs: { src: target, alt: def } }
+          if (attrs.class) { imgNode.attrs.class = attrs.class }
+          if (attrs.width) { imgNode.attrs.width = attrs.width }
+          if (attrs.id)    { imgNode.attrs.id = attrs.id }
+          if (refNode.type === "figure") {
+            const caption = {
+              type: "figcaption",
+              content: parseInline(refNode.attrs.alt, state)
             }
-            const matchWidth = WIDTH_R.exec(directives)
-            if (matchWidth) {
-              refNode.attrs.width = matchWidth[1]
-              attrs.width = matchWidth[1]
-            }
-            const matchID = ID_R.exec(directives)
-            if (matchID) {
-              refNode.attrs.id = matchID[1]
-              attrs.id = matchID[1]
-            }
+            refNode.content = [imgNode, caption]
+            attrs.caption = caption
+          } else {
+            refNode.attrs = imgNode.attrs
           }
         } else {
+          // link node
           refNode.attrs.href = target
         }
       });

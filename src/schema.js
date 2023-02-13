@@ -136,15 +136,12 @@ export const nodes = {
     group: "inline"
   },
 
-  // :: NodeSpec An inline image (`<img>`) node. Supports `src`,
-  // `alt`, and `href` attributes. The latter two default to the empty
-  // string.
+  // :: NodeSpec An inline image (`<img>`) node.
   image: {
     inline: true,
     attrs: {
       src: {},
       alt: {default: null},
-//      title: {default: null},
       width: {default: null},
       class: {default: "inline"}
     },
@@ -153,13 +150,50 @@ export const nodes = {
     parseDOM: [{tag: "img[src]", getAttrs(dom) {
       return {
         src: dom.getAttribute("src"),
-//        title: dom.getAttribute("title"),
         alt: dom.getAttribute("alt"),
         width: dom.getAttribute("width"),
         class: dom.getAttribute("class")
       }
     }}],
     toDOM(node) { return ["img", node.attrs] }
+  },
+
+  // :: NodeSpec A block image (`<img>`) node, for inclusion in a <figure>
+  figimg: {
+    attrs: {
+      src: {},
+      alt: {default: null},
+      width: {default: null},
+    },
+    group: "block",
+    draggable: false,
+    parseDOM: [{tag: "img.figimg", getAttrs(dom) {
+      return {
+        src: dom.getAttribute("src"),
+        alt: dom.getAttribute("alt"),
+        width: dom.getAttribute("width"),
+        class: "figimg"
+      }
+    }}],
+    toDOM(node) { return ["img", node.attrs] }
+  },
+
+  figure: {
+    content: "block{2}",
+    group: "block",
+    marks: "",
+    parseDOM: [{tag: "figure"}],
+    toDOM() {                         
+      return ["figure", 0] 
+    }
+  },
+  figcaption: {
+    content: "inline*",
+    group: "block",
+    parseDOM: [{tag: "figcaption"}],
+    toDOM() { 
+      return ["figcaption", 0] 
+    }
   },
 
   // Table of contents

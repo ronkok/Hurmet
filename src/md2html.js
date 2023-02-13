@@ -1,6 +1,6 @@
-import { hurmet } from "./hurmet.js"
-import temml from "../src/temml.js"
-import { md2ast } from "../src/md2ast.js"
+import { parse } from "./parser.js"
+import temml from "./temml.js"
+import { md2ast } from "./md2ast.js"
 
 const sanitizeUrl = function(url) {
   if (url == null) {
@@ -127,14 +127,24 @@ const nodes = {
     return htmlTag("a", output(node.content), attributes);
   },
   image(node) {
-    const attributes = { src: node.attrs.src, alt: node.attrs.alt };
+    const attributes = { src: node.attrs.src };
+    if (node.attrs.alt)   { attributes.alt = node.attrs.alt }
     if (node.attrs.class) { attributes.class = node.attrs.class }
     if (node.attrs.id)    { attributes.id = node.attrs.id }
     if (node.attrs.width) { attributes.width = node.attrs.width }
     return htmlTag("img", "", attributes, false);
   },
+  figure(node)     { return htmlTag("figure", output(node.content)) + "\n" },
+  figcaption(node) { return htmlTag("figcaption", output(node.content)) },
+  figimg(node) {
+    const attributes = { src: node.attrs.src, class: "figimg" };
+    if (node.attrs.alt)   { attributes.alt = node.attrs.alt }
+    if (node.attrs.id)    { attributes.id = node.attrs.id }
+    if (node.attrs.width) { attributes.width = node.attrs.width }
+    return htmlTag("img", "", attributes, false) + "\n";
+  },
   calculation(node) {
-    const tex = hurmet.parse(node.attrs.entry)
+    const tex = parse(node.attrs.entry)
     return temml.renderToString(
       tex,
       { trust: true, displayMode: (node.attrs.displayMode || false) }
@@ -194,12 +204,7 @@ const output = ast => {
   return html
 }
 
-const md2html = (md, inHtml = false) => {
+export const md2html = (md, inHtml = false) => {
   const ast = md2ast(md, inHtml)
   return output(ast)
-}
-
-export default {
-  md2ast,
-  md2html
 }

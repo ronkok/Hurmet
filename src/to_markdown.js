@@ -139,6 +139,29 @@ const hurmetNodes =  {
     state.renderTable(node, state.delim, state.isGFM)
     state.closeBlock(node)
   },
+  figure(state, node) {
+    const figureCaption = node.content.content[1]
+    const figureState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, false)
+    figureState.renderInline(figureCaption)
+    const caption = figureState.out
+    const ref = getRef(node, state)
+    const attrs = node.content.content[0].attrs // image attributes
+    let path = attrs.src
+    if (attrs.width || attrs.alt) {
+      path += "\n{"
+      if (attrs.width && !isNaN(attrs.width)) { path += " width=" + attrs.width }
+      if (attrs.alt) { path += ' alt="' + state.esc(attrs.alt) + '"' }
+      path += "}"
+    }
+    // We use reference links and defer the image paths to the end of the document.
+    state.paths.set(ref, path)
+    if (ref === caption) {
+      state.write(`!![${caption}][]\n\n`)
+    } else {
+      state.write(`!![${caption}][${ref}]\n\n`)
+    }
+    
+  },
   image(state, node) {
     let path = state.esc(node.attrs.src)
     if (!state.isGFM && (node.attrs.class || node.attrs.width || node.attrs.alt)) {
@@ -151,13 +174,12 @@ const hurmetNodes =  {
     // We use reference links and defer the image paths to the end of the document.
     const ref = getRef(node, state)
     state.paths.set(ref, path)
-    const caption = node.attrs.caption || ""
     if (ref === node.attrs.alt) {
       state.write(`![${node.attrs.alt}][]`)
     } else {
       state.write(`![${node.attrs.alt}][${ref}]`)
     }
-    
+
   },
   hard_break(state, node, parent, index) {
     for (let i = index + 1; i < parent.childCount; i++)
@@ -179,7 +201,7 @@ const hurmetNodes =  {
   calculation(state, node) {
     const entry = node.attrs.entry.trim().replace(/\n(?: *\n)+/g, "\n").replace(/\n/gm, "\n" + state.delim)
     if (state.isGFM) {
-      // Convert colculation to TeX
+      // Convert calculation to TeX
       const tex = parse(entry)
       writeTex(state, node.displayMode, tex)
     } else {
@@ -249,7 +271,11 @@ function isPlainURL(link, parent, index, side) {
 
 const getRef = (node, state) => {
   // We use reference links and defer the image paths to the end of the document.
-  const ref = node.type.name === "image" ? node.attrs.alt : node.attrs.title
+  const ref = node.type.name === "image"
+    ? node.attrs.alt
+    : node.type.name === "figimg"
+    ? node.content.content[0].attrs.alt
+    : node.attrs.title
   const num = isNaN(state.paths.size) ? "1" : String(state.paths.size + 1)
   if (ref) {
     // Determine if ref has already been used

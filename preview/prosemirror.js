@@ -17244,11 +17244,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.5407","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.5432","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.4859","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.6245","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -17257,10 +17257,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4602","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4364","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9992","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.3878","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9872","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.2837","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -17280,7 +17280,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.89289","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.88348","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -17288,23 +17288,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.6183","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.3916","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["3.7577","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["90.3015","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["3.7820","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["88.2475","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["141.12","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["139.88","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1345.90","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1354.10","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -17315,7 +17315,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["20.4050","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["20.0540","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -17345,7 +17345,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.0988","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0690","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -24716,16 +24716,16 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
  *    a. The top border contains ":" characters to indicate column justtification.
  *    b. Top & left borders contain "+" characters at border locations, even where
  *       a merged cell prevents a border from extending to the tables outer edge.
- * 8. Implicit reference links [title][] and implicit reference images ![alt][]
+ * 8. Implicit reference links [title][<ref>] & implicit reference images ![alt|caption][<ref>]
  *    ⋮
  *    [alt]: path
  *    Reference images can have captions and directives. Format is:
- *    ![alt text][ref]{caption}   or [alt][]{caption}
+ *    ![alt text][<ref>]   or \n!![caption][]
  *      ⋮
- *    [ref]: filepath
+ *    [def]: target
  *    {.class #id width=number}
  * 9. Table directives. They are placed on the line after the table. The format is:
- *    {.class #id width=num widths="num1 num2 …"}
+ *    {.class #id width="num1 num2 …" caption}
  * 10. Lists that allow the user to pick list ordering.
  *       1. →  1. 2. 3.  etc.
  *       A. →  A. B. C.  etc. (future)
@@ -25070,13 +25070,9 @@ const TABLES = (function() {
           if (gridTable[i][j].rowspan === 0) { continue }
           const cell = gridTable[i][j];
           state.inline = false;
-          let content = state.inHtml && cell.blob.indexOf("```") === -1 && !/\n\n/.test(cell.blob.replace(/\n+$/g, ""))
-            ? parseInline(cell.blob, state) // Write inline content directly into each <td>
-            : parse$1(cell.blob, state);       // Hurmet.app has a paragraph in each cell.
-          if (content.length === 1 && content[0].type === "null") {
-            content = state.inHtml
-              ? [{ type: "text", text: "" }]
-              : [{ type: "paragraph", content: [] }];
+          let content = parse$1(cell.blob, state);
+          if (state.inHtml && content.length === 1 && content[0].type === "paragraph") {
+            content = content[0].content;
           }
           table.content[i].content.push({
             "type": cell.inHeader ? "table_header" : "table_cell",
@@ -25114,19 +25110,25 @@ const linkIndex = marks => {
 };
 
 const parseRef = function(capture, state, refNode) {
+  // Handle implicit refs: [title][<ref>], ![alt][<ref>], and  \n!![caption][<ref>]
   let ref = capture[2] ? capture[2] : capture[1];
   ref = ref.replace(/\s+/g, " ");
 
-  // We store information about previously seen defs on
-  // state._defs (_ to deconflict with client-defined
-  // state). If the def for this reflink/refimage has
-  // already been seen, we can use its target/source
-  // and title here:
+  // We store information about previously seen defs in state._defs
+  // (_ to deconflict with client-defined state).
   if (state._defs && state._defs[ref]) {
+    // The def for this reflink/refimage has already been seen.
+    // in rules.set("def", ).  We can use its target/source here:
     const def = state._defs[ref];
-    if (refNode.type === "image") {
+    if (refNode.type === "figure") {
+      refNode = { type: "figure", content: [
+        { type: "figimg", attrs: def.attrs },
+        { type: "figcaption", content: parseInline(refNode.attrs.alt, state) }
+      ] };
+      refNode.content[0].attrs.src = def.target;
+    } else if (refNode.type === "image") {
       refNode.attrs.src = def.target;
-      refNode.attrs.width = null;
+      refNode.attrs = def.attrs;
     } else {
       // refNode is a link
       refNode.attrs.href = def.target;
@@ -25264,48 +25266,66 @@ rules.set("special_div", {
     return { type, content: parse$1(div, state) };
   }
 });
-rules.set("def", {
-  // TODO(aria): This will match without a blank line before the next
-  // block element, which is inconsistent with most of the rest of
-  // simple-markdown.
+rules.set("figure", {
   isLeaf: true,
-  match: blockRegex(/^\[([^\]]+)\]: *<?([^\n>]*)>? *\n(?:\{([^\n}]*)\}\n)?/),
+  match: blockRegex(/^!!\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]\s*(?:\n+|$)/),
+  parse: function(capture, state) {
+    return parseRef(capture, state, {
+      type: "figure",
+      attrs: { alt: capture[1] }
+    });
+  }
+});
+rules.set("def", {
+  // Handle (link|image) definition
+  // [def]: target
+  // {.class #id width=number}
+
+  isLeaf: true,
+  // TODO(ron): Need to enable a escaped right bracket inside capture[1], the def
+  match: blockRegex(/^\[((?:\\[\s\S]|[^\\])+?)\]: *<?([^\n>]*)>? *\n(?:\{([^\n}]*)\}\n)?/),
   parse: function(capture, state) {
     const def = capture[1].replace(/\s+/g, " ");
     const target = capture[2];
     const directives = capture[3] || "";
-    const attrs = {};
+
+    const attrs = { alt: def };
+    if (directives) {
+      const matchClass = CLASS_R.exec(directives);
+      const matchWidth = WIDTH_R.exec(directives);
+      const matchID = ID_R.exec(directives);
+      if (matchClass) { attrs.class = matchClass[1]; }
+      if (matchWidth) { attrs.width = matchWidth[1]; }
+      if (matchID)    { attrs.id = matchID[1]; }
+    }
 
     // Look for previous links/images using this def
-    // If any links/images using this def have already been declared,
+    // If any links/images using this def have already been declared in parseRef(),
     // they will have added themselves to the state._refs[def] list
     // (_ to deconflict with client-defined state). We look through
     // that list of reflinks for this def, and modify those AST nodes
     // with our newly found information now.
-    // Sorry :(.
     if (state._refs && state._refs[def]) {
       // `refNode` can be a link or an image
       state._refs[def].forEach(function(refNode) {
-        if (refNode.type === "image") {
-          refNode.attrs.src = target;
-          if (directives) {
-            const matchClass = CLASS_R.exec(directives);
-            if (matchClass) {
-              refNode.attrs.class = matchClass[1];
-              attrs.class = matchClass[1];
-            }
-            const matchWidth = WIDTH_R.exec(directives);
-            if (matchWidth) {
-              refNode.attrs.width = matchWidth[1];
-              attrs.width = matchWidth[1];
-            }
-            const matchID = ID_R.exec(directives);
-            if (matchID) {
-              refNode.attrs.id = matchID[1];
-              attrs.id = matchID[1];
-            }
+        if (refNode.type === "figure" || refNode.type === "image") {
+          const type = refNode.type === "figure" ? "figimg" : "image";
+          const imgNode = { type, attrs: { src: target, alt: def } };
+          if (attrs.class) { imgNode.attrs.class = attrs.class; }
+          if (attrs.width) { imgNode.attrs.width = attrs.width; }
+          if (attrs.id)    { imgNode.attrs.id = attrs.id; }
+          if (refNode.type === "figure") {
+            const caption = {
+              type: "figcaption",
+              content: parseInline(refNode.attrs.alt, state)
+            };
+            refNode.content = [imgNode, caption];
+            attrs.caption = caption;
+          } else {
+            refNode.attrs = imgNode.attrs;
           }
         } else {
+          // link node
           refNode.attrs.href = target;
         }
       });
@@ -42374,7 +42394,69 @@ var temml = {
   __defineMacro: defineMacro
 };
 
-/* Render inline Markdown, given an AST */
+const sanitizeUrl = function(url) {
+  if (url == null) {
+    return null;
+  }
+  try {
+    const prot = decodeURIComponent(url)
+      .replace(/[^A-Za-z0-9/:]/g, "")
+      .toLowerCase();
+    if (
+      prot.indexOf("javascript:") === 0 ||
+      prot.indexOf("vbscript:") === 0 ||
+      prot.indexOf("data:") === 0
+    ) {
+      return null;
+    }
+  } catch (e) {
+    // decodeURIComponent sometimes throws a URIError
+    // See `decodeURIComponent('a%AFc');`
+    // http://stackoverflow.com/questions/9064536/javascript-decodeuricomponent-malformed-uri-exception
+    return null;
+  }
+  return url;
+};
+
+const SANITIZE_TEXT_R = /[<>&"']/g;
+const SANITIZE_TEXT_CODES = {
+  "<": "&lt;",
+  ">": "&gt;",
+  "&": "&amp;",
+  '"': "&quot;",
+  "'": "&#x27;",
+  "/": "&#x2F;",
+  "`": "&#96;"
+};
+const sanitizeText = function(text /* : Attr */) {
+  return String(text).replace(SANITIZE_TEXT_R, function(chr) {
+    return SANITIZE_TEXT_CODES[chr];
+  });
+};
+
+const htmlTag = (tagName, content, attributes = {}, isClosed = true) => {
+  let attributeString = "";
+  for (const attr in attributes) {
+    if (Object.prototype.hasOwnProperty.call(attributes, attr)) {
+      const attribute = attributes[attr];
+    // Removes falsey attributes
+      if (attribute) {
+        const sanitizedAttribute = attr === "src"
+          ? attribute.replace(/</g, "%3C").replace(/>/g, "%3E")
+          : sanitizeText(attribute);
+        attributeString += " " + sanitizeText(attr) + '="' + sanitizedAttribute + '"';
+      }
+    }
+  }
+
+  const unclosedTag = "<" + tagName + attributeString + ">";
+
+  if (isClosed) {
+    return unclosedTag + content + "</" + tagName + ">";
+  } else {
+    return unclosedTag;
+  }
+};
 
 const tagName = {
   em: "em",
@@ -42388,47 +42470,134 @@ const tagName = {
 };
 
 const nodes = {
+  html(node) { return node.text },
+  heading(node)    {
+    const text = output(node.content);
+    let tag = "h" + node.attrs.level;
+    tag = htmlTag(tag, text);
+    // Add id so others can link to it.
+    tag = tag.slice(0, 3) + " id='" + text.toLowerCase().replace(/,/g, "").replace(/\s+/g, '-') + "'" + tag.slice(3);
+    return tag + "\n"
+  },
+  paragraph(node)  { return htmlTag("p", output(node.content)) + "\n" },
+  blockquote(node) {return htmlTag("blockquote", output(node.content)) },
+  code_block(node) {
+    return htmlTag("pre", htmlTag("code", sanitizeText(node.content[0].text)))
+  },
+  hard_break(node) { return "<br>" },
+  def(node)        { return "" },
+  newline(node)    { return "\n" },
+  horizontal_rule(node) { return "<hr>\n" },
+  ordered_list(node) {
+    const attributes = node.attrs.order !== 1 ? { start: node.attrs.order } : undefined;
+    return htmlTag("ol", output(node.content), attributes) + "\n"
+  },
+  bullet_list(node)  { return htmlTag("ul", output(node.content)) + "\n" },
+  list_item(node)    { return htmlTag("li", output(node.content)) + "\n" },
+  table(node)        { return htmlTag("table", output(node.content), node.attrs) + "\n" },
+  table_row(node)    { return htmlTag("tr", output(node.content)) + "\n" },
+  table_header(node) {
+    const attributes = {};
+    if (node.attrs.colspan !== 1) { attributes.colspan = node.attrs.colspan; }
+    if (node.attrs.rowspan !== 1) { attributes.rowspan = node.attrs.rowspan; }
+    if (node.attrs.colwidth !== null && !isNaN(node.attrs.colwidth) ) {
+      attributes.style = `width: ${node.attrs.colwidth}px`;
+    }
+    return htmlTag("th", output(node.content), attributes) + "\n"
+  },
+  table_cell(node) {
+    const attributes = {};
+    if (node.attrs.colspan !== 1) { attributes.colspan = node.attrs.colspan; }
+    if (node.attrs.rowspan !== 1) { attributes.rowspan = node.attrs.rowspan; }
+    if (node.attrs.colwidth !== null && !isNaN(node.attrs.colwidth) ) {
+      attributes.style = `width: ${node.attrs.colwidth}px`;
+    }
+    return htmlTag("td", output(node.content), attributes)
+  },
+  link(node) {
+    const attributes = { href: sanitizeUrl(node.attrs.href), title: node.attrs.title };
+    return htmlTag("a", output(node.content), attributes);
+  },
+  image(node) {
+    const attributes = { src: node.attrs.src };
+    if (node.attrs.alt)   { attributes.alt = node.attrs.alt; }
+    if (node.attrs.class) { attributes.class = node.attrs.class; }
+    if (node.attrs.id)    { attributes.id = node.attrs.id; }
+    if (node.attrs.width) { attributes.width = node.attrs.width; }
+    return htmlTag("img", "", attributes, false);
+  },
+  figure(node)     { return htmlTag("figure", output(node.content)) + "\n" },
+  figcaption(node) { return htmlTag("figcaption", output(node.content)) },
+  figimg(node) {
+    const attributes = { src: node.attrs.src, class: "figimg" };
+    if (node.attrs.alt)   { attributes.alt = node.attrs.alt; }
+    if (node.attrs.id)    { attributes.id = node.attrs.id; }
+    if (node.attrs.width) { attributes.width = node.attrs.width; }
+    return htmlTag("img", "", attributes, false) + "\n";
+  },
   calculation(node) {
     const tex = parse(node.attrs.entry);
-    const dom = document.createElement('span');
-    temml.render(tex, dom);
-    return dom
+    return temml.renderToString(
+      tex,
+      { trust: true, displayMode: (node.attrs.displayMode || false) }
+    )
   },
   tex(node) {
-    const dom = document.createElement('span');
-    dom.classList = "hurmet-tex";
-    temml.render(node.attrs.tex, dom);
-    return dom
+    return temml.renderToString(
+      node.attrs.tex,
+      { trust: true, displayMode: (node.attrs.displayMode || false) }
+    )
   },
+  indented_div(node)    { return htmlTag("div", output(node.content), { class: 'indented' }) },
+  centered_div(node)    {
+    return htmlTag("div", output(node.content), { class: 'centered' } )
+  },
+  dt(node)    {
+    let text = output(node.content);
+    let tag = htmlTag("dt", text);
+    // Add id so others can link to it.
+    const pos = text.indexOf("(");
+    if (pos > -1) { text = text.slice(0, pos).replace("_", "-"); }
+    tag = tag.slice(0, 3) + " id='" + text.toLowerCase().replace(/\s+/g, '-') + "'" + tag.slice(3);
+    return tag + "\n"
+  },
+  dd(node)    { return htmlTag("dd", output(node.content)) + "\n" },
   text(node) {
-    let dom = document.createTextNode(node.text);
+    const text = sanitizeText(node.text);
     if (!node.marks) {
-      return document.createElement('span').appendChild(dom)
+      return text
     } else {
+      let span = text;
       for (const mark of node.marks) {
-        const oldDom = dom.cloneNode(true);
-        dom = document.createElement(tagName[mark.type]);
-        dom.appendChild(oldDom);
+        if (mark.type === "link") {
+          let tag = `<a href='${mark.attrs.href}'`;
+          if (mark.attrs.title) { tag += ` title='${mark.attrs.title}''`; }
+          span = tag + ">" + span + "</a>";
+        } else {
+          const tag = tagName[mark.type];
+          span = `<${tag}>${span}</${tag}>`;
+        }
       }
-      return dom
+      return span
     }
   }
 };
 
 const output = ast => {
-  const dom = document.createElement("span");
+  // Return HTML.
+  let html = "";
   if (Array.isArray(ast)) {
     for (let i = 0; i < ast.length; i++) {
-      dom.appendChild(output(ast[i]));
+      html += output(ast[i]);
     }
   } else if (ast.type !== "null") {
-    dom.appendChild(nodes[ast.type](ast));
+    html += nodes[ast.type](ast);
   }
-  return dom
+  return html
 };
 
-const renderMD = md => {
-  const ast = md2ast(md)[0].content;
+const md2html = (md, inHtml = false) => {
+  const ast = md2ast(md, inHtml);
   return output(ast)
 };
 
@@ -42469,7 +42638,7 @@ const hurmet = {
   draw,
   evaluate,
   md2ast,
-  renderMD,
+  md2html,
   scanModule,
   updateCalculations
 };
@@ -42606,15 +42775,12 @@ const nodes$1 = {
     group: "inline"
   },
 
-  // :: NodeSpec An inline image (`<img>`) node. Supports `src`,
-  // `alt`, and `href` attributes. The latter two default to the empty
-  // string.
+  // :: NodeSpec An inline image (`<img>`) node.
   image: {
     inline: true,
     attrs: {
       src: {},
       alt: {default: null},
-//      title: {default: null},
       width: {default: null},
       class: {default: "inline"}
     },
@@ -42623,13 +42789,50 @@ const nodes$1 = {
     parseDOM: [{tag: "img[src]", getAttrs(dom) {
       return {
         src: dom.getAttribute("src"),
-//        title: dom.getAttribute("title"),
         alt: dom.getAttribute("alt"),
         width: dom.getAttribute("width"),
         class: dom.getAttribute("class")
       }
     }}],
     toDOM(node) { return ["img", node.attrs] }
+  },
+
+  // :: NodeSpec A block image (`<img>`) node, for inclusion in a <figure>
+  figimg: {
+    attrs: {
+      src: {},
+      alt: {default: null},
+      width: {default: null},
+    },
+    group: "block",
+    draggable: false,
+    parseDOM: [{tag: "img.figimg", getAttrs(dom) {
+      return {
+        src: dom.getAttribute("src"),
+        alt: dom.getAttribute("alt"),
+        width: dom.getAttribute("width"),
+        class: "figimg"
+      }
+    }}],
+    toDOM(node) { return ["img", node.attrs] }
+  },
+
+  figure: {
+    content: "block{2}",
+    group: "block",
+    marks: "",
+    parseDOM: [{tag: "figure"}],
+    toDOM() {                         
+      return ["figure", 0] 
+    }
+  },
+  figcaption: {
+    content: "inline*",
+    group: "block",
+    parseDOM: [{tag: "figcaption"}],
+    toDOM() { 
+      return ["figcaption", 0] 
+    }
   },
 
   // Table of contents
@@ -43016,10 +43219,9 @@ function openPrompt(options) {
   };
 
   const domFields = [];
+  // eslint-disable-next-line guard-for-in
   for (const name in options.fields) {
-    if (!(name === "src" && options.fields.src.options.value)) {
-      domFields.push(options.fields[name].render());
-    }
+    domFields.push(options.fields[name].render());
   }
   const submitButton = document.createElement("button");
   submitButton.type = "submit";
@@ -43064,6 +43266,20 @@ function openPrompt(options) {
     form.appendChild(radioGroup);
   }
 
+  let checkbox;
+  if (options.checkbox) {
+    // Create a checkbox
+    checkbox = form.appendChild(document.createElement("input"));
+    checkbox.setAttribute("type", "checkbox");
+    checkbox.setAttribute("id", "checkbox");
+    const checkboxLabel = form.appendChild(document.createElement("label"));
+    checkboxLabel.setAttribute("for", "checkbox");
+    checkboxLabel.innerHTML = options.checkbox.name;
+    if (options.checkbox.checked) { checkbox.checked = true; }
+  } else {
+    checkbox = { checked: false };
+  }
+
   const buttons = form.appendChild(document.createElement("div"));
   buttons.className = prefix$3 + "-buttons";
   buttons.appendChild(submitButton);
@@ -43081,7 +43297,10 @@ function openPrompt(options) {
 
   const submit = () => {
     const params = getValues(options.fields, domFields);
-    if (options.radioButtons) { params.class = form[options.radioButtons.name].value; }
+    if (options.radioButtons && !checkbox.checked) {
+      params.class = form[options.radioButtons.name].value;
+    }
+    params.checkbox = checkbox.checked;
     if (params) {
       close();
       options.callback(params);
@@ -43121,20 +43340,17 @@ function openPrompt(options) {
 function getValues(fields, domFields) {
   const result = Object.create(null);
   let i = 0;
+  // eslint-disable-next-line guard-for-in
   for (const name in fields) {
-    if (name === "src" && fields.src.options.value) {
-      result.src = fields.src.options.value;
-    } else {
-      const field = fields[name];
-      const dom = domFields[i++];
-      const value = field.read(dom);
-      const bad = field.validate(value);
-      if (bad) {
-        reportInvalid(dom, bad);
-        return null
-      }
-      result[name] = field.clean(value);
+    const field = fields[name];
+    const dom = domFields[i++];
+    const value = field.read(dom);
+    const bad = field.validate(value);
+    if (bad) {
+      reportInvalid(dom, bad);
+      return null
     }
+    result[name] = field.clean(value);
   }
   return result
 }
@@ -43399,6 +43615,29 @@ const hurmetNodes =  {
     state.renderTable(node, state.delim, state.isGFM);
     state.closeBlock(node);
   },
+  figure(state, node) {
+    const figureCaption = node.content.content[1];
+    const figureState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, false);
+    figureState.renderInline(figureCaption);
+    const caption = figureState.out;
+    const ref = getRef(node, state);
+    const attrs = node.content.content[0].attrs; // image attributes
+    let path = attrs.src;
+    if (attrs.width || attrs.alt) {
+      path += "\n{";
+      if (attrs.width && !isNaN(attrs.width)) { path += " width=" + attrs.width; }
+      if (attrs.alt) { path += ' alt="' + state.esc(attrs.alt) + '"'; }
+      path += "}";
+    }
+    // We use reference links and defer the image paths to the end of the document.
+    state.paths.set(ref, path);
+    if (ref === caption) {
+      state.write(`!![${caption}][]\n\n`);
+    } else {
+      state.write(`!![${caption}][${ref}]\n\n`);
+    }
+    
+  },
   image(state, node) {
     let path = state.esc(node.attrs.src);
     if (!state.isGFM && (node.attrs.class || node.attrs.width || node.attrs.alt)) {
@@ -43411,13 +43650,12 @@ const hurmetNodes =  {
     // We use reference links and defer the image paths to the end of the document.
     const ref = getRef(node, state);
     state.paths.set(ref, path);
-    const caption = node.attrs.caption || "";
     if (ref === node.attrs.alt) {
       state.write(`![${node.attrs.alt}][]`);
     } else {
       state.write(`![${node.attrs.alt}][${ref}]`);
     }
-    
+
   },
   hard_break(state, node, parent, index) {
     for (let i = index + 1; i < parent.childCount; i++)
@@ -43439,7 +43677,7 @@ const hurmetNodes =  {
   calculation(state, node) {
     const entry = node.attrs.entry.trim().replace(/\n(?: *\n)+/g, "\n").replace(/\n/gm, "\n" + state.delim);
     if (state.isGFM) {
-      // Convert colculation to TeX
+      // Convert calculation to TeX
       const tex = parse(entry);
       writeTex(state, node.displayMode, tex);
     } else {
@@ -43509,7 +43747,11 @@ function isPlainURL(link, parent, index, side) {
 
 const getRef = (node, state) => {
   // We use reference links and defer the image paths to the end of the document.
-  const ref = node.type.name === "image" ? node.attrs.alt : node.attrs.title;
+  const ref = node.type.name === "image"
+    ? node.attrs.alt
+    : node.type.name === "figimg"
+    ? node.content.content[0].attrs.alt
+    : node.attrs.title;
   const num = isNaN(state.paths.size) ? "1" : String(state.paths.size + 1);
   if (ref) {
     // Determine if ref has already been used
@@ -46305,6 +46547,9 @@ function insertImage(nodeType) {
     title: "Insert link to image or edit existing image",
     icon: hurmetIcons.image,
     enable(state) {
+      if (state.selection.node && state.selection.node.type.name == "figimg") {
+        nodeType = schema.nodes.figimg;
+      }
       return canInsert(state, nodeType)
     },
     run(state, _, view) {
@@ -46312,27 +46557,44 @@ function insertImage(nodeType) {
         attrs = null;
       if (state.selection instanceof NodeSelection && state.selection.node.type == nodeType)
         attrs = state.selection.node.attrs;
-      openPrompt({
-        title: "Insert image",
+      const promptOptions = {
+        title: attrs && attrs.src ? "Edit image" : "Insert image",
         fields: {
-          src: new TextField({ label: "Location", required: true, value: attrs && attrs.src }),
-          //title: new TextField({ label: "Title", value: attrs && attrs.title }),
+          src: new TextField({ label: "File path", required: true, value: attrs && attrs.src }),
           alt: new TextField({
             label: "Description",
             value: attrs ? attrs.alt : state.doc.textBetween(from, to, " ")
           }),
           width: new TextField({ label: "Width", value: attrs && attrs.width })
         },
-        radioButtons: {
+        callback(attrs) {
+          const tr = view.state.tr;
+          if (attrs.checkbox) {
+            const str = attrs.alt ? attrs.alt : "caption";
+            const caption = schema.nodes.figcaption.createAndFill(null, [schema.text(str)]);
+            const image = schema.nodes.figimg.createAndFill(attrs);
+            tr.replaceSelectionWith(schema.nodes.figure.createAndFill(null, [image, caption]));
+          } else {
+            tr.replaceSelectionWith(nodeType.createAndFill(attrs));
+          }
+          view.dispatch(tr);
+          view.focus();
+        }
+      };
+      if ((attrs && attrs.class) || !attrs) {
+        promptOptions.radioButtons = {
           name: "position",
           labels: ["inline", "left", "center", "right"],
           current: attrs ? attrs.class : "inline"
-        },
-        callback(attrs) {
-          view.dispatch(view.state.tr.replaceSelectionWith(nodeType.createAndFill(attrs)));
-          view.focus();
-        }
-      });
+        };
+      }
+      if (!attrs) {
+        promptOptions.checkbox = {
+          name: "Include a caption",
+          checked: false
+        };
+      }
+      openPrompt(promptOptions);
     }
   })
 }
@@ -46377,7 +46639,7 @@ function takeSnapshot() {
         callback(attrs) {
           const dateStr = new Date().toISOString().replace(/T.+/, "");
           let md = hurmetMarkdownSerializer.serialize(state.doc, new Map());
-          // ISgnore embedded images
+          // Ignore embedded images
           md = md.replace(/\n\n\[[^\]]+\\: .+/, "");
           state.doc.attrs.snapshots.push({ message: attrs.message, date: dateStr, content: md });
         }

@@ -40,12 +40,12 @@ document range by selecting text, then clicking one of the menu bar buttons:
 | **≡**                                | Navigate…                          |
 +--------------------------------------+------------------------------------+
 | \                                    | Open…, Save…, \                    |
-| **File▾**\                           | Import/Export to Markdown or GFM,\ |
+| **File▾**                            | Import/Export to Markdown or GFM,\ |
 |                                      | Take a snapshot, Show diff, \      |
 |                                      | Set Page Size, Print               |
 +--------------------------------------+------------------------------------+
 | \                                    | Set Decimal, Font size, \          |
-| **Doc▾**\                            | Draft Mode, Print header, \        |
+| **Doc▾**                             | Draft Mode, Print header, \        |
 |                                      | Delete all comments                |
 +--------------------------------------+------------------------------------+
 | ![recalc][]                          | Recalculate all                    |
@@ -87,6 +87,7 @@ document range by selecting text, then clicking one of the menu bar buttons:
 [link]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M6.879 9.934a.81.81 0 0 1-.575-.238 3.818 3.818 0 0 1 0-5.392l3-3C10.024.584 10.982.187 12 .187s1.976.397 2.696 1.117a3.818 3.818 0 0 1 0 5.392l-1.371 1.371a.813.813 0 0 1-1.149-1.149l1.371-1.371A2.19 2.19 0 0 0 12 1.812c-.584 0-1.134.228-1.547.641l-3 3a2.19 2.19 0 0 0 0 3.094.813.813 0 0 1-.575 1.387z'/%3E%3Cpath d='M4 15.813a3.789 3.789 0 0 1-2.696-1.117 3.818 3.818 0 0 1 0-5.392l1.371-1.371a.813.813 0 0 1 1.149 1.149l-1.371 1.371A2.19 2.19 0 0 0 4 14.188c.585 0 1.134-.228 1.547-.641l3-3a2.19 2.19 0 0 0 0-3.094.813.813 0 0 1 1.149-1.149 3.818 3.818 0 0 1 0 5.392l-3 3A3.789 3.789 0 0 1 4 15.813z'/%3E%3C/svg%3E
 [upload]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M7 9h2V5h3L8 1 4 5h3zm3-2.25v1.542L14.579 10 8 12.453 1.421 10 6 8.292V6.75L0 9v4l8 3 8-3V9z'/%3E%3C/svg%3E
 [image]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='m14.998 2 .002.002v11.996l-.002.002H1.002L1 13.998V2.002L1.002 2h13.996zM15 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h14c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1z'/%3E%3Cpath d='M13 4.5a1.5 1.5 0 1 1-3.001-.001A1.5 1.5 0 0 1 13 4.5zM14 13H2v-2l3.5-6 4 5h1L14 7z'/%3E%3C/svg%3E
+[cap]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='m14.998 2 .002.002v11.996l-.002.002H1.002L1 13.998V2.002L1.002 2h13.996zM15 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h14c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1z'/%3E%3Cpath d='M13 4.5a1.5 1.5 0 1 1-3.001-.001A1.5 1.5 0 0 1 13 4.5zM14 13H2v-2l3.5-6 4 5h1L14 7z'/%3E%3C/svg%3E
 [C]: images/C.svg
 [T]: data:image/svg+xml;utf8,%3Csvg height='16' width='16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M.8 4.5V.3c.1-.5.6-.2 1-.3h12.8c.4.2.2.7.3 1v3.5c-.4.7-1.1-.1-1-.7a4 4 0 0 0-2.7-2.7C10.8 1 9.8.6 9.7 1v12.8c0 .8.3 1.5 1.2 1.3.6-.2 1.6.5.8.9H3.9c-.8-.6.4-1 1-.9 1 .2 1-.8 1-1.6V.8c-1.2.2-2.6.5-3.4 1.5-.7.7-.8 1.6-1 2.4-.2.2-.6.1-.7-.2ZM2.6 1c.4-.2.3-.2 0-.2h-1V2ZM9 7.8v-7H6.8l-.1 13.5c.1.4-.4 1 .2.9H9c-.3-.5.1-1.2 0-1.7Zm4.8-6.1c.1 0 .4.5.3 0V.9h-1.3l1 .9z'/%3E%3C/svg%3E
 [math]: https://en.wikibooks.org/wiki/LaTeX/Mathematics
@@ -119,7 +120,7 @@ In Firefox and Safari, the save button always works like a Save As… button.
 
 ### Tracking Changes
 
-The **File…** menu contains commands that enable you to track changes:
+The **File▾** menu contains commands that enable you to track changes:
 
 *   _Take a snapshot…_ will store a snapshot of the current document (not including embedded images)
 *   _Show diff…_ will display the differences between a chosen snapshot and the current document.
@@ -186,9 +187,9 @@ A newline is indicated by a backslash, `\`, at the end of a line.
 +------------------------------------------+--------------------+
 | `$\TeX$`                                 | ¢ \TeX ¢           |
 +------------------------------------------+--------------------+
-| `# Heading 1`                            | **Heading 1**      |
+| `# Heading 1`                            | # Heading 1        |
 +------------------------------------------+--------------------+
-| `## Heading 2`                           | _Heading 2_        |
+| `## Heading 2`                           | ## Heading 2       |
 +------------------------------------------+--------------------+
 | `[Link](http://a.com)`                   | [Link][]           |
 +------------------------------------------+--------------------+
@@ -198,18 +199,22 @@ A newline is indicated by a backslash, `\`, at the end of a line.
 +------------------------------------------+--------------------+
 | `![image](http://url/image.svg)`         | ![image][]         |
 +------------------------------------------+--------------------+
-| `![image[]` \                            | ![image][]         |
+| `![image][]` \                           | ![image][]         |
 | ⋮ \                                      |                    |
 | `[image]: http://url/image.svg`          |                    |
 +------------------------------------------+--------------------+
+| `!![caption][cap]` \                     | !![caption][cap]   |
+| ⋮ \                                      |                    |
+| `[cap]: http://url/image.svg`            |                    |
++------------------------------------------+--------------------+
 | `> Blockquote`                           | | Blockquote       |
 +------------------------------------------+--------------------+
-| `* List`\                                | • List\            |
-| `* List`\                                | • List\            |
-| `* List`                                 | • List             |
+| `* List`\                                | * List             |
+| `* List`\                                | * List             |
+| `* List`                                 | * List             |
 +------------------------------------------+--------------------+
-| `1. One`\                                | 1. One\            |
-| `2. Two`\                                | 2. Two\            |
+| `1. One`\                                | 1. One             |
+| `2. Two`\                                | 2. Two             |
 | `3. Three`                               | 3. Three           |
 +------------------------------------------+--------------------+
 | ````  ``` ```` \                         | ```                |

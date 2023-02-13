@@ -9,7 +9,7 @@ import { updateCalculations } from "./updateCalculations"
 import { calculate } from "./calculate"
 import { draw } from "./draw"
 import { md2ast } from "./md2ast"
-import { renderMD } from "./renderMD"
+import { md2html } from "./md2html"
 
 /*
  * This file bundles together and exposes the calculation parts of Hurmet.
@@ -48,7 +48,7 @@ export const hurmet = {
   draw,
   evaluate,
   md2ast,
-  renderMD,
+  md2html,
   scanModule,
   updateCalculations
 }

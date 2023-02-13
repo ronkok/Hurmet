@@ -12,10 +12,9 @@ export function openPrompt(options) {
   }
 
   const domFields = []
+  // eslint-disable-next-line guard-for-in
   for (const name in options.fields) {
-    if (!(name === "src" && options.fields.src.options.value)) {
-      domFields.push(options.fields[name].render())
-    }
+    domFields.push(options.fields[name].render())
   }
   const submitButton = document.createElement("button")
   submitButton.type = "submit"
@@ -60,6 +59,20 @@ export function openPrompt(options) {
     form.appendChild(radioGroup)
   }
 
+  let checkbox
+  if (options.checkbox) {
+    // Create a checkbox
+    checkbox = form.appendChild(document.createElement("input"))
+    checkbox.setAttribute("type", "checkbox")
+    checkbox.setAttribute("id", "checkbox")
+    const checkboxLabel = form.appendChild(document.createElement("label"))
+    checkboxLabel.setAttribute("for", "checkbox")
+    checkboxLabel.innerHTML = options.checkbox.name
+    if (options.checkbox.checked) { checkbox.checked = true }
+  } else {
+    checkbox = { checked: false }
+  }
+
   const buttons = form.appendChild(document.createElement("div"))
   buttons.className = prefix + "-buttons"
   buttons.appendChild(submitButton)
@@ -77,7 +90,10 @@ export function openPrompt(options) {
 
   const submit = () => {
     const params = getValues(options.fields, domFields)
-    if (options.radioButtons) { params.class = form[options.radioButtons.name].value }
+    if (options.radioButtons && !checkbox.checked) {
+      params.class = form[options.radioButtons.name].value
+    }
+    params.checkbox = checkbox.checked
     if (params) {
       close()
       options.callback(params)
@@ -117,20 +133,17 @@ export function openPrompt(options) {
 function getValues(fields, domFields) {
   const result = Object.create(null)
   let i = 0
+  // eslint-disable-next-line guard-for-in
   for (const name in fields) {
-    if (name === "src" && fields.src.options.value) {
-      result.src = fields.src.options.value
-    } else {
-      const field = fields[name]
-      const dom = domFields[i++]
-      const value = field.read(dom)
-      const bad = field.validate(value)
-      if (bad) {
-        reportInvalid(dom, bad)
-        return null
-      }
-      result[name] = field.clean(value)
+    const field = fields[name]
+    const dom = domFields[i++]
+    const value = field.read(dom)
+    const bad = field.validate(value)
+    if (bad) {
+      reportInvalid(dom, bad)
+      return null
     }
+    result[name] = field.clean(value)
   }
   return result
 }

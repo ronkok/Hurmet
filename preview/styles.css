@@ -457,6 +457,18 @@ li.ProseMirror-selectednode:after {
   cursor: default;
 }
 
+.ProseMirror figure,
+figure img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+figure figcaption {
+  text-align: center;
+  margin-top: 2px;
+}
+
 .ProseMirror-prompt {
   background: white;
   padding: 5px 10px 5px 15px;

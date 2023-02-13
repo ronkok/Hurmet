@@ -501,6 +501,9 @@ function insertImage(nodeType) {
     title: "Insert link to image or edit existing image",
     icon: hurmetIcons.image,
     enable(state) {
+      if (state.selection.node && state.selection.node.type.name == "figimg") {
+        nodeType = schema.nodes.figimg
+      }
       return canInsert(state, nodeType)
     },
     run(state, _, view) {
@@ -508,27 +511,44 @@ function insertImage(nodeType) {
         attrs = null
       if (state.selection instanceof NodeSelection && state.selection.node.type == nodeType)
         attrs = state.selection.node.attrs
-      openPrompt({
-        title: "Insert image",
+      const promptOptions = {
+        title: attrs && attrs.src ? "Edit image" : "Insert image",
         fields: {
-          src: new TextField({ label: "Location", required: true, value: attrs && attrs.src }),
-          //title: new TextField({ label: "Title", value: attrs && attrs.title }),
+          src: new TextField({ label: "File path", required: true, value: attrs && attrs.src }),
           alt: new TextField({
             label: "Description",
             value: attrs ? attrs.alt : state.doc.textBetween(from, to, " ")
           }),
           width: new TextField({ label: "Width", value: attrs && attrs.width })
         },
-        radioButtons: {
+        callback(attrs) {
+          const tr = view.state.tr
+          if (attrs.checkbox) {
+            const str = attrs.alt ? attrs.alt : "caption"
+            const caption = schema.nodes.figcaption.createAndFill(null, [schema.text(str)])
+            const image = schema.nodes.figimg.createAndFill(attrs)
+            tr.replaceSelectionWith(schema.nodes.figure.createAndFill(null, [image, caption]))
+          } else {
+            tr.replaceSelectionWith(nodeType.createAndFill(attrs))
+          }
+          view.dispatch(tr)
+          view.focus()
+        }
+      }
+      if ((attrs && attrs.class) || !attrs) {
+        promptOptions.radioButtons = {
           name: "position",
           labels: ["inline", "left", "center", "right"],
           current: attrs ? attrs.class : "inline"
-        },
-        callback(attrs) {
-          view.dispatch(view.state.tr.replaceSelectionWith(nodeType.createAndFill(attrs)))
-          view.focus()
         }
-      })
+      }
+      if (!attrs) {
+        promptOptions.checkbox = {
+          name: "Include a caption",
+          checked: false
+        }
+      }
+      openPrompt(promptOptions)
     }
   })
 }
@@ -574,7 +594,7 @@ function takeSnapshot() {
         callback(attrs) {
           const dateStr = new Date().toISOString().replace(/T.+/, "")
           let md = hurmetMarkdownSerializer.serialize(state.doc, new Map())
-          // ISgnore embedded images
+          // Ignore embedded images
           md = md.replace(/\n\n\[[^\]]+\\: .+/, "")
           state.doc.attrs.snapshots.push({ message: attrs.message, date: dateStr, content: md })
         }
