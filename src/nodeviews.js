@@ -17,7 +17,7 @@ export class CalcView {
     const attrs = this.node.attrs
     const pos = this.outerView.state.selection.from
     // A CalcView node is a ProseMirror atom. It does not enable direct ProseMirror editing.
-    // Instead we temporarily open a CodeMirror instance in the node location.
+    // Instead we temporarily open a text editor instance in the node location.
     // Then, we update all dependent calculations only if the node is submitted.
     openMathPrompt({
       encoding: "HurmetMath",
@@ -49,7 +49,7 @@ export class TexView {
     const attrs = this.node.attrs
     openMathPrompt({
       // Create a user interface for TeX that is similar to CalcView.
-      // The need for a CodeMirror instance is not as great here as it is in CalcView,
+      // The need for a text editor instance is not as great here as it is in CalcView,
       // but I want the look and feel to be similar for both.
       encoding: "TeX",
       attrs: attrs,
