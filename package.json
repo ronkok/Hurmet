@@ -47,7 +47,7 @@
     "hurmet": "rollup --config utils/rollup.hurmet.config.js",
     "pm": "rollup --config utils/rollup.prosemirror.config.js && node utils/editPM.js",
     "demo": "rollup --config utils/rollup.demo.config.js",
-    "minify": "terser preview/prosemirror.mjs -o site/prosemirror.min.js -m && terser preview/demo.js -o site/demo.min.js -m",
+    "minify": "terser preview/prosemirror.js -o site/prosemirror.min.js -m && terser preview/demo.js -o site/demo.min.js -m",
     "build": "yarn hurmet && yarn demo && yarn pm && yarn minify && yarn docs",
     "rates": "node utils/updateExchangeRates.js",
     "docs": "node utils/buildDocs.js",
