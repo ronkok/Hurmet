@@ -38,20 +38,15 @@ export function openMathPrompt(options) {
   wrapper.className = "math-code"
   wrapper.parentNode.firstChild.style.display = "none"
 
-  const mouseOutside = e => {
+/*  const mouseOutside = e => {
     const target = e.target
-    // wrapper.contains(target) will, in my experience, sometimes give a false negative.
-    // So I've added conditions to ensure target is not a CodeMirror node.
     if (!wrapper.contains(target) && target.getAttribute("role") !== "presentation") {
-      const targetClass = target.getAttribute("class")
-      if (!targetClass || targetClass.slice(0, 2) !== "cm") {
-        close()
-      }
+      close()
     }
   }
-  setTimeout(() => window.addEventListener("mousedown", mouseOutside), 500)
+  setTimeout(() => window.addEventListener("mousedown", mouseOutside), 500) */
   const close = () => {
-    window.removeEventListener("mousedown", mouseOutside)
+//    window.removeEventListener("mousedown", mouseOutside)
     if (wrapper.parentNode) {
       wrapper.parentNode.firstChild.removeAttribute("style")
       wrapper.parentNode.removeChild(wrapper)
@@ -80,6 +75,8 @@ export function openMathPrompt(options) {
   // Place the cursor at the end of the editor.
   const L = jar.toString().length
   jar.restore({ start: L, end: L, dir: undefined })
+
+  editor.addEventListener("blur", _ => { close() })
 
   const mathDisplay = wrapper.appendChild(document.createElement("div"))
   mathDisplay.setAttribute("class", "math-display")
@@ -144,8 +141,13 @@ export function openMathPrompt(options) {
       // eslint-disable-next-line no-undef
       : hurmet.prepareStatement(mathString, options.decimalFormat)
     params.displayMode = options.attrs.displayMode
-    close()
+    if (wrapper.parentNode) {
+      wrapper.parentNode.firstChild.removeAttribute("style")
+    }
     options.callback(params)
+    if (wrapper.parentNode) {
+      wrapper.parentNode.removeChild(wrapper)
+    }
   }
 
   editor.addEventListener("submit", e => {
