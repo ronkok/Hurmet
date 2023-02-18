@@ -38,15 +38,7 @@ export function openMathPrompt(options) {
   wrapper.className = "math-code"
   wrapper.parentNode.firstChild.style.display = "none"
 
-/*  const mouseOutside = e => {
-    const target = e.target
-    if (!wrapper.contains(target) && target.getAttribute("role") !== "presentation") {
-      close()
-    }
-  }
-  setTimeout(() => window.addEventListener("mousedown", mouseOutside), 500) */
   const close = () => {
-//    window.removeEventListener("mousedown", mouseOutside)
     if (wrapper.parentNode) {
       wrapper.parentNode.firstChild.removeAttribute("style")
       wrapper.parentNode.removeChild(wrapper)
