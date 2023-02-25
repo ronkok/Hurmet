@@ -70,4 +70,3 @@ export class TexView {
   }
   stopEvent() { return true }
 }
-

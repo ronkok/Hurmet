@@ -59,7 +59,7 @@ export const nodes = {
     }
   },
 
-// :: NodeSpec A plain paragraph textblock. Represented in the DOM as a `<p>` element.
+  // :: NodeSpec A plain paragraph textblock. Represented in the DOM as a `<p>` element.
   paragraph: {
     content: "inline*",
     group: "block",
@@ -405,27 +405,11 @@ export const nodes = {
   },
 
   comment: {
-    atom: true,
-    marks: "",
-    group: "inline",
-    inline: true,
-    attrs: { comment: { default: "" } },
-    parseDOM: [{ tag: "span.hurmet-comment", getAttrs(dom) {
-      return { comment: dom.getAttribute('data-comment') }
-    }}],
-    toDOM(node) {
-      const container = document.createElement('span')
-      container.className = "hurmet-comment"
-      container.dataset.comment = node.attrs.comment
-      const triangle = document.createElement('span')
-      triangle.className = "left-triangle"
-      container.appendChild(triangle)
-      const dom = document.createElement('span')
-      dom.className = "comment-payload"
-      dom.appendChild(hurmet.renderMD(node.attrs.comment))
-      container.appendChild(dom)
-      return container
-    }
+    content: "inline*",
+    group: "block",
+    isolating: true,
+    parseDOM: [{tag: "aside.comment"}],
+    toDOM(node) { return ["aside", { class: 'comment' }, 0] }
   }
 
 }

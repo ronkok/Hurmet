@@ -1416,11 +1416,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.5560","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.5668","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.5487","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.4633","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -1429,10 +1429,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4366","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4374","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9896","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.3081","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9898","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.3398","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -1452,7 +1452,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.88888","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.88245","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1460,23 +1460,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.3349","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.2959","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["3.7850","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["88.0210","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["3.8916","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["87.4845","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["143.18","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["143.55","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1383.32","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1387.18","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1487,7 +1487,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["19.7313","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["19.5027","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -1517,7 +1517,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.0625","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0570","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -8882,7 +8882,7 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
  *    LaTeX display math is fenced  $$\n … \n$$.
  * 3. ~subscript~
  * 4. ~~strikethrough~~
- * 5. ©comment©
+ * 5. ©> comment (A paragraph in a speech bubble)
  * 6. Pipe tables as per Github Flavored Markdown (GFM).
  * 7. Grid tables as per reStructuredText, with two exceptions:
  *    a. The top border contains ":" characters to indicate column justtification.
@@ -9542,11 +9542,18 @@ rules.set("newline", {
   match: blockRegex(/^(?:\n *)*\n/),
   parse: function() { return { type: "null" } }
 });
+rules.set("comment", {
+  isLeaf: false,
+  match: blockRegex(/^©> +((?:[^\n]|\n(?! *\n))+)(?:\n *)+\n/),
+  parse: function(capture, state) {
+    return { type: "comment", content: parseInline(capture[1].trim(), state) }
+  }
+});
 rules.set("paragraph", {
   isLeaf: false,
   match: blockRegex(/^((?:[^\n]|\n(?! *\n))+)(?:\n *)+\n/),
   parse: function(capture, state) {
-    return { content: parseInline(capture[1], state) };
+    return { content: parseInline(capture[1], state) }
   }
 });
 rules.set("escape", {
@@ -9602,13 +9609,6 @@ rules.set("tex", {
       const tex = capture[1].trim();
       return { content: "", attrs: { tex, displayMode: true } }
     }
-  }
-});
-rules.set("comment", {
-  isLeaf: true,
-  match: inlineRegex(/^©((?:\\[\s\S]|[^\\])+?)©/),
-  parse: function(capture, state) {
-    return { content: "", attrs: { comment: capture[1] } }
   }
 });
 rules.set("link", {
@@ -26652,7 +26652,7 @@ const nodes = {
     return tag + "\n"
   },
   paragraph(node)  { return htmlTag("p", output(node.content)) + "\n" },
-  blockquote(node) {return htmlTag("blockquote", output(node.content)) },
+  blockquote(node) { return htmlTag("blockquote", output(node.content)) },
   code_block(node) {
     return htmlTag("pre", htmlTag("code", sanitizeText(node.content[0].text)))
   },
@@ -26724,6 +26724,7 @@ const nodes = {
   centered_div(node)    {
     return htmlTag("div", output(node.content), { class: 'centered' } )
   },
+  comment(node) { return htmlTag("aside", output(node.content), { class: 'comment' }) },
   dt(node)    {
     let text = output(node.content);
     let tag = htmlTag("dt", text);

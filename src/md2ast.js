@@ -26,7 +26,7 @@
  *    LaTeX display math is fenced  $$\n … \n$$.
  * 3. ~subscript~
  * 4. ~~strikethrough~~
- * 5. ©comment©
+ * 5. ©> comment (A paragraph in a speech bubble)
  * 6. Pipe tables as per Github Flavored Markdown (GFM).
  * 7. Grid tables as per reStructuredText, with two exceptions:
  *    a. The top border contains ":" characters to indicate column justtification.
@@ -686,11 +686,18 @@ rules.set("newline", {
   match: blockRegex(/^(?:\n *)*\n/),
   parse: function() { return { type: "null" } }
 });
+rules.set("comment", {
+  isLeaf: false,
+  match: blockRegex(/^©> +((?:[^\n]|\n(?! *\n))+)(?:\n *)+\n/),
+  parse: function(capture, state) {
+    return { type: "comment", content: parseInline(capture[1].trim(), state) }
+  }
+});
 rules.set("paragraph", {
   isLeaf: false,
   match: blockRegex(/^((?:[^\n]|\n(?! *\n))+)(?:\n *)+\n/),
   parse: function(capture, state) {
-    return { content: parseInline(capture[1], state) };
+    return { content: parseInline(capture[1], state) }
   }
 });
 rules.set("escape", {
@@ -746,13 +753,6 @@ rules.set("tex", {
       const tex = capture[1].trim()
       return { content: "", attrs: { tex, displayMode: true } }
     }
-  }
-});
-rules.set("comment", {
-  isLeaf: true,
-  match: inlineRegex(/^©((?:\\[\s\S]|[^\\])+?)©/),
-  parse: function(capture, state) {
-    return { content: "", attrs: { comment: capture[1] } }
   }
 });
 rules.set("link", {

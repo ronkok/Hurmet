@@ -140,15 +140,13 @@ that location.
 
 ### Comments
 
-The ![comment][] button enables you to write a comment regarding the nearby text.
-The comment will look like this:
+©> Citation needed
 
-<div><span class="hurmet-comment" data-comment="Citation needed"><span class="left-triangle"></span><span class="comment-payload"><span><span>Citation needed</span></span></span></span></div>
+The ![comment][] button enables you to write a comment like the nearby text bubble:
+
+A command in the “Docs” menu will delete all comments in the document.
 
 <br>
-
-Comments can be styled with Markdown inline styles: \__italic_\_, \*\***bold**\*\*,
-\``code`\`, `~`~subscript~`~`, `~~`~~strikethrough~~`~~`, \$¢\TeX¢\$, and \¢¢calcu/lation¢\¢.
 
 ### Table of Contents
 

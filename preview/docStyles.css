@@ -151,36 +151,24 @@ p.indented {
     margin-top: 0.5em;
     text-align: left;
 }
-.hurmet-comment {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
+aside.comment {
     float: right;
-    width: 205px;
-  }
-  .left-triangle {
-    display: inline-block;
-    box-sizing:content-box;
-    width: 0; 
-    height: 0; 
-    border-left: 6px solid white;
-    border-top: 6px solid white;
-    border-bottom: 6px solid white; 
-    border-right:6px solid #e2941f;
-    margin-top:5px;
-  }
-  .comment-payload {
-    display: inline-block;
-    cursor: pointer;
-    background: white;
     border: 2px solid #e2941f;
     border-radius: 8px;
     width: 181px;
     font-size: 90%;
+    text-indent: -4px;
     padding: 4px;
     min-height: 20px;
-  }
-  table {
+    margin: 1em 0 0 8px;
+}
+aside.comment::before {
+    content: "◀";
+    display: inline-block;
+    color: #e2941f;
+    transform: translateX(-0.6em);
+}
+table {
     font-size: inherit;
     margin-left: 1.5em;
     border-collapse: collapse;

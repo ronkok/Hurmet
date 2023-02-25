@@ -362,15 +362,16 @@ export function deleteComments(state, dispatch) {
     },
     run(state, dispatch) {
       // Traverse the document tree and locate all comment nodes
-      const positions = []
+      const positions = [];
+      const tr = state.tr
       state.doc.nodesBetween(0, state.doc.content.size, function(node, pos) {
-        if (node.type.name === "comment") { positions.push(pos) }
+        if (node.type.name === "comment") {
+          positions.push({ start: pos, end: pos + node.nodeSize })
+        }
       })
       // Delete the comments
-      const tr = state.tr
-      for (let i = positions.length - 1; i >=0; i--) {
-        const pos = positions[i];
-        tr.delete(pos, pos + 1)
+      for (let i = positions.length - 1; i >= 0; i--) {
+        tr.delete(positions[i].start, positions[i].end)
       }
       dispatch(tr)
     }
@@ -560,24 +561,21 @@ function insertComment(nodeType) {
     enable(state) {
       return canInsert(state, nodeType)
     },
-    run(state, _, view) {
-      let attrs = null
-      if (state.selection instanceof NodeSelection && state.selection.node.type.name == "comment")
-        attrs = state.selection.node.attrs
-      openPrompt({
-        title: "Insert comment",
-        fields: {
-          comment: new TextAreaField({ label: "Enter your comment", required: true, value: attrs && attrs.comment }),
-        },
-        callback(attrs) {
-          const pos = view.state.selection.from
-          const endPos = state.selection instanceof NodeSelection && state.selection.node.type.name == "comment"
-            ? pos + 1
-            : pos
-          view.dispatch(view.state.tr.replaceWith(pos, endPos, nodeType.createAndFill(attrs)))
-          view.focus()
-        }
-      })
+    run(state, dispatch, view) {      
+      if (state.selection instanceof NodeSelection && state.selection.node.type.name == "comment") {
+        return
+      }
+      const resolvedPos = state.doc.resolve(state.selection.from)
+      const parent = resolvedPos.parent
+      if (parent.type.name === "comment") { return }
+      const tr = state.tr
+      let pos = 0
+      // Anchor the comment at a point preceding the parent block.
+      const blockPos = resolvedPos.before(resolvedPos.depth)
+      tr.insert(blockPos, nodeType.create())
+      pos = blockPos + 1
+      tr.setSelection(TextSelection.create(tr.doc, pos))
+      view.dispatch(tr)
     }
   })
 }

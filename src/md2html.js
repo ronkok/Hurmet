@@ -88,7 +88,7 @@ const nodes = {
     return tag + "\n"
   },
   paragraph(node)  { return htmlTag("p", output(node.content)) + "\n" },
-  blockquote(node) {return htmlTag("blockquote", output(node.content)) },
+  blockquote(node) { return htmlTag("blockquote", output(node.content)) },
   code_block(node) {
     return htmlTag("pre", htmlTag("code", sanitizeText(node.content[0].text)))
   },
@@ -160,6 +160,7 @@ const nodes = {
   centered_div(node)    {
     return htmlTag("div", output(node.content), { class: 'centered' } )
   },
+  comment(node) { return htmlTag("aside", output(node.content), { class: 'comment' }) },
   dt(node)    {
     let text = output(node.content)
     let tag = htmlTag("dt", text)

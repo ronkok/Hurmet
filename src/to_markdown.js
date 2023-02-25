@@ -196,7 +196,13 @@ const hurmetNodes =  {
     writeTex(state, node.displayMode, tex)
   },
   comment(state, node) {
-    state.write(`©${node.attrs.comment.trim()}©`)
+    const prevLength = state.out.length
+    state.write("©> ")
+    state.renderInline(node)
+    if (!state.isGFM) {
+      state.out = limitLineLength(state.out, prevLength, state.delim, state.lineLimit)
+    }
+    state.closeBlock(node)
   },
   calculation(state, node) {
     const entry = node.attrs.entry.trim().replace(/\n(?: *\n)+/g, "\n").replace(/\n/gm, "\n" + state.delim)
