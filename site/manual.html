@@ -40,7 +40,7 @@
 <p>You can create a print header in any document by clicking the File | Print Header menu choice. Later, when you click the File | Print… menu choice, the header will be printed at the top of every page (except the cover page). The header is a table and it should remain a table. Otherwise, edit it any way you want.</p>
 <p>If you write <code>$PAGE</code> into a print header, Hurmet will print page numbers at that location.</p>
 <h3 id='comments'>Comments</h3>
-<aside class="comment">Citation needed</aside><p>The <img alt="comment"> button enables you to write a comment like the nearby text bubble:</p>
+<aside class="comment">Citation needed</aside><p>The <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 1024 1024'%3E%3Cpath d='M512 219q-116 0-218 39t-161 107-59 145q0 64 40 122t115 100l49 28-15 54q-13 52-40 98 86-36 157-97l24-21 32 3q39 4 74 4 116 0 218-39t161-107 59-145-59-145-161-107-218-39zM1024 512q0 99-68 183t-186 133-257 48q-40 0-82-4-113 100-262 138-28 8-65 12h-2q-8 0-15-6t-9-15v-0q-1-2-0-6t1-5 2-5l3-5t4-4 4-5q4-4 17-19t19-21 17-22 18-29 15-33 14-43q-89-50-141-125t-51-160q0-99 68-183t186-133 257-48 257 48 186 133 68 183z'/%3E%3C/svg%3E" alt="comment"> button enables you to write a comment like the nearby text bubble:</p>
 <p>A command in the “Docs” menu will delete all comments in the document.</p>
 <br>
 <h3 id='table-of-contents'>Table of Contents</h3>
@@ -66,8 +66,8 @@
 </td></tr>
 <tr><td style="width: 392px"><code>[Link](http://a.com)</code></td><td style="width: 177px"><a href='http://a.com'>Link</a></td></tr>
 <tr><td style="width: 392px"><code>[Link][]</code> <br>⋮ <br><code>[Link]: http://a.com</code></td><td style="width: 177px"><a href='http://a.com' title='2''>Link</a></td></tr>
-<tr><td style="width: 392px"><code>![image](http://url/image.svg)</code></td><td style="width: 177px"><img alt="image"></td></tr>
-<tr><td style="width: 392px"><code>![image][]</code> <br>⋮ <br><code>[image]: http://url/image.svg</code></td><td style="width: 177px"><img alt="image"></td></tr>
+<tr><td style="width: 392px"><code>![image](http://url/image.svg)</code></td><td style="width: 177px"><img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='m14.998 2 .002.002v11.996l-.002.002H1.002L1 13.998V2.002L1.002 2h13.996zM15 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h14c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1z'/%3E%3Cpath d='M13 4.5a1.5 1.5 0 1 1-3.001-.001A1.5 1.5 0 0 1 13 4.5zM14 13H2v-2l3.5-6 4 5h1L14 7z'/%3E%3C/svg%3E" alt="image"></td></tr>
+<tr><td style="width: 392px"><code>![image][]</code> <br>⋮ <br><code>[image]: http://url/image.svg</code></td><td style="width: 177px"><img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='m14.998 2 .002.002v11.996l-.002.002H1.002L1 13.998V2.002L1.002 2h13.996zM15 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h14c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1z'/%3E%3Cpath d='M13 4.5a1.5 1.5 0 1 1-3.001-.001A1.5 1.5 0 0 1 13 4.5zM14 13H2v-2l3.5-6 4 5h1L14 7z'/%3E%3C/svg%3E" alt="image"></td></tr>
 <tr><td style="width: 392px"><code>!![caption][cap]</code> <br>⋮ <br><code>[cap]: http://url/image.svg</code></td><td style="width: 177px"><figure><img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='m14.998 2 .002.002v11.996l-.002.002H1.002L1 13.998V2.002L1.002 2h13.996zM15 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h14c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1z'/%3E%3Cpath d='M13 4.5a1.5 1.5 0 1 1-3.001-.001A1.5 1.5 0 0 1 13 4.5zM14 13H2v-2l3.5-6 4 5h1L14 7z'/%3E%3C/svg%3E" class="figimg" alt="cap">
 <figcaption>caption</figcaption></figure>
 </td></tr>
@@ -105,7 +105,7 @@ return 3</code></pre></td></tr>
 </code></pre></details>
 <p>…or you can export GFM (Github Flavored Markdown), which does not have Hurmet’s extensions and which converts calculation zones to TeX.</p>
 <h3 id='tex'>TeX</h3>
-<p>Besides its calculation cells, Hurmet also has cells that emulate the math mode of <math><mrow><mtext>T</mtext><mspace width="-0.1667em" style="margin-left:-0.1667em;"></mspace><mpadded voffset="-0.2155em" height="-0.2155em" depth="+0.2155em"><mstyle scriptlevel="0" displaystyle="false"><mtext>E</mtext></mstyle></mpadded><mspace width="-0.125em" style="margin-left:-0.125em;"></mspace><mtext>X</mtext></mrow></math> (pronounced <em>tech</em>). These cells display, but do not calculate, math. You can create a TeX cell by clicking the <img alt="T"> button. Type <strong>Enter</strong> to save the cell.</p>
+<p>Besides its calculation cells, Hurmet also has cells that emulate the math mode of <math><mrow><mtext>T</mtext><mspace width="-0.1667em" style="margin-left:-0.1667em;"></mspace><mpadded voffset="-0.2155em" height="-0.2155em" depth="+0.2155em"><mstyle scriptlevel="0" displaystyle="false"><mtext>E</mtext></mstyle></mpadded><mspace width="-0.125em" style="margin-left:-0.125em;"></mspace><mtext>X</mtext></mrow></math> (pronounced <em>tech</em>). These cells display, but do not calculate, math. You can create a TeX cell by clicking the <img src="data:image/svg+xml;utf8,%3Csvg height='16' width='16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M.8 4.5V.3c.1-.5.6-.2 1-.3h12.8c.4.2.2.7.3 1v3.5c-.4.7-1.1-.1-1-.7a4 4 0 0 0-2.7-2.7C10.8 1 9.8.6 9.7 1v12.8c0 .8.3 1.5 1.2 1.3.6-.2 1.6.5.8.9H3.9c-.8-.6.4-1 1-.9 1 .2 1-.8 1-1.6V.8c-1.2.2-2.6.5-3.4 1.5-.7.7-.8 1.6-1 2.4-.2.2-.6.1-.7-.2ZM2.6 1c.4-.2.3-.2 0-.2h-1V2ZM9 7.8v-7H6.8l-.1 13.5c.1.4-.4 1 .2.9H9c-.3-.5.1-1.2 0-1.7Zm4.8-6.1c.1 0 .4.5.3 0V.9h-1.3l1 .9z'/%3E%3C/svg%3E" alt="T"> button. Type <strong>Enter</strong> to save the cell.</p>
 <p>To create a cell in TeX display mode, first change the paragraph format to center-justified, then create the cell.</p>
 <p>For more information about TeX and LaTeX, good places to start are the Wikibooks pages for writing <a href='https://en.wikibooks.org/wiki/LaTeX/Mathematics'>math</a> and <a href='https://en.wikibooks.org/wiki/LaTeX/Advanced_Mathematics'>advanced math</a>; and the Temml <a href='https://temml.org/'>home page</a> and <a href='https://temml.org/docs/en/supported.html'>supported-functions</a> page.</p>
 <p>Hurmet calculation cells use a different syntax than TeX. In calculation cells, the syntax is more akin to a programming language, yet it renders like mathematics.</p>
@@ -113,7 +113,7 @@ return 3</code></pre></td></tr>
 <h2 id='calculation-tutorial'>Calculation Tutorial</h2>
 <dl class="bold-term">
 <dt id='create-a-cell'>Create a cell</dt>
-<dd><p>Hurmet calculation cells display math and perform numeric calculations. To create a calculation cell in  Hurmet.app, select a spot in the document, then click the <img alt="C"> button or type <strong>Alt c</strong>.</p>
+<dd><p>Hurmet calculation cells display math and perform numeric calculations. To create a calculation cell in  Hurmet.app, select a spot in the document, then click the <img src="images/C.svg" alt="C"> button or type <strong>Alt c</strong>.</p>
 <p>While in a cell,<br>        <strong>Enter</strong> will close and update the cell.<br>        <strong>Shift-Enter</strong> will create a newline inside the cell.<br>        <strong>Esc</strong> will close the cell without updating it.<br>        Clicking elsewhere will also close the cell.</p>
 </dd>
 <div id="statement-container">

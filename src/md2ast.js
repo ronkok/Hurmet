@@ -443,8 +443,8 @@ const parseRef = function(capture, state, refNode) {
       ] }
       refNode.content[0].attrs.src = def.target
     } else if (refNode.type === "image") {
-      refNode.attrs.src = def.target
       refNode.attrs = def.attrs
+      refNode.attrs.src = def.target
     } else {
       // refNode is a link
       refNode.attrs.href = def.target;
