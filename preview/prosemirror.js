@@ -22292,7 +22292,7 @@ const Tuple = Object.freeze({
 
 const numMisMatchError = _ => {
   const str = "Error. Mismatch in number of multiple assignment.";
-  return [`\\color{firebrick}\\text{${str}}`, str]
+  return [`\\textcolor{firebrick}{\\text{${str}}}`, str]
 };
 
 const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAware) => {
@@ -22329,13 +22329,15 @@ const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAware) => {
         formatSpec, decimalFormat);
 
     } else if (isMatrix(result)) {
-      resultDisplay = Matrix.display(
-        isUnitAware ? { value: result.value.plain, dtype: result.dtype } : result,
+      resultDisplay = Matrix.display((isUnitAware || result.value.plain)
+          ? { value: result.value.plain, dtype: result.dtype }
+          : result,
         formatSpec,
         decimalFormat
       );
-      altResultDisplay = Matrix.displayAlt(
-        isUnitAware ? { value: result.value.plain, dtype: result.dtype } : result,
+      altResultDisplay = Matrix.displayAlt((isUnitAware || result.value.plain)
+          ? { value: result.value.plain, dtype: result.dtype }
+          : result,
         formatSpec,
         decimalFormat
       );
@@ -22409,7 +22411,7 @@ const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAware) => {
     } else if (result.value.plain) {
       resultDisplay = format(result.value.plain, formatSpec, decimalFormat);
       if (resultDisplay.dtype && resultDisplay.dtype === dt.ERROR) {
-        resultDisplay = "\\color{firebrick}\\text{" + resultDisplay.value + "}";
+        resultDisplay = "\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}";
         altResultDisplay = resultDisplay.value;
       } else {
         altResultDisplay = resultDisplay.replace(/{,}/g, ",").replace("\\", "");
@@ -22418,7 +22420,7 @@ const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAware) => {
     } else if (Rnl.isRational(result.value)) {
       resultDisplay = format(result.value, formatSpec, decimalFormat);
       if (resultDisplay.dtype && resultDisplay.dtype === dt.ERROR) {
-        resultDisplay = "\\color{firebrick}\\text{" + resultDisplay.value + "}";
+        resultDisplay = "\\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}";
         altResultDisplay = resultDisplay.value;
       } else {
         altResultDisplay = resultDisplay.replace(/{,}/g, ",").replace("\\", "");
@@ -27951,7 +27953,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
 
 const errorResult = (stmt, result) => {
   stmt.value = null;
-  stmt.resultDisplay = "\\color{firebrick}\\text{" + result.value + "}";
+  stmt.resultDisplay = "\\textcolor{firebrick}{\\text{" + result.value + "}}";
   stmt.altResultDisplay = result.value;
   stmt.error = true;
   if (stmt.resulttemplate.indexOf("!") > -1) {
@@ -28073,7 +28075,7 @@ const evaluateDrawing = (stmt, vars, decimalFormat = "1,000,000.") => {
   const funcResult = evalCustomFunction(udf, args, decimalFormat, false, {});
   if (funcResult.dtype === dt.ERROR) {
     stmt.error = true;
-    stmt.tex = "\\color{firebrick}\\text{" + funcResult.value + "}";
+    stmt.tex = "\\textcolor{firebrick}{\\text{" + funcResult.value + "}}";
     stmt.value = null;
     stmt.dtype = dt.ERROR;
   } else {
@@ -28727,7 +28729,7 @@ const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
         // The expression calls a variable.
         // If it also contains an operator or a function, then we need to show the echo.
         if (containsOperator.test("\xa0" + rpn + "\xa0")) {
-          echo = "{\\color{#0000ff}" + echo + "}";
+          echo = "\\textcolor{#0000ff}{" + echo + "}";
         } else {
           echo = "";
         }
@@ -43787,9 +43789,7 @@ function limitLineLength(str, prevLength, delim, limit) {
 }
 
 const writeTex = (state, displayMode, tex) => {
-  tex = tex.replace(/\n/gm, "\n" + state.delim)
-    .replace(/\\\\/gm, "\\\\\\\\")
-    .replace(/\$/gm, "\\$");
+  tex = tex.replace(/\n/gm, "\n" + state.delim).replace(/\$/gm, "\\$");
   if (displayMode) {
     state.write("$$\n" + tex + "\n$$");
   } else {

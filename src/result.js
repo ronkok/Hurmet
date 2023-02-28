@@ -14,7 +14,7 @@ import { Cpx } from "./complex"
 
 const numMisMatchError = _ => {
   const str = "Error. Mismatch in number of multiple assignment."
-  return [`\\color{firebrick}\\text{${str}}`, str]
+  return [`\\textcolor{firebrick}{\\text{${str}}}`, str]
 }
 
 export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAware) => {
@@ -51,13 +51,15 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAwar
         formatSpec, decimalFormat)
 
     } else if (isMatrix(result)) {
-      resultDisplay = Matrix.display(
-        isUnitAware ? { value: result.value.plain, dtype: result.dtype } : result,
+      resultDisplay = Matrix.display((isUnitAware || result.value.plain)
+          ? { value: result.value.plain, dtype: result.dtype }
+          : result,
         formatSpec,
         decimalFormat
       )
-      altResultDisplay = Matrix.displayAlt(
-        isUnitAware ? { value: result.value.plain, dtype: result.dtype } : result,
+      altResultDisplay = Matrix.displayAlt((isUnitAware || result.value.plain)
+          ? { value: result.value.plain, dtype: result.dtype }
+          : result,
         formatSpec,
         decimalFormat
       )
@@ -131,7 +133,7 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAwar
     } else if (result.value.plain) {
       resultDisplay = format(result.value.plain, formatSpec, decimalFormat)
       if (resultDisplay.dtype && resultDisplay.dtype === dt.ERROR) {
-        resultDisplay = "\\color{firebrick}\\text{" + resultDisplay.value + "}"
+        resultDisplay = "\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}"
         altResultDisplay = resultDisplay.value
       } else {
         altResultDisplay = resultDisplay.replace(/{,}/g, ",").replace("\\", "")
@@ -140,7 +142,7 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAwar
     } else if (Rnl.isRational(result.value)) {
       resultDisplay = format(result.value, formatSpec, decimalFormat)
       if (resultDisplay.dtype && resultDisplay.dtype === dt.ERROR) {
-        resultDisplay = "\\color{firebrick}\\text{" + resultDisplay.value + "}"
+        resultDisplay = "\\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}"
         altResultDisplay = resultDisplay.value
       } else {
         altResultDisplay = resultDisplay.replace(/{,}/g, ",").replace("\\", "")
