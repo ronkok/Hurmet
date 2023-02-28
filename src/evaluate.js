@@ -1559,7 +1559,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
 
 const errorResult = (stmt, result) => {
   stmt.value = null
-  stmt.resultDisplay = "\\color{firebrick}\\text{" + result.value + "}"
+  stmt.resultDisplay = "\\textcolor{firebrick}{\\text{" + result.value + "}}"
   stmt.altResultDisplay = result.value
   stmt.error = true
   if (stmt.resulttemplate.indexOf("!") > -1) {
@@ -1681,7 +1681,7 @@ export const evaluateDrawing = (stmt, vars, decimalFormat = "1,000,000.") => {
   const funcResult = evalCustomFunction(udf, args, decimalFormat, false, {})
   if (funcResult.dtype === dt.ERROR) {
     stmt.error = true
-    stmt.tex = "\\color{firebrick}\\text{" + funcResult.value + "}"
+    stmt.tex = "\\textcolor{firebrick}{\\text{" + funcResult.value + "}}"
     stmt.value = null
     stmt.dtype = dt.ERROR
   } else {
