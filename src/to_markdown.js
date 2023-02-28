@@ -336,9 +336,7 @@ function limitLineLength(str, prevLength, delim, limit) {
 }
 
 const writeTex = (state, displayMode, tex) => {
-  tex = tex.replace(/\n/gm, "\n" + state.delim)
-    .replace(/\\\\/gm, "\\\\\\\\")
-    .replace(/\$/gm, "\\$")
+  tex = tex.replace(/\n/gm, "\n" + state.delim).replace(/\$/gm, "\\$")
   if (displayMode) {
     state.write("$$\n" + tex + "\n$$")
   } else {
