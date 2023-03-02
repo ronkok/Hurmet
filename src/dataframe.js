@@ -107,6 +107,13 @@ const range = (df, args, vars, unitAware) => {
     iStart = df.value.rowMap[args[0].value]
     iEnd = iStart
     columnList.push(df.value.columnMap[args[0].value])
+  } else {
+    // Default for args is a list of column names
+    iStart = 0
+    iEnd = args.length
+    for (const arg of args) {
+      columnList.push(df.value.columnMap[arg.value])
+    }
   }
 
   if (rowList.length === 0 && iStart === iEnd && columnList.length === 1) {

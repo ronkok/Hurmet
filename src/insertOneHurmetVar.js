@@ -3,7 +3,7 @@ import { dt } from "./constants"
 import { clone, unitTeXFromString } from "./utils"
 import { format } from "./format"
 import { Rnl } from "./rational"
-import { isMatrix } from "./matrix"
+import { isMatrix, Matrix } from "./matrix"
 import { errorOprnd } from "./error"
 
 export function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
@@ -107,24 +107,43 @@ export function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
       }
     }
   } else if (attrs.dtype === dt.DATAFRAME) {
+    const isSingleRow = attrs.value.data[0].length === 1
     for (let i = 0; i < attrs.name.length; i++) {
-      const datum = attrs.value.data[i][0]
-      const dtype = attrs.value.dtype[i]
-      const val = (dtype & dt.RATIONAL) ? Rnl.fromString(datum) : datum
+      let dtype = attrs.value.dtype[i]
+      let value = isSingleRow ? undefined : [];
+      for (let j = 0; j < attrs.value.data[0].length; j++) {
+        const datum = attrs.value.data[i][j]
+        const val = (dtype & dt.RATIONAL) ? Rnl.fromString(datum) : datum
+        if (isSingleRow) {
+          value = val
+        } else {
+          value.push(val)
+        }
+      }
+      if (!isSingleRow) { dtype += dt.COLUMNVECTOR }
       const result = {
-        value: val,
+        value,
         unit: attrs.unit[attrs.value.units[i]],
-        dtype,
-        resultdisplay: (dtype & dt.RATIONAL) ? parse(format(val)) : parse(val)
+        dtype
       }
       if (attrs.value.units[i]) {
         result.value = { plain: result.value }
         const unit = attrs.unit[attrs.value.units[i]]
-        result.value.inBaseUnits =
-          Rnl.multiply(Rnl.add(result.value.plain, unit.gauge), unit.factor)
+        result.value.inBaseUnits = isSingleRow
+          ? Rnl.multiply(Rnl.add(result.value.plain, unit.gauge), unit.factor)
+          : result.value.plain.map(e => Rnl.multiply(Rnl.add(e, unit.gauge), unit.factor))
         result.expos = unit.expos
         result.resultdisplay += " " + unitTeXFromString(result.unit.name)
       }
+      if ((dtype & dt.RATIONAL) && isSingleRow) {
+        result.resultdisplay = parse(format(value))
+      } else if (dtype & dt.RATIONAL) {
+        result.resultdisplay = Matrix.display({ value, dtype }, formatSpec, decimalFormat)
+            + parse(`'${attrs.value.units[i]}'`)
+      } else {
+        result.resultdisplay = parse(value)
+      }
+
       hurmetVars[attrs.name[i]] = result
     }
   } else if (attrs.dtype === dt.TUPLE) {

@@ -3659,6 +3659,13 @@ const range = (df, args, vars, unitAware) => {
     iStart = df.value.rowMap[args[0].value];
     iEnd = iStart;
     columnList.push(df.value.columnMap[args[0].value]);
+  } else {
+    // Default for args is a list of column names
+    iStart = 0;
+    iEnd = args.length;
+    for (const arg of args) {
+      columnList.push(df.value.columnMap[arg.value]);
+    }
   }
 
   if (rowList.length === 0 && iStart === iEnd && columnList.length === 1) {
@@ -6887,7 +6894,7 @@ const Tuple = Object.freeze({
 
 const numMisMatchError = _ => {
   const str = "Error. Mismatch in number of multiple assignment.";
-  return [`\\color{firebrick}\\text{${str}}`, str]
+  return [`\\textcolor{firebrick}{\\text{${str}}}`, str]
 };
 
 const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAware) => {
@@ -6924,13 +6931,15 @@ const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAware) => {
         formatSpec, decimalFormat);
 
     } else if (isMatrix(result)) {
-      resultDisplay = Matrix.display(
-        isUnitAware ? { value: result.value.plain, dtype: result.dtype } : result,
+      resultDisplay = Matrix.display((isUnitAware || result.value.plain)
+          ? { value: result.value.plain, dtype: result.dtype }
+          : result,
         formatSpec,
         decimalFormat
       );
-      altResultDisplay = Matrix.displayAlt(
-        isUnitAware ? { value: result.value.plain, dtype: result.dtype } : result,
+      altResultDisplay = Matrix.displayAlt((isUnitAware || result.value.plain)
+          ? { value: result.value.plain, dtype: result.dtype }
+          : result,
         formatSpec,
         decimalFormat
       );
@@ -7004,7 +7013,7 @@ const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAware) => {
     } else if (result.value.plain) {
       resultDisplay = format(result.value.plain, formatSpec, decimalFormat);
       if (resultDisplay.dtype && resultDisplay.dtype === dt.ERROR) {
-        resultDisplay = "\\color{firebrick}\\text{" + resultDisplay.value + "}";
+        resultDisplay = "\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}";
         altResultDisplay = resultDisplay.value;
       } else {
         altResultDisplay = resultDisplay.replace(/{,}/g, ",").replace("\\", "");
@@ -7013,7 +7022,7 @@ const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAware) => {
     } else if (Rnl.isRational(result.value)) {
       resultDisplay = format(result.value, formatSpec, decimalFormat);
       if (resultDisplay.dtype && resultDisplay.dtype === dt.ERROR) {
-        resultDisplay = "\\color{firebrick}\\text{" + resultDisplay.value + "}";
+        resultDisplay = "\\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}";
         altResultDisplay = resultDisplay.value;
       } else {
         altResultDisplay = resultDisplay.replace(/{,}/g, ",").replace("\\", "");
@@ -8149,7 +8158,7 @@ const dtype = {
   matrix: {
     scalar(t0, t1, tkn) { return t0 },
     rowVector(t0, t1, tkn) { return t0 },
-    columnVector(t0, t1, tkn) { return tkn === "&" ? t0 : t1 },
+    columnVector(t0, t1, tkn) { return tkn === "&" || tkn === "asterisk" ? t0 : t1 },
     matrix(t0, t1, tkn) { return t0 },
     map(t0, t1, tkn)    { return 0 }
   },
@@ -8510,6 +8519,22 @@ const binary$1 = {
         if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
         return m.map(row => row.map((e, i) => Rnl.subtract(v[i], e)))
       },
+      multiply(v, m) {
+        if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
+        return m.map(row => row.map((e, i) => Rnl.multiply(v[i], e)))
+      },
+      asterisk(v, m) {
+        if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
+        return m.map(row => row.map((e, i) => Rnl.multiply(v[i], e)))
+      },
+      divide(v, m) {
+        if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
+        return m.map(row => row.map((e, i) => Rnl.divide(v[i], e)))
+      },
+      power(v, m) {
+        if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
+        return m.map(row => row.map((e, i) => Rnl.power(v[i], e)))
+      },
       concat(v, m) {
         if (v.length !== m[0].length) { return errorOprnd("BAD_CONCAT") }
         return m.map((row, i) => [v[i], ...row])
@@ -8666,6 +8691,50 @@ const binary$1 = {
         }
         return result
       },
+      multiply(v, m) {
+        // multiply the column vector by each column of the matrix
+        const result = clone(m);
+        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
+        for (let i = 0; i < m.length; i++) {
+          for (let j = 0; j < m[0].length; j++) {
+            result[i][j] = Rnl.multiply(m[i][j], v[j]);
+          }
+        }
+        return result
+      },
+      asterisk(v, m) {
+        // multiply the column vector by each column of the matrix
+        const result = clone(m);
+        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
+        for (let i = 0; i < m.length; i++) {
+          for (let j = 0; j < m[0].length; j++) {
+            result[i][j] = Rnl.multiply(m[i][j], v[j]);
+          }
+        }
+        return result
+      },
+      divide(v, m) {
+        // Divide the column vector by each column of the matrix
+        const result = clone(m);
+        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
+        for (let i = 0; i < m.length; i++) {
+          for (let j = 0; j < m[0].length; j++) {
+            result[i][j] = Rnl.divide(m[i][j], v[j]);
+          }
+        }
+        return result
+      },
+      poser(v, m) {
+        // Take each column vector to the power of each column of the matrix
+        const result = clone(m);
+        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
+        for (let i = 0; i < m.length; i++) {
+          for (let j = 0; j < m[0].length; j++) {
+            result[i][j] = Rnl.power(m[i][j], v[j]);
+          }
+        }
+        return result
+      },
       concat(v, m) {
         if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
         return m.map((row, i) => [v[i], ...row])
@@ -8695,21 +8764,27 @@ const binary$1 = {
       add(m, v)      { return m.map(row => row.map((e, i) => Rnl.add(e, v[i]) )) },
       subtract(m, v) { return m.map(row => row.map((e, i) => Rnl.subtract(e, v[i]) )) },
       multiply(m, v) { return m.map(row => row.map((e, i) => Rnl.multiply(e, v[i]) )) },
+      asterisk(m, v) { return m.map(row => row.map((e, i) => Rnl.multiply(e, v[i]) )) },
       divide(m, v)   { return m.map(row => row.map((e, i) => Rnl.divide(e, v[i]) )) },
       power(m, v)    { return m.map(row => row.map((e, i) => Rnl.power(e, v[i]) )) },
+      modulo(m, v)   { return m.map(row => row.map((e, i) => Rnl.modulo(e, v[i]) )) },
       unshift(m, v) {
         if (m[0].length !== v.length) { return errorOprnd("MIS_ELNUM") }
         return [...m, v]
       }
     },
     columnVector: {
-      add(m, v)      { return m.map(row => row.map((e, i) => Rnl.add(e, v[i]) )) },
-      subtract(m, v) { return m.map(row => row.map((e, i) => Rnl.subtract(e, v[i]) )) },
+      add(m, v)      { return m.map((row, i) => row.map(e => Rnl.add(e, v[i]) )) },
+      subtract(m, v) { return m.map((row, i) => row.map(e => Rnl.subtract(e, v[i]) )) },
       multiply(m, v) {
         // Multiply a matrix times a column vector
         if (m[0].length !== v.length) { return errorOprnd("MIS_ELNUM") }
         return m.map(row => dotProduct(row, v))
       },
+      asterisk(m, v) { return m.map((row, i) => row.map(e => Rnl.multiply(e, v[i]) )) },
+      divide(m, v)   { return m.map((row, i) => row.map(e => Rnl.divide(e, v[i]) )) },
+      power(m, v)    { return m.map((row, i) => row.map(e => Rnl.power(e, v[i]) )) },
+      modulo(m, v)   { return m.map((row, i) => row.map(e => Rnl.modulo(e, v[i]) )) },
       concat(m, v) {
         if (m.length !== v.length) { return errorOprnd("MIS_ELNUM") }
         return m.map((row, i) => [...row, v[i]])
@@ -9238,24 +9313,43 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
       }
     }
   } else if (attrs.dtype === dt.DATAFRAME) {
+    const isSingleRow = attrs.value.data[0].length === 1;
     for (let i = 0; i < attrs.name.length; i++) {
-      const datum = attrs.value.data[i][0];
-      const dtype = attrs.value.dtype[i];
-      const val = (dtype & dt.RATIONAL) ? Rnl.fromString(datum) : datum;
+      let dtype = attrs.value.dtype[i];
+      let value = isSingleRow ? undefined : [];
+      for (let j = 0; j < attrs.value.data[0].length; j++) {
+        const datum = attrs.value.data[i][j];
+        const val = (dtype & dt.RATIONAL) ? Rnl.fromString(datum) : datum;
+        if (isSingleRow) {
+          value = val;
+        } else {
+          value.push(val);
+        }
+      }
+      if (!isSingleRow) { dtype += dt.COLUMNVECTOR; }
       const result = {
-        value: val,
+        value,
         unit: attrs.unit[attrs.value.units[i]],
-        dtype,
-        resultdisplay: (dtype & dt.RATIONAL) ? parse(format(val)) : parse(val)
+        dtype
       };
       if (attrs.value.units[i]) {
         result.value = { plain: result.value };
         const unit = attrs.unit[attrs.value.units[i]];
-        result.value.inBaseUnits =
-          Rnl.multiply(Rnl.add(result.value.plain, unit.gauge), unit.factor);
+        result.value.inBaseUnits = isSingleRow
+          ? Rnl.multiply(Rnl.add(result.value.plain, unit.gauge), unit.factor)
+          : result.value.plain.map(e => Rnl.multiply(Rnl.add(e, unit.gauge), unit.factor));
         result.expos = unit.expos;
         result.resultdisplay += " " + unitTeXFromString(result.unit.name);
       }
+      if ((dtype & dt.RATIONAL) && isSingleRow) {
+        result.resultdisplay = parse(format(value));
+      } else if (dtype & dt.RATIONAL) {
+        result.resultdisplay = Matrix.display({ value, dtype }, formatSpec, decimalFormat)
+            + parse(`'${attrs.value.units[i]}'`);
+      } else {
+        result.resultdisplay = parse(value);
+      }
+
       hurmetVars[attrs.name[i]] = result;
     }
   } else if (attrs.dtype === dt.TUPLE) {
@@ -11330,12 +11424,12 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           product.dtype = (tkn === "*" || shape1 === "scalar" || shape1 === "map" ||
             shape1 === "complex" || shape2 === "scalar" ||
             shape2 === "map" || shape2 === "complex")
-            ? Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, op)
-            : tkn === "·"
-            ? dt.RATIONAL
-            : tkn === "×"
-            ? dt.COLUMNVECTOR
-            : Matrix.multResultType(o1, o2);
+              ? Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, op)
+              : tkn === "·"
+              ? dt.RATIONAL
+              : tkn === "×"
+              ? dt.COLUMNVECTOR
+              : Matrix.multResultType(o1, o2);
 
           product.value = Operators.binary[shape1][shape2][op](o1.value, o2.value);
           if (product.value.dtype && product.value.dtype === dt.ERROR) {
@@ -12546,7 +12640,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
 
 const errorResult = (stmt, result) => {
   stmt.value = null;
-  stmt.resultDisplay = "\\color{firebrick}\\text{" + result.value + "}";
+  stmt.resultDisplay = "\\textcolor{firebrick}{\\text{" + result.value + "}}";
   stmt.altResultDisplay = result.value;
   stmt.error = true;
   if (stmt.resulttemplate.indexOf("!") > -1) {
@@ -12668,7 +12762,7 @@ const evaluateDrawing = (stmt, vars, decimalFormat = "1,000,000.") => {
   const funcResult = evalCustomFunction(udf, args, decimalFormat, false, {});
   if (funcResult.dtype === dt.ERROR) {
     stmt.error = true;
-    stmt.tex = "\\color{firebrick}\\text{" + funcResult.value + "}";
+    stmt.tex = "\\textcolor{firebrick}{\\text{" + funcResult.value + "}}";
     stmt.value = null;
     stmt.dtype = dt.ERROR;
   } else {
@@ -13322,7 +13416,7 @@ const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
         // The expression calls a variable.
         // If it also contains an operator or a function, then we need to show the echo.
         if (containsOperator.test("\xa0" + rpn + "\xa0")) {
-          echo = "{\\color{#0000ff}" + echo + "}";
+          echo = "\\textcolor{#0000ff}{" + echo + "}";
         } else {
           echo = "";
         }
@@ -13422,7 +13516,7 @@ const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
 };
 
 /*
- *  This module mostly organizes one or two passes through the data structure of a Hurmet
+ *  This module organizes one or two passes through the data structure of a Hurmet
  *  document, calling for a calculation to be done on each Hurmet calculation cell.
  *  If you are looking for the calculation itself, look at evaluate.js.
  *

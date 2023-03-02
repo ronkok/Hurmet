@@ -9,7 +9,7 @@ import { DataFrame } from "./dataframe"
 import { clone, addTextEscapes } from "./utils"
 
 /*
- *  This module mostly organizes one or two passes through the data structure of a Hurmet
+ *  This module organizes one or two passes through the data structure of a Hurmet
  *  document, calling for a calculation to be done on each Hurmet calculation cell.
  *  If you are looking for the calculation itself, look at evaluate.js.
  *

@@ -192,6 +192,7 @@ th p { line-height: 1.6; }
 }
 
 .ProseMirror pre {
+  display: inline-block;
   margin-left: 2em;
   margin-bottom: 1em;
   white-space: pre-wrap;

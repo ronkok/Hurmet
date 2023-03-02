@@ -165,7 +165,7 @@ const dtype = {
   matrix: {
     scalar(t0, t1, tkn) { return t0 },
     rowVector(t0, t1, tkn) { return t0 },
-    columnVector(t0, t1, tkn) { return tkn === "&" ? t0 : t1 },
+    columnVector(t0, t1, tkn) { return tkn === "&" || tkn === "asterisk" ? t0 : t1 },
     matrix(t0, t1, tkn) { return t0 },
     map(t0, t1, tkn)    { return 0 }
   },
@@ -526,6 +526,22 @@ const binary = {
         if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
         return m.map(row => row.map((e, i) => Rnl.subtract(v[i], e)))
       },
+      multiply(v, m) {
+        if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
+        return m.map(row => row.map((e, i) => Rnl.multiply(v[i], e)))
+      },
+      asterisk(v, m) {
+        if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
+        return m.map(row => row.map((e, i) => Rnl.multiply(v[i], e)))
+      },
+      divide(v, m) {
+        if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
+        return m.map(row => row.map((e, i) => Rnl.divide(v[i], e)))
+      },
+      power(v, m) {
+        if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
+        return m.map(row => row.map((e, i) => Rnl.power(v[i], e)))
+      },
       concat(v, m) {
         if (v.length !== m[0].length) { return errorOprnd("BAD_CONCAT") }
         return m.map((row, i) => [v[i], ...row])
@@ -682,6 +698,50 @@ const binary = {
         }
         return result
       },
+      multiply(v, m) {
+        // multiply the column vector by each column of the matrix
+        const result = clone(m)
+        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
+        for (let i = 0; i < m.length; i++) {
+          for (let j = 0; j < m[0].length; j++) {
+            result[i][j] = Rnl.multiply(m[i][j], v[j])
+          }
+        }
+        return result
+      },
+      asterisk(v, m) {
+        // multiply the column vector by each column of the matrix
+        const result = clone(m)
+        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
+        for (let i = 0; i < m.length; i++) {
+          for (let j = 0; j < m[0].length; j++) {
+            result[i][j] = Rnl.multiply(m[i][j], v[j])
+          }
+        }
+        return result
+      },
+      divide(v, m) {
+        // Divide the column vector by each column of the matrix
+        const result = clone(m)
+        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
+        for (let i = 0; i < m.length; i++) {
+          for (let j = 0; j < m[0].length; j++) {
+            result[i][j] = Rnl.divide(m[i][j], v[j])
+          }
+        }
+        return result
+      },
+      poser(v, m) {
+        // Take each column vector to the power of each column of the matrix
+        const result = clone(m)
+        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
+        for (let i = 0; i < m.length; i++) {
+          for (let j = 0; j < m[0].length; j++) {
+            result[i][j] = Rnl.power(m[i][j], v[j])
+          }
+        }
+        return result
+      },
       concat(v, m) {
         if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
         return m.map((row, i) => [v[i], ...row])
@@ -711,21 +771,27 @@ const binary = {
       add(m, v)      { return m.map(row => row.map((e, i) => Rnl.add(e, v[i]) )) },
       subtract(m, v) { return m.map(row => row.map((e, i) => Rnl.subtract(e, v[i]) )) },
       multiply(m, v) { return m.map(row => row.map((e, i) => Rnl.multiply(e, v[i]) )) },
+      asterisk(m, v) { return m.map(row => row.map((e, i) => Rnl.multiply(e, v[i]) )) },
       divide(m, v)   { return m.map(row => row.map((e, i) => Rnl.divide(e, v[i]) )) },
       power(m, v)    { return m.map(row => row.map((e, i) => Rnl.power(e, v[i]) )) },
+      modulo(m, v)   { return m.map(row => row.map((e, i) => Rnl.modulo(e, v[i]) )) },
       unshift(m, v) {
         if (m[0].length !== v.length) { return errorOprnd("MIS_ELNUM") }
         return [...m, v]
       }
     },
     columnVector: {
-      add(m, v)      { return m.map(row => row.map((e, i) => Rnl.add(e, v[i]) )) },
-      subtract(m, v) { return m.map(row => row.map((e, i) => Rnl.subtract(e, v[i]) )) },
+      add(m, v)      { return m.map((row, i) => row.map(e => Rnl.add(e, v[i]) )) },
+      subtract(m, v) { return m.map((row, i) => row.map(e => Rnl.subtract(e, v[i]) )) },
       multiply(m, v) {
         // Multiply a matrix times a column vector
         if (m[0].length !== v.length) { return errorOprnd("MIS_ELNUM") }
         return m.map(row => dotProduct(row, v))
       },
+      asterisk(m, v) { return m.map((row, i) => row.map(e => Rnl.multiply(e, v[i]) )) },
+      divide(m, v)   { return m.map((row, i) => row.map(e => Rnl.divide(e, v[i]) )) },
+      power(m, v)    { return m.map((row, i) => row.map(e => Rnl.power(e, v[i]) )) },
+      modulo(m, v)   { return m.map((row, i) => row.map(e => Rnl.modulo(e, v[i]) )) },
       concat(m, v) {
         if (m.length !== v.length) { return errorOprnd("MIS_ELNUM") }
         return m.map((row, i) => [...row, v[i]])

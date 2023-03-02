@@ -337,12 +337,12 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           product.dtype = (tkn === "*" || shape1 === "scalar" || shape1 === "map" ||
             shape1 === "complex" || shape2 === "scalar" ||
             shape2 === "map" || shape2 === "complex")
-            ? Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, op)
-            : tkn === "·"
-            ? dt.RATIONAL
-            : tkn === "×"
-            ? dt.COLUMNVECTOR
-            : Matrix.multResultType(o1, o2)
+              ? Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, op)
+              : tkn === "·"
+              ? dt.RATIONAL
+              : tkn === "×"
+              ? dt.COLUMNVECTOR
+              : Matrix.multResultType(o1, o2)
 
           product.value = Operators.binary[shape1][shape2][op](o1.value, o2.value)
           if (product.value.dtype && product.value.dtype === dt.ERROR) {
