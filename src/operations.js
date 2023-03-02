@@ -149,7 +149,7 @@ const dtype = {
   rowVector: {
     rowVector(t0, t1, tkn) { return tkn === "&_" ? t0 - dt.ROWVECTOR + dt.MATRIX : t0 },
     columnVector(t0, t1, tkn) { return t0 },
-    matrix(t0, t1, tkn) { return tkn === "&_" ? t1 : t0 }
+    matrix(t0, t1, tkn) { return t1 }
   },
   columnVector: {
     rowVector(t0, t1, op) {

@@ -7719,7 +7719,7 @@ const dtype = {
   rowVector: {
     rowVector(t0, t1, tkn) { return tkn === "&_" ? t0 - dt.ROWVECTOR + dt.MATRIX : t0 },
     columnVector(t0, t1, tkn) { return t0 },
-    matrix(t0, t1, tkn) { return tkn === "&_" ? t1 : t0 }
+    matrix(t0, t1, tkn) { return t1 }
   },
   columnVector: {
     rowVector(t0, t1, op) {
@@ -8247,70 +8247,28 @@ const binary$1 = {
     matrix: {
       // Binary operations on a column vector and a 2-D matrix.
       add(v, m) {
-        // Add the column vector to each column of the matrix
-        const result = clone(m);
         if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
-        for (let i = 0; i < m.length; i++) {
-          for (let j = 0; j < m[0].length; j++) {
-            result[i][j] = Rnl.add(m[i][j], v[j]);
-          }
-        }
-        return result
+        return m.map((row, i) => row.map(e => Rnl.add(v[i], e)))
       },
       subtract(v, m) {
-        // Add the column vector to each column of the matrix
-        const result = clone(m);
         if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
-        for (let i = 0; i < m.length; i++) {
-          for (let j = 0; j < m[0].length; j++) {
-            result[i][j] = Rnl.subtract(m[i][j], v[j]);
-          }
-        }
-        return result
+        return m.map((row, i) => row.map(e => Rnl.subtract(v[i], e)))
       },
       multiply(v, m) {
-        // multiply the column vector by each column of the matrix
-        const result = clone(m);
         if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
-        for (let i = 0; i < m.length; i++) {
-          for (let j = 0; j < m[0].length; j++) {
-            result[i][j] = Rnl.multiply(m[i][j], v[j]);
-          }
-        }
-        return result
+        return m.map((row, i) => row.map(e => Rnl.multiply(v[i], e)))
       },
       asterisk(v, m) {
-        // multiply the column vector by each column of the matrix
-        const result = clone(m);
         if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
-        for (let i = 0; i < m.length; i++) {
-          for (let j = 0; j < m[0].length; j++) {
-            result[i][j] = Rnl.multiply(m[i][j], v[j]);
-          }
-        }
-        return result
+        return m.map((row, i) => row.map(e => Rnl.multiply(v[i], e)))
       },
       divide(v, m) {
-        // Divide the column vector by each column of the matrix
-        const result = clone(m);
         if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
-        for (let i = 0; i < m.length; i++) {
-          for (let j = 0; j < m[0].length; j++) {
-            result[i][j] = Rnl.divide(m[i][j], v[j]);
-          }
-        }
-        return result
+        return m.map((row, i) => row.map(e => Rnl.divide(v[i], e)))
       },
-      poser(v, m) {
-        // Take each column vector to the power of each column of the matrix
-        const result = clone(m);
+      power(v, m) {
         if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
-        for (let i = 0; i < m.length; i++) {
-          for (let j = 0; j < m[0].length; j++) {
-            result[i][j] = Rnl.power(m[i][j], v[j]);
-          }
-        }
-        return result
+        return m.map((row, i) => row.map(e => Rnl.power(v[i], e)))
       },
       concat(v, m) {
         if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
