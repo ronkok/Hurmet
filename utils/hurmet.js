@@ -6124,13 +6124,14 @@ const parse = (
               if (rpnOp.symbol === "\\lceil") { rpn += tokenSep + "⎾⏋"; }
           }
           if ((token.input === ")" && nextCharIsFactor(str, tt.RIGHTBRACKET)) ||
-            (token.input === "]" && /^\(/.test(str))) {
+            (token.input === "]" && /^\(/.test(str) ||
+             topDelim.delimType === dMATRIX && /^\[/.test(str))) {
             // Implicit multiplication between parens, as in (2)(3)
-            // Not between square brackets, as in dict[row][property]
             rpn += tokenSep;
             popRpnTokens(rpnPrecFromType[tt.MULT]);
             rpnStack.push({ prec: rpnPrecFromType[tt.MULT], symbol: "⌧" });
             isFollowedBySpace = false;
+            token = { input: "⌧", output: "⌧", ttype: tt.MULT };
           }
         }
 
@@ -7719,7 +7720,7 @@ const dtype = {
   rowVector: {
     rowVector(t0, t1, tkn) { return tkn === "&_" ? t0 - dt.ROWVECTOR + dt.MATRIX : t0 },
     columnVector(t0, t1, tkn) { return t0 },
-    matrix(t0, t1, tkn) { return t1 }
+    matrix(t0, t1, tkn) { return tkn === "multiply" ? t0 : t1 }
   },
   columnVector: {
     rowVector(t0, t1, op) {
@@ -8098,7 +8099,7 @@ const binary$1 = {
       },
       multiply(v, m) {
         if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
-        return m.map(row => row.map((e, i) => Rnl.multiply(v[i], e)))
+        return transpose2D(m).map(row => dotProduct(v, row))
       },
       asterisk(v, m) {
         if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
@@ -8148,8 +8149,8 @@ const binary$1 = {
         return v
       },
       multiply(x, y) {
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return dotProduct(x, y)
+        if (x[0].length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map(row => y.map(e => Rnl.multiply(row, e)))
       },
       divide(x, y) {
         return x.map(m => y.map(e => Rnl.divide(m, e)))
@@ -8255,7 +8256,7 @@ const binary$1 = {
         return m.map((row, i) => row.map(e => Rnl.subtract(v[i], e)))
       },
       multiply(v, m) {
-        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
+        if (m.length !== 1) { return errorOprnd("MIS_ELNUM") }
         return m.map((row, i) => row.map(e => Rnl.multiply(v[i], e)))
       },
       asterisk(v, m) {

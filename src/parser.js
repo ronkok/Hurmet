@@ -1250,13 +1250,14 @@ export const parse = (
               if (rpnOp.symbol === "\\lceil") { rpn += tokenSep + "⎾⏋" }
           }
           if ((token.input === ")" && nextCharIsFactor(str, tt.RIGHTBRACKET)) ||
-            (token.input === "]" && /^\(/.test(str))) {
+            (token.input === "]" && /^\(/.test(str) ||
+             topDelim.delimType === dMATRIX && /^\[/.test(str))) {
             // Implicit multiplication between parens, as in (2)(3)
-            // Not between square brackets, as in dict[row][property]
             rpn += tokenSep
             popRpnTokens(rpnPrecFromType[tt.MULT])
             rpnStack.push({ prec: rpnPrecFromType[tt.MULT], symbol: "⌧" })
             isFollowedBySpace = false
+            token = { input: "⌧", output: "⌧", ttype: tt.MULT }
           }
         }
 
