@@ -696,7 +696,7 @@ Variable names and function names must be written in the form of a valid _identi
 *   The following keywords may not be used as variable names: `π`, `j`, `ℏ`,
     `true`, `false`, `root`, `if`, `else`, `otherwise`, `end`, `and`, `or`, `modulo`, `in`, `to`.
 
-i> ![letter letter-or-digit-or-accent prime][identifier]
+   ![letter letter-or-digit-or-accent prime][identifier]
 
 [identifier]: images/identifier-railroad.svg
 
@@ -775,7 +775,7 @@ Number
 [number]: images/NumberRailroad.svg
 {width=650 #number-rr}
 
-i>  Notice that a number literal must begin and end with a numeral, not a decimal
+    Notice that a number literal must begin and end with a numeral, not a decimal
     symbol. Hurmet will not recognize `5.` as a number.
 
     Hurmet’s default decimal symbol is a dot. You can choose instead to enter
@@ -1511,7 +1511,7 @@ question above is: ¢3 + (4 × 2)= 11¢
 
 Hurmet If Expressions enable you to choose between expressions, based upon one or more conditions, as in:
 
-i> ¢β_1 = {0.85 if f_c′ ≤ 4000; 0.65 if f_c′ ≥ 8000; 0.85 - (f_c′ - 4000)//20000 otherwise}¢
+   ¢β_1 = {0.85 if f_c′ ≤ 4000; 0.65 if f_c′ ≥ 8000; 0.85 - (f_c′ - 4000)//20000 otherwise}¢
 
 This sort of expression is written between the delimiters: `{ }`
 The row separator symbol is **;**

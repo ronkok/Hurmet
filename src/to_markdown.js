@@ -76,7 +76,7 @@ const hurmetNodes =  {
     if (state.isGFM) {
       state.renderContent(node)
     } else {
-      state.wrapBlock("   ", "i> ", node, () => state.renderContent(node))
+      state.wrapBlock("   ", "   ", node, () => state.renderContent(node))
     }
   },
   centered_div(state, node) {

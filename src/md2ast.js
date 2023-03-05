@@ -53,7 +53,7 @@
  *     Blurbs are denoted by a symbol in the left margin.
  *     Subsequent indented text blocks are children of the blurb.
  *     Blurb symbols:
- *       i> indented block
+ *          indented block (3+ spaces)
  *       C> Centered block
  *       H> print header element, <header>
  *       I> Information admonition (future)
@@ -478,7 +478,7 @@ const parseTextMark = (capture, state, mark) => {
 }
 
 const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<!--[^>]+-->[^\n]*\n|<\/?(?:body|details|(div|input|label)(?: [^>]+)?|!DOCTYPE[a-z ]*|html[a-z ="]*|br|dl(?: class="[a-z-]+")?|li|main[a-z\- ="]*|nav|ol|ul(?: [^>]+)?)\/?>[^\n]*?(?:\n|$))/
-const divType = { C: "centered_div", H: "header", "i": "indented_div" }
+const divType = { "C>": "centered_div", "H>": "header", "  ": "indented_div" }
 
 // Rules must be applied in a specific order, so use a Map instead of an object.
 const rules = new Map();
@@ -572,7 +572,8 @@ rules.set("dd", {  // description details
 });
 rules.set("special_div", {
   isLeaf: false,
-  match: blockRegex(/^(C|H|i)>( {1,})[\s\S]+?(?:\n{2,}(?! {2,2}\2)\n*|\s*$)/),
+  match: blockRegex(/^( {2,2}|C>|H>)( +)[\s\S]+?(?:\n{2,}(?! {2,2}\2)\n*|\s*$)/),
+  // indented or centered div, or <header>
   parse: function(capture, state) {
     const type = divType[capture[1]]
     let div = "  " + capture[0].slice(2)
