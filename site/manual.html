@@ -131,8 +131,8 @@ return 3</code></pre></td></tr>
 </div>
 <dt id='multiplication'>Multiplication</dt>
 <dd><p>Hurmet accepts several multiplication syntaxes. If <math><mrow><mi>a</mi><mo>=</mo></mrow><mrow><mn>7.1</mn></mrow></math>, then the following all give the same result:</p>
-<div class="indented"><p><math><mrow><mn>2</mn><mo>×</mo></mrow><mrow><mn>7.1</mn></mrow></math><br><math><mrow><mn>2</mn><mo>*</mo></mrow><mrow><mn>7.1</mn></mrow></math><br><math><mrow><mn>2</mn><mo>⋅</mo></mrow><mrow><mn>7.1</mn></mrow></math><br><math><mrow><mn>2</mn><mspace width="0.1667em"></mspace><mi>a</mi></mrow></math><br><math><mrow><mo form="prefix" stretchy="false">(</mo><mn>2</mn><mo form="postfix" stretchy="false">)</mo><mo form="prefix" stretchy="false">(</mo><mn>7.1</mn><mo form="postfix" stretchy="false">)</mo></mrow></math></p>
-</div><p>To obtain the character <math><mo>×</mo></math>, type xx and hit the space bar. Auto-correct will give you an <math><mo>×</mo></math>.</p>
+<p>i&gt; <math><mrow><mn>2</mn><mo>×</mo></mrow><mrow><mn>7.1</mn></mrow></math><br>   <math><mrow><mn>2</mn><mo>*</mo></mrow><mrow><mn>7.1</mn></mrow></math><br>   <math><mrow><mn>2</mn><mo>⋅</mo></mrow><mrow><mn>7.1</mn></mrow></math><br>   <math><mrow><mn>2</mn><mspace width="0.1667em"></mspace><mi>a</mi></mrow></math><br>   <math><mrow><mo form="prefix" stretchy="false">(</mo><mn>2</mn><mo form="postfix" stretchy="false">)</mo><mo form="prefix" stretchy="false">(</mo><mn>7.1</mn><mo form="postfix" stretchy="false">)</mo></mrow></math></p>
+<p>To obtain the character <math><mo>×</mo></math>, type xx and hit the space bar. Auto-correct will give you an <math><mo>×</mo></math>.</p>
 <p>A space between variables acts as a multiplication operator.</p>
 </dd>
 <dt id='roots'>Roots</dt>
@@ -160,8 +160,8 @@ return 3</code></pre></td></tr>
 </dd>
 <dt id='accents-and-primes'>Accents and Primes</dt>
 <dd><p>To write an accent above a single-letter variable, write the accent name and hit the space bar for an auto-correction. Examples:</p>
-<div class="indented"><p><code>y bar</code> ↦ <math><mover><mi>y</mi><mo stretchy="false" style="math-style:normal;math-depth:0;">‾</mo></mover></math><br><code>θ hat</code> ↦ <math><mover><mi>θ</mi><mo stretchy="false" style="math-style:normal;math-depth:0;">^</mo></mover></math><br><code>P vec</code> ↦ <math><mover><mi>P</mi><mo stretchy="false" style="transform:scale(0.75) translate(10%, 30%);">→</mo></mover></math><br><code>x dot</code> ↦ <math><mover><mi>x</mi><mo stretchy="false" style="math-style:normal;math-depth:0;">˙</mo></mover></math></p>
-</div><p>More detail <a href='#identifiers'>here</a>.</p>
+<p>i&gt; <code>y bar</code> ↦ <math><mover><mi>y</mi><mo stretchy="false" style="math-style:normal;math-depth:0;">‾</mo></mover></math><br>   <code>θ hat</code> ↦ <math><mover><mi>θ</mi><mo stretchy="false" style="math-style:normal;math-depth:0;">^</mo></mover></math><br>   <code>P vec</code> ↦ <math><mover><mi>P</mi><mo stretchy="false" style="transform:scale(0.75) translate(10%, 30%);">→</mo></mover></math><br>   <code>x dot</code> ↦ <math><mover><mi>x</mi><mo stretchy="false" style="math-style:normal;math-depth:0;">˙</mo></mover></math></p>
+<p>More detail <a href='#identifiers'>here</a>.</p>
 <p>To write a prime, type two apostrophes (aka single quotation marks) and hit the space bar. So, <code>f&#x27;&#x27;</code> will result in <math><msup><mi>f</mi><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msup></math></p>
 </dd>
 </div>
@@ -253,10 +253,18 @@ return 3</code></pre></td></tr>
 <th>Display Selector for Unit-Aware Calculation</th>
 <th> Displays:</th>
 </tr>
-<tr><td>       ?</td><td>      ??</td><td>Entire calculation, including the result and a blue echo of the expression displaying the value plugged in to each variable.</td></tr>
-<tr><td>       %</td><td>      %%</td><td>Omits blue echo.</td></tr>
-<tr><td>       @</td><td>     @@</td><td>Displays only the result, like a spreadsheet cell.</td></tr>
-<tr><td>       !</td><td>      !!</td><td>Omits the blue echo and the result.<br>Valid only when the result is a data frame.</td></tr>
+<tr><td><div class="indented"><p>?</p>
+</div></td><td><div class="indented"><p>??</p>
+</div></td><td>Entire calculation, including the result and a blue echo of the expression displaying the value plugged in to each variable.</td></tr>
+<tr><td><div class="indented"><p>%</p>
+</div></td><td><div class="indented"><p>%%</p>
+</div></td><td>Omits blue echo.</td></tr>
+<tr><td><div class="indented"><p>@</p>
+</div></td><td><div class="indented"><p>@@</p>
+</div></td><td>Displays only the result, like a spreadsheet cell.</td></tr>
+<tr><td><div class="indented"><p>!</p>
+</div></td><td><div class="indented"><p>!!</p>
+</div></td><td>Omits the blue echo and the result.<br>Valid only when the result is a data frame.</td></tr>
 </table>
 <div id="accessor-container">
 <h4 id='accessors'>Accessors</h4>
@@ -304,10 +312,18 @@ return 3</code></pre></td></tr>
 <th>Display Selector for Unit-Aware Calculation</th>
 <th> Displays:</th>
 </tr>
-<tr><td>       ?</td><td>      ??</td><td>Entire calculation, including the result and a blue echo of the expression displaying the value plugged in to each variable.</td></tr>
-<tr><td>       %</td><td>      %%</td><td>Omits blue echo.</td></tr>
-<tr><td>       @</td><td>     @@</td><td>Displays only the result, like a spreadsheet cell.</td></tr>
-<tr><td>       !</td><td>      !!</td><td>Omits the blue echo and the result.<br>Valid only when the result is a data frame.</td></tr>
+<tr><td><div class="indented"><p>?</p>
+</div></td><td><div class="indented"><p>??</p>
+</div></td><td>Entire calculation, including the result and a blue echo of the expression displaying the value plugged in to each variable.</td></tr>
+<tr><td><div class="indented"><p>%</p>
+</div></td><td><div class="indented"><p>%%</p>
+</div></td><td>Omits blue echo.</td></tr>
+<tr><td><div class="indented"><p>@</p>
+</div></td><td><div class="indented"><p>@@</p>
+</div></td><td>Displays only the result, like a spreadsheet cell.</td></tr>
+<tr><td><div class="indented"><p>!</p>
+</div></td><td><div class="indented"><p>!!</p>
+</div></td><td>Omits the blue echo and the result.<br>Valid only when the result is a data frame.</td></tr>
 </table>
 <p>For an engineer like me, the most common display selector is <strong>??</strong>. I almost always want to see the entire calculation. Seeing the expression and the plugged-in values helps me to avoid the kind of unseen <a href='http://www.eusprig.org/horror-stories.htm'>errors</a> that creep into spreadsheet calculations. And it makes the calculation reviewable by a second set of eyes.</p>
 <p>A doubled selector will prompt a <a href='#unit-aware-calculations'>unit-aware calculation</a>. After you try them, you may wonder how you ever did without them.</p>
@@ -316,16 +332,23 @@ return 3</code></pre></td></tr>
 <p>One last variation is possible when assigning values from a single-row data frame. You can assign such values to more than one variable at a time, like this:</p>
 <pre><code>A, I, w_self = beam[&quot;A&quot;, &quot;Ix&quot;, &quot;weight&quot;] = !!</code></pre><h2 id='identifiers'>Identifiers</h2>
 <p>Variable names and function names must be written in the form of a valid <em>identifier</em>.</p>
-<ul><li>Identifiers may be multiple characters long.</li>
-<li>The first character must be a letter from the Latin or Greek alphabet. It may be bold or capitalized calligraphic Latin, or ℏ, or ℓ.</li>
-<li>Subsequent characters may be letters or numerals (0123456789).</li>
-<li>An under-score within an identifier is allowed and will be interpreted to mean the start of a subscript.</li>
-<li>If an identifier has only one letter, then an accent character may be written after it. Hurmet will render the accent above the letter, as in <math><mover><mi>θ</mi><mo stretchy="false" style="math-style:normal;math-depth:0;">^</mo></mover></math>.</li>
-<li>Primes may be appended to the very end, as in: <math><mrow><mi>f</mi><msubsup><mrow></mrow><mtext>c</mtext><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msubsup></mrow></math>.</li>
-<li>The following keywords may not be used as variable names: <code>π</code>, <code>j</code>, <code>ℏ</code>, <code>true</code>, <code>false</code>, <code>root</code>, <code>if</code>, <code>else</code>, <code>otherwise</code>, <code>end</code>, <code>and</code>, <code>or</code>, <code>modulo</code>, <code>in</code>, <code>to</code>.</li>
+<ul><li><p>Identifiers may be multiple characters long.</p>
+</li>
+<li><p>The first character must be a letter from the Latin or Greek alphabet. It may be bold or capitalized calligraphic Latin, or ℏ, or ℓ.</p>
+</li>
+<li><p>Subsequent characters may be letters or numerals (0123456789).</p>
+</li>
+<li><p>An under-score within an identifier is allowed and will be interpreted to mean the start of a subscript.</p>
+</li>
+<li><p>If an identifier has only one letter, then an accent character may be written after it. Hurmet will render the accent above the letter, as in <math><mover><mi>θ</mi><mo stretchy="false" style="math-style:normal;math-depth:0;">^</mo></mover></math>.</p>
+</li>
+<li><p>Primes may be appended to the very end, as in: <math><mrow><mi>f</mi><msubsup><mrow></mrow><mtext>c</mtext><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msubsup></mrow></math>.</p>
+</li>
+<li><p>The following keywords may not be used as variable names: <code>π</code>, <code>j</code>, <code>ℏ</code>, <code>true</code>, <code>false</code>, <code>root</code>, <code>if</code>, <code>else</code>, <code>otherwise</code>, <code>end</code>, <code>and</code>, <code>or</code>, <code>modulo</code>, <code>in</code>, <code>to</code>.</p>
+<p><img src="images/identifier-railroad.svg" alt="identifier"></p>
+</li>
 </ul>
-<div class="indented"><p><img src="images/identifier-railroad.svg" alt="identifier"></p>
-</div><p>The names of those accents are:</p>
+<p>The names of those accents are:</p>
 <table><tr><td>grave</td><td>acute</td><td>hat</td><td>tilde</td></tr>
 <tr><td>bar</td><td>breve</td><td>dot</td><td>ddot</td></tr>
 <tr><td>ring</td><td>check</td><td>ul</td><td>leftharpoon</td></tr>
@@ -377,8 +400,8 @@ a[5..]    # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong><
 </ul>
 <p>Also, the character <strong>°</strong> is now a unit name. So one can also write a polar notation as <math><mrow><mi>r</mi><mi>∠</mi><mi>θ</mi><mi>°</mi></mrow></math> and the phase angle will be unit-aware. The characters <code>ooo</code> will auto-correct into °</p>
 <p>Examples:</p>
-<div class="indented"><p><math><mrow><mi>z</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo>=</mo></mrow><mrow><mn>2</mn><mo>+</mo></mrow><mrow><mi>j</mi><mn>3</mn></mrow></math></p>
-<p><math><mrow><mi>z</mi><msub><mrow></mrow><mtext>2</mtext></msub><mo>=</mo></mrow><mrow><mn>4</mn><mi>∠</mi><mn>30</mn><mi>°</mi></mrow></math></p>
+<p>i&gt;  <math><mrow><mi>z</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo>=</mo></mrow><mrow><mn>2</mn><mo>+</mo></mrow><mrow><mi>j</mi><mn>3</mn></mrow></math></p>
+<div class="indented"><p><math><mrow><mi>z</mi><msub><mrow></mrow><mtext>2</mtext></msub><mo>=</mo></mrow><mrow><mn>4</mn><mi>∠</mi><mn>30</mn><mi>°</mi></mrow></math></p>
 <p><math><mrow><mi>z</mi><mo>=</mo></mrow><mrow><mi>z</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo>+</mo></mrow><mrow><mi>z</mi><msub><mrow></mrow><mtext>2</mtext></msub><mo>=</mo></mrow><mrow><mo form="prefix" stretchy="false" style="color:#0000FF;">(</mo><mn style="color:#0000FF;">2</mn><mo style="color:#0000FF;">+</mo></mrow><mrow><mi style="color:#0000FF;">j</mi><mn style="color:#0000FF;">3</mn><mo form="postfix" stretchy="false" style="color:#0000FF;">)</mo><mo style="color:#0000FF;">+</mo></mrow><mrow><mo form="prefix" stretchy="false" style="color:#0000FF;">(</mo><mn style="color:#0000FF;">4</mn><mi style="color:#0000FF;">∠</mi><mn style="color:#0000FF;">30</mn><mi style="color:#0000FF;">°</mi><mo form="postfix" stretchy="false" style="color:#0000FF;">)</mo><mo>=</mo></mrow><mrow><mn>5.46</mn><mo>+</mo></mrow><mrow><mrow><mrow><mi mathvariant="normal">j</mi></mrow><mn>5</mn></mrow></mrow></math></p>
 </div></dd>
 <dt id='unit'>Unit</dt>
@@ -432,8 +455,8 @@ a[5..]    # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong><
 </dd>
 <dt id='matrix-operations'>Matrix Operations</dt>
 <dd><p>All the usual math operators can be applied to a numeric matrix. The operators mostly work in an element-wise fashion. If you add a scalar to a matrix, or pass a matrix to most functions, Hurmet will do an element-by-element calculation and return a matrix, as in:</p>
-<div class="indented"><p><math><mrow><mi>𝐡</mi><mo>=</mo></mrow><mrow><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center"><mtr><mtd><mn>5</mn></mtd></mtr><mtr><mtd><mn>10</mn></mtd></mtr><mtr><mtd><mn>15</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></mrow></math></p>
-<p><math><mrow><mi>𝐱</mi><mo>=</mo></mrow><mrow><mn>2</mn><mspace width="0.1667em"></mspace><mi>𝐡</mi><mo>+</mo></mrow><mrow><mn>1</mn><mo>=</mo></mrow><mrow><mn style="color:#0000FF;">2</mn><mrow style="color:#0000FF;"><mo fence="true" form="prefix">[</mo><mtable columnalign="center"><mtr><mtd><mn>5</mn></mtd></mtr><mtr><mtd><mn>10</mn></mtd></mtr><mtr><mtd><mn>15</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow><mo style="color:#0000FF;">+</mo></mrow><mrow><mn style="color:#0000FF;">1</mn><mo style="color:black;">=</mo></mrow><mrow><mrow style="color:black;"><mo fence="true" form="prefix">[</mo><mtable columnalign="center"><mtr><mtd><mn>11</mn></mtd></mtr><mtr><mtd><mn>21</mn></mtd></mtr><mtr><mtd><mn>31</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></mrow></math></p>
+<p>i&gt; <math><mrow><mi>𝐡</mi><mo>=</mo></mrow><mrow><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center"><mtr><mtd><mn>5</mn></mtd></mtr><mtr><mtd><mn>10</mn></mtd></mtr><mtr><mtd><mn>15</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></mrow></math></p>
+<div class="indented"><p><math><mrow><mi>𝐱</mi><mo>=</mo></mrow><mrow><mn>2</mn><mspace width="0.1667em"></mspace><mi>𝐡</mi><mo>+</mo></mrow><mrow><mn>1</mn><mo>=</mo></mrow><mrow><mn style="color:#0000FF;">2</mn><mrow style="color:#0000FF;"><mo fence="true" form="prefix">[</mo><mtable columnalign="center"><mtr><mtd><mn>5</mn></mtd></mtr><mtr><mtd><mn>10</mn></mtd></mtr><mtr><mtd><mn>15</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow><mo style="color:#0000FF;">+</mo></mrow><mrow><mn style="color:#0000FF;">1</mn><mo style="color:black;">=</mo></mrow><mrow><mrow style="color:black;"><mo fence="true" form="prefix">[</mo><mtable columnalign="center"><mtr><mtd><mn>11</mn></mtd></mtr><mtr><mtd><mn>21</mn></mtd></mtr><mtr><mtd><mn>31</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></mrow></math></p>
 </div><p>Spreadsheet calculations can often be replaced by calulations using vectors, as above. When you really need to get things right, it’s great to be able to see the expression and all the plugged-in values.</p>
 <div id="matrix-mult">
 <p>Multiplication of two matrices is different than other operations. Mathematicians have several ways to multiply matrices. In Hurmet, you choose the type of multiplication by your choice of multiplication operator:</p>
