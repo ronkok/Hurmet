@@ -1025,6 +1025,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
 
         case "=":
         case "==":
+        case "⩵":
         case "<":
         case ">":
         case "<=":

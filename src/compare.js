@@ -18,6 +18,8 @@ export const compare = (op, x, y, yPrev) => {
 
   switch (op) {
     case "=":
+    case "==":
+    case "⩵":
       return equals(x, y)
 
     case "≠":
