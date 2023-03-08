@@ -197,7 +197,7 @@ const hurmetNodes =  {
   },
   comment(state, node) {
     const prevLength = state.out.length
-    state.write("©> ")
+    state.write("© ")
     state.renderInline(node)
     if (!state.isGFM) {
       state.out = limitLineLength(state.out, prevLength, state.delim, state.lineLimit)

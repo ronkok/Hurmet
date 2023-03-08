@@ -140,7 +140,7 @@ that location.
 
 ### Comments
 
-©> Citation needed
+© Citation needed
 
 The ![comment][] button enables you to write a comment like the nearby text bubble:
 
@@ -220,7 +220,9 @@ A newline is indicated by a backslash, `\`, at the end of a line.
 | `return 3` \                             | return 3           |
 | ````  ``` ````                           | ```                |
 +------------------------------------------+--------------------+
-| `i> indented block`                      | indented block     |
+| `© comment`                              | © comment          |
++------------------------------------------+--------------------+
+| `3+ spaces at left margin`               |    indented block  |
 +------------------------------------------+--------------------+
 | `C> Centered block`                      | Centered block     |
 +------------------------------------------+--------------------+

@@ -24763,7 +24763,7 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
  *    LaTeX display math is fenced  $$\n … \n$$.
  * 3. ~subscript~
  * 4. ~~strikethrough~~
- * 5. ©> comment (A paragraph in a speech bubble)
+ * 5. © comment (A paragraph in a speech bubble)
  * 6. Pipe tables as per Github Flavored Markdown (GFM).
  * 7. Grid tables as per reStructuredText, with two exceptions:
  *    a. The top border contains ":" characters to indicate column justtification.
@@ -25426,7 +25426,7 @@ rules.set("newline", {
 });
 rules.set("comment", {
   isLeaf: false,
-  match: blockRegex(/^©> +((?:[^\n]|\n(?! *\n))+)(?:\n *)+\n/),
+  match: blockRegex(/^© +((?:[^\n]|\n(?! *\n))+)(?:\n *)+\n/),
   parse: function(capture, state) {
     return { type: "comment", content: parseInline(capture[1].trim(), state) }
   }
@@ -43702,7 +43702,7 @@ const hurmetNodes =  {
   },
   comment(state, node) {
     const prevLength = state.out.length;
-    state.write("©> ");
+    state.write("© ");
     state.renderInline(node);
     if (!state.isGFM) {
       state.out = limitLineLength(state.out, prevLength, state.delim, state.lineLimit);
