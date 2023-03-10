@@ -4644,7 +4644,7 @@ const miscSymbols = Object.freeze({
   "-:": ["-:", "÷", tt.MULT, ""],
   "=": ["=", "=", tt.REL, ""],
   "≈": ["≈", "≈", tt.REL, ""],
-  "==": ["==", "==", tt.REL, ""],
+  "==": ["==", "⩵", tt.REL, ""],
   "≡": ["≡", "≡", tt.REL, ""],
   ">": [">", "\\gt", tt.REL, ""],
   "<": ["<", "\\lt", tt.REL, ""],
@@ -7887,6 +7887,8 @@ const compare = (op, x, y, yPrev) => {
 
   switch (op) {
     case "=":
+    case "==":
+    case "⩵":
       return equals(x, y)
 
     case "≠":
@@ -12072,6 +12074,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
 
         case "=":
         case "==":
+        case "⩵":
         case "<":
         case ">":
         case "<=":
