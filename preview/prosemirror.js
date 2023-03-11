@@ -44179,6 +44179,8 @@ class MarkdownSerializerState {
       }
     }
 
+    if (mergedCells.length > 0) { isRst = true; }
+
     // Now the third pass, in which we write output.
     this.write(isRst
       ? gridTable(table, numCols, numRowsInHeading, rowSpan, colSpan, colWidth, justify, delim)
