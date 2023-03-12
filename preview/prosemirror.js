@@ -23345,6 +23345,11 @@ const compare = (op, x, y, yPrev) => {
         return false
       } else if (y instanceof Map) {
         return y.has(x)
+      } else if (typeof x === "string" && typeof y === "object" &&
+                 Object.hasOwnProperty.call(y, "headings")) {
+        // Is x a property of dataframe x?
+        return Boolean(y.headings.includes(x) ||
+                      (y.rowMap && Object.hasOwnProperty.call(y.rowMap, x)))
       } else {
         return errorOprnd("NOT_ARRAY")
       }
@@ -23378,6 +23383,11 @@ const compare = (op, x, y, yPrev) => {
         return true
       } else if (y instanceof Map) {
         return !y.has(x)
+      } else if (typeof x === "string" && typeof y === "object" &&
+                 Object.hasOwnProperty.call(y, "headings")) {
+        // Is x a property of dataframe x?
+        return !(y.headings.includes(x) ||
+                (y.rowMap && Object.hasOwnProperty.call(y.rowMap, x)))
       } else {
         return errorOprnd("NOT_ARRAY")
       }

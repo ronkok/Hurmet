@@ -1244,9 +1244,9 @@ _j_
 +---------------+----------------------+---------------------------------------------+
 | ≥             |                      | auto-correct: >=                            |
 +---------------+----------------------+---------------------------------------------+
-| ∈             | ¢c ∈ s¢              | Is an element of a matrix or is a character |
-|               |                      | of a string, or is a property of a          |
-|               |                      | single-row data frame\                      |
+| ∈             | ¢c ∈ s¢              | Is an element of a matrix or\               |
+|               |                      | is a character of a string, or\             |
+|               |                      | is a property of a data frame.\             |
 |               |                      | auto-correct: \in                           |
 +---------------+----------------------+---------------------------------------------+
 | ∉             | ¢c ∉ s¢              | Is not an element of\                       |
