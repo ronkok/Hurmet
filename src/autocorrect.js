@@ -103,6 +103,8 @@ const autoCorrections = {
   "\\alef": "ℵ",
   "\\subset": "⊂",
   "\\supset": "⊃",
+  "contains": "⊆",
+  "owns": "∋",
   "\\subseteq": "⊆",
   "\\nsubset": "⊄",
   "\\nsubseteq": "⊈",

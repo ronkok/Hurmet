@@ -151,7 +151,7 @@ const words = Object.freeze({
   "<-->": ["<-->", "\\xrightleftarrows", tt.UNARY, ""]
 })
 
-const miscRegEx = /^([/÷\u2215_:,;^+\\\-–−*×∘⊗⦼⊙√∛∜·.%∘|╏‖¦><=≈≟≠≡≤≥≅∈∉⊂⊄⊆⊈!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃∫∬∮∑([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7$£¥€₨₩₪]+)/
+const miscRegEx = /^([/÷\u2215_:,;^+\\\-–−*×∘⊗⦼⊙√∛∜·.%∘|╏‖¦><=≈≟≠≡≤≥≅∈∉∋∌⊂⊄⊆⊈⊇⊉!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃∫∬∮∑([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7$£¥€₨₩₪]+)/
 
 const miscSymbols = Object.freeze({
   //    input, output, type,  closeDelim
@@ -216,8 +216,12 @@ const miscSymbols = Object.freeze({
   "|==": ["|==", "\\models", tt.REL, ""],
   "∈": ["∈", "∈", tt.REL, ""],
   "∉": ["∉", "∉", tt.REL, ""],
+  "∋": ["∋", "∋", tt.REL, ""],
+  "∌": ["∌", "∌", tt.REL, ""],
   "⊆": ["⊆", "⊆", tt.REL, ""],
   "⊈": ["⊈", "⊈", tt.REL, ""],
+  "⊇": ["⊇", "⊇", tt.REL, ""],
+  "⊉": ["⊉", "⊉", tt.REL, ""],
   "▪": ["▪", "\\mathrel{▪}", tt.REL, ""],
 
   "!": ["!", "!", tt.FACTORIAL, ""],
@@ -715,7 +719,7 @@ export const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
   }
 
   if (/^``/.test(str)) {
-    // inline CSV string between double back ticks, a data frame literal.
+    // inline TSV string between double back ticks, a data frame literal.
     pos = str.indexOf("`", (str.charAt(2) === "`" ? 3 : 2))
     const inputStr = (pos > 0 ? str.slice(2, pos) : str.slice(2))
     const st = tablessTrim(inputStr)
@@ -723,7 +727,7 @@ export const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
     if (inRealTime) {
       tex = DataFrame.quickDisplay(st)
     } else {
-      const dataStructure = DataFrame.dataFrameFromCSV(st, {})
+      const dataStructure = DataFrame.dataFrameFromTSV(st, {})
       if (dataStructure.dtype === dt.DATAFRAME) {
         tex = DataFrame.display(dataStructure.value, "h3", decimalFormat)
       } else {

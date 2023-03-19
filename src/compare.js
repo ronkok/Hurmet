@@ -63,6 +63,7 @@ export const compare = (op, x, y, yPrev) => {
 
     case "∈":
       if (typeof x === "string" && typeof y === "string") {
+        if (Array.from(x).length > 1) { return false }
         return y.indexOf(x) > -1
       } else if (Array.isArray(y) && !Array.isArray(x)) {
         for (let i = 0; i < y.length; i++) {
@@ -73,23 +74,38 @@ export const compare = (op, x, y, yPrev) => {
         return y.has(x)
       } else if (typeof x === "string" && typeof y === "object" &&
                  Object.hasOwnProperty.call(y, "headings")) {
-        // Is x a property of dataframe x?
+        // Is x a property of dataframe y?
         return Boolean(y.headings.includes(x) ||
                       (y.rowMap && Object.hasOwnProperty.call(y.rowMap, x)))
       } else {
         return errorOprnd("NOT_ARRAY")
       }
 
-    case "⊆":
+    case "∋":
       if (typeof x === "string" && typeof y === "string") {
+        if (Array.from(x).length > 1) { return false }
         return y.indexOf(x) > -1
+      } else if (x instanceof Map) {
+        return x.has(y)
+      } else if (typeof x === "object" && typeof y === "string" &&
+                  Object.hasOwnProperty.call(x, "headings")) {
+        // Is y a property of dataframe x?
+        return Boolean(x.headings.includes(y) ||
+                      (x.rowMap && Object.hasOwnProperty.call(x.rowMap, y)))
+      } else {
+        return errorOprnd("NO_PROP", x.name)
+      }
+
+    case "⊇":
+      if (typeof x === "string" && typeof y === "string") {
+        return x.indexOf(y) > -1
       } else if (Array.isArray(x) && Array.isArray(y)) {
-        for (let i = 0; i < y.length; i++) {
+        for (let i = 0; i < x.length; i++) {
           // We test for a contiguous subset
-          if (equals(x[0], y[i])) {
-            if (i + x.length > y.length) { return false }
-            for (let j = 1; j < x.length; j++) {
-              if (!equals(x[j], y[i + j])) { return false }
+          if (equals(y[0], x[i])) {
+            if (i + y.length > x.length) { return false }
+            for (let j = 1; j < y.length; j++) {
+              if (!equals(y[j], x[i + j])) { return false }
             }
             return true
           }
@@ -101,6 +117,7 @@ export const compare = (op, x, y, yPrev) => {
 
     case "∉":
       if (typeof x === "string" && typeof y === "string") {
+        if (Array.from(x).length === 1) { return false }
         return y.indexOf(x) === -1
       } else if (Array.isArray(y)) {
         for (let i = 0; i < y.length; i++) {
@@ -116,6 +133,21 @@ export const compare = (op, x, y, yPrev) => {
                 (y.rowMap && Object.hasOwnProperty.call(y.rowMap, x)))
       } else {
         return errorOprnd("NOT_ARRAY")
+      }
+
+    case "∌":
+      if (typeof x === "string" && typeof y === "string") {
+        if (Array.from(y).length === 1) { return false }
+        return x.indexOf(y) === -1
+      } else if (x instanceof Map) {
+        return !x.has(y)
+      } else if (typeof x === "object" && typeof y === "string" &&
+                  Object.hasOwnProperty.call(x, "headings")) {
+        // Is y a property of dataframe x?
+        return !(x.headings.includes(y) ||
+                (x.rowMap && Object.hasOwnProperty.call(x.rowMap, y)))
+      } else {
+        return errorOprnd("NO_PROP", x.name)
       }
 
     case "⊈":
@@ -142,5 +174,28 @@ export const compare = (op, x, y, yPrev) => {
         return errorOprnd("NOT_ARRAY")
       }
 
+    case "⊉":
+      if (typeof x === "string" && typeof y === "string") {
+        return x.indexOf(y) === -1
+      } else if (Array.isArray(x) && Array.isArray(y)) {
+        // We test for a contiguous subset
+        for (let i = 0; i < x.length; i++) {
+          if (equals(y[0], x[i])) {
+            if (i + y.length > x.length) { continue }
+            let provisional = true
+            for (let j = 1; j < y.length; j++) {
+              if (!equals(y[j], x[i + j])) {
+                provisional = false
+                continue
+              }
+            }
+            if (!provisional) { continue }
+            return true
+          }
+        }
+        return false
+      } else {
+        return errorOprnd("NOT_ARRAY")
+      }
   }
 }
