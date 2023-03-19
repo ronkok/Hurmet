@@ -173,7 +173,7 @@ export const numeralFromSuperScript = ch => {
   }
 }
 
-// Trim spaces except for tabs. This is used to read tab-delimited CSV.
+// Trim spaces except for tabs. This is used to read tab-separated values (TSV).
 const leadingSpaceRegEx = /^[ \r\n\f]+/
 const trailingSpaceRegEx = /[ \r\n\f]+$/
 export const tablessTrim = str => {

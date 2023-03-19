@@ -71,7 +71,7 @@ const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
   attrs.name = entry.replace(/=.+$/, "").trim()
   let str = parse(entry.replace(/\s*=\s*[$$£¥\u20A0-\u20CF]?(?:!{1,2}).*$/, ""), decimalFormat)
   const url = urlFromEntry(entry)
-  if (/\.(?:csv|txt)$/.test(url)) {
+  if (/\.(?:tsv|txt)$/.test(url)) {
     // Shorten the URL.
     const fileName = url.replace(/.+\//, "")
     const match = textRegEx.exec(str)
@@ -88,7 +88,7 @@ const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
   }
   const data = importRegEx.test(entry)
     ? scanModule(text, decimalFormat)               // import code
-    : DataFrame.dataFrameFromCSV(text, hurmetVars)  // fetch data
+    : DataFrame.dataFrameFromTSV(text, hurmetVars)  // fetch data
 
   // Append the data to attrs
   attrs.value = data.value

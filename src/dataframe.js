@@ -197,8 +197,8 @@ const range = (df, args, vars, unitAware) => {
 const numberRegEx = new RegExp("^(?:=|" + Rnl.numberPattern.slice(1) + "$)")
 const mixedFractionRegEx = /^-?(?:[0-9]+(?: [0-9]+\/[0-9]+))$/
 
-const dataFrameFromCSV = (str, vars) => {
-  // Load a CSV string into a data frame.
+const dataFrameFromTSV = (str, vars) => {
+  // Load a TSV string into a data frame.
   // Data frames are loaded column-wise. The subordinate data structures are:
   const data = []    // where the main data lives, not including column names or units.
   const headings = []                   // An array containing the column names
@@ -208,8 +208,6 @@ const dataFrameFromCSV = (str, vars) => {
   const dtype = []                      // each column's Hurmet operand type
   const unitMap = Object.create(null)   // map from unit names to unit data
   let gotUnits = false
-  // Determine if the file is tab separated or pipe separated
-  const sepChar = str.indexOf("\t") > -1 ? "\t" : "|"
 
   if (str.charAt(0) === "`") { str = str.slice(1) }
   let row = 0
@@ -249,8 +247,6 @@ const dataFrameFromCSV = (str, vars) => {
     }
   }
 
-  const keyRegEx = /^(?:[Nn]ame|[Ii]tem|[Ll]able)$/
-
   const harvest = (datum) => {
     // Load a datum into the dataTable
     datum = datum.trim()
@@ -258,11 +254,13 @@ const dataFrameFromCSV = (str, vars) => {
     if (row === 3 && col === 0) { checkForUnitRow() }
 
     if (row === 0) {
+      if (col === 0 && (datum.length > 0 && datum.charAt(0) === "#")) {
+        // Create a rowMap. The first datum in each row is a key to the row.
+        rowMap = Object.create(null)
+        datum = datum.slice(1)
+      }
       headings.push(datum)
       columnMap[datum] = col
-      if (col === 0 && (datum.length === 0 || keyRegEx.test(datum))) {
-        rowMap = Object.create(null)
-      }
     } else {
       if (row === 1) { data.push([]) } // First data row.
       if (datum === "sumAbove()") {
@@ -282,61 +280,17 @@ const dataFrameFromCSV = (str, vars) => {
   }
 
   // With the closure out of the way, let's load in data.
-  if (str.indexOf('"') === -1) {
-    // There are no quotation marks in the string. Use splits.
-    const lines = str.split(/\r?\n/g)
-    for (const line of lines) {
-      if (line.length > 0) {
-        col = 0
-        const items = line.split(sepChar)
-        for (const item of items) { harvest(item.trim()); col++ }
-        row += 1
-      }
+  // It's tab-separated values, so we can use splits to load in the data.
+  const lines = str.split(/\r?\n/g)
+  for (const line of lines) {
+    if (line.length > 0) {
+      col = 0
+      const items = line.split('\t')
+      for (const item of items) { harvest(item.trim()); col++ }
+      row += 1
     }
-    if (row === 3) { checkForUnitRow() }
-
-  } else {
-    // The string contains at least one quotation mark, so we can't rely on splits.
-    // Much of this section comes from https://stackoverflow.com/a/14991797
-    let datum = ""
-    let inQuote = false  // true means we're inside a quoted field
-    // iterate over each character, keep track of current row and column
-    for (let c = 0; c < str.length; c++) {
-      const cc = str[c]       // current character
-      const nc = str[c + 1]   // next character
-
-      // If the current character is a quotation mark, and we're inside a
-      // quoted field, and the next character is also a quotation mark,
-      // add a quotation mark to the current datum and skip the next character
-      if (cc === '"' && inQuote && nc === '"') { datum += cc; ++c; continue; }
-
-      // If it's just one quotation mark, begin/end quoted field
-      if (cc === '"') { inQuote = !inQuote; continue; }
-
-      // If it's a separator character and we're not in a quoted field, harvest the datum
-      if (cc === sepChar && !inQuote) { harvest(datum); datum = ""; ++col; continue }
-
-      // If it's a CRLF and we're not in a quoted field, skip the next character,
-      // harvest the datum, and move on to the next row and move to column 0 of that new row
-      if (cc === '\r' && nc === '\n' && !inQuote) {
-        harvest(datum); datum = ""; ++row; col = 0; ++c; continue
-      }
-
-      // If it's a CR or LF and we're not in a quoted field, skip the next character,
-      // harvest the datum, and move on to the next row and move to column 0 of that new row
-      if (cc === "\n" && !inQuote) {
-        harvest(datum); datum = ""; ++row; col = 0; ++c; continue
-      }
-      if (cc === "\r" && !inQuote) {
-        harvest(datum); datum = ""; ++row; col = 0; ++c; continue
-      }
-
-      // Otherwise, append the current character to the current datum
-      datum += cc
-    }
-    if (datum.length > 0) { harvest(datum) }
-    if (row === 2) { checkForUnitRow() }
   }
+  if (row === 3) { checkForUnitRow() }
 
   // Data is loaded in. Finish by determining the operand type of each column
   for (let j = 0; j < data.length; j++) {
@@ -503,16 +457,17 @@ const append = (o1, o2, vars, unitAware) => {
 
 const quickDisplay = str => {
   // This is called from the lexer for a display that changes with every keystroke.
-  // It is a quick, rough approximation of a CSV parser.
-  // I use this partly for speed, partly because it is more tolerant of badly formatted CSV
-  // while the author is composing the CSV. This function doesn't spit up many error messages.
-  // Final rendering of a data frame does not use this function.
-  // Final rendering calls dataFrameFromCSV() and display() for accurate CSV parsing.
   if (str === "") { return "" }
-  str = addTextEscapes(str.trim())
-  const sepRegEx = str.indexOf("\t") > -1
-    ? / *\t */g
-    : / *\| */g
+  str = str.trim()
+  let arrayFormat = ""
+  if (str.charAt(0) === "#") {
+    str = str.slice(1).trim()
+    arrayFormat = "l|cccccccccccccccccccccccc"
+  } else {
+    arrayFormat = "c"
+  }
+  str = addTextEscapes(str)
+  const sepRegEx = / *\t */g
   const lines = str.split(/\r?\n/g)
   let tex = ""
   if (lines.length < 3) {
@@ -522,7 +477,7 @@ const quickDisplay = str => {
     }
     tex = tex.slice(0, -10) + "\\end{matrix}"
   } else {
-    tex = "\\begin{array}{l|cccccccccccccccccccccccc}\\text{"
+    tex = `\\begin{array}{${arrayFormat}}\\text{`
     const cells = new Array(lines.length)
     for (let i = 0; i < lines.length; i++) {
       cells[i] = tablessTrim(lines[i]).split(sepRegEx)
@@ -534,7 +489,7 @@ const quickDisplay = str => {
       if (numberRegEx.test(cells[1][j])) { gotAnswer = true; break }
     }
     if (!gotAnswer) {
-      // line[1] had no numbers. If any numbers are ine line[2] then line[1] is units.
+      // line[1] had no numbers. If any numbers are in line[2] then line[1] is units.
       for (let j = 0; j < cells[2].length; j++) {
         if (numberRegEx.test(cells[2][j])) { gotUnits = true; break }
       }
@@ -703,7 +658,6 @@ const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHeadin
         ? format(Rnl.fromString(datum), formatSpec, decimalFormat) + "&"
         : numberRegEx.test(datum)
         ? displayNum(datum, colInfo[j], cellInfo[j][i], decimalFormat) + "&"
-//        ? formattedDecimal(datum, decimalFormat) + "&"
         : datum === ""
         ? "&"
         : "\\text{" + addTextEscapes(datum) + "}&"
@@ -725,34 +679,34 @@ const displayAlt = (df, formatSpec = "h3", omitHeading = false) => {
 
   if (!omitHeading) {
     // Write the column names
-    if (writeRowNums) { str += "|" }
+    if (writeRowNums) { str += "\t" }
     str += ( (df.headings[0] === "name" || df.headings[0] === "item")
       ? ""
-      : df.headings[0]) + "|"
+      : df.headings[0]) + "\t"
     for (let j = 1; j < numCols; j++) {
-      str += df.headings[j] + "|"
+      str += df.headings[j] + "\t"
     }
     str = str.slice(0, -1) + "\n"
   }
 
   // Write the unit names
   if (isNotEmpty(df.units)) {
-    if (writeRowNums) { str += "|" }
+    if (writeRowNums) { str += "\t" }
     for (let j = 0; j < numCols; j++) {
-      str += df.units[j] + "|"
+      str += df.units[j] + "\t"
     }
     str = str.slice(0, -1) + "\n"
   }
 
   // Write the data
   for (let i = 0; i < numRows; i++) {
-    if (writeRowNums) { str += String(i + 1) + "|" }
+    if (writeRowNums) { str += String(i + 1) + "\t" }
     for (let j = 0; j < numCols; j++) {
       const datum = df.data[j][i]
       if (mixedFractionRegEx.test(datum)) {
-        str += format(Rnl.fromString(datum), formatSpec, "100000.") + "|"
+        str += format(Rnl.fromString(datum), formatSpec, "100000.") + "\t"
       } else {
-        str += datum + "|"
+        str += datum + "\t"
       }
     }
     str = str.slice(0, -1) + "\n"
@@ -765,7 +719,7 @@ const displayAlt = (df, formatSpec = "h3", omitHeading = false) => {
 
 export const DataFrame = Object.freeze({
   append,
-  dataFrameFromCSV,
+  dataFrameFromTSV,
   dataFrameFromVectors,
   matrix2table,
   display,

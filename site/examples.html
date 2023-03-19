@@ -109,17 +109,17 @@ Say that we want to build a cylindrical water tank in 5-foot courses.
 
 <h2>Data Frames</h2>
 <p>Data can be stored in a tabular format:            <span class="hurmet-calc" data-entry="rebar = ``
-  |diameter|area
-  |in      |in²
-#3|0.375   |0.11
-#4|0.5     |0.2
-#5|0.625   |0.31
-#6|0.75    |0.44``"></span></p>
+#size	diameter	area
+    	in     	in²
+#3  	0.375  	0.11
+#4  	0.5    	0.2
+#5  	0.625  	0.31
+#6  	0.75   	0.44``"></span></p>
 <p>Later, you can access the data:<br><span class="hurmet-calc" data-entry='A = rebar["#3"].area = ?? in²'></span></p>
 
 <h2>Remote Data</h2>
 <p>Such data can be stored in a remote file. Say that we want to engineer a steel end-plate connection. The calculation could begin by fetching a chunk of data about steel shapes and loading that data into a variable, like this:</p>
-<p><span class="hurmet-calc" data-entry="wideFlanges = fetch(&quot;https://gist.githubusercontent.com/ronkok/a9f465e08be54cb4b46449768511acec/raw/AISC-v15-wideFlanges.csv&quot;) = !"></span></p>
+<p><span class="hurmet-calc" data-entry="wideFlanges = fetch(&quot;https://gist.githubusercontent.com/ronkok/d2ae5b3c74889e71c7bb8422b6017067/raw/AISC-v15-wideFlanges.tsv&quot;) = !"></span></p>
 <p>From that, we can load data into variables for individual dimensions.</p>
 
 <h4>Beam properties<img src="images/EndPlateConnection.svg" alt="End Plate Connection" width="250" class="right">:</h4>

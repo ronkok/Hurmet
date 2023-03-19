@@ -69,10 +69,10 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
     }
 
   } else if (/^``/.test(str)) {
-    // A CSV between double back ticks.
-    // Read the CSV into a data frame.
+    // A TSV between double back ticks.
+    // Read the TSV into a data frame.
     str = tablessTrim(str.slice(2, -2))
-    const dataStructure = DataFrame.dataFrameFromCSV(str, {})
+    const dataStructure = DataFrame.dataFrameFromTSV(str, {})
     if (dataStructure.dtype === dt.DATAFRAME) {
       return [dataStructure.value, dataStructure.unit, dt.DATAFRAME,
         DataFrame.display(dataStructure.value, "h3", decimalFormat)]
