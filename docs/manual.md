@@ -175,6 +175,8 @@ A newline is indicated by a backslash, `\`, at the end of a line.
 +------------------------------------------+--------------------+
 | `**Bold**`                               | **Bold**           |
 +------------------------------------------+--------------------+
+| `**_Bold Italic_**`                      | **_Bold Italic_**  |
++------------------------------------------+--------------------+
 | `~subscript~`                            | ~subscript~        |
 +------------------------------------------+--------------------+
 | `~~strikethrough~~`                      | ~~strikethrough~~  |
@@ -222,9 +224,9 @@ A newline is indicated by a backslash, `\`, at the end of a line.
 +------------------------------------------+--------------------+
 | `© comment`                              | © comment          |
 +------------------------------------------+--------------------+
-| `3+ spaces at left margin`               |    indented block  |
+| `i>  indented block`                     | i>  indented block |
 +------------------------------------------+--------------------+
-| `C> Centered block`                      | Centered block     |
+| `C>  Centered block`                     | Centered block     |
 +------------------------------------------+--------------------+
 {.grid colWidths="392 177"}
 
@@ -234,7 +236,7 @@ Pipe Tables
 
 ```
 | Head 1  |  Head 2  | Head 3  |
-|---------|----------|---------|
+|:--------|:--------:|---------|
 | datum 1 | datum 2  | datum 3 |
 | datum 4 | datum 5  | datum 6 |
 ```
@@ -242,17 +244,32 @@ Pipe Tables
 Grid tables
 
 ```
-+----------+---------------+---------+
-| Head 1   |  Head 2       | Head 3  |
-+==========+===============+=========+
-| datum 1  | merged cell             |
-+----------+---------------+---------+
-| datum 2  | 1st paragraph | datum 3 |
-|          |               |         | 
-|          | 2nd paragraph |         |
-+----------+---------------+---------+
++:---------:+-------------------------+
+| Heading 1 |  Merged Heading         |
++===========+=========================+
+| datum 1   | merged cell             |
++-----------+---------------+---------+
+| merged\   | datum 3       | datum 4 |
+| cell      +---------------+---------|
+|           | datum 5       | datum 6 |
++-----------+---------------+---------+
+| datum 7   | 1st paragraph | datum 8 |
+|           |               |         | 
+|           | 2nd paragraph |         |
++-----------+---------------+---------+
 
 ```
+
+Notes:
+
+1. This list shows what Hurmet writes. Hurmet can also read
+   [alternative](https://commonmark.org/help/) Markdown notations.
+   
+2. Grid tables are more powerful than pipe tables. Grid tables enable merged
+   cells, block elements (such as lists) inside a cell, headings with multiple
+   rows, tables without a heading, tables with only a heading.
+
+   Hurmet grid tables accept `:` in the top border to set (left|center|right) justification.
 
 [Link]: http://a.com
 
@@ -260,7 +277,7 @@ Grid tables
 
 </details>
 
-…or you can export GFM (Github Flavored Markdown), which does not have Hurmet’s
+…or you can export GFM (GitHub Flavored Markdown), which does not have Hurmet’s
 extensions and which converts calculation zones to TeX.
 
 ### TeX
@@ -461,10 +478,10 @@ Display Mode
 | `|x|  ‖x‖`    | ¢|x|˽˽˽‖x‖¢     | `{a if b;` \                 | ¢{a if b; c otherwise}¢       |
 |               |                 | `c otherwise}`               |                               |
 +---------------+-----------------+------------------------------+-------------------------------+
-| `A-->note B`  | ¢A-->note B¢    | ``` `` | dia | area ``` \    | ¢ `` | dia | area             |
-+---------------+-----------------+ ``    | in | in² `` \        |     | in | in²                |
-| `\red("ng")`  | ¢\red("ng")¢    | `` #3 | 0.375 | 0.11 `` \    |  #3 | 0.375 | 0.11            |
-|               |                 | ``` #4 | 0.5   | 0.2 `` ```  | #4 | 0.5   | 0.2 `` ¢         |
+| `A-->note B`  | ¢A-->note B¢    | ``` ``#size	dia	area ``` \   | ¢ ``#size   	dia	area         |
++---------------+-----------------+ ``         	in 	in² `` \     | 	in 	in²                      |
+| `\red("ng")`  | ¢\red("ng")¢    | ``  #3 	0.375  	0.11 ``\     |  #3 	0.375  	0.11             |
+|               |                 | ``` #4 	0.5    	0.2 `` ```   |  #4 	0.5	0.2 `` ¢             |
 +---------------+-----------------+------------------------------+-------------------------------+
 {.markup}
 
@@ -592,11 +609,11 @@ It’s quite simple to assign a value to a variable:
 | Form                              | Examples           |
 +===================================+====================+
 | ![identifier = value][assignment] | `x = 5`            |
-+                                   +--------------------+
+|                                   +--------------------+
 |                                   | `L = 3.1 'm'`      |
-+                                   +--------------------+
+|                                   +--------------------+
 |                                   | `w = 100 'lbf/ft'` |
-+                                   +--------------------+
+|                                   +--------------------+
 |                                   | name = "James"     |
 +-----------------------------------+--------------------+
 
@@ -703,6 +720,7 @@ Variable names and function names must be written in the form of a valid _identi
 [identifier]: images/identifier-railroad.svg
 
 The names of those accents are:
+
 
 +---------+---------+-----+--------------+
 | grave   | acute   | hat | tilde        |
@@ -964,86 +982,87 @@ Data Frame
     A column of numbers can be assigned a unit of measure.
 
     Data frame literals are written between double backtick delimiters. The text
-    between the backticks must be written in CSV format. (CSV once meant comma-separated
-    values.)
+    between the backticks must be written in TSV format. (tab-separated values)
 
-    Instead of commas, Hurmet data is separated by either tabs or pipes, i.e., `|`.
-    (But not both tabs and pipes in the same file.) Numbers must use a dot decimal.
-    The second row may contain units of measure.
+    Numbers must use a dot decimal. The second row may contain units of measure.
+    Tabs and newlines are disallowed in data. Quotation marks, `"`, have no
+    special significance.
 
-    Here’s an example of CSV input:
+    Here’s an example of TSV input:
 
     ```
     rebar =
-    ``|diameter|area
-      |in      |in²
-    #3|0.375   |0.11
-    #4|0.5     |0.2
-    #5|0.625   |0.31
-    #6|0.75    |0.44``
+    ``#size	diameter	area
+     	in     	in²
+    #3	0.375  	0.11
+    #4	0.5    	0.2
+    #5	0.625  	0.31
+    #6	0.75   	0.44``
     ```
 
     … which renders as:
 
     ¢
-    rebar = ``|diameter|area
-      |in      |in²
-    #3|0.375   |0.11
-    #4|0.5     |0.2
-    #5|0.625   |0.31
-    #6|0.75    |0.44``
+    rebar =
+    ``#size	diameter	area
+     	in     	in²
+    #3	0.375  	0.11
+    #4	0.5    	0.2
+    #5	0.625  	0.31
+    #6	0.75   	0.44``
     ¢
 
-    Hurmet will use the first column as keys to the rest of each row if you leave
-    the top left cell blank, or if the content of the top left cell is “name” or “item”.
+    Hurmet will use the first column as keys to the rest of each row if the
+    content of the top left cell begins with a hash tag, #.
 
     A dataframe literal can also show totals on the bottom line, via the
     `sumAbove()` function. So this input:
 
     ```
-    roof = ``Item               | weight
-                                | psf
-    2 layers asphalt shingles   | 8.0
-    1/2 inch plywood            | 1.5
-    insulation, R19 fiberglass  | 0.6
-    trusses at 16 inch o.c.     | 2.5
-    5/8 inch gypsum board       | 2.5
-    lights, HVAC, miscellaneous | 1.5
-    total                       | sumAbove()``
+    roof = ``#Item             	weight
+                               	psf
+    2 layers asphalt shingles  	8.0
+    1/2 inch plywood           	1.5
+    insulation, R19 fiberglass 	0.6
+    trusses at 16 inch o.c.    	2.5
+    5/8 inch gypsum board      	2.5
+    lights, HVAC, miscellaneous	1.5
+    total                      	sumAbove()``
     ```
 
     will render like this:\
-    ¢ roof = ``Item             | weight
-                                | psf
-    2 layers asphalt shingles   | 8.0
-    1/2 inch plywood            | 1.5
-    insulation, R19 fiberglass  | 0.6
-    trusses at 16 inch o.c.     | 2.5
-    5/8 inch gypsum board       | 2.5
-    lights, HVAC, miscellaneous | 1.5
-    total                       | sumAbove()`` ¢
+    ¢ roof = ``#Item           	weight
+                               	psf
+    2 layers asphalt shingles  	8.0
+    1/2 inch plywood           	1.5
+    insulation, R19 fiberglass 	0.6
+    trusses at 16 inch o.c.    	2.5
+    5/8 inch gypsum board      	2.5
+    lights, HVAC, miscellaneous	1.5
+    total                      	sumAbove()`` ¢
 
     Data frames can be quite large, so Hurmet has a `fetch(url)` function to load
-    data from a remote CSV file into a data frame. Since Hurmet runs in a browser,
+    data from a remote TSV file into a data frame. Since Hurmet runs in a browser,
     the url must begin with `http:` or `https:`
 
     A fetch example:
 
     ```
-    wideFlanges = fetch("https://hurmet.app/example.csv") = !
+    wideFlanges = fetch("https://hurmet.app/example.tsv") = !
     ```
 
     That example loads in this data:
 
-    ¢ ``name|weight|A|d|bf|tw|Ix|Sx
-    |lbf/ft|in^2|in|in|in|in^4|in^3
-    W14X90|90|26.5|14|14.5|0.44|999|143
-    W12X65|65|19.1|12.1|12|0.39|533|87.9
-    W10X49|49|14.4|10|10|0.34|272|54.6
-    W8X31|31|9.13|8|8|0.285|110|27.5
-    W8X18|18|5.26|8.14|5.25|0.23|61.9|15.2
-    W6X15|15|4.43|5.99|5.99|0.23|29.1|9.72
-    W4X13|13|3.83|4.16|4.06|0.28|11.3|5.46`` ¢
+    ¢
+    ``#name	weight	A 	d   	bf  	tw  	Ix  	Sx
+     	lbf/ft	in² 	in  	in  	in  	in⁴ 	in³
+    W14X90	90	26.5	14  	14.5	0.44	999 	143
+    W12X65	65	19.1	12.1	12  	0.39	533 	87.9
+    W10X49	49	14.4	10  	10  	0.34	272 	54.6
+    W8X31	31	9.13	8   	8   	0.285	110 	27.5
+    W8X18	18	5.26	8.14	5.25	0.23	61.9	15.2
+    W6X15	15	4.43	5.99	5.99	0.23	29.1	9.72
+    W4X13	13	3.83	4.16	4.06	0.28	11.3	5.46`` ¢
 
     As data frames go, that example is still pretty small. When I assign a data
     frame to a variable, I usually suppress its display by using the **!** display selector.
@@ -1072,9 +1091,9 @@ Data Frame
     Multiple returns must use the `!!` display selector, for now.
 
     If the data frame has only one row of data, a single accessor will call a datum.\
-    Say the data frame is ¢aBar =``| diameter | area
-       | in  |in2
-    #4 | 0.5 | 0.2`` ¢
+    Say the data frame is    ¢aBar =``#size	diameter	area
+      	in 	in²
+    #4	0.5	0.2`` ¢\
     Then one can call ¢A = aBar.area = 0.2 'in2'¢
 
     Numeric cata frames can be multiplied by a unit-less scalar.
@@ -1089,15 +1108,15 @@ Map
     data type, either boolean, string, or number. Maps can be the numeric part of
     a quantity.
 
-    ¢w = ``dead | live | snow
-    30 | 70 | 40`` 'lbf/ft' ¢
+    ¢w = ``dead	live	snow
+    30	70	40`` 'lbf/ft' ¢
 
     You can do arithmetic on maps and run them through functions. The operation
     will be done on each value in the map. For instance, a beam calculation can
     break the loads down into dead load, live load, snow load, etc.:
 
-    ¢ M = 1//8 w L^2  = ¢ ¢``dead | live | snow
-    0.375 | 0.875 | 0.5`` 'k·ft'¢
+    ¢ M = 1//8 w L^2  = ¢ ¢``dead	live	snow
+    0.375	0.875	0.5`` 'k·ft'¢
 
 </dl>
 
@@ -1137,7 +1156,7 @@ _j_
 | Operator      | Example              | Description                                 |
 +===============+======================+=============================================+
 | =             | _x_ = 15             | Assign a value to a variable.               |
-+               +----------------------+---------------------------------------------+
+|               +----------------------+---------------------------------------------+
 |               | if _x_ = 15          | Equality test if in a comparison position.\ |
 |               |                      | That is, “=” tests for equality if there    |
 |               |                      | is something other than a identifier to the |
@@ -1208,7 +1227,7 @@ _j_
 +---------------+----------------------+---------------------------------------------+
 | ||  ||          ¢\\Vert x \\Vert¢    | ¢√(x_1^2 + ⋯ + x_n^2)¢  if the argument is  |
 |                                      | a vector of reals                           |
-+                                      +---------------------------------------------+
+|                                      +---------------------------------------------+
 |                                      | ¢√(∑_i ∑_j A_(i, j)^2)¢  if the argument is |
 |                                      | a 2-D matrix                                |
 +---------------+----------------------+---------------------------------------------+
@@ -1249,11 +1268,16 @@ _j_
 |               |                      | is a property of a data frame.\             |
 |               |                      | auto-correct: \in                           |
 +---------------+----------------------+---------------------------------------------+
+| ∋             | ¢ d ∋ p ¢            | d has a property named y\                   |
+|               |                      | auto-correct: owns                          |
++---------------+----------------------+---------------------------------------------+
 | ∉             | ¢c ∉ s¢              | Is not an element of\                       |
 |               |                      | auto-correct: \notin                        |
 +---------------+----------------------+---------------------------------------------+
+| ∌             | ¢ d ∌ p ¢            | d does not have a property named y          |
++---------------+----------------------+---------------------------------------------+
 | ⊆             | ¢c ⊆ s¢              | Is a subset of\                             |
-|               |                      |  auto-correct: \subseteq                    |
+|               |                      |  auto-correct: \subseteq or contains        |
 +---------------+----------------------+---------------------------------------------+
 | ⊈             | ¢c ⊈ s¢              | Is not a subset of\                         |
 |               |                      |  auto-correct: \nsubseteq                   |
@@ -1620,9 +1644,9 @@ You’re welcome to view all of Hurmet’s built-in [unit definitions](unit-defi
 If the Hurmet built-in unit definitions are not sufficient, you can define a
 set of custom units in a single-row data frame like this:
 
-¢ units = ``smoot | sol
-inches | hours
-67     | 24.6229622`` ¢
+¢ units = ``smoot	sol
+inches	hours
+67    	24.6229622`` ¢
 
 #### Currencies
 
@@ -1633,8 +1657,8 @@ insufficiently accurate, so you can override them and define your own exchange
 rates in a map named **currencies**. Such a statement might be coded
 like this:
 
-¢currencies = ``USD | CAD
-   1  | 1.25`` ¢
+¢currencies = ``USD	CAD
+   1 	1.25`` ¢
 
 The keys in that map are standard three-letter [currrency codes](https://www.xe.com/iso4217.php).
 
@@ -1667,7 +1691,8 @@ There are two aspects to how numbers are displayed: (1) decimal separators, and
 In some countries, the usual decimal separator symbol is a dot. Other countries
 use a comma. Hurmet starts up with a decimal separator based upon the browser’s
 language setting. Hurmet also allows the reader (not the document author) to
-select which display they prefer. Just use the use the drop-down menu labeled “●”.
+select which display they prefer. Just use the use the drop-down menu labeled
+Doc | Set Decimal.
 
 The same menu choice also selects how Hurmet displays thousands separators.
 
@@ -1710,28 +1735,28 @@ specification string must take the form: "**TN∠**", where:
 
 Let _N_ be the number of digits specified. Then:
 
-+--------+---------------------------+-----------+-------------+----------------+
++--------+---------------------------+------------------------------------------+
 | Type   | Description               | Examples                                 |
-+        |                           +-----------+-------------+----------------+
+|        |                           +-----------+-------------+----------------+
 |        |                           | Number    | Format spec | Result display |
 +========+===========================+===========+=============+================+
 | b      | Binary                    | 5         | b           | 0b101          |
 +--------+---------------------------+-----------+-------------+----------------+
 | e or E | A programmer’s version of | 22,000    | e3          | 2\.20e4        |
-+        | scientific notation.      |           +-------------+----------------+
+|        | scientific notation.      |           +-------------+----------------+
 |        | Rounds to _N_             |           | E3          | 2\.20E4        |
 |        | significant digits.       |           |             |                |
 +--------+---------------------------+-----------+-------------+----------------+
 | f      | Rounds to                 | 3\.236    | f0          | 3              |
-+        | exactly _N_ places after  |           +-------------+----------------+
+|        | exactly _N_ places after  |           +-------------+----------------+
 |        | the decimal.              |           | f2          | 3\.24          |
-+        |                           |           +-------------+----------------+
+|        |                           |           +-------------+----------------+
 |        |                           |           | f4          | 3\.2360        |
 +--------+---------------------------+-----------+-------------+----------------+
 | h      | Hurmet’s default format   | 31\.345   | h3          | 31\.3          |
-+        | will round a decimal      +-----------+-------------+----------------+
+|        | will round a decimal      +-----------+-------------+----------------+
 |        | fraction to               | 65,809    | h3          | 65,809         |
-+        | display _N_ significant   +-----------+-------------+----------------+
+|        | display _N_ significant   +-----------+-------------+----------------+
 |        | digits and omit trailing  | 1\.1000   | h3          | 1\.1           |
 |        | zeros, but it will not    |           |             |                |
 |        | round an integer.         |           |             |                |
@@ -1742,23 +1767,23 @@ Let _N_ be the number of digits specified. Then:
 |        | significant digits.       |           |             |                |
 +--------+---------------------------+-----------+-------------+----------------+
 | n or N | Engineering notation,     | 22,000    | n3          | 22\.0·10³      |
-+        | i.e. scientific notation  |           +-------------+----------------+
+|        | i.e. scientific notation  |           +-------------+----------------+
 |        | with exponents that are   |           | N3          | 22\.0×10³      |
 |        | even multiples of 3.      |           |             |                |
 |        | Rounds to _N_             |           |             |                |
 |        | significant digits.       |           |             |                |
 +--------+---------------------------+-----------+-------------+----------------+
 | r      | Rounds to _N_ significant | 31\.345   | r3          | 31\.3          |
-+        | digits.                   +-----------+-------------+----------------+
+|        | digits.                   +-----------+-------------+----------------+
 |        |                           | 65,809    | r3          | 65,800         |
 +--------+---------------------------+-----------+-------------+----------------+
 | s or S | Scientific notation.      | 22,000    | s3          | 2\.20·10⁴      |
-+        | Rounds                    |           +-------------+----------------+
+|        | Rounds                    |           +-------------+----------------+
 |        | to _N_ significant        |           | S3          | 2\.20×10⁴      |
 |        | digits.                   |           |             |                |
 +--------+---------------------------+-----------+-------------+----------------+
 | p or % | Percentage display.\      | 0\.2812   | %1          | 28\.1%         |
-+        | “%” is fixed to           +-----------+-------------+----------------+
+|        | “%” is fixed to           +-----------+-------------+----------------+
 |        | exactly _N_ places after  | 1\.28     | p2          | 130%           |
 |        | the decimal.\             |           |             |                |
 |        | “p” rounds to _N_         |           |             |                |
@@ -1768,13 +1793,13 @@ Let _N_ be the number of digits specified. Then:
 |        | number.                   |           |             |                |
 +--------+---------------------------+-----------+-------------+----------------+
 | x or X | Hexadecimal               | 62        | x           | 0x3e           |
-+        |                           |           +-------------+----------------+
+|        |                           |           +-------------+----------------+
 |        |                           |           | X           | 0x3E           |
 +--------+---------------------------+-----------+-------------+----------------+
 | ∠ or ° | Polar notation of complex | 2 + _j_ 3 | h3          | 2 + _j_3       |
-+        | numbers                   |           +-------------+----------------+
+|        | numbers                   |           +-------------+----------------+
 |        |                           |           | h3∠         | 3\.61∠0.983    |
-+        |                           |           +-------------+----------------+
+|        |                           |           +-------------+----------------+
 |        |                           |           | h3°         | 3\.61∠56.3°    |
 +--------+---------------------------+-----------+-------------+----------------+
 {.grid width=30em}
@@ -2007,13 +2032,13 @@ between the `if` statement and an `end` statement are in the block. Example:
 
 ```
 if a ≤ b
-   x = a + b²
-   y = 2 x
+    x = a + b²
+    y = 2 x
 end
 ```
 
 Indentation is not significant to the parser but is very useful to humans
-reading the code. I usually indent by three spaces.
+reading the code. I usually indent by four spaces.
 
 <dl class="bold-term">
 
@@ -2024,11 +2049,11 @@ if else
 
     ```
     if a ≤ 4000
-       b = 0.85
+        b = 0.85
     else if a ≥ 8000
-       b = 0.65
+        b = 0.65
     else
-       b = 0.85 - (a - 4000)/20000
+        b = 0.85 - (a - 4000)/20000
     end
     ```
 
@@ -2039,9 +2064,9 @@ while
 
     ```
     while b ≠ 0
-       h = b
-       b = a modulo b
-       a = h
+        h = b
+        b = a modulo b
+        a = h
     end
     ```
 
@@ -2052,14 +2077,14 @@ for
 
     Examples:
 
-    +------------------+---------------------------+
-    | ```              | ```                       |
-    | sum = 0          | reverse = ""              |
-    | for i in 1..10   | for ch in "abcdef"        |
-    |    sum = sum + i |    reverse = ch & reverse |
-    | end              | end                       |
-    | ```              | ```                       |
-    +------------------+---------------------------+
+    +-------------------+----------------------------+
+    | ```               | ```                        |
+    | sum = 0           | reverse = ""               |
+    | for i in 1..10    | for ch in "abcdef"         |
+    |     sum = sum + i |     reverse = ch & reverse |
+    | end               | end                        |
+    | ```               | ```                        |
+    +-------------------+----------------------------+
     {.grid}
 
     ![for index variable in range or matrix or string](images/for-loop-railroad.svg)
@@ -2073,9 +2098,9 @@ break
 
     ```
     for i in 1..1000000
-       if i ≥ 2
-          break
-       end
+        if i ≥ 2
+            break
+        end
     end
     ```
 
@@ -2128,7 +2153,7 @@ E = 29000 'ksi'
 v = [4, 6, 8]
 
 function multiply(a, b)
-   return a × b
+    return a × b
 end
 ```
 
@@ -2232,18 +2257,18 @@ Civil and structural engineers may also find these items useful:
 
 * Beam Analysis [Diagram](https://hurmet.app/ce/beamanalysis.html)
 * Concrete Column Interaction [Diagram](https://observablehq.com/@ronkok/concrete-column-interaction-diagram)
-* Fetchable CSV files with steel shape data: [wide flanges][], [channels][], [HSS][], [pipes][], [tees][],
+* Fetchable TSV files with steel shape data: [wide flanges][], [channels][], [HSS][], [pipes][], [tees][],
   [double angles][], [HP][], and [MS][].
 * Importable [Module](https://gist.githubusercontent.com/ronkok/f4d93a4921ebd24c9a40578831d926b7/raw/steelStrengthPerAISC360-16.txt) with functions for steel member strength.
 
-[wide flanges]: https://gist.githubusercontent.com/ronkok/a9f465e08be54cb4b46449768511acec/raw/AISC-v15-wideFlanges.csv
-[channels]: https://gist.githubusercontent.com/ronkok/24987345bc31878e624edc39bfa08827/raw/AISC-v15-channels.csv
-[HSS]: https://gist.githubusercontent.com/ronkok/b027d7c53951995db459989dca4d028c/raw/AISC-v15-HSS.csv
-[pipes]: https://gist.githubusercontent.com/ronkok/0d5d5f487e7f59724d04345418e90c59/raw/AISC-v15-pipes.csv
-[tees]: https://gist.githubusercontent.com/ronkok/114013103c77f9d318d60a808b673001/raw/AISC-v15-tees.csv
-[double angles]: https://gist.githubusercontent.com/ronkok/2b886eb65012f2100fea4841e32d7eab/raw/AISC-v15-2L.csv
-[HP]: https://gist.githubusercontent.com/ronkok/e395e8ea5a2bee21f271e7c18098b69f/raw/AISC-v15-HP.csv
-[MS]: https://gist.githubusercontent.com/ronkok/4573be80587ef802131269ae5a829a01/raw/AISC-v15-MS.csv
+[wide flanges]: https://gist.githubusercontent.com/ronkok/d2ae5b3c74889e71c7bb8422b6017067/raw/AISC-v15-wideFlanges.tsv
+[channels]: https://gist.githubusercontent.com/ronkok/320677ddf9225afecf79bc831d5e1694/raw/AISC-v15-channels.tsv
+[HSS]: https://gist.githubusercontent.com/ronkok/a63582e3870c880981845631cbcb302a/raw/AISC-v15-HSS.tsv
+[pipes]: https://gist.githubusercontent.com/ronkok/b7d6c68daeedb729ac23ab81cc77a154/raw/AISC-v15-pipes.tsv
+[tees]: https://gist.githubusercontent.com/ronkok/0c01e61709ade0b7738106462f831b45/raw/AISC-v15-tees.tsv
+[double angles]: https://gist.githubusercontent.com/ronkok/3a1e2d13672be26ef50e880347300536/raw/AISC-v15-2L.tsv
+[HP]: https://gist.githubusercontent.com/ronkok/4a489aa649aa955d069b26d761e6df5f/raw/AISC-v15-HP.tsv
+[MS]: https://gist.githubusercontent.com/ronkok/93927e8f227109cd9463ccd2409aa73e/raw/AISC-v15-MS.tsv
 
 ## Credits
 

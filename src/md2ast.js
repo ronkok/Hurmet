@@ -9,13 +9,12 @@
  *
  * ## Ways in which this syntax is more strict than Markdown.
  *
- * 1. Emphasis: _emphasis_ only. Asterisks do not create standard emphasis.
- * 2. Strong emphasis: **strong emphasis** only. Underlines do not create strong emphasis.
- * 3. Code blocks must be fenced by triple backticks.
+ * 1. **_bold-italic_** must use both * & _ delimiters. Hurmet will fail on ***what***.
+ * 2. Code blocks must be fenced by triple backticks.
  *    Indented text does not indicate a code block.
- * 4. A blank line must precede the beginning of a list, even a nested list.
- * 5. A hard line break is indicated when a line ends with "\". Double spaces do not count.
- * 6. "Shortcut" reference links [ref] are not recognized.
+ * 3. A blank line must precede the beginning of a list, even a nested list.
+ * 4. A hard line break is indicated when a line ends with "\". Double spaces do not count.
+ * 5. "Shortcut" reference links [ref] are not recognized.
  *    Implicit reference links are recognized and are expanded, see below.
  *
  * ## Extensions
@@ -53,7 +52,7 @@
  *     Blurbs are denoted by a symbol in the left margin.
  *     Subsequent indented text blocks are children of the blurb.
  *     Blurb symbols:
- *          indented block (3+ spaces)
+ *       »  indented block
  *       C> Centered block
  *       H> print header element, <header>
  *       I> Information admonition (future)
@@ -97,7 +96,6 @@
 
 
 const CR_NEWLINE_R = /\r\n?/g;
-const TAB_R = /\t/g;
 const FORMFEED_R = /\f/g;
 const CLASS_R = /(?:^| )\.([a-z-]+)(?: |$)/
 const WIDTH_R = /(?:^| )width="?([\d.a-z]+"?)(?: |$)/
@@ -106,7 +104,7 @@ const ID_R = /(?:^| )#([a-z-]+)(?: |$)/
 
 // Turn various whitespace into easy-to-process whitespace
 const preprocess = function(source) {
-  return source.replace(CR_NEWLINE_R, "\n").replace(FORMFEED_R, "").replace(TAB_R, "    ");
+  return source.replace(CR_NEWLINE_R, "\n").replace(FORMFEED_R, "");
 };
 
 // Creates a match function for an inline scoped element from a regex
@@ -274,7 +272,9 @@ const TABLES = (function() {
       }
       if (myID) { table.attrs.id = myID }
       if (myClass) { table.attrs.class = myClass }
-      table.content.push(parsePipeTableRow(capture[1], parse, state, colWidths, true))
+      if (!/^\|+$/.test(capture[1])) {
+        table.content.push(parsePipeTableRow(capture[1], parse, state, colWidths, true))
+      }
       const tableBody = capture[3].trim().split("\n")
       tableBody.forEach(row => {
         table.content.push(parsePipeTableRow(row, parse, state, colWidths, false))
@@ -285,13 +285,15 @@ const TABLES = (function() {
   };
 
   const headerRegEx = /^\+:?=/
+  const gridSplit = / *\n/g
+  const cellCornerRegEx = /^\+[-=]+\+[+=-]+\+$/g
 
   const parseGridTable = function() {
     return function(capture, state) {
       const topBorder = capture[2]
       const align = parseTableAlign(topBorder.slice(1))
       const [myClass, myID, colWidths] = tableDirectives(capture[3], align)
-      const lines = capture[1].slice(0, -1).split("\n")
+      const lines = capture[1].slice(0, -1).split(gridSplit)
 
       // Does the grid table contain a line separating header from table body?
       let headerExists = false
@@ -304,21 +306,57 @@ const TABLES = (function() {
         }
       }
 
-      // Read the top & left borders to find the locations of the cell corners.
-      const xCorners = [0]
+      // Read the top & left borders to find a first draft of cell corner locations.
+      const colSeps = [0]
       for (let j = 1; j < topBorder.length; j++) {
-        const ch = topBorder.charAt(j)
-        // A "+" character indicates a column border.
-        if (ch === "+") { xCorners.push(j) }
+        if (topBorder.charAt(j) === "+") { colSeps.push(j) }
       }
-      const yCorners = [0]
+      const rowSeps = [0]
       for (let i = 1; i < lines.length; i++) {
-        const ch = lines[i].charAt(0)
-        if (ch === "+") { yCorners.push(i) }
+        if (lines[i].charAt(0) === "+") { rowSeps.push(i) }
       }
 
-      const numCols = xCorners.length - 1
-      const numRows = yCorners.length - 1
+      // Look for the cell corner locations that don't appear on top or left border
+      let rowSepIndex = 0
+      while (rowSepIndex < rowSeps.length) {
+        // Find the next row separator
+        let nextRow = 0
+        const isValid = new Array(colSeps.length).fill(true)
+        for (let i = rowSeps[rowSepIndex] + 1; i < lines.length; i++) {
+          for (let k = 0; k < colSeps.length; k++) {
+            if (!isValid[k]) { continue }
+            if ("+|".indexOf(lines[i][colSeps[k]]) === -1) { isValid[k] = false; continue }
+            if (lines[i][colSeps[k]] === "+") {
+              nextRow = i
+              break
+            }
+          }
+          if (nextRow !== 0) { break }
+        }
+        if (!rowSeps.includes(nextRow)) {
+          rowSeps.splice(rowSepIndex + 1, 0, nextRow)
+        }
+
+        // Check the next horizontal border for new cell corners
+        rowSepIndex += 1
+        const border = lines[nextRow];
+        for (let j = 0; j < colSeps.length - 1; j++) {
+          let cellBorder = border.slice(colSeps[j], colSeps[j + 1] + 1)
+          if (cellCornerRegEx.test(cellBorder)) {
+            cellBorder = cellBorder.slice(1, -1)
+            let pos = cellBorder.indexOf("+") + 1
+            let k = 1
+            while (pos > 0) {
+              colSeps.splice(j + k, 0, colSeps[j] + pos)
+              pos = cellBorder.indexOf("+", pos) + 1
+              k += 1
+            }
+          }
+        }
+      }
+
+      const numCols = colSeps.length - 1
+      const numRows = rowSeps.length - 1
       const gridTable = []
 
       // Create default rows and cells. They may be merged later.
@@ -335,14 +373,14 @@ const TABLES = (function() {
           const cell = row[j]
           if (cell.rowspan === 0) { continue }
           cell.colspan = 1
-          const lastTextRow = lines[yCorners[i + 1] - 1]
-          for (let k = j + 1; k < xCorners.length; k++) {
-            if (lastTextRow.charAt(xCorners[k]) === "|") { break }
+          const lastTextRow = lines[rowSeps[i + 1] - 1]
+          for (let k = j + 1; k < colSeps.length; k++) {
+            if (lastTextRow.charAt(colSeps[k]) === "|") { break }
             cell.colspan += 1
             row[k].rowspan = 0
           }
-          for (let k = i + 1; k < yCorners.length; k++) {
-            const ch = lines[yCorners[k]].charAt(xCorners[j] + 1)
+          for (let k = i + 1; k < rowSeps.length; k++) {
+            const ch = lines[rowSeps[k]].charAt(colSeps[j] + 1)
             if (ch === "-" || ch === "=") { break }
             cell.rowspan += 1
             for (let jj = 0; jj < cell.colspan; jj++) {
@@ -350,10 +388,10 @@ const TABLES = (function() {
             }
           }
           // Now that we know the cell extents, get the cell contents.
-          const xStart = xCorners[j] + 2
-          const xEnd = xCorners[j + cell.colspan] - 1
-          const yStart = yCorners[i] + 1
-          const yEnd = yCorners[i + cell.rowspan]
+          const xStart = colSeps[j] + 2
+          const xEnd = colSeps[j + cell.colspan] - 1
+          const yStart = rowSeps[i] + 1
+          const yEnd = rowSeps[i + cell.rowspan]
           let str = ""
           for (let ii = yStart; ii < yEnd; ii++) {
             str += lines[ii].slice(xStart, xEnd).replace(/ +$/, "") + "\n"
@@ -390,6 +428,7 @@ const TABLES = (function() {
           if (state.inHtml && content.length === 1 && content[0].type === "paragraph") {
             content = content[0].content
           }
+          if (content.length === 1 && content[0].type === "null") { content = [] }
           table.content[i].content.push({
             "type": cell.inHeader ? "table_header" : "table_cell",
             "attrs": {
@@ -409,9 +448,9 @@ const TABLES = (function() {
 
   return {
     parsePipeTable: parsePipeTable(),
-    PIPE_TABLE_REGEX: /^(\|.+)\n\|([-:]+[-| :]*)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
+    PIPE_TABLE_REGEX: /^(\|.*)\n\|([-:]+[-| :]*)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
     parseGridTable: parseGridTable(),
-    GRID_TABLE_REGEX: /^((\+(?:[-:=]+\+)+)\n(?:[+|][^\n]+[+|]\n)+)(?:\{([^\n}]+)\}\n)?\n*/
+    GRID_TABLE_REGEX: /^((\+(?:[-:=]+\+)+)\n(?:[+|][^\n]+[+|] *\n)+)(?:\{([^\n}]+)\}\n)?\n*/
   };
 })();
 
@@ -478,7 +517,7 @@ const parseTextMark = (capture, state, mark) => {
 }
 
 const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<!--[^>]+-->[^\n]*\n|<\/?(?:body|details|(div|input|label)(?: [^>]+)?|!DOCTYPE[a-z ]*|html[a-z ="]*|br|dl(?: class="[a-z-]+")?|li|main[a-z\- ="]*|nav|ol|ul(?: [^>]+)?)\/?>[^\n]*?(?:\n|$))/
-const divType = { "C>": "centered_div", "H>": "header", "  ": "indented_div" }
+const divType = { "C>": "centered_div", "H>": "header", "i>": "indented_div" }
 
 // Rules must be applied in a specific order, so use a Map instead of an object.
 const rules = new Map();
@@ -572,7 +611,7 @@ rules.set("dd", {  // description details
 });
 rules.set("special_div", {
   isLeaf: false,
-  match: blockRegex(/^( {2,2}|C>|H>)( +)[\s\S]+?(?:\n{2,}(?! {2,2}\2)\n*|\s*$)/),
+  match: blockRegex(/^(i>|C>|H>)( +)[\s\S]+?(?:\n{2,}(?! {2,2}\2)\n*|\s*$)/),
   // indented or centered div, or <header>
   parse: function(capture, state) {
     const type = divType[capture[1]]
@@ -718,9 +757,7 @@ rules.set("escape", {
 rules.set("tableSeparator", {
   isLeaf: true,
   match: function(source, state) {
-    if (!state.inTable) {
-      return null;
-    }
+    if (!state.inTable) { return null }
     return /^ *\| */.exec(source);
   },
   parse: function() {
@@ -815,16 +852,16 @@ rules.set("code", {
 });
 rules.set("em", {
   isLeaf: true,
-  match: inlineRegex(/^_((?:\\[\s\S]|[^\\])+?)_/),
+  match: inlineRegex(/^([_*])(?!\s|\1)((?:\\[\s\S]|[^\\])+?)\1/),
   parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "em" )
+    return parseTextMark(capture[2], state, "em" )
   }
 });
 rules.set("strong", {
   isLeaf: true,
-  match: inlineRegex(/^\*\*(?=\S)((?:\\[\s\S]|\*(?!\*)|[^\s*\\]|\s(?!\*\*))+?)\*\*/),
+  match: inlineRegex(/^(\*\*|__)(?=\S)((?:\\[\s\S]|[^\\])+?)\1/),
   parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "strong" )
+    return parseTextMark(capture[2], state, "strong" )
   }
 });
 rules.set("strikethru", {
@@ -1037,7 +1074,9 @@ const populateTOC = ast => {
 
 export const md2ast = (md, inHtml = false) => {
   const ast = parse(md, { inline: false, inHtml })
-  if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") { ast.shift() }
+  if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") {
+    ast.shift()
+  }
   consolidate(ast)
   populateTOC(ast)
   return ast

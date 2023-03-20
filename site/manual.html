@@ -55,6 +55,7 @@
 </tr>
 <tr><td style="width: 392px"><code>_Italic_</code></td><td style="width: 177px"><em>Italic</em></td></tr>
 <tr><td style="width: 392px"><code>**Bold**</code></td><td style="width: 177px"><strong>Bold</strong></td></tr>
+<tr><td style="width: 392px"><code>**_Bold Italic_**</code></td><td style="width: 177px"><strong><em>Bold Italic</em></strong></td></tr>
 <tr><td style="width: 392px"><code>~subscript~</code></td><td style="width: 177px"><sub>subscript</sub></td></tr>
 <tr><td style="width: 392px"><code>~~strikethrough~~</code></td><td style="width: 177px"><del>strikethrough</del></td></tr>
 <tr><td style="width: 392px"><code>`inline code`</code></td><td style="width: 177px"><code>inline code</code></td></tr>
@@ -85,27 +86,38 @@
 <tr><td style="width: 392px"><code>```</code> <br><code>#code block</code> <br><code>return 3</code> <br><code>```</code></td><td style="width: 177px"><pre><code># code block
 return 3</code></pre></td></tr>
 <tr><td style="width: 392px"><code>© comment</code></td><td style="width: 177px"><aside class="comment">comment</aside></td></tr>
-<tr><td style="width: 392px"><code>3+ spaces at left margin</code></td><td style="width: 177px"><div class="indented"><p>indented block</p>
+<tr><td style="width: 392px"><code>i&gt;  indented block</code></td><td style="width: 177px"><div class="indented"><p>indented block</p>
 </div></td></tr>
-<tr><td style="width: 392px"><code>C&gt; Centered block</code></td><td style="width: 177px">Centered block</td></tr>
+<tr><td style="width: 392px"><code>C&gt;  Centered block</code></td><td style="width: 177px">Centered block</td></tr>
 </table>
 <p>Begin a line with <code>*****</code> to get a horzontal rule.</p>
 <p>Pipe Tables</p>
 <pre><code>| Head 1  |  Head 2  | Head 3  |
-|---------|----------|---------|
+|:--------|:--------:|---------|
 | datum 1 | datum 2  | datum 3 |
 | datum 4 | datum 5  | datum 6 |</code></pre><p>Grid tables</p>
-<pre><code>+----------+---------------+---------+
-| Head 1   |  Head 2       | Head 3  |
-+==========+===============+=========+
-| datum 1  | merged cell             |
-+----------+---------------+---------+
-| datum 2  | 1st paragraph | datum 3 |
-|          |               |         | 
-|          | 2nd paragraph |         |
-+----------+---------------+---------+
-</code></pre></details>
-<p>…or you can export GFM (Github Flavored Markdown), which does not have Hurmet’s extensions and which converts calculation zones to TeX.</p>
+<pre><code>+:---------:+-------------------------+
+| Heading 1 |  Merged Heading         |
++===========+=========================+
+| datum 1   | merged cell             |
++-----------+---------------+---------+
+| merged\   | datum 3       | datum 4 |
+| cell      +---------------+---------|
+|           | datum 5       | datum 6 |
++-----------+---------------+---------+
+| datum 7   | 1st paragraph | datum 8 |
+|           |               |         | 
+|           | 2nd paragraph |         |
++-----------+---------------+---------+
+</code></pre><p>Notes:</p>
+<ol><li><p>This list shows what Hurmet writes. Hurmet can also read <a href='https://commonmark.org/help/'>alternative</a> Markdown notations.</p>
+</li>
+<li><p>Grid tables are more powerful than pipe tables. Grid tables enable merged cells, block elements (such as lists) inside a cell, headings with multiple rows, tables without a heading, tables with only a heading.</p>
+<p>Hurmet grid tables accept <code>:</code> in the top border to set (left|center|right) justification.</p>
+</li>
+</ol>
+</details>
+<p>…or you can export GFM (GitHub Flavored Markdown), which does not have Hurmet’s extensions and which converts calculation zones to TeX.</p>
 <h3 id='tex'>TeX</h3>
 <p>Besides its calculation cells, Hurmet also has cells that emulate the math mode of <math><mrow><mtext>T</mtext><mspace width="-0.1667em" style="margin-left:-0.1667em;"></mspace><mpadded voffset="-0.2155em" height="-0.2155em" depth="+0.2155em"><mstyle scriptlevel="0" displaystyle="false"><mtext>E</mtext></mstyle></mpadded><mspace width="-0.125em" style="margin-left:-0.125em;"></mspace><mtext>X</mtext></mrow></math> (pronounced <em>tech</em>). These cells display, but do not calculate, math. You can create a TeX cell by clicking the <img src="data:image/svg+xml;utf8,%3Csvg height='16' width='16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M.8 4.5V.3c.1-.5.6-.2 1-.3h12.8c.4.2.2.7.3 1v3.5c-.4.7-1.1-.1-1-.7a4 4 0 0 0-2.7-2.7C10.8 1 9.8.6 9.7 1v12.8c0 .8.3 1.5 1.2 1.3.6-.2 1.6.5.8.9H3.9c-.8-.6.4-1 1-.9 1 .2 1-.8 1-1.6V.8c-1.2.2-2.6.5-3.4 1.5-.7.7-.8 1.6-1 2.4-.2.2-.6.1-.7-.2ZM2.6 1c.4-.2.3-.2 0-.2h-1V2ZM9 7.8v-7H6.8l-.1 13.5c.1.4-.4 1 .2.9H9c-.3-.5.1-1.2 0-1.7Zm4.8-6.1c.1 0 .4.5.3 0V.9h-1.3l1 .9z'/%3E%3C/svg%3E" alt="T"> button. Type <strong>Enter</strong> to save the cell.</p>
 <p>To create a cell in TeX display mode, first change the paragraph format to center-justified, then create the cell.</p>
@@ -133,8 +145,8 @@ return 3</code></pre></td></tr>
 </div>
 <dt id='multiplication'>Multiplication</dt>
 <dd><p>Hurmet accepts several multiplication syntaxes. If <math><mrow><mi>a</mi><mo>=</mo></mrow><mrow><mn>7.1</mn></mrow></math>, then the following all give the same result:</p>
-<p>i&gt; <math><mrow><mn>2</mn><mo>×</mo></mrow><mrow><mn>7.1</mn></mrow></math><br>   <math><mrow><mn>2</mn><mo>*</mo></mrow><mrow><mn>7.1</mn></mrow></math><br>   <math><mrow><mn>2</mn><mo>⋅</mo></mrow><mrow><mn>7.1</mn></mrow></math><br>   <math><mrow><mn>2</mn><mspace width="0.1667em"></mspace><mi>a</mi></mrow></math><br>   <math><mrow><mo form="prefix" stretchy="false">(</mo><mn>2</mn><mo form="postfix" stretchy="false">)</mo><mo form="prefix" stretchy="false">(</mo><mn>7.1</mn><mo form="postfix" stretchy="false">)</mo></mrow></math></p>
-<p>To obtain the character <math><mo>×</mo></math>, type xx and hit the space bar. Auto-correct will give you an <math><mo>×</mo></math>.</p>
+<div class="indented"><p><math><mrow><mn>2</mn><mo>×</mo></mrow><mrow><mn>7.1</mn></mrow></math><br><math><mrow><mn>2</mn><mo>*</mo></mrow><mrow><mn>7.1</mn></mrow></math><br><math><mrow><mn>2</mn><mo>⋅</mo></mrow><mrow><mn>7.1</mn></mrow></math><br><math><mrow><mn>2</mn><mspace width="0.1667em"></mspace><mi>a</mi></mrow></math><br><math><mrow><mo form="prefix" stretchy="false">(</mo><mn>2</mn><mo form="postfix" stretchy="false">)</mo><mo form="prefix" stretchy="false">(</mo><mn>7.1</mn><mo form="postfix" stretchy="false">)</mo></mrow></math></p>
+</div><p>To obtain the character <math><mo>×</mo></math>, type xx and hit the space bar. Auto-correct will give you an <math><mo>×</mo></math>.</p>
 <p>A space between variables acts as a multiplication operator.</p>
 </dd>
 <dt id='roots'>Roots</dt>
@@ -162,8 +174,8 @@ return 3</code></pre></td></tr>
 </dd>
 <dt id='accents-and-primes'>Accents and Primes</dt>
 <dd><p>To write an accent above a single-letter variable, write the accent name and hit the space bar for an auto-correction. Examples:</p>
-<p>i&gt; <code>y bar</code> ↦ <math><mover><mi>y</mi><mo stretchy="false" style="math-style:normal;math-depth:0;">‾</mo></mover></math><br>   <code>θ hat</code> ↦ <math><mover><mi>θ</mi><mo stretchy="false" style="math-style:normal;math-depth:0;">^</mo></mover></math><br>   <code>P vec</code> ↦ <math><mover><mi>P</mi><mo stretchy="false" style="transform:scale(0.75) translate(10%, 30%);">→</mo></mover></math><br>   <code>x dot</code> ↦ <math><mover><mi>x</mi><mo stretchy="false" style="math-style:normal;math-depth:0;">˙</mo></mover></math></p>
-<p>More detail <a href='#identifiers'>here</a>.</p>
+<div class="indented"><p><code>y bar</code> ↦ <math><mover><mi>y</mi><mo stretchy="false" style="math-style:normal;math-depth:0;">‾</mo></mover></math><br><code>θ hat</code> ↦ <math><mover><mi>θ</mi><mo stretchy="false" style="math-style:normal;math-depth:0;">^</mo></mover></math><br><code>P vec</code> ↦ <math><mover><mi>P</mi><mo stretchy="false" style="transform:scale(0.75) translate(10%, 30%);">→</mo></mover></math><br><code>x dot</code> ↦ <math><mover><mi>x</mi><mo stretchy="false" style="math-style:normal;math-depth:0;">˙</mo></mover></math></p>
+</div><p>More detail <a href='#identifiers'>here</a>.</p>
 <p>To write a prime, type two apostrophes (aka single quotation marks) and hit the space bar. So, <code>f&#x27;&#x27;</code> will result in <math><msup><mi>f</mi><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msup></math></p>
 </dd>
 </div>
@@ -200,7 +212,7 @@ return 3</code></pre></td></tr>
 <tr><td><code>x_(a+b)</code></td><td><math><msub><mi>x</mi><mrow><mi>a</mi><mo>+</mo><mi>b</mi></mrow></msub></math></td><td><code>[1..4] = ?</code></td><td><math><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center center center center"><mtr><mtd><mn>1</mn></mtd><mtd><mn>2</mn></mtd><mtd><mn>3</mn></mtd><mtd><mn>4</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></math></td></tr>
 <tr><td><code>x′</code></td><td><math><msup><mi>x</mi><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msup></math></td><td><code>[1..2..5] = ?</code></td><td><math><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center center center"><mtr><mtd><mn>1</mn></mtd><mtd><mn>3</mn></mtd><mtd><mn>5</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></math></td></tr>
 <tr><td><code>|x|  ‖x‖</code></td><td><math><mrow><mi>|</mi><mi>x</mi><mi>|</mi><mtext> </mtext><mtext> </mtext><mtext> </mtext><mi>‖</mi><mi>x</mi><mi>‖</mi></mrow></math></td><td><code>{a if b;</code> <br><code>c otherwise}</code></td><td><math><mrow><mo fence="true" form="prefix">{</mo><mtable class="tml-cases"><mtr><mtd><mi>a</mi></mtd><mtd><mrow><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">f</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mi>b</mi></mrow></mtd></mtr><mtr><mtd><mi>c</mi></mtd><mtd><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">t</mi></mrow><mrow><mi mathvariant="normal">h</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">w</mi></mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">s</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow></mtd></mtr></mtable><mo fence="true" form="postfix"></mo></mrow></math></td></tr>
-<tr><td><code>A--&gt;note B</code></td><td><math><mrow><mi>A</mi><mrow><mspace width="0.2778em"></mspace><munderover><mo stretchy="true" minsize="1.75em" lspace="0" rspace="0">→</mo><mspace width="2.5000em"></mspace><mrow><mspace width="0.4286em"></mspace><mrow><mrow><mi mathvariant="normal">n</mi></mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">t</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow></mrow><mspace width="0.4286em"></mspace></mrow></munderover><mspace width="0.2778em"></mspace></mrow><mi>B</mi></mrow></math></td><td rowspan="2"><code>`` | dia | area</code> <br><code>| in | in²</code> <br><code>#3 | 0.375 | 0.11</code> <br><code>#4 | 0.5   | 0.2 ``</code></td><td rowspan="2"><math><mtable columnalign="left right right" class="tml-array"><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mrow></mrow></mtd><mtd style="text-align:-webkit-right;"><mtext>dia</mtext></mtd><mtd style="text-align:-webkit-right;"><mtext>area</mtext></mtd></mtr><mtr class="tml-hline-solid"><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mrow></mrow></mtd><mtd style="text-align:-webkit-right;"><mtext>in</mtext></mtd><mtd style="text-align:-webkit-right;"><msup><mtext>in</mtext><mn>2</mn></msup></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>#3</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>0.375</mn></mtd><mtd style="text-align:-webkit-right;"><mn>0.11</mn></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>#4</mtext></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>0.5</mn><mphantom><mn>00</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>0.2</mn><mphantom><mn>0</mn></mphantom></mrow></mtd></mtr></mtable></math></td></tr>
+<tr><td><code>A--&gt;note B</code></td><td><math><mrow><mi>A</mi><mrow><mspace width="0.2778em"></mspace><munderover><mo stretchy="true" minsize="1.75em" lspace="0" rspace="0">→</mo><mspace width="2.5000em"></mspace><mrow><mspace width="0.4286em"></mspace><mrow><mrow><mi mathvariant="normal">n</mi></mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">t</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow></mrow><mspace width="0.4286em"></mspace></mrow></munderover><mspace width="0.2778em"></mspace></mrow><mi>B</mi></mrow></math></td><td rowspan="2"><code>``#size	dia	area</code> <br><code>in 	in²</code> <br><code>#3 	0.375  	0.11</code><br><code>#4 	0.5    	0.2 ``</code></td><td rowspan="2"><math><mtable columnalign="left right right" class="tml-array"><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>size</mtext></mtd><mtd style="text-align:-webkit-right;"><mtext>dia</mtext></mtd><mtd style="text-align:-webkit-right;"><mtext>area</mtext></mtd></mtr><mtr class="tml-hline-solid"><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mrow></mrow></mtd><mtd style="text-align:-webkit-right;"><mtext>in</mtext></mtd><mtd style="text-align:-webkit-right;"><msup><mtext>in</mtext><mn>2</mn></msup></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>#3</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>0.375</mn></mtd><mtd style="text-align:-webkit-right;"><mn>0.11</mn></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>#4</mtext></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>0.5</mn><mphantom><mn>00</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>0.2</mn><mphantom><mn>0</mn></mphantom></mrow></mtd></mtr></mtable></math></td></tr>
 <tr><td><code>\red(&quot;ng&quot;)</code></td><td><math><mrow><mtext style="color:#ff0000;">ng</mtext></mrow></math></td></tr>
 </table>
 <p>Calculation cells also support many of the math-mode TeX functions supported by <a href='https://temml.org/docs/en/supported.html'>Temml</a>. Put function arguments between parentheses, not braces, as in <code>\cancel(5)</code> instead of <code>\cancel{5}</code>.</p>
@@ -255,18 +267,10 @@ return 3</code></pre></td></tr>
 <th>Display Selector for Unit-Aware Calculation</th>
 <th> Displays:</th>
 </tr>
-<tr><td><div class="indented"><p>?</p>
-</div></td><td><div class="indented"><p>??</p>
-</div></td><td>Entire calculation, including the result and a blue echo of the expression displaying the value plugged in to each variable.</td></tr>
-<tr><td><div class="indented"><p>%</p>
-</div></td><td><div class="indented"><p>%%</p>
-</div></td><td>Omits blue echo.</td></tr>
-<tr><td><div class="indented"><p>@</p>
-</div></td><td><div class="indented"><p>@@</p>
-</div></td><td>Displays only the result, like a spreadsheet cell.</td></tr>
-<tr><td><div class="indented"><p>!</p>
-</div></td><td><div class="indented"><p>!!</p>
-</div></td><td>Omits the blue echo and the result.<br>Valid only when the result is a data frame.</td></tr>
+<tr><td>       ?</td><td>      ??</td><td>Entire calculation, including the result and a blue echo of the expression displaying the value plugged in to each variable.</td></tr>
+<tr><td>       %</td><td>      %%</td><td>Omits blue echo.</td></tr>
+<tr><td>       @</td><td>     @@</td><td>Displays only the result, like a spreadsheet cell.</td></tr>
+<tr><td>       !</td><td>      !!</td><td>Omits the blue echo and the result.<br>Valid only when the result is a data frame.</td></tr>
 </table>
 <div id="accessor-container">
 <h4 id='accessors'>Accessors</h4>
@@ -314,18 +318,10 @@ return 3</code></pre></td></tr>
 <th>Display Selector for Unit-Aware Calculation</th>
 <th> Displays:</th>
 </tr>
-<tr><td><div class="indented"><p>?</p>
-</div></td><td><div class="indented"><p>??</p>
-</div></td><td>Entire calculation, including the result and a blue echo of the expression displaying the value plugged in to each variable.</td></tr>
-<tr><td><div class="indented"><p>%</p>
-</div></td><td><div class="indented"><p>%%</p>
-</div></td><td>Omits blue echo.</td></tr>
-<tr><td><div class="indented"><p>@</p>
-</div></td><td><div class="indented"><p>@@</p>
-</div></td><td>Displays only the result, like a spreadsheet cell.</td></tr>
-<tr><td><div class="indented"><p>!</p>
-</div></td><td><div class="indented"><p>!!</p>
-</div></td><td>Omits the blue echo and the result.<br>Valid only when the result is a data frame.</td></tr>
+<tr><td>       ?</td><td>      ??</td><td>Entire calculation, including the result and a blue echo of the expression displaying the value plugged in to each variable.</td></tr>
+<tr><td>       %</td><td>      %%</td><td>Omits blue echo.</td></tr>
+<tr><td>       @</td><td>     @@</td><td>Displays only the result, like a spreadsheet cell.</td></tr>
+<tr><td>       !</td><td>      !!</td><td>Omits the blue echo and the result.<br>Valid only when the result is a data frame.</td></tr>
 </table>
 <p>For an engineer like me, the most common display selector is <strong>??</strong>. I almost always want to see the entire calculation. Seeing the expression and the plugged-in values helps me to avoid the kind of unseen <a href='http://www.eusprig.org/horror-stories.htm'>errors</a> that creep into spreadsheet calculations. And it makes the calculation reviewable by a second set of eyes.</p>
 <p>A doubled selector will prompt a <a href='#unit-aware-calculations'>unit-aware calculation</a>. After you try them, you may wonder how you ever did without them.</p>
@@ -389,11 +385,11 @@ a[5..]    # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong><
 <dd><p>Enter as integers (33), decimals (2.45), percentages (3.2%), scientific notation (3.1e4), mixed fractions (3 ⁷⁄₈) or hexadecimal (0x2A).</p>
 </dd>
 <p><img src="images/NumberRailroad.svg" alt="number" id="number-rr" width="650"></p>
-<div class="indented"><p>Notice that a number literal must begin and end with a numeral, not a decimal symbol. Hurmet will not recognize <code>5.</code> as a number.</p>
-<p>Hurmet’s default decimal symbol is a dot. You can choose instead to enter numbers with a decimal comma via a drop-down menu in the <strong>Doc</strong> menu. Numbers are never entered with a thousands separator, but they can be <em>displayed</em> with one.</p>
-<p>Hurmet always saves a decimal symbol as a dot. It’s only the display that changes.</p>
-<p>While calculations are underway, Hurmet holds every number in memory in rational number format. The numerator and denominator are each integers of arbitrary length. So Hurmet can work precisely with numbers like 0.1 and 0¹⁄₃. Trignonometry and roots are done in double-precision floating point, good to about 15 significant digits.</p>
-</div><dt id='complex-number'>Complex Number</dt>
+<p>    Notice that a number literal must begin and end with a numeral, not a decimal     symbol. Hurmet will not recognize <code>5.</code> as a number.</p>
+<p>    Hurmet’s default decimal symbol is a dot. You can choose instead to enter     numbers with a decimal comma via a drop-down menu in the <strong>Doc</strong> menu. Numbers are     never entered with a thousands separator, but they can be <em>displayed</em> with one.</p>
+<p>    Hurmet always saves a decimal symbol as a dot. It’s only the display that changes.</p>
+<p>    While calculations are underway, Hurmet holds every number in memory in rational     number format. The numerator and denominator are each integers of arbitrary     length. So Hurmet can work precisely with numbers like 0.1 and 0¹⁄₃.     Trignonometry and roots are done in double-precision floating point, good to     about 15 significant digits.</p>
+<dt id='complex-number'>Complex Number</dt>
 <dd><p>One can write a complex number in two forms:</p>
 <ul><li><p><math><mrow><mi>a</mi><mo>+</mo></mrow><mrow><mi>j</mi><mtext> </mtext><mi>b</mi></mrow></math>    The letter “<math><mi>j</mi></math>” is identical to <math><msqrt><mrow><mtext>-</mtext><mn>1</mn></mrow></msqrt></math> by Hurmet definition. Be sure to write a space after <math><mi>j</mi></math>.</p>
 </li>
@@ -402,8 +398,8 @@ a[5..]    # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong><
 </ul>
 <p>Also, the character <strong>°</strong> is now a unit name. So one can also write a polar notation as <math><mrow><mi>r</mi><mi>∠</mi><mi>θ</mi><mi>°</mi></mrow></math> and the phase angle will be unit-aware. The characters <code>ooo</code> will auto-correct into °</p>
 <p>Examples:</p>
-<p>i&gt;  <math><mrow><mi>z</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo>=</mo></mrow><mrow><mn>2</mn><mo>+</mo></mrow><mrow><mi>j</mi><mn>3</mn></mrow></math></p>
-<div class="indented"><p><math><mrow><mi>z</mi><msub><mrow></mrow><mtext>2</mtext></msub><mo>=</mo></mrow><mrow><mn>4</mn><mi>∠</mi><mn>30</mn><mi>°</mi></mrow></math></p>
+<div class="indented"><p><math><mrow><mi>z</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo>=</mo></mrow><mrow><mn>2</mn><mo>+</mo></mrow><mrow><mi>j</mi><mn>3</mn></mrow></math></p>
+<p><math><mrow><mi>z</mi><msub><mrow></mrow><mtext>2</mtext></msub><mo>=</mo></mrow><mrow><mn>4</mn><mi>∠</mi><mn>30</mn><mi>°</mi></mrow></math></p>
 <p><math><mrow><mi>z</mi><mo>=</mo></mrow><mrow><mi>z</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo>+</mo></mrow><mrow><mi>z</mi><msub><mrow></mrow><mtext>2</mtext></msub><mo>=</mo></mrow><mrow><mo form="prefix" stretchy="false" style="color:#0000FF;">(</mo><mn style="color:#0000FF;">2</mn><mo style="color:#0000FF;">+</mo></mrow><mrow><mi style="color:#0000FF;">j</mi><mn style="color:#0000FF;">3</mn><mo form="postfix" stretchy="false" style="color:#0000FF;">)</mo><mo style="color:#0000FF;">+</mo></mrow><mrow><mo form="prefix" stretchy="false" style="color:#0000FF;">(</mo><mn style="color:#0000FF;">4</mn><mi style="color:#0000FF;">∠</mi><mn style="color:#0000FF;">30</mn><mi style="color:#0000FF;">°</mi><mo form="postfix" stretchy="false" style="color:#0000FF;">)</mo><mo>=</mo></mrow><mrow><mn>5.46</mn><mo>+</mo></mrow><mrow><mrow><mrow><mi mathvariant="normal">j</mi></mrow><mn>5</mn></mrow></mrow></math></p>
 </div></dd>
 <dt id='unit'>Unit</dt>
@@ -457,8 +453,8 @@ a[5..]    # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong><
 </dd>
 <dt id='matrix-operations'>Matrix Operations</dt>
 <dd><p>All the usual math operators can be applied to a numeric matrix. The operators mostly work in an element-wise fashion. If you add a scalar to a matrix, or pass a matrix to most functions, Hurmet will do an element-by-element calculation and return a matrix, as in:</p>
-<p>i&gt; <math><mrow><mi>𝐡</mi><mo>=</mo></mrow><mrow><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center"><mtr><mtd><mn>5</mn></mtd></mtr><mtr><mtd><mn>10</mn></mtd></mtr><mtr><mtd><mn>15</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></mrow></math></p>
-<div class="indented"><p><math><mrow><mi>𝐱</mi><mo>=</mo></mrow><mrow><mn>2</mn><mspace width="0.1667em"></mspace><mi>𝐡</mi><mo>+</mo></mrow><mrow><mn>1</mn><mo>=</mo></mrow><mrow><mn style="color:#0000FF;">2</mn><mrow style="color:#0000FF;"><mo fence="true" form="prefix">[</mo><mtable columnalign="center"><mtr><mtd><mn>5</mn></mtd></mtr><mtr><mtd><mn>10</mn></mtd></mtr><mtr><mtd><mn>15</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow><mo style="color:#0000FF;">+</mo></mrow><mrow><mn style="color:#0000FF;">1</mn><mo style="color:black;">=</mo></mrow><mrow><mrow style="color:black;"><mo fence="true" form="prefix">[</mo><mtable columnalign="center"><mtr><mtd><mn>11</mn></mtd></mtr><mtr><mtd><mn>21</mn></mtd></mtr><mtr><mtd><mn>31</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></mrow></math></p>
+<div class="indented"><p><math><mrow><mi>𝐡</mi><mo>=</mo></mrow><mrow><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center"><mtr><mtd><mn>5</mn></mtd></mtr><mtr><mtd><mn>10</mn></mtd></mtr><mtr><mtd><mn>15</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></mrow></math></p>
+<p><math><mrow><mi>𝐱</mi><mo>=</mo></mrow><mrow><mn>2</mn><mspace width="0.1667em"></mspace><mi>𝐡</mi><mo>+</mo></mrow><mrow><mn>1</mn><mo>=</mo></mrow><mrow><mn style="color:#0000FF;">2</mn><mrow style="color:#0000FF;"><mo fence="true" form="prefix">[</mo><mtable columnalign="center"><mtr><mtd><mn>5</mn></mtd></mtr><mtr><mtd><mn>10</mn></mtd></mtr><mtr><mtd><mn>15</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow><mo style="color:#0000FF;">+</mo></mrow><mrow><mn style="color:#0000FF;">1</mn><mo style="color:black;">=</mo></mrow><mrow><mrow style="color:black;"><mo fence="true" form="prefix">[</mo><mtable columnalign="center"><mtr><mtd><mn>11</mn></mtd></mtr><mtr><mtd><mn>21</mn></mtd></mtr><mtr><mtd><mn>31</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></mrow></math></p>
 </div><p>Spreadsheet calculations can often be replaced by calulations using vectors, as above. When you really need to get things right, it’s great to be able to see the expression and all the plugged-in values.</p>
 <div id="matrix-mult">
 <p>Multiplication of two matrices is different than other operations. Mathematicians have several ways to multiply matrices. In Hurmet, you choose the type of multiplication by your choice of multiplication operator:</p>
@@ -481,31 +477,31 @@ a[5..]    # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong><
 <dt id='data-frame'>Data Frame</dt>
 <dd><p>A <em>data frame</em> is a two dimensional data structure that can be accessed with row names and column names or by row indices and column indices.</p>
 <p>Each datum can be a number, a string, <code>true</code>, or <code>false</code>. A missing item will be taken to be <code>undefined</code>. All data in a column must be of the same data type. A column of numbers can be assigned a unit of measure.</p>
-<p>Data frame literals are written between double backtick delimiters. The text between the backticks must be written in CSV format. (CSV once meant comma-separated values.)</p>
-<p>Instead of commas, Hurmet data is separated by either tabs or pipes, i.e., <code>|</code>. (But not both tabs and pipes in the same file.) Numbers must use a dot decimal. The second row may contain units of measure.</p>
-<p>Here’s an example of CSV input:</p>
+<p>Data frame literals are written between double backtick delimiters. The text between the backticks must be written in TSV format. (tab-separated values)</p>
+<p>Numbers must use a dot decimal. The second row may contain units of measure. Tabs and newlines are disallowed in data. Quotation marks, <code>&quot;</code>, have no special significance.</p>
+<p>Here’s an example of TSV input:</p>
 <pre><code>rebar =
-``|diameter|area
-  |in      |in²
-#3|0.375   |0.11
-#4|0.5     |0.2
-#5|0.625   |0.31
-#6|0.75    |0.44``</code></pre><p>… which renders as:</p>
-<p><math><mrow><mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow><mrow><mi mathvariant="normal">b</mi></mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow></mrow><mo>=</mo></mrow><mrow><mtable columnalign="left right right" class="tml-array"><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mrow></mrow></mtd><mtd style="text-align:-webkit-right;"><mtext>diameter</mtext></mtd><mtd style="text-align:-webkit-right;"><mtext>area</mtext></mtd></mtr><mtr class="tml-hline-solid"><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mrow></mrow></mtd><mtd style="text-align:-webkit-right;"><mtext>in</mtext></mtd><mtd style="text-align:-webkit-right;"><msup><mtext>in</mtext><mn>2</mn></msup></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>#3</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>0.375</mn></mtd><mtd style="text-align:-webkit-right;"><mn>0.11</mn></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>#4</mtext></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>0.5</mn><mphantom><mn>00</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>0.2</mn><mphantom><mn>0</mn></mphantom></mrow></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>#5</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>0.625</mn></mtd><mtd style="text-align:-webkit-right;"><mn>0.31</mn></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>#6</mtext></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>0.75</mn><mphantom><mn>0</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mn>0.44</mn></mtd></mtr></mtable></mrow></math></p>
-<p>Hurmet will use the first column as keys to the rest of each row if you leave the top left cell blank, or if the content of the top left cell is “name” or “item”.</p>
+``#size	diameter	area
+ 	in     	in²
+#3	0.375  	0.11
+#4	0.5    	0.2
+#5	0.625  	0.31
+#6	0.75   	0.44``</code></pre><p>… which renders as:</p>
+<p><math><mtable columnalign="left" rowspacing="0em"><mtr><mtd style="text-align:left;"><mrow><mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow><mrow><mi mathvariant="normal">b</mi></mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow></mrow><mo>=</mo></mrow><mo linebreak="newline"></mo></mtd></mtr><mtr><mtd style="text-align:left;"><mrow><mtable columnalign="left right right" class="tml-array"><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>size</mtext></mtd><mtd style="text-align:-webkit-right;"><mtext>diameter</mtext></mtd><mtd style="text-align:-webkit-right;"><mtext>area</mtext></mtd></mtr><mtr class="tml-hline-solid"><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mrow></mrow></mtd><mtd style="text-align:-webkit-right;"><mtext>in</mtext></mtd><mtd style="text-align:-webkit-right;"><msup><mtext>in</mtext><mn>2</mn></msup></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>#3</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>0.375</mn></mtd><mtd style="text-align:-webkit-right;"><mn>0.11</mn></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>#4</mtext></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>0.5</mn><mphantom><mn>00</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>0.2</mn><mphantom><mn>0</mn></mphantom></mrow></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>#5</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>0.625</mn></mtd><mtd style="text-align:-webkit-right;"><mn>0.31</mn></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>#6</mtext></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>0.75</mn><mphantom><mn>0</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mn>0.44</mn></mtd></mtr></mtable></mrow></mtd></mtr></mtable></math></p>
+<p>Hurmet will use the first column as keys to the rest of each row if the content of the top left cell begins with a hash tag, #.</p>
 <p>A dataframe literal can also show totals on the bottom line, via the <code>sumAbove()</code> function. So this input:</p>
-<pre><code>roof = ``Item               | weight
-                            | psf
-2 layers asphalt shingles   | 8.0
-1/2 inch plywood            | 1.5
-insulation, R19 fiberglass  | 0.6
-trusses at 16 inch o.c.     | 2.5
-5/8 inch gypsum board       | 2.5
-lights, HVAC, miscellaneous | 1.5
-total                       | sumAbove()``</code></pre><p>will render like this:<br><math><mrow><mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">f</mi></mrow></mrow><mo>=</mo></mrow><mrow><mtable columnalign="left right" class="tml-array"><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>Item</mtext></mtd><mtd style="text-align:-webkit-right;"><mtext>weight</mtext></mtd></mtr><mtr class="tml-hline-solid"><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mrow></mrow></mtd><mtd style="text-align:-webkit-right;"><mtext>psf</mtext></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>2 layers asphalt shingles</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>8.0</mn></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>1⁄2 inch plywood</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>1.5</mn></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>insulation, R19 fiberglass</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>0.6</mn></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>trusses at 16 inch o.c.</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>2.5</mn></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>5⁄8 inch gypsum board</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>2.5</mn></mtd></mtr><mtr class="tml-hline-solid"><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>lights, HVAC, miscellaneous</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>1.5</mn></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>total</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>16.6</mn></mtd></mtr></mtable></mrow></math></p>
-<p>Data frames can be quite large, so Hurmet has a <code>fetch(url)</code> function to load data from a remote CSV file into a data frame. Since Hurmet runs in a browser, the url must begin with <code>http:</code> or <code>https:</code></p>
+<pre><code>roof = ``#Item             	weight
+                           	psf
+2 layers asphalt shingles  	8.0
+1/2 inch plywood           	1.5
+insulation, R19 fiberglass 	0.6
+trusses at 16 inch o.c.    	2.5
+5/8 inch gypsum board      	2.5
+lights, HVAC, miscellaneous	1.5
+total                      	sumAbove()``</code></pre><p>will render like this:<br><math><mrow><mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">f</mi></mrow></mrow><mo>=</mo></mrow><mrow><mtable columnalign="left right" class="tml-array"><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>Item</mtext></mtd><mtd style="text-align:-webkit-right;"><mtext>weight</mtext></mtd></mtr><mtr class="tml-hline-solid"><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mrow></mrow></mtd><mtd style="text-align:-webkit-right;"><mtext>psf</mtext></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>2 layers asphalt shingles</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>8.0</mn></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>1⁄2 inch plywood</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>1.5</mn></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>insulation, R19 fiberglass</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>0.6</mn></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>trusses at 16 inch o.c.</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>2.5</mn></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>5⁄8 inch gypsum board</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>2.5</mn></mtd></mtr><mtr class="tml-hline-solid"><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>lights, HVAC, miscellaneous</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>1.5</mn></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>total</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>16.6</mn></mtd></mtr></mtable></mrow></math></p>
+<p>Data frames can be quite large, so Hurmet has a <code>fetch(url)</code> function to load data from a remote TSV file into a data frame. Since Hurmet runs in a browser, the url must begin with <code>http:</code> or <code>https:</code></p>
 <p>A fetch example:</p>
-<pre><code>wideFlanges = fetch(&quot;https://hurmet.app/example.csv&quot;) = !</code></pre><p>That example loads in this data:</p>
+<pre><code>wideFlanges = fetch(&quot;https://hurmet.app/example.tsv&quot;) = !</code></pre><p>That example loads in this data:</p>
 <p><math><mtable columnalign="left right right right right right right right" class="tml-array"><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>name</mtext></mtd><mtd style="text-align:-webkit-right;"><mtext>weight</mtext></mtd><mtd style="text-align:-webkit-right;"><mi>A</mi></mtd><mtd style="text-align:-webkit-right;"><mi>d</mi></mtd><mtd style="text-align:-webkit-right;"><mtext>bf</mtext></mtd><mtd style="text-align:-webkit-right;"><mtext>tw</mtext></mtd><mtd style="text-align:-webkit-right;"><mtext>Ix</mtext></mtd><mtd style="text-align:-webkit-right;"><mtext>Sx</mtext></mtd></mtr><mtr class="tml-hline-solid"><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mrow></mrow></mtd><mtd style="text-align:-webkit-right;"><mtext>lbf⁄ft</mtext></mtd><mtd style="text-align:-webkit-right;"><msup><mtext>in</mtext><mn>2</mn></msup></mtd><mtd style="text-align:-webkit-right;"><mtext>in</mtext></mtd><mtd style="text-align:-webkit-right;"><mtext>in</mtext></mtd><mtd style="text-align:-webkit-right;"><mtext>in</mtext></mtd><mtd style="text-align:-webkit-right;"><msup><mtext>in</mtext><mn>4</mn></msup></mtd><mtd style="text-align:-webkit-right;"><msup><mtext>in</mtext><mn>3</mn></msup></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>W14X90</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>90</mn></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>26.5</mn><mphantom><mn>0</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>14</mn><mphantom><mi>.</mi><mn>00</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>14.5</mn><mphantom><mn>0</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>0.44</mn><mphantom><mn>0</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>999</mn><mphantom><mi>.</mi><mn>0</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>143</mn><mphantom><mi>.</mi><mn>00</mn></mphantom></mrow></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>W12X65</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>65</mn></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>19.1</mn><mphantom><mn>0</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>12.1</mn><mphantom><mn>0</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>12</mn><mphantom><mi>.</mi><mn>00</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>0.39</mn><mphantom><mn>0</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>533</mn><mphantom><mi>.</mi><mn>0</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>87.9</mn><mphantom><mn>0</mn></mphantom></mrow></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>W10X49</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>49</mn></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>14.4</mn><mphantom><mn>0</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>10</mn><mphantom><mi>.</mi><mn>00</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>10</mn><mphantom><mi>.</mi><mn>00</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>0.34</mn><mphantom><mn>0</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>272</mn><mphantom><mi>.</mi><mn>0</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>54.6</mn><mphantom><mn>0</mn></mphantom></mrow></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>W8X31</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>31</mn></mtd><mtd style="text-align:-webkit-right;"><mn>9.13</mn></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>8</mn><mphantom><mi>.</mi><mn>00</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>8</mn><mphantom><mi>.</mi><mn>00</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mn>0.285</mn></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>110</mn><mphantom><mi>.</mi><mn>0</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>27.5</mn><mphantom><mn>0</mn></mphantom></mrow></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>W8X18</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>18</mn></mtd><mtd style="text-align:-webkit-right;"><mn>5.26</mn></mtd><mtd style="text-align:-webkit-right;"><mn>8.14</mn></mtd><mtd style="text-align:-webkit-right;"><mn>5.25</mn></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>0.23</mn><mphantom><mn>0</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mn>61.9</mn></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>15.2</mn><mphantom><mn>0</mn></mphantom></mrow></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>W6X15</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>15</mn></mtd><mtd style="text-align:-webkit-right;"><mn>4.43</mn></mtd><mtd style="text-align:-webkit-right;"><mn>5.99</mn></mtd><mtd style="text-align:-webkit-right;"><mn>5.99</mn></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>0.23</mn><mphantom><mn>0</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mn>29.1</mn></mtd><mtd style="text-align:-webkit-right;"><mn>9.72</mn></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>W4X13</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>13</mn></mtd><mtd style="text-align:-webkit-right;"><mn>3.83</mn></mtd><mtd style="text-align:-webkit-right;"><mn>4.16</mn></mtd><mtd style="text-align:-webkit-right;"><mn>4.06</mn></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>0.28</mn><mphantom><mn>0</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mn>11.3</mn></mtd><mtd style="text-align:-webkit-right;"><mn>5.46</mn></mtd></mtr></mtable></math></p>
 <p>As data frames go, that example is still pretty small. When I assign a data frame to a variable, I usually suppress its display by using the <strong>!</strong> display selector.</p>
 <p>I use a data frame most commonly by calling a row from it, like this:</p>
@@ -515,7 +511,7 @@ total                       | sumAbove()``</code></pre><p>will render like this:
 <p>Hurmet will return a <br> <math><mrow><mo fence="true" form="prefix">{</mo><mtable class="tml-cases"><mtr><mtd><mtext>simple type</mtext></mtd><mtd><mrow><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">f</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mtext>you call a single cell, as in df[1, 2]</mtext></mrow></mtd></mtr><mtr><mtd><mtext>column vector</mtext></mtd><mtd><mrow><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">f</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mtext>you call a column, as in df[,2]</mtext></mrow></mtd></mtr><mtr><mtd><mtext>data frame</mtext></mtd><mtd><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">t</mi></mrow><mrow><mi mathvariant="normal">h</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">w</mi></mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">s</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow></mtd></mtr></mtable><mo fence="true" form="postfix"></mo></mrow></math></p>
 <p>Dot notation, as in <code>wideFlanges.W10X49</code>, can be used only if the property name is a valid <a href='#identifiers'>identifier</a>.</p>
 <p>Here are calls that can return multiple values:<br>    <code>A, S_x = wideFlanges.W8X31[&quot;A&quot;, &quot;Sx&quot;] = !!</code>, or<br>    <code>A, S_x = wideFlanges[&quot;W8X31&quot;][&quot;A&quot;, &quot;Sx&quot;] = !!</code> Multiple returns must use the <code>!!</code> display selector, for now.</p>
-<p>If the data frame has only one row of data, a single accessor will call a datum.<br>Say the data frame is <math><mrow><mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">B</mi></mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow></mrow><mo>=</mo></mrow><mrow><mtable columnalign="left right right" class="tml-array"><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mrow></mrow></mtd><mtd style="text-align:-webkit-right;"><mtext>diameter</mtext></mtd><mtd style="text-align:-webkit-right;"><mtext>area</mtext></mtd></mtr><mtr class="tml-hline-solid"><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mrow></mrow></mtd><mtd style="text-align:-webkit-right;"><mtext>in</mtext></mtd><mtd style="text-align:-webkit-right;"><msup><mtext>in</mtext><mn>2</mn></msup></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>#4</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>0.5</mn></mtd><mtd style="text-align:-webkit-right;"><mn>0.2</mn></mtd></mtr></mtable></mrow></math> Then one can call <math><mrow><mi>A</mi><mo>=</mo></mrow><mrow><mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">B</mi></mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow></mrow><mi>.</mi><mtext>area</mtext><mo>=</mo></mrow><mrow><mn>0.2</mn><mspace width="0.2778em"></mspace><msup><mtext>in</mtext><mn>2</mn></msup></mrow></math></p>
+<p>If the data frame has only one row of data, a single accessor will call a datum.<br>Say the data frame is    <math><mrow><mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">B</mi></mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow></mrow><mo>=</mo></mrow><mrow><mtable columnalign="left right right" class="tml-array"><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>size</mtext></mtd><mtd style="text-align:-webkit-right;"><mtext>diameter</mtext></mtd><mtd style="text-align:-webkit-right;"><mtext>area</mtext></mtd></mtr><mtr class="tml-hline-solid"><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mrow></mrow></mtd><mtd style="text-align:-webkit-right;"><mtext>in</mtext></mtd><mtd style="text-align:-webkit-right;"><msup><mtext>in</mtext><mn>2</mn></msup></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>#4</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>0.5</mn></mtd><mtd style="text-align:-webkit-right;"><mn>0.2</mn></mtd></mtr></mtable></mrow></math><br>Then one can call <math><mrow><mi>A</mi><mo>=</mo></mrow><mrow><mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">B</mi></mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow></mrow><mi>.</mi><mtext>area</mtext><mo>=</mo></mrow><mrow><mn>0.2</mn><mspace width="0.2778em"></mspace><msup><mtext>in</mtext><mn>2</mn></msup></mrow></math></p>
 <p>Numeric cata frames can be multiplied by a unit-less scalar. No other math operations are supported for data frames.</p>
 <p>For structural engineers, I’ve put some useful data frames on GitHub. There are links <a href='#other-resources'>below</a>.</p>
 </dd>
@@ -589,8 +585,10 @@ total                       | sumAbove()``</code></pre><p>will render like this:
 <tr><td>≤</td><td></td><td>auto-correct: &lt;=</td></tr>
 <tr><td>≥</td><td></td><td>auto-correct: &gt;=</td></tr>
 <tr><td>∈</td><td><math><mrow><mi>c</mi><mo>∈</mo></mrow><mrow><mi>s</mi></mrow></math></td><td>Is an element of a matrix or<br>is a character of a string, or<br>is a property of a data frame.<br>auto-correct: \in</td></tr>
+<tr><td>∋</td><td><math><mrow><mi>d</mi><mo>∋</mo></mrow><mrow><mi>p</mi></mrow></math></td><td>d has a property named y<br>auto-correct: owns</td></tr>
 <tr><td>∉</td><td><math><mrow><mi>c</mi><mo>∉</mo></mrow><mrow><mi>s</mi></mrow></math></td><td>Is not an element of<br>auto-correct: \notin</td></tr>
-<tr><td>⊆</td><td><math><mrow><mi>c</mi><mo>⊆</mo></mrow><mrow><mi>s</mi></mrow></math></td><td>Is a subset of<br> auto-correct: \subseteq</td></tr>
+<tr><td>∌</td><td><math><mrow><mi>d</mi><mo>∌</mo></mrow><mrow><mi>p</mi></mrow></math></td><td>d does not have a property named y</td></tr>
+<tr><td>⊆</td><td><math><mrow><mi>c</mi><mo>⊆</mo></mrow><mrow><mi>s</mi></mrow></math></td><td>Is a subset of<br> auto-correct: \subseteq or contains</td></tr>
 <tr><td>⊈</td><td><math><mrow><mi>c</mi><mo>⊈</mo></mrow><mrow><mi>s</mi></mrow></math></td><td>Is not a subset of<br> auto-correct: \nsubseteq</td></tr>
 <tr><td>and</td><td>if <em>a</em> and <em>b</em></td><td>Logical and</td></tr>
 <tr><td>or</td><td></td><td>Logical or</td></tr>
@@ -735,8 +733,8 @@ total                       | sumAbove()``</code></pre><p>will render like this:
 <p>Now let’s return to the question that opened this section. We now know that multiplication has a higher precedence than addition, so the answer to our question above is: <math><mrow><mn>3</mn><mo>+</mo></mrow><mrow><mo form="prefix" stretchy="false">(</mo><mn>4</mn><mo>×</mo></mrow><mrow><mn>2</mn><mo form="postfix" stretchy="false">)</mo><mo>=</mo></mrow><mrow><mn>11</mn></mrow></math></p>
 <h2 id='if-expressions'>If Expressions</h2>
 <p>Hurmet If Expressions enable you to choose between expressions, based upon one or more conditions, as in:</p>
-<div class="indented"><p><math><mrow><mi>β</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo>=</mo></mrow><mrow><mrow><mo fence="true" form="prefix">{</mo><mtable class="tml-cases"><mtr><mtd><mn>0.85</mn></mtd><mtd><mrow><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">f</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mi>f</mi><msubsup><mrow></mrow><mtext>c</mtext><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msubsup><mo>≤</mo><mn>4</mn><mo separator="true" lspace="0em" rspace="0em">,</mo><mn>000</mn></mrow></mtd></mtr><mtr><mtd><mn>0.65</mn></mtd><mtd><mrow><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">f</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mi>f</mi><msubsup><mrow></mrow><mtext>c</mtext><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msubsup><mo>≥</mo><mn>8</mn><mo separator="true" lspace="0em" rspace="0em">,</mo><mn>000</mn></mrow></mtd></mtr><mtr><mtd><mrow><mn>0.85</mn><mo>−</mo><mstyle displaystyle="false" scriptlevel="0"><mfrac><mrow><mi>f</mi><msubsup><mrow></mrow><mtext>c</mtext><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msubsup><mo>−</mo><mn>4</mn><mo separator="true" lspace="0em" rspace="0em">,</mo><mn>000</mn></mrow><mrow><mn>20</mn><mo separator="true" lspace="0em" rspace="0em">,</mo><mn>000</mn></mrow></mfrac></mstyle></mrow></mtd><mtd><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">t</mi></mrow><mrow><mi mathvariant="normal">h</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">w</mi></mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">s</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow></mtd></mtr></mtable><mo fence="true" form="postfix"></mo></mrow></mrow></math></p>
-</div><p>This sort of expression is written between the delimiters: <code>{ }</code> The row separator symbol is <strong>;</strong> Hurmet will automatically align the logic words <strong>if</strong> and <strong>otherwise</strong>. So the example above can be coded this way:</p>
+<p>   <math><mrow><mi>β</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo>=</mo></mrow><mrow><mrow><mo fence="true" form="prefix">{</mo><mtable class="tml-cases"><mtr><mtd><mn>0.85</mn></mtd><mtd><mrow><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">f</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mi>f</mi><msubsup><mrow></mrow><mtext>c</mtext><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msubsup><mo>≤</mo><mn>4</mn><mo separator="true" lspace="0em" rspace="0em">,</mo><mn>000</mn></mrow></mtd></mtr><mtr><mtd><mn>0.65</mn></mtd><mtd><mrow><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">f</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mi>f</mi><msubsup><mrow></mrow><mtext>c</mtext><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msubsup><mo>≥</mo><mn>8</mn><mo separator="true" lspace="0em" rspace="0em">,</mo><mn>000</mn></mrow></mtd></mtr><mtr><mtd><mrow><mn>0.85</mn><mo>−</mo><mstyle displaystyle="false" scriptlevel="0"><mfrac><mrow><mi>f</mi><msubsup><mrow></mrow><mtext>c</mtext><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msubsup><mo>−</mo><mn>4</mn><mo separator="true" lspace="0em" rspace="0em">,</mo><mn>000</mn></mrow><mrow><mn>20</mn><mo separator="true" lspace="0em" rspace="0em">,</mo><mn>000</mn></mrow></mfrac></mstyle></mrow></mtd><mtd><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">t</mi></mrow><mrow><mi mathvariant="normal">h</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">w</mi></mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">s</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow></mtd></mtr></mtable><mo fence="true" form="postfix"></mo></mrow></mrow></math></p>
+<p>This sort of expression is written between the delimiters: <code>{ }</code> The row separator symbol is <strong>;</strong> Hurmet will automatically align the logic words <strong>if</strong> and <strong>otherwise</strong>. So the example above can be coded this way:</p>
 <pre><code>β_1 = {
     0.85                         if f_c′ ≤ 4000 ;
     0.65                         if f_c′ ≥ 8000 ;
@@ -805,7 +803,7 @@ total                       | sumAbove()``</code></pre><p>will render like this:
 <h2 id='numeral-display'>Numeral display</h2>
 <p>There are two aspects to how numbers are displayed: (1) decimal separators, and (2) rounding format for results.</p>
 <h3 id='decimal-separator'>Decimal separator</h3>
-<p>In some countries, the usual decimal separator symbol is a dot. Other countries use a comma. Hurmet starts up with a decimal separator based upon the browser’s language setting. Hurmet also allows the reader (not the document author) to select which display they prefer. Just use the use the drop-down menu labeled “●”.</p>
+<p>In some countries, the usual decimal separator symbol is a dot. Other countries use a comma. Hurmet starts up with a decimal separator based upon the browser’s language setting. Hurmet also allows the reader (not the document author) to select which display they prefer. Just use the use the drop-down menu labeled Doc | Set Decimal.</p>
 <p>The same menu choice also selects how Hurmet displays thousands separators.</p>
 <p>This menu choice changes nothing internally. It changes only the display. All Hurmet documents are saved with numbers that have a dot decimal and no thousands separator.</p>
 <h3 id='rounding-of-results'>Rounding of Results</h3>
@@ -980,35 +978,35 @@ end</code></pre><p>Other Hurmet calculation cells can then call the function:</p
 <h4 id='code-blocks'>Code Blocks</h4>
 <p>Inside a user-defined function, Hurmet supports code blocks and some additional control words. That is, words such as <em>if</em> and <em>else</em> can control execution of a <em>block</em> of statements, not just one expression. Statements between the <code>if</code> statement and an <code>end</code> statement are in the block. Example:</p>
 <pre><code>if a ≤ b
-   x = a + b²
-   y = 2 x
-end</code></pre><p>Indentation is not significant to the parser but is very useful to humans reading the code. I usually indent by three spaces.</p>
+    x = a + b²
+    y = 2 x
+end</code></pre><p>Indentation is not significant to the parser but is very useful to humans reading the code. I usually indent by four spaces.</p>
 <dl class="bold-term">
 <dt id='if-else'>if else</dt>
 <dd><p><em>if​​…else</em> control words make the execution of code blocks dependent on a condition. Example:</p>
 <pre><code>if a ≤ 4000
-   b = 0.85
+    b = 0.85
 else if a ≥ 8000
-   b = 0.65
+    b = 0.65
 else
-   b = 0.85 - (a - 4000)/20000
+    b = 0.85 - (a - 4000)/20000
 end</code></pre></dd>
 <dt id='while'>while</dt>
 <dd><p>A <em>while</em> loop executes a code block repeatedly, as long as a condition holds true. Example:</p>
 <pre><code>while b ≠ 0
-   h = b
-   b = a modulo b
-   a = h
+    h = b
+    b = a modulo b
+    a = h
 end</code></pre></dd>
 <dt id='for'>for</dt>
 <dd><p>A <em>for</em> loop iterates, executing a code block once with each element of a range or collection.</p>
 <p>Examples:</p>
 <table class="grid"><tr><td><pre><code>sum = 0
 for i in 1..10
-   sum = sum + i
+    sum = sum + i
 end</code></pre></td><td><pre><code>reverse = &quot;&quot;
 for ch in &quot;abcdef&quot;
-   reverse = ch &amp; reverse
+    reverse = ch &amp; reverse
 end</code></pre></td></tr>
 </table>
 <p><img src="images/for-loop-railroad.svg" alt="for index variable in range or matrix or string"></p>
@@ -1017,9 +1015,9 @@ end</code></pre></td></tr>
 <dt id='break'>break</dt>
 <dd><p>A loop can be terminated early via the <em>break</em> keyword. Example:</p>
 <pre><code>for i in 1..1000000
-   if i ≥ 2
-      break
-   end
+    if i ≥ 2
+        break
+    end
 end</code></pre></dd>
 <dt id='return'>return</dt>
 <dd><p>A <em>return</em> statement terminates the function.</p>
@@ -1045,7 +1043,7 @@ end</code></pre></dd>
 v = [4, 6, 8]
 
 function multiply(a, b)
-   return a × b
+    return a × b
 end</code></pre><p>A Hurmet document can load an entire module into one variable with a import statement. The following statement will import a file that contains the text above.</p>
 <p><code>mod = import(&quot;https://hurmet.app/smallModule.txt&quot;) = !</code></p>
 <p>After a module has been imported and loaded into a variable, its functions and values can be called by writing the module name and variable/function name in dot notation, as in:</p>
@@ -1084,7 +1082,7 @@ end</code></pre><p>A Hurmet document can load an entire module into one variable
 <p>Civil and structural engineers may also find these items useful:</p>
 <ul><li>Beam Analysis <a href='https://hurmet.app/ce/beamanalysis.html'>Diagram</a></li>
 <li>Concrete Column Interaction <a href='https://observablehq.com/@ronkok/concrete-column-interaction-diagram'>Diagram</a></li>
-<li>Fetchable CSV files with steel shape data: <a href='https://gist.githubusercontent.com/ronkok/a9f465e08be54cb4b46449768511acec/raw/AISC-v15-wideFlanges.csv'>wide flanges</a>, <a href='https://gist.githubusercontent.com/ronkok/24987345bc31878e624edc39bfa08827/raw/AISC-v15-channels.csv'>channels</a>, <a href='https://gist.githubusercontent.com/ronkok/b027d7c53951995db459989dca4d028c/raw/AISC-v15-HSS.csv'>HSS</a>, <a href='https://gist.githubusercontent.com/ronkok/0d5d5f487e7f59724d04345418e90c59/raw/AISC-v15-pipes.csv'>pipes</a>, <a href='https://gist.githubusercontent.com/ronkok/114013103c77f9d318d60a808b673001/raw/AISC-v15-tees.csv'>tees</a>, <a href='https://gist.githubusercontent.com/ronkok/2b886eb65012f2100fea4841e32d7eab/raw/AISC-v15-2L.csv'>double angles</a>, <a href='https://gist.githubusercontent.com/ronkok/e395e8ea5a2bee21f271e7c18098b69f/raw/AISC-v15-HP.csv'>HP</a>, and <a href='https://gist.githubusercontent.com/ronkok/4573be80587ef802131269ae5a829a01/raw/AISC-v15-MS.csv'>MS</a>.</li>
+<li>Fetchable TSV files with steel shape data: <a href='https://gist.githubusercontent.com/ronkok/d2ae5b3c74889e71c7bb8422b6017067/raw/AISC-v15-wideFlanges.tsv'>wide flanges</a>, <a href='https://gist.githubusercontent.com/ronkok/320677ddf9225afecf79bc831d5e1694/raw/AISC-v15-channels.tsv'>channels</a>, <a href='https://gist.githubusercontent.com/ronkok/a63582e3870c880981845631cbcb302a/raw/AISC-v15-HSS.tsv'>HSS</a>, <a href='https://gist.githubusercontent.com/ronkok/b7d6c68daeedb729ac23ab81cc77a154/raw/AISC-v15-pipes.tsv'>pipes</a>, <a href='https://gist.githubusercontent.com/ronkok/0c01e61709ade0b7738106462f831b45/raw/AISC-v15-tees.tsv'>tees</a>, <a href='https://gist.githubusercontent.com/ronkok/3a1e2d13672be26ef50e880347300536/raw/AISC-v15-2L.tsv'>double angles</a>, <a href='https://gist.githubusercontent.com/ronkok/4a489aa649aa955d069b26d761e6df5f/raw/AISC-v15-HP.tsv'>HP</a>, and <a href='https://gist.githubusercontent.com/ronkok/93927e8f227109cd9463ccd2409aa73e/raw/AISC-v15-MS.tsv'>MS</a>.</li>
 <li>Importable <a href='https://gist.githubusercontent.com/ronkok/f4d93a4921ebd24c9a40578831d926b7/raw/steelStrengthPerAISC360-16.txt'>Module</a> with functions for steel member strength.</li>
 </ul>
 <h2 id='credits'>Credits</h2>

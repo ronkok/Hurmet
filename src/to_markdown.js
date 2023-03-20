@@ -76,21 +76,21 @@ const hurmetNodes =  {
     if (state.isGFM) {
       state.renderContent(node)
     } else {
-      state.wrapBlock("   ", "   ", node, () => state.renderContent(node))
+      state.wrapBlock("    ", "i>  ", node, () => state.renderContent(node))
     }
   },
   centered_div(state, node) {
     if (state.isGFM) {
       state.renderContent(node)
     } else {
-      state.wrapBlock("   ", "C> ", node, () => state.renderContent(node))
+      state.wrapBlock("    ", "C>  ", node, () => state.renderContent(node))
     }
   },
   header(state, node) {
     if (state.isGFM) {
       state.renderContent(node)
     } else {
-      state.wrapBlock("   ", "H> ", node, () => state.renderContent(node))
+      state.wrapBlock("    ", "H>  ", node, () => state.renderContent(node))
     }
   },
   code_block(state, node) {
@@ -113,7 +113,7 @@ const hurmetNodes =  {
     state.closeBlock(node)
   },
   bullet_list(state, node) {
-    state.renderList(node, "  ", () => (node.attrs.bullet || "+") + " ")
+    state.renderList(node, "  ", () => (node.attrs.bullet || "*") + " ")
   },
   ordered_list(state, node) {
     let start = node.attrs.order || 1
@@ -589,7 +589,7 @@ export class MarkdownSerializerState {
     const colWidth = new Array(numCols).fill(0)
     const mergedCells = [];
     // Do we need a reStructuredText grid table? Or is a GFM pipe table enough?
-    let isRst = !isGFM && numRowsInHeading !== 1;
+    let isRst = !isGFM && numRowsInHeading > 1;
     let tableState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, this.isGFM)
     tableState.lineLimit = 25
     let i = 0
@@ -676,7 +676,7 @@ export class MarkdownSerializerState {
     // Now the third pass, in which we write output.
     this.write(isRst
       ? gridTable(table, numCols, numRowsInHeading, rowSpan, colSpan, colWidth, justify, delim)
-      : pipeTable(table, numCols, colWidth, justify, delim)
+      : pipeTable(table, numCols, colWidth, justify, delim, numRowsInHeading)
     )
     // Write the table's class name and column widths.
     let colWidths = ""
@@ -741,24 +741,32 @@ export class MarkdownSerializerState {
   }
 }
 
-const pipeTable = (table, numCols, colWidth, justify, delim) => {
+const pipeTable = (table, numCols, colWidth, justify, delim, numRowsInHeading) => {
   // Write a GFM pipe table
   let str = ""
-  for (let i = 0; i < table.length; i++) {
-    // Write a table row.
+  // Write heading
+  if (numRowsInHeading === 0) {
+    str += "\n" + "|".repeat(numCols + 1)
+  } else {
+    str += "\n|"
+    for (let j = 0; j < numCols; j++) {
+      str += " " + table[0][j][0] + " |"
+    }
+  }
+  // Write border
+  str += "\n|"
+  for (let j = 0; j < numCols; j++) {
+    let border = justify[j] === "c" ? ":" : "-"
+    border += "-".repeat(colWidth[j])
+    border += ("cr".indexOf(justify[j]) > -1 ? ":" : "-") + "|"
+    str += border
+  }
+  // Write body
+  const startRow = numRowsInHeading === 0 ? 0 : 1
+  for (let i = startRow; i < table.length; i++) {
     str += "\n" + (i === 0 ? "" : delim) + "|"
     for (let j = 0; j < numCols; j++) {
-      str +=" " + table[i][j][0] + " |"
-    }
-    if (i === 0) {
-      //
-      str += "\n|"
-      for (let j = 0; j < numCols; j++) {
-        let border = justify[j] === "c" ? ":" : "-"
-        border += "-".repeat(colWidth[j])
-        border += ("cr".indexOf(justify[j]) > -1 ? ":" : "-") + "|"
-        str += border
-      }
+      str += " " + table[i][j][0] + " |"
     }
   }
   return str
@@ -770,10 +778,20 @@ const gridTable = (table, numCols, numRowsInHeading, rowSpan, colSpan, colWidth,
   // Start by writing the top border. It differs slightly from rst.
   let topBorder = "+"
   for (let j = 0; j < numCols; j++) {
+    if (colSpan[0][j] === 0) { continue }
     // Set column justification with ":" characters, as in pipe tables.
     topBorder += justify[j] === "c" ? ":" : "-"
-    topBorder += "-".repeat(colWidth[j])
-    topBorder += ("cr".indexOf(justify[j]) > -1 ? ":" : "-") + "+"
+    if (colSpan[0][j] === 1) {
+      topBorder += "-".repeat(colWidth[j])
+      topBorder += ("cr".indexOf(justify[j]) > -1 ? ":" : "-")
+      topBorder += "+"
+    } else {
+      for (let k = 0; k < colSpan[0][j]; k++) {
+        topBorder += "-".repeat(colWidth[j + k] + 2)
+      }
+      topBorder = topBorder.slice(0, -1) + ("cr".indexOf(justify[j]) > -1 ? ":" : "-")
+      topBorder += "+"
+    }
   }
 
   // Set pointers frome the the grid table current location to the array of table content.
@@ -815,18 +833,18 @@ const gridTable = (table, numCols, numRowsInHeading, rowSpan, colSpan, colWidth,
         }
       } else if (rowIsReadyForBorder[endRow]) {
         // Write a border under one cell.
-        if (j === 0) {
-          str = delim + "+"
-        } else if (str.charAt(delim.length) === "|") {
-          // Character "+" indicates a row border location.
-          str = delim + "+" + str.slice(delim.length + 1)
-        }
-        const isHeading = numRowsInHeading === endRow + 1
+        if (j === 0) { str = delim + "+" }
+        const ch = numRowsInHeading === endRow + 1 ? "=" : "-"
         let border = "+"
         for (let k = 0; k < colSpan[current[j].row][j]; k++) {
-          border +=  (isHeading ? "=" : "-").repeat(colWidth[j + k] + 2) + "+"
+          border += ch.repeat(colWidth[j + k] + 2)
+          if (current[j].row < colSpan.length - 1 && j + k < colSpan[0].length - 1) {
+            border += colSpan[current[j].row + 1][j + k + 1] > 0 ? "+" : ch
+          } else {
+            border += "+"
+          }
         }
-        str = str.slice(0, -1) + border
+        str = str.slice(0, -1) + border.slice(0, -1) + "+"
       } else {
         // Other columns are still writing content from this table row.
         // We can't write a bottom border yet, so write a blank line into one cell.

@@ -15931,6 +15931,8 @@ const autoCorrections = {
   "\\alef": "ℵ",
   "\\subset": "⊂",
   "\\supset": "⊃",
+  "contains": "⊆",
+  "owns": "∋",
   "\\subseteq": "⊆",
   "\\nsubset": "⊄",
   "\\nsubseteq": "⊈",
@@ -16330,7 +16332,7 @@ const numeralFromSuperScript = ch => {
   }
 };
 
-// Trim spaces except for tabs. This is used to read tab-delimited CSV.
+// Trim spaces except for tabs. This is used to read tab-separated values (TSV).
 const leadingSpaceRegEx = /^[ \r\n\f]+/;
 const trailingSpaceRegEx = /[ \r\n\f]+$/;
 const tablessTrim = str => {
@@ -17244,11 +17246,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6064","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.5874","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.5037","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.5872","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -17257,10 +17259,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4643","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4584","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9824","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.3594","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9858","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.3117","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -17280,7 +17282,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.88258","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.87488","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -17288,23 +17290,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.3095","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.3387","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["3.8118","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["86.9375","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["3.9057","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["87.7870","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["144.70","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["140.57","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1398.24","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1389.84","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -17315,7 +17317,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["19.5428","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["19.9829","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -17345,7 +17347,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.0586","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0623","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -19154,8 +19156,8 @@ const range = (df, args, vars, unitAware) => {
 const numberRegEx$1 = new RegExp("^(?:=|" + Rnl.numberPattern.slice(1) + "$)");
 const mixedFractionRegEx = /^-?(?:[0-9]+(?: [0-9]+\/[0-9]+))$/;
 
-const dataFrameFromCSV = (str, vars) => {
-  // Load a CSV string into a data frame.
+const dataFrameFromTSV = (str, vars) => {
+  // Load a TSV string into a data frame.
   // Data frames are loaded column-wise. The subordinate data structures are:
   const data = [];    // where the main data lives, not including column names or units.
   const headings = [];                   // An array containing the column names
@@ -19165,8 +19167,6 @@ const dataFrameFromCSV = (str, vars) => {
   const dtype = [];                      // each column's Hurmet operand type
   const unitMap = Object.create(null);   // map from unit names to unit data
   let gotUnits = false;
-  // Determine if the file is tab separated or pipe separated
-  const sepChar = str.indexOf("\t") > -1 ? "\t" : "|";
 
   if (str.charAt(0) === "`") { str = str.slice(1); }
   let row = 0;
@@ -19206,8 +19206,6 @@ const dataFrameFromCSV = (str, vars) => {
     }
   };
 
-  const keyRegEx = /^(?:[Nn]ame|[Ii]tem|[Ll]able)$/;
-
   const harvest = (datum) => {
     // Load a datum into the dataTable
     datum = datum.trim();
@@ -19215,11 +19213,13 @@ const dataFrameFromCSV = (str, vars) => {
     if (row === 3 && col === 0) { checkForUnitRow(); }
 
     if (row === 0) {
+      if (col === 0 && (datum.length > 0 && datum.charAt(0) === "#")) {
+        // Create a rowMap. The first datum in each row is a key to the row.
+        rowMap = Object.create(null);
+        datum = datum.slice(1);
+      }
       headings.push(datum);
       columnMap[datum] = col;
-      if (col === 0 && (datum.length === 0 || keyRegEx.test(datum))) {
-        rowMap = Object.create(null);
-      }
     } else {
       if (row === 1) { data.push([]); } // First data row.
       if (datum === "sumAbove()") {
@@ -19239,61 +19239,17 @@ const dataFrameFromCSV = (str, vars) => {
   };
 
   // With the closure out of the way, let's load in data.
-  if (str.indexOf('"') === -1) {
-    // There are no quotation marks in the string. Use splits.
-    const lines = str.split(/\r?\n/g);
-    for (const line of lines) {
-      if (line.length > 0) {
-        col = 0;
-        const items = line.split(sepChar);
-        for (const item of items) { harvest(item.trim()); col++; }
-        row += 1;
-      }
+  // It's tab-separated values, so we can use splits to load in the data.
+  const lines = str.split(/\r?\n/g);
+  for (const line of lines) {
+    if (line.length > 0) {
+      col = 0;
+      const items = line.split('\t');
+      for (const item of items) { harvest(item.trim()); col++; }
+      row += 1;
     }
-    if (row === 3) { checkForUnitRow(); }
-
-  } else {
-    // The string contains at least one quotation mark, so we can't rely on splits.
-    // Much of this section comes from https://stackoverflow.com/a/14991797
-    let datum = "";
-    let inQuote = false;  // true means we're inside a quoted field
-    // iterate over each character, keep track of current row and column
-    for (let c = 0; c < str.length; c++) {
-      const cc = str[c];       // current character
-      const nc = str[c + 1];   // next character
-
-      // If the current character is a quotation mark, and we're inside a
-      // quoted field, and the next character is also a quotation mark,
-      // add a quotation mark to the current datum and skip the next character
-      if (cc === '"' && inQuote && nc === '"') { datum += cc; ++c; continue; }
-
-      // If it's just one quotation mark, begin/end quoted field
-      if (cc === '"') { inQuote = !inQuote; continue; }
-
-      // If it's a separator character and we're not in a quoted field, harvest the datum
-      if (cc === sepChar && !inQuote) { harvest(datum); datum = ""; ++col; continue }
-
-      // If it's a CRLF and we're not in a quoted field, skip the next character,
-      // harvest the datum, and move on to the next row and move to column 0 of that new row
-      if (cc === '\r' && nc === '\n' && !inQuote) {
-        harvest(datum); datum = ""; ++row; col = 0; ++c; continue
-      }
-
-      // If it's a CR or LF and we're not in a quoted field, skip the next character,
-      // harvest the datum, and move on to the next row and move to column 0 of that new row
-      if (cc === "\n" && !inQuote) {
-        harvest(datum); datum = ""; ++row; col = 0; ++c; continue
-      }
-      if (cc === "\r" && !inQuote) {
-        harvest(datum); datum = ""; ++row; col = 0; ++c; continue
-      }
-
-      // Otherwise, append the current character to the current datum
-      datum += cc;
-    }
-    if (datum.length > 0) { harvest(datum); }
-    if (row === 2) { checkForUnitRow(); }
   }
+  if (row === 3) { checkForUnitRow(); }
 
   // Data is loaded in. Finish by determining the operand type of each column
   for (let j = 0; j < data.length; j++) {
@@ -19460,16 +19416,17 @@ const append = (o1, o2, vars, unitAware) => {
 
 const quickDisplay = str => {
   // This is called from the lexer for a display that changes with every keystroke.
-  // It is a quick, rough approximation of a CSV parser.
-  // I use this partly for speed, partly because it is more tolerant of badly formatted CSV
-  // while the author is composing the CSV. This function doesn't spit up many error messages.
-  // Final rendering of a data frame does not use this function.
-  // Final rendering calls dataFrameFromCSV() and display() for accurate CSV parsing.
   if (str === "") { return "" }
-  str = addTextEscapes(str.trim());
-  const sepRegEx = str.indexOf("\t") > -1
-    ? / *\t */g
-    : / *\| */g;
+  str = str.trim();
+  let arrayFormat = "";
+  if (str.charAt(0) === "#") {
+    str = str.slice(1).trim();
+    arrayFormat = "l|cccccccccccccccccccccccc";
+  } else {
+    arrayFormat = "c";
+  }
+  str = addTextEscapes(str);
+  const sepRegEx = / *\t */g;
   const lines = str.split(/\r?\n/g);
   let tex = "";
   if (lines.length < 3) {
@@ -19479,7 +19436,7 @@ const quickDisplay = str => {
     }
     tex = tex.slice(0, -10) + "\\end{matrix}";
   } else {
-    tex = "\\begin{array}{l|cccccccccccccccccccccccc}\\text{";
+    tex = `\\begin{array}{${arrayFormat}}\\text{`;
     const cells = new Array(lines.length);
     for (let i = 0; i < lines.length; i++) {
       cells[i] = tablessTrim(lines[i]).split(sepRegEx);
@@ -19491,7 +19448,7 @@ const quickDisplay = str => {
       if (numberRegEx$1.test(cells[1][j])) { gotAnswer = true; break }
     }
     if (!gotAnswer) {
-      // line[1] had no numbers. If any numbers are ine line[2] then line[1] is units.
+      // line[1] had no numbers. If any numbers are in line[2] then line[1] is units.
       for (let j = 0; j < cells[2].length; j++) {
         if (numberRegEx$1.test(cells[2][j])) { gotUnits = true; break }
       }
@@ -19660,7 +19617,6 @@ const display$2 = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHead
         ? format(Rnl.fromString(datum), formatSpec, decimalFormat) + "&"
         : numberRegEx$1.test(datum)
         ? displayNum(datum, colInfo[j], cellInfo[j][i], decimalFormat) + "&"
-//        ? formattedDecimal(datum, decimalFormat) + "&"
         : datum === ""
         ? "&"
         : "\\text{" + addTextEscapes(datum) + "}&";
@@ -19682,34 +19638,34 @@ const displayAlt$1 = (df, formatSpec = "h3", omitHeading = false) => {
 
   if (!omitHeading) {
     // Write the column names
-    if (writeRowNums) { str += "|"; }
+    if (writeRowNums) { str += "\t"; }
     str += ( (df.headings[0] === "name" || df.headings[0] === "item")
       ? ""
-      : df.headings[0]) + "|";
+      : df.headings[0]) + "\t";
     for (let j = 1; j < numCols; j++) {
-      str += df.headings[j] + "|";
+      str += df.headings[j] + "\t";
     }
     str = str.slice(0, -1) + "\n";
   }
 
   // Write the unit names
   if (isNotEmpty(df.units)) {
-    if (writeRowNums) { str += "|"; }
+    if (writeRowNums) { str += "\t"; }
     for (let j = 0; j < numCols; j++) {
-      str += df.units[j] + "|";
+      str += df.units[j] + "\t";
     }
     str = str.slice(0, -1) + "\n";
   }
 
   // Write the data
   for (let i = 0; i < numRows; i++) {
-    if (writeRowNums) { str += String(i + 1) + "|"; }
+    if (writeRowNums) { str += String(i + 1) + "\t"; }
     for (let j = 0; j < numCols; j++) {
       const datum = df.data[j][i];
       if (mixedFractionRegEx.test(datum)) {
-        str += format(Rnl.fromString(datum), formatSpec, "100000.") + "|";
+        str += format(Rnl.fromString(datum), formatSpec, "100000.") + "\t";
       } else {
-        str += datum + "|";
+        str += datum + "\t";
       }
     }
     str = str.slice(0, -1) + "\n";
@@ -19722,7 +19678,7 @@ const displayAlt$1 = (df, formatSpec = "h3", omitHeading = false) => {
 
 const DataFrame = Object.freeze({
   append,
-  dataFrameFromCSV,
+  dataFrameFromTSV,
   dataFrameFromVectors,
   matrix2table,
   display: display$2,
@@ -20017,7 +19973,7 @@ const words = Object.freeze({
   "<-->": ["<-->", "\\xrightleftarrows", tt.UNARY, ""]
 });
 
-const miscRegEx = /^([/÷\u2215_:,;^+\\\-–−*×∘⊗⦼⊙√∛∜·.%∘|╏‖¦><=≈≟≠≡≤≥≅∈∉⊂⊄⊆⊈!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃∫∬∮∑([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7$£¥€₨₩₪]+)/;
+const miscRegEx = /^([/÷\u2215_:,;^+\\\-–−*×∘⊗⦼⊙√∛∜·.%∘|╏‖¦><=≈≟≠≡≤≥≅∈∉∋∌⊂⊄⊆⊈⊇⊉!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃∫∬∮∑([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7$£¥€₨₩₪]+)/;
 
 const miscSymbols = Object.freeze({
   //    input, output, type,  closeDelim
@@ -20082,8 +20038,12 @@ const miscSymbols = Object.freeze({
   "|==": ["|==", "\\models", tt.REL, ""],
   "∈": ["∈", "∈", tt.REL, ""],
   "∉": ["∉", "∉", tt.REL, ""],
+  "∋": ["∋", "∋", tt.REL, ""],
+  "∌": ["∌", "∌", tt.REL, ""],
   "⊆": ["⊆", "⊆", tt.REL, ""],
   "⊈": ["⊈", "⊈", tt.REL, ""],
+  "⊇": ["⊇", "⊇", tt.REL, ""],
+  "⊉": ["⊉", "⊉", tt.REL, ""],
   "▪": ["▪", "\\mathrel{▪}", tt.REL, ""],
 
   "!": ["!", "!", tt.FACTORIAL, ""],
@@ -20581,7 +20541,7 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
   }
 
   if (/^``/.test(str)) {
-    // inline CSV string between double back ticks, a data frame literal.
+    // inline TSV string between double back ticks, a data frame literal.
     pos = str.indexOf("`", (str.charAt(2) === "`" ? 3 : 2));
     const inputStr = (pos > 0 ? str.slice(2, pos) : str.slice(2));
     const st = tablessTrim(inputStr);
@@ -20589,7 +20549,7 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
     if (inRealTime) {
       tex = DataFrame.quickDisplay(st);
     } else {
-      const dataStructure = DataFrame.dataFrameFromCSV(st, {});
+      const dataStructure = DataFrame.dataFrameFromTSV(st, {});
       if (dataStructure.dtype === dt.DATAFRAME) {
         tex = DataFrame.display(dataStructure.value, "h3", decimalFormat);
       } else {
@@ -23337,6 +23297,7 @@ const compare = (op, x, y, yPrev) => {
 
     case "∈":
       if (typeof x === "string" && typeof y === "string") {
+        if (Array.from(x).length > 1) { return false }
         return y.indexOf(x) > -1
       } else if (Array.isArray(y) && !Array.isArray(x)) {
         for (let i = 0; i < y.length; i++) {
@@ -23347,23 +23308,38 @@ const compare = (op, x, y, yPrev) => {
         return y.has(x)
       } else if (typeof x === "string" && typeof y === "object" &&
                  Object.hasOwnProperty.call(y, "headings")) {
-        // Is x a property of dataframe x?
+        // Is x a property of dataframe y?
         return Boolean(y.headings.includes(x) ||
                       (y.rowMap && Object.hasOwnProperty.call(y.rowMap, x)))
       } else {
         return errorOprnd("NOT_ARRAY")
       }
 
-    case "⊆":
+    case "∋":
       if (typeof x === "string" && typeof y === "string") {
+        if (Array.from(x).length > 1) { return false }
         return y.indexOf(x) > -1
+      } else if (x instanceof Map) {
+        return x.has(y)
+      } else if (typeof x === "object" && typeof y === "string" &&
+                  Object.hasOwnProperty.call(x, "headings")) {
+        // Is y a property of dataframe x?
+        return Boolean(x.headings.includes(y) ||
+                      (x.rowMap && Object.hasOwnProperty.call(x.rowMap, y)))
+      } else {
+        return errorOprnd("NO_PROP", x.name)
+      }
+
+    case "⊇":
+      if (typeof x === "string" && typeof y === "string") {
+        return x.indexOf(y) > -1
       } else if (Array.isArray(x) && Array.isArray(y)) {
-        for (let i = 0; i < y.length; i++) {
+        for (let i = 0; i < x.length; i++) {
           // We test for a contiguous subset
-          if (equals(x[0], y[i])) {
-            if (i + x.length > y.length) { return false }
-            for (let j = 1; j < x.length; j++) {
-              if (!equals(x[j], y[i + j])) { return false }
+          if (equals(y[0], x[i])) {
+            if (i + y.length > x.length) { return false }
+            for (let j = 1; j < y.length; j++) {
+              if (!equals(y[j], x[i + j])) { return false }
             }
             return true
           }
@@ -23375,6 +23351,7 @@ const compare = (op, x, y, yPrev) => {
 
     case "∉":
       if (typeof x === "string" && typeof y === "string") {
+        if (Array.from(x).length === 1) { return false }
         return y.indexOf(x) === -1
       } else if (Array.isArray(y)) {
         for (let i = 0; i < y.length; i++) {
@@ -23390,6 +23367,21 @@ const compare = (op, x, y, yPrev) => {
                 (y.rowMap && Object.hasOwnProperty.call(y.rowMap, x)))
       } else {
         return errorOprnd("NOT_ARRAY")
+      }
+
+    case "∌":
+      if (typeof x === "string" && typeof y === "string") {
+        if (Array.from(y).length === 1) { return false }
+        return x.indexOf(y) === -1
+      } else if (x instanceof Map) {
+        return !x.has(y)
+      } else if (typeof x === "object" && typeof y === "string" &&
+                  Object.hasOwnProperty.call(x, "headings")) {
+        // Is y a property of dataframe x?
+        return !(x.headings.includes(y) ||
+                (x.rowMap && Object.hasOwnProperty.call(x.rowMap, y)))
+      } else {
+        return errorOprnd("NO_PROP", x.name)
       }
 
     case "⊈":
@@ -23416,6 +23408,29 @@ const compare = (op, x, y, yPrev) => {
         return errorOprnd("NOT_ARRAY")
       }
 
+    case "⊉":
+      if (typeof x === "string" && typeof y === "string") {
+        return x.indexOf(y) === -1
+      } else if (Array.isArray(x) && Array.isArray(y)) {
+        // We test for a contiguous subset
+        for (let i = 0; i < x.length; i++) {
+          if (equals(y[0], x[i])) {
+            if (i + y.length > x.length) { continue }
+            let provisional = true;
+            for (let j = 1; j < y.length; j++) {
+              if (!equals(y[j], x[i + j])) {
+                provisional = false;
+                continue
+              }
+            }
+            if (!provisional) { continue }
+            return true
+          }
+        }
+        return false
+      } else {
+        return errorOprnd("NOT_ARRAY")
+      }
   }
 };
 
@@ -24758,13 +24773,12 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
  *
  * ## Ways in which this syntax is more strict than Markdown.
  *
- * 1. Emphasis: _emphasis_ only. Asterisks do not create standard emphasis.
- * 2. Strong emphasis: **strong emphasis** only. Underlines do not create strong emphasis.
- * 3. Code blocks must be fenced by triple backticks.
+ * 1. **_bold-italic_** must use both * & _ delimiters. Hurmet will fail on ***what***.
+ * 2. Code blocks must be fenced by triple backticks.
  *    Indented text does not indicate a code block.
- * 4. A blank line must precede the beginning of a list, even a nested list.
- * 5. A hard line break is indicated when a line ends with "\". Double spaces do not count.
- * 6. "Shortcut" reference links [ref] are not recognized.
+ * 3. A blank line must precede the beginning of a list, even a nested list.
+ * 4. A hard line break is indicated when a line ends with "\". Double spaces do not count.
+ * 5. "Shortcut" reference links [ref] are not recognized.
  *    Implicit reference links are recognized and are expanded, see below.
  *
  * ## Extensions
@@ -24802,7 +24816,7 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
  *     Blurbs are denoted by a symbol in the left margin.
  *     Subsequent indented text blocks are children of the blurb.
  *     Blurb symbols:
- *          indented block (3+ spaces)
+ *       »  indented block
  *       C> Centered block
  *       H> print header element, <header>
  *       I> Information admonition (future)
@@ -24846,7 +24860,6 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
 
 
 const CR_NEWLINE_R = /\r\n?/g;
-const TAB_R = /\t/g;
 const FORMFEED_R = /\f/g;
 const CLASS_R = /(?:^| )\.([a-z-]+)(?: |$)/;
 const WIDTH_R = /(?:^| )width="?([\d.a-z]+"?)(?: |$)/;
@@ -24855,7 +24868,7 @@ const ID_R = /(?:^| )#([a-z-]+)(?: |$)/;
 
 // Turn various whitespace into easy-to-process whitespace
 const preprocess = function(source) {
-  return source.replace(CR_NEWLINE_R, "\n").replace(FORMFEED_R, "").replace(TAB_R, "    ");
+  return source.replace(CR_NEWLINE_R, "\n").replace(FORMFEED_R, "");
 };
 
 // Creates a match function for an inline scoped element from a regex
@@ -25023,7 +25036,9 @@ const TABLES = (function() {
       };
       if (myID) { table.attrs.id = myID; }
       if (myClass) { table.attrs.class = myClass; }
-      table.content.push(parsePipeTableRow(capture[1], parse$1, state, colWidths, true));
+      if (!/^\|+$/.test(capture[1])) {
+        table.content.push(parsePipeTableRow(capture[1], parse$1, state, colWidths, true));
+      }
       const tableBody = capture[3].trim().split("\n");
       tableBody.forEach(row => {
         table.content.push(parsePipeTableRow(row, parse$1, state, colWidths, false));
@@ -25034,13 +25049,15 @@ const TABLES = (function() {
   };
 
   const headerRegEx = /^\+:?=/;
+  const gridSplit = / *\n/g;
+  const cellCornerRegEx = /^\+[-=]+\+[+=-]+\+$/g;
 
   const parseGridTable = function() {
     return function(capture, state) {
       const topBorder = capture[2];
       const align = parseTableAlign(topBorder.slice(1));
       const [myClass, myID, colWidths] = tableDirectives(capture[3], align);
-      const lines = capture[1].slice(0, -1).split("\n");
+      const lines = capture[1].slice(0, -1).split(gridSplit);
 
       // Does the grid table contain a line separating header from table body?
       let headerExists = false;
@@ -25053,21 +25070,57 @@ const TABLES = (function() {
         }
       }
 
-      // Read the top & left borders to find the locations of the cell corners.
-      const xCorners = [0];
+      // Read the top & left borders to find a first draft of cell corner locations.
+      const colSeps = [0];
       for (let j = 1; j < topBorder.length; j++) {
-        const ch = topBorder.charAt(j);
-        // A "+" character indicates a column border.
-        if (ch === "+") { xCorners.push(j); }
+        if (topBorder.charAt(j) === "+") { colSeps.push(j); }
       }
-      const yCorners = [0];
+      const rowSeps = [0];
       for (let i = 1; i < lines.length; i++) {
-        const ch = lines[i].charAt(0);
-        if (ch === "+") { yCorners.push(i); }
+        if (lines[i].charAt(0) === "+") { rowSeps.push(i); }
       }
 
-      const numCols = xCorners.length - 1;
-      const numRows = yCorners.length - 1;
+      // Look for the cell corner locations that don't appear on top or left border
+      let rowSepIndex = 0;
+      while (rowSepIndex < rowSeps.length) {
+        // Find the next row separator
+        let nextRow = 0;
+        const isValid = new Array(colSeps.length).fill(true);
+        for (let i = rowSeps[rowSepIndex] + 1; i < lines.length; i++) {
+          for (let k = 0; k < colSeps.length; k++) {
+            if (!isValid[k]) { continue }
+            if ("+|".indexOf(lines[i][colSeps[k]]) === -1) { isValid[k] = false; continue }
+            if (lines[i][colSeps[k]] === "+") {
+              nextRow = i;
+              break
+            }
+          }
+          if (nextRow !== 0) { break }
+        }
+        if (!rowSeps.includes(nextRow)) {
+          rowSeps.splice(rowSepIndex + 1, 0, nextRow);
+        }
+
+        // Check the next horizontal border for new cell corners
+        rowSepIndex += 1;
+        const border = lines[nextRow];
+        for (let j = 0; j < colSeps.length - 1; j++) {
+          let cellBorder = border.slice(colSeps[j], colSeps[j + 1] + 1);
+          if (cellCornerRegEx.test(cellBorder)) {
+            cellBorder = cellBorder.slice(1, -1);
+            let pos = cellBorder.indexOf("+") + 1;
+            let k = 1;
+            while (pos > 0) {
+              colSeps.splice(j + k, 0, colSeps[j] + pos);
+              pos = cellBorder.indexOf("+", pos) + 1;
+              k += 1;
+            }
+          }
+        }
+      }
+
+      const numCols = colSeps.length - 1;
+      const numRows = rowSeps.length - 1;
       const gridTable = [];
 
       // Create default rows and cells. They may be merged later.
@@ -25084,14 +25137,14 @@ const TABLES = (function() {
           const cell = row[j];
           if (cell.rowspan === 0) { continue }
           cell.colspan = 1;
-          const lastTextRow = lines[yCorners[i + 1] - 1];
-          for (let k = j + 1; k < xCorners.length; k++) {
-            if (lastTextRow.charAt(xCorners[k]) === "|") { break }
+          const lastTextRow = lines[rowSeps[i + 1] - 1];
+          for (let k = j + 1; k < colSeps.length; k++) {
+            if (lastTextRow.charAt(colSeps[k]) === "|") { break }
             cell.colspan += 1;
             row[k].rowspan = 0;
           }
-          for (let k = i + 1; k < yCorners.length; k++) {
-            const ch = lines[yCorners[k]].charAt(xCorners[j] + 1);
+          for (let k = i + 1; k < rowSeps.length; k++) {
+            const ch = lines[rowSeps[k]].charAt(colSeps[j] + 1);
             if (ch === "-" || ch === "=") { break }
             cell.rowspan += 1;
             for (let jj = 0; jj < cell.colspan; jj++) {
@@ -25099,10 +25152,10 @@ const TABLES = (function() {
             }
           }
           // Now that we know the cell extents, get the cell contents.
-          const xStart = xCorners[j] + 2;
-          const xEnd = xCorners[j + cell.colspan] - 1;
-          const yStart = yCorners[i] + 1;
-          const yEnd = yCorners[i + cell.rowspan];
+          const xStart = colSeps[j] + 2;
+          const xEnd = colSeps[j + cell.colspan] - 1;
+          const yStart = rowSeps[i] + 1;
+          const yEnd = rowSeps[i + cell.rowspan];
           let str = "";
           for (let ii = yStart; ii < yEnd; ii++) {
             str += lines[ii].slice(xStart, xEnd).replace(/ +$/, "") + "\n";
@@ -25139,6 +25192,7 @@ const TABLES = (function() {
           if (state.inHtml && content.length === 1 && content[0].type === "paragraph") {
             content = content[0].content;
           }
+          if (content.length === 1 && content[0].type === "null") { content = []; }
           table.content[i].content.push({
             "type": cell.inHeader ? "table_header" : "table_cell",
             "attrs": {
@@ -25158,9 +25212,9 @@ const TABLES = (function() {
 
   return {
     parsePipeTable: parsePipeTable(),
-    PIPE_TABLE_REGEX: /^(\|.+)\n\|([-:]+[-| :]*)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
+    PIPE_TABLE_REGEX: /^(\|.*)\n\|([-:]+[-| :]*)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
     parseGridTable: parseGridTable(),
-    GRID_TABLE_REGEX: /^((\+(?:[-:=]+\+)+)\n(?:[+|][^\n]+[+|]\n)+)(?:\{([^\n}]+)\}\n)?\n*/
+    GRID_TABLE_REGEX: /^((\+(?:[-:=]+\+)+)\n(?:[+|][^\n]+[+|] *\n)+)(?:\{([^\n}]+)\}\n)?\n*/
   };
 })();
 
@@ -25227,7 +25281,7 @@ const parseTextMark = (capture, state, mark) => {
 };
 
 const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<!--[^>]+-->[^\n]*\n|<\/?(?:body|details|(div|input|label)(?: [^>]+)?|!DOCTYPE[a-z ]*|html[a-z ="]*|br|dl(?: class="[a-z-]+")?|li|main[a-z\- ="]*|nav|ol|ul(?: [^>]+)?)\/?>[^\n]*?(?:\n|$))/;
-const divType = { "C>": "centered_div", "H>": "header", "  ": "indented_div" };
+const divType = { "C>": "centered_div", "H>": "header", "i>": "indented_div" };
 
 // Rules must be applied in a specific order, so use a Map instead of an object.
 const rules = new Map();
@@ -25321,7 +25375,7 @@ rules.set("dd", {  // description details
 });
 rules.set("special_div", {
   isLeaf: false,
-  match: blockRegex(/^( {2,2}|C>|H>)( +)[\s\S]+?(?:\n{2,}(?! {2,2}\2)\n*|\s*$)/),
+  match: blockRegex(/^(i>|C>|H>)( +)[\s\S]+?(?:\n{2,}(?! {2,2}\2)\n*|\s*$)/),
   // indented or centered div, or <header>
   parse: function(capture, state) {
     const type = divType[capture[1]];
@@ -25467,9 +25521,7 @@ rules.set("escape", {
 rules.set("tableSeparator", {
   isLeaf: true,
   match: function(source, state) {
-    if (!state.inTable) {
-      return null;
-    }
+    if (!state.inTable) { return null }
     return /^ *\| */.exec(source);
   },
   parse: function() {
@@ -25564,16 +25616,16 @@ rules.set("code", {
 });
 rules.set("em", {
   isLeaf: true,
-  match: inlineRegex(/^_((?:\\[\s\S]|[^\\])+?)_/),
+  match: inlineRegex(/^([_*])(?!\s|\1)((?:\\[\s\S]|[^\\])+?)\1/),
   parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "em" )
+    return parseTextMark(capture[2], state, "em" )
   }
 });
 rules.set("strong", {
   isLeaf: true,
-  match: inlineRegex(/^\*\*(?=\S)((?:\\[\s\S]|\*(?!\*)|[^\s*\\]|\s(?!\*\*))+?)\*\*/),
+  match: inlineRegex(/^(\*\*|__)(?=\S)((?:\\[\s\S]|[^\\])+?)\1/),
   parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "strong" )
+    return parseTextMark(capture[2], state, "strong" )
   }
 });
 rules.set("strikethru", {
@@ -25786,7 +25838,9 @@ const populateTOC = ast => {
 
 const md2ast = (md, inHtml = false) => {
   const ast = parse$1(md, { inline: false, inHtml });
-  if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") { ast.shift(); }
+  if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") {
+    ast.shift();
+  }
   consolidate(ast);
   populateTOC(ast);
   return ast
@@ -26516,6 +26570,8 @@ const draw = Object.freeze({
  */
 
 // Some helper functions
+
+const setComparisons = ["∈", "∉", "∋", "∌", "⊆", "⊈", "⊇", "⊉"];
 
 const needsMap = (...args) => {
   for (let i = 0; i < args.length; i++) {
@@ -27500,8 +27556,12 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "!=":
         case "∈":
         case "∉":
+        case "∋":
+        case "∌":
         case "⊆":
-        case "⊈": {
+        case "⊈":
+        case "⊇":
+        case "⊉": {
           const o2 = stack.pop();
           const o1 = stack.pop();
           if (unitAware &&
@@ -27515,7 +27575,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           bool.unit = null;
           const prevValue = (o1.dtype & dt.BOOLEANFROMCOMPARISON) ? oPrev.value : undefined;
 
-          if (isIn(tkn, ["∈", "∉", "⊆", "⊈"])) {
+          if (setComparisons.includes(tkn)) {
             bool.value = compare(tkn, o1.value, o2.value, prevValue);
           } else {
             const [shape1, shape2, _] = binaryShapesOf(o1, o2);
@@ -28241,10 +28301,10 @@ const valueFromLiteral = (str, name, decimalFormat) => {
     }
 
   } else if (/^``/.test(str)) {
-    // A CSV between double back ticks.
-    // Read the CSV into a data frame.
+    // A TSV between double back ticks.
+    // Read the TSV into a data frame.
     str = tablessTrim(str.slice(2, -2));
-    const dataStructure = DataFrame.dataFrameFromCSV(str, {});
+    const dataStructure = DataFrame.dataFrameFromTSV(str, {});
     if (dataStructure.dtype === dt.DATAFRAME) {
       return [dataStructure.value, dataStructure.unit, dt.DATAFRAME,
         DataFrame.display(dataStructure.value, "h3", decimalFormat)]
@@ -28956,7 +29016,7 @@ const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
   attrs.name = entry.replace(/=.+$/, "").trim();
   let str = parse(entry.replace(/\s*=\s*[$$£¥\u20A0-\u20CF]?(?:!{1,2}).*$/, ""), decimalFormat);
   const url = urlFromEntry(entry);
-  if (/\.(?:csv|txt)$/.test(url)) {
+  if (/\.(?:tsv|txt)$/.test(url)) {
     // Shorten the URL.
     const fileName = url.replace(/.+\//, "");
     const match = textRegEx.exec(str);
@@ -28973,7 +29033,7 @@ const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
   }
   const data = importRegEx.test(entry)
     ? scanModule(text, decimalFormat)               // import code
-    : DataFrame.dataFrameFromCSV(text, hurmetVars);  // fetch data
+    : DataFrame.dataFrameFromTSV(text, hurmetVars);  // fetch data
 
   // Append the data to attrs
   attrs.value = data.value;
@@ -43594,21 +43654,21 @@ const hurmetNodes =  {
     if (state.isGFM) {
       state.renderContent(node);
     } else {
-      state.wrapBlock("   ", "   ", node, () => state.renderContent(node));
+      state.wrapBlock("    ", "i>  ", node, () => state.renderContent(node));
     }
   },
   centered_div(state, node) {
     if (state.isGFM) {
       state.renderContent(node);
     } else {
-      state.wrapBlock("   ", "C> ", node, () => state.renderContent(node));
+      state.wrapBlock("    ", "C>  ", node, () => state.renderContent(node));
     }
   },
   header(state, node) {
     if (state.isGFM) {
       state.renderContent(node);
     } else {
-      state.wrapBlock("   ", "H> ", node, () => state.renderContent(node));
+      state.wrapBlock("    ", "H>  ", node, () => state.renderContent(node));
     }
   },
   code_block(state, node) {
@@ -43631,7 +43691,7 @@ const hurmetNodes =  {
     state.closeBlock(node);
   },
   bullet_list(state, node) {
-    state.renderList(node, "  ", () => (node.attrs.bullet || "+") + " ");
+    state.renderList(node, "  ", () => (node.attrs.bullet || "*") + " ");
   },
   ordered_list(state, node) {
     let start = node.attrs.order || 1;
@@ -44107,7 +44167,7 @@ class MarkdownSerializerState {
     const colWidth = new Array(numCols).fill(0);
     const mergedCells = [];
     // Do we need a reStructuredText grid table? Or is a GFM pipe table enough?
-    let isRst = !isGFM && numRowsInHeading !== 1;
+    let isRst = !isGFM && numRowsInHeading > 1;
     let tableState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, this.isGFM);
     tableState.lineLimit = 25;
     let i = 0;
@@ -44194,7 +44254,7 @@ class MarkdownSerializerState {
     // Now the third pass, in which we write output.
     this.write(isRst
       ? gridTable(table, numCols, numRowsInHeading, rowSpan, colSpan, colWidth, justify, delim)
-      : pipeTable(table, numCols, colWidth, justify, delim)
+      : pipeTable(table, numCols, colWidth, justify, delim, numRowsInHeading)
     );
     // Write the table's class name and column widths.
     let colWidths = "";
@@ -44259,24 +44319,32 @@ class MarkdownSerializerState {
   }
 }
 
-const pipeTable = (table, numCols, colWidth, justify, delim) => {
+const pipeTable = (table, numCols, colWidth, justify, delim, numRowsInHeading) => {
   // Write a GFM pipe table
   let str = "";
-  for (let i = 0; i < table.length; i++) {
-    // Write a table row.
+  // Write heading
+  if (numRowsInHeading === 0) {
+    str += "\n" + "|".repeat(numCols + 1);
+  } else {
+    str += "\n|";
+    for (let j = 0; j < numCols; j++) {
+      str += " " + table[0][j][0] + " |";
+    }
+  }
+  // Write border
+  str += "\n|";
+  for (let j = 0; j < numCols; j++) {
+    let border = justify[j] === "c" ? ":" : "-";
+    border += "-".repeat(colWidth[j]);
+    border += ("cr".indexOf(justify[j]) > -1 ? ":" : "-") + "|";
+    str += border;
+  }
+  // Write body
+  const startRow = numRowsInHeading === 0 ? 0 : 1;
+  for (let i = startRow; i < table.length; i++) {
     str += "\n" + (i === 0 ? "" : delim) + "|";
     for (let j = 0; j < numCols; j++) {
-      str +=" " + table[i][j][0] + " |";
-    }
-    if (i === 0) {
-      //
-      str += "\n|";
-      for (let j = 0; j < numCols; j++) {
-        let border = justify[j] === "c" ? ":" : "-";
-        border += "-".repeat(colWidth[j]);
-        border += ("cr".indexOf(justify[j]) > -1 ? ":" : "-") + "|";
-        str += border;
-      }
+      str += " " + table[i][j][0] + " |";
     }
   }
   return str
@@ -44288,10 +44356,20 @@ const gridTable = (table, numCols, numRowsInHeading, rowSpan, colSpan, colWidth,
   // Start by writing the top border. It differs slightly from rst.
   let topBorder = "+";
   for (let j = 0; j < numCols; j++) {
+    if (colSpan[0][j] === 0) { continue }
     // Set column justification with ":" characters, as in pipe tables.
     topBorder += justify[j] === "c" ? ":" : "-";
-    topBorder += "-".repeat(colWidth[j]);
-    topBorder += ("cr".indexOf(justify[j]) > -1 ? ":" : "-") + "+";
+    if (colSpan[0][j] === 1) {
+      topBorder += "-".repeat(colWidth[j]);
+      topBorder += ("cr".indexOf(justify[j]) > -1 ? ":" : "-");
+      topBorder += "+";
+    } else {
+      for (let k = 0; k < colSpan[0][j]; k++) {
+        topBorder += "-".repeat(colWidth[j + k] + 2);
+      }
+      topBorder = topBorder.slice(0, -1) + ("cr".indexOf(justify[j]) > -1 ? ":" : "-");
+      topBorder += "+";
+    }
   }
 
   // Set pointers frome the the grid table current location to the array of table content.
@@ -44333,18 +44411,18 @@ const gridTable = (table, numCols, numRowsInHeading, rowSpan, colSpan, colWidth,
         }
       } else if (rowIsReadyForBorder[endRow]) {
         // Write a border under one cell.
-        if (j === 0) {
-          str = delim + "+";
-        } else if (str.charAt(delim.length) === "|") {
-          // Character "+" indicates a row border location.
-          str = delim + "+" + str.slice(delim.length + 1);
-        }
-        const isHeading = numRowsInHeading === endRow + 1;
+        if (j === 0) { str = delim + "+"; }
+        const ch = numRowsInHeading === endRow + 1 ? "=" : "-";
         let border = "+";
         for (let k = 0; k < colSpan[current[j].row][j]; k++) {
-          border +=  (isHeading ? "=" : "-").repeat(colWidth[j + k] + 2) + "+";
+          border += ch.repeat(colWidth[j + k] + 2);
+          if (current[j].row < colSpan.length - 1 && j + k < colSpan[0].length - 1) {
+            border += colSpan[current[j].row + 1][j + k + 1] > 0 ? "+" : ch;
+          } else {
+            border += "+";
+          }
         }
-        str = str.slice(0, -1) + border;
+        str = str.slice(0, -1) + border.slice(0, -1) + "+";
       } else {
         // Other columns are still writing content from this table row.
         // We can't write a bottom border yet, so write a blank line into one cell.
@@ -47970,9 +48048,9 @@ function buildInputRules(schema) {
 
 const codeJar = (editor, isMathPrompt) => {
   const options = {
-    tab: "   ",
+    tab: "    ",
     indentOn: /{$/,
-    catchTab: true,
+    catchTab: false,
     preserveIdent: true,
     addClosing: true
   };
