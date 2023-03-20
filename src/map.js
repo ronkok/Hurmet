@@ -90,11 +90,11 @@ const displayAlt = (result, formatSpec, decimalFormat, omitHeading = false) => {
   let topRow = ""
   let botRow = ""
   for (const [key, value] of mapValue.entries()) {
-    topRow += key + ' | '
-    botRow += format(value, formatSpec, decimalFormat) + " | "
+    topRow += key + '\t'
+    botRow += format(value, formatSpec, decimalFormat) + "\t"
   }
-  topRow = topRow.slice(0, -3)
-  botRow = botRow.slice(0, -3)
+  topRow = topRow.slice(0, -1)
+  botRow = botRow.slice(0, -1)
   let str = "``"
   if (!omitHeading) { str += topRow + "\n" }
   str += botRow + "``"
