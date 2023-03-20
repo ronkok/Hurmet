@@ -109,7 +109,7 @@ const hurmetNodes =  {
     state.write(`{.toc start=${node.attrs.start} end=${node.attrs.end}}\n\n`)
   },
   horizontal_rule(state, node) {
-    state.write(node.attrs.markup || "------")
+    state.write(node.attrs.markup || "---------------------------")
     state.closeBlock(node)
   },
   bullet_list(state, node) {
@@ -746,9 +746,9 @@ const pipeTable = (table, numCols, colWidth, justify, delim, numRowsInHeading) =
   let str = ""
   // Write heading
   if (numRowsInHeading === 0) {
-    str += "\n" + "|".repeat(numCols + 1)
+    str += "|".repeat(numCols + 1)
   } else {
-    str += "\n|"
+    str += "|"
     for (let j = 0; j < numCols; j++) {
       str += " " + table[0][j][0] + " |"
     }
