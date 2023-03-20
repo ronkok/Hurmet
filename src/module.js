@@ -8,6 +8,7 @@ import { errorOprnd } from "./error.js"
 const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/
 const keywordRegEx = /^(if|else if|else|return|raise|while|for|break|echo|end)\b/
 const drawCommandRegEx = /^(title|frame|view|axes|grid|stroke|strokewidth|strokedasharray|fill|fontsize|fontweight|fontstyle|fontfamily|marker|line|path|plot|curve|rect|circle|ellipse|arc|text|dot|leader|dimension)\b/
+const leadingSpaceRegEx = /^[\t ]+/
 
 // If you change functionRegEx, then also change it in mathprompt.js.
 // It isn't called from there in order to avoid duplicating Hurmet code inside ProseMirror.js.
@@ -19,7 +20,7 @@ const lexRegEx = /"[^"]*"|``.*|`[^`]*`|'[^']*'|#|[^"`'#]+/g
 const testForStatement = str => {
   const pos = str.indexOf("=")
   if (pos === -1) { return false }
-  const leadStr = str.slice(0, pos).trim()
+  const leadStr = str.slice(0, pos).replace(leadingSpaceRegEx, "").trim()
   if (isValidIdentifier.test(leadStr)) { return true }
   if (leadStr.indexOf(",") === -1) { return false }
   let result = true
@@ -72,7 +73,7 @@ export const scanModule = (str, decimalFormat) => {
 
 }
 
-const handleCSV = (expression, lines, startLineNum) => {
+const handleTSV = (expression, lines, startLineNum) => {
   for (let i = startLineNum + 1; i < lines.length; i++) {
     const line = lines[i].trim()
     if (line.length === 0) { continue }
@@ -140,7 +141,7 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
       name = keyword[0]
       expression = line.slice(name.length).trim()
       if (expression.length > 0 && /^``/.test(expression)) {
-        [expression, i] = handleCSV(expression, lines, i)
+        [expression, i] = handleTSV(expression, lines, i)
       }
     } else if (isDraw && drawCommandRegEx.test(line)) {
       name = "svg"
@@ -154,7 +155,7 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
         const posEq = line.indexOf("=")
         name = line.slice(0, posEq - 1).trim()
         expression = line.slice(posEq + 1).trim()
-        if (/^``/.test(expression)) { [expression, i] = handleCSV(expression, lines, i) }
+        if (/^``/.test(expression)) { [expression, i] = handleTSV(expression, lines, i) }
         if (startSvgRegEx.test(expression)) { isDraw = true }
         isStatement = true
       } else {
