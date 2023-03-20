@@ -320,6 +320,7 @@ const dataFrameFromTSV = (str, vars) => {
   if (isMap) {
     const value = new Map()
     const keys = Object.keys(columnMap)
+    if (str.charAt(0) === "#") { keys[0] = "#" + keys[0] }
     for (let i = 0; i < keys.length; i++) {
       value.set(keys[i], valueFromDatum(data[i][0]))
     }
