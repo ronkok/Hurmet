@@ -1,5 +1,5 @@
 ﻿import { dt, allZeros } from "./constants"
-import { clone, isIn, mapMap, arrayOfRegExMatches, tablessTrim } from "./utils"
+import { clone, mapMap, arrayOfRegExMatches, tablessTrim } from "./utils"
 import { plugValsIntoEcho } from "./echo"
 import { fromAssignment } from "./operand.js"
 import { Functions, multivarFunction } from "./functions"
