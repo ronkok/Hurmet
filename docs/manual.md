@@ -721,16 +721,12 @@ Variable names and function names must be written in the form of a valid _identi
 
 The names of those accents are:
 
-
-+---------+---------+-----+--------------+
+|||||
+|---------|---------|-----|--------------|
 | grave   | acute   | hat | tilde        |
-+---------+---------+-----+--------------+
 | bar     | breve   | dot | ddot         |
-+---------+---------+-----+--------------+
 | ring    | check   | ul  | leftharpoon  |
-+---------+---------+-----+--------------+
 | harpoon | leftvec | vec | leftrightvec |
-+---------+---------+-----+--------------+
 
 Hurmet’s auto-correct can help create identifiers.
 
@@ -2286,7 +2282,8 @@ for which I am very grateful.
 
 *   Many of Hurmet’s menu buttons show images from [icomoon](https://icomoon.io).
 
-*   This document’s railroad diagrams are modified versions of images created with [regexper.com](https://regexper.com), by Jeff Avalone.
+*   This document’s railroad diagrams are modified versions of images created
+    with [regexper.com](https://regexper.com), by Jeff Avalone.
 
 <br>
 
