@@ -222,8 +222,8 @@ export const nodes = {
 
   ordered_list: {
     attrs: {order: {default: 1}},
-	content: "list_item+",
-	group: "block",
+    content: "list_item+",
+    group: "block",
     parseDOM: [{tag: "ol", getAttrs(dom) {
       return {order: dom.hasAttribute("start") ? +dom.getAttribute("start") : 1}
     }}],
@@ -235,8 +235,8 @@ export const nodes = {
   // A bullet list node spec, represented in the DOM as `<ul>`.
   bullet_list: {
     content: "list_item+",
-	group: "block",
-	parseDOM: [{tag: "ul"}],
+    group: "block",
+    parseDOM: [{tag: "ul"}],
     toDOM() { return ["ul", 0] }
   },
 

@@ -199,7 +199,7 @@ const output = ast => {
     for (let i = 0; i < ast.length; i++) {
       html += output(ast[i])
     }
-  } else if (ast.type !== "null") {
+  } else if (ast && ast.type !== "null") {
     html += nodes[ast.type](ast)
   }
   return html

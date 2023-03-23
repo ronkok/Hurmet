@@ -109,7 +109,7 @@ const hurmetNodes =  {
     state.write(`{.toc start=${node.attrs.start} end=${node.attrs.end}}\n\n`)
   },
   horizontal_rule(state, node) {
-    state.write(node.attrs.markup || "---------------------------")
+    state.write(node.attrs.markup || "--------------------")
     state.closeBlock(node)
   },
   bullet_list(state, node) {
@@ -123,6 +123,9 @@ const hurmetNodes =  {
       let nStr = String(start + i)
       return state.repeat(" ", maxW - nStr.length) + nStr + ". "
     })
+    // Write a 2nd blank line after an <ol>, to prevent an adjacent <ol> from
+    // continuing the same numbering.
+    state.write(state.delim + "\n")
   },
   list_item(state, node) {
     state.renderContent(node)
@@ -156,9 +159,9 @@ const hurmetNodes =  {
     // We use reference links and defer the image paths to the end of the document.
     state.paths.set(ref, path)
     if (ref === caption) {
-      state.write(`!![${caption}][]\n\n`)
+      state.write(`![${caption}][]\n\n`)
     } else {
-      state.write(`!![${caption}][${ref}]\n\n`)
+      state.write(`![${caption}][${ref}]\n\n`)
     }
     
   },
