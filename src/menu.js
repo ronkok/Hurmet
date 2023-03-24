@@ -933,7 +933,7 @@ function tableStyle(title, className, icon) {
 const liftItem = new MenuItem({
   title: "Lift out of enclosing block",
   run: lift,
-  enable: state => lift(state),
+  select: state => lift(state),
   icon: icons.lift
 })
 
