@@ -102,6 +102,9 @@ const nodes = {
   },
   bullet_list(node)  { return htmlTag("ul", output(node.content)) + "\n" },
   list_item(node)    { return htmlTag("li", output(node.content)) + "\n" },
+  tight_list_item(node) {
+    return htmlTag("li", output(node.content), { class: "tight" }) + "\n"
+  },
   table(node)        { return htmlTag("table", output(node.content), node.attrs) + "\n" },
   table_row(node)    { return htmlTag("tr", output(node.content)) + "\n" },
   table_header(node) {

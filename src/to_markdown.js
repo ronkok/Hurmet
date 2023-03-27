@@ -130,6 +130,9 @@ const hurmetNodes =  {
   list_item(state, node) {
     state.renderContent(node)
   },
+  tight_list_item(state, node) {
+    state.renderInline(node)
+  },
   paragraph(state, node) {
     const prevLength = state.out.length
     state.renderInline(node)
@@ -545,9 +548,8 @@ export class MarkdownSerializerState {
     if (this.closed && this.closed.type == node.type)
       this.flushClose(3)
 
-    let isTight = typeof node.attrs.tight != "undefined" ? node.attrs.tight : false
     node.forEach((child, _, i) => {
-      if (i && isTight) this.flushClose(1)
+      if (child.type.name === "tight_list_item") { this.flushClose(1) }
       this.wrapBlock(delim, firstDelim(i), node, () => this.render(child, node, i))
     })
   }

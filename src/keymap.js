@@ -8,7 +8,7 @@ import {
   joinDown,
   lift
 } from "prosemirror-commands"
-import { wrapInList, splitListItem, liftListItem, sinkListItem } from "prosemirror-schema-list"
+import { wrapInList, splitListItem, liftListItem, sinkListItem } from "./schema"
 import { undo, redo } from "prosemirror-history"
 import { undoInputRule } from "prosemirror-inputrules"
 import { insertMath, convertWord, saveFileAsJSON } from "./menu"

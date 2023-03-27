@@ -43,9 +43,12 @@
 <p>You can save your work using <strong>Ctrl-S</strong> or the save command in the File menu. Then reopen it using the File | Open… menu choice. In Chrome and Edge, the save button is smart enough to re-save your work to the same file you opened earlier.  In Firefox and Safari, the save button always works like a Save As… button.</p>
 <h3 id='tracking-changes'>Tracking Changes</h3>
 <p>The <strong>File▾</strong> menu contains commands that enable you to track changes:</p>
-<ul><li><em>Take a snapshot…</em> will store a snapshot of the current document (not including embedded images)</li>
-<li><em>Show diff…</em> will display the differences between a chosen snapshot and the current document.</li>
-<li><em>Delete all snapshots…</em>, for when you no longer need to track changes.</li>
+<ul><li class="tight"><p><em>Take a snapshot…</em> will store a snapshot of the current document (not including embedded images)</p>
+</li>
+<li class="tight"><p><em>Show diff…</em> will display the differences between a chosen snapshot and the current document.</p>
+</li>
+<li class="tight"><p><em>Delete all snapshots…</em>, for when you no longer need to track changes.</p>
+</li>
 </ul>
 <p>Snapshots and diffs are displayed in Markdown format.</p>
 <h3 id='print-header'>Print Header</h3>
@@ -83,14 +86,20 @@
 <figcaption>caption</figcaption></figure>
 </td></tr>
 <tr><td style="width: 392px"><code>&gt; Blockquote</code></td><td style="width: 177px">| Blockquote</td></tr>
-<tr><td style="width: 392px"><code>* List</code><br><code>* List</code><br><code>* List</code></td><td style="width: 177px"><ul><li>List</li>
-<li>List</li>
-<li>List</li>
+<tr><td style="width: 392px"><code>* List</code><br><code>* List</code><br><code>* List</code></td><td style="width: 177px"><ul><li class="tight"><p>List</p>
+</li>
+<li class="tight"><p>List</p>
+</li>
+<li class="tight"><p>List</p>
+</li>
 </ul>
 </td></tr>
-<tr><td style="width: 392px"><code>1. One</code><br><code>2. Two</code><br><code>3. Three</code></td><td style="width: 177px"><ol><li>One</li>
-<li>Two</li>
-<li>Three</li>
+<tr><td style="width: 392px"><code>1. One</code><br><code>2. Two</code><br><code>3. Three</code></td><td style="width: 177px"><ol><li class="tight"><p>One</p>
+</li>
+<li class="tight"><p>Two</p>
+</li>
+<li class="tight"><p>Three</p>
+</li>
 </ol>
 </td></tr>
 <tr><td style="width: 392px"><code>```</code> <br><code>#code block</code> <br><code>echo &quot;Hi!&quot;</code> <br><code>```</code></td><td style="width: 177px"><pre><code># code block
@@ -421,9 +430,12 @@ about 15 significant digits.</code></pre><dt id='complex-number'>Complex Number<
 </div></dd>
 <dt id='unit'>Unit</dt>
 <dd><p>A Humet <em>unit</em> can be applied to a numeric value. There are three ways to write a Hurmet unit.</p>
-<ol><li>A unit name between apostrophes, aka single straight quotation marks, written after a numeric value.</li>
-<li>A unit symbol written after a numeric value.</li>
-<li>A currency symbol written before a non-negative number.</li>
+<ol><li class="tight"><p>A unit name between apostrophes, aka single straight quotation marks, written after a numeric value.</p>
+</li>
+<li class="tight"><p>A unit symbol written after a numeric value.</p>
+</li>
+<li class="tight"><p>A currency symbol written before a non-negative number.</p>
+</li>
 </ol>
 <table><tr><th>Input</th>
 <th>Renders as</th>
@@ -809,13 +821,20 @@ total                      	sumAbove()``</code></pre><p>will render like this:<b
 <p>The variable name <strong>currencies</strong> may not be used for any other purpose.</p>
 <h4 id='traditional-units'>Traditional Units</h4>
 <p>Many traditional units have had more than one historical definition. Hurmet currently has the following default treatment of certain traditional units:</p>
-<ul><li><strong>pound</strong> is treated as a mass, not a force. (<strong>lbf</strong> and <strong>lbm</strong> are un-ambiguous alternatives.)</li>
-<li><strong>psf</strong> and <strong>psi</strong>, on the other hand, are treated as force per area.</li>
-<li><strong>ton</strong> is treated as a mass, and is the U.S. customary unit. I also put in a <strong>tonf</strong>, 2000 lbf.</li>
-<li><strong>gallon</strong>, <strong>fl oz</strong>, <strong>pint</strong>, <strong>quart</strong>, and <strong>bushel</strong> are the U.S. customary units.</li>
-<li>Weights are avoirdupois, unless specifically noted as a troy weight.</li>
-<li><strong>point</strong> is the adobe point = ¹∕₇₂ inch. <strong>TeX point</strong> is also available.</li>
-<li><strong>barrel</strong> and <strong>bbl</strong> are an oil barrel = 42 US gallons.</li>
+<ul><li class="tight"><p><strong>pound</strong> is treated as a mass, not a force. (<strong>lbf</strong> and <strong>lbm</strong> are un-ambiguous alternatives.)</p>
+</li>
+<li class="tight"><p><strong>psf</strong> and <strong>psi</strong>, on the other hand, are treated as force per area.</p>
+</li>
+<li class="tight"><p><strong>ton</strong> is treated as a mass, and is the U.S. customary unit. I also put in a <strong>tonf</strong>, 2000 lbf.</p>
+</li>
+<li class="tight"><p><strong>gallon</strong>, <strong>fl oz</strong>, <strong>pint</strong>, <strong>quart</strong>, and <strong>bushel</strong> are the U.S. customary units.</p>
+</li>
+<li class="tight"><p>Weights are avoirdupois, unless specifically noted as a troy weight.</p>
+</li>
+<li class="tight"><p><strong>point</strong> is the adobe point = ¹∕₇₂ inch. <strong>TeX point</strong> is also available.</p>
+</li>
+<li class="tight"><p><strong>barrel</strong> and <strong>bbl</strong> are an oil barrel = 42 US gallons.</p>
+</li>
 </ul>
 <p>If you are curious about some of the more unusual units, such as “survey foot” or “nautical mile”, I recommend Russ Rowlett’s <a href='http://www.ibiblio.org/units/'>dictionary of units of measurement</a>.</p>
 <h2 id='numeral-display'>Numeral display</h2>
@@ -1091,17 +1110,25 @@ end</code></pre><p>A Hurmet document can load an entire module into one variable
 <p>Say that you have written a calculation. It’s awesome and you want to share it so that others can use it as a template. An easy way to share work is via a GitHub <a href='https://gist.github.com/'>Gist</a>. Then anyone can view it, download it, or comment on it. If it is in Markdown format, you can read the Gist right there on GitHub. Here’s an <a href='https://gist.github.com/ronkok/7fec7d11f6fb6a031e5a0827e3531d68'>example</a>.</p>
 <p>Hurmet’s version of Markdown adds some extensions that GitHub does not recognize, such as calculation cells, indented paragraphs, and merged cells in tables.</p>
 <h2 id='coming-attractions'>Coming Attractions</h2>
-<ul><li>Image captions</li>
-<li>A <code>distribution</code> data type, to enable calculations with uncertainty</li>
-<li>A <code>date</code> data type</li>
-<li>Permalinks</li>
+<ul><li class="tight"><p>Image captions</p>
+</li>
+<li class="tight"><p>A <code>distribution</code> data type, to enable calculations with uncertainty</p>
+</li>
+<li class="tight"><p>A <code>date</code> data type</p>
+</li>
+<li class="tight"><p>Permalinks</p>
+</li>
 </ul>
 <h2 id='other-resources'>Other Resources</h2>
 <p>Civil and structural engineers may also find these items useful:</p>
-<ul><li>Beam Analysis <a href='https://hurmet.app/ce/beamanalysis.html'>Diagram</a></li>
-<li>Concrete Column Interaction <a href='https://observablehq.com/@ronkok/concrete-column-interaction-diagram'>Diagram</a></li>
-<li>Fetchable TSV files with steel shape data: <a href='null'>wide flanges</a>, <a href='https://gist.githubusercontent.com/ronkok/320677ddf9225afecf79bc831d5e1694/raw/AISC-v15-channels.tsv'>channels</a>, <a href='https://gist.githubusercontent.com/ronkok/a63582e3870c880981845631cbcb302a/raw/AISC-v15-HSS.tsv'>HSS</a>, <a href='https://gist.githubusercontent.com/ronkok/b7d6c68daeedb729ac23ab81cc77a154/raw/AISC-v15-pipes.tsv'>pipes</a>, <a href='https://gist.githubusercontent.com/ronkok/0c01e61709ade0b7738106462f831b45/raw/AISC-v15-tees.tsv'>tees</a>, <a href='https://gist.githubusercontent.com/ronkok/3a1e2d13672be26ef50e880347300536/raw/AISC-v15-2L.tsv'>double angles</a>, <a href='https://gist.githubusercontent.com/ronkok/4a489aa649aa955d069b26d761e6df5f/raw/AISC-v15-HP.tsv'>HP</a>, and <a href='https://gist.githubusercontent.com/ronkok/93927e8f227109cd9463ccd2409aa73e/raw/AISC-v15-MS.tsv'>MS</a>.</li>
-<li>Importable <a href='https://gist.githubusercontent.com/ronkok/f4d93a4921ebd24c9a40578831d926b7/raw/steelStrengthPerAISC360-16.txt'>Module</a> with functions for steel member strength.</li>
+<ul><li class="tight"><p>Beam Analysis <a href='https://hurmet.app/ce/beamanalysis.html'>Diagram</a></p>
+</li>
+<li class="tight"><p>Concrete Column Interaction <a href='https://observablehq.com/@ronkok/concrete-column-interaction-diagram'>Diagram</a></p>
+</li>
+<li class="tight"><p>Fetchable TSV files with steel shape data: <a href='null'>wide flanges</a>, <a href='https://gist.githubusercontent.com/ronkok/320677ddf9225afecf79bc831d5e1694/raw/AISC-v15-channels.tsv'>channels</a>, <a href='https://gist.githubusercontent.com/ronkok/a63582e3870c880981845631cbcb302a/raw/AISC-v15-HSS.tsv'>HSS</a>, <a href='https://gist.githubusercontent.com/ronkok/b7d6c68daeedb729ac23ab81cc77a154/raw/AISC-v15-pipes.tsv'>pipes</a>, <a href='https://gist.githubusercontent.com/ronkok/0c01e61709ade0b7738106462f831b45/raw/AISC-v15-tees.tsv'>tees</a>, <a href='https://gist.githubusercontent.com/ronkok/3a1e2d13672be26ef50e880347300536/raw/AISC-v15-2L.tsv'>double angles</a>, <a href='https://gist.githubusercontent.com/ronkok/4a489aa649aa955d069b26d761e6df5f/raw/AISC-v15-HP.tsv'>HP</a>, and <a href='https://gist.githubusercontent.com/ronkok/93927e8f227109cd9463ccd2409aa73e/raw/AISC-v15-MS.tsv'>MS</a>.</p>
+</li>
+<li class="tight"><p>Importable <a href='https://gist.githubusercontent.com/ronkok/f4d93a4921ebd24c9a40578831d926b7/raw/steelStrengthPerAISC360-16.txt'>Module</a> with functions for steel member strength.</p>
+</li>
 </ul>
 <h2 id='credits'>Credits</h2>
 <p>I’m Ron Kok and I created Hurmet because I want practicing engineers to have the tools they need to write calculations that are clear, complete, and reviewable.</p>
@@ -1128,42 +1155,68 @@ end</code></pre><p>A Hurmet document can load an entire module into one variable
 <li><a href="#introduction">Introduction</a></li>
 <li>
 <details><summary>Editor</summary>
-<ul><li><a href='#editor-basics'>Basics</a></li>
-<li><a href='#save/open'>Save/Open</a></li>
-<li><a href='#tracking-changes'>Tracking Changes</a></li>
-<li><a href='#print-header'>Print Header</a></li>
-<li><a href='#comments'>Comments</a></li>
-<li><a href='#table-of-contents'>Table of Contents</a></li>
-<li><a href='#markdown'>Markdown</a></li>
-<li><a href='#tex'>TeX</a></li>
+<ul><li class="tight"><p><a href='#editor-basics'>Basics</a></p>
+</li>
+<li class="tight"><p><a href='#save/open'>Save/Open</a></p>
+</li>
+<li class="tight"><p><a href='#tracking-changes'>Tracking Changes</a></p>
+</li>
+<li class="tight"><p><a href='#print-header'>Print Header</a></p>
+</li>
+<li class="tight"><p><a href='#comments'>Comments</a></p>
+</li>
+<li class="tight"><p><a href='#table-of-contents'>Table of Contents</a></p>
+</li>
+<li class="tight"><p><a href='#markdown'>Markdown</a></p>
+</li>
+<li class="tight"><p><a href='#tex'>TeX</a></p>
+</li>
 </ul>
 </details>
 </li>
 <li>
 <details><summary>Tutorial</summary>
-<ul><li><a href='#calculation-tutorial'>Create a cell</a></li>
-<li><a href='#statements'>Statements</a></li>
-<li><a href='#multiplication'>Multiplication</a></li>
-<li><a href='#roots'>Roots</a></li>
-<li><a href='#function'>Functions</a></li>
-<li><a href='#variables'>Variables</a></li>
-<li><a href='#subscripts'>Subscripts</a></li>
-<li><a href='#exponents'>Exponents</a></li>
-<li><a href='#greek-letters'>Greek letters</a></li>
-<li><a href='#accents-and-primes'>Accents and Primes</a></li>
-<li><a href='#units'>Units</a></li>
-<li><a href='#unit-aware-calcs'>Unit-Aware Calcs</a></li>
-<li><a href='#result-rounding'>Result Rounding</a></li>
-<li><a href='#display-mode'>Display Mode</a></li>
+<ul><li class="tight"><p><a href='#calculation-tutorial'>Create a cell</a></p>
+</li>
+<li class="tight"><p><a href='#statements'>Statements</a></p>
+</li>
+<li class="tight"><p><a href='#multiplication'>Multiplication</a></p>
+</li>
+<li class="tight"><p><a href='#roots'>Roots</a></p>
+</li>
+<li class="tight"><p><a href='#function'>Functions</a></p>
+</li>
+<li class="tight"><p><a href='#variables'>Variables</a></p>
+</li>
+<li class="tight"><p><a href='#subscripts'>Subscripts</a></p>
+</li>
+<li class="tight"><p><a href='#exponents'>Exponents</a></p>
+</li>
+<li class="tight"><p><a href='#greek-letters'>Greek letters</a></p>
+</li>
+<li class="tight"><p><a href='#accents-and-primes'>Accents and Primes</a></p>
+</li>
+<li class="tight"><p><a href='#units'>Units</a></p>
+</li>
+<li class="tight"><p><a href='#unit-aware-calcs'>Unit-Aware Calcs</a></p>
+</li>
+<li class="tight"><p><a href='#result-rounding'>Result Rounding</a></p>
+</li>
+<li class="tight"><p><a href='#display-mode'>Display Mode</a></p>
+</li>
 </ul>
 </details>
 </li>
 <li>
 <details><summary>Quick Reference</summary>
-<ul><li><a href='#markup'>Markup</a></li>
-<li><a href='#auto-correct'>Auto-correct</a></li>
-<li><a href='#display-selectors'>Display Selectors</a></li>
-<li><a href='#accessors'>Accessors</a></li>
+<ul><li class="tight"><p><a href='#markup'>Markup</a></p>
+</li>
+<li class="tight"><p><a href='#auto-correct'>Auto-correct</a></p>
+</li>
+<li class="tight"><p><a href='#display-selectors'>Display Selectors</a></p>
+</li>
+<li class="tight"><p><a href='#accessors'>Accessors</a></p>
+</li>
 </ul>
 </details>
 </li>
@@ -1171,35 +1224,54 @@ end</code></pre><p>A Hurmet document can load an entire module into one variable
 <li><a href="#identifiers">Identifiers</a></li>
 <li>
 <details><summary>Data Types</summary>
-<ul><li><a href='#boolean'>Boolean</a></li>
-<li><a href='#string'>String</a></li>
-<li><a href='#number'>Number</a></li>
-<li><a href='#complex-number'>Complex Number</a></li>
-<li><a href='#unit'>Unit</a></li>
-<li><a href='#matrix'>Matrix</a></li>
-<li><a href='#data-frame'>Data Frame</a></li>
-<li><a href='#map'>Map</a></li>
+<ul><li class="tight"><p><a href='#boolean'>Boolean</a></p>
+</li>
+<li class="tight"><p><a href='#string'>String</a></p>
+</li>
+<li class="tight"><p><a href='#number'>Number</a></p>
+</li>
+<li class="tight"><p><a href='#complex-number'>Complex Number</a></p>
+</li>
+<li class="tight"><p><a href='#unit'>Unit</a></p>
+</li>
+<li class="tight"><p><a href='#matrix'>Matrix</a></p>
+</li>
+<li class="tight"><p><a href='#data-frame'>Data Frame</a></p>
+</li>
+<li class="tight"><p><a href='#map'>Map</a></p>
+</li>
 </ul>
 </details>
 </li>
 <li>
 <details><summary>Expressions</summary>
-<ul><li><a href='#expressions'>General</a></li>
-<li><a href='#constants'>Constants</a></li>
-<li><a href='#operators'>Operators</a></li>
-<li><a href='#functions'>Functions</a></li>
-<li><a href='#operator-precedence'>Operator Precedence</a></li>
-<li><a href='#if-expressions'>If Expressions</a></li>
-<li><a href='#overloading'>Overloading</a></li>
+<ul><li class="tight"><p><a href='#expressions'>General</a></p>
+</li>
+<li class="tight"><p><a href='#constants'>Constants</a></p>
+</li>
+<li class="tight"><p><a href='#operators'>Operators</a></p>
+</li>
+<li class="tight"><p><a href='#functions'>Functions</a></p>
+</li>
+<li class="tight"><p><a href='#operator-precedence'>Operator Precedence</a></p>
+</li>
+<li class="tight"><p><a href='#if-expressions'>If Expressions</a></p>
+</li>
+<li class="tight"><p><a href='#overloading'>Overloading</a></p>
+</li>
 </ul>
 </details>
 </li>
 <li>
 <details><summary>Units</summary>
-<ul><li><a href='#unit-aware-calculations'>Unit-Aware Calcs</a></li>
-<li><a href='#custom-units'>Custom Units</a></li>
-<li><a href='#currencies'>Currencies</a></li>
-<li><a href='#traditional-units'>Traditional Units</a></li>
+<ul><li class="tight"><p><a href='#unit-aware-calculations'>Unit-Aware Calcs</a></p>
+</li>
+<li class="tight"><p><a href='#custom-units'>Custom Units</a></p>
+</li>
+<li class="tight"><p><a href='#currencies'>Currencies</a></p>
+</li>
+<li class="tight"><p><a href='#traditional-units'>Traditional Units</a></p>
+</li>
 </ul>
 </details>
 </li>
@@ -1212,13 +1284,20 @@ end</code></pre><p>A Hurmet document can load an entire module into one variable
 <li><a href="#code-blocks">Code blocks</a></li>
 <li>
 <details><summary>Control Flow</summary>
-<ul><li><a href='#if-else'>if…else</a></li>
-<li><a href='#while'>while loops</a></li>
-<li><a href='#for'>for loops</a></li>
-<li><a href='#break'>break</a></li>
-<li><a href='#return'>return</a></li>
-<li><a href='#raise'>raise</a></li>
-<li><a href='#echo'>echo</a></li>
+<ul><li class="tight"><p><a href='#if-else'>if…else</a></p>
+</li>
+<li class="tight"><p><a href='#while'>while loops</a></p>
+</li>
+<li class="tight"><p><a href='#for'>for loops</a></p>
+</li>
+<li class="tight"><p><a href='#break'>break</a></p>
+</li>
+<li class="tight"><p><a href='#return'>return</a></p>
+</li>
+<li class="tight"><p><a href='#raise'>raise</a></p>
+</li>
+<li class="tight"><p><a href='#echo'>echo</a></p>
+</li>
 </ul>
 </details>
 </li>
@@ -1229,11 +1308,16 @@ end</code></pre><p>A Hurmet document can load an entire module into one variable
 <li><a href="#remote-modules">Modules</a></li>
 <li>
 <details><summary>End notes</summary>
-<ul><li><a href='#troubleshooting'>Troubleshooting</a></li>
-<li><a href='#gists'>Gists</a></li>
-<li><a href='#coming-attractions'>Coming Attractions</a></li>
-<li><a href='#other-resources'>Other Resources</a></li>
-<li><a href='#credits'>Credits</a></li>
+<ul><li class="tight"><p><a href='#troubleshooting'>Troubleshooting</a></p>
+</li>
+<li class="tight"><p><a href='#gists'>Gists</a></p>
+</li>
+<li class="tight"><p><a href='#coming-attractions'>Coming Attractions</a></p>
+</li>
+<li class="tight"><p><a href='#other-resources'>Other Resources</a></p>
+</li>
+<li class="tight"><p><a href='#credits'>Credits</a></p>
+</li>
 </ul>
 </details>
 </li>

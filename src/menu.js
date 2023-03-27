@@ -91,6 +91,11 @@ const hurmetIcons = {
     height: 1024,
     path: "M512 219q-116 0-218 39t-161 107-59 145q0 64 40 122t115 100l49 28-15 54q-13 52-40 98 86-36 157-97l24-21 32 3q39 4 74 4 116 0 218-39t161-107 59-145-59-145-161-107-218-39zM1024 512q0 99-68 183t-186 133-257 48q-40 0-82-4-113 100-262 138-28 8-65 12h-2q-8 0-15-6t-9-15v-0q-1-2-0-6t1-5 2-5l3-5t4-4 4-5q4-4 17-19t19-21 17-22 18-29 15-33 14-43q-89-50-141-125t-51-160q0-99 68-183t186-133 257-48 257 48 186 133 68 183z"
   },
+  tighten: {
+    width: 16,
+    height: 16,
+    path: "M0 4h3v2.75h-3z M4.5 4H16v2.75H4.5z M0 9h3v2.75h-3z M4.5 9H16v2.75H4.5z M7 0H13.5L10.25 4 M7 16L10.25 12L13.5 16z"
+  },
   table: {
     width: 24,
     height: 24,
@@ -260,6 +265,33 @@ const navigate = () => {
         window.scrollTo(0, headingTop - boundingTop + 180)
       }
       openSelectPrompt("Scroll to…", buttons, callback)
+    }
+  })
+}
+
+const tighten = () => {
+  return new MenuItem({
+    title: "Tighten list item",
+    icon: hurmetIcons.tighten,
+    select: state => {
+      // Make the button visible only when inside a list item.
+      const {$from, $to, node} = state.selection
+      const parent = $from.node(-1)
+      return ($from.node().type.name == "paragraph" && 
+              parent.type.name == "list_item" &&
+              parent.childCount < 2 &&
+              $from.pos === $to.pos)
+    },
+    run(state, _, view) {
+      const {$from, $to, node} = state.selection
+      const pos = $from.pos
+      const listItem = $from.node(-1)
+      const content = listItem.content
+      const listItemPos = $from.start(-1) - 1
+      const tr = state.tr
+      tr.replaceWith(listItemPos, listItemPos + listItem.nodeSize, schema.nodes.tight_list_item.createAndFill(_, content))
+      tr.setSelection(TextSelection.create(tr.doc, pos))
+      view.dispatch(tr)
     }
   })
 }
@@ -561,7 +593,7 @@ function insertComment(nodeType) {
     enable(state) {
       return canInsert(state, nodeType)
     },
-    run(state, dispatch, view) {      
+    run(state, dispatch, view) {
       if (state.selection instanceof NodeSelection && state.selection.node.type.name == "comment") {
         return
       }
@@ -1114,6 +1146,7 @@ export function buildMenuItems(schema) {
   if ((type = schema.nodes.calculation)) r.insertCalclation = mathMenuItem(type, "calculation")
   if ((type = schema.nodes.tex)) r.insertTeX = mathMenuItem(type, "tex")
   if ((type = schema.nodes.comment)) r.insertComment = insertComment(type)
+  if ((type = schema.nodes.tight_list_item)) r.tighten = tighten()
 
   if ((type = schema.nodes.bullet_list))
     r.wrapBulletList = wrapListItem(type, {
@@ -1321,6 +1354,7 @@ export function buildMenuItems(schema) {
     [
       r.wrapBulletList,
       r.wrapOrderedList,
+      r.tighten,
       r.wrapBlockQuote,
       r.wrapCentered,
       r.wrapIndent,

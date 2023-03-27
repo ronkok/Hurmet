@@ -304,6 +304,9 @@ ul li {
     position: relative;
     left: 1.8em;
 }
+li p {
+    margin: 0;
+}
 a {
     text-decoration: underline;
     color: inherit;

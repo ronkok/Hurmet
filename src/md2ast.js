@@ -128,9 +128,11 @@ const unescapeUrl = function(rawUrlString) {
   return rawUrlString.replace(UNESCAPE_URL_R, "$1");
 };
 
+const tightListRegEx = /(?:\n\n(?!$)|\n[ \t]+(?:\d{1,9}[.)]|[*+-]) )/
+
 const parseList = (str, state) => {
   const items = str.replace(LIST_BLOCK_END_R, "\n").match(LIST_ITEM_R);
-  const isTight = state.inHtml && !/\n\n(?!$)/.test(str)
+  const isTight = !tightListRegEx.test(str)
   const itemContent = items.map(function(item, i) {
     // We need to see how far indented this item is:
     const prefixCapture = LIST_ITEM_PREFIX_R.exec(item);
@@ -140,7 +142,7 @@ const parseList = (str, state) => {
     const spaceRegex = new RegExp("^ {1," + space + "}", "gm");
 
     // Before processing the item, we need a couple things
-    const content = item
+    const contentStr = item
       // remove indents on trailing lines:
       .replace(spaceRegex, "")
       // remove the bullet:
@@ -157,10 +159,11 @@ const parseList = (str, state) => {
 
     // Parse the list item
     state.inline = isTight
-    const adjustedContent = content.replace(LIST_ITEM_END_R, "");
+    const adjustedContent = contentStr.replace(LIST_ITEM_END_R, "");
+    const content = parse(adjustedContent, state)
     const result = isTight
-      ? { type: "list_item", content: parseInline(adjustedContent, state) }
-      : { type: "list_item", content: parse(adjustedContent, state) }
+      ? { type: "tight_list_item", content: [{ "type": "paragraph", "content": content }] }
+      : { type: "list_item", content }
 
     // Restore our state before returning
     state.inline = oldStateInline;

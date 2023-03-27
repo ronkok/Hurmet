@@ -28,13 +28,26 @@ First, test that an inline asterisk does not create a list: * Not a list item.
 A list can be written directly after a paragraph. An empty line is unnecessary.
 * fruits
   + apples
+  
     - macintosh
-    - red delicious
+    - red 
+
+Now try a loose list.
+
+* An itemization should include
+
+    * The first paragraph in this list item
+    
+      A second paragraph
+    
+    * Another list item.
 
 Another paragraph.
 
 1. Item 1 from dotted list
+
 2. Item 2
+
 3. Item 3
 
 

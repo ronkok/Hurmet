@@ -225,6 +225,10 @@ th p { line-height: 1.6; }
   position: relative;
 }
 
+.ProseMirror li.tight > p {
+  margin: -0.5em 0 0.75em 0;
+}
+
 .ProseMirror-hideselection *::selection { background: transparent; }
 .ProseMirror-hideselection *::-moz-selection { background: transparent; }
 .ProseMirror-hideselection { caret-color: transparent; }

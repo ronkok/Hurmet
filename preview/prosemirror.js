@@ -17246,11 +17246,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.5874","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.6189","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.5872","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.7298","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -17259,10 +17259,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4584","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4816","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9858","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.3117","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9874","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.3826","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -17282,7 +17282,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.87488","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.87940","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -17290,23 +17290,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.3387","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.4344","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["3.9057","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["87.7870","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["3.8755","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["88.5650","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["140.57","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["139.85","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1389.84","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1401.12","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -17317,7 +17317,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["19.9829","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["20.0854","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -17347,7 +17347,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.0623","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0745","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -24893,9 +24893,11 @@ const unescapeUrl = function(rawUrlString) {
   return rawUrlString.replace(UNESCAPE_URL_R, "$1");
 };
 
+const tightListRegEx = /(?:\n\n(?!$)|\n[ \t]+(?:\d{1,9}[.)]|[*+-]) )/;
+
 const parseList = (str, state) => {
   const items = str.replace(LIST_BLOCK_END_R, "\n").match(LIST_ITEM_R);
-  const isTight = state.inHtml && !/\n\n(?!$)/.test(str);
+  const isTight = !tightListRegEx.test(str);
   const itemContent = items.map(function(item, i) {
     // We need to see how far indented this item is:
     const prefixCapture = LIST_ITEM_PREFIX_R.exec(item);
@@ -24905,7 +24907,7 @@ const parseList = (str, state) => {
     const spaceRegex = new RegExp("^ {1," + space + "}", "gm");
 
     // Before processing the item, we need a couple things
-    const content = item
+    const contentStr = item
       // remove indents on trailing lines:
       .replace(spaceRegex, "")
       // remove the bullet:
@@ -24922,10 +24924,11 @@ const parseList = (str, state) => {
 
     // Parse the list item
     state.inline = isTight;
-    const adjustedContent = content.replace(LIST_ITEM_END_R, "");
+    const adjustedContent = contentStr.replace(LIST_ITEM_END_R, "");
+    const content = parse$1(adjustedContent, state);
     const result = isTight
-      ? { type: "list_item", content: parseInline(adjustedContent, state) }
-      : { type: "list_item", content: parse$1(adjustedContent, state) };
+      ? { type: "tight_list_item", content: [{ "type": "paragraph", "content": content }] }
+      : { type: "list_item", content };
 
     // Restore our state before returning
     state.inline = oldStateInline;
@@ -42607,6 +42610,9 @@ const nodes = {
   },
   bullet_list(node)  { return htmlTag("ul", output(node.content)) + "\n" },
   list_item(node)    { return htmlTag("li", output(node.content)) + "\n" },
+  tight_list_item(node) {
+    return htmlTag("li", output(node.content), { class: "tight" }) + "\n"
+  },
   table(node)        { return htmlTag("table", output(node.content), node.attrs) + "\n" },
   table_row(node)    { return htmlTag("tr", output(node.content)) + "\n" },
   table_header(node) {
@@ -42975,7 +42981,7 @@ const nodes$1 = {
 
   ordered_list: {
     attrs: {order: {default: 1}},
-    content: "list_item+",
+    content: "list_item+|tight_list_item+",
     group: "block",
     parseDOM: [{tag: "ol", getAttrs(dom) {
       return {order: dom.hasAttribute("start") ? +dom.getAttribute("start") : 1}
@@ -42987,16 +42993,23 @@ const nodes$1 = {
   
   // A bullet list node spec, represented in the DOM as `<ul>`.
   bullet_list: {
-    content: "list_item+",
+    content: "list_item+|tight_list_item+",
     group: "block",
     parseDOM: [{tag: "ul"}],
     toDOM() { return ["ul", 0] }
   },
 
+  tight_list_item: {
+    content: "paragraph",
+    parseDOM: [{tag: "li.tight"}],
+    toDOM() { return ["li", { class: 'tight' }, 0] },
+    defining: true
+  },
+
   // A list item (`<li>`) spec.
   list_item: {
     content: "paragraph block*",
-	  parseDOM: [{tag: "li"}],
+    parseDOM: [{tag: "li"}],
     toDOM() { return ["li", 0] },
     defining: true
   },
@@ -43291,6 +43304,127 @@ function doWrapInList(tr, range, wrappers, joinBefore, listType) {
     splitPos += parent.child(i).nodeSize;
   }
   return tr
+}
+
+const listItems = ["list_item", "tight_list_item"];
+
+// :: (NodeType) ? (state: EditorState, dispatch: ?(tr: Transaction)) ? bool
+// Build a command that splits a non-empty textblock at the top level
+// of a list item by also splitting that list item.
+function splitListItem(itemType) {
+  return function(state, dispatch) {
+    let {$from, $to, node} = state.selection;
+    if ((node && node.isBlock) || $from.depth < 2 || !$from.sameParent($to)) return false
+    let grandParent = $from.node(-1);
+    if (!listItems.includes(grandParent.type.name)) return false
+    if ($from.parent.content.size == 0) {
+      // In an empty block. If this is a nested list, the wrapping
+      // list item should be split. Otherwise, bail out and let next
+      // command handle lifting.
+      if ($from.depth == 2 || $from.node(-3).type != itemType ||
+          $from.index(-2) != $from.node(-2).childCount - 1) return false
+      if (dispatch) {
+        let wrap = Fragment.empty, keepItem = $from.index(-1) > 0;
+        // Build a fragment containing empty versions of the structure
+        // from the outer list item to the parent node of the cursor
+        for (let d = $from.depth - (keepItem ? 1 : 2); d >= $from.depth - 3; d--)
+          wrap = Fragment.from($from.node(d).copy(wrap));
+        // Add a second list item with an empty default start node
+        wrap = wrap.append(Fragment.from(itemType.createAndFill()));
+        let tr = state.tr.replace($from.before(keepItem ? null : -1), $from.after(-3), new Slice(wrap, keepItem ? 3 : 2, 2));
+        tr.setSelection(state.selection.constructor.near(tr.doc.resolve($from.pos + (keepItem ? 3 : 2))));
+        dispatch(tr.scrollIntoView());
+      }
+      return true
+    }
+    let nextType = $to.pos == $from.end() ? grandParent.contentMatchAt(0).defaultType : null;
+    let tr = state.tr.delete($from.pos, $to.pos);
+    let types = nextType && [null, {type: nextType}];
+    if (!canSplit(tr.doc, $from.pos, 2, types)) return false
+    if (dispatch) dispatch(tr.split($from.pos, 2, types).scrollIntoView());
+    return true
+  }
+}
+
+// :: (NodeType) ? (state: EditorState, dispatch: ?(tr: Transaction)) ? bool
+// Create a command to lift the list item around the selection up into
+// a wrapping list.
+function liftListItem(itemType) {
+  return function(state, dispatch) {
+    let {$from, $to} = state.selection;
+    let range = $from.blockRange($to, node => node.childCount && node.firstChild.type == itemType);
+    if (!range) return false
+    if (!dispatch) return true
+    if ($from.node(range.depth - 1).type == itemType) // Inside a parent list
+      return liftToOuterList(state, dispatch, itemType, range)
+    else // Outer list node
+      return liftOutOfList(state, dispatch, range)
+  }
+}
+
+function liftToOuterList(state, dispatch, itemType, range) {
+  let tr = state.tr, end = range.end, endOfList = range.$to.end(range.depth);
+  if (end < endOfList) {
+    // There are siblings after the lifted items, which must become
+    // children of the last item
+    tr.step(new ReplaceAroundStep(end - 1, endOfList, end, endOfList,
+                                  new Slice(Fragment.from(itemType.create(null, range.parent.copy())), 1, 0), 1, true));
+    range = new NodeRange(tr.doc.resolve(range.$from.pos), tr.doc.resolve(endOfList), range.depth);
+  }
+  dispatch(tr.lift(range, liftTarget(range)).scrollIntoView());
+  return true
+}
+
+function liftOutOfList(state, dispatch, range) {
+  let tr = state.tr, list = range.parent;
+  // Merge the list items into a single big item
+  for (let pos = range.end, i = range.endIndex - 1, e = range.startIndex; i > e; i--) {
+    pos -= list.child(i).nodeSize;
+    tr.delete(pos - 1, pos + 1);
+  }
+  let $start = tr.doc.resolve(range.start), item = $start.nodeAfter;
+  let atStart = range.startIndex == 0, atEnd = range.endIndex == list.childCount;
+  let parent = $start.node(-1), indexBefore = $start.index(-1);
+  if (!parent.canReplace(indexBefore + (atStart ? 0 : 1), indexBefore + 1,
+                         item.content.append(atEnd ? Fragment.empty : Fragment.from(list))))
+    return false
+  let start = $start.pos, end = start + item.nodeSize;
+  // Strip off the surrounding list. At the sides where we're not at
+  // the end of the list, the existing list is closed. At sides where
+  // this is the end, it is overwritten to its end.
+  tr.step(new ReplaceAroundStep(start - (atStart ? 1 : 0), end + (atEnd ? 1 : 0), start + 1, end - 1,
+                                new Slice((atStart ? Fragment.empty : Fragment.from(list.copy(Fragment.empty)))
+                                          .append(atEnd ? Fragment.empty : Fragment.from(list.copy(Fragment.empty))),
+                                          atStart ? 0 : 1, atEnd ? 0 : 1), atStart ? 0 : 1));
+  dispatch(tr.scrollIntoView());
+  return true
+}
+
+// :: (NodeType) ? (state: EditorState, dispatch: ?(tr: Transaction)) ? bool
+// Create a command to sink the list item around the selection down
+// into an inner list.
+function sinkListItem(itemType) {
+  return function(state, dispatch) {
+    let {$from, $to} = state.selection;
+    let range = $from.blockRange($to, node => node.childCount && node.firstChild.type == itemType);
+    if (!range) return false
+    let startIndex = range.startIndex;
+    if (startIndex == 0) return false
+    let parent = range.parent, nodeBefore = parent.child(startIndex - 1);
+    if (nodeBefore.type != itemType) return false
+
+    if (dispatch) {
+      let nestedBefore = nodeBefore.lastChild && nodeBefore.lastChild.type == parent.type;
+      let inner = Fragment.from(nestedBefore ? itemType.create() : null);
+      let slice = new Slice(Fragment.from(itemType.create(null, Fragment.from(parent.copy(inner)))),
+                            nestedBefore ? 3 : 1, 0);
+      let before = range.start, after = range.end;
+      dispatch(state.tr.step(new ReplaceAroundStep(before - (nestedBefore ? 3 : 1), after,
+                                                   before, after, slice, 1, true))
+               .scrollIntoView());
+    }
+    return true
+  }
 }
 
 // :: Schema
@@ -43690,6 +43824,9 @@ const hurmetNodes =  {
   },
   list_item(state, node) {
     state.renderContent(node);
+  },
+  tight_list_item(state, node) {
+    state.renderInline(node);
   },
   paragraph(state, node) {
     const prevLength = state.out.length;
@@ -44106,9 +44243,8 @@ class MarkdownSerializerState {
     if (this.closed && this.closed.type == node.type)
       this.flushClose(3);
 
-    let isTight = typeof node.attrs.tight != "undefined" ? node.attrs.tight : false;
     node.forEach((child, _, i) => {
-      if (i && isTight) this.flushClose(1);
+      if (child.type.name === "tight_list_item") { this.flushClose(1); }
       this.wrapBlock(delim, firstDelim(i), node, () => this.render(child, node, i));
     });
   }
@@ -46251,6 +46387,11 @@ const hurmetIcons = {
     height: 1024,
     path: "M512 219q-116 0-218 39t-161 107-59 145q0 64 40 122t115 100l49 28-15 54q-13 52-40 98 86-36 157-97l24-21 32 3q39 4 74 4 116 0 218-39t161-107 59-145-59-145-161-107-218-39zM1024 512q0 99-68 183t-186 133-257 48q-40 0-82-4-113 100-262 138-28 8-65 12h-2q-8 0-15-6t-9-15v-0q-1-2-0-6t1-5 2-5l3-5t4-4 4-5q4-4 17-19t19-21 17-22 18-29 15-33 14-43q-89-50-141-125t-51-160q0-99 68-183t186-133 257-48 257 48 186 133 68 183z"
   },
+  tighten: {
+    width: 16,
+    height: 16,
+    path: "M0 4h3v2.75h-3z M4.5 4H16v2.75H4.5z M0 9h3v2.75h-3z M4.5 9H16v2.75H4.5z M7 0H13.5L10.25 4 M7 16L10.25 12L13.5 16z"
+  },
   table: {
     width: 24,
     height: 24,
@@ -46420,6 +46561,33 @@ const navigate = () => {
         window.scrollTo(0, headingTop - boundingTop + 180);
       };
       openSelectPrompt("Scroll to…", buttons, callback);
+    }
+  })
+};
+
+const tighten = () => {
+  return new MenuItem({
+    title: "Tighten list item",
+    icon: hurmetIcons.tighten,
+    select: state => {
+      // Make the button visible only when inside a list item.
+      const {$from, $to, node} = state.selection;
+      const parent = $from.node(-1);
+      return ($from.node().type.name == "paragraph" && 
+              parent.type.name == "list_item" &&
+              parent.childCount < 2 &&
+              $from.pos === $to.pos)
+    },
+    run(state, _, view) {
+      const {$from, $to, node} = state.selection;
+      const pos = $from.pos;
+      const listItem = $from.node(-1);
+      const content = listItem.content;
+      const listItemPos = $from.start(-1) - 1;
+      const tr = state.tr;
+      tr.replaceWith(listItemPos, listItemPos + listItem.nodeSize, schema.nodes.tight_list_item.createAndFill(_, content));
+      tr.setSelection(TextSelection.create(tr.doc, pos));
+      view.dispatch(tr);
     }
   })
 };
@@ -46719,7 +46887,7 @@ function insertComment(nodeType) {
     enable(state) {
       return canInsert(state, nodeType)
     },
-    run(state, dispatch, view) {      
+    run(state, dispatch, view) {
       if (state.selection instanceof NodeSelection && state.selection.node.type.name == "comment") {
         return
       }
@@ -47090,7 +47258,7 @@ function tableStyle(title, className, icon) {
 const liftItem = new MenuItem({
   title: "Lift out of enclosing block",
   run: lift,
-  enable: state => lift(state),
+  select: state => lift(state),
   icon: icons.lift
 });
 
@@ -47271,6 +47439,7 @@ function buildMenuItems(schema) {
   if ((type = schema.nodes.calculation)) r.insertCalclation = mathMenuItem(type, "calculation");
   if ((type = schema.nodes.tex)) r.insertTeX = mathMenuItem(type, "tex");
   if ((type = schema.nodes.comment)) r.insertComment = insertComment(type);
+  if ((type = schema.nodes.tight_list_item)) r.tighten = tighten();
 
   if ((type = schema.nodes.bullet_list))
     r.wrapBulletList = wrapListItem(type, {
@@ -47476,6 +47645,7 @@ function buildMenuItems(schema) {
     [
       r.wrapBulletList,
       r.wrapOrderedList,
+      r.tighten,
       r.wrapBlockQuote,
       r.wrapCentered,
       r.wrapIndent,
@@ -47511,184 +47681,6 @@ function buildMenuItems(schema) {
   );
 
   return r
-}
-
-// :: (NodeType, ?Object) → (state: EditorState, dispatch: ?(tr: Transaction)) → bool
-// Returns a command function that wraps the selection in a list with
-// the given type an attributes. If `dispatch` is null, only return a
-// value to indicate whether this is possible, but don't actually
-// perform the change.
-function wrapInList$1(listType, attrs) {
-  return function(state, dispatch) {
-    var ref = state.selection;
-    var $from = ref.$from;
-    var $to = ref.$to;
-    var range = $from.blockRange($to), doJoin = false, outerRange = range;
-    if (!range) { return false }
-    // This is at the top of an existing list item
-    if (range.depth >= 2 && $from.node(range.depth - 1).type.compatibleContent(listType) && range.startIndex == 0) {
-      // Don't do anything if this is the top of the list
-      if ($from.index(range.depth - 1) == 0) { return false }
-      var $insert = state.doc.resolve(range.start - 2);
-      outerRange = new NodeRange($insert, $insert, range.depth);
-      if (range.endIndex < range.parent.childCount)
-        { range = new NodeRange($from, state.doc.resolve($to.end(range.depth)), range.depth); }
-      doJoin = true;
-    }
-    var wrap = findWrapping(outerRange, listType, attrs, range);
-    if (!wrap) { return false }
-    if (dispatch) { dispatch(doWrapInList$1(state.tr, range, wrap, doJoin, listType).scrollIntoView()); }
-    return true
-  }
-}
-
-function doWrapInList$1(tr, range, wrappers, joinBefore, listType) {
-  var content = Fragment.empty;
-  for (var i = wrappers.length - 1; i >= 0; i--)
-    { content = Fragment.from(wrappers[i].type.create(wrappers[i].attrs, content)); }
-
-  tr.step(new ReplaceAroundStep(range.start - (joinBefore ? 2 : 0), range.end, range.start, range.end,
-                                new Slice(content, 0, 0), wrappers.length, true));
-
-  var found = 0;
-  for (var i$1 = 0; i$1 < wrappers.length; i$1++) { if (wrappers[i$1].type == listType) { found = i$1 + 1; } }
-  var splitDepth = wrappers.length - found;
-
-  var splitPos = range.start + wrappers.length - (joinBefore ? 2 : 0), parent = range.parent;
-  for (var i$2 = range.startIndex, e = range.endIndex, first = true; i$2 < e; i$2++, first = false) {
-    if (!first && canSplit(tr.doc, splitPos, splitDepth)) {
-      tr.split(splitPos, splitDepth);
-      splitPos += 2 * splitDepth;
-    }
-    splitPos += parent.child(i$2).nodeSize;
-  }
-  return tr
-}
-
-// :: (NodeType) → (state: EditorState, dispatch: ?(tr: Transaction)) → bool
-// Build a command that splits a non-empty textblock at the top level
-// of a list item by also splitting that list item.
-function splitListItem(itemType) {
-  return function(state, dispatch) {
-    var ref = state.selection;
-    var $from = ref.$from;
-    var $to = ref.$to;
-    var node = ref.node;
-    if ((node && node.isBlock) || $from.depth < 2 || !$from.sameParent($to)) { return false }
-    var grandParent = $from.node(-1);
-    if (grandParent.type != itemType) { return false }
-    if ($from.parent.content.size == 0) {
-      // In an empty block. If this is a nested list, the wrapping
-      // list item should be split. Otherwise, bail out and let next
-      // command handle lifting.
-      if ($from.depth == 2 || $from.node(-3).type != itemType ||
-          $from.index(-2) != $from.node(-2).childCount - 1) { return false }
-      if (dispatch) {
-        var wrap = Fragment.empty, keepItem = $from.index(-1) > 0;
-        // Build a fragment containing empty versions of the structure
-        // from the outer list item to the parent node of the cursor
-        for (var d = $from.depth - (keepItem ? 1 : 2); d >= $from.depth - 3; d--)
-          { wrap = Fragment.from($from.node(d).copy(wrap)); }
-        // Add a second list item with an empty default start node
-        wrap = wrap.append(Fragment.from(itemType.createAndFill()));
-        var tr$1 = state.tr.replace($from.before(keepItem ? null : -1), $from.after(-3), new Slice(wrap, keepItem ? 3 : 2, 2));
-        tr$1.setSelection(state.selection.constructor.near(tr$1.doc.resolve($from.pos + (keepItem ? 3 : 2))));
-        dispatch(tr$1.scrollIntoView());
-      }
-      return true
-    }
-    var nextType = $to.pos == $from.end() ? grandParent.contentMatchAt(0).defaultType : null;
-    var tr = state.tr.delete($from.pos, $to.pos);
-    var types = nextType && [null, {type: nextType}];
-    if (!canSplit(tr.doc, $from.pos, 2, types)) { return false }
-    if (dispatch) { dispatch(tr.split($from.pos, 2, types).scrollIntoView()); }
-    return true
-  }
-}
-
-// :: (NodeType) → (state: EditorState, dispatch: ?(tr: Transaction)) → bool
-// Create a command to lift the list item around the selection up into
-// a wrapping list.
-function liftListItem(itemType) {
-  return function(state, dispatch) {
-    var ref = state.selection;
-    var $from = ref.$from;
-    var $to = ref.$to;
-    var range = $from.blockRange($to, function (node) { return node.childCount && node.firstChild.type == itemType; });
-    if (!range) { return false }
-    if (!dispatch) { return true }
-    if ($from.node(range.depth - 1).type == itemType) // Inside a parent list
-      { return liftToOuterList(state, dispatch, itemType, range) }
-    else // Outer list node
-      { return liftOutOfList(state, dispatch, range) }
-  }
-}
-
-function liftToOuterList(state, dispatch, itemType, range) {
-  var tr = state.tr, end = range.end, endOfList = range.$to.end(range.depth);
-  if (end < endOfList) {
-    // There are siblings after the lifted items, which must become
-    // children of the last item
-    tr.step(new ReplaceAroundStep(end - 1, endOfList, end, endOfList,
-                                  new Slice(Fragment.from(itemType.create(null, range.parent.copy())), 1, 0), 1, true));
-    range = new NodeRange(tr.doc.resolve(range.$from.pos), tr.doc.resolve(endOfList), range.depth);
-  }
-  dispatch(tr.lift(range, liftTarget(range)).scrollIntoView());
-  return true
-}
-
-function liftOutOfList(state, dispatch, range) {
-  var tr = state.tr, list = range.parent;
-  // Merge the list items into a single big item
-  for (var pos = range.end, i = range.endIndex - 1, e = range.startIndex; i > e; i--) {
-    pos -= list.child(i).nodeSize;
-    tr.delete(pos - 1, pos + 1);
-  }
-  var $start = tr.doc.resolve(range.start), item = $start.nodeAfter;
-  var atStart = range.startIndex == 0, atEnd = range.endIndex == list.childCount;
-  var parent = $start.node(-1), indexBefore = $start.index(-1);
-  if (!parent.canReplace(indexBefore + (atStart ? 0 : 1), indexBefore + 1,
-                         item.content.append(atEnd ? Fragment.empty : Fragment.from(list))))
-    { return false }
-  var start = $start.pos, end = start + item.nodeSize;
-  // Strip off the surrounding list. At the sides where we're not at
-  // the end of the list, the existing list is closed. At sides where
-  // this is the end, it is overwritten to its end.
-  tr.step(new ReplaceAroundStep(start - (atStart ? 1 : 0), end + (atEnd ? 1 : 0), start + 1, end - 1,
-                                new Slice((atStart ? Fragment.empty : Fragment.from(list.copy(Fragment.empty)))
-                                          .append(atEnd ? Fragment.empty : Fragment.from(list.copy(Fragment.empty))),
-                                          atStart ? 0 : 1, atEnd ? 0 : 1), atStart ? 0 : 1));
-  dispatch(tr.scrollIntoView());
-  return true
-}
-
-// :: (NodeType) → (state: EditorState, dispatch: ?(tr: Transaction)) → bool
-// Create a command to sink the list item around the selection down
-// into an inner list.
-function sinkListItem(itemType) {
-  return function(state, dispatch) {
-    var ref = state.selection;
-    var $from = ref.$from;
-    var $to = ref.$to;
-    var range = $from.blockRange($to, function (node) { return node.childCount && node.firstChild.type == itemType; });
-    if (!range) { return false }
-    var startIndex = range.startIndex;
-    if (startIndex == 0) { return false }
-    var parent = range.parent, nodeBefore = parent.child(startIndex - 1);
-    if (nodeBefore.type != itemType) { return false }
-
-    if (dispatch) {
-      var nestedBefore = nodeBefore.lastChild && nodeBefore.lastChild.type == parent.type;
-      var inner = Fragment.from(nestedBefore ? itemType.create() : null);
-      var slice = new Slice(Fragment.from(itemType.create(null, Fragment.from(parent.type.create(null, inner)))),
-                            nestedBefore ? 3 : 1, 0);
-      var before = range.start, after = range.end;
-      dispatch(state.tr.step(new ReplaceAroundStep(before - (nestedBefore ? 3 : 1), after,
-                                                   before, after, slice, 1, true))
-               .scrollIntoView());
-    }
-    return true
-  }
 }
 
 // ::- Input rules are regular expressions describing a piece of text
@@ -47939,8 +47931,8 @@ function buildKeymap(schema, mapKeys) {
     });
   }
 
-  if ((type = schema.nodes.bullet_list)) bind("Shift-Ctrl-8", wrapInList$1(type));
-  if ((type = schema.nodes.ordered_list)) bind("Shift-Ctrl-9", wrapInList$1(type));
+  if ((type = schema.nodes.bullet_list)) bind("Shift-Ctrl-8", wrapInList(type));
+  if ((type = schema.nodes.ordered_list)) bind("Shift-Ctrl-9", wrapInList(type));
   if ((type = schema.nodes.blockquote)) bind("Ctrl->", wrapIn(type));
   if ((type = schema.nodes.hard_break)) {
     let br = type,

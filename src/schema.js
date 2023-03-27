@@ -222,7 +222,7 @@ export const nodes = {
 
   ordered_list: {
     attrs: {order: {default: 1}},
-    content: "list_item+",
+    content: "list_item+|tight_list_item+",
     group: "block",
     parseDOM: [{tag: "ol", getAttrs(dom) {
       return {order: dom.hasAttribute("start") ? +dom.getAttribute("start") : 1}
@@ -234,16 +234,23 @@ export const nodes = {
   
   // A bullet list node spec, represented in the DOM as `<ul>`.
   bullet_list: {
-    content: "list_item+",
+    content: "list_item+|tight_list_item+",
     group: "block",
     parseDOM: [{tag: "ul"}],
     toDOM() { return ["ul", 0] }
   },
 
+  tight_list_item: {
+    content: "paragraph",
+    parseDOM: [{tag: "li.tight"}],
+    toDOM() { return ["li", { class: 'tight' }, 0] },
+    defining: true
+  },
+
   // A list item (`<li>`) spec.
   list_item: {
     content: "paragraph block*",
-	  parseDOM: [{tag: "li"}],
+    parseDOM: [{tag: "li"}],
     toDOM() { return ["li", 0] },
     defining: true
   },
@@ -540,6 +547,8 @@ function doWrapInList(tr, range, wrappers, joinBefore, listType) {
   return tr
 }
 
+const listItems = ["list_item", "tight_list_item"]
+
 // :: (NodeType) ? (state: EditorState, dispatch: ?(tr: Transaction)) ? bool
 // Build a command that splits a non-empty textblock at the top level
 // of a list item by also splitting that list item.
@@ -548,7 +557,7 @@ export function splitListItem(itemType) {
     let {$from, $to, node} = state.selection
     if ((node && node.isBlock) || $from.depth < 2 || !$from.sameParent($to)) return false
     let grandParent = $from.node(-1)
-    if (grandParent.type != itemType) return false
+    if (!listItems.includes(grandParent.type.name)) return false
     if ($from.parent.content.size == 0) {
       // In an empty block. If this is a nested list, the wrapping
       // list item should be split. Otherwise, bail out and let next
@@ -569,7 +578,7 @@ export function splitListItem(itemType) {
       }
       return true
     }
-    let nextType = $to.pos == $from.end() ? grandParent.defaultContentType(0) : null
+    let nextType = $to.pos == $from.end() ? grandParent.contentMatchAt(0).defaultType : null
     let tr = state.tr.delete($from.pos, $to.pos)
     let types = nextType && [null, {type: nextType}]
     if (!canSplit(tr.doc, $from.pos, 2, types)) return false
