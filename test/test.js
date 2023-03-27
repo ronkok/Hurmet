@@ -105,7 +105,8 @@ const parserTests = [
     "σ^{2}= \\dfrac{1}{n (n - 1)}\\left(n ∑_{i = 1}^{n} x{_\\text{i}}^{2}- \\left(∑_{i = 1}^{n} x{_\\text{k}} \\right)^{2}\\right)"
   ],
   ["(2n)!!/(2n+1)^2", "\\dfrac{(2 n)!!}{(2 n + 1)^{2}}"],
-  ["(1, 2; 3, 4)", "\\begin{pmatrix}1 & 2 \\\\ 3 & 4 \\end{pmatrix}"]
+  ["(1, 2; 3, 4)", "\\begin{pmatrix}1 & 2 \\\\ 3 & 4 \\end{pmatrix}"],
+  ["cos⁻¹ 0.5", "\\cos^{\\text{-}1}{0.5}"]
 ]
 
 console.log("Now testing the parser…")
@@ -457,7 +458,9 @@ end`, vars)
     [`[3; 2] < [2; 4] = @`, `®3/1 ®2/1 matrix 2 1 ®2/1 ®4/1 matrix 2 1 <`, `[false; true]`],
     [`{"Good" if [1; 2] < [2; 4]; "Bad" otherwise} = @`, `®1/1 ®2/1 matrix 2 1 ®2/1 ®4/1 matrix 2 1 < true cases 2 "Good" "Bad"`, "Good"],
     [`{"Good" if [3; 2] < [2; 4]; "Bad" otherwise} = @`, `®3/1 ®2/1 matrix 2 1 ®2/1 ®4/1 matrix 2 1 < true cases 2 "Good" "Bad"`, "Bad"],
-    [`accumulate([2; 3; 0; 4]) = @`, `®2/1 ®3/1 ®0/1 ®4/1 matrix 4 1 accumulate 1`, `[2; 5; 5; 9]`]
+    [`accumulate([2; 3; 0; 4]) = @`, `®2/1 ®3/1 ®0/1 ®4/1 matrix 4 1 accumulate 1`, `[2; 5; 5; 9]`],
+    [`cos⁻¹ 0.5 = @`, "®5/10 acos", "1.0471975511966"],
+    [`cos^(-1) 0.5 = @`, "®5/10 acos", "1.0471975511966"]
 	]
 
   console.log("Now testing calculations…")

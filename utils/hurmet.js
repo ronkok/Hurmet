@@ -4943,8 +4943,8 @@ const exponentOfFunction = (str, decimalFormat, isCalc) => {
   // As in: sin²()
   let expoInput = "";
   if (str.charAt(0) !== "^") {
-    expoInput = /^[⁰¹²³\u2074-\u2079⁻]+/.exec(str)[0];
-    expoInput = numeralFromSuperScript(expoInput);
+    expoInput = /^⁻?[⁰¹²³\u2074-\u2079⁻]+/.exec(str)[0];
+    expoInput = expoInput.split("").map(ch => numeralFromSuperScript(ch)).join("");
   } else if (!openParenRegEx.test(str.slice(1))) {
     expoInput = lex(str.slice(1), decimalFormat, { input: "", output: "", ttype: 50 })[0];
   } else {
@@ -5645,7 +5645,7 @@ const parse = (
         // Is there an exponent on the function name?
         if (functionExpoRegEx.test(str)) {
           const [expoInput, expoTex, expoRPN] = exponentOfFunction(str, decimalFormat, isCalc);
-          if (isCalc && expoRPN === `®1/1${tokenSep}~` && isIn(token.input, trigFunctions)) {
+          if (isCalc && expoRPN === `®-1/1` && isIn(token.input, trigFunctions)) {
             // Inverse trig function.
             token.input = "a" + token.input;
             token.output = "\\a" + token.output.slice(1);
