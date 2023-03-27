@@ -106,8 +106,8 @@ const exponentOfFunction = (str, decimalFormat, isCalc) => {
   // As in: sin²()
   let expoInput = ""
   if (str.charAt(0) !== "^") {
-    expoInput = /^[⁰¹²³\u2074-\u2079⁻]+/.exec(str)[0]
-    expoInput = numeralFromSuperScript(expoInput)
+    expoInput = /^⁻?[⁰¹²³\u2074-\u2079⁻]+/.exec(str)[0]
+    expoInput = expoInput.split("").map(ch => numeralFromSuperScript(ch)).join("")
   } else if (!openParenRegEx.test(str.slice(1))) {
     expoInput = lex(str.slice(1), decimalFormat, { input: "", output: "", ttype: 50 })[0]
   } else {
