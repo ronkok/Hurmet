@@ -48,7 +48,7 @@ document range by selecting text, then clicking one of the menu bar buttons:
 | **Doc▾**                             | Draft Mode, Print header, \        |
 |                                      | Delete all comments                |
 +--------------------------------------+------------------------------------+
-| ![recalc][]                          | Recalculate all                    |
+| ![recalc][] ` `                      | Recalculate all                    |
 +--------------------------------------+------------------------------------+
 | ![undo][]  ![redo][]                 | Undo, Redo                         |
 +--------------------------------------+------------------------------------+
