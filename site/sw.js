@@ -1,6 +1,6 @@
 // A service worker to enable offline use of Hurmet.app
 
-const version = "hurmet-2023-03-28-1"
+const version = "hurmet-2023-03-28-2"
 
 const addResourcesToCache = async(resources) => {
   const cache = await caches.open(version)

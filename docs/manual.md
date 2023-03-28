@@ -40,7 +40,7 @@ document range by selecting text, then clicking one of the menu bar buttons:
 | **≡**                                | Navigate…                          |
 +--------------------------------------+------------------------------------+
 | \                                    | Open…, Save…, \                    |
-| **File▾**                            | Import/Export to Markdown or GFM,\ |
+| **File▾**                            | Import/Export to Markdown,\        |
 |                                      | Take a snapshot, Show diff, \      |
 |                                      | Set Page Size, Print               |
 +--------------------------------------+------------------------------------+
@@ -266,9 +266,6 @@ Grid tables
 [caption]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='m14.998 2 .002.002v11.996l-.002.002H1.002L1 13.998V2.002L1.002 2h13.996zM15 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h14c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1z'/%3E%3Cpath d='M13 4.5a1.5 1.5 0 1 1-3.001-.001A1.5 1.5 0 0 1 13 4.5zM14 13H2v-2l3.5-6 4 5h1L14 7z'/%3E%3C/svg%3E
 
 </details>
-
-…or you can export GFM (GitHub Flavored Markdown), which does not have Hurmet’s
-extensions and which converts calculation zones to TeX.
 
 ### TeX
 
