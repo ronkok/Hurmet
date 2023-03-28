@@ -59,6 +59,10 @@ export const nodes = {
     }
   },
 
+  fragment: {
+    content: "block+"
+  },
+
   // :: NodeSpec A plain paragraph textblock. Represented in the DOM as a `<p>` element.
   paragraph: {
     content: "inline*",

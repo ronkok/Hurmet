@@ -47,8 +47,8 @@ export class MarkdownSerializer {
   // :: (Node, ?Object) → string
   // Serialize the content of the given node to
   // [CommonMark](http://commonmark.org/).
-  serialize(content, paths, isGFM) {
-    let state = new MarkdownSerializerState(this.nodes, this.marks, paths, isGFM)
+  serialize(content, paths) {
+    let state = new MarkdownSerializerState(this.nodes, this.marks, paths)
     state.renderContent(content)
     // Write the link and image paths.
     for (const [key, value] of state.paths.entries()) {
@@ -73,25 +73,13 @@ const hurmetNodes =  {
     state.wrapBlock("> ", null, node, () => state.renderContent(node))
   },
   indented_div(state, node) {
-    if (state.isGFM) {
-      state.renderContent(node)
-    } else {
-      state.wrapBlock("    ", "i>  ", node, () => state.renderContent(node))
-    }
+    state.wrapBlock("    ", "i>  ", node, () => state.renderContent(node))
   },
   centered_div(state, node) {
-    if (state.isGFM) {
-      state.renderContent(node)
-    } else {
-      state.wrapBlock("    ", "C>  ", node, () => state.renderContent(node))
-    }
+    state.wrapBlock("    ", "C>  ", node, () => state.renderContent(node))
   },
   header(state, node) {
-    if (state.isGFM) {
-      state.renderContent(node)
-    } else {
-      state.wrapBlock("    ", "H>  ", node, () => state.renderContent(node))
-    }
+    state.wrapBlock("    ", "H>  ", node, () => state.renderContent(node))
   },
   code_block(state, node) {
     state.write("```" + (node.attrs.params || "") + "\n")
@@ -136,13 +124,11 @@ const hurmetNodes =  {
   paragraph(state, node) {
     const prevLength = state.out.length
     state.renderInline(node)
-    if (!state.isGFM) {
-      state.out = limitLineLength(state.out, prevLength, state.delim, state.lineLimit)
-    }
+    state.out = limitLineLength(state.out, prevLength, state.delim, state.lineLimit)
     state.closeBlock(node)
   },
   table(state, node) {
-    state.renderTable(node, state.delim, state.isGFM)
+    state.renderTable(node, state.delim)
     state.closeBlock(node)
   },
   figure(state, node) {
@@ -170,7 +156,7 @@ const hurmetNodes =  {
   },
   image(state, node) {
     let path = state.esc(node.attrs.src)
-    if (!state.isGFM && (node.attrs.class || node.attrs.width || node.attrs.alt)) {
+    if (node.attrs.class || node.attrs.width || node.attrs.alt) {
       path += "\n{"
       if (node.attrs.class) { path += "." + state.esc(node.attrs.class) }
       if (node.attrs.width && !isNaN(node.attrs.width)) { path += " width=" + node.attrs.width }
@@ -205,23 +191,15 @@ const hurmetNodes =  {
     const prevLength = state.out.length
     state.write("© ")
     state.renderInline(node)
-    if (!state.isGFM) {
-      state.out = limitLineLength(state.out, prevLength, state.delim, state.lineLimit)
-    }
+    state.out = limitLineLength(state.out, prevLength, state.delim, state.lineLimit)
     state.closeBlock(node)
   },
   calculation(state, node) {
     const entry = node.attrs.entry.trim().replace(/\n(?: *\n)+/g, "\n").replace(/\n/gm, "\n" + state.delim)
-    if (state.isGFM) {
-      // Convert calculation to TeX
-      const tex = parse(entry)
-      writeTex(state, node.displayMode, tex)
+    if (node.attrs.displayMode) {
+      state.write("¢¢\n" + entry + "\n¢¢")
     } else {
-      if (node.attrs.displayMode) {
-        state.write("¢¢\n" + entry + "\n¢¢")
-      } else {
-        state.write("¢ " + entry + " ¢")
-      }
+      state.write("¢ " + entry + " ¢")
     }
   }
 }
@@ -250,8 +228,8 @@ const hurmetMarks = {
          escape: false},
   superscript: {open: "<sup>", close: "</sup>", expelEnclosingWhitespace: true},
   subscript: {
-    open(state)  { return state.isGFM ? "<sub>" : "~" },
-    close(state) { return state.isGFM ? "</sub>" : "~" },
+    open(state)  { return "~" },
+    close(state) { return "~" },
     expelEnclosingWhitespace: true
   },
   strikethru: {open: "~~", close: "~~", mixable: true, expelEnclosingWhitespace: true},
@@ -356,11 +334,10 @@ const justifyRegEx = /c(\d)([cr])/g
 // methods related to markdown serialization. Instances are passed to
 // node and mark serialization methods (see `toMarkdown`).
 export class MarkdownSerializerState {
-  constructor(nodes, marks, paths, isGFM) {
+  constructor(nodes, marks, paths) {
     this.nodes = nodes
     this.marks = marks
     this.paths = paths
-    this.isGFM = isGFM
     this.delim = this.out = ""
     this.closed = false
     this.lineLimit = 80
@@ -559,7 +536,7 @@ export class MarkdownSerializerState {
     return justify === "r" ? (pad + str) : (str + pad)
   }
 
-  renderTable(node, delim, isGFM) {
+  renderTable(node, delim) {
     const rows = node.content.content
     let numCols = rows[0].content.content.length
     for (let i = 1; i < rows.length; i++) {
@@ -594,8 +571,8 @@ export class MarkdownSerializerState {
     const colWidth = new Array(numCols).fill(0)
     const mergedCells = [];
     // Do we need a reStructuredText grid table? Or is a GFM pipe table enough?
-    let isRst = !isGFM && numRowsInHeading > 1;
-    let tableState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, this.isGFM)
+    let isRst = numRowsInHeading > 1;
+    let tableState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths)
     tableState.lineLimit = 25
     let i = 0
     let j = 0
@@ -628,7 +605,7 @@ export class MarkdownSerializerState {
             // Each table cell contains an array of strings.
             const cellContent = tableState.out.slice(L).replace(/^\n+/, "").split("\n")
             table[i][j] = cellContent
-            if (cellContent.length > 1 && !isGFM) { isRst = true }
+            if (cellContent.length > 1) { isRst = true }
             // Get width of cell.
             if (colSpan[i][j] === 1) {
               for (let line of table[i][j]) {
@@ -668,7 +645,7 @@ export class MarkdownSerializerState {
           let width = colWidth[j]
           for (let m = 1; m < colSpan[i][j]; m++) { width += colWidth[j + m] + 3 }
           for (let k = 0; k < table[i][j].length; k++) {
-            if (table[i][j][k].indexOf("|") > -1 && !isGFM) { isRst = true }
+            if (table[i][j][k].indexOf("|") > -1) { isRst = true }
             // Pad the line with spaces
             table[i][j][k] += " ".repeat(width - table[i][j][k].length)
           }
@@ -695,9 +672,7 @@ export class MarkdownSerializerState {
       }
     }
     const className = node.attrs.class.replace(/ c\d+[cr]/g, "") // remove column justification
-    if (!isGFM) {
-      this.write(`\n${delim}{.${className} colWidths="${colWidths.trim()}"}\n`)
-    }
+    this.write(`\n${delim}{.${className} colWidths="${colWidths.trim()}"}\n`)
   }
 
   // :: (string, ?bool) → string

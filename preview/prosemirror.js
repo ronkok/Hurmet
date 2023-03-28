@@ -42818,6 +42818,10 @@ const nodes$1 = {
     }
   },
 
+  fragment: {
+    content: "block+"
+  },
+
   // :: NodeSpec A plain paragraph textblock. Represented in the DOM as a `<p>` element.
   paragraph: {
     content: "inline*",
@@ -43752,8 +43756,8 @@ class MarkdownSerializer {
   // :: (Node, ?Object) → string
   // Serialize the content of the given node to
   // [CommonMark](http://commonmark.org/).
-  serialize(content, paths, isGFM) {
-    let state = new MarkdownSerializerState(this.nodes, this.marks, paths, isGFM);
+  serialize(content, paths) {
+    let state = new MarkdownSerializerState(this.nodes, this.marks, paths);
     state.renderContent(content);
     // Write the link and image paths.
     for (const [key, value] of state.paths.entries()) {
@@ -43768,25 +43772,13 @@ const hurmetNodes =  {
     state.wrapBlock("> ", null, node, () => state.renderContent(node));
   },
   indented_div(state, node) {
-    if (state.isGFM) {
-      state.renderContent(node);
-    } else {
-      state.wrapBlock("    ", "i>  ", node, () => state.renderContent(node));
-    }
+    state.wrapBlock("    ", "i>  ", node, () => state.renderContent(node));
   },
   centered_div(state, node) {
-    if (state.isGFM) {
-      state.renderContent(node);
-    } else {
-      state.wrapBlock("    ", "C>  ", node, () => state.renderContent(node));
-    }
+    state.wrapBlock("    ", "C>  ", node, () => state.renderContent(node));
   },
   header(state, node) {
-    if (state.isGFM) {
-      state.renderContent(node);
-    } else {
-      state.wrapBlock("    ", "H>  ", node, () => state.renderContent(node));
-    }
+    state.wrapBlock("    ", "H>  ", node, () => state.renderContent(node));
   },
   code_block(state, node) {
     state.write("```" + (node.attrs.params || "") + "\n");
@@ -43831,13 +43823,11 @@ const hurmetNodes =  {
   paragraph(state, node) {
     const prevLength = state.out.length;
     state.renderInline(node);
-    if (!state.isGFM) {
-      state.out = limitLineLength(state.out, prevLength, state.delim, state.lineLimit);
-    }
+    state.out = limitLineLength(state.out, prevLength, state.delim, state.lineLimit);
     state.closeBlock(node);
   },
   table(state, node) {
-    state.renderTable(node, state.delim, state.isGFM);
+    state.renderTable(node, state.delim);
     state.closeBlock(node);
   },
   figure(state, node) {
@@ -43865,7 +43855,7 @@ const hurmetNodes =  {
   },
   image(state, node) {
     let path = state.esc(node.attrs.src);
-    if (!state.isGFM && (node.attrs.class || node.attrs.width || node.attrs.alt)) {
+    if (node.attrs.class || node.attrs.width || node.attrs.alt) {
       path += "\n{";
       if (node.attrs.class) { path += "." + state.esc(node.attrs.class); }
       if (node.attrs.width && !isNaN(node.attrs.width)) { path += " width=" + node.attrs.width; }
@@ -43900,23 +43890,15 @@ const hurmetNodes =  {
     const prevLength = state.out.length;
     state.write("© ");
     state.renderInline(node);
-    if (!state.isGFM) {
-      state.out = limitLineLength(state.out, prevLength, state.delim, state.lineLimit);
-    }
+    state.out = limitLineLength(state.out, prevLength, state.delim, state.lineLimit);
     state.closeBlock(node);
   },
   calculation(state, node) {
     const entry = node.attrs.entry.trim().replace(/\n(?: *\n)+/g, "\n").replace(/\n/gm, "\n" + state.delim);
-    if (state.isGFM) {
-      // Convert calculation to TeX
-      const tex = parse(entry);
-      writeTex(state, node.displayMode, tex);
+    if (node.attrs.displayMode) {
+      state.write("¢¢\n" + entry + "\n¢¢");
     } else {
-      if (node.attrs.displayMode) {
-        state.write("¢¢\n" + entry + "\n¢¢");
-      } else {
-        state.write("¢ " + entry + " ¢");
-      }
+      state.write("¢ " + entry + " ¢");
     }
   }
 };
@@ -43945,8 +43927,8 @@ const hurmetMarks = {
          escape: false},
   superscript: {open: "<sup>", close: "</sup>", expelEnclosingWhitespace: true},
   subscript: {
-    open(state)  { return state.isGFM ? "<sub>" : "~" },
-    close(state) { return state.isGFM ? "</sub>" : "~" },
+    open(state)  { return "~" },
+    close(state) { return "~" },
     expelEnclosingWhitespace: true
   },
   strikethru: {open: "~~", close: "~~", mixable: true, expelEnclosingWhitespace: true},
@@ -44051,11 +44033,10 @@ const justifyRegEx = /c(\d)([cr])/g;
 // methods related to markdown serialization. Instances are passed to
 // node and mark serialization methods (see `toMarkdown`).
 class MarkdownSerializerState {
-  constructor(nodes, marks, paths, isGFM) {
+  constructor(nodes, marks, paths) {
     this.nodes = nodes;
     this.marks = marks;
     this.paths = paths;
-    this.isGFM = isGFM;
     this.delim = this.out = "";
     this.closed = false;
     this.lineLimit = 80;
@@ -44254,7 +44235,7 @@ class MarkdownSerializerState {
     return justify === "r" ? (pad + str) : (str + pad)
   }
 
-  renderTable(node, delim, isGFM) {
+  renderTable(node, delim) {
     const rows = node.content.content;
     let numCols = rows[0].content.content.length;
     for (let i = 1; i < rows.length; i++) {
@@ -44289,8 +44270,8 @@ class MarkdownSerializerState {
     const colWidth = new Array(numCols).fill(0);
     const mergedCells = [];
     // Do we need a reStructuredText grid table? Or is a GFM pipe table enough?
-    let isRst = !isGFM && numRowsInHeading > 1;
-    let tableState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, this.isGFM);
+    let isRst = numRowsInHeading > 1;
+    let tableState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths);
     tableState.lineLimit = 25;
     let i = 0;
     let j = 0;
@@ -44323,7 +44304,7 @@ class MarkdownSerializerState {
             // Each table cell contains an array of strings.
             const cellContent = tableState.out.slice(L).replace(/^\n+/, "").split("\n");
             table[i][j] = cellContent;
-            if (cellContent.length > 1 && !isGFM) { isRst = true; }
+            if (cellContent.length > 1) { isRst = true; }
             // Get width of cell.
             if (colSpan[i][j] === 1) {
               for (let line of table[i][j]) {
@@ -44363,7 +44344,7 @@ class MarkdownSerializerState {
           let width = colWidth[j];
           for (let m = 1; m < colSpan[i][j]; m++) { width += colWidth[j + m] + 3; }
           for (let k = 0; k < table[i][j].length; k++) {
-            if (table[i][j][k].indexOf("|") > -1 && !isGFM) { isRst = true; }
+            if (table[i][j][k].indexOf("|") > -1) { isRst = true; }
             // Pad the line with spaces
             table[i][j][k] += " ".repeat(width - table[i][j][k].length);
           }
@@ -44390,9 +44371,7 @@ class MarkdownSerializerState {
       }
     }
     const className = node.attrs.class.replace(/ c\d+[cr]/g, ""); // remove column justification
-    if (!isGFM) {
-      this.write(`\n${delim}{.${className} colWidths="${colWidths.trim()}"}\n`);
-    }
+    this.write(`\n${delim}{.${className} colWidths="${colWidths.trim()}"}\n`);
   }
 
   // :: (string, ?bool) → string
@@ -46743,24 +46722,17 @@ function saveFile(state) {
   return new MenuItem({
     title: "Save file...   Ctrl-S",
     label: "Save",
-    enable(state) {
-      return true
-    },
     run(state) {
       saveFileAsJSON(state);
     }
   })
 }
 
-function exportMarkdownFile(isGFM) {
+function exportMarkdownFile() {
   return new MenuItem({
-    title: isGFM ? "Export GitHub Flavored Markdown…" : "Export Markdown…",
-    label: isGFM ? "Export GFM…" : "Export Markdown…",
-    enable(state) {
-      return true
-    },
+    label: "Export Markdown…",
     run(state) {
-      const str = hurmetMarkdownSerializer.serialize(state.doc, new Map(), isGFM);
+      const str = hurmetMarkdownSerializer.serialize(state.doc, new Map());
       // Save the result
       const blob = new Blob([str], {type: "text/plain;charset=utf-8"});
       FileSaver_1(blob, "HurmetMarkdown.md", { autoBom : false });
@@ -46772,9 +46744,6 @@ function openFile() {
   return new MenuItem({
     title: "Open file...",
     label: "Open…",
-    enable() {
-      return true
-    },
     run(state, _, view) {
       readFile(state, _, view, schema, "hurmet");
     }
@@ -46783,13 +46752,44 @@ function openFile() {
 
 function importMarkdownFile() {
   return new MenuItem({
-    title: "Import Markdown...",
     label: "Import Markdown...",
     enable() {
       return true
     },
     run(state, _, view) {
       readFile(state, _, view, schema, "markdown");
+    }
+  })
+}
+
+function copyAsMarkdown() {
+  return new MenuItem({
+    label: "Copy as Markdown",
+    run(state, _, view) {
+      const text = hurmetMarkdownSerializer.serialize(state.selection.content().content, new Map());
+      const type = "text/plain";
+      const blob = new Blob([text], { type });
+      const data = [new ClipboardItem({ [type]: blob })];
+      navigator.clipboard.write(data);
+    }
+  })
+}
+
+function pasteAsMarkdown() {
+  return new MenuItem({
+    label: "Paste from Markdown",
+    run(state, _, view) {
+      navigator.clipboard
+        .readText()
+        .then((clipText) => {
+          const ast = hurmet.md2ast(clipText);
+          const fragment = { type: "fragment", content: ast };
+          const {$from, $to} = state.selection;
+          view.dispatch(
+            view.state.tr.replaceWith($from.pos, $to.pos, schema.nodeFromJSON(fragment))
+          );
+          hurmet.updateCalculations(view, schema.nodes.calculation, true);
+        });
     }
   })
 }
@@ -47015,8 +47015,8 @@ function insertToC(nodeType) {
           }),
         },
         callback(attrs) {
-          const {$from, to} = state.selection;
-          const same = $from.sharedDepth(to);
+          const {$from, $to} = state.selection;
+          const same = $from.sharedDepth($to);
           const startPos = same !== 0 ? $from.before(same) : $from.pos;
           const endPos = same !== 0 ? $from.after(same) : startPos + 1;
           attrs.body = findPageBreaks(view, state, forToC, schema.nodes.toc, attrs.start, attrs.end);
@@ -47384,8 +47384,7 @@ function buildMenuItems(schema) {
   r.apostrophecomma = setDecimalFormat("1’000’000,");
   r.dotcomma = setDecimalFormat("1.000.000,");
 
-  r.exportMarkdown = exportMarkdownFile(false);
-  r.exportGFM = exportMarkdownFile(true);
+  r.exportMarkdown = exportMarkdownFile();
   r.importMarkdownFile = importMarkdownFile();
   r.pica = setFontSize(12);
   r.longprimer = setFontSize(10);
@@ -47580,7 +47579,6 @@ function buildMenuItems(schema) {
     r.openFile,
     r.saveFile,
     r.exportMarkdown,
-    r.exportGFM,
     r.importMarkdownFile,
     r.takeSnapshot,
     r.showDiff,
@@ -47668,10 +47666,14 @@ function buildMenuItems(schema) {
     r.alignColCenter,
     r.alignColRight,
     r.tableStyle
-  ])];  
+  ])];
+
+  r.copyAsMarkdown = copyAsMarkdown();
+  r.pasteAsMarkdown = pasteAsMarkdown();
+  r.Markdown = new Dropdown([r.copyAsMarkdown, r.pasteAsMarkdown], {label: "𝐌"});
 
   r.fullMenu = r.fileMenu.concat(
-    [[undoItem, redoItem]],
+    [[undoItem, redoItem, r.Markdown]],
     r.inlineMenu,
     r.insertMenu,
     r.typeMenu,

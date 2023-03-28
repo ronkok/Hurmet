@@ -449,24 +449,17 @@ function saveFile(state) {
   return new MenuItem({
     title: "Save file...   Ctrl-S",
     label: "Save",
-    enable(state) {
-      return true
-    },
     run(state) {
       saveFileAsJSON(state)
     }
   })
 }
 
-function exportMarkdownFile(isGFM) {
+function exportMarkdownFile() {
   return new MenuItem({
-    title: isGFM ? "Export GitHub Flavored Markdown…" : "Export Markdown…",
-    label: isGFM ? "Export GFM…" : "Export Markdown…",
-    enable(state) {
-      return true
-    },
+    label: "Export Markdown…",
     run(state) {
-      const str = hurmetMarkdownSerializer.serialize(state.doc, new Map(), isGFM)
+      const str = hurmetMarkdownSerializer.serialize(state.doc, new Map())
       // Save the result
       const blob = new Blob([str], {type: "text/plain;charset=utf-8"})
       saveAs(blob, "HurmetMarkdown.md", { autoBom : false });
@@ -478,9 +471,6 @@ function openFile() {
   return new MenuItem({
     title: "Open file...",
     label: "Open…",
-    enable() {
-      return true
-    },
     run(state, _, view) {
       readFile(state, _, view, schema, "hurmet")
     }
@@ -489,13 +479,44 @@ function openFile() {
 
 function importMarkdownFile() {
   return new MenuItem({
-    title: "Import Markdown...",
     label: "Import Markdown...",
     enable() {
       return true
     },
     run(state, _, view) {
       readFile(state, _, view, schema, "markdown")
+    }
+  })
+}
+
+function copyAsMarkdown() {
+  return new MenuItem({
+    label: "Copy as Markdown",
+    run(state, _, view) {
+      const text = hurmetMarkdownSerializer.serialize(state.selection.content().content, new Map())
+      const type = "text/plain"
+      const blob = new Blob([text], { type })
+      const data = [new ClipboardItem({ [type]: blob })];
+      navigator.clipboard.write(data)
+    }
+  })
+}
+
+function pasteAsMarkdown() {
+  return new MenuItem({
+    label: "Paste from Markdown",
+    run(state, _, view) {
+      navigator.clipboard
+        .readText()
+        .then((clipText) => {
+          const ast = hurmet.md2ast(clipText)
+          const fragment = { type: "fragment", content: ast }
+          const {$from, $to} = state.selection
+          view.dispatch(
+            view.state.tr.replaceWith($from.pos, $to.pos, schema.nodeFromJSON(fragment))
+          )
+          hurmet.updateCalculations(view, schema.nodes.calculation, true)
+        })
     }
   })
 }
@@ -722,8 +743,8 @@ function insertToC(nodeType) {
           }),
         },
         callback(attrs) {
-          const {$from, to} = state.selection
-          const same = $from.sharedDepth(to)
+          const {$from, $to} = state.selection
+          const same = $from.sharedDepth($to)
           const startPos = same !== 0 ? $from.before(same) : $from.pos
           const endPos = same !== 0 ? $from.after(same) : startPos + 1
           attrs.body = findPageBreaks(view, state, forToC, schema.nodes.toc, attrs.start, attrs.end)
@@ -1091,8 +1112,7 @@ export function buildMenuItems(schema) {
   r.apostrophecomma = setDecimalFormat("1’000’000,")
   r.dotcomma = setDecimalFormat("1.000.000,")
 
-  r.exportMarkdown = exportMarkdownFile(false)
-  r.exportGFM = exportMarkdownFile(true)
+  r.exportMarkdown = exportMarkdownFile()
   r.importMarkdownFile = importMarkdownFile()
   r.pica = setFontSize(12)
   r.longprimer = setFontSize(10)
@@ -1289,7 +1309,6 @@ export function buildMenuItems(schema) {
     r.openFile,
     r.saveFile,
     r.exportMarkdown,
-    r.exportGFM,
     r.importMarkdownFile,
     r.takeSnapshot,
     r.showDiff,
@@ -1377,10 +1396,14 @@ export function buildMenuItems(schema) {
     r.alignColCenter,
     r.alignColRight,
     r.tableStyle
-  ])]  
+  ])];
+
+  r.copyAsMarkdown = copyAsMarkdown()
+  r.pasteAsMarkdown = pasteAsMarkdown()
+  r.Markdown = new Dropdown([r.copyAsMarkdown, r.pasteAsMarkdown], {label: "𝐌"})
 
   r.fullMenu = r.fileMenu.concat(
-    [[undoItem, redoItem]],
+    [[undoItem, redoItem, r.Markdown]],
     r.inlineMenu,
     r.insertMenu,
     r.typeMenu,
