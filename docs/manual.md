@@ -625,7 +625,7 @@ result should appear. Here are some examples:
 
 The statement form is more precisely defined as:
 
-![optional identifier equals expression equals display selector unit name][statement]
+![optional identifier equals expression equals display selector unit name][statement] ` `
 
 [statement]: images/statement-railroad.svg
 
@@ -705,9 +705,7 @@ Variable names and function names must be written in the form of a valid _identi
 *   The following keywords may not be used as variable names: `π`, `j`, `ℏ`,
     `true`, `false`, `root`, `if`, `else`, `otherwise`, `end`, `and`, `or`, `modulo`, `in`, `to`.
 
-   ![letter letter-or-digit-or-accent prime][identifier]
-
-[identifier]: images/identifier-railroad.svg
+   ![letter letter-or-digit-or-accent prime](images/identifier-railroad.svg)
 
 The names of those accents are:
 
@@ -776,12 +774,12 @@ Number
 : Enter as integers (33), decimals (2.45), percentages (3.2%), scientific
   notation (3.1e4), mixed fractions (3 ⁷⁄₈) or hexadecimal (0x2A).
 
-![integers, decimals, percentages, scientific notation, mixed fractions, or hexadecimal][number]
+![integers, decimals, percentages, scientific notation, mixed fractions, or hexadecimal][number] ` `
 
 [number]: images/NumberRailroad.svg
 {width=650 #number-rr}
 
-    Notice that a number literal must begin and end with a numeral, not a decimal
+i>  Notice that a number literal must begin and end with a numeral, not a decimal
     symbol. Hurmet will not recognize `5.` as a number.
 
     Hurmet’s default decimal symbol is a dot. You can choose instead to enter
@@ -835,11 +833,9 @@ Unit
     | `10 'N·m/s'`           | ¢10 'N·m/s'¢            |
     | `[2.1; 15.3] 'feet'`   | ¢[2.1; 15.3] 'feet'¢    |
 
-    ![number or matrix or map apostrophe unit-name apostrophe][unit]
+    ![number or matrix or map apostrophe unit-name apostrophe](images/unit-railroad.svg)
 
-    [unit]: images/unit-railroad.svg
-
-    A Hurmet treats the number and the unit together as a single _quantity_.
+    Hurmet treats the number and the unit together as a single _quantity_.
     Quantities are useful in [unit-aware calculations](#unit-aware-calculations)
     which do automatic unit conversion and also check for unit compatibility.
 
@@ -1542,9 +1538,7 @@ The spaces in that code example are not significant. Hurmet always aligns the
 words `if` and `otherwise`. In fact, that example could also be coded all onto
 one line. To be precise, the form is:
 
-![expression if condition; expression otherwise][if]
-
-[if]: images/if-railroad.svg
+![expression if condition; expression otherwise](images/if-railroad.svg)
 
 Conditions may contain logical operators:  and or not ∧  ∨  ¬  ⊻
 

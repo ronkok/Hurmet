@@ -321,8 +321,7 @@ echo &quot;Hi!&quot;</code></pre></td></tr>
 <tr><td><code>A = 2 &#x27;m&#x27; × 4 &#x27;feet&#x27; = ?? m²</code></td><td><math><mrow><mi>A</mi><mo>=</mo></mrow><mrow><mn>2</mn><mspace width="0.2778em"></mspace><mtext>m</mtext><mo>×</mo></mrow><mrow><mn>4</mn><mspace width="0.2778em"></mspace><mtext>feet</mtext><mo>=</mo></mrow><mrow><mn>2.4384</mn><mspace width="0.2778em"></mspace><msup><mtext>m</mtext><mn>2</mn></msup></mrow></math></td></tr>
 </table>
 <p>The statement form is more precisely defined as:</p>
-<figure><img src="images/statement-railroad.svg" class="figimg" alt="statement">
-<figcaption>optional identifier equals expression equals display selector unit name</figcaption></figure>
+<p><img src="images/statement-railroad.svg" alt="statement"> <code></code></p>
 <p>At the beginning of the statement, you can write an optional variable name. The result of the calculation will be assigned to that variable. Expressions later in the document can call the variable. Variable names must qualify as valid <a href='#identifiers'>identifiers</a>. They are case-sensitive and bold-sensitive. A search for variable <em>E</em> will not find <em>e</em>. A search for <strong>M</strong> will not find <em>M</em>.</p>
 <p>You can define a unit for the result with a leading currency symbol or a trailing unit name, but not both in the same statement.</p>
 <p>You can also slip in a <code>;</code> character just before the final <code>=</code> sign in a statement. That will create a multiple line statement, with aligned <code>=</code> signs.</p>
@@ -357,7 +356,7 @@ echo &quot;Hi!&quot;</code></pre></td></tr>
 <li><p>Primes may be appended to the very end, as in: <math><mrow><mi>f</mi><msubsup><mrow></mrow><mtext>c</mtext><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msubsup></mrow></math>.</p>
 </li>
 <li><p>The following keywords may not be used as variable names: <code>π</code>, <code>j</code>, <code>ℏ</code>, <code>true</code>, <code>false</code>, <code>root</code>, <code>if</code>, <code>else</code>, <code>otherwise</code>, <code>end</code>, <code>and</code>, <code>or</code>, <code>modulo</code>, <code>in</code>, <code>to</code>.</p>
-<figure></figure>
+<p><img src="images/identifier-railroad.svg" alt="letter letter-or-digit-or-accent prime"></p>
 </li>
 </ul>
 <p>The names of those accents are:</p>
@@ -398,22 +397,12 @@ a[5..]    # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong><
 <dt id='number'>Number</dt>
 <dd><p>Enter as integers (33), decimals (2.45), percentages (3.2%), scientific notation (3.1e4), mixed fractions (3 ⁷⁄₈) or hexadecimal (0x2A).</p>
 </dd>
-<figure><img src="images/NumberRailroad.svg" class="figimg" alt="number" id="number-rr" width="650">
-<figcaption>integers, decimals, percentages, scientific notation, mixed fractions, or hexadecimal</figcaption></figure>
-<pre><code>Notice that a number literal must begin and end with a numeral, not a decimal
-symbol. Hurmet will not recognize `5.` as a number.
-
-Hurmet’s default decimal symbol is a dot. You can choose instead to enter
-numbers with a decimal comma via a drop-down menu in the **Doc** menu. Numbers are
-never entered with a thousands separator, but they can be _displayed_ with one.
-
-Hurmet always saves a decimal symbol as a dot. It’s only the display that changes.
-
-While calculations are underway, Hurmet holds every number in memory in rational
-number format. The numerator and denominator are each integers of arbitrary
-length. So Hurmet can work precisely with numbers like 0.1 and 0¹⁄₃.
-Trignonometry and roots are done in double-precision floating point, good to
-about 15 significant digits.</code></pre><dt id='complex-number'>Complex Number</dt>
+<p><img alt="integers, decimals, percentages, scientific notation, mixed fractions, or hexadecimal"> <code></code></p>
+<div class="indented"><p>Notice that a number literal must begin and end with a numeral, not a decimal symbol. Hurmet will not recognize <code>5.</code> as a number.</p>
+<p>Hurmet’s default decimal symbol is a dot. You can choose instead to enter numbers with a decimal comma via a drop-down menu in the <strong>Doc</strong> menu. Numbers are never entered with a thousands separator, but they can be <em>displayed</em> with one.</p>
+<p>Hurmet always saves a decimal symbol as a dot. It’s only the display that changes.</p>
+<p>While calculations are underway, Hurmet holds every number in memory in rational number format. The numerator and denominator are each integers of arbitrary length. So Hurmet can work precisely with numbers like 0.1 and 0¹⁄₃. Trignonometry and roots are done in double-precision floating point, good to about 15 significant digits.</p>
+</div><dt id='complex-number'>Complex Number</dt>
 <dd><p>One can write a complex number in two forms:</p>
 <ul><li><p><math><mrow><mi>a</mi><mo>+</mo></mrow><mrow><mi>j</mi><mtext> </mtext><mi>b</mi></mrow></math>    The letter “<math><mi>j</mi></math>” is identical to <math><msqrt><mrow><mtext>-</mtext><mn>1</mn></mrow></msqrt></math> by Hurmet definition. Be sure to write a space after <math><mi>j</mi></math>.</p>
 </li>
@@ -444,8 +433,8 @@ about 15 significant digits.</code></pre><dt id='complex-number'>Complex Number<
 <tr><td><code>10 &#x27;N·m/s&#x27;</code></td><td><math><mrow><mn>10</mn><mspace width="0.2778em"></mspace><mrow><mtext>N</mtext><mspace width="0.0556em"></mspace><mo lspace="0em" rspace="0em">⋅</mo><mspace width="0.0556em"></mspace><mtext>m⁄s</mtext></mrow></mrow></math></td></tr>
 <tr><td><code>[2.1; 15.3] &#x27;feet&#x27;</code></td><td><math><mrow><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center"><mtr><mtd><mn>2.1</mn></mtd></mtr><mtr><mtd><mn>15.3</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow><mspace width="0.2778em"></mspace><mtext>feet</mtext></mrow></math></td></tr>
 </table>
-<figure></figure>
-<p>A Hurmet treats the number and the unit together as a single <em>quantity</em>. Quantities are useful in <a href='#unit-aware-calculations'>unit-aware calculations</a> which do automatic unit conversion and also check for unit compatibility.</p>
+<p><img src="images/unit-railroad.svg" alt="number or matrix or map apostrophe unit-name apostrophe"></p>
+<p>Hurmet treats the number and the unit together as a single <em>quantity</em>. Quantities are useful in <a href='#unit-aware-calculations'>unit-aware calculations</a> which do automatic unit conversion and also check for unit compatibility.</p>
 <p>Hurmet has many built-in <a href='unit-definitions.html'>unit definitions</a>. You can write any one of them into a quantity. SI (metric) prefixes are valid on the appropriate unit names.</p>
 <p>You can also create compound units on the fly. That is, you can raise any unit to a power, and these powers-of-units can be multiplied (or divided) together into products. Example:</p>
 <table><tr><th>Input</th>
@@ -767,8 +756,7 @@ total                      	sumAbove()``</code></pre><p>will render like this:<b
     0.65                         if f_c′ ≥ 8000 ;
     0.85 - (f_c′ - 4000)/20000   otherwise
 }</code></pre><p>The spaces in that code example are not significant. Hurmet always aligns the words <code>if</code> and <code>otherwise</code>. In fact, that example could also be coded all onto one line. To be precise, the form is:</p>
-<figure><img src="images/if-railroad.svg" class="figimg" alt="if">
-<figcaption>expression if condition; expression otherwise</figcaption></figure>
+<p><img src="images/if-railroad.svg" alt="expression if condition; expression otherwise"></p>
 <p>Conditions may contain logical operators:  and or not ∧  ∨  ¬  ⊻</p>
 <p><math><mrow><mi>x</mi><mo>=</mo></mrow><mrow><mrow><mo fence="true" form="prefix">{</mo><mtable class="tml-cases"><mtr><mtd><mrow><mn>2</mn><mspace width="0.1667em"></mspace><mi>a</mi></mrow></mtd><mtd><mrow><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">f</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mi>a</mi><mo>&lt;</mo><mi>b</mi><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">n</mi></mrow><mrow><mi mathvariant="normal">d</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mi>b</mi><mo>=</mo><mn>4</mn></mrow></mtd></mtr><mtr><mtd><msup><mi>a</mi><mn>2</mn></msup></mtd><mtd><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">t</mi></mrow><mrow><mi mathvariant="normal">h</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">w</mi></mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">s</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow></mtd></mtr></mtable><mo fence="true" form="postfix"></mo></mrow></mrow></math></p>
 <p>Chained comparisons are okay.</p>
