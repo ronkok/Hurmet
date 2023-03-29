@@ -25572,6 +25572,13 @@ rules.set("strong", {
     return parseTextMark(capture[2], state, "strong" )
   }
 });
+rules.set("del", {
+  isLeaf: true,
+  match: inlineRegex(/^<del>([\s\S]*?)<\/del>/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "strikethru" )
+  }
+});
 rules.set("strikethru", {
   isLeaf: true,
   match: inlineRegex(/^~~(?=\S)((?:\\[\s\S]|~(?!~)|[^\s~\\]|\s(?!~~))+?)~~/),
@@ -25584,6 +25591,13 @@ rules.set("superscript", {
   match: inlineRegex(/^<sup>([\s\S]*?)<\/sup>/),
   parse: function(capture, state) {
     return parseTextMark(capture[1], state, "superscript" )
+  }
+});
+rules.set("subscripttag", {
+  isLeaf: true,
+  match: inlineRegex(/^<sub>([\s\S]*?)<\/sub>/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "subscript" )
   }
 });
 rules.set("subscript", {
