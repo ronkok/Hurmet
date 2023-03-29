@@ -459,9 +459,16 @@ function exportMarkdownFile() {
   return new MenuItem({
     label: "Export Markdown…",
     run(state) {
+      const preamble = `---------------
+decimalFormat: ${state.doc.attrs.decimalFormat}
+fontSize: ${state.doc.attrs.fontSize}
+pageSize: ${state.doc.attrs.pageSize}
+---------------
+
+`
       const str = hurmetMarkdownSerializer.serialize(state.doc, new Map())
       // Save the result
-      const blob = new Blob([str], {type: "text/plain;charset=utf-8"})
+      const blob = new Blob([preamble + str], {type: "text/plain;charset=utf-8"})
       saveAs(blob, "HurmetMarkdown.md", { autoBom : false });
     }
   })

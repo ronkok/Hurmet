@@ -10407,10 +10407,37 @@ const populateTOC = ast => {
   }
 };
 
-const md2ast = (md, inHtml = false) => {
-  const state = { inline: false, _defs: {}, prevCapture: "", remainder: "", inHtml };
+const metadataRegEx = /^---+\n((?:[A-Za-z0-9][A-Za-z0-9 _-]*:[^\n]+\n(?:[ \t]+[^\n]+\n)*)+)---+\n/;
+const metadataItemRegEx = /^[A-Za-z0-9][A-Za-z0-9 _-]*:[^\n]+\n(?:[ \t]+[^\n]+\n)*/;
+const hurmetMetadataNames = ["decimalFormat", "fontSize", "pageSize"];
 
-  // First, get all the link reference definitions
+const parseMetadata = str => {
+  const metadata = {};
+  let capture = str.match(metadataItemRegEx);
+  while (capture) {
+    const item = capture[0].split(":");
+    const key = item[0].trim().replace(/ /g, "");
+    if (hurmetMetadataNames.includes(key)) {
+      const value = item[1].slice(0, -1).trim().replace(/ *\n[ \t]*/g, " ");
+      metadata[key] = value;
+    }
+    str = str.slice(capture[0].length);
+    capture = str.match(metadataItemRegEx);
+  }
+  return metadata
+};
+
+const md2ast = (md, inHtml = false) => {
+  // First, check for a metadata preamble
+  let metadata = false;
+  if (metadataRegEx.test(md)) {
+    const match = metadataRegEx.exec(md);
+    metadata = parseMetadata(match[1]);
+    md = md.slice(match[0].length);
+  }
+
+  // Second, get all the link reference definitions
+  const state = { inline: false, _defs: {}, prevCapture: "", remainder: "", inHtml };
   const defRegEx = /^\[((?:\\[\s\S]|[^\\])+?)\]: *<?([^\n>]*)>? *\n(?:\{([^\n}]*)\}\n)?/gm;
   const captures = [...md.matchAll(defRegEx)];
   for (const capture of captures) {
@@ -10437,7 +10464,11 @@ const md2ast = (md, inHtml = false) => {
   }
   consolidate(ast);
   populateTOC(ast);
-  return ast
+  if (metadata) {
+    return { type: "doc", attrs: metadata, content: ast }
+  } else {
+    return ast
+  }
 };
 
 const startSvg = _ => {

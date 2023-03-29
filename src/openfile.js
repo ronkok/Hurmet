@@ -10,16 +10,20 @@ const handleContents = (view, schema, str, format) => {
     doc = JSON.parse(str)
   } else if (format === "markdown") {
     const ast = hurmet.md2ast(str)
-    doc = {
-      type: "doc",
-      "attrs": {
-        "decimalFormat": "1,000,000.",
-        "inDraftMode": false,
-        "fontSize": 12,
-        "fileHandle": null,
-        "pageSize": "letter"
-      },
-      "content": ast
+    if (typeof ast === "object" && ast.type && ast.type === "doc") {
+      doc = ast
+    } else {
+      doc = {
+        type: "doc",
+        "attrs": {
+          "decimalFormat": "1,000,000.",
+          "inDraftMode": false,
+          "fontSize": 12,
+          "fileHandle": null,
+          "pageSize": "letter"
+        },
+        "content": ast
+      }
     }
     doc = JSON.parse(JSON.stringify(doc))
   }

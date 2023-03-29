@@ -25812,10 +25812,37 @@ const populateTOC = ast => {
   }
 };
 
-const md2ast = (md, inHtml = false) => {
-  const state = { inline: false, _defs: {}, prevCapture: "", remainder: "", inHtml };
+const metadataRegEx = /^---+\n((?:[A-Za-z0-9][A-Za-z0-9 _-]*:[^\n]+\n(?:[ \t]+[^\n]+\n)*)+)---+\n/;
+const metadataItemRegEx = /^[A-Za-z0-9][A-Za-z0-9 _-]*:[^\n]+\n(?:[ \t]+[^\n]+\n)*/;
+const hurmetMetadataNames = ["decimalFormat", "fontSize", "pageSize"];
 
-  // First, get all the link reference definitions
+const parseMetadata = str => {
+  const metadata = {};
+  let capture = str.match(metadataItemRegEx);
+  while (capture) {
+    const item = capture[0].split(":");
+    const key = item[0].trim().replace(/ /g, "");
+    if (hurmetMetadataNames.includes(key)) {
+      const value = item[1].slice(0, -1).trim().replace(/ *\n[ \t]*/g, " ");
+      metadata[key] = value;
+    }
+    str = str.slice(capture[0].length);
+    capture = str.match(metadataItemRegEx);
+  }
+  return metadata
+};
+
+const md2ast = (md, inHtml = false) => {
+  // First, check for a metadata preamble
+  let metadata = false;
+  if (metadataRegEx.test(md)) {
+    const match = metadataRegEx.exec(md);
+    metadata = parseMetadata(match[1]);
+    md = md.slice(match[0].length);
+  }
+
+  // Second, get all the link reference definitions
+  const state = { inline: false, _defs: {}, prevCapture: "", remainder: "", inHtml };
   const defRegEx = /^\[((?:\\[\s\S]|[^\\])+?)\]: *<?([^\n>]*)>? *\n(?:\{([^\n}]*)\}\n)?/gm;
   const captures = [...md.matchAll(defRegEx)];
   for (const capture of captures) {
@@ -25842,7 +25869,11 @@ const md2ast = (md, inHtml = false) => {
   }
   consolidate(ast);
   populateTOC(ast);
-  return ast
+  if (metadata) {
+    return { type: "doc", attrs: metadata, content: ast }
+  } else {
+    return ast
+  }
 };
 
 const startSvg = _ => {
@@ -44468,23 +44499,28 @@ const pipeTable = (table, numCols, colWidth, justify, delim, numRowsInHeading) =
 const gridTable = (table, numCols, numRowsInHeading, rowSpan, colSpan, colWidth, justify, delim) => {
   // Write a reStrucuredText grid table.
 
-  // Start by writing the top border. It differs slightly from rst.
-  let topBorder = "+";
-  for (let j = 0; j < numCols; j++) {
-    if (colSpan[0][j] === 0) { continue }
-    // Set column justification with ":" characters, as in pipe tables.
-    topBorder += justify[j] === "c" ? ":" : "-";
-    if (colSpan[0][j] === 1) {
-      topBorder += "-".repeat(colWidth[j]);
-      topBorder += ("cr".indexOf(justify[j]) > -1 ? ":" : "-");
-      topBorder += "+";
-    } else {
-      for (let k = 0; k < colSpan[0][j]; k++) {
-        topBorder += "-".repeat(colWidth[j + k] + 2);
+  const cellBorder = (ch, isColonRow, i, j) => {
+    let borderStr = "";
+    for (let k = 0; k < colSpan[i][j]; k++) {
+      borderStr += (isColonRow && justify[j] === "c") ? ":" : ch;
+      borderStr += ch.repeat(colWidth[j + k]);
+      borderStr += (isColonRow && "cr".indexOf(justify[j]) > -1) ? ":" : ch;
+      if (i < colSpan.length - 1 && j + k < colSpan[0].length - 1) {
+        borderStr += colSpan[i + 1][j + k + 1] > 0 ? "+" : ch;
+      } else {
+        borderStr += "+";
       }
-      topBorder = topBorder.slice(0, -1) + ("cr".indexOf(justify[j]) > -1 ? ":" : "-");
-      topBorder += "+";
     }
+    return borderStr
+  };
+
+  // Start by writing the top border.
+  let topBorder = "+";
+  let ch = numRowsInHeading === 0 ? "=" : "-";
+  let isColonRow = ch === "=" || numRowsInHeading === 0;
+  for (let j = 0; j < numCols; j++) {
+    if (rowSpan[0][j] === 0) { continue }
+    topBorder += cellBorder(ch, isColonRow, 0, j);
   }
 
   // Set pointers frome the the grid table current location to the array of table content.
@@ -44527,16 +44563,9 @@ const gridTable = (table, numCols, numRowsInHeading, rowSpan, colSpan, colWidth,
       } else if (rowIsReadyForBorder[endRow]) {
         // Write a border under one cell.
         if (j === 0) { str = delim + "+"; }
-        const ch = numRowsInHeading === endRow + 1 ? "=" : "-";
-        let border = "+";
-        for (let k = 0; k < colSpan[current[j].row][j]; k++) {
-          border += ch.repeat(colWidth[j + k] + 2);
-          if (current[j].row < colSpan.length - 1 && j + k < colSpan[0].length - 1) {
-            border += colSpan[current[j].row + 1][j + k + 1] > 0 ? "+" : ch;
-          } else {
-            border += "+";
-          }
-        }
+        ch = numRowsInHeading === endRow + 1 ? "=" : "-";
+        isColonRow = ch === "=";
+        const border = "+" + cellBorder(ch, isColonRow, current[j].row, j);
         str = str.slice(0, -1) + border.slice(0, -1) + "+";
       } else {
         // Other columns are still writing content from this table row.
@@ -44575,17 +44604,21 @@ const handleContents = (view, schema, str, format) => {
     doc = JSON.parse(str);
   } else if (format === "markdown") {
     const ast = hurmet.md2ast(str);
-    doc = {
-      type: "doc",
-      "attrs": {
-        "decimalFormat": "1,000,000.",
-        "inDraftMode": false,
-        "fontSize": 12,
-        "fileHandle": null,
-        "pageSize": "letter"
-      },
-      "content": ast
-    };
+    if (typeof ast === "object" && ast.type && ast.type === "doc") {
+      doc = ast;
+    } else {
+      doc = {
+        type: "doc",
+        "attrs": {
+          "decimalFormat": "1,000,000.",
+          "inDraftMode": false,
+          "fontSize": 12,
+          "fileHandle": null,
+          "pageSize": "letter"
+        },
+        "content": ast
+      };
+    }
     doc = JSON.parse(JSON.stringify(doc));
   }
   const fontSize = (doc.attrs.fontSize) ? doc.attrs.fontSize : 12;
@@ -46746,9 +46779,16 @@ function exportMarkdownFile() {
   return new MenuItem({
     label: "Export Markdown…",
     run(state) {
+      const preamble = `---------------
+decimalFormat: ${state.doc.attrs.decimalFormat}
+fontSize: ${state.doc.attrs.fontSize}
+pageSize: ${state.doc.attrs.pageSize}
+---------------
+
+`;
       const str = hurmetMarkdownSerializer.serialize(state.doc, new Map());
       // Save the result
-      const blob = new Blob([str], {type: "text/plain;charset=utf-8"});
+      const blob = new Blob([preamble + str], {type: "text/plain;charset=utf-8"});
       FileSaver_1(blob, "HurmetMarkdown.md", { autoBom : false });
     }
   })
