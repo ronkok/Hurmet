@@ -53,7 +53,7 @@ document range by selecting text, then clicking one of the menu bar buttons:
 | ![undo][]  ![redo][]                 | Undo, Redo                         |
 +--------------------------------------+------------------------------------+
 | **B**  **_I_**  ![embed][]           | Character styles:\                 |
-| **X~2~**  **X<sup>2</sup>**          | Bold, Italic, Code, Subscript,     |
+| **X<sub>2</sub>** **X<sup>2</sup>**  | Bold, Italic, Code, Subscript,     |
 | ![strikethrough][]  **<u>U</u>**     | Superscript, Strikethrough,        |
 |                                      | Underline                          |
 +--------------------------------------+------------------------------------+
@@ -177,8 +177,6 @@ A newline is indicated by a backslash, `\`, at the end of a line.
 | `**Bold**`                               | **Bold**               |
 +------------------------------------------+------------------------+
 | `**_Bold Italic_**`                      | **_Bold Italic_**      |
-+------------------------------------------+------------------------+
-| `~subscript~`                            | ~subscript~            |
 +------------------------------------------+------------------------+
 | `~~strikethrough~~`                      | ~~strikethrough~~      |
 +------------------------------------------+------------------------+
@@ -1346,7 +1344,7 @@ cos(𝜃), sin(𝜃), tan(𝜃), sec(𝜃), csc(𝜃), cot(𝜃)
 
   Three functions: `sin`, `cos`, and `tan`, do not require parentheses around their arguments.
 
-cos~d~(𝜃), sin~d~(𝜃), tan~d~(𝜃), sec~d~(𝜃), csc~d~(𝜃), cot~d~(𝜃)
+cos<sub>d</sub>(𝜃), sin<sub>d</sub>(𝜃), tan<sub>d</sub>(𝜃), sec<sub>d</sub>(𝜃), csc<sub>d</sub>(𝜃), cot<sub>d</sub>(𝜃)
 
 : The trigonometry functions listed just above will assume that the argument is
   in degrees. Real numbers only. Hurmet will subscript the “d” for you.
@@ -1403,7 +1401,7 @@ log(_z_), ln(_z_)
 
 : Natural (base _e_) logarithm of real or complex number _z_.
 
-log~10~(_x_)
+log<sub>10</sub>(_x_)
 
 : Base 10 logarithm. Real numbers only. Hurmet will subscript the numerals for you.
 
@@ -1847,11 +1845,11 @@ frame _width_, _height_<span class="optional">, position</span>
   _position_ can be "inline", "left", or "right".\
   This command must come before anything is drawn.
 
-view _x_~min~, _x_~max~<span class="optional">, yₘᵢₙ, yₘₐₓ,</span>
+view _x_<sub>min</sub>, _x_<sub>max</sub><span class="optional">, yₘᵢₙ, yₘₐₓ,</span>
 
 : This command is usually written directly after `frame`. The arguments set the
-  coordinate system. If _y_~min~ is omitted, the x-axis is placed in
-  the middle of the picture. If _y_~max~ is omitted, the scales along
+  coordinate system. If _y_<sub>min</sub> is omitted, the x-axis is placed in
+  the middle of the picture. If _y_<sub>max</sub> is omitted, the scales along
   the x-axis and y-axis are the same.
 
 axes _dx_, _dy_<span class="optional">, "labels"</span>
@@ -1940,7 +1938,7 @@ text  [_x_, _y_], "_string_"<span class="optional">, position</span>
   "aboveright", "belowleft", or "belowright". The default is "middle".
 
   The string can be styled with Markdown inline styles: \__italic_\_, \*\***bold**\*\*,
-  \``code`\`, `~`~subscript~`~`, and `~~`~~strikethrough~~`~~`.
+  \``code`\`, `<sub>`<sub>subscript</sub>`</sub>`, and `~~`~~strikethrough~~`~~`.
 
 leader [_x₁_, _y₁_; _x₂_, _y₂_<span class="optional">; x₃, y₃; etc</span>], "_note_"
 

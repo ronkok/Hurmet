@@ -227,11 +227,7 @@ const hurmetMarks = {
          close(_state, _mark, parent, index) { return backticksFor(parent.child(index - 1), 1) },
          escape: false},
   superscript: {open: "<sup>", close: "</sup>", expelEnclosingWhitespace: true},
-  subscript: {
-    open(state)  { return "~" },
-    close(state) { return "~" },
-    expelEnclosingWhitespace: true
-  },
+  subscript: {open: "<sub>", close: "</sub>", expelEnclosingWhitespace: true},
   strikethru: {open: "~~", close: "~~", mixable: true, expelEnclosingWhitespace: true},
   underline: {open: "<u>", close: "</u>", expelEnclosingWhitespace: true},
   highlight: {open: "<mark>", close: "</mark>", expelEnclosingWhitespace: true}

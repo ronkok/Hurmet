@@ -182,7 +182,7 @@ end
         return "hi"
     end
 
-A paragraph
+A paragraph with a sub<sub>script</sub>.
 
 	function tab(y)
 	    return "ho"

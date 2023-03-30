@@ -14,13 +14,11 @@
  *    Hurmet display calculation is fenced ¢¢\n … \n¢¢.
  * 2. LaTeX inline math is delimited $…$. $ and \\ are escaped \$ & \\\\.
  *    LaTeX display math is fenced  $$\n … \n$$.
- * 3. ~subscript~
- * 4. ~~strikethrough~~
- * 5. © comment (A paragraph in a speech bubble)
- * 6. Pipe tables as per Github Flavored Markdown (GFM).
- * 7. Grid tables as per reStructuredText, with ":" characters to indicate
- *    column justtification.
- * 8. Implicit reference links [title][<ref>] & implicit reference images ![alt|caption][<ref>]
+ * 3. ~~strikethrough~~
+ * 4. © comment (A paragraph in a speech bubble)
+ * 5. Pipe tables as per Github Flavored Markdown (GFM).
+ * 6. Grid tables as per Pandoc/reStructuredText
+ * 7. Implicit reference links [title][<ref>] & implicit reference images ![alt|caption][<ref>]
  *    ⋮
  *    [alt]: path
  *    Reference images can have captions and directives. Format is:
@@ -28,31 +26,31 @@
  *      ⋮
  *    [def]: target
  *    {.class #id width=number}
- * 9. Table directives. They are placed on the line after the table. The format is:
+ * 8. Table directives. They are placed on the line after the table. The format is:
  *    {.class #id width="num1 num2 …" caption}
- * 10. Lists that allow the user to pick list ordering.
+ * 9. Lists that allow the user to pick list ordering.
  *       1. →  1. 2. 3.  etc.
  *       A. →  A. B. C.  etc. (future)
  *       a) →  (a) (b) (c)  etc. (future)
- * 11. Table of Contents
+ * 10. Table of Contents
  *     {.toc start=N end=N}
- * 12. Definition lists, per Pandoc.  (future)
- * 13. Blurbs set an attribute on a block element, as in Markua.
+ * 11. Definition lists, per Pandoc.  (future)
+ * 12. Blurbs set an attribute on a block element, as in Markua.
  *     Blurbs are denoted by a symbol in the left margin.
  *     Subsequent indented text blocks are children of the blurb.
  *     Blurb symbols:
- *       »  indented block
+ *       i> indented block
  *       C> Centered block
  *       H> print header element, <header>
  *       I> Information admonition (future)
  *       W> Warning admonition (future)
  *       T> Tip admonition (future)
  *       c> Comment admonition (future)
- * 14. [^1] is a reference to a footnote. (future)
+ * 13. [^1] is a reference to a footnote. (future)
  *     [^1]: The body of the footnote is deferred, similar to reference links.
- * 15. [#1] is a reference to a citation. (future)
+ * 14. [#1] is a reference to a citation. (future)
  *     [#1]: The body of the citation is deferred, similar to reference links.
- * 16. Line blocks begin with "| ", as per Pandoc. (future)
+ * 15. Line blocks begin with "| ", as per Pandoc. (future)
  *
  * hurmetMark.js copyright (c) 2021, 2022 Ron Kok
  *
@@ -828,16 +826,9 @@ rules.set("superscript", {
     return parseTextMark(capture[1], state, "superscript" )
   }
 });
-rules.set("subscripttag", {
-  isLeaf: true,
-  match: inlineRegex(/^<sub>([\s\S]*?)<\/sub>/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "subscript" )
-  }
-});
 rules.set("subscript", {
   isLeaf: true,
-  match: inlineRegex(/^~((?:\\[\s\S]|[^\\])+?)~/),
+  match: inlineRegex(/^<sub>([\s\S]*?)<\/sub>/),
   parse: function(capture, state) {
     return parseTextMark(capture[1], state, "subscript" )
   }
