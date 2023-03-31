@@ -8,6 +8,21 @@ Otherwise, newlines in a paragraph are treated as spaces.
 
 We just had two consecutive blanks lines. It parsed just fine.
 
+### Calculations and TeX
+
+Write a calculation:
+
+¢` L = 3 'ft' `
+
+¢` 2 L = ?? m `
+
+And some $\TeX$: $ \frac a b + c_2 $
+
+¢```df = ``#name	area	diameter
+	in^2	in
+#3	0.22	0.375
+#4	0.31	0.5`` ```
+
 ### Links
 
 Here is a [regular link](https://hurmet.app/) and here is a [reference link][ref link].

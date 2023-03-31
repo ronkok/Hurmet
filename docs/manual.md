@@ -182,14 +182,14 @@ A newline is indicated by a backslash, `\`, at the end of a line.
 +------------------------------------------+------------------------+
 | `` `inline code` ``                      | `inline code`          |
 +------------------------------------------+------------------------+
-| `¢ calcu = la/tion ¢`                    | ¢calcu = la/tion¢      |
+| ``¢` calcu = la/tion ` ``                | ¢` calcu = la/tion `   |
 +------------------------------------------+------------------------+
-| `$ \TeX $`                               | ¢ \TeX ¢               |
+| `$ \TeX $`                               | ¢` \TeX `              |
 +------------------------------------------+------------------------+
 | `# Heading 1`                            | # Heading 1            |
 +------------------------------------------+------------------------+
 | `## Heading 2`                           | ## Heading 2           |
-+------------------------------------------+--------------------+
++------------------------------------------+------------------------+
 | `[Link][id]` \                           | [Link][id]             |
 | ⋮ \                                      |                        |
 | `[id]: http://a.com`                     |                        |
@@ -268,7 +268,7 @@ Grid tables
 ### TeX
 
 Besides its calculation cells, Hurmet also has cells that emulate the math mode
-of ¢ \TeX ¢ (pronounced _tech_). These cells display, but do not calculate, math.
+of ¢` \TeX ` (pronounced _tech_). These cells display, but do not calculate, math.
 You can create a TeX cell by clicking the ![T][] button. Type **Enter** to
 save the cell.
 
@@ -327,17 +327,17 @@ Arithmetic
 
 Multiplication
 
-: Hurmet accepts several multiplication syntaxes. If ¢a = 7.1¢, then the
+: Hurmet accepts several multiplication syntaxes. If ¢` a = 7.1 `, then the
   following all give the same result:
 
-  i> ¢2 × 7.1¢\
-     ¢2 * 7.1¢\
-     ¢2 · 7.1¢\
-     ¢2 a¢\
-     ¢(2)(7.1)¢
+  i> ¢`2 × 7.1`\
+     ¢`2 * 7.1`\
+     ¢`2 · 7.1`\
+     ¢`2 a`\
+     ¢`(2)(7.1)`
 
-  To obtain the character ¢ × ¢, type xx and hit the space bar. Auto-correct
-  will give you an ¢×¢.
+  To obtain the character ¢` × `, type xx and hit the space bar. Auto-correct
+  will give you an ¢`×`.
 
   A space between variables acts as a multiplication operator.
 
@@ -349,33 +349,33 @@ Roots
 Function
 
 : Hurmet treats a word as a function name if it is placed directly before an
-  open parenthesis. Example: ¢sin(π//6) = 0.5¢. Hurmet has many
+  open parenthesis. Example: ¢`sin(π//6) = 0.5`. Hurmet has many
   [built-in functions](#functions).
 
 <div id="variable-container">
 
 Variables
 
-: ¢L = 3.1¢   ← That kind of statement will assign a value to a variable.
+: ¢`L = 3.1`   ← That kind of statement will assign a value to a variable.
   Subsequent cells can then use the variable.<br>Example: `2 L = ?` will result
-  in: ¢2 L = \color(blue)((2))(3.1) \color(black)= 6.2¢
+  in: ¢`2 L = \color(blue)((2))(3.1) \color(black)= 6.2`
 
   A variable name must be a valid [identifier](#identifiers).
 
   An assignment statement can also contain a calculation expression. Example:\
-  `b = 2 L = ?` will result in ¢ b = 2 L = \color(blue)((2))(3.1) \color(black)= 6.2 ¢
+  `b = 2 L = ?` will result in ¢` b = 2 L = \color(blue)((2))(3.1) \color(black)= 6.2 `
 
 </div>
 
 Subscripts
 
 : An underscore signals the beginning of a subscript. Examples: `x_left` and
-  `y_(i+1)` result in ¢x_left¢ and ¢y_(i+1)¢.
+  `y_(i+1)` result in ¢`x_left` and ¢`y_(i+1)`.
 
 Exponents
 
 : A carat signals the beginning of an exponent. Examples: `x^23` and `y^(i+1)`
-  result in ¢x^23¢ and ¢y^(i+1)¢
+  result in ¢`x^23` and ¢`y^(i+1)`
 
 <div id="greek-container">
 
@@ -389,15 +389,15 @@ Accents and Primes
 : To write an accent above a single-letter variable, write the accent name and
   hit the space bar for an auto-correction. Examples:
 
-  i> `y bar` ↦ ¢y̅¢\
-     `θ hat` ↦ ¢θ̂¢\
-     `P vec` ↦ ¢P⃗¢\
-     `x dot` ↦ ¢ẋ¢
+  i> `y bar` ↦ ¢`y̅`\
+     `θ hat` ↦ ¢`θ̂`\
+     `P vec` ↦ ¢`P⃗`\
+     `x dot` ↦ ¢`ẋ`
 
   More detail [here](#identifiers).
 
   To write a prime, type two apostrophes (aka single quotation marks) and hit the
-  space bar. So, `f''` will result in ¢f′¢
+  space bar. So, `f''` will result in ¢`f′`
 
 </div>
 
@@ -413,7 +413,7 @@ Unit-Aware Calcs
 : Hurmet can automatically handle unit conversions of quantities. To call for a
   unit-aware calculations, write `??` instead of `?` where you want the result to
   appear. Example:\
-  `2 × 3.1 'm' = ?? ft` results in ¢2 × (3.1 'm') = 13.1 ft¢.
+  `2 × 3.1 'm' = ?? ft` results in ¢`2 × (3.1 'm') = 13.1 ft`.
 
   This is covered in more detail [below](#unit-aware-calculations).
 
@@ -442,31 +442,31 @@ Display Mode
 +---------------+-----------------+------------------------------+-------------------------------+
 | Input         | Renders as:     | Input                        | Renders or<br>calculates as:  |
 +===============+=================+==============================+===============================+
-| `12/25.2`     | ¢12/25.2¢       | `x`                          | ¢x¢                           |
+| `12/25.2`     | ¢`12/25.2`      | `x`                          | ¢`x`                          |
 +---------------+-----------------+------------------------------+-------------------------------+
-| `(a + b)/c`   | ¢(a + b)/c¢     | `longVarName`                | ¢longVarName¢                 |
+| `(a + b)/c`   | ¢`(a + b)/c`    | `longVarName`                | ¢`longVarName`                |
 +---------------+-----------------+------------------------------+-------------------------------+
-| `a//b`        | ¢a//b¢          | `"A string."`                | ¢"A string."¢                 |
+| `a//b`        | ¢`a//b`         | `"A string."`                | ¢`"A string."`                |
 +---------------+-----------------+------------------------------+-------------------------------+
-| `a///b`       | ¢a///b¢         | `5 'N.m/s2'`                 | ¢5 'N.m/s2'¢                  |
+| `a///b`       | ¢`a///b`        | `5 'N.m/s2'`                 | ¢`5 'N.m/s2'`                 |
 +---------------+-----------------+------------------------------+-------------------------------+
-| `x^23`        | ¢x^23¢          | `(a, b; c, d)`               | ¢(a, b; c, d)}¢               |
+| `x^23`        | ¢`x^23`         | `(a, b; c, d)`               | ¢`(a, b; c, d)}`              |
 +---------------+-----------------+------------------------------+-------------------------------+
-| `x^(a+b)`     | ¢x^(a+b)¢       | `[a, b; c, d]`               | ¢[a, b; c, d]¢                |
+| `x^(a+b)`     | ¢`x^(a+b)`      | `[a, b; c, d]`               | ¢`[a, b; c, d]`               |
 +---------------+-----------------+------------------------------+-------------------------------+
-| `x_subscript` | ¢x_subscript¢   | `{:a, b; c, d:}`             | ¢{:a, b; c, d:}¢              |
+| `x_subscript` | ¢`x_subscript`  | `{:a, b; c, d:}`             | ¢`{:a, b; c, d:}`             |
 +---------------+-----------------+------------------------------+-------------------------------+
-| `x_(a+b)`     | ¢x_(a+b)¢       | `[1..4] = ?`                 | ¢[1, 2, 3, 4]¢                |
+| `x_(a+b)`     | ¢`x_(a+b)`      | `[1..4] = ?`                 | ¢`[1, 2, 3, 4]`               |
 +---------------+-----------------+------------------------------+-------------------------------+
-| `x′`          | ¢x′¢            | `[1..2..5] = ?`              | ¢[1, 3, 5]¢                   |
+| `x′`          | ¢`x′`           | `[1..2..5] = ?`              | ¢`[1, 3, 5]`                  |
 +---------------+-----------------+------------------------------+-------------------------------+
-| `|x|  ‖x‖`    | ¢|x|˽˽˽‖x‖¢     | `{a if b;` \                 | ¢{a if b; c otherwise}¢       |
+| `|x|  ‖x‖`    | ¢`|x|˽˽˽‖x‖`    | `{a if b;` \                 | ¢`{a if b; c otherwise}`      |
 |               |                 | `c otherwise}`               |                               |
 +---------------+-----------------+------------------------------+-------------------------------+
-| `A-->note B`  | ¢A-->note B¢    | ``` ``#size	dia	area ``` \   | ¢ ``#size   	dia	area         |
+| `A-->note B`  | ¢`A-->note B`   | ``` ``#size	dia	area ``` \   | ¢``` ``#size    	dia	area     |
 +---------------+-----------------+ ``         	in 	in² `` \     | 	in 	in²                      |
-| `\red("ng")`  | ¢\red("ng")¢    | ``  #3 	0.375  	0.11 ``\     |  #3 	0.375  	0.11             |
-|               |                 | ``` #4 	0.5    	0.2 `` ```   |  #4 	0.5	0.2 `` ¢             |
+| `\red("ng")`  | ¢`\red("ng")`   | ``  #3 	0.375  	0.11 ``\     |  #3 	0.375  	0.11             |
+|               |                 | ``` #4 	0.5    	0.2 `` ```   |  #4 	0.5	0.2 `` ```           |
 +---------------+-----------------+------------------------------+-------------------------------+
 {.markup}
 
@@ -500,9 +500,9 @@ Auto-correct kicks in when you type a space.
 | `!=`     | ≠    | `<<`         | ⟨          | Psi        | Ψ       | iota     | ι    |
 | `<>`     | ≠    | `>>`         | ⟩          | Omega      | Ω       | kappa    | κ    |
 | ~=       | ≅    | ^^           | ∧          | y bar      | y̅      | lambda   | λ    |
-| \~~      | ≈    | vv           | ∨          | θ hat      | ¢ θ̂ ¢  | mu       | μ    |
-| \\in     | ∈    | vvv          | ⋁          | P vec      | ¢ P⃗ ¢  | nu       | ν    |
-| \\notin  | ∉    | nn           | ∩          | P harpoon  | ¢ P⃑ ¢  | xi       | ξ    |
+| \~~      | ≈    | vv           | ∨          | θ hat      | ¢` θ̂ `  | mu       | μ    |
+| \\in     | ∈    | vvv          | ⋁          | P vec      | ¢` P⃗ `  | nu       | ν    |
+| \\notin  | ∉    | nn           | ∩          | P harpoon  | ¢` P⃑ `  | xi       | ξ    |
 | -=       | ≡    | nnn          | ⋂          | a dot      | ȧ      | pi       | π    |
 | :=       | ≔    | uu           | ∪          | a ddot     | ä      | rho      | ρ    |
 | -:       | ÷    | uuu          | ⋃          | a grave    | à      | sigma    | σ    |
@@ -513,8 +513,8 @@ Auto-correct kicks in when you type a space.
 | `<->`    | ↔    | \\sum        | ∑          | EE         | ∃       | psi      | ψ    |
 | `=>`     | ⇒    | \\int        | ∫          | CC         | ℂ       | omega    | ω    |
 | \\circ   | ∘    | \\iint       | ∬          | HH         | ℍ       | \\hbar   | ℏ    |
-| \|\|\|   | ¦    | ii           | ¢ √(-1) ¢  | NN         | ℕ       | \\ell    | ℓ    |
-| \|\|     | ‖    | OO           | ¢ O︀ ¢      | QQ         | ℚ       | \\euro   | €    |
+| \|\|\|   | ¦    | ii           | ¢` √(-1) `  | NN         | ℕ       | \\ell    | ℓ    |
+| \|\|     | ‖    | OO           | ¢` O︀ `      | QQ         | ℚ       | \\euro   | €    |
 | /_       | ∠    | \\c          | ¢          | RR         | ℝ       | \\yen    | ¥    |
 |          |      |              |            | ZZ         | ℤ       |          |      |
 {.auto-correct}
@@ -522,7 +522,7 @@ Auto-correct kicks in when you type a space.
 The font corrections, e.g., `bb …` work on any letter from A to Z or a to z.
 
 `-->`, `<--`, and `<-->` will auto correct into extensible arrows, as in:
-¢ A ⟶"note" B ¢.
+¢` A ⟶"note" B `.
 
 `\<space>` auto-corrects to `˽` in the text editor, which renders as a space.
 
@@ -560,12 +560,12 @@ The font corrections, e.g., `bb …` work on any letter from A to Z or a to z.
 |                                      | s[3..]                | cde               |
 +--------------------------------------+-----------------------+-------------------+
 | Vector\                              | 𝐕[2]\                | 2\                |
-| 𝐕 = ¢[1, 2, 3, 4, 5]¢               | 𝐕[2..4]\             | ¢[2, 3, 4]¢ \     |
-|                                      | 𝐕[3..]               | ¢[3, 4, 5]¢       |
+| 𝐕 = ¢`[1, 2, 3, 4, 5]`              | 𝐕[2..4]\             | ¢`[2, 3, 4]` \    |
+|                                      | 𝐕[3..]               | ¢`[3, 4, 5]`      |
 +--------------------------------------+-----------------------+-------------------+
 | Matrix\                              | 𝐌[2, 3]\             | 6\                |
-| 𝐌 = ¢\(1, 2, 3; 4, 5, 6; 7, 8, 9)¢  | 𝐌[3,]\               | ¢[7, 8, 9]¢ \     |
-|                                      | 𝐌[2..3, 1..2]        | ¢[4, 5; 7, 8]¢    |
+| 𝐌 = ¢`(1, 2, 3; 4, 5, 6; 7, 8, 9)`  | 𝐌[3,]\               | ¢`[7, 8, 9]` \    |
+|                                      | 𝐌[2..3, 1..2]        | ¢`[4, 5; 7, 8]`   |
 +--------------------------------------+-----------------------+-------------------+
 | Data Frame\                          | DF.B\                 | An entire row\    |
 | ![dataframe][]                       | DF["B"]\              | An entire row\    |
@@ -608,14 +608,14 @@ To calulate an <span id="expression">expression</span> that contains a variable,
 a function, or an operator; write a `?` or `%` or `@` to indicate where the
 result should appear. Here are some examples:
 
-| Input                          | Renders as:                                          |
-|--------------------------------|------------------------------------------------------|
-| `2 + 2 = ?`                    | ¢2 + 2 = 4¢                                          |
-| `2 + 2 = @`                    | ¢4¢                                                  |
-| `A = 2 × 4 = ?`                | ¢A = 2 × 4 = 8¢                                      |
-| `x = 2 A = ?`                  | ¢x = 2 A = \color(blue)((2)(8)) \color(black) = 16¢  |
-| `x = 2 A = %`                  | ¢x = 2 A = 16¢                                       |
-| `A = 2 'm' × 4 'feet' = ?? m²` | ¢A = 2'm' × 4 'feet' = 2.4384 'm²'¢                  |
+| Input                          | Renders as:                                           |
+|--------------------------------|-------------------------------------------------------|
+| `2 + 2 = ?`                    | ¢`2 + 2 = 4`                                          |
+| `2 + 2 = @`                    | ¢`4`                                                  |
+| `A = 2 × 4 = ?`                | ¢`A = 2 × 4 = 8`                                      |
+| `x = 2 A = ?`                  | ¢`x = 2 A = \color(blue)((2)(8)) \color(black) = 16`  |
+| `x = 2 A = %`                  | ¢`x = 2 A = 16`                                       |
+| `A = 2 'm' × 4 'feet' = ?? m²` | ¢`A = 2'm' × 4 'feet' = 2.4384 'm²'`                  |
 {.table-no-wrap}
 
 The statement form is more precisely defined as:
@@ -721,7 +721,7 @@ Hurmet’s auto-correct can help create identifiers.
 | Capital Greek letter | Capitalize the name’s first letter.             | Gamma         | Γ              |
 | Bold letter          | Type “bb”, then space, then the desired letter. | bb M          | 𝐌              |
 | Calligraphic capital letter  | Type “cc”, then space, then the desired letter. | cc P  | 𝒫              |
-| Accent               | Type the name of the accent.                    | y bar         | ¢y̅¢            |
+| Accent               | Type the name of the accent.                    | y bar         | ¢`y̅`           |
 | Prime                | Type two apostrophes.                           | ''            | ′              |
 
 Hurmet will render single Latin letter variable names in _italic_. Function
@@ -760,7 +760,7 @@ String
     **Math String**
 
     Strings will be rendered as math if they are delimited with single backticks
-    instead of double quotes. So somthing like `` `M_n` `` will return as ¢M_n¢.
+    instead of double quotes. So somthing like `` `M_n` `` will return as ¢`M_n`.
     This is useful mostly when a calculation checks a condition and reports whether
     some computed variable can be accepted.
 
@@ -769,10 +769,7 @@ Number
 : Enter as integers (33), decimals (2.45), percentages (3.2%), scientific
   notation (3.1e4), mixed fractions (3 ⁷⁄₈) or hexadecimal (0x2A).
 
-![integers, decimals, percentages, scientific notation, mixed fractions, or hexadecimal][number] ` `
-
-[number]: images/NumberRailroad.svg
-{width=650 #number-rr}
+![integers, decimals, percentages, scientific notation, mixed fractions, or hexadecimal](images/NumberRailroad.svg)
 
 i>  Notice that a number literal must begin and end with a numeral, not a decimal
     symbol. Hurmet will not recognize `5.` as a number.
@@ -793,22 +790,22 @@ Complex Number
 
 :   One can write a complex number in two forms:
 
-    * ¢a + j\ b¢    The letter “¢j¢” is identical to ¢√(-1)¢ by Hurmet
-    definition. Be sure to write a space after ¢j¢.
+    * ¢`a + j\ b`    The letter “¢`j`” is identical to ¢`√(-1)` by Hurmet
+    definition. Be sure to write a space after ¢`j`.
 
-    * ¢r∠θ¢    The characters `/_` will auto-correct into ∠ and ¢θ¢ is in radians.
+    * ¢`r∠θ`    The characters `/_` will auto-correct into ∠ and ¢`θ` is in radians.
 
     Also, the character **°** is now a unit name. So one can also write a polar
-    notation as ¢r∠θ°¢ and the phase angle will be unit-aware.
+    notation as ¢`r∠θ°` and the phase angle will be unit-aware.
     The characters `ooo` will auto-correct into °
 
     Examples:
 
-    i>  ¢z_1 = 2 + j 3¢
+    i>  ¢`z_1 = 2 + j 3`
 
-        ¢z_2 = 4∠30°¢
+        ¢`z_2 = 4∠30°`
 
-        ¢z = z_1 + z_2  = \blue((2 + j 3) + ( 4∠30°)) = 5.46 + j5¢
+        ¢`z = z_1 + z_2  = \blue((2 + j 3) + ( 4∠30°)) = 5.46 + j5`
 
 Unit
 
@@ -822,11 +819,11 @@ Unit
 
     | Input                  | Renders as              |
     |------------------------|-------------------------|
-    | `4.2 'meters'`         | ¢4.2 'meters'¢          |
-    | `30°`                  | ¢30°¢                   |
-    | `$25.10`               | ¢$25.10¢                |
-    | `10 'N·m/s'`           | ¢10 'N·m/s'¢            |
-    | `[2.1; 15.3] 'feet'`   | ¢[2.1; 15.3] 'feet'¢    |
+    | `4.2 'meters'`         | ¢`4.2 'meters'`          |
+    | `30°`                  | ¢`30°`                   |
+    | `$25.10`               | ¢`$25.10`                |
+    | `10 'N·m/s'`           | ¢`10 'N·m/s'`            |
+    | `[2.1; 15.3] 'feet'`   | ¢`[2.1; 15.3] 'feet'`    |
 
     ![number or matrix or map apostrophe unit-name apostrophe](images/unit-railroad.svg)
 
@@ -844,7 +841,7 @@ Unit
 
     | Input          | Renders as      |
     |----------------|-----------------|
-    | `4 'kW.hr/m2'` | ¢4 'kW.hr/m2'¢  |
+    | `4 'kW.hr/m2'` | ¢`4 'kW.hr/m2'` |
 
     Note that within the unit literal, it is not necessary to write `^` to
     indicate a numeric exponent. Also, a dot or a hyphen within a compound unit
@@ -865,21 +862,21 @@ Matrix
     semi-colons. Be sure to write a space after comma separators so they are not
     confused with decimals inside a number. Here are some matrix examples:
 
-    | Input            | Renders as      |
-    |------------------|-----------------|
-    | `(1, 0; 0, 1)`   | ¢(1, 0; 0, 1)¢  |
-    | `[2.1; -15.3]`   | ¢[2.1; -15.3]¢  |
-    | `{:1, 0; 0, 1}`  | ¢{:1, 0; 0, 1}¢ |
+    | Input            | Renders as       |
+    |------------------|------------------|
+    | `(1, 0; 0, 1)`   | ¢`(1, 0; 0, 1)`  |
+    | `[2.1; -15.3]`   | ¢`[2.1; -15.3]`  |
+    | `{:1, 0; 0, 1}`  | ¢`{:1, 0; 0, 1}` |
 
     Another way to create a Hurmet vector is to write a range of numbers between
     brackets; the form is `[start:step:end]`.
     A Hurmet calculation of that form will return a row vector with every number
     in the range. The step size is optional (default = 1). Examples:
 
-    |    Input        |       Result              |
-    |-----------------|---------------------------|
-    | `[2..5] = ?`    | ¢[2..5] = [2, 3, 4, 5]¢   |
-    | `[1..2..5] = ?` | ¢[1..2..5] = [1, 3, 5]¢   |
+    |    Input        |       Result               |
+    |-----------------|----------------------------|
+    | `[2..5] = ?`    | ¢`[2..5] = [2, 3, 4, 5]`   |
+    | `[1..2..5] = ?` | ¢`[1..2..5] = [1, 3, 5]`   |
 
     You can call individual elements with index integers between brackets, as in
     `𝐕[5]` or `𝐌[1, 3]`. You can use a variable name for the index if the variable
@@ -899,9 +896,9 @@ Matrix Operations
     pass a matrix to most functions, Hurmet will do an element-by-element calculation
     and return a matrix, as in:
 
-    i> ¢𝐡 = [5; 10; 15]¢
+    i> ¢` 𝐡 = [5; 10; 15] `
 
-       ¢𝐱 = 2 𝐡 + 1 = \color(blue)(2) [5; 10; 15] + 1 \color(black) = [11; 21; 31]¢
+       ¢` 𝐱 = 2 𝐡 + 1 = \color(blue)(2) [5; 10; 15] + 1 \color(black) = [11; 21; 31] `
 
     Spreadsheet calculations can often be replaced by calulations using vectors, as
     above. When you really need to get things right, it’s great to be able to see
@@ -913,35 +910,35 @@ Matrix Operations
     have several ways to multiply matrices. In Hurmet, you choose the type of
     multiplication by your choice of multiplication operator:
 
-    ¢𝐀 * 𝐁¢ ↦ element-wise product, ¢(𝐀 * 𝐁)_ij = 𝐀_ij × 𝐁_ij¢
+    ¢` 𝐀 * 𝐁 ` ↦ element-wise product, ¢` (𝐀 * 𝐁)_ij = 𝐀_ij × 𝐁_ij `
 
-    ¢𝐀˽𝐁¢ ↦ [matrix product][], ¢(𝐀 𝐁)_ij = ∑_(k = 1)^m 𝐀_i) 𝐁_kj¢
+    ¢` 𝐀˽𝐁 ` ↦ [matrix product][], ¢` (𝐀 𝐁)_ij = ∑_(k = 1)^m 𝐀_i) 𝐁_kj `
 
-    ¢𝐀 × 𝐁¢ ↦ [cross product][] of a pair of three-vectors
-           = ¢|𝐀||𝐁|sin(θ) 𝐧¢
+    ¢` 𝐀 × 𝐁 ` ↦ [cross product][] of a pair of three-vectors
+           = ¢` |𝐀||𝐁|sin(θ) 𝐧 `
 
     [matrix product]: http://www.intmath.com/matrices-determinants/4-multiplying-matrices.php/
     [cross product]: http://www.intmath.com/vectors/8-cross-product-vectors.php/
 
-    ¢𝐀 ⋅ 𝐁¢ ↦ dot product = ¢∑_(i = 1)^n (𝐀_i 𝐁_i)¢
+    ¢` 𝐀 ⋅ 𝐁 ` ↦ dot product = ¢` ∑_(i = 1)^n (𝐀_i 𝐁_i) `
 
     </div>
 
     Here are more of Hurmet’s matrix operations:
 
-    ¢𝐀^T¢ ↦ a transposed matrix.
+    ¢` 𝐀^T ` ↦ a transposed matrix.
 
-    ¢𝐀^(-1)¢ ↦ an inverted matrix, if ¢𝐀¢ is square.
+    ¢` 𝐀^(-1) ` ↦ an inverted matrix, if ¢` 𝐀 ` is square.
 
-    ¢|𝐀|¢ ↦ ¢{determinant if "𝐀 is square"; magnitude otherwise}¢
+    ¢` |𝐀| ` ↦ ¢` {determinant if "𝐀 is square"; magnitude otherwise} `
 
-    ¢abs(𝐀)¢ ↦ element-wise absolute values
+    ¢` abs(𝐀) ` ↦ element-wise absolute values
 
-    ¢‖𝐀‖¢ ↦ ¢{√(x_1^2 + ⋯ + x_n^2) if "𝐀 is a vector"; √(∑_i ∑_j A_ij^2) if "𝐀 is a matrix"¢
+    ¢` ‖𝐀‖ ` ↦ ¢` {√(x_1^2 + ⋯ + x_n^2) if "𝐀 is a vector"; √(∑_i ∑_j A_ij^2) if "𝐀 is a matrix" `
 
-    ¢𝐀 & 𝐁¢ ↦ concatenate 𝐀 and 𝐁 horizontally
+    ¢` 𝐀 & 𝐁 ` ↦ concatenate 𝐀 and 𝐁 horizontally
 
-    ¢𝐀 &_ 𝐁¢ ↦ concatenate 𝐀 and 𝐁 vertically
+    ¢` 𝐀 &_ 𝐁 ` ↦ concatenate 𝐀 and 𝐁 vertically
 
     Functions will mostly work element-wise on an matrix. Exception: functions
     `min()` and `max()` will find the minimum or maximum of the elements in the matrix.
@@ -979,7 +976,7 @@ Data Frame
 
     … which renders as:
 
-    ¢
+    ¢```
     rebar =
     ``#size	diameter	area
      	in     	in²
@@ -987,7 +984,7 @@ Data Frame
     #4	0.5    	0.2
     #5	0.625  	0.31
     #6	0.75   	0.44``
-    ¢
+    ```
 
     Hurmet will use the first column as keys to the rest of each row if the
     content of the top left cell begins with a hash tag, #.
@@ -1008,7 +1005,7 @@ Data Frame
     ```
 
     will render like this:\
-    ¢ roof = ``#Item           	weight
+    ¢``` roof = ``#Item           	weight
                                	psf
     2 layers asphalt shingles  	8.0
     1/2 inch plywood           	1.5
@@ -1016,7 +1013,7 @@ Data Frame
     trusses at 16 inch o.c.    	2.5
     5/8 inch gypsum board      	2.5
     lights, HVAC, miscellaneous	1.5
-    total                      	sumAbove()`` ¢
+    total                      	sumAbove()`` ```
 
     Data frames can be quite large, so Hurmet has a `fetch(url)` function to load
     data from a remote TSV file into a data frame. Since Hurmet runs in a browser,
@@ -1030,7 +1027,7 @@ Data Frame
 
     That example loads in this data:
 
-    ¢
+    ¢```
     ``#name	weight	A 	d   	bf  	tw  	Ix  	Sx
      	lbf/ft	in² 	in  	in  	in  	in⁴ 	in³
     W14X90	90	26.5	14  	14.5	0.44	999 	143
@@ -1039,7 +1036,7 @@ Data Frame
     W8X31	31	9.13	8   	8   	0.285	110 	27.5
     W8X18	18	5.26	8.14	5.25	0.23	61.9	15.2
     W6X15	15	4.43	5.99	5.99	0.23	29.1	9.72
-    W4X13	13	3.83	4.16	4.06	0.28	11.3	5.46`` ¢
+    W4X13	13	3.83	4.16	4.06	0.28	11.3	5.46`` ```
 
     As data frames go, that example is still pretty small. When I assign a data
     frame to a variable, I usually suppress its display by using the **!** display selector.
@@ -1056,8 +1053,8 @@ Data Frame
     `A = beam["A"] = ?? in2` or\
     `A = wideFlanges.W10X49.A = ?? in2`
 
-    Hurmet will return a <br> ¢{"simple type" if "you call a single cell, as in
-    df[1, 2]"; "column vector" if "you call a column, as in df[,2]"; "data frame" otherwise}¢
+    Hurmet will return a <br> ¢` {"simple type" if "you call a single cell, as in
+    df[1, 2]"; "column vector" if "you call a column, as in df[,2]"; "data frame" otherwise} `
 
     Dot notation, as in `wideFlanges.W10X49`, can be used only if the property name
     is a valid [identifier](#identifiers).
@@ -1068,10 +1065,10 @@ Data Frame
     Multiple returns must use the `!!` display selector, for now.
 
     If the data frame has only one row of data, a single accessor will call a datum.\
-    Say the data frame is    ¢aBar =``#size	diameter	area
+    Say the data frame is    ¢```aBar =``#size	diameter	area
       	in 	in²
-    #4	0.5	0.2`` ¢\
-    Then one can call ¢A = aBar.area = 0.2 'in2'¢
+    #4	0.5	0.2`` ```\
+    Then one can call ¢` A = aBar.area = 0.2 'in2' `
 
     Numeric cata frames can be multiplied by a unit-less scalar.
     No other math operations are supported for data frames.
@@ -1085,15 +1082,15 @@ Map
     data type, either boolean, string, or number. Maps can be the numeric part of
     a quantity.
 
-    ¢w = ``dead	live	snow
-    30	70	40`` 'lbf/ft' ¢
+    ¢```w = ``dead	live	snow
+    30	70	40`` 'lbf/ft' ```
 
     You can do arithmetic on maps and run them through functions. The operation
     will be done on each value in the map. For instance, a beam calculation can
     break the loads down into dead load, live load, snow load, etc.:
 
-    ¢ M = 1//8 w L^2  = ¢ ¢``dead	live	snow
-    0.375	0.875	0.5`` 'k·ft'¢
+    ¢` M = 1//8 w L^2  = ` ¢``` ``dead	live	snow
+    0.375	0.875	0.5`` 'k·ft' ```
 
 </dl>
 
@@ -1108,18 +1105,18 @@ standard math notation. That is a broad statement. Here are many nuances:
 
 _π_
 
-: If you write ¢π¢ into an expression, Hurmet uses a value of
+: If you write ¢`π` into an expression, Hurmet uses a value of
   3.1415926535897932384626433832795028841971693993751.
 
 _e_
 
-: Hurmet will treat ¢e¢ just like any other variable most of the time. But if
-  ¢e¢ is the base of an exponent, for example: ¢e^x¢, then Hurmet will take
-  ¢e¢ to mean 2.7182818284590452353602874713527.
+: Hurmet will treat ¢`e` just like any other variable most of the time. But if
+  ¢`e` is the base of an exponent, for example: ¢`e^x`, then Hurmet will take
+  ¢`e` to mean 2.7182818284590452353602874713527.
 
 _j_
 
-: ¢j¢ = ¢√(-1)¢.
+: ¢`j` = ¢`√(-1)`.
 
 ℏ
 
@@ -1144,92 +1141,92 @@ _j_
 +---------------+----------------------+---------------------------------------------+
 | –             |  5 - 3               | Subtraction                                 |
 +---------------+----------------------+---------------------------------------------+
-| \-            | ¢-4¢                 | Unary minus                                 |
+| \-            | ¢`-4`                | Unary minus                                 |
 +---------------+----------------------+---------------------------------------------+
-| \*            | ¢2 * 4¢              | Multiplication of numbers.<br>Element-wise  |
+| \*            | ¢`2 * 4`             | Multiplication of numbers.<br>Element-wise  |
 |               |                      | product of matrices.                        |
 +---------------+----------------------+---------------------------------------------+
 | ×             |  2 × 4               | Multiplication of numbers.\                 |
 |               |                      | Cross product of three-vectors.\            |
 |               |                      | auto-correct: **xx**                        |
 +---------------+----------------------+---------------------------------------------+
-| ·             | ¢a ⋅ b¢              | Multiplication of numbers.\                 |
+| ·             | ¢`a ⋅ b`             | Multiplication of numbers.\                 |
 |               |                      | Dot product of matrices.\                   |
 |               |                      | auto-correct: dot between two spaces.       |
 +---------------+----------------------+---------------------------------------------+
-|               | ¢ (2)(4) ¢           | Multiplication                              |
+|               | ¢` (2)(4) `          | Multiplication                              |
 +---------------+----------------------+---------------------------------------------+
 |               |  `a b`               | Multiplication. (A space acts as an         |
 |               |                      | operator when between variables.)           |
 +---------------+----------------------+---------------------------------------------+
-|               | ¢2 a¢                | Multiplication                              |
+|               | ¢`2 a`               | Multiplication                              |
 +---------------+----------------------+---------------------------------------------+
-|               | ¢a2¢                 | Not a multiplication if no space.\          |
+|               | ¢`a2`                | Not a multiplication if no space.\          |
 |               |                      | Hurmet reads “a2” as an identifier.         |
 +---------------+----------------------+---------------------------------------------+
-|               | ¢sin(2)¢             | Function                                    |
+|               | ¢`sin(2)`            | Function                                    |
 +---------------+----------------------+---------------------------------------------+
 |               | a (2)                | Multiplication if a space exists before the |
 |               |                      | open paren.                                 |
 +---------------+----------------------+---------------------------------------------+
-| /             | ¢8/2¢                | Division                                    |
+| /             | ¢`8/2`               | Division                                    |
 +---------------+----------------------+---------------------------------------------+
-| //            | ¢8//2¢               | Case fraction                               |
+| //            | ¢`8//2`              | Case fraction                               |
 +---------------+----------------------+---------------------------------------------+
-| ///           | ¢8///2¢              | Division displayed inline                   |
+| ///           | ¢`8///2`             | Division displayed inline                   |
 +---------------+----------------------+---------------------------------------------+
-| ÷             | ¢8 ÷ 2¢              | Inline division\                            |
+| ÷             | ¢`8 ÷ 2`             | Inline division\                            |
 |               |                      | auto-correct: -:                            |
 +---------------+----------------------+---------------------------------------------+
-| ^             | ¢3^2¢                | Exponent                                    |
+| ^             | ¢`3^2`               | Exponent                                    |
 +---------------+----------------------+---------------------------------------------+
-| ^*            | ¢z^*¢                | Complex conjugate                           |
+| ^*            | ¢`z^*`               | Complex conjugate                           |
 +---------------+----------------------+---------------------------------------------+
-| &             | ¢s_1 & s_2¢          | Concatenate strings or vectors, or          |
+| &             | ¢`s_1 & s_2`         | Concatenate strings or vectors, or          |
 |               |                      | append numbers onto vectors, or variables   |
 |               |                      | into a map, or append a                     |
 |               |                      | column vector to a data frame               |
 +---------------+----------------------+---------------------------------------------+
-| &\_           | ¢𝐚 &_ 𝐛¢           | Append matrices or vectors vertically.      |
+| &\_           | ¢` 𝐚 &_ 𝐛 `        | Append matrices or vectors vertically.      |
 +---------------+----------------------+---------------------------------------------+
-| √             | ¢√¢                  | Square root\                                |
+| √             | ¢`√`                 | Square root\                                |
 |               |                      | auto-correct: sqrt                          |
 +---------------+----------------------+---------------------------------------------+
-| ¢root  3 ()¢  | ¢root 3 8¢           | nth-root\                                   |
+| ¢`root  3 ()` | ¢`root 3 8`          | nth-root\                                   |
 |               |                      | auto-correct: root n                        |
 +---------------+----------------------+---------------------------------------------+
-| ||            | ¢|-4|¢               | Absolute value of a scalar, determinant of  |
+| ||            | ¢`|-4|`              | Absolute value of a scalar, determinant of  |
 |               |                      | a matrix, or magnitude of a vector or a     |
 |               |                      | complex number.                             |
 +---------------+----------------------+---------------------------------------------+
-| ||  ||          ¢\\Vert x \\Vert¢    | ¢√(x_1^2 + ⋯ + x_n^2)¢  if the argument is  |
+| ||  ||          ¢`\\Vert x \\Vert`   | ¢`√(x_1^2 + ⋯ + x_n^2)`  if the argument is |
 |                                      | a vector of reals                           |
 |                                      +---------------------------------------------+
-|                                      | ¢√(∑_i ∑_j A_(i, j)^2)¢  if the argument is |
+|                                      | ¢`√(∑_i ∑_j A_(i, j)^2)`  if the argument is|
 |                                      | a 2-D matrix                                |
 +---------------+----------------------+---------------------------------------------+
-| ⌊  ⌋          | ¢⎿4.5⏌¢              | Floor. Always rounds down.\                 |
+| ⌊  ⌋          | ¢`⎿4.5⏌`             | Floor. Always rounds down.\                 |
 |               |                      | auto-correct: floor                         |
 +---------------+----------------------+---------------------------------------------+
-| ⌈  ⌉          | ¢⎾4.5⏋¢              | Ceiling. Always rounds up.\                 |
+| ⌈  ⌉          | ¢`⎾4.5⏋`             | Ceiling. Always rounds up.\                 |
 |               |                      | auto-correct: ceil                          |
 +---------------+----------------------+---------------------------------------------+
-| %             | ¢10%¢                | Percent                                     |
+| %             | ¢`10%`               | Percent                                     |
 +---------------+----------------------+---------------------------------------------+
-| ‰             | ¢10‰¢                | Per thousand                                |
+| ‰             | ¢`10‰`               | Per thousand                                |
 +---------------+----------------------+---------------------------------------------+
-| !             | ¢5!¢                 | [Factorial][]\                              |
-|               |                      | precision = ¢{100% if n ≤ 100; 15 digits    |
-|               |                      | otherwise}¢                                 |
+| !             | ¢`5!`                | [Factorial][]\                              |
+|               |                      | precision = ¢`{100% if n ≤ 100; 15 digits   |
+|               |                      | otherwise} `                                |
 +---------------+----------------------+---------------------------------------------+
 | modulo        | `10` `modulo` `5`    | Always returns a positive remainder.        |
 +---------------+----------------------+---------------------------------------------+
-| ¢(n\atop k)¢  | (5 \atop 3)          | Binomial coefficient. ¢(n \atop k) =        |
-|               |                      | n!//(n!(n!-k!))¢                            |
+| ¢`(n\atop k)` | (5 \atop 3)          | Binomial coefficient. ¢`(n \atop k) =   `   |
+|               |                      | n!//(n!(n!-k!))`                            |
 +---------------+----------------------+---------------------------------------------+
-| =             | ¢if x = 15¢          | Equality comparison                         |
+| =             | ¢`if x = 15`         | Equality comparison                         |
 +---------------+----------------------+---------------------------------------------+
-| ≠             | ¢if b ≠ c¢           | Inequality comparison\                      |
+| ≠             | ¢`if b ≠ c`          | Inequality comparison\                      |
 |               |                      | auto-correct: != or <>                      |
 +---------------+----------------------+---------------------------------------------+
 | `<`           |                      |                                             |
@@ -1240,23 +1237,23 @@ _j_
 +---------------+----------------------+---------------------------------------------+
 | ≥             |                      | auto-correct: >=                            |
 +---------------+----------------------+---------------------------------------------+
-| ∈             | ¢c ∈ s¢              | Is an element of a matrix or\               |
+| ∈             | ¢`c ∈ s`             | Is an element of a matrix or\               |
 |               |                      | is a character of a string, or\             |
 |               |                      | is a property of a data frame.\             |
 |               |                      | auto-correct: \in                           |
 +---------------+----------------------+---------------------------------------------+
-| ∋             | ¢ d ∋ p ¢            | d has a property named y\                   |
+| ∋             | ¢` d ∋ p `           | d has a property named y\                   |
 |               |                      | auto-correct: owns                          |
 +---------------+----------------------+---------------------------------------------+
-| ∉             | ¢c ∉ s¢              | Is not an element of\                       |
+| ∉             | ¢`c ∉ s`             | Is not an element of\                       |
 |               |                      | auto-correct: \notin                        |
 +---------------+----------------------+---------------------------------------------+
-| ∌             | ¢ d ∌ p ¢            | d does not have a property named y          |
+| ∌             | ¢` d ∌ p `           | d does not have a property named y          |
 +---------------+----------------------+---------------------------------------------+
-| ⊆             | ¢c ⊆ s¢              | Is a subset of\                             |
+| ⊆             | ¢`c ⊆ s`             | Is a subset of\                             |
 |               |                      |  auto-correct: \subseteq or contains        |
 +---------------+----------------------+---------------------------------------------+
-| ⊈             | ¢c ⊈ s¢              | Is not a subset of\                         |
+| ⊈             | ¢`c ⊈ s`             | Is not a subset of\                         |
 |               |                      |  auto-correct: \nsubseteq                   |
 +---------------+----------------------+---------------------------------------------+
 | and           | if _a_ and _b_       | Logical and                                 |
@@ -1283,7 +1280,7 @@ _j_
 ## Functions
 
 Hurmet treats an [identifier](#identifiers) as a function name if it is placed
-directly before an open parenthesis. So a term like ¢sinh(x)¢ is a function.
+directly before an open parenthesis. So a term like ¢`sinh(x)` is a function.
 
 Hurmet’s built-in functions are described below. Unless noted otherwise, they
 can operate on any real or complex number or any matrix containing real numbers.
@@ -1303,12 +1300,12 @@ accumulate(𝐕)
 
 : Takes a vector, 𝐕, and returns a new vector whose elements are each
   the sum of the preceding elements in 𝐕.\
-  Example: ¢accumulate([2, 4, 1]) = [2, 6, 7]¢
+  Example: ¢`accumulate([2, 4, 1]) = [2, 6, 7]`
 
 acos(_z_), asin(_z_), atan(_z_), asec(_z_), acsc(_z_), acot(_z_)
 
 : Inverse trigonometry functions. One can also call an inverse trigonometry
-  function with a superscript, as in ¢cos^(-1) x¢.
+  function with a superscript, as in ¢`cos^(-1) x`.
 
 atan(_x_, _y_)
 
@@ -1338,9 +1335,9 @@ cos(𝜃), sin(𝜃), tan(𝜃), sec(𝜃), csc(𝜃), cot(𝜃)
 
   A positive integer written as a superscript after a trig function name will
   return the function result raised to a power.\
-  So that: ¢sin^2 θ = (sin θ)^2¢.
+  So that: ¢`sin^2 θ = (sin θ)^2`.
 
-  A superscript <sup>-1</sup> indicates an inverse function. In other words, ¢cos^(-1) x = acos(x)¢.
+  A superscript <sup>-1</sup> indicates an inverse function. In other words, ¢`cos^(-1) x = acos(x)`.
 
   Three functions: `sin`, `cos`, and `tan`, do not require parentheses around their arguments.
 
@@ -1364,7 +1361,7 @@ dataframe(**a**, **b**, …)
 
 exp(_z_)
 
-: ¢e^z¢
+: ¢`e^z`
 
 fetch(_url_)
 
@@ -1377,7 +1374,7 @@ gcd(_m_, _n_)
 
 hypot(_x_, _y_)
 
-: ¢√(x² + y²)¢   …done in a way that avoids overflow. Real numbers only.
+: ¢`√(x² + y²)`   …done in a way that avoids overflow. Real numbers only.
 
 Im(_z_)
 
@@ -1425,7 +1422,7 @@ matrix2table(_matrix_, _rowNames_, _columnNames_)
 : Returns a data frame with the contents of the matrix. _rowNames_ and
   _columnNames_ must each be a vector of strings.
 
-¢min(a,b,c,…),max(a,b,c,…)¢
+¢`min(a,b,c,…),max(a,b,c,…)`
 
 : Minimum or maximum of a list or array. Real numbers only.
 
@@ -1446,7 +1443,7 @@ round(_x_, _spec_)
 
 sign(_x_)
 
-: Returns ¢{1 if x > 0; -1 if x < 0; 0 otherwise}¢<br>Real numbers only.
+: Returns ¢`{1 if x > 0; -1 if x < 0; 0 otherwise}`<br>Real numbers only.
 
 string(_x_, _spec_)
 
@@ -1465,16 +1462,16 @@ zeros(_m_, _n_)
 Γ(_z_)
 
 : [Gamma function](http://en.wikipedia.org/wiki/Gamma_function)\
-  precision = ¢{100% if z" is a positive integer ≤ 100"; 15 digits otherwise}¢
+  precision = ¢`{100% if z" is a positive integer ≤ 100"; 15 digits otherwise}`
 
 </dl>
 
 ## Operator Precedence
 
-What is the result of the expression ¢3 + 4 × 2¢ ?
+What is the result of the expression ¢`3 + 4 × 2` ?
 
 It depends on whether one does the addition first or the multiplication first.
-So the answer could be ¢(3 + 4)(2)= 14¢ or it could be ¢3 + (4 × 2)= 11¢.
+So the answer could be ¢`(3 + 4)(2)= 14` or it could be ¢`3 + (4 × 2)= 11`.
 
 To resolve this ambiguity, Hurmet performs operations with the following precedence:
 
@@ -1508,13 +1505,13 @@ To resolve this ambiguity, Hurmet performs operations with the following precede
 
 Now let’s return to the question that opened this section. We now know that
 multiplication has a higher precedence than addition, so the answer to our
-question above is: ¢3 + (4 × 2)= 11¢
+question above is: ¢`3 + (4 × 2)= 11`
 
 ## If Expressions
 
 Hurmet If Expressions enable you to choose between expressions, based upon one or more conditions, as in:
 
-   ¢β_1 = {0.85 if f_c′ ≤ 4000; 0.65 if f_c′ ≥ 8000; 0.85 - (f_c′ - 4000)//20000 otherwise}¢
+   ¢`β_1 = {0.85 if f_c′ ≤ 4000; 0.65 if f_c′ ≥ 8000; 0.85 - (f_c′ - 4000)//20000 otherwise}`
 
 This sort of expression is written between the delimiters: `{ }`
 The row separator symbol is **;**
@@ -1537,11 +1534,11 @@ one line. To be precise, the form is:
 
 Conditions may contain logical operators:  and or not ∧  ∨  ¬  ⊻
 
-¢x = {2 a if a < b and b = 4; a^2 otherwise}¢
+¢`x = {2 a if a < b and b = 4; a^2 otherwise}`
 
 Chained comparisons are okay.
 
-¢x = {1.0 if a < b < 5 < d; 1.2 otherwise}¢
+¢`x = {1.0 if a < b < 5 < d; 1.2 otherwise}`
 
 ## Overloading
 
@@ -1551,8 +1548,8 @@ takes any of these shapes:
 
 |                           | scalar | vector | matrix | map | map with<br>vector values |
 |:--------------------------|:------:|:------:|:------:|:---:|:-------------------------:|
-| scalar                    | ✓      | ✓      | ✓      | ✓   | ✓                       |
-| vector                    | ✓      | ✓      | ✓      | ✓   |                          |
+| scalar                    | ✓      | ✓      | ✓      | ✓   | ✓                         |
+| vector                    | ✓      | ✓      | ✓      | ✓   |                           |
 | matrix                    | ✓      | ✓      | ✓      |     |                           |
 | map                       | ✓      | ✓      |        |     |                           |
 | map with<br>vector values | ✓      |        |        |     |                           |
@@ -1581,36 +1578,36 @@ a Hurmet calculation cell and write:
 
 … the result will render as:
 
-¢4 'ft' + 3 'yards' = 3.9624 'm'¢
+¢`4 'ft' + 3 'yards' = 3.9624 'm'`
 
 You can create composite units on the fly and Hurmet will still convert them
 automatically.
 
-¢(3 'kW·hr' × (20 'min')) / (800 'lbf' × 1 'h') = 1.0116402439486971731 'km'¢
+¢`(3 'kW·hr' × (20 'min')) / (800 'lbf' × 1 'h') = 1.0116402439486971731 'km'`
 
 If you try to add quantities with non-compatible units, Hurmet will return an
 error message:
 
-¢3 'm' + 2 'V' = \color(firebrick) "Error. Adding incompatible units."¢
+¢`3 'm' + 2 'V' = \color(firebrick) "Error. Adding incompatible units."`
 
 If the calculated units are non-compatible with the units specified for the
 result display, Hurmet will return an error message:
 
-¢3 'm' + 2 'ft' = \color(firebrick) "Error. Calculated units are not
-compatible with the desired result unit:"\, "V"¢
+¢`3 'm' + 2 'ft' = \color(firebrick) "Error. Calculated units are not
+compatible with the desired result unit:"\, "V"`
 
 If you assign a quantity to a variable, a unit-aware calculation will call the
 variable’s entire quantity, not just the numeric value.
 
-¢L = 3 'ft'¢
+¢`L = 3 'ft'`
 
-¢L_2 = 2 L = \color(blue)(2) (3 'ft') \color(black) = 1.8288 'm'¢
+¢`L_2 = 2 L = \color(blue)(2) (3 'ft') \color(black) = 1.8288 'm'`
 
 If you assign a quantity to a variable, you can still call the variable from a
 non-unit-aware calculation. Such a calculation will call the scalar value, not
 the quantity.
 
-¢L_unaware = 2 L = \color(blue)(2) (3) \color(black) = 6¢
+¢`L_unaware = 2 L = \color(blue)(2) (3) \color(black) = 6`
 
 You’re welcome to view all of Hurmet’s built-in [unit definitions](unit-definitions.html).
 
@@ -1619,9 +1616,9 @@ You’re welcome to view all of Hurmet’s built-in [unit definitions](unit-defi
 If the Hurmet built-in unit definitions are not sufficient, you can define a
 set of custom units in a single-row data frame like this:
 
-¢ units = ``smoot	sol
+¢``` units = ``smoot	sol
 inches	hours
-67    	24.6229622`` ¢
+67    	24.6229622`` ```
 
 #### Currencies
 
@@ -1632,8 +1629,8 @@ insufficiently accurate, so you can override them and define your own exchange
 rates in a map named **currencies**. Such a statement might be coded
 like this:
 
-¢currencies = ``USD	CAD
-   1 	1.25`` ¢
+¢```currencies = ``USD	CAD
+   1 	1.25`` ```
 
 The keys in that map are standard three-letter [currrency codes](https://www.xe.com/iso4217.php).
 
@@ -1972,7 +1969,7 @@ end
 
 Other Hurmet calculation cells can then call the function:
 
-¢n = multiply(2, 4) = 8¢
+¢`n = multiply(2, 4) = 8`
 
 Unlike other Hurmet assignments, user defined functions can be placed at the
 end of the document and still be called by other expressions.
@@ -2157,12 +2154,12 @@ That statement will render like this:
 
 <div style="font-size: 16px">
 
-¢ {:f_c′, f_c′′, f_yr, β_1, ρ_0;
+¢` {:f_c′, f_c′′, f_yr, β_1, ρ_0;
 ρ_max, E_c, G_c,  E, G;
 n_c, σ_a, σ_as, μ_s, σ_p;
 p_pl, ρ_g, C_e, I_s, V_w;
 EC, k_zt, α, z_g, SC;
-S_DS, S_D1, I_E,,} = import("https://hurmet.app/parent.txt") ¢
+S_DS, S_D1, I_E,,} = import("https://hurmet.app/parent.txt") `
 
 </div>
 

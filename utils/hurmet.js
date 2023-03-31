@@ -8947,10 +8947,10 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
  *
  * ## Extensions
  *
- * 1. Hurmet inline calculation is delimited ¢…¢.
- *    Hurmet display calculation is fenced ¢¢\n … \n¢¢.
+ * 1. Hurmet inline calculation is delimited ¢`…`.
+ *    Hurmet display calculation is delimited ¢¢ … ¢¢.
  * 2. LaTeX inline math is delimited $…$. $ and \\ are escaped \$ & \\\\.
- *    LaTeX display math is fenced  $$\n … \n$$.
+ *    LaTeX display math is delimited  $$ … $$.
  * 3. ~~strikethrough~~
  * 4. © comment (A paragraph in a speech bubble)
  * 5. Pipe tables as per Github Flavored Markdown (GFM).
@@ -9638,16 +9638,16 @@ rules.set("tableSeparator", {
 });
 rules.set("calculation", {
   isLeaf: true,
-  match: anyScopeRegex(/^(?:¢((?:\\[\s\S]|[^\\])+?)¢|¢¢\n?((?:\\[\s\S]|[^\\])+?)\n?¢¢)/),
+  match: anyScopeRegex(/^(?:¢(`+)([\s\S]*?[^`])\1(?!`)|¢¢\n?((?:\\[\s\S]|[^\\])+?)\n?¢¢)/),
   parse: function(capture, state) {
-    if (capture[1]) {
-      let entry = capture[1].trim();
+    if (capture[2]) {
+      let entry = capture[2].trim();
       if (!/^(?:function|draw\()/.test(entry) && entry.indexOf("``") === -1) {
         entry = entry.replace(/\n/g, " ");
       }
       return { content: "", attrs: { entry } }
     } else {
-      const entry = capture[2].trim();
+      const entry = capture[3].trim();
       return { content: "", attrs: { entry, displayMode: true } }
     }
   }

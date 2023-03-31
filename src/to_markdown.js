@@ -197,9 +197,10 @@ const hurmetNodes =  {
   calculation(state, node) {
     const entry = node.attrs.entry.trim().replace(/\n(?: *\n)+/g, "\n").replace(/\n/gm, "\n" + state.delim)
     if (node.attrs.displayMode) {
-      state.write("¢¢\n" + entry + "\n¢¢")
+      state.write("¢¢ " + entry + " ¢¢")
     } else {
-      state.write("¢ " + entry + " ¢")
+      const ticks = backticksFor({ text: entry, isText: true }, -1).trim()
+      state.write("¢" + ticks + " " + entry + " " + ticks)
     }
   }
 }
