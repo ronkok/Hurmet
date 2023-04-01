@@ -7,9 +7,9 @@
 
 const codeJar = (editor, isMathPrompt) => {
   const options = {
-    tab: "    ",
+    tab: "\t",
     indentOn: /{$/,
-    catchTab: false,
+    catchTab: true,
     preserveIdent: true,
     addClosing: true
   };
