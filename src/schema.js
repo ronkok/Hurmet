@@ -72,7 +72,7 @@ export const nodes = {
   },
 
   // An indented div.
-  indented_div: {
+  indented: {
     content: "block+",
     group: "block",
     defining: true,
@@ -81,7 +81,7 @@ export const nodes = {
   },
 
   //:: NodeSpec An center-aligned div.
-  centered_div: {
+  centered: {
     content: "block+",
     group: "block",
     defining: true,
@@ -229,7 +229,7 @@ export const nodes = {
     content: "list_item+|tight_list_item+",
     group: "block",
     parseDOM: [{tag: "ol", getAttrs(dom) {
-      return {order: dom.hasAttribute("start") ? +dom.getAttribute("start") : 1}
+      return {order: dom.hasAttribute("start") ? + dom.getAttribute("start") : 1}
     }}],
     toDOM(node) {
       return node.attrs.order == 1 ? ["ol", 0] : ["ol", {start: node.attrs.order}, 0]
@@ -439,7 +439,9 @@ export const marks = {
     parseDOM: [{tag: "a[href]", getAttrs(dom) {
       return {href: dom.getAttribute("href"), title: dom.getAttribute("title")}
     }}],
-    toDOM(node) { return ["a", node.attrs] }
+    toDOM(node) {
+      node.attrs.title = node.attrs.href
+      return ["a", node.attrs] }
   },
 
   // :: MarkSpec An emphasis mark. Rendered as an `<em>` element.
