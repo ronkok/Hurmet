@@ -26,5 +26,6 @@ export const dt = Object.freeze({
   ERROR: 32768,
   UNIT: 65536, // User-defined units.
   DRAWING: 131072,
-  RICHTEXT: 262144
+  RICHTEXT: 262144,
+  DICTIONARY: 524288
 })

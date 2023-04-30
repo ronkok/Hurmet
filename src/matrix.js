@@ -17,6 +17,21 @@ export const isVector = oprnd => {
   return (((oprnd.dtype & dt.ROWVECTOR) || (oprnd.dtype & dt.COLUMNVECTOR)) > 0)
 }
 
+const transpose = oprnd => {
+  const result = { unit: oprnd.unit }
+  if (isVector(oprnd)) {
+    result.value = oprnd.value;
+    const delta = ((oprnd.dtype & dt.ROWVECTOR) ? 1  : -1 ) * (dt.COLUMNVECTOR - dt.ROWVECTOR)
+    result.dtype = oprnd.dtype + delta
+  } else if (oprnd.dtype & dt.MATRIX) {
+    result.value = oprnd.value[0].map((x, i) => oprnd.value.map(y => y[i]))
+    result.dtype = oprnd.dtype
+  } else {
+    return errorOprnd("BAD_TRANS")
+  }
+  return result
+}
+
 const convertFromBaseUnits = (oprnd, gauge, factor) => {
   let conversion = (isVector(oprnd))
     ? oprnd.value.map((e) => Rnl.divide(e, factor))
@@ -47,7 +62,7 @@ const display = (m, formatSpec, decimalFormat) => {
   if (m.dtype & dt.MATRIX) {
     str += "{pmatrix}"
     const numRows = m.value.length
-    const numCols = m.value[1].length
+    const numCols = m.value[0].length
     for (let i = 0; i < numRows; i++) {
       for (let j = 0; j < numCols; j++) {
         str += format(m.value[i][j], formatSpec, decimalFormat) + " &"
@@ -90,7 +105,7 @@ const displayAlt = (m, formatSpec, decimalFormat) => {
   if (m.dtype & dt.MATRIX) {
     str += "("
     const numRows = m.value.length
-    const numCols = m.value[1].length
+    const numCols = m.value[0].length
     for (let i = 0; i < numRows; i++) {
       for (let j = 0; j < numCols; j++) {
         str += format(m.value[i][j], formatSpec, decimalFormat).replace(/{,}/g, ",") + ", "
@@ -402,7 +417,7 @@ const multResultType = (o1, o2) => {
 }
 
 const operandFromRange = range => {
-  // Input was [start:step:end]
+  // Input was [start:step:end...]
   // Populate a vector with values from a range
   const array = []
   if (Rnl.greaterThan(range[2], range[0])) {
@@ -422,7 +437,7 @@ const operandFromRange = range => {
   return Object.freeze({
     value: array,
     unit: { expos: allZeros },
-    dtype: dt.RATIONAL + dt.ROWVECTOR
+    dtype: dt.RATIONAL + dt.COLUMNVECTOR
   })
 }
 
@@ -486,17 +501,11 @@ const operandFromTokenStack = (tokenStack, numRows, numCols) => {
 }
 
 const zeros = (m, n) => {
-  if (m === 1) {
+  if (m === 1 || n === 1) {
     return {
       value: new Array(n).fill(Rnl.zero),
       unit: allZeros,
-      dtype: dt.RATIONAL + dt.ROWVECTOR
-    }
-  } else if (n === 1) {
-    return {
-      value: new Array(m).fill(Rnl.zero),
-      unit: allZeros,
-      dtype: dt.RATIONAL + dt.COLUMNVECTOR
+      dtype: dt.RATIONAL + (m === 1 ? dt.ROWVECTOR : dt.COLUMNVECTOR)
     }
   } else {
     const value = []
@@ -521,10 +530,10 @@ export const Matrix = Object.freeze({
   displayAltMapOfVectors,
   identity,
   invert,
-  isVector,
   multResultType,
   operandFromRange,
   operandFromTokenStack,
   submatrix,
+  transpose,
   zeros
 })

@@ -126,15 +126,6 @@ export function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
         unit: attrs.unit[attrs.value.units[i]],
         dtype
       }
-      if (attrs.value.units[i]) {
-        result.value = { plain: result.value }
-        const unit = attrs.unit[attrs.value.units[i]]
-        result.value.inBaseUnits = isSingleRow
-          ? Rnl.multiply(Rnl.add(result.value.plain, unit.gauge), unit.factor)
-          : result.value.plain.map(e => Rnl.multiply(Rnl.add(e, unit.gauge), unit.factor))
-        result.expos = unit.expos
-        result.resultdisplay += " " + unitTeXFromString(result.unit.name)
-      }
       if ((dtype & dt.RATIONAL) && isSingleRow) {
         result.resultdisplay = parse(format(value))
       } else if (dtype & dt.RATIONAL) {
@@ -142,6 +133,15 @@ export function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
             + parse(`'${attrs.value.units[i]}'`)
       } else {
         result.resultdisplay = parse(value)
+      }
+      if (attrs.value.units[i]) {
+        result.value = { plain: result.value }
+        const unit = attrs.unit[attrs.value.units[i]]
+        result.value.inBaseUnits = isSingleRow
+          ? Rnl.multiply(Rnl.add(result.value.plain, unit.gauge), unit.factor)
+          : result.value.plain.map(e => Rnl.multiply(Rnl.add(e, unit.gauge), unit.factor))
+        result.expos = unit.expos
+        result.resultdisplay += "\\;" + unitTeXFromString(result.unit.name)
       }
 
       hurmetVars[attrs.name[i]] = result

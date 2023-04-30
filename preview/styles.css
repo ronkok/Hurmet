@@ -19,7 +19,7 @@ body {
   font-family: Calibri, 'Helvetica Neue', Arial, Cambria, sans-serif;
   font-size: 12pt;
   position: relative;
-  counter-reset: pageNum;
+  counter-reset: pageNum 1;
 }
 .long-primer { font-size: 10pt; }
 
@@ -134,7 +134,7 @@ article {
 div #print-div { width: 785px; font-size: 12pt; }
 div #print-div .long-primer { font-size: 10 pt; }
 .header { break-before: page; counter-increment: pageNum; }
-.page-display::after { content: counter(pageNum) }
+.page-display::after { content: counter(pageNum); }
 th {
   font-weight: normal;
   text-align:left;
@@ -142,6 +142,8 @@ th {
   min-height: 1em;
 }
 th p { line-height: 1.6; }
+th:last-child .page-display { float: right; }
+th:first-child .page-display { float: left; }
 
 /* Image placement */
 .inline {
@@ -193,7 +195,7 @@ th p { line-height: 1.6; }
 
 .ProseMirror pre {
   display: inline-block;
-  margin-left: 2em;
+  margin-left: 1em;
   margin-bottom: 1em;
   white-space: pre-wrap;
 }

@@ -11,7 +11,6 @@ import { compare } from "./compare"
 // This file implements the overloading.
 
 // Some helper functions
-const transpose2D = a => a[0].map((x, i) => a.map(y => y[i]))
 const dotProduct = (a, b) => {
   return a.map((e, j) => Rnl.multiply(e, b[j])).reduce((m, n) => Rnl.add(m, n))
 }
@@ -127,8 +126,8 @@ const dtype = {
   // return the resulting data type.
   scalar: {
     scalar(t0, t1, tkn)     {
-      return (tkn === "&" || tkn === "&_")
-        ? t0 + (tkn === "&" ? dt.ROWVECTOR : dt.COLUMNVECTOR )
+      return (tkn === "&" || tkn === "hcat" || tkn === "hcat")
+        ? t0 + ((tkn === "&" || tkn === "hcat") ? dt.ROWVECTOR : dt.COLUMNVECTOR )
         : t0
     },
     complex(t0, t1, tkn)    { return t1 },
@@ -147,7 +146,7 @@ const dtype = {
     map(t0, t1, tkn)    { return t1 + (t0 & dt.ROWVECTOR) + (t0 & dt.COLUMNVECTOR) }
   },
   rowVector: {
-    rowVector(t0, t1, tkn) { return tkn === "&_" ? t0 - dt.ROWVECTOR + dt.MATRIX : t0 },
+    rowVector(t0, t1, tkn) { return tkn === "vcat" ? t0 - dt.ROWVECTOR + dt.MATRIX : t0 },
     columnVector(t0, t1, tkn) { return t0 },
     matrix(t0, t1, tkn) { return tkn === "multiply" ? t0 : t1 }
   },
@@ -165,7 +164,7 @@ const dtype = {
   matrix: {
     scalar(t0, t1, tkn) { return t0 },
     rowVector(t0, t1, tkn) { return t0 },
-    columnVector(t0, t1, tkn) { return tkn === "&" || tkn === "asterisk" ? t0 : t1 },
+    columnVector(t0, t1, tkn) { return tkn === "&" || tkn === "circ" ? t0 : t1 },
     matrix(t0, t1, tkn) { return t0 },
     map(t0, t1, tkn)    { return 0 }
   },
@@ -202,7 +201,7 @@ const binary = {
           : Rnl.power(x, y)
       },
       hypot(x, y)    { return Rnl.hypot(x, y) },
-      modulo(x, y)   { return Rnl.modulo(x, y) },
+      rem(x, y)      { return Rnl.rem(x, y) },
       and(x, y)      { return x && y },
       or(x, y)       { return x || y },
       xor(x, y)      { return x !== y },
@@ -215,7 +214,7 @@ const binary = {
       multiply(x, z) { return [Rnl.multiply(x, z[0]), Rnl.multiply(x, z[1])] },
       divide(x, z)   { return Cpx.divide([x, Rnl.zero], z) },
       power(x, z)    { return Cpx.power([x, Rnl.zero], z) },
-      modulo(x, z)   { return errorOprnd("NA_COMPL_OP", "modulo") },
+      rem(x, z)      { return errorOprnd("NA_COMPL_OP", "rem") },
       and(x, z)      { return errorOprnd("NA_COMPL_OP", "and") },
       or(x, z)       { return errorOprnd("NA_COMPL_OP", "or") },
       xor(x, z)      { return errorOprnd("NA_COMPL_OP", "xor") }
@@ -228,7 +227,7 @@ const binary = {
       multiply(x, v) { return v.map(e => Rnl.multiply(x, e)) },
       divide(x, v)   { return v.map(e => Rnl.divide(x, e)) },
       power(x, v)    { return v.map(e => Rnl.power(x, e)) },
-      modulo(x, v)   { return v.map(e => Rnl.modulo(x, e)) },
+      rem(x, v)      { return v.map(e => Rnl.rem(x, e)) },
       and(x, v)      { return v.map(e => x && e) },
       or(x, v)       { return v.map(e => x || e) },
       xor(x, v)      { return v.map(e => x !== e) },
@@ -242,7 +241,7 @@ const binary = {
       multiply(x, m) { return m.map(row => row.map(e => Rnl.multiply(x, e))) },
       divide(x, m)   { return m.map(row => row.map(e => Rnl.divide(x, e))) },
       power(x, m)    { return m.map(row => row.map(e => Rnl.power(x, e))) },
-      modulo(x, m)   { return m.map(row => row.map(e => Rnl.modulo(x, e))) },
+      rem(x, m)      { return m.map(row => row.map(e => Rnl.rem(x, e))) },
       and(x, m)      { return m.map(row => row.map(e => x && e)) },
       or(x, m)       { return m.map(row => row.map(e => x || e)) },
       xor(x, m)      { return m.map(row => row.map(e => x !== e)) },
@@ -269,33 +268,15 @@ const binary = {
     map: {
       // Binary operations with a scalar and a map.
       // Perform element-wise operations.
-      add(scalar, map) {
-        return mapMap(map, value => Rnl.add(scalar, value))
-      },
-      subtract(scalar, map) {
-        return mapMap(map, value => Rnl.subtract(scalar, value))
-      },
-      multiply(scalar, map) {
-        return mapMap(map, value => Rnl.multiply(scalar, value))
-      },
-      divide(scalar, map) {
-        return mapMap(map, value => Rnl.divide(scalar, value))
-      },
-      power(scalar, map) {
-        return mapMap(map, value => Rnl.power(scalar, value))
-      },
-      modulo(scalar, map) {
-        return mapMap(map, value => Rnl.modulo(scalar, value))
-      },
-      and(scalar, map) {
-        return mapMap(map, value => scalar && value)
-      },
-      or(scalar, map) {
-        return mapMap(map, value => scalar || value)
-      },
-      xor(scalar, map) {
-        return mapMap(map, value => scalar !== value)
-      }
+      add(scalar, map)      { return mapMap(map, value => Rnl.add(scalar, value)) },
+      subtract(scalar, map) { return mapMap(map, value => Rnl.subtract(scalar, value)) },
+      multiply(scalar, map) { return mapMap(map, value => Rnl.multiply(scalar, value)) },
+      divide(scalar, map)   { return mapMap(map, value => Rnl.divide(scalar, value)) },
+      power(scalar, map)    { return mapMap(map, value => Rnl.power(scalar, value)) },
+      rem(scalar, map)      { return mapMap(map, value => Rnl.rem(scalar, value)) },
+      and(scalar, map)      { return mapMap(map, value => scalar && value) },
+      or(scalar, map)       { return mapMap(map, value => scalar || value) },
+      xor(scalar, map)      { return mapMap(map, value => scalar !== value) }
     },
     mapWithVectorValues: {
       add(scalar, map) {
@@ -313,8 +294,8 @@ const binary = {
       power(scalar, map) {
         return mapMap(map, array => array.map(e => Rnl.power(scalar, e)))
       },
-      modulo(scalar, map) {
-        return mapMap(map, array => array.map(e => Rnl.modulo(scalar, e)))
+      rem(scalar, map) {
+        return mapMap(map, array => array.map(e => Rnl.rem(scalar, e)))
       },
       and(scalar, map) {
         return mapMap(map, array => array.map(e => scalar && e))
@@ -335,7 +316,7 @@ const binary = {
       multiply(z, y) { return [Rnl.multiply(z[0], y), Rnl.multiply(z[1], y) ] },
       divide(z, y)   { return Cpx.divide(z, [y, Rnl.zero]) },
       power(z, y)    { return Cpx.power(z, [y, Rnl.zero]) },
-      modulo(z, y)   { return errorOprnd("NA_COMPL_OP", "modulo") },
+      rem(z, y)      { return errorOprnd("NA_COMPL_OP", "rem") },
       and(z, y)      { return errorOprnd("NA_COMPL_OP", "and") },
       or(z, y)       { return errorOprnd("NA_COMPL_OP", "or") },
       xor(z, y)      { return errorOprnd("NA_COMPL_OP", "xor") }
@@ -346,7 +327,7 @@ const binary = {
       multiply(x, y) { return Cpx.multiply(x, y) },
       divide(x, y)   { return Cpx.divide(x, y) },
       power(x, y)    { return Cpx.power(x, y) },
-      modulo(x, y)   { return errorOprnd("NA_COMPL_OP", "modulo") },
+      rem(x, y)      { return errorOprnd("NA_COMPL_OP", "rem") },
       and(x, y)      { return errorOprnd("NA_COMPL_OP", "and") },
       or(x, y)       { return errorOprnd("NA_COMPL_OP", "or") },
       xor(x, y)      { return errorOprnd("NA_COMPL_OP", "xor") }
@@ -363,7 +344,7 @@ const binary = {
       multiply(v, x) { return v.map(e => Rnl.multiply(e, x)) },
       divide(v, x)   { return v.map(e => Rnl.divide(e, x)) },
       power(v, x)    { return v.map(e => Rnl.power(e, x)) },
-      modulo(v, x)   { return v.map(e => Rnl.modulo(e, x)) },
+      rem(v, x)      { return v.map(e => Rnl.rem(e, x)) },
       and(v, x)      { return v.map(e => e && x) },
       or(v, x)       { return v.map(e => e || x) },
       xor(v, x)      { return v.map(e => e !== x) },
@@ -386,8 +367,8 @@ const binary = {
       power(vector, map) {
         return mapMap(map, val => vector.map(e => Rnl.power(val, e)))
       },
-      modulo(vector, map) {
-        return mapMap(map, val => vector.map(e => Rnl.modulo(val, e)))
+      rem(vector, map) {
+        return mapMap(map, val => vector.map(e => Rnl.rem(val, e)))
       },
       and(vector, map) {
         return mapMap(map, val => vector.map(e => val && e))
@@ -433,7 +414,7 @@ const binary = {
         if (x.length === 1 && y.length === 1) { return [Rnl.multiply(x[0], y[0])] }
         return errorOprnd("MIS_ELNUM")
       },
-      asterisk(x, y) {
+      circ(x, y) {
         // Element-wise multiplication
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
         return x.map((e, i) => Rnl.multiply(e, y[i]))
@@ -488,7 +469,7 @@ const binary = {
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
         return dotProduct(x, y)
       },
-      asterisk(x, y) {
+      circ(x, y) {
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
         return x.map((e, i) => Rnl.multiply(e, y[i]))
       },
@@ -528,9 +509,10 @@ const binary = {
       },
       multiply(v, m) {
         if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
-        return transpose2D(m).map(row => dotProduct(v, row))
+        m = m[0].map((x, i) => m.map(y => y[i])) // Transpose m
+        return m.map(row => dotProduct(v, row))
       },
-      asterisk(v, m) {
+      circ(v, m) {
         if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
         return m.map(row => row.map((e, i) => Rnl.multiply(v[i], e)))
       },
@@ -584,7 +566,7 @@ const binary = {
       divide(x, y) {
         return x.map(m => y.map(e => Rnl.divide(m, e)))
       },
-      asterisk(x, y) {
+      circ(x, y) {
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
         return x.map((e, i) => Rnl.multiply(e, y[i]))
       },
@@ -642,7 +624,7 @@ const binary = {
         if (x.length === 1 && y.length === 1) { return [Rnl.multiply(x[0], y[0])] }
         return errorOprnd("MIS_ELNUM")
       },
-      asterisk(x, y) {
+      circ(x, y) {
         // Element-wise multiplication
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
         return x.map((e, i) => Rnl.multiply(e, y[i]))
@@ -651,9 +633,9 @@ const binary = {
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
         return x.map((e, i) => Rnl.power(e, y[i]))
       },
-      modulo(x, y) {
+      rem(x, y) {
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((e, i) => Rnl.modulo(e, y[i]))
+        return x.map((e, i) => Rnl.rem(e, y[i]))
       },
       and(x, y) {
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
@@ -688,7 +670,7 @@ const binary = {
         if (m.length !== 1) { return errorOprnd("MIS_ELNUM") }
         return m.map((row, i) => row.map(e => Rnl.multiply(v[i], e)))
       },
-      asterisk(v, m) {
+      circ(v, m) {
         if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
         return m.map((row, i) => row.map(e => Rnl.multiply(v[i], e)))
       },
@@ -717,19 +699,18 @@ const binary = {
       multiply(m, x) { return m.map(row => row.map(e => Rnl.multiply(e, x))) },
       divide(m, x)   { return m.map(row => row.map(e => Rnl.divide(e, x))) },
       power(m, x)    {
-        if (x === "T") { return transpose2D(m) }
         if (m.length === m[0].length && Rnl.areEqual(x, [BigInt(-1), BigInt(1)])) {
           return Matrix.invert(m)
         }
         return m.map(row => row.map(e => Rnl.power(e, x)))
       },
-      modulo(m, x)   { return m.map(row => row.map(e => Rnl.modulo(e, x))) }
+      rem(m, x)   { return m.map(row => row.map(e => Rnl.rem(e, x))) }
     },
     rowVector: {
       add(m, v)      { return m.map(row => row.map((e, i) => Rnl.add(e, v[i]) )) },
       subtract(m, v) { return m.map(row => row.map((e, i) => Rnl.subtract(e, v[i]) )) },
       multiply(m, v) { return m.map(row => row.map((e, i) => Rnl.multiply(e, v[i]) )) },
-      asterisk(m, v) { return m.map(row => row.map((e, i) => Rnl.multiply(e, v[i]) )) },
+      circ(m, v) { return m.map(row => row.map((e, i) => Rnl.multiply(e, v[i]) )) },
       divide(m, v)   { return m.map(row => row.map((e, i) => Rnl.divide(e, v[i]) )) },
       power(m, v)    { return m.map(row => row.map((e, i) => Rnl.power(e, v[i]) )) },
       modulo(m, v)   { return m.map(row => row.map((e, i) => Rnl.modulo(e, v[i]) )) },
@@ -746,10 +727,10 @@ const binary = {
         if (m[0].length !== v.length) { return errorOprnd("MIS_ELNUM") }
         return m.map(row => dotProduct(row, v))
       },
-      asterisk(m, v) { return m.map((row, i) => row.map(e => Rnl.multiply(e, v[i]) )) },
+      circ(m, v) { return m.map((row, i) => row.map(e => Rnl.multiply(e, v[i]) )) },
       divide(m, v)   { return m.map((row, i) => row.map(e => Rnl.divide(e, v[i]) )) },
       power(m, v)    { return m.map((row, i) => row.map(e => Rnl.power(e, v[i]) )) },
-      modulo(m, v)   { return m.map((row, i) => row.map(e => Rnl.modulo(e, v[i]) )) },
+      rem(m, v)   { return m.map((row, i) => row.map(e => Rnl.rem(e, v[i]) )) },
       concat(m, v) {
         if (m.length !== v.length) { return errorOprnd("MIS_ELNUM") }
         return m.map((row, i) => [...row, v[i]])
@@ -778,7 +759,7 @@ const binary = {
       multiply(x, y) {
 
       },
-      asterisk(x, y) {
+      circ(x, y) {
         // Element-wise multiplication
         if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
         if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
@@ -794,10 +775,10 @@ const binary = {
         if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
         return x.map((m, i) => m.map((n, j) => Rnl.power(n, y[i][j])))
       },
-      modulo(x, y) {
+      rem(x, y) {
         if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
         if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((m, i) => m.map((n, j) => Rnl.modulo(n, y[i][j])))
+        return x.map((m, i) => m.map((n, j) => Rnl.rem(n, y[i][j])))
       },
       and(x, y) {
         if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
@@ -850,33 +831,15 @@ const binary = {
   map: {
     scalar: {
       // Binary opertions on a map and a scalar
-      add(map, scalar) {
-        return mapMap(map, value => Rnl.add(value, scalar))
-      },
-      subtract(map, scalar) {
-        return mapMap(map, value => Rnl.subtract(value, scalar))
-      },
-      multiply(map, scalar) {
-        return mapMap(map, value => Rnl.multiply(value, scalar))
-      },
-      divide(map, scalar) {
-        return mapMap(map, value => Rnl.divide(value, scalar))
-      },
-      power(map, scalar) {
-        return mapMap(map, value => Rnl.power(value, scalar))
-      },
-      modulo(map, scalar) {
-        return mapMap(map, value => Rnl.modulo(value, scalar))
-      },
-      and(map, scalar) {
-        return mapMap(map, value => value && scalar)
-      },
-      or(map, scalar) {
-        return mapMap(map, value => value || scalar)
-      },
-      xor(map, scalar) {
-        return mapMap(map, value => value !== scalar)
-      }
+      add(map, scalar)      { return mapMap(map, value => Rnl.add(value, scalar)) },
+      subtract(map, scalar) { return mapMap(map, value => Rnl.subtract(value, scalar)) },
+      multiply(map, scalar) { return mapMap(map, value => Rnl.multiply(value, scalar)) },
+      divide(map, scalar)   { return mapMap(map, value => Rnl.divide(value, scalar)) },
+      power(map, scalar)    { return mapMap(map, value => Rnl.power(value, scalar)) },
+      rem(map, scalar)      { return mapMap(map, value => Rnl.rem(value, scalar)) },
+      and(map, scalar)      { return mapMap(map, value => value && scalar) },
+      or(map, scalar)       { return mapMap(map, value => value || scalar) },
+      xor(map, scalar)      { return mapMap(map, value => value !== scalar) }
     },
     vector: {
       add(map, array) {
@@ -894,8 +857,8 @@ const binary = {
       power(map, array) {
         return mapMap(map, value => array.map(e => Rnl.power(value, e)))
       },
-      modulo(map, array) {
-        return mapMap(map, value => array.map(e => Rnl.modulo(value, e)))
+      rem(map, array) {
+        return mapMap(map, value => array.map(e => Rnl.rem(value, e)))
       },
       and(map, array) {
         return mapMap(map, value => array.map(e => value && e))
@@ -931,8 +894,8 @@ const binary = {
       power(map, scalar) {
         return mapMap(map, array => array.map(e => Rnl.power(e, scalar)))
       },
-      modulo(map, scalar) {
-        return mapMap(map, array => array.map(e => Rnl.modulo(e, scalar)))
+      rem(map, scalar) {
+        return mapMap(map, array => array.map(e => Rnl.rem(e, scalar)))
       },
       and(map, scalar) {
         return mapMap(map, array => array.map(e => e && scalar))

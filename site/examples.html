@@ -43,7 +43,7 @@ bar hat vec harpoon dot ddot tilde
 a_subscript   b^exponent    x′
 (a+b) / (c+d)    1//2
 [1; 2; 3]    (a, b; c, d)
-[start..step..end] = ?
+[start:step:end...] = ?
 {a if b; c otherwise}
 Access:
   vector[number]
@@ -101,8 +101,8 @@ Say that we want to build a cylindrical water tank in 5-foot courses.
   </tr>
 </tbody></table>
 <p>We’ll calculate values for each course, all at once, using vectors. Each vector element represents one course. </p>
-<p>The next line creates a vector. The syntax is <code>[start..step..end]</code>. The superscript <sup>T</sup> causes transposition.</p>
-<p><span class="hurmet-calc" data-entry="𝐡 = [h..h..H]^T = ? ft"></span>, water depth at the bottom of each course</p>
+<p>The next line creates a vector. The syntax is <code>[start:step:end...]</code>.</p>
+<p><span class="hurmet-calc" data-entry="𝐡 = [h:h:H...] = ? ft"></span>, water depth at the bottom of each course</p>
 <p><span class="hurmet-calc" data-entry="𝐩_hydro = γ_w· 𝐡 = ?? psf"></span>, lateral hydrostatic pressure</p>
 <p><span class="hurmet-calc" data-entry="𝐭_h= 𝐩_hydro D = ?? kips/ft"></span>, hoop tension in each course</p>
 <p>Vectors can replace many spreadsheet calculations. Then all of the expressions and values are open to view. That extra information helps you to avoid the errors that creep into spreadsheets.</p>
@@ -157,7 +157,7 @@ Say that we want to build a cylindrical water tank in 5-foot courses.
 
 <h2>Rational Numbers</h2>
 <p>Hurmet numbers are rational numbers of arbitrary precision. Unlike most programming languages, Hurmet will do the following comparison correctly:</p>
-<p><span class="hurmet-calc" data-entry="(0.2 + 0.1 = 0.3) = ?"></span></p>
+<p><span class="hurmet-calc" data-entry="(0.2 + 0.1 == 0.3) = ?"></span></p>
 
 <p>Hurmet can handle bigger numbers than many languages: </p>
 <p><span class="hurmet-calc" data-entry="569936821221962380720³+ (-569936821113563493509)³ 
@@ -186,7 +186,7 @@ Say that we want to build a cylindrical water tank in 5-foot courses.
 <p><span class="hurmet-calc" data-entry="function viete(numTerms)
    product = 1
    radicand = 0
-   for i in 1..numTerms
+   for i in 1:numTerms
       radicand = √(2.0 + radicand)
       product = product × (radicand / 2)
    end

@@ -1,5 +1,4 @@
 /* eslint-disable */
-import { dt, allZeros } from "./constants"
 import { Rnl } from "./rational"
 import { format } from "./format"
 import {errorOprnd} from "./error"
@@ -12,25 +11,25 @@ import {errorOprnd} from "./error"
  * This module is a work in progress.
  */
 
-const j = [Rnl.zero, Rnl.one]
+const im = [Rnl.zero, Rnl.one]
 
 const isComplex = a => {
   return Array.isArray(a) && a.length === 2
     && Rnl.isRational(a[0]) && Rnl.isRational(a[1])
 }
 
-const re = z => z[0]
-const im = z => z[1]
+const real = z => z[0]
+const imag = z => z[1]
 const abs = z => Rnl.hypot(z[0], z[1])
 const negate = z => [Rnl.negate(z[0]), Rnl.negate(z[1])]
 const conjugate = z => [z[0], Rnl.negate(z[1])]
 
-const argument = (z) => {
-    // For a complex number z, the "argument" is the angle (in radians) from
+const angle = (z) => {
+    // For a complex number z, the angle (in radians) from
     // the positive real axis to the vector representing z.  + implies counter-clockwise.
     // Electrical engineers call this the phase angle of the complex number.
   if (Rnl.isZero(z[0]) && Rnl.isZero(z[1])) {
-    return errorOprnd("ORIGIN", "argument")
+    return errorOprnd("ORIGIN", "angle")
   } else if (Rnl.isZero(z[1])) {
     return  Rnl.isPositive(z[0]) ? Rnl.zero : Rnl.pi
   } else if (Rnl.isZero(z[0])) {
@@ -118,14 +117,14 @@ const inverse = z => {
 
 const cos = z => {
   const real = Rnl.multiply(Rnl.cos(z[0]), Rnl.cosh(z[1]))
-  const im = Rnl.multiply(Rnl.negate(Rnl.sin(z[0])), Rnl.sinh(z[1]))
-  return [real, im]
+  const imPart = Rnl.multiply(Rnl.negate(Rnl.sin(z[0])), Rnl.sinh(z[1]))
+  return [real, imPart]
 }
 
 const sin = z => {
   const real = Rnl.multiply(Rnl.sin(z[0]), Rnl.cosh(z[1]))
-  const im = Rnl.multiply(Rnl.cos(z[0]), Rnl.sinh(z[1]))
-  return [real, im]
+  const imPart = Rnl.multiply(Rnl.cos(z[0]), Rnl.sinh(z[1]))
+  return [real, imPart]
 }
 
 const log = x => {
@@ -135,7 +134,7 @@ const log = x => {
     return errorOprnd("ORIGIN", "log")
   } else {
     z[0] = Rnl.fromNumber(Math.log(Rnl.toNumber(Rnl.hypot(x[0], x[1]))))
-    z[1] = argument(x)   // phase angle, in radians
+    z[1] = angle(x)   // phase angle, in radians
   }
   return z
 }
@@ -208,13 +207,13 @@ const atanh = z => {
 
 const asin = z => {
   // arcsinh (i * z) / i
-  return divide(asinh(multiply(j, z)), j)
+  return divide(asinh(multiply(im, z)), im)
 }
 
 const atan = z => {
   // (Log(1 + iz) - Log(1 - iz)) / (2 * i)  cf Kahan
-  const term1 = log(increment(multiply(j, z)))
-  const term2 = log(subtract([Rnl.one, Rnl.zero],(multiply(j, z))))
+  const term1 = log(increment(multiply(im, z)))
+  const term2 = log(subtract([Rnl.one, Rnl.zero],(multiply(im, z))))
   return divide(subtract(term1, term2), [Rnl.zero, Rnl.two])  
 }
 
@@ -257,18 +256,22 @@ const lanczos = zPlusOne => {
 }
 
 const display = (z, formatSpec, decimalFormat) => {
-  const complexSpec = /[j∠°]/.test(formatSpec) ? formatSpec.slice(-1) : "j"
+  const complexSpec = /[i∠°]/.test(formatSpec) ? formatSpec.slice(-1) : "i"
   let resultDisplay = ""
   let altResultDisplay = ""
-  if (complexSpec === "j") {
+  if (complexSpec === "i") {
     const real = format(z[0], formatSpec, decimalFormat)
-    let im = format(z[1], formatSpec, decimalFormat)
-    if (im.charAt(0) === "-") { im = "(" + im + ")" }
-    resultDisplay = real + " + j" + im
-    altResultDisplay = real + " + j" + im
+    let imPart = format(z[1], formatSpec, decimalFormat)
+    if (imPart.charAt(0) === "-") {
+      resultDisplay = real + " - " + -imPart + "\\,\\mathord{\\mathrm{im}}"
+      altResultDisplay = real + " - " + -imPart + " im"
+    } else {
+      resultDisplay = real + " + " + imPart + " \\,\\mathord{\\mathrm{im}}"
+      altResultDisplay = real + " + " + imPart + " im"
+    }
   } else {
     const mag = Rnl.hypot(z[0], z[1])
-    let angle = Cpx.argument(result.value)
+    let angle = Cpx.angle(result.value)
     if (complexSpec === "°") {
       angle = Rnl.divide(Rnl.multiply(angle, Rnl.fromNumber(180)), Rnl.pi)
     }
@@ -281,12 +284,12 @@ const display = (z, formatSpec, decimalFormat) => {
 }
 
 export const Cpx = Object.freeze({
-  j,
-  re,
   im,
+  real,
+  imag,
   abs,
   conjugate,
-  argument,
+  angle,
   inverse,
   increment,
   decrement,

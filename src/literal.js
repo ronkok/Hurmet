@@ -13,13 +13,13 @@ const unitRegEx = /('[^']+'|[°ΩÅK])$/
 
 const numStr = "(-?(?:0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?)))"
 const nonNegNumStr = "(0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?))"
-const complexRegEx = new RegExp("^" + numStr + "(?: *([+-]) *j +" + nonNegNumStr + "|∠" + numStr + "(°)?)")
-// const complexRegEx = /^(number)(?: *([+-]) *j +(non-negative number)|∠(number)(°)?)/
+const complexRegEx = new RegExp("^" + numStr + "(?: *([+-]) *(" + nonNegNumStr + ") *im|∠" + numStr + "(°)?)")
+// const complexRegEx = /^(number)(?: *([+-]) *(non-negative number) *im|∠(number)(°)?)/
 /* eslint-enable max-len */
 // Capturing groups:
-//    [1] First number, either a in a + j b, or r in r∠θ
-//    [2] + or -. Gives the sign of the imaginary part in an a + j b.
-//    [3] b, the imaginary part in an a + j b expression
+//    [1] First number, either a in a ± b im, or r in r∠θ
+//    [2] + or -. Gives the sign of the imaginary part in an a ± b im.
+//    [3] b, the imaginary part in an a ± b im expression
 //    [4] theta, the argument (phase angle ) of an r∠θ expression
 //    [5] °, optional trailing degree sign in an r∠θ expression
 
@@ -90,22 +90,22 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
     // str is a complex number.
     const resultDisplay = parse(str, decimalFormat)
     const parts = str.match(complexRegEx)
-    let real
-    let im
+    let realPart
+    let imPart
     if (parts[3]) {
-      // a + j b expression
-      real = Rnl.fromString(parts[1])
-      im = Rnl.fromString(parts[3])
-      if (parts[2] === "-") { im = Rnl.negate(im) }
+      // a + b im expression
+      realPart = Rnl.fromString(parts[1])
+      imPart = Rnl.fromString(parts[3])
+      if (parts[2] === "-") { imPart = Rnl.negate(imPart) }
     } else {
       // r∠θ expression
       const r = Rnl.fromString(parts[1])
       let theta = Rnl.fromString(parts[4])
       if (parts[5]) { theta = Rnl.divide(Rnl.multiply(theta, Rnl.pi), Rnl.fromNumber(180)) }
-      real = Rnl.multiply(r, Rnl.fromNumber(Math.cos(Rnl.toNumber(theta))))
-      im = Rnl.multiply(r, Rnl.fromNumber(Math.sin(Rnl.toNumber(theta))))
+      realPart = Rnl.multiply(r, Rnl.fromNumber(Math.cos(Rnl.toNumber(theta))))
+      imPart = Rnl.multiply(r, Rnl.fromNumber(Math.sin(Rnl.toNumber(theta))))
     }
-    return [[real, im], allZeros, dt.COMPLEX, resultDisplay]
+    return [[realPart, imPart], allZeros, dt.COMPLEX, resultDisplay]
 
   } else if (str.match(numberRegEx)) {
     // str is a number.
@@ -114,7 +114,7 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
       return [Rnl.fromString(str), unitName, dt.RATIONAL + dt.QUANTITY,
         resultDisplay + "\\;" + unitDisplay]
     } else {
-      return [Rnl.fromString(str), allZeros, dt.RATIONAL, resultDisplay]
+      return [Rnl.fromString(str), { expos: allZeros }, dt.RATIONAL, resultDisplay]
     }
 
   } else {

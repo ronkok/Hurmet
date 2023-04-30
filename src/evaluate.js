@@ -1,5 +1,5 @@
 ﻿import { dt, allZeros } from "./constants"
-import { clone, mapMap, arrayOfRegExMatches, tablessTrim } from "./utils"
+import { clone, mapMap, tablessTrim } from "./utils"
 import { plugValsIntoEcho } from "./echo"
 import { fromAssignment } from "./operand.js"
 import { Functions, multivarFunction } from "./functions"
@@ -53,7 +53,7 @@ import { draw } from "./draw"
 
 // Some helper functions
 
-const setComparisons = ["∈", "∉", "∋", "∌", "⊆", "⊈", "⊇", "⊉"]
+const setComparisons = ["in", "!in", "∈", "∉", "∋", "∌", "⊆", "⊈", "⊇", "⊉"]
 
 const needsMap = (...args) => {
   for (let i = 0; i < args.length; i++) {
@@ -67,14 +67,13 @@ const shapeOf = oprnd => {
     ? "complex"
     : oprnd.dtype < 128
     ? "scalar"
-    : Matrix.isVector(oprnd)
+    : isVector(oprnd)
     ? "vector"
     : (oprnd.dtype & dt.MATRIX)
     ? "matrix"
     : oprnd.dtype === dt.DATAFRAME
     ? "dataFrame"
-    : ((oprnd.dtype & dt.MAP) &&
-       ((oprnd.dtype & dt.ROWVECTOR) || (oprnd.dtype & dt.COLUMNVECTOR)))
+    : ((oprnd.dtype & dt.MAP) && isVector(oprnd))
     ? "mapWithVectorValues"
     : (oprnd.dtype & dt.MAP)
     ? "map"
@@ -99,13 +98,16 @@ const binaryShapesOf = (o1, o2) => {
   return [shape1, shape2, needsMultBreakdown]
 }
 
+const matrixMults = { "×": "cross", "·": "dot", "∘": "circ", ".*": "circ",
+  "*": "multiply", "⌧": "multiply" }
+
 const nextToken = (tokens, i) => {
   if (tokens.length < i + 2) { return undefined }
   return tokens[i + 1]
 }
 
 // array of function names that return a real number from a complex argument.
-const arfn = ["abs", "argument", "Im", "Re", "Γ"]
+const arfn = ["abs", "angle", "imag", "real", "Γ", "gamma"]
 
 const stringFromOperand = (oprnd, decimalFormat) => {
   return oprnd.dtype === dt.STRING
@@ -163,11 +165,9 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         oprnd.unit = null
         oprnd.dtype = 0
       } else if (varName === "T" && nextToken(tokens, i) === "^" &&
-        stack.length > 0 && isMatrix(stack[stack.length - 1])) {
-        // Transpose a matrix.
-        oprnd.value = "T"
-        oprnd.unit = null
-        oprnd.dtype = dt.RATIONAL
+            stack.length > 0 && isMatrix(stack[stack.length - 1])) {
+        i += 1
+        oprnd = Matrix.transpose(stack.pop())
       } else {
         const cellAttrs = vars[varName]
         if (!cellAttrs) { return errorOprnd("V_NAME", varName) }
@@ -203,6 +203,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
+        case "pi":
         case "π": {
           const pi = Object.create(null)
           pi.value = Rnl.pi
@@ -223,8 +224,8 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
-        case "j": {
-          // j = √(-1)
+        case "im": {
+          // im = √(-1)
           const j = Object.create(null)
           j.value = [Rnl.zero, Rnl.one]
           j.unit = Object.create(null)
@@ -266,10 +267,12 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         }
 
         case "+":
-        case "-": {
+        case ".+":
+        case "-":
+        case ".-": {
           const o2 = stack.pop()
           const o1 = stack.pop()
-          const op = tkn === "+" ? "add" : "subtract"
+          const op = tkn === "+" || tkn === ".+" ? "add" : "subtract"
           if (!(((o1.dtype & dt.RATIONAL) || (o1.dtype & dt.COMPLEX)) &&
                 ((o2.dtype & dt.RATIONAL) || (o2.dtype & dt.COMPLEX)))) {
             return errorOprnd("NAN_OP")
@@ -308,10 +311,17 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "×":
         case "·":
         case "*":
+        case "∘":
         case "⌧": {
           const oprnd2 = stack.pop()
           const o2 = oprnd2.dtype === dt.DATAFRAME ? clone(oprnd2) : oprnd2
           const o1 = stack.pop()
+          if (tkn === "*" && o1.dtype === dt.STRING && o1.dtype === dt.STRING) {
+            // Julia's string concatenation operator
+            const str1 = stringFromOperand(o1, decimalFormat)
+            const str2 = stringFromOperand(o2, decimalFormat)
+            return { value: str1 + str2, unit: null, dtype: dt.STRING }
+          }
           if (!(((o1.dtype & dt.RATIONAL) || (o1.dtype & dt.COMPLEX)) &&
             ((o2.dtype & dt.RATIONAL) || (o2.dtype & dt.COMPLEX) ||
             o2.dtype === dt.DATAFRAME))) {
@@ -332,11 +342,9 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           product.unit = o2.dtype === dt.DATAFRAME ? clone(o2.unit) : Object.freeze(unit)
 
           const [shape1, shape2, needsMultBreakdown] = binaryShapesOf(o1, o2)
-          const op = needsMultBreakdown
-            ? { "×": "cross", "·": "dot", "*": "asterisk", "⌧": "multiply" }[tkn]
-            : "multiply"
+          const op = needsMultBreakdown ? matrixMults[tkn] : "multiply"
 
-          product.dtype = (tkn === "*" || shape1 === "scalar" || shape1 === "map" ||
+          product.dtype = (tkn === "∘" || shape1 === "scalar" || shape1 === "map" ||
             shape1 === "complex" || shape2 === "scalar" ||
             shape2 === "map" || shape2 === "complex")
               ? Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, op)
@@ -356,8 +364,8 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         }
 
         case "/":
+        case "./":
         case "//":
-        case "÷":
         case "///":
         case "\u2215": {
           const o2 = stack.pop()
@@ -383,18 +391,10 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
-        case "^": {
+        case "^":
+        case ".^": {
           const o2 = stack.pop()
           const o1 = stack.pop()
-          if (Matrix.isVector(o1) && o2.value === "T") {
-            // Transpose a vector
-            const oprnd = clone(o1)
-            oprnd.dtype = o1.dtype + ((o1.dtype & dt.ROWVECTOR)
-              ? dt.COLUMNVECTOR - dt.ROWVECTOR
-              : dt.ROWVECTOR - dt.COLUMNVECTOR)
-            stack.push(Object.freeze(oprnd))
-            break
-          }
           if (!(((o1.dtype & dt.RATIONAL) || o1.dtype === dt.COMPLEX) &&
                 ((o2.dtype & dt.RATIONAL) || o2.dtype === dt.COMPLEX) ||
                 (isMatrix(o1) && o2.value === "T"))) {
@@ -419,25 +419,13 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
-        case "^*": {
-          // complex conjugate
-          const oprnd = stack.pop()
-          if (!(oprnd.dtype & dt.COMPLEX)) { return errorOprnd("NA_REAL"), "conjugate" }
-          const o2 = {
-            value: Cpx.conjugate(oprnd.value),
-            unit: oprnd.unit,
-            dtype: oprnd.dtype
-          }
-          stack.push(Object.freeze(o2))
-          break
-        }
-
         case "&":
-        case "&_": {
+        case "hcat":
+        case "vcat": {
           // Concatenation
           const o2 = stack.pop()
           const o1 = stack.pop()
-          const opName = tkn === "&" ? "concat" : "unshift"
+          const opName = tkn === "vcat" ? "unshift" : "concat"
           const [shape1, shape2, _] = binaryShapesOf(o1, o2)
           let o3 = Object.create(null)
           if (o1.dtype === dt.STRING && o1.dtype === dt.STRING) {
@@ -446,7 +434,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             o3.value = str1 + str2
             o3.unit = null
             o3.dtype = dt.STRING
-          } else if ((o1.dtype & dt.DATAFRAME) && Matrix.isVector(o2) && tkn === "&") {
+          } else if ((o1.dtype & dt.DATAFRAME) && isVector(o2) && tkn !== "vcat") {
             o3 = DataFrame.append(o1, o2, vars, unitAware)
             if (o3.dtype === dt.ERROR) { return o3 }
           } else if ((o1.dtype & dt.MAP) || (o2.dtype & dt.MAP)) {
@@ -572,7 +560,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
-        case "..": {
+        case ":": {
           // range separator.
           const end = stack.pop()
           const o1 = stack.pop()
@@ -591,16 +579,6 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             ? [o1.value, step, end.value]
             : [o1.value[0], o1.value[2], end.value];
           stack.push((Object.freeze(range)))
-          break
-        }
-
-        case ":": {
-          const o2 = stack.pop()
-          const key = stack.pop()
-          if (key.dtype !== dt.STRING) { return errorOprnd("BAD_KEYSTR") }
-          stack.push(Object.freeze({
-            name: key.value, value: o2.value, unit: o2.unit, dtype: o2.dtype
-          }))
           break
         }
 
@@ -672,7 +650,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           i += 2
 
           if (stack[stack.length - 1].dtype === dt.RANGE) {
-            // Input was [start:step:end]
+            // Input was [start:step:end...]
             stack.push(Matrix.operandFromRange(stack.pop().value))
           } else {
             stack.push(Matrix.operandFromTokenStack(stack, numRows, numCols))
@@ -714,11 +692,11 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "asech":
         case "acsch":
         case "acoth":
-        case "Gamma":
+        case "gamma":
         case "Γ":
-        case "logGamma":
-        case "logΓ":
-        case "logFactorial":
+        case "lgamma":
+        case "lfact":
+        case "factorial":
         case "cosd":
         case "sind":
         case "tand":
@@ -731,10 +709,13 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "asecd":
         case "acscd":
         case "acotd":
-        case "Re":
-        case "Im":
-        case "argument":
-        case "chr":
+        case "real":
+        case "imag":
+        case "angle":
+        case "conj":
+        case "ceil":
+        case "floor":
+        case "Char":
         case "round":
         case "sqrt":
         case "sign": {
@@ -748,13 +729,13 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const unit = Object.create(null)
           unit.expos = unitAware ? Functions.functionExpos(tkn, [arg]) : allZeros
           if (unit.expos.dtype && unit.expos.dtype === dt.ERROR) { return unit.expos }
-          output.unit = Object.freeze(unit)
+          output.unit = tkn === "Char" ? null : Object.freeze(unit)
 
           const shape = (arg.dtype & dt.RATIONAL) ? "scalar" : "complex"
-          const value = ((arg.dtype & dt.MAP) && Matrix.isVector(arg))
+          const value = ((arg.dtype & dt.MAP) && isVector(arg))
             // eslint-disable-next-line max-len
             ? mapMap(arg.value, array => array.map(e => Functions.unary[shape][tkn](e)))
-            : Matrix.isVector(arg)
+            : isVector(arg)
             ? arg.value.map(e => Functions.unary[shape][tkn](e))
             : isMatrix(arg)
             ? arg.value.map(row => row.map(e => Functions.unary[shape][tkn](e)))
@@ -764,7 +745,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           if (value.dtype && value.dtype === dt.ERROR) { return value }
           output.value = Object.freeze(value)
 
-          output.dtype = tkn === "chr"
+          output.dtype = tkn === "Char"
             ? arg.dtype - dt.RATIONAL + dt.STRING
             : (arg.dtype & dt.COMPLEX) && arfn.includes(tkn)
             ? arg.dtype - dt.COMPLEX + dt.RATIONAL
@@ -780,7 +761,9 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "gcd":
         case "rms":
         case "binomial":
-        case "zeros": {
+        case "zeros":
+        case "mod":
+        case "rem": {
           // Functions with two real arguments.
           const args = []
           args.push(stack.pop())
@@ -820,9 +803,9 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             output.dtype = num.dtype
           }
           const n = Number(spec.value.slice(1))
-          const value = ((num.dtype & dt.MAP) && Matrix.isVector(num))
+          const value = ((num.dtype & dt.MAP) && isVector(num))
             ? mapMap(num.value, array => array.map(e => Functions.binary[funcName]([e, n])))
-            : Matrix.isVector(num)
+            : isVector(num)
             ? num.value.map(e => Functions.binary[funcName]([e, n]))
             : isMatrix(num)
             ? num.value.map(row => row.map(e => Functions.binary[funcName]([e, n])))
@@ -880,18 +863,33 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
-        case "random": {
-          // No arguments
-          const num = Object.create(null)
-          num.value = Rnl.fromNumber(Math.random())
-          num.unit = Object.create(null)
-          num.unit.expos = allZeros
-          num.dtype = dt.RATIONAL
-          stack.push(Object.freeze(num))
+        case "rand": {
+          const numArgs = Number(tokens[i + 1])
+          i += 1
+          if (numArgs === 0) {
+            const value = Rnl.fromNumber(Math.random())
+            stack.push({ value, unit: allZeros, dtype: dt.RATIONAL })
+          } else if (numArgs === 1) {
+            const n = Rnl.toNumber(stack.pop().value)
+            if (!Number.isInteger(n)) { return errorOprnd("INT_ARG", "rand") }
+            const value = new Array(n).fill(0)
+              .map(e => Rnl.fromNumber(Math.random()))
+            stack.push({ value, unit: allZeros, dtype: dt.RATIONAL + dt.COLUMNVECTOR })
+          } else if (numArgs === 2) {
+            const n = Rnl.toNumber(stack.pop().value)
+            if (!Number.isInteger(n)) { return errorOprnd("INT_ARG", "rand") }
+            const m = Rnl.toNumber(stack.pop().value)
+            if (!Number.isInteger(m)) { return errorOprnd("INT_ARG", "rand") }
+            let value = new Array(m).fill(new Array(n).fill(0))
+            value = value.map(row => row.map(e => Rnl.fromNumber(Math.random())))
+            stack.push({ value, unit: allZeros, dtype: dt.RATIONAL + dt.MATRIX })
+          } else {
+            return errorOprnd("BAD_ARGS", "rand")
+          }
           break
         }
 
-        case "isNaN": {
+        case "isnan": {
           const oprnd = stack.pop()
           const output = Object.create(null)
           output.value = !(oprnd.dtype & dt.RATIONAL)
@@ -904,12 +902,12 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "length": {
           const arg = stack.pop()
           const value = arg.value
-          const length = Matrix.isVector(arg)
+          const length = isVector(arg)
             ? value.length
             : (arg.dtype & dt.MATRIX)
             ? value.length * value[0].length
             : (arg.dtype === dt.STRING)
-            ? value.length - arrayOfRegExMatches(/[\uD800-\uD8FF\uFE00\uFE01]/g, value).length
+            ? Array.from(value).length
             : (arg.dtype & dt.MAP)
             ? arg.keys().value.length
             : 0
@@ -1006,7 +1004,6 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             const udf = lib[functionName]
             if (udf === undefined) { return errorOprnd("F_NAME", functionName) }
             if (udf.dtype === dt.ERROR) { return udf }
-            if (udf.isPrivate) { return errorOprnd("PRIVATE", functionName) }
             oprnd = evalCustomFunction(udf, args, decimalFormat, unitAware, lib)
             i += 1
           } else if (lib && lib[functionName]) {
@@ -1037,7 +1034,9 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "≠":
         case "!=":
         case "∈":
+        case "in":
         case "∉":
+        case "!in":
         case "∋":
         case "∌":
         case "⊆":
@@ -1055,7 +1054,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           }
           const bool = Object.create(null)
           bool.unit = null
-          const prevValue = (o1.dtype & dt.BOOLEANFROMCOMPARISON) ? oPrev.value : undefined
+          const prevValue = (o1.dtype === dt.BOOLEANFROMCOMPARISON) ? oPrev.value : undefined
 
           if (setComparisons.includes(tkn)) {
             bool.value = compare(tkn, o1.value, o2.value, prevValue)
@@ -1075,7 +1074,9 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         }
 
         case "and":
+        case "&&":
         case "or":
+        case "||":
         case "∧":
         case "∨":
         case "⊻": {
@@ -1084,7 +1085,8 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           if (!(o1.dtype & dt.BOOLEAN) || !(o2.dtype & dt.BOOLEAN)) {
             return errorOprnd("LOGIC", tokens[i])
           }
-          const op = { "and": "and", "or": "or", "∧": "and", "∨": "or", "⊻": "xor" }[tkn]
+          const op = { "and": "and", "&&": "and", "or": "or", "∧": "and",
+            "||": "or", "∨": "or", "⊻": "xor" }[tkn]
           const [shape1, shape2, _] = binaryShapesOf(o1, o2)
 
           const bool = Object.create(null)
@@ -1175,7 +1177,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
-        case "modulo": {
+        case "rem%": {
           const o2 = stack.pop()
           const o1 = stack.pop()
           if (!((o1.dtype & dt.RATIONAL) & (o2.dtype & dt.RATIONAL))) {
@@ -1185,7 +1187,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const mod = Object.create(null)
           mod.unit = Object.create(null)
           mod.unit.expos = allZeros
-          mod.value = Operators.binary[shape1][shape2]["modulo"](o1.value, o2.value)
+          mod.value = Operators.binary[shape1][shape2]["rem"](o1.value, o2.value)
           if (mod.value.dtype && mod.value.dtype === dt.ERROR) { return mod.value }
           mod.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn)
           stack.push(Object.freeze(mod))
@@ -1234,7 +1236,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
-        case "raise":
+        case "throw":
           return { value: stack.pop().value, unit: null, dtype: dt.ERROR }
 
         case "\\blue":
@@ -1273,9 +1275,9 @@ const plot = (svg, decimalFormat, fun, numPoints, xMin, xMax) => {
   const max = (xMax == null) ? Rnl.fromNumber(attrs.xmax) : xMax.value
   // Vectorize the evaluation. Start by finding a vector of the input.
   const step = Rnl.divide(Rnl.subtract(max, min), numPoints)
-  const rowVector = Matrix.operandFromRange([min, step, max])
+  const vector = Matrix.operandFromRange([min, step, max])
   // Transpose the row vector into a column vector.
-  const arg = { value: rowVector.value, unit: null, dtype: dt.COLUMNVECTOR + dt.RATIONAL }
+  const arg = { value: vector.value, unit: null, dtype: dt.COLUMNVECTOR + dt.RATIONAL }
   // Run the function on the vector.
   let funResult
   let pathValue
@@ -1340,11 +1342,11 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
   if (args.length > udf.parameters.length) { return errorOprnd("NUMARGS", udf.name) }
   const vars = Object.create(null)
   for (let i = 0; i < args.length; i++) {
-    vars[udf.parameters[i]] = args[i]
+    vars[udf.parameters[i].name] = args[i]
   }
   if (udf.parameters.length > args.length) {
     for (let i = args.length; i < udf.parameters.length; i++) {
-      vars[udf.parameters[i]] = { value: undefined, unit: null, dtype: 0 }
+      vars[udf.parameters[i].name] = udf.parameters[i].default
     }
   }
   if (udf.dtype === dt.DRAWING) {
@@ -1364,7 +1366,11 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
       case "statement": {
         if (control[level].condition) {
           const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib)
-          if (result.dtype === dt.ERROR) { return result }
+          if (result.dtype === dt.ERROR) {
+            // eslint-disable-next-line no-console
+            console.log(statement.rpn)
+            return result
+          }
           if (statement.name) {
             statement.resultdisplay = isUnitAware ? "!!" : "!"
             const [stmt, _] = conditionResult(statement, result, isUnitAware)
@@ -1391,7 +1397,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
         break
       }
 
-      case "else if": {
+      case "elseif": {
         if (control[level].type === "if" && control[level].condition) {
           i = control[level].endOfBlock
           control.pop()
@@ -1444,7 +1450,6 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
           endOfBlock: statement.endOfBlock
         }
         const tokens = statement.rpn.split("\u00A0")
-        tokens.pop() // Discard the "for"
         ctrl.dummyVariable = tokens.shift().slice(1)
         const iterable = evalRpn(tokens.join("\u00A0"), vars, decimalFormat, isUnitAware, lib)
         ctrl.index = (iterable.dtype & dt.RANGE) ? iterable.value[0] : Rnl.fromNumber(0)
@@ -1527,7 +1532,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
         }
         break
 
-      case "echo":
+      case "print":
         if (control[level].condition) {
           if (statement.rpn) {
             const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib)
@@ -1547,7 +1552,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
         }
         break
 
-      case "raise":
+      case "throw":
         if (control[level].condition) {
           if (statement.rpn) {
             const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib)
@@ -1588,7 +1593,7 @@ const conditionResult = (stmt, oprnd, unitAware) => {
   result.unit = clone(oprnd.unit)
   result.dtype = oprnd.dtype
 
-  if (result.dtype === dt.COMPLEX && Rnl.isZero(Cpx.im(result.value))) {
+  if (result.dtype === dt.COMPLEX && Rnl.isZero(Cpx.imag(result.value))) {
     result.value = Cpx.re(result.value)
     result.dtype = 1
   }

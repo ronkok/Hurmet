@@ -6,13 +6,13 @@ import { parse } from "./parser.js"
 import { errorOprnd } from "./error.js"
 
 const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/
-const keywordRegEx = /^(if|else if|else|return|raise|while|for|break|echo|end)\b/
+const keywordRegEx = /^(if|elseif|else|return|throw|while|for|break|print|end)\b/
 const drawCommandRegEx = /^(title|frame|view|axes|grid|stroke|strokewidth|strokedasharray|fill|fontsize|fontweight|fontstyle|fontfamily|marker|line|path|plot|curve|rect|circle|ellipse|arc|text|dot|leader|dimension)\b/
 const leadingSpaceRegEx = /^[\t ]+/
 
 // If you change functionRegEx, then also change it in mathprompt.js.
 // It isn't called from there in order to avoid duplicating Hurmet code inside ProseMirror.js.
-export const functionRegEx = /^(?:private +)?function (?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*\(/
+export const functionRegEx = /^function (?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*\(/
 export const drawRegEx = /^draw\(/
 const startSvgRegEx = /^startSvg\(\)/
 const lexRegEx = /"[^"]*"|``.*|`[^`]*`|'[^']*'|#|[^"`'#]+/g
@@ -93,13 +93,24 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
     const posFn = line1.indexOf("function")
     functionName = line1.slice(posFn + 8, posParen).trim()
   }
-  const isPrivate = /^private /.test(line1)
-  const parameterList =  line1.slice(posParen + 1, -1).trim()
-  const parameters = parameterList.length === 0 ? [] : parameterList.split(/, */g)
+
+  const parameterString =  line1.slice(posParen + 1, -1).trim()
+  const parameterSplit = parameterString.length === 0 ? [] : parameterString.split(/ *[,;] */g)
+  const parameters = [];
+  for (const param of parameterSplit) {
+    const parts = param.split(/ *= */)
+    const name = parts[0]
+    let defaultVal = { name, value: null, dtype: null }
+    if (parts[1]) {
+      const [value, unit, dtype, resultDisplay] = valueFromLiteral(parts[1], "", decimalFormat)
+      defaultVal = { name, value, unit, dtype, resultDisplay }
+    }
+    parameters.push({ name, default: defaultVal })
+  }
+
   const funcObj = {
     name: functionName,
     dtype: isDraw ? dt.DRAWING : dt.MODULE,
-    isPrivate,
     parameters,
     statements: []
   }
@@ -167,6 +178,7 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
     let rpn = ""
     if (expression) {
       [, rpn] = parse(expression, decimalFormat, true)
+      if (name === "for") { rpn = rpn.replace(/\u00a0in\u00a0/, "\u00a0") }
     }
     const stype = isStatement ? "statement" : name
     if (isStatement && /[,;]/.test(name)) {
@@ -175,7 +187,6 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
     funcObj.statements.push({ name: name, rpn: rpn, stype: stype })
     if (stype === "if" || stype === "while" || stype === "for") {
       stackOfCtrls.push({ type: stype, statementNum: funcObj.statements.length - 1 })
-      if (stype === "for" && rpn.indexOf("j\u00a0") === 0) { return [errorOprnd("BAD_J")] }
     } else if (stype === "end") {
       if (stackOfCtrls.length === 0) {
         // Finished the current function.

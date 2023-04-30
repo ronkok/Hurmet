@@ -46,7 +46,7 @@ export const tt = Object.freeze({
   FACTORIAL: 30,
   SUPCHAR: 31,
   ANGLE: 32,
-  ELLIPSIS: 33, //       separator for ranges (1:n)
+  RANGE: 33, //       separator for ranges (1:n)
   KEYWORD: 34, //     keywords: for in while
   PROPERTY: 36, //    property name after a dot accessor
   COMMENT: 37,
@@ -111,19 +111,21 @@ const words = Object.freeze({
   //       input,    tex output,               type, closeDelim
   "true": ["true", "\\mathord{\\text{true}}", tt.ORD, ""],
   "false": ["false", "\\mathord{\\text{false}}", tt.ORD, ""],
-  j: ["j", "j", tt.ORD, ""],
+  im: ["im", "im", tt.LONGVAR, ""],
   cos: ["cos", "\\cos", tt.FUNCTION, ""],
   cosd: ["cosd", "\\operatorname{\\cos_d}", tt.FUNCTION, ""],
   if: ["if", "\\mathrel{\\mathrm{if}}", tt.LOGIC, ""],
   else: ["else", "\\mathrel{\\mathrm{else}}", tt.LOGIC, ""],
+  elseif: ["elseif", "\\mathrel{\\mathrm{elseif}}", tt.LOGIC, ""],
   and: ["and", "\\mathrel{\\mathrm{and}}", tt.LOGIC, ""],
   or: ["or", "\\mathrel{\\mathrm{or}}", tt.LOGIC, ""],
   for: ["for", "\\mathrel{\\mathrm{for}}", tt.KEYWORD, ""],
   while: ["while", "\\mathrel{\\mathrm{while}}", tt.KEYWORD, ""],
-  in: ["in", "\\mathrel{\\mathrm{in}}", tt.KEYWORD, ""],
+  in: ["in", "\\mathrel{\\mathrm{in}}", tt.REL, ""],
+  "!in": ["!in", "\\mathrel{\\mathrm{!in}}", tt.REL, ""],
   break: ["break", "\\mathrel{\\mathrm{break}}", tt.KEYWORD, ""],
   to: ["to", "\\mathbin{\\mathrm{to}}", tt.TO, "" ],
-  raise: ["raise", "\\mathrel{\\mathrm{raise}}", tt.UNARY, ""],
+  throw: ["throw", "\\mathrel{\\mathrm{throw}}", tt.UNARY, ""],
   echo: ["echo", "\\mathrel{\\mathrm{echo}}", tt.UNARY, ""],
   return: ["return", "\\mathrel{\\mathrm{return}}", tt.RETURN, ""],
   sqrt: ["sqrt", "\\sqrt", tt.UNARY, ""],
@@ -141,17 +143,16 @@ const words = Object.freeze({
   log10: ["log10", "\\log_{10}", tt.FUNCTION, ""],
   log2: ["log2", "\\log_{2}", tt.FUNCTION, ""],
   "log!": ["log!", "\\operatorname{log!}", tt.FUNCTION, ""],
-
+  pi: ["pi", "\\mathrm{pi}", tt.ORD, ""],
   π: ["π", "π", tt.ORD, ""],
   "ℓ": ["ℓ", "ℓ", tt.VAR, ""],
-  modulo: ["modulo", "\\operatorname{modulo}", tt.MULT, ""],
   // A few arrows are placed here to give them priority over other arrows
   "->": ["->", "\u2192", tt.REL, ""], // right arrow
   "-->": ["-->", "\\xrightarrow", tt.UNARY, ""],
   "<-->": ["<-->", "\\xrightleftarrows", tt.UNARY, ""]
 })
 
-const miscRegEx = /^([/÷\u2215_:,;^+\\\-–−*×∘⊗⦼⊙√∛∜·.%∘|╏‖¦><=≈≟≠≡≤≥≅∈∉∋∌⊂⊄⊆⊈⊇⊉!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃∫∬∮∑([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7$£¥€₨₩₪]+)/
+const miscRegEx = /^([/÷\u2215_:,;\t^+\\\-–−*×∘⊗⦼⊙√∛∜·.%|╏‖¦><=≈≟≠≡≤≥≅∈∉∋∌⊂⊄⊆⊈⊇⊉!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃∫∬∮∑([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7$£¥€₨₩₪]+)/
 
 const miscSymbols = Object.freeze({
   //    input, output, type,  closeDelim
@@ -161,25 +162,29 @@ const miscSymbols = Object.freeze({
   "///": ["///", "/", tt.MULT, ""],     // inline (shilling) fraction
   "\u2215": ["\u2215", "\u2215", tt.MULT, ""], // inline (shilling) fraction
   "÷": ["÷", "÷", tt.MULT, ""],
+  "./": ["./", "\\mathbin{.'}", tt.MULT, ""],
   "_": ["_", "_", tt.SUB, ""],
   "^": ["^", "^", tt.SUP, ""],
+  ".^": [".^", "\\mathbin{.^}", tt.SUP, ""],
   "+": ["+", "+", tt.ADD, ""],
   "-": ["-", "-", tt.ADD, ""],
   "–": ["-", "-", tt.ADD, ""], // \u2013 en dash
   "−": ["-", "-", tt.ADD, ""], // \u2212 math minus
+  ".+": [".+", "\\mathbin{.+}", tt.ADD, ""],
+  ".-": [".-", "\\mathbin{.-}", tt.ADD, ""],
   "*": ["*", "*", tt.MULT, ""],
   "×": ["×", "×", tt.MULT, ""],
-  "∘": ["∘", "\\circ", tt.MULT, ""], // U+2218
+  "∘": ["∘", "∘", tt.MULT, ""], // U+2218
   "⊗": ["⊗", "⊗", tt.MULT, ""],
+  ".*": [".*", "\\mathbin{.*}", tt.MULT, ""],
   "√": ["√", "\\sqrt", tt.UNARY, ""],
   "\u221B": ["\u221B", "\\sqrt[3]", tt.UNARY, ""],
   "\u221C": ["\u221C", "\\sqrt[4]", tt.UNARY, ""],
   "+-": ["+-", "\u00B1", tt.BIN, ""],
   "**": ["**", "\\star", tt.BIN, ""],
   "·": ["·", "\u22C5", tt.MULT, ""], // dot operator
-  "...": ["...", "\\dots", tt.ORD, ""],
+  "...": ["...", "\\dots", tt.RANGE, ""],
   "%": ["%", "\\%", tt.FACTORIAL, ""],
-  "^*": ["^*", "^*", tt.FACTORIAL, ""],
   "-:": ["-:", "÷", tt.MULT, ""],
   "=": ["=", "=", tt.REL, ""],
   "≈": ["≈", "≈", tt.REL, ""],
@@ -241,8 +246,7 @@ const miscSymbols = Object.freeze({
   "∨": ["∨", "∨", tt.LOGIC, ""],
   "⊻": ["⊻", "⊻", tt.LOGIC, ""], // xor
   "¬": ["¬", "¬", tt.UNARY, ""], // logical not
-  // calculations do not use a ":"" token. But LOGIC is the right precedence for display.
-  ":": [":", ":", tt.LOGIC, ""],
+  "&&": ["&&", "{\\;\\&\\&\\;}", tt.LOGIC, ""],
 
   "\u222B": ["\u222B", "\u222B", tt.UNDEROVER, ""], // \int
   "\u222C": ["\u222C", "\u222C", tt.UNDEROVER, ""], // \iint
@@ -260,8 +264,9 @@ const miscSymbols = Object.freeze({
   "⟩": ["⟩", "⟩", tt.RIGHTBRACKET, ""],
   ":}": [":}", "}", tt.RIGHTBRACKET, ""],
   "|": ["|", "|", tt.LEFTRIGHT, ""],
-  "||": ["||", "\\Vert ", tt.LEFTRIGHT, ""],
-  "‖": ["‖", "\\Vert ", tt.LEFTRIGHT, ""],
+  "||": ["||", "\\mathbin{||}", tt.BIN, ""],
+  "\\|": ["\\|", "‖", tt.LEFTRIGHT, ""],
+  "‖": ["‖", "‖", tt.LEFTRIGHT, ""],
   "<<": ["<<", "\u27E8", tt.LEFTBRACKET, "\u27E9"],
   ">>": [">>", "\u27E9", tt.RIGHTBRACKET, ""],
   "\u23BF": ["\u23BF", "\\lfloor ", tt.LEFTBRACKET, "\\rfloor "],
@@ -301,13 +306,13 @@ const miscSymbols = Object.freeze({
   "\u2220": ["\u2220", "\u2220", tt.ANGLE, ""],
   "✓": ["✓", "✓", tt.ORD, ""],
   "˽": ["˽", "~", tt.SPACE, ""],  // "~" is a no-break space in LaTeX.
-  "\\,": ["\\,", ",\\:", tt.SEP, ""], // escape character to enable non-matrix comma in parens
   "\\;": ["\\;", ";\\:", tt.SEP, ""],
   "…": ["…", "…", tt.ORD, ""],
 
-  "..": ["..", "..", tt.RANGE, ""], // range separator
-  ",": [",", ",\\:", tt.SEP, ""], // function argument separator
-  ";": [";", ";\\:", tt.SEP, ""], // row separator
+  ":": [":", "{:}", tt.RANGE, ""], // range separator
+  ",": [",", ",\\:", tt.SEP, ""], // function argument or vector row separator
+  "\t": ["\t", " & ", tt.SEP, ""],  // matrix element separator
+  ";": [";", " \\\\ ", tt.SEP, ""], // row separator
 
   "$": ["$", "\\$", tt.CURRENCY, ""],
   "£": ["£", "£", tt.CURRENCY, ""],
@@ -526,7 +531,7 @@ const texREL = Object.freeze([
   "equiv", "fallingdotseq", "frown", "ge", "geq", "geqq", "geqslant", "gets", "gg", "ggg",
   "gggtr", "gnapprox", "gneq", "gneqq", "gnsim", "gt", "gtrapprox", "gtreqless", "gtreqqless",
   "gtrless", "gtrsim", "gvertneqq", "hArr", "harr", "hookleftarrow", "hookrightarrow", "iff",
-  "impliedby", "implies", "in", "isin", "Join", "gets", "impliedby", "implies", "in", "isin",
+  "impliedby", "implies", "in", "isin", "Join", "gets", "impliedby", "implies", "in",
   "lArr", "larr", "le", "leadsto", "leftarrow", "leftarrowtail", "leftharpoondown",
   "leftharpoonup", "leftleftarrows", "leftrightarrow", "leftrightarrows", "leftrightharpoons",
   "leftrightsquigarrow", "leq", "leqq", "leqslant", "lessapprox", "lesseqgtr", "lesseqqgtr",

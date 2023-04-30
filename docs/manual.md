@@ -28,7 +28,6 @@ You are welcome to use the [Hurmet.app][] web page under terms of the
 
 [Hurmet.app]: index.html
 [MIT License]: https://opensource.org/licenses/MIT/
-[more features]: #coming-attractions
 [repository]: https://github.com/ronkok/Hurmet
 
 ### Editor Basics
@@ -53,7 +52,7 @@ document range by selecting text, then clicking one of the menu bar buttons:
 | ![undo][]  ![redo][]                 | Undo, Redo                         |
 +--------------------------------------+------------------------------------+
 | **B**  **_I_**  ![embed][]           | Character styles:\                 |
-| **X<sub>2</sub>** **X<sup>2</sup>**  | Bold, Italic, Code, Subscript,     |
+| **X~2~** **X<sup>2</sup>**           | Bold, Italic, Code, Subscript,     |
 | ![strikethrough][]  **<u>U</u>**     | Superscript, Strikethrough,        |
 |                                      | Underline                          |
 +--------------------------------------+------------------------------------+
@@ -140,9 +139,10 @@ that location.
 
 ### Comments
 
-© Citation needed
+{comment}
+A Hurmet comment is a paragraph inside a speech bubble.
 
-The ![comment][] button enables you to write a comment like the nearby text bubble:
+The ![comment][] button enables you to write a comment into the document.
 
 A command in the “Docs” menu will delete all comments in the document.
 
@@ -156,77 +156,72 @@ choose which heading levels to include.
 
 ### Markdown
 
-In the **File▾** menu, you can import or export files in _Markdown_, a
-lightweight markup format. Hurmet's version of Markdown is extended to enable
-calculations, indented paragraphs, centered paragraphs, and tables with merged
-cells or multiple paragraphs in a cell.
+Hurmet documents are saved in _Markdown_, a lightweight, easy-to-read markup
+format. Hurmet's version of Markdown is extended to enable calculations,
+complex tables, and more.
 
 <details><summary>Click for more…</summary>
-
-The table below describes what Hurmet exports. It can also import
-[alternative](https://commonmark.org/help/) Markdown notations.
 
 Paragraphs are preceded by a blank line.\
 A newline is indicated by a backslash, `\`, at the end of a line.
 
-+------------------------------------------+------------------------+
-| Type…                                    | To get…                |
-+==========================================+========================+
-| `_Italic_`                               | _Italic_               |
-+------------------------------------------+------------------------+
-| `**Bold**`                               | **Bold**               |
-+------------------------------------------+------------------------+
-| `**_Bold Italic_**`                      | **_Bold Italic_**      |
-+------------------------------------------+------------------------+
-| `~~strikethrough~~`                      | ~~strikethrough~~      |
-+------------------------------------------+------------------------+
-| `` `inline code` ``                      | `inline code`          |
-+------------------------------------------+------------------------+
-| ``¢` calcu = la/tion ` ``                | ¢` calcu = la/tion `   |
-+------------------------------------------+------------------------+
-| `$ \TeX $`                               | ¢` \TeX `              |
-+------------------------------------------+------------------------+
-| `# Heading 1`                            | # Heading 1            |
-+------------------------------------------+------------------------+
-| `## Heading 2`                           | ## Heading 2           |
-+------------------------------------------+------------------------+
-| `[Link][id]` \                           | [Link][id]             |
-| ⋮ \                                      |                        |
-| `[id]: http://a.com`                     |                        |
-+------------------------------------------+------------------------+
-| inline image: `![alt][]` \               | inline image: ![alt][] |
-| ⋮ \                                      |                        |
-| `[alt]: http://url/image.svg`            |                        |
-+------------------------------------------+------------------------+
-| `![caption][]` \                         | ![caption][]           |
-| ⋮ \                                      |                        |
-| `[caption]: http://url/image.svg`        |                        |
-+------------------------------------------+------------------------+
-| `> Blockquote`                           | | Blockquote           |
-+------------------------------------------+------------------------+
-| `* List`\                                | * List                 |
-| `* List`\                                | * List                 |
-| `* List`                                 | * List                 |
-+------------------------------------------+------------------------+
-| `1. One`\                                | 1. One                 |
-| `2. Two`\                                | 2. Two                 |
-| `3. Three`                               | 3. Three               |
-+------------------------------------------+------------------------+
-| ````  ``` ```` \                         | ```                    |
-| `#code block` \                          | # code block           |
-| `echo "Hi!"` \                           | echo "Hi!"             |
-| ````  ``` ````                           | ```                    |
-+------------------------------------------+------------------------+
-|                                          |                        |
-| `---------`                              | ------                 |
-|                                          |                        |
-+------------------------------------------+------------------------+
-| `© comment`                              | © comment              |
-+------------------------------------------+------------------------+
-| `i>  indented block`                     | i>  indented block     |
-+------------------------------------------+------------------------+
-| `C>  Centered block`                     | Centered block         |
-+------------------------------------------+------------------------+
++------------------------------------------+---------------------------+
+| Type…                                    | To get…                   |
++==========================================+===========================+
+| `_Italic_`                               | _Italic_                  |
++------------------------------------------+---------------------------+
+| `**Bold**`                               | **Bold**                  |
++------------------------------------------+---------------------------+
+| `**_Bold Italic_**`                      | **_Bold Italic_**         |
++------------------------------------------+---------------------------+
+| `~subscript~`                            | ~subscript~               |
++------------------------------------------+---------------------------+
+| `~~strikethrough~~`                      | ~~strikethrough~~         |
++------------------------------------------+---------------------------+
+| `` `inline code` ``                      | `inline code`             |
++------------------------------------------+---------------------------+
+| ``¢` calcu = la/tion ` ``                | ¢` calcu = la/tion `      |
++------------------------------------------+---------------------------+
+| `$\TeX$`                                 | ¢` \TeX `                 |
++------------------------------------------+---------------------------+
+| `# Heading 1`                            | # Heading 1               |
++------------------------------------------+---------------------------+
+| `## Heading 2`                           | ## Heading 2              |
++------------------------------------------+---------------------------+
+| `[Link][link id]`                        | [Link][link id]           |
++------------------------------------------+---------------------------+
+| `![alt][id]`                             | ![alt][id]                |
++------------------------------------------+---------------------------+
+| `!![image and caption][id]`              | !![image and caption][id] |
++------------------------------------------+---------------------------+
+| `[id]: filepath`                         | path to image or link     |
++------------------------------------------+---------------------------+
+| `> Blockquote`                           | | Blockquote              |
++------------------------------------------+---------------------------+
+| `* List`\                                | * List                    |
+| `* List`\                                | * List                    |
+| `* List`                                 | * List                    |
++------------------------------------------+---------------------------+
+| `1. One`\                                | 1. One                    |
+| `2. Two`\                                | 2. Two                    |
+| `3. Three`                               | 3. Three                  |
++------------------------------------------+---------------------------+
+| ````  ``` ```` \                         | ```                       |
+| `#code block` \                          | # code block              |
+| `print "Hi!"` \                          | print "Hi!"               |
+| ````  ``` ````                           | ```                       |
++------------------------------------------+---------------------------+
+|                                          |                           |
+| `---------`                              | ------                    |
+|                                          |                           |
++------------------------------------------+---------------------------+
+| `{indented}`\                            | {indented}                |
+| `>  Block elements. The attribute` \     | >  Block elements. The    |
+| ``   can be `indented`, `centered`,``\   |    attribute can be       |
+| ``   or `header`. ``                     |    `indented`,            |
+|                                          |    `centered`, or         |
+|                                          |    `header`.              |
++------------------------------------------+---------------------------+
 {.grid colWidths="392 177"}
 
 Pipe Tables
@@ -257,11 +252,9 @@ Grid tables
 +-----------+---------------+---------+
 ```
 
-[id]: http://a.com
+[link id]: http://a.com
 
-[alt]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='m14.998 2 .002.002v11.996l-.002.002H1.002L1 13.998V2.002L1.002 2h13.996zM15 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h14c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1z'/%3E%3Cpath d='M13 4.5a1.5 1.5 0 1 1-3.001-.001A1.5 1.5 0 0 1 13 4.5zM14 13H2v-2l3.5-6 4 5h1L14 7z'/%3E%3C/svg%3E
-
-[caption]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='m14.998 2 .002.002v11.996l-.002.002H1.002L1 13.998V2.002L1.002 2h13.996zM15 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h14c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1z'/%3E%3Cpath d='M13 4.5a1.5 1.5 0 1 1-3.001-.001A1.5 1.5 0 0 1 13 4.5zM14 13H2v-2l3.5-6 4 5h1L14 7z'/%3E%3C/svg%3E
+[id]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='m14.998 2 .002.002v11.996l-.002.002H1.002L1 13.998V2.002L1.002 2h13.996zM15 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h14c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1z'/%3E%3Cpath d='M13 4.5a1.5 1.5 0 1 1-3.001-.001A1.5 1.5 0 0 1 13 4.5zM14 13H2v-2l3.5-6 4 5h1L14 7z'/%3E%3C/svg%3E
 
 </details>
 
@@ -330,7 +323,8 @@ Multiplication
 : Hurmet accepts several multiplication syntaxes. If ¢` a = 7.1 `, then the
   following all give the same result:
 
-  i> ¢`2 × 7.1`\
+  {indented}
+  >  ¢`2 × 7.1`\
      ¢`2 * 7.1`\
      ¢`2 · 7.1`\
      ¢`2 a`\
@@ -343,8 +337,8 @@ Multiplication
 
 Roots
 
-: Type `sqrt` and hit the spacebar to auto-correct into $√$<br>`root 3` and
-  `root 4` will also auto-correct into roots.
+: Type `sqrt` and hit the spacebar to auto-correct into `√`.\
+  `root 3` and `root 4` will also auto-correct into roots.
 
 Function
 
@@ -389,7 +383,8 @@ Accents and Primes
 : To write an accent above a single-letter variable, write the accent name and
   hit the space bar for an auto-correction. Examples:
 
-  i> `y bar` ↦ ¢`y̅`\
+  {indented}
+  >  `y bar` ↦ ¢`y̅`\
      `θ hat` ↦ ¢`θ̂`\
      `P vec` ↦ ¢`P⃗`\
      `x dot` ↦ ¢`ẋ`
@@ -456,9 +451,9 @@ Display Mode
 +---------------+-----------------+------------------------------+-------------------------------+
 | `x_subscript` | ¢`x_subscript`  | `{:a, b; c, d:}`             | ¢`{:a, b; c, d:}`             |
 +---------------+-----------------+------------------------------+-------------------------------+
-| `x_(a+b)`     | ¢`x_(a+b)`      | `[1..4] = ?`                 | ¢`[1, 2, 3, 4]`               |
+| `x_(a+b)`     | ¢`x_(a+b)`      | `[1:4...] = ?`               | ¢`[1; 2; 3; 4]`               |
 +---------------+-----------------+------------------------------+-------------------------------+
-| `x′`          | ¢`x′`           | `[1..2..5] = ?`              | ¢`[1, 3, 5]`                  |
+| `x′`          | ¢`x′`           | `[1:2:5...] = ?`             | ¢`[1; 3; 5]`                  |
 +---------------+-----------------+------------------------------+-------------------------------+
 | `|x|  ‖x‖`    | ¢`|x|˽˽˽‖x‖`    | `{a if b;` \                 | ¢`{a if b; c otherwise}`      |
 |               |                 | `c otherwise}`               |                               |
@@ -497,8 +492,8 @@ Auto-correct kicks in when you type a space.
 | `///`    | ∕    | cc P         | 𝒫         | Pi         | Π       | zeta     | ζ    |
 | `<=`     | ≤    | \\ceil       | ⎾⏋         | Sigma      | Σ       | eta      | η    |
 | `>=`     | ≥    | \\floor      | ⎿⏌         | Phi        | Φ       | theta    | θ    |
-| `!=`     | ≠    | `<<`         | ⟨          | Psi        | Ψ       | iota     | ι    |
-| `<>`     | ≠    | `>>`         | ⟩          | Omega      | Ω       | kappa    | κ    |
+| `<>`     | ≠    | `<<`         | ⟨          | Psi        | Ψ       | iota     | ι    |
+|          |      | `>>`         | ⟩          | Omega      | Ω       | kappa    | κ    |
 | ~=       | ≅    | ^^           | ∧          | y bar      | y̅      | lambda   | λ    |
 | \~~      | ≈    | vv           | ∨          | θ hat      | ¢` θ̂ `  | mu       | μ    |
 | \\in     | ∈    | vvv          | ⋁          | P vec      | ¢` P⃗ `  | nu       | ν    |
@@ -511,11 +506,11 @@ Auto-correct kicks in when you type a space.
 | `->`     | →    | \\not        | ¬          | a ring     | å      | phi      | ϕ    |
 | `<-`     | ←    | \\xor        | ⊻          | AA         | ∀       | chi      | χ    |
 | `<->`    | ↔    | \\sum        | ∑          | EE         | ∃       | psi      | ψ    |
-| `=>`     | ⇒    | \\int        | ∫          | CC         | ℂ       | omega    | ω    |
-| \\circ   | ∘    | \\iint       | ∬          | HH         | ℍ       | \\hbar   | ℏ    |
-| \|\|\|   | ¦    | ii           | ¢` √(-1) `  | NN         | ℕ       | \\ell    | ℓ    |
-| \|\|     | ‖    | OO           | ¢` O︀ `      | QQ         | ℚ       | \\euro   | €    |
-| /_       | ∠    | \\c          | ¢          | RR         | ℝ       | \\yen    | ¥    |
+| \\circ   | ∘    | \\int        | ∫          | CC         | ℂ       | omega    | ω    |
+| \|\|\|   | ¦    | \\iint       | ∬          | HH         | ℍ       | \\hbar   | ℏ    |
+| \\\|     | ‖    | ii           | ¢` √(-1) `  | NN         | ℕ       | \\ell    | ℓ    |
+| /_       | ∠    | OO           | ¢` O︀ `      | QQ         | ℚ       | \\euro   | €    |
+|          |      | \\c          | ¢          | RR         | ℝ       | \\yen    | ¥    |
 |          |      |              |            | ZZ         | ℤ       |          |      |
 {.auto-correct}
 
@@ -524,7 +519,7 @@ The font corrections, e.g., `bb …` work on any letter from A to Z or a to z.
 `-->`, `<--`, and `<-->` will auto correct into extensible arrows, as in:
 ¢` A ⟶"note" B `.
 
-`\<space>` auto-corrects to `˽` in the text editor, which renders as a space.
+`<space>` auto-corrects to `˽` in the text editor, which renders as a space.
 
 
 #### Display Selectors
@@ -556,16 +551,16 @@ The font corrections, e.g., `bb …` work on any letter from A to Z or a to z.
 | Data Type and Example                | Accessor              | Returns           |
 +:=====================================+:======================+:==================+
 | string\                              | s[2]\                 | b\                |
-| s = "abcde"                          | s[2..4]\              | bce\              |
-|                                      | s[3..]                | cde               |
+| s = "abcde"                          | s[2:4]\               | bce\              |
+|                                      | s[3:end]              | cde               |
 +--------------------------------------+-----------------------+-------------------+
 | Vector\                              | 𝐕[2]\                | 2\                |
-| 𝐕 = ¢`[1, 2, 3, 4, 5]`              | 𝐕[2..4]\             | ¢`[2, 3, 4]` \    |
-|                                      | 𝐕[3..]               | ¢`[3, 4, 5]`      |
+| 𝐕 = ¢`[1; 2; 3; 4; 5]`              | 𝐕[2:4]\              | ¢`[2; 3; 4]` \    |
+|                                      | 𝐕[3:end]             | ¢`[3; 4; 5]`      |
 +--------------------------------------+-----------------------+-------------------+
 | Matrix\                              | 𝐌[2, 3]\             | 6\                |
-| 𝐌 = ¢`(1, 2, 3; 4, 5, 6; 7, 8, 9)`  | 𝐌[3,]\               | ¢`[7, 8, 9]` \    |
-|                                      | 𝐌[2..3, 1..2]        | ¢`[4, 5; 7, 8]`   |
+| 𝐌 = ¢`(1, 2, 3; 4, 5, 6; 7, 8, 9)`  | 𝐌[3,:]\               | ¢`[7, 8, 9]` \    |
+|                                      | 𝐌[2:3, 1:2]          | ¢`(4, 5; 7, 8)`   |
 +--------------------------------------+-----------------------+-------------------+
 | Data Frame\                          | DF.B\                 | An entire row\    |
 | ![dataframe][]                       | DF["B"]\              | An entire row\    |
@@ -620,7 +615,7 @@ result should appear. Here are some examples:
 
 The statement form is more precisely defined as:
 
-![optional identifier equals expression equals display selector unit name][statement] ` `
+![optional identifier equals expression equals display selector unit name][statement]
 
 [statement]: images/statement-railroad.svg
 
@@ -697,8 +692,8 @@ Variable names and function names must be written in the form of a valid _identi
 *   If an identifier has only one letter, then an accent character may be
     written after it. Hurmet will render the accent above the letter, as in ¢θ̂¢.
 *   Primes may be appended to the very end, as in: ¢f_c′¢.
-*   The following keywords may not be used as variable names: `π`, `j`, `ℏ`,
-    `true`, `false`, `root`, `if`, `else`, `otherwise`, `end`, `and`, `or`, `modulo`, `in`, `to`.
+*   The following keywords may not be used as variable names: `π`, `im`, `ℏ`, `pi`,
+    `true`, `false`, `root`, `if`, `else`, `elseif`, `otherwise`, `end`, `and`, `or`, `in`, `to`.
 
    ![letter letter-or-digit-or-accent prime](images/identifier-railroad.svg)
 
@@ -752,9 +747,9 @@ String
 
     ```
     a = "abcdefg"
-    a[2]     # returns "b"
-    a[2..4]   # returns "bcd"
-    a[5..]    # returns "efg"
+    a[2]      # returns "b"
+    a[2:4]    # returns "bcd"
+    a[5:end]  # returns "efg"
     ```
 
     **Math String**
@@ -771,27 +766,28 @@ Number
 
 ![integers, decimals, percentages, scientific notation, mixed fractions, or hexadecimal](images/NumberRailroad.svg)
 
-i>  Notice that a number literal must begin and end with a numeral, not a decimal
-    symbol. Hurmet will not recognize `5.` as a number.
+{indented}
+>  Notice that a number literal must begin and end with a numeral, not a decimal
+   symbol. Hurmet will not recognize `5.` as a number.
 
-    Hurmet’s default decimal symbol is a dot. You can choose instead to enter
-    numbers with a decimal comma via a drop-down menu in the **Doc** menu. Numbers are
-    never entered with a thousands separator, but they can be _displayed_ with one.
+   Hurmet’s default decimal symbol is a dot. You can choose instead to enter
+   numbers with a decimal comma via a drop-down menu in the **Doc** menu. Numbers are
+   never entered with a thousands separator, but they can be _displayed_ with one.
 
-    Hurmet always saves a decimal symbol as a dot. It’s only the display that changes.
+   Hurmet always saves a decimal symbol as a dot. It’s only the display that changes.
 
-    While calculations are underway, Hurmet holds every number in memory in rational
-    number format. The numerator and denominator are each integers of arbitrary
-    length. So Hurmet can work precisely with numbers like 0.1 and 0¹⁄₃.
-    Trignonometry and roots are done in double-precision floating point, good to
-    about 15 significant digits.
+   While calculations are underway, Hurmet holds every number in memory in rational
+   number format. The numerator and denominator are each integers of arbitrary
+   length. So Hurmet can work precisely with numbers like 0.1 and 0¹⁄₃.
+   Trignonometry and roots are done in double-precision floating point, good to
+   about 15 significant digits.
 
 Complex Number
 
 :   One can write a complex number in two forms:
 
-    * ¢`a + j\ b`    The letter “¢`j`” is identical to ¢`√(-1)` by Hurmet
-    definition. Be sure to write a space after ¢`j`.
+    * ¢`a ± b im `    The letters `im` are identical to ¢`√(-1)` by Hurmet
+    definition.
 
     * ¢`r∠θ`    The characters `/_` will auto-correct into ∠ and ¢`θ` is in radians.
 
@@ -801,11 +797,12 @@ Complex Number
 
     Examples:
 
-    i>  ¢`z_1 = 2 + j 3`
+    {indented}
+    >  ¢`z_1 = 2 + 3 im`
 
-        ¢`z_2 = 4∠30°`
+       ¢`z_2 = 4∠30°`
 
-        ¢`z = z_1 + z_2  = \blue((2 + j 3) + ( 4∠30°)) = 5.46 + j5`
+       ¢`z = z_1 + z_2  = \blue((2 + 3 im) + ( 4∠30°)) = 5.46 + 5 bm`
 
 Unit
 
@@ -855,39 +852,36 @@ Matrix
     A Hurmet matrix element can be a number, a string, `true`, `false`, or an
     exprression that resolves to one of those simple types.
 
-    A Hurmet _vector_ is a one dimensional matrix, either a row vector or a column vector.
-
     A matrix literal is written between delimiters, either `( )` or `[ ]` or
-    `{: }`. Matrix elements are separated by commas. Matrix rows are separated by
-    semi-colons. Be sure to write a space after comma separators so they are not
-    confused with decimals inside a number. Here are some matrix examples:
-
-    | Input            | Renders as       |
-    |------------------|------------------|
-    | `(1, 0; 0, 1)`   | ¢`(1, 0; 0, 1)`  |
-    | `[2.1; -15.3]`   | ¢`[2.1; -15.3]`  |
-    | `{:1, 0; 0, 1}`  | ¢`{:1, 0; 0, 1}` |
-
+    `{: }`. Matrix elements are horizontally separated by tabs or commas.
+    Matrix rows are separated by semi-colons. So this: `(1, 0; 0, 1)` renders
+    as ¢`(1, 0; 0, 1)`.
+    
+    A Hurmet _vector_ is a one dimensional array. If you multiply it times a
+    matrix, a Hurmet vector will act like a column vector. Write a vector
+    literal with values separated by semi-colons.
+    
+    | Input           | Renders as        |
+    |-----------------|-------------------|
+    | `[2.1; -15.3]`  | ¢`[2.1; -15.3]`   |
+    | `[4; 5]`        | ¢`[4; 5]` |
+    
     Another way to create a Hurmet vector is to write a range of numbers between
-    brackets; the form is `[start:step:end]`.
-    A Hurmet calculation of that form will return a row vector with every number
+    brackets; the form is `[start:step:end...]`.
+    A Hurmet calculation of that form will return a vector with every number
     in the range. The step size is optional (default = 1). Examples:
-
-    |    Input        |       Result               |
-    |-----------------|----------------------------|
-    | `[2..5] = ?`    | ¢`[2..5] = [2, 3, 4, 5]`   |
-    | `[1..2..5] = ?` | ¢`[1..2..5] = [1, 3, 5]`   |
+    
+    |    Input         |       Result               |
+    |------------------|----------------------------|
+    | `[2:5...] = ?`   | ¢`[2:5...] = [2; 3; 4; 5]` |
+    | `[1:2:5...] = ?` | ¢`[1:2:5...] = [1; 3; 5]`  |
 
     You can call individual elements with index integers between brackets, as in
     `𝐕[5]` or `𝐌[1, 3]`. You can use a variable name for the index if the variable
-    returns an integer.
-
-    You can access a sub-matrix using the range operator, “..”, as in `𝐌[2..5, 1]`.
-    Entire rows or columns can be called by omitting an index, as in `𝐌[2,]` or
-    `𝐌[,1]`. Hurmet indexes are one-based.
-
-    To write a numeric interval instead of a matrix, write the same thing, but with
-    no spaces: `[1,2,3…10]`
+    returns an integer. Hurmet indexes are one-based.
+    
+    You can access a sub-matrix using the range operator, “:”, as in `𝐕[2:5]` or
+    `𝐕[2:end]`. Entire rows or columns can be called, as in `𝐌[2,:]` or `𝐌[:,1]`. 
 
 Matrix Operations
 
@@ -896,7 +890,8 @@ Matrix Operations
     pass a matrix to most functions, Hurmet will do an element-by-element calculation
     and return a matrix, as in:
 
-    i> ¢` 𝐡 = [5; 10; 15] `
+    {indented}
+    >  ¢` 𝐡 = [5; 10; 15] `
 
        ¢` 𝐱 = 2 𝐡 + 1 = \color(blue)(2) [5; 10; 15] + 1 \color(black) = [11; 21; 31] `
 
@@ -910,9 +905,9 @@ Matrix Operations
     have several ways to multiply matrices. In Hurmet, you choose the type of
     multiplication by your choice of multiplication operator:
 
-    ¢` 𝐀 * 𝐁 ` ↦ element-wise product, ¢` (𝐀 * 𝐁)_ij = 𝐀_ij × 𝐁_ij `
+    ¢` 𝐀 ∘ 𝐁 ` ↦ element-wise product, ¢` (𝐀 ∘ 𝐁)_ij = 𝐀_ij × 𝐁_ij `
 
-    ¢` 𝐀˽𝐁 ` ↦ [matrix product][], ¢` (𝐀 𝐁)_ij = ∑_(k = 1)^m 𝐀_i) 𝐁_kj `
+    ¢` 𝐀˽𝐁 ` or ¢` 𝐀 * 𝐁 ` ↦ [matrix product][], ¢` (𝐀 𝐁)_ij = ∑_(k = 1)^m 𝐀_i) 𝐁_kj `
 
     ¢` 𝐀 × 𝐁 ` ↦ [cross product][] of a pair of three-vectors
            = ¢` |𝐀||𝐁|sin(θ) 𝐧 `
@@ -936,15 +931,14 @@ Matrix Operations
 
     ¢` ‖𝐀‖ ` ↦ ¢` {√(x_1^2 + ⋯ + x_n^2) if "𝐀 is a vector"; √(∑_i ∑_j A_ij^2) if "𝐀 is a matrix" `
 
-    ¢` 𝐀 & 𝐁 ` ↦ concatenate 𝐀 and 𝐁 horizontally
+    ¢` 𝐀 & 𝐁 ` or ¢` hcat(𝐀, 𝐁) ` ↦ concatenate 𝐀 and 𝐁 horizontally
 
-    ¢` 𝐀 &_ 𝐁 ` ↦ concatenate 𝐀 and 𝐁 vertically
+    ¢` vcat(𝐀, 𝐁) ` ↦ concatenate 𝐀 and 𝐁 vertically
 
     Functions will mostly work element-wise on an matrix. Exception: functions
     `min()` and `max()` will find the minimum or maximum of the elements in the matrix.
 
-    If you want to write a comma or a semi-colon inside parentheses and not create
-    an matrix, use `\,` or `\;`.
+    If you want to write a semi-colon inside parentheses and not create a matrix, use `\;`.
 
 Data Frame
 
@@ -965,8 +959,7 @@ Data Frame
     Here’s an example of TSV input:
 
     ```
-    rebar =
-    ``#size	diameter	area
+    rebar = ``#size	diameter	area
      	in     	in²
     #3	0.375  	0.11
     #4	0.5    	0.2
@@ -977,8 +970,7 @@ Data Frame
     … which renders as:
 
     ¢```
-    rebar =
-    ``#size	diameter	area
+    rebar = ``#size	diameter	area
      	in     	in²
     #3	0.375  	0.11
     #4	0.5    	0.2
@@ -1103,7 +1095,7 @@ standard math notation. That is a broad statement. Here are many nuances:
 
 <dl>
 
-_π_
+_π_ or **pi**
 
 : If you write ¢`π` into an expression, Hurmet uses a value of
   3.1415926535897932384626433832795028841971693993751.
@@ -1114,9 +1106,9 @@ _e_
   ¢`e` is the base of an exponent, for example: ¢`e^x`, then Hurmet will take
   ¢`e` to mean 2.7182818284590452353602874713527.
 
-_j_
+_im_
 
-: ¢`j` = ¢`√(-1)`.
+: ¢`im` = ¢`√(-1)`.
 
 ℏ
 
@@ -1130,12 +1122,6 @@ _j_
 | Operator      | Example              | Description                                 |
 +===============+======================+=============================================+
 | =             | _x_ = 15             | Assign a value to a variable.               |
-|               +----------------------+---------------------------------------------+
-|               | if _x_ = 15          | Equality test if in a comparison position.\ |
-|               |                      | That is, “=” tests for equality if there    |
-|               |                      | is something other than a identifier to the |
-|               |                      | left of it or a display selector to the     |
-|               |                      | right of it.                                |
 +---------------+----------------------+---------------------------------------------+
 | \+            |  2 + 2               | Addition                                    |
 +---------------+----------------------+---------------------------------------------+
@@ -1143,15 +1129,16 @@ _j_
 +---------------+----------------------+---------------------------------------------+
 | \-            | ¢`-4`                | Unary minus                                 |
 +---------------+----------------------+---------------------------------------------+
-| \*            | ¢`2 * 4`             | Multiplication of numbers.<br>Element-wise  |
-|               |                      | product of matrices.                        |
+| \*            | ¢`2 * 4`             | Multiplication of numbers or matrices.\     |
+|               +----------------------+---------------------------------------------+
+|               | `"s1"*"s2"`          | Concatenation of strings                    |
 +---------------+----------------------+---------------------------------------------+
 | ×             |  2 × 4               | Multiplication of numbers.\                 |
 |               |                      | Cross product of three-vectors.\            |
 |               |                      | auto-correct: **xx**                        |
 +---------------+----------------------+---------------------------------------------+
 | ·             | ¢`a ⋅ b`             | Multiplication of numbers.\                 |
-|               |                      | Dot product of matrices.\                   |
+|               |                      | Dot product of vectors or matrices.\        |
 |               |                      | auto-correct: dot between two spaces.       |
 +---------------+----------------------+---------------------------------------------+
 |               | ¢` (2)(4) `          | Multiplication                              |
@@ -1175,19 +1162,12 @@ _j_
 +---------------+----------------------+---------------------------------------------+
 | ///           | ¢`8///2`             | Division displayed inline                   |
 +---------------+----------------------+---------------------------------------------+
-| ÷             | ¢`8 ÷ 2`             | Inline division\                            |
-|               |                      | auto-correct: -:                            |
-+---------------+----------------------+---------------------------------------------+
 | ^             | ¢`3^2`               | Exponent                                    |
 +---------------+----------------------+---------------------------------------------+
-| ^*            | ¢`z^*`               | Complex conjugate                           |
-+---------------+----------------------+---------------------------------------------+
-| &             | ¢`s_1 & s_2`         | Concatenate strings or vectors, or          |
-|               |                      | append numbers onto vectors, or variables   |
-|               |                      | into a map, or append a                     |
-|               |                      | column vector to a data frame               |
-+---------------+----------------------+---------------------------------------------+
-| &\_           | ¢` 𝐚 &_ 𝐛 `        | Append matrices or vectors vertically.      |
+| &             | ¢`s_1 & s_2`         | Concatenate strings or horizontally         |
+|               |                      | concatenate vectors, or append numbers      |
+|               |                      |  onto vectors, or variables into a map,     |
+|               |                      |  or append a column vector to a data frame  |
 +---------------+----------------------+---------------------------------------------+
 | √             | ¢`√`                 | Square root\                                |
 |               |                      | auto-correct: sqrt                          |
@@ -1195,11 +1175,11 @@ _j_
 | ¢`root  3 ()` | ¢`root 3 8`          | nth-root\                                   |
 |               |                      | auto-correct: root n                        |
 +---------------+----------------------+---------------------------------------------+
-| ||            | ¢`|-4|`              | Absolute value of a scalar, determinant of  |
+| |             | ¢`|-4|`              | Absolute value of a scalar, determinant of  |
 |               |                      | a matrix, or magnitude of a vector or a     |
 |               |                      | complex number.                             |
 +---------------+----------------------+---------------------------------------------+
-| ||  ||          ¢`\\Vert x \\Vert`   | ¢`√(x_1^2 + ⋯ + x_n^2)`  if the argument is |
+| `\|  \|`        ¢`‖ x ‖`             | ¢`√(x_1^2 + ⋯ + x_n^2)`  if the argument is |
 |                                      | a vector of reals                           |
 |                                      +---------------------------------------------+
 |                                      | ¢`√(∑_i ∑_j A_(i, j)^2)`  if the argument is|
@@ -1211,34 +1191,36 @@ _j_
 | ⌈  ⌉          | ¢`⎾4.5⏋`             | Ceiling. Always rounds up.\                 |
 |               |                      | auto-correct: ceil                          |
 +---------------+----------------------+---------------------------------------------+
-| %             | ¢`10%`               | Percent                                     |
+| %             | ¢`10%`               | Percent\                                    |
+|               |                      | % is not a remainder operator. If you       |
+|               |                      | need a remainder, use the rem() function.   |
 +---------------+----------------------+---------------------------------------------+
 | ‰             | ¢`10‰`               | Per thousand                                |
 +---------------+----------------------+---------------------------------------------+
 | !             | ¢`5!`                | [Factorial][]\                              |
 |               |                      | precision = ¢`{100% if n ≤ 100; 15 digits   |
 |               |                      | otherwise} `                                |
+|               +----------------------+---------------------------------------------+
+|               | ¢`if !x`             | Logical not if preceded by a space          |
 +---------------+----------------------+---------------------------------------------+
-| modulo        | `10` `modulo` `5`    | Always returns a positive remainder.        |
-+---------------+----------------------+---------------------------------------------+
-| ¢`(n\atop k)` | (5 \atop 3)          | Binomial coefficient. ¢`(n \atop k) =   `   |
+| ¢`(n\atop k)` | (5 \atop 3)          | Binomial coefficient. ¢`(n \atop k) =       |
 |               |                      | n!//(n!(n!-k!))`                            |
 +---------------+----------------------+---------------------------------------------+
-| =             | ¢`if x = 15`         | Equality comparison                         |
+| ==            | ¢`x == 15`           | Equality comparison                         |
 +---------------+----------------------+---------------------------------------------+
 | ≠             | ¢`if b ≠ c`          | Inequality comparison\                      |
-|               |                      | auto-correct: != or <>                      |
+| !=            |                      | auto-correct:  <>                           |
 +---------------+----------------------+---------------------------------------------+
-| `<`           |                      |                                             |
+| `<`           |                      | Less than comparison                        |
 +---------------+----------------------+---------------------------------------------+
-| `>`           |                      |                                             |
+| `>`           |                      | Greater than comparison                     |
 +---------------+----------------------+---------------------------------------------+
 | ≤             |                      | auto-correct: <=                            |
 +---------------+----------------------+---------------------------------------------+
 | ≥             |                      | auto-correct: >=                            |
 +---------------+----------------------+---------------------------------------------+
-| ∈             | ¢`c ∈ s`             | Is an element of a matrix or\               |
-|               |                      | is a character of a string, or\             |
+| ∈\            | ¢`c ∈ s` \           | Is an element of a matrix or\               |
+| in            | ¢`c in s`            | is a character of a string, or\             |
 |               |                      | is a property of a data frame.\             |
 |               |                      | auto-correct: \in                           |
 +---------------+----------------------+---------------------------------------------+
@@ -1256,20 +1238,21 @@ _j_
 | ⊈             | ¢`c ⊈ s`             | Is not a subset of\                         |
 |               |                      |  auto-correct: \nsubseteq                   |
 +---------------+----------------------+---------------------------------------------+
-| and           | if _a_ and _b_       | Logical and                                 |
+| and\          | if _a_ and _b_\      | Logical and                                 |
+| &&\           | if _a_ && _b_\       |                                             |
+| ∧             | if _a_ ∧ _b_         |                                             |
 +---------------+----------------------+---------------------------------------------+
-| or            |                      | Logical or                                  |
-+---------------+----------------------+---------------------------------------------+
-| ∧             |                      | Logical and. <br>auto-correct: ^^           |
-+---------------+----------------------+---------------------------------------------+
-| ∨             |                      | Logical or.  <br>auto-correct: vv           |
+| or\           | if _a_ or _b_\       | Logical or                                  |
+| ||\           | if _a_ || _b_\       |                                             |
+| ∨             | if _a_ ∨ _b_         |                                             |
 +---------------+----------------------+---------------------------------------------+
 | ⊻             |                      | Logical xor                                 |
 +---------------+----------------------+---------------------------------------------+
-| ¬             |  if ¬ _a_            | Logical not                                 |
+| ¬\            |  if ¬ _a_\           | Logical not                                 |
+| !             |  if !a               |                                             |
 +---------------+----------------------+---------------------------------------------+
-| :             | 𝐕\[2..3\] \         | Range separator                             |
-|               | for _i_ in 1..3      |                                             |
+| :             | 𝐕\[2:3\] \           | Range separator                             |
+|               | for _i_ in 1:3       |                                             |
 +---------------+----------------------+---------------------------------------------+
 {#op-table .grid width=35em}
 
@@ -1313,15 +1296,23 @@ atan(_x_, _y_)
   quadrant. Given a point defined by real coordinates _x_ and _y_, _atan_ returns
   the angle between that point and the positive _x_-axis of a plane. Real numbers only.
 
-argument(_z_)
+angle(_z_)
 
 : Phase angle of a complex number.
 
-chr(_n_)
+ceil(_x_)
+
+: Ceiling. Always rounds up. Real numbers only.
+
+Char(_n_)
 
 : Takes an integer as a argument, treats it as a Unicode code point, and
   returns the corresponding string character.\
-  `chr(34)` returns a double quotation mark.
+  `Char(34)` returns a double quotation mark.
+
+conj(_z_)
+
+: Complex conjugate of a complex number.
 
 cos(𝜃), sin(𝜃), tan(𝜃), sec(𝜃), csc(𝜃), cot(𝜃)
 
@@ -1341,7 +1332,7 @@ cos(𝜃), sin(𝜃), tan(𝜃), sec(𝜃), csc(𝜃), cot(𝜃)
 
   Three functions: `sin`, `cos`, and `tan`, do not require parentheses around their arguments.
 
-cos<sub>d</sub>(𝜃), sin<sub>d</sub>(𝜃), tan<sub>d</sub>(𝜃), sec<sub>d</sub>(𝜃), csc<sub>d</sub>(𝜃), cot<sub>d</sub>(𝜃)
+cos~d~(𝜃), sin~d~(𝜃), tan~d~(𝜃), sec~d~(𝜃), csc~d~(𝜃), cot~d~(𝜃)
 
 : The trigonometry functions listed just above will assume that the argument is
   in degrees. Real numbers only. Hurmet will subscript the “d” for you.
@@ -1363,6 +1354,10 @@ exp(_z_)
 
 : ¢`e^z`
 
+Floor(_x_)
+
+: Floor. Always rounds down. Real numbers only.
+
 fetch(_url_)
 
 : Fetches the contents of a remote file. It expects the file to be in CSV format
@@ -1372,15 +1367,20 @@ gcd(_m_, _n_)
 
 : Greatest common divisor of two integers.
 
+hcat(_v_, _x_)
+
+Horizontal concatenation of: two strings, or two matrices, or an element onto
+a vector, or a variable onto a map, or a vector onto a data frame.
+
 hypot(_x_, _y_)
 
 : ¢`√(x² + y²)`   …done in a way that avoids overflow. Real numbers only.
 
-Im(_z_)
+imag(_z_)
 
 : Imaginary part of a complex number.
 
-isNaN(_x_)
+isnan(_x_)
 
 : Indicates if the argument is not numeric.
 
@@ -1398,7 +1398,7 @@ log(_z_), ln(_z_)
 
 : Natural (base _e_) logarithm of real or complex number _z_.
 
-log<sub>10</sub>(_x_)
+log~10~(_x_)
 
 : Base 10 logarithm. Real numbers only. Hurmet will subscript the numerals for you.
 
@@ -1406,16 +1406,16 @@ log(_b_, _x_)
 
 : Base _b_ logarithm. Real numbers only.
 
-logFactorial(_n_)
+lfact(_n_)
 
 : Returns the natural logarithm of the factorial of the argument. Valid only
   for non-negative integers. Note that `log(n!)` is a valid alias for
-  `logFactorial(n)`. Real numbers only.
+  `lfact(n)`. Real numbers only.
 
-logΓ(_x_)
+lgamma(_x_)
 
-: Returns the natural logarithm of the Gamma function, Γ(_x_). For now,
-  Hurmet's logΓ(_x_) function only works on positive rational numbers.
+: Returns the natural logarithm of the gamma function, Γ(_x_). For now,
+  Hurmet's lgamma(_x_) function only works on positive rational numbers.
 
 matrix2table(_matrix_, _rowNames_, _columnNames_)
 
@@ -1426,14 +1426,26 @@ matrix2table(_matrix_, _rowNames_, _columnNames_)
 
 : Minimum or maximum of a list or array. Real numbers only.
 
-random()
+mod(_x_, _y_)
 
-: A pseudo-random number in the range from 0 to 1 (inclusive of 0, but not 1).
+: _x_ modulo _y_. This functions divides _x_ by _y_, and returns the absolute value of the remainder.
+
+rand(), rand(_n_), rand(_m_, _n_)
+
+: Pseudo-random number(s) in the range from 0 to 1 (inclusive of 0, but not 1).
   Good for Monte-Carlo modeling. Not sufficiently random for crypto.
+  
+  The optional arguments are integers. _rand_ with no arguments will return a
+  single random number. If one or two arguments are provided, _rand_ will
+  return a matrix filled with random numbers.
 
-Re(_z_)
+real(_z_)
 
 : Real part of a complex number.
+
+rem(_x_, _y_)
+
+: Remainder. This functions divides _x_ by _y_, and returns the remainder.
 
 round(_x_, _spec_)
 
@@ -1454,6 +1466,14 @@ string(_x_, _spec_)
 sum(_a_, _b_, _c_, …), product(_a_, _b_, _c_, …), length(_a_, _b_, _c_, …), range(_a_, _b_, _c_, …), mean(_a_, _b_, _c_, …), variance(_a_, _b_, _c_, …), stddev(_a_, _b_, _c_, …)
 
 : Functions that accumulate a result from a list of arguments. Real numbers only.
+
+transpose(_M_)
+
+: Transpose a matrix.
+
+vcat(_v_, _x_)
+
+Vertical concatenation of: two matrices, or an element onto a vertical vector.
 
 zeros(_m_, _n_)
 
@@ -1484,10 +1504,9 @@ To resolve this ambiguity, Hurmet performs operations with the following precede
 +---------------+---------------------------------------------------------------+
 | \-            | Unary minus, for example: -4                                  |
 +---------------+---------------------------------------------------------------+
-| ∠             | To write a complex number in _r_∠θ notation. (Coming later    |
-|               | this year)                                                    |
+| ∠             | To write a complex number in _r_∠θ notation.                  |
 +---------------+---------------------------------------------------------------+
-| × · / ÷       | Multiplication or division, from left to right.               |
+| × · /         | Multiplication or division, from left to right.               |
 +---------------+---------------------------------------------------------------+
 | \+ – &        | Addition or subtraction or concatenation, from left to right. |
 +---------------+---------------------------------------------------------------+
@@ -1768,7 +1787,7 @@ Let _N_ be the number of digits specified. Then:
 |        |                           |           +-------------+----------------+
 |        |                           |           | X           | 0x3E           |
 +--------+---------------------------+-----------+-------------+----------------+
-| ∠ or ° | Polar notation of complex | 2 + _j_ 3 | h3          | 2 + _j_3       |
+| ∠ or ° | Polar notation of complex | 2 + 3 im  | h3          | 2 + 3 im       |
 |        | numbers                   |           +-------------+----------------+
 |        |                           |           | h3∠         | 3\.61∠0.983    |
 |        |                           |           +-------------+----------------+
@@ -1842,11 +1861,11 @@ frame _width_, _height_<span class="optional">, position</span>
   _position_ can be "inline", "left", or "right".\
   This command must come before anything is drawn.
 
-view _x_<sub>min</sub>, _x_<sub>max</sub><span class="optional">, yₘᵢₙ, yₘₐₓ,</span>
+view _x_~min~, _x_~max~<span class="optional">, yₘᵢₙ, yₘₐₓ,</span>
 
 : This command is usually written directly after `frame`. The arguments set the
-  coordinate system. If _y_<sub>min</sub> is omitted, the x-axis is placed in
-  the middle of the picture. If _y_<sub>max</sub> is omitted, the scales along
+  coordinate system. If _y_~min~ is omitted, the x-axis is placed in
+  the middle of the picture. If _y_~max~ is omitted, the scales along
   the x-axis and y-axis are the same.
 
 axes _dx_, _dy_<span class="optional">, "labels"</span>
@@ -1935,7 +1954,7 @@ text  [_x_, _y_], "_string_"<span class="optional">, position</span>
   "aboveright", "belowleft", or "belowright". The default is "middle".
 
   The string can be styled with Markdown inline styles: \__italic_\_, \*\***bold**\*\*,
-  \``code`\`, `<sub>`<sub>subscript</sub>`</sub>`, and `~~`~~strikethrough~~`~~`.
+  \``code`\`, `~`~subscript~`~`, and `~~`~~strikethrough~~`~~`.
 
 leader [_x₁_, _y₁_; _x₂_, _y₂_<span class="optional">; x₃, y₃; etc</span>], "_note_"
 
@@ -1974,12 +1993,15 @@ Other Hurmet calculation cells can then call the function:
 Unlike other Hurmet assignments, user defined functions can be placed at the
 end of the document and still be called by other expressions.
 
-The function can have any number of arguments, or none, separated by commas. So
-the form of the first line is:
-
-![functionName open paren arguments close paren](images/function-railroad.svg)
-
+The function can have any number of arguments, or none, separated by commas.
 The function name and each argument (if any) must be valid identifiers.
+
+If any arguments are optional, write them after a semi-colon and provide a
+default value.
+
+```
+function Ms(section, Fy, Lb; Cb = 1, axis = "x")
+```
 
 Function statements end at a line ending, unless the last character is one of:
 **( [ { , ; + -** or the following line begins with one of: **} ] )**
@@ -2022,7 +2044,7 @@ if else
     ```
     if a ≤ 4000
         b = 0.85
-    else if a ≥ 8000
+    elseif a ≥ 8000
         b = 0.65
     else
         b = 0.85 - (a - 4000)/20000
@@ -2052,7 +2074,7 @@ for
     +-------------------+----------------------------+
     | ```               | ```                        |
     | sum = 0           | reverse = ""               |
-    | for i in 1..10    | for ch in "abcdef"         |
+    | for i in 1:10     | for ch in "abcdef"         |
     |     sum = sum + i |     reverse = ch & reverse |
     | end               | end                        |
     | ```               | ```                        |
@@ -2069,7 +2091,7 @@ break
 :   A loop can be terminated early via the _break_ keyword. Example:
 
     ```
-    for i in 1..1000000
+    for i in 1:1000000
         if i ≥ 2
             break
         end
@@ -2085,19 +2107,19 @@ return
     If the optional _expression_ is present, the function will return its result.
     If not, the function will return `undefined`.
 
-raise
+throw
 
-:   A _raise_ statement terminates the function and returns an optional error message.
+:   A _throw_ statement terminates the function and returns an optional error message.
 
-    ![raise optional string](images/raise-railroad.svg)
+    ![throw optional string](images/throw-railroad.svg)
 
-echo
+print
 
-:   A _echo_ statement writes a message to the browser’s console. You can type
+:   A _print_ statement writes a message to the browser’s console. You can type
     **Ctrl Shift I** to see it. Such a message can be very useful while debugging
     a function.
 
-    ![echo string](images/echo-railroad.svg)
+    ![print string](images/print-railroad.svg)
 
 </dl>
 
@@ -2198,7 +2220,7 @@ render math as plain text and omit the blue echos.
 #### Matrix multiplication
 
 To get element-wise multiplication of two matrices, the operator symbol must be
-[explicitly](#matrix-mult) written as `*`.
+[explicitly](#matrix-mult) written as `∘` or `.*`.
 
 ## Gists
 
@@ -2208,17 +2230,15 @@ format. This is useful for collaboration.
 
 Say that you have written a calculation. It’s awesome and you want to share it
 so that others can use it as a template. An easy way to share work is via a
-GitHub [Gist](https://gist.github.com/ "Gist"). Then anyone can view it,
-download it, or comment on it. If it is in Markdown format, you can read the
-Gist right there on GitHub. Here’s an
-[example](https://gist.github.com/ronkok/7fec7d11f6fb6a031e5a0827e3531d68).
+GitHub [Gist](https://gist.github.com/). Then anyone can view it,
+download it, or comment on it. Here’s an
+[example](https://gist.githubusercontent.com/ronkok/7fec7d11f6fb6a031e5a0827e3531d68/raw/EndPlateConnectionExample.md).
 
 Hurmet’s version of Markdown adds some extensions that GitHub does not recognize,
 such as calculation cells, indented paragraphs, and merged cells in tables.
 
 ## Coming Attractions
 
-*   Image captions
 *   A `distribution` data type, to enable calculations with uncertainty
 *   A `date` data type
 *   Permalinks
@@ -2263,7 +2283,7 @@ for which I am very grateful.
 
 <br>
 
-Copyright © 2020-2023 Ron Kok. Released under the [MIT License](https://opensource.org/licenses/MIT)
+Copyright © 2020-2023 Ron Kok. Released under the [MIT License][]
 
 <br>
 
@@ -2373,8 +2393,8 @@ Copyright © 2020-2023 Ron Kok. Released under the [MIT License](https://opensou
 * [for loops](#for)
 * [break](#break)
 * [return](#return)
-* [raise](#raise)
-* [echo](#echo)
+* [throw](#throw)
+* [print](#print)
 
 </details>
 </li>

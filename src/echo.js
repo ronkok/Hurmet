@@ -11,7 +11,7 @@ import { formatResult } from "./result"
  */
 
 const varRegEx = /〖[^〗]*〗/
-const openParenRegEx = /([([{|‖]|[^\\][,;:])$/
+const openParenRegEx = /(?:[([{|‖]|[^\\][,;:](?:\\:)?)$/
 
 export const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat) => {
   // For each variable name in the echo string, substitute a value.
@@ -89,16 +89,18 @@ export const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat
 
     if (hvar.dtype === dt.DATAFRAME || (hvar.dtype & dt.MAP)) {
       display = "\\mathrm{" + vars[varName].name + "}"
-    } else if (unitAware) {
-      display = needsParens ? "\\left(" + hvar.resultdisplay + "\\right)" : hvar.resultdisplay
     } else {
-      let displaySansUnits = hvar.resultdisplay
-      const posUnit = hvar.resultdisplay.lastIndexOf("{\\text{")
-      if (posUnit > -1) {
-        displaySansUnits = hvar.resultdisplay.slice(0, posUnit).trim()
-        displaySansUnits = displaySansUnits.replace(/\\; *$/, "").trim()
+      display = hvar.resultdisplay
+      if (!unitAware) {
+        const posUnit = display.lastIndexOf("{\\text{")
+        if (posUnit > -1) {
+          display = display.slice(0, posUnit).trim()
+                            .replace(/\\; *$/, "").trim()
+        }
       }
-      display = needsParens ? "\\left(" + displaySansUnits + "\\right)" : displaySansUnits
+      if (needsParens) {
+        display = hvar.dtype > 256 ? "\\left(" + display + "\\right)" : "(" + display + ")"
+      }
     }
     str = str.substring(0, pos) + display + str.substring(pos + matchLength)
   }

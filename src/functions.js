@@ -3,7 +3,7 @@ import { Rnl } from "./rational"
 import { Cpx } from "./complex"
 import { clone } from "./utils"
 import { unitsAreCompatible } from "./units"
-import { Matrix } from "./matrix"
+import { Matrix, isVector } from "./matrix"
 import { errorOprnd } from "./error"
 
 const negativeOne = Object.freeze(Rnl.negate(Rnl.one))
@@ -85,8 +85,9 @@ const functionExpos = (functionName, args) => {
     case "binomial":
     case "gamma":
     case "Γ":
-    case "logΓ":
-    case "logFactorial":
+    case "lgamma":
+    case "lfact":
+    case "factorial":
       if (!unitsAreCompatible(expos, allZeros)) {
         return errorOprnd("UNIT_IN", functionName)
       }
@@ -105,6 +106,8 @@ const functionExpos = (functionName, args) => {
     case "atan2":
     case "hypot":
     case "rms":
+    case "ceil":
+    case "floor":
     case "sum":
     case "mean":
     case "median":
@@ -124,9 +127,10 @@ const functionExpos = (functionName, args) => {
       return functionName === "atan2" ? allZeros : x
     }
 
-    case "Re":
-    case "Im":
-    case "argument":
+    case "real":
+    case "imag":
+    case "angle":
+    case "conj":
       return allZeros
 
     case "product": {
@@ -159,8 +163,8 @@ const gamma = x => {
   }
 }
 
-const logΓ = r => {
-  // logGamma function. Returns natural logarithm of the Gamma function.
+const lgamma = r => {
+  // Returns natural logarithm of the Gamma function.
   // Ref: https://www.johndcook.com/blog/2010/08/16/how-to-compute-log-factorial/
   if (Rnl.isZero(r)) { return errorOprnd("Γ0") }
   if (Rnl.isNegative(r)) { return errorOprnd("LOGΓ") }
@@ -191,8 +195,8 @@ const binomial = (n, k) => {
       Rnl.multiply(Rnl.factorial(k), Rnl.factorial(Rnl.subtract(n, k))))
 //    } else {
 //      return Rnl.fromNumber(Math.round(Math.exp(Rnl.toNumber(
-//        Rnl.subtract(logFactorial(n),
-//          Rnl.add(logFactorial(k), logFactorial(Rnl.subtract(n, k))))))))
+//        Rnl.subtract(lfact(n),
+//          Rnl.add(lfact(k), lfact(Rnl.subtract(n, k))))))))
 //    }
 
   } else if (Rnl.isInteger(n) && Rnl.isInteger(k) && Rnl.isPositive(k)) {
@@ -223,9 +227,10 @@ const unary = {
   scalar: {
     // Functions that take one real argument.
     abs(x)  { return Rnl.abs(x) },
-    argument(x) { return errorOprnd("NA_REAL", "argument") },
-    Re(x)   { return errorOprnd("NA_REAL", "Re") },
-    Im(x)   { return errorOprnd("NA_REAL", "Im") },
+    angle(x) { return errorOprnd("NA_REAL", "angle") },
+    real(x)   { return errorOprnd("NA_REAL", "real") },
+    imag(x)   { return errorOprnd("NA_REAL", "imag") },
+    conj(x)   { return errorOprnd("NA_REAL", "conj") },
     cos(x)  { return Rnl.cos(x) },
     sin(x)  { return Rnl.sin(x) },
     tan(x)  { return Rnl.tan(x) },
@@ -343,19 +348,28 @@ const unary = {
       const num = Rnl.toNumber(x)
       return Rnl.fromNumber((Math.log(1 + 1 / num) - Math.log(1 - 1 / num)) / 2)
     },
-    Gamma(x) {
+    ceil(x) {
+      return Rnl.ceil(x)
+    },
+    floor(x) {
+      return Rnl.floor(x)
+    },
+    gamma(x) {
       return gamma(x)
     },
     Γ(x) {
       return gamma(x)
     },
-    logΓ(x) {
+    lgamma(x) {
       if (Rnl.isNegative(x) || Rnl.isZero(x)) { return errorOprnd("LOGΓ") }
-      return logΓ(x)
+      return lgamma(x)
     },
-    logFactorial(x) {
+    lfact(x) {
       if (Rnl.isNegative(x) || !Rnl.isInteger(x)) { return errorOprnd("FACT") }
-      return logΓ(Rnl.add(x, Rnl.one))
+      return lgamma(Rnl.add(x, Rnl.one))
+    },
+    factorial(x) {
+      return Rnl.factorial(x)
     },
     sign(x) {
       return Rnl.isPositive(x) ? Rnl.one : Rnl.isZero(x) ? Rnl.zero : negativeOne
@@ -406,8 +420,8 @@ const unary = {
       const y = this.asec(x)
       return y.dtype ? y : Rnl.divide(y, piOver180)
     },
-    chr(x) {
-      return String.fromCodePoint(Number(x))
+    Char(x) {
+      return String.fromCodePoint(Rnl.toNumber(x))
     },
     sqrt(x) {
       const y = [BigInt(1), BigInt(2)]
@@ -421,17 +435,18 @@ const unary = {
   },
   complex: {
     // Functions that take one complex argument.
-    abs(z)      { return Cpx.abs(z) },
-    argument(z) { return Cpx.argument(z) },
-    Re(z)       { return z[0] },
-    Im(z)       { return z[1] },
-    cos(z)      { return Cpx.cos(z) },
-    sin(z)      { return Cpx.sin(z) },
-    asin(z)     { return Cpx.asin(z) },
-    atan(z)     { return Cpx.atan(z) },
-    acos(z)     { return Cpx.subtract([halfPi, Rnl.zero], Cpx.asin(z))}, // π/2 - arcsin(z)
-    tan(z)      { return Cpx.divide(Cpx.sin(z), Cpx.cos(z)) },
-    cot(z)      { return Cpx.divide(Cpx.cos(z), Cpx.sin(z)) },
+    abs(z)   { return Cpx.abs(z) },
+    angle(z) { return Cpx.angle(z) },
+    real(z)  { return z[0] },
+    imag(z)  { return z[1] },
+    conj(z)  { return Cpx.conjugate(z) },
+    cos(z)   { return Cpx.cos(z) },
+    sin(z)   { return Cpx.sin(z) },
+    asin(z)  { return Cpx.asin(z) },
+    atan(z)  { return Cpx.atan(z) },
+    acos(z)  { return Cpx.subtract([halfPi, Rnl.zero], Cpx.asin(z))}, // π/2 - arcsin(z)
+    tan(z)   { return Cpx.divide(Cpx.sin(z), Cpx.cos(z)) },
+    cot(z)   { return Cpx.divide(Cpx.cos(z), Cpx.sin(z)) },
     sec(z) {
       const c = Cpx.cos(z)
       return c.dtype ? c : Cpx.inverse(c)
@@ -510,15 +525,24 @@ const unary = {
     acoth(z) {
       return Cpx.atanh(Cpx.inverse(z))
     },
-    Gamma(z) {
+    ceil(z) {
+      return errorOprnd("NA_COMPL_OP", "ceil")
+    },
+    floor(z) {
+      return errorOprnd("NA_COMPL_OP", "ceil")
+    },
+    gamma(z) {
       return Cpx.gamma(z)
     },
     Γ(z) {
       return Cpx.gamma(z)
     },
-    logΓ(z) {
-      // TODO: complex logΓ
-      return errorOprnd("NA_COMPL_OP", "logΓ")
+    lgamma(z) {
+      // TODO: complex log of gamma()
+      return errorOprnd("NA_COMPL_OP", "lgamma")
+    },
+    factorial(z) {
+      return errorOprnd("NA_COMPL_OP", "factorial")
     },
     sign(z) {
       if (Rnl.isZero(z[1]) && Rnl.isPositive(z[0])) {
@@ -573,6 +597,12 @@ const binary = {
   },
   zeros([m, n]) {
     return Matrix.zeros(Rnl.toNumber(m), Rnl.toNumber(n))
+  },
+  mod([x, y]) {
+    return Rnl.mod(x, y)
+  },
+  rem([x, y]) {
+    return Rnl.rem(x, y)
   }
 }
 
@@ -663,7 +693,7 @@ export const multivarFunction = (arity, functionName, args) => {
   // Deal with a function that may have multiple arguments.
 
   if (args.length === 1) {
-    const list = Matrix.isVector(args[0])
+    const list = isVector(args[0])
       ? args[0].value
       : (args.dtype & dt.MATRIX)
       // TODO: fix the next line.
@@ -690,7 +720,7 @@ export const multivarFunction = (arity, functionName, args) => {
     let dtype = args[0].dtype
 
     for (iArg = 0; iArg < args.length; iArg++) {
-      if (Matrix.isVector(args[iArg])) {
+      if (isVector(args[iArg])) {
         gotVector = true
         dtype = args[iArg].dtype
         break

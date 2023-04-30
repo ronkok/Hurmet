@@ -10,7 +10,7 @@ const groupByFourRegEx = /\B(?=(\d{4})+$)/g  // use sometimes in China
 // Grouping as common in south Asia: 10,10,000
 const groupByLakhCroreRegEx = /(\d)(?=(\d\d)+\d$)/g
 
-const formatRegEx = /^([beEfhkmprsStx%])?(-?[\d]+)?([j∠°])?$/
+const formatRegEx = /^([beEfhkmprsStx%])?(-?[\d]+)?([i∠°])?$/
 
 const superscript = str => {
   // Convert a numeral string to Unicode superscript characters.
@@ -203,7 +203,7 @@ export const format = (num, specStr = "h3", decimalFormat = "1,000,000.") => {
   if (Rnl.isZero(num)) { return "0" }
 
   const spec = { ftype: specStr.charAt(0) }
-  if (/[j∠°]$/.test(specStr)) { specStr = specStr.slice(0, -1) }
+  if (/[i∠°]$/.test(specStr)) { specStr = specStr.slice(0, -1) }
   if (specStr.length > 1) { spec.numDigits = Number(specStr.slice(1)) }
 
   if (spec.ftype === "%" || spec.ftype === "p") { num[0] = num[0] * BigInt(100) }

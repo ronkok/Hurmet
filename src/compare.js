@@ -18,6 +18,8 @@ export const compare = (op, x, y, yPrev) => {
 
   switch (op) {
     case "=":
+      return errorOprnd("BAD_EQ")
+
     case "==":
     case "⩵":
       return equals(x, y)
@@ -62,9 +64,15 @@ export const compare = (op, x, y, yPrev) => {
       }
 
     case "∈":
+    case "in":
       if (typeof x === "string" && typeof y === "string") {
         if (Array.from(x).length > 1) { return false }
         return y.indexOf(x) > -1
+      } else if (Array.isArray(y) && Rnl.isRational(y[0]) && Rnl.isRational(x)) {
+        for (let i = 0; i < y.length; i++) {
+          if (Rnl.areEqual(x, y[i])) { return true }
+        }
+        return false
       } else if (Array.isArray(y) && !Array.isArray(x)) {
         for (let i = 0; i < y.length; i++) {
           if (equals(x, y[i])) { return true }
@@ -116,9 +124,15 @@ export const compare = (op, x, y, yPrev) => {
       }
 
     case "∉":
+    case "!in":
       if (typeof x === "string" && typeof y === "string") {
         if (Array.from(x).length === 1) { return false }
         return y.indexOf(x) === -1
+      } else if (Array.isArray(y) && Rnl.isRational(y[0]) && Rnl.isRational(x)) {
+        for (let i = 0; i < y.length; i++) {
+          if (Rnl.areEqual(x, y[i])) { return false }
+        }
+        return true
       } else if (Array.isArray(y)) {
         for (let i = 0; i < y.length; i++) {
           if (x === y[i]) { return false }

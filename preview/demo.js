@@ -423,7 +423,7 @@ function textAfterCursor(editor) {
 
 // autocorrect.js
 
-const autoCorrectRegEx = /([!?:<>\-~/_]=| \.|~~|\+-|-\+|<-->|<->|<>|<--|<-|-->|->|=>|-:|\^\^|\|\||\/\/\/|\b(bar|hat|vec|tilde|dot|ddot|ul)|\b(bb|bbb|cc|ff|ss) [A-Za-z]|\\?[A-Za-z]{2,}|\\c|\\ |\\o|root [234]|<<|>>|\^-?[0-9]+|\|\|\||\/_|''|""|00)\s$/;
+const autoCorrectRegEx = /([?:<>\-~/_]=| \.|~~|\+-|-\+|<-->|<->|<>|<--|<-|-->|->|-:|\^\^|\\\||\/\/\/|\b(bar|hat|vec|tilde|dot|ddot|ul)|\b(bb|bbb|cc|ff|ss) [A-Za-z]|\\?[A-Za-z]{2,}|\\c|\\ |\\o|root [234]|<<|>>|\^-?[0-9]+|\|\|\||\/_|''|""|00)\s$/;
 
 const accents = {
   acute: "\u0301",
@@ -554,7 +554,6 @@ const autoCorrections = {
   vvv: "⋁",
   "\\xor": "⊻",
   "\\in": "\u2208",
-  "!=": "≠",
   "<>": "≠",
   ":=": "≔",
   "?=": "≟",
@@ -574,12 +573,11 @@ const autoCorrections = {
   "<--": "\u27F5",
   "-->": "⟶",
   "->": "→",
-  "=>": "⇒",
   "<-->": "\\xrightleftarrows",
   "\\circ": "∘",
   "\\otimes": "⊗",
   "|||": "¦",
-  "||": "‖",
+  "\\|": "‖",
   "/_": "∠",
   " .": "\u00B7", // half-high dot
   "''": "\u2032", // two apostrophes → prime
@@ -749,7 +747,8 @@ const dt = Object.freeze({
   ERROR: 32768,
   UNIT: 65536, // User-defined units.
   DRAWING: 131072,
-  RICHTEXT: 262144
+  RICHTEXT: 262144,
+  DICTIONARY: 524288
 });
 
 /*
@@ -983,6 +982,7 @@ const errorMessages = Object.freeze({
     NAN:       "Error. Value of $@$ is not a numeric.",
     NANARG:    "Error. Argument to function $@$ must be numeric.",
     NULL:      "Error. Missing value for $@$.", // $@$ will be italic in TeX
+    BAD_EQ:    'Error. Use "==" instead of "=" to check for equality.',
     V_NAME:    "Error. Variable $@$ not found.",
     F_NAME:    "Error. Function @ not found.",
     NAN_OP:    "Error. Arithmetic operation on a non-numeric value.",
@@ -1003,7 +1003,7 @@ const errorMessages = Object.freeze({
     LOGF:      "Error. Argument to log!() must be a non-negative integer.",
     Γ0:        "Error. Γ(0) is infinite.",
     ΓPOLE:     "Error. Γ() of a negative integer is infinite.",
-    LOGΓ:      "Error. Argument to Hurmet logΓ() must be a positive number.",
+    LOGΓ:      "Error. Argument to Hurmet lgamma() must be a positive number.",
     TAN90:     "Error. tan($@$) is infinite.",
     ATRIG:     "Error. Input to @ must be between -1 and 1.",
     COT:       "Error. Input to @ must not be zero.",
@@ -1041,14 +1041,13 @@ const errorMessages = Object.freeze({
     DF_UNIT:   "Invalid unit \"&\" in data frame.",
     FORM_FRAC: "Error. Hurmet can do binary or hexadecimal format only on integers.",
     PRIVATE:   "Error. Function @ is not private.",
-    GCD:       "Error. The gcd function can take only integers as arguments.",
+    INT_ARG:   "Error. The @ function can take only integers as arguments.",
     BAD_KEY:   "Error. Data structure does not contain key \"@\".",
     NUM_KEY:   "Error. A key must be a string, not a number.",
     IMMUT_UDF: `Error. Variable @ already contains a user-defined function.
                 Hurmet cannot assign a different value to @.`,
     NO_PROP:   `Error. Cannot call a property from variable "@" because it has no properties.`,
-    NOT_ARRAY: `Error. Cannot check if an element is in the second operand because
- the second operand is not an array.`,
+    NOT_ARRAY: `Error. Cannot The second operand is not an array.`,
     MULT_MIS:  "Error. Mismatch in number of multiple assignment.",
     COUNT:     "Error. The count() function works only on strings.",
     NOT_VECTOR:"Error. Arguments to dataframe() must be vectors.",
@@ -1062,7 +1061,8 @@ const errorMessages = Object.freeze({
     BAD_KEYSTR: "Error. The key in a key:value pair must be a string.",
     BAD_APPEND: "Error. Can not append a @",
     MAP_APPEND: "Error. Can not append. Wrong data type.",
-    BAD_J:      "Error. Do not use j for a loop index. In Hurmet, j = √(-1)"
+    BAD_TRANS:  "Error. Only a matrix can be transposed.",
+    BAD_ARGS:   "Error. Wrong number of arguments to function @"
   }
 });
 
@@ -1183,7 +1183,7 @@ const gcdi = (a, b) => {
 
 const gcd = (m, n) => {
   // Greatest common divisor of two rationals
-  if (!Rnl.isInteger(m) || !Rnl.isInteger(n)) { return errorOprnd("GCD") }
+  if (!Rnl.isInteger(m) || !Rnl.isInteger(n)) { return errorOprnd("INT_ARG", "gcd") }
   return [gcdi(m[0] / m[1], n[0] / n[1]), iOne]
 };
 
@@ -1269,7 +1269,7 @@ const power = (a, b) => {
         ? [a[0] ** b[0], a[1] ** b[0]]
         : isPositive(a) || greaterThan(b, one) || lessThan(b, negate(one))
         ? fromNumber(toNumber(a) ** toNumber(b))
-        : areEqual(modulo(b, two), one)
+        : areEqual(mod(b, two), one)
         ? fromNumber(-1 * (-1 * toNumber(a)) ** toNumber(b))
         : errorOprnd("BAD_ROOT");
     } catch (err) {
@@ -1303,9 +1303,14 @@ const hypot = (a, b) => {
   return Rnl.multiply(maximum, sqrt(Rnl.increment(Rnl.multiply(r, r))))
 };
 
-const modulo = (a, b) => {
+const mod = (a, b) => {
   const quotient = divide(normalize(a), normalize(b));
   return [intAbs(quotient[0] % quotient[1]), iOne]
+};
+
+const rem = (a, b) => {
+  const quotient = divide(normalize(a), normalize(b));
+  return [quotient[0] % quotient[1], iOne]
 };
 
 const areEqual = (a, b) => {
@@ -1486,7 +1491,8 @@ const Rnl = Object.freeze({
   reciprocal,
   gcd,
   hbar,
-  modulo,
+  mod,
+  rem,
   hypot,
   one,
   pi: pi$1,
@@ -1523,7 +1529,7 @@ const groupByFourRegEx = /\B(?=(\d{4})+$)/g;  // use sometimes in China
 // Grouping as common in south Asia: 10,10,000
 const groupByLakhCroreRegEx = /(\d)(?=(\d\d)+\d$)/g;
 
-const formatRegEx = /^([beEfhkmprsStx%])?(-?[\d]+)?([j∠°])?$/;
+const formatRegEx = /^([beEfhkmprsStx%])?(-?[\d]+)?([i∠°])?$/;
 
 const superscript$1 = str => {
   // Convert a numeral string to Unicode superscript characters.
@@ -1716,7 +1722,7 @@ const format = (num, specStr = "h3", decimalFormat = "1,000,000.") => {
   if (Rnl.isZero(num)) { return "0" }
 
   const spec = { ftype: specStr.charAt(0) };
-  if (/[j∠°]$/.test(specStr)) { specStr = specStr.slice(0, -1); }
+  if (/[i∠°]$/.test(specStr)) { specStr = specStr.slice(0, -1); }
   if (specStr.length > 1) { spec.numDigits = Number(specStr.slice(1)); }
 
   if (spec.ftype === "%" || spec.ftype === "p") { num[0] = num[0] * BigInt(100); }
@@ -1841,11 +1847,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6189","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.6664","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.7298","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.4872","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -1854,10 +1860,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4816","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4981","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9874","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.3826","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9839","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.5979","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -1877,7 +1883,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.87940","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.88050","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1885,23 +1891,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.4344","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.6199","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["3.8755","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["88.5650","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["3.9939","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["89.8555","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["139.85","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["149.35","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1401.12","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1470.89","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1912,7 +1918,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["20.0854","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["19.8182","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -1942,7 +1948,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.0745","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0981","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -2741,25 +2747,25 @@ const unitFromUnitName = (inputStr, vars) => {
  * This module is a work in progress.
  */
 
-const j = [Rnl.zero, Rnl.one];
+const im = [Rnl.zero, Rnl.one];
 
 const isComplex = a => {
   return Array.isArray(a) && a.length === 2
     && Rnl.isRational(a[0]) && Rnl.isRational(a[1])
 };
 
-const re = z => z[0];
-const im = z => z[1];
+const real = z => z[0];
+const imag = z => z[1];
 const abs$1 = z => Rnl.hypot(z[0], z[1]);
 const negate$1 = z => [Rnl.negate(z[0]), Rnl.negate(z[1])];
 const conjugate = z => [z[0], Rnl.negate(z[1])];
 
-const argument = (z) => {
-    // For a complex number z, the "argument" is the angle (in radians) from
+const angle = (z) => {
+    // For a complex number z, the angle (in radians) from
     // the positive real axis to the vector representing z.  + implies counter-clockwise.
     // Electrical engineers call this the phase angle of the complex number.
   if (Rnl.isZero(z[0]) && Rnl.isZero(z[1])) {
-    return errorOprnd("ORIGIN", "argument")
+    return errorOprnd("ORIGIN", "angle")
   } else if (Rnl.isZero(z[1])) {
     return  Rnl.isPositive(z[0]) ? Rnl.zero : Rnl.pi
   } else if (Rnl.isZero(z[0])) {
@@ -2845,14 +2851,14 @@ const inverse = z => {
 
 const cos$1 = z => {
   const real = Rnl.multiply(Rnl.cos(z[0]), Rnl.cosh(z[1]));
-  const im = Rnl.multiply(Rnl.negate(Rnl.sin(z[0])), Rnl.sinh(z[1]));
-  return [real, im]
+  const imPart = Rnl.multiply(Rnl.negate(Rnl.sin(z[0])), Rnl.sinh(z[1]));
+  return [real, imPart]
 };
 
 const sin$1 = z => {
   const real = Rnl.multiply(Rnl.sin(z[0]), Rnl.cosh(z[1]));
-  const im = Rnl.multiply(Rnl.cos(z[0]), Rnl.sinh(z[1]));
-  return [real, im]
+  const imPart = Rnl.multiply(Rnl.cos(z[0]), Rnl.sinh(z[1]));
+  return [real, imPart]
 };
 
 const log = x => {
@@ -2862,7 +2868,7 @@ const log = x => {
     return errorOprnd("ORIGIN", "log")
   } else {
     z[0] = Rnl.fromNumber(Math.log(Rnl.toNumber(Rnl.hypot(x[0], x[1]))));
-    z[1] = argument(x);   // phase angle, in radians
+    z[1] = angle(x);   // phase angle, in radians
   }
   return z
 };
@@ -2935,13 +2941,13 @@ const atanh = z => {
 
 const asin = z => {
   // arcsinh (i * z) / i
-  return divide$1(asinh(multiply$1(j, z)), j)
+  return divide$1(asinh(multiply$1(im, z)), im)
 };
 
 const atan = z => {
   // (Log(1 + iz) - Log(1 - iz)) / (2 * i)  cf Kahan
-  const term1 = log(increment$1(multiply$1(j, z)));
-  const term2 = log(subtract$1([Rnl.one, Rnl.zero],(multiply$1(j, z))));
+  const term1 = log(increment$1(multiply$1(im, z)));
+  const term2 = log(subtract$1([Rnl.one, Rnl.zero],(multiply$1(im, z))));
   return divide$1(subtract$1(term1, term2), [Rnl.zero, Rnl.two])  
 };
 
@@ -2984,18 +2990,22 @@ const lanczos$1 = zPlusOne => {
 };
 
 const display = (z, formatSpec, decimalFormat) => {
-  const complexSpec = /[j∠°]/.test(formatSpec) ? formatSpec.slice(-1) : "j";
+  const complexSpec = /[i∠°]/.test(formatSpec) ? formatSpec.slice(-1) : "i";
   let resultDisplay = "";
   let altResultDisplay = "";
-  if (complexSpec === "j") {
+  if (complexSpec === "i") {
     const real = format(z[0], formatSpec, decimalFormat);
-    let im = format(z[1], formatSpec, decimalFormat);
-    if (im.charAt(0) === "-") { im = "(" + im + ")"; }
-    resultDisplay = real + " + j" + im;
-    altResultDisplay = real + " + j" + im;
+    let imPart = format(z[1], formatSpec, decimalFormat);
+    if (imPart.charAt(0) === "-") {
+      resultDisplay = real + " - " + -imPart + "\\,\\mathord{\\mathrm{im}}";
+      altResultDisplay = real + " - " + -imPart + " im";
+    } else {
+      resultDisplay = real + " + " + imPart + " \\,\\mathord{\\mathrm{im}}";
+      altResultDisplay = real + " + " + imPart + " im";
+    }
   } else {
     const mag = Rnl.hypot(z[0], z[1]);
-    let angle = Cpx.argument(result.value);
+    let angle = Cpx.angle(result.value);
     if (complexSpec === "°") {
       angle = Rnl.divide(Rnl.multiply(angle, Rnl.fromNumber(180)), Rnl.pi);
     }
@@ -3008,12 +3018,12 @@ const display = (z, formatSpec, decimalFormat) => {
 };
 
 const Cpx = Object.freeze({
-  j,
-  re,
   im,
+  real,
+  imag,
   abs: abs$1,
   conjugate,
-  argument,
+  angle,
   inverse,
   increment: increment$1,
   decrement: decrement$1,
@@ -3050,6 +3060,21 @@ const isVector = oprnd => {
   return (((oprnd.dtype & dt.ROWVECTOR) || (oprnd.dtype & dt.COLUMNVECTOR)) > 0)
 };
 
+const transpose = oprnd => {
+  const result = { unit: oprnd.unit };
+  if (isVector(oprnd)) {
+    result.value = oprnd.value;
+    const delta = ((oprnd.dtype & dt.ROWVECTOR) ? 1  : -1 ) * (dt.COLUMNVECTOR - dt.ROWVECTOR);
+    result.dtype = oprnd.dtype + delta;
+  } else if (oprnd.dtype & dt.MATRIX) {
+    result.value = oprnd.value[0].map((x, i) => oprnd.value.map(y => y[i]));
+    result.dtype = oprnd.dtype;
+  } else {
+    return errorOprnd("BAD_TRANS")
+  }
+  return result
+};
+
 const convertFromBaseUnits = (oprnd, gauge, factor) => {
   let conversion = (isVector(oprnd))
     ? oprnd.value.map((e) => Rnl.divide(e, factor))
@@ -3080,7 +3105,7 @@ const display$1 = (m, formatSpec, decimalFormat) => {
   if (m.dtype & dt.MATRIX) {
     str += "{pmatrix}";
     const numRows = m.value.length;
-    const numCols = m.value[1].length;
+    const numCols = m.value[0].length;
     for (let i = 0; i < numRows; i++) {
       for (let j = 0; j < numCols; j++) {
         str += format(m.value[i][j], formatSpec, decimalFormat) + " &";
@@ -3123,7 +3148,7 @@ const displayAlt = (m, formatSpec, decimalFormat) => {
   if (m.dtype & dt.MATRIX) {
     str += "(";
     const numRows = m.value.length;
-    const numCols = m.value[1].length;
+    const numCols = m.value[0].length;
     for (let i = 0; i < numRows; i++) {
       for (let j = 0; j < numCols; j++) {
         str += format(m.value[i][j], formatSpec, decimalFormat).replace(/{,}/g, ",") + ", ";
@@ -3435,7 +3460,7 @@ const multResultType = (o1, o2) => {
 };
 
 const operandFromRange = range => {
-  // Input was [start:step:end]
+  // Input was [start:step:end...]
   // Populate a vector with values from a range
   const array = [];
   if (Rnl.greaterThan(range[2], range[0])) {
@@ -3455,7 +3480,7 @@ const operandFromRange = range => {
   return Object.freeze({
     value: array,
     unit: { expos: allZeros },
-    dtype: dt.RATIONAL + dt.ROWVECTOR
+    dtype: dt.RATIONAL + dt.COLUMNVECTOR
   })
 };
 
@@ -3519,17 +3544,11 @@ const operandFromTokenStack = (tokenStack, numRows, numCols) => {
 };
 
 const zeros = (m, n) => {
-  if (m === 1) {
+  if (m === 1 || n === 1) {
     return {
       value: new Array(n).fill(Rnl.zero),
       unit: allZeros,
-      dtype: dt.RATIONAL + dt.ROWVECTOR
-    }
-  } else if (n === 1) {
-    return {
-      value: new Array(m).fill(Rnl.zero),
-      unit: allZeros,
-      dtype: dt.RATIONAL + dt.COLUMNVECTOR
+      dtype: dt.RATIONAL + (m === 1 ? dt.ROWVECTOR : dt.COLUMNVECTOR)
     }
   } else {
     const value = [];
@@ -3554,11 +3573,11 @@ const Matrix = Object.freeze({
   displayAltMapOfVectors,
   identity,
   invert,
-  isVector,
   multResultType,
   operandFromRange,
   operandFromTokenStack,
   submatrix,
+  transpose,
   zeros
 });
 
@@ -4464,7 +4483,7 @@ const tt = Object.freeze({
   FACTORIAL: 30,
   SUPCHAR: 31,
   ANGLE: 32,
-  ELLIPSIS: 33, //       separator for ranges (1:n)
+  RANGE: 33, //       separator for ranges (1:n)
   KEYWORD: 34, //     keywords: for in while
   PROPERTY: 36, //    property name after a dot accessor
   COMMENT: 37,
@@ -4529,19 +4548,21 @@ const words = Object.freeze({
   //       input,    tex output,               type, closeDelim
   "true": ["true", "\\mathord{\\text{true}}", tt.ORD, ""],
   "false": ["false", "\\mathord{\\text{false}}", tt.ORD, ""],
-  j: ["j", "j", tt.ORD, ""],
+  im: ["im", "im", tt.LONGVAR, ""],
   cos: ["cos", "\\cos", tt.FUNCTION, ""],
   cosd: ["cosd", "\\operatorname{\\cos_d}", tt.FUNCTION, ""],
   if: ["if", "\\mathrel{\\mathrm{if}}", tt.LOGIC, ""],
   else: ["else", "\\mathrel{\\mathrm{else}}", tt.LOGIC, ""],
+  elseif: ["elseif", "\\mathrel{\\mathrm{elseif}}", tt.LOGIC, ""],
   and: ["and", "\\mathrel{\\mathrm{and}}", tt.LOGIC, ""],
   or: ["or", "\\mathrel{\\mathrm{or}}", tt.LOGIC, ""],
   for: ["for", "\\mathrel{\\mathrm{for}}", tt.KEYWORD, ""],
   while: ["while", "\\mathrel{\\mathrm{while}}", tt.KEYWORD, ""],
-  in: ["in", "\\mathrel{\\mathrm{in}}", tt.KEYWORD, ""],
+  in: ["in", "\\mathrel{\\mathrm{in}}", tt.REL, ""],
+  "!in": ["!in", "\\mathrel{\\mathrm{!in}}", tt.REL, ""],
   break: ["break", "\\mathrel{\\mathrm{break}}", tt.KEYWORD, ""],
   to: ["to", "\\mathbin{\\mathrm{to}}", tt.TO, "" ],
-  raise: ["raise", "\\mathrel{\\mathrm{raise}}", tt.UNARY, ""],
+  throw: ["throw", "\\mathrel{\\mathrm{throw}}", tt.UNARY, ""],
   echo: ["echo", "\\mathrel{\\mathrm{echo}}", tt.UNARY, ""],
   return: ["return", "\\mathrel{\\mathrm{return}}", tt.RETURN, ""],
   sqrt: ["sqrt", "\\sqrt", tt.UNARY, ""],
@@ -4559,17 +4580,16 @@ const words = Object.freeze({
   log10: ["log10", "\\log_{10}", tt.FUNCTION, ""],
   log2: ["log2", "\\log_{2}", tt.FUNCTION, ""],
   "log!": ["log!", "\\operatorname{log!}", tt.FUNCTION, ""],
-
+  pi: ["pi", "\\mathrm{pi}", tt.ORD, ""],
   π: ["π", "π", tt.ORD, ""],
   "ℓ": ["ℓ", "ℓ", tt.VAR, ""],
-  modulo: ["modulo", "\\operatorname{modulo}", tt.MULT, ""],
   // A few arrows are placed here to give them priority over other arrows
   "->": ["->", "\u2192", tt.REL, ""], // right arrow
   "-->": ["-->", "\\xrightarrow", tt.UNARY, ""],
   "<-->": ["<-->", "\\xrightleftarrows", tt.UNARY, ""]
 });
 
-const miscRegEx = /^([/÷\u2215_:,;^+\\\-–−*×∘⊗⦼⊙√∛∜·.%∘|╏‖¦><=≈≟≠≡≤≥≅∈∉∋∌⊂⊄⊆⊈⊇⊉!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃∫∬∮∑([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7$£¥€₨₩₪]+)/;
+const miscRegEx = /^([/÷\u2215_:,;\t^+\\\-–−*×∘⊗⦼⊙√∛∜·.%|╏‖¦><=≈≟≠≡≤≥≅∈∉∋∌⊂⊄⊆⊈⊇⊉!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃∫∬∮∑([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7$£¥€₨₩₪]+)/;
 
 const miscSymbols = Object.freeze({
   //    input, output, type,  closeDelim
@@ -4579,25 +4599,29 @@ const miscSymbols = Object.freeze({
   "///": ["///", "/", tt.MULT, ""],     // inline (shilling) fraction
   "\u2215": ["\u2215", "\u2215", tt.MULT, ""], // inline (shilling) fraction
   "÷": ["÷", "÷", tt.MULT, ""],
+  "./": ["./", "\\mathbin{.'}", tt.MULT, ""],
   "_": ["_", "_", tt.SUB, ""],
   "^": ["^", "^", tt.SUP, ""],
+  ".^": [".^", "\\mathbin{.^}", tt.SUP, ""],
   "+": ["+", "+", tt.ADD, ""],
   "-": ["-", "-", tt.ADD, ""],
   "–": ["-", "-", tt.ADD, ""], // \u2013 en dash
   "−": ["-", "-", tt.ADD, ""], // \u2212 math minus
+  ".+": [".+", "\\mathbin{.+}", tt.ADD, ""],
+  ".-": [".-", "\\mathbin{.-}", tt.ADD, ""],
   "*": ["*", "*", tt.MULT, ""],
   "×": ["×", "×", tt.MULT, ""],
-  "∘": ["∘", "\\circ", tt.MULT, ""], // U+2218
+  "∘": ["∘", "∘", tt.MULT, ""], // U+2218
   "⊗": ["⊗", "⊗", tt.MULT, ""],
+  ".*": [".*", "\\mathbin{.*}", tt.MULT, ""],
   "√": ["√", "\\sqrt", tt.UNARY, ""],
   "\u221B": ["\u221B", "\\sqrt[3]", tt.UNARY, ""],
   "\u221C": ["\u221C", "\\sqrt[4]", tt.UNARY, ""],
   "+-": ["+-", "\u00B1", tt.BIN, ""],
   "**": ["**", "\\star", tt.BIN, ""],
   "·": ["·", "\u22C5", tt.MULT, ""], // dot operator
-  "...": ["...", "\\dots", tt.ORD, ""],
+  "...": ["...", "\\dots", tt.RANGE, ""],
   "%": ["%", "\\%", tt.FACTORIAL, ""],
-  "^*": ["^*", "^*", tt.FACTORIAL, ""],
   "-:": ["-:", "÷", tt.MULT, ""],
   "=": ["=", "=", tt.REL, ""],
   "≈": ["≈", "≈", tt.REL, ""],
@@ -4659,8 +4683,7 @@ const miscSymbols = Object.freeze({
   "∨": ["∨", "∨", tt.LOGIC, ""],
   "⊻": ["⊻", "⊻", tt.LOGIC, ""], // xor
   "¬": ["¬", "¬", tt.UNARY, ""], // logical not
-  // calculations do not use a ":"" token. But LOGIC is the right precedence for display.
-  ":": [":", ":", tt.LOGIC, ""],
+  "&&": ["&&", "{\\;\\&\\&\\;}", tt.LOGIC, ""],
 
   "\u222B": ["\u222B", "\u222B", tt.UNDEROVER, ""], // \int
   "\u222C": ["\u222C", "\u222C", tt.UNDEROVER, ""], // \iint
@@ -4678,8 +4701,9 @@ const miscSymbols = Object.freeze({
   "⟩": ["⟩", "⟩", tt.RIGHTBRACKET, ""],
   ":}": [":}", "}", tt.RIGHTBRACKET, ""],
   "|": ["|", "|", tt.LEFTRIGHT, ""],
-  "||": ["||", "\\Vert ", tt.LEFTRIGHT, ""],
-  "‖": ["‖", "\\Vert ", tt.LEFTRIGHT, ""],
+  "||": ["||", "\\mathbin{||}", tt.BIN, ""],
+  "\\|": ["\\|", "‖", tt.LEFTRIGHT, ""],
+  "‖": ["‖", "‖", tt.LEFTRIGHT, ""],
   "<<": ["<<", "\u27E8", tt.LEFTBRACKET, "\u27E9"],
   ">>": [">>", "\u27E9", tt.RIGHTBRACKET, ""],
   "\u23BF": ["\u23BF", "\\lfloor ", tt.LEFTBRACKET, "\\rfloor "],
@@ -4719,13 +4743,13 @@ const miscSymbols = Object.freeze({
   "\u2220": ["\u2220", "\u2220", tt.ANGLE, ""],
   "✓": ["✓", "✓", tt.ORD, ""],
   "˽": ["˽", "~", tt.SPACE, ""],  // "~" is a no-break space in LaTeX.
-  "\\,": ["\\,", ",\\:", tt.SEP, ""], // escape character to enable non-matrix comma in parens
   "\\;": ["\\;", ";\\:", tt.SEP, ""],
   "…": ["…", "…", tt.ORD, ""],
 
-  "..": ["..", "..", tt.RANGE, ""], // range separator
-  ",": [",", ",\\:", tt.SEP, ""], // function argument separator
-  ";": [";", ";\\:", tt.SEP, ""], // row separator
+  ":": [":", "{:}", tt.RANGE, ""], // range separator
+  ",": [",", ",\\:", tt.SEP, ""], // function argument or vector row separator
+  "\t": ["\t", " & ", tt.SEP, ""],  // matrix element separator
+  ";": [";", " \\\\ ", tt.SEP, ""], // row separator
 
   "$": ["$", "\\$", tt.CURRENCY, ""],
   "£": ["£", "£", tt.CURRENCY, ""],
@@ -4944,7 +4968,7 @@ const texREL = Object.freeze([
   "equiv", "fallingdotseq", "frown", "ge", "geq", "geqq", "geqslant", "gets", "gg", "ggg",
   "gggtr", "gnapprox", "gneq", "gneqq", "gnsim", "gt", "gtrapprox", "gtreqless", "gtreqqless",
   "gtrless", "gtrsim", "gvertneqq", "hArr", "harr", "hookleftarrow", "hookrightarrow", "iff",
-  "impliedby", "implies", "in", "isin", "Join", "gets", "impliedby", "implies", "in", "isin",
+  "impliedby", "implies", "in", "isin", "Join", "gets", "impliedby", "implies", "in",
   "lArr", "larr", "le", "leadsto", "leftarrow", "leftarrowtail", "leftharpoondown",
   "leftharpoonup", "leftleftarrows", "leftrightarrow", "leftrightarrows", "leftrightharpoons",
   "leftrightsquigarrow", "leq", "leqq", "leqslant", "lessapprox", "lesseqgtr", "lesseqqgtr",
@@ -5274,18 +5298,19 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
 
 // Keep the next three lists sorted, so that the isIn() binary search will work properly.
 const builtInFunctions = [
-  "Gamma", "Im", "Re", "abs", "acos", "acosd", "acosh", "acot", "acotd", "acoth", "acsc",
-  "acscd", "acsch", "argument", "asec", "asecd", "asech", "asin", "asind", "asinh", "atan",
-  "atan2", "atand", "atanh", "binomial", "chr", "cos", "cosd", "cosh", "cosh", "cot", "cotd",
-  "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp",
-  "fetch", "format", "gcd", "hypot", "isNaN", "length", "lerp", "ln", "log", "log10", "log2",
-  "logFactorial", "logGamma", "logn", "logΓ", "matrix2table", "random", "rms", "round",
-  "roundSig", "roundn", "sec", "secd", "sech", "sech", "sign", "sin", "sind", "sinh",
-  "startSvg", "string", "tan", "tand", "tanh", "tanh", "trace", "transpose", "zeros", "Γ"
+  "Char", "abs", "acos", "acosd", "acosh", "acot", "acotd", "acoth", "acsc", "acscd",
+  "acsch", "angle", "asec", "asecd", "asech", "asin", "asind", "asinh", "atan", "atan2",
+  "atand", "atanh", "binomial", "ceil", "conj", "cos", "cosd", "cosh", "cosh", "cot",
+  "cotd", "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp", "factorial", "fetch",
+  "floor", "format", "gamma", "gcd", "hcat", "hypot", "imag", "isnan", "length", "lerp", "ln",
+  "log", "log10", "log2", "lfact", "lgamma", "logn", "matrix2table", "mod", "real",
+  "rem", "rms", "round", "roundSig", "roundn", "sec", "secd", "sech", "sech", "sign", "sin",
+  "sind", "sinh", "startSvg", "string", "tan", "tand", "tanh", "tanh", "trace", "transpose",
+  "vcat", "zeros", "Γ"
 ];
 
 const builtInReducerFunctions = ["accumulate", "dataframe",
-  "max", "mean", "median", "min", "product", "range", "stddev", "sum", "variance"
+  "max", "mean", "median", "min", "product", "rand", "range", "stddev", "sum", "variance"
 ];
 
 const trigFunctions = ["cos", "cosd", "cot", "cotd", "csc", "cscd", "sec", "secd",
@@ -5466,7 +5491,7 @@ const nextCharIsFactor = (str, tokenType) => {
       return true
     } else {
       if (factors.test(fc)) {
-        fcMeetsTest = !/^(if|and|atop|or|else|modulo|otherwise|not|for|in|while|end)\b/.test(st);
+        fcMeetsTest = !/^(if|and|atop|or|else|elseif|otherwise|not|for|in|while|end)\b/.test(st);
       }
     }
   }
@@ -5482,9 +5507,9 @@ const cloneToken$1 = token => {
   }
 };
 
-// The RegEx below is equal to /^\s+/ except it omits \n and the no-break space \xa0.
+// The RegEx below is equal to /^\s+/ except it omits \n, \t, and the no-break space \xa0.
 // I use \xa0 to precede the combining arrow accent character \u20D7.
-const leadingSpaceRegEx$1 = /^[ \f\r\t\v\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]+/;
+const leadingSpaceRegEx$1 = /^[ \f\r\v\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]+/;
 const leadingLaTeXSpaceRegEx = /^(˽|\\quad|\\qquad)+/;
 
 /* eslint-disable indent-legacy */
@@ -5537,8 +5562,9 @@ const dNOTHING = 0;
 const dPAREN = 1; //           () or [] or {}, but not one of the use cases below
 const dFUNCTION = 2; //        sin(x)
 const dACCESSOR = 3; //        identifier[index] or identifier[start:step:end]
-const dMATRIX = 4; //          [1; 2] or (1, 2; 3, 4) or {1, 2}
+const dMATRIX = 4; //          [1; 2] or (1 \t 2; 3 \t 4)
 const dVECTORFROMRANGE = 5; // [start:end] or [start:step:end]
+const dDICTIONARY = 6; //      {key => value, key => value}
 const dCASES = 7; //           { a if b; c otherwise }
 const dBINOMIAL = 8;
 const dSUBSCRIPT = 9; //       Parens around a subscript do not get converted into matrices.
@@ -5591,7 +5617,7 @@ const parse = (
     }
   };
 
-  const popTexTokens = (texPrec, okToAppend, closeDelim) => {
+  const popTexTokens = (texPrec, okToAppend) => {
 
     if (!okToAppend) { return }
 
@@ -5649,7 +5675,10 @@ const parse = (
             }
           }
 
-          if (delim.delimType === dMATRIX) {
+          if (delim.delimType === dDICTIONARY && delim.open.length > 3) {
+            tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + 2);
+            op.closeDelim = delim.close;
+          } else if (delim.delimType === dMATRIX) {
             const inc = tex.slice(op.pos, op.pos + 1) === "\\" ? 2 : 1;
             tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + inc);
             op.closeDelim = delim.close;
@@ -5757,6 +5786,14 @@ const parse = (
       followedByFactor = nextCharIsFactor(str, token.ttype);
     }
 
+    if (token.input === "!" && (isPrecededBySpace ||
+        !isIn(prevToken.ttype,
+          [tt.ORD, tt.VAR, tt.NUM, tt.LONGVAR, tt.RIGHTBRACKET, tt.SUPCHAR]))) {
+      // Redefine ! as logical not in certain contexts, to match Julia syntax.
+      token.ttype = tt.UNARY;
+      token.input = "¬";
+    }
+
     switch (token.ttype) {
       case tt.SPACE: //      spaces and newlines
       case tt.BIN: //        infix math operators that render but don't calc, e.g. \bowtie
@@ -5805,9 +5842,9 @@ const parse = (
 
       case tt.NUM:
       case tt.ORD:
-        // Numbers and ORDs get appended directly onto rpn. Pass -1 to suppress an rpn pop.
         popTexTokens(2, okToAppend);
         if (isCalc) {
+          // Numbers and ORDs get appended directly onto rpn. Pass -1 to suppress an rpn pop.
           popRpnTokens(-1);
           rpn += token.ttype === tt.NUM ? rationalRPN(token.input) : token.input;
         }
@@ -5877,8 +5914,8 @@ const parse = (
           rpn += '"' + token.input + '"'; // a loop index variable name.
         } else {
           // We're in the echo of a Hurmet calculation.
-          if (/^(\.[^.]|\[)/.test(str)) {
-            // When the blue echo has an index in a bracket, e.g., varName[indes], it renders
+          if (/^(\.[^.]|\[)/.test(str) || token.input === "im") {
+            // When the blue echo has an index in a bracket, e.g., varName[index], it renders
             // the name of the variable, not the value. The value of the value of the index.
             token.output = token.ttype === tt.LONGVAR
               ? "\\mathrm{" + token.output + "}"
@@ -5887,7 +5924,7 @@ const parse = (
             token.output = token.input;
             token.output = "〖" + token.output;
           }
-          rpn += "¿" + token.input;
+          rpn += token.input === "im" ? "im" : "¿" + token.input;
         }
 
         tex += token.output + (str.charAt(0) === "." ? "" : " ");
@@ -5955,19 +5992,25 @@ const parse = (
       }
 
       case tt.RANGE: {
-        //   range separator, as in 1..n
+        //   range separator, as in 1:n
         popTexTokens(1, okToAppend);
         posOfPrevRun = tex.length;
-
-        if (isCalc) {
+        if (isCalc && token.input !== "...") {
           rpn += tokenSep;
           popRpnTokens(3);
-          rpnStack.push({ prec: 3, symbol: ".." });
-          if (str.charAt(0) === "]" || str.length === 0) {
-            rpn += '"∞"'; // slice of the form: identifier[n..]
+          rpnStack.push({ prec: 3, symbol: ":" });
+          if (["[", ","].includes(prevToken.input) && /^[,\]]/.test(str)) {
+            // A bare colon in a accessor, e.g., M[:, 2]
+            rpn += `®1/1${tokenSep}"∞"`;
+          } else if (/^end[,\]]/.test(str)) {
+            rpn += '"∞"'; // slice of the form: identifier[n:end]
+            str = str.slice(3);
           }
         }
-        tex += token.output;
+        const topDelim = delims[delims.length - 1];
+        tex += topDelim.delimType === dPAREN && topDelim.symbol === "{"
+          ? "\\colon"
+          : token.output;
         break
       }
 
@@ -6205,16 +6248,10 @@ const parse = (
         break
 
       case tt.KEYWORD:
-        // Either "for", "in", "while", or "break"
+        // Either "for", "while", or "break"
         popTexTokens(1, true);
         posOfPrevRun = tex.length;
-        if (isCalc) {
-          popRpnTokens(2);
-          if (token.input === "in") {
-            rpn += tokenSep;
-            rpnStack.push({ prec: rpnPrec, symbol: "for" });
-          }
-        }
+        if (isCalc) { popRpnTokens(2); }
         tex += token.output + " ";
         break
 
@@ -6241,9 +6278,6 @@ const parse = (
         }
         if (topDelim.delimType === dCASES && isIn(token.input, ["if", "otherwise"])) {
           tex += "&";
-        }
-        if (token.input === ":"  && topDelim.delimType === dPAREN && topDelim.symbol === "{") {
-          token.output = "\\colon";
         }
         tex += token.output;
         if (isCalc) {
@@ -6338,75 +6372,67 @@ const parse = (
       }
 
       case tt.SEP: {
-        // Either a comma or a semi-colon. Colons are handled elsewhere.
+        // Either a comma or a tab or a semi-colon. Colons are handled elsewhere.
         popTexTokens(1, okToAppend);
         posOfPrevRun = tex.length;
-
-        if (token.input === "\\," || token.input === "\\;") {
-          // escape characters that enable commas in a non-matrix paren.
-          tex += token.output + " ";
-        } else {
-          const delim = delims[delims.length - 1];
-          if (delim.delimType === dPAREN && isFollowedBySpaceOrNewline) {
-            delim.delimType = dMATRIX;
-            const ch = delim.name === "["
-              ? "b"
-              : delim.name === "("
-              ? "p"
-              : delim.name === "{:"
-              ? ""
-              : "B";
-            delim.open = `\\begin{${ch}matrix}`;
-            delim.close = `\\end{${ch}matrix}`;
-            delim.isTall = true;
-            token.output = token.input === "," ? "&" : "\\\\";
-          } else if (delim.delimType === dMATRIX && token.input === ",") {
-            token.output = "&";
-          } else if (delim.delimType > 3 && token.input === ";") {
-            token.output = "\\\\";
+        const delim = delims[delims.length - 1];
+        if (delim.delimType === dPAREN && ([";", "\t"].includes(token.input) ||
+            token.input === "," && isFollowedBySpaceOrNewline)) {
+          delim.delimType = dMATRIX;
+          const ch = delim.name === "["
+            ? "b"
+            : delim.name === "("
+            ? "p"
+            : delim.name === "{:"
+            ? ""
+            : "B";
+          delim.open = `\\begin{${ch}matrix}`;
+          delim.close = `\\end{${ch}matrix}`;
+          delim.isTall = true;
+        }
+        if (isCalc) {
+          if (prevToken.ttype === tt.LEFTBRACKET && delim.delimType === dACCESSOR) {
+            rpn += "®0/1";
           }
-          if (isCalc) {
-            if (prevToken.ttype === tt.LEFTBRACKET && delim.delimType === dACCESSOR) {
-              rpn += "®0/1";
-            }
-            rpn += tokenSep;
-            popRpnTokens(1);
-          }
+          rpn += tokenSep;
+          popRpnTokens(1);
+        }
+        if (delim.delimType === dMATRIX && token.input === ",") {
+          token.output = " & ";
+        }
 
-          tex += token.output + " ";
+        tex += token.output + " ";
 
-          if (isCalc) {
-            if (delims.length === 1) {
-              rpn += token.output;
+        if (isCalc) {
+          if (delims.length === 1) {
+            rpn += token.output;
 
-            } else {
-              if (token.input === ";") {
-                delim.numRows += 1;
-                if (delims.length > 0 && delim.delimType === dCASES) {
-                // We're about to begin an expression inside an If Expression.
-                // Temporarily change the token separator.
-                  tokenSep = "§";
-                }
+          } else {
+            if (token.input === ";") {
+              delim.numRows += 1;
+              if (delims.length > 0 && delim.delimType === dCASES) {
+              // We're about to begin an expression inside an If Expression.
+              // Temporarily change the token separator.
+                tokenSep = "§";
               }
-
-              if (delim.numRows === 1) {
-                if (token.input === ","  ||
-                    (token.input === " " && (delim.delimType === dMATRIX))) {
-                  if (str.charAt(0) === "]") {
-                    rpn += "®0/1";
-                  } else if (token.input === "," && delim.delimType === dFUNCTION &&
-                             delim.numArgs === 2 && delim.name === "plot" ) {
-                    // The literal function for a plot() statement inside a draw()
-                    // Wrap the rpn in quotation marks.
-                    rpn = rpn.slice(0, delim.rpnPos + 5) + '"'
-                        + rpn.slice(delim.rpnPos + 5, -1).replace(/\u00a0/g, "§") + '"' + tokenSep;
-                  }
-                }
-              }
-              delim.numArgs += 1;
             }
+
+            if (delim.numRows === 1) {
+              if ([",", "\t"].includes(token.input) && (str.charAt(0) === "]")) {
+                rpn += "®0/1";
+              }
+              if (token.input === "," && delim.delimType === dFUNCTION &&
+                          delim.numArgs === 2 && delim.name === "plot" ) {
+                // The literal function for a plot() statement inside a draw()
+                // Wrap the rpn in quotation marks.
+                rpn = rpn.slice(0, delim.rpnPos + 5) + '"'
+                    + rpn.slice(delim.rpnPos + 5, -1).replace(/\u00a0/g, "§") + '"' + tokenSep;
+              }
+            }
+            delim.numArgs += 1;
           }
         }
+
         okToAppend = true;
         break
       }
@@ -6455,14 +6481,14 @@ const parse = (
                   rpn = rpn.slice(0, 6) + '"' + rpn.slice(6).replace(/\u00a0/g, "§") + '"';
                 }
               } else if (symbol === "log" && regEx.test(rpn)) {
-                rpn = rpn.slice(0, rpn.length - 1) + "logFactorial";
+                rpn = rpn.slice(0, rpn.length - 1) + "lfact";
                 break
               }
               rpn += (symbol.slice(-1) === "^")
                 ? firstSep + symbol
-                : isIn(symbol, builtInFunctions)
+                : builtInFunctions.includes(symbol)
                 ? firstSep + symbol
-                : isIn(symbol, builtInReducerFunctions)
+                : builtInReducerFunctions.includes(symbol)
                 ? firstSep + symbol + tokenSep + numArgs
                 : firstSep + "function" + tokenSep + symbol + tokenSep + numArgs;
               break
@@ -6539,7 +6565,7 @@ const parse = (
         }
         if (isRightDelim) {
           // Treat as a right delimiter
-          topDelim.close = token.input === "|" ? "\\vert " : "\\Vert ";
+          topDelim.close = token.input === "|" ? "|" : "‖";
           texStack[texStack.length - 1].closeDelim = topDelim.close;
           popTexTokens(0, okToAppend);
           delims.pop();
@@ -6560,15 +6586,15 @@ const parse = (
             prec: 0,
             pos: tex.length,
             ttype: tt.LEFTRIGHT,
-            closeDelim: token.input === "|" ? "\\vert " : "\\Vert "
+            closeDelim: token.input === "|" ? "|" : "‖"
           });
 
           delims.push({
             delimType: dPAREN,
             name: token.input,
             isTall: false,
-            open: token.input === "|" ? "\\vert " : "\\Vert ",
-            close: token.input === "|" ? "\\vert " : "\\Vert ",
+            open: token.input === "|" ? "|" : "‖",
+            close: token.input === "|" ? "|" : "‖",
             numArgs: 1,
             numRows: 1,
             rpnPos: rpn.length,
@@ -6579,7 +6605,7 @@ const parse = (
             rpnStack.push({ prec: 0, symbol: token.output });
           }
 
-          tex += token.input === "|" ? "\\vert " : "\\Vert ";
+          tex += token.input === "|" ? "|" : "‖";
           posOfPrevRun = tex.length;
           okToAppend = false;
         }
@@ -6614,7 +6640,7 @@ const parse = (
     while (rpnStack.length > 0) {
       rpn += tokenSep + rpnStack.pop().symbol;
     }
-    const varRegEx = /〖[^ ().]+/g;
+    const varRegEx = /〖[^ ().\\,;]+/g;
     let arr;
     while ((arr = varRegEx.exec(tex)) !== null) {
       if ("¨ˆˉ˙˜".indexOf(arr[0][1]) === -1) {
@@ -7028,7 +7054,7 @@ const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAware) => {
  */
 
 const varRegEx = /〖[^〗]*〗/;
-const openParenRegEx$1 = /([([{|‖]|[^\\][,;:])$/;
+const openParenRegEx$1 = /(?:[([{|‖]|[^\\][,;:](?:\\:)?)$/;
 
 const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat) => {
   // For each variable name in the echo string, substitute a value.
@@ -7106,16 +7132,18 @@ const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat) => {
 
     if (hvar.dtype === dt.DATAFRAME || (hvar.dtype & dt.MAP)) {
       display = "\\mathrm{" + vars[varName].name + "}";
-    } else if (unitAware) {
-      display = needsParens ? "\\left(" + hvar.resultdisplay + "\\right)" : hvar.resultdisplay;
     } else {
-      let displaySansUnits = hvar.resultdisplay;
-      const posUnit = hvar.resultdisplay.lastIndexOf("{\\text{");
-      if (posUnit > -1) {
-        displaySansUnits = hvar.resultdisplay.slice(0, posUnit).trim();
-        displaySansUnits = displaySansUnits.replace(/\\; *$/, "").trim();
+      display = hvar.resultdisplay;
+      if (!unitAware) {
+        const posUnit = display.lastIndexOf("{\\text{");
+        if (posUnit > -1) {
+          display = display.slice(0, posUnit).trim()
+                            .replace(/\\; *$/, "").trim();
+        }
       }
-      display = needsParens ? "\\left(" + displaySansUnits + "\\right)" : displaySansUnits;
+      if (needsParens) {
+        display = hvar.dtype > 256 ? "\\left(" + display + "\\right)" : "(" + display + ")";
+      }
     }
     str = str.substring(0, pos) + display + str.substring(pos + matchLength);
   }
@@ -7201,8 +7229,9 @@ const functionExpos = (functionName, args) => {
     case "binomial":
     case "gamma":
     case "Γ":
-    case "logΓ":
-    case "logFactorial":
+    case "lgamma":
+    case "lfact":
+    case "factorial":
       if (!unitsAreCompatible(expos, allZeros)) {
         return errorOprnd("UNIT_IN", functionName)
       }
@@ -7221,6 +7250,8 @@ const functionExpos = (functionName, args) => {
     case "atan2":
     case "hypot":
     case "rms":
+    case "ceil":
+    case "floor":
     case "sum":
     case "mean":
     case "median":
@@ -7240,9 +7271,10 @@ const functionExpos = (functionName, args) => {
       return functionName === "atan2" ? allZeros : x
     }
 
-    case "Re":
-    case "Im":
-    case "argument":
+    case "real":
+    case "imag":
+    case "angle":
+    case "conj":
       return allZeros
 
     case "product": {
@@ -7275,8 +7307,8 @@ const gamma = x => {
   }
 };
 
-const logΓ = r => {
-  // logGamma function. Returns natural logarithm of the Gamma function.
+const lgamma = r => {
+  // Returns natural logarithm of the Gamma function.
   // Ref: https://www.johndcook.com/blog/2010/08/16/how-to-compute-log-factorial/
   if (Rnl.isZero(r)) { return errorOprnd("Γ0") }
   if (Rnl.isNegative(r)) { return errorOprnd("LOGΓ") }
@@ -7307,8 +7339,8 @@ const binomial = (n, k) => {
       Rnl.multiply(Rnl.factorial(k), Rnl.factorial(Rnl.subtract(n, k))))
 //    } else {
 //      return Rnl.fromNumber(Math.round(Math.exp(Rnl.toNumber(
-//        Rnl.subtract(logFactorial(n),
-//          Rnl.add(logFactorial(k), logFactorial(Rnl.subtract(n, k))))))))
+//        Rnl.subtract(lfact(n),
+//          Rnl.add(lfact(k), lfact(Rnl.subtract(n, k))))))))
 //    }
 
   } else if (Rnl.isInteger(n) && Rnl.isInteger(k) && Rnl.isPositive(k)) {
@@ -7339,9 +7371,10 @@ const unary = {
   scalar: {
     // Functions that take one real argument.
     abs(x)  { return Rnl.abs(x) },
-    argument(x) { return errorOprnd("NA_REAL", "argument") },
-    Re(x)   { return errorOprnd("NA_REAL", "Re") },
-    Im(x)   { return errorOprnd("NA_REAL", "Im") },
+    angle(x) { return errorOprnd("NA_REAL", "angle") },
+    real(x)   { return errorOprnd("NA_REAL", "real") },
+    imag(x)   { return errorOprnd("NA_REAL", "imag") },
+    conj(x)   { return errorOprnd("NA_REAL", "conj") },
     cos(x)  { return Rnl.cos(x) },
     sin(x)  { return Rnl.sin(x) },
     tan(x)  { return Rnl.tan(x) },
@@ -7459,19 +7492,28 @@ const unary = {
       const num = Rnl.toNumber(x);
       return Rnl.fromNumber((Math.log(1 + 1 / num) - Math.log(1 - 1 / num)) / 2)
     },
-    Gamma(x) {
+    ceil(x) {
+      return Rnl.ceil(x)
+    },
+    floor(x) {
+      return Rnl.floor(x)
+    },
+    gamma(x) {
       return gamma(x)
     },
     Γ(x) {
       return gamma(x)
     },
-    logΓ(x) {
+    lgamma(x) {
       if (Rnl.isNegative(x) || Rnl.isZero(x)) { return errorOprnd("LOGΓ") }
-      return logΓ(x)
+      return lgamma(x)
     },
-    logFactorial(x) {
+    lfact(x) {
       if (Rnl.isNegative(x) || !Rnl.isInteger(x)) { return errorOprnd("FACT") }
-      return logΓ(Rnl.add(x, Rnl.one))
+      return lgamma(Rnl.add(x, Rnl.one))
+    },
+    factorial(x) {
+      return Rnl.factorial(x)
     },
     sign(x) {
       return Rnl.isPositive(x) ? Rnl.one : Rnl.isZero(x) ? Rnl.zero : negativeOne
@@ -7522,8 +7564,8 @@ const unary = {
       const y = this.asec(x);
       return y.dtype ? y : Rnl.divide(y, piOver180)
     },
-    chr(x) {
-      return String.fromCodePoint(Number(x))
+    Char(x) {
+      return String.fromCodePoint(Rnl.toNumber(x))
     },
     sqrt(x) {
       const y = [BigInt(1), BigInt(2)];
@@ -7537,17 +7579,18 @@ const unary = {
   },
   complex: {
     // Functions that take one complex argument.
-    abs(z)      { return Cpx.abs(z) },
-    argument(z) { return Cpx.argument(z) },
-    Re(z)       { return z[0] },
-    Im(z)       { return z[1] },
-    cos(z)      { return Cpx.cos(z) },
-    sin(z)      { return Cpx.sin(z) },
-    asin(z)     { return Cpx.asin(z) },
-    atan(z)     { return Cpx.atan(z) },
-    acos(z)     { return Cpx.subtract([halfPi, Rnl.zero], Cpx.asin(z))}, // π/2 - arcsin(z)
-    tan(z)      { return Cpx.divide(Cpx.sin(z), Cpx.cos(z)) },
-    cot(z)      { return Cpx.divide(Cpx.cos(z), Cpx.sin(z)) },
+    abs(z)   { return Cpx.abs(z) },
+    angle(z) { return Cpx.angle(z) },
+    real(z)  { return z[0] },
+    imag(z)  { return z[1] },
+    conj(z)  { return Cpx.conjugate(z) },
+    cos(z)   { return Cpx.cos(z) },
+    sin(z)   { return Cpx.sin(z) },
+    asin(z)  { return Cpx.asin(z) },
+    atan(z)  { return Cpx.atan(z) },
+    acos(z)  { return Cpx.subtract([halfPi, Rnl.zero], Cpx.asin(z))}, // π/2 - arcsin(z)
+    tan(z)   { return Cpx.divide(Cpx.sin(z), Cpx.cos(z)) },
+    cot(z)   { return Cpx.divide(Cpx.cos(z), Cpx.sin(z)) },
     sec(z) {
       const c = Cpx.cos(z);
       return c.dtype ? c : Cpx.inverse(c)
@@ -7626,15 +7669,24 @@ const unary = {
     acoth(z) {
       return Cpx.atanh(Cpx.inverse(z))
     },
-    Gamma(z) {
+    ceil(z) {
+      return errorOprnd("NA_COMPL_OP", "ceil")
+    },
+    floor(z) {
+      return errorOprnd("NA_COMPL_OP", "ceil")
+    },
+    gamma(z) {
       return Cpx.gamma(z)
     },
     Γ(z) {
       return Cpx.gamma(z)
     },
-    logΓ(z) {
-      // TODO: complex logΓ
-      return errorOprnd("NA_COMPL_OP", "logΓ")
+    lgamma(z) {
+      // TODO: complex log of gamma()
+      return errorOprnd("NA_COMPL_OP", "lgamma")
+    },
+    factorial(z) {
+      return errorOprnd("NA_COMPL_OP", "factorial")
     },
     sign(z) {
       if (Rnl.isZero(z[1]) && Rnl.isPositive(z[0])) {
@@ -7689,6 +7741,12 @@ const binary = {
   },
   zeros([m, n]) {
     return Matrix.zeros(Rnl.toNumber(m), Rnl.toNumber(n))
+  },
+  mod([x, y]) {
+    return Rnl.mod(x, y)
+  },
+  rem([x, y]) {
+    return Rnl.rem(x, y)
   }
 };
 
@@ -7779,7 +7837,7 @@ const multivarFunction = (arity, functionName, args) => {
   // Deal with a function that may have multiple arguments.
 
   if (args.length === 1) {
-    const list = Matrix.isVector(args[0])
+    const list = isVector(args[0])
       ? args[0].value
       : (args.dtype & dt.MATRIX)
       // TODO: fix the next line.
@@ -7806,7 +7864,7 @@ const multivarFunction = (arity, functionName, args) => {
     let dtype = args[0].dtype;
 
     for (iArg = 0; iArg < args.length; iArg++) {
-      if (Matrix.isVector(args[iArg])) {
+      if (isVector(args[iArg])) {
         gotVector = true;
         dtype = args[iArg].dtype;
         break
@@ -7848,6 +7906,8 @@ const compare = (op, x, y, yPrev) => {
 
   switch (op) {
     case "=":
+      return errorOprnd("BAD_EQ")
+
     case "==":
     case "⩵":
       return equals(x, y)
@@ -7892,9 +7952,15 @@ const compare = (op, x, y, yPrev) => {
       }
 
     case "∈":
+    case "in":
       if (typeof x === "string" && typeof y === "string") {
         if (Array.from(x).length > 1) { return false }
         return y.indexOf(x) > -1
+      } else if (Array.isArray(y) && Rnl.isRational(y[0]) && Rnl.isRational(x)) {
+        for (let i = 0; i < y.length; i++) {
+          if (Rnl.areEqual(x, y[i])) { return true }
+        }
+        return false
       } else if (Array.isArray(y) && !Array.isArray(x)) {
         for (let i = 0; i < y.length; i++) {
           if (equals(x, y[i])) { return true }
@@ -7946,9 +8012,15 @@ const compare = (op, x, y, yPrev) => {
       }
 
     case "∉":
+    case "!in":
       if (typeof x === "string" && typeof y === "string") {
         if (Array.from(x).length === 1) { return false }
         return y.indexOf(x) === -1
+      } else if (Array.isArray(y) && Rnl.isRational(y[0]) && Rnl.isRational(x)) {
+        for (let i = 0; i < y.length; i++) {
+          if (Rnl.areEqual(x, y[i])) { return false }
+        }
+        return true
       } else if (Array.isArray(y)) {
         for (let i = 0; i < y.length; i++) {
           if (x === y[i]) { return false }
@@ -8035,7 +8107,6 @@ const compare = (op, x, y, yPrev) => {
 // This file implements the overloading.
 
 // Some helper functions
-const transpose2D = a => a[0].map((x, i) => a.map(y => y[i]));
 const dotProduct = (a, b) => {
   return a.map((e, j) => Rnl.multiply(e, b[j])).reduce((m, n) => Rnl.add(m, n))
 };
@@ -8149,8 +8220,8 @@ const dtype = {
   // return the resulting data type.
   scalar: {
     scalar(t0, t1, tkn)     {
-      return (tkn === "&" || tkn === "&_")
-        ? t0 + (tkn === "&" ? dt.ROWVECTOR : dt.COLUMNVECTOR )
+      return (tkn === "&" || tkn === "hcat" || tkn === "hcat")
+        ? t0 + ((tkn === "&" || tkn === "hcat") ? dt.ROWVECTOR : dt.COLUMNVECTOR )
         : t0
     },
     complex(t0, t1, tkn)    { return t1 },
@@ -8169,7 +8240,7 @@ const dtype = {
     map(t0, t1, tkn)    { return t1 + (t0 & dt.ROWVECTOR) + (t0 & dt.COLUMNVECTOR) }
   },
   rowVector: {
-    rowVector(t0, t1, tkn) { return tkn === "&_" ? t0 - dt.ROWVECTOR + dt.MATRIX : t0 },
+    rowVector(t0, t1, tkn) { return tkn === "vcat" ? t0 - dt.ROWVECTOR + dt.MATRIX : t0 },
     columnVector(t0, t1, tkn) { return t0 },
     matrix(t0, t1, tkn) { return tkn === "multiply" ? t0 : t1 }
   },
@@ -8187,7 +8258,7 @@ const dtype = {
   matrix: {
     scalar(t0, t1, tkn) { return t0 },
     rowVector(t0, t1, tkn) { return t0 },
-    columnVector(t0, t1, tkn) { return tkn === "&" || tkn === "asterisk" ? t0 : t1 },
+    columnVector(t0, t1, tkn) { return tkn === "&" || tkn === "circ" ? t0 : t1 },
     matrix(t0, t1, tkn) { return t0 },
     map(t0, t1, tkn)    { return 0 }
   },
@@ -8224,7 +8295,7 @@ const binary$1 = {
           : Rnl.power(x, y)
       },
       hypot(x, y)    { return Rnl.hypot(x, y) },
-      modulo(x, y)   { return Rnl.modulo(x, y) },
+      rem(x, y)      { return Rnl.rem(x, y) },
       and(x, y)      { return x && y },
       or(x, y)       { return x || y },
       xor(x, y)      { return x !== y },
@@ -8237,7 +8308,7 @@ const binary$1 = {
       multiply(x, z) { return [Rnl.multiply(x, z[0]), Rnl.multiply(x, z[1])] },
       divide(x, z)   { return Cpx.divide([x, Rnl.zero], z) },
       power(x, z)    { return Cpx.power([x, Rnl.zero], z) },
-      modulo(x, z)   { return errorOprnd("NA_COMPL_OP", "modulo") },
+      rem(x, z)      { return errorOprnd("NA_COMPL_OP", "rem") },
       and(x, z)      { return errorOprnd("NA_COMPL_OP", "and") },
       or(x, z)       { return errorOprnd("NA_COMPL_OP", "or") },
       xor(x, z)      { return errorOprnd("NA_COMPL_OP", "xor") }
@@ -8250,7 +8321,7 @@ const binary$1 = {
       multiply(x, v) { return v.map(e => Rnl.multiply(x, e)) },
       divide(x, v)   { return v.map(e => Rnl.divide(x, e)) },
       power(x, v)    { return v.map(e => Rnl.power(x, e)) },
-      modulo(x, v)   { return v.map(e => Rnl.modulo(x, e)) },
+      rem(x, v)      { return v.map(e => Rnl.rem(x, e)) },
       and(x, v)      { return v.map(e => x && e) },
       or(x, v)       { return v.map(e => x || e) },
       xor(x, v)      { return v.map(e => x !== e) },
@@ -8264,7 +8335,7 @@ const binary$1 = {
       multiply(x, m) { return m.map(row => row.map(e => Rnl.multiply(x, e))) },
       divide(x, m)   { return m.map(row => row.map(e => Rnl.divide(x, e))) },
       power(x, m)    { return m.map(row => row.map(e => Rnl.power(x, e))) },
-      modulo(x, m)   { return m.map(row => row.map(e => Rnl.modulo(x, e))) },
+      rem(x, m)      { return m.map(row => row.map(e => Rnl.rem(x, e))) },
       and(x, m)      { return m.map(row => row.map(e => x && e)) },
       or(x, m)       { return m.map(row => row.map(e => x || e)) },
       xor(x, m)      { return m.map(row => row.map(e => x !== e)) },
@@ -8291,33 +8362,15 @@ const binary$1 = {
     map: {
       // Binary operations with a scalar and a map.
       // Perform element-wise operations.
-      add(scalar, map) {
-        return mapMap(map, value => Rnl.add(scalar, value))
-      },
-      subtract(scalar, map) {
-        return mapMap(map, value => Rnl.subtract(scalar, value))
-      },
-      multiply(scalar, map) {
-        return mapMap(map, value => Rnl.multiply(scalar, value))
-      },
-      divide(scalar, map) {
-        return mapMap(map, value => Rnl.divide(scalar, value))
-      },
-      power(scalar, map) {
-        return mapMap(map, value => Rnl.power(scalar, value))
-      },
-      modulo(scalar, map) {
-        return mapMap(map, value => Rnl.modulo(scalar, value))
-      },
-      and(scalar, map) {
-        return mapMap(map, value => scalar && value)
-      },
-      or(scalar, map) {
-        return mapMap(map, value => scalar || value)
-      },
-      xor(scalar, map) {
-        return mapMap(map, value => scalar !== value)
-      }
+      add(scalar, map)      { return mapMap(map, value => Rnl.add(scalar, value)) },
+      subtract(scalar, map) { return mapMap(map, value => Rnl.subtract(scalar, value)) },
+      multiply(scalar, map) { return mapMap(map, value => Rnl.multiply(scalar, value)) },
+      divide(scalar, map)   { return mapMap(map, value => Rnl.divide(scalar, value)) },
+      power(scalar, map)    { return mapMap(map, value => Rnl.power(scalar, value)) },
+      rem(scalar, map)      { return mapMap(map, value => Rnl.rem(scalar, value)) },
+      and(scalar, map)      { return mapMap(map, value => scalar && value) },
+      or(scalar, map)       { return mapMap(map, value => scalar || value) },
+      xor(scalar, map)      { return mapMap(map, value => scalar !== value) }
     },
     mapWithVectorValues: {
       add(scalar, map) {
@@ -8335,8 +8388,8 @@ const binary$1 = {
       power(scalar, map) {
         return mapMap(map, array => array.map(e => Rnl.power(scalar, e)))
       },
-      modulo(scalar, map) {
-        return mapMap(map, array => array.map(e => Rnl.modulo(scalar, e)))
+      rem(scalar, map) {
+        return mapMap(map, array => array.map(e => Rnl.rem(scalar, e)))
       },
       and(scalar, map) {
         return mapMap(map, array => array.map(e => scalar && e))
@@ -8357,7 +8410,7 @@ const binary$1 = {
       multiply(z, y) { return [Rnl.multiply(z[0], y), Rnl.multiply(z[1], y) ] },
       divide(z, y)   { return Cpx.divide(z, [y, Rnl.zero]) },
       power(z, y)    { return Cpx.power(z, [y, Rnl.zero]) },
-      modulo(z, y)   { return errorOprnd("NA_COMPL_OP", "modulo") },
+      rem(z, y)      { return errorOprnd("NA_COMPL_OP", "rem") },
       and(z, y)      { return errorOprnd("NA_COMPL_OP", "and") },
       or(z, y)       { return errorOprnd("NA_COMPL_OP", "or") },
       xor(z, y)      { return errorOprnd("NA_COMPL_OP", "xor") }
@@ -8368,7 +8421,7 @@ const binary$1 = {
       multiply(x, y) { return Cpx.multiply(x, y) },
       divide(x, y)   { return Cpx.divide(x, y) },
       power(x, y)    { return Cpx.power(x, y) },
-      modulo(x, y)   { return errorOprnd("NA_COMPL_OP", "modulo") },
+      rem(x, y)      { return errorOprnd("NA_COMPL_OP", "rem") },
       and(x, y)      { return errorOprnd("NA_COMPL_OP", "and") },
       or(x, y)       { return errorOprnd("NA_COMPL_OP", "or") },
       xor(x, y)      { return errorOprnd("NA_COMPL_OP", "xor") }
@@ -8385,7 +8438,7 @@ const binary$1 = {
       multiply(v, x) { return v.map(e => Rnl.multiply(e, x)) },
       divide(v, x)   { return v.map(e => Rnl.divide(e, x)) },
       power(v, x)    { return v.map(e => Rnl.power(e, x)) },
-      modulo(v, x)   { return v.map(e => Rnl.modulo(e, x)) },
+      rem(v, x)      { return v.map(e => Rnl.rem(e, x)) },
       and(v, x)      { return v.map(e => e && x) },
       or(v, x)       { return v.map(e => e || x) },
       xor(v, x)      { return v.map(e => e !== x) },
@@ -8408,8 +8461,8 @@ const binary$1 = {
       power(vector, map) {
         return mapMap(map, val => vector.map(e => Rnl.power(val, e)))
       },
-      modulo(vector, map) {
-        return mapMap(map, val => vector.map(e => Rnl.modulo(val, e)))
+      rem(vector, map) {
+        return mapMap(map, val => vector.map(e => Rnl.rem(val, e)))
       },
       and(vector, map) {
         return mapMap(map, val => vector.map(e => val && e))
@@ -8455,7 +8508,7 @@ const binary$1 = {
         if (x.length === 1 && y.length === 1) { return [Rnl.multiply(x[0], y[0])] }
         return errorOprnd("MIS_ELNUM")
       },
-      asterisk(x, y) {
+      circ(x, y) {
         // Element-wise multiplication
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
         return x.map((e, i) => Rnl.multiply(e, y[i]))
@@ -8510,7 +8563,7 @@ const binary$1 = {
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
         return dotProduct(x, y)
       },
-      asterisk(x, y) {
+      circ(x, y) {
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
         return x.map((e, i) => Rnl.multiply(e, y[i]))
       },
@@ -8550,9 +8603,10 @@ const binary$1 = {
       },
       multiply(v, m) {
         if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
-        return transpose2D(m).map(row => dotProduct(v, row))
+        m = m[0].map((x, i) => m.map(y => y[i])); // Transpose m
+        return m.map(row => dotProduct(v, row))
       },
-      asterisk(v, m) {
+      circ(v, m) {
         if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
         return m.map(row => row.map((e, i) => Rnl.multiply(v[i], e)))
       },
@@ -8606,7 +8660,7 @@ const binary$1 = {
       divide(x, y) {
         return x.map(m => y.map(e => Rnl.divide(m, e)))
       },
-      asterisk(x, y) {
+      circ(x, y) {
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
         return x.map((e, i) => Rnl.multiply(e, y[i]))
       },
@@ -8664,7 +8718,7 @@ const binary$1 = {
         if (x.length === 1 && y.length === 1) { return [Rnl.multiply(x[0], y[0])] }
         return errorOprnd("MIS_ELNUM")
       },
-      asterisk(x, y) {
+      circ(x, y) {
         // Element-wise multiplication
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
         return x.map((e, i) => Rnl.multiply(e, y[i]))
@@ -8673,9 +8727,9 @@ const binary$1 = {
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
         return x.map((e, i) => Rnl.power(e, y[i]))
       },
-      modulo(x, y) {
+      rem(x, y) {
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((e, i) => Rnl.modulo(e, y[i]))
+        return x.map((e, i) => Rnl.rem(e, y[i]))
       },
       and(x, y) {
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
@@ -8710,7 +8764,7 @@ const binary$1 = {
         if (m.length !== 1) { return errorOprnd("MIS_ELNUM") }
         return m.map((row, i) => row.map(e => Rnl.multiply(v[i], e)))
       },
-      asterisk(v, m) {
+      circ(v, m) {
         if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
         return m.map((row, i) => row.map(e => Rnl.multiply(v[i], e)))
       },
@@ -8739,19 +8793,18 @@ const binary$1 = {
       multiply(m, x) { return m.map(row => row.map(e => Rnl.multiply(e, x))) },
       divide(m, x)   { return m.map(row => row.map(e => Rnl.divide(e, x))) },
       power(m, x)    {
-        if (x === "T") { return transpose2D(m) }
         if (m.length === m[0].length && Rnl.areEqual(x, [BigInt(-1), BigInt(1)])) {
           return Matrix.invert(m)
         }
         return m.map(row => row.map(e => Rnl.power(e, x)))
       },
-      modulo(m, x)   { return m.map(row => row.map(e => Rnl.modulo(e, x))) }
+      rem(m, x)   { return m.map(row => row.map(e => Rnl.rem(e, x))) }
     },
     rowVector: {
       add(m, v)      { return m.map(row => row.map((e, i) => Rnl.add(e, v[i]) )) },
       subtract(m, v) { return m.map(row => row.map((e, i) => Rnl.subtract(e, v[i]) )) },
       multiply(m, v) { return m.map(row => row.map((e, i) => Rnl.multiply(e, v[i]) )) },
-      asterisk(m, v) { return m.map(row => row.map((e, i) => Rnl.multiply(e, v[i]) )) },
+      circ(m, v) { return m.map(row => row.map((e, i) => Rnl.multiply(e, v[i]) )) },
       divide(m, v)   { return m.map(row => row.map((e, i) => Rnl.divide(e, v[i]) )) },
       power(m, v)    { return m.map(row => row.map((e, i) => Rnl.power(e, v[i]) )) },
       modulo(m, v)   { return m.map(row => row.map((e, i) => Rnl.modulo(e, v[i]) )) },
@@ -8768,10 +8821,10 @@ const binary$1 = {
         if (m[0].length !== v.length) { return errorOprnd("MIS_ELNUM") }
         return m.map(row => dotProduct(row, v))
       },
-      asterisk(m, v) { return m.map((row, i) => row.map(e => Rnl.multiply(e, v[i]) )) },
+      circ(m, v) { return m.map((row, i) => row.map(e => Rnl.multiply(e, v[i]) )) },
       divide(m, v)   { return m.map((row, i) => row.map(e => Rnl.divide(e, v[i]) )) },
       power(m, v)    { return m.map((row, i) => row.map(e => Rnl.power(e, v[i]) )) },
-      modulo(m, v)   { return m.map((row, i) => row.map(e => Rnl.modulo(e, v[i]) )) },
+      rem(m, v)   { return m.map((row, i) => row.map(e => Rnl.rem(e, v[i]) )) },
       concat(m, v) {
         if (m.length !== v.length) { return errorOprnd("MIS_ELNUM") }
         return m.map((row, i) => [...row, v[i]])
@@ -8800,7 +8853,7 @@ const binary$1 = {
       multiply(x, y) {
 
       },
-      asterisk(x, y) {
+      circ(x, y) {
         // Element-wise multiplication
         if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
         if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
@@ -8816,10 +8869,10 @@ const binary$1 = {
         if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
         return x.map((m, i) => m.map((n, j) => Rnl.power(n, y[i][j])))
       },
-      modulo(x, y) {
+      rem(x, y) {
         if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
         if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((m, i) => m.map((n, j) => Rnl.modulo(n, y[i][j])))
+        return x.map((m, i) => m.map((n, j) => Rnl.rem(n, y[i][j])))
       },
       and(x, y) {
         if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
@@ -8872,33 +8925,15 @@ const binary$1 = {
   map: {
     scalar: {
       // Binary opertions on a map and a scalar
-      add(map, scalar) {
-        return mapMap(map, value => Rnl.add(value, scalar))
-      },
-      subtract(map, scalar) {
-        return mapMap(map, value => Rnl.subtract(value, scalar))
-      },
-      multiply(map, scalar) {
-        return mapMap(map, value => Rnl.multiply(value, scalar))
-      },
-      divide(map, scalar) {
-        return mapMap(map, value => Rnl.divide(value, scalar))
-      },
-      power(map, scalar) {
-        return mapMap(map, value => Rnl.power(value, scalar))
-      },
-      modulo(map, scalar) {
-        return mapMap(map, value => Rnl.modulo(value, scalar))
-      },
-      and(map, scalar) {
-        return mapMap(map, value => value && scalar)
-      },
-      or(map, scalar) {
-        return mapMap(map, value => value || scalar)
-      },
-      xor(map, scalar) {
-        return mapMap(map, value => value !== scalar)
-      }
+      add(map, scalar)      { return mapMap(map, value => Rnl.add(value, scalar)) },
+      subtract(map, scalar) { return mapMap(map, value => Rnl.subtract(value, scalar)) },
+      multiply(map, scalar) { return mapMap(map, value => Rnl.multiply(value, scalar)) },
+      divide(map, scalar)   { return mapMap(map, value => Rnl.divide(value, scalar)) },
+      power(map, scalar)    { return mapMap(map, value => Rnl.power(value, scalar)) },
+      rem(map, scalar)      { return mapMap(map, value => Rnl.rem(value, scalar)) },
+      and(map, scalar)      { return mapMap(map, value => value && scalar) },
+      or(map, scalar)       { return mapMap(map, value => value || scalar) },
+      xor(map, scalar)      { return mapMap(map, value => value !== scalar) }
     },
     vector: {
       add(map, array) {
@@ -8916,8 +8951,8 @@ const binary$1 = {
       power(map, array) {
         return mapMap(map, value => array.map(e => Rnl.power(value, e)))
       },
-      modulo(map, array) {
-        return mapMap(map, value => array.map(e => Rnl.modulo(value, e)))
+      rem(map, array) {
+        return mapMap(map, value => array.map(e => Rnl.rem(value, e)))
       },
       and(map, array) {
         return mapMap(map, value => array.map(e => value && e))
@@ -8953,8 +8988,8 @@ const binary$1 = {
       power(map, scalar) {
         return mapMap(map, array => array.map(e => Rnl.power(e, scalar)))
       },
-      modulo(map, scalar) {
-        return mapMap(map, array => array.map(e => Rnl.modulo(e, scalar)))
+      rem(map, scalar) {
+        return mapMap(map, array => array.map(e => Rnl.rem(e, scalar)))
       },
       and(map, scalar) {
         return mapMap(map, array => array.map(e => e && scalar))
@@ -9319,15 +9354,6 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
         unit: attrs.unit[attrs.value.units[i]],
         dtype
       };
-      if (attrs.value.units[i]) {
-        result.value = { plain: result.value };
-        const unit = attrs.unit[attrs.value.units[i]];
-        result.value.inBaseUnits = isSingleRow
-          ? Rnl.multiply(Rnl.add(result.value.plain, unit.gauge), unit.factor)
-          : result.value.plain.map(e => Rnl.multiply(Rnl.add(e, unit.gauge), unit.factor));
-        result.expos = unit.expos;
-        result.resultdisplay += " " + unitTeXFromString(result.unit.name);
-      }
       if ((dtype & dt.RATIONAL) && isSingleRow) {
         result.resultdisplay = parse(format(value));
       } else if (dtype & dt.RATIONAL) {
@@ -9335,6 +9361,15 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
             + parse(`'${attrs.value.units[i]}'`);
       } else {
         result.resultdisplay = parse(value);
+      }
+      if (attrs.value.units[i]) {
+        result.value = { plain: result.value };
+        const unit = attrs.unit[attrs.value.units[i]];
+        result.value.inBaseUnits = isSingleRow
+          ? Rnl.multiply(Rnl.add(result.value.plain, unit.gauge), unit.factor)
+          : result.value.plain.map(e => Rnl.multiply(Rnl.add(e, unit.gauge), unit.factor));
+        result.expos = unit.expos;
+        result.resultdisplay += "\\;" + unitTeXFromString(result.unit.name);
       }
 
       hurmetVars[attrs.name[i]] = result;
@@ -9371,48 +9406,46 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
  * ## Extensions
  *
  * 1. Hurmet inline calculation is delimited ¢`…`.
- *    Hurmet display calculation is delimited ¢¢ … ¢¢.
- * 2. LaTeX inline math is delimited $…$. $ and \\ are escaped \$ & \\\\.
+ *    Hurmet display calculation is delimited ¢¢…¢¢.
+ * 2. LaTeX inline math is delimited $…$.
+ *    No space allowed after 1st $ or before 2nd $. No digit after 2nd $.
  *    LaTeX display math is delimited  $$ … $$.
- * 3. ~~strikethrough~~
- * 4. © comment (A paragraph in a speech bubble)
- * 5. Pipe tables as per Github Flavored Markdown (GFM).
- * 6. Grid tables as per Pandoc/reStructuredText
- * 7. Implicit reference links [title][<ref>] & implicit reference images ![alt|caption][<ref>]
- *    ⋮
- *    [alt]: path
- *    Reference images can have captions and directives. Format is:
- *    ![alt text][<ref>]   or \n![caption][]\n
- *      ⋮
- *    [def]: target
- *    {.class #id width=number}
- * 8. Table directives. They are placed on the line after the table. The format is:
- *    {.class #id width="num1 num2 …" caption}
- * 9. Lists that allow the user to pick list ordering.
- *       1. →  1. 2. 3.  etc.
- *       A. →  A. B. C.  etc. (future)
- *       a) →  (a) (b) (c)  etc. (future)
- * 10. Table of Contents
+ * 3. ~subscript~
+ * 4. ~~strikethrough~~
+ * 5. Comment (A paragraph in a speech bubble)
+ *    Its Markdown is a paragraph preceded by `{comment}\n`
+ * 6. Pipe tables as per Github Flavored Markdown (GFM).
+ * 7. Grid tables as per Pandoc and reStructuredText
+ * 8. Attributes for reference link definitions
+ *      [id]: target
+ *      {.class #id width=number}
+ * 9. Figure/Caption for images. Format is a paragraph that consists entirely of:
+ *    !![caption][id]
+ * 10. Table directives. They are placed on the line after the table. The format is:
+ *     {.class #id width="num1 num2 …" caption}
+ * 11. Lists that allow the user to pick list ordering.
+ *        1. →  1. 2. 3.  etc.
+ *        A. →  A. B. C.  etc. (future)
+ *        a) →  (a) (b) (c)  etc. (future)
+ * 12. Table of Contents
  *     {.toc start=N end=N}
- * 11. Definition lists, per Pandoc.  (future)
- * 12. Blurbs set an attribute on a block element, as in Markua.
- *     Blurbs are denoted by a symbol in the left margin.
- *     Subsequent indented text blocks are children of the blurb.
- *     Blurb symbols:
- *       i> indented block
- *       C> Centered block
- *       H> print header element, <header>
- *       I> Information admonition (future)
- *       W> Warning admonition (future)
- *       T> Tip admonition (future)
- *       c> Comment admonition (future)
- * 13. [^1] is a reference to a footnote. (future)
- *     [^1]: The body of the footnote is deferred, similar to reference links.
- * 14. [#1] is a reference to a citation. (future)
- *     [#1]: The body of the citation is deferred, similar to reference links.
- * 15. Line blocks begin with "| ", as per Pandoc. (future)
+ * 13. Definition lists, per Pandoc.  (future)
+ * 14. Attributes that define a div.
+ *     The format is:
+ *     {attribute}
+ *     >  Block element
  *
- * hurmetMark.js copyright (c) 2021, 2022 Ron Kok
+ *        Block element
+ *
+ *     Current attributes are (indented|centered|header)
+ *     Future attributes include admonitions for info, warning, etc.
+ * 15. [^1] is a reference to a footnote. (future)
+ *     [^1]: The body of the footnote is deferred, similar to reference links.
+ * 16. [#1] is a reference to a citation. (future)
+ *     [#1]: The body of the citation is deferred, similar to reference links.
+ * 17. Line blocks begin with "| ", as per Pandoc. (future)
+ *
+ * hurmetMark.js copyright (c) 2021 - 2023 Ron Kok
  *
  * This file has been adapted (and heavily modified) from Simple-Markdown.
  * Simple-Markdown copyright (c) 2014-2019 Khan Academy & Aria Buckles.
@@ -9755,9 +9788,9 @@ const TABLES = (function() {
 
           if (colWidths) {
             // Set an attribute used by ProseMirror.
-            let cellWidth = 0;
+            const cellWidth = cell.colspan === 0 ? null : [];
             for (let k = 0; k < cell.colspan; k++) {
-              cellWidth += Number(colWidths[j + k]);
+              cellWidth.push(Number(colWidths[j + k]));
             }
             cell.width = cellWidth;
           }
@@ -9787,7 +9820,7 @@ const TABLES = (function() {
             "attrs": {
               "colspan": cell.colspan,
               "rowspan": cell.rowspan,
-              "colwidth": (colWidths) ? [cell.width] : null,
+              "colwidth": (colWidths) ? cell.width : null,
               "background": null
             },
             content: content
@@ -9857,7 +9890,6 @@ const parseTextMark = (capture, state, mark) => {
 };
 
 const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<\/?(?:body|details|(div|input|label)(?: [^>]+)?|!DOCTYPE[a-z ]*|html[a-z ="]*|br|dl(?: class="[a-z-]+")?|li|main[a-z\- ="]*|nav|ol|ul(?: [^>]+)?)\/?>[^\n]*?(?:\n|$))/;
-const divType = { "C>": "centered_div", "H>": "header", "i>": "indented_div" };
 
 // Rules must be applied in a specific order, so use a Map instead of an object.
 const rules = new Map();
@@ -9972,20 +10004,17 @@ rules.set("dd", {  // description details
 });
 rules.set("special_div", {
   isLeaf: false,
-  match: blockRegex(/^(i>|C>|H>)( +)[\s\S]+?(?:\n{2,}(?! {2,2}\2)\n*|\s*$)/),
+  match: blockRegex(/^(?:{(centered|header|indented)} *\n)(> {2}[\s\S]+?(?:\n{2,}(?![> ] {2})\n*|\s*$))/),
   // indented or centered div, or <header>
   parse: function(capture, state) {
-    const type = divType[capture[1]];
-    let div = "  " + capture[0].slice(2);
-    const indent = 2 + capture[2].length;
-    const spaceRegex = new RegExp("^ {" + indent + "," + indent + "}", "gm");
-    div = div.replace(spaceRegex, ""); // remove indents on trailing lines:
-    return { type, content: parse$1(div, state) };
+    let div = " " + capture[2].slice(1);
+    div = div.replace(/^ {3}/gm, ""); // remove indents on trailing lines:
+    return { type: capture[1], content: parse$1(div, state) };
   }
 });
 rules.set("figure", {
   isLeaf: true,
-  match: blockRegex(/^!\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]\s*(?:\n+|$)/),
+  match: blockRegex(/^!!\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\] *(?:\n *)+\n/),
   parse: function(capture, state) {
     return parseRef(capture, state, {
       type: "figure",
@@ -9995,7 +10024,7 @@ rules.set("figure", {
 });
 rules.set("def", {
   isLeaf: true,
-  match: blockRegex(/^\[((?:\\[\s\S]|[^\\])+?)\]: *<?([^\n>]*)>? *\n(?:\{([^\n}]*)\}\n)?/),
+  match: blockRegex(/^\[([^\]\n]+)\]: *<?([^\n>]*)>? *\n(?:\{([^\n}]*)\}\n)?/),
   // Link reference definitions were handled in md2ast().
   parse: function(capture, state) { return { type: "null" } }
 });
@@ -10016,23 +10045,25 @@ rules.set("gridTable", {
   match: blockRegex(TABLES.GRID_TABLE_REGEX),
   parse: TABLES.parseGridTable
 });
+rules.set("displayTeX", {
+  isLeaf: true,
+  match: blockRegex(/^\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$ *\n/),
+  parse: function(capture, state) {
+    const tex = capture[1].trim();
+    return { type: "tex", content: "", attrs: { tex, displayMode: true } }
+  }
+});
 rules.set("newline", {
   isLeaf: true,
   match: blockRegex(/^(?:\n *)*\n/),
   parse: function() { return { type: "null" } }
 });
-rules.set("comment", {
-  isLeaf: false,
-  match: blockRegex(/^© +((?:[^\n]|\n(?! *\n))+)(?:\n *)+\n/),
-  parse: function(capture, state) {
-    return { type: "comment", content: parseInline(capture[1].trim(), state) }
-  }
-});
 rules.set("paragraph", {
   isLeaf: false,
-  match: blockRegex(/^((?:[^\n]|\n(?! *\n))+)(?:\n *)+\n/),
+  match: blockRegex(/^({comment}\n)?((?:[^\n]|\n(?! *\n))+)(?:\n *)+\n/),
   parse: function(capture, state) {
-    return { content: parseInline(capture[1], state) }
+    const type = capture[1] ? "comment" : "paragraph";
+    return { type, content: parseInline(capture[2], state) }
   }
 });
 rules.set("escape", {
@@ -10057,35 +10088,6 @@ rules.set("tableSeparator", {
   },
   parse: function() {
     return { type: "tableSeparator" };
-  }
-});
-rules.set("calculation", {
-  isLeaf: true,
-  match: anyScopeRegex(/^(?:¢(`+)([\s\S]*?[^`])\1(?!`)|¢¢\n?((?:\\[\s\S]|[^\\])+?)\n?¢¢)/),
-  parse: function(capture, state) {
-    if (capture[2]) {
-      let entry = capture[2].trim();
-      if (!/^(?:function|draw\()/.test(entry) && entry.indexOf("``") === -1) {
-        entry = entry.replace(/\n/g, " ");
-      }
-      return { content: "", attrs: { entry } }
-    } else {
-      const entry = capture[3].trim();
-      return { content: "", attrs: { entry, displayMode: true } }
-    }
-  }
-});
-rules.set("tex", {
-  isLeaf: true,
-  match: anyScopeRegex(/^(?:\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$|\$((?:\\[\s\S]|[^\\])+?)\$)/),
-  parse: function(capture, state) {
-    if (capture[2]) {
-      const tex = capture[2].trim().replace(/\n/g, " ");
-      return { content: "", attrs: { tex } }
-    } else {
-      const tex = capture[1].trim();
-      return { content: "", attrs: { tex, displayMode: true } }
-    }
   }
 });
 rules.set("link", {
@@ -10113,13 +10115,10 @@ rules.set("reflink", {
   isLeaf: true,
   match: inlineRegex(/^\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]/),
   parse: function(capture, state) {
+    const defIndex = capture[2] ? capture[2] : capture[1];
     const textNode = parseTextMark(capture[1], state, "link" )[0];
     const i = linkIndex(textNode.marks);
-    textNode.marks[i].attrs = { href: null };
-    if (capture[2]) {
-      textNode.marks[i].attrs.title = capture[2];
-    }
-    parseRef(capture, state, textNode.marks[i]);
+    textNode.marks[i].attrs = { href: state._defs[defIndex].target };
     return textNode
   }
 });
@@ -10149,6 +10148,30 @@ rules.set("code", {
   parse: function(capture, state) {
     const text = capture[2].trim();
     return [{ type: "text", text, marks: [{ type: "code" }] }]
+  }
+});
+rules.set("tex", {
+  isLeaf: true,
+  match: inlineRegex(/^\$((?:[^\s][\S\s]*?)?(?:[^\s\\]))\$(?![0-9])/),
+  parse: function(capture, state) {
+    const tex = capture[1].trim();
+    return { type: "tex", content: "", attrs: { tex, displayMode: false } }
+  }
+});
+rules.set("calculation", {
+  isLeaf: true,
+  match: anyScopeRegex(/^(?:¢(`+)([\s\S]*?[^`])\1(?!`)|¢¢\n?((?:\\[\s\S]|[^\\])+?)\n?¢¢)/),
+  parse: function(capture, state) {
+    if (capture[2]) {
+      let entry = capture[2].trim();
+      if (!/^(?:function|draw\()/.test(entry) && entry.indexOf("``") === -1) {
+        entry = entry.replace(/\n/g, " ");
+      }
+      return { content: "", attrs: { entry } }
+    } else {
+      const entry = capture[3].trim();
+      return { content: "", attrs: { entry, displayMode: true } }
+    }
   }
 });
 rules.set("em", {
@@ -10193,7 +10216,13 @@ rules.set("subscript", {
     return parseTextMark(capture[1], state, "subscript" )
   }
 });
-rules.set("underline", {
+rules.set("tilde", {
+  isLeaf: true,
+  match: inlineRegex(/^~((?:\\[\s\S]|[^\\])+?)~/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "subscript" )
+  }
+});rules.set("underline", {
   isLeaf: true,
   match: inlineRegex(/^<u>([\s\S]*?)<\/u>/),
   parse: function(capture, state) {
@@ -10238,28 +10267,8 @@ rules.set("text", {
   }
 });
 
-const doNotEscape = ["calculation", "code", "tex"];
-const textModeRegEx = /\\(ce|text|hbox|raisebox|fbox)\{/;
-
-const identifyTeX = (source) => {
-  // In TeX, a pair of $…$ delimiters can be nested inside \text{…}.
-  // Parse the string and do not end on a $ inside a {} group.
-  let prevChar = "$";
-  let groupLevel = 0;
-  for (let i = 1; i < source.length; i++) {
-    const ch = source.charAt(i);
-    if (ch === "{" && prevChar !== "\\") { groupLevel += 1; }
-    if (ch === "}" && prevChar !== "\\") { groupLevel -= 1; }
-    if (ch === "$" && prevChar !== "\\" && groupLevel === 0) {
-      return [source.slice(0, i + 1), null, source.slice(1, i)]
-    }
-    prevChar = ch;
-  }
-  return [source, null, source.slice(1, -1)]
-};
-
 const lists = ["bullet_list", "ordered_list"];
-const LIST_LOOKBEHIND_R = /(?:^|\n)( *)$/;
+const LIST_LOOKBEHIND_R = /(?:\n)( *)$/;
 
 const parse$1 = (source, state) => {
   if (!state.inline) { source += "\n\n"; }
@@ -10271,27 +10280,30 @@ const parse$1 = (source, state) => {
     let ruleName = null;
     let rule = null;
     for (const [currRuleName, currRule] of rules) {
-      if (state.inCode && doNotEscape.includes(currRuleName)) { continue }
       capture = currRule.match(source, state);
       if (capture) {
         rule = currRule;
         ruleName = currRuleName;
-        const isList = lists.includes(ruleName);
-        if (!isList || LIST_LOOKBEHIND_R.test(state.prevCapture)) {
-          if (isList && state.inline) {
-            // We matched a list that does not have a preceding blank line.
-            // Finish the current block element before beginning the list.
-            state.remainder = capture[0]; // to be prepended to source.
-            return result
-          } else {
-            break
+
+        if (lists.includes(ruleName)) {
+          // Lists are complicated because we do not require a blank line before a list.
+          const prevCaptureStr = state.prevCapture == null ? "" : state.prevCapture;
+          const isStartOfLineCapture = LIST_LOOKBEHIND_R.test(prevCaptureStr);
+          if (isStartOfLineCapture) {
+            if (state.inline) {
+              // We matched a list that does not have a preceding blank line.
+              // Finish the current block element before beginning the list.
+              state.remainder = capture[0];
+              return result
+            } else {
+              break
+            }
           }
+        } else {
+          break
         }
+
       }
-    }
-    if (ruleName === "tex" && capture[2] && textModeRegEx.test(capture[2])) {
-      // Check a TeX string for nested $. The capture may need to be extended.
-      capture = identifyTeX(source);
     }
     const parsed = rule.parse(capture, state);
     if (Array.isArray(parsed)) {
@@ -10418,6 +10430,8 @@ const parseMetadata = str => {
   return metadata
 };
 
+const dateMessageRegEx = /^date:([^\n]+)\nmessage:([^\n]+)\n/;
+
 const md2ast = (md, inHtml = false) => {
   // First, check for a metadata preamble
   let metadata = false;
@@ -10429,7 +10443,7 @@ const md2ast = (md, inHtml = false) => {
 
   // Second, get all the link reference definitions
   const state = { inline: false, _defs: {}, prevCapture: "", remainder: "", inHtml };
-  const defRegEx = /^\[((?:\\[\s\S]|[^\\])+?)\]: *<?([^\n>]*)>? *\n(?:\{([^\n}]*)\}\n)?/gm;
+  const defRegEx = /\n *\[([^\]\n]+)\]: *<?([^\n>]*)>? *(?:\n\{([^\n}]*)\})?(?=\n)/gm;
   const captures = [...md.matchAll(defRegEx)];
   for (const capture of captures) {
     const def = capture[1].replace(/\s+/g, " ");
@@ -10448,6 +10462,17 @@ const md2ast = (md, inHtml = false) => {
     state._defs[def] = { target, attrs };
   }
 
+  // Find out if there are any snapshots.
+  let snapshotStrings = [];
+  let gotSnapshot = false;
+  if (metadata) {
+    snapshotStrings = md.split("<!--SNAPSHOT-->\n");
+    if (snapshotStrings.length > 1) {
+      gotSnapshot = true;
+      md = snapshotStrings.shift();
+    }
+  }
+
   // Proceed to parse the document.
   const ast = parse$1(md, state);
   if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") {
@@ -10456,6 +10481,18 @@ const md2ast = (md, inHtml = false) => {
   consolidate(ast);
   populateTOC(ast);
   if (metadata) {
+    if (gotSnapshot) {
+      const snapshots = [];
+      for (const str of snapshotStrings) {
+        const capture = dateMessageRegEx.exec(str);
+        snapshots.push({
+          date: capture[1] ? Date.parse(capture[1].trim()) : undefined,
+          message: capture[2] ? capture[2].trim() : undefined,
+          content: capture ? str.slice(capture[0].length) : str
+        });
+      }
+      metadata.snapshots = snapshots;
+    }
     return { type: "doc", attrs: metadata, content: ast }
   } else {
     return ast
@@ -11187,7 +11224,7 @@ const draw = Object.freeze({
 
 // Some helper functions
 
-const setComparisons = ["∈", "∉", "∋", "∌", "⊆", "⊈", "⊇", "⊉"];
+const setComparisons = ["in", "!in", "∈", "∉", "∋", "∌", "⊆", "⊈", "⊇", "⊉"];
 
 const needsMap = (...args) => {
   for (let i = 0; i < args.length; i++) {
@@ -11201,14 +11238,13 @@ const shapeOf = oprnd => {
     ? "complex"
     : oprnd.dtype < 128
     ? "scalar"
-    : Matrix.isVector(oprnd)
+    : isVector(oprnd)
     ? "vector"
     : (oprnd.dtype & dt.MATRIX)
     ? "matrix"
     : oprnd.dtype === dt.DATAFRAME
     ? "dataFrame"
-    : ((oprnd.dtype & dt.MAP) &&
-       ((oprnd.dtype & dt.ROWVECTOR) || (oprnd.dtype & dt.COLUMNVECTOR)))
+    : ((oprnd.dtype & dt.MAP) && isVector(oprnd))
     ? "mapWithVectorValues"
     : (oprnd.dtype & dt.MAP)
     ? "map"
@@ -11233,13 +11269,16 @@ const binaryShapesOf = (o1, o2) => {
   return [shape1, shape2, needsMultBreakdown]
 };
 
+const matrixMults = { "×": "cross", "·": "dot", "∘": "circ", ".*": "circ",
+  "*": "multiply", "⌧": "multiply" };
+
 const nextToken = (tokens, i) => {
   if (tokens.length < i + 2) { return undefined }
   return tokens[i + 1]
 };
 
 // array of function names that return a real number from a complex argument.
-const arfn = ["abs", "argument", "Im", "Re", "Γ"];
+const arfn = ["abs", "angle", "imag", "real", "Γ", "gamma"];
 
 const stringFromOperand = (oprnd, decimalFormat) => {
   return oprnd.dtype === dt.STRING
@@ -11297,11 +11336,9 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         oprnd.unit = null;
         oprnd.dtype = 0;
       } else if (varName === "T" && nextToken(tokens, i) === "^" &&
-        stack.length > 0 && isMatrix(stack[stack.length - 1])) {
-        // Transpose a matrix.
-        oprnd.value = "T";
-        oprnd.unit = null;
-        oprnd.dtype = dt.RATIONAL;
+            stack.length > 0 && isMatrix(stack[stack.length - 1])) {
+        i += 1;
+        oprnd = Matrix.transpose(stack.pop());
       } else {
         const cellAttrs = vars[varName];
         if (!cellAttrs) { return errorOprnd("V_NAME", varName) }
@@ -11337,6 +11374,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
+        case "pi":
         case "π": {
           const pi = Object.create(null);
           pi.value = Rnl.pi;
@@ -11357,8 +11395,8 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
-        case "j": {
-          // j = √(-1)
+        case "im": {
+          // im = √(-1)
           const j = Object.create(null);
           j.value = [Rnl.zero, Rnl.one];
           j.unit = Object.create(null);
@@ -11400,10 +11438,12 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         }
 
         case "+":
-        case "-": {
+        case ".+":
+        case "-":
+        case ".-": {
           const o2 = stack.pop();
           const o1 = stack.pop();
-          const op = tkn === "+" ? "add" : "subtract";
+          const op = tkn === "+" || tkn === ".+" ? "add" : "subtract";
           if (!(((o1.dtype & dt.RATIONAL) || (o1.dtype & dt.COMPLEX)) &&
                 ((o2.dtype & dt.RATIONAL) || (o2.dtype & dt.COMPLEX)))) {
             return errorOprnd("NAN_OP")
@@ -11442,10 +11482,17 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "×":
         case "·":
         case "*":
+        case "∘":
         case "⌧": {
           const oprnd2 = stack.pop();
           const o2 = oprnd2.dtype === dt.DATAFRAME ? clone(oprnd2) : oprnd2;
           const o1 = stack.pop();
+          if (tkn === "*" && o1.dtype === dt.STRING && o1.dtype === dt.STRING) {
+            // Julia's string concatenation operator
+            const str1 = stringFromOperand(o1, decimalFormat);
+            const str2 = stringFromOperand(o2, decimalFormat);
+            return { value: str1 + str2, unit: null, dtype: dt.STRING }
+          }
           if (!(((o1.dtype & dt.RATIONAL) || (o1.dtype & dt.COMPLEX)) &&
             ((o2.dtype & dt.RATIONAL) || (o2.dtype & dt.COMPLEX) ||
             o2.dtype === dt.DATAFRAME))) {
@@ -11466,11 +11513,9 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           product.unit = o2.dtype === dt.DATAFRAME ? clone(o2.unit) : Object.freeze(unit);
 
           const [shape1, shape2, needsMultBreakdown] = binaryShapesOf(o1, o2);
-          const op = needsMultBreakdown
-            ? { "×": "cross", "·": "dot", "*": "asterisk", "⌧": "multiply" }[tkn]
-            : "multiply";
+          const op = needsMultBreakdown ? matrixMults[tkn] : "multiply";
 
-          product.dtype = (tkn === "*" || shape1 === "scalar" || shape1 === "map" ||
+          product.dtype = (tkn === "∘" || shape1 === "scalar" || shape1 === "map" ||
             shape1 === "complex" || shape2 === "scalar" ||
             shape2 === "map" || shape2 === "complex")
               ? Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, op)
@@ -11490,8 +11535,8 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         }
 
         case "/":
+        case "./":
         case "//":
-        case "÷":
         case "///":
         case "\u2215": {
           const o2 = stack.pop();
@@ -11517,18 +11562,10 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
-        case "^": {
+        case "^":
+        case ".^": {
           const o2 = stack.pop();
           const o1 = stack.pop();
-          if (Matrix.isVector(o1) && o2.value === "T") {
-            // Transpose a vector
-            const oprnd = clone(o1);
-            oprnd.dtype = o1.dtype + ((o1.dtype & dt.ROWVECTOR)
-              ? dt.COLUMNVECTOR - dt.ROWVECTOR
-              : dt.ROWVECTOR - dt.COLUMNVECTOR);
-            stack.push(Object.freeze(oprnd));
-            break
-          }
           if (!(((o1.dtype & dt.RATIONAL) || o1.dtype === dt.COMPLEX) &&
                 ((o2.dtype & dt.RATIONAL) || o2.dtype === dt.COMPLEX) ||
                 (isMatrix(o1) && o2.value === "T"))) {
@@ -11553,25 +11590,13 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
-        case "^*": {
-          // complex conjugate
-          const oprnd = stack.pop();
-          if (!(oprnd.dtype & dt.COMPLEX)) { return errorOprnd("NA_REAL"), "conjugate" }
-          const o2 = {
-            value: Cpx.conjugate(oprnd.value),
-            unit: oprnd.unit,
-            dtype: oprnd.dtype
-          };
-          stack.push(Object.freeze(o2));
-          break
-        }
-
         case "&":
-        case "&_": {
+        case "hcat":
+        case "vcat": {
           // Concatenation
           const o2 = stack.pop();
           const o1 = stack.pop();
-          const opName = tkn === "&" ? "concat" : "unshift";
+          const opName = tkn === "vcat" ? "unshift" : "concat";
           const [shape1, shape2, _] = binaryShapesOf(o1, o2);
           let o3 = Object.create(null);
           if (o1.dtype === dt.STRING && o1.dtype === dt.STRING) {
@@ -11580,7 +11605,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             o3.value = str1 + str2;
             o3.unit = null;
             o3.dtype = dt.STRING;
-          } else if ((o1.dtype & dt.DATAFRAME) && Matrix.isVector(o2) && tkn === "&") {
+          } else if ((o1.dtype & dt.DATAFRAME) && isVector(o2) && tkn !== "vcat") {
             o3 = DataFrame.append(o1, o2, vars, unitAware);
             if (o3.dtype === dt.ERROR) { return o3 }
           } else if ((o1.dtype & dt.MAP) || (o2.dtype & dt.MAP)) {
@@ -11706,7 +11731,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
-        case "..": {
+        case ":": {
           // range separator.
           const end = stack.pop();
           const o1 = stack.pop();
@@ -11725,16 +11750,6 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             ? [o1.value, step, end.value]
             : [o1.value[0], o1.value[2], end.value];
           stack.push((Object.freeze(range)));
-          break
-        }
-
-        case ":": {
-          const o2 = stack.pop();
-          const key = stack.pop();
-          if (key.dtype !== dt.STRING) { return errorOprnd("BAD_KEYSTR") }
-          stack.push(Object.freeze({
-            name: key.value, value: o2.value, unit: o2.unit, dtype: o2.dtype
-          }));
           break
         }
 
@@ -11806,7 +11821,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           i += 2;
 
           if (stack[stack.length - 1].dtype === dt.RANGE) {
-            // Input was [start:step:end]
+            // Input was [start:step:end...]
             stack.push(Matrix.operandFromRange(stack.pop().value));
           } else {
             stack.push(Matrix.operandFromTokenStack(stack, numRows, numCols));
@@ -11848,11 +11863,11 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "asech":
         case "acsch":
         case "acoth":
-        case "Gamma":
+        case "gamma":
         case "Γ":
-        case "logGamma":
-        case "logΓ":
-        case "logFactorial":
+        case "lgamma":
+        case "lfact":
+        case "factorial":
         case "cosd":
         case "sind":
         case "tand":
@@ -11865,10 +11880,13 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "asecd":
         case "acscd":
         case "acotd":
-        case "Re":
-        case "Im":
-        case "argument":
-        case "chr":
+        case "real":
+        case "imag":
+        case "angle":
+        case "conj":
+        case "ceil":
+        case "floor":
+        case "Char":
         case "round":
         case "sqrt":
         case "sign": {
@@ -11882,13 +11900,13 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const unit = Object.create(null);
           unit.expos = unitAware ? Functions.functionExpos(tkn, [arg]) : allZeros;
           if (unit.expos.dtype && unit.expos.dtype === dt.ERROR) { return unit.expos }
-          output.unit = Object.freeze(unit);
+          output.unit = tkn === "Char" ? null : Object.freeze(unit);
 
           const shape = (arg.dtype & dt.RATIONAL) ? "scalar" : "complex";
-          const value = ((arg.dtype & dt.MAP) && Matrix.isVector(arg))
+          const value = ((arg.dtype & dt.MAP) && isVector(arg))
             // eslint-disable-next-line max-len
             ? mapMap(arg.value, array => array.map(e => Functions.unary[shape][tkn](e)))
-            : Matrix.isVector(arg)
+            : isVector(arg)
             ? arg.value.map(e => Functions.unary[shape][tkn](e))
             : isMatrix(arg)
             ? arg.value.map(row => row.map(e => Functions.unary[shape][tkn](e)))
@@ -11898,7 +11916,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           if (value.dtype && value.dtype === dt.ERROR) { return value }
           output.value = Object.freeze(value);
 
-          output.dtype = tkn === "chr"
+          output.dtype = tkn === "Char"
             ? arg.dtype - dt.RATIONAL + dt.STRING
             : (arg.dtype & dt.COMPLEX) && arfn.includes(tkn)
             ? arg.dtype - dt.COMPLEX + dt.RATIONAL
@@ -11914,7 +11932,9 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "gcd":
         case "rms":
         case "binomial":
-        case "zeros": {
+        case "zeros":
+        case "mod":
+        case "rem": {
           // Functions with two real arguments.
           const args = [];
           args.push(stack.pop());
@@ -11954,9 +11974,9 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             output.dtype = num.dtype;
           }
           const n = Number(spec.value.slice(1));
-          const value = ((num.dtype & dt.MAP) && Matrix.isVector(num))
+          const value = ((num.dtype & dt.MAP) && isVector(num))
             ? mapMap(num.value, array => array.map(e => Functions.binary[funcName]([e, n])))
-            : Matrix.isVector(num)
+            : isVector(num)
             ? num.value.map(e => Functions.binary[funcName]([e, n]))
             : isMatrix(num)
             ? num.value.map(row => row.map(e => Functions.binary[funcName]([e, n])))
@@ -12014,18 +12034,33 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
-        case "random": {
-          // No arguments
-          const num = Object.create(null);
-          num.value = Rnl.fromNumber(Math.random());
-          num.unit = Object.create(null);
-          num.unit.expos = allZeros;
-          num.dtype = dt.RATIONAL;
-          stack.push(Object.freeze(num));
+        case "rand": {
+          const numArgs = Number(tokens[i + 1]);
+          i += 1;
+          if (numArgs === 0) {
+            const value = Rnl.fromNumber(Math.random());
+            stack.push({ value, unit: allZeros, dtype: dt.RATIONAL });
+          } else if (numArgs === 1) {
+            const n = Rnl.toNumber(stack.pop().value);
+            if (!Number.isInteger(n)) { return errorOprnd("INT_ARG", "rand") }
+            const value = new Array(n).fill(0)
+              .map(e => Rnl.fromNumber(Math.random()));
+            stack.push({ value, unit: allZeros, dtype: dt.RATIONAL + dt.COLUMNVECTOR });
+          } else if (numArgs === 2) {
+            const n = Rnl.toNumber(stack.pop().value);
+            if (!Number.isInteger(n)) { return errorOprnd("INT_ARG", "rand") }
+            const m = Rnl.toNumber(stack.pop().value);
+            if (!Number.isInteger(m)) { return errorOprnd("INT_ARG", "rand") }
+            let value = new Array(m).fill(new Array(n).fill(0));
+            value = value.map(row => row.map(e => Rnl.fromNumber(Math.random())));
+            stack.push({ value, unit: allZeros, dtype: dt.RATIONAL + dt.MATRIX });
+          } else {
+            return errorOprnd("BAD_ARGS", "rand")
+          }
           break
         }
 
-        case "isNaN": {
+        case "isnan": {
           const oprnd = stack.pop();
           const output = Object.create(null);
           output.value = !(oprnd.dtype & dt.RATIONAL);
@@ -12038,12 +12073,12 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "length": {
           const arg = stack.pop();
           const value = arg.value;
-          const length = Matrix.isVector(arg)
+          const length = isVector(arg)
             ? value.length
             : (arg.dtype & dt.MATRIX)
             ? value.length * value[0].length
             : (arg.dtype === dt.STRING)
-            ? value.length - arrayOfRegExMatches(/[\uD800-\uD8FF\uFE00\uFE01]/g, value).length
+            ? Array.from(value).length
             : (arg.dtype & dt.MAP)
             ? arg.keys().value.length
             : 0;
@@ -12140,7 +12175,6 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             const udf = lib[functionName];
             if (udf === undefined) { return errorOprnd("F_NAME", functionName) }
             if (udf.dtype === dt.ERROR) { return udf }
-            if (udf.isPrivate) { return errorOprnd("PRIVATE", functionName) }
             oprnd = evalCustomFunction(udf, args, decimalFormat, unitAware, lib);
             i += 1;
           } else if (lib && lib[functionName]) {
@@ -12171,7 +12205,9 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "≠":
         case "!=":
         case "∈":
+        case "in":
         case "∉":
+        case "!in":
         case "∋":
         case "∌":
         case "⊆":
@@ -12189,7 +12225,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           }
           const bool = Object.create(null);
           bool.unit = null;
-          const prevValue = (o1.dtype & dt.BOOLEANFROMCOMPARISON) ? oPrev.value : undefined;
+          const prevValue = (o1.dtype === dt.BOOLEANFROMCOMPARISON) ? oPrev.value : undefined;
 
           if (setComparisons.includes(tkn)) {
             bool.value = compare(tkn, o1.value, o2.value, prevValue);
@@ -12209,7 +12245,9 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         }
 
         case "and":
+        case "&&":
         case "or":
+        case "||":
         case "∧":
         case "∨":
         case "⊻": {
@@ -12218,7 +12256,8 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           if (!(o1.dtype & dt.BOOLEAN) || !(o2.dtype & dt.BOOLEAN)) {
             return errorOprnd("LOGIC", tokens[i])
           }
-          const op = { "and": "and", "or": "or", "∧": "and", "∨": "or", "⊻": "xor" }[tkn];
+          const op = { "and": "and", "&&": "and", "or": "or", "∧": "and",
+            "||": "or", "∨": "or", "⊻": "xor" }[tkn];
           const [shape1, shape2, _] = binaryShapesOf(o1, o2);
 
           const bool = Object.create(null);
@@ -12309,7 +12348,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
-        case "modulo": {
+        case "rem%": {
           const o2 = stack.pop();
           const o1 = stack.pop();
           if (!((o1.dtype & dt.RATIONAL) & (o2.dtype & dt.RATIONAL))) {
@@ -12319,7 +12358,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const mod = Object.create(null);
           mod.unit = Object.create(null);
           mod.unit.expos = allZeros;
-          mod.value = Operators.binary[shape1][shape2]["modulo"](o1.value, o2.value);
+          mod.value = Operators.binary[shape1][shape2]["rem"](o1.value, o2.value);
           if (mod.value.dtype && mod.value.dtype === dt.ERROR) { return mod.value }
           mod.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn);
           stack.push(Object.freeze(mod));
@@ -12368,7 +12407,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
-        case "raise":
+        case "throw":
           return { value: stack.pop().value, unit: null, dtype: dt.ERROR }
 
         case "\\blue":
@@ -12405,9 +12444,9 @@ const plot = (svg, decimalFormat, fun, numPoints, xMin, xMax) => {
   const max = (xMax == null) ? Rnl.fromNumber(attrs.xmax) : xMax.value;
   // Vectorize the evaluation. Start by finding a vector of the input.
   const step = Rnl.divide(Rnl.subtract(max, min), numPoints);
-  const rowVector = Matrix.operandFromRange([min, step, max]);
+  const vector = Matrix.operandFromRange([min, step, max]);
   // Transpose the row vector into a column vector.
-  const arg = { value: rowVector.value, unit: null, dtype: dt.COLUMNVECTOR + dt.RATIONAL };
+  const arg = { value: vector.value, unit: null, dtype: dt.COLUMNVECTOR + dt.RATIONAL };
   // Run the function on the vector.
   let funResult;
   let pathValue;
@@ -12470,11 +12509,11 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
   if (args.length > udf.parameters.length) { return errorOprnd("NUMARGS", udf.name) }
   const vars = Object.create(null);
   for (let i = 0; i < args.length; i++) {
-    vars[udf.parameters[i]] = args[i];
+    vars[udf.parameters[i].name] = args[i];
   }
   if (udf.parameters.length > args.length) {
     for (let i = args.length; i < udf.parameters.length; i++) {
-      vars[udf.parameters[i]] = { value: undefined, unit: null, dtype: 0 };
+      vars[udf.parameters[i].name] = udf.parameters[i].default;
     }
   }
   if (udf.dtype === dt.DRAWING) {
@@ -12494,7 +12533,11 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
       case "statement": {
         if (control[level].condition) {
           const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib);
-          if (result.dtype === dt.ERROR) { return result }
+          if (result.dtype === dt.ERROR) {
+            // eslint-disable-next-line no-console
+            console.log(statement.rpn);
+            return result
+          }
           if (statement.name) {
             statement.resultdisplay = isUnitAware ? "!!" : "!";
             const [stmt, _] = conditionResult(statement, result, isUnitAware);
@@ -12521,7 +12564,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
         break
       }
 
-      case "else if": {
+      case "elseif": {
         if (control[level].type === "if" && control[level].condition) {
           i = control[level].endOfBlock;
           control.pop();
@@ -12574,7 +12617,6 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
           endOfBlock: statement.endOfBlock
         };
         const tokens = statement.rpn.split("\u00A0");
-        tokens.pop(); // Discard the "for"
         ctrl.dummyVariable = tokens.shift().slice(1);
         const iterable = evalRpn(tokens.join("\u00A0"), vars, decimalFormat, isUnitAware, lib);
         ctrl.index = (iterable.dtype & dt.RANGE) ? iterable.value[0] : Rnl.fromNumber(0);
@@ -12657,7 +12699,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
         }
         break
 
-      case "echo":
+      case "print":
         if (control[level].condition) {
           if (statement.rpn) {
             const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib);
@@ -12677,7 +12719,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
         }
         break
 
-      case "raise":
+      case "throw":
         if (control[level].condition) {
           if (statement.rpn) {
             const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib);
@@ -12716,7 +12758,7 @@ const conditionResult = (stmt, oprnd, unitAware) => {
   result.unit = clone(oprnd.unit);
   result.dtype = oprnd.dtype;
 
-  if (result.dtype === dt.COMPLEX && Rnl.isZero(Cpx.im(result.value))) {
+  if (result.dtype === dt.COMPLEX && Rnl.isZero(Cpx.imag(result.value))) {
     result.value = Cpx.re(result.value);
     result.dtype = 1;
   }
@@ -12861,13 +12903,13 @@ const unitRegEx$1 = /('[^']+'|[°ΩÅK])$/;
 
 const numStr = "(-?(?:0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?)))";
 const nonNegNumStr = "(0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?))";
-const complexRegEx = new RegExp("^" + numStr + "(?: *([+-]) *j +" + nonNegNumStr + "|∠" + numStr + "(°)?)");
-// const complexRegEx = /^(number)(?: *([+-]) *j +(non-negative number)|∠(number)(°)?)/
+const complexRegEx = new RegExp("^" + numStr + "(?: *([+-]) *(" + nonNegNumStr + ") *im|∠" + numStr + "(°)?)");
+// const complexRegEx = /^(number)(?: *([+-]) *(non-negative number) *im|∠(number)(°)?)/
 /* eslint-enable max-len */
 // Capturing groups:
-//    [1] First number, either a in a + j b, or r in r∠θ
-//    [2] + or -. Gives the sign of the imaginary part in an a + j b.
-//    [3] b, the imaginary part in an a + j b expression
+//    [1] First number, either a in a ± b im, or r in r∠θ
+//    [2] + or -. Gives the sign of the imaginary part in an a ± b im.
+//    [3] b, the imaginary part in an a ± b im expression
 //    [4] theta, the argument (phase angle ) of an r∠θ expression
 //    [5] °, optional trailing degree sign in an r∠θ expression
 
@@ -12938,22 +12980,22 @@ const valueFromLiteral = (str, name, decimalFormat) => {
     // str is a complex number.
     const resultDisplay = parse(str, decimalFormat);
     const parts = str.match(complexRegEx);
-    let real;
-    let im;
+    let realPart;
+    let imPart;
     if (parts[3]) {
-      // a + j b expression
-      real = Rnl.fromString(parts[1]);
-      im = Rnl.fromString(parts[3]);
-      if (parts[2] === "-") { im = Rnl.negate(im); }
+      // a + b im expression
+      realPart = Rnl.fromString(parts[1]);
+      imPart = Rnl.fromString(parts[3]);
+      if (parts[2] === "-") { imPart = Rnl.negate(imPart); }
     } else {
       // r∠θ expression
       const r = Rnl.fromString(parts[1]);
       let theta = Rnl.fromString(parts[4]);
       if (parts[5]) { theta = Rnl.divide(Rnl.multiply(theta, Rnl.pi), Rnl.fromNumber(180)); }
-      real = Rnl.multiply(r, Rnl.fromNumber(Math.cos(Rnl.toNumber(theta))));
-      im = Rnl.multiply(r, Rnl.fromNumber(Math.sin(Rnl.toNumber(theta))));
+      realPart = Rnl.multiply(r, Rnl.fromNumber(Math.cos(Rnl.toNumber(theta))));
+      imPart = Rnl.multiply(r, Rnl.fromNumber(Math.sin(Rnl.toNumber(theta))));
     }
-    return [[real, im], allZeros, dt.COMPLEX, resultDisplay]
+    return [[realPart, imPart], allZeros, dt.COMPLEX, resultDisplay]
 
   } else if (str.match(numberRegEx$3)) {
     // str is a number.
@@ -12962,7 +13004,7 @@ const valueFromLiteral = (str, name, decimalFormat) => {
       return [Rnl.fromString(str), unitName, dt.RATIONAL + dt.QUANTITY,
         resultDisplay + "\\;" + unitDisplay]
     } else {
-      return [Rnl.fromString(str), allZeros, dt.RATIONAL, resultDisplay]
+      return [Rnl.fromString(str), { expos: allZeros }, dt.RATIONAL, resultDisplay]
     }
 
   } else {
@@ -13032,13 +13074,13 @@ const improveQuantities = (attrs, vars) => {
 };
 
 const isValidIdentifier$1 = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/;
-const keywordRegEx = /^(if|else if|else|return|raise|while|for|break|echo|end)\b/;
+const keywordRegEx = /^(if|elseif|else|return|throw|while|for|break|print|end)\b/;
 const drawCommandRegEx = /^(title|frame|view|axes|grid|stroke|strokewidth|strokedasharray|fill|fontsize|fontweight|fontstyle|fontfamily|marker|line|path|plot|curve|rect|circle|ellipse|arc|text|dot|leader|dimension)\b/;
 const leadingSpaceRegEx$2 = /^[\t ]+/;
 
 // If you change functionRegEx, then also change it in mathprompt.js.
 // It isn't called from there in order to avoid duplicating Hurmet code inside ProseMirror.js.
-const functionRegEx = /^(?:private +)?function (?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*\(/;
+const functionRegEx = /^function (?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*\(/;
 const drawRegEx = /^draw\(/;
 const startSvgRegEx = /^startSvg\(\)/;
 const lexRegEx = /"[^"]*"|``.*|`[^`]*`|'[^']*'|#|[^"`'#]+/g;
@@ -13119,13 +13161,24 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
     const posFn = line1.indexOf("function");
     functionName = line1.slice(posFn + 8, posParen).trim();
   }
-  const isPrivate = /^private /.test(line1);
-  const parameterList =  line1.slice(posParen + 1, -1).trim();
-  const parameters = parameterList.length === 0 ? [] : parameterList.split(/, */g);
+
+  const parameterString =  line1.slice(posParen + 1, -1).trim();
+  const parameterSplit = parameterString.length === 0 ? [] : parameterString.split(/ *[,;] */g);
+  const parameters = [];
+  for (const param of parameterSplit) {
+    const parts = param.split(/ *= */);
+    const name = parts[0];
+    let defaultVal = { name, value: null, dtype: null };
+    if (parts[1]) {
+      const [value, unit, dtype, resultDisplay] = valueFromLiteral(parts[1], "", decimalFormat);
+      defaultVal = { name, value, unit, dtype, resultDisplay };
+    }
+    parameters.push({ name, default: defaultVal });
+  }
+
   const funcObj = {
     name: functionName,
     dtype: isDraw ? dt.DRAWING : dt.MODULE,
-    isPrivate,
     parameters,
     statements: []
   };
@@ -13193,6 +13246,7 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
     let rpn = "";
     if (expression) {
       [, rpn] = parse(expression, decimalFormat, true);
+      if (name === "for") { rpn = rpn.replace(/\u00a0in\u00a0/, "\u00a0"); }
     }
     const stype = isStatement ? "statement" : name;
     if (isStatement && /[,;]/.test(name)) {
@@ -13201,7 +13255,6 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
     funcObj.statements.push({ name: name, rpn: rpn, stype: stype });
     if (stype === "if" || stype === "while" || stype === "for") {
       stackOfCtrls.push({ type: stype, statementNum: funcObj.statements.length - 1 });
-      if (stype === "for" && rpn.indexOf("j\u00a0") === 0) { return [errorOprnd("BAD_J")] }
     } else if (stype === "end") {
       if (stackOfCtrls.length === 0) {
         // Finished the current function.
@@ -13294,13 +13347,13 @@ const scanAssignment = (lines, decimalFormat, iStart) => {
  *    7. Return the result. Hurmet will attach it to ProseMirror "attrs" of that node.
  */
 
-const containsOperator = /[+\-×·*∘⌧/^%‰&√!¡|‖&=<>≟≠≤≥∈∉⋐∧∨⊻¬]|\xa0(function|modulo|\\atop|root|sum|abs|cos|sin|tan|acos|asin|atan|sec|csc|cot|asec|acsc|acot|exp|log|ln|log10|log2|cosh|sinh|tanh|sech|csch|coth|acosh|asinh|atanh|asech|acsch|acoth|Gamma|Γ|logGamma|logΓ|logFactorial|cosd|sind|tand|acosd|asind|atand|secd|cscd|cotd|asecd|acscd|acotd|Re|Im|argument|chr|round|sqrt|sign|\?{}|%|⎾⏋|⎿⏌|\[\]|\(\))\xa0/;
+const containsOperator = /[+\-×·*∘⌧/^%‰&√!¡|‖&=<>≟≠≤≥∈∉⋐∧∨⊻¬]|\xa0(function|mod|\\atop|root|sum|abs|cos|sin|tan|acos|asin|atan|sec|csc|cot|asec|acsc|acot|exp|log|ln|log10|log2|cosh|sinh|tanh|sech|csch|coth|acosh|asinh|atanh|asech|acsch|acoth|gamma|Γ|lgamma|logΓ|lfact|cosd|sind|tand|acosd|asind|atand|secd|cscd|cotd|asecd|acscd|acotd|real|imag|angle|Char|round|sqrt|sign|\?{}|%|⎾⏋|⎿⏌|\[\]|\(\))\xa0/;
 const mustDoCalculation = /^(``.+``|[$$£¥\u20A0-\u20CF]?(\?{1,2}|@{1,2}|%{1,2}|!{1,2})[^=!(?@%!{})]*)$/;
 const assignDataFrameRegEx = /^[^=]+=\s*``/;
 const currencyRegEx = /^[$£¥\u20A0-\u20CF]/;
 const isValidIdentifier$2 = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/;
 const matrixOfNames = /^[([](?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*[,;].+[)\]]$/;
-const isKeyWord = /^(π|true|false|root|if|else|and|or|otherwise|modulo|for|while|break|return|raise)$/;
+const isKeyWord = /^(π|true|false|root|if|else|elseif|and|or|otherwise|mod|for|while|break|return|throw)$/;
 
 const shortcut = (str, decimalFormat) => {
   // No calculation in str. Parse it just for presentation.
@@ -14158,6 +14211,7 @@ class Settings {
     this.displayMode = utils.deflt(options.displayMode, false);    // boolean
     this.annotate = utils.deflt(options.annotate, false);           // boolean
     this.leqno = utils.deflt(options.leqno, false);                // boolean
+    this.throwOnError = utils.deflt(options.throwOnError, false);  // boolean
     this.errorColor = utils.deflt(options.errorColor, "#b22222");  // string
     this.macros = options.macros || {};
     this.wrap = utils.deflt(options.wrap, "tex");                    // "tex" | "="
@@ -14835,6 +14889,9 @@ defineSymbol(math, rel, "\u225e", "\\measeq", true);
 defineSymbol(math, rel, "\u225f", "\\questeq", true);
 defineSymbol(math, rel, "\u2260", "\\ne", true);
 defineSymbol(math, rel, "\u2260", "\\neq");
+// unicodemath
+defineSymbol(math, rel, "\u2a75", "\\eqeq", true);
+defineSymbol(math, rel, "\u2a76", "\\eqeqeq", true);
 // mathtools.sty
 defineSymbol(math, rel, "\u2237", "\\dblcolon", true);
 defineSymbol(math, rel, "\u2254", "\\coloneqq", true);
@@ -16100,7 +16157,7 @@ function buildMathML(tree, texExpression, style, settings) {
     math.setAttribute("display", "block");
     math.style.display = math.children.length === 1 && math.children[0].type === "mtable"
       ? "inline"
-      : "inline-block";
+      : "block math";
   }
   return math;
 }
@@ -19971,7 +20028,9 @@ defineFunction({
     const arr = (body.body) ? body.body : [body];
     for (const arg of arr) {
       if (textAtomTypes.includes(arg.type)) {
-        if (arg.text) {
+        if (symbols[parser.mode][arg.text]) {
+          mord.text += symbols[parser.mode][arg.text].replace;
+        } else if (arg.text) {
           mord.text += arg.text;
         } else if (arg.body) {
           arg.body.map(e => { mord.text += e.text; });
@@ -25189,109 +25248,6 @@ class MacroExpander {
   }
 }
 
-/*
- * This file defines the Unicode scripts and script families that we
- * support. To add new scripts or families, just add a new entry to the
- * scriptData array below. Adding scripts to the scriptData array allows
- * characters from that script to appear in \text{} environments.
- */
-
-/**
- * Each script or script family has a name and an array of blocks.
- * Each block is an array of two numbers which specify the start and
- * end points (inclusive) of a block of Unicode codepoints.
-
-/**
- * Unicode block data for the families of scripts we support in \text{}.
- * Scripts only need to appear here if they do not have font metrics.
- */
-const scriptData = [
-  {
-    // Latin characters beyond the Latin-1 characters we have metrics for.
-    // Needed for Czech, Hungarian and Turkish text, for example.
-    name: "latin",
-    blocks: [
-      [0x0100, 0x024f], // Latin Extended-A and Latin Extended-B
-      [0x0300, 0x036f] // Combining Diacritical marks
-    ]
-  },
-  {
-    // The Cyrillic script used by Russian and related languages.
-    // A Cyrillic subset used to be supported as explicitly defined
-    // symbols in symbols.js
-    name: "cyrillic",
-    blocks: [[0x0400, 0x04ff]]
-  },
-  {
-    // Armenian
-    name: "armenian",
-    blocks: [[0x0530, 0x058f]]
-  },
-  {
-    // The Brahmic scripts of South and Southeast Asia
-    // Devanagari (0900–097F)
-    // Bengali (0980–09FF)
-    // Gurmukhi (0A00–0A7F)
-    // Gujarati (0A80–0AFF)
-    // Oriya (0B00–0B7F)
-    // Tamil (0B80–0BFF)
-    // Telugu (0C00–0C7F)
-    // Kannada (0C80–0CFF)
-    // Malayalam (0D00–0D7F)
-    // Sinhala (0D80–0DFF)
-    // Thai (0E00–0E7F)
-    // Lao (0E80–0EFF)
-    // Tibetan (0F00–0FFF)
-    // Myanmar (1000–109F)
-    name: "brahmic",
-    blocks: [[0x0900, 0x109f]]
-  },
-  {
-    name: "georgian",
-    blocks: [[0x10a0, 0x10ff]]
-  },
-  {
-    // Chinese and Japanese.
-    // The "k" in cjk is for Korean, but we've separated Korean out
-    name: "cjk",
-    blocks: [
-      [0x3000, 0x30ff], // CJK symbols and punctuation, Hiragana, Katakana
-      [0x4e00, 0x9faf], // CJK ideograms
-      [0xff00, 0xff60] // Fullwidth punctuation
-      // TODO: add halfwidth Katakana and Romanji glyphs
-    ]
-  },
-  {
-    // Korean
-    name: "hangul",
-    blocks: [[0xac00, 0xd7af]]
-  }
-];
-
-/**
- * A flattened version of all the supported blocks in a single array.
- * This is an optimization to make supportedCodepoint() fast.
- */
-const allBlocks = [];
-scriptData.forEach((s) => s.blocks.forEach((b) => allBlocks.push(...b)));
-
-/**
- * Given a codepoint, return true if it falls within one of the
- * scripts or script families defined above and false otherwise.
- *
- * Micro benchmarks shows that this is faster than
- * /[\u3000-\u30FF\u4E00-\u9FAF\uFF00-\uFF60\uAC00-\uD7AF\u0900-\u109F]/.test()
- * in Firefox, Chrome and Node.
- */
-function supportedCodepoint(codepoint) {
-  for (let i = 0; i < allBlocks.length; i += 2) {
-    if (codepoint >= allBlocks[i] && codepoint <= allBlocks[i + 1]) {
-      return true;
-    }
-  }
-  return false;
-}
-
 // Helpers for Parser.js handling of Unicode (sub|super)script characters.
 
 const unicodeSubRegEx = /^[₊₋₌₍₎₀₁₂₃₄₅₆₇₈₉ₐₑₕᵢⱼₖₗₘₙₒₚᵣₛₜᵤᵥₓᵦᵧᵨᵩᵪ]/;
@@ -26694,13 +26650,8 @@ class Parser {
       symbol = s;
     } else if (text.charCodeAt(0) >= 0x80) {
       // no symbol for e.g. ^
-      if (this.settings.strict) {
-        if (!supportedCodepoint(text.charCodeAt(0))) {
-          throw new ParseError(`Unrecognized Unicode character "${text[0]}"` +
-          ` (${text.charCodeAt(0)})`, nucleus);
-        } else if (this.mode === "math") {
-          throw new ParseError(`Unicode text character "${text[0]}" used in math mode`, nucleus)
-        }
+      if (this.settings.strict && this.mode === "math") {
+        throw new ParseError(`Unicode text character "${text[0]}" used in math mode`, nucleus)
       }
       // All nonmathematical Unicode characters are rendered as if they
       // are in text mode (wrapped in \text) because that's what it
@@ -26931,7 +26882,7 @@ class Style {
  * https://mit-license.org/
  */
 
-const version = "0.10.9";
+const version = "0.10.11";
 
 function postProcess(block) {
   const labelMap = {};
@@ -27298,8 +27249,8 @@ const nodes = {
       { trust: true, displayMode: (node.attrs.displayMode || false) }
     )
   },
-  indented_div(node)    { return htmlTag("div", output(node.content), { class: 'indented' }) },
-  centered_div(node)    {
+  indented(node)    { return htmlTag("div", output(node.content), { class: 'indented' }) },
+  centered(node)    {
     return htmlTag("div", output(node.content), { class: 'centered' } )
   },
   comment(node) { return htmlTag("aside", output(node.content), { class: 'comment' }) },

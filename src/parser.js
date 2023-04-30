@@ -13,18 +13,19 @@ import { Rnl } from "./rational"
 
 // Keep the next three lists sorted, so that the isIn() binary search will work properly.
 const builtInFunctions = [
-  "Gamma", "Im", "Re", "abs", "acos", "acosd", "acosh", "acot", "acotd", "acoth", "acsc",
-  "acscd", "acsch", "argument", "asec", "asecd", "asech", "asin", "asind", "asinh", "atan",
-  "atan2", "atand", "atanh", "binomial", "chr", "cos", "cosd", "cosh", "cosh", "cot", "cotd",
-  "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp",
-  "fetch", "format", "gcd", "hypot", "isNaN", "length", "lerp", "ln", "log", "log10", "log2",
-  "logFactorial", "logGamma", "logn", "logΓ", "matrix2table", "random", "rms", "round",
-  "roundSig", "roundn", "sec", "secd", "sech", "sech", "sign", "sin", "sind", "sinh",
-  "startSvg", "string", "tan", "tand", "tanh", "tanh", "trace", "transpose", "zeros", "Γ"
+  "Char", "abs", "acos", "acosd", "acosh", "acot", "acotd", "acoth", "acsc", "acscd",
+  "acsch", "angle", "asec", "asecd", "asech", "asin", "asind", "asinh", "atan", "atan2",
+  "atand", "atanh", "binomial", "ceil", "conj", "cos", "cosd", "cosh", "cosh", "cot",
+  "cotd", "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp", "factorial", "fetch",
+  "floor", "format", "gamma", "gcd", "hcat", "hypot", "imag", "isnan", "length", "lerp", "ln",
+  "log", "log10", "log2", "lfact", "lgamma", "logn", "matrix2table", "mod", "real",
+  "rem", "rms", "round", "roundSig", "roundn", "sec", "secd", "sech", "sech", "sign", "sin",
+  "sind", "sinh", "startSvg", "string", "tan", "tand", "tanh", "tanh", "trace", "transpose",
+  "vcat", "zeros", "Γ"
 ]
 
 const builtInReducerFunctions = ["accumulate", "dataframe",
-  "max", "mean", "median", "min", "product", "range", "stddev", "sum", "variance"
+  "max", "mean", "median", "min", "product", "rand", "range", "stddev", "sum", "variance"
 ]
 
 const trigFunctions = ["cos", "cosd", "cot", "cotd", "csc", "cscd", "sec", "secd",
@@ -208,7 +209,7 @@ const nextCharIsFactor = (str, tokenType) => {
       return true
     } else {
       if (factors.test(fc)) {
-        fcMeetsTest = !/^(if|and|atop|or|else|modulo|otherwise|not|for|in|while|end)\b/.test(st)
+        fcMeetsTest = !/^(if|and|atop|or|else|elseif|otherwise|not|for|in|while|end)\b/.test(st)
       }
     }
   }
@@ -224,9 +225,9 @@ const cloneToken = token => {
   }
 }
 
-// The RegEx below is equal to /^\s+/ except it omits \n and the no-break space \xa0.
+// The RegEx below is equal to /^\s+/ except it omits \n, \t, and the no-break space \xa0.
 // I use \xa0 to precede the combining arrow accent character \u20D7.
-export const leadingSpaceRegEx = /^[ \f\r\t\v\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]+/
+export const leadingSpaceRegEx = /^[ \f\r\v\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]+/
 const leadingLaTeXSpaceRegEx = /^(˽|\\quad|\\qquad)+/
 
 /* eslint-disable indent-legacy */
@@ -279,8 +280,9 @@ const dNOTHING = 0
 const dPAREN = 1 //           () or [] or {}, but not one of the use cases below
 const dFUNCTION = 2 //        sin(x)
 const dACCESSOR = 3 //        identifier[index] or identifier[start:step:end]
-const dMATRIX = 4 //          [1; 2] or (1, 2; 3, 4) or {1, 2}
+const dMATRIX = 4 //          [1; 2] or (1 \t 2; 3 \t 4)
 const dVECTORFROMRANGE = 5 // [start:end] or [start:step:end]
+const dDICTIONARY = 6 //      {key => value, key => value}
 const dCASES = 7 //           { a if b; c otherwise }
 const dBINOMIAL = 8
 const dSUBSCRIPT = 9 //       Parens around a subscript do not get converted into matrices.
@@ -333,7 +335,7 @@ export const parse = (
     }
   }
 
-  const popTexTokens = (texPrec, okToAppend, closeDelim) => {
+  const popTexTokens = (texPrec, okToAppend) => {
 
     if (!okToAppend) { return }
 
@@ -391,7 +393,10 @@ export const parse = (
             }
           }
 
-          if (delim.delimType === dMATRIX) {
+          if (delim.delimType === dDICTIONARY && delim.open.length > 3) {
+            tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + 2)
+            op.closeDelim = delim.close
+          } else if (delim.delimType === dMATRIX) {
             const inc = tex.slice(op.pos, op.pos + 1) === "\\" ? 2 : 1
             tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + inc)
             op.closeDelim = delim.close
@@ -499,6 +504,14 @@ export const parse = (
       followedByFactor = nextCharIsFactor(str, token.ttype)
     }
 
+    if (token.input === "!" && (isPrecededBySpace ||
+        !isIn(prevToken.ttype,
+          [tt.ORD, tt.VAR, tt.NUM, tt.LONGVAR, tt.RIGHTBRACKET, tt.SUPCHAR]))) {
+      // Redefine ! as logical not in certain contexts, to match Julia syntax.
+      token.ttype = tt.UNARY
+      token.input = "¬"
+    }
+
     switch (token.ttype) {
       case tt.SPACE: //      spaces and newlines
       case tt.BIN: //        infix math operators that render but don't calc, e.g. \bowtie
@@ -547,9 +560,9 @@ export const parse = (
 
       case tt.NUM:
       case tt.ORD:
-        // Numbers and ORDs get appended directly onto rpn. Pass -1 to suppress an rpn pop.
         popTexTokens(2, okToAppend)
         if (isCalc) {
+          // Numbers and ORDs get appended directly onto rpn. Pass -1 to suppress an rpn pop.
           popRpnTokens(-1)
           rpn += token.ttype === tt.NUM ? rationalRPN(token.input) : token.input
         }
@@ -619,8 +632,8 @@ export const parse = (
           rpn += '"' + token.input + '"' // a loop index variable name.
         } else {
           // We're in the echo of a Hurmet calculation.
-          if (/^(\.[^.]|\[)/.test(str)) {
-            // When the blue echo has an index in a bracket, e.g., varName[indes], it renders
+          if (/^(\.[^.]|\[)/.test(str) || token.input === "im") {
+            // When the blue echo has an index in a bracket, e.g., varName[index], it renders
             // the name of the variable, not the value. The value of the value of the index.
             token.output = token.ttype === tt.LONGVAR
               ? "\\mathrm{" + token.output + "}"
@@ -629,7 +642,7 @@ export const parse = (
             token.output = token.input
             token.output = "〖" + token.output
           }
-          rpn += "¿" + token.input
+          rpn += token.input === "im" ? "im" : "¿" + token.input
         }
 
         tex += token.output + (str.charAt(0) === "." ? "" : " ")
@@ -697,19 +710,25 @@ export const parse = (
       }
 
       case tt.RANGE: {
-        //   range separator, as in 1..n
+        //   range separator, as in 1:n
         popTexTokens(1, okToAppend)
         posOfPrevRun = tex.length
-
-        if (isCalc) {
+        if (isCalc && token.input !== "...") {
           rpn += tokenSep
           popRpnTokens(3)
-          rpnStack.push({ prec: 3, symbol: ".." })
-          if (str.charAt(0) === "]" || str.length === 0) {
-            rpn += '"∞"' // slice of the form: identifier[n..]
+          rpnStack.push({ prec: 3, symbol: ":" })
+          if (["[", ","].includes(prevToken.input) && /^[,\]]/.test(str)) {
+            // A bare colon in a accessor, e.g., M[:, 2]
+            rpn += `®1/1${tokenSep}"∞"`
+          } else if (/^end[,\]]/.test(str)) {
+            rpn += '"∞"' // slice of the form: identifier[n:end]
+            str = str.slice(3)
           }
         }
-        tex += token.output
+        const topDelim = delims[delims.length - 1]
+        tex += topDelim.delimType === dPAREN && topDelim.symbol === "{"
+          ? "\\colon"
+          : token.output
         break
       }
 
@@ -947,16 +966,10 @@ export const parse = (
         break
 
       case tt.KEYWORD:
-        // Either "for", "in", "while", or "break"
+        // Either "for", "while", or "break"
         popTexTokens(1, true)
         posOfPrevRun = tex.length
-        if (isCalc) {
-          popRpnTokens(2)
-          if (token.input === "in") {
-            rpn += tokenSep
-            rpnStack.push({ prec: rpnPrec, symbol: "for" })
-          }
-        }
+        if (isCalc) { popRpnTokens(2) }
         tex += token.output + " "
         break
 
@@ -983,9 +996,6 @@ export const parse = (
         }
         if (topDelim.delimType === dCASES && isIn(token.input, ["if", "otherwise"])) {
           tex += "&"
-        }
-        if (token.input === ":"  && topDelim.delimType === dPAREN && topDelim.symbol === "{") {
-          token.output = "\\colon"
         }
         tex += token.output
         if (isCalc) {
@@ -1080,75 +1090,67 @@ export const parse = (
       }
 
       case tt.SEP: {
-        // Either a comma or a semi-colon. Colons are handled elsewhere.
+        // Either a comma or a tab or a semi-colon. Colons are handled elsewhere.
         popTexTokens(1, okToAppend)
         posOfPrevRun = tex.length
-
-        if (token.input === "\\," || token.input === "\\;") {
-          // escape characters that enable commas in a non-matrix paren.
-          tex += token.output + " "
-        } else {
-          const delim = delims[delims.length - 1]
-          if (delim.delimType === dPAREN && isFollowedBySpaceOrNewline) {
-            delim.delimType = dMATRIX
-            const ch = delim.name === "["
-              ? "b"
-              : delim.name === "("
-              ? "p"
-              : delim.name === "{:"
-              ? ""
-              : "B"
-            delim.open = `\\begin{${ch}matrix}`
-            delim.close = `\\end{${ch}matrix}`
-            delim.isTall = true
-            token.output = token.input === "," ? "&" : "\\\\"
-          } else if (delim.delimType === dMATRIX && token.input === ",") {
-            token.output = "&"
-          } else if (delim.delimType > 3 && token.input === ";") {
-            token.output = "\\\\"
+        const delim = delims[delims.length - 1]
+        if (delim.delimType === dPAREN && ([";", "\t"].includes(token.input) ||
+            token.input === "," && isFollowedBySpaceOrNewline)) {
+          delim.delimType = dMATRIX
+          const ch = delim.name === "["
+            ? "b"
+            : delim.name === "("
+            ? "p"
+            : delim.name === "{:"
+            ? ""
+            : "B"
+          delim.open = `\\begin{${ch}matrix}`
+          delim.close = `\\end{${ch}matrix}`
+          delim.isTall = true
+        }
+        if (isCalc) {
+          if (prevToken.ttype === tt.LEFTBRACKET && delim.delimType === dACCESSOR) {
+            rpn += "®0/1"
           }
-          if (isCalc) {
-            if (prevToken.ttype === tt.LEFTBRACKET && delim.delimType === dACCESSOR) {
-              rpn += "®0/1"
-            }
-            rpn += tokenSep
-            popRpnTokens(1)
-          }
+          rpn += tokenSep
+          popRpnTokens(1)
+        }
+        if (delim.delimType === dMATRIX && token.input === ",") {
+          token.output = " & "
+        }
 
-          tex += token.output + " "
+        tex += token.output + " "
 
-          if (isCalc) {
-            if (delims.length === 1) {
-              rpn += token.output
+        if (isCalc) {
+          if (delims.length === 1) {
+            rpn += token.output
 
-            } else {
-              if (token.input === ";") {
-                delim.numRows += 1
-                if (delims.length > 0 && delim.delimType === dCASES) {
-                // We're about to begin an expression inside an If Expression.
-                // Temporarily change the token separator.
-                  tokenSep = "§"
-                }
+          } else {
+            if (token.input === ";") {
+              delim.numRows += 1
+              if (delims.length > 0 && delim.delimType === dCASES) {
+              // We're about to begin an expression inside an If Expression.
+              // Temporarily change the token separator.
+                tokenSep = "§"
               }
-
-              if (delim.numRows === 1) {
-                if (token.input === ","  ||
-                    (token.input === " " && (delim.delimType === dMATRIX))) {
-                  if (str.charAt(0) === "]") {
-                    rpn += "®0/1"
-                  } else if (token.input === "," && delim.delimType === dFUNCTION &&
-                             delim.numArgs === 2 && delim.name === "plot" ) {
-                    // The literal function for a plot() statement inside a draw()
-                    // Wrap the rpn in quotation marks.
-                    rpn = rpn.slice(0, delim.rpnPos + 5) + '"'
-                        + rpn.slice(delim.rpnPos + 5, -1).replace(/\u00a0/g, "§") + '"' + tokenSep
-                  }
-                }
-              }
-              delim.numArgs += 1
             }
+
+            if (delim.numRows === 1) {
+              if ([",", "\t"].includes(token.input) && (str.charAt(0) === "]")) {
+                rpn += "®0/1"
+              }
+              if (token.input === "," && delim.delimType === dFUNCTION &&
+                          delim.numArgs === 2 && delim.name === "plot" ) {
+                // The literal function for a plot() statement inside a draw()
+                // Wrap the rpn in quotation marks.
+                rpn = rpn.slice(0, delim.rpnPos + 5) + '"'
+                    + rpn.slice(delim.rpnPos + 5, -1).replace(/\u00a0/g, "§") + '"' + tokenSep
+              }
+            }
+            delim.numArgs += 1
           }
         }
+
         okToAppend = true
         break
       }
@@ -1197,14 +1199,14 @@ export const parse = (
                   rpn = rpn.slice(0, 6) + '"' + rpn.slice(6).replace(/\u00a0/g, "§") + '"'
                 }
               } else if (symbol === "log" && regEx.test(rpn)) {
-                rpn = rpn.slice(0, rpn.length - 1) + "logFactorial"
+                rpn = rpn.slice(0, rpn.length - 1) + "lfact"
                 break
               }
               rpn += (symbol.slice(-1) === "^")
                 ? firstSep + symbol
-                : isIn(symbol, builtInFunctions)
+                : builtInFunctions.includes(symbol)
                 ? firstSep + symbol
-                : isIn(symbol, builtInReducerFunctions)
+                : builtInReducerFunctions.includes(symbol)
                 ? firstSep + symbol + tokenSep + numArgs
                 : firstSep + "function" + tokenSep + symbol + tokenSep + numArgs
               break
@@ -1281,7 +1283,7 @@ export const parse = (
         }
         if (isRightDelim) {
           // Treat as a right delimiter
-          topDelim.close = token.input === "|" ? "\\vert " : "\\Vert "
+          topDelim.close = token.input === "|" ? "|" : "‖"
           texStack[texStack.length - 1].closeDelim = topDelim.close
           popTexTokens(0, okToAppend)
           delims.pop()
@@ -1302,15 +1304,15 @@ export const parse = (
             prec: 0,
             pos: tex.length,
             ttype: tt.LEFTRIGHT,
-            closeDelim: token.input === "|" ? "\\vert " : "\\Vert "
+            closeDelim: token.input === "|" ? "|" : "‖"
           })
 
           delims.push({
             delimType: dPAREN,
             name: token.input,
             isTall: false,
-            open: token.input === "|" ? "\\vert " : "\\Vert ",
-            close: token.input === "|" ? "\\vert " : "\\Vert ",
+            open: token.input === "|" ? "|" : "‖",
+            close: token.input === "|" ? "|" : "‖",
             numArgs: 1,
             numRows: 1,
             rpnPos: rpn.length,
@@ -1321,7 +1323,7 @@ export const parse = (
             rpnStack.push({ prec: 0, symbol: token.output })
           }
 
-          tex += token.input === "|" ? "\\vert " : "\\Vert "
+          tex += token.input === "|" ? "|" : "‖"
           posOfPrevRun = tex.length
           okToAppend = false
         }
@@ -1356,7 +1358,7 @@ export const parse = (
     while (rpnStack.length > 0) {
       rpn += tokenSep + rpnStack.pop().symbol
     }
-    const varRegEx = /〖[^ ().]+/g
+    const varRegEx = /〖[^ ().\\,;]+/g
     let arr
     while ((arr = varRegEx.exec(tex)) !== null) {
       if ("¨ˆˉ˙˜".indexOf(arr[0][1]) === -1) {

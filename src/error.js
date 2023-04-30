@@ -10,6 +10,7 @@ const errorMessages = Object.freeze({
     NAN:       "Error. Value of $@$ is not a numeric.",
     NANARG:    "Error. Argument to function $@$ must be numeric.",
     NULL:      "Error. Missing value for $@$.", // $@$ will be italic in TeX
+    BAD_EQ:    'Error. Use "==" instead of "=" to check for equality.',
     V_NAME:    "Error. Variable $@$ not found.",
     F_NAME:    "Error. Function @ not found.",
     NAN_OP:    "Error. Arithmetic operation on a non-numeric value.",
@@ -30,7 +31,7 @@ const errorMessages = Object.freeze({
     LOGF:      "Error. Argument to log!() must be a non-negative integer.",
     Γ0:        "Error. Γ(0) is infinite.",
     ΓPOLE:     "Error. Γ() of a negative integer is infinite.",
-    LOGΓ:      "Error. Argument to Hurmet logΓ() must be a positive number.",
+    LOGΓ:      "Error. Argument to Hurmet lgamma() must be a positive number.",
     TAN90:     "Error. tan($@$) is infinite.",
     ATRIG:     "Error. Input to @ must be between -1 and 1.",
     COT:       "Error. Input to @ must not be zero.",
@@ -68,14 +69,13 @@ const errorMessages = Object.freeze({
     DF_UNIT:   "Invalid unit \"&\" in data frame.",
     FORM_FRAC: "Error. Hurmet can do binary or hexadecimal format only on integers.",
     PRIVATE:   "Error. Function @ is not private.",
-    GCD:       "Error. The gcd function can take only integers as arguments.",
+    INT_ARG:   "Error. The @ function can take only integers as arguments.",
     BAD_KEY:   "Error. Data structure does not contain key \"@\".",
     NUM_KEY:   "Error. A key must be a string, not a number.",
     IMMUT_UDF: `Error. Variable @ already contains a user-defined function.
                 Hurmet cannot assign a different value to @.`,
     NO_PROP:   `Error. Cannot call a property from variable "@" because it has no properties.`,
-    NOT_ARRAY: `Error. Cannot check if an element is in the second operand because
- the second operand is not an array.`,
+    NOT_ARRAY: `Error. Cannot The second operand is not an array.`,
     MULT_MIS:  "Error. Mismatch in number of multiple assignment.",
     COUNT:     "Error. The count() function works only on strings.",
     NOT_VECTOR:"Error. Arguments to dataframe() must be vectors.",
@@ -89,7 +89,8 @@ const errorMessages = Object.freeze({
     BAD_KEYSTR: "Error. The key in a key:value pair must be a string.",
     BAD_APPEND: "Error. Can not append a @",
     MAP_APPEND: "Error. Can not append. Wrong data type.",
-    BAD_J:      "Error. Do not use j for a loop index. In Hurmet, j = √(-1)"
+    BAD_TRANS:  "Error. Only a matrix can be transposed.",
+    BAD_ARGS:   "Error. Wrong number of arguments to function @"
   }
 })
 

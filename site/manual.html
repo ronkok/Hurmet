@@ -13,28 +13,18 @@
 <h2 id='introduction'>Introduction</h2>
 <p><em>Hurmet</em> is a rich-text editor that gives you the ability to create high quality calculation documents using standard math notation.</p>
 <p>Hurmet calculations are much easier to read and check than spreadsheet calculations. Hurmet does not hide the active expressions and intermediate values of a calculation. They’re all open for review in the displayed document.</p>
-<p>You are welcome to use the <a href='null'>Hurmet.app</a> web page under terms of the <a href='https://opensource.org/licenses/MIT/'>MIT License</a>. The source code is available in Hurmet’s GitHub <a href='https://github.com/ronkok/Hurmet'>repository</a>.</p>
+<p>You are welcome to use the <a href='index.html'>Hurmet.app</a> web page under terms of the <a href='https://opensource.org/licenses/MIT/'>MIT License</a>. The source code is available in Hurmet’s GitHub <a href='https://github.com/ronkok/Hurmet'>repository</a>.</p>
 <h3 id='editor-basics'>Editor Basics</h3>
 <p>Hurmet provides rich-text editing capabilities. You can apply styles to a document range by selecting text, then clicking one of the menu bar buttons:</p>
 <table><tr><td><strong>≡</strong></td><td>Navigate…</td></tr>
 <tr><td><br><strong>File▾</strong></td><td>Open…, Save…, <br>Import/Export to Markdown,<br>Take a snapshot, Show diff, <br>Set Page Size, Print</td></tr>
 <tr><td><br><strong>Doc▾</strong></td><td>Set Decimal, Font size, <br>Draft Mode, Print header, <br>Delete all comments</td></tr>
 <tr><td><img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 9a7.982 7.982 0 0 0 2.709 6l1.323-1.5a6 6 0 1 1 8.212-8.743L10.001 7h6V1l-2.343 2.343A8 8 0 0 0 .001 9z'/%3E%3C/svg%3E" alt="recalc"> <code></code></td><td>Recalculate all</td></tr>
-<tr><td><figure></figure>
-</td><td>Undo, Redo</td></tr>
+<tr><td><img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M11.904 16C13.681 12.781 13.98 7.87 7 8.034V12L1 6l6-6v3.881c8.359-.218 9.29 7.378 4.904 12.119z'/%3E%3C/svg%3E" alt="undo">  <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M9 3.881V0l6 6-6 6V8.034C2.02 7.87 2.319 12.781 4.096 16-.29 11.259.641 3.663 9 3.881z'/%3E%3C/svg%3E" alt="redo"></td><td>Undo, Redo</td></tr>
 <tr><td><strong>B</strong>  <strong><em>I</em></strong>  <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='m9 11.5 1.5 1.5 5-5-5-5L9 4.5 12.5 8zM7 4.5 5.5 3l-5 5 5 5L7 11.5 3.5 8z'/%3E%3C/svg%3E" alt="embed"> <strong>X</strong><strong><sub>2</sub></strong> <strong>X</strong><strong><sup>2</sup></strong> <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M16 8v1h-3.664c.43.602.664 1.292.664 2 0 1.107-.573 2.172-1.572 2.921C10.501 14.617 9.283 15 8 15s-2.501-.383-3.428-1.079C3.573 13.172 3 12.107 3 11h2c0 1.084 1.374 2 3 2s3-.916 3-2-1.374-2-3-2H0V8h4.68a3.003 3.003 0 0 1-.108-.079C3.573 7.172 3 6.107 3 5s.573-2.172 1.572-2.921C5.499 1.383 6.717 1 8 1s2.501.383 3.428 1.079C12.427 2.828 13 3.893 13 5h-2c0-1.084-1.374-2-3-2s-3 .916-3 2 1.374 2 3 2c1.234 0 2.407.354 3.32 1H16z'/%3E%3C/svg%3E" alt="strikethrough">  <strong><u>U</u></strong></td><td>Character styles:<br>Bold, Italic, Code, Subscript, Superscript, Strikethrough, Underline</td></tr>
-<tr><td><figure></figure>
-<figure></figure>
-<figure></figure>
-</td><td>Insert:<br>Link…, Horizontal rule, Uploaded image…, Link to image…, Table of Contents…, Calculation…, TeX…, Comment…</td></tr>
+<tr><td><img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M6.879 9.934a.81.81 0 0 1-.575-.238 3.818 3.818 0 0 1 0-5.392l3-3C10.024.584 10.982.187 12 .187s1.976.397 2.696 1.117a3.818 3.818 0 0 1 0 5.392l-1.371 1.371a.813.813 0 0 1-1.149-1.149l1.371-1.371A2.19 2.19 0 0 0 12 1.812c-.584 0-1.134.228-1.547.641l-3 3a2.19 2.19 0 0 0 0 3.094.813.813 0 0 1-.575 1.387z'/%3E%3Cpath d='M4 15.813a3.789 3.789 0 0 1-2.696-1.117 3.818 3.818 0 0 1 0-5.392l1.371-1.371a.813.813 0 0 1 1.149 1.149l-1.371 1.371A2.19 2.19 0 0 0 4 14.188c.585 0 1.134-.228 1.547-.641l3-3a2.19 2.19 0 0 0 0-3.094.813.813 0 0 1 1.149-1.149 3.818 3.818 0 0 1 0 5.392l-3 3A3.789 3.789 0 0 1 4 15.813z'/%3E%3C/svg%3E" alt="link"> <strong>—</strong> <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M7 9h2V5h3L8 1 4 5h3zm3-2.25v1.542L14.579 10 8 12.453 1.421 10 6 8.292V6.75L0 9v4l8 3 8-3V9z'/%3E%3C/svg%3E" alt="upload"> <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='m14.998 2 .002.002v11.996l-.002.002H1.002L1 13.998V2.002L1.002 2h13.996zM15 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h14c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1z'/%3E%3Cpath d='M13 4.5a1.5 1.5 0 1 1-3.001-.001A1.5 1.5 0 0 1 13 4.5zM14 13H2v-2l3.5-6 4 5h1L14 7z'/%3E%3C/svg%3E" alt="image"> ToC <img src="images/C.svg" alt="C"> <img src="data:image/svg+xml;utf8,%3Csvg height='16' width='16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M.8 4.5V.3c.1-.5.6-.2 1-.3h12.8c.4.2.2.7.3 1v3.5c-.4.7-1.1-.1-1-.7a4 4 0 0 0-2.7-2.7C10.8 1 9.8.6 9.7 1v12.8c0 .8.3 1.5 1.2 1.3.6-.2 1.6.5.8.9H3.9c-.8-.6.4-1 1-.9 1 .2 1-.8 1-1.6V.8c-1.2.2-2.6.5-3.4 1.5-.7.7-.8 1.6-1 2.4-.2.2-.6.1-.7-.2ZM2.6 1c.4-.2.3-.2 0-.2h-1V2ZM9 7.8v-7H6.8l-.1 13.5c.1.4-.4 1 .2.9H9c-.3-.5.1-1.2 0-1.7Zm4.8-6.1c.1 0 .4.5.3 0V.9h-1.3l1 .9z'/%3E%3C/svg%3E" alt="T">  <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 1024 1024'%3E%3Cpath d='M512 219q-116 0-218 39t-161 107-59 145q0 64 40 122t115 100l49 28-15 54q-13 52-40 98 86-36 157-97l24-21 32 3q39 4 74 4 116 0 218-39t161-107 59-145-59-145-161-107-218-39zM1024 512q0 99-68 183t-186 133-257 48q-40 0-82-4-113 100-262 138-28 8-65 12h-2q-8 0-15-6t-9-15v-0q-1-2-0-6t1-5 2-5l3-5t4-4 4-5q4-4 17-19t19-21 17-22 18-29 15-33 14-43q-89-50-141-125t-51-160q0-99 68-183t186-133 257-48 257 48 186 133 68 183z'/%3E%3C/svg%3E" alt="comment"></td><td>Insert:<br>Link…, Horizontal rule, Uploaded image…, Link to image…, Table of Contents…, Calculation…, TeX…, Comment…</td></tr>
 <tr><td><strong>¶</strong> <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='m9 11.5 1.5 1.5 5-5-5-5L9 4.5 12.5 8zM7 4.5 5.5 3l-5 5 5 5L7 11.5 3.5 8z'/%3E%3C/svg%3E" alt="embed"> <strong>H1 H2</strong> <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 1h16v2H0zm3 3h10v2H3zm0 6h10v2H3zM0 7h16v2H0zm0 6h16v2H0z'/%3E%3C/svg%3E" alt="align-center"> <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 1h16v2H0zm6 3h10v2H6zm0 3h10v2H6zm0 3h10v2H6zm-6 3h16v2H0zm0-2V5l4 3z'/%3E%3C/svg%3E" alt="indent"> <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 0h4v4H0zm6 1h10v2H6zM0 6h4v4H0zm6 1h10v2H6zm-6 5h4v4H0zm6 1h10v2H6z'/%3E%3C/svg%3E" alt="list"> <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M6 13h10v2H6zm0-6h10v2H6zm0-6h10v2H6zM3 0v4H2V1H1V0zM2 8.219V9h2v1H1V7.719l2-.938V6H1V5h3v2.281zM4 11v5H1v-1h2v-1H1v-1h2v-1H1v-1z'/%3E%3C/svg%3E" alt="numbered list"> <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M3.516 7a3.5 3.5 0 1 1-3.5 3.5L0 10a7 7 0 0 1 7-7v2a4.97 4.97 0 0 0-3.536 1.464 5.01 5.01 0 0 0-.497.578c.179-.028.362-.043.548-.043zm9 0a3.5 3.5 0 1 1-3.5 3.5L9 10a7 7 0 0 1 7-7v2a4.97 4.97 0 0 0-3.536 1.464 5.01 5.01 0 0 0-.497.578c.179-.028.362-.043.549-.043z'/%3E%3C/svg%3E" alt="quotes"></td><td>Block styles:<br>Plain paragraph, Code block, Headings, Centered paragraph, Indent, List, Ordered list, Block quote</td></tr>
-<tr><td><figure></figure>
-<figure></figure>
-<figure></figure>
-<figure></figure>
-<figure></figure>
-<p>Tbl Style</p>
-</td><td>Table:<br>Insert table, Insert row, Insert column, Delete table, Delete row, Delete column, Toggle cell merge, Align left, Align center, Align  right, Set table style</td></tr>
+<tr><td><img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath d='M17 17v5h2a3 3 0 0 0 3-3v-2h-5Zm-2 0H9v5h6v-5Zm2-2h5V9h-5v6Zm-2 0V9H9v6h6Zm2-8h5V5a3 3 0 0 0-3-3h-2v5Zm-2 0V2H9v5h6Zm9 9.177V19a5 5 0 0 1-5 5H5a5 5 0 0 1-5-5V5a5 5 0 0 1 5-5h14a5 5 0 0 1 5 5v2.823a.843.843 0 0 1 0 .354v7.646a.843.843 0 0 1 0 .354ZM7 2H5a3 3 0 0 0-3 3v2h5V2ZM2 9v6h5V9H2Zm0 8v2a3 3 0 0 0 3 3h2v-5H2Z'/%3E%3C/svg%3E" alt="table"> <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath d='M19 14a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm2.5 5.938a.937.937 0 1 0 0-1.875h-1.25a.312.312 0 0 1-.313-.313V16.5a.937.937 0 1 0-1.875 0v1.25c0 .173-.14.313-.312.313H16.5a.937.937 0 1 0 0 1.875h1.25c.173 0 .313.14.313.312v1.25a.937.937 0 1 0 1.875 0v-1.25c0-.173.14-.313.312-.313h1.25ZM5 2a3 3 0 1 0 0 6h14a3 3 0 0 0 0-6H5Zm0-2h14a5 5 0 0 1 0 10H5A5 5 0 1 1 5 0Z'/%3E%3C/svg%3E" alt="insert-row"> <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath d='M19 14a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm2.5 5.938a.937.937 0 1 0 0-1.875h-1.25a.312.312 0 0 1-.313-.313V16.5a.937.937 0 1 0-1.875 0v1.25c0 .173-.14.313-.312.313H16.5a.937.937 0 1 0 0 1.875h1.25c.173 0 .313.14.313.312v1.25a.937.937 0 1 0 1.875 0v-1.25c0-.173.14-.313.312-.313h1.25ZM2 19a3 3 0 0 0 6 0V5a3 3 0 1 0-6 0v14Zm-2 0V5a5 5 0 1 1 10 0v14a5 5 0 0 1-10 0Z'/%3E%3C/svg%3E" alt="insert-column"> <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath d='M19 14a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm-2.5 5.938h5a.937.937 0 1 0 0-1.875h-5a.937.937 0 1 0 0 1.875ZM12.29 17H9v5h3.674c.356.75.841 1.426 1.427 2H5a5 5 0 0 1-5-5V5a5 5 0 0 1 5-5h14a5 5 0 0 1 5 5v2.823a.843.843 0 0 1 0 .354V14.1a7.018 7.018 0 0 0-2-1.427V9h-5v3.29a6.972 6.972 0 0 0-2 .965V9H9v6h4.255a6.972 6.972 0 0 0-.965 2ZM17 7h5V5a3 3 0 0 0-3-3h-2v5Zm-2 0V2H9v5h6ZM7 2H5a3 3 0 0 0-3 3v2h5V2ZM2 9v6h5V9H2Zm0 8v2a3 3 0 0 0 3 3h2v-5H2Z'/%3E%3C/svg%3E" alt="delete-table"> <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath d='M13.255 15a6.972 6.972 0 0 0-.965 2H5A5 5 0 0 1 5 7h14a5 5 0 0 1 4.671 6.787 7.01 7.01 0 0 0-1.74-1.146A3 3 0 0 0 19 9H5a3 3 0 0 0 0 6h8.255ZM19 14a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm-2.5 5.938h5a.937.937 0 1 0 0-1.875h-5a.937.937 0 1 0 0 1.875Z'/%3E%3C/svg%3E" alt="delete-row"> <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath d='M12.641 21.931a7.01 7.01 0 0 0 1.146 1.74A5 5 0 0 1 7 19V5a5 5 0 1 1 10 0v7.29a6.972 6.972 0 0 0-2 .965V5a3 3 0 0 0-6 0v14a3 3 0 0 0 3.641 2.931ZM19 14a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm-2.5 5.938h5a.937.937 0 1 0 0-1.875h-5a.937.937 0 1 0 0 1.875Z'/%3E%3C/svg%3E" alt="delete-column"> <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath d='M2 19a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V5a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v14Zm-2 0V5a5 5 0 0 1 5-5h14a5 5 0 0 1 5 5v14a5 5 0 0 1-5 5H5a5 5 0 0 1-5-5Zm12-9a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0v-2a1 1 0 0 1 1-1Zm0 6a1 1 0 0 1 1 1v3a1 1 0 0 1-2 0v-3a1 1 0 0 1 1-1Zm0-13a1 1 0 0 1 1 1v3a1 1 0 0 1-2 0V4a1 1 0 0 1 1-1Z'/%3E%3C/svg%3E" alt="merge"> <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 1h16v2H0zm0 3h10v2H0zm0 6h10v2H0zm0-3h16v2H0zm0 6h16v2H0z'/%3E%3C/svg%3E" alt="align-left"> <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 1h16v2H0zm3 3h10v2H3zm0 6h10v2H3zM0 7h16v2H0zm0 6h16v2H0z'/%3E%3C/svg%3E" alt="align-center"> <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 1h16v2H0zm6 3h10v2H6zm0 6h10v2H6zM0 7h16v2H0zm0 6h16v2H0z'/%3E%3C/svg%3E" alt="align-right"> Tbl Style</td><td>Table:<br>Insert table, Insert row, Insert column, Delete table, Delete row, Delete column, Toggle cell merge, Align left, Align center, Align  right, Set table style</td></tr>
 <tr><td><img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M7 4.75c0-.412.338-.75.75-.75h.5c.412 0 .75.338.75.75v.5c0 .412-.338.75-.75.75h-.5A.753.753 0 0 1 7 5.25v-.5zM10 12H6v-1h1V8H6V7h3v4h1z'/%3E%3Cpath d='M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm0 14.5a6.5 6.5 0 1 1 0-13 6.5 6.5 0 0 1 0 13z'/%3E%3C/svg%3E" alt="information">  <strong>Q</strong></td><td>Information, Quick Reference</td></tr>
 </table>
 <h3 id='save/open'>Save/Open</h3>
@@ -53,15 +43,14 @@
 <p>You can create a print header in any document by clicking the File | Print Header menu choice. Later, when you click the File | Print… menu choice, the header will be printed at the top of every page (except the cover page). The header is a table and it should remain a table. Otherwise, edit it any way you want.</p>
 <p>If you write <code>$PAGE</code> into a print header, Hurmet will print page numbers at that location.</p>
 <h3 id='comments'>Comments</h3>
-<aside class="comment">Citation needed</aside><p>The <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 1024 1024'%3E%3Cpath d='M512 219q-116 0-218 39t-161 107-59 145q0 64 40 122t115 100l49 28-15 54q-13 52-40 98 86-36 157-97l24-21 32 3q39 4 74 4 116 0 218-39t161-107 59-145-59-145-161-107-218-39zM1024 512q0 99-68 183t-186 133-257 48q-40 0-82-4-113 100-262 138-28 8-65 12h-2q-8 0-15-6t-9-15v-0q-1-2-0-6t1-5 2-5l3-5t4-4 4-5q4-4 17-19t19-21 17-22 18-29 15-33 14-43q-89-50-141-125t-51-160q0-99 68-183t186-133 257-48 257 48 186 133 68 183z'/%3E%3C/svg%3E" alt="comment"> button enables you to write a comment like the nearby text bubble:</p>
+<aside class="comment">A Hurmet comment is a paragraph inside a speech bubble.</aside><p>The <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 1024 1024'%3E%3Cpath d='M512 219q-116 0-218 39t-161 107-59 145q0 64 40 122t115 100l49 28-15 54q-13 52-40 98 86-36 157-97l24-21 32 3q39 4 74 4 116 0 218-39t161-107 59-145-59-145-161-107-218-39zM1024 512q0 99-68 183t-186 133-257 48q-40 0-82-4-113 100-262 138-28 8-65 12h-2q-8 0-15-6t-9-15v-0q-1-2-0-6t1-5 2-5l3-5t4-4 4-5q4-4 17-19t19-21 17-22 18-29 15-33 14-43q-89-50-141-125t-51-160q0-99 68-183t186-133 257-48 257 48 186 133 68 183z'/%3E%3C/svg%3E" alt="comment"> button enables you to write a comment into the document.</p>
 <p>A command in the “Docs” menu will delete all comments in the document.</p>
 <br>
 <h3 id='table-of-contents'>Table of Contents</h3>
 <p>The <strong>ToC</strong> button creates a Table of Contents at the selection point. The table will be built from Headings in your document. In the ToC dialog box, you can choose which heading levels to include.</p>
 <h3 id='markdown'>Markdown</h3>
-<p>In the <strong>File▾</strong> menu, you can import or export files in <em>Markdown</em>, a lightweight markup format. Hurmet&#x27;s version of Markdown is extended to enable calculations, indented paragraphs, centered paragraphs, and tables with merged cells or multiple paragraphs in a cell.</p>
+<p>Hurmet documents are saved in <em>Markdown</em>, a lightweight, easy-to-read markup format. Hurmet&#x27;s version of Markdown is extended to enable calculations, complex tables, and more.</p>
 <details><summary>Click for more…</summary>
-<p>The table below describes what Hurmet exports. It can also import <a href='https://commonmark.org/help/'>alternative</a> Markdown notations.</p>
 <p>Paragraphs are preceded by a blank line.<br>A newline is indicated by a backslash, <code>\</code>, at the end of a line.</p>
 <table class="grid"><tr><th style="width: 392px">Type…</th>
 <th style="width: 177px">To get…</th>
@@ -69,19 +58,21 @@
 <tr><td style="width: 392px"><code>_Italic_</code></td><td style="width: 177px"><em>Italic</em></td></tr>
 <tr><td style="width: 392px"><code>**Bold**</code></td><td style="width: 177px"><strong>Bold</strong></td></tr>
 <tr><td style="width: 392px"><code>**_Bold Italic_**</code></td><td style="width: 177px"><strong><em>Bold Italic</em></strong></td></tr>
+<tr><td style="width: 392px"><code>~subscript~</code></td><td style="width: 177px"><sub>subscript</sub></td></tr>
 <tr><td style="width: 392px"><code>~~strikethrough~~</code></td><td style="width: 177px"><del>strikethrough</del></td></tr>
 <tr><td style="width: 392px"><code>`inline code`</code></td><td style="width: 177px"><code>inline code</code></td></tr>
 <tr><td style="width: 392px"><code>¢` calcu = la/tion `</code></td><td style="width: 177px"><math><mrow><mrow><mrow><mi mathvariant="normal">c</mi></mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">l</mi></mrow><mrow><mi mathvariant="normal">c</mi></mrow><mrow><mi mathvariant="normal">u</mi></mrow></mrow><mo>=</mo></mrow><mrow><mstyle displaystyle="true" scriptlevel="0"><mfrac><mrow><mrow><mi mathvariant="normal">l</mi></mrow><mrow><mi mathvariant="normal">a</mi></mrow></mrow><mrow><mrow><mi mathvariant="normal">t</mi></mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">n</mi></mrow></mrow></mfrac></mstyle></mrow></math></td></tr>
-<tr><td style="width: 392px"><code>$ \TeX $</code></td><td style="width: 177px"><math><mrow><mtext>T</mtext><mspace width="-0.1667em" style="margin-left:-0.1667em;"></mspace><mpadded voffset="-0.2155em" height="-0.2155em" depth="+0.2155em"><mstyle scriptlevel="0" displaystyle="false"><mtext>E</mtext></mstyle></mpadded><mspace width="-0.125em" style="margin-left:-0.125em;"></mspace><mtext>X</mtext></mrow></math></td></tr>
+<tr><td style="width: 392px"><code>$\TeX$</code></td><td style="width: 177px"><math><mrow><mtext>T</mtext><mspace width="-0.1667em" style="margin-left:-0.1667em;"></mspace><mpadded voffset="-0.2155em" height="-0.2155em" depth="+0.2155em"><mstyle scriptlevel="0" displaystyle="false"><mtext>E</mtext></mstyle></mpadded><mspace width="-0.125em" style="margin-left:-0.125em;"></mspace><mtext>X</mtext></mrow></math></td></tr>
 <tr><td style="width: 392px"><code># Heading 1</code></td><td style="width: 177px"><h1 id='heading-1'>Heading 1</h1>
 </td></tr>
 <tr><td style="width: 392px"><code>## Heading 2</code></td><td style="width: 177px"><h2 id='heading-2'>Heading 2</h2>
 </td></tr>
-<tr><td style="width: 392px"><code>[Link][id]</code> <br>⋮ <br><code>[id]: http://a.com</code></td><td style="width: 177px"><a href='http://a.com' title='id''>Link</a></td></tr>
-<tr><td style="width: 392px">inline image: <code>![alt][]</code> <br>⋮ <br><code>[alt]: http://url/image.svg</code></td><td style="width: 177px">inline image: <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='m14.998 2 .002.002v11.996l-.002.002H1.002L1 13.998V2.002L1.002 2h13.996zM15 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h14c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1z'/%3E%3Cpath d='M13 4.5a1.5 1.5 0 1 1-3.001-.001A1.5 1.5 0 0 1 13 4.5zM14 13H2v-2l3.5-6 4 5h1L14 7z'/%3E%3C/svg%3E" alt="alt"></td></tr>
-<tr><td style="width: 392px"><code>![caption][]</code> <br>⋮ <br><code>[caption]: http://url/image.svg</code></td><td style="width: 177px"><figure><img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='m14.998 2 .002.002v11.996l-.002.002H1.002L1 13.998V2.002L1.002 2h13.996zM15 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h14c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1z'/%3E%3Cpath d='M13 4.5a1.5 1.5 0 1 1-3.001-.001A1.5 1.5 0 0 1 13 4.5zM14 13H2v-2l3.5-6 4 5h1L14 7z'/%3E%3C/svg%3E" class="figimg" alt="caption">
-<figcaption>caption</figcaption></figure>
+<tr><td style="width: 392px"><code>[Link][link id]</code></td><td style="width: 177px"><a href='http://a.com'>Link</a></td></tr>
+<tr><td style="width: 392px"><code>![alt][id]</code></td><td style="width: 177px"><img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='m14.998 2 .002.002v11.996l-.002.002H1.002L1 13.998V2.002L1.002 2h13.996zM15 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h14c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1z'/%3E%3Cpath d='M13 4.5a1.5 1.5 0 1 1-3.001-.001A1.5 1.5 0 0 1 13 4.5zM14 13H2v-2l3.5-6 4 5h1L14 7z'/%3E%3C/svg%3E" alt="id"></td></tr>
+<tr><td style="width: 392px"><code>!![image and caption][id]</code></td><td style="width: 177px"><figure><img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='m14.998 2 .002.002v11.996l-.002.002H1.002L1 13.998V2.002L1.002 2h13.996zM15 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h14c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1z'/%3E%3Cpath d='M13 4.5a1.5 1.5 0 1 1-3.001-.001A1.5 1.5 0 0 1 13 4.5zM14 13H2v-2l3.5-6 4 5h1L14 7z'/%3E%3C/svg%3E" class="figimg" alt="id">
+<figcaption>image and caption</figcaption></figure>
 </td></tr>
+<tr><td style="width: 392px"><code>[id]: filepath</code></td><td style="width: 177px">path to image or link</td></tr>
 <tr><td style="width: 392px"><code>&gt; Blockquote</code></td><td style="width: 177px">| Blockquote</td></tr>
 <tr><td style="width: 392px"><code>* List</code><br><code>* List</code><br><code>* List</code></td><td style="width: 177px"><ul><li class="tight"><p>List</p>
 </li>
@@ -99,14 +90,12 @@
 </li>
 </ol>
 </td></tr>
-<tr><td style="width: 392px"><code>```</code> <br><code>#code block</code> <br><code>echo &quot;Hi!&quot;</code> <br><code>```</code></td><td style="width: 177px"><pre><code># code block
-echo &quot;Hi!&quot;</code></pre></td></tr>
+<tr><td style="width: 392px"><code>```</code> <br><code>#code block</code> <br><code>print &quot;Hi!&quot;</code> <br><code>```</code></td><td style="width: 177px"><pre><code># code block
+print &quot;Hi!&quot;</code></pre></td></tr>
 <tr><td style="width: 392px"><code>---------</code></td><td style="width: 177px"><hr>
 </td></tr>
-<tr><td style="width: 392px"><code>© comment</code></td><td style="width: 177px"><aside class="comment">comment</aside></td></tr>
-<tr><td style="width: 392px"><code>i&gt;  indented block</code></td><td style="width: 177px"><div class="indented"><p>indented block</p>
+<tr><td style="width: 392px"><code>{indented}</code><br><code>&gt;  Block elements. The attribute</code> <br><code>can be `indented`, `centered`,</code><br><code>or `header`.</code></td><td style="width: 177px"><div class="indented"><p>Block elements. The attribute can be <code>indented</code>, <code>centered</code>, or <code>header</code>.</p>
 </div></td></tr>
-<tr><td style="width: 392px"><code>C&gt;  Centered block</code></td><td style="width: 177px">Centered block</td></tr>
 </table>
 <p>Pipe Tables</p>
 <pre><code>| Head 1  |  Head 2  | Head 3  |
@@ -159,7 +148,7 @@ echo &quot;Hi!&quot;</code></pre></td></tr>
 <p>A space between variables acts as a multiplication operator.</p>
 </dd>
 <dt id='roots'>Roots</dt>
-<dd><p>Type <code>sqrt</code> and hit the spacebar to auto-correct into <math><mtext>√</mtext></math><br><code>root 3</code> and <code>root 4</code> will also auto-correct into roots.</p>
+<dd><p>Type <code>sqrt</code> and hit the spacebar to auto-correct into <code>√</code>.<br><code>root 3</code> and <code>root 4</code> will also auto-correct into roots.</p>
 </dd>
 <dt id='function'>Function</dt>
 <dd><p>Hurmet treats a word as a function name if it is placed directly before an open parenthesis. Example: <math><mrow><mrow><mi>sin</mi><mo>⁡</mo></mrow><mrow><mo fence="true" form="prefix">(</mo><mstyle displaystyle="false" scriptlevel="0"><mfrac><mi>π</mi><mn>6</mn></mfrac></mstyle><mo fence="true" form="postfix">)</mo></mrow><mo>=</mo></mrow><mrow><mn>0.5</mn></mrow></math>. Hurmet has many <a href='#functions'>built-in functions</a>.</p>
@@ -218,9 +207,9 @@ echo &quot;Hi!&quot;</code></pre></td></tr>
 <tr><td><code>x^23</code></td><td><math><msup><mi>x</mi><mn>23</mn></msup></math></td><td><code>(a, b; c, d)</code></td><td><math><mrow><mo fence="true" form="prefix">(</mo><mtable columnalign="center center"><mtr><mtd><mi>a</mi></mtd><mtd><mi>b</mi></mtd></mtr><mtr><mtd><mi>c</mi></mtd><mtd><mi>d</mi></mtd></mtr></mtable><mo fence="true" form="postfix">)</mo></mrow></math></td></tr>
 <tr><td><code>x^(a+b)</code></td><td><math><msup><mi>x</mi><mrow><mi>a</mi><mo>+</mo><mi>b</mi></mrow></msup></math></td><td><code>[a, b; c, d]</code></td><td><math><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center center"><mtr><mtd><mi>a</mi></mtd><mtd><mi>b</mi></mtd></mtr><mtr><mtd><mi>c</mi></mtd><mtd><mi>d</mi></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></math></td></tr>
 <tr><td><code>x_subscript</code></td><td><math><mrow><mi>x</mi><msub><mrow></mrow><mtext>subscript</mtext></msub></mrow></math></td><td><code>{:a, b; c, d:}</code></td><td><math><mtable columnalign="center center"><mtr><mtd><mi>a</mi></mtd><mtd><mi>b</mi></mtd></mtr><mtr><mtd><mi>c</mi></mtd><mtd><mi>d</mi></mtd></mtr></mtable></math></td></tr>
-<tr><td><code>x_(a+b)</code></td><td><math><msub><mi>x</mi><mrow><mi>a</mi><mo>+</mo><mi>b</mi></mrow></msub></math></td><td><code>[1..4] = ?</code></td><td><math><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center center center center"><mtr><mtd><mn>1</mn></mtd><mtd><mn>2</mn></mtd><mtd><mn>3</mn></mtd><mtd><mn>4</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></math></td></tr>
-<tr><td><code>x′</code></td><td><math><msup><mi>x</mi><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msup></math></td><td><code>[1..2..5] = ?</code></td><td><math><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center center center"><mtr><mtd><mn>1</mn></mtd><mtd><mn>3</mn></mtd><mtd><mn>5</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></math></td></tr>
-<tr><td><code>|x|  ‖x‖</code></td><td><math><mrow><mi>|</mi><mi>x</mi><mi>|</mi><mtext> </mtext><mtext> </mtext><mtext> </mtext><mi>‖</mi><mi>x</mi><mi>‖</mi></mrow></math></td><td><code>{a if b;</code> <br><code>c otherwise}</code></td><td><math><mrow><mo fence="true" form="prefix">{</mo><mtable class="tml-cases"><mtr><mtd><mi>a</mi></mtd><mtd><mrow><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">f</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mi>b</mi></mrow></mtd></mtr><mtr><mtd><mi>c</mi></mtd><mtd><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">t</mi></mrow><mrow><mi mathvariant="normal">h</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">w</mi></mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">s</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow></mtd></mtr></mtable><mo fence="true" form="postfix"></mo></mrow></math></td></tr>
+<tr><td><code>x_(a+b)</code></td><td><math><msub><mi>x</mi><mrow><mi>a</mi><mo>+</mo><mi>b</mi></mrow></msub></math></td><td><code>[1:4...] = ?</code></td><td><math><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center"><mtr><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>2</mn></mtd></mtr><mtr><mtd><mn>3</mn></mtd></mtr><mtr><mtd><mn>4</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></math></td></tr>
+<tr><td><code>x′</code></td><td><math><msup><mi>x</mi><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msup></math></td><td><code>[1:2:5...] = ?</code></td><td><math><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center"><mtr><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>3</mn></mtd></mtr><mtr><mtd><mn>5</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></math></td></tr>
+<tr><td><code>|x|  ‖x‖</code></td><td><math><mrow><mi>|</mi><mi>x</mi><mi>|</mi><mtext> </mtext><mtext> </mtext><mtext> </mtext><mtext>‖</mtext><mi>x</mi><mtext>‖</mtext></mrow></math></td><td><code>{a if b;</code> <br><code>c otherwise}</code></td><td><math><mrow><mo fence="true" form="prefix">{</mo><mtable class="tml-cases"><mtr><mtd><mi>a</mi></mtd><mtd><mrow><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">f</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mi>b</mi></mrow></mtd></mtr><mtr><mtd><mi>c</mi></mtd><mtd><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">t</mi></mrow><mrow><mi mathvariant="normal">h</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">w</mi></mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">s</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow></mtd></mtr></mtable><mo fence="true" form="postfix"></mo></mrow></math></td></tr>
 <tr><td><code>A--&gt;note B</code></td><td><math><mrow><mi>A</mi><mrow><mspace width="0.2778em"></mspace><munderover><mo stretchy="true" minsize="1.75em" lspace="0" rspace="0">→</mo><mspace width="2.5000em"></mspace><mrow><mspace width="0.4286em"></mspace><mrow><mrow><mi mathvariant="normal">n</mi></mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">t</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow></mrow><mspace width="0.4286em"></mspace></mrow></munderover><mspace width="0.2778em"></mspace></mrow><mi>B</mi></mrow></math></td><td rowspan="2"><code>``#size	dia	area</code> <br><code>in 	in²</code> <br><code>#3 	0.375  	0.11</code><br><code>#4 	0.5    	0.2 ``</code></td><td rowspan="2"><math><mtable columnalign="left right right" class="tml-array"><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>size</mtext></mtd><mtd style="text-align:-webkit-right;"><mtext>dia</mtext></mtd><mtd style="text-align:-webkit-right;"><mtext>area</mtext></mtd></mtr><mtr class="tml-hline-solid"><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mrow></mrow></mtd><mtd style="text-align:-webkit-right;"><mtext>in</mtext></mtd><mtd style="text-align:-webkit-right;"><msup><mtext>in</mtext><mn>2</mn></msup></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>#3</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>0.375</mn></mtd><mtd style="text-align:-webkit-right;"><mn>0.11</mn></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>#4</mtext></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>0.5</mn><mphantom><mn>00</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>0.2</mn><mphantom><mn>0</mn></mphantom></mrow></mtd></mtr></mtable></math></td></tr>
 <tr><td><code>\red(&quot;ng&quot;)</code></td><td><math><mrow><mtext style="color:#ff0000;">ng</mtext></mrow></math></td></tr>
 </table>
@@ -247,8 +236,8 @@ echo &quot;Hi!&quot;</code></pre></td></tr>
 <tr><td><code>///</code></td><td>∕</td><td>cc P</td><td>𝒫</td><td>Pi</td><td>Π</td><td>zeta</td><td>ζ</td></tr>
 <tr><td><code>&lt;=</code></td><td>≤</td><td>\ceil</td><td>⎾⏋</td><td>Sigma</td><td>Σ</td><td>eta</td><td>η</td></tr>
 <tr><td><code>&gt;=</code></td><td>≥</td><td>\floor</td><td>⎿⏌</td><td>Phi</td><td>Φ</td><td>theta</td><td>θ</td></tr>
-<tr><td><code>!=</code></td><td>≠</td><td><code>&lt;&lt;</code></td><td>⟨</td><td>Psi</td><td>Ψ</td><td>iota</td><td>ι</td></tr>
-<tr><td><code>&lt;&gt;</code></td><td>≠</td><td><code>&gt;&gt;</code></td><td>⟩</td><td>Omega</td><td>Ω</td><td>kappa</td><td>κ</td></tr>
+<tr><td><code>&lt;&gt;</code></td><td>≠</td><td><code>&lt;&lt;</code></td><td>⟨</td><td>Psi</td><td>Ψ</td><td>iota</td><td>ι</td></tr>
+<tr><td></td><td></td><td><code>&gt;&gt;</code></td><td>⟩</td><td>Omega</td><td>Ω</td><td>kappa</td><td>κ</td></tr>
 <tr><td>~=</td><td>≅</td><td>^^</td><td>∧</td><td>y bar</td><td>y̅</td><td>lambda</td><td>λ</td></tr>
 <tr><td>~~</td><td>≈</td><td>vv</td><td>∨</td><td>θ hat</td><td><math><mover><mi>θ</mi><mo stretchy="false" style="math-style:normal;math-depth:0;">^</mo></mover></math></td><td>mu</td><td>μ</td></tr>
 <tr><td>\in</td><td>∈</td><td>vvv</td><td>⋁</td><td>P vec</td><td><math><mover><mi>P</mi><mo stretchy="false" style="transform:scale(0.75) translate(10%, 30%);">→</mo></mover></math></td><td>nu</td><td>ν</td></tr>
@@ -261,16 +250,16 @@ echo &quot;Hi!&quot;</code></pre></td></tr>
 <tr><td><code>-&gt;</code></td><td>→</td><td>\not</td><td>¬</td><td>a ring</td><td>å</td><td>phi</td><td>ϕ</td></tr>
 <tr><td><code>&lt;-</code></td><td>←</td><td>\xor</td><td>⊻</td><td>AA</td><td>∀</td><td>chi</td><td>χ</td></tr>
 <tr><td><code>&lt;-&gt;</code></td><td>↔</td><td>\sum</td><td>∑</td><td>EE</td><td>∃</td><td>psi</td><td>ψ</td></tr>
-<tr><td><code>=&gt;</code></td><td>⇒</td><td>\int</td><td>∫</td><td>CC</td><td>ℂ</td><td>omega</td><td>ω</td></tr>
-<tr><td>\circ</td><td>∘</td><td>\iint</td><td>∬</td><td>HH</td><td>ℍ</td><td>\hbar</td><td>ℏ</td></tr>
-<tr><td>|||</td><td>¦</td><td>ii</td><td><math><msqrt><mrow><mtext>-</mtext><mn>1</mn></mrow></msqrt></math></td><td>NN</td><td>ℕ</td><td>\ell</td><td>ℓ</td></tr>
-<tr><td>||</td><td>‖</td><td>OO</td><td><math><mrow><mi>O</mi><mtext>︀</mtext></mrow></math></td><td>QQ</td><td>ℚ</td><td>\euro</td><td>€</td></tr>
-<tr><td>/_</td><td>∠</td><td>\c</td><td>¢</td><td>RR</td><td>ℝ</td><td>\yen</td><td>¥</td></tr>
+<tr><td>\circ</td><td>∘</td><td>\int</td><td>∫</td><td>CC</td><td>ℂ</td><td>omega</td><td>ω</td></tr>
+<tr><td>|||</td><td>¦</td><td>\iint</td><td>∬</td><td>HH</td><td>ℍ</td><td>\hbar</td><td>ℏ</td></tr>
+<tr><td>\|</td><td>‖</td><td>ii</td><td><math><msqrt><mrow><mtext>-</mtext><mn>1</mn></mrow></msqrt></math></td><td>NN</td><td>ℕ</td><td>\ell</td><td>ℓ</td></tr>
+<tr><td>/_</td><td>∠</td><td>OO</td><td><math><mrow><mi>O</mi><mtext>︀</mtext></mrow></math></td><td>QQ</td><td>ℚ</td><td>\euro</td><td>€</td></tr>
+<tr><td></td><td></td><td>\c</td><td>¢</td><td>RR</td><td>ℝ</td><td>\yen</td><td>¥</td></tr>
 <tr><td></td><td></td><td></td><td></td><td>ZZ</td><td>ℤ</td><td></td><td></td></tr>
 </table>
 <p>The font corrections, e.g., <code>bb …</code> work on any letter from A to Z or a to z.</p>
 <p><code>--&gt;</code>, <code>&lt;--</code>, and <code>&lt;--&gt;</code> will auto correct into extensible arrows, as in: <math><mrow><mi>A</mi><mrow><mspace width="0.2778em"></mspace><munderover><mo stretchy="true" minsize="1.75em" lspace="0" rspace="0">→</mo><mspace width="2.5000em"></mspace><mrow><mspace width="0.4286em"></mspace><mtext>note</mtext><mspace width="0.4286em"></mspace></mrow></munderover><mspace width="0.2778em"></mspace></mrow><mi>B</mi></mrow></math>.</p>
-<p><code>\&lt;space&gt;</code> auto-corrects to <code>˽</code> in the text editor, which renders as a space.</p>
+<p><code>&lt;space&gt;</code> auto-corrects to <code>˽</code> in the text editor, which renders as a space.</p>
 <h4 id='display-selectors'>Display Selectors</h4>
 <table class="c1c c2c"><tr><th>Display selector</th>
 <th>Display Selector for Unit-Aware Calculation</th>
@@ -287,9 +276,9 @@ echo &quot;Hi!&quot;</code></pre></td></tr>
 <th>Accessor</th>
 <th>Returns</th>
 </tr>
-<tr><td>string<br>s = &quot;abcde&quot;</td><td>s[2]<br>s[2..4]<br>s[3..]</td><td>b<br>bce<br>cde</td></tr>
-<tr><td>Vector<br>𝐕 = <math><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center center center center center"><mtr><mtd><mn>1</mn></mtd><mtd><mn>2</mn></mtd><mtd><mn>3</mn></mtd><mtd><mn>4</mn></mtd><mtd><mn>5</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></math></td><td>𝐕[2]<br>𝐕[2..4]<br>𝐕[3..]</td><td>2<br><math><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center center center"><mtr><mtd><mn>2</mn></mtd><mtd><mn>3</mn></mtd><mtd><mn>4</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></math> <br><math><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center center center"><mtr><mtd><mn>3</mn></mtd><mtd><mn>4</mn></mtd><mtd><mn>5</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></math></td></tr>
-<tr><td>Matrix<br>𝐌 = <math><mrow><mo fence="true" form="prefix">(</mo><mtable columnalign="center center center"><mtr><mtd><mn>1</mn></mtd><mtd><mn>2</mn></mtd><mtd><mn>3</mn></mtd></mtr><mtr><mtd><mn>4</mn></mtd><mtd><mn>5</mn></mtd><mtd><mn>6</mn></mtd></mtr><mtr><mtd><mn>7</mn></mtd><mtd><mn>8</mn></mtd><mtd><mn>9</mn></mtd></mtr></mtable><mo fence="true" form="postfix">)</mo></mrow></math></td><td>𝐌[2, 3]<br>𝐌[3,]<br>𝐌[2..3, 1..2]</td><td>6<br><math><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center center center"><mtr><mtd><mn>7</mn></mtd><mtd><mn>8</mn></mtd><mtd><mn>9</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></math> <br><math><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center center"><mtr><mtd><mn>4</mn></mtd><mtd><mn>5</mn></mtd></mtr><mtr><mtd><mn>7</mn></mtd><mtd><mn>8</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></math></td></tr>
+<tr><td>string<br>s = &quot;abcde&quot;</td><td>s[2]<br>s[2:4]<br>s[3:end]</td><td>b<br>bce<br>cde</td></tr>
+<tr><td>Vector<br>𝐕 = <math><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center"><mtr><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>2</mn></mtd></mtr><mtr><mtd><mn>3</mn></mtd></mtr><mtr><mtd><mn>4</mn></mtd></mtr><mtr><mtd><mn>5</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></math></td><td>𝐕[2]<br>𝐕[2:4]<br>𝐕[3:end]</td><td>2<br><math><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center"><mtr><mtd><mn>2</mn></mtd></mtr><mtr><mtd><mn>3</mn></mtd></mtr><mtr><mtd><mn>4</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></math> <br><math><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center"><mtr><mtd><mn>3</mn></mtd></mtr><mtr><mtd><mn>4</mn></mtd></mtr><mtr><mtd><mn>5</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></math></td></tr>
+<tr><td>Matrix<br>𝐌 = <math><mrow><mo fence="true" form="prefix">(</mo><mtable columnalign="center center center"><mtr><mtd><mn>1</mn></mtd><mtd><mn>2</mn></mtd><mtd><mn>3</mn></mtd></mtr><mtr><mtd><mn>4</mn></mtd><mtd><mn>5</mn></mtd><mtd><mn>6</mn></mtd></mtr><mtr><mtd><mn>7</mn></mtd><mtd><mn>8</mn></mtd><mtd><mn>9</mn></mtd></mtr></mtable><mo fence="true" form="postfix">)</mo></mrow></math></td><td>𝐌[2, 3]<br>𝐌[3,:]<br>𝐌[2:3, 1:2]</td><td>6<br> <math><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center center center"><mtr><mtd><mn>7</mn></mtd><mtd><mn>8</mn></mtd><mtd><mn>9</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></math> <br><math><mrow><mo fence="true" form="prefix">(</mo><mtable columnalign="center center"><mtr><mtd><mn>4</mn></mtd><mtd><mn>5</mn></mtd></mtr><mtr><mtd><mn>7</mn></mtd><mtd><mn>8</mn></mtd></mtr></mtable><mo fence="true" form="postfix">)</mo></mrow></math></td></tr>
 <tr><td>Data Frame<br><img src="images/dataframe.png" alt="dataframe" width="200"></td><td>DF.B<br>DF[&quot;B&quot;]<br>DF.area<br>DF.B.area<br>DF[&quot;B&quot;].area<br>DF[&quot;B&quot;, &quot;area&quot;]<br>DF.w[1]</td><td>An entire row<br>An entire row<br>Column vector<br>22<br>22<br>22<br>4</td></tr>
 </table>
 </div>
@@ -300,9 +289,7 @@ echo &quot;Hi!&quot;</code></pre></td></tr>
 <table><tr><th>Form</th>
 <th>Examples</th>
 </tr>
-<tr><td rowspan="4"><figure><img src="images/assignment-railroad.svg" class="figimg" alt="assignment">
-<figcaption>identifier = value</figcaption></figure>
-</td><td><code>x = 5</code></td></tr>
+<tr><td rowspan="4"><img src="images/assignment-railroad.svg" alt="assignment"></td><td><code>x = 5</code></td></tr>
 <tr><td><code>L = 3.1 &#x27;m&#x27;</code></td></tr>
 <tr><td><code>w = 100 &#x27;lbf/ft&#x27;</code></td></tr>
 <tr><td>name = &quot;James&quot;</td></tr>
@@ -319,7 +306,7 @@ echo &quot;Hi!&quot;</code></pre></td></tr>
 <tr><td><code>A = 2 &#x27;m&#x27; × 4 &#x27;feet&#x27; = ?? m²</code></td><td><math><mrow><mi>A</mi><mo>=</mo></mrow><mrow><mn>2</mn><mspace width="0.2778em"></mspace><mtext>m</mtext><mo>×</mo></mrow><mrow><mn>4</mn><mspace width="0.2778em"></mspace><mtext>feet</mtext><mo>=</mo></mrow><mrow><mn>2.4384</mn><mspace width="0.2778em"></mspace><msup><mtext>m</mtext><mn>2</mn></msup></mrow></math></td></tr>
 </table>
 <p>The statement form is more precisely defined as:</p>
-<p><img src="images/statement-railroad.svg" alt="statement"> <code></code></p>
+<p><img src="images/statement-railroad.svg" alt="statement"></p>
 <p>At the beginning of the statement, you can write an optional variable name. The result of the calculation will be assigned to that variable. Expressions later in the document can call the variable. Variable names must qualify as valid <a href='#identifiers'>identifiers</a>. They are case-sensitive and bold-sensitive. A search for variable <em>E</em> will not find <em>e</em>. A search for <strong>M</strong> will not find <em>M</em>.</p>
 <p>You can define a unit for the result with a leading currency symbol or a trailing unit name, but not both in the same statement.</p>
 <p>You can also slip in a <code>;</code> character just before the final <code>=</code> sign in a statement. That will create a multiple line statement, with aligned <code>=</code> signs.</p>
@@ -353,7 +340,7 @@ echo &quot;Hi!&quot;</code></pre></td></tr>
 </li>
 <li><p>Primes may be appended to the very end, as in: ¢f_c′¢.</p>
 </li>
-<li><p>The following keywords may not be used as variable names: <code>π</code>, <code>j</code>, <code>ℏ</code>, <code>true</code>, <code>false</code>, <code>root</code>, <code>if</code>, <code>else</code>, <code>otherwise</code>, <code>end</code>, <code>and</code>, <code>or</code>, <code>modulo</code>, <code>in</code>, <code>to</code>.</p>
+<li><p>The following keywords may not be used as variable names: <code>π</code>, <code>im</code>, <code>ℏ</code>, <code>pi</code>, <code>true</code>, <code>false</code>, <code>root</code>, <code>if</code>, <code>else</code>, <code>elseif</code>, <code>otherwise</code>, <code>end</code>, <code>and</code>, <code>or</code>, <code>in</code>, <code>to</code>.</p>
 <p><img src="images/identifier-railroad.svg" alt="letter letter-or-digit-or-accent prime"></p>
 </li>
 </ul>
@@ -387,9 +374,9 @@ echo &quot;Hi!&quot;</code></pre></td></tr>
 <dd><p>A <em>string</em> literal is a string of text characters enclosed by a pair of straight double quotation marks. The string may include any Unicode character except a straight double quotation mark, a newline, or a carriage return.</p>
 <pre><code>&quot;This is a string.&quot;</code></pre><p>You can call a subset of any string with an index or range in brackets. Hurmet indices are one-based. Examples:</p>
 <pre><code>a = &quot;abcdefg&quot;
-a[2]     # returns &quot;b&quot;
-a[2..4]   # returns &quot;bcd&quot;
-a[5..]    # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong></p>
+a[2]      # returns &quot;b&quot;
+a[2:4]    # returns &quot;bcd&quot;
+a[5:end]  # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong></p>
 <p>Strings will be rendered as math if they are delimited with single backticks instead of double quotes. So somthing like <code>`M_n`</code> will return as <math><mrow><mi>M</mi><msub><mrow></mrow><mtext>n</mtext></msub></mrow></math>. This is useful mostly when a calculation checks a condition and reports whether some computed variable can be accepted.</p>
 </dd>
 <dt id='number'>Number</dt>
@@ -402,16 +389,16 @@ a[5..]    # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong><
 <p>While calculations are underway, Hurmet holds every number in memory in rational number format. The numerator and denominator are each integers of arbitrary length. So Hurmet can work precisely with numbers like 0.1 and 0¹⁄₃. Trignonometry and roots are done in double-precision floating point, good to about 15 significant digits.</p>
 </div><dt id='complex-number'>Complex Number</dt>
 <dd><p>One can write a complex number in two forms:</p>
-<ul><li><p><math><mrow><mi>a</mi><mo>+</mo></mrow><mrow><mi>j</mi><mtext> </mtext><mi>b</mi></mrow></math>    The letter “<math><mi>j</mi></math>” is identical to <math><msqrt><mrow><mtext>-</mtext><mn>1</mn></mrow></msqrt></math> by Hurmet definition. Be sure to write a space after <math><mi>j</mi></math>.</p>
+<ul><li><p><math><mrow><mi>a</mi><mo>±</mo></mrow><mrow><mi>b</mi><mspace width="0.1667em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">m</mi></mrow></mrow></mrow></math>    The letters <code>im</code> are identical to <math><msqrt><mrow><mtext>-</mtext><mn>1</mn></mrow></msqrt></math> by Hurmet definition.</p>
 </li>
 <li><p><math><mrow><mi>r</mi><mi>∠</mi><mi>θ</mi></mrow></math>    The characters <code>/_</code> will auto-correct into ∠ and <math><mi>θ</mi></math> is in radians.</p>
 </li>
 </ul>
 <p>Also, the character <strong>°</strong> is now a unit name. So one can also write a polar notation as <math><mrow><mi>r</mi><mi>∠</mi><mi>θ</mi><mi>°</mi></mrow></math> and the phase angle will be unit-aware. The characters <code>ooo</code> will auto-correct into °</p>
 <p>Examples:</p>
-<div class="indented"><p><math><mrow><mi>z</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo>=</mo></mrow><mrow><mn>2</mn><mo>+</mo></mrow><mrow><mi>j</mi><mn>3</mn></mrow></math></p>
+<div class="indented"><p><math><mrow><mi>z</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo>=</mo></mrow><mrow><mn>2</mn><mo>+</mo></mrow><mrow><mn>3</mn><mspace width="0.1667em"></mspace><mspace width="0.1667em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">m</mi></mrow></mrow></mrow></math></p>
 <p><math><mrow><mi>z</mi><msub><mrow></mrow><mtext>2</mtext></msub><mo>=</mo></mrow><mrow><mn>4</mn><mi>∠</mi><mn>30</mn><mi>°</mi></mrow></math></p>
-<p><math><mrow><mi>z</mi><mo>=</mo></mrow><mrow><mi>z</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo>+</mo></mrow><mrow><mi>z</mi><msub><mrow></mrow><mtext>2</mtext></msub><mo>=</mo></mrow><mrow><mo form="prefix" stretchy="false" style="color:#0000FF;">(</mo><mn style="color:#0000FF;">2</mn><mo style="color:#0000FF;">+</mo></mrow><mrow><mi style="color:#0000FF;">j</mi><mn style="color:#0000FF;">3</mn><mo form="postfix" stretchy="false" style="color:#0000FF;">)</mo><mo style="color:#0000FF;">+</mo></mrow><mrow><mo form="prefix" stretchy="false" style="color:#0000FF;">(</mo><mn style="color:#0000FF;">4</mn><mi style="color:#0000FF;">∠</mi><mn style="color:#0000FF;">30</mn><mi style="color:#0000FF;">°</mi><mo form="postfix" stretchy="false" style="color:#0000FF;">)</mo><mo>=</mo></mrow><mrow><mn>5.46</mn><mo>+</mo></mrow><mrow><mrow><mrow><mi mathvariant="normal">j</mi></mrow><mn>5</mn></mrow></mrow></math></p>
+<p><math><mrow><mi>z</mi><mo>=</mo></mrow><mrow><mi>z</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo>+</mo></mrow><mrow><mi>z</mi><msub><mrow></mrow><mtext>2</mtext></msub><mo>=</mo></mrow><mrow><mo form="prefix" stretchy="false" style="color:#0000FF;">(</mo><mn style="color:#0000FF;">2</mn><mo style="color:#0000FF;">+</mo></mrow><mrow><mn style="color:#0000FF;">3</mn><mspace width="0.1667em" style="color:#0000FF;"></mspace><mspace width="0.1667em" style="color:#0000FF;"></mspace><mrow style="color:#0000FF;"><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">m</mi></mrow></mrow><mo form="postfix" stretchy="false" style="color:#0000FF;">)</mo><mo style="color:#0000FF;">+</mo></mrow><mrow><mo form="prefix" stretchy="false" style="color:#0000FF;">(</mo><mn style="color:#0000FF;">4</mn><mi style="color:#0000FF;">∠</mi><mn style="color:#0000FF;">30</mn><mi style="color:#0000FF;">°</mi><mo form="postfix" stretchy="false" style="color:#0000FF;">)</mo><mo>=</mo></mrow><mrow><mn>5.46</mn><mo>+</mo></mrow><mrow><mn>5</mn><mspace width="0.1667em"></mspace><mspace width="0.1667em"></mspace><mrow><mrow><mi mathvariant="normal">b</mi></mrow><mrow><mi mathvariant="normal">m</mi></mrow></mrow></mrow></math></p>
 </div></dd>
 <dt id='unit'>Unit</dt>
 <dd><p>A Humet <em>unit</em> can be applied to a numeric value. There are three ways to write a Hurmet unit.</p>
@@ -445,25 +432,23 @@ a[5..]    # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong><
 </dd>
 <dt id='matrix'>Matrix</dt>
 <dd><p>A Hurmet <em>matrix</em> is a one or two dimensional arrangement of matrix elements. A Hurmet matrix element can be a number, a string, <code>true</code>, <code>false</code>, or an exprression that resolves to one of those simple types.</p>
-<p>A Hurmet <em>vector</em> is a one dimensional matrix, either a row vector or a column vector.</p>
-<p>A matrix literal is written between delimiters, either <code>( )</code> or <code>[ ]</code> or <code>{: }</code>. Matrix elements are separated by commas. Matrix rows are separated by semi-colons. Be sure to write a space after comma separators so they are not confused with decimals inside a number. Here are some matrix examples:</p>
+<p>A matrix literal is written between delimiters, either <code>( )</code> or <code>[ ]</code> or <code>{: }</code>. Matrix elements are horizontally separated by tabs or commas. Matrix rows are separated by semi-colons. So this: <code>(1, 0; 0, 1)</code> renders as <math><mrow><mo fence="true" form="prefix">(</mo><mtable columnalign="center center"><mtr><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr></mtable><mo fence="true" form="postfix">)</mo></mrow></math>.</p>
+<p>A Hurmet <em>vector</em> is a one dimensional array. If you multiply it times a matrix, a Hurmet vector will act like a column vector. Write a vector literal with values separated by semi-colons.</p>
 <table><tr><th>Input</th>
 <th>Renders as</th>
 </tr>
-<tr><td><code>(1, 0; 0, 1)</code></td><td><math><mrow><mo fence="true" form="prefix">(</mo><mtable columnalign="center center"><mtr><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr></mtable><mo fence="true" form="postfix">)</mo></mrow></math></td></tr>
 <tr><td><code>[2.1; -15.3]</code></td><td><math><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center"><mtr><mtd><mn>2.1</mn></mtd></mtr><mtr><mtd><mrow><mtext>-</mtext><mn>15.3</mn></mrow></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></math></td></tr>
-<tr><td><code>{:1, 0; 0, 1}</code></td><td><math><mtable columnalign="center center"><mtr><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr></mtable></math></td></tr>
+<tr><td><code>[4; 5]</code></td><td><math><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center"><mtr><mtd><mn>4</mn></mtd></mtr><mtr><mtd><mn>5</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></math></td></tr>
 </table>
-<p>Another way to create a Hurmet vector is to write a range of numbers between brackets; the form is <code>[start:step:end]</code>. A Hurmet calculation of that form will return a row vector with every number in the range. The step size is optional (default = 1). Examples:</p>
+<p>Another way to create a Hurmet vector is to write a range of numbers between brackets; the form is <code>[start:step:end...]</code>. A Hurmet calculation of that form will return a vector with every number in the range. The step size is optional (default = 1). Examples:</p>
 <table><tr><th>Input</th>
 <th>Result</th>
 </tr>
-<tr><td><code>[2..5] = ?</code></td><td><math><mrow><mo form="prefix" stretchy="false">[</mo><mn>2</mn><mi>.</mi><mi>.</mi><mn>5</mn><mo form="postfix" stretchy="false">]</mo><mo>=</mo></mrow><mrow><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center center center center"><mtr><mtd><mn>2</mn></mtd><mtd><mn>3</mn></mtd><mtd><mn>4</mn></mtd><mtd><mn>5</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></mrow></math></td></tr>
-<tr><td><code>[1..2..5] = ?</code></td><td><math><mrow><mo form="prefix" stretchy="false">[</mo><mn>1</mn><mi>.</mi><mi>.</mi><mn>2</mn><mi>.</mi><mi>.</mi><mn>5</mn><mo form="postfix" stretchy="false">]</mo><mo>=</mo></mrow><mrow><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center center center"><mtr><mtd><mn>1</mn></mtd><mtd><mn>3</mn></mtd><mtd><mn>5</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></mrow></math></td></tr>
+<tr><td><code>[2:5...] = ?</code></td><td><math><mrow><mo form="prefix" stretchy="false">[</mo><mn>2</mn><mo lspace="0em" rspace="0em">:</mo></mrow><mrow><mn>5</mn><mo>…</mo><mspace width="0.1667em"></mspace></mrow><mrow><mo form="postfix" stretchy="false">]</mo><mo>=</mo></mrow><mrow><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center"><mtr><mtd><mn>2</mn></mtd></mtr><mtr><mtd><mn>3</mn></mtd></mtr><mtr><mtd><mn>4</mn></mtd></mtr><mtr><mtd><mn>5</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></mrow></math></td></tr>
+<tr><td><code>[1:2:5...] = ?</code></td><td><math><mrow><mo form="prefix" stretchy="false">[</mo><mn>1</mn><mo lspace="0em" rspace="0em">:</mo></mrow><mrow><mn>2</mn><mo lspace="0em" rspace="0em">:</mo></mrow><mrow><mn>5</mn><mo>…</mo><mspace width="0.1667em"></mspace></mrow><mrow><mo form="postfix" stretchy="false">]</mo><mo>=</mo></mrow><mrow><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center"><mtr><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>3</mn></mtd></mtr><mtr><mtd><mn>5</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow></mrow></math></td></tr>
 </table>
-<p>You can call individual elements with index integers between brackets, as in <code>𝐕[5]</code> or <code>𝐌[1, 3]</code>. You can use a variable name for the index if the variable returns an integer.</p>
-<p>You can access a sub-matrix using the range operator, “..”, as in <code>𝐌[2..5, 1]</code>. Entire rows or columns can be called by omitting an index, as in <code>𝐌[2,]</code> or <code>𝐌[,1]</code>. Hurmet indexes are one-based.</p>
-<p>To write a numeric interval instead of a matrix, write the same thing, but with no spaces: <code>[1,2,3…10]</code></p>
+<p>You can call individual elements with index integers between brackets, as in <code>𝐕[5]</code> or <code>𝐌[1, 3]</code>. You can use a variable name for the index if the variable returns an integer. Hurmet indexes are one-based.</p>
+<p>You can access a sub-matrix using the range operator, “:”, as in <code>𝐕[2:5]</code> or <code>𝐕[2:end]</code>. Entire rows or columns can be called, as in <code>𝐌[2,:]</code> or <code>𝐌[:,1]</code>. </p>
 </dd>
 <dt id='matrix-operations'>Matrix Operations</dt>
 <dd><p>All the usual math operators can be applied to a numeric matrix. The operators mostly work in an element-wise fashion. If you add a scalar to a matrix, or pass a matrix to most functions, Hurmet will do an element-by-element calculation and return a matrix, as in:</p>
@@ -472,9 +457,9 @@ a[5..]    # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong><
 </div><p>Spreadsheet calculations can often be replaced by calulations using vectors, as above. When you really need to get things right, it’s great to be able to see the expression and all the plugged-in values.</p>
 <div id="matrix-mult">
 <p>Multiplication of two matrices is different than other operations. Mathematicians have several ways to multiply matrices. In Hurmet, you choose the type of multiplication by your choice of multiplication operator:</p>
-<p><math><mrow><mi>𝐀</mi><mo>*</mo></mrow><mrow><mi>𝐁</mi></mrow></math> ↦ element-wise product, <math><mrow><mo form="prefix" stretchy="false">(</mo><mi>𝐀</mi><mo>*</mo></mrow><mrow><mi>𝐁</mi><msub><mo form="postfix" stretchy="false">)</mo><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">j</mi></mrow></mrow></msub><mo>=</mo></mrow><mrow><mrow><mi mathvariant="normal">𝐀</mi><msub><mrow></mrow><mtext>ij</mtext></msub></mrow><mo>×</mo></mrow><mrow><mrow><mi mathvariant="normal">𝐁</mi><msub><mrow></mrow><mtext>ij</mtext></msub></mrow></mrow></math></p>
-<p><math><mrow><mi>𝐀</mi><mtext> </mtext><mi>𝐁</mi></mrow></math> ↦ <a href='null'>matrix product</a>, <math><mrow><mo form="prefix" stretchy="false">(</mo><mi>𝐀</mi><mi>𝐁</mi><msub><mo form="postfix" stretchy="false">)</mo><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">j</mi></mrow></mrow></msub><mo>=</mo></mrow><mrow><msubsup><mo movablelimits="false">∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></msubsup><mspace width="0.1667em"></mspace><mrow><mi mathvariant="normal">𝐀</mi><msub><mrow></mrow><mtext>i</mtext></msub></mrow><mspace width="0.1667em"></mspace><mrow><mi mathvariant="normal">𝐁</mi><msub><mrow></mrow><mtext>kj</mtext></msub></mrow></mrow></math></p>
-<p><math><mrow><mi>𝐀</mi><mo>×</mo></mrow><mrow><mi>𝐁</mi></mrow></math> ↦ <a href='null'>cross product</a> of a pair of three-vectors        = <math><mrow><mi>|</mi><mi>𝐀</mi><mi>‖</mi><mi>𝐁</mi><mi>|</mi><mrow><mspace width="0.1667em"></mspace><mi>sin</mi><mo>⁡</mo></mrow><mo form="prefix" stretchy="false">(</mo><mi>θ</mi><mo form="postfix" stretchy="false">)</mo><mi>𝐧</mi><mi>|</mi></mrow></math></p>
+<p><math><mrow><mi>𝐀</mi><mo>∘</mo></mrow><mrow><mi>𝐁</mi></mrow></math> ↦ element-wise product, <math><mrow><mo form="prefix" stretchy="false">(</mo><mi>𝐀</mi><mo>∘</mo></mrow><mrow><mi>𝐁</mi><msub><mo form="postfix" stretchy="false">)</mo><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">j</mi></mrow></mrow></msub><mo>=</mo></mrow><mrow><mrow><mi mathvariant="normal">𝐀</mi><msub><mrow></mrow><mtext>ij</mtext></msub></mrow><mo>×</mo></mrow><mrow><mrow><mi mathvariant="normal">𝐁</mi><msub><mrow></mrow><mtext>ij</mtext></msub></mrow></mrow></math></p>
+<p><math><mrow><mi>𝐀</mi><mtext> </mtext><mi>𝐁</mi></mrow></math> or <math><mrow><mi>𝐀</mi><mo>*</mo></mrow><mrow><mi>𝐁</mi></mrow></math> ↦ <a href='http://www.intmath.com/matrices-determinants/4-multiplying-matrices.php/'>matrix product</a>, <math><mrow><mo form="prefix" stretchy="false">(</mo><mi>𝐀</mi><mi>𝐁</mi><msub><mo form="postfix" stretchy="false">)</mo><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">j</mi></mrow></mrow></msub><mo>=</mo></mrow><mrow><msubsup><mo movablelimits="false">∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></msubsup><mspace width="0.1667em"></mspace><mrow><mi mathvariant="normal">𝐀</mi><msub><mrow></mrow><mtext>i</mtext></msub></mrow><mspace width="0.1667em"></mspace><mrow><mi mathvariant="normal">𝐁</mi><msub><mrow></mrow><mtext>kj</mtext></msub></mrow></mrow></math></p>
+<p><math><mrow><mi>𝐀</mi><mo>×</mo></mrow><mrow><mi>𝐁</mi></mrow></math> ↦ <a href='http://www.intmath.com/vectors/8-cross-product-vectors.php/'>cross product</a> of a pair of three-vectors        = <math><mrow><mi>|</mi><mi>𝐀</mi><mo lspace="0.2222em" rspace="0.2222em">||</mo></mrow><mrow><mi>𝐁</mi><mi>|</mi><mrow><mspace width="0.1667em"></mspace><mi>sin</mi><mo>⁡</mo></mrow><mo form="prefix" stretchy="false">(</mo><mi>θ</mi><mo form="postfix" stretchy="false">)</mo><mi>𝐧</mi></mrow></math></p>
 <p><math><mrow><mi>𝐀</mi><mo>⋅</mo></mrow><mrow><mi>𝐁</mi></mrow></math> ↦ dot product = <math><mrow><msubsup><mo movablelimits="false">∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></msubsup><mo form="prefix" stretchy="false">(</mo><mrow><mi mathvariant="normal">𝐀</mi><msub><mrow></mrow><mtext>i</mtext></msub></mrow><mspace width="0.1667em"></mspace><mspace width="0.1667em"></mspace><mrow><mi mathvariant="normal">𝐁</mi><msub><mrow></mrow><mtext>i</mtext></msub></mrow><mo form="postfix" stretchy="false">)</mo></mrow></math></p>
 </div>
 <p>Here are more of Hurmet’s matrix operations:</p>
@@ -482,11 +467,11 @@ a[5..]    # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong><
 <p><math><msup><mi>𝐀</mi><mrow><mtext>-</mtext><mn>1</mn></mrow></msup></math> ↦ an inverted matrix, if <math><mi>𝐀</mi></math> is square.</p>
 <p><math><mrow><mi>|</mi><mi>𝐀</mi><mi>|</mi></mrow></math> ↦ <math><mrow><mo fence="true" form="prefix">{</mo><mtable class="tml-cases"><mtr><mtd><mrow><mrow><mi mathvariant="normal">d</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow><mrow><mi mathvariant="normal">t</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">m</mi></mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">n</mi></mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">n</mi></mrow><mrow><mi mathvariant="normal">t</mi></mrow></mrow></mtd><mtd><mrow><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">f</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mtext>𝐀 is square</mtext></mrow></mtd></mtr><mtr><mtd><mrow><mrow><mi mathvariant="normal">m</mi></mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">g</mi></mrow><mrow><mi mathvariant="normal">n</mi></mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">t</mi></mrow><mrow><mi mathvariant="normal">u</mi></mrow><mrow><mi mathvariant="normal">d</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow></mrow></mtd><mtd><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">t</mi></mrow><mrow><mi mathvariant="normal">h</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">w</mi></mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">s</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow></mtd></mtr></mtable><mo fence="true" form="postfix"></mo></mrow></math></p>
 <p><math><mrow><mi>abs</mi><mo>⁡</mo></mrow><mrow><mo form="prefix" stretchy="false">(</mo><mi>𝐀</mi><mo form="postfix" stretchy="false">)</mo></mrow></math> ↦ element-wise absolute values</p>
-<p><math><mrow><mi>‖</mi><mi>𝐀</mi><mi>‖</mi></mrow></math> ↦ <math><mrow><mo fence="true" form="prefix">{</mo><mtable class="tml-cases"><mtr><mtd><msqrt><mrow><mi>x</mi><msup><msub><mrow></mrow><mtext>1</mtext></msub><mn>2</mn></msup><mo>+</mo><mo>⋯</mo><mo>+</mo><mi>x</mi><msup><msub><mrow></mrow><mtext>n</mtext></msub><mn>2</mn></msup></mrow></msqrt></mtd><mtd><mrow><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">f</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mtext>𝐀 is a vector</mtext></mrow></mtd></mtr><mtr><mtd><msqrt><mrow><msub><mo movablelimits="false">∑</mo><mi>i</mi></msub><msub><mo movablelimits="false">∑</mo><mi>j</mi></msub><mi>A</mi><msup><msub><mrow></mrow><mtext>ij</mtext></msub><mn>2</mn></msup></mrow></msqrt></mtd><mtd><mrow><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">f</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mtext>𝐀 is a matrix</mtext></mrow></mtd></mtr></mtable><mo fence="true" form="postfix"></mo></mrow></math></p>
-<p><math><mrow><mi>𝐀</mi><mo lspace="0.2222em" rspace="0.2222em">&amp;</mo></mrow><mrow><mi>𝐁</mi></mrow></math> ↦ concatenate 𝐀 and 𝐁 horizontally</p>
-<p><math><mrow><mi>𝐀</mi><mrow><mspace width="0.2222em"></mspace><menclose notation="bottom" style="padding:0 0 0.1em 0;border-bottom:0.065em solid;"><mi>&amp;</mi></menclose><mspace width="0.2222em"></mspace></mrow><mi>𝐁</mi></mrow></math> ↦ concatenate 𝐀 and 𝐁 vertically</p>
+<p><math><mrow><mtext>‖</mtext><mi>𝐀</mi><mtext>‖</mtext></mrow></math> ↦ <math><mrow><mo fence="true" form="prefix">{</mo><mtable class="tml-cases"><mtr><mtd><msqrt><mrow><mi>x</mi><msup><msub><mrow></mrow><mtext>1</mtext></msub><mn>2</mn></msup><mo>+</mo><mo>⋯</mo><mo>+</mo><mi>x</mi><msup><msub><mrow></mrow><mtext>n</mtext></msub><mn>2</mn></msup></mrow></msqrt></mtd><mtd><mrow><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">f</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mtext>𝐀 is a vector</mtext></mrow></mtd></mtr><mtr><mtd><msqrt><mrow><msub><mo movablelimits="false">∑</mo><mi>i</mi></msub><msub><mo movablelimits="false">∑</mo><mi>j</mi></msub><mi>A</mi><msup><msub><mrow></mrow><mtext>ij</mtext></msub><mn>2</mn></msup></mrow></msqrt></mtd><mtd><mrow><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">f</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mtext>𝐀 is a matrix</mtext></mrow></mtd></mtr></mtable><mo fence="true" form="postfix"></mo></mrow></math></p>
+<p><math><mrow><mi>𝐀</mi><mo lspace="0.2222em" rspace="0.2222em">&amp;</mo></mrow><mrow><mi>𝐁</mi></mrow></math> or <math><mrow><mi>hcat</mi><mo>⁡</mo></mrow><mrow><mo form="prefix" stretchy="false">(</mo><mi>𝐀</mi><mo separator="true">,</mo><mspace width="0.2222em"></mspace></mrow><mrow><mi>𝐁</mi><mo form="postfix" stretchy="false">)</mo></mrow></math> ↦ concatenate 𝐀 and 𝐁 horizontally</p>
+<p><math><mrow><mi>vcat</mi><mo>⁡</mo></mrow><mrow><mo form="prefix" stretchy="false">(</mo><mi>𝐀</mi><mo separator="true">,</mo><mspace width="0.2222em"></mspace></mrow><mrow><mi>𝐁</mi><mo form="postfix" stretchy="false">)</mo></mrow></math> ↦ concatenate 𝐀 and 𝐁 vertically</p>
 <p>Functions will mostly work element-wise on an matrix. Exception: functions <code>min()</code> and <code>max()</code> will find the minimum or maximum of the elements in the matrix.</p>
-<p>If you want to write a comma or a semi-colon inside parentheses and not create an matrix, use <code>\,</code> or <code>\;</code>.</p>
+<p>If you want to write a semi-colon inside parentheses and not create a matrix, use <code>\;</code>.</p>
 </dd>
 <dt id='data-frame'>Data Frame</dt>
 <dd><p>A <em>data frame</em> is a two dimensional data structure that can be accessed with row names and column names or by row indices and column indices.</p>
@@ -494,14 +479,13 @@ a[5..]    # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong><
 <p>Data frame literals are written between double backtick delimiters. The text between the backticks must be written in TSV format. (tab-separated values)</p>
 <p>Numbers must use a dot decimal. The second row may contain units of measure. Tabs and newlines are disallowed in data. Quotation marks, <code>&quot;</code>, have no special significance.</p>
 <p>Here’s an example of TSV input:</p>
-<pre><code>rebar =
-``#size	diameter	area
+<pre><code>rebar = ``#size	diameter	area
  	in     	in²
 #3	0.375  	0.11
 #4	0.5    	0.2
 #5	0.625  	0.31
 #6	0.75   	0.44``</code></pre><p>… which renders as:</p>
-<p><math><mtable columnalign="left" rowspacing="0em"><mtr><mtd style="text-align:left;"><mrow><mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow><mrow><mi mathvariant="normal">b</mi></mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow></mrow><mo>=</mo></mrow><mo linebreak="newline"></mo></mtd></mtr><mtr><mtd style="text-align:left;"><mrow><mtable columnalign="left right right" class="tml-array"><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>size</mtext></mtd><mtd style="text-align:-webkit-right;"><mtext>diameter</mtext></mtd><mtd style="text-align:-webkit-right;"><mtext>area</mtext></mtd></mtr><mtr class="tml-hline-solid"><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mrow></mrow></mtd><mtd style="text-align:-webkit-right;"><mtext>in</mtext></mtd><mtd style="text-align:-webkit-right;"><msup><mtext>in</mtext><mn>2</mn></msup></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>#3</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>0.375</mn></mtd><mtd style="text-align:-webkit-right;"><mn>0.11</mn></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>#4</mtext></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>0.5</mn><mphantom><mn>00</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>0.2</mn><mphantom><mn>0</mn></mphantom></mrow></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>#5</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>0.625</mn></mtd><mtd style="text-align:-webkit-right;"><mn>0.31</mn></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>#6</mtext></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>0.75</mn><mphantom><mn>0</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mn>0.44</mn></mtd></mtr></mtable></mrow></mtd></mtr></mtable></math></p>
+<p><math><mrow><mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow><mrow><mi mathvariant="normal">b</mi></mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow></mrow><mo>=</mo></mrow><mrow><mtable columnalign="left right right" class="tml-array"><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>size</mtext></mtd><mtd style="text-align:-webkit-right;"><mtext>diameter</mtext></mtd><mtd style="text-align:-webkit-right;"><mtext>area</mtext></mtd></mtr><mtr class="tml-hline-solid"><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mrow></mrow></mtd><mtd style="text-align:-webkit-right;"><mtext>in</mtext></mtd><mtd style="text-align:-webkit-right;"><msup><mtext>in</mtext><mn>2</mn></msup></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>#3</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>0.375</mn></mtd><mtd style="text-align:-webkit-right;"><mn>0.11</mn></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>#4</mtext></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>0.5</mn><mphantom><mn>00</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>0.2</mn><mphantom><mn>0</mn></mphantom></mrow></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>#5</mtext></mtd><mtd style="text-align:-webkit-right;"><mn>0.625</mn></mtd><mtd style="text-align:-webkit-right;"><mn>0.31</mn></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>#6</mtext></mtd><mtd style="text-align:-webkit-right;"><mrow><mn>0.75</mn><mphantom><mn>0</mn></mphantom></mrow></mtd><mtd style="text-align:-webkit-right;"><mn>0.44</mn></mtd></mtr></mtable></mrow></math></p>
 <p>Hurmet will use the first column as keys to the rest of each row if the content of the top left cell begins with a hash tag, #.</p>
 <p>A dataframe literal can also show totals on the bottom line, via the <code>sumAbove()</code> function. So this input:</p>
 <pre><code>roof = ``#Item             	weight
@@ -540,14 +524,14 @@ total                      	sumAbove()``</code></pre><p>will render like this:<b
 <p>Hurmet calculations are meant to be recognizeable to anyone familiar with standard math notation. That is a broad statement. Here are many nuances:</p>
 <h2 id='constants'>Constants</h2>
 <dl>
-<dt id='<em>π</em>'><em>π</em></dt>
+<dt id='<em>π</em>-or-<strong>pi</strong>'><em>π</em> or <strong>pi</strong></dt>
 <dd><p>If you write <math><mi>π</mi></math> into an expression, Hurmet uses a value of 3.1415926535897932384626433832795028841971693993751.</p>
 </dd>
 <dt id='<em>e</em>'><em>e</em></dt>
 <dd><p>Hurmet will treat <math><mi>e</mi></math> just like any other variable most of the time. But if <math><mi>e</mi></math> is the base of an exponent, for example: <math><msup><mi>e</mi><mi>x</mi></msup></math>, then Hurmet will take <math><mi>e</mi></math> to mean 2.7182818284590452353602874713527.</p>
 </dd>
-<dt id='<em>j</em>'><em>j</em></dt>
-<dd><p><math><mi>j</mi></math> = <math><msqrt><mrow><mtext>-</mtext><mn>1</mn></mrow></msqrt></math>.</p>
+<dt id='<em>im</em>'><em>im</em></dt>
+<dd><p><math><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">m</mi></mrow></mrow></math> = <math><msqrt><mrow><mtext>-</mtext><mn>1</mn></mrow></msqrt></math>.</p>
 </dd>
 <dt id='ℏ'>ℏ</dt>
 <dd><p>For ℏ, Hurmet uses a value of 1.054571817 × 10⁻³⁴ J·s.</p>
@@ -558,14 +542,14 @@ total                      	sumAbove()``</code></pre><p>will render like this:<b
 <th>Example</th>
 <th>Description</th>
 </tr>
-<tr><td rowspan="2">=</td><td><em>x</em> = 15</td><td>Assign a value to a variable.</td></tr>
-<tr><td>if <em>x</em> = 15</td><td>Equality test if in a comparison position.<br>That is, “=” tests for equality if there is something other than a identifier to the left of it or a display selector to the right of it.</td></tr>
+<tr><td>=</td><td><em>x</em> = 15</td><td>Assign a value to a variable.</td></tr>
 <tr><td>+</td><td> 2 + 2</td><td>Addition</td></tr>
 <tr><td>–</td><td> 5 - 3</td><td>Subtraction</td></tr>
 <tr><td>-</td><td><math><mrow><mtext>-</mtext><mn>4</mn></mrow></math></td><td>Unary minus</td></tr>
-<tr><td>*</td><td><math><mrow><mn>2</mn><mo>*</mo></mrow><mrow><mn>4</mn></mrow></math></td><td>Multiplication of numbers.<br>Element-wise product of matrices.</td></tr>
+<tr><td rowspan="2">*</td><td><math><mrow><mn>2</mn><mo>*</mo></mrow><mrow><mn>4</mn></mrow></math></td><td>Multiplication of numbers or matrices.\</td></tr>
+<tr><td><code>&quot;s1&quot;*&quot;s2&quot;</code></td><td>Concatenation of strings</td></tr>
 <tr><td>×</td><td> 2 × 4</td><td>Multiplication of numbers.<br>Cross product of three-vectors.<br>auto-correct: <strong>xx</strong></td></tr>
-<tr><td>·</td><td><math><mrow><mi>a</mi><mo>⋅</mo></mrow><mrow><mi>b</mi></mrow></math></td><td>Multiplication of numbers.<br>Dot product of matrices.<br>auto-correct: dot between two spaces.</td></tr>
+<tr><td>·</td><td><math><mrow><mi>a</mi><mo>⋅</mo></mrow><mrow><mi>b</mi></mrow></math></td><td>Multiplication of numbers.<br>Dot product of vectors or matrices.<br>auto-correct: dot between two spaces.</td></tr>
 <tr><td></td><td><math><mrow><mo form="prefix" stretchy="false">(</mo><mn>2</mn><mo form="postfix" stretchy="false">)</mo><mo form="prefix" stretchy="false">(</mo><mn>4</mn><mo form="postfix" stretchy="false">)</mo></mrow></math></td><td>Multiplication</td></tr>
 <tr><td></td><td> <code>a b</code></td><td>Multiplication. (A space acts as an operator when between variables.)</td></tr>
 <tr><td></td><td><math><mrow><mn>2</mn><mspace width="0.1667em"></mspace><mi>a</mi></mrow></math></td><td>Multiplication</td></tr>
@@ -575,42 +559,37 @@ total                      	sumAbove()``</code></pre><p>will render like this:<b
 <tr><td>/</td><td><math><mstyle displaystyle="true" scriptlevel="0"><mfrac><mn>8</mn><mn>2</mn></mfrac></mstyle></math></td><td>Division</td></tr>
 <tr><td>//</td><td><math><mstyle displaystyle="false" scriptlevel="0"><mfrac><mn>8</mn><mn>2</mn></mfrac></mstyle></math></td><td>Case fraction</td></tr>
 <tr><td>///</td><td><math><mrow><mn>8</mn><mo lspace="0em" rspace="0em">⁄</mo></mrow><mrow><mn>2</mn></mrow></math></td><td>Division displayed inline</td></tr>
-<tr><td>÷</td><td><math><mrow><mn>8</mn><mo>÷</mo></mrow><mrow><mn>2</mn></mrow></math></td><td>Inline division<br>auto-correct: -:</td></tr>
 <tr><td>^</td><td><math><msup><mn>3</mn><mn>2</mn></msup></math></td><td>Exponent</td></tr>
-<tr><td>^*</td><td><math><msup><mi>z</mi><mo>*</mo></msup></math></td><td>Complex conjugate</td></tr>
-<tr><td>&amp;</td><td><math><mrow><mi>s</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo lspace="0.2222em" rspace="0.2222em">&amp;</mo></mrow><mrow><mi>s</mi><msub><mrow></mrow><mtext>2</mtext></msub></mrow></math></td><td>Concatenate strings or vectors, or append numbers onto vectors, or variables into a map, or append a column vector to a data frame</td></tr>
-<tr><td>&amp;_</td><td><math><mrow><mi>𝐚</mi><mrow><mspace width="0.2222em"></mspace><menclose notation="bottom" style="padding:0 0 0.1em 0;border-bottom:0.065em solid;"><mi>&amp;</mi></menclose><mspace width="0.2222em"></mspace></mrow><mi>𝐛</mi></mrow></math></td><td>Append matrices or vectors vertically.</td></tr>
+<tr><td>&amp;</td><td><math><mrow><mi>s</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo lspace="0.2222em" rspace="0.2222em">&amp;</mo></mrow><mrow><mi>s</mi><msub><mrow></mrow><mtext>2</mtext></msub></mrow></math></td><td>Concatenate strings or horizontally concatenate vectors, or append numbers  onto vectors, or variables into a map,  or append a column vector to a data frame</td></tr>
 <tr><td>√</td><td><math><msqrt><mrow></mrow></msqrt></math></td><td>Square root<br>auto-correct: sqrt</td></tr>
 <tr><td><math><mroot><mrow></mrow><mn>3</mn></mroot></math></td><td><math><mroot><mn>8</mn><mn>3</mn></mroot></math></td><td>nth-root<br>auto-correct: root n</td></tr>
-<tr><td>||</td><td><math><mrow><mi>|</mi><mtext>-</mtext><mn>4</mn><mi>|</mi></mrow></math></td><td>Absolute value of a scalar, determinant of a matrix, or magnitude of a vector or a complex number.</td></tr>
-<tr><td colspan="2" rowspan="2">||  ||          <math><mrow><mtext> </mtext><mi>‖</mi><mi>x</mi><mtext> </mtext><mi>‖</mi></mrow></math></td><td><math><msqrt><mrow><mi>x</mi><msup><msub><mrow></mrow><mtext>1</mtext></msub><mn>2</mn></msup><mo>+</mo><mo>⋯</mo><mo>+</mo><mi>x</mi><msup><msub><mrow></mrow><mtext>n</mtext></msub><mn>2</mn></msup></mrow></msqrt></math>  if the argument is a vector of reals</td></tr>
+<tr><td>|</td><td><math><mrow><mi>|</mi><mtext>-</mtext><mn>4</mn><mi>|</mi></mrow></math></td><td>Absolute value of a scalar, determinant of a matrix, or magnitude of a vector or a complex number.</td></tr>
+<tr><td colspan="2" rowspan="2"><code>\|  \|</code>        <math><mrow><mtext>‖</mtext><mi>x</mi><mtext>‖</mtext></mrow></math></td><td><math><msqrt><mrow><mi>x</mi><msup><msub><mrow></mrow><mtext>1</mtext></msub><mn>2</mn></msup><mo>+</mo><mo>⋯</mo><mo>+</mo><mi>x</mi><msup><msub><mrow></mrow><mtext>n</mtext></msub><mn>2</mn></msup></mrow></msqrt></math>  if the argument is a vector of reals</td></tr>
 <tr><td><math><msqrt><mrow><msub><mo movablelimits="false">∑</mo><mi>i</mi></msub><msub><mo movablelimits="false">∑</mo><mi>j</mi></msub><msubsup><mi>A</mi><mrow><mi>i</mi><mo separator="true">,</mo><mspace width="0.2222em"></mspace><mi>j</mi></mrow><mn>2</mn></msubsup></mrow></msqrt></math>  if the argument i a 2-D matrix</td></tr>
 <tr><td>⌊  ⌋</td><td><math><mrow><mo form="prefix" stretchy="false">⌊</mo><mn>4.5</mn><mo form="postfix" stretchy="false">⌋</mo></mrow></math></td><td>Floor. Always rounds down.<br>auto-correct: floor</td></tr>
 <tr><td>⌈  ⌉</td><td><math><mrow><mo form="prefix" stretchy="false">⌈</mo><mn>4.5</mn><mo form="postfix" stretchy="false">⌉</mo></mrow></math></td><td>Ceiling. Always rounds up.<br>auto-correct: ceil</td></tr>
-<tr><td>%</td><td><math><mrow><mn>10</mn><mi>%</mi></mrow></math></td><td>Percent</td></tr>
+<tr><td>%</td><td><math><mrow><mn>10</mn><mi>%</mi></mrow></math></td><td>Percent<br>% is not a remainder operator. If you need a remainder, use the rem() function.</td></tr>
 <tr><td>‰</td><td><math><mrow><mn>10</mn><mi>‰</mi></mrow></math></td><td>Per thousand</td></tr>
-<tr><td>!</td><td><math><mrow><mn>5</mn><mo form="postfix" stretchy="false">!</mo></mrow></math></td><td><a href='https://en.wikipedia.org/wiki/Factorial'>Factorial</a><br>precision = <math><mrow><mo fence="true" form="prefix">{</mo><mtable class="tml-cases"><mtr><mtd><mrow><mn>100</mn><mi>%</mi></mrow></mtd><mtd><mrow><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">f</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mi>n</mi><mo>≤</mo><mn>100</mn></mrow></mtd></mtr><mtr><mtd><mrow><mn>15</mn><mspace width="0.1667em"></mspace><mspace width="0.1667em"></mspace><mrow><mrow><mi mathvariant="normal">d</mi></mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">g</mi></mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">t</mi></mrow><mrow><mi mathvariant="normal">s</mi></mrow></mrow></mrow></mtd><mtd><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">t</mi></mrow><mrow><mi mathvariant="normal">h</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">w</mi></mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">s</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow></mtd></mtr></mtable><mo fence="true" form="postfix"></mo></mrow></math></td></tr>
-<tr><td>modulo</td><td><code>10</code> <code>modulo</code> <code>5</code></td><td>Always returns a positive remainder.</td></tr>
-<tr><td><math><mrow><mo fence="true" form="prefix">(</mo><mfrac linethickness="0px"><mi>n</mi><mi>k</mi></mfrac><mo fence="true" form="postfix">)</mo></mrow></math></td><td>(5 \atop 3)</td><td>Binomial coefficient. <math><mrow><mrow><mo fence="true" form="prefix">(</mo><mfrac linethickness="0px"><mi>n</mi><mi>k</mi></mfrac><mo fence="true" form="postfix">)</mo></mrow><mo>=</mo></mrow></math> n!//(n!(n!-k!))`</td></tr>
-<tr><td>=</td><td><math><mrow><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">f</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mi>x</mi><mo>=</mo></mrow><mrow><mn>15</mn></mrow></math></td><td>Equality comparison</td></tr>
-<tr><td>≠</td><td><math><mrow><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">f</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mi>b</mi><mo>≠</mo></mrow><mrow><mi>c</mi></mrow></math></td><td>Inequality comparison<br>auto-correct: != or &lt;&gt;</td></tr>
-<tr><td><code>&lt;</code></td><td></td><td></td></tr>
-<tr><td><code>&gt;</code></td><td></td><td></td></tr>
+<tr><td rowspan="2">!</td><td><math><mrow><mn>5</mn><mo form="postfix" stretchy="false">!</mo></mrow></math></td><td><a href='https://en.wikipedia.org/wiki/Factorial'>Factorial</a><br>precision = <math><mrow><mo fence="true" form="prefix">{</mo><mtable class="tml-cases"><mtr><mtd><mrow><mn>100</mn><mi>%</mi></mrow></mtd><mtd><mrow><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">f</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mi>n</mi><mo>≤</mo><mn>100</mn></mrow></mtd></mtr><mtr><mtd><mrow><mn>15</mn><mspace width="0.1667em"></mspace><mspace width="0.1667em"></mspace><mrow><mrow><mi mathvariant="normal">d</mi></mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">g</mi></mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">t</mi></mrow><mrow><mi mathvariant="normal">s</mi></mrow></mrow></mrow></mtd><mtd><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">t</mi></mrow><mrow><mi mathvariant="normal">h</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">w</mi></mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">s</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow></mtd></mtr></mtable><mo fence="true" form="postfix"></mo></mrow></math></td></tr>
+<tr><td><math><mrow><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">f</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mo form="postfix" stretchy="false">!</mo><mi>x</mi></mrow></math></td><td>Logical not if preceded by a space</td></tr>
+<tr><td><math><mrow><mo fence="true" form="prefix">(</mo><mfrac linethickness="0px"><mi>n</mi><mi>k</mi></mfrac><mo fence="true" form="postfix">)</mo></mrow></math></td><td>(5 \atop 3)</td><td>Binomial coefficient. <math><mrow><mrow><mo fence="true" form="prefix">(</mo><mfrac linethickness="0px"><mi>n</mi><mi>k</mi></mfrac><mo fence="true" form="postfix">)</mo></mrow><mo>=</mo></mrow><mrow><mstyle displaystyle="false" scriptlevel="0"><mfrac><mrow><mi>n</mi><mo form="postfix" stretchy="false">!</mo></mrow><mrow><mi>n</mi><mo form="postfix" stretchy="false">!</mo><mo form="prefix" stretchy="false">(</mo><mi>n</mi><mo form="postfix" stretchy="false">!</mo><mo>−</mo><mi>k</mi><mo form="postfix" stretchy="false">!</mo><mo form="postfix" stretchy="false">)</mo></mrow></mfrac></mstyle></mrow></math></td></tr>
+<tr><td>==</td><td><math><mrow><mi>x</mi><mo>⩵</mo></mrow><mrow><mn>15</mn></mrow></math></td><td>Equality comparison</td></tr>
+<tr><td>≠ !=</td><td><math><mrow><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">f</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mi>b</mi><mo>≠</mo></mrow><mrow><mi>c</mi></mrow></math></td><td>Inequality comparison<br>auto-correct:  &lt;&gt;</td></tr>
+<tr><td><code>&lt;</code></td><td></td><td>Less than comparison</td></tr>
+<tr><td><code>&gt;</code></td><td></td><td>Greater than comparison</td></tr>
 <tr><td>≤</td><td></td><td>auto-correct: &lt;=</td></tr>
 <tr><td>≥</td><td></td><td>auto-correct: &gt;=</td></tr>
-<tr><td>∈</td><td><math><mrow><mi>c</mi><mo>∈</mo></mrow><mrow><mi>s</mi></mrow></math></td><td>Is an element of a matrix or<br>is a character of a string, or<br>is a property of a data frame.<br>auto-correct: \in</td></tr>
+<tr><td>∈<br>in</td><td><math><mrow><mi>c</mi><mo>∈</mo></mrow><mrow><mi>s</mi></mrow></math> <br><math><mrow><mi>c</mi><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">n</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mi>s</mi></mrow></math></td><td>Is an element of a matrix or<br>is a character of a string, or<br>is a property of a data frame.<br>auto-correct: \in</td></tr>
 <tr><td>∋</td><td><math><mrow><mi>d</mi><mo>∋</mo></mrow><mrow><mi>p</mi></mrow></math></td><td>d has a property named y<br>auto-correct: owns</td></tr>
 <tr><td>∉</td><td><math><mrow><mi>c</mi><mo>∉</mo></mrow><mrow><mi>s</mi></mrow></math></td><td>Is not an element of<br>auto-correct: \notin</td></tr>
 <tr><td>∌</td><td><math><mrow><mi>d</mi><mo>∌</mo></mrow><mrow><mi>p</mi></mrow></math></td><td>d does not have a property named y</td></tr>
 <tr><td>⊆</td><td><math><mrow><mi>c</mi><mo>⊆</mo></mrow><mrow><mi>s</mi></mrow></math></td><td>Is a subset of<br> auto-correct: \subseteq or contains</td></tr>
 <tr><td>⊈</td><td><math><mrow><mi>c</mi><mo>⊈</mo></mrow><mrow><mi>s</mi></mrow></math></td><td>Is not a subset of<br> auto-correct: \nsubseteq</td></tr>
-<tr><td>and</td><td>if <em>a</em> and <em>b</em></td><td>Logical and</td></tr>
-<tr><td>or</td><td></td><td>Logical or</td></tr>
-<tr><td>∧</td><td></td><td>Logical and. <br>auto-correct: ^^</td></tr>
-<tr><td>∨</td><td></td><td>Logical or.  <br>auto-correct: vv</td></tr>
+<tr><td>and<br>&amp;&amp;<br>∧</td><td>if <em>a</em> and <em>b</em><br>if <em>a</em> &amp;&amp; <em>b</em><br>if <em>a</em> ∧ <em>b</em></td><td>Logical and</td></tr>
+<tr><td>or<br>||<br>∨</td><td>if <em>a</em> or <em>b</em><br>if <em>a</em> || <em>b</em><br>if <em>a</em> ∨ <em>b</em></td><td>Logical or</td></tr>
 <tr><td>⊻</td><td></td><td>Logical xor</td></tr>
-<tr><td>¬</td><td> if ¬ <em>a</em></td><td>Logical not</td></tr>
-<tr><td>:</td><td>𝐕[2..3] <br>for <em>i</em> in 1..3</td><td>Range separator</td></tr>
+<tr><td>¬<br>!</td><td> if ¬ <em>a</em><br> if !a</td><td>Logical not</td></tr>
+<tr><td>:</td><td>𝐕[2:3] <br>for <em>i</em> in 1:3</td><td> Range separator</td></tr>
 </table>
 </div>
 <h2 id='functions'>Functions</h2>
@@ -631,11 +610,17 @@ total                      	sumAbove()``</code></pre><p>will render like this:<b
 <dt id='atan'>atan(<em>x</em>, <em>y</em>)</dt>
 <dd><p>When <em>atan</em> is called with two arguments, it returns an angle in the proper quadrant. Given a point defined by real coordinates <em>x</em> and <em>y</em>, <em>atan</em> returns the angle between that point and the positive <em>x</em>-axis of a plane. Real numbers only.</p>
 </dd>
-<dt id='argument'>argument(<em>z</em>)</dt>
+<dt id='angle'>angle(<em>z</em>)</dt>
 <dd><p>Phase angle of a complex number.</p>
 </dd>
-<dt id='chr'>chr(<em>n</em>)</dt>
-<dd><p>Takes an integer as a argument, treats it as a Unicode code point, and returns the corresponding string character.<br><code>chr(34)</code> returns a double quotation mark.</p>
+<dt id='ceil'>ceil(<em>x</em>)</dt>
+<dd><p>Ceiling. Always rounds up. Real numbers only.</p>
+</dd>
+<dt id='char'>Char(<em>n</em>)</dt>
+<dd><p>Takes an integer as a argument, treats it as a Unicode code point, and returns the corresponding string character.<br><code>Char(34)</code> returns a double quotation mark.</p>
+</dd>
+<dt id='conj'>conj(<em>z</em>)</dt>
+<dd><p>Complex conjugate of a complex number.</p>
 </dd>
 <dt id='cos'>cos(𝜃), sin(𝜃), tan(𝜃), sec(𝜃), csc(𝜃), cot(𝜃)</dt>
 <dd><p>Trigonometry functions.</p>
@@ -660,19 +645,24 @@ total                      	sumAbove()``</code></pre><p>will render like this:<b
 <dt id='exp'>exp(<em>z</em>)</dt>
 <dd><p><math><msup><mi>e</mi><mi>z</mi></msup></math></p>
 </dd>
+<dt id='floor'>Floor(<em>x</em>)</dt>
+<dd><p>Floor. Always rounds down. Real numbers only.</p>
+</dd>
 <dt id='fetch'>fetch(<em>url</em>)</dt>
 <dd><p>Fetches the contents of a remote file. It expects the file to be in CSV format and will return a data range. Fetch functions must be stand-alone expressions.</p>
 </dd>
 <dt id='gcd'>gcd(<em>m</em>, <em>n</em>)</dt>
 <dd><p>Greatest common divisor of two integers.</p>
 </dd>
+<p>hcat(<em>v</em>, <em>x</em>)</p>
+<p>Horizontal concatenation of: two strings, or two matrices, or an element onto a vector, or a variable onto a map, or a vector onto a data frame.</p>
 <dt id='hypot'>hypot(<em>x</em>, <em>y</em>)</dt>
 <dd><p><math><msqrt><mrow><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup></mrow></msqrt></math>   …done in a way that avoids overflow. Real numbers only.</p>
 </dd>
-<dt id='im'>Im(<em>z</em>)</dt>
+<dt id='imag'>imag(<em>z</em>)</dt>
 <dd><p>Imaginary part of a complex number.</p>
 </dd>
-<dt id='isnan'>isNaN(<em>x</em>)</dt>
+<dt id='isnan'>isnan(<em>x</em>)</dt>
 <dd><p>Indicates if the argument is not numeric.</p>
 </dd>
 <dt id='length'>length(a)</dt>
@@ -690,11 +680,11 @@ total                      	sumAbove()``</code></pre><p>will render like this:<b
 <dt id='log'>log(<em>b</em>, <em>x</em>)</dt>
 <dd><p>Base <em>b</em> logarithm. Real numbers only.</p>
 </dd>
-<dt id='logfactorial'>logFactorial(<em>n</em>)</dt>
-<dd><p>Returns the natural logarithm of the factorial of the argument. Valid only for non-negative integers. Note that <code>log(n!)</code> is a valid alias for <code>logFactorial(n)</code>. Real numbers only.</p>
+<dt id='lfact'>lfact(<em>n</em>)</dt>
+<dd><p>Returns the natural logarithm of the factorial of the argument. Valid only for non-negative integers. Note that <code>log(n!)</code> is a valid alias for <code>lfact(n)</code>. Real numbers only.</p>
 </dd>
-<dt id='logγ'>logΓ(<em>x</em>)</dt>
-<dd><p>Returns the natural logarithm of the Gamma function, Γ(<em>x</em>). For now, Hurmet&#x27;s logΓ(<em>x</em>) function only works on positive rational numbers.</p>
+<dt id='lgamma'>lgamma(<em>x</em>)</dt>
+<dd><p>Returns the natural logarithm of the gamma function, Γ(<em>x</em>). For now, Hurmet&#x27;s lgamma(<em>x</em>) function only works on positive rational numbers.</p>
 </dd>
 <dt id='matrix2table'>matrix2table(<em>matrix</em>, <em>rowNames</em>, <em>columnNames</em>)</dt>
 <dd><p>Returns a data frame with the contents of the matrix. <em>rowNames</em> and <em>columnNames</em> must each be a vector of strings.</p>
@@ -702,11 +692,18 @@ total                      	sumAbove()``</code></pre><p>will render like this:<b
 <dt id='<math><mrow><mrow><mi>min</mi><mo>⁡</mo></mrow><mo-form="prefix"-stretchy="false">'><math><mrow><mrow><mi>min</mi><mo>⁡</mo></mrow><mo form="prefix" stretchy="false">(</mo><mi>a</mi><mo separator="true">,</mo><mspace width="0.2222em"></mspace></mrow><mrow><mi>b</mi><mo separator="true">,</mo><mspace width="0.2222em"></mspace></mrow><mrow><mi>c</mi><mo separator="true">,</mo><mspace width="0.2222em"></mspace></mrow><mrow><mo>…</mo><mo form="postfix" stretchy="false">)</mo><mo separator="true">,</mo><mspace width="0.2222em"></mspace></mrow><mrow><mrow><mspace width="0.1667em"></mspace><mi>max</mi><mo>⁡</mo></mrow><mo form="prefix" stretchy="false">(</mo><mi>a</mi><mo separator="true">,</mo><mspace width="0.2222em"></mspace></mrow><mrow><mi>b</mi><mo separator="true">,</mo><mspace width="0.2222em"></mspace></mrow><mrow><mi>c</mi><mo separator="true">,</mo><mspace width="0.2222em"></mspace></mrow><mrow><mo>…</mo><mo form="postfix" stretchy="false">)</mo></mrow></math></dt>
 <dd><p>Minimum or maximum of a list or array. Real numbers only.</p>
 </dd>
-<dt id='random'>random()</dt>
-<dd><p>A pseudo-random number in the range from 0 to 1 (inclusive of 0, but not 1). Good for Monte-Carlo modeling. Not sufficiently random for crypto.</p>
+<dt id='mod'>mod(<em>x</em>, <em>y</em>)</dt>
+<dd><p><em>x</em> modulo <em>y</em>. This functions divides <em>x</em> by <em>y</em>, and returns the absolute value of the remainder.</p>
 </dd>
-<dt id='re'>Re(<em>z</em>)</dt>
+<dt id='rand'>rand(), rand(<em>n</em>), rand(<em>m</em>, <em>n</em>)</dt>
+<dd><p>Pseudo-random number(s) in the range from 0 to 1 (inclusive of 0, but not 1). Good for Monte-Carlo modeling. Not sufficiently random for crypto.</p>
+<p>The optional arguments are integers. <em>rand</em> with no arguments will return a single random number. If one or two arguments are provided, <em>rand</em> will return a matrix filled with random numbers.</p>
+</dd>
+<dt id='real'>real(<em>z</em>)</dt>
 <dd><p>Real part of a complex number.</p>
+</dd>
+<dt id='rem'>rem(<em>x</em>, <em>y</em>)</dt>
+<dd><p>Remainder. This functions divides <em>x</em> by <em>y</em>, and returns the remainder.</p>
 </dd>
 <dt id='round'>round(<em>x</em>, <em>spec</em>)</dt>
 <dd><p>Rounds a real number <em>x</em>.<br>To round to an integer, omit the spec.<br>To round to <em>n</em> significant digits, write the spec as &quot;r<em>n</em>&quot;, e.g., &quot;r3&quot;.<br>To round to <em>n</em> places after the decimal, write the spec as &quot;f<em>n</em>&quot;.</p>
@@ -720,6 +717,11 @@ total                      	sumAbove()``</code></pre><p>will render like this:<b
 <dt id='sum'>sum(<em>a</em>, <em>b</em>, <em>c</em>, …), product(<em>a</em>, <em>b</em>, <em>c</em>, …), length(<em>a</em>, <em>b</em>, <em>c</em>, …), range(<em>a</em>, <em>b</em>, <em>c</em>, …), mean(<em>a</em>, <em>b</em>, <em>c</em>, …), variance(<em>a</em>, <em>b</em>, <em>c</em>, …), stddev(<em>a</em>, <em>b</em>, <em>c</em>, …)</dt>
 <dd><p>Functions that accumulate a result from a list of arguments. Real numbers only.</p>
 </dd>
+<dt id='transpose'>transpose(<em>M</em>)</dt>
+<dd><p>Transpose a matrix.</p>
+</dd>
+<p>vcat(<em>v</em>, <em>x</em>)</p>
+<p>Vertical concatenation of: two matrices, or an element onto a vertical vector.</p>
 <dt id='zeros'>zeros(<em>m</em>, <em>n</em>)</dt>
 <dd><p>Returns a <em>m</em> × <em>n</em> matrix filled with zeros.  Real numbers only.</p>
 </dd>
@@ -735,8 +737,8 @@ total                      	sumAbove()``</code></pre><p>will render like this:<b
 <tr><td>^</td><td>Then exponents, from right to left.</td></tr>
 <tr><td>√</td><td>Roots</td></tr>
 <tr><td>-</td><td>Unary minus, for example: -4</td></tr>
-<tr><td>∠</td><td>To write a complex number in <em>r</em>∠θ notation. (Coming later this year)</td></tr>
-<tr><td>× · / ÷</td><td>Multiplication or division, from left to right.</td></tr>
+<tr><td>∠</td><td>To write a complex number in <em>r</em>∠θ notation.</td></tr>
+<tr><td>× · /</td><td>Multiplication or division, from left to right.</td></tr>
 <tr><td>+ – &amp;</td><td>Addition or subtraction or concatenation, from left to right.</td></tr>
 <tr><td>&lt; &gt; ≤ ≥ = ≠</td><td>Comparisons (for <a href='#if-expressions'>If Expressions</a>)</td></tr>
 <tr><td>∧ ∨ ¬ ⊻</td><td>Logical operators (ditto)</td></tr>
@@ -788,7 +790,7 @@ total                      	sumAbove()``</code></pre><p>will render like this:<b
 <p>If you try to add quantities with non-compatible units, Hurmet will return an error message:</p>
 <p><math><mrow><mn>3</mn><mspace width="0.2778em"></mspace><mtext>m</mtext><mo>+</mo></mrow><mrow><mn>2</mn><mspace width="0.2778em"></mspace><mtext>V</mtext><mo>=</mo></mrow><mrow><mtext style="color:firebrick;">Error. Adding incompatible units.</mtext></mrow></math></p>
 <p>If the calculated units are non-compatible with the units specified for the result display, Hurmet will return an error message:</p>
-<p><math><mrow><mn>3</mn><mspace width="0.2778em"></mspace><mtext>m</mtext><mo>+</mo></mrow><mrow><mn>2</mn><mspace width="0.2778em"></mspace><mtext>ft</mtext><mo>=</mo></mrow><mrow><mtext style="color:firebrick;">Error. Calculated units are not compatible with the desired result unit:</mtext><mo separator="true" style="color:firebrick;">,</mo><mspace width="0.2222em" style="color:firebrick;"></mspace></mrow><mrow><mtext style="color:firebrick;">V</mtext></mrow></math></p>
+<p><math><mrow><mn>3</mn><mspace width="0.2778em"></mspace><mtext>m</mtext><mo>+</mo></mrow><mrow><mn>2</mn><mspace width="0.2778em"></mspace><mtext>ft</mtext><mo>=</mo></mrow><mrow><mtext style="color:firebrick;">Error. Calculated units are not compatible with the desired result unit:</mtext><mtext style="color:firebrick;"> </mtext><mo separator="true" style="color:firebrick;">,</mo><mspace width="0.2222em" style="color:firebrick;"></mspace></mrow><mrow><mtext style="color:firebrick;">V</mtext></mrow></math></p>
 <p>If you assign a quantity to a variable, a unit-aware calculation will call the variable’s entire quantity, not just the numeric value.</p>
 <p><math><mrow><mi>L</mi><mo>=</mo></mrow><mrow><mn>3</mn><mspace width="0.2778em"></mspace><mtext>ft</mtext></mrow></math></p>
 <p><math><mrow><mi>L</mi><msub><mrow></mrow><mtext>2</mtext></msub><mo>=</mo></mrow><mrow><mn>2</mn><mspace width="0.1667em"></mspace><mi>L</mi><mo>=</mo></mrow><mrow><mn style="color:#0000FF;">2</mn><mo form="prefix" stretchy="false" style="color:#0000FF;">(</mo><mn style="color:#0000FF;">3</mn><mspace width="0.2778em" style="color:#0000FF;"></mspace><mtext style="color:#0000FF;">ft</mtext><mo form="postfix" stretchy="false" style="color:#0000FF;">)</mo><mo style="color:black;">=</mo></mrow><mrow><mn style="color:black;">1.8288</mn><mspace width="0.2778em" style="color:black;"></mspace><mtext style="color:black;">m</mtext></mrow></math></p>
@@ -874,7 +876,7 @@ total                      	sumAbove()``</code></pre><p>will render like this:<b
 <tr><td>t</td><td>Truncates to a whole number.</td><td>31.6</td><td>t</td><td>31</td></tr>
 <tr><td rowspan="2">x or X</td><td rowspan="2">Hexadecimal</td><td rowspan="2">62</td><td>x</td><td>0x3e</td></tr>
 <tr><td>X</td><td>0x3E</td></tr>
-<tr><td rowspan="3">∠ or °</td><td rowspan="3">Polar notation of complex numbers</td><td rowspan="3">2 + <em>j</em> 3</td><td>h3</td><td>2 + <em>j</em>3</td></tr>
+<tr><td rowspan="3">∠ or °</td><td rowspan="3">Polar notation of complex numbers</td><td rowspan="3">2 + 3 im</td><td>h3</td><td>2 + 3 im</td></tr>
 <tr><td>h3∠</td><td>3.61∠0.983</td></tr>
 <tr><td>h3°</td><td>3.61∠56.3°</td></tr>
 </table>
@@ -969,7 +971,7 @@ end</code></pre><p>… which results in this plot …</p>
 <dt id='text-[<em>x</em>,-<em>y</em>],-&quot;<em>string</em>&quot;<span-class="optional">,-position</span>'>text  [<em>x</em>, <em>y</em>], &quot;<em>string</em>&quot;<span class="optional">, position</span></dt>
 <dd><p>Writes the string at a point keyed to coordinates <em>x</em>, <em>y</em>.</p>
 <p><em>position</em> can be &quot;above&quot;, &quot;below&quot;, &quot;middle&quot;, &quot;left&quot;, &quot;right&quot;, &quot;aboveleft&quot;, &quot;aboveright&quot;, &quot;belowleft&quot;, or &quot;belowright&quot;. The default is &quot;middle&quot;.</p>
-<p>The string can be styled with Markdown inline styles: _<em>italic</em>_, **<strong>bold</strong>**, `<code>code</code>`, <code>&lt;sub&gt;</code><sub>subscript</sub><code>&lt;/sub&gt;</code>, and <code>~~</code><del>strikethrough</del><code>~~</code>.</p>
+<p>The string can be styled with Markdown inline styles: _<em>italic</em>_, **<strong>bold</strong>**, `<code>code</code>`, <code>~</code><sub>subscript</sub><code>~</code>, and <code>~~</code><del>strikethrough</del><code>~~</code>.</p>
 </dd>
 <dt id='leader-[<em>x₁</em>,-<em>y₁</em>;-<em>x₂</em>,-<em>y₂</em><span-class="optional">;-x₃,-y₃;-etc</span>],-&quot;<em>note</em>&quot;'>leader [<em>x₁</em>, <em>y₁</em>; <em>x₂</em>, <em>y₂</em><span class="optional">; x₃, y₃; etc</span>], &quot;<em>note</em>&quot;</dt>
 <dd><p>Writes a note with an arrow pointing to a location.</p>
@@ -988,10 +990,9 @@ end</code></pre><p>… which results in this plot …</p>
 end</code></pre><p>Other Hurmet calculation cells can then call the function:</p>
 <p><math><mrow><mi>n</mi><mo>=</mo></mrow><mrow><mi>multiply</mi><mo>⁡</mo></mrow><mrow><mo form="prefix" stretchy="false">(</mo><mn>2</mn><mo separator="true">,</mo><mspace width="0.2222em"></mspace></mrow><mrow><mn>4</mn><mo form="postfix" stretchy="false">)</mo><mo>=</mo></mrow><mrow><mn>8</mn></mrow></math></p>
 <p>Unlike other Hurmet assignments, user defined functions can be placed at the end of the document and still be called by other expressions.</p>
-<p>The function can have any number of arguments, or none, separated by commas. So the form of the first line is:</p>
-<p><img src="images/function-railroad.svg" alt="functionName open paren arguments close paren"></p>
-<p>The function name and each argument (if any) must be valid identifiers.</p>
-<p>Function statements end at a line ending, unless the last character is one of: <strong>( [ { , ; + -</strong> or the following line begins with one of: <strong>} ] )</strong></p>
+<p>The function can have any number of arguments, or none, separated by commas. The function name and each argument (if any) must be valid identifiers.</p>
+<p>If any arguments are optional, write them after a semi-colon and provide a default value.</p>
+<pre><code>function Ms(section, Fy, Lb; Cb = 1, axis = &quot;x&quot;)</code></pre><p>Function statements end at a line ending, unless the last character is one of: <strong>( [ { , ; + -</strong> or the following line begins with one of: <strong>} ] )</strong></p>
 <p>Comments can be written after <code>#</code>. A space must precede the <code>#</code>.</p>
 <p>Variables created inside a user-defined function are local and their values will not be available outside the function. A user-defined function returns only the result of the expression in a <code>return</code> statement.</p>
 <p>If you omit any arguments when you call a function, Hurmet will fill out the argument list with values of <code>undefined</code> when it executes the function.</p>
@@ -1007,7 +1008,7 @@ end</code></pre><p>Indentation is not significant to the parser but is very usef
 <dd><p><em>if​​…else</em> control words make the execution of code blocks dependent on a condition. Example:</p>
 <pre><code>if a ≤ 4000
     b = 0.85
-else if a ≥ 8000
+elseif a ≥ 8000
     b = 0.65
 else
     b = 0.85 - (a - 4000)/20000
@@ -1023,7 +1024,7 @@ end</code></pre></dd>
 <dd><p>A <em>for</em> loop iterates, executing a code block once with each element of a range or collection.</p>
 <p>Examples:</p>
 <table class="grid"><tr><td><pre><code>sum = 0
-for i in 1..10
+for i in 1:10
     sum = sum + i
 end</code></pre></td><td><pre><code>reverse = &quot;&quot;
 for ch in &quot;abcdef&quot;
@@ -1035,7 +1036,7 @@ end</code></pre></td></tr>
 </dd>
 <dt id='break'>break</dt>
 <dd><p>A loop can be terminated early via the <em>break</em> keyword. Example:</p>
-<pre><code>for i in 1..1000000
+<pre><code>for i in 1:1000000
     if i ≥ 2
         break
     end
@@ -1045,13 +1046,13 @@ end</code></pre></dd>
 <p><img src="images/return-railroad.svg" alt="return optional expression"></p>
 <p>If the optional <em>expression</em> is present, the function will return its result. If not, the function will return <code>undefined</code>.</p>
 </dd>
-<dt id='raise'>raise</dt>
-<dd><p>A <em>raise</em> statement terminates the function and returns an optional error message.</p>
-<p><img src="images/raise-railroad.svg" alt="raise optional string"></p>
+<dt id='throw'>throw</dt>
+<dd><p>A <em>throw</em> statement terminates the function and returns an optional error message.</p>
+<p><img src="images/throw-railroad.svg" alt="throw optional string"></p>
 </dd>
-<dt id='echo'>echo</dt>
-<dd><p>A <em>echo</em> statement writes a message to the browser’s console. You can type <strong>Ctrl Shift I</strong> to see it. Such a message can be very useful while debugging a function.</p>
-<p><img src="images/echo-railroad.svg" alt="echo string"></p>
+<dt id='print'>print</dt>
+<dd><p>A <em>print</em> statement writes a message to the browser’s console. You can type <strong>Ctrl Shift I</strong> to see it. Such a message can be very useful while debugging a function.</p>
+<p><img src="images/print-railroad.svg" alt="print string"></p>
 </dd>
 </dl>
 <h4 id='startsvg'>startSvg</h4>
@@ -1088,15 +1089,13 @@ end</code></pre><p>A Hurmet document can load an entire module into one variable
 <h4 id='typing-lag'>Typing lag</h4>
 <p>A big document with a lot of math may cause typing lag. You can regain speed by clicking on the Draft Mode toggle button at <strong>File | Draft mode</strong>. It will render math as plain text and omit the blue echos.</p>
 <h4 id='matrix-multiplication'>Matrix multiplication</h4>
-<p>To get element-wise multiplication of two matrices, the operator symbol must be <a href='#matrix-mult'>explicitly</a> written as <code>*</code>.</p>
+<p>To get element-wise multiplication of two matrices, the operator symbol must be <a href='#matrix-mult'>explicitly</a> written as <code>∘</code> or <code>.*</code>.</p>
 <h2 id='gists'>Gists</h2>
 <p>Hurmet can export or import a document in <a href='https://guides.github.com/features/mastering-markdown/'>Markdown</a> format. This is useful for collaboration.</p>
-<p>Say that you have written a calculation. It’s awesome and you want to share it so that others can use it as a template. An easy way to share work is via a GitHub <a href='https://gist.github.com/'>Gist</a>. Then anyone can view it, download it, or comment on it. If it is in Markdown format, you can read the Gist right there on GitHub. Here’s an <a href='https://gist.github.com/ronkok/7fec7d11f6fb6a031e5a0827e3531d68'>example</a>.</p>
+<p>Say that you have written a calculation. It’s awesome and you want to share it so that others can use it as a template. An easy way to share work is via a GitHub <a href='https://gist.github.com/'>Gist</a>. Then anyone can view it, download it, or comment on it. Here’s an <a href='https://gist.githubusercontent.com/ronkok/7fec7d11f6fb6a031e5a0827e3531d68/raw/EndPlateConnectionExample.md'>example</a>.</p>
 <p>Hurmet’s version of Markdown adds some extensions that GitHub does not recognize, such as calculation cells, indented paragraphs, and merged cells in tables.</p>
 <h2 id='coming-attractions'>Coming Attractions</h2>
-<ul><li class="tight"><p>Image captions</p>
-</li>
-<li class="tight"><p>A <code>distribution</code> data type, to enable calculations with uncertainty</p>
+<ul><li class="tight"><p>A <code>distribution</code> data type, to enable calculations with uncertainty</p>
 </li>
 <li class="tight"><p>A <code>date</code> data type</p>
 </li>
@@ -1109,7 +1108,7 @@ end</code></pre><p>A Hurmet document can load an entire module into one variable
 </li>
 <li class="tight"><p>Concrete Column Interaction <a href='https://observablehq.com/@ronkok/concrete-column-interaction-diagram'>Diagram</a></p>
 </li>
-<li class="tight"><p>Fetchable TSV files with steel shape data: <a href='null'>wide flanges</a>, <a href='https://gist.githubusercontent.com/ronkok/320677ddf9225afecf79bc831d5e1694/raw/AISC-v15-channels.tsv'>channels</a>, <a href='https://gist.githubusercontent.com/ronkok/a63582e3870c880981845631cbcb302a/raw/AISC-v15-HSS.tsv'>HSS</a>, <a href='https://gist.githubusercontent.com/ronkok/b7d6c68daeedb729ac23ab81cc77a154/raw/AISC-v15-pipes.tsv'>pipes</a>, <a href='https://gist.githubusercontent.com/ronkok/0c01e61709ade0b7738106462f831b45/raw/AISC-v15-tees.tsv'>tees</a>, <a href='https://gist.githubusercontent.com/ronkok/3a1e2d13672be26ef50e880347300536/raw/AISC-v15-2L.tsv'>double angles</a>, <a href='https://gist.githubusercontent.com/ronkok/4a489aa649aa955d069b26d761e6df5f/raw/AISC-v15-HP.tsv'>HP</a>, and <a href='https://gist.githubusercontent.com/ronkok/93927e8f227109cd9463ccd2409aa73e/raw/AISC-v15-MS.tsv'>MS</a>.</p>
+<li class="tight"><p>Fetchable TSV files with steel shape data: <a href='https://gist.githubusercontent.com/ronkok/d2ae5b3c74889e71c7bb8422b6017067/raw/AISC-v15-wideFlanges.tsv'>wide flanges</a>, <a href='https://gist.githubusercontent.com/ronkok/320677ddf9225afecf79bc831d5e1694/raw/AISC-v15-channels.tsv'>channels</a>, <a href='https://gist.githubusercontent.com/ronkok/a63582e3870c880981845631cbcb302a/raw/AISC-v15-HSS.tsv'>HSS</a>, <a href='https://gist.githubusercontent.com/ronkok/b7d6c68daeedb729ac23ab81cc77a154/raw/AISC-v15-pipes.tsv'>pipes</a>, <a href='https://gist.githubusercontent.com/ronkok/0c01e61709ade0b7738106462f831b45/raw/AISC-v15-tees.tsv'>tees</a>, <a href='https://gist.githubusercontent.com/ronkok/3a1e2d13672be26ef50e880347300536/raw/AISC-v15-2L.tsv'>double angles</a>, <a href='https://gist.githubusercontent.com/ronkok/4a489aa649aa955d069b26d761e6df5f/raw/AISC-v15-HP.tsv'>HP</a>, and <a href='https://gist.githubusercontent.com/ronkok/93927e8f227109cd9463ccd2409aa73e/raw/AISC-v15-MS.tsv'>MS</a>.</p>
 </li>
 <li class="tight"><p>Importable <a href='https://gist.githubusercontent.com/ronkok/f4d93a4921ebd24c9a40578831d926b7/raw/steelStrengthPerAISC360-16.txt'>Module</a> with functions for steel member strength.</p>
 </li>
@@ -1129,7 +1128,7 @@ end</code></pre><p>A Hurmet document can load an entire module into one variable
 </li>
 </ul>
 <br>
-<p>Copyright © 2020-2023 Ron Kok. Released under the <a href='https://opensource.org/licenses/MIT'>MIT License</a></p>
+<p>Copyright © 2020-2023 Ron Kok. Released under the <a href='https://opensource.org/licenses/MIT/'>MIT License</a></p>
 <br>
 </main>
 <nav>
@@ -1278,9 +1277,9 @@ end</code></pre><p>A Hurmet document can load an entire module into one variable
 </li>
 <li class="tight"><p><a href='#return'>return</a></p>
 </li>
-<li class="tight"><p><a href='#raise'>raise</a></p>
+<li class="tight"><p><a href='#throw'>throw</a></p>
 </li>
-<li class="tight"><p><a href='#echo'>echo</a></p>
+<li class="tight"><p><a href='#print'>print</a></p>
 </li>
 </ul>
 </details>

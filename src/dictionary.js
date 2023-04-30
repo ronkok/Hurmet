@@ -168,7 +168,7 @@ const display = (dictionary, formatSpec, decimalFormat) => {
       : val.dtype === dt.STRING
       ? "\\text{" + addTextEscapes(val.value) + "}"
       : "\\text{" + addTextEscapes(String(val.value)) + "}"
-    str += valStr + ",\\:"
+    str += valStr + ",=>"
   }
   return str.slice(0, -3) + "\\}"
 }
@@ -176,7 +176,7 @@ const display = (dictionary, formatSpec, decimalFormat) => {
 const displayAlt = (dictionary, formatSpec, decimalFormat) => {
   let str = "{"
   for (const [key, val] of dictionary.entries()) {
-    str += key + ": "
+    str += key + " => "
     // TODO: value is a row vector.
     const valStr = val.value === undefined
       ? ""

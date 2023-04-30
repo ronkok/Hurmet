@@ -108,7 +108,7 @@ const gcdi = (a, b) => {
 
 const gcd = (m, n) => {
   // Greatest common divisor of two rationals
-  if (!Rnl.isInteger(m) || !Rnl.isInteger(n)) { return errorOprnd("GCD") }
+  if (!Rnl.isInteger(m) || !Rnl.isInteger(n)) { return errorOprnd("INT_ARG", "gcd") }
   return [gcdi(m[0] / m[1], n[0] / n[1]), iOne]
 }
 
@@ -194,7 +194,7 @@ const power = (a, b) => {
         ? [a[0] ** b[0], a[1] ** b[0]]
         : isPositive(a) || greaterThan(b, one) || lessThan(b, negate(one))
         ? fromNumber(toNumber(a) ** toNumber(b))
-        : areEqual(modulo(b, two), one)
+        : areEqual(mod(b, two), one)
         ? fromNumber(-1 * (-1 * toNumber(a)) ** toNumber(b))
         : errorOprnd("BAD_ROOT")
     } catch (err) {
@@ -228,9 +228,14 @@ const hypot = (a, b) => {
   return Rnl.multiply(maximum, sqrt(Rnl.increment(Rnl.multiply(r, r))))
 }
 
-const modulo = (a, b) => {
+const mod = (a, b) => {
   const quotient = divide(normalize(a), normalize(b))
   return [intAbs(quotient[0] % quotient[1]), iOne]
+}
+
+const rem = (a, b) => {
+  const quotient = divide(normalize(a), normalize(b))
+  return [quotient[0] % quotient[1], iOne]
 }
 
 const areEqual = (a, b) => {
@@ -411,7 +416,8 @@ export const Rnl = Object.freeze({
   reciprocal,
   gcd,
   hbar,
-  modulo,
+  mod,
+  rem,
   hypot,
   one,
   pi,
