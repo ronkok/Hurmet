@@ -45,6 +45,7 @@ const handleContents = (view, schema, str, format) => {
   )
   view.state.doc.attrs.fontSize = fontSize
   view.state.doc.attrs.pageSize = pageSize
+  if (doc.attrs.snapshots) { view.state.doc.attrs.snapshots = doc.attrs.snapshots }
 
   // Update all the calculation nodes and refresh the document display.
   // eslint-disable-next-line no-undef
@@ -53,7 +54,7 @@ const handleContents = (view, schema, str, format) => {
 
 async function getFile(view, schema, format) {
   const pickerOpts = {
-    types: [{ description: 'Text', accept: { 'text/*': ['.hurmet'] } }],
+    types: [{ description: 'Text', accept: { 'text/*': ['.md'] } }],
     excludeAcceptAllOption: true,
     multiple: false
   };
@@ -67,7 +68,7 @@ async function getFile(view, schema, format) {
 }
 
 export function readFile(state, _, view, schema, format) {
-  if (window.showOpenFilePicker && !(format === "markdown")) {
+  if (window.showOpenFilePicker && !(format === "hurmet")) {
     // Use the Chromium File System Access API, so users can Ctrl-S to save a document.
     getFile(view, schema, format)
   } else {

@@ -47,12 +47,14 @@ export class MarkdownSerializer {
   // :: (Node, ?Object) → string
   // Serialize the content of the given node to
   // [CommonMark](http://commonmark.org/).
-  serialize(content, paths) {
-    let state = new MarkdownSerializerState(this.nodes, this.marks, paths)
+  serialize(content, paths, isGFM = false, forSnapshot = false) {
+    let state = new MarkdownSerializerState(this.nodes, this.marks, paths, isGFM)
     state.renderContent(content)
-    // Write the link and image paths.
-    for (const [key, value] of state.paths.entries()) {
-      state.write("\n[" + key + "]: " + value + "\n")
+    // Write the link and image paths, unless this is done for a snapshot.
+    if (!forSnapshot) {
+      for (const [key, value] of state.paths.entries()) {
+        state.write("\n[" + key + "]: " + value + "\n")
+      }
     }
     return state.out
   }
@@ -68,18 +70,35 @@ const maxBacktickCount = str => {
   return max  
 }
 
+const indentBlankLines = (state, prevLength) => {
+  const block = state.out.slice(prevLength + 1).replace(/\n\n/g, `\n${state.delim + "   "}\n`)
+  state.out = state.out.slice(0, prevLength + 1) + block
+}
+
 const hurmetNodes =  {
   blockquote(state, node) {
     state.wrapBlock("> ", null, node, () => state.renderContent(node))
   },
-  indented_div(state, node) {
-    state.wrapBlock("    ", "i>  ", node, () => state.renderContent(node))
+  indented(state, node) {
+    if (state.isGFM) {
+      state.renderContent(node)
+    } else {
+      state.wrapBlock("   ", ">  ", node, () => state.renderContent(node), "indented")
+    }
   },
-  centered_div(state, node) {
-    state.wrapBlock("    ", "C>  ", node, () => state.renderContent(node))
+  centered(state, node) {
+    if (state.isGFM) {
+      state.renderContent(node)
+    } else {
+       state.wrapBlock("   ", ">  ", node, () => state.renderContent(node), "centered")
+    }
   },
   header(state, node) {
-    state.wrapBlock("    ", "H>  ", node, () => state.renderContent(node))
+    if (state.isGFM) {
+      state.renderContent(node)
+    } else {
+       state.wrapBlock("   ", ">  ", node, () => state.renderContent(node), "header")
+    }
   },
   code_block(state, node) {
     state.write("```" + (node.attrs.params || "") + "\n")
@@ -101,7 +120,7 @@ const hurmetNodes =  {
     state.closeBlock(node)
   },
   bullet_list(state, node) {
-    state.renderList(node, "  ", () => (node.attrs.bullet || "*") + " ")
+    state.renderList(node, "    ", () => (node.attrs.bullet || "*") + "   ")
   },
   ordered_list(state, node) {
     let start = node.attrs.order || 1
@@ -109,7 +128,7 @@ const hurmetNodes =  {
     let space = state.repeat(" ", maxW + 2)
     state.renderList(node, space, i => {
       let nStr = String(start + i)
-      return state.repeat(" ", maxW - nStr.length) + nStr + ". "
+      return state.repeat(" ", maxW - nStr.length) + nStr + ".  "
     })
     // Write a 2nd blank line after an <ol>, to prevent an adjacent <ol> from
     // continuing the same numbering.
@@ -124,22 +143,40 @@ const hurmetNodes =  {
   paragraph(state, node) {
     const prevLength = state.out.length
     state.renderInline(node)
-    state.out = limitLineLength(state.out, prevLength, state.delim, state.lineLimit)
+    if (!state.isGFM) {
+      state.out = limitLineLength(state.out, prevLength, state.delim, state.lineLimit)
+    }
+    state.closeBlock(node)
+  },
+  comment(state, node) {
+    if (!state.isGFM) {
+      state.write(state.delim + `{comment}\n`)
+    }
+    const prevLength = state.out.length
+    state.renderInline(node)
+    if (!state.isGFM) {
+      state.out = limitLineLength(state.out, prevLength, state.delim, state.lineLimit)
+    }
     state.closeBlock(node)
   },
   table(state, node) {
-    state.renderTable(node, state.delim)
+    state.renderTable(node, state.delim, state.isGFM)
     state.closeBlock(node)
   },
   figure(state, node) {
-    const figureCaption = node.content.content[1]
-    const figureState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, false)
-    figureState.renderInline(figureCaption)
-    const caption = figureState.out
+    let caption
+    if (!state.isGFM) {
+      const figureCaption = node.content.content[1]
+      const figureState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, false)
+      figureState.renderInline(figureCaption)
+      caption = figureState.out
+    } else {
+      caption = node.attrs.alt
+    }
     const ref = getRef(node, state)
     const attrs = node.content.content[0].attrs // image attributes
     let path = attrs.src
-    if (attrs.width || attrs.alt) {
+    if (!state.isGFM && (attrs.width || attrs.alt)) {
       path += "\n{"
       if (attrs.width && !isNaN(attrs.width)) { path += " width=" + attrs.width }
       if (attrs.alt) { path += ' alt="' + state.esc(attrs.alt) + '"' }
@@ -148,15 +185,15 @@ const hurmetNodes =  {
     // We use reference links and defer the image paths to the end of the document.
     state.paths.set(ref, path)
     if (ref === caption) {
-      state.write(`![${caption}][]\n\n`)
+      state.write(`!![${caption}][]\n\n`)
     } else {
-      state.write(`![${caption}][${ref}]\n\n`)
+      state.write(`!![${caption}][${ref}]\n\n`)
     }
     
   },
   image(state, node) {
     let path = state.esc(node.attrs.src)
-    if (node.attrs.class || node.attrs.width || node.attrs.alt) {
+    if (!state.isGFM && (node.attrs.class || node.attrs.width || node.attrs.alt)) {
       path += "\n{"
       if (node.attrs.class) { path += "." + state.esc(node.attrs.class) }
       if (node.attrs.width && !isNaN(node.attrs.width)) { path += " width=" + node.attrs.width }
@@ -185,22 +222,21 @@ const hurmetNodes =  {
   },
   tex(state, node) {
     const tex = node.attrs.tex.trim()
-    writeTex(state, node.displayMode, tex)
-  },
-  comment(state, node) {
-    const prevLength = state.out.length
-    state.write("© ")
-    state.renderInline(node)
-    state.out = limitLineLength(state.out, prevLength, state.delim, state.lineLimit)
-    state.closeBlock(node)
+    writeTex(state, node.attrs.displayMode, tex)
   },
   calculation(state, node) {
     const entry = node.attrs.entry.trim().replace(/\n(?: *\n)+/g, "\n").replace(/\n/gm, "\n" + state.delim)
-    if (node.attrs.displayMode) {
-      state.write("¢¢ " + entry + " ¢¢")
+    if (state.isGFM) {
+      // Convert calculation to TeX
+      const tex = parse(entry)
+      writeTex(state, node.attrs.displayMode, tex)
     } else {
-      const ticks = backticksFor({ text: entry, isText: true }, -1).trim()
-      state.write("¢" + ticks + " " + entry + " " + ticks)
+      if (node.attrs.displayMode) {
+        state.write("¢¢ " + entry + " ¢¢")
+      } else {
+        const ticks = backticksFor({ text: entry, isText: true }, -1).trim()
+        state.write("¢" + ticks + " " + entry + " " + ticks)
+      }
     }
   }
 }
@@ -228,7 +264,11 @@ const hurmetMarks = {
          close(_state, _mark, parent, index) { return backticksFor(parent.child(index - 1), 1) },
          escape: false},
   superscript: {open: "<sup>", close: "</sup>", expelEnclosingWhitespace: true},
-  subscript: {open: "<sub>", close: "</sub>", expelEnclosingWhitespace: true},
+  subscript: {
+    open(state)  { return state.isGFM ? "<sub>" : "~" },
+    close(state) { return state.isGFM ? "</sub>" : "~" },
+    expelEnclosingWhitespace: true
+  },
   strikethru: {open: "~~", close: "~~", mixable: true, expelEnclosingWhitespace: true},
   underline: {open: "<u>", close: "</u>", expelEnclosingWhitespace: true},
   highlight: {open: "<mark>", close: "</mark>", expelEnclosingWhitespace: true}
@@ -248,7 +288,7 @@ function backticksFor(node, side) {
 }
 
 function isPlainURL(link, parent, index, side) {
-  if (link.attrs.title || !/^\w+:/.test(link.attrs.href)) return false
+  if (!/^\w+:/.test(link.attrs.href)) return false
   let content = parent.child(index + (side < 0 ? -1 : 0))
   if (!content.isText || content.text != link.attrs.href || content.marks[content.marks.length - 1] != link) return false
   if (index == (side < 0 ? 1 : parent.childCount - 1)) return true
@@ -262,7 +302,7 @@ const getRef = (node, state) => {
     ? node.attrs.alt
     : node.type.name === "figimg"
     ? node.content.content[0].attrs.alt
-    : node.attrs.title
+    : null
   const num = isNaN(state.paths.size) ? "1" : String(state.paths.size + 1)
   if (ref) {
     // Determine if ref has already been used
@@ -281,7 +321,7 @@ const blockRegEx = /^(?:[>*+-] |#+ |\d+[.)] |[A-B]\. |\-\-\-|```|[iCFHhITWADE]> 
 function limitLineLength(str, prevLength, delim, limit) {
   let graf = str.slice(prevLength)
   if (graf.length <= limit) { return str }
-  if (/``|¢ *(?:function|draw\()/.test(graf)) { return str }
+  if (/``|¢` *(?:function|draw\()/.test(graf)) { return str }
 
   const leading = "\n" + delim
   let result = ""
@@ -317,24 +357,27 @@ function limitLineLength(str, prevLength, delim, limit) {
 }
 
 const writeTex = (state, displayMode, tex) => {
-  tex = tex.replace(/\n/gm, "\n" + state.delim).replace(/\$/gm, "\\$")
+  tex = tex.replace(/\n/gm, "\n" + state.delim)
   if (displayMode) {
-    state.write("$$\n" + tex + "\n$$")
+    state.write("$$ " + tex + " $$")
   } else {
-    state.write("$ " + tex + " $")
+    state.write("$" + tex + "$")
   }
 } 
 
 const justifyRegEx = /c(\d)([cr])/g
 
+const colWidthPicker = [0, 80, 50, 35];
+
 // ::- This is an object used to track state and expose
 // methods related to markdown serialization. Instances are passed to
 // node and mark serialization methods (see `toMarkdown`).
 export class MarkdownSerializerState {
-  constructor(nodes, marks, paths) {
+  constructor(nodes, marks, paths, isGFM) {
     this.nodes = nodes
     this.marks = marks
     this.paths = paths
+    this.isGFM = isGFM
     this.delim = this.out = ""
     this.closed = false
     this.lineLimit = 80
@@ -360,8 +403,9 @@ export class MarkdownSerializerState {
   // line in `firstDelim`. `node` should be the node that is closed at
   // the end of the block, and `f` is a function that renders the
   // content of the block.
-  wrapBlock(delim, firstDelim, node, f) {
+  wrapBlock(delim, firstDelim, node, f, nodeType) {
     let old = this.delim
+    if (nodeType) { this.write(`{${nodeType}}\n`) }
     this.write(firstDelim || delim)
     this.delim += delim
     f()
@@ -533,7 +577,7 @@ export class MarkdownSerializerState {
     return justify === "r" ? (pad + str) : (str + pad)
   }
 
-  renderTable(node, delim) {
+  renderTable(node, delim, isGFM) {
     const rows = node.content.content
     let numCols = rows[0].content.content.length
     for (let i = 1; i < rows.length; i++) {
@@ -568,9 +612,9 @@ export class MarkdownSerializerState {
     const colWidth = new Array(numCols).fill(0)
     const mergedCells = [];
     // Do we need a reStructuredText grid table? Or is a GFM pipe table enough?
-    let isRst = numRowsInHeading > 1;
-    let tableState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths)
-    tableState.lineLimit = 25
+    let isRst = !isGFM && numRowsInHeading > 1;
+    let tableState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, this.isGFM)
+    tableState.lineLimit = numCols > 3 ? 25 : colWidthPicker[numCols];
     let i = 0
     let j = 0
     let jPM = 0
@@ -602,7 +646,7 @@ export class MarkdownSerializerState {
             // Each table cell contains an array of strings.
             const cellContent = tableState.out.slice(L).replace(/^\n+/, "").split("\n")
             table[i][j] = cellContent
-            if (cellContent.length > 1) { isRst = true }
+            if (cellContent.length > 1 && !isGFM) { isRst = true }
             // Get width of cell.
             if (colSpan[i][j] === 1) {
               for (let line of table[i][j]) {
@@ -642,7 +686,7 @@ export class MarkdownSerializerState {
           let width = colWidth[j]
           for (let m = 1; m < colSpan[i][j]; m++) { width += colWidth[j + m] + 3 }
           for (let k = 0; k < table[i][j].length; k++) {
-            if (table[i][j][k].indexOf("|") > -1) { isRst = true }
+            if (table[i][j][k].indexOf("|") > -1 && !isGFM) { isRst = true }
             // Pad the line with spaces
             table[i][j][k] += " ".repeat(width - table[i][j][k].length)
           }
@@ -669,7 +713,9 @@ export class MarkdownSerializerState {
       }
     }
     const className = node.attrs.class.replace(/ c\d+[cr]/g, "") // remove column justification
-    this.write(`\n${delim}{.${className} colWidths="${colWidths.trim()}"}\n`)
+    if (!isGFM) {
+      this.write(`\n${delim}{.${className} colWidths="${colWidths.trim()}"}\n`)
+    }
   }
 
   // :: (string, ?bool) → string
@@ -677,10 +723,9 @@ export class MarkdownSerializerState {
   // content. If `startOfLine` is true, also escape characters that
   // has special meaning only at the start of the line.
   esc(str, startOfLine) {
-    str = str.replace(/[`\\~¢\$\[\]]/g, "\\$&")
-    str = str.replace(/(\*\*|\$\$|¢¢|~~)/g, "\\$1")
+    str = str.replace(/([`*\\¢\$<\[_~])/g, "\\$1")
     if (startOfLine) {
-      str = str.replace(/^(\#+|:|\-|\*|\+) /, "\\$1").replace(/^(\d+)\./, "$1\\.")
+      str = str.replace(/^(\#|:|\-|\*|\+|>)/, "\\$1").replace(/^(\d+)\./, "$1\\.")
     }
     return str
   }
@@ -754,7 +799,7 @@ const gridTable = (table, numCols, numRowsInHeading, rowSpan, colSpan, colWidth,
 
   const cellBorder = (ch, isColonRow, i, j) => {
     let borderStr = ""
-    for (let k = 0; k < colSpan[i][j]; k++) {
+    for (let k = 0; k < colSpan[(i === -1 ? 0 : i)][j]; k++) {
       borderStr += (isColonRow && justify[j] === "c") ? ":" : ch
       borderStr += ch.repeat(colWidth[j + k])
       borderStr += (isColonRow && "cr".indexOf(justify[j]) > -1) ? ":" : ch
@@ -773,7 +818,7 @@ const gridTable = (table, numCols, numRowsInHeading, rowSpan, colSpan, colWidth,
   let isColonRow = ch === "=" || numRowsInHeading === 0
   for (let j = 0; j < numCols; j++) {
     if (rowSpan[0][j] === 0) { continue }
-    topBorder += cellBorder(ch, isColonRow, 0, j)
+    topBorder += cellBorder(ch, isColonRow, -1, j)
   }
 
   // Set pointers frome the the grid table current location to the array of table content.

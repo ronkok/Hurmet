@@ -1,88 +1,133 @@
-Hurmet Markdown Input Test
-==========================
+---------------
+decimalFormat: 1,000,000.
+fontSize: 12
+pageSize: letter
+---------------
 
-Paragraphs are blocks of text separated by empty lines. A backslash, \\, or two
-spaces at the end of a line is treated as a hard line break, like this:\
+# Hurmet Markdown Input Test
+
+Paragraphs are blocks of text separated by empty lines. For a hard line break,
+Hurmet writes a backslash, `\`, at the end of a line, like this:\
+Hurmet also reads two spaces at the end of a line as a line break, line this:\
 Otherwise, newlines in a paragraph are treated as spaces.
 
+Two consecutive blank lines parse like a single blank line. Like the two
+preceeding lines.
 
-We just had two consecutive blanks lines. It parsed just fine.
+{comment}
+A Hurmet comment is a paragraph inside a speech bubble. Its Markdown is a
+paragraph preceded by `{comment}\n`.
 
-### Calculations and TeX
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+incididunt ut labore et dolore magna aliqua.
 
-Write a calculation:
+### TeX
 
-¢` L = 3 'ft' `
+Hurmet reads inline TeX written between `$` delimiters:\
+The obligatory logo: $\TeX$. A second TeX on the same line: $\frac a b + c_2$.
 
-¢` 2 L = ?? m `
+As in Pandoc, the opening \$ must have a non-space character immediately to its
+right, and the closing \$ must have a non-space character immediately to its
+left. The closing \$ must not be followed immediately by a digit. Thus,
+\$20,000 and \$30,000 won’t parse as math.
 
-And some $\TeX$: $ \frac a b + c_2 $
+Display TeX is written between `$$` delimiters:
 
-¢```df = ``#name	area	diameter
+$$
+\oint_C \vec{B}\circ d\vec{l} = \mu_0 \left( I_{\text{enc}} + \varepsilon_0
+\frac{d}{d t} \int_S \vec{E} \circ \hat{n}\; d a \right)
+$$
+
+While we’re here, let’s test the equation numbering system.
+
+$$
+\begin{equation} x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a} \end{equation}
+$$
+
+### Calculations
+
+For inline calculations, the delimiters are `` ¢`…` ``:
+
+¢` L = 3 'ft' `. Another calc on the same line: ¢` w = 0.2 'kips/ft' `
+
+¢` M = (w L²)/8 = ?? kip-ft `
+
+Hurmet data frame literals are written between double backticks: ``` `` ```. In that case, the calculation delimiters use triple backticks: ```` ``` ````:
+
+¢``` rebar =
+``#name	area	diameter
 	in^2	in
 #3	0.22	0.375
 #4	0.31	0.5`` ```
 
+Hurmet calculations also have a display mode, written between `¢¢` delimiters:
+
+¢¢ E = m c² ¢¢
+
 ### Links
 
-Here is a [regular link](https://hurmet.app/) and here is a [reference link][ref link].
-Another [ref link][]. And here is an autolink: <http://example.com/>
-
-[ref link]: https://hurmet.app/
+Here is a [regular link][1] and here is a [reference link][2]. Another [ref
+link][3]. And here is an auto-link: <http://example.com/>
 
 ### Images
 
-![This is a tank][tank]
+![This is a caption for a tank image.][4]
 
-Here's a tank ![tank][tank] picture.
+Here’s an inline tank ![tank][] image.
 
 ### Lists
 
 First, test that an inline asterisk does not create a list: * Not a list item.
 
-A list can be written directly after a paragraph. An empty line is unnecessary.
-* fruits
-  + apples
-  
-    - macintosh
-    - red 
+A list can be written directly after a paragraph. An empty line is unnecessary. 
+
+*   fruits 
+
+    *   apples
+        *   macintosh
+        *   red
 
 Now try a loose list.
 
-* An itemization should include
+*   An itemization should include
 
-    * The first paragraph in this list item
-    
-      A second paragraph
-    
-    * Another list item.
+    *   The first paragraph in this list item
+
+        A second paragraph
+
+    *   Another list item.
 
 Another paragraph.
 
-1. Item 1 from dotted list
+1.  Item 1 from dotted list
 
-2. Item 2
+2.  Item 2
 
-3. Item 3
+3.  Item 3
 
 
-1. Item 1 from dotted list
-2. Item 2
-3. Item 3
+1.  Item 1 from dotted list
 
-Lists can begin with numbers other than one.
+2.  Item 2
 
-4) Item 4 from close paren
-5) Item 5
-6) Item 6
+3.  Item 3
+
+
+Lists can begin with numbers other than one. 4.  Item 4 from close paren 5. 
+Item 5 6.  Item 6
 
 #### Pipe Tables
 
-| Head 1  |  Head 2  | Head 3  |
-|:--------|:--------:|---------|
-| datum 1 | datum 2  | datum 3 |
-| datum 4 | datum 5  | datum 6 |
-{.grid}
+A typical pipe table:
+
+| Head 1  | Head 2  | Head 3  |
+|---------|:-------:|---------|
+| datum 1 | datum 2 | datum 3 |
+| datum 4 | datum 5 | datum 6 |
+{.grid colWidths="null null null"}
+
+We can write a pipe table without a heading. Its top line consists of empty
+cells, e.g., `|||||`. Below is an example:
 
 |||||
 |---------|---------|-----|--------------|
@@ -90,118 +135,100 @@ Lists can begin with numbers other than one.
 | bar     | breve   | dot | ddot         |
 | ring    | check   | ul  | leftharpoon  |
 | harpoon | leftvec | vec | leftrightvec |
-{.grid}
+{.grid colWidths="null null null null"}
 
 #### Grid tables
 
-+--------+---------------------------+------------------------------------------+
-| Type   | Description               | Examples                                 |
-|        |                           +-----------+-------------+----------------+
-|        |                           | Number    | Format spec | Result display |
-+========+===========================+===========+=============+================+
-| b      | Binary                    | 5         | b           | 0b101          |
-+--------+---------------------------+-----------+-------------+----------------+
-| e or E | A programmer’s version of | 22,000    | e3          | 2\.20e4        |
-|        | scientific notation.      |           +-------------+----------------+
-|        | Rounds to _N_             |           | E3          | 2\.20E4        |
-|        | significant digits.       |           |             |                |
-+--------+---------------------------+-----------+-------------+----------------+
-{.grid width=30em}
+Hurmet can write tables with merged cells and block elements inside a cell.
+For format, we use the grid table from reStructuredText. Like the example below:
 
-+-----------+----------------------------+
-| Heading 1 |  Merged Heading            |
-+:=========:+============================+
-| datum 1   | merged cell                |
-+-----------+------------------+---------+
-| merged\   | datum 3          | datum 4 |
-| cell      +------------------+---------+
-|           | datum 5          | datum 6 |
-+-----------+------------------+---------+
-| datum 7   | - block elements | datum 8 |
-|           | - inside a       |         |
-|           | - cell           |         |
-+-----------+------------------+---------+
-{.grid}
++--------+---------------------------+---------------------------------------+
+| Type   | Description               | Examples                              |
+|        |                           +--------+-------------+----------------+
+|        |                           | Number | Format spec | Result display |
++========+===========================+========+=============+================+
+| b      | Binary                    | 5      | b           | 0b101          |
++--------+---------------------------+--------+-------------+----------------+
+| e or E | A programmer’s version of | 22,000 | e3          | 2\.20e4        |
+|        | scientific notation.      |        +-------------+----------------+
+|        | Rounds to _N_             |        | E3          | 2\.20E4        |
+|        | significant digits.       |        |             |                |
++--------+---------------------------+--------+-------------+----------------+
+{.grid colWidths="null null null null null"}
 
-+------------------------+------------+----------+----------+
-| Header row, column 1   | Header 2   | Header 3 | Header 4 |
-+:=======================+:==========:+:=========+=========:+
-| body row 1, column 1   | column 2   | column 3 | column 4 |
-+------------------------+------------+----------+----------+
-| body row 2             | Cells may span columns.          |
-+------------------------+------------+---------------------+
-| body row 3             | Cells may  | - Table cells       |
-+------------------------+ span rows. | - may contain       |
-| body row 4             |            | - block elements.   |
-+------------------------+------------+---------------------+
-{.grid}
+However, we use `:` in the header border to show column alignment. Pandoc does
+the same thing.
 
-+---------------+:----------------------------------------:+
-| ! %           | Factorials and percents are done first.  |
-+---------------+------------------------------------------+
-| ^             | Then exponents, from right to left.      |
-+---------------+------------------------------------------+
-| √             | Roots                                    |
-+---------------+------------------------------------------+
-{.grid}
++-----------+------------------------------+
+| Heading 1 |  Merged Heading              |
++:=========:+==============================+
+| datum 1   | merged cell                  |
++-----------+--------------------+---------+
+| merged\   | datum 3            | datum 4 |
+| cell      +--------------------+---------+
+|           | datum 5            | datum 6 |
++-----------+--------------------+---------+
+| datum 7   | *   block elements | datum 8 |
+|           | *   inside a       |         |
+|           | *   cell           |         |
++-----------+--------------------+---------+
+{.grid colWidths="null null null"}
 
-#### Bold and Italic
+Another grid table example.
 
-Hurmet standard notation: _italic_, **bold**, and **_bold-italic_**.
++----------------------+----------------------+----------+----------+
+| Header row, column 1 | Header 2             | Header 3 | Header 4 |
++======================+:====================:+==========+=========:+
+| body row 1, column 1 | column 2             | column 3 | column 4 |
++----------------------+----------------------+----------+----------+
+| body row 2           | Cells may span columns.                    |
++----------------------+----------------------+---------------------+
+| body row 3           | Cells may span rows. | *   Table cells     |
++----------------------+                      | *   may contain     |
+| body row 4           |                      | *   block elements. |
++----------------------+----------------------+---------------------+
+{.grid colWidths="null null null null"}
 
-A paragraph with alternate *italic*, __bold__, and __*bold-italic*__.
+Grid tables can also be written without a header. Just omit the `====` border.
 
-#### Section properties:
++=====+:=======================:+
+| ! % | Factorials and percents |
+|     | are done first.         |
++-----+-------------------------+
+| ^   | Then exponents, from    |
+|     | right to left.          |
++-----+-------------------------+
+| √   | Roots                   |
++-----+-------------------------+
+{.grid colWidths="null null"}
 
-¢ Timber = 
-``#name	width	depth	area	Sx  	Ix  	Sy  	Iy  	weight
-     	in  	in  	in² 	in³ 	in⁴ 	in³ 	in⁴ 	lbf/ft
-2x4  	1.5 	3.5 	5.25	3.06	5.36	1.31	0.984	1.3
-2x6  	1.5 	5.5 	8.25	7.56	20.8	2.06	1.55	2
-2x8  	1.5 	7.25	10.9	13.1	47.6	2.72	2.04	2.6
-2x10 	1.5 	9.25	13.9	21.4	98.9	3.47	2.60	3.4
-2x12 	1.5 	11.25	16.9	31.6	178 	4.22	3.16	4.1
-4x4  	3.5 	3.5 	12.25	7.15	12.5	7.15	12.51	3
-6x6  	5.5 	5.5 	30.3	27.7	76.3	27.7	76.3	7.4
-8x8  	7.5 	7.5 	56.3	70.3	264 	70.3	264 	13.7`` ¢
+#### Inline Style
 
-¢ w = ``
-dead	live	snow
-30  	70  	40`` 'k·ft' ¢
+Hurmet standard notation: _italic_, **bold**, and _**bold-italic**_.
 
-¢ roof = ``#Item           	weight
-                           	psf
-2 layers asphalt shingles  	8.0
-1/2″ plywood               	1.5
-insulation, R19 fiberglass 	0.6
-trusses at 16″ o.c.        	2.5
-5/8″ gypsum board          	2.5
-lights, HVAC, miscellaneous	1.5
-total                      	sumAbove()`` ¢
+A paragraph with alternate _italic_, **bold**, and _**bold-italic**_.
 
-### Code blocks
+Hurmet writes a sub~script~ with tildes. It can also read a sub~script~ written
+with HTML tags.
+
+### Code Blocks
 
 ```
-function backtick(a)
-    return "hello"
-end
+Here is some code.
+And some more 
 ```
 
-~~~
-function tilde(b)
-    return "ahoy"
-end
-~~~
+A paragraph
 
-    function spaces(x)
-        return "hi"
-    end
 
-A paragraph with a sub<sub>script</sub>.
+[1]: https://hurmet.app/
 
-	function tab(y)
-	    return "ho"
-	end
+[2]: https://hurmet.app/
+
+[3]: https://hurmet.app/
+
+[4]: https://hurmet.app/images/IsoTankCourses.svg
+{ alt="4"}
 
 [tank]: https://hurmet.app/images/IsoTankCourses.svg
-[C]: https://hurmet.app/images/C.svg
+{.inline alt="tank"}

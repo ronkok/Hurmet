@@ -11,48 +11,46 @@
  * ## Extensions
  *
  * 1. Hurmet inline calculation is delimited ¢`…`.
- *    Hurmet display calculation is delimited ¢¢ … ¢¢.
- * 2. LaTeX inline math is delimited $…$. $ and \\ are escaped \$ & \\\\.
+ *    Hurmet display calculation is delimited ¢¢…¢¢.
+ * 2. LaTeX inline math is delimited $…$.
+ *    No space allowed after 1st $ or before 2nd $. No digit after 2nd $.
  *    LaTeX display math is delimited  $$ … $$.
- * 3. ~~strikethrough~~
- * 4. © comment (A paragraph in a speech bubble)
- * 5. Pipe tables as per Github Flavored Markdown (GFM).
- * 6. Grid tables as per Pandoc/reStructuredText
- * 7. Implicit reference links [title][<ref>] & implicit reference images ![alt|caption][<ref>]
- *    ⋮
- *    [alt]: path
- *    Reference images can have captions and directives. Format is:
- *    ![alt text][<ref>]   or \n![caption][]\n
- *      ⋮
- *    [def]: target
- *    {.class #id width=number}
- * 8. Table directives. They are placed on the line after the table. The format is:
- *    {.class #id width="num1 num2 …" caption}
- * 9. Lists that allow the user to pick list ordering.
- *       1. →  1. 2. 3.  etc.
- *       A. →  A. B. C.  etc. (future)
- *       a) →  (a) (b) (c)  etc. (future)
- * 10. Table of Contents
+ * 3. ~subscript~
+ * 4. ~~strikethrough~~
+ * 5. Comment (A paragraph in a speech bubble)
+ *    Its Markdown is a paragraph preceded by `{comment}\n`
+ * 6. Pipe tables as per Github Flavored Markdown (GFM).
+ * 7. Grid tables as per Pandoc and reStructuredText
+ * 8. Attributes for reference link definitions
+ *      [id]: target
+ *      {.class #id width=number}
+ * 9. Figure/Caption for images. Format is a paragraph that consists entirely of:
+ *    !![caption][id]
+ * 10. Table directives. They are placed on the line after the table. The format is:
+ *     {.class #id width="num1 num2 …" caption}
+ * 11. Lists that allow the user to pick list ordering.
+ *        1. →  1. 2. 3.  etc.
+ *        A. →  A. B. C.  etc. (future)
+ *        a) →  (a) (b) (c)  etc. (future)
+ * 12. Table of Contents
  *     {.toc start=N end=N}
- * 11. Definition lists, per Pandoc.  (future)
- * 12. Blurbs set an attribute on a block element, as in Markua.
- *     Blurbs are denoted by a symbol in the left margin.
- *     Subsequent indented text blocks are children of the blurb.
- *     Blurb symbols:
- *       i> indented block
- *       C> Centered block
- *       H> print header element, <header>
- *       I> Information admonition (future)
- *       W> Warning admonition (future)
- *       T> Tip admonition (future)
- *       c> Comment admonition (future)
- * 13. [^1] is a reference to a footnote. (future)
- *     [^1]: The body of the footnote is deferred, similar to reference links.
- * 14. [#1] is a reference to a citation. (future)
- *     [#1]: The body of the citation is deferred, similar to reference links.
- * 15. Line blocks begin with "| ", as per Pandoc. (future)
+ * 13. Definition lists, per Pandoc.  (future)
+ * 14. Attributes that define a div.
+ *     The format is:
+ *     {attribute}
+ *     >  Block element
  *
- * hurmetMark.js copyright (c) 2021, 2022 Ron Kok
+ *        Block element
+ *
+ *     Current attributes are (indented|centered|header)
+ *     Future attributes include admonitions for info, warning, etc.
+ * 15. [^1] is a reference to a footnote. (future)
+ *     [^1]: The body of the footnote is deferred, similar to reference links.
+ * 16. [#1] is a reference to a citation. (future)
+ *     [#1]: The body of the citation is deferred, similar to reference links.
+ * 17. Line blocks begin with "| ", as per Pandoc. (future)
+ *
+ * hurmetMark.js copyright (c) 2021 - 2023 Ron Kok
  *
  * This file has been adapted (and heavily modified) from Simple-Markdown.
  * Simple-Markdown copyright (c) 2014-2019 Khan Academy & Aria Buckles.
@@ -395,9 +393,9 @@ const TABLES = (function() {
 
           if (colWidths) {
             // Set an attribute used by ProseMirror.
-            let cellWidth = 0
+            const cellWidth = cell.colspan === 0 ? null : [];
             for (let k = 0; k < cell.colspan; k++) {
-              cellWidth += Number(colWidths[j + k])
+              cellWidth.push(Number(colWidths[j + k]))
             }
             cell.width = cellWidth
           }
@@ -427,7 +425,7 @@ const TABLES = (function() {
             "attrs": {
               "colspan": cell.colspan,
               "rowspan": cell.rowspan,
-              "colwidth": (colWidths) ? [cell.width] : null,
+              "colwidth": (colWidths) ? cell.width : null,
               "background": null
             },
             content: content
@@ -497,7 +495,6 @@ const parseTextMark = (capture, state, mark) => {
 }
 
 const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<\/?(?:body|details|(div|input|label)(?: [^>]+)?|!DOCTYPE[a-z ]*|html[a-z ="]*|br|dl(?: class="[a-z-]+")?|li|main[a-z\- ="]*|nav|ol|ul(?: [^>]+)?)\/?>[^\n]*?(?:\n|$))/
-const divType = { "C>": "centered_div", "H>": "header", "i>": "indented_div" }
 
 // Rules must be applied in a specific order, so use a Map instead of an object.
 const rules = new Map();
@@ -612,20 +609,17 @@ rules.set("dd", {  // description details
 });
 rules.set("special_div", {
   isLeaf: false,
-  match: blockRegex(/^(i>|C>|H>)( +)[\s\S]+?(?:\n{2,}(?! {2,2}\2)\n*|\s*$)/),
+  match: blockRegex(/^(?:{(centered|header|indented)} *\n)(> {2}[\s\S]+?(?:\n{2,}(?![> ] {2})\n*|\s*$))/),
   // indented or centered div, or <header>
   parse: function(capture, state) {
-    const type = divType[capture[1]]
-    let div = "  " + capture[0].slice(2)
-    const indent = 2 + capture[2].length
-    const spaceRegex = new RegExp("^ {" + indent + "," + indent + "}", "gm");
-    div = div.replace(spaceRegex, "") // remove indents on trailing lines:
-    return { type, content: parse(div, state) };
+    let div = " " + capture[2].slice(1)
+    div = div.replace(/^ {3}/gm, "") // remove indents on trailing lines:
+    return { type: capture[1], content: parse(div, state) };
   }
 });
 rules.set("figure", {
   isLeaf: true,
-  match: blockRegex(/^!\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]\s*(?:\n+|$)/),
+  match: blockRegex(/^!!\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\] *(?:\n *)+\n/),
   parse: function(capture, state) {
     return parseRef(capture, state, {
       type: "figure",
@@ -635,7 +629,7 @@ rules.set("figure", {
 });
 rules.set("def", {
   isLeaf: true,
-  match: blockRegex(/^\[((?:\\[\s\S]|[^\\])+?)\]: *<?([^\n>]*)>? *\n(?:\{([^\n}]*)\}\n)?/),
+  match: blockRegex(/^\[([^\]\n]+)\]: *<?([^\n>]*)>? *\n(?:\{([^\n}]*)\}\n)?/),
   // Link reference definitions were handled in md2ast().
   parse: function(capture, state) { return { type: "null" } }
 });
@@ -655,24 +649,26 @@ rules.set("gridTable", {
   isLeaf: false,
   match: blockRegex(TABLES.GRID_TABLE_REGEX),
   parse: TABLES.parseGridTable
+});
+rules.set("displayTeX", {
+  isLeaf: true,
+  match: blockRegex(/^\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$ *\n/),
+  parse: function(capture, state) {
+    const tex = capture[1].trim()
+    return { type: "tex", content: "", attrs: { tex, displayMode: true } }
+  }
 })
 rules.set("newline", {
   isLeaf: true,
   match: blockRegex(/^(?:\n *)*\n/),
   parse: function() { return { type: "null" } }
 });
-rules.set("comment", {
-  isLeaf: false,
-  match: blockRegex(/^© +((?:[^\n]|\n(?! *\n))+)(?:\n *)+\n/),
-  parse: function(capture, state) {
-    return { type: "comment", content: parseInline(capture[1].trim(), state) }
-  }
-});
 rules.set("paragraph", {
   isLeaf: false,
-  match: blockRegex(/^((?:[^\n]|\n(?! *\n))+)(?:\n *)+\n/),
+  match: blockRegex(/^({comment}\n)?((?:[^\n]|\n(?! *\n))+)(?:\n *)+\n/),
   parse: function(capture, state) {
-    return { content: parseInline(capture[1], state) }
+    const type = capture[1] ? "comment" : "paragraph"
+    return { type, content: parseInline(capture[2], state) }
   }
 });
 rules.set("escape", {
@@ -697,35 +693,6 @@ rules.set("tableSeparator", {
   },
   parse: function() {
     return { type: "tableSeparator" };
-  }
-});
-rules.set("calculation", {
-  isLeaf: true,
-  match: anyScopeRegex(/^(?:¢(`+)([\s\S]*?[^`])\1(?!`)|¢¢\n?((?:\\[\s\S]|[^\\])+?)\n?¢¢)/),
-  parse: function(capture, state) {
-    if (capture[2]) {
-      let entry = capture[2].trim()
-      if (!/^(?:function|draw\()/.test(entry) && entry.indexOf("``") === -1) {
-        entry = entry.replace(/\n/g, " ")
-      }
-      return { content: "", attrs: { entry } }
-    } else {
-      const entry = capture[3].trim()
-      return { content: "", attrs: { entry, displayMode: true } }
-    }
-  }
-});
-rules.set("tex", {
-  isLeaf: true,
-  match: anyScopeRegex(/^(?:\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$|\$((?:\\[\s\S]|[^\\])+?)\$)/),
-  parse: function(capture, state) {
-    if (capture[2]) {
-      const tex = capture[2].trim().replace(/\n/g, " ")
-      return { content: "", attrs: { tex } }
-    } else {
-      const tex = capture[1].trim()
-      return { content: "", attrs: { tex, displayMode: true } }
-    }
   }
 });
 rules.set("link", {
@@ -753,13 +720,10 @@ rules.set("reflink", {
   isLeaf: true,
   match: inlineRegex(/^\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]/),
   parse: function(capture, state) {
-    const textNode = parseTextMark(capture[1], state, "link" )[0]
+    const defIndex = capture[2] ? capture[2] : capture[1];
+    const textNode = parseTextMark(capture[1], state, "link" )[0];
     const i = linkIndex(textNode.marks)
-    textNode.marks[i].attrs = { href: null }
-    if (capture[2]) {
-      textNode.marks[i].attrs.title = capture[2]
-    }
-    parseRef(capture, state, textNode.marks[i]);
+    textNode.marks[i].attrs = { href: state._defs[defIndex].target }
     return textNode
   }
 });
@@ -789,6 +753,30 @@ rules.set("code", {
   parse: function(capture, state) {
     const text = capture[2].trim()
     return [{ type: "text", text, marks: [{ type: "code" }] }]
+  }
+});
+rules.set("tex", {
+  isLeaf: true,
+  match: inlineRegex(/^\$((?:[^\s][\S\s]*?)?(?:[^\s\\]))\$(?![0-9])/),
+  parse: function(capture, state) {
+    const tex = capture[1].trim()
+    return { type: "tex", content: "", attrs: { tex, displayMode: false } }
+  }
+});
+rules.set("calculation", {
+  isLeaf: true,
+  match: anyScopeRegex(/^(?:¢(`+)([\s\S]*?[^`])\1(?!`)|¢¢\n?((?:\\[\s\S]|[^\\])+?)\n?¢¢)/),
+  parse: function(capture, state) {
+    if (capture[2]) {
+      let entry = capture[2].trim()
+      if (!/^(?:function|draw\()/.test(entry) && entry.indexOf("``") === -1) {
+        entry = entry.replace(/\n/g, " ")
+      }
+      return { content: "", attrs: { entry } }
+    } else {
+      const entry = capture[3].trim()
+      return { content: "", attrs: { entry, displayMode: true } }
+    }
   }
 });
 rules.set("em", {
@@ -833,7 +821,13 @@ rules.set("subscript", {
     return parseTextMark(capture[1], state, "subscript" )
   }
 });
-rules.set("underline", {
+rules.set("tilde", {
+  isLeaf: true,
+  match: inlineRegex(/^~((?:\\[\s\S]|[^\\])+?)~/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "subscript" )
+  }
+});rules.set("underline", {
   isLeaf: true,
   match: inlineRegex(/^<u>([\s\S]*?)<\/u>/),
   parse: function(capture, state) {
@@ -878,28 +872,8 @@ rules.set("text", {
   }
 });
 
-const doNotEscape = ["calculation", "code", "tex"]
-const textModeRegEx = /\\(ce|text|hbox|raisebox|fbox)\{/
-
-const identifyTeX = (source) => {
-  // In TeX, a pair of $…$ delimiters can be nested inside \text{…}.
-  // Parse the string and do not end on a $ inside a {} group.
-  let prevChar = "$"
-  let groupLevel = 0
-  for (let i = 1; i < source.length; i++) {
-    const ch = source.charAt(i)
-    if (ch === "{" && prevChar !== "\\") { groupLevel += 1 }
-    if (ch === "}" && prevChar !== "\\") { groupLevel -= 1 }
-    if (ch === "$" && prevChar !== "\\" && groupLevel === 0) {
-      return [source.slice(0, i + 1), null, source.slice(1, i)]
-    }
-    prevChar = ch
-  }
-  return [source, null, source.slice(1, -1)]
-}
-
 const lists = ["bullet_list", "ordered_list"]
-const LIST_LOOKBEHIND_R = /(?:^|\n)( *)$/
+const LIST_LOOKBEHIND_R = /(?:\n)( *)$/
 
 const parse = (source, state) => {
   if (!state.inline) { source += "\n\n"; }
@@ -911,27 +885,30 @@ const parse = (source, state) => {
     let ruleName = null;
     let rule = null;
     for (const [currRuleName, currRule] of rules) {
-      if (state.inCode && doNotEscape.includes(currRuleName)) { continue }
       capture = currRule.match(source, state);
       if (capture) {
-        rule = currRule;
-        ruleName = currRuleName;
-        const isList = lists.includes(ruleName)
-        if (!isList || LIST_LOOKBEHIND_R.test(state.prevCapture)) {
-          if (isList && state.inline) {
-            // We matched a list that does not have a preceding blank line.
-            // Finish the current block element before beginning the list.
-            state.remainder = capture[0] // to be prepended to source.
-            return result
-          } else {
-            break
+        rule = currRule
+        ruleName = currRuleName
+
+        if (lists.includes(ruleName)) {
+          // Lists are complicated because we do not require a blank line before a list.
+          const prevCaptureStr = state.prevCapture == null ? "" : state.prevCapture
+          const isStartOfLineCapture = LIST_LOOKBEHIND_R.test(prevCaptureStr)
+          if (isStartOfLineCapture) {
+            if (state.inline) {
+              // We matched a list that does not have a preceding blank line.
+              // Finish the current block element before beginning the list.
+              state.remainder = capture[0];
+              return result
+            } else {
+              break
+            }
           }
+        } else {
+          break
         }
+
       }
-    }
-    if (ruleName === "tex" && capture[2] && textModeRegEx.test(capture[2])) {
-      // Check a TeX string for nested $. The capture may need to be extended.
-      capture = identifyTeX(source)
     }
     const parsed = rule.parse(capture, state);
     if (Array.isArray(parsed)) {
@@ -1058,6 +1035,8 @@ const parseMetadata = str => {
   return metadata
 }
 
+const dateMessageRegEx = /^date:([^\n]+)\nmessage:([^\n]+)\n/
+
 export const md2ast = (md, inHtml = false) => {
   // First, check for a metadata preamble
   let metadata = false
@@ -1069,7 +1048,7 @@ export const md2ast = (md, inHtml = false) => {
 
   // Second, get all the link reference definitions
   const state = { inline: false, _defs: {}, prevCapture: "", remainder: "", inHtml }
-  const defRegEx = /^\[((?:\\[\s\S]|[^\\])+?)\]: *<?([^\n>]*)>? *\n(?:\{([^\n}]*)\}\n)?/gm;
+  const defRegEx = /\n *\[([^\]\n]+)\]: *<?([^\n>]*)>? *(?:\n\{([^\n}]*)\})?(?=\n)/gm
   const captures = [...md.matchAll(defRegEx)];
   for (const capture of captures) {
     const def = capture[1].replace(/\s+/g, " ")
@@ -1088,6 +1067,17 @@ export const md2ast = (md, inHtml = false) => {
     state._defs[def] = { target, attrs }
   }
 
+  // Find out if there are any snapshots.
+  let snapshotStrings = []
+  let gotSnapshot = false
+  if (metadata) {
+    snapshotStrings = md.split("<!--SNAPSHOT-->\n")
+    if (snapshotStrings.length > 1) {
+      gotSnapshot = true
+      md = snapshotStrings.shift()
+    }
+  }
+
   // Proceed to parse the document.
   const ast = parse(md, state)
   if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") {
@@ -1096,6 +1086,18 @@ export const md2ast = (md, inHtml = false) => {
   consolidate(ast)
   populateTOC(ast)
   if (metadata) {
+    if (gotSnapshot) {
+      const snapshots = []
+      for (const str of snapshotStrings) {
+        const capture = dateMessageRegEx.exec(str)
+        snapshots.push({
+          date: capture[1] ? Date.parse(capture[1].trim()) : undefined,
+          message: capture[2] ? capture[2].trim() : undefined,
+          content: capture ? str.slice(capture[0].length) : str
+        })
+      }
+      metadata.snapshots = snapshots
+    }
     return { type: "doc", attrs: metadata, content: ast }
   } else {
     return ast

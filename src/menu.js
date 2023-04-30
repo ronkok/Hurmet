@@ -344,45 +344,21 @@ const getSelectionRect = selection => {
   )
 }
 
-const pruneHurmet = node => {
-  // Traverse the document tree and delete non-entry Hurmet attributes
-  for (const item in node) {
-    let child = node[item]
-    if (child !== null && typeof child === 'object') {
-      if (Array.isArray(child)) {
-        for (let i = child.length - 1; i >= 0; i -= 1) {
-          // Test if the paragraph contains any empty Hurmet calculation cells.
-          if (child[i].hasOwnProperty("type")
-              && (child[i].type === "calculation" || child[i].type === "tex")) {
-            if ((child[i].type === "calculation" && child[i].attrs.entry.length === 0) ||
-                (child[i].type === "tex" && child[i].attrs.tex.length === 0)) {          
-              // Remove the empty cell from the paragraph array
-              child.splice(i, 1)
-            }
-          }
-        }
-        if (child.length > 0) {
-          pruneHurmet(child)  // recurse into a paragraph
-        }
-      } else if (child.type) {
-        if (child.type === "calculation") {
-          // Prune the attributes. Keep only the entry and the displayMode.
-          if (child.attrs.displayMode) {
-            child.attrs = { entry: child.attrs.entry, displayMode: true }
-          } else {
-            child.attrs = { entry: child.attrs.entry }
-          }
-        } else if (child.type === "tex") {
-          // Do nothing.
-        } else {
-          pruneHurmet(child);
-        }
-      } else {
-        pruneHurmet(child);
-      }  	      
+const pruneHurmet = (state, view) => {
+  const positions = [];
+  const tr = state.tr
+  // Traverse the doc and find locations of empty calculation zones.
+  state.doc.nodesBetween(0, state.doc.content.size, function(node, pos) {
+    if ((node.type.name === "calculation" && node.attrs.entry.length === 0) || 
+        (node.type.name === "tex" && node.attrs.tex.length === 0)) {
+      positions.push(pos)
     }
+  })
+  // Delete the empty nodes
+  for (let i = positions.length - 1; i >= 0; i--) {
+    tr.delete(positions[i].start, positions[i].start + 1)
   }
-  return node
+  view.dispatch(tr)
 }
 
 export function deleteComments(state, dispatch) {
@@ -423,12 +399,23 @@ function sleep (time) {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
 
-// Export saveFileAsJSON so that it is available in keymap.js
-export function saveFileAsJSON(state) {
-  // Get a copy of the document
-  const docJSON = state.doc.toJSON()
+// Export saveFileAsMarkdown so that it is available in keymap.js
+export function saveFileAsMarkdown(state, view) {
   // Prune the Hurmet math parts down to just the entry. Then stringify it.
-  const str = JSON.stringify(pruneHurmet(docJSON))
+  pruneHurmet(state, view)
+  let str = `---------------
+decimalFormat: ${state.doc.attrs.decimalFormat}
+fontSize: ${state.doc.attrs.fontSize}
+pageSize: ${state.doc.attrs.pageSize}
+---------------
+
+` + hurmetMarkdownSerializer.serialize(state.doc, new Map())
+
+  for (const snapshot of state.doc.attrs.snapshots) {
+    str += `\n<!--SNAPSHOT-->\ndate: ${snapshot.date}\nmessage: ${snapshot.message}\n\n`
+    str += snapshot.content
+  }
+  str =  str
   if (window.showOpenFilePicker && state.doc.attrs.fileHandle) {
     // Use the Chromium File System Access API, so users can click to save a document.
     const button = document.getElementsByClassName("ProseMirror-menubar").item(0).children[1]
@@ -441,35 +428,16 @@ export function saveFileAsJSON(state) {
   } else {
     // Legacy method for Firefox and Safari
     const blob = new Blob([str], {type: "text/plain;charset=utf-8"})
-    saveAs(blob, "HurmetFile.hurmet");
+    saveAs(blob, "HurmetFile.md", { autoBom : false });
   }
 }
 
-function saveFile(state) {
+function saveFile() {
   return new MenuItem({
     title: "Save file...   Ctrl-S",
     label: "Save",
-    run(state) {
-      saveFileAsJSON(state)
-    }
-  })
-}
-
-function exportMarkdownFile() {
-  return new MenuItem({
-    label: "Export Markdown…",
-    run(state) {
-      const preamble = `---------------
-decimalFormat: ${state.doc.attrs.decimalFormat}
-fontSize: ${state.doc.attrs.fontSize}
-pageSize: ${state.doc.attrs.pageSize}
----------------
-
-`
-      const str = hurmetMarkdownSerializer.serialize(state.doc, new Map())
-      // Save the result
-      const blob = new Blob([preamble + str], {type: "text/plain;charset=utf-8"})
-      saveAs(blob, "HurmetMarkdown.md", { autoBom : false });
+    run(state, _, view) {
+      saveFileAsMarkdown(state, view)
     }
   })
 }
@@ -478,18 +446,6 @@ function openFile() {
   return new MenuItem({
     title: "Open file...",
     label: "Open…",
-    run(state, _, view) {
-      readFile(state, _, view, schema, "hurmet")
-    }
-  })
-}
-
-function importMarkdownFile() {
-  return new MenuItem({
-    label: "Import Markdown...",
-    enable() {
-      return true
-    },
     run(state, _, view) {
       readFile(state, _, view, schema, "markdown")
     }
@@ -501,6 +457,20 @@ function copyAsMarkdown() {
     label: "Copy as Markdown",
     run(state, _, view) {
       const text = hurmetMarkdownSerializer.serialize(state.selection.content().content, new Map())
+      const type = "text/plain"
+      const blob = new Blob([text], { type })
+      const data = [new ClipboardItem({ [type]: blob })];
+      navigator.clipboard.write(data)
+    }
+  })
+}
+
+function copyAsGFM() {
+  return new MenuItem({
+    label: "Copy as GFM",
+    title: "Copy as GitHub Flavored Markdown",
+    run(state, _, view) {
+      const text = hurmetMarkdownSerializer.serialize(state.selection.content().content, new Map(), true)
       const type = "text/plain"
       const blob = new Blob([text], { type })
       const data = [new ClipboardItem({ [type]: blob })];
@@ -651,8 +621,8 @@ function takeSnapshot() {
         fields: { message: new TextField({ label: "Commit message", required: true }) },
         callback(attrs) {
           const dateStr = new Date().toISOString().replace(/T.+/, "")
-          let md = hurmetMarkdownSerializer.serialize(state.doc, new Map())
-          // Ignore embedded images
+          let md = hurmetMarkdownSerializer.serialize(state.doc, new Map(), false, true)
+          // Ignore path definitions
           md = md.replace(/\n\n\[[^\]]+\\: .+/, "")
           state.doc.attrs.snapshots.push({ message: attrs.message, date: dateStr, content: md })
         }
@@ -674,15 +644,14 @@ function showDiff() {
       }
       for (let i = 0; i < state.doc.attrs.snapshots.length; i++) {
         buttons.push({
-          textContent: snapshots[i].date + " " + snapshots[i].message,
+          textContent: (new Date(snapshots[i].date)).toISOString().replace(/T.+/, "") + "  " + snapshots[i].message,
           pos: i
         })
       }
       const callback = pos => {
         const dmp = new diff_match_patch()
         const text1 = state.doc.attrs.snapshots[pos].content
-        let text2 = hurmetMarkdownSerializer.serialize(state.doc, new Map())
-        text2 = text2.replace(/\n\n\[[^\]]+\\: .+/, "")
+        const text2 = hurmetMarkdownSerializer.serialize(state.doc, new Map(), false, true)
         dmp.Diff_Timeout = 2
         dmp.Diff_EditCost = 4
         let d = dmp.diff_main(text1, text2)
@@ -690,7 +659,7 @@ function showDiff() {
         const ds = dmp.diff_prettyHtml(d)
         const wrapper = document.body.appendChild(document.createElement("div"))
         wrapper.className = "ProseMirror-prompt"
-        wrapper.style = "width: 550px; max-height: 500px; overflow: scroll;"
+        wrapper.style = "width: 650px; max-height: 500px; overflow: scroll;"
         wrapper.id = ""
         wrapper.innerHTML = ds
         const button = document.createElement("button")
@@ -774,8 +743,9 @@ export function insertMath(state, view, encoding) {
   const pos = tr.selection.from
 
   // Check if the cell should be type set as display mode.
-  const parent = state.doc.resolve(pos).parent
-  if (parent.type.name === "centered_paragraph") { attrs.displayMode = true }
+  const resolvedPos = state.doc.resolve(pos)
+  const grandParent = state.doc.resolve(resolvedPos.before(resolvedPos.depth)).parent
+  if (grandParent.type.name === "centered") { attrs.displayMode = true }
 
   tr.replaceSelectionWith(nodeType.createAndFill(attrs))
   tr.setSelection(NodeSelection.create(tr.doc, pos))
@@ -1024,11 +994,7 @@ function linkItem(markType) {
       openPrompt({
         title: "Create a link",
         fields: {
-          href: new TextField({
-            label: "Link target",
-            required: true
-          }),
-          title: new TextField({ label: "Title" })
+          href: new TextField({ label: "Link target", required: true })
         },
         callback(attrs) {
           toggleMark(markType, attrs)(view.state, view.dispatch)
@@ -1119,8 +1085,6 @@ export function buildMenuItems(schema) {
   r.apostrophecomma = setDecimalFormat("1’000’000,")
   r.dotcomma = setDecimalFormat("1.000.000,")
 
-  r.exportMarkdown = exportMarkdownFile()
-  r.importMarkdownFile = importMarkdownFile()
   r.pica = setFontSize(12)
   r.longprimer = setFontSize(10)
   r.letter = setPageSize("letter")
@@ -1190,12 +1154,12 @@ export function buildMenuItems(schema) {
       title: "Wrap in block quote",
       icon: icons.blockquote
     })
-  if ((type = schema.nodes.centered_div))
+  if ((type = schema.nodes.centered))
     r.wrapCentered = wrapItem(type, {
       title: "Center block",
       icon: hurmetIcons["align-center"]
     })
-  if ((type = schema.nodes.indented_div))
+  if ((type = schema.nodes.indented))
     r.wrapIndent = wrapItem(type, {
       title: "Indent block",
       icon: hurmetIcons.indent
@@ -1315,8 +1279,6 @@ export function buildMenuItems(schema) {
   r.fileDropDown = new Dropdown([
     r.openFile,
     r.saveFile,
-    r.exportMarkdown,
-    r.importMarkdownFile,
     r.takeSnapshot,
     r.showDiff,
     r.deleteSnapshots,
@@ -1406,8 +1368,9 @@ export function buildMenuItems(schema) {
   ])];
 
   r.copyAsMarkdown = copyAsMarkdown()
+  r.copyAsGFM = copyAsGFM()
   r.pasteAsMarkdown = pasteAsMarkdown()
-  r.Markdown = new Dropdown([r.copyAsMarkdown, r.pasteAsMarkdown], {label: "𝐌"})
+  r.Markdown = new Dropdown([r.copyAsMarkdown, r.copyAsGFM, r.pasteAsMarkdown], {label: "𝐌"})
 
   r.fullMenu = r.fileMenu.concat(
     [[undoItem, redoItem, r.Markdown]],

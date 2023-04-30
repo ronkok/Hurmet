@@ -159,8 +159,8 @@ const nodes = {
       { trust: true, displayMode: (node.attrs.displayMode || false) }
     )
   },
-  indented_div(node)    { return htmlTag("div", output(node.content), { class: 'indented' }) },
-  centered_div(node)    {
+  indented(node)    { return htmlTag("div", output(node.content), { class: 'indented' }) },
+  centered(node)    {
     return htmlTag("div", output(node.content), { class: 'centered' } )
   },
   comment(node) { return htmlTag("aside", output(node.content), { class: 'comment' }) },
