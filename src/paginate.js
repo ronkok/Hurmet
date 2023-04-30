@@ -1,7 +1,11 @@
+import { clone } from "./utils"
+
 // Items related to pagination and Table of Contents
 
-const headingsRegEx = /^H[1-6]$/
+const headsRegEx = /^H[1-6]$/
 const levelRegEx = /(\d+)(?:[^\d]+(\d+))?/
+const lists = ["OL", "UL"]
+const blockRegEx = /^(centered|indented)$/
 export const forToC = 0
 export const forPrint = 1
 
@@ -28,7 +32,7 @@ export const tocLevels = entry => {
 }
 
 export const renderToC = (tocArray, ul) => {
-  // Called by schema. Renders a Table of Contents.
+  // Called by schema.js. Renders a Table of Contents.
   ul.innerHTML = ""
   ul.className = "toc"
   for (const item of tocArray) {
@@ -44,11 +48,13 @@ export const renderToC = (tocArray, ul) => {
   }
 }
 
-const pushToToC = (element, tocArray, targetRegEx, iPass, startLevel, pageNum, elNum) => {
-  if (iPass === 0 && targetRegEx && targetRegEx.test(element.tagName)) {
-    const level = Number(element.tagName.slice(1)) - startLevel
-    tocArray.push([element.textContent, level, pageNum, elNum])
+const bottomOf = element => {
+  let bottom = element.getBoundingClientRect().bottom
+  const images = element.getElementsByTagName("img")
+  for (let i = 0; i < images.length; i++) {
+    bottom = Math.max(bottom, images[i].getBoundingClientRect().bottom)
   }
+  return bottom
 }
 
 export const findPageBreaks = (view, state, purpose, tocSchema, startLevel, endLevel = 0) => {
@@ -63,18 +69,16 @@ export const findPageBreaks = (view, state, purpose, tocSchema, startLevel, endL
       endLevel = tocNode.attrs.end
     }
   }
-  let targetRegEx
+  let tocRegEx
   if (endLevel > 0) {
     let targetStr = "^("
     for (let i = startLevel; i <= endLevel; i++) {
       targetStr += "H" + i + "|"
     }
     targetStr = targetStr.slice(0, -1) + ")$"
-    targetRegEx = targetStr.length > 0 ? RegExp(targetStr) : null
+    tocRegEx = targetStr.length > 0 ? RegExp(targetStr) : null
   }
   const tocArray = []
-  const [editor] = document.getElementsByClassName("ProseMirror-example-setup-style")
-  const source = editor.cloneNode(true)
   const destination = document.getElementById("print-div")
   const frag = document.createDocumentFragment()
   let header
@@ -85,61 +89,112 @@ export const findPageBreaks = (view, state, purpose, tocSchema, startLevel, endL
     header.classList.add("header")
     header.innerHTML = header.innerHTML.replace("$PAGE", '<span class="page-display"></span>')
     const headerRect = document.getElementsByTagName("header")[0].getBoundingClientRect()
-    pageHeight = pageHeight - 137 /*margins*/  -  (headerRect.bottom - headerRect.top)
+    pageHeight = pageHeight - 139 /*margins*/  -  (headerRect.bottom - headerRect.top)
   } else {
-    pageHeight = pageHeight - 137
+    pageHeight = pageHeight - 139
   }
 
   const numPasses = purpose === forPrint ? 2 : 1
-  const numEls = source.childNodes.length
+
+  let packet = [];
+  destination.innerHTML = ""
+
   for (let iPass = 0; iPass < numPasses; iPass++) {
-    destination.innerHTML = ""
-    let iStart = headerExists ? 1 : 0
-    let iEnd = 0
+    const [editor] = document.getElementsByClassName("ProseMirror-example-setup-style")
+    const source = editor.cloneNode(true)
+    const numEls = source.childNodes.length
+    let prevElement = { index: headerExists ? 0 : -1, all: true }
+    let iStart = prevElement.all ? prevElement.index + 1 : prevElement.index
     let pageNum = 1  // Loop will increment pageNum. Odd numbers will be on recto side.
     while (iStart < numEls) {
-      const top = editor.children[iStart].getBoundingClientRect().top
+      const top = prevElement.all
+        ? editor.children[iStart].getBoundingClientRect().top
+        : editor.children[iStart].children[prevElement.end].getBoundingClientRect().top
+      packet = [];
+
       // Iterate on the top level elements. Check the bottom coordinate of each.
-      for (let i = iStart + 1; i < numEls; i++) {
-        const element = editor.children[i]
+      for (let i = iStart; i < numEls; i++) {
+        const element = editor.children[i]; // A top level element.
+        let elementData = { index: i, all: true }
+
+        if (i === iStart && !prevElement.all) {
+          // Continue to print a block that was begun on the previous page.
+          elementData = { index: i, all: false, tag: element.tagName,
+            class: element.className, start: prevElement.end }
+          for (let j = prevElement.end; j < element.children.length; j++) {
+            const bot = bottomOf(element.children[j])
+            if (bot - top > pageHeight) {
+              elementData.end = j - 1
+              break
+            }
+          }
+          if (!elementData.end) { elementData.end = element.children.length }
+          packet.push(elementData)
+          if (elementData.end < element.children.length) {
+            break
+          } else {
+            continue
+          }
+        }
+
         if (element.tagName === "H1" &&
           element.getBoundingClientRect().top - top > 0.75 * pageHeight) {
-          // Prevent a H! near the bottom of a page.
-          iEnd = i - 1
-          pushToToC(element, tocArray, targetRegEx, iPass, startLevel, pageNum + 1, i)
+          // Prevent a H1 near the bottom of a page.
           break
         }
         if (element.tagName === "H2" &&
           element.getBoundingClientRect().top - top > 0.85 * pageHeight) {
-          // Prevent a H! near the bottom of a page.
-          iEnd = i - 1
-          pushToToC(element, tocArray, targetRegEx, iPass, startLevel, pageNum + 1, i)
+          // Prevent a H2 near the bottom of a page.
           break
         }
-        let bottom = element.getBoundingClientRect().bottom
-        const images = element.getElementsByTagName("img")
-        for (let j = 0; j < images.length; j++) {
-          bottom = Math.max(bottom, images[j].getBoundingClientRect().bottom)
-        }
-        if (bottom - top > pageHeight) {
-          const iLast = tocArray.length === 0
-            ? 0
-            : tocArray[tocArray.length - 1][3]
-          iEnd = (headingsRegEx.test(editor.children[i - 1].tagName) ||
-                  element.className === "indented")
-            ? i - 2
-            : i - 1
-          if (iEnd + 1 !== iLast) {
-            pushToToC(editor.children[iEnd + 1], tocArray, targetRegEx,
-              iPass, startLevel, pageNum + 1, iEnd + 1)
-            break
+
+        const bottom = bottomOf(element)
+        if (pageHeight > bottom - top) {
+          packet.push(elementData)
+        } else {
+          // element runs past the bottom of the page.
+          // Check if element is a list or an (indented|centered) div
+          if (element.children.length > 1 && (lists.includes(element.tagName) ||
+          (element.tagName === "DIV" && blockRegEx.test(element.className)))) {
+            const firstBot = bottomOf(element.children[0])
+            if (firstBot - top > pageHeight) {
+              if (headsRegEx.test(editor.children[i - 1].tagName)) {
+                packet.pop()
+                if (iPass === 0 && tocRegEx && tocRegEx.test(editor.children[i - 1].tagName)) {
+                  tocArray.pop()
+                }
+              }
+              break
+            }
+            for (let j = 0; j < element.children.length; j++) {
+              const bot = bottomOf(element.children[j])
+              if (bot - top > pageHeight) {
+                elementData = { index: i, all: false, tag: element.tagName,
+                  class: element.className, start: 0, end: j - 1 }
+                break
+              }
+            }
+            if (elementData.end < element.children.length) {
+              packet.push(elementData)
+              break
+            }
           }
+          if (headsRegEx.test(editor.children[i - 1].tagName)) {
+            packet.pop()
+            if (iPass === 0 && tocRegEx && tocRegEx.test(editor.children[i - 1].tagName)) {
+              tocArray.pop()
+            }
+          }
+          break
         }
-        pushToToC(element, tocArray, targetRegEx, iPass, startLevel, pageNum, i)
+        if (iPass === 0 && tocRegEx && tocRegEx.test(element.tagName)) {
+          const level = Number(element.tagName.slice(1)) - startLevel
+          tocArray.push([element.textContent, level, pageNum])
+        }
       }
+
       // The loop has found enough elements to fill a page.
-      if (iEnd === iStart - 1) { iEnd = numEls - 1 }
-      if (purpose === forPrint) {
+      if (purpose === forPrint && iPass === 1) {
         // Copy the identified elements to the destination div.
         if (headerExists && pageNum > 1) {
           frag.append(header.cloneNode(true))
@@ -147,13 +202,27 @@ export const findPageBreaks = (view, state, purpose, tocSchema, startLevel, endL
         // Create a body div
         const div = document.createElement("div")
         div.className = "print-body"
-        for (let i = iStart; i <= iEnd; i++) {
-          div.append(source.children[i].cloneNode(true))
+        for (const elementData of packet) {
+          const i = elementData.index
+          if (elementData.all) {
+            div.append(source.children[i].cloneNode(true))
+          } else {
+            const el = document.createElement(elementData.tag)
+            if (elementData.class) { el.className = elementData.class }
+            if (elementData.tag === "OL" && elementData.start > 0) {
+              el.setAttribute("start", elementData.start)
+            }
+            for (let j = elementData.start; j < elementData.end; j++) {
+              el.append(source.children[i].children[j].cloneNode(true))
+            }
+            div.append(el)
+          }
         }
         frag.append(div)
         destination.append(frag)
       }
-      iStart = iEnd + 1
+      prevElement = clone(packet[packet.length - 1])
+      iStart = prevElement.all ? prevElement.index + 1 : prevElement.index
       pageNum += 1
     }
     if (purpose === forPrint && tocNode && iPass === 0) {
