@@ -2121,6 +2121,12 @@ print
 
     ![print string](images/print-railroad.svg)
 
+one-liner
+
+:   To make early returns less verbose, a one-liner _if_ syntax is available:
+
+    ![one liner](images/one-liner-railroad.svg)
+
 </dl>
 
 #### startSvg

@@ -9,6 +9,7 @@ const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\
 const keywordRegEx = /^(if|elseif|else|return|throw|while|for|break|print|end)\b/
 const drawCommandRegEx = /^(title|frame|view|axes|grid|stroke|strokewidth|strokedasharray|fill|fontsize|fontweight|fontstyle|fontfamily|marker|line|path|plot|curve|rect|circle|ellipse|arc|text|dot|leader|dimension)\b/
 const leadingSpaceRegEx = /^[\t ]+/
+const oneLinerRegEx = /^(( *)if [^\n"`]+) ((?:return|throw|print|break)\b(?:[^\n]+)?)(?: end)? *\n/gm
 
 // If you change functionRegEx, then also change it in mathprompt.js.
 // It isn't called from there in order to avoid duplicating Hurmet code inside ProseMirror.js.
@@ -47,6 +48,9 @@ export const scanModule = (str, decimalFormat) => {
   // Scan the code and break it down into individual lines of code.
   // Assemble the lines into functions and assign each function to parent.
   const parent = Object.create(null)
+
+  // Expand one-liners into three lines each.
+  str = str.replace(oneLinerRegEx, "$1\n$2    $3\n$2end\n")
 
   // Statements end at a newline.
   const lines = str.split(/\r?\n/g)

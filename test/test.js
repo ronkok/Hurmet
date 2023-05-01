@@ -297,7 +297,7 @@ hurmet.calculate(`function testWhile(b)
 end`, vars)
 
 hurmet.calculate(`function testBreak()
-   print "This is an echo test."
+   print "This is an print test."
    sum = 0
    for i in 1:100
       if i > 3
