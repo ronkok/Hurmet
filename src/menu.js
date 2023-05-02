@@ -356,7 +356,7 @@ const pruneHurmet = (state, view) => {
   })
   // Delete the empty nodes
   for (let i = positions.length - 1; i >= 0; i--) {
-    tr.delete(positions[i].start, positions[i].start + 1)
+    tr.delete(positions[i], positions[i] + 1)
   }
   view.dispatch(tr)
 }
