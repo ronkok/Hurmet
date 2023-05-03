@@ -12654,7 +12654,7 @@ const isValidIdentifier$1 = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u211
 const keywordRegEx = /^(if|elseif|else|return|throw|while|for|break|print|end)\b/;
 const drawCommandRegEx = /^(title|frame|view|axes|grid|stroke|strokewidth|strokedasharray|fill|fontsize|fontweight|fontstyle|fontfamily|marker|line|path|plot|curve|rect|circle|ellipse|arc|text|dot|leader|dimension)\b/;
 const leadingSpaceRegEx$2 = /^[\t ]+/;
-const oneLinerRegEx = /^(( *)if [^\n"`]+) ((?:return|throw|break)\b(?:[^\n]+)?)(?: end)? *\n/gm;
+const oneLinerRegEx = /^(( *)if [^\n"`]+) ((?:return|throw|print|break)\b(?:[^\n]+)?)(?: end)? *\n/gm;
 
 // If you change functionRegEx, then also change it in mathprompt.js.
 // It isn't called from there in order to avoid duplicating Hurmet code inside ProseMirror.js.
