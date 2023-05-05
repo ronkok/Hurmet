@@ -159,11 +159,9 @@ const nodes = {
       { trust: true, displayMode: (node.attrs.displayMode || false) }
     )
   },
-  indented(node)    { return htmlTag("div", output(node.content), { class: 'indented' }) },
-  centered(node)    {
-    return htmlTag("div", output(node.content), { class: 'centered' } )
-  },
-  comment(node) { return htmlTag("aside", output(node.content), { class: 'comment' }) },
+  indented(node) { return htmlTag("div", output(node.content), { class: 'indented' }) },
+  centered(node) { return htmlTag("div", output(node.content), { class: 'centered' }) },
+  comment(node)  { return htmlTag("aside", output(node.content), { class: 'comment' }) },
   dt(node)    {
     let text = output(node.content)
     let tag = htmlTag("dt", text)

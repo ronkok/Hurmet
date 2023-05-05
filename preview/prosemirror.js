@@ -15926,6 +15926,10 @@ const bottomOf = element => {
   for (let i = 0; i < images.length; i++) {
     bottom = Math.max(bottom, images[i].getBoundingClientRect().bottom);
   }
+  const svgs = element.getElementsByTagName("svg");
+  for (let i = 0; i < svgs.length; i++) {
+    bottom = Math.max(bottom, svgs[i].getBoundingClientRect().bottom);
+  }
   return bottom
 };
 
@@ -25337,8 +25341,12 @@ const parseRef = function(capture, state, refNode) {
       ] };
       refNode.content[0].attrs.src = def.target;
     } else if (refNode.type === "image") {
-      refNode.attrs = def.attrs;
-      refNode.attrs.src = def.target;
+      if (def.target.indexOf("\n") > -1) {
+        refNode = { type: "calculation", content: "", attrs: { entry: def.target } };
+      } else {
+        refNode.attrs = def.attrs;
+        refNode.attrs.src = def.target;
+      }
     } else {
       // refNode is a link
       refNode.attrs.href = def.target;
@@ -25496,7 +25504,7 @@ rules.set("figure", {
 });
 rules.set("def", {
   isLeaf: true,
-  match: blockRegex(/^\[([^\]\n]+)\]: *<?([^\n>]*)>? *\n(?:\{([^\n}]*)\}\n)?/),
+  match: blockRegex(/^\[([^\]\n]+)\]: *(?:¢(`+)([\s\S]*?[^`])\2(?!`)|<?([^\n>]*)>? *(?:\n\{([^\n}]*)\})?)/),
   // Link reference definitions were handled in md2ast().
   parse: function(capture, state) { return { type: "null" } }
 });
@@ -25844,6 +25852,10 @@ const consolidate = arr => {
           !node.marks && !prevNode.marks) {
         prevNode.text += node.text;
         arr.splice(i, 1);
+      } else if ((node.type === 'indented' && prevNode.type === 'indented') ||
+                 (node.type === 'centered' && prevNode.type === 'centered')) {
+        prevNode.content = prevNode.content.concat(node.content);
+        arr.splice(i, 1);
       } else if (node.type === "null") {
         arr.splice(i, 1);
       } else if (!rules.has(node.type) || !rules.get(node.type).isLeaf) {
@@ -25915,12 +25927,12 @@ const md2ast = (md, inHtml = false) => {
 
   // Second, get all the link reference definitions
   const state = { inline: false, _defs: {}, prevCapture: "", remainder: "", inHtml };
-  const defRegEx = /\n *\[([^\]\n]+)\]: *<?([^\n>]*)>? *(?:\n\{([^\n}]*)\})?(?=\n)/gm;
+  const defRegEx = /\n *\[([^\]\n]+)\]: *(?:¢(`+)([\s\S]*?[^`])\2(?!`)|<?([^\n>]*)>? *(?:\n\{([^\n}]*)\})?)(?=\n)/gm;
   const captures = [...md.matchAll(defRegEx)];
   for (const capture of captures) {
     const def = capture[1].replace(/\s+/g, " ");
-    const target = capture[2];
-    const directives = capture[3] || "";
+    const target = capture[4] || capture[3].trim();
+    const directives = capture[5] || "";
 
     const attrs = { alt: def };
     if (directives) {
@@ -42725,11 +42737,9 @@ const nodes = {
       { trust: true, displayMode: (node.attrs.displayMode || false) }
     )
   },
-  indented(node)    { return htmlTag("div", output(node.content), { class: 'indented' }) },
-  centered(node)    {
-    return htmlTag("div", output(node.content), { class: 'centered' } )
-  },
-  comment(node) { return htmlTag("aside", output(node.content), { class: 'comment' }) },
+  indented(node) { return htmlTag("div", output(node.content), { class: 'indented' }) },
+  centered(node) { return htmlTag("div", output(node.content), { class: 'centered' }) },
+  comment(node)  { return htmlTag("aside", output(node.content), { class: 'comment' }) },
   dt(node)    {
     let text = output(node.content);
     let tag = htmlTag("dt", text);
@@ -43979,17 +43989,24 @@ const hurmetNodes =  {
     writeTex(state, node.attrs.displayMode, tex);
   },
   calculation(state, node) {
-    const entry = node.attrs.entry.trim().replace(/\n(?: *\n)+/g, "\n").replace(/\n/gm, "\n" + state.delim);
+    let entry = node.attrs.entry.trim().replace(/\n(?: *\n)+/g, "\n").replace(/\n/gm, "\n" + state.delim);
     if (state.isGFM) {
       // Convert calculation to TeX
       const tex = parse(entry);
       writeTex(state, node.attrs.displayMode, tex);
     } else {
-      if (node.attrs.displayMode) {
+      if (!node.attrs.displayMode) {
+        const ticks = backticksFor({ text: entry, isText: true }, -1).trim();
+        entry = "¢" + ticks + " " + entry + " " + ticks;
+      }
+      if (node.attrs.entry.slice(0, 5) === "draw(") {
+        const ref = getRef(node, state);
+        state.paths.set(ref, entry);
+        state.write(isNaN(ref) ? `![${ref}][]` : `![][${ref}]`);
+      } else if (node.attrs.displayMode) {
         state.write("¢¢ " + entry + " ¢¢");
       } else {
-        const ticks = backticksFor({ text: entry, isText: true }, -1).trim();
-        state.write("¢" + ticks + " " + entry + " " + ticks);
+        state.write(entry);
       }
     }
   }
@@ -44050,13 +44067,18 @@ function isPlainURL(link, parent, index, side) {
   return !link.isInSet(next.marks)
 }
 
+const titleRegEx = /\n *title +"([^\n]+)" *\n/;
+
 const getRef = (node, state) => {
   // We use reference links and defer the image paths to the end of the document.
-  const ref = node.type.name === "image"
+  let ref = node.type.name === "image"
     ? node.attrs.alt
     : node.type.name === "figimg"
     ? node.content.content[0].attrs.alt
     : null;
+  if (node.attrs.entry && titleRegEx.test(node.attrs.entry)) {
+    ref = titleRegEx.exec(node.attrs.entry)[1].trim();
+  }
   const num = isNaN(state.paths.size) ? "1" : String(state.paths.size + 1);
   if (ref) {
     // Determine if ref has already been used

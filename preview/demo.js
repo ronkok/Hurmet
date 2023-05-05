@@ -9865,8 +9865,12 @@ const parseRef = function(capture, state, refNode) {
       ] };
       refNode.content[0].attrs.src = def.target;
     } else if (refNode.type === "image") {
-      refNode.attrs = def.attrs;
-      refNode.attrs.src = def.target;
+      if (def.target.indexOf("\n") > -1) {
+        refNode = { type: "calculation", content: "", attrs: { entry: def.target } };
+      } else {
+        refNode.attrs = def.attrs;
+        refNode.attrs.src = def.target;
+      }
     } else {
       // refNode is a link
       refNode.attrs.href = def.target;
@@ -10024,7 +10028,7 @@ rules.set("figure", {
 });
 rules.set("def", {
   isLeaf: true,
-  match: blockRegex(/^\[([^\]\n]+)\]: *<?([^\n>]*)>? *\n(?:\{([^\n}]*)\}\n)?/),
+  match: blockRegex(/^\[([^\]\n]+)\]: *(?:¢(`+)([\s\S]*?[^`])\2(?!`)|<?([^\n>]*)>? *(?:\n\{([^\n}]*)\})?)/),
   // Link reference definitions were handled in md2ast().
   parse: function(capture, state) { return { type: "null" } }
 });
@@ -10372,6 +10376,10 @@ const consolidate = arr => {
           !node.marks && !prevNode.marks) {
         prevNode.text += node.text;
         arr.splice(i, 1);
+      } else if ((node.type === 'indented' && prevNode.type === 'indented') ||
+                 (node.type === 'centered' && prevNode.type === 'centered')) {
+        prevNode.content = prevNode.content.concat(node.content);
+        arr.splice(i, 1);
       } else if (node.type === "null") {
         arr.splice(i, 1);
       } else if (!rules.has(node.type) || !rules.get(node.type).isLeaf) {
@@ -10443,12 +10451,12 @@ const md2ast = (md, inHtml = false) => {
 
   // Second, get all the link reference definitions
   const state = { inline: false, _defs: {}, prevCapture: "", remainder: "", inHtml };
-  const defRegEx = /\n *\[([^\]\n]+)\]: *<?([^\n>]*)>? *(?:\n\{([^\n}]*)\})?(?=\n)/gm;
+  const defRegEx = /\n *\[([^\]\n]+)\]: *(?:¢(`+)([\s\S]*?[^`])\2(?!`)|<?([^\n>]*)>? *(?:\n\{([^\n}]*)\})?)(?=\n)/gm;
   const captures = [...md.matchAll(defRegEx)];
   for (const capture of captures) {
     const def = capture[1].replace(/\s+/g, " ");
-    const target = capture[2];
-    const directives = capture[3] || "";
+    const target = capture[4] || capture[3].trim();
+    const directives = capture[5] || "";
 
     const attrs = { alt: def };
     if (directives) {
@@ -27253,11 +27261,9 @@ const nodes = {
       { trust: true, displayMode: (node.attrs.displayMode || false) }
     )
   },
-  indented(node)    { return htmlTag("div", output(node.content), { class: 'indented' }) },
-  centered(node)    {
-    return htmlTag("div", output(node.content), { class: 'centered' } )
-  },
-  comment(node) { return htmlTag("aside", output(node.content), { class: 'comment' }) },
+  indented(node) { return htmlTag("div", output(node.content), { class: 'indented' }) },
+  centered(node) { return htmlTag("div", output(node.content), { class: 'centered' }) },
+  comment(node)  { return htmlTag("aside", output(node.content), { class: 'comment' }) },
   dt(node)    {
     let text = output(node.content);
     let tag = htmlTag("dt", text);
