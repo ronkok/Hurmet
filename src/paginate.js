@@ -54,6 +54,10 @@ const bottomOf = element => {
   for (let i = 0; i < images.length; i++) {
     bottom = Math.max(bottom, images[i].getBoundingClientRect().bottom)
   }
+  const svgs = element.getElementsByTagName("svg")
+  for (let i = 0; i < svgs.length; i++) {
+    bottom = Math.max(bottom, svgs[i].getBoundingClientRect().bottom)
+  }
   return bottom
 }
 
