@@ -381,3 +381,10 @@ export function updateCalculations(
     }
   }
 }
+
+export const helpers = Object.freeze({
+  fetchRegEx,
+  textRegEx,
+  urlFromEntry,
+  processFetchedString
+})
