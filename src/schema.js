@@ -3,7 +3,8 @@ import {Schema} from "prosemirror-model"
 import {findWrapping, liftTarget, canSplit, ReplaceAroundStep} from "prosemirror-transform"
 import {Slice, Fragment, NodeRange} from "prosemirror-model"
 import { renderToC, tocLevels } from "./paginate"
-import { hurmet } from "./hurmet.js"
+import { dt } from "./constants"
+import { draw } from "./draw"
 import temml from "./temml.js"
 
 // Helpers for creating a schema that supports tables.
@@ -367,10 +368,10 @@ export const nodes = {
       //if (node.attrs.dtype !== dt.IMAGE) {
       dom = document.createElement('span')
       dom.classList = "hurmet-calc"
-      if (node.attrs.dtype && node.attrs.dtype === hurmet.dt.DRAWING) {
+      if (node.attrs.dtype && node.attrs.dtype === dt.DRAWING) {
         dom = document.createElement('span')
-        dom.appendChild(hurmet.draw.renderSVG(node.attrs.resultdisplay))
-      } else if (node.attrs.dtype && node.attrs.dtype === hurmet.dt.MODULE &&
+        dom.appendChild(draw.renderSVG(node.attrs.resultdisplay))
+      } else if (node.attrs.dtype && node.attrs.dtype === dt.MODULE &&
         functionRegEx.test(node.attrs.entry)) {
         dom.appendChild(document.createElement('pre'))
         dom.firstChild.appendChild(document.createElement('code'))

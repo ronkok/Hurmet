@@ -1,426 +1,3 @@
-/* eslint-disable */
-
-/* I've revised this version of CodeJar for Hurmet math zones.
- * I've removed history and highlighting. They each had a delay and Hurmet
- * needs speed in order to update a view of the math with every keystroke.
- */
-
-const codeJar = (editor, isMathPrompt) => {
-  const options = {
-    tab: "\t",
-    indentOn: /{$/,
-    catchTab: true,
-    preserveIdent: true,
-    addClosing: true
-  };
-
-  const document = window.document;
-
-  const listeners = [];
-  let callback;
-
-  editor.setAttribute("contenteditable", "plaintext-only");
-  editor.setAttribute("spellcheck", "false");
-  editor.style.outline = "none";
-  editor.style.overflowWrap = "break-word";
-  editor.style.overflowY = "auto";
-  editor.style.whiteSpace = "pre-wrap";
-
-  let isLegacy = false; // true if plaintext-only is not supported
-
-  if (editor.contentEditable !== "plaintext-only") isLegacy = true;
-  if (isLegacy) editor.setAttribute("contenteditable", "true");
-
-  const on = (type, fn) => {
-    listeners.push([type, fn]);
-    editor.addEventListener(type, fn);
-  }
-
-  ;on("keydown", event => {
-    // The next five lines are Hurmet customization. Not part of vanilla CodeJar.
-    if (isMathPrompt && event.keyCode === 13 && !event.shiftKey) return
-    if (event.keyCode === 65 && event.ctrlKey ) {
-      window.getSelection().selectAllChildren(editor);
-      event.preventDefault();
-    }
-    if (event.defaultPrevented) return
-    if (options.preserveIdent) handleNewLine(event);
-    else legacyNewLineFix(event);
-    if (options.catchTab) handleTabCharacters(event);
-    if (options.addClosing) handleSelfClosingCharacters(event);
-    if (isLegacy) restore(save());
-  })
-
-  ;on("keyup", event => {
-    if (event.defaultPrevented) return
-    if (event.isComposing) return
-    if (callback) callback(toString());
-  })
-
-  ;on("paste", event => {
-    handlePaste(event);
-    if (callback) callback(toString());
-  });
-
-  function save() {
-    const s = getSelection();
-    const pos = { start: 0, end: 0, dir: undefined };
-
-    let { anchorNode, anchorOffset, focusNode, focusOffset } = s;
-    if (!anchorNode || !focusNode) throw "error1"
-
-    // Selection anchor and focus are expected to be text nodes,
-    // so normalize them.
-    if (anchorNode.nodeType === Node.ELEMENT_NODE) {
-      const node = document.createTextNode("");
-      anchorNode.insertBefore(node, anchorNode.childNodes[anchorOffset]);
-      anchorNode = node;
-      anchorOffset = 0;
-    }
-    if (focusNode.nodeType === Node.ELEMENT_NODE) {
-      const node = document.createTextNode("");
-      focusNode.insertBefore(node, focusNode.childNodes[focusOffset]);
-      focusNode = node;
-      focusOffset = 0;
-    }
-
-    visit(editor, el => {
-      if (el === anchorNode && el === focusNode) {
-        pos.start += anchorOffset;
-        pos.end += focusOffset;
-        pos.dir = anchorOffset <= focusOffset ? "->" : "<-";
-        return "stop"
-      }
-
-      if (el === anchorNode) {
-        pos.start += anchorOffset;
-        if (!pos.dir) {
-          pos.dir = "->";
-        } else {
-          return "stop"
-        }
-      } else if (el === focusNode) {
-        pos.end += focusOffset;
-        if (!pos.dir) {
-          pos.dir = "<-";
-        } else {
-          return "stop"
-        }
-      }
-
-      if (el.nodeType === Node.TEXT_NODE) {
-        if (pos.dir != "->") pos.start += el.nodeValue.length;
-        if (pos.dir != "<-") pos.end += el.nodeValue.length;
-      }
-    });
-
-    // collapse empty text nodes
-    editor.normalize();
-
-    return pos
-  }
-
-  function restore(pos) {
-    const s = getSelection();
-    let startNode,
-      startOffset = 0;
-    let endNode,
-      endOffset = 0;
-
-    if (!pos.dir) pos.dir = "->";
-    if (pos.start < 0) pos.start = 0;
-    if (pos.end < 0) pos.end = 0;
-
-    // Flip start and end if the direction reversed
-    if (pos.dir == "<-") {
-      const { start, end } = pos;
-      pos.start = end;
-      pos.end = start;
-    }
-
-    let current = 0;
-
-    visit(editor, el => {
-      if (el.nodeType !== Node.TEXT_NODE) return
-
-      const len = (el.nodeValue || "").length;
-      if (current + len > pos.start) {
-        if (!startNode) {
-          startNode = el;
-          startOffset = pos.start - current;
-        }
-        if (current + len > pos.end) {
-          endNode = el;
-          endOffset = pos.end - current;
-          return "stop"
-        }
-      }
-      current += len;
-    });
-
-    if (!startNode)
-      (startNode = editor), (startOffset = editor.childNodes.length);
-    if (!endNode) (endNode = editor), (endOffset = editor.childNodes.length);
-
-    // Flip back the selection
-    if (pos.dir == "<-") {
-[startNode, startOffset, endNode, endOffset] = [
-        endNode,
-        endOffset,
-        startNode,
-        startOffset
-      ];
-    }
-
-    s.setBaseAndExtent(startNode, startOffset, endNode, endOffset);
-  }
-
-  function beforeCursor() {
-    const s = getSelection();
-    const r0 = s.getRangeAt(0);
-    const r = document.createRange();
-    r.selectNodeContents(editor);
-    r.setEnd(r0.startContainer, r0.startOffset);
-    return r.toString()
-  }
-
-  function afterCursor() {
-    const s = getSelection();
-    const r0 = s.getRangeAt(0);
-    const r = document.createRange();
-    r.selectNodeContents(editor);
-    r.setStart(r0.endContainer, r0.endOffset);
-    return r.toString()
-  }
-
-  function handleNewLine(event) {
-    if (event.key === "Enter") {
-      const before = beforeCursor();
-      const after = afterCursor();
-
-      let [padding] = findPadding(before);
-      let newLinePadding = padding;
-
-      // If last symbol is "{" ident new line
-      // Allow user defines indent rule
-      if (options.indentOn.test(before)) {
-        newLinePadding += options.tab;
-      }
-
-      // Preserve padding
-      if (newLinePadding.length > 0) {
-        preventDefault(event);
-        event.stopPropagation();
-        insert("\n" + newLinePadding);
-      } else {
-        legacyNewLineFix(event);
-      }
-
-      // Place adjacent "}" on next line
-      if (newLinePadding !== padding && after[0] === "}") {
-        const pos = save();
-        insert("\n" + padding);
-        restore(pos);
-      }
-    }
-  }
-
-  function legacyNewLineFix(event) {
-    // Firefox does not support plaintext-only mode
-    // and puts <div><br></div> on Enter. Let's help.
-    if (isLegacy && event.key === "Enter") {
-      preventDefault(event);
-      event.stopPropagation();
-      if (afterCursor() == "") {
-        insert("\n ");
-        const pos = save();
-        pos.start = --pos.end;
-        restore(pos);
-      } else {
-        insert("\n");
-      }
-    }
-  }
-
-  function handleSelfClosingCharacters(event) {
-    const open = `([{'"`;
-    const close = `)]}'"`;
-    const codeAfter = afterCursor();
-    const codeBefore = beforeCursor();
-    const escapeCharacter = codeBefore.substr(codeBefore.length - 1) === "\\";
-    const charAfter = codeAfter.substr(0, 1);
-    if (
-      close.includes(event.key) &&
-      !escapeCharacter &&
-      charAfter === event.key
-    ) {
-      // We already have closing char next to cursor.
-      // Move one char to right.
-      const pos = save();
-      preventDefault(event);
-      pos.start = ++pos.end;
-      restore(pos);
-    } else if (
-      open.includes(event.key) &&
-      !escapeCharacter &&
-      (`"'`.includes(event.key) || ["", " ", "\n"].includes(charAfter))
-    ) {
-      preventDefault(event);
-      const pos = save();
-      const wrapText = pos.start == pos.end ? "" : getSelection().toString();
-      const text = event.key + wrapText + close[open.indexOf(event.key)];
-      insert(text);
-      pos.start++;
-      pos.end++;
-      restore(pos);
-    }
-  }
-
-  function handleTabCharacters(event) {
-    if (event.key === "Tab") {
-      preventDefault(event);
-      if (event.shiftKey) {
-        const before = beforeCursor();
-        let [padding, start] = findPadding(before);
-        if (padding.length > 0) {
-          const pos = save();
-          // Remove full length tab or just remaining padding
-          const len = Math.min(options.tab.length, padding.length);
-          restore({ start, end: start + len });
-          document.execCommand("delete");
-          pos.start -= len;
-          pos.end -= len;
-          restore(pos);
-        }
-      } else {
-        insert(options.tab);
-      }
-    }
-  }
-
-  function handlePaste(event) {
-    preventDefault(event);
-    const text = (event.originalEvent || event).clipboardData
-      .getData("text/plain")
-      .replace(/\r/g, "");
-    const pos = save();
-    insert(text);
-    restore({ start: pos.start + text.length, end: pos.start + text.length });
-  }
-
-  function visit(editor, visitor) {
-    const queue = [];
-
-    if (editor.firstChild) queue.push(editor.firstChild);
-
-    let el = queue.pop();
-
-    while (el) {
-      if (visitor(el) === "stop") break
-
-      if (el.nextSibling) queue.push(el.nextSibling);
-      if (el.firstChild) queue.push(el.firstChild);
-
-      el = queue.pop();
-    }
-  }
-
-  function insert(text) {
-    text = text
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-    document.execCommand("insertHTML", false, text);
-  }
-
-  function findPadding(text) {
-    // Find beginning of previous line.
-    let i = text.length - 1;
-    while (i >= 0 && text[i] !== "\n") i--;
-    i++;
-    // Find padding of the line.
-    let j = i;
-    while (j < text.length && /[ \t]/.test(text[j])) j++;
-    return [text.substring(i, j) || "", i, j]
-  }
-
-  function toString() {
-    return editor.textContent || ""
-  }
-
-  function preventDefault(event) {
-    event.preventDefault();
-  }
-
-  function getSelection() {
-    if (editor.parentNode && editor.parentNode.nodeType == Node.DOCUMENT_FRAGMENT_NODE) {
-      return editor.parentNode.getSelection()
-    }
-    return window.getSelection()
-  }
-
-  return {
-    updateOptions(newOptions) {
-      Object.assign(options, newOptions);
-    },
-    updateCode(code) {
-      editor.textContent = code;
-    },
-    onUpdate(cb) {
-      callback = cb;
-    },
-    toString,
-    save,
-    restore,
-    destroy() {
-      for (let [type, fn] of listeners) {
-        editor.removeEventListener(type, fn);
-      }
-    }
-  }
-};
-
-/**
- * Returns selected text.
- */
-function selectedText() {
-  const s = window.getSelection();
-  if (s.rangeCount === 0) return ""
-  return s.getRangeAt(0).toString()
-}
-
-/**
- * Returns text before the cursor.
- * @param editor Editor DOM node.
- */
-function textBeforeCursor(editor) {
-  const s = window.getSelection();
-  if (s.rangeCount === 0) return ""
-
-  const r0 = s.getRangeAt(0);
-  const r = document.createRange();
-  r.selectNodeContents(editor);
-  r.setEnd(r0.startContainer, r0.startOffset);
-  return r.toString()
-}
-
-/**
- * Returns text after the cursor.
- * @param editor Editor DOM node.
- */
-function textAfterCursor(editor) {
-  const s = window.getSelection();
-  if (s.rangeCount === 0) return ""
-
-  const r0 = s.getRangeAt(0);
-  const r = document.createRange();
-  r.selectNodeContents(editor);
-  r.setStart(r0.endContainer, r0.endOffset);
-  return r.toString()
-}
-
 // autocorrect.js
 
 const autoCorrectRegEx = /([?:<>\-~/_]=| \.|~~|\+-|-\+|<-->|<->|<>|<--|<-|-->|->|-:|\^\^|\\\||\/\/\/|\b(bar|hat|vec|tilde|dot|ddot|ul)|\b(bb|bbb|cc|ff|ss) [A-Za-z]|\\?[A-Za-z]{2,}|\\c|\\ |\\o|root [234]|<<|>>|\^-?[0-9]+|\|\|\||\/_|''|""|00)\s$/;
@@ -6667,6 +6244,166 @@ const parse = (
   return isCalc ? [tex, rpn] : tex
 };
 
+function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
+  // hurmetVars is a key:value store of variable names and attributes.
+  // This function is called to insert an assignment into hurmetVars.
+  const formatSpec = hurmetVars.format ? hurmetVars.format.value : "h15";
+
+  if (!Array.isArray(attrs.name)) {
+    // This is the typical case.
+    hurmetVars[attrs.name] = attrs;
+
+  } else if (attrs.value === null) {
+    for (let i = 0; i < attrs.name.length; i++) {
+      hurmetVars[attrs.name[i]] = { value: null };
+    }
+
+  } else if (isMatrix(attrs)) {
+    // Assign to a matrix of names
+    const isQuantity = Boolean(attrs.dtype & dt.QUANTITY);
+    let resultDisplay = attrs.resultdisplay;
+    resultDisplay = resultDisplay.replace(/\\(begin|end){[bp]matrix}/g, "").trim();
+    const displays = resultDisplay.split(/&|\\\\/);
+    if (attrs.dtype & dt.MATRIX) {
+      // A 2 dimensional matrix.
+      const dtype = attrs.dtype - dt.MATRIX;
+      const numRows = isQuantity ? attrs.value.plain.length : attrs.value.length;
+      const numCols = attrs.name.length / numRows;
+      let iName = 0;
+      for (let i = 0; i < numRows; i++) {
+        for (let j = 0; j < numCols; j++) {
+          const value = isQuantity
+            ? { plain: attrs.value.plain[i][j], inBaseUnits: attrs.value.inBaseUnits[i][j] }
+            : attrs.value[i][j];
+          hurmetVars[attrs.name[i]] = {
+            name: attrs.name[iName],
+            value,
+            resultdisplay: isQuantity
+              ? parse(displays[iName].trim() + " '" + attrs.unit + "'")
+              : displays[iName].trim(),
+            expos: attrs.expos,
+            unit: isQuantity ? attrs.unit : undefined,
+            dtype
+          };
+          iName += 1;
+        }
+      }
+    } else {
+      // Assign to a vector of names.
+      const isColumn = Boolean(attrs.dtype & dt.COLUMNVECTOR);
+      const dtype = attrs.dtype - (isColumn ? dt.COLUMNVECTOR : dt.ROWVECTOR);
+      for (let i = 0; i < attrs.name.length; i++) {
+        const value = isQuantity
+          ? { plain: attrs.value.plain[i], inBaseUnits: attrs.value.inBaseUnits[i] }
+          : attrs.value[i];
+        hurmetVars[attrs.name[i]] = {
+          name: attrs.name[i],
+          value,
+          resultdisplay: isQuantity
+            ? parse(displays[i].trim() + " '" + attrs.unit + "'")
+            : displays[i].trim(),
+          expos: attrs.expos,
+          unit: isQuantity ? attrs.unit : undefined,
+          dtype
+        };
+      }
+    }
+
+  // From this point forward, we're dealing with multiple assignment
+  } else if (attrs.dtype & dt.MAP) {
+    const unit = attrs.value.unit;
+    const unitName = unit && unit.name ? unit.name : undefined;
+    const dtype = attrs.dtype - dt.MAP;
+    let i = 0;
+    if (attrs.dtype & dt.QUANTITY) {
+      for (const value of attrs.value.plain.values()) {
+        const result = {
+          value: { plain: value },
+          expos: attrs.expos,
+          factor: attrs.factor,
+          dtype
+        };
+        result.resultdisplay = format(value, formatSpec, decimalFormat);
+        if (unitName) { result.resultdisplay += " " + unitTeXFromString(unitName); }
+        hurmetVars[attrs.name[i]] = result;
+        i += 1;
+      }
+      i = 0;
+      for (const value of attrs.value.inBaseUnits.values()) {
+        hurmetVars[attrs.name[i]].value.inBaseUnits = value;
+        i += 1;
+      }
+    } else {
+      for (const value of attrs.value.values()) {
+        const result = { value, expos: attrs.expos, factor: attrs.factor, dtype };
+        result.resultdisplay = Rnl.isRational(value)
+          ? format(value, formatSpec, decimalFormat)
+          : String(value);
+        if (unitName) { result.resultdisplay += " " + unitTeXFromString(unitName); }
+        hurmetVars[attrs.name[i]] = result;
+        i += 1;
+      }
+    }
+  } else if (attrs.dtype === dt.DATAFRAME) {
+    const isSingleRow = attrs.value.data[0].length === 1;
+    for (let i = 0; i < attrs.name.length; i++) {
+      let dtype = attrs.value.dtype[i];
+      let value = isSingleRow ? undefined : [];
+      for (let j = 0; j < attrs.value.data[0].length; j++) {
+        const datum = attrs.value.data[i][j];
+        const val = (dtype & dt.RATIONAL) ? Rnl.fromString(datum) : datum;
+        if (isSingleRow) {
+          value = val;
+        } else {
+          value.push(val);
+        }
+      }
+      if (!isSingleRow) { dtype += dt.COLUMNVECTOR; }
+      const result = {
+        value,
+        unit: attrs.unit[attrs.value.units[i]],
+        dtype
+      };
+      if ((dtype & dt.RATIONAL) && isSingleRow) {
+        result.resultdisplay = parse(format(value));
+      } else if (dtype & dt.RATIONAL) {
+        result.resultdisplay = Matrix.display({ value, dtype }, formatSpec, decimalFormat)
+            + parse(`'${attrs.value.units[i]}'`);
+      } else {
+        result.resultdisplay = parse(value);
+      }
+      if (attrs.value.units[i]) {
+        result.value = { plain: result.value };
+        const unit = attrs.unit[attrs.value.units[i]];
+        result.value.inBaseUnits = isSingleRow
+          ? Rnl.multiply(Rnl.add(result.value.plain, unit.gauge), unit.factor)
+          : result.value.plain.map(e => Rnl.multiply(Rnl.add(e, unit.gauge), unit.factor));
+        result.expos = unit.expos;
+        result.resultdisplay += "\\;" + unitTeXFromString(result.unit.name);
+      }
+
+      hurmetVars[attrs.name[i]] = result;
+    }
+  } else if (attrs.dtype === dt.TUPLE) {
+    let i = 0;
+    for (const value of attrs.value.values()) {
+      hurmetVars[attrs.name[i]] = value;
+      i += 1;
+    }
+  } else if (attrs.dtype === dt.MODULE) {
+    if (attrs.name.length !== attrs.value.length) {
+      return errorOprnd("MULT_MIS")
+    } else {
+      let i = 0;
+      for (const value of attrs.value.values()) {
+        const result = clone(value);
+        hurmetVars[attrs.name[i]] = result;
+        i += 1;
+      }
+    }
+  }
+}
+
 /*
  * Hurmet operands often have numeric values. Sometimes they are the numbers originally
  * input by the writer, henceforward known as "plain". Sometimes we work instead with
@@ -9233,166 +8970,6 @@ const textRange = (str, index) => {
   }
   return { value, unit: null, dtype: dt.STRING }
 };
-
-function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
-  // hurmetVars is a key:value store of variable names and attributes.
-  // This function is called to insert an assignment into hurmetVars.
-  const formatSpec = hurmetVars.format ? hurmetVars.format.value : "h15";
-
-  if (!Array.isArray(attrs.name)) {
-    // This is the typical case.
-    hurmetVars[attrs.name] = attrs;
-
-  } else if (attrs.value === null) {
-    for (let i = 0; i < attrs.name.length; i++) {
-      hurmetVars[attrs.name[i]] = { value: null };
-    }
-
-  } else if (isMatrix(attrs)) {
-    // Assign to a matrix of names
-    const isQuantity = Boolean(attrs.dtype & dt.QUANTITY);
-    let resultDisplay = attrs.resultdisplay;
-    resultDisplay = resultDisplay.replace(/\\(begin|end){[bp]matrix}/g, "").trim();
-    const displays = resultDisplay.split(/&|\\\\/);
-    if (attrs.dtype & dt.MATRIX) {
-      // A 2 dimensional matrix.
-      const dtype = attrs.dtype - dt.MATRIX;
-      const numRows = isQuantity ? attrs.value.plain.length : attrs.value.length;
-      const numCols = attrs.name.length / numRows;
-      let iName = 0;
-      for (let i = 0; i < numRows; i++) {
-        for (let j = 0; j < numCols; j++) {
-          const value = isQuantity
-            ? { plain: attrs.value.plain[i][j], inBaseUnits: attrs.value.inBaseUnits[i][j] }
-            : attrs.value[i][j];
-          hurmetVars[attrs.name[i]] = {
-            name: attrs.name[iName],
-            value,
-            resultdisplay: isQuantity
-              ? parse(displays[iName].trim() + " '" + attrs.unit + "'")
-              : displays[iName].trim(),
-            expos: attrs.expos,
-            unit: isQuantity ? attrs.unit : undefined,
-            dtype
-          };
-          iName += 1;
-        }
-      }
-    } else {
-      // Assign to a vector of names.
-      const isColumn = Boolean(attrs.dtype & dt.COLUMNVECTOR);
-      const dtype = attrs.dtype - (isColumn ? dt.COLUMNVECTOR : dt.ROWVECTOR);
-      for (let i = 0; i < attrs.name.length; i++) {
-        const value = isQuantity
-          ? { plain: attrs.value.plain[i], inBaseUnits: attrs.value.inBaseUnits[i] }
-          : attrs.value[i];
-        hurmetVars[attrs.name[i]] = {
-          name: attrs.name[i],
-          value,
-          resultdisplay: isQuantity
-            ? parse(displays[i].trim() + " '" + attrs.unit + "'")
-            : displays[i].trim(),
-          expos: attrs.expos,
-          unit: isQuantity ? attrs.unit : undefined,
-          dtype
-        };
-      }
-    }
-
-  // From this point forward, we're dealing with multiple assignment
-  } else if (attrs.dtype & dt.MAP) {
-    const unit = attrs.value.unit;
-    const unitName = unit && unit.name ? unit.name : undefined;
-    const dtype = attrs.dtype - dt.MAP;
-    let i = 0;
-    if (attrs.dtype & dt.QUANTITY) {
-      for (const value of attrs.value.plain.values()) {
-        const result = {
-          value: { plain: value },
-          expos: attrs.expos,
-          factor: attrs.factor,
-          dtype
-        };
-        result.resultdisplay = format(value, formatSpec, decimalFormat);
-        if (unitName) { result.resultdisplay += " " + unitTeXFromString(unitName); }
-        hurmetVars[attrs.name[i]] = result;
-        i += 1;
-      }
-      i = 0;
-      for (const value of attrs.value.inBaseUnits.values()) {
-        hurmetVars[attrs.name[i]].value.inBaseUnits = value;
-        i += 1;
-      }
-    } else {
-      for (const value of attrs.value.values()) {
-        const result = { value, expos: attrs.expos, factor: attrs.factor, dtype };
-        result.resultdisplay = Rnl.isRational(value)
-          ? format(value, formatSpec, decimalFormat)
-          : String(value);
-        if (unitName) { result.resultdisplay += " " + unitTeXFromString(unitName); }
-        hurmetVars[attrs.name[i]] = result;
-        i += 1;
-      }
-    }
-  } else if (attrs.dtype === dt.DATAFRAME) {
-    const isSingleRow = attrs.value.data[0].length === 1;
-    for (let i = 0; i < attrs.name.length; i++) {
-      let dtype = attrs.value.dtype[i];
-      let value = isSingleRow ? undefined : [];
-      for (let j = 0; j < attrs.value.data[0].length; j++) {
-        const datum = attrs.value.data[i][j];
-        const val = (dtype & dt.RATIONAL) ? Rnl.fromString(datum) : datum;
-        if (isSingleRow) {
-          value = val;
-        } else {
-          value.push(val);
-        }
-      }
-      if (!isSingleRow) { dtype += dt.COLUMNVECTOR; }
-      const result = {
-        value,
-        unit: attrs.unit[attrs.value.units[i]],
-        dtype
-      };
-      if ((dtype & dt.RATIONAL) && isSingleRow) {
-        result.resultdisplay = parse(format(value));
-      } else if (dtype & dt.RATIONAL) {
-        result.resultdisplay = Matrix.display({ value, dtype }, formatSpec, decimalFormat)
-            + parse(`'${attrs.value.units[i]}'`);
-      } else {
-        result.resultdisplay = parse(value);
-      }
-      if (attrs.value.units[i]) {
-        result.value = { plain: result.value };
-        const unit = attrs.unit[attrs.value.units[i]];
-        result.value.inBaseUnits = isSingleRow
-          ? Rnl.multiply(Rnl.add(result.value.plain, unit.gauge), unit.factor)
-          : result.value.plain.map(e => Rnl.multiply(Rnl.add(e, unit.gauge), unit.factor));
-        result.expos = unit.expos;
-        result.resultdisplay += "\\;" + unitTeXFromString(result.unit.name);
-      }
-
-      hurmetVars[attrs.name[i]] = result;
-    }
-  } else if (attrs.dtype === dt.TUPLE) {
-    let i = 0;
-    for (const value of attrs.value.values()) {
-      hurmetVars[attrs.name[i]] = value;
-      i += 1;
-    }
-  } else if (attrs.dtype === dt.MODULE) {
-    if (attrs.name.length !== attrs.value.length) {
-      return errorOprnd("MULT_MIS")
-    } else {
-      let i = 0;
-      for (const value of attrs.value.values()) {
-        const result = clone(value);
-        hurmetVars[attrs.name[i]] = result;
-        i += 1;
-      }
-    }
-  }
-}
 
 /**
  * md2ast() returns an AST that matches the memory structure  of a Hurmet.app document.
@@ -13635,389 +13212,8 @@ const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
   return attrs
 };
 
-/*
- *  This module organizes one or two passes through the data structure of a Hurmet
- *  document, calling for a calculation to be done on each Hurmet calculation cell.
- *  If you are looking for the calculation itself, look at evaluate.js.
- *
- *  To be more precise, this module is called:
- *    1. When an author submits one calculation cell, or
- *    2. When a new Hurmet.app instance has opened (from index.js), or
- *    3. When a user has opened a new file         (from openFile.js), or
- *    4. When a recalculate-all has been called, possibly after a paste. (from menu.js)
- *
- *  Case 1 calculates the submitted cell and all dependent calculation cells.
- *  Cases 2 thru 4 re-calculate the entire document. I.e., isCalcAll is set to true.
- *  After calculation is complete, we send the results to ProseMirror to be
- *  rendered in the document.
- *
- *   This module's main exported function is updateCalculations(…)
- */
-
-/*
-* Note 1: state.selection shenanigans
-*
-* Before creating a ProseMirror (PM) transaction, this module first changes `state.selection`.
-* That is to say, I change the PM state without running that change thru a PM transaction.
-* PM docs advise against that, so I want to explain why I do so.
-*
-* For Undo purposes, a calculation should be atomic.
-* An Undo of a calculation should return the doc to the condition before the
-* calculation cell was edited. That will feel natural to people accustomed to Excel.
-* When a calculation is submitted, Hurmet creates a single PM transaction and into it,
-* Hurmet collects all the changes that the calculation makes to the original cell and
-* also all the changes to dependent cells.
-* When a user submits a calculation, the cell is open, so a PM Undo would ordinarily return
-* the state to a condition that once again has the cell open.
-*
-* But now consider a user who wants to Undo twice. The first Undo retreats to a condition in
-* which a cell is open. The user thinks a second Undo will change the PM document. But no!
-* Because the cell is open, the CodeMirror plain text editor is active and the Undo is captured
-* by CodeMirror. An Undo affects CodeMirror but not the outer document. It's very confusing!
-* So the Undo should return to a condition in which the cell is closed. That's why I change
-* the PM state.selection object _before_ I create the PM transaction. I don't want an Undo to
-* open that cell and so I don't want the Undo to finish with the selection point inside the
-* cell. Before creating the transaction, I move the selection point to just after the cell.
-*/
-
-const fetchRegEx = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′* *= *(?:fetch|import)\(/;
-const importRegEx = /^[^=]+= *import/;
-const fileErrorRegEx = /^Error while reading file. Status Code: \d*$/;
-const textRegEx = /\\text{[^}]+}/;
-
-const urlFromEntry = entry => {
-  // Get the URL from the entry input string.
-  const str = entry.replace(/^[^()]+\("?/, "");
-  return str.replace(/"?\).*$/, "").trim()
-};
-
-// Helper function.
-const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
-  const attrs = Object.create(null);
-  attrs.entry = entry;
-  attrs.name = entry.replace(/=.+$/, "").trim();
-  let str = parse(entry.replace(/\s*=\s*[$$£¥\u20A0-\u20CF]?(?:!{1,2}).*$/, ""), decimalFormat);
-  const url = urlFromEntry(entry);
-  if (/\.(?:tsv|txt)$/.test(url)) {
-    // Shorten the URL.
-    const fileName = url.replace(/.+\//, "");
-    const match = textRegEx.exec(str);
-    str = str.slice(0, match.index) + "\\text{" + addTextEscapes(fileName) + "})";
-  }
-  attrs.tex = str;
-  attrs.alt = entry;
-  if (text === "File not found." || fileErrorRegEx.test(text)) {
-    attrs.dtype = dt.ERROR;
-    attrs.tex += ` = \\red{\\text{${text}}}`;
-    attrs.alt = " = " + text;
-    attrs.value = null;
-    return attrs
-  }
-  const data = importRegEx.test(entry)
-    ? scanModule(text, decimalFormat)               // import code
-    : DataFrame.dataFrameFromTSV(text, hurmetVars);  // fetch data
-
-  // Append the data to attrs
-  attrs.value = data.value;
-  attrs.dtype = data.dtype;
-  attrs.unit = data.unit;
-  attrs.isFetch = true;
-  if (data.dtype === dt.MODULE && /^importedParameters *=/.test(entry)) {
-    // Assign to multiple variables, not one namespace.
-    let nameTex = "\\begin{matrix}";
-    let i = 0;
-    Object.entries(data.value).forEach(([key, value]) => {
-      hurmetVars[key] =  value;
-      nameTex += parse(value.name) + " & ";
-      i += 1;
-      if (i === 5) {
-        nameTex = nameTex.slice(0, -1) + "\\\\ ";
-        i = 0;
-      }
-    });
-    nameTex = nameTex.slice(0, (i === 0 ? -2 : -1)) + "\\end{matrix}";
-    attrs.tex = attrs.tex.replace("\\mathrm{importedParameters}", nameTex);
-  }
-  return attrs
-};
-
-const workAsync = (
-  view,
-  calcNodeSchema,
-  isCalcAll,
-  nodeAttrs,
-  curPos,
-  hurmetVars,
-  urls,
-  fetchPositions
-) => {
-
-  // Here we fetch the remote data.
-  const doc = view.state.doc;
-  const inDraftMode = doc.attrs.inDraftMode;
-  const decimalFormat = doc.attrs.decimalFormat;
-
-  Promise.all(
-    urls.map(url => fetch(url, {
-      method: "GET",
-      headers: { "Content-Type": "text/plain;charset=UTF-8" },
-      mode: "cors"
-    }))
-  ).then(fetchResponses => {
-    // The fetch promises have resolved. Now we extract their text.
-    return Promise.all(fetchResponses.map(r => {
-      if (r.status !== 200 && r.status !== 0) {
-        return r.status === 404
-          ? 'File not found.'
-          : 'Error while reading file. Status Code: ' + r.status
-      }
-      return r.text()
-    }))
-  }).then((texts) => {
-    // At this point, we have the text of each Hurmet fetch and import.
-    // Create a ProseMirror transacation.
-    // Each node update below will be one step in the transaction.
-    const state = view.state;
-    if (state.selection.to === curPos + 1) {
-      // See Note 1 above for an explanation of the state.selection shenanigans.
-      state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1));
-    }
-    const tr = state.tr;
-
-    // Load in the data from the fetch statements
-    for (let i = 0; i < texts.length; i++) {
-      const pos = fetchPositions[i];
-      const entry = isCalcAll
-        ? doc.nodeAt(pos).attrs.entry
-        : nodeAttrs.entry;
-      const attrs = processFetchedString(entry, texts[i], hurmetVars, decimalFormat);
-      attrs.inDraftMode = inDraftMode;
-      tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs));
-      if (attrs.name) {
-        insertOneHurmetVar(hurmetVars, attrs, decimalFormat);
-      }
-    }
-    // There. Fetches are done and are loaded into the document.
-    // Now proceed to the rest of the work.
-    try {
-      proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs,
-                        curPos, hurmetVars, tr);
-    } catch (err) {
-      console.log(err); // eslint-disable-line no-console
-      const pos = nodeAttrs.template.indexOf(nodeAttrs.resultdisplay);
-      nodeAttrs.tex = nodeAttrs.template.slice(0, pos) + "\\text{" + err + "}";
-      tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs));
-      tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)));
-      view.dispatch(tr);
-      view.focus();
-    }
-  });
-};
-
-const proceedAfterFetch = (
-  view,
-  calcNodeSchema,
-  isCalcAll,
-  nodeAttrs,
-  curPos,
-  hurmetVars,
-  tr
-) => {
-  // This function happens either
-  //   1. After remote, fetched data has been processed, or
-  //   2. After we know that no fetch statements need be processed.
-  const doc = view.state.doc;
-  const decimalFormat = doc.attrs.decimalFormat;
-
-  if (!isCalcAll && (nodeAttrs.name || nodeAttrs.rpn ||
-    (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING))) {
-    // Load hurmetVars with values from earlier in the document.
-    doc.nodesBetween(0, curPos, function(node) {
-      if (node.type.name === "calculation") {
-        const attrs = node.attrs;
-        if (attrs.name) {
-          if (attrs.name === "importedParameters") {
-            Object.entries(attrs.value).forEach(([key, value]) => {
-              hurmetVars[key] =  value;
-            });
-          } else {
-            insertOneHurmetVar(hurmetVars, attrs, decimalFormat);
-          }
-        }
-      }
-    });
-
-    // Hoist any user-defined functions located below the selection.
-    doc.nodesBetween(curPos + 1, doc.content.size, function(node, pos) {
-      if (node.type.name === "calculation" && node.attrs.dtype === dt.MODULE) {
-        insertOneHurmetVar(hurmetVars, node.attrs, decimalFormat);
-      }
-    });
-
-    // Calculate the current node.
-    if (!fetchRegEx.test(nodeAttrs.entry)) {
-      // This is the typical calculation statement. We'll evalutate it.
-      let attrs = clone(nodeAttrs); // prepareStatement was already run in mathprompt.js.
-      // The mathPrompt dialog box did not have accesss to hurmetVars, so it
-      // did not do unit conversions on the result template. Do that first.
-      improveQuantities(attrs, hurmetVars);
-      // Now proceed to do the calculation of the cell.
-      if (attrs.rpn || (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING)) {
-        attrs = attrs.dtype && attrs.dtype === dt.DRAWING
-          ? evaluateDrawing(attrs, hurmetVars, decimalFormat)
-          : evaluate(attrs, hurmetVars, decimalFormat);
-      }
-      if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, decimalFormat); }
-      attrs.displayMode = nodeAttrs.displayMode;
-      tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(attrs));
-    }
-  }
-
-  // Finally, update calculations after startPos.
-  const startPos = isCalcAll ? 0 : (curPos + 1);
-  doc.nodesBetween(startPos, doc.content.size, function(node, pos) {
-    if (node.type.name === "calculation") {
-      const mustCalc = isCalcAll ? !fetchRegEx.test(node.attrs.entry) : !node.attrs.isFetch;
-      if (mustCalc) {
-        const entry = node.attrs.entry;
-        let attrs = isCalcAll
-          ? prepareStatement(entry, decimalFormat)
-          : clone(node.attrs);
-        attrs.displayMode = node.attrs.displayMode;
-        const mustRedraw = attrs.dtype && attrs.dtype === dt.DRAWING &&
-          (attrs.rpn || (attrs.value.parameters.length > 0 || isCalcAll));
-        if (isCalcAll || attrs.rpn || mustRedraw || (attrs.name && !(hurmetVars[attrs.name] &&
-          hurmetVars[attrs.name].isFetch))) {
-          if (isCalcAll) { improveQuantities(attrs, hurmetVars); }
-          if (attrs.rpn || mustRedraw) {
-            attrs = attrs.rpn // attrs.dtype && attrs.dtype === dt.DRAWING
-              ? evaluate(attrs, hurmetVars, decimalFormat)
-              : evaluateDrawing(attrs, hurmetVars, decimalFormat);
-          }
-          if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, decimalFormat); }
-          if (isCalcAll || attrs.rpn || mustRedraw) {
-            tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs));
-          }
-        }
-      } else if (node.attrs.name && !(isCalcAll && node.attrs.isFetch)) {
-        if (node.attrs.name) {
-          if (node.attrs.name === "importedParameters") {
-            Object.entries(node.attrs.value).forEach(([key, value]) => {
-              hurmetVars[key] =  value;
-            });
-          } else {
-            insertOneHurmetVar(hurmetVars, node.attrs, decimalFormat);
-          }
-        }
-      }
-    }
-  });
-
-  // All the steps are now loaded into the transaction.
-  // Dispatch the transaction to ProseMirror, which will re-render the document.
-  if (!isCalcAll) {
-    tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)));
-  }
-  view.dispatch(tr);
-  view.focus();
-};
-
-function updateCalculations(
-  view,
-  calcNodeSchema,
-  isCalcAll = false,
-  nodeAttrs,
-  curPos
-) {
-  const doc = view.state.doc;
-
-  if (!(isCalcAll || nodeAttrs.name || nodeAttrs.rpn ||
-      (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING))) {
-    // No calculation is required. Just render the node and get out.
-    const state = view.state;
-    if (state.selection.to === curPos + 1) {
-      // See Note 1 above for an explanation of the state.selection shenanigans.
-      state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1));
-    }
-    const tr = state.tr;
-    try {
-      tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs));
-    } catch (err) {
-      // nada
-    } finally {
-      view.dispatch(tr);
-      view.focus();
-    }
-    return
-  }
-
-  // Create an object in which we'll hold variable values.
-  const hurmetVars = Object.create(null);
-  hurmetVars.format = { value: "h15" }; // default rounding format
-
-  // Get an array of all the URLs called by fetch statements.
-  const urls = [];
-  const fetchPositions = [];
-  if (!isCalcAll) {
-    // The author has submitted a single calculation cell.
-    const entry = nodeAttrs.entry;
-    if (fetchRegEx.test(entry)) {
-      urls.push(urlFromEntry(entry));
-      fetchPositions.push(curPos);
-    }
-  } else {
-    // We're updating the entire document.
-    doc.nodesBetween(0, doc.content.size, function(node, pos) {
-      if (node.type.name === "calculation" && !node.attrs.value) {
-        const entry = node.attrs.entry;
-        if (fetchRegEx.test(entry)) {
-          urls.push(urlFromEntry(entry));
-          fetchPositions.push(pos);
-        } else if (/^function /.test(entry)) {
-          node.attrs = prepareStatement(entry, doc.attrs.decimalFormat);
-          insertOneHurmetVar(hurmetVars, node.attrs, doc.attrs.decimalFormat);
-        }
-      } else if (node.attrs.isFetch || (node.attrs.dtype && node.attrs.dtype === dt.MODULE)) {
-        insertOneHurmetVar(hurmetVars, node.attrs, doc.attrs.decimalFormat);
-      }
-    });
-  }
-
-  if (urls.length > 0) {
-    // We have to fetch some remote data. Asynchronous work ahead.
-    workAsync(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos,
-              hurmetVars, urls, fetchPositions);
-  } else {
-    // Skip the fetches and go directly to work that we can do synchronously.
-    const state = view.state;
-    if (state.selection.to === curPos + 1) {
-      // See Note 1 above for an explanation of the state.selection shenanigans.
-      state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1));
-    }
-    const tr = state.tr;
-    try {
-      proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr);
-    } catch (err) {
-      console.log(err); // eslint-disable-line no-console
-      const pos = nodeAttrs.template.indexOf(nodeAttrs.resultdisplay);
-      nodeAttrs.tex = nodeAttrs.template.slice(0, pos) + "\\text{" + err + "}";
-      tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs));
-      tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)));
-      view.dispatch(tr);
-      view.focus();
-    }
-  }
-}
-
-const helpers = Object.freeze({
-  fetchRegEx,
-  textRegEx,
-  urlFromEntry,
-  processFetchedString
-});
-
 // This function is not used by the Hurmet.app page.
-// It is provided for use by unit tests.
+// It is provided for use by unit tests and by the demo box in the manual page.
 // If you are looking for the app's main calculation module, try evaluate.js.
 const calculate = (
   entry,
@@ -14041,6 +13237,429 @@ const calculate = (
    ? attrs.alt
    : attrs.tex
 };
+
+/* eslint-disable */
+
+/* I've revised this version of CodeJar for Hurmet math zones.
+ * I've removed history and highlighting. They each had a delay and Hurmet
+ * needs speed in order to update a view of the math with every keystroke.
+ */
+
+const codeJar = (editor, isMathPrompt) => {
+  const options = {
+    tab: "\t",
+    indentOn: /{$/,
+    catchTab: true,
+    preserveIdent: true,
+    addClosing: true
+  };
+
+  const document = window.document;
+
+  const listeners = [];
+  let callback;
+
+  editor.setAttribute("contenteditable", "plaintext-only");
+  editor.setAttribute("spellcheck", "false");
+  editor.style.outline = "none";
+  editor.style.overflowWrap = "break-word";
+  editor.style.overflowY = "auto";
+  editor.style.whiteSpace = "pre-wrap";
+
+  let isLegacy = false; // true if plaintext-only is not supported
+
+  if (editor.contentEditable !== "plaintext-only") isLegacy = true;
+  if (isLegacy) editor.setAttribute("contenteditable", "true");
+
+  const on = (type, fn) => {
+    listeners.push([type, fn]);
+    editor.addEventListener(type, fn);
+  }
+
+  ;on("keydown", event => {
+    // The next five lines are Hurmet customization. Not part of vanilla CodeJar.
+    if (isMathPrompt && event.keyCode === 13 && !event.shiftKey) return
+    if (event.keyCode === 65 && event.ctrlKey ) {
+      window.getSelection().selectAllChildren(editor);
+      event.preventDefault();
+    }
+    if (event.defaultPrevented) return
+    if (options.preserveIdent) handleNewLine(event);
+    else legacyNewLineFix(event);
+    if (options.catchTab) handleTabCharacters(event);
+    if (options.addClosing) handleSelfClosingCharacters(event);
+    if (isLegacy) restore(save());
+  })
+
+  ;on("keyup", event => {
+    if (event.defaultPrevented) return
+    if (event.isComposing) return
+    if (callback) callback(toString());
+  })
+
+  ;on("paste", event => {
+    handlePaste(event);
+    if (callback) callback(toString());
+  });
+
+  function save() {
+    const s = getSelection();
+    const pos = { start: 0, end: 0, dir: undefined };
+
+    let { anchorNode, anchorOffset, focusNode, focusOffset } = s;
+    if (!anchorNode || !focusNode) throw "error1"
+
+    // Selection anchor and focus are expected to be text nodes,
+    // so normalize them.
+    if (anchorNode.nodeType === Node.ELEMENT_NODE) {
+      const node = document.createTextNode("");
+      anchorNode.insertBefore(node, anchorNode.childNodes[anchorOffset]);
+      anchorNode = node;
+      anchorOffset = 0;
+    }
+    if (focusNode.nodeType === Node.ELEMENT_NODE) {
+      const node = document.createTextNode("");
+      focusNode.insertBefore(node, focusNode.childNodes[focusOffset]);
+      focusNode = node;
+      focusOffset = 0;
+    }
+
+    visit(editor, el => {
+      if (el === anchorNode && el === focusNode) {
+        pos.start += anchorOffset;
+        pos.end += focusOffset;
+        pos.dir = anchorOffset <= focusOffset ? "->" : "<-";
+        return "stop"
+      }
+
+      if (el === anchorNode) {
+        pos.start += anchorOffset;
+        if (!pos.dir) {
+          pos.dir = "->";
+        } else {
+          return "stop"
+        }
+      } else if (el === focusNode) {
+        pos.end += focusOffset;
+        if (!pos.dir) {
+          pos.dir = "<-";
+        } else {
+          return "stop"
+        }
+      }
+
+      if (el.nodeType === Node.TEXT_NODE) {
+        if (pos.dir != "->") pos.start += el.nodeValue.length;
+        if (pos.dir != "<-") pos.end += el.nodeValue.length;
+      }
+    });
+
+    // collapse empty text nodes
+    editor.normalize();
+
+    return pos
+  }
+
+  function restore(pos) {
+    const s = getSelection();
+    let startNode,
+      startOffset = 0;
+    let endNode,
+      endOffset = 0;
+
+    if (!pos.dir) pos.dir = "->";
+    if (pos.start < 0) pos.start = 0;
+    if (pos.end < 0) pos.end = 0;
+
+    // Flip start and end if the direction reversed
+    if (pos.dir == "<-") {
+      const { start, end } = pos;
+      pos.start = end;
+      pos.end = start;
+    }
+
+    let current = 0;
+
+    visit(editor, el => {
+      if (el.nodeType !== Node.TEXT_NODE) return
+
+      const len = (el.nodeValue || "").length;
+      if (current + len > pos.start) {
+        if (!startNode) {
+          startNode = el;
+          startOffset = pos.start - current;
+        }
+        if (current + len > pos.end) {
+          endNode = el;
+          endOffset = pos.end - current;
+          return "stop"
+        }
+      }
+      current += len;
+    });
+
+    if (!startNode)
+      (startNode = editor), (startOffset = editor.childNodes.length);
+    if (!endNode) (endNode = editor), (endOffset = editor.childNodes.length);
+
+    // Flip back the selection
+    if (pos.dir == "<-") {
+[startNode, startOffset, endNode, endOffset] = [
+        endNode,
+        endOffset,
+        startNode,
+        startOffset
+      ];
+    }
+
+    s.setBaseAndExtent(startNode, startOffset, endNode, endOffset);
+  }
+
+  function beforeCursor() {
+    const s = getSelection();
+    const r0 = s.getRangeAt(0);
+    const r = document.createRange();
+    r.selectNodeContents(editor);
+    r.setEnd(r0.startContainer, r0.startOffset);
+    return r.toString()
+  }
+
+  function afterCursor() {
+    const s = getSelection();
+    const r0 = s.getRangeAt(0);
+    const r = document.createRange();
+    r.selectNodeContents(editor);
+    r.setStart(r0.endContainer, r0.endOffset);
+    return r.toString()
+  }
+
+  function handleNewLine(event) {
+    if (event.key === "Enter") {
+      const before = beforeCursor();
+      const after = afterCursor();
+
+      let [padding] = findPadding(before);
+      let newLinePadding = padding;
+
+      // If last symbol is "{" ident new line
+      // Allow user defines indent rule
+      if (options.indentOn.test(before)) {
+        newLinePadding += options.tab;
+      }
+
+      // Preserve padding
+      if (newLinePadding.length > 0) {
+        preventDefault(event);
+        event.stopPropagation();
+        insert("\n" + newLinePadding);
+      } else {
+        legacyNewLineFix(event);
+      }
+
+      // Place adjacent "}" on next line
+      if (newLinePadding !== padding && after[0] === "}") {
+        const pos = save();
+        insert("\n" + padding);
+        restore(pos);
+      }
+    }
+  }
+
+  function legacyNewLineFix(event) {
+    // Firefox does not support plaintext-only mode
+    // and puts <div><br></div> on Enter. Let's help.
+    if (isLegacy && event.key === "Enter") {
+      preventDefault(event);
+      event.stopPropagation();
+      if (afterCursor() == "") {
+        insert("\n ");
+        const pos = save();
+        pos.start = --pos.end;
+        restore(pos);
+      } else {
+        insert("\n");
+      }
+    }
+  }
+
+  function handleSelfClosingCharacters(event) {
+    const open = `([{'"`;
+    const close = `)]}'"`;
+    const codeAfter = afterCursor();
+    const codeBefore = beforeCursor();
+    const escapeCharacter = codeBefore.substr(codeBefore.length - 1) === "\\";
+    const charAfter = codeAfter.substr(0, 1);
+    if (
+      close.includes(event.key) &&
+      !escapeCharacter &&
+      charAfter === event.key
+    ) {
+      // We already have closing char next to cursor.
+      // Move one char to right.
+      const pos = save();
+      preventDefault(event);
+      pos.start = ++pos.end;
+      restore(pos);
+    } else if (
+      open.includes(event.key) &&
+      !escapeCharacter &&
+      (`"'`.includes(event.key) || ["", " ", "\n"].includes(charAfter))
+    ) {
+      preventDefault(event);
+      const pos = save();
+      const wrapText = pos.start == pos.end ? "" : getSelection().toString();
+      const text = event.key + wrapText + close[open.indexOf(event.key)];
+      insert(text);
+      pos.start++;
+      pos.end++;
+      restore(pos);
+    }
+  }
+
+  function handleTabCharacters(event) {
+    if (event.key === "Tab") {
+      preventDefault(event);
+      if (event.shiftKey) {
+        const before = beforeCursor();
+        let [padding, start] = findPadding(before);
+        if (padding.length > 0) {
+          const pos = save();
+          // Remove full length tab or just remaining padding
+          const len = Math.min(options.tab.length, padding.length);
+          restore({ start, end: start + len });
+          document.execCommand("delete");
+          pos.start -= len;
+          pos.end -= len;
+          restore(pos);
+        }
+      } else {
+        insert(options.tab);
+      }
+    }
+  }
+
+  function handlePaste(event) {
+    preventDefault(event);
+    const text = (event.originalEvent || event).clipboardData
+      .getData("text/plain")
+      .replace(/\r/g, "");
+    const pos = save();
+    insert(text);
+    restore({ start: pos.start + text.length, end: pos.start + text.length });
+  }
+
+  function visit(editor, visitor) {
+    const queue = [];
+
+    if (editor.firstChild) queue.push(editor.firstChild);
+
+    let el = queue.pop();
+
+    while (el) {
+      if (visitor(el) === "stop") break
+
+      if (el.nextSibling) queue.push(el.nextSibling);
+      if (el.firstChild) queue.push(el.firstChild);
+
+      el = queue.pop();
+    }
+  }
+
+  function insert(text) {
+    text = text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+    document.execCommand("insertHTML", false, text);
+  }
+
+  function findPadding(text) {
+    // Find beginning of previous line.
+    let i = text.length - 1;
+    while (i >= 0 && text[i] !== "\n") i--;
+    i++;
+    // Find padding of the line.
+    let j = i;
+    while (j < text.length && /[ \t]/.test(text[j])) j++;
+    return [text.substring(i, j) || "", i, j]
+  }
+
+  function toString() {
+    return editor.textContent || ""
+  }
+
+  function preventDefault(event) {
+    event.preventDefault();
+  }
+
+  function getSelection() {
+    if (editor.parentNode && editor.parentNode.nodeType == Node.DOCUMENT_FRAGMENT_NODE) {
+      return editor.parentNode.getSelection()
+    }
+    return window.getSelection()
+  }
+
+  return {
+    updateOptions(newOptions) {
+      Object.assign(options, newOptions);
+    },
+    updateCode(code) {
+      editor.textContent = code;
+    },
+    onUpdate(cb) {
+      callback = cb;
+    },
+    toString,
+    save,
+    restore,
+    destroy() {
+      for (let [type, fn] of listeners) {
+        editor.removeEventListener(type, fn);
+      }
+    }
+  }
+};
+
+/**
+ * Returns selected text.
+ */
+function selectedText() {
+  const s = window.getSelection();
+  if (s.rangeCount === 0) return ""
+  return s.getRangeAt(0).toString()
+}
+
+/**
+ * Returns text before the cursor.
+ * @param editor Editor DOM node.
+ */
+function textBeforeCursor(editor) {
+  const s = window.getSelection();
+  if (s.rangeCount === 0) return ""
+
+  const r0 = s.getRangeAt(0);
+  const r = document.createRange();
+  r.selectNodeContents(editor);
+  r.setEnd(r0.startContainer, r0.startOffset);
+  return r.toString()
+}
+
+/**
+ * Returns text after the cursor.
+ * @param editor Editor DOM node.
+ */
+function textAfterCursor(editor) {
+  const s = window.getSelection();
+  if (s.rangeCount === 0) return ""
+
+  const r0 = s.getRangeAt(0);
+  const r = document.createRange();
+  r.selectNodeContents(editor);
+  r.setStart(r0.endContainer, r0.endOffset);
+  return r.toString()
+}
 
 /**
  * This is the ParseError class, which is the main error thrown by Temml
@@ -27111,294 +26730,43 @@ var temml = {
   __defineMacro: defineMacro
 };
 
-const sanitizeUrl = function(url) {
-  if (url == null) {
-    return null;
-  }
-  try {
-    const prot = decodeURIComponent(url)
-      .replace(/[^A-Za-z0-9/:]/g, "")
-      .toLowerCase();
-    if (
-      prot.indexOf("javascript:") === 0 ||
-      prot.indexOf("vbscript:") === 0 ||
-      prot.indexOf("data:") === 0
-    ) {
-      return null;
-    }
-  } catch (e) {
-    // decodeURIComponent sometimes throws a URIError
-    // See `decodeURIComponent('a%AFc');`
-    // http://stackoverflow.com/questions/9064536/javascript-decodeuricomponent-malformed-uri-exception
-    return null;
-  }
-  return url;
-};
-
-const SANITIZE_TEXT_R = /[<>&"']/g;
-const SANITIZE_TEXT_CODES = {
-  "<": "&lt;",
-  ">": "&gt;",
-  "&": "&amp;",
-  '"': "&quot;",
-  "'": "&#x27;",
-  "/": "&#x2F;",
-  "`": "&#96;"
-};
-const sanitizeText = function(text /* : Attr */) {
-  return String(text).replace(SANITIZE_TEXT_R, function(chr) {
-    return SANITIZE_TEXT_CODES[chr];
-  });
-};
-
-const htmlTag = (tagName, content, attributes = {}, isClosed = true) => {
-  let attributeString = "";
-  for (const attr in attributes) {
-    if (Object.prototype.hasOwnProperty.call(attributes, attr)) {
-      const attribute = attributes[attr];
-    // Removes falsey attributes
-      if (attribute) {
-        const sanitizedAttribute = attr === "src"
-          ? attribute.replace(/</g, "%3C").replace(/>/g, "%3E")
-          : sanitizeText(attribute);
-        attributeString += " " + sanitizeText(attr) + '="' + sanitizedAttribute + '"';
-      }
-    }
-  }
-
-  const unclosedTag = "<" + tagName + attributeString + ">";
-
-  if (isClosed) {
-    return unclosedTag + content + "</" + tagName + ">";
-  } else {
-    return unclosedTag;
-  }
-};
-
-const tagName = {
-  em: "em",
-  strong: "strong",
-  code: "code",
-  strikethru: "del",
-  subscript: "sub",
-  superscript: "sup",
-  underline: "u",
-  highlight: "mark"
-};
-
-const nodes = {
-  html(node) { return node.text },
-  heading(node)    {
-    const text = output(node.content);
-    let tag = "h" + node.attrs.level;
-    tag = htmlTag(tag, text);
-    // Add id so others can link to it.
-    tag = tag.slice(0, 3) + " id='" + text.toLowerCase().replace(/,/g, "").replace(/\s+/g, '-') + "'" + tag.slice(3);
-    return tag + "\n"
-  },
-  paragraph(node)  { return htmlTag("p", output(node.content)) + "\n" },
-  blockquote(node) { return htmlTag("blockquote", output(node.content)) },
-  code_block(node) {
-    return htmlTag("pre", htmlTag("code", sanitizeText(node.content[0].text)))
-  },
-  hard_break(node) { return "<br>" },
-  def(node)        { return "" },
-  newline(node)    { return "\n" },
-  horizontal_rule(node) { return "<hr>\n" },
-  ordered_list(node) {
-    const attributes = node.attrs.order !== 1 ? { start: node.attrs.order } : undefined;
-    return htmlTag("ol", output(node.content), attributes) + "\n"
-  },
-  bullet_list(node)  { return htmlTag("ul", output(node.content)) + "\n" },
-  list_item(node)    { return htmlTag("li", output(node.content)) + "\n" },
-  tight_list_item(node) {
-    return htmlTag("li", output(node.content), { class: "tight" }) + "\n"
-  },
-  table(node)        { return htmlTag("table", output(node.content), node.attrs) + "\n" },
-  table_row(node)    { return htmlTag("tr", output(node.content)) + "\n" },
-  table_header(node) {
-    const attributes = {};
-    if (node.attrs.colspan !== 1) { attributes.colspan = node.attrs.colspan; }
-    if (node.attrs.rowspan !== 1) { attributes.rowspan = node.attrs.rowspan; }
-    if (node.attrs.colwidth !== null && !isNaN(node.attrs.colwidth) ) {
-      attributes.style = `width: ${node.attrs.colwidth}px`;
-    }
-    return htmlTag("th", output(node.content), attributes) + "\n"
-  },
-  table_cell(node) {
-    const attributes = {};
-    if (node.attrs.colspan !== 1) { attributes.colspan = node.attrs.colspan; }
-    if (node.attrs.rowspan !== 1) { attributes.rowspan = node.attrs.rowspan; }
-    if (node.attrs.colwidth !== null && !isNaN(node.attrs.colwidth) ) {
-      attributes.style = `width: ${node.attrs.colwidth}px`;
-    }
-    return htmlTag("td", output(node.content), attributes)
-  },
-  link(node) {
-    const attributes = { href: sanitizeUrl(node.attrs.href), title: node.attrs.title };
-    return htmlTag("a", output(node.content), attributes);
-  },
-  image(node) {
-    const attributes = { src: node.attrs.src };
-    if (node.attrs.alt)   { attributes.alt = node.attrs.alt; }
-    if (node.attrs.class) { attributes.class = node.attrs.class; }
-    if (node.attrs.id)    { attributes.id = node.attrs.id; }
-    if (node.attrs.width) { attributes.width = node.attrs.width; }
-    return htmlTag("img", "", attributes, false);
-  },
-  figure(node)     { return htmlTag("figure", output(node.content)) + "\n" },
-  figcaption(node) { return htmlTag("figcaption", output(node.content)) },
-  figimg(node) {
-    const attributes = { src: node.attrs.src, class: "figimg" };
-    if (node.attrs.alt)   { attributes.alt = node.attrs.alt; }
-    if (node.attrs.id)    { attributes.id = node.attrs.id; }
-    if (node.attrs.width) { attributes.width = node.attrs.width; }
-    return htmlTag("img", "", attributes, false) + "\n";
-  },
-  calculation(node) {
-    const tex = parse(node.attrs.entry);
-    return temml.renderToString(
-      tex,
-      { trust: true, displayMode: (node.attrs.displayMode || false) }
-    )
-  },
-  tex(node) {
-    return temml.renderToString(
-      node.attrs.tex,
-      { trust: true, displayMode: (node.attrs.displayMode || false) }
-    )
-  },
-  indented(node) { return htmlTag("div", output(node.content), { class: 'indented' }) },
-  centered(node) { return htmlTag("div", output(node.content), { class: 'centered' }) },
-  comment(node)  { return htmlTag("aside", output(node.content), { class: 'comment' }) },
-  dt(node)    {
-    let text = output(node.content);
-    let tag = htmlTag("dt", text);
-    // Add id so others can link to it.
-    const pos = text.indexOf("(");
-    if (pos > -1) { text = text.slice(0, pos).replace("_", "-"); }
-    tag = tag.slice(0, 3) + " id='" + text.toLowerCase().replace(/\s+/g, '-') + "'" + tag.slice(3);
-    return tag + "\n"
-  },
-  dd(node)    { return htmlTag("dd", output(node.content)) + "\n" },
-  text(node) {
-    const text = sanitizeText(node.text);
-    if (!node.marks) {
-      return text
-    } else {
-      let span = text;
-      for (const mark of node.marks) {
-        if (mark.type === "link") {
-          let tag = `<a href='${mark.attrs.href}'`;
-          if (mark.attrs.title) { tag += ` title='${mark.attrs.title}''`; }
-          span = tag + ">" + span + "</a>";
-        } else {
-          const tag = tagName[mark.type];
-          span = `<${tag}>${span}</${tag}>`;
-        }
-      }
-      return span
-    }
-  }
-};
-
-const output = ast => {
-  // Return HTML.
-  let html = "";
-  if (Array.isArray(ast)) {
-    for (let i = 0; i < ast.length; i++) {
-      html += output(ast[i]);
-    }
-  } else if (ast && ast.type !== "null") {
-    html += nodes[ast.type](ast);
-  }
-  return html
-};
-
-const md2html = (md, inHtml = false) => {
-  const ast = md2ast(md, inHtml);
-  return output(ast)
-};
-
-/*
- * This file bundles together and exposes the calculation parts of Hurmet.
- * I use Rollup to create a UMD module from this code.
- * That way, one file can expose the same functionality to (1) the Hurmet.app web page,
- * (2) the REPL in the reference manual, (3) the script that transpiles
- * the Hurmet reference manual from Markdown to HTML, and (4) unit testing.
- *
- * Some of Hurmet’s exported functions are valuable only to the Hurmet.app web page.
- * If you wish to use Hurmet’s math parsing and/or calculation abilities,
- * the two functions you want are:
- *   parse(entry: string, decimalFormat?: string)
- *   calculate(entry: string, vars?: Object, draftMode?: boolean, decimalFormat?: string)
- *
- *   parse() returns a TeX string.
- *   calculate() returns either a TeX string or a string in Hurmet calculation syntax.
- *
- * The parameters of those two function are:
- *   entry: The string that a user types into a calculation editing box.
- *   draftMode: Determines if result is in TeX or in Hurmet calculation syntax.
- *   decimalFormat: A string containing one of the options available in the Hurmet ● menu.
- *   vars: If you want to evaluate several statements, the variable "vars" holds variable data.
- *         Initialize it as: vars = {}
- *         Or, if you want to specify a rounding format, initialize it as:
- *             vars = { format: { value: "h3" } }
- *         vars is updated with new variable data each time calculate() is called.
- */
-
-const hurmet = {
-  dt,
-  parse,
-  calculate,
-  autoCorrect,
-  prepareStatement,
-  improveQuantities,
-  draw,
-  evaluate,
-  md2ast,
-  md2html,
-  scanModule,
-  updateCalculations
-};
-
 /* eslint-disable */
 
 // Set up the REPL in the reference manual.
 // Define some variables and store their data in hurmetVars.
 const hurmetVars = Object.create(null);
-hurmet.calculate(`x = 5`, hurmetVars);
-hurmet.calculate(`w = 100 'lbf/ft'`, hurmetVars);
-hurmet.calculate(`L = 3.1 'm'`, hurmetVars);
-hurmet.calculate(`name = "James"`, hurmetVars);
-hurmet.calculate(`s = "abcde"`, hurmetVars);
-hurmet.calculate(`𝐕 = [1, 2, 3, 4, 5]`, hurmetVars);
-hurmet.calculate(`𝐌 = (1, 2, 3; 4, 5, 6; 7, 8, 9)`, hurmetVars);
+calculate(`x = 5`, hurmetVars);
+calculate(`w = 100 'lbf/ft'`, hurmetVars);
+calculate(`L = 3.1 'm'`, hurmetVars);
+calculate(`name = "James"`, hurmetVars);
+calculate(`s = "abcde"`, hurmetVars);
+calculate(`𝐕 = [1, 2, 3, 4, 5]`, hurmetVars);
+calculate(`𝐌 = (1, 2, 3; 4, 5, 6; 7, 8, 9)`, hurmetVars);
 const df = "``" + `name,w,area\n,in,in²\nA,4,10\nB,6,22` + "``";
-hurmet.calculate(`DF =` + df, hurmetVars);
-hurmet.calculate(`A = 8`, hurmetVars);
+calculate(`DF =` + df, hurmetVars);
+calculate(`A = 8`, hurmetVars);
 const wideFlanges = "``" + `name|weight|A|d|bf|tw|Ix|Sx|rx\n|lbf/ft|in^2|in|in|in|in^4|in^3|in\nW14X90|90|26.5|14|14.5|0.44|999|143|6.14\nW12X65|65|19.1|12.1|12|0.39|533|87.9|5.28\nW10X49|49|14.4|10|10|0.34|272|54.6|4.35\nW8X31|31|9.13|8|8|0.285|110|27.5|3.47\nW8X18|18|5.26|8.14|5.25|0.23|61.9|15.2|3.43\nW6X15|15|4.43|5.99|5.99|0.23|29.1|9.72|2.56\nW4X13|13|3.83|4.16|4.06|0.28|11.3|5.46|1.72` + "``";
-hurmet.calculate(`wideFlanges =` + wideFlanges, hurmetVars);
+calculate(`wideFlanges =` + wideFlanges, hurmetVars);
 const dict = `{"#4": 0.22, "#5": 0.31} 'in2'`;
-hurmet.calculate(`barArea =` + dict, hurmetVars);
+calculate(`barArea =` + dict, hurmetVars);
 const module = "E = 29000 'ksi'\n\nv = [4, 6, 8]\n\nfunction multiply(a, b)\n  return a × b\nend";
-hurmetVars["mod"] = hurmet.scanModule(module);
+hurmetVars["mod"] = scanModule(module);
 
 const renderMath = (jar, demoOutput) => {
   let entry = jar.toString();
   const selText = selectedText();
   if (selText.length === 0) {
     // eslint-disable-next-line no-undef
-    hurmet.autoCorrect(jar, textBeforeCursor(editor), textAfterCursor(editor));
+    autoCorrect(jar, textBeforeCursor(editor), textAfterCursor(editor));
   }
   entry = jar.toString();
   const format = document.getElementById("formatBox").value.trim();
   hurmetVars.format = { value: format };
-  const tex = hurmet.calculate(entry, hurmetVars);
+  const tex = calculate(entry, hurmetVars);
 
   try {
-    if (typeof tex === "object" && tex.dtype && tex.dtype === hurmet.dt.DRAWING) {
-      demoOutput.appendChild(hurmet.Draw.renderSVG(tex.resultdisplay));
+    if (typeof tex === "object" && tex.dtype && tex.dtype === dt.DRAWING) {
+      demoOutput.appendChild(draw.renderSVG(tex.resultdisplay));
     } else {
       temml.render(tex, demoOutput, {
         trust: (context) => context.command === "\\class" && context.class === "special-fraction",

@@ -1,33 +1,17 @@
-import { autoCorrect } from "./autocorrect"
-import { dt } from "./constants"
 import { parse } from "./parser"
-import { prepareStatement } from "./prepareStatement"
-import { improveQuantities } from "./improveQuantities"
-import { evaluate } from "./evaluate"
-import { scanModule } from "./module"
-import { updateCalculations } from "./updateCalculations"
 import { calculate } from "./calculate"
-import { draw } from "./draw"
-import { md2ast } from "./md2ast"
 import { md2html } from "./md2html"
 
 /*
- * This file bundles together and exposes the calculation parts of Hurmet.
- * I use Rollup to create a UMD module from this code.
- * That way, one file can expose the same functionality to (1) the Hurmet.app web page,
- * (2) the REPL in the reference manual, (3) the script that transpiles
- * the Hurmet reference manual from Markdown to HTML, and (4) unit testing.
+ * This file bundles together and exposes the calculation parts of Hurmet for use
+ * as a CLI app. That is, for unit testing and for the CLI Markdown-to-HTML utility.
  *
- * Some of Hurmet’s exported functions are valuable only to the Hurmet.app web page.
- * If you wish to use Hurmet’s math parsing and/or calculation abilities,
- * the two functions you want are:
- *   parse(entry: string, decimalFormat?: string)
- *   calculate(entry: string, vars?: Object, draftMode?: boolean, decimalFormat?: string)
- *
- *   parse() returns a TeX string.
+ * It exposes three methods
+ *   parse() returns a TeX string and, if asked, an RPN string.
  *   calculate() returns either a TeX string or a string in Hurmet calculation syntax.
+ *   md2html() returns an HTML string.
  *
- * The parameters of those two function are:
+ * The parameters of the first two methods are:
  *   entry: The string that a user types into a calculation editing box.
  *   draftMode: Determines if result is in TeX or in Hurmet calculation syntax.
  *   decimalFormat: A string containing one of the options available in the Hurmet ● menu.
@@ -39,16 +23,7 @@ import { md2html } from "./md2html"
  */
 
 export const hurmet = {
-  dt,
   parse,
   calculate,
-  autoCorrect,
-  prepareStatement,
-  improveQuantities,
-  draw,
-  evaluate,
-  md2ast,
-  md2html,
-  scanModule,
-  updateCalculations
+  md2html
 }

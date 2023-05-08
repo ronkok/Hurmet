@@ -80,15 +80,15 @@ const tagName = {
 const nodes = {
   html(node) { return node.text },
   heading(node)    {
-    const text = output(node.content)
+    const text = ast2html(node.content)
     let tag = "h" + node.attrs.level
     tag = htmlTag(tag, text)
     // Add id so others can link to it.
     tag = tag.slice(0, 3) + " id='" + text.toLowerCase().replace(/,/g, "").replace(/\s+/g, '-') + "'" + tag.slice(3)
     return tag + "\n"
   },
-  paragraph(node)  { return htmlTag("p", output(node.content)) + "\n" },
-  blockquote(node) { return htmlTag("blockquote", output(node.content)) },
+  paragraph(node)  { return htmlTag("p", ast2html(node.content)) + "\n" },
+  blockquote(node) { return htmlTag("blockquote", ast2html(node.content)) },
   code_block(node) {
     return htmlTag("pre", htmlTag("code", sanitizeText(node.content[0].text)))
   },
@@ -98,15 +98,15 @@ const nodes = {
   horizontal_rule(node) { return "<hr>\n" },
   ordered_list(node) {
     const attributes = node.attrs.order !== 1 ? { start: node.attrs.order } : undefined
-    return htmlTag("ol", output(node.content), attributes) + "\n"
+    return htmlTag("ol", ast2html(node.content), attributes) + "\n"
   },
-  bullet_list(node)  { return htmlTag("ul", output(node.content)) + "\n" },
-  list_item(node)    { return htmlTag("li", output(node.content)) + "\n" },
+  bullet_list(node)  { return htmlTag("ul", ast2html(node.content)) + "\n" },
+  list_item(node)    { return htmlTag("li", ast2html(node.content)) + "\n" },
   tight_list_item(node) {
-    return htmlTag("li", output(node.content), { class: "tight" }) + "\n"
+    return htmlTag("li", ast2html(node.content), { class: "tight" }) + "\n"
   },
-  table(node)        { return htmlTag("table", output(node.content), node.attrs) + "\n" },
-  table_row(node)    { return htmlTag("tr", output(node.content)) + "\n" },
+  table(node)        { return htmlTag("table", ast2html(node.content), node.attrs) + "\n" },
+  table_row(node)    { return htmlTag("tr", ast2html(node.content)) + "\n" },
   table_header(node) {
     const attributes = {}
     if (node.attrs.colspan !== 1) { attributes.colspan = node.attrs.colspan }
@@ -114,7 +114,7 @@ const nodes = {
     if (node.attrs.colwidth !== null && !isNaN(node.attrs.colwidth) ) {
       attributes.style = `width: ${node.attrs.colwidth}px`
     }
-    return htmlTag("th", output(node.content), attributes) + "\n"
+    return htmlTag("th", ast2html(node.content), attributes) + "\n"
   },
   table_cell(node) {
     const attributes = {}
@@ -123,11 +123,11 @@ const nodes = {
     if (node.attrs.colwidth !== null && !isNaN(node.attrs.colwidth) ) {
       attributes.style = `width: ${node.attrs.colwidth}px`
     }
-    return htmlTag("td", output(node.content), attributes)
+    return htmlTag("td", ast2html(node.content), attributes)
   },
   link(node) {
     const attributes = { href: sanitizeUrl(node.attrs.href), title: node.attrs.title };
-    return htmlTag("a", output(node.content), attributes);
+    return htmlTag("a", ast2html(node.content), attributes);
   },
   image(node) {
     const attributes = { src: node.attrs.src };
@@ -137,8 +137,8 @@ const nodes = {
     if (node.attrs.width) { attributes.width = node.attrs.width }
     return htmlTag("img", "", attributes, false);
   },
-  figure(node)     { return htmlTag("figure", output(node.content)) + "\n" },
-  figcaption(node) { return htmlTag("figcaption", output(node.content)) },
+  figure(node)     { return htmlTag("figure", ast2html(node.content)) + "\n" },
+  figcaption(node) { return htmlTag("figcaption", ast2html(node.content)) },
   figimg(node) {
     const attributes = { src: node.attrs.src, class: "figimg" };
     if (node.attrs.alt)   { attributes.alt = node.attrs.alt }
@@ -159,11 +159,11 @@ const nodes = {
       { trust: true, displayMode: (node.attrs.displayMode || false) }
     )
   },
-  indented(node) { return htmlTag("div", output(node.content), { class: 'indented' }) },
-  centered(node) { return htmlTag("div", output(node.content), { class: 'centered' }) },
-  comment(node)  { return htmlTag("aside", output(node.content), { class: 'comment' }) },
+  indented(node) { return htmlTag("div", ast2html(node.content), { class: 'indented' }) },
+  centered(node) { return htmlTag("div", ast2html(node.content), { class: 'centered' }) },
+  comment(node)  { return htmlTag("aside", ast2html(node.content), { class: 'comment' }) },
   dt(node)    {
-    let text = output(node.content)
+    let text = ast2html(node.content)
     let tag = htmlTag("dt", text)
     // Add id so others can link to it.
     const pos = text.indexOf("(")
@@ -171,7 +171,7 @@ const nodes = {
     tag = tag.slice(0, 3) + " id='" + text.toLowerCase().replace(/\s+/g, '-') + "'" + tag.slice(3)
     return tag + "\n"
   },
-  dd(node)    { return htmlTag("dd", output(node.content)) + "\n" },
+  dd(node)    { return htmlTag("dd", ast2html(node.content)) + "\n" },
   text(node) {
     const text = sanitizeText(node.text)
     if (!node.marks) {
@@ -193,12 +193,12 @@ const nodes = {
   }
 }
 
-const output = ast => {
+const ast2html = ast => {
   // Return HTML.
   let html = ""
   if (Array.isArray(ast)) {
     for (let i = 0; i < ast.length; i++) {
-      html += output(ast[i])
+      html += ast2html(ast[i])
     }
   } else if (ast && ast.type !== "null") {
     html += nodes[ast.type](ast)
@@ -208,5 +208,5 @@ const output = ast => {
 
 export const md2html = (md, inHtml = false) => {
   const ast = md2ast(md, inHtml)
-  return output(ast)
+  return ast2html(ast)
 }

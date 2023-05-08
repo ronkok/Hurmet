@@ -1,6 +1,10 @@
 /* eslint-disable */
+import { autoCorrect } from "./autocorrect"
+import { calculate } from "./calculate"
+import { draw } from "./draw"
+import { dt } from "./constants"
+import { scanModule } from "./module"
 import { codeJar, selectedText, textBeforeCursor, textAfterCursor } from "./codejar"
-import { hurmet } from "./hurmet.js"
 import temml from "./temml.js"
 
 'use strict'
@@ -8,38 +12,38 @@ import temml from "./temml.js"
 // Set up the REPL in the reference manual.
 // Define some variables and store their data in hurmetVars.
 const hurmetVars = Object.create(null)
-hurmet.calculate(`x = 5`, hurmetVars)
-hurmet.calculate(`w = 100 'lbf/ft'`, hurmetVars)
-hurmet.calculate(`L = 3.1 'm'`, hurmetVars)
-hurmet.calculate(`name = "James"`, hurmetVars)
-hurmet.calculate(`s = "abcde"`, hurmetVars)
-hurmet.calculate(`𝐕 = [1, 2, 3, 4, 5]`, hurmetVars)
-hurmet.calculate(`𝐌 = (1, 2, 3; 4, 5, 6; 7, 8, 9)`, hurmetVars)
+calculate(`x = 5`, hurmetVars)
+calculate(`w = 100 'lbf/ft'`, hurmetVars)
+calculate(`L = 3.1 'm'`, hurmetVars)
+calculate(`name = "James"`, hurmetVars)
+calculate(`s = "abcde"`, hurmetVars)
+calculate(`𝐕 = [1, 2, 3, 4, 5]`, hurmetVars)
+calculate(`𝐌 = (1, 2, 3; 4, 5, 6; 7, 8, 9)`, hurmetVars)
 const df = "``" + `name,w,area\n,in,in²\nA,4,10\nB,6,22` + "``"
-hurmet.calculate(`DF =` + df, hurmetVars)
-hurmet.calculate(`A = 8`, hurmetVars)
+calculate(`DF =` + df, hurmetVars)
+calculate(`A = 8`, hurmetVars)
 const wideFlanges = "``" + `name|weight|A|d|bf|tw|Ix|Sx|rx\n|lbf/ft|in^2|in|in|in|in^4|in^3|in\nW14X90|90|26.5|14|14.5|0.44|999|143|6.14\nW12X65|65|19.1|12.1|12|0.39|533|87.9|5.28\nW10X49|49|14.4|10|10|0.34|272|54.6|4.35\nW8X31|31|9.13|8|8|0.285|110|27.5|3.47\nW8X18|18|5.26|8.14|5.25|0.23|61.9|15.2|3.43\nW6X15|15|4.43|5.99|5.99|0.23|29.1|9.72|2.56\nW4X13|13|3.83|4.16|4.06|0.28|11.3|5.46|1.72` + "``"
-hurmet.calculate(`wideFlanges =` + wideFlanges, hurmetVars)
+calculate(`wideFlanges =` + wideFlanges, hurmetVars)
 const dict = `{"#4": 0.22, "#5": 0.31} 'in2'`
-hurmet.calculate(`barArea =` + dict, hurmetVars)
+calculate(`barArea =` + dict, hurmetVars)
 const module = "E = 29000 'ksi'\n\nv = [4, 6, 8]\n\nfunction multiply(a, b)\n  return a × b\nend"
-hurmetVars["mod"] = hurmet.scanModule(module)
+hurmetVars["mod"] = scanModule(module)
 
 const renderMath = (jar, demoOutput) => {
   let entry = jar.toString()
   const selText = selectedText(editor)
   if (selText.length === 0) {
     // eslint-disable-next-line no-undef
-    hurmet.autoCorrect(jar, textBeforeCursor(editor), textAfterCursor(editor))
+    autoCorrect(jar, textBeforeCursor(editor), textAfterCursor(editor))
   }
   entry = jar.toString()
   const format = document.getElementById("formatBox").value.trim()
   hurmetVars.format = { value: format }
-  const tex = hurmet.calculate(entry, hurmetVars)
+  const tex = calculate(entry, hurmetVars)
 
   try {
-    if (typeof tex === "object" && tex.dtype && tex.dtype === hurmet.dt.DRAWING) {
-      demoOutput.appendChild(hurmet.Draw.renderSVG(tex.resultdisplay))
+    if (typeof tex === "object" && tex.dtype && tex.dtype === dt.DRAWING) {
+      demoOutput.appendChild(draw.renderSVG(tex.resultdisplay))
     } else {
       temml.render(tex, demoOutput, {
         trust: (context) => context.command === "\\class" && context.class === "special-fraction",

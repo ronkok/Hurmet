@@ -1,333 +1,3 @@
-// autocorrect.js
-
-const autoCorrectRegEx = /([?:<>\-~/_]=| \.|~~|\+-|-\+|<-->|<->|<>|<--|<-|-->|->|-:|\^\^|\\\||\/\/\/|\b(bar|hat|vec|tilde|dot|ddot|ul)|\b(bb|bbb|cc|ff|ss) [A-Za-z]|\\?[A-Za-z]{2,}|\\c|\\ |\\o|root [234]|<<|>>|\^-?[0-9]+|\|\|\||\/_|''|""|00)\s$/;
-
-const accents = {
-  acute: "\u0301",
-  bar: "\u0305",
-  breve: "\u0306",
-  check: "\u030c",
-  dot: "\u0307",
-  ddot: "\u0308",
-  grave: "\u0300",
-  hat: "\u0302",
-  harpoon: "\u20d1",
-  leftharpoon: "\u20d0",
-  leftrightvec: "\u20e1",
-  leftvec: "\u20d6",
-  ring: "\u030a",
-  tilde: "\u0303",
-  vec: "\u20d7",
-  ul: "\u0332"
-};
-
-const autoCorrections = {
-  alpha: "α",
-  beta: "β",
-  chi: "χ",
-  delta: "δ",
-  Delta: "Δ",
-  epsilon: "ε",
-  varepsilon: "\u025B",
-  eta: "\u03B7",
-  gamma: "γ",
-  Gamma: "Γ",
-  iota: "\u03B9",
-  kappa: "\u03BA",
-  lambda: "λ",
-  Lambda: "Λ",
-  mu: "μ",
-  nu: "\u03BD",
-  omega: "ω",
-  Omega: "Ω",
-  phi: "\u03D5",
-  varphi: "\u03C6",
-  Phi: "\u03A6",
-  pi: "π",
-  Pi: "Π",
-  psi: "ψ",
-  Psi: "Ψ",
-  rho: "ρ",
-  sigma: "σ",
-  Sigma: "Σ",
-  tau: "τ",
-  theta: "θ",
-  vartheta: "\u03D1",
-  Theta: "Θ",
-  upsilon: "\u03C5",
-  xi: "\u03BE",
-  Xi: "\u039E",
-  zeta: "\u03B6",
-  prime: "ʹ",
-  ee: "ε",
-  ll: "λ",
-  sqrt: "√",
-  "root 2": "\u221A",
-  "root 3": "\u221B",
-  "root 4": "\u221C",
-  AA: "∀",
-  CC: "\u2102",
-  EE: "∃",
-  HH: "\u210D",
-  NN: "\u2115",
-  QQ: "\u211A",
-  RR: "\u211D",
-  ZZ: "\u2124",
-  OO: "𝒪",
-  ii: "√(-1)",
-  oo: "∞", // infinity
-  ooo: "°",
-  not: "¬",
-  "-:": "÷",
-  "\\ ": "˽",  // space
-  "\\c": "¢",
-  "\\cdots": "\u22ef",
-  "\\vdots": "\u22ee",
-  "\\ddots": "\u22f1",
-  "\\floor": "\u23BF\u23CC",
-  "\\ceil": "\u23BE\u23CB",
-  xx: "×",
-  "\\int": "∫",
-  "\\iint": "∬",
-  "\\oint": "∮",
-  "\\sum": "∑",
-  nn: "∩", // cap
-  nnn: "⋂",
-  uu: "∪", // cup
-  uuu: "⋃",
-  "\\del": "∂",
-  "\\grad": "∇",
-  "\\hbar": "ℏ",
-  "\\ell": "ℓ",
-  "\\nabla": "∇",
-  "\\alef": "ℵ",
-  "\\subset": "⊂",
-  "\\supset": "⊃",
-  "contains": "⊆",
-  "owns": "∋",
-  "\\subseteq": "⊆",
-  "\\nsubset": "⊄",
-  "\\nsubseteq": "⊈",
-  "\\forall": "∀",
-  "\\therefore": "∴",
-  "\\mapsto": "↦",
-  "\\checkmark": "✓",
-  bar: "\u02C9",
-  dot: "\u02D9",
-  ddot: "\u00A8",
-  hat: "\u02C6",
-  tilde: "\u02DC",
-  vec: "\u00A0\u20D7",
-  "\\land": "∧",
-  "\\lor": "∨",
-  "\\not": "¬",
-  "\\notin": "∉",
-  "\\euro": "€",
-  "\\pound": "£",
-  "\\yen": "¥",
-  "\\o": "ø",
-  "^^": "∧",
-  vv: "∨",
-  vvv: "⋁",
-  "\\xor": "⊻",
-  "\\in": "\u2208",
-  "<>": "≠",
-  ":=": "≔",
-  "?=": "≟",
-  "<=": "≤",
-  ">=": "≥",
-  "-=": "≡",
-  "~=": "≅",
-  "_=": "≡",
-  "~~": "≈",
-  "+-": "±",
-  "-+": "∓",
-  "<<": "\u27E8",
-  ">>": "\u27E9",
-  "///": "\u2215",
-  "<->": "\u2194",
-  "<-": "\u2190",
-  "<--": "\u27F5",
-  "-->": "⟶",
-  "->": "→",
-  "<-->": "\\xrightleftarrows",
-  "\\circ": "∘",
-  "\\otimes": "⊗",
-  "|||": "¦",
-  "\\|": "‖",
-  "/_": "∠",
-  " .": "\u00B7", // half-high dot
-  "''": "\u2032", // two apostrophes → prime
-  '""': "\u2033" // double prime
-};
-
-const supCharFromNum = {
-  "^": "",
-  "-": "⁻",
-  "2": "²",
-  "3": "³",
-  "1": "¹",
-  "0": "⁰",
-  "4": "⁴",
-  "5": "⁵",
-  "6": "⁶",
-  "7": "⁷",
-  "8": "⁸",
-  "9": "⁹",
-  "(": "",
-  ")": ""
-};
-
-const superscript = str => {
-  let superChar = "";
-  for (const ch of str) {
-    superChar += supCharFromNum[ch];
-  }
-  return superChar
-};
-
-const lowSurrogateDiff = {
-  // captital diff, lower case diff
-  bb: [0xdbbf, 0xdbb9], //  bold
-  bbb: [0xdcf7, 0xdcf1], // blackboard bold
-  cc: [0xdc5b, 0xdc55], // calligraphic
-  ff: [0xdd5f, 0xdd59] //   sans-serif
-};
-
-// 7 blackboard bold characters (ℂ, ℍ, ℕ, ℙ, ℚ, ℝ, ℤ) have Unicode code points in the
-// basic multi-lingual plane. So they must be treated differently than the other
-// blackboard bold characters. Eleven calligraphic characters work the same way.
-const wideExceptions = [0xdd3a, 0xdd3f, 0xdd45, 0xdd47, 0xdd48, 0xdd49, 0xdd51, // bbb
-  0xdc9d, 0xdca0, 0xdca1, 0xdca3, 0xdca4, 0xdca7, 0xdca8, // calligraphic
-  0xdcad, 0xdcba, 0xdcbc, 0xdcc1, 0xdcc4];
-
-const bbb = {
-  C: "\u2102",
-  H: "\u210D",
-  N: "\u2115",
-  P: "\u2119",
-  Q: "\u211A",
-  R: "\u211D",
-  Z: "\u2124"
-};
-const calligraphic = {
-  B: "\u212C",
-  E: "\u2130",
-  F: "\u2131",
-  H: "\u210B",
-  I: "\u2110",
-  L: "\u2112",
-  M: "\u2133",
-  R: "\u211B",
-  e: "\u212F",
-  g: "\u210A",
-  l: "\u2113",
-  o: "\u2134"
-};
-
-const accentedChar = str => {
-  const posSpace = str.indexOf(" ");
-  const ch = str.substring(posSpace + 1);
-  const accentName = str.substring(0, posSpace);
-  switch (accentName) {
-    case "bb": // bold
-    case "bbb": // blackboard bold
-    case "cc": // caligraphic
-    case "ff": { // sans-serif
-      const code = ch.charCodeAt(0);
-      let newChar = "";
-      if (code < 0x0041 || code > 0x007a) { return null }
-      const isSmall = code < 0x005b ? 0 : 1;
-      if (accentName === "cc" && isSmall && code !== 0x006c) { return null }
-      if (code > 0x005a && accentName === "bbb") { return null }
-      const lowSurrogate = code + lowSurrogateDiff[accentName][isSmall];
-      if (wideExceptions.includes(lowSurrogate)) {
-        newChar = accentName === "bbb" ? bbb[ch] : calligraphic[ch];
-      } else {
-        newChar = "\uD835" + String.fromCharCode(lowSurrogate);
-      }
-      return newChar
-    }
-
-    default:
-      return null
-  }
-};
-
-const autoCorrect = (jar, preText, postText) => {
-  // Auto-correct math in real time.
-  // jar is an instance of a CodeJar editing box.
-//  const pos = doc.getCursor()
-  if (preText.length > 0 && preText.slice(-1) === " ") {
-    // Auto-correct only after the user hits the space bar.
-    const matches = autoCorrectRegEx.exec(preText);
-    if (matches) {
-      const word = matches[0].slice(0, -1); // Trim the final space.
-      let correction;
-      const accent = accents[word];
-      if (accent) {
-        const newStr = preText.slice(0, -(matches[0].length + 1)) + accent;
-        jar.updateCode(newStr + postText);
-        // Move the cursor to the correct location
-        const L = newStr.length;
-        jar.restore({ start: L, end: L, dir: undefined });
-      } else {
-        correction = autoCorrections[word]; // Check for a match in the lookup table.
-        if (!correction) {
-          // No perfect match in the lookup table. Try for a superscript or an accent.
-          if (word.charAt(0) === "^") {
-            correction = superscript(word); // e.g. x²
-          } else {
-            if (word.indexOf(" ") > 0) {
-              // accented char or Unicode character. E.g. bar y   or   bb M
-              correction = accentedChar(word);
-            }
-          }
-        }
-      }
-      if (correction) {
-        const newStr = preText.slice(0, -matches[0].length) + correction;
-        jar.updateCode(newStr + postText);
-        // Move the cursor to the correct location
-        const L = newStr.length;
-        jar.restore({ start: L, end: L, dir: undefined });
-      }
-    }
-  }
-};
-
-// unit exponents of a number with no unit.
-const allZeros = Object.freeze([0, 0, 0, 0, 0, 0, 0, 0]);
-
-// Data types
-// Some operands will be two types at the same time, e.g. RATIONAL + MATRIX.
-// So we'll enumerate data types in powers of two.
-// That way, we can use a bit-wise "&" operator to test for an individual type.
-const dt = Object.freeze({
-  NULL: 0,
-  RATIONAL: 1,
-  COMPLEX: 2,
-  BOOLEAN: 4,
-  FROMCOMPARISON: 8,
-  BOOLEANFROMCOMPARISON: 12, // 4 + 8, useful for chained comparisons
-  STRING: 16,
-  QUANTITY: 32, // Contains both a magnitude and a unit-of-measure
-  DATE: 64, //     Not currently used
-  RANGE: 128, //   as in:  1:10
-  TUPLE: 256, //   Used for multiple assignment from a module.
-  MAP: 512,  //    A key:value store with all the same data type the same unit
-  ROWVECTOR: 1024,
-  COLUMNVECTOR: 2048,
-  MATRIX: 4096, // two dimensional
-  DATAFRAME: 8192,
-  MODULE: 16384, // contains user-defined functions
-  ERROR: 32768,
-  UNIT: 65536, // User-defined units.
-  DRAWING: 131072,
-  RICHTEXT: 262144,
-  DICTIONARY: 524288
-});
-
 /*
  * Hurmet, copyright (c) by Ron Kok
  * Distributed under an MIT license: https://Hurmet.app/LICENSE.txt
@@ -549,6 +219,38 @@ const unitTeXFromString = str => {
 
   return unit + "}}"
 };
+
+// unit exponents of a number with no unit.
+const allZeros = Object.freeze([0, 0, 0, 0, 0, 0, 0, 0]);
+
+// Data types
+// Some operands will be two types at the same time, e.g. RATIONAL + MATRIX.
+// So we'll enumerate data types in powers of two.
+// That way, we can use a bit-wise "&" operator to test for an individual type.
+const dt = Object.freeze({
+  NULL: 0,
+  RATIONAL: 1,
+  COMPLEX: 2,
+  BOOLEAN: 4,
+  FROMCOMPARISON: 8,
+  BOOLEANFROMCOMPARISON: 12, // 4 + 8, useful for chained comparisons
+  STRING: 16,
+  QUANTITY: 32, // Contains both a magnitude and a unit-of-measure
+  DATE: 64, //     Not currently used
+  RANGE: 128, //   as in:  1:10
+  TUPLE: 256, //   Used for multiple assignment from a module.
+  MAP: 512,  //    A key:value store with all the same data type the same unit
+  ROWVECTOR: 1024,
+  COLUMNVECTOR: 2048,
+  MATRIX: 4096, // two dimensional
+  DATAFRAME: 8192,
+  MODULE: 16384, // contains user-defined functions
+  ERROR: 32768,
+  UNIT: 65536, // User-defined units.
+  DRAWING: 131072,
+  RICHTEXT: 262144,
+  DICTIONARY: 524288
+});
 
 const errorMessages = Object.freeze({
   EN: {
@@ -1108,7 +810,7 @@ const groupByLakhCroreRegEx = /(\d)(?=(\d\d)+\d$)/g;
 
 const formatRegEx = /^([beEfhkmprsStx%])?(-?[\d]+)?([i∠°])?$/;
 
-const superscript$1 = str => {
+const superscript = str => {
   // Convert a numeral string to Unicode superscript characters.
   // Used for denominator in mixed fractions/
   let result = "";
@@ -1138,7 +840,7 @@ const subscript = str => {
 const texFromMixedFraction = (numParts) => {
   return (numParts[1] ? "-" : "") +
     numParts[3] + "\\,\\class{special-fraction}{\\text{" +
-    superscript$1(numParts[4]) + "\u2044" + subscript(numParts[5]) + "}}"
+    superscript(numParts[4]) + "\u2044" + subscript(numParts[5]) + "}}"
 };
 
 const intAbs$1 = i => i >= BigInt(0) ? i : BigInt(-1) * i;  // absolute value of a BigInt
@@ -1191,7 +893,7 @@ const roundedString = (r, spec) => {
           // Mixed fraction
           const quotientStr = String(numerator / denominator);
           const remainder = numerator % denominator;
-          return sign + quotientStr + "\u00a0" + superscript$1(remainder) +
+          return sign + quotientStr + "\u00a0" + superscript(remainder) +
             "⁄" + subscript(denominator)
         }
 
@@ -4376,7 +4078,7 @@ const texFunctions = Object.freeze({
   "\\qquad": ["\\qquad", "\\qquad", tt.SPACE, ""]
 });
 
-const accents$1 = Object.freeze([
+const accents = Object.freeze([
   "Bbb",
   "Overrightarrow",
   "acute",
@@ -4787,7 +4489,7 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
     // TeX control word, starting with backslash. e.g. \, or \circ
     const match = matchObj[0];
     st = match.substring(1);
-    if (isIn(st, accents$1)) {
+    if (isIn(st, accents)) {
       return [match, match, tt.ACCENT, ""]
     }
     if (isIn(st, unaries)) {
@@ -6243,6 +5945,166 @@ const parse = (
 
   return isCalc ? [tex, rpn] : tex
 };
+
+function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
+  // hurmetVars is a key:value store of variable names and attributes.
+  // This function is called to insert an assignment into hurmetVars.
+  const formatSpec = hurmetVars.format ? hurmetVars.format.value : "h15";
+
+  if (!Array.isArray(attrs.name)) {
+    // This is the typical case.
+    hurmetVars[attrs.name] = attrs;
+
+  } else if (attrs.value === null) {
+    for (let i = 0; i < attrs.name.length; i++) {
+      hurmetVars[attrs.name[i]] = { value: null };
+    }
+
+  } else if (isMatrix(attrs)) {
+    // Assign to a matrix of names
+    const isQuantity = Boolean(attrs.dtype & dt.QUANTITY);
+    let resultDisplay = attrs.resultdisplay;
+    resultDisplay = resultDisplay.replace(/\\(begin|end){[bp]matrix}/g, "").trim();
+    const displays = resultDisplay.split(/&|\\\\/);
+    if (attrs.dtype & dt.MATRIX) {
+      // A 2 dimensional matrix.
+      const dtype = attrs.dtype - dt.MATRIX;
+      const numRows = isQuantity ? attrs.value.plain.length : attrs.value.length;
+      const numCols = attrs.name.length / numRows;
+      let iName = 0;
+      for (let i = 0; i < numRows; i++) {
+        for (let j = 0; j < numCols; j++) {
+          const value = isQuantity
+            ? { plain: attrs.value.plain[i][j], inBaseUnits: attrs.value.inBaseUnits[i][j] }
+            : attrs.value[i][j];
+          hurmetVars[attrs.name[i]] = {
+            name: attrs.name[iName],
+            value,
+            resultdisplay: isQuantity
+              ? parse(displays[iName].trim() + " '" + attrs.unit + "'")
+              : displays[iName].trim(),
+            expos: attrs.expos,
+            unit: isQuantity ? attrs.unit : undefined,
+            dtype
+          };
+          iName += 1;
+        }
+      }
+    } else {
+      // Assign to a vector of names.
+      const isColumn = Boolean(attrs.dtype & dt.COLUMNVECTOR);
+      const dtype = attrs.dtype - (isColumn ? dt.COLUMNVECTOR : dt.ROWVECTOR);
+      for (let i = 0; i < attrs.name.length; i++) {
+        const value = isQuantity
+          ? { plain: attrs.value.plain[i], inBaseUnits: attrs.value.inBaseUnits[i] }
+          : attrs.value[i];
+        hurmetVars[attrs.name[i]] = {
+          name: attrs.name[i],
+          value,
+          resultdisplay: isQuantity
+            ? parse(displays[i].trim() + " '" + attrs.unit + "'")
+            : displays[i].trim(),
+          expos: attrs.expos,
+          unit: isQuantity ? attrs.unit : undefined,
+          dtype
+        };
+      }
+    }
+
+  // From this point forward, we're dealing with multiple assignment
+  } else if (attrs.dtype & dt.MAP) {
+    const unit = attrs.value.unit;
+    const unitName = unit && unit.name ? unit.name : undefined;
+    const dtype = attrs.dtype - dt.MAP;
+    let i = 0;
+    if (attrs.dtype & dt.QUANTITY) {
+      for (const value of attrs.value.plain.values()) {
+        const result = {
+          value: { plain: value },
+          expos: attrs.expos,
+          factor: attrs.factor,
+          dtype
+        };
+        result.resultdisplay = format(value, formatSpec, decimalFormat);
+        if (unitName) { result.resultdisplay += " " + unitTeXFromString(unitName); }
+        hurmetVars[attrs.name[i]] = result;
+        i += 1;
+      }
+      i = 0;
+      for (const value of attrs.value.inBaseUnits.values()) {
+        hurmetVars[attrs.name[i]].value.inBaseUnits = value;
+        i += 1;
+      }
+    } else {
+      for (const value of attrs.value.values()) {
+        const result = { value, expos: attrs.expos, factor: attrs.factor, dtype };
+        result.resultdisplay = Rnl.isRational(value)
+          ? format(value, formatSpec, decimalFormat)
+          : String(value);
+        if (unitName) { result.resultdisplay += " " + unitTeXFromString(unitName); }
+        hurmetVars[attrs.name[i]] = result;
+        i += 1;
+      }
+    }
+  } else if (attrs.dtype === dt.DATAFRAME) {
+    const isSingleRow = attrs.value.data[0].length === 1;
+    for (let i = 0; i < attrs.name.length; i++) {
+      let dtype = attrs.value.dtype[i];
+      let value = isSingleRow ? undefined : [];
+      for (let j = 0; j < attrs.value.data[0].length; j++) {
+        const datum = attrs.value.data[i][j];
+        const val = (dtype & dt.RATIONAL) ? Rnl.fromString(datum) : datum;
+        if (isSingleRow) {
+          value = val;
+        } else {
+          value.push(val);
+        }
+      }
+      if (!isSingleRow) { dtype += dt.COLUMNVECTOR; }
+      const result = {
+        value,
+        unit: attrs.unit[attrs.value.units[i]],
+        dtype
+      };
+      if ((dtype & dt.RATIONAL) && isSingleRow) {
+        result.resultdisplay = parse(format(value));
+      } else if (dtype & dt.RATIONAL) {
+        result.resultdisplay = Matrix.display({ value, dtype }, formatSpec, decimalFormat)
+            + parse(`'${attrs.value.units[i]}'`);
+      } else {
+        result.resultdisplay = parse(value);
+      }
+      if (attrs.value.units[i]) {
+        result.value = { plain: result.value };
+        const unit = attrs.unit[attrs.value.units[i]];
+        result.value.inBaseUnits = isSingleRow
+          ? Rnl.multiply(Rnl.add(result.value.plain, unit.gauge), unit.factor)
+          : result.value.plain.map(e => Rnl.multiply(Rnl.add(e, unit.gauge), unit.factor));
+        result.expos = unit.expos;
+        result.resultdisplay += "\\;" + unitTeXFromString(result.unit.name);
+      }
+
+      hurmetVars[attrs.name[i]] = result;
+    }
+  } else if (attrs.dtype === dt.TUPLE) {
+    let i = 0;
+    for (const value of attrs.value.values()) {
+      hurmetVars[attrs.name[i]] = value;
+      i += 1;
+    }
+  } else if (attrs.dtype === dt.MODULE) {
+    if (attrs.name.length !== attrs.value.length) {
+      return errorOprnd("MULT_MIS")
+    } else {
+      let i = 0;
+      for (const value of attrs.value.values()) {
+        const result = clone(value);
+        hurmetVars[attrs.name[i]] = result;
+        i += 1;
+      }
+    }
+  }
+}
 
 /*
  * Hurmet operands often have numeric values. Sometimes they are the numbers originally
@@ -8810,166 +8672,6 @@ const textRange = (str, index) => {
   }
   return { value, unit: null, dtype: dt.STRING }
 };
-
-function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
-  // hurmetVars is a key:value store of variable names and attributes.
-  // This function is called to insert an assignment into hurmetVars.
-  const formatSpec = hurmetVars.format ? hurmetVars.format.value : "h15";
-
-  if (!Array.isArray(attrs.name)) {
-    // This is the typical case.
-    hurmetVars[attrs.name] = attrs;
-
-  } else if (attrs.value === null) {
-    for (let i = 0; i < attrs.name.length; i++) {
-      hurmetVars[attrs.name[i]] = { value: null };
-    }
-
-  } else if (isMatrix(attrs)) {
-    // Assign to a matrix of names
-    const isQuantity = Boolean(attrs.dtype & dt.QUANTITY);
-    let resultDisplay = attrs.resultdisplay;
-    resultDisplay = resultDisplay.replace(/\\(begin|end){[bp]matrix}/g, "").trim();
-    const displays = resultDisplay.split(/&|\\\\/);
-    if (attrs.dtype & dt.MATRIX) {
-      // A 2 dimensional matrix.
-      const dtype = attrs.dtype - dt.MATRIX;
-      const numRows = isQuantity ? attrs.value.plain.length : attrs.value.length;
-      const numCols = attrs.name.length / numRows;
-      let iName = 0;
-      for (let i = 0; i < numRows; i++) {
-        for (let j = 0; j < numCols; j++) {
-          const value = isQuantity
-            ? { plain: attrs.value.plain[i][j], inBaseUnits: attrs.value.inBaseUnits[i][j] }
-            : attrs.value[i][j];
-          hurmetVars[attrs.name[i]] = {
-            name: attrs.name[iName],
-            value,
-            resultdisplay: isQuantity
-              ? parse(displays[iName].trim() + " '" + attrs.unit + "'")
-              : displays[iName].trim(),
-            expos: attrs.expos,
-            unit: isQuantity ? attrs.unit : undefined,
-            dtype
-          };
-          iName += 1;
-        }
-      }
-    } else {
-      // Assign to a vector of names.
-      const isColumn = Boolean(attrs.dtype & dt.COLUMNVECTOR);
-      const dtype = attrs.dtype - (isColumn ? dt.COLUMNVECTOR : dt.ROWVECTOR);
-      for (let i = 0; i < attrs.name.length; i++) {
-        const value = isQuantity
-          ? { plain: attrs.value.plain[i], inBaseUnits: attrs.value.inBaseUnits[i] }
-          : attrs.value[i];
-        hurmetVars[attrs.name[i]] = {
-          name: attrs.name[i],
-          value,
-          resultdisplay: isQuantity
-            ? parse(displays[i].trim() + " '" + attrs.unit + "'")
-            : displays[i].trim(),
-          expos: attrs.expos,
-          unit: isQuantity ? attrs.unit : undefined,
-          dtype
-        };
-      }
-    }
-
-  // From this point forward, we're dealing with multiple assignment
-  } else if (attrs.dtype & dt.MAP) {
-    const unit = attrs.value.unit;
-    const unitName = unit && unit.name ? unit.name : undefined;
-    const dtype = attrs.dtype - dt.MAP;
-    let i = 0;
-    if (attrs.dtype & dt.QUANTITY) {
-      for (const value of attrs.value.plain.values()) {
-        const result = {
-          value: { plain: value },
-          expos: attrs.expos,
-          factor: attrs.factor,
-          dtype
-        };
-        result.resultdisplay = format(value, formatSpec, decimalFormat);
-        if (unitName) { result.resultdisplay += " " + unitTeXFromString(unitName); }
-        hurmetVars[attrs.name[i]] = result;
-        i += 1;
-      }
-      i = 0;
-      for (const value of attrs.value.inBaseUnits.values()) {
-        hurmetVars[attrs.name[i]].value.inBaseUnits = value;
-        i += 1;
-      }
-    } else {
-      for (const value of attrs.value.values()) {
-        const result = { value, expos: attrs.expos, factor: attrs.factor, dtype };
-        result.resultdisplay = Rnl.isRational(value)
-          ? format(value, formatSpec, decimalFormat)
-          : String(value);
-        if (unitName) { result.resultdisplay += " " + unitTeXFromString(unitName); }
-        hurmetVars[attrs.name[i]] = result;
-        i += 1;
-      }
-    }
-  } else if (attrs.dtype === dt.DATAFRAME) {
-    const isSingleRow = attrs.value.data[0].length === 1;
-    for (let i = 0; i < attrs.name.length; i++) {
-      let dtype = attrs.value.dtype[i];
-      let value = isSingleRow ? undefined : [];
-      for (let j = 0; j < attrs.value.data[0].length; j++) {
-        const datum = attrs.value.data[i][j];
-        const val = (dtype & dt.RATIONAL) ? Rnl.fromString(datum) : datum;
-        if (isSingleRow) {
-          value = val;
-        } else {
-          value.push(val);
-        }
-      }
-      if (!isSingleRow) { dtype += dt.COLUMNVECTOR; }
-      const result = {
-        value,
-        unit: attrs.unit[attrs.value.units[i]],
-        dtype
-      };
-      if ((dtype & dt.RATIONAL) && isSingleRow) {
-        result.resultdisplay = parse(format(value));
-      } else if (dtype & dt.RATIONAL) {
-        result.resultdisplay = Matrix.display({ value, dtype }, formatSpec, decimalFormat)
-            + parse(`'${attrs.value.units[i]}'`);
-      } else {
-        result.resultdisplay = parse(value);
-      }
-      if (attrs.value.units[i]) {
-        result.value = { plain: result.value };
-        const unit = attrs.unit[attrs.value.units[i]];
-        result.value.inBaseUnits = isSingleRow
-          ? Rnl.multiply(Rnl.add(result.value.plain, unit.gauge), unit.factor)
-          : result.value.plain.map(e => Rnl.multiply(Rnl.add(e, unit.gauge), unit.factor));
-        result.expos = unit.expos;
-        result.resultdisplay += "\\;" + unitTeXFromString(result.unit.name);
-      }
-
-      hurmetVars[attrs.name[i]] = result;
-    }
-  } else if (attrs.dtype === dt.TUPLE) {
-    let i = 0;
-    for (const value of attrs.value.values()) {
-      hurmetVars[attrs.name[i]] = value;
-      i += 1;
-    }
-  } else if (attrs.dtype === dt.MODULE) {
-    if (attrs.name.length !== attrs.value.length) {
-      return errorOprnd("MULT_MIS")
-    } else {
-      let i = 0;
-      for (const value of attrs.value.values()) {
-        const result = clone(value);
-        hurmetVars[attrs.name[i]] = result;
-        i += 1;
-      }
-    }
-  }
-}
 
 /**
  * md2ast() returns an AST that matches the memory structure  of a Hurmet.app document.
@@ -13212,389 +12914,8 @@ const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
   return attrs
 };
 
-/*
- *  This module organizes one or two passes through the data structure of a Hurmet
- *  document, calling for a calculation to be done on each Hurmet calculation cell.
- *  If you are looking for the calculation itself, look at evaluate.js.
- *
- *  To be more precise, this module is called:
- *    1. When an author submits one calculation cell, or
- *    2. When a new Hurmet.app instance has opened (from index.js), or
- *    3. When a user has opened a new file         (from openFile.js), or
- *    4. When a recalculate-all has been called, possibly after a paste. (from menu.js)
- *
- *  Case 1 calculates the submitted cell and all dependent calculation cells.
- *  Cases 2 thru 4 re-calculate the entire document. I.e., isCalcAll is set to true.
- *  After calculation is complete, we send the results to ProseMirror to be
- *  rendered in the document.
- *
- *   This module's main exported function is updateCalculations(…)
- */
-
-/*
-* Note 1: state.selection shenanigans
-*
-* Before creating a ProseMirror (PM) transaction, this module first changes `state.selection`.
-* That is to say, I change the PM state without running that change thru a PM transaction.
-* PM docs advise against that, so I want to explain why I do so.
-*
-* For Undo purposes, a calculation should be atomic.
-* An Undo of a calculation should return the doc to the condition before the
-* calculation cell was edited. That will feel natural to people accustomed to Excel.
-* When a calculation is submitted, Hurmet creates a single PM transaction and into it,
-* Hurmet collects all the changes that the calculation makes to the original cell and
-* also all the changes to dependent cells.
-* When a user submits a calculation, the cell is open, so a PM Undo would ordinarily return
-* the state to a condition that once again has the cell open.
-*
-* But now consider a user who wants to Undo twice. The first Undo retreats to a condition in
-* which a cell is open. The user thinks a second Undo will change the PM document. But no!
-* Because the cell is open, the CodeMirror plain text editor is active and the Undo is captured
-* by CodeMirror. An Undo affects CodeMirror but not the outer document. It's very confusing!
-* So the Undo should return to a condition in which the cell is closed. That's why I change
-* the PM state.selection object _before_ I create the PM transaction. I don't want an Undo to
-* open that cell and so I don't want the Undo to finish with the selection point inside the
-* cell. Before creating the transaction, I move the selection point to just after the cell.
-*/
-
-const fetchRegEx = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′* *= *(?:fetch|import)\(/;
-const importRegEx = /^[^=]+= *import/;
-const fileErrorRegEx = /^Error while reading file. Status Code: \d*$/;
-const textRegEx = /\\text{[^}]+}/;
-
-const urlFromEntry = entry => {
-  // Get the URL from the entry input string.
-  const str = entry.replace(/^[^()]+\("?/, "");
-  return str.replace(/"?\).*$/, "").trim()
-};
-
-// Helper function.
-const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
-  const attrs = Object.create(null);
-  attrs.entry = entry;
-  attrs.name = entry.replace(/=.+$/, "").trim();
-  let str = parse(entry.replace(/\s*=\s*[$$£¥\u20A0-\u20CF]?(?:!{1,2}).*$/, ""), decimalFormat);
-  const url = urlFromEntry(entry);
-  if (/\.(?:tsv|txt)$/.test(url)) {
-    // Shorten the URL.
-    const fileName = url.replace(/.+\//, "");
-    const match = textRegEx.exec(str);
-    str = str.slice(0, match.index) + "\\text{" + addTextEscapes(fileName) + "})";
-  }
-  attrs.tex = str;
-  attrs.alt = entry;
-  if (text === "File not found." || fileErrorRegEx.test(text)) {
-    attrs.dtype = dt.ERROR;
-    attrs.tex += ` = \\red{\\text{${text}}}`;
-    attrs.alt = " = " + text;
-    attrs.value = null;
-    return attrs
-  }
-  const data = importRegEx.test(entry)
-    ? scanModule(text, decimalFormat)               // import code
-    : DataFrame.dataFrameFromTSV(text, hurmetVars);  // fetch data
-
-  // Append the data to attrs
-  attrs.value = data.value;
-  attrs.dtype = data.dtype;
-  attrs.unit = data.unit;
-  attrs.isFetch = true;
-  if (data.dtype === dt.MODULE && /^importedParameters *=/.test(entry)) {
-    // Assign to multiple variables, not one namespace.
-    let nameTex = "\\begin{matrix}";
-    let i = 0;
-    Object.entries(data.value).forEach(([key, value]) => {
-      hurmetVars[key] =  value;
-      nameTex += parse(value.name) + " & ";
-      i += 1;
-      if (i === 5) {
-        nameTex = nameTex.slice(0, -1) + "\\\\ ";
-        i = 0;
-      }
-    });
-    nameTex = nameTex.slice(0, (i === 0 ? -2 : -1)) + "\\end{matrix}";
-    attrs.tex = attrs.tex.replace("\\mathrm{importedParameters}", nameTex);
-  }
-  return attrs
-};
-
-const workAsync = (
-  view,
-  calcNodeSchema,
-  isCalcAll,
-  nodeAttrs,
-  curPos,
-  hurmetVars,
-  urls,
-  fetchPositions
-) => {
-
-  // Here we fetch the remote data.
-  const doc = view.state.doc;
-  const inDraftMode = doc.attrs.inDraftMode;
-  const decimalFormat = doc.attrs.decimalFormat;
-
-  Promise.all(
-    urls.map(url => fetch(url, {
-      method: "GET",
-      headers: { "Content-Type": "text/plain;charset=UTF-8" },
-      mode: "cors"
-    }))
-  ).then(fetchResponses => {
-    // The fetch promises have resolved. Now we extract their text.
-    return Promise.all(fetchResponses.map(r => {
-      if (r.status !== 200 && r.status !== 0) {
-        return r.status === 404
-          ? 'File not found.'
-          : 'Error while reading file. Status Code: ' + r.status
-      }
-      return r.text()
-    }))
-  }).then((texts) => {
-    // At this point, we have the text of each Hurmet fetch and import.
-    // Create a ProseMirror transacation.
-    // Each node update below will be one step in the transaction.
-    const state = view.state;
-    if (state.selection.to === curPos + 1) {
-      // See Note 1 above for an explanation of the state.selection shenanigans.
-      state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1));
-    }
-    const tr = state.tr;
-
-    // Load in the data from the fetch statements
-    for (let i = 0; i < texts.length; i++) {
-      const pos = fetchPositions[i];
-      const entry = isCalcAll
-        ? doc.nodeAt(pos).attrs.entry
-        : nodeAttrs.entry;
-      const attrs = processFetchedString(entry, texts[i], hurmetVars, decimalFormat);
-      attrs.inDraftMode = inDraftMode;
-      tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs));
-      if (attrs.name) {
-        insertOneHurmetVar(hurmetVars, attrs, decimalFormat);
-      }
-    }
-    // There. Fetches are done and are loaded into the document.
-    // Now proceed to the rest of the work.
-    try {
-      proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs,
-                        curPos, hurmetVars, tr);
-    } catch (err) {
-      console.log(err); // eslint-disable-line no-console
-      const pos = nodeAttrs.template.indexOf(nodeAttrs.resultdisplay);
-      nodeAttrs.tex = nodeAttrs.template.slice(0, pos) + "\\text{" + err + "}";
-      tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs));
-      tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)));
-      view.dispatch(tr);
-      view.focus();
-    }
-  });
-};
-
-const proceedAfterFetch = (
-  view,
-  calcNodeSchema,
-  isCalcAll,
-  nodeAttrs,
-  curPos,
-  hurmetVars,
-  tr
-) => {
-  // This function happens either
-  //   1. After remote, fetched data has been processed, or
-  //   2. After we know that no fetch statements need be processed.
-  const doc = view.state.doc;
-  const decimalFormat = doc.attrs.decimalFormat;
-
-  if (!isCalcAll && (nodeAttrs.name || nodeAttrs.rpn ||
-    (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING))) {
-    // Load hurmetVars with values from earlier in the document.
-    doc.nodesBetween(0, curPos, function(node) {
-      if (node.type.name === "calculation") {
-        const attrs = node.attrs;
-        if (attrs.name) {
-          if (attrs.name === "importedParameters") {
-            Object.entries(attrs.value).forEach(([key, value]) => {
-              hurmetVars[key] =  value;
-            });
-          } else {
-            insertOneHurmetVar(hurmetVars, attrs, decimalFormat);
-          }
-        }
-      }
-    });
-
-    // Hoist any user-defined functions located below the selection.
-    doc.nodesBetween(curPos + 1, doc.content.size, function(node, pos) {
-      if (node.type.name === "calculation" && node.attrs.dtype === dt.MODULE) {
-        insertOneHurmetVar(hurmetVars, node.attrs, decimalFormat);
-      }
-    });
-
-    // Calculate the current node.
-    if (!fetchRegEx.test(nodeAttrs.entry)) {
-      // This is the typical calculation statement. We'll evalutate it.
-      let attrs = clone(nodeAttrs); // prepareStatement was already run in mathprompt.js.
-      // The mathPrompt dialog box did not have accesss to hurmetVars, so it
-      // did not do unit conversions on the result template. Do that first.
-      improveQuantities(attrs, hurmetVars);
-      // Now proceed to do the calculation of the cell.
-      if (attrs.rpn || (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING)) {
-        attrs = attrs.dtype && attrs.dtype === dt.DRAWING
-          ? evaluateDrawing(attrs, hurmetVars, decimalFormat)
-          : evaluate(attrs, hurmetVars, decimalFormat);
-      }
-      if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, decimalFormat); }
-      attrs.displayMode = nodeAttrs.displayMode;
-      tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(attrs));
-    }
-  }
-
-  // Finally, update calculations after startPos.
-  const startPos = isCalcAll ? 0 : (curPos + 1);
-  doc.nodesBetween(startPos, doc.content.size, function(node, pos) {
-    if (node.type.name === "calculation") {
-      const mustCalc = isCalcAll ? !fetchRegEx.test(node.attrs.entry) : !node.attrs.isFetch;
-      if (mustCalc) {
-        const entry = node.attrs.entry;
-        let attrs = isCalcAll
-          ? prepareStatement(entry, decimalFormat)
-          : clone(node.attrs);
-        attrs.displayMode = node.attrs.displayMode;
-        const mustRedraw = attrs.dtype && attrs.dtype === dt.DRAWING &&
-          (attrs.rpn || (attrs.value.parameters.length > 0 || isCalcAll));
-        if (isCalcAll || attrs.rpn || mustRedraw || (attrs.name && !(hurmetVars[attrs.name] &&
-          hurmetVars[attrs.name].isFetch))) {
-          if (isCalcAll) { improveQuantities(attrs, hurmetVars); }
-          if (attrs.rpn || mustRedraw) {
-            attrs = attrs.rpn // attrs.dtype && attrs.dtype === dt.DRAWING
-              ? evaluate(attrs, hurmetVars, decimalFormat)
-              : evaluateDrawing(attrs, hurmetVars, decimalFormat);
-          }
-          if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, decimalFormat); }
-          if (isCalcAll || attrs.rpn || mustRedraw) {
-            tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs));
-          }
-        }
-      } else if (node.attrs.name && !(isCalcAll && node.attrs.isFetch)) {
-        if (node.attrs.name) {
-          if (node.attrs.name === "importedParameters") {
-            Object.entries(node.attrs.value).forEach(([key, value]) => {
-              hurmetVars[key] =  value;
-            });
-          } else {
-            insertOneHurmetVar(hurmetVars, node.attrs, decimalFormat);
-          }
-        }
-      }
-    }
-  });
-
-  // All the steps are now loaded into the transaction.
-  // Dispatch the transaction to ProseMirror, which will re-render the document.
-  if (!isCalcAll) {
-    tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)));
-  }
-  view.dispatch(tr);
-  view.focus();
-};
-
-function updateCalculations(
-  view,
-  calcNodeSchema,
-  isCalcAll = false,
-  nodeAttrs,
-  curPos
-) {
-  const doc = view.state.doc;
-
-  if (!(isCalcAll || nodeAttrs.name || nodeAttrs.rpn ||
-      (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING))) {
-    // No calculation is required. Just render the node and get out.
-    const state = view.state;
-    if (state.selection.to === curPos + 1) {
-      // See Note 1 above for an explanation of the state.selection shenanigans.
-      state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1));
-    }
-    const tr = state.tr;
-    try {
-      tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs));
-    } catch (err) {
-      // nada
-    } finally {
-      view.dispatch(tr);
-      view.focus();
-    }
-    return
-  }
-
-  // Create an object in which we'll hold variable values.
-  const hurmetVars = Object.create(null);
-  hurmetVars.format = { value: "h15" }; // default rounding format
-
-  // Get an array of all the URLs called by fetch statements.
-  const urls = [];
-  const fetchPositions = [];
-  if (!isCalcAll) {
-    // The author has submitted a single calculation cell.
-    const entry = nodeAttrs.entry;
-    if (fetchRegEx.test(entry)) {
-      urls.push(urlFromEntry(entry));
-      fetchPositions.push(curPos);
-    }
-  } else {
-    // We're updating the entire document.
-    doc.nodesBetween(0, doc.content.size, function(node, pos) {
-      if (node.type.name === "calculation" && !node.attrs.value) {
-        const entry = node.attrs.entry;
-        if (fetchRegEx.test(entry)) {
-          urls.push(urlFromEntry(entry));
-          fetchPositions.push(pos);
-        } else if (/^function /.test(entry)) {
-          node.attrs = prepareStatement(entry, doc.attrs.decimalFormat);
-          insertOneHurmetVar(hurmetVars, node.attrs, doc.attrs.decimalFormat);
-        }
-      } else if (node.attrs.isFetch || (node.attrs.dtype && node.attrs.dtype === dt.MODULE)) {
-        insertOneHurmetVar(hurmetVars, node.attrs, doc.attrs.decimalFormat);
-      }
-    });
-  }
-
-  if (urls.length > 0) {
-    // We have to fetch some remote data. Asynchronous work ahead.
-    workAsync(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos,
-              hurmetVars, urls, fetchPositions);
-  } else {
-    // Skip the fetches and go directly to work that we can do synchronously.
-    const state = view.state;
-    if (state.selection.to === curPos + 1) {
-      // See Note 1 above for an explanation of the state.selection shenanigans.
-      state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1));
-    }
-    const tr = state.tr;
-    try {
-      proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr);
-    } catch (err) {
-      console.log(err); // eslint-disable-line no-console
-      const pos = nodeAttrs.template.indexOf(nodeAttrs.resultdisplay);
-      nodeAttrs.tex = nodeAttrs.template.slice(0, pos) + "\\text{" + err + "}";
-      tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs));
-      tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)));
-      view.dispatch(tr);
-      view.focus();
-    }
-  }
-}
-
-const helpers = Object.freeze({
-  fetchRegEx,
-  textRegEx,
-  urlFromEntry,
-  processFetchedString
-});
-
 // This function is not used by the Hurmet.app page.
-// It is provided for use by unit tests.
+// It is provided for use by unit tests and by the demo box in the manual page.
 // If you are looking for the app's main calculation module, try evaluate.js.
 const calculate = (
   entry,
@@ -21091,7 +20412,7 @@ const frak = Object.freeze({
   Z: 0x20CE
 });
 
-const bbb$1 = Object.freeze({
+const bbb = Object.freeze({
   C: 0x20BF, // blackboard bold
   H: 0x20C5,
   N: 0x20C7,
@@ -21148,7 +20469,7 @@ const offset = Object.freeze({
     "script-bold": ch =>            { return 0x1D48F },
     "fraktur": ch =>                { return frak[ch] || 0x1D4C3 },
     "fraktur-bold": ch =>           { return 0x1D52B },
-    "double-struck": ch =>          { return bbb$1[ch] || 0x1D4F7 },
+    "double-struck": ch =>          { return bbb[ch] || 0x1D4F7 },
     "sans-serif": ch =>             { return 0x1D55F },
     "sans-serif-bold": ch =>        { return 0x1D593 },
     "sans-serif-italic": ch =>      { return 0x1D5C7 },
@@ -26898,22 +26219,15 @@ const md2html = (md, inHtml = false) => {
 };
 
 /*
- * This file bundles together and exposes the calculation parts of Hurmet.
- * I use Rollup to create a UMD module from this code.
- * That way, one file can expose the same functionality to (1) the Hurmet.app web page,
- * (2) the REPL in the reference manual, (3) the script that transpiles
- * the Hurmet reference manual from Markdown to HTML, and (4) unit testing.
+ * This file bundles together and exposes the calculation parts of Hurmet for use
+ * as a CLI app. That is, for unit testing and for the CLI Markdown-to-HTML utility.
  *
- * Some of Hurmet’s exported functions are valuable only to the Hurmet.app web page.
- * If you wish to use Hurmet’s math parsing and/or calculation abilities,
- * the two functions you want are:
- *   parse(entry: string, decimalFormat?: string)
- *   calculate(entry: string, vars?: Object, draftMode?: boolean, decimalFormat?: string)
- *
- *   parse() returns a TeX string.
+ * It exposes three methods
+ *   parse() returns a TeX string and, if asked, an RPN string.
  *   calculate() returns either a TeX string or a string in Hurmet calculation syntax.
+ *   md2html() returns an HTML string.
  *
- * The parameters of those two function are:
+ * The parameters of the first two methods are:
  *   entry: The string that a user types into a calculation editing box.
  *   draftMode: Determines if result is in TeX or in Hurmet calculation syntax.
  *   decimalFormat: A string containing one of the options available in the Hurmet ● menu.
@@ -26925,18 +26239,9 @@ const md2html = (md, inHtml = false) => {
  */
 
 const hurmet = {
-  dt,
   parse,
   calculate,
-  autoCorrect,
-  prepareStatement,
-  improveQuantities,
-  draw,
-  evaluate,
-  md2ast,
-  md2html,
-  scanModule,
-  updateCalculations
+  md2html
 };
 
 export { hurmet };

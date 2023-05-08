@@ -3,11 +3,10 @@ import { insertOneHurmetVar } from "./insertOneHurmetVar"
 import { prepareStatement } from "./prepareStatement"
 import { improveQuantities } from "./improveQuantities"
 import { evaluate, evaluateDrawing } from "./evaluate"
-import { scanModule } from "./module"
 import { clone } from "./utils"
 
 // This function is not used by the Hurmet.app page.
-// It is provided for use by unit tests.
+// It is provided for use by unit tests and by the demo box in the manual page.
 // If you are looking for the app's main calculation module, try evaluate.js.
 export const calculate = (
   entry,
@@ -30,8 +29,4 @@ export const calculate = (
    : inDraftMode
    ? attrs.alt
    : attrs.tex
-}
-
-export const scan = entry => {
-  return scanModule(entry, "1,000,000.")
 }

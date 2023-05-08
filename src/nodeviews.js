@@ -1,6 +1,6 @@
 import { schema } from "./schema"
 import { openMathPrompt } from "./mathprompt"
-import { hurmet } from "./hurmet.js"
+import { updateCalculations } from "./updateCalculations"
 
 // nodeviews.js
 
@@ -26,7 +26,7 @@ export class CalcView {
       dom: this.dom,
       callback(attrs) {
         // eslint-disable-next-line no-undef
-        hurmet.updateCalculations(this.outerView, schema.nodes.calculation, false, attrs, pos)
+        updateCalculations(this.outerView, schema.nodes.calculation, false, attrs, pos)
       }
     })
   }

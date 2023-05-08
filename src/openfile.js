@@ -1,4 +1,5 @@
-import { hurmet } from "./hurmet"
+import { md2ast } from "./md2ast"
+import { updateCalculations } from "./updateCalculations"
 
 const handleContents = (view, schema, str, format) => {
   // Strip the BOM, if any, from the beginning of the result string.
@@ -9,7 +10,7 @@ const handleContents = (view, schema, str, format) => {
   if (format === "hurmet") {
     doc = JSON.parse(str)
   } else if (format === "markdown") {
-    const ast = hurmet.md2ast(str)
+    const ast = md2ast(str)
     if (typeof ast === "object" && ast.type && ast.type === "doc") {
       doc = ast
     } else {
@@ -49,7 +50,7 @@ const handleContents = (view, schema, str, format) => {
 
   // Update all the calculation nodes and refresh the document display.
   // eslint-disable-next-line no-undef
-  hurmet.updateCalculations(view, schema.nodes.calculation, true)
+  updateCalculations(view, schema.nodes.calculation, true)
 }
 
 async function getFile(view, schema, format) {

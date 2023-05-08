@@ -27,7 +27,8 @@ import { readFile } from "./openfile"
 import { saveAs } from "filesaver.js-npm"
 import { findPageBreaks, forToC, forPrint } from "./paginate.js"
 import { diff_match_patch } from "./diffMatchPatch"
-import { hurmet } from "./hurmet"
+import { md2ast } from "./md2ast"
+import { updateCalculations } from "./updateCalculations"
 
 // Menu icons that are not included in node-module menu.js
 const hurmetIcons = {
@@ -486,13 +487,13 @@ function pasteAsMarkdown() {
       navigator.clipboard
         .readText()
         .then((clipText) => {
-          const ast = hurmet.md2ast(clipText)
+          const ast = md2ast(clipText)
           const fragment = { type: "fragment", content: ast }
           const {$from, $to} = state.selection
           view.dispatch(
             view.state.tr.replaceWith($from.pos, $to.pos, schema.nodeFromJSON(fragment))
           )
-          hurmet.updateCalculations(view, schema.nodes.calculation, true)
+          updateCalculations(view, schema.nodes.calculation, true)
         })
     }
   })
@@ -873,7 +874,7 @@ function reCalcAll() {
     title: "Recalculate all",
     icon: hurmetIcons.recalc,
     run(state, _, view) {
-      hurmet.updateCalculations(view, schema.nodes.calculation, true)
+      updateCalculations(view, schema.nodes.calculation, true)
     }
   })
 }
@@ -883,7 +884,7 @@ function setDecimalFormat(label) {
     label: label,
     run(state, _, view) {
       state.doc.attrs.decimalFormat = label
-      hurmet.updateCalculations(view, schema.nodes.calculation, true)
+      updateCalculations(view, schema.nodes.calculation, true)
     }
   })
 }
