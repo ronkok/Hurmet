@@ -1,4 +1,4 @@
-import * as fs from 'fs';  // Node.js file system
+import { fs } from 'fs';  // Node.js file system
 import { hurmet } from './hurmet.js'
 
 // This file builds the Hurmet documentation.
