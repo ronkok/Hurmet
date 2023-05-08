@@ -1057,8 +1057,8 @@ export const md2ast = (md, inHtml = false) => {
   // Second, get all the link reference definitions
   const state = { inline: false, _defs: {}, prevCapture: "", remainder: "", inHtml }
   const defRegEx = /\n *\[([^\]\n]+)\]: *(?:¢(`+)([\s\S]*?[^`])\2(?!`)|<?([^\n>]*)>? *(?:\n\{([^\n}]*)\})?)(?=\n)/gm
-  const captures = [...md.matchAll(defRegEx)];
-  for (const capture of captures) {
+  let capture
+  while ((capture = defRegEx.exec(md)) !== null) {
     const def = capture[1].replace(/\s+/g, " ")
     const target = capture[4] || capture[3].trim();
     const directives = capture[5] || "";
