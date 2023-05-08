@@ -1,4 +1,4 @@
-import * as fs from 'fs';  // Node.js file system
+const fs = require('fs')  // Node.js file system
 
 // I edit ProseMirror to accomplish three things:
 // 1. Enable table classes.

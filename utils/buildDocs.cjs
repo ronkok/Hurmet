@@ -1,5 +1,5 @@
-import * as fs from 'fs';  // Node.js file system
-import { hurmet } from './hurmet.js'
+const fs = require('fs') // Node.js file system
+const hurmet = require('./hurmet.cjs')
 
 // This file builds the Hurmet documentation.
 // Start by translating the reference manual from Markdown to HTML.

@@ -22,7 +22,7 @@ import { md2html } from "./md2html"
  *         vars is updated with new variable data each time calculate() is called.
  */
 
-export const hurmet = {
+export default {
   parse,
   calculate,
   md2html
