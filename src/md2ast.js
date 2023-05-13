@@ -471,7 +471,7 @@ const parseRef = function(capture, state, refNode) {
       refNode.content[0].attrs.src = def.target
     } else if (refNode.type === "image") {
       if (def.target.indexOf("\n") > -1) {
-        refNode = { type: "calculation", content: "", attrs: { entry: def.target } }
+        refNode = { type: "calculation", attrs: { entry: def.target } }
       } else {
         refNode.attrs = def.attrs
         refNode.attrs.src = def.target
@@ -659,7 +659,7 @@ rules.set("displayTeX", {
   match: blockRegex(/^\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$ *\n/),
   parse: function(capture, state) {
     const tex = capture[1].trim()
-    return { type: "tex", content: "", attrs: { tex, displayMode: true } }
+    return { type: "tex", attrs: { tex, displayMode: true } }
   }
 })
 rules.set("newline", {
@@ -764,7 +764,7 @@ rules.set("tex", {
   match: inlineRegex(/^\$((?:[^\s][\S\s]*?)?(?:[^\s\\]))\$(?![0-9])/),
   parse: function(capture, state) {
     const tex = capture[1].trim()
-    return { type: "tex", content: "", attrs: { tex, displayMode: false } }
+    return { type: "tex", attrs: { tex, displayMode: false } }
   }
 });
 rules.set("calculation", {
@@ -776,10 +776,10 @@ rules.set("calculation", {
       if (!/^(?:function|draw\()/.test(entry) && entry.indexOf("``") === -1) {
         entry = entry.replace(/\n/g, " ")
       }
-      return { content: "", attrs: { entry } }
+      return { attrs: { entry } }
     } else {
       const entry = capture[3].trim()
-      return { content: "", attrs: { entry, displayMode: true } }
+      return { attrs: { entry, displayMode: true } }
     }
   }
 });

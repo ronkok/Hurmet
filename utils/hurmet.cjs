@@ -1128,11 +1128,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6379","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.6310","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.4960","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.3844","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -1141,10 +1141,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4860","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4702","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9828","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.6112","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9744","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.5722","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -1164,7 +1164,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.87378","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.87020","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1172,23 +1172,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.6434","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.5425","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["4.0159","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["90.0010","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["3.9695","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["89.5200","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["147.80","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["147.02","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1451.90","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1455.02","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1199,7 +1199,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["19.7073","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["19.2067","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -1229,7 +1229,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.1014","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0892","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -9147,7 +9147,7 @@ const parseRef = function(capture, state, refNode) {
       refNode.content[0].attrs.src = def.target;
     } else if (refNode.type === "image") {
       if (def.target.indexOf("\n") > -1) {
-        refNode = { type: "calculation", content: "", attrs: { entry: def.target } };
+        refNode = { type: "calculation", attrs: { entry: def.target } };
       } else {
         refNode.attrs = def.attrs;
         refNode.attrs.src = def.target;
@@ -9335,7 +9335,7 @@ rules.set("displayTeX", {
   match: blockRegex(/^\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$ *\n/),
   parse: function(capture, state) {
     const tex = capture[1].trim();
-    return { type: "tex", content: "", attrs: { tex, displayMode: true } }
+    return { type: "tex", attrs: { tex, displayMode: true } }
   }
 });
 rules.set("newline", {
@@ -9440,7 +9440,7 @@ rules.set("tex", {
   match: inlineRegex(/^\$((?:[^\s][\S\s]*?)?(?:[^\s\\]))\$(?![0-9])/),
   parse: function(capture, state) {
     const tex = capture[1].trim();
-    return { type: "tex", content: "", attrs: { tex, displayMode: false } }
+    return { type: "tex", attrs: { tex, displayMode: false } }
   }
 });
 rules.set("calculation", {
@@ -9452,10 +9452,10 @@ rules.set("calculation", {
       if (!/^(?:function|draw\()/.test(entry) && entry.indexOf("``") === -1) {
         entry = entry.replace(/\n/g, " ");
       }
-      return { content: "", attrs: { entry } }
+      return { attrs: { entry } }
     } else {
       const entry = capture[3].trim();
-      return { content: "", attrs: { entry, displayMode: true } }
+      return { attrs: { entry, displayMode: true } }
     }
   }
 });
@@ -12192,7 +12192,7 @@ const unitRegEx$1 = /('[^']+'|[°ΩÅK])$/;
 
 const numStr = "(-?(?:0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?)))";
 const nonNegNumStr = "(0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?))";
-const complexRegEx = new RegExp("^" + numStr + "(?: *([+-]) *(" + nonNegNumStr + ") *im|∠" + numStr + "(°)?)");
+const complexRegEx = new RegExp("^" + numStr + "(?: *([+-]) *" + nonNegNumStr + " *im|∠" + numStr + "(°)?)");
 // const complexRegEx = /^(number)(?: *([+-]) *(non-negative number) *im|∠(number)(°)?)/
 /* eslint-enable max-len */
 // Capturing groups:
@@ -26011,6 +26011,238 @@ var temml = {
   __defineMacro: defineMacro
 };
 
+/*
+ *  This module organizes one or two passes through the data structure of a Hurmet
+ *  document, calling for a calculation to be done on each Hurmet calculation cell.
+ *  If you are looking for the calculation itself, look at evaluate.js.
+ *
+ *  To be more precise, this module is called:
+ *    1. When an author submits one calculation cell, or
+ *    2. When a new Hurmet.app instance has opened (from index.js), or
+ *    3. When a user has opened a new file         (from openFile.js), or
+ *    4. When a recalculate-all has been called, possibly after a paste. (from menu.js)
+ *
+ *  Case 1 calculates the submitted cell and all dependent calculation cells.
+ *  Cases 2 thru 4 re-calculate the entire document. I.e., isCalcAll is set to true.
+ *  After calculation is complete, we send the results to ProseMirror to be
+ *  rendered in the document.
+ *
+ *   This module's main exported function is updateCalculations(…)
+ */
+
+/*
+* Note 1: state.selection shenanigans
+*
+* Before creating a ProseMirror (PM) transaction, this module first changes `state.selection`.
+* That is to say, I change the PM state without running that change thru a PM transaction.
+* PM docs advise against that, so I want to explain why I do so.
+*
+* For Undo purposes, a calculation should be atomic.
+* An Undo of a calculation should return the doc to the condition before the
+* calculation cell was edited. That will feel natural to people accustomed to Excel.
+* When a calculation is submitted, Hurmet creates a single PM transaction and into it,
+* Hurmet collects all the changes that the calculation makes to the original cell and
+* also all the changes to dependent cells.
+* When a user submits a calculation, the cell is open, so a PM Undo would ordinarily return
+* the state to a condition that once again has the cell open.
+*
+* But now consider a user who wants to Undo twice. The first Undo retreats to a condition in
+* which a cell is open. The user thinks a second Undo will change the PM document. But no!
+* Because the cell is open, the CodeMirror plain text editor is active and the Undo is captured
+* by CodeMirror. An Undo affects CodeMirror but not the outer document. It's very confusing!
+* So the Undo should return to a condition in which the cell is closed. That's why I change
+* the PM state.selection object _before_ I create the PM transaction. I don't want an Undo to
+* open that cell and so I don't want the Undo to finish with the selection point inside the
+* cell. Before creating the transaction, I move the selection point to just after the cell.
+*/
+
+const fetchRegEx = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′* *= *(?:fetch|import)\(/;
+const importRegEx = /^[^=]+= *import/;
+const fileErrorRegEx = /^Error while reading file. Status Code: \d*$/;
+const textRegEx = /\\text{[^}]+}/;
+
+const urlFromEntry = entry => {
+  // Get the URL from the entry input string.
+  const str = entry.replace(/^[^()]+\("?/, "");
+  return str.replace(/"?\).*$/, "").trim()
+};
+
+// Helper function.
+const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
+  const attrs = Object.create(null);
+  attrs.entry = entry;
+  attrs.name = entry.replace(/=.+$/, "").trim();
+  let str = parse(entry.replace(/\s*=\s*[$$£¥\u20A0-\u20CF]?(?:!{1,2}).*$/, ""), decimalFormat);
+  const url = urlFromEntry(entry);
+  if (/\.(?:tsv|txt)$/.test(url)) {
+    // Shorten the URL.
+    const fileName = url.replace(/.+\//, "");
+    const match = textRegEx.exec(str);
+    str = str.slice(0, match.index) + "\\text{" + addTextEscapes(fileName) + "})";
+  }
+  attrs.tex = str;
+  attrs.alt = entry;
+  if (text === "File not found." || fileErrorRegEx.test(text)) {
+    attrs.dtype = dt.ERROR;
+    attrs.tex += ` = \\red{\\text{${text}}}`;
+    attrs.alt = " = " + text;
+    attrs.value = null;
+    return attrs
+  }
+  const data = importRegEx.test(entry)
+    ? scanModule(text, decimalFormat)               // import code
+    : DataFrame.dataFrameFromTSV(text, hurmetVars);  // fetch data
+
+  // Append the data to attrs
+  attrs.value = data.value;
+  attrs.dtype = data.dtype;
+  attrs.unit = data.unit;
+  attrs.isFetch = true;
+  if (data.dtype === dt.MODULE && /^importedParameters *=/.test(entry)) {
+    // Assign to multiple variables, not one namespace.
+    let nameTex = "\\begin{matrix}";
+    let i = 0;
+    Object.entries(data.value).forEach(([key, value]) => {
+      hurmetVars[key] =  value;
+      nameTex += parse(value.name) + " & ";
+      i += 1;
+      if (i === 5) {
+        nameTex = nameTex.slice(0, -1) + "\\\\ ";
+        i = 0;
+      }
+    });
+    nameTex = nameTex.slice(0, (i === 0 ? -2 : -1)) + "\\end{matrix}";
+    attrs.tex = attrs.tex.replace("\\mathrm{importedParameters}", nameTex);
+  }
+  return attrs
+};
+
+const helpers = Object.freeze({
+  fetchRegEx,
+  textRegEx,
+  urlFromEntry,
+  processFetchedString
+});
+
+async function fetchTexts(urls) {
+  // Here we fetch remote data.
+  return Promise.all(
+    urls.map(url => fetch(url, {
+      method: "GET",
+      headers: { "Content-Type": "text/plain;charset=UTF-8" },
+      mode: "cors"
+    }))
+  ).then(fetchResponses => {
+    // The fetch promises have resolved. Now we extract their text.
+    return Promise.all(fetchResponses.map(r => {
+      if (r.status !== 200 && r.status !== 0) {
+        return r.status === 404
+          ? 'File not found.'
+          : 'Error while reading file. Status Code: ' + r.status
+      }
+      return r.text()
+    }))
+  }).then((texts) => {
+    // At this point, we have the text of each Hurmet fetch and import.
+    return texts
+  })
+}
+
+async function getRemoteTexts(urls) {
+  // This is necessary to return text, not just a promise of text.
+  return await fetchTexts(urls)
+}
+
+const getCalcNodes = (ast, calcNodes) => {
+  // Create an array of calculation nodes.
+  if (Array.isArray(ast)) {
+    for (let i = 0; i < ast.length; i++) {
+      getCalcNodes(ast[i], calcNodes);
+    }
+  } else if (ast && ast.type === "calculation") {
+    calcNodes.push(ast);
+  // eslint-disable-next-line no-prototype-builtins
+  } else if (ast.hasOwnProperty("content")) {
+    for (let j = 0; j < ast.content.length; j++) {
+      getCalcNodes(ast.content[j], calcNodes);
+    }
+  }
+};
+
+async function updateCalcs(doc) {
+  // This function is a lot like what updateCalculations.js does for the Hurmet web site.
+
+  // Create an object in which we'll hold variable values.
+  const hurmetVars = Object.create(null);
+  hurmetVars.format = { value: "h15" }; // default rounding format
+  const decimalFormat = doc.attrs ? doc.attrs.decimalFormat : '1,000,000.';
+
+  // Create an array of all the calculation nodes in the document
+  const calcNodes = [];
+  getCalcNodes(Array.isArray(doc) ? doc : doc.content, calcNodes);
+  if (calcNodes.length === 0) { return doc }
+
+  // Get an array of all the URLs called by fetch statements.
+  const urls = [];
+  const callers = [];
+  for (const node of calcNodes) {
+    const entry = node.attrs.entry;
+    if (helpers.fetchRegEx.test(entry)) {
+      urls.push(helpers.urlFromEntry(entry));
+      callers.push(node);
+    } else if (/^function /.test(entry)) {
+      node.attrs = prepareStatement(entry, decimalFormat);
+      insertOneHurmetVar(hurmetVars, node.attrs, decimalFormat);
+    }
+  }
+
+  if (urls.length > 0) {
+    // We have to fetch some remote data.
+    const texts = await getRemoteTexts(urls);
+    // Fetches are now complete. Load in the data.
+    for (let i = 0; i < texts.length; i++) {
+      const node = callers[i];
+      const entry = node.attrs.entry;
+      // When we modify a node, we are also mutating the container doc.
+      node.attrs = helpers.processFetchedString(entry, texts[i], hurmetVars, decimalFormat);
+      if (node.attrs.name) {
+        if (node.attrs.name === "importedParameters") {
+          Object.entries(node.attrs.value).forEach(([key, value]) => {
+            hurmetVars[key] =  value;
+          });
+        } else {
+          insertOneHurmetVar(hurmetVars, node.attrs, decimalFormat);
+        }
+      }
+    }
+  }
+
+  // Fetches, if any, are now complete and loaded into hurmetVars.
+  // Make a pass through the calculation nodes and calculate each result.
+  try {
+    for (const node of calcNodes) {
+      if (!helpers.fetchRegEx.test(node.attrs.entry)) {
+        const entry = node.attrs.entry;
+        let attrs = prepareStatement(entry, decimalFormat);
+        attrs.displayMode = node.attrs.displayMode;
+        const mustDraw = attrs.dtype && attrs.dtype === dt.DRAWING;
+        improveQuantities(attrs, hurmetVars);
+        if (attrs.rpn || mustDraw) {
+          attrs = attrs.rpn
+            ? evaluate(attrs, hurmetVars, decimalFormat)
+            : evaluateDrawing(attrs, hurmetVars, decimalFormat);
+        }
+        if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, decimalFormat); }
+        // When we modify a node, we are also mutating the container doc.
+        node.attrs = attrs;
+      }
+    }
+    return doc
+  } catch (err) {
+    console.log(err); // eslint-disable-line no-console
+  }
+}
+
 const sanitizeUrl = function(url) {
   if (url == null) {
     return null;
@@ -26086,14 +26318,82 @@ const tagName = {
   highlight: "mark"
 };
 
+const quoteRegEx = /"/g;
+const dataStr = str => {
+  if (str.indexOf("'") === -1) {
+    return `'${str}'`
+  } else if (str.indexOf('"') === -1) {
+    return `"${str}"`
+  } else {
+    return `"${str.replace(quoteRegEx, "&quot;")}"`
+  }
+};
+
+const writeSVG = dwg => {
+  let svg = '<svg xmlns="http://www.w3.org/2000/svg"';
+  Object.keys(dwg.attrs).forEach(key => {
+    svg += ` ${key}='${dwg.attrs[key]}'`;
+  });
+  svg += ">\n";
+  dwg.children.forEach(el => {
+    svg += `<${el.tag}`;
+    Object.keys(el.attrs).forEach(attr => {
+      if (attr !== "title") {
+        svg += ` ${attr}='${el.attrs[attr]}'`;
+      }
+    });
+    svg += ">\n";
+    if (el.tag === "text") {
+      el.children.forEach(child => {
+        svg += '<tspan';
+        if (child.attrs) {
+          Object.keys(child.attrs).forEach(mark => {
+            svg += ` ${mark}='child.attrs[mark]'`;
+          });
+        }
+        svg += `>${sanitizeText(child.text)}</tspan>`;
+      });
+    }
+    svg += `</${el.tag}>\n`;
+  });
+  svg += "</svg>";
+  return svg
+};
+
+const writeTOC = node => {
+  let toc = "<ul class='toc'>\n";
+  for (const item of node.attrs.body) {
+    let li = "  <li";
+    if (item[1] > 0) { li += ` style= 'margin-left: ${String(1.5 * item[1])}em'`; }
+    li += `><span>${item[0]}</span><span>0</span></li>\n`;
+    toc += li;
+  }
+  return toc + "</ul>\n"
+};
+
+const headingText = content => {
+  let str = "";
+  for (const node of content) {
+    if (node.type && node.type === "text") {
+      str += node.text;
+    }
+  }
+  return sanitizeText(str)
+};
+
+const headings = [];
+
 const nodes = {
   html(node) { return node.text },
-  heading(node)    {
-    const text = ast2html(node.content);
+  heading(node) {
+    const text = headingText(node.content);
     let tag = "h" + node.attrs.level;
     tag = htmlTag(tag, text);
-    // Add id so others can link to it.
-    tag = tag.slice(0, 3) + " id='" + text.toLowerCase().replace(/,/g, "").replace(/\s+/g, '-') + "'" + tag.slice(3);
+    if (!headings.includes(text)) {
+    // Add an id so others can link to it.
+      tag = tag.slice(0, 3) + " id='" + text.toLowerCase().replace(/,/g, "").replace(/\s+/g, '-') + "'" + tag.slice(3);
+      headings.push(text);
+    }
     return tag + "\n"
   },
   paragraph(node)  { return htmlTag("p", ast2html(node.content)) + "\n" },
@@ -26156,21 +26456,40 @@ const nodes = {
     return htmlTag("img", "", attributes, false) + "\n";
   },
   calculation(node) {
-    const tex = parse(node.attrs.entry);
-    return temml.renderToString(
-      tex,
-      { trust: true, displayMode: (node.attrs.displayMode || false) }
-    )
+    if (node.attrs.dtype && node.attrs.dtype === dt.DRAWING) {
+      return `<span class='hurmet-calc' data-entry=${dataStr(node.attrs.entry)}>` +
+        `${writeSVG(node.attrs.resultdisplay)}</span>`
+    } else {
+      const tex = node.attrs.tex ? node.attrs.tex : parse(node.attrs.entry);
+      const mathML = temml.renderToString(
+        tex,
+        { trust: true, displayMode: (node.attrs.displayMode || false) }
+      );
+      const tag = node.attrs.displayMode ? "p" : "span";
+      return `<${tag} class='hurmet-calc' data-entry=${dataStr(node.attrs.entry)}>` +
+              `${mathML}</${tag}>`
+    }
   },
   tex(node) {
-    return temml.renderToString(
+    const mathML = temml.renderToString(
       node.attrs.tex,
       { trust: true, displayMode: (node.attrs.displayMode || false) }
-    )
+    );
+    const tag = node.attrs.displayMode ? "p" : "span";
+    return `<${tag} class='hurmet-tex' data-entry=${dataStr(node.attrs.tex)}>` +
+            `${mathML}</${tag}>`
   },
-  indented(node) { return htmlTag("div", ast2html(node.content), { class: 'indented' }) },
-  centered(node) { return htmlTag("div", ast2html(node.content), { class: 'centered' }) },
-  comment(node)  { return htmlTag("aside", ast2html(node.content), { class: 'comment' }) },
+  indented(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'indented' }) + "\n"
+  },
+  centered(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'centered' }) + "\n"
+  },
+  header(node)   { return htmlTag("header", ast2html(node.content)) + "\n" },
+  toc(node)      { return writeTOC(node) },
+  comment(node)  {
+    return htmlTag("aside", ast2html(node.content), { class: 'comment' }) + "\n"
+  },
   dt(node)    {
     let text = ast2html(node.content);
     let tag = htmlTag("dt", text);
@@ -26202,6 +26521,26 @@ const nodes = {
   }
 };
 
+const getTOCitems = (ast, tocArray, start, end, node) => {
+  if (Array.isArray(ast)) {
+    for (let i = 0; i < ast.length; i++) {
+      getTOCitems(ast[i], tocArray, start, end, node);
+    }
+  } else if (ast && ast.type === "heading") {
+    const level = ast.attrs.level;
+    if (start <= level && level <= end) {
+      tocArray.push([headingText(ast.content), level - start]);
+    }
+  } else if (ast.type === "toc") {
+    node.push(ast);
+  // eslint-disable-next-line no-prototype-builtins
+  } else if (ast.hasOwnProperty("content")) {
+    for (let j = 0; j < ast.content.length; j++) {
+      getTOCitems(ast.content[j], tocArray, start, end, node);
+    }
+  }
+};
+
 const ast2html = ast => {
   // Return HTML.
   let html = "";
@@ -26209,16 +26548,36 @@ const ast2html = ast => {
     for (let i = 0; i < ast.length; i++) {
       html += ast2html(ast[i]);
     }
+  } else if (ast && ast.type === "doc") {
+    html += ast2html(ast.content);
   } else if (ast && ast.type !== "null") {
     html += nodes[ast.type](ast);
   }
   return html
 };
 
-const md2html = (md, inHtml = false) => {
-  const ast = md2ast(md, inHtml);
-  return ast2html(ast)
-};
+async function md2html(md, inHtml = false) {
+  // Convert the Markdown to an AST that matches the Hurmet internal data structure.
+  let ast = md2ast(md, inHtml);
+
+  const tocCapture = /\n *\n{\.toc start=(\d) end=(\d)}\n/.exec(md);
+  if (tocCapture) {
+    // Populate a Table of Contents
+    const start = Number(tocCapture[1]);
+    const end = Number(tocCapture[2]);
+    const tocArray = [];
+    const node = [];
+    getTOCitems(ast, tocArray, start, end, node);
+    node[0].attrs.body = tocArray;
+  }
+
+  // Perform calculations
+  ast = await updateCalcs(ast);
+
+  // Write the HTML
+  const html = ast2html(ast);
+  return html
+}
 
 /*
  * This file bundles together and exposes the calculation parts of Hurmet for use

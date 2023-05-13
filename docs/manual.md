@@ -801,7 +801,7 @@ Complex Number
     {indented}
     >  ¢`z_1 = 2 + 3 im`
 
-       ¢`z_2 = 4∠30°`
+       ¢` z_2 = 4∠30° `
 
        ¢`z = z_1 + z_2  = \blue((2 + 3 im) + ( 4∠30°)) = 5.46 + 5 bm`
 

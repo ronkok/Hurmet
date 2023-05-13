@@ -188,7 +188,7 @@ th:first-child .page-display { float: left; }
 
 .ProseMirror {
   word-wrap: break-word;
-  white-space: pre-wrap;
+  white-space: normal;
   -webkit-font-variant-ligatures: none;
   font-variant-ligatures: none;
 }

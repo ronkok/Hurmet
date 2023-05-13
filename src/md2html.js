@@ -1,6 +1,8 @@
 import { parse } from "./parser.js"
 import temml from "./temml.js"
 import { md2ast } from "./md2ast.js"
+import { updateCalcs } from "./updateCalcsForCLI.js"
+import { dt } from "./constants"
 
 const sanitizeUrl = function(url) {
   if (url == null) {
@@ -77,14 +79,82 @@ const tagName = {
   highlight: "mark"
 }
 
+const quoteRegEx = /"/g
+const dataStr = str => {
+  if (str.indexOf("'") === -1) {
+    return `'${str}'`
+  } else if (str.indexOf('"') === -1) {
+    return `"${str}"`
+  } else {
+    return `"${str.replace(quoteRegEx, "&quot;")}"`
+  }
+}
+
+const writeSVG = dwg => {
+  let svg = '<svg xmlns="http://www.w3.org/2000/svg"'
+  Object.keys(dwg.attrs).forEach(key => {
+    svg += ` ${key}='${dwg.attrs[key]}'`
+  })
+  svg += ">\n"
+  dwg.children.forEach(el => {
+    svg += `<${el.tag}`
+    Object.keys(el.attrs).forEach(attr => {
+      if (attr !== "title") {
+        svg += ` ${attr}='${el.attrs[attr]}'`
+      }
+    })
+    svg += ">\n"
+    if (el.tag === "text") {
+      el.children.forEach(child => {
+        svg += '<tspan'
+        if (child.attrs) {
+          Object.keys(child.attrs).forEach(mark => {
+            svg += ` ${mark}='child.attrs[mark]'`
+          })
+        }
+        svg += `>${sanitizeText(child.text)}</tspan>`
+      })
+    }
+    svg += `</${el.tag}>\n`
+  })
+  svg += "</svg>"
+  return svg
+}
+
+const writeTOC = node => {
+  let toc = "<ul class='toc'>\n"
+  for (const item of node.attrs.body) {
+    let li = "  <li"
+    if (item[1] > 0) { li += ` style= 'margin-left: ${String(1.5 * item[1])}em'` }
+    li += `><span>${item[0]}</span><span>0</span></li>\n`
+    toc += li
+  }
+  return toc + "</ul>\n"
+}
+
+const headingText = content => {
+  let str = ""
+  for (const node of content) {
+    if (node.type && node.type === "text") {
+      str += node.text
+    }
+  }
+  return sanitizeText(str)
+}
+
+const headings = [];
+
 const nodes = {
   html(node) { return node.text },
-  heading(node)    {
-    const text = ast2html(node.content)
+  heading(node) {
+    const text = headingText(node.content)
     let tag = "h" + node.attrs.level
     tag = htmlTag(tag, text)
-    // Add id so others can link to it.
-    tag = tag.slice(0, 3) + " id='" + text.toLowerCase().replace(/,/g, "").replace(/\s+/g, '-') + "'" + tag.slice(3)
+    if (!headings.includes(text)) {
+    // Add an id so others can link to it.
+      tag = tag.slice(0, 3) + " id='" + text.toLowerCase().replace(/,/g, "").replace(/\s+/g, '-') + "'" + tag.slice(3)
+      headings.push(text)
+    }
     return tag + "\n"
   },
   paragraph(node)  { return htmlTag("p", ast2html(node.content)) + "\n" },
@@ -147,21 +217,40 @@ const nodes = {
     return htmlTag("img", "", attributes, false) + "\n";
   },
   calculation(node) {
-    const tex = parse(node.attrs.entry)
-    return temml.renderToString(
-      tex,
-      { trust: true, displayMode: (node.attrs.displayMode || false) }
-    )
+    if (node.attrs.dtype && node.attrs.dtype === dt.DRAWING) {
+      return `<span class='hurmet-calc' data-entry=${dataStr(node.attrs.entry)}>` +
+        `${writeSVG(node.attrs.resultdisplay)}</span>`
+    } else {
+      const tex = node.attrs.tex ? node.attrs.tex : parse(node.attrs.entry)
+      const mathML = temml.renderToString(
+        tex,
+        { trust: true, displayMode: (node.attrs.displayMode || false) }
+      )
+      const tag = node.attrs.displayMode ? "p" : "span"
+      return `<${tag} class='hurmet-calc' data-entry=${dataStr(node.attrs.entry)}>` +
+              `${mathML}</${tag}>`
+    }
   },
   tex(node) {
-    return temml.renderToString(
+    const mathML = temml.renderToString(
       node.attrs.tex,
       { trust: true, displayMode: (node.attrs.displayMode || false) }
     )
+    const tag = node.attrs.displayMode ? "p" : "span"
+    return `<${tag} class='hurmet-tex' data-entry=${dataStr(node.attrs.tex)}>` +
+            `${mathML}</${tag}>`
   },
-  indented(node) { return htmlTag("div", ast2html(node.content), { class: 'indented' }) },
-  centered(node) { return htmlTag("div", ast2html(node.content), { class: 'centered' }) },
-  comment(node)  { return htmlTag("aside", ast2html(node.content), { class: 'comment' }) },
+  indented(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'indented' }) + "\n"
+  },
+  centered(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'centered' }) + "\n"
+  },
+  header(node)   { return htmlTag("header", ast2html(node.content)) + "\n" },
+  toc(node)      { return writeTOC(node) },
+  comment(node)  {
+    return htmlTag("aside", ast2html(node.content), { class: 'comment' }) + "\n"
+  },
   dt(node)    {
     let text = ast2html(node.content)
     let tag = htmlTag("dt", text)
@@ -193,6 +282,26 @@ const nodes = {
   }
 }
 
+const getTOCitems = (ast, tocArray, start, end, node) => {
+  if (Array.isArray(ast)) {
+    for (let i = 0; i < ast.length; i++) {
+      getTOCitems(ast[i], tocArray, start, end, node)
+    }
+  } else if (ast && ast.type === "heading") {
+    const level = ast.attrs.level
+    if (start <= level && level <= end) {
+      tocArray.push([headingText(ast.content), level - start])
+    }
+  } else if (ast.type === "toc") {
+    node.push(ast)
+  // eslint-disable-next-line no-prototype-builtins
+  } else if (ast.hasOwnProperty("content")) {
+    for (let j = 0; j < ast.content.length; j++) {
+      getTOCitems(ast.content[j], tocArray, start, end, node)
+    }
+  }
+}
+
 const ast2html = ast => {
   // Return HTML.
   let html = ""
@@ -200,13 +309,33 @@ const ast2html = ast => {
     for (let i = 0; i < ast.length; i++) {
       html += ast2html(ast[i])
     }
+  } else if (ast && ast.type === "doc") {
+    html += ast2html(ast.content)
   } else if (ast && ast.type !== "null") {
     html += nodes[ast.type](ast)
   }
   return html
 }
 
-export const md2html = (md, inHtml = false) => {
-  const ast = md2ast(md, inHtml)
-  return ast2html(ast)
+export async function md2html(md, inHtml = false) {
+  // Convert the Markdown to an AST that matches the Hurmet internal data structure.
+  let ast = md2ast(md, inHtml)
+
+  const tocCapture = /\n *\n{\.toc start=(\d) end=(\d)}\n/.exec(md)
+  if (tocCapture) {
+    // Populate a Table of Contents
+    const start = Number(tocCapture[1])
+    const end = Number(tocCapture[2])
+    const tocArray = [];
+    const node = [];
+    getTOCitems(ast, tocArray, start, end, node)
+    node[0].attrs.body = tocArray
+  }
+
+  // Perform calculations
+  ast = await updateCalcs(ast)
+
+  // Write the HTML
+  const html = ast2html(ast)
+  return html
 }

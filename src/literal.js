@@ -13,7 +13,7 @@ const unitRegEx = /('[^']+'|[°ΩÅK])$/
 
 const numStr = "(-?(?:0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?)))"
 const nonNegNumStr = "(0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?))"
-const complexRegEx = new RegExp("^" + numStr + "(?: *([+-]) *(" + nonNegNumStr + ") *im|∠" + numStr + "(°)?)")
+const complexRegEx = new RegExp("^" + numStr + "(?: *([+-]) *" + nonNegNumStr + " *im|∠" + numStr + "(°)?)")
 // const complexRegEx = /^(number)(?: *([+-]) *(non-negative number) *im|∠(number)(°)?)/
 /* eslint-enable max-len */
 // Capturing groups:

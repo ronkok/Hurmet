@@ -85,7 +85,7 @@ const fromString = str => {
       ? BigInt(parts[7]) - BigInt(decimalFrac.length)  // scientific notation.
       : parts[8]
       ? BigInt(-2) - BigInt(decimalFrac.length)  // percentage.
-      : BigInt(0) - BigInt(decimalFrac.length)
+      : BigInt(0) - BigInt(decimalFrac.length);
     r = (exp < 0)
       ? [numerator, BigInt(10) ** -exp]
       : normalize([numerator * BigInt(10) ** exp, iOne])
