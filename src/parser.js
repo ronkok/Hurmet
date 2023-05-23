@@ -18,13 +18,13 @@ const builtInFunctions = [
   "atand", "atanh", "binomial", "ceil", "conj", "cos", "cosd", "cosh", "cosh", "cot",
   "cotd", "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp", "factorial", "fetch",
   "floor", "format", "gamma", "gcd", "hcat", "hypot", "imag", "isnan", "length", "lerp", "ln",
-  "log", "log10", "log2", "lfact", "lgamma", "logn", "matrix2table", "mod", "real",
+  "log", "log10", "log2", "lfact", "lgamma", "logn", "mod", "real",
   "rem", "rms", "round", "roundSig", "roundn", "sec", "secd", "sech", "sech", "sign", "sin",
   "sind", "sinh", "startSvg", "string", "tan", "tand", "tanh", "tanh", "trace", "transpose",
   "vcat", "zeros", "Γ"
 ]
 
-const builtInReducerFunctions = ["accumulate", "dataframe",
+const builtInReducerFunctions = ["accumulate", "dataframe", "matrix2table",
   "max", "mean", "median", "min", "product", "rand", "range", "stddev", "sum", "variance"
 ]
 

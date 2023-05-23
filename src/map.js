@@ -1,9 +1,8 @@
-import { dt, allZeros } from "./constants"
+import { dt } from "./constants"
 import { Rnl } from "./rational"
-import { mapMap, clone, unitTeXFromString } from "./utils"
-import { format } from "./format"
+import { clone } from "./utils"
 import { errorOprnd } from "./error"
-import { formatColumnName } from "./dataframe"
+import { identifyRange } from "./dataframe"
 
 /*
  * This file deals with Hurmet maps, which are similar to hash maps.
@@ -51,88 +50,77 @@ const append = (o1, o2, shape1, shape2) => {
   return map
 }
 
-const convertFromBaseUnits = (map, gauge, factor) => {
-  map = mapMap( map, value =>  Rnl.divide(value, factor))
+const convertFromBaseUnits = (data, gauge, factor) => {
+  data = data.map(column => Rnl.isRational(column[0])
+    ? column.map(e => Rnl.divide(e, factor))
+    : column
+  )
   if (!Rnl.isZero(gauge)) {
-    map = mapMap( map, value => Rnl.subtract(value, gauge))
+    data = data.map(column => Rnl.isRational(column[0])
+      ? column.map(e => Rnl.subtract(e, gauge))
+      : column
+    )
   }
-  return  map
+  return data
 }
 
-const convertToBaseUnits = (map, gauge, factor) => {
+const convertToBaseUnits = (data, gauge, factor) => {
   if (!Rnl.isZero(gauge)) {
-    map = mapMap(map, value => Rnl.add(value, gauge))
+    data = data.map(column => Rnl.isRational(column[0])
+      ? column.map(e => Rnl.add(e, gauge))
+      : column
+    )
   }
-  return mapMap(map, value => Rnl.multiply(value, factor))
+  data = data.map(column => Rnl.isRational(column[0])
+    ? column.map(e => Rnl.multiply(e, factor))
+    : column
+  )
+  return data
 }
 
-const display = (result, formatSpec, decimalFormat, omitHeading = false) => {
-  const mapValue = result.value.plain ? result.value.plain : result.value
-  let topRow = ""
-  let botRow = ""
-  for (const [key, value] of mapValue.entries()) {
-    topRow += formatColumnName(key) + " & "
-    botRow += format(value, formatSpec, decimalFormat) + " & "
-  }
-  topRow = topRow.slice(0, -3)
-  botRow = botRow.slice(0, -3)
-  let str = "\\begin{array}{c}"
-  if (!omitHeading) { str += topRow + " \\\\ \\hline " }
-  str += botRow + "\\end{array}"
-  if (result.unit && result.unit.name) {
-    str += "\\;" + unitTeXFromString(result.unit.name)
-  }
-  return str
-}
+const range = (map, keys) => {
+  let unit = clone(map.unit)
+  const [rowList, columnList, iStart, iEnd] = identifyRange(map, keys)
+  if (rowList.length === 0 && iStart === iEnd && columnList.length === 1) {
+    // Return one value.
+    const value = map.value.data[columnList[0]][iStart];
+    return { value, unit, dtype: map.dtype - dt.MAP }
 
-const displayAlt = (result, formatSpec, decimalFormat, omitHeading = false) => {
-  const mapValue = result.value.plain ? result.value.plain : result.value
-  let topRow = ""
-  let botRow = ""
-  for (const [key, value] of mapValue.entries()) {
-    topRow += key + '\t'
-    botRow += format(value, formatSpec, decimalFormat) + "\t"
-  }
-  topRow = topRow.slice(0, -1)
-  botRow = botRow.slice(0, -1)
-  let str = "``"
-  if (!omitHeading) { str += topRow + "\n" }
-  str += botRow + "``"
-  if (result.unit && result.unit.name) {
-    str = `${str} '${result.unit.name}'`
-  }
-  return str
-}
+  } else if (columnList.length === 1) {
+    // Return data from one column, in a column vector or a quantity
+    const value = map.value.data[columnList[0]].slice(iStart, iEnd + 1)
+    const dtype = columnList[0] === 0
+      ? dt.COLUMNVECTOR + (typeof value[0] === "string" ? dt.STRING : map.dtype - dt.MAP)
+      : map.dtype - dt.MAP + dt.COLUMNVECTOR
+    if (columnList[0] === -1) { unit = null }
+    return { value, unit, dtype }
 
-const singleValueFromMap = (map, key, isNumeric, unitAware) => {
-  if (!map.value.has(key)) { return errorOprnd("BAD_KEY", key) }
-  const value = clone(map.value.get(key))
-  if (!isNumeric) {
-    return { value, unit: map.unit, dtype: map.dtype - dt.MAP }
-  } else if (unitAware) {
-    return { value, unit: { expos: map.unit.expos }, dtype: map.dtype - dt.MAP }
   } else {
-    return { value, unit: allZeros, dtype: map.dtype - dt.MAP }
-  }
-}
-
-const valueFromMap = (map, keys, unitAware) => {
-  // Return the value of a map's key/value pair.
-  // `keys` is an array.
-  for (let j = 0; j < keys.length; j++) {
-    if (keys[j].dtype === dt.RATIONAL) { return errorOprnd("NUM_KEY") }
-    keys[j] = keys[j].value
-  }
-  if (keys.length === 1) {
-    const isNumeric = (map.dtype & dt.RATIONAL)
-    const treatAsUnitAware = keys.length > 1 || unitAware
-    return singleValueFromMap(map, keys[0], isNumeric, treatAsUnitAware)
-  } else {
-    const value = new Map()
-    for (let i = 0; i < keys.length; i++) {
-      value.set(keys[i], map.value.get(keys[i]))
+    // Return a map.
+    const headings = []
+    const data = []
+    const columnMap = Object.create(null)
+    const rowMap = rowList.length === 0 ? false : Object.create(null)
+    for (let j = 0; j < columnList.length; j++) {
+      headings.push(map.value.headings[columnList[j]])
+      columnMap[map.value.headings[j]] = j
+      if (rowList.length > 0) {
+        const elements = []
+        for (let i = 0; i < rowList.length; i++) {
+          const rowName = rowList[i]
+          elements.push(map.value.data[columnList[j]][map.value.rowMap[rowName]])
+          rowMap[rowName] = i
+        }
+        data.push(elements)
+      } else {
+        data.push(map.value.data[columnList[j]].slice(iStart, iEnd + 1))
+      }
     }
-    return { value, unit: map.unit, dtype: map.dtype }
+    return {
+      value: { data, headings, columnMap, rowMap },
+      unit,
+      dtype: map.dtype
+    }
   }
 }
 
@@ -140,7 +128,5 @@ export const map = Object.freeze({
   append,
   convertFromBaseUnits,
   convertToBaseUnits,
-  display,
-  displayAlt,
-  valueFromMap
+  range
 })

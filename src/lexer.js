@@ -2,8 +2,6 @@
 import { Rnl } from "./rational"
 import { formattedDecimal, texFromMixedFraction } from "./format"
 import { DataFrame } from "./dataframe"
-import { map } from "./map"
-import { dt } from "./constants"
 
 /*
  * lexer.js
@@ -733,11 +731,7 @@ export const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
       tex = DataFrame.quickDisplay(st)
     } else {
       const dataStructure = DataFrame.dataFrameFromTSV(st, {})
-      if (dataStructure.dtype === dt.DATAFRAME) {
-        tex = DataFrame.display(dataStructure.value, "h3", decimalFormat)
-      } else {
-        tex = map.display(dataStructure, "h3", decimalFormat)
-      }
+      tex = DataFrame.display(dataStructure.value, "h3", decimalFormat)
     }
     return ["``" + inputStr + "``", tex, tt.DATAFRAME, ""]
   }

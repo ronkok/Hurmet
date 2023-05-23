@@ -397,17 +397,6 @@ const clone = obj => {
   throw new Error("Unable to clone obj! Its type isn't supported.")
 };
 
-
-// A map function for Maps
-const mapMap = (map, fn) => {
-  const newMap = new Map();
-  for (const [key, value] of map.entries()) {
-    newMap.set(key, fn(value));
-  }
-  return newMap
-};
-
-
 // A function to return an array containing all matches to a RegEx pattern.
 const arrayOfRegExMatches = (regex, text) => {
   if (regex.constructor !== RegExp) { throw new Error('not RegExp') }
@@ -1424,11 +1413,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6310","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.6231","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.3844","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.3554","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -1437,10 +1426,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4702","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4575","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9744","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.5722","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9738","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.5766","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -1460,7 +1449,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.87020","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.86840","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1468,23 +1457,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.5425","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.4494","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["3.9695","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["89.5200","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["3.9338","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["89.4215","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["147.02","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["149.55","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1455.02","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1432.76","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1495,7 +1484,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["19.2067","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["19.0850","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -1525,7 +1514,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.0892","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0808","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -2677,6 +2666,22 @@ const convertToBaseUnits = (oprnd, gauge, factor) => {
   return Object.freeze(conversion)
 };
 
+const elementDisplay = (value, dtype, formatSpec, decimalFormat, isAlt = false) => {
+  let display = value === undefined
+    ? ""
+    : (dtype & dt.RATIONAL)
+    ? format(value, formatSpec, decimalFormat)
+    : (dtype & dt.COMPLEX)
+    ? Cpx.display(value, formatSpec, decimalFormat)[0]
+    : (dtype & dt.BOOLEAN) || (dtype & dt.STRING)
+    ? (isAlt ? value : "\\text{" + value + "}")
+    : value;
+  if (isAlt && ((dtype & dt.RATIONAL) || (dtype & dt.COMPLEX))) {
+    display = display.replace(/{,}/g, ",");
+  }
+  return display
+};
+
 const display$1 = (m, formatSpec, decimalFormat) => {
   let str = "\\begin";
   if (m.dtype & dt.MATRIX) {
@@ -2685,7 +2690,7 @@ const display$1 = (m, formatSpec, decimalFormat) => {
     const numCols = m.value[0].length;
     for (let i = 0; i < numRows; i++) {
       for (let j = 0; j < numCols; j++) {
-        str += format(m.value[i][j], formatSpec, decimalFormat) + " &";
+        str += elementDisplay(m.value[i][j], m.dtype, formatSpec, decimalFormat) + " &";
       }
       str = str.slice(0, -1) + " \\\\ ";
     }
@@ -2697,22 +2702,14 @@ const display$1 = (m, formatSpec, decimalFormat) => {
     if (m.value.plain) {
       const numArgs = m.value.plain.length;
       for (let i = 0; i < numArgs; i++) {
-        str += format(m.value.plain[i], formatSpec, decimalFormat) +
-          ((i < numArgs - 1) ? argSep : "");
+        str += elementDisplay(m.value.plain[i], m.dtype, formatSpec, decimalFormat) +
+               ((i < numArgs - 1) ? argSep : "");
       }
     } else {
       const numArgs = m.value.length;
       for (let i = 0; i < numArgs; i++) {
-        const elementDisplay = m.value[i] === undefined
-          ? ""
-          : (m.dtype & dt.RATIONAL)
-          ? format(m.value[i], formatSpec, decimalFormat)
-          : (m.dtype & dt.COMPLEX)
-          ? Cpx.display(m.value[i], formatSpec, decimalFormat)[0]
-          : (m.dtype & dt.BOOLEAN) || (m.dtype & dt.STRING)
-          ? "\\text{" + m.value[i] + "}"
-          : m.value[i];
-        str += elementDisplay + ((i < numArgs - 1) ? argSep : "");
+        str += elementDisplay(m.value[i], m.dtype, formatSpec, decimalFormat) +
+               ((i < numArgs - 1) ? argSep : "");
       }
     }
     str += "\\end{bmatrix}";
@@ -2728,7 +2725,7 @@ const displayAlt = (m, formatSpec, decimalFormat) => {
     const numCols = m.value[0].length;
     for (let i = 0; i < numRows; i++) {
       for (let j = 0; j < numCols; j++) {
-        str += format(m.value[i][j], formatSpec, decimalFormat).replace(/{,}/g, ",") + ", ";
+        str += elementDisplay(m.value[i][j], m.dtype, formatSpec, decimalFormat, true) + ", ";
       }
       str = str.slice(0, -2) + "; ";
     }
@@ -2740,79 +2737,20 @@ const displayAlt = (m, formatSpec, decimalFormat) => {
     if (m.value.plain) {
       const numArgs = m.value.plain.length;
       for (let i = 0; i < numArgs; i++) {
-        str += format(m.value.plain[i], formatSpec, decimalFormat).replace(/{,}/g, ",") +
+        str += elementDisplay(m.value.plain[i], m.dtype, formatSpec, decimalFormat, true) +
            ((i < numArgs - 1) ? argSep : "");
       }
     } else {
       const numArgs = m.value.length;
       for (let i = 0; i < numArgs; i++) {
-        const elementDisplay = m.value[i] === undefined
-          ? ""
-          : (m.dtype & dt.RATIONAL)
-          ? format(m.value[i], formatSpec, decimalFormat).replace(/{,}/g, ",")
-          : (m.dtype & dt.COMPLEX)
-          ? Cpx.display(m.value[i], formatSpec, decimalFormat)[1].replace(/{,}/g, ",")
-          : m.value[i];
-        str += elementDisplay + ((i < numArgs - 1) ? argSep : "");
+        str += elementDisplay(m.value[i], m.dtype, formatSpec, decimalFormat, true) +
+               ((i < numArgs - 1) ? argSep : "");
       }
     }
     str += "]";
   }
   return str
 };
-
-const displayMapOfVectors = (value, formatSpec, decimalFormat) => {
-  // Display a map full of vectors
-  let str = "\\begin{Bmatrix}";
-  Object.keys(value).forEach(key => {
-    const vector = value[key];
-    str += "\\text{" + key + "}: \\begin{bmatrix}";
-    const numArgs = vector.plain.length;
-    if (vector.plain) {
-      for (let i = 0; i < numArgs; i++) {
-        str += format(vector.plain[i], formatSpec, decimalFormat) +
-          ((i < numArgs - 1) ? ", " : "");
-      }
-    } else {
-      for (let i = 0; i < numArgs; i++) {
-        const elementDisplay = Rnl.isRational(vector[i])
-          ? format(vector[i], formatSpec, decimalFormat)
-          : (typeof vector[i] === "boolean") || (typeof vector[i] === "string")
-          ? "\\text{" + vector[i] + "}"
-          : vector[i];
-        str += elementDisplay + ((i < numArgs - 1) ? " & " : "");
-      }
-    }
-    str += "\\end{bmatrix} \\\\";
-  });
-  str = str.slice(0, -2) + "\\end{Bmatrix}";
-  return str
-};
-
-const displayAltMapOfVectors = (value, formatSpec, decimalFormat) => {
-  let str = "{";
-  Object.keys(value).forEach(key => {
-    const vector = value[key];
-    str += key + ": [";
-    const numArgs = vector.plain.length;
-    if (vector.plain) {
-      for (let i = 0; i < numArgs; i++) {
-        str += format(vector.plain[i], formatSpec, decimalFormat) +
-        ((i < numArgs - 1) ? ", " : "").replace(/{,}/g, ",") + " ";
-      }
-    } else {
-      for (let i = 0; i < numArgs; i++) {
-        const elementDisplay = Rnl.isRational(vector[i])
-          ? format(vector[i], formatSpec, decimalFormat).replace(/{,}/g, ",") + " "
-          : String(vector[i]) + "}";
-        str += elementDisplay + ((i < numArgs - 1) ? " " : "");
-      }
-    }
-    str += "];";
-  });
-  return str.slice(0, -1) + "}"
-};
-
 
 const identity = (num, mutable) => {
   const n = Rnl.isRational(num) ? Rnl.toNumber(num) : num;
@@ -3146,8 +3084,7 @@ const Matrix = Object.freeze({
   convertToBaseUnits,
   display: display$1,
   displayAlt,
-  displayMapOfVectors,
-  displayAltMapOfVectors,
+  elementDisplay,
   identity,
   invert,
   multResultType,
@@ -3188,12 +3125,13 @@ const datumFromValue = (value, dtype) => {
     : value
 };
 
-const range = (df, args, vars, unitAware) => {
+const identifyRange = (df, args) => {
+  // A helper function for range(). Also used by map.range()
+
   let iStart;
   let iEnd;
   const rowList = [];
   let columnList = [];
-  let unit = Object.create(null);
 
   // Find what must be returned. I.e. populate rowList and columnList
   if (df.value.data[0].length === 1) {
@@ -3214,9 +3152,10 @@ const range = (df, args, vars, unitAware) => {
       }
     }
   } else if (args.length === 1 && args[0].dtype === dt.RATIONAL) {
-    iStart = Rnl.toNumber(args[0].value) - 1;
-    iEnd = iStart;
-    columnList = columnListFromRange(0, df.value.data.length - 1);
+    // Return a column vector
+    iStart = 0;
+    iEnd = df.value.data[0].length - 1;
+    columnList.push(Rnl.toNumber(args[0].value) - 1);
   } else if (args.length === 1 && args[0].dtype === dt.RANGE) {
     iStart = Rnl.toNumber(args[0].value[0]) - 1;
     iEnd = Rnl.toNumber(args[0].value[1]) - 1;
@@ -3265,7 +3204,12 @@ const range = (df, args, vars, unitAware) => {
       columnList.push(df.value.columnMap[arg.value]);
     }
   }
+  return [rowList, columnList, iStart, iEnd]
+};
 
+const range = (df, args, vars, unitAware) => {
+  let unit = Object.create(null);
+  const [rowList, columnList, iStart, iEnd] = identifyRange(df, args);
   if (rowList.length === 0 && iStart === iEnd && columnList.length === 1) {
     // Return one value.
     let dtype = df.value.dtype[columnList[0]];
@@ -3330,12 +3274,12 @@ const range = (df, args, vars, unitAware) => {
     }
     return {
       value: {
-        data: data,
-        headings: headings,
-        columnMap: columnMap,
-        rowMap: false,
-        units: units,
-        dtype: dtype
+        data,
+        headings,
+        columnMap,
+        rowMap,
+        units,
+        dtype
       },
       unit: clone(unitMap),
       dtype: dt.DATAFRAME
@@ -3346,16 +3290,17 @@ const range = (df, args, vars, unitAware) => {
 // const numberRegEx = new RegExp(Rnl.numberPattern + "$")
 const numberRegEx$1 = new RegExp("^(?:=|" + Rnl.numberPattern.slice(1) + "$)");
 const mixedFractionRegEx = /^-?(?:[0-9]+(?: [0-9]+\/[0-9]+))$/;
+const escRegEx = /^\\#/;
 
 const dataFrameFromTSV = (str, vars) => {
   // Load a TSV string into a data frame.
   // Data frames are loaded column-wise. The subordinate data structures are:
-  const data = [];    // where the main data lives, not including column names or units.
-  const headings = [];                   // An array containing the column names
+  let data = [];   // where the main data lives, not including column names or units.
+  const headings = [];                  // An array containing the column names
   const columnMap = Object.create(null); // map of column names to column index numbers
   let rowMap =  false;                   // ditto for rows.
-  const units = [];                      // array of unit names, one for each column
-  const dtype = [];                      // each column's Hurmet operand type
+  const units = [];                     // array of unit names, one for each column
+  const dtype = [];                     // each column's Hurmet operand type
   const unitMap = Object.create(null);   // map from unit names to unit data
   let gotUnits = false;
 
@@ -3404,10 +3349,14 @@ const dataFrameFromTSV = (str, vars) => {
     if (row === 3 && col === 0) { checkForUnitRow(); }
 
     if (row === 0) {
-      if (col === 0 && (datum.length > 0 && datum.charAt(0) === "#")) {
-        // Create a rowMap. The first datum in each row is a key to the row.
-        rowMap = Object.create(null);
-        datum = datum.slice(1);
+      if (col === 0) {
+        if (datum.length > 0 && datum.charAt(0) === "#") {
+          // Create a rowMap. The first datum in each row is a key to the row.
+          rowMap = Object.create(null);
+          datum = datum.slice(1);
+        } else if (escRegEx.test(datum)) {
+          datum = datum.slice(1);
+        }
       }
       headings.push(datum);
       columnMap[datum] = col;
@@ -3460,24 +3409,26 @@ const dataFrameFromTSV = (str, vars) => {
 
   // Check if this data qualifies as a Hurmet Map.
   let isMap = false;
-  if (data[0].length === 1 && Object.keys(unitMap).length === 0) {
+  let iStart = 0;
+  if (Object.keys(unitMap).length === 0) {
     isMap = true;
-    for (let i = 1; i < dtype.length; i++) {
-      if (dtype[i] !== dtype[0]) { isMap = false; break }
+    iStart = (rowMap) ? 1 : 0;
+    for (let i = iStart + 1; i < dtype.length; i++) {
+      if (dtype[i] !== dtype[iStart]) { isMap = false; break }
     }
   }
 
   if (isMap) {
-    const value = new Map();
-    const keys = Object.keys(columnMap);
-    if (str.charAt(0) === "#") { keys[0] = "#" + keys[0]; }
-    for (let i = 0; i < keys.length; i++) {
-      value.set(keys[i], valueFromDatum(data[i][0]));
+    if (dtype[iStart] === dt.RATIONAL) {
+      data = data.map((col, i) => dtype[i] === dt.RATIONAL
+        ? col.map(el => Rnl.fromString(el))
+        : col
+      );
     }
     return {
-      value,
-      unit: (dtype[0] === dt.RATIONAL ? allZeros : null),
-      dtype: dt.MAP + dtype[0]
+      value: { data, headings, columnMap, rowMap },
+      unit: (dtype[0] === dt.RATIONAL ? { expos: allZeros } : null),
+      dtype: dt.MAP + dtype[iStart]
     }
   } else {
     return {
@@ -3540,40 +3491,37 @@ const dataFrameFromVectors = (vectors, vars) => {
   }
 };
 
-const matrix2table = (matrix, rowNames, columnNames, vars) => {
+const matrix2table = (matrix, headings, rowHeadings) => {
   // Use the contents of a matrix to create a dataframe.
-  const data = [];
-  for (let i = 0; i <= matrix.value[0].length; i++) { data.push([]); }
-  const headings = columnNames.value;
-  headings.unshift("");
+  if (rowHeadings.length > 0) { headings = [""].concat(headings); }
   const columnMap = Object.create(null);
-  for (let i = 1; i < columnNames.value[0].length; i++) { columnMap[headings[i]] = i; }
-  const colDtype = dt.RATIONAL + (matrix.unit ? dt.QUANTITY : 0);
-  const dtype = Array(matrix.value[0].length).fill(colDtype);
-  dtype.unshift(null);
-  let units = [];
-  const unitMap = Object.create(null);
-  if (matrix.unit.name) {
-    units = Array(matrix.value[0].length).fill(matrix.unit.name);
-    units.unshift("");
-    unitMap[matrix.unit.name] = unitFromUnitName(matrix.unit.name, vars);
+  for (let i = 0; i < headings.length; i++) {
+    columnMap[headings[i]] = i;
   }
-
-  const rowMap = Object.create(null);
-  data[0] = rowNames.value;
-  const formatSpec = vars.format ? vars.format.value : "h15";
-  for (let i = 0; i < rowNames.value.length; i++) { rowMap[data[0][i]] = i; }
-  for (let i = 0; i < matrix.value.length; i++) {
-    for (let j = 0; j < matrix.value[0].length; j++) {
-      const value = matrix.value[i][j];
-      data[j + 1].push(format(value, formatSpec, "1000000."));
+  let rowMap = false;
+  if (rowHeadings.length > 0) {
+    rowMap = Object.create(null);
+    for (let i = 0; i < rowHeadings.length; i++) {
+      rowMap[rowHeadings[i]] = i;
     }
   }
-
+  const data = new Array(headings.length);
+  let delta = 0;
+  if (rowHeadings.length > 0) {
+    data[0] = rowHeadings;
+    delta = 1;
+  }
+  for (let j = 0; j < matrix.value[0].length; j++) {
+    const k = j + delta;
+    data[k] = [];
+    for (let i = 0; i < matrix.value.length; i++) {
+      data[k].push(matrix.value[i][j]);
+    }
+  }
   return {
-    value: { data, headings, columnMap, rowMap, units, dtype },
-    unit: unitMap,
-    dtype: dt.DATAFRAME
+    value: { data, headings, columnMap, rowMap },
+    unit: matrix.unit,
+    dtype: matrix.dtype - dt.MATRIX + dt.MAP
   }
 };
 
@@ -3705,6 +3653,7 @@ const formatColumnName = str => {
 };
 
 const isNotEmpty = row => {
+  if (!row) { return false }
   for (let i = 0; i < row.length; i++) {
     if (row[i] !== "" && row[i] !== null) { return true }
   }
@@ -3716,8 +3665,9 @@ const getNumInfo =  df => {
   const numCols = df.data.length;
   const colInfo = new Array(numCols);
   const cellInfo = new Array(numCols);
+  const DFisRational = !df.dtype && Rnl.isRational(df.data[0][0]);
   for (let j = 0; j < numCols; j++) {
-    if (df.dtype[j] & dt.RATIONAL) {
+    if (DFisRational || (df.dtype && df.dtype[j] & dt.RATIONAL)) {
       colInfo[j] = { hasAlignChar: false, maxLenAfterAlignChar: 0 };
       cellInfo[j] = [];
       for (let i = 0; i < df.data[0].length; i++) {
@@ -3760,6 +3710,7 @@ const display$2 = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHead
   const numCols = df.data.length;
   const writeRowNums = numRows > 5 && !df.rowMap;
   const numColsInHeading = numCols + (writeRowNums ? 1 : 0);
+  const isMap = !df.dtype;
   let str = "\\begin{array}{";
   str += df.rowMap
     ? "l|"
@@ -3767,7 +3718,11 @@ const display$2 = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHead
     ? "r|"
     : "";
   for (let j = 1; j < numColsInHeading; j++) {
-    str += (df.dtype[j] & dt.RATIONAL ? "r " : "l " );
+    str += isMap
+      ? "c "
+      : Rnl.isRational(df.data[j][0])
+      ? "r "
+      : "l ";
   }
   str = str.slice(0, -1) + "}";
 
@@ -3805,13 +3760,23 @@ const display$2 = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHead
     if (writeRowNums) { str += String(i + 1) + " & "; }
     for (let j = 0; j < numCols; j++) {
       const datum = df.data[j][i];
-      str += mixedFractionRegEx.test(datum)
-        ? format(Rnl.fromString(datum), formatSpec, decimalFormat) + "&"
-        : numberRegEx$1.test(datum)
-        ? displayNum(datum, colInfo[j], cellInfo[j][i], decimalFormat) + "&"
-        : datum === ""
-        ? "&"
-        : "\\text{" + addTextEscapes(datum) + "}&";
+      if (isMap) {
+        str += datum === undefined
+        ? " & "
+        : Rnl.isRational(datum)
+        ? format(datum, formatSpec, decimalFormat) + "&"
+        : Cpx.isComplex(datum)
+        ? Cpx.display(datum, formatSpec, decimalFormat)[0] + "&"
+        : "\\text{" + datum + "} &";
+      } else {
+        str += mixedFractionRegEx.test(datum)
+          ? format(Rnl.fromString(datum), formatSpec, decimalFormat) + "&"
+          : numberRegEx$1.test(datum)
+          ? displayNum(datum, colInfo[j], cellInfo[j][i], decimalFormat) + "&"
+          : datum === ""
+          ? "&"
+          : "\\text{" + addTextEscapes(datum) + "}&";
+      }
     }
     str = str.slice(0, -1) + " \\\\ ";
   }
@@ -3821,7 +3786,8 @@ const display$2 = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHead
   return str
 };
 
-const displayAlt$1 = (df, formatSpec = "h3", omitHeading = false) => {
+const displayAlt$1 = (df, formatSpec = "h3", decimalFormat = "1,000,000.",
+                   omitHeading = false) => {
   if (df.data.length === 0) { return "" }
   const numRows = df.data[0].length;
   const numCols = df.data.length;
@@ -3850,14 +3816,25 @@ const displayAlt$1 = (df, formatSpec = "h3", omitHeading = false) => {
   }
 
   // Write the data
+  const isMap = !df.dtype;
   for (let i = 0; i < numRows; i++) {
     if (writeRowNums) { str += String(i + 1) + "\t"; }
     for (let j = 0; j < numCols; j++) {
       const datum = df.data[j][i];
-      if (mixedFractionRegEx.test(datum)) {
-        str += format(Rnl.fromString(datum), formatSpec, "100000.") + "\t";
+      if (isMap) {
+        str += datum === undefined
+          ? "\t"
+          : Rnl.isRational(datum)
+          ? format(datum, formatSpec, decimalFormat).replace(/{,}/g, ",") + "\t"
+          : Cpx.isComplex(datum)
+          ? Cpx.display(datum, formatSpec, decimalFormat)[1].replace(/{,}/g, ",") + "\t"
+          : datum + "\t";
       } else {
-        str += datum + "\t";
+        if (mixedFractionRegEx.test(datum)) {
+          str += format(Rnl.fromString(datum), formatSpec, "100000.") + "\t";
+        } else {
+          str += datum + "\t";
+        }
       }
     }
     str = str.slice(0, -1) + "\n";
@@ -3877,146 +3854,6 @@ const DataFrame = Object.freeze({
   displayAlt: displayAlt$1,
   quickDisplay,
   range
-});
-
-/*
- * This file deals with Hurmet maps, which are similar to hash maps.
- * In a map, every value is of the same data type and has the same unit-of-measure.
- */
-
-const checkUnitEquality = (u1, u2) => {
-  let x;
-  let y;
-  if (u1.expos && u2.expos) {
-    x = u1.expos;
-    y = u2.expos;
-  } else {
-    x = u1;
-    y = u2;
-  }
-  if (Array.isArray(x)) {
-    if (Array.isArray(y)) {
-      if (x.length !== y.length) { return false }
-      x.forEach((e, i) => { if (e !== y[i]) { return false } });
-      return true
-    } else {
-      return false
-    }
-  } else {
-    return x === y
-  }
-};
-
-const append$1 = (o1, o2, shape1, shape2) => {
-  let map;
-  let scalar;
-  if (o1.dtype & dt.MAP) {
-    if (shape2 !== "scalar") { return errorOprnd("BAD_APPEND", shape2) }
-    map = o1;
-    scalar = o2;
-  } else {
-    if (shape1 !== "scalar") { return errorOprnd("BAD_APPEND", shape1) }
-    map = o2;
-    scalar = o1;
-  }
-  if (!(map.dtype & scalar.dtype)) { errorOprnd("MAP_APPEND"); }
-  if (!checkUnitEquality(map.unit, scalar.unit)) { errorOprnd("UNIT_APEND"); }
-  map.value.set(scalar.name, scalar.value);
-  return map
-};
-
-const convertFromBaseUnits$1 = (map, gauge, factor) => {
-  map = mapMap( map, value =>  Rnl.divide(value, factor));
-  if (!Rnl.isZero(gauge)) {
-    map = mapMap( map, value => Rnl.subtract(value, gauge));
-  }
-  return  map
-};
-
-const convertToBaseUnits$1 = (map, gauge, factor) => {
-  if (!Rnl.isZero(gauge)) {
-    map = mapMap(map, value => Rnl.add(value, gauge));
-  }
-  return mapMap(map, value => Rnl.multiply(value, factor))
-};
-
-const display$3 = (result, formatSpec, decimalFormat, omitHeading = false) => {
-  const mapValue = result.value.plain ? result.value.plain : result.value;
-  let topRow = "";
-  let botRow = "";
-  for (const [key, value] of mapValue.entries()) {
-    topRow += formatColumnName(key) + " & ";
-    botRow += format(value, formatSpec, decimalFormat) + " & ";
-  }
-  topRow = topRow.slice(0, -3);
-  botRow = botRow.slice(0, -3);
-  let str = "\\begin{array}{c}";
-  if (!omitHeading) { str += topRow + " \\\\ \\hline "; }
-  str += botRow + "\\end{array}";
-  if (result.unit && result.unit.name) {
-    str += "\\;" + unitTeXFromString(result.unit.name);
-  }
-  return str
-};
-
-const displayAlt$2 = (result, formatSpec, decimalFormat, omitHeading = false) => {
-  const mapValue = result.value.plain ? result.value.plain : result.value;
-  let topRow = "";
-  let botRow = "";
-  for (const [key, value] of mapValue.entries()) {
-    topRow += key + '\t';
-    botRow += format(value, formatSpec, decimalFormat) + "\t";
-  }
-  topRow = topRow.slice(0, -1);
-  botRow = botRow.slice(0, -1);
-  let str = "``";
-  if (!omitHeading) { str += topRow + "\n"; }
-  str += botRow + "``";
-  if (result.unit && result.unit.name) {
-    str = `${str} '${result.unit.name}'`;
-  }
-  return str
-};
-
-const singleValueFromMap = (map, key, isNumeric, unitAware) => {
-  if (!map.value.has(key)) { return errorOprnd("BAD_KEY", key) }
-  const value = clone(map.value.get(key));
-  if (!isNumeric) {
-    return { value, unit: map.unit, dtype: map.dtype - dt.MAP }
-  } else if (unitAware) {
-    return { value, unit: { expos: map.unit.expos }, dtype: map.dtype - dt.MAP }
-  } else {
-    return { value, unit: allZeros, dtype: map.dtype - dt.MAP }
-  }
-};
-
-const valueFromMap = (map, keys, unitAware) => {
-  // Return the value of a map's key/value pair.
-  // `keys` is an array.
-  for (let j = 0; j < keys.length; j++) {
-    if (keys[j].dtype === dt.RATIONAL) { return errorOprnd("NUM_KEY") }
-    keys[j] = keys[j].value;
-  }
-  if (keys.length === 1) {
-    const isNumeric = (map.dtype & dt.RATIONAL);
-    const treatAsUnitAware = keys.length > 1 || unitAware;
-    return singleValueFromMap(map, keys[0], isNumeric, treatAsUnitAware)
-  } else {
-    const value = new Map();
-    for (let i = 0; i < keys.length; i++) {
-      value.set(keys[i], map.value.get(keys[i]));
-    }
-    return { value, unit: map.unit, dtype: map.dtype }
-  }
-};
-
-const map = Object.freeze({
-  append: append$1,
-  convertFromBaseUnits: convertFromBaseUnits$1,
-  convertToBaseUnits: convertToBaseUnits$1,
-  display: display$3,
-  displayAlt: displayAlt$2,
-  valueFromMap
 });
 
 /*
@@ -4747,11 +4584,7 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
       tex = DataFrame.quickDisplay(st);
     } else {
       const dataStructure = DataFrame.dataFrameFromTSV(st, {});
-      if (dataStructure.dtype === dt.DATAFRAME) {
-        tex = DataFrame.display(dataStructure.value, "h3", decimalFormat);
-      } else {
-        tex = map.display(dataStructure, "h3", decimalFormat);
-      }
+      tex = DataFrame.display(dataStructure.value, "h3", decimalFormat);
     }
     return ["``" + inputStr + "``", tex, tt.DATAFRAME, ""]
   }
@@ -4880,13 +4713,13 @@ const builtInFunctions = [
   "atand", "atanh", "binomial", "ceil", "conj", "cos", "cosd", "cosh", "cosh", "cot",
   "cotd", "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp", "factorial", "fetch",
   "floor", "format", "gamma", "gcd", "hcat", "hypot", "imag", "isnan", "length", "lerp", "ln",
-  "log", "log10", "log2", "lfact", "lgamma", "logn", "matrix2table", "mod", "real",
+  "log", "log10", "log2", "lfact", "lgamma", "logn", "mod", "real",
   "rem", "rms", "round", "roundSig", "roundn", "sec", "secd", "sech", "sech", "sign", "sin",
   "sind", "sinh", "startSvg", "string", "tan", "tand", "tanh", "tanh", "trace", "transpose",
   "vcat", "zeros", "Γ"
 ];
 
-const builtInReducerFunctions = ["accumulate", "dataframe",
+const builtInReducerFunctions = ["accumulate", "dataframe", "matrix2table",
   "max", "mean", "median", "min", "product", "rand", "range", "stddev", "sum", "variance"
 ];
 
@@ -6311,12 +6144,12 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
 
   // From this point forward, we're dealing with multiple assignment
   } else if (attrs.dtype & dt.MAP) {
-    const unit = attrs.value.unit;
+    const unit = attrs.unit;
     const unitName = unit && unit.name ? unit.name : undefined;
     const dtype = attrs.dtype - dt.MAP;
     let i = 0;
     if (attrs.dtype & dt.QUANTITY) {
-      for (const value of attrs.value.plain.values()) {
+      for (const value of attrs.value.data.plain) {
         const result = {
           value: { plain: value },
           expos: attrs.expos,
@@ -6329,12 +6162,12 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
         i += 1;
       }
       i = 0;
-      for (const value of attrs.value.inBaseUnits.values()) {
+      for (const value of attrs.value.data.inBaseUnits) {
         hurmetVars[attrs.name[i]].value.inBaseUnits = value;
         i += 1;
       }
     } else {
-      for (const value of attrs.value.values()) {
+      for (const value of attrs.value.data) {
         const result = { value, expos: attrs.expos, factor: attrs.factor, dtype };
         result.resultdisplay = Rnl.isRational(value)
           ? format(value, formatSpec, decimalFormat)
@@ -6379,7 +6212,6 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
           ? Rnl.multiply(Rnl.add(result.value.plain, unit.gauge), unit.factor)
           : result.value.plain.map(e => Rnl.multiply(Rnl.add(e, unit.gauge), unit.factor));
         result.expos = unit.expos;
-        result.resultdisplay += "\\;" + unitTeXFromString(result.unit.name);
       }
 
       hurmetVars[attrs.name[i]] = result;
@@ -6403,6 +6235,133 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
     }
   }
 }
+
+/*
+ * This file deals with Hurmet maps, which are similar to hash maps.
+ * In a map, every value is of the same data type and has the same unit-of-measure.
+ */
+
+const checkUnitEquality = (u1, u2) => {
+  let x;
+  let y;
+  if (u1.expos && u2.expos) {
+    x = u1.expos;
+    y = u2.expos;
+  } else {
+    x = u1;
+    y = u2;
+  }
+  if (Array.isArray(x)) {
+    if (Array.isArray(y)) {
+      if (x.length !== y.length) { return false }
+      x.forEach((e, i) => { if (e !== y[i]) { return false } });
+      return true
+    } else {
+      return false
+    }
+  } else {
+    return x === y
+  }
+};
+
+const append$1 = (o1, o2, shape1, shape2) => {
+  let map;
+  let scalar;
+  if (o1.dtype & dt.MAP) {
+    if (shape2 !== "scalar") { return errorOprnd("BAD_APPEND", shape2) }
+    map = o1;
+    scalar = o2;
+  } else {
+    if (shape1 !== "scalar") { return errorOprnd("BAD_APPEND", shape1) }
+    map = o2;
+    scalar = o1;
+  }
+  if (!(map.dtype & scalar.dtype)) { errorOprnd("MAP_APPEND"); }
+  if (!checkUnitEquality(map.unit, scalar.unit)) { errorOprnd("UNIT_APEND"); }
+  map.value.set(scalar.name, scalar.value);
+  return map
+};
+
+const convertFromBaseUnits$1 = (data, gauge, factor) => {
+  data = data.map(column => Rnl.isRational(column[0])
+    ? column.map(e => Rnl.divide(e, factor))
+    : column
+  );
+  if (!Rnl.isZero(gauge)) {
+    data = data.map(column => Rnl.isRational(column[0])
+      ? column.map(e => Rnl.subtract(e, gauge))
+      : column
+    );
+  }
+  return data
+};
+
+const convertToBaseUnits$1 = (data, gauge, factor) => {
+  if (!Rnl.isZero(gauge)) {
+    data = data.map(column => Rnl.isRational(column[0])
+      ? column.map(e => Rnl.add(e, gauge))
+      : column
+    );
+  }
+  data = data.map(column => Rnl.isRational(column[0])
+    ? column.map(e => Rnl.multiply(e, factor))
+    : column
+  );
+  return data
+};
+
+const range$1 = (map, keys) => {
+  let unit = clone(map.unit);
+  const [rowList, columnList, iStart, iEnd] = identifyRange(map, keys);
+  if (rowList.length === 0 && iStart === iEnd && columnList.length === 1) {
+    // Return one value.
+    const value = map.value.data[columnList[0]][iStart];
+    return { value, unit, dtype: map.dtype - dt.MAP }
+
+  } else if (columnList.length === 1) {
+    // Return data from one column, in a column vector or a quantity
+    const value = map.value.data[columnList[0]].slice(iStart, iEnd + 1);
+    const dtype = columnList[0] === 0
+      ? dt.COLUMNVECTOR + (typeof value[0] === "string" ? dt.STRING : map.dtype - dt.MAP)
+      : map.dtype - dt.MAP + dt.COLUMNVECTOR;
+    if (columnList[0] === -1) { unit = null; }
+    return { value, unit, dtype }
+
+  } else {
+    // Return a map.
+    const headings = [];
+    const data = [];
+    const columnMap = Object.create(null);
+    const rowMap = rowList.length === 0 ? false : Object.create(null);
+    for (let j = 0; j < columnList.length; j++) {
+      headings.push(map.value.headings[columnList[j]]);
+      columnMap[map.value.headings[j]] = j;
+      if (rowList.length > 0) {
+        const elements = [];
+        for (let i = 0; i < rowList.length; i++) {
+          const rowName = rowList[i];
+          elements.push(map.value.data[columnList[j]][map.value.rowMap[rowName]]);
+          rowMap[rowName] = i;
+        }
+        data.push(elements);
+      } else {
+        data.push(map.value.data[columnList[j]].slice(iStart, iEnd + 1));
+      }
+    }
+    return {
+      value: { data, headings, columnMap, rowMap },
+      unit,
+      dtype: map.dtype
+    }
+  }
+};
+
+const map = Object.freeze({
+  append: append$1,
+  convertFromBaseUnits: convertFromBaseUnits$1,
+  convertToBaseUnits: convertToBaseUnits$1,
+  range: range$1
+});
 
 /*
  * Hurmet operands often have numeric values. Sometimes they are the numbers originally
@@ -6459,7 +6418,7 @@ const fromAssignment = (cellAttrs, unitAware) => {
   if (dtype === dt.STRING || dtype === dt.BOOLEAN || dtype === dt.DRAWING ||
       dtype === dt.MODULE || dtype === dt.NULL) {
     oprnd.unit = null;
-  } else if (dtype === dt.DATAFRAME || (dtype & dt.MAP)) {
+  } else if (dtype === dt.DATAFRAME) {
     oprnd.unit = Object.freeze(clone(cellAttrs.unit));
   } else if (cellAttrs.unit && cellAttrs.unit.expos) {
     oprnd.unit = clone(cellAttrs.unit);
@@ -6477,10 +6436,17 @@ const fromAssignment = (cellAttrs, unitAware) => {
   if (cellAttrs.dtype & dt.QUANTITY) {
     // Here we discard some of the cellAttrs information. In a unit-aware calculation,
     // number, matrix, and map operands contain only the value.inBaseUnits.
-    oprnd.value = Object.freeze(unitAware
-      ? clone(cellAttrs.value.inBaseUnits)
-      : clone(cellAttrs.value.plain)
-    );
+    if (cellAttrs.dtype & dt.MAP) {
+      oprnd.value = clone(cellAttrs.value);
+      oprnd.value.data = unitAware
+        ? oprnd.value.data.inBaseUnits
+        : oprnd.value.data.plain;
+    } else {
+      oprnd.value = Object.freeze(unitAware
+        ? clone(cellAttrs.value.inBaseUnits)
+        : clone(cellAttrs.value.plain)
+      );
+    }
     oprnd.dtype = cellAttrs.dtype - dt.QUANTITY;
 
   } else if (cellAttrs.dtype === dt.STRING) {
@@ -6508,7 +6474,7 @@ const fromAssignment = (cellAttrs, unitAware) => {
 function propertyFromDotAccessor(parent, index, vars, unitAware) {
   const property = Object.create(null);
   if (parent.dtype & dt.MAP) {
-    return map.valueFromMap(parent, [index], unitAware)
+    return map.range(parent, [index], unitAware)
 
   } else if (parent.dtype & dt.DATAFRAME) {
     return DataFrame.range(parent, [index], vars, unitAware)
@@ -6547,7 +6513,7 @@ function propertyFromDotAccessor(parent, index, vars, unitAware) {
   }
 }
 
-const display$4 = (tuple, formatSpec = "h3", decimalFormat = "1,000,000.") => {
+const display$3 = (tuple, formatSpec = "h3", decimalFormat = "1,000,000.") => {
   if (tuple.size === 0) { return "" }
   let str = "\\begin{array}{c}";
 
@@ -6579,7 +6545,7 @@ const display$4 = (tuple, formatSpec = "h3", decimalFormat = "1,000,000.") => {
   return str
 };
 
-const displayAlt$3 = (tuple, formatSpec = "h3") => {
+const displayAlt$2 = (tuple, formatSpec = "h3") => {
   if (tuple.size === 0) { return "" }
   let str = "``";
 
@@ -6610,8 +6576,8 @@ const displayAlt$3 = (tuple, formatSpec = "h3") => {
 };
 
 const Tuple = Object.freeze({
-  display: display$4,
-  displayAlt: displayAlt$3
+  display: display$3,
+  displayAlt: displayAlt$2
 });
 
 // A result has been sent here from evaluate.js or updateCalculations.js.
@@ -6650,11 +6616,6 @@ const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAware) => {
       altResultDisplay = "";
       return stmt
 
-    } else if (isMatrix(result) && (result.dtype & dt.MAP)) {
-      resultDisplay = Matrix.displayMapOfVectors(result.value, formatSpec, decimalFormat);
-      altResultDisplay = Matrix.displayAltMapOfVectors(result.value,
-        formatSpec, decimalFormat);
-
     } else if (isMatrix(result)) {
       resultDisplay = Matrix.display((isUnitAware || result.value.plain)
           ? { value: result.value.plain, dtype: result.dtype }
@@ -6680,14 +6641,17 @@ const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAware) => {
       }
 
     } else if (result.dtype & dt.MAP) {
-      const mapSize = (stmt.dtype & dt.QUANTITY) ? result.value.plain.size : result.value.size;
-      if (numNames > 1 && numNames !== mapSize) {
-        [resultDisplay, altResultDisplay] = numMisMatchError();
+      let localValue;
+      if (isUnitAware || result.value.data.plain) {
+        localValue = clone(result.value);
+        localValue.data = result.value.data.plain;
       } else {
-        const omitHeading = stmt.name && Array.isArray(stmt.name) && stmt.name.length > 1;
-        resultDisplay = map.display(result, formatSpec, decimalFormat, omitHeading);
-        altResultDisplay = map.displayAlt(result, formatSpec, decimalFormat, omitHeading);
+        localValue = result.value;
       }
+      const omitHeading = stmt.name && Array.isArray(stmt.name) && stmt.name.length > 1;
+      resultDisplay = DataFrame.display(localValue, formatSpec, decimalFormat, omitHeading);
+      altResultDisplay = DataFrame.displayAlt(localValue, formatSpec,
+                                              decimalFormat, omitHeading);
 
     } else if (result.dtype === dt.TUPLE) {
       if (numNames > 1 && numNames !== result.length) {
@@ -6868,7 +6832,7 @@ const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat) => {
     needsParens = needsParens && !isParened;
 
     if (hvar.dtype === dt.DATAFRAME || (hvar.dtype & dt.MAP)) {
-      display = "\\mathrm{" + vars[varName].name + "}";
+      display = "\\mathrm{" + parse(vars[varName].name) + "}";
     } else {
       display = hvar.resultdisplay;
       if (!unitAware) {
@@ -7915,25 +7879,61 @@ const unary$1 = {
   },
 
   map: {
-    abs(map)       { return mapMap(map, value => Rnl.abs(value)) },
-    negate(map)    { return mapMap(map, value => Rnl.negate(value)) },
-    exp(map)       { return mapMap(map, value => Rnl.exp(value)) },
-    floor(map)     { return mapMap(map, value => Rnl.floor(value)) },
-    ceil(map)      { return mapMap(map, value => Rnl.ceil(value)) },
-    percent(map)   { return mapMap(map, value => Rnl.multiply(oneTenth, value)) },
-    factorial(map) { return mapMap(map, value => Rnl.factorial(value)) },
-    not(map)       { return mapMap(map, value => !value) }
-  },
-
-  mapWithVectorValues: {
-    abs(map)       { return mapMap(map, array => array.map(e => Rnl.abs(e))) },
-    negate(map)    { return mapMap(map, array => array.map(e => Rnl.negate(e))) },
-    exp(map)       { return mapMap(map, array => array.map(e => Rnl.exp(e)))},
-    floor(map)     { return mapMap(map, array => array.map(e => Rnl.floor(e))) },
-    ceil(map)      { return mapMap(map, array => array.map(e => Rnl.ceil(e))) },
-    percent(map)   { return mapMap(map, array => array.map(e => Rnl.multiply(oneTenth, e))) },
-    factorial(map) { return mapMap(map, array => array.map(e => Rnl.factorial(e))) },
-    not(map)       { return mapMap(map, array => array.map(e => !e)) }
+    abs(map) {
+      map.data = map.data.map(column => Rnl.isRational(column[0])
+      ? column.map(e => Rnl.abs(e))
+      : column
+    );
+      return map
+    },
+    negate(map) {
+      map.data = map.data.map(column => Rnl.isRational(column[0])
+      ? column.map(e => Rnl.negate(e))
+      : column
+    );
+      return map
+    },
+    exp(map) {
+      map.data = map.data.map(column => Rnl.isRational(column[0])
+        ? column.map(e => Rnl.exp(e))
+        : column
+      );
+      return map
+    },
+    floor(map) {
+      map.data = map.data.map(column => Rnl.isRational(column[0])
+        ? column.map(e => Rnl.floor(e))
+        : column
+      );
+      return map
+    },
+    ceil(map) {
+      map.data = map.data.map(column => Rnl.isRational(column[0])
+        ? column.map(e => Rnl.ceil(e))
+        : column);
+      return map
+    },
+    percent(map) {
+      map.data = map.data.map(column => Rnl.isRational(column[0])
+        ? column.map(e => Rnl.multiply(oneTenth, e))
+        : column
+      );
+      return map
+    },
+    factorial(map) {
+      map.data = map.data.map(column => Rnl.isRational(column[0])
+        ? column.map(e => Rnl.factorial(e))
+        : column
+      );
+      return map
+    },
+    not(map) {
+      map.data = map.data.map(column => typeof column[0] === "boolean"
+       ? column.map(e => !e)
+       : column
+      );
+      return map
+    }
   }
 };
 
@@ -7965,8 +7965,7 @@ const dtype = {
     vector(t0, t1, tkn)     { return t1 },
     matrix(t0, t1, tkn)     { return t1 },
     dataFrame(t0, t1, tkn)  { return t1 },
-    map(t0, t1, tkn)        { return t1 },
-    mapWithVectorValues(t0, t1, tkn) { return t1 }
+    map(t0, t1, tkn)        { return t1 }
   },
   complex: {
     scalar(t0, t1, tkn)  { return t0 },
@@ -7995,7 +7994,7 @@ const dtype = {
   matrix: {
     scalar(t0, t1, tkn) { return t0 },
     rowVector(t0, t1, tkn) { return t0 },
-    columnVector(t0, t1, tkn) { return tkn === "&" || tkn === "circ" ? t0 : t1 },
+    columnVector(t0, t1, tkn) { return tkn === "*" || tkn === "⌧" ? t1 : t0 },
     matrix(t0, t1, tkn) { return t0 },
     map(t0, t1, tkn)    { return 0 }
   },
@@ -8004,12 +8003,9 @@ const dtype = {
   },
   map: {
     scalar(t0, t1, tkn) { return t0 },
-    vector(t0, t1, tkn) { return t0 + (t1 & dt.ROWVECTOR) + (t1 & dt.COLUMNVECTOR) },
+    vector(t0, t1, tkn) { return t0 },
     matrix(t0, t1, tkn) { return 0 },
     map(t0, t1, tkn)    { return t0 }
-  },
-  mapWithVectorValues: {
-    scalar(t0, t1, tkn) { return t0 }
   }
 };
 
@@ -8099,43 +8095,68 @@ const binary$1 = {
     map: {
       // Binary operations with a scalar and a map.
       // Perform element-wise operations.
-      add(scalar, map)      { return mapMap(map, value => Rnl.add(scalar, value)) },
-      subtract(scalar, map) { return mapMap(map, value => Rnl.subtract(scalar, value)) },
-      multiply(scalar, map) { return mapMap(map, value => Rnl.multiply(scalar, value)) },
-      divide(scalar, map)   { return mapMap(map, value => Rnl.divide(scalar, value)) },
-      power(scalar, map)    { return mapMap(map, value => Rnl.power(scalar, value)) },
-      rem(scalar, map)      { return mapMap(map, value => Rnl.rem(scalar, value)) },
-      and(scalar, map)      { return mapMap(map, value => scalar && value) },
-      or(scalar, map)       { return mapMap(map, value => scalar || value) },
-      xor(scalar, map)      { return mapMap(map, value => scalar !== value) }
-    },
-    mapWithVectorValues: {
       add(scalar, map) {
-        return mapMap(map, array => array.map(e => Rnl.add(scalar, e)))
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.add(scalar, e))
+          : col
+        );
+        return map
       },
       subtract(scalar, map) {
-        return mapMap(map, array => array.map(e => Rnl.subtract(scalar, e)))
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.subtract(scalar, e))
+          : col
+        );
+        return map
       },
       multiply(scalar, map) {
-        return mapMap(map, array => array.map(e => Rnl.multiply(scalar, e)))
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.multiply(scalar, e))
+          : col
+        );
+        return map
       },
       divide(scalar, map) {
-        return mapMap(map, array => array.map(e => Rnl.divide(scalar, e)))
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.divide(scalar, e))
+          : col
+        );
+        return map
       },
       power(scalar, map) {
-        return mapMap(map, array => array.map(e => Rnl.power(scalar, e)))
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.power(scalar, e))
+          : col
+        );
+        return map
       },
       rem(scalar, map) {
-        return mapMap(map, array => array.map(e => Rnl.rem(scalar, e)))
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.rem(scalar, e))
+          : col
+        );
+        return map
       },
       and(scalar, map) {
-        return mapMap(map, array => array.map(e => scalar && e))
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map(e => scalar && e)
+          : col
+        );
+        return map
       },
       or(scalar, map) {
-        return mapMap(map, array => array.map(e => scalar || e))
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map(e => scalar || e)
+          : col
+        );
+        return map
       },
       xor(scalar, map) {
-        return mapMap(map, array => array.map(e => scalar !== e))
+        map.data =  map.data.map(col =>  typeof col[0] === "boolean"
+          ? col.map(e => scalar !== e)
+          : col
+        );
+        return map
       }
     }
   },
@@ -8180,36 +8201,6 @@ const binary$1 = {
       or(v, x)       { return v.map(e => e || x) },
       xor(v, x)      { return v.map(e => e !== x) },
       concat(v, x)   { return [...v, x]}
-    },
-    map: {
-      // Binary operations with a vector and a map
-      add(vector, map) {
-        return mapMap(map, val => vector.map(e => Rnl.add(val, e)))
-      },
-      subtract(vector, map) {
-        return mapMap(map, val => vector.map(e => Rnl.subtract(val, e)))
-      },
-      multiply(vector, map) {
-        return mapMap(map, val => vector.map(e => Rnl.multiply(val, e)))
-      },
-      divide(vector, map) {
-        return mapMap(map, val => vector.map(e => Rnl.divide(val, e)))
-      },
-      power(vector, map) {
-        return mapMap(map, val => vector.map(e => Rnl.power(val, e)))
-      },
-      rem(vector, map) {
-        return mapMap(map, val => vector.map(e => Rnl.rem(val, e)))
-      },
-      and(vector, map) {
-        return mapMap(map, val => vector.map(e => val && e))
-      },
-      or(vector, map) {
-        return mapMap(map, val => vector.map(e => val || e))
-      },
-      xor(vector, map) {
-        return mapMap(map, val => vector.map(e => val !== e))
-      }
     }
   },
 
@@ -8486,7 +8477,6 @@ const binary$1 = {
       },
       unshift(x, y) { return x.concat(y) }
     },
-
     matrix: {
       // Binary operations on a column vector and a 2-D matrix.
       add(v, m) {
@@ -8518,6 +8508,72 @@ const binary$1 = {
         return m.map((row, i) => [v[i], ...row])
       },
       unshift(x, y) { return "BAD_CONCAT" }
+    },
+    map: {
+      // Binary operations between a column vector and a map
+      add(vector, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.add(vector[i], e))
+          : col
+        );
+        return map
+      },
+      subtract(vector, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.subtract(vector[i], e))
+          : col
+        );
+        return map
+      },
+      multiply(vector, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.multiply(vector[i], e))
+          : col
+        );
+        return map
+      },
+      divide(vector, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.divide(vector[i], e))
+          : col
+        );
+        return map
+      },
+      power(vector, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.power(vector[i], e))
+          : col
+        );
+        return map
+      },
+      rem(vector, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.rem(vector[i], e))
+          : col
+        );
+        return map
+      },
+      and(vector, map) {
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map((e, i) => vector[i] && e)
+          : col
+        );
+        return map
+      },
+      or(vector, map) {
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map((e, i) => vector[i] || e)
+          : col
+        );
+        return map
+      },
+      xor(vector, map) {
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map((e, i) => vector[i] !== e)
+          : col
+        );
+        return map
+      }
     }
   },
 
@@ -8662,93 +8718,139 @@ const binary$1 = {
   map: {
     scalar: {
       // Binary opertions on a map and a scalar
-      add(map, scalar)      { return mapMap(map, value => Rnl.add(value, scalar)) },
-      subtract(map, scalar) { return mapMap(map, value => Rnl.subtract(value, scalar)) },
-      multiply(map, scalar) { return mapMap(map, value => Rnl.multiply(value, scalar)) },
-      divide(map, scalar)   { return mapMap(map, value => Rnl.divide(value, scalar)) },
-      power(map, scalar)    { return mapMap(map, value => Rnl.power(value, scalar)) },
-      rem(map, scalar)      { return mapMap(map, value => Rnl.rem(value, scalar)) },
-      and(map, scalar)      { return mapMap(map, value => value && scalar) },
-      or(map, scalar)       { return mapMap(map, value => value || scalar) },
-      xor(map, scalar)      { return mapMap(map, value => value !== scalar) }
-    },
-    vector: {
-      add(map, array) {
-        return mapMap(map, value => array.map(e => Rnl.add(value, e)))
-      },
-      subtract(map, array) {
-        return mapMap(map, value => array.map(e => Rnl.subtract(value, e)))
-      },
-      multiply(map, array) {
-        return mapMap(map, value => array.map(e => Rnl.multiply(value, e)))
-      },
-      divide(map, array) {
-        return mapMap(map, value => array.map(e => Rnl.divide(value, e)))
-      },
-      power(map, array) {
-        return mapMap(map, value => array.map(e => Rnl.power(value, e)))
-      },
-      rem(map, array) {
-        return mapMap(map, value => array.map(e => Rnl.rem(value, e)))
-      },
-      and(map, array) {
-        return mapMap(map, value => array.map(e => value && e))
-      },
-      or(map, array) {
-        return mapMap(map, value => array.map(e => value || e))
-      },
-      xor(map, array) {
-        return mapMap(map, value => array.map(e => value !== e))
-      }
-    },
-    matrix: {
-
-    },
-    map: {
-
-    }
-  },
-  mapWithVectorValues: {
-    scalar: {
       add(map, scalar) {
-        return mapMap(map, array => array.map(e => Rnl.add(e, scalar)))
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.add(e, scalar))
+          : col
+        );
+        return map
       },
       subtract(map, scalar) {
-        return mapMap(map, array => array.map(e => Rnl.subtract(e, scalar)))
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.subtract(e, scalar))
+          : col
+        );
+        return map
       },
       multiply(map, scalar) {
-        return mapMap(map, array => array.map(e => Rnl.multiply(e, scalar)))
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.multiply(e, scalar))
+          : col
+        );
+        return map
       },
       divide(map, scalar) {
-        return mapMap(map, array => array.map(e => Rnl.divide(e, scalar)))
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.divide(e, scalar))
+          : col
+        );
+        return map
       },
       power(map, scalar) {
-        return mapMap(map, array => array.map(e => Rnl.power(e, scalar)))
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.power(e, scalar))
+          : col
+        );
+        return map
       },
       rem(map, scalar) {
-        return mapMap(map, array => array.map(e => Rnl.rem(e, scalar)))
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.rem(e, scalar))
+          : col
+        );
+        return map
       },
       and(map, scalar) {
-        return mapMap(map, array => array.map(e => e && scalar))
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map(e => e && scalar)
+          : col
+        );
+        return map
       },
       or(map, scalar) {
-        return mapMap(map, array => array.map(e => e || scalar))
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map(e => e || scalar)
+          : col
+        );
+        return map
       },
       xor(map, scalar) {
-        return mapMap(map, array => array.map(e => e !== scalar))
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map(e => e !== scalar)
+          : col
+        );
+        return map
       }
-
     },
-    vector: {
-
+    columnVector: {
+      add(map, vector) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.add(e, vector[i]))
+          : col
+        );
+        return map
+      },
+      subtract(map, vector) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.subtract(e, vector[i]))
+          : col
+        );
+        return map
+      },
+      multiply(map, vector) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.multiply(e, vector[i]))
+          : col
+        );
+        return map
+      },
+      divide(map, vector) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.divide(e, vector[i]))
+          : col
+        );
+        return map
+      },
+      power(map, vector) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.power(e, vector[i]))
+          : col
+        );
+        return map
+      },
+      rem(map, vector) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.rem(e, vector[i]))
+          : col
+        );
+        return map
+      },
+      and(map, vector) {
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map((e, i) => e && vector[i])
+          : col
+        );
+        return map
+      },
+      or(map, vector) {
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map((e, i) => e || vector[i])
+          : col
+        );
+        return map
+      },
+      xor(map, vector) {
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map((e, i) => e !== vector[i])
+          : col
+        );
+        return map
+      }
     },
     matrix: {
 
     },
     map: {
-
-    },
-    mapWithVectorValues: {
 
     }
   }
@@ -8757,6 +8859,8 @@ const binary$1 = {
 // Binary relations get their own object, separate from other binary operations.
 // That's because Hurmet allows chained comparisons, as in  a < b < c.
 // So we have to pass yPrev as well as the two current operands.
+
+const strOps = ["∈", "in", "∋", "⊇", "∉", "!in", "∌", "⊈", "⊉"];
 
 const relations = {
   scalar: {
@@ -8788,15 +8892,12 @@ const relations = {
     map: {
       relate(op, x, map, yPrev) {
         if (yPrev === undefined) {
-          return mapMap(map, value => compare(op, x, value, undefined))
-        } else if (typeof yPrev !== "object") {
-          return mapMap(map, value => compare(op, x, value, yPrev))
-        } else {
-          const newMap = new Map();
-          for (const [key, value] of map.entries()) {
-            newMap.set(key,  compare(op, x, value, yPrev[key]));
-          }
-          return newMap
+          map.data =  map.data.map((column, j) =>
+            j > 0 || typeof column[0] !== "string" || strOps.includes(op)
+            ? column.map(e => compare(op, x, e, undefined))
+            : column
+          );
+          return map
         }
       }
     }
@@ -8828,6 +8929,18 @@ const relations = {
       relate(op, x, y, yPrev) {
         if (yPrev === undefined) {
           return x.map((e, i) => compare(op, e, y[i], undefined))
+        }
+      }
+    },
+    map: {
+      relate(op, v, map, yPrev) {
+        if (yPrev === undefined) {
+          map.data =  map.data.map((column, j) =>
+            j > 0 || typeof column[0] !== "string" || strOps.includes(op)
+            ? column.map((e, i) => compare(op, v[i], e, undefined))
+            : column
+          );
+          return map
         }
       }
     }
@@ -8864,14 +8977,11 @@ const isDivByZero = (quotient, shape) => {
       }
       return false
     case "map":
-      for (const [_, value] of Object.entries(quotient)) {
-        if (value[1] === BigInt(0)) { return true }
-      }
-      return false
-    case "mapWithVectorValues":
-      for (const [_, value] of Object.entries(quotient)) {
-        for (let i = 0; i < value.length; i++) {
-          if (value[i][1] === BigInt(0)) { return true }
+      for (let j = 0; j < quotient.data[0].length; j++) {
+        if (Rnl.isRational(quotient.data[j][0])) {
+          for (let i = 0; i < quotient.data.length; i++) {
+            if (quotient.data[i][j][1] === BigInt(0)) { return true }
+          }
         }
       }
       return false
@@ -10811,13 +10921,6 @@ const draw = Object.freeze({
 
 const setComparisons = ["in", "!in", "∈", "∉", "∋", "∌", "⊆", "⊈", "⊇", "⊉"];
 
-const needsMap = (...args) => {
-  for (let i = 0; i < args.length; i++) {
-    if ((args[i].dtype & dt.MAP) && (args[i].dtype & dt.RATIONAL)) { return true }
-  }
-  return false
-};
-
 const shapeOf = oprnd => {
   return oprnd.dtype === dt.COMPLEX
     ? "complex"
@@ -10829,8 +10932,6 @@ const shapeOf = oprnd => {
     ? "matrix"
     : oprnd.dtype === dt.DATAFRAME
     ? "dataFrame"
-    : ((oprnd.dtype & dt.MAP) && isVector(oprnd))
-    ? "mapWithVectorValues"
     : (oprnd.dtype & dt.MAP)
     ? "map"
     : "other"
@@ -10840,7 +10941,7 @@ const binaryShapesOf = (o1, o2) => {
   let shape1 = shapeOf(o1);
   let shape2 = shapeOf(o2);
   let needsMultBreakdown = false;
-  if (isMatrix(o1) && isMatrix(o2)) {
+  if ((isMatrix(o1) || (o1.dtyp & dt.MAP)) && (isMatrix(o2) || (o2.dtype & dt.MAP))) {
     // If both operands are matrices, we need to return more information.
     // That enables the various ways to multiply two matrices.
     needsMultBreakdown = true;
@@ -10873,7 +10974,7 @@ const stringFromOperand = (oprnd, decimalFormat) => {
     : isMatrix(oprnd.dtype)
     ? Matrix.displayAlt(oprnd, "h15", decimalFormat)
     : (oprnd.dtype & dt.MAP)
-    ? map.displayAlt(oprnd.value, "h15", decimalFormat)
+    ? DataFrame.displayAlt(oprnd.value, "h15", decimalFormat)
     : oprnd.value
 };
 
@@ -11271,7 +11372,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         }
 
         case "[]": {
-          // Bracket accessor to a data frame, matrix, string, data frame, or module.
+          // Bracket accessor to a data frame, matrix, string, map, or module.
           const numArgs = Number(tokens[i + 1]);
           i += 1;
           const args = [];
@@ -11282,7 +11383,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             property = DataFrame.range(o1, args, vars, unitAware);
 
           } else if (o1.dtype & dt.MAP) {
-            property = map.valueFromMap(o1, args, unitAware);
+            property = map.range(o1, args, unitAware);
 
           } else if (o1.dtype === dt.STRING) {
             property = textRange(o1.value, args[0]);
@@ -11488,16 +11589,20 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           output.unit = tkn === "Char" ? null : Object.freeze(unit);
 
           const shape = (arg.dtype & dt.RATIONAL) ? "scalar" : "complex";
-          const value = ((arg.dtype & dt.MAP) && isVector(arg))
-            // eslint-disable-next-line max-len
-            ? mapMap(arg.value, array => array.map(e => Functions.unary[shape][tkn](e)))
-            : isVector(arg)
-            ? arg.value.map(e => Functions.unary[shape][tkn](e))
-            : isMatrix(arg)
-            ? arg.value.map(row => row.map(e => Functions.unary[shape][tkn](e)))
-            : needsMap(arg)
-            ? mapMap(arg.value, val => Functions.unary[shape][tkn](val))
-            : Functions.unary[shape][tkn](arg.value);
+          let value;
+          if (arg.dtype & dt.MAP) {
+            value = arg.value;
+            value.data = value.data.map(col => Rnl.isRational(col[0])
+              ? col.map(e => Functions.unary[shape][tkn](e))
+              : col
+            );
+          } else {
+            value = isVector(arg)
+              ? arg.value.map(e => Functions.unary[shape][tkn](e))
+              : isMatrix(arg)
+              ? arg.value.map(row => row.map(e => Functions.unary[shape][tkn](e)))
+              : Functions.unary[shape][tkn](arg.value);
+          }
           if (value.dtype && value.dtype === dt.ERROR) { return value }
           output.value = Object.freeze(value);
 
@@ -11559,15 +11664,21 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             output.dtype = num.dtype;
           }
           const n = Number(spec.value.slice(1));
-          const value = ((num.dtype & dt.MAP) && isVector(num))
-            ? mapMap(num.value, array => array.map(e => Functions.binary[funcName]([e, n])))
-            : isVector(num)
-            ? num.value.map(e => Functions.binary[funcName]([e, n]))
-            : isMatrix(num)
-            ? num.value.map(row => row.map(e => Functions.binary[funcName]([e, n])))
-            : needsMap(num)
-            ? mapMap(num.value, val => Functions.binary[funcName]([val, n]))
-            : Functions.binary[funcName]([num.value, n]);
+          let value;
+          if (num.dtype & dt.MAP) {
+            value = num.value;
+            value.data = value.data.map(
+              col => Rnl.isRational(col[0])
+                ? col.map(e => Functions.binary[funcName][tkn]([e, n]))
+                : col
+              );
+          } else {
+            value = isVector(num)
+              ? num.value.map(e => Functions.binary[funcName]([e, n]))
+              : isMatrix(num)
+              ? num.value.map(row => row.map(e => Functions.binary[funcName]([e, n])))
+              : Functions.binary[funcName]([num.value, n]);
+          }
           if (value.dtype && value.dtype === dt.ERROR) { return value }
           output.value = Object.freeze(value);
           if (num.name) { output.name = num.name; }
@@ -11713,10 +11824,12 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         }
 
         case "matrix2table": {
-          const colNames = stack.pop();
-          const rowNames = stack.pop();
+          const numArgs = Number(tokens[i + 1]);
+          i += 1;
+          const rowNames = numArgs === 3 ? stack.pop().value : [];
+          const colNames = stack.pop().value;
           const matrix = stack.pop();
-          const result = DataFrame.matrix2table(matrix, rowNames, colNames, vars);
+          const result = DataFrame.matrix2table(matrix, colNames, rowNames);
           if (result.dtype === dt.ERROR) { return result }
           stack.push(result);
           break
@@ -12367,13 +12480,19 @@ const conditionResult = (stmt, oprnd, unitAware) => {
   }
 
   if (result.dtype & dt.RATIONAL) {
-    result.value = isVector(result)
-      ? result.value.map(e => Rnl.normalize(e))
-      : isMatrix(result)
-      ? result.value.map(row => row.map(e => Rnl.normalize(e)))
-      : result.dtype === dt.RATIONAL
-      ? Rnl.normalize(result.value)
-      : result.value;
+    if (result.dtype & dt.MAP) {
+      result.value.data = result.value.data.map(column => Rnl.isRational(column[0])
+        ? column.map(e => Rnl.normalize(e))
+        : column);
+    } else {
+      result.value = isVector(result)
+        ? result.value.map(e => Rnl.normalize(e))
+        : isMatrix(result)
+        ? result.value.map(row => row.map(e => Rnl.normalize(e)))
+        : result.dtype === dt.RATIONAL
+        ? Rnl.normalize(result.value)
+        : result.value;
+    }
   } else if (result.dtype === dt.COMPLEX) {
     result.value = [Rnl.normalize(result.value[0]), Rnl.normalize(result.value[1])];
   }
@@ -12388,40 +12507,45 @@ const conditionResult = (stmt, oprnd, unitAware) => {
     if (!unitInResultSpec & unitsAreCompatible(result.unit.expos, allZeros)) {
       stmt.factor = Rnl.one; stmt.gauge = Rnl.zero; stmt.expos = allZeros;
     }
-    result.value = {
-      plain: (isMatrix(result))
-        ? Matrix.convertFromBaseUnits(
-          { value: result.value, dtype: result.dtype },
-          stmt.gauge,
-          stmt.factor
-          )
-        : (result.dtype & dt.MAP)
-        ? map.convertFromBaseUnits(result.value, stmt.gauge, stmt.factor)
-        : Rnl.subtract(Rnl.divide(result.value, stmt.factor), stmt.gauge),
-      inBaseUnits: result.value
-    };
+    if (result.dtype & dt.MAP) {
+      result.value.data = {
+        plain: map.convertFromBaseUnits(result.value.data, stmt.gauge, stmt.factor),
+        inBaseUnits: result.value.data
+      };
+    } else {
+      result.value = {
+        plain: (isMatrix(result))
+          ? Matrix.convertFromBaseUnits(
+            { value: result.value, dtype: result.dtype },
+            stmt.gauge,
+            stmt.factor
+            )
+          : Rnl.subtract(Rnl.divide(result.value, stmt.factor), stmt.gauge),
+        inBaseUnits: result.value
+      };
+    }
     stmt.dtype += dt.QUANTITY;
     stmt.expos = result.unit.expos;
   } else if (unitInResultSpec) {
     // A non-unit aware calculation, but with a unit attached to the result.
-    result.value = {
-      plain: result.value,
-      inBaseUnits: (isMatrix(result) && (result.dtype & dt.MAP))
-        ? mapMap(result.value, val => {
-          return val.map(e => Rnl.multiply(Rnl.add(e, stmt.gauge), stmt.factor))
-        })
-        : (isMatrix(result))
-        ? Matrix.convertToBaseUnits(
-          { value: result.value, dtype: result.dtype },
-          stmt.gauge,
-          stmt.factor
-          )
-        : (result.dtype & dt.MAP)
-        ? mapMap(result.value, val => {
-          return Rnl.multiply(Rnl.add(val, stmt.gauge), stmt.factor)
-        })
-        : Rnl.multiply(Rnl.add(result.value, stmt.gauge), stmt.factor)
-    };
+    if (result.dtype & dt.MAP) {
+      const data = {
+        plain: result.value.data,
+        inBaseUnits: map.convertToBaseUnits(result.value.data, stmt.gauge, stmt.factor)
+      };
+      result.value.data = data;
+    } else {
+      result.value = {
+        plain: result.value,
+        inBaseUnits: (isMatrix(result))
+          ? Matrix.convertToBaseUnits(
+            { value: result.value, dtype: result.dtype },
+            stmt.gauge,
+            stmt.factor
+            )
+          : Rnl.multiply(Rnl.add(result.value, stmt.gauge), stmt.factor)
+      };
+    }
     stmt.dtype += dt.QUANTITY;
 
   } else if ((result.dtype & dt.RATIONAL) || (result.dtype & dt.COMPLEX) ) {
@@ -12558,7 +12682,7 @@ const valueFromLiteral = (str, name, decimalFormat) => {
         dataStructure.dtype = dt.MAP + dt.RATIONAL + dt.QUANTITY;
       }
       return [dataStructure.value, dataStructure.unit, dataStructure.dtype,
-        map.display(dataStructure, "h3", decimalFormat) + "\\;" + unitDisplay]
+        DataFrame.display(dataStructure.value, "h3", decimalFormat) + "\\;" + unitDisplay]
     }
 
   } else if (complexRegEx.test(str)) {
@@ -12637,10 +12761,10 @@ const improveQuantities = (attrs, vars) => {
         inBaseUnits: Matrix.convertToBaseUnits(attrs, unit.gauge, unit.factor)
       };
     } else if (attrs.dtype & dt.MAP) {
-      const plain = clone(attrs.value);
-      const inBaseUnits = map.convertToBaseUnits(plain, unit.gauge, unit.factor);
-      attrs.value = { plain, inBaseUnits };
-      attrs.unit = { expos: unit.expos };
+      attrs.value.data = {
+        plain: attrs.value.data,
+        inBaseUnits: map.convertToBaseUnits(attrs.value.data, unit.gauge, unit.factor)
+      };
     }
   }
   if (attrs.rpn && !attrs.value) {
@@ -21415,6 +21539,8 @@ defineFunctionBuilders({
       node = new mathMLTree.MathNode("mi", [text]);
       if (text.text === origText && latinRegEx.test(origText)) {
         node.setAttribute("mathvariant", "italic");
+      } else if (text.text === "∇" && variant === "normal") {
+        node.setAttribute("mathvariant", "normal");
       }
     }
     return node
@@ -26520,7 +26646,7 @@ class Style {
  * https://mit-license.org/
  */
 
-const version = "0.10.11";
+const version = "0.10.12";
 
 function postProcess(block) {
   const labelMap = {};

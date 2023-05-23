@@ -8,7 +8,7 @@ import { Rnl } from "./rational"
 export function propertyFromDotAccessor(parent, index, vars, unitAware) {
   const property = Object.create(null)
   if (parent.dtype & dt.MAP) {
-    return map.valueFromMap(parent, [index], unitAware)
+    return map.range(parent, [index], unitAware)
 
   } else if (parent.dtype & dt.DATAFRAME) {
     return DataFrame.range(parent, [index], vars, unitAware)

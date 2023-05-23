@@ -73,12 +73,12 @@ export function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
 
   // From this point forward, we're dealing with multiple assignment
   } else if (attrs.dtype & dt.MAP) {
-    const unit = attrs.value.unit
+    const unit = attrs.unit
     const unitName = unit && unit.name ? unit.name : undefined
     const dtype = attrs.dtype - dt.MAP
     let i = 0
     if (attrs.dtype & dt.QUANTITY) {
-      for (const value of attrs.value.plain.values()) {
+      for (const value of attrs.value.data.plain) {
         const result = {
           value: { plain: value },
           expos: attrs.expos,
@@ -91,12 +91,12 @@ export function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
         i += 1
       }
       i = 0
-      for (const value of attrs.value.inBaseUnits.values()) {
+      for (const value of attrs.value.data.inBaseUnits) {
         hurmetVars[attrs.name[i]].value.inBaseUnits = value
         i += 1
       }
     } else {
-      for (const value of attrs.value.values()) {
+      for (const value of attrs.value.data) {
         const result = { value, expos: attrs.expos, factor: attrs.factor, dtype }
         result.resultdisplay = Rnl.isRational(value)
           ? format(value, formatSpec, decimalFormat)
@@ -141,7 +141,6 @@ export function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
           ? Rnl.multiply(Rnl.add(result.value.plain, unit.gauge), unit.factor)
           : result.value.plain.map(e => Rnl.multiply(Rnl.add(e, unit.gauge), unit.factor))
         result.expos = unit.expos
-        result.resultdisplay += "\\;" + unitTeXFromString(result.unit.name)
       }
 
       hurmetVars[attrs.name[i]] = result

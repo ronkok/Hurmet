@@ -1071,8 +1071,8 @@ Data Frame
 
 Map
 
-:   A Hurmet _map_ is a single-row data frame in which every value is the same
-    data type, either boolean, string, or number. Maps can be the numeric part of
+:   A Hurmet _map_ is unit-less data frame in which every value is the same data
+    type, either boolean, string, or number. Maps can be the numeric part of
     a quantity.
 
     ¢```w = ``dead	live	snow
@@ -1084,6 +1084,15 @@ Map
 
     ¢` M = 1//8 w L^2  = ` ¢``` ``dead	live	snow
     0.375	0.875	0.5`` 'k·ft' ```
+    
+    Or, you could do your calculations in matrices and then annotate the matrix
+    by converting it to a map:
+    
+    ¢` P = (10, 21.2, 15; 11, 25, 14) 'kips' `
+    
+    ¢``` P_a = matrix2table(P, ["D", "L", "S"], ["Col A", "Col B"]) = ``#	D	L	S
+    Col A	10	21.1	15
+    Col B	11	25	14`` 'kips' ```
 
 </dl>
 
@@ -1418,10 +1427,10 @@ lgamma(_x_)
 : Returns the natural logarithm of the gamma function, Γ(_x_). For now,
   Hurmet's lgamma(_x_) function only works on positive rational numbers.
 
-matrix2table(_matrix_, _rowNames_, _columnNames_)
+matrix2table(_matrix_, _columnNames_, _rowNames_)
 
-: Returns a data frame with the contents of the matrix. _rowNames_ and
-  _columnNames_ must each be a vector of strings.
+: Returns a map with the contents of the matrix. _columnNames_ and
+  the optional _rowNames_ must each be a vector of strings.
 
 ¢`min(a,b,c,…),max(a,b,c,…)`
 

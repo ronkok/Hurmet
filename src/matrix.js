@@ -57,6 +57,22 @@ const convertToBaseUnits = (oprnd, gauge, factor) => {
   return Object.freeze(conversion)
 }
 
+const elementDisplay = (value, dtype, formatSpec, decimalFormat, isAlt = false) => {
+  let display = value === undefined
+    ? ""
+    : (dtype & dt.RATIONAL)
+    ? format(value, formatSpec, decimalFormat)
+    : (dtype & dt.COMPLEX)
+    ? Cpx.display(value, formatSpec, decimalFormat)[0]
+    : (dtype & dt.BOOLEAN) || (dtype & dt.STRING)
+    ? (isAlt ? value : "\\text{" + value + "}")
+    : value
+  if (isAlt && ((dtype & dt.RATIONAL) || (dtype & dt.COMPLEX))) {
+    display = display.replace(/{,}/g, ",")
+  }
+  return display
+}
+
 const display = (m, formatSpec, decimalFormat) => {
   let str = "\\begin"
   if (m.dtype & dt.MATRIX) {
@@ -65,7 +81,7 @@ const display = (m, formatSpec, decimalFormat) => {
     const numCols = m.value[0].length
     for (let i = 0; i < numRows; i++) {
       for (let j = 0; j < numCols; j++) {
-        str += format(m.value[i][j], formatSpec, decimalFormat) + " &"
+        str += elementDisplay(m.value[i][j], m.dtype, formatSpec, decimalFormat) + " &"
       }
       str = str.slice(0, -1) + " \\\\ "
     }
@@ -77,22 +93,14 @@ const display = (m, formatSpec, decimalFormat) => {
     if (m.value.plain) {
       const numArgs = m.value.plain.length
       for (let i = 0; i < numArgs; i++) {
-        str += format(m.value.plain[i], formatSpec, decimalFormat) +
-          ((i < numArgs - 1) ? argSep : "")
+        str += elementDisplay(m.value.plain[i], m.dtype, formatSpec, decimalFormat) +
+               ((i < numArgs - 1) ? argSep : "")
       }
     } else {
       const numArgs = m.value.length
       for (let i = 0; i < numArgs; i++) {
-        const elementDisplay = m.value[i] === undefined
-          ? ""
-          : (m.dtype & dt.RATIONAL)
-          ? format(m.value[i], formatSpec, decimalFormat)
-          : (m.dtype & dt.COMPLEX)
-          ? Cpx.display(m.value[i], formatSpec, decimalFormat)[0]
-          : (m.dtype & dt.BOOLEAN) || (m.dtype & dt.STRING)
-          ? "\\text{" + m.value[i] + "}"
-          : m.value[i]
-        str += elementDisplay + ((i < numArgs - 1) ? argSep : "")
+        str += elementDisplay(m.value[i], m.dtype, formatSpec, decimalFormat) +
+               ((i < numArgs - 1) ? argSep : "")
       }
     }
     str += "\\end{bmatrix}"
@@ -108,7 +116,7 @@ const displayAlt = (m, formatSpec, decimalFormat) => {
     const numCols = m.value[0].length
     for (let i = 0; i < numRows; i++) {
       for (let j = 0; j < numCols; j++) {
-        str += format(m.value[i][j], formatSpec, decimalFormat).replace(/{,}/g, ",") + ", "
+        str += elementDisplay(m.value[i][j], m.dtype, formatSpec, decimalFormat, true) + ", "
       }
       str = str.slice(0, -2) + "; "
     }
@@ -120,79 +128,20 @@ const displayAlt = (m, formatSpec, decimalFormat) => {
     if (m.value.plain) {
       const numArgs = m.value.plain.length
       for (let i = 0; i < numArgs; i++) {
-        str += format(m.value.plain[i], formatSpec, decimalFormat).replace(/{,}/g, ",") +
+        str += elementDisplay(m.value.plain[i], m.dtype, formatSpec, decimalFormat, true) +
            ((i < numArgs - 1) ? argSep : "")
       }
     } else {
       const numArgs = m.value.length
       for (let i = 0; i < numArgs; i++) {
-        const elementDisplay = m.value[i] === undefined
-          ? ""
-          : (m.dtype & dt.RATIONAL)
-          ? format(m.value[i], formatSpec, decimalFormat).replace(/{,}/g, ",")
-          : (m.dtype & dt.COMPLEX)
-          ? Cpx.display(m.value[i], formatSpec, decimalFormat)[1].replace(/{,}/g, ",")
-          : m.value[i]
-        str += elementDisplay + ((i < numArgs - 1) ? argSep : "")
+        str += elementDisplay(m.value[i], m.dtype, formatSpec, decimalFormat, true) +
+               ((i < numArgs - 1) ? argSep : "")
       }
     }
     str += "]"
   }
   return str
 }
-
-const displayMapOfVectors = (value, formatSpec, decimalFormat) => {
-  // Display a map full of vectors
-  let str = "\\begin{Bmatrix}"
-  Object.keys(value).forEach(key => {
-    const vector = value[key]
-    str += "\\text{" + key + "}: \\begin{bmatrix}"
-    const numArgs = vector.plain.length
-    if (vector.plain) {
-      for (let i = 0; i < numArgs; i++) {
-        str += format(vector.plain[i], formatSpec, decimalFormat) +
-          ((i < numArgs - 1) ? ", " : "")
-      }
-    } else {
-      for (let i = 0; i < numArgs; i++) {
-        const elementDisplay = Rnl.isRational(vector[i])
-          ? format(vector[i], formatSpec, decimalFormat)
-          : (typeof vector[i] === "boolean") || (typeof vector[i] === "string")
-          ? "\\text{" + vector[i] + "}"
-          : vector[i]
-        str += elementDisplay + ((i < numArgs - 1) ? " & " : "")
-      }
-    }
-    str += "\\end{bmatrix} \\\\"
-  })
-  str = str.slice(0, -2) + "\\end{Bmatrix}"
-  return str
-}
-
-const displayAltMapOfVectors = (value, formatSpec, decimalFormat) => {
-  let str = "{"
-  Object.keys(value).forEach(key => {
-    const vector = value[key]
-    str += key + ": ["
-    const numArgs = vector.plain.length
-    if (vector.plain) {
-      for (let i = 0; i < numArgs; i++) {
-        str += format(vector.plain[i], formatSpec, decimalFormat) +
-        ((i < numArgs - 1) ? ", " : "").replace(/{,}/g, ",") + " "
-      }
-    } else {
-      for (let i = 0; i < numArgs; i++) {
-        const elementDisplay = Rnl.isRational(vector[i])
-          ? format(vector[i], formatSpec, decimalFormat).replace(/{,}/g, ",") + " "
-          : String(vector[i]) + "}"
-        str += elementDisplay + ((i < numArgs - 1) ? " " : "")
-      }
-    }
-    str += "];"
-  })
-  return str.slice(0, -1) + "}"
-}
-
 
 const identity = (num, mutable) => {
   const n = Rnl.isRational(num) ? Rnl.toNumber(num) : num
@@ -526,8 +475,7 @@ export const Matrix = Object.freeze({
   convertToBaseUnits,
   display,
   displayAlt,
-  displayMapOfVectors,
-  displayAltMapOfVectors,
+  elementDisplay,
   identity,
   invert,
   multResultType,

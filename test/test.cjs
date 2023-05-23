@@ -72,8 +72,8 @@ const parserTests = [
   ["C = <<n \\atop k>>", "C = \\left\u27E8{{n}\\atop{k}}\\right\u27E9"],
   ["(exp(-exp(u)))/((u+γ)^2+π^2)", "\\dfrac{\\exp(\\text{-} \\exp(u))}{(u + γ)^{2}+ π^{2}}"],
   [
-    "α = ``B	C	D\n 7.0	9.5	11.5``[C_exp]",
-    "α = \\begin{array}{c}B & C & D \\\\ \\hline 7 & 9.5 & 11.5\\end{array}[C{_\\text{exp}}]"
+    'α = ``B	C	D\n7.0	9.5	11.5``["C"]',
+    "α = \\begin{array}{c c}{B}&{C}&{D} \\\\ \\hline 7&9.5&11.5\\end{array}[\\text{C}]"
   ],
   ["H^2 = \\dot a/a", "H^{2}= \\dfrac{\\dot{a}}{a}"],
   ["P = (1.2(D/H))", "P = \\left(1.2 \\left(\\dfrac{D}{H}\\right)\\right)"],
@@ -228,10 +228,10 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     ["𝐏q = [10; 15] 'kips'", "𝐏q = @", "[10; 15]"],
     ["vector = [2.1; -15.3; 11]", "vector = @", "[2.1; -15.3; 11]"],
     ["matrix = (2.1, 7.5; -15.3, 33)", "matrix = @", ""],
-    ['frameRow = ``#4	#5	area\n 0.22	0.31	0.44``', "frameRow = @", "``#4	#5	area\n0.22	0.31	0.44``"],
+    ['frameRow = ``\\#4	#5	area\n 0.22	0.31	0.44``', "frameRow = @", "``#4	#5	area\n0.22	0.31	0.44``"],
     ["radius = [0.375; 0.25; 0.3125; 0.375] 'in'", "radius = @", ""],
-    ["barArea = ``#4	#5	area\n 0.22	0.31	0.44`` 'in2'", "barArea = @", ""],
-    ["unitLessBarArea = ``#4	#5	area\n 0.22	0.31	0.44``", "unitLessBarArea = @", ""],
+    ["barArea = ``\\#4	#5	area\n 0.22	0.31	0.44`` 'in2'", "barArea = @", ""],
+    ["unitLessBarArea = ``\\#4	#5	area\n 0.22	0.31	0.44``", "unitLessBarArea = @", ""],
     ["rebar = ``#name	diameter	area\nunit	in	in²\n#3	0.375	0.11\n#4	0.5	0.2\n#5	0.625	0.31\n#6	0.75	0.44``", "rebar = @", ""],
     ["wideFlanges = ``#name	weight	area	d	bf	tw	tf	Ix	Sx	rx	Iy	Sy	ry\nunit	lbf/ft	in^2	in	in	in	in	in^4	in^3	in	in^4	in^3	in\nW10X49	49	14.4	10	10	0.34	0.56	272	54.6	4.35	93.4	18.7	2.54\nW8X31	31	9.13	8	8	0.285	0.435	110	27.5	3.47	37.1	9.27	2.02\nW8X18	18	5.26	8.14	5.25	0.23	0.33	61.9	15.2	3.43	7.97	3.04	1.23``", "wideFlanges = @", ""]
   ]
@@ -297,7 +297,7 @@ hurmet.calculate(`function testWhile(b)
 end`, vars)
 
 hurmet.calculate(`function testBreak()
-   print "This is an print test."
+   print "This is a print test."
    sum = 0
    for i in 1:100
       if i > 3
@@ -379,7 +379,7 @@ end`, vars)
     [`unitLessBarArea["#4"] = @`, `¿unitLessBarArea "#4" [] 1`, "0.22"],
     [`unitLessBarArea.area = @`, `¿unitLessBarArea "area" .`, "0.44"],
     ["wideFlanges.W8X31 = @", `¿wideFlanges "W8X31" .`, "``	weight	area	d	bf	tw	tf	Ix	Sx	rx	Iy	Sy	ry\nunit	lbf/ft	in^2	in	in	in	in	in^4	in^3	in	in^4	in^3	in\nW8X31	31	9.13	8	8	0.285	0.435	110	27.5	3.47	37.1	9.27	2.02``"],
-    ["wideFlanges[2] = @", `¿wideFlanges ®2/1 [] 1`, "``	weight	area	d	bf	tw	tf	Ix	Sx	rx	Iy	Sy	ry\nunit	lbf/ft	in^2	in	in	in	in	in^4	in^3	in	in^4	in^3	in\nW8X31	31	9.13	8	8	0.285	0.435	110	27.5	3.47	37.1	9.27	2.02``"],
+    ["wideFlanges[2] = @", `¿wideFlanges ®2/1 [] 1`, "[49; 31; 18]"],
     ["wideFlanges.W8X31.area = @", `¿wideFlanges "W8X31" . "area" .`, "9.13"],
     ["wideFlanges.W8X31.area = @@ in²", `¿wideFlanges "W8X31" . "area" .`, "9.13 in²"],
     [`wideFlanges[["W10X49"; "W8X31"]]["area", "d"] = @`, `¿wideFlanges "W10X49" "W8X31" matrix 2 1 [] 1 "area" "d" [] 2`, "``area	d\nin^2	in\n14.4	10\n9.13	8``"],
@@ -472,7 +472,8 @@ end`, vars)
     ["true or false = @", "true false or", "true"],
     ["true || false = @", "true false ||", "true"],
     ["ceil(4.5) = @", "®45/10 ceil", "5"],
-    ["floor(-4.5) = @", "®-45/10 floor", "-5"]
+    ["floor(-4.5) = @", "®-45/10 floor", "-5"],
+    [`matrix2table(matrix, ["D", "L"], ["A", "B"]) = @`, `¿matrix "D" "L" matrix 1 2 "A" "B" matrix 1 2 matrix2table 3`, "``\tD\tL\nA\t2.1\t7.5\nB\t-15.3\t33``"]
   ]
 
   console.log("Now testing calculations…")

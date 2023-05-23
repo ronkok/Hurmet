@@ -1,4 +1,3 @@
-import { clone } from "./utils"
 import { dt, allZeros } from "./constants"
 import { Matrix } from "./matrix"
 import { unitFromUnitName } from "./units"
@@ -45,10 +44,10 @@ export const improveQuantities = (attrs, vars) => {
         inBaseUnits: Matrix.convertToBaseUnits(attrs, unit.gauge, unit.factor)
       }
     } else if (attrs.dtype & dt.MAP) {
-      const plain = clone(attrs.value)
-      const inBaseUnits = map.convertToBaseUnits(plain, unit.gauge, unit.factor)
-      attrs.value = { plain, inBaseUnits }
-      attrs.unit = { expos: unit.expos }
+      attrs.value.data = {
+        plain: attrs.value.data,
+        inBaseUnits: map.convertToBaseUnits(attrs.value.data, unit.gauge, unit.factor)
+      }
     }
   }
   if (attrs.rpn && !attrs.value) {

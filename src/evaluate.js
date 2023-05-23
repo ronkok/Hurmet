@@ -1,5 +1,5 @@
 ﻿import { dt, allZeros } from "./constants"
-import { clone, mapMap, tablessTrim } from "./utils"
+import { clone, tablessTrim } from "./utils"
 import { plugValsIntoEcho } from "./echo"
 import { fromAssignment } from "./operand.js"
 import { Functions, multivarFunction } from "./functions"
@@ -55,13 +55,6 @@ import { draw } from "./draw"
 
 const setComparisons = ["in", "!in", "∈", "∉", "∋", "∌", "⊆", "⊈", "⊇", "⊉"]
 
-const needsMap = (...args) => {
-  for (let i = 0; i < args.length; i++) {
-    if ((args[i].dtype & dt.MAP) && (args[i].dtype & dt.RATIONAL)) { return true }
-  }
-  return false
-}
-
 const shapeOf = oprnd => {
   return oprnd.dtype === dt.COMPLEX
     ? "complex"
@@ -73,8 +66,6 @@ const shapeOf = oprnd => {
     ? "matrix"
     : oprnd.dtype === dt.DATAFRAME
     ? "dataFrame"
-    : ((oprnd.dtype & dt.MAP) && isVector(oprnd))
-    ? "mapWithVectorValues"
     : (oprnd.dtype & dt.MAP)
     ? "map"
     : "other"
@@ -84,7 +75,7 @@ const binaryShapesOf = (o1, o2) => {
   let shape1 = shapeOf(o1)
   let shape2 = shapeOf(o2)
   let needsMultBreakdown = false
-  if (isMatrix(o1) && isMatrix(o2)) {
+  if ((isMatrix(o1) || (o1.dtyp & dt.MAP)) && (isMatrix(o2) || (o2.dtype & dt.MAP))) {
     // If both operands are matrices, we need to return more information.
     // That enables the various ways to multiply two matrices.
     needsMultBreakdown = true
@@ -117,7 +108,7 @@ const stringFromOperand = (oprnd, decimalFormat) => {
     : isMatrix(oprnd.dtype)
     ? Matrix.displayAlt(oprnd, "h15", decimalFormat)
     : (oprnd.dtype & dt.MAP)
-    ? map.displayAlt(oprnd.value, "h15", decimalFormat)
+    ? DataFrame.displayAlt(oprnd.value, "h15", decimalFormat)
     : oprnd.value
 }
 
@@ -515,7 +506,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         }
 
         case "[]": {
-          // Bracket accessor to a data frame, matrix, string, data frame, or module.
+          // Bracket accessor to a data frame, matrix, string, map, or module.
           const numArgs = Number(tokens[i + 1])
           i += 1
           const args = []
@@ -526,7 +517,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             property = DataFrame.range(o1, args, vars, unitAware)
 
           } else if (o1.dtype & dt.MAP) {
-            property = map.valueFromMap(o1, args, unitAware)
+            property = map.range(o1, args, unitAware)
 
           } else if (o1.dtype === dt.STRING) {
             property = textRange(o1.value, args[0])
@@ -732,16 +723,20 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           output.unit = tkn === "Char" ? null : Object.freeze(unit)
 
           const shape = (arg.dtype & dt.RATIONAL) ? "scalar" : "complex"
-          const value = ((arg.dtype & dt.MAP) && isVector(arg))
-            // eslint-disable-next-line max-len
-            ? mapMap(arg.value, array => array.map(e => Functions.unary[shape][tkn](e)))
-            : isVector(arg)
-            ? arg.value.map(e => Functions.unary[shape][tkn](e))
-            : isMatrix(arg)
-            ? arg.value.map(row => row.map(e => Functions.unary[shape][tkn](e)))
-            : needsMap(arg)
-            ? mapMap(arg.value, val => Functions.unary[shape][tkn](val))
-            : Functions.unary[shape][tkn](arg.value)
+          let value
+          if (arg.dtype & dt.MAP) {
+            value = arg.value
+            value.data = value.data.map(col => Rnl.isRational(col[0])
+              ? col.map(e => Functions.unary[shape][tkn](e))
+              : col
+            )
+          } else {
+            value = isVector(arg)
+              ? arg.value.map(e => Functions.unary[shape][tkn](e))
+              : isMatrix(arg)
+              ? arg.value.map(row => row.map(e => Functions.unary[shape][tkn](e)))
+              : Functions.unary[shape][tkn](arg.value)
+          }
           if (value.dtype && value.dtype === dt.ERROR) { return value }
           output.value = Object.freeze(value)
 
@@ -803,15 +798,21 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             output.dtype = num.dtype
           }
           const n = Number(spec.value.slice(1))
-          const value = ((num.dtype & dt.MAP) && isVector(num))
-            ? mapMap(num.value, array => array.map(e => Functions.binary[funcName]([e, n])))
-            : isVector(num)
-            ? num.value.map(e => Functions.binary[funcName]([e, n]))
-            : isMatrix(num)
-            ? num.value.map(row => row.map(e => Functions.binary[funcName]([e, n])))
-            : needsMap(num)
-            ? mapMap(num.value, val => Functions.binary[funcName]([val, n]))
-            : Functions.binary[funcName]([num.value, n])
+          let value
+          if (num.dtype & dt.MAP) {
+            value = num.value
+            value.data = value.data.map(
+              col => Rnl.isRational(col[0])
+                ? col.map(e => Functions.binary[funcName][tkn]([e, n]))
+                : col
+              )
+          } else {
+            value = isVector(num)
+              ? num.value.map(e => Functions.binary[funcName]([e, n]))
+              : isMatrix(num)
+              ? num.value.map(row => row.map(e => Functions.binary[funcName]([e, n])))
+              : Functions.binary[funcName]([num.value, n])
+          }
           if (value.dtype && value.dtype === dt.ERROR) { return value }
           output.value = Object.freeze(value)
           if (num.name) { output.name = num.name }
@@ -957,10 +958,12 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         }
 
         case "matrix2table": {
-          const colNames = stack.pop()
-          const rowNames = stack.pop()
+          const numArgs = Number(tokens[i + 1])
+          i += 1
+          const rowNames = numArgs === 3 ? stack.pop().value : [];
+          const colNames = stack.pop().value
           const matrix = stack.pop()
-          const result = DataFrame.matrix2table(matrix, rowNames, colNames, vars)
+          const result = DataFrame.matrix2table(matrix, colNames, rowNames)
           if (result.dtype === dt.ERROR) { return result }
           stack.push(result)
           break
@@ -1617,13 +1620,19 @@ const conditionResult = (stmt, oprnd, unitAware) => {
   }
 
   if (result.dtype & dt.RATIONAL) {
-    result.value = isVector(result)
-      ? result.value.map(e => Rnl.normalize(e))
-      : isMatrix(result)
-      ? result.value.map(row => row.map(e => Rnl.normalize(e)))
-      : result.dtype === dt.RATIONAL
-      ? Rnl.normalize(result.value)
-      : result.value
+    if (result.dtype & dt.MAP) {
+      result.value.data = result.value.data.map(column => Rnl.isRational(column[0])
+        ? column.map(e => Rnl.normalize(e))
+        : column)
+    } else {
+      result.value = isVector(result)
+        ? result.value.map(e => Rnl.normalize(e))
+        : isMatrix(result)
+        ? result.value.map(row => row.map(e => Rnl.normalize(e)))
+        : result.dtype === dt.RATIONAL
+        ? Rnl.normalize(result.value)
+        : result.value
+    }
   } else if (result.dtype === dt.COMPLEX) {
     result.value = [Rnl.normalize(result.value[0]), Rnl.normalize(result.value[1])]
   }
@@ -1638,39 +1647,44 @@ const conditionResult = (stmt, oprnd, unitAware) => {
     if (!unitInResultSpec & unitsAreCompatible(result.unit.expos, allZeros)) {
       stmt.factor = Rnl.one; stmt.gauge = Rnl.zero; stmt.expos = allZeros;
     }
-    result.value = {
-      plain: (isMatrix(result))
-        ? Matrix.convertFromBaseUnits(
-          { value: result.value, dtype: result.dtype },
-          stmt.gauge,
-          stmt.factor
-          )
-        : (result.dtype & dt.MAP)
-        ? map.convertFromBaseUnits(result.value, stmt.gauge, stmt.factor)
-        : Rnl.subtract(Rnl.divide(result.value, stmt.factor), stmt.gauge),
-      inBaseUnits: result.value
+    if (result.dtype & dt.MAP) {
+      result.value.data = {
+        plain: map.convertFromBaseUnits(result.value.data, stmt.gauge, stmt.factor),
+        inBaseUnits: result.value.data
+      }
+    } else {
+      result.value = {
+        plain: (isMatrix(result))
+          ? Matrix.convertFromBaseUnits(
+            { value: result.value, dtype: result.dtype },
+            stmt.gauge,
+            stmt.factor
+            )
+          : Rnl.subtract(Rnl.divide(result.value, stmt.factor), stmt.gauge),
+        inBaseUnits: result.value
+      }
     }
     stmt.dtype += dt.QUANTITY
     stmt.expos = result.unit.expos
   } else if (unitInResultSpec) {
     // A non-unit aware calculation, but with a unit attached to the result.
-    result.value = {
-      plain: result.value,
-      inBaseUnits: (isMatrix(result) && (result.dtype & dt.MAP))
-        ? mapMap(result.value, val => {
-          return val.map(e => Rnl.multiply(Rnl.add(e, stmt.gauge), stmt.factor))
-        })
-        : (isMatrix(result))
-        ? Matrix.convertToBaseUnits(
-          { value: result.value, dtype: result.dtype },
-          stmt.gauge,
-          stmt.factor
-          )
-        : (result.dtype & dt.MAP)
-        ? mapMap(result.value, val => {
-          return Rnl.multiply(Rnl.add(val, stmt.gauge), stmt.factor)
-        })
-        : Rnl.multiply(Rnl.add(result.value, stmt.gauge), stmt.factor)
+    if (result.dtype & dt.MAP) {
+      const data = {
+        plain: result.value.data,
+        inBaseUnits: map.convertToBaseUnits(result.value.data, stmt.gauge, stmt.factor)
+      }
+      result.value.data = data
+    } else {
+      result.value = {
+        plain: result.value,
+        inBaseUnits: (isMatrix(result))
+          ? Matrix.convertToBaseUnits(
+            { value: result.value, dtype: result.dtype },
+            stmt.gauge,
+            stmt.factor
+            )
+          : Rnl.multiply(Rnl.add(result.value, stmt.gauge), stmt.factor)
+      }
     }
     stmt.dtype += dt.QUANTITY
 

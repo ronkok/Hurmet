@@ -67,17 +67,6 @@ export const clone = obj => {
   throw new Error("Unable to clone obj! Its type isn't supported.")
 }
 
-
-// A map function for Maps
-export const mapMap = (map, fn) => {
-  const newMap = new Map()
-  for (const [key, value] of map.entries()) {
-    newMap.set(key, fn(value))
-  }
-  return newMap
-}
-
-
 // A function to return an array containing all matches to a RegEx pattern.
 export const arrayOfRegExMatches = (regex, text) => {
   if (regex.constructor !== RegExp) { throw new Error('not RegExp') }

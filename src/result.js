@@ -2,11 +2,10 @@ import { dt } from "./constants"
 import { Rnl } from "./rational"
 import { parse } from "./parser"
 import { format } from "./format"
-import { addTextEscapes } from "./utils"
+import { addTextEscapes, clone } from "./utils"
 import { Matrix, isMatrix } from "./matrix"
 import { DataFrame } from "./dataframe"
 import { Tuple } from "./tuple"
-import { map } from "./map"
 import { Cpx } from "./complex"
 
 // A result has been sent here from evaluate.js or updateCalculations.js.
@@ -45,11 +44,6 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAwar
       altResultDisplay = ""
       return stmt
 
-    } else if (isMatrix(result) && (result.dtype & dt.MAP)) {
-      resultDisplay = Matrix.displayMapOfVectors(result.value, formatSpec, decimalFormat)
-      altResultDisplay = Matrix.displayAltMapOfVectors(result.value,
-        formatSpec, decimalFormat)
-
     } else if (isMatrix(result)) {
       resultDisplay = Matrix.display((isUnitAware || result.value.plain)
           ? { value: result.value.plain, dtype: result.dtype }
@@ -75,14 +69,17 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAwar
       }
 
     } else if (result.dtype & dt.MAP) {
-      const mapSize = (stmt.dtype & dt.QUANTITY) ? result.value.plain.size : result.value.size
-      if (numNames > 1 && numNames !== mapSize) {
-        [resultDisplay, altResultDisplay] = numMisMatchError()
+      let localValue
+      if (isUnitAware || result.value.data.plain) {
+        localValue = clone(result.value)
+        localValue.data = result.value.data.plain
       } else {
-        const omitHeading = stmt.name && Array.isArray(stmt.name) && stmt.name.length > 1
-        resultDisplay = map.display(result, formatSpec, decimalFormat, omitHeading)
-        altResultDisplay = map.displayAlt(result, formatSpec, decimalFormat, omitHeading)
+        localValue = result.value
       }
+      const omitHeading = stmt.name && Array.isArray(stmt.name) && stmt.name.length > 1
+      resultDisplay = DataFrame.display(localValue, formatSpec, decimalFormat, omitHeading)
+      altResultDisplay = DataFrame.displayAlt(localValue, formatSpec,
+                                              decimalFormat, omitHeading)
 
     } else if (result.dtype === dt.TUPLE) {
       if (numNames > 1 && numNames !== result.length) {

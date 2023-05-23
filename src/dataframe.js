@@ -4,6 +4,7 @@ import { clone, addTextEscapes, unitTeXFromString, tablessTrim } from "./utils"
 import { unitFromUnitName } from "./units"
 import { errorOprnd } from "./error"
 import { Matrix } from "./matrix"
+import { Cpx } from "./complex"
 import { format, formattedDecimal } from "./format"
 
 const columnListFromRange = (start, end) => {
@@ -38,12 +39,13 @@ const datumFromValue = (value, dtype) => {
     : value
 }
 
-const range = (df, args, vars, unitAware) => {
+export const identifyRange = (df, args) => {
+  // A helper function for range(). Also used by map.range()
+
   let iStart
   let iEnd
-  const rowList = []
-  let columnList = []
-  let unit = Object.create(null)
+  const rowList = [];
+  let columnList = [];
 
   // Find what must be returned. I.e. populate rowList and columnList
   if (df.value.data[0].length === 1) {
@@ -64,9 +66,10 @@ const range = (df, args, vars, unitAware) => {
       }
     }
   } else if (args.length === 1 && args[0].dtype === dt.RATIONAL) {
-    iStart = Rnl.toNumber(args[0].value) - 1
-    iEnd = iStart
-    columnList = columnListFromRange(0, df.value.data.length - 1)
+    // Return a column vector
+    iStart = 0
+    iEnd = df.value.data[0].length - 1
+    columnList.push(Rnl.toNumber(args[0].value) - 1)
   } else if (args.length === 1 && args[0].dtype === dt.RANGE) {
     iStart = Rnl.toNumber(args[0].value[0]) - 1
     iEnd = Rnl.toNumber(args[0].value[1]) - 1
@@ -115,7 +118,12 @@ const range = (df, args, vars, unitAware) => {
       columnList.push(df.value.columnMap[arg.value])
     }
   }
+  return [rowList, columnList, iStart, iEnd]
+}
 
+const range = (df, args, vars, unitAware) => {
+  let unit = Object.create(null)
+  const [rowList, columnList, iStart, iEnd] = identifyRange(df, args)
   if (rowList.length === 0 && iStart === iEnd && columnList.length === 1) {
     // Return one value.
     let dtype = df.value.dtype[columnList[0]]
@@ -152,10 +160,10 @@ const range = (df, args, vars, unitAware) => {
 
   } else {
     // Return a data frame.
-    const headings = []
-    const units = []
-    const dtype = []
-    const data = []
+    const headings = [];
+    const units = [];
+    const dtype = [];
+    const data = [];
     const columnMap = Object.create(null)
     const unitMap = Object.create(null)
     const rowMap = rowList.length === 0 ? false : Object.create(null)
@@ -180,12 +188,12 @@ const range = (df, args, vars, unitAware) => {
     }
     return {
       value: {
-        data: data,
-        headings: headings,
-        columnMap: columnMap,
-        rowMap: false,
-        units: units,
-        dtype: dtype
+        data,
+        headings,
+        columnMap,
+        rowMap,
+        units,
+        dtype
       },
       unit: clone(unitMap),
       dtype: dt.DATAFRAME
@@ -196,16 +204,17 @@ const range = (df, args, vars, unitAware) => {
 // const numberRegEx = new RegExp(Rnl.numberPattern + "$")
 const numberRegEx = new RegExp("^(?:=|" + Rnl.numberPattern.slice(1) + "$)")
 const mixedFractionRegEx = /^-?(?:[0-9]+(?: [0-9]+\/[0-9]+))$/
+const escRegEx = /^\\#/
 
 const dataFrameFromTSV = (str, vars) => {
   // Load a TSV string into a data frame.
   // Data frames are loaded column-wise. The subordinate data structures are:
-  const data = []    // where the main data lives, not including column names or units.
-  const headings = []                   // An array containing the column names
+  let data = [];   // where the main data lives, not including column names or units.
+  const headings = [];                  // An array containing the column names
   const columnMap = Object.create(null) // map of column names to column index numbers
   let rowMap =  false                   // ditto for rows.
-  const units = []                      // array of unit names, one for each column
-  const dtype = []                      // each column's Hurmet operand type
+  const units = [];                     // array of unit names, one for each column
+  const dtype = [];                     // each column's Hurmet operand type
   const unitMap = Object.create(null)   // map from unit names to unit data
   let gotUnits = false
 
@@ -254,10 +263,14 @@ const dataFrameFromTSV = (str, vars) => {
     if (row === 3 && col === 0) { checkForUnitRow() }
 
     if (row === 0) {
-      if (col === 0 && (datum.length > 0 && datum.charAt(0) === "#")) {
-        // Create a rowMap. The first datum in each row is a key to the row.
-        rowMap = Object.create(null)
-        datum = datum.slice(1)
+      if (col === 0) {
+        if (datum.length > 0 && datum.charAt(0) === "#") {
+          // Create a rowMap. The first datum in each row is a key to the row.
+          rowMap = Object.create(null)
+          datum = datum.slice(1)
+        } else if (escRegEx.test(datum)) {
+          datum = datum.slice(1)
+        }
       }
       headings.push(datum)
       columnMap[datum] = col
@@ -310,24 +323,26 @@ const dataFrameFromTSV = (str, vars) => {
 
   // Check if this data qualifies as a Hurmet Map.
   let isMap = false
-  if (data[0].length === 1 && Object.keys(unitMap).length === 0) {
+  let iStart = 0
+  if (Object.keys(unitMap).length === 0) {
     isMap = true
-    for (let i = 1; i < dtype.length; i++) {
-      if (dtype[i] !== dtype[0]) { isMap = false; break }
+    iStart = (rowMap) ? 1 : 0
+    for (let i = iStart + 1; i < dtype.length; i++) {
+      if (dtype[i] !== dtype[iStart]) { isMap = false; break }
     }
   }
 
   if (isMap) {
-    const value = new Map()
-    const keys = Object.keys(columnMap)
-    if (str.charAt(0) === "#") { keys[0] = "#" + keys[0] }
-    for (let i = 0; i < keys.length; i++) {
-      value.set(keys[i], valueFromDatum(data[i][0]))
+    if (dtype[iStart] === dt.RATIONAL) {
+      data = data.map((col, i) => dtype[i] === dt.RATIONAL
+        ? col.map(el => Rnl.fromString(el))
+        : col
+      )
     }
     return {
-      value,
-      unit: (dtype[0] === dt.RATIONAL ? allZeros : null),
-      dtype: dt.MAP + dtype[0]
+      value: { data, headings, columnMap, rowMap },
+      unit: (dtype[0] === dt.RATIONAL ? { expos: allZeros } : null),
+      dtype: dt.MAP + dtype[iStart]
     }
   } else {
     return {
@@ -390,40 +405,37 @@ const dataFrameFromVectors = (vectors, vars) => {
   }
 }
 
-const matrix2table = (matrix, rowNames, columnNames, vars) => {
+const matrix2table = (matrix, headings, rowHeadings) => {
   // Use the contents of a matrix to create a dataframe.
-  const data = []
-  for (let i = 0; i <= matrix.value[0].length; i++) { data.push([]) }
-  const headings = columnNames.value
-  headings.unshift("")
+  if (rowHeadings.length > 0) { headings = [""].concat(headings) }
   const columnMap = Object.create(null)
-  for (let i = 1; i < columnNames.value[0].length; i++) { columnMap[headings[i]] = i }
-  const colDtype = dt.RATIONAL + (matrix.unit ? dt.QUANTITY : 0)
-  const dtype = Array(matrix.value[0].length).fill(colDtype)
-  dtype.unshift(null)
-  let units = []
-  const unitMap = Object.create(null)
-  if (matrix.unit.name) {
-    units = Array(matrix.value[0].length).fill(matrix.unit.name)
-    units.unshift("")
-    unitMap[matrix.unit.name] = unitFromUnitName(matrix.unit.name, vars)
+  for (let i = 0; i < headings.length; i++) {
+    columnMap[headings[i]] = i
   }
-
-  const rowMap = Object.create(null)
-  data[0] = rowNames.value
-  const formatSpec = vars.format ? vars.format.value : "h15"
-  for (let i = 0; i < rowNames.value.length; i++) { rowMap[data[0][i]] = i }
-  for (let i = 0; i < matrix.value.length; i++) {
-    for (let j = 0; j < matrix.value[0].length; j++) {
-      const value = matrix.value[i][j];
-      data[j + 1].push(format(value, formatSpec, "1000000."))
+  let rowMap = false
+  if (rowHeadings.length > 0) {
+    rowMap = Object.create(null)
+    for (let i = 0; i < rowHeadings.length; i++) {
+      rowMap[rowHeadings[i]] = i
     }
   }
-
+  const data = new Array(headings.length)
+  let delta = 0
+  if (rowHeadings.length > 0) {
+    data[0] = rowHeadings
+    delta = 1
+  }
+  for (let j = 0; j < matrix.value[0].length; j++) {
+    const k = j + delta
+    data[k] = [];
+    for (let i = 0; i < matrix.value.length; i++) {
+      data[k].push(matrix.value[i][j])
+    }
+  }
   return {
-    value: { data, headings, columnMap, rowMap, units, dtype },
-    unit: unitMap,
-    dtype: dt.DATAFRAME
+    value: { data, headings, columnMap, rowMap },
+    unit: matrix.unit,
+    dtype: matrix.dtype - dt.MATRIX + dt.MAP
   }
 }
 
@@ -555,6 +567,7 @@ export const formatColumnName = str => {
 }
 
 const isNotEmpty = row => {
+  if (!row) { return false }
   for (let i = 0; i < row.length; i++) {
     if (row[i] !== "" && row[i] !== null) { return true }
   }
@@ -566,8 +579,9 @@ const getNumInfo =  df => {
   const numCols = df.data.length
   const colInfo = new Array(numCols)
   const cellInfo = new Array(numCols)
+  const DFisRational = !df.dtype && Rnl.isRational(df.data[0][0])
   for (let j = 0; j < numCols; j++) {
-    if (df.dtype[j] & dt.RATIONAL) {
+    if (DFisRational || (df.dtype && df.dtype[j] & dt.RATIONAL)) {
       colInfo[j] = { hasAlignChar: false, maxLenAfterAlignChar: 0 }
       cellInfo[j] = []
       for (let i = 0; i < df.data[0].length; i++) {
@@ -610,6 +624,7 @@ const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHeadin
   const numCols = df.data.length
   const writeRowNums = numRows > 5 && !df.rowMap
   const numColsInHeading = numCols + (writeRowNums ? 1 : 0)
+  const isMap = !df.dtype
   let str = "\\begin{array}{"
   str += df.rowMap
     ? "l|"
@@ -617,7 +632,11 @@ const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHeadin
     ? "r|"
     : ""
   for (let j = 1; j < numColsInHeading; j++) {
-    str += (df.dtype[j] & dt.RATIONAL ? "r " : "l " )
+    str += isMap
+      ? "c "
+      : Rnl.isRational(df.data[j][0])
+      ? "r "
+      : "l "
   }
   str = str.slice(0, -1) + "}"
 
@@ -655,13 +674,23 @@ const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHeadin
     if (writeRowNums) { str += String(i + 1) + " & " }
     for (let j = 0; j < numCols; j++) {
       const datum = df.data[j][i]
-      str += mixedFractionRegEx.test(datum)
-        ? format(Rnl.fromString(datum), formatSpec, decimalFormat) + "&"
-        : numberRegEx.test(datum)
-        ? displayNum(datum, colInfo[j], cellInfo[j][i], decimalFormat) + "&"
-        : datum === ""
-        ? "&"
-        : "\\text{" + addTextEscapes(datum) + "}&"
+      if (isMap) {
+        str += datum === undefined
+        ? " & "
+        : Rnl.isRational(datum)
+        ? format(datum, formatSpec, decimalFormat) + "&"
+        : Cpx.isComplex(datum)
+        ? Cpx.display(datum, formatSpec, decimalFormat)[0] + "&"
+        : "\\text{" + datum + "} &"
+      } else {
+        str += mixedFractionRegEx.test(datum)
+          ? format(Rnl.fromString(datum), formatSpec, decimalFormat) + "&"
+          : numberRegEx.test(datum)
+          ? displayNum(datum, colInfo[j], cellInfo[j][i], decimalFormat) + "&"
+          : datum === ""
+          ? "&"
+          : "\\text{" + addTextEscapes(datum) + "}&"
+      }
     }
     str = str.slice(0, -1) + " \\\\ "
   }
@@ -671,7 +700,8 @@ const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHeadin
   return str
 }
 
-const displayAlt = (df, formatSpec = "h3", omitHeading = false) => {
+const displayAlt = (df, formatSpec = "h3", decimalFormat = "1,000,000.",
+                   omitHeading = false) => {
   if (df.data.length === 0) { return "" }
   const numRows = df.data[0].length
   const numCols = df.data.length
@@ -700,14 +730,25 @@ const displayAlt = (df, formatSpec = "h3", omitHeading = false) => {
   }
 
   // Write the data
+  const isMap = !df.dtype
   for (let i = 0; i < numRows; i++) {
     if (writeRowNums) { str += String(i + 1) + "\t" }
     for (let j = 0; j < numCols; j++) {
-      const datum = df.data[j][i]
-      if (mixedFractionRegEx.test(datum)) {
-        str += format(Rnl.fromString(datum), formatSpec, "100000.") + "\t"
+      const datum = df.data[j][i];
+      if (isMap) {
+        str += datum === undefined
+          ? "\t"
+          : Rnl.isRational(datum)
+          ? format(datum, formatSpec, decimalFormat).replace(/{,}/g, ",") + "\t"
+          : Cpx.isComplex(datum)
+          ? Cpx.display(datum, formatSpec, decimalFormat)[1].replace(/{,}/g, ",") + "\t"
+          : datum + "\t"
       } else {
-        str += datum + "\t"
+        if (mixedFractionRegEx.test(datum)) {
+          str += format(Rnl.fromString(datum), formatSpec, "100000.") + "\t"
+        } else {
+          str += datum + "\t"
+        }
       }
     }
     str = str.slice(0, -1) + "\n"

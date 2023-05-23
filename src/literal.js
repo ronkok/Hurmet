@@ -5,7 +5,6 @@ import { evalRpn } from "./evaluate"
 import { Rnl } from "./rational"
 import { parseFormatSpec } from "./format"
 import { DataFrame } from "./dataframe"
-import { map } from "./map"
 
 const numberRegEx = new RegExp(Rnl.numberPattern)
 const unitRegEx = /('[^']+'|[°ΩÅK])$/
@@ -83,7 +82,7 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
         dataStructure.dtype = dt.MAP + dt.RATIONAL + dt.QUANTITY
       }
       return [dataStructure.value, dataStructure.unit, dataStructure.dtype,
-        map.display(dataStructure, "h3", decimalFormat) + "\\;" + unitDisplay]
+        DataFrame.display(dataStructure.value, "h3", decimalFormat) + "\\;" + unitDisplay]
     }
 
   } else if (complexRegEx.test(str)) {

@@ -1,4 +1,5 @@
 import { dt } from "./constants"
+import { parse } from "./parser"
 import { propertyFromDotAccessor } from "./property"
 import { isMatrix } from "./matrix"
 import { errorOprnd } from "./error"
@@ -88,7 +89,7 @@ export const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat
     needsParens = needsParens && !isParened
 
     if (hvar.dtype === dt.DATAFRAME || (hvar.dtype & dt.MAP)) {
-      display = "\\mathrm{" + vars[varName].name + "}"
+      display = "\\mathrm{" + parse(vars[varName].name) + "}"
     } else {
       display = hvar.resultdisplay
       if (!unitAware) {

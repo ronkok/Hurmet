@@ -1,5 +1,4 @@
 import { dt } from "./constants"
-import { mapMap } from "./utils"
 import { errorOprnd } from "./error"
 import { Rnl } from "./rational"
 import { Cpx } from "./complex"
@@ -84,25 +83,61 @@ const unary = {
   },
 
   map: {
-    abs(map)       { return mapMap(map, value => Rnl.abs(value)) },
-    negate(map)    { return mapMap(map, value => Rnl.negate(value)) },
-    exp(map)       { return mapMap(map, value => Rnl.exp(value)) },
-    floor(map)     { return mapMap(map, value => Rnl.floor(value)) },
-    ceil(map)      { return mapMap(map, value => Rnl.ceil(value)) },
-    percent(map)   { return mapMap(map, value => Rnl.multiply(oneTenth, value)) },
-    factorial(map) { return mapMap(map, value => Rnl.factorial(value)) },
-    not(map)       { return mapMap(map, value => !value) }
-  },
-
-  mapWithVectorValues: {
-    abs(map)       { return mapMap(map, array => array.map(e => Rnl.abs(e))) },
-    negate(map)    { return mapMap(map, array => array.map(e => Rnl.negate(e))) },
-    exp(map)       { return mapMap(map, array => array.map(e => Rnl.exp(e)))},
-    floor(map)     { return mapMap(map, array => array.map(e => Rnl.floor(e))) },
-    ceil(map)      { return mapMap(map, array => array.map(e => Rnl.ceil(e))) },
-    percent(map)   { return mapMap(map, array => array.map(e => Rnl.multiply(oneTenth, e))) },
-    factorial(map) { return mapMap(map, array => array.map(e => Rnl.factorial(e))) },
-    not(map)       { return mapMap(map, array => array.map(e => !e)) }
+    abs(map) {
+      map.data = map.data.map(column => Rnl.isRational(column[0])
+      ? column.map(e => Rnl.abs(e))
+      : column
+    )
+      return map
+    },
+    negate(map) {
+      map.data = map.data.map(column => Rnl.isRational(column[0])
+      ? column.map(e => Rnl.negate(e))
+      : column
+    )
+      return map
+    },
+    exp(map) {
+      map.data = map.data.map(column => Rnl.isRational(column[0])
+        ? column.map(e => Rnl.exp(e))
+        : column
+      )
+      return map
+    },
+    floor(map) {
+      map.data = map.data.map(column => Rnl.isRational(column[0])
+        ? column.map(e => Rnl.floor(e))
+        : column
+      )
+      return map
+    },
+    ceil(map) {
+      map.data = map.data.map(column => Rnl.isRational(column[0])
+        ? column.map(e => Rnl.ceil(e))
+        : column)
+      return map
+    },
+    percent(map) {
+      map.data = map.data.map(column => Rnl.isRational(column[0])
+        ? column.map(e => Rnl.multiply(oneTenth, e))
+        : column
+      )
+      return map
+    },
+    factorial(map) {
+      map.data = map.data.map(column => Rnl.isRational(column[0])
+        ? column.map(e => Rnl.factorial(e))
+        : column
+      )
+      return map
+    },
+    not(map) {
+      map.data = map.data.map(column => typeof column[0] === "boolean"
+       ? column.map(e => !e)
+       : column
+      )
+      return map
+    }
   }
 }
 
@@ -134,8 +169,7 @@ const dtype = {
     vector(t0, t1, tkn)     { return t1 },
     matrix(t0, t1, tkn)     { return t1 },
     dataFrame(t0, t1, tkn)  { return t1 },
-    map(t0, t1, tkn)        { return t1 },
-    mapWithVectorValues(t0, t1, tkn) { return t1 }
+    map(t0, t1, tkn)        { return t1 }
   },
   complex: {
     scalar(t0, t1, tkn)  { return t0 },
@@ -164,7 +198,7 @@ const dtype = {
   matrix: {
     scalar(t0, t1, tkn) { return t0 },
     rowVector(t0, t1, tkn) { return t0 },
-    columnVector(t0, t1, tkn) { return tkn === "&" || tkn === "circ" ? t0 : t1 },
+    columnVector(t0, t1, tkn) { return tkn === "*" || tkn === "⌧" ? t1 : t0 },
     matrix(t0, t1, tkn) { return t0 },
     map(t0, t1, tkn)    { return 0 }
   },
@@ -173,12 +207,9 @@ const dtype = {
   },
   map: {
     scalar(t0, t1, tkn) { return t0 },
-    vector(t0, t1, tkn) { return t0 + (t1 & dt.ROWVECTOR) + (t1 & dt.COLUMNVECTOR) },
+    vector(t0, t1, tkn) { return t0 },
     matrix(t0, t1, tkn) { return 0 },
     map(t0, t1, tkn)    { return t0 }
-  },
-  mapWithVectorValues: {
-    scalar(t0, t1, tkn) { return t0 }
   }
 }
 
@@ -268,43 +299,68 @@ const binary = {
     map: {
       // Binary operations with a scalar and a map.
       // Perform element-wise operations.
-      add(scalar, map)      { return mapMap(map, value => Rnl.add(scalar, value)) },
-      subtract(scalar, map) { return mapMap(map, value => Rnl.subtract(scalar, value)) },
-      multiply(scalar, map) { return mapMap(map, value => Rnl.multiply(scalar, value)) },
-      divide(scalar, map)   { return mapMap(map, value => Rnl.divide(scalar, value)) },
-      power(scalar, map)    { return mapMap(map, value => Rnl.power(scalar, value)) },
-      rem(scalar, map)      { return mapMap(map, value => Rnl.rem(scalar, value)) },
-      and(scalar, map)      { return mapMap(map, value => scalar && value) },
-      or(scalar, map)       { return mapMap(map, value => scalar || value) },
-      xor(scalar, map)      { return mapMap(map, value => scalar !== value) }
-    },
-    mapWithVectorValues: {
       add(scalar, map) {
-        return mapMap(map, array => array.map(e => Rnl.add(scalar, e)))
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.add(scalar, e))
+          : col
+        )
+        return map
       },
       subtract(scalar, map) {
-        return mapMap(map, array => array.map(e => Rnl.subtract(scalar, e)))
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.subtract(scalar, e))
+          : col
+        )
+        return map
       },
       multiply(scalar, map) {
-        return mapMap(map, array => array.map(e => Rnl.multiply(scalar, e)))
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.multiply(scalar, e))
+          : col
+        )
+        return map
       },
       divide(scalar, map) {
-        return mapMap(map, array => array.map(e => Rnl.divide(scalar, e)))
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.divide(scalar, e))
+          : col
+        )
+        return map
       },
       power(scalar, map) {
-        return mapMap(map, array => array.map(e => Rnl.power(scalar, e)))
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.power(scalar, e))
+          : col
+        )
+        return map
       },
       rem(scalar, map) {
-        return mapMap(map, array => array.map(e => Rnl.rem(scalar, e)))
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.rem(scalar, e))
+          : col
+        )
+        return map
       },
       and(scalar, map) {
-        return mapMap(map, array => array.map(e => scalar && e))
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map(e => scalar && e)
+          : col
+        )
+        return map
       },
       or(scalar, map) {
-        return mapMap(map, array => array.map(e => scalar || e))
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map(e => scalar || e)
+          : col
+        )
+        return map
       },
       xor(scalar, map) {
-        return mapMap(map, array => array.map(e => scalar !== e))
+        map.data =  map.data.map(col =>  typeof col[0] === "boolean"
+          ? col.map(e => scalar !== e)
+          : col
+        )
+        return map
       }
     }
   },
@@ -349,36 +405,6 @@ const binary = {
       or(v, x)       { return v.map(e => e || x) },
       xor(v, x)      { return v.map(e => e !== x) },
       concat(v, x)   { return [...v, x]}
-    },
-    map: {
-      // Binary operations with a vector and a map
-      add(vector, map) {
-        return mapMap(map, val => vector.map(e => Rnl.add(val, e)))
-      },
-      subtract(vector, map) {
-        return mapMap(map, val => vector.map(e => Rnl.subtract(val, e)))
-      },
-      multiply(vector, map) {
-        return mapMap(map, val => vector.map(e => Rnl.multiply(val, e)))
-      },
-      divide(vector, map) {
-        return mapMap(map, val => vector.map(e => Rnl.divide(val, e)))
-      },
-      power(vector, map) {
-        return mapMap(map, val => vector.map(e => Rnl.power(val, e)))
-      },
-      rem(vector, map) {
-        return mapMap(map, val => vector.map(e => Rnl.rem(val, e)))
-      },
-      and(vector, map) {
-        return mapMap(map, val => vector.map(e => val && e))
-      },
-      or(vector, map) {
-        return mapMap(map, val => vector.map(e => val || e))
-      },
-      xor(vector, map) {
-        return mapMap(map, val => vector.map(e => val !== e))
-      }
     }
   },
 
@@ -655,7 +681,6 @@ const binary = {
       },
       unshift(x, y) { return x.concat(y) }
     },
-
     matrix: {
       // Binary operations on a column vector and a 2-D matrix.
       add(v, m) {
@@ -687,6 +712,72 @@ const binary = {
         return m.map((row, i) => [v[i], ...row])
       },
       unshift(x, y) { return "BAD_CONCAT" }
+    },
+    map: {
+      // Binary operations between a column vector and a map
+      add(vector, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.add(vector[i], e))
+          : col
+        )
+        return map
+      },
+      subtract(vector, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.subtract(vector[i], e))
+          : col
+        )
+        return map
+      },
+      multiply(vector, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.multiply(vector[i], e))
+          : col
+        )
+        return map
+      },
+      divide(vector, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.divide(vector[i], e))
+          : col
+        )
+        return map
+      },
+      power(vector, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.power(vector[i], e))
+          : col
+        )
+        return map
+      },
+      rem(vector, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.rem(vector[i], e))
+          : col
+        )
+        return map
+      },
+      and(vector, map) {
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map((e, i) => vector[i] && e)
+          : col
+        )
+        return map
+      },
+      or(vector, map) {
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map((e, i) => vector[i] || e)
+          : col
+        )
+        return map
+      },
+      xor(vector, map) {
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map((e, i) => vector[i] !== e)
+          : col
+        )
+        return map
+      }
     }
   },
 
@@ -831,93 +922,139 @@ const binary = {
   map: {
     scalar: {
       // Binary opertions on a map and a scalar
-      add(map, scalar)      { return mapMap(map, value => Rnl.add(value, scalar)) },
-      subtract(map, scalar) { return mapMap(map, value => Rnl.subtract(value, scalar)) },
-      multiply(map, scalar) { return mapMap(map, value => Rnl.multiply(value, scalar)) },
-      divide(map, scalar)   { return mapMap(map, value => Rnl.divide(value, scalar)) },
-      power(map, scalar)    { return mapMap(map, value => Rnl.power(value, scalar)) },
-      rem(map, scalar)      { return mapMap(map, value => Rnl.rem(value, scalar)) },
-      and(map, scalar)      { return mapMap(map, value => value && scalar) },
-      or(map, scalar)       { return mapMap(map, value => value || scalar) },
-      xor(map, scalar)      { return mapMap(map, value => value !== scalar) }
-    },
-    vector: {
-      add(map, array) {
-        return mapMap(map, value => array.map(e => Rnl.add(value, e)))
-      },
-      subtract(map, array) {
-        return mapMap(map, value => array.map(e => Rnl.subtract(value, e)))
-      },
-      multiply(map, array) {
-        return mapMap(map, value => array.map(e => Rnl.multiply(value, e)))
-      },
-      divide(map, array) {
-        return mapMap(map, value => array.map(e => Rnl.divide(value, e)))
-      },
-      power(map, array) {
-        return mapMap(map, value => array.map(e => Rnl.power(value, e)))
-      },
-      rem(map, array) {
-        return mapMap(map, value => array.map(e => Rnl.rem(value, e)))
-      },
-      and(map, array) {
-        return mapMap(map, value => array.map(e => value && e))
-      },
-      or(map, array) {
-        return mapMap(map, value => array.map(e => value || e))
-      },
-      xor(map, array) {
-        return mapMap(map, value => array.map(e => value !== e))
-      }
-    },
-    matrix: {
-
-    },
-    map: {
-
-    }
-  },
-  mapWithVectorValues: {
-    scalar: {
       add(map, scalar) {
-        return mapMap(map, array => array.map(e => Rnl.add(e, scalar)))
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.add(e, scalar))
+          : col
+        )
+        return map
       },
       subtract(map, scalar) {
-        return mapMap(map, array => array.map(e => Rnl.subtract(e, scalar)))
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.subtract(e, scalar))
+          : col
+        )
+        return map
       },
       multiply(map, scalar) {
-        return mapMap(map, array => array.map(e => Rnl.multiply(e, scalar)))
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.multiply(e, scalar))
+          : col
+        )
+        return map
       },
       divide(map, scalar) {
-        return mapMap(map, array => array.map(e => Rnl.divide(e, scalar)))
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.divide(e, scalar))
+          : col
+        )
+        return map
       },
       power(map, scalar) {
-        return mapMap(map, array => array.map(e => Rnl.power(e, scalar)))
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.power(e, scalar))
+          : col
+        )
+        return map
       },
       rem(map, scalar) {
-        return mapMap(map, array => array.map(e => Rnl.rem(e, scalar)))
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.rem(e, scalar))
+          : col
+        )
+        return map
       },
       and(map, scalar) {
-        return mapMap(map, array => array.map(e => e && scalar))
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map(e => e && scalar)
+          : col
+        )
+        return map
       },
       or(map, scalar) {
-        return mapMap(map, array => array.map(e => e || scalar))
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map(e => e || scalar)
+          : col
+        )
+        return map
       },
       xor(map, scalar) {
-        return mapMap(map, array => array.map(e => e !== scalar))
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map(e => e !== scalar)
+          : col
+        )
+        return map
       }
-
     },
-    vector: {
-
+    columnVector: {
+      add(map, vector) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.add(e, vector[i]))
+          : col
+        )
+        return map
+      },
+      subtract(map, vector) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.subtract(e, vector[i]))
+          : col
+        )
+        return map
+      },
+      multiply(map, vector) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.multiply(e, vector[i]))
+          : col
+        )
+        return map
+      },
+      divide(map, vector) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.divide(e, vector[i]))
+          : col
+        )
+        return map
+      },
+      power(map, vector) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.power(e, vector[i]))
+          : col
+        )
+        return map
+      },
+      rem(map, vector) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.rem(e, vector[i]))
+          : col
+        )
+        return map
+      },
+      and(map, vector) {
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map((e, i) => e && vector[i])
+          : col
+        )
+        return map
+      },
+      or(map, vector) {
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map((e, i) => e || vector[i])
+          : col
+        )
+        return map
+      },
+      xor(map, vector) {
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map((e, i) => e !== vector[i])
+          : col
+        )
+        return map
+      }
     },
     matrix: {
 
     },
     map: {
-
-    },
-    mapWithVectorValues: {
 
     }
   }
@@ -926,6 +1063,8 @@ const binary = {
 // Binary relations get their own object, separate from other binary operations.
 // That's because Hurmet allows chained comparisons, as in  a < b < c.
 // So we have to pass yPrev as well as the two current operands.
+
+const strOps = ["∈", "in", "∋", "⊇", "∉", "!in", "∌", "⊈", "⊉"]
 
 const relations = {
   scalar: {
@@ -961,15 +1100,14 @@ const relations = {
     map: {
       relate(op, x, map, yPrev) {
         if (yPrev === undefined) {
-          return mapMap(map, value => compare(op, x, value, undefined))
-        } else if (typeof yPrev !== "object") {
-          return mapMap(map, value => compare(op, x, value, yPrev))
+          map.data =  map.data.map((column, j) =>
+            j > 0 || typeof column[0] !== "string" || strOps.includes(op)
+            ? column.map(e => compare(op, x, e, undefined))
+            : column
+          )
+          return map
         } else {
-          const newMap = new Map()
-          for (const [key, value] of map.entries()) {
-            newMap.set(key,  compare(op, x, value, yPrev[key]))
-          }
-          return newMap
+          // Error.
         }
       }
     }
@@ -1003,6 +1141,18 @@ const relations = {
       relate(op, x, y, yPrev) {
         if (yPrev === undefined) {
           return x.map((e, i) => compare(op, e, y[i], undefined))
+        }
+      }
+    },
+    map: {
+      relate(op, v, map, yPrev) {
+        if (yPrev === undefined) {
+          map.data =  map.data.map((column, j) =>
+            j > 0 || typeof column[0] !== "string" || strOps.includes(op)
+            ? column.map((e, i) => compare(op, v[i], e, undefined))
+            : column
+          )
+          return map
         }
       }
     }
@@ -1041,14 +1191,11 @@ export const isDivByZero = (quotient, shape) => {
       }
       return false
     case "map":
-      for (const [_, value] of Object.entries(quotient)) {
-        if (value[1] === BigInt(0)) { return true }
-      }
-      return false
-    case "mapWithVectorValues":
-      for (const [_, value] of Object.entries(quotient)) {
-        for (let i = 0; i < value.length; i++) {
-          if (value[i][1] === BigInt(0)) { return true }
+      for (let j = 0; j < quotient.data[0].length; j++) {
+        if (Rnl.isRational(quotient.data[j][0])) {
+          for (let i = 0; i < quotient.data.length; i++) {
+            if (quotient.data[i][j][1] === BigInt(0)) { return true }
+          }
         }
       }
       return false

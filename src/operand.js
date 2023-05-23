@@ -57,7 +57,7 @@ export const fromAssignment = (cellAttrs, unitAware) => {
   if (dtype === dt.STRING || dtype === dt.BOOLEAN || dtype === dt.DRAWING ||
       dtype === dt.MODULE || dtype === dt.NULL) {
     oprnd.unit = null
-  } else if (dtype === dt.DATAFRAME || (dtype & dt.MAP)) {
+  } else if (dtype === dt.DATAFRAME) {
     oprnd.unit = Object.freeze(clone(cellAttrs.unit))
   } else if (cellAttrs.unit && cellAttrs.unit.expos) {
     oprnd.unit = clone(cellAttrs.unit)
@@ -75,10 +75,17 @@ export const fromAssignment = (cellAttrs, unitAware) => {
   if (cellAttrs.dtype & dt.QUANTITY) {
     // Here we discard some of the cellAttrs information. In a unit-aware calculation,
     // number, matrix, and map operands contain only the value.inBaseUnits.
-    oprnd.value = Object.freeze(unitAware
-      ? clone(cellAttrs.value.inBaseUnits)
-      : clone(cellAttrs.value.plain)
-    )
+    if (cellAttrs.dtype & dt.MAP) {
+      oprnd.value = clone(cellAttrs.value)
+      oprnd.value.data = unitAware
+        ? oprnd.value.data.inBaseUnits
+        : oprnd.value.data.plain
+    } else {
+      oprnd.value = Object.freeze(unitAware
+        ? clone(cellAttrs.value.inBaseUnits)
+        : clone(cellAttrs.value.plain)
+      )
+    }
     oprnd.dtype = cellAttrs.dtype - dt.QUANTITY
 
   } else if (cellAttrs.dtype === dt.STRING) {

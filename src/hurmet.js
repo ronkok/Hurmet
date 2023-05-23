@@ -1,6 +1,7 @@
 import { parse } from "./parser"
 import { calculate } from "./calculate"
 import { md2html } from "./md2html"
+import { updateCalculations } from "./updateCalculations"
 
 /*
  * This file bundles together and exposes the calculation parts of Hurmet for use
@@ -25,5 +26,6 @@ import { md2html } from "./md2html"
 export default {
   parse,
   calculate,
-  md2html
+  md2html,
+  updateCalculations
 }
