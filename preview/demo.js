@@ -9501,7 +9501,9 @@ const TABLES = (function() {
           if (state.inHtml && content.length === 1 && content[0].type === "paragraph") {
             content = content[0].content;
           }
-          if (content.length === 1 && content[0].type === "null") { content = []; }
+          if (content.length === 1 && content[0].type === "null") {
+            content = [{ type: "paragraph", content: [] }];
+          }
           table.content[i].content.push({
             "type": cell.inHeader ? "table_header" : "table_cell",
             "attrs": {
