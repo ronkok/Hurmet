@@ -1,5 +1,5 @@
 const fs = require('fs') // Node.js file system
-const hurmet = require('./hurmet.cjs');
+const hurmet = require('../preview/hurmet.js');
 
 // This file builds the Hurmet documentation.
 

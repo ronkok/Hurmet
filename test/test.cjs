@@ -3,7 +3,7 @@
 /* eslint-disable indent-legacy */
 /* eslint-disable no-console */
 
-const hurmet = require('../utils/hurmet.cjs');
+const hurmet = require('../preview/hurmet.js');
 
 /* Unit tests.
  * For unit tests, I merely check if module outputs match their expected output.

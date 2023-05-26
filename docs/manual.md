@@ -6,6 +6,7 @@
    <title>Hurmet Manual</title>
    <link rel="icon" href="./images/favicon.svg"/>
    <link rel="stylesheet" href="./docStyles.min.css">
+   <script src="hurmet.min.js"></script>
 </head>
 
 <body>
@@ -2454,13 +2455,13 @@ Copyright © 2020-2023 Ron Kok. Released under the [MIT License][]
 </div>
 
 <div id="demo">
-<p>format = "<input type="text" id="formatBox" value="h3" onchange="updateFormat()" style="width: 2em;">"</p>
+<p>format = "<input type="text" id="formatBox" value="h3" style="width: 2em;">"</p>
 <p></p>
 <div>Give it a try. (It’s interactive.)</div>
 <div id="input-container"><form><div id="demo-input"></div></form></div>
 <div id="demo-output"></div>
 </div> <!-- demo -->
 
-<script type="module" src="./demo.min.js"></script>
+<script src="./demo.min.js"></script>
 </body>
 </html>

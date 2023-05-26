@@ -1,5 +1,4 @@
 /* eslint-disable */
-import { parse } from "./parser"
 // ::- A specification for serializing a ProseMirror document as
 // Markdown/CommonMark text.
 export class MarkdownSerializer {
@@ -228,7 +227,7 @@ const hurmetNodes =  {
     let entry = node.attrs.entry.trim().replace(/\n(?: *\n)+/g, "\n").replace(/\n/gm, "\n" + state.delim)
     if (state.isGFM) {
       // Convert calculation to TeX
-      const tex = parse(entry)
+      const tex = hurmet.parse(entry)
       writeTex(state, node.attrs.displayMode, tex)
     } else {
       if (!node.attrs.displayMode) {

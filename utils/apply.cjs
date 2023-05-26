@@ -1,5 +1,5 @@
 const fs = require('fs')  // Node.js file system utility
-const hurmet = require('./hurmet.cjs');
+const hurmet = require('../preview/hurmet.js');
 
 // The main function has to be async because it contains an 'await' statement.
 (async function main() {

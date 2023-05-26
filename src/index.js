@@ -17,7 +17,6 @@ import { buildMenuItems } from "./menu"
 import { buildKeymap } from "./keymap"
 import { buildInputRules } from "./inputrules"
 import { CalcView, TexView } from "./nodeviews"
-import { updateCalculations } from "./updateCalculations"
 
 // Bundle together the plugins.
 function pmSetup(options) {
@@ -67,7 +66,7 @@ const fix = fixTables(window.view.state)
 if (fix) { window.view.state = window.view.state.apply(fix.setMeta("addToHistory", false)) }
 
 // eslint-disable-next-line no-undef
-updateCalculations(window.view, schema.nodes.calculation, true)
+hurmet.updateCalculations(window.view, schema.nodes.calculation, true)
 
 document.execCommand("enableObjectResizing", false, false)
 document.execCommand("enableInlineTableEditing", false, false)

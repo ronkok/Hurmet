@@ -4,8 +4,7 @@ import {findWrapping, liftTarget, canSplit, ReplaceAroundStep} from "prosemirror
 import {Slice, Fragment, NodeRange} from "prosemirror-model"
 import { renderToC, tocLevels } from "./paginate"
 import { dt } from "./constants"
-import { draw } from "./draw"
-import temml from "./temml.js"
+import { renderSVG } from "./renderSVG"
 
 // Helpers for creating a schema that supports tables.
 
@@ -370,7 +369,7 @@ export const nodes = {
       dom.classList = "hurmet-calc"
       if (node.attrs.dtype && node.attrs.dtype === dt.DRAWING) {
         dom = document.createElement('span')
-        dom.appendChild(draw.renderSVG(node.attrs.resultdisplay))
+        dom.appendChild(renderSVG(node.attrs.resultdisplay))
       } else if (node.attrs.dtype && node.attrs.dtype === dt.MODULE &&
         functionRegEx.test(node.attrs.entry)) {
         dom.appendChild(document.createElement('pre'))
@@ -381,7 +380,7 @@ export const nodes = {
         dom.firstChild.textContent = node.attrs.alt ? node.attrs.alt : node.attrs.entry
       } else {
         const tex = node.attrs.tex
-        temml.render(tex, dom, {
+        hurmet.render(tex, dom, {
           displayMode: node.attrs.displayMode,
           trust: (context) => context.command === '\\class' && context.class === "special-fraction",
           wrap: "="
@@ -411,7 +410,7 @@ export const nodes = {
       const tex = node.attrs.tex
       dom.dataset.tex = tex
       if (node.attrs.displayMode) { dom.dataset.display = "true" }
-      temml.render(tex, dom, { displayMode: node.attrs.displayMode, wrap: "=" })
+      hurmet.render(tex, dom, { displayMode: node.attrs.displayMode, wrap: "=" })
       return dom
     }
   },
