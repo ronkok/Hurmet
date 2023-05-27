@@ -188,7 +188,7 @@ th:first-child .page-display { float: left; }
 
 .ProseMirror {
   word-wrap: break-word;
-  white-space: normal;
+  white-space: pre-wrap;
   -webkit-font-variant-ligatures: none;
   font-variant-ligatures: none;
 }
@@ -933,8 +933,8 @@ menclose.xcancel {
 math   { font-size: 1em; }
 math .special-fraction { font-family: "Times New Roman"; }
 /* Create a hanging indent on calculations that wrap to a second line. */
-.hurmet-calc > math > mrow:not(:first-child) { margin-left: 2.5em }
-.hurmet-calc > math > mrow:not(:last-child) { margin-right: -2.5em }
+.hurmet-calc > math > mrow:not(:first-child) { margin-left: 2em }
+.hurmet-calc > math > mrow:not(:last-child) { margin-right: -2em }
 
 /*
  * This section contains CSS for tables.
