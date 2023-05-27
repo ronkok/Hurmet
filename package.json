@@ -48,7 +48,7 @@
     "demo": "rollup --config utils/rollup.demo.config.js",
     "minify": "terser preview/prosemirror.js -o site/prosemirror.min.js -m && terser preview/hurmet.js -o site/hurmet.min.js -m && terser preview/demo.js -o site/demo.min.js -m",
     "build": "yarn hurmet && yarn demo && yarn pm && yarn minify && yarn docs",
-    "rates": "node utils/updateExchangeRates.js",
+    "rates": "node utils/updateExchangeRates.cjs",
     "docs": "node utils/buildDocs.cjs",
     "test": "yarn test:lint && node test/test.cjs",
     "test:lint": "eslint src",
