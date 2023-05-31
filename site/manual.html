@@ -1160,6 +1160,27 @@ end</code></pre><p>A Hurmet document can load an entire module into one variable
 <p><code>https://gist.githubusercontent.com/ronkok/c6c564cf162008cccf03ab8afeb09a83/raw/ParentFileExample.txt</code></p>
 </div>
 <p>If you create your own Gists, you&#x27;ll see that the addresses of the raw files are very long. If you want a permalink to your file, delete the 40 random characters after &quot;/raw/&quot;. Github keeps a copy of every draft of your file and the random part after &quot;/raw/&quot; is the revision ID.</p>
+<h2 id='batch-mode'>Batch Mode</h2>
+<p>Suppose you want to operate in batch mode and run the calculations on an entire document, or multiple documents, all at once. You can do that.</p>
+<p>There is an altenate version of Hurmet that runs in Node.js from a command-line interface (CLI). It exposes one method, <code>md2html()</code>, which takes Markdown input and returns an HTML document. The code below shows how one might apply it in Node.js:</p>
+<pre><code>// Read a Markdown file, run the calcs, and write an HTML file.
+const fs = require(&#x27;fs&#x27;)
+const hurmet = require(&#x27;filePath/hurmet.js&#x27;)
+const titleRegEx = /([^.\\/]+)\.md$/;  // A helper.
+
+// The main function has to be async.
+(async function main() {
+  const inputPath = &#x27;filePath/fileName.md&#x27;
+  const title = titleRegEx.exec(inputPath)[1];
+  const outputPath = `filePath/${title}.html`
+  // Read the file.
+  const md = fs.readFileSync(inputPath).toString(&#x27;utf8&#x27;)
+  // Run the calculations and convert to HTML.
+  const html = await hurmet.md2html(md, title)
+  fs.writeFileSync(outputPath, html)
+})();</code></pre><p>In the code above, you need to customize the <code>filePath</code> and <code>fileName</code> callouts. </p>
+<p>The HTML file <code>&lt;head&gt;</code> contains references to a CSS (style) file and two fonts. You can get those files, and the <code>hurmet.js</code> file that runs all this, from Hurmet’s <a href='https://github.com/ronkok/Hurmet'>GitHub repository</a>. Find the green button labeled “code” and get a zip file.</p>
+<p>In that zip file, the <code>preview</code> folder contains the files: <code>hurmet.js</code>, <code>styles.css</code>, <code>latinmodernmath.woff2</code>, and <code>Temml.woff2</code>. The CSS and font files need to be copied to the same folder as your HTML files.</p>
 <h2 id='troubleshooting'>Troubleshooting</h2>
 <h4 id='typing-lag'>Typing lag</h4>
 <p>A big document with a lot of math may cause typing lag. You can regain speed by clicking on the Draft Mode toggle button at <strong>File | Draft mode</strong>. It will render math as plain text and omit the blue echos.</p>
@@ -1365,6 +1386,7 @@ end</code></pre><p>A Hurmet document can load an entire module into one variable
 </details>
 </li>
 <li><a href="#remote-modules">Modules</a></li>
+<li><a href="#batch-mode">Batch Mode</a></li>
 <li>
 <details><summary>End notes</summary>
 <ul><li class="tight"><p><a href='#troubleshooting'>Troubleshooting</a></p>

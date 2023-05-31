@@ -9,7 +9,7 @@ const hurmet = require('../preview/hurmet.js');
   // Start by translating the reference manual from Markdown to HTML.
   let manual = fs.readFileSync('docs/manual.md').toString('utf8')
   // convert Markdown to HTML
-  manual =  await hurmet.md2html(manual, true)
+  manual =  await hurmet.md2html(manual, "", true)
   fs.writeFileSync('site/manual.html', manual)
 
   // Now translate the unit-definitions file from Markdown to HTML.
@@ -18,7 +18,7 @@ const hurmet = require('../preview/hurmet.js');
   units = units.replace("| L  | M  | Ti | E  | Te | # | LI | $ |",
     "| length | mass | time | electric<br>current | temp | amount | luminous<br>intensity " +
     "| money |")
-  units =  await hurmet.md2html(units, true)
+  units =  await hurmet.md2html(units, "", true)
 
   // In the unit-definition file, replace factor fractions with stacked fractions.
   const fractionRegEx = /<td>([\d.]+)\/([\d.]+)<\/td>/g

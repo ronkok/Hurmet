@@ -2260,6 +2260,46 @@ are very long. If you want a permalink to your file, delete the 40
 random characters after "/raw/". Github keeps a copy of every draft of your
 file and the random part after "/raw/" is the revision ID.
 
+## Batch Mode
+
+Suppose you want to operate in batch mode and run the calculations on an entire
+document, or multiple documents, all at once. You can do that.
+
+There is an altenate version of Hurmet that runs in Node.js from a command-line
+interface (CLI). It exposes one method, `md2html()`, which takes Markdown input
+and returns an HTML document. The code below shows how one might apply it in
+Node.js:
+
+```
+// Read a Markdown file, run the calcs, and write an HTML file.
+const fs = require('fs')
+const hurmet = require('filePath/hurmet.js')
+const titleRegEx = /([^.\\/]+)\.md$/;  // A helper.
+
+// The main function has to be async.
+(async function main() {
+  const inputPath = 'filePath/fileName.md'
+  const title = titleRegEx.exec(inputPath)[1];
+  const outputPath = `filePath/${title}.html`
+  // Read the file.
+  const md = fs.readFileSync(inputPath).toString('utf8')
+  // Run the calculations and convert to HTML.
+  const html = await hurmet.md2html(md, title)
+  fs.writeFileSync(outputPath, html)
+})();
+```
+
+In the code above, you need to customize the `filePath` and `fileName` callouts. 
+
+The HTML file `<head>` contains references to a CSS (style) file and two fonts.
+You can get those files, and the `hurmet.js` file that runs all this, from Hurmet’s
+[GitHub repository](https://github.com/ronkok/Hurmet). Find the green
+button labeled “code” and get a zip file.
+
+In that zip file, the `preview` folder contains the files: `hurmet.js`, `styles.css`,
+`latinmodernmath.woff2`, and `Temml.woff2`. The CSS and font files need to be
+copied to the same folder as your HTML files.
+
 ## Troubleshooting
 
 #### Typing lag
@@ -2455,6 +2495,7 @@ Copyright © 2020-2023 Ron Kok. Released under the [MIT License][]
 </details>
 </li>
 <li><a href="#remote-modules">Modules</a></li>
+<li><a href="#batch-mode">Batch Mode</a></li>
 <li>
 <details><summary>End notes</summary>
 

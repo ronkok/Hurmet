@@ -27016,13 +27016,32 @@
     return html
   };
 
-  async function md2html(md, inHtml = false) {
+  const wrapWithHead = (html, title, attrs) => {
+    title = title ? title : "Hurmet doc";
+    const fontClass = attrs && attrs.fontSize
+      ? { "10": "long-primer", "12": "pica" }[attrs.fontSize]
+      : "long-primer";
+    const head = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${title}</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<article class="ProseMirror ${fontClass}">
+`;
+    return head + html + "\n</article>\n</body>\n</html>"
+  };
+
+  async function md2html(md, title = "", inHtml = false) {
     // Convert the Markdown to an AST that matches the Hurmet internal data structure.
     let ast = md2ast(md, inHtml);
 
+    // Populate a Table of Contents, if any exists.
     const tocCapture = /\n *\n{\.toc start=(\d) end=(\d)}\n/.exec(md);
     if (tocCapture) {
-      // Populate a Table of Contents
       const start = Number(tocCapture[1]);
       const end = Number(tocCapture[2]);
       const tocArray = [];
@@ -27035,7 +27054,12 @@
     ast = await updateCalcs(ast);
 
     // Write the HTML
-    const html = ast2html(ast);
+    let html = ast2html(ast);
+
+    if (title.length > 0) {
+      html = wrapWithHead(html, title, ast.attrs);
+    }
+
     return html
   }
 
