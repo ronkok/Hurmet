@@ -1243,11 +1243,11 @@ _im_
 +---------------+----------------------+---------------------------------------------+
 | ∌             | ¢` d ∌ p `           | d does not have a property named y          |
 +---------------+----------------------+---------------------------------------------+
-| ⊆             | ¢`c ⊆ s`             | Is a subset of\                             |
-|               |                      |  auto-correct: \subseteq or contains        |
+| ⊂             | ¢`c ⊂ s`             | Is a subset of\                             |
+|               |                      |  auto-correct: \subset or contains          |
 +---------------+----------------------+---------------------------------------------+
-| ⊈             | ¢`c ⊈ s`             | Is not a subset of\                         |
-|               |                      |  auto-correct: \nsubseteq                   |
+| ⊄             | ¢`c ⊄ s`             | Is not a subset of\                         |
+|               |                      |  auto-correct: \nsubset                     |
 +---------------+----------------------+---------------------------------------------+
 | and\          | if _a_ and _b_\      | Logical and                                 |
 | &&\           | if _a_ && _b_\       |                                             |
@@ -1809,6 +1809,40 @@ Let _N_ be the number of digits specified. Then:
 Numeric result display types **f** and **%** can be set to any non-negative
 integer. The significant digit display types are limited to no more than 15
 significant digits.
+
+## Tests
+
+Hurmet test statements will send an error message if a criterion is not met. 
+For example, if you assign numeric values to two variables and then write:
+
+{indented}
+>  `@test F_u ≤ ϕR_n`
+
+The result will be one of these two messages:
+
++=======================+============================================+
+| ¢` P_u ≤ ϕR_n, ok ✓ ` | $P_u \nleq ϕR_n, \colorbox{Salmon}{ n.g.}$ |
++-----------------------+--------------------------------------------+
+{.nogrid colWidths="157 178"}
+
+If the test fails, the message is also written to the console. So you can run an
+entire document and get notifications in one place if something has gone wrong.
+(You can see a browser console by typing Ctrl-Shift-I.)
+
+If you have previously assigned a string to the variable “assert”, a failing
+test message takes a more informative format:
+
+{indented}
+>  ¢` assert = "The column at location B2 should work." `
+
+   $\colorbox{Salmon}{The column at location B2 should work, but $P_u \nleq ϕR_n $}$
+
+A test statement takes this form:
+
+{indented}
+>  ![@test value1 comparison operator value2](images/test-railroad.svg)
+
+If you want a unit-aware comparison, write “@@test” instead of “@test”.
 
 ## Drawings
 
@@ -2396,6 +2430,7 @@ Copyright © 2020-2023 Ron Kok. Released under the [MIT License][]
 </details>
 </li>
 <li><a href="#numeral-display">Numeral Display</a></li>
+<li><a href="#tests">Tests</a></li>
 <li><a href="#drawings">Drawings</a></li>
 <li>
 <details><summary>UDFs</summary>

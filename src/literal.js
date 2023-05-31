@@ -50,7 +50,7 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
       return parseFormatSpec(str.slice(1, -1).trim())
     } else {
       const tex = parse(str, decimalFormat)
-      return [str, undefined, dt.STRING, tex]
+      return [str.slice(1, -1), undefined, dt.STRING, tex]
     }
 
   } else if (/^[([]/.test(str)) {

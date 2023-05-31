@@ -473,9 +473,12 @@ end`, vars)
     ["true || false = @", "true false ||", "true"],
     ["ceil(4.5) = @", "®45/10 ceil", "5"],
     ["floor(-4.5) = @", "®-45/10 floor", "-5"],
-    [`matrix2table(matrix, ["D", "L"], ["A", "B"]) = @`, `¿matrix "D" "L" matrix 1 2 "A" "B" matrix 1 2 matrix2table 3`, "``\tD\tL\nA\t2.1\t7.5\nB\t-15.3\t33``"]
+    [`matrix2table(matrix, ["D", "L"], ["A", "B"]) = @`, `¿matrix "D" "L" matrix 1 2 "A" "B" matrix 1 2 matrix2table 3`, "``\tD\tL\nA\t2.1\t7.5\nB\t-15.3\t33``"],
+    [`@test 2 < 3`, "®2/1 ®3/1 <", "2 < 3, ok ✓"],
+    [`@test 2 > 3`, "®2/1 ®3/1 >", "2 !> 3, n.g."]
   ]
 
+  const testRegEx = /^(@{1,2})test /
   console.log("Now testing calculations…")
   console.log("")
   for (let i = 0; i < calcTests.length; i++) {
@@ -484,7 +487,9 @@ end`, vars)
     const expectedRPN = calcTests[i][1];
     const expectedOutput = calcTests[i][2];
     const pos = inputStr.lastIndexOf("=")
-    const [_, rpn] = hurmet.parse(inputStr.slice(0, pos).trim(), "1,000,000.", true)
+    let str = pos > -1 ? inputStr.slice(0, pos).trim() : inputStr
+    str = str.replace(testRegEx, "")
+    const [_, rpn] = hurmet.parse(str, "1,000,000.", true)
     const output = hurmet.calculate(inputStr, vars, true)
     if (output !== expectedOutput || rpn !== expectedRPN) {
       numErrors += 1

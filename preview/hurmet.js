@@ -3685,7 +3685,7 @@
     break: ["break", "\\mathrel{\\mathrm{break}}", tt.KEYWORD, ""],
     to: ["to", "\\mathbin{\\mathrm{to}}", tt.TO, "" ],
     throw: ["throw", "\\mathrel{\\mathrm{throw}}", tt.UNARY, ""],
-    echo: ["echo", "\\mathrel{\\mathrm{echo}}", tt.UNARY, ""],
+    print: ["print", "\\mathrel{\\mathrm{print}}", tt.UNARY, ""],
     return: ["return", "\\mathrel{\\mathrm{return}}", tt.RETURN, ""],
     sqrt: ["sqrt", "\\sqrt", tt.UNARY, ""],
     otherwise: ["otherwise", "\\mathrel{\\mathrm{otherwise}}", tt.LOGIC, ""],
@@ -3711,7 +3711,7 @@
     "<-->": ["<-->", "\\xrightleftarrows", tt.UNARY, ""]
   });
 
-  const miscRegEx = /^([/÷\u2215_:,;\t^+\\\-–−*×∘⊗⦼⊙√∛∜·.%|╏‖¦><=≈≟≠≡≤≥≅∈∉∋∌⊂⊄⊆⊈⊇⊉!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃∫∬∮∑([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7$£¥€₨₩₪]+)/;
+  const miscRegEx = /^([/÷\u2215_:,;\t^+\\\-–−*×∘⊗⦼⊙√∛∜·.%|╏‖¦><=≈≟≠≡≤≥≅∈∉∋∌⊂⊄⊆⊈⊃⊇⊉!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃∫∬∮∑([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7$£¥€₨₩₪]+)/;
 
   const miscSymbols = Object.freeze({
     //    input, output, type,  closeDelim
@@ -3750,7 +3750,9 @@
     "==": ["==", "⩵", tt.REL, ""],
     "≡": ["≡", "≡", tt.REL, ""],
     ">": [">", "\\gt", tt.REL, ""],
+    "\u226f": ["\u226f", "\\ngtr", tt.REL, ""],
     "<": ["<", "\\lt", tt.REL, ""],
+    "\u226e": ["\u226e", "\\nless", tt.REL, ""],
     "?=": ["?=", "\u225F", tt.REL, ""],
     "≟": ["≟", "\u225F", tt.REL, ""],
     "≠": ["≠", "≠", tt.REL, ""],
@@ -3782,6 +3784,10 @@
     "∉": ["∉", "∉", tt.REL, ""],
     "∋": ["∋", "∋", tt.REL, ""],
     "∌": ["∌", "∌", tt.REL, ""],
+    "⊂": ["⊂", "⊂", tt.REL, ""],
+    "⊃": ["⊃", "⊃", tt.REL, ""],
+    "⊄": ["⊄", "⊄", tt.REL, ""],
+    "⊅": ["⊅", "⊅", tt.REL, ""],
     "⊆": ["⊆", "⊆", tt.REL, ""],
     "⊈": ["⊈", "⊈", tt.REL, ""],
     "⊇": ["⊇", "⊇", tt.REL, ""],
@@ -3897,12 +3903,17 @@
     "\\iff": ["\\iff", "\\iff", tt.LOGIC, ""],
     "\\land": ["\\land", "\\land", tt.BIN, ""],
     "\\lor": ["\\lor", "\\lor", tt.BIN, ""],
+    "\\ngtr": ["\\ngtr", "\\ngtr", tt.REL, ""],
+    "\\nless": ["\\nless", "\\nless", tt.REL, ""],
+    "\\nleq": ["\\nleq", "\\nleq", tt.REL, ""],
+    "\\ngeq": ["\\ngeq", "\\ngeq", tt.REL, ""],
     "\\in": ["\\in", "∈", tt.REL, ""],
     "\\notin": ["\\notin", "∉", tt.REL, ""],
     "\\subset": ["\\subset", "⊂", tt.REL, ""],
     "\\subseteq": ["\\subseteq", "⊆", tt.REL, ""],
     "\\nsubset": ["\\nsubset", "⊄", tt.REL, ""],
     "\\nsubseteq": ["\\nsubseteq", "⊈", tt.REL, ""],
+    "\\supset": ["\\subset", "⊃", tt.REL, ""],
     "\\left.": ["\\left.", "\\left.", tt.LEFTBRACKET, "\\right."],
     "\\right.": ["\\right.", "\\right.", tt.RIGHTBRACKET, ""],
     "\\mod": ["\\mod", "\\mod", tt.BIN, ""],
@@ -6295,8 +6306,32 @@
     const str = "Error. Mismatch in number of multiple assignment.";
     return [`\\textcolor{firebrick}{\\text{${str}}}`, str]
   };
+  const testRegEx = /^@{1,2}test /;
+  const compRegEx = /\u00a0([⩵≠><>≤≥∋∈∉∌⊂⊃⊄⊅]|==|in|!in|!=|=>|<=)$/;
+  const negatedComp = {
+    "⩵": ["≠", "≠"],
+    "==": ["≠", "≠"],
+    "≠": ["==", "=="],
+    ">": ["\\ngtr", "!>"],
+    "<": ["\\nless", "!<"],
+    "≤": ["\\nleq", "!≤"],
+    "≥": ["\\ngeq", "!≥"],
+    "∋": ["∌", "∌"],
+    "∈": ["∉", "∉"],
+    "⊂": ["⊄", "⊄"],
+    "⊃": ["⊅", "⊅"],
+    "∉": ["∈", "∈"],
+    "∌": ["∋", "∋"],
+    "⊄": ["⊂", "⊂"],
+    "⊅": ["⊃", "⊃"],
+    "in": ["∉", "∉"],
+    "!in": ["in", "in"],
+    "!=": ["==", "=="],
+    "=>": ["\\ngeq", "!≥"],
+    "<=": ["\\ngeq", "!≥"]
+  };
 
-  const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAware) => {
+  const formatResult = (stmt, result, formatSpec, decimalFormat, assert, isUnitAware) => {
     if (!result) { return stmt }
 
     if (result.dtype === dt.DRAWING) {
@@ -6323,6 +6358,31 @@
         resultDisplay = "";
         altResultDisplay = "";
         return stmt
+
+      } else if (result.dtype & dt.BOOLEAN && testRegEx.test(stmt.entry) &&
+        compRegEx.test(stmt.rpn)) {
+        if (testValue(result) === true) {
+          resultDisplay = parse(stmt.entry.replace(testRegEx, "")) +
+            ",\\text{ ok }✓";
+          altResultDisplay = stmt.entry.replace(testRegEx, "") + ", ok ✓";
+        } else {
+          const op = compRegEx.exec(stmt.rpn).slice(1);
+          const negOp = negatedComp[op];
+          if (assert) {
+            const assertStr = assert.value.replace(/\.$/, "");
+            resultDisplay = `\\colorbox{Salmon}{${assertStr}, but $` +
+                parse(stmt.entry.replace(testRegEx, "").replace(op, negOp[0])) + "$}";
+            altResultDisplay = assertStr + ", but " +
+                stmt.entry.replace(testRegEx, "").replace(op, negOp[1]);
+          } else {
+            resultDisplay = parse(stmt.entry.replace(testRegEx, "").replace(op, negOp[0])) +
+                ",\\colorbox{Salmon}{ n.g.}";
+            altResultDisplay = stmt.entry.replace(testRegEx, "").replace(op, negOp[1]) +
+                ", n.g.";
+          }
+          // eslint-disable-next-line no-console
+          console.log(altResultDisplay);
+        }
 
       } else if (isMatrix(result)) {
         resultDisplay = Matrix.display((isUnitAware || result.value.plain)
@@ -6456,6 +6516,29 @@
     return stmt
   };
 
+  const testValue = oprnd => {
+    if (isVector(oprnd)) {
+      for (let i = 0; i < oprnd.value.length; i++) {
+        if (!oprnd.value[i]) { return false }
+      }
+    } else if (isMatrix(oprnd)) {
+      for (let i = 0; i < oprnd.value.length; i++) {
+        for (let j = 0; j < oprnd.value[0].length; j++) {
+          if (!oprnd.value[i][j]) { return false }
+        }
+      }
+    } else if (oprnd.dtype & dt.MAP) {
+      for (let j = 0; j < oprnd.value.data.length; j++) {
+        for (let i = 0; i < oprnd.value.data[0].length; i++) {
+          if (!oprnd.value.data[j][i]) { return false }
+        }
+      }
+    } else {
+      return oprnd.value
+    }
+    return true
+  };
+
   /*
    *  This module receives a TeX template string and a object containing Hurmet variables.
    *  At each location where the template contains a variable, this module plugs in a TeX string
@@ -6495,7 +6578,7 @@
             hvar = propertyFromDotAccessor(hvar, indexOprnd, vars, unitAware);
             if (!hvar) { return errorOprnd("V_NAME", propName) }
             const stmt = { resulttemplate: "@", altresulttemplate: "@" };
-            hvar.resultdisplay = formatResult(stmt, hvar, formatSpec,
+            hvar.resultdisplay = formatResult(stmt, hvar, formatSpec, null,
                   decimalFormat).resultdisplay;
           }
         }
@@ -7401,7 +7484,7 @@
           return errorOprnd("NO_PROP", x.name)
         }
 
-      case "⊇":
+      case "⊃":
         if (typeof x === "string" && typeof y === "string") {
           return x.indexOf(y) > -1
         } else if (Array.isArray(x) && Array.isArray(y)) {
@@ -7461,7 +7544,7 @@
           return errorOprnd("NO_PROP", x.name)
         }
 
-      case "⊈":
+      case "⊄":
         if (typeof x === "string" && typeof y === "string") {
           return y.indexOf(x) === -1
         } else if (Array.isArray(x) && Array.isArray(y)) {
@@ -7485,7 +7568,7 @@
           return errorOprnd("NOT_ARRAY")
         }
 
-      case "⊉":
+      case "⊅":
         if (typeof x === "string" && typeof y === "string") {
           return x.indexOf(y) === -1
         } else if (Array.isArray(x) && Array.isArray(y)) {
@@ -10596,7 +10679,7 @@
 
   // Some helper functions
 
-  const setComparisons = ["in", "!in", "∈", "∉", "∋", "∌", "⊆", "⊈", "⊇", "⊉"];
+  const setComparisons = ["in", "!in", "∈", "∉", "∋", "∌", "⊂", "⊄", "⊃", "⊅"];
 
   const shapeOf = oprnd => {
     return oprnd.dtype === dt.COMPLEX
@@ -11585,10 +11668,10 @@
           case "!in":
           case "∋":
           case "∌":
-          case "⊆":
-          case "⊈":
-          case "⊇":
-          case "⊉": {
+          case "⊂":
+          case "⊄":
+          case "⊃":
+          case "⊅": {
             const o2 = stack.pop();
             const o1 = stack.pop();
             if (unitAware &&
@@ -12278,7 +12361,8 @@
       let result;
       [stmt, result] = conditionResult(stmt, oprnd, isUnitAware);
       if (stmt.error) { return stmt }
-      stmt = formatResult(stmt, result, formatSpec, decimalFormat, isUnitAware);
+      const assert = vars.assert ? vars.assert : null;
+      stmt = formatResult(stmt, result, formatSpec, decimalFormat, assert, isUnitAware);
     }
     return stmt
   };
@@ -12327,7 +12411,7 @@
         return parseFormatSpec(str.slice(1, -1).trim())
       } else {
         const tex = parse(str, decimalFormat);
-        return [str, undefined, dt.STRING, tex]
+        return [str.slice(1, -1), undefined, dt.STRING, tex]
       }
 
     } else if (/^[([]/.test(str)) {
@@ -12744,6 +12828,7 @@
   const isValidIdentifier$2 = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/;
   const matrixOfNames = /^[([](?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*[,;].+[)\]]$/;
   const isKeyWord = /^(π|true|false|root|if|else|elseif|and|or|otherwise|mod|for|while|break|return|throw)$/;
+  const testRegEx$1 = /^(@{1,2})test /;
 
   const shortcut = (str, decimalFormat) => {
     // No calculation in str. Parse it just for presentation.
@@ -12801,6 +12886,14 @@
     }
 
     str = inputStr;
+
+    if (testRegEx$1.test(inputStr)) {
+      str = str.replace(testRegEx$1, "").trim();
+      const [_, rpn] = parse(str, decimalFormat, true);
+      const resulttemplate = testRegEx$1.exec(inputStr)[1];
+      return { entry: inputStr, template: "", rpn, resulttemplate,
+        altresulttemplate: resulttemplate, resultdisplay: "" }
+    }
 
     const isDataFrameAssigment = assignDataFrameRegEx.test(str);
     const posOfLastEquals = isDataFrameAssigment

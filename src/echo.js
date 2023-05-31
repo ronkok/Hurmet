@@ -44,7 +44,7 @@ export const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat
           hvar = propertyFromDotAccessor(hvar, indexOprnd, vars, unitAware)
           if (!hvar) { return errorOprnd("V_NAME", propName) }
           const stmt = { resulttemplate: "@", altresulttemplate: "@" }
-          hvar.resultdisplay = formatResult(stmt, hvar, formatSpec,
+          hvar.resultdisplay = formatResult(stmt, hvar, formatSpec, null,
                 decimalFormat).resultdisplay
         }
       }

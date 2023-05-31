@@ -3,7 +3,7 @@ import { Rnl } from "./rational"
 import { parse } from "./parser"
 import { format } from "./format"
 import { addTextEscapes, clone } from "./utils"
-import { Matrix, isMatrix } from "./matrix"
+import { Matrix, isMatrix, isVector } from "./matrix"
 import { DataFrame } from "./dataframe"
 import { Tuple } from "./tuple"
 import { Cpx } from "./complex"
@@ -15,8 +15,32 @@ const numMisMatchError = _ => {
   const str = "Error. Mismatch in number of multiple assignment."
   return [`\\textcolor{firebrick}{\\text{${str}}}`, str]
 }
+const testRegEx = /^@{1,2}test /
+const compRegEx = /\u00a0([⩵≠><>≤≥∋∈∉∌⊂⊃⊄⊅]|==|in|!in|!=|=>|<=)$/
+const negatedComp = {
+  "⩵": ["≠", "≠"],
+  "==": ["≠", "≠"],
+  "≠": ["==", "=="],
+  ">": ["\\ngtr", "!>"],
+  "<": ["\\nless", "!<"],
+  "≤": ["\\nleq", "!≤"],
+  "≥": ["\\ngeq", "!≥"],
+  "∋": ["∌", "∌"],
+  "∈": ["∉", "∉"],
+  "⊂": ["⊄", "⊄"],
+  "⊃": ["⊅", "⊅"],
+  "∉": ["∈", "∈"],
+  "∌": ["∋", "∋"],
+  "⊄": ["⊂", "⊂"],
+  "⊅": ["⊃", "⊃"],
+  "in": ["∉", "∉"],
+  "!in": ["in", "in"],
+  "!=": ["==", "=="],
+  "=>": ["\\ngeq", "!≥"],
+  "<=": ["\\ngeq", "!≥"]
+}
 
-export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAware) => {
+export const formatResult = (stmt, result, formatSpec, decimalFormat, assert, isUnitAware) => {
   if (!result) { return stmt }
 
   if (result.dtype === dt.DRAWING) {
@@ -43,6 +67,31 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAwar
       resultDisplay = ""
       altResultDisplay = ""
       return stmt
+
+    } else if (result.dtype & dt.BOOLEAN && testRegEx.test(stmt.entry) &&
+      compRegEx.test(stmt.rpn)) {
+      if (testValue(result) === true) {
+        resultDisplay = parse(stmt.entry.replace(testRegEx, "")) +
+          ",\\text{ ok }✓"
+        altResultDisplay = stmt.entry.replace(testRegEx, "") + ", ok ✓"
+      } else {
+        const op = compRegEx.exec(stmt.rpn).slice(1)
+        const negOp = negatedComp[op]
+        if (assert) {
+          const assertStr = assert.value.replace(/\.$/, "")
+          resultDisplay = `\\colorbox{Salmon}{${assertStr}, but $` +
+              parse(stmt.entry.replace(testRegEx, "").replace(op, negOp[0])) + "$}"
+          altResultDisplay = assertStr + ", but " +
+              stmt.entry.replace(testRegEx, "").replace(op, negOp[1])
+        } else {
+          resultDisplay = parse(stmt.entry.replace(testRegEx, "").replace(op, negOp[0])) +
+              ",\\colorbox{Salmon}{ n.g.}"
+          altResultDisplay = stmt.entry.replace(testRegEx, "").replace(op, negOp[1]) +
+              ", n.g."
+        }
+        // eslint-disable-next-line no-console
+        console.log(altResultDisplay)
+      }
 
     } else if (isMatrix(result)) {
       resultDisplay = Matrix.display((isUnitAware || result.value.plain)
@@ -174,4 +223,27 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAwar
     }
   }
   return stmt
+}
+
+const testValue = oprnd => {
+  if (isVector(oprnd)) {
+    for (let i = 0; i < oprnd.value.length; i++) {
+      if (!oprnd.value[i]) { return false }
+    }
+  } else if (isMatrix(oprnd)) {
+    for (let i = 0; i < oprnd.value.length; i++) {
+      for (let j = 0; j < oprnd.value[0].length; j++) {
+        if (!oprnd.value[i][j]) { return false }
+      }
+    }
+  } else if (oprnd.dtype & dt.MAP) {
+    for (let j = 0; j < oprnd.value.data.length; j++) {
+      for (let i = 0; i < oprnd.value.data[0].length; i++) {
+        if (!oprnd.value.data[j][i]) { return false }
+      }
+    }
+  } else {
+    return oprnd.value
+  }
+  return true
 }

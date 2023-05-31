@@ -634,8 +634,8 @@ Col B	11	25	14`` 'kips'"><math><mrow><mi>P</mi><msub><mrow></mrow><mtext>a</mtex
 <tr><td>∋</td><td><span class='hurmet-calc' data-entry='d ∋ p'><math><mrow><mi>d</mi><mo>∋</mo></mrow><mrow><mi>p</mi></mrow></math></span></td><td>d has a property named y<br>auto-correct: owns</td></tr>
 <tr><td>∉</td><td><span class='hurmet-calc' data-entry='c ∉ s'><math><mrow><mi>c</mi><mo>∉</mo></mrow><mrow><mi>s</mi></mrow></math></span></td><td>Is not an element of<br>auto-correct: \notin</td></tr>
 <tr><td>∌</td><td><span class='hurmet-calc' data-entry='d ∌ p'><math><mrow><mi>d</mi><mo>∌</mo></mrow><mrow><mi>p</mi></mrow></math></span></td><td>d does not have a property named y</td></tr>
-<tr><td>⊆</td><td><span class='hurmet-calc' data-entry='c ⊆ s'><math><mrow><mi>c</mi><mo>⊆</mo></mrow><mrow><mi>s</mi></mrow></math></span></td><td>Is a subset of<br> auto-correct: \subseteq or contains</td></tr>
-<tr><td>⊈</td><td><span class='hurmet-calc' data-entry='c ⊈ s'><math><mrow><mi>c</mi><mo>⊈</mo></mrow><mrow><mi>s</mi></mrow></math></span></td><td>Is not a subset of<br> auto-correct: \nsubseteq</td></tr>
+<tr><td>⊂</td><td><span class='hurmet-calc' data-entry='c ⊂ s'><math><mrow><mi>c</mi><mo>⊂</mo></mrow><mrow><mi>s</mi></mrow></math></span></td><td>Is a subset of<br> auto-correct: \subset or contains</td></tr>
+<tr><td>⊄</td><td><span class='hurmet-calc' data-entry='c ⊄ s'><math><mrow><mi>c</mi><mo>⊄</mo></mrow><mrow><mi>s</mi></mrow></math></span></td><td>Is not a subset of<br> auto-correct: \nsubset</td></tr>
 <tr><td>and<br>&amp;&amp;<br>∧</td><td>if <em>a</em> and <em>b</em><br>if <em>a</em> &amp;&amp; <em>b</em><br>if <em>a</em> ∧ <em>b</em></td><td>Logical and</td></tr>
 <tr><td>or<br>||<br>∨</td><td>if <em>a</em> or <em>b</em><br>if <em>a</em> || <em>b</em><br>if <em>a</em> ∨ <em>b</em></td><td>Logical or</td></tr>
 <tr><td>⊻</td><td><p></p>
@@ -936,6 +936,22 @@ inches	hours
 <tr><td>h3°</td><td>3.61∠56.3°</td></tr>
 </table>
 <p>Numeric result display types <strong>f</strong> and <strong>%</strong> can be set to any non-negative integer. The significant digit display types are limited to no more than 15 significant digits.</p>
+<h2 id='tests'>Tests</h2>
+<p>Hurmet test statements will send an error message if a criterion is not met.  For example, if you assign numeric values to two variables and then write:</p>
+<div class="indented"><p><code>@test F_u ≤ ϕR_n</code></p>
+</div>
+<p>The result will be one of these two messages:</p>
+<table class="nogrid"><tr><td style="width: 157px"><span class='hurmet-calc' data-entry='P_u ≤ ϕR_n, ok ✓'><math><mrow><mi>P</mi><msub><mrow></mrow><mtext>u</mtext></msub><mo>≤</mo></mrow><mrow><mrow><mrow><mi mathvariant="normal">ϕ</mi></mrow><mrow><mi mathvariant="normal">R</mi></mrow><msub><mrow></mrow><mtext>n</mtext></msub></mrow><mo separator="true">,</mo><mspace width="0.2222em"></mspace></mrow><mrow><mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">k</mi></mrow></mrow><mi>✓</mi></mrow></math></span></td><td style="width: 178px"><span class='hurmet-tex' data-entry='P_u \nleq ϕR_n, \colorbox{Salmon}{ n.g.}'><math><mrow><msub><mi>P</mi><mi>u</mi></msub><mo>≰</mo></mrow><mrow><mi>ϕ</mi><msub><mi>R</mi><mi>n</mi></msub><mo separator="true">,</mo></mrow><mrow><mpadded mathbackground="#f8948c" style="padding:3pt 0 3pt 0;"><mspace width="3pt"></mspace><mrow><mtext> </mtext><mtext>n</mtext><mtext>.</mtext><mtext>g</mtext><mtext>.</mtext></mrow><mspace width="3pt"></mspace></mpadded></mrow></math></span></td></tr>
+</table>
+<p>If the test fails, the message is also written to the console. So you can run an entire document and get notifications in one place if something has gone wrong. (You can see a browser console by typing Ctrl-Shift-I.)</p>
+<p>If you have previously assigned a string to the variable “assert”, a failing test message takes a more informative format:</p>
+<div class="indented"><p><span class='hurmet-calc' data-entry='assert = "The column at location B2 should work."'><math><mrow><mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">s</mi></mrow><mrow><mi mathvariant="normal">s</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">t</mi></mrow></mrow><mo>=</mo></mrow><mrow><mtext>The column at location B2 should work.</mtext></mrow></math></span></p>
+<p><span class='hurmet-tex' data-entry='\colorbox{Salmon}{The column at location B2 should work, but $P_u \nleq ϕR_n $}'><math><mpadded mathbackground="#f8948c" style="padding:3pt 0 3pt 0;"><mspace width="3pt"></mspace><mrow><mtext>T</mtext><mtext>h</mtext><mtext>e</mtext><mtext> </mtext><mtext>c</mtext><mtext>o</mtext><mtext>l</mtext><mtext>u</mtext><mtext>m</mtext><mtext>n</mtext><mtext> </mtext><mtext>a</mtext><mtext>t</mtext><mtext> </mtext><mtext>l</mtext><mtext>o</mtext><mtext>c</mtext><mtext>a</mtext><mtext>t</mtext><mtext>i</mtext><mtext>o</mtext><mtext>n</mtext><mtext> </mtext><mtext>B</mtext><mtext>2</mtext><mtext> </mtext><mtext>s</mtext><mtext>h</mtext><mtext>o</mtext><mtext>u</mtext><mtext>l</mtext><mtext>d</mtext><mtext> </mtext><mtext>w</mtext><mtext>o</mtext><mtext>r</mtext><mtext>k</mtext><mtext>,</mtext><mtext> </mtext><mtext>b</mtext><mtext>u</mtext><mtext>t</mtext><mtext> </mtext><mrow><msub><mi>P</mi><mi>u</mi></msub><mo>≰</mo><mi>ϕ</mi><msub><mi>R</mi><mi>n</mi></msub></mrow></mrow><mspace width="3pt"></mspace></mpadded></math></span></p>
+</div>
+<p>A test statement takes this form:</p>
+<div class="indented"><p><img src="images/test-railroad.svg" alt="@test value1 comparison operator value2"></p>
+</div>
+<p>If you want a unit-aware comparison, write “@@test” instead of “@test”.</p>
 <h2 id='drawings'>Drawings</h2>
 <p>Hurmet’s <em>draw</em> environment can plot functions and render simple sketches. For a sine wave, you can open a math zone and type the following code…</p>
 <pre><code>draw()
@@ -1318,6 +1334,7 @@ end</code></pre><p>A Hurmet document can load an entire module into one variable
 </details>
 </li>
 <li><a href="#numeral-display">Numeral Display</a></li>
+<li><a href="#tests">Tests</a></li>
 <li><a href="#drawings">Drawings</a></li>
 <li>
 <details><summary>UDFs</summary>

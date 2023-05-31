@@ -103,11 +103,13 @@ const autoCorrections = {
   "\\alef": "ℵ",
   "\\subset": "⊂",
   "\\supset": "⊃",
-  "contains": "⊆",
+  "contains": "⊃",
   "owns": "∋",
   "\\subseteq": "⊆",
   "\\nsubset": "⊄",
   "\\nsubseteq": "⊈",
+  "\\nsupset": "⊅",
+  "\\nsupseteq": "⊉",
   "\\forall": "∀",
   "\\therefore": "∴",
   "\\mapsto": "↦",
@@ -862,7 +864,8 @@ const prompts = {
   "functions": "sin(π/6) = ?",
   "if-expressions": `x = {1 if 12 < 30; 0 otherwise} = ?`,
   "unit-aware-calculations": "4 'ft' + 3 'yards' = ?? m",
-  "remote-modules": "mod.E = ?? psi"
+  "remote-modules": "mod.E = ?? psi",
+  "tests": "@test 2 ≤ 3"
 };
 
 // Start the demonstration editor
@@ -918,3 +921,4 @@ observer.observe(document.getElementById("functions"));
 observer.observe(document.getElementById("if-expressions"));
 observer.observe(document.getElementById("unit-aware-calculations"));
 observer.observe(document.getElementById("remote-modules"));
+observer.observe(document.getElementById("tests"));
