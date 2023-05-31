@@ -124,7 +124,7 @@ const words = Object.freeze({
   break: ["break", "\\mathrel{\\mathrm{break}}", tt.KEYWORD, ""],
   to: ["to", "\\mathbin{\\mathrm{to}}", tt.TO, "" ],
   throw: ["throw", "\\mathrel{\\mathrm{throw}}", tt.UNARY, ""],
-  echo: ["echo", "\\mathrel{\\mathrm{echo}}", tt.UNARY, ""],
+  print: ["print", "\\mathrel{\\mathrm{print}}", tt.UNARY, ""],
   return: ["return", "\\mathrel{\\mathrm{return}}", tt.RETURN, ""],
   sqrt: ["sqrt", "\\sqrt", tt.UNARY, ""],
   otherwise: ["otherwise", "\\mathrel{\\mathrm{otherwise}}", tt.LOGIC, ""],
@@ -150,7 +150,7 @@ const words = Object.freeze({
   "<-->": ["<-->", "\\xrightleftarrows", tt.UNARY, ""]
 })
 
-const miscRegEx = /^([/÷\u2215_:,;\t^+\\\-–−*×∘⊗⦼⊙√∛∜·.%|╏‖¦><=≈≟≠≡≤≥≅∈∉∋∌⊂⊄⊆⊈⊇⊉!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃∫∬∮∑([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7$£¥€₨₩₪]+)/
+const miscRegEx = /^([/÷\u2215_:,;\t^+\\\-–−*×∘⊗⦼⊙√∛∜·.%|╏‖¦><=≈≟≠≡≤≥≅∈∉∋∌⊂⊄⊆⊈⊃⊇⊉!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃∫∬∮∑([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7$£¥€₨₩₪]+)/
 
 const miscSymbols = Object.freeze({
   //    input, output, type,  closeDelim
@@ -189,7 +189,9 @@ const miscSymbols = Object.freeze({
   "==": ["==", "⩵", tt.REL, ""],
   "≡": ["≡", "≡", tt.REL, ""],
   ">": [">", "\\gt", tt.REL, ""],
+  "\u226f": ["\u226f", "\\ngtr", tt.REL, ""],
   "<": ["<", "\\lt", tt.REL, ""],
+  "\u226e": ["\u226e", "\\nless", tt.REL, ""],
   "?=": ["?=", "\u225F", tt.REL, ""],
   "≟": ["≟", "\u225F", tt.REL, ""],
   "≠": ["≠", "≠", tt.REL, ""],
@@ -221,6 +223,10 @@ const miscSymbols = Object.freeze({
   "∉": ["∉", "∉", tt.REL, ""],
   "∋": ["∋", "∋", tt.REL, ""],
   "∌": ["∌", "∌", tt.REL, ""],
+  "⊂": ["⊂", "⊂", tt.REL, ""],
+  "⊃": ["⊃", "⊃", tt.REL, ""],
+  "⊄": ["⊄", "⊄", tt.REL, ""],
+  "⊅": ["⊅", "⊅", tt.REL, ""],
   "⊆": ["⊆", "⊆", tt.REL, ""],
   "⊈": ["⊈", "⊈", tt.REL, ""],
   "⊇": ["⊇", "⊇", tt.REL, ""],
@@ -336,12 +342,17 @@ const texFunctions = Object.freeze({
   "\\iff": ["\\iff", "\\iff", tt.LOGIC, ""],
   "\\land": ["\\land", "\\land", tt.BIN, ""],
   "\\lor": ["\\lor", "\\lor", tt.BIN, ""],
+  "\\ngtr": ["\\ngtr", "\\ngtr", tt.REL, ""],
+  "\\nless": ["\\nless", "\\nless", tt.REL, ""],
+  "\\nleq": ["\\nleq", "\\nleq", tt.REL, ""],
+  "\\ngeq": ["\\ngeq", "\\ngeq", tt.REL, ""],
   "\\in": ["\\in", "∈", tt.REL, ""],
   "\\notin": ["\\notin", "∉", tt.REL, ""],
   "\\subset": ["\\subset", "⊂", tt.REL, ""],
   "\\subseteq": ["\\subseteq", "⊆", tt.REL, ""],
   "\\nsubset": ["\\nsubset", "⊄", tt.REL, ""],
   "\\nsubseteq": ["\\nsubseteq", "⊈", tt.REL, ""],
+  "\\supset": ["\\subset", "⊃", tt.REL, ""],
   "\\left.": ["\\left.", "\\left.", tt.LEFTBRACKET, "\\right."],
   "\\right.": ["\\right.", "\\right.", tt.RIGHTBRACKET, ""],
   "\\mod": ["\\mod", "\\mod", tt.BIN, ""],

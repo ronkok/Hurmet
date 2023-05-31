@@ -104,7 +104,7 @@ export const compare = (op, x, y, yPrev) => {
         return errorOprnd("NO_PROP", x.name)
       }
 
-    case "⊇":
+    case "⊃":
       if (typeof x === "string" && typeof y === "string") {
         return x.indexOf(y) > -1
       } else if (Array.isArray(x) && Array.isArray(y)) {
@@ -164,7 +164,7 @@ export const compare = (op, x, y, yPrev) => {
         return errorOprnd("NO_PROP", x.name)
       }
 
-    case "⊈":
+    case "⊄":
       if (typeof x === "string" && typeof y === "string") {
         return y.indexOf(x) === -1
       } else if (Array.isArray(x) && Array.isArray(y)) {
@@ -188,7 +188,7 @@ export const compare = (op, x, y, yPrev) => {
         return errorOprnd("NOT_ARRAY")
       }
 
-    case "⊉":
+    case "⊅":
       if (typeof x === "string" && typeof y === "string") {
         return x.indexOf(y) === -1
       } else if (Array.isArray(x) && Array.isArray(y)) {

@@ -53,7 +53,7 @@ import { draw } from "./draw"
 
 // Some helper functions
 
-const setComparisons = ["in", "!in", "∈", "∉", "∋", "∌", "⊆", "⊈", "⊇", "⊉"]
+const setComparisons = ["in", "!in", "∈", "∉", "∋", "∌", "⊂", "⊄", "⊃", "⊅"]
 
 const shapeOf = oprnd => {
   return oprnd.dtype === dt.COMPLEX
@@ -1042,10 +1042,10 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "!in":
         case "∋":
         case "∌":
-        case "⊆":
-        case "⊈":
-        case "⊇":
-        case "⊉": {
+        case "⊂":
+        case "⊄":
+        case "⊃":
+        case "⊅": {
           const o2 = stack.pop()
           const o1 = stack.pop()
           if (unitAware &&
@@ -1741,7 +1741,8 @@ export const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
     let result
     [stmt, result] = conditionResult(stmt, oprnd, isUnitAware)
     if (stmt.error) { return stmt }
-    stmt = formatResult(stmt, result, formatSpec, decimalFormat, isUnitAware)
+    const assert = vars.assert ? vars.assert : null
+    stmt = formatResult(stmt, result, formatSpec, decimalFormat, assert, isUnitAware)
   }
   return stmt
 }
