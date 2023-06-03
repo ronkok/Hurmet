@@ -93,6 +93,7 @@ const isUnary = (prevToken) => {
     case tt.VAR:
     case tt.RIGHTBRACKET:
     case tt.LONGVAR:
+    case tt.UNIT:
     case tt.CURRENCY:
     case tt.SUPCHAR:
     case tt.PRIME:
