@@ -76,20 +76,27 @@ const indentBlankLines = (state, prevLength) => {
 
 const hurmetNodes =  {
   blockquote(state, node) {
-    state.wrapBlock("> ", null, node, () => state.renderContent(node))
+    state.wrapBlock("", null, node, () => state.renderContent(node))
+  },
+  comment(state, node) {
+    if (state.isGFM) {
+      state.renderContent(node)
+    } else {
+      state.wrapBlock("", null, node, () => state.renderContent(node), "comment")
+    }
   },
   indented(state, node) {
     if (state.isGFM) {
       state.renderContent(node)
     } else {
-      state.wrapBlock("   ", ">  ", node, () => state.renderContent(node), "indented")
+      state.wrapBlock("", null, node, () => state.renderContent(node), "indented")
     }
   },
   centered(state, node) {
     if (state.isGFM) {
       state.renderContent(node)
     } else {
-       state.wrapBlock("   ", ">  ", node, () => state.renderContent(node), "centered")
+       state.wrapBlock("", null, node, () => state.renderContent(node), "centered")
     }
   },
   header(state, node) {
@@ -140,17 +147,6 @@ const hurmetNodes =  {
     state.renderInline(node)
   },
   paragraph(state, node) {
-    const prevLength = state.out.length
-    state.renderInline(node)
-    if (!state.isGFM) {
-      state.out = limitLineLength(state.out, prevLength, state.delim, state.lineLimit)
-    }
-    state.closeBlock(node)
-  },
-  comment(state, node) {
-    if (!state.isGFM) {
-      state.write(state.delim + `{comment}\n`)
-    }
     const prevLength = state.out.length
     state.renderInline(node)
     if (!state.isGFM) {
@@ -367,14 +363,19 @@ function limitLineLength(str, prevLength, delim, limit) {
   return str.slice(0, prevLength) + result
 }
 
+const newlineRegEx = /\n/gm
+const dollarRegEx = /([^ ])\$/g
 const writeTex = (state, displayMode, tex) => {
-  tex = tex.replace(/\n/gm, "\n" + state.delim)
+  tex = tex.replace(newlineRegEx, "\n" + state.delim)
+  // Precede nested $ w/space.
+  // Prevents Markdown parser from mis-identifying nested $ as an ending $.
+  tex = rex.replace(dollarRegEx, "$1 $")
   if (displayMode) {
     state.write("$$ " + tex + " $$")
   } else {
     state.write("$" + tex + "$")
   }
-} 
+}
 
 const justifyRegEx = /c(\d)([cr])/g
 
@@ -390,6 +391,7 @@ export class MarkdownSerializerState {
     this.paths = paths
     this.isGFM = isGFM
     this.delim = this.out = ""
+    this.divFence = ""
     this.closed = false
     this.lineLimit = 80
   }
@@ -416,11 +418,18 @@ export class MarkdownSerializerState {
   // content of the block.
   wrapBlock(delim, firstDelim, node, f, nodeType) {
     let old = this.delim
-    if (nodeType) { this.write(`{${nodeType}}\n`) }
+    if (nodeType) {
+      this.divFence += ":::"
+      this.write(`${this.delim}${this.divFence} ${nodeType}\n`)
+    }
     this.write(firstDelim || delim)
     this.delim += delim
     f()
     this.delim = old
+    if (nodeType) {
+      this.out = this.out + (`\n${this.delim}${this.divFence}\n`)
+      this.divFence = this.divFence.slice(0, -3)
+    }
     this.closeBlock(node)
   }
 

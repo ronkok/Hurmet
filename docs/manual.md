@@ -216,12 +216,13 @@ A newline is indicated by a backslash, `\`, at the end of a line.
 | `---------`                              | ------                    |
 |                                          |                           |
 +------------------------------------------+---------------------------+
-| `{indented}`\                            | {indented}                |
-| `>  Block elements. The attribute` \     | >  Block elements. The    |
-| ``   can be `indented`, `centered`,``\   |    attribute can be       |
-| ``   or `header`. ``                     |    `indented`,            |
-|                                          |    `centered`, or         |
-|                                          |    `header`.              |
+| `::: indented`\                          | ::: indented              |
+| `Block elements. The attribute` \        | Block elements. The       |
+| ``can be `indented`, `centered`,``\      | attribute can be          |
+| ``or `header`. ``\                       | `indented`,               |
+| ``:::``                                  | `centered`, or            |
+|                                          | `header`.                 |
+|                                          | :::                       |
 +------------------------------------------+---------------------------+
 {.grid colWidths="392 177"}
 
@@ -324,13 +325,14 @@ Multiplication
 : Hurmet accepts several multiplication syntaxes. If ¢` a = 7.1 `, then the
   following all give the same result:
 
-  {indented}
-  >  ¢`2 × 7.1`\
-     ¢`2 * 7.1`\
-     ¢`2 · 7.1`\
-     ¢`2 ∘ 7.1`\
-     ¢`2 a`\
-     ¢`(2)(7.1)`
+  ::: indented
+  ¢`2 × 7.1`\
+  ¢`2 * 7.1`\
+  ¢`2 · 7.1`\
+  ¢`2 ∘ 7.1`\
+  ¢`2 a`\
+  ¢`(2)(7.1)`
+  :::
 
   To obtain the character ¢` × `, type xx and hit the space bar. Auto-correct
   will give you an ¢`×`.
@@ -385,11 +387,12 @@ Accents and Primes
 : To write an accent above a single-letter variable, write the accent name and
   hit the space bar for an auto-correction. Examples:
 
-  {indented}
-  >  `y bar` ↦ ¢`y̅`\
-     `θ hat` ↦ ¢`θ̂`\
-     `P vec` ↦ ¢`P⃗`\
-     `x dot` ↦ ¢`ẋ`
+  ::: indented
+  `y bar` ↦ ¢`y̅`\
+  `θ hat` ↦ ¢`θ̂`\
+  `P vec` ↦ ¢`P⃗`\
+  `x dot` ↦ ¢`ẋ`
+  :::
 
   More detail [here](#identifiers).
 
@@ -692,8 +695,8 @@ Variable names and function names must be written in the form of a valid _identi
 *   An under-score within an identifier is allowed and will be interpreted
     to mean the start of a subscript.
 *   If an identifier has only one letter, then an accent character may be
-    written after it. Hurmet will render the accent above the letter, as in ¢θ̂¢.
-*   Primes may be appended to the very end, as in: ¢f_c′¢.
+    written after it. Hurmet will render the accent above the letter, as in ¢`θ̂`¢.
+*   Primes may be appended to the very end, as in: ¢`f_c′`¢.
 *   The following keywords may not be used as variable names: `π`, `im`, `ℏ`, `pi`,
     `true`, `false`, `root`, `if`, `else`, `elseif`, `otherwise`, `end`, `and`, `or`, `in`, `to`.
 
@@ -768,21 +771,22 @@ Number
 
 ![integers, decimals, percentages, scientific notation, mixed fractions, or hexadecimal](images/NumberRailroad.svg)
 
-{indented}
->  Notice that a number literal must begin and end with a numeral, not a decimal
-   symbol. Hurmet will not recognize `5.` as a number.
+::: indented
+Notice that a number literal must begin and end with a numeral, not a decimal
+symbol. Hurmet will not recognize `5.` as a number.
 
-   Hurmet’s default decimal symbol is a dot. You can choose instead to enter
-   numbers with a decimal comma via a drop-down menu in the **Doc** menu. Numbers are
-   never entered with a thousands separator, but they can be _displayed_ with one.
+Hurmet’s default decimal symbol is a dot. You can choose instead to enter
+numbers with a decimal comma via a drop-down menu in the **Doc** menu. Numbers are
+never entered with a thousands separator, but they can be _displayed_ with one.
 
-   Hurmet always saves a decimal symbol as a dot. It’s only the display that changes.
+Hurmet always saves a decimal symbol as a dot. It’s only the display that changes.
 
-   While calculations are underway, Hurmet holds every number in memory in rational
-   number format. The numerator and denominator are each integers of arbitrary
-   length. So Hurmet can work precisely with numbers like 0.1 and 0¹⁄₃.
-   Trignonometry and roots are done in double-precision floating point, good to
-   about 15 significant digits.
+While calculations are underway, Hurmet holds every number in memory in rational
+number format. The numerator and denominator are each integers of arbitrary
+length. So Hurmet can work precisely with numbers like 0.1 and 0¹⁄₃.
+Trignonometry and roots are done in double-precision floating point, good to
+about 15 significant digits.
+:::
 
 Complex Number
 
@@ -799,12 +803,13 @@ Complex Number
 
     Examples:
 
-    {indented}
-    >  ¢`z_1 = 2 + 3 im`
+    ::: indented
+    ¢`z_1 = 2 + 3 im`
 
-       ¢` z_2 = 4∠30° `
+    ¢` z_2 = 4∠30° `
 
-       ¢`z = z_1 + z_2  = \blue((2 + 3 im) + ( 4∠30°)) = 5.46 + 5 bm`
+    ¢`z = z_1 + z_2  = \blue((2 + 3 im) + ( 4∠30°)) = 5.46 + 5 bm`
+    :::
 
 Unit
 
@@ -892,10 +897,11 @@ Matrix Operations
     pass a matrix to most functions, Hurmet will do an element-by-element calculation
     and return a matrix, as in:
 
-    {indented}
-    >  ¢` 𝐡 = [5; 10; 15] `
+    ::: indented
+    ¢` 𝐡 = [5; 10; 15] `
 
-       ¢` 𝐱 = 2 𝐡 + 1 = \color(blue)(2) [5; 10; 15] + 1 \color(black) = [11; 21; 31] `
+    ¢` 𝐱 = 2 𝐡 + 1 = \color(blue)(2) [5; 10; 15] + 1 \color(black) = [11; 21; 31] `
+    :::
 
     Spreadsheet calculations can often be replaced by calulations using vectors, as
     above. When you really need to get things right, it’s great to be able to see
@@ -1815,8 +1821,9 @@ significant digits.
 Hurmet test statements will send an error message if a criterion is not met. 
 For example, if you assign numeric values to two variables and then write:
 
-{indented}
->  `@test F_u ≤ ϕR_n`
+::: indented
+`@test F_u ≤ ϕR_n`
+:::
 
 The result will be one of these two messages:
 
@@ -1832,15 +1839,17 @@ entire document and get notifications in one place if something has gone wrong.
 If you have previously assigned a string to the variable “assert”, a failing
 test message takes a more informative format:
 
-{indented}
->  ¢` assert = "The column at location B2 should work." `
+::: indented
+¢` assert = "The column at location B2 should work." `
+:::
 
    $\colorbox{Salmon}{The column at location B2 should work, but $P_u \nleq ϕR_n $}$
 
 A test statement takes this form:
 
-{indented}
->  ![@test value1 comparison operator value2](images/test-railroad.svg)
+::: indented
+![@test value1 comparison operator value2](images/test-railroad.svg)
+:::
 
 If you want a unit-aware comparison, write “@@test” instead of “@test”.
 

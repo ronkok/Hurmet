@@ -246,7 +246,9 @@ const nodes = {
   centered(node) {
     return htmlTag("div", ast2html(node.content), { class: 'centered' }) + "\n"
   },
-  header(node)   { return htmlTag("header", ast2html(node.content)) + "\n" },
+  header(node)   {
+    return htmlTag("header", ast2html(node.content)) + "\n"
+  },
   toc(node)      { return writeTOC(node) },
   comment(node)  {
     return htmlTag("aside", ast2html(node.content), { class: 'comment' }) + "\n"

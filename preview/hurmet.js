@@ -1121,11 +1121,11 @@
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6439","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.6248","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.3878","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.3752","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -1134,10 +1134,10 @@
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4630","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4443","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9707","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.5874","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9758","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.6065","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -1157,7 +1157,7 @@
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.86813","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.85930","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1165,23 +1165,23 @@
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.4230","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.4346","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["4.0180","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["88.8049","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["4.0311","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["88.6380","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["150.24","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["149.46","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1425.46","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1401.66","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1192,7 +1192,7 @@
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["19.0690","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["18.8527","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -1222,7 +1222,7 @@
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.0751","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0763","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -3654,6 +3654,7 @@
       case tt.VAR:
       case tt.RIGHTBRACKET:
       case tt.LONGVAR:
+      case tt.UNIT:
       case tt.CURRENCY:
       case tt.SUPCHAR:
       case tt.PRIME:
@@ -8878,7 +8879,7 @@
    *
    * ## Restrictions
    *
-   * 1. **_bold-italic_** must use both * & _ delimiters. Hurmet will fail on ***what***.
+   * 1. **_bold-italic_** must use both * & _ delimiters. Hurmet will fail on ***wat***.
    * 2. "Shortcut" reference links [ref] are not recognized.
    *
    * ## Extensions
@@ -8890,38 +8891,32 @@
    *    LaTeX display math is delimited  $$ … $$.
    * 3. ~subscript~
    * 4. ~~strikethrough~~
-   * 5. Comment (A paragraph in a speech bubble)
-   *    Its Markdown is a paragraph preceded by `{comment}\n`
-   * 6. Pipe tables as per Github Flavored Markdown (GFM).
-   * 7. Grid tables as per Pandoc and reStructuredText
-   * 8. Attributes for reference link definitions
+   * 5. Pipe tables as per Github Flavored Markdown (GFM).
+   * 6. Grid tables as per Pandoc and reStructuredText
+   * 7. Attributes for reference link definitions
    *      [id]: target
    *      {.class #id width=number}
-   * 9. Figure/Caption for images. Format is a paragraph that consists entirely of:
+   * 8. Figure/Caption for images. Format is a paragraph that consists entirely of:
    *    !![caption][id]
-   * 10. Table directives. They are placed on the line after the table. The format is:
+   * 9.  Table directives. They are placed on the line after the table. The format is:
    *     {.class #id width="num1 num2 …" caption}
-   * 11. Lists that allow the user to pick list ordering.
+   * 10. Lists that allow the user to pick list ordering.
    *        1. →  1. 2. 3.  etc.
    *        A. →  A. B. C.  etc. (future)
    *        a) →  (a) (b) (c)  etc. (future)
+   * 11. Fenced divs, similar to Pandoc.
+   *     ::: (centered|comment|indented|header)
+   *     Block elements
+   *     :::
+   *     Nested divs are distinguished by number of colons. Minimum three.
    * 12. Table of Contents
    *     {.toc start=N end=N}
    * 13. Definition lists, per Pandoc.  (future)
-   * 14. Attributes that define a div.
-   *     The format is:
-   *     {attribute}
-   *     >  Block element
-   *
-   *        Block element
-   *
-   *     Current attributes are (indented|centered|header)
-   *     Future attributes include admonitions for info, warning, etc.
-   * 15. [^1] is a reference to a footnote. (future)
+   * 14. [^1] is a reference to a footnote. (future)
    *     [^1]: The body of the footnote is deferred, similar to reference links.
-   * 16. [#1] is a reference to a citation. (future)
+   * 15. [#1] is a reference to a citation. (future)
    *     [#1]: The body of the citation is deferred, similar to reference links.
-   * 17. Line blocks begin with "| ", as per Pandoc. (future)
+   * 16. Line blocks begin with "| ", as per Pandoc. (future)
    *
    * hurmetMark.js copyright (c) 2021 - 2023 Ron Kok
    *
@@ -9373,7 +9368,7 @@
     return text
   };
 
-  const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<\/?(?:body|details|(div|input|label)(?: [^>]+)?|!DOCTYPE[a-z ]*|html[a-z ="]*|br|dl(?: class="[a-z-]+")?|li|main[a-z\- ="]*|nav|ol|ul(?: [^>]+)?)\/?>[^\n]*?(?:\n|$))/;
+  const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<(?:\/?(?:!DOCTYPE html|body|li|br|hr|(?:div|article|details|input|label|ul|ol|dl|main|nav)(?: (?:class|id)=(["'])[A-Za-z- ]+\2){0,2})|html(?: lang=(["'])[a-z]+\3)?)>[^\n]*?(?:\n|$))/;
 
   // Rules must be applied in a specific order, so use a Map instead of an object.
   const rules = new Map();
@@ -9388,7 +9383,7 @@
   rules.set("htmlComment", {
     isLeaf: true,
     match: blockRegex(/^ *<!--[^>]+-->[^\n]*\n/),
-    parse: function(captue, state) {
+    parse: function(capture, state) {
       return { type: "null" }
     }
   }),
@@ -9415,7 +9410,7 @@
   });
   rules.set("dt", {  // description term
     isLeaf: false,
-    match: blockRegex(/^(([^\n]*)\n)(?=<dd>|\n:)/),
+    match: blockRegex(/^(([^\n]*)\n)(?=<dd>|\n: )/),
     parse: function(capture, state) {
       return { content: parseInline(capture[2].trim(), state) }
     }
@@ -9488,12 +9483,13 @@
   });
   rules.set("special_div", {
     isLeaf: false,
-    match: blockRegex(/^(?:{(centered|header|indented)} *\n)(> {2}[\s\S]+?(?:\n{2,}(?![> ] {2})\n*|\s*$))/),
-    // indented or centered div, or <header>
+    match: blockRegex(/^(:{3,}) ?(indented|comment|centered|header) *\n([\s\S]+?)\n+\1 *(?:\n{2,}|\s*$)/),
+    // indented or centered or comment div, or <header>
     parse: function(capture, state) {
-      let div = " " + capture[2].slice(1);
-      div = div.replace(/^ {3}/gm, ""); // remove indents on trailing lines:
-      return { type: capture[1], content: parse$1(div, state) };
+      const content = capture[2] === "comment"
+        ? parseInline(capture[3], state)
+        : parse$1(capture[3], state);
+      return { type: capture[2], content };
     }
   });
   rules.set("figure", {
@@ -9544,10 +9540,9 @@
   });
   rules.set("paragraph", {
     isLeaf: false,
-    match: blockRegex(/^({comment}\n)?((?:[^\n]|\n(?! *\n))+)(?:\n *)+\n/),
+    match: blockRegex(/^((?:[^\n]|\n(?! *\n))+)(?:\n *)+\n/),
     parse: function(capture, state) {
-      const type = capture[1] ? "comment" : "paragraph";
-      return { type, content: parseInline(capture[2], state) }
+      return { type: "paragraph", content: parseInline(capture[1], state) }
     }
   });
   rules.set("escape", {
@@ -26945,7 +26940,9 @@
     centered(node) {
       return htmlTag("div", ast2html(node.content), { class: 'centered' }) + "\n"
     },
-    header(node)   { return htmlTag("header", ast2html(node.content)) + "\n" },
+    header(node)   {
+      return htmlTag("header", ast2html(node.content)) + "\n"
+    },
     toc(node)      { return writeTOC(node) },
     comment(node)  {
       return htmlTag("aside", ast2html(node.content), { class: 'comment' }) + "\n"

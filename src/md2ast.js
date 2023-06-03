@@ -5,7 +5,7 @@
  *
  * ## Restrictions
  *
- * 1. **_bold-italic_** must use both * & _ delimiters. Hurmet will fail on ***what***.
+ * 1. **_bold-italic_** must use both * & _ delimiters. Hurmet will fail on ***wat***.
  * 2. "Shortcut" reference links [ref] are not recognized.
  *
  * ## Extensions
@@ -17,38 +17,32 @@
  *    LaTeX display math is delimited  $$ … $$.
  * 3. ~subscript~
  * 4. ~~strikethrough~~
- * 5. Comment (A paragraph in a speech bubble)
- *    Its Markdown is a paragraph preceded by `{comment}\n`
- * 6. Pipe tables as per Github Flavored Markdown (GFM).
- * 7. Grid tables as per Pandoc and reStructuredText
- * 8. Attributes for reference link definitions
+ * 5. Pipe tables as per Github Flavored Markdown (GFM).
+ * 6. Grid tables as per Pandoc and reStructuredText
+ * 7. Attributes for reference link definitions
  *      [id]: target
  *      {.class #id width=number}
- * 9. Figure/Caption for images. Format is a paragraph that consists entirely of:
+ * 8. Figure/Caption for images. Format is a paragraph that consists entirely of:
  *    !![caption][id]
- * 10. Table directives. They are placed on the line after the table. The format is:
+ * 9.  Table directives. They are placed on the line after the table. The format is:
  *     {.class #id width="num1 num2 …" caption}
- * 11. Lists that allow the user to pick list ordering.
+ * 10. Lists that allow the user to pick list ordering.
  *        1. →  1. 2. 3.  etc.
  *        A. →  A. B. C.  etc. (future)
  *        a) →  (a) (b) (c)  etc. (future)
+ * 11. Fenced divs, similar to Pandoc.
+ *     ::: (centered|comment|indented|header)
+ *     Block elements
+ *     :::
+ *     Nested divs are distinguished by number of colons. Minimum three.
  * 12. Table of Contents
  *     {.toc start=N end=N}
  * 13. Definition lists, per Pandoc.  (future)
- * 14. Attributes that define a div.
- *     The format is:
- *     {attribute}
- *     >  Block element
- *
- *        Block element
- *
- *     Current attributes are (indented|centered|header)
- *     Future attributes include admonitions for info, warning, etc.
- * 15. [^1] is a reference to a footnote. (future)
+ * 14. [^1] is a reference to a footnote. (future)
  *     [^1]: The body of the footnote is deferred, similar to reference links.
- * 16. [#1] is a reference to a citation. (future)
+ * 15. [#1] is a reference to a citation. (future)
  *     [#1]: The body of the citation is deferred, similar to reference links.
- * 17. Line blocks begin with "| ", as per Pandoc. (future)
+ * 16. Line blocks begin with "| ", as per Pandoc. (future)
  *
  * hurmetMark.js copyright (c) 2021 - 2023 Ron Kok
  *
@@ -500,7 +494,7 @@ const parseTextMark = (capture, state, mark) => {
   return text
 }
 
-const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<\/?(?:body|details|(div|input|label)(?: [^>]+)?|!DOCTYPE[a-z ]*|html[a-z ="]*|br|dl(?: class="[a-z-]+")?|li|main[a-z\- ="]*|nav|ol|ul(?: [^>]+)?)\/?>[^\n]*?(?:\n|$))/
+const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<(?:\/?(?:!DOCTYPE html|body|li|br|hr|(?:div|article|details|input|label|ul|ol|dl|main|nav)(?: (?:class|id)=(["'])[A-Za-z- ]+\2){0,2})|html(?: lang=(["'])[a-z]+\3)?)>[^\n]*?(?:\n|$))/
 
 // Rules must be applied in a specific order, so use a Map instead of an object.
 const rules = new Map();
@@ -515,7 +509,7 @@ rules.set("html", {
 rules.set("htmlComment", {
   isLeaf: true,
   match: blockRegex(/^ *<!--[^>]+-->[^\n]*\n/),
-  parse: function(captue, state) {
+  parse: function(capture, state) {
     return { type: "null" }
   }
 }),
@@ -542,7 +536,7 @@ rules.set("heading", {
 });
 rules.set("dt", {  // description term
   isLeaf: false,
-  match: blockRegex(/^(([^\n]*)\n)(?=<dd>|\n:)/),
+  match: blockRegex(/^(([^\n]*)\n)(?=<dd>|\n: )/),
   parse: function(capture, state) {
     return { content: parseInline(capture[2].trim(), state) }
   }
@@ -615,12 +609,13 @@ rules.set("dd", {  // description details
 });
 rules.set("special_div", {
   isLeaf: false,
-  match: blockRegex(/^(?:{(centered|header|indented)} *\n)(> {2}[\s\S]+?(?:\n{2,}(?![> ] {2})\n*|\s*$))/),
-  // indented or centered div, or <header>
+  match: blockRegex(/^(:{3,}) ?(indented|comment|centered|header) *\n([\s\S]+?)\n+\1 *(?:\n{2,}|\s*$)/),
+  // indented or centered or comment div, or <header>
   parse: function(capture, state) {
-    let div = " " + capture[2].slice(1)
-    div = div.replace(/^ {3}/gm, "") // remove indents on trailing lines:
-    return { type: capture[1], content: parse(div, state) };
+    const content = capture[2] === "comment"
+      ? parseInline(capture[3], state)
+      : parse(capture[3], state)
+    return { type: capture[2], content };
   }
 });
 rules.set("figure", {
@@ -671,10 +666,9 @@ rules.set("newline", {
 });
 rules.set("paragraph", {
   isLeaf: false,
-  match: blockRegex(/^({comment}\n)?((?:[^\n]|\n(?! *\n))+)(?:\n *)+\n/),
+  match: blockRegex(/^((?:[^\n]|\n(?! *\n))+)(?:\n *)+\n/),
   parse: function(capture, state) {
-    const type = capture[1] ? "comment" : "paragraph"
-    return { type, content: parseInline(capture[2], state) }
+    return { type: "paragraph", content: parseInline(capture[1], state) }
   }
 });
 rules.set("escape", {
