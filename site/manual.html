@@ -96,7 +96,7 @@
 print &quot;Hi!&quot;</code></pre></td></tr>
 <tr><td style="width: 392px"><code>---------</code></td><td style="width: 177px"><hr>
 </td></tr>
-<tr><td style="width: 392px"><code>{indented}</code><br><code>&gt;  Block elements. The attribute</code> <br><code>can be `indented`, `centered`,</code><br><code>or `header`.</code></td><td style="width: 177px"><div class="indented"><p>Block elements. The attribute can be <code>indented</code>, <code>centered</code>, or <code>header</code>.</p>
+<tr><td style="width: 392px"><code>::: indented</code><br><code>Block elements. The attribute</code> <br><code>can be `indented`, `centered`,</code><br><code>or `header`.</code><br><code>:::</code></td><td style="width: 177px"><div class="indented"><p>Block elements. The attribute can be <code>indented</code>, <code>centered</code>, or <code>header</code>.</p>
 </div>
 </td></tr>
 </table>
@@ -344,9 +344,9 @@ print &quot;Hi!&quot;</code></pre></td></tr>
 </li>
 <li><p>An under-score within an identifier is allowed and will be interpreted to mean the start of a subscript.</p>
 </li>
-<li><p>If an identifier has only one letter, then an accent character may be written after it. Hurmet will render the accent above the letter, as in ¢θ̂¢.</p>
+<li><p>If an identifier has only one letter, then an accent character may be written after it. Hurmet will render the accent above the letter, as in <span class='hurmet-calc' data-entry='θ̂'><math><mover><mi>θ</mi><mo stretchy="false" style="math-style:normal;math-depth:0;">^</mo></mover></math></span>¢.</p>
 </li>
-<li><p>Primes may be appended to the very end, as in: ¢f_c′¢.</p>
+<li><p>Primes may be appended to the very end, as in: <span class='hurmet-calc' data-entry='f_c′'><math><mrow><mi>f</mi><msubsup><mrow></mrow><mtext>c</mtext><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msubsup></mrow></math></span>¢.</p>
 </li>
 <li><p>The following keywords may not be used as variable names: <code>π</code>, <code>im</code>, <code>ℏ</code>, <code>pi</code>, <code>true</code>, <code>false</code>, <code>root</code>, <code>if</code>, <code>else</code>, <code>elseif</code>, <code>otherwise</code>, <code>end</code>, <code>and</code>, <code>or</code>, <code>in</code>, <code>to</code>.</p>
 <p><img src="images/identifier-railroad.svg" alt="letter letter-or-digit-or-accent prime"></p>
@@ -946,8 +946,8 @@ inches	hours
 <p>If the test fails, the message is also written to the console. So you can run an entire document and get notifications in one place if something has gone wrong. (You can see a browser console by typing Ctrl-Shift-I.)</p>
 <p>If you have previously assigned a string to the variable “assert”, a failing test message takes a more informative format:</p>
 <div class="indented"><p><span class='hurmet-calc' data-entry='assert = "The column at location B2 should work."'><math><mrow><mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">s</mi></mrow><mrow><mi mathvariant="normal">s</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">t</mi></mrow></mrow><mo>=</mo></mrow><mrow><mtext>The column at location B2 should work.</mtext></mrow></math></span></p>
-<p><span class='hurmet-tex' data-entry='\colorbox{Salmon}{The column at location B2 should work, but $P_u \nleq ϕR_n $}'><math><mpadded mathbackground="#f8948c" style="padding:3pt 0 3pt 0;"><mspace width="3pt"></mspace><mrow><mtext>T</mtext><mtext>h</mtext><mtext>e</mtext><mtext> </mtext><mtext>c</mtext><mtext>o</mtext><mtext>l</mtext><mtext>u</mtext><mtext>m</mtext><mtext>n</mtext><mtext> </mtext><mtext>a</mtext><mtext>t</mtext><mtext> </mtext><mtext>l</mtext><mtext>o</mtext><mtext>c</mtext><mtext>a</mtext><mtext>t</mtext><mtext>i</mtext><mtext>o</mtext><mtext>n</mtext><mtext> </mtext><mtext>B</mtext><mtext>2</mtext><mtext> </mtext><mtext>s</mtext><mtext>h</mtext><mtext>o</mtext><mtext>u</mtext><mtext>l</mtext><mtext>d</mtext><mtext> </mtext><mtext>w</mtext><mtext>o</mtext><mtext>r</mtext><mtext>k</mtext><mtext>,</mtext><mtext> </mtext><mtext>b</mtext><mtext>u</mtext><mtext>t</mtext><mtext> </mtext><mrow><msub><mi>P</mi><mi>u</mi></msub><mo>≰</mo><mi>ϕ</mi><msub><mi>R</mi><mi>n</mi></msub></mrow></mrow><mspace width="3pt"></mspace></mpadded></math></span></p>
 </div>
+<p>   <span class='hurmet-tex' data-entry='\colorbox{Salmon}{The column at location B2 should work, but $P_u \nleq ϕR_n $}'><math><mpadded mathbackground="#f8948c" style="padding:3pt 0 3pt 0;"><mspace width="3pt"></mspace><mrow><mtext>T</mtext><mtext>h</mtext><mtext>e</mtext><mtext> </mtext><mtext>c</mtext><mtext>o</mtext><mtext>l</mtext><mtext>u</mtext><mtext>m</mtext><mtext>n</mtext><mtext> </mtext><mtext>a</mtext><mtext>t</mtext><mtext> </mtext><mtext>l</mtext><mtext>o</mtext><mtext>c</mtext><mtext>a</mtext><mtext>t</mtext><mtext>i</mtext><mtext>o</mtext><mtext>n</mtext><mtext> </mtext><mtext>B</mtext><mtext>2</mtext><mtext> </mtext><mtext>s</mtext><mtext>h</mtext><mtext>o</mtext><mtext>u</mtext><mtext>l</mtext><mtext>d</mtext><mtext> </mtext><mtext>w</mtext><mtext>o</mtext><mtext>r</mtext><mtext>k</mtext><mtext>,</mtext><mtext> </mtext><mtext>b</mtext><mtext>u</mtext><mtext>t</mtext><mtext> </mtext><mrow><msub><mi>P</mi><mi>u</mi></msub><mo>≰</mo><mi>ϕ</mi><msub><mi>R</mi><mi>n</mi></msub></mrow></mrow><mspace width="3pt"></mspace></mpadded></math></span></p>
 <p>A test statement takes this form:</p>
 <div class="indented"><p><img src="images/test-railroad.svg" alt="@test value1 comparison operator value2"></p>
 </div>
@@ -1150,13 +1150,13 @@ end</code></pre><p>A Hurmet document can load an entire module into one variable
 <p>The Hurmet variable name <code>importedParameters</code> has a special purpose. It loads module values into multiple variables instead of into one variable. An example of such an import is:</p>
 <p><code>importedParameters = import(&quot;https://hurmet.app/parent.txt&quot;) = !</code></p>
 <p>That statement will render like this:</p>
-<div style="font-size: 16px">
+<p>&lt;div style=&quot;font-size: 16px&quot;&gt;</p>
 <p><span class='hurmet-calc' data-entry='{:f_c′, f_c′′, f_yr, β_1, ρ_0; ρ_max, E_c, G_c,  E, G; n_c, σ_a, σ_as, μ_s, σ_p; p_pl, ρ_g, C_e, I_s, V_w; EC, k_zt, α, z_g, SC; S_DS, S_D1, I_E,,} = import("https://hurmet.app/parent.txt")'><math><mrow><mtable columnalign="center center center center center"><mtr><mtd><mrow><mi>f</mi><msubsup><mrow></mrow><mtext>c</mtext><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msubsup></mrow></mtd><mtd><mrow><mi>f</mi><msubsup><mrow></mrow><mtext>c</mtext><mrow><mo class="tml-prime">′</mo><mo class="tml-prime">′</mo></mrow></msubsup></mrow></mtd><mtd><mrow><mi>f</mi><msub><mrow></mrow><mtext>yr</mtext></msub></mrow></mtd><mtd><mrow><mi>β</mi><msub><mrow></mrow><mtext>1</mtext></msub></mrow></mtd><mtd><mrow><mi>ρ</mi><msub><mrow></mrow><mtext>0</mtext></msub></mrow></mtd></mtr><mtr><mtd><mrow><mi>ρ</mi><msub><mrow></mrow><mtext>max</mtext></msub></mrow></mtd><mtd><mrow><mi>E</mi><msub><mrow></mrow><mtext>c</mtext></msub></mrow></mtd><mtd><mrow><mi>G</mi><msub><mrow></mrow><mtext>c</mtext></msub></mrow></mtd><mtd><mi>E</mi></mtd><mtd><mi>G</mi></mtd></mtr><mtr><mtd><mrow><mi>n</mi><msub><mrow></mrow><mtext>c</mtext></msub></mrow></mtd><mtd><mrow><mi>σ</mi><msub><mrow></mrow><mtext>a</mtext></msub></mrow></mtd><mtd><mrow><mi>σ</mi><msub><mrow></mrow><mtext>as</mtext></msub></mrow></mtd><mtd><mrow><mi>μ</mi><msub><mrow></mrow><mtext>s</mtext></msub></mrow></mtd><mtd><mrow><mi>σ</mi><msub><mrow></mrow><mtext>p</mtext></msub></mrow></mtd></mtr><mtr><mtd><mrow><mi>p</mi><msub><mrow></mrow><mtext>pl</mtext></msub></mrow></mtd><mtd><mrow><mi>ρ</mi><msub><mrow></mrow><mtext>g</mtext></msub></mrow></mtd><mtd><mrow><mi>C</mi><msub><mrow></mrow><mtext>e</mtext></msub></mrow></mtd><mtd><mrow><mi>I</mi><msub><mrow></mrow><mtext>s</mtext></msub></mrow></mtd><mtd><mrow><mi>V</mi><msub><mrow></mrow><mtext>w</mtext></msub></mrow></mtd></mtr><mtr><mtd><mrow><mrow><mi mathvariant="normal">E</mi></mrow><mrow><mi mathvariant="normal">C</mi></mrow></mrow></mtd><mtd><mrow><mi>k</mi><msub><mrow></mrow><mtext>zt</mtext></msub></mrow></mtd><mtd><mi>α</mi></mtd><mtd><mrow><mi>z</mi><msub><mrow></mrow><mtext>g</mtext></msub></mrow></mtd><mtd><mrow><mrow><mi mathvariant="normal">S</mi></mrow><mrow><mi mathvariant="normal">C</mi></mrow></mrow></mtd></mtr><mtr><mtd><mrow><mi>S</mi><msub><mrow></mrow><mtext>DS</mtext></msub></mrow></mtd><mtd><mrow><mi>S</mi><msub><mrow></mrow><mtext>D1</mtext></msub></mrow></mtd><mtd><mrow><mi>I</mi><msub><mrow></mrow><mtext>E</mtext></msub></mrow></mtd><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd></mtr></mtable><mo>=</mo></mrow><mrow><mi>import</mi><mo>⁡</mo></mrow><mrow><mo form="prefix" stretchy="false">(</mo><mtext>https:⁄⁄hurmet.app⁄parent.txt</mtext><mo form="postfix" stretchy="false">)</mo></mrow></math></span></p>
 </div>
 <p>Such a statement is handy in a big project, where you break the calculations into several documents. Since any big project often has several common variables, you want a way to keep them synchronized. Put an <code>importedParameters</code> statement into each of the documents and you’re good. As an added benefit, a reviewer can see what you are doing.</p>
 <p><strong>Gists</strong></p>
 <p>Hurmet is a web app, so it can import text files only from addresses that begin with <code>http</code> or <code>https</code>. An easy way to create such a file is a Github <a href='https://gist.github.com/'>Gist</a>. I&#x27;ve written an example Gist for imported parameters:</p>
-<div style="width: 30em; overflow-x: scroll">
+<p>&lt;div style=&quot;width: 30em; overflow-x: scroll&quot;&gt;</p>
 <p><code>https://gist.githubusercontent.com/ronkok/c6c564cf162008cccf03ab8afeb09a83/raw/ParentFileExample.txt</code></p>
 </div>
 <p>If you create your own Gists, you&#x27;ll see that the addresses of the raw files are very long. If you want a permalink to your file, delete the 40 random characters after &quot;/raw/&quot;. Github keeps a copy of every draft of your file and the random part after &quot;/raw/&quot; is the revision ID.</p>
@@ -1431,4 +1431,4 @@ const titleRegEx = /([^.\\/]+)\.md$/;  // A helper.
 </div> <!-- demo -->
 <script src="./demo.min.js"></script>
 </body>
-</html>
+<p>&lt;/html&gt;</p>

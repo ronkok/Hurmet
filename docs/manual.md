@@ -140,8 +140,9 @@ that location.
 
 ### Comments
 
-{comment}
+::: comment
 A Hurmet comment is a paragraph inside a speech bubble.
+:::
 
 The ![comment][] button enables you to write a comment into the document.
 
