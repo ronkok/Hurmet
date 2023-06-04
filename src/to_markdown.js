@@ -364,10 +364,10 @@ function limitLineLength(str, prevLength, delim, limit) {
 }
 
 const newlineRegEx = /\n/gm
-const dollarRegEx = /([^ ])\$/g
+const dollarRegEx = /([^ \\])\$/g
 const writeTex = (state, displayMode, tex) => {
   tex = tex.replace(newlineRegEx, "\n" + state.delim)
-  // Precede nested $ w/space.
+  // Precede a nested $ with a space.
   // Prevents Markdown parser from mis-identifying nested $ as an ending $.
   tex = rex.replace(dollarRegEx, "$1 $")
   if (displayMode) {
