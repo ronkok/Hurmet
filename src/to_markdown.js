@@ -369,7 +369,7 @@ const writeTex = (state, displayMode, tex) => {
   tex = tex.replace(newlineRegEx, "\n" + state.delim)
   // Precede a nested $ with a space.
   // Prevents Markdown parser from mis-identifying nested $ as an ending $.
-  tex = rex.replace(dollarRegEx, "$1 $")
+  tex = tex.replace(dollarRegEx, "$1 $")
   if (displayMode) {
     state.write("$$ " + tex + " $$")
   } else {
