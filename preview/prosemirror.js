@@ -17047,7 +17047,7 @@ const hurmetNodes =  {
     if (state.isGFM) {
       state.renderContent(node);
     } else {
-       state.wrapBlock("   ", ">  ", node, () => state.renderContent(node), "header");
+       state.wrapBlock("", "", node, () => state.renderContent(node), "header");
     }
   },
   code_block(state, node) {
@@ -17322,6 +17322,7 @@ const writeTex = (state, displayMode, tex) => {
 };
 
 const justifyRegEx = /c(\d)([cr])/g;
+const trailNewlineRegEx = /\n+$/;
 
 const colWidthPicker = [0, 80, 50, 35];
 
@@ -17371,7 +17372,7 @@ class MarkdownSerializerState {
     f();
     this.delim = old;
     if (nodeType) {
-      this.out = this.out + (`\n${this.delim}${this.divFence}\n`);
+      this.out = this.out.replace(trailNewlineRegEx, "") + (`\n${this.delim}${this.divFence}\n`);
       this.divFence = this.divFence.slice(0, -3);
     }
     this.closeBlock(node);
