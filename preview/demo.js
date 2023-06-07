@@ -301,7 +301,11 @@ const autoCorrect = (jar, preText, postText) => {
 const renderSVG = dwg => {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   Object.keys(dwg.attrs).forEach(key => {
-    svg.setAttribute(key, dwg.attrs[key]);
+    if (key === "float") {
+      svg.style.float = dwg.attrs.float;
+    } else {
+      svg.setAttribute(key, dwg.attrs[key]);
+    }
   });
   dwg.children.forEach(el => {
     const node = document.createElementNS("http://www.w3.org/2000/svg", el.tag);

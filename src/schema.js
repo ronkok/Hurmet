@@ -369,6 +369,9 @@ export const nodes = {
       dom.classList = "hurmet-calc"
       if (node.attrs.dtype && node.attrs.dtype === dt.DRAWING) {
         dom = document.createElement('span')
+        if (node.attrs.resultdisplay.attrs.float) {
+          dom.style.float = node.attrs.resultdisplay.attrs.float
+        }
         dom.appendChild(renderSVG(node.attrs.resultdisplay))
       } else if (node.attrs.dtype && node.attrs.dtype === dt.MODULE &&
         functionRegEx.test(node.attrs.entry)) {

@@ -10199,7 +10199,7 @@
       attrs.height = typeof height === "number" ? height : Rnl.toNumber(height.value);
       svg.attrs.height = attrs.height;
       if (typeof position !== "string") { position = position.value; }
-      svg.attrs.style = `float: ${position}`;
+      if (position !== "inline") { svg.attrs.float = position; }
       attrs.xunitlength = attrs.width / (attrs.xmax - attrs.xmin);
       attrs.yunitlength = attrs.height / (attrs.ymax - attrs.ymin);
       attrs.origin = [-attrs.xmin * attrs.xunitlength, -attrs.ymin * attrs.yunitlength];

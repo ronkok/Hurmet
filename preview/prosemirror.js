@@ -15981,7 +15981,11 @@ const dt = Object.freeze({
 const renderSVG = dwg => {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   Object.keys(dwg.attrs).forEach(key => {
-    svg.setAttribute(key, dwg.attrs[key]);
+    if (key === "float") {
+      svg.style.float = dwg.attrs.float;
+    } else {
+      svg.setAttribute(key, dwg.attrs[key]);
+    }
   });
   dwg.children.forEach(el => {
     const node = document.createElementNS("http://www.w3.org/2000/svg", el.tag);
@@ -16375,6 +16379,9 @@ const nodes = {
       dom.classList = "hurmet-calc";
       if (node.attrs.dtype && node.attrs.dtype === dt.DRAWING) {
         dom = document.createElement('span');
+        if (node.attrs.resultdisplay.attrs.float) {
+          dom.style.float = node.attrs.resultdisplay.attrs.float;
+        }
         dom.appendChild(renderSVG(node.attrs.resultdisplay));
       } else if (node.attrs.dtype && node.attrs.dtype === dt.MODULE &&
         functionRegEx.test(node.attrs.entry)) {
