@@ -865,18 +865,18 @@ Matrix
     Matrix rows are separated by semi-colons. So this: `(1, 0; 0, 1)` renders
     as ¢`(1, 0; 0, 1)`.
     
-    A Hurmet _vector_ is a one dimensional array. If you multiply it times a
-    matrix, a Hurmet vector will act like a column vector. Write a vector
-    literal with values separated by semi-colons.
+    A Hurmet _vector_ is a one dimensional array. Write a vector
+    literal with values separated by commas or semi-colons, but not both.
     
     | Input           | Renders as        |
     |-----------------|-------------------|
-    | `[2.1; -15.3]`  | ¢`[2.1; -15.3]`   |
-    | `[4; 5]`        | ¢`[4; 5]` |
-    
-    Another way to create a Hurmet vector is to write a range of numbers between
+    | `[2.1, -15.3]`  | ¢`[2.1, -15.3]`   |
+    | `[4; 5]`        | ¢`[4; 5]`         |
+    | `[]`            | ¢`[]`             |
+        
+    Another way to create a Hurmet column vector is to write a range of numbers between
     brackets; the form is `[start:step:end...]`.
-    A Hurmet calculation of that form will return a vector with every number
+    A Hurmet calculation of that form will return a column vector with every number
     in the range. The step size is optional (default = 1). Examples:
     
     |    Input         |       Result               |
@@ -940,9 +940,11 @@ Matrix Operations
 
     ¢` ‖𝐀‖ ` ↦ ¢` {√(x_1^2 + ⋯ + x_n^2) if "𝐀 is a vector"; √(∑_i ∑_j A_ij^2) if "𝐀 is a matrix" `
 
-    ¢` 𝐀 & 𝐁 ` or ¢` hcat(𝐀, 𝐁) ` ↦ concatenate 𝐀 and 𝐁 horizontally
+    ¢` 𝐀 & 𝐁 ` or ¢` hcat(𝐀, 𝐁) ` ↦ concatenate matrices 𝐀 and 𝐁 horizontally
 
     ¢` vcat(𝐀, 𝐁) ` ↦ concatenate 𝐀 and 𝐁 vertically
+    
+    ¢` 𝐀 & e ` ↦ append an element to any vector
 
     Functions will mostly work element-wise on an matrix. Exception: functions
     `min()` and `max()` will find the minimum or maximum of the elements in the matrix.
@@ -1283,11 +1285,14 @@ _im_
 Hurmet treats an [identifier](#identifiers) as a function name if it is placed
 directly before an open parenthesis. So a term like ¢`sinh(x)` is a function.
 
-Hurmet’s built-in functions are described below. Unless noted otherwise, they
-can operate on any real or complex number or any matrix containing real numbers.
+Functions can return multiple values if the return statement is written in
+the form:  `return a, b, c, …, z`
 
 Transcendental functions such as trigonometry or logarithms are done to 15
 digits precision.
+
+Hurmet’s built-in functions are described below. Unless noted otherwise, they
+can operate on any real or complex number or any matrix containing real numbers.
 
 ------
 
@@ -1372,14 +1377,18 @@ exp(_z_)
 
 : ¢`e^z`
 
-Floor(_x_)
-
-: Floor. Always rounds down. Real numbers only.
-
 fetch(_url_)
 
 : Fetches the contents of a remote file. It expects the file to be in CSV format
   and will return a data range. Fetch functions must be stand-alone expressions.
+
+findfirst(_searchstring_, _string_)
+
+: Searches the _string_ and returns the index of the first occurence of _searchstring_.
+
+floor(_x_)
+
+: floor. Always rounds down. Real numbers only.
 
 gcd(_m_, _n_)
 
@@ -1387,8 +1396,8 @@ gcd(_m_, _n_)
 
 hcat(_v_, _x_)
 
-Horizontal concatenation of: two strings, or two matrices, or an element onto
-a vector, or a variable onto a map, or a vector onto a data frame.
+: Horizontal concatenation of: two strings, or two matrices, or an element onto
+  a vector, or a variable onto a map, or a vector onto a data frame.
 
 hypot(_x_, _y_)
 
@@ -1448,6 +1457,10 @@ mod(_x_, _y_)
 
 : _x_ modulo _y_. This functions divides _x_ by _y_, and returns the absolute value of the remainder.
 
+number(_string_)
+
+: Converts a string, such as "5" or "3.14" to a number.
+
 rand(), rand(_n_), rand(_m_, _n_)
 
 : Pseudo-random number(s) in the range from 0 to 1 (inclusive of 0, but not 1).
@@ -1491,7 +1504,7 @@ transpose(_M_)
 
 vcat(_v_, _x_)
 
-Vertical concatenation of: two matrices, or an element onto a vertical vector.
+:  Vertical concatenation of: two matrices, or an element onto a vertical vector.
 
 zeros(_m_, _n_)
 

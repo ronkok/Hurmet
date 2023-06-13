@@ -2,7 +2,7 @@ import { dt } from "./constants"
 import { clone } from "./utils"
 import { isVector } from "./matrix"
 import { Rnl } from "./rational"
-import { md2ast } from "./md2ast"
+import { inlineMd2ast } from "./md2ast"
 
 const startSvg = _ => {
   return {
@@ -140,7 +140,7 @@ const textLocal = (svg, p, str, pos) => {
   textNode.attrs["font-size"] = attrs.fontsize
   textNode.attrs["text-anchor"] = textanchor
   // Load Markdown into an AST
-  const ast = md2ast(str)[0].content
+  const ast = inlineMd2ast(str)
   // Load content of AST into <tspan> nodes.
   if (Array.isArray(ast)) {
     let prevNodeContainedSubscript = false
@@ -433,10 +433,10 @@ const functions = {
     const node = { tag: "rect", attrs: {} }
     const p = [Rnl.toNumber(m.value[0][0]), Rnl.toNumber(m.value[0][1])]
     const q = [Rnl.toNumber(m.value[1][0]), Rnl.toNumber(m.value[1][1])]
-    node.attrs.x = p[0] * attrs.xunitlength + attrs.origin[0]
-    node.attrs.y = attrs.height - q[1] * attrs.yunitlength - attrs.origin[1]
-    node.attrs.width = (q[0] - p[0]) * attrs.xunitlength
-    node.attrs.height = (q[1] - p[1]) * attrs.yunitlength
+    node.attrs.x = Math.min(p[0], q[0]) * attrs.xunitlength + attrs.origin[0]
+    node.attrs.y = attrs.height - Math.max(p[1], q[1]) * attrs.yunitlength - attrs.origin[1]
+    node.attrs.width = Math.abs((q[0] - p[0]) * attrs.xunitlength)
+    node.attrs.height = Math.abs((q[1] - p[1]) * attrs.yunitlength)
     if (r != null) {
       const rNum = Rnl.toNumber(r.value) * attrs.xunitlength
       node.attrs.rx = rNum

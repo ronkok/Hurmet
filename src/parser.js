@@ -17,8 +17,8 @@ const builtInFunctions = [
   "acsch", "angle", "asec", "asecd", "asech", "asin", "asind", "asinh", "atan", "atan2",
   "atand", "atanh", "binomial", "ceil", "conj", "cos", "cosd", "cosh", "cosh", "cot",
   "cotd", "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp", "factorial", "fetch",
-  "floor", "format", "gamma", "gcd", "hcat", "hypot", "imag", "isnan", "length", "lerp", "ln",
-  "log", "log10", "log2", "lfact", "lgamma", "logn", "mod", "real",
+  "findfirst", "floor", "format", "gamma", "gcd", "hcat", "hypot", "imag", "isnan", "length",
+  "lerp", "ln", "log", "log10", "log2", "lfact", "lgamma", "logn", "mod", "number", "real",
   "rem", "rms", "round", "roundSig", "roundn", "sec", "secd", "sech", "sech", "sign", "sin",
   "sind", "sinh", "startSvg", "string", "tan", "tand", "tanh", "tanh", "trace", "transpose",
   "vcat", "zeros", "Γ"
@@ -240,7 +240,7 @@ const rpnPrecFromType = [
       -1, 16, 15, -1, 14,
       13,  9,  3,  2, 10,
       -1, -1,  4,  3, -1,
-      -1
+      -1, -1
 ]
 
 const texPrecFromType = [
@@ -252,7 +252,7 @@ const texPrecFromType = [
        2, -1, 15,  2, 14,
       13,  9, -1,  1, -1,
       15, -1,  1,  -1, 2,
-       2
+       2, 2
 ]
 /* eslint-enable indent-legacy */
 
@@ -317,6 +317,7 @@ export const parse = (
   let tokenSep = "\xa0" // no break space
   let rpnPrec = -1
   const exprStack = [] // Use for lazy evalulation of ternary (If) expressions
+  let numFreeCommas = 0 // # of itens in a tuple
 
   // This function, parse(), is the main function for this module.
   // Before we get to the start line, we write two enclosed functions,
@@ -558,6 +559,17 @@ export const parse = (
         okToAppend = true
         break
 
+      case tt.BOOLEAN:
+        popTexTokens(2, okToAppend)
+        if (isCalc) {
+          popRpnTokens(-1)
+          rpn += token.input
+        }
+        if (isPrecededBySpace) { posOfPrevRun = tex.length }
+        tex += token.output
+        okToAppend = true
+        break
+
       case tt.NUM:
       case tt.ORD:
         popTexTokens(2, okToAppend)
@@ -612,6 +624,9 @@ export const parse = (
         popTexTokens(2, okToAppend)
         posOfPrevRun = tex.length
         tex += token.output
+        if (isCalc) {
+          rpn += token.input
+        }
         okToAppend = true
         break
 
@@ -1123,7 +1138,11 @@ export const parse = (
 
         if (isCalc) {
           if (delims.length === 1) {
-            rpn += token.output
+            if (token.input === "\t") {
+              rpn += token.output
+            } else if (token.input === ",") {
+              numFreeCommas += 1 // item in a tuple
+            }
 
           } else {
             if (token.input === ";") {
@@ -1357,6 +1376,9 @@ export const parse = (
   if (isCalc) {
     while (rpnStack.length > 0) {
       rpn += tokenSep + rpnStack.pop().symbol
+    }
+    if (numFreeCommas > 0) {
+      rpn += tokenSep + "tuple" + tokenSep + String(numFreeCommas + 1)
     }
     const varRegEx = /〖[^ ().\\,;]+/g
     let arr

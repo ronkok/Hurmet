@@ -1041,6 +1041,16 @@ const parseMetadata = str => {
 
 const dateMessageRegEx = /^date:([^\n]+)\nmessage:([^\n]+)\n/
 
+export const inlineMd2ast = md => {
+  const state = { inline: true, _defs: {}, prevCapture: "", remainder: "", inHtml: false }
+  const ast = parse(md, state)
+  if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") {
+    ast.shift()
+  }
+  consolidate(ast)
+  return ast
+}
+
 export const md2ast = (md, inHtml = false) => {
   // First, check for a metadata preamble
   let metadata = false

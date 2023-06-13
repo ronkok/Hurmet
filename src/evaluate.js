@@ -9,7 +9,7 @@ import { Matrix, isMatrix, isVector } from "./matrix"
 import { map } from "./map"
 import { DataFrame } from "./dataframe"
 import { propertyFromDotAccessor } from "./property"
-import { textRange } from "./text"
+import { textRange, findfirst } from "./text"
 import { compare } from "./compare"
 import { errorOprnd } from "./error"
 import { Rnl } from "./rational"
@@ -170,11 +170,11 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
     } else if (ch === '"') {
       // A string literal.
       const chEnd = tkn.charAt(tkn.length - 1)
-      const str = ch === '"' && chEnd === '"' ? tkn.slice(1, -1).trim() : tkn.trim()
+      const str = ch === '"' && chEnd === '"' ? tkn.slice(1, -1) : tkn
       stack.push(Object.freeze({ value: str, unit: null, dtype: dt.STRING }))
 
     } else if (/^``/.test(tkn)) {
-      stack.push(DataFrame.dataFrameFromCSV(tablessTrim(tkn.slice(2, -2)), {}))
+      stack.push(DataFrame.dataFrameFromTSV(tablessTrim(tkn.slice(2, -2)), {}))
 
     } else if (ch === '`') {
       // A rich text literal
@@ -440,6 +440,10 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             o3.value = Operators.binary[shape1][shape2][opName](o1.value, o2.value)
             if (o3.value.dtype) { return o3.value } // Error
             o3.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn)
+            if (o1.dtype === dt.COLUMNVECTOR && shape2 === "scalar") {
+              // Appending an element to an empty column vector
+              o3.dtype = o1.dtype + o2.dtype
+            }
             o3.unit = o1.unit
           }
           stack.push(Object.freeze(o3))
@@ -563,7 +567,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           range.dtype = dt.RANGE
           const step = o1.dtype !== dt.RATIONAL
             ? o1.value[2]
-            : end.value === "∞" || Rnl.lessThan(o1.value, end.value)
+            : end.value === "∞" || Rnl.lessThanOrEqualTo(o1.value, end.value)
             ? Rnl.one
             : Rnl.negate(Rnl.one)
           range.value = o1.dtype === dt.RATIONAL
@@ -640,12 +644,23 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const numCols = Number(tokens[i + 2])
           i += 2
 
-          if (stack[stack.length - 1].dtype === dt.RANGE) {
+          if (stack.length > 0 && stack[stack.length - 1].dtype === dt.RANGE) {
             // Input was [start:step:end...]
             stack.push(Matrix.operandFromRange(stack.pop().value))
           } else {
             stack.push(Matrix.operandFromTokenStack(stack, numRows, numCols))
           }
+          break
+        }
+
+        case "tuple": {
+          const numItems = Number(tokens[i + 1])
+          i += 1
+          const oprnd = { value: [], unit: null, dtype: dt.TUPLE }
+          for (let j = 0; j < numItems; j++) {
+            oprnd.value.unshift(stack.pop())
+          }
+          stack.push(oprnd)
           break
         }
 
@@ -778,6 +793,40 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
+        case "number": {
+          const arg = stack.pop()
+          if (!(arg.dtype & dt.STRING)) { return errorOprnd("STRING") }
+          const output = Object.create(null)
+          output.unit = { expos: allZeros }
+          output.value = isVector(arg)
+            ? arg.value.map(e => Rnl.fromString(e))
+            : isMatrix(arg)
+            ? arg.value.map(row => row.map(e => Rnl.fromString(e)))
+            : Rnl.fromString(arg.value)
+          output.dtype = arg.dtype - dt.STRING + dt.RATIONAL
+          stack.push(Object.freeze(output))
+          break
+        }
+
+        case "findfirst": {
+          const args = []
+          args.push(stack.pop())
+          args.unshift(stack.pop())
+          if (!((args[1].dtype & dt.STRING) && (args[1].dtype & dt.STRING))) {
+            return errorOprnd("STRING")
+          }
+          const output = Object.create(null)
+          output.unit = { expos: allZeros }
+          output.value = isVector(args[1])
+            ? args[1].value.map(e => findfirst(args[0], e))
+            : isMatrix(args[1])
+            ? args[1].value.map(row => row.map(e => findfirst(args[0], e)))
+            : findfirst(args[0], args[1])
+          output.dtype = args[1].dtype - dt.STRING + dt.RATIONAL
+          stack.push(Object.freeze(output))
+          break
+        }
+
         case "roundn":
         case "string": {
           // Round a numeric value.
@@ -785,7 +834,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const num = stack.pop()
           if (!(num.dtype & dt.RATIONAL)) { return errorOprnd("") }
           if (!(spec.dtype & dt.STRING)) { return errorOprnd("") }
-          if (!/(?:f-?|r)\d+/.test(spec.value)) { return errorOprnd("") }
+          if (!/(?:[fr])\d+/.test(spec.value)) { return errorOprnd("") }
           let funcName = ""
           const output = Object.create(null)
           if (tkn === "string") {
@@ -1446,25 +1495,30 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
       }
 
       case "for": {
-        const ctrl = {
-          type: "for",
-          condition: true,
-          startStatement: i,
-          endOfBlock: statement.endOfBlock
+        if (control[level].condition) {
+          const ctrl = {
+            type: "for",
+            condition: true,
+            startStatement: i,
+            endOfBlock: statement.endOfBlock
+          }
+          const tokens = statement.rpn.split("\u00A0")
+          ctrl.dummyVariable = tokens.shift().slice(1)
+          const iterable = evalRpn(tokens.join("\u00A0"), vars,
+                                   decimalFormat, isUnitAware, lib)
+          ctrl.index = (iterable.dtype & dt.RANGE) ? iterable.value[0] : Rnl.fromNumber(0)
+          ctrl.step = (iterable.dtype & dt.RANGE) ? iterable.value[1] : Rnl.fromNumber(0)
+          ctrl.endIndex = (iterable.dtype & dt.RANGE)
+            ? iterable.value[2]
+            : Rnl.fromNumber(iterable.value.length - 1)
+          const [oprnd, nextIndex] = elementFromIterable(iterable, ctrl.index, ctrl.step)
+          ctrl.nextIndex = nextIndex
+          ctrl.iterable = iterable
+          control.push(ctrl)
+          vars[ctrl.dummyVariable] = oprnd
+        } else {
+          i = statement.endOfBlock
         }
-        const tokens = statement.rpn.split("\u00A0")
-        ctrl.dummyVariable = tokens.shift().slice(1)
-        const iterable = evalRpn(tokens.join("\u00A0"), vars, decimalFormat, isUnitAware, lib)
-        ctrl.index = (iterable.dtype & dt.RANGE) ? iterable.value[0] : Rnl.fromNumber(0)
-        ctrl.step = (iterable.dtype & dt.RANGE) ? iterable.value[1] : Rnl.fromNumber(0)
-        ctrl.endIndex = (iterable.dtype & dt.RANGE)
-          ? iterable.value[2]
-          : Rnl.fromNumber(iterable.value.length - 1)
-        const [oprnd, nextIndex] = elementFromIterable(iterable, ctrl.index, ctrl.step)
-        ctrl.nextIndex = nextIndex
-        ctrl.iterable = iterable
-        control.push(ctrl)
-        vars[ctrl.dummyVariable] = oprnd
         break
       }
 
@@ -1542,7 +1596,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
             if (result.dtype === dt.ERROR) { return result }
             const msg = result.dtype === dt.RATIONAL
               ? Rnl.toNumber(result.value)
-              : result.dtype === dt.STRING
+              : result.dtype === dt.STRING || result.dtype === dt.BOOLEAN
               ? result.value
               : isVector(result) && (result.dtype & dt.RATIONAL)
               ? result.value.map(e => Rnl.toNumber(e))
@@ -1692,7 +1746,9 @@ const conditionResult = (stmt, oprnd, unitAware) => {
     // A numeric result with no unit specified.
     stmt.expos = allZeros
   }
-  if (result.value)  { stmt.value = result.value }
+  if (Object.prototype.hasOwnProperty.call(result, "value")) {
+    stmt.value = result.value
+  }
   return [stmt, result]
 }
 
@@ -1701,7 +1757,7 @@ export const evaluateDrawing = (stmt, vars, decimalFormat = "1,000,000.") => {
   const udf = stmt.value
   const args = [];
   for (let i = 0; i < udf.parameters.length; i++) {
-    const argName = udf.parameters[i]
+    const argName = udf.parameters[i].name
     args.push(evalRpn("¿" + argName, vars, decimalFormat, false, {}))
   }
   const funcResult = evalCustomFunction(udf, args, decimalFormat, false, {})

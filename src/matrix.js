@@ -74,9 +74,9 @@ const elementDisplay = (value, dtype, formatSpec, decimalFormat, isAlt = false) 
 }
 
 const display = (m, formatSpec, decimalFormat) => {
-  let str = "\\begin"
+  let str = ""
   if (m.dtype & dt.MATRIX) {
-    str += "{pmatrix}"
+    str += "\\begin{pmatrix}"
     const numRows = m.value.length
     const numCols = m.value[0].length
     for (let i = 0; i < numRows; i++) {
@@ -88,22 +88,25 @@ const display = (m, formatSpec, decimalFormat) => {
     str = str.slice(0, -3).trim()
     str += "\\end{pmatrix}"
   } else {
-    str += "{bmatrix}"
-    const argSep = (m.dtype & dt.ROWVECTOR) ? " & " : " \\\\ "
-    if (m.value.plain) {
-      const numArgs = m.value.plain.length
-      for (let i = 0; i < numArgs; i++) {
-        str += elementDisplay(m.value.plain[i], m.dtype, formatSpec, decimalFormat) +
-               ((i < numArgs - 1) ? argSep : "")
-      }
+    const numArgs = m.value.plain ? m.value.plain.length : m.value.length
+    if (numArgs === 0) {
+      str += "[\\,]"
     } else {
-      const numArgs = m.value.length
-      for (let i = 0; i < numArgs; i++) {
-        str += elementDisplay(m.value[i], m.dtype, formatSpec, decimalFormat) +
-               ((i < numArgs - 1) ? argSep : "")
+      str += "\\begin{bmatrix}"
+      const argSep = (m.dtype & dt.ROWVECTOR) ? " & " : " \\\\ "
+      if (m.value.plain) {
+        for (let i = 0; i < numArgs; i++) {
+          str += elementDisplay(m.value.plain[i], m.dtype, formatSpec, decimalFormat) +
+                ((i < numArgs - 1) ? argSep : "")
+        }
+      } else {
+        for (let i = 0; i < numArgs; i++) {
+          str += elementDisplay(m.value[i], m.dtype, formatSpec, decimalFormat) +
+                ((i < numArgs - 1) ? argSep : "")
+        }
       }
+      str += "\\end{bmatrix}"
     }
-    str += "\\end{bmatrix}"
   }
   return str
 }
@@ -393,7 +396,7 @@ const operandFromRange = range => {
 const operandFromTokenStack = (tokenStack, numRows, numCols) => {
   // TODO: Get dtype correct for matrices that contain strings or booleans.
   if (numRows === 0 && numCols === 0) {
-    return Object.freeze({ value: new Array(0), unit: null, dtype: dt.ROWVECTOR })
+    return Object.freeze({ value: new Array(0), unit: null, dtype: dt.COLUMNVECTOR })
   } else if (numRows === 1 && numCols === 1) {
     // One element. Return a scalar.
     return tokenStack.pop()

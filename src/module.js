@@ -1,4 +1,5 @@
 import { dt } from "./constants.js"
+import { tablessTrim } from "./utils.js"
 import { valueFromLiteral } from "./literal"
 import { improveQuantities } from "./improveQuantities"
 import { arrayOfRegExMatches } from "./utils"
@@ -9,11 +10,12 @@ const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\
 const keywordRegEx = /^(if|elseif|else|return|throw|while|for|break|print|end)\b/
 const drawCommandRegEx = /^(title|frame|view|axes|grid|stroke|strokewidth|strokedasharray|fill|fontsize|fontweight|fontstyle|fontfamily|marker|line|path|plot|curve|rect|circle|ellipse|arc|text|dot|leader|dimension)\b/
 const leadingSpaceRegEx = /^[\t ]+/
-const oneLinerRegEx = /^(( *)if [^\n"`]+) ((?:return|throw|print|break)\b(?:[^\n]+)?)(?: end)? *\n/gm
+const oneLinerRegEx = /^(( *)if [^\n`]+) +((?:return|throw|print|break)\b(?:[^\n]+)?)(?: end)? *\n/gm
 
 // If you change functionRegEx, then also change it in mathprompt.js.
 // It isn't called from there in order to avoid duplicating Hurmet code inside ProseMirror.js.
 export const functionRegEx = /^function (?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*\(/
+export const moduleRegEx = /^module ([A-Za-z][A-Za-z0-9]*)/
 export const drawRegEx = /^draw\(/
 const startSvgRegEx = /^startSvg\(\)/
 const lexRegEx = /"[^"]*"|``.*|`[^`]*`|'[^']*'|#|[^"`'#]+/g
@@ -49,7 +51,7 @@ export const scanModule = (str, decimalFormat) => {
   // Assemble the lines into functions and assign each function to parent.
   const parent = Object.create(null)
 
-  // Expand one-liners into three lines each.
+  // Expand one-liners into if ... end blocks.
   str = str.replace(oneLinerRegEx, "$1\n$2    $3\n$2end\n")
 
   // Statements end at a newline.
@@ -79,7 +81,7 @@ export const scanModule = (str, decimalFormat) => {
 
 const handleTSV = (expression, lines, startLineNum) => {
   for (let i = startLineNum + 1; i < lines.length; i++) {
-    const line = lines[i].trim()
+    const line = tablessTrim(lines[i])
     if (line.length === 0) { continue }
     expression += "\n" + line
     if (line.slice(-2) === "``") { return [expression, i] }
@@ -175,7 +177,7 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
         isStatement = true
       } else {
         // TODO: We shouldn't get here. Write an error.
-        return [errorOprnd("FUNC_LINE", functionName + ", line " + (i + 1)), i]
+        return [errorOprnd("FUNC_LINE", functionName + ", line " + (i + 1) + "\n" + line), i]
       }
     }
 

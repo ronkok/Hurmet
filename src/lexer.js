@@ -51,7 +51,8 @@ export const tt = Object.freeze({
   RETURN: 38,  // A return statement inside a user-defined function.
   TO: 39,
   DATAFRAME: 40,
-  RICHTEXT: 41
+  RICHTEXT: 41,
+  BOOLEAN: 42
 })
 
 const minusRegEx = /^-(?![-=<>:])/
@@ -108,8 +109,8 @@ const wordRegEx = /^(?:(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u212C\u2130\u2131\u210B
 
 const words = Object.freeze({
   //       input,    tex output,               type, closeDelim
-  "true": ["true", "\\mathord{\\text{true}}", tt.ORD, ""],
-  "false": ["false", "\\mathord{\\text{false}}", tt.ORD, ""],
+  "true": ["true", "\\mathord{\\text{true}}", tt.BOOLEAN, ""],
+  "false": ["false", "\\mathord{\\text{false}}", tt.BOOLEAN, ""],
   im: ["im", "im", tt.LONGVAR, ""],
   cos: ["cos", "\\cos", tt.FUNCTION, ""],
   cosd: ["cosd", "\\operatorname{\\cos_d}", tt.FUNCTION, ""],

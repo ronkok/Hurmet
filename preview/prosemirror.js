@@ -16048,7 +16048,7 @@ function setCellAttrs(node, extraAttrs) {
   return attrs
 }
 
-const functionRegEx = / *function /;
+const functionOrModuleRegEx = / *(?:function|module) /;
  
 // :: Object
 // [Specs](#model.NodeSpec) for the nodes defined in this schema.
@@ -16384,7 +16384,7 @@ const nodes = {
         }
         dom.appendChild(renderSVG(node.attrs.resultdisplay));
       } else if (node.attrs.dtype && node.attrs.dtype === dt.MODULE &&
-        functionRegEx.test(node.attrs.entry)) {
+        functionOrModuleRegEx.test(node.attrs.entry)) {
         dom.appendChild(document.createElement('pre'));
         dom.firstChild.appendChild(document.createElement('code'));
         dom.firstChild.firstChild.textContent = node.attrs.entry;
@@ -22036,7 +22036,7 @@ function textAfterCursor(editor) {
 
 const commaRegEx = /"[^"]*"|[0-9]+,[0-9]+|[A-Za-zıȷ\u0391-\u03D5\uD835][A-Za-z0-9_ıȷ\u0391-\u03D5\uD835\uDC00-\uDFFF]/g;
 const dotRegEx = /"[^"]*"|[0-9]+\.[0-9]+|[A-Za-zıȷ\u0391-\u03D5\uD835][A-Za-z0-9_ıȷ\u0391-\u03D5\uD835\uDC00-\uDFFF]/g;
-const functionRegEx$1 = /^(?:private +)?function (?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*\(/;
+const functionRegEx = /^(?:private +)?function (?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*\(/;
 
 const dotFromCommaForStorage = (str) => {
   // Lex for strings, numbers, and identifiers
@@ -22117,7 +22117,7 @@ function openMathPrompt(options) {
       }
       tex = jar.toString();
       if (decimalSymbol === ",") { tex = dotFromCommaForStorage(tex); }
-      isUDF = functionRegEx$1.test(tex);
+      isUDF = functionRegEx.test(tex);
       if (!isUDF) {
         // eslint-disable-next-line no-undef
         tex = hurmet.parse(tex, options.decimalFormat, false, true);

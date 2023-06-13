@@ -294,7 +294,7 @@
       MATRIX_DIV:"Error. Cannot divide one matrix by another.",
       MATRIX_MOD:"Error. Cannot take the modulo of one matrix by another.",
       BAD_INDEX: "Error. Index to a matrix must be numeric.",
-      FUNC_LINE: "Error in function @.",
+      FUNC_LINE: "Error in function @",
       BAD_BREAK: "Error in function @. break called outside of a loop",
       FETCH:     "Error. A fetch() function must be the only item in its expression.",
       STR_INDEX: "Error. The index to text may be only a real number or a range.",
@@ -1121,11 +1121,11 @@
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6248","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.6023","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.3752","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.2965","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -1134,10 +1134,10 @@
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4443","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4362","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9758","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.6065","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9716","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.6839","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -1157,7 +1157,7 @@
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.85930","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.85795","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1165,23 +1165,23 @@
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.4346","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.4493","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["4.0311","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["88.6380","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["3.8816","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["88.8900","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["149.46","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["150.24","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1401.66","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1391.11","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1192,7 +1192,7 @@
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["18.8527","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["18.7356","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -1222,7 +1222,7 @@
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.0763","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0780","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -2391,9 +2391,9 @@
   };
 
   const display$1 = (m, formatSpec, decimalFormat) => {
-    let str = "\\begin";
+    let str = "";
     if (m.dtype & dt.MATRIX) {
-      str += "{pmatrix}";
+      str += "\\begin{pmatrix}";
       const numRows = m.value.length;
       const numCols = m.value[0].length;
       for (let i = 0; i < numRows; i++) {
@@ -2405,22 +2405,25 @@
       str = str.slice(0, -3).trim();
       str += "\\end{pmatrix}";
     } else {
-      str += "{bmatrix}";
-      const argSep = (m.dtype & dt.ROWVECTOR) ? " & " : " \\\\ ";
-      if (m.value.plain) {
-        const numArgs = m.value.plain.length;
-        for (let i = 0; i < numArgs; i++) {
-          str += elementDisplay(m.value.plain[i], m.dtype, formatSpec, decimalFormat) +
-                 ((i < numArgs - 1) ? argSep : "");
-        }
+      const numArgs = m.value.plain ? m.value.plain.length : m.value.length;
+      if (numArgs === 0) {
+        str += "[\\,]";
       } else {
-        const numArgs = m.value.length;
-        for (let i = 0; i < numArgs; i++) {
-          str += elementDisplay(m.value[i], m.dtype, formatSpec, decimalFormat) +
-                 ((i < numArgs - 1) ? argSep : "");
+        str += "\\begin{bmatrix}";
+        const argSep = (m.dtype & dt.ROWVECTOR) ? " & " : " \\\\ ";
+        if (m.value.plain) {
+          for (let i = 0; i < numArgs; i++) {
+            str += elementDisplay(m.value.plain[i], m.dtype, formatSpec, decimalFormat) +
+                  ((i < numArgs - 1) ? argSep : "");
+          }
+        } else {
+          for (let i = 0; i < numArgs; i++) {
+            str += elementDisplay(m.value[i], m.dtype, formatSpec, decimalFormat) +
+                  ((i < numArgs - 1) ? argSep : "");
+          }
         }
+        str += "\\end{bmatrix}";
       }
-      str += "\\end{bmatrix}";
     }
     return str
   };
@@ -2710,7 +2713,7 @@
   const operandFromTokenStack = (tokenStack, numRows, numCols) => {
     // TODO: Get dtype correct for matrices that contain strings or booleans.
     if (numRows === 0 && numCols === 0) {
-      return Object.freeze({ value: new Array(0), unit: null, dtype: dt.ROWVECTOR })
+      return Object.freeze({ value: new Array(0), unit: null, dtype: dt.COLUMNVECTOR })
     } else if (numRows === 1 && numCols === 1) {
       // One element. Return a scalar.
       return tokenStack.pop()
@@ -3054,7 +3057,9 @@
       // Load a datum into the dataTable
       datum = datum.trim();
 
-      if (row === 3 && col === 0) { checkForUnitRow(); }
+      if (row === 3 && col === 0) {
+        checkForUnitRow();
+      }
 
       if (row === 0) {
         if (col === 0) {
@@ -3612,7 +3617,8 @@
     RETURN: 38,  // A return statement inside a user-defined function.
     TO: 39,
     DATAFRAME: 40,
-    RICHTEXT: 41
+    RICHTEXT: 41,
+    BOOLEAN: 42
   });
 
   const minusRegEx = /^-(?![-=<>:])/;
@@ -3669,8 +3675,8 @@
 
   const words = Object.freeze({
     //       input,    tex output,               type, closeDelim
-    "true": ["true", "\\mathord{\\text{true}}", tt.ORD, ""],
-    "false": ["false", "\\mathord{\\text{false}}", tt.ORD, ""],
+    "true": ["true", "\\mathord{\\text{true}}", tt.BOOLEAN, ""],
+    "false": ["false", "\\mathord{\\text{false}}", tt.BOOLEAN, ""],
     im: ["im", "im", tt.LONGVAR, ""],
     cos: ["cos", "\\cos", tt.FUNCTION, ""],
     cosd: ["cosd", "\\operatorname{\\cos_d}", tt.FUNCTION, ""],
@@ -4432,8 +4438,8 @@
     "acsch", "angle", "asec", "asecd", "asech", "asin", "asind", "asinh", "atan", "atan2",
     "atand", "atanh", "binomial", "ceil", "conj", "cos", "cosd", "cosh", "cosh", "cot",
     "cotd", "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp", "factorial", "fetch",
-    "floor", "format", "gamma", "gcd", "hcat", "hypot", "imag", "isnan", "length", "lerp", "ln",
-    "log", "log10", "log2", "lfact", "lgamma", "logn", "mod", "real",
+    "findfirst", "floor", "format", "gamma", "gcd", "hcat", "hypot", "imag", "isnan", "length",
+    "lerp", "ln", "log", "log10", "log2", "lfact", "lgamma", "logn", "mod", "number", "real",
     "rem", "rms", "round", "roundSig", "roundn", "sec", "secd", "sech", "sech", "sign", "sin",
     "sind", "sinh", "startSvg", "string", "tan", "tand", "tanh", "tanh", "trace", "transpose",
     "vcat", "zeros", "Γ"
@@ -4652,7 +4658,7 @@
         -1, 16, 15, -1, 14,
         13,  9,  3,  2, 10,
         -1, -1,  4,  3, -1,
-        -1
+        -1, -1
   ];
 
   const texPrecFromType = [
@@ -4664,7 +4670,7 @@
          2, -1, 15,  2, 14,
         13,  9, -1,  1, -1,
         15, -1,  1,  -1, 2,
-         2
+         2, 2
   ];
   /* eslint-enable indent-legacy */
 
@@ -4729,6 +4735,7 @@
     let tokenSep = "\xa0"; // no break space
     let rpnPrec = -1;
     const exprStack = []; // Use for lazy evalulation of ternary (If) expressions
+    let numFreeCommas = 0; // # of itens in a tuple
 
     // This function, parse(), is the main function for this module.
     // Before we get to the start line, we write two enclosed functions,
@@ -4970,6 +4977,17 @@
           okToAppend = true;
           break
 
+        case tt.BOOLEAN:
+          popTexTokens(2, okToAppend);
+          if (isCalc) {
+            popRpnTokens(-1);
+            rpn += token.input;
+          }
+          if (isPrecededBySpace) { posOfPrevRun = tex.length; }
+          tex += token.output;
+          okToAppend = true;
+          break
+
         case tt.NUM:
         case tt.ORD:
           popTexTokens(2, okToAppend);
@@ -5024,6 +5042,9 @@
           popTexTokens(2, okToAppend);
           posOfPrevRun = tex.length;
           tex += token.output;
+          if (isCalc) {
+            rpn += token.input;
+          }
           okToAppend = true;
           break
 
@@ -5535,7 +5556,11 @@
 
           if (isCalc) {
             if (delims.length === 1) {
-              rpn += token.output;
+              if (token.input === "\t") {
+                rpn += token.output;
+              } else if (token.input === ",") {
+                numFreeCommas += 1; // item in a tuple
+              }
 
             } else {
               if (token.input === ";") {
@@ -5769,6 +5794,9 @@
     if (isCalc) {
       while (rpnStack.length > 0) {
         rpn += tokenSep + rpnStack.pop().symbol;
+      }
+      if (numFreeCommas > 0) {
+        rpn += tokenSep + "tuple" + tokenSep + String(numFreeCommas + 1);
       }
       const varRegEx = /〖[^ ().\\,;]+/g;
       let arr;
@@ -8792,84 +8820,39 @@
 
   const wideCharRegEx = /[\uD800-\uDBFF][\uDC00-\uDFFF][\uFE00\uFE01]?/g;
 
+  const findfirst = (searchString, str) => {
+    const index = str.value.indexOf(searchString.value);
+    const wideCharMatches = arrayOfRegExMatches(wideCharRegEx, str.value.slice(0, index));
+    return Rnl.fromNumber(index + wideCharMatches.length + 1)
+  };
+
   const textRange = (str, index) => {
     // Find a range of the string str
     if (index.dtype !== dt.RATIONAL && index.dtype !== dt.RANGE) {
       return errorOprnd("STR_INDEX")
     }
 
-    const wideCharMatches = arrayOfRegExMatches(wideCharRegEx, str);
+    const strArray = Array.from(str);
     let value = "";
-
-    if (wideCharMatches.length === 0) {
-      // No surrogate pairs were found.
-      // Each text character is one UTF-16 code unit.
-      // So do a naive access of the string.
-      if (index.dtype === dt.RATIONAL) {
-        value = str.charAt(Rnl.toNumber(index.value) - 1);
-      } else if (index.dtype === dt.RANGE) {
-        const start = Rnl.toNumber(index.value[0]);
-        const step = Rnl.toNumber(index.value[1]);
-        const end = index.value[2] === "∞"
-          ? str.length
-          : Rnl.toNumber(index.value[2]);
-        if (step === 1) {
-          // No step size specified.
-          value = str.slice(start - 1, end);
-        } else {
-          for (let i = start - 1; i < end; i += step) {
-            value += str.charAt(i);
-          }
-        }
-      }
-    } else {
-      // We must account for surrogate pairs and variation selectors.
-      let discardLength = 0;
-      let endOfPrevWideChar = 0;
-      let cleanString = "";
-      let start = 0;
-      let step = 0;
-      let end = 0;
-      if (index.dtype === dt.RATIONAL) {
-        // Return one character.
-        start = Rnl.toNumber(index.value);
-        step = 1;
-        end = start;
+    if (index.dtype === dt.RATIONAL) {
+      const pos = Rnl.toNumber(index.value) - 1;
+      value = strArray.at(pos);
+    } else if (index.dtype === dt.RANGE) {
+      const start = Rnl.toNumber(index.value[0]);
+      const step = Rnl.toNumber(index.value[1]);
+      const end = index.value[2] === "∞"
+        ? str.length
+        : Rnl.toNumber(index.value[2]);
+      if (step === 1) {
+        value = strArray.slice(start - 1, end).join("");
       } else {
-        // index is a range and str contains at least one surrogate pair.
-        start = Rnl.toNumber(index.value[0]);
-        step = Rnl.toNumber(index.value[1]);
-        end = Rnl.toNumber(index.value[2]);
-      }
-      let realIndex = start;
+        for (let i = start - 1; i < end; i += step) {
+          value += strArray.at(i);
+        }
 
-      for (let i = 0; i < wideCharMatches.length; i++) {
-        const posWideChar = wideCharMatches[i].index;
-        cleanString = str.slice(endOfPrevWideChar, posWideChar);
-        while (realIndex <= end && discardLength + cleanString.length >= realIndex) {
-          value += cleanString[realIndex - discardLength - 1];
-          realIndex += step;
-        }
-        if (realIndex <= end && discardLength + cleanString.length === realIndex - 1) {
-          value += wideCharMatches[i].value;
-          realIndex += step;
-        }
-        if (realIndex > end) {
-          return { value, unit: null, dtype: dt.STRING }
-        }
-        discardLength += cleanString.length + 1;
-        endOfPrevWideChar = posWideChar + wideCharMatches[i].length;
-      }
-      if (realIndex >= discardLength && realIndex <= end) {
-        cleanString = str.slice(endOfPrevWideChar);
-        while (realIndex <= end && discardLength + cleanString.length >= realIndex) {
-          value += cleanString[realIndex - discardLength - 1];
-          realIndex += step;
-        }
-      } else {
-        return errorOprnd("BIGINDEX")
       }
     }
+
     return { value, unit: null, dtype: dt.STRING }
   };
 
@@ -9915,6 +9898,16 @@
 
   const dateMessageRegEx = /^date:([^\n]+)\nmessage:([^\n]+)\n/;
 
+  const inlineMd2ast = md => {
+    const state = { inline: true, _defs: {}, prevCapture: "", remainder: "", inHtml: false };
+    const ast = parse$1(md, state);
+    if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") {
+      ast.shift();
+    }
+    consolidate(ast);
+    return ast
+  };
+
   const md2ast = (md, inHtml = false) => {
     // First, check for a metadata preamble
     let metadata = false;
@@ -10118,7 +10111,7 @@
     textNode.attrs["font-size"] = attrs.fontsize;
     textNode.attrs["text-anchor"] = textanchor;
     // Load Markdown into an AST
-    const ast = md2ast(str)[0].content;
+    const ast = inlineMd2ast(str);
     // Load content of AST into <tspan> nodes.
     if (Array.isArray(ast)) {
       let prevNodeContainedSubscript = false;
@@ -10411,10 +10404,10 @@
       const node = { tag: "rect", attrs: {} };
       const p = [Rnl.toNumber(m.value[0][0]), Rnl.toNumber(m.value[0][1])];
       const q = [Rnl.toNumber(m.value[1][0]), Rnl.toNumber(m.value[1][1])];
-      node.attrs.x = p[0] * attrs.xunitlength + attrs.origin[0];
-      node.attrs.y = attrs.height - q[1] * attrs.yunitlength - attrs.origin[1];
-      node.attrs.width = (q[0] - p[0]) * attrs.xunitlength;
-      node.attrs.height = (q[1] - p[1]) * attrs.yunitlength;
+      node.attrs.x = Math.min(p[0], q[0]) * attrs.xunitlength + attrs.origin[0];
+      node.attrs.y = attrs.height - Math.max(p[1], q[1]) * attrs.yunitlength - attrs.origin[1];
+      node.attrs.width = Math.abs((q[0] - p[0]) * attrs.xunitlength);
+      node.attrs.height = Math.abs((q[1] - p[1]) * attrs.yunitlength);
       if (r != null) {
         const rNum = Rnl.toNumber(r.value) * attrs.xunitlength;
         node.attrs.rx = rNum;
@@ -10791,11 +10784,11 @@
       } else if (ch === '"') {
         // A string literal.
         const chEnd = tkn.charAt(tkn.length - 1);
-        const str = ch === '"' && chEnd === '"' ? tkn.slice(1, -1).trim() : tkn.trim();
+        const str = ch === '"' && chEnd === '"' ? tkn.slice(1, -1) : tkn;
         stack.push(Object.freeze({ value: str, unit: null, dtype: dt.STRING }));
 
       } else if (/^``/.test(tkn)) {
-        stack.push(DataFrame.dataFrameFromCSV(tablessTrim(tkn.slice(2, -2)), {}));
+        stack.push(DataFrame.dataFrameFromTSV(tablessTrim(tkn.slice(2, -2)), {}));
 
       } else if (ch === '`') {
         // A rich text literal
@@ -11061,6 +11054,10 @@
               o3.value = Operators.binary[shape1][shape2][opName](o1.value, o2.value);
               if (o3.value.dtype) { return o3.value } // Error
               o3.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn);
+              if (o1.dtype === dt.COLUMNVECTOR && shape2 === "scalar") {
+                // Appending an element to an empty column vector
+                o3.dtype = o1.dtype + o2.dtype;
+              }
               o3.unit = o1.unit;
             }
             stack.push(Object.freeze(o3));
@@ -11184,7 +11181,7 @@
             range.dtype = dt.RANGE;
             const step = o1.dtype !== dt.RATIONAL
               ? o1.value[2]
-              : end.value === "∞" || Rnl.lessThan(o1.value, end.value)
+              : end.value === "∞" || Rnl.lessThanOrEqualTo(o1.value, end.value)
               ? Rnl.one
               : Rnl.negate(Rnl.one);
             range.value = o1.dtype === dt.RATIONAL
@@ -11261,12 +11258,23 @@
             const numCols = Number(tokens[i + 2]);
             i += 2;
 
-            if (stack[stack.length - 1].dtype === dt.RANGE) {
+            if (stack.length > 0 && stack[stack.length - 1].dtype === dt.RANGE) {
               // Input was [start:step:end...]
               stack.push(Matrix.operandFromRange(stack.pop().value));
             } else {
               stack.push(Matrix.operandFromTokenStack(stack, numRows, numCols));
             }
+            break
+          }
+
+          case "tuple": {
+            const numItems = Number(tokens[i + 1]);
+            i += 1;
+            const oprnd = { value: [], unit: null, dtype: dt.TUPLE };
+            for (let j = 0; j < numItems; j++) {
+              oprnd.value.unshift(stack.pop());
+            }
+            stack.push(oprnd);
             break
           }
 
@@ -11399,6 +11407,40 @@
             break
           }
 
+          case "number": {
+            const arg = stack.pop();
+            if (!(arg.dtype & dt.STRING)) { return errorOprnd("STRING") }
+            const output = Object.create(null);
+            output.unit = { expos: allZeros };
+            output.value = isVector(arg)
+              ? arg.value.map(e => Rnl.fromString(e))
+              : isMatrix(arg)
+              ? arg.value.map(row => row.map(e => Rnl.fromString(e)))
+              : Rnl.fromString(arg.value);
+            output.dtype = arg.dtype - dt.STRING + dt.RATIONAL;
+            stack.push(Object.freeze(output));
+            break
+          }
+
+          case "findfirst": {
+            const args = [];
+            args.push(stack.pop());
+            args.unshift(stack.pop());
+            if (!((args[1].dtype & dt.STRING) && (args[1].dtype & dt.STRING))) {
+              return errorOprnd("STRING")
+            }
+            const output = Object.create(null);
+            output.unit = { expos: allZeros };
+            output.value = isVector(args[1])
+              ? args[1].value.map(e => findfirst(args[0], e))
+              : isMatrix(args[1])
+              ? args[1].value.map(row => row.map(e => findfirst(args[0], e)))
+              : findfirst(args[0], args[1]);
+            output.dtype = args[1].dtype - dt.STRING + dt.RATIONAL;
+            stack.push(Object.freeze(output));
+            break
+          }
+
           case "roundn":
           case "string": {
             // Round a numeric value.
@@ -11406,7 +11448,7 @@
             const num = stack.pop();
             if (!(num.dtype & dt.RATIONAL)) { return errorOprnd("") }
             if (!(spec.dtype & dt.STRING)) { return errorOprnd("") }
-            if (!/(?:f-?|r)\d+/.test(spec.value)) { return errorOprnd("") }
+            if (!/(?:[fr])\d+/.test(spec.value)) { return errorOprnd("") }
             let funcName = "";
             const output = Object.create(null);
             if (tkn === "string") {
@@ -12063,25 +12105,30 @@
         }
 
         case "for": {
-          const ctrl = {
-            type: "for",
-            condition: true,
-            startStatement: i,
-            endOfBlock: statement.endOfBlock
-          };
-          const tokens = statement.rpn.split("\u00A0");
-          ctrl.dummyVariable = tokens.shift().slice(1);
-          const iterable = evalRpn(tokens.join("\u00A0"), vars, decimalFormat, isUnitAware, lib);
-          ctrl.index = (iterable.dtype & dt.RANGE) ? iterable.value[0] : Rnl.fromNumber(0);
-          ctrl.step = (iterable.dtype & dt.RANGE) ? iterable.value[1] : Rnl.fromNumber(0);
-          ctrl.endIndex = (iterable.dtype & dt.RANGE)
-            ? iterable.value[2]
-            : Rnl.fromNumber(iterable.value.length - 1);
-          const [oprnd, nextIndex] = elementFromIterable(iterable, ctrl.index, ctrl.step);
-          ctrl.nextIndex = nextIndex;
-          ctrl.iterable = iterable;
-          control.push(ctrl);
-          vars[ctrl.dummyVariable] = oprnd;
+          if (control[level].condition) {
+            const ctrl = {
+              type: "for",
+              condition: true,
+              startStatement: i,
+              endOfBlock: statement.endOfBlock
+            };
+            const tokens = statement.rpn.split("\u00A0");
+            ctrl.dummyVariable = tokens.shift().slice(1);
+            const iterable = evalRpn(tokens.join("\u00A0"), vars,
+                                     decimalFormat, isUnitAware, lib);
+            ctrl.index = (iterable.dtype & dt.RANGE) ? iterable.value[0] : Rnl.fromNumber(0);
+            ctrl.step = (iterable.dtype & dt.RANGE) ? iterable.value[1] : Rnl.fromNumber(0);
+            ctrl.endIndex = (iterable.dtype & dt.RANGE)
+              ? iterable.value[2]
+              : Rnl.fromNumber(iterable.value.length - 1);
+            const [oprnd, nextIndex] = elementFromIterable(iterable, ctrl.index, ctrl.step);
+            ctrl.nextIndex = nextIndex;
+            ctrl.iterable = iterable;
+            control.push(ctrl);
+            vars[ctrl.dummyVariable] = oprnd;
+          } else {
+            i = statement.endOfBlock;
+          }
           break
         }
 
@@ -12159,7 +12206,7 @@
               if (result.dtype === dt.ERROR) { return result }
               const msg = result.dtype === dt.RATIONAL
                 ? Rnl.toNumber(result.value)
-                : result.dtype === dt.STRING
+                : result.dtype === dt.STRING || result.dtype === dt.BOOLEAN
                 ? result.value
                 : isVector(result) && (result.dtype & dt.RATIONAL)
                 ? result.value.map(e => Rnl.toNumber(e))
@@ -12307,7 +12354,9 @@
       // A numeric result with no unit specified.
       stmt.expos = allZeros;
     }
-    if (result.value)  { stmt.value = result.value; }
+    if (Object.prototype.hasOwnProperty.call(result, "value")) {
+      stmt.value = result.value;
+    }
     return [stmt, result]
   };
 
@@ -12316,7 +12365,7 @@
     const udf = stmt.value;
     const args = [];
     for (let i = 0; i < udf.parameters.length; i++) {
-      const argName = udf.parameters[i];
+      const argName = udf.parameters[i].name;
       args.push(evalRpn("¿" + argName, vars, decimalFormat, false, {}));
     }
     const funcResult = evalCustomFunction(udf, args, decimalFormat, false, {});
@@ -12542,11 +12591,12 @@
   const keywordRegEx = /^(if|elseif|else|return|throw|while|for|break|print|end)\b/;
   const drawCommandRegEx = /^(title|frame|view|axes|grid|stroke|strokewidth|strokedasharray|fill|fontsize|fontweight|fontstyle|fontfamily|marker|line|path|plot|curve|rect|circle|ellipse|arc|text|dot|leader|dimension)\b/;
   const leadingSpaceRegEx$2 = /^[\t ]+/;
-  const oneLinerRegEx = /^(( *)if [^\n"`]+) ((?:return|throw|print|break)\b(?:[^\n]+)?)(?: end)? *\n/gm;
+  const oneLinerRegEx = /^(( *)if [^\n`]+) +((?:return|throw|print|break)\b(?:[^\n]+)?)(?: end)? *\n/gm;
 
   // If you change functionRegEx, then also change it in mathprompt.js.
   // It isn't called from there in order to avoid duplicating Hurmet code inside ProseMirror.js.
   const functionRegEx = /^function (?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*\(/;
+  const moduleRegEx = /^module ([A-Za-z][A-Za-z0-9]*)/;
   const drawRegEx = /^draw\(/;
   const startSvgRegEx = /^startSvg\(\)/;
   const lexRegEx = /"[^"]*"|``.*|`[^`]*`|'[^']*'|#|[^"`'#]+/g;
@@ -12582,7 +12632,7 @@
     // Assemble the lines into functions and assign each function to parent.
     const parent = Object.create(null);
 
-    // Expand one-liners into three lines each.
+    // Expand one-liners into if ... end blocks.
     str = str.replace(oneLinerRegEx, "$1\n$2    $3\n$2end\n");
 
     // Statements end at a newline.
@@ -12612,7 +12662,7 @@
 
   const handleTSV = (expression, lines, startLineNum) => {
     for (let i = startLineNum + 1; i < lines.length; i++) {
-      const line = lines[i].trim();
+      const line = tablessTrim(lines[i]);
       if (line.length === 0) { continue }
       expression += "\n" + line;
       if (line.slice(-2) === "``") { return [expression, i] }
@@ -12708,7 +12758,7 @@
           isStatement = true;
         } else {
           // TODO: We shouldn't get here. Write an error.
-          return [errorOprnd("FUNC_LINE", functionName + ", line " + (i + 1)), i]
+          return [errorOprnd("FUNC_LINE", functionName + ", line " + (i + 1) + "\n" + line), i]
         }
       }
 
@@ -12852,13 +12902,16 @@
     let dtype;
     let str = "";
 
+    const isModule = moduleRegEx.test(inputStr);
     const isDraw = drawRegEx.test(inputStr);
-    if (functionRegEx.test(inputStr) || isDraw) {
+    if (functionRegEx.test(inputStr) || isDraw || isModule) {
       // This cell contains a custom function.
       let name = "";
       if (isDraw) {
         name = "draw";
-      } else {
+      } else if (isModule) {
+        name = moduleRegEx.exec(inputStr)[1].trim();
+      } else if (!isModule) {
         const posFn = inputStr.indexOf("function");
         const posParen = inputStr.indexOf("(");
         name = inputStr.slice(posFn + 8, posParen).trim();
@@ -12872,7 +12925,7 @@
       const attrs = {
         entry: inputStr,
         name,
-        value: (isError) ? module.value : module.value[name],
+        value: (isError || isModule) ? module.value : module.value[name],
         // TODO: what to do with comma decimals?
         dtype: isError ? dt.ERROR : name === "draw" ? dt.DRAWING : dt.MODULE,
         error: isError
@@ -12981,7 +13034,7 @@
     }
 
     if (expression.length > 0) {
-      // The author may want a calculaltion done on the expression.
+      // The author may want a calculation done on the expression.
       if (/^\s*fetch\(/.test(expression)) {
         // fetch() functions are handled in updateCalculations.js, not here.
         // It's easier from there to send a fetch() callback to a ProseMirror transaction.

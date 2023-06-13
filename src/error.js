@@ -48,7 +48,7 @@ const errorMessages = Object.freeze({
     MATRIX_DIV:"Error. Cannot divide one matrix by another.",
     MATRIX_MOD:"Error. Cannot take the modulo of one matrix by another.",
     BAD_INDEX: "Error. Index to a matrix must be numeric.",
-    FUNC_LINE: "Error in function @.",
+    FUNC_LINE: "Error in function @",
     BAD_BREAK: "Error in function @. break called outside of a loop",
     FETCH:     "Error. A fetch() function must be the only item in its expression.",
     STR_INDEX: "Error. The index to text may be only a real number or a range.",

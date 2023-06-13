@@ -1,7 +1,7 @@
 ﻿import { parse } from "./parser"
 import { dt } from "./constants"
 import { valueFromLiteral } from "./literal"
-import { functionRegEx, drawRegEx, scanModule } from "./module"
+import { functionRegEx, drawRegEx, moduleRegEx, scanModule } from "./module"
 
 /*  prepareStatement.js
  *
@@ -68,13 +68,16 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
   let dtype
   let str = ""
 
+  const isModule = moduleRegEx.test(inputStr)
   const isDraw = drawRegEx.test(inputStr)
-  if (functionRegEx.test(inputStr) || isDraw) {
+  if (functionRegEx.test(inputStr) || isDraw || isModule) {
     // This cell contains a custom function.
     let name = ""
     if (isDraw) {
       name = "draw"
-    } else {
+    } else if (isModule) {
+      name = moduleRegEx.exec(inputStr)[1].trim()
+    } else if (!isModule) {
       const posFn = inputStr.indexOf("function")
       const posParen = inputStr.indexOf("(")
       name = inputStr.slice(posFn + 8, posParen).trim()
@@ -88,7 +91,7 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
     const attrs = {
       entry: inputStr,
       name,
-      value: (isError) ? module.value : module.value[name],
+      value: (isError || isModule) ? module.value : module.value[name],
       // TODO: what to do with comma decimals?
       dtype: isError ? dt.ERROR : name === "draw" ? dt.DRAWING : dt.MODULE,
       error: isError
@@ -197,7 +200,7 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
   }
 
   if (expression.length > 0) {
-    // The author may want a calculaltion done on the expression.
+    // The author may want a calculation done on the expression.
     if (/^\s*fetch\(/.test(expression)) {
       // fetch() functions are handled in updateCalculations.js, not here.
       // It's easier from there to send a fetch() callback to a ProseMirror transaction.

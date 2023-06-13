@@ -359,11 +359,6 @@ li.ProseMirror-selectednode:after {
   border-radius: 4px;
 }
 
-.ProseMirror-menu-active {
-  background: #eee;
-  border-radius: 4px;
-}
-
 .ProseMirror-menu-disabled {
   opacity: .3;
 }

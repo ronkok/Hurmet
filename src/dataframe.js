@@ -260,7 +260,9 @@ const dataFrameFromTSV = (str, vars) => {
     // Load a datum into the dataTable
     datum = datum.trim()
 
-    if (row === 3 && col === 0) { checkForUnitRow() }
+    if (row === 3 && col === 0) {
+      checkForUnitRow()
+    }
 
     if (row === 0) {
       if (col === 0) {

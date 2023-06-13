@@ -38,7 +38,7 @@ function setCellAttrs(node, extraAttrs) {
   return attrs
 }
 
-const functionRegEx = / *function /
+const functionOrModuleRegEx = /^ *(?:function|module) /
  
 // :: Object
 // [Specs](#model.NodeSpec) for the nodes defined in this schema.
@@ -374,7 +374,7 @@ export const nodes = {
         }
         dom.appendChild(renderSVG(node.attrs.resultdisplay))
       } else if (node.attrs.dtype && node.attrs.dtype === dt.MODULE &&
-        functionRegEx.test(node.attrs.entry)) {
+        functionOrModuleRegEx.test(node.attrs.entry)) {
         dom.appendChild(document.createElement('pre'))
         dom.firstChild.appendChild(document.createElement('code'))
         dom.firstChild.firstChild.textContent = node.attrs.entry
