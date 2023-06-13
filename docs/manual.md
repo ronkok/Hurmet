@@ -2127,7 +2127,7 @@ while
     ```
     while b ≠ 0
         h = b
-        b = a modulo b
+        b = mod(a, b)
         a = h
     end
     ```
