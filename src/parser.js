@@ -1138,12 +1138,9 @@ export const parse = (
 
         if (isCalc) {
           if (delims.length === 1) {
-            if (token.input === "\t") {
-              rpn += token.output
-            } else if (token.input === ",") {
+            if (token.input === ",") {
               numFreeCommas += 1 // item in a tuple
             }
-
           } else {
             if (token.input === ";") {
               delim.numRows += 1
