@@ -55,7 +55,7 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
 
   } else if (/^[([]/.test(str)) {
     // We're processing a matrix
-    const [tex, rpn] = parse(str, decimalFormat, true)
+    const [tex, rpn, _] = parse(str, decimalFormat, true)
     const oprnd = evalRpn(rpn, {}, decimalFormat, false, {})
     let unit = (oprnd.dtype & dt.RATIONAL) ? allZeros : null
     let dtype = oprnd.dtype

@@ -114,6 +114,29 @@ const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
   return attrs
 }
 
+const mustCalc = (attrs, hurmetVars, changedVars, isCalcAll) => {
+  if (isCalcAll) { return true }
+  if (attrs.rpn && !(attrs.name && hurmetVars[attrs.name] && hurmetVars[attrs.name].isFetch)) {
+    for (const varName of attrs.dependencies) {
+      if (changedVars.has(varName)) { return true }
+    }
+  }
+  if (attrs.dtype && attrs.dtype === dt.DRAWING && attrs.value.parameters &&
+      attrs.value.parameters.length > 0) {
+    for (const parameter of attrs.value.parameters) {
+      if (changedVars.has(parameter)) { return true }
+    }
+  }
+  return false
+}
+
+/*
+  const mustRedraw = attrs.dtype && attrs.dtype === dt.DRAWING &&
+  (attrs.rpn || (attrs.value.parameters.length > 0))
+if (attrs.rpn || mustRedraw || (attrs.name && !(hurmetVars[attrs.name] &&
+  hurmetVars[attrs.name].isFetch))) {
+*/
+
 const workAsync = (
   view,
   calcNodeSchema,
@@ -167,7 +190,7 @@ const workAsync = (
       attrs.inDraftMode = inDraftMode
       tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs))
       if (attrs.name) {
-        insertOneHurmetVar(hurmetVars, attrs, decimalFormat)
+        insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat)
       }
     }
     // There. Fetches are done and are loaded into the document.
@@ -201,6 +224,8 @@ const proceedAfterFetch = (
   //   2. After we know that no fetch statements need be processed.
   const doc = view.state.doc
   const decimalFormat = doc.attrs.decimalFormat
+  // Create a set to track which variable have a changed value.
+  const changedVars = isCalcAll ? null : new Set()
 
   if (!isCalcAll && (nodeAttrs.name || nodeAttrs.rpn ||
     (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING))) {
@@ -214,7 +239,7 @@ const proceedAfterFetch = (
               hurmetVars[key] =  value
             })
           } else {
-            insertOneHurmetVar(hurmetVars, attrs, decimalFormat)
+            insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat)
           }
         }
       }
@@ -223,7 +248,7 @@ const proceedAfterFetch = (
     // Hoist any user-defined functions located below the selection.
     doc.nodesBetween(curPos + 1, doc.content.size, function(node, pos) {
       if (node.type.name === "calculation" && node.attrs.dtype === dt.MODULE) {
-        insertOneHurmetVar(hurmetVars, node.attrs, decimalFormat)
+        insertOneHurmetVar(hurmetVars, node.attrs, null, decimalFormat)
       }
     })
 
@@ -240,7 +265,7 @@ const proceedAfterFetch = (
           ? evaluateDrawing(attrs, hurmetVars, decimalFormat)
           : evaluate(attrs, hurmetVars, decimalFormat)
       }
-      if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, decimalFormat) }
+      if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat) }
       attrs.displayMode = nodeAttrs.displayMode
       tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(attrs))
     }
@@ -250,8 +275,8 @@ const proceedAfterFetch = (
   const startPos = isCalcAll ? 0 : (curPos + 1)
   doc.nodesBetween(startPos, doc.content.size, function(node, pos) {
     if (node.type.name === "calculation") {
-      const mustCalc = isCalcAll ? !fetchRegEx.test(node.attrs.entry) : !node.attrs.isFetch
-      if (mustCalc) {
+      const notFetched = isCalcAll ? !fetchRegEx.test(node.attrs.entry) : !node.attrs.isFetch
+      if (notFetched) {
         const entry = node.attrs.entry
         let attrs = isCalcAll
           ? prepareStatement(entry, decimalFormat)
@@ -259,18 +284,19 @@ const proceedAfterFetch = (
         attrs.displayMode = node.attrs.displayMode
         const mustRedraw = attrs.dtype && attrs.dtype === dt.DRAWING &&
           (attrs.rpn || (attrs.value.parameters.length > 0 || isCalcAll))
-        if (isCalcAll || attrs.rpn || mustRedraw || (attrs.name && !(hurmetVars[attrs.name] &&
-          hurmetVars[attrs.name].isFetch))) {
+        if (mustCalc(attrs, hurmetVars, changedVars, isCalcAll)) {
           if (isCalcAll) { improveQuantities(attrs, hurmetVars) }
           if (attrs.rpn || mustRedraw) {
             attrs = attrs.rpn // attrs.dtype && attrs.dtype === dt.DRAWING
               ? evaluate(attrs, hurmetVars, decimalFormat)
               : evaluateDrawing(attrs, hurmetVars, decimalFormat)
           }
-          if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, decimalFormat) }
+          if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat) }
           if (isCalcAll || attrs.rpn || mustRedraw) {
             tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs))
           }
+        } else if (attrs.name && attrs.value) {
+          insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat)
         }
       } else if (node.attrs.name && !(isCalcAll && node.attrs.isFetch)) {
         if (node.attrs.name) {
@@ -279,7 +305,7 @@ const proceedAfterFetch = (
               hurmetVars[key] =  value
             })
           } else {
-            insertOneHurmetVar(hurmetVars, node.attrs, decimalFormat)
+            insertOneHurmetVar(hurmetVars, node.attrs, null, decimalFormat)
           }
         }
       }
@@ -348,10 +374,10 @@ export function updateCalculations(
           fetchPositions.push(pos)
         } else if (/^function /.test(entry)) {
           node.attrs = prepareStatement(entry, doc.attrs.decimalFormat)
-          insertOneHurmetVar(hurmetVars, node.attrs, doc.attrs.decimalFormat)
+          insertOneHurmetVar(hurmetVars, node.attrs, null, doc.attrs.decimalFormat)
         }
       } else if (node.attrs.isFetch || (node.attrs.dtype && node.attrs.dtype === dt.MODULE)) {
-        insertOneHurmetVar(hurmetVars, node.attrs, doc.attrs.decimalFormat)
+        insertOneHurmetVar(hurmetVars, node.attrs, null, doc.attrs.decimalFormat)
       }
     })
   }

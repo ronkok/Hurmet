@@ -1426,7 +1426,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
           if (statement.name) {
             statement.resultdisplay = isUnitAware ? "!!" : "!"
             const [stmt, _] = conditionResult(statement, result, isUnitAware)
-            insertOneHurmetVar(vars, stmt, decimalFormat)
+            insertOneHurmetVar(vars, stmt, null, decimalFormat)
           }
         }
         break

@@ -16048,7 +16048,7 @@ function setCellAttrs(node, extraAttrs) {
   return attrs
 }
 
-const functionOrModuleRegEx = / *(?:function|module) /;
+const functionOrModuleRegEx = /^ *(?:function|module) /;
  
 // :: Object
 // [Specs](#model.NodeSpec) for the nodes defined in this schema.
@@ -16352,6 +16352,7 @@ const nodes = {
       tex: {default: ""}, //              The string I pass to Temml for final rendering.
       alt: {default: ""}, //              The string I render when in draft mode.
       rpn: {default: null}, //            RPN from parser.js, for calculation.
+      dependencies: {default: []}, //     For use in avoiding unnecesary calculations
       inDraftMode: {default: false},
       resulttemplate: {default: null}, // String with units, but waiting for a value.
       altresulttemplate: {default: null}, // Ditto, but in draft mode.

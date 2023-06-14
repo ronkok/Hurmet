@@ -73,7 +73,7 @@ export async function updateCalcs(doc) {
       callers.push(node)
     } else if (/^function /.test(entry)) {
       node.attrs = prepareStatement(entry, decimalFormat)
-      insertOneHurmetVar(hurmetVars, node.attrs, decimalFormat)
+      insertOneHurmetVar(hurmetVars, node.attrs, null, decimalFormat)
     }
   }
 
@@ -92,7 +92,7 @@ export async function updateCalcs(doc) {
             hurmetVars[key] =  value
           })
         } else {
-          insertOneHurmetVar(hurmetVars, node.attrs, decimalFormat)
+          insertOneHurmetVar(hurmetVars, node.attrs, null, decimalFormat)
         }
       }
     }
@@ -113,7 +113,7 @@ export async function updateCalcs(doc) {
             ? evaluate(attrs, hurmetVars, decimalFormat)
             : evaluateDrawing(attrs, hurmetVars, decimalFormat)
         }
-        if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, decimalFormat) }
+        if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat) }
         // When we modify a node, we are also mutating the container doc.
         node.attrs = attrs
       }

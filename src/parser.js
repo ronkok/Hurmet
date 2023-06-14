@@ -299,6 +299,7 @@ export const parse = (
   let rpn = ""
   let token = {}
   let prevToken = { input: "", output: "", ttype: 50 }
+  const dependencies = [];
   let mustLex = true
   let mustAlign = false
   let posOfPrevRun = 0
@@ -658,6 +659,7 @@ export const parse = (
             token.output = "〖" + token.output
           }
           rpn += token.input === "im" ? "im" : "¿" + token.input
+          if (token.input !== "im") { dependencies.push(token.input) }
         }
 
         tex += token.output + (str.charAt(0) === "." ? "" : " ")
@@ -884,6 +886,7 @@ export const parse = (
           texStack.push({ prec: 16, pos: tex.length, ttype: tt.ACCENT, closeDelim: "〗" })
           tex += "〖" + token.input
           rpn += "¿" + token.input
+          dependencies.push(token.input)
         } else {
           texStack.push({ prec: 16, pos: tex.length, ttype: tt.ACCENT, closeDelim: "}" })
           tex += token.output + "{"
@@ -895,7 +898,10 @@ export const parse = (
 
       case tt.PRIME:
         popTexTokens(15, true)
-        if (isCalc) { rpn += token.input }
+        if (isCalc) {
+          rpn += token.input
+          dependencies.push(prevToken.input + token.input)
+        }
         tex = tex.trim() + token.output + " "
         okToAppend = true
         break
@@ -1401,5 +1407,5 @@ export const parse = (
     tex = "\\begin{aligned}" + tex.slice(0, pos) + "&" + tex.slice(pos) + "\\end{aligned}"
   }
 
-  return isCalc ? [tex, rpn] : tex
+  return isCalc ? [tex, rpn, dependencies] : tex
 }

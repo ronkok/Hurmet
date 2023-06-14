@@ -6,7 +6,7 @@ import { Rnl } from "./rational"
 import { isMatrix, Matrix } from "./matrix"
 import { errorOprnd } from "./error"
 
-export function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
+export function insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat) {
   // hurmetVars is a key:value store of variable names and attributes.
   // This function is called to insert an assignment into hurmetVars.
   const formatSpec = hurmetVars.format ? hurmetVars.format.value : "h15"
@@ -14,6 +14,9 @@ export function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
   if (!Array.isArray(attrs.name)) {
     // This is the typical case.
     hurmetVars[attrs.name] = attrs
+    if (changedVars) {
+      changedVars.add(attrs.name)
+    }
 
   } else if (attrs.value === null) {
     for (let i = 0; i < attrs.name.length; i++) {
@@ -47,6 +50,7 @@ export function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
             unit: isQuantity ? attrs.unit : undefined,
             dtype
           }
+          if (changedVars) { changedVars.add(attrs.name[iName]) }
           iName += 1
         }
       }
@@ -68,6 +72,7 @@ export function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
           unit: isQuantity ? attrs.unit : undefined,
           dtype
         }
+        if (changedVars) { changedVars.add(attrs.name[i]) }
       }
     }
 
@@ -88,6 +93,7 @@ export function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
         result.resultdisplay = format(value, formatSpec, decimalFormat)
         if (unitName) { result.resultdisplay += " " + unitTeXFromString(unitName) }
         hurmetVars[attrs.name[i]] = result
+        if (changedVars) { changedVars.add(attrs.name[i]) }
         i += 1
       }
       i = 0
@@ -103,6 +109,7 @@ export function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
           : String(value)
         if (unitName) { result.resultdisplay += " " + unitTeXFromString(unitName) }
         hurmetVars[attrs.name[i]] = result
+        if (changedVars) { changedVars.add(attrs.name[i]) }
         i += 1
       }
     }
@@ -144,11 +151,13 @@ export function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
       }
 
       hurmetVars[attrs.name[i]] = result
+      if (changedVars) { changedVars.add(attrs.name[i]) }
     }
   } else if (attrs.dtype === dt.TUPLE) {
     let i = 0
     for (const value of attrs.value.values()) {
       hurmetVars[attrs.name[i]] = value
+      if (changedVars) { changedVars.add(attrs.name[i]) }
       i += 1
     }
   } else if (attrs.dtype === dt.MODULE) {
@@ -159,6 +168,7 @@ export function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
       for (const value of attrs.value.values()) {
         const result = clone(value)
         hurmetVars[attrs.name[i]] = result
+        if (changedVars) { changedVars.add(attrs.name[i]) }
         i += 1
       }
     }

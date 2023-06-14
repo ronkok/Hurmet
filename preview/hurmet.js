@@ -4717,6 +4717,7 @@
     let rpn = "";
     let token = {};
     let prevToken = { input: "", output: "", ttype: 50 };
+    const dependencies = [];
     let mustLex = true;
     let mustAlign = false;
     let posOfPrevRun = 0;
@@ -5076,6 +5077,7 @@
               token.output = "〖" + token.output;
             }
             rpn += token.input === "im" ? "im" : "¿" + token.input;
+            if (token.input !== "im") { dependencies.push(token.input); }
           }
 
           tex += token.output + (str.charAt(0) === "." ? "" : " ");
@@ -5302,6 +5304,7 @@
             texStack.push({ prec: 16, pos: tex.length, ttype: tt.ACCENT, closeDelim: "〗" });
             tex += "〖" + token.input;
             rpn += "¿" + token.input;
+            dependencies.push(token.input);
           } else {
             texStack.push({ prec: 16, pos: tex.length, ttype: tt.ACCENT, closeDelim: "}" });
             tex += token.output + "{";
@@ -5313,7 +5316,10 @@
 
         case tt.PRIME:
           popTexTokens(15, true);
-          if (isCalc) { rpn += token.input; }
+          if (isCalc) {
+            rpn += token.input;
+            dependencies.push(prevToken.input + token.input);
+          }
           tex = tex.trim() + token.output + " ";
           okToAppend = true;
           break
@@ -5556,12 +5562,9 @@
 
           if (isCalc) {
             if (delims.length === 1) {
-              if (token.input === "\t") {
-                rpn += token.output;
-              } else if (token.input === ",") {
+              if (token.input === ",") {
                 numFreeCommas += 1; // item in a tuple
               }
-
             } else {
               if (token.input === ";") {
                 delim.numRows += 1;
@@ -5822,10 +5825,10 @@
       tex = "\\begin{aligned}" + tex.slice(0, pos) + "&" + tex.slice(pos) + "\\end{aligned}";
     }
 
-    return isCalc ? [tex, rpn] : tex
+    return isCalc ? [tex, rpn, dependencies] : tex
   };
 
-  function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
+  function insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat) {
     // hurmetVars is a key:value store of variable names and attributes.
     // This function is called to insert an assignment into hurmetVars.
     const formatSpec = hurmetVars.format ? hurmetVars.format.value : "h15";
@@ -5833,6 +5836,9 @@
     if (!Array.isArray(attrs.name)) {
       // This is the typical case.
       hurmetVars[attrs.name] = attrs;
+      if (changedVars) {
+        changedVars.add(attrs.name);
+      }
 
     } else if (attrs.value === null) {
       for (let i = 0; i < attrs.name.length; i++) {
@@ -5866,6 +5872,7 @@
               unit: isQuantity ? attrs.unit : undefined,
               dtype
             };
+            if (changedVars) { changedVars.add(attrs.name[iName]); }
             iName += 1;
           }
         }
@@ -5887,6 +5894,7 @@
             unit: isQuantity ? attrs.unit : undefined,
             dtype
           };
+          if (changedVars) { changedVars.add(attrs.name[i]); }
         }
       }
 
@@ -5907,6 +5915,7 @@
           result.resultdisplay = format(value, formatSpec, decimalFormat);
           if (unitName) { result.resultdisplay += " " + unitTeXFromString(unitName); }
           hurmetVars[attrs.name[i]] = result;
+          if (changedVars) { changedVars.add(attrs.name[i]); }
           i += 1;
         }
         i = 0;
@@ -5922,6 +5931,7 @@
             : String(value);
           if (unitName) { result.resultdisplay += " " + unitTeXFromString(unitName); }
           hurmetVars[attrs.name[i]] = result;
+          if (changedVars) { changedVars.add(attrs.name[i]); }
           i += 1;
         }
       }
@@ -5963,11 +5973,13 @@
         }
 
         hurmetVars[attrs.name[i]] = result;
+        if (changedVars) { changedVars.add(attrs.name[i]); }
       }
     } else if (attrs.dtype === dt.TUPLE) {
       let i = 0;
       for (const value of attrs.value.values()) {
         hurmetVars[attrs.name[i]] = value;
+        if (changedVars) { changedVars.add(attrs.name[i]); }
         i += 1;
       }
     } else if (attrs.dtype === dt.MODULE) {
@@ -5978,6 +5990,7 @@
         for (const value of attrs.value.values()) {
           const result = clone(value);
           hurmetVars[attrs.name[i]] = result;
+          if (changedVars) { changedVars.add(attrs.name[i]); }
           i += 1;
         }
       }
@@ -12036,7 +12049,7 @@
             if (statement.name) {
               statement.resultdisplay = isUnitAware ? "!!" : "!";
               const [stmt, _] = conditionResult(statement, result, isUnitAware);
-              insertOneHurmetVar(vars, stmt, decimalFormat);
+              insertOneHurmetVar(vars, stmt, null, decimalFormat);
             }
           }
           break
@@ -12460,7 +12473,7 @@
 
     } else if (/^[([]/.test(str)) {
       // We're processing a matrix
-      const [tex, rpn] = parse(str, decimalFormat, true);
+      const [tex, rpn, _] = parse(str, decimalFormat, true);
       const oprnd = evalRpn(rpn, {}, decimalFormat, false, {});
       let unit = (oprnd.dtype & dt.RATIONAL) ? allZeros : null;
       let dtype = oprnd.dtype;
@@ -12763,15 +12776,16 @@
       }
 
       let rpn = "";
+      let _;
       if (expression) {
-        [, rpn] = parse(expression, decimalFormat, true);
+        [, rpn, _] = parse(expression, decimalFormat, true);
         if (name === "for") { rpn = rpn.replace(/\u00a0in\u00a0/, "\u00a0"); }
       }
       const stype = isStatement ? "statement" : name;
       if (isStatement && /[,;]/.test(name)) {
         name = name.split(/[,;]/).map(e => e.trim());
       }
-      funcObj.statements.push({ name: name, rpn: rpn, stype: stype });
+      funcObj.statements.push({ name, rpn, stype });
       if (stype === "if" || stype === "while" || stype === "for") {
         stackOfCtrls.push({ type: stype, statementNum: funcObj.statements.length - 1 });
       } else if (stype === "end") {
@@ -12894,6 +12908,7 @@
     let expression = "";
     let echo = "";
     let rpn = "";
+    let dependencies = [];
     let resultDisplay = "";
     let name = "";
     let leadsWithCurrency = false;
@@ -12937,9 +12952,9 @@
 
     if (testRegEx$1.test(inputStr)) {
       str = str.replace(testRegEx$1, "").trim();
-      const [_, rpn] = parse(str, decimalFormat, true);
+      const [_, rpn, dependencies] = parse(str, decimalFormat, true);
       const resulttemplate = testRegEx$1.exec(inputStr)[1];
-      return { entry: inputStr, template: "", rpn, resulttemplate,
+      return { entry: inputStr, template: "", rpn, dependencies, resulttemplate,
         altresulttemplate: resulttemplate, resultdisplay: "" }
     }
 
@@ -13042,7 +13057,7 @@
 
       } else {
         // Parse the expression. Stop short of doing the calculation.
-        [echo, rpn] = parse(expression, decimalFormat, true);
+        [echo, rpn, dependencies] = parse(expression, decimalFormat, true);
 
         // Shoulld we display an echo of the expression, with values shown for each variable?
         if (suppressResultDisplay || displayResultOnly || echo.indexOf("〖") === -1
@@ -13142,6 +13157,7 @@
       attrs.alt = altEqn;
     }
     if (rpn) { attrs.rpn = rpn; }
+    if (dependencies.length > 0) { attrs.dependencies = dependencies; }
     if (value) { attrs.value = value; }
     if (unit) {
       if (Array.isArray(unit)) {
@@ -26357,6 +26373,29 @@
     return attrs
   };
 
+  const mustCalc = (attrs, hurmetVars, changedVars, isCalcAll) => {
+    if (isCalcAll) { return true }
+    if (attrs.rpn && !(attrs.name && hurmetVars[attrs.name] && hurmetVars[attrs.name].isFetch)) {
+      for (const varName of attrs.dependencies) {
+        if (changedVars.has(varName)) { return true }
+      }
+    }
+    if (attrs.dtype && attrs.dtype === dt.DRAWING && attrs.value.parameters &&
+        attrs.value.parameters.length > 0) {
+      for (const parameter of attrs.value.parameters) {
+        if (changedVars.has(parameter)) { return true }
+      }
+    }
+    return false
+  };
+
+  /*
+    const mustRedraw = attrs.dtype && attrs.dtype === dt.DRAWING &&
+    (attrs.rpn || (attrs.value.parameters.length > 0))
+  if (attrs.rpn || mustRedraw || (attrs.name && !(hurmetVars[attrs.name] &&
+    hurmetVars[attrs.name].isFetch))) {
+  */
+
   const workAsync = (
     view,
     calcNodeSchema,
@@ -26410,7 +26449,7 @@
         attrs.inDraftMode = inDraftMode;
         tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs));
         if (attrs.name) {
-          insertOneHurmetVar(hurmetVars, attrs, decimalFormat);
+          insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat);
         }
       }
       // There. Fetches are done and are loaded into the document.
@@ -26444,6 +26483,8 @@
     //   2. After we know that no fetch statements need be processed.
     const doc = view.state.doc;
     const decimalFormat = doc.attrs.decimalFormat;
+    // Create a set to track which variable have a changed value.
+    const changedVars = isCalcAll ? null : new Set();
 
     if (!isCalcAll && (nodeAttrs.name || nodeAttrs.rpn ||
       (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING))) {
@@ -26457,7 +26498,7 @@
                 hurmetVars[key] =  value;
               });
             } else {
-              insertOneHurmetVar(hurmetVars, attrs, decimalFormat);
+              insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat);
             }
           }
         }
@@ -26466,7 +26507,7 @@
       // Hoist any user-defined functions located below the selection.
       doc.nodesBetween(curPos + 1, doc.content.size, function(node, pos) {
         if (node.type.name === "calculation" && node.attrs.dtype === dt.MODULE) {
-          insertOneHurmetVar(hurmetVars, node.attrs, decimalFormat);
+          insertOneHurmetVar(hurmetVars, node.attrs, null, decimalFormat);
         }
       });
 
@@ -26483,7 +26524,7 @@
             ? evaluateDrawing(attrs, hurmetVars, decimalFormat)
             : evaluate(attrs, hurmetVars, decimalFormat);
         }
-        if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, decimalFormat); }
+        if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat); }
         attrs.displayMode = nodeAttrs.displayMode;
         tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(attrs));
       }
@@ -26493,8 +26534,8 @@
     const startPos = isCalcAll ? 0 : (curPos + 1);
     doc.nodesBetween(startPos, doc.content.size, function(node, pos) {
       if (node.type.name === "calculation") {
-        const mustCalc = isCalcAll ? !fetchRegEx.test(node.attrs.entry) : !node.attrs.isFetch;
-        if (mustCalc) {
+        const notFetched = isCalcAll ? !fetchRegEx.test(node.attrs.entry) : !node.attrs.isFetch;
+        if (notFetched) {
           const entry = node.attrs.entry;
           let attrs = isCalcAll
             ? prepareStatement(entry, decimalFormat)
@@ -26502,18 +26543,19 @@
           attrs.displayMode = node.attrs.displayMode;
           const mustRedraw = attrs.dtype && attrs.dtype === dt.DRAWING &&
             (attrs.rpn || (attrs.value.parameters.length > 0 || isCalcAll));
-          if (isCalcAll || attrs.rpn || mustRedraw || (attrs.name && !(hurmetVars[attrs.name] &&
-            hurmetVars[attrs.name].isFetch))) {
+          if (mustCalc(attrs, hurmetVars, changedVars, isCalcAll)) {
             if (isCalcAll) { improveQuantities(attrs, hurmetVars); }
             if (attrs.rpn || mustRedraw) {
               attrs = attrs.rpn // attrs.dtype && attrs.dtype === dt.DRAWING
                 ? evaluate(attrs, hurmetVars, decimalFormat)
                 : evaluateDrawing(attrs, hurmetVars, decimalFormat);
             }
-            if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, decimalFormat); }
+            if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat); }
             if (isCalcAll || attrs.rpn || mustRedraw) {
               tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs));
             }
+          } else if (attrs.name && attrs.value) {
+            insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat);
           }
         } else if (node.attrs.name && !(isCalcAll && node.attrs.isFetch)) {
           if (node.attrs.name) {
@@ -26522,7 +26564,7 @@
                 hurmetVars[key] =  value;
               });
             } else {
-              insertOneHurmetVar(hurmetVars, node.attrs, decimalFormat);
+              insertOneHurmetVar(hurmetVars, node.attrs, null, decimalFormat);
             }
           }
         }
@@ -26591,10 +26633,10 @@
             fetchPositions.push(pos);
           } else if (/^function /.test(entry)) {
             node.attrs = prepareStatement(entry, doc.attrs.decimalFormat);
-            insertOneHurmetVar(hurmetVars, node.attrs, doc.attrs.decimalFormat);
+            insertOneHurmetVar(hurmetVars, node.attrs, null, doc.attrs.decimalFormat);
           }
         } else if (node.attrs.isFetch || (node.attrs.dtype && node.attrs.dtype === dt.MODULE)) {
-          insertOneHurmetVar(hurmetVars, node.attrs, doc.attrs.decimalFormat);
+          insertOneHurmetVar(hurmetVars, node.attrs, null, doc.attrs.decimalFormat);
         }
       });
     }
@@ -26700,7 +26742,7 @@
         callers.push(node);
       } else if (/^function /.test(entry)) {
         node.attrs = prepareStatement(entry, decimalFormat);
-        insertOneHurmetVar(hurmetVars, node.attrs, decimalFormat);
+        insertOneHurmetVar(hurmetVars, node.attrs, null, decimalFormat);
       }
     }
 
@@ -26719,7 +26761,7 @@
               hurmetVars[key] =  value;
             });
           } else {
-            insertOneHurmetVar(hurmetVars, node.attrs, decimalFormat);
+            insertOneHurmetVar(hurmetVars, node.attrs, null, decimalFormat);
           }
         }
       }
@@ -26740,7 +26782,7 @@
               ? evaluate(attrs, hurmetVars, decimalFormat)
               : evaluateDrawing(attrs, hurmetVars, decimalFormat);
           }
-          if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, decimalFormat); }
+          if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat); }
           // When we modify a node, we are also mutating the container doc.
           node.attrs = attrs;
         }

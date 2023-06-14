@@ -60,6 +60,7 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
   let expression = ""
   let echo = ""
   let rpn = ""
+  let dependencies = [];
   let resultDisplay = ""
   let name = ""
   let leadsWithCurrency = false
@@ -103,9 +104,9 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
 
   if (testRegEx.test(inputStr)) {
     str = str.replace(testRegEx, "").trim()
-    const [_, rpn] = parse(str, decimalFormat, true)
+    const [_, rpn, dependencies] = parse(str, decimalFormat, true)
     const resulttemplate = testRegEx.exec(inputStr)[1];
-    return { entry: inputStr, template: "", rpn, resulttemplate,
+    return { entry: inputStr, template: "", rpn, dependencies, resulttemplate,
       altresulttemplate: resulttemplate, resultdisplay: "" }
   }
 
@@ -208,7 +209,7 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
 
     } else {
       // Parse the expression. Stop short of doing the calculation.
-      [echo, rpn] = parse(expression, decimalFormat, true)
+      [echo, rpn, dependencies] = parse(expression, decimalFormat, true)
 
       // Shoulld we display an echo of the expression, with values shown for each variable?
       if (suppressResultDisplay || displayResultOnly || echo.indexOf("〖") === -1
@@ -308,6 +309,7 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
     attrs.alt = altEqn
   }
   if (rpn) { attrs.rpn = rpn }
+  if (dependencies.length > 0) { attrs.dependencies = dependencies }
   if (value) { attrs.value = value }
   if (unit) {
     if (Array.isArray(unit)) {

@@ -182,15 +182,16 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
     }
 
     let rpn = ""
+    let _
     if (expression) {
-      [, rpn] = parse(expression, decimalFormat, true)
+      [, rpn, _] = parse(expression, decimalFormat, true)
       if (name === "for") { rpn = rpn.replace(/\u00a0in\u00a0/, "\u00a0") }
     }
     const stype = isStatement ? "statement" : name
     if (isStatement && /[,;]/.test(name)) {
       name = name.split(/[,;]/).map(e => e.trim())
     }
-    funcObj.statements.push({ name: name, rpn: rpn, stype: stype })
+    funcObj.statements.push({ name, rpn, stype })
     if (stype === "if" || stype === "while" || stype === "for") {
       stackOfCtrls.push({ type: stype, statementNum: funcObj.statements.length - 1 })
     } else if (stype === "end") {
