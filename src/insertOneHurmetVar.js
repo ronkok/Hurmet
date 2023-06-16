@@ -50,7 +50,7 @@ export function insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat
             unit: isQuantity ? attrs.unit : undefined,
             dtype
           }
-          if (changedVars) { changedVars.add(attrs.name[iName]) }
+          if (changedVars) { changedVars.add(attrs.name[i]) }
           iName += 1
         }
       }

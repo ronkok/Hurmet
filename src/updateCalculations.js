@@ -130,13 +130,6 @@ const mustCalc = (attrs, hurmetVars, changedVars, isCalcAll) => {
   return false
 }
 
-/*
-  const mustRedraw = attrs.dtype && attrs.dtype === dt.DRAWING &&
-  (attrs.rpn || (attrs.value.parameters.length > 0))
-if (attrs.rpn || mustRedraw || (attrs.name && !(hurmetVars[attrs.name] &&
-  hurmetVars[attrs.name].isFetch))) {
-*/
-
 const workAsync = (
   view,
   calcNodeSchema,

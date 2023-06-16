@@ -57,16 +57,8 @@ export const fromAssignment = (cellAttrs, unitAware) => {
   if (dtype === dt.STRING || dtype === dt.BOOLEAN || dtype === dt.DRAWING ||
       dtype === dt.MODULE || dtype === dt.NULL) {
     oprnd.unit = null
-  } else if (dtype === dt.DATAFRAME) {
-    oprnd.unit = Object.freeze(clone(cellAttrs.unit))
-  } else if (cellAttrs.unit && cellAttrs.unit.expos) {
-    oprnd.unit = clone(cellAttrs.unit)
   } else if (cellAttrs.unit) {
-    oprnd.unit = Object.create(null)
-    if (cellAttrs.unit)  { oprnd.unit.name = cellAttrs.unit }
-    if (cellAttrs.expos) { oprnd.unit.expos = clone(cellAttrs.expos) }
-  } else if (cellAttrs.expos && Array.isArray(cellAttrs.expos)) {
-    oprnd.unit = { expos: clone(cellAttrs.expos) }
+    oprnd.unit = clone(cellAttrs.unit)
   } else {
     oprnd.unit = null
   }

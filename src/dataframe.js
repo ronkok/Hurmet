@@ -3,7 +3,7 @@ import { Rnl } from "./rational"
 import { clone, addTextEscapes, unitTeXFromString, tablessTrim } from "./utils"
 import { unitFromUnitName } from "./units"
 import { errorOprnd } from "./error"
-import { Matrix } from "./matrix"
+import { Matrix, isMatrix } from "./matrix"
 import { Cpx } from "./complex"
 import { format, formattedDecimal } from "./format"
 
@@ -27,7 +27,7 @@ const valueFromDatum = datum => {
   : datum
 }
 
-const datumFromValue = (value, dtype) => {
+const datumFromValue = (value, dtype, formatSpec) => {
   return value === true
     ? "true"
     : value === false
@@ -35,7 +35,7 @@ const datumFromValue = (value, dtype) => {
     : value = undefined
     ? ""
     : (dtype === dt.RATIONAL)
-    ? "0 " + String(value[0]) + "/" + String(value[1])
+    ? format(value, formatSpec, "1000000.")
     : value
 }
 
@@ -375,7 +375,7 @@ const dataFrameFromVectors = (vectors, vars) => {
     headings.push(vector.name)
     columnMap[vector.name] = j
     const colDtype = vector.dtype - vectorType
-    data.push(vector.value.map(e => datumFromValue(e, colDtype)))
+    data.push(vector.value.map(e => datumFromValue(e, colDtype, vars.format.value)))
     dtype.push(colDtype)
     if (vector.unit.name) {
       units.push(vector.unit.name)
@@ -442,31 +442,74 @@ const matrix2table = (matrix, headings, rowHeadings) => {
 }
 
 const append = (o1, o2, vars, unitAware) => {
-  // Append a vector to a dataframe.
-  const oprnd = clone(o1) // We employ copy-on-write for data frames.
-  const numRows = o1.value.data[0].length
-  if (numRows !== o2.value.length) { return errorOprnd("BAD_CONCAT") }
-  oprnd.value.headings.push(o2.name)
-  oprnd.value.columnMap[o2.name] = o1.value.headings.length - 1
-  const dtype = (o2.dtype & dt.COLUMNVECTOR)
-    ? o2.dtype - dt.COLUMNVECTOR
-    : o2.dtype - dt.ROWVECTOR
-  if (o2.unit.name && o2.unit.name.length > 0) {
-    oprnd.value.units.push(o2.unit.name)
-    const unit = unitFromUnitName(o2.unit.name, vars)
-    if (!oprnd.unit[o2.unit.name]) {
-      oprnd.unit[o2.unit.name] = unit
+  // Append a vector or single value to a dataframe.
+  // We use copy-on-write for dataframes, so copy it here.
+  const oprnd = o1.dtype === dt.DATAFRAME ? clone(o1) : clone(o2)
+  const addend = o1.dtype === dt.DATAFRAME ? o2 : o1
+  if (o1.dtype === dt.DATAFRAME) {
+    oprnd.value.columnMap[addend.name] = oprnd.value.headings.length
+    oprnd.value.headings.push(addend.name)
+  } else {
+    for (const [key, value] of Object.entries(oprnd.value.columnMap)) {
+      oprnd.value.columnMap[key] = value + 1
     }
-    if (unitAware) {
-      const v = Matrix.convertFromBaseUnits(o2, unit.gauge, unit.factor)
-      oprnd.value.data.push(v.map(e => datumFromValue(e, dtype)))
+    oprnd.value.columnMap[addend.name] = 0
+    oprnd.value.headings.unshift(addend.name)
+  }
+  let unit
+  if (addend.unit && addend.unit.name && addend.unit.name.length > 0) {
+    if (o1.dtype === dt.DATAFRAME) {
+      oprnd.value.units.push(addend.unit.name)
     } else {
-      oprnd.value.data.push(o2.value.map(e => datumFromValue(e, dtype)))
+      oprnd.value.units.unshift(addend.unit.name)
+    }
+    unit = unitFromUnitName(addend.unit.name, vars)
+    if (!oprnd.unit[addend.unit.name]) {
+      oprnd.unit[addend.unit.name] = unit
+    }
+  }
+  const dtype = addend.dype === dt.RATIONAL && unit
+    ? dt.RATIONAL + dt.QUANTITY
+    : !isMatrix(addend)
+    ? addend.dtype
+    : (addend.dtype & dt.COLUMNVECTOR)
+    ? addend.dtype - dt.COLUMNVECTOR
+    : addend.dtype - dt.ROWVECTOR
+  const numRows = oprnd.value.data[0].length
+  if (numRows === 1 && !isMatrix(addend)) {
+    const v = unitAware && dtype === dt.RATIONAL && unit
+      ? Rnl.subtract(Rnl.divide(addend.value, unit.factor), unit.gauge)
+      : addend.value
+    if (o1.dtype === dt.DATAFRAME) {
+      oprnd.value.data.push([datumFromValue(v, dtype, vars.format.value)])
+    } else {
+      oprnd.value.data.unshift([datumFromValue(v, dtype, vars.format.value)])
     }
   } else {
-    oprnd.value.units.push(null)
+    if (unitAware && dtype === dt.RATIONAL && unit) {
+      const v = Matrix.convertFromBaseUnits(addend, unit.gauge, unit.factor)
+      if (o1.dtype === dt.DATAFRAME) {
+        oprnd.value.data.push(v.map(e => datumFromValue(e, dtype, vars.format.value)))
+      } else {
+        oprnd.value.data.unshift(v.map(e => datumFromValue(e, dtype, vars.format.value)))
+      }
+    } else {
+      if (o1.dtype === dt.DATAFRAME) {
+        oprnd.value.data.push(addend.value.map(
+          e => datumFromValue(e, dtype, vars.format.value)
+        ))
+      } else {
+        oprnd.value.data.unshift(addend.value.map(
+          e => datumFromValue(e, dtype, vars.format.value)
+        ))
+      }
+    }
   }
-  oprnd.value.dtype.push(dtype)
+  if (o1.dtype === dt.DATAFRAME) {
+    oprnd.value.dtype.push(dtype)
+  } else {
+    oprnd.value.dtype.unshift(dtype)
+  }
   return oprnd
 }
 

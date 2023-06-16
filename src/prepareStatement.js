@@ -34,7 +34,7 @@ import { functionRegEx, drawRegEx, moduleRegEx, scanModule } from "./module"
 
 const containsOperator = /[+\-×·*∘⌧/^%‰&√!¡|‖&=<>≟≠≤≥∈∉⋐∧∨⊻¬]|\xa0(function|mod|\\atop|root|sum|abs|cos|sin|tan|acos|asin|atan|sec|csc|cot|asec|acsc|acot|exp|log|ln|log10|log2|cosh|sinh|tanh|sech|csch|coth|acosh|asinh|atanh|asech|acsch|acoth|gamma|Γ|lgamma|logΓ|lfact|cosd|sind|tand|acosd|asind|atand|secd|cscd|cotd|asecd|acscd|acotd|real|imag|angle|Char|round|sqrt|sign|\?{}|%|⎾⏋|⎿⏌|\[\]|\(\))\xa0/
 const mustDoCalculation = /^(``.+``|[$$£¥\u20A0-\u20CF]?(\?{1,2}|@{1,2}|%{1,2}|!{1,2})[^=!(?@%!{})]*)$/
-const assignDataFrameRegEx = /^[^=]+=\s*``/
+const assignDataFrameRegEx = /^[^=]+=\s*``[\s\S]+`` *\n/
 const currencyRegEx = /^[$£¥\u20A0-\u20CF]/
 const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/
 const matrixOfNames = /^[([](?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*[,;].+[)\]]$/
@@ -312,11 +312,7 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
   if (dependencies.length > 0) { attrs.dependencies = dependencies }
   if (value) { attrs.value = value }
   if (unit) {
-    if (Array.isArray(unit)) {
-      attrs.expos = unit
-    } else {
-      attrs.unit = unit
-    }
+    attrs.unit = Array.isArray(unit) ? { expos:  unit } : unit
   }
 
   return attrs

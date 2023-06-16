@@ -32,7 +32,7 @@ export const improveQuantities = (attrs, vars) => {
       return attrs
     }
 
-    attrs.expos = unit.expos
+    attrs.unit = unit
     if (Rnl.isRational(attrs.value)) {
       attrs.value = {
         plain: attrs.value,
@@ -52,14 +52,12 @@ export const improveQuantities = (attrs, vars) => {
   }
   if (attrs.rpn && !attrs.value) {
     if (attrs.unit) {
-      const unit = (attrs.unit)
+      const unit = (attrs.unit && typeof attrs.unit === "string")
         ? unitFromUnitName(attrs.unit, vars)
         : { factor: 1, gauge: 0, expos: allZeros }
       // We save factor and gauge with the cell attrs so that the result of
       // a later calculation can be converted into the desired display units.
-      attrs.factor = unit.factor
-      attrs.gauge = unit.gauge
-      attrs.expos = unit.expos
+      attrs.unit = unit
     }
   }
 

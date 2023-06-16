@@ -350,11 +350,7 @@ export const nodes = {
       template: {default: null}, //       tex, including echo, but waiting for plugged-in values.
       altTemplate: {default: ""}, //      Ditto, but in draft mode.
       value: {default: null},  //         Value passed to other calculations.
-      unit: {default: ""}, //             Unit specified by user, in which to display the result.
-      //                                    Hurmet maps and data frame save a data structure, not a name.
-      expos: {default: null}, //          Unit exponents of result, for checking unit compatibility.
-      factor: {default: null}, //         Factor for converting value.inBaseUnits to result units
-      gauge: {default: null}, //          Unit gauge, for ditto
+      unit: {default: null}, //           Unit specified by user, in which to display the result.
       dtype: {default: 0}, //             Data type of the result. See constants.js.
       isFetch: {default: false}, //       Identifies cells that need async treatment.
       error: {default: false} //          boolean. True if calculation resulted in an error.

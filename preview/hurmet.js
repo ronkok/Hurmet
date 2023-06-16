@@ -2826,13 +2826,13 @@
     : datum
   };
 
-  const datumFromValue = (value, dtype) => {
+  const datumFromValue = (value, dtype, formatSpec) => {
     return value === true
       ? "true"
       : value === false
       ? "false"
       : value =  (dtype === dt.RATIONAL)
-      ? "0 " + String(value[0]) + "/" + String(value[1])
+      ? format(value, formatSpec, "1000000.")
       : value
   };
 
@@ -3172,7 +3172,7 @@
       headings.push(vector.name);
       columnMap[vector.name] = j;
       const colDtype = vector.dtype - vectorType;
-      data.push(vector.value.map(e => datumFromValue(e, colDtype)));
+      data.push(vector.value.map(e => datumFromValue(e, colDtype, vars.format.value)));
       dtype.push(colDtype);
       if (vector.unit.name) {
         units.push(vector.unit.name);
@@ -3239,31 +3239,74 @@
   };
 
   const append = (o1, o2, vars, unitAware) => {
-    // Append a vector to a dataframe.
-    const oprnd = clone(o1); // We employ copy-on-write for data frames.
-    const numRows = o1.value.data[0].length;
-    if (numRows !== o2.value.length) { return errorOprnd("BAD_CONCAT") }
-    oprnd.value.headings.push(o2.name);
-    oprnd.value.columnMap[o2.name] = o1.value.headings.length - 1;
-    const dtype = (o2.dtype & dt.COLUMNVECTOR)
-      ? o2.dtype - dt.COLUMNVECTOR
-      : o2.dtype - dt.ROWVECTOR;
-    if (o2.unit.name && o2.unit.name.length > 0) {
-      oprnd.value.units.push(o2.unit.name);
-      const unit = unitFromUnitName(o2.unit.name, vars);
-      if (!oprnd.unit[o2.unit.name]) {
-        oprnd.unit[o2.unit.name] = unit;
+    // Append a vector or single value to a dataframe.
+    // We use copy-on-write for dataframes, so copy it here.
+    const oprnd = o1.dtype === dt.DATAFRAME ? clone(o1) : clone(o2);
+    const addend = o1.dtype === dt.DATAFRAME ? o2 : o1;
+    if (o1.dtype === dt.DATAFRAME) {
+      oprnd.value.columnMap[addend.name] = oprnd.value.headings.length;
+      oprnd.value.headings.push(addend.name);
+    } else {
+      for (const [key, value] of Object.entries(oprnd.value.columnMap)) {
+        oprnd.value.columnMap[key] = value + 1;
       }
-      if (unitAware) {
-        const v = Matrix.convertFromBaseUnits(o2, unit.gauge, unit.factor);
-        oprnd.value.data.push(v.map(e => datumFromValue(e, dtype)));
+      oprnd.value.columnMap[addend.name] = 0;
+      oprnd.value.headings.unshift(addend.name);
+    }
+    let unit;
+    if (addend.unit && addend.unit.name && addend.unit.name.length > 0) {
+      if (o1.dtype === dt.DATAFRAME) {
+        oprnd.value.units.push(addend.unit.name);
       } else {
-        oprnd.value.data.push(o2.value.map(e => datumFromValue(e, dtype)));
+        oprnd.value.units.unshift(addend.unit.name);
+      }
+      unit = unitFromUnitName(addend.unit.name, vars);
+      if (!oprnd.unit[addend.unit.name]) {
+        oprnd.unit[addend.unit.name] = unit;
+      }
+    }
+    const dtype = addend.dype === dt.RATIONAL && unit
+      ? dt.RATIONAL + dt.QUANTITY
+      : !isMatrix(addend)
+      ? addend.dtype
+      : (addend.dtype & dt.COLUMNVECTOR)
+      ? addend.dtype - dt.COLUMNVECTOR
+      : addend.dtype - dt.ROWVECTOR;
+    const numRows = oprnd.value.data[0].length;
+    if (numRows === 1 && !isMatrix(addend)) {
+      const v = unitAware && dtype === dt.RATIONAL && unit
+        ? Rnl.subtract(Rnl.divide(addend.value, unit.factor), unit.gauge)
+        : addend.value;
+      if (o1.dtype === dt.DATAFRAME) {
+        oprnd.value.data.push([datumFromValue(v, dtype, vars.format.value)]);
+      } else {
+        oprnd.value.data.unshift([datumFromValue(v, dtype, vars.format.value)]);
       }
     } else {
-      oprnd.value.units.push(null);
+      if (unitAware && dtype === dt.RATIONAL && unit) {
+        const v = Matrix.convertFromBaseUnits(addend, unit.gauge, unit.factor);
+        if (o1.dtype === dt.DATAFRAME) {
+          oprnd.value.data.push(v.map(e => datumFromValue(e, dtype, vars.format.value)));
+        } else {
+          oprnd.value.data.unshift(v.map(e => datumFromValue(e, dtype, vars.format.value)));
+        }
+      } else {
+        if (o1.dtype === dt.DATAFRAME) {
+          oprnd.value.data.push(addend.value.map(
+            e => datumFromValue(e, dtype, vars.format.value)
+          ));
+        } else {
+          oprnd.value.data.unshift(addend.value.map(
+            e => datumFromValue(e, dtype, vars.format.value)
+          ));
+        }
+      }
     }
-    oprnd.value.dtype.push(dtype);
+    if (o1.dtype === dt.DATAFRAME) {
+      oprnd.value.dtype.push(dtype);
+    } else {
+      oprnd.value.dtype.unshift(dtype);
+    }
     return oprnd
   };
 
@@ -5872,7 +5915,7 @@
               unit: isQuantity ? attrs.unit : undefined,
               dtype
             };
-            if (changedVars) { changedVars.add(attrs.name[iName]); }
+            if (changedVars) { changedVars.add(attrs.name[i]); }
             iName += 1;
           }
         }
@@ -6179,16 +6222,8 @@
     if (dtype === dt.STRING || dtype === dt.BOOLEAN || dtype === dt.DRAWING ||
         dtype === dt.MODULE || dtype === dt.NULL) {
       oprnd.unit = null;
-    } else if (dtype === dt.DATAFRAME) {
-      oprnd.unit = Object.freeze(clone(cellAttrs.unit));
-    } else if (cellAttrs.unit && cellAttrs.unit.expos) {
-      oprnd.unit = clone(cellAttrs.unit);
     } else if (cellAttrs.unit) {
-      oprnd.unit = Object.create(null);
-      if (cellAttrs.unit)  { oprnd.unit.name = cellAttrs.unit; }
-      if (cellAttrs.expos) { oprnd.unit.expos = clone(cellAttrs.expos); }
-    } else if (cellAttrs.expos && Array.isArray(cellAttrs.expos)) {
-      oprnd.unit = { expos: clone(cellAttrs.expos) };
+      oprnd.unit = clone(cellAttrs.unit);
     } else {
       oprnd.unit = null;
     }
@@ -11055,6 +11090,10 @@
             } else if ((o1.dtype & dt.DATAFRAME) && isVector(o2) && tkn !== "vcat") {
               o3 = DataFrame.append(o1, o2, vars, unitAware);
               if (o3.dtype === dt.ERROR) { return o3 }
+            } else if (((o1.dtype & dt.DATAFRAME) && shape2 === "scalar") ||
+                       (shape1 === "scalar" && (o2.dtype & dt.DATAFRAME))) {
+              o3 = DataFrame.append(o1, o2, vars, unitAware);
+              if (o3.dtype === dt.ERROR) { return o3 }
             } else if ((o1.dtype & dt.MAP) || (o2.dtype & dt.MAP)) {
               o3 = map.append(o1, o2, shape1, shape2, vars);
               if (o3.dtype === dt.ERROR) { return o3 }
@@ -12278,10 +12317,11 @@
 
     // Check unit compatibility.
     if (result.dtype !== dt.ERROR && unitAware && stmt.resultdisplay.indexOf("!") === -1 &&
-      (stmt.expos || (result.unit && result.unit.expos && Array.isArray(result.unit.expos)))) {
-      const expos = (stmt.expos) ? stmt.expos : allZeros;
+      (stmt.unit && stmt.unit.expos ||
+        (result.unit && result.unit.expos && Array.isArray(result.unit.expos)))) {
+      const expos = (stmt.unit && stmt.unit.expos) ? stmt.unit.expos : allZeros;
       if (!unitsAreCompatible(result.unit.expos, expos)) {
-        const message = stmt.expos ? "UNIT_RES" : "UNIT_MISS";
+        const message = stmt.unit.expos ? "UNIT_RES" : "UNIT_MISS";
         result = errorOprnd(message);
       }
     }
@@ -12314,17 +12354,18 @@
     stmt.dtype = result.dtype;
 
     // If unit-aware, convert result to desired result units.
-    const unitInResultSpec = (stmt.factor && (stmt.factor !== 1 || stmt.gauge));
+    const unitInResultSpec = (stmt.unit && stmt.unit.factor &&
+        (!Rnl.areEqual(stmt.unit.factor, Rnl.one) || stmt.unit.gauge));
     if ((result.dtype & dt.DATAFRAME) ||
         (typeof stmt.resultdisplay === "string" && stmt.resultdisplay.indexOf("!") > -1)) {
       stmt.unit = result.unit;
     } else if (unitAware && (result.dtype & dt.RATIONAL)) {
       if (!unitInResultSpec & unitsAreCompatible(result.unit.expos, allZeros)) {
-        stmt.factor = Rnl.one; stmt.gauge = Rnl.zero; stmt.expos = allZeros;
+        stmt.unit = { factor: Rnl.one, gauge: Rnl.zero, expos: allZeros };
       }
       if (result.dtype & dt.MAP) {
         result.value.data = {
-          plain: map.convertFromBaseUnits(result.value.data, stmt.gauge, stmt.factor),
+          plain: map.convertFromBaseUnits(result.value.data, stmt.unit.gauge, stmt.unit.factor),
           inBaseUnits: result.value.data
         };
       } else {
@@ -12332,10 +12373,10 @@
           plain: (isMatrix(result))
             ? Matrix.convertFromBaseUnits(
               { value: result.value, dtype: result.dtype },
-              stmt.gauge,
-              stmt.factor
+              stmt.unit.gauge,
+              stmt.unit.factor
               )
-            : Rnl.subtract(Rnl.divide(result.value, stmt.factor), stmt.gauge),
+            : Rnl.subtract(Rnl.divide(result.value, stmt.unit.factor), stmt.unit.gauge),
           inBaseUnits: result.value
         };
       }
@@ -12346,7 +12387,8 @@
       if (result.dtype & dt.MAP) {
         const data = {
           plain: result.value.data,
-          inBaseUnits: map.convertToBaseUnits(result.value.data, stmt.gauge, stmt.factor)
+          inBaseUnits: map.convertToBaseUnits(result.value.data,
+                                              stmt.unit.gauge, stmt.unit.factor)
         };
         result.value.data = data;
       } else {
@@ -12355,17 +12397,17 @@
           inBaseUnits: (isMatrix(result))
             ? Matrix.convertToBaseUnits(
               { value: result.value, dtype: result.dtype },
-              stmt.gauge,
-              stmt.factor
+              stmt.unit.gauge,
+              stmt.unit.factor
               )
-            : Rnl.multiply(Rnl.add(result.value, stmt.gauge), stmt.factor)
+            : Rnl.multiply(Rnl.add(result.value, stmt.unit.gauge), stmt.unit.factor)
         };
       }
       stmt.dtype += dt.QUANTITY;
 
     } else if ((result.dtype & dt.RATIONAL) || (result.dtype & dt.COMPLEX) ) {
       // A numeric result with no unit specified.
-      stmt.expos = allZeros;
+      stmt.unit = { expos: allZeros };
     }
     if (Object.prototype.hasOwnProperty.call(result, "value")) {
       stmt.value = result.value;
@@ -12475,7 +12517,7 @@
       // We're processing a matrix
       const [tex, rpn, _] = parse(str, decimalFormat, true);
       const oprnd = evalRpn(rpn, {}, decimalFormat, false, {});
-      let unit = (oprnd.dtype & dt.RATIONAL) ? allZeros : null;
+      let unit = (oprnd.dtype & dt.RATIONAL) ? { expos: allZeros } : null;
       let dtype = oprnd.dtype;
       if (unitName) {
         unit = unitName;
@@ -12567,7 +12609,7 @@
         return attrs
       }
 
-      attrs.expos = unit.expos;
+      attrs.unit = unit;
       if (Rnl.isRational(attrs.value)) {
         attrs.value = {
           plain: attrs.value,
@@ -12587,14 +12629,12 @@
     }
     if (attrs.rpn && !attrs.value) {
       if (attrs.unit) {
-        const unit = (attrs.unit)
+        const unit = (attrs.unit && typeof attrs.unit === "string")
           ? unitFromUnitName(attrs.unit, vars)
           : { factor: 1, gauge: 0, expos: allZeros };
         // We save factor and gauge with the cell attrs so that the result of
         // a later calculation can be converted into the desired display units.
-        attrs.factor = unit.factor;
-        attrs.gauge = unit.gauge;
-        attrs.expos = unit.expos;
+        attrs.unit = unit;
       }
     }
 
@@ -12882,7 +12922,7 @@
 
   const containsOperator = /[+\-×·*∘⌧/^%‰&√!¡|‖&=<>≟≠≤≥∈∉⋐∧∨⊻¬]|\xa0(function|mod|\\atop|root|sum|abs|cos|sin|tan|acos|asin|atan|sec|csc|cot|asec|acsc|acot|exp|log|ln|log10|log2|cosh|sinh|tanh|sech|csch|coth|acosh|asinh|atanh|asech|acsch|acoth|gamma|Γ|lgamma|logΓ|lfact|cosd|sind|tand|acosd|asind|atand|secd|cscd|cotd|asecd|acscd|acotd|real|imag|angle|Char|round|sqrt|sign|\?{}|%|⎾⏋|⎿⏌|\[\]|\(\))\xa0/;
   const mustDoCalculation = /^(``.+``|[$$£¥\u20A0-\u20CF]?(\?{1,2}|@{1,2}|%{1,2}|!{1,2})[^=!(?@%!{})]*)$/;
-  const assignDataFrameRegEx = /^[^=]+=\s*``/;
+  const assignDataFrameRegEx = /^[^=]+=\s*``[\s\S]+`` *\n/;
   const currencyRegEx = /^[$£¥\u20A0-\u20CF]/;
   const isValidIdentifier$2 = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/;
   const matrixOfNames = /^[([](?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*[,;].+[)\]]$/;
@@ -13160,11 +13200,7 @@
     if (dependencies.length > 0) { attrs.dependencies = dependencies; }
     if (value) { attrs.value = value; }
     if (unit) {
-      if (Array.isArray(unit)) {
-        attrs.expos = unit;
-      } else {
-        attrs.unit = unit;
-      }
+      attrs.unit = Array.isArray(unit) ? { expos:  unit } : unit;
     }
 
     return attrs
@@ -26388,13 +26424,6 @@
     }
     return false
   };
-
-  /*
-    const mustRedraw = attrs.dtype && attrs.dtype === dt.DRAWING &&
-    (attrs.rpn || (attrs.value.parameters.length > 0))
-  if (attrs.rpn || mustRedraw || (attrs.name && !(hurmetVars[attrs.name] &&
-    hurmetVars[attrs.name].isFetch))) {
-  */
 
   const workAsync = (
     view,

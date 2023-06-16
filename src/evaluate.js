@@ -428,6 +428,10 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           } else if ((o1.dtype & dt.DATAFRAME) && isVector(o2) && tkn !== "vcat") {
             o3 = DataFrame.append(o1, o2, vars, unitAware)
             if (o3.dtype === dt.ERROR) { return o3 }
+          } else if (((o1.dtype & dt.DATAFRAME) && shape2 === "scalar") ||
+                     (shape1 === "scalar" && (o2.dtype & dt.DATAFRAME))) {
+            o3 = DataFrame.append(o1, o2, vars, unitAware)
+            if (o3.dtype === dt.ERROR) { return o3 }
           } else if ((o1.dtype & dt.MAP) || (o2.dtype & dt.MAP)) {
             o3 = map.append(o1, o2, shape1, shape2, vars)
             if (o3.dtype === dt.ERROR) { return o3 }
@@ -1657,10 +1661,11 @@ const conditionResult = (stmt, oprnd, unitAware) => {
 
   // Check unit compatibility.
   if (result.dtype !== dt.ERROR && unitAware && stmt.resultdisplay.indexOf("!") === -1 &&
-    (stmt.expos || (result.unit && result.unit.expos && Array.isArray(result.unit.expos)))) {
-    const expos = (stmt.expos) ? stmt.expos : allZeros
+    (stmt.unit && stmt.unit.expos ||
+      (result.unit && result.unit.expos && Array.isArray(result.unit.expos)))) {
+    const expos = (stmt.unit && stmt.unit.expos) ? stmt.unit.expos : allZeros
     if (!unitsAreCompatible(result.unit.expos, expos)) {
-      const message = stmt.expos ? "UNIT_RES" : "UNIT_MISS"
+      const message = stmt.unit.expos ? "UNIT_RES" : "UNIT_MISS"
       result = errorOprnd(message)
     }
   }
@@ -1693,17 +1698,18 @@ const conditionResult = (stmt, oprnd, unitAware) => {
   stmt.dtype = result.dtype
 
   // If unit-aware, convert result to desired result units.
-  const unitInResultSpec = (stmt.factor && (stmt.factor !== 1 || stmt.gauge))
+  const unitInResultSpec = (stmt.unit && stmt.unit.factor &&
+      (!Rnl.areEqual(stmt.unit.factor, Rnl.one) || stmt.unit.gauge))
   if ((result.dtype & dt.DATAFRAME) ||
       (typeof stmt.resultdisplay === "string" && stmt.resultdisplay.indexOf("!") > -1)) {
     stmt.unit = result.unit
   } else if (unitAware && (result.dtype & dt.RATIONAL)) {
     if (!unitInResultSpec & unitsAreCompatible(result.unit.expos, allZeros)) {
-      stmt.factor = Rnl.one; stmt.gauge = Rnl.zero; stmt.expos = allZeros;
+      stmt.unit = { factor: Rnl.one, gauge: Rnl.zero, expos: allZeros }
     }
     if (result.dtype & dt.MAP) {
       result.value.data = {
-        plain: map.convertFromBaseUnits(result.value.data, stmt.gauge, stmt.factor),
+        plain: map.convertFromBaseUnits(result.value.data, stmt.unit.gauge, stmt.unit.factor),
         inBaseUnits: result.value.data
       }
     } else {
@@ -1711,10 +1717,10 @@ const conditionResult = (stmt, oprnd, unitAware) => {
         plain: (isMatrix(result))
           ? Matrix.convertFromBaseUnits(
             { value: result.value, dtype: result.dtype },
-            stmt.gauge,
-            stmt.factor
+            stmt.unit.gauge,
+            stmt.unit.factor
             )
-          : Rnl.subtract(Rnl.divide(result.value, stmt.factor), stmt.gauge),
+          : Rnl.subtract(Rnl.divide(result.value, stmt.unit.factor), stmt.unit.gauge),
         inBaseUnits: result.value
       }
     }
@@ -1725,7 +1731,8 @@ const conditionResult = (stmt, oprnd, unitAware) => {
     if (result.dtype & dt.MAP) {
       const data = {
         plain: result.value.data,
-        inBaseUnits: map.convertToBaseUnits(result.value.data, stmt.gauge, stmt.factor)
+        inBaseUnits: map.convertToBaseUnits(result.value.data,
+                                            stmt.unit.gauge, stmt.unit.factor)
       }
       result.value.data = data
     } else {
@@ -1734,17 +1741,17 @@ const conditionResult = (stmt, oprnd, unitAware) => {
         inBaseUnits: (isMatrix(result))
           ? Matrix.convertToBaseUnits(
             { value: result.value, dtype: result.dtype },
-            stmt.gauge,
-            stmt.factor
+            stmt.unit.gauge,
+            stmt.unit.factor
             )
-          : Rnl.multiply(Rnl.add(result.value, stmt.gauge), stmt.factor)
+          : Rnl.multiply(Rnl.add(result.value, stmt.unit.gauge), stmt.unit.factor)
       }
     }
     stmt.dtype += dt.QUANTITY
 
   } else if ((result.dtype & dt.RATIONAL) || (result.dtype & dt.COMPLEX) ) {
     // A numeric result with no unit specified.
-    stmt.expos = allZeros
+    stmt.unit = { expos: allZeros }
   }
   if (Object.prototype.hasOwnProperty.call(result, "value")) {
     stmt.value = result.value
