@@ -188,18 +188,7 @@ const workAsync = (
     }
     // There. Fetches are done and are loaded into the document.
     // Now proceed to the rest of the work.
-    try {
-      proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs,
-                        curPos, hurmetVars, tr)
-    } catch (err) {
-      console.log(err) // eslint-disable-line no-console
-      const pos = nodeAttrs.template.indexOf(nodeAttrs.resultdisplay)
-      nodeAttrs.tex = nodeAttrs.template.slice(0, pos) + "\\text{" + err + "}"
-      tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs))
-      tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)))
-      view.dispatch(tr)
-      view.focus()
-    }
+    proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr)
   })
 }
 
@@ -251,15 +240,19 @@ const proceedAfterFetch = (
       let attrs = clone(nodeAttrs) // prepareStatement was already run in mathprompt.js.
       // The mathPrompt dialog box did not have accesss to hurmetVars, so it
       // did not do unit conversions on the result template. Do that first.
-      improveQuantities(attrs, hurmetVars)
-      // Now proceed to do the calculation of the cell.
-      if (attrs.rpn || (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING)) {
-        attrs = attrs.dtype && attrs.dtype === dt.DRAWING
-          ? evaluateDrawing(attrs, hurmetVars, decimalFormat)
-          : evaluate(attrs, hurmetVars, decimalFormat)
+      try {
+        improveQuantities(attrs, hurmetVars)
+        // Now proceed to do the calculation of the cell.
+        if (attrs.rpn || (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING)) {
+          attrs = attrs.dtype && attrs.dtype === dt.DRAWING
+            ? evaluateDrawing(attrs, hurmetVars, decimalFormat)
+            : evaluate(attrs, hurmetVars, decimalFormat)
+        }
+        if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat) }
+        attrs.displayMode = nodeAttrs.displayMode
+      } catch (err) {
+        attrs.tex = "\\text{" + attrs.entry + " = " + err + "}"
       }
-      if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat) }
-      attrs.displayMode = nodeAttrs.displayMode
       tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(attrs))
     }
   }
@@ -278,13 +271,19 @@ const proceedAfterFetch = (
         const mustRedraw = attrs.dtype && attrs.dtype === dt.DRAWING &&
           (attrs.rpn || (attrs.value.parameters.length > 0 || isCalcAll))
         if (mustCalc(attrs, hurmetVars, changedVars, isCalcAll)) {
-          if (isCalcAll) { improveQuantities(attrs, hurmetVars) }
-          if (attrs.rpn || mustRedraw) {
-            attrs = attrs.rpn // attrs.dtype && attrs.dtype === dt.DRAWING
-              ? evaluate(attrs, hurmetVars, decimalFormat)
-              : evaluateDrawing(attrs, hurmetVars, decimalFormat)
+          try {
+            if (isCalcAll) { improveQuantities(attrs, hurmetVars) }
+            if (attrs.rpn || mustRedraw) {
+              attrs = attrs.rpn // attrs.dtype && attrs.dtype === dt.DRAWING
+                ? evaluate(attrs, hurmetVars, decimalFormat)
+                : evaluateDrawing(attrs, hurmetVars, decimalFormat)
+            }
+            if (attrs.name) {
+              insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat)
+            }
+          } catch (err) {
+            attrs.tex = "\\text{" + attrs.entry + " = " + err + "}"
           }
-          if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat) }
           if (isCalcAll || attrs.rpn || mustRedraw) {
             tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs))
           }
@@ -387,17 +386,7 @@ export function updateCalculations(
       state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1))
     }
     const tr = state.tr
-    try {
-      proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr)
-    } catch (err) {
-      console.log(err) // eslint-disable-line no-console
-      const pos = nodeAttrs.template.indexOf(nodeAttrs.resultdisplay)
-      nodeAttrs.tex = nodeAttrs.template.slice(0, pos) + "\\text{" + err + "}"
-      tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs))
-      tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)))
-      view.dispatch(tr)
-      view.focus()
-    }
+    proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr)
   }
 }
 
