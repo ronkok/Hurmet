@@ -91,7 +91,7 @@ const binaryShapesOf = (o1, o2) => {
 }
 
 const matrixMults = { "×": "cross", "·": "dot", "∘": "circ", ".*": "circ",
-  "*": "multiply", "⌧": "multiply" }
+  "*": "multiply", "∗": "multiply", "⌧": "multiply" }
 
 const nextToken = (tokens, i) => {
   if (tokens.length < i + 2) { return undefined }
@@ -303,12 +303,14 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "×":
         case "·":
         case "*":
+        case "∗":
         case "∘":
         case "⌧": {
           const oprnd2 = stack.pop()
           const o2 = oprnd2.dtype === dt.DATAFRAME ? clone(oprnd2) : oprnd2
           const o1 = stack.pop()
-          if (tkn === "*" && o1.dtype === dt.STRING && o1.dtype === dt.STRING) {
+          if ((tkn === "*" || tkn === "∗")
+               && o1.dtype === dt.STRING && o1.dtype === dt.STRING) {
             // Julia's string concatenation operator
             const str1 = stringFromOperand(o1, decimalFormat)
             const str2 = stringFromOperand(o2, decimalFormat)
