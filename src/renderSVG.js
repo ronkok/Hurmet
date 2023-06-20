@@ -28,6 +28,10 @@ export const renderSVG = dwg => {
         tspan.appendChild(document.createTextNode(child.text))
         node.appendChild(tspan)
       })
+    } else if (el.tag === "defs") {
+      const styleNode = document.createElementNS("http://www.w3.org/2000/svg", "style")
+      styleNode.appendChild(document.createTextNode(el.style))
+      node.appendChild(styleNode)
     }
     svg.appendChild(node)
   })

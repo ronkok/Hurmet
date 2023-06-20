@@ -18,6 +18,7 @@ import { insertOneHurmetVar } from "./insertOneHurmetVar"
 import { formatResult } from "./result"
 import { Cpx } from "./complex"
 import { draw } from "./draw"
+import { beamDiagram } from "./beam/beamAnalysis.js"
 
 // evaluate.js
 
@@ -671,6 +672,15 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "startSvg":
           stack.push({ value: draw.startSvg(), unit: null, dtype: dt.DRAWING })
           break
+
+        case "beamDiagram": {
+          const arg = stack.pop()
+          if (!(arg.dtype & dt.MAP)) { return errorOprnd("BAD_TYPE", "beamDiagram") }
+          const diagram = beamDiagram(arg.value.data)
+          if (diagram.dtype && diagram.dtype === dt.ERROR) { return diagram }
+          stack.push({ value: diagram, resultdisplay: diagram, unit: null, dtype: dt.DRAWING })
+          break
+        }
 
         case "abs":
         case "cos":
@@ -1635,6 +1645,7 @@ const errorResult = (stmt, result) => {
   stmt.resultDisplay = "\\textcolor{firebrick}{\\text{" + result.value + "}}"
   stmt.altResultDisplay = result.value
   stmt.error = true
+  stmt.dtype = dt.ERROR
   if (stmt.resulttemplate.indexOf("!") > -1) {
     stmt.tex += "= " + stmt.resultDisplay
     stmt.alt += result.value

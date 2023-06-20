@@ -15,13 +15,13 @@ import { Rnl } from "./rational"
 const builtInFunctions = [
   "Char", "abs", "acos", "acosd", "acosh", "acot", "acotd", "acoth", "acsc", "acscd",
   "acsch", "angle", "asec", "asecd", "asech", "asin", "asind", "asinh", "atan", "atan2",
-  "atand", "atanh", "binomial", "ceil", "conj", "cos", "cosd", "cosh", "cosh", "cot",
-  "cotd", "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp", "factorial", "fetch",
-  "findfirst", "floor", "format", "gamma", "gcd", "hcat", "hypot", "imag", "isnan", "length",
-  "lerp", "ln", "log", "log10", "log2", "lfact", "lgamma", "logn", "mod", "number", "real",
-  "rem", "rms", "round", "roundSig", "roundn", "sec", "secd", "sech", "sech", "sign", "sin",
-  "sind", "sinh", "startSvg", "string", "tan", "tand", "tanh", "tanh", "trace", "transpose",
-  "vcat", "zeros", "Γ"
+  "atand", "atanh", "binomial", "beamDiagram", "ceil", "conj", "cos", "cosd", "cosh",
+  "cosh", "cot", "cotd", "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp",
+  "factorial", "fetch", "findfirst", "floor", "format", "gamma", "gcd", "hcat", "hypot",
+  "imag", "isnan", "length", "lerp", "ln", "log", "log10", "log2", "lfact", "lgamma", "logn",
+  "mod", "number", "real", "rem", "rms", "round", "roundSig", "roundn", "sec", "secd", "sech",
+  "sech", "sign", "sin", "sind", "sinh", "startSvg", "string", "tan", "tand", "tanh", "tanh",
+  "trace", "transpose", "vcat", "zeros", "Γ"
 ]
 
 const builtInReducerFunctions = ["accumulate", "dataframe", "matrix2table",

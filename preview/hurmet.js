@@ -1121,11 +1121,11 @@
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6023","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.5941","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.2965","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.2790","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -1134,10 +1134,10 @@
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4362","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4500","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9716","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.6839","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9770","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.8100","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -1157,7 +1157,7 @@
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.85795","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.85428","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1165,23 +1165,23 @@
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.4493","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.5799","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["3.8816","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["88.8900","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["3.9024","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["89.7953","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["150.24","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["154.65","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1391.11","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1397.67","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1192,7 +1192,7 @@
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["18.7356","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["18.7771","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -1222,7 +1222,7 @@
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.0780","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0966","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -4479,13 +4479,13 @@
   const builtInFunctions = [
     "Char", "abs", "acos", "acosd", "acosh", "acot", "acotd", "acoth", "acsc", "acscd",
     "acsch", "angle", "asec", "asecd", "asech", "asin", "asind", "asinh", "atan", "atan2",
-    "atand", "atanh", "binomial", "ceil", "conj", "cos", "cosd", "cosh", "cosh", "cot",
-    "cotd", "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp", "factorial", "fetch",
-    "findfirst", "floor", "format", "gamma", "gcd", "hcat", "hypot", "imag", "isnan", "length",
-    "lerp", "ln", "log", "log10", "log2", "lfact", "lgamma", "logn", "mod", "number", "real",
-    "rem", "rms", "round", "roundSig", "roundn", "sec", "secd", "sech", "sech", "sign", "sin",
-    "sind", "sinh", "startSvg", "string", "tan", "tand", "tanh", "tanh", "trace", "transpose",
-    "vcat", "zeros", "Γ"
+    "atand", "atanh", "binomial", "beamDiagram", "ceil", "conj", "cos", "cosd", "cosh",
+    "cosh", "cot", "cotd", "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp",
+    "factorial", "fetch", "findfirst", "floor", "format", "gamma", "gcd", "hcat", "hypot",
+    "imag", "isnan", "length", "lerp", "ln", "log", "log10", "log2", "lfact", "lgamma", "logn",
+    "mod", "number", "real", "rem", "rms", "round", "roundSig", "roundn", "sec", "secd", "sech",
+    "sech", "sign", "sin", "sind", "sinh", "startSvg", "string", "tan", "tand", "tanh", "tanh",
+    "trace", "transpose", "vcat", "zeros", "Γ"
   ];
 
   const builtInReducerFunctions = ["accumulate", "dataframe", "matrix2table",
@@ -10681,6 +10681,3319 @@
     functions
   });
 
+  // Some helper functions and objects.
+
+  // Lengths and x-coordinates are written as rational numbers, not floating point.
+  // That way, we can make a lessThanOrEqualTo comparison w/o floating point errors.
+
+  const nodeFixity = { p: "pinned", f: "fixed", h: "hinge", ph: "proppedHinge", s: "spring" };
+  const ord = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth"];
+
+  const loadType = {
+    // type 0 is total service load, an accumulation of all of the others.
+    dead: 1,  D: 1, d: 1, load: 1, // dead
+    fluid: 2, F: 2, f: 2, // fluid
+    live: 3,  L: 3, l: 3, // live
+    H: 4, h: 4, // horizontal load, usually soil against a retaining wall
+    roof: 5,  Lr: 5, lr: 5, LR: 5, lR: 5, // roof live
+    snow: 6,  S: 6, s: 6, // snow
+    rain: 7,  R: 7, r: 7, // rain
+    wind: 8,  W: 8, w: 8, // wind
+    EQ: 9,    E: 9, e: 9  // earthquake
+  };
+
+  const newNode = (fixity, k, xCoordinate) => {
+    return {
+      fixity,
+      k: (fixity === "spring" ? k : 0),
+      x: xCoordinate,
+      P: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      M: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      Pr: [0, 0, 0, 0, 0, 0, 0, 0, 0], // "r" stands for reaction
+      PrMin: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      Mr: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      MrMin: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+  };
+
+  const incrementDoF = fixity => {
+    switch (fixity) {
+      case "pinned":
+        return 1
+      case "fixed":
+        return 0
+      case "hinge":
+        return 3
+      default:
+        return 2
+    }
+  };
+
+  const newSegment = (length, xOfLeftEnd) => {
+    // A "segment" is a beam section between points of load discontinuity.
+    return {
+      length,
+      xOfLeftEnd,
+      // Point load applied at left end of segments.
+      // Array dim'ed to 9 for different load types, e.g., dead, live, wind, etc.
+      P: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      M: [0, 0, 0, 0, 0, 0, 0, 0, 0],  // point moment
+      Pf: 0, // factored point load at left end
+      Mf: 0,
+      w1: [0, 0, 0, 0, 0, 0, 0, 0, 0], // distributed load at left end of segments.
+      w2: [0, 0, 0, 0, 0, 0, 0, 0, 0], // at right end.
+      Vmax: {
+        left: { value: 0, case: 0 },
+        mid: { value: 0, case: 0, x: 0 },
+        right: { value: 0, case: 0 }
+      },
+      Vmin: {
+        left: { value: 0, case: 0 },
+        mid: { value: 0, case: 0, x: 0 },
+        right: { value: 0, case: 0 }
+      },
+      Mmax: {
+        left: { value: 0, case: 0 },
+        mid: { value: 0, case: 0, x: 0 },
+        right: { value: 0, case: 0 }
+      },
+      Mmin: {
+        left: { value: 0, case: 0 },
+        mid: { value: 0, case: 0, x: 0 },
+        right: { value: 0, case: 0 }
+      }
+    }
+  };
+
+  const identifySegment = (xGlobal, span) => {
+    // Which segment contains xGlobal?
+    for (let i = 0; i < span.segments.length; i++) {
+      const xSegEnd = Rnl.add(span.segments[i].xOfLeftEnd, span.segments[i].length);
+      if (Rnl.lessThanOrEqualTo(xGlobal, xSegEnd)) { return i }
+    }
+    return -1
+  };
+
+  const splitSegment = (segments, iSeg, xGlobal) => {
+    // segments` is an array.
+    // We need to split the element at segments[iSeg] into two elements.
+    const length = Rnl.subtract(xGlobal, segments[iSeg].xOfLeftEnd);
+    if (iSeg === 0) {
+      segments.unshift(newSegment(length, segments[0].xOfLeftEnd));
+    } else {
+      const s1 = segments.slice(0, iSeg);
+      s1.push(newSegment(length, segments[iSeg].xOfLeftEnd));
+      segments =  s1.concat(segments.slice(iSeg));
+    }
+    const seg = segments[iSeg + 1];
+    const newSeg = segments[iSeg];
+    for (let i = 0; i < 9; i++) {
+      const slope = (seg.w2[i] - seg.w1[i]) / Rnl.toNumber(seg.length);
+      newSeg.w1[i] = seg.w1[i];
+      newSeg.w2[i] = seg.w1[i];
+      seg.w1[i] = seg.w1[i] + slope * Rnl.toNumber(length);
+      newSeg.P[i] = seg.P[i];
+      seg.P[i] = 0;
+      newSeg.M[i] = seg.M[i];
+      seg.M[i] = 0;
+    }
+    seg.xOfLeftEnd = xGlobal;
+    seg.length = Rnl.subtract(seg.length, newSeg.length);
+    return segments
+  };
+
+  // Here's the main function of this module.
+  // Take the raw input strings, validate them, and load them
+  // into data structures for use by the analyze function.
+  function populateData(input) {
+    const errorMsg = "";
+    const beam = {
+      E: 0, // modulus of elasticity
+      I: 0, // moment of inertia
+      k: 0, // spring constant
+      convention: input.convention ? 1 : -1, // Plot positive moment on comp or tension side.
+      SI: input.SI || false, // boolean. Are we using SI units?
+      doLiveLoadPatterns: input.patterns,
+      comboName: input.combinations,
+      LLF: input.LLF,
+      SDS: input.SDS,
+      gotType: [false, false, false, false, false, false, false, false, false],
+      wMax: 0, // default line load maximum
+      x: 180, // x coordinate of the beam's left end inside the SVG, in px
+      allLoadsAreUniform: true // subject to change below
+    };
+
+    if (input.E === 1 || input.E === 0) {
+      // We don't know E or I, so we won't do a deflection diagram.
+      // But we will still do the shear and moment diagrams.
+      beam.E = 1;
+      beam.I = 1;
+      beam.k = 0;
+    } else {
+      beam.E = input.E;  // Modulus of elasticity
+      beam.I = input.I;  // Moment of inertia, I
+      beam.k = input.k;  // Spring constant
+    }
+    if (beam.E === 1 && beam.I === 1 && input.k !== 0) {
+      return ["E and I are necessary for an analysis with spring supports."]
+    }
+    beam.EI = beam.E * beam.I;
+
+    // Load in node data and span data.
+    // Definitions
+    // (1) A "span" is a section of beam between two user-defined nodes.
+    // (2) A "segment" is a section of beam between nodes or points of load discontinuity.
+    // Each span thus contains one or more segments.
+    let i = 0;
+    let cummulativeLength = Rnl.zero;
+    const nodes = [];
+    const spans = [];
+    beam.numDegreesOfFreedom = 0;
+    for (i = 0; i < input.nodes.length; i++) {
+      // Process node input.
+      const fixity = input.nodes[i] === "none" ? "continuous" : nodeFixity[input.nodes[i]];
+      if (!fixity) { return [`The ${ord[i]} node designation is invalid.`] }
+      if (fixity === "spring" && input.k === 0) {
+        return ["Error. A model with a spring needs a spring constant, k."]
+      }
+      nodes.push(newNode(fixity, beam.k, cummulativeLength));
+      beam.numDegreesOfFreedom += incrementDoF(fixity);
+      if (i < input.spanLength.length) {
+        // Process span input.
+        const length = input.spanLength[i];
+        spans.push({
+          length,
+          segments: Array(1).fill(newSegment(length, cummulativeLength))
+        });
+        cummulativeLength = Rnl.add(cummulativeLength, length);
+      }
+    }
+    if (spans.length === 0) { return [`No span lengths.`] }
+    const numSpans =  spans.length;
+    beam.numSegments = numSpans;
+    beam.length = nodes[nodes.length - 1].x;
+
+    // Point Loads
+    for (i = 0; i < input.loads.length; i++) {
+      const load = input.loads[i];
+      if (load.shape === "w") {
+        // Skip the distributed loads for now. We'll pick them up later.
+        continue
+      }
+      if (load.from === 0) { continue }
+      let type = load.type === "none" ? 0 : loadType[load.type];
+      if (type === 0) {
+        if (beam.comboName !== "service") {
+          return [`The ${ord[i]} load must have a load type defined.`]
+        } else {
+          type = 1; // In a service load analysis, treat unlabled loads as Dead loads.
+        }
+      }
+
+      const P = input.loads[i].P;
+      const M = input.loads[i].M;
+      const x = input.loads[i].from;
+
+      let foundAHome = false;
+      for (let j = 0; j < nodes.length; j++) {
+        if (Rnl.areEqual(x, nodes[j].x)) {
+          nodes[j].P[0] += P;
+          nodes[j].M[0] += M;
+          if (type !== 0) { nodes[j].P[type] += P; }
+          foundAHome = true;
+          break
+        }
+      }
+      if (foundAHome) { continue }
+
+      for (let j = 0; j < spans.length; j++) {
+        if (Rnl.greaterThan(x, nodes[j].x) && Rnl.lessThan(x, nodes[j + 1].x)) {
+          const span = spans[j];
+          const iSeg = identifySegment(x, span);
+          if (Rnl.greaterThan(x, span.segments[iSeg].xOfLeftEnd)) {
+            span.segments = splitSegment(span.segments, iSeg, x);
+            beam.numSegments += 1;
+          }
+          beam.gotType[0] = true;
+          span.segments[iSeg + 1].P[0] += P;      // add to sum of service loads
+          span.segments[iSeg + 1].M[0] += M;
+          if (type !== 0) {
+            beam.gotType[type] = true;
+            span.segments[iSeg + 1].P[type] += P;
+            span.segments[iSeg + 1].M[type] += M;
+          }
+        }
+      }
+    }
+
+    // Distributied loads
+    beam.allLoadsAreUniform = true;  // initialize the variable
+    for (i = 0; i < input.loads.length; i++) {
+      const load = input.loads[i];
+      if (load.shape !== "w") { continue }
+      let type = load.type === "none" ? 0 : loadType[load.type];
+      if (type === 0) {
+        if (beam.comboName !== "service") {
+          return [`The ${ord[i]} load must have a load type defined.`]
+        } else {
+          type = 1; // In a service load analysis, treat unlabled loads as Dead loads.
+        }
+      }
+
+      const wStart = load.wStart;
+      const wEnd = load.wEnd;
+
+      if (Math.abs(wStart) > beam.wMax) { beam.wMax = Math.abs(wStart); }
+      if (Math.abs(wEnd) > beam.wMax) { beam.wMax = Math.abs(wEnd); }
+
+      const xStart = load.from;
+      const xEnd = Rnl.isZero(load.to)
+        ? cummulativeLength
+        : load.to;
+
+      const slope = (wEnd - wStart) / Rnl.toNumber(Rnl.subtract(xEnd, xStart));
+      if (slope !== 0) {beam.allLoadsAreUniform = false;}
+
+      let iStartSpan = 0;
+      let iEndSpan = 0;
+      let iStartSeg = 0;
+      let iEndSeg = 0;
+
+      // If necessary, split segments at points of load discontinuity.
+      for (let j = 0; j < spans.length; j++) {
+        if (Rnl.areEqual(xStart, nodes[j].x)) {
+          iStartSpan = j;
+          iStartSeg = 0;
+          break
+        }
+        if (Rnl.greaterThan(xStart, nodes[j].x) && Rnl.lessThan(xStart, nodes[j + 1].x)) {
+          for (let k = 0; k < spans[j].segments.length; k++) {
+            const seg = spans[j].segments[k];
+            if (Rnl.areEqual(xStart, seg.xOfLeftEnd)) {
+              iStartSpan = j;
+              iStartSeg = k;
+              break
+            }
+            const segEnd = k < spans[j].segments.length - 1
+              ? spans[j].segments[k + 1].xOfLeftEnd
+              : nodes[j + 1].x;
+            if (Rnl.greaterThan(xStart, seg.xOfLeftEnd) && Rnl.lessThan(xStart, segEnd)) {
+              spans[j].segments = splitSegment(spans[j].segments, k, xStart);
+              beam.numSegments += 1;
+              iStartSpan = j;
+              iStartSeg = k + 1;
+              break
+            }
+          }
+        }
+      }
+
+      for (let j = 0; j < spans.length; j++) {
+        if (Rnl.areEqual(xEnd, nodes[j + 1].x)) {
+          iEndSpan = j;
+          iEndSeg = spans[j].segments.length - 1;
+          break
+        }
+        if (Rnl.greaterThan(xEnd, nodes[j].x) && Rnl.lessThan(xEnd, nodes[j + 1].x)) {
+          for (let k = 0; k < spans[j].segments.length; k++) {
+            const seg = spans[j].segments[k];
+            const segEnd = k < spans[j].segments.length - 1
+              ? spans[j].segments[k + 1].xOfLeftEnd
+              : nodes[j + 1].x;
+            if (Rnl.areEqual(xEnd, segEnd)) {
+              iEndSpan = j;
+              iEndSeg = k;
+              break
+            }
+            if (Rnl.greaterThan(xEnd, seg.xOfLeftEnd) && Rnl.lessThan(xEnd, segEnd)) {
+              spans[j].segments = splitSegment(spans[j].segments, k, xEnd);
+              beam.numSegments += 1;
+              iEndSpan = j;
+              iEndSeg = k;
+              break
+            }
+          }
+        }
+      }
+
+      // Now apply distributed loads
+      for (let iSpan = iStartSpan; iSpan <= iEndSpan; iSpan++) {
+        const span = spans[iSpan];
+        const startSeg = (iSpan  === iStartSpan ? iStartSeg : 0);
+        const endSeg = (iSpan  === iEndSpan ? iEndSeg : spans[iSpan].segments.length - 1);
+        for (let iSeg = startSeg; iSeg <= endSeg; iSeg++) {
+          const xLeft = span.segments[iSeg].xOfLeftEnd;
+          const w1 = wStart + slope * Rnl.toNumber(Rnl.subtract(xLeft, xStart));
+          const xRight = Rnl.add(span.segments[iSeg].xOfLeftEnd, span.segments[iSeg].length);
+          const w2 = wStart + slope * Rnl.toNumber(Rnl.subtract(xRight, xStart));
+          // add to sum of service loads
+          span.segments[iSeg].w1[0] += w1;
+          span.segments[iSeg].w2[0] += w2;
+          // add to specific load type, e.g., dead, live, etc.
+          span.segments[iSeg].w1[type] += w1;
+          span.segments[iSeg].w2[type] += w2;
+        }
+      }
+
+      beam.gotType[0] = true;
+      if (type !== 0) {
+        beam.gotType[type] = true;
+      }
+    }
+
+    // Henceforward there are no <= comparisons.
+    // Change lengths into floating point numbers.
+    for (let i = 0; i < nodes.length; i++) {
+      nodes[i].x = Rnl.toNumber(nodes[i].x);
+    }
+    for (let i = 0; i < spans.length; i++) {
+      spans[i].length = Rnl.toNumber(spans[i].length);
+      for (let j = 0; j < spans[i].segments.length; j++) {
+        spans[i].segments[j].length = Rnl.toNumber(spans[i].segments[j].length);
+        spans[i].segments[j].xOfLeftEnd = Rnl.toNumber(spans[i].segments[j].xOfLeftEnd);
+      }
+    }
+    beam.length = Rnl.toNumber(beam.length);
+
+    return [errorMsg, beam, nodes, spans]
+
+  }
+
+  // Each of the methods in this module draws some item.
+
+  const circle = (x, y, radius) => {
+    return { tag: "circle", attrs: { cx: x, cy: y, r: radius } }
+  };
+
+  const restraint = (node, beam) => {
+    const value = [];
+    const x = beam.xDiagram + beam.xScale * node.x;
+    if (node.fixity === "hinge" || node.fixity === "proppedHinge") {
+      value.push(circle(beam.xDiagram + beam.xScale * node.x, beam.yLoad, 4));
+    }
+    const path = { tag: "path", attrs: { d: "" } };
+    if (node.fixity === "pinned" || node.fixity === "proppedHinge") {
+      // draw a triangle
+      const y = node.fixity === "pinned" ? beam.yLoad + 0.75 : beam.yLoad + 4;
+      path.attrs.d = `M${x} ${y} l5 10 h-10 z`;
+      path.attrs.style = "fill-opacity:1.0";
+    } else if (node.fixity === "fixed") {
+      const xd = (node.x === 0 ? -1 : 1) * 7;
+      // eslint-disable-next-line max-len
+      path.attrs.d = `M${x} ${beam.yLoad - 7} v14 m0 -14 l${xd} 7 M${x} ${beam.yLoad} l${xd} 7 M${x} ${beam.yLoad + 7} l${xd} 7`;
+    } else if (node.fixity === "spring") {
+      const y = beam.yLoad + .75;
+      path.attrs.d = `M${x} ${y} v3 l6 1.5 -12 3 12 3 -12 3 6 1.5 v3 m-6 0 h12`;
+    }
+    value.push(path);
+    return value
+  };
+
+  const pointForce = (x, y, load, fixity, isReaction = false) => {
+    const sgn = (load < 0 ? -1 : 1); // -1 is down
+    const lengthAdjustment = fixity === "fixed"
+      ? 7
+      : fixity === "pinned" && isReaction
+      ? 10
+      : fixity === "proppedHinge" && isReaction
+      ? 18
+      : fixity === "hinge"
+      ? 4
+      : fixity === "spring" && isReaction
+      ? 18
+      : 0;
+    const length = 40 - lengthAdjustment;
+    // Reactions are drawn below the beam line. Imposed loads are drawn above the beam line.
+    const yText = y + (isReaction ? 55 : -45);
+    // Set x and y at the tip of the arrowhead
+    if (isReaction) { y += lengthAdjustment + 0.75; } else { y -= 0.75; }
+    if (sgn === -1 && isReaction) { y += length; }
+    if (sgn === 1 && !isReaction) { y -= length; }
+    const arrow = {
+      tag: "path",
+      attrs: {
+        style: "fill: #000; fill-opacity:1.0",
+        // eslint-disable-next-line max-len
+        d: `M${x} ${y} l${sgn * 4} ${sgn * 8} h${-sgn * 3.5} v${sgn * (length - 8)} h${-sgn * 1} v${-sgn * (length - 8)} h${-sgn * 3}z`
+      }
+    };
+    const text = textNode(String(load), x, yText, "middle");
+    return [arrow, text]
+  };
+
+  const pointMoment = (x, y, load, isReaction = false) => {
+    let isCounterClockwise = load >= 0; // = (load < 0 ? -1 : 1) // 1 is counter-clockwise
+    load = Math.abs(load);
+    let arrow;
+    let text;
+    if (!isReaction) {
+      arrow = momentArrow(x, y, (isCounterClockwise ? 165 : 15), 150, isCounterClockwise);
+      text = textNode(String(load), x, y - 25, "middle");
+    } else {
+      // The moment is a reaction
+      isCounterClockwise = !isCounterClockwise;
+      if (x < 100) {  // left end
+        arrow = momentArrow(x, y, (isCounterClockwise ? 260 : 100), 140, isCounterClockwise);
+        text = textNode(String(load), x - 15, y - 15, "end");
+      } else {
+        arrow = momentArrow(x, y, (isCounterClockwise ? 80 : 280), 140, isCounterClockwise);
+        text = textNode(String(load), x + 16, y - 15);
+      }
+    }
+    return [...arrow, text]
+  };
+
+  const momentArrow = (xCtr, yCtr, thetaAtArrowPoint, subtendedAngle, isCounterClockwise) => {
+    // Draw a circular arc with an arrowhead.
+    // Find startAngle and endAngle: the begining and ending of the arc
+    // theta = 0 at 3 o'clock.  theta is + for counterclockwise
+    const startAngle = thetaAtArrowPoint * (Math.PI / 180);
+    const sgn = isCounterClockwise ? 1 : -1;
+    const endAngle = startAngle - sgn * subtendedAngle * (Math.PI / 180);
+    // sgn = 1 for counterclockwise, -1 for clockwise
+    const diameter = 35;
+    const r = diameter / 2; // radius
+    const arrowHeadLength = 8;
+    const startAnglePrime = startAngle - sgn * (2 * 0.9 * arrowHeadLength / diameter);
+    const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+
+    let xStart = 0;
+    let yStart = 0;
+    let xEnd = 0;
+    let yEnd = 0;
+    if (sgn > 0) {
+      xEnd = (xCtr + r * Math.cos(startAnglePrime)).toFixed(2);   // arrow end
+      yEnd = (yCtr - r * Math.sin(startAnglePrime)).toFixed(2);
+      xStart = (xCtr + r * Math.cos(endAngle)).toFixed(2);
+      yStart = (yCtr - r * Math.sin(endAngle)).toFixed(2);
+    } else {
+      xStart = (xCtr + r * Math.cos(startAnglePrime)).toFixed(2);
+      yStart = (yCtr - r * Math.sin(startAnglePrime)).toFixed(2);
+      xEnd = (xCtr + r * Math.cos(endAngle)).toFixed(2);
+      yEnd = (yCtr - r * Math.sin(endAngle)).toFixed(2);
+    }
+
+    const path = {
+      tag: "path",
+      attrs: { d: `M${xStart} ${yStart}A${r} ${r} 0 ${largeArcFlag} 0 ${xEnd} ${yEnd}` }
+    };
+
+    // Draw the arrow head
+    const xTip = xCtr + r * Math.cos(startAngle);
+    const yTip = yCtr - r * Math.sin(startAngle);
+    const alpha = startAngle - sgn * 100 / 180 * Math.PI; // rotate by 100°
+    const beta = 22.5 * Math.PI / 180;    // angle subtended by half-arrowhead
+    const x = Array(3).fill("");
+    const y = Array(3).fill("");
+    x[0] = xTip.toFixed(2);
+    y[0] = yTip.toFixed(2);
+    x[1] = (xTip + arrowHeadLength * Math.cos(alpha - beta)).toFixed(2);
+    y[1] = (yTip - arrowHeadLength * Math.sin(alpha - beta)).toFixed(2);
+    x[2] = (xTip + arrowHeadLength * Math.cos(alpha + beta)).toFixed(2);
+    y[2] = (yTip - arrowHeadLength * Math.sin(alpha + beta)).toFixed(2);
+
+    let points = "";
+    for (let i = 0; i < x.length; i++) {
+      points += `${x[i]} ${y[i]} `;
+    }
+    const polygon = { tag: "polygon", attrs: { points } };
+    return [path, polygon]
+  };
+
+  const polyline = (x, y) => {
+    let d = `M${x[0]} ${y[0]}`;
+    for (let i = 1; i < x.length; i++) {
+      d += ` L${x[i]} ${y[i]}`;
+    }
+    return { tag: "path", attrs: { d } }
+  };
+
+  const textNode = (str, x, y, horizAlign) => {
+    const node = { tag: "text", attrs: { x: String(x), y: String(y) } };
+    if (horizAlign === "middle" || horizAlign === "end") {
+      node.attrs["text-anchor"] = horizAlign;
+    }
+    node.children = [{ tag: "tspan", text: str }];
+    return node
+  };
+
+  const Draw = Object.freeze({
+    pointForce,
+    pointMoment,
+    polyline,
+    restraint,
+    textNode
+  });
+
+  // Constants
+  const DEAD = 1;
+  const FLUID = 2;
+  const LIVE = 3;
+  const HORIZ = 4;
+  const ROOFLIVE = 5;
+  const SNOW = 6;
+  const RAIN = 7;
+  const WIND = 8;
+  const EQ = 9;
+
+  const round = (num, prec) => {
+    // Round a number to prec significant digits.
+    // Return a string. This is used for display of numbers on the diagram.
+    const str = num.toPrecision(prec);
+    if (str.indexOf("e") === -1) { return str }
+    const pos = str.indexOf("e");
+    const significand = Number.parseFloat(str.slice(0, pos));
+    const exponent = Number.parseFloat(str.slice(pos + 1));
+    return (significand * 10 ** exponent).toString()
+  };
+
+  function createLoadDiagram(beam, nodes, spans) {
+    beam.xDiagram = 90;  // x coordinate at left end of diagram line, px
+    beam.yLoad = 80;     // y coordiate of load diagram
+    beam.xScale = 300 / nodes[nodes.length - 1].x;
+    const lengthFactor = beam.SI ? 1 : 0.3048;
+    const forceFactor = beam.SI ? 1000 : 4448.2216152605;
+    const momentFactor = beam.SI ? 1000 : 4448.2216152605 * 0.3048;
+    const lineLoadFactor = beam.SI ? 1000 : 4448.2216152605 / 0.3048;
+
+    // Begin the diagram.
+    let diagram = [];
+    diagram.push({ tag: "title", attrs: { text: "Beam Diagram" } });
+    diagram.push({
+      tag: "defs",
+      attrs: {},
+      style: `svg { background-color: #fff; }
+text, tspan { font: 12px Arial; }
+circle { stroke:#000; fill:#fff; }
+polygon { stroke:#000; fill: #000; fill-opacity:1.0 }
+line { stroke:#000; }
+path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
+    });
+    diagram.push(Draw.textNode("loads", 20, beam.yLoad + 2));
+    diagram.push(Draw.textNode(`(${beam.SI ? 'kN, m' : 'kips, ft'})`, 20, beam.yLoad + 16));
+    diagram.push({
+      tag: "path",
+      attrs: { strokeWidth: "1.5px", d: `M${beam.xDiagram} ${beam.yLoad} h300` }
+    });
+
+    // Draw restraints
+    for (let i = 0; i < nodes.length; i++) {
+      if (nodes[i].fixity !== "continuous") {
+        diagram = diagram.concat(Draw.restraint(nodes[i], beam));
+      }
+    }
+
+    // Write the span length below each span, but only if there are no loads in the way.
+    for (let i = 0; i < spans.length; i++) {
+      let okay = true; // initialize
+      if (spans[i].length * beam.xScale < 30) { continue }
+      if (okay) {
+        for (let j = 1; j < spans[i].segments.length; j++) {
+          if (spans[i].segments[j].P[0] > 0) { okay = false; break }
+        }
+      }
+      if (okay) {
+        const x = beam.xDiagram + beam.xScale * (nodes[i].x + spans[i].length / 2);
+        const unit = beam.SI ? "" : "′";
+        const sText = round(spans[i].length / lengthFactor, 3);
+        diagram.push(Draw.textNode(`${sText}${unit}`, x, beam.yLoad + 15));
+      }
+    }
+
+    // Draw nodal loads
+    for (let i = 0; i < nodes.length; i++) {
+      const x = beam.xDiagram + beam.xScale * nodes[i].x;
+      if (Math.abs(nodes[i].P[0]) > 0) {
+        const sText = round(nodes[i].P[0] / forceFactor, 3);
+        diagram = diagram.concat(Draw.pointForce(x, beam.yLoad, sText, nodes[i].fixity));
+      }
+      if (Math.abs(nodes[i].M[0]) > 0) {
+        const sText = round(nodes[i].M[0] / momentFactor, 3);
+        diagram = diagram.concat(Draw.pointMoment(x, beam.yLoad, sText));
+      }
+    }
+
+    // Draw span loads
+    const wScale = 20 / beam.wMax;
+    let wPrev = 0;
+    let d = `M${beam.xDiagram} ${beam.yLoad}`;
+    for (let i = 0; i < spans.length; i++) {
+      for (let j = 0; j < spans[i].segments.length; j++) {
+        const seg = spans[i].segments[j];
+        const x = beam.xDiagram + beam.xScale * seg.xOfLeftEnd;
+        if (Math.abs(seg.P[0]) > 0) {
+          const sText = round(seg.P[0] / forceFactor, 3);
+          diagram = diagram.concat(Draw.pointForce( x, beam.yLoad, sText, "continuous"));
+        }
+        if (Math.abs(seg.M[0]) > 0) {
+          const sText = round(seg.M[0] / momentFactor, 3);
+          diagram = diagram.concat(Draw.pointMoment(x, beam.yLoad, sText));
+        }
+        // Draw a line segment for the service load.
+        const xEnd = x + beam.xScale * seg.length;
+        if (seg.w1[0] !== wPrev) {
+          d += `V${beam.yLoad + seg.w1[0] * wScale}`; // vertical load discontinuiy.
+        }
+        const yEnd = beam.yLoad + seg.w2[0] * wScale;
+        d += `L${xEnd} ${yEnd}`;
+        wPrev =  seg.w2[0];
+      }
+    }
+    if (wPrev !== 0) { d += `V${beam.yLoad}`; }
+    diagram.push({ tag: "path", attrs: { d } });
+
+    // Write in the line load values
+    let lastSegUniform = false;
+    let firstSegment;
+    let xFirstSegment = 0;
+    const segments = [];
+    for (let i = 0; i < spans.length; i++) {
+      for (let j = 0; j < spans[i].segments.length; j++) {
+        segments.push(spans[i].segments[j]);
+      }
+    }
+    const numSegments = segments.length;
+    for (let i = 0; i < segments.length; i++) {
+      const seg = segments[i];
+      if (seg.w1[0] === seg.w2[0] && Math.abs(seg.w1[0]) > 0) {
+        lastSegUniform = true;
+        if (i === 0 || seg.w1[0] !== segments[i - 1].w1[0] || lastSegUniform === false) {
+          firstSegment = i;
+          xFirstSegment = beam.xScale * seg.xOfLeftEnd;
+        }
+        if (i === numSegments - 1 || segments[i + 1].w1[0] !== segments[i + 1].w2[0]
+          || seg.w1[0] !== segments[i + 1].w1[0]) {
+          // This segment is the end of a uniform load.
+          // Find a place to write the load value
+          const lenSegLoad = i < numSegments - 1
+            ? segments[i + 1].xOfLeftEnd - segments[firstSegment].xOfLeftEnd
+            : beam.length - segments[firstSegment].xOfLeftEnd;
+          if (lenSegLoad * beam.xScale > 30) {
+            let noBust = true; // initialize the value
+            const fudge = seg.w1[0] > 0 ? 10 : -4;
+            const yy = beam.yLoad + wScale * seg.w1[0] + fudge;
+            const str = round(Math.abs(seg.w1[0] / lineLoadFactor), 3);
+            // try the middle of the uniform load.  See if there is a point load there
+            for (let j = firstSegment + 1; j <= i; j++) {
+              if (beam.xScale * (Math.abs(segments[j].xOfLeftEnd
+                - (segments[firstSegment].xOfLeftEnd + lenSegLoad / 2))) < 35) {
+                if (segments[j].M[0] || segments[j].P[0] !== 0) {
+                  noBust = false;
+                  break
+                }
+              }
+            }
+            if (noBust) {
+              const x = beam.xDiagram + xFirstSegment + beam.xScale * lenSegLoad / 2;
+              diagram.push(Draw.textNode(str, x, yy));
+            } else {
+              // try the 1/3 point
+              noBust = true;
+              for (let j = firstSegment + 1; j <= i; j++) {
+                if (beam.xScale * (Math.abs(segments[j].xOfLeftEnd
+                  - (segments[firstSegment].xOfLeftEnd + lenSegLoad / 3))) < 35) {
+                  if (segments[j].M[0] || segments[j].P[0] !== 0) {
+                    noBust = false;
+                    break
+                  }
+                }
+              }
+              if (noBust) {
+                const x = beam.xDiagram + xFirstSegment + beam.xScale * lenSegLoad / 3 - 17;
+                diagram.push(Draw.textNode(str, x, yy));
+              } else {
+                // try the 2/3 point
+                noBust = true;
+                for (let j = firstSegment + 1; j <= i; j++) {
+                  if (beam.xScale * (Math.abs(segments[j].xOfLeftEnd
+                    - (segments[firstSegment].xOfLeftEnd + 2 * lenSegLoad / 3))) < 5) {
+                    if (segments[j].M[0] || segments[j].P[0] !== 0) {
+                      noBust = false;
+                      break
+                    }
+                  }
+                }
+                if (noBust) {
+                  const x = beam.xDiagram + xFirstSegment + beam.xScale * 2 * lenSegLoad / 3;
+                  diagram.push(Draw.textNode(str, x, yy));
+                } else {
+                  if (i === 0) {
+                    diagram.push(Draw.textNode(str, beam.xDiagram  - 35, yy));
+                  }
+                }
+              }
+            }
+          }
+        }
+      } else {
+        // We've got a distributed sloping load
+        lastSegUniform = false;
+        const s = i === 0
+          ? 0
+          : (segments[i - 1].w2[0] - segments[i - 1].w1[0]) / segments[i - 1].length;
+        const s2 = (seg.w2[0] - seg.w1[0]) / seg.length;
+        const s3 = i === numSegments - 1
+          ? 0
+          : (segments[i + 1].w2[0] - segments[i + 1].w1[0]) / segments[i + 1].length;
+        if (Math.abs(s2 - s) > 0.05 || i === 0) {
+          if (Math.abs(seg.w1[0]) > 0.05) {
+            if (seg.length * beam.xScale > 20) {
+              const str = round(Math.abs(seg.w1[0] / lineLoadFactor), 3);
+              const x = beam.xDiagram + beam.xScale * seg.xOfLeftEnd;
+              const fudge = seg.w1[0] > 0 ? 10 : -5;
+              const yy = beam.yLoad + wScale * seg.w1[0] + fudge;
+              diagram.push(Draw.textNode(str, x, yy));
+            }
+          }
+        }
+        if (Math.abs(s2 - s3) > 0.05  || i === numSegments - 1
+          || Math.abs(seg.w2[0] - segments[i + 1].w1[0]) > 0) {
+          if (Math.abs(seg.w2[0]) > 0.05) {
+            if (seg.length * beam.xScale > 20) {
+              const str = round(Math.abs(seg.w2[0] / lineLoadFactor), 3);
+              const x = beam.xDiagram + beam.xScale * (seg.xOfLeftEnd + seg.length) - 30;
+              const fudge = seg.w2[0] > 0 ? 10 : -5;
+              const yy = beam.yLoad + wScale * seg.w2[0] + fudge;
+              diagram.push(Draw.textNode(str, x, yy));
+            }
+          }
+        }
+      }
+    }
+
+    return diagram
+  }
+
+  /* The list below enumerates the load combinations and load
+   * factors used by Hurmet for beam analysis.
+   *
+   * Hurmet always does one service load analysis that includes
+   * all load types. Load factor = 1.0 in that analysis.
+   *
+   * Then Hurmet examines each line below, If the beam is loaded
+   * by any of the load types listed in the first column, Hurmet will
+   * perform an analysis with the load factor combination listed
+   * on that line.
+   *
+   * NOTATION
+   *   D=Dead, F=Fluid, L=Live, H=Horizontal, £=Roof Live
+   *   S=Snow, R=Rain,  W=Wind, E=Earthquake
+   *
+   *   LLF=either 1 or 0.5, per user input
+   *
+   *   For earthquake cases, Hurmet finds SDS from user input.
+   *   If SDS <= 0.125, Hurmet sets SDS = 0.
+   */
+
+  const loadCombinations = Object.freeze({
+    "service": [
+      ["DFLH£SRWE", "0 1 1 1 1 1 1 1 1 1"]
+    ],
+    "ASCE 7-16": [
+      //      Eqn  D            F            L   H     £    S    R    W   EQ
+      ["DFH", "1  1.4          1.4           0  1.6    0    0    0    0    0"],
+      ["L",   "2  1.2          1.2         1.6  1.6    0    0    0    0    0"],
+      ["L£",  "2  1.2          1.2         1.6  1.6  0.5    0    0    0    0"],
+      ["LS",  "2  1.2          1.2         1.6  1.6    0  0.5    0    0    0"],
+      ["LR",  "2  1.2          1.2         1.6  1.6    0    0  0.5    0    0"],
+      ["£",   "3  1.2          1.2           0  1.6  1.6    0    0    0    0"],
+      ["£L",  "3  1.2          1.2         LLF  1.6  1.6    0    0    0    0"],
+      ["£W",  "3  1.2          1.2           0  1.6  1.6    0    0  0.5    0"],
+      ["S",   "3  1.2          1.2           0  1.6    0  1.6    0    0    0"],
+      ["SL",  "3  1.2          1.2         LLF  1.6    0  1.6    0    0    0"],
+      ["SW",  "3  1.2          1.2           0  1.6    0  1.6    0  0.5    0"],
+      ["R",   "3  1.2          1.2           0  1.6    0    0  1.6    0    0"],
+      ["RL",  "3  1.2          1.2         LLF  1.6    0    0  1.6    0    0"],
+      ["RW",  "3  1.2          1.2           0  1.6    0    0  1.6  0.5    0"],
+      ["W",   "4  1.2          1.2           0  1.6    0    0    0  1.0    0"],
+      ["WL",  "4  1.2          1.2         LLF  1.6    0    0    0  1.0    0"],
+      ["W£",  "4  1.2          1.2           0  1.6  0.5    0    0  1.0    0"],
+      ["WL£", "4  1.2          1.2         LLF  1.6  0.5    0    0  1.0    0"],
+      ["WS",  "4  1.2          1.2           0  1.6    0  0.5    0  1.0    0"],
+      ["WLS", "4  1.2          1.2         LLF  1.6    0  0.5    0  1.0    0"],
+      ["WR",  "4  1.2          1.2           0  1.6    0    0  0.5  1.0    0"],
+      ["WLR", "4  1.2          1.2         LLF  1.6    0    0  0.5  1.0    0"],
+      ["W",   "6  0.9          0             0  1.6    0    0    0  1.0    0"],
+      ["E",   "6  1.2+0.2×SDS  1.2+0.2×SDS   1  1.6    0  0.2    0    0    1"],
+      ["E",   "7  0.9-0.2×SDS  0.9-0.2×SDS   0  1.6    0    0    0    0    1"]
+    ],
+    "ASCE 7-16 ASD": [
+      //      Eqn  D             F           L    H    £    S    R    W   EQ
+      ["DF",  "1   1             1           0    1    0    0    0    0    0"],
+      ["L",   "2   1             1           1    1    0    0    0    0    0"],
+      ["£",   "3   1             1           0    1    1    0    0    0    0"],
+      ["S",   "3   1             1           0    1    0    1    0    0    0"],
+      ["R",   "3   1             1           0    1    0    0    1    0    0"],
+      ["L£",  "4   1             1         0.75   1   0.75  0    0    0    0"],
+      ["LS",  "4   1             1         0.75   1    0   0.75  0    0    0"],
+      ["LR",  "4   1             1         0.75   1    0    0   0.75  0    0"],
+      ["W",   "5   1             1           0    1    0    0    0   0.6   0"],
+      ["LW",  "6   1             1         0.75   1    0    0    0   0.45  0"],
+      ["£W",  "6   1             1           0    1   0.75  0    0   0.45  0"],
+      ["SW",  "6   1             1           0    1    0  0.75   0   0.45  0"],
+      ["RW",  "6   1             1           0    1    0    0  0.75  0.45  0"],
+      ["L£W", "6   1             1         0.75   1   0.75  0    0   0.45  0"],
+      ["LSW", "6   1             1         0.75   1    0  0.75   0   0.45  0"],
+      ["LRW", "6   1             1         0.75   1    0    0  0.75  0.45  0"],
+      ["W",   "7  0.6            0           0    1    0    0    0   0.6   0"],
+      ["E",   "8  1+0.14×SDS   1+0.14×SDS    0    1    0    0    0    0    0.7"],
+      ["E",   "9  1+0.105×SDS  1+0.105×SDS  0.75  1    0  0.75   0    0    0.525"],
+      ["E",  "10  0.6-0.14×SDS 0.6-0.14×SDS  0    0    0    0    0    0    0.7"]
+    ],
+    "2021 IBC ASD": [
+      //     Eqn  D   F   L   H  £   S   R   W   EQ
+      ["DFL", "1  1   1   1   1  0   0   0   0   0"],
+      ["£",   "1  1   1   1   1  1   0   0   0   0"],
+      ["S",   "1  1   1   1   1  0   1   0   0   0"],
+      ["R",   "1  1   1   1   1  0   0   1   0   0"],
+      ["W",   "2  1   1   1   1  0   0   0  0.6  0"],
+      ["W",   "3  1   1   1   1  0  0.5  0  0.6  0"],
+      ["S",   "4  1   1   1   1  0   1   0  0.3  0"],
+      ["E",  " 5  1   1   1   1  0   1   0   0  0.72"],
+      ["E",   "6 0.9 0.9  0   1  0   0   0   0  0.72"]
+    ]
+  });
+
+  const ftRegEx = /′/g;
+  const numberRegEx$3 = new RegExp(Rnl.numberPattern);
+  const metricLengths = ["m", "cm", "mm"];
+  const vars = Object.create(null);
+
+  const readNumber = str => {
+    const matches = numberRegEx$3.exec(str);
+    if (matches) {
+      const numStr = matches[0];
+      return [Rnl.fromString(numStr), numStr.length];
+    } else {
+      return ["Error", null]
+    }
+  };
+
+  const convertToBaseUnit = (num, unitName) => {
+    const unit = unitFromUnitName(unitName, vars);
+    return Rnl.multiply(Rnl.add(num, unit.gauge), unit.factor)
+  };
+
+  const readInputData = data => {
+    const input = Object.create(null);
+    // Set some defaults
+    input.nodes = [];
+    input.spanLength = [];
+    input.loads = [];
+    input.E = 1;
+    input.I = 1;
+    input.LLF = 0;
+    input.SDS = 0;
+    input.k = 0;
+    input.SI = false;
+    input.combinations = "service";
+    // Read the input and overwrite the defaults.
+    for (let i = 0; i < data[0].length; i++) {
+      const item = data[0][i].trim();
+      let datum = data[1][i].trim();
+      switch (item) {
+        case "E": {
+          const [E, pos] = readNumber(datum);
+          if (typeof E === "string") { return "Error. Non-numeric E." }
+          const unitName = datum.slice(pos).trim();
+          input.E = Rnl.toNumber(convertToBaseUnit(E, unitName));
+          break
+        }
+
+        case "I": {
+          const [I, pos] = readNumber(datum);
+          if (typeof I === "string") { return "Error. Non-numeric I." }
+          const unitName = datum.slice(pos).trim();
+          input.I = Rnl.toNumber(convertToBaseUnit(I, unitName));
+          break
+        }
+
+        case "k": {
+          const [k, pos] = readNumber(datum);
+          if (typeof k === "string") { return "Error. Non-numeric k." }
+          const unitName = datum.slice(pos).trim();
+          input.k = Rnl.toNumber(convertToBaseUnit(k, unitName));
+          break
+        }
+
+        case "setup": {
+          if (numberRegEx$3.test(datum)) { input.nodes.push("none"); }
+          const elements = datum.split(/ +/g);
+          for (let k = 0; k < elements.length; k++) {
+            switch (elements[k]) {
+              case "p":
+              case "f":
+              case "h":
+              case "ph":
+              case "s":
+              case "-":
+                input.nodes.push(elements[k] === "-" ? "none" : elements[k]);
+                break
+              default: {
+                const element = elements[k].replace(ftRegEx, "ft");
+                const [L, pos] = readNumber(element);
+                if (typeof L === "string") { return "Error. Non-numeric length." }
+                let unitName = element.slice(pos).trim();
+                if (unitName === "") { unitName = "mm"; }
+                if (metricLengths.includes(unitName)) { input.SI = true; }
+                input.spanLength.push(convertToBaseUnit(L, unitName));
+                break
+              }
+            }
+          }
+          if (numberRegEx$3.test(elements[elements.length - 1])) { input.nodes.push("none"); }
+          break
+        }
+
+        case "dead":
+        case "D":
+        case "load":
+        case "live":
+        case "L":
+        case "snow":
+        case "S":
+        case "wind":
+        case "W":
+        case "EQ":
+        case "F":
+        case "H":
+        case "rain":
+        case "roof":
+        case "R": {
+          const load = Object.create(null);
+          datum = datum.replace(ftRegEx, "ft");
+          const elements = datum.split(",");
+          let str = elements[0];
+          load.type = item;
+          load.from = Rnl.zero;
+          load.to = Rnl.zero;
+          load.P = 0;
+          load.M = 0;
+          load.wStart = 0;
+          load.wEnd = 0;
+          let [num1, pos] = readNumber(str);  // eslint-disable-line prefer-const
+          if (typeof num1 === "string") { return "Error. Non-numeric load." }
+          let num2 = num1;
+          str = str.slice(pos).trim();
+          if (str.slice(0, 1) === ":") {
+            str = str.slice(1).trim();
+            [num2, pos] = readNumber(str);
+            str = str.slice(pos).trim();
+          }
+          const unitName = str.trim();
+          const unit = unitFromUnitName(unitName, vars);
+          // Read the load from & to points, if any
+          let L1 = 0;
+          let L2 = 0;
+          let lengthUnitName = "";
+          if (elements.length > 1) {
+            str = elements[1].trim();
+            [L1, pos] = readNumber(str);
+            str = str.slice(pos).trim();
+            if (str.slice(0, 1) === ":") {
+              str = str.slice(1).trim();
+              [L2, pos] = readNumber(str);
+              str = str.slice(pos).trim();
+            } else {
+              L2 = L1;
+            }
+            lengthUnitName = str.trim();
+            if (lengthUnitName === "") { lengthUnitName = "mm"; }
+          }
+          const expos = unit.expos.join("");
+          if (expos === "01-200000") {
+            load.shape = "w";
+            load.wStart = Rnl.toNumber(convertToBaseUnit(num1, unitName));
+            load.wEnd = Rnl.toNumber(convertToBaseUnit(num2, unitName));
+          } else if (expos === "11-200000") {
+            load.shape = "P";
+            load.P = Rnl.toNumber(convertToBaseUnit(num1, unitName));
+          } else if (expos === "21-200000") {
+            load.shape = "M";
+            load.M = Rnl.toNumber(convertToBaseUnit(num1, unitName));
+          } else {
+            return `Error. ${unitName} is not a force, line load, or moment.`
+          }
+          if (L1 !== 0) { load.from = convertToBaseUnit(L1, lengthUnitName); }
+          if (L2 !== 0) { load.to = convertToBaseUnit(L2, lengthUnitName); }
+          input.loads.push(load);
+          break
+        }
+
+        case "combo": {
+          const validCombos = Object.keys(loadCombinations);
+          if (!validCombos.includes(datum)) {
+            // eslint-disable-next-line max-len
+            return `Error. Unsupported combo. Supported combos are:}\\\\ \\text{${validCombos.join(", ")}`
+          }
+          input.combinations = datum;
+          break
+        }
+
+        case "LLF": {
+          const [LLF, _] = readNumber(datum);
+          if (typeof LLF === "string") { return "Error. LLF is non-numeric." }
+          input.LLF = Rnl.toNumber(LLF);
+          break
+        }
+
+        case "SDS": {
+          const [SDS, _] = readNumber(datum);
+          if (typeof SDS === "string") { return "Error. SDS is non-numeric." }
+          input.SDS = Rnl.toNumber(SDS);
+          break
+        }
+
+        default:
+          return `Error. Unrecognized item ${item}`
+      }
+    }
+    return input
+  };
+
+  const dotProduct$1 = (a, b) => a.map((e, i) => (e * b[i])).reduce((m, n) => m + n);
+  const isLiveish = loadType => loadType === LIVE || loadType === ROOFLIVE || loadType === SNOW;
+
+  function doAnalysis(beam, nodes, spans) {
+    const numNodes = nodes.length;
+    const numSpans = spans.length;
+    const gotType = beam.gotType;
+    const numDegreesOfFreedom = beam.numDegreesOfFreedom;
+    const numEndActions = 4 * numSpans + numNodes; // include the node spring actions.
+    beam.numEndActions = numEndActions;
+    const EI = beam.EI;
+
+    // The Direct Stiffness Method employs matrix methods to solve indeterminate structures.
+    // Textbooks describe the Direct Stiffness Method with one-based matrices.
+    // To avoid confusion, the code below employs arrays as if they were one-based.
+    // Since JavaScript arrays are actually zero-based, we will dimension each array with one
+    // element more than it needs. Then we'll leave array[0] unused. All our loops will be
+    // written as if we had one-based arrays.
+
+    // Prepend elements to arrays `nodes` & `spans` so that they act like 1-based arrays.
+    nodes.unshift(0);
+    spans.unshift(0);
+
+    // Find the Span Stiffness Matrix, SSM
+    // Imagine that a fixed-end span undergoes a displacement, Δ, down at its right end.
+    // ▄                                                         █
+    // █                                                         █
+    // █▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,█
+    // █             ▀▀▀▀▀▀▀▄▄▄▄                                 █
+    // █                         ▀▀▀▌▄▄g                         █
+    // █                                 ▀▀▀▀▌▄▄▄▄,              █
+    //                                             ▀▀▀▀▀▀▀▀▀▀▀▀▀▀█
+    //                                                           █
+    // If we draw the free-body diagram of the span, we would see these forces:
+    // V_left = 6EIΔ/L², upward
+    // M_left = 12EIΔ/L³, clockwise
+    // V_right = 6EIΔ/L², downward
+    // M_right = 12EIΔ/L³, clockwise
+    // The Span Stiffness Matrix is populated, for each span, with just those stiffnesses.
+
+    const ssm = [];
+    ssm.push([0, 0, 0, 0, 0]);
+    for (let i = 1; i <= numSpans; i++) {
+      const subMatrix = [
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0]
+      ];
+      subMatrix[1][1] = EI * 12 / spans[i].length ** 3;
+      subMatrix[1][2] = EI * 6 / spans[i].length ** 2;
+      subMatrix[1][3] = -EI * 12 / spans[i].length ** 3;
+      subMatrix[1][4] = EI * 6 / spans[i].length ** 2;
+      subMatrix[2][1] = EI * 6 / spans[i].length ** 2;
+      subMatrix[2][2] = EI * 4 / spans[i].length;
+      subMatrix[2][3] = -EI * 6 / spans[i].length ** 2;
+      subMatrix[2][4] = EI * 2 / spans[i].length;
+      subMatrix[3][1] = -EI * 12 / spans[i].length ** 3;
+      subMatrix[3][2] = -EI * 6 / spans[i].length ** 2;
+      subMatrix[3][3] = EI * 12 / spans[i].length ** 3;
+      subMatrix[3][4] = -EI * 6 / spans[i].length ** 2;
+      subMatrix[4][1] = EI * 6 / spans[i].length ** 2;
+      subMatrix[4][2] = EI * 2 / spans[i].length;
+      subMatrix[4][3] = -EI * 6 / spans[i].length ** 2;
+      subMatrix[4][4] = EI * 4 / spans[i].length;
+      ssm.push(subMatrix);
+    }
+
+    //Find dtm, the Displacement Transformation Matrix
+    const dtm = new Array(numEndActions + 1).fill(0).map(e => {
+      return new Array(numDegreesOfFreedom + 1).fill(0)
+    });
+    let j = 0;
+    for (let i = 1; i <= numNodes; i++) {
+      if (i === 1) {
+        if (nodes[i].fixity === "continuous" || nodes[i].fixity === "spring") {
+          dtm[1][1] = 1;
+          dtm[2][1] = 1;
+          dtm[3][2] = 1;
+          j = 2;
+        } else if (nodes[i].fixity === "fixed") ; else if (nodes[i].fixity === "pinned") {
+          dtm[3][1] = 1;
+          j = 1;
+        }
+      } else if (i === numNodes) {
+        if (nodes[i].fixity === "continuous" || nodes[i].fixity === "spring") {
+          j = j + 1;
+          dtm[5 * numSpans - 1][j] = 1;
+          j = j + 1;
+          dtm[5 * numSpans][j] = 1;
+          dtm[5 * numSpans + 1][j - 1] = 1;
+        } else if (nodes[i].fixity === "fixed") ; else if (nodes[i].fixity === "pinned") {
+          j = j + 1;
+          dtm[5 * numSpans][j] = 1;
+        }
+      } else {
+        if (nodes[i].fixity === "continuous" || nodes[i].fixity === "spring") {
+          j = j + 1;
+          dtm[5 * (i - 1) - 1][j] = 1;
+          dtm[5 * (i - 1) + 1][j] = 1;
+          dtm[5 * (i - 1) + 2][j] = 1;
+          j = j + 1;
+          dtm[5 * (i - 1)][j] = 1;
+          dtm[5 * (i - 1) + 3][j] = 1;
+        } else if (nodes[i].fixity === "hinge") {
+          j = j + 1;
+          dtm[5 * (i - 1) - 1][j] = 1;
+          dtm[5 * (i - 1) + 1][j] = 1;
+          dtm[5 * (i - 1) + 2][j] = 1;
+          j = j + 1;
+          dtm[5 * (i - 1)][j] = 1;
+          j = j + 1;
+          dtm[5 * (i - 1) + 3][j] = 1;
+        } else if (nodes[i].fixity === "proppedHinge") {
+          j = j + 1;
+          dtm[5 * (i - 1)][j] = 1;
+          j = j + 1;
+          dtm[5 * (i - 1) + 3][j] = 1;
+        } else if (nodes[i].fixity === "fixed") ; else if (nodes[i].fixity === "pinned") {
+          j = j + 1;
+          dtm[5 * (i - 1)][j] = 1;
+          dtm[5 * (i - 1) + 3][j] = 1;
+        }
+      }
+    }
+
+    //Now do the first  matrix operations
+    const lsmDtm = createLsmDtm(ssm, dtm, nodes, numEndActions, numDegreesOfFreedom);
+    // Create the Stiffness Matrix.
+    const [sm, bandWidth] = createSM(dtm, lsmDtm, numDegreesOfFreedom);
+
+    let diag = [];
+    let ltm = [];
+    if (numDegreesOfFreedom > 1) {
+      [diag, ltm] = luDecomposition(sm, bandWidth);
+    }
+
+    //Find the number of load patterns
+    beam.containsLive = beam.gotType[LIVE] || beam.gotType[ROOFLIVE] || beam.gotType[SNOW];
+    const numPatterns = !beam.containsLive
+      ? 1
+      : !beam.doLiveLoadPatterns
+      ? 1
+      : numSpans > 7
+      ? 2
+      : beam.patterns
+      ? 2 ** (numSpans - 1)
+      : 2;
+    beam.numPatterns = numPatterns;
+
+    // Initialize some variables
+    const feam = new Array(numEndActions + 1).fill(0);       // Fixed End Action Matrix
+    const nfm = new Array(numDegreesOfFreedom + 1).fill(0);  // Nodal Force Matrix
+    let mam;  // Member Action Matrix
+    let dm;   // Displacement Matrix
+    let mamD = new Array(numEndActions).fill(0);       // mam for Dead load
+    let dmD = new Array(numDegreesOfFreedom).fill(0);  // Displacement Matrix for Dead Load
+    let mamL; // Live
+    let dmL;
+    let mamLr; // Roof Live
+    let dmLr;
+    let mamS; // Snow
+    let dmS;
+    let mamF = new Array(numEndActions).fill(0); // Fluid
+    let dmF = new Array(numDegreesOfFreedom).fill(0);
+    let mamH = new Array(numEndActions).fill(0); // HORIZ
+    let dmH = new Array(numDegreesOfFreedom).fill(0);
+    let mamR = new Array(numEndActions).fill(0); // RAIN
+    let dmR = new Array(numDegreesOfFreedom).fill(0);
+    let mamW = new Array(numEndActions).fill(0); // WIND
+    let dmW = new Array(numDegreesOfFreedom).fill(0);
+    let mamE = new Array(numEndActions).fill(0); // EQ
+    let dmE = new Array(numDegreesOfFreedom).fill(0);
+    if (numPatterns > 1 && beam.containsLive) {
+      mamL = new Array(numEndActions + 1).fill(0);
+      mamL = mamL.map(e => new Array(numDegreesOfFreedom + 1).fill(0));
+      dmL = new Array(numDegreesOfFreedom + 1).fill(0);
+      dmL = dmL.map(e => new Array(numSpans + 1).fill(0));
+      mamLr = new Array(numEndActions + 1).fill(0);
+      mamLr = mamLr.map(e => new Array(numDegreesOfFreedom + 1).fill(0));
+      dmLr = new Array(numDegreesOfFreedom + 1).fill(0);
+      dmLr = dmLr.map(e => new Array(numSpans + 1).fill(0));
+      mamS = new Array(numEndActions + 1).fill(0);
+      mamS = mamS.map(e => new Array(numDegreesOfFreedom + 1).fill(0));
+      dmS = new Array(numDegreesOfFreedom + 1).fill(0);
+      dmS = dmS.map(e => new Array(numSpans + 1).fill(0));
+    } else {
+      mamL = new Array(numEndActions).fill(0);
+      dmL = new Array(numDegreesOfFreedom).fill(0);
+      mamLr = new Array(numEndActions).fill(0);
+      dmLr = new Array(numDegreesOfFreedom).fill(0);
+      mamS = new Array(numEndActions).fill(0);
+      dmS = new Array(numDegreesOfFreedom).fill(0);
+    }
+
+    //Find a Member end Action Matrix, mam for each type of load, Service, D, L, S, W, E, etc
+    //For the live loads, find a different mam due to loads on each individual span.
+    for (let loadType = 0; loadType <= EQ; loadType++) {
+      if (loadType === 0 || gotType[loadType]) {
+        let lastK = 0;
+        let doPatterns = false; // patterned live loads
+        if (loadType === 0) {
+          doPatterns = false;
+          lastK = 1;
+        } else if (isLiveish(loadType) && numPatterns > 1) {
+          doPatterns = true;
+          // To do load patterns, we have to get a Member Action Matrix, mam, for each span.
+          lastK = numSpans;
+        } else {
+          doPatterns = false;
+          lastK = 1;
+        }
+
+        for (let k = 1; k <= lastK; k++) {
+          for (let i = 1;  i <= numSpans; i++) {
+            const L = spans[i].length;
+            const iSpring = 5 * i - 4;
+            const i1 = 5 * i - 3;
+            const i2 = 5 * i - 2;
+            const i3 = 5 * i - 1;
+            const i4 = 5 * i;
+
+            // Find the fixed end actions
+            feam[iSpring] = 0;
+            feam[i1] = 0; //The left end reaction if this segment were a fixed/fixed beam.
+            feam[i2] = 0; //The left fixed end moment
+            feam[i3] = 0; //The right end reaction
+            feam[i4] = 0; //The right fixed end moment
+            let applyLoadsFromThisSpan = false;
+            if (!doPatterns) {
+              // We are not doing live load patterns.
+              // So make one pass thru the beam and get a MAM that is the result of all loads.
+              applyLoadsFromThisSpan = true;
+            } else {
+              // We are doing live load patterns.
+              // k = number of spans.
+              // Make k passes thru the beam.
+              // In the kth pass, we calclate a MAM for the entire beam that results from
+              // live loads on just the kth span.
+              // The other spans have FEAM = [0, 0, etc] as their contribution to this MAM.
+              // Having k MAMs will enable us later to superimpose forces for each pattern.
+              applyLoadsFromThisSpan = i === k;
+            }
+
+            if (applyLoadsFromThisSpan) {
+              for (let iSeg = 0; iSeg < spans[i].segments.length; iSeg++) {
+                const seg = spans[i].segments[iSeg];
+                // In the next few lines,
+                // a is the distance from the beginning of the span to the load point.
+                // b is the length of the load.
+                // c is the distance from the end of the load to the right edge of the span.
+                // e is the distance from the left edge of the load to the right end of the span.
+                // d is the distance from the right edge of the load to the left edge of the span.
+                let w = 0;
+                let s = 0;
+                const a = seg.xOfLeftEnd - nodes[i].x;
+                let b = seg.length;
+                let c = L - a - b;
+                let d = a + b;
+                const e = b + c;
+                let gotOppSigns = false;
+                let a2 = 0;
+                let b2 = 0;
+                let c2 = 0;
+                let d2 = 0;
+                let e2 = 0;
+
+                if (Math.abs(seg.w1[loadType]) < 0.000000001) { seg.w1[loadType] = 0; }
+                if (Math.abs(seg.w2[loadType]) < 0.000000001) { seg.w2[loadType] = 0; }
+
+                if (seg.w1[loadType] !== 0 && seg.w2[loadType] !== 0 &&
+                        Math.sign(seg.w1[loadType]) !== Math.sign(seg.w2[loadType])) {
+                  gotOppSigns = true;
+                  w = 0;
+                  s = (seg.w2[loadType] - seg.w1[loadType]) / b;   //slope of line load
+                  a2 = a - seg.w1[loadType] / s;
+                  b2 = d - a2;
+                  c2 = c;
+                  d2 = d;
+                  e2 = d2 - b2;
+                  b = a2 - a;
+                  d = a + b;
+                  c = L - d;
+
+                } else {
+                  gotOppSigns = false;
+                  w = Math.abs(seg.w1[loadType]) < Math.abs(seg.w2[loadType])
+                    ? seg.w1[loadType]
+                    : seg.w2[loadType];
+                }
+
+                if (a === 0) {
+                  feam[iSpring] = seg.P[loadType];
+                } else {
+                  //FEA for point loads
+                  feam[i2] = feam[i2] + seg.P[loadType] * a * e ** 2 / L ** 2;
+                  feam[i4] = feam[i4] - seg.P[loadType] * a ** 2 * e / L ** 2;
+                  feam[i2] = feam[i2] - seg.M[loadType] * (-1 + 4 * a / L - 3 * a ** 2 / L ** 2);
+                  feam[i4] = feam[i4] - seg.M[loadType] * a / L * (2 - 3 * a / L);
+                  feam[i1] = feam[i1] + seg.P[loadType] * e ** 2 / L ** 3 * (3 * a + e);
+                  feam[i3] = feam[i3] + seg.P[loadType] * a ** 2 / L ** 3 * (a + 3 * e);
+                  feam[i1] = feam[i1] - 6 * seg.M[loadType] * a / L ** 2 * (1 - a / L);
+                  feam[i3] = feam[i3] + 6 * seg.M[loadType] * a / L ** 2 * (1 - a / L);
+                }
+
+                //FEA for uniform loads
+                if (w !== 0) {
+                  const mA = (w * b / (12 * L ** 2 * b)) * (e ** 3 * (4 * L - 3 * e)
+                      - c ** 3 * (4 * L - 3 * c));
+                  feam[i2] = feam[i2] + mA;
+                  const mB = (w * b / (12 * L ** 2 * b)) * (d ** 3 * (4 * L - 3 * d)
+                      - a ** 3 * (4 * L - 3 * a));
+                  feam[i4] = feam[i4] - mB;
+                  feam[i1] = feam[i1] + (w * b / (2 * L)) * (2 * c + b) + (mA - mB) / L;
+                  feam[i3] = feam[i3] + (w * b / (2 * L)) * (2 * a + b) + (mB - mA) / L;
+                }
+
+                //FEA for triangular loads
+                if (Math.abs(seg.w1[loadType]) > Math.abs(seg.w2[loadType]) || gotOppSigns) {
+                  const wL = seg.w1[loadType] - w;
+                  // const wR = 0
+                  const wT = wL;
+                  const centerOfTriangle = a + b / 3;
+                  const wF = wT * d / b;
+                  const mA = (wF * L ** 2 / 60) * (d / L) ** 2 * (10 - 10 * d / L
+                      + 3 * d ** 2 / L ** 2)
+                      - ((wF - wT) * L ** 2 / 60) * (a / L) ** 2
+                        * (10 - 10 * a / L + 3 * a ** 2 / L ** 2)
+                      - (wT * L ** 2 / 12) * (a / L) ** 2 * (6 - 8 * a / L + 3 * a ** 2 / L ** 2);
+                  feam[i2] = feam[i2] + mA;
+                  const mB = (wF * L ** 2 / 60) * (d / L) ** 3 * (5 - 3 * d / L)
+                      - ((wF - wT) * L ** 2 / 60) * (a / L) ** 3 * (5 - 3 * a / L)
+                      - (wT * L ** 2 / 12) * (a / L) ** 3 * (4 - 3 * a / L);
+                  feam[i4] = feam[i4] - mB;
+                  feam[i1] = feam[i1] + 0.5 * (wT * b) * (L - centerOfTriangle) / L + (mA - mB) / L;
+                  feam[i3] = feam[i3] + 0.5 * (wT * b) * centerOfTriangle / L + (mB - mA) / L;
+
+                } else if (Math.abs(seg.w2[loadType]) > Math.abs(seg.w1[loadType])) {
+                  // const wL = 0
+                  const wR = seg.w2[loadType] - w;
+                  const wT = wR;
+                  const centerOfTriangle = a + 2 * b / 3;
+                  const wF = wT * e / b;
+                  const mA = (wF * L ** 2 / 60) * (e / L) ** 3 * (5 - 3 * e / L)
+                      - ((wF - wT) * L ** 2 / 60) * (c / L) ** 3 * (5 - 3 * c / L)
+                      - (wT * L ** 2 / 12) * (c / L) ** 3 * (4 - 3 * c / L);
+                  feam[i2] = feam[i2] + mA;
+                  const mB = (wF * L ** 2 / 60) * (e / L) ** 2
+                        * (10 - 10 * e / L + 3 * e ** 2 / L ** 2)
+                      - ((wF - wT) * L ** 2 / 60) * (c / L) ** 2
+                        * (10 - 10 * c / L + 3 * c ** 2 / L ** 2)
+                      - (wT * L ** 2 / 12) * (c / L) ** 2 * (6 - 8 * c / L + 3 * c ** 2 / L ** 2);
+                  feam[i4] = feam[i4] - mB;
+                  feam[i1] = feam[i1] + 0.5 * (wT * b) * (L - centerOfTriangle) / L + (mA - mB) / L;
+                  feam[i3] = feam[i3] + 0.5 * (wT * b) * centerOfTriangle / L + (mB - mA) / L;
+                }
+                if (gotOppSigns) {
+                  //Do the right-hand triangle load
+                  // const wL = 0
+                  // const wR = seg.w2[loadType]
+                  const wT = seg.w2[loadType];
+                  const centerOfTriangle = a2 + 2 * b2 / 3;
+                  const wF = wT * e2 / b2;
+                  const mA = (wF * L ** 2 / 60) * (e2 / L) ** 3 * (5 - 3 * e2 / L)
+                      - ((wF - wT) * L ** 2 / 60) * (c2 / L) ** 3 * (5 - 3 * c2 / L)
+                      - (wT * L ** 2 / 12) * (c2 / L) ** 3 * (4 - 3 * c2 / L);
+                  feam[i2] = feam[i2] + mA;
+                  const mB = (wF * L ** 2 / 60) * (e2 / L) ** 2
+                      * (10 - 10 * e2 / L + 3 * e2 ** 2 / L ** 2)
+                      - ((wF - wT) * L ** 2 / 60) * (c2 / L) ** 2
+                      * (10 - 10 * c2 / L + 3 * c2 ** 2 / L ** 2)
+                      - (wT * L ** 2 / 12) * (c2 / L) ** 2 * (6 - 8 * c2 / L + 3 * c2 ** 2 / L ** 2);
+                  feam[i4] = feam[i4] - mB;
+                  feam[i1] = feam[i1] + 0.5 * (wT * b2) * (L - centerOfTriangle) / L + (mA - mB) / L;
+                  feam[i3] = feam[i3] + 0.5 * (wT * b2) * centerOfTriangle / L + (mB - mA) / L;
+                }
+              }
+            }
+          }
+
+          //Find the Nodal Force Matrix, NFM
+          let j = 0;
+          for (let i = 1; i <= numNodes; i++) {
+            if (i === 1) {
+              if (nodes[i].fixity === "continuous" || nodes[i].fixity === "spring") {
+                nfm[1] = -feam[1] - feam[2];
+                nfm[2] = -feam[3];
+                if (isLiveish(loadType) && numPatterns > 1) {
+                  if (k === 0) {
+                    nfm[1] = nfm[1] - nodes[1].P[loadType];
+                    nfm[2] = nfm[2] - nodes[1].M[loadType];
+                  }
+                } else {
+                  nfm[1] = nfm[1] - nodes[1].P[loadType];
+                  nfm[2] = nfm[2] - nodes[1].M[loadType];
+                }
+
+                j = 2;
+              } else if (nodes[i].fixity === "fixed") ; else if (nodes[i].fixity === "pinned") {
+                j += 1;
+                nfm[1] = -feam[3];
+                if (isLiveish(loadType) && numPatterns > 1) {
+                  if (k === 1) {
+                    nfm[j] = nfm[j] - nodes[1].M[loadType];
+                  }
+                } else {
+                  nfm[j] = nfm[j] - nodes[1].M[loadType];
+                }
+              }
+            } else if (i === numNodes) {
+              if (nodes[i].fixity === "continuous" || nodes[i].fixity === "spring") {
+                j += 1;
+                nfm[j] = -feam[5 * numSpans - 1] - feam[5 * numSpans + 1];
+                j += 1;
+                nfm[j] = -feam[5 * numSpans];
+                if (isLiveish(loadType) && numPatterns > 1) {
+                  if (k === numSpans) {
+                    nfm[j - 1] = nfm[j - 1] - nodes[numNodes].P[loadType];
+                    nfm[j] = nfm[j] - nodes[numNodes].M[loadType];
+                  }
+                } else {
+                  nfm[j - 1] = nfm[j - 1] - nodes[numNodes].P[loadType];
+                  nfm[j] = nfm[j] - nodes[numNodes].M[loadType];
+                }
+              } else if (nodes[i].fixity === "fixed") ; else if (nodes[i].fixity === "pinned") {
+                j += 1;
+                nfm[j] = -feam[5 * numSpans];
+                if (isLiveish(loadType) && numPatterns > 1) {
+                  if (k === numSpans) {
+                    nfm[j] = nfm[j] - nodes[numNodes].M[loadType];
+                  }
+                } else {
+                  nfm[j] = nfm[j] - nodes[numNodes].M[loadType];
+                }
+              }
+            } else {
+              if (nodes[i].fixity === "continuous" || nodes[i].fixity === "spring") {
+                j += 1;
+                nfm[j] = -feam[5 * (i - 1) - 1] - feam[5 * (i - 1) + 1] - feam[5 * (i - 1) + 2];
+                j += 1;
+                nfm[j] = -feam[5 * (i - 1)] - feam[5 * (i - 1) + 3];
+                if ((loadType === 3 || loadType === 5 || loadType === 6) && numPatterns > 1) {
+                  if (k === i) {
+                    nfm[j - 1] = nfm[j - 1] - nodes[i].P[loadType];
+                    nfm[j] = nfm[j] - nodes[i].M[loadType];
+                  }
+                } else {
+                  nfm[j - 1] = nfm[j - 1] - nodes[i].P[loadType];
+                  nfm[j] = nfm[j] - nodes[i].M[loadType];
+                }
+              } else if (nodes[i].fixity === "hinge") {
+                j += 1;
+                nfm[j] = -feam[5 * (i - 1) - 1] - feam[5 * (i - 1) + 1] - feam[5 * (i - 1) + 2];
+                j += 1;
+                nfm[j] = -feam[5 * (i - 1)];
+                if ((loadType === 3 || loadType === 5 || loadType === 6) && numPatterns > 1) {
+                  if (k === i) {
+                    nfm[j - 1] = nfm[j - 1] - nodes[i].P[loadType];
+                    nfm[j] = nfm[j] - nodes[i].M[loadType];
+                  }
+                } else {
+                  nfm[j - 1] = nfm[j - 1] - nodes[i].P[loadType];
+                  nfm[j] = nfm[j] - nodes[i].M[loadType];
+                }
+
+                j += 1;
+                nfm[j] = -feam[5 * (i - 1) + 3];
+              } else if (nodes[i].fixity === "proppedHinge") {
+                j += 1;
+                nfm[j] = -feam[5 * (i - 1)];
+                j += 1;
+                nfm[j] = -feam[5 * (i - 1) + 3];
+              } else if (nodes[i].fixity === "fixed") ; else if (nodes[i].fixity === "pinned") {
+                j += 1;
+                nfm[j] = -feam[5 * (i - 1)] - feam[5 * (i - 1) + 3];
+                if ((loadType === 3 || loadType === 5 || loadType === 6) && numPatterns > 1) {
+                  if (k === i) {
+                    nfm[j] = nfm[j] - nodes[i].M[loadType];
+                  }
+                } else {
+                  nfm[j] = nfm[j] - nodes[i].M[loadType];
+                }
+              }
+            }
+          }
+
+          //Now do the rest of the matrix operations for the current load type
+          if (numDegreesOfFreedom === 0) {
+            dm = [0];
+          } else if (numDegreesOfFreedom === 1) {
+            dm = [0, nfm[1] / sm[1][1]];
+          } else {
+            dm = solveViaLDLt(diag, ltm, nfm, bandWidth);
+          }
+
+          // Get the Member Action Matrix, MAM.
+          // Multiply lsmDtm times dm, then add the resulting column vector to the FEAM
+          mam = lsmDtm.map(row => dotProduct$1(row, dm)).map((e, i) => e + feam[i]);
+
+          //Set elements of mam = 0 where fixity so dictates
+          for (let i = 1; i <= numEndActions; i++) {
+            if (Math.abs(mam[i]) < 0.00000000000001) { mam[i] = 0; }
+          }
+
+          switch (loadType) {
+            case DEAD:
+              mamD = clone(mam);
+              if (EI !== 1) { dmD = clone(dm); }
+              break
+            case FLUID:
+              mamF = clone(mam);
+              if (EI !== 1) { dmF = clone(dm); }
+              break
+            case LIVE:
+              if (typeof mamL[0] === "number") {
+                mamL = clone(mam);
+                if (EI !== 1) { dmL = clone(dm); }
+              } else {
+                for (let j = 1; j < 5 * numSpans + 1; j++) {
+                  mamL[j][k - 1] = mam[j]; //mam for live loads on span k
+                }
+                if (EI !== 1) {
+                  for (let j = 1; j <= numDegreesOfFreedom; j++) {
+                    dmL[j][k] = dm[j];
+                  }
+                }
+              }
+              break
+            case HORIZ:
+              mamH = clone(mam);
+              if (EI !== 1) { dmH = clone(dm); }
+              break
+            case ROOFLIVE:
+              if (typeof mamLr[0] === "number") {
+                mamLr = clone(mam);
+                if (EI !== 1) { dmLr = clone(dm); }
+              } else {
+                for (let j = 1; j < 5 * numSpans + 1; j++) {
+                  mamLr[j][k - 1] = mam[j];
+                }
+                if (EI !== 1) {
+                  for (let j = 0; j < numDegreesOfFreedom; j++) {
+                    dmLr[j][k] = dm[j];
+                  }
+                }
+              }
+              break
+            case SNOW:
+              if (typeof mamS[0] === "number") {
+                mamS = clone(mam);
+                dmS = clone(dm);
+              } else {
+                for (let j = 1; j < 5 * numSpans + 1; j++) {
+                  mamS[j][k - 1] = mam[j];
+                }
+                if (EI !== 1) {
+                  for (let j = 0; j < numDegreesOfFreedom; j++) {
+                    dmS[j][k] = dm[j];
+                  }
+                }
+              }
+              break
+            case RAIN:
+              mamR = clone(mam);
+              if (EI !== 1) { dmR = clone(dm); }
+              break
+            case WIND:
+              mamW = clone(mam);
+              if (EI !== 1) { dmW = clone(dm); }
+              break
+            case EQ:
+              mamE = clone(mam);
+              if (EI !== 1) { dmE = clone(dm); }
+              break
+          }
+
+          // Find the reactions
+          if (numPatterns === 1 || !(beam.containsLive && isLiveish(loadType))) {
+            if (nodes[1].fixity === "fixed") {
+              nodes[1].Mr[loadType] = mam[3] + nodes[1].M[loadType];
+            }
+            if (nodes[1].fixity === "spring") {
+              nodes[1].Pr[loadType] = mam[1];
+            } else if (nodes[1].fixity !== "continuous") {
+              nodes[1].Pr[loadType] = -mam[2] - nodes[1].P[loadType];
+            }
+
+            for (let j = 2; j <= numSpans; j++) {
+              if (nodes[j].fixity === "fixed") {
+                nodes[j].Mr[loadType] = mam[5 * (j - 1)] + mam[5 * (j - 1) + 3] + nodes[j].M[loadType];
+              }
+              if (nodes[j].fixity === "spring") {
+                nodes[j].Pr[loadType] = mam[5 * (j - 1) + 1];
+              } else if (nodes[j].fixity !== "continuous") {
+                nodes[j].Pr[loadType] = -mam[5 * (j - 1) - 1] - mam[5 * (j - 1) + 2]
+                    - nodes[j].P[loadType];
+              }
+            }
+
+            if (nodes[numNodes].fixity === "fixed") {
+              nodes[numNodes].Mr[loadType] = mam[5 * numSpans] + nodes[numNodes].M[loadType];
+            }
+            if (nodes[numNodes].fixity === "spring") {
+              nodes[numNodes].Pr[loadType] = mam[5 * numSpans + 1];
+            } else if (nodes[numNodes].fixity !== "continuous") {
+              nodes[numNodes].Pr[loadType] = -mam[5 * numSpans - 1] - nodes[numNodes].P[loadType];
+            }
+          } else {
+            let mTest = 0;
+            if (nodes[1].fixity === "fixed") {
+              mTest = mam[3] + nodes[1].M[loadType];
+              if (mTest > 0) { nodes[1].Mr[loadType] = nodes[1].Mr[loadType] + mTest; }
+              if (mTest < 0) { nodes[1].MrMin[loadType] = nodes[1].MrMin[loadType] + mTest; }
+            }
+            let pTest = 0;
+            if (nodes[1].fixity === "spring") {
+              pTest = mam[1];
+            } else if (nodes[1].fixity !== "continuous") {
+              pTest = -mam[2] - nodes[1].P[loadType];
+            }
+            if (pTest > 0) { nodes[1].Pr[loadType] = nodes[1].Pr[loadType] + pTest; }
+            if (pTest < 0) { nodes[1].PrMin[loadType] = nodes[1].PrMin[loadType] + pTest; }
+
+            for (let j = 1; j < numSpans; j++) {
+              if (nodes[j].fixity === "fixed") {
+                mTest = mam[5 * (j - 1)] + mam[5 * (j - 1) + 3] + nodes[j].M[loadType];
+                if (mTest > 0) { nodes[j].Mr[loadType] = nodes[j].Mr[loadType] + mTest; }
+                if (mTest < 0) { nodes[j].MrMin[loadType] = nodes[j].MrMin[loadType] + mTest; }
+              }
+              pTest = 0;
+              if (nodes[j].fixity === "spring") {
+                nodes[j].Pr[loadType] = nodes[j].Pr[loadType] + mam[5 * (j - 1) + 1];
+              } else if (nodes[j].fixity !== "continuous") {
+                pTest = -mam[5 * (j - 1) - 1] - mam[5 * (j - 1) + 2] - nodes[j].P[loadType];
+              }
+              if (pTest > 0) { nodes[j].Pr[loadType] = nodes[j].Pr[loadType] + pTest; }
+              if (pTest < 0) { nodes[j].PrMin[loadType] = nodes[j].PrMin[loadType] + pTest; }
+            }
+
+            if (nodes[numNodes].fixity === "fixed") {
+              mTest = mam[5 * numSpans] + nodes[numSpans].M[loadType];
+              if (mTest > 0) {
+                nodes[numNodes].Mr[loadType] = nodes[numNodes].Mr[loadType] + mTest;
+              }
+              if (mTest < 0) {
+                nodes[numNodes].MrMin[loadType] = nodes[numNodes].MrMin[loadType] + mTest;
+              }
+            }
+
+            pTest = 0;
+            if (nodes[numNodes].fixity === "spring") {
+              nodes[numNodes].Pr[loadType] = nodes[numNodes].Pr[loadType] + mam[5 * numSpans + 1];
+            } else if (nodes[numNodes].fixity !== "continuous") {
+              pTest = -mam[5 * numSpans - 1] - nodes[j].P[loadType];
+            }
+            if (pTest > 0) {
+              nodes[numNodes].Pr[loadType] = nodes[numNodes].Pr[loadType] + pTest;
+            }
+            if (pTest < 0) {
+              nodes[numNodes].PrMin[loadType] = nodes[numNodes].PrMin[loadType] + pTest;
+            }
+          } //finished finding the reactions
+
+        }
+      }
+    }
+    return [
+      [mamD, mamL, mamLr, mamS, mamF, mamH, mamR, mamW, mamE],
+      [dmD, dmL, dmLr, dmS, dmF, dmH, dmR, dmW, dmE]
+    ]
+  }
+
+  const createLsmDtm = (ssm, dtm, nodes, numEndActions, numDegreesOfFreedom) => {
+  // Create LSM × DTM
+
+    let lsmDtm = new Array(numEndActions + 1).fill(0);
+    lsmDtm = lsmDtm.map(e => new Array(numDegreesOfFreedom + 1).fill(0));
+
+    for (let i = 1; i <= numEndActions; i++) {
+      const iSpan = Math.trunc((i - 1) / 5) + 1;
+      const g = i - 1 - 5 * (iSpan - 1);
+
+      for (let j = 1; j <= numDegreesOfFreedom; j++) {
+        if (g === 0) {
+          lsmDtm[i][j] = nodes[iSpan].k * dtm[i][j];
+        } else {
+          const kStart = 5 * iSpan - 3;
+          const kEnd = 5 * iSpan;
+          let h = 0;
+          for (let k = kStart; k <= kEnd; k++) {
+            h += 1;
+            lsmDtm[i][j] = lsmDtm[i][j] + ssm[iSpan][g][h] * dtm[k][j];
+          }
+        }
+      }
+    }
+    return lsmDtm
+  };
+
+  const createSM = (dtm, lsmDtm, numDegreesOfFreedom) => {
+    // Create the Stiffness Matrix, SM.
+    // SM = DTM**T × LsmDtm
+    let sm = Array(numDegreesOfFreedom + 1).fill(0);
+    sm = sm.map(e => Array(numDegreesOfFreedom + 1).fill(0));
+    const h = lsmDtm.length - 1;
+    let bandWidth = 1;
+    for (let i = 1; i < dtm[0].length; i++) {
+      for (let j = 1; j <= i; j++) {                       // Only the lower half of SM.
+        for (let k = 1; k <= h; k++) {
+          sm[i][j] = sm[i][j] + dtm[k][i] * lsmDtm[k][j];   // DTM**T, not DTM.
+        }
+        if (sm[i][j] !== 0 && i - j > bandWidth) { bandWidth = i - j;}  // lower band width
+      }
+    }
+    return [sm, bandWidth]
+  };
+
+  const luDecomposition = (sm, bandWidth) => {
+    // Perform the LU Decomposition of the stiffness matrix, SM.
+    // This is in preparation for the LDL**T matrix solution to come later.
+
+    const diag = new Array(sm.length).fill(0);
+    // Lower Triangular matrix, ltm
+    let ltm = new Array(sm.length).fill(0);
+    ltm = ltm.map(e => new Array(sm.length - 1).fill(0));
+
+    const n = sm.length - 1;    // number of equations
+
+    for (let j = 1; j <= n; j++) {
+      let kStar = Math.max(j - bandWidth, 1);
+      diag[j] = sm[j][j];
+      for (let k = kStar; k <= j - 1; k++) {
+        diag[j] = diag[j] - diag[k] * ltm[j][k] * ltm[j][k];
+      }
+
+      const iMax = Math.min(j + bandWidth, n);
+      for (let i = j + 1; i <= iMax; i++) {
+        kStar =  Math.max(i - bandWidth, 1);
+        let sum = 0;
+        for (let k = kStar; k <= j - 1; k++) {
+          sum = sum + diag[k] * ltm[j][k] * ltm[i][k];
+        }
+        ltm[i][j] = (sm[i][j] - sum) / diag[j];
+      }
+    }
+    return [diag, ltm]
+  };
+
+  const solveViaLDLt = (diag, ltm, b, bandWidth) => {
+    // Solve for dm() in a system of equations expressed by matrices: SM()× dm() = NFM()
+
+    // This sub// s method is a banded version of the LDL**T solver.
+    // LDL**T takes advantage of the fact that SM is a symmetric, positive-definite matrix.
+    // The algorithm will overwrite b(), which starts out as NFM and ends as dm.
+    // We already have the diag & ltm matrices, so we can go directly to the LU solution.
+
+    const n = b.length - 1;       // number of equations
+
+    // Forward substitution
+    for (let i = 2; i <= n; i++) {
+      const kStar = i - bandWidth < 1 ? 1 : i - bandWidth;
+      for (let k = kStar; k <= i - 1; k++) {
+        b[i] = b[i] - ltm[i][k] * b[k];
+      }
+    }
+
+    // Diagonal scaling and backward substitution
+    b[n] = b[n] / diag[n];
+    for (let i = n - 1; i >= 1; i--) {
+      b[i] = b[i] / diag[i];
+      const kStar = Math.min(n, i + bandWidth);
+      for (let k = i + 1; k <= kStar; k++) {
+        b[i] = b[i] - ltm[k][i] * b[k];
+      }
+    }
+
+    return b
+  };
+
+  function getLoadPatterns(beam, numSpans) {
+    if (!beam.containsLive || !beam.doLiveLoadPatterns) {
+      // Just one pattern. It includes each span.
+      const pattern = [1];
+      for (let i = 2; i <= numSpans; i++) {
+        pattern.push(i);
+      }
+      return [pattern]
+    } else if (beam.numPatterns === 2 || numSpans > 7) {
+      // Do 2 patterns.  One with all live load on, and one with all live load off.
+      const pattern = [1];
+      for (let i = 2; i <= numSpans; i++) {
+        pattern.push(i);
+      }
+      return [pattern, []]
+    } else {
+      switch (numSpans) {
+        case 1:
+          return [[1], []]
+        case 2:
+          return [[1, 2], [], [1], [2]]
+        case 3:
+          return [[1, 2, 3], [], [1], [2], [3], [1, 2], [1, 3], [2, 3]]
+        case 4:
+          // eslint-disable-next-line max-len
+          return [[1, 2, 3, 4], [], [1], [2], [3], [4], [1, 2], [1, 3], [1, 4], [2, 3], [2, 4], [3, 4], [1, 2, 3], [1, 2, 4], [1, 3, 4], [2, 3, 4]]
+        case 5:
+          // eslint-disable-next-line max-len
+          return [[1, 2, 3, 4, 5], [], [1], [2], [3], [4], [5], [1, 2], [1, 3], [1, 4], [1, 5], [2, 3], [2, 4], [2, 5], [3, 4], [3, 5], [4, 5], [1, 2, 3], [1, 2, 4], [1, 2, 5], [1, 3, 4], [1, 3, 5], [1, 4, 5], [2, 3, 4], [2, 3, 5], [2, 4, 5], [3, 4, 5], [1, 2, 3, 4], [1, 2, 3, 5], [1, 2, 4, 5], [1, 3, 4, 5], [2, 3, 4, 5]]
+        case 6:
+          // eslint-disable-next-line max-len
+          return [[1, 2, 3, 4, 5, 6], [], [1], [2], [3], [4], [5], [6], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [2, 3], [2, 4], [2, 5], [2, 6], [3, 4], [3, 5], [3, 6], [4, 5], [4, 6], [5, 6], [1, 2, 3], [1, 2, 4], [1, 2, 5], [1, 2, 6], [1, 3, 4], [1, 3, 5], [1, 3, 6], [1, 4, 5], [1, 4, 6], [1, 5, 6], [2, 3, 4], [2, 3, 5], [2, 3, 6], [2, 4, 5], [2, 4, 6], [2, 5, 6], [3, 4, 5], [3, 4, 6], [3, 5, 6], [4, 5, 6], [1, 2, 3, 4], [1, 2, 3, 5], [1, 2, 3, 6], [1, 2, 4, 5], [1, 2, 4, 6], [1, 2, 5, 6], [1, 3, 4, 5], [1, 3, 4, 6], [1, 3, 5, 6], [1, 4, 5, 6], [2, 3, 4, 5], [2, 3, 4, 6], [2, 3, 5, 6], [2, 4, 5, 6], [3, 4, 5, 6], [1, 2, 3, 4, 5], [1, 2, 3, 4, 6], [1, 2, 3, 5, 6], [1, 2, 4, 5, 6], [1, 3, 4, 5, 6], [2, 3, 4, 5, 6]]
+        case 7:
+          // eslint-disable-next-line max-len
+          return [[1, 2, 3, 4, 5, 6, 7], [], [1], [2], [3], [4], [5], [6], [7], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [1, 7], [2, 3], [2, 4], [2, 5], [2, 6], [2, 7], [3, 4], [3, 5], [3, 6], [3, 7], [4, 5], [4, 6], [4, 7], [5, 6], [5, 7], [6, 7], [1, 2, 3], [1, 2, 4], [1, 2, 5], [1, 2, 6], [1, 2, 7], [1, 3, 4], [1, 3, 5], [1, 3, 6], [1, 3, 7], [1, 4, 5], [1, 4, 6], [1, 4, 7], [1, 5, 6], [1, 5, 7], [1, 6, 7], [2, 3, 4], [2, 3, 5], [2, 3, 6], [2, 3, 7], [2, 4, 5], [2, 4, 6], [2, 4, 7], [2, 5, 6], [2, 5, 7], [2, 6, 7], [3, 4, 5], [3, 4, 6], [3, 4, 7], [3, 5, 6], [3, 5, 7], [3, 6, 7], [4, 5, 6], [4, 5, 7], [4, 6, 7], [5, 6, 7], [1, 2, 3, 4], [1, 2, 3, 5], [1, 2, 3, 6], [1, 2, 3, 7], [1, 2, 4, 5], [1, 2, 4, 6], [1, 2, 4, 7], [1, 2, 5, 6], [1, 2, 5, 7], [1, 2, 6, 7], [1, 3, 4, 5], [1, 3, 4, 6], [1, 3, 4, 7], [1, 3, 5, 6], [1, 3, 5, 7], [1, 3, 6, 7], [1, 4, 5, 6], [1, 4, 5, 7], [1, 4, 6, 7], [1, 5, 6, 7], [2, 3, 4, 5], [2, 3, 4, 6], [2, 3, 4, 7], [2, 3, 5, 6], [2, 3, 5, 7], [2, 3, 6, 7], [2, 4, 5, 6], [2, 4, 5, 7], [2, 4, 6, 7], [2, 5, 6, 7], [3, 4, 5, 6], [3, 4, 5, 7], [3, 4, 6, 7], [3, 5, 6, 7], [4, 5, 6, 7], [1, 2, 3, 4, 5], [1, 2, 3, 4, 6], [1, 2, 3, 4, 7], [1, 2, 3, 5, 6], [1, 2, 3, 5, 7], [1, 2, 3, 6, 7], [1, 2, 4, 5, 6], [1, 2, 4, 5, 7], [1, 2, 4, 6, 7], [1, 2, 5, 6, 7], [1, 3, 4, 5, 6], [1, 3, 4, 5, 7], [1, 3, 4, 6, 7], [1, 3, 5, 6, 7], [1, 4, 5, 6, 7], [2, 3, 4, 5, 6], [2, 3, 4, 5, 7], [2, 3, 4, 6, 7], [2, 3, 5, 6, 7], [2, 4, 5, 6, 7], [3, 4, 5, 6, 7], [1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 7], [1, 2, 3, 4, 6, 7], [1, 2, 3, 5, 6, 7], [1, 2, 4, 5, 6, 7], [1, 3, 4, 5, 6, 7], [2, 3, 4, 5, 6, 7]]
+          // We cannot get here.
+      }
+    }
+  }
+
+  function populateMAM(loadFactors, combern, loadPattern, beam, nodes, spans, actions) {
+    const [mamD, mamL, mamLr, mamS, mamF, mamH, mamR, mamW, mamE] = actions;
+    let mam = new Array(beam.numEndActions).fill(0);
+    let gotFullSnow = false;
+    const numSpans = spans.length - 1;
+    const numNodes = nodes.length - 1;
+    const numPatterns = beam.numPatterns;
+    const didNode = new Array(numNodes);
+    const didHalfLoad = new Array(numNodes);
+
+    if (loadFactors[DEAD] > 0 && beam.gotType[DEAD]) {
+      //do the dead load
+      const df = loadFactors[DEAD];
+      mam = mam.map((e, i) => mamD[i]);
+      for (let i = 1; i <= numSpans; i++) {
+        nodes[i].Pf = df * nodes[i].P[1];
+        nodes[i].Mf = df * nodes[i].M[1];
+        for (let j = 0; j < spans[i].segments.length; j++) {
+          const seg = spans[i].segments[j];
+          seg.w1f[combern] = df * seg.w1[1];
+          seg.w2f = df * seg.w2[1];
+          seg.Pf = df * seg.P[1];
+          seg.Mf = df * seg.M[1];
+        }
+      }
+    }
+
+    if (loadFactors[FLUID] > 0 && beam.gotType[FLUID]) {
+      //Do the fluid load
+      const ff = loadFactors[FLUID];
+      mam = mam.map((e, i) => e + ff * mamF[i]);
+      for (let i = 1; i <= numSpans; i++) {
+        nodes[i].Pf = nodes[i].Pf + ff * nodes[i].P[2];
+        nodes[i].Mf = nodes[i].Mf + ff * nodes[i].M[2];
+        for (let j = 0; j < spans[i].segments.length; j++) {
+          const seg = spans[i].segments[j];
+          seg.w1f[combern] = seg.w1f[combern] + ff * seg.w1[2];
+          seg.w2f = seg.w2f + ff * seg.w2[2];
+          seg.Pf = seg.Pf + ff * seg.P[2];
+          seg.Mf = seg.Mf + ff * seg.M[2];
+        }
+      }
+    }
+
+    if (loadFactors[LIVE] > 0 && beam.gotType[LIVE]) {
+      //do the live load
+      const liveFactor = loadFactors[LIVE];
+      if (numPatterns === 1) {
+        for (let i = 1; i < mam.length; i++) {
+          mam[i] = mam[i] + liveFactor * mamL[i];
+        }
+        for (let i = 1; i <= numSpans; i++) {
+          nodes[i].Pf = nodes[i].Pf + liveFactor * nodes[i].P[LIVE];
+          nodes[i].Mf = nodes[i].Mf + liveFactor * nodes[i].M[LIVE];
+          for (let j = 0; j < spans[i].segments.length; j++) {
+            const seg = spans[i].segments[j];
+            seg.w1f[combern] = seg.w1f[combern] + liveFactor * seg.w1[LIVE];
+            seg.w2f = seg.w2f + liveFactor * seg.w2[LIVE];
+            seg.Pf = seg.Pf + liveFactor * seg.P[LIVE];
+            seg.Mf = seg.Mf + liveFactor * seg.M[LIVE];
+          }
+        }
+      } else {
+        for (let k = 1; k <= numSpans; k++) {
+          if (loadPattern.includes(k)) {
+            let ii = 0;
+            for (let j = 1; j <= numSpans; j++) {
+              ii = 5 * j - 4;
+              mam[ii] = mam[ii] + liveFactor * mamL[ii][k - 1];
+              mam[ii + 1] = mam[ii + 1] + liveFactor * mamL[ii + 1][k - 1];
+              mam[ii + 2] = mam[ii + 2] + liveFactor * mamL[ii + 2][k - 1];
+              mam[ii + 3] = mam[ii + 3] + liveFactor * mamL[ii + 3][k - 1];
+              mam[ii + 4] = mam[ii + 4] + liveFactor * mamL[ii + 4][k - 1];
+            }
+            mam[ii + 5] = mam[ii + 5] + liveFactor * mamL[ii + 5][k - 1];
+          }
+        }
+
+        //Do node loads.  Include a node load if the span on either side is in the load pattern.
+        didNode.fill(false);
+        for (let i = 1; i <= numSpans; i++) {
+          if (loadPattern.includes(i)) {
+            if (!didNode[i]) {
+              nodes[i].Pf = nodes[i].Pf + liveFactor * nodes[i].P[LIVE];
+              nodes[i].Mf = nodes[i].Mf + liveFactor * nodes[i].M[LIVE];
+              didNode[i] = true;
+            }
+            if (!didNode[i + 1]) {
+              nodes[i + 1].Pf = nodes[i + 1].Pf + liveFactor * nodes[i + 1].P[LIVE];
+              nodes[i + 1].Mf = nodes[i + 1].Mf + liveFactor * nodes[i + 1].M[LIVE];
+              didNode[i + 1] = true;
+            }
+          }
+          for (let j = 0; j < spans[i].segments.length; j++) {
+            const seg = spans[i].segments[j];
+            if (loadPattern.includes(i)) {
+              seg.w1f[combern] = seg.w1f[combern] + liveFactor * seg.w1[LIVE];
+              seg.w2f = seg.w2f + liveFactor * seg.w2[LIVE];
+              seg.Pf = seg.Pf + liveFactor * seg.P[LIVE];
+              seg.Mf = seg.Mf + liveFactor * seg.M[LIVE];
+            }
+          }
+        }
+      }
+    }
+
+    if (loadFactors[HORIZ] > 0 && beam.gotType[HORIZ]) {
+      //Do the lateral earth pressure load
+      const hf = loadFactors[HORIZ];
+      for (let i = 1; i < mam.length; i++) {
+        mam[i] = mam[i] + hf * mamH[i];
+      }
+      for (let i = 1; i <= numSpans; i++) {
+        nodes[i].Pf = nodes[i].Pf + hf * nodes[i].P[HORIZ];
+        nodes[i].Mf = nodes[i].Mf + hf * nodes[i].M[HORIZ];
+        for (let j = 0; j < spans[i].segments.length; j++) {
+          const seg = spans[i].segments[j];
+          seg.w1f[combern] = seg.w1f[combern] + hf * seg.w1[HORIZ];
+          seg.w2f = seg.w2f + hf * seg.w2[HORIZ];
+          seg.Pf = seg.Pf + hf * seg.P[HORIZ];
+          seg.Mf = seg.Mf + hf * seg.M[HORIZ];
+        }
+      }
+    }
+
+    if (loadFactors[ROOFLIVE] > 0 && beam.gotType[ROOFLIVE]) {
+      //do the roof live load
+      const lrF = loadFactors[ROOFLIVE];
+      if (numPatterns === 1) {
+        for (let i = 1; i < mam.length; i++) {
+          mam[i] = mam[i] + lrF * mamH[i];
+        }
+        for (let i = 1; i <= numSpans; i++) {
+          nodes[i].Pf = nodes[i].Pf + lrF * nodes[i].P[ROOFLIVE];
+          nodes[i].Mf = nodes[i].Mf + lrF * nodes[i].M[ROOFLIVE];
+          for (let j = 0; j < spans[i].segments.length; j++) {
+            const seg = spans[i].segments[j];
+            seg.w1f[combern] = seg.w1f[combern] + lrF * seg.w1[ROOFLIVE];
+            seg.w2f = seg.w2f + lrF * seg.w2[5];
+            seg.Pf = seg.Pf + lrF * seg.P[ROOFLIVE];
+            seg.Mf = seg.Mf + lrF * seg.M[ROOFLIVE];
+          }
+        }
+      } else {
+        for (let k = 1; k <= numSpans; k++) {
+          if (loadPattern.includes(k)) {
+            let ii = 0;
+            for (let j = 1; j <= numSpans; j++) {
+              ii = 5 * j - 4;
+              mam[ii] = mam[ii] + lrF * mamLr[ii][k - 1];
+              mam[ii + 1] = mam[ii + 1] + lrF * mamLr[ii + 1][k - 1];
+              mam[ii + 2] = mam[ii + 2] + lrF * mamLr[ii + 2][k - 1];
+              mam[ii + 3] = mam[ii + 3] + lrF * mamLr[ii + 3][k - 1];
+              mam[ii + 4] = mam[ii + 4] + lrF * mamLr[ii + 4][k - 1];
+            }
+            mam[ii + 5] = mam[ii + 5] + lrF * mamLr[k - 1];
+          }
+        }
+
+        didNode.fill(false);
+        for (let k = 1; k <= numSpans; k++) {
+          if (loadPattern.includes(k)) {
+            if (!didNode[k]) {
+              nodes[k].Pf = nodes[k].Pf + lrF * nodes[k].P[ROOFLIVE];
+              nodes[k].Mf = nodes[k].Mf + lrF * nodes[k].M[ROOFLIVE];
+              didNode[k] = true;
+            }
+            if (!didNode[k + 1]) {
+              nodes[k + 1].Pf = nodes[k + 1].Pf + lrF * nodes[k + 1].P[ROOFLIVE];
+              nodes[k + 1].Mf = nodes[k + 1].Mf + lrF * nodes[k + 1].M[ROOFLIVE];
+              didNode[k + 1] = true;
+            }
+          }
+        }
+
+        for (let i = 1; i <= numSpans; i++) {
+          if (loadPattern.includes(i)) {
+            for (let j = 0; j < spans[i].segments.length; j++) {
+              const seg = spans[i].segments[j];
+              seg.w1f[combern] = seg.w1f[combern] + lrF * seg.w1[ROOFLIVE];
+              seg.w2f = seg.w2f + lrF * seg.w2[ROOFLIVE];
+              seg.Pf = seg.Pf + lrF * seg.P[ROOFLIVE];
+              seg.Mf = seg.Mf + lrF * seg.M[ROOFLIVE];
+            }
+          }
+        }
+      }
+    }
+
+    if (loadFactors[SNOW] > 0 && beam.gotType[SNOW]) {
+      const sf = loadFactors[SNOW];
+      if (numPatterns === 1) {
+        for (let i = 1; i < mam.length; i++) {
+          mam[i] = mam[i] + sf * mamS[i];
+        }
+        for (let i = 1; i <= numSpans; i++) {
+          nodes[i].Pf = nodes[i].Pf + sf * nodes[i].P[SNOW];
+          nodes[i].Mf = nodes[i].Mf + sf * nodes[i].M[SNOW];
+          for (let j = 0; j < spans[i].segments.length; j++) {
+            const seg = spans[i].segments[j];
+            seg.w1f[combern] = seg.w1f[combern] + sf * seg.w1[SNOW];
+            seg.w2f = seg.w2f + sf * seg.w2[SNOW];
+            seg.Pf = seg.Pf + sf * seg.P[SNOW];
+            seg.Mf = seg.Mf + sf * seg.M[SNOW];
+          }
+        }
+      } else {
+        for (let k = 1; k <= numSpans; k++) {
+          let f = loadPattern.includes(k) ? 1 : 0.5;
+          if (loadPattern.length === 0) { f = 0; }
+          let ii = 0;
+          for (let j = 1; j <= numSpans; j++) {
+            ii = 5 * j - 4;
+            mam[ii] = mam[ii] + f * sf * mamS[ii][k - 1];
+            mam[ii + 1] = mam[ii + 1] + f * sf * mamS[ii + 1][k - 1];
+            mam[ii + 2] = mam[ii + 2] + f * sf * mamS[ii + 2][k - 1];
+            mam[ii + 3] = mam[ii + 3] + f * sf * mamS[ii + 3][k - 1];
+            mam[ii + 4] = mam[ii + 4] + f * sf * mamS[ii + 4][k - 1];
+          }
+          mam[ii + 5] = mam[ii + 5] + f * sf * mamS[ii + 5][k - 1];
+        }
+
+        //Do node loads
+        didNode.fill(false);
+        didHalfLoad.fill(false);
+        for (let k = 1; k <= numSpans; k++) {
+          if (loadPattern.length > 0) {
+            gotFullSnow = loadPattern.includes(k);
+            //Check node k
+            if (didNode[k]) ; else if (!gotFullSnow && didHalfLoad[k]) ; else if (gotFullSnow && !didHalfLoad[k]) {
+              nodes[k].Pf = nodes[k].Pf + sf * nodes[k].P[SNOW];
+              nodes[k].Mf = nodes[k].Mf + sf * nodes[k].M[SNOW];
+              didNode[k] = true;
+            } else if (!gotFullSnow && !didHalfLoad[k]) {
+              nodes[k].Pf = nodes[k].Pf + 0.5 * sf * nodes[k].P[SNOW];
+              nodes[k].Mf = nodes[k].Mf + 0.5 * sf * nodes[k].M[SNOW];
+              didHalfLoad[k] = true;
+            }
+
+            //Check node k+1
+            if (gotFullSnow) {
+              nodes[k + 1].Pf = nodes[k + 1].Pf + sf * nodes[k + 1].P[SNOW];
+              nodes[k + 1].Mf = nodes[k + 1].Mf + sf * nodes[k + 1].M[SNOW];
+              didNode[k + 1] = true;
+            } else {
+              nodes[k + 1].Pf = nodes[k + 1].Pf + 0.5 * sf * nodes[k + 1].P[SNOW];
+              nodes[k + 1].Mf = nodes[k + 1].Mf + 0.5 * sf * nodes[k + 1].M[SNOW];
+              didHalfLoad[k + 1] = true;
+            }
+          }
+        }
+
+        for (let i = 1; i <= numSpans; i++) {
+          for (let j = 0; j < spans[i].segments.length; j++) {
+            const seg = spans[i].segments[j];
+            let f = loadPattern.includes(i) ? 1 : 0.5;
+            if (loadPattern.length === 0) { f = 0; }
+            seg.w1f[combern] = seg.w1f[combern] + f * sf * seg.w1[6];
+            seg.w2f = seg.w2f + f * sf * seg.w2[6];
+            seg.Pf = seg.Pf + f * sf * seg.P[6];
+            seg.Mf = seg.Mf + f * sf * seg.M[6];
+          }
+        }
+      }
+    }
+
+    if (loadFactors[RAIN] > 0 && beam.gotType[RAIN]) {
+      const rf = loadFactors[RAIN];
+      for (let i = 1; i < mam.length; i++) {
+        mam[i] = mam[i] + rf * mamR[i];
+      }
+      for (let i = 1; i <= numSpans; i++) {
+        nodes[i].Pf = nodes[i].Pf + rf * nodes[i].P[RAIN];
+        nodes[i].Mf = nodes[i].Mf + rf * nodes[i].M[RAIN];
+        for (let j = 0; j < spans[i].segments.length; j++) {
+          const seg = spans[i].segments[j];
+          seg.w1f[combern] = seg.w1f[combern] + rf * seg.w1[RAIN];
+          seg.w2f = seg.w2f + rf * seg.w2[RAIN];
+          seg.Pf = seg.Pf + rf * seg.P[RAIN];
+          seg.Mf = seg.Mf + rf * seg.M[RAIN];
+        }
+      }
+    }
+
+    if (loadFactors[WIND] > 0 && beam.gotType[WIND]) {
+      const wf = loadFactors[WIND];
+      for (let i = 1; i < mam.length; i++) {
+        mam[i] = mam[i] + wf * mamW[i];
+      }
+      for (let i = 1; i <= numSpans; i++) {
+        nodes[i].Pf = nodes[i].Pf + wf * nodes[i].P[WIND];
+        nodes[i].Mf = nodes[i].Mf + wf * nodes[i].M[WIND];
+        for (let j = 0; j < spans[i].segments.length; j++) {
+          const seg = spans[i].segments[j];
+          seg.w1f[combern] = seg.w1f[combern] + wf * seg.w1[WIND];
+          seg.w2f = seg.w2f + wf * seg.w2[WIND];
+          seg.Pf = seg.Pf + wf * seg.P[WIND];
+          seg.Mf = seg.Mf + wf * seg.M[WIND];
+        }
+      }
+    }
+
+    if (loadFactors[EQ] > 0 && beam.gotType[EQ]) {
+      const ef = loadFactors[EQ];
+      for (let i = 1; i < mam.length; i++) {
+        mam[i] = mam[i] + ef * mamE[i];
+      }
+      for (let i = 1; i <= numSpans; i++) {
+        nodes[i].Pf = nodes[i].Pf + ef * nodes[i].P[EQ];
+        nodes[i].Mf = nodes[i].Mf + ef * nodes[i].M[EQ];
+        for (let j = 0; j < spans[i].segments.length; j++) {
+          const seg = spans[i].segments[j];
+          seg.w1f[combern] = seg.w1f[combern] + ef * seg.w1[EQ];
+          seg.w2f = seg.w2f + ef * seg.w2[EQ];
+          seg.Pf = seg.Pf + ef * seg.P[EQ];
+          seg.Mf = seg.Mf + ef * seg.M[EQ];
+        }
+      }
+    }
+
+    for (let i = 1; i <= numSpans; i++) {
+      for (let j = 0; j < spans[i].segments.length; j++) {
+        const seg = spans[i].segments[j];
+        if (seg.length !== 0) {
+          seg.slope[combern] = (seg.w2f - seg.w1f[combern]) / seg.length;
+        }
+      }
+    }
+    return mam
+  }
+
+  function combine(beam, nodes, spans, actions, deflections) {
+    // We already have member end actions for each load type on each span.
+    // In this function, we superimpose the load combinations and live load patterns and
+    // find the maximum and minimum shears and moments.
+    const numSpans = spans.length - 1;
+    const isService = beam.comboName === "service";
+    const numPatterns = beam.numPatterns;
+    const liveLoadPatterns = getLoadPatterns(beam, numSpans);
+    const [dmD, dmL, dmLr, dmS, dmF, dmH, dmR, dmW, dmE] = deflections;
+
+    let vMin = 0;
+    let vMax = 0;
+    let mMin = 0;
+    let mMax = 0;
+    let deflectionMax = 0;
+    let deflMaxCase = 0;
+    let deflectionMin = 0;
+    let deflMinCase = 0;
+
+    // Get ready to do lots of different load combinations.
+    // Definition: "combern" is a conflation of the words "combination" and "pattern".
+    const comboSet = loadCombinations[beam.comboName];
+    const numComberns = getNumComberns(comboSet, isService, beam);
+
+    for (let i = 1; i <= numSpans; i++) {
+      for (let j = 0; j < spans[i].segments.length; j++) {
+        const seg = spans[i].segments[j];
+        seg.w1f = new Array(numComberns).fill(0);
+        seg.w2f = 0;
+        seg.slope = new Array(numComberns).fill(0);
+        seg.V1 = new Array(numComberns).fill(0);
+        seg.M1 = new Array(numComberns).fill(0);
+        if (beam.EI !== 1) {
+          seg.theta1 = new Array(numPatterns).fill(0);
+          seg.delta1 = new Array(numPatterns).fill(0);
+        }
+      }
+    }
+
+    // The number of interations through this next loop will be a function of
+    // both the number of load combinations and the number of load patterns.
+    // I define "combern" as a conflation of the words "combination" & "pattern"
+    // "combern" will be the loop index as we look at unique combinations of both
+    // load combinations and live load patterns.
+    // Each time through the loop, we;ll get the factored loads and the factored MAM
+    // To do this, we'll make much use of a subroutine called "PopulateMAM"
+    // It's called as:  PopulateMAM  loadFactors, combern, iPattern
+    // The load factors are factors from the ASCE or NBCC load combinations
+
+    // As you can see below, we'll find a unique MAM for each iCombo and live load pattern.
+    // Then, we'll use the MAM to find the segment shears, moments, etc.
+
+    let combern = 0;
+
+    // iCombo 0 is for deflections only. We'll go thru each load pattern.
+    // iCombo 1 thru comboSet.length is for finding shear and moment extremes. As code
+    // requires, this often means testing many load combinations.
+
+    for (let iCombo = 0; iCombo <= comboSet.length; iCombo++) {
+      const  isReqd = iCombo === 0 && beam.EI !== 0
+        ? true  // Go thru each load pattern and find deflection extremes.
+        : isService
+        ? true
+        : isReqdCombo(comboSet[iCombo - 1][0], beam.gotType);
+
+      if (isReqd) {
+        const loadFactors = iCombo === 0 && beam.EI !== 0
+          ? [0, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+          : factorsFrom(comboSet[iCombo - 1][1].trim().split(/ +/), beam);
+
+        for (let iPattern = 0; iPattern < numPatterns; iPattern++) {
+          const loadPattern = liveLoadPatterns[iPattern];
+
+          // Get the Member Action Matrix, MAM, for this combern.
+          // A MAM contains the end shears and end moments for each span.
+          const mam = populateMAM(loadFactors, combern, loadPattern, beam, nodes, spans, actions);
+
+          let dm;
+          if (iCombo === 0 && beam.EI !== 1) {
+            // Create a Displacement Matrix, DM, for this load combination and load pattern.
+            dm = new Array(beam.numDegreesOfFreedom + 1).fill(0);
+            if (beam.gotType[DEAD]) { dm = dm.map((e, i) => e + dmD[i]); }
+            if (beam.gotType[FLUID]) { dm = dm.map((e, i) => e + dmF[i]); }
+            if (beam.gotType[LIVE]) { dm = getLiveDM(dm, dmL, loadPattern, numSpans); }
+            if (beam.gotType[HORIZ]) { dm = dm.map((e, i) => e + dmH[i]); }
+            if (beam.gotType[ROOFLIVE]) { dm = getLiveDM(dm, dmLr, loadPattern, numSpans); }
+            if (beam.gotType[SNOW]) { dm = getLiveDM(dm, dmS, loadPattern, numSpans); }
+            if (beam.gotType[RAIN]) { dm = dm.map((e, i) => e + dmR[i]); }
+            if (beam.gotType[WIND]) { dm = dm.map((e, i) => e + dmW[i]); }
+            if (beam.gotType[EQ]) { dm = dm.map((e, i) => e + dmE[i]); }
+          }
+
+          let iDM = 0;
+          for (let iSpan = 1; iSpan <= numSpans; iSpan++) {
+            let vMid = 0;
+            let vEnd = 0;
+            let mMid = 0;
+            let mEnd = 0;
+            let slopeEnd = 0;
+            let deflectionEnd = 0;
+            let deflectionMid = 0;
+            for (let k = 0; k < spans[iSpan].segments.length; k++) {
+              const seg = spans[iSpan].segments[k];
+
+              if (k === 0) {
+                // The first segment in this span.
+                seg.V1[combern] = -mam[5 * iSpan - 3];
+                seg.M1[combern] = mam[5 * iSpan - 2];
+                if (iCombo === 0 && beam.EI !== 1) {
+                  iDM = getThetaAndDelta(nodes[iSpan].fixity, dm, seg, combern, iDM);
+                }
+              } else {
+                // Subsequent segments.
+                seg.V1[combern] = vEnd + seg.Pf;
+                seg.M1[combern] = mEnd - seg.Mf;
+                if (iCombo === 0 && beam.EI !== 1) {
+                  seg.theta1[combern] = slopeEnd;
+                  seg.delta1[combern] = deflectionEnd;
+                }
+              }
+
+              vEnd = seg.V1[combern] + seg.w1f[combern] * seg.length
+                   + 0.5 * seg.slope[combern] * seg.length ** 2;
+              if (Math.abs(vEnd) < 0.00000000000001) { vEnd = 0; }
+
+              mEnd = seg.M1[combern] + seg.V1[combern] * seg.length
+                   + 0.5 * seg.w1f[combern] * seg.length ** 2
+                   + seg.slope[combern] * seg.length ** 3 / 6;
+              if (Math.abs(mEnd) < 0.00000000000001) { mEnd = 0; }
+
+              if (iCombo === 0) {
+                // Check if this load pattern contains a deflection extreme.
+                if (beam.EI !== 1) {
+                  slopeEnd = seg.theta1[combern] + (seg.M1[combern] * seg.length
+                    + 0.5 * seg.V1[combern] * seg.length ** 2
+                    + seg.w1f[combern] * seg.length ** 3 / 6
+                    + seg.slope[combern] * seg.length ** 4 / 24) / beam.EI;
+                  deflectionMid = seg.delta1[combern] + seg.theta1[combern] * 0.5 * seg.length
+                      + (0.5 * seg.M1[combern] * (0.5 * seg.length) ** 2
+                      + seg.V1[combern] * (0.5 * seg.length) ** 3 / 6
+                      + seg.w1f[combern] * (0.5 * seg.length) ** 4 / 24
+                      + seg.slope[combern] * (0.5 * seg.length) ** 5 / 120) / beam.EI;
+                  deflectionEnd = seg.delta1[combern] + seg.theta1[combern] * seg.length
+                      + (0.5 * seg.M1[combern] * seg.length ** 2
+                          + seg.V1[combern] * seg.length ** 3 / 6
+                      + seg.w1f[combern] * seg.length ** 4 / 24
+                      + seg.slope[combern] * seg.length ** 5 / 120) / beam.EI;
+                  if (seg.delta1[combern] > deflectionMax) {
+                    deflectionMax = seg.delta1[combern];
+                    deflMaxCase = combern;
+                  }
+                  if (seg.delta1[combern] < deflectionMin) {
+                    deflectionMin = seg.delta1[combern];
+                    deflMaxCase = combern;
+                  }
+                  if (deflectionEnd > deflectionMax) {
+                    deflectionMax = deflectionEnd;
+                    deflMaxCase = combern;
+                  }
+                  if (deflectionEnd < deflectionMin) {
+                    deflectionMin = deflectionEnd;
+                    deflMinCase = combern;
+                  }
+                  if (deflectionMid > deflectionMax) {
+                    deflectionMax = deflectionMid;
+                    deflMaxCase = combern;
+                  }
+                  if (deflectionMid < deflectionMin) {
+                    deflectionMin = deflectionMid;
+                    deflMinCase = combern;
+                  }
+                }
+              } else {
+                // Determine if this combern contains a shear or moment extreme.
+                // Start by finding the shear value in the middle of the segment
+                let xCross = 0; // initialze the variable
+                if (seg.slope[combern] !== 0) {
+                  xCross = -1 * seg.w1f[combern] / seg.slope[combern];
+                  if (xCross > 0 && xCross < seg.length) {
+                    vMid = seg.V1[combern] + seg.w1f[combern] * xCross
+                          + 0.5 * seg.slope[combern] * xCross ** 2;
+                  } else {
+                    vMid = seg.V1[combern] + seg.w1f[combern] * (seg.length / 2)
+                          + 0.5 * seg.slope[combern] * (seg.length / 2) ** 2;
+                  }
+                } else {
+                  vMid = seg.V1[combern] + seg.w1f[combern] * (seg.length / 2)
+                        + 0.5 * seg.slope[combern] * (seg.length / 2) ** 2;
+                }
+
+                // Find the moment in the middle of the segment
+                xCross = 0; // initialze the variable
+                if (seg.slope[combern] === 0) {
+                  if (seg.w1f[combern] !== 0) {
+                    xCross = -seg.V1[combern] / seg.w1f[combern];
+                  }
+                } else {
+                  if ((seg.w1f[combern] ** 2 - 2 * seg.slope[combern] * seg.V1[combern]) > 0) {
+                    xCross = -(seg.w1f[combern] + Math.sqrt(seg.w1f[combern] ** 2
+                            - 2 * seg.slope[combern] * seg.V1[combern])) / seg.slope[combern];
+                  }
+                }
+                if (xCross > 0 && xCross < seg.length) {
+                  mMid = seg.M1[combern] + seg.V1[combern] * xCross
+                        + 0.5 * seg.w1f[combern] * xCross ** 2 + seg.slope[combern] * xCross ** 3 / 6;
+                } else {
+                  mMid = seg.M1[combern] + seg.V1[combern] * (seg.length / 2)
+                      + 0.5 * seg.w1f[combern] * (seg.length / 2) ** 2
+                      + seg.slope[combern] * (seg.length / 2) ** 3 / 6;
+                }
+
+                // Check for local maximums and minimums
+                if (seg.V1[combern] > seg.Vmax.left.value && seg.V1[combern] > 0.01) {
+                  seg.Vmax.left.value = seg.V1[combern];
+                  seg.Vmax.left.case = combern;   // This is a case that we// ll want to plot
+                  if (seg.V1[combern] > vMax) { vMax = seg.V1[combern]; }
+                }
+
+                if (vMid > seg.Vmax.mid.value && vMid > 0.01) {
+                  seg.Vmax.mid.value = vMid;
+                  seg.Vmax.mid.case = combern;
+                  if (vMid > vMax) { vMax = vMid; }
+                }
+
+                if (vEnd > seg.Vmax.right.value && vEnd > 0.01) {
+                  seg.Vmax.right.value = vEnd;
+                  seg.Vmax.right.case = combern;
+                  if (vEnd > vMax) { vMax = vEnd; }
+                }
+
+                if (seg.V1[combern] < seg.Vmin.left.value && seg.V1[combern] < -0.01) {
+                  seg.Vmin.left.value = seg.V1[combern];
+                  seg.Vmin.left.case = combern;
+                  if (seg.V1[combern] < vMin) { vMin = seg.V1[combern]; }
+                }
+
+                if (vMid < seg.Vmin.mid.value && vMid < -0.01) {
+                  seg.Vmin.mid.value = vMid;
+                  seg.Vmin.mid.case = combern;
+                  if (vMid < vMin) { vMin = vMid; }
+                }
+
+                if (vEnd < seg.Vmin.right.value && vEnd < -0.01) {
+                  seg.Vmin.right.value = vEnd;
+                  seg.Vmin.right.case = combern;
+                  if (vEnd < vMin) { vMin = vEnd; }
+                }
+
+                if (seg.M1[combern] > seg.Mmax.left.value && seg.M1[combern] > 0.01) {
+                  seg.Mmax.left.value = seg.M1[combern];
+                  seg.Mmax.left.case = combern;
+                  if (seg.M1[combern] > mMax) { mMax = seg.M1[combern]; }
+                }
+
+                if (mMid > seg.Mmax.mid.value && mMid > 0.01) {
+                  seg.Mmax.mid.value = mMid;
+                  seg.Mmax.mid.case = combern;
+                  seg.Mmax.mid.x = seg.xOfLeftEnd + xCross;
+                  if (mMid > mMax) { mMax = mMid; }
+                }
+
+                if (mEnd > seg.Mmax.right.value && mEnd > 0.01) {
+                  seg.Mmax.right.value = mEnd;
+                  seg.Mmax.right.case = combern;
+                  if (mEnd > mMax) { mMax = mEnd; }
+                }
+
+                if (seg.M1[combern] < seg.Mmin.left.value && seg.M1[combern] < -0.01) {
+                  seg.Mmin.left.value = seg.M1[combern];
+                  seg.Mmin.left.case = combern;
+                  if (seg.M1[combern] < mMin) { mMin = seg.M1[combern]; }
+                }
+
+                if (mMid < seg.Mmin.mid.value && mMid < -0.01) {
+                  seg.Mmin.mid.value = mMid;
+                  seg.Mmin.mid.case = combern;
+                  seg.Mmin.mid.x = seg.xOfLeftEnd + xCross;
+                  if (mMid < mMin) { mMin = mMid; }
+                }
+
+                if (mEnd < seg.Mmin.right.value && mEnd < -0.01) {
+                  seg.Mmin.right.value = mEnd;
+                  seg.Mmin.right.case = combern;
+                  if (mEnd < mMin) { mMin = mEnd; }
+                }
+              }
+
+            }
+          }
+          combern += 1;
+        }
+      }
+    }
+    return [vMax, vMin, mMax, mMin, deflectionMax, deflectionMin,
+      deflMaxCase, deflMinCase, numComberns]
+  }
+
+  const isReqdCombo = (str, gotType) => {
+    str = str.replace(/ /g, "");
+    if (str.length === 0) { return false }
+
+    for (let i = 0; i < str.length; i++) {
+      const c = str.slice(i, i + 1);
+
+      switch (c) {
+        case "D":
+          if (gotType[DEAD]) { return true }
+          break
+        case "F":
+          if (gotType[FLUID]) { return true }
+          break
+        case "L":
+          if (gotType[LIVE]) { return true }
+          break
+        case "H":
+          if (gotType[HORIZ]) { return true }
+          break
+        case "£":
+          if (gotType[ROOFLIVE]) { return true }
+          break
+        case "S":
+          if (gotType[SNOW]) { return true }
+          break
+        case "R":
+          if (gotType[RAIN]) { return true }
+          break
+        case "W":
+          if (gotType[WIND]) { return true }
+          break
+        case "E":
+          if (gotType[EQ]) { return true }
+      }
+    }
+    return false
+  };
+
+  const comboContainsLive = combo => {
+    return (combo[LIVE] !== 0 || combo[ROOFLIVE] !== 0 || combo[SNOW] !== 0)
+  };
+
+  const getNumComberns = (comboSet, isService, beam) => {
+    // We'll do a superposition of forces for each load combination and each live load pattern.
+    // How many is that?
+    // First, count the number of comberns needed to do the deflection superpositions.
+    let numComberns = beam.EI === 1 ? 1 : beam.numPatterns;
+    // Then add a combern for each superposition done to get shears and moments.
+    for (let i = 0; i < comboSet.length; i++) {
+      if (isService || isReqdCombo(comboSet[i][0], beam.gotType)) {
+        numComberns += beam.containsLive && comboContainsLive(comboSet[i][1].trim().split(/ +/))
+        ? beam.numPatterns
+        : 1;
+      }
+    }
+    return numComberns
+  };
+
+  const getLiveDM = (a, b, loadPattern, numSpans) => {
+    if (Array.isArray(b[1])) {
+      for (let k = 1; k <= numSpans; k++) {
+        if (loadPattern.includes(k)) {
+          a = a.map((e, i) => e + b[i][k]);
+        }
+      }
+    } else {
+      a = a.map((e, i) => e  + b[i]);
+    }
+    return a
+  };
+
+  const factorsFrom = (factors, beam) => {
+    // Get a combination of load factors.
+    // The input is a string from one line in loadCombinations.js.
+
+    // Sometimes the dead load factor is adjusted for vertical seismic motion.
+    // In that case, the input string contain something like: 1.2+0.2*SDS
+    if (factors[1].indexOf("*SDS") > -1) {
+      let str = factors[1];
+      let pos = str.indexOf("*SDS");
+      str = str.slice(0, pos);
+      pos = str.indexOf("+");
+      if (pos > 0) {
+        factors[1] = Number(str.slice(0, pos)) + Number(str.slice(pos + 1)) * beam.SDS;
+      } else {
+        pos = str.indexOf("-");
+        factors[1] = Number(str.slice(0, pos)) - Number(str.slice(pos + 1)) * beam.SDS;
+      }
+    }
+
+    // Adjust live load factor
+    if (factors[3] === "LLF") { factors[3] = beam.LLF; }
+
+    return factors.map(e => Number(e))
+  };
+
+  const getThetaAndDelta = (fixity, dm, seg, i, iDM) => {
+    if (fixity === "fixed") {
+      seg.delta1[i] = 0;
+      seg.theta1[i] = 0;
+    } else if (fixity === "pinned") {
+      seg.delta1[i] = 0;
+      iDM = iDM + 1;
+      seg.theta1[i] = -dm[iDM];
+    } else if (fixity === "continuous") {
+      iDM = iDM + 1;
+      seg.delta1[i] = -dm[iDM];
+      iDM = iDM + 1;
+      seg.theta1[i] = -dm[iDM];
+    } else if (fixity === "spring") {
+      iDM = iDM + 1;
+      seg.delta1[i] = -dm[iDM];
+      iDM = iDM + 1;
+      seg.theta1[i] = -dm[iDM];
+    } else if (fixity === "proppedHinge") {
+      iDM = iDM + 1;
+      seg.delta1[i] = 0;
+      iDM = iDM + 1;
+      seg.theta1[i] = -dm[iDM];
+    } else if (fixity === "hinge") {
+      iDM = iDM + 1;
+      seg.delta1[i] = -dm[iDM];
+      iDM = iDM + 1;
+      iDM = iDM + 1;
+      seg.theta1[i] = -dm[iDM];
+    }
+    return iDM
+  };
+
+  // Review the segments. Find out which comberns should be displayed
+  function selectCases(spans) {
+    const shearCases = [];
+    const bendingCases = [];
+    for (let i = 1; i < spans.length; i++) {
+      for (let j = 0; j < spans[i].segments.length; j++) {
+        const seg = spans[i].segments[j];
+        if (seg.Vmax.left.value > 0) {
+          if (!shearCases.includes(seg.Vmax.left.case)) {
+            shearCases.push(seg.Vmax.left.case);
+          }
+        }
+        if (seg.Vmin.left.value < 0) {
+          if (!shearCases.includes(seg.Vmin.left.case)) {
+            shearCases.push(seg.Vmin.left.case);
+          }
+        }
+        if (seg.Mmax.left.value > 0) {
+          if (!bendingCases.includes(seg.Mmax.left.case)) {
+            bendingCases.push(seg.Mmax.left.case);
+          }
+        }
+        if (seg.Mmin.left.value < 0) {
+          if (!bendingCases.includes(seg.Mmin.left.case)) {
+            bendingCases.push(seg.Mmin.left.case);
+          }
+        }
+        if (seg.Vmax.mid.value > 0) {
+          if (!shearCases.includes(seg.Vmax.mid.case)) {
+            shearCases.push(seg.Vmax.mid.case);
+          }
+        }
+        if (seg.Vmin.mid.value < 0) {
+          if (!shearCases.includes(seg.Vmin.mid.case)) {
+            shearCases.push(seg.Vmin.mid.case);
+          }
+        }
+        if (seg.Mmax.mid.value > 0) {
+          if (!bendingCases.includes(seg.Mmax.mid.case)) {
+            bendingCases.push(seg.Mmax.mid.case);
+          }
+        }
+        if (seg.Mmin.mid.value < 0) {
+          if (!bendingCases.includes(seg.Mmin.mid.case)) {
+            bendingCases.push(seg.Mmin.mid.case);
+          }
+        }
+        if (seg.Vmax.right.value > 0) {
+          if (!shearCases.includes(seg.Vmax.right.case)) {
+            shearCases.push(seg.Vmax.right.case);
+          }
+        }
+        if (seg.Vmin.right.value < 0) {
+          if (!shearCases.includes(seg.Vmin.right.case)) {
+            shearCases.push(seg.Vmin.right.case);
+          }
+        }
+        if (seg.Mmax.right.value > 0) {
+          if (!bendingCases.includes(seg.Mmax.right.case)) {
+            bendingCases.push(seg.Mmax.right.case);
+          }
+        }
+        if (seg.Mmin.right.value < 0) {
+          if (!bendingCases.includes(seg.Mmin.right.case)) {
+            bendingCases.push(seg.Mmin.right.case);
+          }
+        }
+      }
+    }
+    return [shearCases, bendingCases]
+  }
+
+  function locateDiagrams(beam, extremes) {
+    // Find the y-coordinates for the shear, moment, and deflection diagrams.
+
+    // First, find out how many reaction vectors will be written onto the load diagram.
+    const [vMax, vMin, mMax, mMin, deflectionMax, deflectionMin, , , ] = extremes;
+
+    const vScale = vMax - vMin > 0 ? 60 / (vMax - vMin) : 0;
+    const mScale = mMax - mMin > 0 ? 60 / (mMax - mMin) : 0;
+    const reactionTextHeight = 16;
+
+    let yV = vMax > 0.0005
+      ? beam.yLoad + 12 + reactionTextHeight + vMax * vScale + 70
+      : beam.yLoad + 12 + reactionTextHeight;
+    yV = Math.round(yV);
+    const botOfV = vMin < -0.0005
+      ? yV + vMin * vScale + 50
+      : yV + 70;
+    let yM = mMax > 0.0005
+      ? botOfV + 12 + mMax * mScale + 40
+      : botOfV + 12;
+    yM = Math.round(yM);
+    let yMax = yM;
+
+    // Get yText for moment
+    let yText = yM - mScale * mMin;
+    if (yText > yMax) { yMax = yText; }
+
+    let yDeflection = 0;
+    let deflectionScale = 0;
+    if (beam.EI !== 1) {
+      // eslint-disable-next-line max-len
+      if (deflectionMax > deflectionMin) { deflectionScale = 30 / (deflectionMax - deflectionMin); }
+      const botOfM = Math.abs(mMin) > 0.05 * mMax
+        ? yM + mMin * mScale + 40
+        : yM + 14;
+      yDeflection = botOfM + 80 + deflectionMax * deflectionScale;
+      if (deflectionMax > 0.1 * (deflectionMax - deflectionMin)) {
+        yDeflection = yDeflection + 20;
+      }
+      yDeflection = Math.round(yDeflection);
+      yMax = yDeflection;
+      if (Math.abs(deflectionMin) > 0.2 * (deflectionMax - deflectionMin)) {
+        yText = yDeflection - deflectionScale * deflectionMin;
+        if (yText > yMax) { yMax = yText; }
+      }
+    }
+    yMax += 20;
+
+    return [yV, yM, yDeflection, vScale, mScale, deflectionScale, yMax]
+
+  }
+
+  function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes) {
+    let diagram = [];
+    // Now go thru the comberns again.  Draw the line work this time.
+    const numSpans = spans.length - 1;
+    const [vMax, vMin, mMax, mMin, , , deflMaxCase, deflMinCase, numComberns] = extremes;
+    const [shearCases, bendingCases] = cases;
+    const [yV, yM, yDeflection, vScale, mScale, deflectionScale] = yCoords;
+    const vSmall = 0.01 * (vMax - vMin);
+    const mSmall = 0.05 * (mMax - mMin);
+    let deflectionMax = 0;
+    let deflectionMin = 0;
+    let xDeflectionMax = 0;
+    let xDeflectionMin = 0;
+    const xIncrement = beam.length / 50;
+    const wV = [];
+    const wVx = [];
+    const wM = [];
+    const wMx = [];
+    const horizAlign = "middle";
+
+    // Draw the horizontal lines for the shear and moment diagrams
+    diagram.push(Draw.textNode("shear", 20, yV + 2));
+    diagram.push(Draw.textNode(`(${beam.SI ? "kN" : "kips"})`, 20, yV + 16));
+    diagram.push({
+      tag: "path",
+      attrs: { d: `M${beam.xDiagram} ${yV} h300`, "stroke-width": '1.5px' }
+    });
+    diagram.push(Draw.textNode("bending", 20, yM + 2));
+    diagram.push(Draw.textNode(`(${beam.SI ? "kN-m" : "kip-ft"})`, 20, yM + 16));
+    diagram.push({
+      tag: "path",
+      attrs: { d: `M${beam.xDiagram} ${yM} h300`, "stroke-width": '1.5px' }
+    });
+
+    if (beam.comboName !== "service" && beam.comboName.indexOf("ASD") === -1) {
+      diagram.push(Draw.textNode("factored", 20, yV - 12));
+      diagram.push(Draw.textNode("factored", 20, yM - 12));
+    }
+
+    // Draw the reactions.
+    let f = 0;
+    for (let i = 1; i < nodes.length; i++) {
+      const x = beam.xDiagram + beam.xScale * nodes[i].x;
+      if (Math.abs(nodes[i].Pr[0] > 0)) {
+        f = 1 / (beam.SI ? 1000 : 4448.2216152605);
+        const sText = round(nodes[i].Pr[0] * f, 3);
+        diagram = diagram.concat(Draw.pointForce(x, beam.yLoad, sText, nodes[i].fixity, true));
+      }
+      if (Math.abs(nodes[i].Mr[0]) > 0) {
+        f = 1 / (beam.SI ? 1000 : 4448.2216152605 * 0.3048);
+        const sText = round(nodes[i].Mr[0] * f, 3);
+        diagram = diagram.concat(Draw.pointMoment(x, beam.yLoad, sText, true));
+      }
+    }
+
+    for (let combern = 0; combern <= numComberns; combern++) {
+      // Are we in a deflection combern?
+      const inaDeflCase = (deflMinCase === combern || deflMaxCase === combern) && beam.EI !== 1;
+      // Should we plot this combern?
+      if (!(shearCases.includes(combern) || bendingCases.includes(combern) || inaDeflCase)) {
+        continue // Skip this combern.
+      }
+      // This is a combern for which we should plot the line work
+      // Find detailed shear and moments for the diagrams.  And we check local maximums to see
+      // if we should write their values onto the diagram.
+      let lastVend = 0;
+      let lastW2f = 0;
+      const x = inaDeflCase ? [] : [0];
+      const deflection = [];
+      const v = [];
+      const m = [];
+      if (!inaDeflCase) {
+        v.push(0);
+        m.push(0);
+      }
+      let k = 0;
+      for (let i = 1; i <= numSpans; i++) {
+        for (let j = 0; j < spans[i].segments.length; j++) {
+          const seg = spans[i].segments[j];
+          const vEnd = seg.V1[combern] + seg.w1f[combern] * seg.length
+              + 0.5 * seg.slope[combern] * seg.length ** 2;
+          const mEnd = seg.M1[combern] + seg.V1[combern] * seg.length
+            + 0.5 * seg.w1f[combern] * seg.length ** 2 + seg.slope[combern] * seg.length ** 3 / 6;
+          const w2f = seg.w1f[combern] + seg.slope[combern] * seg.length;
+          let deflectionEnd = 0;
+          if (inaDeflCase) {
+            deflectionEnd = seg.delta1[combern] + seg.theta1[combern] * seg.length
+              + (0.5 * seg.M1[combern] * seg.length ** 2 + seg.V1[combern] * seg.length ** 3 / 6
+              + seg.w1f[combern] * seg.length ** 4 / 24
+              + seg.slope[combern] * seg.length ** 5 / 120) / beam.EI;
+          }
+          // Details for line work
+          let xLocal = 0;
+          k += 1;
+          x.push(seg.xOfLeftEnd);
+          if (inaDeflCase) {
+            deflection.push(seg.delta1[combern]);
+            if (seg.delta1[combern] > deflectionMax) {
+              deflectionMax = seg.delta1[combern];
+              xDeflectionMax = seg.xOfLeftEnd;
+            }
+            if (seg.delta1[combern] < deflectionMin) {
+              deflectionMin = seg.delta1[combern];
+              xDeflectionMin = seg.xOfLeftEnd;
+            }
+            if (deflectionEnd > deflectionMax) {
+              deflectionMax = deflectionEnd;
+              xDeflectionMax = seg.xOfLeftEnd + seg.length;
+            }
+            if (deflectionEnd < deflectionMin) {
+              deflectionMin = deflectionEnd;
+              xDeflectionMin = seg.xOfLeftEnd + seg.length;
+            }
+          } else {
+            v.push(seg.V1[combern]);
+            m.push(seg.M1[combern]);
+          }
+
+          for (let ii = 1; ii <= Math.trunc(seg.length / xIncrement); ii++) {
+            k = k + 1;
+            x.push(x[x.length - 1] + xIncrement);
+            xLocal += xIncrement;
+            if (inaDeflCase) {
+              deflection.push(seg.delta1[combern] + seg.theta1[combern] * xLocal
+                  + (0.5 * seg.M1[combern] * xLocal ** 2
+                  + seg.V1[combern] * xLocal ** 3 / 6 + seg.w1f[combern] * xLocal ** 4 / 24
+                  + seg.slope[combern] * xLocal ** 5 / 120) / beam.EI);
+              if (deflection[deflection.length - 1] > deflectionMax) {
+                deflectionMax = deflection[deflection.length - 1];
+                xDeflectionMax = seg.xOfLeftEnd + xLocal;
+              }
+              if (deflection[deflection.length - 1] < deflectionMin) {
+                deflectionMin = deflection[deflection.length - 1];
+                xDeflectionMin = seg.xOfLeftEnd + xLocal;
+              }
+            } else {
+              v.push(seg.V1[combern] + seg.w1f[combern] * xLocal
+                + 0.5 * seg.slope[combern] * xLocal ** 2);
+              m.push(seg.M1[combern] + seg.V1[combern] * xLocal
+                + 0.5 * seg.w1f[combern] * xLocal ** 2 + seg.slope[combern] * xLocal ** 3 / 6);
+            }
+          }
+
+          k += 1;
+          x.push(seg.xOfLeftEnd + seg.length);
+          if (inaDeflCase) {
+            deflection.push(deflectionEnd);
+          } else {
+            v.push(vEnd);
+            m.push(mEnd);
+          }
+
+          // Check for local maximums and minimums
+          if (seg.Vmax.left.case === combern || seg.Vmin.left.case === combern) {
+            // Do we also want to write this value onto the shear diagram?
+            if (i === 1 && j === 0) {
+              if (Math.abs(seg.V1[combern]) > vSmall) {
+                checkVs(seg.V1[combern], 0, wV, wVx, spans, beam.length);
+              }
+            } else if (!(lastW2f === seg.w1f[combern] &&
+                Math.abs(seg.V1[combern] - lastVend) < vSmall)) {
+              checkVs(seg.V1[combern], seg.xOfLeftEnd, wV, wVx, spans, beam.length);
+            }
+          }
+
+          if (seg.Vmax.mid.case === combern || seg.Vmin.mid.case === combern) {
+            let xCross = 0;
+            if (seg.slope[combern] !== 0) {
+              xCross = -1 * seg.w1f[combern] / seg.slope[combern];
+              if (xCross > 0 && xCross < seg.length) {
+                const vMid = seg.V1[combern] + seg.w1f[combern] * xCross
+                    + 0.5 * seg.slope[combern] * xCross ** 2;
+                checkVs(vMid, seg.xOfLeftEnd + xCross, wV, wVx, spans, beam.length);
+              }
+            }
+          }
+
+          if (seg.Vmax.right.case === combern || seg.Vmin.right.case === combern) {
+            if (Math.abs(vEnd) > vSmall) {
+              checkVs(vEnd, seg.xOfLeftEnd + seg.length, wV, wVx, spans, beam.length);
+            }
+          }
+
+          if (seg.Mmax.left.case === combern || seg.Mmin.left.case === combern) {
+            if (i === 1 && j === 0) {
+              if (Math.abs(seg.M1[combern]) > mSmall) {
+                checkMs(seg.M1[combern], 0, wM, wMx, spans, beam.length, mSmall);
+              }
+            } else {
+              checkMs(seg.M1[combern], seg.xOfLeftEnd, wM,
+                wMx, spans, beam.length, mSmall);
+            }
+          }
+
+          if (seg.Mmax.mid.case === combern || seg.Mmin.mid.case === combern) {
+            let xCross = 0; // initialze the variable
+            let mMid = 0;
+            if (seg.slope[combern] === 0) {
+              if (seg.w1f[combern] !== 0) {
+                xCross = -seg.V1[combern] / seg.w1f[combern];
+                if (xCross > 0 && xCross < seg.length) {
+                  mMid = seg.M1[combern] + seg.V1[combern] * xCross
+                    + 0.5 * seg.w1f[combern] * xCross ** 2 + seg.slope[combern] * xCross ** 3 / 6;
+                  checkMs(mMid, seg.xOfLeftEnd + xCross, wM, wMx, spans, beam.length, mSmall);
+                }
+              }
+            } else {
+              let mMid1 = 0;
+              let mMid2 = 0;
+              let xCross1 = 0;
+              let xCross2 = 0;
+              if ((seg.w1f[combern] ** 2 - 2 * seg.slope[combern] * seg.V1[combern]) > 0) {
+                const determinant = Math.sqrt(seg.w1f[combern] ** 2
+                      - 2 * seg.slope[combern] * seg.V1[combern]);
+                xCross1 = -(seg.w1f[combern] - determinant) / seg.slope[combern];
+                xCross2 = -(seg.w1f[combern] + determinant) / seg.slope[combern];
+                if (xCross1 > 0 && xCross1 < seg.length) {
+                  xCross = xCross1;
+                  mMid1 = seg.M1[combern] + seg.V1[combern] * xCross
+                    + 0.5 * seg.w1f[combern] * xCross ** 2 + seg.slope[combern] * xCross ** 3 / 6;
+                }
+                if (xCross2 > 0 && xCross2 < seg.length) {
+                  xCross = xCross2;
+                  mMid2 = seg.M1[combern] + seg.V1[combern] * xCross
+                    + 0.5 * seg.w1f[combern] * xCross ** 2 + seg.slope[combern] * xCross ** 3 / 6;
+                }
+              }
+              if (mMid1 > 0 || mMid2 > 0) {
+                if (mMid1 > mMid2) {
+                  mMid = mMid1;
+                  xCross = xCross1;
+                } else {
+                  mMid = mMid2;
+                  xCross = xCross2;
+                }
+              }
+              if (xCross > 0 && xCross < seg.length) {
+                mMid = seg.M1[combern] + seg.V1[combern] * xCross
+                    + 0.5 * seg.w1f[combern] * xCross ** 2 + seg.slope[combern] * xCross ** 3 / 6;
+                checkMs(mMid, seg.xOfLeftEnd + xCross, wM, wMx, spans, beam.length, mSmall);
+              }
+            }
+          }
+
+          if (seg.Mmax.right.case === combern || seg.Mmin.right.case === combern) {
+            checkMs(mEnd, seg.xOfLeftEnd + seg.length, wM, wMx, spans, beam.length, mSmall);
+          }
+
+          lastW2f = w2f;
+          lastVend = vEnd;
+        }
+      }
+
+      // Plot diagrams
+      const numDataPoints = k;
+
+      // Draw the shear diagrams
+      if (shearCases.includes(combern)) {
+        let xPoly;
+        let yPoly;
+
+        if (beam.allLoadsAreUniform) {
+          // Make the shear diagram out of straight lines.
+          let linearV = new Array(2 * beam.numSegments + 3).fill(0);
+          linearV = linearV.map(e => [0, 0]);
+          k = 1;
+          linearV[k][0] = beam.xDiagram;
+          linearV[k][1] = yV;
+          for (let i = 1; i <= numSpans; i++) {
+            for (let j = 0; j < spans[i].segments.length; j++) {
+              const seg = spans[i].segments[j];
+              k = k + 1;
+              linearV[k][0] = beam.xDiagram + beam.xScale * seg.xOfLeftEnd;
+              linearV[k][1] = yV - vScale * seg.V1[combern];
+              k = k + 1;
+              linearV[k][0] = beam.xDiagram + beam.xScale * (seg.xOfLeftEnd + seg.length);
+              const vEnd = seg.V1[combern] + seg.w1f[combern] * seg.length
+                  + 0.5 * seg.slope[combern] * seg.length ** 2;
+              linearV[k][1] = yV - vScale * vEnd;
+            }
+          }
+          k = k + 1;
+          linearV[k][0] = beam.xDiagram + beam.xScale * beam.length;
+          linearV[k][1] = yV;
+          const numOfShearDataPoints = k;
+
+          xPoly = new Array(numOfShearDataPoints - 1);
+          yPoly = new Array(numOfShearDataPoints - 1);
+          for (let ii = 1; ii <= numOfShearDataPoints; ii++) {
+            xPoly[ii - 1] = linearV[ii][0].toFixed(2);
+            yPoly[ii - 1] = linearV[ii][1].toFixed(2);
+          }
+
+        } else {
+          xPoly = new Array(numDataPoints + 1).fill(0);
+          yPoly = new Array(numDataPoints + 1).fill(0);
+          for (let ii = 0; ii < numDataPoints; ii++) {
+            xPoly[ii] = (beam.xDiagram + beam.xScale * x[ii]).toFixed(2); // x(ii)
+            yPoly[ii] = (yV - vScale * v.shift()).toFixed(2);
+          }
+          xPoly[numDataPoints] = beam.xDiagram + 300;
+          yPoly[numDataPoints] = yV;
+        }
+        diagram.push(Draw.polyline(xPoly, yPoly));
+      }
+
+      // Draw the moment diagram
+      if (bendingCases.includes(combern)) {
+        const xPoly = new Array(numDataPoints + 1).fill(0);
+        const yPoly = new Array(numDataPoints + 1).fill(0);
+        for (let ii = 0; ii <= numDataPoints; ii++) {
+          xPoly[ii] = (beam.xDiagram + beam.xScale * x[ii]).toFixed(2); // x(ii)
+          yPoly[ii] = (yM - beam.convention * mScale * m.shift()).toFixed(2); // M(ii)
+        }
+        xPoly[numDataPoints + 1] = beam.xDiagram + 300;
+        yPoly[numDataPoints + 1] = yM;
+        diagram.push(Draw.polyline(xPoly, yPoly));
+      }
+
+      if (inaDeflCase) {
+        // Draw the deflection diagram
+        diagram.push(Draw.textNode("deflection", 20, yDeflection + 2));
+        diagram.push({
+          tag: "path",
+          attrs: { d: `M${beam.xDiagram} ${yDeflection} h300`, "stroke-width": '1.5px' }
+        });
+        const xPoly = new Array(numDataPoints - 1).fill(0);
+        const yPoly = new Array(numDataPoints - 1).fill(0);
+        for (let ii = 1; ii <= numDataPoints - 1; ii++) {
+          xPoly[ii - 1] = (beam.xDiagram + beam.xScale * x[ii]).toFixed(2); // x(ii)
+          yPoly[ii - 1] = (yDeflection - deflectionScale * deflection[ii]).toFixed(2);
+        }
+        diagram.push(Draw.polyline(xPoly, yPoly));
+      }
+    }
+
+    // Write the values of the local shear maximums onto the diagrams.
+    f = 1 / (beam.SI ? 1000 : 4448.2216152605); // conversion factor for N to kips or MN
+    while (wV.length > 0) {
+      const xText = (beam.xDiagram + beam.xScale * wVx.shift()).toFixed(2);
+      const fudge = wV[0] > 0 ? -2 : 13;
+      const yText = (yV - vScale * wV[0] + fudge).toFixed(2);
+      // horizAlign is middle
+      diagram.push(Draw.textNode(round(wV.shift() * f, 3), xText, yText, horizAlign));
+    }
+
+    // Write the values of the local bending maximums onto the diagrams.
+    f = beam.convention / (beam.SI ? 1000 : 4448.2216152605 * 0.3048);
+    while (wM.length > 0) {
+      const xText = (beam.xDiagram + beam.xScale * wMx.shift()).toFixed(2);
+      const fudge = beam.convention * wM[0] > 0 ? -2 : 13;
+      const yText = (yM - beam.convention * mScale * wM[0] + fudge).toFixed(2);
+      const sText = round(wM.shift() * f, 3);
+      diagram.push(Draw.textNode(sText, xText, yText, horizAlign));
+    }
+
+    if (beam.EI !== 1) {
+      // Insert the max and min deflection values
+      beam.deflectionMax = Math.max(Math.abs(deflectionMax), Math.abs(deflectionMin));
+      f = beam.SI ? 1000 : (12 / 0.3048);
+      let sText = "";
+      let xText = 0;
+      let yText = 0;
+      if (deflectionMax > 0.2 * (deflectionMax - deflectionMin)) {
+        xText = beam.xDiagram + beam.xScale * xDeflectionMax;
+        yText = yDeflection - deflectionScale * deflectionMax - 2;
+        if (beam.SI) {
+          sText = round(deflectionMax * f, 1) + " mm";
+        } else {
+          sText = round(deflectionMax * f, 2) + '″';
+        }
+        diagram.push(Draw.textNode(sText, xText, yText, horizAlign));
+      }
+      if (Math.abs(deflectionMin) > 0.2 * (deflectionMax - deflectionMin)) {
+        xText = beam.xDiagram + beam.xScale * xDeflectionMin;
+        yText = yDeflection - deflectionScale * deflectionMin + 13;
+        if (beam.SI) {
+          sText = round(f * deflectionMin, 1) + " mm";
+        } else {
+          sText = round(f * deflectionMin, 2) + '″';
+        }
+        diagram.push(Draw.textNode(sText, xText, yText, horizAlign));
+      }
+    }
+
+    return diagram
+  }
+
+  const checkVs = (v, x, wV, wVx, spans, beamLength) => {
+    // Check if we should write this value onto the shear diagram
+    let gottaWrite = true; // initialize the variable
+    const shortDistance = 0.15 * beamLength;
+
+    for (let i = 1; i < spans.length; i++) {
+      for (let k = 0; k < spans[i].segments.length; k++) {
+        const seg = spans[i].segments[k];
+        const xOfRightEnd = seg.xOfLeftEnd + seg.length;
+        if (xOfRightEnd < x -  shortDistance) { continue }
+        if (seg.xOfLeftEnd > x + shortDistance) { continue }
+
+        if (Math.abs(seg.xOfLeftEnd - x) < shortDistance) {
+          if (v > 0) {
+            if (seg.Vmax.left.value > v) {
+              gottaWrite = false;
+              break
+            }
+          } else if (seg.Vmin.left.value < v) {
+            gottaWrite = false;
+            break
+          }
+        }
+
+        const xRightEnd = seg.xOfLeftEnd + seg.length;
+        if (Math.abs(x - xRightEnd < shortDistance)) {
+          if (v > 0) {
+            if (seg.Vmax.right.value > v) {
+              gottaWrite = false;
+              break
+            }
+          } else if (seg.Vmin.right.value < v) {
+            gottaWrite = false;
+            break
+          }
+        }
+      }
+    }
+
+    if (gottaWrite) {
+      wV.push(v);
+      wVx.push(x);
+    }
+  };
+
+  const checkMs = (m, x, wM, wMx, spans, beamLength, mSmall) => {
+    // Check if we should write this value onto the moment diagram
+    if (Math.abs(m) < mSmall) { return false }
+    let gottaWrite = true; // initialize the variable
+    const shortDistance = 0.15 * beamLength;
+
+    for (let i = 1; i < spans.length; i++) {
+      for (let k = 0; k < spans[i].segments.length; k++) {
+        const seg = spans[i].segments[k];
+        const xOfRightEnd = seg.xOfLeftEnd + seg.length;
+        if (xOfRightEnd < x -  shortDistance) { continue }
+        if (seg.xOfLeftEnd > x + shortDistance) { continue }
+
+        if (Math.abs(seg.xOfLeftEnd - x) < shortDistance) {
+          if (m > 0) {
+            if (seg.Mmax.left.value > m) {
+              gottaWrite = false;
+              break
+            }
+          } else if (seg.Mmin.left.value < m) {
+            gottaWrite = false;
+            break
+          }
+        }
+
+        if (m > 0 && Math.abs(seg.Mmax.mid.x - x) < shortDistance) {
+          if (seg.Mmax.mid.value > m) {
+            gottaWrite = false;
+            break
+          }
+        }
+        if (m < 0 && Math.abs(seg.Mmin.mid.x - x) < shortDistance) {
+          if (seg.Mmin.mid.value < m) {
+            gottaWrite = false;
+            break
+          }
+        }
+
+        const xRightEnd = seg.xOfLeftEnd + seg.length;
+        if (Math.abs(x - xRightEnd < shortDistance)) {
+          if (m > 0) {
+            if (seg.Mmax.right.value > m) {
+              gottaWrite = false;
+              break
+            }
+          } else if (seg.Mmin.right.value < m) {
+            gottaWrite = false;
+            break
+          }
+        }
+      }
+    }
+
+    if (gottaWrite) {
+      wM.push(m);
+      wMx.push(x);
+    }
+  };
+
+  function error(msg) {
+    if (msg === "") { return { value: "Error", unit: null, dtype: dt.ERROR } }
+    return { value: msg, unit: null, dtype: dt.ERROR }
+  }
+
+  const beamDiagram = inputData => {
+    // This is the main analysis function.
+
+    // Get raw data from the input dataframe.
+    const input = readInputData(inputData);
+    if (typeof input === "string") { return error(input) }
+
+    // Validate input and populate data structures.
+    const [errorMsg, beam, nodes, spans] = populateData(input);
+    if (errorMsg) { return error(errorMsg) }
+
+    // Start the SVG
+    const svg = { tag: 'svg', children: [], attrs: { float: "right" } };
+
+    // Create the first diagram. Show fixities, lengths, and loads.
+    const loadDiagram = createLoadDiagram(beam, nodes, spans);
+    svg.children = svg.children.concat(loadDiagram);
+
+    // Do the linear algebra. For each load type, get member end actions and node displacements.
+    const [actions, deflections] = doAnalysis(beam, nodes, spans);
+
+    // Determine shear, moment, and deflection maximums and minimums by superimposing
+    // the relevent load combinations and live load patterns.
+    const extremes = combine(beam, nodes, spans, actions, deflections);
+
+    // Decide which combinations get plotted.
+    const cases = selectCases(spans);
+
+    // Find the y coordinates for the shear, moment, and deflection diagrams.
+    const yCoords = locateDiagrams(beam, extremes);
+    const yMax = yCoords[6]; // Diagram overall height in local coords.
+
+    const diagrams = drawDiagrams(beam, nodes, spans, cases, yCoords, extremes);
+    svg.children = svg.children.concat(diagrams);
+
+    // Set the outer dimensions of the diagram.
+    svg.attrs.width = "375"; // px
+    svg.attrs.height = (375 / 450 * yMax).toFixed(0);
+    svg.attrs.viewBox = `0 0 450 ${yMax.toFixed(0)}`;
+
+    return svg
+
+  };
+
   // evaluate.js
 
   /*
@@ -11333,6 +14646,15 @@
           case "startSvg":
             stack.push({ value: draw.startSvg(), unit: null, dtype: dt.DRAWING });
             break
+
+          case "beamDiagram": {
+            const arg = stack.pop();
+            if (!(arg.dtype & dt.MAP)) { return errorOprnd("BAD_TYPE", "beamDiagram") }
+            const diagram = beamDiagram(arg.value.data);
+            if (diagram.dtype && diagram.dtype === dt.ERROR) { return diagram }
+            stack.push({ value: diagram, resultdisplay: diagram, unit: null, dtype: dt.DRAWING });
+            break
+          }
 
           case "abs":
           case "cos":
@@ -12291,6 +15613,7 @@
     stmt.resultDisplay = "\\textcolor{firebrick}{\\text{" + result.value + "}}";
     stmt.altResultDisplay = result.value;
     stmt.error = true;
+    stmt.dtype = dt.ERROR;
     if (stmt.resulttemplate.indexOf("!") > -1) {
       stmt.tex += "= " + stmt.resultDisplay;
       stmt.alt += result.value;
@@ -12466,7 +15789,7 @@
     return stmt
   };
 
-  const numberRegEx$3 = new RegExp(Rnl.numberPattern);
+  const numberRegEx$4 = new RegExp(Rnl.numberPattern);
   const unitRegEx$1 = /('[^']+'|[°ΩÅK])$/;
   /* eslint-disable max-len */
 
@@ -12566,7 +15889,7 @@
       }
       return [[realPart, imPart], allZeros, dt.COMPLEX, resultDisplay]
 
-    } else if (str.match(numberRegEx$3)) {
+    } else if (str.match(numberRegEx$4)) {
       // str is a number.
       const resultDisplay = parse(str, decimalFormat);
       if (unitName) {
@@ -13391,7 +16714,7 @@
    * 1/6551.6em with our ptPerEm = 10):
    * http://www.ctex.org/documents/shredder/src/texbook.pdf#page=69
    */
-  const round = function(n) {
+  const round$1 = function(n) {
     return +n.toFixed(4);
   };
 
@@ -13402,7 +16725,7 @@
     getBaseElem,
     isCharacterBox,
     protocolFromUrl,
-    round
+    round: round$1
   };
 
   /**
@@ -20905,7 +24228,7 @@
   // "mathord" and "textord" ParseNodes created in Parser.js from symbol Groups in
   // src/symbols.js.
 
-  const numberRegEx$4 = /^\d(?:[\d,.]*\d)?$/;
+  const numberRegEx$5 = /^\d(?:[\d,.]*\d)?$/;
   const latinRegEx = /[A-Ba-z]/;
 
   const italicNumber = (text, variant, tag) => {
@@ -20959,7 +24282,7 @@
       const variant = getVariant(group, style) || "normal";
 
       let node;
-      if (numberRegEx$4.test(group.text)) {
+      if (numberRegEx$5.test(group.text)) {
         const tag = group.mode === "text" ? "mtext" : "mn";
         if (variant === "italic" || variant === "bold-italic") {
           return italicNumber(text, variant, tag)
@@ -26483,18 +29806,7 @@
       }
       // There. Fetches are done and are loaded into the document.
       // Now proceed to the rest of the work.
-      try {
-        proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs,
-                          curPos, hurmetVars, tr);
-      } catch (err) {
-        console.log(err); // eslint-disable-line no-console
-        const pos = nodeAttrs.template.indexOf(nodeAttrs.resultdisplay);
-        nodeAttrs.tex = nodeAttrs.template.slice(0, pos) + "\\text{" + err + "}";
-        tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs));
-        tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)));
-        view.dispatch(tr);
-        view.focus();
-      }
+      proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr);
     });
   };
 
@@ -26546,15 +29858,19 @@
         let attrs = clone(nodeAttrs); // prepareStatement was already run in mathprompt.js.
         // The mathPrompt dialog box did not have accesss to hurmetVars, so it
         // did not do unit conversions on the result template. Do that first.
-        improveQuantities(attrs, hurmetVars);
-        // Now proceed to do the calculation of the cell.
-        if (attrs.rpn || (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING)) {
-          attrs = attrs.dtype && attrs.dtype === dt.DRAWING
-            ? evaluateDrawing(attrs, hurmetVars, decimalFormat)
-            : evaluate(attrs, hurmetVars, decimalFormat);
+        try {
+          improveQuantities(attrs, hurmetVars);
+          // Now proceed to do the calculation of the cell.
+          if (attrs.rpn || (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING)) {
+            attrs = attrs.dtype && attrs.dtype === dt.DRAWING
+              ? evaluateDrawing(attrs, hurmetVars, decimalFormat)
+              : evaluate(attrs, hurmetVars, decimalFormat);
+          }
+          if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat); }
+          attrs.displayMode = nodeAttrs.displayMode;
+        } catch (err) {
+          attrs.tex = "\\text{" + attrs.entry + " = " + err + "}";
         }
-        if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat); }
-        attrs.displayMode = nodeAttrs.displayMode;
         tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(attrs));
       }
     }
@@ -26573,13 +29889,19 @@
           const mustRedraw = attrs.dtype && attrs.dtype === dt.DRAWING &&
             (attrs.rpn || (attrs.value.parameters.length > 0 || isCalcAll));
           if (mustCalc(attrs, hurmetVars, changedVars, isCalcAll)) {
-            if (isCalcAll) { improveQuantities(attrs, hurmetVars); }
-            if (attrs.rpn || mustRedraw) {
-              attrs = attrs.rpn // attrs.dtype && attrs.dtype === dt.DRAWING
-                ? evaluate(attrs, hurmetVars, decimalFormat)
-                : evaluateDrawing(attrs, hurmetVars, decimalFormat);
+            try {
+              if (isCalcAll) { improveQuantities(attrs, hurmetVars); }
+              if (attrs.rpn || mustRedraw) {
+                attrs = attrs.rpn // attrs.dtype && attrs.dtype === dt.DRAWING
+                  ? evaluate(attrs, hurmetVars, decimalFormat)
+                  : evaluateDrawing(attrs, hurmetVars, decimalFormat);
+              }
+              if (attrs.name) {
+                insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat);
+              }
+            } catch (err) {
+              attrs.tex = "\\text{" + attrs.entry + " = " + err + "}";
             }
-            if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat); }
             if (isCalcAll || attrs.rpn || mustRedraw) {
               tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs));
             }
@@ -26682,17 +30004,7 @@
         state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1));
       }
       const tr = state.tr;
-      try {
-        proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr);
-      } catch (err) {
-        console.log(err); // eslint-disable-line no-console
-        const pos = nodeAttrs.template.indexOf(nodeAttrs.resultdisplay);
-        nodeAttrs.tex = nodeAttrs.template.slice(0, pos) + "\\text{" + err + "}";
-        tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs));
-        tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)));
-        view.dispatch(tr);
-        view.focus();
-      }
+      proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr);
     }
   }
 
