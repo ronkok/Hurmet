@@ -813,6 +813,9 @@ export const parse = (
           texStack.push({ prec: 13, pos: posOfPrevRun, ttype: tt.SUP, closeDelim: "}" })
         }
         if (isCalc) { rpnStack.push({ prec: 13, symbol: "^" }) }
+        if (delims.length > 0 && str.charAt(0) === "(") {
+          delims[delims.length - 1].isTall = true
+        }
         tex += "^{"
         okToAppend = false
         break
