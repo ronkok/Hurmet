@@ -17100,7 +17100,11 @@ const hurmetNodes =  {
   },
   paragraph(state, node) {
     const prevLength = state.out.length;
-    state.renderInline(node);
+    if (node.content.content.length > 0) {
+      state.renderInline(node);
+    } else {
+      state.write("¶");
+    }
     if (!state.isGFM) {
       state.out = limitLineLength(state.out, prevLength, state.delim, state.lineLimit);
     }

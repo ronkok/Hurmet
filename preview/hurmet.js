@@ -3761,7 +3761,7 @@
     "<-->": ["<-->", "\\xrightleftarrows", tt.UNARY, ""]
   });
 
-  const miscRegEx = /^([/÷\u2215_:,;\t^+\\\-–−*×∘⊗⦼⊙√∛∜·.%|╏‖¦><=≈≟≠≡≤≥≅∈∉∋∌⊂⊄⊆⊈⊃⊇⊉!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃∫∬∮∑([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7$£¥€₨₩₪]+)/;
+  const miscRegEx = /^([/÷\u2215_:,;\t^+\\\-–−*∗×∘⊗⦼⊙√∛∜·.%|╏‖¦><=≈≟≠≡≤≥≅∈∉∋∌⊂⊄⊆⊈⊃⊇⊉!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃∫∬∮∑([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7$£¥€₨₩₪]+)/;
 
   const miscSymbols = Object.freeze({
     //    input, output, type,  closeDelim
@@ -3782,6 +3782,7 @@
     ".+": [".+", "\\mathbin{.+}", tt.ADD, ""],
     ".-": [".-", "\\mathbin{.-}", tt.ADD, ""],
     "*": ["*", "*", tt.MULT, ""],
+    "∗": ["∗", "∗", tt.MULT, ""],
     "×": ["×", "×", tt.MULT, ""],
     "∘": ["∘", "∘", tt.MULT, ""], // U+2218
     "⊗": ["⊗", "⊗", tt.MULT, ""],
@@ -4546,6 +4547,7 @@
   };
 
   const colorSpecRegEx = /^(#([a-f0-9]{6}|[a-f0-9]{3})|[a-z]+|\([^)]+\))/i;
+  const accentRegEx$2 = /^(?:.|\uD835.)[\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]_/;
 
   const factors = /^[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133\uD835[({√∛∜]/;
 
@@ -5103,7 +5105,9 @@
 
           if (!isCalc) {
             if (token.ttype === tt.LONGVAR) {
-              token.output = "\\mathrm{" + token.output + "}";
+              if (!accentRegEx$2.test(token.input)) {
+                token.output = "\\mathrm{" + token.output + "}";
+              }
             }
           } else if (prevToken.input === "for") {
             rpn += '"' + token.input + '"'; // a loop index variable name.
@@ -5271,6 +5275,9 @@
             texStack.push({ prec: 13, pos: posOfPrevRun, ttype: tt.SUP, closeDelim: "}" });
           }
           if (isCalc) { rpnStack.push({ prec: 13, symbol: "^" }); }
+          if (delims.length > 0 && str.charAt(0) === "(") {
+            delims[delims.length - 1].isTall = true;
+          }
           tex += "^{";
           okToAppend = false;
           break
@@ -8924,30 +8931,31 @@
    * 4. ~~strikethrough~~
    * 5. Pipe tables as per Github Flavored Markdown (GFM).
    * 6. Grid tables as per Pandoc and reStructuredText
-   * 7. Attributes for reference link definitions
+   * 7. Empty paragraphs: A line consisting only of "¶".
+   * 8. Attributes for reference link definitions
    *      [id]: target
    *      {.class #id width=number}
-   * 8. Figure/Caption for images. Format is a paragraph that consists entirely of:
+   * 9. Figure/Caption for images. Format is a paragraph that consists entirely of:
    *    !![caption][id]
-   * 9.  Table directives. They are placed on the line after the table. The format is:
+   * 10. Table directives. They are placed on the line after the table. The format is:
    *     {.class #id width="num1 num2 …" caption}
-   * 10. Lists that allow the user to pick list ordering.
+   * 11. Lists that allow the user to pick list ordering.
    *        1. →  1. 2. 3.  etc.
    *        A. →  A. B. C.  etc. (future)
    *        a) →  (a) (b) (c)  etc. (future)
-   * 11. Fenced divs, similar to Pandoc.
+   * 12. Fenced divs, similar to Pandoc.
    *     ::: (centered|comment|indented|header)
    *     Block elements
    *     :::
    *     Nested divs are distinguished by number of colons. Minimum three.
-   * 12. Table of Contents
+   * 13. Table of Contents
    *     {.toc start=N end=N}
-   * 13. Definition lists, per Pandoc.  (future)
-   * 14. [^1] is a reference to a footnote. (future)
+   * 14. Definition lists, per Pandoc.  (future)
+   * 15. [^1] is a reference to a footnote. (future)
    *     [^1]: The body of the footnote is deferred, similar to reference links.
-   * 15. [#1] is a reference to a citation. (future)
+   * 16. [#1] is a reference to a citation. (future)
    *     [#1]: The body of the citation is deferred, similar to reference links.
-   * 16. Line blocks begin with "| ", as per Pandoc. (future)
+   * 17. Line blocks begin with "| ", as per Pandoc. (future)
    *
    * hurmetMark.js copyright (c) 2021 - 2023 Ron Kok
    *
@@ -9568,6 +9576,13 @@
     isLeaf: true,
     match: blockRegex(/^(?:\n *)*\n/),
     parse: function() { return { type: "null" } }
+  });
+  rules.set("emptyParagraph", {
+    isLeaf: true,
+    match: blockRegex(/^¶(?:\n *)+\n/),
+    parse: function(capture, state) {
+      return { type: "paragraph", content: [] }
+    }
   });
   rules.set("paragraph", {
     isLeaf: false,
@@ -12004,7 +12019,7 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
                 // b is the length of the load.
                 // c is the distance from the end of the load to the right edge of the span.
                 // e is the distance from the left edge of the load to the right end of the span.
-                // d is the distance from the right edge of the load to the left edge of the span.
+                // d is the distance from the right edge of the load to the left edge of the span
                 let w = 0;
                 let s = 0;
                 const a = seg.xOfLeftEnd - nodes[i].x;
@@ -12086,7 +12101,8 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
                       - ((wF - wT) * L ** 2 / 60) * (a / L) ** 3 * (5 - 3 * a / L)
                       - (wT * L ** 2 / 12) * (a / L) ** 3 * (4 - 3 * a / L);
                   feam[i4] = feam[i4] - mB;
-                  feam[i1] = feam[i1] + 0.5 * (wT * b) * (L - centerOfTriangle) / L + (mA - mB) / L;
+                  feam[i1] = feam[i1]
+                            + 0.5 * (wT * b) * (L - centerOfTriangle) / L + (mA - mB) / L;
                   feam[i3] = feam[i3] + 0.5 * (wT * b) * centerOfTriangle / L + (mB - mA) / L;
 
                 } else if (Math.abs(seg.w2[loadType]) > Math.abs(seg.w1[loadType])) {
@@ -12105,7 +12121,8 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
                         * (10 - 10 * c / L + 3 * c ** 2 / L ** 2)
                       - (wT * L ** 2 / 12) * (c / L) ** 2 * (6 - 8 * c / L + 3 * c ** 2 / L ** 2);
                   feam[i4] = feam[i4] - mB;
-                  feam[i1] = feam[i1] + 0.5 * (wT * b) * (L - centerOfTriangle) / L + (mA - mB) / L;
+                  feam[i1] = feam[i1]
+                             + 0.5 * (wT * b) * (L - centerOfTriangle) / L + (mA - mB) / L;
                   feam[i3] = feam[i3] + 0.5 * (wT * b) * centerOfTriangle / L + (mB - mA) / L;
                 }
                 if (gotOppSigns) {
@@ -12123,9 +12140,11 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
                       * (10 - 10 * e2 / L + 3 * e2 ** 2 / L ** 2)
                       - ((wF - wT) * L ** 2 / 60) * (c2 / L) ** 2
                       * (10 - 10 * c2 / L + 3 * c2 ** 2 / L ** 2)
+                      // eslint-disable-next-line max-len
                       - (wT * L ** 2 / 12) * (c2 / L) ** 2 * (6 - 8 * c2 / L + 3 * c2 ** 2 / L ** 2);
                   feam[i4] = feam[i4] - mB;
-                  feam[i1] = feam[i1] + 0.5 * (wT * b2) * (L - centerOfTriangle) / L + (mA - mB) / L;
+                  feam[i1] = feam[i1]
+                            + 0.5 * (wT * b2) * (L - centerOfTriangle) / L + (mA - mB) / L;
                   feam[i3] = feam[i3] + 0.5 * (wT * b2) * centerOfTriangle / L + (mB - mA) / L;
                 }
               }
@@ -12341,7 +12360,8 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
 
             for (let j = 2; j <= numSpans; j++) {
               if (nodes[j].fixity === "fixed") {
-                nodes[j].Mr[loadType] = mam[5 * (j - 1)] + mam[5 * (j - 1) + 3] + nodes[j].M[loadType];
+                nodes[j].Mr[loadType] = mam[5 * (j - 1)]
+                                         + mam[5 * (j - 1) + 3] + nodes[j].M[loadType];
               }
               if (nodes[j].fixity === "spring") {
                 nodes[j].Pr[loadType] = mam[5 * (j - 1) + 1];
@@ -13106,7 +13126,8 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
                 }
                 if (xCross > 0 && xCross < seg.length) {
                   mMid = seg.M1[combern] + seg.V1[combern] * xCross
-                        + 0.5 * seg.w1f[combern] * xCross ** 2 + seg.slope[combern] * xCross ** 3 / 6;
+                        + 0.5 * seg.w1f[combern] * xCross ** 2
+                        + seg.slope[combern] * xCross ** 3 / 6;
                 } else {
                   mMid = seg.M1[combern] + seg.V1[combern] * (seg.length / 2)
                       + 0.5 * seg.w1f[combern] * (seg.length / 2) ** 2
@@ -14065,7 +14086,7 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
   };
 
   const matrixMults = { "×": "cross", "·": "dot", "∘": "circ", ".*": "circ",
-    "*": "multiply", "⌧": "multiply" };
+    "*": "multiply", "∗": "multiply", "⌧": "multiply" };
 
   const nextToken = (tokens, i) => {
     if (tokens.length < i + 2) { return undefined }
@@ -14277,12 +14298,14 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
           case "×":
           case "·":
           case "*":
+          case "∗":
           case "∘":
           case "⌧": {
             const oprnd2 = stack.pop();
             const o2 = oprnd2.dtype === dt.DATAFRAME ? clone(oprnd2) : oprnd2;
             const o1 = stack.pop();
-            if (tkn === "*" && o1.dtype === dt.STRING && o1.dtype === dt.STRING) {
+            if ((tkn === "*" || tkn === "∗")
+                 && o1.dtype === dt.STRING && o1.dtype === dt.STRING) {
               // Julia's string concatenation operator
               const str1 = stringFromOperand(o1, decimalFormat);
               const str2 = stringFromOperand(o2, decimalFormat);

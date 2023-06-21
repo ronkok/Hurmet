@@ -19,30 +19,31 @@
  * 4. ~~strikethrough~~
  * 5. Pipe tables as per Github Flavored Markdown (GFM).
  * 6. Grid tables as per Pandoc and reStructuredText
- * 7. Attributes for reference link definitions
+ * 7. Empty paragraphs: A line consisting only of "¶".
+ * 8. Attributes for reference link definitions
  *      [id]: target
  *      {.class #id width=number}
- * 8. Figure/Caption for images. Format is a paragraph that consists entirely of:
+ * 9. Figure/Caption for images. Format is a paragraph that consists entirely of:
  *    !![caption][id]
- * 9.  Table directives. They are placed on the line after the table. The format is:
+ * 10. Table directives. They are placed on the line after the table. The format is:
  *     {.class #id width="num1 num2 …" caption}
- * 10. Lists that allow the user to pick list ordering.
+ * 11. Lists that allow the user to pick list ordering.
  *        1. →  1. 2. 3.  etc.
  *        A. →  A. B. C.  etc. (future)
  *        a) →  (a) (b) (c)  etc. (future)
- * 11. Fenced divs, similar to Pandoc.
+ * 12. Fenced divs, similar to Pandoc.
  *     ::: (centered|comment|indented|header)
  *     Block elements
  *     :::
  *     Nested divs are distinguished by number of colons. Minimum three.
- * 12. Table of Contents
+ * 13. Table of Contents
  *     {.toc start=N end=N}
- * 13. Definition lists, per Pandoc.  (future)
- * 14. [^1] is a reference to a footnote. (future)
+ * 14. Definition lists, per Pandoc.  (future)
+ * 15. [^1] is a reference to a footnote. (future)
  *     [^1]: The body of the footnote is deferred, similar to reference links.
- * 15. [#1] is a reference to a citation. (future)
+ * 16. [#1] is a reference to a citation. (future)
  *     [#1]: The body of the citation is deferred, similar to reference links.
- * 16. Line blocks begin with "| ", as per Pandoc. (future)
+ * 17. Line blocks begin with "| ", as per Pandoc. (future)
  *
  * hurmetMark.js copyright (c) 2021 - 2023 Ron Kok
  *
@@ -663,6 +664,13 @@ rules.set("newline", {
   isLeaf: true,
   match: blockRegex(/^(?:\n *)*\n/),
   parse: function() { return { type: "null" } }
+});
+rules.set("emptyParagraph", {
+  isLeaf: true,
+  match: blockRegex(/^¶(?:\n *)+\n/),
+  parse: function(capture, state) {
+    return { type: "paragraph", content: [] }
+  }
 });
 rules.set("paragraph", {
   isLeaf: false,
