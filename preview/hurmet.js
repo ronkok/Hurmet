@@ -13517,7 +13517,7 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
     let f = 0;
     for (let i = 1; i < nodes.length; i++) {
       const x = beam.xDiagram + beam.xScale * nodes[i].x;
-      if (Math.abs(nodes[i].Pr[0] > 0)) {
+      if (Math.abs(nodes[i].Pr[0]) > 0) {
         f = 1 / (beam.SI ? 1000 : 4448.2216152605);
         const sText = round(nodes[i].Pr[0] * f, 3);
         diagram = diagram.concat(Draw.pointForce(x, beam.yLoad, sText, nodes[i].fixity, true));
