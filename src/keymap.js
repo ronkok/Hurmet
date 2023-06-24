@@ -11,7 +11,7 @@ import {
 import { wrapInList, splitListItem, liftListItem, sinkListItem } from "./schema"
 import { undo, redo } from "prosemirror-history"
 import { undoInputRule } from "prosemirror-inputrules"
-import { insertMath, convertWord, saveFileAsMarkdown } from "./menu"
+import { insertMath, saveFileAsMarkdown } from "./menu"
 import { readFile } from "./openfile"
 import { goToNextCell } from "prosemirror-tables"
 
@@ -84,10 +84,6 @@ export function buildKeymap(schema, mapKeys) {
   if ((type = schema.nodes.calculation)) {
     bind("Alt-c", (state, _, view) => {
       insertMath(state, view, "calculation")
-      return true
-    })
-    bind("Alt-h", (state, _, view) => {
-      convertWord(state, view)
       return true
     })
   }

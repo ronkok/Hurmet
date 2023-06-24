@@ -762,33 +762,6 @@ function mathMenuItem(nodeType, encoding) {
   })
 }
 
-export function convertWord(state, view) {
-  // Convert text to calculation nodes.
-  // Used for conversion from ClariCalc, which does most of the work.
-  const doc = state.doc
-  const tr = state.tr
-  const calcNode = schema.nodes.calculation
-  const RegExCalc = /\$`[^`]+`/g
-  const calcs = [];
-  doc.nodesBetween(0, doc.content.size, function(node, pos) {
-    if (node.type.name === "text") {
-      const str = node.text
-      const matches = str.matchAll(RegExCalc)
-      for (const match of matches) {
-        const start = pos + match.index
-        const end = start + match[0].length
-        const entry = match[0].slice(2, -1).trim()
-        calcs.push({ start, end, entry })
-      }
-    }
-  })
-  while (calcs.length > 0) {
-    const { start, end, entry } = calcs.pop()
-    tr.replaceWith(start, end, calcNode.createAndFill({ entry }))
-  }
-  view.dispatch(tr)
-}
-
 const createTable = (schema, rowsCount = 3, colsCount = 3, withHeaderRow = true) => {
   const cells = [];
   const headerCells = [];
