@@ -1644,7 +1644,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
 
 const errorResult = (stmt, result) => {
   stmt.value = null
-  stmt.resultDisplay = "\\textcolor{firebrick}{\\text{" + result.value + "}}"
+  stmt.resultDisplay = "\\textcolor{firebrick}{\\text{" + result.value.replace(/%/g, "\\%") + "}}"
   stmt.altResultDisplay = result.value
   stmt.error = true
   stmt.dtype = dt.ERROR
