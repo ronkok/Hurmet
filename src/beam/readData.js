@@ -1,6 +1,5 @@
 import { Rnl } from "../rational.js"
 import { unitFromUnitName } from "../units.js"
-import { loadCombinations } from "./loadCombinations.js"
 
 const ftRegEx = /′/g
 const numberRegEx = new RegExp(Rnl.numberPattern)

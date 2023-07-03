@@ -1,6 +1,5 @@
 import { DEAD, FLUID, LIVE, ROOFLIVE, HORIZ, SNOW, RAIN, WIND, EQ } from "./utils"
 import { getLoadPatterns } from "./loadPatterns"
-//import { loadCombinations } from "./loadCombinations"
 import { populateMAM } from "./populateMAM"
 
 export function combine(beam, nodes, spans, actions, deflections, comboSet) {
@@ -312,45 +311,6 @@ const isReqdCombo = (combo, gotType) => {
   return isDeadLoadOnly
 }
 
-const oldIsReqdCombo = (str, gotType) => {
-  str = str.replace(/ /g, "")
-  if (str.length === 0) { return false }
-
-  for (let i = 0; i < str.length; i++) {
-    const c = str.slice(i, i + 1)
-
-    switch (c) {
-      case "D":
-        if (gotType[DEAD]) { return true }
-        break
-      case "F":
-        if (gotType[FLUID]) { return true }
-        break
-      case "L":
-        if (gotType[LIVE]) { return true }
-        break
-      case "H":
-        if (gotType[HORIZ]) { return true }
-        break
-      case "£":
-        if (gotType[ROOFLIVE]) { return true }
-        break
-      case "S":
-        if (gotType[SNOW]) { return true }
-        break
-      case "R":
-        if (gotType[RAIN]) { return true }
-        break
-      case "W":
-        if (gotType[WIND]) { return true }
-        break
-      case "E":
-        if (gotType[EQ]) { return true }
-    }
-  }
-  return false
-}
-
 const comboContainsLive = combo => {
   return (combo[LIVE] !== 0 || combo[ROOFLIVE] !== 0 || combo[SNOW] !== 0)
 }
@@ -382,31 +342,6 @@ const getLiveDM = (a, b, loadPattern, numSpans) => {
     a = a.map((e, i) => e  + b[i])
   }
   return a
-}
-
-const factorsFrom = (factors, beam) => {
-  // Get a combination of load factors.
-  // The input is a string from one line in loadCombinations.js.
-
-  // Sometimes the dead load factor is adjusted for vertical seismic motion.
-  // In that case, the input string contain something like: 1.2+0.2*SDS
-  if (factors[1].indexOf("*SDS") > -1) {
-    let str = factors[1]
-    let pos = str.indexOf("*SDS")
-    str = str.slice(0, pos)
-    pos = str.indexOf("+")
-    if (pos > 0) {
-      factors[1] = Number(str.slice(0, pos)) + Number(str.slice(pos + 1)) * beam.SDS
-    } else {
-      pos = str.indexOf("-")
-      factors[1] = Number(str.slice(0, pos)) - Number(str.slice(pos + 1)) * beam.SDS
-    }
-  }
-
-  // Adjust live load factor
-  if (factors[3] === "LLF") { factors[3] = beam.LLF }
-
-  return factors.map(e => Number(e))
 }
 
 const getThetaAndDelta = (fixity, dm, seg, i, iDM) => {
