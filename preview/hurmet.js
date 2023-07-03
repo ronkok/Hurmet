@@ -4480,7 +4480,7 @@
   const builtInFunctions = [
     "Char", "abs", "acos", "acosd", "acosh", "acot", "acotd", "acoth", "acsc", "acscd",
     "acsch", "angle", "asec", "asecd", "asech", "asin", "asind", "asinh", "atan", "atan2",
-    "atand", "atanh", "binomial", "beamDiagram", "ceil", "conj", "cos", "cosd", "cosh",
+    "atand", "atanh", "binomial", "ceil", "conj", "cos", "cosd", "cosh",
     "cosh", "cot", "cotd", "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp",
     "factorial", "fetch", "findfirst", "floor", "format", "gamma", "gcd", "hcat", "hypot",
     "imag", "isnan", "length", "lerp", "ln", "log", "log10", "log2", "lfact", "lgamma", "logn",
@@ -4489,7 +4489,7 @@
     "trace", "transpose", "vcat", "zeros", "Γ"
   ];
 
-  const builtInReducerFunctions = ["accumulate", "dataframe", "matrix2table",
+  const builtInReducerFunctions = ["accumulate", "beamDiagram", "dataframe", "matrix2table",
     "max", "mean", "median", "min", "product", "rand", "range", "stddev", "sum", "variance"
   ];
 
@@ -10710,11 +10710,26 @@
     fluid: 2, F: 2, f: 2, // fluid
     live: 3,  L: 3, l: 3, // live
     H: 4, h: 4, // horizontal load, usually soil against a retaining wall
-    roof: 5,  Lr: 5, lr: 5, LR: 5, lR: 5, // roof live
+    roof: 5,  Lr: 5, lr: 5, LR: 5, lR: 5, RL: 5, roofLive: 5, // roof live
     snow: 6,  S: 6, s: 6, // snow
     rain: 7,  R: 7, r: 7, // rain
     wind: 8,  W: 8, w: 8, // wind
-    EQ: 9,    E: 9, e: 9  // earthquake
+    EQ: 9,    E: 9, e: 9, seismic: 9  // earthquake
+  };
+
+  const combinationsFromInput = factorInput => {
+    const data = factorInput.data;
+    const headings = factorInput.headings;
+    const combinations = [];
+    for (let i = 0; i < data[0].length; i++) {
+      const factors = new Array(10).fill(0);
+      for (let j = 0; j < headings.length; j++) {
+        const type = loadType[headings[j]];
+        factors[type] = Rnl.toNumber(data[j][i]);
+      }
+      combinations.push(factors);
+    }
+    return combinations
   };
 
   const newNode = (fixity, k, xCoordinate) => {
@@ -10820,16 +10835,17 @@
   // Here's the main function of this module.
   // Take the raw input strings, validate them, and load them
   // into data structures for use by the analyze function.
-  function populateData(input) {
+  function populateData(input, factorInput) {
     const errorMsg = "";
     const beam = {
       E: 0, // modulus of elasticity
       I: 0, // moment of inertia
       k: 0, // spring constant
-      convention: input.convention ? 1 : -1, // Plot positive moment on comp or tension side.
+      convention: input.convention
+        ? input.convention
+        : 1, // Plot + moment on comp or tension side.
       SI: input.SI || false, // boolean. Are we using SI units?
       doLiveLoadPatterns: input.patterns,
-      comboName: input.combinations,
       LLF: input.LLF,
       SDS: input.SDS,
       gotType: [false, false, false, false, false, false, false, false, false],
@@ -11070,7 +11086,11 @@
     }
     beam.length = Rnl.toNumber(beam.length);
 
-    return [errorMsg, beam, nodes, spans]
+    const combinations = typeof factorInput === "string"
+      ? "service"
+      : combinationsFromInput(factorInput);
+
+    return [errorMsg, beam, nodes, spans, combinations]
 
   }
 
@@ -11601,7 +11621,7 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
     input.SDS = 0;
     input.k = 0;
     input.SI = false;
-    input.combinations = "service";
+    input.convention = 1;
     // Read the input and overwrite the defaults.
     for (let i = 0; i < data[0].length; i++) {
       const item = data[0][i].trim();
@@ -11631,7 +11651,7 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
           break
         }
 
-        case "setup": {
+        case "plan": {
           if (numberRegEx$3.test(datum)) { input.nodes.push("none"); }
           const elements = datum.split(/ +/g);
           for (let k = 0; k < elements.length; k++) {
@@ -11735,13 +11755,8 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
           break
         }
 
-        case "combo": {
-          const validCombos = Object.keys(loadCombinations);
-          if (!validCombos.includes(datum)) {
-            // eslint-disable-next-line max-len
-            return `Error. Unsupported combo. Supported combos are:}\\\\ \\text{${validCombos.join(", ")}`
-          }
-          input.combinations = datum;
+        case "convention": {
+          input.convention = datum.charAt(0).toLowerCase() === "t" ? -1 : 1;
           break
         }
 
@@ -12922,12 +12937,13 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
     return mam
   }
 
-  function combine(beam, nodes, spans, actions, deflections) {
+  function combine(beam, nodes, spans, actions, deflections, comboSet) {
     // We already have member end actions for each load type on each span.
     // In this function, we superimpose the load combinations and live load patterns and
     // find the maximum and minimum shears and moments.
     const numSpans = spans.length - 1;
-    const isService = beam.comboName === "service";
+    const isService = comboSet === "service";
+    if (isService) { comboSet = [[0, 1, 1, 1, 1, 1, 1, 1, 1, 1]]; }
     const numPatterns = beam.numPatterns;
     const liveLoadPatterns = getLoadPatterns(beam, numSpans);
     const [dmD, dmL, dmLr, dmS, dmF, dmH, dmR, dmW, dmE] = deflections;
@@ -12943,7 +12959,6 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
 
     // Get ready to do lots of different load combinations.
     // Definition: "combern" is a conflation of the words "combination" and "pattern".
-    const comboSet = loadCombinations[beam.comboName];
     const numComberns = getNumComberns(comboSet, isService, beam);
 
     for (let i = 1; i <= numSpans; i++) {
@@ -12985,12 +13000,12 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
         ? true  // Go thru each load pattern and find deflection extremes.
         : isService
         ? true
-        : isReqdCombo(comboSet[iCombo - 1][0], beam.gotType);
+        : isReqdCombo(comboSet[iCombo - 1], beam.gotType);
 
       if (isReqd) {
         const loadFactors = iCombo === 0 && beam.EI !== 0
           ? [0, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-          : factorsFrom(comboSet[iCombo - 1][1].trim().split(/ +/), beam);
+          : comboSet[iCombo - 1];
 
         for (let iPattern = 0; iPattern < numPatterns; iPattern++) {
           const loadPattern = liveLoadPatterns[iPattern];
@@ -13220,43 +13235,15 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
       deflMaxCase, deflMinCase, numComberns]
   }
 
-  const isReqdCombo = (str, gotType) => {
-    str = str.replace(/ /g, "");
-    if (str.length === 0) { return false }
-
-    for (let i = 0; i < str.length; i++) {
-      const c = str.slice(i, i + 1);
-
-      switch (c) {
-        case "D":
-          if (gotType[DEAD]) { return true }
-          break
-        case "F":
-          if (gotType[FLUID]) { return true }
-          break
-        case "L":
-          if (gotType[LIVE]) { return true }
-          break
-        case "H":
-          if (gotType[HORIZ]) { return true }
-          break
-        case "£":
-          if (gotType[ROOFLIVE]) { return true }
-          break
-        case "S":
-          if (gotType[SNOW]) { return true }
-          break
-        case "R":
-          if (gotType[RAIN]) { return true }
-          break
-        case "W":
-          if (gotType[WIND]) { return true }
-          break
-        case "E":
-          if (gotType[EQ]) { return true }
+  const isReqdCombo = (combo, gotType) => {
+    let isDeadLoadOnly = true;
+    for (let j = 2; j < combo.length; j++) {
+      if (combo[j] > 0) {
+        isDeadLoadOnly = false;
+        if (gotType[j]) { return true }
       }
     }
-    return false
+    return isDeadLoadOnly
   };
 
   const comboContainsLive = combo => {
@@ -13270,8 +13257,8 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
     let numComberns = beam.EI === 1 ? 1 : beam.numPatterns;
     // Then add a combern for each superposition done to get shears and moments.
     for (let i = 0; i < comboSet.length; i++) {
-      if (isService || isReqdCombo(comboSet[i][0], beam.gotType)) {
-        numComberns += beam.containsLive && comboContainsLive(comboSet[i][1].trim().split(/ +/))
+      if (isService || isReqdCombo(comboSet[i], beam.gotType)) {
+        numComberns += beam.containsLive && comboContainsLive(comboSet[i])
         ? beam.numPatterns
         : 1;
       }
@@ -13290,31 +13277,6 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
       a = a.map((e, i) => e  + b[i]);
     }
     return a
-  };
-
-  const factorsFrom = (factors, beam) => {
-    // Get a combination of load factors.
-    // The input is a string from one line in loadCombinations.js.
-
-    // Sometimes the dead load factor is adjusted for vertical seismic motion.
-    // In that case, the input string contain something like: 1.2+0.2*SDS
-    if (factors[1].indexOf("*SDS") > -1) {
-      let str = factors[1];
-      let pos = str.indexOf("*SDS");
-      str = str.slice(0, pos);
-      pos = str.indexOf("+");
-      if (pos > 0) {
-        factors[1] = Number(str.slice(0, pos)) + Number(str.slice(pos + 1)) * beam.SDS;
-      } else {
-        pos = str.indexOf("-");
-        factors[1] = Number(str.slice(0, pos)) - Number(str.slice(pos + 1)) * beam.SDS;
-      }
-    }
-
-    // Adjust live load factor
-    if (factors[3] === "LLF") { factors[3] = beam.LLF; }
-
-    return factors.map(e => Number(e))
   };
 
   const getThetaAndDelta = (fixity, dm, seg, i, iDM) => {
@@ -13474,7 +13436,7 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
 
   }
 
-  function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes) {
+  function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combinations) {
     let diagram = [];
     // Now go thru the comberns again.  Draw the line work this time.
     const numSpans = spans.length - 1;
@@ -13508,7 +13470,7 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
       attrs: { d: `M${beam.xDiagram} ${yM} h300`, "stroke-width": '1.5px' }
     });
 
-    if (beam.comboName !== "service" && beam.comboName.indexOf("ASD") === -1) {
+    if (combinations !== "service") {
       diagram.push(Draw.textNode("factored", 20, yV - 12));
       diagram.push(Draw.textNode("factored", 20, yM - 12));
     }
@@ -13971,15 +13933,15 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
     return { value: msg, unit: null, dtype: dt.ERROR }
   }
 
-  const beamDiagram = inputData => {
+  const beamDiagram = (beamInputData, loadFactorInput) => {
     // This is the main analysis function.
 
     // Get raw data from the input dataframe.
-    const input = readInputData(inputData);
-    if (typeof input === "string") { return error(input) }
+    const beamInput = readInputData(beamInputData);
+    if (typeof input === "string") { return error(beamInput) }
 
     // Validate input and populate data structures.
-    const [errorMsg, beam, nodes, spans] = populateData(input);
+    const [errorMsg, beam, nodes, spans, combinations] = populateData(beamInput, loadFactorInput);
     if (errorMsg) { return error(errorMsg) }
 
     // Start the SVG
@@ -13994,7 +13956,7 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
 
     // Determine shear, moment, and deflection maximums and minimums by superimposing
     // the relevent load combinations and live load patterns.
-    const extremes = combine(beam, nodes, spans, actions, deflections);
+    const extremes = combine(beam, nodes, spans, actions, deflections, combinations);
 
     // Decide which combinations get plotted.
     const cases = selectCases(spans);
@@ -14003,7 +13965,7 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
     const yCoords = locateDiagrams(beam, extremes);
     const yMax = yCoords[6]; // Diagram overall height in local coords.
 
-    const diagrams = drawDiagrams(beam, nodes, spans, cases, yCoords, extremes);
+    const diagrams = drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combinations);
     svg.children = svg.children.concat(diagrams);
 
     // Set the outer dimensions of the diagram.
@@ -14671,9 +14633,13 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
             break
 
           case "beamDiagram": {
-            const arg = stack.pop();
-            if (!(arg.dtype & dt.MAP)) { return errorOprnd("BAD_TYPE", "beamDiagram") }
-            const diagram = beamDiagram(arg.value.data);
+            const numArgs = Number(tokens[i + 1]);
+            i += 1;
+            let combinations = "service";
+            if (numArgs === 2)  { combinations = stack.pop().value; }
+            const beam = stack.pop();
+            if (!(beam.dtype & dt.MAP)) { return errorOprnd("BAD_TYPE", "beamDiagram") }
+            const diagram = beamDiagram(beam.value.data, combinations);
             if (diagram.dtype && diagram.dtype === dt.ERROR) { return diagram }
             stack.push({ value: diagram, resultdisplay: diagram, unit: null, dtype: dt.DRAWING });
             break

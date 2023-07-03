@@ -14,11 +14,26 @@ const loadType = {
   fluid: 2, F: 2, f: 2, // fluid
   live: 3,  L: 3, l: 3, // live
   H: 4, h: 4, // horizontal load, usually soil against a retaining wall
-  roof: 5,  Lr: 5, lr: 5, LR: 5, lR: 5, // roof live
+  roof: 5,  Lr: 5, lr: 5, LR: 5, lR: 5, RL: 5, roofLive: 5, // roof live
   snow: 6,  S: 6, s: 6, // snow
   rain: 7,  R: 7, r: 7, // rain
   wind: 8,  W: 8, w: 8, // wind
-  EQ: 9,    E: 9, e: 9  // earthquake
+  EQ: 9,    E: 9, e: 9, seismic: 9  // earthquake
+}
+
+const combinationsFromInput = factorInput => {
+  const data = factorInput.data
+  const headings = factorInput.headings
+  const combinations = [];
+  for (let i = 0; i < data[0].length; i++) {
+    const factors = new Array(10).fill(0)
+    for (let j = 0; j < headings.length; j++) {
+      const type = loadType[headings[j]];
+      factors[type] = Rnl.toNumber(data[j][i])
+    }
+    combinations.push(factors)
+  }
+  return combinations
 }
 
 const newNode = (fixity, k, xCoordinate) => {
@@ -124,16 +139,17 @@ const splitSegment = (segments, iSeg, xGlobal) => {
 // Here's the main function of this module.
 // Take the raw input strings, validate them, and load them
 // into data structures for use by the analyze function.
-export function populateData(input) {
+export function populateData(input, factorInput) {
   const errorMsg = ""
   const beam = {
     E: 0, // modulus of elasticity
     I: 0, // moment of inertia
     k: 0, // spring constant
-    convention: input.convention ? 1 : -1, // Plot positive moment on comp or tension side.
+    convention: input.convention
+      ? input.convention
+      : 1, // Plot + moment on comp or tension side.
     SI: input.SI || false, // boolean. Are we using SI units?
     doLiveLoadPatterns: input.patterns,
-    comboName: input.combinations,
     LLF: input.LLF,
     SDS: input.SDS,
     gotType: [false, false, false, false, false, false, false, false, false],
@@ -374,6 +390,10 @@ export function populateData(input) {
   }
   beam.length = Rnl.toNumber(beam.length)
 
-  return [errorMsg, beam, nodes, spans]
+  const combinations = typeof factorInput === "string"
+    ? "service"
+    : combinationsFromInput(factorInput)
+
+  return [errorMsg, beam, nodes, spans, combinations]
 
 }

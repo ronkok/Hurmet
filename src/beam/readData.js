@@ -34,7 +34,7 @@ export const readInputData = data => {
   input.SDS = 0
   input.k = 0
   input.SI = false
-  input.combinations = "service"
+  input.convention = 1
   // Read the input and overwrite the defaults.
   for (let i = 0; i < data[0].length; i++) {
     const item = data[0][i].trim()
@@ -64,7 +64,7 @@ export const readInputData = data => {
         break
       }
 
-      case "setup": {
+      case "plan": {
         if (numberRegEx.test(datum)) { input.nodes.push("none") }
         const elements = datum.split(/ +/g)
         for (let k = 0; k < elements.length; k++) {
@@ -168,13 +168,8 @@ export const readInputData = data => {
         break
       }
 
-      case "combo": {
-        const validCombos = Object.keys(loadCombinations)
-        if (!validCombos.includes(datum)) {
-          // eslint-disable-next-line max-len
-          return `Error. Unsupported combo. Supported combos are:}\\\\ \\text{${validCombos.join(", ")}`
-        }
-        input.combinations = datum
+      case "convention": {
+        input.convention = datum.charAt(0).toLowerCase() === "t" ? -1 : 1
         break
       }
 

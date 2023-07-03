@@ -676,9 +676,13 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
 
         case "beamDiagram": {
-          const arg = stack.pop()
-          if (!(arg.dtype & dt.MAP)) { return errorOprnd("BAD_TYPE", "beamDiagram") }
-          const diagram = beamDiagram(arg.value.data)
+          const numArgs = Number(tokens[i + 1])
+          i += 1
+          let combinations = "service"
+          if (numArgs === 2)  { combinations = stack.pop().value }
+          const beam = stack.pop()
+          if (!(beam.dtype & dt.MAP)) { return errorOprnd("BAD_TYPE", "beamDiagram") }
+          const diagram = beamDiagram(beam.value.data, combinations)
           if (diagram.dtype && diagram.dtype === dt.ERROR) { return diagram }
           stack.push({ value: diagram, resultdisplay: diagram, unit: null, dtype: dt.DRAWING })
           break

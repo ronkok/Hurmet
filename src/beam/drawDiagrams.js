@@ -1,7 +1,7 @@
 import { Draw } from "./draw"
 import { round } from "./utils"
 
-export function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes) {
+export function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combinations) {
   let diagram = [];
   // Now go thru the comberns again.  Draw the line work this time.
   const numSpans = spans.length - 1
@@ -35,7 +35,7 @@ export function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes) {
     attrs: { d: `M${beam.xDiagram} ${yM} h300`, "stroke-width": '1.5px' }
   })
 
-  if (beam.comboName !== "service" && beam.comboName.indexOf("ASD") === -1) {
+  if (combinations !== "service") {
     diagram.push(Draw.textNode("factored", 20, yV - 12))
     diagram.push(Draw.textNode("factored", 20, yM - 12))
   }

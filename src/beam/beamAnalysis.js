@@ -13,15 +13,15 @@ export function error(msg) {
   return { value: msg, unit: null, dtype: dt.ERROR }
 }
 
-export const beamDiagram = inputData => {
+export const beamDiagram = (beamInputData, loadFactorInput) => {
   // This is the main analysis function.
 
   // Get raw data from the input dataframe.
-  const input = readInputData(inputData)
-  if (typeof input === "string") { return error(input) }
+  const beamInput = readInputData(beamInputData)
+  if (typeof input === "string") { return error(beamInput) }
 
   // Validate input and populate data structures.
-  const [errorMsg, beam, nodes, spans] = populateData(input)
+  const [errorMsg, beam, nodes, spans, combinations] = populateData(beamInput, loadFactorInput)
   if (errorMsg) { return error(errorMsg) }
 
   // Start the SVG
@@ -36,7 +36,7 @@ export const beamDiagram = inputData => {
 
   // Determine shear, moment, and deflection maximums and minimums by superimposing
   // the relevent load combinations and live load patterns.
-  const extremes = combine(beam, nodes, spans, actions, deflections)
+  const extremes = combine(beam, nodes, spans, actions, deflections, combinations)
 
   // Decide which combinations get plotted.
   const cases = selectCases(spans)
@@ -45,7 +45,7 @@ export const beamDiagram = inputData => {
   const yCoords = locateDiagrams(beam, extremes)
   const yMax = yCoords[6] // Diagram overall height in local coords.
 
-  const diagrams = drawDiagrams(beam, nodes, spans, cases, yCoords, extremes)
+  const diagrams = drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combinations)
   svg.children = svg.children.concat(diagrams)
 
   // Set the outer dimensions of the diagram.

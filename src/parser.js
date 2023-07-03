@@ -15,7 +15,7 @@ import { Rnl } from "./rational"
 const builtInFunctions = [
   "Char", "abs", "acos", "acosd", "acosh", "acot", "acotd", "acoth", "acsc", "acscd",
   "acsch", "angle", "asec", "asecd", "asech", "asin", "asind", "asinh", "atan", "atan2",
-  "atand", "atanh", "binomial", "beamDiagram", "ceil", "conj", "cos", "cosd", "cosh",
+  "atand", "atanh", "binomial", "ceil", "conj", "cos", "cosd", "cosh",
   "cosh", "cot", "cotd", "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp",
   "factorial", "fetch", "findfirst", "floor", "format", "gamma", "gcd", "hcat", "hypot",
   "imag", "isnan", "length", "lerp", "ln", "log", "log10", "log2", "lfact", "lgamma", "logn",
@@ -24,7 +24,7 @@ const builtInFunctions = [
   "trace", "transpose", "vcat", "zeros", "Γ"
 ]
 
-const builtInReducerFunctions = ["accumulate", "dataframe", "matrix2table",
+const builtInReducerFunctions = ["accumulate", "beamDiagram", "dataframe", "matrix2table",
   "max", "mean", "median", "min", "product", "rand", "range", "stddev", "sum", "variance"
 ]
 

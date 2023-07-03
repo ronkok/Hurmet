@@ -1,14 +1,15 @@
 import { DEAD, FLUID, LIVE, ROOFLIVE, HORIZ, SNOW, RAIN, WIND, EQ } from "./utils"
 import { getLoadPatterns } from "./loadPatterns"
-import { loadCombinations } from "./loadCombinations"
+//import { loadCombinations } from "./loadCombinations"
 import { populateMAM } from "./populateMAM"
 
-export function combine(beam, nodes, spans, actions, deflections) {
+export function combine(beam, nodes, spans, actions, deflections, comboSet) {
   // We already have member end actions for each load type on each span.
   // In this function, we superimpose the load combinations and live load patterns and
   // find the maximum and minimum shears and moments.
   const numSpans = spans.length - 1
-  const isService = beam.comboName === "service"
+  const isService = comboSet === "service"
+  if (isService) { comboSet = [[0, 1, 1, 1, 1, 1, 1, 1, 1, 1]] }
   const numPatterns = beam.numPatterns
   const liveLoadPatterns = getLoadPatterns(beam, numSpans)
   const [dmD, dmL, dmLr, dmS, dmF, dmH, dmR, dmW, dmE] = deflections
@@ -24,7 +25,6 @@ export function combine(beam, nodes, spans, actions, deflections) {
 
   // Get ready to do lots of different load combinations.
   // Definition: "combern" is a conflation of the words "combination" and "pattern".
-  const comboSet = loadCombinations[beam.comboName]
   const numComberns = getNumComberns(comboSet, isService, beam)
 
   for (let i = 1; i <= numSpans; i++) {
@@ -66,12 +66,12 @@ export function combine(beam, nodes, spans, actions, deflections) {
       ? true  // Go thru each load pattern and find deflection extremes.
       : isService
       ? true
-      : isReqdCombo(comboSet[iCombo - 1][0], beam.gotType)
+      : isReqdCombo(comboSet[iCombo - 1], beam.gotType)
 
     if (isReqd) {
       const loadFactors = iCombo === 0 && beam.EI !== 0
         ? [0, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        : factorsFrom(comboSet[iCombo - 1][1].trim().split(/ +/), beam)
+        : comboSet[iCombo - 1]
 
       for (let iPattern = 0; iPattern < numPatterns; iPattern++) {
         const loadPattern = liveLoadPatterns[iPattern]
@@ -301,7 +301,18 @@ export function combine(beam, nodes, spans, actions, deflections) {
     deflMaxCase, deflMinCase, numComberns]
 }
 
-const isReqdCombo = (str, gotType) => {
+const isReqdCombo = (combo, gotType) => {
+  let isDeadLoadOnly = true
+  for (let j = 2; j < combo.length; j++) {
+    if (combo[j] > 0) {
+      isDeadLoadOnly = false
+      if (gotType[j]) { return true }
+    }
+  }
+  return isDeadLoadOnly
+}
+
+const oldIsReqdCombo = (str, gotType) => {
   str = str.replace(/ /g, "")
   if (str.length === 0) { return false }
 
@@ -351,8 +362,8 @@ const getNumComberns = (comboSet, isService, beam) => {
   let numComberns = beam.EI === 1 ? 1 : beam.numPatterns
   // Then add a combern for each superposition done to get shears and moments.
   for (let i = 0; i < comboSet.length; i++) {
-    if (isService || isReqdCombo(comboSet[i][0], beam.gotType)) {
-      numComberns += beam.containsLive && comboContainsLive(comboSet[i][1].trim().split(/ +/))
+    if (isService || isReqdCombo(comboSet[i], beam.gotType)) {
+      numComberns += beam.containsLive && comboContainsLive(comboSet[i])
       ? beam.numPatterns
       : 1
     }
