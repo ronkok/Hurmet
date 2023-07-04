@@ -13311,8 +13311,10 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
     const botOfV = vMin < -0.0005
       ? yV + vMin * vScale + 50
       : yV + 70;
-    let yM = mMax > 0.0005
-      ? botOfV + 12 + mMax * mScale + 40
+    const momentMax = beam.convention === 1 ? mMax : Math.abs(mMin);
+    const momentMin = beam.convention === 1 ? Math.abs(mMin) : mMax;
+    let yM = momentMax > 0.0005
+      ? botOfV + 12 + momentMax * mScale + 40
       : botOfV + 12;
     yM = Math.round(yM);
     let yMax = yM;
@@ -13326,13 +13328,10 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
     if (beam.EI !== 1) {
       // eslint-disable-next-line max-len
       if (deflectionMax > deflectionMin) { deflectionScale = 30 / (deflectionMax - deflectionMin); }
-      const botOfM = Math.abs(mMin) > 0.05 * mMax
-        ? yM + mMin * mScale + 40
+      const botOfM = momentMin > (0.05 * momentMax)
+        ? yM + momentMin * mScale + 14
         : yM + 14;
-      yDeflection = botOfM + 80 + deflectionMax * deflectionScale;
-      if (deflectionMax > 0.1 * (deflectionMax - deflectionMin)) {
-        yDeflection = yDeflection + 20;
-      }
+      yDeflection = botOfM + 60 + deflectionMax * deflectionScale;
       yDeflection = Math.round(yDeflection);
       yMax = yDeflection;
       if (Math.abs(deflectionMin) > 0.2 * (deflectionMax - deflectionMin)) {
