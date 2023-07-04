@@ -8,24 +8,6 @@
 
 // utils.js
 
-export const isIn = (item, arry) => {
-  // Binary search to see if item is in an array
-  // This works only if the array is pre-sorted.
-  if (arry.length === 0) { return false }
-  let i = 0
-  let iLow = 0
-  let iHigh = arry.length - 1
-  while (iLow < iHigh) {
-    i = Math.floor((iLow + iHigh) / 2)
-    if (item > arry[i]) {
-      iLow = i + 1
-    } else {
-      iHigh = i
-    }
-  }
-  return item === arry[iLow]
-}
-
 export const clone = obj => {
   // Clone a JavaScript object.
   // That is, make a deep copy that does not contain any reference to the original object.

@@ -1,4 +1,4 @@
-﻿import { isIn, addTextEscapes, tablessTrim, unitTeXFromString } from "./utils"
+﻿import { addTextEscapes, tablessTrim, unitTeXFromString } from "./utils"
 import { Rnl } from "./rational"
 import { formattedDecimal, texFromMixedFraction } from "./format"
 import { DataFrame } from "./dataframe"
@@ -374,7 +374,7 @@ const texFunctions = Object.freeze({
   "\\qquad": ["\\qquad", "\\qquad", tt.SPACE, ""]
 })
 
-const accents = Object.freeze([
+const accents = new Set([
   "Bbb",
   "Overrightarrow",
   "acute",
@@ -423,7 +423,7 @@ const accents = Object.freeze([
 ])
 
 // Avoid "operatorname" for functions that are already math operators.
-const mathOperators = Object.freeze([
+const mathOperators = new Set([
   "arccos",
   "arcsin",
   "arctan",
@@ -460,7 +460,7 @@ const mathOperators = Object.freeze([
   "th"
 ])
 
-const colors = Object.freeze([
+const colors = new Set([
   "blue",
   "gray",
   "green",
@@ -470,7 +470,7 @@ const colors = Object.freeze([
   "red"
 ])
 
-const unaries = Object.freeze([
+const unaries = new Set([
   "bcancel",
   "boxed",
   "cancel",
@@ -517,7 +517,7 @@ const unaries = Object.freeze([
   "xtwoheadrightarrow"
 ])
 
-const binaries = Object.freeze([
+const binaries = new Set([
   "dfrac",
   "frac",
   "lower",
@@ -529,7 +529,7 @@ const binaries = Object.freeze([
   "underset"
 ])
 
-const texREL = Object.freeze([
+const texREL = new Set([
   "Bumpeq", "Colonapprox", "Coloneq", "Coloneqq", "Colonsim", "Darr", "Doteq", "Downarrow",
   "Eqcolon", "Eqqcolon", "Harr", "Larr", "Leftarrow", "Leftrightarrow", "Lleftarrow",
   "Longleftarrow", "Longleftrightarrow", "Longrightarrow", "Lrarr", "Lsh", "Rarr",
@@ -655,7 +655,7 @@ const lexOneWord = (str, prevToken) => {
         ? [match, "\\sqrt", tt.UNARY, ""]
         : match === "f"
         ? [match, match, tt.FUNCTION, ""]
-        : isIn(match, mathOperators)
+        : mathOperators.has(match)
         ? [match, "\\" + match, tt.FUNCTION, ""]
         : [match, "\\operatorname{" + groupSubscript(match) + "}", tt.FUNCTION, ""]
     } else if (prevToken.ttype === tt.ACCESSOR) {
@@ -781,19 +781,19 @@ export const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
     // TeX control word, starting with backslash. e.g. \, or \circ
     const match = matchObj[0]
     st = match.substring(1)
-    if (isIn(st, accents)) {
+    if (accents.has(st)) {
       return [match, match, tt.ACCENT, ""]
     }
-    if (isIn(st, unaries)) {
+    if (unaries.has(st)) {
       return [match, match, tt.UNARY, ""]
     }
-    if (isIn(st, colors)) {
+    if (colors.has(st)) {
       return [match, "\\textcolor{" + st + "}", tt.UNARY, ""]
     }
-    if (isIn(st, binaries)) {
+    if (binaries.has(st)) {
       return [match, match, tt.BINARY, ""]
     }
-    if (isIn(st, texREL)) {
+    if (texREL.has(st)) {
       return [match, match, tt.REL, ""]
     }
     const texFunc = texFunctions[match]

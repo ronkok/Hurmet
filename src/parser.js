@@ -1,4 +1,4 @@
-﻿import { isIn, addTextEscapes, numeralFromSuperScript } from "./utils"
+﻿import { addTextEscapes, numeralFromSuperScript } from "./utils"
 import { tt, lex } from "./lexer"
 import { Rnl } from "./rational"
 
@@ -11,8 +11,7 @@ import { Rnl } from "./rational"
  *
 */
 
-// Keep the next three lists sorted, so that the isIn() binary search will work properly.
-const builtInFunctions = [
+const builtInFunctions = new Set([
   "Char", "abs", "acos", "acosd", "acosh", "acot", "acotd", "acoth", "acsc", "acscd",
   "acsch", "angle", "asec", "asecd", "asech", "asin", "asind", "asinh", "atan", "atan2",
   "atand", "atanh", "binomial", "ceil", "conj", "cos", "cosd", "cosh",
@@ -22,14 +21,15 @@ const builtInFunctions = [
   "mod", "number", "real", "rem", "rms", "round", "roundSig", "roundn", "sec", "secd", "sech",
   "sech", "sign", "sin", "sind", "sinh", "startSvg", "string", "tan", "tand", "tanh", "tanh",
   "trace", "transpose", "vcat", "zeros", "Γ"
-]
+])
 
-const builtInReducerFunctions = ["accumulate", "beamDiagram", "dataframe", "matrix2table",
-  "max", "mean", "median", "min", "product", "rand", "range", "stddev", "sum", "variance"
-]
+const builtInReducerFunctions = new Set(["accumulate", "beamDiagram", "dataframe",
+  "matrix2table", "max", "mean", "median", "min", "product", "rand", "range", "stddev", "sum",
+  "variance"
+])
 
-const trigFunctions = ["cos", "cosd", "cot", "cotd", "csc", "cscd", "sec", "secd",
-  "sin", "sind", "tand", "tan"]
+const trigFunctions = new Set(["cos", "cosd", "cot", "cotd", "csc", "cscd", "sec", "secd",
+  "sin", "sind", "tand", "tan"])
 
 const rationalRPN = numStr => {
   // Return a representation of a rational number that is recognized by evalRPN().
@@ -196,6 +196,9 @@ const testForImplicitMult = (prevToken, texStack, str) => {
   return false
 }
 
+const multiplicands = new Set([tt.ORD, tt.VAR, tt.NUM, tt.LONGVAR, tt.RIGHTBRACKET,
+  tt.CURRENCY, tt.SUPCHAR])
+
 const nextCharIsFactor = (str, tokenType) => {
   const st = str.replace(leadingLaTeXSpaceRegEx, "")
   const fc = st.charAt(0)
@@ -204,9 +207,7 @@ const nextCharIsFactor = (str, tokenType) => {
   if (st.length > 0) {
     if (fc === "|" || fc === "‖") {
       // TODO: Work out left/right
-    } else if (/^[({[√∛∜0-9]/.test(st) &&
-      (isIn(tokenType, [tt.ORD, tt.VAR, tt.NUM, tt.LONGVAR, tt.RIGHTBRACKET,
-        tt.CURRENCY, tt.SUPCHAR]))) {
+    } else if (/^[({[√∛∜0-9]/.test(st) && multiplicands.has(tokenType)) {
       return true
     } else {
       if (factors.test(fc)) {
@@ -225,6 +226,8 @@ const cloneToken = token => {
     closeDelim: token.closeDelim
   }
 }
+
+const endOfOrd = new Set([tt.ORD, tt.VAR, tt.NUM, tt.LONGVAR, tt.RIGHTBRACKET, tt.SUPCHAR])
 
 // The RegEx below is equal to /^\s+/ except it omits \n, \t, and the no-break space \xa0.
 // I use \xa0 to precede the combining arrow accent character \u20D7.
@@ -507,9 +510,7 @@ export const parse = (
       followedByFactor = nextCharIsFactor(str, token.ttype)
     }
 
-    if (token.input === "!" && (isPrecededBySpace ||
-        !isIn(prevToken.ttype,
-          [tt.ORD, tt.VAR, tt.NUM, tt.LONGVAR, tt.RIGHTBRACKET, tt.SUPCHAR]))) {
+    if (token.input === "!" && (isPrecededBySpace || !endOfOrd.has(prevToken.ttype))) {
       // Redefine ! as logical not in certain contexts, to match Julia syntax.
       token.ttype = tt.UNARY
       token.input = "¬"
@@ -852,7 +853,7 @@ export const parse = (
         // Is there an exponent on the function name?
         if (functionExpoRegEx.test(str)) {
           const [expoInput, expoTex, expoRPN] = exponentOfFunction(str, decimalFormat, isCalc)
-          if (isCalc && expoRPN === `®-1/1` && isIn(token.input, trigFunctions)) {
+          if (isCalc && expoRPN === `®-1/1` && trigFunctions.has(token.input)) {
             // Inverse trig function.
             token.input = "a" + token.input
             token.output = "\\a" + token.output.slice(1)
@@ -1021,7 +1022,7 @@ export const parse = (
             }
           }
         }
-        if (topDelim.delimType === dCASES && isIn(token.input, ["if", "otherwise"])) {
+        if (topDelim.delimType === dCASES && ["if", "otherwise"].includes(token.input)) {
           tex += "&"
         }
         tex += token.output
@@ -1099,7 +1100,7 @@ export const parse = (
           delim.delimType = dPAREN
           delim.rpnLength = rpn.length
         } else if (token.input === "[" &&
-            (isIn(prevToken.ttype, [tt.VAR, tt.LONGVAR, tt.STRING, tt.PROPERTY]) ||
+            ([tt.VAR, tt.LONGVAR, tt.STRING, tt.PROPERTY].includes(prevToken.ttype) ||
             prevToken.input === "]")) {
           rpn += tokenSep
           delim.delimType = dACCESSOR
@@ -1232,9 +1233,9 @@ export const parse = (
               }
               rpn += (symbol.slice(-1) === "^")
                 ? firstSep + symbol
-                : builtInFunctions.includes(symbol)
+                : builtInFunctions.has(symbol)
                 ? firstSep + symbol
-                : builtInReducerFunctions.includes(symbol)
+                : builtInReducerFunctions.has(symbol)
                 ? firstSep + symbol + tokenSep + numArgs
                 : firstSep + "function" + tokenSep + symbol + tokenSep + numArgs
               break
