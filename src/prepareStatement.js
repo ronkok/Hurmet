@@ -16,7 +16,7 @@ import { functionRegEx, drawRegEx, moduleRegEx, scanModule } from "./module"
  *  when an author changes an assigned value.  Later, calculation updates will not have to
  *  repeat the work done in this module, so updates will be faster.
  *
- *  Variable inputStr contains the string that an author wrote into the dialog box.
+ *  Variable inputStr contains the string that an author wrote into mathPrompt().
  *
  *  From that entry this module will:
  *    1. Determine the name of the cell, as in "x" from "x = 12"
@@ -24,12 +24,11 @@ import { functionRegEx, drawRegEx, moduleRegEx, scanModule } from "./module"
  *    3. If the input asks for a calculation:
  *       a. Parse the expression into an echo string (in TeX) with placeholders that will be
  *          filled in later with values when the calculation is done.
- *       b. Parse the expression into RPN (postfix) to be passed later to evaluate().
+ *       b. Complie the expression into RPN (postfix) to be passed later to evaluateRPN().
  *       c. Process the unit of measure, if any, of the result. Save it for later calculation.
  *    4. If an assigned value is static, not calculated, find its value.
- *    5. If a unit has been defined in a staic assignment, find the value in Hurmet base units.
- *    6. Append all the display strings together.
- *    7. Return the result. Hurmet will attach it to ProseMirror "attrs" of that node.
+ *    5. Append all the display strings together.
+ *    6. Return the result. Hurmet will attach it to ProseMirror "attrs" of that node.
  */
 
 const containsOperator = /[+\-×·*∘⌧/^%‰&√!¡|‖&=<>≟≠≤≥∈∉⋐∧∨⊻¬]|\xa0(function|mod|\\atop|root|sum|abs|cos|sin|tan|acos|asin|atan|sec|csc|cot|asec|acsc|acot|exp|log|ln|log10|log2|cosh|sinh|tanh|sech|csch|coth|acosh|asinh|atanh|asech|acsch|acoth|gamma|Γ|lgamma|logΓ|lfact|cosd|sind|tand|acosd|asind|atand|secd|cscd|cotd|asecd|acscd|acotd|real|imag|angle|Char|round|sqrt|sign|\?{}|%|⎾⏋|⎿⏌|\[\]|\(\))\xa0/

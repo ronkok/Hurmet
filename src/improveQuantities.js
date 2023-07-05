@@ -8,7 +8,10 @@ import { Rnl } from "./rational"
 /*  This module, like prepareStatement.js, is called only when
  *  (1) an author submits a Hurmet calculation dialog box, or
  *  (2) when a new document is opened, or (3) when recalculate-all is called.
- *  Here we process literal values of assignment statements.
+ *  Here we process literal values of assignment statements and deal w/units.
+ *  This work was not done in prepareStatement() because prepareStatement()
+ *  is called from mathprompt(), which does not have access to hurmetVars,
+ *  which may contain user-defined units.
  */
 
 export const improveQuantities = (attrs, vars) => {
