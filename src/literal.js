@@ -8,6 +8,7 @@ import { DataFrame } from "./dataframe"
 
 const numberRegEx = new RegExp(Rnl.numberPattern)
 const unitRegEx = /('[^']+'|[°ΩÅK])$/
+const matrixRegEx = /^[([] *(?:(?:[-0-9.]+|"[^"]+"|true|false) *[,;\t]? *)+[)\]]/
 /* eslint-disable max-len */
 
 const numStr = "(-?(?:0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?)))"
@@ -22,19 +23,16 @@ const complexRegEx = new RegExp("^" + numStr + "(?: *([+-]) *" + nonNegNumStr + 
 //    [4] theta, the argument (phase angle ) of an r∠θ expression
 //    [5] °, optional trailing degree sign in an r∠θ expression
 
+const unitFromString = str => {
+  if (str.length === 0) { return ["", ""] }
+  const unitName = str.replace(/'/g, "").trim()
+  const unitDisplay = unitTeXFromString(unitName)
+  return [unitName, unitDisplay]
+}
+
 export const valueFromLiteral = (str, name, decimalFormat) => {
   // Read a literal string and return a value
   // The return should take the form: [value, unit, dtype, resultDisplay]
-
-  // Start by checking for a unit
-  let unitName = ""
-  let unitDisplay = ""
-  const unitMatch = unitRegEx.exec(str)
-  if (unitMatch) {
-    unitName = unitMatch[0].replace(/'/g, "").trim()
-    str = str.slice(0, -unitMatch[0].length).trim()
-    unitDisplay = unitTeXFromString(unitName)
-  }
 
   if (/^[({[].* to /.test(str)) {
     // str defines a quantity distribution, (a to b). That is handled by calculation.js.
@@ -53,10 +51,13 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
       return [str.slice(1, -1), undefined, dt.STRING, tex]
     }
 
-  } else if (/^[([]/.test(str)) {
+  } else if (matrixRegEx.test(str)) {
     // We're processing a matrix
-    const [tex, rpn, _] = parse(str, decimalFormat, true)
+    const matrixStr = matrixRegEx.exec(str)[0];
+    const [tex, rpn, _] = parse(matrixStr, decimalFormat, true)
     const oprnd = evalRpn(rpn, {}, decimalFormat, false, {})
+    const unitStr = str.slice(matrixStr.length).trim()
+    const [unitName, unitDisplay] = unitFromString(unitStr)
     let unit = (oprnd.dtype & dt.RATIONAL) ? { expos: allZeros } : null
     let dtype = oprnd.dtype
     if (unitName) {
@@ -70,13 +71,16 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
   } else if (/^``/.test(str)) {
     // A TSV between double back ticks.
     // Read the TSV into a data frame.
-    str = tablessTrim(str.slice(2, -2))
-    const dataStructure = DataFrame.dataFrameFromTSV(str, {})
+    const pos = str.indexOf("``", 2)
+    const tsv = tablessTrim(str.slice(2, pos))
+    const dataStructure = DataFrame.dataFrameFromTSV(tsv, {})
     if (dataStructure.dtype === dt.DATAFRAME) {
       return [dataStructure.value, dataStructure.unit, dt.DATAFRAME,
         DataFrame.display(dataStructure.value, "h3", decimalFormat)]
     } else {
       // It's a Hurmet Map
+      const unitStr = str.slice(pos + 1).trim()
+      const [unitName, unitDisplay] = unitFromString(unitStr)
       if (unitName) {
         dataStructure.unit = unitName
         dataStructure.dtype = dt.MAP + dt.RATIONAL + dt.QUANTITY
@@ -106,19 +110,28 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
     }
     return [[realPart, imPart], allZeros, dt.COMPLEX, resultDisplay]
 
-  } else if (str.match(numberRegEx)) {
-    // str is a number.
-    const resultDisplay = parse(str, decimalFormat)
-    if (unitName) {
-      return [Rnl.fromString(str), unitName, dt.RATIONAL + dt.QUANTITY,
-        resultDisplay + "\\;" + unitDisplay]
-    } else {
-      return [Rnl.fromString(str), { expos: allZeros }, dt.RATIONAL, resultDisplay]
-    }
-
   } else {
-    return [0, null, dt.ERROR, ""]
+    const match = numberRegEx.exec(str)
+    if (match) {
+      // str begins with a number.
+      const numStr = match[0];
+      const unitStr = str.slice(numStr.length).trim()
+      const [unitName, unitDisplay] = unitFromString(unitStr)
+      if (unitName && !unitRegEx.test(unitName)) {
+        // Wrap unitName in unit delimiters
+        str = numStr + ` '${unitName}'`
+      }
+      const resultDisplay = parse(numStr, decimalFormat)
+      if (unitStr) {
+        return [Rnl.fromString(numStr), unitName, dt.RATIONAL + dt.QUANTITY,
+          resultDisplay + "\\;" + unitDisplay]
+      } else {
+        return [Rnl.fromString(numStr), { expos: allZeros }, dt.RATIONAL, resultDisplay]
+      }
 
+    } else {
+      return [0, null, dt.ERROR, ""]
+    }
   }
 }
 
