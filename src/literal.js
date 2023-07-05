@@ -8,7 +8,7 @@ import { DataFrame } from "./dataframe"
 
 const numberRegEx = new RegExp(Rnl.numberPattern)
 const unitRegEx = /('[^']+'|[°ΩÅK])$/
-const matrixRegEx = /^[([] *(?:(?:[-0-9.]+|"[^"]+"|true|false) *[,;\t]? *)+[)\]]/
+const matrixRegEx = /^[([] *(?:(?:-?[0-9.]+|"[^"]+"|true|false) *[,;\t]? *)+[)\]]/
 /* eslint-disable max-len */
 
 const numStr = "(-?(?:0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?)))"
