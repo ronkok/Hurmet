@@ -18,7 +18,7 @@ export const beamDiagram = (beamInputData, loadFactorInput) => {
 
   // Get raw data from the input dataframe.
   const beamInput = readInputData(beamInputData)
-  if (typeof input === "string") { return error(beamInput) }
+  if (typeof beamInput === "string") { return error(beamInput) }
 
   // Validate input and populate data structures.
   const [errorMsg, beam, nodes, spans, combinations] = populateData(beamInput, loadFactorInput)
