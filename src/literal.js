@@ -79,7 +79,7 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
         DataFrame.display(dataStructure.value, "h3", decimalFormat)]
     } else {
       // It's a Hurmet Map
-      const unitStr = str.slice(pos + 1).trim()
+      const unitStr = str.slice(pos + 2).trim()
       const [unitName, unitDisplay] = unitFromString(unitStr)
       if (unitName) {
         dataStructure.unit = unitName
