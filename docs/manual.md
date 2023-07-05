@@ -2355,7 +2355,6 @@ such as calculation cells, indented paragraphs, and merged cells in tables.
 
 *   A `distribution` data type, to enable calculations with uncertainty
 *   A `date` data type
-*   Permalinks
 
 ## Other Resources
 
