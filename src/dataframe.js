@@ -681,6 +681,8 @@ const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHeadin
   for (let j = 1; j < numColsInHeading; j++) {
     str += isMap
       ? "c "
+      : numRows === 1
+      ? "c "
       : Rnl.isRational(data[j][0])
       ? "r "
       : "l "
