@@ -15658,6 +15658,8 @@ function getAllWrapping(node) {
  * See https://Hurmet.app and https://Hurmet.app/docs/en/manual.html
  */
 
+// utils.js
+
 const clone = obj => {
   // Clone a JavaScript object.
   // That is, make a deep copy that does not contain any reference to the original object.
@@ -22140,7 +22142,7 @@ function openMathPrompt(options) {
     const params = (isTex)
       ? { tex: mathString }
       // eslint-disable-next-line no-undef
-      : hurmet.prepareStatement(mathString, options.decimalFormat);
+      : hurmet.compile(mathString, options.decimalFormat);
     params.displayMode = options.attrs.displayMode;
     if (wrapper.parentNode) {
       wrapper.parentNode.firstChild.removeAttribute("style");

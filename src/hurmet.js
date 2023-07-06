@@ -2,7 +2,7 @@ import { parse } from "./parser"
 import { calculate } from "./calculate"
 import { md2ast } from "./md2ast"
 import { md2html } from "./md2html"
-import { prepareStatement } from "./prepareStatement"
+import { compile } from "./compile"
 import temml from "./temml.js"
 import { scanModule } from "./module"
 import { updateCalculations } from "./updateCalculations"
@@ -31,7 +31,7 @@ const render = (tex, dom, options) => {
 export default {
   parse,
   calculate,
-  prepareStatement,
+  compile,
   md2ast,
   md2html,
   scanModule,

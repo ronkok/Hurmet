@@ -1,6 +1,6 @@
 import { dt } from "./constants"
 import { insertOneHurmetVar } from "./insertOneHurmetVar"
-import { prepareStatement } from "./prepareStatement"
+import { compile } from "./compile"
 import { evaluate, evaluateDrawing } from "./evaluate"
 import { clone } from "./utils"
 
@@ -13,7 +13,7 @@ export const calculate = (
   inDraftMode = false,
   decimalFormat = "1,000,000."
 ) => {
-  let attrs = prepareStatement(entry, decimalFormat)
+  let attrs = compile(entry, decimalFormat)
   if (attrs.rpn) {
     attrs = evaluate(clone(attrs), vars, decimalFormat)
   } else if (attrs.dtype && attrs.dtype === dt.DRAWING) {

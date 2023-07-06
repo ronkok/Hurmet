@@ -132,7 +132,7 @@ export function openMathPrompt(options) {
     const params = (isTex)
       ? { tex: mathString }
       // eslint-disable-next-line no-undef
-      : hurmet.prepareStatement(mathString, options.decimalFormat)
+      : hurmet.compile(mathString, options.decimalFormat)
     params.displayMode = options.attrs.displayMode
     if (wrapper.parentNode) {
       wrapper.parentNode.firstChild.removeAttribute("style")

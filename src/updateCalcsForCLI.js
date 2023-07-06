@@ -1,4 +1,4 @@
-import { prepareStatement } from "./prepareStatement"
+import { compile } from "./compile"
 import { evaluate, evaluateDrawing } from "./evaluate"
 import { dt } from "./constants"
 import { helpers } from "./updateCalculations"
@@ -71,7 +71,7 @@ export async function updateCalcs(doc) {
       urls.push(helpers.urlFromEntry(entry))
       callers.push(node)
     } else if (/^function /.test(entry)) {
-      node.attrs = prepareStatement(entry, decimalFormat)
+      node.attrs = compile(entry, decimalFormat)
       insertOneHurmetVar(hurmetVars, node.attrs, null, decimalFormat)
     }
   }
@@ -103,7 +103,7 @@ export async function updateCalcs(doc) {
     for (const node of calcNodes) {
       if (!helpers.fetchRegEx.test(node.attrs.entry)) {
         const entry = node.attrs.entry
-        let attrs = prepareStatement(entry, decimalFormat)
+        let attrs = compile(entry, decimalFormat)
         attrs.displayMode = node.attrs.displayMode
         const mustDraw = attrs.dtype && attrs.dtype === dt.DRAWING
         if (attrs.rpn || mustDraw) {

@@ -4,7 +4,7 @@ import { valueFromLiteral } from "./literal"
 import { functionRegEx, drawRegEx, moduleRegEx, scanModule } from "./module"
 import { unitFromUnitName } from "./units"
 
-/*  prepareStatement.js
+/*  compile.js
  *
  *  This module is called when: (1) an author submits a Hurmet calculation dialog box, or
  *  (2) when a new document is opened, or (3) when recalculate-all is called.
@@ -25,9 +25,9 @@ import { unitFromUnitName } from "./units"
  *    3. If the input asks for a calculation:
  *       a. Parse the expression into an echo string (in TeX) with placeholders that will be
  *          filled in later with values when the calculation is done.
- *       b. Complie the expression into RPN (postfix) to be passed later to evaluateRPN().
+ *       b. Compile the expression into RPN (postfix) to be passed later to evaluateRPN().
  *       c. Process the unit of measure, if any, of the result. Save it for later calculation.
- *    4. If an assigned value is static, not calculated, find its value.
+ *    4. If an assigned value is static, not dynamically calculated, find its value.
  *    5. Append all the display strings together.
  *    6. Return the result. Hurmet will attach it to ProseMirror "attrs" of that node.
  */
@@ -47,7 +47,7 @@ const shortcut = (str, decimalFormat) => {
   return { entry: str, tex, alt: str }
 }
 
-export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
+export const compile = (inputStr, decimalFormat = "1,000,000.") => {
   let leadStr = ""
   let mainStr = ""
   let trailStr = ""

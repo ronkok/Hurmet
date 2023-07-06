@@ -1,7 +1,7 @@
 import { dt } from "./constants"
 import { parse } from "./parser"
 import { insertOneHurmetVar } from "./insertOneHurmetVar"
-import { prepareStatement } from "./prepareStatement"
+import { compile } from "./compile"
 import { evaluate, evaluateDrawing } from "./evaluate"
 import { scanModule } from "./module"
 import { DataFrame } from "./dataframe"
@@ -236,7 +236,7 @@ const proceedAfterFetch = (
     // Calculate the current node.
     if (!fetchRegEx.test(nodeAttrs.entry)) {
       // This is the typical calculation statement. We'll evalutate it.
-      let attrs = clone(nodeAttrs) // prepareStatement was already run in mathprompt.js.
+      let attrs = clone(nodeAttrs) // compile was already run in mathprompt.js.
       // The mathPrompt dialog box did not have accesss to hurmetVars, so it
       // did not do unit conversions on the result template. Do that first.
       try {
@@ -263,7 +263,7 @@ const proceedAfterFetch = (
       if (notFetched) {
         const entry = node.attrs.entry
         let attrs = isCalcAll
-          ? prepareStatement(entry, decimalFormat)
+          ? compile(entry, decimalFormat)
           : clone(node.attrs)
         attrs.displayMode = node.attrs.displayMode
         const mustRedraw = attrs.dtype && attrs.dtype === dt.DRAWING &&
@@ -362,7 +362,7 @@ export function updateCalculations(
           urls.push(urlFromEntry(entry))
           fetchPositions.push(pos)
         } else if (/^function /.test(entry)) {
-          node.attrs = prepareStatement(entry, doc.attrs.decimalFormat)
+          node.attrs = compile(entry, doc.attrs.decimalFormat)
           insertOneHurmetVar(hurmetVars, node.attrs, null, doc.attrs.decimalFormat)
         }
       } else if (node.attrs.isFetch || (node.attrs.dtype && node.attrs.dtype === dt.MODULE)) {

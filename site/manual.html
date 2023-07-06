@@ -406,7 +406,7 @@ a[5:end]  # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong><
 <p>Also, the character <strong>°</strong> is now a unit name. So one can also write a polar notation as <span class='hurmet-calc' data-entry='r∠θ°'><math><mrow><mi>r</mi><mi>∠</mi><mi>θ</mi><mi>°</mi></mrow></math></span> and the phase angle will be unit-aware. The characters <code>ooo</code> will auto-correct into °</p>
 <p>Examples:</p>
 <div class="indented"><p><span class='hurmet-calc' data-entry='z_1 = 2 + 3 im'><math><mrow><mi>z</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo>=</mo></mrow><mrow><mn>2</mn><mo>+</mo></mrow><mrow><mn>3</mn><mspace width="0.1667em"></mspace><mspace width="0.1667em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">m</mi></mrow></mrow></mrow></math></span></p>
-<p><span class='hurmet-calc' data-entry='z_2 = 4∠30°'><math><mrow><mi>z</mi><msub><mrow></mrow><mtext>2</mtext></msub><mo>=</mo></mrow><mrow><mn>4</mn><mi>∠</mi><mn>30</mn></mrow></math></span></p>
+<p><span class='hurmet-calc' data-entry='z_2 = 4∠30°'><math><mrow><mi>z</mi><msub><mrow></mrow><mtext>2</mtext></msub><mo>=</mo></mrow><mrow><mn>4</mn><mi>∠</mi><mn>30</mn><mi>°</mi></mrow></math></span></p>
 <p><span class='hurmet-calc' data-entry='z = z_1 + z_2  = \blue((2 + 3 im) + ( 4∠30°)) = 5.46 + 5 bm'><math><mrow><mi>z</mi><mo>=</mo></mrow><mrow><mi>z</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo>+</mo></mrow><mrow><mi>z</mi><msub><mrow></mrow><mtext>2</mtext></msub><mo>=</mo></mrow><mrow><mo form="prefix" stretchy="false" style="color:#0000FF;">(</mo><mn style="color:#0000FF;">2</mn><mo style="color:#0000FF;">+</mo></mrow><mrow><mn style="color:#0000FF;">3</mn><mspace width="0.1667em" style="color:#0000FF;"></mspace><mspace width="0.1667em" style="color:#0000FF;"></mspace><mrow style="color:#0000FF;"><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">m</mi></mrow></mrow><mo form="postfix" stretchy="false" style="color:#0000FF;">)</mo><mo style="color:#0000FF;">+</mo></mrow><mrow><mo form="prefix" stretchy="false" style="color:#0000FF;">(</mo><mn style="color:#0000FF;">4</mn><mi style="color:#0000FF;">∠</mi><mn style="color:#0000FF;">30</mn><mi style="color:#0000FF;">°</mi><mo form="postfix" stretchy="false" style="color:#0000FF;">)</mo><mo>=</mo></mrow><mrow><mn>5.46</mn><mo>+</mo></mrow><mrow><mn>5</mn><mspace width="0.1667em"></mspace><mspace width="0.1667em"></mspace><mrow><mrow><mi mathvariant="normal">b</mi></mrow><mrow><mi mathvariant="normal">m</mi></mrow></mrow></mrow></math></span></p>
 </div>
 </dd>
@@ -647,7 +647,7 @@ Col B	11	25	14`` 'kips'"><math><mrow><mi>P</mi><msub><mrow></mrow><mtext>a</mtex
 </table>
 </div>
 <h2 id='functions'>Functions</h2>
-<p>Hurmet treats an <a href='#identifiers'>identifier</a> as a function name if it is placed directly before an open parenthesis. So a term like <span class='hurmet-calc' data-entry='sinh(x)'><math><mrow><mi>sinh</mi><mo>⁡</mo></mrow><mrow><mo form="prefix" stretchy="false">(</mo><mi>x</mi><mo form="postfix" stretchy="false">)</mo></mrow></math></span> is a function.</p>
+<p>Hurmet treats an <a href='#identifiers'>identifier</a> as a function name if it is placed directly before an open parenthesis. So a term like <span class='hurmet-calc' data-entry='sinh(x)'><math><mrow><mrow><mi>sinh</mi><mo>⁡</mo></mrow><mo form="prefix" stretchy="false">(</mo><mi>x</mi><mo form="postfix" stretchy="false">)</mo></mrow></math></span> is a function.</p>
 <p>Functions can return multiple values if the return statement is written in the form:  <code>return a, b, c, …, z</code></p>
 <p>Transcendental functions such as trigonometry or logarithms are done to 15 digits precision.</p>
 <p>Hurmet’s built-in functions are described below. Unless noted otherwise, they can operate on any real or complex number or any matrix containing real numbers.</p>
@@ -855,22 +855,13 @@ Col B	11	25	14`` 'kips'"><math><mrow><mi>P</mi><msub><mrow></mrow><mtext>a</mtex
 <p>If the calculated units are non-compatible with the units specified for the result display, Hurmet will return an error message:</p>
 <p><span class='hurmet-calc' data-entry="3 'm' + 2 'ft' = \color(firebrick) &quot;Error. Calculated units are not compatible with the desired result unit:&quot;\, &quot;V&quot;"><math><mrow><mn>3</mn><mspace width="0.2778em"></mspace><mtext>m</mtext><mo>+</mo></mrow><mrow><mn>2</mn><mspace width="0.2778em"></mspace><mtext>ft</mtext><mo>=</mo></mrow><mrow><mtext style="color:firebrick;">Error. Calculated units are not compatible with the desired result unit:</mtext><mtext style="color:firebrick;"> </mtext><mo separator="true" style="color:firebrick;">,</mo><mspace width="0.2222em" style="color:firebrick;"></mspace></mrow><mrow><mtext style="color:firebrick;">V</mtext></mrow></math></span></p>
 <p>If you assign a quantity to a variable, a unit-aware calculation will call the variable’s entire quantity, not just the numeric value.</p>
-<p><span class='hurmet-calc' data-entry="L = 3 'ft'"><math><mrow><mi>L</mi><mo>=</mo></mrow><mrow><mn>3</mn><mspace width="0.2778em"></mspace><mtext>ft</mtext></mrow></math></span></p>
+<p><span class='hurmet-calc' data-entry="L = 3 'ft'"><math><mrow><mi>L</mi><mo>=</mo></mrow><mrow><mn>3</mn><mspace width="0.1667em"></mspace><mtext>ft</mtext></mrow></math></span></p>
 <p><span class='hurmet-calc' data-entry="L_2 = 2 L = \color(blue)(2) (3 'ft') \color(black) = 1.8288 'm'"><math><mrow><mi>L</mi><msub><mrow></mrow><mtext>2</mtext></msub><mo>=</mo></mrow><mrow><mn>2</mn><mspace width="0.1667em"></mspace><mi>L</mi><mo>=</mo></mrow><mrow><mn style="color:#0000FF;">2</mn><mo form="prefix" stretchy="false" style="color:#0000FF;">(</mo><mn style="color:#0000FF;">3</mn><mspace width="0.2778em" style="color:#0000FF;"></mspace><mtext style="color:#0000FF;">ft</mtext><mo form="postfix" stretchy="false" style="color:#0000FF;">)</mo><mo style="color:black;">=</mo></mrow><mrow><mn style="color:black;">1.8288</mn><mspace width="0.2778em" style="color:black;"></mspace><mtext style="color:black;">m</mtext></mrow></math></span></p>
 <p>If you assign a quantity to a variable, you can still call the variable from a non-unit-aware calculation. Such a calculation will call the scalar value, not the quantity.</p>
 <p><span class='hurmet-calc' data-entry='L_unaware = 2 L = \color(blue)(2) (3) \color(black) = 6'><math><mrow><mi>L</mi><msub><mrow></mrow><mtext>unaware</mtext></msub><mo>=</mo></mrow><mrow><mn>2</mn><mspace width="0.1667em"></mspace><mi>L</mi><mo>=</mo></mrow><mrow><mn style="color:#0000FF;">2</mn><mo form="prefix" stretchy="false" style="color:#0000FF;">(</mo><mn style="color:#0000FF;">3</mn><mo form="postfix" stretchy="false" style="color:#0000FF;">)</mo><mo style="color:black;">=</mo></mrow><mrow><mn style="color:black;">6</mn></mrow></math></span></p>
 <p>You’re welcome to view all of Hurmet’s built-in <a href='unit-definitions.html'>unit definitions</a>.</p>
-<h4 id='custom-units'>Custom Units</h4>
-<p>If the Hurmet built-in unit definitions are not sufficient, you can define a set of custom units in a single-row data frame like this:</p>
-<p><span class='hurmet-calc' data-entry='units = ``smoot	sol
-inches	hours
-67    	24.6229622``'><math><mrow><mrow><mrow><mi mathvariant="normal">u</mi></mrow><mrow><mi mathvariant="normal">n</mi></mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">t</mi></mrow><mrow><mi mathvariant="normal">s</mi></mrow></mrow><mo>=</mo></mrow><mrow><mtable columnalign="left" class="tml-array"><mtr><mtd style="text-align:-webkit-left;"><mtext>smoot</mtext></mtd><mtd><mtext>sol</mtext></mtd></mtr><mtr class="tml-hline-solid"><mtd style="text-align:-webkit-left;"><mtext>inches</mtext></mtd><mtd><mtext>hours</mtext></mtd></mtr><mtr><mtd style="text-align:-webkit-left;"><mn>67</mn></mtd><mtd><mn>24.6229622</mn></mtd></mtr></mtable></mrow></math></span></p>
 <h4 id='currencies'>Currencies</h4>
-<p>Currency exchange rates change, so Hurmet’s exchange rates are updated with <a href='https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml'>data from the European Central Bank</a>. That update occurs only once per week. For many purposes, such rates are insufficiently accurate, so you can override them and define your own exchange rates in a map named <strong>currencies</strong>. Such a statement might be coded like this:</p>
-<p><span class='hurmet-calc' data-entry='currencies = ``USD	CAD
-   1 	1.25``'><math><mrow><mrow><mrow><mi mathvariant="normal">c</mi></mrow><mrow><mi mathvariant="normal">u</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow><mrow><mi mathvariant="normal">n</mi></mrow><mrow><mi mathvariant="normal">c</mi></mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow><mrow><mi mathvariant="normal">s</mi></mrow></mrow><mo>=</mo></mrow><mrow><mtable columnalign="center" class="tml-array"><mtr class="tml-hline-solid"><mtd><mtext>USD</mtext></mtd><mtd><mtext>CAD</mtext></mtd></mtr><mtr><mtd><mn>1</mn></mtd><mtd><mn>1.25</mn></mtd></mtr></mtable><mspace width="0.2778em"></mspace></mrow></math></span></p>
-<p>The keys in that map are standard three-letter <a href='https://www.xe.com/iso4217.php'>currrency codes</a>.</p>
-<p>The variable name <strong>currencies</strong> may not be used for any other purpose.</p>
+<p>Currency exchange rates change, so Hurmet’s exchange rates are updated with <a href='https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml'>data from the European Central Bank</a>. That update occurs only once per week. </p>
 <h4 id='traditional-units'>Traditional Units</h4>
 <p>Many traditional units have had more than one historical definition. Hurmet currently has the following default treatment of certain traditional units:</p>
 <ul><li class="tight"><p><strong>pound</strong> is treated as a mass, not a force. (<strong>lbf</strong> and <strong>lbm</strong> are un-ambiguous alternatives.)</p>
@@ -1206,8 +1197,6 @@ const titleRegEx = /([^.\\/]+)\.md$/;  // A helper.
 </li>
 <li class="tight"><p>A <code>date</code> data type</p>
 </li>
-<li class="tight"><p>Permalinks</p>
-</li>
 </ul>
 <h2 id='other-resources'>Other Resources</h2>
 <p>Civil and structural engineers may also find these items useful:</p>
@@ -1355,10 +1344,6 @@ const titleRegEx = /([^.\\/]+)\.md$/;  // A helper.
 <li>
 <details><summary>Units</summary>
 <ul><li class="tight"><p><a href='#unit-aware-calculations'>Unit-Aware Calcs</a></p>
-</li>
-<li class="tight"><p><a href='#custom-units'>Custom Units</a></p>
-</li>
-<li class="tight"><p><a href='#currencies'>Currencies</a></p>
 </li>
 <li class="tight"><p><a href='#traditional-units'>Traditional Units</a></p>
 </li>
