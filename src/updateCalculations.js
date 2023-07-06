@@ -2,7 +2,6 @@ import { dt } from "./constants"
 import { parse } from "./parser"
 import { insertOneHurmetVar } from "./insertOneHurmetVar"
 import { prepareStatement } from "./prepareStatement"
-import { improveQuantities } from "./improveQuantities"
 import { evaluate, evaluateDrawing } from "./evaluate"
 import { scanModule } from "./module"
 import { DataFrame } from "./dataframe"
@@ -241,8 +240,7 @@ const proceedAfterFetch = (
       // The mathPrompt dialog box did not have accesss to hurmetVars, so it
       // did not do unit conversions on the result template. Do that first.
       try {
-        improveQuantities(attrs, hurmetVars)
-        // Now proceed to do the calculation of the cell.
+        // Proceed to do the calculation of the cell.
         if (attrs.rpn || (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING)) {
           attrs = attrs.dtype && attrs.dtype === dt.DRAWING
             ? evaluateDrawing(attrs, hurmetVars, decimalFormat)
@@ -272,7 +270,6 @@ const proceedAfterFetch = (
           (attrs.rpn || (attrs.value.parameters.length > 0 || isCalcAll))
         if (mustCalc(attrs, hurmetVars, changedVars, isCalcAll)) {
           try {
-            if (isCalcAll) { improveQuantities(attrs, hurmetVars) }
             if (attrs.rpn || mustRedraw) {
               attrs = attrs.rpn // attrs.dtype && attrs.dtype === dt.DRAWING
                 ? evaluate(attrs, hurmetVars, decimalFormat)

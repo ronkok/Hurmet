@@ -1,5 +1,4 @@
 import { prepareStatement } from "./prepareStatement"
-import { improveQuantities } from "./improveQuantities"
 import { evaluate, evaluateDrawing } from "./evaluate"
 import { dt } from "./constants"
 import { helpers } from "./updateCalculations"
@@ -107,7 +106,6 @@ export async function updateCalcs(doc) {
         let attrs = prepareStatement(entry, decimalFormat)
         attrs.displayMode = node.attrs.displayMode
         const mustDraw = attrs.dtype && attrs.dtype === dt.DRAWING
-        improveQuantities(attrs, hurmetVars)
         if (attrs.rpn || mustDraw) {
           attrs = attrs.rpn
             ? evaluate(attrs, hurmetVars, decimalFormat)

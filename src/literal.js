@@ -3,11 +3,13 @@ import { tablessTrim, unitTeXFromString } from "./utils"
 import { parse } from "./parser"
 import { evalRpn } from "./evaluate"
 import { Rnl } from "./rational"
+import { Matrix } from "./matrix"
+import { unitFromUnitName } from "./units"
 import { parseFormatSpec } from "./format"
 import { DataFrame } from "./dataframe"
+import { map } from "./map"
 
 const numberRegEx = new RegExp(Rnl.numberPattern)
-const unitRegEx = /('[^']+'|[°ΩÅK])$/
 const matrixRegEx = /^[([] *(?:(?:-?[0-9.]+|"[^"]+"|true|false) *[,;\t]? *)+[)\]]/
 /* eslint-disable max-len */
 
@@ -26,8 +28,39 @@ const complexRegEx = new RegExp("^" + numStr + "(?: *([+-]) *" + nonNegNumStr + 
 const unitFromString = str => {
   if (str.length === 0) { return ["", ""] }
   const unitName = str.replace(/'/g, "").trim()
-  const unitDisplay = unitTeXFromString(unitName)
-  return [unitName, unitDisplay]
+  const unit = unitFromUnitName(unitName)
+  const unitDisplay = (unit.dtype && unit.dtype === dt.ERROR)
+    ? ""
+    : unitTeXFromString(unitName)
+  return [unit, unitDisplay]
+}
+
+const literalWithUnit = (oprnd, tex, unitStr) => {
+  let unit = (oprnd.dtype & dt.RATIONAL) ? { expos: allZeros } : null
+  let unitDisplay = ""
+  let value = oprnd.value
+  if (unitStr.length > 0) {
+    [unit, unitDisplay] = unitFromString(unitStr)
+    if (unit.dtype && unit.dtype === dt.ERROR) {
+      return [0, null, dt.ERROR, ""]
+    }
+    value = oprnd.dtype === dt.RATIONAL
+      ? {
+        plain: oprnd.value,
+        inBaseUnits: Rnl.multiply(Rnl.add(oprnd.value, unit.gauge), unit.factor)
+      }
+      : {
+        plain: oprnd.value,
+        inBaseUnits: Matrix.convertToBaseUnits(oprnd, unit.gauge, unit.factor)
+      }
+  }
+  let dtype = oprnd.dtype
+  if (unitDisplay.length > 0) {
+    dtype += dt.QUANTITY
+    return [value, unit, dtype, tex + "\\," + unitDisplay]
+  } else {
+    return [value, unit, dtype, tex]
+  }
 }
 
 export const valueFromLiteral = (str, name, decimalFormat) => {
@@ -57,36 +90,34 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
     const [tex, rpn, _] = parse(matrixStr, decimalFormat, true)
     const oprnd = evalRpn(rpn, {}, decimalFormat, false, {})
     const unitStr = str.slice(matrixStr.length).trim()
-    const [unitName, unitDisplay] = unitFromString(unitStr)
-    let unit = (oprnd.dtype & dt.RATIONAL) ? { expos: allZeros } : null
-    let dtype = oprnd.dtype
-    if (unitName) {
-      unit = unitName
-      dtype += dt.QUANTITY
-      return [oprnd.value, unit, dtype, tex + "\\," + unitDisplay]
-    } else {
-      return [oprnd.value, unit, dtype, tex]
-    }
+    return literalWithUnit(oprnd, tex, unitStr)
 
   } else if (/^``/.test(str)) {
     // A TSV between double back ticks.
     // Read the TSV into a data frame.
     const pos = str.indexOf("``", 2)
     const tsv = tablessTrim(str.slice(2, pos))
-    const dataStructure = DataFrame.dataFrameFromTSV(tsv)
-    if (dataStructure.dtype === dt.DATAFRAME) {
-      return [dataStructure.value, dataStructure.unit, dt.DATAFRAME,
-        DataFrame.display(dataStructure.value, "h3", decimalFormat)]
+    const oprnd = DataFrame.dataFrameFromTSV(tsv)
+    if (oprnd.dtype === dt.DATAFRAME) {
+      return [oprnd.value, oprnd.unit, dt.DATAFRAME,
+        DataFrame.display(oprnd.value, "h3", decimalFormat)]
     } else {
       // It's a Hurmet Map
       const unitStr = str.slice(pos + 2).trim()
-      const [unitName, unitDisplay] = unitFromString(unitStr)
-      if (unitName) {
-        dataStructure.unit = unitName
-        dataStructure.dtype = dt.MAP + dt.RATIONAL + dt.QUANTITY
+      let unit
+      let unitDisplay = ""
+      if (unitStr.length > 0) {
+        [unit, unitDisplay] = unitFromString(unitStr)
+        if (unit.dtype && unit.dtype === dt.ERROR) { return [0, null, dt.ERROR, ""] }
+        oprnd.unit = unit
+        oprnd.dtype = dt.MAP + dt.RATIONAL + dt.QUANTITY
+        oprnd.value.data = {
+          plain: oprnd.value.data,
+          inBaseUnits: map.convertToBaseUnits(oprnd.value.data, unit.gauge, unit.factor)
+        }
       }
-      return [dataStructure.value, dataStructure.unit, dataStructure.dtype,
-        DataFrame.display(dataStructure.value, "h3", decimalFormat) + "\\;" + unitDisplay]
+      return [oprnd.value, unit, oprnd.dtype,
+        DataFrame.display(oprnd.value, "h3", decimalFormat) + "\\;" + unitDisplay]
     }
 
   } else if (complexRegEx.test(str)) {
@@ -116,20 +147,12 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
       // str begins with a number.
       const numStr = match[0];
       const unitStr = str.slice(numStr.length).trim()
-      const [unitName, unitDisplay] = unitFromString(unitStr)
-      if (unitName && !unitRegEx.test(unitName)) {
-        // Wrap unitName in unit delimiters
-        str = numStr + ` '${unitName}'`
-      }
-      const resultDisplay = parse(numStr, decimalFormat)
-      if (unitStr) {
-        return [Rnl.fromString(numStr), unitName, dt.RATIONAL + dt.QUANTITY,
-          resultDisplay + "\\;" + unitDisplay]
-      } else {
-        return [Rnl.fromString(numStr), { expos: allZeros }, dt.RATIONAL, resultDisplay]
-      }
+      const [tex, rpn, _] = parse(numStr, decimalFormat, true)
+      const oprnd = evalRpn(rpn, {}, decimalFormat, false, {})
+      return literalWithUnit(oprnd, tex, unitStr)
 
     } else {
+      // TODO: Preceding currency symbol, e.g., $25.20
       return [0, null, dt.ERROR, ""]
     }
   }

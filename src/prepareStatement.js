@@ -1,7 +1,8 @@
 ﻿import { parse } from "./parser"
-import { dt } from "./constants"
+import { dt, allZeros } from "./constants"
 import { valueFromLiteral } from "./literal"
 import { functionRegEx, drawRegEx, moduleRegEx, scanModule } from "./module"
+import { unitFromUnitName } from "./units"
 
 /*  prepareStatement.js
  *
@@ -311,7 +312,13 @@ export const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
   if (dependencies.length > 0) { attrs.dependencies = dependencies }
   if (value) { attrs.value = value }
   if (unit) {
-    attrs.unit = Array.isArray(unit) ? { expos:  unit } : unit
+    if (rpn && !attrs.value) {
+      attrs.unit = typeof unit === "string"
+        ? unitFromUnitName(unit)
+        : { factor: 1, gauge: 0, expos: allZeros }
+    } else {
+      attrs.unit = Array.isArray(unit) ? { expos:  unit } : unit
+    }
   }
 
   return attrs

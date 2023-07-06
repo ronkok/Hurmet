@@ -1,7 +1,6 @@
 import { dt } from "./constants.js"
 import { tablessTrim } from "./utils.js"
 import { valueFromLiteral } from "./literal"
-import { improveQuantities } from "./improveQuantities"
 import { arrayOfRegExMatches } from "./utils"
 import { parse } from "./parser.js"
 import { errorOprnd } from "./error.js"
@@ -253,6 +252,5 @@ const scanAssignment = (lines, decimalFormat, iStart) => {
   const trailStr = str.slice(posEquals + 1).trim()
   const [value, unit, dtype, resultDisplay] = valueFromLiteral(trailStr, name, decimalFormat)
   const stmt = { name, value, unit, dtype, resultDisplay }
-  improveQuantities(stmt, {})
   return [stmt, iEnd]
 }

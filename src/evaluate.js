@@ -510,7 +510,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           // Accessor of a object's property in dot notation
           const o2 = stack.pop()
           const o1 = stack.pop()
-          const property = propertyFromDotAccessor(o1, o2, vars, unitAware)
+          const property = propertyFromDotAccessor(o1, o2, unitAware)
           if (property.dtype === dt.ERROR) { return property }
           stack.push(Object.freeze(property))
           break

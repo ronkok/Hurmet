@@ -5,13 +5,13 @@ import { fromAssignment } from "./operand.js"
 import { errorOprnd } from "./error"
 import { Rnl } from "./rational"
 
-export function propertyFromDotAccessor(parent, index, vars, unitAware) {
+export function propertyFromDotAccessor(parent, index, unitAware) {
   const property = Object.create(null)
   if (parent.dtype & dt.MAP) {
     return map.range(parent, [index], unitAware)
 
   } else if (parent.dtype & dt.DATAFRAME) {
-    return DataFrame.range(parent, [index], vars, unitAware)
+    return DataFrame.range(parent, [index], unitAware)
 
   } else if ((parent.dtype === dt.STRING || (parent.dtype & dt.ARRAY)) &&
     index.dtype === dt.RATIONAL) {

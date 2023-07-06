@@ -621,16 +621,17 @@ const isNotEmpty = row => {
 
 const getNumInfo =  df => {
   // Gather info for in setting numbers on a decimal tab.
-  const numCols = df.data.length
+  const data = df.data.plain ? df.data.plain : df.data
+  const numCols = data.length
   const colInfo = new Array(numCols)
   const cellInfo = new Array(numCols)
-  const DFisRational = !df.dtype && Rnl.isRational(df.data[0][0])
+  const DFisRational = !df.dtype && Rnl.isRational(data[0][0])
   for (let j = 0; j < numCols; j++) {
     if (DFisRational || (df.dtype && df.dtype[j] & dt.RATIONAL)) {
       colInfo[j] = { hasAlignChar: false, maxLenAfterAlignChar: 0 }
       cellInfo[j] = []
-      for (let i = 0; i < df.data[0].length; i++) {
-        const datum = df.data[j][i]
+      for (let i = 0; i < data[0].length; i++) {
+        const datum = data[j][i]
         const pos = datum.indexOf(".")
         const hasAlignChar = pos > -1
         const lenAfterAlignChar = hasAlignChar ? datum.length - pos - 1 : 0
@@ -664,9 +665,10 @@ const displayNum = (datum, colInfo, cellInfo, decimalFormat) => {
 const totalRegEx = /^(?:total|sum)/i
 
 const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHeading = false) => {
-  if (df.data.length === 0) { return "" }
-  const numRows = df.data[0].length
-  const numCols = df.data.length
+  const data = df.data.plain ? df.data.plain : df.data
+  if (data.length === 0) { return "" }
+  const numRows = data[0].length
+  const numCols = data.length
   const writeRowNums = numRows > 5 && !df.rowMap
   const numColsInHeading = numCols + (writeRowNums ? 1 : 0)
   const isMap = !df.dtype
@@ -679,7 +681,7 @@ const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHeadin
   for (let j = 1; j < numColsInHeading; j++) {
     str += isMap
       ? "c "
-      : Rnl.isRational(df.data[j][0])
+      : Rnl.isRational(data[j][0])
       ? "r "
       : "l "
   }
@@ -715,10 +717,10 @@ const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHeadin
 
   // Write the data
   for (let i = 0; i < numRows; i++) {
-    if (i === numRows - 1 && totalRegEx.test(df.data[0][i])) { str += "\\hline " }
+    if (i === numRows - 1 && totalRegEx.test(data[0][i])) { str += "\\hline " }
     if (writeRowNums) { str += String(i + 1) + " & " }
     for (let j = 0; j < numCols; j++) {
-      const datum = df.data[j][i]
+      const datum = data[j][i]
       if (isMap) {
         str += datum === undefined
         ? " & "
@@ -747,9 +749,10 @@ const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHeadin
 
 const displayAlt = (df, formatSpec = "h3", decimalFormat = "1,000,000.",
                    omitHeading = false) => {
-  if (df.data.length === 0) { return "" }
-  const numRows = df.data[0].length
-  const numCols = df.data.length
+  const data = df.data.plain ? df.data.plain : df.data
+  if (data.length === 0) { return "" }
+  const numRows = data[0].length
+  const numCols = data.length
   const writeRowNums = numRows > 5 && !df.rowMap
   let str = "``"
 
@@ -779,7 +782,7 @@ const displayAlt = (df, formatSpec = "h3", decimalFormat = "1,000,000.",
   for (let i = 0; i < numRows; i++) {
     if (writeRowNums) { str += String(i + 1) + "\t" }
     for (let j = 0; j < numCols; j++) {
-      const datum = df.data[j][i];
+      const datum = data[j][i];
       if (isMap) {
         str += datum === undefined
           ? "\t"
