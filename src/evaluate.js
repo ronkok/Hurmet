@@ -175,7 +175,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
       stack.push(Object.freeze({ value: str, unit: null, dtype: dt.STRING }))
 
     } else if (/^``/.test(tkn)) {
-      stack.push(DataFrame.dataFrameFromTSV(tablessTrim(tkn.slice(2, -2)), {}))
+      stack.push(DataFrame.dataFrameFromTSV(tablessTrim(tkn.slice(2, -2))))
 
     } else if (ch === '`') {
       // A rich text literal
@@ -429,14 +429,14 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             o3.unit = null
             o3.dtype = dt.STRING
           } else if ((o1.dtype & dt.DATAFRAME) && isVector(o2) && tkn !== "vcat") {
-            o3 = DataFrame.append(o1, o2, vars, unitAware)
+            o3 = DataFrame.append(o1, o2, vars.format.value, unitAware)
             if (o3.dtype === dt.ERROR) { return o3 }
           } else if (((o1.dtype & dt.DATAFRAME) && shape2 === "scalar") ||
                      (shape1 === "scalar" && (o2.dtype & dt.DATAFRAME))) {
-            o3 = DataFrame.append(o1, o2, vars, unitAware)
+            o3 = DataFrame.append(o1, o2, vars.format.value, unitAware)
             if (o3.dtype === dt.ERROR) { return o3 }
           } else if ((o1.dtype & dt.MAP) || (o2.dtype & dt.MAP)) {
-            o3 = map.append(o1, o2, shape1, shape2, vars)
+            o3 = map.append(o1, o2, shape1, shape2)
             if (o3.dtype === dt.ERROR) { return o3 }
           } else {
             if (unitAware) {
@@ -525,7 +525,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const o1 = stack.pop()
           let property
           if (o1.dtype & dt.DATAFRAME) {
-            property = DataFrame.range(o1, args, vars, unitAware)
+            property = DataFrame.range(o1, args, unitAware)
 
           } else if (o1.dtype & dt.MAP) {
             property = map.range(o1, args, unitAware)
@@ -554,7 +554,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
               ? null
               : { value: Rnl.zero, unit: allZeros, dtype: dt.RATIONAL }
             property = (o1.dtype & dt.DATAFRAME)
-              ? DataFrame.range(o1, rowIndex, colIndex, vars, unitAware)
+              ? DataFrame.range(o1, rowIndex, colIndex, unitAware)
               : Matrix.submatrix(o1, rowIndex, colIndex)
           }
           if (property.dtype === dt.ERROR) { return property }
@@ -914,7 +914,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           }
 
           if (tkn === "dataframe") {
-            const df = DataFrame.dataFrameFromVectors(args, vars)
+            const df = DataFrame.dataFrameFromVectors(args, vars.format.value)
             if (df.dtype && df.dtype === dt.ERROR) { return df }
             stack.push(df)
             break
@@ -1226,13 +1226,13 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           if (!unitAware) {
             output.value = o1.value
             if (o1.dtype & dt.MAP) {
-              output.unit = unitFromUnitName(unitName, vars)
+              output.unit = unitFromUnitName(unitName)
             } else {
               output.unit.name = unitName
             }
           } else {
             // Convert the magnitude to base units.
-            const unit = unitFromUnitName(unitName, vars)
+            const unit = unitFromUnitName(unitName)
             if (unit.dtype && unit.dtype === dt.ERROR) { return unit }
             if (isMatrix(o1)) {
               output.unit.expos = o1.unit.expos.map((e, j) => e + unit.expos[j])

@@ -14,7 +14,7 @@ import { Rnl } from "./rational"
  *  which may contain user-defined units.
  */
 
-export const improveQuantities = (attrs, vars) => {
+export const improveQuantities = (attrs) => {
   if (attrs.name && attrs.value && (attrs.dtype & dt.QUANTITY)) {
     // Assignment of a quantity. Get it in base units
     const unit = (attrs.unit === undefined)
@@ -26,7 +26,7 @@ export const improveQuantities = (attrs, vars) => {
         expos: allZeros
       }
       : typeof attrs.unit === "string"
-      ? unitFromUnitName(attrs.unit, vars)
+      ? unitFromUnitName(attrs.unit)
       : attrs.unit // unit from a MAP is already expanded.
 
     if (unit.dtype && unit.dtype === dt.ERROR) {
@@ -56,7 +56,7 @@ export const improveQuantities = (attrs, vars) => {
   if (attrs.rpn && !attrs.value) {
     if (attrs.unit) {
       const unit = (attrs.unit && typeof attrs.unit === "string")
-        ? unitFromUnitName(attrs.unit, vars)
+        ? unitFromUnitName(attrs.unit)
         : { factor: 1, gauge: 0, expos: allZeros }
       // We save factor and gauge with the cell attrs so that the result of
       // a later calculation can be converted into the desired display units.

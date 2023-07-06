@@ -73,7 +73,7 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
     // Read the TSV into a data frame.
     const pos = str.indexOf("``", 2)
     const tsv = tablessTrim(str.slice(2, pos))
-    const dataStructure = DataFrame.dataFrameFromTSV(tsv, {})
+    const dataStructure = DataFrame.dataFrameFromTSV(tsv)
     if (dataStructure.dtype === dt.DATAFRAME) {
       return [dataStructure.value, dataStructure.unit, dt.DATAFRAME,
         DataFrame.display(dataStructure.value, "h3", decimalFormat)]

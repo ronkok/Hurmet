@@ -1661,30 +1661,12 @@ the quantity.
 
 You’re welcome to view all of Hurmet’s built-in [unit definitions](unit-definitions.html).
 
-#### Custom Units
-
-If the Hurmet built-in unit definitions are not sufficient, you can define a
-set of custom units in a single-row data frame like this:
-
-¢``` units = ``smoot	sol
-inches	hours
-67    	24.6229622`` ```
 
 #### Currencies
 
 Currency exchange rates change, so Hurmet’s exchange rates are updated with
 [data from the European Central Bank](https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml).
-That update occurs only once per week. For many purposes, such rates are
-insufficiently accurate, so you can override them and define your own exchange
-rates in a map named **currencies**. Such a statement might be coded
-like this:
-
-¢```currencies = ``USD	CAD
-   1 	1.25`` ```
-
-The keys in that map are standard three-letter [currrency codes](https://www.xe.com/iso4217.php).
-
-The variable name **currencies** may not be used for any other purpose.
+That update occurs only once per week. 
 
 #### Traditional Units
 
@@ -2485,8 +2467,6 @@ Copyright © 2020-2023 Ron Kok. Released under the [MIT License][]
 <details><summary>Units</summary>
 
 * [Unit-Aware Calcs](#unit-aware-calculations)
-* [Custom Units](#custom-units)
-* [Currencies](#currencies)
 * [Traditional Units](#traditional-units)
 
 </details>

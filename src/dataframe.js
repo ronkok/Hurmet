@@ -121,7 +121,7 @@ export const identifyRange = (df, args) => {
   return [rowList, columnList, iStart, iEnd]
 }
 
-const range = (df, args, vars, unitAware) => {
+const range = (df, args, unitAware) => {
   let unit = Object.create(null)
   const [rowList, columnList, iStart, iEnd] = identifyRange(df, args)
   if (rowList.length === 0 && iStart === iEnd && columnList.length === 1) {
@@ -133,7 +133,7 @@ const range = (df, args, vars, unitAware) => {
     unit.expos = (dtype & dt.RATIONAL) ? allZeros : null
     if (unitAware && df.value.units[j]) {
       const unitName = df.value.units[j] ? df.value.units[j] : undefined
-      const unitObj = unitFromUnitName(unitName, vars)
+      const unitObj = unitFromUnitName(unitName)
       value = Rnl.multiply(Rnl.add(value, unitObj.gauge), unitObj.factor)
       unit.expos = unitObj.expos
     }
@@ -206,7 +206,7 @@ const numberRegEx = new RegExp("^(?:=|" + Rnl.numberPattern.slice(1) + "$)")
 const mixedFractionRegEx = /^-?(?:[0-9]+(?: [0-9]+\/[0-9]+))$/
 const escRegEx = /^\\#/
 
-const dataFrameFromTSV = (str, vars) => {
+const dataFrameFromTSV = (str) => {
   // Load a TSV string into a data frame.
   // Data frames are loaded column-wise. The subordinate data structures are:
   let data = [];   // where the main data lives, not including column names or units.
@@ -241,7 +241,7 @@ const dataFrameFromTSV = (str, vars) => {
         units.push(unitName)
         if (unitName.length > 0) {
           if (!unitMap[unitName]) {
-            const unit = unitFromUnitName(unitName, vars)
+            const unit = unitFromUnitName(unitName)
             if (unit) {
               unitMap[unitName] = unit
             } else {
@@ -355,7 +355,7 @@ const dataFrameFromTSV = (str, vars) => {
   }
 }
 
-const dataFrameFromVectors = (vectors, vars) => {
+const dataFrameFromVectors = (vectors, formatSpec) => {
   // Take an array of vectors and return a dataframe.
   const data = []
   const headings = []
@@ -375,12 +375,12 @@ const dataFrameFromVectors = (vectors, vars) => {
     headings.push(vector.name)
     columnMap[vector.name] = j
     const colDtype = vector.dtype - vectorType
-    data.push(vector.value.map(e => datumFromValue(e, colDtype, vars.format.value)))
+    data.push(vector.value.map(e => datumFromValue(e, colDtype, formatSpec)))
     dtype.push(colDtype)
     if (vector.unit.name) {
       units.push(vector.unit.name)
       if (!unitMap[vector.unit.name]) {
-        const unit = unitFromUnitName(vector.unit.name, vars)
+        const unit = unitFromUnitName(vector.unit.name)
         unitMap[vector.unit.name] = unit
       }
     } else {
@@ -441,7 +441,7 @@ const matrix2table = (matrix, headings, rowHeadings) => {
   }
 }
 
-const append = (o1, o2, vars, unitAware) => {
+const append = (o1, o2, formatSpec, unitAware) => {
   // Append a vector or single value to a dataframe.
   // We use copy-on-write for dataframes, so copy it here.
   const oprnd = o1.dtype === dt.DATAFRAME ? clone(o1) : clone(o2)
@@ -463,7 +463,7 @@ const append = (o1, o2, vars, unitAware) => {
     } else {
       oprnd.value.units.unshift(addend.unit.name)
     }
-    unit = unitFromUnitName(addend.unit.name, vars)
+    unit = unitFromUnitName(addend.unit.name)
     if (!oprnd.unit[addend.unit.name]) {
       oprnd.unit[addend.unit.name] = unit
     }
@@ -481,26 +481,26 @@ const append = (o1, o2, vars, unitAware) => {
       ? Rnl.subtract(Rnl.divide(addend.value, unit.factor), unit.gauge)
       : addend.value
     if (o1.dtype === dt.DATAFRAME) {
-      oprnd.value.data.push([datumFromValue(v, dtype, vars.format.value)])
+      oprnd.value.data.push([datumFromValue(v, dtype, formatSpec)])
     } else {
-      oprnd.value.data.unshift([datumFromValue(v, dtype, vars.format.value)])
+      oprnd.value.data.unshift([datumFromValue(v, dtype, formatSpec)])
     }
   } else {
     if (unitAware && dtype === dt.RATIONAL && unit) {
       const v = Matrix.convertFromBaseUnits(addend, unit.gauge, unit.factor)
       if (o1.dtype === dt.DATAFRAME) {
-        oprnd.value.data.push(v.map(e => datumFromValue(e, dtype, vars.format.value)))
+        oprnd.value.data.push(v.map(e => datumFromValue(e, dtype, formatSpec)))
       } else {
-        oprnd.value.data.unshift(v.map(e => datumFromValue(e, dtype, vars.format.value)))
+        oprnd.value.data.unshift(v.map(e => datumFromValue(e, dtype, formatSpec)))
       }
     } else {
       if (o1.dtype === dt.DATAFRAME) {
         oprnd.value.data.push(addend.value.map(
-          e => datumFromValue(e, dtype, vars.format.value)
+          e => datumFromValue(e, dtype, formatSpec)
         ))
       } else {
         oprnd.value.data.unshift(addend.value.map(
-          e => datumFromValue(e, dtype, vars.format.value)
+          e => datumFromValue(e, dtype, formatSpec)
         ))
       }
     }

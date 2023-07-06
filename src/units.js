@@ -616,7 +616,7 @@ const synonyms = Object.freeze({
   "¥": "JPY"
 })
 
-const unitFromWord = (inputStr, currencies, customUnits) => {
+const unitFromWord = (inputStr) => {
   const str = inputStr.trim()
   const L = str.length
   const u = {
@@ -670,15 +670,6 @@ const unitFromWord = (inputStr, currencies, customUnits) => {
       }
     }
 
-    if ((customUnits) && (Object.hasOwnProperty.call(customUnits.value.columnMap, word))) {
-      // User-defined unit
-      const n = customUnits.value.columnMap[word]
-      const baseUnit = customUnits.unit[customUnits.value.units[n]];
-      u.factor = Rnl.multiply(Rnl.fromString(customUnits.value.data[n][0]), baseUnit.factor)
-      u.expos = baseUnit.expos
-      return u
-    }
-
     if (doTheSearch) {
       unitArray = unitTable[word]
       if (unitArray) { gotMatch = true }
@@ -702,17 +693,12 @@ const unitFromWord = (inputStr, currencies, customUnits) => {
     u.expos = Object.freeze(unitArray[4])
     if (u.expos[7] === 1) {
       const currencyCode = (synonyms[word] ? synonyms[word] : word)
-      if (currencies && currencies.value.has(currencyCode)) {
-        // User defined currency exchange rate.
-        u.factor = Rnl.reciprocal(currencies.value.get(currencyCode))
+      // Read the line whose key is the standard 3-letter currency code.
+      unitArray = unitTable[currencyCode]
+      if (unitArray[0] === "0") {
+        return errorOprnd("CURRENCY")
       } else {
-        // Read the line whose key is the standard 3-letter currency code.
-        unitArray = unitTable[currencyCode]
-        if (unitArray[0] === "0") {
-          return errorOprnd("CURRENCY")
-        } else {
-          u.factor = Rnl.reciprocal(Rnl.fromString(unitArray[0]))
-        }
+        u.factor = Rnl.reciprocal(Rnl.fromString(unitArray[0]))
       }
     } else {
       // TODO: Change factor table to integers and use BigInt() instead of Rnl.fromString
@@ -741,15 +727,11 @@ const unitFromWord = (inputStr, currencies, customUnits) => {
 const opOrNumRegEx = /[0-9·\-⁰¹²³\u2074-\u2079⁻/^()]/
 const numeralRegEx = /[0-9-]/
 
-export const unitFromUnitName = (inputStr, vars) => {
+export const unitFromUnitName = (inputStr) => {
 
   // TODO: Handle ° ʹ ″
 
   if (!inputStr) { return { name: null, factor: null, gauge: null, log: "", expos: null } }
-
-  const currencies = vars.currencies
-
-  const customUnits = (vars.units) ? vars.units : null
 
   let str = inputStr.trim()
   // Replace dashes & bullets with half-high dot
@@ -860,7 +842,7 @@ export const unitFromUnitName = (inputStr, vars) => {
         if (opOrNumRegEx.test(str.charAt(j))) { break }
       }
       word = str.substring(i, j);   // May actually be two words, as in "nautical miles"
-      simpleUnit = unitFromWord(word, currencies, customUnits)
+      simpleUnit = unitFromWord(word)
 
       if (simpleUnit.dtype && simpleUnit.dtype === dt.ERROR) { return simpleUnit }
 

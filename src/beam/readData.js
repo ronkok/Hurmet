@@ -4,7 +4,6 @@ import { unitFromUnitName } from "../units.js"
 const ftRegEx = /′/g
 const numberRegEx = new RegExp(Rnl.numberPattern)
 const metricLengths = ["m", "cm", "mm"];
-const vars = Object.create(null)
 
 const readNumber = str => {
   const matches = numberRegEx.exec(str)
@@ -17,7 +16,7 @@ const readNumber = str => {
 }
 
 const convertToBaseUnit = (num, unitName) => {
-  const unit = unitFromUnitName(unitName, vars)
+  const unit = unitFromUnitName(unitName)
   return Rnl.multiply(Rnl.add(num, unit.gauge), unit.factor)
 }
 
@@ -128,7 +127,7 @@ export const readInputData = data => {
           str = str.slice(pos).trim()
         }
         const unitName = str.trim()
-        const unit = unitFromUnitName(unitName, vars)
+        const unit = unitFromUnitName(unitName)
         // Read the load from & to points, if any
         let L1 = 0
         let L2 = 0
