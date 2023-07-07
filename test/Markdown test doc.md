@@ -11,12 +11,18 @@ Hurmet writes a backslash, `\`, at the end of a line, like this:\
 Hurmet also reads two spaces at the end of a line as a line break, line this:\
 Otherwise, newlines in a paragraph are treated as spaces.
 
-Two consecutive blank lines parse like a single blank line. Like the two
-preceeding lines.
 
-{comment}
-A Hurmet comment is a paragraph inside a speech bubble. Its Markdown is a
-paragraph preceded by `{comment}\n`.
+Two consecutive blank lines parse like a single blank line. Like the two
+preceding lines.
+
+¶
+
+An empty paragraph is designated by a pilcrow symbol, ¶, by itself on its own
+line, like the preceding one.
+
+::: comment
+A Hurmet comment is a paragraph inside a speech bubble.
+:::
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
 incididunt ut labore et dolore magna aliqua.
