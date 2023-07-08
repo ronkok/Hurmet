@@ -21173,7 +21173,7 @@ function buildKeymap(schema, mapKeys) {
     keys[key] = cmd;
   }
 
-  bind("Ctrl-s", (state, _, view) => { saveFileAsMarkdown(state); return true });
+  bind("Ctrl-s", (state, _, view) => { saveFileAsMarkdown(state, view); return true });
   bind("Alt-j", (state, _, view) => { readFile(state, _, view, schema, "hurmet"); return true });
   bind("Mod-z", undo);
   bind("Shift-Mod-z", redo);

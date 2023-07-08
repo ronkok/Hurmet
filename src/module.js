@@ -6,10 +6,10 @@ import { parse } from "./parser.js"
 import { errorOprnd } from "./error.js"
 
 const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/
-const keywordRegEx = /^(if|elseif|else|return|throw|while|for|break|print|end)\b/
+const keywordRegEx = /^(if|elseif|else|return|throw|while|for|break|print|end)(\u2002|\b)/
 const drawCommandRegEx = /^(title|frame|view|axes|grid|stroke|strokewidth|strokedasharray|fill|fontsize|fontweight|fontstyle|fontfamily|marker|line|path|plot|curve|rect|circle|ellipse|arc|text|dot|leader|dimension)\b/
 const leadingSpaceRegEx = /^[\t ]+/
-const oneLinerRegEx = /^(( *)if [^\n`]+) +((?:return|throw|print|break)\b(?:[^\n]+)?)(?: end)? *\n/gm
+const oneLinerRegEx = /^( *)if ([^\n`]+) +(return|throw|print|break)\b([^\n]+)?(?: end)? *\n/gm
 
 // If you change functionRegEx, then also change it in mathprompt.js.
 // It isn't called from there in order to avoid duplicating Hurmet code inside ProseMirror.js.
@@ -51,7 +51,7 @@ export const scanModule = (str, decimalFormat) => {
   const parent = Object.create(null)
 
   // Expand one-liners into if ... end blocks.
-  str = str.replace(oneLinerRegEx, "$1\n$2    $3\n$2end\n")
+  str = str.replace(oneLinerRegEx, "$1if\u2002$2\n$1    $3\u2002$4\n$1end\n")
 
   // Statements end at a newline.
   const lines = str.split(/\r?\n/g)
@@ -127,7 +127,9 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
   let name = ""
   let isStatement = false
 
+  let j = startLineNum
   for (let i = startLineNum + 1; i < lines.length; i++) {
+    j += 1
     let line = stripComment(lines[i])
     if (line.length === 0) { continue }
 
@@ -152,9 +154,11 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
       continue
     }
 
+    let isFromOneLiner = false
     const keyword = keywordRegEx.exec(line)
     if (keyword) {
-      name = keyword[0]
+      name = keyword[1];
+      if (keyword[2]) { isFromOneLiner = true }
       expression = line.slice(name.length).trim()
       if (expression.length > 0 && /^``/.test(expression)) {
         [expression, i] = handleTSV(expression, lines, i)
@@ -176,10 +180,10 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
         isStatement = true
       } else {
         // TODO: We shouldn't get here. Write an error.
-        return [errorOprnd("FUNC_LINE", functionName + ", line " + (i + 1) + "\n" + line), i]
+        return [errorOprnd("FUNC_LINE", functionName + ", line " + (j + 1) + "\n" + line), i]
       }
     }
-
+    if (isFromOneLiner) { j -= 1 }
     let rpn = ""
     let _
     if (expression) {

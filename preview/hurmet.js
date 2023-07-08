@@ -1103,11 +1103,11 @@
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6398","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.6416","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.2788","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.3527","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -1116,10 +1116,10 @@
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4415","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4557","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9788","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.8983","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9754","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.8773","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -1139,7 +1139,7 @@
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.85828","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.85298","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1147,23 +1147,23 @@
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.5157","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.5232","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["4.0486","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["89.2065","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["4.0428","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["90.0465","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["157.16","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["156.01","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1435.88","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1421.91","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1174,7 +1174,7 @@
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["18.5614","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["18.7883","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -1204,7 +1204,7 @@
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.0866","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0888","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -3441,6 +3441,8 @@
       : "";
     for (let j = 1; j < numColsInHeading; j++) {
       str += isMap
+        ? "c "
+        : numRows === 1
         ? "c "
         : Rnl.isRational(data[j][0])
         ? "r "
@@ -15804,10 +15806,10 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
   };
 
   const isValidIdentifier$1 = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/;
-  const keywordRegEx = /^(if|elseif|else|return|throw|while|for|break|print|end)\b/;
+  const keywordRegEx = /^(if|elseif|else|return|throw|while|for|break|print|end)(\u2002|\b)/;
   const drawCommandRegEx = /^(title|frame|view|axes|grid|stroke|strokewidth|strokedasharray|fill|fontsize|fontweight|fontstyle|fontfamily|marker|line|path|plot|curve|rect|circle|ellipse|arc|text|dot|leader|dimension)\b/;
   const leadingSpaceRegEx$2 = /^[\t ]+/;
-  const oneLinerRegEx = /^(( *)if [^\n`]+) +((?:return|throw|print|break)\b(?:[^\n]+)?)(?: end)? *\n/gm;
+  const oneLinerRegEx = /^( *)if ([^\n`]+) +(return|throw|print|break)\b([^\n]+)?(?: end)? *\n/gm;
 
   // If you change functionRegEx, then also change it in mathprompt.js.
   // It isn't called from there in order to avoid duplicating Hurmet code inside ProseMirror.js.
@@ -15849,7 +15851,7 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
     const parent = Object.create(null);
 
     // Expand one-liners into if ... end blocks.
-    str = str.replace(oneLinerRegEx, "$1\n$2    $3\n$2end\n");
+    str = str.replace(oneLinerRegEx, "$1if\u2002$2\n$1    $3\u2002$4\n$1end\n");
 
     // Statements end at a newline.
     const lines = str.split(/\r?\n/g);
@@ -15925,7 +15927,9 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
     let name = "";
     let isStatement = false;
 
+    let j = startLineNum;
     for (let i = startLineNum + 1; i < lines.length; i++) {
+      j += 1;
       let line = stripComment(lines[i]);
       if (line.length === 0) { continue }
 
@@ -15950,9 +15954,11 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
         continue
       }
 
+      let isFromOneLiner = false;
       const keyword = keywordRegEx.exec(line);
       if (keyword) {
-        name = keyword[0];
+        name = keyword[1];
+        if (keyword[2]) { isFromOneLiner = true; }
         expression = line.slice(name.length).trim();
         if (expression.length > 0 && /^``/.test(expression)) {
           [expression, i] = handleTSV(expression, lines, i);
@@ -15974,10 +15980,10 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
           isStatement = true;
         } else {
           // TODO: We shouldn't get here. Write an error.
-          return [errorOprnd("FUNC_LINE", functionName + ", line " + (i + 1) + "\n" + line), i]
+          return [errorOprnd("FUNC_LINE", functionName + ", line " + (j + 1) + "\n" + line), i]
         }
       }
-
+      if (isFromOneLiner) { j -= 1; }
       let rpn = "";
       let _;
       if (expression) {
