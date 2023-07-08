@@ -2467,6 +2467,7 @@ Copyright © 2020-2023 Ron Kok. Released under the [MIT License][]
 <details><summary>Units</summary>
 
 * [Unit-Aware Calcs](#unit-aware-calculations)
+* [Currencies](#currencies)
 * [Traditional Units](#traditional-units)
 
 </details>
