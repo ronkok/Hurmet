@@ -14,7 +14,7 @@ const addResourcesToCache = async(resources) => {
 // Pre-install the offline page.
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    addResourcesToCache(['/offline.html'])
+    addResourcesToCache(['https://hurmet.app/offline.html'])
   )
 })
 
@@ -33,7 +33,7 @@ self.addEventListener('fetch', (event) => {
         return fetchedResponse;
       }).catch(() => {
         // If the network is unavailable, get
-        return cache.match('/offline.html');
+        return cache.match('https://hurmet.app/offline.html');
       });
     }));
   } else {
