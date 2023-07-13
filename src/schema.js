@@ -5,6 +5,7 @@ import {Slice, Fragment, NodeRange} from "prosemirror-model"
 import { renderToC, tocLevels } from "./paginate"
 import { dt } from "./constants"
 import { renderSVG } from "./renderSVG"
+import hurmet from "./hurmet"
 
 // Helpers for creating a schema that supports tables.
 

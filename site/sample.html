@@ -5,22 +5,22 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Hurmet Sample</title>
-  <link rel="icon" href="./images/favicon.svg"/>
-  <link rel="stylesheet" href="./styles.min.css">
+  <link rel="manifest" href="/app.webmanifest">
+  <link rel="icon" href="./images/favicon.svg">
+  <link rel="stylesheet" href="/styles.min.css">
   <style id="pageStyle">@media print {@page{size: letter; margin: 16mm 0.75in 16mm 0.75in;}}</style>
-  <script src="hurmet.min.js"></script>
 </head>
 
 <body>
 <nav>
   <ul>
-    <li><a href="https://hurmet.app" target="_blank">Home</a></li>
-    <li><a href="./manual.html" target="_blank">Documentation</a></li>
+    <li><a href="/index.html" target="_blank">Home</a></li>
+    <li><a href="/manual.html" target="_blank">Documentation</a></li>
     <li><a href="https://github.com/ronkok/Hurmet" target="_blank">GitHub</a></li>
   </ul>
 </nav>
 
-<div id="title"><a href="index.html" style="text-decoration: none; color: #000;">Hurmet</a></div>
+<div id="title"><a href="/index.html" style="text-decoration: none; color: #000;">Hurmet</a></div>
  
 <article>
 
@@ -233,7 +233,7 @@ end"></span></p></td>
 
 <div id="copyright">Copyright © 2020-2023 Ron Kok. Released under the <a href="https://opensource.org/licenses/MIT">MIT License</a></div>
 
-<script type="module" src="./prosemirror.min.js"></script>
+<script type="module" src="/prosemirror.min.js"></script>
 <script>
   window.addEventListener('beforeunload', function (e) {
 	// If changes have been made, put up a dialog box to warn the user.

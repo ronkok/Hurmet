@@ -1,5 +1,6 @@
 import { autoCorrect } from "./autocorrect"
 import { codeJar, selectedText, textBeforeCursor, textAfterCursor } from "./codejar"
+import hurmet from "./hurmet"
 
 const commaRegEx = /"[^"]*"|[0-9]+,[0-9]+|[A-Za-zıȷ\u0391-\u03D5\uD835][A-Za-z0-9_ıȷ\u0391-\u03D5\uD835\uDC00-\uDFFF]/g
 const dotRegEx = /"[^"]*"|[0-9]+\.[0-9]+|[A-Za-zıȷ\u0391-\u03D5\uD835][A-Za-z0-9_ıȷ\u0391-\u03D5\uD835\uDC00-\uDFFF]/g
@@ -86,7 +87,6 @@ export function openMathPrompt(options) {
       if (decimalSymbol === ",") { tex = dotFromCommaForStorage(tex) }
       isUDF = functionRegEx.test(tex)
       if (!isUDF) {
-        // eslint-disable-next-line no-undef
         tex = hurmet.parse(tex, options.decimalFormat, false, true)
       }
     } else {
@@ -94,7 +94,6 @@ export function openMathPrompt(options) {
     }
     if (!isUDF) {
       try {
-        // eslint-disable-next-line no-undef
         hurmet.render(tex, mathDisplay, {
           displayMode: options.attrs.displayMode,
           trust: (context) => context.command === '\\class' &&
@@ -131,7 +130,6 @@ export function openMathPrompt(options) {
     }
     const params = (isTex)
       ? { tex: mathString }
-      // eslint-disable-next-line no-undef
       : hurmet.compile(mathString, options.decimalFormat)
     params.displayMode = options.attrs.displayMode
     if (wrapper.parentNode) {

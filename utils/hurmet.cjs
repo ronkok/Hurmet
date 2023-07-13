@@ -10,24 +10,6 @@
 
 // utils.js
 
-const isIn = (item, arry) => {
-  // Binary search to see if item is in an array
-  // This works only if the array is pre-sorted.
-  if (arry.length === 0) { return false }
-  let i = 0;
-  let iLow = 0;
-  let iHigh = arry.length - 1;
-  while (iLow < iHigh) {
-    i = Math.floor((iLow + iHigh) / 2);
-    if (item > arry[i]) {
-      iLow = i + 1;
-    } else {
-      iHigh = i;
-    }
-  }
-  return item === arry[iLow]
-};
-
 const clone = obj => {
   // Clone a JavaScript object.
   // That is, make a deep copy that does not contain any reference to the original object.
@@ -290,7 +272,7 @@ const errorMessages = Object.freeze({
     MATRIX_DIV:"Error. Cannot divide one matrix by another.",
     MATRIX_MOD:"Error. Cannot take the modulo of one matrix by another.",
     BAD_INDEX: "Error. Index to a matrix must be numeric.",
-    FUNC_LINE: "Error in function @.",
+    FUNC_LINE: "Error in function @",
     BAD_BREAK: "Error in function @. break called outside of a loop",
     FETCH:     "Error. A fetch() function must be the only item in its expression.",
     STR_INDEX: "Error. The index to text may be only a real number or a range.",
@@ -1117,11 +1099,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6231","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.6416","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.3554","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.3527","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -1130,10 +1112,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4575","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4557","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9738","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.5766","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9754","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.8773","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -1153,7 +1135,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.86840","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.85298","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1161,23 +1143,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.4494","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.5232","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["3.9338","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["89.4215","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["4.0428","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["90.0465","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["149.55","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["156.01","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1432.76","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1421.91","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1188,7 +1170,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["19.0850","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["18.7883","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -1218,7 +1200,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.0808","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0888","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -1671,7 +1653,7 @@ const synonyms = Object.freeze({
   "¥": "JPY"
 });
 
-const unitFromWord = (inputStr, currencies, customUnits) => {
+const unitFromWord = (inputStr) => {
   const str = inputStr.trim();
   const L = str.length;
   const u = {
@@ -1725,15 +1707,6 @@ const unitFromWord = (inputStr, currencies, customUnits) => {
       }
     }
 
-    if ((customUnits) && (Object.hasOwnProperty.call(customUnits.value.columnMap, word))) {
-      // User-defined unit
-      const n = customUnits.value.columnMap[word];
-      const baseUnit = customUnits.unit[customUnits.value.units[n]];
-      u.factor = Rnl.multiply(Rnl.fromString(customUnits.value.data[n][0]), baseUnit.factor);
-      u.expos = baseUnit.expos;
-      return u
-    }
-
     if (doTheSearch) {
       unitArray = unitTable[word];
       if (unitArray) { gotMatch = true; }
@@ -1757,17 +1730,12 @@ const unitFromWord = (inputStr, currencies, customUnits) => {
     u.expos = Object.freeze(unitArray[4]);
     if (u.expos[7] === 1) {
       const currencyCode = (synonyms[word] ? synonyms[word] : word);
-      if (currencies && currencies.value.has(currencyCode)) {
-        // User defined currency exchange rate.
-        u.factor = Rnl.reciprocal(currencies.value.get(currencyCode));
+      // Read the line whose key is the standard 3-letter currency code.
+      unitArray = unitTable[currencyCode];
+      if (unitArray[0] === "0") {
+        return errorOprnd("CURRENCY")
       } else {
-        // Read the line whose key is the standard 3-letter currency code.
-        unitArray = unitTable[currencyCode];
-        if (unitArray[0] === "0") {
-          return errorOprnd("CURRENCY")
-        } else {
-          u.factor = Rnl.reciprocal(Rnl.fromString(unitArray[0]));
-        }
+        u.factor = Rnl.reciprocal(Rnl.fromString(unitArray[0]));
       }
     } else {
       // TODO: Change factor table to integers and use BigInt() instead of Rnl.fromString
@@ -1796,15 +1764,11 @@ const unitFromWord = (inputStr, currencies, customUnits) => {
 const opOrNumRegEx = /[0-9·\-⁰¹²³\u2074-\u2079⁻/^()]/;
 const numeralRegEx = /[0-9-]/;
 
-const unitFromUnitName = (inputStr, vars) => {
+const unitFromUnitName = (inputStr) => {
 
   // TODO: Handle ° ʹ ″
 
   if (!inputStr) { return { name: null, factor: null, gauge: null, log: "", expos: null } }
-
-  const currencies = vars.currencies;
-
-  const customUnits = (vars.units) ? vars.units : null;
 
   let str = inputStr.trim();
   // Replace dashes & bullets with half-high dot
@@ -1915,7 +1879,7 @@ const unitFromUnitName = (inputStr, vars) => {
         if (opOrNumRegEx.test(str.charAt(j))) { break }
       }
       word = str.substring(i, j);   // May actually be two words, as in "nautical miles"
-      simpleUnit = unitFromWord(word, currencies, customUnits);
+      simpleUnit = unitFromWord(word);
 
       if (simpleUnit.dtype && simpleUnit.dtype === dt.ERROR) { return simpleUnit }
 
@@ -2387,9 +2351,9 @@ const elementDisplay = (value, dtype, formatSpec, decimalFormat, isAlt = false) 
 };
 
 const display$1 = (m, formatSpec, decimalFormat) => {
-  let str = "\\begin";
+  let str = "";
   if (m.dtype & dt.MATRIX) {
-    str += "{pmatrix}";
+    str += "\\begin{pmatrix}";
     const numRows = m.value.length;
     const numCols = m.value[0].length;
     for (let i = 0; i < numRows; i++) {
@@ -2401,22 +2365,25 @@ const display$1 = (m, formatSpec, decimalFormat) => {
     str = str.slice(0, -3).trim();
     str += "\\end{pmatrix}";
   } else {
-    str += "{bmatrix}";
-    const argSep = (m.dtype & dt.ROWVECTOR) ? " & " : " \\\\ ";
-    if (m.value.plain) {
-      const numArgs = m.value.plain.length;
-      for (let i = 0; i < numArgs; i++) {
-        str += elementDisplay(m.value.plain[i], m.dtype, formatSpec, decimalFormat) +
-               ((i < numArgs - 1) ? argSep : "");
-      }
+    const numArgs = m.value.plain ? m.value.plain.length : m.value.length;
+    if (numArgs === 0) {
+      str += "[\\,]";
     } else {
-      const numArgs = m.value.length;
-      for (let i = 0; i < numArgs; i++) {
-        str += elementDisplay(m.value[i], m.dtype, formatSpec, decimalFormat) +
-               ((i < numArgs - 1) ? argSep : "");
+      str += "\\begin{bmatrix}";
+      const argSep = (m.dtype & dt.ROWVECTOR) ? " & " : " \\\\ ";
+      if (m.value.plain) {
+        for (let i = 0; i < numArgs; i++) {
+          str += elementDisplay(m.value.plain[i], m.dtype, formatSpec, decimalFormat) +
+                ((i < numArgs - 1) ? argSep : "");
+        }
+      } else {
+        for (let i = 0; i < numArgs; i++) {
+          str += elementDisplay(m.value[i], m.dtype, formatSpec, decimalFormat) +
+                ((i < numArgs - 1) ? argSep : "");
+        }
       }
+      str += "\\end{bmatrix}";
     }
-    str += "\\end{bmatrix}";
   }
   return str
 };
@@ -2706,7 +2673,7 @@ const operandFromRange = range => {
 const operandFromTokenStack = (tokenStack, numRows, numCols) => {
   // TODO: Get dtype correct for matrices that contain strings or booleans.
   if (numRows === 0 && numCols === 0) {
-    return Object.freeze({ value: new Array(0), unit: null, dtype: dt.ROWVECTOR })
+    return Object.freeze({ value: new Array(0), unit: null, dtype: dt.COLUMNVECTOR })
   } else if (numRows === 1 && numCols === 1) {
     // One element. Return a scalar.
     return tokenStack.pop()
@@ -2819,13 +2786,13 @@ const valueFromDatum = datum => {
   : datum
 };
 
-const datumFromValue = (value, dtype) => {
+const datumFromValue = (value, dtype, formatSpec) => {
   return value === true
     ? "true"
     : value === false
     ? "false"
     : value =  (dtype === dt.RATIONAL)
-    ? "0 " + String(value[0]) + "/" + String(value[1])
+    ? format(value, formatSpec, "1000000.")
     : value
 };
 
@@ -2911,7 +2878,7 @@ const identifyRange = (df, args) => {
   return [rowList, columnList, iStart, iEnd]
 };
 
-const range = (df, args, vars, unitAware) => {
+const range = (df, args, unitAware) => {
   let unit = Object.create(null);
   const [rowList, columnList, iStart, iEnd] = identifyRange(df, args);
   if (rowList.length === 0 && iStart === iEnd && columnList.length === 1) {
@@ -2923,7 +2890,7 @@ const range = (df, args, vars, unitAware) => {
     unit.expos = (dtype & dt.RATIONAL) ? allZeros : null;
     if (unitAware && df.value.units[j]) {
       const unitName = df.value.units[j] ? df.value.units[j] : undefined;
-      const unitObj = unitFromUnitName(unitName, vars);
+      const unitObj = unitFromUnitName(unitName);
       value = Rnl.multiply(Rnl.add(value, unitObj.gauge), unitObj.factor);
       unit.expos = unitObj.expos;
     }
@@ -2996,7 +2963,7 @@ const numberRegEx$1 = new RegExp("^(?:=|" + Rnl.numberPattern.slice(1) + "$)");
 const mixedFractionRegEx = /^-?(?:[0-9]+(?: [0-9]+\/[0-9]+))$/;
 const escRegEx = /^\\#/;
 
-const dataFrameFromTSV = (str, vars) => {
+const dataFrameFromTSV = (str) => {
   // Load a TSV string into a data frame.
   // Data frames are loaded column-wise. The subordinate data structures are:
   let data = [];   // where the main data lives, not including column names or units.
@@ -3031,7 +2998,7 @@ const dataFrameFromTSV = (str, vars) => {
         units.push(unitName);
         if (unitName.length > 0) {
           if (!unitMap[unitName]) {
-            const unit = unitFromUnitName(unitName, vars);
+            const unit = unitFromUnitName(unitName);
             if (unit) {
               unitMap[unitName] = unit;
             } else {
@@ -3050,7 +3017,9 @@ const dataFrameFromTSV = (str, vars) => {
     // Load a datum into the dataTable
     datum = datum.trim();
 
-    if (row === 3 && col === 0) { checkForUnitRow(); }
+    if (row === 3 && col === 0) {
+      checkForUnitRow();
+    }
 
     if (row === 0) {
       if (col === 0) {
@@ -3143,7 +3112,7 @@ const dataFrameFromTSV = (str, vars) => {
   }
 };
 
-const dataFrameFromVectors = (vectors, vars) => {
+const dataFrameFromVectors = (vectors, formatSpec) => {
   // Take an array of vectors and return a dataframe.
   const data = [];
   const headings = [];
@@ -3163,12 +3132,12 @@ const dataFrameFromVectors = (vectors, vars) => {
     headings.push(vector.name);
     columnMap[vector.name] = j;
     const colDtype = vector.dtype - vectorType;
-    data.push(vector.value.map(e => datumFromValue(e, colDtype)));
+    data.push(vector.value.map(e => datumFromValue(e, colDtype, formatSpec)));
     dtype.push(colDtype);
     if (vector.unit.name) {
       units.push(vector.unit.name);
       if (!unitMap[vector.unit.name]) {
-        const unit = unitFromUnitName(vector.unit.name, vars);
+        const unit = unitFromUnitName(vector.unit.name);
         unitMap[vector.unit.name] = unit;
       }
     } else {
@@ -3229,32 +3198,75 @@ const matrix2table = (matrix, headings, rowHeadings) => {
   }
 };
 
-const append = (o1, o2, vars, unitAware) => {
-  // Append a vector to a dataframe.
-  const oprnd = clone(o1); // We employ copy-on-write for data frames.
-  const numRows = o1.value.data[0].length;
-  if (numRows !== o2.value.length) { return errorOprnd("BAD_CONCAT") }
-  oprnd.value.headings.push(o2.name);
-  oprnd.value.columnMap[o2.name] = o1.value.headings.length - 1;
-  const dtype = (o2.dtype & dt.COLUMNVECTOR)
-    ? o2.dtype - dt.COLUMNVECTOR
-    : o2.dtype - dt.ROWVECTOR;
-  if (o2.unit.name && o2.unit.name.length > 0) {
-    oprnd.value.units.push(o2.unit.name);
-    const unit = unitFromUnitName(o2.unit.name, vars);
-    if (!oprnd.unit[o2.unit.name]) {
-      oprnd.unit[o2.unit.name] = unit;
+const append = (o1, o2, formatSpec, unitAware) => {
+  // Append a vector or single value to a dataframe.
+  // We use copy-on-write for dataframes, so copy it here.
+  const oprnd = o1.dtype === dt.DATAFRAME ? clone(o1) : clone(o2);
+  const addend = o1.dtype === dt.DATAFRAME ? o2 : o1;
+  if (o1.dtype === dt.DATAFRAME) {
+    oprnd.value.columnMap[addend.name] = oprnd.value.headings.length;
+    oprnd.value.headings.push(addend.name);
+  } else {
+    for (const [key, value] of Object.entries(oprnd.value.columnMap)) {
+      oprnd.value.columnMap[key] = value + 1;
     }
-    if (unitAware) {
-      const v = Matrix.convertFromBaseUnits(o2, unit.gauge, unit.factor);
-      oprnd.value.data.push(v.map(e => datumFromValue(e, dtype)));
+    oprnd.value.columnMap[addend.name] = 0;
+    oprnd.value.headings.unshift(addend.name);
+  }
+  let unit;
+  if (addend.unit && addend.unit.name && addend.unit.name.length > 0) {
+    if (o1.dtype === dt.DATAFRAME) {
+      oprnd.value.units.push(addend.unit.name);
     } else {
-      oprnd.value.data.push(o2.value.map(e => datumFromValue(e, dtype)));
+      oprnd.value.units.unshift(addend.unit.name);
+    }
+    unit = unitFromUnitName(addend.unit.name);
+    if (!oprnd.unit[addend.unit.name]) {
+      oprnd.unit[addend.unit.name] = unit;
+    }
+  }
+  const dtype = addend.dype === dt.RATIONAL && unit
+    ? dt.RATIONAL + dt.QUANTITY
+    : !isMatrix(addend)
+    ? addend.dtype
+    : (addend.dtype & dt.COLUMNVECTOR)
+    ? addend.dtype - dt.COLUMNVECTOR
+    : addend.dtype - dt.ROWVECTOR;
+  const numRows = oprnd.value.data[0].length;
+  if (numRows === 1 && !isMatrix(addend)) {
+    const v = unitAware && dtype === dt.RATIONAL && unit
+      ? Rnl.subtract(Rnl.divide(addend.value, unit.factor), unit.gauge)
+      : addend.value;
+    if (o1.dtype === dt.DATAFRAME) {
+      oprnd.value.data.push([datumFromValue(v, dtype, formatSpec)]);
+    } else {
+      oprnd.value.data.unshift([datumFromValue(v, dtype, formatSpec)]);
     }
   } else {
-    oprnd.value.units.push(null);
+    if (unitAware && dtype === dt.RATIONAL && unit) {
+      const v = Matrix.convertFromBaseUnits(addend, unit.gauge, unit.factor);
+      if (o1.dtype === dt.DATAFRAME) {
+        oprnd.value.data.push(v.map(e => datumFromValue(e, dtype, formatSpec)));
+      } else {
+        oprnd.value.data.unshift(v.map(e => datumFromValue(e, dtype, formatSpec)));
+      }
+    } else {
+      if (o1.dtype === dt.DATAFRAME) {
+        oprnd.value.data.push(addend.value.map(
+          e => datumFromValue(e, dtype, formatSpec)
+        ));
+      } else {
+        oprnd.value.data.unshift(addend.value.map(
+          e => datumFromValue(e, dtype, formatSpec)
+        ));
+      }
+    }
   }
-  oprnd.value.dtype.push(dtype);
+  if (o1.dtype === dt.DATAFRAME) {
+    oprnd.value.dtype.push(dtype);
+  } else {
+    oprnd.value.dtype.unshift(dtype);
+  }
   return oprnd
 };
 
@@ -3366,16 +3378,17 @@ const isNotEmpty = row => {
 
 const getNumInfo =  df => {
   // Gather info for in setting numbers on a decimal tab.
-  const numCols = df.data.length;
+  const data = df.data.plain ? df.data.plain : df.data;
+  const numCols = data.length;
   const colInfo = new Array(numCols);
   const cellInfo = new Array(numCols);
-  const DFisRational = !df.dtype && Rnl.isRational(df.data[0][0]);
+  const DFisRational = !df.dtype && Rnl.isRational(data[0][0]);
   for (let j = 0; j < numCols; j++) {
     if (DFisRational || (df.dtype && df.dtype[j] & dt.RATIONAL)) {
       colInfo[j] = { hasAlignChar: false, maxLenAfterAlignChar: 0 };
       cellInfo[j] = [];
-      for (let i = 0; i < df.data[0].length; i++) {
-        const datum = df.data[j][i];
+      for (let i = 0; i < data[0].length; i++) {
+        const datum = data[j][i];
         const pos = datum.indexOf(".");
         const hasAlignChar = pos > -1;
         const lenAfterAlignChar = hasAlignChar ? datum.length - pos - 1 : 0;
@@ -3409,9 +3422,10 @@ const displayNum = (datum, colInfo, cellInfo, decimalFormat) => {
 const totalRegEx = /^(?:total|sum)/i;
 
 const display$2 = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHeading = false) => {
-  if (df.data.length === 0) { return "" }
-  const numRows = df.data[0].length;
-  const numCols = df.data.length;
+  const data = df.data.plain ? df.data.plain : df.data;
+  if (data.length === 0) { return "" }
+  const numRows = data[0].length;
+  const numCols = data.length;
   const writeRowNums = numRows > 5 && !df.rowMap;
   const numColsInHeading = numCols + (writeRowNums ? 1 : 0);
   const isMap = !df.dtype;
@@ -3424,7 +3438,9 @@ const display$2 = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHead
   for (let j = 1; j < numColsInHeading; j++) {
     str += isMap
       ? "c "
-      : Rnl.isRational(df.data[j][0])
+      : numRows === 1
+      ? "c "
+      : Rnl.isRational(data[j][0])
       ? "r "
       : "l ";
   }
@@ -3460,10 +3476,10 @@ const display$2 = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHead
 
   // Write the data
   for (let i = 0; i < numRows; i++) {
-    if (i === numRows - 1 && totalRegEx.test(df.data[0][i])) { str += "\\hline "; }
+    if (i === numRows - 1 && totalRegEx.test(data[0][i])) { str += "\\hline "; }
     if (writeRowNums) { str += String(i + 1) + " & "; }
     for (let j = 0; j < numCols; j++) {
-      const datum = df.data[j][i];
+      const datum = data[j][i];
       if (isMap) {
         str += datum === undefined
         ? " & "
@@ -3492,9 +3508,10 @@ const display$2 = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHead
 
 const displayAlt$1 = (df, formatSpec = "h3", decimalFormat = "1,000,000.",
                    omitHeading = false) => {
-  if (df.data.length === 0) { return "" }
-  const numRows = df.data[0].length;
-  const numCols = df.data.length;
+  const data = df.data.plain ? df.data.plain : df.data;
+  if (data.length === 0) { return "" }
+  const numRows = data[0].length;
+  const numCols = data.length;
   const writeRowNums = numRows > 5 && !df.rowMap;
   let str = "``";
 
@@ -3524,7 +3541,7 @@ const displayAlt$1 = (df, formatSpec = "h3", decimalFormat = "1,000,000.",
   for (let i = 0; i < numRows; i++) {
     if (writeRowNums) { str += String(i + 1) + "\t"; }
     for (let j = 0; j < numCols; j++) {
-      const datum = df.data[j][i];
+      const datum = data[j][i];
       if (isMap) {
         str += datum === undefined
           ? "\t"
@@ -3608,7 +3625,8 @@ const tt = Object.freeze({
   RETURN: 38,  // A return statement inside a user-defined function.
   TO: 39,
   DATAFRAME: 40,
-  RICHTEXT: 41
+  RICHTEXT: 41,
+  BOOLEAN: 42
 });
 
 const minusRegEx = /^-(?![-=<>:])/;
@@ -3650,6 +3668,7 @@ const isUnary = (prevToken) => {
     case tt.VAR:
     case tt.RIGHTBRACKET:
     case tt.LONGVAR:
+    case tt.UNIT:
     case tt.CURRENCY:
     case tt.SUPCHAR:
     case tt.PRIME:
@@ -3664,8 +3683,8 @@ const wordRegEx = /^(?:(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u212C\u2130\u2131\u210B
 
 const words = Object.freeze({
   //       input,    tex output,               type, closeDelim
-  "true": ["true", "\\mathord{\\text{true}}", tt.ORD, ""],
-  "false": ["false", "\\mathord{\\text{false}}", tt.ORD, ""],
+  "true": ["true", "\\mathord{\\text{true}}", tt.BOOLEAN, ""],
+  "false": ["false", "\\mathord{\\text{false}}", tt.BOOLEAN, ""],
   im: ["im", "im", tt.LONGVAR, ""],
   cos: ["cos", "\\cos", tt.FUNCTION, ""],
   cosd: ["cosd", "\\operatorname{\\cos_d}", tt.FUNCTION, ""],
@@ -3681,7 +3700,7 @@ const words = Object.freeze({
   break: ["break", "\\mathrel{\\mathrm{break}}", tt.KEYWORD, ""],
   to: ["to", "\\mathbin{\\mathrm{to}}", tt.TO, "" ],
   throw: ["throw", "\\mathrel{\\mathrm{throw}}", tt.UNARY, ""],
-  echo: ["echo", "\\mathrel{\\mathrm{echo}}", tt.UNARY, ""],
+  print: ["print", "\\mathrel{\\mathrm{print}}", tt.UNARY, ""],
   return: ["return", "\\mathrel{\\mathrm{return}}", tt.RETURN, ""],
   sqrt: ["sqrt", "\\sqrt", tt.UNARY, ""],
   otherwise: ["otherwise", "\\mathrel{\\mathrm{otherwise}}", tt.LOGIC, ""],
@@ -3707,7 +3726,7 @@ const words = Object.freeze({
   "<-->": ["<-->", "\\xrightleftarrows", tt.UNARY, ""]
 });
 
-const miscRegEx = /^([/÷\u2215_:,;\t^+\\\-–−*×∘⊗⦼⊙√∛∜·.%|╏‖¦><=≈≟≠≡≤≥≅∈∉∋∌⊂⊄⊆⊈⊇⊉!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃∫∬∮∑([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7$£¥€₨₩₪]+)/;
+const miscRegEx = /^([/÷\u2215_:,;\t^+\\\-–−*∗×∘⊗⦼⊙√∛∜·.%|╏‖¦><=≈≟≠≡≤≥≅∈∉∋∌⊂⊄⊆⊈⊃⊇⊉!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃∫∬∮∑([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7$£¥€₨₩₪]+)/;
 
 const miscSymbols = Object.freeze({
   //    input, output, type,  closeDelim
@@ -3728,6 +3747,7 @@ const miscSymbols = Object.freeze({
   ".+": [".+", "\\mathbin{.+}", tt.ADD, ""],
   ".-": [".-", "\\mathbin{.-}", tt.ADD, ""],
   "*": ["*", "*", tt.MULT, ""],
+  "∗": ["∗", "∗", tt.MULT, ""],
   "×": ["×", "×", tt.MULT, ""],
   "∘": ["∘", "∘", tt.MULT, ""], // U+2218
   "⊗": ["⊗", "⊗", tt.MULT, ""],
@@ -3746,7 +3766,9 @@ const miscSymbols = Object.freeze({
   "==": ["==", "⩵", tt.REL, ""],
   "≡": ["≡", "≡", tt.REL, ""],
   ">": [">", "\\gt", tt.REL, ""],
+  "\u226f": ["\u226f", "\\ngtr", tt.REL, ""],
   "<": ["<", "\\lt", tt.REL, ""],
+  "\u226e": ["\u226e", "\\nless", tt.REL, ""],
   "?=": ["?=", "\u225F", tt.REL, ""],
   "≟": ["≟", "\u225F", tt.REL, ""],
   "≠": ["≠", "≠", tt.REL, ""],
@@ -3778,6 +3800,10 @@ const miscSymbols = Object.freeze({
   "∉": ["∉", "∉", tt.REL, ""],
   "∋": ["∋", "∋", tt.REL, ""],
   "∌": ["∌", "∌", tt.REL, ""],
+  "⊂": ["⊂", "⊂", tt.REL, ""],
+  "⊃": ["⊃", "⊃", tt.REL, ""],
+  "⊄": ["⊄", "⊄", tt.REL, ""],
+  "⊅": ["⊅", "⊅", tt.REL, ""],
   "⊆": ["⊆", "⊆", tt.REL, ""],
   "⊈": ["⊈", "⊈", tt.REL, ""],
   "⊇": ["⊇", "⊇", tt.REL, ""],
@@ -3893,12 +3919,17 @@ const texFunctions = Object.freeze({
   "\\iff": ["\\iff", "\\iff", tt.LOGIC, ""],
   "\\land": ["\\land", "\\land", tt.BIN, ""],
   "\\lor": ["\\lor", "\\lor", tt.BIN, ""],
+  "\\ngtr": ["\\ngtr", "\\ngtr", tt.REL, ""],
+  "\\nless": ["\\nless", "\\nless", tt.REL, ""],
+  "\\nleq": ["\\nleq", "\\nleq", tt.REL, ""],
+  "\\ngeq": ["\\ngeq", "\\ngeq", tt.REL, ""],
   "\\in": ["\\in", "∈", tt.REL, ""],
   "\\notin": ["\\notin", "∉", tt.REL, ""],
   "\\subset": ["\\subset", "⊂", tt.REL, ""],
   "\\subseteq": ["\\subseteq", "⊆", tt.REL, ""],
   "\\nsubset": ["\\nsubset", "⊄", tt.REL, ""],
   "\\nsubseteq": ["\\nsubseteq", "⊈", tt.REL, ""],
+  "\\supset": ["\\subset", "⊃", tt.REL, ""],
   "\\left.": ["\\left.", "\\left.", tt.LEFTBRACKET, "\\right."],
   "\\right.": ["\\right.", "\\right.", tt.RIGHTBRACKET, ""],
   "\\mod": ["\\mod", "\\mod", tt.BIN, ""],
@@ -3917,7 +3948,7 @@ const texFunctions = Object.freeze({
   "\\qquad": ["\\qquad", "\\qquad", tt.SPACE, ""]
 });
 
-const accents = Object.freeze([
+const accents = new Set([
   "Bbb",
   "Overrightarrow",
   "acute",
@@ -3966,7 +3997,7 @@ const accents = Object.freeze([
 ]);
 
 // Avoid "operatorname" for functions that are already math operators.
-const mathOperators = Object.freeze([
+const mathOperators = new Set([
   "arccos",
   "arcsin",
   "arctan",
@@ -4003,7 +4034,7 @@ const mathOperators = Object.freeze([
   "th"
 ]);
 
-const colors = Object.freeze([
+const colors = new Set([
   "blue",
   "gray",
   "green",
@@ -4013,7 +4044,7 @@ const colors = Object.freeze([
   "red"
 ]);
 
-const unaries = Object.freeze([
+const unaries = new Set([
   "bcancel",
   "boxed",
   "cancel",
@@ -4060,7 +4091,7 @@ const unaries = Object.freeze([
   "xtwoheadrightarrow"
 ]);
 
-const binaries = Object.freeze([
+const binaries = new Set([
   "dfrac",
   "frac",
   "lower",
@@ -4072,7 +4103,7 @@ const binaries = Object.freeze([
   "underset"
 ]);
 
-const texREL = Object.freeze([
+const texREL = new Set([
   "Bumpeq", "Colonapprox", "Coloneq", "Coloneqq", "Colonsim", "Darr", "Doteq", "Downarrow",
   "Eqcolon", "Eqqcolon", "Harr", "Larr", "Leftarrow", "Leftrightarrow", "Lleftarrow",
   "Longleftarrow", "Longleftrightarrow", "Longrightarrow", "Lrarr", "Lsh", "Rarr",
@@ -4198,7 +4229,7 @@ const lexOneWord = (str, prevToken) => {
         ? [match, "\\sqrt", tt.UNARY, ""]
         : match === "f"
         ? [match, match, tt.FUNCTION, ""]
-        : isIn(match, mathOperators)
+        : mathOperators.has(match)
         ? [match, "\\" + match, tt.FUNCTION, ""]
         : [match, "\\operatorname{" + groupSubscript(match) + "}", tt.FUNCTION, ""]
     } else if (prevToken.ttype === tt.ACCESSOR) {
@@ -4324,19 +4355,19 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
     // TeX control word, starting with backslash. e.g. \, or \circ
     const match = matchObj[0];
     st = match.substring(1);
-    if (isIn(st, accents)) {
+    if (accents.has(st)) {
       return [match, match, tt.ACCENT, ""]
     }
-    if (isIn(st, unaries)) {
+    if (unaries.has(st)) {
       return [match, match, tt.UNARY, ""]
     }
-    if (isIn(st, colors)) {
+    if (colors.has(st)) {
       return [match, "\\textcolor{" + st + "}", tt.UNARY, ""]
     }
-    if (isIn(st, binaries)) {
+    if (binaries.has(st)) {
       return [match, match, tt.BINARY, ""]
     }
-    if (isIn(st, texREL)) {
+    if (texREL.has(st)) {
       return [match, match, tt.REL, ""]
     }
     const texFunc = texFunctions[match];
@@ -4410,25 +4441,25 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
  *
 */
 
-// Keep the next three lists sorted, so that the isIn() binary search will work properly.
-const builtInFunctions = [
+const builtInFunctions = new Set([
   "Char", "abs", "acos", "acosd", "acosh", "acot", "acotd", "acoth", "acsc", "acscd",
   "acsch", "angle", "asec", "asecd", "asech", "asin", "asind", "asinh", "atan", "atan2",
-  "atand", "atanh", "binomial", "ceil", "conj", "cos", "cosd", "cosh", "cosh", "cot",
-  "cotd", "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp", "factorial", "fetch",
-  "floor", "format", "gamma", "gcd", "hcat", "hypot", "imag", "isnan", "length", "lerp", "ln",
-  "log", "log10", "log2", "lfact", "lgamma", "logn", "mod", "real",
-  "rem", "rms", "round", "roundSig", "roundn", "sec", "secd", "sech", "sech", "sign", "sin",
-  "sind", "sinh", "startSvg", "string", "tan", "tand", "tanh", "tanh", "trace", "transpose",
-  "vcat", "zeros", "Γ"
-];
+  "atand", "atanh", "binomial", "ceil", "conj", "cos", "cosd", "cosh",
+  "cosh", "cot", "cotd", "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp",
+  "factorial", "fetch", "findfirst", "floor", "format", "gamma", "gcd", "hcat", "hypot",
+  "imag", "isnan", "length", "lerp", "ln", "log", "log10", "log2", "lfact", "lgamma", "logn",
+  "mod", "number", "real", "rem", "rms", "round", "roundSig", "roundn", "sec", "secd", "sech",
+  "sech", "sign", "sin", "sind", "sinh", "startSvg", "string", "tan", "tand", "tanh", "tanh",
+  "trace", "transpose", "vcat", "zeros", "Γ"
+]);
 
-const builtInReducerFunctions = ["accumulate", "dataframe", "matrix2table",
-  "max", "mean", "median", "min", "product", "rand", "range", "stddev", "sum", "variance"
-];
+const builtInReducerFunctions = new Set(["accumulate", "beamDiagram", "dataframe",
+  "matrix2table", "max", "mean", "median", "min", "product", "rand", "range", "stddev", "sum",
+  "variance"
+]);
 
-const trigFunctions = ["cos", "cosd", "cot", "cotd", "csc", "cscd", "sec", "secd",
-  "sin", "sind", "tand", "tan"];
+const trigFunctions = new Set(["cos", "cosd", "cot", "cotd", "csc", "cscd", "sec", "secd",
+  "sin", "sind", "tand", "tan"]);
 
 const rationalRPN = numStr => {
   // Return a representation of a rational number that is recognized by evalRPN().
@@ -4481,6 +4512,7 @@ const numFromSupChars = str => {
 };
 
 const colorSpecRegEx = /^(#([a-f0-9]{6}|[a-f0-9]{3})|[a-z]+|\([^)]+\))/i;
+const accentRegEx$2 = /^(?:.|\uD835.)[\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]_/;
 
 const factors = /^[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133\uD835[({√∛∜]/;
 
@@ -4593,15 +4625,16 @@ const testForImplicitMult = (prevToken, texStack, str) => {
   return false
 };
 
+const multiplicands = new Set([tt.ORD, tt.VAR, tt.NUM, tt.LONGVAR, tt.RIGHTBRACKET,
+  tt.CURRENCY, tt.SUPCHAR]);
+
 const nextCharIsFactor = (str, tokenType) => {
   const st = str.replace(leadingLaTeXSpaceRegEx, "");
   const fc = st.charAt(0);
 
   let fcMeetsTest = false;
   if (st.length > 0) {
-    if (fc === "|" || fc === "‖") ; else if (/^[({[√∛∜0-9]/.test(st) &&
-      (isIn(tokenType, [tt.ORD, tt.VAR, tt.NUM, tt.LONGVAR, tt.RIGHTBRACKET,
-        tt.CURRENCY, tt.SUPCHAR]))) {
+    if (fc === "|" || fc === "‖") ; else if (/^[({[√∛∜0-9]/.test(st) && multiplicands.has(tokenType)) {
       return true
     } else {
       if (factors.test(fc)) {
@@ -4621,6 +4654,8 @@ const cloneToken$1 = token => {
   }
 };
 
+const endOfOrd = new Set([tt.ORD, tt.VAR, tt.NUM, tt.LONGVAR, tt.RIGHTBRACKET, tt.SUPCHAR]);
+
 // The RegEx below is equal to /^\s+/ except it omits \n, \t, and the no-break space \xa0.
 // I use \xa0 to precede the combining arrow accent character \u20D7.
 const leadingSpaceRegEx$1 = /^[ \f\r\v\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]+/;
@@ -4636,7 +4671,7 @@ const rpnPrecFromType = [
       -1, 16, 15, -1, 14,
       13,  9,  3,  2, 10,
       -1, -1,  4,  3, -1,
-      -1
+      -1, -1
 ];
 
 const texPrecFromType = [
@@ -4648,7 +4683,7 @@ const texPrecFromType = [
        2, -1, 15,  2, 14,
       13,  9, -1,  1, -1,
       15, -1,  1,  -1, 2,
-       2
+       2, 2
 ];
 /* eslint-enable indent-legacy */
 
@@ -4695,6 +4730,7 @@ const parse = (
   let rpn = "";
   let token = {};
   let prevToken = { input: "", output: "", ttype: 50 };
+  const dependencies = [];
   let mustLex = true;
   let mustAlign = false;
   let posOfPrevRun = 0;
@@ -4713,6 +4749,7 @@ const parse = (
   let tokenSep = "\xa0"; // no break space
   let rpnPrec = -1;
   const exprStack = []; // Use for lazy evalulation of ternary (If) expressions
+  let numFreeCommas = 0; // # of itens in a tuple
 
   // This function, parse(), is the main function for this module.
   // Before we get to the start line, we write two enclosed functions,
@@ -4900,9 +4937,7 @@ const parse = (
       followedByFactor = nextCharIsFactor(str, token.ttype);
     }
 
-    if (token.input === "!" && (isPrecededBySpace ||
-        !isIn(prevToken.ttype,
-          [tt.ORD, tt.VAR, tt.NUM, tt.LONGVAR, tt.RIGHTBRACKET, tt.SUPCHAR]))) {
+    if (token.input === "!" && (isPrecededBySpace || !endOfOrd.has(prevToken.ttype))) {
       // Redefine ! as logical not in certain contexts, to match Julia syntax.
       token.ttype = tt.UNARY;
       token.input = "¬";
@@ -4951,6 +4986,17 @@ const parse = (
         }
         popTexTokens(texPrecFromType[token.ttype], okToAppend);
         tex += isCalc ? token.input : token.output + " ";
+        okToAppend = true;
+        break
+
+      case tt.BOOLEAN:
+        popTexTokens(2, okToAppend);
+        if (isCalc) {
+          popRpnTokens(-1);
+          rpn += token.input;
+        }
+        if (isPrecededBySpace) { posOfPrevRun = tex.length; }
+        tex += token.output;
         okToAppend = true;
         break
 
@@ -5008,6 +5054,9 @@ const parse = (
         popTexTokens(2, okToAppend);
         posOfPrevRun = tex.length;
         tex += token.output;
+        if (isCalc) {
+          rpn += token.input;
+        }
         okToAppend = true;
         break
 
@@ -5022,7 +5071,9 @@ const parse = (
 
         if (!isCalc) {
           if (token.ttype === tt.LONGVAR) {
-            token.output = "\\mathrm{" + token.output + "}";
+            if (!accentRegEx$2.test(token.input)) {
+              token.output = "\\mathrm{" + token.output + "}";
+            }
           }
         } else if (prevToken.input === "for") {
           rpn += '"' + token.input + '"'; // a loop index variable name.
@@ -5039,6 +5090,7 @@ const parse = (
             token.output = "〖" + token.output;
           }
           rpn += token.input === "im" ? "im" : "¿" + token.input;
+          if (token.input !== "im") { dependencies.push(token.input); }
         }
 
         tex += token.output + (str.charAt(0) === "." ? "" : " ");
@@ -5189,6 +5241,9 @@ const parse = (
           texStack.push({ prec: 13, pos: posOfPrevRun, ttype: tt.SUP, closeDelim: "}" });
         }
         if (isCalc) { rpnStack.push({ prec: 13, symbol: "^" }); }
+        if (delims.length > 0 && str.charAt(0) === "(") {
+          delims[delims.length - 1].isTall = true;
+        }
         tex += "^{";
         okToAppend = false;
         break
@@ -5225,7 +5280,7 @@ const parse = (
         // Is there an exponent on the function name?
         if (functionExpoRegEx.test(str)) {
           const [expoInput, expoTex, expoRPN] = exponentOfFunction(str, decimalFormat, isCalc);
-          if (isCalc && expoRPN === `®-1/1` && isIn(token.input, trigFunctions)) {
+          if (isCalc && expoRPN === `®-1/1` && trigFunctions.has(token.input)) {
             // Inverse trig function.
             token.input = "a" + token.input;
             token.output = "\\a" + token.output.slice(1);
@@ -5265,6 +5320,7 @@ const parse = (
           texStack.push({ prec: 16, pos: tex.length, ttype: tt.ACCENT, closeDelim: "〗" });
           tex += "〖" + token.input;
           rpn += "¿" + token.input;
+          dependencies.push(token.input);
         } else {
           texStack.push({ prec: 16, pos: tex.length, ttype: tt.ACCENT, closeDelim: "}" });
           tex += token.output + "{";
@@ -5276,7 +5332,10 @@ const parse = (
 
       case tt.PRIME:
         popTexTokens(15, true);
-        if (isCalc) { rpn += token.input; }
+        if (isCalc) {
+          rpn += token.input;
+          dependencies.push(prevToken.input + token.input);
+        }
         tex = tex.trim() + token.output + " ";
         okToAppend = true;
         break
@@ -5390,7 +5449,7 @@ const parse = (
             }
           }
         }
-        if (topDelim.delimType === dCASES && isIn(token.input, ["if", "otherwise"])) {
+        if (topDelim.delimType === dCASES && ["if", "otherwise"].includes(token.input)) {
           tex += "&";
         }
         tex += token.output;
@@ -5468,7 +5527,7 @@ const parse = (
           delim.delimType = dPAREN;
           delim.rpnLength = rpn.length;
         } else if (token.input === "[" &&
-            (isIn(prevToken.ttype, [tt.VAR, tt.LONGVAR, tt.STRING, tt.PROPERTY]) ||
+            ([tt.VAR, tt.LONGVAR, tt.STRING, tt.PROPERTY].includes(prevToken.ttype) ||
             prevToken.input === "]")) {
           rpn += tokenSep;
           delim.delimType = dACCESSOR;
@@ -5519,8 +5578,9 @@ const parse = (
 
         if (isCalc) {
           if (delims.length === 1) {
-            rpn += token.output;
-
+            if (token.input === ",") {
+              numFreeCommas += 1; // item in a tuple
+            }
           } else {
             if (token.input === ";") {
               delim.numRows += 1;
@@ -5600,9 +5660,9 @@ const parse = (
               }
               rpn += (symbol.slice(-1) === "^")
                 ? firstSep + symbol
-                : builtInFunctions.includes(symbol)
+                : builtInFunctions.has(symbol)
                 ? firstSep + symbol
-                : builtInReducerFunctions.includes(symbol)
+                : builtInReducerFunctions.has(symbol)
                 ? firstSep + symbol + tokenSep + numArgs
                 : firstSep + "function" + tokenSep + symbol + tokenSep + numArgs;
               break
@@ -5754,6 +5814,9 @@ const parse = (
     while (rpnStack.length > 0) {
       rpn += tokenSep + rpnStack.pop().symbol;
     }
+    if (numFreeCommas > 0) {
+      rpn += tokenSep + "tuple" + tokenSep + String(numFreeCommas + 1);
+    }
     const varRegEx = /〖[^ ().\\,;]+/g;
     let arr;
     while ((arr = varRegEx.exec(tex)) !== null) {
@@ -5778,10 +5841,10 @@ const parse = (
     tex = "\\begin{aligned}" + tex.slice(0, pos) + "&" + tex.slice(pos) + "\\end{aligned}";
   }
 
-  return isCalc ? [tex, rpn] : tex
+  return isCalc ? [tex, rpn, dependencies] : tex
 };
 
-function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
+function insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat) {
   // hurmetVars is a key:value store of variable names and attributes.
   // This function is called to insert an assignment into hurmetVars.
   const formatSpec = hurmetVars.format ? hurmetVars.format.value : "h15";
@@ -5789,6 +5852,9 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
   if (!Array.isArray(attrs.name)) {
     // This is the typical case.
     hurmetVars[attrs.name] = attrs;
+    if (changedVars) {
+      changedVars.add(attrs.name);
+    }
 
   } else if (attrs.value === null) {
     for (let i = 0; i < attrs.name.length; i++) {
@@ -5822,6 +5888,7 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
             unit: isQuantity ? attrs.unit : undefined,
             dtype
           };
+          if (changedVars) { changedVars.add(attrs.name[i]); }
           iName += 1;
         }
       }
@@ -5843,6 +5910,7 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
           unit: isQuantity ? attrs.unit : undefined,
           dtype
         };
+        if (changedVars) { changedVars.add(attrs.name[i]); }
       }
     }
 
@@ -5863,6 +5931,7 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
         result.resultdisplay = format(value, formatSpec, decimalFormat);
         if (unitName) { result.resultdisplay += " " + unitTeXFromString(unitName); }
         hurmetVars[attrs.name[i]] = result;
+        if (changedVars) { changedVars.add(attrs.name[i]); }
         i += 1;
       }
       i = 0;
@@ -5878,6 +5947,7 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
           : String(value);
         if (unitName) { result.resultdisplay += " " + unitTeXFromString(unitName); }
         hurmetVars[attrs.name[i]] = result;
+        if (changedVars) { changedVars.add(attrs.name[i]); }
         i += 1;
       }
     }
@@ -5919,11 +5989,13 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
       }
 
       hurmetVars[attrs.name[i]] = result;
+      if (changedVars) { changedVars.add(attrs.name[i]); }
     }
   } else if (attrs.dtype === dt.TUPLE) {
     let i = 0;
     for (const value of attrs.value.values()) {
       hurmetVars[attrs.name[i]] = value;
+      if (changedVars) { changedVars.add(attrs.name[i]); }
       i += 1;
     }
   } else if (attrs.dtype === dt.MODULE) {
@@ -5934,6 +6006,7 @@ function insertOneHurmetVar(hurmetVars, attrs, decimalFormat) {
       for (const value of attrs.value.values()) {
         const result = clone(value);
         hurmetVars[attrs.name[i]] = result;
+        if (changedVars) { changedVars.add(attrs.name[i]); }
         i += 1;
       }
     }
@@ -6122,16 +6195,8 @@ const fromAssignment = (cellAttrs, unitAware) => {
   if (dtype === dt.STRING || dtype === dt.BOOLEAN || dtype === dt.DRAWING ||
       dtype === dt.MODULE || dtype === dt.NULL) {
     oprnd.unit = null;
-  } else if (dtype === dt.DATAFRAME) {
-    oprnd.unit = Object.freeze(clone(cellAttrs.unit));
-  } else if (cellAttrs.unit && cellAttrs.unit.expos) {
-    oprnd.unit = clone(cellAttrs.unit);
   } else if (cellAttrs.unit) {
-    oprnd.unit = Object.create(null);
-    if (cellAttrs.unit)  { oprnd.unit.name = cellAttrs.unit; }
-    if (cellAttrs.expos) { oprnd.unit.expos = clone(cellAttrs.expos); }
-  } else if (cellAttrs.expos && Array.isArray(cellAttrs.expos)) {
-    oprnd.unit = { expos: clone(cellAttrs.expos) };
+    oprnd.unit = clone(cellAttrs.unit);
   } else {
     oprnd.unit = null;
   }
@@ -6175,13 +6240,13 @@ const fromAssignment = (cellAttrs, unitAware) => {
   return Object.freeze(oprnd)
 };
 
-function propertyFromDotAccessor(parent, index, vars, unitAware) {
+function propertyFromDotAccessor(parent, index, unitAware) {
   const property = Object.create(null);
   if (parent.dtype & dt.MAP) {
     return map.range(parent, [index], unitAware)
 
   } else if (parent.dtype & dt.DATAFRAME) {
-    return DataFrame.range(parent, [index], vars, unitAware)
+    return DataFrame.range(parent, [index], unitAware)
 
   } else if ((parent.dtype === dt.STRING || (parent.dtype & dt.ARRAY)) &&
     index.dtype === dt.RATIONAL) {
@@ -6291,8 +6356,32 @@ const numMisMatchError = _ => {
   const str = "Error. Mismatch in number of multiple assignment.";
   return [`\\textcolor{firebrick}{\\text{${str}}}`, str]
 };
+const testRegEx = /^@{1,2}test /;
+const compRegEx = /\u00a0([⩵≠><>≤≥∋∈∉∌⊂⊃⊄⊅]|==|in|!in|!=|=>|<=)$/;
+const negatedComp = {
+  "⩵": ["≠", "≠"],
+  "==": ["≠", "≠"],
+  "≠": ["==", "=="],
+  ">": ["\\ngtr", "!>"],
+  "<": ["\\nless", "!<"],
+  "≤": ["\\nleq", "!≤"],
+  "≥": ["\\ngeq", "!≥"],
+  "∋": ["∌", "∌"],
+  "∈": ["∉", "∉"],
+  "⊂": ["⊄", "⊄"],
+  "⊃": ["⊅", "⊅"],
+  "∉": ["∈", "∈"],
+  "∌": ["∋", "∋"],
+  "⊄": ["⊂", "⊂"],
+  "⊅": ["⊃", "⊃"],
+  "in": ["∉", "∉"],
+  "!in": ["in", "in"],
+  "!=": ["==", "=="],
+  "=>": ["\\ngeq", "!≥"],
+  "<=": ["\\ngeq", "!≥"]
+};
 
-const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAware) => {
+const formatResult = (stmt, result, formatSpec, decimalFormat, assert, isUnitAware) => {
   if (!result) { return stmt }
 
   if (result.dtype === dt.DRAWING) {
@@ -6319,6 +6408,31 @@ const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAware) => {
       resultDisplay = "";
       altResultDisplay = "";
       return stmt
+
+    } else if (result.dtype & dt.BOOLEAN && testRegEx.test(stmt.entry) &&
+      compRegEx.test(stmt.rpn)) {
+      if (testValue(result) === true) {
+        resultDisplay = parse(stmt.entry.replace(testRegEx, "")) +
+          ",\\text{ ok }✓";
+        altResultDisplay = stmt.entry.replace(testRegEx, "") + ", ok ✓";
+      } else {
+        const op = compRegEx.exec(stmt.rpn).slice(1);
+        const negOp = negatedComp[op];
+        if (assert) {
+          const assertStr = assert.value.replace(/\.$/, "");
+          resultDisplay = `\\colorbox{Salmon}{${assertStr}, but $` +
+              parse(stmt.entry.replace(testRegEx, "").replace(op, negOp[0])) + "$}";
+          altResultDisplay = assertStr + ", but " +
+              stmt.entry.replace(testRegEx, "").replace(op, negOp[1]);
+        } else {
+          resultDisplay = parse(stmt.entry.replace(testRegEx, "").replace(op, negOp[0])) +
+              ",\\colorbox{Salmon}{ n.g.}";
+          altResultDisplay = stmt.entry.replace(testRegEx, "").replace(op, negOp[1]) +
+              ", n.g.";
+        }
+        // eslint-disable-next-line no-console
+        console.log(altResultDisplay);
+      }
 
     } else if (isMatrix(result)) {
       resultDisplay = Matrix.display((isUnitAware || result.value.plain)
@@ -6452,6 +6566,29 @@ const formatResult = (stmt, result, formatSpec, decimalFormat, isUnitAware) => {
   return stmt
 };
 
+const testValue = oprnd => {
+  if (isVector(oprnd)) {
+    for (let i = 0; i < oprnd.value.length; i++) {
+      if (!oprnd.value[i]) { return false }
+    }
+  } else if (isMatrix(oprnd)) {
+    for (let i = 0; i < oprnd.value.length; i++) {
+      for (let j = 0; j < oprnd.value[0].length; j++) {
+        if (!oprnd.value[i][j]) { return false }
+      }
+    }
+  } else if (oprnd.dtype & dt.MAP) {
+    for (let j = 0; j < oprnd.value.data.length; j++) {
+      for (let i = 0; i < oprnd.value.data[0].length; i++) {
+        if (!oprnd.value.data[j][i]) { return false }
+      }
+    }
+  } else {
+    return oprnd.value
+  }
+  return true
+};
+
 /*
  *  This module receives a TeX template string and a object containing Hurmet variables.
  *  At each location where the template contains a variable, this module plugs in a TeX string
@@ -6488,10 +6625,10 @@ const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat) => {
         for (let i = 1; i < names.length; i++) {
           const propName = names[i].replace("}", "").replace("\\mathrm{", "").trim();
           const indexOprnd = { value: propName, unit: null, dtype: dt.STRING };
-          hvar = propertyFromDotAccessor(hvar, indexOprnd, vars, unitAware);
+          hvar = propertyFromDotAccessor(hvar, indexOprnd, vars);
           if (!hvar) { return errorOprnd("V_NAME", propName) }
           const stmt = { resulttemplate: "@", altresulttemplate: "@" };
-          hvar.resultdisplay = formatResult(stmt, hvar, formatSpec,
+          hvar.resultdisplay = formatResult(stmt, hvar, formatSpec, null,
                 decimalFormat).resultdisplay;
         }
       }
@@ -7397,7 +7534,7 @@ const compare = (op, x, y, yPrev) => {
         return errorOprnd("NO_PROP", x.name)
       }
 
-    case "⊇":
+    case "⊃":
       if (typeof x === "string" && typeof y === "string") {
         return x.indexOf(y) > -1
       } else if (Array.isArray(x) && Array.isArray(y)) {
@@ -7457,7 +7594,7 @@ const compare = (op, x, y, yPrev) => {
         return errorOprnd("NO_PROP", x.name)
       }
 
-    case "⊈":
+    case "⊄":
       if (typeof x === "string" && typeof y === "string") {
         return y.indexOf(x) === -1
       } else if (Array.isArray(x) && Array.isArray(y)) {
@@ -7481,7 +7618,7 @@ const compare = (op, x, y, yPrev) => {
         return errorOprnd("NOT_ARRAY")
       }
 
-    case "⊉":
+    case "⊅":
       if (typeof x === "string" && typeof y === "string") {
         return x.indexOf(y) === -1
       } else if (Array.isArray(x) && Array.isArray(y)) {
@@ -8704,84 +8841,39 @@ const Operators = Object.freeze({
 
 const wideCharRegEx = /[\uD800-\uDBFF][\uDC00-\uDFFF][\uFE00\uFE01]?/g;
 
+const findfirst = (searchString, str) => {
+  const index = str.value.indexOf(searchString.value);
+  const wideCharMatches = arrayOfRegExMatches(wideCharRegEx, str.value.slice(0, index));
+  return Rnl.fromNumber(index + wideCharMatches.length + 1)
+};
+
 const textRange = (str, index) => {
   // Find a range of the string str
   if (index.dtype !== dt.RATIONAL && index.dtype !== dt.RANGE) {
     return errorOprnd("STR_INDEX")
   }
 
-  const wideCharMatches = arrayOfRegExMatches(wideCharRegEx, str);
+  const strArray = Array.from(str);
   let value = "";
-
-  if (wideCharMatches.length === 0) {
-    // No surrogate pairs were found.
-    // Each text character is one UTF-16 code unit.
-    // So do a naive access of the string.
-    if (index.dtype === dt.RATIONAL) {
-      value = str.charAt(Rnl.toNumber(index.value) - 1);
-    } else if (index.dtype === dt.RANGE) {
-      const start = Rnl.toNumber(index.value[0]);
-      const step = Rnl.toNumber(index.value[1]);
-      const end = index.value[2] === "∞"
-        ? str.length
-        : Rnl.toNumber(index.value[2]);
-      if (step === 1) {
-        // No step size specified.
-        value = str.slice(start - 1, end);
-      } else {
-        for (let i = start - 1; i < end; i += step) {
-          value += str.charAt(i);
-        }
-      }
-    }
-  } else {
-    // We must account for surrogate pairs and variation selectors.
-    let discardLength = 0;
-    let endOfPrevWideChar = 0;
-    let cleanString = "";
-    let start = 0;
-    let step = 0;
-    let end = 0;
-    if (index.dtype === dt.RATIONAL) {
-      // Return one character.
-      start = Rnl.toNumber(index.value);
-      step = 1;
-      end = start;
+  if (index.dtype === dt.RATIONAL) {
+    const pos = Rnl.toNumber(index.value) - 1;
+    value = strArray.at(pos);
+  } else if (index.dtype === dt.RANGE) {
+    const start = Rnl.toNumber(index.value[0]);
+    const step = Rnl.toNumber(index.value[1]);
+    const end = index.value[2] === "∞"
+      ? str.length
+      : Rnl.toNumber(index.value[2]);
+    if (step === 1) {
+      value = strArray.slice(start - 1, end).join("");
     } else {
-      // index is a range and str contains at least one surrogate pair.
-      start = Rnl.toNumber(index.value[0]);
-      step = Rnl.toNumber(index.value[1]);
-      end = Rnl.toNumber(index.value[2]);
-    }
-    let realIndex = start;
+      for (let i = start - 1; i < end; i += step) {
+        value += strArray.at(i);
+      }
 
-    for (let i = 0; i < wideCharMatches.length; i++) {
-      const posWideChar = wideCharMatches[i].index;
-      cleanString = str.slice(endOfPrevWideChar, posWideChar);
-      while (realIndex <= end && discardLength + cleanString.length >= realIndex) {
-        value += cleanString[realIndex - discardLength - 1];
-        realIndex += step;
-      }
-      if (realIndex <= end && discardLength + cleanString.length === realIndex - 1) {
-        value += wideCharMatches[i].value;
-        realIndex += step;
-      }
-      if (realIndex > end) {
-        return { value, unit: null, dtype: dt.STRING }
-      }
-      discardLength += cleanString.length + 1;
-      endOfPrevWideChar = posWideChar + wideCharMatches[i].length;
-    }
-    if (realIndex >= discardLength && realIndex <= end) {
-      cleanString = str.slice(endOfPrevWideChar);
-      while (realIndex <= end && discardLength + cleanString.length >= realIndex) {
-        value += cleanString[realIndex - discardLength - 1];
-        realIndex += step;
-      }
-    } else {
-      return errorOprnd("BIGINDEX")
     }
   }
+
   return { value, unit: null, dtype: dt.STRING }
 };
 
@@ -8791,7 +8883,7 @@ const textRange = (str, index) => {
  *
  * ## Restrictions
  *
- * 1. **_bold-italic_** must use both * & _ delimiters. Hurmet will fail on ***what***.
+ * 1. **_bold-italic_** must use both * & _ delimiters. Hurmet will fail on ***wat***.
  * 2. "Shortcut" reference links [ref] are not recognized.
  *
  * ## Extensions
@@ -8803,10 +8895,9 @@ const textRange = (str, index) => {
  *    LaTeX display math is delimited  $$ … $$.
  * 3. ~subscript~
  * 4. ~~strikethrough~~
- * 5. Comment (A paragraph in a speech bubble)
- *    Its Markdown is a paragraph preceded by `{comment}\n`
- * 6. Pipe tables as per Github Flavored Markdown (GFM).
- * 7. Grid tables as per Pandoc and reStructuredText
+ * 5. Pipe tables as per Github Flavored Markdown (GFM).
+ * 6. Grid tables as per Pandoc and reStructuredText
+ * 7. Empty paragraphs: A line consisting only of "¶".
  * 8. Attributes for reference link definitions
  *      [id]: target
  *      {.class #id width=number}
@@ -8818,18 +8909,14 @@ const textRange = (str, index) => {
  *        1. →  1. 2. 3.  etc.
  *        A. →  A. B. C.  etc. (future)
  *        a) →  (a) (b) (c)  etc. (future)
- * 12. Table of Contents
+ * 12. Fenced divs, similar to Pandoc.
+ *     ::: (centered|comment|indented|header)
+ *     Block elements
+ *     :::
+ *     Nested divs are distinguished by number of colons. Minimum three.
+ * 13. Table of Contents
  *     {.toc start=N end=N}
- * 13. Definition lists, per Pandoc.  (future)
- * 14. Attributes that define a div.
- *     The format is:
- *     {attribute}
- *     >  Block element
- *
- *        Block element
- *
- *     Current attributes are (indented|centered|header)
- *     Future attributes include admonitions for info, warning, etc.
+ * 14. Definition lists, per Pandoc.  (future)
  * 15. [^1] is a reference to a footnote. (future)
  *     [^1]: The body of the footnote is deferred, similar to reference links.
  * 16. [#1] is a reference to a citation. (future)
@@ -9286,7 +9373,7 @@ const parseTextMark = (capture, state, mark) => {
   return text
 };
 
-const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<\/?(?:body|details|(div|input|label)(?: [^>]+)?|!DOCTYPE[a-z ]*|html[a-z ="]*|br|dl(?: class="[a-z-]+")?|li|main[a-z\- ="]*|nav|ol|ul(?: [^>]+)?)\/?>[^\n]*?(?:\n|$))/;
+const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<(?:\/?(?:!DOCTYPE html|body|li|br|hr|(?:div|article|details|input|label|ul|ol|dl|main|nav)(?: (?:class|id)=(["'])[A-Za-z- ]+\2){0,2})|\/?html(?: lang=(["'])[a-z]+\3)?)>[^\n]*?(?:\n|$))/;
 
 // Rules must be applied in a specific order, so use a Map instead of an object.
 const rules = new Map();
@@ -9301,7 +9388,7 @@ rules.set("html", {
 rules.set("htmlComment", {
   isLeaf: true,
   match: blockRegex(/^ *<!--[^>]+-->[^\n]*\n/),
-  parse: function(captue, state) {
+  parse: function(capture, state) {
     return { type: "null" }
   }
 }),
@@ -9328,7 +9415,7 @@ rules.set("heading", {
 });
 rules.set("dt", {  // description term
   isLeaf: false,
-  match: blockRegex(/^(([^\n]*)\n)(?=<dd>|\n:)/),
+  match: blockRegex(/^(([^\n]*)\n)(?=<dd>|\n: )/),
   parse: function(capture, state) {
     return { content: parseInline(capture[2].trim(), state) }
   }
@@ -9401,12 +9488,13 @@ rules.set("dd", {  // description details
 });
 rules.set("special_div", {
   isLeaf: false,
-  match: blockRegex(/^(?:{(centered|header|indented)} *\n)(> {2}[\s\S]+?(?:\n{2,}(?![> ] {2})\n*|\s*$))/),
-  // indented or centered div, or <header>
+  match: blockRegex(/^(:{3,}) ?(indented|comment|centered|header) *\n([\s\S]+?)\n+\1 *(?:\n{2,}|\s*$)/),
+  // indented or centered or comment div, or <header>
   parse: function(capture, state) {
-    let div = " " + capture[2].slice(1);
-    div = div.replace(/^ {3}/gm, ""); // remove indents on trailing lines:
-    return { type: capture[1], content: parse$1(div, state) };
+    const content = capture[2] === "comment"
+      ? parseInline(capture[3], state)
+      : parse$1(capture[3], state);
+    return { type: capture[2], content };
   }
 });
 rules.set("figure", {
@@ -9455,12 +9543,18 @@ rules.set("newline", {
   match: blockRegex(/^(?:\n *)*\n/),
   parse: function() { return { type: "null" } }
 });
+rules.set("emptyParagraph", {
+  isLeaf: true,
+  match: blockRegex(/^¶(?:\n *)+\n/),
+  parse: function(capture, state) {
+    return { type: "paragraph", content: [] }
+  }
+});
 rules.set("paragraph", {
   isLeaf: false,
-  match: blockRegex(/^({comment}\n)?((?:[^\n]|\n(?! *\n))+)(?:\n *)+\n/),
+  match: blockRegex(/^((?:[^\n]|\n(?! *\n))+)(?:\n *)+\n/),
   parse: function(capture, state) {
-    const type = capture[1] ? "comment" : "paragraph";
-    return { type, content: parseInline(capture[2], state) }
+    return { type: "paragraph", content: parseInline(capture[1], state) }
   }
 });
 rules.set("escape", {
@@ -9833,6 +9927,16 @@ const parseMetadata = str => {
 
 const dateMessageRegEx = /^date:([^\n]+)\nmessage:([^\n]+)\n/;
 
+const inlineMd2ast = md => {
+  const state = { inline: true, _defs: {}, prevCapture: "", remainder: "", inHtml: false };
+  const ast = parse$1(md, state);
+  if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") {
+    ast.shift();
+  }
+  consolidate(ast);
+  return ast
+};
+
 const md2ast = (md, inHtml = false) => {
   // First, check for a metadata preamble
   let metadata = false;
@@ -10036,7 +10140,7 @@ const textLocal = (svg, p, str, pos) => {
   textNode.attrs["font-size"] = attrs.fontsize;
   textNode.attrs["text-anchor"] = textanchor;
   // Load Markdown into an AST
-  const ast = md2ast(str)[0].content;
+  const ast = inlineMd2ast(str);
   // Load content of AST into <tspan> nodes.
   if (Array.isArray(ast)) {
     let prevNodeContainedSubscript = false;
@@ -10117,7 +10221,7 @@ const functions = {
     attrs.height = typeof height === "number" ? height : Rnl.toNumber(height.value);
     svg.attrs.height = attrs.height;
     if (typeof position !== "string") { position = position.value; }
-    svg.attrs.style = `float: ${position}`;
+    if (position !== "inline") { svg.attrs.float = position; }
     attrs.xunitlength = attrs.width / (attrs.xmax - attrs.xmin);
     attrs.yunitlength = attrs.height / (attrs.ymax - attrs.ymin);
     attrs.origin = [-attrs.xmin * attrs.xunitlength, -attrs.ymin * attrs.yunitlength];
@@ -10329,10 +10433,10 @@ const functions = {
     const node = { tag: "rect", attrs: {} };
     const p = [Rnl.toNumber(m.value[0][0]), Rnl.toNumber(m.value[0][1])];
     const q = [Rnl.toNumber(m.value[1][0]), Rnl.toNumber(m.value[1][1])];
-    node.attrs.x = p[0] * attrs.xunitlength + attrs.origin[0];
-    node.attrs.y = attrs.height - q[1] * attrs.yunitlength - attrs.origin[1];
-    node.attrs.width = (q[0] - p[0]) * attrs.xunitlength;
-    node.attrs.height = (q[1] - p[1]) * attrs.yunitlength;
+    node.attrs.x = Math.min(p[0], q[0]) * attrs.xunitlength + attrs.origin[0];
+    node.attrs.y = attrs.height - Math.max(p[1], q[1]) * attrs.yunitlength - attrs.origin[1];
+    node.attrs.width = Math.abs((q[0] - p[0]) * attrs.xunitlength);
+    node.attrs.height = Math.abs((q[1] - p[1]) * attrs.yunitlength);
     if (r != null) {
       const rNum = Rnl.toNumber(r.value) * attrs.xunitlength;
       node.attrs.rx = rNum;
@@ -10553,43 +10657,3199 @@ const functions = {
 
 };
 
-const renderSVG = dwg => {
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  Object.keys(dwg.attrs).forEach(key => {
-    svg.setAttribute(key, dwg.attrs[key]);
-  });
-  dwg.children.forEach(el => {
-    const node = document.createElementNS("http://www.w3.org/2000/svg", el.tag);
-    Object.keys(el.attrs).forEach(attr => {
-      node.setAttribute(attr, el.attrs[attr]);
-      if (attr === "title") {
-        node.appendChild(document.createTextNode(el.attrs["text"]));
-      } else {
-        node.setAttribute(attr, el.attrs[attr]);
-      }
-    });
-    if (el.tag === "text") {
-      el.children.forEach(child => {
-        const tspan = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
-        if (child.attrs) {
-          Object.keys(child.attrs).forEach(mark => {
-            tspan.setAttribute(mark, child.attrs[mark]);
-          });
-        }
-        tspan.appendChild(document.createTextNode(child.text));
-        node.appendChild(tspan);
-      });
-    }
-    svg.appendChild(node);
-  });
-  return svg
-};
-
 const draw = Object.freeze({
   startSvg,
-  functions,
-  renderSVG
+  functions
 });
+
+// Some helper functions and objects.
+
+// Lengths and x-coordinates are written as rational numbers, not floating point.
+// That way, we can make a lessThanOrEqualTo comparison w/o floating point errors.
+
+const nodeFixity = { p: "pinned", f: "fixed", h: "hinge", ph: "proppedHinge", s: "spring" };
+const ord = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth"];
+
+const loadType = {
+  // type 0 is total service load, an accumulation of all of the others.
+  dead: 1,  D: 1, d: 1, load: 1, // dead
+  fluid: 2, F: 2, f: 2, // fluid
+  live: 3,  L: 3, l: 3, // live
+  H: 4, h: 4, // horizontal load, usually soil against a retaining wall
+  roof: 5,  Lr: 5, lr: 5, LR: 5, lR: 5, RL: 5, roofLive: 5, // roof live
+  snow: 6,  S: 6, s: 6, // snow
+  rain: 7,  R: 7, r: 7, // rain
+  wind: 8,  W: 8, w: 8, // wind
+  EQ: 9,    E: 9, e: 9, seismic: 9  // earthquake
+};
+
+const combinationsFromInput = factorInput => {
+  const data = factorInput.data;
+  const headings = factorInput.headings;
+  const combinations = [];
+  for (let i = 0; i < data[0].length; i++) {
+    const factors = new Array(10).fill(0);
+    for (let j = 0; j < headings.length; j++) {
+      const type = loadType[headings[j]];
+      factors[type] = Rnl.toNumber(data[j][i]);
+    }
+    combinations.push(factors);
+  }
+  return combinations
+};
+
+const newNode = (fixity, k, xCoordinate) => {
+  return {
+    fixity,
+    k: (fixity === "spring" ? k : 0),
+    x: xCoordinate,
+    P: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    M: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    Pr: [0, 0, 0, 0, 0, 0, 0, 0, 0], // "r" stands for reaction
+    PrMin: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    Mr: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    MrMin: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+  }
+};
+
+const incrementDoF = fixity => {
+  switch (fixity) {
+    case "pinned":
+      return 1
+    case "fixed":
+      return 0
+    case "hinge":
+      return 3
+    default:
+      return 2
+  }
+};
+
+const newSegment = (length, xOfLeftEnd) => {
+  // A "segment" is a beam section between points of load discontinuity.
+  return {
+    length,
+    xOfLeftEnd,
+    // Point load applied at left end of segments.
+    // Array dim'ed to 9 for different load types, e.g., dead, live, wind, etc.
+    P: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    M: [0, 0, 0, 0, 0, 0, 0, 0, 0],  // point moment
+    Pf: 0, // factored point load at left end
+    Mf: 0,
+    w1: [0, 0, 0, 0, 0, 0, 0, 0, 0], // distributed load at left end of segments.
+    w2: [0, 0, 0, 0, 0, 0, 0, 0, 0], // at right end.
+    Vmax: {
+      left: { value: 0, case: 0 },
+      mid: { value: 0, case: 0, x: 0 },
+      right: { value: 0, case: 0 }
+    },
+    Vmin: {
+      left: { value: 0, case: 0 },
+      mid: { value: 0, case: 0, x: 0 },
+      right: { value: 0, case: 0 }
+    },
+    Mmax: {
+      left: { value: 0, case: 0 },
+      mid: { value: 0, case: 0, x: 0 },
+      right: { value: 0, case: 0 }
+    },
+    Mmin: {
+      left: { value: 0, case: 0 },
+      mid: { value: 0, case: 0, x: 0 },
+      right: { value: 0, case: 0 }
+    }
+  }
+};
+
+const identifySegment = (xGlobal, span) => {
+  // Which segment contains xGlobal?
+  for (let i = 0; i < span.segments.length; i++) {
+    const xSegEnd = Rnl.add(span.segments[i].xOfLeftEnd, span.segments[i].length);
+    if (Rnl.lessThanOrEqualTo(xGlobal, xSegEnd)) { return i }
+  }
+  return -1
+};
+
+const splitSegment = (segments, iSeg, xGlobal) => {
+  // segments` is an array.
+  // We need to split the element at segments[iSeg] into two elements.
+  const length = Rnl.subtract(xGlobal, segments[iSeg].xOfLeftEnd);
+  if (iSeg === 0) {
+    segments.unshift(newSegment(length, segments[0].xOfLeftEnd));
+  } else {
+    const s1 = segments.slice(0, iSeg);
+    s1.push(newSegment(length, segments[iSeg].xOfLeftEnd));
+    segments =  s1.concat(segments.slice(iSeg));
+  }
+  const seg = segments[iSeg + 1];
+  const newSeg = segments[iSeg];
+  for (let i = 0; i < 9; i++) {
+    const slope = (seg.w2[i] - seg.w1[i]) / Rnl.toNumber(seg.length);
+    newSeg.w1[i] = seg.w1[i];
+    newSeg.w2[i] = seg.w1[i];
+    seg.w1[i] = seg.w1[i] + slope * Rnl.toNumber(length);
+    newSeg.P[i] = seg.P[i];
+    seg.P[i] = 0;
+    newSeg.M[i] = seg.M[i];
+    seg.M[i] = 0;
+  }
+  seg.xOfLeftEnd = xGlobal;
+  seg.length = Rnl.subtract(seg.length, newSeg.length);
+  return segments
+};
+
+// Here's the main function of this module.
+// Take the raw input strings, validate them, and load them
+// into data structures for use by the analyze function.
+function populateData(input, factorInput) {
+  const errorMsg = "";
+  const beam = {
+    E: 0, // modulus of elasticity
+    I: 0, // moment of inertia
+    k: 0, // spring constant
+    convention: input.convention
+      ? input.convention
+      : 1, // Plot + moment on comp or tension side.
+    SI: input.SI || false, // boolean. Are we using SI units?
+    doLiveLoadPatterns: input.patterns,
+    LLF: input.LLF,
+    SDS: input.SDS,
+    gotType: [false, false, false, false, false, false, false, false, false],
+    wMax: 0, // default line load maximum
+    x: 180, // x coordinate of the beam's left end inside the SVG, in px
+    allLoadsAreUniform: true // subject to change below
+  };
+
+  if (input.E === 1 || input.E === 0) {
+    // We don't know E or I, so we won't do a deflection diagram.
+    // But we will still do the shear and moment diagrams.
+    beam.E = 1;
+    beam.I = 1;
+    beam.k = 0;
+  } else {
+    beam.E = input.E;  // Modulus of elasticity
+    beam.I = input.I;  // Moment of inertia, I
+    beam.k = input.k;  // Spring constant
+  }
+  if (beam.E === 1 && beam.I === 1 && input.k !== 0) {
+    return ["E and I are necessary for an analysis with spring supports."]
+  }
+  beam.EI = beam.E * beam.I;
+
+  // Load in node data and span data.
+  // Definitions
+  // (1) A "span" is a section of beam between two user-defined nodes.
+  // (2) A "segment" is a section of beam between nodes or points of load discontinuity.
+  // Each span thus contains one or more segments.
+  let i = 0;
+  let cummulativeLength = Rnl.zero;
+  const nodes = [];
+  const spans = [];
+  beam.numDegreesOfFreedom = 0;
+  for (i = 0; i < input.nodes.length; i++) {
+    // Process node input.
+    const fixity = input.nodes[i] === "none" ? "continuous" : nodeFixity[input.nodes[i]];
+    if (!fixity) { return [`The ${ord[i]} node designation is invalid.`] }
+    if (fixity === "spring" && input.k === 0) {
+      return ["Error. A model with a spring needs a spring constant, k."]
+    }
+    nodes.push(newNode(fixity, beam.k, cummulativeLength));
+    beam.numDegreesOfFreedom += incrementDoF(fixity);
+    if (i < input.spanLength.length) {
+      // Process span input.
+      const length = input.spanLength[i];
+      spans.push({
+        length,
+        segments: Array(1).fill(newSegment(length, cummulativeLength))
+      });
+      cummulativeLength = Rnl.add(cummulativeLength, length);
+    }
+  }
+  if (spans.length === 0) { return [`No span lengths.`] }
+  const numSpans =  spans.length;
+  beam.numSegments = numSpans;
+  beam.length = nodes[nodes.length - 1].x;
+
+  // Point Loads
+  for (i = 0; i < input.loads.length; i++) {
+    const load = input.loads[i];
+    if (load.shape === "w") {
+      // Skip the distributed loads for now. We'll pick them up later.
+      continue
+    }
+    if (load.from === 0) { continue }
+    let type = load.type === "none" ? 0 : loadType[load.type];
+    if (type === 0) {
+      if (beam.comboName !== "service") {
+        return [`The ${ord[i]} load must have a load type defined.`]
+      } else {
+        type = 1; // In a service load analysis, treat unlabled loads as Dead loads.
+      }
+    }
+
+    const P = input.loads[i].P;
+    const M = input.loads[i].M;
+    const x = input.loads[i].from;
+
+    let foundAHome = false;
+    for (let j = 0; j < nodes.length; j++) {
+      if (Rnl.areEqual(x, nodes[j].x)) {
+        nodes[j].P[0] += P;
+        nodes[j].M[0] += M;
+        if (type !== 0) { nodes[j].P[type] += P; }
+        foundAHome = true;
+        break
+      }
+    }
+    if (foundAHome) { continue }
+
+    for (let j = 0; j < spans.length; j++) {
+      if (Rnl.greaterThan(x, nodes[j].x) && Rnl.lessThan(x, nodes[j + 1].x)) {
+        const span = spans[j];
+        const iSeg = identifySegment(x, span);
+        if (Rnl.greaterThan(x, span.segments[iSeg].xOfLeftEnd)) {
+          span.segments = splitSegment(span.segments, iSeg, x);
+          beam.numSegments += 1;
+        }
+        beam.gotType[0] = true;
+        span.segments[iSeg + 1].P[0] += P;      // add to sum of service loads
+        span.segments[iSeg + 1].M[0] += M;
+        if (type !== 0) {
+          beam.gotType[type] = true;
+          span.segments[iSeg + 1].P[type] += P;
+          span.segments[iSeg + 1].M[type] += M;
+        }
+      }
+    }
+  }
+
+  // Distributied loads
+  beam.allLoadsAreUniform = true;  // initialize the variable
+  for (i = 0; i < input.loads.length; i++) {
+    const load = input.loads[i];
+    if (load.shape !== "w") { continue }
+    let type = load.type === "none" ? 0 : loadType[load.type];
+    if (type === 0) {
+      if (beam.comboName !== "service") {
+        return [`The ${ord[i]} load must have a load type defined.`]
+      } else {
+        type = 1; // In a service load analysis, treat unlabled loads as Dead loads.
+      }
+    }
+
+    const wStart = load.wStart;
+    const wEnd = load.wEnd;
+
+    if (Math.abs(wStart) > beam.wMax) { beam.wMax = Math.abs(wStart); }
+    if (Math.abs(wEnd) > beam.wMax) { beam.wMax = Math.abs(wEnd); }
+
+    const xStart = load.from;
+    const xEnd = Rnl.isZero(load.to)
+      ? cummulativeLength
+      : load.to;
+
+    const slope = (wEnd - wStart) / Rnl.toNumber(Rnl.subtract(xEnd, xStart));
+    if (slope !== 0) {beam.allLoadsAreUniform = false;}
+
+    let iStartSpan = 0;
+    let iEndSpan = 0;
+    let iStartSeg = 0;
+    let iEndSeg = 0;
+
+    // If necessary, split segments at points of load discontinuity.
+    for (let j = 0; j < spans.length; j++) {
+      if (Rnl.areEqual(xStart, nodes[j].x)) {
+        iStartSpan = j;
+        iStartSeg = 0;
+        break
+      }
+      if (Rnl.greaterThan(xStart, nodes[j].x) && Rnl.lessThan(xStart, nodes[j + 1].x)) {
+        for (let k = 0; k < spans[j].segments.length; k++) {
+          const seg = spans[j].segments[k];
+          if (Rnl.areEqual(xStart, seg.xOfLeftEnd)) {
+            iStartSpan = j;
+            iStartSeg = k;
+            break
+          }
+          const segEnd = k < spans[j].segments.length - 1
+            ? spans[j].segments[k + 1].xOfLeftEnd
+            : nodes[j + 1].x;
+          if (Rnl.greaterThan(xStart, seg.xOfLeftEnd) && Rnl.lessThan(xStart, segEnd)) {
+            spans[j].segments = splitSegment(spans[j].segments, k, xStart);
+            beam.numSegments += 1;
+            iStartSpan = j;
+            iStartSeg = k + 1;
+            break
+          }
+        }
+      }
+    }
+
+    for (let j = 0; j < spans.length; j++) {
+      if (Rnl.areEqual(xEnd, nodes[j + 1].x)) {
+        iEndSpan = j;
+        iEndSeg = spans[j].segments.length - 1;
+        break
+      }
+      if (Rnl.greaterThan(xEnd, nodes[j].x) && Rnl.lessThan(xEnd, nodes[j + 1].x)) {
+        for (let k = 0; k < spans[j].segments.length; k++) {
+          const seg = spans[j].segments[k];
+          const segEnd = k < spans[j].segments.length - 1
+            ? spans[j].segments[k + 1].xOfLeftEnd
+            : nodes[j + 1].x;
+          if (Rnl.areEqual(xEnd, segEnd)) {
+            iEndSpan = j;
+            iEndSeg = k;
+            break
+          }
+          if (Rnl.greaterThan(xEnd, seg.xOfLeftEnd) && Rnl.lessThan(xEnd, segEnd)) {
+            spans[j].segments = splitSegment(spans[j].segments, k, xEnd);
+            beam.numSegments += 1;
+            iEndSpan = j;
+            iEndSeg = k;
+            break
+          }
+        }
+      }
+    }
+
+    // Now apply distributed loads
+    for (let iSpan = iStartSpan; iSpan <= iEndSpan; iSpan++) {
+      const span = spans[iSpan];
+      const startSeg = (iSpan  === iStartSpan ? iStartSeg : 0);
+      const endSeg = (iSpan  === iEndSpan ? iEndSeg : spans[iSpan].segments.length - 1);
+      for (let iSeg = startSeg; iSeg <= endSeg; iSeg++) {
+        const xLeft = span.segments[iSeg].xOfLeftEnd;
+        const w1 = wStart + slope * Rnl.toNumber(Rnl.subtract(xLeft, xStart));
+        const xRight = Rnl.add(span.segments[iSeg].xOfLeftEnd, span.segments[iSeg].length);
+        const w2 = wStart + slope * Rnl.toNumber(Rnl.subtract(xRight, xStart));
+        // add to sum of service loads
+        span.segments[iSeg].w1[0] += w1;
+        span.segments[iSeg].w2[0] += w2;
+        // add to specific load type, e.g., dead, live, etc.
+        span.segments[iSeg].w1[type] += w1;
+        span.segments[iSeg].w2[type] += w2;
+      }
+    }
+
+    beam.gotType[0] = true;
+    if (type !== 0) {
+      beam.gotType[type] = true;
+    }
+  }
+
+  // Henceforward there are no <= comparisons.
+  // Change lengths into floating point numbers.
+  for (let i = 0; i < nodes.length; i++) {
+    nodes[i].x = Rnl.toNumber(nodes[i].x);
+  }
+  for (let i = 0; i < spans.length; i++) {
+    spans[i].length = Rnl.toNumber(spans[i].length);
+    for (let j = 0; j < spans[i].segments.length; j++) {
+      spans[i].segments[j].length = Rnl.toNumber(spans[i].segments[j].length);
+      spans[i].segments[j].xOfLeftEnd = Rnl.toNumber(spans[i].segments[j].xOfLeftEnd);
+    }
+  }
+  beam.length = Rnl.toNumber(beam.length);
+
+  const combinations = typeof factorInput === "string"
+    ? "service"
+    : combinationsFromInput(factorInput);
+
+  return [errorMsg, beam, nodes, spans, combinations]
+
+}
+
+// Each of the methods in this module draws some item.
+
+const circle = (x, y, radius) => {
+  return { tag: "circle", attrs: { cx: x, cy: y, r: radius } }
+};
+
+const restraint = (node, beam) => {
+  const value = [];
+  const x = beam.xDiagram + beam.xScale * node.x;
+  if (node.fixity === "hinge" || node.fixity === "proppedHinge") {
+    value.push(circle(beam.xDiagram + beam.xScale * node.x, beam.yLoad, 4));
+  }
+  const path = { tag: "path", attrs: { d: "" } };
+  if (node.fixity === "pinned" || node.fixity === "proppedHinge") {
+    // draw a triangle
+    const y = node.fixity === "pinned" ? beam.yLoad + 0.75 : beam.yLoad + 4;
+    path.attrs.d = `M${x} ${y} l5 10 h-10 z`;
+    path.attrs.style = "fill-opacity:1.0";
+  } else if (node.fixity === "fixed") {
+    const xd = (node.x === 0 ? -1 : 1) * 7;
+    // eslint-disable-next-line max-len
+    path.attrs.d = `M${x} ${beam.yLoad - 7} v14 m0 -14 l${xd} 7 M${x} ${beam.yLoad} l${xd} 7 M${x} ${beam.yLoad + 7} l${xd} 7`;
+  } else if (node.fixity === "spring") {
+    const y = beam.yLoad + .75;
+    path.attrs.d = `M${x} ${y} v3 l6 1.5 -12 3 12 3 -12 3 6 1.5 v3 m-6 0 h12`;
+  }
+  value.push(path);
+  return value
+};
+
+const pointForce = (x, y, load, fixity, isReaction = false) => {
+  const sgn = (load < 0 ? -1 : 1); // -1 is down
+  const lengthAdjustment = fixity === "fixed"
+    ? 7
+    : fixity === "pinned" && isReaction
+    ? 10
+    : fixity === "proppedHinge" && isReaction
+    ? 18
+    : fixity === "hinge"
+    ? 4
+    : fixity === "spring" && isReaction
+    ? 18
+    : 0;
+  const length = 40 - lengthAdjustment;
+  // Reactions are drawn below the beam line. Imposed loads are drawn above the beam line.
+  const yText = y + (isReaction ? 55 : -45);
+  // Set x and y at the tip of the arrowhead
+  if (isReaction) { y += lengthAdjustment + 0.75; } else { y -= 0.75; }
+  if (sgn === -1 && isReaction) { y += length; }
+  if (sgn === 1 && !isReaction) { y -= length; }
+  const arrow = {
+    tag: "path",
+    attrs: {
+      style: "fill: #000; fill-opacity:1.0",
+      // eslint-disable-next-line max-len
+      d: `M${x} ${y} l${sgn * 4} ${sgn * 8} h${-sgn * 3.5} v${sgn * (length - 8)} h${-sgn * 1} v${-sgn * (length - 8)} h${-sgn * 3}z`
+    }
+  };
+  const text = textNode(String(load), x, yText, "middle");
+  return [arrow, text]
+};
+
+const pointMoment = (x, y, load, isReaction = false) => {
+  let isCounterClockwise = load >= 0; // = (load < 0 ? -1 : 1) // 1 is counter-clockwise
+  load = Math.abs(load);
+  let arrow;
+  let text;
+  if (!isReaction) {
+    arrow = momentArrow(x, y, (isCounterClockwise ? 165 : 15), 150, isCounterClockwise);
+    text = textNode(String(load), x, y - 25, "middle");
+  } else {
+    // The moment is a reaction
+    isCounterClockwise = !isCounterClockwise;
+    if (x < 100) {  // left end
+      arrow = momentArrow(x, y, (isCounterClockwise ? 260 : 100), 140, isCounterClockwise);
+      text = textNode(String(load), x - 15, y - 15, "end");
+    } else {
+      arrow = momentArrow(x, y, (isCounterClockwise ? 80 : 280), 140, isCounterClockwise);
+      text = textNode(String(load), x + 16, y - 15);
+    }
+  }
+  return [...arrow, text]
+};
+
+const momentArrow = (xCtr, yCtr, thetaAtArrowPoint, subtendedAngle, isCounterClockwise) => {
+  // Draw a circular arc with an arrowhead.
+  // Find startAngle and endAngle: the begining and ending of the arc
+  // theta = 0 at 3 o'clock.  theta is + for counterclockwise
+  const startAngle = thetaAtArrowPoint * (Math.PI / 180);
+  const sgn = isCounterClockwise ? 1 : -1;
+  const endAngle = startAngle - sgn * subtendedAngle * (Math.PI / 180);
+  // sgn = 1 for counterclockwise, -1 for clockwise
+  const diameter = 35;
+  const r = diameter / 2; // radius
+  const arrowHeadLength = 8;
+  const startAnglePrime = startAngle - sgn * (2 * 0.9 * arrowHeadLength / diameter);
+  const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+
+  let xStart = 0;
+  let yStart = 0;
+  let xEnd = 0;
+  let yEnd = 0;
+  if (sgn > 0) {
+    xEnd = (xCtr + r * Math.cos(startAnglePrime)).toFixed(2);   // arrow end
+    yEnd = (yCtr - r * Math.sin(startAnglePrime)).toFixed(2);
+    xStart = (xCtr + r * Math.cos(endAngle)).toFixed(2);
+    yStart = (yCtr - r * Math.sin(endAngle)).toFixed(2);
+  } else {
+    xStart = (xCtr + r * Math.cos(startAnglePrime)).toFixed(2);
+    yStart = (yCtr - r * Math.sin(startAnglePrime)).toFixed(2);
+    xEnd = (xCtr + r * Math.cos(endAngle)).toFixed(2);
+    yEnd = (yCtr - r * Math.sin(endAngle)).toFixed(2);
+  }
+
+  const path = {
+    tag: "path",
+    attrs: { d: `M${xStart} ${yStart}A${r} ${r} 0 ${largeArcFlag} 0 ${xEnd} ${yEnd}` }
+  };
+
+  // Draw the arrow head
+  const xTip = xCtr + r * Math.cos(startAngle);
+  const yTip = yCtr - r * Math.sin(startAngle);
+  const alpha = startAngle - sgn * 100 / 180 * Math.PI; // rotate by 100°
+  const beta = 22.5 * Math.PI / 180;    // angle subtended by half-arrowhead
+  const x = Array(3).fill("");
+  const y = Array(3).fill("");
+  x[0] = xTip.toFixed(2);
+  y[0] = yTip.toFixed(2);
+  x[1] = (xTip + arrowHeadLength * Math.cos(alpha - beta)).toFixed(2);
+  y[1] = (yTip - arrowHeadLength * Math.sin(alpha - beta)).toFixed(2);
+  x[2] = (xTip + arrowHeadLength * Math.cos(alpha + beta)).toFixed(2);
+  y[2] = (yTip - arrowHeadLength * Math.sin(alpha + beta)).toFixed(2);
+
+  let points = "";
+  for (let i = 0; i < x.length; i++) {
+    points += `${x[i]} ${y[i]} `;
+  }
+  const polygon = { tag: "polygon", attrs: { points } };
+  return [path, polygon]
+};
+
+const polyline = (x, y) => {
+  let d = `M${x[0]} ${y[0]}`;
+  for (let i = 1; i < x.length; i++) {
+    d += ` L${x[i]} ${y[i]}`;
+  }
+  return { tag: "path", attrs: { d } }
+};
+
+const textNode = (str, x, y, horizAlign) => {
+  const node = { tag: "text", attrs: { x: String(x), y: String(y) } };
+  if (horizAlign === "middle" || horizAlign === "end") {
+    node.attrs["text-anchor"] = horizAlign;
+  }
+  node.children = [{ tag: "tspan", text: str }];
+  return node
+};
+
+const Draw = Object.freeze({
+  pointForce,
+  pointMoment,
+  polyline,
+  restraint,
+  textNode
+});
+
+// Constants
+const DEAD = 1;
+const FLUID = 2;
+const LIVE = 3;
+const HORIZ = 4;
+const ROOFLIVE = 5;
+const SNOW = 6;
+const RAIN = 7;
+const WIND = 8;
+const EQ = 9;
+
+const round = (num, prec) => {
+  // Round a number to prec significant digits.
+  // Return a string. This is used for display of numbers on the diagram.
+  const str = num.toPrecision(prec);
+  if (str.indexOf("e") === -1) { return str }
+  const pos = str.indexOf("e");
+  const significand = Number.parseFloat(str.slice(0, pos));
+  const exponent = Number.parseFloat(str.slice(pos + 1));
+  return (significand * 10 ** exponent).toString()
+};
+
+function createLoadDiagram(beam, nodes, spans) {
+  beam.xDiagram = 90;  // x coordinate at left end of diagram line, px
+  beam.yLoad = 80;     // y coordiate of load diagram
+  beam.xScale = 300 / nodes[nodes.length - 1].x;
+  const lengthFactor = beam.SI ? 1 : 0.3048;
+  const forceFactor = beam.SI ? 1000 : 4448.2216152605;
+  const momentFactor = beam.SI ? 1000 : 4448.2216152605 * 0.3048;
+  const lineLoadFactor = beam.SI ? 1000 : 4448.2216152605 / 0.3048;
+
+  // Begin the diagram.
+  let diagram = [];
+  diagram.push({ tag: "title", attrs: { text: "Beam Diagram" } });
+  diagram.push({
+    tag: "defs",
+    attrs: {},
+    style: `svg { background-color: #fff; }
+text, tspan { font: 12px Arial; }
+circle { stroke:#000; fill:#fff; }
+polygon { stroke:#000; fill: #000; fill-opacity:1.0 }
+line { stroke:#000; }
+path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
+  });
+  diagram.push(Draw.textNode("loads", 20, beam.yLoad + 2));
+  diagram.push(Draw.textNode(`(${beam.SI ? 'kN, m' : 'kips, ft'})`, 20, beam.yLoad + 16));
+  diagram.push({
+    tag: "path",
+    attrs: { strokeWidth: "1.5px", d: `M${beam.xDiagram} ${beam.yLoad} h300` }
+  });
+
+  // Draw restraints
+  for (let i = 0; i < nodes.length; i++) {
+    if (nodes[i].fixity !== "continuous") {
+      diagram = diagram.concat(Draw.restraint(nodes[i], beam));
+    }
+  }
+
+  // Write the span length below each span, but only if there are no loads in the way.
+  for (let i = 0; i < spans.length; i++) {
+    let okay = true; // initialize
+    if (spans[i].length * beam.xScale < 30) { continue }
+    if (okay) {
+      for (let j = 1; j < spans[i].segments.length; j++) {
+        if (spans[i].segments[j].P[0] > 0) { okay = false; break }
+      }
+    }
+    if (okay) {
+      const x = beam.xDiagram + beam.xScale * (nodes[i].x + spans[i].length / 2);
+      const unit = beam.SI ? "" : "′";
+      const sText = round(spans[i].length / lengthFactor, 3);
+      diagram.push(Draw.textNode(`${sText}${unit}`, x, beam.yLoad + 15));
+    }
+  }
+
+  // Draw nodal loads
+  for (let i = 0; i < nodes.length; i++) {
+    const x = beam.xDiagram + beam.xScale * nodes[i].x;
+    if (Math.abs(nodes[i].P[0]) > 0) {
+      const sText = round(nodes[i].P[0] / forceFactor, 3);
+      diagram = diagram.concat(Draw.pointForce(x, beam.yLoad, sText, nodes[i].fixity));
+    }
+    if (Math.abs(nodes[i].M[0]) > 0) {
+      const sText = round(nodes[i].M[0] / momentFactor, 3);
+      diagram = diagram.concat(Draw.pointMoment(x, beam.yLoad, sText));
+    }
+  }
+
+  // Draw span loads
+  const wScale = 20 / beam.wMax;
+  let wPrev = 0;
+  let d = `M${beam.xDiagram} ${beam.yLoad}`;
+  for (let i = 0; i < spans.length; i++) {
+    for (let j = 0; j < spans[i].segments.length; j++) {
+      const seg = spans[i].segments[j];
+      const x = beam.xDiagram + beam.xScale * seg.xOfLeftEnd;
+      if (Math.abs(seg.P[0]) > 0) {
+        const sText = round(seg.P[0] / forceFactor, 3);
+        diagram = diagram.concat(Draw.pointForce( x, beam.yLoad, sText, "continuous"));
+      }
+      if (Math.abs(seg.M[0]) > 0) {
+        const sText = round(seg.M[0] / momentFactor, 3);
+        diagram = diagram.concat(Draw.pointMoment(x, beam.yLoad, sText));
+      }
+      // Draw a line segment for the service load.
+      const xEnd = x + beam.xScale * seg.length;
+      if (seg.w1[0] !== wPrev) {
+        d += `V${beam.yLoad + seg.w1[0] * wScale}`; // vertical load discontinuiy.
+      }
+      const yEnd = beam.yLoad + seg.w2[0] * wScale;
+      d += `L${xEnd} ${yEnd}`;
+      wPrev =  seg.w2[0];
+    }
+  }
+  if (wPrev !== 0) { d += `V${beam.yLoad}`; }
+  diagram.push({ tag: "path", attrs: { d } });
+
+  // Write in the line load values
+  let lastSegUniform = false;
+  let firstSegment;
+  let xFirstSegment = 0;
+  const segments = [];
+  for (let i = 0; i < spans.length; i++) {
+    for (let j = 0; j < spans[i].segments.length; j++) {
+      segments.push(spans[i].segments[j]);
+    }
+  }
+  const numSegments = segments.length;
+  for (let i = 0; i < segments.length; i++) {
+    const seg = segments[i];
+    if (seg.w1[0] === seg.w2[0] && Math.abs(seg.w1[0]) > 0) {
+      lastSegUniform = true;
+      if (i === 0 || seg.w1[0] !== segments[i - 1].w1[0] || lastSegUniform === false) {
+        firstSegment = i;
+        xFirstSegment = beam.xScale * seg.xOfLeftEnd;
+      }
+      if (i === numSegments - 1 || segments[i + 1].w1[0] !== segments[i + 1].w2[0]
+        || seg.w1[0] !== segments[i + 1].w1[0]) {
+        // This segment is the end of a uniform load.
+        // Find a place to write the load value
+        const lenSegLoad = i < numSegments - 1
+          ? segments[i + 1].xOfLeftEnd - segments[firstSegment].xOfLeftEnd
+          : beam.length - segments[firstSegment].xOfLeftEnd;
+        if (lenSegLoad * beam.xScale > 30) {
+          let noBust = true; // initialize the value
+          const fudge = seg.w1[0] > 0 ? 10 : -4;
+          const yy = beam.yLoad + wScale * seg.w1[0] + fudge;
+          const str = round(Math.abs(seg.w1[0] / lineLoadFactor), 3);
+          // try the middle of the uniform load.  See if there is a point load there
+          for (let j = firstSegment + 1; j <= i; j++) {
+            if (beam.xScale * (Math.abs(segments[j].xOfLeftEnd
+              - (segments[firstSegment].xOfLeftEnd + lenSegLoad / 2))) < 35) {
+              if (segments[j].M[0] || segments[j].P[0] !== 0) {
+                noBust = false;
+                break
+              }
+            }
+          }
+          if (noBust) {
+            const x = beam.xDiagram + xFirstSegment + beam.xScale * lenSegLoad / 2;
+            diagram.push(Draw.textNode(str, x, yy));
+          } else {
+            // try the 1/3 point
+            noBust = true;
+            for (let j = firstSegment + 1; j <= i; j++) {
+              if (beam.xScale * (Math.abs(segments[j].xOfLeftEnd
+                - (segments[firstSegment].xOfLeftEnd + lenSegLoad / 3))) < 35) {
+                if (segments[j].M[0] || segments[j].P[0] !== 0) {
+                  noBust = false;
+                  break
+                }
+              }
+            }
+            if (noBust) {
+              const x = beam.xDiagram + xFirstSegment + beam.xScale * lenSegLoad / 3 - 17;
+              diagram.push(Draw.textNode(str, x, yy));
+            } else {
+              // try the 2/3 point
+              noBust = true;
+              for (let j = firstSegment + 1; j <= i; j++) {
+                if (beam.xScale * (Math.abs(segments[j].xOfLeftEnd
+                  - (segments[firstSegment].xOfLeftEnd + 2 * lenSegLoad / 3))) < 5) {
+                  if (segments[j].M[0] || segments[j].P[0] !== 0) {
+                    noBust = false;
+                    break
+                  }
+                }
+              }
+              if (noBust) {
+                const x = beam.xDiagram + xFirstSegment + beam.xScale * 2 * lenSegLoad / 3;
+                diagram.push(Draw.textNode(str, x, yy));
+              } else {
+                if (i === 0) {
+                  diagram.push(Draw.textNode(str, beam.xDiagram  - 35, yy));
+                }
+              }
+            }
+          }
+        }
+      }
+    } else {
+      // We've got a distributed sloping load
+      lastSegUniform = false;
+      const s = i === 0
+        ? 0
+        : (segments[i - 1].w2[0] - segments[i - 1].w1[0]) / segments[i - 1].length;
+      const s2 = (seg.w2[0] - seg.w1[0]) / seg.length;
+      const s3 = i === numSegments - 1
+        ? 0
+        : (segments[i + 1].w2[0] - segments[i + 1].w1[0]) / segments[i + 1].length;
+      if (Math.abs(s2 - s) > 0.05 || i === 0) {
+        if (Math.abs(seg.w1[0]) > 0.05) {
+          if (seg.length * beam.xScale > 20) {
+            const str = round(Math.abs(seg.w1[0] / lineLoadFactor), 3);
+            const x = beam.xDiagram + beam.xScale * seg.xOfLeftEnd;
+            const fudge = seg.w1[0] > 0 ? 10 : -5;
+            const yy = beam.yLoad + wScale * seg.w1[0] + fudge;
+            diagram.push(Draw.textNode(str, x, yy));
+          }
+        }
+      }
+      if (Math.abs(s2 - s3) > 0.05  || i === numSegments - 1
+        || Math.abs(seg.w2[0] - segments[i + 1].w1[0]) > 0) {
+        if (Math.abs(seg.w2[0]) > 0.05) {
+          if (seg.length * beam.xScale > 20) {
+            const str = round(Math.abs(seg.w2[0] / lineLoadFactor), 3);
+            const x = beam.xDiagram + beam.xScale * (seg.xOfLeftEnd + seg.length) - 30;
+            const fudge = seg.w2[0] > 0 ? 10 : -5;
+            const yy = beam.yLoad + wScale * seg.w2[0] + fudge;
+            diagram.push(Draw.textNode(str, x, yy));
+          }
+        }
+      }
+    }
+  }
+
+  return diagram
+}
+
+const ftRegEx = /′/g;
+const numberRegEx$3 = new RegExp(Rnl.numberPattern);
+const metricLengths = ["m", "cm", "mm"];
+
+const readNumber = str => {
+  const matches = numberRegEx$3.exec(str);
+  if (matches) {
+    const numStr = matches[0];
+    return [Rnl.fromString(numStr), numStr.length];
+  } else {
+    return ["Error", null]
+  }
+};
+
+const convertToBaseUnit = (num, unitName) => {
+  const unit = unitFromUnitName(unitName);
+  return Rnl.multiply(Rnl.add(num, unit.gauge), unit.factor)
+};
+
+const readInputData = data => {
+  const input = Object.create(null);
+  // Set some defaults
+  input.nodes = [];
+  input.spanLength = [];
+  input.loads = [];
+  input.E = 1;
+  input.I = 1;
+  input.LLF = 0;
+  input.SDS = 0;
+  input.k = 0;
+  input.SI = false;
+  input.convention = 1;
+  // Read the input and overwrite the defaults.
+  for (let i = 0; i < data[0].length; i++) {
+    const item = data[0][i].trim();
+    let datum = data[1][i].trim();
+    switch (item) {
+      case "E": {
+        const [E, pos] = readNumber(datum);
+        if (typeof E === "string") { return "Error. Non-numeric E." }
+        const unitName = datum.slice(pos).trim();
+        input.E = Rnl.toNumber(convertToBaseUnit(E, unitName));
+        break
+      }
+
+      case "I": {
+        const [I, pos] = readNumber(datum);
+        if (typeof I === "string") { return "Error. Non-numeric I." }
+        const unitName = datum.slice(pos).trim();
+        input.I = Rnl.toNumber(convertToBaseUnit(I, unitName));
+        break
+      }
+
+      case "k": {
+        const [k, pos] = readNumber(datum);
+        if (typeof k === "string") { return "Error. Non-numeric k." }
+        const unitName = datum.slice(pos).trim();
+        input.k = Rnl.toNumber(convertToBaseUnit(k, unitName));
+        break
+      }
+
+      case "plan": {
+        if (numberRegEx$3.test(datum)) { input.nodes.push("none"); }
+        const elements = datum.split(/ +/g);
+        for (let k = 0; k < elements.length; k++) {
+          switch (elements[k]) {
+            case "p":
+            case "f":
+            case "h":
+            case "ph":
+            case "s":
+            case "-":
+              input.nodes.push(elements[k] === "-" ? "none" : elements[k]);
+              break
+            default: {
+              const element = elements[k].replace(ftRegEx, "ft");
+              const [L, pos] = readNumber(element);
+              if (typeof L === "string") { return "Error. Non-numeric length." }
+              let unitName = element.slice(pos).trim();
+              if (unitName === "") { unitName = "mm"; }
+              if (metricLengths.includes(unitName)) { input.SI = true; }
+              input.spanLength.push(convertToBaseUnit(L, unitName));
+              break
+            }
+          }
+        }
+        if (numberRegEx$3.test(elements[elements.length - 1])) { input.nodes.push("none"); }
+        break
+      }
+
+      case "dead":
+      case "D":
+      case "load":
+      case "live":
+      case "L":
+      case "snow":
+      case "S":
+      case "wind":
+      case "W":
+      case "EQ":
+      case "F":
+      case "H":
+      case "rain":
+      case "roof":
+      case "R": {
+        const load = Object.create(null);
+        datum = datum.replace(ftRegEx, "ft");
+        const elements = datum.split(",");
+        let str = elements[0];
+        load.type = item;
+        load.from = Rnl.zero;
+        load.to = Rnl.zero;
+        load.P = 0;
+        load.M = 0;
+        load.wStart = 0;
+        load.wEnd = 0;
+        let [num1, pos] = readNumber(str);  // eslint-disable-line prefer-const
+        if (typeof num1 === "string") { return "Error. Non-numeric load." }
+        let num2 = num1;
+        str = str.slice(pos).trim();
+        if (str.slice(0, 1) === ":") {
+          str = str.slice(1).trim();
+          [num2, pos] = readNumber(str);
+          str = str.slice(pos).trim();
+        }
+        const unitName = str.trim();
+        const unit = unitFromUnitName(unitName);
+        // Read the load from & to points, if any
+        let L1 = 0;
+        let L2 = 0;
+        let lengthUnitName = "";
+        if (elements.length > 1) {
+          str = elements[1].trim();
+          [L1, pos] = readNumber(str);
+          str = str.slice(pos).trim();
+          if (str.slice(0, 1) === ":") {
+            str = str.slice(1).trim();
+            [L2, pos] = readNumber(str);
+            str = str.slice(pos).trim();
+          } else {
+            L2 = L1;
+          }
+          lengthUnitName = str.trim();
+          if (lengthUnitName === "") { lengthUnitName = "mm"; }
+        }
+        const expos = unit.expos.join("");
+        if (expos === "01-200000") {
+          load.shape = "w";
+          load.wStart = Rnl.toNumber(convertToBaseUnit(num1, unitName));
+          load.wEnd = Rnl.toNumber(convertToBaseUnit(num2, unitName));
+        } else if (expos === "11-200000") {
+          load.shape = "P";
+          load.P = Rnl.toNumber(convertToBaseUnit(num1, unitName));
+        } else if (expos === "21-200000") {
+          load.shape = "M";
+          load.M = Rnl.toNumber(convertToBaseUnit(num1, unitName));
+        } else {
+          return `Error. ${unitName} is not a force, line load, or moment.`
+        }
+        if (L1 !== 0) { load.from = convertToBaseUnit(L1, lengthUnitName); }
+        if (L2 !== 0) { load.to = convertToBaseUnit(L2, lengthUnitName); }
+        input.loads.push(load);
+        break
+      }
+
+      case "convention": {
+        input.convention = datum.charAt(0).toLowerCase() === "t" ? -1 : 1;
+        break
+      }
+
+      case "LLF": {
+        const [LLF, _] = readNumber(datum);
+        if (typeof LLF === "string") { return "Error. LLF is non-numeric." }
+        input.LLF = Rnl.toNumber(LLF);
+        break
+      }
+
+      case "SDS": {
+        const [SDS, _] = readNumber(datum);
+        if (typeof SDS === "string") { return "Error. SDS is non-numeric." }
+        input.SDS = Rnl.toNumber(SDS);
+        break
+      }
+
+      default:
+        return `Error. Unrecognized item ${item}`
+    }
+  }
+  return input
+};
+
+const dotProduct$1 = (a, b) => a.map((e, i) => (e * b[i])).reduce((m, n) => m + n);
+const isLiveish = loadType => loadType === LIVE || loadType === ROOFLIVE || loadType === SNOW;
+
+function doAnalysis(beam, nodes, spans) {
+  const numNodes = nodes.length;
+  const numSpans = spans.length;
+  const gotType = beam.gotType;
+  const numDegreesOfFreedom = beam.numDegreesOfFreedom;
+  const numEndActions = 4 * numSpans + numNodes; // include the node spring actions.
+  beam.numEndActions = numEndActions;
+  const EI = beam.EI;
+
+  // The Direct Stiffness Method employs matrix methods to solve indeterminate structures.
+  // Textbooks describe the Direct Stiffness Method with one-based matrices.
+  // To avoid confusion, the code below employs arrays as if they were one-based.
+  // Since JavaScript arrays are actually zero-based, we will dimension each array with one
+  // element more than it needs. Then we'll leave array[0] unused. All our loops will be
+  // written as if we had one-based arrays.
+
+  // Prepend elements to arrays `nodes` & `spans` so that they act like 1-based arrays.
+  nodes.unshift(0);
+  spans.unshift(0);
+
+  // Find the Span Stiffness Matrix, SSM
+  // Imagine that a fixed-end span undergoes a displacement, Δ, down at its right end.
+  // ▄                                                         █
+  // █                                                         █
+  // █▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,█
+  // █             ▀▀▀▀▀▀▀▄▄▄▄                                 █
+  // █                         ▀▀▀▌▄▄g                         █
+  // █                                 ▀▀▀▀▌▄▄▄▄,              █
+  //                                             ▀▀▀▀▀▀▀▀▀▀▀▀▀▀█
+  //                                                           █
+  // If we draw the free-body diagram of the span, we would see these forces:
+  // V_left = 6EIΔ/L², upward
+  // M_left = 12EIΔ/L³, clockwise
+  // V_right = 6EIΔ/L², downward
+  // M_right = 12EIΔ/L³, clockwise
+  // The Span Stiffness Matrix is populated, for each span, with just those stiffnesses.
+
+  const ssm = [];
+  ssm.push([0, 0, 0, 0, 0]);
+  for (let i = 1; i <= numSpans; i++) {
+    const subMatrix = [
+      [0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0]
+    ];
+    subMatrix[1][1] = EI * 12 / spans[i].length ** 3;
+    subMatrix[1][2] = EI * 6 / spans[i].length ** 2;
+    subMatrix[1][3] = -EI * 12 / spans[i].length ** 3;
+    subMatrix[1][4] = EI * 6 / spans[i].length ** 2;
+    subMatrix[2][1] = EI * 6 / spans[i].length ** 2;
+    subMatrix[2][2] = EI * 4 / spans[i].length;
+    subMatrix[2][3] = -EI * 6 / spans[i].length ** 2;
+    subMatrix[2][4] = EI * 2 / spans[i].length;
+    subMatrix[3][1] = -EI * 12 / spans[i].length ** 3;
+    subMatrix[3][2] = -EI * 6 / spans[i].length ** 2;
+    subMatrix[3][3] = EI * 12 / spans[i].length ** 3;
+    subMatrix[3][4] = -EI * 6 / spans[i].length ** 2;
+    subMatrix[4][1] = EI * 6 / spans[i].length ** 2;
+    subMatrix[4][2] = EI * 2 / spans[i].length;
+    subMatrix[4][3] = -EI * 6 / spans[i].length ** 2;
+    subMatrix[4][4] = EI * 4 / spans[i].length;
+    ssm.push(subMatrix);
+  }
+
+  //Find dtm, the Displacement Transformation Matrix
+  const dtm = new Array(numEndActions + 1).fill(0).map(e => {
+    return new Array(numDegreesOfFreedom + 1).fill(0)
+  });
+  let j = 0;
+  for (let i = 1; i <= numNodes; i++) {
+    if (i === 1) {
+      if (nodes[i].fixity === "continuous" || nodes[i].fixity === "spring") {
+        dtm[1][1] = 1;
+        dtm[2][1] = 1;
+        dtm[3][2] = 1;
+        j = 2;
+      } else if (nodes[i].fixity === "fixed") ; else if (nodes[i].fixity === "pinned") {
+        dtm[3][1] = 1;
+        j = 1;
+      }
+    } else if (i === numNodes) {
+      if (nodes[i].fixity === "continuous" || nodes[i].fixity === "spring") {
+        j = j + 1;
+        dtm[5 * numSpans - 1][j] = 1;
+        j = j + 1;
+        dtm[5 * numSpans][j] = 1;
+        dtm[5 * numSpans + 1][j - 1] = 1;
+      } else if (nodes[i].fixity === "fixed") ; else if (nodes[i].fixity === "pinned") {
+        j = j + 1;
+        dtm[5 * numSpans][j] = 1;
+      }
+    } else {
+      if (nodes[i].fixity === "continuous" || nodes[i].fixity === "spring") {
+        j = j + 1;
+        dtm[5 * (i - 1) - 1][j] = 1;
+        dtm[5 * (i - 1) + 1][j] = 1;
+        dtm[5 * (i - 1) + 2][j] = 1;
+        j = j + 1;
+        dtm[5 * (i - 1)][j] = 1;
+        dtm[5 * (i - 1) + 3][j] = 1;
+      } else if (nodes[i].fixity === "hinge") {
+        j = j + 1;
+        dtm[5 * (i - 1) - 1][j] = 1;
+        dtm[5 * (i - 1) + 1][j] = 1;
+        dtm[5 * (i - 1) + 2][j] = 1;
+        j = j + 1;
+        dtm[5 * (i - 1)][j] = 1;
+        j = j + 1;
+        dtm[5 * (i - 1) + 3][j] = 1;
+      } else if (nodes[i].fixity === "proppedHinge") {
+        j = j + 1;
+        dtm[5 * (i - 1)][j] = 1;
+        j = j + 1;
+        dtm[5 * (i - 1) + 3][j] = 1;
+      } else if (nodes[i].fixity === "fixed") ; else if (nodes[i].fixity === "pinned") {
+        j = j + 1;
+        dtm[5 * (i - 1)][j] = 1;
+        dtm[5 * (i - 1) + 3][j] = 1;
+      }
+    }
+  }
+
+  //Now do the first  matrix operations
+  const lsmDtm = createLsmDtm(ssm, dtm, nodes, numEndActions, numDegreesOfFreedom);
+  // Create the Stiffness Matrix.
+  const [sm, bandWidth] = createSM(dtm, lsmDtm, numDegreesOfFreedom);
+
+  let diag = [];
+  let ltm = [];
+  if (numDegreesOfFreedom > 1) {
+    [diag, ltm] = luDecomposition(sm, bandWidth);
+  }
+
+  //Find the number of load patterns
+  beam.containsLive = beam.gotType[LIVE] || beam.gotType[ROOFLIVE] || beam.gotType[SNOW];
+  const numPatterns = !beam.containsLive
+    ? 1
+    : !beam.doLiveLoadPatterns
+    ? 1
+    : numSpans > 7
+    ? 2
+    : beam.patterns
+    ? 2 ** (numSpans - 1)
+    : 2;
+  beam.numPatterns = numPatterns;
+
+  // Initialize some variables
+  const feam = new Array(numEndActions + 1).fill(0);       // Fixed End Action Matrix
+  const nfm = new Array(numDegreesOfFreedom + 1).fill(0);  // Nodal Force Matrix
+  let mam;  // Member Action Matrix
+  let dm;   // Displacement Matrix
+  let mamD = new Array(numEndActions).fill(0);       // mam for Dead load
+  let dmD = new Array(numDegreesOfFreedom).fill(0);  // Displacement Matrix for Dead Load
+  let mamL; // Live
+  let dmL;
+  let mamLr; // Roof Live
+  let dmLr;
+  let mamS; // Snow
+  let dmS;
+  let mamF = new Array(numEndActions).fill(0); // Fluid
+  let dmF = new Array(numDegreesOfFreedom).fill(0);
+  let mamH = new Array(numEndActions).fill(0); // HORIZ
+  let dmH = new Array(numDegreesOfFreedom).fill(0);
+  let mamR = new Array(numEndActions).fill(0); // RAIN
+  let dmR = new Array(numDegreesOfFreedom).fill(0);
+  let mamW = new Array(numEndActions).fill(0); // WIND
+  let dmW = new Array(numDegreesOfFreedom).fill(0);
+  let mamE = new Array(numEndActions).fill(0); // EQ
+  let dmE = new Array(numDegreesOfFreedom).fill(0);
+  if (numPatterns > 1 && beam.containsLive) {
+    mamL = new Array(numEndActions + 1).fill(0);
+    mamL = mamL.map(e => new Array(numDegreesOfFreedom + 1).fill(0));
+    dmL = new Array(numDegreesOfFreedom + 1).fill(0);
+    dmL = dmL.map(e => new Array(numSpans + 1).fill(0));
+    mamLr = new Array(numEndActions + 1).fill(0);
+    mamLr = mamLr.map(e => new Array(numDegreesOfFreedom + 1).fill(0));
+    dmLr = new Array(numDegreesOfFreedom + 1).fill(0);
+    dmLr = dmLr.map(e => new Array(numSpans + 1).fill(0));
+    mamS = new Array(numEndActions + 1).fill(0);
+    mamS = mamS.map(e => new Array(numDegreesOfFreedom + 1).fill(0));
+    dmS = new Array(numDegreesOfFreedom + 1).fill(0);
+    dmS = dmS.map(e => new Array(numSpans + 1).fill(0));
+  } else {
+    mamL = new Array(numEndActions).fill(0);
+    dmL = new Array(numDegreesOfFreedom).fill(0);
+    mamLr = new Array(numEndActions).fill(0);
+    dmLr = new Array(numDegreesOfFreedom).fill(0);
+    mamS = new Array(numEndActions).fill(0);
+    dmS = new Array(numDegreesOfFreedom).fill(0);
+  }
+
+  //Find a Member end Action Matrix, mam for each type of load, Service, D, L, S, W, E, etc
+  //For the live loads, find a different mam due to loads on each individual span.
+  for (let loadType = 0; loadType <= EQ; loadType++) {
+    if (loadType === 0 || gotType[loadType]) {
+      let lastK = 0;
+      let doPatterns = false; // patterned live loads
+      if (loadType === 0) {
+        doPatterns = false;
+        lastK = 1;
+      } else if (isLiveish(loadType) && numPatterns > 1) {
+        doPatterns = true;
+        // To do load patterns, we have to get a Member Action Matrix, mam, for each span.
+        lastK = numSpans;
+      } else {
+        doPatterns = false;
+        lastK = 1;
+      }
+
+      for (let k = 1; k <= lastK; k++) {
+        for (let i = 1;  i <= numSpans; i++) {
+          const L = spans[i].length;
+          const iSpring = 5 * i - 4;
+          const i1 = 5 * i - 3;
+          const i2 = 5 * i - 2;
+          const i3 = 5 * i - 1;
+          const i4 = 5 * i;
+
+          // Find the fixed end actions
+          feam[iSpring] = 0;
+          feam[i1] = 0; //The left end reaction if this segment were a fixed/fixed beam.
+          feam[i2] = 0; //The left fixed end moment
+          feam[i3] = 0; //The right end reaction
+          feam[i4] = 0; //The right fixed end moment
+          let applyLoadsFromThisSpan = false;
+          if (!doPatterns) {
+            // We are not doing live load patterns.
+            // So make one pass thru the beam and get a MAM that is the result of all loads.
+            applyLoadsFromThisSpan = true;
+          } else {
+            // We are doing live load patterns.
+            // k = number of spans.
+            // Make k passes thru the beam.
+            // In the kth pass, we calclate a MAM for the entire beam that results from
+            // live loads on just the kth span.
+            // The other spans have FEAM = [0, 0, etc] as their contribution to this MAM.
+            // Having k MAMs will enable us later to superimpose forces for each pattern.
+            applyLoadsFromThisSpan = i === k;
+          }
+
+          if (applyLoadsFromThisSpan) {
+            for (let iSeg = 0; iSeg < spans[i].segments.length; iSeg++) {
+              const seg = spans[i].segments[iSeg];
+              // In the next few lines,
+              // a is the distance from the beginning of the span to the load point.
+              // b is the length of the load.
+              // c is the distance from the end of the load to the right edge of the span.
+              // e is the distance from the left edge of the load to the right end of the span.
+              // d is the distance from the right edge of the load to the left edge of the span
+              let w = 0;
+              let s = 0;
+              const a = seg.xOfLeftEnd - nodes[i].x;
+              let b = seg.length;
+              let c = L - a - b;
+              let d = a + b;
+              const e = b + c;
+              let gotOppSigns = false;
+              let a2 = 0;
+              let b2 = 0;
+              let c2 = 0;
+              let d2 = 0;
+              let e2 = 0;
+
+              if (Math.abs(seg.w1[loadType]) < 0.000000001) { seg.w1[loadType] = 0; }
+              if (Math.abs(seg.w2[loadType]) < 0.000000001) { seg.w2[loadType] = 0; }
+
+              if (seg.w1[loadType] !== 0 && seg.w2[loadType] !== 0 &&
+                      Math.sign(seg.w1[loadType]) !== Math.sign(seg.w2[loadType])) {
+                gotOppSigns = true;
+                w = 0;
+                s = (seg.w2[loadType] - seg.w1[loadType]) / b;   //slope of line load
+                a2 = a - seg.w1[loadType] / s;
+                b2 = d - a2;
+                c2 = c;
+                d2 = d;
+                e2 = d2 - b2;
+                b = a2 - a;
+                d = a + b;
+                c = L - d;
+
+              } else {
+                gotOppSigns = false;
+                w = Math.abs(seg.w1[loadType]) < Math.abs(seg.w2[loadType])
+                  ? seg.w1[loadType]
+                  : seg.w2[loadType];
+              }
+
+              if (a === 0) {
+                feam[iSpring] = seg.P[loadType];
+              } else {
+                //FEA for point loads
+                feam[i2] = feam[i2] + seg.P[loadType] * a * e ** 2 / L ** 2;
+                feam[i4] = feam[i4] - seg.P[loadType] * a ** 2 * e / L ** 2;
+                feam[i2] = feam[i2] - seg.M[loadType] * (-1 + 4 * a / L - 3 * a ** 2 / L ** 2);
+                feam[i4] = feam[i4] - seg.M[loadType] * a / L * (2 - 3 * a / L);
+                feam[i1] = feam[i1] + seg.P[loadType] * e ** 2 / L ** 3 * (3 * a + e);
+                feam[i3] = feam[i3] + seg.P[loadType] * a ** 2 / L ** 3 * (a + 3 * e);
+                feam[i1] = feam[i1] - 6 * seg.M[loadType] * a / L ** 2 * (1 - a / L);
+                feam[i3] = feam[i3] + 6 * seg.M[loadType] * a / L ** 2 * (1 - a / L);
+              }
+
+              //FEA for uniform loads
+              if (w !== 0) {
+                const mA = (w * b / (12 * L ** 2 * b)) * (e ** 3 * (4 * L - 3 * e)
+                    - c ** 3 * (4 * L - 3 * c));
+                feam[i2] = feam[i2] + mA;
+                const mB = (w * b / (12 * L ** 2 * b)) * (d ** 3 * (4 * L - 3 * d)
+                    - a ** 3 * (4 * L - 3 * a));
+                feam[i4] = feam[i4] - mB;
+                feam[i1] = feam[i1] + (w * b / (2 * L)) * (2 * c + b) + (mA - mB) / L;
+                feam[i3] = feam[i3] + (w * b / (2 * L)) * (2 * a + b) + (mB - mA) / L;
+              }
+
+              //FEA for triangular loads
+              if (Math.abs(seg.w1[loadType]) > Math.abs(seg.w2[loadType]) || gotOppSigns) {
+                const wL = seg.w1[loadType] - w;
+                // const wR = 0
+                const wT = wL;
+                const centerOfTriangle = a + b / 3;
+                const wF = wT * d / b;
+                const mA = (wF * L ** 2 / 60) * (d / L) ** 2 * (10 - 10 * d / L
+                    + 3 * d ** 2 / L ** 2)
+                    - ((wF - wT) * L ** 2 / 60) * (a / L) ** 2
+                      * (10 - 10 * a / L + 3 * a ** 2 / L ** 2)
+                    - (wT * L ** 2 / 12) * (a / L) ** 2 * (6 - 8 * a / L + 3 * a ** 2 / L ** 2);
+                feam[i2] = feam[i2] + mA;
+                const mB = (wF * L ** 2 / 60) * (d / L) ** 3 * (5 - 3 * d / L)
+                    - ((wF - wT) * L ** 2 / 60) * (a / L) ** 3 * (5 - 3 * a / L)
+                    - (wT * L ** 2 / 12) * (a / L) ** 3 * (4 - 3 * a / L);
+                feam[i4] = feam[i4] - mB;
+                feam[i1] = feam[i1]
+                          + 0.5 * (wT * b) * (L - centerOfTriangle) / L + (mA - mB) / L;
+                feam[i3] = feam[i3] + 0.5 * (wT * b) * centerOfTriangle / L + (mB - mA) / L;
+
+              } else if (Math.abs(seg.w2[loadType]) > Math.abs(seg.w1[loadType])) {
+                // const wL = 0
+                const wR = seg.w2[loadType] - w;
+                const wT = wR;
+                const centerOfTriangle = a + 2 * b / 3;
+                const wF = wT * e / b;
+                const mA = (wF * L ** 2 / 60) * (e / L) ** 3 * (5 - 3 * e / L)
+                    - ((wF - wT) * L ** 2 / 60) * (c / L) ** 3 * (5 - 3 * c / L)
+                    - (wT * L ** 2 / 12) * (c / L) ** 3 * (4 - 3 * c / L);
+                feam[i2] = feam[i2] + mA;
+                const mB = (wF * L ** 2 / 60) * (e / L) ** 2
+                      * (10 - 10 * e / L + 3 * e ** 2 / L ** 2)
+                    - ((wF - wT) * L ** 2 / 60) * (c / L) ** 2
+                      * (10 - 10 * c / L + 3 * c ** 2 / L ** 2)
+                    - (wT * L ** 2 / 12) * (c / L) ** 2 * (6 - 8 * c / L + 3 * c ** 2 / L ** 2);
+                feam[i4] = feam[i4] - mB;
+                feam[i1] = feam[i1]
+                           + 0.5 * (wT * b) * (L - centerOfTriangle) / L + (mA - mB) / L;
+                feam[i3] = feam[i3] + 0.5 * (wT * b) * centerOfTriangle / L + (mB - mA) / L;
+              }
+              if (gotOppSigns) {
+                //Do the right-hand triangle load
+                // const wL = 0
+                // const wR = seg.w2[loadType]
+                const wT = seg.w2[loadType];
+                const centerOfTriangle = a2 + 2 * b2 / 3;
+                const wF = wT * e2 / b2;
+                const mA = (wF * L ** 2 / 60) * (e2 / L) ** 3 * (5 - 3 * e2 / L)
+                    - ((wF - wT) * L ** 2 / 60) * (c2 / L) ** 3 * (5 - 3 * c2 / L)
+                    - (wT * L ** 2 / 12) * (c2 / L) ** 3 * (4 - 3 * c2 / L);
+                feam[i2] = feam[i2] + mA;
+                const mB = (wF * L ** 2 / 60) * (e2 / L) ** 2
+                    * (10 - 10 * e2 / L + 3 * e2 ** 2 / L ** 2)
+                    - ((wF - wT) * L ** 2 / 60) * (c2 / L) ** 2
+                    * (10 - 10 * c2 / L + 3 * c2 ** 2 / L ** 2)
+                    // eslint-disable-next-line max-len
+                    - (wT * L ** 2 / 12) * (c2 / L) ** 2 * (6 - 8 * c2 / L + 3 * c2 ** 2 / L ** 2);
+                feam[i4] = feam[i4] - mB;
+                feam[i1] = feam[i1]
+                          + 0.5 * (wT * b2) * (L - centerOfTriangle) / L + (mA - mB) / L;
+                feam[i3] = feam[i3] + 0.5 * (wT * b2) * centerOfTriangle / L + (mB - mA) / L;
+              }
+            }
+          }
+        }
+
+        //Find the Nodal Force Matrix, NFM
+        let j = 0;
+        for (let i = 1; i <= numNodes; i++) {
+          if (i === 1) {
+            if (nodes[i].fixity === "continuous" || nodes[i].fixity === "spring") {
+              nfm[1] = -feam[1] - feam[2];
+              nfm[2] = -feam[3];
+              if (isLiveish(loadType) && numPatterns > 1) {
+                if (k === 0) {
+                  nfm[1] = nfm[1] - nodes[1].P[loadType];
+                  nfm[2] = nfm[2] - nodes[1].M[loadType];
+                }
+              } else {
+                nfm[1] = nfm[1] - nodes[1].P[loadType];
+                nfm[2] = nfm[2] - nodes[1].M[loadType];
+              }
+
+              j = 2;
+            } else if (nodes[i].fixity === "fixed") ; else if (nodes[i].fixity === "pinned") {
+              j += 1;
+              nfm[1] = -feam[3];
+              if (isLiveish(loadType) && numPatterns > 1) {
+                if (k === 1) {
+                  nfm[j] = nfm[j] - nodes[1].M[loadType];
+                }
+              } else {
+                nfm[j] = nfm[j] - nodes[1].M[loadType];
+              }
+            }
+          } else if (i === numNodes) {
+            if (nodes[i].fixity === "continuous" || nodes[i].fixity === "spring") {
+              j += 1;
+              nfm[j] = -feam[5 * numSpans - 1] - feam[5 * numSpans + 1];
+              j += 1;
+              nfm[j] = -feam[5 * numSpans];
+              if (isLiveish(loadType) && numPatterns > 1) {
+                if (k === numSpans) {
+                  nfm[j - 1] = nfm[j - 1] - nodes[numNodes].P[loadType];
+                  nfm[j] = nfm[j] - nodes[numNodes].M[loadType];
+                }
+              } else {
+                nfm[j - 1] = nfm[j - 1] - nodes[numNodes].P[loadType];
+                nfm[j] = nfm[j] - nodes[numNodes].M[loadType];
+              }
+            } else if (nodes[i].fixity === "fixed") ; else if (nodes[i].fixity === "pinned") {
+              j += 1;
+              nfm[j] = -feam[5 * numSpans];
+              if (isLiveish(loadType) && numPatterns > 1) {
+                if (k === numSpans) {
+                  nfm[j] = nfm[j] - nodes[numNodes].M[loadType];
+                }
+              } else {
+                nfm[j] = nfm[j] - nodes[numNodes].M[loadType];
+              }
+            }
+          } else {
+            if (nodes[i].fixity === "continuous" || nodes[i].fixity === "spring") {
+              j += 1;
+              nfm[j] = -feam[5 * (i - 1) - 1] - feam[5 * (i - 1) + 1] - feam[5 * (i - 1) + 2];
+              j += 1;
+              nfm[j] = -feam[5 * (i - 1)] - feam[5 * (i - 1) + 3];
+              if ((loadType === 3 || loadType === 5 || loadType === 6) && numPatterns > 1) {
+                if (k === i) {
+                  nfm[j - 1] = nfm[j - 1] - nodes[i].P[loadType];
+                  nfm[j] = nfm[j] - nodes[i].M[loadType];
+                }
+              } else {
+                nfm[j - 1] = nfm[j - 1] - nodes[i].P[loadType];
+                nfm[j] = nfm[j] - nodes[i].M[loadType];
+              }
+            } else if (nodes[i].fixity === "hinge") {
+              j += 1;
+              nfm[j] = -feam[5 * (i - 1) - 1] - feam[5 * (i - 1) + 1] - feam[5 * (i - 1) + 2];
+              j += 1;
+              nfm[j] = -feam[5 * (i - 1)];
+              if ((loadType === 3 || loadType === 5 || loadType === 6) && numPatterns > 1) {
+                if (k === i) {
+                  nfm[j - 1] = nfm[j - 1] - nodes[i].P[loadType];
+                  nfm[j] = nfm[j] - nodes[i].M[loadType];
+                }
+              } else {
+                nfm[j - 1] = nfm[j - 1] - nodes[i].P[loadType];
+                nfm[j] = nfm[j] - nodes[i].M[loadType];
+              }
+
+              j += 1;
+              nfm[j] = -feam[5 * (i - 1) + 3];
+            } else if (nodes[i].fixity === "proppedHinge") {
+              j += 1;
+              nfm[j] = -feam[5 * (i - 1)];
+              j += 1;
+              nfm[j] = -feam[5 * (i - 1) + 3];
+            } else if (nodes[i].fixity === "fixed") ; else if (nodes[i].fixity === "pinned") {
+              j += 1;
+              nfm[j] = -feam[5 * (i - 1)] - feam[5 * (i - 1) + 3];
+              if ((loadType === 3 || loadType === 5 || loadType === 6) && numPatterns > 1) {
+                if (k === i) {
+                  nfm[j] = nfm[j] - nodes[i].M[loadType];
+                }
+              } else {
+                nfm[j] = nfm[j] - nodes[i].M[loadType];
+              }
+            }
+          }
+        }
+
+        //Now do the rest of the matrix operations for the current load type
+        if (numDegreesOfFreedom === 0) {
+          dm = [0];
+        } else if (numDegreesOfFreedom === 1) {
+          dm = [0, nfm[1] / sm[1][1]];
+        } else {
+          dm = solveViaLDLt(diag, ltm, nfm, bandWidth);
+        }
+
+        // Get the Member Action Matrix, MAM.
+        // Multiply lsmDtm times dm, then add the resulting column vector to the FEAM
+        mam = lsmDtm.map(row => dotProduct$1(row, dm)).map((e, i) => e + feam[i]);
+
+        //Set elements of mam = 0 where fixity so dictates
+        for (let i = 1; i <= numEndActions; i++) {
+          if (Math.abs(mam[i]) < 0.00000000000001) { mam[i] = 0; }
+        }
+
+        switch (loadType) {
+          case DEAD:
+            mamD = clone(mam);
+            if (EI !== 1) { dmD = clone(dm); }
+            break
+          case FLUID:
+            mamF = clone(mam);
+            if (EI !== 1) { dmF = clone(dm); }
+            break
+          case LIVE:
+            if (typeof mamL[0] === "number") {
+              mamL = clone(mam);
+              if (EI !== 1) { dmL = clone(dm); }
+            } else {
+              for (let j = 1; j < 5 * numSpans + 1; j++) {
+                mamL[j][k - 1] = mam[j]; //mam for live loads on span k
+              }
+              if (EI !== 1) {
+                for (let j = 1; j <= numDegreesOfFreedom; j++) {
+                  dmL[j][k] = dm[j];
+                }
+              }
+            }
+            break
+          case HORIZ:
+            mamH = clone(mam);
+            if (EI !== 1) { dmH = clone(dm); }
+            break
+          case ROOFLIVE:
+            if (typeof mamLr[0] === "number") {
+              mamLr = clone(mam);
+              if (EI !== 1) { dmLr = clone(dm); }
+            } else {
+              for (let j = 1; j < 5 * numSpans + 1; j++) {
+                mamLr[j][k - 1] = mam[j];
+              }
+              if (EI !== 1) {
+                for (let j = 0; j < numDegreesOfFreedom; j++) {
+                  dmLr[j][k] = dm[j];
+                }
+              }
+            }
+            break
+          case SNOW:
+            if (typeof mamS[0] === "number") {
+              mamS = clone(mam);
+              dmS = clone(dm);
+            } else {
+              for (let j = 1; j < 5 * numSpans + 1; j++) {
+                mamS[j][k - 1] = mam[j];
+              }
+              if (EI !== 1) {
+                for (let j = 0; j < numDegreesOfFreedom; j++) {
+                  dmS[j][k] = dm[j];
+                }
+              }
+            }
+            break
+          case RAIN:
+            mamR = clone(mam);
+            if (EI !== 1) { dmR = clone(dm); }
+            break
+          case WIND:
+            mamW = clone(mam);
+            if (EI !== 1) { dmW = clone(dm); }
+            break
+          case EQ:
+            mamE = clone(mam);
+            if (EI !== 1) { dmE = clone(dm); }
+            break
+        }
+
+        // Find the reactions
+        if (numPatterns === 1 || !(beam.containsLive && isLiveish(loadType))) {
+          if (nodes[1].fixity === "fixed") {
+            nodes[1].Mr[loadType] = mam[3] + nodes[1].M[loadType];
+          }
+          if (nodes[1].fixity === "spring") {
+            nodes[1].Pr[loadType] = mam[1];
+          } else if (nodes[1].fixity !== "continuous") {
+            nodes[1].Pr[loadType] = -mam[2] - nodes[1].P[loadType];
+          }
+
+          for (let j = 2; j <= numSpans; j++) {
+            if (nodes[j].fixity === "fixed") {
+              nodes[j].Mr[loadType] = mam[5 * (j - 1)]
+                                       + mam[5 * (j - 1) + 3] + nodes[j].M[loadType];
+            }
+            if (nodes[j].fixity === "spring") {
+              nodes[j].Pr[loadType] = mam[5 * (j - 1) + 1];
+            } else if (nodes[j].fixity !== "continuous") {
+              nodes[j].Pr[loadType] = -mam[5 * (j - 1) - 1] - mam[5 * (j - 1) + 2]
+                  - nodes[j].P[loadType];
+            }
+          }
+
+          if (nodes[numNodes].fixity === "fixed") {
+            nodes[numNodes].Mr[loadType] = mam[5 * numSpans] + nodes[numNodes].M[loadType];
+          }
+          if (nodes[numNodes].fixity === "spring") {
+            nodes[numNodes].Pr[loadType] = mam[5 * numSpans + 1];
+          } else if (nodes[numNodes].fixity !== "continuous") {
+            nodes[numNodes].Pr[loadType] = -mam[5 * numSpans - 1] - nodes[numNodes].P[loadType];
+          }
+        } else {
+          let mTest = 0;
+          if (nodes[1].fixity === "fixed") {
+            mTest = mam[3] + nodes[1].M[loadType];
+            if (mTest > 0) { nodes[1].Mr[loadType] = nodes[1].Mr[loadType] + mTest; }
+            if (mTest < 0) { nodes[1].MrMin[loadType] = nodes[1].MrMin[loadType] + mTest; }
+          }
+          let pTest = 0;
+          if (nodes[1].fixity === "spring") {
+            pTest = mam[1];
+          } else if (nodes[1].fixity !== "continuous") {
+            pTest = -mam[2] - nodes[1].P[loadType];
+          }
+          if (pTest > 0) { nodes[1].Pr[loadType] = nodes[1].Pr[loadType] + pTest; }
+          if (pTest < 0) { nodes[1].PrMin[loadType] = nodes[1].PrMin[loadType] + pTest; }
+
+          for (let j = 1; j < numSpans; j++) {
+            if (nodes[j].fixity === "fixed") {
+              mTest = mam[5 * (j - 1)] + mam[5 * (j - 1) + 3] + nodes[j].M[loadType];
+              if (mTest > 0) { nodes[j].Mr[loadType] = nodes[j].Mr[loadType] + mTest; }
+              if (mTest < 0) { nodes[j].MrMin[loadType] = nodes[j].MrMin[loadType] + mTest; }
+            }
+            pTest = 0;
+            if (nodes[j].fixity === "spring") {
+              nodes[j].Pr[loadType] = nodes[j].Pr[loadType] + mam[5 * (j - 1) + 1];
+            } else if (nodes[j].fixity !== "continuous") {
+              pTest = -mam[5 * (j - 1) - 1] - mam[5 * (j - 1) + 2] - nodes[j].P[loadType];
+            }
+            if (pTest > 0) { nodes[j].Pr[loadType] = nodes[j].Pr[loadType] + pTest; }
+            if (pTest < 0) { nodes[j].PrMin[loadType] = nodes[j].PrMin[loadType] + pTest; }
+          }
+
+          if (nodes[numNodes].fixity === "fixed") {
+            mTest = mam[5 * numSpans] + nodes[numSpans].M[loadType];
+            if (mTest > 0) {
+              nodes[numNodes].Mr[loadType] = nodes[numNodes].Mr[loadType] + mTest;
+            }
+            if (mTest < 0) {
+              nodes[numNodes].MrMin[loadType] = nodes[numNodes].MrMin[loadType] + mTest;
+            }
+          }
+
+          pTest = 0;
+          if (nodes[numNodes].fixity === "spring") {
+            nodes[numNodes].Pr[loadType] = nodes[numNodes].Pr[loadType] + mam[5 * numSpans + 1];
+          } else if (nodes[numNodes].fixity !== "continuous") {
+            pTest = -mam[5 * numSpans - 1] - nodes[j].P[loadType];
+          }
+          if (pTest > 0) {
+            nodes[numNodes].Pr[loadType] = nodes[numNodes].Pr[loadType] + pTest;
+          }
+          if (pTest < 0) {
+            nodes[numNodes].PrMin[loadType] = nodes[numNodes].PrMin[loadType] + pTest;
+          }
+        } //finished finding the reactions
+
+      }
+    }
+  }
+  return [
+    [mamD, mamL, mamLr, mamS, mamF, mamH, mamR, mamW, mamE],
+    [dmD, dmL, dmLr, dmS, dmF, dmH, dmR, dmW, dmE]
+  ]
+}
+
+const createLsmDtm = (ssm, dtm, nodes, numEndActions, numDegreesOfFreedom) => {
+// Create LSM × DTM
+
+  let lsmDtm = new Array(numEndActions + 1).fill(0);
+  lsmDtm = lsmDtm.map(e => new Array(numDegreesOfFreedom + 1).fill(0));
+
+  for (let i = 1; i <= numEndActions; i++) {
+    const iSpan = Math.trunc((i - 1) / 5) + 1;
+    const g = i - 1 - 5 * (iSpan - 1);
+
+    for (let j = 1; j <= numDegreesOfFreedom; j++) {
+      if (g === 0) {
+        lsmDtm[i][j] = nodes[iSpan].k * dtm[i][j];
+      } else {
+        const kStart = 5 * iSpan - 3;
+        const kEnd = 5 * iSpan;
+        let h = 0;
+        for (let k = kStart; k <= kEnd; k++) {
+          h += 1;
+          lsmDtm[i][j] = lsmDtm[i][j] + ssm[iSpan][g][h] * dtm[k][j];
+        }
+      }
+    }
+  }
+  return lsmDtm
+};
+
+const createSM = (dtm, lsmDtm, numDegreesOfFreedom) => {
+  // Create the Stiffness Matrix, SM.
+  // SM = DTM**T × LsmDtm
+  let sm = Array(numDegreesOfFreedom + 1).fill(0);
+  sm = sm.map(e => Array(numDegreesOfFreedom + 1).fill(0));
+  const h = lsmDtm.length - 1;
+  let bandWidth = 1;
+  for (let i = 1; i < dtm[0].length; i++) {
+    for (let j = 1; j <= i; j++) {                       // Only the lower half of SM.
+      for (let k = 1; k <= h; k++) {
+        sm[i][j] = sm[i][j] + dtm[k][i] * lsmDtm[k][j];   // DTM**T, not DTM.
+      }
+      if (sm[i][j] !== 0 && i - j > bandWidth) { bandWidth = i - j;}  // lower band width
+    }
+  }
+  return [sm, bandWidth]
+};
+
+const luDecomposition = (sm, bandWidth) => {
+  // Perform the LU Decomposition of the stiffness matrix, SM.
+  // This is in preparation for the LDL**T matrix solution to come later.
+
+  const diag = new Array(sm.length).fill(0);
+  // Lower Triangular matrix, ltm
+  let ltm = new Array(sm.length).fill(0);
+  ltm = ltm.map(e => new Array(sm.length - 1).fill(0));
+
+  const n = sm.length - 1;    // number of equations
+
+  for (let j = 1; j <= n; j++) {
+    let kStar = Math.max(j - bandWidth, 1);
+    diag[j] = sm[j][j];
+    for (let k = kStar; k <= j - 1; k++) {
+      diag[j] = diag[j] - diag[k] * ltm[j][k] * ltm[j][k];
+    }
+
+    const iMax = Math.min(j + bandWidth, n);
+    for (let i = j + 1; i <= iMax; i++) {
+      kStar =  Math.max(i - bandWidth, 1);
+      let sum = 0;
+      for (let k = kStar; k <= j - 1; k++) {
+        sum = sum + diag[k] * ltm[j][k] * ltm[i][k];
+      }
+      ltm[i][j] = (sm[i][j] - sum) / diag[j];
+    }
+  }
+  return [diag, ltm]
+};
+
+const solveViaLDLt = (diag, ltm, b, bandWidth) => {
+  // Solve for dm() in a system of equations expressed by matrices: SM()× dm() = NFM()
+
+  // This sub// s method is a banded version of the LDL**T solver.
+  // LDL**T takes advantage of the fact that SM is a symmetric, positive-definite matrix.
+  // The algorithm will overwrite b(), which starts out as NFM and ends as dm.
+  // We already have the diag & ltm matrices, so we can go directly to the LU solution.
+
+  const n = b.length - 1;       // number of equations
+
+  // Forward substitution
+  for (let i = 2; i <= n; i++) {
+    const kStar = i - bandWidth < 1 ? 1 : i - bandWidth;
+    for (let k = kStar; k <= i - 1; k++) {
+      b[i] = b[i] - ltm[i][k] * b[k];
+    }
+  }
+
+  // Diagonal scaling and backward substitution
+  b[n] = b[n] / diag[n];
+  for (let i = n - 1; i >= 1; i--) {
+    b[i] = b[i] / diag[i];
+    const kStar = Math.min(n, i + bandWidth);
+    for (let k = i + 1; k <= kStar; k++) {
+      b[i] = b[i] - ltm[k][i] * b[k];
+    }
+  }
+
+  return b
+};
+
+function getLoadPatterns(beam, numSpans) {
+  if (!beam.containsLive || !beam.doLiveLoadPatterns) {
+    // Just one pattern. It includes each span.
+    const pattern = [1];
+    for (let i = 2; i <= numSpans; i++) {
+      pattern.push(i);
+    }
+    return [pattern]
+  } else if (beam.numPatterns === 2 || numSpans > 7) {
+    // Do 2 patterns.  One with all live load on, and one with all live load off.
+    const pattern = [1];
+    for (let i = 2; i <= numSpans; i++) {
+      pattern.push(i);
+    }
+    return [pattern, []]
+  } else {
+    switch (numSpans) {
+      case 1:
+        return [[1], []]
+      case 2:
+        return [[1, 2], [], [1], [2]]
+      case 3:
+        return [[1, 2, 3], [], [1], [2], [3], [1, 2], [1, 3], [2, 3]]
+      case 4:
+        // eslint-disable-next-line max-len
+        return [[1, 2, 3, 4], [], [1], [2], [3], [4], [1, 2], [1, 3], [1, 4], [2, 3], [2, 4], [3, 4], [1, 2, 3], [1, 2, 4], [1, 3, 4], [2, 3, 4]]
+      case 5:
+        // eslint-disable-next-line max-len
+        return [[1, 2, 3, 4, 5], [], [1], [2], [3], [4], [5], [1, 2], [1, 3], [1, 4], [1, 5], [2, 3], [2, 4], [2, 5], [3, 4], [3, 5], [4, 5], [1, 2, 3], [1, 2, 4], [1, 2, 5], [1, 3, 4], [1, 3, 5], [1, 4, 5], [2, 3, 4], [2, 3, 5], [2, 4, 5], [3, 4, 5], [1, 2, 3, 4], [1, 2, 3, 5], [1, 2, 4, 5], [1, 3, 4, 5], [2, 3, 4, 5]]
+      case 6:
+        // eslint-disable-next-line max-len
+        return [[1, 2, 3, 4, 5, 6], [], [1], [2], [3], [4], [5], [6], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [2, 3], [2, 4], [2, 5], [2, 6], [3, 4], [3, 5], [3, 6], [4, 5], [4, 6], [5, 6], [1, 2, 3], [1, 2, 4], [1, 2, 5], [1, 2, 6], [1, 3, 4], [1, 3, 5], [1, 3, 6], [1, 4, 5], [1, 4, 6], [1, 5, 6], [2, 3, 4], [2, 3, 5], [2, 3, 6], [2, 4, 5], [2, 4, 6], [2, 5, 6], [3, 4, 5], [3, 4, 6], [3, 5, 6], [4, 5, 6], [1, 2, 3, 4], [1, 2, 3, 5], [1, 2, 3, 6], [1, 2, 4, 5], [1, 2, 4, 6], [1, 2, 5, 6], [1, 3, 4, 5], [1, 3, 4, 6], [1, 3, 5, 6], [1, 4, 5, 6], [2, 3, 4, 5], [2, 3, 4, 6], [2, 3, 5, 6], [2, 4, 5, 6], [3, 4, 5, 6], [1, 2, 3, 4, 5], [1, 2, 3, 4, 6], [1, 2, 3, 5, 6], [1, 2, 4, 5, 6], [1, 3, 4, 5, 6], [2, 3, 4, 5, 6]]
+      case 7:
+        // eslint-disable-next-line max-len
+        return [[1, 2, 3, 4, 5, 6, 7], [], [1], [2], [3], [4], [5], [6], [7], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [1, 7], [2, 3], [2, 4], [2, 5], [2, 6], [2, 7], [3, 4], [3, 5], [3, 6], [3, 7], [4, 5], [4, 6], [4, 7], [5, 6], [5, 7], [6, 7], [1, 2, 3], [1, 2, 4], [1, 2, 5], [1, 2, 6], [1, 2, 7], [1, 3, 4], [1, 3, 5], [1, 3, 6], [1, 3, 7], [1, 4, 5], [1, 4, 6], [1, 4, 7], [1, 5, 6], [1, 5, 7], [1, 6, 7], [2, 3, 4], [2, 3, 5], [2, 3, 6], [2, 3, 7], [2, 4, 5], [2, 4, 6], [2, 4, 7], [2, 5, 6], [2, 5, 7], [2, 6, 7], [3, 4, 5], [3, 4, 6], [3, 4, 7], [3, 5, 6], [3, 5, 7], [3, 6, 7], [4, 5, 6], [4, 5, 7], [4, 6, 7], [5, 6, 7], [1, 2, 3, 4], [1, 2, 3, 5], [1, 2, 3, 6], [1, 2, 3, 7], [1, 2, 4, 5], [1, 2, 4, 6], [1, 2, 4, 7], [1, 2, 5, 6], [1, 2, 5, 7], [1, 2, 6, 7], [1, 3, 4, 5], [1, 3, 4, 6], [1, 3, 4, 7], [1, 3, 5, 6], [1, 3, 5, 7], [1, 3, 6, 7], [1, 4, 5, 6], [1, 4, 5, 7], [1, 4, 6, 7], [1, 5, 6, 7], [2, 3, 4, 5], [2, 3, 4, 6], [2, 3, 4, 7], [2, 3, 5, 6], [2, 3, 5, 7], [2, 3, 6, 7], [2, 4, 5, 6], [2, 4, 5, 7], [2, 4, 6, 7], [2, 5, 6, 7], [3, 4, 5, 6], [3, 4, 5, 7], [3, 4, 6, 7], [3, 5, 6, 7], [4, 5, 6, 7], [1, 2, 3, 4, 5], [1, 2, 3, 4, 6], [1, 2, 3, 4, 7], [1, 2, 3, 5, 6], [1, 2, 3, 5, 7], [1, 2, 3, 6, 7], [1, 2, 4, 5, 6], [1, 2, 4, 5, 7], [1, 2, 4, 6, 7], [1, 2, 5, 6, 7], [1, 3, 4, 5, 6], [1, 3, 4, 5, 7], [1, 3, 4, 6, 7], [1, 3, 5, 6, 7], [1, 4, 5, 6, 7], [2, 3, 4, 5, 6], [2, 3, 4, 5, 7], [2, 3, 4, 6, 7], [2, 3, 5, 6, 7], [2, 4, 5, 6, 7], [3, 4, 5, 6, 7], [1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 7], [1, 2, 3, 4, 6, 7], [1, 2, 3, 5, 6, 7], [1, 2, 4, 5, 6, 7], [1, 3, 4, 5, 6, 7], [2, 3, 4, 5, 6, 7]]
+        // We cannot get here.
+    }
+  }
+}
+
+function populateMAM(loadFactors, combern, loadPattern, beam, nodes, spans, actions) {
+  const [mamD, mamL, mamLr, mamS, mamF, mamH, mamR, mamW, mamE] = actions;
+  let mam = new Array(beam.numEndActions).fill(0);
+  let gotFullSnow = false;
+  const numSpans = spans.length - 1;
+  const numNodes = nodes.length - 1;
+  const numPatterns = beam.numPatterns;
+  const didNode = new Array(numNodes);
+  const didHalfLoad = new Array(numNodes);
+
+  if (loadFactors[DEAD] > 0 && beam.gotType[DEAD]) {
+    //do the dead load
+    const df = loadFactors[DEAD];
+    mam = mam.map((e, i) => mamD[i]);
+    for (let i = 1; i <= numSpans; i++) {
+      nodes[i].Pf = df * nodes[i].P[1];
+      nodes[i].Mf = df * nodes[i].M[1];
+      for (let j = 0; j < spans[i].segments.length; j++) {
+        const seg = spans[i].segments[j];
+        seg.w1f[combern] = df * seg.w1[1];
+        seg.w2f = df * seg.w2[1];
+        seg.Pf = df * seg.P[1];
+        seg.Mf = df * seg.M[1];
+      }
+    }
+  }
+
+  if (loadFactors[FLUID] > 0 && beam.gotType[FLUID]) {
+    //Do the fluid load
+    const ff = loadFactors[FLUID];
+    mam = mam.map((e, i) => e + ff * mamF[i]);
+    for (let i = 1; i <= numSpans; i++) {
+      nodes[i].Pf = nodes[i].Pf + ff * nodes[i].P[2];
+      nodes[i].Mf = nodes[i].Mf + ff * nodes[i].M[2];
+      for (let j = 0; j < spans[i].segments.length; j++) {
+        const seg = spans[i].segments[j];
+        seg.w1f[combern] = seg.w1f[combern] + ff * seg.w1[2];
+        seg.w2f = seg.w2f + ff * seg.w2[2];
+        seg.Pf = seg.Pf + ff * seg.P[2];
+        seg.Mf = seg.Mf + ff * seg.M[2];
+      }
+    }
+  }
+
+  if (loadFactors[LIVE] > 0 && beam.gotType[LIVE]) {
+    //do the live load
+    const liveFactor = loadFactors[LIVE];
+    if (numPatterns === 1) {
+      for (let i = 1; i < mam.length; i++) {
+        mam[i] = mam[i] + liveFactor * mamL[i];
+      }
+      for (let i = 1; i <= numSpans; i++) {
+        nodes[i].Pf = nodes[i].Pf + liveFactor * nodes[i].P[LIVE];
+        nodes[i].Mf = nodes[i].Mf + liveFactor * nodes[i].M[LIVE];
+        for (let j = 0; j < spans[i].segments.length; j++) {
+          const seg = spans[i].segments[j];
+          seg.w1f[combern] = seg.w1f[combern] + liveFactor * seg.w1[LIVE];
+          seg.w2f = seg.w2f + liveFactor * seg.w2[LIVE];
+          seg.Pf = seg.Pf + liveFactor * seg.P[LIVE];
+          seg.Mf = seg.Mf + liveFactor * seg.M[LIVE];
+        }
+      }
+    } else {
+      for (let k = 1; k <= numSpans; k++) {
+        if (loadPattern.includes(k)) {
+          let ii = 0;
+          for (let j = 1; j <= numSpans; j++) {
+            ii = 5 * j - 4;
+            mam[ii] = mam[ii] + liveFactor * mamL[ii][k - 1];
+            mam[ii + 1] = mam[ii + 1] + liveFactor * mamL[ii + 1][k - 1];
+            mam[ii + 2] = mam[ii + 2] + liveFactor * mamL[ii + 2][k - 1];
+            mam[ii + 3] = mam[ii + 3] + liveFactor * mamL[ii + 3][k - 1];
+            mam[ii + 4] = mam[ii + 4] + liveFactor * mamL[ii + 4][k - 1];
+          }
+          mam[ii + 5] = mam[ii + 5] + liveFactor * mamL[ii + 5][k - 1];
+        }
+      }
+
+      //Do node loads.  Include a node load if the span on either side is in the load pattern.
+      didNode.fill(false);
+      for (let i = 1; i <= numSpans; i++) {
+        if (loadPattern.includes(i)) {
+          if (!didNode[i]) {
+            nodes[i].Pf = nodes[i].Pf + liveFactor * nodes[i].P[LIVE];
+            nodes[i].Mf = nodes[i].Mf + liveFactor * nodes[i].M[LIVE];
+            didNode[i] = true;
+          }
+          if (!didNode[i + 1]) {
+            nodes[i + 1].Pf = nodes[i + 1].Pf + liveFactor * nodes[i + 1].P[LIVE];
+            nodes[i + 1].Mf = nodes[i + 1].Mf + liveFactor * nodes[i + 1].M[LIVE];
+            didNode[i + 1] = true;
+          }
+        }
+        for (let j = 0; j < spans[i].segments.length; j++) {
+          const seg = spans[i].segments[j];
+          if (loadPattern.includes(i)) {
+            seg.w1f[combern] = seg.w1f[combern] + liveFactor * seg.w1[LIVE];
+            seg.w2f = seg.w2f + liveFactor * seg.w2[LIVE];
+            seg.Pf = seg.Pf + liveFactor * seg.P[LIVE];
+            seg.Mf = seg.Mf + liveFactor * seg.M[LIVE];
+          }
+        }
+      }
+    }
+  }
+
+  if (loadFactors[HORIZ] > 0 && beam.gotType[HORIZ]) {
+    //Do the lateral earth pressure load
+    const hf = loadFactors[HORIZ];
+    for (let i = 1; i < mam.length; i++) {
+      mam[i] = mam[i] + hf * mamH[i];
+    }
+    for (let i = 1; i <= numSpans; i++) {
+      nodes[i].Pf = nodes[i].Pf + hf * nodes[i].P[HORIZ];
+      nodes[i].Mf = nodes[i].Mf + hf * nodes[i].M[HORIZ];
+      for (let j = 0; j < spans[i].segments.length; j++) {
+        const seg = spans[i].segments[j];
+        seg.w1f[combern] = seg.w1f[combern] + hf * seg.w1[HORIZ];
+        seg.w2f = seg.w2f + hf * seg.w2[HORIZ];
+        seg.Pf = seg.Pf + hf * seg.P[HORIZ];
+        seg.Mf = seg.Mf + hf * seg.M[HORIZ];
+      }
+    }
+  }
+
+  if (loadFactors[ROOFLIVE] > 0 && beam.gotType[ROOFLIVE]) {
+    //do the roof live load
+    const lrF = loadFactors[ROOFLIVE];
+    if (numPatterns === 1) {
+      for (let i = 1; i < mam.length; i++) {
+        mam[i] = mam[i] + lrF * mamH[i];
+      }
+      for (let i = 1; i <= numSpans; i++) {
+        nodes[i].Pf = nodes[i].Pf + lrF * nodes[i].P[ROOFLIVE];
+        nodes[i].Mf = nodes[i].Mf + lrF * nodes[i].M[ROOFLIVE];
+        for (let j = 0; j < spans[i].segments.length; j++) {
+          const seg = spans[i].segments[j];
+          seg.w1f[combern] = seg.w1f[combern] + lrF * seg.w1[ROOFLIVE];
+          seg.w2f = seg.w2f + lrF * seg.w2[5];
+          seg.Pf = seg.Pf + lrF * seg.P[ROOFLIVE];
+          seg.Mf = seg.Mf + lrF * seg.M[ROOFLIVE];
+        }
+      }
+    } else {
+      for (let k = 1; k <= numSpans; k++) {
+        if (loadPattern.includes(k)) {
+          let ii = 0;
+          for (let j = 1; j <= numSpans; j++) {
+            ii = 5 * j - 4;
+            mam[ii] = mam[ii] + lrF * mamLr[ii][k - 1];
+            mam[ii + 1] = mam[ii + 1] + lrF * mamLr[ii + 1][k - 1];
+            mam[ii + 2] = mam[ii + 2] + lrF * mamLr[ii + 2][k - 1];
+            mam[ii + 3] = mam[ii + 3] + lrF * mamLr[ii + 3][k - 1];
+            mam[ii + 4] = mam[ii + 4] + lrF * mamLr[ii + 4][k - 1];
+          }
+          mam[ii + 5] = mam[ii + 5] + lrF * mamLr[k - 1];
+        }
+      }
+
+      didNode.fill(false);
+      for (let k = 1; k <= numSpans; k++) {
+        if (loadPattern.includes(k)) {
+          if (!didNode[k]) {
+            nodes[k].Pf = nodes[k].Pf + lrF * nodes[k].P[ROOFLIVE];
+            nodes[k].Mf = nodes[k].Mf + lrF * nodes[k].M[ROOFLIVE];
+            didNode[k] = true;
+          }
+          if (!didNode[k + 1]) {
+            nodes[k + 1].Pf = nodes[k + 1].Pf + lrF * nodes[k + 1].P[ROOFLIVE];
+            nodes[k + 1].Mf = nodes[k + 1].Mf + lrF * nodes[k + 1].M[ROOFLIVE];
+            didNode[k + 1] = true;
+          }
+        }
+      }
+
+      for (let i = 1; i <= numSpans; i++) {
+        if (loadPattern.includes(i)) {
+          for (let j = 0; j < spans[i].segments.length; j++) {
+            const seg = spans[i].segments[j];
+            seg.w1f[combern] = seg.w1f[combern] + lrF * seg.w1[ROOFLIVE];
+            seg.w2f = seg.w2f + lrF * seg.w2[ROOFLIVE];
+            seg.Pf = seg.Pf + lrF * seg.P[ROOFLIVE];
+            seg.Mf = seg.Mf + lrF * seg.M[ROOFLIVE];
+          }
+        }
+      }
+    }
+  }
+
+  if (loadFactors[SNOW] > 0 && beam.gotType[SNOW]) {
+    const sf = loadFactors[SNOW];
+    if (numPatterns === 1) {
+      for (let i = 1; i < mam.length; i++) {
+        mam[i] = mam[i] + sf * mamS[i];
+      }
+      for (let i = 1; i <= numSpans; i++) {
+        nodes[i].Pf = nodes[i].Pf + sf * nodes[i].P[SNOW];
+        nodes[i].Mf = nodes[i].Mf + sf * nodes[i].M[SNOW];
+        for (let j = 0; j < spans[i].segments.length; j++) {
+          const seg = spans[i].segments[j];
+          seg.w1f[combern] = seg.w1f[combern] + sf * seg.w1[SNOW];
+          seg.w2f = seg.w2f + sf * seg.w2[SNOW];
+          seg.Pf = seg.Pf + sf * seg.P[SNOW];
+          seg.Mf = seg.Mf + sf * seg.M[SNOW];
+        }
+      }
+    } else {
+      for (let k = 1; k <= numSpans; k++) {
+        let f = loadPattern.includes(k) ? 1 : 0.5;
+        if (loadPattern.length === 0) { f = 0; }
+        let ii = 0;
+        for (let j = 1; j <= numSpans; j++) {
+          ii = 5 * j - 4;
+          mam[ii] = mam[ii] + f * sf * mamS[ii][k - 1];
+          mam[ii + 1] = mam[ii + 1] + f * sf * mamS[ii + 1][k - 1];
+          mam[ii + 2] = mam[ii + 2] + f * sf * mamS[ii + 2][k - 1];
+          mam[ii + 3] = mam[ii + 3] + f * sf * mamS[ii + 3][k - 1];
+          mam[ii + 4] = mam[ii + 4] + f * sf * mamS[ii + 4][k - 1];
+        }
+        mam[ii + 5] = mam[ii + 5] + f * sf * mamS[ii + 5][k - 1];
+      }
+
+      //Do node loads
+      didNode.fill(false);
+      didHalfLoad.fill(false);
+      for (let k = 1; k <= numSpans; k++) {
+        if (loadPattern.length > 0) {
+          gotFullSnow = loadPattern.includes(k);
+          //Check node k
+          if (didNode[k]) ; else if (!gotFullSnow && didHalfLoad[k]) ; else if (gotFullSnow && !didHalfLoad[k]) {
+            nodes[k].Pf = nodes[k].Pf + sf * nodes[k].P[SNOW];
+            nodes[k].Mf = nodes[k].Mf + sf * nodes[k].M[SNOW];
+            didNode[k] = true;
+          } else if (!gotFullSnow && !didHalfLoad[k]) {
+            nodes[k].Pf = nodes[k].Pf + 0.5 * sf * nodes[k].P[SNOW];
+            nodes[k].Mf = nodes[k].Mf + 0.5 * sf * nodes[k].M[SNOW];
+            didHalfLoad[k] = true;
+          }
+
+          //Check node k+1
+          if (gotFullSnow) {
+            nodes[k + 1].Pf = nodes[k + 1].Pf + sf * nodes[k + 1].P[SNOW];
+            nodes[k + 1].Mf = nodes[k + 1].Mf + sf * nodes[k + 1].M[SNOW];
+            didNode[k + 1] = true;
+          } else {
+            nodes[k + 1].Pf = nodes[k + 1].Pf + 0.5 * sf * nodes[k + 1].P[SNOW];
+            nodes[k + 1].Mf = nodes[k + 1].Mf + 0.5 * sf * nodes[k + 1].M[SNOW];
+            didHalfLoad[k + 1] = true;
+          }
+        }
+      }
+
+      for (let i = 1; i <= numSpans; i++) {
+        for (let j = 0; j < spans[i].segments.length; j++) {
+          const seg = spans[i].segments[j];
+          let f = loadPattern.includes(i) ? 1 : 0.5;
+          if (loadPattern.length === 0) { f = 0; }
+          seg.w1f[combern] = seg.w1f[combern] + f * sf * seg.w1[6];
+          seg.w2f = seg.w2f + f * sf * seg.w2[6];
+          seg.Pf = seg.Pf + f * sf * seg.P[6];
+          seg.Mf = seg.Mf + f * sf * seg.M[6];
+        }
+      }
+    }
+  }
+
+  if (loadFactors[RAIN] > 0 && beam.gotType[RAIN]) {
+    const rf = loadFactors[RAIN];
+    for (let i = 1; i < mam.length; i++) {
+      mam[i] = mam[i] + rf * mamR[i];
+    }
+    for (let i = 1; i <= numSpans; i++) {
+      nodes[i].Pf = nodes[i].Pf + rf * nodes[i].P[RAIN];
+      nodes[i].Mf = nodes[i].Mf + rf * nodes[i].M[RAIN];
+      for (let j = 0; j < spans[i].segments.length; j++) {
+        const seg = spans[i].segments[j];
+        seg.w1f[combern] = seg.w1f[combern] + rf * seg.w1[RAIN];
+        seg.w2f = seg.w2f + rf * seg.w2[RAIN];
+        seg.Pf = seg.Pf + rf * seg.P[RAIN];
+        seg.Mf = seg.Mf + rf * seg.M[RAIN];
+      }
+    }
+  }
+
+  if (loadFactors[WIND] > 0 && beam.gotType[WIND]) {
+    const wf = loadFactors[WIND];
+    for (let i = 1; i < mam.length; i++) {
+      mam[i] = mam[i] + wf * mamW[i];
+    }
+    for (let i = 1; i <= numSpans; i++) {
+      nodes[i].Pf = nodes[i].Pf + wf * nodes[i].P[WIND];
+      nodes[i].Mf = nodes[i].Mf + wf * nodes[i].M[WIND];
+      for (let j = 0; j < spans[i].segments.length; j++) {
+        const seg = spans[i].segments[j];
+        seg.w1f[combern] = seg.w1f[combern] + wf * seg.w1[WIND];
+        seg.w2f = seg.w2f + wf * seg.w2[WIND];
+        seg.Pf = seg.Pf + wf * seg.P[WIND];
+        seg.Mf = seg.Mf + wf * seg.M[WIND];
+      }
+    }
+  }
+
+  if (loadFactors[EQ] > 0 && beam.gotType[EQ]) {
+    const ef = loadFactors[EQ];
+    for (let i = 1; i < mam.length; i++) {
+      mam[i] = mam[i] + ef * mamE[i];
+    }
+    for (let i = 1; i <= numSpans; i++) {
+      nodes[i].Pf = nodes[i].Pf + ef * nodes[i].P[EQ];
+      nodes[i].Mf = nodes[i].Mf + ef * nodes[i].M[EQ];
+      for (let j = 0; j < spans[i].segments.length; j++) {
+        const seg = spans[i].segments[j];
+        seg.w1f[combern] = seg.w1f[combern] + ef * seg.w1[EQ];
+        seg.w2f = seg.w2f + ef * seg.w2[EQ];
+        seg.Pf = seg.Pf + ef * seg.P[EQ];
+        seg.Mf = seg.Mf + ef * seg.M[EQ];
+      }
+    }
+  }
+
+  for (let i = 1; i <= numSpans; i++) {
+    for (let j = 0; j < spans[i].segments.length; j++) {
+      const seg = spans[i].segments[j];
+      if (seg.length !== 0) {
+        seg.slope[combern] = (seg.w2f - seg.w1f[combern]) / seg.length;
+      }
+    }
+  }
+  return mam
+}
+
+function combine(beam, nodes, spans, actions, deflections, comboSet) {
+  // We already have member end actions for each load type on each span.
+  // In this function, we superimpose the load combinations and live load patterns and
+  // find the maximum and minimum shears and moments.
+  const numSpans = spans.length - 1;
+  const isService = comboSet === "service";
+  if (isService) { comboSet = [[0, 1, 1, 1, 1, 1, 1, 1, 1, 1]]; }
+  const numPatterns = beam.numPatterns;
+  const liveLoadPatterns = getLoadPatterns(beam, numSpans);
+  const [dmD, dmL, dmLr, dmS, dmF, dmH, dmR, dmW, dmE] = deflections;
+
+  let vMin = 0;
+  let vMax = 0;
+  let mMin = 0;
+  let mMax = 0;
+  let deflectionMax = 0;
+  let deflMaxCase = 0;
+  let deflectionMin = 0;
+  let deflMinCase = 0;
+
+  // Get ready to do lots of different load combinations.
+  // Definition: "combern" is a conflation of the words "combination" and "pattern".
+  const numComberns = getNumComberns(comboSet, isService, beam);
+
+  for (let i = 1; i <= numSpans; i++) {
+    for (let j = 0; j < spans[i].segments.length; j++) {
+      const seg = spans[i].segments[j];
+      seg.w1f = new Array(numComberns).fill(0);
+      seg.w2f = 0;
+      seg.slope = new Array(numComberns).fill(0);
+      seg.V1 = new Array(numComberns).fill(0);
+      seg.M1 = new Array(numComberns).fill(0);
+      if (beam.EI !== 1) {
+        seg.theta1 = new Array(numPatterns).fill(0);
+        seg.delta1 = new Array(numPatterns).fill(0);
+      }
+    }
+  }
+
+  // The number of interations through this next loop will be a function of
+  // both the number of load combinations and the number of load patterns.
+  // I define "combern" as a conflation of the words "combination" & "pattern"
+  // "combern" will be the loop index as we look at unique combinations of both
+  // load combinations and live load patterns.
+  // Each time through the loop, we;ll get the factored loads and the factored MAM
+  // To do this, we'll make much use of a subroutine called "PopulateMAM"
+  // It's called as:  PopulateMAM  loadFactors, combern, iPattern
+  // The load factors are factors from the ASCE or NBCC load combinations
+
+  // As you can see below, we'll find a unique MAM for each iCombo and live load pattern.
+  // Then, we'll use the MAM to find the segment shears, moments, etc.
+
+  let combern = 0;
+
+  // iCombo 0 is for deflections only. We'll go thru each load pattern.
+  // iCombo 1 thru comboSet.length is for finding shear and moment extremes. As code
+  // requires, this often means testing many load combinations.
+
+  for (let iCombo = 0; iCombo <= comboSet.length; iCombo++) {
+    const  isReqd = iCombo === 0 && beam.EI !== 0
+      ? true  // Go thru each load pattern and find deflection extremes.
+      : isService
+      ? true
+      : isReqdCombo(comboSet[iCombo - 1], beam.gotType);
+
+    if (isReqd) {
+      const loadFactors = iCombo === 0 && beam.EI !== 0
+        ? [0, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        : comboSet[iCombo - 1];
+
+      for (let iPattern = 0; iPattern < numPatterns; iPattern++) {
+        const loadPattern = liveLoadPatterns[iPattern];
+
+        // Get the Member Action Matrix, MAM, for this combern.
+        // A MAM contains the end shears and end moments for each span.
+        const mam = populateMAM(loadFactors, combern, loadPattern, beam, nodes, spans, actions);
+
+        let dm;
+        if (iCombo === 0 && beam.EI !== 1) {
+          // Create a Displacement Matrix, DM, for this load combination and load pattern.
+          dm = new Array(beam.numDegreesOfFreedom + 1).fill(0);
+          if (beam.gotType[DEAD]) { dm = dm.map((e, i) => e + dmD[i]); }
+          if (beam.gotType[FLUID]) { dm = dm.map((e, i) => e + dmF[i]); }
+          if (beam.gotType[LIVE]) { dm = getLiveDM(dm, dmL, loadPattern, numSpans); }
+          if (beam.gotType[HORIZ]) { dm = dm.map((e, i) => e + dmH[i]); }
+          if (beam.gotType[ROOFLIVE]) { dm = getLiveDM(dm, dmLr, loadPattern, numSpans); }
+          if (beam.gotType[SNOW]) { dm = getLiveDM(dm, dmS, loadPattern, numSpans); }
+          if (beam.gotType[RAIN]) { dm = dm.map((e, i) => e + dmR[i]); }
+          if (beam.gotType[WIND]) { dm = dm.map((e, i) => e + dmW[i]); }
+          if (beam.gotType[EQ]) { dm = dm.map((e, i) => e + dmE[i]); }
+        }
+
+        let iDM = 0;
+        for (let iSpan = 1; iSpan <= numSpans; iSpan++) {
+          let vMid = 0;
+          let vEnd = 0;
+          let mMid = 0;
+          let mEnd = 0;
+          let slopeEnd = 0;
+          let deflectionEnd = 0;
+          let deflectionMid = 0;
+          for (let k = 0; k < spans[iSpan].segments.length; k++) {
+            const seg = spans[iSpan].segments[k];
+
+            if (k === 0) {
+              // The first segment in this span.
+              seg.V1[combern] = -mam[5 * iSpan - 3];
+              seg.M1[combern] = mam[5 * iSpan - 2];
+              if (iCombo === 0 && beam.EI !== 1) {
+                iDM = getThetaAndDelta(nodes[iSpan].fixity, dm, seg, combern, iDM);
+              }
+            } else {
+              // Subsequent segments.
+              seg.V1[combern] = vEnd + seg.Pf;
+              seg.M1[combern] = mEnd - seg.Mf;
+              if (iCombo === 0 && beam.EI !== 1) {
+                seg.theta1[combern] = slopeEnd;
+                seg.delta1[combern] = deflectionEnd;
+              }
+            }
+
+            vEnd = seg.V1[combern] + seg.w1f[combern] * seg.length
+                 + 0.5 * seg.slope[combern] * seg.length ** 2;
+            if (Math.abs(vEnd) < 0.00000000000001) { vEnd = 0; }
+
+            mEnd = seg.M1[combern] + seg.V1[combern] * seg.length
+                 + 0.5 * seg.w1f[combern] * seg.length ** 2
+                 + seg.slope[combern] * seg.length ** 3 / 6;
+            if (Math.abs(mEnd) < 0.00000000000001) { mEnd = 0; }
+
+            if (iCombo === 0) {
+              // Check if this load pattern contains a deflection extreme.
+              if (beam.EI !== 1) {
+                slopeEnd = seg.theta1[combern] + (seg.M1[combern] * seg.length
+                  + 0.5 * seg.V1[combern] * seg.length ** 2
+                  + seg.w1f[combern] * seg.length ** 3 / 6
+                  + seg.slope[combern] * seg.length ** 4 / 24) / beam.EI;
+                deflectionMid = seg.delta1[combern] + seg.theta1[combern] * 0.5 * seg.length
+                    + (0.5 * seg.M1[combern] * (0.5 * seg.length) ** 2
+                    + seg.V1[combern] * (0.5 * seg.length) ** 3 / 6
+                    + seg.w1f[combern] * (0.5 * seg.length) ** 4 / 24
+                    + seg.slope[combern] * (0.5 * seg.length) ** 5 / 120) / beam.EI;
+                deflectionEnd = seg.delta1[combern] + seg.theta1[combern] * seg.length
+                    + (0.5 * seg.M1[combern] * seg.length ** 2
+                        + seg.V1[combern] * seg.length ** 3 / 6
+                    + seg.w1f[combern] * seg.length ** 4 / 24
+                    + seg.slope[combern] * seg.length ** 5 / 120) / beam.EI;
+                if (seg.delta1[combern] > deflectionMax) {
+                  deflectionMax = seg.delta1[combern];
+                  deflMaxCase = combern;
+                }
+                if (seg.delta1[combern] < deflectionMin) {
+                  deflectionMin = seg.delta1[combern];
+                  deflMaxCase = combern;
+                }
+                if (deflectionEnd > deflectionMax) {
+                  deflectionMax = deflectionEnd;
+                  deflMaxCase = combern;
+                }
+                if (deflectionEnd < deflectionMin) {
+                  deflectionMin = deflectionEnd;
+                  deflMinCase = combern;
+                }
+                if (deflectionMid > deflectionMax) {
+                  deflectionMax = deflectionMid;
+                  deflMaxCase = combern;
+                }
+                if (deflectionMid < deflectionMin) {
+                  deflectionMin = deflectionMid;
+                  deflMinCase = combern;
+                }
+              }
+            } else {
+              // Determine if this combern contains a shear or moment extreme.
+              // Start by finding the shear value in the middle of the segment
+              let xCross = 0; // initialze the variable
+              if (seg.slope[combern] !== 0) {
+                xCross = -1 * seg.w1f[combern] / seg.slope[combern];
+                if (xCross > 0 && xCross < seg.length) {
+                  vMid = seg.V1[combern] + seg.w1f[combern] * xCross
+                        + 0.5 * seg.slope[combern] * xCross ** 2;
+                } else {
+                  vMid = seg.V1[combern] + seg.w1f[combern] * (seg.length / 2)
+                        + 0.5 * seg.slope[combern] * (seg.length / 2) ** 2;
+                }
+              } else {
+                vMid = seg.V1[combern] + seg.w1f[combern] * (seg.length / 2)
+                      + 0.5 * seg.slope[combern] * (seg.length / 2) ** 2;
+              }
+
+              // Find the moment in the middle of the segment
+              xCross = 0; // initialze the variable
+              if (seg.slope[combern] === 0) {
+                if (seg.w1f[combern] !== 0) {
+                  xCross = -seg.V1[combern] / seg.w1f[combern];
+                }
+              } else {
+                if ((seg.w1f[combern] ** 2 - 2 * seg.slope[combern] * seg.V1[combern]) > 0) {
+                  xCross = -(seg.w1f[combern] + Math.sqrt(seg.w1f[combern] ** 2
+                          - 2 * seg.slope[combern] * seg.V1[combern])) / seg.slope[combern];
+                }
+              }
+              if (xCross > 0 && xCross < seg.length) {
+                mMid = seg.M1[combern] + seg.V1[combern] * xCross
+                      + 0.5 * seg.w1f[combern] * xCross ** 2
+                      + seg.slope[combern] * xCross ** 3 / 6;
+              } else {
+                mMid = seg.M1[combern] + seg.V1[combern] * (seg.length / 2)
+                    + 0.5 * seg.w1f[combern] * (seg.length / 2) ** 2
+                    + seg.slope[combern] * (seg.length / 2) ** 3 / 6;
+              }
+
+              // Check for local maximums and minimums
+              if (seg.V1[combern] > seg.Vmax.left.value && seg.V1[combern] > 0.01) {
+                seg.Vmax.left.value = seg.V1[combern];
+                seg.Vmax.left.case = combern;   // This is a case that we// ll want to plot
+                if (seg.V1[combern] > vMax) { vMax = seg.V1[combern]; }
+              }
+
+              if (vMid > seg.Vmax.mid.value && vMid > 0.01) {
+                seg.Vmax.mid.value = vMid;
+                seg.Vmax.mid.case = combern;
+                if (vMid > vMax) { vMax = vMid; }
+              }
+
+              if (vEnd > seg.Vmax.right.value && vEnd > 0.01) {
+                seg.Vmax.right.value = vEnd;
+                seg.Vmax.right.case = combern;
+                if (vEnd > vMax) { vMax = vEnd; }
+              }
+
+              if (seg.V1[combern] < seg.Vmin.left.value && seg.V1[combern] < -0.01) {
+                seg.Vmin.left.value = seg.V1[combern];
+                seg.Vmin.left.case = combern;
+                if (seg.V1[combern] < vMin) { vMin = seg.V1[combern]; }
+              }
+
+              if (vMid < seg.Vmin.mid.value && vMid < -0.01) {
+                seg.Vmin.mid.value = vMid;
+                seg.Vmin.mid.case = combern;
+                if (vMid < vMin) { vMin = vMid; }
+              }
+
+              if (vEnd < seg.Vmin.right.value && vEnd < -0.01) {
+                seg.Vmin.right.value = vEnd;
+                seg.Vmin.right.case = combern;
+                if (vEnd < vMin) { vMin = vEnd; }
+              }
+
+              if (seg.M1[combern] > seg.Mmax.left.value && seg.M1[combern] > 0.01) {
+                seg.Mmax.left.value = seg.M1[combern];
+                seg.Mmax.left.case = combern;
+                if (seg.M1[combern] > mMax) { mMax = seg.M1[combern]; }
+              }
+
+              if (mMid > seg.Mmax.mid.value && mMid > 0.01) {
+                seg.Mmax.mid.value = mMid;
+                seg.Mmax.mid.case = combern;
+                seg.Mmax.mid.x = seg.xOfLeftEnd + xCross;
+                if (mMid > mMax) { mMax = mMid; }
+              }
+
+              if (mEnd > seg.Mmax.right.value && mEnd > 0.01) {
+                seg.Mmax.right.value = mEnd;
+                seg.Mmax.right.case = combern;
+                if (mEnd > mMax) { mMax = mEnd; }
+              }
+
+              if (seg.M1[combern] < seg.Mmin.left.value && seg.M1[combern] < -0.01) {
+                seg.Mmin.left.value = seg.M1[combern];
+                seg.Mmin.left.case = combern;
+                if (seg.M1[combern] < mMin) { mMin = seg.M1[combern]; }
+              }
+
+              if (mMid < seg.Mmin.mid.value && mMid < -0.01) {
+                seg.Mmin.mid.value = mMid;
+                seg.Mmin.mid.case = combern;
+                seg.Mmin.mid.x = seg.xOfLeftEnd + xCross;
+                if (mMid < mMin) { mMin = mMid; }
+              }
+
+              if (mEnd < seg.Mmin.right.value && mEnd < -0.01) {
+                seg.Mmin.right.value = mEnd;
+                seg.Mmin.right.case = combern;
+                if (mEnd < mMin) { mMin = mEnd; }
+              }
+            }
+
+          }
+        }
+        combern += 1;
+      }
+    }
+  }
+  return [vMax, vMin, mMax, mMin, deflectionMax, deflectionMin,
+    deflMaxCase, deflMinCase, numComberns]
+}
+
+const isReqdCombo = (combo, gotType) => {
+  let isDeadLoadOnly = true;
+  for (let j = 2; j < combo.length; j++) {
+    if (combo[j] > 0) {
+      isDeadLoadOnly = false;
+      if (gotType[j]) { return true }
+    }
+  }
+  return isDeadLoadOnly
+};
+
+const comboContainsLive = combo => {
+  return (combo[LIVE] !== 0 || combo[ROOFLIVE] !== 0 || combo[SNOW] !== 0)
+};
+
+const getNumComberns = (comboSet, isService, beam) => {
+  // We'll do a superposition of forces for each load combination and each live load pattern.
+  // How many is that?
+  // First, count the number of comberns needed to do the deflection superpositions.
+  let numComberns = beam.EI === 1 ? 1 : beam.numPatterns;
+  // Then add a combern for each superposition done to get shears and moments.
+  for (let i = 0; i < comboSet.length; i++) {
+    if (isService || isReqdCombo(comboSet[i], beam.gotType)) {
+      numComberns += beam.containsLive && comboContainsLive(comboSet[i])
+      ? beam.numPatterns
+      : 1;
+    }
+  }
+  return numComberns
+};
+
+const getLiveDM = (a, b, loadPattern, numSpans) => {
+  if (Array.isArray(b[1])) {
+    for (let k = 1; k <= numSpans; k++) {
+      if (loadPattern.includes(k)) {
+        a = a.map((e, i) => e + b[i][k]);
+      }
+    }
+  } else {
+    a = a.map((e, i) => e  + b[i]);
+  }
+  return a
+};
+
+const getThetaAndDelta = (fixity, dm, seg, i, iDM) => {
+  if (fixity === "fixed") {
+    seg.delta1[i] = 0;
+    seg.theta1[i] = 0;
+  } else if (fixity === "pinned") {
+    seg.delta1[i] = 0;
+    iDM = iDM + 1;
+    seg.theta1[i] = -dm[iDM];
+  } else if (fixity === "continuous") {
+    iDM = iDM + 1;
+    seg.delta1[i] = -dm[iDM];
+    iDM = iDM + 1;
+    seg.theta1[i] = -dm[iDM];
+  } else if (fixity === "spring") {
+    iDM = iDM + 1;
+    seg.delta1[i] = -dm[iDM];
+    iDM = iDM + 1;
+    seg.theta1[i] = -dm[iDM];
+  } else if (fixity === "proppedHinge") {
+    iDM = iDM + 1;
+    seg.delta1[i] = 0;
+    iDM = iDM + 1;
+    seg.theta1[i] = -dm[iDM];
+  } else if (fixity === "hinge") {
+    iDM = iDM + 1;
+    seg.delta1[i] = -dm[iDM];
+    iDM = iDM + 1;
+    iDM = iDM + 1;
+    seg.theta1[i] = -dm[iDM];
+  }
+  return iDM
+};
+
+// Review the segments. Find out which comberns should be displayed
+function selectCases(spans) {
+  const shearCases = [];
+  const bendingCases = [];
+  for (let i = 1; i < spans.length; i++) {
+    for (let j = 0; j < spans[i].segments.length; j++) {
+      const seg = spans[i].segments[j];
+      if (seg.Vmax.left.value > 0) {
+        if (!shearCases.includes(seg.Vmax.left.case)) {
+          shearCases.push(seg.Vmax.left.case);
+        }
+      }
+      if (seg.Vmin.left.value < 0) {
+        if (!shearCases.includes(seg.Vmin.left.case)) {
+          shearCases.push(seg.Vmin.left.case);
+        }
+      }
+      if (seg.Mmax.left.value > 0) {
+        if (!bendingCases.includes(seg.Mmax.left.case)) {
+          bendingCases.push(seg.Mmax.left.case);
+        }
+      }
+      if (seg.Mmin.left.value < 0) {
+        if (!bendingCases.includes(seg.Mmin.left.case)) {
+          bendingCases.push(seg.Mmin.left.case);
+        }
+      }
+      if (seg.Vmax.mid.value > 0) {
+        if (!shearCases.includes(seg.Vmax.mid.case)) {
+          shearCases.push(seg.Vmax.mid.case);
+        }
+      }
+      if (seg.Vmin.mid.value < 0) {
+        if (!shearCases.includes(seg.Vmin.mid.case)) {
+          shearCases.push(seg.Vmin.mid.case);
+        }
+      }
+      if (seg.Mmax.mid.value > 0) {
+        if (!bendingCases.includes(seg.Mmax.mid.case)) {
+          bendingCases.push(seg.Mmax.mid.case);
+        }
+      }
+      if (seg.Mmin.mid.value < 0) {
+        if (!bendingCases.includes(seg.Mmin.mid.case)) {
+          bendingCases.push(seg.Mmin.mid.case);
+        }
+      }
+      if (seg.Vmax.right.value > 0) {
+        if (!shearCases.includes(seg.Vmax.right.case)) {
+          shearCases.push(seg.Vmax.right.case);
+        }
+      }
+      if (seg.Vmin.right.value < 0) {
+        if (!shearCases.includes(seg.Vmin.right.case)) {
+          shearCases.push(seg.Vmin.right.case);
+        }
+      }
+      if (seg.Mmax.right.value > 0) {
+        if (!bendingCases.includes(seg.Mmax.right.case)) {
+          bendingCases.push(seg.Mmax.right.case);
+        }
+      }
+      if (seg.Mmin.right.value < 0) {
+        if (!bendingCases.includes(seg.Mmin.right.case)) {
+          bendingCases.push(seg.Mmin.right.case);
+        }
+      }
+    }
+  }
+  return [shearCases, bendingCases]
+}
+
+function locateDiagrams(beam, extremes) {
+  // Find the y-coordinates for the shear, moment, and deflection diagrams.
+
+  // First, find out how many reaction vectors will be written onto the load diagram.
+  const [vMax, vMin, mMax, mMin, deflectionMax, deflectionMin, , , ] = extremes;
+
+  const vScale = vMax - vMin > 0 ? 60 / (vMax - vMin) : 0;
+  const mScale = mMax - mMin > 0 ? 60 / (mMax - mMin) : 0;
+  const reactionTextHeight = 16;
+
+  let yV = vMax > 0.0005
+    ? beam.yLoad + 12 + reactionTextHeight + vMax * vScale + 70
+    : beam.yLoad + 12 + reactionTextHeight;
+  yV = Math.round(yV);
+  const botOfV = vMin < -0.0005
+    ? yV + vMin * vScale + 50
+    : yV + 70;
+  const momentMax = beam.convention === 1 ? mMax : Math.abs(mMin);
+  const momentMin = beam.convention === 1 ? Math.abs(mMin) : mMax;
+  let yM = momentMax > 0.0005
+    ? botOfV + 12 + momentMax * mScale + 40
+    : botOfV + 12;
+  yM = Math.round(yM);
+  let yMax = yM;
+
+  // Get yText for moment
+  let yText = yM - mScale * mMin;
+  if (yText > yMax) { yMax = yText; }
+
+  let yDeflection = 0;
+  let deflectionScale = 0;
+  if (beam.EI !== 1) {
+    // eslint-disable-next-line max-len
+    if (deflectionMax > deflectionMin) { deflectionScale = 30 / (deflectionMax - deflectionMin); }
+    const botOfM = momentMin > (0.05 * momentMax)
+      ? yM + momentMin * mScale + 14
+      : yM + 14;
+    yDeflection = botOfM + 60 + deflectionMax * deflectionScale;
+    yDeflection = Math.round(yDeflection);
+    yMax = yDeflection;
+    if (Math.abs(deflectionMin) > 0.2 * (deflectionMax - deflectionMin)) {
+      yText = yDeflection - deflectionScale * deflectionMin;
+      if (yText > yMax) { yMax = yText; }
+    }
+  }
+  yMax += 20;
+
+  return [yV, yM, yDeflection, vScale, mScale, deflectionScale, yMax]
+
+}
+
+function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combinations) {
+  let diagram = [];
+  // Now go thru the comberns again.  Draw the line work this time.
+  const numSpans = spans.length - 1;
+  const [vMax, vMin, mMax, mMin, , , deflMaxCase, deflMinCase, numComberns] = extremes;
+  const [shearCases, bendingCases] = cases;
+  const [yV, yM, yDeflection, vScale, mScale, deflectionScale] = yCoords;
+  const vSmall = 0.01 * (vMax - vMin);
+  const mSmall = 0.05 * (mMax - mMin);
+  let deflectionMax = 0;
+  let deflectionMin = 0;
+  let xDeflectionMax = 0;
+  let xDeflectionMin = 0;
+  const xIncrement = beam.length / 50;
+  const wV = [];
+  const wVx = [];
+  const wM = [];
+  const wMx = [];
+  const horizAlign = "middle";
+
+  // Draw the horizontal lines for the shear and moment diagrams
+  diagram.push(Draw.textNode("shear", 20, yV + 2));
+  diagram.push(Draw.textNode(`(${beam.SI ? "kN" : "kips"})`, 20, yV + 16));
+  diagram.push({
+    tag: "path",
+    attrs: { d: `M${beam.xDiagram} ${yV} h300`, "stroke-width": '1.5px' }
+  });
+  diagram.push(Draw.textNode("bending", 20, yM + 2));
+  diagram.push(Draw.textNode(`(${beam.SI ? "kN-m" : "kip-ft"})`, 20, yM + 16));
+  diagram.push({
+    tag: "path",
+    attrs: { d: `M${beam.xDiagram} ${yM} h300`, "stroke-width": '1.5px' }
+  });
+
+  if (combinations !== "service") {
+    diagram.push(Draw.textNode("factored", 20, yV - 12));
+    diagram.push(Draw.textNode("factored", 20, yM - 12));
+  }
+
+  // Draw the reactions.
+  let f = 0;
+  for (let i = 1; i < nodes.length; i++) {
+    const x = beam.xDiagram + beam.xScale * nodes[i].x;
+    if (Math.abs(nodes[i].Pr[0]) > 0) {
+      f = 1 / (beam.SI ? 1000 : 4448.2216152605);
+      const sText = round(nodes[i].Pr[0] * f, 3);
+      diagram = diagram.concat(Draw.pointForce(x, beam.yLoad, sText, nodes[i].fixity, true));
+    }
+    if (Math.abs(nodes[i].Mr[0]) > 0) {
+      f = 1 / (beam.SI ? 1000 : 4448.2216152605 * 0.3048);
+      const sText = round(nodes[i].Mr[0] * f, 3);
+      diagram = diagram.concat(Draw.pointMoment(x, beam.yLoad, sText, true));
+    }
+  }
+
+  for (let combern = 0; combern <= numComberns; combern++) {
+    // Are we in a deflection combern?
+    const inaDeflCase = (deflMinCase === combern || deflMaxCase === combern) && beam.EI !== 1;
+    // Should we plot this combern?
+    if (!(shearCases.includes(combern) || bendingCases.includes(combern) || inaDeflCase)) {
+      continue // Skip this combern.
+    }
+    // This is a combern for which we should plot the line work
+    // Find detailed shear and moments for the diagrams.  And we check local maximums to see
+    // if we should write their values onto the diagram.
+    let lastVend = 0;
+    let lastW2f = 0;
+    const x = inaDeflCase ? [] : [0];
+    const deflection = [];
+    const v = [];
+    const m = [];
+    if (!inaDeflCase) {
+      v.push(0);
+      m.push(0);
+    }
+    let k = 0;
+    for (let i = 1; i <= numSpans; i++) {
+      for (let j = 0; j < spans[i].segments.length; j++) {
+        const seg = spans[i].segments[j];
+        const vEnd = seg.V1[combern] + seg.w1f[combern] * seg.length
+            + 0.5 * seg.slope[combern] * seg.length ** 2;
+        const mEnd = seg.M1[combern] + seg.V1[combern] * seg.length
+          + 0.5 * seg.w1f[combern] * seg.length ** 2 + seg.slope[combern] * seg.length ** 3 / 6;
+        const w2f = seg.w1f[combern] + seg.slope[combern] * seg.length;
+        let deflectionEnd = 0;
+        if (inaDeflCase) {
+          deflectionEnd = seg.delta1[combern] + seg.theta1[combern] * seg.length
+            + (0.5 * seg.M1[combern] * seg.length ** 2 + seg.V1[combern] * seg.length ** 3 / 6
+            + seg.w1f[combern] * seg.length ** 4 / 24
+            + seg.slope[combern] * seg.length ** 5 / 120) / beam.EI;
+        }
+        // Details for line work
+        let xLocal = 0;
+        k += 1;
+        x.push(seg.xOfLeftEnd);
+        if (inaDeflCase) {
+          deflection.push(seg.delta1[combern]);
+          if (seg.delta1[combern] > deflectionMax) {
+            deflectionMax = seg.delta1[combern];
+            xDeflectionMax = seg.xOfLeftEnd;
+          }
+          if (seg.delta1[combern] < deflectionMin) {
+            deflectionMin = seg.delta1[combern];
+            xDeflectionMin = seg.xOfLeftEnd;
+          }
+          if (deflectionEnd > deflectionMax) {
+            deflectionMax = deflectionEnd;
+            xDeflectionMax = seg.xOfLeftEnd + seg.length;
+          }
+          if (deflectionEnd < deflectionMin) {
+            deflectionMin = deflectionEnd;
+            xDeflectionMin = seg.xOfLeftEnd + seg.length;
+          }
+        } else {
+          v.push(seg.V1[combern]);
+          m.push(seg.M1[combern]);
+        }
+
+        for (let ii = 1; ii <= Math.trunc(seg.length / xIncrement); ii++) {
+          k = k + 1;
+          x.push(x[x.length - 1] + xIncrement);
+          xLocal += xIncrement;
+          if (inaDeflCase) {
+            deflection.push(seg.delta1[combern] + seg.theta1[combern] * xLocal
+                + (0.5 * seg.M1[combern] * xLocal ** 2
+                + seg.V1[combern] * xLocal ** 3 / 6 + seg.w1f[combern] * xLocal ** 4 / 24
+                + seg.slope[combern] * xLocal ** 5 / 120) / beam.EI);
+            if (deflection[deflection.length - 1] > deflectionMax) {
+              deflectionMax = deflection[deflection.length - 1];
+              xDeflectionMax = seg.xOfLeftEnd + xLocal;
+            }
+            if (deflection[deflection.length - 1] < deflectionMin) {
+              deflectionMin = deflection[deflection.length - 1];
+              xDeflectionMin = seg.xOfLeftEnd + xLocal;
+            }
+          } else {
+            v.push(seg.V1[combern] + seg.w1f[combern] * xLocal
+              + 0.5 * seg.slope[combern] * xLocal ** 2);
+            m.push(seg.M1[combern] + seg.V1[combern] * xLocal
+              + 0.5 * seg.w1f[combern] * xLocal ** 2 + seg.slope[combern] * xLocal ** 3 / 6);
+          }
+        }
+
+        k += 1;
+        x.push(seg.xOfLeftEnd + seg.length);
+        if (inaDeflCase) {
+          deflection.push(deflectionEnd);
+        } else {
+          v.push(vEnd);
+          m.push(mEnd);
+        }
+
+        // Check for local maximums and minimums
+        if (seg.Vmax.left.case === combern || seg.Vmin.left.case === combern) {
+          // Do we also want to write this value onto the shear diagram?
+          if (i === 1 && j === 0) {
+            if (Math.abs(seg.V1[combern]) > vSmall) {
+              checkVs(seg.V1[combern], 0, wV, wVx, spans, beam.length);
+            }
+          } else if (!(lastW2f === seg.w1f[combern] &&
+              Math.abs(seg.V1[combern] - lastVend) < vSmall)) {
+            checkVs(seg.V1[combern], seg.xOfLeftEnd, wV, wVx, spans, beam.length);
+          }
+        }
+
+        if (seg.Vmax.mid.case === combern || seg.Vmin.mid.case === combern) {
+          let xCross = 0;
+          if (seg.slope[combern] !== 0) {
+            xCross = -1 * seg.w1f[combern] / seg.slope[combern];
+            if (xCross > 0 && xCross < seg.length) {
+              const vMid = seg.V1[combern] + seg.w1f[combern] * xCross
+                  + 0.5 * seg.slope[combern] * xCross ** 2;
+              checkVs(vMid, seg.xOfLeftEnd + xCross, wV, wVx, spans, beam.length);
+            }
+          }
+        }
+
+        if (seg.Vmax.right.case === combern || seg.Vmin.right.case === combern) {
+          if (Math.abs(vEnd) > vSmall) {
+            checkVs(vEnd, seg.xOfLeftEnd + seg.length, wV, wVx, spans, beam.length);
+          }
+        }
+
+        if (seg.Mmax.left.case === combern || seg.Mmin.left.case === combern) {
+          if (i === 1 && j === 0) {
+            if (Math.abs(seg.M1[combern]) > mSmall) {
+              checkMs(seg.M1[combern], 0, wM, wMx, spans, beam.length, mSmall);
+            }
+          } else {
+            checkMs(seg.M1[combern], seg.xOfLeftEnd, wM,
+              wMx, spans, beam.length, mSmall);
+          }
+        }
+
+        if (seg.Mmax.mid.case === combern || seg.Mmin.mid.case === combern) {
+          let xCross = 0; // initialze the variable
+          let mMid = 0;
+          if (seg.slope[combern] === 0) {
+            if (seg.w1f[combern] !== 0) {
+              xCross = -seg.V1[combern] / seg.w1f[combern];
+              if (xCross > 0 && xCross < seg.length) {
+                mMid = seg.M1[combern] + seg.V1[combern] * xCross
+                  + 0.5 * seg.w1f[combern] * xCross ** 2 + seg.slope[combern] * xCross ** 3 / 6;
+                checkMs(mMid, seg.xOfLeftEnd + xCross, wM, wMx, spans, beam.length, mSmall);
+              }
+            }
+          } else {
+            let mMid1 = 0;
+            let mMid2 = 0;
+            let xCross1 = 0;
+            let xCross2 = 0;
+            if ((seg.w1f[combern] ** 2 - 2 * seg.slope[combern] * seg.V1[combern]) > 0) {
+              const determinant = Math.sqrt(seg.w1f[combern] ** 2
+                    - 2 * seg.slope[combern] * seg.V1[combern]);
+              xCross1 = -(seg.w1f[combern] - determinant) / seg.slope[combern];
+              xCross2 = -(seg.w1f[combern] + determinant) / seg.slope[combern];
+              if (xCross1 > 0 && xCross1 < seg.length) {
+                xCross = xCross1;
+                mMid1 = seg.M1[combern] + seg.V1[combern] * xCross
+                  + 0.5 * seg.w1f[combern] * xCross ** 2 + seg.slope[combern] * xCross ** 3 / 6;
+              }
+              if (xCross2 > 0 && xCross2 < seg.length) {
+                xCross = xCross2;
+                mMid2 = seg.M1[combern] + seg.V1[combern] * xCross
+                  + 0.5 * seg.w1f[combern] * xCross ** 2 + seg.slope[combern] * xCross ** 3 / 6;
+              }
+            }
+            if (mMid1 > 0 || mMid2 > 0) {
+              if (mMid1 > mMid2) {
+                mMid = mMid1;
+                xCross = xCross1;
+              } else {
+                mMid = mMid2;
+                xCross = xCross2;
+              }
+            }
+            if (xCross > 0 && xCross < seg.length) {
+              mMid = seg.M1[combern] + seg.V1[combern] * xCross
+                  + 0.5 * seg.w1f[combern] * xCross ** 2 + seg.slope[combern] * xCross ** 3 / 6;
+              checkMs(mMid, seg.xOfLeftEnd + xCross, wM, wMx, spans, beam.length, mSmall);
+            }
+          }
+        }
+
+        if (seg.Mmax.right.case === combern || seg.Mmin.right.case === combern) {
+          checkMs(mEnd, seg.xOfLeftEnd + seg.length, wM, wMx, spans, beam.length, mSmall);
+        }
+
+        lastW2f = w2f;
+        lastVend = vEnd;
+      }
+    }
+
+    // Plot diagrams
+    const numDataPoints = k;
+
+    // Draw the shear diagrams
+    if (shearCases.includes(combern)) {
+      let xPoly;
+      let yPoly;
+
+      if (beam.allLoadsAreUniform) {
+        // Make the shear diagram out of straight lines.
+        let linearV = new Array(2 * beam.numSegments + 3).fill(0);
+        linearV = linearV.map(e => [0, 0]);
+        k = 1;
+        linearV[k][0] = beam.xDiagram;
+        linearV[k][1] = yV;
+        for (let i = 1; i <= numSpans; i++) {
+          for (let j = 0; j < spans[i].segments.length; j++) {
+            const seg = spans[i].segments[j];
+            k = k + 1;
+            linearV[k][0] = beam.xDiagram + beam.xScale * seg.xOfLeftEnd;
+            linearV[k][1] = yV - vScale * seg.V1[combern];
+            k = k + 1;
+            linearV[k][0] = beam.xDiagram + beam.xScale * (seg.xOfLeftEnd + seg.length);
+            const vEnd = seg.V1[combern] + seg.w1f[combern] * seg.length
+                + 0.5 * seg.slope[combern] * seg.length ** 2;
+            linearV[k][1] = yV - vScale * vEnd;
+          }
+        }
+        k = k + 1;
+        linearV[k][0] = beam.xDiagram + beam.xScale * beam.length;
+        linearV[k][1] = yV;
+        const numOfShearDataPoints = k;
+
+        xPoly = new Array(numOfShearDataPoints - 1);
+        yPoly = new Array(numOfShearDataPoints - 1);
+        for (let ii = 1; ii <= numOfShearDataPoints; ii++) {
+          xPoly[ii - 1] = linearV[ii][0].toFixed(2);
+          yPoly[ii - 1] = linearV[ii][1].toFixed(2);
+        }
+
+      } else {
+        xPoly = new Array(numDataPoints + 1).fill(0);
+        yPoly = new Array(numDataPoints + 1).fill(0);
+        for (let ii = 0; ii < numDataPoints; ii++) {
+          xPoly[ii] = (beam.xDiagram + beam.xScale * x[ii]).toFixed(2); // x(ii)
+          yPoly[ii] = (yV - vScale * v.shift()).toFixed(2);
+        }
+        xPoly[numDataPoints] = beam.xDiagram + 300;
+        yPoly[numDataPoints] = yV;
+      }
+      diagram.push(Draw.polyline(xPoly, yPoly));
+    }
+
+    // Draw the moment diagram
+    if (bendingCases.includes(combern)) {
+      const xPoly = new Array(numDataPoints + 1).fill(0);
+      const yPoly = new Array(numDataPoints + 1).fill(0);
+      for (let ii = 0; ii <= numDataPoints; ii++) {
+        xPoly[ii] = (beam.xDiagram + beam.xScale * x[ii]).toFixed(2); // x(ii)
+        yPoly[ii] = (yM - beam.convention * mScale * m.shift()).toFixed(2); // M(ii)
+      }
+      xPoly[numDataPoints + 1] = beam.xDiagram + 300;
+      yPoly[numDataPoints + 1] = yM;
+      diagram.push(Draw.polyline(xPoly, yPoly));
+    }
+
+    if (inaDeflCase) {
+      // Draw the deflection diagram
+      diagram.push(Draw.textNode("deflection", 20, yDeflection + 2));
+      diagram.push({
+        tag: "path",
+        attrs: { d: `M${beam.xDiagram} ${yDeflection} h300`, "stroke-width": '1.5px' }
+      });
+      const xPoly = new Array(numDataPoints - 1).fill(0);
+      const yPoly = new Array(numDataPoints - 1).fill(0);
+      for (let ii = 1; ii <= numDataPoints - 1; ii++) {
+        xPoly[ii - 1] = (beam.xDiagram + beam.xScale * x[ii]).toFixed(2); // x(ii)
+        yPoly[ii - 1] = (yDeflection - deflectionScale * deflection[ii]).toFixed(2);
+      }
+      diagram.push(Draw.polyline(xPoly, yPoly));
+    }
+  }
+
+  // Write the values of the local shear maximums onto the diagrams.
+  f = 1 / (beam.SI ? 1000 : 4448.2216152605); // conversion factor for N to kips or MN
+  while (wV.length > 0) {
+    const xText = (beam.xDiagram + beam.xScale * wVx.shift()).toFixed(2);
+    const fudge = wV[0] > 0 ? -2 : 13;
+    const yText = (yV - vScale * wV[0] + fudge).toFixed(2);
+    // horizAlign is middle
+    diagram.push(Draw.textNode(round(wV.shift() * f, 3), xText, yText, horizAlign));
+  }
+
+  // Write the values of the local bending maximums onto the diagrams.
+  f = beam.convention / (beam.SI ? 1000 : 4448.2216152605 * 0.3048);
+  while (wM.length > 0) {
+    const xText = (beam.xDiagram + beam.xScale * wMx.shift()).toFixed(2);
+    const fudge = beam.convention * wM[0] > 0 ? -2 : 13;
+    const yText = (yM - beam.convention * mScale * wM[0] + fudge).toFixed(2);
+    const sText = round(wM.shift() * f, 3);
+    diagram.push(Draw.textNode(sText, xText, yText, horizAlign));
+  }
+
+  if (beam.EI !== 1) {
+    // Insert the max and min deflection values
+    beam.deflectionMax = Math.max(Math.abs(deflectionMax), Math.abs(deflectionMin));
+    f = beam.SI ? 1000 : (12 / 0.3048);
+    let sText = "";
+    let xText = 0;
+    let yText = 0;
+    if (deflectionMax > 0.2 * (deflectionMax - deflectionMin)) {
+      xText = beam.xDiagram + beam.xScale * xDeflectionMax;
+      yText = yDeflection - deflectionScale * deflectionMax - 2;
+      if (beam.SI) {
+        sText = round(deflectionMax * f, 1) + " mm";
+      } else {
+        sText = round(deflectionMax * f, 2) + '″';
+      }
+      diagram.push(Draw.textNode(sText, xText, yText, horizAlign));
+    }
+    if (Math.abs(deflectionMin) > 0.2 * (deflectionMax - deflectionMin)) {
+      xText = beam.xDiagram + beam.xScale * xDeflectionMin;
+      yText = yDeflection - deflectionScale * deflectionMin + 13;
+      if (beam.SI) {
+        sText = round(f * deflectionMin, 1) + " mm";
+      } else {
+        sText = round(f * deflectionMin, 2) + '″';
+      }
+      diagram.push(Draw.textNode(sText, xText, yText, horizAlign));
+    }
+  }
+
+  return diagram
+}
+
+const checkVs = (v, x, wV, wVx, spans, beamLength) => {
+  // Check if we should write this value onto the shear diagram
+  let gottaWrite = true; // initialize the variable
+  const shortDistance = 0.15 * beamLength;
+
+  for (let i = 1; i < spans.length; i++) {
+    for (let k = 0; k < spans[i].segments.length; k++) {
+      const seg = spans[i].segments[k];
+      const xOfRightEnd = seg.xOfLeftEnd + seg.length;
+      if (xOfRightEnd < x -  shortDistance) { continue }
+      if (seg.xOfLeftEnd > x + shortDistance) { continue }
+
+      if (Math.abs(seg.xOfLeftEnd - x) < shortDistance) {
+        if (v > 0) {
+          if (seg.Vmax.left.value > v) {
+            gottaWrite = false;
+            break
+          }
+        } else if (seg.Vmin.left.value < v) {
+          gottaWrite = false;
+          break
+        }
+      }
+
+      const xRightEnd = seg.xOfLeftEnd + seg.length;
+      if (Math.abs(x - xRightEnd < shortDistance)) {
+        if (v > 0) {
+          if (seg.Vmax.right.value > v) {
+            gottaWrite = false;
+            break
+          }
+        } else if (seg.Vmin.right.value < v) {
+          gottaWrite = false;
+          break
+        }
+      }
+    }
+  }
+
+  if (gottaWrite) {
+    wV.push(v);
+    wVx.push(x);
+  }
+};
+
+const checkMs = (m, x, wM, wMx, spans, beamLength, mSmall) => {
+  // Check if we should write this value onto the moment diagram
+  if (Math.abs(m) < mSmall) { return false }
+  let gottaWrite = true; // initialize the variable
+  const shortDistance = 0.15 * beamLength;
+
+  for (let i = 1; i < spans.length; i++) {
+    for (let k = 0; k < spans[i].segments.length; k++) {
+      const seg = spans[i].segments[k];
+      const xOfRightEnd = seg.xOfLeftEnd + seg.length;
+      if (xOfRightEnd < x -  shortDistance) { continue }
+      if (seg.xOfLeftEnd > x + shortDistance) { continue }
+
+      if (Math.abs(seg.xOfLeftEnd - x) < shortDistance) {
+        if (m > 0) {
+          if (seg.Mmax.left.value > m) {
+            gottaWrite = false;
+            break
+          }
+        } else if (seg.Mmin.left.value < m) {
+          gottaWrite = false;
+          break
+        }
+      }
+
+      if (m > 0 && Math.abs(seg.Mmax.mid.x - x) < shortDistance) {
+        if (seg.Mmax.mid.value > m) {
+          gottaWrite = false;
+          break
+        }
+      }
+      if (m < 0 && Math.abs(seg.Mmin.mid.x - x) < shortDistance) {
+        if (seg.Mmin.mid.value < m) {
+          gottaWrite = false;
+          break
+        }
+      }
+
+      const xRightEnd = seg.xOfLeftEnd + seg.length;
+      if (Math.abs(x - xRightEnd < shortDistance)) {
+        if (m > 0) {
+          if (seg.Mmax.right.value > m) {
+            gottaWrite = false;
+            break
+          }
+        } else if (seg.Mmin.right.value < m) {
+          gottaWrite = false;
+          break
+        }
+      }
+    }
+  }
+
+  if (gottaWrite) {
+    wM.push(m);
+    wMx.push(x);
+  }
+};
+
+function error(msg) {
+  if (msg === "") { return { value: "Error", unit: null, dtype: dt.ERROR } }
+  return { value: msg, unit: null, dtype: dt.ERROR }
+}
+
+const beamDiagram = (beamInputData, loadFactorInput) => {
+  // This is the main analysis function.
+
+  // Get raw data from the input dataframe.
+  const beamInput = readInputData(beamInputData);
+  if (typeof beamInput === "string") { return error(beamInput) }
+
+  // Validate input and populate data structures.
+  const [errorMsg, beam, nodes, spans, combinations] = populateData(beamInput, loadFactorInput);
+  if (errorMsg) { return error(errorMsg) }
+
+  // Start the SVG
+  const svg = { tag: 'svg', children: [], attrs: { float: "right" } };
+
+  // Create the first diagram. Show fixities, lengths, and loads.
+  const loadDiagram = createLoadDiagram(beam, nodes, spans);
+  svg.children = svg.children.concat(loadDiagram);
+
+  // Do the linear algebra. For each load type, get member end actions and node displacements.
+  const [actions, deflections] = doAnalysis(beam, nodes, spans);
+
+  // Determine shear, moment, and deflection maximums and minimums by superimposing
+  // the relevent load combinations and live load patterns.
+  const extremes = combine(beam, nodes, spans, actions, deflections, combinations);
+
+  // Decide which combinations get plotted.
+  const cases = selectCases(spans);
+
+  // Find the y coordinates for the shear, moment, and deflection diagrams.
+  const yCoords = locateDiagrams(beam, extremes);
+  const yMax = yCoords[6]; // Diagram overall height in local coords.
+
+  const diagrams = drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combinations);
+  svg.children = svg.children.concat(diagrams);
+
+  // Set the outer dimensions of the diagram.
+  svg.attrs.width = "375"; // px
+  svg.attrs.height = (375 / 450 * yMax).toFixed(0);
+  svg.attrs.viewBox = `0 0 450 ${yMax.toFixed(0)}`;
+
+  return svg
+
+};
 
 // evaluate.js
 
@@ -10625,7 +13885,7 @@ const draw = Object.freeze({
 
 // Some helper functions
 
-const setComparisons = ["in", "!in", "∈", "∉", "∋", "∌", "⊆", "⊈", "⊇", "⊉"];
+const setComparisons = ["in", "!in", "∈", "∉", "∋", "∌", "⊂", "⊄", "⊃", "⊅"];
 
 const shapeOf = oprnd => {
   return oprnd.dtype === dt.COMPLEX
@@ -10662,7 +13922,7 @@ const binaryShapesOf = (o1, o2) => {
 };
 
 const matrixMults = { "×": "cross", "·": "dot", "∘": "circ", ".*": "circ",
-  "*": "multiply", "⌧": "multiply" };
+  "*": "multiply", "∗": "multiply", "⌧": "multiply" };
 
 const nextToken = (tokens, i) => {
   if (tokens.length < i + 2) { return undefined }
@@ -10742,11 +14002,11 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
     } else if (ch === '"') {
       // A string literal.
       const chEnd = tkn.charAt(tkn.length - 1);
-      const str = ch === '"' && chEnd === '"' ? tkn.slice(1, -1).trim() : tkn.trim();
+      const str = ch === '"' && chEnd === '"' ? tkn.slice(1, -1) : tkn;
       stack.push(Object.freeze({ value: str, unit: null, dtype: dt.STRING }));
 
     } else if (/^``/.test(tkn)) {
-      stack.push(DataFrame.dataFrameFromCSV(tablessTrim(tkn.slice(2, -2)), {}));
+      stack.push(DataFrame.dataFrameFromTSV(tablessTrim(tkn.slice(2, -2))));
 
     } else if (ch === '`') {
       // A rich text literal
@@ -10874,12 +14134,14 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "×":
         case "·":
         case "*":
+        case "∗":
         case "∘":
         case "⌧": {
           const oprnd2 = stack.pop();
           const o2 = oprnd2.dtype === dt.DATAFRAME ? clone(oprnd2) : oprnd2;
           const o1 = stack.pop();
-          if (tkn === "*" && o1.dtype === dt.STRING && o1.dtype === dt.STRING) {
+          if ((tkn === "*" || tkn === "∗")
+               && o1.dtype === dt.STRING && o1.dtype === dt.STRING) {
             // Julia's string concatenation operator
             const str1 = stringFromOperand(o1, decimalFormat);
             const str2 = stringFromOperand(o2, decimalFormat);
@@ -10998,10 +14260,14 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             o3.unit = null;
             o3.dtype = dt.STRING;
           } else if ((o1.dtype & dt.DATAFRAME) && isVector(o2) && tkn !== "vcat") {
-            o3 = DataFrame.append(o1, o2, vars, unitAware);
+            o3 = DataFrame.append(o1, o2, vars.format.value, unitAware);
+            if (o3.dtype === dt.ERROR) { return o3 }
+          } else if (((o1.dtype & dt.DATAFRAME) && shape2 === "scalar") ||
+                     (shape1 === "scalar" && (o2.dtype & dt.DATAFRAME))) {
+            o3 = DataFrame.append(o1, o2, vars.format.value, unitAware);
             if (o3.dtype === dt.ERROR) { return o3 }
           } else if ((o1.dtype & dt.MAP) || (o2.dtype & dt.MAP)) {
-            o3 = map.append(o1, o2, shape1, shape2, vars);
+            o3 = map.append(o1, o2, shape1, shape2);
             if (o3.dtype === dt.ERROR) { return o3 }
           } else {
             if (unitAware) {
@@ -11012,6 +14278,10 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             o3.value = Operators.binary[shape1][shape2][opName](o1.value, o2.value);
             if (o3.value.dtype) { return o3.value } // Error
             o3.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn);
+            if (o1.dtype === dt.COLUMNVECTOR && shape2 === "scalar") {
+              // Appending an element to an empty column vector
+              o3.dtype = o1.dtype + o2.dtype;
+            }
             o3.unit = o1.unit;
           }
           stack.push(Object.freeze(o3));
@@ -11071,7 +14341,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           // Accessor of a object's property in dot notation
           const o2 = stack.pop();
           const o1 = stack.pop();
-          const property = propertyFromDotAccessor(o1, o2, vars, unitAware);
+          const property = propertyFromDotAccessor(o1, o2, unitAware);
           if (property.dtype === dt.ERROR) { return property }
           stack.push(Object.freeze(property));
           break
@@ -11086,7 +14356,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const o1 = stack.pop();
           let property;
           if (o1.dtype & dt.DATAFRAME) {
-            property = DataFrame.range(o1, args, vars, unitAware);
+            property = DataFrame.range(o1, args, unitAware);
 
           } else if (o1.dtype & dt.MAP) {
             property = map.range(o1, args, unitAware);
@@ -11115,7 +14385,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
               ? null
               : { value: Rnl.zero, unit: allZeros, dtype: dt.RATIONAL };
             property = (o1.dtype & dt.DATAFRAME)
-              ? DataFrame.range(o1, rowIndex, colIndex, vars, unitAware)
+              ? DataFrame.range(o1, rowIndex, colIndex, unitAware)
               : Matrix.submatrix(o1, rowIndex, colIndex);
           }
           if (property.dtype === dt.ERROR) { return property }
@@ -11135,7 +14405,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           range.dtype = dt.RANGE;
           const step = o1.dtype !== dt.RATIONAL
             ? o1.value[2]
-            : end.value === "∞" || Rnl.lessThan(o1.value, end.value)
+            : end.value === "∞" || Rnl.lessThanOrEqualTo(o1.value, end.value)
             ? Rnl.one
             : Rnl.negate(Rnl.one);
           range.value = o1.dtype === dt.RATIONAL
@@ -11212,7 +14482,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const numCols = Number(tokens[i + 2]);
           i += 2;
 
-          if (stack[stack.length - 1].dtype === dt.RANGE) {
+          if (stack.length > 0 && stack[stack.length - 1].dtype === dt.RANGE) {
             // Input was [start:step:end...]
             stack.push(Matrix.operandFromRange(stack.pop().value));
           } else {
@@ -11221,9 +14491,33 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
+        case "tuple": {
+          const numItems = Number(tokens[i + 1]);
+          i += 1;
+          const oprnd = { value: [], unit: null, dtype: dt.TUPLE };
+          for (let j = 0; j < numItems; j++) {
+            oprnd.value.unshift(stack.pop());
+          }
+          stack.push(oprnd);
+          break
+        }
+
         case "startSvg":
           stack.push({ value: draw.startSvg(), unit: null, dtype: dt.DRAWING });
           break
+
+        case "beamDiagram": {
+          const numArgs = Number(tokens[i + 1]);
+          i += 1;
+          let combinations = "service";
+          if (numArgs === 2)  { combinations = stack.pop().value; }
+          const beam = stack.pop();
+          if (!(beam.dtype & dt.MAP)) { return errorOprnd("BAD_TYPE", "beamDiagram") }
+          const diagram = beamDiagram(beam.value.data, combinations);
+          if (diagram.dtype && diagram.dtype === dt.ERROR) { return diagram }
+          stack.push({ value: diagram, resultdisplay: diagram, unit: null, dtype: dt.DRAWING });
+          break
+        }
 
         case "abs":
         case "cos":
@@ -11350,6 +14644,40 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
+        case "number": {
+          const arg = stack.pop();
+          if (!(arg.dtype & dt.STRING)) { return errorOprnd("STRING") }
+          const output = Object.create(null);
+          output.unit = { expos: allZeros };
+          output.value = isVector(arg)
+            ? arg.value.map(e => Rnl.fromString(e))
+            : isMatrix(arg)
+            ? arg.value.map(row => row.map(e => Rnl.fromString(e)))
+            : Rnl.fromString(arg.value);
+          output.dtype = arg.dtype - dt.STRING + dt.RATIONAL;
+          stack.push(Object.freeze(output));
+          break
+        }
+
+        case "findfirst": {
+          const args = [];
+          args.push(stack.pop());
+          args.unshift(stack.pop());
+          if (!((args[1].dtype & dt.STRING) && (args[1].dtype & dt.STRING))) {
+            return errorOprnd("STRING")
+          }
+          const output = Object.create(null);
+          output.unit = { expos: allZeros };
+          output.value = isVector(args[1])
+            ? args[1].value.map(e => findfirst(args[0], e))
+            : isMatrix(args[1])
+            ? args[1].value.map(row => row.map(e => findfirst(args[0], e)))
+            : findfirst(args[0], args[1]);
+          output.dtype = args[1].dtype - dt.STRING + dt.RATIONAL;
+          stack.push(Object.freeze(output));
+          break
+        }
+
         case "roundn":
         case "string": {
           // Round a numeric value.
@@ -11357,7 +14685,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const num = stack.pop();
           if (!(num.dtype & dt.RATIONAL)) { return errorOprnd("") }
           if (!(spec.dtype & dt.STRING)) { return errorOprnd("") }
-          if (!/(?:f-?|r)\d+/.test(spec.value)) { return errorOprnd("") }
+          if (!/(?:[fr])\d+/.test(spec.value)) { return errorOprnd("") }
           let funcName = "";
           const output = Object.create(null);
           if (tkn === "string") {
@@ -11417,7 +14745,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           }
 
           if (tkn === "dataframe") {
-            const df = DataFrame.dataFrameFromVectors(args, vars);
+            const df = DataFrame.dataFrameFromVectors(args, vars.format.value);
             if (df.dtype && df.dtype === dt.ERROR) { return df }
             stack.push(df);
             break
@@ -11614,10 +14942,10 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "!in":
         case "∋":
         case "∌":
-        case "⊆":
-        case "⊈":
-        case "⊇":
-        case "⊉": {
+        case "⊂":
+        case "⊄":
+        case "⊃":
+        case "⊅": {
           const o2 = stack.pop();
           const o1 = stack.pop();
           if (unitAware &&
@@ -11729,13 +15057,13 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           if (!unitAware) {
             output.value = o1.value;
             if (o1.dtype & dt.MAP) {
-              output.unit = unitFromUnitName(unitName, vars);
+              output.unit = unitFromUnitName(unitName);
             } else {
               output.unit.name = unitName;
             }
           } else {
             // Convert the magnitude to base units.
-            const unit = unitFromUnitName(unitName, vars);
+            const unit = unitFromUnitName(unitName);
             if (unit.dtype && unit.dtype === dt.ERROR) { return unit }
             if (isMatrix(o1)) {
               output.unit.expos = o1.unit.expos.map((e, j) => e + unit.expos[j]);
@@ -11945,7 +15273,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
           if (statement.name) {
             statement.resultdisplay = isUnitAware ? "!!" : "!";
             const [stmt, _] = conditionResult(statement, result, isUnitAware);
-            insertOneHurmetVar(vars, stmt, decimalFormat);
+            insertOneHurmetVar(vars, stmt, null, decimalFormat);
           }
         }
         break
@@ -12014,25 +15342,30 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
       }
 
       case "for": {
-        const ctrl = {
-          type: "for",
-          condition: true,
-          startStatement: i,
-          endOfBlock: statement.endOfBlock
-        };
-        const tokens = statement.rpn.split("\u00A0");
-        ctrl.dummyVariable = tokens.shift().slice(1);
-        const iterable = evalRpn(tokens.join("\u00A0"), vars, decimalFormat, isUnitAware, lib);
-        ctrl.index = (iterable.dtype & dt.RANGE) ? iterable.value[0] : Rnl.fromNumber(0);
-        ctrl.step = (iterable.dtype & dt.RANGE) ? iterable.value[1] : Rnl.fromNumber(0);
-        ctrl.endIndex = (iterable.dtype & dt.RANGE)
-          ? iterable.value[2]
-          : Rnl.fromNumber(iterable.value.length - 1);
-        const [oprnd, nextIndex] = elementFromIterable(iterable, ctrl.index, ctrl.step);
-        ctrl.nextIndex = nextIndex;
-        ctrl.iterable = iterable;
-        control.push(ctrl);
-        vars[ctrl.dummyVariable] = oprnd;
+        if (control[level].condition) {
+          const ctrl = {
+            type: "for",
+            condition: true,
+            startStatement: i,
+            endOfBlock: statement.endOfBlock
+          };
+          const tokens = statement.rpn.split("\u00A0");
+          ctrl.dummyVariable = tokens.shift().slice(1);
+          const iterable = evalRpn(tokens.join("\u00A0"), vars,
+                                   decimalFormat, isUnitAware, lib);
+          ctrl.index = (iterable.dtype & dt.RANGE) ? iterable.value[0] : Rnl.fromNumber(0);
+          ctrl.step = (iterable.dtype & dt.RANGE) ? iterable.value[1] : Rnl.fromNumber(0);
+          ctrl.endIndex = (iterable.dtype & dt.RANGE)
+            ? iterable.value[2]
+            : Rnl.fromNumber(iterable.value.length - 1);
+          const [oprnd, nextIndex] = elementFromIterable(iterable, ctrl.index, ctrl.step);
+          ctrl.nextIndex = nextIndex;
+          ctrl.iterable = iterable;
+          control.push(ctrl);
+          vars[ctrl.dummyVariable] = oprnd;
+        } else {
+          i = statement.endOfBlock;
+        }
         break
       }
 
@@ -12110,7 +15443,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
             if (result.dtype === dt.ERROR) { return result }
             const msg = result.dtype === dt.RATIONAL
               ? Rnl.toNumber(result.value)
-              : result.dtype === dt.STRING
+              : result.dtype === dt.STRING || result.dtype === dt.BOOLEAN
               ? result.value
               : isVector(result) && (result.dtype & dt.RATIONAL)
               ? result.value.map(e => Rnl.toNumber(e))
@@ -12140,9 +15473,10 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
 
 const errorResult = (stmt, result) => {
   stmt.value = null;
-  stmt.resultDisplay = "\\textcolor{firebrick}{\\text{" + result.value + "}}";
+  stmt.resultDisplay = "\\textcolor{firebrick}{\\text{" + result.value.replace(/%/g, "\\%") + "}}";
   stmt.altResultDisplay = result.value;
   stmt.error = true;
+  stmt.dtype = dt.ERROR;
   if (stmt.resulttemplate.indexOf("!") > -1) {
     stmt.tex += "= " + stmt.resultDisplay;
     stmt.alt += result.value;
@@ -12169,10 +15503,11 @@ const conditionResult = (stmt, oprnd, unitAware) => {
 
   // Check unit compatibility.
   if (result.dtype !== dt.ERROR && unitAware && stmt.resultdisplay.indexOf("!") === -1 &&
-    (stmt.expos || (result.unit && result.unit.expos && Array.isArray(result.unit.expos)))) {
-    const expos = (stmt.expos) ? stmt.expos : allZeros;
+    (stmt.unit && stmt.unit.expos ||
+      (result.unit && result.unit.expos && Array.isArray(result.unit.expos)))) {
+    const expos = (stmt.unit && stmt.unit.expos) ? stmt.unit.expos : allZeros;
     if (!unitsAreCompatible(result.unit.expos, expos)) {
-      const message = stmt.expos ? "UNIT_RES" : "UNIT_MISS";
+      const message = stmt.unit.expos ? "UNIT_RES" : "UNIT_MISS";
       result = errorOprnd(message);
     }
   }
@@ -12205,17 +15540,18 @@ const conditionResult = (stmt, oprnd, unitAware) => {
   stmt.dtype = result.dtype;
 
   // If unit-aware, convert result to desired result units.
-  const unitInResultSpec = (stmt.factor && (stmt.factor !== 1 || stmt.gauge));
+  const unitInResultSpec = (stmt.unit && stmt.unit.factor &&
+      (!Rnl.areEqual(stmt.unit.factor, Rnl.one) || stmt.unit.gauge));
   if ((result.dtype & dt.DATAFRAME) ||
       (typeof stmt.resultdisplay === "string" && stmt.resultdisplay.indexOf("!") > -1)) {
     stmt.unit = result.unit;
   } else if (unitAware && (result.dtype & dt.RATIONAL)) {
     if (!unitInResultSpec & unitsAreCompatible(result.unit.expos, allZeros)) {
-      stmt.factor = Rnl.one; stmt.gauge = Rnl.zero; stmt.expos = allZeros;
+      stmt.unit = { factor: Rnl.one, gauge: Rnl.zero, expos: allZeros };
     }
     if (result.dtype & dt.MAP) {
       result.value.data = {
-        plain: map.convertFromBaseUnits(result.value.data, stmt.gauge, stmt.factor),
+        plain: map.convertFromBaseUnits(result.value.data, stmt.unit.gauge, stmt.unit.factor),
         inBaseUnits: result.value.data
       };
     } else {
@@ -12223,10 +15559,10 @@ const conditionResult = (stmt, oprnd, unitAware) => {
         plain: (isMatrix(result))
           ? Matrix.convertFromBaseUnits(
             { value: result.value, dtype: result.dtype },
-            stmt.gauge,
-            stmt.factor
+            stmt.unit.gauge,
+            stmt.unit.factor
             )
-          : Rnl.subtract(Rnl.divide(result.value, stmt.factor), stmt.gauge),
+          : Rnl.subtract(Rnl.divide(result.value, stmt.unit.factor), stmt.unit.gauge),
         inBaseUnits: result.value
       };
     }
@@ -12237,7 +15573,8 @@ const conditionResult = (stmt, oprnd, unitAware) => {
     if (result.dtype & dt.MAP) {
       const data = {
         plain: result.value.data,
-        inBaseUnits: map.convertToBaseUnits(result.value.data, stmt.gauge, stmt.factor)
+        inBaseUnits: map.convertToBaseUnits(result.value.data,
+                                            stmt.unit.gauge, stmt.unit.factor)
       };
       result.value.data = data;
     } else {
@@ -12246,19 +15583,21 @@ const conditionResult = (stmt, oprnd, unitAware) => {
         inBaseUnits: (isMatrix(result))
           ? Matrix.convertToBaseUnits(
             { value: result.value, dtype: result.dtype },
-            stmt.gauge,
-            stmt.factor
+            stmt.unit.gauge,
+            stmt.unit.factor
             )
-          : Rnl.multiply(Rnl.add(result.value, stmt.gauge), stmt.factor)
+          : Rnl.multiply(Rnl.add(result.value, stmt.unit.gauge), stmt.unit.factor)
       };
     }
     stmt.dtype += dt.QUANTITY;
 
   } else if ((result.dtype & dt.RATIONAL) || (result.dtype & dt.COMPLEX) ) {
     // A numeric result with no unit specified.
-    stmt.expos = allZeros;
+    stmt.unit = { expos: allZeros };
   }
-  if (result.value)  { stmt.value = result.value; }
+  if (Object.prototype.hasOwnProperty.call(result, "value")) {
+    stmt.value = result.value;
+  }
   return [stmt, result]
 };
 
@@ -12267,7 +15606,7 @@ const evaluateDrawing = (stmt, vars, decimalFormat = "1,000,000.") => {
   const udf = stmt.value;
   const args = [];
   for (let i = 0; i < udf.parameters.length; i++) {
-    const argName = udf.parameters[i];
+    const argName = udf.parameters[i].name;
     args.push(evalRpn("¿" + argName, vars, decimalFormat, false, {}));
   }
   const funcResult = evalCustomFunction(udf, args, decimalFormat, false, {});
@@ -12307,13 +15646,14 @@ const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
     let result;
     [stmt, result] = conditionResult(stmt, oprnd, isUnitAware);
     if (stmt.error) { return stmt }
-    stmt = formatResult(stmt, result, formatSpec, decimalFormat, isUnitAware);
+    const assert = vars.assert ? vars.assert : null;
+    stmt = formatResult(stmt, result, formatSpec, decimalFormat, assert, isUnitAware);
   }
   return stmt
 };
 
-const numberRegEx$3 = new RegExp(Rnl.numberPattern);
-const unitRegEx$1 = /('[^']+'|[°ΩÅK])$/;
+const numberRegEx$4 = new RegExp(Rnl.numberPattern);
+const matrixRegEx = /^[([] *(?:(?:-?[0-9.]+|"[^"]+"|true|false) *[,;\t]? *)+[)\]]/;
 /* eslint-disable max-len */
 
 const numStr = "(-?(?:0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?)))";
@@ -12328,19 +15668,47 @@ const complexRegEx = new RegExp("^" + numStr + "(?: *([+-]) *" + nonNegNumStr + 
 //    [4] theta, the argument (phase angle ) of an r∠θ expression
 //    [5] °, optional trailing degree sign in an r∠θ expression
 
+const unitFromString = str => {
+  if (str.length === 0) { return ["", ""] }
+  const unitName = str.replace(/'/g, "").trim();
+  const unit = unitFromUnitName(unitName);
+  const unitDisplay = (unit.dtype && unit.dtype === dt.ERROR)
+    ? ""
+    : unitTeXFromString(unitName);
+  return [unit, unitDisplay]
+};
+
+const literalWithUnit = (oprnd, tex, unitStr) => {
+  let unit = (oprnd.dtype & dt.RATIONAL) ? { expos: allZeros } : null;
+  let unitDisplay = "";
+  let value = oprnd.value;
+  if (unitStr.length > 0) {
+    [unit, unitDisplay] = unitFromString(unitStr);
+    if (unit.dtype && unit.dtype === dt.ERROR) {
+      return [0, null, dt.ERROR, ""]
+    }
+    value = oprnd.dtype === dt.RATIONAL
+      ? {
+        plain: oprnd.value,
+        inBaseUnits: Rnl.multiply(Rnl.add(oprnd.value, unit.gauge), unit.factor)
+      }
+      : {
+        plain: oprnd.value,
+        inBaseUnits: Matrix.convertToBaseUnits(oprnd, unit.gauge, unit.factor)
+      };
+  }
+  let dtype = oprnd.dtype;
+  if (unitDisplay.length > 0) {
+    dtype += dt.QUANTITY;
+    return [value, unit, dtype, tex + "\\," + unitDisplay]
+  } else {
+    return [value, unit, dtype, tex]
+  }
+};
+
 const valueFromLiteral = (str, name, decimalFormat) => {
   // Read a literal string and return a value
   // The return should take the form: [value, unit, dtype, resultDisplay]
-
-  // Start by checking for a unit
-  let unitName = "";
-  let unitDisplay = "";
-  const unitMatch = unitRegEx$1.exec(str);
-  if (unitMatch) {
-    unitName = unitMatch[0].replace(/'/g, "").trim();
-    str = str.slice(0, -unitMatch[0].length).trim();
-    unitDisplay = unitTeXFromString(unitName);
-  }
 
   if (/^[({[].* to /.test(str)) {
     // str defines a quantity distribution, (a to b). That is handled by calculation.js.
@@ -12356,39 +15724,43 @@ const valueFromLiteral = (str, name, decimalFormat) => {
       return parseFormatSpec(str.slice(1, -1).trim())
     } else {
       const tex = parse(str, decimalFormat);
-      return [str, undefined, dt.STRING, tex]
+      return [str.slice(1, -1), undefined, dt.STRING, tex]
     }
 
-  } else if (/^[([]/.test(str)) {
+  } else if (matrixRegEx.test(str)) {
     // We're processing a matrix
-    const [tex, rpn] = parse(str, decimalFormat, true);
+    const matrixStr = matrixRegEx.exec(str)[0];
+    const [tex, rpn, _] = parse(matrixStr, decimalFormat, true);
     const oprnd = evalRpn(rpn, {}, decimalFormat, false, {});
-    let unit = (oprnd.dtype & dt.RATIONAL) ? allZeros : null;
-    let dtype = oprnd.dtype;
-    if (unitName) {
-      unit = unitName;
-      dtype += dt.QUANTITY;
-      return [oprnd.value, unit, dtype, tex + "\\," + unitDisplay]
-    } else {
-      return [oprnd.value, unit, dtype, tex]
-    }
+    const unitStr = str.slice(matrixStr.length).trim();
+    return literalWithUnit(oprnd, tex, unitStr)
 
   } else if (/^``/.test(str)) {
     // A TSV between double back ticks.
     // Read the TSV into a data frame.
-    str = tablessTrim(str.slice(2, -2));
-    const dataStructure = DataFrame.dataFrameFromTSV(str, {});
-    if (dataStructure.dtype === dt.DATAFRAME) {
-      return [dataStructure.value, dataStructure.unit, dt.DATAFRAME,
-        DataFrame.display(dataStructure.value, "h3", decimalFormat)]
+    const pos = str.indexOf("``", 2);
+    const tsv = tablessTrim(str.slice(2, pos));
+    const oprnd = DataFrame.dataFrameFromTSV(tsv);
+    if (oprnd.dtype === dt.DATAFRAME) {
+      return [oprnd.value, oprnd.unit, dt.DATAFRAME,
+        DataFrame.display(oprnd.value, "h3", decimalFormat)]
     } else {
       // It's a Hurmet Map
-      if (unitName) {
-        dataStructure.unit = unitName;
-        dataStructure.dtype = dt.MAP + dt.RATIONAL + dt.QUANTITY;
+      const unitStr = str.slice(pos + 2).trim();
+      let unit;
+      let unitDisplay = "";
+      if (unitStr.length > 0) {
+        [unit, unitDisplay] = unitFromString(unitStr);
+        if (unit.dtype && unit.dtype === dt.ERROR) { return [0, null, dt.ERROR, ""] }
+        oprnd.unit = unit;
+        oprnd.dtype = dt.MAP + dt.RATIONAL + dt.QUANTITY;
+        oprnd.value.data = {
+          plain: oprnd.value.data,
+          inBaseUnits: map.convertToBaseUnits(oprnd.value.data, unit.gauge, unit.factor)
+        };
       }
-      return [dataStructure.value, dataStructure.unit, dataStructure.dtype,
-        DataFrame.display(dataStructure.value, "h3", decimalFormat) + "\\;" + unitDisplay]
+      return [oprnd.value, unit, oprnd.dtype,
+        DataFrame.display(oprnd.value, "h3", decimalFormat) + "\\;" + unitDisplay]
     }
 
   } else if (complexRegEx.test(str)) {
@@ -12412,91 +15784,33 @@ const valueFromLiteral = (str, name, decimalFormat) => {
     }
     return [[realPart, imPart], allZeros, dt.COMPLEX, resultDisplay]
 
-  } else if (str.match(numberRegEx$3)) {
-    // str is a number.
-    const resultDisplay = parse(str, decimalFormat);
-    if (unitName) {
-      return [Rnl.fromString(str), unitName, dt.RATIONAL + dt.QUANTITY,
-        resultDisplay + "\\;" + unitDisplay]
-    } else {
-      return [Rnl.fromString(str), { expos: allZeros }, dt.RATIONAL, resultDisplay]
-    }
-
   } else {
-    return [0, null, dt.ERROR, ""]
+    const match = numberRegEx$4.exec(str);
+    if (match) {
+      // str begins with a number.
+      const numStr = match[0];
+      const unitStr = str.slice(numStr.length).trim();
+      const [tex, rpn, _] = parse(numStr, decimalFormat, true);
+      const oprnd = evalRpn(rpn, {}, decimalFormat, false, {});
+      return literalWithUnit(oprnd, tex, unitStr)
 
-  }
-};
-
-/*  This module, like prepareStatement.js, is called only when
- *  (1) an author submits a Hurmet calculation dialog box, or
- *  (2) when a new document is opened, or (3) when recalculate-all is called.
- *  Here we process literal values of assignment statements.
- */
-
-const improveQuantities = (attrs, vars) => {
-  if (attrs.name && attrs.value && (attrs.dtype & dt.QUANTITY)) {
-    // Assignment of a quantity. Get it in base units
-    const unit = (attrs.unit === undefined)
-      ? {
-        name: "",
-        factor: Rnl.one,
-        gauge: Rnl.zero,
-        log: "",
-        expos: allZeros
-      }
-      : typeof attrs.unit === "string"
-      ? unitFromUnitName(attrs.unit, vars)
-      : attrs.unit; // unit from a MAP is already expanded.
-
-    if (unit.dtype && unit.dtype === dt.ERROR) {
-      attrs.tex += "\u00a0\\color{firebrick}{\\text{" + unit.value + "}}";
-      attrs.alt += unit.value;
-      return attrs
-    }
-
-    attrs.expos = unit.expos;
-    if (Rnl.isRational(attrs.value)) {
-      attrs.value = {
-        plain: attrs.value,
-        inBaseUnits: Rnl.multiply(Rnl.add(attrs.value, unit.gauge), unit.factor)
-      };
-    } else if (isMatrix(attrs)) {
-      attrs.value = {
-        plain: attrs.value,
-        inBaseUnits: Matrix.convertToBaseUnits(attrs, unit.gauge, unit.factor)
-      };
-    } else if (attrs.dtype & dt.MAP) {
-      attrs.value.data = {
-        plain: attrs.value.data,
-        inBaseUnits: map.convertToBaseUnits(attrs.value.data, unit.gauge, unit.factor)
-      };
+    } else {
+      // TODO: Preceding currency symbol, e.g., $25.20
+      return [0, null, dt.ERROR, ""]
     }
   }
-  if (attrs.rpn && !attrs.value) {
-    if (attrs.unit) {
-      const unit = (attrs.unit)
-        ? unitFromUnitName(attrs.unit, vars)
-        : { factor: 1, gauge: 0, expos: allZeros };
-      // We save factor and gauge with the cell attrs so that the result of
-      // a later calculation can be converted into the desired display units.
-      attrs.factor = unit.factor;
-      attrs.gauge = unit.gauge;
-      attrs.expos = unit.expos;
-    }
-  }
-
 };
 
 const isValidIdentifier$1 = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/;
-const keywordRegEx = /^(if|elseif|else|return|throw|while|for|break|print|end)\b/;
+const keywordRegEx = /^(if|elseif|else|return|throw|while|for|break|print|end)(\u2002|\b)/;
 const drawCommandRegEx = /^(title|frame|view|axes|grid|stroke|strokewidth|strokedasharray|fill|fontsize|fontweight|fontstyle|fontfamily|marker|line|path|plot|curve|rect|circle|ellipse|arc|text|dot|leader|dimension)\b/;
 const leadingSpaceRegEx$2 = /^[\t ]+/;
-const oneLinerRegEx = /^(( *)if [^\n"`]+) ((?:return|throw|print|break)\b(?:[^\n]+)?)(?: end)? *\n/gm;
+const oneLinerRegEx = /^( *)if ([^\n`]+) +(return|throw|print|break)\b([^\n]+)?(?: end)? *\n/gm;
 
 // If you change functionRegEx, then also change it in mathprompt.js.
 // It isn't called from there in order to avoid duplicating Hurmet code inside ProseMirror.js.
 const functionRegEx = /^function (?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*\(/;
+const moduleRegEx = /^module ([A-Za-z][A-Za-z0-9]*)/;
 const drawRegEx = /^draw\(/;
 const startSvgRegEx = /^startSvg\(\)/;
 const lexRegEx = /"[^"]*"|``.*|`[^`]*`|'[^']*'|#|[^"`'#]+/g;
@@ -12532,8 +15846,8 @@ const scanModule = (str, decimalFormat) => {
   // Assemble the lines into functions and assign each function to parent.
   const parent = Object.create(null);
 
-  // Expand one-liners into three lines each.
-  str = str.replace(oneLinerRegEx, "$1\n$2    $3\n$2end\n");
+  // Expand one-liners into if ... end blocks.
+  str = str.replace(oneLinerRegEx, "$1if\u2002$2\n$1    $3\u2002$4\n$1end\n");
 
   // Statements end at a newline.
   const lines = str.split(/\r?\n/g);
@@ -12562,7 +15876,7 @@ const scanModule = (str, decimalFormat) => {
 
 const handleTSV = (expression, lines, startLineNum) => {
   for (let i = startLineNum + 1; i < lines.length; i++) {
-    const line = lines[i].trim();
+    const line = tablessTrim(lines[i]);
     if (line.length === 0) { continue }
     expression += "\n" + line;
     if (line.slice(-2) === "``") { return [expression, i] }
@@ -12609,7 +15923,9 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
   let name = "";
   let isStatement = false;
 
+  let j = startLineNum;
   for (let i = startLineNum + 1; i < lines.length; i++) {
+    j += 1;
     let line = stripComment(lines[i]);
     if (line.length === 0) { continue }
 
@@ -12634,9 +15950,11 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
       continue
     }
 
+    let isFromOneLiner = false;
     const keyword = keywordRegEx.exec(line);
     if (keyword) {
-      name = keyword[0];
+      name = keyword[1];
+      if (keyword[2]) { isFromOneLiner = true; }
       expression = line.slice(name.length).trim();
       if (expression.length > 0 && /^``/.test(expression)) {
         [expression, i] = handleTSV(expression, lines, i);
@@ -12658,20 +15976,21 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
         isStatement = true;
       } else {
         // TODO: We shouldn't get here. Write an error.
-        return [errorOprnd("FUNC_LINE", functionName + ", line " + (i + 1)), i]
+        return [errorOprnd("FUNC_LINE", functionName + ", line " + (j + 1) + "\n" + line), i]
       }
     }
-
+    if (isFromOneLiner) { j -= 1; }
     let rpn = "";
+    let _;
     if (expression) {
-      [, rpn] = parse(expression, decimalFormat, true);
+      [, rpn, _] = parse(expression, decimalFormat, true);
       if (name === "for") { rpn = rpn.replace(/\u00a0in\u00a0/, "\u00a0"); }
     }
     const stype = isStatement ? "statement" : name;
     if (isStatement && /[,;]/.test(name)) {
       name = name.split(/[,;]/).map(e => e.trim());
     }
-    funcObj.statements.push({ name: name, rpn: rpn, stype: stype });
+    funcObj.statements.push({ name, rpn, stype });
     if (stype === "if" || stype === "while" || stype === "for") {
       stackOfCtrls.push({ type: stype, statementNum: funcObj.statements.length - 1 });
     } else if (stype === "end") {
@@ -12733,11 +16052,10 @@ const scanAssignment = (lines, decimalFormat, iStart) => {
   const trailStr = str.slice(posEquals + 1).trim();
   const [value, unit, dtype, resultDisplay] = valueFromLiteral(trailStr, name, decimalFormat);
   const stmt = { name, value, unit, dtype, resultDisplay };
-  improveQuantities(stmt, {});
   return [stmt, iEnd]
 };
 
-/*  prepareStatement.js
+/*  compile.js
  *
  *  This module is called when: (1) an author submits a Hurmet calculation dialog box, or
  *  (2) when a new document is opened, or (3) when recalculate-all is called.
@@ -12750,7 +16068,7 @@ const scanAssignment = (lines, decimalFormat, iStart) => {
  *  when an author changes an assigned value.  Later, calculation updates will not have to
  *  repeat the work done in this module, so updates will be faster.
  *
- *  Variable inputStr contains the string that an author wrote into the dialog box.
+ *  Variable inputStr contains the string that an author wrote into mathPrompt().
  *
  *  From that entry this module will:
  *    1. Determine the name of the cell, as in "x" from "x = 12"
@@ -12758,21 +16076,21 @@ const scanAssignment = (lines, decimalFormat, iStart) => {
  *    3. If the input asks for a calculation:
  *       a. Parse the expression into an echo string (in TeX) with placeholders that will be
  *          filled in later with values when the calculation is done.
- *       b. Parse the expression into RPN (postfix) to be passed later to evaluate().
+ *       b. Compile the expression into RPN (postfix) to be passed later to evaluateRPN().
  *       c. Process the unit of measure, if any, of the result. Save it for later calculation.
- *    4. If an assigned value is static, not calculated, find its value.
- *    5. If a unit has been defined in a staic assignment, find the value in Hurmet base units.
- *    6. Append all the display strings together.
- *    7. Return the result. Hurmet will attach it to ProseMirror "attrs" of that node.
+ *    4. If an assigned value is static, not dynamically calculated, find its value.
+ *    5. Append all the display strings together.
+ *    6. Return the result. Hurmet will attach it to ProseMirror "attrs" of that node.
  */
 
 const containsOperator = /[+\-×·*∘⌧/^%‰&√!¡|‖&=<>≟≠≤≥∈∉⋐∧∨⊻¬]|\xa0(function|mod|\\atop|root|sum|abs|cos|sin|tan|acos|asin|atan|sec|csc|cot|asec|acsc|acot|exp|log|ln|log10|log2|cosh|sinh|tanh|sech|csch|coth|acosh|asinh|atanh|asech|acsch|acoth|gamma|Γ|lgamma|logΓ|lfact|cosd|sind|tand|acosd|asind|atand|secd|cscd|cotd|asecd|acscd|acotd|real|imag|angle|Char|round|sqrt|sign|\?{}|%|⎾⏋|⎿⏌|\[\]|\(\))\xa0/;
 const mustDoCalculation = /^(``.+``|[$$£¥\u20A0-\u20CF]?(\?{1,2}|@{1,2}|%{1,2}|!{1,2})[^=!(?@%!{})]*)$/;
-const assignDataFrameRegEx = /^[^=]+=\s*``/;
+const assignDataFrameRegEx = /^[^=]+=\s*``[\s\S]+`` *\n/;
 const currencyRegEx = /^[$£¥\u20A0-\u20CF]/;
 const isValidIdentifier$2 = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/;
 const matrixOfNames = /^[([](?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*[,;].+[)\]]$/;
 const isKeyWord = /^(π|true|false|root|if|else|elseif|and|or|otherwise|mod|for|while|break|return|throw)$/;
+const testRegEx$1 = /^(@{1,2})test /;
 
 const shortcut = (str, decimalFormat) => {
   // No calculation in str. Parse it just for presentation.
@@ -12780,7 +16098,7 @@ const shortcut = (str, decimalFormat) => {
   return { entry: str, tex, alt: str }
 };
 
-const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
+const compile = (inputStr, decimalFormat = "1,000,000.") => {
   let leadStr = "";
   let mainStr = "";
   let trailStr = "";
@@ -12793,6 +16111,7 @@ const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
   let expression = "";
   let echo = "";
   let rpn = "";
+  let dependencies = [];
   let resultDisplay = "";
   let name = "";
   let leadsWithCurrency = false;
@@ -12801,13 +16120,16 @@ const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
   let dtype;
   let str = "";
 
+  const isModule = moduleRegEx.test(inputStr);
   const isDraw = drawRegEx.test(inputStr);
-  if (functionRegEx.test(inputStr) || isDraw) {
+  if (functionRegEx.test(inputStr) || isDraw || isModule) {
     // This cell contains a custom function.
     let name = "";
     if (isDraw) {
       name = "draw";
-    } else {
+    } else if (isModule) {
+      name = moduleRegEx.exec(inputStr)[1].trim();
+    } else if (!isModule) {
       const posFn = inputStr.indexOf("function");
       const posParen = inputStr.indexOf("(");
       name = inputStr.slice(posFn + 8, posParen).trim();
@@ -12821,7 +16143,7 @@ const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
     const attrs = {
       entry: inputStr,
       name,
-      value: (isError) ? module.value : module.value[name],
+      value: (isError || isModule) ? module.value : module.value[name],
       // TODO: what to do with comma decimals?
       dtype: isError ? dt.ERROR : name === "draw" ? dt.DRAWING : dt.MODULE,
       error: isError
@@ -12830,6 +16152,14 @@ const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
   }
 
   str = inputStr;
+
+  if (testRegEx$1.test(inputStr)) {
+    str = str.replace(testRegEx$1, "").trim();
+    const [_, rpn, dependencies] = parse(str, decimalFormat, true);
+    const resulttemplate = testRegEx$1.exec(inputStr)[1];
+    return { entry: inputStr, template: "", rpn, dependencies, resulttemplate,
+      altresulttemplate: resulttemplate, resultdisplay: "" }
+  }
 
   const isDataFrameAssigment = assignDataFrameRegEx.test(str);
   const posOfLastEquals = isDataFrameAssigment
@@ -12922,7 +16252,7 @@ const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
   }
 
   if (expression.length > 0) {
-    // The author may want a calculaltion done on the expression.
+    // The author may want a calculation done on the expression.
     if (/^\s*fetch\(/.test(expression)) {
       // fetch() functions are handled in updateCalculations.js, not here.
       // It's easier from there to send a fetch() callback to a ProseMirror transaction.
@@ -12930,7 +16260,7 @@ const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
 
     } else {
       // Parse the expression. Stop short of doing the calculation.
-      [echo, rpn] = parse(expression, decimalFormat, true);
+      [echo, rpn, dependencies] = parse(expression, decimalFormat, true);
 
       // Shoulld we display an echo of the expression, with values shown for each variable?
       if (suppressResultDisplay || displayResultOnly || echo.indexOf("〖") === -1
@@ -13030,12 +16360,15 @@ const prepareStatement = (inputStr, decimalFormat = "1,000,000.") => {
     attrs.alt = altEqn;
   }
   if (rpn) { attrs.rpn = rpn; }
+  if (dependencies.length > 0) { attrs.dependencies = dependencies; }
   if (value) { attrs.value = value; }
   if (unit) {
-    if (Array.isArray(unit)) {
-      attrs.expos = unit;
+    if (rpn && !attrs.value) {
+      attrs.unit = typeof unit === "string"
+        ? unitFromUnitName(unit)
+        : { factor: 1, gauge: 0, expos: allZeros };
     } else {
-      attrs.unit = unit;
+      attrs.unit = Array.isArray(unit) ? { expos:  unit } : unit;
     }
   }
 
@@ -13051,8 +16384,7 @@ const calculate = (
   inDraftMode = false,
   decimalFormat = "1,000,000."
 ) => {
-  let attrs = prepareStatement(entry, decimalFormat);
-  improveQuantities(attrs, vars);
+  let attrs = compile(entry, decimalFormat);
   if (attrs.rpn) {
     attrs = evaluate(clone(attrs), vars, decimalFormat);
   } else if (attrs.dtype && attrs.dtype === dt.DRAWING) {
@@ -13227,7 +16559,7 @@ const protocolFromUrl = function(url) {
  * 1/6551.6em with our ptPerEm = 10):
  * http://www.ctex.org/documents/shredder/src/texbook.pdf#page=69
  */
-const round = function(n) {
+const round$1 = function(n) {
   return +n.toFixed(4);
 };
 
@@ -13238,7 +16570,7 @@ var utils = {
   getBaseElem,
   isCharacterBox,
   protocolFromUrl,
-  round
+  round: round$1
 };
 
 /**
@@ -20741,7 +24073,7 @@ const smallCaps = Object.freeze({
 // "mathord" and "textord" ParseNodes created in Parser.js from symbol Groups in
 // src/symbols.js.
 
-const numberRegEx$4 = /^\d(?:[\d,.]*\d)?$/;
+const numberRegEx$5 = /^\d(?:[\d,.]*\d)?$/;
 const latinRegEx = /[A-Ba-z]/;
 
 const italicNumber = (text, variant, tag) => {
@@ -20795,7 +24127,7 @@ defineFunctionBuilders({
     const variant = getVariant(group, style) || "normal";
 
     let node;
-    if (numberRegEx$4.test(group.text)) {
+    if (numberRegEx$5.test(group.text)) {
       const tag = group.mode === "text" ? "mtext" : "mn";
       if (variant === "italic" || variant === "bold-italic") {
         return italicNumber(text, variant, tag)
@@ -26245,6 +29577,22 @@ const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
   return attrs
 };
 
+const mustCalc = (attrs, hurmetVars, changedVars, isCalcAll) => {
+  if (isCalcAll) { return true }
+  if (attrs.rpn && !(attrs.name && hurmetVars[attrs.name] && hurmetVars[attrs.name].isFetch)) {
+    for (const varName of attrs.dependencies) {
+      if (changedVars.has(varName)) { return true }
+    }
+  }
+  if (attrs.dtype && attrs.dtype === dt.DRAWING && attrs.value.parameters &&
+      attrs.value.parameters.length > 0) {
+    for (const parameter of attrs.value.parameters) {
+      if (changedVars.has(parameter)) { return true }
+    }
+  }
+  return false
+};
+
 const workAsync = (
   view,
   calcNodeSchema,
@@ -26298,23 +29646,12 @@ const workAsync = (
       attrs.inDraftMode = inDraftMode;
       tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs));
       if (attrs.name) {
-        insertOneHurmetVar(hurmetVars, attrs, decimalFormat);
+        insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat);
       }
     }
     // There. Fetches are done and are loaded into the document.
     // Now proceed to the rest of the work.
-    try {
-      proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs,
-                        curPos, hurmetVars, tr);
-    } catch (err) {
-      console.log(err); // eslint-disable-line no-console
-      const pos = nodeAttrs.template.indexOf(nodeAttrs.resultdisplay);
-      nodeAttrs.tex = nodeAttrs.template.slice(0, pos) + "\\text{" + err + "}";
-      tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs));
-      tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)));
-      view.dispatch(tr);
-      view.focus();
-    }
+    proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr);
   });
 };
 
@@ -26332,6 +29669,8 @@ const proceedAfterFetch = (
   //   2. After we know that no fetch statements need be processed.
   const doc = view.state.doc;
   const decimalFormat = doc.attrs.decimalFormat;
+  // Create a set to track which variable have a changed value.
+  const changedVars = isCalcAll ? null : new Set();
 
   if (!isCalcAll && (nodeAttrs.name || nodeAttrs.rpn ||
     (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING))) {
@@ -26345,7 +29684,7 @@ const proceedAfterFetch = (
               hurmetVars[key] =  value;
             });
           } else {
-            insertOneHurmetVar(hurmetVars, attrs, decimalFormat);
+            insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat);
           }
         }
       }
@@ -26354,25 +29693,28 @@ const proceedAfterFetch = (
     // Hoist any user-defined functions located below the selection.
     doc.nodesBetween(curPos + 1, doc.content.size, function(node, pos) {
       if (node.type.name === "calculation" && node.attrs.dtype === dt.MODULE) {
-        insertOneHurmetVar(hurmetVars, node.attrs, decimalFormat);
+        insertOneHurmetVar(hurmetVars, node.attrs, null, decimalFormat);
       }
     });
 
     // Calculate the current node.
     if (!fetchRegEx.test(nodeAttrs.entry)) {
       // This is the typical calculation statement. We'll evalutate it.
-      let attrs = clone(nodeAttrs); // prepareStatement was already run in mathprompt.js.
+      let attrs = clone(nodeAttrs); // compile was already run in mathprompt.js.
       // The mathPrompt dialog box did not have accesss to hurmetVars, so it
       // did not do unit conversions on the result template. Do that first.
-      improveQuantities(attrs, hurmetVars);
-      // Now proceed to do the calculation of the cell.
-      if (attrs.rpn || (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING)) {
-        attrs = attrs.dtype && attrs.dtype === dt.DRAWING
-          ? evaluateDrawing(attrs, hurmetVars, decimalFormat)
-          : evaluate(attrs, hurmetVars, decimalFormat);
+      try {
+        // Proceed to do the calculation of the cell.
+        if (attrs.rpn || (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING)) {
+          attrs = attrs.dtype && attrs.dtype === dt.DRAWING
+            ? evaluateDrawing(attrs, hurmetVars, decimalFormat)
+            : evaluate(attrs, hurmetVars, decimalFormat);
+        }
+        if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat); }
+        attrs.displayMode = nodeAttrs.displayMode;
+      } catch (err) {
+        attrs.tex = "\\text{" + attrs.entry + " = " + err + "}";
       }
-      if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, decimalFormat); }
-      attrs.displayMode = nodeAttrs.displayMode;
       tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(attrs));
     }
   }
@@ -26381,27 +29723,33 @@ const proceedAfterFetch = (
   const startPos = isCalcAll ? 0 : (curPos + 1);
   doc.nodesBetween(startPos, doc.content.size, function(node, pos) {
     if (node.type.name === "calculation") {
-      const mustCalc = isCalcAll ? !fetchRegEx.test(node.attrs.entry) : !node.attrs.isFetch;
-      if (mustCalc) {
+      const notFetched = isCalcAll ? !fetchRegEx.test(node.attrs.entry) : !node.attrs.isFetch;
+      if (notFetched) {
         const entry = node.attrs.entry;
         let attrs = isCalcAll
-          ? prepareStatement(entry, decimalFormat)
+          ? compile(entry, decimalFormat)
           : clone(node.attrs);
         attrs.displayMode = node.attrs.displayMode;
         const mustRedraw = attrs.dtype && attrs.dtype === dt.DRAWING &&
           (attrs.rpn || (attrs.value.parameters.length > 0 || isCalcAll));
-        if (isCalcAll || attrs.rpn || mustRedraw || (attrs.name && !(hurmetVars[attrs.name] &&
-          hurmetVars[attrs.name].isFetch))) {
-          if (isCalcAll) { improveQuantities(attrs, hurmetVars); }
-          if (attrs.rpn || mustRedraw) {
-            attrs = attrs.rpn // attrs.dtype && attrs.dtype === dt.DRAWING
-              ? evaluate(attrs, hurmetVars, decimalFormat)
-              : evaluateDrawing(attrs, hurmetVars, decimalFormat);
+        if (mustCalc(attrs, hurmetVars, changedVars, isCalcAll)) {
+          try {
+            if (attrs.rpn || mustRedraw) {
+              attrs = attrs.rpn // attrs.dtype && attrs.dtype === dt.DRAWING
+                ? evaluate(attrs, hurmetVars, decimalFormat)
+                : evaluateDrawing(attrs, hurmetVars, decimalFormat);
+            }
+            if (attrs.name) {
+              insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat);
+            }
+          } catch (err) {
+            attrs.tex = "\\text{" + attrs.entry + " = " + err + "}";
           }
-          if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, decimalFormat); }
           if (isCalcAll || attrs.rpn || mustRedraw) {
             tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs));
           }
+        } else if (attrs.name && attrs.value) {
+          insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat);
         }
       } else if (node.attrs.name && !(isCalcAll && node.attrs.isFetch)) {
         if (node.attrs.name) {
@@ -26410,7 +29758,7 @@ const proceedAfterFetch = (
               hurmetVars[key] =  value;
             });
           } else {
-            insertOneHurmetVar(hurmetVars, node.attrs, decimalFormat);
+            insertOneHurmetVar(hurmetVars, node.attrs, null, decimalFormat);
           }
         }
       }
@@ -26478,11 +29826,11 @@ function updateCalculations(
           urls.push(urlFromEntry(entry));
           fetchPositions.push(pos);
         } else if (/^function /.test(entry)) {
-          node.attrs = prepareStatement(entry, doc.attrs.decimalFormat);
-          insertOneHurmetVar(hurmetVars, node.attrs, doc.attrs.decimalFormat);
+          node.attrs = compile(entry, doc.attrs.decimalFormat);
+          insertOneHurmetVar(hurmetVars, node.attrs, null, doc.attrs.decimalFormat);
         }
       } else if (node.attrs.isFetch || (node.attrs.dtype && node.attrs.dtype === dt.MODULE)) {
-        insertOneHurmetVar(hurmetVars, node.attrs, doc.attrs.decimalFormat);
+        insertOneHurmetVar(hurmetVars, node.attrs, null, doc.attrs.decimalFormat);
       }
     });
   }
@@ -26499,17 +29847,7 @@ function updateCalculations(
       state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1));
     }
     const tr = state.tr;
-    try {
-      proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr);
-    } catch (err) {
-      console.log(err); // eslint-disable-line no-console
-      const pos = nodeAttrs.template.indexOf(nodeAttrs.resultdisplay);
-      nodeAttrs.tex = nodeAttrs.template.slice(0, pos) + "\\text{" + err + "}";
-      tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs));
-      tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)));
-      view.dispatch(tr);
-      view.focus();
-    }
+    proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr);
   }
 }
 
@@ -26587,8 +29925,8 @@ async function updateCalcs(doc) {
       urls.push(helpers.urlFromEntry(entry));
       callers.push(node);
     } else if (/^function /.test(entry)) {
-      node.attrs = prepareStatement(entry, decimalFormat);
-      insertOneHurmetVar(hurmetVars, node.attrs, decimalFormat);
+      node.attrs = compile(entry, decimalFormat);
+      insertOneHurmetVar(hurmetVars, node.attrs, null, decimalFormat);
     }
   }
 
@@ -26607,7 +29945,7 @@ async function updateCalcs(doc) {
             hurmetVars[key] =  value;
           });
         } else {
-          insertOneHurmetVar(hurmetVars, node.attrs, decimalFormat);
+          insertOneHurmetVar(hurmetVars, node.attrs, null, decimalFormat);
         }
       }
     }
@@ -26619,16 +29957,15 @@ async function updateCalcs(doc) {
     for (const node of calcNodes) {
       if (!helpers.fetchRegEx.test(node.attrs.entry)) {
         const entry = node.attrs.entry;
-        let attrs = prepareStatement(entry, decimalFormat);
+        let attrs = compile(entry, decimalFormat);
         attrs.displayMode = node.attrs.displayMode;
         const mustDraw = attrs.dtype && attrs.dtype === dt.DRAWING;
-        improveQuantities(attrs, hurmetVars);
         if (attrs.rpn || mustDraw) {
           attrs = attrs.rpn
             ? evaluate(attrs, hurmetVars, decimalFormat)
             : evaluateDrawing(attrs, hurmetVars, decimalFormat);
         }
-        if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, decimalFormat); }
+        if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat); }
         // When we modify a node, we are also mutating the container doc.
         node.attrs = attrs;
       }
@@ -26881,7 +30218,9 @@ const nodes = {
   centered(node) {
     return htmlTag("div", ast2html(node.content), { class: 'centered' }) + "\n"
   },
-  header(node)   { return htmlTag("header", ast2html(node.content)) + "\n" },
+  header(node)   {
+    return htmlTag("header", ast2html(node.content)) + "\n"
+  },
   toc(node)      { return writeTOC(node) },
   comment(node)  {
     return htmlTag("aside", ast2html(node.content), { class: 'comment' }) + "\n"
@@ -26952,13 +30291,32 @@ const ast2html = ast => {
   return html
 };
 
-async function md2html(md, inHtml = false) {
+const wrapWithHead = (html, title, attrs) => {
+  title = title ? title : "Hurmet doc";
+  const fontClass = attrs && attrs.fontSize
+    ? { "10": "long-primer", "12": "pica" }[attrs.fontSize]
+    : "long-primer";
+  const head = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${title}</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<article class="ProseMirror ${fontClass}">
+`;
+  return head + html + "\n</article>\n</body>\n</html>"
+};
+
+async function md2html(md, title = "", inHtml = false) {
   // Convert the Markdown to an AST that matches the Hurmet internal data structure.
   let ast = md2ast(md, inHtml);
 
+  // Populate a Table of Contents, if any exists.
   const tocCapture = /\n *\n{\.toc start=(\d) end=(\d)}\n/.exec(md);
   if (tocCapture) {
-    // Populate a Table of Contents
     const start = Number(tocCapture[1]);
     const end = Number(tocCapture[2]);
     const tocArray = [];
@@ -26971,35 +30329,45 @@ async function md2html(md, inHtml = false) {
   ast = await updateCalcs(ast);
 
   // Write the HTML
-  const html = ast2html(ast);
+  let html = ast2html(ast);
+
+  if (title.length > 0) {
+    html = wrapWithHead(html, title, ast.attrs);
+  }
+
   return html
 }
 
 /*
- * This file bundles together and exposes the calculation parts of Hurmet for use
- * as a CLI app. That is, for unit testing and for the CLI Markdown-to-HTML utility.
+ * This file bundles together and exposes the calculation parts of Hurmet.
+ * I use Rollup to create a UMD module from this code.
+ * That way, one file can expose the same functionality to (1) the Hurmet.app web page,
+ * (2) the REPL in the reference manual, (3) the script that transpiles
+ * the Hurmet reference manual from Markdown to HTML, and (4) unit testing.
  *
- * It exposes three methods
- *   parse() returns a TeX string and, if asked, an RPN string.
+ * Some of Hurmet’s exported functions are valuable only to the Hurmet.app web page.
+ * If you wish to use Hurmet’s math parsing and/or calculation abilities,
+ * the two functions you want are:
+ *   parse(entry: string, decimalFormat?: string)
+ *   calculate(entry: string, vars?: Object, draftMode?: boolean, decimalFormat?: string)
+ *
+ *   parse() returns a TeX string.
  *   calculate() returns either a TeX string or a string in Hurmet calculation syntax.
- *   md2html() returns an HTML string.
- *
- * The parameters of the first two methods are:
- *   entry: The string that a user types into a calculation editing box.
- *   draftMode: Determines if result is in TeX or in Hurmet calculation syntax.
- *   decimalFormat: A string containing one of the options available in the Hurmet ● menu.
- *   vars: If you want to evaluate several statements, the variable "vars" holds variable data.
- *         Initialize it as: vars = {}
- *         Or, if you want to specify a rounding format, initialize it as:
- *             vars = { format: { value: "h3" } }
- *         vars is updated with new variable data each time calculate() is called.
  */
+
+const render$1 = (tex, dom, options) => {
+  temml.render(tex, dom, options);
+};
 
 var hurmet = {
   parse,
   calculate,
+  compile,
+  md2ast,
   md2html,
-  updateCalculations
+  scanModule,
+  updateCalculations,
+  render: render$1
 };
 
 module.exports = hurmet;

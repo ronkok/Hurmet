@@ -1,6 +1,7 @@
 /* eslint-disable */
 import { autoCorrect } from "./autocorrect"
 import { renderSVG } from "./renderSVG"
+import hurmet from "./hurmet"
 import { dt } from "./constants"
 import { codeJar, selectedText, textBeforeCursor, textAfterCursor } from "./codejar"
 

@@ -4,9 +4,9 @@
    <meta charset="utf-8">
    <meta name="viewport" content="width=device-width, initial-scale=1">
    <title>Hurmet Manual</title>
-   <link rel="icon" href="./images/favicon.svg"/>
-   <link rel="stylesheet" href="./docStyles.min.css">
-   <script src="hurmet.min.js"></script>
+   <link rel="manifest" href="/app.webmanifest">
+   <link rel="icon" href="./images/favicon.svg">
+   <link rel="stylesheet" href="/docStyles.min.css">
 </head>
 
 <body>
@@ -2541,6 +2541,6 @@ Copyright © 2020-2023 Ron Kok. Released under the [MIT License][]
 <div id="demo-output"></div>
 </div> <!-- demo -->
 
-<script src="./demo.min.js"></script>
+<script type="module" src="./demo.min.js"></script>
 </body>
 </html>

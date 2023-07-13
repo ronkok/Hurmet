@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="initial-scale=1">
 <title>Hurmet Units</title>
-<link rel="icon" href="./images/favicon.svg"/>
-<style>body{font-size:16px}h1{margin-left:5em;margin-top:2em;font-family:Verdana, sans-serif;font-variant:small-caps;letter-spacing:0.05em;font-size:120%}p{margin-left:5em;width:580px}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sup{top:-0.5em}sub{bottom:-0.25em}table{width:100%;margin-top:1em;margin-left:2em;border-collapse:collapse;width:auto}td{padding:0.3em;text-align:center;vertical-align:middle;hyphens:none;border:1px solid #aaa}th{font-size:95%;padding:0.3rem 0.5rem;line-height:1.05;text-align:center;vertical-align:middle;border:1px solid #aaa;position:sticky}table{overflow-y:auto;height:500px}table th{position:sticky;top:0;background-color:#fff}table tbody tr td:nth-child(1){text-align:left}table tbody tr td:nth-child(13){text-align:left}.fraction{display:inline-flex;flex-direction:column;text-align:center}.fraction > span{display:inline-block;line-height:1.1}.rule{height:1.5px;background:black}</style>
+<link rel="manifest" href="/app.webmanifest">
+<style>body{font-size:16px}h1{margin-left:5em;margin-top:2em;font-family:Verdana sans-serif;font-variant:small-caps;letter-spacing:0.05em;font-size:120%}p{margin-left:5em;width:580px}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sup{top:-0.5em}sub{bottom:-0.25em}table{width:100%;margin-top:1em;margin-left:2em;border-collapse:collapse;width:auto}td{padding:0.3em;text-align:center;vertical-align:middle;hyphens:none;border:1px solid #aaa}th{font-size:95%;padding:0.3rem 0.5rem;line-height:1.05;text-align:center;vertical-align:middle;border:1px solid #aaa;position:sticky}table{overflow-y:auto;height:500px}table th{position:sticky;top:0;background-color:#fff}table tbody tr td:nth-child(1){text-align:left}table tbody tr td:nth-child(13){text-align:left}.fraction{display:inline-flex;flex-direction:column;text-align:center}.fraction > span{display:inline-block;line-height:1.1}.rule{height:1.5px;background:black}</style>
 </head>
 <body>
 

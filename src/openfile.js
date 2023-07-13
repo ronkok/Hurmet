@@ -1,3 +1,5 @@
+import hurmet from "./hurmet"
+
 const handleContents = (view, schema, str, format) => {
   // Strip the BOM, if any, from the beginning of the result string.
   if (/^ï»¿/.test(str)) { str = str.substring(3) }
@@ -7,7 +9,6 @@ const handleContents = (view, schema, str, format) => {
   if (format === "hurmet") {
     doc = JSON.parse(str)
   } else if (format === "markdown") {
-    // eslint-disable-next-line no-undef
     const ast = hurmet.md2ast(str)
     if (typeof ast === "object" && ast.type && ast.type === "doc") {
       doc = ast
@@ -47,7 +48,6 @@ const handleContents = (view, schema, str, format) => {
   if (doc.attrs.snapshots) { view.state.doc.attrs.snapshots = doc.attrs.snapshots }
 
   // Update all the calculation nodes and refresh the document display.
-  // eslint-disable-next-line no-undef
   hurmet.updateCalculations(view, schema.nodes.calculation, true)
 }
 

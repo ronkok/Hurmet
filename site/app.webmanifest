@@ -1,0 +1,36 @@
+{
+   "name": "Hurmet",
+   "description": "Rich-text editor with live calculations",
+   "lang": "en",
+   "icons": [
+       {
+          "src": "images/H-512.png",
+          "type": "image/png",
+          "sizes": "512x512"
+       },
+       {
+          "src": "images/H-1024.png",
+          "type": "image/png",
+          "sizes": "1024x1024"
+       },
+       {
+          "src": "images/H-192.png",
+          "type": "image/png",
+          "sizes": "192x192"
+       },
+       {
+          "src": "images/H-384.png",
+          "type": "image/png",
+          "sizes": "384x384"
+       },
+       {
+          "src": "/images/H-maskable-512.png",
+          "type": "image/png",
+          "sizes": "512x512",
+          "purpose": "maskable"
+       }
+    ],
+    "start_url": "/",
+    "display": "standalone",
+    "id": "/"
+}

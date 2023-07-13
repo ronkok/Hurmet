@@ -1,3 +1,5 @@
+import hurmet from "./hurmet"
+
 /* eslint-disable */
 // ::- A specification for serializing a ProseMirror document as
 // Markdown/CommonMark text.

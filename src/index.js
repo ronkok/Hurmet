@@ -17,6 +17,7 @@ import { buildMenuItems } from "./menu"
 import { buildKeymap } from "./keymap"
 import { buildInputRules } from "./inputrules"
 import { CalcView, TexView } from "./nodeviews"
+import hurmet from "./hurmet"
 
 // Bundle together the plugins.
 function pmSetup(options) {
@@ -65,7 +66,6 @@ if (["BD", "IN", "LK", "MV", "MP", "PK"].includes(userRegion)) {
 const fix = fixTables(window.view.state)
 if (fix) { window.view.state = window.view.state.apply(fix.setMeta("addToHistory", false)) }
 
-// eslint-disable-next-line no-undef
 hurmet.updateCalculations(window.view, schema.nodes.calculation, true)
 
 document.execCommand("enableObjectResizing", false, false)
