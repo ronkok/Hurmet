@@ -1,6 +1,6 @@
 // A service worker to enable offline use of Hurmet.app
 
-const cacheName = "hurmet-2023-07-15"
+const cacheName = "hurmet-2023-07-15-1"
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(cacheName));
@@ -11,17 +11,18 @@ const addResourcesToCache = async(resources) => {
   await cache.addAll(resources)
 }
 
-// Pre-install the offline page and the Latin Modern font.
+// Pre-cache the offline page and the fonts.
 self.addEventListener("install", (event) => {
   event.waitUntil(
     addResourcesToCache([
       'https://hurmet.app/offline.html',
-      'https://hurmet.app/latinmodernmath.woff2'
+      'https://hurmet.app/latinmodernmath.woff2',
+      'https://hurmet.app/Temml.woff2'
     ])
   )
 })
 
-// The purpose of this worker is to enable offline use, not to speed startup.
+// The purpose of this worker is to enable offline use, not primarily to speed startup.
 // Hurmet is in active development and I always want to load the most current JS.
 // So go to the network first. If network is unavailable, get the cache.
 self.addEventListener('fetch', (event) => {
@@ -42,7 +43,7 @@ self.addEventListener('fetch', (event) => {
     // Get a font from the cache
     event.respondWith(caches.open(cacheName).then((cache) => {
       // Go to the cache first
-      return cache.match('https://hurmet.app/latinmodernmath.woff2').then((cachedResponse) => {
+      return cache.match(event.request.url).then((cachedResponse) => {
         // Return a cached response if we have one
         if (cachedResponse) {
           return cachedResponse;
