@@ -1,6 +1,6 @@
 // A service worker to enable offline use of Hurmet.app
 
-const cacheName = "hurmet-2023-07-13"
+const cacheName = "hurmet-2023-07-15"
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(cacheName));
@@ -11,10 +11,13 @@ const addResourcesToCache = async(resources) => {
   await cache.addAll(resources)
 }
 
-// Pre-install the offline page.
+// Pre-install the offline page and the Latin Modern font.
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    addResourcesToCache(['https://hurmet.app/offline.html'])
+    addResourcesToCache([
+      'https://hurmet.app/offline.html',
+      'https://hurmet.app/latinmodernmath.woff2'
+    ])
   )
 })
 
@@ -22,7 +25,6 @@ self.addEventListener("install", (event) => {
 // Hurmet is in active development and I always want to load the most current JS.
 // So go to the network first. If network is unavailable, get the cache.
 self.addEventListener('fetch', (event) => {
-  // Check if this is a navigation request
   if (event.request.mode === 'navigate') {
     // Open the cache
     event.respondWith(caches.open(cacheName).then((cache) => {
@@ -36,6 +38,26 @@ self.addEventListener('fetch', (event) => {
         return cache.match('https://hurmet.app/offline.html');
       });
     }));
+  } else if (event.request.destination === 'font') {
+    // Get a font from the cache
+    event.respondWith(caches.open(cacheName).then((cache) => {
+      // Go to the cache first
+      return cache.match('https://hurmet.app/latinmodernmath.woff2').then((cachedResponse) => {
+        // Return a cached response if we have one
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+
+        // Otherwise, hit the network
+        return fetch(event.request).then((fetchedResponse) => {
+          // Add the network response to the cache for later visits
+          cache.put(event.request, fetchedResponse.clone());
+
+          // Return the network response
+          return fetchedResponse;
+        })
+      })
+    }))
   } else {
     return;
   }

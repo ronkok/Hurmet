@@ -4,11 +4,9 @@ src/altParser.js
 preview/prosemirror.js
 preview/demo.js
 preview/styles.min.css
-preview/katex.min.css
 preview/Temml.woff2
-preview/temml.min.css
 site/prosemirror.min.js
 site/demo.min.js
 utils/ECB Exchange Rates.xml
-utils/hurmet.js
+utils/hurmet.cjs
 site/server.cjs

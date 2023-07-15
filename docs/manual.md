@@ -2318,6 +2318,11 @@ render math as plain text and omit the blue echos.
 To get element-wise multiplication of two matrices, the operator symbol must be
 [explicitly](#matrix-mult) written as `∘` or `.*`.
 
+####  Offline
+
+If Hurmet does not work offline, it may be because the browser is deleting cookies.
+If that is the case, whitelist "hurmet.app".
+
 ## Gists
 
 Hurmet can export or import a document in
