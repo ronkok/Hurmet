@@ -25,10 +25,8 @@ const hurmet = require('./hurmet.cjs');
   let parts = []
   while ((parts = fractionRegEx.exec(units)) !== null) {
     units = units.slice(0, parts.index)
-      + "<td><span class='fraction'><span>" + parts[1] + "</span>"
-      + "<span class='rule'></span>"
-      + "<span>" + parts[2] + "</span></span></td>"
-      + units.slice(parts.index + parts[0].length)
+    + `<td><math><mfrac><mn>${parts[1]}</mn><mn>${parts[2]}</mn></mfrac></math></td>`
+    + units.slice(parts.index + parts[0].length)
   }
   fs.writeFileSync('site/unit-definitions.html', units)
 })();
