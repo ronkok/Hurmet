@@ -799,7 +799,9 @@ const pipeTable = (table, numCols, colWidth, justify, delim, numRowsInHeading) =
   } else {
     str += "|"
     for (let j = 0; j < numCols; j++) {
-      str += " " + table[0][j][0] + " |"
+      let cell = table[0][j][0];
+      if (cell.trim() === "¶") { cell = cell.replace("¶", " ") }
+      str += " " + cell + " |"
     }
   }
   // Write border
@@ -815,7 +817,9 @@ const pipeTable = (table, numCols, colWidth, justify, delim, numRowsInHeading) =
   for (let i = startRow; i < table.length; i++) {
     str += "\n" + (i === 0 ? "" : delim) + "|"
     for (let j = 0; j < numCols; j++) {
-      str += " " + table[i][j][0] + " |"
+      let cell = table[i][j][0];
+      if (cell.trim() === "¶") { cell = cell.replace("¶", " ") }
+      str += " " + cell + " |"
     }
   }
   return str
