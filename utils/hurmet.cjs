@@ -3427,7 +3427,6 @@ const display$2 = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHead
   const numRows = data[0].length;
   const numCols = data.length;
   const writeRowNums = numRows > 5 && !df.rowMap;
-  const numColsInHeading = numCols + (writeRowNums ? 1 : 0);
   const isMap = !df.dtype;
   let str = "\\begin{array}{";
   str += df.rowMap
@@ -3435,7 +3434,7 @@ const display$2 = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHead
     : writeRowNums
     ? "r|"
     : "";
-  for (let j = 1; j < numColsInHeading; j++) {
+  for (let j = 1; j < numCols; j++) {
     str += isMap
       ? "c "
       : numRows === 1

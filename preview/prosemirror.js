@@ -19364,7 +19364,6 @@ const display$2 = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHead
   const numRows = data[0].length;
   const numCols = data.length;
   const writeRowNums = numRows > 5 && !df.rowMap;
-  const numColsInHeading = numCols + (writeRowNums ? 1 : 0);
   const isMap = !df.dtype;
   let str = "\\begin{array}{";
   str += df.rowMap
@@ -19372,7 +19371,7 @@ const display$2 = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHead
     : writeRowNums
     ? "r|"
     : "";
-  for (let j = 1; j < numColsInHeading; j++) {
+  for (let j = 1; j < numCols; j++) {
     str += isMap
       ? "c "
       : numRows === 1
@@ -46296,7 +46295,7 @@ const render$1 = (tex, dom, options) => {
   temml.render(tex, dom, options);
 };
 
-var hurmet$1 = {
+var hurmet = {
   parse,
   calculate,
   compile,
@@ -46683,7 +46682,7 @@ const nodes$1 = {
         dom.firstChild.textContent = node.attrs.alt ? node.attrs.alt : node.attrs.entry;
       } else {
         const tex = node.attrs.tex;
-        hurmet$1.render(tex, dom, {
+        hurmet.render(tex, dom, {
           displayMode: node.attrs.displayMode,
           trust: (context) => context.command === '\\class' && context.class === "special-fraction",
           wrap: "="
@@ -46713,7 +46712,7 @@ const nodes$1 = {
       const tex = node.attrs.tex;
       dom.dataset.tex = tex;
       if (node.attrs.displayMode) { dom.dataset.display = "true"; }
-      hurmet$1.render(tex, dom, { displayMode: node.attrs.displayMode, wrap: "=" });
+      hurmet.render(tex, dom, { displayMode: node.attrs.displayMode, wrap: "=" });
       return dom
     }
   },
@@ -47468,7 +47467,7 @@ const hurmetNodes =  {
     let entry = node.attrs.entry.trim().replace(/\n(?: *\n)+/g, "\n").replace(/\n/gm, "\n" + state.delim);
     if (state.isGFM) {
       // Convert calculation to TeX
-      const tex = hurmet$1.parse(entry);
+      const tex = hurmet.parse(entry);
       writeTex(state, node.attrs.displayMode, tex);
     } else {
       if (!node.attrs.displayMode) {
@@ -48038,7 +48037,9 @@ const pipeTable = (table, numCols, colWidth, justify, delim, numRowsInHeading) =
   } else {
     str += "|";
     for (let j = 0; j < numCols; j++) {
-      str += " " + table[0][j][0] + " |";
+      let cell = table[0][j][0];
+      if (cell.trim() === "¶") { cell = cell.replace("¶", " "); }
+      str += " " + cell + " |";
     }
   }
   // Write border
@@ -48054,7 +48055,9 @@ const pipeTable = (table, numCols, colWidth, justify, delim, numRowsInHeading) =
   for (let i = startRow; i < table.length; i++) {
     str += "\n" + (i === 0 ? "" : delim) + "|";
     for (let j = 0; j < numCols; j++) {
-      str += " " + table[i][j][0] + " |";
+      let cell = table[i][j][0];
+      if (cell.trim() === "¶") { cell = cell.replace("¶", " "); }
+      str += " " + cell + " |";
     }
   }
   return str
@@ -48167,7 +48170,7 @@ const handleContents = (view, schema, str, format) => {
   if (format === "hurmet") {
     doc = JSON.parse(str);
   } else if (format === "markdown") {
-    const ast = hurmet$1.md2ast(str);
+    const ast = hurmet.md2ast(str);
     if (typeof ast === "object" && ast.type && ast.type === "doc") {
       doc = ast;
     } else {
@@ -48206,7 +48209,7 @@ const handleContents = (view, schema, str, format) => {
   if (doc.attrs.snapshots) { view.state.doc.attrs.snapshots = doc.attrs.snapshots; }
 
   // Update all the calculation nodes and refresh the document display.
-  hurmet$1.updateCalculations(view, schema.nodes.calculation, true);
+  hurmet.updateCalculations(view, schema.nodes.calculation, true);
 };
 
 async function getFile(view, schema, format) {
@@ -52381,14 +52384,14 @@ function openMathPrompt(options) {
       if (decimalSymbol === ",") { tex = dotFromCommaForStorage(tex); }
       isUDF = functionRegEx$1.test(tex);
       if (!isUDF) {
-        tex = hurmet$1.parse(tex, options.decimalFormat, false, true);
+        tex = hurmet.parse(tex, options.decimalFormat, false, true);
       }
     } else {
       tex = code;
     }
     if (!isUDF) {
       try {
-        hurmet$1.render(tex, mathDisplay, {
+        hurmet.render(tex, mathDisplay, {
           displayMode: options.attrs.displayMode,
           trust: (context) => context.command === '\\class' &&
                               context.class === "special-fraction",
@@ -52424,7 +52427,7 @@ function openMathPrompt(options) {
     }
     const params = (isTex)
       ? { tex: mathString }
-      : hurmet$1.compile(mathString, options.decimalFormat);
+      : hurmet.compile(mathString, options.decimalFormat);
     params.displayMode = options.attrs.displayMode;
     if (wrapper.parentNode) {
       wrapper.parentNode.firstChild.removeAttribute("style");
@@ -52476,7 +52479,7 @@ class CalcView {
       outerView: this.outerView,
       dom: this.dom,
       callback(attrs) {
-        hurmet$1.updateCalculations(this.outerView, schema.nodes.calculation, false, attrs, pos);
+        hurmet.updateCalculations(this.outerView, schema.nodes.calculation, false, attrs, pos);
       }
     });
   }
@@ -52570,7 +52573,7 @@ if (["BD", "IN", "LK", "MV", "MP", "PK"].includes(userRegion)) {
 const fix = fixTables(window.view.state);
 if (fix) { window.view.state = window.view.state.apply(fix.setMeta("addToHistory", false)); }
 
-hurmet$1.updateCalculations(window.view, schema.nodes.calculation, true);
+hurmet.updateCalculations(window.view, schema.nodes.calculation, true);
 
 document.execCommand("enableObjectResizing", false, false);
 document.execCommand("enableInlineTableEditing", false, false);
