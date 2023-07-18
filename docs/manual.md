@@ -1382,9 +1382,20 @@ fetch(_url_)
 : Fetches the contents of a remote file. It expects the file to be in CSV format
   and will return a data range. Fetch functions must be stand-alone expressions.
 
-findfirst(_searchstring_, _string_)
+findfirst(_searchstring_, _string_)\
+findfirst(_value_, _vector_)\
+findfirst(_booleanVector_)
 
-: Searches the _string_ and returns the index of the first occurence of _searchstring_.
+: Searches the _string_ (_vector_) and returns the index of the first occurence of
+  _searchstring_ (_value_).\
+  If only one (vector) argment is provided, `findfirst` will return the index of the first `true`.
+  
+
+findmax(_v_)
+
+: Find the maximum numeric value of a vector. Returns the value and the index. So you
+  would call it this way:\
+  `max, index = findmax(𝐕) = ?`
 
 floor(_x_)
 
@@ -1461,6 +1472,10 @@ number(_string_)
 
 : Converts a string, such as "5" or "3.14" to a number.
 
+ones(_m_, _n_)
+
+: Returns a _m_ × _n_ matrix filled with ones.  Arguments must be integers.
+
 rand(), rand(_n_), rand(_m_, _n_)
 
 : Pseudo-random number(s) in the range from 0 to 1 (inclusive of 0, but not 1).
@@ -1496,7 +1511,14 @@ string(_x_, _spec_)
 
 sum(_a_, _b_, _c_, …), product(_a_, _b_, _c_, …), length(_a_, _b_, _c_, …), range(_a_, _b_, _c_, …), mean(_a_, _b_, _c_, …), variance(_a_, _b_, _c_, …), stddev(_a_, _b_, _c_, …)
 
-: Functions that accumulate a result from a list of arguments. Real numbers only.
+: Functions that accumulate a result from a list of arguments or a vector.
+  Real numbers only.
+
+sum(_M_, _n_)
+
+: Takes a matrix and sums either the rows or the columns.\
+  `sum(𝐌, 1)` will sum the columns and return a row vector.\
+  `sum(𝐌, 2)` will sum the rows and return a column vector.
 
 transpose(_M_)
 
@@ -1508,7 +1530,7 @@ vcat(_v_, _x_)
 
 zeros(_m_, _n_)
 
-: Returns a _m_ × _n_ matrix filled with zeros.  Real numbers only.
+: Returns a _m_ × _n_ matrix filled with zeros.  Arguments must be integers.
 
 Γ(_z_)
 

@@ -49,17 +49,17 @@ const displayAlt = (tuple, formatSpec = "h3") => {
       if (attrs.unit && attrs.unit.name) {
         rowTex += attrs.unit.name
       }
-      rowTex += " | "
+      rowTex += "\t"
     }
-    str += rowTex.slice(0, -3) + "\n"
+    str += rowTex.slice(0, -1) + "\n"
   }
 
   // Write the data
   let botRow = ""
   for (const attrs of tuple.values()) {
-    botRow += format(attrs.value, formatSpec, "100000.") + " | "
+    botRow += format(attrs.value, formatSpec, "100000.") + "\t"
   }
-  str = botRow.slice(0, -3)
+  str += botRow.slice(0, -1)
   return str + "``"
 }
 

@@ -476,7 +476,12 @@ end`, vars)
     ["floor(-4.5) = @", "®-45/10 floor", "-5"],
     [`matrix2table(matrix, ["D", "L"], ["A", "B"]) = @`, `¿matrix "D" "L" matrix 1 2 "A" "B" matrix 1 2 matrix2table 3`, "``\tD\tL\nA\t2.1\t7.5\nB\t-15.3\t33``"],
     [`@test 2 < 3`, "®2/1 ®3/1 <", "2 < 3, ok ✓"],
-    [`@test 2 > 3`, "®2/1 ®3/1 >", "2 !> 3, n.g."]
+    [`@test 2 > 3`, "®2/1 ®3/1 >", "2 !> 3, n.g."],
+    [`sum(matrix, 2) = @`, "¿matrix ®2/1 sum 2", "[9.6; 17.7]"],
+    [`ones(2, 3) = @`, "®2/1 ®3/1 ones", "(1, 1, 1; 1, 1, 1)"],
+    [`findfirst([false; false; true; false]) = @`, "false false true false matrix 4 1 findfirst 1", "3"],
+    [`findfirst(4, [1; 3; 4; 6; 3]) = @`, "®4/1 ®1/1 ®3/1 ®4/1 ®6/1 ®3/1 matrix 5 1 findfirst 2", "3"],
+    [`findmax([1; 4; 6; 3]) = @`, "®1/1 ®4/1 ®6/1 ®3/1 matrix 4 1 findmax", "``6\t3``"]
   ]
 
   const testRegEx = /^(@{1,2})test /

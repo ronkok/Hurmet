@@ -3,7 +3,7 @@ import { Rnl } from "./rational"
 import { Cpx } from "./complex"
 import { clone } from "./utils"
 import { unitsAreCompatible } from "./units"
-import { Matrix, isVector } from "./matrix"
+import { Matrix, isVector, isMatrix } from "./matrix"
 import { errorOprnd } from "./error"
 
 const negativeOne = Object.freeze(Rnl.negate(Rnl.one))
@@ -595,6 +595,9 @@ const binary = {
   binomial([x, y]) {
     return binomial(x, y)
   },
+  ones([m, n]) {
+    return Matrix.ones(Rnl.toNumber(m), Rnl.toNumber(n))
+  },
   zeros([m, n]) {
     return Matrix.zeros(Rnl.toNumber(m), Rnl.toNumber(n))
   },
@@ -712,6 +715,21 @@ export const multivarFunction = (arity, functionName, args) => {
 
     return [value, dtype]
 
+  } else if (functionName === "sum" && args.length === 2 && isMatrix(args[0])
+    && args[1].dtype === dt.RATIONAL) {
+    if (Rnl.areEqual(args[1].value, Rnl.two)) {
+      const dtype = dt.COLUMNVECTOR + dt.RATIONAL
+      const result = args[0].value.map(row => row.reduce((sum, e) => Rnl.add(sum, e)))
+      return [ result, dtype ]
+    } else if (Rnl.areEqual(args[1].value, Rnl.one)) {
+      const dtype = dt.ROWVECTOR + dt.RATIONAL
+      const result = Matrix.transpose(args[0]).value.map(
+        row => row.reduce((sum, e) => Rnl.add(sum, e))
+      )
+      return [ result, dtype ]
+    } else {
+      return [errorOprnd("BAD_SUM"), dt.ERROR]
+    }
   } else {
     // We have multiple arguments.
     // Is one of them a vector?
@@ -729,7 +747,7 @@ export const multivarFunction = (arity, functionName, args) => {
     const list = args.map(e => e.value)
     if (!gotVector) {
       const result = Functions[arity][functionName](list)
-      return functionName === "zeros"
+      return functionName === "zeros" || functionName === "ones"
         ? [result.value, result.dtype]
         : [result, args[0].dtype]
 

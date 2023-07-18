@@ -371,7 +371,7 @@ const dataFrameFromVectors = (vectors, formatSpec) => {
       : (vector.dtype & dt.COLUMNVECTOR)
       ? dt.COLUMNVECTOR
       : dt.ERROR
-    if (vectorType === dt.ERROR) { return errorOprnd("NOT_VECTOR") }
+    if (vectorType === dt.ERROR) { return errorOprnd("NOT_VECTOR", "dataframe") }
     headings.push(vector.name)
     columnMap[vector.name] = j
     const colDtype = vector.dtype - vectorType

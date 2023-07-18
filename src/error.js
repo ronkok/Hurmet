@@ -78,7 +78,7 @@ const errorMessages = Object.freeze({
     NOT_ARRAY: `Error. Cannot The second operand is not an array.`,
     MULT_MIS:  "Error. Mismatch in number of multiple assignment.",
     COUNT:     "Error. The count() function works only on strings.",
-    NOT_VECTOR:"Error. Arguments to dataframe() must be vectors.",
+    NOT_VECTOR:"Error. Arguments to @() must be vectors.",
     BAD_DISPLAY:"Error. Result may not be suppressed. Use '?' display selector.",
     NA_COMPL_OP:"Error. \"@\" cannot be performed on a complex number.",
     NA_REAL:    "Error. \"@\" can be performed only a complex number.",
@@ -90,7 +90,8 @@ const errorMessages = Object.freeze({
     BAD_APPEND: "Error. Can not append a @",
     MAP_APPEND: "Error. Can not append. Wrong data type.",
     BAD_TRANS:  "Error. Only a matrix can be transposed.",
-    BAD_ARGS:   "Error. Wrong number of arguments to function @"
+    BAD_ARGS:   "Error. Wrong number of arguments to function @",
+    BAD_SUM:    "Error. Second argument to sum function must be 1 or 2."
   }
 })
 

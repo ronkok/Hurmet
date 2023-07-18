@@ -791,6 +791,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "gcd":
         case "rms":
         case "binomial":
+        case "ones":
         case "zeros":
         case "mod":
         case "rem": {
@@ -807,6 +808,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           output.unit = Object.freeze(unit)
 
           const [value, dtype] = multivarFunction("binary", tkn, args)
+          if (dtype === dt.ERROR) { return value }
           output.value = Object.freeze(value)
           output.dtype = dtype
           stack.push(Object.freeze(output))
@@ -828,21 +830,51 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
+        case "findmax": {
+          const arg = stack.pop()
+          let max = arg.value[0];
+          let index = 1
+          if (!(isVector(arg) && (arg.dtype & dt.RATIONAL))) {
+            return errorOprnd("NOT_VECTOR", "findmax")
+          }
+          for (let i = 1; i < arg.value.length; i++) {
+            if (Rnl.greaterThan(arg.value[i], max)) {
+              max = arg.value[i];
+              index = Rnl.fromNumber(i + 1)
+            }
+          }
+          const tuple = { value: new Map(), unit: null, dtype: dt.TUPLE }
+          tuple.value.set("max", { value: max, unit: allZeros, dtype: dt.RATIONAL })
+          tuple.value.set("index", { value: index, unit: allZeros, dtype: dt.RATIONAL })
+          stack.push(tuple)
+          break
+        }
+
         case "findfirst": {
+          const numArgs = Number(tokens[i + 1])
+          i += 1
           const args = []
           args.push(stack.pop())
-          args.unshift(stack.pop())
-          if (!((args[1].dtype & dt.STRING) && (args[1].dtype & dt.STRING))) {
-            return errorOprnd("STRING")
-          }
+          if (numArgs === 2) {args.unshift(stack.pop()) }
+          const isString = numArgs === 2 && (args[1].dtype & dt.STRING)
           const output = Object.create(null)
           output.unit = { expos: allZeros }
-          output.value = isVector(args[1])
+          output.value = isString && isVector(args[1])
             ? args[1].value.map(e => findfirst(args[0], e))
-            : isMatrix(args[1])
+            : isString && isMatrix(args[1])
             ? args[1].value.map(row => row.map(e => findfirst(args[0], e)))
-            : findfirst(args[0], args[1])
-          output.dtype = args[1].dtype - dt.STRING + dt.RATIONAL
+            : isString
+            ? findfirst(args[0], args[1])
+            : numArgs === 1
+            ? Matrix.findfirst(true, args[0])
+            : isVector(args[1])
+            ? Matrix.findfirst(args[0].value, args[1])
+            : errorOprnd("ERR_FUNC", "Error. Did not understand arguments")
+          if (isString) {
+            output.dtype = args[1].dtype - dt.STRING + dt.RATIONAL
+          } else {
+            output.dtype = dt.RATIONAL
+          }
           stack.push(Object.freeze(output))
           break
         }
@@ -927,6 +959,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           output.unit = Object.freeze(unit)
 
           const [value, dtype] = multivarFunction("reduce", tkn, args)
+          if (dtype === dt.ERROR) { return value }
           output.value = Object.freeze(value)
           output.dtype = dtype
           stack.push(Object.freeze(output))

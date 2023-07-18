@@ -641,7 +641,7 @@ const errorMessages = Object.freeze({
     NOT_ARRAY: `Error. Cannot The second operand is not an array.`,
     MULT_MIS:  "Error. Mismatch in number of multiple assignment.",
     COUNT:     "Error. The count() function works only on strings.",
-    NOT_VECTOR:"Error. Arguments to dataframe() must be vectors.",
+    NOT_VECTOR:"Error. Arguments to @() must be vectors.",
     BAD_DISPLAY:"Error. Result may not be suppressed. Use '?' display selector.",
     NA_COMPL_OP:"Error. \"@\" cannot be performed on a complex number.",
     NA_REAL:    "Error. \"@\" can be performed only a complex number.",
@@ -653,7 +653,8 @@ const errorMessages = Object.freeze({
     BAD_APPEND: "Error. Can not append a @",
     MAP_APPEND: "Error. Can not append. Wrong data type.",
     BAD_TRANS:  "Error. Only a matrix can be transposed.",
-    BAD_ARGS:   "Error. Wrong number of arguments to function @"
+    BAD_ARGS:   "Error. Wrong number of arguments to function @",
+    BAD_SUM:    "Error. Second argument to sum function must be 1 or 2."
   }
 });
 
@@ -2762,6 +2763,18 @@ const displayAlt = (m, formatSpec, decimalFormat) => {
   return str
 };
 
+const findfirst = (el, array) => {
+  if (!isVector(array)) { return errorOprnd("NOT_VECTOR", "findfirst") }
+  const isNumeric = Rnl.isRational(el);
+  for (let i = 0; i < array.value.length; i++) {
+    const val = array.value[i];
+    if ((isNumeric & Rnl.areEqual(val, el)) || val === el ) {
+      return Rnl.fromNumber(i + 1)
+    }
+  }
+  return Rnl.zero
+};
+
 const identity = (num, mutable) => {
   const n = Rnl.isRational(num) ? Rnl.toNumber(num) : num;
   if (n === 1) {
@@ -3068,6 +3081,27 @@ const operandFromTokenStack = (tokenStack, numRows, numCols) => {
   }
 };
 
+const ones = (m, n) => {
+  if (m === 1 || n === 1) {
+    return {
+      value: new Array(n).fill(Rnl.one),
+      unit: allZeros,
+      dtype: dt.RATIONAL + (m === 1 ? dt.ROWVECTOR : dt.COLUMNVECTOR)
+    }
+  } else {
+    const value = [];
+    for (let i = 0; i < m; i++) {
+      value.push(new Array(n).fill(Rnl.one));
+    }
+    Object.freeze(value);
+    return Object.freeze({
+      value: value,
+      unit: { expos: allZeros },
+      dtype: dt.RATIONAL + dt.MATRIX
+    })
+  }
+};
+
 const zeros = (m, n) => {
   if (m === 1 || n === 1) {
     return {
@@ -3095,9 +3129,11 @@ const Matrix = Object.freeze({
   display: display$1,
   displayAlt,
   elementDisplay,
+  findfirst,
   identity,
   invert,
   multResultType,
+  ones,
   operandFromRange,
   operandFromTokenStack,
   submatrix,
@@ -3467,7 +3503,7 @@ const dataFrameFromVectors = (vectors, formatSpec) => {
       : (vector.dtype & dt.COLUMNVECTOR)
       ? dt.COLUMNVECTOR
       : dt.ERROR;
-    if (vectorType === dt.ERROR) { return errorOprnd("NOT_VECTOR") }
+    if (vectorType === dt.ERROR) { return errorOprnd("NOT_VECTOR", "dataframe") }
     headings.push(vector.name);
     columnMap[vector.name] = j;
     const colDtype = vector.dtype - vectorType;
@@ -4784,16 +4820,16 @@ const builtInFunctions = new Set([
   "acsch", "angle", "asec", "asecd", "asech", "asin", "asind", "asinh", "atan", "atan2",
   "atand", "atanh", "binomial", "ceil", "conj", "cos", "cosd", "cosh",
   "cosh", "cot", "cotd", "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp",
-  "factorial", "fetch", "findfirst", "floor", "format", "gamma", "gcd", "hcat", "hypot",
-  "imag", "isnan", "length", "lerp", "ln", "log", "log10", "log2", "lfact", "lgamma", "logn",
-  "mod", "number", "real", "rem", "rms", "round", "roundSig", "roundn", "sec", "secd", "sech",
-  "sech", "sign", "sin", "sind", "sinh", "startSvg", "string", "tan", "tand", "tanh", "tanh",
-  "trace", "transpose", "vcat", "zeros", "Γ"
+  "factorial", "fetch", "findmax", "floor", "format", "gamma", "gcd", "hcat",
+  "hypot", "imag", "isnan", "length", "lerp", "ln", "log", "log10", "log2", "lfact", "lgamma",
+  "logn", "mod", "number", "ones", "real", "rem", "rms", "round", "roundSig", "roundn", "sec",
+  "secd", "sech", "sech", "sign", "sin", "sind", "sinh", "startSvg", "string", "tan", "tand",
+  "tanh", "tanh", "trace", "transpose", "vcat", "zeros", "Γ"
 ]);
 
 const builtInReducerFunctions = new Set(["accumulate", "beamDiagram", "dataframe",
-  "matrix2table", "max", "mean", "median", "min", "product", "rand", "range", "stddev", "sum",
-  "variance"
+  "findfirst", "matrix2table", "max", "mean", "median", "min", "product", "rand", "range",
+  "stddev", "sum", "variance"
 ]);
 
 const trigFunctions = new Set(["cos", "cosd", "cot", "cotd", "csc", "cscd", "sec", "secd",
@@ -6668,17 +6704,17 @@ const displayAlt$2 = (tuple, formatSpec = "h3") => {
       if (attrs.unit && attrs.unit.name) {
         rowTex += attrs.unit.name;
       }
-      rowTex += " | ";
+      rowTex += "\t";
     }
-    str += rowTex.slice(0, -3) + "\n";
+    str += rowTex.slice(0, -1) + "\n";
   }
 
   // Write the data
   let botRow = "";
   for (const attrs of tuple.values()) {
-    botRow += format(attrs.value, formatSpec, "100000.") + " | ";
+    botRow += format(attrs.value, formatSpec, "100000.") + "\t";
   }
-  str = botRow.slice(0, -3);
+  str += botRow.slice(0, -1);
   return str + "``"
 };
 
@@ -6810,7 +6846,7 @@ const formatResult = (stmt, result, formatSpec, decimalFormat, assert, isUnitAwa
                                               decimalFormat, omitHeading);
 
     } else if (result.dtype === dt.TUPLE) {
-      if (numNames > 1 && numNames !== result.length) {
+      if (numNames > 1 && numNames !== result.value.size) {
         [resultDisplay, altResultDisplay] = numMisMatchError();
       } else {
         resultDisplay = Tuple.display(result.value, formatSpec, decimalFormat);
@@ -7619,6 +7655,9 @@ const binary = {
   binomial([x, y]) {
     return binomial(x, y)
   },
+  ones([m, n]) {
+    return Matrix.ones(Rnl.toNumber(m), Rnl.toNumber(n))
+  },
   zeros([m, n]) {
     return Matrix.zeros(Rnl.toNumber(m), Rnl.toNumber(n))
   },
@@ -7736,6 +7775,21 @@ const multivarFunction = (arity, functionName, args) => {
 
     return [value, dtype]
 
+  } else if (functionName === "sum" && args.length === 2 && isMatrix(args[0])
+    && args[1].dtype === dt.RATIONAL) {
+    if (Rnl.areEqual(args[1].value, Rnl.two)) {
+      const dtype = dt.COLUMNVECTOR + dt.RATIONAL;
+      const result = args[0].value.map(row => row.reduce((sum, e) => Rnl.add(sum, e)));
+      return [ result, dtype ]
+    } else if (Rnl.areEqual(args[1].value, Rnl.one)) {
+      const dtype = dt.ROWVECTOR + dt.RATIONAL;
+      const result = Matrix.transpose(args[0]).value.map(
+        row => row.reduce((sum, e) => Rnl.add(sum, e))
+      );
+      return [ result, dtype ]
+    } else {
+      return [errorOprnd("BAD_SUM"), dt.ERROR]
+    }
   } else {
     // We have multiple arguments.
     // Is one of them a vector?
@@ -7753,7 +7807,7 @@ const multivarFunction = (arity, functionName, args) => {
     const list = args.map(e => e.value);
     if (!gotVector) {
       const result = Functions[arity][functionName](list);
-      return functionName === "zeros"
+      return functionName === "zeros" || functionName === "ones"
         ? [result.value, result.dtype]
         : [result, args[0].dtype]
 
@@ -9179,7 +9233,7 @@ const Operators = Object.freeze({
 
 const wideCharRegEx = /[\uD800-\uDBFF][\uDC00-\uDFFF][\uFE00\uFE01]?/g;
 
-const findfirst = (searchString, str) => {
+const findfirst$1 = (searchString, str) => {
   const index = str.value.indexOf(searchString.value);
   const wideCharMatches = arrayOfRegExMatches(wideCharRegEx, str.value.slice(0, index));
   return Rnl.fromNumber(index + wideCharMatches.length + 1)
@@ -14960,6 +15014,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
         case "gcd":
         case "rms":
         case "binomial":
+        case "ones":
         case "zeros":
         case "mod":
         case "rem": {
@@ -14976,6 +15031,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           output.unit = Object.freeze(unit);
 
           const [value, dtype] = multivarFunction("binary", tkn, args);
+          if (dtype === dt.ERROR) { return value }
           output.value = Object.freeze(value);
           output.dtype = dtype;
           stack.push(Object.freeze(output));
@@ -14997,21 +15053,51 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
+        case "findmax": {
+          const arg = stack.pop();
+          let max = arg.value[0];
+          let index = 1;
+          if (!(isVector(arg) && (arg.dtype & dt.RATIONAL))) {
+            return errorOprnd("NOT_VECTOR", "findmax")
+          }
+          for (let i = 1; i < arg.value.length; i++) {
+            if (Rnl.greaterThan(arg.value[i], max)) {
+              max = arg.value[i];
+              index = Rnl.fromNumber(i + 1);
+            }
+          }
+          const tuple = { value: new Map(), unit: null, dtype: dt.TUPLE };
+          tuple.value.set("max", { value: max, unit: allZeros, dtype: dt.RATIONAL });
+          tuple.value.set("index", { value: index, unit: allZeros, dtype: dt.RATIONAL });
+          stack.push(tuple);
+          break
+        }
+
         case "findfirst": {
+          const numArgs = Number(tokens[i + 1]);
+          i += 1;
           const args = [];
           args.push(stack.pop());
-          args.unshift(stack.pop());
-          if (!((args[1].dtype & dt.STRING) && (args[1].dtype & dt.STRING))) {
-            return errorOprnd("STRING")
-          }
+          if (numArgs === 2) {args.unshift(stack.pop()); }
+          const isString = numArgs === 2 && (args[1].dtype & dt.STRING);
           const output = Object.create(null);
           output.unit = { expos: allZeros };
-          output.value = isVector(args[1])
-            ? args[1].value.map(e => findfirst(args[0], e))
-            : isMatrix(args[1])
-            ? args[1].value.map(row => row.map(e => findfirst(args[0], e)))
-            : findfirst(args[0], args[1]);
-          output.dtype = args[1].dtype - dt.STRING + dt.RATIONAL;
+          output.value = isString && isVector(args[1])
+            ? args[1].value.map(e => findfirst$1(args[0], e))
+            : isString && isMatrix(args[1])
+            ? args[1].value.map(row => row.map(e => findfirst$1(args[0], e)))
+            : isString
+            ? findfirst$1(args[0], args[1])
+            : numArgs === 1
+            ? Matrix.findfirst(true, args[0])
+            : isVector(args[1])
+            ? Matrix.findfirst(args[0].value, args[1])
+            : errorOprnd("ERR_FUNC", "Error. Did not understand arguments");
+          if (isString) {
+            output.dtype = args[1].dtype - dt.STRING + dt.RATIONAL;
+          } else {
+            output.dtype = dt.RATIONAL;
+          }
           stack.push(Object.freeze(output));
           break
         }
@@ -15096,6 +15182,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           output.unit = Object.freeze(unit);
 
           const [value, dtype] = multivarFunction("reduce", tkn, args);
+          if (dtype === dt.ERROR) { return value }
           output.value = Object.freeze(value);
           output.dtype = dtype;
           stack.push(Object.freeze(output));

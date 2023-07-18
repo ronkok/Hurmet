@@ -16,16 +16,16 @@ const builtInFunctions = new Set([
   "acsch", "angle", "asec", "asecd", "asech", "asin", "asind", "asinh", "atan", "atan2",
   "atand", "atanh", "binomial", "ceil", "conj", "cos", "cosd", "cosh",
   "cosh", "cot", "cotd", "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp",
-  "factorial", "fetch", "findfirst", "floor", "format", "gamma", "gcd", "hcat", "hypot",
-  "imag", "isnan", "length", "lerp", "ln", "log", "log10", "log2", "lfact", "lgamma", "logn",
-  "mod", "number", "real", "rem", "rms", "round", "roundSig", "roundn", "sec", "secd", "sech",
-  "sech", "sign", "sin", "sind", "sinh", "startSvg", "string", "tan", "tand", "tanh", "tanh",
-  "trace", "transpose", "vcat", "zeros", "Γ"
+  "factorial", "fetch", "findmax", "floor", "format", "gamma", "gcd", "hcat",
+  "hypot", "imag", "isnan", "length", "lerp", "ln", "log", "log10", "log2", "lfact", "lgamma",
+  "logn", "mod", "number", "ones", "real", "rem", "rms", "round", "roundSig", "roundn", "sec",
+  "secd", "sech", "sech", "sign", "sin", "sind", "sinh", "startSvg", "string", "tan", "tand",
+  "tanh", "tanh", "trace", "transpose", "vcat", "zeros", "Γ"
 ])
 
 const builtInReducerFunctions = new Set(["accumulate", "beamDiagram", "dataframe",
-  "matrix2table", "max", "mean", "median", "min", "product", "rand", "range", "stddev", "sum",
-  "variance"
+  "findfirst", "matrix2table", "max", "mean", "median", "min", "product", "rand", "range",
+  "stddev", "sum", "variance"
 ])
 
 const trigFunctions = new Set(["cos", "cosd", "cot", "cotd", "csc", "cscd", "sec", "secd",

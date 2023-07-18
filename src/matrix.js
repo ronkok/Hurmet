@@ -146,6 +146,18 @@ const displayAlt = (m, formatSpec, decimalFormat) => {
   return str
 }
 
+const findfirst = (el, array) => {
+  if (!isVector(array)) { return errorOprnd("NOT_VECTOR", "findfirst") }
+  const isNumeric = Rnl.isRational(el)
+  for (let i = 0; i < array.value.length; i++) {
+    const val = array.value[i]
+    if ((isNumeric & Rnl.areEqual(val, el)) || val === el ) {
+      return Rnl.fromNumber(i + 1)
+    }
+  }
+  return Rnl.zero
+}
+
 const identity = (num, mutable) => {
   const n = Rnl.isRational(num) ? Rnl.toNumber(num) : num
   if (n === 1) {
@@ -452,6 +464,27 @@ const operandFromTokenStack = (tokenStack, numRows, numCols) => {
   }
 }
 
+const ones = (m, n) => {
+  if (m === 1 || n === 1) {
+    return {
+      value: new Array(n).fill(Rnl.one),
+      unit: allZeros,
+      dtype: dt.RATIONAL + (m === 1 ? dt.ROWVECTOR : dt.COLUMNVECTOR)
+    }
+  } else {
+    const value = []
+    for (let i = 0; i < m; i++) {
+      value.push(new Array(n).fill(Rnl.one))
+    }
+    Object.freeze(value)
+    return Object.freeze({
+      value: value,
+      unit: { expos: allZeros },
+      dtype: dt.RATIONAL + dt.MATRIX
+    })
+  }
+}
+
 const zeros = (m, n) => {
   if (m === 1 || n === 1) {
     return {
@@ -479,9 +512,11 @@ export const Matrix = Object.freeze({
   display,
   displayAlt,
   elementDisplay,
+  findfirst,
   identity,
   invert,
   multResultType,
+  ones,
   operandFromRange,
   operandFromTokenStack,
   submatrix,

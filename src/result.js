@@ -131,7 +131,7 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, assert, is
                                               decimalFormat, omitHeading)
 
     } else if (result.dtype === dt.TUPLE) {
-      if (numNames > 1 && numNames !== result.length) {
+      if (numNames > 1 && numNames !== result.value.size) {
         [resultDisplay, altResultDisplay] = numMisMatchError()
       } else {
         resultDisplay = Tuple.display(result.value, formatSpec, decimalFormat)
