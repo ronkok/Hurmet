@@ -383,14 +383,17 @@ const multResultType = (o1, o2) => {
 const operandFromRange = range => {
   // Input was [start:step:end...]
   // Populate a vector with values from a range
+  if (Rnl.isZero(range[1])) { return errorOprnd("ZERO_STEP") }
+  if (!Rnl.areEqual(Rnl.sign(Rnl.subtract(range[2], range[0])), Rnl.sign(range[1]))) {
+    range[1] = Rnl.negate(range[1])
+  }
   const array = []
   if (Rnl.greaterThan(range[2], range[0])) {
     for (let j = range[0]; Rnl.lessThan(j, range[2]); j = Rnl.add(j, range[1])) {
       array.push(j)
     }
   } else {
-    for (let j = range[0]; Rnl.greaterThanOrEqualTo(j, range[2]);
-        j = Rnl.add(j, range[1])) {
+    for (let j = range[0]; Rnl.greaterThanOrEqualTo(j, range[2]); j = Rnl.add(j, range[1])) {
       array.push(j)
     }
   }

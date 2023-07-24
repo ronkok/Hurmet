@@ -732,9 +732,10 @@ export const multivarFunction = (arity, functionName, args) => {
     }
   } else {
     // We have multiple arguments.
-    // Is one of them a vector?
+    // Is one of them a vector or a matrix?
     let iArg = 0;
     let gotVector = false;
+    let gotMatrix = false
     let dtype = args[0].dtype
 
     for (iArg = 0; iArg < args.length; iArg++) {
@@ -742,21 +743,36 @@ export const multivarFunction = (arity, functionName, args) => {
         gotVector = true
         dtype = args[iArg].dtype
         break
+      } else if (isMatrix(args[iArg])) {
+        gotMatrix = true
+        dtype = args[iArg].dtype
+        break
       }
     }
     const list = args.map(e => e.value)
-    if (!gotVector) {
+    if (!(gotVector || gotMatrix)) {
       const result = Functions[arity][functionName](list)
       return functionName === "zeros" || functionName === "ones"
         ? [result.value, result.dtype]
         : [result, args[0].dtype]
 
     } else {
-      const listClone = clone(list)
       const result = []
-      for (let i = 0; i < list[iArg].length; i++) {
-        listClone[iArg] = list[iArg][i]
-        result.push(Functions[arity][functionName](listClone))
+      if (gotVector) {
+        const listClone = clone(list)
+        for (let i = 0; i < list[iArg].length; i++) {
+          listClone[iArg] = list[iArg][i]
+          result.push(Functions[arity][functionName](listClone))
+        }
+      } else {
+        const listClone = clone(list)
+        for (let i = 0; i < list[iArg].length; i++) {
+          result.push([])
+          for (let j = 0; j < list[iArg][0].length; j++) {
+            listClone[iArg] = list[iArg][i][j]
+            result[i].push(Functions[arity][functionName](listClone))
+          }
+        }
       }
       return [ result, dtype ]
     }

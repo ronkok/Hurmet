@@ -651,12 +651,11 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const numCols = Number(tokens[i + 2])
           i += 2
 
-          if (stack.length > 0 && stack[stack.length - 1].dtype === dt.RANGE) {
-            // Input was [start:step:end...]
-            stack.push(Matrix.operandFromRange(stack.pop().value))
-          } else {
-            stack.push(Matrix.operandFromTokenStack(stack, numRows, numCols))
-          }
+          const result = (stack.length > 0 && stack[stack.length - 1].dtype === dt.RANGE)
+            ? Matrix.operandFromRange(stack.pop().value) // Input was [start:step:end...]
+            : Matrix.operandFromTokenStack(stack, numRows, numCols)
+          if (result.dtype === dt.ERROR) { return result }
+          stack.push(result)
           break
         }
 
@@ -815,11 +814,26 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
-        case "number": {
+        case "Int": {
           const arg = stack.pop()
-          if (!(arg.dtype & dt.STRING)) { return errorOprnd("STRING") }
           const output = Object.create(null)
           output.unit = { expos: allZeros }
+          if (!(arg.dtype & dt.BOOLEAN)) { return errorOprnd("LOGIC", "Int") }
+          output.value = isVector(arg)
+            ? arg.value.map(e => Rnl.fromNumber(Number(e)))
+            : isMatrix(arg)
+            ? arg.value.map(row => row.map(e => Rnl.fromNumber(Number(e))))
+            : Rnl.fromNumber(Number(arg.value))
+          output.dtype = arg.dtype - dt.BOOLEAN + dt.RATIONAL
+          stack.push(Object.freeze(output))
+          break
+        }
+
+        case "number": {
+          const arg = stack.pop()
+          const output = Object.create(null)
+          output.unit = { expos: allZeros }
+          if (!(arg.dtype & dt.STRING)) { return errorOprnd("STRING") }
           output.value = isVector(arg)
             ? arg.value.map(e => Rnl.fromString(e))
             : isMatrix(arg)
@@ -1163,13 +1177,15 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
 
           if (setComparisons.includes(tkn)) {
             bool.value = compare(tkn, o1.value, o2.value, prevValue)
+            bool.dtype = o1.dtype + dt.BOOLEANFROMCOMPARISON
           } else {
             const [shape1, shape2, _] = binaryShapesOf(o1, o2)
             bool.value = Operators.relations[shape1][shape2].relate(tkn, o1.value,
               o2.value, prevValue)
+            bool.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn)
+                         + dt.BOOLEANFROMCOMPARISON
           }
           if (bool.value.dtype && bool.value.dtype === dt.ERROR) { return bool.value }
-          bool.dtype = o1.dtype + dt.BOOLEANFROMCOMPARISON
           if (bool.dtype & dt.RATIONAL) { bool.dtype -= dt.RATIONAL }
           if (bool.dtype & dt.COMPLEX) { bool.dtype -= dt.COMPLEX }
           if (bool.dtype & dt.STRING) { bool.dtype -= dt.STRING }

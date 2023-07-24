@@ -91,7 +91,8 @@ const errorMessages = Object.freeze({
     MAP_APPEND: "Error. Can not append. Wrong data type.",
     BAD_TRANS:  "Error. Only a matrix can be transposed.",
     BAD_ARGS:   "Error. Wrong number of arguments to function @",
-    BAD_SUM:    "Error. Second argument to sum function must be 1 or 2."
+    BAD_SUM:    "Error. Second argument to sum function must be 1 or 2.",
+    ZERO_STEP:  "Error. Step value must be > zero."
   }
 })
 

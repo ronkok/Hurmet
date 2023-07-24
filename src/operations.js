@@ -1134,6 +1134,14 @@ const relations = {
           return x.map((e, i) => compare(op, e, y[i], undefined))
         }
       }
+    },
+    matrix: {
+      relate(op, v, m, yPrev) {
+        if (yPrev === undefined) {
+          if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
+          return m.map(row => row.map((e, i) => compare(op, v[i], e, undefined)))
+        }
+      }
     }
   },
   columnVector: {
@@ -1168,6 +1176,13 @@ const relations = {
           return m.map((row, i) => row.map((e, j) => compare(op, e, y, yPrev[i][j])))
         } else {
           // Error.
+        }
+      }
+    },
+    matrix: {
+      relate(op, m1, m2, yPrev) {
+        if (yPrev === undefined) {
+          return x.map((e, i) => compare(op, e, y[i], undefined))
         }
       }
     }

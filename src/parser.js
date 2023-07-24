@@ -12,7 +12,7 @@ import { Rnl } from "./rational"
 */
 
 const builtInFunctions = new Set([
-  "Char", "abs", "acos", "acosd", "acosh", "acot", "acotd", "acoth", "acsc", "acscd",
+  "Char", "Int", "abs", "acos", "acosd", "acosh", "acot", "acotd", "acoth", "acsc", "acscd",
   "acsch", "angle", "asec", "asecd", "asech", "asin", "asind", "asinh", "atan", "atan2",
   "atand", "atanh", "binomial", "ceil", "conj", "cos", "cosd", "cosh",
   "cosh", "cot", "cotd", "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp",

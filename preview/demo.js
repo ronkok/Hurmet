@@ -654,7 +654,8 @@ const errorMessages = Object.freeze({
     MAP_APPEND: "Error. Can not append. Wrong data type.",
     BAD_TRANS:  "Error. Only a matrix can be transposed.",
     BAD_ARGS:   "Error. Wrong number of arguments to function @",
-    BAD_SUM:    "Error. Second argument to sum function must be 1 or 2."
+    BAD_SUM:    "Error. Second argument to sum function must be 1 or 2.",
+    ZERO_STEP:  "Error. Step value must be > zero."
   }
 });
 
@@ -797,6 +798,7 @@ const isZero = r => r[0] === iZero;
 
 const isNegative = r => r[0] < iZero;
 const isPositive = r => r[0] > iZero;
+const sign = r => isPositive(r) ? one : isZero(r) ? zero : negate(one);
 
 const negate = r => [BigInt(-1) * r[0], r[1]];
 
@@ -1069,6 +1071,7 @@ const Rnl = Object.freeze({
   isZero,
   isNegative,
   isPositive,
+  sign,
   negate,
   abs,
   increment,
@@ -1439,11 +1442,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6350","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.6510","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.3847","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.3437","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -1452,10 +1455,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4728","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4668","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9649","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["8.0076","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9630","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.9860","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -1475,7 +1478,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.85590","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.86706","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1483,23 +1486,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.7694","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.6946","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["4.0499","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["92.1985","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["4.0214","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["91.1750","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["155.51","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["157.63","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1423.03","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1429.52","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1510,7 +1513,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["18.9497","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["18.8531","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -1540,7 +1543,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.1221","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.1123","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -3000,14 +3003,17 @@ const multResultType = (o1, o2) => {
 const operandFromRange = range => {
   // Input was [start:step:end...]
   // Populate a vector with values from a range
+  if (Rnl.isZero(range[1])) { return errorOprnd("ZERO_STEP") }
+  if (!Rnl.areEqual(Rnl.sign(Rnl.subtract(range[2], range[0])), Rnl.sign(range[1]))) {
+    range[1] = Rnl.negate(range[1]);
+  }
   const array = [];
   if (Rnl.greaterThan(range[2], range[0])) {
     for (let j = range[0]; Rnl.lessThan(j, range[2]); j = Rnl.add(j, range[1])) {
       array.push(j);
     }
   } else {
-    for (let j = range[0]; Rnl.greaterThanOrEqualTo(j, range[2]);
-        j = Rnl.add(j, range[1])) {
+    for (let j = range[0]; Rnl.greaterThanOrEqualTo(j, range[2]); j = Rnl.add(j, range[1])) {
       array.push(j);
     }
   }
@@ -4816,7 +4822,7 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
 */
 
 const builtInFunctions = new Set([
-  "Char", "abs", "acos", "acosd", "acosh", "acot", "acotd", "acoth", "acsc", "acscd",
+  "Char", "Int", "abs", "acos", "acosd", "acosh", "acot", "acotd", "acoth", "acsc", "acscd",
   "acsch", "angle", "asec", "asecd", "asech", "asin", "asind", "asinh", "atan", "atan2",
   "atand", "atanh", "binomial", "ceil", "conj", "cos", "cosd", "cosh",
   "cosh", "cot", "cotd", "coth", "coth", "count", "csc", "cscd", "csch", "csch", "exp",
@@ -7792,9 +7798,10 @@ const multivarFunction = (arity, functionName, args) => {
     }
   } else {
     // We have multiple arguments.
-    // Is one of them a vector?
+    // Is one of them a vector or a matrix?
     let iArg = 0;
     let gotVector = false;
+    let gotMatrix = false;
     let dtype = args[0].dtype;
 
     for (iArg = 0; iArg < args.length; iArg++) {
@@ -7802,21 +7809,36 @@ const multivarFunction = (arity, functionName, args) => {
         gotVector = true;
         dtype = args[iArg].dtype;
         break
+      } else if (isMatrix(args[iArg])) {
+        gotMatrix = true;
+        dtype = args[iArg].dtype;
+        break
       }
     }
     const list = args.map(e => e.value);
-    if (!gotVector) {
+    if (!(gotVector || gotMatrix)) {
       const result = Functions[arity][functionName](list);
       return functionName === "zeros" || functionName === "ones"
         ? [result.value, result.dtype]
         : [result, args[0].dtype]
 
     } else {
-      const listClone = clone(list);
       const result = [];
-      for (let i = 0; i < list[iArg].length; i++) {
-        listClone[iArg] = list[iArg][i];
-        result.push(Functions[arity][functionName](listClone));
+      if (gotVector) {
+        const listClone = clone(list);
+        for (let i = 0; i < list[iArg].length; i++) {
+          listClone[iArg] = list[iArg][i];
+          result.push(Functions[arity][functionName](listClone));
+        }
+      } else {
+        const listClone = clone(list);
+        for (let i = 0; i < list[iArg].length; i++) {
+          result.push([]);
+          for (let j = 0; j < list[iArg][0].length; j++) {
+            listClone[iArg] = list[iArg][i][j];
+            result[i].push(Functions[arity][functionName](listClone));
+          }
+        }
       }
       return [ result, dtype ]
     }
@@ -9155,6 +9177,14 @@ const relations = {
           return x.map((e, i) => compare(op, e, y[i], undefined))
         }
       }
+    },
+    matrix: {
+      relate(op, v, m, yPrev) {
+        if (yPrev === undefined) {
+          if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
+          return m.map(row => row.map((e, i) => compare(op, v[i], e, undefined)))
+        }
+      }
     }
   },
   columnVector: {
@@ -9187,6 +9217,13 @@ const relations = {
           return m.map(row => row.map(e => compare(op, e, y, yPrev)))
         } else if (Array.isArray(yPrev)) {
           return m.map((row, i) => row.map((e, j) => compare(op, e, y, yPrev[i][j])))
+        }
+      }
+    },
+    matrix: {
+      relate(op, m1, m2, yPrev) {
+        if (yPrev === undefined) {
+          return x.map((e, i) => compare(op, e, y[i], undefined))
         }
       }
     }
@@ -14874,12 +14911,11 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const numCols = Number(tokens[i + 2]);
           i += 2;
 
-          if (stack.length > 0 && stack[stack.length - 1].dtype === dt.RANGE) {
-            // Input was [start:step:end...]
-            stack.push(Matrix.operandFromRange(stack.pop().value));
-          } else {
-            stack.push(Matrix.operandFromTokenStack(stack, numRows, numCols));
-          }
+          const result = (stack.length > 0 && stack[stack.length - 1].dtype === dt.RANGE)
+            ? Matrix.operandFromRange(stack.pop().value) // Input was [start:step:end...]
+            : Matrix.operandFromTokenStack(stack, numRows, numCols);
+          if (result.dtype === dt.ERROR) { return result }
+          stack.push(result);
           break
         }
 
@@ -15038,11 +15074,26 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
-        case "number": {
+        case "Int": {
           const arg = stack.pop();
-          if (!(arg.dtype & dt.STRING)) { return errorOprnd("STRING") }
           const output = Object.create(null);
           output.unit = { expos: allZeros };
+          if (!(arg.dtype & dt.BOOLEAN)) { return errorOprnd("LOGIC", "Int") }
+          output.value = isVector(arg)
+            ? arg.value.map(e => Rnl.fromNumber(Number(e)))
+            : isMatrix(arg)
+            ? arg.value.map(row => row.map(e => Rnl.fromNumber(Number(e))))
+            : Rnl.fromNumber(Number(arg.value));
+          output.dtype = arg.dtype - dt.BOOLEAN + dt.RATIONAL;
+          stack.push(Object.freeze(output));
+          break
+        }
+
+        case "number": {
+          const arg = stack.pop();
+          const output = Object.create(null);
+          output.unit = { expos: allZeros };
+          if (!(arg.dtype & dt.STRING)) { return errorOprnd("STRING") }
           output.value = isVector(arg)
             ? arg.value.map(e => Rnl.fromString(e))
             : isMatrix(arg)
@@ -15386,13 +15437,15 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
 
           if (setComparisons.includes(tkn)) {
             bool.value = compare(tkn, o1.value, o2.value, prevValue);
+            bool.dtype = o1.dtype + dt.BOOLEANFROMCOMPARISON;
           } else {
             const [shape1, shape2, _] = binaryShapesOf(o1, o2);
             bool.value = Operators.relations[shape1][shape2].relate(tkn, o1.value,
               o2.value, prevValue);
+            bool.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn)
+                         + dt.BOOLEANFROMCOMPARISON;
           }
           if (bool.value.dtype && bool.value.dtype === dt.ERROR) { return bool.value }
-          bool.dtype = o1.dtype + dt.BOOLEANFROMCOMPARISON;
           if (bool.dtype & dt.RATIONAL) { bool.dtype -= dt.RATIONAL; }
           if (bool.dtype & dt.COMPLEX) { bool.dtype -= dt.COMPLEX; }
           if (bool.dtype & dt.STRING) { bool.dtype -= dt.STRING; }
@@ -23629,7 +23682,7 @@ defineFunction({
   }
 });
 
-const sign = num => num >= 0 ? "+" : "-";
+const sign$1 = num => num >= 0 ? "+" : "-";
 
 // \raise, \lower, and \raisebox
 
@@ -23641,8 +23694,8 @@ const mathmlBuilder = (group, style) => {
   const dyAbs = Math.abs(dy.number);
   // The next two lines do not work in Chromium.
   // TODO: Find some other way to adjust height and depth.
-  node.setAttribute("height", sign(dy.number) +  dyAbs + dy.unit);
-  node.setAttribute("depth", sign(-dy.number) +  dyAbs + dy.unit);
+  node.setAttribute("height", sign$1(dy.number) +  dyAbs + dy.unit);
+  node.setAttribute("depth", sign$1(-dy.number) +  dyAbs + dy.unit);
   return node
 };
 
