@@ -451,7 +451,7 @@ Unicode range 1D49C to 1D4B5.
   
   @font-face {
     font-family: Latin Modern Math;
-    src: url('latinmodernmath.woff2');
+    src: url('./latinmodernmath.woff2');
   }
   
   math {
@@ -474,6 +474,10 @@ Unicode range 1D49C to 1D4B5.
     font-family: "Latin Modern Math", "Times New Roman", math;
   }
   
+  /* Next line is active in Firefox and Safari.
+   * Not in Chromium, which recognizes display: "block math" written inline. */
+  math.tml-display { display: block; }
+  
   *.mathscr {
     font-family: "Temml";
   }
@@ -493,7 +497,7 @@ Unicode range 1D49C to 1D4B5.
   }
   
   /* Avoid flex-wrap in Firefox */
-  @supports (-moz-appearance:meterbar) and (display:flex) {
+  @-moz-document url-prefix() {
     math { display: inline; }
     math > mrow { padding: 0 }
   }
@@ -619,7 +623,7 @@ Unicode range 1D49C to 1D4B5.
   
   /* MathML-Core does not support <menclose> attributes.
    * So Use background images for \cancel */
-  menclose.cancel {
+  mrow.cancel {
     background: 
         linear-gradient(to top left,
             rgba(0,0,0,0) 0%,
@@ -629,7 +633,7 @@ Unicode range 1D49C to 1D4B5.
             rgba(0,0,0,0) 100%);
   }
   
-  menclose.bcancel {
+  mrow.bcancel {
     background: 
         linear-gradient(to top right,
             rgba(0,0,0,0) 0%,
@@ -639,7 +643,7 @@ Unicode range 1D49C to 1D4B5.
             rgba(0,0,0,0) 100%);
   }
   
-  menclose.xcancel {
+  mrow.xcancel {
     background: 
         linear-gradient(to top left,
             rgba(0,0,0,0) 0%,
@@ -653,8 +657,8 @@ Unicode range 1D49C to 1D4B5.
             rgba(0,0,0,1) 50%,
             rgba(0,0,0,0) calc(50% + 0.06em),
             rgba(0,0,0,0) 100%);
-  }  
-
+  }
+  
 /* This section sets math sizes */
 math   { font-size: 1em; }
 math .special-fraction { font-family: "Times New Roman"; }

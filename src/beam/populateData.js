@@ -261,7 +261,7 @@ export function populateData(input, factorInput) {
     }
   }
 
-  // Distributied loads
+  // Distributed loads
   beam.allLoadsAreUniform = true  // initialize the variable
   for (i = 0; i < input.loads.length; i++) {
     const load = input.loads[i];
