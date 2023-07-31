@@ -1182,7 +1182,7 @@ const relations = {
     matrix: {
       relate(op, m1, m2, yPrev) {
         if (yPrev === undefined) {
-          return x.map((e, i) => compare(op, e, y[i], undefined))
+          return m1.map((e, i) => compare(op, e, m2[i], undefined))
         }
       }
     }
