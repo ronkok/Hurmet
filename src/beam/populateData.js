@@ -5,30 +5,35 @@ import { Rnl } from "../rational.js"
 // Lengths and x-coordinates are written as rational numbers, not floating point.
 // That way, we can make a lessThanOrEqualTo comparison w/o floating point errors.
 
-const nodeFixity = { p: "pinned", f: "fixed", h: "hinge", ph: "proppedHinge", s: "spring" }
 const ord = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth"];
 
-const loadType = {
-  // type 0 is total service load, an accumulation of all of the others.
-  dead: 1,  D: 1, d: 1, load: 1, // dead
-  fluid: 2, F: 2, f: 2, // fluid
-  live: 3,  L: 3, l: 3, // live
-  H: 4, h: 4, // horizontal load, usually soil against a retaining wall
-  roof: 5,  Lr: 5, lr: 5, LR: 5, lR: 5, RL: 5, roofLive: 5, // roof live
-  snow: 6,  S: 6, s: 6, // snow
-  rain: 7,  R: 7, r: 7, // rain
-  wind: 8,  W: 8, w: 8, // wind
-  EQ: 9,    E: 9, e: 9, seismic: 9  // earthquake
+const loadTypesFromInput = factorInput => {
+  let doLiveLoadPatterns = false
+  const headings = factorInput.headings || null
+  const loadTypeMap = Object.create(null)
+  const getsPattern = new Array(9).fill(false)
+  if (factorInput === "service" || !factorInput) {
+    return [null, getsPattern, 1, doLiveLoadPatterns]
+  }
+  for (let i = 0; i < headings.length; i++) {
+    const loadName = headings[i].replace("*", "")
+    loadTypeMap[loadName] = i + 1
+    if (headings[i].indexOf("*") > -1) {
+      doLiveLoadPatterns = true
+      getsPattern[i + 1] = true
+    }
+  }
+  return [loadTypeMap, getsPattern, headings.length, doLiveLoadPatterns]
 }
 
-const combinationsFromInput = factorInput => {
+const combinationsFromInput = (factorInput, loadTypeMap) => {
   const data = factorInput.data
   const headings = factorInput.headings
   const combinations = [];
   for (let i = 0; i < data[0].length; i++) {
     const factors = new Array(10).fill(0)
     for (let j = 0; j < headings.length; j++) {
-      const type = loadType[headings[j]];
+      const type = loadTypeMap[headings[j].replace("*", "")];
       factors[type] = Rnl.toNumber(data[j][i])
     }
     combinations.push(factors)
@@ -50,7 +55,7 @@ const newNode = (fixity, k, xCoordinate) => {
   }
 }
 
-const incrementDoF = fixity => {
+const incrementDegreesOfFreedom = fixity => {
   switch (fixity) {
     case "pinned":
       return 1
@@ -150,8 +155,6 @@ export function populateData(input, factorInput) {
       : 1, // Plot + moment on comp or tension side.
     SI: input.SI || false, // boolean. Are we using SI units?
     doLiveLoadPatterns: input.patterns,
-    LLF: input.LLF,
-    SDS: input.SDS,
     gotType: [false, false, false, false, false, false, false, false, false],
     wMax: 0, // default line load maximum
     x: 180, // x coordinate of the beam's left end inside the SVG, in px
@@ -178,21 +181,27 @@ export function populateData(input, factorInput) {
   // Definitions
   // (1) A "span" is a section of beam between two user-defined nodes.
   // (2) A "segment" is a section of beam between nodes or points of load discontinuity.
-  // Each span thus contains one or more segments.
+  // Each span thus consists of one or more segments.
   let i = 0
   let cummulativeLength = Rnl.zero
   const nodes = []
   const spans = []
   beam.numDegreesOfFreedom = 0
+  // eslint-disable-next-line max-len
+  const [loadTypeMap, getsPattern, numLoadTypes, doLiveLoadPatterns] = loadTypesFromInput(factorInput)
+  beam.numLoadTypes = numLoadTypes
+  beam.getsPattern = getsPattern
+  beam.doLiveLoadPatterns = doLiveLoadPatterns
+
   for (i = 0; i < input.nodes.length; i++) {
     // Process node input.
-    const fixity = input.nodes[i] === "none" ? "continuous" : nodeFixity[input.nodes[i]];
+    const fixity = input.nodes[i];
     if (!fixity) { return [`The ${ord[i]} node designation is invalid.`] }
     if (fixity === "spring" && input.k === 0) {
       return ["Error. A model with a spring needs a spring constant, k."]
     }
     nodes.push(newNode(fixity, beam.k, cummulativeLength))
-    beam.numDegreesOfFreedom += incrementDoF(fixity)
+    beam.numDegreesOfFreedom += incrementDegreesOfFreedom(fixity)
     if (i < input.spanLength.length) {
       // Process span input.
       const length = input.spanLength[i]
@@ -216,7 +225,11 @@ export function populateData(input, factorInput) {
       continue
     }
     if (load.from === 0) { continue }
-    let type = load.type === "none" ? 0 : loadType[load.type]
+    let type = load.type === "none"
+      ? 0
+      : loadTypeMap
+      ? loadTypeMap[load.type]
+      : 1
     if (type === 0) {
       if (beam.comboName !== "service") {
         return [`The ${ord[i]} load must have a load type defined.`]
@@ -266,7 +279,7 @@ export function populateData(input, factorInput) {
   for (i = 0; i < input.loads.length; i++) {
     const load = input.loads[i];
     if (load.shape !== "w") { continue }
-    let type = load.type === "none" ? 0 : loadType[load.type]
+    let type = load.type === "none" ? 0 : loadTypeMap ? loadTypeMap[load.type] : 1
     if (type === 0) {
       if (beam.comboName !== "service") {
         return [`The ${ord[i]} load must have a load type defined.`]
@@ -392,7 +405,7 @@ export function populateData(input, factorInput) {
 
   const combinations = typeof factorInput === "string"
     ? "service"
-    : combinationsFromInput(factorInput)
+    : combinationsFromInput(factorInput, loadTypeMap)
 
   return [errorMsg, beam, nodes, spans, combinations]
 

@@ -28,13 +28,58 @@ export const readInputData = data => {
   input.loads = [];
   input.E = 1
   input.I = 1
-  input.LLF = 0
-  input.SDS = 0
   input.k = 0
   input.SI = false
   input.convention = 1
   // Read the input and overwrite the defaults.
-  for (let i = 0; i < data[0].length; i++) {
+
+  // Read the top line of data.
+  // It contains the geometry, connectivity, and node fixity.
+  const layout = data[1][0].trim()
+  if (numberRegEx.test(layout)) { input.nodes.push("continuous") }
+  const elements = layout.split(/ +/g)
+  for (let k = 0; k < elements.length; k++) {
+    switch (elements[k]) {
+      case "p":
+      case "△":
+        input.nodes.push("pinned")
+        break
+      case "f":
+      case "⫢":
+        input.nodes.push("fixed")
+        break
+      case "h":
+      case "∘":
+        input.nodes.push("hinged")
+        break
+      case "ph":
+      case "⫯":
+      case "⧊":
+        input.nodes.push("proppedHinge")
+        break
+      case "s":
+      case "⌇":
+        input.nodes.push("spring")
+        break
+      case "-":
+        input.nodes.push("continuous")
+        break
+      default: {
+        const element = elements[k].replace(ftRegEx, "ft")
+        const [L, pos] = readNumber(element)
+        if (typeof L === "string") { return "Error. Non-numeric length." }
+        let unitName = element.slice(pos).trim()
+        if (unitName === "") { unitName = "mm" }
+        if (metricLengths.includes(unitName)) { input.SI = true }
+        input.spanLength.push(convertToBaseUnit(L, unitName))
+        break
+      }
+    }
+  }
+  if (numberRegEx.test(elements[elements.length - 1])) { input.nodes.push("continuous") }
+
+  // Read the rest of the data.
+  for (let i = 1; i < data[0].length; i++) {
     const item = data[0][i].trim()
     let datum = data[1][i].trim()
     switch (item) {
@@ -62,50 +107,13 @@ export const readInputData = data => {
         break
       }
 
-      case "plan": {
-        if (numberRegEx.test(datum)) { input.nodes.push("none") }
-        const elements = datum.split(/ +/g)
-        for (let k = 0; k < elements.length; k++) {
-          switch (elements[k]) {
-            case "p":
-            case "f":
-            case "h":
-            case "ph":
-            case "s":
-            case "-":
-              input.nodes.push(elements[k] === "-" ? "none" : elements[k])
-              break
-            default: {
-              const element = elements[k].replace(ftRegEx, "ft")
-              const [L, pos] = readNumber(element)
-              if (typeof L === "string") { return "Error. Non-numeric length." }
-              let unitName = element.slice(pos).trim()
-              if (unitName === "") { unitName = "mm" }
-              if (metricLengths.includes(unitName)) { input.SI = true }
-              input.spanLength.push(convertToBaseUnit(L, unitName))
-              break
-            }
-          }
-        }
-        if (numberRegEx.test(elements[elements.length - 1])) { input.nodes.push("none") }
+      case "+M": {
+        input.convention = datum.charAt(0).toLowerCase() === "←→" ? 1 : -1
         break
       }
 
-      case "dead":
-      case "D":
-      case "load":
-      case "live":
-      case "L":
-      case "snow":
-      case "S":
-      case "wind":
-      case "W":
-      case "EQ":
-      case "F":
-      case "H":
-      case "rain":
-      case "roof":
-      case "R": {
+      default: {
+        // Treat as a load
         const load = Object.create(null)
         datum = datum.replace(ftRegEx, "ft")
         const elements = datum.split(",")
@@ -163,30 +171,7 @@ export const readInputData = data => {
         if (L1 !== 0) { load.from = convertToBaseUnit(L1, lengthUnitName) }
         if (L2 !== 0) { load.to = convertToBaseUnit(L2, lengthUnitName) }
         input.loads.push(load)
-        break
       }
-
-      case "convention": {
-        input.convention = datum.charAt(0).toLowerCase() === "t" ? -1 : 1
-        break
-      }
-
-      case "LLF": {
-        const [LLF, _] = readNumber(datum)
-        if (typeof LLF === "string") { return "Error. LLF is non-numeric." }
-        input.LLF = Rnl.toNumber(LLF)
-        break
-      }
-
-      case "SDS": {
-        const [SDS, _] = readNumber(datum)
-        if (typeof SDS === "string") { return "Error. SDS is non-numeric." }
-        input.SDS = Rnl.toNumber(SDS)
-        break
-      }
-
-      default:
-        return `Error. Unrecognized item ${item}`
     }
   }
   return input

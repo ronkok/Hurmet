@@ -1,8 +1,8 @@
-import { DEAD, FLUID, LIVE, ROOFLIVE, HORIZ, SNOW, RAIN, WIND, EQ } from "./utils"
 import { clone } from "../utils"
 
 const dotProduct = (a, b) => a.map((e, i) => (e * b[i])).reduce((m, n) => m + n)
-const isLiveish = loadType => loadType === LIVE || loadType === ROOFLIVE || loadType === SNOW
+const isLiveish = (loadType, beam) => beam.getsPattern[loadType];
+
 
 export function doAnalysis(beam, nodes, spans) {
   const numNodes = nodes.length
@@ -26,13 +26,14 @@ export function doAnalysis(beam, nodes, spans) {
 
   // Find the Span Stiffness Matrix, SSM
   // Imagine that a fixed-end span undergoes a displacement, Δ, down at its right end.
+  // (Notice that rotation, θ, is zero at both ends)
   // ▄                                                         █
   // █                                                         █
-  // █▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,█
-  // █             ▀▀▀▀▀▀▀▄▄▄▄                                 █
-  // █                         ▀▀▀▌▄▄g                         █
-  // █                                 ▀▀▀▀▌▄▄▄▄,              █
-  //                                             ▀▀▀▀▀▀▀▀▀▀▀▀▀▀█
+  // █▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,█──────┬──
+  // █             ▀▀▀▀▀▀▀▄▄▄▄                                 █      │
+  // █                         ▀▀▀▄▄▄▄▄                        █      │ Δ
+  // █                                 ▀▀▀▀▄▄▄▄▄▄              █      │
+  //                                             ▀▀▀▀▀▀▀▀▀▀▀▀▀▀█──────┴──
   //                                                           █
   // If we draw the free-body diagram of the span, we would see these forces:
   // V_left = 6EIΔ/L², upward
@@ -41,7 +42,7 @@ export function doAnalysis(beam, nodes, spans) {
   // M_right = 12EIΔ/L³, clockwise
   // The Span Stiffness Matrix is populated, for each span, with just those stiffnesses.
 
-  const ssm = [];
+  const ssm = []; // Span Stiffnes Matrix, not yet the Stiffness Matrix.
   ssm.push([0, 0, 0, 0, 0])
   for (let i = 1; i <= numSpans; i++) {
     const subMatrix = [
@@ -146,73 +147,51 @@ export function doAnalysis(beam, nodes, spans) {
   }
 
   //Find the number of load patterns
-  beam.containsLive = beam.gotType[LIVE] || beam.gotType[ROOFLIVE] || beam.gotType[SNOW]
+  beam.containsLive = false
+  for (let i = 1; i <= beam.numLoadTypes; i++) {
+    if (beam.getsPattern[i]) { beam.containsLive = true; break }
+  }
   const numPatterns = !beam.containsLive
     ? 1
     : !beam.doLiveLoadPatterns
     ? 1
     : numSpans > 7
-    ? 2
-    : beam.patterns
-    ? 2 ** (numSpans - 1)
+    ? beam.patterns
     : 2
-  beam.numPatterns = numPatterns
 
   // Initialize some variables
   const feam = new Array(numEndActions + 1).fill(0)       // Fixed End Action Matrix
   const nfm = new Array(numDegreesOfFreedom + 1).fill(0)  // Nodal Force Matrix
   let mam  // Member Action Matrix
   let dm   // Displacement Matrix
-  let mamD = new Array(numEndActions).fill(0)       // mam for Dead load
-  let dmD = new Array(numDegreesOfFreedom).fill(0)  // Displacement Matrix for Dead Load
-  let mamL // Live
-  let dmL
-  let mamLr // Roof Live
-  let dmLr
-  let mamS // Snow
-  let dmS
-  let mamF = new Array(numEndActions).fill(0) // Fluid
-  let dmF = new Array(numDegreesOfFreedom).fill(0)
-  let mamH = new Array(numEndActions).fill(0) // HORIZ
-  let dmH = new Array(numDegreesOfFreedom).fill(0)
-  let mamR = new Array(numEndActions).fill(0) // RAIN
-  let dmR = new Array(numDegreesOfFreedom).fill(0)
-  let mamW = new Array(numEndActions).fill(0) // WIND
-  let dmW = new Array(numDegreesOfFreedom).fill(0)
-  let mamE = new Array(numEndActions).fill(0) // EQ
-  let dmE = new Array(numDegreesOfFreedom).fill(0)
-  if (numPatterns > 1 && beam.containsLive) {
-    mamL = new Array(numEndActions + 1).fill(0)
-    mamL = mamL.map(e => new Array(numDegreesOfFreedom + 1).fill(0))
-    dmL = new Array(numDegreesOfFreedom + 1).fill(0)
-    dmL = dmL.map(e => new Array(numSpans + 1).fill(0))
-    mamLr = new Array(numEndActions + 1).fill(0)
-    mamLr = mamLr.map(e => new Array(numDegreesOfFreedom + 1).fill(0))
-    dmLr = new Array(numDegreesOfFreedom + 1).fill(0)
-    dmLr = dmLr.map(e => new Array(numSpans + 1).fill(0))
-    mamS = new Array(numEndActions + 1).fill(0)
-    mamS = mamS.map(e => new Array(numDegreesOfFreedom + 1).fill(0))
-    dmS = new Array(numDegreesOfFreedom + 1).fill(0)
-    dmS = dmS.map(e => new Array(numSpans + 1).fill(0))
-  } else {
-    mamL = new Array(numEndActions).fill(0)
-    dmL = new Array(numDegreesOfFreedom).fill(0)
-    mamLr = new Array(numEndActions).fill(0)
-    dmLr = new Array(numDegreesOfFreedom).fill(0)
-    mamS = new Array(numEndActions).fill(0)
-    dmS = new Array(numDegreesOfFreedom).fill(0)
+  const actions = new Array(beam.numLoadTypes)
+  const deflections = new Array(beam.numLoadTypes)
+  for (let i = 0; i <= beam.numLoadTypes; i++) {
+    if (beam.getsPattern[i]) {
+      actions[i] = new Array(numEndActions + 1).fill(0)
+      for (let j = 0; j < actions[i].length; j++) {
+        actions[i][j] = new Array(numDegreesOfFreedom).fill(0)
+      }
+      deflections[i] = new Array(numDegreesOfFreedom + 1).fill(0)
+      for (let j = 0; j < deflections[i].length; j++) {
+        deflections[i][j] = Array(numSpans + 1).fill(0)
+      }
+    } else {
+      actions[i] = new Array(numEndActions).fill(0)
+      deflections[i] = new Array(numDegreesOfFreedom).fill(0)
+    }
   }
 
   //Find a Member end Action Matrix, mam for each type of load, Service, D, L, S, W, E, etc
   //For the live loads, find a different mam due to loads on each individual span.
-  for (let loadType = 0; loadType <= EQ; loadType++) {
+  for (let loadType = 0; loadType <= 9; loadType++) {
     if (loadType === 0 || gotType[loadType]) {
       let lastK = 0
       let doPatterns = false // patterned live loads
       if (loadType === 0) {
         doPatterns = false
         lastK = 1
-      } else if (isLiveish(loadType) && numPatterns > 1) {
+      } else if (isLiveish(loadType, beam) && numPatterns > 1) {
         doPatterns = true
         // To do load patterns, we have to get a Member Action Matrix, mam, for each span.
         lastK = numSpans
@@ -399,7 +378,7 @@ export function doAnalysis(beam, nodes, spans) {
             if (nodes[i].fixity === "continuous" || nodes[i].fixity === "spring") {
               nfm[1] = -feam[1] - feam[2]
               nfm[2] = -feam[3]
-              if (isLiveish(loadType) && numPatterns > 1) {
+              if (isLiveish(loadType, beam) && numPatterns > 1) {
                 if (k === 0) {
                   nfm[1] = nfm[1] - nodes[1].P[loadType]
                   nfm[2] = nfm[2] - nodes[1].M[loadType]
@@ -415,7 +394,7 @@ export function doAnalysis(beam, nodes, spans) {
             } else if (nodes[i].fixity === "pinned") {
               j += 1
               nfm[1] = -feam[3]
-              if (isLiveish(loadType) && numPatterns > 1) {
+              if (isLiveish(loadType, beam) && numPatterns > 1) {
                 if (k === 1) {
                   nfm[j] = nfm[j] - nodes[1].M[loadType]
                 }
@@ -429,7 +408,7 @@ export function doAnalysis(beam, nodes, spans) {
               nfm[j] = -feam[5 * numSpans - 1] - feam[5 * numSpans + 1]
               j += 1
               nfm[j] = -feam[5 * numSpans]
-              if (isLiveish(loadType) && numPatterns > 1) {
+              if (isLiveish(loadType, beam) && numPatterns > 1) {
                 if (k === numSpans) {
                   nfm[j - 1] = nfm[j - 1] - nodes[numNodes].P[loadType]
                   nfm[j] = nfm[j] - nodes[numNodes].M[loadType]
@@ -443,7 +422,7 @@ export function doAnalysis(beam, nodes, spans) {
             } else if (nodes[i].fixity === "pinned") {
               j += 1
               nfm[j] = -feam[5 * numSpans]
-              if (isLiveish(loadType) && numPatterns > 1) {
+              if (isLiveish(loadType, beam) && numPatterns > 1) {
                 if (k === numSpans) {
                   nfm[j] = nfm[j] - nodes[numNodes].M[loadType]
                 }
@@ -522,80 +501,22 @@ export function doAnalysis(beam, nodes, spans) {
           if (Math.abs(mam[i]) < 0.00000000000001) { mam[i] = 0 }
         }
 
-        switch (loadType) {
-          case DEAD:
-            mamD = clone(mam)
-            if (EI !== 1) { dmD = clone(dm) }
-            break
-          case FLUID:
-            mamF = clone(mam)
-            if (EI !== 1) { dmF = clone(dm) }
-            break
-          case LIVE:
-            if (typeof mamL[0] === "number") {
-              mamL = clone(mam)
-              if (EI !== 1) { dmL = clone(dm) }
-            } else {
-              for (let j = 1; j < 5 * numSpans + 1; j++) {
-                mamL[j][k - 1] = mam[j] //mam for live loads on span k
-              }
-              if (EI !== 1) {
-                for (let j = 1; j <= numDegreesOfFreedom; j++) {
-                  dmL[j][k] = dm[j]
-                }
-              }
+        if ((!beam.getsPattern[loadType]) || typeof actions[loadType][0] === "number") {
+          actions[loadType] = clone(mam)
+          if (EI !== 1) { deflections[loadType] = clone(dm) }
+        } else {
+          for (let j = 1; j < 5 * numSpans + 1; j++) {
+            actions[loadType][j][k - 1] = mam[j] //mam for live loads on span k
+          }
+          if (EI !== 1) {
+            for (let j = 1; j <= numDegreesOfFreedom; j++) {
+              deflections[loadType][j][k] = dm[j]
             }
-            break
-          case HORIZ:
-            mamH = clone(mam)
-            if (EI !== 1) { dmH = clone(dm) }
-            break
-          case ROOFLIVE:
-            if (typeof mamLr[0] === "number") {
-              mamLr = clone(mam)
-              if (EI !== 1) { dmLr = clone(dm) }
-            } else {
-              for (let j = 1; j < 5 * numSpans + 1; j++) {
-                mamLr[j][k - 1] = mam[j]
-              }
-              if (EI !== 1) {
-                for (let j = 0; j < numDegreesOfFreedom; j++) {
-                  dmLr[j][k] = dm[j]
-                }
-              }
-            }
-            break
-          case SNOW:
-            if (typeof mamS[0] === "number") {
-              mamS = clone(mam)
-              dmS = clone(dm)
-            } else {
-              for (let j = 1; j < 5 * numSpans + 1; j++) {
-                mamS[j][k - 1] = mam[j]
-              }
-              if (EI !== 1) {
-                for (let j = 0; j < numDegreesOfFreedom; j++) {
-                  dmS[j][k] = dm[j]
-                }
-              }
-            }
-            break
-          case RAIN:
-            mamR = clone(mam)
-            if (EI !== 1) { dmR = clone(dm) }
-            break
-          case WIND:
-            mamW = clone(mam)
-            if (EI !== 1) { dmW = clone(dm) }
-            break
-          case EQ:
-            mamE = clone(mam)
-            if (EI !== 1) { dmE = clone(dm) }
-            break
+          }
         }
 
         // Find the reactions
-        if (numPatterns === 1 || !(beam.containsLive && isLiveish(loadType))) {
+        if (numPatterns === 1 || !(beam.containsLive && isLiveish(loadType, beam))) {
           if (nodes[1].fixity === "fixed") {
             nodes[1].Mr[loadType] = mam[3] + nodes[1].M[loadType]
           }
@@ -685,10 +606,7 @@ export function doAnalysis(beam, nodes, spans) {
       }
     }
   }
-  return [
-    [mamD, mamL, mamLr, mamS, mamF, mamH, mamR, mamW, mamE],
-    [dmD, dmL, dmLr, dmS, dmF, dmH, dmR, dmW, dmE]
-  ]
+  return [actions, deflections]
 }
 
 const createLsmDtm = (ssm, dtm, nodes, numEndActions, numDegreesOfFreedom) => {
@@ -768,7 +686,7 @@ const luDecomposition = (sm, bandWidth) => {
 }
 
 const solveViaLDLt = (diag, ltm, b, bandWidth) => {
-  // Solve for dm() in a system of equations expressed by matrices: SM()× dm() = NFM()
+  // Solve for dm() in a system of equations expressed by matrices: SM() × dm() = NFM()
 
   // This sub// s method is a banded version of the LDL**T solver.
   // LDL**T takes advantage of the fact that SM is a symmetric, positive-definite matrix.

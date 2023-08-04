@@ -11,7 +11,7 @@
 export const clone = obj => {
   // Clone a JavaScript object.
   // That is, make a deep copy that does not contain any reference to the original object.
-  // This function works if the object conatains only these types:
+  // This function works if the object contains only these types:
   //     boolean, number, bigint, string, null, undefined, date, array, object, Map
   // Any other type, or non-tree structure (e.g., "this"), cannot be handled by this function.
   // This is a modified version of https://stackoverflow.com/a/728694

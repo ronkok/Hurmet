@@ -1,4 +1,3 @@
-import { DEAD, FLUID, LIVE, ROOFLIVE, HORIZ, SNOW, RAIN, WIND, EQ } from "./utils"
 import { getLoadPatterns } from "./loadPatterns"
 import { populateMAM } from "./populateMAM"
 
@@ -9,9 +8,8 @@ export function combine(beam, nodes, spans, actions, deflections, comboSet) {
   const numSpans = spans.length - 1
   const isService = comboSet === "service"
   if (isService) { comboSet = [[0, 1, 1, 1, 1, 1, 1, 1, 1, 1]] }
-  const numPatterns = beam.numPatterns
   const liveLoadPatterns = getLoadPatterns(beam, numSpans)
-  const [dmD, dmL, dmLr, dmS, dmF, dmH, dmR, dmW, dmE] = deflections
+  const numPatterns = liveLoadPatterns.length
 
   let vMin = 0
   let vMax = 0
@@ -24,7 +22,7 @@ export function combine(beam, nodes, spans, actions, deflections, comboSet) {
 
   // Get ready to do lots of different load combinations.
   // Definition: "combern" is a conflation of the words "combination" and "pattern".
-  const numComberns = getNumComberns(comboSet, isService, beam)
+  const numComberns = getNumComberns(comboSet, isService, beam, numPatterns)
 
   for (let i = 1; i <= numSpans; i++) {
     for (let j = 0; j < spans[i].segments.length; j++) {
@@ -83,15 +81,15 @@ export function combine(beam, nodes, spans, actions, deflections, comboSet) {
         if (iCombo === 0 && beam.EI !== 1) {
           // Create a Displacement Matrix, DM, for this load combination and load pattern.
           dm = new Array(beam.numDegreesOfFreedom + 1).fill(0)
-          if (beam.gotType[DEAD]) { dm = dm.map((e, i) => e + dmD[i]) }
-          if (beam.gotType[FLUID]) { dm = dm.map((e, i) => e + dmF[i]) }
-          if (beam.gotType[LIVE]) { dm = getLiveDM(dm, dmL, loadPattern, numSpans) }
-          if (beam.gotType[HORIZ]) { dm = dm.map((e, i) => e + dmH[i]) }
-          if (beam.gotType[ROOFLIVE]) { dm = getLiveDM(dm, dmLr, loadPattern, numSpans) }
-          if (beam.gotType[SNOW]) { dm = getLiveDM(dm, dmS, loadPattern, numSpans) }
-          if (beam.gotType[RAIN]) { dm = dm.map((e, i) => e + dmR[i]) }
-          if (beam.gotType[WIND]) { dm = dm.map((e, i) => e + dmW[i]) }
-          if (beam.gotType[EQ]) { dm = dm.map((e, i) => e + dmE[i]) }
+          for (let iLoadType = 1; iLoadType < 10; iLoadType++) {
+            if (beam.gotType[iLoadType]) {
+              if (beam.getsPattern[iLoadType]) {
+                dm = getLiveDM(dm, deflections[iLoadType], loadPattern, numSpans)
+              } else {
+                dm = dm.map((e, i) => e + deflections[iLoadType][i])
+              }
+            }
+          }
         }
 
         let iDM = 0
@@ -311,21 +309,22 @@ const isReqdCombo = (combo, gotType) => {
   return isDeadLoadOnly
 }
 
-const comboContainsLive = combo => {
-  return (combo[LIVE] !== 0 || combo[ROOFLIVE] !== 0 || combo[SNOW] !== 0)
-}
+/*const comboContainsLive = (combo, beam) => {
+  for (let i = 1; i <= beam.numLoadTypes; i++) {
+    if (beam.getsPattern[i] && combo[i] !== 0) { return true }
+  }
+  return false
+}*/
 
-const getNumComberns = (comboSet, isService, beam) => {
+const getNumComberns = (comboSet, isService, beam, numPatterns) => {
   // We'll do a superposition of forces for each load combination and each live load pattern.
   // How many is that?
   // First, count the number of comberns needed to do the deflection superpositions.
-  let numComberns = beam.EI === 1 ? 1 : beam.numPatterns
+  let numComberns = beam.EI === 1 ? 1 : numPatterns
   // Then add a combern for each superposition done to get shears and moments.
   for (let i = 0; i < comboSet.length; i++) {
     if (isService || isReqdCombo(comboSet[i], beam.gotType)) {
-      numComberns += beam.containsLive && comboContainsLive(comboSet[i])
-      ? beam.numPatterns
-      : 1
+      numComberns += numPatterns
     }
   }
   return numComberns

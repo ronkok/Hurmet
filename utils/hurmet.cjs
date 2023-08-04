@@ -13,7 +13,7 @@
 const clone = obj => {
   // Clone a JavaScript object.
   // That is, make a deep copy that does not contain any reference to the original object.
-  // This function works if the object conatains only these types:
+  // This function works if the object contains only these types:
   //     boolean, number, bigint, string, null, undefined, date, array, object, Map
   // Any other type, or non-tree structure (e.g., "this"), cannot be handled by this function.
   // This is a modified version of https://stackoverflow.com/a/728694
@@ -8884,7 +8884,7 @@ const relations = {
     matrix: {
       relate(op, m1, m2, yPrev) {
         if (yPrev === undefined) {
-          return x.map((e, i) => compare(op, e, y[i], undefined))
+          return m1.map((e, i) => compare(op, e, m2[i], undefined))
         }
       }
     }
@@ -10757,30 +10757,35 @@ const draw = Object.freeze({
 // Lengths and x-coordinates are written as rational numbers, not floating point.
 // That way, we can make a lessThanOrEqualTo comparison w/o floating point errors.
 
-const nodeFixity = { p: "pinned", f: "fixed", h: "hinge", ph: "proppedHinge", s: "spring" };
 const ord = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth"];
 
-const loadType = {
-  // type 0 is total service load, an accumulation of all of the others.
-  dead: 1,  D: 1, d: 1, load: 1, // dead
-  fluid: 2, F: 2, f: 2, // fluid
-  live: 3,  L: 3, l: 3, // live
-  H: 4, h: 4, // horizontal load, usually soil against a retaining wall
-  roof: 5,  Lr: 5, lr: 5, LR: 5, lR: 5, RL: 5, roofLive: 5, // roof live
-  snow: 6,  S: 6, s: 6, // snow
-  rain: 7,  R: 7, r: 7, // rain
-  wind: 8,  W: 8, w: 8, // wind
-  EQ: 9,    E: 9, e: 9, seismic: 9  // earthquake
+const loadTypesFromInput = factorInput => {
+  let doLiveLoadPatterns = false;
+  const headings = factorInput.headings || null;
+  const loadTypeMap = Object.create(null);
+  const getsPattern = new Array(9).fill(false);
+  if (factorInput === "service" || !factorInput) {
+    return [null, getsPattern, 1, doLiveLoadPatterns]
+  }
+  for (let i = 0; i < headings.length; i++) {
+    const loadName = headings[i].replace("*", "");
+    loadTypeMap[loadName] = i + 1;
+    if (headings[i].indexOf("*") > -1) {
+      doLiveLoadPatterns = true;
+      getsPattern[i + 1] = true;
+    }
+  }
+  return [loadTypeMap, getsPattern, headings.length, doLiveLoadPatterns]
 };
 
-const combinationsFromInput = factorInput => {
+const combinationsFromInput = (factorInput, loadTypeMap) => {
   const data = factorInput.data;
   const headings = factorInput.headings;
   const combinations = [];
   for (let i = 0; i < data[0].length; i++) {
     const factors = new Array(10).fill(0);
     for (let j = 0; j < headings.length; j++) {
-      const type = loadType[headings[j]];
+      const type = loadTypeMap[headings[j].replace("*", "")];
       factors[type] = Rnl.toNumber(data[j][i]);
     }
     combinations.push(factors);
@@ -10802,7 +10807,7 @@ const newNode = (fixity, k, xCoordinate) => {
   }
 };
 
-const incrementDoF = fixity => {
+const incrementDegreesOfFreedom = fixity => {
   switch (fixity) {
     case "pinned":
       return 1
@@ -10902,8 +10907,6 @@ function populateData(input, factorInput) {
       : 1, // Plot + moment on comp or tension side.
     SI: input.SI || false, // boolean. Are we using SI units?
     doLiveLoadPatterns: input.patterns,
-    LLF: input.LLF,
-    SDS: input.SDS,
     gotType: [false, false, false, false, false, false, false, false, false],
     wMax: 0, // default line load maximum
     x: 180, // x coordinate of the beam's left end inside the SVG, in px
@@ -10930,21 +10933,27 @@ function populateData(input, factorInput) {
   // Definitions
   // (1) A "span" is a section of beam between two user-defined nodes.
   // (2) A "segment" is a section of beam between nodes or points of load discontinuity.
-  // Each span thus contains one or more segments.
+  // Each span thus consists of one or more segments.
   let i = 0;
   let cummulativeLength = Rnl.zero;
   const nodes = [];
   const spans = [];
   beam.numDegreesOfFreedom = 0;
+  // eslint-disable-next-line max-len
+  const [loadTypeMap, getsPattern, numLoadTypes, doLiveLoadPatterns] = loadTypesFromInput(factorInput);
+  beam.numLoadTypes = numLoadTypes;
+  beam.getsPattern = getsPattern;
+  beam.doLiveLoadPatterns = doLiveLoadPatterns;
+
   for (i = 0; i < input.nodes.length; i++) {
     // Process node input.
-    const fixity = input.nodes[i] === "none" ? "continuous" : nodeFixity[input.nodes[i]];
+    const fixity = input.nodes[i];
     if (!fixity) { return [`The ${ord[i]} node designation is invalid.`] }
     if (fixity === "spring" && input.k === 0) {
       return ["Error. A model with a spring needs a spring constant, k."]
     }
     nodes.push(newNode(fixity, beam.k, cummulativeLength));
-    beam.numDegreesOfFreedom += incrementDoF(fixity);
+    beam.numDegreesOfFreedom += incrementDegreesOfFreedom(fixity);
     if (i < input.spanLength.length) {
       // Process span input.
       const length = input.spanLength[i];
@@ -10968,7 +10977,11 @@ function populateData(input, factorInput) {
       continue
     }
     if (load.from === 0) { continue }
-    let type = load.type === "none" ? 0 : loadType[load.type];
+    let type = load.type === "none"
+      ? 0
+      : loadTypeMap
+      ? loadTypeMap[load.type]
+      : 1;
     if (type === 0) {
       if (beam.comboName !== "service") {
         return [`The ${ord[i]} load must have a load type defined.`]
@@ -11018,7 +11031,7 @@ function populateData(input, factorInput) {
   for (i = 0; i < input.loads.length; i++) {
     const load = input.loads[i];
     if (load.shape !== "w") { continue }
-    let type = load.type === "none" ? 0 : loadType[load.type];
+    let type = load.type === "none" ? 0 : loadTypeMap ? loadTypeMap[load.type] : 1;
     if (type === 0) {
       if (beam.comboName !== "service") {
         return [`The ${ord[i]} load must have a load type defined.`]
@@ -11144,7 +11157,7 @@ function populateData(input, factorInput) {
 
   const combinations = typeof factorInput === "string"
     ? "service"
-    : combinationsFromInput(factorInput);
+    : combinationsFromInput(factorInput, loadTypeMap);
 
   return [errorMsg, beam, nodes, spans, combinations]
 
@@ -11315,17 +11328,6 @@ const Draw = Object.freeze({
   restraint,
   textNode
 });
-
-// Constants
-const DEAD = 1;
-const FLUID = 2;
-const LIVE = 3;
-const HORIZ = 4;
-const ROOFLIVE = 5;
-const SNOW = 6;
-const RAIN = 7;
-const WIND = 8;
-const EQ = 9;
 
 const round = (num, prec) => {
   // Round a number to prec significant digits.
@@ -11582,13 +11584,58 @@ const readInputData = data => {
   input.loads = [];
   input.E = 1;
   input.I = 1;
-  input.LLF = 0;
-  input.SDS = 0;
   input.k = 0;
   input.SI = false;
   input.convention = 1;
   // Read the input and overwrite the defaults.
-  for (let i = 0; i < data[0].length; i++) {
+
+  // Read the top line of data.
+  // It contains the geometry, connectivity, and node fixity.
+  const layout = data[1][0].trim();
+  if (numberRegEx$3.test(layout)) { input.nodes.push("continuous"); }
+  const elements = layout.split(/ +/g);
+  for (let k = 0; k < elements.length; k++) {
+    switch (elements[k]) {
+      case "p":
+      case "△":
+        input.nodes.push("pinned");
+        break
+      case "f":
+      case "⫢":
+        input.nodes.push("fixed");
+        break
+      case "h":
+      case "∘":
+        input.nodes.push("hinged");
+        break
+      case "ph":
+      case "⫯":
+      case "⧊":
+        input.nodes.push("proppedHinge");
+        break
+      case "s":
+      case "⌇":
+        input.nodes.push("spring");
+        break
+      case "-":
+        input.nodes.push("continuous");
+        break
+      default: {
+        const element = elements[k].replace(ftRegEx, "ft");
+        const [L, pos] = readNumber(element);
+        if (typeof L === "string") { return "Error. Non-numeric length." }
+        let unitName = element.slice(pos).trim();
+        if (unitName === "") { unitName = "mm"; }
+        if (metricLengths.includes(unitName)) { input.SI = true; }
+        input.spanLength.push(convertToBaseUnit(L, unitName));
+        break
+      }
+    }
+  }
+  if (numberRegEx$3.test(elements[elements.length - 1])) { input.nodes.push("continuous"); }
+
+  // Read the rest of the data.
+  for (let i = 1; i < data[0].length; i++) {
     const item = data[0][i].trim();
     let datum = data[1][i].trim();
     switch (item) {
@@ -11616,50 +11663,13 @@ const readInputData = data => {
         break
       }
 
-      case "plan": {
-        if (numberRegEx$3.test(datum)) { input.nodes.push("none"); }
-        const elements = datum.split(/ +/g);
-        for (let k = 0; k < elements.length; k++) {
-          switch (elements[k]) {
-            case "p":
-            case "f":
-            case "h":
-            case "ph":
-            case "s":
-            case "-":
-              input.nodes.push(elements[k] === "-" ? "none" : elements[k]);
-              break
-            default: {
-              const element = elements[k].replace(ftRegEx, "ft");
-              const [L, pos] = readNumber(element);
-              if (typeof L === "string") { return "Error. Non-numeric length." }
-              let unitName = element.slice(pos).trim();
-              if (unitName === "") { unitName = "mm"; }
-              if (metricLengths.includes(unitName)) { input.SI = true; }
-              input.spanLength.push(convertToBaseUnit(L, unitName));
-              break
-            }
-          }
-        }
-        if (numberRegEx$3.test(elements[elements.length - 1])) { input.nodes.push("none"); }
+      case "+M": {
+        input.convention = datum.charAt(0).toLowerCase() === "←→" ? 1 : -1;
         break
       }
 
-      case "dead":
-      case "D":
-      case "load":
-      case "live":
-      case "L":
-      case "snow":
-      case "S":
-      case "wind":
-      case "W":
-      case "EQ":
-      case "F":
-      case "H":
-      case "rain":
-      case "roof":
-      case "R": {
+      default: {
+        // Treat as a load
         const load = Object.create(null);
         datum = datum.replace(ftRegEx, "ft");
         const elements = datum.split(",");
@@ -11717,37 +11727,15 @@ const readInputData = data => {
         if (L1 !== 0) { load.from = convertToBaseUnit(L1, lengthUnitName); }
         if (L2 !== 0) { load.to = convertToBaseUnit(L2, lengthUnitName); }
         input.loads.push(load);
-        break
       }
-
-      case "convention": {
-        input.convention = datum.charAt(0).toLowerCase() === "t" ? -1 : 1;
-        break
-      }
-
-      case "LLF": {
-        const [LLF, _] = readNumber(datum);
-        if (typeof LLF === "string") { return "Error. LLF is non-numeric." }
-        input.LLF = Rnl.toNumber(LLF);
-        break
-      }
-
-      case "SDS": {
-        const [SDS, _] = readNumber(datum);
-        if (typeof SDS === "string") { return "Error. SDS is non-numeric." }
-        input.SDS = Rnl.toNumber(SDS);
-        break
-      }
-
-      default:
-        return `Error. Unrecognized item ${item}`
     }
   }
   return input
 };
 
 const dotProduct$1 = (a, b) => a.map((e, i) => (e * b[i])).reduce((m, n) => m + n);
-const isLiveish = loadType => loadType === LIVE || loadType === ROOFLIVE || loadType === SNOW;
+const isLiveish = (loadType, beam) => beam.getsPattern[loadType];
+
 
 function doAnalysis(beam, nodes, spans) {
   const numNodes = nodes.length;
@@ -11771,13 +11759,14 @@ function doAnalysis(beam, nodes, spans) {
 
   // Find the Span Stiffness Matrix, SSM
   // Imagine that a fixed-end span undergoes a displacement, Δ, down at its right end.
+  // (Notice that rotation, θ, is zero at both ends)
   // ▄                                                         █
   // █                                                         █
-  // █▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,█
-  // █             ▀▀▀▀▀▀▀▄▄▄▄                                 █
-  // █                         ▀▀▀▌▄▄g                         █
-  // █                                 ▀▀▀▀▌▄▄▄▄,              █
-  //                                             ▀▀▀▀▀▀▀▀▀▀▀▀▀▀█
+  // █▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,█──────┬──
+  // █             ▀▀▀▀▀▀▀▄▄▄▄                                 █      │
+  // █                         ▀▀▀▄▄▄▄▄                        █      │ Δ
+  // █                                 ▀▀▀▀▄▄▄▄▄▄              █      │
+  //                                             ▀▀▀▀▀▀▀▀▀▀▀▀▀▀█──────┴──
   //                                                           █
   // If we draw the free-body diagram of the span, we would see these forces:
   // V_left = 6EIΔ/L², upward
@@ -11786,7 +11775,7 @@ function doAnalysis(beam, nodes, spans) {
   // M_right = 12EIΔ/L³, clockwise
   // The Span Stiffness Matrix is populated, for each span, with just those stiffnesses.
 
-  const ssm = [];
+  const ssm = []; // Span Stiffnes Matrix, not yet the Stiffness Matrix.
   ssm.push([0, 0, 0, 0, 0]);
   for (let i = 1; i <= numSpans; i++) {
     const subMatrix = [
@@ -11885,73 +11874,51 @@ function doAnalysis(beam, nodes, spans) {
   }
 
   //Find the number of load patterns
-  beam.containsLive = beam.gotType[LIVE] || beam.gotType[ROOFLIVE] || beam.gotType[SNOW];
+  beam.containsLive = false;
+  for (let i = 1; i <= beam.numLoadTypes; i++) {
+    if (beam.getsPattern[i]) { beam.containsLive = true; break }
+  }
   const numPatterns = !beam.containsLive
     ? 1
     : !beam.doLiveLoadPatterns
     ? 1
     : numSpans > 7
-    ? 2
-    : beam.patterns
-    ? 2 ** (numSpans - 1)
+    ? beam.patterns
     : 2;
-  beam.numPatterns = numPatterns;
 
   // Initialize some variables
   const feam = new Array(numEndActions + 1).fill(0);       // Fixed End Action Matrix
   const nfm = new Array(numDegreesOfFreedom + 1).fill(0);  // Nodal Force Matrix
   let mam;  // Member Action Matrix
   let dm;   // Displacement Matrix
-  let mamD = new Array(numEndActions).fill(0);       // mam for Dead load
-  let dmD = new Array(numDegreesOfFreedom).fill(0);  // Displacement Matrix for Dead Load
-  let mamL; // Live
-  let dmL;
-  let mamLr; // Roof Live
-  let dmLr;
-  let mamS; // Snow
-  let dmS;
-  let mamF = new Array(numEndActions).fill(0); // Fluid
-  let dmF = new Array(numDegreesOfFreedom).fill(0);
-  let mamH = new Array(numEndActions).fill(0); // HORIZ
-  let dmH = new Array(numDegreesOfFreedom).fill(0);
-  let mamR = new Array(numEndActions).fill(0); // RAIN
-  let dmR = new Array(numDegreesOfFreedom).fill(0);
-  let mamW = new Array(numEndActions).fill(0); // WIND
-  let dmW = new Array(numDegreesOfFreedom).fill(0);
-  let mamE = new Array(numEndActions).fill(0); // EQ
-  let dmE = new Array(numDegreesOfFreedom).fill(0);
-  if (numPatterns > 1 && beam.containsLive) {
-    mamL = new Array(numEndActions + 1).fill(0);
-    mamL = mamL.map(e => new Array(numDegreesOfFreedom + 1).fill(0));
-    dmL = new Array(numDegreesOfFreedom + 1).fill(0);
-    dmL = dmL.map(e => new Array(numSpans + 1).fill(0));
-    mamLr = new Array(numEndActions + 1).fill(0);
-    mamLr = mamLr.map(e => new Array(numDegreesOfFreedom + 1).fill(0));
-    dmLr = new Array(numDegreesOfFreedom + 1).fill(0);
-    dmLr = dmLr.map(e => new Array(numSpans + 1).fill(0));
-    mamS = new Array(numEndActions + 1).fill(0);
-    mamS = mamS.map(e => new Array(numDegreesOfFreedom + 1).fill(0));
-    dmS = new Array(numDegreesOfFreedom + 1).fill(0);
-    dmS = dmS.map(e => new Array(numSpans + 1).fill(0));
-  } else {
-    mamL = new Array(numEndActions).fill(0);
-    dmL = new Array(numDegreesOfFreedom).fill(0);
-    mamLr = new Array(numEndActions).fill(0);
-    dmLr = new Array(numDegreesOfFreedom).fill(0);
-    mamS = new Array(numEndActions).fill(0);
-    dmS = new Array(numDegreesOfFreedom).fill(0);
+  const actions = new Array(beam.numLoadTypes);
+  const deflections = new Array(beam.numLoadTypes);
+  for (let i = 0; i <= beam.numLoadTypes; i++) {
+    if (beam.getsPattern[i]) {
+      actions[i] = new Array(numEndActions + 1).fill(0);
+      for (let j = 0; j < actions[i].length; j++) {
+        actions[i][j] = new Array(numDegreesOfFreedom).fill(0);
+      }
+      deflections[i] = new Array(numDegreesOfFreedom + 1).fill(0);
+      for (let j = 0; j < deflections[i].length; j++) {
+        deflections[i][j] = Array(numSpans + 1).fill(0);
+      }
+    } else {
+      actions[i] = new Array(numEndActions).fill(0);
+      deflections[i] = new Array(numDegreesOfFreedom).fill(0);
+    }
   }
 
   //Find a Member end Action Matrix, mam for each type of load, Service, D, L, S, W, E, etc
   //For the live loads, find a different mam due to loads on each individual span.
-  for (let loadType = 0; loadType <= EQ; loadType++) {
+  for (let loadType = 0; loadType <= 9; loadType++) {
     if (loadType === 0 || gotType[loadType]) {
       let lastK = 0;
       let doPatterns = false; // patterned live loads
       if (loadType === 0) {
         doPatterns = false;
         lastK = 1;
-      } else if (isLiveish(loadType) && numPatterns > 1) {
+      } else if (isLiveish(loadType, beam) && numPatterns > 1) {
         doPatterns = true;
         // To do load patterns, we have to get a Member Action Matrix, mam, for each span.
         lastK = numSpans;
@@ -12138,7 +12105,7 @@ function doAnalysis(beam, nodes, spans) {
             if (nodes[i].fixity === "continuous" || nodes[i].fixity === "spring") {
               nfm[1] = -feam[1] - feam[2];
               nfm[2] = -feam[3];
-              if (isLiveish(loadType) && numPatterns > 1) {
+              if (isLiveish(loadType, beam) && numPatterns > 1) {
                 if (k === 0) {
                   nfm[1] = nfm[1] - nodes[1].P[loadType];
                   nfm[2] = nfm[2] - nodes[1].M[loadType];
@@ -12152,7 +12119,7 @@ function doAnalysis(beam, nodes, spans) {
             } else if (nodes[i].fixity === "fixed") ; else if (nodes[i].fixity === "pinned") {
               j += 1;
               nfm[1] = -feam[3];
-              if (isLiveish(loadType) && numPatterns > 1) {
+              if (isLiveish(loadType, beam) && numPatterns > 1) {
                 if (k === 1) {
                   nfm[j] = nfm[j] - nodes[1].M[loadType];
                 }
@@ -12166,7 +12133,7 @@ function doAnalysis(beam, nodes, spans) {
               nfm[j] = -feam[5 * numSpans - 1] - feam[5 * numSpans + 1];
               j += 1;
               nfm[j] = -feam[5 * numSpans];
-              if (isLiveish(loadType) && numPatterns > 1) {
+              if (isLiveish(loadType, beam) && numPatterns > 1) {
                 if (k === numSpans) {
                   nfm[j - 1] = nfm[j - 1] - nodes[numNodes].P[loadType];
                   nfm[j] = nfm[j] - nodes[numNodes].M[loadType];
@@ -12178,7 +12145,7 @@ function doAnalysis(beam, nodes, spans) {
             } else if (nodes[i].fixity === "fixed") ; else if (nodes[i].fixity === "pinned") {
               j += 1;
               nfm[j] = -feam[5 * numSpans];
-              if (isLiveish(loadType) && numPatterns > 1) {
+              if (isLiveish(loadType, beam) && numPatterns > 1) {
                 if (k === numSpans) {
                   nfm[j] = nfm[j] - nodes[numNodes].M[loadType];
                 }
@@ -12255,80 +12222,22 @@ function doAnalysis(beam, nodes, spans) {
           if (Math.abs(mam[i]) < 0.00000000000001) { mam[i] = 0; }
         }
 
-        switch (loadType) {
-          case DEAD:
-            mamD = clone(mam);
-            if (EI !== 1) { dmD = clone(dm); }
-            break
-          case FLUID:
-            mamF = clone(mam);
-            if (EI !== 1) { dmF = clone(dm); }
-            break
-          case LIVE:
-            if (typeof mamL[0] === "number") {
-              mamL = clone(mam);
-              if (EI !== 1) { dmL = clone(dm); }
-            } else {
-              for (let j = 1; j < 5 * numSpans + 1; j++) {
-                mamL[j][k - 1] = mam[j]; //mam for live loads on span k
-              }
-              if (EI !== 1) {
-                for (let j = 1; j <= numDegreesOfFreedom; j++) {
-                  dmL[j][k] = dm[j];
-                }
-              }
+        if ((!beam.getsPattern[loadType]) || typeof actions[loadType][0] === "number") {
+          actions[loadType] = clone(mam);
+          if (EI !== 1) { deflections[loadType] = clone(dm); }
+        } else {
+          for (let j = 1; j < 5 * numSpans + 1; j++) {
+            actions[loadType][j][k - 1] = mam[j]; //mam for live loads on span k
+          }
+          if (EI !== 1) {
+            for (let j = 1; j <= numDegreesOfFreedom; j++) {
+              deflections[loadType][j][k] = dm[j];
             }
-            break
-          case HORIZ:
-            mamH = clone(mam);
-            if (EI !== 1) { dmH = clone(dm); }
-            break
-          case ROOFLIVE:
-            if (typeof mamLr[0] === "number") {
-              mamLr = clone(mam);
-              if (EI !== 1) { dmLr = clone(dm); }
-            } else {
-              for (let j = 1; j < 5 * numSpans + 1; j++) {
-                mamLr[j][k - 1] = mam[j];
-              }
-              if (EI !== 1) {
-                for (let j = 0; j < numDegreesOfFreedom; j++) {
-                  dmLr[j][k] = dm[j];
-                }
-              }
-            }
-            break
-          case SNOW:
-            if (typeof mamS[0] === "number") {
-              mamS = clone(mam);
-              dmS = clone(dm);
-            } else {
-              for (let j = 1; j < 5 * numSpans + 1; j++) {
-                mamS[j][k - 1] = mam[j];
-              }
-              if (EI !== 1) {
-                for (let j = 0; j < numDegreesOfFreedom; j++) {
-                  dmS[j][k] = dm[j];
-                }
-              }
-            }
-            break
-          case RAIN:
-            mamR = clone(mam);
-            if (EI !== 1) { dmR = clone(dm); }
-            break
-          case WIND:
-            mamW = clone(mam);
-            if (EI !== 1) { dmW = clone(dm); }
-            break
-          case EQ:
-            mamE = clone(mam);
-            if (EI !== 1) { dmE = clone(dm); }
-            break
+          }
         }
 
         // Find the reactions
-        if (numPatterns === 1 || !(beam.containsLive && isLiveish(loadType))) {
+        if (numPatterns === 1 || !(beam.containsLive && isLiveish(loadType, beam))) {
           if (nodes[1].fixity === "fixed") {
             nodes[1].Mr[loadType] = mam[3] + nodes[1].M[loadType];
           }
@@ -12418,10 +12327,7 @@ function doAnalysis(beam, nodes, spans) {
       }
     }
   }
-  return [
-    [mamD, mamL, mamLr, mamS, mamF, mamH, mamR, mamW, mamE],
-    [dmD, dmL, dmLr, dmS, dmF, dmH, dmR, dmW, dmE]
-  ]
+  return [actions, deflections]
 }
 
 const createLsmDtm = (ssm, dtm, nodes, numEndActions, numDegreesOfFreedom) => {
@@ -12501,7 +12407,7 @@ const luDecomposition = (sm, bandWidth) => {
 };
 
 const solveViaLDLt = (diag, ltm, b, bandWidth) => {
-  // Solve for dm() in a system of equations expressed by matrices: SM()× dm() = NFM()
+  // Solve for dm() in a system of equations expressed by matrices: SM() × dm() = NFM()
 
   // This sub// s method is a banded version of the LDL**T solver.
   // LDL**T takes advantage of the fact that SM is a symmetric, positive-definite matrix.
@@ -12572,321 +12478,87 @@ function getLoadPatterns(beam, numSpans) {
 }
 
 function populateMAM(loadFactors, combern, loadPattern, beam, nodes, spans, actions) {
-  const [mamD, mamL, mamLr, mamS, mamF, mamH, mamR, mamW, mamE] = actions;
-  let mam = new Array(beam.numEndActions).fill(0);
-  let gotFullSnow = false;
+  let mam = new Array(beam.numEndActions).fill(0); // Member end Action Matrix
   const numSpans = spans.length - 1;
   const numNodes = nodes.length - 1;
   const numPatterns = beam.numPatterns;
   const didNode = new Array(numNodes);
-  const didHalfLoad = new Array(numNodes);
 
-  if (loadFactors[DEAD] > 0 && beam.gotType[DEAD]) {
-    //do the dead load
-    const df = loadFactors[DEAD];
-    mam = mam.map((e, i) => mamD[i]);
-    for (let i = 1; i <= numSpans; i++) {
-      nodes[i].Pf = df * nodes[i].P[1];
-      nodes[i].Mf = df * nodes[i].M[1];
-      for (let j = 0; j < spans[i].segments.length; j++) {
-        const seg = spans[i].segments[j];
-        seg.w1f[combern] = df * seg.w1[1];
-        seg.w2f = df * seg.w2[1];
-        seg.Pf = df * seg.P[1];
-        seg.Mf = df * seg.M[1];
-      }
+  // Fill mam with dead load
+  const deadLoadFactor = loadFactors[1];
+  mam = mam.map((e, i) => deadLoadFactor * actions[1][i]);
+  for (let i = 1; i <= numSpans; i++) {
+    nodes[i].Pf = deadLoadFactor * nodes[i].P[1];
+    nodes[i].Mf = deadLoadFactor * nodes[i].M[1];
+    for (let j = 0; j < spans[i].segments.length; j++) {
+      const seg = spans[i].segments[j];
+      seg.w1f[combern] = deadLoadFactor * seg.w1[1];
+      seg.w2f = deadLoadFactor * seg.w2[1];
+      seg.Pf = deadLoadFactor * seg.P[1];
+      seg.Mf = deadLoadFactor * seg.M[1];
     }
   }
 
-  if (loadFactors[FLUID] > 0 && beam.gotType[FLUID]) {
-    //Do the fluid load
-    const ff = loadFactors[FLUID];
-    mam = mam.map((e, i) => e + ff * mamF[i]);
-    for (let i = 1; i <= numSpans; i++) {
-      nodes[i].Pf = nodes[i].Pf + ff * nodes[i].P[2];
-      nodes[i].Mf = nodes[i].Mf + ff * nodes[i].M[2];
-      for (let j = 0; j < spans[i].segments.length; j++) {
-        const seg = spans[i].segments[j];
-        seg.w1f[combern] = seg.w1f[combern] + ff * seg.w1[2];
-        seg.w2f = seg.w2f + ff * seg.w2[2];
-        seg.Pf = seg.Pf + ff * seg.P[2];
-        seg.Mf = seg.Mf + ff * seg.M[2];
-      }
-    }
-  }
-
-  if (loadFactors[LIVE] > 0 && beam.gotType[LIVE]) {
-    //do the live load
-    const liveFactor = loadFactors[LIVE];
-    if (numPatterns === 1) {
-      for (let i = 1; i < mam.length; i++) {
-        mam[i] = mam[i] + liveFactor * mamL[i];
-      }
-      for (let i = 1; i <= numSpans; i++) {
-        nodes[i].Pf = nodes[i].Pf + liveFactor * nodes[i].P[LIVE];
-        nodes[i].Mf = nodes[i].Mf + liveFactor * nodes[i].M[LIVE];
-        for (let j = 0; j < spans[i].segments.length; j++) {
-          const seg = spans[i].segments[j];
-          seg.w1f[combern] = seg.w1f[combern] + liveFactor * seg.w1[LIVE];
-          seg.w2f = seg.w2f + liveFactor * seg.w2[LIVE];
-          seg.Pf = seg.Pf + liveFactor * seg.P[LIVE];
-          seg.Mf = seg.Mf + liveFactor * seg.M[LIVE];
-        }
-      }
-    } else {
-      for (let k = 1; k <= numSpans; k++) {
-        if (loadPattern.includes(k)) {
-          let ii = 0;
-          for (let j = 1; j <= numSpans; j++) {
-            ii = 5 * j - 4;
-            mam[ii] = mam[ii] + liveFactor * mamL[ii][k - 1];
-            mam[ii + 1] = mam[ii + 1] + liveFactor * mamL[ii + 1][k - 1];
-            mam[ii + 2] = mam[ii + 2] + liveFactor * mamL[ii + 2][k - 1];
-            mam[ii + 3] = mam[ii + 3] + liveFactor * mamL[ii + 3][k - 1];
-            mam[ii + 4] = mam[ii + 4] + liveFactor * mamL[ii + 4][k - 1];
-          }
-          mam[ii + 5] = mam[ii + 5] + liveFactor * mamL[ii + 5][k - 1];
-        }
-      }
-
-      //Do node loads.  Include a node load if the span on either side is in the load pattern.
-      didNode.fill(false);
-      for (let i = 1; i <= numSpans; i++) {
-        if (loadPattern.includes(i)) {
-          if (!didNode[i]) {
-            nodes[i].Pf = nodes[i].Pf + liveFactor * nodes[i].P[LIVE];
-            nodes[i].Mf = nodes[i].Mf + liveFactor * nodes[i].M[LIVE];
-            didNode[i] = true;
-          }
-          if (!didNode[i + 1]) {
-            nodes[i + 1].Pf = nodes[i + 1].Pf + liveFactor * nodes[i + 1].P[LIVE];
-            nodes[i + 1].Mf = nodes[i + 1].Mf + liveFactor * nodes[i + 1].M[LIVE];
-            didNode[i + 1] = true;
-          }
-        }
-        for (let j = 0; j < spans[i].segments.length; j++) {
-          const seg = spans[i].segments[j];
-          if (loadPattern.includes(i)) {
-            seg.w1f[combern] = seg.w1f[combern] + liveFactor * seg.w1[LIVE];
-            seg.w2f = seg.w2f + liveFactor * seg.w2[LIVE];
-            seg.Pf = seg.Pf + liveFactor * seg.P[LIVE];
-            seg.Mf = seg.Mf + liveFactor * seg.M[LIVE];
-          }
-        }
-      }
-    }
-  }
-
-  if (loadFactors[HORIZ] > 0 && beam.gotType[HORIZ]) {
-    //Do the lateral earth pressure load
-    const hf = loadFactors[HORIZ];
-    for (let i = 1; i < mam.length; i++) {
-      mam[i] = mam[i] + hf * mamH[i];
-    }
-    for (let i = 1; i <= numSpans; i++) {
-      nodes[i].Pf = nodes[i].Pf + hf * nodes[i].P[HORIZ];
-      nodes[i].Mf = nodes[i].Mf + hf * nodes[i].M[HORIZ];
-      for (let j = 0; j < spans[i].segments.length; j++) {
-        const seg = spans[i].segments[j];
-        seg.w1f[combern] = seg.w1f[combern] + hf * seg.w1[HORIZ];
-        seg.w2f = seg.w2f + hf * seg.w2[HORIZ];
-        seg.Pf = seg.Pf + hf * seg.P[HORIZ];
-        seg.Mf = seg.Mf + hf * seg.M[HORIZ];
-      }
-    }
-  }
-
-  if (loadFactors[ROOFLIVE] > 0 && beam.gotType[ROOFLIVE]) {
-    //do the roof live load
-    const lrF = loadFactors[ROOFLIVE];
-    if (numPatterns === 1) {
-      for (let i = 1; i < mam.length; i++) {
-        mam[i] = mam[i] + lrF * mamH[i];
-      }
-      for (let i = 1; i <= numSpans; i++) {
-        nodes[i].Pf = nodes[i].Pf + lrF * nodes[i].P[ROOFLIVE];
-        nodes[i].Mf = nodes[i].Mf + lrF * nodes[i].M[ROOFLIVE];
-        for (let j = 0; j < spans[i].segments.length; j++) {
-          const seg = spans[i].segments[j];
-          seg.w1f[combern] = seg.w1f[combern] + lrF * seg.w1[ROOFLIVE];
-          seg.w2f = seg.w2f + lrF * seg.w2[5];
-          seg.Pf = seg.Pf + lrF * seg.P[ROOFLIVE];
-          seg.Mf = seg.Mf + lrF * seg.M[ROOFLIVE];
-        }
-      }
-    } else {
-      for (let k = 1; k <= numSpans; k++) {
-        if (loadPattern.includes(k)) {
-          let ii = 0;
-          for (let j = 1; j <= numSpans; j++) {
-            ii = 5 * j - 4;
-            mam[ii] = mam[ii] + lrF * mamLr[ii][k - 1];
-            mam[ii + 1] = mam[ii + 1] + lrF * mamLr[ii + 1][k - 1];
-            mam[ii + 2] = mam[ii + 2] + lrF * mamLr[ii + 2][k - 1];
-            mam[ii + 3] = mam[ii + 3] + lrF * mamLr[ii + 3][k - 1];
-            mam[ii + 4] = mam[ii + 4] + lrF * mamLr[ii + 4][k - 1];
-          }
-          mam[ii + 5] = mam[ii + 5] + lrF * mamLr[k - 1];
-        }
-      }
-
-      didNode.fill(false);
-      for (let k = 1; k <= numSpans; k++) {
-        if (loadPattern.includes(k)) {
-          if (!didNode[k]) {
-            nodes[k].Pf = nodes[k].Pf + lrF * nodes[k].P[ROOFLIVE];
-            nodes[k].Mf = nodes[k].Mf + lrF * nodes[k].M[ROOFLIVE];
-            didNode[k] = true;
-          }
-          if (!didNode[k + 1]) {
-            nodes[k + 1].Pf = nodes[k + 1].Pf + lrF * nodes[k + 1].P[ROOFLIVE];
-            nodes[k + 1].Mf = nodes[k + 1].Mf + lrF * nodes[k + 1].M[ROOFLIVE];
-            didNode[k + 1] = true;
-          }
-        }
-      }
-
-      for (let i = 1; i <= numSpans; i++) {
-        if (loadPattern.includes(i)) {
+  // Superimpose the other load types onto mam.
+  for (let iLoadType = 2; iLoadType <= 9; iLoadType++) {
+    const loadFactor = loadFactors[iLoadType];
+    if (loadFactor > 0 && beam.gotType[iLoadType]) {
+      if (!beam.getsPattern[iLoadType] || numPatterns === 1) {
+        mam = mam.map((e, i) => e + loadFactor * actions[iLoadType][i]);
+        for (let i = 1; i <= numSpans; i++) {
+          nodes[i].Pf = nodes[i].Pf + loadFactor * nodes[i].P[iLoadType];
+          nodes[i].Mf = nodes[i].Mf + loadFactor * nodes[i].M[iLoadType];
           for (let j = 0; j < spans[i].segments.length; j++) {
             const seg = spans[i].segments[j];
-            seg.w1f[combern] = seg.w1f[combern] + lrF * seg.w1[ROOFLIVE];
-            seg.w2f = seg.w2f + lrF * seg.w2[ROOFLIVE];
-            seg.Pf = seg.Pf + lrF * seg.P[ROOFLIVE];
-            seg.Mf = seg.Mf + lrF * seg.M[ROOFLIVE];
+            seg.w1f[combern] = seg.w1f[combern] + loadFactor * seg.w1[iLoadType];
+            seg.w2f = seg.w2f + loadFactor * seg.w2[iLoadType];
+            seg.Pf = seg.Pf + loadFactor * seg.P[iLoadType];
+            seg.Mf = seg.Mf + loadFactor * seg.M[iLoadType];
           }
         }
-      }
-    }
-  }
-
-  if (loadFactors[SNOW] > 0 && beam.gotType[SNOW]) {
-    const sf = loadFactors[SNOW];
-    if (numPatterns === 1) {
-      for (let i = 1; i < mam.length; i++) {
-        mam[i] = mam[i] + sf * mamS[i];
-      }
-      for (let i = 1; i <= numSpans; i++) {
-        nodes[i].Pf = nodes[i].Pf + sf * nodes[i].P[SNOW];
-        nodes[i].Mf = nodes[i].Mf + sf * nodes[i].M[SNOW];
-        for (let j = 0; j < spans[i].segments.length; j++) {
-          const seg = spans[i].segments[j];
-          seg.w1f[combern] = seg.w1f[combern] + sf * seg.w1[SNOW];
-          seg.w2f = seg.w2f + sf * seg.w2[SNOW];
-          seg.Pf = seg.Pf + sf * seg.P[SNOW];
-          seg.Mf = seg.Mf + sf * seg.M[SNOW];
-        }
-      }
-    } else {
-      for (let k = 1; k <= numSpans; k++) {
-        let f = loadPattern.includes(k) ? 1 : 0.5;
-        if (loadPattern.length === 0) { f = 0; }
-        let ii = 0;
-        for (let j = 1; j <= numSpans; j++) {
-          ii = 5 * j - 4;
-          mam[ii] = mam[ii] + f * sf * mamS[ii][k - 1];
-          mam[ii + 1] = mam[ii + 1] + f * sf * mamS[ii + 1][k - 1];
-          mam[ii + 2] = mam[ii + 2] + f * sf * mamS[ii + 2][k - 1];
-          mam[ii + 3] = mam[ii + 3] + f * sf * mamS[ii + 3][k - 1];
-          mam[ii + 4] = mam[ii + 4] + f * sf * mamS[ii + 4][k - 1];
-        }
-        mam[ii + 5] = mam[ii + 5] + f * sf * mamS[ii + 5][k - 1];
-      }
-
-      //Do node loads
-      didNode.fill(false);
-      didHalfLoad.fill(false);
-      for (let k = 1; k <= numSpans; k++) {
-        if (loadPattern.length > 0) {
-          gotFullSnow = loadPattern.includes(k);
-          //Check node k
-          if (didNode[k]) ; else if (!gotFullSnow && didHalfLoad[k]) ; else if (gotFullSnow && !didHalfLoad[k]) {
-            nodes[k].Pf = nodes[k].Pf + sf * nodes[k].P[SNOW];
-            nodes[k].Mf = nodes[k].Mf + sf * nodes[k].M[SNOW];
-            didNode[k] = true;
-          } else if (!gotFullSnow && !didHalfLoad[k]) {
-            nodes[k].Pf = nodes[k].Pf + 0.5 * sf * nodes[k].P[SNOW];
-            nodes[k].Mf = nodes[k].Mf + 0.5 * sf * nodes[k].M[SNOW];
-            didHalfLoad[k] = true;
-          }
-
-          //Check node k+1
-          if (gotFullSnow) {
-            nodes[k + 1].Pf = nodes[k + 1].Pf + sf * nodes[k + 1].P[SNOW];
-            nodes[k + 1].Mf = nodes[k + 1].Mf + sf * nodes[k + 1].M[SNOW];
-            didNode[k + 1] = true;
-          } else {
-            nodes[k + 1].Pf = nodes[k + 1].Pf + 0.5 * sf * nodes[k + 1].P[SNOW];
-            nodes[k + 1].Mf = nodes[k + 1].Mf + 0.5 * sf * nodes[k + 1].M[SNOW];
-            didHalfLoad[k + 1] = true;
+      } else {
+        // load case includes live load patterns
+        for (let k = 1; k <= numSpans; k++) {
+          if (loadPattern.includes(k)) {
+            let ii = 0;
+            for (let j = 1; j <= numSpans; j++) {
+              ii = 5 * j - 4;
+              mam[ii] = mam[ii] + loadFactor * actions[iLoadType][ii][k - 1];
+              mam[ii + 1] = mam[ii + 1] + loadFactor * actions[iLoadType][ii + 1][k - 1];
+              mam[ii + 2] = mam[ii + 2] + loadFactor * actions[iLoadType][ii + 2][k - 1];
+              mam[ii + 3] = mam[ii + 3] + loadFactor * actions[iLoadType][ii + 3][k - 1];
+              mam[ii + 4] = mam[ii + 4] + loadFactor * actions[iLoadType][ii + 4][k - 1];
+            }
+            mam[ii + 5] = mam[ii + 5] + loadFactor * actions[iLoadType][ii + 5][k - 1];
           }
         }
-      }
 
-      for (let i = 1; i <= numSpans; i++) {
-        for (let j = 0; j < spans[i].segments.length; j++) {
-          const seg = spans[i].segments[j];
-          let f = loadPattern.includes(i) ? 1 : 0.5;
-          if (loadPattern.length === 0) { f = 0; }
-          seg.w1f[combern] = seg.w1f[combern] + f * sf * seg.w1[6];
-          seg.w2f = seg.w2f + f * sf * seg.w2[6];
-          seg.Pf = seg.Pf + f * sf * seg.P[6];
-          seg.Mf = seg.Mf + f * sf * seg.M[6];
+        // Do node loads.
+        // Include a node load if the span on either side is in the load pattern.
+        didNode.fill(false);
+        for (let i = 1; i <= numSpans; i++) {
+          if (loadPattern.includes(i)) {
+            if (!didNode[i]) {
+              nodes[i].Pf = nodes[i].Pf + loadFactor * nodes[i].P[iLoadType];
+              nodes[i].Mf = nodes[i].Mf + loadFactor * nodes[i].M[iLoadType];
+              didNode[i] = true;
+            }
+            if (!didNode[i + 1]) {
+              nodes[i + 1].Pf = nodes[i + 1].Pf + loadFactor * nodes[i + 1].P[iLoadType];
+              nodes[i + 1].Mf = nodes[i + 1].Mf + loadFactor * nodes[i + 1].M[iLoadType];
+              didNode[i + 1] = true;
+            }
+          }
+          for (let j = 0; j < spans[i].segments.length; j++) {
+            const seg = spans[i].segments[j];
+            if (loadPattern.includes(i)) {
+              seg.w1f[combern] = seg.w1f[combern] + loadFactor * seg.w1[iLoadType];
+              seg.w2f = seg.w2f + loadFactor * seg.w2[iLoadType];
+              seg.Pf = seg.Pf + loadFactor * seg.P[iLoadType];
+              seg.Mf = seg.Mf + loadFactor * seg.M[iLoadType];
+            }
+          }
         }
-      }
-    }
-  }
-
-  if (loadFactors[RAIN] > 0 && beam.gotType[RAIN]) {
-    const rf = loadFactors[RAIN];
-    for (let i = 1; i < mam.length; i++) {
-      mam[i] = mam[i] + rf * mamR[i];
-    }
-    for (let i = 1; i <= numSpans; i++) {
-      nodes[i].Pf = nodes[i].Pf + rf * nodes[i].P[RAIN];
-      nodes[i].Mf = nodes[i].Mf + rf * nodes[i].M[RAIN];
-      for (let j = 0; j < spans[i].segments.length; j++) {
-        const seg = spans[i].segments[j];
-        seg.w1f[combern] = seg.w1f[combern] + rf * seg.w1[RAIN];
-        seg.w2f = seg.w2f + rf * seg.w2[RAIN];
-        seg.Pf = seg.Pf + rf * seg.P[RAIN];
-        seg.Mf = seg.Mf + rf * seg.M[RAIN];
-      }
-    }
-  }
-
-  if (loadFactors[WIND] > 0 && beam.gotType[WIND]) {
-    const wf = loadFactors[WIND];
-    for (let i = 1; i < mam.length; i++) {
-      mam[i] = mam[i] + wf * mamW[i];
-    }
-    for (let i = 1; i <= numSpans; i++) {
-      nodes[i].Pf = nodes[i].Pf + wf * nodes[i].P[WIND];
-      nodes[i].Mf = nodes[i].Mf + wf * nodes[i].M[WIND];
-      for (let j = 0; j < spans[i].segments.length; j++) {
-        const seg = spans[i].segments[j];
-        seg.w1f[combern] = seg.w1f[combern] + wf * seg.w1[WIND];
-        seg.w2f = seg.w2f + wf * seg.w2[WIND];
-        seg.Pf = seg.Pf + wf * seg.P[WIND];
-        seg.Mf = seg.Mf + wf * seg.M[WIND];
-      }
-    }
-  }
-
-  if (loadFactors[EQ] > 0 && beam.gotType[EQ]) {
-    const ef = loadFactors[EQ];
-    for (let i = 1; i < mam.length; i++) {
-      mam[i] = mam[i] + ef * mamE[i];
-    }
-    for (let i = 1; i <= numSpans; i++) {
-      nodes[i].Pf = nodes[i].Pf + ef * nodes[i].P[EQ];
-      nodes[i].Mf = nodes[i].Mf + ef * nodes[i].M[EQ];
-      for (let j = 0; j < spans[i].segments.length; j++) {
-        const seg = spans[i].segments[j];
-        seg.w1f[combern] = seg.w1f[combern] + ef * seg.w1[EQ];
-        seg.w2f = seg.w2f + ef * seg.w2[EQ];
-        seg.Pf = seg.Pf + ef * seg.P[EQ];
-        seg.Mf = seg.Mf + ef * seg.M[EQ];
       }
     }
   }
@@ -12909,9 +12581,8 @@ function combine(beam, nodes, spans, actions, deflections, comboSet) {
   const numSpans = spans.length - 1;
   const isService = comboSet === "service";
   if (isService) { comboSet = [[0, 1, 1, 1, 1, 1, 1, 1, 1, 1]]; }
-  const numPatterns = beam.numPatterns;
   const liveLoadPatterns = getLoadPatterns(beam, numSpans);
-  const [dmD, dmL, dmLr, dmS, dmF, dmH, dmR, dmW, dmE] = deflections;
+  const numPatterns = liveLoadPatterns.length;
 
   let vMin = 0;
   let vMax = 0;
@@ -12924,7 +12595,7 @@ function combine(beam, nodes, spans, actions, deflections, comboSet) {
 
   // Get ready to do lots of different load combinations.
   // Definition: "combern" is a conflation of the words "combination" and "pattern".
-  const numComberns = getNumComberns(comboSet, isService, beam);
+  const numComberns = getNumComberns(comboSet, isService, beam, numPatterns);
 
   for (let i = 1; i <= numSpans; i++) {
     for (let j = 0; j < spans[i].segments.length; j++) {
@@ -12983,15 +12654,15 @@ function combine(beam, nodes, spans, actions, deflections, comboSet) {
         if (iCombo === 0 && beam.EI !== 1) {
           // Create a Displacement Matrix, DM, for this load combination and load pattern.
           dm = new Array(beam.numDegreesOfFreedom + 1).fill(0);
-          if (beam.gotType[DEAD]) { dm = dm.map((e, i) => e + dmD[i]); }
-          if (beam.gotType[FLUID]) { dm = dm.map((e, i) => e + dmF[i]); }
-          if (beam.gotType[LIVE]) { dm = getLiveDM(dm, dmL, loadPattern, numSpans); }
-          if (beam.gotType[HORIZ]) { dm = dm.map((e, i) => e + dmH[i]); }
-          if (beam.gotType[ROOFLIVE]) { dm = getLiveDM(dm, dmLr, loadPattern, numSpans); }
-          if (beam.gotType[SNOW]) { dm = getLiveDM(dm, dmS, loadPattern, numSpans); }
-          if (beam.gotType[RAIN]) { dm = dm.map((e, i) => e + dmR[i]); }
-          if (beam.gotType[WIND]) { dm = dm.map((e, i) => e + dmW[i]); }
-          if (beam.gotType[EQ]) { dm = dm.map((e, i) => e + dmE[i]); }
+          for (let iLoadType = 1; iLoadType < 10; iLoadType++) {
+            if (beam.gotType[iLoadType]) {
+              if (beam.getsPattern[iLoadType]) {
+                dm = getLiveDM(dm, deflections[iLoadType], loadPattern, numSpans);
+              } else {
+                dm = dm.map((e, i) => e + deflections[iLoadType][i]);
+              }
+            }
+          }
         }
 
         let iDM = 0;
@@ -13211,21 +12882,22 @@ const isReqdCombo = (combo, gotType) => {
   return isDeadLoadOnly
 };
 
-const comboContainsLive = combo => {
-  return (combo[LIVE] !== 0 || combo[ROOFLIVE] !== 0 || combo[SNOW] !== 0)
-};
+/*const comboContainsLive = (combo, beam) => {
+  for (let i = 1; i <= beam.numLoadTypes; i++) {
+    if (beam.getsPattern[i] && combo[i] !== 0) { return true }
+  }
+  return false
+}*/
 
-const getNumComberns = (comboSet, isService, beam) => {
+const getNumComberns = (comboSet, isService, beam, numPatterns) => {
   // We'll do a superposition of forces for each load combination and each live load pattern.
   // How many is that?
   // First, count the number of comberns needed to do the deflection superpositions.
-  let numComberns = beam.EI === 1 ? 1 : beam.numPatterns;
+  let numComberns = beam.EI === 1 ? 1 : numPatterns;
   // Then add a combern for each superposition done to get shears and moments.
   for (let i = 0; i < comboSet.length; i++) {
     if (isService || isReqdCombo(comboSet[i], beam.gotType)) {
-      numComberns += beam.containsLive && comboContainsLive(comboSet[i])
-      ? beam.numPatterns
-      : 1;
+      numComberns += numPatterns;
     }
   }
   return numComberns
