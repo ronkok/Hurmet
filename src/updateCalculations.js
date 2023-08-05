@@ -271,6 +271,7 @@ const proceedAfterFetch = (
         if (mustCalc(attrs, hurmetVars, changedVars, isCalcAll)) {
           try {
             if (attrs.rpn || mustRedraw) {
+              attrs.error = false
               attrs = attrs.rpn // attrs.dtype && attrs.dtype === dt.DRAWING
                 ? evaluate(attrs, hurmetVars, decimalFormat)
                 : evaluateDrawing(attrs, hurmetVars, decimalFormat)
@@ -318,6 +319,7 @@ export function updateCalculations(
   curPos
 ) {
   const doc = view.state.doc
+  if (nodeAttrs && nodeAttrs.name && nodeAttrs.name === "format") { isCalcAll = true }
 
   if (!(isCalcAll || nodeAttrs.name || nodeAttrs.rpn ||
       (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING))) {
