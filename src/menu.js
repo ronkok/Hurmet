@@ -285,11 +285,15 @@ const tighten = () => {
     run(state, _, view) {
       const {$from, $to, node} = state.selection
       const pos = $from.pos
-      const listItem = $from.node(-1)
-      const content = listItem.content
-      const listItemPos = $from.start(-1) - 1
+      const list = $from.node(-2)
+      const listPos = $from.start(-2) - 1
+      const ast = list.toJSON()
+      for (const item of ast.content) {
+        item.type = "tight_list_item"
+      }
+      const tightList = schema.nodeFromJSON(ast)
       const tr = state.tr
-      tr.replaceWith(listItemPos, listItemPos + listItem.nodeSize, schema.nodes.tight_list_item.createAndFill(_, content))
+      tr.replaceWith(listPos, listPos + list.nodeSize, tightList)
       tr.setSelection(TextSelection.create(tr.doc, pos))
       view.dispatch(tr)
     }
