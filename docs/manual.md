@@ -2369,7 +2369,6 @@ such as calculation cells, indented paragraphs, and merged cells in tables.
 
 Civil and structural engineers may also find these items useful:
 
-* Beam Analysis [Diagram](https://hurmet.app/ce/beamanalysis.html)
 * Concrete Column Interaction [Diagram](https://observablehq.com/@ronkok/concrete-column-interaction-diagram)
 * Fetchable TSV files with steel shape data: [wide flanges][], [channels][], [HSS][], [pipes][], [tees][],
   [double angles][], [HP][], and [MS][].
