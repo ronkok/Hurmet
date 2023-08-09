@@ -246,6 +246,9 @@ const nodes = {
   centered(node) {
     return htmlTag("div", ast2html(node.content), { class: 'centered' }) + "\n"
   },
+  hidden(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'hidden' }) + "\n"
+  },
   header(node)   {
     return htmlTag("header", ast2html(node.content)) + "\n"
   },
@@ -322,7 +325,7 @@ const ast2html = ast => {
 const wrapWithHead = (html, title, attrs) => {
   title = title ? title : "Hurmet doc"
   const fontClass = attrs && attrs.fontSize
-    ? { "10": "long-primer", "12": "pica" }[attrs.fontSize]
+    ? { "10": "long-primer", "12": "pica", "18": "great-primer" }[attrs.fontSize]
     : "long-primer"
   const head = `<!DOCTYPE html>
 <html lang="en">

@@ -610,7 +610,7 @@ rules.set("dd", {  // description details
 });
 rules.set("special_div", {
   isLeaf: false,
-  match: blockRegex(/^(:{3,}) ?(indented|comment|centered|header) *\n([\s\S]+?)\n+\1 *(?:\n{2,}|\s*$)/),
+  match: blockRegex(/^(:{3,}) ?(indented|comment|centered|header|hidden) *\n([\s\S]+?)\n+\1 *(?:\n{2,}|\s*$)/),
   // indented or centered or comment div, or <header>
   parse: function(capture, state) {
     const content = capture[2] === "comment"
