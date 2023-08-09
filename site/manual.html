@@ -1176,7 +1176,7 @@ end</code></pre><p>A Hurmet document can load an entire module into one variable
 <p>There is an altenate version of Hurmet that runs in Node.js from a command-line interface (CLI). It exposes one method, <code>md2html()</code>, which takes Markdown input and returns an HTML document. The code below shows how one might apply it in Node.js:</p>
 <pre><code>// Read a Markdown file, run the calcs, and write an HTML file.
 const fs = require(&#x27;fs&#x27;)
-const hurmet = require(&#x27;filePath/hurmet.js&#x27;)
+const hurmet = require(&#x27;filePath/hurmet.cjs&#x27;)
 const titleRegEx = /([^.\\/]+)\.md$/;  // A helper.
 
 // The main function has to be async.
