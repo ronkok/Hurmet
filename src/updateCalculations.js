@@ -113,8 +113,8 @@ const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
   return attrs
 }
 
-const mustCalc = (attrs, hurmetVars, changedVars, isCalcAll) => {
-  if (isCalcAll) { return true }
+const mustCalc = (attrs, hurmetVars, changedVars, isCalcAll, isFormat) => {
+  if (isCalcAll || isFormat) { return true }
   if (attrs.rpn && !(attrs.name && hurmetVars[attrs.name] && hurmetVars[attrs.name].isFetch)) {
     for (const varName of attrs.dependencies) {
       if (changedVars.has(varName)) { return true }
@@ -257,6 +257,7 @@ const proceedAfterFetch = (
 
   // Finally, update calculations after startPos.
   const startPos = isCalcAll ? 0 : (curPos + 1)
+  const isFormat = (nodeAttrs && nodeAttrs.name && nodeAttrs.name === "format")
   doc.nodesBetween(startPos, doc.content.size, function(node, pos) {
     if (node.type.name === "calculation") {
       const notFetched = isCalcAll ? !fetchRegEx.test(node.attrs.entry) : !node.attrs.isFetch
@@ -268,7 +269,7 @@ const proceedAfterFetch = (
         attrs.displayMode = node.attrs.displayMode
         const mustRedraw = attrs.dtype && attrs.dtype === dt.DRAWING &&
           (attrs.rpn || (attrs.value.parameters.length > 0 || isCalcAll))
-        if (mustCalc(attrs, hurmetVars, changedVars, isCalcAll)) {
+        if (mustCalc(attrs, hurmetVars, changedVars, isCalcAll, isFormat)) {
           try {
             if (attrs.rpn || mustRedraw) {
               attrs.error = false
@@ -319,7 +320,6 @@ export function updateCalculations(
   curPos
 ) {
   const doc = view.state.doc
-  if (nodeAttrs && nodeAttrs.name && nodeAttrs.name === "format") { isCalcAll = true }
 
   if (!(isCalcAll || nodeAttrs.name || nodeAttrs.rpn ||
       (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING))) {
