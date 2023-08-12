@@ -109,7 +109,7 @@ const writeSVG = dwg => {
         svg += '<tspan'
         if (child.attrs) {
           Object.keys(child.attrs).forEach(mark => {
-            svg += ` ${mark}='child.attrs[mark]'`
+            svg += ` ${mark}='${child.attrs[mark]}'`
           })
         }
         svg += `>${sanitizeText(child.text)}</tspan>`

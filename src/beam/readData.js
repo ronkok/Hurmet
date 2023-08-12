@@ -3,6 +3,7 @@ import { unitFromUnitName } from "../units.js"
 
 const ftRegEx = /′/g
 const numberRegEx = new RegExp(Rnl.numberPattern)
+const lengths = ["ft", "m", "cm", "mm"];
 const metricLengths = ["m", "cm", "mm"];
 
 const readNumber = str => {
@@ -69,7 +70,14 @@ export const readInputData = data => {
         const [L, pos] = readNumber(element)
         if (typeof L === "string") { return "Error. Non-numeric length." }
         let unitName = element.slice(pos).trim()
-        if (unitName === "") { unitName = "mm" }
+        if (unitName === "") {
+          if (lengths.includes(elements[k + 1])) {
+            unitName = elements[k + 1];
+            k += 1
+          } else {
+            unitName = "mm"
+          }
+        }
         if (metricLengths.includes(unitName)) { input.SI = true }
         input.spanLength.push(convertToBaseUnit(L, unitName))
         break
