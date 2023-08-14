@@ -50139,10 +50139,6 @@ async function writeFile(fileHandle, contents) {
   await writable.close();
 }
 
-function sleep (time) {
-  return new Promise((resolve) => setTimeout(resolve, time));
-}
-
 // Export saveFileAsMarkdown so that it is available in keymap.js
 function saveFileAsMarkdown(state, view) {
   // Prune the Hurmet math parts down to just the entry. Then stringify it.
@@ -50163,14 +50159,6 @@ pageSize: ${state.doc.attrs.pageSize}
   if (window.showOpenFilePicker && state.doc.attrs.fileHandle) {
     // Use the Chromium File System Access API, so users can click to save a document.
     writeFile(state.doc.attrs.fileHandle, str);
-    // Blink the alert, so the author knows that a save takes place.
-    const saveAlert = document.getElementById("saved");
-    saveAlert.style.visibility = "visible";
-    const scroll = window.scrollY;
-    saveAlert.style.top = scroll < 240 ? "240px" : String(scroll) + "px";
-    sleep(500).then(() => {
-        saveAlert.style.visibility = "hidden";
-    });
   } else {
     // Legacy method for Firefox and Safari
     const blob = new Blob([str], {type: "text/plain;charset=utf-8"});

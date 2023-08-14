@@ -108,13 +108,6 @@ h6 { font-size: 90%; font-weight: bold;  margin: 1em 0 1em 0; }
   font-size: 20px;
   padding: 20px 3px 30px;
 }
-#saved {
-  visibility: hidden;
-  position: absolute;
-  top: 240px;
-  left: calc((100% - 772px) / 2);
-  width: 40px;
-}
 
 strong { font-weight: bold; }
 
