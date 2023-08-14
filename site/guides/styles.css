@@ -1,0 +1,515 @@
+    
+:root {
+  --font-main: Verdana, sans-serif;
+  --font-secondary: Verdana, sans-serif;
+  --background-color: #fff;
+  --heading-color: #222;
+  --text-color: #444;
+  --link-color: #3273dc;
+  --visited-color:  #8b6fcb;
+  --code-background-color: #f2f2f2;
+  --code-color: #222;
+  --blockquote-color: #222;
+}
+
+@font-face {
+  font-family: 'Temml';
+  src: url('../Temml.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: Latin Modern Math;
+  src: url('../latinmodernmath.woff2');
+}
+
+body {
+  font-family: var(--font-secondary);
+  font-size: 16px;
+  margin: auto;
+  padding: 20px;
+  max-width: 720px;
+  text-align: left;
+  background-color: var(--background-color);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.5;
+  color: var(--text-color);
+}
+
+h1, h2, h3, h5 {
+  font-family: Verdana, sans-serif;
+  font-variant: small-caps;
+  letter-spacing: 0.05em;
+  font-weight: bold;
+  margin: 1em 0 1em 0;
+}
+			 
+h1 { font-size: 130%; margin-top: 3em; }
+h2 { font-size: 105%; margin-top: 2em; }
+h3 { font-size: 100%; margin-top: 1em; }
+h4 { font-size: 100%; margin: 1em 0 1em 0; font-weight: bold; }
+h5 { font-size: 110%; text-align: center; }
+h6 { font-size: 90%; font-weight: bold;  margin: 1em 0 1em 0; }
+
+a {
+  color: var(--link-color);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline; 
+}
+
+nav a {
+  margin-right: 8px;
+}
+
+strong, b {
+  color: var(--heading-color);
+}
+
+button {
+  margin: 0;
+  cursor: pointer;
+}
+
+main {
+  line-height: 1.6;
+}
+
+table {
+  width: 100%;
+}
+
+li.tight > p {
+  margin: -0.5em 0 0.75em 0;
+}
+
+div.indented { margin-left: 2em; }
+div.centered { text-align: center; }
+div.hidden { display: none; }
+
+hr {
+  border: 0;
+  border-top: 1px dashed;
+}
+
+img {
+  max-width: 100%;
+}
+
+code {
+  font-family: monospace;
+  padding: 2px;
+  background-color: var(--code-background-color);
+  color: var(--code-color);
+  border-radius: 3px;
+}
+
+pre {
+  width: 100%;
+}
+
+blockquote {
+  border-left: 1px solid #999;
+  color: var(--code-color);
+  padding-left: 20px;
+  font-style: italic;
+}
+
+footer {
+  padding: 25px 0;
+  text-align: center;
+}
+
+.inline {
+  width: auto !important;
+}
+
+
+nav {
+  max-width: 672px;
+  margin: 0 auto;
+  background: #fff;
+  height: 66px
+}
+
+nav * {
+  font-family: Arial, sans-serif;
+}
+
+nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  float: right;
+}
+
+nav ul li {
+  display: inline-block;
+  padding-top: 27px;
+  text-decoration: none
+}
+
+nav  a {
+  padding: 33px 0 0 18px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.highlight, .code {
+  padding: 1px 15px;
+  background-color: var(--code-background-color);
+  color: var(--code-color);
+  border-radius: 3px;
+  margin-block-start: 1em;
+  margin-block-end: 1em;
+  overflow-x: auto;
+}
+
+/* blog post list */
+ul.blog-posts {
+  list-style-type: none;
+  padding: unset;
+}
+
+ul.blog-posts li {
+  display: flex;
+}
+
+ul.blog-posts li span {
+  flex: 0 0 130px;
+}
+
+ul.blog-posts li a:visited {
+  color: var(--visited-color);
+}
+
+math {
+  font-style: normal;
+  font-weight: normal;
+  line-height: normal;
+  font-size-adjust: none;
+  text-indent: 0;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  direction: ltr;
+}
+
+math * {
+  border-color: currentColor;
+}
+
+math {
+  font-family: "Latin Modern Math", "Times New Roman", math;
+}
+
+/* Next line is active in Firefox and Safari.
+ * Not in Chromium, which recognizes display: "block math" written inline. */
+math.tml-display { display: block; }
+
+*.mathscr {
+  font-family: "Temml";
+}
+
+mo.tml-prime {
+  font-family: Temml;
+}
+
+/* flex-wrap for line-breaking in Chromium */
+math {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+math > mrow {
+  padding: 0.5ex 0ex;
+}
+
+/* Avoid flex-wrap in Firefox */
+@-moz-document url-prefix() {
+  math { display: inline; }
+  math > mrow { padding: 0 }
+}
+
+/* AMS environment auto-numbering via CSS counter. */
+.tml-eqn::before {
+  counter-increment: tmlEqnNo;
+  content: "(" counter(tmlEqnNo) ")";
+}
+
+body {
+  counter-reset: tmlEqnNo;
+}
+
+/* Environment arrays */
+
+/* Environments that addjot to row spacing */
+mtable.tml-jot > mtr > mtd {
+  padding-top: calc(0.5ex + 0.09em);
+  padding-bottom: calc(0.5ex + 0.09em);
+}
+
+/* Zero column gap for {alignat}, {split}, etc */
+mtable.tml-abut > mtr > mtd,
+mtable.tml-align > mtr > mtd:nth-child(odd),
+mtable.tml-align-star > mtr > mtd:nth-child(even) {
+  padding-left: 0em;
+  padding-right: 0em;
+}
+
+mtable.tml-align > mtr > mtd:nth-child(even),
+mtable.tml-align-star > mtr > mtd:nth-child(odd) {
+  padding-left: 1em;
+  padding-right: 0em;
+}
+
+mtable.tml-align > mtr > mtd:nth-child(1) {
+  padding-left: 0em;
+}
+
+mtable.tml-align > mtr > mtd:nth-child(odd),
+mtable.tml-alignat > mtr > mtd:nth-child(odd),
+mtable.tml-aligned > mtr > mtd:nth-child(even) {
+  text-align: -webkit-left;
+  text-align: -moz-left;
+}
+
+mtable.tml-align > mtr > mtd:nth-child(even),
+mtable.tml-alignat > mtr > mtd:nth-child(even),
+mtable.tml-aligned > mtr > mtd:nth-child(odd),
+mtable.tml-align-star > mtr > mtd:nth-child(odd) {
+  text-align: -webkit-right;
+  text-align: -moz-right;
+}
+
+mtable.tml-cases > mtr > mtd {
+  padding-left: 0em;
+  padding-right: 0em;
+  text-align: -webkit-left;
+  text-align: -moz-left;
+}
+
+mtable.tml-cases > mtr > mtd:nth-child(2) {
+  padding-left: 1em;
+}
+
+mtable.tml-small > mtr > mtd {
+  padding-top: 0.35ex;
+  padding-bottom: 0.35ex;
+  padding-left: 0.1389em;
+  padding-right: 0.1389em;
+}
+
+mtable.tml-subarray > mtr > mtd {
+  padding-top: 0em;
+  padding-left: 0em;
+}
+
+mtable.tml-cd > mtr > mtd {
+  padding-left: 0.25em;
+  padding-right: 0.25em;
+}
+
+mtable > mtr:first-child > mtr > mtd {
+  padding-top: 0em;
+}
+
+mtable > mtr:last-child > mtr > mtd {
+  padding-bottom: 0em;
+}
+
+mtable:not(.tml-array) > mtr > mtd:first-child {
+  padding-left: 0em;
+}
+
+mtable:not(.tml-array) > mtr > mtd:last-child {
+  padding-right: 0em;
+}
+
+mtr.tml-top-solid > mtd {
+  border-top: 0.06em solid;
+}
+
+mtr.tml-top-double > mtd {
+  border-top: 0.15em double;
+}
+
+mtr.tml-top-dashed > mtd {
+  border-top: 0.06em dashed;
+}
+
+mtr.tml-hline-solid > mtd {
+  border-bottom: 0.06em solid;
+}
+
+mtr.tml-hline-double > mtd {
+  border-bottom: 0.15em double;
+}
+
+mtr.tml-hline-dashed > mtd {
+  border-bottom: 0.06em dashed;
+}
+
+/* MathML-Core does not support <menclose> attributes.
+ * So Use background images for \cancel */
+mrow.cancel {
+  background: 
+      linear-gradient(to top left,
+          rgba(0,0,0,0) 0%,
+          rgba(0,0,0,0) calc(50% - 0.06em),
+          rgba(0,0,0,1) 50%,
+          rgba(0,0,0,0) calc(50% + 0.06em),
+          rgba(0,0,0,0) 100%);
+}
+
+mrow.bcancel {
+  background: 
+      linear-gradient(to top right,
+          rgba(0,0,0,0) 0%,
+          rgba(0,0,0,0) calc(50% - 0.06em),
+          rgba(0,0,0,1) 50%,
+          rgba(0,0,0,0) calc(50% + 0.06em),
+          rgba(0,0,0,0) 100%);
+}
+
+mrow.xcancel {
+  background: 
+      linear-gradient(to top left,
+          rgba(0,0,0,0) 0%,
+          rgba(0,0,0,0) calc(50% - 0.06em),
+          rgba(0,0,0,1) 50%,
+          rgba(0,0,0,0) calc(50% + 0.06em),
+          rgba(0,0,0,0) 100%),
+      linear-gradient(to top right,
+          rgba(0,0,0,0) 0%,
+          rgba(0,0,0,0) calc(50% - 0.06em),
+          rgba(0,0,0,1) 50%,
+          rgba(0,0,0,0) calc(50% + 0.06em),
+          rgba(0,0,0,0) 100%);
+}
+
+/* This section modifies Temml math CSS */
+math   { font-size: 1.1em; }
+math .special-fraction { font-family: "Times New Roman"; }
+/* Create a hanging indent on calculations that wrap to a second line. */
+.hurmet-calc > math > mrow:not(:first-child) { margin-left: 2em }
+.hurmet-calc > math > mrow:not(:last-child) { margin-right: -2em }
+
+/*
+ * This section contains CSS for tables.
+ * Tables were developed separately from ProseMirror and are maintained by Atlassian.
+ */
+
+ .ProseMirror .tableWrapper {
+  overflow-x: auto;
+}
+.ProseMirror table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  overflow: hidden;
+  margin-bottom: 1em;
+}
+.ProseMirror td, .ProseMirror th {
+  vertical-align: center;
+  box-sizing: border-box;
+  position: relative;
+  min-width: 1em;
+  padding: 2px 3px;
+}
+.ProseMirror table p { line-height: 1.2; margin: 2px 0 2px 0; }
+.ProseMirror header table p  { line-height: 1.6; }
+.ProseMirror td > *, .ProseMirror th > *,
+.ProseMirror td > *:first-child {
+  margin-top: 2px;
+  margin-bottom: 3px;
+}
+.ProseMirror th > *:first-child {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+.ProseMirror .column-resize-handle {
+  position: absolute;
+  right: -2px; top: 0; bottom: 0;
+  width: 4px;
+  z-index: 20;
+  background-color: #adf;
+  pointer-events: none;
+}
+.ProseMirror.resize-cursor {
+  cursor: ew-resize;
+  cursor: col-resize;
+}
+/* Give selected cells a blue overlay */
+.ProseMirror .selectedCell:after {
+  z-index: 2;
+  position: absolute;
+  content: "";
+  left: 0; right: 0; top: 0; bottom: 0;
+  background: rgba(200, 200, 255, 0.4);
+  pointer-events: none;
+}
+
+/* Table styles */
+.ProseMirror table.grid td, .ProseMirror table.grid th {
+  border: 1px solid #ddd;
+}
+.ProseMirror table.grid th { font-weight: 600 }
+
+.ProseMirror table.nogrid td, .ProseMirror table.nogrid th {
+  border: none;
+}
+.ProseMirror table.rules td, .ProseMirror table.rules th {
+  border-bottom: 2px solid #ddd;
+}
+.ProseMirror table.rules tr:last-child td { border-bottom: none; }
+
+.ProseMirror table.one-rule th {
+  border-bottom: 1px solid #111111;  
+}
+.ProseMirror table.one-rule td {
+  border: none;
+}
+
+.ProseMirror table.two-rules th { border-bottom: 1px solid #111111; }
+.ProseMirror table.two-rules tr:last-child td { border-top: 1px solid #111111; }
+
+.ProseMirror table.three-rules th { border-top: 2px solid #111111; border-bottom: 1px solid #111111; }
+.ProseMirror table.three-rules tr:last-child td { border-bottom: 2px solid #111111; }
+
+.ProseMirror table.four-rules th { border-top: 2px solid #111111; border-bottom: 1px solid #111111; }
+.ProseMirror table.four-rules tr:nth-child(5n) td { padding-bottom: 1em; }
+.ProseMirror table.four-rules tr:last-child td { border-top: 1px solid #111111; border-bottom: 2px solid #111111; }
+
+.ProseMirror table.striped th, .ProseMirror table.striped td { border: 1px solid #ddd }
+.ProseMirror table.striped tbody tr:nth-child(even) {
+   background-color: #f6f8fa;
+}
+.ProseMirror table.striped th { font-weight: 600 }
+
+/* Column alignment. Apply these classes to the table node. */
+/* This is not Atlassian CSS. It's specific to Hurmet. */
+.c1r td:nth-child(1), .c1r th:nth-child(1),
+.c2r td:nth-child(2), .c2r th:nth-child(2),
+.c3r td:nth-child(3), .c3r th:nth-child(3),
+.c4r td:nth-child(4), .c4r th:nth-child(4),
+.c5r td:nth-child(5), .c5r th:nth-child(5),
+.c6r td:nth-child(6), .c6r th:nth-child(6),
+.c7r td:nth-child(7), .c7r th:nth-child(7),
+.c8r td:nth-child(8), .c8r th:nth-child(8),
+.c9r td:nth-child(9), .c9r th:nth-child(9) { text-align:right }
+
+.c1c td:nth-child(1), .c1c th:nth-child(1),
+.c2c td:nth-child(2), .c2c th:nth-child(2),
+.c3c td:nth-child(3), .c3c th:nth-child(3),
+.c4c td:nth-child(4), .c4c th:nth-child(4),
+.c5c td:nth-child(5), .c5c th:nth-child(5),
+.c6c td:nth-child(6), .c6c th:nth-child(6),
+.c7c td:nth-child(7), .c7c th:nth-child(7),
+.c8c td:nth-child(8), .c8c th:nth-child(8),
+.c9c td:nth-child(9), .c9c th:nth-child(9) { text-align:center }

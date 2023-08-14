@@ -422,12 +422,14 @@ pageSize: ${state.doc.attrs.pageSize}
   str =  str
   if (window.showOpenFilePicker && state.doc.attrs.fileHandle) {
     // Use the Chromium File System Access API, so users can click to save a document.
-    const button = document.getElementsByClassName("ProseMirror-menubar").item(0).children[1]
-    // Blink the button, so the author knows that a save takes place.
-    button.classList.add("ProseMirror-menu-active")
     writeFile(state.doc.attrs.fileHandle, str)
+    // Blink the alert, so the author knows that a save takes place.
+    const saveAlert = document.getElementById("saved")
+    saveAlert.style.visibility = "visible"
+    const scroll = window.scrollY
+    saveAlert.style.top = scroll < 240 ? "240px" : String(scroll) + "px"
     sleep(500).then(() => {
-      button.classList.remove("ProseMirror-menu-active")
+        saveAlert.style.visibility = "hidden"
     });
   } else {
     // Legacy method for Firefox and Safari

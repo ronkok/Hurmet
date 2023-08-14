@@ -27158,7 +27158,7 @@ const pointForce = (x, y, load, fixity, isReaction = false) => {
       d: `M${x} ${y} l${sgn * 4} ${sgn * 8} h${-sgn * 3.5} v${sgn * (length - 8)} h${-sgn * 1} v${-sgn * (length - 8)} h${-sgn * 3}z`
     }
   };
-  const text = textNode(String(load), x, yText, "middle");
+  const text = textNode(String(Math.abs(load)), x, yText, "middle");
   return [arrow, text]
 };
 
@@ -27353,7 +27353,7 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
       const x = beam.xDiagram + beam.xScale * seg.xOfLeftEnd;
       if (Math.abs(seg.P[0]) > 0) {
         const sText = round(seg.P[0] / forceFactor, 3);
-        diagram = diagram.concat(Draw.pointForce( x, beam.yLoad, sText, "continuous"));
+        diagram = diagram.concat(Draw.pointForce(x, beam.yLoad, sText, "continuous"));
       }
       if (Math.abs(seg.M[0]) > 0) {
         const sText = round(seg.M[0] / momentFactor, 3);
@@ -29345,9 +29345,11 @@ function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combinations
       });
       const xPoly = new Array(numDataPoints - 1).fill(0);
       const yPoly = new Array(numDataPoints - 1).fill(0);
+      xPoly[0] = beam.xDiagram.toFixed(2);
+      yPoly[0] = yDeflection.toFixed(2);
       for (let ii = 1; ii <= numDataPoints - 1; ii++) {
-        xPoly[ii - 1] = (beam.xDiagram + beam.xScale * x[ii]).toFixed(2); // x(ii)
-        yPoly[ii - 1] = (yDeflection - deflectionScale * deflection[ii]).toFixed(2);
+        xPoly[ii] = (beam.xDiagram + beam.xScale * x[ii]).toFixed(2); // x(ii)
+        yPoly[ii] = (yDeflection - deflectionScale * deflection[ii]).toFixed(2);
       }
       diagram.push(Draw.polyline(xPoly, yPoly));
     }
@@ -50160,12 +50162,14 @@ pageSize: ${state.doc.attrs.pageSize}
   str =  str;
   if (window.showOpenFilePicker && state.doc.attrs.fileHandle) {
     // Use the Chromium File System Access API, so users can click to save a document.
-    const button = document.getElementsByClassName("ProseMirror-menubar").item(0).children[1];
-    // Blink the button, so the author knows that a save takes place.
-    button.classList.add("ProseMirror-menu-active");
     writeFile(state.doc.attrs.fileHandle, str);
+    // Blink the alert, so the author knows that a save takes place.
+    const saveAlert = document.getElementById("saved");
+    saveAlert.style.visibility = "visible";
+    const scroll = window.scrollY;
+    saveAlert.style.top = scroll < 240 ? "240px" : String(scroll) + "px";
     sleep(500).then(() => {
-      button.classList.remove("ProseMirror-menu-active");
+        saveAlert.style.visibility = "hidden";
     });
   } else {
     // Legacy method for Firefox and Safari

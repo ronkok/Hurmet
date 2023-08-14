@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Concrete Column Interaction</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <nav>
+   <ul>
+     <li><a href="../index.html">Hurmet</a></li>
+     <li><a href="../manual.html">Documentation</a></li>
+   </ul>
+  </nav>
+<article class="ProseMirror pica">
+<div class="hidden"><p><span class='hurmet-calc' data-entry='colDiagram1 = import("https://gist.githubusercontent.com/ronkok/6ea53b79cd49a0ab5c6c60e3f9e8c874/raw/concreteColumnInteraction.txt") = !'><math><mrow><mrow><mrow><mi mathvariant="normal">c</mi></mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">l</mi></mrow><mrow><mi mathvariant="normal">D</mi></mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">g</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">m</mi></mrow><mn>1</mn></mrow><mo>=</mo></mrow><mrow><mi>import</mi><mo>⁡</mo></mrow><mrow><mo form="prefix" stretchy="false">(</mo><mtext>concreteColumnInteraction.txt</mtext><mo form="postfix" stretchy="false">)</mo></mrow></math></span></p>
+<p><span class='hurmet-calc' data-entry='col =
+``f_c′	f_y	width	depth	barSize	bars	cover	tieSize
+psi	psi	in	in			in	
+4500	60000	24	24	#7	12	2	#4`` = @'><math><mtable columnalign="center center center center center center center" class="tml-array"><mtr><mtd><msubsup><mi>f</mi><mtext>c</mtext><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msubsup></mtd><mtd><msub><mi>f</mi><mtext>y</mtext></msub></mtd><mtd><mtext>width</mtext></mtd><mtd><mtext>depth</mtext></mtd><mtd><mtext>barSize</mtext></mtd><mtd><mtext>bars</mtext></mtd><mtd><mtext>cover</mtext></mtd><mtd><mtext>tieSize</mtext></mtd></mtr><mtr class="tml-hline-solid"><mtd><mtext>psi</mtext></mtd><mtd><mtext>psi</mtext></mtd><mtd><mtext>in</mtext></mtd><mtd><mtext>in</mtext></mtd><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd><mtd><mtext>in</mtext></mtd><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow><mn>4</mn><mo separator="true" lspace="0em" rspace="0em">,</mo><mn>500</mn></mrow></mtd><mtd><mrow><mn>60</mn><mo separator="true" lspace="0em" rspace="0em">,</mo><mn>000</mn></mrow></mtd><mtd><mn>24</mn></mtd><mtd><mn>24</mn></mtd><mtd><mtext>#7</mtext></mtd><mtd><mn>12</mn></mtd><mtd><mn>2</mn></mtd><mtd><mtext>#4</mtext></mtd></mtr></mtable></math></span></p>
+</div>
+<h1 id='concrete-column-interaction-diagram'>Concrete Column Interaction Diagram</h1>
+<p>This guide is aimed at civil engineers. It shows how Hurmet can produce a concrete column interaction diagram, like this one:</p>
+<p><span class='hurmet-calc' data-entry='colDiagram1.draw(col, 100, 200) = @'><svg xmlns="http://www.w3.org/2000/svg" xmlns='http://www.w3.org/2000/svg' width='640' height='180' style='display: inline;'>
+<title text='Concrete Interaction Diagram'>
+</title>
+<text text='**Concrete Column**' x='64' y='12' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan font-weight='bold'>Concrete Column</tspan></text>
+<text text='f~c~′' x='75.60000000000001' y='36' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>f</tspan><tspan font-size='0.8em' dy='2'>c</tspan><tspan dy='-2'>′</tspan></text>
+<text text='f~y~' x='75.60000000000001' y='53.599999999999994' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>f</tspan><tspan font-size='0.8em' dy='2'>y</tspan></text>
+<text text='ACI 318-' x='75.60000000000001' y='71.19999999999999' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>ACI 318-</tspan></text>
+<text text='Width' x='75.60000000000001' y='88.8' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Width</tspan></text>
+<text text='Depth' x='75.60000000000001' y='106.39999999999999' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Depth</tspan></text>
+<text text='Bar size' x='75.60000000000001' y='124' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Bar size</tspan></text>
+<text text='Bar qty' x='75.60000000000001' y='141.6' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Bar qty</tspan></text>
+<text text='Clear cover' x='75.60000000000001' y='159.2' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Clear cover</tspan></text>
+<text text='Tie size' x='75.60000000000001' y='176.8' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Tie size</tspan></text>
+<text text='4.5' x='87.60000000000001' y='36' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>4.5</tspan></text>
+<text text='ksi' x='118' y='36' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ksi</tspan></text>
+<text text='60' x='87.60000000000001' y='53.599999999999994' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>60</tspan></text>
+<text text='ksi' x='118' y='53.599999999999994' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ksi</tspan></text>
+<text text='19' x='87.60000000000001' y='71.19999999999999' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>19</tspan></text>
+<text text='24.0' x='87.60000000000001' y='88.8' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>24.0</tspan></text>
+<text text='in' x='118' y='88.8' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>in</tspan></text>
+<text text='24.0' x='87.60000000000001' y='106.39999999999999' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>24.0</tspan></text>
+<text text='in' x='118' y='106.39999999999999' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>in</tspan></text>
+<text text='#7' x='87.60000000000001' y='124' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>#7</tspan></text>
+<text text='12' x='87.60000000000001' y='141.6' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>12</tspan></text>
+<text text='2.00' x='87.60000000000001' y='159.2' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>2.00</tspan></text>
+<text text='in' x='118' y='159.2' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>in</tspan></text>
+<text text='#4' x='87.60000000000001' y='176.8' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>#4</tspan></text>
+<rect x='168' y='4' width='100' height='100' stroke-width='1' stroke='black' fill='none'>
+</rect>
+<rect x='176.33333333333334' y='12.333333333333314' width='83.33333333333333' height='83.33333333333334' rx='6.25' ry='6.25' stroke-width='0' stroke='black' fill='black'>
+</rect>
+<rect x='178.41666666666669' y='14.416666666666657' width='79.16666666666669' height='79.16666666666667' rx='4.166666666666667' ry='4.166666666666667' stroke-width='0' stroke='black' fill='white'>
+</rect>
+<circle cx='180.92606770833333' cy='91.07393229166667' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='180.92606770833333' cy='16.926067708333335' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='205.64202256944446' cy='91.07393229166667' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='205.64202256944446' cy='16.926067708333335' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='230.35797743055556' cy='91.07393229166667' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='230.35797743055556' cy='16.926067708333335' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='255.0739322916667' cy='91.07393229166667' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='255.0739322916667' cy='16.926067708333335' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='180.92606770833333' cy='66.35797743055554' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='255.0739322916667' cy='66.35797743055554' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='180.92606770833333' cy='41.642022569444435' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='255.0739322916667' cy='41.642022569444435' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<text text='A~g~ = 576.0 in²' x='174' y='124' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>A</tspan><tspan font-size='0.8em' dy='2'>g</tspan><tspan dy='-2'> = 576.0 in²</tspan></text>
+<text text='A~s~ = 7.2 in²' x='174' y='141.6' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>A</tspan><tspan font-size='0.8em' dy='2'>s</tspan><tspan dy='-2'> = 7.2 in²</tspan></text>
+<text text='ρ = 1.25%' x='174' y='159.2' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ρ = 1.25%</tspan></text>
+<text text='bars at 5.93″ c/c' x='174' y='176.8' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>bars at 5.93″ c/c</tspan></text>
+<path d='M368,148 368,4' stroke-width='1' stroke='black' fill='black'>
+</path>
+<path d='M368,148 528,148' stroke-width='1' stroke='black' fill='black'>
+</path>
+<text text='ϕP~n~ (kips)' x='362' y='16' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>ϕP</tspan><tspan font-size='0.8em' dy='2'>n</tspan><tspan dy='-2'> (kips)</tspan></text>
+<text text='0' x='362' y='163' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>0</tspan></text>
+<text text='ϕM~n~ (kip·ft)' x='504' y='176' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>ϕM</tspan><tspan font-size='0.8em' dy='2'>n</tspan><tspan dy='-2'> (kip·ft)</tspan></text>
+<path d='M368,28 L379.742396556626,28 L417.4928671465036,28 L443.04770661721415,28 L462.6313999694801,35.33019867388211 L477.0739573423893,43.36444632907268 L487.86008762382966,50.534090994425185 L496.0048035404424,56.99511564774974 L501.98416076567685,62.60408067573553 L506.7671726973385,67.9837426327891 L510.48516131754604,72.94547106354833 L513.4046272862323,77.55004511559584 L515.7230971430148,81.84700352345607 L517.5885215859875,85.87712826117865 L519.1127368640886,89.67429752732056 L520.3809523809524,93.26688731077131 L520.1095663264817,96.16841273559658 L518.9016194850662,98.60832575844019 L517.5925522168291,100.90536037503318 L516.4453649236711,102.81045893666698 L515.0185924589554,104.86463195411189 L513.563356027894,106.81510914586586 L511.8722306853497,108.75569233532357 L510.08186117788966,110.64758442749077 L508.2976175548331,112.46184943866271 L506.5263262361504,114.2052124438136 L504.58890661170227,115.67438997004304 L502.6019816238869,117.00253550309287 L500.64028856575214,118.27581997968977 L498.70604628207997,119.49850403413873 L496.8008385420999,120.6744182463564 L495.08593613288826,122.8994191126747 L493.38006387034415,124.97469636202248 L491.68920248384484,126.91993803789964 L490.01653308197166,128.75152526941056 L488.3633483866171,130.48319860104144 L486.7296746147964,132.12656944845054 L485.1146990358044,133.69151711071262 L483.5170654949293,135.18650014082073 L481.9350793130014,136.61880287974626 L480.689398639891,137.67915905109936 L479.5010271062751,138.65327916927683 L478.3323118481469,139.58131267068936 L477.18124926521745,140.4674729452121 L476.04588222925895,141.31547496900498 L474.92431998885405,142.12860688606372 L473.8147504110332,142.90978959768583 L472.715446817557,143.66162664006237 L471.6247710310417,144.386446147806 L470.54117378980845,145.08633633068078 L469.46319336437085,145.76317560401517 L468.389452974409,146.4186582897351 L469.2062305964946,146.52625698984673 L468.15952712001473,147.14348007338484 L469.33235530643174,148 ' stroke-width='1' stroke='black' fill='transparent'>
+</path>
+<text text='1356 kips' x='374' y='22' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>1356 kips</tspan></text>
+<text text='321' x='463.33235530643174' y='142' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>321</tspan></text>
+<text text='ϕP~n~ = 618 kips' x='526.3809523809524' y='92.4668873107713' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ϕP</tspan><tspan font-size='0.8em' dy='2'>n</tspan><tspan dy='-2'> = 618 kips</tspan></text>
+<text text='ϕM~n~ = 483 kip·ft' x='526.3809523809524' y='108.46688731077131' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ϕM</tspan><tspan font-size='0.8em' dy='2'>n</tspan><tspan dy='-2'> = 483 kip·ft</tspan></text>
+<text text='ϕM~n~ = 245 kip·ft' x='444.935242460978' y='25.599999999999994' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ϕM</tspan><tspan font-size='0.8em' dy='2'>n</tspan><tspan dy='-2'> = 245 kip·ft</tspan></text>
+<path d='M368,121.45099850794611 528,121.45099850794611' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='300' x='362' y='125.45099850794611' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>300</tspan></text>
+<path d='M368,94.90199701589222 528,94.90199701589222' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='600' x='362' y='98.90199701589222' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>600</tspan></text>
+<path d='M368,68.35299552383835 528,68.35299552383835' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='900' x='362' y='72.35299552383835' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>900</tspan></text>
+<path d='M368,41.80399403178447 528,41.80399403178447' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='1200' x='362' y='45.80399403178447' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>1200</tspan></text>
+<path d='M399.5421469340781,148 399.5421469340781,28' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='100' x='399.5421469340781' y='163' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>100</tspan></text>
+<path d='M431.0842938681562,148 431.0842938681562,28' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='200' x='431.0842938681562' y='163' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>200</tspan></text>
+<path d='M462.6264408022343,148 462.6264408022343,28' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='300' x='462.6264408022343' y='163' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>300</tspan></text>
+<path d='M494.1685877363124,148 494.1685877363124,28' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='400' x='494.1685877363124' y='163' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>400</tspan></text>
+<path d='M525.7107346703905,148 525.7107346703905,28' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='500' x='525.7107346703905' y='163' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>500</tspan></text>
+<circle cx='431.0842938681562' cy='139.15033283598203' r='2.4000000000000004' stroke-width='0.5' stroke='black' fill='black' stroke-dasharray='5 10'>
+</circle>
+</svg></span></p>
+<p>It’s a three-step process. First, one must import a module. To do that, open a math zone (Alt-C) and copy in this code:</p>
+<pre style="overflow-x: scroll;"><code>colDiagram = import(&quot;https://gist.githubusercontent.com/ronkok/6ea53b79cd49a0ab5c6c60e3f9e8c874/raw/concreteColumnInteraction.txt&quot;) = !</code></pre><p>That module exposes one function, which works through a loop that sets the neutral axis in 25 different locations and finds the axial strength and bending strength that results from each neutral axis location. The process is described in <a href='https://www.concrete.org/portals/0/files/pdf/e702.2_interaction_diagram_for_concrete_columns_2007-02-20.pdf'>ACI E702.2</a>. And you can look at the function’s <a href='https://gist.githubusercontent.com/ronkok/6ea53b79cd49a0ab5c6c60e3f9e8c874/raw/concreteColumnInteraction.txt'>source code</a>.</p>
+<p>Your second step is to define the parameters of your column in a data frame. Here’s an example:</p>
+<pre><code>col =
+``f_c′	f_y	width	depth	barSize	bars	cover	tieSize
+psi	psi	in	in			in	
+4500	60000	24	24	#7	12	2	#4`` = @</code></pre><p>Note that the diagram function is not unit-aware. You have to use the same units as the example.</p>
+<p>Finally, invoke the function with this code:</p>
+<pre><code>colDiagram.draw(col) = @</code></pre><p>In your document, the results will look like this:</p>
+<div class="indented"><p><span class='hurmet-calc' data-entry='colDiagram = import("https://gist.githubusercontent.com/ronkok/6ea53b79cd49a0ab5c6c60e3f9e8c874/raw/concreteColumnInteraction.txt") = !'><math><mrow><mrow><mrow><mi mathvariant="normal">c</mi></mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">l</mi></mrow><mrow><mi mathvariant="normal">D</mi></mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">g</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">m</mi></mrow></mrow><mo>=</mo></mrow><mrow><mi>import</mi><mo>⁡</mo></mrow><mrow><mo form="prefix" stretchy="false">(</mo><mtext>concreteColumnInteraction.txt</mtext><mo form="postfix" stretchy="false">)</mo></mrow></math></span></p>
+<p><span class='hurmet-calc' data-entry='col =
+``f_c′	f_y	width	depth	barSize	bars	cover	tieSize
+psi	psi	in	in			in	
+4500	60000	24	24	#7	12	2	#4`` = @'><math><mtable columnalign="center center center center center center center" class="tml-array"><mtr><mtd><msubsup><mi>f</mi><mtext>c</mtext><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msubsup></mtd><mtd><msub><mi>f</mi><mtext>y</mtext></msub></mtd><mtd><mtext>width</mtext></mtd><mtd><mtext>depth</mtext></mtd><mtd><mtext>barSize</mtext></mtd><mtd><mtext>bars</mtext></mtd><mtd><mtext>cover</mtext></mtd><mtd><mtext>tieSize</mtext></mtd></mtr><mtr class="tml-hline-solid"><mtd><mtext>psi</mtext></mtd><mtd><mtext>psi</mtext></mtd><mtd><mtext>in</mtext></mtd><mtd><mtext>in</mtext></mtd><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd><mtd><mtext>in</mtext></mtd><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow><mn>4</mn><mo separator="true" lspace="0em" rspace="0em">,</mo><mn>500</mn></mrow></mtd><mtd><mrow><mn>60</mn><mo separator="true" lspace="0em" rspace="0em">,</mo><mn>000</mn></mrow></mtd><mtd><mn>24</mn></mtd><mtd><mn>24</mn></mtd><mtd><mtext>#7</mtext></mtd><mtd><mn>12</mn></mtd><mtd><mn>2</mn></mtd><mtd><mtext>#4</mtext></mtd></mtr></mtable></math></span></p>
+<p><span class='hurmet-calc' data-entry='colDiagram.draw(col) = @'><svg xmlns="http://www.w3.org/2000/svg" xmlns='http://www.w3.org/2000/svg' width='640' height='180' style='display: inline;'>
+<title text='Concrete Interaction Diagram'>
+</title>
+<text text='**Concrete Column**' x='64' y='12' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan font-weight='bold'>Concrete Column</tspan></text>
+<text text='f~c~′' x='75.60000000000001' y='36' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>f</tspan><tspan font-size='0.8em' dy='2'>c</tspan><tspan dy='-2'>′</tspan></text>
+<text text='f~y~' x='75.60000000000001' y='53.599999999999994' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>f</tspan><tspan font-size='0.8em' dy='2'>y</tspan></text>
+<text text='ACI 318-' x='75.60000000000001' y='71.19999999999999' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>ACI 318-</tspan></text>
+<text text='Width' x='75.60000000000001' y='88.8' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Width</tspan></text>
+<text text='Depth' x='75.60000000000001' y='106.39999999999999' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Depth</tspan></text>
+<text text='Bar size' x='75.60000000000001' y='124' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Bar size</tspan></text>
+<text text='Bar qty' x='75.60000000000001' y='141.6' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Bar qty</tspan></text>
+<text text='Clear cover' x='75.60000000000001' y='159.2' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Clear cover</tspan></text>
+<text text='Tie size' x='75.60000000000001' y='176.8' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Tie size</tspan></text>
+<text text='4.5' x='87.60000000000001' y='36' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>4.5</tspan></text>
+<text text='ksi' x='118' y='36' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ksi</tspan></text>
+<text text='60' x='87.60000000000001' y='53.599999999999994' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>60</tspan></text>
+<text text='ksi' x='118' y='53.599999999999994' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ksi</tspan></text>
+<text text='19' x='87.60000000000001' y='71.19999999999999' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>19</tspan></text>
+<text text='24.0' x='87.60000000000001' y='88.8' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>24.0</tspan></text>
+<text text='in' x='118' y='88.8' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>in</tspan></text>
+<text text='24.0' x='87.60000000000001' y='106.39999999999999' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>24.0</tspan></text>
+<text text='in' x='118' y='106.39999999999999' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>in</tspan></text>
+<text text='#7' x='87.60000000000001' y='124' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>#7</tspan></text>
+<text text='12' x='87.60000000000001' y='141.6' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>12</tspan></text>
+<text text='2.00' x='87.60000000000001' y='159.2' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>2.00</tspan></text>
+<text text='in' x='118' y='159.2' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>in</tspan></text>
+<text text='#4' x='87.60000000000001' y='176.8' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>#4</tspan></text>
+<rect x='168' y='4' width='100' height='100' stroke-width='1' stroke='black' fill='none'>
+</rect>
+<rect x='176.33333333333334' y='12.333333333333314' width='83.33333333333333' height='83.33333333333334' rx='6.25' ry='6.25' stroke-width='0' stroke='black' fill='black'>
+</rect>
+<rect x='178.41666666666669' y='14.416666666666657' width='79.16666666666669' height='79.16666666666667' rx='4.166666666666667' ry='4.166666666666667' stroke-width='0' stroke='black' fill='white'>
+</rect>
+<circle cx='180.92606770833333' cy='91.07393229166667' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='180.92606770833333' cy='16.926067708333335' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='205.64202256944446' cy='91.07393229166667' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='205.64202256944446' cy='16.926067708333335' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='230.35797743055556' cy='91.07393229166667' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='230.35797743055556' cy='16.926067708333335' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='255.0739322916667' cy='91.07393229166667' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='255.0739322916667' cy='16.926067708333335' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='180.92606770833333' cy='66.35797743055554' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='255.0739322916667' cy='66.35797743055554' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='180.92606770833333' cy='41.642022569444435' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='255.0739322916667' cy='41.642022569444435' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<text text='A~g~ = 576.0 in²' x='174' y='124' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>A</tspan><tspan font-size='0.8em' dy='2'>g</tspan><tspan dy='-2'> = 576.0 in²</tspan></text>
+<text text='A~s~ = 7.2 in²' x='174' y='141.6' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>A</tspan><tspan font-size='0.8em' dy='2'>s</tspan><tspan dy='-2'> = 7.2 in²</tspan></text>
+<text text='ρ = 1.25%' x='174' y='159.2' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ρ = 1.25%</tspan></text>
+<text text='bars at 5.93″ c/c' x='174' y='176.8' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>bars at 5.93″ c/c</tspan></text>
+<path d='M368,148 368,4' stroke-width='1' stroke='black' fill='black'>
+</path>
+<path d='M368,148 528,148' stroke-width='1' stroke='black' fill='black'>
+</path>
+<text text='ϕP~n~ (kips)' x='362' y='16' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>ϕP</tspan><tspan font-size='0.8em' dy='2'>n</tspan><tspan dy='-2'> (kips)</tspan></text>
+<text text='0' x='362' y='163' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>0</tspan></text>
+<text text='ϕM~n~ (kip·ft)' x='504' y='176' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>ϕM</tspan><tspan font-size='0.8em' dy='2'>n</tspan><tspan dy='-2'> (kip·ft)</tspan></text>
+<path d='M368,28 L379.742396556626,28 L417.4928671465036,28 L443.04770661721415,28 L462.6313999694801,35.33019867388211 L477.0739573423893,43.36444632907268 L487.86008762382966,50.534090994425185 L496.0048035404424,56.99511564774974 L501.98416076567685,62.60408067573553 L506.7671726973385,67.9837426327891 L510.48516131754604,72.94547106354833 L513.4046272862323,77.55004511559584 L515.7230971430148,81.84700352345607 L517.5885215859875,85.87712826117865 L519.1127368640886,89.67429752732056 L520.3809523809524,93.26688731077131 L520.1095663264817,96.16841273559658 L518.9016194850662,98.60832575844019 L517.5925522168291,100.90536037503318 L516.4453649236711,102.81045893666698 L515.0185924589554,104.86463195411189 L513.563356027894,106.81510914586586 L511.8722306853497,108.75569233532357 L510.08186117788966,110.64758442749077 L508.2976175548331,112.46184943866271 L506.5263262361504,114.2052124438136 L504.58890661170227,115.67438997004304 L502.6019816238869,117.00253550309287 L500.64028856575214,118.27581997968977 L498.70604628207997,119.49850403413873 L496.8008385420999,120.6744182463564 L495.08593613288826,122.8994191126747 L493.38006387034415,124.97469636202248 L491.68920248384484,126.91993803789964 L490.01653308197166,128.75152526941056 L488.3633483866171,130.48319860104144 L486.7296746147964,132.12656944845054 L485.1146990358044,133.69151711071262 L483.5170654949293,135.18650014082073 L481.9350793130014,136.61880287974626 L480.689398639891,137.67915905109936 L479.5010271062751,138.65327916927683 L478.3323118481469,139.58131267068936 L477.18124926521745,140.4674729452121 L476.04588222925895,141.31547496900498 L474.92431998885405,142.12860688606372 L473.8147504110332,142.90978959768583 L472.715446817557,143.66162664006237 L471.6247710310417,144.386446147806 L470.54117378980845,145.08633633068078 L469.46319336437085,145.76317560401517 L468.389452974409,146.4186582897351 L469.2062305964946,146.52625698984673 L468.15952712001473,147.14348007338484 L469.33235530643174,148 ' stroke-width='1' stroke='black' fill='transparent'>
+</path>
+<text text='1356 kips' x='374' y='22' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>1356 kips</tspan></text>
+<text text='321' x='463.33235530643174' y='142' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>321</tspan></text>
+<text text='ϕP~n~ = 618 kips' x='526.3809523809524' y='92.4668873107713' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ϕP</tspan><tspan font-size='0.8em' dy='2'>n</tspan><tspan dy='-2'> = 618 kips</tspan></text>
+<text text='ϕM~n~ = 483 kip·ft' x='526.3809523809524' y='108.46688731077131' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ϕM</tspan><tspan font-size='0.8em' dy='2'>n</tspan><tspan dy='-2'> = 483 kip·ft</tspan></text>
+<text text='ϕM~n~ = 245 kip·ft' x='444.935242460978' y='25.599999999999994' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ϕM</tspan><tspan font-size='0.8em' dy='2'>n</tspan><tspan dy='-2'> = 245 kip·ft</tspan></text>
+<path d='M368,121.45099850794611 528,121.45099850794611' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='300' x='362' y='125.45099850794611' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>300</tspan></text>
+<path d='M368,94.90199701589222 528,94.90199701589222' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='600' x='362' y='98.90199701589222' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>600</tspan></text>
+<path d='M368,68.35299552383835 528,68.35299552383835' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='900' x='362' y='72.35299552383835' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>900</tspan></text>
+<path d='M368,41.80399403178447 528,41.80399403178447' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='1200' x='362' y='45.80399403178447' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>1200</tspan></text>
+<path d='M399.5421469340781,148 399.5421469340781,28' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='100' x='399.5421469340781' y='163' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>100</tspan></text>
+<path d='M431.0842938681562,148 431.0842938681562,28' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='200' x='431.0842938681562' y='163' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>200</tspan></text>
+<path d='M462.6264408022343,148 462.6264408022343,28' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='300' x='462.6264408022343' y='163' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>300</tspan></text>
+<path d='M494.1685877363124,148 494.1685877363124,28' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='400' x='494.1685877363124' y='163' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>400</tspan></text>
+<path d='M525.7107346703905,148 525.7107346703905,28' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='500' x='525.7107346703905' y='163' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>500</tspan></text>
+</svg></span></p>
+</div>
+<h1 id='variations'>Variations</h1>
+<h2 id='bar-pattern'>Bar Pattern</h2>
+<p>The bar arrangement need not be doubly symmetric. You can define a bar pattern in the form: 𝐦x𝐧, where 𝐦 and 𝐧 are integers ≥ 2. Like this example:</p>
+<div class="indented"><p><span class='hurmet-calc' data-entry='col =
+``f_c′	f_y	width	depth	barSize	bars	cover	tieSize
+psi	psi	in	in			in	
+4500	60000	24	24	#7	5x4	2	#4`` = @'><math><mtable columnalign="center center center center center center center" class="tml-array"><mtr><mtd><msubsup><mi>f</mi><mtext>c</mtext><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msubsup></mtd><mtd><msub><mi>f</mi><mtext>y</mtext></msub></mtd><mtd><mtext>width</mtext></mtd><mtd><mtext>depth</mtext></mtd><mtd><mtext>barSize</mtext></mtd><mtd><mtext>bars</mtext></mtd><mtd><mtext>cover</mtext></mtd><mtd><mtext>tieSize</mtext></mtd></mtr><mtr class="tml-hline-solid"><mtd><mtext>psi</mtext></mtd><mtd><mtext>psi</mtext></mtd><mtd><mtext>in</mtext></mtd><mtd><mtext>in</mtext></mtd><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd><mtd><mtext>in</mtext></mtd><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow><mn>4</mn><mo separator="true" lspace="0em" rspace="0em">,</mo><mn>500</mn></mrow></mtd><mtd><mrow><mn>60</mn><mo separator="true" lspace="0em" rspace="0em">,</mo><mn>000</mn></mrow></mtd><mtd><mn>24</mn></mtd><mtd><mn>24</mn></mtd><mtd><mtext>#7</mtext></mtd><mtd><mtext>5x4</mtext></mtd><mtd><mn>2</mn></mtd><mtd><mtext>#4</mtext></mtd></mtr></mtable></math></span></p>
+<p><span class='hurmet-calc' data-entry='colDiagram.draw(col) = @'><svg xmlns="http://www.w3.org/2000/svg" xmlns='http://www.w3.org/2000/svg' width='640' height='180' style='display: inline;'>
+<title text='Concrete Interaction Diagram'>
+</title>
+<text text='**Concrete Column**' x='64' y='12' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan font-weight='bold'>Concrete Column</tspan></text>
+<text text='f~c~′' x='75.60000000000001' y='36' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>f</tspan><tspan font-size='0.8em' dy='2'>c</tspan><tspan dy='-2'>′</tspan></text>
+<text text='f~y~' x='75.60000000000001' y='53.599999999999994' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>f</tspan><tspan font-size='0.8em' dy='2'>y</tspan></text>
+<text text='ACI 318-' x='75.60000000000001' y='71.19999999999999' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>ACI 318-</tspan></text>
+<text text='Width' x='75.60000000000001' y='88.8' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Width</tspan></text>
+<text text='Depth' x='75.60000000000001' y='106.39999999999999' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Depth</tspan></text>
+<text text='Bar size' x='75.60000000000001' y='124' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Bar size</tspan></text>
+<text text='Bar pattern' x='75.60000000000001' y='141.6' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Bar pattern</tspan></text>
+<text text='Clear cover' x='75.60000000000001' y='159.2' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Clear cover</tspan></text>
+<text text='Tie size' x='75.60000000000001' y='176.8' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Tie size</tspan></text>
+<text text='4.5' x='87.60000000000001' y='36' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>4.5</tspan></text>
+<text text='ksi' x='118' y='36' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ksi</tspan></text>
+<text text='60' x='87.60000000000001' y='53.599999999999994' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>60</tspan></text>
+<text text='ksi' x='118' y='53.599999999999994' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ksi</tspan></text>
+<text text='19' x='87.60000000000001' y='71.19999999999999' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>19</tspan></text>
+<text text='24.0' x='87.60000000000001' y='88.8' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>24.0</tspan></text>
+<text text='in' x='118' y='88.8' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>in</tspan></text>
+<text text='24.0' x='87.60000000000001' y='106.39999999999999' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>24.0</tspan></text>
+<text text='in' x='118' y='106.39999999999999' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>in</tspan></text>
+<text text='#7' x='87.60000000000001' y='124' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>#7</tspan></text>
+<text text='5x4' x='87.60000000000001' y='141.6' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>5x4</tspan></text>
+<text text='2.00' x='87.60000000000001' y='159.2' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>2.00</tspan></text>
+<text text='in' x='118' y='159.2' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>in</tspan></text>
+<text text='#4' x='87.60000000000001' y='176.8' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>#4</tspan></text>
+<rect x='168' y='4' width='100' height='100' stroke-width='1' stroke='black' fill='none'>
+</rect>
+<rect x='176.33333333333334' y='12.333333333333314' width='83.33333333333333' height='83.33333333333334' rx='6.25' ry='6.25' stroke-width='0' stroke='black' fill='black'>
+</rect>
+<rect x='178.41666666666669' y='14.416666666666657' width='79.16666666666669' height='79.16666666666667' rx='4.166666666666667' ry='4.166666666666667' stroke-width='0' stroke='black' fill='white'>
+</rect>
+<circle cx='180.92606770833333' cy='91.07393229166667' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='180.92606770833333' cy='16.926067708333335' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='199.46303385416667' cy='91.07393229166667' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='199.46303385416667' cy='16.926067708333335' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='218' cy='91.07393229166667' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='218' cy='16.926067708333335' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='236.53696614583333' cy='91.07393229166667' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='236.53696614583333' cy='16.926067708333335' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='255.0739322916667' cy='91.07393229166667' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='255.0739322916667' cy='16.926067708333335' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='180.92606770833333' cy='66.35797743055554' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='255.0739322916667' cy='66.35797743055554' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='180.92606770833333' cy='41.642022569444435' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='255.0739322916667' cy='41.642022569444435' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<text text='A~g~ = 576.0 in²' x='174' y='124' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>A</tspan><tspan font-size='0.8em' dy='2'>g</tspan><tspan dy='-2'> = 576.0 in²</tspan></text>
+<text text='A~s~ = 8.4 in²' x='174' y='141.6' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>A</tspan><tspan font-size='0.8em' dy='2'>s</tspan><tspan dy='-2'> = 8.4 in²</tspan></text>
+<text text='ρ = 1.46%' x='174' y='159.2' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ρ = 1.46%</tspan></text>
+<text text='bars at 4.45″ × 5.93″ c/c' x='174' y='176.8' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>bars at 4.45″ × 5.93″ c/c</tspan></text>
+<path d='M368,148 368,4' stroke-width='1' stroke='black' fill='black'>
+</path>
+<path d='M368,148 528,148' stroke-width='1' stroke='black' fill='black'>
+</path>
+<text text='ϕP~n~ (kips)' x='362' y='16' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>ϕP</tspan><tspan font-size='0.8em' dy='2'>n</tspan><tspan dy='-2'> (kips)</tspan></text>
+<text text='0' x='362' y='163' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>0</tspan></text>
+<text text='ϕM~n~ (kip·ft)' x='504' y='176' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>ϕM</tspan><tspan font-size='0.8em' dy='2'>n</tspan><tspan dy='-2'> (kip·ft)</tspan></text>
+<path d='M368,28 L380.89955398496613,28 L417.0318846055029,28 L441.3255996572458,28 L460.3134314735201,36.04856479088261 L474.4494286194076,44.07818130205217 L485.1347526449262,51.26498224858929 L493.32729961774925,57.76101994012197 L499.47633667081186,63.426469347007526 L504.4963490109674,68.8683939691409 L508.5112688875058,73.902916714248 L511.7726004712433,78.58928513547143 L514.4667551150573,82.9757896238926 L516.733358055355,87.10218447470761 L518.6779523067903,91.00149417820978 L520.3809523809524,94.70137966708042 L520.3127228913703,97.60322277701361 L519.1727494713525,99.98165160061386 L517.9373458595041,102.22080245958387 L516.8547129346565,104.07789379372839 L515.5082276172369,106.08030300570053 L514.134880053939,107.9816294584099 L512.4865629168569,109.89377381903 L510.7218032949808,111.76735870591286 L508.96282484256903,113.56527266305255 L507.21606984420987,115.29407129796856 L505.312534889654,116.75559374722803 L503.3622803308473,118.07963811653642 L501.4358378539846,119.35020389183785 L499.53530144531396,120.57144434226248 L497.6621657524171,121.747093519639 L496.4248875795319,123.97476028710666 L495.168602579281,126.05647637402035 L493.90008256070826,128.0114336981666 L492.62342549253975,129.8556005949984 L491.3408913754829,131.6023713563417 L490.05347745361024,133.26306479783702 L488.76131749395455,134.84731126673705 L487.46396086782846,136.36335616607718 L486.1605686230464,137.81830027623974 L485.1628592465849,138.91067062706296 L484.20248057457013,139.91897801638464 L483.2436309321068,140.88236014129333 L482.284949145685,141.8049242170177 L481.3250719746315,142.69029160476822 L480.36265715717485,143.5416675894802 L479.39639889082883,144.36189946766453 L478.4250378709584,145.1535251681171 L477.4473674209143,145.91881415799358 L476.462236825459,146.6598020255489 L477.98987396384587,148 ' stroke-width='1' stroke='black' fill='transparent'>
+</path>
+<path d='M368,28 L380.89955398496613,28 L417.0318846055029,28 L441.3255996572458,28 L460.3134314735201,36.04856479088261 L474.4494286194076,44.07818130205217 L485.1347526449262,51.26498224858929 L493.32729961774925,57.76101994012197 L499.47633667081186,63.426469347007526 L504.4963490109674,68.8683939691409 L508.5112688875058,73.902916714248 L511.7726004712433,78.58928513547143 L514.4667551150573,82.9757896238926 L516.733358055355,87.10218447470761 L518.6779523067903,91.00149417820978 L520.3809523809524,94.70137966708042 L520.3127228913703,97.60322277701361 L519.1727494713525,99.98165160061386 L517.9373458595041,102.22080245958387 L516.8547129346565,104.07789379372839 L515.5082276172369,106.08030300570053 L514.134880053939,107.9816294584099 L512.4865629168569,109.89377381903 L510.7218032949808,111.76735870591286 L508.96282484256903,113.56527266305255 L507.21606984420987,115.29407129796856 L505.312534889654,116.75559374722803 L503.3622803308473,118.07963811653642 L501.4358378539846,119.35020389183785 L499.53530144531396,120.57144434226248 L497.6621657524171,121.747093519639 L496.4248875795319,123.97476028710666 L495.168602579281,126.05647637402035 L493.90008256070826,128.0114336981666 L492.62342549253975,129.8556005949984 L491.3408913754829,131.6023713563417 L490.05347745361024,133.26306479783702 L488.76131749395455,134.84731126673705 L487.46396086782846,136.36335616607718 L486.1605686230464,137.81830027623974 L485.1628592465849,138.91067062706296 L484.20248057457013,139.91897801638464 L483.2436309321068,140.88236014129333 L482.284949145685,141.8049242170177 L481.3250719746315,142.69029160476822 L480.36265715717485,143.5416675894802 L479.39639889082883,144.36189946766453 L478.4250378709584,145.1535251681171 L477.4473674209143,145.91881415799358 L476.462236825459,146.6598020255489 L477.98987396384587,148 ' stroke-width='1' stroke='black' fill='transparent'>
+</path>
+<text text='1391 kips' x='374' y='22' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>1391 kips</tspan></text>
+<text text='370' x='471.98987396384587' y='142' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>370</tspan></text>
+<text text='ϕP~n~ = 618 kips' x='526.3809523809524' y='93.90137966708042' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ϕP</tspan><tspan font-size='0.8em' dy='2'>n</tspan><tspan dy='-2'> = 618 kips</tspan></text>
+<text text='ϕM~n~ = 512 kip·ft' x='526.3809523809524' y='109.90137966708042' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ϕM</tspan><tspan font-size='0.8em' dy='2'>n</tspan><tspan dy='-2'> = 512 kip·ft</tspan></text>
+<text text='ϕM~n~ = 258 kip·ft' x='444.3220904997929' y='25.599999999999994' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ϕM</tspan><tspan font-size='0.8em' dy='2'>n</tspan><tspan dy='-2'> = 258 kip·ft</tspan></text>
+<path d='M368,122.1200158385503 528,122.1200158385503' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='300' x='362' y='126.1200158385503' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>300</tspan></text>
+<path d='M368,96.2400316771006 528,96.2400316771006' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='600' x='362' y='100.2400316771006' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>600</tspan></text>
+<path d='M368,70.36004751565092 528,70.36004751565092' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='900' x='362' y='74.36004751565092' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>900</tspan></text>
+<path d='M368,44.480063354201235 528,44.480063354201235' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='1200' x='362' y='48.480063354201235' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>1200</tspan></text>
+<path d='M397.76721150494336,148 397.76721150494336,28' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='100' x='397.76721150494336' y='163' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>100</tspan></text>
+<path d='M427.53442300988667,148 427.53442300988667,28' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='200' x='427.53442300988667' y='163' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>200</tspan></text>
+<path d='M457.30163451482997,148 457.30163451482997,28' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='300' x='457.30163451482997' y='163' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>300</tspan></text>
+<path d='M487.0688460197733,148 487.0688460197733,28' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='400' x='487.0688460197733' y='163' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>400</tspan></text>
+<path d='M516.8360575247165,148 516.8360575247165,28' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='500' x='516.8360575247165' y='163' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>500</tspan></text>
+</svg></span></p>
+</div>
+<h2 id='material-properties'>Material Properties</h2>
+<p>Your calculation package may have previously defined values for <span class='hurmet-calc' data-entry='f_c′'><math><mrow><mi>f</mi><msubsup><mrow></mrow><mtext>c</mtext><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msubsup></mrow></math></span> and <span class='hurmet-calc' data-entry='f_y'><math><mrow><mi>f</mi><msub><mrow></mrow><mtext>y</mtext></msub></mrow></math></span>. Like this:</p>
+<div class="indented"><p><span class='hurmet-calc' data-entry='f_c′ = 3000 psi'><math><mrow><mi>f</mi><msubsup><mrow></mrow><mtext>c</mtext><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msubsup><mo>=</mo></mrow><mrow><mn>3</mn><mo separator="true" lspace="0em" rspace="0em">,</mo></mrow><mrow><mn>000</mn><mspace width="0.1667em"></mspace><mtext>psi</mtext></mrow></math></span></p>
+<p><span class='hurmet-calc' data-entry='f_y = 60000 psi'><math><mrow><mi>f</mi><msub><mrow></mrow><mtext>y</mtext></msub><mo>=</mo></mrow><mrow><mn>60</mn><mo separator="true" lspace="0em" rspace="0em">,</mo></mrow><mrow><mn>000</mn><mspace width="0.1667em"></mspace><mtext>psi</mtext></mrow></math></span></p>
+</div>
+<p>In that case, you can define the column by appending <span class='hurmet-calc' data-entry='f_c′'><math><mrow><mi>f</mi><msubsup><mrow></mrow><mtext>c</mtext><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msubsup></mrow></math></span> and <span class='hurmet-calc' data-entry='f_y'><math><mrow><mi>f</mi><msub><mrow></mrow><mtext>y</mtext></msub></mrow></math></span> to a slightly smaller data frame.</p>
+<pre><code>col =
+``width	depth	barSize	bars	cover	tieSize
+in	in			in	
+24	24	#7	12	2	#4`` &amp; f_c′ &amp; f_y = @</code></pre><p>… which will result in this:</p>
+<div class="indented"><p><span class='hurmet-calc' data-entry='col =
+``width	depth	barSize	bars	cover	tieSize
+in	in			in	
+24	24	#7	12	2	#4`` & f_c′ & f_y = @'><math><mtable columnalign="center center center center center center center" class="tml-array"><mtr><mtd><mtext>width</mtext></mtd><mtd><mtext>depth</mtext></mtd><mtd><mtext>barSize</mtext></mtd><mtd><mtext>bars</mtext></mtd><mtd><mtext>cover</mtext></mtd><mtd><mtext>tieSize</mtext></mtd><mtd><msubsup><mi>f</mi><mtext>c</mtext><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msubsup></mtd><mtd><msub><mi>f</mi><mtext>y</mtext></msub></mtd></mtr><mtr class="tml-hline-solid"><mtd><mtext>in</mtext></mtd><mtd><mtext>in</mtext></mtd><mtd><mrow></mrow></mtd><mtd><mrow></mrow></mtd><mtd><mtext>in</mtext></mtd><mtd><mrow></mrow></mtd><mtd><mtext>psi</mtext></mtd><mtd><mtext>psi</mtext></mtd></mtr><mtr><mtd><mn>24</mn></mtd><mtd><mn>24</mn></mtd><mtd><mtext>#7</mtext></mtd><mtd><mn>12</mn></mtd><mtd><mn>2</mn></mtd><mtd><mtext>#4</mtext></mtd><mtd><mrow><mn>3</mn><mo separator="true" lspace="0em" rspace="0em">,</mo><mn>000</mn></mrow></mtd><mtd><mrow><mn>60</mn><mo separator="true" lspace="0em" rspace="0em">,</mo><mn>000</mn></mrow></mtd></mtr></mtable></math></span></p>
+<p><span class='hurmet-calc' data-entry='colDiagram.draw(col) = @'><svg xmlns="http://www.w3.org/2000/svg" xmlns='http://www.w3.org/2000/svg' width='640' height='180' style='display: inline;'>
+<title text='Concrete Interaction Diagram'>
+</title>
+<text text='**Concrete Column**' x='64' y='12' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan font-weight='bold'>Concrete Column</tspan></text>
+<text text='f~c~′' x='75.60000000000001' y='36' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>f</tspan><tspan font-size='0.8em' dy='2'>c</tspan><tspan dy='-2'>′</tspan></text>
+<text text='f~y~' x='75.60000000000001' y='53.599999999999994' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>f</tspan><tspan font-size='0.8em' dy='2'>y</tspan></text>
+<text text='ACI 318-' x='75.60000000000001' y='71.19999999999999' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>ACI 318-</tspan></text>
+<text text='Width' x='75.60000000000001' y='88.8' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Width</tspan></text>
+<text text='Depth' x='75.60000000000001' y='106.39999999999999' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Depth</tspan></text>
+<text text='Bar size' x='75.60000000000001' y='124' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Bar size</tspan></text>
+<text text='Bar qty' x='75.60000000000001' y='141.6' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Bar qty</tspan></text>
+<text text='Clear cover' x='75.60000000000001' y='159.2' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Clear cover</tspan></text>
+<text text='Tie size' x='75.60000000000001' y='176.8' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Tie size</tspan></text>
+<text text='3.0' x='87.60000000000001' y='36' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>3.0</tspan></text>
+<text text='ksi' x='118' y='36' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ksi</tspan></text>
+<text text='60' x='87.60000000000001' y='53.599999999999994' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>60</tspan></text>
+<text text='ksi' x='118' y='53.599999999999994' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ksi</tspan></text>
+<text text='19' x='87.60000000000001' y='71.19999999999999' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>19</tspan></text>
+<text text='24.0' x='87.60000000000001' y='88.8' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>24.0</tspan></text>
+<text text='in' x='118' y='88.8' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>in</tspan></text>
+<text text='24.0' x='87.60000000000001' y='106.39999999999999' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>24.0</tspan></text>
+<text text='in' x='118' y='106.39999999999999' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>in</tspan></text>
+<text text='#7' x='87.60000000000001' y='124' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>#7</tspan></text>
+<text text='12' x='87.60000000000001' y='141.6' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>12</tspan></text>
+<text text='2.00' x='87.60000000000001' y='159.2' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>2.00</tspan></text>
+<text text='in' x='118' y='159.2' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>in</tspan></text>
+<text text='#4' x='87.60000000000001' y='176.8' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>#4</tspan></text>
+<rect x='168' y='4' width='100' height='100' stroke-width='1' stroke='black' fill='none'>
+</rect>
+<rect x='176.33333333333334' y='12.333333333333314' width='83.33333333333333' height='83.33333333333334' rx='6.25' ry='6.25' stroke-width='0' stroke='black' fill='black'>
+</rect>
+<rect x='178.41666666666669' y='14.416666666666657' width='79.16666666666669' height='79.16666666666667' rx='4.166666666666667' ry='4.166666666666667' stroke-width='0' stroke='black' fill='white'>
+</rect>
+<circle cx='180.92606770833333' cy='91.07393229166667' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='180.92606770833333' cy='16.926067708333335' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='205.64202256944446' cy='91.07393229166667' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='205.64202256944446' cy='16.926067708333335' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='230.35797743055556' cy='91.07393229166667' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='230.35797743055556' cy='16.926067708333335' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='255.0739322916667' cy='91.07393229166667' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='255.0739322916667' cy='16.926067708333335' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='180.92606770833333' cy='66.35797743055554' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='255.0739322916667' cy='66.35797743055554' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='180.92606770833333' cy='41.642022569444435' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='255.0739322916667' cy='41.642022569444435' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<text text='A~g~ = 576.0 in²' x='174' y='124' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>A</tspan><tspan font-size='0.8em' dy='2'>g</tspan><tspan dy='-2'> = 576.0 in²</tspan></text>
+<text text='A~s~ = 7.2 in²' x='174' y='141.6' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>A</tspan><tspan font-size='0.8em' dy='2'>s</tspan><tspan dy='-2'> = 7.2 in²</tspan></text>
+<text text='ρ = 1.25%' x='174' y='159.2' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ρ = 1.25%</tspan></text>
+<text text='bars at 5.93″ c/c' x='174' y='176.8' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>bars at 5.93″ c/c</tspan></text>
+<path d='M368,148 368,4' stroke-width='1' stroke='black' fill='black'>
+</path>
+<path d='M368,148 528,148' stroke-width='1' stroke='black' fill='black'>
+</path>
+<text text='ϕP~n~ (kips)' x='362' y='16' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>ϕP</tspan><tspan font-size='0.8em' dy='2'>n</tspan><tspan dy='-2'> (kips)</tspan></text>
+<text text='0' x='362' y='163' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>0</tspan></text>
+<text text='ϕM~n~ (kip·ft)' x='504' y='176' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>ϕM</tspan><tspan font-size='0.8em' dy='2'>n</tspan><tspan dy='-2'> (kip·ft)</tspan></text>
+<path d='M368,28 L383.4953883913254,28 L416.67415288414804,28 L439.65629630619287,28.185505645509295 L457.6693579291475,37.04955053488172 L471.32443680919187,44.96464358621418 L481.85402326990317,52.109261194460984 L490.10809373495886,58.61976361722252 L496.4817107999838,64.35829344163386 L501.80931085936413,69.8961223057413 L506.19928235162297,75.05626192190881 L509.88113294398994,79.8927943982552 L513.025982617602,84.44994672843734 L515.7627354965898,88.76423779310922 L518.1893718392839,92.86608751020859 L520.3809523809524,96.78103902887908 L519.7240101110311,99.46143597536395 L518.7968193825835,101.93970437005825 L517.7723840239801,104.28684602218149 L516.6780984852526,106.51644878229679 L515.7385202779534,108.39645334355187 L514.5565739801208,110.4279259072404 L512.9473161605767,112.53663395861369 L511.3303994162823,114.56667566848091 L509.71405502875126,116.52500222709858 L508.0906552508575,118.40086536367475 L506.1580632448524,119.83088918540341 L504.2414149991063,121.20570280095833 L502.3436933855379,122.52967055234193 L500.467150391087,123.80670859224429 L498.61345039633954,125.04034097658922 L498.46739885268175,127.38980491552195 L498.2283699773987,129.60006963992493 L497.9062012189062,131.68931097780677 L497.5080358839563,133.67267234932814 L497.0390648407142,135.56287184476776 L496.5030519579871,137.37066907511164 L495.9027106294095,139.10522818361133 L495.2399763755618,140.77440300085948 L494.5466554731882,142.3556476100615 L494.27948893006396,143.42733937820276 L493.97505637234457,144.45139148062887 L493.63371800822046,145.43227356647375 L493.25565348023576,146.37391310570405 L495.79119302437005,148 ' stroke-width='1' stroke='black' fill='transparent'>
+</path>
+<text text='979 kips' x='374' y='22' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>979 kips</tspan></text>
+<text text='309' x='489.79119302437005' y='142' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>309</tspan></text>
+<text text='ϕP~n~ = 418 kips' x='526.3809523809524' y='95.98103902887908' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ϕP</tspan><tspan font-size='0.8em' dy='2'>n</tspan><tspan dy='-2'> = 418 kips</tspan></text>
+<text text='ϕM~n~ = 369 kip·ft' x='526.3809523809524' y='111.98103902887908' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ϕM</tspan><tspan font-size='0.8em' dy='2'>n</tspan><tspan dy='-2'> = 369 kip·ft</tspan></text>
+<text text='ϕM~n~ = 127 kip·ft' x='420.0990212765007' y='25.599999999999994' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ϕM</tspan><tspan font-size='0.8em' dy='2'>n</tspan><tspan dy='-2'> = 127 kip·ft</tspan></text>
+<path d='M368,123.48190319274656 528,123.48190319274656' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='200' x='362' y='127.48190319274656' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>200</tspan></text>
+<path d='M368,98.96380638549313 528,98.96380638549313' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='400' x='362' y='102.96380638549313' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>400</tspan></text>
+<path d='M368,74.44570957823969 528,74.44570957823969' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='600' x='362' y='78.44570957823969' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>600</tspan></text>
+<path d='M368,49.92761277098626 528,49.92761277098626' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='800' x='362' y='53.92761277098626' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>800</tspan></text>
+<path d='M398.97900986122704,148 398.97900986122704,28' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='75' x='398.97900986122704' y='163' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>75</tspan></text>
+<path d='M429.9580197224541,148 429.9580197224541,28' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='150' x='429.9580197224541' y='163' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>150</tspan></text>
+<path d='M460.93702958368124,148 460.93702958368124,28' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='225' x='460.93702958368124' y='163' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>225</tspan></text>
+<path d='M491.9160394449083,148 491.9160394449083,28' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='300' x='491.9160394449083' y='163' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>300</tspan></text>
+<path d='M522.8950493061353,148 522.8950493061353,28' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='375' x='522.8950493061353' y='163' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>375</tspan></text>
+</svg></span></p>
+</div>
+<h2 id='strength-demand'>Strength Demand</h2>
+<p>The function has two optional arguments: <code>Pu</code> and <code>Mu</code>. If you supply both of them, the function will draw a dot on the diagram that represents your strength demand.</p>
+<div class="indented"><p><span class='hurmet-calc' data-entry='P_u = 150 kips'><math><mrow><mi>P</mi><msub><mrow></mrow><mtext>u</mtext></msub><mo>=</mo></mrow><mrow><mn>150</mn><mspace width="0.1667em"></mspace><mtext>kips</mtext></mrow></math></span></p>
+<p><span class='hurmet-calc' data-entry='M_u = 80 k·ft'><math><mrow><mi>M</mi><msub><mrow></mrow><mtext>u</mtext></msub><mo>=</mo></mrow><mrow><mn>80</mn><mspace width="0.1667em"></mspace><mrow><mtext>k</mtext><mspace width="0.0556em"></mspace><mo lspace="0em" rspace="0em">⋅</mo><mspace width="0.0556em"></mspace><mtext>ft</mtext></mrow></mrow></math></span></p>
+</div>
+<p>You then invoke the function with the optional arguments:</p>
+<pre><code>colDiagram.draw(col, P_u, M_u) = @</code></pre><p>… with this result:</p>
+<div class="indented"><p><span class='hurmet-calc' data-entry='colDiagram.draw(col, P_u, M_u) = @'><svg xmlns="http://www.w3.org/2000/svg" xmlns='http://www.w3.org/2000/svg' width='640' height='180' style='display: inline;'>
+<title text='Concrete Interaction Diagram'>
+</title>
+<text text='**Concrete Column**' x='64' y='12' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan font-weight='bold'>Concrete Column</tspan></text>
+<text text='f~c~′' x='75.60000000000001' y='36' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>f</tspan><tspan font-size='0.8em' dy='2'>c</tspan><tspan dy='-2'>′</tspan></text>
+<text text='f~y~' x='75.60000000000001' y='53.599999999999994' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>f</tspan><tspan font-size='0.8em' dy='2'>y</tspan></text>
+<text text='ACI 318-' x='75.60000000000001' y='71.19999999999999' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>ACI 318-</tspan></text>
+<text text='Width' x='75.60000000000001' y='88.8' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Width</tspan></text>
+<text text='Depth' x='75.60000000000001' y='106.39999999999999' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Depth</tspan></text>
+<text text='Bar size' x='75.60000000000001' y='124' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Bar size</tspan></text>
+<text text='Bar qty' x='75.60000000000001' y='141.6' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Bar qty</tspan></text>
+<text text='Clear cover' x='75.60000000000001' y='159.2' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Clear cover</tspan></text>
+<text text='Tie size' x='75.60000000000001' y='176.8' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>Tie size</tspan></text>
+<text text='3.0' x='87.60000000000001' y='36' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>3.0</tspan></text>
+<text text='ksi' x='118' y='36' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ksi</tspan></text>
+<text text='60' x='87.60000000000001' y='53.599999999999994' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>60</tspan></text>
+<text text='ksi' x='118' y='53.599999999999994' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ksi</tspan></text>
+<text text='19' x='87.60000000000001' y='71.19999999999999' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>19</tspan></text>
+<text text='24.0' x='87.60000000000001' y='88.8' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>24.0</tspan></text>
+<text text='in' x='118' y='88.8' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>in</tspan></text>
+<text text='24.0' x='87.60000000000001' y='106.39999999999999' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>24.0</tspan></text>
+<text text='in' x='118' y='106.39999999999999' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>in</tspan></text>
+<text text='#7' x='87.60000000000001' y='124' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>#7</tspan></text>
+<text text='12' x='87.60000000000001' y='141.6' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>12</tspan></text>
+<text text='2.00' x='87.60000000000001' y='159.2' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>2.00</tspan></text>
+<text text='in' x='118' y='159.2' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>in</tspan></text>
+<text text='#4' x='87.60000000000001' y='176.8' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>#4</tspan></text>
+<rect x='168' y='4' width='100' height='100' stroke-width='1' stroke='black' fill='none'>
+</rect>
+<rect x='176.33333333333334' y='12.333333333333314' width='83.33333333333333' height='83.33333333333334' rx='6.25' ry='6.25' stroke-width='0' stroke='black' fill='black'>
+</rect>
+<rect x='178.41666666666669' y='14.416666666666657' width='79.16666666666669' height='79.16666666666667' rx='4.166666666666667' ry='4.166666666666667' stroke-width='0' stroke='black' fill='white'>
+</rect>
+<circle cx='180.92606770833333' cy='91.07393229166667' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='180.92606770833333' cy='16.926067708333335' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='205.64202256944446' cy='91.07393229166667' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='205.64202256944446' cy='16.926067708333335' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='230.35797743055556' cy='91.07393229166667' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='230.35797743055556' cy='16.926067708333335' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='255.0739322916667' cy='91.07393229166667' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='255.0739322916667' cy='16.926067708333335' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='180.92606770833333' cy='66.35797743055554' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='255.0739322916667' cy='66.35797743055554' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='180.92606770833333' cy='41.642022569444435' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<circle cx='255.0739322916667' cy='41.642022569444435' r='1.822916666666667' stroke-width='0' stroke='black' fill='black'>
+</circle>
+<text text='A~g~ = 576.0 in²' x='174' y='124' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>A</tspan><tspan font-size='0.8em' dy='2'>g</tspan><tspan dy='-2'> = 576.0 in²</tspan></text>
+<text text='A~s~ = 7.2 in²' x='174' y='141.6' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>A</tspan><tspan font-size='0.8em' dy='2'>s</tspan><tspan dy='-2'> = 7.2 in²</tspan></text>
+<text text='ρ = 1.25%' x='174' y='159.2' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ρ = 1.25%</tspan></text>
+<text text='bars at 5.93″ c/c' x='174' y='176.8' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>bars at 5.93″ c/c</tspan></text>
+<path d='M368,148 368,4' stroke-width='1' stroke='black' fill='black'>
+</path>
+<path d='M368,148 528,148' stroke-width='1' stroke='black' fill='black'>
+</path>
+<text text='ϕP~n~ (kips)' x='362' y='16' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>ϕP</tspan><tspan font-size='0.8em' dy='2'>n</tspan><tspan dy='-2'> (kips)</tspan></text>
+<text text='0' x='362' y='163' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>0</tspan></text>
+<text text='ϕM~n~ (kip·ft)' x='504' y='176' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>ϕM</tspan><tspan font-size='0.8em' dy='2'>n</tspan><tspan dy='-2'> (kip·ft)</tspan></text>
+<path d='M368,28 L383.4953883913254,28 L416.67415288414804,28 L439.65629630619287,28.185505645509295 L457.6693579291475,37.04955053488172 L471.32443680919187,44.96464358621418 L481.85402326990317,52.109261194460984 L490.10809373495886,58.61976361722252 L496.4817107999838,64.35829344163386 L501.80931085936413,69.8961223057413 L506.19928235162297,75.05626192190881 L509.88113294398994,79.8927943982552 L513.025982617602,84.44994672843734 L515.7627354965898,88.76423779310922 L518.1893718392839,92.86608751020859 L520.3809523809524,96.78103902887908 L519.7240101110311,99.46143597536395 L518.7968193825835,101.93970437005825 L517.7723840239801,104.28684602218149 L516.6780984852526,106.51644878229679 L515.7385202779534,108.39645334355187 L514.5565739801208,110.4279259072404 L512.9473161605767,112.53663395861369 L511.3303994162823,114.56667566848091 L509.71405502875126,116.52500222709858 L508.0906552508575,118.40086536367475 L506.1580632448524,119.83088918540341 L504.2414149991063,121.20570280095833 L502.3436933855379,122.52967055234193 L500.467150391087,123.80670859224429 L498.61345039633954,125.04034097658922 L498.46739885268175,127.38980491552195 L498.2283699773987,129.60006963992493 L497.9062012189062,131.68931097780677 L497.5080358839563,133.67267234932814 L497.0390648407142,135.56287184476776 L496.5030519579871,137.37066907511164 L495.9027106294095,139.10522818361133 L495.2399763755618,140.77440300085948 L494.5466554731882,142.3556476100615 L494.27948893006396,143.42733937820276 L493.97505637234457,144.45139148062887 L493.63371800822046,145.43227356647375 L493.25565348023576,146.37391310570405 L495.79119302437005,148 ' stroke-width='1' stroke='black' fill='transparent'>
+</path>
+<text text='979 kips' x='374' y='22' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>979 kips</tspan></text>
+<text text='309' x='489.79119302437005' y='142' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>309</tspan></text>
+<text text='ϕP~n~ = 418 kips' x='526.3809523809524' y='95.98103902887908' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ϕP</tspan><tspan font-size='0.8em' dy='2'>n</tspan><tspan dy='-2'> = 418 kips</tspan></text>
+<text text='ϕM~n~ = 369 kip·ft' x='526.3809523809524' y='111.98103902887908' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ϕM</tspan><tspan font-size='0.8em' dy='2'>n</tspan><tspan dy='-2'> = 369 kip·ft</tspan></text>
+<text text='ϕM~n~ = 127 kip·ft' x='420.0990212765007' y='25.599999999999994' font-family='sans-serif' font-size='12' text-anchor='start'>
+<tspan>ϕM</tspan><tspan font-size='0.8em' dy='2'>n</tspan><tspan dy='-2'> = 127 kip·ft</tspan></text>
+<path d='M368,123.48190319274656 528,123.48190319274656' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='200' x='362' y='127.48190319274656' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>200</tspan></text>
+<path d='M368,98.96380638549313 528,98.96380638549313' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='400' x='362' y='102.96380638549313' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>400</tspan></text>
+<path d='M368,74.44570957823969 528,74.44570957823969' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='600' x='362' y='78.44570957823969' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>600</tspan></text>
+<path d='M368,49.92761277098626 528,49.92761277098626' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='800' x='362' y='53.92761277098626' font-family='sans-serif' font-size='12' text-anchor='end'>
+<tspan>800</tspan></text>
+<path d='M398.97900986122704,148 398.97900986122704,28' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='75' x='398.97900986122704' y='163' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>75</tspan></text>
+<path d='M429.9580197224541,148 429.9580197224541,28' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='150' x='429.9580197224541' y='163' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>150</tspan></text>
+<path d='M460.93702958368124,148 460.93702958368124,28' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='225' x='460.93702958368124' y='163' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>225</tspan></text>
+<path d='M491.9160394449083,148 491.9160394449083,28' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='300' x='491.9160394449083' y='163' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>300</tspan></text>
+<path d='M522.8950493061353,148 522.8950493061353,28' stroke-width='0.5' stroke='black' fill='transparent' stroke-dasharray='5 10'>
+</path>
+<text text='375' x='522.8950493061353' y='163' font-family='sans-serif' font-size='12' text-anchor='middle'>
+<tspan>375</tspan></text>
+<circle cx='401.04427718530883' cy='129.6114273945599' r='2.4000000000000004' stroke-width='0.5' stroke='black' fill='black' stroke-dasharray='5 10'>
+</circle>
+</svg></span></p>
+</div>
+<h1 id='limitations'>Limitations</h1>
+<p>The remote module works only with rectangular columns with ties. If you want a diagram that deals with circular cross-sections, octagons, or spirals, check out <a href='https://observablehq.com/@ronkok/concrete-column-interaction-diagram'>this utility</a>.</p>
+<p>This function is not the last word on concrete capacity. For one thing, it deals only with short columns. Slenderness must be addressed elsewhere. Also, ACI 318 has several prescriptive requirements that must be met in order for this diagram to be valid. Such as: maximum bar spacing, minimum ρ values, and minimum cover. You are responsible to check those prescriptive requirements. </p>
+<p>Only qualified engineers should use this diagram.</p>
+
+</article>
+</body>
+</html>
