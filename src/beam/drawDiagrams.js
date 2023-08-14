@@ -329,9 +329,11 @@ export function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combi
       })
       const xPoly = new Array(numDataPoints - 1).fill(0)
       const yPoly = new Array(numDataPoints - 1).fill(0)
+      xPoly[0] = beam.xDiagram.toFixed(2)
+      yPoly[0] = yDeflection.toFixed(2)
       for (let ii = 1; ii <= numDataPoints - 1; ii++) {
-        xPoly[ii - 1] = (beam.xDiagram + beam.xScale * x[ii]).toFixed(2) // x(ii)
-        yPoly[ii - 1] = (yDeflection - deflectionScale * deflection[ii]).toFixed(2)
+        xPoly[ii] = (beam.xDiagram + beam.xScale * x[ii]).toFixed(2) // x(ii)
+        yPoly[ii] = (yDeflection - deflectionScale * deflection[ii]).toFixed(2)
       }
       diagram.push(Draw.polyline(xPoly, yPoly))
     }
