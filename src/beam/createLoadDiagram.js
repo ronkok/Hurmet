@@ -77,7 +77,7 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
       const x = beam.xDiagram + beam.xScale * seg.xOfLeftEnd
       if (Math.abs(seg.P[0]) > 0) {
         const sText = round(seg.P[0] / forceFactor, 3)
-        diagram = diagram.concat(Draw.pointForce( x, beam.yLoad, sText, "continuous"))
+        diagram = diagram.concat(Draw.pointForce(x, beam.yLoad, sText, "continuous"))
       }
       if (Math.abs(seg.M[0]) > 0) {
         const sText = round(seg.M[0] / momentFactor, 3)

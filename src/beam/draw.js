@@ -56,7 +56,7 @@ const pointForce = (x, y, load, fixity, isReaction = false) => {
       d: `M${x} ${y} l${sgn * 4} ${sgn * 8} h${-sgn * 3.5} v${sgn * (length - 8)} h${-sgn * 1} v${-sgn * (length - 8)} h${-sgn * 3}z`
     }
   }
-  const text = textNode(String(load), x, yText, "middle")
+  const text = textNode(String(Math.abs(load)), x, yText, "middle")
   return [arrow, text]
 }
 
