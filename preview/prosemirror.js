@@ -15050,7 +15050,7 @@ function hashPath(path) {
 }
 
 function getIcon(icon) {
-  var node = document.createElement("div");
+  var node = document.createElement("span");
   node.className = prefix;
   if (icon.path) {
     var name = "pm-icon-" + hashPath(icon.path).toString(16);
