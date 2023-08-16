@@ -99,7 +99,7 @@ const writeSVG = dwg => {
   dwg.children.forEach(el => {
     svg += `<${el.tag}`
     Object.keys(el.attrs).forEach(attr => {
-      if (attr !== "title") {
+      if (el.tag !== "title") {
         svg += ` ${attr}='${el.attrs[attr]}'`
       }
     })
@@ -114,6 +114,8 @@ const writeSVG = dwg => {
         }
         svg += `>${sanitizeText(child.text)}</tspan>`
       })
+    } else if (el.tag === "title") {
+      svg += sanitizeText(el.attrs.text)
     }
     svg += `</${el.tag}>\n`
   })

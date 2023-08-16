@@ -354,6 +354,10 @@ li.ProseMirror-selectednode:after {
   border-radius: 4px;
 }
 
+.ProseMirror-menu-disabled {
+  opacity: .3;
+}
+
 .ProseMirror-menu-submenu-wrap:hover .ProseMirror-menu-submenu, .ProseMirror-menu-submenu-wrap-active .ProseMirror-menu-submenu {
   display: block;
 }
@@ -395,10 +399,6 @@ li.ProseMirror-selectednode:after {
 
 .ProseMirror-icon span {
   vertical-align: text-top;
-}
-.ProseMirror-menu-disabled svg {
-  fill: lightgray;
-  stroke: lightgray;
 }
 .ProseMirror-gapcursor {
   display: none;

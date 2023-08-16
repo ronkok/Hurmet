@@ -26,13 +26,13 @@ export function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combi
   diagram.push(Draw.textNode(`(${beam.SI ? "kN" : "kips"})`, 20, yV + 16))
   diagram.push({
     tag: "path",
-    attrs: { d: `M${beam.xDiagram} ${yV} h300`, "stroke-width": '1.5px' }
+    attrs: { d: `M${beam.xDiagram} ${yV} h300`, stroke: "black", "stroke-width": '1.5px' }
   })
   diagram.push(Draw.textNode("bending", 20, yM + 2))
   diagram.push(Draw.textNode(`(${beam.SI ? "kN-m" : "kip-ft"})`, 20, yM + 16))
   diagram.push({
     tag: "path",
-    attrs: { d: `M${beam.xDiagram} ${yM} h300`, "stroke-width": '1.5px' }
+    attrs: { d: `M${beam.xDiagram} ${yM} h300`, stroke: "black", "stroke-width": '1.5px' }
   })
 
   if (combinations !== "service") {
@@ -325,7 +325,7 @@ export function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combi
       diagram.push(Draw.textNode("deflection", 20, yDeflection + 2))
       diagram.push({
         tag: "path",
-        attrs: { d: `M${beam.xDiagram} ${yDeflection} h300`, "stroke-width": '1.5px' }
+        attrs: { d: `M${beam.xDiagram} ${yDeflection} h300`, stroke: "black", "stroke-width": '1.5px' }
       })
       const xPoly = new Array(numDataPoints - 1).fill(0)
       const yPoly = new Array(numDataPoints - 1).fill(0)

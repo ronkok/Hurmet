@@ -10,8 +10,7 @@ export const renderSVG = dwg => {
   dwg.children.forEach(el => {
     const node = document.createElementNS("http://www.w3.org/2000/svg", el.tag)
     Object.keys(el.attrs).forEach(attr => {
-      node.setAttribute(attr, el.attrs[attr])
-      if (attr === "title") {
+      if (el.tag === "title") {
         node.appendChild(document.createTextNode(el.attrs["text"]))
       } else {
         node.setAttribute(attr, el.attrs[attr])

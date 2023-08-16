@@ -17,17 +17,14 @@ export function createLoadDiagram(beam, nodes, spans) {
     tag: "defs",
     attrs: {},
     style: `svg { background-color: #fff; }
-text, tspan { font: 12px Arial; }
-circle { stroke:#000; fill:#fff; }
-polygon { stroke:#000; fill: #000; fill-opacity:1.0 }
-line { stroke:#000; }
-path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
+text, tspan { font: 12px Arial; }`
   })
   diagram.push(Draw.textNode("loads", 20, beam.yLoad + 2))
   diagram.push(Draw.textNode(`(${beam.SI ? 'kN, m' : 'kips, ft'})`, 20, beam.yLoad + 16))
   diagram.push({
     tag: "path",
-    attrs: { strokeWidth: "1.5px", d: `M${beam.xDiagram} ${beam.yLoad} h300` }
+    attrs: { stroke: "black", "stroke-width": "1.5px",
+      d: `M${beam.xDiagram} ${beam.yLoad} h300` }
   })
 
   // Draw restraints
@@ -94,7 +91,7 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
     }
   }
   if (wPrev !== 0) { d += `V${beam.yLoad}` }
-  diagram.push({ tag: "path", attrs: { d } })
+  diagram.push({ tag: "path", attrs: { d, stroke: "black", "fill-opacity": "0.0" } })
 
   // Write in the line load values
   let lastSegUniform = false

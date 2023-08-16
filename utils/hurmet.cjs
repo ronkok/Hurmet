@@ -11180,7 +11180,7 @@ const restraint = (node, beam) => {
     // draw a triangle
     const y = node.fixity === "pinned" ? beam.yLoad + 0.75 : beam.yLoad + 4;
     path.attrs.d = `M${x} ${y} l5 10 h-10 z`;
-    path.attrs.style = "fill-opacity:1.0";
+    path.attrs.style = "fill:#fff; stroke:#000";
   } else if (node.fixity === "fixed") {
     const xd = (node.x === 0 ? -1 : 1) * 7;
     // eslint-disable-next-line max-len
@@ -11309,7 +11309,7 @@ const polyline = (x, y) => {
   for (let i = 1; i < x.length; i++) {
     d += ` L${x[i]} ${y[i]}`;
   }
-  return { tag: "path", attrs: { d } }
+  return { tag: "path", attrs: { d, stroke: "black", "fill-opacity": "0.0" } }
 };
 
 const textNode = (str, x, y, horizAlign) => {
@@ -11356,17 +11356,14 @@ function createLoadDiagram(beam, nodes, spans) {
     tag: "defs",
     attrs: {},
     style: `svg { background-color: #fff; }
-text, tspan { font: 12px Arial; }
-circle { stroke:#000; fill:#fff; }
-polygon { stroke:#000; fill: #000; fill-opacity:1.0 }
-line { stroke:#000; }
-path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
+text, tspan { font: 12px Arial; }`
   });
   diagram.push(Draw.textNode("loads", 20, beam.yLoad + 2));
   diagram.push(Draw.textNode(`(${beam.SI ? 'kN, m' : 'kips, ft'})`, 20, beam.yLoad + 16));
   diagram.push({
     tag: "path",
-    attrs: { strokeWidth: "1.5px", d: `M${beam.xDiagram} ${beam.yLoad} h300` }
+    attrs: { stroke: "black", "stroke-width": "1.5px",
+      d: `M${beam.xDiagram} ${beam.yLoad} h300` }
   });
 
   // Draw restraints
@@ -11433,7 +11430,7 @@ path { stroke:#000; fill:#fff; fill-opacity: 0.0 }`
     }
   }
   if (wPrev !== 0) { d += `V${beam.yLoad}`; }
-  diagram.push({ tag: "path", attrs: { d } });
+  diagram.push({ tag: "path", attrs: { d, stroke: "black", "fill-opacity": "0.0" } });
 
   // Write in the line load values
   let lastSegUniform = false;
@@ -13105,13 +13102,13 @@ function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combinations
   diagram.push(Draw.textNode(`(${beam.SI ? "kN" : "kips"})`, 20, yV + 16));
   diagram.push({
     tag: "path",
-    attrs: { d: `M${beam.xDiagram} ${yV} h300`, "stroke-width": '1.5px' }
+    attrs: { d: `M${beam.xDiagram} ${yV} h300`, stroke: "black", "stroke-width": '1.5px' }
   });
   diagram.push(Draw.textNode("bending", 20, yM + 2));
   diagram.push(Draw.textNode(`(${beam.SI ? "kN-m" : "kip-ft"})`, 20, yM + 16));
   diagram.push({
     tag: "path",
-    attrs: { d: `M${beam.xDiagram} ${yM} h300`, "stroke-width": '1.5px' }
+    attrs: { d: `M${beam.xDiagram} ${yM} h300`, stroke: "black", "stroke-width": '1.5px' }
   });
 
   if (combinations !== "service") {
@@ -13404,7 +13401,7 @@ function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combinations
       diagram.push(Draw.textNode("deflection", 20, yDeflection + 2));
       diagram.push({
         tag: "path",
-        attrs: { d: `M${beam.xDiagram} ${yDeflection} h300`, "stroke-width": '1.5px' }
+        attrs: { d: `M${beam.xDiagram} ${yDeflection} h300`, stroke: "black", "stroke-width": '1.5px' }
       });
       const xPoly = new Array(numDataPoints - 1).fill(0);
       const yPoly = new Array(numDataPoints - 1).fill(0);
@@ -29918,7 +29915,7 @@ const writeSVG = dwg => {
   dwg.children.forEach(el => {
     svg += `<${el.tag}`;
     Object.keys(el.attrs).forEach(attr => {
-      if (attr !== "title") {
+      if (el.tag !== "title") {
         svg += ` ${attr}='${el.attrs[attr]}'`;
       }
     });
@@ -29933,6 +29930,8 @@ const writeSVG = dwg => {
         }
         svg += `>${sanitizeText(child.text)}</tspan>`;
       });
+    } else if (el.tag === "title") {
+      svg += sanitizeText(el.attrs.text);
     }
     svg += `</${el.tag}>\n`;
   });

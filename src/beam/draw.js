@@ -15,7 +15,7 @@ const restraint = (node, beam) => {
     // draw a triangle
     const y = node.fixity === "pinned" ? beam.yLoad + 0.75 : beam.yLoad + 4
     path.attrs.d = `M${x} ${y} l5 10 h-10 z`
-    path.attrs.style = "fill-opacity:1.0"
+    path.attrs.style = "fill:#fff; stroke:#000"
   } else if (node.fixity === "fixed") {
     const xd = (node.x === 0 ? -1 : 1) * 7
     // eslint-disable-next-line max-len
@@ -144,7 +144,7 @@ const polyline = (x, y) => {
   for (let i = 1; i < x.length; i++) {
     d += ` L${x[i]} ${y[i]}`
   }
-  return { tag: "path", attrs: { d } }
+  return { tag: "path", attrs: { d, stroke: "black", "fill-opacity": "0.0" } }
 }
 
 const textNode = (str, x, y, horizAlign) => {
