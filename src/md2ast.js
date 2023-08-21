@@ -81,6 +81,8 @@ const CLASS_R = /(?:^| )\.([a-z-]+)(?: |$)/
 const WIDTH_R = /(?:^| )width="?([\d.a-z]+"?)(?: |$)/
 const COL_WIDTHS_R = /(?:^| )colWidths="([^"]*)"/
 const ID_R = /(?:^| )#([a-z-]+)(?: |$)/
+const leadingSpaceRegEx = /^ +/
+const trailingSpaceRegEx = / +$/
 
 // Turn various whitespace into easy-to-process whitespace
 const preprocess = function(source) {
@@ -200,12 +202,21 @@ const TABLES = (function() {
     return [myClass, myID, colWidths]
   }
 
+  const pipeRegEx = /(?<!\\)\|/
+
   const parsePipeTableRow = function(source, parse, state, colWidths, inHeader) {
-    const prevInTable = state.inTable;
-    state.inTable = true;
-    const tableRow = parse(source.trim(), state);
+    let cells = source.trim().split(pipeRegEx)
+    cells.shift()
+    cells.pop()
+    const tableRow = [{ type: "tableSeparator" }]
+    for (const str of cells) {
+      const cell = parse(str, state)
+      tableRow.push(...cell)
+      tableRow.push({ type: "tableSeparator" })
+    }
+//    const tableRow = parse(source.trim(), state);
     consolidate(tableRow)
-    state.inTable = prevInTable;
+  //  state.inTable = prevInTable;
 
     const row = {
       type: "table_row",
@@ -213,7 +224,14 @@ const TABLES = (function() {
     }
     let j = -1
     tableRow.forEach(function(node, i) {
-      if (node.type === "text") { node.text = node.text.trim() }
+      if (node.type === "text") {
+        if (i > 0 && tableRow[i - 1].type === "tableSeparator") {
+          node.text = node.text.replace(leadingSpaceRegEx, "")
+        }
+        if (i < tableRow.length - 1) {
+          node.text = node.text.replace(trailingSpaceRegEx, "")
+        }
+      }
       if (node.type === "tableSeparator") {
         if (i !== tableRow.length - 1) {  // Filter out the row's  last table separator
           // Create a new cell
@@ -495,7 +513,7 @@ const parseTextMark = (capture, state, mark) => {
   return text
 }
 
-const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<(?:\/?(?:!DOCTYPE html|body|li|br|hr|(?:div|article|details|input|label|ul|ol|dl|main|nav)(?: (?:class|id)=(["'])[A-Za-z- ]+\2){0,2})|\/?html(?: lang=(["'])[a-z]+\3)?)>[^\n]*?(?:\n|$))/
+const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<(?:\/?(?:!DOCTYPE html|body|li|br|hr|(?:div|article|details|input|label|ul|ol|dl|main|nav)(?: (?:class|id|style)=(["'])[A-Za-z0-9.:;\- ]+\2){0,2})|\/?html(?: lang=(["'])[a-z]+\3)?)>[^\n]*?(?:\n|$))/
 
 // Rules must be applied in a specific order, so use a Map instead of an object.
 const rules = new Map();
@@ -654,7 +672,7 @@ rules.set("gridTable", {
 });
 rules.set("displayTeX", {
   isLeaf: true,
-  match: blockRegex(/^\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$ *\n/),
+  match: blockRegex(/^\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$ *(?:\n|$)/),
   parse: function(capture, state) {
     const tex = capture[1].trim()
     return { type: "tex", attrs: { tex, displayMode: true } }
@@ -765,10 +783,15 @@ rules.set("code", {
 });
 rules.set("tex", {
   isLeaf: true,
-  match: inlineRegex(/^\$((?:[^\s][\S\s]*?)?(?:[^\s\\]))\$(?![0-9])/),
+  match: inlineRegex(/^(?:\$\$((?:\\[\s\S]|[^\\])+?)\$\$|\$((?:[^\s][\S\s]*?)?(?:[^\s\\]))\$(?![0-9]))/),
   parse: function(capture, state) {
-    const tex = capture[1].trim()
-    return { type: "tex", attrs: { tex, displayMode: false } }
+    if (capture[1]) {
+      const tex = capture[1].trim()
+      return { type: "tex", attrs: { tex, displayMode: true } }
+    } else {
+      const tex = capture[2].trim()
+      return { type: "tex", attrs: { tex, displayMode: false } }
+    }
   }
 });
 rules.set("calculation", {

@@ -721,7 +721,7 @@ export class MarkdownSerializerState {
       }
     }
 
-    if (mergedCells.length > 0) { isRst = true }
+    if (mergedCells.length > 0 || tableState.out.indexOf("|") > -1) { isRst = true }
 
     // Now the third pass, in which we write output.
     this.write(isRst

@@ -1103,11 +1103,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6850","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.6999","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.3656","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.4076","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -1116,10 +1116,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4791","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4733","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9617","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.9584","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9571","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.9197","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -1139,7 +1139,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.86415","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.85493","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1147,23 +1147,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.6007","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.5105","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["4.0994","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["91.0970","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["4.1245","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["90.2825","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["158.97","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["158.11","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1459.31","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1457.04","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1174,7 +1174,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["18.7092","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["18.5581","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -1204,7 +1204,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.1004","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0867","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -9049,6 +9049,8 @@ const CLASS_R = /(?:^| )\.([a-z-]+)(?: |$)/;
 const WIDTH_R = /(?:^| )width="?([\d.a-z]+"?)(?: |$)/;
 const COL_WIDTHS_R = /(?:^| )colWidths="([^"]*)"/;
 const ID_R = /(?:^| )#([a-z-]+)(?: |$)/;
+const leadingSpaceRegEx$2 = /^ +/;
+const trailingSpaceRegEx$1 = / +$/;
 
 // Turn various whitespace into easy-to-process whitespace
 const preprocess = function(source) {
@@ -9168,12 +9170,21 @@ const TABLES = (function() {
     return [myClass, myID, colWidths]
   };
 
+  const pipeRegEx = /(?<!\\)\|/;
+
   const parsePipeTableRow = function(source, parse, state, colWidths, inHeader) {
-    const prevInTable = state.inTable;
-    state.inTable = true;
-    const tableRow = parse(source.trim(), state);
+    let cells = source.trim().split(pipeRegEx);
+    cells.shift();
+    cells.pop();
+    const tableRow = [{ type: "tableSeparator" }];
+    for (const str of cells) {
+      const cell = parse(str, state);
+      tableRow.push(...cell);
+      tableRow.push({ type: "tableSeparator" });
+    }
+//    const tableRow = parse(source.trim(), state);
     consolidate(tableRow);
-    state.inTable = prevInTable;
+  //  state.inTable = prevInTable;
 
     const row = {
       type: "table_row",
@@ -9181,7 +9192,14 @@ const TABLES = (function() {
     };
     let j = -1;
     tableRow.forEach(function(node, i) {
-      if (node.type === "text") { node.text = node.text.trim(); }
+      if (node.type === "text") {
+        if (i > 0 && tableRow[i - 1].type === "tableSeparator") {
+          node.text = node.text.replace(leadingSpaceRegEx$2, "");
+        }
+        if (i < tableRow.length - 1) {
+          node.text = node.text.replace(trailingSpaceRegEx$1, "");
+        }
+      }
       if (node.type === "tableSeparator") {
         if (i !== tableRow.length - 1) {  // Filter out the row's  last table separator
           // Create a new cell
@@ -9463,7 +9481,7 @@ const parseTextMark = (capture, state, mark) => {
   return text
 };
 
-const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<(?:\/?(?:!DOCTYPE html|body|li|br|hr|(?:div|article|details|input|label|ul|ol|dl|main|nav)(?: (?:class|id)=(["'])[A-Za-z- ]+\2){0,2})|\/?html(?: lang=(["'])[a-z]+\3)?)>[^\n]*?(?:\n|$))/;
+const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<(?:\/?(?:!DOCTYPE html|body|li|br|hr|(?:div|article|details|input|label|ul|ol|dl|main|nav)(?: (?:class|id|style)=(["'])[A-Za-z0-9.:;\- ]+\2){0,2})|\/?html(?: lang=(["'])[a-z]+\3)?)>[^\n]*?(?:\n|$))/;
 
 // Rules must be applied in a specific order, so use a Map instead of an object.
 const rules = new Map();
@@ -9622,7 +9640,7 @@ rules.set("gridTable", {
 });
 rules.set("displayTeX", {
   isLeaf: true,
-  match: blockRegex(/^\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$ *\n/),
+  match: blockRegex(/^\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$ *(?:\n|$)/),
   parse: function(capture, state) {
     const tex = capture[1].trim();
     return { type: "tex", attrs: { tex, displayMode: true } }
@@ -9733,10 +9751,15 @@ rules.set("code", {
 });
 rules.set("tex", {
   isLeaf: true,
-  match: inlineRegex(/^\$((?:[^\s][\S\s]*?)?(?:[^\s\\]))\$(?![0-9])/),
+  match: inlineRegex(/^(?:\$\$((?:\\[\s\S]|[^\\])+?)\$\$|\$((?:[^\s][\S\s]*?)?(?:[^\s\\]))\$(?![0-9]))/),
   parse: function(capture, state) {
-    const tex = capture[1].trim();
-    return { type: "tex", attrs: { tex, displayMode: false } }
+    if (capture[1]) {
+      const tex = capture[1].trim();
+      return { type: "tex", attrs: { tex, displayMode: true } }
+    } else {
+      const tex = capture[2].trim();
+      return { type: "tex", attrs: { tex, displayMode: false } }
+    }
   }
 });
 rules.set("calculation", {
@@ -15622,7 +15645,7 @@ const valueFromLiteral = (str, name, decimalFormat) => {
 const isValidIdentifier$1 = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/;
 const keywordRegEx = /^(if|elseif|else|return|throw|while|for|break|print|end)(\u2002|\b)/;
 const drawCommandRegEx = /^(title|frame|view|axes|grid|stroke|strokewidth|strokedasharray|fill|fontsize|fontweight|fontstyle|fontfamily|marker|line|path|plot|curve|rect|circle|ellipse|arc|text|dot|leader|dimension)\b/;
-const leadingSpaceRegEx$2 = /^[\t ]+/;
+const leadingSpaceRegEx$3 = /^[\t ]+/;
 const oneLinerRegEx = /^( *)if ([^\n`]+) +(return|throw|print|break)\b([^\n]+)?(?: end)? *\n/gm;
 
 // If you change functionRegEx, then also change it in mathprompt.js.
@@ -15636,7 +15659,7 @@ const lexRegEx = /"[^"]*"|``.*|`[^`]*`|'[^']*'|#|[^"`'#]+/g;
 const testForStatement = str => {
   const pos = str.indexOf("=");
   if (pos === -1) { return false }
-  const leadStr = str.slice(0, pos).replace(leadingSpaceRegEx$2, "").trim();
+  const leadStr = str.slice(0, pos).replace(leadingSpaceRegEx$3, "").trim();
   if (isValidIdentifier$1.test(leadStr)) { return true }
   if (leadStr.indexOf(",") === -1) { return false }
   let result = true;
