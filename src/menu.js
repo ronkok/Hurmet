@@ -590,7 +590,7 @@ function insertImage(nodeType) {
 
 function insertComment(nodeType) {
   return new MenuItem({
-    title: "Insert or edit a comment",
+    title: "Insert a comment",
     icon: hurmetIcons.comment,
     enable(state) {
       return canInsert(state, nodeType)
