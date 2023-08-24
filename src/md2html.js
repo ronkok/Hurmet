@@ -114,6 +114,8 @@ const writeSVG = dwg => {
         }
         svg += `>${sanitizeText(child.text)}</tspan>`
       })
+    } else if (el.tag === "defs") {
+      svg += `<style>${sanitizeText(el.style)}</style>`
     } else if (el.tag === "title") {
       svg += sanitizeText(el.attrs.text)
     }
@@ -178,23 +180,19 @@ const nodes = {
     return htmlTag("li", ast2html(node.content), { class: "tight" }) + "\n"
   },
   table(node)        { return htmlTag("table", ast2html(node.content), node.attrs) + "\n" },
+  colGroup(node)     { return htmlTag("colgroup", ast2html(node.content), node.attrs) + "\n" },
+  col(node)          { return htmlTag("col", "", node.attrs[0], true) + "\n" },
   table_row(node)    { return htmlTag("tr", ast2html(node.content)) + "\n" },
   table_header(node) {
     const attributes = {}
     if (node.attrs.colspan !== 1) { attributes.colspan = node.attrs.colspan }
     if (node.attrs.rowspan !== 1) { attributes.rowspan = node.attrs.rowspan }
-    if (node.attrs.colwidth !== null && !isNaN(node.attrs.colwidth) ) {
-      attributes.style = `width: ${node.attrs.colwidth}px`
-    }
     return htmlTag("th", ast2html(node.content), attributes) + "\n"
   },
   table_cell(node) {
     const attributes = {}
     if (node.attrs.colspan !== 1) { attributes.colspan = node.attrs.colspan }
     if (node.attrs.rowspan !== 1) { attributes.rowspan = node.attrs.rowspan }
-    if (node.attrs.colwidth !== null && !isNaN(node.attrs.colwidth) ) {
-      attributes.style = `width: ${node.attrs.colwidth}px`
-    }
     return htmlTag("td", ast2html(node.content), attributes)
   },
   link(node) {
@@ -220,8 +218,10 @@ const nodes = {
   },
   calculation(node) {
     if (node.attrs.dtype && node.attrs.dtype === dt.DRAWING) {
-      return `<span class='hurmet-calc' data-entry=${dataStr(node.attrs.entry)}>` +
-        `${writeSVG(node.attrs.resultdisplay)}</span>`
+      const svg = writeSVG(node.attrs.resultdisplay)
+      const style = svg.indexOf('float="right"' > -1) ? " style='float: right;'" : ""
+      return `<span class='hurmet-calc' data-entry=${dataStr(node.attrs.entry)}${style}>` +
+        `${svg}</span>`
     } else {
       const tex = node.attrs.tex ? node.attrs.tex : parse(node.attrs.entry)
       const mathML = temml.renderToString(

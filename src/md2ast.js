@@ -273,6 +273,16 @@ const TABLES = (function() {
       }
       if (myID) { table.attrs.id = myID }
       if (myClass) { table.attrs.class = myClass }
+      if (colWidths && state.inHtml) {
+        let sum = 0
+        colWidths.forEach(el => { sum += Number(el) } )
+        table.attrs.style = `width: ${sum}px`
+        const colGroup = { type: "colGroup", content: [] }
+        for (const width of colWidths) {
+          colGroup.content.push({ type: "col", attrs: [{ style: `width: ${width}px` }] })
+        }
+        table.content.push(colGroup)
+      }
       if (!/^\|+$/.test(capture[1])) {
         table.content.push(parsePipeTableRow(capture[1], parse, state, colWidths, true))
       }
@@ -422,6 +432,16 @@ const TABLES = (function() {
       }
       if (myID) { table.attrs.id = myID }
       if (myClass) { table.attrs.class = myClass }
+      if (colWidths && state.inHtml) {
+        let sum = 0
+        colWidths.forEach(el => { sum += Number(el) } )
+        table.attrs.style = `width: ${sum}px`
+        const colGroup = { type: "colGroup", attrs: null, content: [] }
+        for (const width of colWidths) {
+          colGroup.content.push({ type: "col", attrs: [{ style: `width: ${width}px` }] })
+        }
+        table.content.push(colGroup)
+      }
       for (let i = 0; i < numRows; i++) {
         table.content.push({ type: "table_row", content: [] } )
         for (let j = 0; j < numCols; j++) {

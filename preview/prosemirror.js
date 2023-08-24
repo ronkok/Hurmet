@@ -25177,6 +25177,16 @@ const TABLES = (function() {
       };
       if (myID) { table.attrs.id = myID; }
       if (myClass) { table.attrs.class = myClass; }
+      if (colWidths && state.inHtml) {
+        let sum = 0;
+        colWidths.forEach(el => { sum += Number(el); } );
+        table.attrs.style = `width: ${sum}px`;
+        const colGroup = { type: "colGroup", content: [] };
+        for (const width of colWidths) {
+          colGroup.content.push({ type: "col", attrs: [{ style: `width: ${width}px` }] });
+        }
+        table.content.push(colGroup);
+      }
       if (!/^\|+$/.test(capture[1])) {
         table.content.push(parsePipeTableRow(capture[1], parse$1, state, colWidths, true));
       }
@@ -25326,6 +25336,16 @@ const TABLES = (function() {
       };
       if (myID) { table.attrs.id = myID; }
       if (myClass) { table.attrs.class = myClass; }
+      if (colWidths && state.inHtml) {
+        let sum = 0;
+        colWidths.forEach(el => { sum += Number(el); } );
+        table.attrs.style = `width: ${sum}px`;
+        const colGroup = { type: "colGroup", attrs: null, content: [] };
+        for (const width of colWidths) {
+          colGroup.content.push({ type: "col", attrs: [{ style: `width: ${width}px` }] });
+        }
+        table.content.push(colGroup);
+      }
       for (let i = 0; i < numRows; i++) {
         table.content.push({ type: "table_row", content: [] } );
         for (let j = 0; j < numCols; j++) {
@@ -45889,6 +45909,8 @@ const writeSVG = dwg => {
         }
         svg += `>${sanitizeText(child.text)}</tspan>`;
       });
+    } else if (el.tag === "defs") {
+      svg += `<style>${sanitizeText(el.style)}</style>`;
     } else if (el.tag === "title") {
       svg += sanitizeText(el.attrs.text);
     }
@@ -45953,23 +45975,19 @@ const nodes = {
     return htmlTag("li", ast2html(node.content), { class: "tight" }) + "\n"
   },
   table(node)        { return htmlTag("table", ast2html(node.content), node.attrs) + "\n" },
+  colGroup(node)     { return htmlTag("colgroup", ast2html(node.content), node.attrs) + "\n" },
+  col(node)          { return htmlTag("col", "", node.attrs[0], true) + "\n" },
   table_row(node)    { return htmlTag("tr", ast2html(node.content)) + "\n" },
   table_header(node) {
     const attributes = {};
     if (node.attrs.colspan !== 1) { attributes.colspan = node.attrs.colspan; }
     if (node.attrs.rowspan !== 1) { attributes.rowspan = node.attrs.rowspan; }
-    if (node.attrs.colwidth !== null && !isNaN(node.attrs.colwidth) ) {
-      attributes.style = `width: ${node.attrs.colwidth}px`;
-    }
     return htmlTag("th", ast2html(node.content), attributes) + "\n"
   },
   table_cell(node) {
     const attributes = {};
     if (node.attrs.colspan !== 1) { attributes.colspan = node.attrs.colspan; }
     if (node.attrs.rowspan !== 1) { attributes.rowspan = node.attrs.rowspan; }
-    if (node.attrs.colwidth !== null && !isNaN(node.attrs.colwidth) ) {
-      attributes.style = `width: ${node.attrs.colwidth}px`;
-    }
     return htmlTag("td", ast2html(node.content), attributes)
   },
   link(node) {
@@ -45995,8 +46013,10 @@ const nodes = {
   },
   calculation(node) {
     if (node.attrs.dtype && node.attrs.dtype === dt.DRAWING) {
-      return `<span class='hurmet-calc' data-entry=${dataStr(node.attrs.entry)}>` +
-        `${writeSVG(node.attrs.resultdisplay)}</span>`
+      const svg = writeSVG(node.attrs.resultdisplay);
+      const style = svg.indexOf('float="right"' > -1) ? " style='float: right;'" : "";
+      return `<span class='hurmet-calc' data-entry=${dataStr(node.attrs.entry)}${style}>` +
+        `${svg}</span>`
     } else {
       const tex = node.attrs.tex ? node.attrs.tex : parse(node.attrs.entry);
       const mathML = temml.renderToString(
@@ -50351,7 +50371,7 @@ function insertImage(nodeType) {
 
 function insertComment(nodeType) {
   return new MenuItem({
-    title: "Insert or edit a comment",
+    title: "Insert a comment",
     icon: hurmetIcons.comment,
     enable(state) {
       return canInsert(state, nodeType)
@@ -51453,7 +51473,7 @@ function buildInputRules(schema) {
 
 // autocorrect.js
 
-const autoCorrectRegEx = /([?:<>\-~/_]=| \.| \*|~~|\+-|-\+|<-->|<->|<>|<--|<-|-->|->|-:|\^\^|\\\||\/\/\/|\b(bar|hat|vec|tilde|dot|ddot|ul)|\b(bb|bbb|cc|ff|ss) [A-Za-z]|\\?[A-Za-z]{2,}|\\c|\\ |\\o|root [234]|<<|>>|\^-?[0-9]+|\|\|\||\/_|''|""|00)\s$/;
+const autoCorrectRegEx = /([?:<>\-~/_!]=| \.| \*|~~|\+-|-\+|<-->|<->|<>|<--|<-|-->|->|-:|\^\^|\\\||\/\/\/|\b(bar|hat|vec|tilde|dot|ddot|ul)|\b(bb|bbb|cc|ff|ss) [A-Za-z]|\\?[A-Za-z]{2,}|\\c|\\ |\\o|root [234]|<<|>>|\^-?[0-9]+|\|\|\||\/_|''|""|00)\s$/;
 
 const accents$1 = {
   acute: "\u0301",
@@ -51587,6 +51607,7 @@ const autoCorrections = {
   "\\xor": "⊻",
   "\\in": "\u2208",
   "<>": "≠",
+  "!=": "≠",
   ":=": "≔",
   "?=": "≟",
   "<=": "≤",
