@@ -645,7 +645,7 @@ ul.toc span + span {
   margin: 0 0 0 8px;
 }
 .ProseMirror aside.comment::before {
-  content: "◀";
+  content: "◀\00FE0E";
   display: inline-block;
   color: #e2941f;
   transform: translateX(-0.6em);

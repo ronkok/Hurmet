@@ -163,7 +163,7 @@ aside.comment {
     margin: 1em 0 0 8px;
 }
 aside.comment::before {
-    content: "◀";
+    content: "◀\00FE0E";
     display: inline-block;
     color: #e2941f;
     transform: translateX(-0.6em);
