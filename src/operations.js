@@ -32,6 +32,7 @@ const unary = {
     ceil(x)      { return Rnl.ceil(x) },
     percent(x)   { return Rnl.multiply(oneTenth, x) },
     factorial(x) { return Rnl.factorial(x) },
+    doubleFactorial(x) { return Rnl.doubleFactorial(x) },
     not(x)       { return !x }
   },
 
@@ -45,6 +46,7 @@ const unary = {
     ceil(z)      { return errorOprnd("NA_COMPL_OP", "ceil") },
     percent(z)   { return errorOprnd("NA_COMPL_OP", "percent") },
     factorial(z) { return errorOprnd("NA_COMPL_OP", "factorial") },
+    doubleFactorial(z) { return errorOprnd("NA_COMPL_OP", "factorial") },
     not(z)       { return errorOprnd("NA_COMPL_OP", "not") }
   },
 
@@ -57,6 +59,7 @@ const unary = {
     ceil(v)      { return v.map(e => Rnl.ceil(e)) },
     percent(v)   { return v.map(e => Rnl.multiply(oneTenth, e)) },
     factorial(v) { return v.map(e => Rnl.factorial(e)) },
+    doubleFactorial(v) { return v.map(e => Rnl.doubleFactorial(e)) },
     not(v)       { return v.map(e => !e) }
   },
 
@@ -79,6 +82,7 @@ const unary = {
     ceil(m)      { return m.map(row => row.map(e => Rnl.ceil(e))) },
     percent(m)   { return m.map(row => row.map(e => Rnl.multiply(oneTenth, e))) },
     factorial(m) { return m.map(row => row.map(e => Rnl.factorial(e))) },
+    doubleFactorial(m) { return m.map(row => row.map(e => Rnl.doubleFactorial(e))) },
     not(m)       { return m.map(row => row.map(e => !e)) }
   },
 
@@ -127,6 +131,13 @@ const unary = {
     factorial(map) {
       map.data = map.data.map(column => Rnl.isRational(column[0])
         ? column.map(e => Rnl.factorial(e))
+        : column
+      )
+      return map
+    },
+    doubleFactorial(map) {
+      map.data = map.data.map(column => Rnl.isRational(column[0])
+        ? column.map(e => Rnl.doubleFactorial(e))
         : column
       )
       return map

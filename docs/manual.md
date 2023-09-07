@@ -1223,6 +1223,8 @@ _im_
 |               +----------------------+---------------------------------------------+
 |               | ¢`if !x`             | Logical not if preceded by a space          |
 +---------------+----------------------+---------------------------------------------+
+| ‼             | ¢`5!!`               | [Double Factorial][]                        |
++---------------+----------------------+---------------------------------------------+
 | ¢`(n\atop k)` | (5 \atop 3)          | Binomial coefficient. ¢`(n \atop k) =       |
 |               |                      | n!//(n!(n!-k!))`                            |
 +---------------+----------------------+---------------------------------------------+
@@ -1277,6 +1279,7 @@ _im_
 {#op-table .grid width=35em}
 
 [Factorial]: https://en.wikipedia.org/wiki/Factorial
+[Double Factorial]: https://en.wikipedia.org/wiki/Double_factorial
 
 </div>
 

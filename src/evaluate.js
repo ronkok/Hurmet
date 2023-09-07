@@ -597,7 +597,9 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
-        case "!": {
+        case "!":
+        case "‼":
+        case "!!": {
           // TODO: "!!" and "¡"
           const o1 = stack.pop()
           if (!(o1.dtype & dt.RATIONAL)) { return errorOprnd("NAN_OP") }
@@ -609,7 +611,9 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const factorial = Object.create(null)
           factorial.unit = allZeros
           factorial.dtype = dt.RATIONAL
-          factorial.value = Operators.unary[shapeOf(o1)]["factorial"](x)
+          factorial.value = tkn === "!"
+            ? Operators.unary[shapeOf(o1)]["factorial"](x)
+            : Operators.unary[shapeOf(o1)]["doubleFactorial"](x)
           if (factorial.value.dtype) { return factorial.value } // Error
           stack.push(Object.freeze(factorial))
           break
