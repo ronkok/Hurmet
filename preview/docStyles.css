@@ -429,8 +429,9 @@ summary {
  * This section contains the CSS for Temml math rendering.
  */
 
- directory for details. The fonts can be obtained from several TeX distributions
- or package managers.
+/*
+ The Latin Modern fonts are released under the GUST font license, which is
+ legally equivalent to the LaTeX Project Public License.
  
  The Latin Modern WOFF font has been obtained from
  http://www.gust.org.pl/projects/e-foundry/
