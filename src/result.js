@@ -79,7 +79,7 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, assert, is
         const negOp = negatedComp[op]
         if (assert) {
           const assertStr = assert.value.replace(/\.$/, "")
-          resultDisplay = `\\colorbox{Salmon}{${assertStr}, but $` +
+          resultDisplay = "\\colorbox{Salmon}{" + assertStr + ", but $" +
               parse(stmt.entry.replace(testRegEx, "").replace(op, negOp[0])) + "$}"
           altResultDisplay = assertStr + ", but " +
               stmt.entry.replace(testRegEx, "").replace(op, negOp[1])
