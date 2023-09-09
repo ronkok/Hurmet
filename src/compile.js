@@ -94,6 +94,7 @@ export const compile = (inputStr, decimalFormat = "1,000,000.") => {
       name,
       value: (isError || isModule) ? module.value : module.value[name],
       // TODO: what to do with comma decimals?
+      resultdisplay: "\\text{" + name + "}",
       dtype: isError ? dt.ERROR : name === "draw" ? dt.DRAWING : dt.MODULE,
       error: isError
     }
