@@ -325,7 +325,8 @@ export function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combi
       diagram.push(Draw.textNode("deflection", 20, yDeflection + 2))
       diagram.push({
         tag: "path",
-        attrs: { d: `M${beam.xDiagram} ${yDeflection} h300`, stroke: "black", "stroke-width": '1.5px' }
+        attrs: { d: `M${beam.xDiagram} ${yDeflection} h300`,
+          stroke: "black", "stroke-width": '1.5px' }
       })
       const xPoly = new Array(numDataPoints - 1).fill(0)
       const yPoly = new Array(numDataPoints - 1).fill(0)
