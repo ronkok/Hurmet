@@ -17054,11 +17054,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6737","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.6743","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.3495","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.3238","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -17067,10 +17067,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4656","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4623","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9574","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.8679","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9543","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.8565","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -17090,7 +17090,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.85538","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.85735","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -17098,23 +17098,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.5068","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.3915","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["4.1163","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["89.6970","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["4.1162","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["88.8610","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["157.47","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["157.84","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1428.30","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1428.51","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -17125,7 +17125,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["18.5188","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["18.7019","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -17155,7 +17155,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.0844","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0704","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -20741,7 +20741,8 @@ const parse = (
   let tokenSep = "\xa0"; // no break space
   let rpnPrec = -1;
   const exprStack = []; // Use for lazy evalulation of ternary (If) expressions
-  let numFreeCommas = 0; // # of itens in a tuple
+  let numFreeCommas = 0; // # of items in a tuple
+  let posArrow = 0;
 
   // This function, parse(), is the main function for this module.
   // Before we get to the start line, we write two enclosed functions,
@@ -20946,6 +20947,14 @@ const parse = (
           token = checkForUnaryMinus(token, prevToken);
         }
 
+        if (isCalc && token.output === "→") {
+          // This arrow is used for anonymous functions, e.g., x → cos x.
+          rpn = rpn.replace(/¿([^\u00a0]+)$/, '"$1"');
+          posArrow = rpn.length;
+          const posBracket = tex.lastIndexOf("〖");
+          tex = tex.slice(0, posBracket) + tex.slice(posBracket + 1);
+        }
+
         if (isCalc && token.ttype !== tt.SPACE) {
           if (token.output !== "\\text{-}") { rpn += tokenSep; }
           rpnPrec = rpnPrecFromType[token.ttype];
@@ -21079,7 +21088,7 @@ const parse = (
               : token.output;
           } else {
             token.output = token.input;
-            token.output = "〖" + token.output;
+            token.output = (posArrow > 0 ? "" : "〖") + token.output;
           }
           rpn += token.input === "im" ? "im" : "¿" + token.input;
           if (token.input !== "im") { dependencies.push(token.input); }
@@ -21310,7 +21319,7 @@ const parse = (
 
         if (isCalc) {
           texStack.push({ prec: 16, pos: tex.length, ttype: tt.ACCENT, closeDelim: "〗" });
-          tex += "〖" + token.input;
+          tex += (posArrow > 0 ? "" : "〖") + token.input;
           rpn += "¿" + token.input;
           dependencies.push(token.input);
         } else {
@@ -21587,12 +21596,18 @@ const parse = (
               if ([",", "\t"].includes(token.input) && (str.charAt(0) === "]")) {
                 rpn += "®0/1";
               }
-              if (token.input === "," && delim.delimType === dFUNCTION &&
-                          delim.numArgs === 2 && delim.name === "plot" ) {
-                // The literal function for a plot() statement inside a draw()
-                // Wrap the rpn in quotation marks.
-                rpn = rpn.slice(0, delim.rpnPos + 5) + '"'
-                    + rpn.slice(delim.rpnPos + 5, -1).replace(/\u00a0/g, "§") + '"' + tokenSep;
+              if (token.input === "," && delim.delimType === dFUNCTION) {
+                if (posArrow > 0) {
+                  rpn = rpn.slice(0, posArrow + 1) + '"'
+                      + rpn.slice(posArrow + 1, -3).replace(/\u00a0/g, "§") + '"'
+                      + tokenSep + "→" + tokenSep;
+                  posArrow = 0;
+                } else if (delim.numArgs === 2 && delim.name === "plot" ) {
+                  // The literal function for a plot() statement inside a draw()
+                  // Wrap the rpn in quotation marks.
+                  rpn = rpn.slice(0, delim.rpnPos + 5) + '"'
+                      + rpn.slice(delim.rpnPos + 5, -1).replace(/\u00a0/g, "§") + '"' + tokenSep;
+                }
               }
             }
             delim.numArgs += 1;
@@ -22412,7 +22427,7 @@ const formatResult = (stmt, result, formatSpec, decimalFormat, assert, isUnitAwa
         const negOp = negatedComp[op];
         if (assert) {
           const assertStr = assert.value.replace(/\.$/, "");
-          resultDisplay = `\\colorbox{Salmon}{${assertStr}, but $` +
+          resultDisplay = "\\colorbox{Salmon}{" + assertStr + ", but $" +
               parse(stmt.entry.replace(testRegEx, "").replace(op, negOp[0])) + "$}";
           altResultDisplay = assertStr + ", but " +
               stmt.entry.replace(testRegEx, "").replace(op, negOp[1]);
@@ -30966,6 +30981,20 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
+        case "→": {
+          // Anonymous function, e.g., x → cos x
+          const rpn = stack.pop().value.replace(/§/g, "\xa0");
+          const indexVariable = stack.pop().value;
+          stack.push({
+            dtype: dt.MODULE,
+            unit: null,
+            value: {
+              parameters: [ { name: indexVariable }],
+              statements: [{ rpn, stype: "return" }]
+            } });
+          break
+        }
+
         case "throw":
           return { value: stack.pop().value, unit: null, dtype: dt.ERROR }
 
@@ -31972,6 +32001,7 @@ const compile = (inputStr, decimalFormat = "1,000,000.") => {
       name,
       value: (isError || isModule) ? module.value : module.value[name],
       // TODO: what to do with comma decimals?
+      resultdisplay: "\\text{" + name + "}",
       dtype: isError ? dt.ERROR : name === "draw" ? dt.DRAWING : dt.MODULE,
       error: isError
     };

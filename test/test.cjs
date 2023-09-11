@@ -320,6 +320,16 @@ hurmet.calculate(`function testThrow()
    return sum
 end`, vars)
 
+hurmet.calculate(`function newton(f, fPrime, guess; ε = 1e-15)
+x = guess
+for i in 1:1000
+    fx = f(x)
+    if |fx| ≤ ε return x
+    x = x - fx / fPrime(x)
+end
+throw "Error. Function did not converge."
+end`, vars)
+
   // Calculations.
   const calcTests = [
     // input string, expected RPN, expected result
@@ -481,7 +491,10 @@ end`, vars)
     [`ones(2, 3) = @`, "®2/1 ®3/1 ones", "(1, 1, 1; 1, 1, 1)"],
     [`findfirst([false; false; true; false]) = @`, "false false true false matrix 4 1 findfirst 1", "3"],
     [`findfirst(4, [1; 3; 4; 6; 3]) = @`, "®4/1 ®1/1 ®3/1 ®4/1 ®6/1 ®3/1 matrix 5 1 findfirst 2", "3"],
-    [`findmax([1; 4; 6; 3]) = @`, "®1/1 ®4/1 ®6/1 ®3/1 matrix 4 1 findmax", "``6\t3``"]
+    [`findmax([1; 4; 6; 3]) = @`, "®1/1 ®4/1 ®6/1 ®3/1 matrix 4 1 findmax", "``6\t3``"],
+    [`5!! = @`, "®5/1 !!", "15"],
+    [`30!! = @`, "®30/1 !!", "42,849,873,690,624,000"],
+    [`newton(x → cos x, y → -sin y, 1.5) = @`, `"x" "¿x§cos" → "y" "¿y§sin§~" → ®15/10 function newton 3`, "1.5707963267949"]
   ]
 
   const testRegEx = /^(@{1,2})test /

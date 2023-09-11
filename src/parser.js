@@ -322,7 +322,8 @@ export const parse = (
   let tokenSep = "\xa0" // no break space
   let rpnPrec = -1
   const exprStack = [] // Use for lazy evalulation of ternary (If) expressions
-  let numFreeCommas = 0 // # of itens in a tuple
+  let numFreeCommas = 0 // # of items in a tuple
+  let posArrow = 0
 
   // This function, parse(), is the main function for this module.
   // Before we get to the start line, we write two enclosed functions,
@@ -527,6 +528,14 @@ export const parse = (
           token = checkForUnaryMinus(token, prevToken)
         }
 
+        if (isCalc && token.output === "→") {
+          // This arrow is used for anonymous functions, e.g., x → cos x.
+          rpn = rpn.replace(/¿([^\u00a0]+)$/, '"$1"')
+          posArrow = rpn.length
+          const posBracket = tex.lastIndexOf("〖")
+          tex = tex.slice(0, posBracket) + tex.slice(posBracket + 1)
+        }
+
         if (isCalc && token.ttype !== tt.SPACE) {
           if (token.output !== "\\text{-}") { rpn += tokenSep }
           rpnPrec = rpnPrecFromType[token.ttype]
@@ -660,7 +669,7 @@ export const parse = (
               : token.output
           } else {
             token.output = token.input
-            token.output = "〖" + token.output
+            token.output = (posArrow > 0 ? "" : "〖") + token.output
           }
           rpn += token.input === "im" ? "im" : "¿" + token.input
           if (token.input !== "im") { dependencies.push(token.input) }
@@ -891,7 +900,7 @@ export const parse = (
 
         if (isCalc) {
           texStack.push({ prec: 16, pos: tex.length, ttype: tt.ACCENT, closeDelim: "〗" })
-          tex += "〖" + token.input
+          tex += (posArrow > 0 ? "" : "〖") + token.input
           rpn += "¿" + token.input
           dependencies.push(token.input)
         } else {
@@ -1168,12 +1177,18 @@ export const parse = (
               if ([",", "\t"].includes(token.input) && (str.charAt(0) === "]")) {
                 rpn += "®0/1"
               }
-              if (token.input === "," && delim.delimType === dFUNCTION &&
-                          delim.numArgs === 2 && delim.name === "plot" ) {
-                // The literal function for a plot() statement inside a draw()
-                // Wrap the rpn in quotation marks.
-                rpn = rpn.slice(0, delim.rpnPos + 5) + '"'
-                    + rpn.slice(delim.rpnPos + 5, -1).replace(/\u00a0/g, "§") + '"' + tokenSep
+              if (token.input === "," && delim.delimType === dFUNCTION) {
+                if (posArrow > 0) {
+                  rpn = rpn.slice(0, posArrow + 1) + '"'
+                      + rpn.slice(posArrow + 1, -3).replace(/\u00a0/g, "§") + '"'
+                      + tokenSep + "→" + tokenSep
+                  posArrow = 0
+                } else if (delim.numArgs === 2 && delim.name === "plot" ) {
+                  // The literal function for a plot() statement inside a draw()
+                  // Wrap the rpn in quotation marks.
+                  rpn = rpn.slice(0, delim.rpnPos + 5) + '"'
+                      + rpn.slice(delim.rpnPos + 5, -1).replace(/\u00a0/g, "§") + '"' + tokenSep
+                }
               }
             }
             delim.numArgs += 1

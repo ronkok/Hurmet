@@ -38,6 +38,10 @@ body {
   color: var(--text-color);
 }
 
+article {
+  white-space: pre-wrap;
+}
+
 h1, h2, h3, h5 {
   font-family: Verdana, sans-serif;
   font-variant: small-caps;
@@ -45,13 +49,18 @@ h1, h2, h3, h5 {
   font-weight: bold;
   margin: 1em 0 1em 0;
 }
-			 
+
 h1 { font-size: 130%; margin-top: 3em; }
 h2 { font-size: 105%; margin-top: 2em; }
 h3 { font-size: 100%; margin-top: 1em; }
 h4 { font-size: 100%; margin: 1em 0 1em 0; font-weight: bold; }
 h5 { font-size: 110%; text-align: center; }
 h6 { font-size: 90%; font-weight: bold;  margin: 1em 0 1em 0; }
+
+p {
+  min-height: 0.1em;
+  margin: 0;
+}
 
 a {
   color: var(--link-color);
