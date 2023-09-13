@@ -337,7 +337,13 @@ export const parse = (
         const topPrec = rpnStack[rpnStack.length - 1].prec
         //                         exponents, from right to left.
         if (topPrec < rpnPrec || (topPrec === 13 && rpnPrec === 13)) { break }
-        rpn += rpnStack.pop().symbol + tokenSep
+        const symbol = rpnStack.pop().symbol
+        if (symbol === "→") {
+          rpn = rpn.slice(0, posArrow + 1) + '"'
+            + rpn.slice(posArrow + 1, -1).replace(/\u00a0/g, "§") + '"' + tokenSep
+          posArrow = 0
+        }
+        rpn += symbol + tokenSep
       }
     }
   }
@@ -522,7 +528,7 @@ export const parse = (
       case tt.BIN: //        infix math operators that render but don't calc, e.g. \bowtie
       case tt.ADD: //        infix add/subtract operators, + -
       case tt.MULT: //       infix mult/divide operators, × * · // ÷
-      case tt.REL: //        relational operators, e.g  < →
+      case tt.REL: //        relational operators, e.g  < == →
       case tt.UNDEROVER: { // int, sum, lim, etc
         if (token.output.length > 0 && "- +".indexOf(token.output) > -1) {
           token = checkForUnaryMinus(token, prevToken)
@@ -1178,12 +1184,7 @@ export const parse = (
                 rpn += "®0/1"
               }
               if (token.input === "," && delim.delimType === dFUNCTION) {
-                if (posArrow > 0) {
-                  rpn = rpn.slice(0, posArrow + 1) + '"'
-                      + rpn.slice(posArrow + 1, -3).replace(/\u00a0/g, "§") + '"'
-                      + tokenSep + "→" + tokenSep
-                  posArrow = 0
-                } else if (delim.numArgs === 2 && delim.name === "plot" ) {
+                if (delim.numArgs === 2 && delim.name === "plot" ) {
                   // The literal function for a plot() statement inside a draw()
                   // Wrap the rpn in quotation marks.
                   rpn = rpn.slice(0, delim.rpnPos + 5) + '"'

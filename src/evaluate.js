@@ -1363,14 +1363,14 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
 
         case "→": {
           // Anonymous function, e.g., x → cos x
-          const rpn = stack.pop().value.replace(/§/g, "\xa0")
-          const indexVariable = stack.pop().value
+          const rpnLocal = stack.pop().value.replace(/§/g, "\xa0")
+          const parameter = stack.pop().value
           stack.push({
             dtype: dt.MODULE,
             unit: null,
             value: {
-              parameters: [ { name: indexVariable }],
-              statements: [{ rpn, stype: "return" }]
+              parameters: [ { name: parameter }],
+              statements: [{ rpn: rpnLocal, stype: "return" }]
             } })
           break
         }

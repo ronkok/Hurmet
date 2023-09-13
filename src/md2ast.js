@@ -205,7 +205,7 @@ const TABLES = (function() {
   const pipeRegEx = /(?<!\\)\|/  // eslint doesn't like look behind. Disregard the warning.
 
   const parsePipeTableRow = function(source, parse, state, colWidths, inHeader) {
-    const cells = source.trim().split(/\|/)
+    const cells = source.trim().split(pipeRegEx)
     cells.shift()
     cells.pop()
     const tableRow = [{ type: "tableSeparator" }]

@@ -20194,10 +20194,10 @@ const miscSymbols = Object.freeze({
   "¬": ["¬", "¬", tt.UNARY, ""], // logical not
   "&&": ["&&", "{\\;\\&\\&\\;}", tt.LOGIC, ""],
 
-  "\u222B": ["\u222B", "\u222B", tt.UNDEROVER, ""], // \int
-  "\u222C": ["\u222C", "\u222C", tt.UNDEROVER, ""], // \iint
-  "\u222E": ["\u222E", "\u222E", tt.UNDEROVER, ""], // \oint
-  "\u2211": ["\u2211", "\u2211", tt.UNDEROVER, ""], // \sum
+  "\u222B": ["\u222B", "\\displaystyle\u222B", tt.UNDEROVER, ""], // \int
+  "\u222C": ["\u222C", "\\displaystyle\u222C", tt.UNDEROVER, ""], // \iint
+  "\u222E": ["\u222E", "\\displaystyle\u222E", tt.UNDEROVER, ""], // \oint
+  "\u2211": ["\u2211", "\\displaystyle\u2211", tt.UNDEROVER, ""], // \sum
 
   "(": ["(", "(", tt.LEFTBRACKET, ")"],
   "[": ["[", "[", tt.LEFTBRACKET, "]"],
@@ -20300,15 +20300,15 @@ const texFunctions = Object.freeze({
   "\\mod": ["\\mod", "\\mod", tt.BIN, ""],
   "\\diamond": ["\\diamond", "\\diamond", tt.ORD, ""],
   "\\square": ["\\square", "\\square", tt.ORD, ""],
-  "\\int": ["\\int", "\\int", tt.UNDEROVER, ""],
-  "\\iint": ["\\iint", "\\iint", tt.UNDEROVER, ""],
-  "\\iiint": ["\\iiint", "\\iiint", tt.UNDEROVER, ""],
-  "\\oint": ["\\oint", "\\oint", tt.UNDEROVER, ""],
-  "\\oiint": ["\\oiint", "\\oiint", tt.UNDEROVER, ""],
-  "\\oiiint": ["\\oiiint", "\\oiiint", tt.UNDEROVER, ""],
+  "\\int": ["\\int", "\\displaystyle\\int", tt.UNDEROVER, ""],
+  "\\iint": ["\\iint", "\\displaystyle\\iint", tt.UNDEROVER, ""],
+  "\\iiint": ["\\iiint", "\\displaystyle\\iiint", tt.UNDEROVER, ""],
+  "\\oint": ["\\oint", "\\displaystyle\\oint", tt.UNDEROVER, ""],
+  "\\oiint": ["\\oiint", "\\displaystyle\\oiint", tt.UNDEROVER, ""],
+  "\\oiiint": ["\\oiiint", "\\displaystyle\\oiiint", tt.UNDEROVER, ""],
   "\\over": ["\\over", "\\dfrac{", tt.DIV],
-  "\\sum": ["\\sum", "\\sum", tt.UNDEROVER, ""],
-  "\\prod": ["\\prod", "\\prod", tt.UNDEROVER, ""],
+  "\\sum": ["\\sum", "\\displaystyle\\sum", tt.UNDEROVER, ""],
+  "\\prod": ["\\prod", "\\displaystyle\\prod", tt.UNDEROVER, ""],
   "\\quad": ["\\quad", "\\quad", tt.SPACE, ""],
   "\\qquad": ["\\qquad", "\\qquad", tt.SPACE, ""]
 });
@@ -21129,7 +21129,13 @@ const parse$1 = (
         const topPrec = rpnStack[rpnStack.length - 1].prec;
         //                         exponents, from right to left.
         if (topPrec < rpnPrec || (topPrec === 13 && rpnPrec === 13)) { break }
-        rpn += rpnStack.pop().symbol + tokenSep;
+        const symbol = rpnStack.pop().symbol;
+        if (symbol === "→") {
+          rpn = rpn.slice(0, posArrow + 1) + '"'
+            + rpn.slice(posArrow + 1, -1).replace(/\u00a0/g, "§") + '"' + tokenSep;
+          posArrow = 0;
+        }
+        rpn += symbol + tokenSep;
       }
     }
   };
@@ -21314,7 +21320,7 @@ const parse$1 = (
       case tt.BIN: //        infix math operators that render but don't calc, e.g. \bowtie
       case tt.ADD: //        infix add/subtract operators, + -
       case tt.MULT: //       infix mult/divide operators, × * · // ÷
-      case tt.REL: //        relational operators, e.g  < →
+      case tt.REL: //        relational operators, e.g  < == →
       case tt.UNDEROVER: { // int, sum, lim, etc
         if (token.output.length > 0 && "- +".indexOf(token.output) > -1) {
           token = checkForUnaryMinus(token, prevToken);
@@ -21970,12 +21976,7 @@ const parse$1 = (
                 rpn += "®0/1";
               }
               if (token.input === "," && delim.delimType === dFUNCTION) {
-                if (posArrow > 0) {
-                  rpn = rpn.slice(0, posArrow + 1) + '"'
-                      + rpn.slice(posArrow + 1, -3).replace(/\u00a0/g, "§") + '"'
-                      + tokenSep + "→" + tokenSep;
-                  posArrow = 0;
-                } else if (delim.numArgs === 2 && delim.name === "plot" ) {
+                if (delim.numArgs === 2 && delim.name === "plot" ) {
                   // The literal function for a plot() statement inside a draw()
                   // Wrap the rpn in quotation marks.
                   rpn = rpn.slice(0, delim.rpnPos + 5) + '"'
@@ -25520,8 +25521,10 @@ const TABLES = (function() {
     return [myClass, myID, colWidths]
   };
 
+  const pipeRegEx = /(?<!\\)\|/;  // eslint doesn't like look behind. Disregard the warning.
+
   const parsePipeTableRow = function(source, parse, state, colWidths, inHeader) {
-    const cells = source.trim().split(/\|/);
+    const cells = source.trim().split(pipeRegEx);
     cells.shift();
     cells.pop();
     const tableRow = [{ type: "tableSeparator" }];
@@ -31355,14 +31358,14 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
 
         case "→": {
           // Anonymous function, e.g., x → cos x
-          const rpn = stack.pop().value.replace(/§/g, "\xa0");
-          const indexVariable = stack.pop().value;
+          const rpnLocal = stack.pop().value.replace(/§/g, "\xa0");
+          const parameter = stack.pop().value;
           stack.push({
             dtype: dt.MODULE,
             unit: null,
             value: {
-              parameters: [ { name: indexVariable }],
-              statements: [{ rpn, stype: "return" }]
+              parameters: [ { name: parameter }],
+              statements: [{ rpn: rpnLocal, stype: "return" }]
             } });
           break
         }

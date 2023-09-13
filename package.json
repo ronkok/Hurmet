@@ -7,7 +7,9 @@
   "packageManager": "yarn@3.2.2",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=18.13.0" },
+  "engines": {
+    "node": ">=18.13.0"
+  },
   "maintainers": [
     {
       "name": "Ron Kok",

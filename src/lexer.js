@@ -255,10 +255,10 @@ const miscSymbols = Object.freeze({
   "¬": ["¬", "¬", tt.UNARY, ""], // logical not
   "&&": ["&&", "{\\;\\&\\&\\;}", tt.LOGIC, ""],
 
-  "\u222B": ["\u222B", "\u222B", tt.UNDEROVER, ""], // \int
-  "\u222C": ["\u222C", "\u222C", tt.UNDEROVER, ""], // \iint
-  "\u222E": ["\u222E", "\u222E", tt.UNDEROVER, ""], // \oint
-  "\u2211": ["\u2211", "\u2211", tt.UNDEROVER, ""], // \sum
+  "\u222B": ["\u222B", "\\displaystyle\u222B", tt.UNDEROVER, ""], // \int
+  "\u222C": ["\u222C", "\\displaystyle\u222C", tt.UNDEROVER, ""], // \iint
+  "\u222E": ["\u222E", "\\displaystyle\u222E", tt.UNDEROVER, ""], // \oint
+  "\u2211": ["\u2211", "\\displaystyle\u2211", tt.UNDEROVER, ""], // \sum
 
   "(": ["(", "(", tt.LEFTBRACKET, ")"],
   "[": ["[", "[", tt.LEFTBRACKET, "]"],
@@ -361,15 +361,15 @@ const texFunctions = Object.freeze({
   "\\mod": ["\\mod", "\\mod", tt.BIN, ""],
   "\\diamond": ["\\diamond", "\\diamond", tt.ORD, ""],
   "\\square": ["\\square", "\\square", tt.ORD, ""],
-  "\\int": ["\\int", "\\int", tt.UNDEROVER, ""],
-  "\\iint": ["\\iint", "\\iint", tt.UNDEROVER, ""],
-  "\\iiint": ["\\iiint", "\\iiint", tt.UNDEROVER, ""],
-  "\\oint": ["\\oint", "\\oint", tt.UNDEROVER, ""],
-  "\\oiint": ["\\oiint", "\\oiint", tt.UNDEROVER, ""],
-  "\\oiiint": ["\\oiiint", "\\oiiint", tt.UNDEROVER, ""],
+  "\\int": ["\\int", "\\displaystyle\\int", tt.UNDEROVER, ""],
+  "\\iint": ["\\iint", "\\displaystyle\\iint", tt.UNDEROVER, ""],
+  "\\iiint": ["\\iiint", "\\displaystyle\\iiint", tt.UNDEROVER, ""],
+  "\\oint": ["\\oint", "\\displaystyle\\oint", tt.UNDEROVER, ""],
+  "\\oiint": ["\\oiint", "\\displaystyle\\oiint", tt.UNDEROVER, ""],
+  "\\oiiint": ["\\oiiint", "\\displaystyle\\oiiint", tt.UNDEROVER, ""],
   "\\over": ["\\over", "\\dfrac{", tt.DIV],
-  "\\sum": ["\\sum", "\\sum", tt.UNDEROVER, ""],
-  "\\prod": ["\\prod", "\\prod", tt.UNDEROVER, ""],
+  "\\sum": ["\\sum", "\\displaystyle\\sum", tt.UNDEROVER, ""],
+  "\\prod": ["\\prod", "\\displaystyle\\prod", tt.UNDEROVER, ""],
   "\\quad": ["\\quad", "\\quad", tt.SPACE, ""],
   "\\qquad": ["\\qquad", "\\qquad", tt.SPACE, ""]
 })
