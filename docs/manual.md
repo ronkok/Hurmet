@@ -383,6 +383,8 @@ Greek letters
 : To write a Greek letter, write the name of the letter and hit the space bar.
   So, `alpha` ↦ α and `beta` ↦ β. More detail [here](#auto-correct).
 
+</div>
+
 Accents and Primes
 
 : To write an accent above a single-letter variable, write the accent name and
@@ -1568,7 +1570,8 @@ To resolve this ambiguity, Hurmet performs operations with the following precede
 +---------------+---------------------------------------------------------------+
 | × · /         | Multiplication or division, from left to right.               |
 +---------------+---------------------------------------------------------------+
-| \+ – &        | Addition or subtraction or concatenation, from left to right. |
+| \+ – & ∑      | Addition or subtraction or concatenation, from left to right. |
+|               | Also, summation.                                              |
 +---------------+---------------------------------------------------------------+
 | < > ≤ ≥ = ≠   | Comparisons (for [If Expressions](#if-expressions))           |
 +---------------+---------------------------------------------------------------+
@@ -1618,6 +1621,18 @@ Conditions may contain logical operators:  and or not ∧  ∨  ¬  �
 Chained comparisons are okay.
 
 ¢`x = {1.0 if a < b < 5 < d; 1.2 otherwise}`
+
+## Summation
+
+Hurmet can handle single-index summation terms. Like this one:\
+  ¢` ∑_(n=0)⁴ 2 n = 20 `
+
+You write the summation expression like this:\
+`\sum_(n=0)^4 2 n = ?`
+
+The `\sum` and `^4` will auto-correct into more descriptive terms and the input
+text ends up like this:\
+`∑_(n=0)⁴ 2 n = ?`.
 
 ## Overloading
 
@@ -2492,6 +2507,7 @@ Copyright © 2020-2023 Ron Kok. Released under the [MIT License][]
 * [Functions](#functions)
 * [Operator Precedence](#operator-precedence)
 * [If Expressions](#if-expressions)
+* [Summation](#summation)
 * [Overloading](#overloading)
 
 </details>

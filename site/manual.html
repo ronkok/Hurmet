@@ -177,6 +177,7 @@ print &quot;Hi!&quot;</code></pre></td></tr>
 <dt id='greek-letters'>Greek letters</dt>
 <dd><p>To write a Greek letter, write the name of the letter and hit the space bar. So, <code>alpha</code> ↦ α and <code>beta</code> ↦ β. More detail <a href='#auto-correct'>here</a>.</p>
 </dd>
+</div>
 <dt id='accents-and-primes'>Accents and Primes</dt>
 <dd><p>To write an accent above a single-letter variable, write the accent name and hit the space bar for an auto-correction. Examples:</p>
 <div class="indented"><p><code>y bar</code> ↦ <span class='hurmet-calc' data-entry='y̅'><math><mover><mi>y</mi><mo stretchy="false" style="math-style:normal;math-depth:0;">‾</mo></mover></math></span><br><code>θ hat</code> ↦ <span class='hurmet-calc' data-entry='θ̂'><math><mover><mi>θ</mi><mo stretchy="false" style="math-style:normal;math-depth:0;">^</mo></mover></math></span><br><code>P vec</code> ↦ <span class='hurmet-calc' data-entry='P⃗'><math><mover><mi>P</mi><mo stretchy="false" style="transform:scale(0.75) translate(10%, 30%);">→</mo></mover></math></span><br><code>x dot</code> ↦ <span class='hurmet-calc' data-entry='ẋ'><math><mover><mi>x</mi><mo stretchy="false" style="math-style:normal;math-depth:0;">˙</mo></mover></math></span></p>
@@ -816,7 +817,7 @@ Col B	11	25	14`` 'kips'"><math><mrow><mi>P</mi><msub><mrow></mrow><mtext>a</mtex
 <tr><td>-</td><td>Unary minus, for example: -4</td></tr>
 <tr><td>∠</td><td>To write a complex number in <em>r</em>∠θ notation.</td></tr>
 <tr><td>× · /</td><td>Multiplication or division, from left to right.</td></tr>
-<tr><td>+ – &amp;</td><td>Addition or subtraction or concatenation, from left to right.</td></tr>
+<tr><td>+ – &amp; ∑</td><td>Addition or subtraction or concatenation, from left to right. Also, summation.</td></tr>
 <tr><td>&lt; &gt; ≤ ≥ = ≠</td><td>Comparisons (for <a href='#if-expressions'>If Expressions</a>)</td></tr>
 <tr><td>∧ ∨ ¬ ⊻</td><td>Logical operators (ditto)</td></tr>
 <tr><td>:</td><td>Separator for a range of integers, as in <strong>V</strong>[2:3].</td></tr>
@@ -838,6 +839,10 @@ Col B	11	25	14`` 'kips'"><math><mrow><mi>P</mi><msub><mrow></mrow><mtext>a</mtex
 <p><span class='hurmet-calc' data-entry='x = {2 a if a < b and b = 4; a^2 otherwise}'><math><mrow><mi>x</mi><mo>=</mo></mrow><mrow><mrow><mo fence="true" form="prefix">{</mo><mtable><mtr><mtd style="padding:0.5ex 0em 0.5ex 0em;text-align:-webkit-left;"><mrow><mn>2</mn><mspace width="0.1667em"></mspace><mi>a</mi></mrow></mtd><mtd style="padding:0.5ex 0em 0.5ex 1em;text-align:-webkit-left;"><mrow><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">f</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mi>a</mi><mo>&lt;</mo><mi>b</mi><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">n</mi></mrow><mrow><mi mathvariant="normal">d</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mi>b</mi><mo>=</mo><mn>4</mn></mrow></mtd></mtr><mtr><mtd style="padding:0.5ex 0em 0.5ex 0em;text-align:-webkit-left;"><msup><mi>a</mi><mn>2</mn></msup></mtd><mtd style="padding:0.5ex 0em 0.5ex 1em;text-align:-webkit-left;"><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">t</mi></mrow><mrow><mi mathvariant="normal">h</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">w</mi></mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">s</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow></mtd></mtr></mtable><mo fence="true" form="postfix"></mo></mrow></mrow></math></span></p>
 <p>Chained comparisons are okay.</p>
 <p><span class='hurmet-calc' data-entry='x = {1.0 if a < b < 5 < d; 1.2 otherwise}'><math><mrow><mi>x</mi><mo>=</mo></mrow><mrow><mrow><mo fence="true" form="prefix">{</mo><mtable><mtr><mtd style="padding:0.5ex 0em 0.5ex 0em;text-align:-webkit-left;"><mn>1.0</mn></mtd><mtd style="padding:0.5ex 0em 0.5ex 1em;text-align:-webkit-left;"><mrow><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">f</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mi>a</mi><mo>&lt;</mo><mi>b</mi><mo>&lt;</mo><mn>5</mn><mo>&lt;</mo><mi>d</mi></mrow></mtd></mtr><mtr><mtd style="padding:0.5ex 0em 0.5ex 0em;text-align:-webkit-left;"><mn>1.2</mn></mtd><mtd style="padding:0.5ex 0em 0.5ex 1em;text-align:-webkit-left;"><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">t</mi></mrow><mrow><mi mathvariant="normal">h</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">w</mi></mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">s</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow></mtd></mtr></mtable><mo fence="true" form="postfix"></mo></mrow></mrow></math></span></p>
+<h2 id='summation'>Summation</h2>
+<p>Hurmet can handle single-index summation terms. Like this one:<br>  <span class='hurmet-calc' data-entry='∑_(n=0)⁴ 2 n = 20'><math><mstyle scriptlevel="0" displaystyle="true"><mrow><munderover><mo movablelimits="false">∑</mo><mrow><mi>n</mi><mo>=</mo><mn>0</mn></mrow><mn>4</mn></munderover></mrow><mn>2</mn><mspace width="0.1667em"></mspace><mi>n</mi><mo>=</mo><mn>20</mn></mstyle></math></span></p>
+<p>You write the summation expression like this:<br><code>\sum_(n=0)^4 2 n = ?</code></p>
+<p>The <code>\sum</code> and <code>^4</code> will auto-correct into more descriptive terms and the input text ends up like this:<br><code>∑_(n=0)⁴ 2 n = ?</code>.</p>
 <h2 id='overloading'>Overloading</h2>
 <p>Overloading summary. That is, Hurmet  math operators and functions will work on all the data types tablulated below. They also work on a Hurmet quantity that takes any of these shapes:</p>
 <table class="c2c c3c c4c c5c c6c"><tr><th></th>
@@ -1352,6 +1357,8 @@ const titleRegEx = /([^.\\/]+)\.md$/;  // A helper.
 <li class="tight"><p><a href='#operator-precedence'>Operator Precedence</a></p>
 </li>
 <li class="tight"><p><a href='#if-expressions'>If Expressions</a></p>
+</li>
+<li class="tight"><p><a href='#summation'>Summation</a></p>
 </li>
 <li class="tight"><p><a href='#overloading'>Overloading</a></p>
 </li>

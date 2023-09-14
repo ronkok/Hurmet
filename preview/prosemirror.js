@@ -19967,7 +19967,7 @@ const tt = Object.freeze({
   LONGVAR: 13,
   LEFTBRACKET: 14,
   RIGHTBRACKET: 15,
-  UNDEROVER: 16,
+  BIG_OPERATOR: 16,
   LEFTRIGHT: 17, //   |
   STRING: 18,
   UNIT: 19, //    unit-of-measure, e.g., 'meters' or °
@@ -20194,10 +20194,10 @@ const miscSymbols = Object.freeze({
   "¬": ["¬", "¬", tt.UNARY, ""], // logical not
   "&&": ["&&", "{\\;\\&\\&\\;}", tt.LOGIC, ""],
 
-  "\u222B": ["\u222B", "\\displaystyle\u222B", tt.UNDEROVER, ""], // \int
-  "\u222C": ["\u222C", "\\displaystyle\u222C", tt.UNDEROVER, ""], // \iint
-  "\u222E": ["\u222E", "\\displaystyle\u222E", tt.UNDEROVER, ""], // \oint
-  "\u2211": ["\u2211", "\\displaystyle\u2211", tt.UNDEROVER, ""], // \sum
+  "\u222B": ["\u222B", "\\displaystyle\u222B", tt.BIG_OPERATOR, ""], // \int
+  "\u222C": ["\u222C", "\\displaystyle\u222C", tt.BIG_OPERATOR, ""], // \iint
+  "\u222E": ["\u222E", "\\displaystyle\u222E", tt.BIG_OPERATOR, ""], // \oint
+  "\u2211": ["\u2211", "\\displaystyle\u2211", tt.BIG_OPERATOR, ""], // \sum
 
   "(": ["(", "(", tt.LEFTBRACKET, ")"],
   "[": ["[", "[", tt.LEFTBRACKET, "]"],
@@ -20300,15 +20300,15 @@ const texFunctions = Object.freeze({
   "\\mod": ["\\mod", "\\mod", tt.BIN, ""],
   "\\diamond": ["\\diamond", "\\diamond", tt.ORD, ""],
   "\\square": ["\\square", "\\square", tt.ORD, ""],
-  "\\int": ["\\int", "\\displaystyle\\int", tt.UNDEROVER, ""],
-  "\\iint": ["\\iint", "\\displaystyle\\iint", tt.UNDEROVER, ""],
-  "\\iiint": ["\\iiint", "\\displaystyle\\iiint", tt.UNDEROVER, ""],
-  "\\oint": ["\\oint", "\\displaystyle\\oint", tt.UNDEROVER, ""],
-  "\\oiint": ["\\oiint", "\\displaystyle\\oiint", tt.UNDEROVER, ""],
-  "\\oiiint": ["\\oiiint", "\\displaystyle\\oiiint", tt.UNDEROVER, ""],
+  "\\int": ["\\int", "\\displaystyle\\int", tt.BIG_OPERATOR, ""],
+  "\\iint": ["\\iint", "\\displaystyle\\iint", tt.BIG_OPERATOR, ""],
+  "\\iiint": ["\\iiint", "\\displaystyle\\iiint", tt.BIG_OPERATOR, ""],
+  "\\oint": ["\\oint", "\\displaystyle\\oint", tt.BIG_OPERATOR, ""],
+  "\\oiint": ["\\oiint", "\\displaystyle\\oiint", tt.BIG_OPERATOR, ""],
+  "\\oiiint": ["\\oiiint", "\\displaystyle\\oiiint", tt.BIG_OPERATOR, ""],
   "\\over": ["\\over", "\\dfrac{", tt.DIV],
-  "\\sum": ["\\sum", "\\displaystyle\\sum", tt.UNDEROVER, ""],
-  "\\prod": ["\\prod", "\\displaystyle\\prod", tt.UNDEROVER, ""],
+  "\\sum": ["\\sum", "\\displaystyle\\sum", tt.BIG_OPERATOR, ""],
+  "\\prod": ["\\prod", "\\displaystyle\\prod", tt.BIG_OPERATOR, ""],
   "\\quad": ["\\quad", "\\quad", tt.SPACE, ""],
   "\\qquad": ["\\qquad", "\\qquad", tt.SPACE, ""]
 });
@@ -20991,7 +20991,7 @@ const testForImplicitMult = (prevToken, texStack, str) => {
 };
 
 const multiplicands = new Set([tt.ORD, tt.VAR, tt.NUM, tt.LONGVAR, tt.RIGHTBRACKET,
-  tt.CURRENCY, tt.SUPCHAR]);
+  tt.CURRENCY, tt.SUPCHAR, tt.BIG_OPERATOR]);
 
 const nextCharIsFactor = (str, tokenType) => {
   const st = str.replace(leadingLaTeXSpaceRegEx, "");
@@ -20999,7 +20999,7 @@ const nextCharIsFactor = (str, tokenType) => {
 
   let fcMeetsTest = false;
   if (st.length > 0) {
-    if (fc === "|" || fc === "‖") ; else if (/^[({[√∛∜0-9]/.test(st) && multiplicands.has(tokenType)) {
+    if (fc === "|" || fc === "‖") ; else if (/^[({[√∛∜∑0-9]/.test(st) && multiplicands.has(tokenType)) {
       return true
     } else {
       if (factors.test(fc)) {
@@ -21025,16 +21025,17 @@ const endOfOrd = new Set([tt.ORD, tt.VAR, tt.NUM, tt.LONGVAR, tt.RIGHTBRACKET, t
 // I use \xa0 to precede the combining arrow accent character \u20D7.
 const leadingSpaceRegEx$2 = /^[ \f\r\v\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]+/;
 const leadingLaTeXSpaceRegEx = /^(˽|\\quad|\\qquad)+/;
+const sumRegEx = /\\∑_¿([^\xa0]+)([^=]+)\xa0=(\xa0[^^]+)\xa0\^\xa0([^∑]+)\xa0∑/;
 
 /* eslint-disable indent-legacy */
 const rpnPrecFromType = [
-  12, 12, 15, 13, 16, 10,
-       7, 10, 12, -1, -1,
+  13, 13, 16, 14, 17, 10,
+       8, 10, 13, -1, -1,
       -1,  1, -1,  0,  0,
-      -1,  0, -1, 14,  0,
-       6,  7,  5,  4,  1,
-      -1, 16, 15, -1, 14,
-      13,  9,  3,  2, 10,
+       7,  0, -1, 15,  0,
+       6,  8,  5,  4,  1,
+      13, 17, 16, -1, 15,
+      14, 10,  3,  2, 11,
       -1, -1,  4,  3, -1,
       -1, -1
 ];
@@ -21043,7 +21044,7 @@ const texPrecFromType = [
   12, 12, 15, 13, 16, 10,
        2, 10, 12,  2,  2,
        2,  1,  2,  2,  0,
-       1,  1,  2, 14,  1,
+       2,  1,  2, 14,  1,
        2,  2,  1,  1,  1,
        2, -1, 15,  2, 14,
       13,  9, -1,  1, -1,
@@ -21061,14 +21062,15 @@ TeX  RPN
   1    4    if ∧ ∨       logical operators, return
   1    5    < > ≤ ≥      comparisons
   2    6    + -          addition and subtraction
-  2    7    * (x)(y) /   multiplication, division
-  9    9    ∠            \angle. Used as a separator for complex numbers in polar notation
- 10   10    -            unary minus
- 12   12    sqrt sin     unary functions, math functions, and binary functions (e.g. root 3 x)
- 13   13    ^            superscript, i.e. exponent
- 14   14    ! % ‰ °      factorial, percent, permil, degree
- 15   15    _ ' .        subscript, prime, dot notation property accessor
- 16   16    hat bb       accent and font
+  2    7    ∑            big operators
+  2    8    * (x)(y) /   multiplication, division
+  9   10    ∠            \angle. Used as a separator for complex numbers in polar notation
+ 10   11    -            unary minus
+ 12   13    sqrt sin     unary functions, math functions, and binary functions (e.g. root 3 x)
+ 13   14    ^            superscript, i.e. exponent
+ 14   15    ! % ‰ °      factorial, percent, permil, degree
+ 15   16    _ ' .        subscript, prime, dot notation property accessor
+ 16   17    hat bb       accent and font
 */
 
 // Delimiter types
@@ -21286,7 +21288,17 @@ const parse$1 = (
     mustLex = true; // default
 
     isImplicitMult = isPrecededBySpace && okToAppend &&
-      testForImplicitMult(prevToken, texStack, str);
+                     testForImplicitMult(prevToken, texStack, str);
+    if (isCalc) {
+      if (prevToken.input === "⌧" && rpnStack.length > 1
+            && rpnStack[rpnStack.length - 2].symbol === "∑"
+            && rpn.charAt(rpn.length - 2) === "^"
+      ) {
+        // This is the space after a ∑_(i=0)^n symbol. Do not treat as implicit multiplication.
+        rpnStack.pop();
+      }
+    }
+
     if (isImplicitMult) {
       const prevType = prevToken.ttype;
       token = {
@@ -21321,7 +21333,7 @@ const parse$1 = (
       case tt.ADD: //        infix add/subtract operators, + -
       case tt.MULT: //       infix mult/divide operators, × * · // ÷
       case tt.REL: //        relational operators, e.g  < == →
-      case tt.UNDEROVER: { // int, sum, lim, etc
+      case tt.BIG_OPERATOR: { // int, sum, lim, etc
         if (token.output.length > 0 && "- +".indexOf(token.output) > -1) {
           token = checkForUnaryMinus(token, prevToken);
         }
@@ -21335,9 +21347,10 @@ const parse$1 = (
         }
 
         if (isCalc && token.ttype !== tt.SPACE) {
-          if (token.output !== "\\text{-}") { rpn += tokenSep; }
-          rpnPrec = rpnPrecFromType[token.ttype];
-          popRpnTokens(rpnPrec);
+          if (token.output !== "\\text{-}" && token.ttype !== tt.BIG_OPERATOR) {
+            rpn += tokenSep;
+          }
+          popRpnTokens(rpnPrecFromType[token.ttype === tt.BIG_OPERATOR ? tt.VAR : token.ttype]);
         }
 
         const texPrec = texPrecFromType[token.ttype];
@@ -21345,10 +21358,15 @@ const parse$1 = (
         tex += token.output + " ";
         posOfPrevRun = tex.length;
 
-        if (token.ttype === tt.UNDEROVER && delims.length > 1) {
+        if (token.ttype === tt.BIG_OPERATOR && delims.length > 1) {
           delims[delims.length - 1].isTall = true;
-        } else if (isCalc) {
-          rpnStack.push({ prec: rpnPrec, symbol: token.input });
+        }
+        if (isCalc) {
+          if (token.input === "∑" || token.input === "\\sum") {
+            rpn += "\\∑";
+            token.input === "∑";
+          }
+          rpnStack.push({ prec: rpnPrecFromType[token.ttype], symbol: token.input });
         }
 
         okToAppend = true;
@@ -21400,9 +21418,10 @@ const parse$1 = (
           // We've encountered something like the expression "2a".
           popTexTokens(2, okToAppend);
           if (isCalc) {
+            rpnPrec = rpnPrecFromType[tt.MULT];
             rpn += tokenSep;
-            popRpnTokens(7);
-            rpnStack.push({ prec: rpnPrecFromType[tt.MULT], symbol: "⌧" });
+            popRpnTokens(rpnPrec);
+            rpnStack.push({ prec: rpnPrec, symbol: "⌧" });
           }
         }
         break
@@ -21486,7 +21505,7 @@ const parse$1 = (
         popTexTokens(14, true);
         texStack.push({ prec: 14, pos: op.pos, ttype: tt.UNIT, closeDelim: "" });
         if (isCalc) {
-          popRpnTokens(14);
+          popRpnTokens(rpnPrecFromType[tt.UNIT]);
           rpn += tokenSep + "applyUnit" + tokenSep + token.input.replace(/'/g, "");
         }
         if (!/^'?°'?$/.test(token.input)) { tex += "\\;"; }
@@ -21560,10 +21579,11 @@ const parse$1 = (
         break
       }
 
-      case tt.DIV:  //  / or \atop
+      case tt.DIV: { //  / or \atop
         if (isCalc) { rpn += tokenSep; }
         popTexTokens(2, true);
-        popRpnTokens(7);
+        rpnPrec = rpnPrecFromType[tt.DIV];
+        popRpnTokens(rpnPrec);
         if (token.input === "//") {
           // case fraction
           texStack.push({ prec: 2, pos: op.pos, ttype: tt.DIV, closeDelim: "}" });
@@ -21583,16 +21603,17 @@ const parse$1 = (
         if (isCalc) {
           if (token.input === "\\atop") {
             if (delims[delims.length - 1].delimType === dBINOMIAL) {
-              rpnStack.push({ prec: 7, symbol: "()" });
+              rpnStack.push({ prec: rpnPrec, symbol: "()" });
             }
           } else {
-            rpnStack.push({ prec: 7, symbol: token.input });
+            rpnStack.push({ prec: rpnPrec, symbol: token.input });
           }
         }
         delims[delims.length - 1].isTall = true;
         posOfPrevRun = tex.length;
         okToAppend = false;
         break
+      }
 
       case tt.SUB: { // _
         popTexTokens(15, true);
@@ -21612,7 +21633,7 @@ const parse$1 = (
             rpn = rpn.slice(0, -2) + "®27182818284590452353602874713527/10000000000000000000000000000000";
           }
           rpn += tokenSep;
-          popRpnTokens(13);
+          popRpnTokens(rpnPrecFromType[tt.SUP]);
         }
         popTexTokens(13, true);
         if (prevToken.ttype === tt.RIGHTBRACKET) {
@@ -21620,7 +21641,7 @@ const parse$1 = (
         } else {
           texStack.push({ prec: 13, pos: posOfPrevRun, ttype: tt.SUP, closeDelim: "}" });
         }
-        if (isCalc) { rpnStack.push({ prec: 13, symbol: "^" }); }
+        if (isCalc) { rpnStack.push({ prec: rpnPrecFromType[tt.SUP], symbol: "^" }); }
         if (delims.length > 0 && str.charAt(0) === "(") {
           delims[delims.length - 1].isTall = true;
         }
@@ -21636,7 +21657,7 @@ const parse$1 = (
             rpn = rpn.slice(0, -2) + "®27182818284590452353602874713527/10000000000000000000000000000000";
           }
           rpn += tokenSep;
-          popRpnTokens(13);
+          popRpnTokens(rpnPrecFromType[tt.SUPCHAR]);
         }
         popTexTokens(13, true);
         const supNum = numFromSupChars(token.output);
@@ -21647,7 +21668,7 @@ const parse$1 = (
         }
         tex += "^{" + supNum;
         if (isCalc) {
-          rpnStack.push({ prec: 13, symbol: "^" });
+          rpnStack.push({ prec: rpnPrecFromType[tt.SUPCHAR], symbol: "^" });
           rpn += rationalRPN(supNum);
         }
         okToAppend = true;
@@ -21672,7 +21693,7 @@ const parse$1 = (
           str = str.slice(L).trim();
         }
         if (isCalc) {
-          rpnStack.push({ prec: 12, symbol: token.input });
+          rpnStack.push({ prec: rpnPrecFromType[tt.FUNCTION], symbol: token.input });
           if (prevToken.input === "⌧") { tex += "×"; }
         }
         fc = str.charAt(0);
@@ -21692,7 +21713,7 @@ const parse$1 = (
       case tt.ACCENT:
         if (isCalc) {
           rpn += tokenSep;
-          popRpnTokens(16);
+          popRpnTokens(rpnPrecFromType[tt.ACCENT]);
         }
         popTexTokens(1, okToAppend);
 
@@ -21725,7 +21746,9 @@ const parse$1 = (
         posOfPrevRun = tex.length;
         const binCD = token.input === "root" ? "]{" : "}{";
         texStack.push({ prec: 12, pos: tex.length, ttype: tt.BINARY, closeDelim: binCD });
-        if (isCalc) { rpnStack.push({ prec: 12, symbol: token.output }); }
+        if (isCalc) {
+          rpnStack.push({ prec: rpnPrecFromType[tt.BINARY], symbol: token.output });
+        }
         tex += token.output + (token.input === "root" ? "[" : "{");
         delims[delims.length - 1].isTall = true;
         okToAppend = false;
@@ -21737,7 +21760,10 @@ const parse$1 = (
         posOfPrevRun = tex.length;
         texStack.push({ prec: 12, pos: tex.length, ttype: tt.CURRENCY, closeDelim: "" });
         if (isCalc) {
-          rpnStack.push({ prec: 12, symbol: "applyUnit" + tokenSep + token.input });
+          rpnStack.push({
+            prec: rpnPrecFromType[tt.CURRENCY],
+            symbol: "applyUnit" + tokenSep + token.input
+          });
           if (prevToken.input === "⌧") { tex += "×"; }
         }
         tex += token.output;
@@ -21750,7 +21776,7 @@ const parse$1 = (
         posOfPrevRun = tex.length;
         texStack.push({ prec: 12, pos: tex.length, ttype: tt.UNARY, closeDelim: "}" });
         if (isCalc) {
-          rpnStack.push({ prec: 12, symbol: token.input });
+          rpnStack.push({ prec: rpnPrecFromType[tt.UNARY], symbol: token.input });
           if (prevToken.input === "⌧") { tex += "×"; }
         }
         tex += token.output;
@@ -21782,7 +21808,7 @@ const parse$1 = (
         popTexTokens(14, true);
         texStack.push({ prec: 14, pos: op.pos, ttype: tt.FACTORIAL, closeDelim: "" });
         if (isCalc) {
-          popRpnTokens(14);
+          popRpnTokens(rpnPrecFromType[tt.FACTORIAL]);
           rpn += tokenSep + token.output;
         }
         tex += token.output;
@@ -22175,11 +22201,11 @@ const parse$1 = (
       default:
         if (isCalc) {
           rpn += tokenSep;
-          popRpnTokens(12);
+          popRpnTokens(rpnPrecFromType[tt.ORD]);
         }
         popTexTokens(1, okToAppend);
         texStack.push({ prec: 1, pos: tex.length, ttype: tt.ORD, closeDelim: "" });
-        if (isCalc) { rpnStack.push({ prec: 12, symbol: token.output }); }
+        if (isCalc) { rpnStack.push({ prec: rpnPrecFromType[tt.ORD], symbol: token.output }); }
         tex += token.output + " ";
         posOfPrevRun = tex.length;
         okToAppend = true;
@@ -22191,9 +22217,18 @@ const parse$1 = (
 
   popTexTokens(0, true); // Pop all the remaining close delimiters off the stack.
 
+  let indexVariable = "";
   if (isCalc) {
     while (rpnStack.length > 0) {
       rpn += tokenSep + rpnStack.pop().symbol;
+    }
+    let sum = sumRegEx.exec(rpn);
+    while (sum) {
+      // We've matched a ∑_(i=0)^n … term. Edit the index variable and the local RPN.
+      indexVariable = sum[1];
+      rpn = rpn.slice(0, sum.index) + '"' + sum[1] + '"' + sum[2] + sum[3] + tokenSep
+        + '"' + sum[4].replace(/\u00a0/g, "§") + '"\xa0∑' + rpn.slice(sum.index + sum[0].length);
+      sum = sumRegEx.exec(rpn);
     }
     if (numFreeCommas > 0) {
       rpn += tokenSep + "tuple" + tokenSep + String(numFreeCommas + 1);
@@ -22216,6 +22251,9 @@ const parse$1 = (
   tex = tex.replace(/ {2,}/g, " "); // Replace multiple spaces with single space.
   tex = tex.replace(/\s+(?=[_^'!)}\]〗])/g, ""); // Delete spaces before right delims
   tex = tex.replace(/\s+$/, ""); //                 Delete trailing space
+  if (indexVariable.length > 0) {
+    tex = tex.replace(new RegExp(`〖${indexVariable}〗`, "g"), indexVariable);
+  }
 
   if (mustAlign) {
     const pos = tex.indexOf("=");
@@ -31367,6 +31405,23 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
               parameters: [ { name: parameter }],
               statements: [{ rpn: rpnLocal, stype: "return" }]
             } });
+          break
+        }
+
+        case "∑": {
+          const rpnLocal = stack.pop().value.replace(/§/g, "\xa0");
+          const endOfRange = stack.pop().value;
+          let index = stack.pop().value;
+          const parameter = stack.pop().value;
+          let sum = Rnl.zero;
+          while (Rnl.lessThanOrEqualTo(index, endOfRange)) {
+            vars[parameter] = { value: index, unit: allZeros, dtype: dt.RATIONAL };
+            const localResult = evalRpn(rpnLocal, vars, decimalFormat, false);
+            sum = Rnl.add(sum, localResult.value);
+            index = Rnl.add(index, Rnl.one);
+          }
+          delete vars[parameter];
+          stack.push({ value: sum, unit: allZeros, dtype: dt.RATIONAL });
           break
         }
 

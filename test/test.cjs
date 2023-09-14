@@ -55,9 +55,9 @@ const parserTests = [
   ["x = (-b +- sqrt(b^2-4a c))/(2 a)", "x = \\dfrac{\\text{-} b ± \\sqrt{b^{2}- 4 a c}}{2 \\, a}"],
   [
     `f(x) = \\int_(-∞)^∞ \\hat f (ξ)  e^(2 π i ξ x)  "d" ξ`,
-    "f(x)= \\int_{\\text{-} ∞}^{∞}\\hat{f} (ξ) e^{2 \\, π i ξ x}\\text{d}ξ"
+    "f(x)= \\displaystyle\\int_{\\text{-} ∞}^{∞}\\hat{f} (ξ) e^{2 \\, π i ξ x}\\text{d}ξ"
   ],
-  ["\\int_(-∞)^∞ \\hat f", "\\int_{\\text{-} ∞}^{∞}\\hat{f}"],
+  ["\\int_(-∞)^∞ \\hat f", "\\displaystyle\\int_{\\text{-} ∞}^{∞}\\hat{f}"],
   [
     "r = 1/((|cos θ|^p + |sin θ|^p)^(1///p))",
     "r = \\dfrac{1}{(|\\cos{θ}|^{p}+ |\\sin{θ}|^{p})^{1 / p}}"
@@ -102,7 +102,7 @@ const parserTests = [
   ],
   [
     "σ^2 = 1/(n (n-1)) (n ∑_(i=1)^n x_i^2 - (∑_(i=1)^n x_k)^2)",
-    "σ^{2}= \\dfrac{1}{n (n - 1)}\\left(n ∑_{i = 1}^{n} x{_\\text{i}}^{2}- \\left(∑_{i = 1}^{n} x{_\\text{k}} \\right)^{2}\\right)"
+    "σ^{2}= \\dfrac{1}{n (n - 1)}\\left(n \\displaystyle∑_{i = 1}^{n} x{_\\text{i}}^{2}- \\left(\\displaystyle∑_{i = 1}^{n} x{_\\text{k}} \\right)^{2}\\right)"
   ],
   ["(2n)!!/(2n+1)^2", "\\dfrac{(2 n)!!}{(2 n + 1)^{2}}"],
   ["(1	2; 3	4)", "\\begin{pmatrix}1 & 2 \\\\ 3 & 4 \\end{pmatrix}"],
@@ -494,7 +494,9 @@ end`, vars)
     [`findmax([1; 4; 6; 3]) = @`, "®1/1 ®4/1 ®6/1 ®3/1 matrix 4 1 findmax", "``6\t3``"],
     [`5!! = @`, "®5/1 !!", "15"],
     [`30!! = @`, "®30/1 !!", "42,849,873,690,624,000"],
-    [`newton(x → cos x, y → -sin y, 1.5) = @`, `"x" "¿x§cos" → "y" "¿y§sin§~" → ®15/10 function newton 3`, "1.5707963267949"]
+    [`newton(x → cos x, y → -sin y, 1.5) = @`, `"x" "¿x§cos" → "y" "¿y§sin§~" → ®15/10 function newton 3`, "1.5707963267949"],
+    [`4 ∑_(n=1)³ 2n + 3 = @`, `®4/1 "n" ®1/1 ®3/1 "®2/1§¿n§⌧" ∑ ⌧ ®3/1 +`, "51"],
+    [`∑_(n=0)⁴ 2 n = @`, `"n" ®0/1 ®4/1 "®2/1§¿n§⌧" ∑`, "20"]
   ]
 
   const testRegEx = /^(@{1,2})test /

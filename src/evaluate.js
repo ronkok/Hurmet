@@ -1375,6 +1375,23 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
+        case "∑": {
+          const rpnLocal = stack.pop().value.replace(/§/g, "\xa0")
+          const endOfRange = stack.pop().value
+          let index = stack.pop().value
+          const parameter = stack.pop().value
+          let sum = Rnl.zero
+          while (Rnl.lessThanOrEqualTo(index, endOfRange)) {
+            vars[parameter] = { value: index, unit: allZeros, dtype: dt.RATIONAL }
+            const localResult = evalRpn(rpnLocal, vars, decimalFormat, false)
+            sum = Rnl.add(sum, localResult.value)
+            index = Rnl.add(index, Rnl.one)
+          }
+          delete vars[parameter]
+          stack.push({ value: sum, unit: allZeros, dtype: dt.RATIONAL })
+          break
+        }
+
         case "throw":
           return { value: stack.pop().value, unit: null, dtype: dt.ERROR }
 
