@@ -800,7 +800,7 @@ const groupByFourRegEx = /\B(?=(\d{4})+$)/g;  // use sometimes in China
 // Grouping as common in south Asia: 10,10,000
 const groupByLakhCroreRegEx = /(\d)(?=(\d\d)+\d$)/g;
 
-const formatRegEx = /^([beEfhkmprsStx%])?(-?[\d]+)?([i∠°])?$/;
+const formatRegEx = /^([beEfhkmprsStx%])?(-?[\d]+)?([∠°]{0,2})?$/;
 
 const superscript = str => {
   // Convert a numeral string to Unicode superscript characters.
@@ -954,7 +954,7 @@ const parseFormatSpec = str => {
   //    T = type, [bEefhkmNnprSstx%], default: "h"
   //    n = number of digits, [0-9]+, default: 15
   //
-  //    Possible future additions: complex number format [√∠°]
+  //    Possible future additions: complex number format [∠°]
 
   const match = formatRegEx.exec(str);
   if (!match) {
@@ -989,11 +989,13 @@ const parseFormatSpec = str => {
   return [str, undefined, dt.STRING, "\\text{" + ftype + String(N) + ctype + "}" ]
 };
 
+const angleRegEx = /[∠°]+$/;
+
 const format = (num, specStr = "h3", decimalFormat = "1,000,000.") => {
   if (Rnl.isZero(num)) { return "0" }
 
   const spec = { ftype: specStr.charAt(0) };
-  if (/[i∠°]$/.test(specStr)) { specStr = specStr.slice(0, -1); }
+  specStr = specStr.replace(angleRegEx, "");
   if (specStr.length > 1) { spec.numDigits = Number(specStr.slice(1)); }
 
   if (spec.ftype === "%" || spec.ftype === "p") { num[0] = num[0] * BigInt(100); }
@@ -2000,7 +2002,7 @@ const unitFromUnitName = (inputStr) => {
  * This module is a work in progress.
  */
 
-const im = [Rnl.zero, Rnl.one];
+const j = [Rnl.zero, Rnl.one];
 
 const isComplex = a => {
   return Array.isArray(a) && a.length === 2
@@ -2194,13 +2196,13 @@ const atanh = z => {
 
 const asin = z => {
   // arcsinh (i * z) / i
-  return divide(asinh(multiply(im, z)), im)
+  return divide(asinh(multiply(j, z)), j)
 };
 
 const atan = z => {
   // (Log(1 + iz) - Log(1 - iz)) / (2 * i)  cf Kahan
-  const term1 = log(increment(multiply(im, z)));
-  const term2 = log(subtract([Rnl.one, Rnl.zero],(multiply(im, z))));
+  const term1 = log(increment(multiply(j, z)));
+  const term2 = log(subtract([Rnl.one, Rnl.zero],(multiply(j, z))));
   return divide(subtract(term1, term2), [Rnl.zero, Rnl.two])  
 };
 
@@ -2243,35 +2245,35 @@ const lanczos = zPlusOne => {
 };
 
 const display$3 = (z, formatSpec, decimalFormat) => {
-  const complexSpec = /[i∠°]/.test(formatSpec) ? formatSpec.slice(-1) : "i";
+  const complexSpec = /[∠°]/.test(formatSpec) ? formatSpec.slice(-1) : "j";
   let resultDisplay = "";
   let altResultDisplay = "";
-  if (complexSpec === "i") {
+  if (complexSpec === "j") {
     const real = format(z[0], formatSpec, decimalFormat);
     let imPart = format(z[1], formatSpec, decimalFormat);
     if (imPart.charAt(0) === "-") {
-      resultDisplay = real + " - " + -imPart + "\\,\\mathord{\\mathrm{im}}";
-      altResultDisplay = real + " - " + -imPart + " im";
+      resultDisplay = real + " - j\\," + -imPart;
+      altResultDisplay = real + " - j " + -imPart;
     } else {
-      resultDisplay = real + " + " + imPart + " \\,\\mathord{\\mathrm{im}}";
-      altResultDisplay = real + " + " + imPart + " im";
+      resultDisplay = real + " + j\\, " + imPart;
+      altResultDisplay = real + " + j " + imPart;
     }
   } else {
     const mag = Rnl.hypot(z[0], z[1]);
-    let angle = Cpx.angle(result.value);
-    if (complexSpec === "°") {
+    let angle = Cpx.angle(z);
+    const inDegrees = complexSpec.indexOf("°") > -1;
+    if (inDegrees) {
       angle = Rnl.divide(Rnl.multiply(angle, Rnl.fromNumber(180)), Rnl.pi);
     }
     resultDisplay = format(mag, formatSpec, decimalFormat) + "∠" +
-                    format(angle, formatSpec, decimalFormat) +
-                    (complexSpec === "°" ? "°" : "");
+                    format(angle, formatSpec, decimalFormat) + (inDegrees ? "°" : "");
     altResultDisplay = resultDisplay;
   }
   return [resultDisplay, altResultDisplay]
 };
 
 const Cpx = Object.freeze({
-  im,
+  j,
   real,
   imag,
   abs,
@@ -3741,7 +3743,6 @@ const words = Object.freeze({
   //       input,    tex output,               type, closeDelim
   "true": ["true", "\\mathord{\\text{true}}", tt.BOOLEAN, ""],
   "false": ["false", "\\mathord{\\text{false}}", tt.BOOLEAN, ""],
-  im: ["im", "im", tt.LONGVAR, ""],
   cos: ["cos", "\\cos", tt.FUNCTION, ""],
   cosd: ["cosd", "\\operatorname{\\cos_d}", tt.FUNCTION, ""],
   if: ["if", "\\mathrel{\\mathrm{if}}", tt.LOGIC, ""],
@@ -6608,24 +6609,6 @@ const formatResult = (stmt, result, formatSpec, decimalFormat, assert, isUnitAwa
     } else if (result.dtype === dt.COMPLEX) {
       const z = result.value;
       [resultDisplay, altResultDisplay] = Cpx.display(z, formatSpec, decimalFormat);
-/*        const complexSpec = /[j∠°]/.test(formatSpec) ? formatSpec.slice(-1) : "j"
-      if (complexSpec === "j") {
-        const real = format(z[0], formatSpec, decimalFormat)
-        let im = format(z[1], formatSpec, decimalFormat)
-        if (im.charAt(0) === "-") { im = "(" + im + ")" }
-        resultDisplay = real + " + j" + im
-        altResultDisplay = real + " + j" + im
-      } else {
-        const mag = Rnl.hypot(z[0], z[1])
-        let angle = Cpx.argument(result.value)
-        if (complexSpec === "°") {
-          angle = Rnl.divide(Rnl.multiply(angle, Rnl.fromNumber(180)), Rnl.pi)
-        }
-        resultDisplay = format(mag, formatSpec, decimalFormat) + "∠" +
-                        format(angle, formatSpec, decimalFormat) +
-                        (complexSpec === "°" ? "°" : "")
-        altResultDisplay = resultDisplay
-      } */
 
     } else if (result.value.plain) {
       resultDisplay = format(result.value.plain, formatSpec, decimalFormat);
@@ -6748,6 +6731,10 @@ const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat) => {
     } else if (varName === "e" && /^\^/.test(str.slice(pos + 3).trim())) {
       // e^x
       str = str.substring(0, pos) + "e" + str.substring(pos + matchLength);
+      continue
+    } else if (varName === "j") {
+      // √(-1)
+      str = str.substring(0, pos) + "j" + str.substring(pos + matchLength);
       continue
     } else if (!vars[varName]) {
       return errorOprnd("V_NAME", varName)
@@ -13884,6 +13871,11 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             stack.length > 0 && isMatrix(stack[stack.length - 1])) {
         i += 1;
         oprnd = Matrix.transpose(stack.pop());
+      } else if (varName === "j" && !vars.j) {
+        oprnd.value = [Rnl.zero, Rnl.one];
+        oprnd.unit = Object.create(null);
+        oprnd.unit.expos = allZeros;
+        oprnd.dtype = dt.COMPLEX;
       } else {
         const cellAttrs = vars[varName];
         if (!cellAttrs) { return errorOprnd("V_NAME", varName) }
@@ -13937,17 +13929,6 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           e.unit = Object.create(null);
           e.unit.expos = allZeros;
           stack.push(Object.freeze(e));
-          break
-        }
-
-        case "im": {
-          // im = √(-1)
-          const j = Object.create(null);
-          j.value = [Rnl.zero, Rnl.one];
-          j.unit = Object.create(null);
-          j.unit.expos = allZeros;
-          j.dtype = dt.COMPLEX;
-          stack.push(Object.freeze(j));
           break
         }
 
@@ -15474,7 +15455,7 @@ const conditionResult = (stmt, oprnd, unitAware) => {
   result.dtype = oprnd.dtype;
 
   if (result.dtype === dt.COMPLEX && Rnl.isZero(Cpx.imag(result.value))) {
-    result.value = Cpx.re(result.value);
+    result.value = Cpx.real(result.value);
     result.dtype = 1;
   }
 
@@ -15635,8 +15616,8 @@ const matrixRegEx = /^[([] *(?:(?:-?[0-9.]+|"[^"]+"|true|false) *[,;\t]? *)+[)\]
 
 const numStr = "(-?(?:0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?)))";
 const nonNegNumStr = "(0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?))";
-const complexRegEx = new RegExp("^" + numStr + "(?: *([+-]) *" + nonNegNumStr + " *im|∠" + numStr + "(°)?)");
-// const complexRegEx = /^(number)(?: *([+-]) *(non-negative number) *im|∠(number)(°)?)/
+const complexRegEx = new RegExp("^" + numStr + "(?: *([+-]) *(?: j *" + nonNegNumStr + "|" + nonNegNumStr + " *∠" + numStr + "(°)?))");
+// const complexRegEx = /^(number)(?: *([+-]) *(non-negative number) *j(number)(°)?)/
 /* eslint-enable max-len */
 // Capturing groups:
 //    [1] First number, either a in a ± b im, or r in r∠θ

@@ -55,6 +55,10 @@ export const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat
       // e^x
       str = str.substring(0, pos) + "e" + str.substring(pos + matchLength);
       continue
+    } else if (varName === "j") {
+      // √(-1)
+      str = str.substring(0, pos) + "j" + str.substring(pos + matchLength)
+      continue
     } else if (!vars[varName]) {
       return errorOprnd("V_NAME", varName)
     } else {

@@ -402,7 +402,6 @@ Accents and Primes
   To write a prime, type two apostrophes (aka single quotation marks) and hit the
   space bar. So, `f''` will result in ¢`f′`
 
-</div>
 
 <div id="q-container">
 
@@ -700,7 +699,7 @@ Variable names and function names must be written in the form of a valid _identi
 *   If an identifier has only one letter, then an accent character may be
     written after it. Hurmet will render the accent above the letter, as in ¢`θ̂`.
 *   Primes may be appended to the very end, as in: ¢`f_c′`.
-*   The following keywords may not be used as variable names: `π`, `im`, `ℏ`, `pi`,
+*   The following keywords may not be used as variable names: `π`, `ℏ`, `pi`,
     `true`, `false`, `root`, `if`, `else`, `elseif`, `otherwise`, `end`, `and`, `or`, `in`, `to`.
 
    ![letter letter-or-digit-or-accent prime](images/identifier-railroad.svg)
@@ -795,8 +794,8 @@ Complex Number
 
 :   One can write a complex number in two forms:
 
-    * ¢`a ± b im `    The letters `im` are identical to ¢`√(-1)` by Hurmet
-    definition.
+    * ¢`a ± j b `    The letter `j` is identical to ¢`√(-1)` by Hurmet
+    definition. Write a space after the j, as in `2 - j 3`.
 
     * ¢`r∠θ`    The characters `/_` will auto-correct into ∠ and ¢`θ` is in radians.
 
@@ -807,11 +806,11 @@ Complex Number
     Examples:
 
     ::: indented
-    ¢`z_1 = 2 + 3 im`
+    ¢`z_1 = 2 + j 3`
 
     ¢` z_2 = 4∠30° `
 
-    ¢`z = z_1 + z_2  = \blue((2 + 3 im) + ( 4∠30°)) = 5.46 + 5 bm`
+    ¢`z = z_1 + z_2  = \blue((2 + j 3) + ( 4∠30°)) = 5.46 + j 5`
     :::
 
 Unit
@@ -1069,11 +1068,15 @@ Data Frame
         `A, S_x = wideFlanges["W8X31"]["A", "Sx"] = !!`
     Multiple returns must use the `!!` display selector, for now.
 
+<div id="single-row">
+
     If the data frame has only one row of data, a single accessor will call a datum.\
     Say the data frame is    ¢```aBar =``#size	diameter	area
       	in 	in²
     #4	0.5	0.2`` ```\
     Then one can call ¢` A = aBar.area = 0.2 'in2' `
+
+</div>
 
     Numeric cata frames can be multiplied by a unit-less scalar.
     No other math operations are supported for data frames.
@@ -1130,7 +1133,7 @@ _e_
 
 _im_
 
-: ¢`im` = ¢`√(-1)`.
+: ¢`j` = ¢`√(-1)`. This value can be overwritten by a Hurmet assignment.
 
 ℏ
 
@@ -1844,7 +1847,7 @@ Let _N_ be the number of digits specified. Then:
 |        |                           |           +-------------+----------------+
 |        |                           |           | X           | 0x3E           |
 +--------+---------------------------+-----------+-------------+----------------+
-| ∠ or ° | Polar notation of complex | 2 + 3 im  | h3          | 2 + 3 im       |
+| ∠ or ° | Polar notation of complex | 2 + j 3   | h3          | 2 + j 3        |
 |        | numbers                   |           +-------------+----------------+
 |        |                           |           | h3∠         | 3\.61∠0.983    |
 |        |                           |           +-------------+----------------+

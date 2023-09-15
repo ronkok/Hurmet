@@ -11,7 +11,7 @@ import {errorOprnd} from "./error"
  * This module is a work in progress.
  */
 
-const im = [Rnl.zero, Rnl.one]
+const j = [Rnl.zero, Rnl.one]
 
 const isComplex = a => {
   return Array.isArray(a) && a.length === 2
@@ -207,13 +207,13 @@ const atanh = z => {
 
 const asin = z => {
   // arcsinh (i * z) / i
-  return divide(asinh(multiply(im, z)), im)
+  return divide(asinh(multiply(j, z)), j)
 }
 
 const atan = z => {
   // (Log(1 + iz) - Log(1 - iz)) / (2 * i)  cf Kahan
-  const term1 = log(increment(multiply(im, z)))
-  const term2 = log(subtract([Rnl.one, Rnl.zero],(multiply(im, z))))
+  const term1 = log(increment(multiply(j, z)))
+  const term2 = log(subtract([Rnl.one, Rnl.zero],(multiply(j, z))))
   return divide(subtract(term1, term2), [Rnl.zero, Rnl.two])  
 }
 
@@ -256,35 +256,35 @@ const lanczos = zPlusOne => {
 }
 
 const display = (z, formatSpec, decimalFormat) => {
-  const complexSpec = /[i∠°]/.test(formatSpec) ? formatSpec.slice(-1) : "i"
+  const complexSpec = /[∠°]/.test(formatSpec) ? formatSpec.slice(-1) : "j"
   let resultDisplay = ""
   let altResultDisplay = ""
-  if (complexSpec === "i") {
+  if (complexSpec === "j") {
     const real = format(z[0], formatSpec, decimalFormat)
     let imPart = format(z[1], formatSpec, decimalFormat)
     if (imPart.charAt(0) === "-") {
-      resultDisplay = real + " - " + -imPart + "\\,\\mathord{\\mathrm{im}}"
-      altResultDisplay = real + " - " + -imPart + " im"
+      resultDisplay = real + " - j\\," + -imPart
+      altResultDisplay = real + " - j " + -imPart
     } else {
-      resultDisplay = real + " + " + imPart + " \\,\\mathord{\\mathrm{im}}"
-      altResultDisplay = real + " + " + imPart + " im"
+      resultDisplay = real + " + j\\, " + imPart
+      altResultDisplay = real + " + j " + imPart
     }
   } else {
     const mag = Rnl.hypot(z[0], z[1])
-    let angle = Cpx.angle(result.value)
-    if (complexSpec === "°") {
+    let angle = Cpx.angle(z)
+    const inDegrees = complexSpec.indexOf("°") > -1
+    if (inDegrees) {
       angle = Rnl.divide(Rnl.multiply(angle, Rnl.fromNumber(180)), Rnl.pi)
     }
     resultDisplay = format(mag, formatSpec, decimalFormat) + "∠" +
-                    format(angle, formatSpec, decimalFormat) +
-                    (complexSpec === "°" ? "°" : "")
+                    format(angle, formatSpec, decimalFormat) + (inDegrees ? "°" : "")
     altResultDisplay = resultDisplay
   }
   return [resultDisplay, altResultDisplay]
 }
 
 export const Cpx = Object.freeze({
-  im,
+  j,
   real,
   imag,
   abs,

@@ -185,7 +185,6 @@ print &quot;Hi!&quot;</code></pre></td></tr>
 <p>More detail <a href='#identifiers'>here</a>.</p>
 <p>To write a prime, type two apostrophes (aka single quotation marks) and hit the space bar. So, <code>f&#x27;&#x27;</code> will result in <span class='hurmet-calc' data-entry='f′'><math><msup><mi>f</mi><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msup></math></span></p>
 </dd>
-</div>
 <div id="q-container">
 <dt id='units'>Units</dt>
 <dd><p>After a number, write a Hurmet <em>unit</em> between two single quotation marks, like this: <code>5 &#x27;meters&#x27;</code>. Or, prepend a currency symbol to a number, e.g. <code>$30</code>.</p>
@@ -352,7 +351,7 @@ print &quot;Hi!&quot;</code></pre></td></tr>
 </li>
 <li><p>Primes may be appended to the very end, as in: <span class='hurmet-calc' data-entry='f_c′'><math><mrow><mi>f</mi><msubsup><mrow></mrow><mtext>c</mtext><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msubsup></mrow></math></span>.</p>
 </li>
-<li><p>The following keywords may not be used as variable names: <code>π</code>, <code>im</code>, <code>ℏ</code>, <code>pi</code>, <code>true</code>, <code>false</code>, <code>root</code>, <code>if</code>, <code>else</code>, <code>elseif</code>, <code>otherwise</code>, <code>end</code>, <code>and</code>, <code>or</code>, <code>in</code>, <code>to</code>.</p>
+<li><p>The following keywords may not be used as variable names: <code>π</code>, <code>ℏ</code>, <code>pi</code>, <code>true</code>, <code>false</code>, <code>root</code>, <code>if</code>, <code>else</code>, <code>elseif</code>, <code>otherwise</code>, <code>end</code>, <code>and</code>, <code>or</code>, <code>in</code>, <code>to</code>.</p>
 <p><img src="images/identifier-railroad.svg" alt="letter letter-or-digit-or-accent prime"></p>
 </li>
 </ul>
@@ -402,16 +401,16 @@ a[5:end]  # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong><
 </div>
 <dt id='complex-number'>Complex Number</dt>
 <dd><p>One can write a complex number in two forms:</p>
-<ul><li><p><span class='hurmet-calc' data-entry='a ± b im'><math><mrow><mi>a</mi><mo>±</mo></mrow><mrow><mi>b</mi><mspace width="0.1667em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">m</mi></mrow></mrow></mrow></math></span>    The letters <code>im</code> are identical to <span class='hurmet-calc' data-entry='√(-1)'><math><msqrt><mrow><mtext>-</mtext><mn>1</mn></mrow></msqrt></math></span> by Hurmet definition.</p>
+<ul><li><p><span class='hurmet-calc' data-entry='a ± j b'><math><mrow><mi>a</mi><mo>±</mo></mrow><mrow><mi>j</mi><mi>b</mi></mrow></math></span>    The letter <code>j</code> is identical to <span class='hurmet-calc' data-entry='√(-1)'><math><msqrt><mrow><mtext>-</mtext><mn>1</mn></mrow></msqrt></math></span> by Hurmet definition. Write a space after the j, as in <code>2 - j 3</code>.</p>
 </li>
 <li><p><span class='hurmet-calc' data-entry='r∠θ'><math><mrow><mi>r</mi><mi>∠</mi><mi>θ</mi></mrow></math></span>    The characters <code>/_</code> will auto-correct into ∠ and <span class='hurmet-calc' data-entry='θ'><math><mi>θ</mi></math></span> is in radians.</p>
 </li>
 </ul>
 <p>Also, the character <strong>°</strong> is now a unit name. So one can also write a polar notation as <span class='hurmet-calc' data-entry='r∠θ°'><math><mrow><mi>r</mi><mi>∠</mi><mi>θ</mi><mi>°</mi></mrow></math></span> and the phase angle will be unit-aware. The characters <code>ooo</code> will auto-correct into °</p>
 <p>Examples:</p>
-<div class="indented"><p><span class='hurmet-calc' data-entry='z_1 = 2 + 3 im'><math><mrow><mi>z</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo>=</mo></mrow><mrow><mn>2</mn><mo>+</mo></mrow><mrow><mn>3</mn><mspace width="0.1667em"></mspace><mspace width="0.1667em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">m</mi></mrow></mrow></mrow></math></span></p>
+<div class="indented"><p><span class='hurmet-calc' data-entry='z_1 = 2 + j 3'><math><mrow><mi>z</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo>=</mo></mrow><mrow><mn>2</mn><mo>+</mo></mrow><mrow><mi>j</mi><mn>3</mn></mrow></math></span></p>
 <p><span class='hurmet-calc' data-entry='z_2 = 4∠30°'><math><mrow><mi>z</mi><msub><mrow></mrow><mtext>2</mtext></msub><mo>=</mo></mrow><mrow><mn>4</mn><mi>∠</mi><mn>30</mn><mi>°</mi></mrow></math></span></p>
-<p><span class='hurmet-calc' data-entry='z = z_1 + z_2  = \blue((2 + 3 im) + ( 4∠30°)) = 5.46 + 5 bm'><math><mrow><mi>z</mi><mo>=</mo></mrow><mrow><mi>z</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo>+</mo></mrow><mrow><mi>z</mi><msub><mrow></mrow><mtext>2</mtext></msub><mo>=</mo></mrow><mrow><mo form="prefix" stretchy="false" style="color:#0000FF;">(</mo><mn style="color:#0000FF;">2</mn><mo style="color:#0000FF;">+</mo><mn style="color:#0000FF;">3</mn><mspace width="0.1667em" style="color:#0000FF;"></mspace><mspace width="0.1667em" style="color:#0000FF;"></mspace><mrow style="color:#0000FF;"><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">m</mi></mrow></mrow><mo form="postfix" stretchy="false" style="color:#0000FF;">)</mo><mo style="color:#0000FF;">+</mo></mrow><mrow><mo form="prefix" stretchy="false" style="color:#0000FF;">(</mo><mn style="color:#0000FF;">4</mn><mi style="color:#0000FF;">∠</mi><mn style="color:#0000FF;">30</mn><mi style="color:#0000FF;">°</mi><mo form="postfix" stretchy="false" style="color:#0000FF;">)</mo><mo>=</mo></mrow><mrow><mn>5.46</mn><mo>+</mo></mrow><mrow><mn>5</mn><mspace width="0.1667em"></mspace><mspace width="0.1667em"></mspace><mrow><mrow><mi mathvariant="normal">b</mi></mrow><mrow><mi mathvariant="normal">m</mi></mrow></mrow></mrow></math></span></p>
+<p><span class='hurmet-calc' data-entry='z = z_1 + z_2  = \blue((2 + j 3) + ( 4∠30°)) = 5.46 + j 5'><math><mrow><mi>z</mi><mo>=</mo></mrow><mrow><mi>z</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo>+</mo></mrow><mrow><mi>z</mi><msub><mrow></mrow><mtext>2</mtext></msub><mo>=</mo></mrow><mrow><mo form="prefix" stretchy="false" style="color:#0000FF;">(</mo><mn style="color:#0000FF;">2</mn><mo style="color:#0000FF;">+</mo><mi style="color:#0000FF;">j</mi><mn style="color:#0000FF;">3</mn><mo form="postfix" stretchy="false" style="color:#0000FF;">)</mo><mo style="color:#0000FF;">+</mo></mrow><mrow><mo form="prefix" stretchy="false" style="color:#0000FF;">(</mo><mn style="color:#0000FF;">4</mn><mi style="color:#0000FF;">∠</mi><mn style="color:#0000FF;">30</mn><mi style="color:#0000FF;">°</mi><mo form="postfix" stretchy="false" style="color:#0000FF;">)</mo><mo>=</mo></mrow><mrow><mn>5.46</mn><mo>+</mo></mrow><mrow><mi>j</mi><mn>5</mn></mrow></math></span></p>
 </div>
 </dd>
 <dt id='unit'>Unit</dt>
@@ -547,13 +546,18 @@ W4X13	13	3.83	4.16	4.06	0.28	11.3	5.46``'><math><mtable columnalign="left left l
 <p>Hurmet will return a <br> <span class='hurmet-calc' data-entry='{"simple type" if "you call a single cell, as in df[1, 2]"; "column vector" if "you call a column, as in df[,2]"; "data frame" otherwise}'><math><mrow><mo fence="true" form="prefix">{</mo><mtable><mtr><mtd style="padding:0.5ex 0em 0.5ex 0em;text-align:-webkit-left;"><mtext>simple type</mtext></mtd><mtd style="padding:0.5ex 0em 0.5ex 1em;text-align:-webkit-left;"><mrow><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">f</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mtext>you call a single cell, as in df[1, 2]</mtext></mrow></mtd></mtr><mtr><mtd style="padding:0.5ex 0em 0.5ex 0em;text-align:-webkit-left;"><mtext>column vector</mtext></mtd><mtd style="padding:0.5ex 0em 0.5ex 1em;text-align:-webkit-left;"><mrow><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">f</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow><mtext>you call a column, as in df[,2]</mtext></mrow></mtd></mtr><mtr><mtd style="padding:0.5ex 0em 0.5ex 0em;text-align:-webkit-left;"><mtext>data frame</mtext></mtd><mtd style="padding:0.5ex 0em 0.5ex 1em;text-align:-webkit-left;"><mrow><mspace width="0.2778em"></mspace><mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">t</mi></mrow><mrow><mi mathvariant="normal">h</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">w</mi></mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">s</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow></mrow><mspace width="0.2778em"></mspace></mrow></mtd></mtr></mtable><mo fence="true" form="postfix"></mo></mrow></math></span></p>
 <p>Dot notation, as in <code>wideFlanges.W10X49</code>, can be used only if the property name is a valid <a href='#identifiers'>identifier</a>.</p>
 <p>Here are calls that can return multiple values:<br>    <code>A, S_x = wideFlanges.W8X31[&quot;A&quot;, &quot;Sx&quot;] = !!</code>, or<br>    <code>A, S_x = wideFlanges[&quot;W8X31&quot;][&quot;A&quot;, &quot;Sx&quot;] = !!</code> Multiple returns must use the <code>!!</code> display selector, for now.</p>
-<p>If the data frame has only one row of data, a single accessor will call a datum.<br>Say the data frame is    <span class='hurmet-calc' data-entry='aBar =``#size	diameter	area
-  	in 	in²
-#4	0.5	0.2``'><math><mrow><mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">B</mi></mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow></mrow><mo>=</mo></mrow><mrow><mtable columnalign="left center center"><mtr><mtd style="padding:0.5ex 0.4em 0.5ex 0em;text-align:-webkit-left;border-right:0.06em solid;"><mtext>size</mtext></mtd><mtd style="padding:0.5ex 0.4em 0.5ex 0.4em;"><mtext>diameter</mtext></mtd><mtd style="padding:0.5ex 0em 0.5ex 0.4em;"><mtext>area</mtext></mtd></mtr><mtr><mtd style="border-bottom:0.06em solid;padding:0.5ex 0.4em 0.5ex 0em;text-align:-webkit-left;border-right:0.06em solid;"><mrow></mrow></mtd><mtd style="border-bottom:0.06em solid;padding:0.5ex 0.4em 0.5ex 0.4em;"><mtext>in</mtext></mtd><mtd style="border-bottom:0.06em solid;padding:0.5ex 0em 0.5ex 0.4em;"><msup><mtext>in</mtext><mn>2</mn></msup></mtd></mtr><mtr><mtd style="padding:0.5ex 0.4em 0.5ex 0em;text-align:-webkit-left;border-right:0.06em solid;"><mtext>#4</mtext></mtd><mtd style="padding:0.5ex 0.4em 0.5ex 0.4em;"><mn>0.5</mn></mtd><mtd style="padding:0.5ex 0em 0.5ex 0.4em;"><mn>0.2</mn></mtd></mtr></mtable></mrow></math></span><br>Then one can call <span class='hurmet-calc' data-entry="A = aBar.area = 0.2 'in2'"><math><mrow><mi>A</mi><mo>=</mo></mrow><mrow><mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">B</mi></mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow></mrow><mi>.</mi><mtext>area</mtext><mo>=</mo></mrow><mrow><mn>0.2</mn><mspace width="0.2778em"></mspace><msup><mtext>in</mtext><mn>2</mn></msup></mrow></math></span></p>
-<p>Numeric cata frames can be multiplied by a unit-less scalar. No other math operations are supported for data frames.</p>
-<p>For structural engineers, I’ve put some useful data frames on GitHub. There are links <a href='#other-resources'>below</a>.</p>
 </dd>
-<dt id='map'>Map</dt>
+<div id="single-row">
+<pre><code>If the data frame has only one row of data, a single accessor will call a datum.\
+Say the data frame is    ¢```aBar =``#size	diameter	area
+  	in 	in²
+#4	0.5	0.2`` ```\
+Then one can call ¢` A = aBar.area = 0.2 &#x27;in2&#x27; `</code></pre></div>
+<pre><code>Numeric cata frames can be multiplied by a unit-less scalar.
+No other math operations are supported for data frames.
+
+For structural engineers, I’ve put some useful data frames on GitHub. There are
+links [below](#other-resources).</code></pre><dt id='map'>Map</dt>
 <dd><p>A Hurmet <em>map</em> is unit-less data frame in which every value is the same data type, either boolean, string, or number. Maps can be the numeric part of a quantity.</p>
 <p><span class='hurmet-calc' data-entry="w = ``dead	live	snow
 30	70	40`` 'lbf/ft'"><math><mrow><mi>w</mi><mo>=</mo></mrow><mrow><mtable columnalign="center center"><mtr><mtd style="border-bottom:0.06em solid;padding:0.5ex 0.4em 0.5ex 0em;"><mtext>dead</mtext></mtd><mtd style="border-bottom:0.06em solid;padding:0.5ex 0.4em 0.5ex 0.4em;"><mtext>live</mtext></mtd><mtd style="border-bottom:0.06em solid;padding:0.5ex 0em 0.5ex 0.4em;"><mtext>snow</mtext></mtd></mtr><mtr><mtd style="padding:0.5ex 0.4em 0.5ex 0em;"><mn>30</mn></mtd><mtd style="padding:0.5ex 0.4em 0.5ex 0.4em;"><mn>70</mn></mtd><mtd style="padding:0.5ex 0em 0.5ex 0.4em;"><mn>40</mn></mtd></mtr></mtable><mspace width="0.2778em"></mspace><mtext>lbf⁄ft</mtext></mrow></math></span></p>
@@ -578,7 +582,7 @@ Col B	11	25	14`` 'kips'"><math><mrow><mi>P</mi><msub><mrow></mrow><mtext>a</mtex
 <dd><p>Hurmet will treat <span class='hurmet-calc' data-entry='e'><math><mi>e</mi></math></span> just like any other variable most of the time. But if <span class='hurmet-calc' data-entry='e'><math><mi>e</mi></math></span> is the base of an exponent, for example: <span class='hurmet-calc' data-entry='e^x'><math><msup><mi>e</mi><mi>x</mi></msup></math></span>, then Hurmet will take <span class='hurmet-calc' data-entry='e'><math><mi>e</mi></math></span> to mean 2.7182818284590452353602874713527.</p>
 </dd>
 <dt id='<em>im</em>'><em>im</em></dt>
-<dd><p><span class='hurmet-calc' data-entry='im'><math><mrow><mrow><mi mathvariant="normal">i</mi></mrow><mrow><mi mathvariant="normal">m</mi></mrow></mrow></math></span> = <span class='hurmet-calc' data-entry='√(-1)'><math><msqrt><mrow><mtext>-</mtext><mn>1</mn></mrow></msqrt></math></span>.</p>
+<dd><p><span class='hurmet-calc' data-entry='j'><math><mi>j</mi></math></span> = <span class='hurmet-calc' data-entry='√(-1)'><math><msqrt><mrow><mtext>-</mtext><mn>1</mn></mrow></msqrt></math></span>. This value can be overwritten by a Hurmet assignment.</p>
 </dd>
 <dt id='ℏ'>ℏ</dt>
 <dd><p>For ℏ, Hurmet uses a value of 1.054571817 × 10⁻³⁴ J·s.</p>
@@ -952,7 +956,7 @@ Col B	11	25	14`` 'kips'"><math><mrow><mi>P</mi><msub><mrow></mrow><mtext>a</mtex
 <tr><td>t</td><td>Truncates to a whole number.</td><td>31.6</td><td>t</td><td>31</td></tr>
 <tr><td rowspan="2">x or X</td><td rowspan="2">Hexadecimal</td><td rowspan="2">62</td><td>x</td><td>0x3e</td></tr>
 <tr><td>X</td><td>0x3E</td></tr>
-<tr><td rowspan="3">∠ or °</td><td rowspan="3">Polar notation of complex numbers</td><td rowspan="3">2 + 3 im</td><td>h3</td><td>2 + 3 im</td></tr>
+<tr><td rowspan="3">∠ or °</td><td rowspan="3">Polar notation of complex numbers</td><td rowspan="3">2 + j 3</td><td>h3</td><td>2 + j 3</td></tr>
 <tr><td>h3∠</td><td>3.61∠0.983</td></tr>
 <tr><td>h3°</td><td>3.61∠56.3°</td></tr>
 </table>

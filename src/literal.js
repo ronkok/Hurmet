@@ -15,8 +15,8 @@ const matrixRegEx = /^[([] *(?:(?:-?[0-9.]+|"[^"]+"|true|false) *[,;\t]? *)+[)\]
 
 const numStr = "(-?(?:0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?)))"
 const nonNegNumStr = "(0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?))"
-const complexRegEx = new RegExp("^" + numStr + "(?: *([+-]) *" + nonNegNumStr + " *im|∠" + numStr + "(°)?)")
-// const complexRegEx = /^(number)(?: *([+-]) *(non-negative number) *im|∠(number)(°)?)/
+const complexRegEx = new RegExp("^" + numStr + "(?: *([+-]) *(?: j *" + nonNegNumStr + "|" + nonNegNumStr + " *∠" + numStr + "(°)?))")
+// const complexRegEx = /^(number)(?: *([+-]) *(non-negative number) *j(number)(°)?)/
 /* eslint-enable max-len */
 // Capturing groups:
 //    [1] First number, either a in a ± b im, or r in r∠θ

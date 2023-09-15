@@ -160,6 +160,11 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             stack.length > 0 && isMatrix(stack[stack.length - 1])) {
         i += 1
         oprnd = Matrix.transpose(stack.pop())
+      } else if (varName === "j" && !vars.j) {
+        oprnd.value = [Rnl.zero, Rnl.one];
+        oprnd.unit = Object.create(null)
+        oprnd.unit.expos = allZeros
+        oprnd.dtype = dt.COMPLEX
       } else {
         const cellAttrs = vars[varName]
         if (!cellAttrs) { return errorOprnd("V_NAME", varName) }
@@ -213,17 +218,6 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           e.unit = Object.create(null)
           e.unit.expos = allZeros
           stack.push(Object.freeze(e))
-          break
-        }
-
-        case "im": {
-          // im = √(-1)
-          const j = Object.create(null)
-          j.value = [Rnl.zero, Rnl.one]
-          j.unit = Object.create(null)
-          j.unit.expos = allZeros
-          j.dtype = dt.COMPLEX
-          stack.push(Object.freeze(j))
           break
         }
 
@@ -1756,7 +1750,7 @@ const conditionResult = (stmt, oprnd, unitAware) => {
   result.dtype = oprnd.dtype
 
   if (result.dtype === dt.COMPLEX && Rnl.isZero(Cpx.imag(result.value))) {
-    result.value = Cpx.re(result.value)
+    result.value = Cpx.real(result.value)
     result.dtype = 1
   }
 

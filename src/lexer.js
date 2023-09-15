@@ -111,7 +111,6 @@ const words = Object.freeze({
   //       input,    tex output,               type, closeDelim
   "true": ["true", "\\mathord{\\text{true}}", tt.BOOLEAN, ""],
   "false": ["false", "\\mathord{\\text{false}}", tt.BOOLEAN, ""],
-  im: ["im", "im", tt.LONGVAR, ""],
   cos: ["cos", "\\cos", tt.FUNCTION, ""],
   cosd: ["cosd", "\\operatorname{\\cos_d}", tt.FUNCTION, ""],
   if: ["if", "\\mathrel{\\mathrm{if}}", tt.LOGIC, ""],

@@ -6346,27 +6346,27 @@ var index_es$2 = /*#__PURE__*/Object.freeze({
   Transaction: Transaction
 });
 
-var result$1 = {};
+var result = {};
 
 if (typeof navigator != "undefined" && typeof document != "undefined") {
   var ie_edge = /Edge\/(\d+)/.exec(navigator.userAgent);
   var ie_upto10 = /MSIE \d/.test(navigator.userAgent);
   var ie_11up = /Trident\/(?:[7-9]|\d{2,})\..*rv:(\d+)/.exec(navigator.userAgent);
 
-  result$1.mac = /Mac/.test(navigator.platform);
-  var ie$1 = result$1.ie = !!(ie_upto10 || ie_11up || ie_edge);
-  result$1.ie_version = ie_upto10 ? document.documentMode || 6 : ie_11up ? +ie_11up[1] : ie_edge ? +ie_edge[1] : null;
-  result$1.gecko = !ie$1 && /gecko\/(\d+)/i.test(navigator.userAgent);
-  result$1.gecko_version = result$1.gecko && +(/Firefox\/(\d+)/.exec(navigator.userAgent) || [0, 0])[1];
+  result.mac = /Mac/.test(navigator.platform);
+  var ie$1 = result.ie = !!(ie_upto10 || ie_11up || ie_edge);
+  result.ie_version = ie_upto10 ? document.documentMode || 6 : ie_11up ? +ie_11up[1] : ie_edge ? +ie_edge[1] : null;
+  result.gecko = !ie$1 && /gecko\/(\d+)/i.test(navigator.userAgent);
+  result.gecko_version = result.gecko && +(/Firefox\/(\d+)/.exec(navigator.userAgent) || [0, 0])[1];
   var chrome$1 = !ie$1 && /Chrome\/(\d+)/.exec(navigator.userAgent);
-  result$1.chrome = !!chrome$1;
-  result$1.chrome_version = chrome$1 && +chrome$1[1];
+  result.chrome = !!chrome$1;
+  result.chrome_version = chrome$1 && +chrome$1[1];
   // Is true for both iOS and iPadOS for convenience
-  result$1.safari = !ie$1 && /Apple Computer/.test(navigator.vendor);
-  result$1.ios = result$1.safari && (/Mobile\/\w+/.test(navigator.userAgent) || navigator.maxTouchPoints > 2);
-  result$1.android = /Android \d/.test(navigator.userAgent);
-  result$1.webkit = "webkitFontSmoothing" in document.documentElement.style;
-  result$1.webkit_version = result$1.webkit && +(/\bAppleWebKit\/(\d+)/.exec(navigator.userAgent) || [0, 0])[1];
+  result.safari = !ie$1 && /Apple Computer/.test(navigator.vendor);
+  result.ios = result.safari && (/Mobile\/\w+/.test(navigator.userAgent) || navigator.maxTouchPoints > 2);
+  result.android = /Android \d/.test(navigator.userAgent);
+  result.webkit = "webkitFontSmoothing" in document.documentElement.style;
+  result.webkit_version = result.webkit && +(/\bAppleWebKit\/(\d+)/.exec(navigator.userAgent) || [0, 0])[1];
 }
 
 var domIndex = function(node) {
@@ -6447,7 +6447,7 @@ function hasBlockDesc(dom) {
 // (isCollapsed inappropriately returns true in shadow dom)
 var selectionCollapsed = function(domSel) {
   var collapsed = domSel.isCollapsed;
-  if (collapsed && result$1.chrome && domSel.rangeCount && !domSel.getRangeAt(0).collapsed)
+  if (collapsed && result.chrome && domSel.rangeCount && !domSel.getRangeAt(0).collapsed)
     { collapsed = false; }
   return collapsed
 };
@@ -6718,10 +6718,10 @@ function posAtCoords(view, coords) {
     if (!elt) { return null }
   }
   // Safari's caretRangeFromPoint returns nonsense when on a draggable element
-  if (result$1.safari && elt.draggable) { node = offset = null; }
+  if (result.safari && elt.draggable) { node = offset = null; }
   elt = targetKludge(elt, coords);
   if (node) {
-    if (result$1.gecko && node.nodeType == 1) {
+    if (result.gecko && node.nodeType == 1) {
       // Firefox will sometimes return offsets into <input> nodes, which
       // have no actual children, from caretPositionFromPoint (#953)
       offset = Math.min(offset, node.childNodes.length);
@@ -6766,7 +6766,7 @@ function coordsAtPos(view, pos, side) {
   var node = ref.node;
   var offset = ref.offset;
 
-  var supportEmptyRange = result$1.webkit || result$1.gecko;
+  var supportEmptyRange = result.webkit || result.gecko;
   if (node.nodeType == 3) {
     // These browsers support querying empty text ranges. Prefer that in
     // bidi context or when at the end of a node.
@@ -6775,7 +6775,7 @@ function coordsAtPos(view, pos, side) {
       // Firefox returns bad results (the position before the space)
       // when querying a position directly after line-broken
       // whitespace. Detect this situation and and kludge around it
-      if (result$1.gecko && offset && /\s/.test(node.nodeValue[offset - 1]) && offset < node.nodeValue.length) {
+      if (result.gecko && offset && /\s/.test(node.nodeValue[offset - 1]) && offset < node.nodeValue.length) {
         var rectBefore = singleRect(textRange$1(node, offset - 1, offset - 1), -1);
         if (rectBefore.top == rect.top) {
           var rectAfter = singleRect(textRange$1(node, offset, offset + 1), -1);
@@ -7287,7 +7287,7 @@ ViewDesc.prototype.setSelection = function setSelection (anchor, head, root, for
   // BR node for some reason doesn't always work (#1073). On Safari,
   // the cursor sometimes inexplicable visually lags behind its
   // reported position in such situations (#1092).
-  if ((result$1.gecko || result$1.safari) && anchor == head) {
+  if ((result.gecko || result.safari) && anchor == head) {
     if (anchorDOM.node.nodeType == 3) {
       brKludge = anchorDOM.offset && anchorDOM.node.nodeValue[anchorDOM.offset - 1] == "\n";
     } else {
@@ -7296,7 +7296,7 @@ ViewDesc.prototype.setSelection = function setSelection (anchor, head, root, for
     }
   }
 
-  if (!(force || brKludge && result$1.safari) &&
+  if (!(force || brKludge && result.safari) &&
       isEquivalentPosition(anchorDOM.node, anchorDOM.offset, domSel.anchorNode, domSel.anchorOffset) &&
       isEquivalentPosition(headDOM.node, headDOM.offset, domSel.focusNode, domSel.focusOffset))
     { return }
@@ -7643,7 +7643,7 @@ var NodeViewDesc = /*@__PURE__*/(function (ViewDesc) {
       // May have to protect focused DOM from being changed if a composition is active
       if (composition) { this.protectLocalComposition(view, composition); }
       renderDescs(this.contentDOM, this.children, view);
-      if (result$1.ios) { iosHacks(this.dom); }
+      if (result.ios) { iosHacks(this.dom); }
     }
   };
 
@@ -8412,7 +8412,7 @@ function selectionToDOM(view, force) {
 // between non-editable block nodes. We briefly make something
 // editable, set the selection, then set it uneditable again.
 
-var brokenSelectBetweenUneditable = result$1.safari || result$1.chrome && result$1.chrome_version < 63;
+var brokenSelectBetweenUneditable = result.safari || result.chrome && result.chrome_version < 63;
 
 function temporarilyEditableNear(view, pos) {
   var ref = view.docView.domFromPos(pos, 0);
@@ -8420,7 +8420,7 @@ function temporarilyEditableNear(view, pos) {
   var offset = ref.offset;
   var after = offset < node.childNodes.length ? node.childNodes[offset] : null;
   var before = offset ? node.childNodes[offset - 1] : null;
-  if (result$1.safari && after && after.contentEditable == "false") { return setEditable(after) }
+  if (result.safari && after && after.contentEditable == "false") { return setEditable(after) }
   if ((!after || after.contentEditable == "false") && (!before || before.contentEditable == "false")) {
     if (after) { return setEditable(after) }
     else if (before) { return setEditable(before) }
@@ -8429,7 +8429,7 @@ function temporarilyEditableNear(view, pos) {
 
 function setEditable(element) {
   element.contentEditable = "true";
-  if (result$1.safari && element.draggable) { element.draggable = false; element.wasDraggable = true; }
+  if (result.safari && element.draggable) { element.draggable = false; element.wasDraggable = true; }
   return element
 }
 
@@ -8464,7 +8464,7 @@ function selectCursorWrapper(view) {
   // resize handles and a selection that considers the absolutely
   // positioned wrapper, rather than the root editable node, the
   // focused element.
-  if (!img && !view.state.selection.visible && result$1.ie && result$1.ie_version <= 11) {
+  if (!img && !view.state.selection.visible && result.ie && result.ie_version <= 11) {
     node.disabled = true;
     node.disabled = false;
   }
@@ -8545,14 +8545,14 @@ function selectHorizontally(view, dir, mods) {
       var next = moveSelectionBlock(view.state, dir);
       if (next && (next instanceof NodeSelection)) { return apply(view, next) }
       return false
-    } else if (!(result$1.mac && mods.indexOf("m") > -1)) {
+    } else if (!(result.mac && mods.indexOf("m") > -1)) {
       var $head = sel.$head, node = $head.textOffset ? null : dir < 0 ? $head.nodeBefore : $head.nodeAfter, desc;
       if (!node || node.isText) { return false }
       var nodePos = dir < 0 ? $head.pos - node.nodeSize : $head.pos;
       if (!(node.isAtom || (desc = view.docView.descAt(nodePos)) && !desc.contentDOM)) { return false }
       if (NodeSelection.isSelectable(node)) {
         return apply(view, new NodeSelection(dir < 0 ? view.state.doc.resolve($head.pos - node.nodeSize) : $head))
-      } else if (result$1.webkit) {
+      } else if (result.webkit) {
         // Chrome and Safari will introduce extra pointless cursor
         // positions around inline uneditable nodes, so we have to
         // take over and move the cursor past them (#937)
@@ -8589,7 +8589,7 @@ function skipIgnoredNodesLeft(view) {
   // Gecko will do odd things when the selection is directly in front
   // of a non-editable node, so in that case, move it into the next
   // node if possible. Issue prosemirror/prosemirror#832.
-  if (result$1.gecko && node.nodeType == 1 && offset < nodeLen(node) && isIgnorable(node.childNodes[offset])) { force = true; }
+  if (result.gecko && node.nodeType == 1 && offset < nodeLen(node) && isIgnorable(node.childNodes[offset])) { force = true; }
   for (;;) {
     if (offset > 0) {
       if (node.nodeType != 1) {
@@ -8697,7 +8697,7 @@ function setSelFocus(view, sel, node, offset) {
 function selectVertically(view, dir, mods) {
   var sel = view.state.selection;
   if (sel instanceof TextSelection && !sel.empty || mods.indexOf("s") > -1) { return false }
-  if (result$1.mac && mods.indexOf("m") > -1) { return false }
+  if (result.mac && mods.indexOf("m") > -1) { return false }
   var $from = sel.$from;
   var $to = sel.$to;
 
@@ -8745,7 +8745,7 @@ function switchEditable(view, node, state) {
 // directly at the start of a textblock and has an uneditable node
 // after it
 function safariDownArrowBug(view) {
-  if (!result$1.safari || view.state.selection.$head.parentOffset > 0) { return }
+  if (!result.safari || view.state.selection.$head.parentOffset > 0) { return }
   var ref = view.root.getSelection();
   var focusNode = ref.focusNode;
   var focusOffset = ref.focusOffset;
@@ -8775,9 +8775,9 @@ function getMods(event) {
 
 function captureKeyDown(view, event) {
   var code = event.keyCode, mods = getMods(event);
-  if (code == 8 || (result$1.mac && code == 72 && mods == "c")) { // Backspace, Ctrl-h on Mac
+  if (code == 8 || (result.mac && code == 72 && mods == "c")) { // Backspace, Ctrl-h on Mac
     return stopNativeHorizontalDelete(view, -1) || skipIgnoredNodesLeft(view)
-  } else if (code == 46 || (result$1.mac && code == 68 && mods == "c")) { // Delete, Ctrl-d on Mac
+  } else if (code == 46 || (result.mac && code == 68 && mods == "c")) { // Delete, Ctrl-d on Mac
     return stopNativeHorizontalDelete(view, 1) || skipIgnoredNodesRight(view)
   } else if (code == 13 || code == 27) { // Enter, Esc
     return true
@@ -8789,7 +8789,7 @@ function captureKeyDown(view, event) {
     return selectVertically(view, -1, mods) || skipIgnoredNodesLeft(view)
   } else if (code == 40) { // Down arrow
     return safariDownArrowBug(view) || selectVertically(view, 1, mods) || skipIgnoredNodesRight(view)
-  } else if (mods == (result$1.mac ? "m" : "c") &&
+  } else if (mods == (result.mac ? "m" : "c") &&
              (code == 66 || code == 73 || code == 89 || code == 90)) { // Mod-[biyz]
     return true
   }
@@ -8818,7 +8818,7 @@ function parseBetween(view, from_, to_) {
   }
   // Work around issue in Chrome where backspacing sometimes replaces
   // the deleted content with a random BR node (issues #799, #831)
-  if (result$1.chrome && view.lastKeyCode === 8) {
+  if (result.chrome && view.lastKeyCode === 8) {
     for (var off = toOffset; off > fromOffset; off--) {
       var node = parent.childNodes[off - 1], desc = node.pmViewDesc;
       if (node.nodeType == "BR" && !desc) { toOffset = off; break }
@@ -8857,11 +8857,11 @@ function ruleFromNode(dom) {
     // Safari replaces the list item or table cell with a BR
     // directly in the list node (?!) if you delete the last
     // character in a list item or table cell (#708, #862)
-    if (result$1.safari && /^(ul|ol)$/i.test(dom.parentNode.nodeName)) {
+    if (result.safari && /^(ul|ol)$/i.test(dom.parentNode.nodeName)) {
       var skip = document.createElement("div");
       skip.appendChild(document.createElement("li"));
       return {skip: skip}
-    } else if (dom.parentNode.lastChild == dom || result$1.safari && /^(tr|table)$/i.test(dom.parentNode.nodeName)) {
+    } else if (dom.parentNode.lastChild == dom || result.safari && /^(tr|table)$/i.test(dom.parentNode.nodeName)) {
       return {ignore: true}
     }
   } else if (dom.nodeName == "IMG" && dom.getAttribute("mark-placeholder")) {
@@ -8891,7 +8891,7 @@ function readDOMChange(view, from, to, typeOver, addedNodes) {
   var parse = parseBetween(view, from, to);
   // Chrome sometimes leaves the cursor before the inserted text when
   // composing after a cursor wrapper. This moves it forward.
-  if (result$1.chrome && view.cursorWrapper && parse.sel && parse.sel.anchor == view.cursorWrapper.deco.from) {
+  if (result.chrome && view.cursorWrapper && parse.sel && parse.sel.anchor == view.cursorWrapper.deco.from) {
     var text = view.cursorWrapper.deco.type.toDOM.nextSibling;
     var size = text && text.nodeValue ? text.nodeValue.length : 1;
     parse.sel = {anchor: parse.sel.anchor + size, head: parse.sel.anchor + size};
@@ -8914,7 +8914,7 @@ function readDOMChange(view, from, to, typeOver, addedNodes) {
     if (typeOver && sel instanceof TextSelection && !sel.empty && sel.$head.sameParent(sel.$anchor) &&
         !view.composing && !(parse.sel && parse.sel.anchor != parse.sel.head)) {
       change = {start: sel.from, endA: sel.to, endB: sel.to};
-    } else if (result$1.ios && view.lastIOSEnter > Date.now() - 225 &&
+    } else if (result.ios && view.lastIOSEnter > Date.now() - 225 &&
                addedNodes.some(function (n) { return n.nodeName == "DIV" || n.nodeName == "P"; }) &&
                view.someProp("handleKeyDown", function (f) { return f(view, keyEvent(13, "Enter")); })) {
       view.lastIOSEnter = 0;
@@ -8945,7 +8945,7 @@ function readDOMChange(view, from, to, typeOver, addedNodes) {
   // IE11 will insert a non-breaking space _ahead_ of the space after
   // the cursor space when adding a space before another space. When
   // that happened, adjust the change to cover the space instead.
-  if (result$1.ie && result$1.ie_version <= 11 && change.endB == change.start + 1 &&
+  if (result.ie && result.ie_version <= 11 && change.endB == change.start + 1 &&
       change.endA == change.start && change.start > parse.from &&
       parse.doc.textBetween(change.start - parse.from - 1, change.start - parse.from + 1) == " \u00a0") {
     change.start--;
@@ -8959,7 +8959,7 @@ function readDOMChange(view, from, to, typeOver, addedNodes) {
   var nextSel;
   // If this looks like the effect of pressing Enter (or was recorded
   // as being an iOS enter press), just dispatch an Enter key instead.
-  if (((result$1.ios && view.lastIOSEnter > Date.now() - 225 &&
+  if (((result.ios && view.lastIOSEnter > Date.now() - 225 &&
         (!inlineChange || addedNodes.some(function (n) { return n.nodeName == "DIV" || n.nodeName == "P"; }))) ||
        (!inlineChange && $from.pos < parse.doc.content.size &&
         (nextSel = Selection.findFrom(parse.doc.resolve($from.pos + 1), 1, true)) &&
@@ -8972,7 +8972,7 @@ function readDOMChange(view, from, to, typeOver, addedNodes) {
   if (view.state.selection.anchor > change.start &&
       looksLikeJoin(doc, change.start, change.endA, $from, $to) &&
       view.someProp("handleKeyDown", function (f) { return f(view, keyEvent(8, "Backspace")); })) {
-    if (result$1.android && result$1.chrome) { view.domObserver.suppressSelectionUpdates(); } // #820
+    if (result.android && result.chrome) { view.domObserver.suppressSelectionUpdates(); } // #820
     return
   }
 
@@ -8984,7 +8984,7 @@ function readDOMChange(view, from, to, typeOver, addedNodes) {
   // leaving the cursor in the wrong place. When that happens, we drop
   // the new paragraph from the initial change, and fire a simulated
   // enter key afterwards.
-  if (result$1.android && !inlineChange && $from.start() != $to.start() && $to.parentOffset == 0 && $from.depth == $to.depth &&
+  if (result.android && !inlineChange && $from.start() != $to.start() && $to.parentOffset == 0 && $from.depth == $to.depth &&
       parse.sel && parse.sel.anchor == parse.sel.head && parse.sel.head == change.endA) {
     change.endB -= 2;
     $to = parse.doc.resolveNoCache(change.endB - parse.from);
@@ -9000,7 +9000,7 @@ function readDOMChange(view, from, to, typeOver, addedNodes) {
     if ($from.pos == $to.pos) { // Deletion
       // IE11 sometimes weirdly moves the DOM selection around after
       // backspacing out the first element in a textblock
-      if (result$1.ie && result$1.ie_version <= 11 && $from.parentOffset == 0) {
+      if (result.ie && result.ie_version <= 11 && $from.parentOffset == 0) {
         view.domObserver.suppressSelectionUpdates();
         setTimeout(function () { return selectionToDOM(view); }, 20);
       }
@@ -9031,9 +9031,9 @@ function readDOMChange(view, from, to, typeOver, addedNodes) {
     // happening, don't update the selection.
     // Edge just doesn't move the cursor forward when you start typing
     // in an empty block or between br nodes.
-    if (sel$2 && !(result$1.chrome && result$1.android && view.composing && sel$2.empty &&
+    if (sel$2 && !(result.chrome && result.android && view.composing && sel$2.empty &&
                    (sel$2.head == chFrom || sel$2.head == tr.mapping.map(chTo) - 1) ||
-                 result$1.ie && sel$2.empty && sel$2.head == chFrom))
+                 result.ie && sel$2.empty && sel$2.head == chFrom))
       { tr.setSelection(sel$2); }
   }
   if (storedMarks) { tr.ensureMarks(storedMarks); }
@@ -9350,7 +9350,7 @@ var observeOptions = {
   subtree: true
 };
 // IE11 has very broken mutation observers, so we also listen to DOMCharacterDataModified
-var useCharData = result$1.ie && result$1.ie_version <= 11;
+var useCharData = result.ie && result.ie_version <= 11;
 
 var SelectionState = function SelectionState() {
   this.anchorNode = this.anchorOffset = this.focusNode = this.focusOffset = null;
@@ -9380,7 +9380,7 @@ var DOMObserver = function DOMObserver(view, handleDOMChange) {
       // text node after a BR node) call the observer callback
       // before actually updating the DOM, which will cause
       // ProseMirror to miss the change (see #930)
-      if (result$1.ie && result$1.ie_version <= 11 && mutations.some(
+      if (result.ie && result.ie_version <= 11 && mutations.some(
         function (m) { return m.type == "childList" && m.removedNodes.length ||
              m.type == "characterData" && m.oldValue.length > m.target.nodeValue.length; }))
         { this$1$1.flushSoon(); }
@@ -9457,7 +9457,7 @@ DOMObserver.prototype.onSelectionChange = function onSelectionChange () {
   // Deletions on IE11 fire their events in the wrong order, giving
   // us a selection change event before the DOM changes are
   // reported.
-  if (result$1.ie && result$1.ie_version <= 11 && !this.view.state.selection.empty) {
+  if (result.ie && result.ie_version <= 11 && !this.view.state.selection.empty) {
     var sel = this.view.root.getSelection();
     // Selection.isCollapsed isn't reliable on IE
     if (sel.focusNode && isEquivalentPosition(sel.focusNode, sel.focusOffset, sel.anchorNode, sel.anchorOffset))
@@ -9494,16 +9494,16 @@ DOMObserver.prototype.flush = function flush () {
   var from = -1, to = -1, typeOver = false, added = [];
   if (this.view.editable) {
     for (var i = 0; i < mutations.length; i++) {
-      var result$1$1 = this.registerMutation(mutations[i], added);
-      if (result$1$1) {
-        from = from < 0 ? result$1$1.from : Math.min(result$1$1.from, from);
-        to = to < 0 ? result$1$1.to : Math.max(result$1$1.to, to);
-        if (result$1$1.typeOver) { typeOver = true; }
+      var result$1 = this.registerMutation(mutations[i], added);
+      if (result$1) {
+        from = from < 0 ? result$1.from : Math.min(result$1.from, from);
+        to = to < 0 ? result$1.to : Math.max(result$1.to, to);
+        if (result$1.typeOver) { typeOver = true; }
       }
     }
   }
 
-  if (result$1.gecko && added.length > 1) {
+  if (result.gecko && added.length > 1) {
     var brs = added.filter(function (n) { return n.nodeName == "BR"; });
     if (brs.length == 2) {
       var a = brs[0];
@@ -9537,7 +9537,7 @@ DOMObserver.prototype.registerMutation = function registerMutation (mut, added) 
 
   if (mut.type == "childList") {
     var prev = mut.previousSibling, next = mut.nextSibling;
-    if (result$1.ie && result$1.ie_version <= 11 && mut.addedNodes.length) {
+    if (result.ie && result.ie_version <= 11 && mut.addedNodes.length) {
       // IE11 gives us incorrect next/prev siblings for some
       // insertions, so if there are added nodes, recompute those
       for (var i = 0; i < mut.addedNodes.length; i++) {
@@ -9620,7 +9620,7 @@ function initInput(view) {
   // On Safari, for reasons beyond my understanding, adding an input
   // event handler makes an issue where the composition vanishes when
   // you press enter go away.
-  if (result$1.safari) { view.dom.addEventListener("input", function () { return null; }); }
+  if (result.safari) { view.dom.addEventListener("input", function () { return null; }); }
 
   ensureListeners(view);
 }
@@ -9678,7 +9678,7 @@ editHandlers.keydown = function (view, event) {
   // keyboard gets confused. So the hack here is to set a flag that
   // makes the DOM change code recognize that what just happens should
   // be replaced by whatever the Enter key handlers do.
-  if (result$1.ios && event.keyCode == 13 && !event.ctrlKey && !event.altKey && !event.metaKey) {
+  if (result.ios && event.keyCode == 13 && !event.ctrlKey && !event.altKey && !event.metaKey) {
     var now = Date.now();
     view.lastIOSEnter = now;
     view.lastIOSEnterFallbackTimeout = setTimeout(function () {
@@ -9700,7 +9700,7 @@ editHandlers.keyup = function (view, e) {
 
 editHandlers.keypress = function (view, event) {
   if (inOrNearComposition(view, event) || !event.charCode ||
-      event.ctrlKey && !event.altKey || result$1.mac && event.metaKey) { return }
+      event.ctrlKey && !event.altKey || result.mac && event.metaKey) { return }
 
   if (view.someProp("handleKeyPress", function (f) { return f(view, event); })) {
     event.preventDefault();
@@ -9828,7 +9828,7 @@ function forceDOMFlush(view) {
   return endComposition(view)
 }
 
-var selectNodeModifier = result$1.mac ? "metaKey" : "ctrlKey";
+var selectNodeModifier = result.mac ? "metaKey" : "ctrlKey";
 
 handlers.mousedown = function (view, event) {
   view.shiftKey = event.shiftKey;
@@ -9883,7 +9883,7 @@ var MouseDown = function MouseDown(view, pos, event, flushed) {
     { this.mightDrag = {node: targetNode,
                       pos: targetPos,
                       addAttr: this.target && !this.target.draggable,
-                      setUneditable: this.target && result$1.gecko && !this.target.hasAttribute("contentEditable")}; }
+                      setUneditable: this.target && result.gecko && !this.target.hasAttribute("contentEditable")}; }
 
   if (this.target && this.mightDrag && (this.mightDrag.addAttr || this.mightDrag.setUneditable)) {
     this.view.domObserver.stop();
@@ -9925,7 +9925,7 @@ MouseDown.prototype.up = function up (event) {
     event.preventDefault();
   } else if (this.flushed ||
              // Safari ignores clicks on draggable elements
-             (result$1.safari && this.mightDrag && !this.mightDrag.node.isAtom) ||
+             (result.safari && this.mightDrag && !this.mightDrag.node.isAtom) ||
              // Chrome will sometimes treat a node selection as a
              // cursor, but still report that the node is selected
              // when asked through getSelection. You'll then get a
@@ -9933,7 +9933,7 @@ MouseDown.prototype.up = function up (event) {
              // (hidden) cursor is doesn't change the selection, and
              // thus doesn't get a reaction from ProseMirror. This
              // works around that.
-             (result$1.chrome && !(this.view.state.selection instanceof TextSelection) &&
+             (result.chrome && !(this.view.state.selection instanceof TextSelection) &&
               (pos.pos == this.view.state.selection.from || pos.pos == this.view.state.selection.to))) {
     updateSelection(this.view, Selection.near(this.view.state.doc.resolve(pos.pos)), "pointer");
     event.preventDefault();
@@ -9968,7 +9968,7 @@ function inOrNearComposition(view, event) {
   // This guards against the case where compositionend is triggered without the keyboard
   // (e.g. character confirmation may be done with the mouse), and keydown is triggered
   // afterwards- we wouldn't want to ignore the keydown event in this case.
-  if (result$1.safari && Math.abs(event.timeStamp - view.compositionEndedAt) < 500) {
+  if (result.safari && Math.abs(event.timeStamp - view.compositionEndedAt) < 500) {
     view.compositionEndedAt = -2e8;
     return true
   }
@@ -9976,7 +9976,7 @@ function inOrNearComposition(view, event) {
 }
 
 // Drop active composition after 5 seconds of inactivity on Android
-var timeoutComposition = result$1.android ? 5000 : -1;
+var timeoutComposition = result.android ? 5000 : -1;
 
 editHandlers.compositionstart = editHandlers.compositionupdate = function (view) {
   if (!view.composing) {
@@ -9995,7 +9995,7 @@ editHandlers.compositionstart = editHandlers.compositionupdate = function (view)
       // In firefox, if the cursor is after but outside a marked node,
       // the inserted text won't inherit the marks. So this moves it
       // inside if necessary.
-      if (result$1.gecko && state.selection.empty && $pos.parentOffset && !$pos.textOffset && $pos.nodeBefore.marks.length) {
+      if (result.gecko && state.selection.empty && $pos.parentOffset && !$pos.textOffset && $pos.nodeBefore.marks.length) {
         var sel = view.root.getSelection();
         for (var node = sel.focusNode, offset = sel.focusOffset; node && node.nodeType == 1 && offset != 0;) {
           var before = offset < 0 ? node.lastChild : node.childNodes[offset - 1];
@@ -10069,8 +10069,8 @@ function captureCopy(view, dom) {
 // This is very crude, but unfortunately both these browsers _pretend_
 // that they have a clipboard API—all the objects and methods are
 // there, they just don't work, and they are hard to test.
-var brokenClipboardAPI = (result$1.ie && result$1.ie_version < 15) ||
-      (result$1.ios && result$1.webkit_version < 604);
+var brokenClipboardAPI = (result.ie && result.ie_version < 15) ||
+      (result.ios && result.webkit_version < 604);
 
 handlers.copy = editHandlers.cut = function (view, e) {
   var sel = view.state.selection, cut = e.type == "cut";
@@ -10135,7 +10135,7 @@ var Dragging = function Dragging(slice, move) {
   this.move = move;
 };
 
-var dragCopyModifier = result$1.mac ? "altKey" : "ctrlKey";
+var dragCopyModifier = result.mac ? "altKey" : "ctrlKey";
 
 handlers.dragstart = function (view, e) {
   var mouseDown = view.mouseDown;
@@ -10248,7 +10248,7 @@ handlers.beforeinput = function (view, event) {
 
   // Very specific hack to deal with backspace sometimes failing on
   // Chrome Android when after an uneditable node.
-  if (result$1.chrome && result$1.android && event.inputType == "deleteContentBackward") {
+  if (result.chrome && result.android && event.inputType == "deleteContentBackward") {
     var domChangeCount = view.domChangeCount;
     setTimeout(function () {
       if (view.domChangeCount != domChangeCount) { return } // Event already had some effect
@@ -11078,14 +11078,14 @@ EditorView.prototype.updateStateInner = function updateStateInner (state, reconf
     // state where the thing the user sees differs from the
     // selection reported by the Selection object (#710, #973,
     // #1011, #1013, #1035).
-    var forceSelUpdate = updateDoc && (result$1.ie || result$1.chrome) && !this.composing &&
+    var forceSelUpdate = updateDoc && (result.ie || result.chrome) && !this.composing &&
         !prev.selection.empty && !state.selection.empty && selectionContextChanged(prev.selection, state.selection);
     if (updateDoc) {
       // If the node that the selection points into is written to,
       // Chrome sometimes starts misreporting the selection, so this
       // tracks that and forces a selection reset when our update
       // did write to the node.
-      var chromeKludge = result$1.chrome ? (this.trackWrites = this.root.getSelection().focusNode) : null;
+      var chromeKludge = result.chrome ? (this.trackWrites = this.root.getSelection().focusNode) : null;
       if (redraw || !this.docView.update(state.doc, outerDeco, innerDeco, this)) {
         this.docView.updateOuterDeco([]);
         this.docView.destroy();
@@ -17109,7 +17109,7 @@ const groupByFourRegEx = /\B(?=(\d{4})+$)/g;  // use sometimes in China
 // Grouping as common in south Asia: 10,10,000
 const groupByLakhCroreRegEx = /(\d)(?=(\d\d)+\d$)/g;
 
-const formatRegEx = /^([beEfhkmprsStx%])?(-?[\d]+)?([i∠°])?$/;
+const formatRegEx = /^([beEfhkmprsStx%])?(-?[\d]+)?([∠°]{0,2})?$/;
 
 const superscript$1 = str => {
   // Convert a numeral string to Unicode superscript characters.
@@ -17263,7 +17263,7 @@ const parseFormatSpec = str => {
   //    T = type, [bEefhkmNnprSstx%], default: "h"
   //    n = number of digits, [0-9]+, default: 15
   //
-  //    Possible future additions: complex number format [√∠°]
+  //    Possible future additions: complex number format [∠°]
 
   const match = formatRegEx.exec(str);
   if (!match) {
@@ -17298,11 +17298,13 @@ const parseFormatSpec = str => {
   return [str, undefined, dt.STRING, "\\text{" + ftype + String(N) + ctype + "}" ]
 };
 
+const angleRegEx = /[∠°]+$/;
+
 const format = (num, specStr = "h3", decimalFormat = "1,000,000.") => {
   if (Rnl.isZero(num)) { return "0" }
 
   const spec = { ftype: specStr.charAt(0) };
-  if (/[i∠°]$/.test(specStr)) { specStr = specStr.slice(0, -1); }
+  specStr = specStr.replace(angleRegEx, "");
   if (specStr.length > 1) { spec.numDigits = Number(specStr.slice(1)); }
 
   if (spec.ftype === "%" || spec.ftype === "p") { num[0] = num[0] * BigInt(100); }
@@ -18309,7 +18311,7 @@ const unitFromUnitName = (inputStr) => {
  * This module is a work in progress.
  */
 
-const im = [Rnl.zero, Rnl.one];
+const j = [Rnl.zero, Rnl.one];
 
 const isComplex = a => {
   return Array.isArray(a) && a.length === 2
@@ -18503,13 +18505,13 @@ const atanh = z => {
 
 const asin = z => {
   // arcsinh (i * z) / i
-  return divide(asinh(multiply(im, z)), im)
+  return divide(asinh(multiply(j, z)), j)
 };
 
 const atan = z => {
   // (Log(1 + iz) - Log(1 - iz)) / (2 * i)  cf Kahan
-  const term1 = log(increment(multiply(im, z)));
-  const term2 = log(subtract([Rnl.one, Rnl.zero],(multiply(im, z))));
+  const term1 = log(increment(multiply(j, z)));
+  const term2 = log(subtract([Rnl.one, Rnl.zero],(multiply(j, z))));
   return divide(subtract(term1, term2), [Rnl.zero, Rnl.two])  
 };
 
@@ -18552,35 +18554,35 @@ const lanczos = zPlusOne => {
 };
 
 const display$3 = (z, formatSpec, decimalFormat) => {
-  const complexSpec = /[i∠°]/.test(formatSpec) ? formatSpec.slice(-1) : "i";
+  const complexSpec = /[∠°]/.test(formatSpec) ? formatSpec.slice(-1) : "j";
   let resultDisplay = "";
   let altResultDisplay = "";
-  if (complexSpec === "i") {
+  if (complexSpec === "j") {
     const real = format(z[0], formatSpec, decimalFormat);
     let imPart = format(z[1], formatSpec, decimalFormat);
     if (imPart.charAt(0) === "-") {
-      resultDisplay = real + " - " + -imPart + "\\,\\mathord{\\mathrm{im}}";
-      altResultDisplay = real + " - " + -imPart + " im";
+      resultDisplay = real + " - j\\," + -imPart;
+      altResultDisplay = real + " - j " + -imPart;
     } else {
-      resultDisplay = real + " + " + imPart + " \\,\\mathord{\\mathrm{im}}";
-      altResultDisplay = real + " + " + imPart + " im";
+      resultDisplay = real + " + j\\, " + imPart;
+      altResultDisplay = real + " + j " + imPart;
     }
   } else {
     const mag = Rnl.hypot(z[0], z[1]);
-    let angle = Cpx.angle(result.value);
-    if (complexSpec === "°") {
+    let angle = Cpx.angle(z);
+    const inDegrees = complexSpec.indexOf("°") > -1;
+    if (inDegrees) {
       angle = Rnl.divide(Rnl.multiply(angle, Rnl.fromNumber(180)), Rnl.pi);
     }
     resultDisplay = format(mag, formatSpec, decimalFormat) + "∠" +
-                    format(angle, formatSpec, decimalFormat) +
-                    (complexSpec === "°" ? "°" : "");
+                    format(angle, formatSpec, decimalFormat) + (inDegrees ? "°" : "");
     altResultDisplay = resultDisplay;
   }
   return [resultDisplay, altResultDisplay]
 };
 
 const Cpx = Object.freeze({
-  im,
+  j,
   real,
   imag,
   abs,
@@ -20050,7 +20052,6 @@ const words = Object.freeze({
   //       input,    tex output,               type, closeDelim
   "true": ["true", "\\mathord{\\text{true}}", tt.BOOLEAN, ""],
   "false": ["false", "\\mathord{\\text{false}}", tt.BOOLEAN, ""],
-  im: ["im", "im", tt.LONGVAR, ""],
   cos: ["cos", "\\cos", tt.FUNCTION, ""],
   cosd: ["cosd", "\\operatorname{\\cos_d}", tt.FUNCTION, ""],
   if: ["if", "\\mathrel{\\mathrm{if}}", tt.LOGIC, ""],
@@ -22917,24 +22918,6 @@ const formatResult = (stmt, result, formatSpec, decimalFormat, assert, isUnitAwa
     } else if (result.dtype === dt.COMPLEX) {
       const z = result.value;
       [resultDisplay, altResultDisplay] = Cpx.display(z, formatSpec, decimalFormat);
-/*        const complexSpec = /[j∠°]/.test(formatSpec) ? formatSpec.slice(-1) : "j"
-      if (complexSpec === "j") {
-        const real = format(z[0], formatSpec, decimalFormat)
-        let im = format(z[1], formatSpec, decimalFormat)
-        if (im.charAt(0) === "-") { im = "(" + im + ")" }
-        resultDisplay = real + " + j" + im
-        altResultDisplay = real + " + j" + im
-      } else {
-        const mag = Rnl.hypot(z[0], z[1])
-        let angle = Cpx.argument(result.value)
-        if (complexSpec === "°") {
-          angle = Rnl.divide(Rnl.multiply(angle, Rnl.fromNumber(180)), Rnl.pi)
-        }
-        resultDisplay = format(mag, formatSpec, decimalFormat) + "∠" +
-                        format(angle, formatSpec, decimalFormat) +
-                        (complexSpec === "°" ? "°" : "")
-        altResultDisplay = resultDisplay
-      } */
 
     } else if (result.value.plain) {
       resultDisplay = format(result.value.plain, formatSpec, decimalFormat);
@@ -23057,6 +23040,10 @@ const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat) => {
     } else if (varName === "e" && /^\^/.test(str.slice(pos + 3).trim())) {
       // e^x
       str = str.substring(0, pos) + "e" + str.substring(pos + matchLength);
+      continue
+    } else if (varName === "j") {
+      // √(-1)
+      str = str.substring(0, pos) + "j" + str.substring(pos + matchLength);
       continue
     } else if (!vars[varName]) {
       return errorOprnd("V_NAME", varName)
@@ -30193,6 +30180,11 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             stack.length > 0 && isMatrix(stack[stack.length - 1])) {
         i += 1;
         oprnd = Matrix.transpose(stack.pop());
+      } else if (varName === "j" && !vars.j) {
+        oprnd.value = [Rnl.zero, Rnl.one];
+        oprnd.unit = Object.create(null);
+        oprnd.unit.expos = allZeros;
+        oprnd.dtype = dt.COMPLEX;
       } else {
         const cellAttrs = vars[varName];
         if (!cellAttrs) { return errorOprnd("V_NAME", varName) }
@@ -30246,17 +30238,6 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           e.unit = Object.create(null);
           e.unit.expos = allZeros;
           stack.push(Object.freeze(e));
-          break
-        }
-
-        case "im": {
-          // im = √(-1)
-          const j = Object.create(null);
-          j.value = [Rnl.zero, Rnl.one];
-          j.unit = Object.create(null);
-          j.unit.expos = allZeros;
-          j.dtype = dt.COMPLEX;
-          stack.push(Object.freeze(j));
           break
         }
 
@@ -31783,7 +31764,7 @@ const conditionResult = (stmt, oprnd, unitAware) => {
   result.dtype = oprnd.dtype;
 
   if (result.dtype === dt.COMPLEX && Rnl.isZero(Cpx.imag(result.value))) {
-    result.value = Cpx.re(result.value);
+    result.value = Cpx.real(result.value);
     result.dtype = 1;
   }
 
@@ -31944,8 +31925,8 @@ const matrixRegEx = /^[([] *(?:(?:-?[0-9.]+|"[^"]+"|true|false) *[,;\t]? *)+[)\]
 
 const numStr = "(-?(?:0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?)))";
 const nonNegNumStr = "(0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?))";
-const complexRegEx = new RegExp("^" + numStr + "(?: *([+-]) *" + nonNegNumStr + " *im|∠" + numStr + "(°)?)");
-// const complexRegEx = /^(number)(?: *([+-]) *(non-negative number) *im|∠(number)(°)?)/
+const complexRegEx = new RegExp("^" + numStr + "(?: *([+-]) *(?: j *" + nonNegNumStr + "|" + nonNegNumStr + " *∠" + numStr + "(°)?))");
+// const complexRegEx = /^(number)(?: *([+-]) *(non-negative number) *j(number)(°)?)/
 /* eslint-enable max-len */
 // Capturing groups:
 //    [1] First number, either a in a ± b im, or r in r∠θ

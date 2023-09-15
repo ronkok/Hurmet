@@ -80,9 +80,10 @@ const prompts = {
   "matrix": "[2.1; -15.3]",
   "matrix-mult": "[1, 2, 3] [3; 2; 1] = ?",
   "data-frame": "wideFlanges.W10X49.A = ?? in2",
-  "dictionary": 'A = barArea["#4"] = ?',
+  "single-row": 'A = barArea["#4"] = ?',
   "functions": "sin(π/6) = ?",
   "if-expressions": `x = {1 if 12 < 30; 0 otherwise} = ?`,
+  "summation": `∑_(n=0)^4 2 n = ?`,
   "unit-aware-calculations": "4 'ft' + 3 'yards' = ?? m",
   "remote-modules": "mod.E = ?? psi",
   "tests": "@test 2 ≤ 3"
@@ -138,6 +139,7 @@ observer.observe(document.getElementById("matrix"))
 observer.observe(document.getElementById("matrix-mult"))
 observer.observe(document.getElementById("data-frame"))
 observer.observe(document.getElementById("functions"))
+observer.observe(document.getElementById("summation"))
 observer.observe(document.getElementById("if-expressions"))
 observer.observe(document.getElementById("unit-aware-calculations"))
 observer.observe(document.getElementById("remote-modules"))

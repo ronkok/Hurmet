@@ -157,24 +157,6 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, assert, is
     } else if (result.dtype === dt.COMPLEX) {
       const z = result.value;
       [resultDisplay, altResultDisplay] = Cpx.display(z, formatSpec, decimalFormat)
-/*        const complexSpec = /[j∠°]/.test(formatSpec) ? formatSpec.slice(-1) : "j"
-      if (complexSpec === "j") {
-        const real = format(z[0], formatSpec, decimalFormat)
-        let im = format(z[1], formatSpec, decimalFormat)
-        if (im.charAt(0) === "-") { im = "(" + im + ")" }
-        resultDisplay = real + " + j" + im
-        altResultDisplay = real + " + j" + im
-      } else {
-        const mag = Rnl.hypot(z[0], z[1])
-        let angle = Cpx.argument(result.value)
-        if (complexSpec === "°") {
-          angle = Rnl.divide(Rnl.multiply(angle, Rnl.fromNumber(180)), Rnl.pi)
-        }
-        resultDisplay = format(mag, formatSpec, decimalFormat) + "∠" +
-                        format(angle, formatSpec, decimalFormat) +
-                        (complexSpec === "°" ? "°" : "")
-        altResultDisplay = resultDisplay
-      } */
 
     } else if (result.value.plain) {
       resultDisplay = format(result.value.plain, formatSpec, decimalFormat)
