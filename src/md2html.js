@@ -62,6 +62,9 @@ const htmlTag = (tagName, content, attributes = {}, isClosed = true) => {
   const unclosedTag = "<" + tagName + attributeString + ">";
 
   if (isClosed) {
+    if (content.charAt(content.length - 1) === "\n") {
+      content = content.slice(0, -1)
+    }
     return unclosedTag + content + "</" + tagName + ">";
   } else {
     return unclosedTag;
