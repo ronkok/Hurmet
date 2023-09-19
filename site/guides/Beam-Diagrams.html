@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Beam Diagrams</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <nav>
+   <ul>
+     <li><a href="../index.html">Hurmet</a></li>
+     <li><a href="../manual.html">Documentation</a></li>
+   </ul>
+  </nav>
+<article class="ProseMirror pica">
+<h1 id='beam-diagrams'>Beam Diagrams</h1>
+<p>This guide is aimed at civil engineers. It shows how Hurmet can produce a beam diagram, like this one:</p>
+<p><span class='hurmet-calc' data-entry='beam =
+``#item	value
+plan	△ 12′ △ 10′ △
+E	29000 ksi
+I	131 in⁴
+dead	-0.031 kips/ft
+live	-0.4 kips/ft
+live	-2 kips, 4′``'><math><mrow><mrow><mrow><mi mathvariant="normal">b</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">m</mi></mrow></mrow><mo>=</mo></mrow><mrow><mtable columnalign="left center" class="tml-array"><mtr class="tml-hline-solid"><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>item</mtext></mtd><mtd><mtext>value</mtext></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>plan</mtext></mtd><mtd><mtext>△ 12′ △ 10′ △</mtext></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>E</mtext></mtd><mtd><mtext>29000 ksi</mtext></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>I</mtext></mtd><mtd><mtext>131 in⁴</mtext></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>dead</mtext></mtd><mtd><mtext>-0.031 kips⁄ft</mtext></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>live</mtext></mtd><mtd><mtext>-0.4 kips⁄ft</mtext></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>live</mtext></mtd><mtd><mtext>-2 kips, 4′</mtext></mtd></mtr></mtable><mspace width="0.2778em"></mspace></mrow></math></span> <span class='hurmet-calc' data-entry='beamDiagram(beam) = @' style='float: right;'><svg xmlns="http://www.w3.org/2000/svg" float='right' width='375' height='382' viewBox='0 0 450 458'>
+<title>
+Beam Diagram</title>
+<defs>
+<style>svg { background-color: #fff; }
+text, tspan { font: 12px Arial; }</style></defs>
+<text x='20' y='82'>
+<tspan>loads</tspan></text>
+<text x='20' y='96'>
+<tspan>(kips, ft)</tspan></text>
+<path stroke='black' stroke-width='1.5px' d='M90 80 h300'>
+</path>
+<path d='M90 80.75 l5 10 h-10 z' style='fill:#fff; stroke:#000'>
+</path>
+<path d='M253.63636363636365 80.75 l5 10 h-10 z' style='fill:#fff; stroke:#000'>
+</path>
+<path d='M390 80.75 l5 10 h-10 z' style='fill:#fff; stroke:#000'>
+</path>
+<text x='171.8181818181818' y='95'>
+<tspan>12.0′</tspan></text>
+<text x='321.8181818181818' y='95'>
+<tspan>10.0′</tspan></text>
+<path style='fill: #000; fill-opacity:1.0' d='M144.54545454545456 79.25 l-4 -8 h3.5 v-32 h1 v32 h3z'>
+</path>
+<text x='144.54545454545456' y='35' text-anchor='middle'>
+<tspan>2</tspan></text>
+<path d='M90 80V58.45L144.54545454545456 58.45L253.63636363636368 58.45L390 58.45V80' stroke='black' fill-opacity='0.0'>
+</path>
+<text x='240' y='54.45'>
+<tspan>0.431</tspan></text>
+<text x='20' y='207'>
+<tspan>shear</tspan></text>
+<text x='20' y='221'>
+<tspan>(kips)</tspan></text>
+<path d='M90 205 h300' stroke='black' stroke-width='1.5px'>
+</path>
+<text x='20' y='307'>
+<tspan>bending</tspan></text>
+<text x='20' y='321'>
+<tspan>(kip-ft)</tspan></text>
+<path d='M90 305 h300' stroke='black' stroke-width='1.5px'>
+</path>
+<path style='fill: #000; fill-opacity:1.0' d='M90 90.75 l4 8 h-3.5 v22 h-1 v-22 h-3z'>
+</path>
+<text x='90' y='135' text-anchor='middle'>
+<tspan>3.2</tspan></text>
+<path style='fill: #000; fill-opacity:1.0' d='M253.63636363636365 90.75 l4 8 h-3.5 v22 h-1 v-22 h-3z'>
+</path>
+<text x='253.63636363636365' y='135' text-anchor='middle'>
+<tspan>6.99</tspan></text>
+<path style='fill: #000; fill-opacity:1.0' d='M390 90.75 l4 8 h-3.5 v22 h-1 v-22 h-3z'>
+</path>
+<text x='390' y='135' text-anchor='middle'>
+<tspan>1.29</tspan></text>
+<text x='20' y='410'>
+<tspan>deflection</tspan></text>
+<path d='M90 408 h300' stroke='black' stroke-width='1.5px'>
+</path>
+<path d='M90.00 408.00 L96.00 412.29 L102.00 416.51 L108.00 420.56 L114.00 424.38 L120.00 427.91 L126.00 431.07 L132.00 433.82 L138.00 436.10 L144.00 437.87 L144.55 438.00 L144.55 438.00 L150.55 439.16 L156.55 439.78 L162.55 439.87 L168.55 439.47 L174.55 438.60 L180.55 437.30 L186.55 435.61 L192.55 433.59 L198.55 431.27 L204.55 428.71 L210.55 425.99 L216.55 423.15 L222.55 420.28 L228.55 417.46 L234.55 414.76 L240.55 412.26 L246.55 410.07 L252.55 408.28 L253.64 408.00 L253.64 408.00 L259.64 406.78 L265.64 405.99 L271.64 405.58 L277.64 405.46 L283.64 405.59 L289.64 405.90 L295.64 406.33 L301.64 406.85 L307.64 407.41 L313.64 407.98 L319.64 408.51 L325.64 408.99 L331.64 409.40 L337.64 409.70 L343.64 409.90 L349.64 409.99 L355.64 409.96 L361.64 409.82 L367.64 409.57 L373.64 409.23 L379.64 408.82 L385.64 408.35 L390.00 408.00' stroke='black' fill-opacity='0.0'>
+</path>
+<path d='M90.00 205.00 L90.00 178.22 L144.55 192.64 L144.55 209.38 L253.64 238.22 L253.64 179.76 L390.00 215.82 L390.00 205.00' stroke='black' fill-opacity='0.0'>
+</path>
+<path d='M90.00 305.00 L90.00 305.00 L96.00 300.44 L102.00 296.15 L108.00 292.15 L114.00 288.42 L120.00 284.98 L126.00 281.81 L132.00 278.92 L138.00 276.30 L144.00 273.97 L144.55 273.77 L144.55 273.77 L150.55 274.68 L156.55 275.86 L162.55 277.33 L168.55 279.07 L174.55 281.09 L180.55 283.39 L186.55 285.97 L192.55 288.83 L198.55 291.96 L204.55 295.38 L210.55 299.07 L216.55 303.04 L222.55 307.29 L228.55 311.82 L234.55 316.63 L240.55 321.71 L246.55 327.07 L252.55 332.72 L253.64 333.77 L253.64 333.77 L259.64 329.48 L265.64 325.47 L271.64 321.73 L277.64 318.28 L283.64 315.10 L289.64 312.20 L295.64 309.58 L301.64 307.24 L307.64 305.17 L313.64 303.39 L319.64 301.88 L325.64 300.65 L331.64 299.70 L337.64 299.03 L343.64 298.64 L349.64 298.53 L355.64 298.69 L361.64 299.14 L367.64 299.86 L373.64 300.86 L379.64 302.14 L385.64 303.69 L390.00 305.00 L390 305' stroke='black' fill-opacity='0.0'>
+</path>
+<text x='90.00' y='176.22' text-anchor='middle'>
+<tspan>3.20</tspan></text>
+<text x='144.55' y='190.64' text-anchor='middle'>
+<tspan>1.48</tspan></text>
+<text x='253.64' y='251.22' text-anchor='middle'>
+<tspan>-3.97</tspan></text>
+<text x='253.64' y='177.76' text-anchor='middle'>
+<tspan>3.02</tspan></text>
+<text x='390.00' y='228.82' text-anchor='middle'>
+<tspan>-1.29</tspan></text>
+<text x='90.00' y='176.22' text-anchor='middle'>
+<tspan>3.20</tspan></text>
+<text x='144.55' y='190.64' text-anchor='middle'>
+<tspan>1.48</tspan></text>
+<text x='253.64' y='251.22' text-anchor='middle'>
+<tspan>-3.97</tspan></text>
+<text x='253.64' y='177.76' text-anchor='middle'>
+<tspan>3.02</tspan></text>
+<text x='390.00' y='228.82' text-anchor='middle'>
+<tspan>-1.29</tspan></text>
+<text x='144.55' y='271.77' text-anchor='middle'>
+<tspan>9.36</tspan></text>
+<text x='144.55' y='271.77' text-anchor='middle'>
+<tspan>9.36</tspan></text>
+<text x='253.64' y='346.77' text-anchor='middle'>
+<tspan>-8.62</tspan></text>
+<text x='349.09' y='296.53' text-anchor='middle'>
+<tspan>1.94</tspan></text>
+<text x='144.55' y='271.77' text-anchor='middle'>
+<tspan>9.36</tspan></text>
+<text x='144.55' y='271.77' text-anchor='middle'>
+<tspan>9.36</tspan></text>
+<text x='253.64' y='346.77' text-anchor='middle'>
+<tspan>-8.62</tspan></text>
+<text x='349.09' y='296.53' text-anchor='middle'>
+<tspan>1.94</tspan></text>
+<text x='162.54545454545456' y='452.8738861057729' text-anchor='middle'>
+<tspan>-0.047″</tspan></text>
+</svg></span></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p>A service load analysis, as shown above, is a two-step process. The first step is to define the beam parameters. To do this, open a math zone and write a data frame like this one:</p>
+<pre><code>beam =
+``#item	value
+plan	△ 12′ △ 10′ △
+E	29000 ksi
+I	131 in⁴
+dead	-0.031 kips/ft
+live	-0.4 kips/ft
+live	-2 kips, 4′``</code></pre><p>Let’s go through that data line-by-line.</p>
+<div class="indented"><p>Line 0 contains headings, but Hurmet doesn&#x27;t read the words in that line. Write headings in whatever language you want.</p>
+<p>Line 1 describes the beam’s nodes and span lengths. Span units can be <code>m</code>, <code>ft</code>, or <code>′</code>. Nodes are written with the following symbols:</p>
+<div class="indented"><table class="grid c2c c3c" style="width: 360px"><colgroup><col style="width: 170px"></col>
+<col style="width: 80px"></col>
+<col style="width: 110px"></col>
+</colgroup>
+<tr><th>Restraint Type</th>
+<th>Symbol</th>
+<th>Alternate<br>Symbol</th>
+</tr>
+<tr><td>pinned</td><td>p</td><td>△</td></tr>
+<tr><td>fixed</td><td>f</td><td>⫢</td></tr>
+<tr><td>hinge</td><td>h</td><td>∘</td></tr>
+<tr><td>spring</td><td>s</td><td>⌇</td></tr>
+<tr><td>pinned hinge</td><td>ph</td><td>⫯</td></tr>
+<tr><td>no restraint</td><td>-</td><td>-</td></tr>
+</table>
+</div>
+<p>Next come two optional lines. One must be named <code>I</code>, for moment of inertia in <code>in⁴</code> or <code>cm⁴</code>. The other must be named <code>E</code>, for modulus of elasticity in <code>ksi</code> or <code>MPa</code>. If you omit E and I, Hurmet will not create a displacement diagram.</p>
+<p>If the beam contains one or more spring supports, include a line named <code>k</code>, for a spring constant in <code>kips/in</code> or <code>kN/m</code>.</p>
+<p>The default moment diagram shows positive moment on the compression side. If you prefer the other convention include a line named <code>+M</code>, whose only datum is <code>←→</code>.</p>
+<p>All the remaining lines will describe loads. Name your loads whatever you want. Point loads can take units of <code>kips</code> or <code>kN</code>. Distributed loads can take units of <code>kips/ft</code> or <code>kN/m</code>. Load locations are measured from the left end of the beam. Moments take units of <code>k·ft</code> or <code>kN·M</code>.</p>
+</div>
+<p>The second step is the easy part. Open a math zone and call the <code>beamDiagram</code> function, like this:</p>
+<pre><code>beamDiagram(beam) = @</code></pre><h1 id='variations'>Variations</h1>
+<h2 id='distributed-loads'>Distributed Loads</h2>
+<p>Write the location of a distributed load as a <code>start:stop</code> range. Like the live load in this example:</p>
+<p><span class='hurmet-calc' data-entry='beam2 =
+``#item	value
+plan	△ 12′ △ 10′ △
+E	29000 ksi
+I	131 in⁴
+dead	-0.031 kips/ft
+live	-0.4 kips/ft, 9:14 ft
+live	-2 kips, 4′``'><math><mrow><mrow><mrow><mi mathvariant="normal">b</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">m</mi></mrow><mn>2</mn></mrow><mo>=</mo></mrow><mrow><mtable columnalign="left center" class="tml-array"><mtr class="tml-hline-solid"><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>item</mtext></mtd><mtd><mtext>value</mtext></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>plan</mtext></mtd><mtd><mtext>△ 12′ △ 10′ △</mtext></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>E</mtext></mtd><mtd><mtext>29000 ksi</mtext></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>I</mtext></mtd><mtd><mtext>131 in⁴</mtext></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>dead</mtext></mtd><mtd><mtext>-0.031 kips⁄ft</mtext></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>live</mtext></mtd><mtd><mtext>-0.4 kips⁄ft, 9:14 ft</mtext></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>live</mtext></mtd><mtd><mtext>-2 kips, 4′</mtext></mtd></mtr></mtable><mspace width="0.2778em"></mspace></mrow></math></span><span class='hurmet-calc' data-entry='beamDiagram(beam2) = @' style='float: right;'><svg xmlns="http://www.w3.org/2000/svg" float='right' width='375' height='375' viewBox='0 0 450 450'>
+<title>
+Beam Diagram</title>
+<defs>
+<style>svg { background-color: #fff; }
+text, tspan { font: 12px Arial; }</style></defs>
+<text x='20' y='82'>
+<tspan>loads</tspan></text>
+<text x='20' y='96'>
+<tspan>(kips, ft)</tspan></text>
+<path stroke='black' stroke-width='1.5px' d='M90 80 h300'>
+</path>
+<path d='M90 80.75 l5 10 h-10 z' style='fill:#fff; stroke:#000'>
+</path>
+<path d='M253.63636363636365 80.75 l5 10 h-10 z' style='fill:#fff; stroke:#000'>
+</path>
+<path d='M390 80.75 l5 10 h-10 z' style='fill:#fff; stroke:#000'>
+</path>
+<text x='171.8181818181818' y='95'>
+<tspan>12.0′</tspan></text>
+<text x='321.8181818181818' y='95'>
+<tspan>10.0′</tspan></text>
+<path style='fill: #000; fill-opacity:1.0' d='M144.54545454545456 79.25 l-4 -8 h3.5 v-32 h1 v32 h3z'>
+</path>
+<text x='144.54545454545456' y='35' text-anchor='middle'>
+<tspan>2</tspan></text>
+<path d='M90 80V78.45L144.54545454545456 78.45L212.72727272727275 78.45V58.45L253.63636363636363 58.45L280.90909090909093 58.45V78.45L390 78.45V80' stroke='black' fill-opacity='0.0'>
+</path>
+<text x='171.8181818181818' y='74.45'>
+<tspan>0.0310</tspan></text>
+<text x='246.8181818181818' y='54.45'>
+<tspan>0.431</tspan></text>
+<text x='335.45454545454544' y='74.45'>
+<tspan>0.0310</tspan></text>
+<text x='20' y='203'>
+<tspan>shear</tspan></text>
+<text x='20' y='217'>
+<tspan>(kips)</tspan></text>
+<path d='M90 201 h300' stroke='black' stroke-width='1.5px'>
+</path>
+<text x='20' y='304'>
+<tspan>bending</tspan></text>
+<text x='20' y='318'>
+<tspan>(kip-ft)</tspan></text>
+<path d='M90 302 h300' stroke='black' stroke-width='1.5px'>
+</path>
+<path style='fill: #000; fill-opacity:1.0' d='M90 90.75 l4 8 h-3.5 v22 h-1 v-22 h-3z'>
+</path>
+<text x='90' y='135' text-anchor='middle'>
+<tspan>1.38</tspan></text>
+<path style='fill: #000; fill-opacity:1.0' d='M253.63636363636365 90.75 l4 8 h-3.5 v22 h-1 v-22 h-3z'>
+</path>
+<text x='253.63636363636365' y='135' text-anchor='middle'>
+<tspan>3.41</tspan></text>
+<path style='fill: #000; fill-opacity:1.0' d='M390 120.75 l-4 -8 h3.5 v-22 h1 v22 h3z'>
+</path>
+<text x='390' y='135' text-anchor='middle'>
+<tspan>0.112</tspan></text>
+<text x='20' y='407'>
+<tspan>deflection</tspan></text>
+<path d='M90 405 h300' stroke='black' stroke-width='1.5px'>
+</path>
+<path d='M90.00 405.00 L96.00 408.45 L102.00 411.85 L108.00 415.13 L114.00 418.25 L120.00 421.15 L126.00 423.78 L132.00 426.08 L138.00 428.01 L144.00 429.51 L144.55 429.62 L144.55 429.62 L150.55 430.61 L156.55 431.14 L162.55 431.25 L168.55 430.96 L174.55 430.32 L180.55 429.34 L186.55 428.08 L192.55 426.55 L198.55 424.80 L204.55 422.85 L210.55 420.75 L212.73 419.95 L212.73 419.95 L218.73 417.70 L224.73 415.37 L230.73 413.03 L236.73 410.72 L242.73 408.52 L248.73 406.48 L253.64 405.00 L253.64 405.00 L259.64 403.46 L265.64 402.19 L271.64 401.16 L277.64 400.33 L280.91 399.96 L280.91 399.96 L286.91 399.41 L292.91 399.02 L298.91 398.77 L304.91 398.66 L310.91 398.66 L316.91 398.78 L322.91 398.99 L328.91 399.28 L334.91 399.65 L340.91 400.08 L346.91 400.57 L352.91 401.11 L358.91 401.68 L364.91 402.29 L370.91 402.91 L376.91 403.56 L382.91 404.22 L388.91 404.88 L390.00 405.00' stroke='black' fill-opacity='0.0'>
+</path>
+<path d='M90.00 201.00 L90.00 177.81 L144.55 179.89 L144.55 213.49 L212.73 216.09 L212.73 216.09 L253.64 237.81 L253.64 180.48 L280.91 194.96 L280.91 194.96 L390.00 199.13 L390.00 201.00' stroke='black' fill-opacity='0.0'>
+</path>
+<path d='M90.00 302.00 L90.00 302.00 L96.00 297.85 L102.00 293.74 L108.00 289.68 L114.00 285.65 L120.00 281.67 L126.00 277.72 L132.00 273.82 L138.00 269.96 L144.00 266.14 L144.55 265.79 L144.55 265.79 L150.55 268.06 L156.55 270.37 L162.55 272.72 L168.55 275.11 L174.55 277.54 L180.55 280.01 L186.55 282.52 L192.55 285.08 L198.55 287.68 L204.55 290.31 L210.55 292.99 L212.73 293.98 L212.73 293.98 L218.73 296.98 L224.73 300.55 L230.73 304.70 L236.73 309.41 L242.73 314.71 L248.73 320.57 L253.64 325.79 L253.64 325.79 L259.64 322.39 L265.64 319.56 L271.64 317.30 L277.64 315.62 L280.91 314.94 L280.91 314.94 L286.91 313.87 L292.91 312.85 L298.91 311.87 L304.91 310.92 L310.91 310.02 L316.91 309.16 L322.91 308.35 L328.91 307.57 L334.91 306.83 L340.91 306.14 L346.91 305.48 L352.91 304.87 L358.91 304.30 L364.91 303.77 L370.91 303.28 L376.91 302.83 L382.91 302.43 L388.91 302.06 L390.00 302.00 L390 302' stroke='black' fill-opacity='0.0'>
+</path>
+<text x='90.00' y='175.81' text-anchor='middle'>
+<tspan>1.38</tspan></text>
+<text x='144.55' y='177.89' text-anchor='middle'>
+<tspan>1.26</tspan></text>
+<text x='253.64' y='250.81' text-anchor='middle'>
+<tspan>-2.19</tspan></text>
+<text x='253.64' y='178.48' text-anchor='middle'>
+<tspan>1.22</tspan></text>
+<text x='390.00' y='197.13' text-anchor='middle'>
+<tspan>0.112</tspan></text>
+<text x='90.00' y='175.81' text-anchor='middle'>
+<tspan>1.38</tspan></text>
+<text x='144.55' y='177.89' text-anchor='middle'>
+<tspan>1.26</tspan></text>
+<text x='253.64' y='250.81' text-anchor='middle'>
+<tspan>-2.19</tspan></text>
+<text x='253.64' y='178.48' text-anchor='middle'>
+<tspan>1.22</tspan></text>
+<text x='390.00' y='197.13' text-anchor='middle'>
+<tspan>0.112</tspan></text>
+<text x='144.55' y='263.79' text-anchor='middle'>
+<tspan>5.27</tspan></text>
+<text x='144.55' y='263.79' text-anchor='middle'>
+<tspan>5.27</tspan></text>
+<text x='212.73' y='291.98' text-anchor='middle'>
+<tspan>1.17</tspan></text>
+<text x='212.73' y='291.98' text-anchor='middle'>
+<tspan>1.17</tspan></text>
+<text x='253.64' y='338.79' text-anchor='middle'>
+<tspan>-3.47</tspan></text>
+<text x='144.55' y='263.79' text-anchor='middle'>
+<tspan>5.27</tspan></text>
+<text x='144.55' y='263.79' text-anchor='middle'>
+<tspan>5.27</tspan></text>
+<text x='212.73' y='291.98' text-anchor='middle'>
+<tspan>1.17</tspan></text>
+<text x='212.73' y='291.98' text-anchor='middle'>
+<tspan>1.17</tspan></text>
+<text x='253.64' y='338.79' text-anchor='middle'>
+<tspan>-3.47</tspan></text>
+<text x='162.54545454545456' y='444.2451199151139' text-anchor='middle'>
+<tspan>-0.025″</tspan></text>
+</svg></span></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p>Write a sloping load as a <code>startLoad:endLoad</code> range.</p>
+<p><span class='hurmet-calc' data-entry='bm3 =
+``#item	value
+plan	△ 12′ △ 10′ △
+E	29000 ksi
+I	131 in⁴
+dead	-0.031 kips/ft
+live	-0.2:-0.4 k/ft, 9:14 ft
+live	-2 kips, 4′``'><math><mrow><mrow><mrow><mi mathvariant="normal">b</mi></mrow><mrow><mi mathvariant="normal">m</mi></mrow><mn>3</mn></mrow><mo>=</mo></mrow><mrow><mtable columnalign="left center" class="tml-array"><mtr class="tml-hline-solid"><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>item</mtext></mtd><mtd><mtext>value</mtext></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>plan</mtext></mtd><mtd><mtext>△ 12′ △ 10′ △</mtext></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>E</mtext></mtd><mtd><mtext>29000 ksi</mtext></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>I</mtext></mtd><mtd><mtext>131 in⁴</mtext></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>dead</mtext></mtd><mtd><mtext>-0.031 kips⁄ft</mtext></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>live</mtext></mtd><mtd><mtext>-0.2:-0.4 k⁄ft, 9:14 ft</mtext></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>live</mtext></mtd><mtd><mtext>-2 kips, 4′</mtext></mtd></mtr></mtable><mspace width="0.2778em"></mspace></mrow></math></span> <span class='hurmet-calc' data-entry='beamDiagram(bm3) = @' style='float: right;'><svg xmlns="http://www.w3.org/2000/svg" float='right' width='375' height='380' viewBox='0 0 450 456'>
+<title>
+Beam Diagram</title>
+<defs>
+<style>svg { background-color: #fff; }
+text, tspan { font: 12px Arial; }</style></defs>
+<text x='20' y='82'>
+<tspan>loads</tspan></text>
+<text x='20' y='96'>
+<tspan>(kips, ft)</tspan></text>
+<path stroke='black' stroke-width='1.5px' d='M90 80 h300'>
+</path>
+<path d='M90 80.75 l5 10 h-10 z' style='fill:#fff; stroke:#000'>
+</path>
+<path d='M253.63636363636365 80.75 l5 10 h-10 z' style='fill:#fff; stroke:#000'>
+</path>
+<path d='M390 80.75 l5 10 h-10 z' style='fill:#fff; stroke:#000'>
+</path>
+<text x='171.8181818181818' y='95'>
+<tspan>12.0′</tspan></text>
+<text x='321.8181818181818' y='95'>
+<tspan>10.0′</tspan></text>
+<path style='fill: #000; fill-opacity:1.0' d='M144.54545454545456 79.25 l-4 -8 h3.5 v-32 h1 v32 h3z'>
+</path>
+<text x='144.54545454545456' y='35' text-anchor='middle'>
+<tspan>2</tspan></text>
+<path d='M90 80V78.45L144.54545454545456 78.45L212.72727272727275 78.45V68.45L253.63636363636363 62.45L280.90909090909093 58.45V78.45L390 78.45V80' stroke='black' fill-opacity='0.0'>
+</path>
+<text x='171.8181818181818' y='74.45'>
+<tspan>0.0310</tspan></text>
+<text x='212.72727272727272' y='63.45'>
+<tspan>0.231</tspan></text>
+<text x='250.90909090909088' y='53.45'>
+<tspan>0.431</tspan></text>
+<text x='335.45454545454544' y='74.45'>
+<tspan>0.0310</tspan></text>
+<text x='20' y='206'>
+<tspan>shear</tspan></text>
+<text x='20' y='220'>
+<tspan>(kips)</tspan></text>
+<path d='M90 204 h300' stroke='black' stroke-width='1.5px'>
+</path>
+<text x='20' y='311'>
+<tspan>bending</tspan></text>
+<text x='20' y='325'>
+<tspan>(kip-ft)</tspan></text>
+<path d='M90 309 h300' stroke='black' stroke-width='1.5px'>
+</path>
+<path style='fill: #000; fill-opacity:1.0' d='M90 90.75 l4 8 h-3.5 v22 h-1 v-22 h-3z'>
+</path>
+<text x='90' y='135' text-anchor='middle'>
+<tspan>1.35</tspan></text>
+<path style='fill: #000; fill-opacity:1.0' d='M253.63636363636365 90.75 l4 8 h-3.5 v22 h-1 v-22 h-3z'>
+</path>
+<text x='253.63636363636365' y='135' text-anchor='middle'>
+<tspan>2.92</tspan></text>
+<path style='fill: #000; fill-opacity:1.0' d='M390 120.75 l-4 -8 h3.5 v-22 h1 v22 h3z'>
+</path>
+<text x='390' y='135' text-anchor='middle'>
+<tspan>0.0854</tspan></text>
+<text x='20' y='413'>
+<tspan>deflection</tspan></text>
+<path d='M90 411 h300' stroke='black' stroke-width='1.5px'>
+</path>
+<path d='M90.00 411.00 L96.00 414.53 L102.00 418.01 L108.00 421.36 L114.00 424.55 L120.00 427.51 L126.00 430.18 L132.00 432.51 L138.00 434.45 L144.00 435.94 L144.55 436.05 L144.55 436.05 L150.55 437.00 L156.55 437.49 L162.55 437.53 L168.55 437.17 L174.55 436.44 L180.55 435.39 L186.55 434.03 L192.55 432.43 L198.55 430.60 L204.55 428.60 L210.55 426.45 L212.73 425.65 L212.73 425.65 L218.73 423.38 L224.73 421.06 L230.73 418.76 L236.73 416.51 L242.73 414.37 L248.73 412.42 L253.64 411.00 L253.64 411.00 L259.64 409.53 L265.64 408.33 L271.64 407.36 L277.64 406.59 L280.91 406.24 L280.91 406.24 L286.91 405.73 L292.91 405.37 L298.91 405.15 L304.91 405.05 L310.91 405.07 L316.91 405.18 L322.91 405.38 L328.91 405.67 L334.91 406.02 L340.91 406.43 L346.91 406.88 L352.91 407.39 L358.91 407.92 L364.91 408.49 L370.91 409.07 L376.91 409.67 L382.91 410.28 L388.91 410.89 L390.00 411.00' stroke='black' fill-opacity='0.0'>
+</path>
+<path d='M90.00 204.00 L90.00 178.36 L96.00 178.62 L102.00 178.88 L108.00 179.14 L114.00 179.40 L120.00 179.66 L126.00 179.92 L132.00 180.18 L138.00 180.44 L144.00 180.70 L144.55 180.72 L144.55 218.79 L150.55 219.05 L156.55 219.31 L162.55 219.57 L168.55 219.83 L174.55 220.09 L180.55 220.35 L186.55 220.61 L192.55 220.87 L198.55 221.13 L204.55 221.39 L210.55 221.65 L212.73 221.74 L212.73 221.74 L218.73 223.75 L224.73 225.91 L230.73 228.21 L236.73 230.66 L242.73 233.26 L248.73 236.01 L253.64 238.36 L253.64 182.77 L259.64 185.78 L265.64 188.94 L271.64 192.25 L277.64 195.71 L280.91 197.65 L280.91 197.65 L286.91 197.91 L292.91 198.17 L298.91 198.43 L304.91 198.69 L310.91 198.95 L316.91 199.21 L322.91 199.47 L328.91 199.73 L334.91 199.99 L340.91 200.25 L346.91 200.51 L352.91 200.77 L358.91 201.03 L364.91 201.29 L370.91 201.55 L376.91 201.81 L382.91 202.07 L388.91 202.33 L390 204' stroke='black' fill-opacity='0.0'>
+</path>
+<path d='M90.00 309.00 L90.00 309.00 L96.00 304.73 L102.00 300.51 L108.00 296.33 L114.00 292.19 L120.00 288.10 L126.00 284.05 L132.00 280.04 L138.00 276.08 L144.00 272.16 L144.55 271.80 L144.55 271.80 L150.55 274.30 L156.55 276.84 L162.55 279.42 L168.55 282.05 L174.55 284.72 L180.55 287.43 L186.55 290.19 L192.55 292.99 L198.55 295.84 L204.55 298.73 L210.55 301.66 L212.73 302.73 L212.73 302.73 L218.73 305.87 L224.73 309.35 L230.73 313.21 L236.73 317.46 L242.73 322.14 L248.73 327.26 L253.64 331.80 L253.64 331.80 L259.64 328.50 L265.64 325.71 L271.64 323.47 L277.64 321.79 L280.91 321.12 L280.91 321.12 L286.91 320.08 L292.91 319.09 L298.91 318.13 L304.91 317.22 L310.91 316.36 L316.91 315.53 L322.91 314.76 L328.91 314.02 L334.91 313.33 L340.91 312.68 L346.91 312.07 L352.91 311.51 L358.91 310.99 L364.91 310.52 L370.91 310.08 L376.91 309.70 L382.91 309.35 L388.91 309.05 L390.00 309.00 L390 309' stroke='black' fill-opacity='0.0'>
+</path>
+<text x='90.00' y='176.36' text-anchor='middle'>
+<tspan>1.35</tspan></text>
+<text x='144.55' y='178.72' text-anchor='middle'>
+<tspan>1.22</tspan></text>
+<text x='253.64' y='251.36' text-anchor='middle'>
+<tspan>-1.81</tspan></text>
+<text x='253.64' y='180.77' text-anchor='middle'>
+<tspan>1.12</tspan></text>
+<text x='390.00' y='200.38' text-anchor='middle'>
+<tspan>0.0854</tspan></text>
+<text x='90.00' y='176.36' text-anchor='middle'>
+<tspan>1.35</tspan></text>
+<text x='144.55' y='178.72' text-anchor='middle'>
+<tspan>1.22</tspan></text>
+<text x='253.64' y='251.36' text-anchor='middle'>
+<tspan>-1.81</tspan></text>
+<text x='253.64' y='180.77' text-anchor='middle'>
+<tspan>1.12</tspan></text>
+<text x='390.00' y='200.38' text-anchor='middle'>
+<tspan>0.0854</tspan></text>
+<text x='144.55' y='269.80' text-anchor='middle'>
+<tspan>5.14</tspan></text>
+<text x='144.55' y='269.80' text-anchor='middle'>
+<tspan>5.14</tspan></text>
+<text x='212.73' y='300.73' text-anchor='middle'>
+<tspan>0.866</tspan></text>
+<text x='212.73' y='300.73' text-anchor='middle'>
+<tspan>0.866</tspan></text>
+<text x='253.64' y='344.80' text-anchor='middle'>
+<tspan>-3.15</tspan></text>
+<text x='144.55' y='269.80' text-anchor='middle'>
+<tspan>5.14</tspan></text>
+<text x='144.55' y='269.80' text-anchor='middle'>
+<tspan>5.14</tspan></text>
+<text x='212.73' y='300.73' text-anchor='middle'>
+<tspan>0.866</tspan></text>
+<text x='212.73' y='300.73' text-anchor='middle'>
+<tspan>0.866</tspan></text>
+<text x='253.64' y='344.80' text-anchor='middle'>
+<tspan>-3.15</tspan></text>
+<text x='162.54545454545456' y='450.5291470078089' text-anchor='middle'>
+<tspan>-0.024″</tspan></text>
+</svg></span></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<h2 id='units'>Units</h2>
+<p>Hurmet can write output in either SI units or imperial units. It takes its cue from the span lengths in line 1. If those lengths are written in <code>ft</code> or <code>′</code>, output will be in <code>kips</code> and <code>feet</code>. Input lengths in <code>m</code> or <code>mm</code> will result in output in <code>KN</code> and <code>m</code>. Remember that span lengths without units will be taken as <code>mm</code>.</p>
+<p><span class='hurmet-calc' data-entry='beam4 =
+``#item	value
+plan	△ 3.5m △ 3000 △
+E	200 GPa
+I	5450 cm⁴
+dead	-0.542 kN/m
+live	-5.84 kN/m
+live	-9 kN, 1200``'><math><mrow><mrow><mrow><mi mathvariant="normal">b</mi></mrow><mrow><mi mathvariant="normal">e</mi></mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">m</mi></mrow><mn>4</mn></mrow><mo>=</mo></mrow><mrow><mtable columnalign="left center" class="tml-array"><mtr class="tml-hline-solid"><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>item</mtext></mtd><mtd><mtext>value</mtext></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>plan</mtext></mtd><mtd><mtext>△ 3.5m △ 3000 △</mtext></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>E</mtext></mtd><mtd><mtext>200 GPa</mtext></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>I</mtext></mtd><mtd><mtext>5450 cm⁴</mtext></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>dead</mtext></mtd><mtd><mtext>-0.542 kN⁄m</mtext></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>live</mtext></mtd><mtd><mtext>-5.84 kN⁄m</mtext></mtd></mtr><mtr><mtd style="text-align:-webkit-left;border-right:0.06em solid;"><mtext>live</mtext></mtd><mtd><mtext>-9 kN, 1200</mtext></mtd></mtr></mtable><mspace width="0.2778em"></mspace></mrow></math></span>   <span class='hurmet-calc' data-entry='beamDiagram(beam4) = @' style='float: right;'><svg xmlns="http://www.w3.org/2000/svg" float='right' width='375' height='382' viewBox='0 0 450 458'>
+<title>
+Beam Diagram</title>
+<defs>
+<style>svg { background-color: #fff; }
+text, tspan { font: 12px Arial; }</style></defs>
+<text x='20' y='82'>
+<tspan>loads</tspan></text>
+<text x='20' y='96'>
+<tspan>(kN, m)</tspan></text>
+<path stroke='black' stroke-width='1.5px' d='M90 80 h300'>
+</path>
+<path d='M90 80.75 l5 10 h-10 z' style='fill:#fff; stroke:#000'>
+</path>
+<path d='M251.53846153846155 80.75 l5 10 h-10 z' style='fill:#fff; stroke:#000'>
+</path>
+<path d='M390 80.75 l5 10 h-10 z' style='fill:#fff; stroke:#000'>
+</path>
+<text x='170.76923076923077' y='95'>
+<tspan>3.50</tspan></text>
+<text x='320.7692307692308' y='95'>
+<tspan>3.00</tspan></text>
+<path style='fill: #000; fill-opacity:1.0' d='M145.3846153846154 79.25 l-4 -8 h3.5 v-32 h1 v32 h3z'>
+</path>
+<text x='145.3846153846154' y='35' text-anchor='middle'>
+<tspan>9</tspan></text>
+<path d='M90 80V58.14383561643835L145.3846153846154 58.14383561643835L251.53846153846155 58.14383561643835L390 58.14383561643835V80' stroke='black' fill-opacity='0.0'>
+</path>
+<text x='240' y='54.14383561643835'>
+<tspan>6.38</tspan></text>
+<text x='20' y='207'>
+<tspan>shear</tspan></text>
+<text x='20' y='221'>
+<tspan>(kN)</tspan></text>
+<path d='M90 205 h300' stroke='black' stroke-width='1.5px'>
+</path>
+<text x='20' y='307'>
+<tspan>bending</tspan></text>
+<text x='20' y='321'>
+<tspan>(kN-m)</tspan></text>
+<path d='M90 305 h300' stroke='black' stroke-width='1.5px'>
+</path>
+<path style='fill: #000; fill-opacity:1.0' d='M90 90.75 l4 8 h-3.5 v22 h-1 v-22 h-3z'>
+</path>
+<text x='90' y='135' text-anchor='middle'>
+<tspan>13.9</tspan></text>
+<path style='fill: #000; fill-opacity:1.0' d='M251.53846153846155 90.75 l4 8 h-3.5 v22 h-1 v-22 h-3z'>
+</path>
+<text x='251.53846153846155' y='135' text-anchor='middle'>
+<tspan>30.7</tspan></text>
+<path style='fill: #000; fill-opacity:1.0' d='M390 90.75 l4 8 h-3.5 v22 h-1 v-22 h-3z'>
+</path>
+<text x='390' y='135' text-anchor='middle'>
+<tspan>5.86</tspan></text>
+<text x='20' y='410'>
+<tspan>deflection</tspan></text>
+<path d='M90 408 h300' stroke='black' stroke-width='1.5px'>
+</path>
+<path d='M90.00 408.00 L96.00 412.29 L102.00 416.49 L108.00 420.54 L114.00 424.35 L120.00 427.85 L126.00 431.00 L132.00 433.72 L138.00 435.96 L144.00 437.68 L145.38 438.00 L145.38 438.00 L151.38 439.03 L157.38 439.51 L163.38 439.45 L169.38 438.90 L175.38 437.88 L181.38 436.43 L187.38 434.61 L193.38 432.46 L199.38 430.03 L205.38 427.39 L211.38 424.60 L217.38 421.74 L223.38 418.88 L229.38 416.10 L235.38 413.48 L241.38 411.13 L247.38 409.12 L251.54 408.00 L251.54 408.00 L257.54 406.80 L263.54 406.06 L269.54 405.68 L275.54 405.62 L281.54 405.80 L287.54 406.16 L293.54 406.65 L299.54 407.23 L305.54 407.84 L311.54 408.45 L317.54 409.02 L323.54 409.53 L329.54 409.96 L335.54 410.28 L341.54 410.48 L347.54 410.56 L353.54 410.51 L359.54 410.34 L365.54 410.05 L371.54 409.65 L377.54 409.17 L383.54 408.63 L389.54 408.05 L390.00 408.00' stroke='black' fill-opacity='0.0'>
+</path>
+<path d='M90.00 205.00 L90.00 178.39 L145.38 193.05 L145.38 210.28 L251.54 238.39 L251.54 179.56 L390.00 216.22 L390.00 205.00' stroke='black' fill-opacity='0.0'>
+</path>
+<path d='M90.00 305.00 L90.00 305.00 L96.00 300.47 L102.00 296.22 L108.00 292.25 L114.00 288.56 L120.00 285.14 L126.00 282.01 L132.00 279.15 L138.00 276.57 L144.00 274.27 L145.38 273.78 L145.38 273.78 L151.38 274.85 L157.38 276.19 L163.38 277.82 L169.38 279.72 L175.38 281.90 L181.38 284.36 L187.38 287.09 L193.38 290.11 L199.38 293.41 L205.38 296.98 L211.38 300.83 L217.38 304.96 L223.38 309.37 L229.38 314.06 L235.38 319.03 L241.38 324.27 L247.38 329.80 L251.54 333.78 L251.54 333.78 L257.54 329.46 L263.54 325.42 L269.54 321.65 L275.54 318.16 L281.54 314.95 L287.54 312.02 L293.54 309.37 L299.54 307.00 L305.54 304.91 L311.54 303.09 L317.54 301.56 L323.54 300.30 L329.54 299.32 L335.54 298.62 L341.54 298.20 L347.54 298.05 L353.54 298.19 L359.54 298.60 L365.54 299.29 L371.54 300.26 L377.54 301.51 L383.54 303.04 L389.54 304.85 L390.00 305.00 L390 305' stroke='black' fill-opacity='0.0'>
+</path>
+<text x='90.00' y='176.39' text-anchor='middle'>
+<tspan>13.9</tspan></text>
+<text x='145.38' y='191.05' text-anchor='middle'>
+<tspan>6.24</tspan></text>
+<text x='251.54' y='251.39' text-anchor='middle'>
+<tspan>-17.4</tspan></text>
+<text x='251.54' y='177.56' text-anchor='middle'>
+<tspan>13.3</tspan></text>
+<text x='390.00' y='229.22' text-anchor='middle'>
+<tspan>-5.86</tspan></text>
+<text x='90.00' y='176.39' text-anchor='middle'>
+<tspan>13.9</tspan></text>
+<text x='145.38' y='191.05' text-anchor='middle'>
+<tspan>6.24</tspan></text>
+<text x='251.54' y='251.39' text-anchor='middle'>
+<tspan>-17.4</tspan></text>
+<text x='251.54' y='177.56' text-anchor='middle'>
+<tspan>13.3</tspan></text>
+<text x='390.00' y='229.22' text-anchor='middle'>
+<tspan>-5.86</tspan></text>
+<text x='145.38' y='271.78' text-anchor='middle'>
+<tspan>12.1</tspan></text>
+<text x='145.38' y='271.78' text-anchor='middle'>
+<tspan>12.1</tspan></text>
+<text x='251.54' y='346.78' text-anchor='middle'>
+<tspan>-11.1</tspan></text>
+<text x='251.54' y='346.78' text-anchor='middle'>
+<tspan>-11.1</tspan></text>
+<text x='347.63' y='296.05' text-anchor='middle'>
+<tspan>2.69</tspan></text>
+<text x='145.38' y='271.78' text-anchor='middle'>
+<tspan>12.1</tspan></text>
+<text x='145.38' y='271.78' text-anchor='middle'>
+<tspan>12.1</tspan></text>
+<text x='251.54' y='346.78' text-anchor='middle'>
+<tspan>-11.1</tspan></text>
+<text x='251.54' y='346.78' text-anchor='middle'>
+<tspan>-11.1</tspan></text>
+<text x='347.63' y='296.05' text-anchor='middle'>
+<tspan>2.69</tspan></text>
+<text x='157.3846153846154' y='452.50512821112943' text-anchor='middle'>
+<tspan>-1 mm</tspan></text>
+</svg></span></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<h2 id='load-combinations'>Load Combinations</h2>
+<p>Strength-level analysis requires load factors in several different combinations. You can define your own combinations in a data frame. </p>
+<p> <span class='hurmet-calc' data-entry='loadFactors = 
+``dead	live
+1.4	0
+1.2	1.6``'><math><mrow><mrow><mrow><mi mathvariant="normal">l</mi></mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">d</mi></mrow><mrow><mi mathvariant="normal">F</mi></mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">c</mi></mrow><mrow><mi mathvariant="normal">t</mi></mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">s</mi></mrow></mrow><mo>=</mo></mrow><mrow><mtable columnalign="center" class="tml-array"><mtr class="tml-hline-solid"><mtd><mtext>dead</mtext></mtd><mtd><mtext>live</mtext></mtd></mtr><mtr><mtd><mn>1.4</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>1.2</mn></mtd><mtd><mn>1.6</mn></mtd></mtr></mtable><mspace width="0.2778em"></mspace></mrow></math></span></p>
+<p>… then the function call includes an optional argument:</p>
+<pre><code>beamDiagram(beam, loadFactors) = @</code></pre><p>… and the result looks like this:</p>
+<p><span class='hurmet-calc' data-entry='beamDiagram(beam, loadFactors) = @' style='float: right;'><svg xmlns="http://www.w3.org/2000/svg" float='right' width='375' height='382' viewBox='0 0 450 458'>
+<title>
+Beam Diagram</title>
+<defs>
+<style>svg { background-color: #fff; }
+text, tspan { font: 12px Arial; }</style></defs>
+<text x='20' y='82'>
+<tspan>loads</tspan></text>
+<text x='20' y='96'>
+<tspan>(kips, ft)</tspan></text>
+<path stroke='black' stroke-width='1.5px' d='M90 80 h300'>
+</path>
+<path d='M90 80.75 l5 10 h-10 z' style='fill:#fff; stroke:#000'>
+</path>
+<path d='M253.63636363636365 80.75 l5 10 h-10 z' style='fill:#fff; stroke:#000'>
+</path>
+<path d='M390 80.75 l5 10 h-10 z' style='fill:#fff; stroke:#000'>
+</path>
+<text x='171.8181818181818' y='95'>
+<tspan>12.0′</tspan></text>
+<text x='321.8181818181818' y='95'>
+<tspan>10.0′</tspan></text>
+<path style='fill: #000; fill-opacity:1.0' d='M144.54545454545456 79.25 l-4 -8 h3.5 v-32 h1 v32 h3z'>
+</path>
+<text x='144.54545454545456' y='35' text-anchor='middle'>
+<tspan>2</tspan></text>
+<path d='M90 80V58.45L144.54545454545456 58.45L253.63636363636368 58.45L390 58.45V80' stroke='black' fill-opacity='0.0'>
+</path>
+<text x='240' y='54.45'>
+<tspan>0.431</tspan></text>
+<text x='20' y='207'>
+<tspan>shear</tspan></text>
+<text x='20' y='221'>
+<tspan>(kips)</tspan></text>
+<path d='M90 205 h300' stroke='black' stroke-width='1.5px'>
+</path>
+<text x='20' y='307'>
+<tspan>bending</tspan></text>
+<text x='20' y='321'>
+<tspan>(kip-ft)</tspan></text>
+<path d='M90 305 h300' stroke='black' stroke-width='1.5px'>
+</path>
+<text x='20' y='193'>
+<tspan>factored</tspan></text>
+<text x='20' y='293'>
+<tspan>factored</tspan></text>
+<path style='fill: #000; fill-opacity:1.0' d='M90 90.75 l4 8 h-3.5 v22 h-1 v-22 h-3z'>
+</path>
+<text x='90' y='135' text-anchor='middle'>
+<tspan>3.2</tspan></text>
+<path style='fill: #000; fill-opacity:1.0' d='M253.63636363636365 90.75 l4 8 h-3.5 v22 h-1 v-22 h-3z'>
+</path>
+<text x='253.63636363636365' y='135' text-anchor='middle'>
+<tspan>6.99</tspan></text>
+<path style='fill: #000; fill-opacity:1.0' d='M390 90.75 l4 8 h-3.5 v22 h-1 v-22 h-3z'>
+</path>
+<text x='390' y='135' text-anchor='middle'>
+<tspan>1.29</tspan></text>
+<text x='20' y='410'>
+<tspan>deflection</tspan></text>
+<path d='M90 408 h300' stroke='black' stroke-width='1.5px'>
+</path>
+<path d='M90.00 408.00 L96.00 412.29 L102.00 416.51 L108.00 420.56 L114.00 424.38 L120.00 427.91 L126.00 431.07 L132.00 433.82 L138.00 436.10 L144.00 437.87 L144.55 438.00 L144.55 438.00 L150.55 439.16 L156.55 439.78 L162.55 439.87 L168.55 439.47 L174.55 438.60 L180.55 437.30 L186.55 435.61 L192.55 433.59 L198.55 431.27 L204.55 428.71 L210.55 425.99 L216.55 423.15 L222.55 420.28 L228.55 417.46 L234.55 414.76 L240.55 412.26 L246.55 410.07 L252.55 408.28 L253.64 408.00 L253.64 408.00 L259.64 406.78 L265.64 405.99 L271.64 405.58 L277.64 405.46 L283.64 405.59 L289.64 405.90 L295.64 406.33 L301.64 406.85 L307.64 407.41 L313.64 407.98 L319.64 408.51 L325.64 408.99 L331.64 409.40 L337.64 409.70 L343.64 409.90 L349.64 409.99 L355.64 409.96 L361.64 409.82 L367.64 409.57 L373.64 409.23 L379.64 408.82 L385.64 408.35 L390.00 408.00' stroke='black' fill-opacity='0.0'>
+</path>
+<path d='M90.00 205.00 L90.00 203.92 L144.55 204.84 L144.55 204.84 L253.64 206.68 L253.64 203.49 L390.00 205.79 L390.00 205.00' stroke='black' fill-opacity='0.0'>
+</path>
+<path d='M90.00 205.00 L90.00 178.18 L144.55 192.53 L144.55 209.48 L253.64 238.18 L253.64 179.86 L390.00 215.73 L390.00 205.00' stroke='black' fill-opacity='0.0'>
+</path>
+<path d='M90.00 305.00 L90.00 305.00 L96.00 300.44 L102.00 296.15 L108.00 292.14 L114.00 288.41 L120.00 284.95 L126.00 281.77 L132.00 278.87 L138.00 276.25 L144.00 273.90 L144.55 273.70 L144.55 273.70 L150.55 274.62 L156.55 275.82 L162.55 277.30 L168.55 279.05 L174.55 281.08 L180.55 283.39 L186.55 285.97 L192.55 288.83 L198.55 291.97 L204.55 295.38 L210.55 299.07 L216.55 303.04 L222.55 307.28 L228.55 311.80 L234.55 316.59 L240.55 321.67 L246.55 327.02 L252.55 332.64 L253.64 333.70 L253.64 333.70 L259.64 329.43 L265.64 325.44 L271.64 321.72 L277.64 318.28 L283.64 315.12 L289.64 312.24 L295.64 309.63 L301.64 307.30 L307.64 305.24 L313.64 303.47 L319.64 301.96 L325.64 300.74 L331.64 299.79 L337.64 299.12 L343.64 298.72 L349.64 298.61 L355.64 298.76 L361.64 299.20 L367.64 299.91 L373.64 300.90 L379.64 302.16 L385.64 303.71 L390.00 305.00 L390 305' stroke='black' fill-opacity='0.0'>
+</path>
+<text x='90.00' y='176.18' text-anchor='middle'>
+<tspan>5.06</tspan></text>
+<text x='144.55' y='190.53' text-anchor='middle'>
+<tspan>2.35</tspan></text>
+<text x='253.64' y='251.18' text-anchor='middle'>
+<tspan>-6.26</tspan></text>
+<text x='253.64' y='177.86' text-anchor='middle'>
+<tspan>4.75</tspan></text>
+<text x='390.00' y='228.73' text-anchor='middle'>
+<tspan>-2.03</tspan></text>
+<text x='144.55' y='271.70' text-anchor='middle'>
+<tspan>14.8</tspan></text>
+<text x='144.55' y='271.70' text-anchor='middle'>
+<tspan>14.8</tspan></text>
+<text x='253.64' y='346.70' text-anchor='middle'>
+<tspan>-13.6</tspan></text>
+<text x='349.20' y='296.60' text-anchor='middle'>
+<tspan>3.03</tspan></text>
+<text x='162.54545454545456' y='452.8738861057729' text-anchor='middle'>
+<tspan>-0.047″</tspan></text>
+</svg></span></p>
+<p>Yes, the shapes of this diagram are very similar to the first diagram. But look closely. The shear and bending magnitudes are larger.</p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p>You can also get patterned live loads by marking a load type with an asterisk:</p>
+<p><span class='hurmet-calc' data-entry='loadFactors = 
+``dead	live*
+1.4	0
+1.2	1.6``'><math><mrow><mrow><mrow><mi mathvariant="normal">l</mi></mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">d</mi></mrow><mrow><mi mathvariant="normal">F</mi></mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">c</mi></mrow><mrow><mi mathvariant="normal">t</mi></mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">s</mi></mrow></mrow><mo>=</mo></mrow><mrow><mtable columnalign="center" class="tml-array"><mtr class="tml-hline-solid"><mtd><mtext>dead</mtext></mtd><mtd><mtext>live*</mtext></mtd></mtr><mtr><mtd><mn>1.4</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>1.2</mn></mtd><mtd><mn>1.6</mn></mtd></mtr></mtable><mspace width="0.2778em"></mspace></mrow></math></span><span class='hurmet-calc' data-entry='beamDiagram(beam, loadFactors) = @' style='float: right;'><svg xmlns="http://www.w3.org/2000/svg" float='right' width='375' height='383' viewBox='0 0 450 460'>
+<title>
+Beam Diagram</title>
+<defs>
+<style>svg { background-color: #fff; }
+text, tspan { font: 12px Arial; }</style></defs>
+<text x='20' y='82'>
+<tspan>loads</tspan></text>
+<text x='20' y='96'>
+<tspan>(kips, ft)</tspan></text>
+<path stroke='black' stroke-width='1.5px' d='M90 80 h300'>
+</path>
+<path d='M90 80.75 l5 10 h-10 z' style='fill:#fff; stroke:#000'>
+</path>
+<path d='M253.63636363636365 80.75 l5 10 h-10 z' style='fill:#fff; stroke:#000'>
+</path>
+<path d='M390 80.75 l5 10 h-10 z' style='fill:#fff; stroke:#000'>
+</path>
+<text x='171.8181818181818' y='95'>
+<tspan>12.0′</tspan></text>
+<text x='321.8181818181818' y='95'>
+<tspan>10.0′</tspan></text>
+<path style='fill: #000; fill-opacity:1.0' d='M144.54545454545456 79.25 l-4 -8 h3.5 v-32 h1 v32 h3z'>
+</path>
+<text x='144.54545454545456' y='35' text-anchor='middle'>
+<tspan>2</tspan></text>
+<path d='M90 80V58.45L144.54545454545456 58.45L253.63636363636368 58.45L390 58.45V80' stroke='black' fill-opacity='0.0'>
+</path>
+<text x='240' y='54.45'>
+<tspan>0.431</tspan></text>
+<text x='20' y='208'>
+<tspan>shear</tspan></text>
+<text x='20' y='222'>
+<tspan>(kips)</tspan></text>
+<path d='M90 206 h300' stroke='black' stroke-width='1.5px'>
+</path>
+<text x='20' y='310'>
+<tspan>bending</tspan></text>
+<text x='20' y='324'>
+<tspan>(kip-ft)</tspan></text>
+<path d='M90 308 h300' stroke='black' stroke-width='1.5px'>
+</path>
+<text x='20' y='194'>
+<tspan>factored</tspan></text>
+<text x='20' y='296'>
+<tspan>factored</tspan></text>
+<path style='fill: #000; fill-opacity:1.0' d='M90 90.75 l4 8 h-3.5 v22 h-1 v-22 h-3z'>
+</path>
+<text x='90' y='135' text-anchor='middle'>
+<tspan>3.2</tspan></text>
+<path style='fill: #000; fill-opacity:1.0' d='M253.63636363636365 90.75 l4 8 h-3.5 v22 h-1 v-22 h-3z'>
+</path>
+<text x='253.63636363636365' y='135' text-anchor='middle'>
+<tspan>6.99</tspan></text>
+<path style='fill: #000; fill-opacity:1.0' d='M390 90.75 l4 8 h-3.5 v22 h-1 v-22 h-3z'>
+</path>
+<text x='390' y='135' text-anchor='middle'>
+<tspan>1.29</tspan></text>
+<text x='20' y='419'>
+<tspan>deflection</tspan></text>
+<path d='M90 417 h300' stroke='black' stroke-width='1.5px'>
+</path>
+<path d='M90.00 417.00 L96.00 420.20 L102.00 423.34 L108.00 426.38 L114.00 429.25 L120.00 431.92 L126.00 434.33 L132.00 436.46 L138.00 438.26 L144.00 439.69 L144.55 439.80 L144.55 439.80 L150.55 440.81 L156.55 441.44 L162.55 441.68 L168.55 441.57 L174.55 441.10 L180.55 440.31 L186.55 439.22 L192.55 437.86 L198.55 436.24 L204.55 434.42 L210.55 432.42 L216.55 430.29 L222.55 428.07 L228.55 425.80 L234.55 423.54 L240.55 421.33 L246.55 419.24 L252.55 417.33 L253.64 417.00 L253.64 417.00 L259.64 415.36 L265.64 413.95 L271.64 412.76 L277.64 411.78 L283.64 411.00 L289.64 410.40 L295.64 409.97 L301.64 409.70 L307.64 409.58 L313.64 409.59 L319.64 409.72 L325.64 409.97 L331.64 410.33 L337.64 410.77 L343.64 411.29 L349.64 411.89 L355.64 412.54 L361.64 413.25 L367.64 414.00 L373.64 414.78 L379.64 415.58 L385.64 416.40 L390.00 417.00' stroke='black' fill-opacity='0.0'>
+</path>
+<path d='M90.00 206.00 L90.00 204.95 L144.55 205.84 L144.55 205.84 L253.64 207.63 L253.64 204.53 L390.00 206.77 L390.00 206.00' stroke='black' fill-opacity='0.0'>
+</path>
+<path d='M90.00 206.00 L90.00 179.88 L144.55 193.85 L144.55 210.36 L253.64 238.31 L253.64 181.51 L390.00 216.45 L390.00 206.00' stroke='black' fill-opacity='0.0'>
+</path>
+<path d='M90.00 308.00 L90.00 308.00 L96.00 303.62 L102.00 299.51 L108.00 295.67 L114.00 292.09 L120.00 288.77 L126.00 285.72 L132.00 282.94 L138.00 280.42 L144.00 278.17 L144.55 277.98 L144.55 277.98 L150.55 278.86 L156.55 280.01 L162.55 281.43 L168.55 283.11 L174.55 285.06 L180.55 287.27 L186.55 289.75 L192.55 292.49 L198.55 295.50 L204.55 298.77 L210.55 302.31 L216.55 306.12 L222.55 310.19 L228.55 314.52 L234.55 319.12 L240.55 323.99 L246.55 329.12 L252.55 334.51 L253.64 335.52 L253.64 335.52 L259.64 331.43 L265.64 327.60 L271.64 324.04 L277.64 320.74 L283.64 317.71 L289.64 314.94 L295.64 312.44 L301.64 310.20 L307.64 308.23 L313.64 306.53 L319.64 305.09 L325.64 303.91 L331.64 303.00 L337.64 302.36 L343.64 301.98 L349.64 301.87 L355.64 302.02 L361.64 302.44 L367.64 303.12 L373.64 304.07 L379.64 305.28 L385.64 306.76 L390.00 308.00 L390 308' stroke='black' fill-opacity='0.0'>
+</path>
+<path d='M90.00 206.00 L90.00 178.31 L144.55 192.29 L144.55 208.80 L253.64 236.75 L253.64 199.90 L390.00 201.82 L390.00 206.00' stroke='black' fill-opacity='0.0'>
+</path>
+<path d='M90.00 308.00 L90.00 308.00 L96.00 303.35 L102.00 298.97 L108.00 294.86 L114.00 291.01 L120.00 287.42 L126.00 284.10 L132.00 281.05 L138.00 278.26 L144.00 275.74 L144.55 275.52 L144.55 275.52 L150.55 276.14 L156.55 277.02 L162.55 278.17 L168.55 279.58 L174.55 281.26 L180.55 283.20 L186.55 285.41 L192.55 287.88 L198.55 290.62 L204.55 293.62 L210.55 296.89 L216.55 300.42 L222.55 304.22 L228.55 308.29 L234.55 312.62 L240.55 317.22 L246.55 322.08 L252.55 327.20 L253.64 328.16 L253.64 328.16 L259.64 327.12 L265.64 326.09 L271.64 325.07 L277.64 324.07 L283.64 323.08 L289.64 322.11 L295.64 321.15 L301.64 320.21 L307.64 319.28 L313.64 318.36 L319.64 317.46 L325.64 316.58 L331.64 315.71 L337.64 314.85 L343.64 314.01 L349.64 313.18 L355.64 312.37 L361.64 311.57 L367.64 310.79 L373.64 310.02 L379.64 309.27 L385.64 308.53 L390.00 308.00 L390 308' stroke='black' fill-opacity='0.0'>
+</path>
+<path d='M90.00 206.00 L90.00 206.66 L144.55 207.43 L144.55 207.43 L253.64 208.96 L253.64 186.36 L390.00 221.30 L390.00 206.00' stroke='black' fill-opacity='0.0'>
+</path>
+<path d='M90.00 308.00 L90.00 308.00 L96.00 308.12 L102.00 308.26 L108.00 308.41 L114.00 308.57 L120.00 308.75 L126.00 308.95 L132.00 309.15 L138.00 309.38 L144.00 309.62 L144.55 309.64 L144.55 309.64 L150.55 309.89 L156.55 310.16 L162.55 310.44 L168.55 310.74 L174.55 311.05 L180.55 311.38 L186.55 311.72 L192.55 312.07 L198.55 312.45 L204.55 312.83 L210.55 313.23 L216.55 313.64 L222.55 314.07 L228.55 314.52 L234.55 314.97 L240.55 315.45 L246.55 315.93 L252.55 316.43 L253.64 316.53 L253.64 316.53 L259.64 313.27 L265.64 310.28 L271.64 307.55 L277.64 305.09 L283.64 302.89 L289.64 300.96 L295.64 299.29 L301.64 297.89 L307.64 296.76 L313.64 295.89 L319.64 295.29 L325.64 294.95 L331.64 294.87 L337.64 295.06 L343.64 295.52 L349.64 296.24 L355.64 297.23 L361.64 298.48 L367.64 300.00 L373.64 301.79 L379.64 303.84 L385.64 306.15 L390.00 308.00 L390 308' stroke='black' fill-opacity='0.0'>
+</path>
+<text x='253.64' y='251.31' text-anchor='middle'>
+<tspan>-6.26</tspan></text>
+<text x='253.64' y='179.51' text-anchor='middle'>
+<tspan>4.75</tspan></text>
+<text x='90.00' y='176.31' text-anchor='middle'>
+<tspan>5.37</tspan></text>
+<text x='144.55' y='190.29' text-anchor='middle'>
+<tspan>2.66</tspan></text>
+<text x='390.00' y='199.82' text-anchor='middle'>
+<tspan>0.810</tspan></text>
+<text x='390.00' y='234.30' text-anchor='middle'>
+<tspan>-2.96</tspan></text>
+<text x='253.64' y='348.52' text-anchor='middle'>
+<tspan>-13.6</tspan></text>
+<text x='144.55' y='273.52' text-anchor='middle'>
+<tspan>16.0</tspan></text>
+<text x='144.55' y='273.52' text-anchor='middle'>
+<tspan>16.0</tspan></text>
+<text x='330.30' y='292.87' text-anchor='middle'>
+<tspan>6.49</tspan></text>
+<text x='307.6363636363636' y='407.57584112672754' text-anchor='middle'>
+<tspan>0.017″</tspan></text>
+<text x='162.54545454545456' y='454.68308860695475' text-anchor='middle'>
+<tspan>-0.056″</tspan></text>
+</svg></span></p>
+<p></p>
+
+</article>
+</body>
+</html>

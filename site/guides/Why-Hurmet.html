@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Why Hurmet</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <nav>
+   <ul>
+     <li><a href="../index.html">Hurmet</a></li>
+     <li><a href="../manual.html">Documentation</a></li>
+   </ul>
+  </nav>
+<article class="ProseMirror pica">
+<div class="hidden"><p><span class='hurmet-calc' data-entry='format = "h3"'><math><mrow><mrow><mrow><mi mathvariant="normal">f</mi></mrow><mrow><mi mathvariant="normal">o</mi></mrow><mrow><mi mathvariant="normal">r</mi></mrow><mrow><mi mathvariant="normal">m</mi></mrow><mrow><mi mathvariant="normal">a</mi></mrow><mrow><mi mathvariant="normal">t</mi></mrow></mrow><mo>=</mo></mrow><mrow><mtext>h3</mtext></mrow></math></span></p>
+<p><span class='hurmet-calc' data-entry='w = 252 lbf/ft'><math><mrow><mi>w</mi><mo>=</mo></mrow><mrow><mn>252</mn><mspace width="0.1667em"></mspace><mtext>lbf⁄ft</mtext></mrow></math></span></p>
+<p><span class='hurmet-calc' data-entry='L = 9.4 ft'><math><mrow><mi>L</mi><mo>=</mo></mrow><mrow><mn>9.4</mn><mspace width="0.1667em"></mspace><mtext>ft</mtext></mrow></math></span></p>
+<p><span class='hurmet-calc' data-entry='F_y = 36 ksi'><math><mrow><mi>F</mi><msub><mrow></mrow><mtext>y</mtext></msub><mo>=</mo></mrow><mrow><mn>36</mn><mspace width="0.1667em"></mspace><mtext>ksi</mtext></mrow></math></span></p>
+<p><span class='hurmet-calc' data-entry='t_w = 0.2 in'><math><mrow><mi>t</mi><msub><mrow></mrow><mtext>w</mtext></msub><mo>=</mo></mrow><mrow><mn>0.2</mn><mspace width="0.1667em"></mspace><mtext>in</mtext></mrow></math></span></p>
+<p><span class='hurmet-calc' data-entry='d = 6 in'><math><mrow><mi>d</mi><mo>=</mo></mrow><mrow><mn>6</mn><mspace width="0.1667em"></mspace><mtext>in</mtext></mrow></math></span></p>
+<p><span class='hurmet-calc' data-entry='Ω_v = 1.67'><math><mrow><mrow><mi mathvariant="normal">Ω</mi></mrow><msub><mrow></mrow><mtext>v</mtext></msub><mo>=</mo></mrow><mrow><mn>1.67</mn></mrow></math></span></p></div>
+<h1 id='why-hurmet?'>Why Hurmet?</h1>
+<p><em><a href='../index.html'>Hurmet</a></em> is a rich-text editor that can perform and display live calculations. Why use Hurmet instead of some other calculation method?</p>
+<h2 id='reason-#1:-correctness'>Reason #1: Correctness</h2>
+<p>Picture this situation: You are an engineer, doing a calculation in a spreadsheet. It’s really, really important that the result is correct. In the spreadsheet, you look at the result of your calculation and you see something like looks like this:  <span class='hurmet-tex' data-entry='\boxed{2.78}'><math><mrow scriptlevel="0" displaystyle="true" style="padding:3pt 0 3pt 0;border:1px solid;"><mspace width="3pt"></mspace><mn>2.78</mn><mspace width="3pt"></mspace></mrow></math></span></p>
+<p>When you wrote the formula for that calculation, did you make any mistakes? When the spreadsheet plugged in a value for a variable, did it plug in the correct value? Are you sure? Don’t you want to check?</p>
+<p>Hurmet solves this problem. With Hurmet, the formula is always visible, even in the printed output. So are all the values that Hurmet assigns to variables. So your calculation now looks like this:</p>
+<p><span class='hurmet-calc' data-entry='M = (w L²)/8 = ?? k·ft'><math><mrow><mi>M</mi><mo>=</mo></mrow><mrow><mstyle displaystyle="true" scriptlevel="0"><mfrac><mrow><mi>w</mi><msup><mi>L</mi><mn>2</mn></msup></mrow><mn>8</mn></mfrac></mstyle><mo>=</mo></mrow><mrow><mstyle displaystyle="true" scriptlevel="0" style="color:#0000ff;"><mfrac><mrow><mo form="prefix" stretchy="false">(</mo><mn>252</mn><mspace width="0.1667em"></mspace><mtext>lbf⁄ft</mtext><mo form="postfix" stretchy="false">)</mo><mo form="prefix" stretchy="false">(</mo><mn>9.4</mn><mspace width="0.1667em"></mspace><mtext>ft</mtext><msup><mo form="postfix" stretchy="false">)</mo><mn>2</mn></msup></mrow><mn>8</mn></mfrac></mstyle><mo>=</mo></mrow><mrow><mn>2.78</mn><mspace width="0.2778em"></mspace><mrow><mtext>k</mtext><mspace width="0.0556em"></mspace><mo lspace="0em" rspace="0em">⋅</mo><mspace width="0.0556em"></mspace><mtext>ft</mtext></mrow></mrow></math></span></p>
+<p>With Hurmet, you get to see what your calculation is doing. So you can get it right.</p>
+<h2 id='reason-#2:-communication'>Reason #2: Communication</h2>
+<p>An engineering calculation is not complete when you have demonstrated a result to yourself. You must also communicate your work to others. Among those others are: </p>
+<ul><li class="tight"><p>the designer with whom you are working</p></li>
+<li class="tight"><p>the designer’s checker</p></li>
+<li class="tight"><p>your checker</p></li>
+<li class="tight"><p>the engineer-of-record (who may or may not be the same person as your checker)</p></li>
+<li class="tight"><p>the official who issues a building permit</p></li>
+<li class="tight"><p>yourself, five years from now when the client wants a modification</p></li></ul>
+<p>Everyone on that list is busy. They don’t have time to finish work that is only partly written down. They don’t have time to decipher cryptic comments. You need to be complete. You need to be clear.</p>
+<p>You need to convey the calculations you have done and the values you have used. The work should be annotated with descriptions that guide the reader through your chain of thought. A calculation should be at least as detailed as this snippet:</p>
+<div class="indented"><p>Check shear</p>
+<div class="indented"><p><span class='hurmet-calc' data-entry='V = (w L)/2 = ?? kips'><math><mrow><mi>V</mi><mo>=</mo></mrow><mrow><mstyle displaystyle="true" scriptlevel="0"><mfrac><mrow><mi>w</mi><mi>L</mi></mrow><mn>2</mn></mfrac></mstyle><mo>=</mo></mrow><mrow><mstyle displaystyle="true" scriptlevel="0" style="color:#0000ff;"><mfrac><mrow><mo form="prefix" stretchy="false">(</mo><mn>252</mn><mspace width="0.1667em"></mspace><mtext>lbf⁄ft</mtext><mo form="postfix" stretchy="false">)</mo><mo form="prefix" stretchy="false">(</mo><mn>9.4</mn><mspace width="0.1667em"></mspace><mtext>ft</mtext><mo form="postfix" stretchy="false">)</mo></mrow><mn>2</mn></mfrac></mstyle><mo>=</mo></mrow><mrow><mn>1.18</mn><mspace width="0.2778em"></mspace><mtext>kips</mtext></mrow></math></span>, shear</p>
+<p><span class='hurmet-calc' data-entry='V_allow = 1//Ω_v·0.6 F_y t_w d = ?? kips'><math><mrow><mi>V</mi><msub><mrow></mrow><mtext>allow</mtext></msub><mo>=</mo></mrow><mrow><mstyle displaystyle="false" scriptlevel="0"><mfrac><mn>1</mn><mrow><mrow><mi mathvariant="normal">Ω</mi></mrow><msub><mrow></mrow><mtext>v</mtext></msub></mrow></mfrac></mstyle><mo>⋅</mo></mrow><mrow><mn>0.6</mn><mspace width="0.1667em"></mspace><mi>F</mi><msub><mrow></mrow><mtext>y</mtext></msub><mi>t</mi><msub><mrow></mrow><mtext>w</mtext></msub><mi>d</mi><mo>=</mo></mrow><mrow><mstyle displaystyle="false" scriptlevel="0" style="color:#0000ff;"><mfrac><mn>1</mn><mn>1.67</mn></mfrac></mstyle><mo style="color:#0000ff;">⋅</mo></mrow><mrow><mo form="prefix" stretchy="false" style="color:#0000ff;">(</mo><mn style="color:#0000ff;">0.6</mn><mo form="postfix" stretchy="false" style="color:#0000ff;">)</mo><mspace width="0.1667em" style="color:#0000ff;"></mspace><mo form="prefix" stretchy="false" style="color:#0000ff;">(</mo><mn style="color:#0000ff;">36</mn><mspace width="0.1667em" style="color:#0000ff;"></mspace><mtext style="color:#0000ff;">ksi</mtext><mo form="postfix" stretchy="false" style="color:#0000ff;">)</mo><mo form="prefix" stretchy="false" style="color:#0000ff;">(</mo><mn style="color:#0000ff;">0.2</mn><mspace width="0.1667em" style="color:#0000ff;"></mspace><mtext style="color:#0000ff;">in</mtext><mo form="postfix" stretchy="false" style="color:#0000ff;">)</mo><mo form="prefix" stretchy="false" style="color:#0000ff;">(</mo><mn style="color:#0000ff;">6</mn><mspace width="0.1667em" style="color:#0000ff;"></mspace><mtext style="color:#0000ff;">in</mtext><mo form="postfix" stretchy="false" style="color:#0000ff;">)</mo><mo>=</mo></mrow><mrow><mn>15.5</mn><mspace width="0.2778em"></mspace><mtext>kips</mtext></mrow></math></span><span class='hurmet-calc' data-entry='{"> V, ok" if V_allow > V; \red("< V, ng") otherwise} = @'><math><mtext>&gt; V, ok</mtext></math></span></p></div></div>
+<h2 id='reason-#3:-unit-aware-calculations'>Reason #3: Unit-Aware Calculations</h2>
+<p>In 1983, Air Canada Flight 143 ran out of fuel in midair. It had refueled incorrectly because a calculation contained a unit-conversion error. Before you scoff, know that this sort of thing can easily slip into a calculation. It’s a problem.</p>
+<p>Hurmet calculations can include units-of-measure. And it does unit conversions automatically. If you want to mix metric and imperial units, go ahead. Then specify that the result be written in units of your choice.  Let unit-conversion errors be a thing of the past.</p>
+<div class="indented"><p><span class='hurmet-calc' data-entry="200 'lbf/ft'· 100 'm/min'· 2 'hrs' = ?? kN"><math><mrow><mn>200</mn><mspace width="0.2778em"></mspace><mtext>lbf⁄ft</mtext><mo>⋅</mo></mrow><mrow><mn>100</mn><mspace width="0.2778em"></mspace><mtext>m⁄min</mtext><mo>⋅</mo></mrow><mrow><mn>2</mn><mspace width="0.2778em"></mspace><mtext>hrs</mtext><mo>=</mo></mrow><mrow><mn>35</mn><mo separator="true" lspace="0em" rspace="0em">,</mo></mrow><mrow><mn>025</mn><mspace width="0.2778em"></mspace><mtext>kN</mtext></mrow></math></span></p></div>
+<p>Incompatible units return an error message: </p>
+<div class="indented"><p><span class='hurmet-calc' data-entry="2 'meters' + 3 'hours' = ??"><math><mrow><mn>2</mn><mspace width="0.2778em"></mspace><mtext>meters</mtext><mo>+</mo></mrow><mrow><mn>3</mn><mspace width="0.2778em"></mspace><mtext>hours</mtext><mo>=</mo></mrow><mrow><mtext style="color:firebrick;">Error. Adding incompatible units.</mtext></mrow></math></span></p></div>
+<h2 id='reason-#4:-rapid-adjustment'>Reason #4: Rapid Adjustment</h2>
+<p>Need to make a change? No problem. Re-define a variable with a new value. Hurmet will immediately recalculate all the dependencies.</p>
+
+</article>
+</body>
+</html>

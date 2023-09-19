@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Areas</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <nav>
+   <ul>
+     <li><a href="../index.html">Hurmet</a></li>
+     <li><a href="../manual.html">Documentation</a></li>
+   </ul>
+  </nav>
+<article class="ProseMirror pica">
+<h2 id='areas'>Areas</h2>
+<p>Terms:</p>
+<div class="indented"><p><span class='hurmet-tex' data-entry='P'><math><mi>P</mi></math></span>: perimeter distance<br><span class='hurmet-tex' data-entry='A'><math><mi>A</mi></math></span>: area<br><span class='hurmet-tex' data-entry='r'><math><mi>r</mi></math></span>: radius<br><span class='hurmet-tex' data-entry='D'><math><mi>D</mi></math></span>: diameter<br><span class='hurmet-tex' data-entry='n'><math><mi>n</mi></math></span>: number of sides</p></div>
+<p>Triangles<span class='hurmet-calc' data-entry='draw()
+    title "Triangle"
+    frame 150, 120, "right"
+    view -1.1, 1.1, -0.2, 0.8
+    fill "#D9F2FB"
+    path [-1, 0; 0.3, 0.7; 1, 0; -1, 0]
+    line [0.3, 0; 0.3, 0.7]
+    text [0, 0], "a", "below"
+    text [0.3, 0.3], "h", "left"
+    text [-0.3, 0.4], "b", "left"
+    text [0.6; 0.4], "c", "right"
+    text [-0.8, -0.02], "θ", "aboveright"
+    text [0.95, -0.02], "θ~1~", "aboveleft"
+end' style='float: right;'><svg xmlns="http://www.w3.org/2000/svg" xmlns='http://www.w3.org/2000/svg' width='150' height='120' style='display: inline;' float='right'>
+<title>
+Triangle</title>
+<path d='M6.818181818181827,96 L95.45454545454545,12 L143.1818181818182,96 L6.818181818181827,96 ' stroke-width='1' stroke='black' fill='#D9F2FB'>
+</path>
+<path d='M95.45454545454545,96 95.45454545454545,12' stroke-width='1' stroke='black' fill='#D9F2FB'>
+</path>
+<text text='a' x='75' y='112.6625' font-family='sans-serif' font-size='13.33' text-anchor='middle'>
+<tspan>a</tspan></text>
+<text text='h' x='88.78954545454545' y='64.44333333333333' font-family='sans-serif' font-size='13.33' text-anchor='end'>
+<tspan>h</tspan></text>
+<text text='b' x='47.88045454545455' y='52.443333333333335' font-family='sans-serif' font-size='13.33' text-anchor='end'>
+<tspan>b</tspan></text>
+<text text='c' x='122.57409090909091' y='52.443333333333335' font-family='sans-serif' font-size='13.33' text-anchor='start'>
+<tspan>c</tspan></text>
+<text text='θ' x='27.11954545454546' y='91.735' font-family='sans-serif' font-size='13.33' text-anchor='start'>
+<tspan>θ</tspan></text>
+<text text='θ~1~' x='133.10772727272726' y='91.735' font-family='sans-serif' font-size='13.33' text-anchor='end'>
+<tspan>θ</tspan><tspan font-size='0.8em' dy='2'>1</tspan></text>
+</svg></span></p>
+<div class="indented"><p><span class='hurmet-calc' data-entry='h = b sin θ = a (tan θ tan θ_1) / (tan θ + tan θ_1)'><math><mrow><mi>h</mi><mo>=</mo><mi>b</mi><mrow><mspace width="0.1667em"></mspace><mi>sin</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mi>θ</mi></mrow><mrow><mo>=</mo><mi>a</mi><mstyle displaystyle="true" scriptlevel="0"><mfrac><mrow><mrow><mspace width="0.1667em"></mspace><mi>tan</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mi>θ</mi><mrow><mspace width="0.1667em"></mspace><mi>tan</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mrow><mi>θ</mi><msub><mrow></mrow><mtext>1</mtext></msub></mrow></mrow><mrow><mrow><mspace width="0.1667em"></mspace><mi>tan</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mi>θ</mi><mo>+</mo><mrow><mi>tan</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mrow><mi>θ</mi><msub><mrow></mrow><mtext>1</mtext></msub></mrow></mrow></mfrac></mstyle></mrow></math></span></p>
+<p><span class='hurmet-calc' data-entry='A = 1//2 a h = 1//2 a b sin θ = a²/2 (sin θ sin θ_1 ) / (sin θ + sin θ_1)'><math><mrow><mi>A</mi><mo>=</mo><mstyle displaystyle="false" scriptlevel="0"><mfrac><mn>1</mn><mn>2</mn></mfrac></mstyle><mspace width="0.1667em"></mspace><mi>a</mi><mi>h</mi></mrow><mrow><mo>=</mo><mstyle displaystyle="false" scriptlevel="0"><mfrac><mn>1</mn><mn>2</mn></mfrac></mstyle><mspace width="0.1667em"></mspace><mi>a</mi><mi>b</mi><mrow><mspace width="0.1667em"></mspace><mi>sin</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mi>θ</mi></mrow><mrow><mo>=</mo><mstyle displaystyle="true" scriptlevel="0"><mfrac><msup><mi>a</mi><mn>2</mn></msup><mn>2</mn></mfrac></mstyle><mspace width="0.1667em"></mspace><mstyle displaystyle="true" scriptlevel="0"><mfrac><mrow><mrow><mspace width="0.1667em"></mspace><mi>sin</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mi>θ</mi><mrow><mspace width="0.1667em"></mspace><mi>sin</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mrow><mi>θ</mi><msub><mrow></mrow><mtext>1</mtext></msub></mrow></mrow><mrow><mrow><mspace width="0.1667em"></mspace><mi>sin</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mi>θ</mi><mo>+</mo><mrow><mi>sin</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mrow><mi>θ</mi><msub><mrow></mrow><mtext>1</mtext></msub></mrow></mrow></mfrac></mstyle></mrow></math></span></p>
+<p>           <span class='hurmet-calc' data-entry='s = (a + b + c)/2'><math><mrow><mi>s</mi><mo>=</mo><mstyle displaystyle="true" scriptlevel="0"><mfrac><mrow><mi>a</mi><mo>+</mo><mi>b</mi><mo>+</mo><mi>c</mi></mrow><mn>2</mn></mfrac></mstyle></mrow></math></span>, then <span class='hurmet-calc' data-entry='A = s √((s - a)(s - b)(s - c) )'><math><mrow><mi>A</mi><mo>=</mo><mi>s</mi><msqrt><mrow><mo form="prefix" stretchy="false">(</mo><mi>s</mi><mo>−</mo><mi>a</mi><mo form="postfix" stretchy="false">)</mo><mo form="prefix" stretchy="false">(</mo><mi>s</mi><mo>−</mo><mi>b</mi><mo form="postfix" stretchy="false">)</mo><mo form="prefix" stretchy="false">(</mo><mi>s</mi><mo>−</mo><mi>c</mi><mo form="postfix" stretchy="false">)</mo></mrow></msqrt></mrow></math></span>  <br>(Heron’s formula)</p>
+<p><span class='hurmet-calc' data-entry='P = a + b + √(a² + b² - 2 a b cos θ) = a (1 + sin α / sin(θ + θ_1) + sin θ / sin(θ + θ_1))'><math><mrow><mi>P</mi><mo>=</mo><mi>a</mi><mo>+</mo><mi>b</mi><mo>+</mo><msqrt><mrow><msup><mi>a</mi><mn>2</mn></msup><mo>+</mo><msup><mi>b</mi><mn>2</mn></msup><mo>−</mo><mn>2</mn><mspace width="0.1667em"></mspace><mi>a</mi><mi>b</mi><mrow><mspace width="0.1667em"></mspace><mi>cos</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mi>θ</mi></mrow></msqrt></mrow><mrow><mo>=</mo><mi>a</mi><mrow><mo fence="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><mstyle displaystyle="true" scriptlevel="0"><mfrac><mrow><mrow><mi>sin</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mi>α</mi></mrow><mrow><mrow><mspace width="0.1667em"></mspace><mi>sin</mi><mo>⁡</mo></mrow><mo form="prefix" stretchy="false">(</mo><mi>θ</mi><mo>+</mo><mi>θ</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo form="postfix" stretchy="false">)</mo></mrow></mfrac></mstyle><mo>+</mo><mstyle displaystyle="true" scriptlevel="0"><mfrac><mrow><mrow><mi>sin</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mi>θ</mi></mrow><mrow><mrow><mspace width="0.1667em"></mspace><mi>sin</mi><mo>⁡</mo></mrow><mo form="prefix" stretchy="false">(</mo><mi>θ</mi><mo>+</mo><mi>θ</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo form="postfix" stretchy="false">)</mo></mrow></mfrac></mstyle><mo fence="true" form="postfix">)</mo></mrow></mrow></math></span></p></div>
+<p>Equilateral Triangle<span class='hurmet-calc' data-entry='draw()
+    title "Equilateral Triangle"
+    frame 150, 120, "right"
+    view -1.1, 1.1, -0.3, 1.9
+    fill "#D9F2FB"
+    path [-1, 0; 0, 1.732; 1, 0; -1, 0]
+    line [0, 0; 0, 1.732]
+    text [0, 0], "a", "below"
+    text [0.3, 0.7], "h", "left"
+    text [-0.5, 0.9], "a", "left"
+    text [-0.8, -0.02], "θ", "aboveright"
+end' style='float: right;'><svg xmlns="http://www.w3.org/2000/svg" xmlns='http://www.w3.org/2000/svg' width='150' height='120' style='display: inline;' float='right'>
+<title>
+Equilateral Triangle</title>
+<path d='M6.818181818181827,103.63636363636363 L75,9.16363636363635 L143.1818181818182,103.63636363636363 L6.818181818181827,103.63636363636363 ' stroke-width='1' stroke='black' fill='#D9F2FB'>
+</path>
+<path d='M75,103.63636363636363 75,9.16363636363635' stroke-width='1' stroke='black' fill='#D9F2FB'>
+</path>
+<text text='a' x='75' y='120.29886363636362' font-family='sans-serif' font-size='13.33' text-anchor='middle'>
+<tspan>a</tspan></text>
+<text text='h' x='88.78954545454545' y='69.89787878787877' font-family='sans-serif' font-size='13.33' text-anchor='end'>
+<tspan>h</tspan></text>
+<text text='a' x='34.244090909090914' y='58.988787878787875' font-family='sans-serif' font-size='13.33' text-anchor='end'>
+<tspan>a</tspan></text>
+<text text='θ' x='27.11954545454546' y='98.06227272727271' font-family='sans-serif' font-size='13.33' text-anchor='start'>
+<tspan>θ</tspan></text>
+</svg></span></p>
+<div class="indented"><p><span class='hurmet-calc' data-entry='h = √3//2 a'><math><mrow><mi>h</mi><mo>=</mo><mstyle displaystyle="false" scriptlevel="0"><mfrac><msqrt><mn>3</mn></msqrt><mn>2</mn></mfrac></mstyle><mspace width="0.1667em"></mspace><mi>a</mi></mrow></math></span>          <span class='hurmet-calc' data-entry='P = 3 a'><math><mrow><mi>P</mi><mo>=</mo><mn>3</mn><mspace width="0.1667em"></mspace><mtext>a</mtext></mrow></math></span>         <span class='hurmet-calc' data-entry='A = √3//4 a² = 1/√3 h²'><math><mrow><mi>A</mi><mo>=</mo><mstyle displaystyle="false" scriptlevel="0"><mfrac><msqrt><mn>3</mn></msqrt><mn>4</mn></mfrac></mstyle><mspace width="0.1667em"></mspace><msup><mi>a</mi><mn>2</mn></msup></mrow><mrow><mo>=</mo><mstyle displaystyle="true" scriptlevel="0"><mfrac><mn>1</mn><mrow><msqrt><mn>3</mn></msqrt><msup><mi>h</mi><mn>2</mn></msup></mrow></mfrac></mstyle></mrow></math></span></p></div>
+<p>Isosceles triangle<span class='hurmet-calc' data-entry='draw()
+    title "Isosceles Triangle"
+    frame 150, 120, "right"
+    view -1.1, 1.1, -0.3, 1.82
+    fill "#D9F2FB"
+    path [-0.7, 0; 0, 1.8; 0.7, 0; -0.7, 0]
+    line [0, 0; 0, 1.8]
+    text [0, 0], "a", "below"
+    text [0.3, 0.7], "h", "left"
+    text [-0.3, 0.9], "b", "left"
+    text [0.3; 0.9], "b", "right"
+    text [-0.6, -0.02], "θ", "aboveright"
+    text [0.6, -0.02], "θ", "aboveleft"
+end' style='float: right;'><svg xmlns="http://www.w3.org/2000/svg" xmlns='http://www.w3.org/2000/svg' width='150' height='120' style='display: inline;' float='right'>
+<title>
+Isosceles Triangle</title>
+<path d='M27.27272727272728,103.01886792452831 L75,1.1320754716981085 L122.72727272727272,103.01886792452831 L27.27272727272728,103.01886792452831 ' stroke-width='1' stroke='black' fill='#D9F2FB'>
+</path>
+<path d='M75,103.01886792452831 75,1.1320754716981085' stroke-width='1' stroke='black' fill='#D9F2FB'>
+</path>
+<text text='a' x='75' y='119.6813679245283' font-family='sans-serif' font-size='13.33' text-anchor='middle'>
+<tspan>a</tspan></text>
+<text text='h' x='88.78954545454545' y='67.83955974842767' font-family='sans-serif' font-size='13.33' text-anchor='end'>
+<tspan>h</tspan></text>
+<text text='b' x='47.88045454545455' y='56.51880503144653' font-family='sans-serif' font-size='13.33' text-anchor='end'>
+<tspan>b</tspan></text>
+<text text='b' x='102.11954545454546' y='56.51880503144653' font-family='sans-serif' font-size='13.33' text-anchor='start'>
+<tspan>b</tspan></text>
+<text text='θ' x='40.7559090909091' y='97.4859433962264' font-family='sans-serif' font-size='13.33' text-anchor='start'>
+<tspan>θ</tspan></text>
+<text text='θ' x='109.2440909090909' y='97.4859433962264' font-family='sans-serif' font-size='13.33' text-anchor='end'>
+<tspan>θ</tspan></text>
+</svg></span></p>
+<div class="indented"><p><span class='hurmet-calc' data-entry='h = a//2 tan θ = b sin θ'><math><mrow><mi>h</mi><mo>=</mo><mstyle displaystyle="false" scriptlevel="0"><mfrac><mi>a</mi><mn>2</mn></mfrac></mstyle><mspace width="0.1667em"></mspace><mrow><mspace width="0.1667em"></mspace><mi>tan</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mi>θ</mi></mrow><mrow><mo>=</mo><mi>b</mi><mrow><mspace width="0.1667em"></mspace><mi>sin</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mi>θ</mi></mrow></math></span>            <span class='hurmet-calc' data-entry='θ = tan⁻¹ ((2 h) / a)'><math><mrow><mi>θ</mi><mo>=</mo><msup><mi>tan</mi><mrow><mtext>-</mtext><mn>1</mn></mrow></msup><mo>⁡</mo><mrow><mo fence="true" form="prefix">(</mo><mstyle displaystyle="true" scriptlevel="0"><mfrac><mrow><mn>2</mn><mspace width="0.1667em"></mspace><mi>h</mi></mrow><mi>a</mi></mfrac></mstyle><mo fence="true" form="postfix">)</mo></mrow></mrow></math></span></p>
+<p><span class='hurmet-calc' data-entry='a = 2 b cos θ'><math><mrow><mi>a</mi><mo>=</mo><mn>2</mn><mspace width="0.1667em"></mspace><mi>b</mi><mrow><mspace width="0.1667em"></mspace><mi>cos</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mi>θ</mi></mrow></math></span>          <span class='hurmet-calc' data-entry='b = √(h² + a²/4)'><math><mrow><mi>b</mi><mo>=</mo><msqrt><mrow><msup><mi>h</mi><mn>2</mn></msup><mo>+</mo><mstyle displaystyle="true" scriptlevel="0"><mfrac><msup><mi>a</mi><mn>2</mn></msup><mn>4</mn></mfrac></mstyle></mrow></msqrt></mrow></math></span></p>
+<p><span class='hurmet-calc' data-entry='A = 1//2 b² sin θ'><math><mrow><mi>A</mi><mo>=</mo><mstyle displaystyle="false" scriptlevel="0"><mfrac><mn>1</mn><mn>2</mn></mfrac></mstyle><mspace width="0.1667em"></mspace><msup><mi>b</mi><mn>2</mn></msup><mrow><mi>sin</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mi>θ</mi></mrow></math></span></p></div>
+<p>Square</p>
+<div class="indented"><p><span class='hurmet-calc' data-entry='P = 4 a'><math><mrow><mi>P</mi><mo>=</mo><mn>4</mn><mspace width="0.1667em"></mspace><mtext>a</mtext></mrow></math></span>              <span class='hurmet-calc' data-entry='A = a²'><math><mrow><mi>A</mi><mo>=</mo><msup><mi>a</mi><mn>2</mn></msup></mrow></math></span></p></div>
+<p>Rectangle</p>
+<div class="indented"><p><span class='hurmet-calc' data-entry='P = 2 (a + b)'><math><mrow><mi>P</mi><mo>=</mo><mn>2</mn><mspace width="0.1667em"></mspace><mo form="prefix" stretchy="false">(</mo><mi>a</mi><mo>+</mo><mi>b</mi><mo form="postfix" stretchy="false">)</mo></mrow></math></span>            <span class='hurmet-calc' data-entry='A = a b'><math><mrow><mi>A</mi><mo>=</mo><mi>a</mi><mi>b</mi></mrow></math></span></p></div>
+<p>Trapezoid<span class='hurmet-calc' data-entry='draw()
+    title "Trapezoid"
+    frame 120, 90, "right"
+    view -1.1, 1.1, -0.35, 1.4
+    fill "#D9F2FB"
+    path [-1, 0; -0.5, 1.1; 0.4, 1.1; 1, 0; -1, 0]
+    line [-0.2, 0; -0.2, 1.1]
+    text [0, 1.1], "a", "above"
+    text [-0.2, 0.6], "h", "right"
+    text [0, 0], "b", "below"
+end' style='float: right;'><svg xmlns="http://www.w3.org/2000/svg" xmlns='http://www.w3.org/2000/svg' width='120' height='90' style='display: inline;' float='right'>
+<title>
+Trapezoid</title>
+<path d='M5.45454545454546,72 L32.727272727272734,15.428571428571423 L81.81818181818181,15.428571428571423 L114.54545454545453,72 L5.45454545454546,72 ' stroke-width='1' stroke='black' fill='#D9F2FB'>
+</path>
+<path d='M49.09090909090909,72 49.09090909090909,15.428571428571423' stroke-width='1' stroke='black' fill='#D9F2FB'>
+</path>
+<text text='a' x='60' y='8.763571428571424' font-family='sans-serif' font-size='13.33' text-anchor='middle'>
+<tspan>a</tspan></text>
+<text text='h' x='55.75590909090909' y='45.586190476190474' font-family='sans-serif' font-size='13.33' text-anchor='start'>
+<tspan>h</tspan></text>
+<text text='b' x='60' y='88.6625' font-family='sans-serif' font-size='13.33' text-anchor='middle'>
+<tspan>b</tspan></text>
+</svg></span></p>
+<div class="indented"><p><span class='hurmet-calc' data-entry='A = (a + b)/2 h'><math><mrow><mi>A</mi><mo>=</mo><mstyle displaystyle="true" scriptlevel="0"><mfrac><mrow><mi>a</mi><mo>+</mo><mi>b</mi></mrow><mn>2</mn></mfrac></mstyle><mspace width="0.1667em"></mspace><mi>h</mi></mrow></math></span></p></div>
+<p>Regular Polygon</p>
+<div class="indented"><p><span class='hurmet-calc' data-entry='P = n a'><math><mrow><mi>P</mi><mo>=</mo><mi>n</mi><mi>a</mi></mrow></math></span>           <span class='hurmet-calc' data-entry='θ = 180° (1 - 2//n)'><math><mrow><mi>θ</mi><mo>=</mo><mn>180</mn><mi>°</mi><mspace width="0.1667em"></mspace><mrow><mo fence="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mstyle displaystyle="false" scriptlevel="0"><mfrac><mn>2</mn><mi>n</mi></mfrac></mstyle><mo fence="true" form="postfix">)</mo></mrow></mrow></math></span>, peak angle      <span class='hurmet-calc' data-entry='ϕ = 180°/n'><math><mrow><mi>ϕ</mi><mo>=</mo><mstyle displaystyle="true" scriptlevel="0"><mfrac><mrow><mn>180</mn><mi>°</mi></mrow><mi>n</mi></mfrac></mstyle></mrow></math></span>, central angle<span class='hurmet-calc' data-entry='draw()
+    title "Regular polygon"
+    frame 130, 140, "right"
+    view -0.6, 0.6, -0.5
+    fill "#D9F2FB"
+    path [0, 0.7694; 0.4045, 0.4755; 0.25, 0; -0.25, 0; -0.4045, 0.4755; 0, 0.7694]
+    text [-0.3, 0.2], "a", "left"
+    text [0, 0.7694], "θ", "below"
+end' style='float: right;'><svg xmlns="http://www.w3.org/2000/svg" xmlns='http://www.w3.org/2000/svg' width='130' height='140' style='display: inline;' float='right'>
+<title>
+Regular polygon</title>
+<path d='M65,2.481666666666655 L108.82083333333334,34.320833333333326 L92.08333333333334,85.83333333333333 L37.916666666666664,85.83333333333333 L21.17916666666666,34.320833333333326 L65,2.481666666666655 ' stroke-width='1' stroke='black' fill='#D9F2FB'>
+</path>
+<text text='a' x='25.835' y='68.60999999999999' font-family='sans-serif' font-size='13.33' text-anchor='end'>
+<tspan>a</tspan></text>
+<text text='θ' x='65' y='19.144166666666656' font-family='sans-serif' font-size='13.33' text-anchor='middle'>
+<tspan>θ</tspan></text>
+</svg></span><br><span class='hurmet-calc' data-entry='A = (a n²) / (4 tan(π//n) )'><math><mrow><mi>A</mi><mo>=</mo><mstyle displaystyle="true" scriptlevel="0"><mfrac><mrow><mi>a</mi><msup><mi>n</mi><mn>2</mn></msup></mrow><mrow><mn>4</mn><mspace width="0.1667em"></mspace><mrow><mspace width="0.1667em"></mspace><mi>tan</mi><mo>⁡</mo></mrow><mrow><mo fence="true" form="prefix">(</mo><mstyle displaystyle="false" scriptlevel="0"><mfrac><mi>π</mi><mi>n</mi></mfrac></mstyle><mo fence="true" form="postfix">)</mo></mrow></mrow></mfrac></mstyle></mrow></math></span>             <span class='hurmet-calc' data-entry='a = √((4A tan(π//n))/n)'><math><mrow><mi>a</mi><mo>=</mo><msqrt><mstyle displaystyle="true" scriptlevel="0"><mfrac><mrow><mn>4</mn><mi>A</mi><mrow><mspace width="0.1667em"></mspace><mi>tan</mi><mo>⁡</mo></mrow><mrow><mo fence="true" form="prefix">(</mo><mstyle displaystyle="false" scriptlevel="0"><mfrac><mi>π</mi><mi>n</mi></mfrac></mstyle><mo fence="true" form="postfix">)</mo></mrow></mrow><mi>n</mi></mfrac></mstyle></msqrt></mrow></math></span></p>
+<p>if <span class='hurmet-calc' data-entry='n'><math><mi>n</mi></math></span> is even:        <span class='hurmet-calc' data-entry='L_sharps = L_flats / cos ϕ'><math><mrow><mi>L</mi><msub><mrow></mrow><mtext>sharps</mtext></msub><mo>=</mo><mstyle displaystyle="true" scriptlevel="0"><mfrac><mrow><mi>L</mi><msub><mrow></mrow><mtext>flats</mtext></msub></mrow><mrow><mrow><mspace width="0.1667em"></mspace><mi>cos</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mi>ϕ</mi></mrow></mfrac></mstyle></mrow></math></span>             <span class='hurmet-calc' data-entry='a = L_flats tan ϕ'><math><mrow><mi>a</mi><mo>=</mo><mi>L</mi><msub><mrow></mrow><mtext>flats</mtext></msub><mrow><mspace width="0.1667em"></mspace><mi>tan</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mi>ϕ</mi></mrow></math></span></p></div>
+<p>Irregular Polygon</p>
+<div class="indented"><p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUUAAAC1CAYAAADIke3wAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAHYcAAB2HAY/l8WUAACFlSURBVHhe7Z0JmBTFFcdrBRaCrAoIAZZDUBIQSYIgAuEQwhkFDCJyCCogBAwgkkAUhCDIFUSCBgkSDHIaRBYFBRHw4woYMBxBI5o1oHIZAVHcIB9U5tVW9da03dM9M9091//3fW+3q7qm+3V39X9eTVVXZ/EQDAAAgOAK+R8AAEAIiCIAAGhAFAEAQAOiCAAAGhBFAADQgCgCAIAGRBH4zvbt21lWVpZhlLajY8eORjlaThS6zzNmzJC59lCZaMqD5AXjFEEgkFCMGTNGphizqnYkRC1atJAp6zJBQgKncPKFBHzDhg1iGbdUaoNIEQTC6NGjWYcOHWSqUCTN6IK4bds2uZQ4pk+fLpes/dVRgqgfI0hNIIogMMaNGyeXmIga9Wa03lQmYWnevLlMJY5mzZrJpUJ/7dAFs02bNnIJpCyhUB+AwAhFX9S2FBYSP9s8N1BZ+qyfKL/IQtGrzA2H/FBlnAjCZxAfiBRBoOjNaGpymn9r1KPJSOi/4fmJ3oTeuXOnXArHbdM5KJ9BnEhxBCAwKOKiqmc2txGUHpkFEXXpPpqh/at1dpEkEbTPIHYQKYLAod8LzR0pFGVRFBkJ+g1SRVtOUZmX6NGieTjR5s2bxX/yx+p30ET5DGIHoghSBuqdJnEhkXLbzPYCvcPF3IRWzWG7DpZE+QxiB6IIEsLkyZPlUiEkHOYozAxFWhRhOkWUXqNHgPrvn3qvs51PifIZxA5EEQSO3uGgNykpqookjOvXr0/YUB2rJrTedLYjkT6D2IAogkAhQVGCSJBo6IJjjiCTBasmtFPTGaQmEEUQKLroqc4W8zAdp2Z0IjA3od00nUFqAlEEgWFuNutCo3dCODWjE4Ue0bppOoPUBKIIAsGq2axDAul1M5qiOTVzDQlyvOhNaHUs5uMAqQ9EEQSCm8ke9GYoiY7eRE0GSLj1yBBRYnoCUQS+o0dp5mazGV0wzZNGJAN6Mx8dLOkJRBH4DjUxOefCnJqbJJiqLFkkAXWCIk/ahpcRnT54Gx0s6QlEEXjO+PHj2Y9//GPWqVMntnbtWpmbOPTfMuMFHSwZQOibFADPCEVPxsQHym699Va+ePFiWSJYQs1xzyZhCAmhcUy0XZCeQBSBZ4wYMcIQDSv74Q9/yOfMmcMvX74sP+E/SshiQQkqbUMXRFoG6Quaz8AThgwZwv7whz/IFGN33nknGzlyJCtRooTMYeyDDz5gw4cPZ5UqVWKTJk1ip0+flmv8QXXS2PV2u4Wa35GGE4E0Q4ojADFz//33G1EU2cCBA+Uazr/44gs+ceJEXrFixbAyZNnZ2TwknPyjjz6SpZMP3V9EiJkB3uYH4qJ3795s+fLlMsXYQw89xJ599lmZKiLUZGZ//OMfxbrDhw/L3CJCwsp+9atfsYYNG8ocABIDRBHEzF133cVeeeUVmWJs1KhRbObMmTJlz+LFi4VA7t69W+YUQc1uEta2bdvKHACCBaIIoubSpUusa9eubN26dTKHsccee4w9+eSTMuUOGq5D4mj1G12rVq1E5Ni9e3eZA0AwQBRBVHzzzTdCEN966y2Zw9jEiRPF2MRYoQ4REscVK1bInCJovCNFjg8++KDMAcBfIIrANdRbTIKoP3o3bdq0iO9EjoZDhw4JcXzuuedkThHVq1cX4kjRY+nSpWUuAN4DUQSuOH78uBDEv//97zKHsaeffpo9/PDDMuUdx44dEx0yJJDnzp2TuYXk5OQIYSSBzM3NlbkAeAdEETjyn//8RwjigQMHZA4T0dwvf/lLmfIHaqqTMJJAHj16VOYWQfsngaxXr57MASB+IIogIjTgmgSR/isWLlzIHnjgAZkKhueff14I5P79+2VOET179hSRYzyTRwCggCgCWygyJEGkSFGxdOlSMTYxUbz88stCHN9++22ZU0SHDh2EOHbu3FnmABA9EEVgyTvvvCME8cSJEzKnUJBobGIysGnTJtGszsvLkzlFNG7cWDSr+/btK3MAcA9EEXwHelaYBPHMmTMifcUVV7A1a9awO+64Q6STib1794rI8YUXXpA5RfzgBz8QkSNZsWLFZC4AkYEogjBo/CEJInVyEDT8hQQx2Z8wyc/PN3qsv/32W5lbSIUKFYwe6/Lly8tcAKyBKAIDekKFBJGeWCHKli0rBFF/v0qyQ2MpSRjJTp48KXMLoRl7VOR4ww03yFwAwoEoAgE9w6z/XkjTe5Eg0u9zqQhVaxJGih71nnPFfffdJ6LHRo0ayRwACoEoArZs2TLWp08fmWKsRo0aQhDpEbt0YMmSJUIgd+3aJXOKoMiYIsd27drJHJDpQBQzHOqg6N+/v0wVdk6QINapU0fmpA/08wBFjlYTULRs2VKIY48ePWQOyFQgihnMvHnzxIzZih/96EdCEK+77jqZk57s2LFDRI76PJAKOgckjoMGDZI5INOAKGYo9OoA/bnlW265RQhi5cqVZU7689577wlxnDt3rswpolq1akanTJkyZWQuyAQgihnI9OnT2W9/+1uZKnzXMgliuXLlZE5mQZNdqOE8X375pcwthARRDeepWrWqzAXpDEQxw3jiiSfYhAkTZIqxn/3sZ0IQr7zySpmTuRQUFAhhJIE8cuSIzC1i8ODBQhzr168vc0A6AlHMIMaOHcumTJkiU4z9/Oc/F4JYvHhxmQMUCxYsEAK5b98+mVPEPffcI8QxlcZvAvdAFDOEX//61+ypp56SKca6devGVq1aJVPADjpHJI5btmyROUW0b99eiGOXLl1kDkgHIIoZwLBhw0STUNGrVy8xNhG4Z/PmzeIcrl69WuYUQZ1U9Ltjv379ZA5IaUgUQfpC72Cmy6yM3tEMYmfv3r28f//+YedUWe3atfns2bP5xYsXZenEsW3btjDfKG0Hvc9alUvku611n6dPny5z7aEy0ZR3C0Qxjenbt69RacgGDx4s14B4yc/P54888ggvWbJk2Dkmu/baa/mECRP4qVOnZOnEoIsGmRVm8Uw00fiii7mXQBTTlB49eoRVsOHDh8s1wEtOnz7NJ02axCtVqhR2vsmKFy/OR4wYwQ8fPixLB48uHFbRlO5vpGgyKKKJ/lQ5r6NbiGIa0rVrV6PCkI0ePVquAX7yzDPP8Dp16oSde2X9+vXju3fvliWDI1IzOlmazTpuI9doxDNaIIppxIULF3jHjh3DKtXjjz8u14KgWLJkCW/atGnYdVDWpUsXvmHDBlkyGHQBUeJnlWeFLpxW5gf69u2iV90vM/H6bFki0reLGd2BSCfXb3Sf3Xxz+PlNkwjOnTvHW7dubRwT2eTJk+VakAjWrVvHO3XqFHZNlLVo0YKvWLFClvQf/T7V6z6Zm/ub/luZH7i5N9V6Kx8oLx6fbWXTfOKsMItnoonGFzo5yeJ3vNAP+s2aNQs7/t///vdyLUg0O3bs4L179w67Psrq16/P582bJ0v6h/leVeYUEFAZN0LiNbqPZnRtshJ0yo/H54iKoAuH1clT68gifdsEhX6y3FxsskRccC/55JNP+M0332wcD9mcOXPkWpBMvPfee3zo0KFh10pZ1apV+dSpU0XE7xdmYXSq+6q8073kB5GET+mSlf9e+HxFaAO2jBs3Ti4xNmbMGLZ9+3aZYqxjx45yqfDVksnwzt1QtCSXCv21Y8aMGXKJsTZt2sil1OPf//63uA7vvvuuzGFs/vz5YrA2SD7q1q0rno45duyYeOTymmuukWsY+/TTT9mjjz4qZimiyTpCX3ZyTeLYuXOnXAoe/V42+7Fhwwbx3+re9cRnKY626IqtlNkqzw5aT6bKk/kZVbrZj+6PFUH7HAuHDh3iN9xwQ5iPixYtkmtBKlBQUMBnzpzJr7vuurDrqGzQoEF8//79snT8mOs0WaR6rcrT/a5/ltJB3A9qf2QKXXus8MJnR1EkzBtXy2R2O6J8VYY+T5/TP0vLfuBmH2o9+aWTKJ+jhZ6qqFatmuEXWZA/2gPvWbBgAW/QoEHYNVV2991387fffluWjA39HtaXyezuYfNnzPeDW5GJFat9KZ/ovxVe+OxKFHWx0I12ZodyzsoJ9Xm/TqraPpmZSCcokT67JdQ84BUrVjT8IVu9erVcC1KdVatWfWcUgbJ27drxvLw8WdI9VGf17RD6fWAnMGq9uc7r2/PzftD3o7TGnDaj1sfjsytRJPSNktmdSIUqZ4W6IHYHFi/6BTefACV8Vv6rz1jht89u2LJlC7/66qsNP0uUKMFff/11uRakE5s2beLdunUzrrVujRo14i+88IIs6Yyq82T6/WCX74ag7gfln9qXWo4Ftz5H7GiJh9C2hSWCWH+kTaTPTpDfnTp1MmaGzsnJES9gojyQflD9pGnLqBNtwIABMreQPXv2sAceeIDVrl2bzZ49m128eFGu+S7UEafqfEgEwzpE9Y5UmhtS70hNFkICJpcKZyoi6Dh8JSQCrtC/VZRF++2iUNvy81tG91MRzzdNED7bsWbNGsNvMppwgMa+gczh448/5qNGjeKlSpUKqwtk5cuX5+PHj+cnT56UpQsxt+6s0O8JquNm7O5x9Tnz/eC0vWgxHwOZE9H6bMaVOuiCqC+TRSuM6iC9OGGR0C+O8lH5Hu2+g/LZipdeesk4DrLc3FweihTkWpBpnDlzRjypZDUBRbFixcIG7evrIt2nejklGKrO2wmIupfM6/X7zqv7Re3LaZux+mzGURTVjpQRsR64vq1IF8kL9H2pk2BOuyFIn828+OKLxr7JatWqxQ8ePCjXgkzn2Wef5XXr1g2rIzk5OWKdWyEh9DpOpuq5Oa1Q5a22G6s2REL3z1HQZLlofDbjKIr6ydV3ZJdvh35gbsp7gdofmX6x3JIInxXPP/+8sW8yqvyJnIIKJC/0BJOqJ5UrV5a58aPXf7p/yNze91TOjQC5IZp7Nx6fFRH3om/MfID6zp12Fq1TXqGfTOWD+TjsSJTPBEUAat9kNH7tyJEjci0A4Wzfvt2oK40bN5a53kB1X7+PyNzcQ27LuSHaezdWnxW2okgb1jdqhVl0rIjmgNxsLxrMx0Dmhmh89pqnnnoqzN8mTZrwEydOyLUAfJfly5cb9eWuu+6SuYlD3Xd0P8eLuhfJaLtBYKsSyhEnZ/Ry5pMQrbh4LYqEflLdbDNan71kypQphq9krVq1Ej+sAxCJGTNmGHXm4YcflrmJQ91DsaAElbahtqPSQWHpeTTOmKMxJaBK4KI5GD9EUffP6ZsrFp+9goZUKD/J2rdvL56NBcCJYcOGGfWGWhqJhO43un+UDkSLWU+UBYlvrzjNysqSS/aDLWnwqNXsOmoGHhqcHC80I46aMcfpUOPxOR5oVpSQIMsUE+8RzsvLC/MHADvuvPNOtmbNGrG8cuVK1r17d7GcqpjvQy90ICpIFL3GTu3NZhe50TqvojXajpvtxetzrFBzR98+PfwPQDTo82nu2rVL5oJYCTYudYESJy/ERwkiWazhvJ8MGTLE8I/s3nvvlWsAcE+FChWMOvTZZ5/JXBArSSeKSshiQQkqbUMXRKcoMRGYX6g+YMAAuQYA93z99ddGHcrOzpa5IB58mxAiFtQD6SFxE/9jhR6AVw/BE4H/JuFAKCJkCxculCnGhg4dyhYsWCBTALhHn6G7WrVqcgnEQ1KJInVgkIDF2pFh/lwoQnTsXAmau+++my1dulSmGBs5cqSYoh6AWIAoek9SiaIXkAgqS6YI8fLly6xz587s5ZdfljmFvc6zZs2SKQCiB6LoPWknislIQUGBGGa0du1amcPY7373OzZ16lSZAiA2IIreA1H0mTNnzghB3Lhxo8xhQgwnTJggUwDEztGjR+USRNErIIo+cuLECTEz9tatW2UOE81lajYD4AV6pFi9enW5BOIBougTR44cEYK4e/dumcNEhwp1rADgFWg+e49vj/llMocPHxaPXr3//vsyh4khN+Z3bQAQL2XKlGHnz58Xy/RTjf6CfRAbiBQ95uDBgyJC1AVx8eLFEETgOZ9//rkhiCSGEERvgCh6CL1ljTpV8vPzZQ5jf/3rX8VgbQC8Bk1nf4AoegQ9jUOCeOzYMZGmmT5effVVMVgbAD+AKPoDRNEDNm3aJJrMX3zxhUh/73vfEwPHabA2AH4BUfQHiGKcvP7660IQv/76a5Gm33XeeOMN1r59e5EGwC8wRtEfIIpxsHr1anb77bezixcvivT3v/99IYitWrUSaQD8BGMU/QGiGCMrVqxg3bp1k6nCSkmC2KRJE5kDgL+g+ewPEMUYWLRoEevVq5dMMVa7dm0hiA0aNJA5APgPRNEfMHg7SqipnJubK8aIESSI1KlSq1YtkQYgCGjWpWLFiskUY99++y0rUaKETIF4QKQYJVTxrr/+epliYhmCCIJGjxKrVKkCQfQQiGIM6G/eoyiRmtMABAmazv4BUYyBli1bhk3sQLPenD17VqYA8B+Ion9AFGNk2rRprGbNmmKZpgh79NFHxTIAQYAxiv4BUYyR7OxsIYyKefPmJdXrD0B6o0eKGKPoLRDFOOjRowfr3bu3TBU2owEIAjSf/QOiGCcULZYuXVos79+/X7x7BQC/gSj6B0QxTqhC6s3oiRMnsn/84x8yBYA/6L8povnsLRi87RFt27YVs+UQNBmE/jJ+ALyEJh/JyckRyyVLlmT/+9//xDLwBkSKHqFHi2+++SabO3euTAHgLWg6+wtE0SMaNWrExo4dK1NMDNFRE84C4CUQRX+BKHrI5MmT2U033SSWz507h95o4AsQRX+BKHqM3oymF1atWrVKpgDwBnSy+AtE0WNo0tmBAwfKVGEz+tKlSzIFQPwgUvQXiKIP0IQRFSpUEMsffvghmtHAUyCK/gJR9IFy5cqFNaNnzpwp3vYHgBfguWd/wThFH+nSpQt77bXXxHLz5s3Ztm3bxDIA8UBPUBUUFIjlL7/8kl111VViGXgDIkUf0eddpEiRIkYA4uHUqVOGIJYtWxaC6AMQRR+pW7cumzJlikwVThhBvzECECv4PdF/IIo+Q73PjRs3FsvUC415F0E8QBT9B6IYAHozmsYt0vhFAGIBnSz+A1EMgNtuu42NGDFCpgqb0fTECwDRokeKGLjtDxDFgKAhOjVq1BDL9Ew0mtEgFtB89h+IYkCUKlUqbOwizaJDs+kAEA1oPvsPRDFAevbsKUyBJ11AtKD57D8YvB0wR44cYXXq1DEmBqWZusePHy+WAYgEjV4oXry4TDF28eLFsDTwBkSKAUO/K+rN6AkTJoh3uwDghB4l5ubmQhB9AqKYAKgnunXr1jKFZjRwBzpZggGimCD0aJHeF03vjQYgEuhkCQaIYoKgp1z0YTm0fOLECZkC4LugkyUYIIoJhJ6LvvHGG8Xy2bNn0YwGEUHzORggiglGb0YvWrSI5eXlyRQA4aD5HAwQxQTTuXNn1r9/f5kq7HTBKClgBZrPwQBRTAJowojy5cuL5Q8++ADNaGAJms/BgMHbScKCBQvYgw8+KFOM7dy5kzVt2lSmQKbz1VdfGRPK0iOjaqJZ4D2IFJMEegMgvQlQgWgR6CBKDA6IYhKhz7u4detWNmvWLJkCmQ46WYIDophE1KtXj02ePFmmCqPF/Px8mQKZDDpZggOimGSMHTuWNWrUSCzTA/9oRgMCzefggCgmIXozeuXKlWzp0qUyBTIVNJ+DA6KYhLRp04YNGzZMpgqb0efPn5cpkImg+RwcEMUkhZ50URHBp59+imZ0hoPmc3BgnGISs2zZMtanTx+ZYmzjxo2sbdu2MgUyCRqbeOHCBbFMLz3LyckRy8B7ECkmMb1792Y9evSQKYxdzFROnjxpCGK5cuUgiD4DUUxyqBmdnZ0tlvfu3Rs2ZAdkBuhkCRaIYpJTs2bNsJl0Hn/8cXbw4EGZApkAOlmCBaKYAowcOZK1atVKptCMzjSsOlm2b9/OsrKyDKO0HR07djTK0XKi0H2eMWOGzLWHykRT3jOoowUkP3/729+oQ8yw+fPnyzUg3XnkkUeM6z516lSZy/n06dPD6oQV27ZtcywTJNH40qFDh4T4jUgxRWjSpAkbM2aMTBVGi6dOnZIpkM7YNZ9Hjx7NQsIhU4WRlZkWLVrIJcZCAimXEof+YIJT9LdhwwbxXz/GIIAophD02yK9M5o4ffo0mtEZQqQxiuPGjZNLTHxp6s1ovalMwtK8eXOZShzNmjWTS4X+2qELJj3MECgyYgQpQl5eXlgTZM2aNXINSFcqVKhgXO+PP/5Y5hahN6OpyWmX5wb1OfrvF8ovMmreW0E+qzJOeO0zRDEFuf/++40KU7duXZkL0oFDhw7xF198kY8YMYL/9Kc/5aVKlTKuNdmlS5dkyXB0EdEFkcxOeMzovz/6KYq6f3b7UeudBN0PnyGKKcjJkyf5NddcY1SGUDNargGpxEcffcRfeukl/pvf/IaHmoj86quvNq6pld10003yk99FFwfdohEKs7D6ie6jGV00nQTdD58hiinKn/70J6MykO3atUuuAcnIJ598wlevXs3HjRvHO3XqxCtWrBh2/SJZzZo1effu3fmWLVvk1qwxC6NTlKWjhEiJjN+iGEn4lA9O/vvlMzpaUpRBgwax0M0lUxi7mEzQqIA33nhDPH30i1/8QnSOkNEy5dE6u5EDVapUYV26dGETJ05ka9euZcePHxcTDdMUcrfddpss5S3UOUOdHiFxCaxTQ+9wofcR6ahe50i++OqzFMdAMX+jRQqR1bcAmdM3h5/oPrv5RtK/Cb36BjNz4MABYx9kTz/9tFwDguLs2bN806ZNfMaMGbxHjx78+uuvD7smkezaa68Vdfqxxx7jq1at4keOHJFbjQ39XlEW6d5S0OfUvaXqrV91Vkf3U6HfN5Hw0+eENZ/1g7c7AWbxTDTR+KJXUD954oknjP2ULFnSsncSeENBQQEPRSh89uzZvG/fvvzGG280zr2T5eTk8FCkx0eNGsWXL1/ODx8+LLfqDXp905fJ3AQdqozXAhMJXQPU/pU/9N8Ov31OqNLoF8/qgNQ6skgXNij0i+h0AVS5SBfXK26++WZjf/fcc4/MBfFAvbzvvPMOf+655/jAgQP5T37yE+McO1l2djZv2rQpHzZsGP/LX/7CDx48KLfqD3Rv6Psn9LpqVwfV5/S6rD7nVL+9QPdb7c+cNhOEzwkVRfPFpLRCF8wghMUNZn/tUBeJzKsLFYk333wzzK9ly5bJNcAt+/fv5wsXLuRDhw7lt956Ky9evHjYOY1kDRs25IMGDRKdX3v27JFbDA79XrG7h/R8Ba0331teC4wTyj+1T7VsRxA+J1QUCf1EqIO1yrOCLjStV2XJvDoxduj7sqpohO6TGb98fuihh4ztVa9enX/zzTdyDTDzr3/9iy9ZsoSPHDmSt2zZkl955ZVh1yOS0bCY++67j8+ZM4fv3LmTX7hwQW41Meh1yXyvUF3Tfdfrq/qcuQ6re8/v+0hhvtfVfyuC8jnhokiog1UHppbJzCdAoV9w+jx9zumkeoHun91F0P3S8dPnr776iufm5hrbHz58uFyT2eTn5/OVK1eKsZzt2rXjZcuWNc6Rk9WuXZv37NmTz5w5UwyHOXfunNxqcqDXJzIr9Pqq1zH9c5HMXMftthcr5mMgs8Nczs7s7ku3JIUoWp0Yp4NTYkKf1VEXLd4TEwndRzN6pTH75rfPixcvNvZNRr2imcRnn33GX331VT5+/Hh+++2380qVKoWdj0hG0XW3bt34k08+ydevX88///xzudXkRfffXKd09HKqjtF/K1N1lP5T2q6uqjJeoPbptE3dT92cfI6WpBBFgg5EnRink0PQeqsyajtOn48HOvHKT/MFoP3a7T8In2mQr/Ltlltukbnpx3//+18hXiRiJGY1atQwjtvJSCxJNEk86dlxEtNUQ9UzMqd6Y763zHVWR9Vt+m+FXve9qK+E7p/dfiPh5HO0pKwo2qFOkFcXzIpIF9EuPxJe+kyPjumdBCQaqQ41W6n5Ss3YXr16iWatOj4no+Zy27Zt+ZgxY0QzmprTwB5VF53qL9VVr+4xtU+yWHDrs1uSRhTpBKsToyzSN5oV+smN9rPRovupiOXi+uEziYfaJtk///lPuSb5oY4L6sB45plnRIcGdWzoxxLJSpcuzVu0aCE6UKgj5f3335dbBW5xKzBUxitRVPd+rNtz67NbkkIUdUE0i6MbodCFhcyrkxMJfZ/Kx2gurt8+N2/e3Nj2HXfcIXOTj71794qhLDSkhYa26OckkhUrVkwMnaEhNH/+85/5vn375BaB31B9p2vgRZ3V73e/Axm3JFwU1QlWRuiC4UZgaBv0Gf1zfp9g3W9VOczpSPjt844dO4ztki1YsECuSRw0iJkGM9OgZhrcTIOcdR8jGQ2eHjBgAJ87d64YVG03hRbwHyVksaDuG9qGLohu7vOgSLgo6idGFwW7fCfUSY/2c7Gg9kOmi1u0+OUzTUmltkvP2QbZo0qPsdHjbPRYGz3eRo+5KV+cjOaIvPfee8XjdHQ+MOYyeaDrQfdmrPVUr+u6JRMJ9SbSN4X55EVzEZRAuYnY4kEXQnUs5uNwix8+X758OaxTgiItP6CJDGhCA5rYgI6fBFjt08lq1aolJlKg437rrbf4mTNn5FZBuqJf/1jvFz9JmCiaRc8Ks+i4xU5gYt2eHVbferFi53O8vPLKK2H+vfbaa3JNbBw/fpyvXbuWT5w4kXfp0oVXqVIlbPuRrGrVqrxr165iEot169aJyXIBSDYSJor6zRIpCtTL6YJBomYnILTOXJ5QwkPm1TeU2pebbcbisxf069fP8LFevXoy15nTp0/zjRs38mnTponxjzTZqdqOk9F7RTp27MjHjh0rJlc9evSo3CoAyU1CRDEaIbFrRpvTClXeart+iKLun5OgqXLR+OwFFN1dddVVxv6pmWvm/PnzfOvWrXzWrFm8T58+vE6dOkZ5J6Ntt27dWvyGuWLFCv7hhx/KrQKQemTRn1DFTjlo5l31TtuQGIn/mzdvNmbtDQmN7Ssd1asf169fL/7HA72KUb2q0elUxuNzvMybN48NGTJEphhbuHAhKygoYHv37mV79uxhBw4ckGsiU6pUKdawYcMwC0Wfci0AaQCJYqpCEZYe/ZG5ibbclnMDbSea7cXqsxcoX91aVlYWb9SoER88eDCfP38+f/fdd+WWAEhfUjZSjBUVrVGkNnr0aJkbGxRxBhHlecW+fftYgwYNZOq71K9fX0R+ISE0osASJUrItQBkBhknikrIYjlsJaihiEuklSBS2oumeBDMnDmTTZo0iVWuXNkQPmVlypSRpQDIXDJKFEnU6G1q48aNiymq038T1Mmw7xUA0pqMixTjJSsrSy6lVoQIAHAHRBEAADTwMnwAANCAKAIAgAZEEQAANCCKAACgAVEEAAANiCIAABgw9n9YTlEq8Ss90wAAAABJRU5ErkJggg==" alt="Irregular Polygon" class="right" width="180">Area</p>
+<div class="indented"><p>Find vertex coordinates, listed in a counter-clockwise order: (x1, y1), (x2, y2), …, (xn, yn). Then:</p>
+<p><span class='hurmet-calc' data-entry='A = 1//2 (x_1 y_2 - x_2 y_1 + x_2 y_3 - x_3 y_2 + … + x_n y_1 - x_1 y_n)'><math><mrow><mi>A</mi><mo>=</mo><mstyle displaystyle="false" scriptlevel="0"><mfrac><mn>1</mn><mn>2</mn></mfrac></mstyle><mspace width="0.1667em"></mspace><mo form="prefix" stretchy="false">(</mo><mi>x</mi><msub><mrow></mrow><mtext>1</mtext></msub><mi>y</mi><msub><mrow></mrow><mtext>2</mtext></msub><mo>−</mo><mi>x</mi><msub><mrow></mrow><mtext>2</mtext></msub><mi>y</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo>+</mo><mi>x</mi><msub><mrow></mrow><mtext>2</mtext></msub><mi>y</mi><msub><mrow></mrow><mtext>3</mtext></msub><mo>−</mo><mi>x</mi><msub><mrow></mrow><mtext>3</mtext></msub><mi>y</mi><msub><mrow></mrow><mtext>2</mtext></msub><mo>+</mo><mo>…</mo><mo>+</mo><mi>x</mi><msub><mrow></mrow><mtext>n</mtext></msub><mi>y</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo>−</mo><mi>x</mi><msub><mrow></mrow><mtext>1</mtext></msub><mi>y</mi><msub><mrow></mrow><mtext>n</mtext></msub><mo form="postfix" stretchy="false">)</mo></mrow></math></span></p></div></div>
+<p>Circle<span class='hurmet-calc' data-entry='draw()
+    title "Circle"
+    frame 100, 100, "right"
+    view -1.1, 1.1, -1.1
+    fill "#D9F2FB"
+    circle [0, 0], 1
+    line [0, 0; 1, 0]
+    text [0.4, 0], "r", "above"
+end' style='float: right;'><svg xmlns="http://www.w3.org/2000/svg" xmlns='http://www.w3.org/2000/svg' width='100' height='100' style='display: inline;' float='right'>
+<title>
+Circle</title>
+<circle cx='50' cy='50' r='45.45454545454545' stroke-width='1' stroke='black' fill='#D9F2FB'>
+</circle>
+<path d='M50,50 95.45454545454545,50' stroke-width='1' stroke='black' fill='#D9F2FB'>
+</path>
+<text text='r' x='68.18181818181819' y='43.335' font-family='sans-serif' font-size='13.33' text-anchor='middle'>
+<tspan>r</tspan></text>
+</svg></span></p>
+<div class="indented"><p><span class='hurmet-calc' data-entry='P = π D = 2 π r'><math><mrow><mi>P</mi><mo>=</mo><mi>π</mi><mi>D</mi></mrow><mrow><mo>=</mo><mn>2</mn><mspace width="0.1667em"></mspace><mi>π</mi><mi>r</mi></mrow></math></span>              <span class='hurmet-calc' data-entry='A = π r² = (π D²)/4'><math><mrow><mi>A</mi><mo>=</mo><mi>π</mi><msup><mi>r</mi><mn>2</mn></msup></mrow><mrow><mo>=</mo><mstyle displaystyle="true" scriptlevel="0"><mfrac><mrow><mi>π</mi><msup><mi>D</mi><mn>2</mn></msup></mrow><mn>4</mn></mfrac></mstyle></mrow></math></span></p></div>
+<p>Ellipse</p>
+<div class="indented"><p><span class='hurmet-calc' data-entry='A = π a b'><math><mrow><mi>A</mi><mo>=</mo><mi>π</mi><mi>a</mi><mi>b</mi></mrow></math></span><span class='hurmet-calc' data-entry='draw()
+    title "Ellipse"
+    frame 150, 75, "right"
+    view -1.1, 1.1, -0.55
+    fill "#D9F2FB"
+    ellipse [0, 0], 1, 0.5
+    line [0, 0; 1, 0]
+    line [0, 0; 0, 0.5]
+    text [0.4, 0], "a", "above"
+    text [0, 0.25], "b", "left"
+end' style='float: right;'><svg xmlns="http://www.w3.org/2000/svg" xmlns='http://www.w3.org/2000/svg' width='150' height='75' style='display: inline;' float='right'>
+<title>
+Ellipse</title>
+<ellipse cx='75' cy='37.5' rx='68.18181818181817' ry='34.090909090909086' stroke-width='1' stroke='black' fill='#D9F2FB'>
+</ellipse>
+<path d='M75,37.5 143.1818181818182,37.5' stroke-width='1' stroke='black' fill='#D9F2FB'>
+</path>
+<path d='M75,37.5 75,3.4090909090909136' stroke-width='1' stroke='black' fill='#D9F2FB'>
+</path>
+<text text='a' x='102.27272727272727' y='30.835' font-family='sans-serif' font-size='13.33' text-anchor='middle'>
+<tspan>a</tspan></text>
+<text text='b' x='68.335' y='24.89787878787879' font-family='sans-serif' font-size='13.33' text-anchor='end'>
+<tspan>b</tspan></text>
+</svg></span></p>
+<p>Circumference. No closed formula exists, so we have approximations and series expansions. </p>
+<div class="indented"><p><span class='hurmet-calc' data-entry='h = (a - b)² / (a + b)²'><math><mrow><mi>h</mi><mo>=</mo><mstyle displaystyle="true" scriptlevel="0"><mfrac><mrow><mo form="prefix" stretchy="false">(</mo><mi>a</mi><mo>−</mo><mi>b</mi><msup><mo form="postfix" stretchy="false">)</mo><mn>2</mn></msup></mrow><mrow><mo form="prefix" stretchy="false">(</mo><mi>a</mi><mo>+</mo><mi>b</mi><msup><mo form="postfix" stretchy="false">)</mo><mn>2</mn></msup></mrow></mfrac></mstyle></mrow></math></span></p>
+<p><span class='hurmet-calc' data-entry='P ≅ π (a+b) (1 + 3h / ( 10 + √(4-3h)))'><math><mrow><mi>P</mi><mo>≅</mo><mi>π</mi><mo form="prefix" stretchy="false">(</mo><mi>a</mi><mo>+</mo><mi>b</mi><mo form="postfix" stretchy="false">)</mo><mrow><mo fence="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><mstyle displaystyle="true" scriptlevel="0"><mfrac><mrow><mn>3</mn><mi>h</mi></mrow><mrow><mn>10</mn><mo>+</mo><msqrt><mrow><mn>4</mn><mo>−</mo><mn>3</mn><mi>h</mi></mrow></msqrt></mrow></mfrac></mstyle><mo fence="true" form="postfix">)</mo></mrow></mrow></math></span>       (Ramanujan 1914)</p>
+<p><span class='hurmet-calc' data-entry='P = π (a + b) (1 + 1//4 h + \displaystyle \sum_(i=2)^∞ ((2i - 3)!! / (2i)!!)^2 h^i)'><math><mrow><mi>P</mi><mo>=</mo><mi>π</mi><mo form="prefix" stretchy="false">(</mo><mi>a</mi><mo>+</mo><mi>b</mi><mo form="postfix" stretchy="false">)</mo><mrow><mo fence="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><mstyle displaystyle="false" scriptlevel="0"><mfrac><mn>1</mn><mn>4</mn></mfrac></mstyle><mspace width="0.1667em"></mspace><mi>h</mi><mo>+</mo><mstyle scriptlevel="0" displaystyle="true"><mstyle scriptlevel="0" displaystyle="true"><mrow><munderover><mo movablelimits="false">∑</mo><mrow><mi>i</mi><mo>=</mo><mn>2</mn></mrow><mi>∞</mi></munderover></mrow><msup><mrow><mo fence="true" form="prefix">(</mo><mstyle displaystyle="true" scriptlevel="0"><mfrac><mrow><mo form="prefix" stretchy="false">(</mo><mn>2</mn><mi>i</mi><mo>−</mo><mn>3</mn><mo form="postfix" stretchy="false">)</mo><mo form="postfix" stretchy="false">!</mo><mo form="postfix" stretchy="false">!</mo></mrow><mrow><mo form="prefix" stretchy="false">(</mo><mn>2</mn><mi>i</mi><mo form="postfix" stretchy="false">)</mo><mo form="postfix" stretchy="false">!</mo><mo form="postfix" stretchy="false">!</mo></mrow></mfrac></mstyle><mo fence="true" form="postfix">)</mo></mrow><mn>2</mn></msup><mspace width="0.1667em"></mspace><msup><mi>h</mi><mi>i</mi></msup></mstyle></mstyle><mo fence="true" form="postfix">)</mo></mrow></mrow></math></span>    (Bessel 1825)</p></div></div>
+<p>Hollow circle</p>
+<div class="indented"><p></p></div>
+<p>Circular Sector<span class='hurmet-calc' data-entry='draw()
+    title "Circlular sector"
+    frame 100, 100, "right"
+    view -0.8, 0.8, 0
+    fill "#D9F2FB"
+    path [0, 0; 0.7071, 0.7071; -0.7071, 0.7071; 0,0], [0, 1, 0]
+    line [-0.7071, 0.7071; 0.7071, 0.7071]
+    text [0.4, 0], "r", "above"
+    text [0, 0.65], "c", "above"
+    text [0, 1], "L", "above"
+    text [0, 0], "θ", "above"
+end' style='float: right;'><svg xmlns="http://www.w3.org/2000/svg" xmlns='http://www.w3.org/2000/svg' width='100' height='100' style='display: inline;' float='right'>
+<title>
+Circlular sector</title>
+<path d='M50,100 L94.19375,55.806250000000006 A62.5 62.5 0 0 0 5.806250000000006,55.806250000000006 L50,100 ' stroke-width='1' stroke='black' fill='#D9F2FB'>
+</path>
+<path d='M5.806250000000006,55.806250000000006 94.19375,55.806250000000006' stroke-width='1' stroke='black' fill='#D9F2FB'>
+</path>
+<text text='r' x='75' y='93.335' font-family='sans-serif' font-size='13.33' text-anchor='middle'>
+<tspan>r</tspan></text>
+<text text='c' x='50' y='52.71' font-family='sans-serif' font-size='13.33' text-anchor='middle'>
+<tspan>c</tspan></text>
+<text text='L' x='50' y='30.835' font-family='sans-serif' font-size='13.33' text-anchor='middle'>
+<tspan>L</tspan></text>
+<text text='θ' x='50' y='93.335' font-family='sans-serif' font-size='13.33' text-anchor='middle'>
+<tspan>θ</tspan></text>
+</svg></span></p>
+<div class="indented"><p><span class='hurmet-calc' data-entry='L = r θ'><math><mrow><mi>L</mi><mo>=</mo><mi>r</mi><mi>θ</mi></mrow></math></span>        <span class='hurmet-calc' data-entry='c = 2 r sin(θ//2)'><math><mrow><mi>c</mi><mo>=</mo><mn>2</mn><mspace width="0.1667em"></mspace><mi>r</mi><mrow><mspace width="0.1667em"></mspace><mi>sin</mi><mo>⁡</mo></mrow><mrow><mo fence="true" form="prefix">(</mo><mstyle displaystyle="false" scriptlevel="0"><mfrac><mi>θ</mi><mn>2</mn></mfrac></mstyle><mo fence="true" form="postfix">)</mo></mrow></mrow></math></span>      <span class='hurmet-calc' data-entry='A = 1//2 r² θ'><math><mrow><mi>A</mi><mo>=</mo><mstyle displaystyle="false" scriptlevel="0"><mfrac><mn>1</mn><mn>2</mn></mfrac></mstyle><mspace width="0.1667em"></mspace><msup><mi>r</mi><mn>2</mn></msup><mi>θ</mi></mrow></math></span>     </p></div>
+<p>Circular Segment</p>
+<div class="indented"><p><span class='hurmet-calc' data-entry='L = r θ'><math><mrow><mi>L</mi><mo>=</mo><mi>r</mi><mi>θ</mi></mrow></math></span></p>
+<p><span class='hurmet-calc' data-entry='c = 2 r sin(θ//2) = 2 r_p tan (1//2 θ) = 2 √(r² - r_p²) = 2 √(h (2 r - h))'><math><mrow><mi>c</mi><mo>=</mo><mn>2</mn><mspace width="0.1667em"></mspace><mi>r</mi><mrow><mspace width="0.1667em"></mspace><mi>sin</mi><mo>⁡</mo></mrow><mrow><mo fence="true" form="prefix">(</mo><mstyle displaystyle="false" scriptlevel="0"><mfrac><mi>θ</mi><mn>2</mn></mfrac></mstyle><mo fence="true" form="postfix">)</mo></mrow></mrow><mrow><mo>=</mo><mn>2</mn><mspace width="0.1667em"></mspace><mi>r</mi><msub><mrow></mrow><mtext>p</mtext></msub><mrow><mspace width="0.1667em"></mspace><mi>tan</mi><mo>⁡</mo></mrow><mrow><mo fence="true" form="prefix">(</mo><mstyle displaystyle="false" scriptlevel="0"><mfrac><mn>1</mn><mn>2</mn></mfrac></mstyle><mspace width="0.1667em"></mspace><mi>θ</mi><mo fence="true" form="postfix">)</mo></mrow></mrow><mrow><mo>=</mo><mn>2</mn><mspace width="0.1667em"></mspace><msqrt><mrow><msup><mi>r</mi><mn>2</mn></msup><mo>−</mo><mi>r</mi><msup><msub><mrow></mrow><mtext>p</mtext></msub><mn>2</mn></msup></mrow></msqrt></mrow><mrow><mo>=</mo><mn>2</mn><mspace width="0.1667em"></mspace><msqrt><mrow><mi>h</mi><mo form="prefix" stretchy="false">(</mo><mn>2</mn><mspace width="0.1667em"></mspace><mi>r</mi><mo>−</mo><mi>h</mi><mo form="postfix" stretchy="false">)</mo></mrow></msqrt></mrow></math></span><span class='hurmet-calc' data-entry='draw()
+    title "Circlular segment"
+    frame 100, 100, "right"
+    view -0.8, 0.8, 0
+    fill "#D9F2FB"
+    line [0, 0; 0.7071, 0.7071]
+    line [0, 0; -0.7071, 0.7071]
+    path [0.7071, 0.7071; -0.7071, 0.7071; 0.7071, 0.7071], [1, 0]
+    line [-0.7071, 0.7071; 0.7071, 0.7071]
+    line [0, 0.7071; 0, 1]
+    text [0.4, 0], "r", "above"
+    text [-0.25, 0.8], "c", "below"
+    text [-0.05, 0.85], "h", "right"
+    text [-0.4, 0.9], "L", "above"
+    text [0, 0], "θ", "above"
+end' style='float: right;'><svg xmlns="http://www.w3.org/2000/svg" xmlns='http://www.w3.org/2000/svg' width='100' height='100' style='display: inline;' float='right'>
+<title>
+Circlular segment</title>
+<path d='M50,100 94.19375,55.806250000000006' stroke-width='1' stroke='black' fill='#D9F2FB'>
+</path>
+<path d='M50,100 5.806250000000006,55.806250000000006' stroke-width='1' stroke='black' fill='#D9F2FB'>
+</path>
+<path d='M94.19375,55.806250000000006 A62.5 62.5 0 0 0 5.806250000000006,55.806250000000006 L94.19375,55.806250000000006 ' stroke-width='1' stroke='black' fill='#D9F2FB'>
+</path>
+<path d='M5.806250000000006,55.806250000000006 94.19375,55.806250000000006' stroke-width='1' stroke='black' fill='#D9F2FB'>
+</path>
+<path d='M50,55.806250000000006 50,37.5' stroke-width='1' stroke='black' fill='#D9F2FB'>
+</path>
+<text text='r' x='75' y='93.335' font-family='sans-serif' font-size='13.33' text-anchor='middle'>
+<tspan>r</tspan></text>
+<text text='c' x='34.375' y='66.6625' font-family='sans-serif' font-size='13.33' text-anchor='middle'>
+<tspan>c</tspan></text>
+<text text='h' x='53.54' y='51.318333333333335' font-family='sans-serif' font-size='13.33' text-anchor='start'>
+<tspan>h</tspan></text>
+<text text='L' x='25' y='37.085' font-family='sans-serif' font-size='13.33' text-anchor='middle'>
+<tspan>L</tspan></text>
+<text text='θ' x='50' y='93.335' font-family='sans-serif' font-size='13.33' text-anchor='middle'>
+<tspan>θ</tspan></text>
+</svg></span></p>
+<p><span class='hurmet-calc' data-entry='r_p = r - h = r cos(1//2 θ) = 1//2 c cot(1//2 θ) = 1//2 √(4 r² - c²)'><math><mrow><mi>r</mi><msub><mrow></mrow><mtext>p</mtext></msub><mo>=</mo><mi>r</mi><mo>−</mo><mi>h</mi></mrow><mrow><mo>=</mo><mi>r</mi><mrow><mspace width="0.1667em"></mspace><mi>cos</mi><mo>⁡</mo></mrow><mrow><mo fence="true" form="prefix">(</mo><mstyle displaystyle="false" scriptlevel="0"><mfrac><mn>1</mn><mn>2</mn></mfrac></mstyle><mspace width="0.1667em"></mspace><mi>θ</mi><mo fence="true" form="postfix">)</mo></mrow></mrow><mrow><mo>=</mo><mstyle displaystyle="false" scriptlevel="0"><mfrac><mn>1</mn><mn>2</mn></mfrac></mstyle><mspace width="0.1667em"></mspace><mi>c</mi><mrow><mspace width="0.1667em"></mspace><mi>cot</mi><mo>⁡</mo></mrow><mrow><mo fence="true" form="prefix">(</mo><mstyle displaystyle="false" scriptlevel="0"><mfrac><mn>1</mn><mn>2</mn></mfrac></mstyle><mspace width="0.1667em"></mspace><mi>θ</mi><mo fence="true" form="postfix">)</mo></mrow></mrow><mrow><mo>=</mo><mstyle displaystyle="false" scriptlevel="0"><mfrac><mn>1</mn><mn>2</mn></mfrac></mstyle><mspace width="0.1667em"></mspace><msqrt><mrow><mn>4</mn><mspace width="0.1667em"></mspace><msup><mi>r</mi><mn>2</mn></msup><mo>−</mo><msup><mi>c</mi><mn>2</mn></msup></mrow></msqrt></mrow></math></span></p>
+<p><span class='hurmet-calc' data-entry='θ = L/r = 2 cos⁻¹(r_p/r) = 2 tan⁻¹(c /(2 r_p)) = 2 sin⁻¹(c/(2r))'><math><mrow><mi>θ</mi><mo>=</mo><mstyle displaystyle="true" scriptlevel="0"><mfrac><mi>L</mi><mi>r</mi></mfrac></mstyle></mrow><mrow><mo>=</mo><mn>2</mn><mspace width="0.1667em"></mspace><mspace width="0.1667em"></mspace><msup><mi>cos</mi><mrow><mtext>-</mtext><mn>1</mn></mrow></msup><mo>⁡</mo><mrow><mo fence="true" form="prefix">(</mo><mstyle displaystyle="true" scriptlevel="0"><mfrac><mrow><mi>r</mi><msub><mrow></mrow><mtext>p</mtext></msub></mrow><mi>r</mi></mfrac></mstyle><mo fence="true" form="postfix">)</mo></mrow></mrow><mrow><mo>=</mo><mn>2</mn><mspace width="0.1667em"></mspace><mspace width="0.1667em"></mspace><msup><mi>tan</mi><mrow><mtext>-</mtext><mn>1</mn></mrow></msup><mo>⁡</mo><mrow><mo fence="true" form="prefix">(</mo><mstyle displaystyle="true" scriptlevel="0"><mfrac><mi>c</mi><mrow><mn>2</mn><mspace width="0.1667em"></mspace><mi>r</mi><msub><mrow></mrow><mtext>p</mtext></msub></mrow></mfrac></mstyle><mo fence="true" form="postfix">)</mo></mrow></mrow><mrow><mo>=</mo><mn>2</mn><mspace width="0.1667em"></mspace><mspace width="0.1667em"></mspace><msup><mi>sin</mi><mrow><mtext>-</mtext><mn>1</mn></mrow></msup><mo>⁡</mo><mrow><mo fence="true" form="prefix">(</mo><mstyle displaystyle="true" scriptlevel="0"><mfrac><mi>c</mi><mrow><mn>2</mn><mi>r</mi></mrow></mfrac></mstyle><mo fence="true" form="postfix">)</mo></mrow></mrow></math></span></p>
+<p><span class='hurmet-calc' data-entry='A = 1//2 r² (θ - sin θ) = 1//2 (r L - r_p c) = r² cos⁻¹(r_p/r) - r_p √(r² - r_p²) = r² cos⁻¹((r - h)/r) - (r - h)·√(2 r h - h²)'><math><mrow><mi>A</mi><mo>=</mo><mstyle displaystyle="false" scriptlevel="0"><mfrac><mn>1</mn><mn>2</mn></mfrac></mstyle><mspace width="0.1667em"></mspace><msup><mi>r</mi><mn>2</mn></msup><mo form="prefix" stretchy="false">(</mo><mi>θ</mi><mo>−</mo><mrow><mi>sin</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mi>θ</mi><mo form="postfix" stretchy="false">)</mo></mrow><mrow><mo>=</mo><mstyle displaystyle="false" scriptlevel="0"><mfrac><mn>1</mn><mn>2</mn></mfrac></mstyle><mspace width="0.1667em"></mspace><mo form="prefix" stretchy="false">(</mo><mi>r</mi><mi>L</mi><mo>−</mo><mi>r</mi><msub><mrow></mrow><mtext>p</mtext></msub><mi>c</mi><mo form="postfix" stretchy="false">)</mo></mrow><mrow><mo>=</mo><msup><mi>r</mi><mn>2</mn></msup><msup><mi>cos</mi><mrow><mtext>-</mtext><mn>1</mn></mrow></msup><mo>⁡</mo><mrow><mo fence="true" form="prefix">(</mo><mstyle displaystyle="true" scriptlevel="0"><mfrac><mrow><mi>r</mi><msub><mrow></mrow><mtext>p</mtext></msub></mrow><mi>r</mi></mfrac></mstyle><mo fence="true" form="postfix">)</mo></mrow><mo>−</mo><mi>r</mi><msub><mrow></mrow><mtext>p</mtext></msub><msqrt><mrow><msup><mi>r</mi><mn>2</mn></msup><mo>−</mo><mi>r</mi><msup><msub><mrow></mrow><mtext>p</mtext></msub><mn>2</mn></msup></mrow></msqrt></mrow><mrow><mo>=</mo><msup><mi>r</mi><mn>2</mn></msup><msup><mi>cos</mi><mrow><mtext>-</mtext><mn>1</mn></mrow></msup><mo>⁡</mo><mrow><mo fence="true" form="prefix">(</mo><mstyle displaystyle="true" scriptlevel="0"><mfrac><mrow><mi>r</mi><mo>−</mo><mi>h</mi></mrow><mi>r</mi></mfrac></mstyle><mo fence="true" form="postfix">)</mo></mrow><mo>−</mo><mo form="prefix" stretchy="false">(</mo><mi>r</mi><mo>−</mo><mi>h</mi><mo form="postfix" stretchy="false">)</mo><mo>⋅</mo><msqrt><mrow><mn>2</mn><mspace width="0.1667em"></mspace><mi>r</mi><mi>h</mi><mo>−</mo><msup><mi>h</mi><mn>2</mn></msup></mrow></msqrt></mrow></math></span></p></div>
+<p>Elliptical Sector<span class='hurmet-calc' data-entry='draw()
+    title "Elliptical sector"
+    frame 200, 100, "right"
+    view -1.4, 1.4, -0.7
+    ellipse [0, 0], 1, 0.5
+    line [-1.2, 0; 1.2, 0]
+    line [0, -0.7; 0, 0.7]
+    text [0.9, 0.1], "a", "belowright"
+    text [-0.05, 0.6], "b", "right"
+    line [0, 0; 0.91, 0.2]
+    text [0.9, 0.2], "θ~0~", "right"
+    line [0, 0; 0.31, 0.47]
+    text [0.25, 0.55], "θ~1~", "right"
+end' style='float: right;'><svg xmlns="http://www.w3.org/2000/svg" xmlns='http://www.w3.org/2000/svg' width='200' height='100' style='display: inline;' float='right'>
+<title>
+Elliptical sector</title>
+<ellipse cx='100' cy='50' rx='71.42857142857143' ry='35.714285714285715' stroke-width='1' stroke='black' fill='none'>
+</ellipse>
+<path d='M14.285714285714292,50 185.71428571428572,50' stroke-width='1' stroke='black' fill='none'>
+</path>
+<path d='M100,100 100,0' stroke-width='1' stroke='black' fill='none'>
+</path>
+<text text='a' x='170.95071428571427' y='59.51964285714286' font-family='sans-serif' font-size='13.33' text-anchor='start'>
+<tspan>a</tspan></text>
+<text text='b' x='103.09357142857144' y='11.58619047619048' font-family='sans-serif' font-size='13.33' text-anchor='start'>
+<tspan>b</tspan></text>
+<path d='M100,50 165,35.71428571428571' stroke-width='1' stroke='black' fill='none'>
+</path>
+<text text='θ~0~' x='170.95071428571427' y='40.15761904761904' font-family='sans-serif' font-size='13.33' text-anchor='start'>
+<tspan>θ</tspan><tspan font-size='0.8em' dy='2'>0</tspan></text>
+<path d='M100,50 122.14285714285714,16.42857142857143' stroke-width='1' stroke='black' fill='none'>
+</path>
+<text text='θ~1~' x='124.52214285714287' y='15.157619047619042' font-family='sans-serif' font-size='13.33' text-anchor='start'>
+<tspan>θ</tspan><tspan font-size='0.8em' dy='2'>1</tspan></text>
+</svg></span></p>
+<div class="indented"><p><span class='hurmet-calc' data-entry='A = F(θ_1) - F(θ_0)'><math><mrow><mi>A</mi><mo>=</mo><mi mathvariant="normal">F</mi><mo>⁡</mo><mo form="prefix" stretchy="false">(</mo><mi>θ</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo form="postfix" stretchy="false">)</mo><mo>−</mo><mi mathvariant="normal">F</mi><mo>⁡</mo><mo form="prefix" stretchy="false">(</mo><mi>θ</mi><msub><mrow></mrow><mtext>0</mtext></msub><mo form="postfix" stretchy="false">)</mo></mrow></math></span>, where:</p>
+<p><span class='hurmet-calc' data-entry='F(θ) = (a b)/2 (θ - tan⁻¹(((b-a) sin(2 θ)) / (b² cos²θ + a²sin²θ)))'><math><mrow><mi mathvariant="normal">F</mi><mo>⁡</mo><mo form="prefix" stretchy="false">(</mo><mi>θ</mi><mo form="postfix" stretchy="false">)</mo><mo>=</mo><mstyle displaystyle="true" scriptlevel="0"><mfrac><mrow><mi>a</mi><mi>b</mi></mrow><mn>2</mn></mfrac></mstyle><mspace width="0.1667em"></mspace><mrow><mo fence="true" form="prefix">(</mo><mi>θ</mi><mo>−</mo><msup><mi>tan</mi><mrow><mtext>-</mtext><mn>1</mn></mrow></msup><mo>⁡</mo><mrow><mo fence="true" form="prefix">(</mo><mstyle displaystyle="true" scriptlevel="0"><mfrac><mrow><mo form="prefix" stretchy="false">(</mo><mi>b</mi><mo>−</mo><mi>a</mi><mo form="postfix" stretchy="false">)</mo><mrow><mspace width="0.1667em"></mspace><mi>sin</mi><mo>⁡</mo></mrow><mo form="prefix" stretchy="false">(</mo><mn>2</mn><mspace width="0.1667em"></mspace><mi>θ</mi><mo form="postfix" stretchy="false">)</mo></mrow><mrow><msup><mi>b</mi><mn>2</mn></msup><msup><mi>cos</mi><mn>2</mn></msup><mo>⁡</mo><mspace width="0.1667em"></mspace><mi>θ</mi><mo>+</mo><msup><mi>a</mi><mn>2</mn></msup><msup><mi>sin</mi><mn>2</mn></msup><mo>⁡</mo><mspace width="0.1667em"></mspace><mi>θ</mi></mrow></mfrac></mstyle><mo fence="true" form="postfix">)</mo></mrow><mo fence="true" form="postfix">)</mo></mrow></mrow></math></span></p></div>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+
+</article>
+</body>
+</html>

@@ -101,17 +101,12 @@ div.indented { margin-left: 2em; }
 div.centered { text-align: center; }
 div.hidden { display: none; }
 
-hr {
-  border: 0;
-  border-top: 1px dashed;
-}
-
 img {
   max-width: 100%;
 }
 
 code {
-  font-family: monospace;
+  font-family: Consolas, 'Courier New', 'Cambria Math', monospace;
   padding: 2px;
   background-color: var(--code-background-color);
   color: var(--code-color);
@@ -120,6 +115,7 @@ code {
 
 pre {
   width: 100%;
+  margin-left: 2em;
 }
 
 blockquote {
