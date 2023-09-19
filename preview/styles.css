@@ -64,6 +64,10 @@ nav ul li ul li {
   padding-top: 0.4em;
 }
 
+nav ul li ul li a {
+  padding: 0 0 0 18px;
+}
+
 article, #title {
   max-width: 672px;
   margin: 0 auto;
