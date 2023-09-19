@@ -54,6 +54,16 @@ nav  a {
   color: inherit;
 }
 
+nav li details {
+  padding-left: 1em;
+  cursor: pointer;
+}
+
+nav ul li ul li {
+  display: block;
+  padding-top: 0.4em;
+}
+
 article, #title {
   max-width: 672px;
   margin: 0 auto;
