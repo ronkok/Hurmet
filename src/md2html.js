@@ -128,6 +128,8 @@ const writeSVG = dwg => {
   return svg
 }
 
+const functionOrModuleRegEx = /^ *(?:function|module) /
+
 const writeTOC = node => {
   let toc = "<ul class='toc'>\n"
   for (const item of node.attrs.body) {
@@ -225,11 +227,14 @@ const nodes = {
       const style = svg.indexOf('float="right"' > -1) ? " style='float: right;'" : ""
       return `<span class='hurmet-calc' data-entry=${dataStr(node.attrs.entry)}${style}>` +
         `${svg}</span>`
+    } else if (node.attrs.dtype && node.attrs.dtype === dt.MODULE &&
+               functionOrModuleRegEx.test(node.attrs.entry)) {
+      return `<pre><code>${node.attrs.entry}</code></pre>`
     } else {
       const tex = node.attrs.tex ? node.attrs.tex : parse(node.attrs.entry)
       const mathML = temml.renderToString(
         tex,
-        { trust: true, displayMode: (node.attrs.displayMode || false) }
+        { trust: true, wrap: "=", displayMode: (node.attrs.displayMode || false) }
       )
       const tag = node.attrs.displayMode ? "p" : "span"
       return `<${tag} class='hurmet-calc' data-entry=${dataStr(node.attrs.entry)}>` +
