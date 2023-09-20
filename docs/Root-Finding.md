@@ -167,7 +167,7 @@ having to copy them into your document.
 That Gist is located at:
 
 ```
-https://gist.githubusercontent.com/ronkok/a6c48bbb3b65c973d7cee69f2735c42f/raw/rootFinding.txt"
+https://gist.githubusercontent.com/ronkok/a6c48bbb3b65c973d7cee69f2735c42f/raw/rootFinding.txt
 ```
 
 To use it, just copy and paste the following two lines into Hurmet.app.
