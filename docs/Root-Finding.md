@@ -161,7 +161,7 @@ Use Brent’s method to find a root of ¢` cos x `
 
 ## Remote Module
 
-I’ve saved theses three functions in a GitHub Gist, so you can call them without
+I’ve saved these three functions in a GitHub Gist, so you can call them without
 having to copy them into your document.
 
 First, open a math zone (Alt-C) and copy in this code:
@@ -173,7 +173,7 @@ findRoot = import("https://gist.githubusercontent.com/ronkok/a6c48bbb3b65c973d7c
 Then call a function like this example:
 
 ::: indented
-¢` x = findRoot.newton(x → x³ - 5, y → 3 y², 1) = 1.7099759466767 `
+¢` x = findRoot.newton(x → x³ - 5, y → 3 y², 1) = ? `
 :::
 
 [1]: https://www.codeproject.com/Articles/79541/Three-Methods-for-Root-finding-in-C
