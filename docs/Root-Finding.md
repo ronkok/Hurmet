@@ -6,7 +6,7 @@ pageSize: letter
 
 ## Root Finding
 
-For finding roots of a function, ¢` f `.
+Here, you can find three Hurmet functions for finding roots of a function, ¢` f `.
 
 Bisection method
 
@@ -164,15 +164,17 @@ Use Brent’s method to find a root of ¢` cos x `
 I’ve saved these three functions in a GitHub Gist, so you can call them without
 having to copy them into your document.
 
-First, open a math zone (Alt-C) and copy in this code:
+That Gist is located at:
 
 ```
-findRoot = import("https://gist.githubusercontent.com/ronkok/a6c48bbb3b65c973d7cee69f2735c42f/raw/rootFinding.txt") = !
+https://gist.githubusercontent.com/ronkok/a6c48bbb3b65c973d7cee69f2735c42f/raw/rootFinding.txt"
 ```
 
-Then call a function like this example:
+To use it, just copy and paste the following two lines into Hurmet.app.
 
 ::: indented
+¢` findRoot = import("https://gist.githubusercontent.com/ronkok/a6c48bbb3b65c973d7cee69f2735c42f/raw/rootFinding.txt") = ! `
+
 ¢` x = findRoot.newton(x → x³ - 5, y → 3 y², 1) = ? `
 :::
 
