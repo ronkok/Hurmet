@@ -17,8 +17,8 @@ psi	psi	in	in			in
 
 # Concrete Column Interaction Diagram
 
-This guide is aimed at civil engineers. It shows how Hurmet can produce a
-concrete column interaction diagram, like this one:
+This guide is aimed at civil and structural engineers. It shows how Hurmet can
+produce a concrete column interaction diagram, like this one:
 
 ¢` colDiagram1.draw(col, 100, 200) = @ `
 

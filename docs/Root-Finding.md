@@ -12,7 +12,8 @@ Bisection method
 
 ::: indented
 Slow but sure. Select ¢` a ` and ¢` b ` such that ¢` f(a) ` and ¢` f(b) ` have
-opposite signs. 
+opposite signs. The optional argument ε  enables you to define a desired
+precision.
 :::
 
 ¢` function bisection(f, a, b; ε = 1e-15)
@@ -58,8 +59,7 @@ Converges faster than bisection. Sure to find a result, so long as the function
 is continuous.\
 Select ¢` a ` and ¢` b ` such that ¢` f(a) ` and ¢` f(b) ` have opposite signs.
 
-Adapted from John D Cook: [Three Methods for Root-finding in C# -
-CodeProject][1]
+Adapted from John D Cook: [Three Methods for Root-finding in C#][1]
 
 ¢` function brent(f, a, b; ε = 1e-15)
     fa = f(a)
@@ -139,7 +139,7 @@ end `
 ## Examples
 
 You can pass a function as an argument to another function. One way to do that
-is with arrow notation, e.g., ¢` x → cos x `.
+is with arrow notation, e.g., ¢` x → cos x `. (Note: `->` will auto-correct into →)
 
 Use bisection to find a root of ¢` cos x `.
 
@@ -159,5 +159,21 @@ Use Brent’s method to find a root of ¢` cos x `
 ¢` x = brent(x → cos x, 1, 2) = ? `
 :::
 
+## Remote Module
+
+I’ve saved theses three functions in a GitHub Gist, so you can call them without
+having to copy them into your document.
+
+First, open a math zone (Alt-C) and copy in this code:
+
+```
+findRoot = import("https://gist.githubusercontent.com/ronkok/a6c48bbb3b65c973d7cee69f2735c42f/raw/rootFinding.txt") = !
+```
+
+Then call a function like this example:
+
+::: indented
+¢` x = findRoot.newton(x → x³ - 5, y → 3 y², 1) = 1.7099759466767 `
+:::
 
 [1]: https://www.codeproject.com/Articles/79541/Three-Methods-for-Root-finding-in-C
