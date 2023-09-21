@@ -4,7 +4,7 @@ fontSize: 12
 pageSize: letter
 ---------------
 
-## Root Finding
+# Root Finding
 
 This guide shows three Hurmet functions for finding roots of a function, _f_. A
 copy of these functions is located in a GitHub Gist and you can import them
@@ -54,8 +54,8 @@ Brent’s method
 
 ::: indented
 Converges faster than bisection. Sure to find a result, so long as the function
-is continuous.\
-Select ¢` a ` and ¢` b ` such that ¢` f(a) ` and ¢` f(b) ` have opposite signs.
+is continuous. Select ¢` a ` and ¢` b ` such that ¢` f(a) ` and ¢` f(b) ` have
+opposite signs.
 
 Use Brent’s method to find a root of ¢` cos x `
 
