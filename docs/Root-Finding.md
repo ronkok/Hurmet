@@ -6,15 +6,67 @@ pageSize: letter
 
 ## Root Finding
 
-Here, you can find three Hurmet functions for finding roots of a function, ¢` f `.
+This guide shows three Hurmet functions for finding roots of a function, _f_. A
+copy of these functions is located in a GitHub Gist and you can import them
+into Hurmet by copying the following statement into your document.
+
+::: indented
+¢` findRoot =
+import("https://gist.githubusercontent.com/ronkok/a6c48bbb3b65c973d7cee69f2735c42f/raw/rootFinding.txt") = ! `
+:::
+
+To use these methods, you will pass a function as an argument to another
+function. One way to do that is with arrow notation, e.g., ¢` x → cos x `.
+(Note: `->` will auto-correct into →)
 
 Bisection method
 
 ::: indented
-Slow but sure. Select ¢` a ` and ¢` b ` such that ¢` f(a) ` and ¢` f(b) ` have
-opposite signs. The optional argument ε  enables you to define a desired
-precision.
+Slow but sure. Select arguments ¢` a ` and ¢` b ` such that ¢` f(a) ` and ¢`
+f(b) ` have opposite signs. The optional argument ε  enables you to define a
+desired precision.
+
+Use bisection to find a root of ¢` cos x `.
+
+:::::: indented
+¢` x = findRoot.bisection(x → cos x, 1, 2) = % `
+::::::
 :::
+
+Newton’s method
+
+::: indented
+Much faster than bisection when it works. Sometimes it does not converge. It’s
+not a good idea to use Newton’s method for a periodic function. It will freeze
+the browser tab.
+
+Input the function _f_, its first derivative _f_ ′, and a starting guess. The
+_ε_  is optional.
+
+Use Newton’s method to find the cube root of five.
+
+:::::: indented
+¢` x = findRoot.newton(x → x³ - 5, y → 3 y², 1) = ? `
+::::::
+:::
+
+Brent’s method
+
+::: indented
+Converges faster than bisection. Sure to find a result, so long as the function
+is continuous.\
+Select ¢` a ` and ¢` b ` such that ¢` f(a) ` and ¢` f(b) ` have opposite signs.
+
+Use Brent’s method to find a root of ¢` cos x `
+
+:::::: indented
+¢` x = findRoot.brent(x → cos x, 1, 2) = ? `
+::::::
+:::
+
+### Reference
+
+Bisection method
 
 ¢` function bisection(f, a, b; ε = 1e-15)
     fa = f(a)
@@ -34,15 +86,6 @@ end `
 
 Newton’s method
 
-::: indented
-Much faster than bisection when it works. Sometimes it does not converge. It’s
-not a good idea to use Newton’s method for a periodic function. It will freeze
-the browser tab.
-
-Input the function _f_, its first derivative _f_ ′, and a starting guess. The
-_ε_  is optional.
-:::
-
 ¢` function newton(f, fPrime, guess; ε = 1e-15)
     x = guess
     while true
@@ -55,10 +98,6 @@ end `
 Brent’s method
 
 ::: indented
-Converges faster than bisection. Sure to find a result, so long as the function
-is continuous.\
-Select ¢` a ` and ¢` b ` such that ¢` f(a) ` and ¢` f(b) ` have opposite signs.
-
 Adapted from John D Cook: [Three Methods for Root-finding in C#][1]
 
 ¢` function brent(f, a, b; ε = 1e-15)
@@ -136,46 +175,11 @@ Adapted from John D Cook: [Three Methods for Root-finding in C#][1]
 end `
 :::
 
-## Examples
-
-You can pass a function as an argument to another function. One way to do that
-is with arrow notation, e.g., ¢` x → cos x `. (Note: `->` will auto-correct into →)
-
-Use bisection to find a root of ¢` cos x `.
-
-::: indented
-¢` x = bisection(x → cos x, 1, 2) = % `
-:::
-
-Use Newton’s method to find the cube root of five.
-
-::: indented
-¢` x = newton(x → x³ - 5, y → 3 y², 1) = ? `
-:::
-
-Use Brent’s method to find a root of ¢` cos x `
-
-::: indented
-¢` x = brent(x → cos x, 1, 2) = ? `
-:::
-
 ## Remote Module
 
-I’ve saved these three functions in a GitHub Gist, so you can call them without
-having to copy them into your document.
+I’ve saved these three functions in a GitHub Gist, so you can call them
+remotely. That Gist is located at:
+`https://gist.githubusercontent.com/ronkok/a6c48bbb3b65c973d7cee69f2735c42f/raw/rootFinding.txt`
 
-That Gist is located at:
-
-```
-https://gist.githubusercontent.com/ronkok/a6c48bbb3b65c973d7cee69f2735c42f/raw/rootFinding.txt
-```
-
-To use it, just copy and paste the following two lines into Hurmet.app.
-
-::: indented
-¢` findRoot = import("https://gist.githubusercontent.com/ronkok/a6c48bbb3b65c973d7cee69f2735c42f/raw/rootFinding.txt") = ! `
-
-¢` x = findRoot.newton(x → x³ - 5, y → 3 y², 1) = ? `
-:::
 
 [1]: https://www.codeproject.com/Articles/79541/Three-Methods-for-Root-finding-in-C
