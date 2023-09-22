@@ -6,14 +6,9 @@ pageSize: letter
 
 # Root Finding
 
-This guide shows three Hurmet functions for finding roots of a function, _f_. A
-copy of these functions is located in a GitHub Gist and you can import them
-into Hurmet by copying the following statement into your document.
-
-::: indented
-¢` findRoot =
-import("https://gist.githubusercontent.com/ronkok/a6c48bbb3b65c973d7cee69f2735c42f/raw/rootFinding.txt") = ! `
-:::
+This guide shows three Hurmet functions for finding roots of a function, _f_.
+The functions are saved in a GitHub Gist so you can access them with an
+`import` statement.
 
 To use these methods, you will pass a function as an argument to another
 function. One way to do that is with arrow notation, e.g., ¢` x → cos x `.
@@ -23,12 +18,15 @@ Bisection method
 
 ::: indented
 Slow but sure. Select arguments ¢` a ` and ¢` b ` such that ¢` f(a) ` and ¢`
-f(b) ` have opposite signs. The optional argument ε  enables you to define a
+f(b) ` have opposite signs. An optional argument ε  enables you to define a
 desired precision.
 
 Use bisection to find a root of ¢` cos x `.
 
 :::::: indented
+¢` findRoot =
+import("https://gist.githubusercontent.com/ronkok/a6c48bbb3b65c973d7cee69f2735c42f/raw/rootFinding.txt") = ! `
+
 ¢` x = findRoot.bisection(x → cos x, 1, 2) = % `
 ::::::
 :::
@@ -46,6 +44,9 @@ _ε_  is optional.
 Use Newton’s method to find the cube root of five.
 
 :::::: indented
+¢` findRoot =
+import("https://gist.githubusercontent.com/ronkok/a6c48bbb3b65c973d7cee69f2735c42f/raw/rootFinding.txt") = ! `
+
 ¢` x = findRoot.newton(x → x³ - 5, y → 3 y², 1) = ? `
 ::::::
 :::
@@ -60,6 +61,9 @@ opposite signs.
 Use Brent’s method to find a root of ¢` cos x `
 
 :::::: indented
+¢` findRoot =
+import("https://gist.githubusercontent.com/ronkok/a6c48bbb3b65c973d7cee69f2735c42f/raw/rootFinding.txt") = ! `
+
 ¢` x = findRoot.brent(x → cos x, 1, 2) = ? `
 ::::::
 :::
