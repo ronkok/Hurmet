@@ -93,6 +93,9 @@ export function openPrompt(options) {
     if (options.radioButtons && !checkbox.checked) {
       params.class = form[options.radioButtons.name].value
     }
+    if (options.src && !params.src) {
+      params.src = options.src
+    }
     params.checkbox = checkbox.checked
     if (params) {
       close()

@@ -549,12 +549,17 @@ function insertImage(nodeType) {
       const promptOptions = {
         title: attrs && attrs.src ? "Edit image" : "Insert image",
         fields: {
-          src: new TextField({ label: "File path", required: true, value: attrs && attrs.src }),
+//          src: new TextField({ label: "File path", required: true, value: attrs && attrs.src }),
           alt: new TextField({
             label: "Description",
             value: attrs ? attrs.alt : state.doc.textBetween(from, to, " ")
           }),
           width: new TextField({ label: "Width", value: attrs && attrs.width })
+        },
+        radioButtons: {
+          name: "position",
+          labels: ["inline", "left", "center", "right"],
+          current: attrs && attrs.class ? attrs.class : "inline"
         },
         callback(attrs) {
           const tr = view.state.tr
@@ -570,12 +575,13 @@ function insertImage(nodeType) {
           view.focus()
         }
       }
-      if ((attrs && attrs.class) || !attrs) {
-        promptOptions.radioButtons = {
-          name: "position",
-          labels: ["inline", "left", "center", "right"],
-          current: attrs ? attrs.class : "inline"
+      if (!(attrs && attrs.src) || (attrs && attrs.src && attrs.src.length < 400)) {
+        promptOptions.fields = {
+          src: new TextField({ label: "File path", required: true, value: attrs && attrs.src }),
+          ...promptOptions.fields
         }
+      } else if (attrs && attrs.src) {
+        promptOptions.src = attrs.src
       }
       if (!attrs) {
         promptOptions.checkbox = {
