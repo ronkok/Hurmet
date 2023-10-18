@@ -1120,11 +1120,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6339","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.6586","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.3065","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.3295","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -1133,10 +1133,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4227","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4425","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9669","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.7352","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9492","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.7278","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -1156,7 +1156,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.86458","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.86610","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1164,12 +1164,12 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.2959","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.2687","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["4.0472","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["88.0165","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["4.2515","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["87.9540","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
@@ -1180,7 +1180,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1425.26","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1428.23","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1191,7 +1191,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["18.5030","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["19.0247","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -1221,7 +1221,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.0594","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0565","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -9467,6 +9467,7 @@ const TABLES = (function() {
       };
       if (myID) { table.attrs.id = myID; }
       if (myClass) { table.attrs.class = myClass; }
+      let k = 0;
       if (colWidths && state.inHtml) {
         let sum = 0;
         colWidths.forEach(el => { sum += Number(el); } );
@@ -9476,6 +9477,7 @@ const TABLES = (function() {
           colGroup.content.push({ type: "col", attrs: [{ style: `width: ${width}px` }] });
         }
         table.content.push(colGroup);
+        k = 1;
       }
       for (let i = 0; i < numRows; i++) {
         table.content.push({ type: "table_row", content: [] } );
@@ -9490,7 +9492,7 @@ const TABLES = (function() {
           if (content.length === 1 && content[0].type === "null") {
             content = [{ type: "paragraph", content: [] }];
           }
-          table.content[i].content.push({
+          table.content[i + k].content.push({
             "type": cell.inHeader ? "table_header" : "table_cell",
             "attrs": {
               "colspan": cell.colspan,
@@ -9568,7 +9570,7 @@ const parseTextMark = (capture, state, mark) => {
   return text
 };
 
-const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<(?:\/?(?:!DOCTYPE html|body|li|br|hr|(?:div|article|details|input|label|ul|ol|dl|main|nav)(?: (?:class|id|style)=(["'])[A-Za-z0-9.:;\- ]+\2){0,2})|\/?html(?: lang=(["'])[a-z]+\3)?)>[^\n]*?(?:\n|$))/;
+const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<(?:\/?(?:!DOCTYPE html|body|li|br|hr|(?:div|article|details|input|label|ul|ol|dl|main|nav)(?: (?:class|for|id|style|type)=(["'])[A-Za-z0-9_.:;\- ]+\2){0,2})|\/?html(?: lang=(["'])[a-z]+\3)?)>[^\n]*?(?:\n|$))/;
 
 // Rules must be applied in a specific order, so use a Map instead of an object.
 const rules = new Map();
@@ -16837,7 +16839,7 @@ class TextNode$1 {
   }
 }
 
-/**
+/*
  * This node represents an image embed (<img>) element.
  */
 class Img {
@@ -16882,7 +16884,7 @@ class Img {
       markup += ` style="${utils.escape(styles)}"`;
     }
 
-    markup += "/>";
+    markup += ">";
     return markup;
   }
 }
@@ -17058,6 +17060,34 @@ var mathMLTree = {
  * This file provides support for building horizontal stretchy elements.
  */
 
+// TODO: Remove when Chromium stretches \widetilde & \widehat
+const estimatedWidth = node => {
+  let width = 0;
+  if (node.body) {
+    for (const item of node.body) {
+      width += estimatedWidth(item);
+    }
+  } else if (node.type === "supsub") {
+    width += estimatedWidth(node.base);
+    if (node.sub) { width += 0.7 * estimatedWidth(node.sub); }
+    if (node.sup) { width += 0.7 * estimatedWidth(node.sup); }
+  } else if (node.type === "mathord" || node.type === "textord") {
+    for (const ch of node.text.split('')) {
+      const codePoint = ch.codePointAt(0);
+      if ((0x60 < codePoint && codePoint < 0x7B) || (0x03B0 < codePoint && codePoint < 0x3CA)) {
+        width += 0.56; // lower case latin or greek. Use advance width of letter n
+      } else if (0x2F < codePoint && codePoint < 0x3A) {
+        width += 0.50; // numerals.
+      } else {
+        width += 0.92; // advance width of letter M
+      }
+    }
+  } else {
+    width += 1.0;
+  }
+  return width
+};
+
 const stretchyCodePoint = {
   widehat: "^",
   widecheck: "ˇ",
@@ -17115,8 +17145,27 @@ const mathMLnode = function(label) {
   return node
 };
 
+const crookedWides = ["\\widetilde", "\\widehat", "\\widecheck", "\\utilde"];
+
+// TODO: Remove when Chromium stretches \widetilde & \widehat
+const accentNode = (group) => {
+  const mo = mathMLnode(group.label);
+  if (crookedWides.includes(group.label)) {
+    const width = estimatedWidth(group.base);
+    if (1 < width && width < 1.6) {
+      mo.classes.push("tml-crooked-2");
+    } else if (1.6 <= width && width < 2.5) {
+      mo.classes.push("tml-crooked-3");
+    } else if (2.5 <= width) {
+      mo.classes.push("tml-crooked-4");
+    }
+  }
+  return mo
+};
+
 var stretchy = {
-  mathMLnode
+  mathMLnode,
+  accentNode
 };
 
 /**
@@ -17332,6 +17381,10 @@ defineSymbol(math, mathord, "\u21af", "\\lightning", true);
 defineSymbol(math, mathord, "\u220E", "\\QED", true);
 defineSymbol(math, mathord, "\u2030", "\\permil", true);
 defineSymbol(text, textord, "\u2030", "\\permil");
+defineSymbol(math, mathord, "\u2609", "\\astrosun", true);
+defineSymbol(math, mathord, "\u263c", "\\sun", true);
+defineSymbol(math, mathord, "\u263e", "\\leftmoon", true);
+defineSymbol(math, mathord, "\u263d", "\\rightmoon", true);
 
 // AMS Negated Binary Relations
 defineSymbol(math, rel, "\u226e", "\\nless", true);
@@ -17410,6 +17463,8 @@ defineSymbol(math, textord, "\u2127", "\\mho");
 defineSymbol(math, textord, "\u2132", "\\Finv", true);
 defineSymbol(math, textord, "\u2141", "\\Game", true);
 defineSymbol(math, textord, "\u2035", "\\backprime");
+defineSymbol(math, textord, "\u2036", "\\backdprime");
+defineSymbol(math, textord, "\u2037", "\\backtrprime");
 defineSymbol(math, textord, "\u25b2", "\\blacktriangle");
 defineSymbol(math, textord, "\u25bc", "\\blacktriangledown");
 defineSymbol(math, textord, "\u25a0", "\\blacksquare");
@@ -17613,6 +17668,9 @@ defineSymbol(text, textord, "\u2423", "\\textvisiblespace", true);
 defineSymbol(math, textord, "\u2220", "\\angle", true);
 defineSymbol(math, textord, "\u221e", "\\infty", true);
 defineSymbol(math, textord, "\u2032", "\\prime");
+defineSymbol(math, textord, "\u2033", "\\dprime");
+defineSymbol(math, textord, "\u2034", "\\trprime");
+defineSymbol(math, textord, "\u2057", "\\qprime");
 defineSymbol(math, textord, "\u25b3", "\\triangle");
 defineSymbol(text, textord, "\u0391", "\\Alpha", true);
 defineSymbol(text, textord, "\u0392", "\\Beta", true);
@@ -17792,7 +17850,8 @@ defineSymbol(math, punct, ";", ";");
 defineSymbol(math, bin, "\u22bc", "\\barwedge", true);
 defineSymbol(math, bin, "\u22bb", "\\veebar", true);
 defineSymbol(math, bin, "\u2299", "\\odot", true);
-defineSymbol(math, bin, "\u2295", "\\oplus", true);
+// Firefox turns ⊕ into an emoji. So append \uFE0E. Define Unicode character in macros, not here.
+defineSymbol(math, bin, "\u2295\uFE0E", "\\oplus");
 defineSymbol(math, bin, "\u2297", "\\otimes", true);
 defineSymbol(math, textord, "\u2202", "\\partial", true);
 defineSymbol(math, bin, "\u2298", "\\oslash", true);
@@ -18023,6 +18082,8 @@ for (let i = 0; i < letters.length; i++) {
   defineSymbol(math, mathord, ch, ch);
   defineSymbol(text, textord, ch, ch);
 }
+// Prevent Firefox from using a dotless i.
+defineSymbol(text, textord, "i\uFE0E", "i");
 
 // Some more letters in Unicode Basic Multilingual Plane.
 const narrow = "ÇÐÞçþℂℍℕℙℚℝℤℎℏℊℋℌℐℑℒℓ℘ℛℜℬℰℱℳℭℨ";
@@ -18500,7 +18561,7 @@ function buildMathML(tree, texExpression, style, settings) {
 
 const mathmlBuilder$a = (group, style) => {
   const accentNode = group.isStretchy
-    ? stretchy.mathMLnode(group.label)
+    ? stretchy.accentNode(group)
     : new mathMLTree.MathNode("mo", [makeText(group.label, group.mode)]);
 
   if (group.label === "\\vec") {
@@ -18520,25 +18581,21 @@ const mathmlBuilder$a = (group, style) => {
   return node;
 };
 
-const NON_STRETCHY_ACCENT_REGEX = new RegExp(
-  [
-    "\\acute",
-    "\\grave",
-    "\\ddot",
-    "\\dddot",
-    "\\ddddot",
-    "\\tilde",
-    "\\bar",
-    "\\breve",
-    "\\check",
-    "\\hat",
-    "\\vec",
-    "\\dot",
-    "\\mathring"
-  ]
-    .map((accent) => `\\${accent}`)
-    .join("|")
-);
+const nonStretchyAccents = new Set([
+  "\\acute",
+  "\\grave",
+  "\\ddot",
+  "\\dddot",
+  "\\ddddot",
+  "\\tilde",
+  "\\bar",
+  "\\breve",
+  "\\check",
+  "\\hat",
+  "\\vec",
+  "\\dot",
+  "\\mathring"
+]);
 
 // Accents
 defineFunction({
@@ -18576,7 +18633,7 @@ defineFunction({
   handler: (context, args) => {
     const base = normalizeArgument(args[0]);
 
-    const isStretchy = !NON_STRETCHY_ACCENT_REGEX.test(context.funcName);
+    const isStretchy = !nonStretchyAccents.has(context.funcName);
 
     return {
       type: "accent",
@@ -18614,7 +18671,6 @@ defineFunction({
       mode: mode,
       label: context.funcName,
       isStretchy: false,
-      isShifty: true,
       base: base
     };
   },
@@ -18644,7 +18700,7 @@ defineFunction({
     };
   },
   mathmlBuilder: (group, style) => {
-    const accentNode = stretchy.mathMLnode(group.label);
+    const accentNode = stretchy.accentNode(group);
     accentNode.style["math-depth"] = 0;
     const node = new mathMLTree.MathNode("munder", [
       buildGroup$1(group.base, style),
@@ -20745,6 +20801,10 @@ const mathmlBuilder$7 = function(group, style) {
           // Chromium does not recognize text-align: left. Use -webkit-
           // TODO: Remove -webkit- when Chromium no longer needs it.
           row.children[j].style.textAlign = "-webkit-" + (j % 2 ? "left" : "right");
+        }
+        if (group.addEqnNum) {
+          const k = group.leqno ? 0 : row.children.length - 1;
+          row.children[k].style.textAlign = "-webkit-" + (group.leqno ? "left" : "right");
         }
       }
       if (row.children.length > 1 && group.envClasses.includes("cases")) {
@@ -23686,7 +23746,14 @@ defineFunctionBuilders({
     }
 
     if (group.sup) {
-      children.push(buildGroup$1(group.sup, childStyle));
+      const sup = buildGroup$1(group.sup, childStyle);
+      const testNode = sup.type === "mrow" ? sup.children[0] : sup;
+      if ((testNode.type === "mo" && testNode.classes.includes("tml-prime"))
+        && group.base && group.base.text && group.base.text === "f") {
+        // Chromium does not address italic correction on prime. Prevent f′ from overlapping.
+        testNode.classes.push("prime-pad");
+      }
+      children.push(sup);
     }
 
     let nodeType;
@@ -24152,6 +24219,8 @@ const smallCaps = Object.freeze({
 
 const numberRegEx = /^\d(?:[\d,.]*\d)?$/;
 const latinRegEx = /[A-Ba-z]/;
+const primes = new Set(["\\prime", "\\dprime", "\\trprime", "\\qprime",
+  "\\backprime", "\\backdprime", "\\backtrprime"]);
 
 const italicNumber = (text, variant, tag) => {
   const mn = new mathMLTree.MathNode(tag, [text]);
@@ -24219,7 +24288,7 @@ defineFunctionBuilders({
         text.text = variantChar(text.text, variant);
       }
       node = new mathMLTree.MathNode("mtext", [text]);
-    } else if (group.text === "\\prime") {
+    } else if (primes.has(group.text)) {
       node = new mathMLTree.MathNode("mo", [text]);
       // TODO: If/when Chromium uses ssty variant for prime, remove the next line.
       node.classes.push("tml-prime");
@@ -24872,6 +24941,9 @@ defineMacro("\\char", function(context) {
 // The Latin Modern font renders <mi>√</mi> at the wrong vertical alignment.
 // This macro provides a better rendering.
 defineMacro("\\surd", '\\sqrt{\\vphantom{|}}');
+
+// See comment for \oplus in symbols.js.
+defineMacro("\u2295", "\\oplus");
 
 defineMacro("\\hbox", "\\text{#1}");
 
@@ -29137,7 +29209,6 @@ class Parser {
           loc: SourceLocation.range(nucleus),
           label: command,
           isStretchy: false,
-          isShifty: true,
           base: symbol
         };
       }
@@ -29335,7 +29406,7 @@ class Style {
  * https://mit-license.org/
  */
 
-const version = "0.10.14";
+const version = "0.10.16";
 
 function postProcess(block) {
   const labelMap = {};
@@ -29386,6 +29457,7 @@ function postProcess(block) {
 /* eslint no-console:0 */
 
 /**
+ * @type {import('./temml').render}
  * Parse and build an expression, and place that expression in the DOM node
  * given.
  */
@@ -29423,6 +29495,7 @@ if (typeof document !== "undefined") {
 }
 
 /**
+ * @type {import('./temml').renderToString}
  * Parse and build an expression, and return the markup for that.
  */
 const renderToString = function(expression, options) {
@@ -29431,6 +29504,7 @@ const renderToString = function(expression, options) {
 };
 
 /**
+ * @type {import('./temml').generateParseTree}
  * Parse an expression and return the parse tree.
  */
 const generateParseTree = function(expression, options) {
@@ -29439,6 +29513,7 @@ const generateParseTree = function(expression, options) {
 };
 
 /**
+ * @type {import('./temml').definePreamble}
  * Take an expression which contains a preamble.
  * Parse it and return the macros.
  */
@@ -29471,6 +29546,7 @@ const renderError = function(error, expression, options) {
 };
 
 /**
+ * @type {import('./temml').renderToMathMLTree}
  * Generates and returns the Temml build tree. This is used for advanced
  * use cases (like rendering to custom output).
  */
@@ -29488,6 +29564,7 @@ const renderToMathMLTree = function(expression, options) {
   }
 };
 
+/** @type {import('./temml').default} */
 var temml = {
   /**
    * Current Temml version
@@ -30233,8 +30310,10 @@ const nodes = {
     return htmlTag("li", ast2html(node.content), { class: "tight" }) + "\n"
   },
   table(node)        { return htmlTag("table", ast2html(node.content), node.attrs) + "\n" },
-  colGroup(node)     { return htmlTag("colgroup", ast2html(node.content), node.attrs) + "\n" },
-  col(node)          { return htmlTag("col", "", node.attrs[0], true) + "\n" },
+  colGroup(node)     {
+    return "\n" + htmlTag("colgroup", ast2html(node.content), node.attrs) + "\n"
+  },
+  col(node)          { return htmlTag("col", "", node.attrs[0], false) },
   table_row(node)    { return htmlTag("tr", ast2html(node.content)) + "\n" },
   table_header(node) {
     const attributes = {};
