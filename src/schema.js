@@ -373,11 +373,12 @@ export const nodes = {
         dom.appendChild(renderSVG(node.attrs.resultdisplay))
       } else if (node.attrs.dtype && node.attrs.dtype === dt.MODULE &&
         functionOrModuleRegEx.test(node.attrs.entry)) {
-        dom.appendChild(document.createElement('pre'))
-        dom.firstChild.appendChild(document.createElement('code'))
-        dom.firstChild.firstChild.textContent = node.attrs.entry
+        dom.appendChild(document.createElement('span'))
+        dom.firstChild.className = "hmt-code"
+        dom.firstChild.textContent = node.attrs.entry
       } else if (node.attrs.inDraftMode || !node.attrs.tex) {
-        dom.appendChild(document.createElement('code'))
+        dom.appendChild(document.createElement('span'))
+        dom.firstChild.className = "hmt-code"
         dom.firstChild.textContent = node.attrs.alt ? node.attrs.alt : node.attrs.entry
       } else {
         const tex = node.attrs.tex

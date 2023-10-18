@@ -327,6 +327,14 @@ pre > code,
 td code {
     background-color: transparent;
 }
+.hmt-code {
+    white-space: pre;
+    background-color: #f6f8fa;
+    font-family: Consolas,"Liberation Mono",Courier,monospace;
+    font-weight: normal;
+    font-size: 0.9em;
+  }
+  
 #input-container {
     font-size: 0.9em;
     width: 100%;
