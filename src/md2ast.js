@@ -432,6 +432,7 @@ const TABLES = (function() {
       }
       if (myID) { table.attrs.id = myID }
       if (myClass) { table.attrs.class = myClass }
+      let k = 0
       if (colWidths && state.inHtml) {
         let sum = 0
         colWidths.forEach(el => { sum += Number(el) } )
@@ -441,6 +442,7 @@ const TABLES = (function() {
           colGroup.content.push({ type: "col", attrs: [{ style: `width: ${width}px` }] })
         }
         table.content.push(colGroup)
+        k = 1
       }
       for (let i = 0; i < numRows; i++) {
         table.content.push({ type: "table_row", content: [] } )
@@ -455,7 +457,7 @@ const TABLES = (function() {
           if (content.length === 1 && content[0].type === "null") {
             content = [{ type: "paragraph", content: [] }]
           }
-          table.content[i].content.push({
+          table.content[i + k].content.push({
             "type": cell.inHeader ? "table_header" : "table_cell",
             "attrs": {
               "colspan": cell.colspan,
@@ -533,7 +535,7 @@ const parseTextMark = (capture, state, mark) => {
   return text
 }
 
-const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<(?:\/?(?:!DOCTYPE html|body|li|br|hr|(?:div|article|details|input|label|ul|ol|dl|main|nav)(?: (?:class|id|style)=(["'])[A-Za-z0-9.:;\- ]+\2){0,2})|\/?html(?: lang=(["'])[a-z]+\3)?)>[^\n]*?(?:\n|$))/
+const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<(?:\/?(?:!DOCTYPE html|body|li|br|hr|(?:div|article|details|input|label|ul|ol|dl|main|nav)(?: (?:class|for|id|style|type)=(["'])[A-Za-z0-9_.:;\- ]+\2){0,2})|\/?html(?: lang=(["'])[a-z]+\3)?)>[^\n]*?(?:\n|$))/
 
 // Rules must be applied in a specific order, so use a Map instead of an object.
 const rules = new Map();

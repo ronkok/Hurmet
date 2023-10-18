@@ -185,8 +185,10 @@ const nodes = {
     return htmlTag("li", ast2html(node.content), { class: "tight" }) + "\n"
   },
   table(node)        { return htmlTag("table", ast2html(node.content), node.attrs) + "\n" },
-  colGroup(node)     { return htmlTag("colgroup", ast2html(node.content), node.attrs) + "\n" },
-  col(node)          { return htmlTag("col", "", node.attrs[0], true) + "\n" },
+  colGroup(node)     {
+    return "\n" + htmlTag("colgroup", ast2html(node.content), node.attrs) + "\n"
+  },
+  col(node)          { return htmlTag("col", "", node.attrs[0], false) },
   table_row(node)    { return htmlTag("tr", ast2html(node.content)) + "\n" },
   table_header(node) {
     const attributes = {}
