@@ -46665,7 +46665,8 @@ const nodes$1 = {
         `${svg}</span>`
     } else if (node.attrs.dtype && node.attrs.dtype === dt.MODULE &&
                functionOrModuleRegEx$1.test(node.attrs.entry)) {
-      return `<pre><code>${node.attrs.entry}</code></pre>`
+      return `<span class='hurmet-calc' data-entry=${dataStr(node.attrs.entry)}>`
+        + `<span class='hmt-code'>${sanitizeText(node.attrs.entry)}</span></span>`
     } else {
       const tex = node.attrs.tex ? node.attrs.tex : parse$1(node.attrs.entry);
       const mathML = temml.renderToString(
@@ -46844,7 +46845,8 @@ var hurmet = {
   md2html,
   scanModule,
   updateCalculations,
-  render
+  render,
+  Rnl
 };
 
 /* eslint-disable */
@@ -53103,6 +53105,27 @@ window.view = new EditorView(document.querySelector("#editor"), {
   nodeViews: {
     calculation(node, view) { return new CalcView(node, view) },
     tex(node, view) { return new TexView(node, view) }
+  },
+  clipboardTextSerializer: (content, view) => {
+    // If the selection consists of a single calc with a numeric result, return the result.
+    if (content.content && content.content.content.length === 1
+        && content.content.content[0].type.name === "paragraph"
+        && content.content.content[0].content && content.content.content[0].content.content
+        && content.content.content[0].content.content.length === 1
+        && content.content.content[0].content.content[0].type.name === "calculation") {
+      const value = content.content.content[0].content.content[0].attrs.value;
+      if (value.plain && hurmet.Rnl.isRational(value.plain)) {
+        return hurmet.Rnl.toNumber(value.plain)
+      }
+      if (hurmet.Rnl.isRational(value)) { return hurmet.Rnl.toNumber(value) }
+      if (Array.isArray(value) && hurmet.Rnl.isRational(value[0])) {
+        return value.map(e => hurmet.Rnl.toNumber(e))
+      }
+      return value
+    } else {
+      // Otherwise, return the default.
+      return content.content.textBetween(0, content.content.size, "\n\n")
+    }
   }
 });
 

@@ -30536,7 +30536,8 @@ var hurmet = {
   md2html,
   scanModule,
   updateCalculations,
-  render
+  render,
+  Rnl
 };
 
 module.exports = hurmet;

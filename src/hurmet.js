@@ -6,6 +6,7 @@ import { compile } from "./compile"
 import temml from "./temml.js"
 import { scanModule } from "./module"
 import { updateCalculations } from "./updateCalculations"
+import { Rnl } from "./rational"
 
 /*
  * This file bundles together and exposes the calculation parts of Hurmet.
@@ -36,5 +37,6 @@ export default {
   md2html,
   scanModule,
   updateCalculations,
-  render
+  render,
+  Rnl
 }
