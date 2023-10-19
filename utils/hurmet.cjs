@@ -30356,7 +30356,8 @@ const nodes = {
         `${svg}</span>`
     } else if (node.attrs.dtype && node.attrs.dtype === dt.MODULE &&
                functionOrModuleRegEx.test(node.attrs.entry)) {
-      return `<pre><code>${node.attrs.entry}</code></pre>`
+      return `<span class='hurmet-calc' data-entry=${dataStr(node.attrs.entry)}>`
+        + `<span class='hmt-code'>${sanitizeText(node.attrs.entry)}</span></span>`
     } else {
       const tex = node.attrs.tex ? node.attrs.tex : parse$1(node.attrs.entry);
       const mathML = temml.renderToString(
