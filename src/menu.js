@@ -456,29 +456,29 @@ function openFile() {
   })
 }
 
+function copyText(state, isGFM) {
+  const text = hurmetMarkdownSerializer.serialize(state.selection.content().content, new Map(), isGFM)
+  const type = "text/plain"
+  const blob = new Blob([text], { type })
+  const data = [new ClipboardItem({ [type]: blob })];
+  navigator.clipboard.write(data)
+}
+
 function copyAsMarkdown() {
   return new MenuItem({
-    label: "Copy as Markdown",
+    label: "Copy as Hurmet Markdown",
     run(state, _, view) {
-      const text = hurmetMarkdownSerializer.serialize(state.selection.content().content, new Map())
-      const type = "text/plain"
-      const blob = new Blob([text], { type })
-      const data = [new ClipboardItem({ [type]: blob })];
-      navigator.clipboard.write(data)
+      copyText(state, false)
     }
   })
 }
 
 function copyAsGFM() {
   return new MenuItem({
-    label: "Copy as GFM",
+    label: "Copy as GitHub Markdown",
     title: "Copy as GitHub Flavored Markdown",
     run(state, _, view) {
-      const text = hurmetMarkdownSerializer.serialize(state.selection.content().content, new Map(), true)
-      const type = "text/plain"
-      const blob = new Blob([text], { type })
-      const data = [new ClipboardItem({ [type]: blob })];
-      navigator.clipboard.write(data)
+      copyText(state, true)
     }
   })
 }
