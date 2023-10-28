@@ -2133,13 +2133,8 @@ const taggedExpression = (expression, tag, style, leqno) => {
 
   expression = new mathMLTree.MathNode("mtd", [expression]);
   const rowArray = [glue$1(), expression, glue$1()];
-  if (leqno) {
-    rowArray[0].children.push(tag);
-    rowArray[0].style.textAlign = "-webkit-left";
-  } else {
-    rowArray[2].children.push(tag);
-    rowArray[2].style.textAlign = "-webkit-right";
-  }
+  rowArray[leqno ? 0 : 2].classes.push(leqno ? "tml-left" : "tml-right");
+  rowArray[leqno ? 0 : 2].children.push(tag);
   const mtr = new mathMLTree.MathNode("mtr", rowArray, ["tml-tageqn"]);
   const table = new mathMLTree.MathNode("mtable", [mtr]);
   table.style.width = "100%";
@@ -2194,6 +2189,15 @@ function buildMathML(tree, texExpression, style, settings) {
   return math;
 }
 
+const smalls = "acegıȷmnopqrsuvwxyzαγεηικμνοπρςστυχωϕ𝐚𝐜𝐞𝐠𝐦𝐧𝐨𝐩𝐪𝐫𝐬𝐮𝐯𝐰𝐱𝐲𝐳";
+const talls = "ABCDEFGHIJKLMNOPQRSTUVWXYZbdfhkltΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩβδλζφθψ"
+             + "𝐀𝐁𝐂𝐃𝐄𝐅𝐆𝐇𝐈𝐉𝐊𝐋𝐌𝐍𝐎𝐏𝐐𝐑𝐒𝐓𝐔𝐕𝐖𝐗𝐘𝐙𝐛𝐝𝐟𝐡𝐤𝐥𝐭";
+const longSmalls = new Set(["\\alpha", "\\gamma", "\\delta", "\\epsilon", "\\eta", "\\iota",
+  "\\kappa", "\\mu", "\\nu", "\\pi", "\\rho", "\\sigma", "\\tau", "\\upsilon", "\\chi", "\\psi",
+  "\\omega", "\\imath", "\\jmath"]);
+const longTalls = new Set(["\\Gamma", "\\Delta", "\\Sigma", "\\Omega", "\\beta", "\\delta",
+  "\\lambda", "\\theta", "\\psi"]);
+
 const mathmlBuilder$a = (group, style) => {
   const accentNode = group.isStretchy
     ? stretchy.accentNode(group)
@@ -2204,6 +2208,13 @@ const mathmlBuilder$a = (group, style) => {
   } else {
     accentNode.style.mathStyle = "normal";
     accentNode.style.mathDepth = "0";
+    if (needWebkitShift.has(group.label) &&  utils.isCharacterBox(group.base)) {
+      let shift = "";
+      const ch = group.base.text;
+      if (smalls.indexOf(ch) > -1 || longSmalls.has(ch)) { shift = "tml-xshift"; }
+      if (talls.indexOf(ch) > -1  || longTalls.has(ch))  { shift = "tml-capshift"; }
+      if (shift) { accentNode.classes.push(shift); }
+    }
   }
   if (!group.isStretchy) {
     accentNode.setAttribute("stretchy", "false");
@@ -2230,6 +2241,19 @@ const nonStretchyAccents = new Set([
   "\\vec",
   "\\dot",
   "\\mathring"
+]);
+
+const needWebkitShift = new Set([
+  "\\acute",
+  "\\bar",
+  "\\breve",
+  "\\check",
+  "\\dot",
+  "\\ddot",
+  "\\grave",
+  "\\hat",
+  "\\mathring",
+  "\\'", "\\^", "\\~", "\\=", "\\u", "\\.", '\\"', "\\r", "\\H", "\\v"
 ]);
 
 // Accents
@@ -3901,7 +3925,10 @@ rgba(0,0,0,0) 100%);`;
       node.style.marginRight = "0.03889em";
       break
     case "\\sout":
-      node.style["text-decoration"] = "line-through 0.08em solid";
+      node.style.backgroundImage = 'linear-gradient(black, black)';
+      node.style.backgroundRepeat = 'no-repeat';
+      node.style.backgroundSize = '100% 1.5px';
+      node.style.backgroundPosition = '0 center';
       break
     case "\\boxed":
       // \newcommand{\boxed}[1]{\fbox{\m@th$\displaystyle#1$}} from amsmath.sty
@@ -4152,8 +4179,9 @@ const getTag = (group, style, rowNum) => {
     return tag
   } else {
     // AMS automatcally numbered equaton.
-    // Insert a class so the element can be populated by a post-processor.
-    tag = new mathMLTree.MathNode("mtext", [], ["tml-eqn"]);
+    // Insert a class so the element can be populated by a CSS counter.
+    // WebKit will display the CSS counter only inside a span.
+    tag = new mathMLTree.MathNode("mtext", [new Span(["tml-eqn"])]);
   }
   return tag
 };
@@ -13057,7 +13085,7 @@ class Style {
  * https://mit-license.org/
  */
 
-const version = "0.10.16";
+const version = "0.10.17";
 
 function postProcess(block) {
   const labelMap = {};
@@ -13112,9 +13140,9 @@ function postProcess(block) {
  * Parse and build an expression, and place that expression in the DOM node
  * given.
  */
-let render = function(expression, baseNode, options) {
+let render = function(expression, baseNode, options = {}) {
   baseNode.textContent = "";
-  const alreadyInMathElement = baseNode.tagName === "MATH";
+  const alreadyInMathElement = baseNode.tagName.toLowerCase() === "math";
   if (alreadyInMathElement) { options.wrap = "none"; }
   const math = renderToMathMLTree(expression, options);
   if (alreadyInMathElement) {
