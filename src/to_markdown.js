@@ -71,6 +71,8 @@ const maxBacktickCount = str => {
   return max  
 }
 
+const ampRegEx = /=[^=]*@[^=]*$/
+
 const indentBlankLines = (state, prevLength) => {
   const block = state.out.slice(prevLength + 1).replace(/\n\n/g, `\n${state.delim + "   "}\n`)
   state.out = state.out.slice(0, prevLength + 1) + block
@@ -229,7 +231,12 @@ const hurmetNodes =  {
     let entry = node.attrs.entry.trim().replace(/\n(?: *\n)+/g, "\n").replace(/\n/gm, "\n" + state.delim)
     if (state.isGFM) {
       if (node.attrs.alt && node.attrs.value) {
-        state.write(node.attrs.alt)
+        if (ampRegEx.test(entry)) {
+          // A calculation cell that displays only the result.
+          state.write(node.attrs.alt)
+        } else {
+          writeTex(state, node.attrs.displayMode, node.attrs.tex)
+        }
       } else {
         // Convert calculation field to TeX
         const tex = hurmet.parse(entry)

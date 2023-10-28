@@ -47887,6 +47887,8 @@ class MarkdownSerializer {
   }
 }
 
+const ampRegEx = /=[^=]*@[^=]*$/;
+
 const hurmetNodes =  {
   blockquote(state, node) {
     state.wrapBlock("", null, node, () => state.renderContent(node));
@@ -48040,7 +48042,12 @@ const hurmetNodes =  {
     let entry = node.attrs.entry.trim().replace(/\n(?: *\n)+/g, "\n").replace(/\n/gm, "\n" + state.delim);
     if (state.isGFM) {
       if (node.attrs.alt && node.attrs.value) {
-        state.write(node.attrs.alt);
+        if (ampRegEx.test(entry)) {
+          // A calculation cell that displays only the result.
+          state.write(node.attrs.alt);
+        } else {
+          writeTex(state, node.attrs.displayMode, node.attrs.tex);
+        }
       } else {
         // Convert calculation field to TeX
         const tex = hurmet.parse(entry);
