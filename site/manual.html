@@ -144,7 +144,7 @@ print &quot;Hi!&quot;</code></pre></td></tr>
 </div>
 <dt id='accents-and-primes'>Accents and Primes</dt>
 <dd><p>To write an accent above a single-letter variable, write the accent name and hit the space bar for an auto-correction. Examples:</p>
-<div class="indented"><p><code>y bar</code> ↦ <span class='hurmet-calc' data-entry='y̅'><math><mover><mi>y</mi><mo stretchy="false" style="math-style:normal;math-depth:0;">‾</mo></mover></math></span><br><code>θ hat</code> ↦ <span class='hurmet-calc' data-entry='θ̂'><math><mover><mi>θ</mi><mo stretchy="false" style="math-style:normal;math-depth:0;">^</mo></mover></math></span><br><code>P vec</code> ↦ <span class='hurmet-calc' data-entry='P⃗'><math><mover><mi>P</mi><mo stretchy="false" style="transform:scale(0.75) translate(10%, 30%);">→</mo></mover></math></span><br><code>x dot</code> ↦ <span class='hurmet-calc' data-entry='ẋ'><math><mover><mi>x</mi><mo stretchy="false" style="math-style:normal;math-depth:0;">˙</mo></mover></math></span></p></div>
+<div class="indented"><p><code>y bar</code> ↦ <span class='hurmet-calc' data-entry='y̅'><math><mover><mi>y</mi><mo stretchy="false" class="tml-xshift" style="math-style:normal;math-depth:0;">‾</mo></mover></math></span><br><code>θ hat</code> ↦ <span class='hurmet-calc' data-entry='θ̂'><math><mover><mi>θ</mi><mo stretchy="false" class="tml-capshift" style="math-style:normal;math-depth:0;">^</mo></mover></math></span><br><code>P vec</code> ↦ <span class='hurmet-calc' data-entry='P⃗'><math><mover><mi>P</mi><mo stretchy="false" style="transform:scale(0.75) translate(10%, 30%);">→</mo></mover></math></span><br><code>x dot</code> ↦ <span class='hurmet-calc' data-entry='ẋ'><math><mover><mi>x</mi><mo stretchy="false" class="tml-xshift" style="math-style:normal;math-depth:0;">˙</mo></mover></math></span></p></div>
 <p>More detail <a href='#identifiers'>here</a>.</p>
 <p>To write a prime, type two apostrophes (aka single quotation marks) and hit the space bar. So, <code>f&#x27;&#x27;</code> will result in <span class='hurmet-calc' data-entry='f′'><math><msup><mi>f</mi><mo lspace="0em" rspace="0em" class="tml-prime prime-pad">′</mo></msup></math></span></p></dd>
 <div id="q-container">
@@ -205,7 +205,7 @@ print &quot;Hi!&quot;</code></pre></td></tr>
 <tr><td><code>&lt;&gt;</code></td><td>≠</td><td><code>&lt;&lt;</code></td><td>⟨</td><td>Psi</td><td>Ψ</td><td>iota</td><td>ι</td></tr>
 <tr><td></td><td></td><td><code>&gt;&gt;</code></td><td>⟩</td><td>Omega</td><td>Ω</td><td>kappa</td><td>κ</td></tr>
 <tr><td>~=</td><td>≅</td><td>^^</td><td>∧</td><td>y bar</td><td>y̅</td><td>lambda</td><td>λ</td></tr>
-<tr><td>~~</td><td>≈</td><td>vv</td><td>∨</td><td>θ hat</td><td><span class='hurmet-calc' data-entry='θ̂'><math><mover><mi>θ</mi><mo stretchy="false" style="math-style:normal;math-depth:0;">^</mo></mover></math></span></td><td>mu</td><td>μ</td></tr>
+<tr><td>~~</td><td>≈</td><td>vv</td><td>∨</td><td>θ hat</td><td><span class='hurmet-calc' data-entry='θ̂'><math><mover><mi>θ</mi><mo stretchy="false" class="tml-capshift" style="math-style:normal;math-depth:0;">^</mo></mover></math></span></td><td>mu</td><td>μ</td></tr>
 <tr><td>\in</td><td>∈</td><td>vvv</td><td>⋁</td><td>P vec</td><td><span class='hurmet-calc' data-entry='P⃗'><math><mover><mi>P</mi><mo stretchy="false" style="transform:scale(0.75) translate(10%, 30%);">→</mo></mover></math></span></td><td>nu</td><td>ν</td></tr>
 <tr><td>\notin</td><td>∉</td><td>nn</td><td>∩</td><td>P harpoon</td><td><span class='hurmet-calc' data-entry='P⃑'><math><mover><mi>P</mi><mo stretchy="true" style="math-style:normal;math-depth:0;">⇀</mo></mover></math></span></td><td>xi</td><td>ξ</td></tr>
 <tr><td>-=</td><td>≡</td><td>nnn</td><td>⋂</td><td>a dot</td><td>ȧ</td><td>pi</td><td>π</td></tr>
@@ -287,7 +287,7 @@ print &quot;Hi!&quot;</code></pre></td></tr>
 <li><p>The first character must be a letter from the Latin or Greek alphabet. It may be bold or capitalized calligraphic Latin, or ℏ, or ℓ.</p></li>
 <li><p>Subsequent characters may be letters or numerals (0123456789).</p></li>
 <li><p>An under-score within an identifier is allowed and will be interpreted to mean the start of a subscript.</p></li>
-<li><p>If an identifier has only one letter, then an accent character may be written after it. Hurmet will render the accent above the letter, as in <span class='hurmet-calc' data-entry='θ̂'><math><mover><mi>θ</mi><mo stretchy="false" style="math-style:normal;math-depth:0;">^</mo></mover></math></span>.</p></li>
+<li><p>If an identifier has only one letter, then an accent character may be written after it. Hurmet will render the accent above the letter, as in <span class='hurmet-calc' data-entry='θ̂'><math><mover><mi>θ</mi><mo stretchy="false" class="tml-capshift" style="math-style:normal;math-depth:0;">^</mo></mover></math></span>.</p></li>
 <li><p>Primes may be appended to the very end, as in: <span class='hurmet-calc' data-entry='f_c′'><math><mrow><mi>f</mi><msubsup><mrow></mrow><mtext>c</mtext><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msubsup></mrow></math></span>.</p></li>
 <li><p>The following keywords may not be used as variable names: <code>π</code>, <code>ℏ</code>, <code>pi</code>, <code>true</code>, <code>false</code>, <code>root</code>, <code>if</code>, <code>else</code>, <code>elseif</code>, <code>otherwise</code>, <code>end</code>, <code>and</code>, <code>or</code>, <code>in</code>, <code>to</code>.</p>
 <p><img src="images/identifier-railroad.svg" alt="letter letter-or-digit-or-accent prime"></p></li></ul>
@@ -306,7 +306,7 @@ print &quot;Hi!&quot;</code></pre></td></tr>
 <tr><td>Capital Greek letter</td><td>Capitalize the name’s first letter.</td><td>Gamma</td><td>Γ</td></tr>
 <tr><td>Bold letter</td><td>Type “bb”, then space, then the desired letter.</td><td>bb M</td><td>𝐌</td></tr>
 <tr><td>Calligraphic capital letter</td><td>Type “cc”, then space, then the desired letter.</td><td>cc P</td><td>𝒫</td></tr>
-<tr><td>Accent</td><td>Type the name of the accent.</td><td>y bar</td><td><span class='hurmet-calc' data-entry='y̅'><math><mover><mi>y</mi><mo stretchy="false" style="math-style:normal;math-depth:0;">‾</mo></mover></math></span></td></tr>
+<tr><td>Accent</td><td>Type the name of the accent.</td><td>y bar</td><td><span class='hurmet-calc' data-entry='y̅'><math><mover><mi>y</mi><mo stretchy="false" class="tml-xshift" style="math-style:normal;math-depth:0;">‾</mo></mover></math></span></td></tr>
 <tr><td>Prime</td><td>Type two apostrophes.</td><td>&#x27;&#x27;</td><td>′</td></tr></table>
 <p>Hurmet will render single Latin letter variable names in <em>italic</em>. Function names and multi-letter variable names are rendered in upright font. As a convention, I personally use <strong>bold</strong> letters for variables that contain vectors or matrices.</p>
 <h2 id='data-types'>Data Types</h2>
