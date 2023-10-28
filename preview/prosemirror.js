@@ -25465,11 +25465,11 @@ const unescapeUrl = function(rawUrlString) {
   return rawUrlString.replace(UNESCAPE_URL_R, "$1");
 };
 
-const tightListRegEx = /(?:\n\n(?!$)|\n[ \t]+(?:\d{1,9}[.)]|[*+-]) )/;
+const looseListRegEx = /\n\n(?!$)/;
 
 const parseList = (str, state) => {
   const items = str.replace(LIST_BLOCK_END_R, "\n").match(LIST_ITEM_R);
-  const isTight = !tightListRegEx.test(str);
+  const isTight = !looseListRegEx.test(str);
   const itemContent = items.map(function(item, i) {
     // We need to see how far indented this item is:
     const prefixCapture = LIST_ITEM_PREFIX_R.exec(item);
@@ -47951,9 +47951,6 @@ const hurmetNodes =  {
       let nStr = String(start + i);
       return state.repeat(" ", maxW - nStr.length) + nStr + ".  "
     });
-    // Write a 2nd blank line after an <ol>, to prevent an adjacent <ol> from
-    // continuing the same numbering.
-    state.write(state.delim + "\n");
   },
   list_item(state, node) {
     state.renderContent(node);
@@ -48412,9 +48409,7 @@ class MarkdownSerializerState {
   // `firstDelim` is a function going from an item index to a
   // delimiter for the first line of the item.
   renderList(node, delim, firstDelim) {
-    if (this.closed && this.closed.type == node.type)
-      this.flushClose(3);
-
+    this.flushClose();
     node.forEach((child, _, i) => {
       if (child.type.name === "tight_list_item") { this.flushClose(1); }
       this.wrapBlock(delim, firstDelim(i), node, () => this.render(child, node, i));

@@ -140,9 +140,6 @@ const hurmetNodes =  {
       let nStr = String(start + i)
       return state.repeat(" ", maxW - nStr.length) + nStr + ".  "
     })
-    // Write a 2nd blank line after an <ol>, to prevent an adjacent <ol> from
-    // continuing the same numbering.
-    state.write(state.delim + "\n")
   },
   list_item(state, node) {
     state.renderContent(node)
@@ -601,9 +598,7 @@ export class MarkdownSerializerState {
   // `firstDelim` is a function going from an item index to a
   // delimiter for the first line of the item.
   renderList(node, delim, firstDelim) {
-    if (this.closed && this.closed.type == node.type)
-      this.flushClose(3)
-
+    this.flushClose()
     node.forEach((child, _, i) => {
       if (child.type.name === "tight_list_item") { this.flushClose(1) }
       this.wrapBlock(delim, firstDelim(i), node, () => this.render(child, node, i))

@@ -86,12 +86,15 @@ Here’s an inline tank ![tank][] image.
 First, test that an inline asterisk does not create a list: * Not a list item.
 
 A list can be written directly after a paragraph. An empty line is unnecessary. 
-
 *   fruits 
 
     *   apples
         *   macintosh
         *   red
+
+Try a numbered list w/o a empty line
+1.  Item 1
+2.  Item 2
 
 Now try a loose list.
 
