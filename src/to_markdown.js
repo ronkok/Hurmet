@@ -228,9 +228,13 @@ const hurmetNodes =  {
   calculation(state, node) {
     let entry = node.attrs.entry.trim().replace(/\n(?: *\n)+/g, "\n").replace(/\n/gm, "\n" + state.delim)
     if (state.isGFM) {
-      // Convert calculation to TeX
-      const tex = hurmet.parse(entry)
-      writeTex(state, node.attrs.displayMode, tex)
+      if (node.attrs.alt && node.attrs.value) {
+        state.write(node.attrs.alt)
+      } else {
+        // Convert calculation field to TeX
+        const tex = hurmet.parse(entry)
+        writeTex(state, node.attrs.displayMode, tex)
+      }
     } else {
       if (!node.attrs.displayMode) {
         const ticks = backticksFor({ text: entry, isText: true }, -1).trim()
