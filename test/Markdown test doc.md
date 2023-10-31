@@ -85,45 +85,86 @@ Here’s an inline tank ![tank][] image.
 
 First, test that an inline asterisk does not create a list: * Not a list item.
 
-A list can be written directly after a paragraph. An empty line is unnecessary. 
-*   fruits 
+*   A bullet list
 
-    *   apples
-        *   macintosh
-        *   red
+*   … can have nested lists
 
-Try a numbered list w/o a empty line
-1.  Item 1
-2.  Item 2
+    *   nuts
 
-Now try a loose list.
+    *   fruit
 
-*   An itemization should include
+       *   apples
+           *   macintosh
+           *   red
 
-    *   The first paragraph in this list item
+       *   bananas
 
-        A second paragraph
+1.  An ordered  list
 
-    *   Another list item.
+2.  … can also have nested lists
 
-Another paragraph.
+   1.  nuts
 
-1.  Item 1 from dotted list
+   2.  fruit
 
-2.  Item 2
+        1.  apples
+            1.  macintosh
+            2.  red
 
-3.  Item 3
-
-
-1.  Item 1 from dotted list
-
-2.  Item 2
-
-3.  Item 3
+        2. bananas
 
 
-Lists can begin with numbers other than one. 4.  Item 4 from close paren 5. 
-Item 5 6.  Item 6
+A list can be started in the line after a paragraph. An empty line is unnecessary.
+*   A list can be started in the line after a (loose) list item.
+
+*   An empty line is unnecessary.
+        *   apples
+        *   bananas
+
+Hurmet can also parse a tight list.
+*   But a tight list:
+    *   cannot have
+    *   … a nested list on the line following
+    *   … a list item.
+
+*   A list after a tight list needs an intervening newline.
+
+*   That's because, in the Hurmet schema, a tight\_list\_item
+    *   … cannot contain a block element.
+    *   So it is impossible
+    *   … to nest a list inside the list item of a tight list.
+
+
+*   In a loose list …
+
+    *   a list item can contain
+
+        … a second paragraph.
+
+        … and another paragraph
+
+    *   And the next list item.
+
+        … can also contain multiple paragraphs
+
+Ordered lists can begin with numbers other than one. 
+
+4.  Item 4
+5.  Item 5
+6.  Item 6
+
+
+*   Bullet lists can contain
+
+*   … nested lists that are
+
+    1. Ordered lists, and what's more,
+
+    2. The nested, ordered list can contain a list that is
+
+        * a bullet list
+        * Yay!
+
 
 #### Pipe Tables
 

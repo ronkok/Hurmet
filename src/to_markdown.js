@@ -140,6 +140,9 @@ const hurmetNodes =  {
       let nStr = String(start + i)
       return state.repeat(" ", maxW - nStr.length) + nStr + ".  "
     })
+    // Write a 2nd blank line after an <ol>, to prevent an adjacent <ol> from
+    // continuing the same numbering.
+    state.write(state.delim + "\n")
   },
   list_item(state, node) {
     state.renderContent(node)

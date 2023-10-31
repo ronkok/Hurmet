@@ -9495,11 +9495,9 @@ const unescapeUrl = function(rawUrlString) {
   return rawUrlString.replace(UNESCAPE_URL_R, "$1");
 };
 
-const looseListRegEx = /\n\n(?!$)/;
-
 const parseList = (str, state) => {
   const items = str.replace(LIST_BLOCK_END_R, "\n").match(LIST_ITEM_R);
-  const isTight = !looseListRegEx.test(str);
+  const isTight = !/\n\n/.test(str.replace(/\n*$/, ""));
   const itemContent = items.map(function(item, i) {
     // We need to see how far indented this item is:
     const prefixCapture = LIST_ITEM_PREFIX_R.exec(item);
@@ -9584,7 +9582,7 @@ const TABLES = (function() {
     cells.pop();
     const tableRow = [{ type: "tableSeparator" }];
     for (const str of cells) {
-      const cell = parse(str, state);
+      const cell = parse(str.trim(), state);
       tableRow.push(...cell);
       tableRow.push({ type: "tableSeparator" });
     }
@@ -10291,7 +10289,7 @@ rules.set("text", {
   // We break on any symbol characters so that this grammar
   // is easy to extend without needing to modify this regex
   isLeaf: true,
-  match: anyScopeRegex(/^[\s\S]+?(?=[^0-9A-Za-z\s\u00c0-\uffff]|\n\n| {2,}\n|\w+:\S|$)/),
+  match: anyScopeRegex(/^[\s\S]+?(?=[^0-9A-Za-z\s\u00c0-\uffff]|\n\n| {2,}\n|\d+[.)]|\w+:\S|$)/),
   parse: function(capture, state) {
     return {
       text: capture[0].replace(/\n/g, " ")
