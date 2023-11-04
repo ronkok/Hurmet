@@ -1144,7 +1144,7 @@ export function buildMenuItems(schema) {
     })
   if ((type = schema.nodes.indented))
     r.wrapIndent = wrapItem(type, {
-      title: "Indent block",
+      title: "Indent block  Alt-I",
       icon: hurmetIcons.indent
     })
   if ((type = schema.nodes.paragraph))

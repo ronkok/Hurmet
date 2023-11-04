@@ -91,6 +91,7 @@ export function buildKeymap(schema, mapKeys) {
   if ((type = schema.nodes.bullet_list)) bind("Shift-Ctrl-8", wrapInList(type))
   if ((type = schema.nodes.ordered_list)) bind("Shift-Ctrl-9", wrapInList(type))
   if ((type = schema.nodes.blockquote)) bind("Ctrl->", wrapIn(type))
+  if ((type = schema.nodes.indented)) bind("Alt-i", wrapIn(type))
   if ((type = schema.nodes.hard_break)) {
     let br = type,
       cmd = chainCommands(exitCode, (state, dispatch) => {
