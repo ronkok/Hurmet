@@ -115,7 +115,7 @@ h2 { font-size: 105%; margin-top: 2em; }
 h3 { font-size: 100%; margin-top: 1em; }
 h4 { font-size: 100%; margin: 1em 0 1em 0; font-weight: bold; }
 h5 { font-size: 110%; text-align: center; }
-h6 { font-size: 90%; font-weight: bold;  margin: 1em 0 1em 0; }
+h6 { font-size: 95%; font-weight: bold; text-align: center;  margin: 1em 0 1em 0; }
 
 #title {
   font-family: Tahoma, Calibri, san-serif;
@@ -914,6 +914,9 @@ math .special-fraction { font-family: "Times New Roman"; }
   left: 0; right: 0; top: 0; bottom: 0;
   background: rgba(200, 200, 255, 0.4);
   pointer-events: none;
+}
+.ProseMirror h6 + div.tableWrapper {
+  margin-top: -0.7em;
 }
 
 /* Table styles */

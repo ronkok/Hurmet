@@ -67,7 +67,8 @@ document range by selecting text, then clicking one of the menu bar buttons:
 | ![align-center][] ![indent][]        | Plain paragraph, Code block,       |
 | ![list][] ![numbered list][]         | Headings, Centered paragraph,      |
 | ![quotes][]                          | Indent, List, Ordered list, Block  |
-|                                      | quote                              |
+|                                      | quote\                             |
+|                                      | (H6 works well as a table caption) |
 +--------------------------------------+------------------------------------+
 | ![table][] ![insert-row][]           | Table:\                            |
 | ![insert-column][] ![delete-table][] | Insert table, Insert row, Insert   |
