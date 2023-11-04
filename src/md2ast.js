@@ -651,9 +651,7 @@ rules.set("special_div", {
   match: blockRegex(/^(:{3,}) ?(indented|comment|centered|header|hidden) *\n([\s\S]+?)\n+\1 *(?:\n{2,}|\s*$)/),
   // indented or centered or comment div, or <header>
   parse: function(capture, state) {
-    const content = capture[2] === "comment"
-      ? parseInline(capture[3], state)
-      : parse(capture[3], state)
+    const content = parse(capture[3], state)
     return { type: capture[2], content };
   }
 });
@@ -910,12 +908,9 @@ rules.set("span", {
   }
 });
 rules.set("text", {
-  // Here we look for anything followed by non-symbols,
-  // double newlines, or double-space-newlines
-  // We break on any symbol characters so that this grammar
-  // is easy to extend without needing to modify this regex
+  // We break on symbol characters, double newlines, or double-space-newlines.
   isLeaf: true,
-  match: anyScopeRegex(/^[\s\S]+?(?=[^0-9A-Za-z\s\u00c0-\uffff]|\n\n| {2,}\n|\d+[.)]|\w+:\S|$)/),
+  match: anyScopeRegex(/^[\s\S]+?(?=[_*`#>|\\\-+=![({$¢¶<~+:]|\n\n| {2,}\n|\d+[.)]|\w+:\S|$)/),
   parse: function(capture, state) {
     return {
       text: capture[0].replace(/\n/g, " ")

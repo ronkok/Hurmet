@@ -664,8 +664,7 @@ ul.toc span + span {
   border-radius: 8px;
   width: 181px;
   font-size: 90%;
-  text-indent: -4px;
-  padding: 4px;
+  padding: 4px 8px 4px 8px;
   min-height: 20px;
   margin: 0 0 0 8px;
 }
@@ -673,7 +672,7 @@ ul.toc span + span {
   content: "◀\00FE0E";
   display: inline-block;
   color: #e2941f;
-  transform: translateX(-0.6em);
+  transform: translateX(-1.4em);
 }
 
 .ProseMirror {
@@ -683,6 +682,21 @@ ul.toc span + span {
 }
 
 .ProseMirror p { margin-bottom: 1em; }
+
+.ProseMirror aside.comment p,
+.ProseMirror aside.comment ul,
+.ProseMirror aside.comment ol {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.ProseMirror aside.comment > *:first-child {
+  margin-top: -1.2em;
+}
+
+.ProseMirror aside.comment > *:last-child {
+  margin-bottom: 0.1em;
+}
 
 .ProseMirror-gapcursor {
   display: none;

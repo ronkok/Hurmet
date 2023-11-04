@@ -418,7 +418,7 @@ export const nodes = {
   },
 
   comment: {
-    content: "inline*",
+    content: "block+",
     group: "block",
     isolating: true,
     parseDOM: [{tag: "aside.comment"}],

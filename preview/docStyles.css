@@ -157,16 +157,27 @@ aside.comment {
     border-radius: 8px;
     width: 181px;
     font-size: 90%;
-    text-indent: -4px;
-    padding: 4px;
+    padding: 4px 8px 4px 8px;
     min-height: 20px;
-    margin: 1em 0 0 8px;
-}
+    margin: 0 0 0 1em;
+  }
 aside.comment::before {
     content: "◀\00FE0E";
     display: inline-block;
     color: #e2941f;
-    transform: translateX(-0.6em);
+    transform: translateX(-1.3em);
+}
+aside.comment p,
+aside.comment ul,
+aside.comment ol {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+aside.comment > *:first-child {
+  margin-top: -1.2em;
+}
+aside.comment > *:last-child {
+  margin-bottom: 0.1em;
 }
 table {
     font-size: inherit;

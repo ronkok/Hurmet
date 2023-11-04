@@ -170,10 +170,10 @@ Ordered lists can begin with numbers other than one.
 
 A typical pipe table:
 
-| Head 1  | Head 2  | Head 3  |
-|---------|:-------:|---------|
-| datum 1 | datum 2 | datum 3 |
-| datum 4 | datum 5 | datum 6 |
+| Head 1  | Head 2  | Head 3           |
+|---------|:-------:|------------------|
+| datum 1 | datum 2 | datum 3          |
+| datum 4 | datum 5 | ¢`x = 2 + 2 = ?` |
 {.grid colWidths="null null null"}
 
 We can write a pipe table without a heading. Its top line consists of empty
