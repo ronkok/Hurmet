@@ -80,7 +80,7 @@ const indentBlankLines = (state, prevLength) => {
 
 const hurmetNodes =  {
   blockquote(state, node) {
-    state.wrapBlock("", null, node, () => state.renderContent(node))
+    state.wrapBlock("> ", null, node, () => state.renderContent(node))
   },
   comment(state, node) {
     if (state.isGFM) {
@@ -101,6 +101,13 @@ const hurmetNodes =  {
       state.renderContent(node)
     } else {
        state.wrapBlock("", null, node, () => state.renderContent(node), "centered")
+    }
+  },
+  boxed(state, node) {
+    if (state.isGFM) {
+      state.renderContent(node)
+    } else {
+      state.wrapBlock("", null, node, () => state.renderContent(node), "boxed")
     }
   },
   header(state, node) {

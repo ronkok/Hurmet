@@ -90,6 +90,15 @@ export const nodes = {
     toDOM () { return ['div', { class: 'centered' }, 0] },
   },
 
+  // An boxed div.
+  boxed: {
+    content: "block+",
+    group: "block",
+    defining: true,
+	  parseDOM: [{tag: "div.boxed"}],
+    toDOM() { return ['div', { class: 'boxed' }, 0] }
+  },
+
   // :: NodeSpec A blockquote (`<blockquote>`) wrapping one or more blocks.
   blockquote: {
     content: "block+",

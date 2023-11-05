@@ -11,7 +11,6 @@ Hurmet writes a backslash, `\`, at the end of a line, like this:\
 Hurmet also reads two spaces at the end of a line as a line break, line this:\
 Otherwise, newlines in a paragraph are treated as spaces.
 
-
 Two consecutive blank lines parse like a single blank line. Like the two
 preceding lines.
 
@@ -21,11 +20,37 @@ An empty paragraph is designated by a pilcrow symbol, ¶, by itself on its own
 line, like the preceding one.
 
 ::: comment
-A Hurmet comment is a paragraph inside a speech bubble.
+A Hurmet comment is inside a speech bubble.
+
+It can contain more than one paragraph.
 :::
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
 incididunt ut labore et dolore magna aliqua.
+
+::: indented
+There are some divs with special styling.
+
+This one is indented.
+
+:::::: indented
+Nested indentation is possible.
+::::::
+:::
+
+::: boxed
+For engineer’s results, this div is boxed.
+:::
+
+::: centered
+This div is centered.
+
+Special divs can contain more than one paragraph.
+:::
+
+> The grand-daddy of all these special divs is the blockquote.
+>
+> The Hurmet schema for blockquote is the template for other special divs.
 
 ### TeX
 
@@ -39,16 +64,12 @@ left. The closing \$ must not be followed immediately by a digit. Thus,
 
 Display TeX is written between `$$` delimiters:
 
-$$
-\oint_C \vec{B}\circ d\vec{l} = \mu_0 \left( I_{\text{enc}} + \varepsilon_0
-\frac{d}{d t} \int_S \vec{E} \circ \hat{n}\; d a \right)
-$$
+$$ \oint_C \vec{B}\circ d\vec{l} = \mu_0 \left( I_{\text{enc}} + \varepsilon_0
+\frac{d}{d t} \int_S \vec{E} \circ \hat{n}\; d a \right) $$
 
 While we’re here, let’s test the equation numbering system.
 
-$$
-\begin{equation} x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a} \end{equation}
-$$
+$$ \begin{equation} x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a} \end{equation} $$
 
 ### Calculations
 
@@ -77,13 +98,13 @@ link][3]. And here is an auto-link: <http://example.com/>
 
 ### Images
 
-![This is a caption for a tank image.][4]
+![4][]
 
 Here’s an inline tank ![tank][] image.
 
 ### Lists
 
-First, test that an inline asterisk does not create a list: * Not a list item.
+First, test that an inline asterisk does not create a list: \* Not a list item.
 
 *   A bullet list
 
@@ -93,11 +114,12 @@ First, test that an inline asterisk does not create a list: * Not a list item.
 
     *   fruit
 
-       *   apples
-           *   macintosh
-           *   red
+        *   apples 
 
-       *   bananas
+            *   macintosh
+            *   red
+
+        *   bananas
 
 1.  An ordered  list
 
@@ -107,33 +129,46 @@ First, test that an inline asterisk does not create a list: * Not a list item.
 
    2.  fruit
 
-        1.  apples
-            1.  macintosh
-            2.  red
+      1.  apples 
 
-        2. bananas
+         1.  macintosh
+         2.  red
+
+                  
+
+      2.  bananas
+
+            
+
+      
 
 
-A list can be started in the line after a paragraph. An empty line is unnecessary.
+A list can be started in the line after a paragraph. An empty line is
+unnecessary. 
+
 *   A list can be started in the line after a (loose) list item.
 
-*   An empty line is unnecessary.
-        *   apples
-        *   bananas
+*   An empty line is unnecessary.     
 
-Hurmet can also parse a tight list.
-*   But a tight list:
+    *   apples
+
+    *   bananas
+
+Hurmet can also parse a tight list. 
+
+*   But a tight list: 
+
     *   cannot have
     *   … a nested list on the line following
     *   … a list item.
 
 *   A list after a tight list needs an intervening newline.
 
-*   That's because, in the Hurmet schema, a tight\_list\_item
+*   That's because, in the Hurmet schema, a tight\_list\_item 
+
     *   … cannot contain a block element.
     *   So it is impossible
     *   … to nest a list inside the list item of a tight list.
-
 
 *   In a loose list …
 
@@ -158,22 +193,23 @@ Ordered lists can begin with numbers other than one.
 
 *   … nested lists that are
 
-    1. Ordered lists, and what's more,
+    1.  Ordered lists, and what's more,
 
-    2. The nested, ordered list can contain a list that is
+    2.  The nested, ordered list can contain a list that is
 
-        * a bullet list
-        * Yay!
+       *   a bullet list
+       *   Yay!
 
+        
 
 #### Pipe Tables
 
 A typical pipe table:
 
-| Head 1  | Head 2  | Head 3           |
-|---------|:-------:|------------------|
-| datum 1 | datum 2 | datum 3          |
-| datum 4 | datum 5 | ¢`x = 2 + 2 = ?` |
+| Head 1  | Head 2  | Head 3             |
+|---------|:-------:|--------------------|
+| datum 1 | datum 2 | datum 3            |
+| datum 4 | datum 5 | ¢` x = 2 + 2 = ? ` |
 {.grid colWidths="null null null"}
 
 We can write a pipe table without a heading. Its top line consists of empty
@@ -189,8 +225,8 @@ cells, e.g., `|||||`. Below is an example:
 
 #### Grid tables
 
-Hurmet can write tables with merged cells and block elements inside a cell.
-For format, we use the grid table from reStructuredText. Like the example below:
+Hurmet can write tables with merged cells and block elements inside a cell. For
+format, we use the grid table from reStructuredText. Like the example below:
 
 +--------+---------------------------+---------------------------------------+
 | Type   | Description               | Examples                              |
@@ -241,15 +277,11 @@ Another grid table example.
 
 Grid tables can also be written without a header. Just omit the `====` border.
 
-+=====+:=======================:+
-| ! % | Factorials and percents |
-|     | are done first.         |
-+-----+-------------------------+
-| ^   | Then exponents, from    |
-|     | right to left.          |
-+-----+-------------------------+
-| √   | Roots                   |
-+-----+-------------------------+
+|||
+|-----|:---------------------------------------:|
+| ! % | Factorials and percents are done first. |
+| ^   | Then exponents, from right to left.     |
+| √   | Roots                                   |
 {.grid colWidths="null null"}
 
 #### Inline Style
@@ -278,7 +310,7 @@ A paragraph
 [3]: https://hurmet.app/
 
 [4]: https://hurmet.app/images/IsoTankCourses.svg
-{ alt="4"}
+{.inline alt="4"}
 
 [tank]: https://hurmet.app/images/IsoTankCourses.svg
 {.inline alt="tank"}

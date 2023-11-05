@@ -256,6 +256,9 @@ const nodes = {
   indented(node) {
     return htmlTag("div", ast2html(node.content), { class: 'indented' }) + "\n"
   },
+  boxed(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'boxed' }) + "\n"
+  },
   centered(node) {
     return htmlTag("div", ast2html(node.content), { class: 'centered' }) + "\n"
   },

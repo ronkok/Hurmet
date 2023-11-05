@@ -726,6 +726,8 @@ ul.toc span + span {
 
 .ProseMirror div.indented { margin-left: 2em; }
 .ProseMirror div.centered { text-align: center; }
+.ProseMirror div.boxed { width: fit-content; min-width: 2em; border: 1px solid #000; }
+.ProseMirror div.boxed p { line-height: 1.2; margin: 4px; }
 
 /*
  * This section contains the CSS for Temml math rendering.

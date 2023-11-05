@@ -32,7 +32,7 @@
  *        A. →  A. B. C.  etc. (future)
  *        a) →  (a) (b) (c)  etc. (future)
  * 12. Fenced divs, similar to Pandoc.
- *     ::: (centered|comment|indented|header)
+ *     ::: (centered|comment|indented|boxed|header)
  *     Block elements
  *     :::
  *     Nested divs are distinguished by number of colons. Minimum three.
@@ -648,8 +648,8 @@ rules.set("dd", {  // description details
 });
 rules.set("special_div", {
   isLeaf: false,
-  match: blockRegex(/^(:{3,}) ?(indented|comment|centered|header|hidden) *\n([\s\S]+?)\n+\1 *(?:\n{2,}|\s*$)/),
-  // indented or centered or comment div, or <header>
+  match: blockRegex(/^(:{3,}) ?(indented|comment|centered|boxed|header|hidden) *\n([\s\S]+?)\n+\1 *(?:\n{2,}|\s*$)/),
+  // indented or centered or boxed or comment div, or <header>
   parse: function(capture, state) {
     const content = parse(capture[3], state)
     return { type: capture[2], content };

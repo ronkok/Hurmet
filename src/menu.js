@@ -76,6 +76,11 @@ const hurmetIcons = {
     height: 16,
     path: "M0 1h16v2h-16zM6 4h10v2h-10zM6 7h10v2h-10zM6 10h10v2h-10zM0 13h16v2h-16zM0 11v-6l4 3z"
   },
+  boxed: {
+    width: 16,
+    height: 16,
+    path: "M1 1h14v142h-14zM2 2v13h12v-13z"
+  },
   "T": {
     width: 16,
     height: 16,
@@ -1147,6 +1152,11 @@ export function buildMenuItems(schema) {
       title: "Indent block  Alt-I",
       icon: hurmetIcons.indent
     })
+  if ((type = schema.nodes.boxed))
+    r.wrapBoxed = wrapItem(type, {
+      title: "Draw box around block",
+      icon: hurmetIcons.boxed
+  })
   if ((type = schema.nodes.paragraph))
     r.makeParagraph = blockTypeItem(type, {
       title: "Change to plain paragraph",
@@ -1329,6 +1339,7 @@ export function buildMenuItems(schema) {
       r.wrapBlockQuote,
       r.wrapCentered,
       r.wrapIndent,
+      r.wrapBoxed,
       joinUpItem,
       liftItem,
       selectParentNodeItem

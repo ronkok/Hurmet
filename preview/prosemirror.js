@@ -17429,11 +17429,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6616","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.6478","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.2451","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.2423","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -17442,10 +17442,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4572","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4653","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9502","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.7143","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9625","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.8193","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -17465,7 +17465,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.87023","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.86983","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -17473,23 +17473,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.2426","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.3745","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["4.2903","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["87.7510","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["4.2491","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["89.0545","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["158.08","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["159.87","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1430.38","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1402.42","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -17500,7 +17500,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["19.0642","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["18.5803","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -17530,7 +17530,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.0541","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0702","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -25376,7 +25376,7 @@ const textRange = (str, index) => {
  *        A. →  A. B. C.  etc. (future)
  *        a) →  (a) (b) (c)  etc. (future)
  * 12. Fenced divs, similar to Pandoc.
- *     ::: (centered|comment|indented|header)
+ *     ::: (centered|comment|indented|boxed|header)
  *     Block elements
  *     :::
  *     Nested divs are distinguished by number of colons. Minimum three.
@@ -25992,12 +25992,10 @@ rules.set("dd", {  // description details
 });
 rules.set("special_div", {
   isLeaf: false,
-  match: blockRegex(/^(:{3,}) ?(indented|comment|centered|header|hidden) *\n([\s\S]+?)\n+\1 *(?:\n{2,}|\s*$)/),
-  // indented or centered or comment div, or <header>
+  match: blockRegex(/^(:{3,}) ?(indented|comment|centered|boxed|header|hidden) *\n([\s\S]+?)\n+\1 *(?:\n{2,}|\s*$)/),
+  // indented or centered or boxed or comment div, or <header>
   parse: function(capture, state) {
-    const content = capture[2] === "comment"
-      ? parseInline(capture[3], state)
-      : parse(capture[3], state);
+    const content = parse(capture[3], state);
     return { type: capture[2], content };
   }
 });
@@ -26254,12 +26252,9 @@ rules.set("span", {
   }
 });
 rules.set("text", {
-  // Here we look for anything followed by non-symbols,
-  // double newlines, or double-space-newlines
-  // We break on any symbol characters so that this grammar
-  // is easy to extend without needing to modify this regex
+  // We break on symbol characters, double newlines, or double-space-newlines.
   isLeaf: true,
-  match: anyScopeRegex(/^[\s\S]+?(?=[^0-9A-Za-z\s\u00c0-\uffff]|\n\n| {2,}\n|\d+[.)]|\w+:\S|$)/),
+  match: anyScopeRegex(/^[\s\S]+?(?=[_*`#>|\\\-+=![({$¢¶<~+:]|\n\n| {2,}\n|\d+[.)]|\w+:\S|$)/),
   parse: function(capture, state) {
     return {
       text: capture[0].replace(/\n/g, " ")
@@ -46714,6 +46709,9 @@ const nodes$1 = {
   indented(node) {
     return htmlTag("div", ast2html(node.content), { class: 'indented' }) + "\n"
   },
+  boxed(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'boxed' }) + "\n"
+  },
   centered(node) {
     return htmlTag("div", ast2html(node.content), { class: 'centered' }) + "\n"
   },
@@ -46956,6 +46954,15 @@ const nodes = {
     defining: true,
     parseDOM: [{tag: "div.centered"}],
     toDOM () { return ['div', { class: 'centered' }, 0] },
+  },
+
+  // An boxed div.
+  boxed: {
+    content: "block+",
+    group: "block",
+    defining: true,
+	  parseDOM: [{tag: "div.boxed"}],
+    toDOM() { return ['div', { class: 'boxed' }, 0] }
   },
 
   // :: NodeSpec A blockquote (`<blockquote>`) wrapping one or more blocks.
@@ -47286,7 +47293,7 @@ const nodes = {
   },
 
   comment: {
-    content: "inline*",
+    content: "block+",
     group: "block",
     isolating: true,
     parseDOM: [{tag: "aside.comment"}],
@@ -47889,7 +47896,7 @@ const ampRegEx = /=[^=]*@[^=]*$/;
 
 const hurmetNodes =  {
   blockquote(state, node) {
-    state.wrapBlock("", null, node, () => state.renderContent(node));
+    state.wrapBlock("> ", null, node, () => state.renderContent(node));
   },
   comment(state, node) {
     if (state.isGFM) {
@@ -47910,6 +47917,13 @@ const hurmetNodes =  {
       state.renderContent(node);
     } else {
        state.wrapBlock("", null, node, () => state.renderContent(node), "centered");
+    }
+  },
+  boxed(state, node) {
+    if (state.isGFM) {
+      state.renderContent(node);
+    } else {
+      state.wrapBlock("", null, node, () => state.renderContent(node), "boxed");
     }
   },
   header(state, node) {
@@ -50542,6 +50556,11 @@ const hurmetIcons = {
     height: 16,
     path: "M0 1h16v2h-16zM6 4h10v2h-10zM6 7h10v2h-10zM6 10h10v2h-10zM0 13h16v2h-16zM0 11v-6l4 3z"
   },
+  boxed: {
+    width: 16,
+    height: 16,
+    path: "M1 1h14v142h-14zM2 2v13h12v-13z"
+  },
   "T": {
     width: 16,
     height: 16,
@@ -51609,9 +51628,14 @@ function buildMenuItems(schema) {
     });
   if ((type = schema.nodes.indented))
     r.wrapIndent = wrapItem_1(type, {
-      title: "Indent block",
+      title: "Indent block  Alt-I",
       icon: hurmetIcons.indent
     });
+  if ((type = schema.nodes.boxed))
+    r.wrapBoxed = wrapItem_1(type, {
+      title: "Draw box around block",
+      icon: hurmetIcons.boxed
+  });
   if ((type = schema.nodes.paragraph))
     r.makeParagraph = blockTypeItem_1(type, {
       title: "Change to plain paragraph",
@@ -51792,6 +51816,7 @@ function buildMenuItems(schema) {
       r.wrapBlockQuote,
       r.wrapCentered,
       r.wrapIndent,
+      r.wrapBoxed,
       joinUpItem_1,
       liftItem,
       selectParentNodeItem
@@ -52079,6 +52104,7 @@ function buildKeymap(schema, mapKeys) {
   if ((type = schema.nodes.bullet_list)) bind("Shift-Ctrl-8", wrapInList(type));
   if ((type = schema.nodes.ordered_list)) bind("Shift-Ctrl-9", wrapInList(type));
   if ((type = schema.nodes.blockquote)) bind("Ctrl->", wrapIn(type));
+  if ((type = schema.nodes.indented)) bind("Alt-i", wrapIn(type));
   if ((type = schema.nodes.hard_break)) {
     let br = type,
       cmd = chainCommands(exitCode, (state, dispatch) => {
@@ -52393,10 +52419,7 @@ const calligraphic = {
   o: "\u2134"
 };
 
-const accentedChar = str => {
-  const posSpace = str.indexOf(" ");
-  const ch = str.substring(posSpace + 1);
-  const accentName = str.substring(0, posSpace);
+const accentedChar = (ch, accentName) => {
   switch (accentName) {
     case "bb": // bold
     case "bbb": // blackboard bold
@@ -52464,12 +52487,14 @@ const autoCorrect = (jar, preText, postText) => {
   }
 };
 
+const boldPrevChar = preText=> {
+  if (preText.length == 0) { return null }
+  const ch = preText.charAt(preText.length - 1);
+  return accentedChar(ch, "bb")
+};
+
 /* eslint-disable */
 
-/* I've revised this version of CodeJar for Hurmet math zones.
- * I've removed history and highlighting. They each had a delay and Hurmet
- * needs speed in order to update a view of the math with every keystroke.
- */
 
 const codeJar = (editor, isMathPrompt) => {
   const options = {
@@ -52505,6 +52530,16 @@ const codeJar = (editor, isMathPrompt) => {
   ;on("keydown", event => {
     // The next five lines are Hurmet customization. Not part of vanilla CodeJar.
     if (isMathPrompt && event.keyCode === 13 && !event.shiftKey) return
+    if (isMathPrompt && event.keyCode === 66 && event.ctrlKey) {
+      // Make the previous letter bold.
+      const preText = textBeforeCursor(editor);
+      const ch = boldPrevChar(preText);
+      if (ch) {
+        const L = preText.length;
+        editor.textContent = preText.slice(0, -1) + ch + textAfterCursor(editor);
+        restore({ start: L, end: L, dir: undefined });
+      }
+    }
     if (event.keyCode === 65 && event.ctrlKey ) {
       window.getSelection().selectAllChildren(editor);
       event.preventDefault();
