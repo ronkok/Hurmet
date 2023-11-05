@@ -5,6 +5,8 @@
  * needs speed in order to update a view of the math with every keystroke.
  */
 
+import { boldPrevChar } from "./autocorrect"
+
 export const codeJar = (editor, isMathPrompt) => {
   const options = {
     tab: "\t",
@@ -39,6 +41,16 @@ export const codeJar = (editor, isMathPrompt) => {
   ;on("keydown", event => {
     // The next five lines are Hurmet customization. Not part of vanilla CodeJar.
     if (isMathPrompt && event.keyCode === 13 && !event.shiftKey) return
+    if (isMathPrompt && event.keyCode === 66 && event.ctrlKey) {
+      // Make the previous letter bold.
+      const preText = textBeforeCursor(editor)
+      const ch = boldPrevChar(preText)
+      if (ch) {
+        const L = preText.length
+        editor.textContent = preText.slice(0, -1) + ch + textAfterCursor(editor)
+        restore({ start: L, end: L, dir: undefined })
+      }
+    }
     if (event.keyCode === 65 && event.ctrlKey ) {
       window.getSelection().selectAllChildren(editor)
       event.preventDefault()

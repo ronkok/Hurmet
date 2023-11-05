@@ -486,7 +486,7 @@ and `\red`.
 
 #### Auto-correct
 
-Auto-correct kicks in when you type a space.
+Auto-correct kicks in when you type a space inside a math zone.
 
 <div class="auto-correct"></div>
 
@@ -522,7 +522,8 @@ Auto-correct kicks in when you type a space.
 |          |      |              |            | ZZ         | ℤ       |          |      |
 {.auto-correct}
 
-The font corrections, e.g., `bb …` work on any letter from A to Z or a to z.
+The font corrections, e.g., `bb …` work on any letter from A to Z or a to z. You can
+also make one those letters bold by typing it and then typing **Ctrl+B**.
 
 `-->`, `<--`, and `<-->` will auto correct into extensible arrows, as in:
 ¢` A ⟶"note" B `.
