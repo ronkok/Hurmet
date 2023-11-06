@@ -229,7 +229,14 @@ const calligraphic = {
   o: "\u2134"
 };
 
-const accentedChar = (ch, accentName) => {
+const fontStr = str => {
+  const posSpace = str.indexOf(" ");
+  const ch = str.substring(posSpace + 1);
+  const accentName = str.substring(0, posSpace);
+  return fontedChar(ch, accentName)
+};
+
+const fontedChar = (ch, accentName) => {
   switch (accentName) {
     case "bb": // bold
     case "bbb": // blackboard bold
@@ -280,8 +287,8 @@ const autoCorrect = (jar, preText, postText) => {
             correction = superscript$1(word); // e.g. x²
           } else {
             if (word.indexOf(" ") > 0) {
-              // accented char or Unicode character. E.g. bar y   or   bb M
-              correction = accentedChar(word);
+              // accented char or Unicode character. E.g.  bb M
+              correction = fontStr(word);
             }
           }
         }
@@ -297,10 +304,10 @@ const autoCorrect = (jar, preText, postText) => {
   }
 };
 
-const boldPrevChar = preText=> {
-  if (preText.length == 0) { return null }
+const boldPrevChar = preText => {
+  if (preText.length === 0) { return null }
   const ch = preText.charAt(preText.length - 1);
-  return accentedChar(ch, "bb")
+  return fontedChar(ch, "bb")
 };
 
 const renderSVG = dwg => {

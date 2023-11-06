@@ -229,14 +229,14 @@ const calligraphic = {
   o: "\u2134"
 }
 
-const accent = str => {
+const fontStr = str => {
   const posSpace = str.indexOf(" ")
   const ch = str.substring(posSpace + 1)
   const accentName = str.substring(0, posSpace)
-
+  return fontedChar(ch, accentName)
 }
 
-const accentedChar = (ch, accentName) => {
+const fontedChar = (ch, accentName) => {
   switch (accentName) {
     case "bb": // bold
     case "bbb": // blackboard bold
@@ -287,8 +287,8 @@ export const autoCorrect = (jar, preText, postText) => {
             correction = superscript(word) // e.g. x²
           } else {
             if (word.indexOf(" ") > 0) {
-              // accented char or Unicode character. E.g. bar y   or   bb M
-              correction = accentedChar(word)
+              // accented char or Unicode character. E.g.  bb M
+              correction = fontStr(word)
             }
           }
         }
@@ -304,8 +304,8 @@ export const autoCorrect = (jar, preText, postText) => {
   }
 }
 
-export const boldPrevChar = preText=> {
-  if (preText.length == 0) { return null }
+export const boldPrevChar = preText => {
+  if (preText.length === 0) { return null }
   const ch = preText.charAt(preText.length - 1)
-  return accentedChar(ch, "bb")
+  return fontedChar(ch, "bb")
 }
