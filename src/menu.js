@@ -71,16 +71,6 @@ const hurmetIcons = {
     height: 16,
     path: "M14.998 2c0.001 0.001 0.001 0.001 0.002 0.002v11.996c-0.001 0.001-0.001 0.001-0.002 0.002h-13.996c-0.001-0.001-0.001-0.001-0.002-0.002v-11.996c0.001-0.001 0.001-0.001 0.002-0.002h13.996zM15 1h-14c-0.55 0-1 0.45-1 1v12c0 0.55 0.45 1 1 1h14c0.55 0 1-0.45 1-1v-12c0-0.55-0.45-1-1-1v0z M13 4.5c0 0.828-0.672 1.5-1.5 1.5s-1.5-0.672-1.5-1.5 0.672-1.5 1.5-1.5 1.5 0.672 1.5 1.5z M14 13h-12v-2l3.5-6 4 5h1l3.5-3z"
   },
-  "indent": {
-    width: 16,
-    height: 16,
-    path: "M0 1h16v2h-16zM6 4h10v2h-10zM6 7h10v2h-10zM6 10h10v2h-10zM0 13h16v2h-16zM0 11v-6l4 3z"
-  },
-  boxed: {
-    width: 16,
-    height: 16,
-    path: "M1 1h14v142h-14zM2 2v13h12v-13z"
-  },
   "T": {
     width: 16,
     height: 16,
@@ -1145,17 +1135,37 @@ export function buildMenuItems(schema) {
   if ((type = schema.nodes.centered))
     r.wrapCentered = wrapItem(type, {
       title: "Center block",
-      icon: hurmetIcons["align-center"]
+      label: "Centered"
     })
   if ((type = schema.nodes.indented))
     r.wrapIndent = wrapItem(type, {
       title: "Indent block  Alt-I",
-      icon: hurmetIcons.indent
+      label: "Indented  Alt-I"
     })
   if ((type = schema.nodes.boxed))
     r.wrapBoxed = wrapItem(type, {
       title: "Draw box around block",
-      icon: hurmetIcons.boxed
+      label: "Boxed"
+  })
+  if ((type = schema.nodes.note))
+    r.wrapNote = wrapItem(type, {
+      title: "Note alert",
+      label: "Note"
+  })
+  if ((type = schema.nodes.tip))
+    r.wrapTip = wrapItem(type, {
+      title: "Tip alert",
+      label: "Tip"
+  })
+  if ((type = schema.nodes.important))
+    r.wrapImportant = wrapItem(type, {
+      title: "Alert as important",
+      label: "Important"
+  })
+  if ((type = schema.nodes.warning))
+    r.wrapWarning = wrapItem(type, {
+      title: "Warning alert",
+      label: "Warning"
   })
   if ((type = schema.nodes.paragraph))
     r.makeParagraph = blockTypeItem(type, {
@@ -1337,9 +1347,17 @@ export function buildMenuItems(schema) {
       r.wrapOrderedList,
       r.tighten,
       r.wrapBlockQuote,
-      r.wrapCentered,
-      r.wrapIndent,
-      r.wrapBoxed,
+      r.blockDropDown = new Dropdown([
+        r.wrapCentered,
+        r.wrapIndent,
+        r.wrapBoxed,
+        r.wrapNote,
+        r.wrapTip,
+        r.wrapImportant,
+        r.wrapWarning
+        ],
+        { label: "⎕", title: "Block format" }
+      ),
       joinUpItem,
       liftItem,
       selectParentNodeItem

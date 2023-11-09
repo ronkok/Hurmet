@@ -81,7 +81,7 @@ export const nodes = {
     toDOM() { return ['div', { class: 'indented' }, 0] }
   },
 
-  //:: NodeSpec An center-aligned div.
+  // A center-aligned div.
   centered: {
     content: "block+",
     group: "block",
@@ -90,7 +90,7 @@ export const nodes = {
     toDOM () { return ['div', { class: 'centered' }, 0] },
   },
 
-  // An boxed div.
+  // A boxed div.
   boxed: {
     content: "block+",
     group: "block",
@@ -106,6 +106,42 @@ export const nodes = {
     defining: true,
     parseDOM: [{tag: "blockquote"}],
     toDOM() { return ["blockquote", 0] }
+  },
+
+  // A "Note" alert div.
+  note: {
+    content: "block+",
+    group: "block",
+    defining: true,
+	  parseDOM: [{tag: "div.note"}],
+    toDOM() { return ['div', { class: 'note' }, 0] }
+  },
+
+  // A "Tip" alert div.
+  tip: {
+    content: "block+",
+    group: "block",
+    defining: true,
+	  parseDOM: [{tag: "div.tip"}],
+    toDOM() { return ['div', { class: 'tip' }, 0] }
+  },
+
+  // An "Inportant" alert div.
+  important: {
+    content: "block+",
+    group: "block",
+    defining: true,
+	  parseDOM: [{tag: "div.important"}],
+    toDOM() { return ['div', { class: 'important' }, 0] }
+  },
+
+  // A "Warning" alert div.
+  warning: {
+    content: "block+",
+    group: "block",
+    defining: true,
+	  parseDOM: [{tag: "div.warning"}],
+    toDOM() { return ['div', { class: 'warning' }, 0] }
   },
 
   // :: NodeSpec A horizontal rule (`<hr>`).

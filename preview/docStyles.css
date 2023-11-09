@@ -151,6 +151,26 @@ p.indented {
     margin-top: 0.5em;
     text-align: left;
 }
+div.boxed { width: fit-content; min-width: 2em; border: 1px solid #000; }
+div.boxed p { line-height: 1.2; margin: 4px; }
+div.note {
+  padding: 0 1em 8px 1em;
+  margin-bottom: 16px;
+  color: inherit;
+}
+div.note > *:first-child::before {
+  content: "🛈   Note\A";
+  white-space: pre;
+  color: rgb(9, 105, 218);
+  line-height: 2em;
+}
+div.note > *:last-child {
+  padding-bottom: 0px;
+  margin-bottom: 0px;
+}
+div.note {
+  border-left: .25em solid rgb(9, 105, 218)
+}
 aside.comment {
     float: right;
     border: 2px solid #e2941f;
@@ -215,6 +235,7 @@ table.grid th {
     border: 1px solid #aaa;
     vertical-align: middle;
 }
+table.grid p { text-align: left; }
 table.markup {
     margin-left: 0;
     white-space: nowrap;

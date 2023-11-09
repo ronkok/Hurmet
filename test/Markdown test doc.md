@@ -52,6 +52,26 @@ Special divs can contain more than one paragraph.
 >
 > The Hurmet schema for blockquote is the template for other special divs.
 
+> A second blockquote
+
+¶
+
+> [!NOTE]
+> A note alert contains information the user should notice even if skimming.
+>
+> An alert can contain multiple paragraphs.
+
+> [!TIP]
+> Optional information to help a user be more successful.
+
+> [!IMPORTANT]
+> Essential information required for user success.
+
+> [!WARNING]
+> Negative potential consequences of an action.
+
+> Check a blockquote after an alert.
+
 ### TeX
 
 Hurmet reads inline TeX written between `$` delimiters:\

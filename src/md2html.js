@@ -265,6 +265,18 @@ const nodes = {
   hidden(node) {
     return htmlTag("div", ast2html(node.content), { class: 'hidden' }) + "\n"
   },
+  note(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'note' }) + "\n"
+  },
+  tip(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'tip' }) + "\n"
+  },
+  important(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'important' }) + "\n"
+  },
+  warning(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'warning' }) + "\n"
+  },
   header(node)   {
     return htmlTag("header", ast2html(node.content)) + "\n"
   },

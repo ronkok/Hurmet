@@ -110,6 +110,18 @@ const hurmetNodes =  {
       state.wrapBlock("", null, node, () => state.renderContent(node), "boxed")
     }
   },
+  note(state, node) {
+    state.wrapBlock("> ", null, node, () => state.renderContent(node), "note")
+  },
+  tip(state, node) {
+    state.wrapBlock("> ", null, node, () => state.renderContent(node), (state.isGFM ? "note" : "tip"))
+  },
+  important(state, node) {
+    state.wrapBlock("> ", null, node, () => state.renderContent(node), "important")
+  },
+  warning(state, node) {
+    state.wrapBlock("> ", null, node, () => state.renderContent(node), "warning")
+  },
   header(state, node) {
     if (state.isGFM) {
       state.renderContent(node)
@@ -444,14 +456,18 @@ export class MarkdownSerializerState {
   wrapBlock(delim, firstDelim, node, f, nodeType) {
     let old = this.delim
     if (nodeType) {
-      this.divFence += ":::"
-      this.write(`${this.delim}${this.divFence} ${nodeType}\n`)
+      if (delim.length > 0) {
+        if (nodeType) { this.write(`> [!${nodeType.toUpperCase()}]\n`) }
+      } else {
+        this.divFence += ":::"
+        this.write(`${this.delim}${this.divFence} ${nodeType}\n`)
+      }
     }
     this.write(firstDelim || delim)
     this.delim += delim
     f()
     this.delim = old
-    if (nodeType) {
+    if (nodeType && delim.length === 0) {
       this.out = this.out.replace(trailNewlineRegEx, "") + (`\n${this.delim}${this.divFence}\n`)
       this.divFence = this.divFence.slice(0, -3)
     }

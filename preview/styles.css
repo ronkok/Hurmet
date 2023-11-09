@@ -729,6 +729,59 @@ ul.toc span + span {
 .ProseMirror div.boxed { width: fit-content; min-width: 2em; border: 1px solid #000; }
 .ProseMirror div.boxed p { line-height: 1.2; margin: 4px; }
 
+.ProseMirror div.note,
+.ProseMirror div.tip,
+.ProseMirror div.important,
+.ProseMirror div.warning {
+  padding: 0 1em 8px 1em;
+  margin-bottom: 16px;
+  color: inherit;
+}
+.ProseMirror div.note > *:first-child::before {
+  content: "🛈   Note\A";
+  white-space: pre;
+  color: rgb(9, 105, 218);
+  line-height: 2em;
+}
+.ProseMirror div.note > *:last-child,
+.ProseMirror div.tip > *:last-child,
+.ProseMirror div.important > *:last-child,
+.ProseMirror div.warning > *:last-child {
+  padding-bottom: 0px;
+  margin-bottom: 0px;
+}
+
+.ProseMirror div.note {
+  border-left: .25em solid rgb(9, 105, 218)
+}
+.ProseMirror div.tip {
+  border-left: .25em solid rgb(80, 185, 250)
+}
+.ProseMirror div.important {
+  border-left: .25em solid rgb(130, 80, 223)
+}
+.ProseMirror div.warning {
+  border-left: .25em solid rgb(154, 103, 0)
+}
+.ProseMirror div.tip > *:first-child::before {
+  content: "💡  Tip\A";
+  white-space: pre;
+  color: rgb(9, 105, 218);
+  line-height: 2em;
+} 
+.ProseMirror div.important > *:first-child::before {
+  content: "⚠  Important\A";
+  white-space: pre;
+  color: rgb(130, 80, 223);
+  line-height: 2em;
+} 
+.ProseMirror div.warning > *:first-child::before {
+  content: "⚠  Warning\A";
+  white-space: pre;
+  color: rgb(154, 103, 0);
+  line-height: 2em;
+} 
+
 /*
  * This section contains the CSS for Temml math rendering.
  */

@@ -25375,19 +25375,22 @@ const textRange = (str, index) => {
  *        1. →  1. 2. 3.  etc.
  *        A. →  A. B. C.  etc. (future)
  *        a) →  (a) (b) (c)  etc. (future)
- * 12. Fenced divs, similar to Pandoc.
+ * 12. Alerts per GFM
+ *     > [!note] or [!tip] or [!important] or [!warning]
+ *     > Content of note
+ * 13. Fenced divs, similar to Pandoc.
  *     ::: (centered|comment|indented|boxed|header)
  *     Block elements
  *     :::
  *     Nested divs are distinguished by number of colons. Minimum three.
- * 13. Table of Contents
+ * 14. Table of Contents
  *     {.toc start=N end=N}
- * 14. Definition lists, per Pandoc.  (future)
- * 15. [^1] is a reference to a footnote. (future)
+ * 15. Definition lists, per Pandoc.  (future)
+ * 16. [^1] is a reference to a footnote. (future)
  *     [^1]: The body of the footnote is deferred, similar to reference links.
- * 16. [#1] is a reference to a citation. (future)
+ * 17. [#1] is a reference to a citation. (future)
  *     [#1]: The body of the citation is deferred, similar to reference links.
- * 17. Line blocks begin with "| ", as per Pandoc. (future)
+ * 18. Line blocks begin with "| ", as per Pandoc. (future)
  *
  * hurmetMark.js copyright (c) 2021 - 2023 Ron Kok
  *
@@ -25953,11 +25956,21 @@ rules.set("fence", {
     };
   }
 });
+rules.set("alert", {
+  isLeaf: false,
+  match: blockRegex(/^(?: *> \[!(NOTE|TIP|IMPORTANT|WARNING)\])((?:\n *>(?! *\[!)[^\n]*)+)(?:\n *)+\n/),
+  // Alert for note |tip | important | warning
+  parse: function(capture, state) {
+    const cap = capture[2].replace(/\n *> ?/gm, "\n").replace(/^\n/, "");
+    const content = parse(cap, state);
+    return { type: capture[1].toLowerCase(), content }
+  }
+});
 rules.set("blockquote", {
   isLeaf: false,
-  match: blockRegex(/^( *>[^\n]+(\n[^\n]+)*\n*)+\n{2,}/),
+  match: blockRegex(/^>([^\n]*(?:\n *>[^\n]*)*)(?:\n *)+\n/),
   parse: function(capture, state) {
-    const content = capture[0].replace(/^ *> ?/gm, "");
+    const content = capture[1].replace(/\n *> ?/gm, "\n");
     return { content: parse(content, state) };
   }
 });
@@ -46718,6 +46731,18 @@ const nodes$1 = {
   hidden(node) {
     return htmlTag("div", ast2html(node.content), { class: 'hidden' }) + "\n"
   },
+  note(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'note' }) + "\n"
+  },
+  tip(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'tip' }) + "\n"
+  },
+  important(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'important' }) + "\n"
+  },
+  warning(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'warning' }) + "\n"
+  },
   header(node)   {
     return htmlTag("header", ast2html(node.content)) + "\n"
   },
@@ -46947,7 +46972,7 @@ const nodes = {
     toDOM() { return ['div', { class: 'indented' }, 0] }
   },
 
-  //:: NodeSpec An center-aligned div.
+  // A center-aligned div.
   centered: {
     content: "block+",
     group: "block",
@@ -46956,7 +46981,7 @@ const nodes = {
     toDOM () { return ['div', { class: 'centered' }, 0] },
   },
 
-  // An boxed div.
+  // A boxed div.
   boxed: {
     content: "block+",
     group: "block",
@@ -46972,6 +46997,42 @@ const nodes = {
     defining: true,
     parseDOM: [{tag: "blockquote"}],
     toDOM() { return ["blockquote", 0] }
+  },
+
+  // A "Note" alert div.
+  note: {
+    content: "block+",
+    group: "block",
+    defining: true,
+	  parseDOM: [{tag: "div.note"}],
+    toDOM() { return ['div', { class: 'note' }, 0] }
+  },
+
+  // A "Tip" alert div.
+  tip: {
+    content: "block+",
+    group: "block",
+    defining: true,
+	  parseDOM: [{tag: "div.tip"}],
+    toDOM() { return ['div', { class: 'tip' }, 0] }
+  },
+
+  // An "Inportant" alert div.
+  important: {
+    content: "block+",
+    group: "block",
+    defining: true,
+	  parseDOM: [{tag: "div.important"}],
+    toDOM() { return ['div', { class: 'important' }, 0] }
+  },
+
+  // A "Warning" alert div.
+  warning: {
+    content: "block+",
+    group: "block",
+    defining: true,
+	  parseDOM: [{tag: "div.warning"}],
+    toDOM() { return ['div', { class: 'warning' }, 0] }
   },
 
   // :: NodeSpec A horizontal rule (`<hr>`).
@@ -47926,6 +47987,18 @@ const hurmetNodes =  {
       state.wrapBlock("", null, node, () => state.renderContent(node), "boxed");
     }
   },
+  note(state, node) {
+    state.wrapBlock("> ", null, node, () => state.renderContent(node), "note");
+  },
+  tip(state, node) {
+    state.wrapBlock("> ", null, node, () => state.renderContent(node), (state.isGFM ? "note" : "tip"));
+  },
+  important(state, node) {
+    state.wrapBlock("> ", null, node, () => state.renderContent(node), "important");
+  },
+  warning(state, node) {
+    state.wrapBlock("> ", null, node, () => state.renderContent(node), "warning");
+  },
   header(state, node) {
     if (state.isGFM) {
       state.renderContent(node);
@@ -48260,14 +48333,18 @@ class MarkdownSerializerState {
   wrapBlock(delim, firstDelim, node, f, nodeType) {
     let old = this.delim;
     if (nodeType) {
-      this.divFence += ":::";
-      this.write(`${this.delim}${this.divFence} ${nodeType}\n`);
+      if (delim.length > 0) {
+        if (nodeType) { this.write(`> [!${nodeType.toUpperCase()}]\n`); }
+      } else {
+        this.divFence += ":::";
+        this.write(`${this.delim}${this.divFence} ${nodeType}\n`);
+      }
     }
     this.write(firstDelim || delim);
     this.delim += delim;
     f();
     this.delim = old;
-    if (nodeType) {
+    if (nodeType && delim.length === 0) {
       this.out = this.out.replace(trailNewlineRegEx, "") + (`\n${this.delim}${this.divFence}\n`);
       this.divFence = this.divFence.slice(0, -3);
     }
@@ -50551,16 +50628,6 @@ const hurmetIcons = {
     height: 16,
     path: "M14.998 2c0.001 0.001 0.001 0.001 0.002 0.002v11.996c-0.001 0.001-0.001 0.001-0.002 0.002h-13.996c-0.001-0.001-0.001-0.001-0.002-0.002v-11.996c0.001-0.001 0.001-0.001 0.002-0.002h13.996zM15 1h-14c-0.55 0-1 0.45-1 1v12c0 0.55 0.45 1 1 1h14c0.55 0 1-0.45 1-1v-12c0-0.55-0.45-1-1-1v0z M13 4.5c0 0.828-0.672 1.5-1.5 1.5s-1.5-0.672-1.5-1.5 0.672-1.5 1.5-1.5 1.5 0.672 1.5 1.5z M14 13h-12v-2l3.5-6 4 5h1l3.5-3z"
   },
-  "indent": {
-    width: 16,
-    height: 16,
-    path: "M0 1h16v2h-16zM6 4h10v2h-10zM6 7h10v2h-10zM6 10h10v2h-10zM0 13h16v2h-16zM0 11v-6l4 3z"
-  },
-  boxed: {
-    width: 16,
-    height: 16,
-    path: "M1 1h14v142h-14zM2 2v13h12v-13z"
-  },
   "T": {
     width: 16,
     height: 16,
@@ -51624,17 +51691,37 @@ function buildMenuItems(schema) {
   if ((type = schema.nodes.centered))
     r.wrapCentered = wrapItem_1(type, {
       title: "Center block",
-      icon: hurmetIcons["align-center"]
+      label: "Centered"
     });
   if ((type = schema.nodes.indented))
     r.wrapIndent = wrapItem_1(type, {
       title: "Indent block  Alt-I",
-      icon: hurmetIcons.indent
+      label: "Indented  Alt-I"
     });
   if ((type = schema.nodes.boxed))
     r.wrapBoxed = wrapItem_1(type, {
       title: "Draw box around block",
-      icon: hurmetIcons.boxed
+      label: "Boxed"
+  });
+  if ((type = schema.nodes.note))
+    r.wrapNote = wrapItem_1(type, {
+      title: "Note alert",
+      label: "Note"
+  });
+  if ((type = schema.nodes.tip))
+    r.wrapTip = wrapItem_1(type, {
+      title: "Tip alert",
+      label: "Tip"
+  });
+  if ((type = schema.nodes.important))
+    r.wrapImportant = wrapItem_1(type, {
+      title: "Alert as important",
+      label: "Important"
+  });
+  if ((type = schema.nodes.warning))
+    r.wrapWarning = wrapItem_1(type, {
+      title: "Warning alert",
+      label: "Warning"
   });
   if ((type = schema.nodes.paragraph))
     r.makeParagraph = blockTypeItem_1(type, {
@@ -51814,9 +51901,17 @@ function buildMenuItems(schema) {
       r.wrapOrderedList,
       r.tighten,
       r.wrapBlockQuote,
-      r.wrapCentered,
-      r.wrapIndent,
-      r.wrapBoxed,
+      r.blockDropDown = new Dropdown_1([
+        r.wrapCentered,
+        r.wrapIndent,
+        r.wrapBoxed,
+        r.wrapNote,
+        r.wrapTip,
+        r.wrapImportant,
+        r.wrapWarning
+        ],
+        { label: "⎕", title: "Block format" }
+      ),
       joinUpItem_1,
       liftItem,
       selectParentNodeItem

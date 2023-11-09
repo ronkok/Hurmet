@@ -9066,19 +9066,22 @@ const textRange = (str, index) => {
  *        1. →  1. 2. 3.  etc.
  *        A. →  A. B. C.  etc. (future)
  *        a) →  (a) (b) (c)  etc. (future)
- * 12. Fenced divs, similar to Pandoc.
+ * 12. Alerts per GFM
+ *     > [!note] or [!tip] or [!important] or [!warning]
+ *     > Content of note
+ * 13. Fenced divs, similar to Pandoc.
  *     ::: (centered|comment|indented|boxed|header)
  *     Block elements
  *     :::
  *     Nested divs are distinguished by number of colons. Minimum three.
- * 13. Table of Contents
+ * 14. Table of Contents
  *     {.toc start=N end=N}
- * 14. Definition lists, per Pandoc.  (future)
- * 15. [^1] is a reference to a footnote. (future)
+ * 15. Definition lists, per Pandoc.  (future)
+ * 16. [^1] is a reference to a footnote. (future)
  *     [^1]: The body of the footnote is deferred, similar to reference links.
- * 16. [#1] is a reference to a citation. (future)
+ * 17. [#1] is a reference to a citation. (future)
  *     [#1]: The body of the citation is deferred, similar to reference links.
- * 17. Line blocks begin with "| ", as per Pandoc. (future)
+ * 18. Line blocks begin with "| ", as per Pandoc. (future)
  *
  * hurmetMark.js copyright (c) 2021 - 2023 Ron Kok
  *
@@ -9644,11 +9647,21 @@ rules.set("fence", {
     };
   }
 });
+rules.set("alert", {
+  isLeaf: false,
+  match: blockRegex(/^(?: *> \[!(NOTE|TIP|IMPORTANT|WARNING)\])((?:\n *>(?! *\[!)[^\n]*)+)(?:\n *)+\n/),
+  // Alert for note |tip | important | warning
+  parse: function(capture, state) {
+    const cap = capture[2].replace(/\n *> ?/gm, "\n").replace(/^\n/, "");
+    const content = parse(cap, state);
+    return { type: capture[1].toLowerCase(), content }
+  }
+});
 rules.set("blockquote", {
   isLeaf: false,
-  match: blockRegex(/^( *>[^\n]+(\n[^\n]+)*\n*)+\n{2,}/),
+  match: blockRegex(/^>([^\n]*(?:\n *>[^\n]*)*)(?:\n *)+\n/),
   parse: function(capture, state) {
-    const content = capture[0].replace(/^ *> ?/gm, "");
+    const content = capture[1].replace(/\n *> ?/gm, "\n");
     return { content: parse(content, state) };
   }
 });
@@ -30408,6 +30421,18 @@ const nodes = {
   },
   hidden(node) {
     return htmlTag("div", ast2html(node.content), { class: 'hidden' }) + "\n"
+  },
+  note(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'note' }) + "\n"
+  },
+  tip(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'tip' }) + "\n"
+  },
+  important(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'important' }) + "\n"
+  },
+  warning(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'warning' }) + "\n"
   },
   header(node)   {
     return htmlTag("header", ast2html(node.content)) + "\n"

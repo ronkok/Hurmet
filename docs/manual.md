@@ -63,12 +63,11 @@ document range by selecting text, then clicking one of the menu bar buttons:
 |                                      | Contents…, Calculation…, TeX…,     |
 |                                      | Comment…                           |
 +--------------------------------------+------------------------------------+
-| **¶** ![embed][] **H1 H2**           | Block styles:\                     |
-| ![align-center][] ![indent][]        | Plain paragraph, Code block,       |
-| ![list][] ![numbered list][]         | Headings, Centered paragraph,      |
-| ![quotes][] ![boxed][]               | Indent, List, Ordered list, Block  |
-|                                      | quote, Boxed\                      |
-|                                      | (H6 works well as a table caption) |
+| **¶** ![embed][] **H1 H2**           | Block styles:\                     |
+| ![list][] ![numbered list][]         | Plain paragraph, Code block,       |
+| ![quotes][] Centered Indented        | Headings, List, Ordered list,      |
+| Boxed Note Tip Important Warning ⬚   | Centered Indented Boxed Note       |
+|                                      | Important Warning Select Parent    |
 +--------------------------------------+------------------------------------+
 | ![table][] ![insert-row][]           | Table:\                            |
 | ![insert-column][] ![delete-table][] | Insert table, Insert row, Insert   |
@@ -219,15 +218,21 @@ A newline is indicated by a backslash, `\`, at the end of a line.
 | `---------`                              | ------                    |
 |                                          |                           |
 +------------------------------------------+---------------------------+
-| `::: indented`\                          | ::: indented              |
+| `::: boxed`\                             | ::: boxed                 |
 | `Block elements. The attribute` \        | Block elements. The       |
 | ``can be `indented`, `centered`,``\      | attribute can be          |
-| ``or `header`. ``\                       | `indented`,               |
-| ``:::``                                  | `centered`, or            |
+| `` `boxed`, or `header`. ``\             | `indented`,               |
+| ``:::``                                  | `centered`, `boxed`, or   |
 |                                          | `header`.                 |
 |                                          | :::                       |
 +------------------------------------------+---------------------------+
-{.grid colWidths="392 177"}
+| `> [!NOTE]`\                             | > [!NOTE]                 |
+| `> Alerts. The attribute can be`\        | > Alerts. The attribute   |
+| ``> `NOTE`, `TIP`, `IMPORTANT`, or``\    | > can be `NOTE`, `TIP`,   |
+| ``> `WARNING`.``                         | > `IMPORTANT`, or         |
+|                                          | > `WARNING`.              |
++------------------------------------------+---------------------------+
+{.grid colWidths="380 215"}
 
 Pipe Tables
 
