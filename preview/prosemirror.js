@@ -18249,7 +18249,7 @@ const unitFromUnitName = (inputStr) => {
   iQueue = 0;
 
   for (let i = 0; i < rpnArray.length; i++) {
-    if (/[·/\-^]/.test(rpnArray[i])) {
+    if (/^[·/\-^]$/.test(rpnArray[i])) {
       val2 = factors.pop();
       e2 = expoStack.pop();
     }
