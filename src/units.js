@@ -726,6 +726,7 @@ const unitFromWord = (inputStr) => {
 
 const opOrNumRegEx = /[0-9·\-⁰¹²³\u2074-\u2079⁻/^()]/
 const numeralRegEx = /[0-9-]/
+const opRegEx = /^[·/\-^]$/
 
 export const unitFromUnitName = (inputStr) => {
 
@@ -882,7 +883,7 @@ export const unitFromUnitName = (inputStr) => {
   iQueue = 0
 
   for (let i = 0; i < rpnArray.length; i++) {
-    if (/^[·/\-^]$/.test(rpnArray[i])) {
+    if (opRegEx.test(rpnArray[i])) {
       val2 = factors.pop()
       e2 = expoStack.pop()
     }
