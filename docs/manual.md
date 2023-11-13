@@ -1076,7 +1076,7 @@ Data Frame
         `A, S_x = wideFlanges["W8X31"]["A", "Sx"] = !!`
     Multiple returns must use the `!!` display selector, for now.
 
-<div id="single-row">
+    <div id="single-row">
 
     If the data frame has only one row of data, a single accessor will call a datum.\
     Say the data frame is    ¢```aBar =``#size	diameter	area
@@ -1084,7 +1084,7 @@ Data Frame
     #4	0.5	0.2`` ```\
     Then one can call ¢` A = aBar.area = 0.2 'in2' `
 
-</div>
+    </div>
 
     Numeric cata frames can be multiplied by a unit-less scalar.
     No other math operations are supported for data frames.
