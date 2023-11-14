@@ -57,16 +57,10 @@ const importRegEx = /^[^=]+= *import/
 const fileErrorRegEx = /^Error while reading file. Status Code: \d*$/
 const textRegEx = /\\text{[^}]+}/
 
-const argsFromEntry = entry => {
-  // Get the URL from the entry input string.
-  let str = entry.replace(/^[^()]+\("?/, "")
-  str = str.replace(/"?\)[^)]*$/, "").trim()
-  const args = str.split(/ *, */).map(el => el.replace('"', ""))
-  if (args.length === 1) { args.push("") }
-  return args
-}
 const urlFromEntry = entry => {
-  return argsFromEntry(entry)[0]
+  // Get the URL from the entry input string.
+  const str = entry.replace(/^[^()]+\("?/, "")
+  return str.replace(/"?\).*$/, "").trim()
 }
 
 // Helper function.
@@ -75,14 +69,12 @@ const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
   attrs.entry = entry
   attrs.name = entry.replace(/=.+$/, "").trim()
   let str = parse(entry.replace(/\s*=\s*[$$£¥\u20A0-\u20CF]?(?:!{1,2}).*$/, ""), decimalFormat)
-  const [url, pattern] = argsFromEntry(entry)
+  const url = urlFromEntry(entry)
   if (/\.(?:tsv|txt)$/.test(url)) {
     // Shorten the URL.
     const fileName = url.replace(/.+\//, "")
     const match = textRegEx.exec(str)
-    str = str.slice(0, match.index) + "\\text{" + addTextEscapes(fileName) + "}"
-    if (pattern.length > 0) { str += ", \\text{ " + addTextEscapes(pattern) + "}" }
-    str += ")"
+    str = str.slice(0, match.index) + "\\text{" + addTextEscapes(fileName) + "})"
   }
   attrs.tex = str
   attrs.alt = entry
@@ -93,10 +85,9 @@ const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
     attrs.value = null
     return attrs
   }
-  const isImport = importRegEx.test(entry)
-  const data = isImport
-    ? scanModule(text, decimalFormat)            // import code
-    : DataFrame.dataFrameFromTSV(text, pattern)  // fetch data
+  const data = importRegEx.test(entry)
+    ? scanModule(text, decimalFormat)     // import code
+    : DataFrame.dataFrameFromTSV(text)    // fetch data
 
   // Append the data to attrs
   attrs.value = data.value

@@ -584,9 +584,8 @@ Col B	11	25	14`` 'kips'"><math><mrow><mi>P</mi><msub><mrow></mrow><mtext>a</mtex
 <dd><p>Takes vectors as arguments and returns a dataframe.</p></dd>
 <dt id='exp'>exp(<em>z</em>)</dt>
 <dd><p><span class='hurmet-calc' data-entry='e^z'><math><msup><mi>e</mi><mi>z</mi></msup></math></span></p></dd>
-<dt id='fetch'>fetch(<em>url</em>, <em>pattern</em>)</dt>
-<dd><p>Fetches the contents of a remote file. It expects the file to be in CSV format and will return a data range. Fetch functions must be stand-alone expressions.</p>
-<p><em>pattern</em> is an optional regular expression pattern. If <em>pattern</em> is supplied, the function will filter the data and return only rows that match <em>pattern</em>.</p></dd>
+<dt id='fetch'>fetch(<em>url</em>)</dt>
+<dd><p>Fetches the contents of a remote file. It expects the file to be in TSV format (tab-separated values) and will return a data range. Fetch functions must be stand-alone expressions.</p></dd>
 <p>findfirst(<em>searchstring</em>, <em>string</em>)<br>findfirst(<em>value</em>, <em>vector</em>)<br>findfirst(<em>booleanVector</em>)</p>
 <dd><p>Searches the <em>string</em> (<em>vector</em>) and returns the index of the first occurence of <em>searchstring</em> (<em>value</em>).<br>If only one (vector) argment is provided, <code>findfirst</code> will return the index of the first <code>true</code>.</p></dd>
 <dt id='findmax'>findmax(<em>v</em>)</dt>

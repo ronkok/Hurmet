@@ -3024,11 +3024,10 @@ const numberRegEx$5 = new RegExp("^(?:=|" + Rnl.numberPattern.slice(1) + "$)");
 const mixedFractionRegEx = /^-?(?:[0-9]+(?: [0-9]+\/[0-9]+))$/;
 const escRegEx = /^\\#/;
 
-const hasUnitRow = str => {
+const hasUnitRow = lines => {
   // Determine if there is a row for unit names.
   let gotUnits = false;
   let gotAnswer = false;
-  const lines = str.split(/\r?\n/g);
   const units = lines[1].split("\t");
   for (let iCol = 0; iCol < units.length; iCol++) {
     if (numberRegEx$5.test(units[iCol][0])) { gotAnswer = true; break }
@@ -3042,7 +3041,7 @@ const hasUnitRow = str => {
   return gotUnits
 };
 
-const dataFrameFromTSV = (str, pattern = "") => {
+const dataFrameFromTSV = str => {
   // Load a TSV string into a data frame.
   // Data frames are loaded column-wise. The subordinate data structures are:
   let data = [];   // where the main data lives, not including column names or units.
@@ -3052,13 +3051,12 @@ const dataFrameFromTSV = (str, pattern = "") => {
   const units = [];                     // array of unit names, one for each column
   const dtype = [];                     // each column's Hurmet operand type
   const unitMap = Object.create(null);   // map from unit names to unit data
-  const gotUnits = hasUnitRow(str);
-  const regExPattern = pattern === "" ? null : new RegExp(pattern);
 
   if (str.charAt(0) === "`") { str = str.slice(1); }
 
   // It's tab-separated values, so we can use splits to load in the data.
   const lines = str.split(/\r?\n/g);
+  const gotUnits = hasUnitRow(lines);
 
   // Read in the column headings.
   const cols = lines[0].split('\t');
@@ -3097,7 +3095,6 @@ const dataFrameFromTSV = (str, pattern = "") => {
   let row = -1;
   for (let i = (gotUnits ? 2 : 1); i < lines.length; i++) {
     const line = lines[i];
-    if (regExPattern && !regExPattern.test(line)) { continue }
     row += 1;
     line.split('\t').forEach((datum, col) => {
       datum = datum.trim();
@@ -3622,7 +3619,6 @@ const DataFrame = Object.freeze({
   append: append$1,
   dataFrameFromTSV,
   dataFrameFromVectors,
-  hasUnitRow,
   matrix2table,
   display: display$1,
   displayAlt: displayAlt$1,
@@ -29699,16 +29695,10 @@ const importRegEx = /^[^=]+= *import/;
 const fileErrorRegEx = /^Error while reading file. Status Code: \d*$/;
 const textRegEx = /\\text{[^}]+}/;
 
-const argsFromEntry = entry => {
-  // Get the URL from the entry input string.
-  let str = entry.replace(/^[^()]+\("?/, "");
-  str = str.replace(/"?\)[^)]*$/, "").trim();
-  const args = str.split(/ *, */).map(el => el.replace('"', ""));
-  if (args.length === 1) { args.push(""); }
-  return args
-};
 const urlFromEntry = entry => {
-  return argsFromEntry(entry)[0]
+  // Get the URL from the entry input string.
+  const str = entry.replace(/^[^()]+\("?/, "");
+  return str.replace(/"?\).*$/, "").trim()
 };
 
 // Helper function.
@@ -29717,14 +29707,12 @@ const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
   attrs.entry = entry;
   attrs.name = entry.replace(/=.+$/, "").trim();
   let str = parse$1(entry.replace(/\s*=\s*[$$£¥\u20A0-\u20CF]?(?:!{1,2}).*$/, ""), decimalFormat);
-  const [url, pattern] = argsFromEntry(entry);
+  const url = urlFromEntry(entry);
   if (/\.(?:tsv|txt)$/.test(url)) {
     // Shorten the URL.
     const fileName = url.replace(/.+\//, "");
     const match = textRegEx.exec(str);
-    str = str.slice(0, match.index) + "\\text{" + addTextEscapes(fileName) + "}";
-    if (pattern.length > 0) { str += ", \\text{ " + addTextEscapes(pattern) + "}"; }
-    str += ")";
+    str = str.slice(0, match.index) + "\\text{" + addTextEscapes(fileName) + "})";
   }
   attrs.tex = str;
   attrs.alt = entry;
@@ -29735,10 +29723,9 @@ const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
     attrs.value = null;
     return attrs
   }
-  const isImport = importRegEx.test(entry);
-  const data = isImport
-    ? scanModule(text, decimalFormat)            // import code
-    : DataFrame.dataFrameFromTSV(text, pattern);  // fetch data
+  const data = importRegEx.test(entry)
+    ? scanModule(text, decimalFormat)     // import code
+    : DataFrame.dataFrameFromTSV(text);    // fetch data
 
   // Append the data to attrs
   attrs.value = data.value;

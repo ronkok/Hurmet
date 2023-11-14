@@ -207,11 +207,10 @@ const numberRegEx = new RegExp("^(?:=|" + Rnl.numberPattern.slice(1) + "$)")
 const mixedFractionRegEx = /^-?(?:[0-9]+(?: [0-9]+\/[0-9]+))$/
 const escRegEx = /^\\#/
 
-const hasUnitRow = str => {
+const hasUnitRow = lines => {
   // Determine if there is a row for unit names.
   let gotUnits = false
   let gotAnswer = false
-  const lines = str.split(/\r?\n/g)
   const units = lines[1].split("\t")
   for (let iCol = 0; iCol < units.length; iCol++) {
     if (numberRegEx.test(units[iCol][0])) { gotAnswer = true; break }
@@ -225,7 +224,7 @@ const hasUnitRow = str => {
   return gotUnits
 }
 
-const dataFrameFromTSV = (str, pattern = "") => {
+const dataFrameFromTSV = str => {
   // Load a TSV string into a data frame.
   // Data frames are loaded column-wise. The subordinate data structures are:
   let data = [];   // where the main data lives, not including column names or units.
@@ -235,13 +234,12 @@ const dataFrameFromTSV = (str, pattern = "") => {
   const units = [];                     // array of unit names, one for each column
   const dtype = [];                     // each column's Hurmet operand type
   const unitMap = Object.create(null)   // map from unit names to unit data
-  const gotUnits = hasUnitRow(str)
-  const regExPattern = pattern === "" ? null : new RegExp(pattern)
 
   if (str.charAt(0) === "`") { str = str.slice(1) }
 
   // It's tab-separated values, so we can use splits to load in the data.
   const lines = str.split(/\r?\n/g)
+  const gotUnits = hasUnitRow(lines)
 
   // Read in the column headings.
   const cols = lines[0].split('\t')
@@ -280,7 +278,6 @@ const dataFrameFromTSV = (str, pattern = "") => {
   let row = -1
   for (let i = (gotUnits ? 2 : 1); i < lines.length; i++) {
     const line = lines[i];
-    if (regExPattern && !regExPattern.test(line)) { continue }
     row += 1
     line.split('\t').forEach((datum, col) => {
       datum = datum.trim()
@@ -805,7 +802,6 @@ export const DataFrame = Object.freeze({
   append,
   dataFrameFromTSV,
   dataFrameFromVectors,
-  hasUnitRow,
   matrix2table,
   display,
   displayAlt,
