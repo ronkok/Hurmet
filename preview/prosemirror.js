@@ -19214,7 +19214,7 @@ const identifyRange = (df, args) => {
       iEnd = df.value.data[0].length - 1;
       columnList.push(df.value.columnMap[args[0].value]);
     } else {
-      return errorOprnd("BAD_ROW_NAME", args[0].value)
+      return [errorOprnd("BAD_ROW_NAME", args[0].value), null, null, null]
     }
   } else if (args.length === 1 && args[0].dtype === dt.STRING + dt.COLUMNVECTOR) {
     // A vector of row names
@@ -19250,6 +19250,7 @@ const identifyRange = (df, args) => {
 const range$1 = (df, args, unitAware) => {
   let unit = Object.create(null);
   const [rowList, columnList, iStart, iEnd] = identifyRange(df, args);
+  if (rowList.dtype && rowList.dtype === dt.ERROR) { return rowList }
   if (rowList.length === 0 && iStart === iEnd && columnList.length === 1) {
     // Return one value.
     let dtype = df.value.dtype[columnList[0]];
@@ -19332,7 +19333,25 @@ const numberRegEx$5 = new RegExp("^(?:=|" + Rnl.numberPattern.slice(1) + "$)");
 const mixedFractionRegEx = /^-?(?:[0-9]+(?: [0-9]+\/[0-9]+))$/;
 const escRegEx = /^\\#/;
 
-const dataFrameFromTSV = (str) => {
+const hasUnitRow = str => {
+  // Determine if there is a row for unit names.
+  let gotUnits = false;
+  let gotAnswer = false;
+  const lines = str.split(/\r?\n/g);
+  const units = lines[1].split("\t");
+  for (let iCol = 0; iCol < units.length; iCol++) {
+    if (numberRegEx$5.test(units[iCol][0])) { gotAnswer = true; break }
+  }
+  if (!gotAnswer) {
+    const firstDataLine = lines[2].split("\t");
+    for (let iCol = 0; iCol < firstDataLine.length; iCol++) {
+      if (numberRegEx$5.test(firstDataLine[iCol][1])) { gotUnits = true; break }
+    }
+  }
+  return gotUnits
+};
+
+const dataFrameFromTSV = (str, pattern = "") => {
   // Load a TSV string into a data frame.
   // Data frames are loaded column-wise. The subordinate data structures are:
   let data = [];   // where the main data lives, not including column names or units.
@@ -19342,68 +19361,55 @@ const dataFrameFromTSV = (str) => {
   const units = [];                     // array of unit names, one for each column
   const dtype = [];                     // each column's Hurmet operand type
   const unitMap = Object.create(null);   // map from unit names to unit data
-  let gotUnits = false;
+  const gotUnits = hasUnitRow(str);
+  const regExPattern = pattern === "" ? null : new RegExp(pattern);
 
   if (str.charAt(0) === "`") { str = str.slice(1); }
-  let row = 0;
-  let col = 0;
 
-  // Before we start loading data, let's write two closed functions, to share variable scope.
-  const checkForUnitRow = _ => {
-    // Determine if there is a row for unit names.
-    let gotAnswer = false;
-    for (let iCol = 0; iCol < data.length; iCol++) {
-      if (numberRegEx$5.test(data[iCol][0])) { gotAnswer = true; break }
-    }
-    if (!gotAnswer) {
-      for (let iCol = 0; iCol < data.length; iCol++) {
-        if (numberRegEx$5.test(data[iCol][1])) { gotUnits = true; break }
-      }
-    }
-    if (gotUnits) {
-      // Shift the top row of data into units.
-      for (let iCol = 0; iCol < data.length; iCol++) {
-        const unitName = data[iCol].shift();
-        units.push(unitName);
-        if (unitName.length > 0) {
-          if (!unitMap[unitName]) {
-            const unit = unitFromUnitName(unitName);
-            if (unit) {
-              unitMap[unitName] = unit;
-            } else {
-              return errorOprnd("DF_UNIT", unitName)
-            }
-          }
-        }
-      }
-      if (rowMap) {
-        Object.entries(rowMap).forEach(([key, value]) => { rowMap[key] = value - 1; });
-      }
-    }
-  };
+  // It's tab-separated values, so we can use splits to load in the data.
+  const lines = str.split(/\r?\n/g);
 
-  const harvest = (datum) => {
-    // Load a datum into the dataTable
+  // Read in the column headings.
+  const cols = lines[0].split('\t');
+  if (cols[0].length > 0 && cols[0].charAt(0) === "#") {
+    // Create a rowMap. The first datum in each row is a key to the row.
+    rowMap = Object.create(null);
+    cols[0] = cols[0].slice(1);
+  } else if (escRegEx.test(cols[0])) {
+    cols[0] = cols[0].slice(1);
+  }
+  cols.forEach((datum, col) => {
     datum = datum.trim();
+    headings.push(datum);
+    columnMap[datum] = col;
+    data.push([]);
+  });
 
-    if (row === 3 && col === 0) {
-      checkForUnitRow();
-    }
-
-    if (row === 0) {
-      if (col === 0) {
-        if (datum.length > 0 && datum.charAt(0) === "#") {
-          // Create a rowMap. The first datum in each row is a key to the row.
-          rowMap = Object.create(null);
-          datum = datum.slice(1);
-        } else if (escRegEx.test(datum)) {
-          datum = datum.slice(1);
+  // Units
+  if (gotUnits) {
+    const unitNames = lines[1].split('\t');
+    unitNames.forEach(unitName => {
+      unitName = unitName.trim();
+      units.push(unitName);
+      if (unitName.length > 0 && !unitMap[unitName]) {
+        const unit = unitFromUnitName(unitName);
+        if (unit) {
+          unitMap[unitName] = unit;
+        } else {
+          return errorOprnd("DF_UNIT", unitName)
         }
       }
-      headings.push(datum);
-      columnMap[datum] = col;
-    } else {
-      if (row === 1) { data.push([]); } // First data row.
+    });
+  }
+
+  // Data
+  let row = -1;
+  for (let i = (gotUnits ? 2 : 1); i < lines.length; i++) {
+    const line = lines[i];
+    if (regExPattern && !regExPattern.test(line)) { continue }
+    row += 1;
+    line.split('\t').forEach((datum, col) => {
+      datum = datum.trim();
       if (datum === "sumAbove()") {
         let sum = Rnl.zero;
         for (const num of data[col]) {
@@ -19415,23 +19421,10 @@ const dataFrameFromTSV = (str) => {
       }
       data[col].push(datum);
       if (rowMap && col === 0) {
-        rowMap[datum] = row - 1 - (gotUnits ? 1 : 0);
+        rowMap[datum] = row;
       }
-    }
-  };
-
-  // With the closure out of the way, let's load in data.
-  // It's tab-separated values, so we can use splits to load in the data.
-  const lines = str.split(/\r?\n/g);
-  for (const line of lines) {
-    if (line.length > 0) {
-      col = 0;
-      const items = line.split('\t');
-      for (const item of items) { harvest(item.trim()); col++; }
-      row += 1;
-    }
+    });
   }
-  if (row === 3) { checkForUnitRow(); }
 
   // Data is loaded in. Finish by determining the operand type of each column
   for (let j = 0; j < data.length; j++) {
@@ -19938,6 +19931,7 @@ const DataFrame = Object.freeze({
   append: append$1,
   dataFrameFromTSV,
   dataFrameFromVectors,
+  hasUnitRow,
   matrix2table,
   display: display$1,
   displayAlt: displayAlt$1,
@@ -20685,7 +20679,7 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
     if (inRealTime) {
       tex = DataFrame.quickDisplay(st);
     } else {
-      const dataStructure = DataFrame.dataFrameFromTSV(st, {});
+      const dataStructure = DataFrame.dataFrameFromTSV(st);
       tex = DataFrame.display(dataStructure.value, "h3", decimalFormat);
     }
     return ["``" + inputStr + "``", tex, tt.DATAFRAME, ""]
@@ -46014,10 +46008,16 @@ const importRegEx = /^[^=]+= *import/;
 const fileErrorRegEx = /^Error while reading file. Status Code: \d*$/;
 const textRegEx = /\\text{[^}]+}/;
 
-const urlFromEntry = entry => {
+const argsFromEntry = entry => {
   // Get the URL from the entry input string.
-  const str = entry.replace(/^[^()]+\("?/, "");
-  return str.replace(/"?\).*$/, "").trim()
+  let str = entry.replace(/^[^()]+\("?/, "");
+  str = str.replace(/"?\)[^)]*$/, "").trim();
+  const args = str.split(/ *, */).map(el => el.replace('"', ""));
+  if (args.length === 1) { args.push(""); }
+  return args
+};
+const urlFromEntry = entry => {
+  return argsFromEntry(entry)[0]
 };
 
 // Helper function.
@@ -46026,12 +46026,14 @@ const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
   attrs.entry = entry;
   attrs.name = entry.replace(/=.+$/, "").trim();
   let str = parse$1(entry.replace(/\s*=\s*[$$£¥\u20A0-\u20CF]?(?:!{1,2}).*$/, ""), decimalFormat);
-  const url = urlFromEntry(entry);
+  const [url, pattern] = argsFromEntry(entry);
   if (/\.(?:tsv|txt)$/.test(url)) {
     // Shorten the URL.
     const fileName = url.replace(/.+\//, "");
     const match = textRegEx.exec(str);
-    str = str.slice(0, match.index) + "\\text{" + addTextEscapes(fileName) + "})";
+    str = str.slice(0, match.index) + "\\text{" + addTextEscapes(fileName) + "}";
+    if (pattern.length > 0) { str += ", \\text{ " + addTextEscapes(pattern) + "}"; }
+    str += ")";
   }
   attrs.tex = str;
   attrs.alt = entry;
@@ -46042,9 +46044,10 @@ const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
     attrs.value = null;
     return attrs
   }
-  const data = importRegEx.test(entry)
-    ? scanModule(text, decimalFormat)               // import code
-    : DataFrame.dataFrameFromTSV(text, hurmetVars);  // fetch data
+  const isImport = importRegEx.test(entry);
+  const data = isImport
+    ? scanModule(text, decimalFormat)            // import code
+    : DataFrame.dataFrameFromTSV(text, pattern);  // fetch data
 
   // Append the data to attrs
   attrs.value = data.value;

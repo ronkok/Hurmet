@@ -57,10 +57,16 @@ const importRegEx = /^[^=]+= *import/
 const fileErrorRegEx = /^Error while reading file. Status Code: \d*$/
 const textRegEx = /\\text{[^}]+}/
 
-const urlFromEntry = entry => {
+const argsFromEntry = entry => {
   // Get the URL from the entry input string.
-  const str = entry.replace(/^[^()]+\("?/, "")
-  return str.replace(/"?\).*$/, "").trim()
+  let str = entry.replace(/^[^()]+\("?/, "")
+  str = str.replace(/"?\)[^)]*$/, "").trim()
+  const args = str.split(/ *, */).map(el => el.replace('"', ""))
+  if (args.length === 1) { args.push("") }
+  return args
+}
+const urlFromEntry = entry => {
+  return argsFromEntry(entry)[0]
 }
 
 // Helper function.
@@ -69,12 +75,14 @@ const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
   attrs.entry = entry
   attrs.name = entry.replace(/=.+$/, "").trim()
   let str = parse(entry.replace(/\s*=\s*[$$£¥\u20A0-\u20CF]?(?:!{1,2}).*$/, ""), decimalFormat)
-  const url = urlFromEntry(entry)
+  const [url, pattern] = argsFromEntry(entry)
   if (/\.(?:tsv|txt)$/.test(url)) {
     // Shorten the URL.
     const fileName = url.replace(/.+\//, "")
     const match = textRegEx.exec(str)
-    str = str.slice(0, match.index) + "\\text{" + addTextEscapes(fileName) + "})"
+    str = str.slice(0, match.index) + "\\text{" + addTextEscapes(fileName) + "}"
+    if (pattern.length > 0) { str += ", \\text{ " + addTextEscapes(pattern) + "}" }
+    str += ")"
   }
   attrs.tex = str
   attrs.alt = entry
@@ -85,9 +93,10 @@ const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
     attrs.value = null
     return attrs
   }
-  const data = importRegEx.test(entry)
-    ? scanModule(text, decimalFormat)               // import code
-    : DataFrame.dataFrameFromTSV(text, hurmetVars)  // fetch data
+  const isImport = importRegEx.test(entry)
+  const data = isImport
+    ? scanModule(text, decimalFormat)            // import code
+    : DataFrame.dataFrameFromTSV(text, pattern)  // fetch data
 
   // Append the data to attrs
   attrs.value = data.value
@@ -346,8 +355,8 @@ export function updateCalculations(
   hurmetVars.format = { value: "h15" } // default rounding format
 
   // Get an array of all the URLs called by fetch statements.
-  const urls = []
-  const fetchPositions = []
+  const urls = [];
+  const fetchPositions = [];
   if (!isCalcAll) {
     // The author has submitted a single calculation cell.
     const entry = nodeAttrs.entry

@@ -1397,10 +1397,13 @@ exp(_z_)
 
 : ¢`e^z`
 
-fetch(_url_)
+fetch(_url_, _pattern_)
 
 : Fetches the contents of a remote file. It expects the file to be in CSV format
   and will return a data range. Fetch functions must be stand-alone expressions.
+
+  _pattern_ is an optional regular expression pattern. If _pattern_ is supplied,
+  the function will filter the data and return only the rows that match _pattern_.
 
 findfirst(_searchstring_, _string_)\
 findfirst(_value_, _vector_)\

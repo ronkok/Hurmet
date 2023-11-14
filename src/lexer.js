@@ -743,7 +743,7 @@ export const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
     if (inRealTime) {
       tex = DataFrame.quickDisplay(st)
     } else {
-      const dataStructure = DataFrame.dataFrameFromTSV(st, {})
+      const dataStructure = DataFrame.dataFrameFromTSV(st)
       tex = DataFrame.display(dataStructure.value, "h3", decimalFormat)
     }
     return ["``" + inputStr + "``", tex, tt.DATAFRAME, ""]
