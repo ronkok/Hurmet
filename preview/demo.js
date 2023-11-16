@@ -3375,19 +3375,15 @@ const escRegEx = /^\\#/;
 
 const hasUnitRow = lines => {
   // Determine if there is a row for unit names.
-  let gotUnits = false;
-  let gotAnswer = false;
-  const units = lines[1].split("\t");
-  for (let iCol = 0; iCol < units.length; iCol++) {
-    if (numberRegEx$5.test(units[iCol][0])) { gotAnswer = true; break }
+  const units = lines[1].split("\t").map(el => el.trim());
+  for (const unitName of units) {
+    if (numberRegEx$5.test(unitName)) { return false }
   }
-  if (!gotAnswer) {
-    const firstDataLine = lines[2].split("\t");
-    for (let iCol = 0; iCol < firstDataLine.length; iCol++) {
-      if (numberRegEx$5.test(firstDataLine[iCol][1])) { gotUnits = true; break }
-    }
+  const firstDataLine = lines[2].split("\t").map(el => el.trim());
+  for (const datum of firstDataLine) {
+    if (numberRegEx$5.test(datum)) { return true }
   }
-  return gotUnits
+  return false
 };
 
 const dataFrameFromTSV = str => {
