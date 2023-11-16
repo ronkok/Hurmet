@@ -56,7 +56,8 @@ export const nodes = {
       fileHandle: { default: null },
       fontSize: { default: 12 },       // 12 | 10
       pageSize: { default: "letter" }, // letter | A4
-      snapshots: { default: [] }
+      snapshots: { default: [] },
+      fallbacks: { default: {} }       // Fallback data, in case fetched files are unavailable
     }
   },
 
@@ -399,6 +400,7 @@ export const nodes = {
       unit: {default: null}, //           Unit specified by user, in which to display the result.
       dtype: {default: 0}, //             Data type of the result. See constants.js.
       isFetch: {default: false}, //       Identifies cells that need async treatment.
+      fallback: {default: ""}, //         Fallback data, in case imported files are unavailable.
       error: {default: false} //          boolean. True if calculation resulted in an error.
     },
     parseDOM: [{tag: "span.hurmet-calc",  getAttrs(dom) {

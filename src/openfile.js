@@ -49,6 +49,7 @@ const handleContents = (view, schema, str, format) => {
 
   // Update all the calculation nodes and refresh the document display.
   hurmet.updateCalculations(view, schema.nodes.calculation, true)
+  view.state.doc.fallbacks = {}
 }
 
 async function getFile(view, schema, format) {

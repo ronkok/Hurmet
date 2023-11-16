@@ -28,6 +28,7 @@ import { readFile } from "./openfile"
 import { saveAs } from "filesaver.js-npm"
 import { findPageBreaks, forToC, forPrint } from "./paginate.js"
 import { diff_match_patch } from "./diffMatchPatch"
+import { dt } from "./constants.js"
 
 // Menu icons that are not included in node-module menu.js
 const hurmetIcons = {
@@ -409,6 +410,35 @@ pageSize: ${state.doc.attrs.pageSize}
 ---------------
 
 ` + hurmetMarkdownSerializer.serialize(state.doc, new Map())
+
+  // Save some fetched data as a fallback for when the internet is down.
+  let gottaFallback = false
+  const fallbacks = {}
+  state.doc.nodesBetween(0, state.doc.content.size, function(node, pos) {
+    if (node.type.name === "calculation" && node.attrs.isFetch) {
+      gottaFallback = true
+      const url = node.attrs.entry.replace(/^[^()]+\("?/, "").replace(/"?\).*$/, "").trim()
+      let text = ""
+      if (node.attrs.dtype === dt.MODULE) {
+        text = node.attrs.fallback
+      } else {
+        text += node.attrs.rowMap ? "#" : ""
+        text += node.attrs.value.headings.join("\t")
+        if (node.attrs.value.units) { text += "\n" + node.attrs.value.units.join("\t") }
+        let rowText = "\n"
+        node.attrs.value.usedRows.forEach(row => {
+          for (let j = 0; j < node.attrs.value.headings.length; j++) {
+            rowText += node.attrs.value.data[j][row] + "\t"
+          }
+          text += rowText.slice(0, -1)
+        })
+      }
+      fallbacks[node.attrs.name] = { url, text }
+    }
+  })
+  if (gottaFallback) {
+    str += `\n<!--FALLBACKS-->\n` + JSON.stringify(fallbacks)
+  }
 
   for (const snapshot of state.doc.attrs.snapshots) {
     str += `\n<!--SNAPSHOT-->\ndate: ${snapshot.date}\nmessage: ${snapshot.message}\n\n`

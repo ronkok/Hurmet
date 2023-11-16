@@ -52,6 +52,7 @@ export const identifyRange = (df, args) => {
     // The source is a single-row data frame. Each argument calls a column.
     iStart = 0
     iEnd = 0
+    binaryInsert(df.value.usedRows, 0)
     for (let i = 0; i < args.length; i++) {
       if (args[i].dtype === dt.STRING) {
         columnList.push(df.value.columnMap[args[i].value])
@@ -73,6 +74,7 @@ export const identifyRange = (df, args) => {
   } else if (args.length === 1 && args[0].dtype === dt.RANGE) {
     iStart = Rnl.toNumber(args[0].value[0]) - 1
     iEnd = Rnl.toNumber(args[0].value[1]) - 1
+    for (let i = iStart; i <= iEnd; i++) { binaryInsert(df.value.usedRows, i) }
     columnList = columnListFromRange(0, df.value.data.length - 1)
   } else if (args.length === 1 && args[0].dtype === dt.STRING) {
     // Only one indicator has been given.
@@ -81,6 +83,7 @@ export const identifyRange = (df, args) => {
       // Return a row
       iStart = df.value.rowMap[args[0].value]
       iEnd = iStart
+      binaryInsert(df.value.usedRows, iStart)
       columnList = columnListFromRange(0, df.value.data.length - 1)
     } else if (df.value.columnMap && args[0].value in df.value.columnMap) {
       // Return a column vector
@@ -94,6 +97,7 @@ export const identifyRange = (df, args) => {
     // A vector of row names
     for (const rowName of args[0].value) {
       rowList.push(rowName)
+      binaryInsert(df.value.usedRows, df.value.rowMap(rowName))
     }
     columnList = columnListFromRange(0, df.value.data.length - 1) // All the columns.
   } else if (args.length === 1 && args[0].dtype === dt.STRING + dt.ROWVECTOR) {
@@ -109,6 +113,7 @@ export const identifyRange = (df, args) => {
     // Return a single cell value
     iStart = df.value.rowMap[args[0].value]
     iEnd = iStart
+    binaryInsert(df.value.usedRows, iStart)
     columnList.push(df.value.columnMap[args[0].value])
   } else {
     // Default for args is a list of column names
@@ -194,6 +199,7 @@ const range = (df, args, unitAware) => {
         columnMap,
         rowMap,
         units,
+        usedRows: [],
         dtype
       },
       unit: clone(unitMap),
@@ -230,6 +236,7 @@ const dataFrameFromTSV = str => {
   const units = [];                     // array of unit names, one for each column
   const dtype = [];                     // each column's Hurmet operand type
   const unitMap = Object.create(null)   // map from unit names to unit data
+  const usedRows = [];
 
   if (str.charAt(0) === "`") { str = str.slice(1) }
 
@@ -328,13 +335,13 @@ const dataFrameFromTSV = str => {
       )
     }
     return {
-      value: { data, headings, columnMap, rowMap },
+      value: { data, headings, columnMap, rowMap, usedRows },
       unit: (dtype[0] === dt.RATIONAL ? { expos: allZeros } : null),
       dtype: dt.MAP + dtype[iStart]
     }
   } else {
     return {
-      value: { data, headings, columnMap, rowMap, units, dtype },
+      value: { data, headings, columnMap, rowMap, units, usedRows, dtype },
       unit: unitMap,
       dtype: dt.DATAFRAME
     }
@@ -386,6 +393,7 @@ const dataFrameFromVectors = (vectors, formatSpec) => {
       columnMap: columnMap,
       rowMap: rowMap,
       units: units,
+      usedRows: [],
       dtype: dtype
     },
     unit: unitMap,
@@ -792,6 +800,25 @@ const displayAlt = (df, formatSpec = "h3", decimalFormat = "1,000,000.",
   str = str.slice(0, -1).trim()
   str += "``"
   return str
+}
+
+function binaryInsert(inputArr, key) {
+  if (inputArr.length === 0) { inputArr.push(key); return }
+  let start = 0
+  let end = inputArr.length - 1
+  while (start <= end) {
+    const middle = Math.floor((start + end) / 2)
+    if (inputArr[middle] === key) {
+      break
+    } else if (inputArr[middle] < key) {
+      start = middle + 1  // continue searching to the right
+    } else {
+      end = middle - 1   // search searching to the left
+    }
+  }
+  if (start < end || inputArr[start] < key) {
+    inputArr.splice(start, 0, key)
+  }
 }
 
 export const DataFrame = Object.freeze({

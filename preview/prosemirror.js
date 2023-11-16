@@ -19178,6 +19178,7 @@ const identifyRange = (df, args) => {
     // The source is a single-row data frame. Each argument calls a column.
     iStart = 0;
     iEnd = 0;
+    binaryInsert(df.value.usedRows, 0);
     for (let i = 0; i < args.length; i++) {
       if (args[i].dtype === dt.STRING) {
         columnList.push(df.value.columnMap[args[i].value]);
@@ -19199,6 +19200,7 @@ const identifyRange = (df, args) => {
   } else if (args.length === 1 && args[0].dtype === dt.RANGE) {
     iStart = Rnl.toNumber(args[0].value[0]) - 1;
     iEnd = Rnl.toNumber(args[0].value[1]) - 1;
+    for (let i = iStart; i <= iEnd; i++) { binaryInsert(df.value.usedRows, i); }
     columnList = columnListFromRange(0, df.value.data.length - 1);
   } else if (args.length === 1 && args[0].dtype === dt.STRING) {
     // Only one indicator has been given.
@@ -19207,6 +19209,7 @@ const identifyRange = (df, args) => {
       // Return a row
       iStart = df.value.rowMap[args[0].value];
       iEnd = iStart;
+      binaryInsert(df.value.usedRows, iStart);
       columnList = columnListFromRange(0, df.value.data.length - 1);
     } else if (df.value.columnMap && args[0].value in df.value.columnMap) {
       // Return a column vector
@@ -19220,6 +19223,7 @@ const identifyRange = (df, args) => {
     // A vector of row names
     for (const rowName of args[0].value) {
       rowList.push(rowName);
+      binaryInsert(df.value.usedRows, df.value.rowMap(rowName));
     }
     columnList = columnListFromRange(0, df.value.data.length - 1); // All the columns.
   } else if (args.length === 1 && args[0].dtype === dt.STRING + dt.ROWVECTOR) {
@@ -19235,6 +19239,7 @@ const identifyRange = (df, args) => {
     // Return a single cell value
     iStart = df.value.rowMap[args[0].value];
     iEnd = iStart;
+    binaryInsert(df.value.usedRows, iStart);
     columnList.push(df.value.columnMap[args[0].value]);
   } else {
     // Default for args is a list of column names
@@ -19320,6 +19325,7 @@ const range$1 = (df, args, unitAware) => {
         columnMap,
         rowMap,
         units,
+        usedRows: [],
         dtype
       },
       unit: clone(unitMap),
@@ -19356,6 +19362,7 @@ const dataFrameFromTSV = str => {
   const units = [];                     // array of unit names, one for each column
   const dtype = [];                     // each column's Hurmet operand type
   const unitMap = Object.create(null);   // map from unit names to unit data
+  const usedRows = [];
 
   if (str.charAt(0) === "`") { str = str.slice(1); }
 
@@ -19454,13 +19461,13 @@ const dataFrameFromTSV = str => {
       );
     }
     return {
-      value: { data, headings, columnMap, rowMap },
+      value: { data, headings, columnMap, rowMap, usedRows },
       unit: (dtype[0] === dt.RATIONAL ? { expos: allZeros } : null),
       dtype: dt.MAP + dtype[iStart]
     }
   } else {
     return {
-      value: { data, headings, columnMap, rowMap, units, dtype },
+      value: { data, headings, columnMap, rowMap, units, usedRows, dtype },
       unit: unitMap,
       dtype: dt.DATAFRAME
     }
@@ -19512,6 +19519,7 @@ const dataFrameFromVectors = (vectors, formatSpec) => {
       columnMap: columnMap,
       rowMap: rowMap,
       units: units,
+      usedRows: [],
       dtype: dtype
     },
     unit: unitMap,
@@ -19919,6 +19927,25 @@ const displayAlt$1 = (df, formatSpec = "h3", decimalFormat = "1,000,000.",
   str += "``";
   return str
 };
+
+function binaryInsert(inputArr, key) {
+  if (inputArr.length === 0) { inputArr.push(key); return }
+  let start = 0;
+  let end = inputArr.length - 1;
+  while (start <= end) {
+    const middle = Math.floor((start + end) / 2);
+    if (inputArr[middle] === key) {
+      break
+    } else if (inputArr[middle] < key) {
+      start = middle + 1;  // continue searching to the right
+    } else {
+      end = middle - 1;   // search searching to the left
+    }
+  }
+  if (start < end || inputArr[start] < key) {
+    inputArr.splice(start, 0, key);
+  }
+}
 
 const DataFrame = Object.freeze({
   append: append$1,
@@ -26482,6 +26509,17 @@ const md2ast = (md, inHtml = false) => {
     }
   }
 
+  // Find out if there are any fallbacks for fetched files
+  let fallbackStrings = [];
+  if (metadata) {
+    fallbackStrings = md.split("<!--FALLBACKS-->\n");
+    if (fallbackStrings.length > 1) {
+      md = fallbackStrings.shift();
+    } else {
+      fallbackStrings = null;
+    }
+  }
+
   // Proceed to parse the document.
   const ast = parse(md, state);
   if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") {
@@ -26490,6 +26528,9 @@ const md2ast = (md, inHtml = false) => {
   consolidate(ast);
   populateTOC(ast);
   if (metadata) {
+    if (fallbackStrings) {
+      metadata.fallbacks = JSON.parse(fallbackStrings.pop().trim());
+    }
     if (gotSnapshot) {
       const snapshots = [];
       for (const str of snapshotStrings) {
@@ -46037,6 +46078,7 @@ const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
   attrs.dtype = data.dtype;
   attrs.unit = data.unit;
   attrs.isFetch = true;
+  attrs.fallback = data.dtype === dt.MODULE ? text : "";
   if (data.dtype === dt.MODULE && /^importedParameters *=/.test(entry)) {
     // Assign to multiple variables, not one namespace.
     let nameTex = "\\begin{matrix}";
@@ -46098,6 +46140,12 @@ const workAsync = (
     // The fetch promises have resolved. Now we extract their text.
     return Promise.all(fetchResponses.map(r => {
       if (r.status !== 200 && r.status !== 0) {
+        // The fetch failed. Try for a fallback.
+        Object.keys(doc.attrs.fallbacks).forEach(function(key) {
+          if (doc.attrs.fallbacks.key.url === r.url) {
+            return doc.attrs.fallbacks.key.text
+          }
+        });
         return r.status === 404
           ? 'File not found.'
           : 'Error while reading file. Status Code: ' + r.status
@@ -46934,7 +46982,8 @@ const nodes = {
       fileHandle: { default: null },
       fontSize: { default: 12 },       // 12 | 10
       pageSize: { default: "letter" }, // letter | A4
-      snapshots: { default: [] }
+      snapshots: { default: [] },
+      fallbacks: { default: {} }       // Fallback data, in case fetched files are unavailable
     }
   },
 
@@ -47277,6 +47326,7 @@ const nodes = {
       unit: {default: null}, //           Unit specified by user, in which to display the result.
       dtype: {default: 0}, //             Data type of the result. See constants.js.
       isFetch: {default: false}, //       Identifies cells that need async treatment.
+      fallback: {default: ""}, //         Fallback data, in case imported files are unavailable.
       error: {default: false} //          boolean. True if calculation resulted in an error.
     },
     parseDOM: [{tag: "span.hurmet-calc",  getAttrs(dom) {
@@ -48868,6 +48918,7 @@ const handleContents = (view, schema, str, format) => {
 
   // Update all the calculation nodes and refresh the document display.
   hurmet.updateCalculations(view, schema.nodes.calculation, true);
+  view.state.doc.fallbacks = {};
 };
 
 async function getFile(view, schema, format) {
@@ -50953,6 +51004,35 @@ pageSize: ${state.doc.attrs.pageSize}
 ---------------
 
 ` + hurmetMarkdownSerializer.serialize(state.doc, new Map());
+
+  // Save some fetched data as a fallback for when the internet is down.
+  let gottaFallback = false;
+  const fallbacks = {};
+  state.doc.nodesBetween(0, state.doc.content.size, function(node, pos) {
+    if (node.type.name === "calculation" && node.attrs.isFetch) {
+      gottaFallback = true;
+      const url = node.attrs.entry.replace(/^[^()]+\("?/, "").replace(/"?\).*$/, "").trim();
+      let text = "";
+      if (node.attrs.dtype === dt.MODULE) {
+        text = node.attrs.fallback;
+      } else {
+        text += node.attrs.rowMap ? "#" : "";
+        text += node.attrs.value.headings.join("\t");
+        if (node.attrs.value.units) { text += "\n" + node.attrs.value.units.join("\t"); }
+        let rowText = "\n";
+        node.attrs.value.usedRows.forEach(row => {
+          for (let j = 0; j < node.attrs.value.headings.length; j++) {
+            rowText += node.attrs.value.data[j][row] + "\t";
+          }
+          text += rowText.slice(0, -1);
+        });
+      }
+      fallbacks[node.attrs.name] = { url, text };
+    }
+  });
+  if (gottaFallback) {
+    str += `\n<!--FALLBACKS-->\n` + JSON.stringify(fallbacks);
+  }
 
   for (const snapshot of state.doc.attrs.snapshots) {
     str += `\n<!--SNAPSHOT-->\ndate: ${snapshot.date}\nmessage: ${snapshot.message}\n\n`;

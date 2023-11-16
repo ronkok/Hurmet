@@ -94,6 +94,7 @@ const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
   attrs.dtype = data.dtype
   attrs.unit = data.unit
   attrs.isFetch = true
+  attrs.fallback = data.dtype === dt.MODULE ? text : ""
   if (data.dtype === dt.MODULE && /^importedParameters *=/.test(entry)) {
     // Assign to multiple variables, not one namespace.
     let nameTex = "\\begin{matrix}"
@@ -145,50 +146,66 @@ const workAsync = (
   const inDraftMode = doc.attrs.inDraftMode
   const decimalFormat = doc.attrs.decimalFormat
 
-  Promise.all(
-    urls.map(url => fetch(url, {
-      method: "GET",
-      headers: { "Content-Type": "text/plain;charset=UTF-8" },
-      mode: "cors"
-    }))
-  ).then(fetchResponses => {
-    // The fetch promises have resolved. Now we extract their text.
-    return Promise.all(fetchResponses.map(r => {
-      if (r.status !== 200 && r.status !== 0) {
-        return r.status === 404
-          ? 'File not found.'
-          : 'Error while reading file. Status Code: ' + r.status
-      }
-      return r.text()
-    }))
-  }).then((texts) => {
-    // At this point, we have the text of each Hurmet fetch and import.
-    // Create a ProseMirror transacation.
-    // Each node update below will be one step in the transaction.
-    const state = view.state
-    if (state.selection.to === curPos + 1) {
-      // See Note 1 above for an explanation of the state.selection shenanigans.
-      state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1))
+  if (!navigator.onLine) {
+    for (const url of urls) {
+      Object.keys(doc.attrs.fallbacks).forEach(function(key) {
+        if (doc.attrs.fallbacks.key.url === url) {
+          return doc.attrs.fallbacks.key.text
+        }
+      })
     }
-    const tr = state.tr
+  } else {
+    Promise.all(
+      urls.map(url => fetch(url, {
+        method: "GET",
+        headers: { "Content-Type": "text/plain;charset=UTF-8" },
+        mode: "cors"
+      }))
+    ).then(fetchResponses => {
+      // The fetch promises have resolved. Now we extract their text.
+      return Promise.all(fetchResponses.map(r => {
+        if (r.status !== 200 && r.status !== 0) {
+          // The fetch failed. Try for a fallback.
+          Object.keys(doc.attrs.fallbacks).forEach(function(key) {
+            if (doc.attrs.fallbacks.key.url === r.url) {
+              return doc.attrs.fallbacks.key.text
+            }
+          })
+          return r.status === 404
+            ? 'File not found.'
+            : 'Error while reading file. Status Code: ' + r.status
+        }
+        return r.text()
+      }))
+    }).then((texts) => {
+      // At this point, we have the text of each Hurmet fetch and import.
+      // Create a ProseMirror transacation.
+      // Each node update below will be one step in the transaction.
+      const state = view.state
+      if (state.selection.to === curPos + 1) {
+        // See Note 1 above for an explanation of the state.selection shenanigans.
+        state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1))
+      }
+      const tr = state.tr
 
-    // Load in the data from the fetch statements
-    for (let i = 0; i < texts.length; i++) {
-      const pos = fetchPositions[i]
-      const entry = isCalcAll
-        ? doc.nodeAt(pos).attrs.entry
-        : nodeAttrs.entry
-      const attrs = processFetchedString(entry, texts[i], hurmetVars, decimalFormat)
-      attrs.inDraftMode = inDraftMode
-      tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs))
-      if (attrs.name) {
-        insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat)
+      // Load in the data from the fetch statements
+      for (let i = 0; i < texts.length; i++) {
+        const pos = fetchPositions[i];
+        const entry = isCalcAll
+          ? doc.nodeAt(pos).attrs.entry
+          : nodeAttrs.entry
+        const attrs = processFetchedString(entry, texts[i], hurmetVars, decimalFormat)
+        attrs.inDraftMode = inDraftMode
+        tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs))
+        if (attrs.name) {
+          insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat)
+        }
       }
-    }
-    // There. Fetches are done and are loaded into the document.
-    // Now proceed to the rest of the work.
-    proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr)
-  })
+      // There. Fetches are done and are loaded into the document.
+      // Now proceed to the rest of the work.
+      proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr)
+    })
+  }
 }
 
 const proceedAfterFetch = (

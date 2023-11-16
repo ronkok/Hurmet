@@ -1141,13 +1141,24 @@ export const md2ast = (md, inHtml = false) => {
   }
 
   // Find out if there are any snapshots.
-  let snapshotStrings = []
+  let snapshotStrings = [];
   let gotSnapshot = false
   if (metadata) {
     snapshotStrings = md.split("<!--SNAPSHOT-->\n")
     if (snapshotStrings.length > 1) {
       gotSnapshot = true
       md = snapshotStrings.shift()
+    }
+  }
+
+  // Find out if there are any fallbacks for fetched files
+  let fallbackStrings = [];
+  if (metadata) {
+    fallbackStrings = md.split("<!--FALLBACKS-->\n")
+    if (fallbackStrings.length > 1) {
+      md = fallbackStrings.shift()
+    } else {
+      fallbackStrings = null
     }
   }
 
@@ -1159,6 +1170,9 @@ export const md2ast = (md, inHtml = false) => {
   consolidate(ast)
   populateTOC(ast)
   if (metadata) {
+    if (fallbackStrings) {
+      metadata.fallbacks = JSON.parse(fallbackStrings.pop().trim())
+    }
     if (gotSnapshot) {
       const snapshots = []
       for (const str of snapshotStrings) {
