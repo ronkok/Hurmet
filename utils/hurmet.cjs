@@ -29803,7 +29803,7 @@ const workWithFetchedTexts = (
   fetchPositions,
   texts
 ) => {
-    // At this point, we have the text of each Hurmet fetch and import.
+  // At this point, we have the text of each Hurmet fetch and import.
   // Create a ProseMirror transacation.
   // Each node update below will be one step in the transaction.
   const state = view.state;
@@ -29872,8 +29872,8 @@ const workAsync = (
         if (r.status !== 200 && r.status !== 0) {
           // The fetch failed. Try for a fallback.
           Object.keys(doc.attrs.fallbacks).forEach(function(key) {
-            if (doc.attrs.fallbacks.key.url === r.url) {
-              return doc.attrs.fallbacks.key.text
+            if (doc.attrs.fallbacks[key].url === r.url) {
+              return doc.attrs.fallbacks[key].text
             }
           });
           return r.status === 404
@@ -29885,33 +29885,6 @@ const workAsync = (
     }).then((texts) => {
       workWithFetchedTexts(view, doc, inDraftMode, decimalFormat, calcNodeSchema, isCalcAll,
         nodeAttrs, curPos, hurmetVars, fetchPositions, texts);
-/*      // At this point, we have the text of each Hurmet fetch and import.
-      // Create a ProseMirror transacation.
-      // Each node update below will be one step in the transaction.
-      const state = view.state
-      if (state.selection.to === curPos + 1) {
-        // See Note 1 above for an explanation of the state.selection shenanigans.
-        state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1))
-      }
-      const tr = state.tr
-
-      // Load in the data from the fetch statements
-      for (let i = 0; i < texts.length; i++) {
-        const pos = fetchPositions[i];
-        const entry = isCalcAll
-          ? doc.nodeAt(pos).attrs.entry
-          : nodeAttrs.entry
-        const attrs = processFetchedString(entry, texts[i], hurmetVars, decimalFormat)
-        attrs.inDraftMode = inDraftMode
-        tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs))
-        if (attrs.name) {
-          insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat)
-        }
-      }
-      // There. Fetches are done and are loaded into the document.
-      // Now proceed to the rest of the work.
-      proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr)
-      */
     });
   }
 };
