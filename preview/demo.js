@@ -3218,6 +3218,7 @@ const identifyRange = (df, args) => {
     // The source is a single-row data frame. Each argument calls a column.
     iStart = 0;
     iEnd = 0;
+    if (df.dtype === dt.DATAFRAME) { df.value.usedRows.add(0); }
     for (let i = 0; i < args.length; i++) {
       if (args[i].dtype === dt.STRING) {
         columnList.push(df.value.columnMap[args[i].value]);
@@ -3239,6 +3240,9 @@ const identifyRange = (df, args) => {
   } else if (args.length === 1 && args[0].dtype === dt.RANGE) {
     iStart = Rnl.toNumber(args[0].value[0]) - 1;
     iEnd = Rnl.toNumber(args[0].value[1]) - 1;
+    if (df.dtype === dt.DATAFRAME) {
+      for (let i = iStart; i <= iEnd; i++) { df.value.usedRows.add(i); }
+    }
     columnList = columnListFromRange(0, df.value.data.length - 1);
   } else if (args.length === 1 && args[0].dtype === dt.STRING) {
     // Only one indicator has been given.
@@ -3247,6 +3251,7 @@ const identifyRange = (df, args) => {
       // Return a row
       iStart = df.value.rowMap[args[0].value];
       iEnd = iStart;
+      if (df.dtype === dt.DATAFRAME) { df.value.usedRows.add(iStart); }
       columnList = columnListFromRange(0, df.value.data.length - 1);
     } else if (df.value.columnMap && args[0].value in df.value.columnMap) {
       // Return a column vector
@@ -3260,6 +3265,7 @@ const identifyRange = (df, args) => {
     // A vector of row names
     for (const rowName of args[0].value) {
       rowList.push(rowName);
+      if (df.dtype === dt.DATAFRAME) { df.value.usedRows.add(df.value.rowMap[rowName]); }
     }
     columnList = columnListFromRange(0, df.value.data.length - 1); // All the columns.
   } else if (args.length === 1 && args[0].dtype === dt.STRING + dt.ROWVECTOR) {
@@ -3275,6 +3281,7 @@ const identifyRange = (df, args) => {
     // Return a single cell value
     iStart = df.value.rowMap[args[0].value];
     iEnd = iStart;
+    if (df.dtype === dt.DATAFRAME) { df.value.usedRows.add(iStart); }
     columnList.push(df.value.columnMap[args[0].value]);
   } else {
     // Default for args is a list of column names
@@ -3360,6 +3367,7 @@ const range$1 = (df, args, unitAware) => {
         columnMap,
         rowMap,
         units,
+        usedRows: new Set(),
         dtype
       },
       unit: clone(unitMap),
@@ -3396,6 +3404,7 @@ const dataFrameFromTSV = str => {
   const units = [];                     // array of unit names, one for each column
   const dtype = [];                     // each column's Hurmet operand type
   const unitMap = Object.create(null);   // map from unit names to unit data
+  const usedRows = new Set();
 
   if (str.charAt(0) === "`") { str = str.slice(1); }
 
@@ -3494,13 +3503,13 @@ const dataFrameFromTSV = str => {
       );
     }
     return {
-      value: { data, headings, columnMap, rowMap },
+      value: { data, headings, columnMap, rowMap, usedRows },
       unit: (dtype[0] === dt.RATIONAL ? { expos: allZeros } : null),
       dtype: dt.MAP + dtype[iStart]
     }
   } else {
     return {
-      value: { data, headings, columnMap, rowMap, units, dtype },
+      value: { data, headings, columnMap, rowMap, units, usedRows, dtype },
       unit: unitMap,
       dtype: dt.DATAFRAME
     }
@@ -3552,6 +3561,7 @@ const dataFrameFromVectors = (vectors, formatSpec) => {
       columnMap: columnMap,
       rowMap: rowMap,
       units: units,
+      usedRows: new Set(),
       dtype: dtype
     },
     unit: unitMap,
@@ -10522,6 +10532,17 @@ const md2ast = (md, inHtml = false) => {
     }
   }
 
+  // Find out if there are any fallbacks for fetched files
+  let fallbackStrings = [];
+  if (metadata) {
+    fallbackStrings = md.split("<!--FALLBACKS-->\n");
+    if (fallbackStrings.length > 1) {
+      md = fallbackStrings.shift();
+    } else {
+      fallbackStrings = null;
+    }
+  }
+
   // Proceed to parse the document.
   const ast = parse(md, state);
   if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") {
@@ -10530,6 +10551,9 @@ const md2ast = (md, inHtml = false) => {
   consolidate(ast);
   populateTOC(ast);
   if (metadata) {
+    if (fallbackStrings) {
+      metadata.fallbacks = JSON.parse(fallbackStrings.pop().trim());
+    }
     if (gotSnapshot) {
       const snapshots = [];
       for (const str of snapshotStrings) {
@@ -15794,7 +15818,9 @@ const errorResult = (stmt, result) => {
 
 const conditionResult = (stmt, oprnd, unitAware) => {
   let result = Object.create(null);
-  result.value = clone(oprnd.value);
+  result.value = oprnd.dtype === dt.DATAFRAME
+    ? oprnd.value
+    : clone(oprnd.value);
   result.unit = clone(oprnd.unit);
   result.dtype = oprnd.dtype;
 
@@ -30077,6 +30103,7 @@ const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
   attrs.dtype = data.dtype;
   attrs.unit = data.unit;
   attrs.isFetch = true;
+  attrs.fallback = data.dtype === dt.MODULE ? text : "";
   if (data.dtype === dt.MODULE && /^importedParameters *=/.test(entry)) {
     // Assign to multiple variables, not one namespace.
     let nameTex = "\\begin{matrix}";
@@ -30112,6 +30139,48 @@ const mustCalc = (attrs, hurmetVars, changedVars, isCalcAll, isFormat) => {
   return false
 };
 
+const workWithFetchedTexts = (
+  view,
+  doc,
+  inDraftMode,
+  decimalFormat,
+  calcNodeSchema,
+  isCalcAll,
+  nodeAttrs,
+  curPos,
+  hurmetVars,
+  fetchPositions,
+  texts
+) => {
+    // At this point, we have the text of each Hurmet fetch and import.
+  // Create a ProseMirror transacation.
+  // Each node update below will be one step in the transaction.
+  const state = view.state;
+  if (state.selection.to === curPos + 1) {
+    // See Note 1 above for an explanation of the state.selection shenanigans.
+    state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1));
+  }
+  const tr = state.tr;
+
+  // Load in the data from the fetch statements
+  for (let i = 0; i < texts.length; i++) {
+    const pos = fetchPositions[i];
+    const entry = isCalcAll
+      ? doc.nodeAt(pos).attrs.entry
+      : nodeAttrs.entry;
+    const attrs = processFetchedString(entry, texts[i], hurmetVars, decimalFormat);
+    attrs.inDraftMode = inDraftMode;
+    tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs));
+    if (attrs.name) {
+      insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat);
+    }
+  }
+  // There. Fetches are done and are loaded into the document.
+  // Now proceed to the rest of the work.
+  proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr);
+
+};
+
 const workAsync = (
   view,
   calcNodeSchema,
@@ -30128,50 +30197,72 @@ const workAsync = (
   const inDraftMode = doc.attrs.inDraftMode;
   const decimalFormat = doc.attrs.decimalFormat;
 
-  Promise.all(
-    urls.map(url => fetch(url, {
-      method: "GET",
-      headers: { "Content-Type": "text/plain;charset=UTF-8" },
-      mode: "cors"
-    }))
-  ).then(fetchResponses => {
-    // The fetch promises have resolved. Now we extract their text.
-    return Promise.all(fetchResponses.map(r => {
-      if (r.status !== 200 && r.status !== 0) {
-        return r.status === 404
-          ? 'File not found.'
-          : 'Error while reading file. Status Code: ' + r.status
-      }
-      return r.text()
-    }))
-  }).then((texts) => {
-    // At this point, we have the text of each Hurmet fetch and import.
-    // Create a ProseMirror transacation.
-    // Each node update below will be one step in the transaction.
-    const state = view.state;
-    if (state.selection.to === curPos + 1) {
-      // See Note 1 above for an explanation of the state.selection shenanigans.
-      state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1));
+  if (!navigator.onLine) {
+    const texts = [];
+    for (const url of urls) {
+      Object.keys(doc.attrs.fallbacks).forEach(function(key) {
+        if (doc.attrs.fallbacks[key].url === url) {
+          texts.push(doc.attrs.fallbacks[key].text);
+        }
+      });
     }
-    const tr = state.tr;
+    workWithFetchedTexts(view, doc, inDraftMode, decimalFormat, calcNodeSchema, isCalcAll,
+      nodeAttrs, curPos, hurmetVars, fetchPositions, texts);
+  } else {
+    Promise.all(
+      urls.map(url => fetch(url, {
+        method: "GET",
+        headers: { "Content-Type": "text/plain;charset=UTF-8" },
+        mode: "cors"
+      }))
+    ).then(fetchResponses => {
+      // The fetch promises have resolved. Now we extract their text.
+      return Promise.all(fetchResponses.map(r => {
+        if (r.status !== 200 && r.status !== 0) {
+          // The fetch failed. Try for a fallback.
+          Object.keys(doc.attrs.fallbacks).forEach(function(key) {
+            if (doc.attrs.fallbacks.key.url === r.url) {
+              return doc.attrs.fallbacks.key.text
+            }
+          });
+          return r.status === 404
+            ? 'File not found.'
+            : 'Error while reading file. Status Code: ' + r.status
+        }
+        return r.text()
+      }))
+    }).then((texts) => {
+      workWithFetchedTexts(view, doc, inDraftMode, decimalFormat, calcNodeSchema, isCalcAll,
+        nodeAttrs, curPos, hurmetVars, fetchPositions, texts);
+/*      // At this point, we have the text of each Hurmet fetch and import.
+      // Create a ProseMirror transacation.
+      // Each node update below will be one step in the transaction.
+      const state = view.state
+      if (state.selection.to === curPos + 1) {
+        // See Note 1 above for an explanation of the state.selection shenanigans.
+        state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1))
+      }
+      const tr = state.tr
 
-    // Load in the data from the fetch statements
-    for (let i = 0; i < texts.length; i++) {
-      const pos = fetchPositions[i];
-      const entry = isCalcAll
-        ? doc.nodeAt(pos).attrs.entry
-        : nodeAttrs.entry;
-      const attrs = processFetchedString(entry, texts[i], hurmetVars, decimalFormat);
-      attrs.inDraftMode = inDraftMode;
-      tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs));
-      if (attrs.name) {
-        insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat);
+      // Load in the data from the fetch statements
+      for (let i = 0; i < texts.length; i++) {
+        const pos = fetchPositions[i];
+        const entry = isCalcAll
+          ? doc.nodeAt(pos).attrs.entry
+          : nodeAttrs.entry
+        const attrs = processFetchedString(entry, texts[i], hurmetVars, decimalFormat)
+        attrs.inDraftMode = inDraftMode
+        tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs))
+        if (attrs.name) {
+          insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat)
+        }
       }
-    }
-    // There. Fetches are done and are loaded into the document.
-    // Now proceed to the rest of the work.
-    proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr);
-  });
+      // There. Fetches are done and are loaded into the document.
+      // Now proceed to the rest of the work.
+      proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr)
+      */
+    });
+  }
 };
 
 const proceedAfterFetch = (

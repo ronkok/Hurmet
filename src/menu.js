@@ -421,12 +421,12 @@ pageSize: ${state.doc.attrs.pageSize}
       let text = ""
       if (node.attrs.dtype === dt.MODULE) {
         text = node.attrs.fallback
-      } else {
-        text += node.attrs.rowMap ? "#" : ""
+      } else if (node.attrs.dtype === dt.DATAFRAME) {
+        text += node.attrs.value.rowMap ? "#" : ""
         text += node.attrs.value.headings.join("\t")
         if (node.attrs.value.units) { text += "\n" + node.attrs.value.units.join("\t") }
-        let rowText = "\n"
-        node.attrs.value.usedRows.forEach(row => {
+        Array.from(node.attrs.value.usedRows).sort((a, b) => a - b).forEach(row => {
+          let rowText = "\n"
           for (let j = 0; j < node.attrs.value.headings.length; j++) {
             rowText += node.attrs.value.data[j][row] + "\t"
           }

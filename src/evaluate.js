@@ -1745,7 +1745,9 @@ const errorResult = (stmt, result) => {
 
 const conditionResult = (stmt, oprnd, unitAware) => {
   let result = Object.create(null)
-  result.value = clone(oprnd.value)
+  result.value = oprnd.dtype === dt.DATAFRAME
+    ? oprnd.value
+    : clone(oprnd.value)
   result.unit = clone(oprnd.unit)
   result.dtype = oprnd.dtype
 

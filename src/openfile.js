@@ -46,10 +46,11 @@ const handleContents = (view, schema, str, format) => {
   view.state.doc.attrs.fontSize = fontSize
   view.state.doc.attrs.pageSize = pageSize
   if (doc.attrs.snapshots) { view.state.doc.attrs.snapshots = doc.attrs.snapshots }
+  if (doc.attrs.fallbacks) { view.state.doc.attrs.fallbacks = doc.attrs.fallbacks }
 
   // Update all the calculation nodes and refresh the document display.
   hurmet.updateCalculations(view, schema.nodes.calculation, true)
-  view.state.doc.fallbacks = {}
+  view.state.doc.attrs.fallbacks = {}
 }
 
 async function getFile(view, schema, format) {
