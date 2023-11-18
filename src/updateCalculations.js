@@ -144,7 +144,7 @@ const workWithFetchedTexts = (
   texts
 ) => {
   // At this point, we have the text of each Hurmet fetch and import.
-  // Create a ProseMirror transacation.
+  // Create a ProseMirror transaction.
   // Each node update below will be one step in the transaction.
   const state = view.state
   if (state.selection.to === curPos + 1) {

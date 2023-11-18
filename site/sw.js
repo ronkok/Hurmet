@@ -1,6 +1,6 @@
 // A service worker to enable offline use of Hurmet.app
 
-const cacheName = "hurmet-2023-11-17-3"
+const cacheName = "hurmet-2023-11-18"
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(cacheName));
