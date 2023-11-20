@@ -849,7 +849,7 @@ export const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
   // No keywords were matched. Return 1 character.
   const c1 = str.charAt(0)
   if (c1 === "." && (prevToken.ttype === tt.VAR || prevToken.ttype === tt.LONGVAR ||
-    prevToken.ttype === tt.STRING || prevToken.input === "]" ||
+    prevToken.ttype === tt.STRING || prevToken.input === "]" || prevToken.input === ")" ||
     prevToken.ttype === tt.PROPERTY)) {
     // Suppress the spacing of the accessor dot.
     return [".", "{.}", tt.ACCESSOR, ""]

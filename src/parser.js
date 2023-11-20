@@ -1142,7 +1142,7 @@ export const parse = (
           delim.rpnLength = rpn.length
         } else if (token.input === "[" &&
             ([tt.VAR, tt.LONGVAR, tt.STRING, tt.PROPERTY].includes(prevToken.ttype) ||
-            prevToken.input === "]")) {
+            prevToken.input === "]" || (prevToken.input === ")" && !isPrecededBySpace))) {
           rpn += tokenSep
           delim.delimType = dACCESSOR
         } else {
@@ -1322,7 +1322,10 @@ export const parse = (
               if (rpnOp.symbol === "\\lfloor") { rpn += tokenSep + "⎿⏌" }
               if (rpnOp.symbol === "\\lceil") { rpn += tokenSep + "⎾⏋" }
           }
-          if ((token.input === ")" && nextCharIsFactor(str, tt.RIGHTBRACKET)) ||
+          if ((token.input === ")" &&
+            // eslint-disable-next-line max-len
+            !(topDelim.delimType === dFUNCTION && str.charAt(0) === "[" && !isFollowedBySpace) &&
+            nextCharIsFactor(str, tt.RIGHTBRACKET)) ||
             (token.input === "]" && /^\(/.test(str) ||
              topDelim.delimType === dMATRIX && /^\[/.test(str))) {
             // Implicit multiplication between parens, as in (2)(3)

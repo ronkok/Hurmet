@@ -20787,7 +20787,7 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
   // No keywords were matched. Return 1 character.
   const c1 = str.charAt(0);
   if (c1 === "." && (prevToken.ttype === tt.VAR || prevToken.ttype === tt.LONGVAR ||
-    prevToken.ttype === tt.STRING || prevToken.input === "]" ||
+    prevToken.ttype === tt.STRING || prevToken.input === "]" || prevToken.input === ")" ||
     prevToken.ttype === tt.PROPERTY)) {
     // Suppress the spacing of the accessor dot.
     return [".", "{.}", tt.ACCESSOR, ""]
@@ -21932,7 +21932,7 @@ const parse$1 = (
           delim.rpnLength = rpn.length;
         } else if (token.input === "[" &&
             ([tt.VAR, tt.LONGVAR, tt.STRING, tt.PROPERTY].includes(prevToken.ttype) ||
-            prevToken.input === "]")) {
+            prevToken.input === "]" || (prevToken.input === ")" && !isPrecededBySpace))) {
           rpn += tokenSep;
           delim.delimType = dACCESSOR;
         } else {
@@ -22112,7 +22112,10 @@ const parse$1 = (
               if (rpnOp.symbol === "\\lfloor") { rpn += tokenSep + "⎿⏌"; }
               if (rpnOp.symbol === "\\lceil") { rpn += tokenSep + "⎾⏋"; }
           }
-          if ((token.input === ")" && nextCharIsFactor(str, tt.RIGHTBRACKET)) ||
+          if ((token.input === ")" &&
+            // eslint-disable-next-line max-len
+            !(topDelim.delimType === dFUNCTION && str.charAt(0) === "[" && !isFollowedBySpace) &&
+            nextCharIsFactor(str, tt.RIGHTBRACKET)) ||
             (token.input === "]" && /^\(/.test(str) ||
              topDelim.delimType === dMATRIX && /^\[/.test(str))) {
             // Implicit multiplication between parens, as in (2)(3)
