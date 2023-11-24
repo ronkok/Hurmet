@@ -24,11 +24,11 @@ body {
 .long-primer { font-size: 10pt; }
 
 nav {
-  max-width: 672px;
+  max-width: 838px;
   margin: 0 auto;
   background: #fff;
   font-size: 14px;
-  height: 66px
+  height: 36px
 }
 
 nav * {
@@ -44,12 +44,12 @@ nav ul {
 
 nav ul li {
   display: inline-block;
-  padding-top: 27px;
+  padding-top: 5px;
   text-decoration: none
 }
 
 nav  a {
-  padding: 33px 0 0 18px;
+  padding: 5px 0 0 18px;
   text-decoration: none;
   color: inherit;
 }
@@ -67,9 +67,8 @@ nav ul li ul li {
 nav ul li ul li a {
   padding: 0 0 0 18px;
 }
-
-article, #title {
-  max-width: 672px;
+article {
+  max-width: 838px;
   margin: 0 auto;
 }
 .show-hint article {
@@ -117,18 +116,40 @@ h4 { font-size: 100%; margin: 1em 0 1em 0; font-weight: bold; }
 h5 { font-size: 110%; text-align: center; }
 h6 { font-size: 95%; font-weight: bold; text-align: center;  margin: 1em 0 1em 0; }
 
+#promotion {
+  position: relative;
+  float: left;
+  width: calc(50% - 430px);
+  z-index: 1;
+}
+#small-title {
+  float: left;
+  font-family: Tahoma, Calibri, san-serif;
+  font-weight: bold;
+  font-size: 20px;
+  padding-left: 72px;
+  display: none;
+}
+@media (max-width: 995px) {
+  #promotion   { display: none; }
+  #small-title { display: inline; }
+}
 #title {
   font-family: Tahoma, Calibri, san-serif;
   font-weight: bold;
   font-size: 32px;
-  padding: 12px 3px 0;
+  width: 170px;
+  padding: 12px 6px 0;
+  margin: 0 auto;
 }
 
 #slogan {
   font-family: Bahnschrift, Calibri, san-serif;
   font-weight: bold;
   font-size: 20px;
-  padding: 20px 3px 30px;
+  width: 170px;
+  padding: 25px 6px;
+  margin: 0 auto;
 }
 
 strong { font-weight: bold; }
@@ -138,7 +159,7 @@ article {
 }
 
 #copyright {
-  max-width: 672px;
+  max-width: 838px;
   margin: 0 auto;
   font-family: Arial, sans-serif;
   font-size: 10px;
@@ -153,7 +174,7 @@ article {
 @media screen {
   #print-div { display: none; }
 }
-div #print-div { width: 785px; font-size: 12pt; }
+div #print-div { width: 672px; font-size: 12pt; }
 div #print-div .long-primer { font-size: 10 pt; }
 .header { break-before: page; counter-increment: pageNum; }
 .page-display::after { content: counter(pageNum); }
@@ -393,7 +414,7 @@ li.ProseMirror-selectednode:after {
   position: relative;
   min-height: 1em;
   color: #666;
-  padding: 1px 6px;
+  padding: 1px 83px;
   top: 0; left: 0; right: 0;
   border-bottom: 1px solid silver;
   background: white;
@@ -626,6 +647,7 @@ ul.toc span + span {
 }
 
 #editor, .editor {
+  position: relative;
   background: white;
   color: black;
   background-clip: padding-box;
@@ -633,19 +655,12 @@ ul.toc span + span {
   border: 2px solid rgba(0, 0, 0, 0.2);
   padding: 5px 0;
   margin-bottom: 23px;
-  width: 672px;
+  width: 838px;
   overflow-x: hidden;
+  z-index: 2;
 }
-#hint {
-  visibility: hidden;
-  position: absolute;
-  top: 80px;
-  left: calc(672px + ((100% - 772px) / 2));
-  width: 200px;
-  height: 500px;
-}
-.show-hint #hint {
-  visibility: inherit;
+.ProseMirror-example-setup-style {
+  margin: 0 83px;
 }
 
 .ProseMirror p:first-child,

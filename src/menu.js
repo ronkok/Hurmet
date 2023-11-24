@@ -1421,7 +1421,7 @@ export function buildMenuItems(schema) {
     r.typeMenu,
     r.blockMenu,
     r.tableMenu,
-    [[r.help, r.hint]]
+    [[r.help]]
   )
 
   return r

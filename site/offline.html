@@ -11,14 +11,22 @@
 
 <body>
 
-<div id="title">Hurmet</div>
- 
-<article>
+<nav><div id="small-title">Hurmet</div></nav>
 
-<div id="slogan"><h4>A notebook for calculations</h4></div>
+<div id="promotion">
+  <div id="title">Hurmet</div>
+  <p id="slogan">A notebook for<br>calculations</p>
+</div>
+
+<article>
 
 <div id=editor class="pica" style="margin-bottom: 23px"></div>
 <div style="display: none" id="content">
+   <p></p>
+   <p></p>
+   <p></p>
+   <p></p>
+   <p></p>
    <p></p>
    <p></p>
    <p></p>
@@ -27,37 +35,6 @@
 
 <div id="print-div" class="ProseMirror pica"></div>
 </article>
-
-<div id="hint">
-  <pre><code>Quick Reference
-Γ Δ Θ Λ Ξ Π Σ Φ Ψ Ω
-α β γ δ ε ζ η θ ι κ λ μ
-ν ξ π ρ σ τ υ ϕ χ ψ ω
-∀ ∃ ︀ℂ ℍ ℕ ℚ ℝ ℤ ℏ ℓ € ¥ £ ø ✓
-𝐀 𝐁 𝐂 𝐃 𝐄 𝐅 𝐆 𝐇 𝐈 𝐉 𝐊 𝐋 𝐌
-𝐍 𝐎 𝐏 𝐐 𝐑 𝐒 𝐓 𝐔 𝐕 𝐖 𝐗 𝐘 𝐙
-𝐚 𝐛 𝐜 𝐝 𝐞 𝐟 𝐠 𝐡 𝐢 𝐣 𝐤 𝐥 𝐦
-𝐧 𝐨 𝐩 𝐪 𝐫 𝐬 𝐭 𝐮 𝐯 𝐰 𝐱 𝐲 𝐳
-𝒜 ℬ 𝒞 𝒟 ℰ ℱ 𝒢 ℋ ℐ 𝒦 ℒ ℳ
-𝒩 𝒪 𝒫 𝒬 ℛ 𝒮 𝒯 𝒰 𝒱 𝒲 𝒳 𝒴 𝒵
-√ ∛ × * · ∘  ′ ∞ ° ∕ ‖ ∠ ÷ ± ∓ ⊻ ¬ 
-≤ ≥ ≠ ≅ ≈ ∈ ∉ ⋐ ≡ ≔ → ← ↔ ⇒
-⎾ ⏋ ⎿ ⏌ ⟨ ⟩ ∧ ∨ ⋁ ∩ ⋂ ∪ ⋃ ∑ ∫ ∬ ∇
-bar hat vec harpoon dot ddot tilde
-'unit'   "string"  `rich text`
-a_subscript   b^exponent    x′
-(a+b) / (c+d)    1//2
-[1; 2; 3]    (a, b; c, d)
-[start:step:end...] = ?
-{a if b; c otherwise}
-Access:
-  vector[indexNumber]
-  dataFrame.rowName.colName
-  dataframe["colName"][indexNumber]
-Display:
-  ? all, @ result only
-  % no echo, ! no result</code></pre>
-</div>
 
 <div id="copyright">Copyright © 2020-2023 Ron Kok. Released under the <a href="https://opensource.org/licenses/MIT">MIT License</a></div>
 

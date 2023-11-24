@@ -1,6 +1,6 @@
 // autocorrect.js
 
-const autoCorrectRegEx = /([?:<>\-~/_!]=| \.| \*|~~|\+-|-\+|<-->|<->|<>|<--|<-|-->|->|-:|\^\^|\\\||\/\/\/|\b(bar|hat|vec|tilde|dot|ddot|ul)|\b(bb|bbb|cc|ff|ss) [A-Za-z]|\\?[A-Za-z]{2,}|\\c|\\ |\\o|root [234]|<<|>>|\^-?[0-9]+|\|\|\||\/_|''|""|00)\s$/;
+const autoCorrectRegEx = /([?:<>\-~/_!]=| \.| \*|~~|\+-|-\+|<-->|<->|<>|<--|<-|-->|->|=>|-:|\^\^|\\\||\/\/\/|\b(bar|hat|vec|tilde|dot|ddot|ul)|\b(bb|bbb|cc|ff|ss) [A-Za-z]|\\?[A-Za-z]{2,}|\\c|\\ |\\o|root [234]|<<|>>|\^-?[0-9]+|\|\|\||\/_|''|""|00)\s$/;
 
 const accents$1 = {
   acute: "\u0301",
@@ -153,6 +153,7 @@ const autoCorrections = {
   "<--": "\u27F5",
   "-->": "⟶",
   "->": "→",
+  "=>": "⇒",
   "<-->": "\\xrightleftarrows",
   "\\circ": "∘",
   "\\otimes": "⊗",
