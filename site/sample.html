@@ -88,7 +88,7 @@ Say that we want to build a cylindrical water tank in 5-foot courses.
 #6  	0.75   	0.44``"></span></p>
 <p>Later, you can access the data:<br><span class="hurmet-calc" data-entry='A = rebar["#3"].area = ?? in²'></span></p>
 
-<h2>Remote Data</h2>
+<h2 id="remote-data">Remote Data</h2>
 <p>Such data can be stored in a remote file. Say that we want to engineer a steel end-plate connection. The calculation could begin by fetching a chunk of data about steel shapes and loading that data into a variable, like this:</p>
 <p><span class="hurmet-calc" data-entry="wideFlanges = fetch(&quot;https://gist.githubusercontent.com/ronkok/d2ae5b3c74889e71c7bb8422b6017067/raw/AISC-v15-wideFlanges.tsv&quot;) = !"></span></p>
 <p>From that, we can load data into variables for individual dimensions.</p>
