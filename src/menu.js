@@ -258,7 +258,7 @@ const navigate = () => {
       const callback = pos => {
         const headingTop = view.coordsAtPos(pos).top
         const boundingTop = view.dom.getBoundingClientRect().top
-        window.scrollTo(0, headingTop - boundingTop + 180)
+        window.scrollTo(0, headingTop - boundingTop)
       }
       openSelectPrompt("Scroll to…", buttons, callback)
     }
