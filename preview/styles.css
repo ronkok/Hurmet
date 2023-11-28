@@ -28,7 +28,7 @@ nav {
   margin: 0 auto;
   background: #fff;
   font-size: 14px;
-  height: 36px
+  height: 66px
 }
 
 nav * {
@@ -37,7 +37,7 @@ nav * {
 
 nav ul {
   list-style: none;
-  margin: 0;
+  margin-top: 24px;
   padding: 0;
   float: right;
 }
@@ -128,9 +128,10 @@ h6 { font-size: 95%; font-weight: bold; text-align: center;  margin: 1em 0 1em 0
   font-weight: bold;
   font-size: 20px;
   padding-left: 72px;
+  margin-top: 24px;
   display: none;
 }
-@media (max-width: 995px) {
+@media (max-width: 1120px) {
   #promotion   { display: none; }
   #small-title { display: inline; }
 }
