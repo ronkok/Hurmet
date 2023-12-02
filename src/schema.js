@@ -52,7 +52,8 @@ export const nodes = {
     // outside the undo stack.
     attrs: {
       decimalFormat: {default: '1,000,000.' },
-      inDraftMode: { default: false }, // boolean
+      inDraftMode: { default: false },  // boolean
+      saveIsValid: { default: false }, // boolean
       fileHandle: { default: null },
       fontSize: { default: 12 },       // 12 | 10
       pageSize: { default: "letter" }, // letter | A4

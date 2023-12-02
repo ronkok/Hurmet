@@ -400,7 +400,7 @@ function sleep (time) {
 }
 
 // Export saveFileAsMarkdown so that it is available in keymap.js
-export function saveFileAsMarkdown(state, view) {
+export function saveFileAsMarkdown(state, view, isSaveAs = false) {
   // Prune the Hurmet math parts down to just the entry. Then stringify it.
   pruneHurmet(state, view)
   let str = `---------------
@@ -445,7 +445,7 @@ pageSize: ${state.doc.attrs.pageSize}
     str += snapshot.content
   }
   str =  str
-  if (window.showOpenFilePicker && state.doc.attrs.fileHandle) {
+  if (window.showOpenFilePicker && state.doc.attrs.saveIsValid && state.doc.attrs.fileHandle && !isSaveAs) {
     // Use the Chromium File System Access API, so users can click to save a document.
     const button = document.getElementsByClassName("ProseMirror-menubar").item(0).children[1]
     // Blink the button, so the author knows that a save takes place.
@@ -457,16 +457,30 @@ pageSize: ${state.doc.attrs.pageSize}
   } else {
     // Legacy method for Firefox and Safari
     const blob = new Blob([str], {type: "text/plain;charset=utf-8"})
-    saveAs(blob, "HurmetFile.md", { autoBom : false });
+    saveAs(blob, "HurmetFile.md", { autoBom : false })
+    state.doc.attrs.saveIsValid = false
   }
 }
 
 function saveFile() {
   return new MenuItem({
-    title: "Save file...   Ctrl-S",
+    title: "Save file   Ctrl-S",
     label: "Save",
+    enable(state) {
+      return state.doc.attrs.saveIsValid
+    },
     run(state, _, view) {
       saveFileAsMarkdown(state, view)
+    }
+  })
+}
+
+function saveFileAs() {
+  return new MenuItem({
+    title: "Save file as…",
+    label: "Save as…",
+    run(state, _, view) {
+      saveFileAsMarkdown(state, view, true)
     }
   })
 }
@@ -1082,6 +1096,7 @@ export function buildMenuItems(schema) {
   r.navigate = navigate()
   r.openFile = openFile()
   r.saveFile = saveFile()
+  r.saveFileAs = saveFileAs()
   r.insertHeader = insertHeader()
 
   r.dot = setDecimalFormat("1000000.")
@@ -1312,6 +1327,7 @@ export function buildMenuItems(schema) {
   r.fileDropDown = new Dropdown([
     r.openFile,
     r.saveFile,
+    r.saveFileAs,
     r.takeSnapshot,
     r.showDiff,
     r.deleteSnapshots,

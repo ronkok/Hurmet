@@ -72,6 +72,7 @@ export function readFile(state, _, view, schema, format) {
   if (window.showOpenFilePicker && !(format === "hurmet")) {
     // Use the Chromium File System Access API, so users can Ctrl-S to save a document.
     getFile(view, schema, format)
+    state.doc.attrs.saveIsValid = true
   } else {
     // Legacy file open system for Firefox and Safari
     // Open a dialog box.
