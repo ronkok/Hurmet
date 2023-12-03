@@ -217,6 +217,7 @@ const escRegEx = /^\\#/
 
 const hasUnitRow = lines => {
   // Determine if there is a row for unit names.
+  if (lines.length < 3) { return false }
   const units = lines[1].split("\t").map(el => el.trim())
   for (const unitName of units) {
     if (numberRegEx.test(unitName)) { return false }
