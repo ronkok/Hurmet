@@ -27,5 +27,6 @@ export const dt = Object.freeze({
   UNIT: 65536, // User-defined units.
   DRAWING: 131072,
   RICHTEXT: 262144,
-  DICTIONARY: 524288
+  DICTIONARY: 524288,
+  MACRO: 1048576
 })

@@ -245,7 +245,7 @@ const rpnPrecFromType = [
       13, 17, 16, -1, 15,
       14, 10,  3,  2, 11,
       -1, -1,  4,  3, -1,
-      -1, -1
+      -1, -1, -1
 ]
 
 const texPrecFromType = [
@@ -257,7 +257,7 @@ const texPrecFromType = [
        2, -1, 15,  2, 14,
       13,  9, -1,  1, -1,
       15, -1,  1,  -1, 2,
-       2, 2
+       2,  2,  2
 ]
 /* eslint-enable indent-legacy */
 
@@ -653,6 +653,16 @@ export const parse = (
         if (isPrecededBySpace) { posOfPrevRun = tex.length }
         token.output = token.output === "`" ? "`" : parse(token.output, decimalFormat, false)
         tex += "{" + token.output + "}"
+        okToAppend = true
+        break
+      }
+
+      case tt.MACRO: {
+        popTexTokens(2, okToAppend)
+        if (isCalc) { rpn += '"""' + token.output + '"""' }  // Keep before addTextEscapes()
+        if (isPrecededBySpace) { posOfPrevRun = tex.length }
+        token.output = addTextEscapes(token.output)
+        tex += "\\text{" + token.output + "}"
         okToAppend = true
         break
       }

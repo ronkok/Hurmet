@@ -11,7 +11,7 @@ import {
 import { wrapInList, splitListItem, liftListItem, sinkListItem } from "./schema"
 import { undo, redo } from "prosemirror-history"
 import { undoInputRule } from "prosemirror-inputrules"
-import { insertMath, saveFileAsMarkdown } from "./menu"
+import { insertMath, saveFileAsMarkdown, expandHurmetMacro } from "./menu"
 import { readFile } from "./openfile"
 import { goToNextCell } from "prosemirror-tables"
 
@@ -87,7 +87,10 @@ export function buildKeymap(schema, mapKeys) {
       return true
     })
   }
-
+  bind("Alt-e", (state, _, view) => {
+    expandHurmetMacro(state, view)
+    return true
+  })
   if ((type = schema.nodes.bullet_list)) bind("Shift-Ctrl-8", wrapInList(type))
   if ((type = schema.nodes.ordered_list)) bind("Shift-Ctrl-9", wrapInList(type))
   if ((type = schema.nodes.blockquote)) bind("Ctrl->", wrapIn(type))

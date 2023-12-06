@@ -75,6 +75,10 @@ export const valueFromLiteral = (str, name, decimalFormat) => {
   } else if (str === "true" || str === "false") {
     return [Boolean(str), null, dt.BOOLEAN, `\\mathord{\\text{${str}}}`]
 
+  } else if (str.length > 3 && str.slice(0, 3) === '"""') {
+    // str contains a macro
+    return [str.slice(3, -3), undefined, dt.MACRO, ""]
+
   } else if (/^\x22.+\x22/.test(str)) {
     // str contains text between quotation marks
     if (name === "format") {

@@ -253,7 +253,18 @@ const scanAssignment = (lines, decimalFormat, iStart) => {
   if (/[,;]/.test(name)) {
     name = name.split(/[,;]/).map(e => e.trim())
   }
-  const trailStr = str.slice(posEquals + 1).trim()
+  let trailStr = str.slice(posEquals + 1).trim()
+  if (trailStr.length > 3 && trailStr.slice(0, 3) === '"""') {
+    // We're at a macro, which extends beyond normal line endings.
+    let j = iEnd
+    let pos = trailStr.indexOf('"""', 3)
+    while (pos < 0 && j < lines.length - 1) {
+      j += 1
+      trailStr += "\n" + lines[j];
+      pos = trailStr.indexOf('"""', 3)
+    }
+    iEnd = j
+  }
   const [value, unit, dtype, resultDisplay] = valueFromLiteral(trailStr, name, decimalFormat)
   const stmt = { name, value, unit, dtype, resultDisplay }
   return [stmt, iEnd]

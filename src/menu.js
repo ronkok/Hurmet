@@ -87,6 +87,11 @@ const hurmetIcons = {
     height: 1024,
     path: "M512 219q-116 0-218 39t-161 107-59 145q0 64 40 122t115 100l49 28-15 54q-13 52-40 98 86-36 157-97l24-21 32 3q39 4 74 4 116 0 218-39t161-107 59-145-59-145-161-107-218-39zM1024 512q0 99-68 183t-186 133-257 48q-40 0-82-4-113 100-262 138-28 8-65 12h-2q-8 0-15-6t-9-15v-0q-1-2-0-6t1-5 2-5l3-5t4-4 4-5q4-4 17-19t19-21 17-22 18-29 15-33 14-43q-89-50-141-125t-51-160q0-99 68-183t186-133 257-48 257 48 186 133 68 183z"
   },
+  scroll: {
+    width: 512,
+    height: 512,
+    path: "M426.667 0c-46.933 0-85.333 38.4-85.333 85.333V192c0 12.8 8.533 21.333 21.333 21.333h128c12.8 0 21.333-8.533 21.333-21.333V85.333C512 38.4 473.6 0 426.667 0zm42.666 170.667H384V85.333c0-23.467 19.2-42.667 42.667-42.667s42.667 19.2 42.667 42.667v85.334zM362.667 384c-12.8 0-21.333 8.533-21.333 21.333v21.333c0 12.8 8.533 21.333 21.333 21.333S384 439.467 384 426.667v-21.333c0-12.801-8.533-21.334-21.333-21.334z M362.667 405.333c-12.8 0-21.333 8.533-21.333 21.333 0 23.467-19.2 42.667-42.667 42.667S256 450.133 256 426.667v-21.333c0-12.8-8.533-21.333-21.333-21.333-12.8 0-21.333 8.533-21.333 21.333v21.333c0 46.933 38.4 85.333 85.333 85.333S384 473.6 384 426.667c0-12.8-8.533-21.334-21.333-21.334z M426.667 0h-320c-36.267 0-64 27.733-64 64v341.333c0 12.8 8.533 21.333 21.333 21.333s21.333-8.533 21.333-21.333V64c0-12.8 8.533-21.333 21.333-21.333H352c-6.4 12.8-10.667 27.733-10.667 42.667v320c0 12.8 8.533 21.333 21.333 21.333S384 418.133 384 405.333v-320c0-23.467 19.2-42.667 42.667-42.667C454.4 42.667 454.4 0 426.667 0z M298.667 469.333c-23.467 0-42.667-19.2-42.667-42.667v-21.333c0-12.8-8.533-21.333-21.333-21.333H21.333C8.533 384 0 392.533 0 405.333v21.333C0 473.6 38.4 512 85.333 512h213.333c27.734 0 27.734-42.667.001-42.667zm-213.334 0c-23.467 0-42.667-19.2-42.667-42.667h170.667c0 14.933 4.267 29.867 10.667 42.667H85.333zM192 106.667h-42.667C136.533 106.667 128 115.2 128 128s8.533 21.333 21.333 21.333H192c12.8 0 21.333-8.533 21.333-21.333S204.8 106.667 192 106.667zM277.333 192h-42.667c-12.8 0-21.333 8.533-21.333 21.333 0 12.8 8.533 21.333 21.333 21.333h42.667c12.8 0 21.333-8.533 21.333-21.333.001-12.8-8.533-21.333-21.333-21.333zM277.333 106.667H256c-12.8 0-21.333 8.533-21.333 21.333S243.2 149.333 256 149.333h21.333c12.8 0 21.333-8.533 21.333-21.333s-8.533-21.333-21.333-21.333zM192 277.333h-42.667c-12.8 0-21.333 8.533-21.333 21.333 0 12.8 8.533 21.333 21.333 21.333H192c12.8 0 21.333-8.533 21.333-21.333 0-12.799-8.533-21.333-21.333-21.333zM277.333 277.333H256c-12.8 0-21.333 8.533-21.333 21.333 0 12.8 8.533 21.333 21.333 21.333h21.333c12.8 0 21.333-8.533 21.333-21.333.001-12.799-8.533-21.333-21.333-21.333zM149.333 192c-12.8 0-21.333 8.533-21.333 21.333 0 12.8 8.533 21.333 21.333 21.333 12.8 0 21.333-8.533 21.333-21.333.001-12.8-8.533-21.333-21.333-21.333z"
+  },
   tighten: {
     width: 16,
     height: 16,
@@ -742,6 +747,45 @@ function deleteSnapshots() {
   })
 }
 
+export function expandHurmetMacro(state, view) {
+  let textFrom = 0
+  let textTo = 0
+  if (state.selection.from < state.selection.to) {
+    textFrom = state.selection.from
+    textTo = state.selection.to
+  } else {
+    textFrom = state.doc.resolve(state.selection.from).before()
+    textTo = state.selection.from
+  }
+  const text = state.doc.textBetween(textFrom, textTo)
+  const match = /[A-Za-z][A-Za-z0-9_]*$/.exec(text)
+  if (match) {
+    const name = match[0];
+    state.doc.nodesBetween(0, state.doc.content.size, function(node, pos) {
+      if (node.type.name === "calculation" && node.attrs.dtype === dt.MODULE) {
+        if (node.attrs.value[name] && node.attrs.value[name].dtype === dt.MACRO) {
+          const macro = node.attrs.value[name].value
+          const fragment = { type: "fragment", content: hurmet.md2ast(macro) }
+          view.dispatch(
+            view.state.tr.replaceWith(textTo - name.length, textTo, schema.nodeFromJSON(fragment))
+          )
+          hurmet.updateCalculations(view, schema.nodes.calculation, true)
+        }
+      }
+    })
+  }
+}
+
+function macroButton() {
+  return new MenuItem({
+    icon: hurmetIcons.scroll,
+    title: "Expand a macro from the previous word.  Alt-E",
+    run(state, _, view) {
+      expandHurmetMacro(state, view)
+    }
+  })
+}
+
 function insertToC(nodeType) {
   // Table of Contents
   return new MenuItem({
@@ -1157,6 +1201,7 @@ export function buildMenuItems(schema) {
   if ((type = schema.nodes.image)) r.imageUpload = uploadImage(type)
   if ((type = schema.nodes.image)) r.imageLink = insertImage(type)
   if ((type = schema.nodes.toc)) r.toc = insertToC(type)
+  r.macroButton = macroButton()
   if ((type = schema.nodes.calculation)) r.insertCalclation = mathMenuItem(type, "calculation")
   if ((type = schema.nodes.tex)) r.insertTeX = mathMenuItem(type, "tex")
   if ((type = schema.nodes.comment)) r.insertComment = insertComment(type)
@@ -1371,6 +1416,7 @@ export function buildMenuItems(schema) {
     r.toc,
     r.insertCalclation,
     r.insertTeX,
+    r.macroButton,
     r.insertComment
   ]]
 

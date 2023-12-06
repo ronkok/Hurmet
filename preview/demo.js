@@ -572,7 +572,8 @@ const dt = Object.freeze({
   UNIT: 65536, // User-defined units.
   DRAWING: 131072,
   RICHTEXT: 262144,
-  DICTIONARY: 524288
+  DICTIONARY: 524288,
+  MACRO: 1048576
 });
 
 const errorMessages = Object.freeze({
@@ -3384,6 +3385,7 @@ const escRegEx = /^\\#/;
 
 const hasUnitRow = lines => {
   // Determine if there is a row for unit names.
+  if (lines.length < 3) { return false }
   const units = lines[1].split("\t").map(el => el.trim());
   for (const unitName of units) {
     if (numberRegEx$5.test(unitName)) { return false }
@@ -4031,7 +4033,8 @@ const tt = Object.freeze({
   TO: 39,
   DATAFRAME: 40,
   RICHTEXT: 41,
-  BOOLEAN: 42
+  BOOLEAN: 42,
+  MACRO: 43
 });
 
 const minusRegEx = /^-(?![-=<>:])/;
@@ -4687,6 +4690,17 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
   let st = "";
   let matchObj;
 
+  if (str.length > 3 && str.slice(0, 3) === "===") {
+    // A macro between triple-double quotation marks.
+    pos = str.indexOf('"""', 3);
+    if (pos > 0) {
+      st = str.slice(3, pos);
+      return ['"""' + st + '"""', st, tt.MACRO, ""]
+    } else {
+      return [str, str.slice(3), tt.MACRO, ""]
+    }
+  }
+
   if (str.charAt(0) === '"') {
     // String between double quotation marks. Parser will convert it to \text{…}
     pos = str.indexOf('"', 1);
@@ -5076,7 +5090,7 @@ const rpnPrecFromType = [
       13, 17, 16, -1, 15,
       14, 10,  3,  2, 11,
       -1, -1,  4,  3, -1,
-      -1, -1
+      -1, -1, -1
 ];
 
 const texPrecFromType = [
@@ -5088,7 +5102,7 @@ const texPrecFromType = [
        2, -1, 15,  2, 14,
       13,  9, -1,  1, -1,
       15, -1,  1,  -1, 2,
-       2, 2
+       2,  2,  2
 ];
 /* eslint-enable indent-legacy */
 
@@ -5484,6 +5498,16 @@ const parse$1 = (
         if (isPrecededBySpace) { posOfPrevRun = tex.length; }
         token.output = token.output === "`" ? "`" : parse$1(token.output, decimalFormat, false);
         tex += "{" + token.output + "}";
+        okToAppend = true;
+        break
+      }
+
+      case tt.MACRO: {
+        popTexTokens(2, okToAppend);
+        if (isCalc) { rpn += '"""' + token.output + '"""'; }  // Keep before addTextEscapes()
+        if (isPrecededBySpace) { posOfPrevRun = tex.length; }
+        token.output = addTextEscapes(token.output);
+        tex += "\\text{" + token.output + "}";
         okToAppend = true;
         break
       }
@@ -16050,6 +16074,10 @@ const valueFromLiteral = (str, name, decimalFormat) => {
   } else if (str === "true" || str === "false") {
     return [Boolean(str), null, dt.BOOLEAN, `\\mathord{\\text{${str}}}`]
 
+  } else if (str.length > 3 && str.slice(0, 3) === '"""') {
+    // str contains a macro
+    return [str.slice(3, -3), undefined, dt.MACRO, ""]
+
   } else if (/^\x22.+\x22/.test(str)) {
     // str contains text between quotation marks
     if (name === "format") {
@@ -16381,7 +16409,18 @@ const scanAssignment = (lines, decimalFormat, iStart) => {
   if (/[,;]/.test(name)) {
     name = name.split(/[,;]/).map(e => e.trim());
   }
-  const trailStr = str.slice(posEquals + 1).trim();
+  let trailStr = str.slice(posEquals + 1).trim();
+  if (trailStr.length > 3 && trailStr.slice(0, 3) === '"""') {
+    // We're at a macro, which extends beyond normal line endings.
+    let j = iEnd;
+    let pos = trailStr.indexOf('"""', 3);
+    while (pos < 0 && j < lines.length - 1) {
+      j += 1;
+      trailStr += "\n" + lines[j];
+      pos = trailStr.indexOf('"""', 3);
+    }
+    iEnd = j;
+  }
   const [value, unit, dtype, resultDisplay] = valueFromLiteral(trailStr, name, decimalFormat);
   const stmt = { name, value, unit, dtype, resultDisplay };
   return [stmt, iEnd]

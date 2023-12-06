@@ -59,9 +59,9 @@ document range by selecting text, then clicking one of the menu bar buttons:
 +--------------------------------------+------------------------------------+
 | ![link][] **—** ![upload][]          | Insert:\                           |
 | ![image][] ToC ![C][]                | Link…, Horizontal rule, Uploaded   |
-| ![T][]  ![comment][]                 | image…, Link to image…, Table of   |
+| ![T][] ![scroll][]  ![comment][]     | image…, Link to image…, Table of   |
 |                                      | Contents…, Calculation…, TeX…,     |
-|                                      | Comment…                           |
+|                                      | Macro expansion, Comment…          |
 +--------------------------------------+------------------------------------+
 | **¶** ![embed][] **H1 H2**           | Block styles:\                     |
 | ![list][] ![numbered list][]         | Plain paragraph, Code block,       |
@@ -90,6 +90,7 @@ document range by selecting text, then clicking one of the menu bar buttons:
 [cap]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='m14.998 2 .002.002v11.996l-.002.002H1.002L1 13.998V2.002L1.002 2h13.996zM15 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h14c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1z'/%3E%3Cpath d='M13 4.5a1.5 1.5 0 1 1-3.001-.001A1.5 1.5 0 0 1 13 4.5zM14 13H2v-2l3.5-6 4 5h1L14 7z'/%3E%3C/svg%3E
 [C]: images/C.svg
 [T]: data:image/svg+xml;utf8,%3Csvg height='16' width='16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M.8 4.5V.3c.1-.5.6-.2 1-.3h12.8c.4.2.2.7.3 1v3.5c-.4.7-1.1-.1-1-.7a4 4 0 0 0-2.7-2.7C10.8 1 9.8.6 9.7 1v12.8c0 .8.3 1.5 1.2 1.3.6-.2 1.6.5.8.9H3.9c-.8-.6.4-1 1-.9 1 .2 1-.8 1-1.6V.8c-1.2.2-2.6.5-3.4 1.5-.7.7-.8 1.6-1 2.4-.2.2-.6.1-.7-.2ZM2.6 1c.4-.2.3-.2 0-.2h-1V2ZM9 7.8v-7H6.8l-.1 13.5c.1.4-.4 1 .2.9H9c-.3-.5.1-1.2 0-1.7Zm4.8-6.1c.1 0 .4.5.3 0V.9h-1.3l1 .9z'/%3E%3C/svg%3E
+[scroll]: data:image/svg+xml;utf8,%3Csvg height='16' width='16' viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M426.667 0c-46.933 0-85.333 38.4-85.333 85.333V192c0 12.8 8.533 21.333 21.333 21.333h128c12.8 0 21.333-8.533 21.333-21.333V85.333C512 38.4 473.6 0 426.667 0zm42.666 170.667H384V85.333c0-23.467 19.2-42.667 42.667-42.667s42.667 19.2 42.667 42.667v85.334zM362.667 384c-12.8 0-21.333 8.533-21.333 21.333v21.333c0 12.8 8.533 21.333 21.333 21.333S384 439.467 384 426.667v-21.333c0-12.801-8.533-21.334-21.333-21.334z M362.667 405.333c-12.8 0-21.333 8.533-21.333 21.333 0 23.467-19.2 42.667-42.667 42.667S256 450.133 256 426.667v-21.333c0-12.8-8.533-21.333-21.333-21.333-12.8 0-21.333 8.533-21.333 21.333v21.333c0 46.933 38.4 85.333 85.333 85.333S384 473.6 384 426.667c0-12.8-8.533-21.334-21.333-21.334z M426.667 0h-320c-36.267 0-64 27.733-64 64v341.333c0 12.8 8.533 21.333 21.333 21.333s21.333-8.533 21.333-21.333V64c0-12.8 8.533-21.333 21.333-21.333H352c-6.4 12.8-10.667 27.733-10.667 42.667v320c0 12.8 8.533 21.333 21.333 21.333S384 418.133 384 405.333v-320c0-23.467 19.2-42.667 42.667-42.667C454.4 42.667 454.4 0 426.667 0z M298.667 469.333c-23.467 0-42.667-19.2-42.667-42.667v-21.333c0-12.8-8.533-21.333-21.333-21.333H21.333C8.533 384 0 392.533 0 405.333v21.333C0 473.6 38.4 512 85.333 512h213.333c27.734 0 27.734-42.667.001-42.667zm-213.334 0c-23.467 0-42.667-19.2-42.667-42.667h170.667c0 14.933 4.267 29.867 10.667 42.667H85.333zM192 106.667h-42.667C136.533 106.667 128 115.2 128 128s8.533 21.333 21.333 21.333H192c12.8 0 21.333-8.533 21.333-21.333S204.8 106.667 192 106.667zM277.333 192h-42.667c-12.8 0-21.333 8.533-21.333 21.333 0 12.8 8.533 21.333 21.333 21.333h42.667c12.8 0 21.333-8.533 21.333-21.333.001-12.8-8.533-21.333-21.333-21.333zM277.333 106.667H256c-12.8 0-21.333 8.533-21.333 21.333S243.2 149.333 256 149.333h21.333c12.8 0 21.333-8.533 21.333-21.333s-8.533-21.333-21.333-21.333zM192 277.333h-42.667c-12.8 0-21.333 8.533-21.333 21.333 0 12.8 8.533 21.333 21.333 21.333H192c12.8 0 21.333-8.533 21.333-21.333 0-12.799-8.533-21.333-21.333-21.333zM277.333 277.333H256c-12.8 0-21.333 8.533-21.333 21.333 0 12.8 8.533 21.333 21.333 21.333h21.333c12.8 0 21.333-8.533 21.333-21.333.001-12.799-8.533-21.333-21.333-21.333zM149.333 192c-12.8 0-21.333 8.533-21.333 21.333 0 12.8 8.533 21.333 21.333 21.333 12.8 0 21.333-8.533 21.333-21.333.001-12.8-8.533-21.333-21.333-21.333z'/%3E%3C/svg%3E
 [math]: https://en.wikibooks.org/wiki/LaTeX/Mathematics
 [advanced math]: https://en.wikibooks.org/wiki/LaTeX/Advanced_Mathematics
 [home page]: https://temml.org/
@@ -138,6 +139,14 @@ remain a table. Otherwise, edit it any way you want.
 
 If you write `$PAGE` into a print header, Hurmet will print page numbers at
 that location.
+
+### Macro Expansion
+
+To expand a macro, (1) write the macro name in your document, put the selection
+point after the name, and then (2) hit the ![scroll][] button or type **Alt+E**.
+Hurmet will replace the macro name with the macro expansion.
+
+To learn how to write macros or how to import macros, see the [macros](#macros) section, below.
 
 ### Comments
 
@@ -2303,6 +2312,42 @@ variables, you want a way to keep them synchronized. Put an
 `importedParameters` statement into each of the documents and you’re good. As
 an added benefit, a reviewer can see what you are doing.
 
+## Macros
+
+A _macro_ enables you to save typing. You type the macro name, hit **Alt-E**,
+and a larger section appears in your document. The macro name serves as an
+abbreviation for the macro expansion.
+
+A Hurmet macro is written in a module. The macro expansion is a section of a
+Hurmet document, written in Markdown format. The expansion is contained
+within `"""…"""` delimiters. Here’s an example:
+
+```
+ab = """¢` A_b = (π d_b^2) / 4 = ?? in² `, bolt area"""
+```
+
+As you can see, the macro expansion contains an equation to find the area of a
+bolt. That expression is written into a module. If you’re writing macros, you
+typically write several macros into each module.
+
+A user can invoke the macro in two steps. First, import the module into a
+document, as in this example:
+
+<div style="width: 30em; overflow-x: scroll">
+
+```
+macros = import("https://gist.githubusercontent.com/ronkok/317f8ce0f706608fa9b3e3258ecea138/raw/csMacros.txt") = !
+```
+
+</div>
+
+Then the user types the macro name, `ab`, and hits **Alt-E**. The macro
+expansion appears in the document.
+
+It doesn’t really matter what you name the module. When a user invokes the
+**Alt-E** command, Hurmet will search all active variables to see if they
+contain the desired macro name.
+
 **Gists**
 
 Hurmet is a web app, so it can import text files only from addresses that begin
@@ -2406,7 +2451,8 @@ Civil and structural engineers may also find these items useful:
 * Concrete Column Interaction [Diagram](https://observablehq.com/@ronkok/concrete-column-interaction-diagram)
 * Fetchable TSV files with steel shape data: [wide flanges][], [channels][], [HSS][], [pipes][], [tees][],
   [double angles][], [HP][], and [MS][].
-* Importable [Module](https://gist.githubusercontent.com/ronkok/f4d93a4921ebd24c9a40578831d926b7/raw/steelStrengthPerAISC360-16.txt) with functions for steel member strength.
+* Importable [module](https://gist.githubusercontent.com/ronkok/f4d93a4921ebd24c9a40578831d926b7/raw/steelStrengthPerAISC360-16.txt) with functions for steel member strength.
+* A set of macros for civil and structural engineers. Here’s a [description][macroDesc] and a [link][macroLink] to the source.
 
 [wide flanges]: https://gist.githubusercontent.com/ronkok/d2ae5b3c74889e71c7bb8422b6017067/raw/AISC-v15-wideFlanges.tsv
 [channels]: https://gist.githubusercontent.com/ronkok/320677ddf9225afecf79bc831d5e1694/raw/AISC-v15-channels.tsv
@@ -2416,6 +2462,8 @@ Civil and structural engineers may also find these items useful:
 [double angles]: https://gist.githubusercontent.com/ronkok/3a1e2d13672be26ef50e880347300536/raw/AISC-v15-2L.tsv
 [HP]: https://gist.githubusercontent.com/ronkok/4a489aa649aa955d069b26d761e6df5f/raw/AISC-v15-HP.tsv
 [MS]: https://gist.githubusercontent.com/ronkok/93927e8f227109cd9463ccd2409aa73e/raw/AISC-v15-MS.tsv
+[macroDesc]: https://gist.github.com/ronkok/cc46b817a1c1760e014fd65f7b12ebcc
+[macroLink]: https://gist.githubusercontent.com/ronkok/317f8ce0f706608fa9b3e3258ecea138/raw/csMacros.txt
 
 ## Credits
 
@@ -2558,7 +2606,15 @@ Copyright © 2020-2023 Ron Kok. Released under the [MIT License][]
 </ul>
 </details>
 </li>
-<li><a href="#remote-modules">Modules</a></li>
+<li>
+<details><summary>Modules</summary>
+
+* [Remote Modules](#remote-modules)
+* [Imported Parameters](#imported-parameters)
+* [Macros](#macros)
+
+</details>
+</li>
 <li><a href="#batch-mode">Batch Mode</a></li>
 <li>
 <details><summary>End notes</summary>

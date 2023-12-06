@@ -52,7 +52,8 @@ export const tt = Object.freeze({
   TO: 39,
   DATAFRAME: 40,
   RICHTEXT: 41,
-  BOOLEAN: 42
+  BOOLEAN: 42,
+  MACRO: 43
 })
 
 const minusRegEx = /^-(?![-=<>:])/
@@ -707,6 +708,17 @@ export const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
   let pos = 0
   let st = ""
   let matchObj
+
+  if (str.length > 3 && str.slice(0, 3) === "===") {
+    // A macro between triple-double quotation marks.
+    pos = str.indexOf('"""', 3)
+    if (pos > 0) {
+      st = str.slice(3, pos)
+      return ['"""' + st + '"""', st, tt.MACRO, ""]
+    } else {
+      return [str, str.slice(3), tt.MACRO, ""]
+    }
+  }
 
   if (str.charAt(0) === '"') {
     // String between double quotation marks. Parser will convert it to \text{…}
