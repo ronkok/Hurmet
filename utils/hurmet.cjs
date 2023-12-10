@@ -17786,7 +17786,7 @@ defineSymbol(math, open, "\u00ac", "\\lnot");
 defineSymbol(math, textord, "\u22a4", "\\top");
 defineSymbol(math, textord, "\u22a5", "\\bot");
 defineSymbol(math, textord, "\u2205", "\\emptyset");
-defineSymbol(math, textord, "\u00f8", "\\varnothing");
+defineSymbol(math, textord, "\u2300", "\\varnothing");
 defineSymbol(math, mathord, "\u03b1", "\\alpha", true);
 defineSymbol(math, mathord, "\u03b2", "\\beta", true);
 defineSymbol(math, mathord, "\u03b3", "\\gamma", true);
@@ -17847,6 +17847,8 @@ defineSymbol(math, bin, "\u2228", "\\vee", true);
 defineSymbol(math, open, "\u27e6", "\\llbracket", true); // stmaryrd/semantic packages
 defineSymbol(math, close, "\u27e7", "\\rrbracket", true);
 defineSymbol(math, open, "\u27e8", "\\langle", true);
+defineSymbol(math, open, "\u27ea", "\\lAngle", true);
+defineSymbol(math, open, "\u2989", "\\llangle", true);
 defineSymbol(math, open, "|", "\\lvert");
 defineSymbol(math, open, "\u2016", "\\lVert");
 defineSymbol(math, textord, "!", "\\oc"); // cmll package
@@ -17858,6 +17860,8 @@ defineSymbol(math, close, "?", "?");
 defineSymbol(math, close, "!", "!");
 defineSymbol(math, close, "‼", "‼");
 defineSymbol(math, close, "\u27e9", "\\rangle", true);
+defineSymbol(math, close, "\u27eb", "\\rAngle", true);
+defineSymbol(math, close, "\u298a", "\\rrangle", true);
 defineSymbol(math, close, "|", "\\rvert");
 defineSymbol(math, close, "\u2016", "\\rVert");
 defineSymbol(math, open, "\u2983", "\\lBrace", true); // stmaryrd/semantic packages
@@ -17939,6 +17943,8 @@ defineSymbol(math, close, "]", "\\rbrack", true);
 defineSymbol(text, textord, "]", "\\rbrack", true);
 defineSymbol(math, open, "(", "\\lparen", true);
 defineSymbol(math, close, ")", "\\rparen", true);
+defineSymbol(math, open, "⦇", "\\llparenthesis", true);
+defineSymbol(math, close, "⦈", "\\rrparenthesis", true);
 defineSymbol(text, textord, "<", "\\textless", true); // in T1 fontenc
 defineSymbol(text, textord, ">", "\\textgreater", true); // in T1 fontenc
 defineSymbol(math, open, "\u230a", "\\lfloor", true);
@@ -17976,6 +17982,7 @@ defineSymbol(math, op, "\u2211", "\\sum");
 defineSymbol(math, op, "\u2a02", "\\bigotimes");
 defineSymbol(math, op, "\u2a01", "\\bigoplus");
 defineSymbol(math, op, "\u2a00", "\\bigodot");
+defineSymbol(math, op, "\u2a09", "\\bigtimes");
 defineSymbol(math, op, "\u222e", "\\oint");
 defineSymbol(math, op, "\u222f", "\\oiint");
 defineSymbol(math, op, "\u2230", "\\oiiint");
@@ -18095,6 +18102,8 @@ defineSymbol(text, textord, "\u20ac", "\\euro", true);
 defineSymbol(text, textord, "\u20ac", "\\texteuro");
 defineSymbol(math, textord, "\u00a9", "\\copyright", true);
 defineSymbol(text, textord, "\u00a9", "\\textcopyright");
+defineSymbol(math, textord, "\u2300", "\\diameter", true);
+defineSymbol(text, textord, "\u2300", "\\diameter");
 
 // Italic Greek
 defineSymbol(math, textord, "𝛤", "\\varGamma");
@@ -18386,7 +18395,7 @@ const makeText = function(text, mode, style) {
 
 const consolidateText = mrow => {
   // If possible, consolidate adjacent <mtext> elements into a single element.
-  if (mrow.type !== "mrow") { return mrow }
+  if (mrow.type !== "mrow" && mrow.type !== "mstyle") { return mrow }
   if (mrow.children.length === 0) { return mrow } // empty group, e.g., \text{}
   if (!mrow.children[0].attributes || mrow.children[0].type !== "mtext") { return mrow }
   const variant = mrow.children[0].attributes.mathvariant || "";
@@ -18422,6 +18431,9 @@ const consolidateText = mrow => {
   const L = mtext.children[0].text.length;
   if (L > 0 && mtext.children[0].text.charAt(L - 1) === " ") {
     mtext.children[0].text = mtext.children[0].text.slice(0, -1) + "\u00a0";
+  }
+  for (const [key, value] of Object.entries(mrow.attributes)) {
+    mtext.attributes[key] = value;
   }
   return mtext
 };
@@ -18476,6 +18488,14 @@ const makeRow = function(body) {
   if (body.length === 1 && !(body[0] instanceof DocumentFragment)) {
     return body[0];
   } else {
+    // Suppress spacing on <mo> nodes at both ends of the row.
+    if (body[0] instanceof MathNode && body[0].type === "mo" && !body[0].attributes.fence) {
+      body[0].attributes.lspace = "0em";
+    }
+    const end = body.length - 1;
+    if (body[end] instanceof MathNode && body[end].type === "mo" && !body[end].attributes.fence) {
+      body[end].attributes.rspace = "0em";
+    }
     return new mathMLTree.MathNode("mrow", body);
   }
 };
@@ -20021,6 +20041,10 @@ const delimiters = [
   "\\lbrace",
   "\\}",
   "\\rbrace",
+  "⦇",
+  "\\llparenthesis",
+  "⦈",
+  "\\rrparenthesis",
   "\\lfloor",
   "\\rfloor",
   "\u230a",
@@ -20035,6 +20059,14 @@ const delimiters = [
   "\u27e8",
   "\\rangle",
   "\u27e9",
+  "\\lAngle",
+  "\u27ea",
+  "\\rAngle",
+  "\u27eb",
+  "\\llangle",
+  "⦉",
+  "\\rrangle",
+  "⦊",
   "\\lt",
   "\\gt",
   "\\lvert",
@@ -20156,9 +20188,9 @@ defineFunction({
       // defaults.
       node.setAttribute("fence", "false");
     }
-    if (group.delim === "\u2216" || group.delim.indexOf("arrow") > -1) {
-      // \backslash is not in the operator dictionary,
-      // so we have to explicitly set stretchy to true.
+    if (group.delim === "\u2216" || group.delim === "\\vert" ||
+        group.delim === "|" || group.delim.indexOf("arrow") > -1) {
+      // We have to explicitly set stretchy to true.
       node.setAttribute("stretchy", "true");
     }
     node.setAttribute("symmetric", "true"); // Needed for tall arrows in Firefox.
@@ -21948,6 +21980,33 @@ defineFunction({
   mathmlBuilder: mathmlBuilder$5
 });
 
+// \hbox is provided for compatibility with LaTeX functions that act on a box.
+// This function by itself doesn't do anything but set scriptlevel to \textstyle
+// and prevent a soft line break.
+
+defineFunction({
+  type: "hbox",
+  names: ["\\hbox"],
+  props: {
+    numArgs: 1,
+    argTypes: ["hbox"],
+    allowedInArgument: true,
+    allowedInText: false
+  },
+  handler({ parser }, args) {
+    return {
+      type: "hbox",
+      mode: parser.mode,
+      body: ordargument(args[0])
+    };
+  },
+  mathmlBuilder(group, style) {
+    const newStyle = style.withLevel(StyleLevel.TEXT);
+    const mrow = buildExpressionRow(group.body, newStyle);
+    return consolidateText(mrow)
+  }
+});
+
 const mathmlBuilder$4 = (group, style) => {
   const accentNode = stretchy.mathMLnode(group.label);
   accentNode.style["math-depth"] = 0;
@@ -22917,7 +22976,8 @@ const singleCharBigOps = {
   "\u2a02": "\\bigotimes",
   "\u2a04": "\\biguplus",
   "\u2a05": "\\bigsqcap",
-  "\u2a06": "\\bigsqcup"
+  "\u2a06": "\\bigsqcup",
+  "\u2a09": "\\bigtimes"
 };
 
 defineFunction({
@@ -22937,6 +22997,7 @@ defineFunction({
     "\\bigodot",
     "\\bigsqcap",
     "\\bigsqcup",
+    "\\bigtimes",
     "\\smallint",
     "\u220F",
     "\u2210",
@@ -25032,8 +25093,6 @@ defineMacro("\\surd", '\\sqrt{\\vphantom{|}}');
 // See comment for \oplus in symbols.js.
 defineMacro("\u2295", "\\oplus");
 
-defineMacro("\\hbox", "\\text{#1}");
-
 // Per TeXbook p.122, "/" gets zero operator spacing.
 // And MDN recommends using U+2044 instead of / for inline
 defineMacro("/", "{\u2044}");
@@ -25116,6 +25175,7 @@ const dotsByToken = {
   "\\bigodot": "\\dotsb",
   "\\bigsqcap": "\\dotsb",
   "\\bigsqcup": "\\dotsb",
+  "\\bigtimes": "\\dotsb",
   "\\And": "\\dotsb",
   "\\longrightarrow": "\\dotsb",
   "\\Longrightarrow": "\\dotsb",
