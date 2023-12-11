@@ -1,5 +1,12 @@
 const fs = require('fs') // Node.js file system
 const hurmet = require('./hurmet.cjs');
+// I use md2html.js to build docs for both Hurmet and Temml.
+// If Temml were statically built into md2html, the Temml build process
+// would be much more complex, involving a round trip to this repository.
+// So I import Temml into md2html dynamically.
+const temml = require('./temml.cjs');
+// eslint-disable-next-line no-undef
+globalThis.temml = temml;
 
 // This file builds the Hurmet documentation.
 

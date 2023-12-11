@@ -2380,6 +2380,8 @@ Node.js:
 // Read a Markdown file, run the calcs, and write an HTML file.
 const fs = require('fs')
 const hurmet = require('filePath/hurmet.cjs')
+const temml = require('filePath/temml.cjs') // Math rendering library
+globalThis.temml = temml
 const titleRegEx = /([^.\\/]+)\.md$/;  // A helper.
 
 // The main function has to be async.

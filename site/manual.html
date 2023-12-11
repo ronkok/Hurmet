@@ -994,6 +994,8 @@ end</code></pre><p>A Hurmet document can load an entire module into one variable
 <pre><code>// Read a Markdown file, run the calcs, and write an HTML file.
 const fs = require(&#x27;fs&#x27;)
 const hurmet = require(&#x27;filePath/hurmet.cjs&#x27;)
+const temml = require(&#x27;filePath/temml.cjs&#x27;) // Math rendering library
+globalThis.temml = temml
 const titleRegEx = /([^.\\/]+)\.md$/;  // A helper.
 
 // The main function has to be async.

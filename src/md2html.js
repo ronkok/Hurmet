@@ -1,5 +1,4 @@
 import { parse } from "./parser.js"
-import temml from "./temml.js"
 import { md2ast } from "./md2ast.js"
 import { updateCalcs } from "./updateCalcsForCLI.js"
 import { dt } from "./constants"
@@ -235,7 +234,8 @@ const nodes = {
         + `<span class='hmt-code'>${sanitizeText(node.attrs.entry)}</span></span>`
     } else {
       const tex = node.attrs.tex ? node.attrs.tex : parse(node.attrs.entry)
-      const mathML = temml.renderToString(
+      // eslint-disable-next-line no-undef
+      const mathML = globalThis.temml.renderToString(
         tex,
         { trust: true, wrap: "=", displayMode: (node.attrs.displayMode || false) }
       )
@@ -245,7 +245,8 @@ const nodes = {
     }
   },
   tex(node) {
-    const mathML = temml.renderToString(
+    // eslint-disable-next-line no-undef
+    const mathML = globalThis.temml.renderToString(
       node.attrs.tex,
       { trust: true, displayMode: (node.attrs.displayMode || false) }
     )
