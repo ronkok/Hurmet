@@ -27,7 +27,7 @@ import { hurmetMarkdownSerializer } from "./to_markdown"
 import { readFile } from "./openfile"
 import { saveAs } from "filesaver.js-npm"
 import { findPageBreaks, forToC, forPrint } from "./paginate.js"
-import { diff_match_patch } from "./diffMatchPatch"
+import { showDiff } from "./diffMatchPatch"
 import { dt } from "./constants.js"
 
 // Menu icons that are not included in node-module menu.js
@@ -685,48 +685,11 @@ function takeSnapshot() {
   })
 }
 
-function showDiff() {
+function showDiffMenuItem() {
   return new MenuItem({
     label: "Show diff...",
     run(state, _, view) {
-      const title = "Show the difference since:"
-      const buttons = [];
-      const snapshots = state.doc.attrs.snapshots
-      if (state.doc.attrs.snapshots.length === 0) {
-        alert('There are no snapshots to diff.')
-        return
-      }
-      for (let i = 0; i < state.doc.attrs.snapshots.length; i++) {
-        buttons.push({
-          textContent: (new Date(snapshots[i].date)).toISOString().replace(/T.+/, "") + "  " + snapshots[i].message,
-          pos: i
-        })
-      }
-      const callback = pos => {
-        const dmp = new diff_match_patch()
-        const text1 = state.doc.attrs.snapshots[pos].content
-        const text2 = hurmetMarkdownSerializer.serialize(state.doc, new Map(), false, true)
-        dmp.Diff_Timeout = 2
-        dmp.Diff_EditCost = 4
-        let d = dmp.diff_main(text1, text2)
-        dmp.diff_cleanupSemantic(d);
-        const ds = dmp.diff_prettyHtml(d)
-        const wrapper = document.body.appendChild(document.createElement("div"))
-        wrapper.className = "ProseMirror-prompt"
-        wrapper.style = "width: 650px; max-height: 500px; overflow: scroll;"
-        wrapper.id = ""
-        wrapper.innerHTML = ds
-        const button = document.createElement("button")
-        button.type = "button"
-        button.className = "ProseMirror-prompt-cancel"
-        button.textContent = "Close"
-        button.onclick = function(e) { wrapper.parentNode.removeChild(wrapper) }
-        wrapper.appendChild(button)
-        const box = wrapper.getBoundingClientRect()
-        wrapper.style.top = ((window.innerHeight - box.height) / 2) + "px"
-        wrapper.style.left = ((window.innerWidth - box.width) / 2) + "px"
-      }
-      openSelectPrompt(title, buttons, callback)
+      showDiff(state)
     }
   })
 }
@@ -1161,7 +1124,7 @@ export function buildMenuItems(schema) {
   r.recalcAll = reCalcAll(schema)
   r.deleteComments = deleteComments()
   r.takeSnapshot = takeSnapshot()
-  r.showDiff = showDiff()
+  r.showDiffMenuItem = showDiffMenuItem()
   r.deleteSnapshots = deleteSnapshots()
   r.print = print()
 
@@ -1374,7 +1337,7 @@ export function buildMenuItems(schema) {
     r.saveFile,
     r.saveFileAs,
     r.takeSnapshot,
-    r.showDiff,
+    r.showDiffMenuItem,
     r.deleteSnapshots,
     r.pagesize,
     r.print

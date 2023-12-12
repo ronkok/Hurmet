@@ -49370,7 +49370,86 @@ var FileSaverExports = FileSaver.exports;
 
 /* eslint-disable */
 
-/* This file contains the diff-match-patch class from
+
+const showDiff = state => {
+  const title = "Show the difference since:";
+  const buttons = [];
+  const snapshots = state.doc.attrs.snapshots;
+  if (state.doc.attrs.snapshots.length === 0) {
+    alert('There are no snapshots to diff.');
+    return
+  }
+  for (let i = 0; i < state.doc.attrs.snapshots.length; i++) {
+    buttons.push({
+      textContent: (new Date(snapshots[i].date)).toISOString().replace(/T.+/, "") + "  " + snapshots[i].message,
+      pos: i
+    });
+  }
+  const callback = pos => {
+    const dmp = new diff_match_patch();
+    const text1 = state.doc.attrs.snapshots[pos].content;
+    const text2 = hurmetMarkdownSerializer.serialize(state.doc, new Map(), false, true);
+    dmp.Diff_Timeout = 2;
+    dmp.Diff_EditCost = 4;
+    let d = dmp.diff_main(text1, text2);
+    dmp.diff_cleanupSemantic(d);
+    const ds = dmp.diff_prettyHtml(d);
+    const wrapper = document.body.appendChild(document.createElement("div"));
+    wrapper.className = "ProseMirror-prompt";
+    wrapper.style = "width: 850px; height: 500px";
+    wrapper.id = "";
+    const container = wrapper.appendChild(document.createElement("div"));
+    container.style = "width: 850px; max-height: 450px; overflow: scroll;";
+    container.innerHTML = ds;
+    const spacer = wrapper.appendChild(document.createElement("div"));
+    spacer.style.height = "10px";
+    const prevButton = document.createElement("button");
+    prevButton.type = "button";
+    prevButton.style.marginRight = "2em";
+    prevButton.textContent = "Previous";
+    prevButton.onclick = function(e) {
+      const top = container.getBoundingClientRect().top;
+      const diffs = Array.from(container.getElementsByClassName("diff"));
+      for (let i = diffs.length - 1; i >= 0; i--) {
+        const bottom = diffs[i].getBoundingClientRect().bottom;
+        if (bottom < top) {
+          diffs[i].scrollIntoView();
+          container.scrollTo({top: container.scrollTop - 80});
+          break
+        }
+      }
+    };
+    wrapper.appendChild(prevButton);
+    const nextButton = document.createElement("button");
+    nextButton.type = "button";
+    nextButton.style.marginRight = "2em";
+    nextButton.textContent = "Next";
+    nextButton.onclick = function(e) {
+      const bottom = container.getBoundingClientRect().bottom;
+      const diffs = container.getElementsByClassName("diff");
+      for (let diff of [...diffs]) {
+        const top = diff.getBoundingClientRect().top;
+        if (top > bottom) {
+          diff.scrollIntoView();
+          container.scrollTo({top: container.scrollTop - 80});
+          break
+        }
+      }
+    };
+    wrapper.appendChild(nextButton);
+    const closeButton = document.createElement("button");
+    closeButton.type = "button";
+    closeButton.textContent = "Close";
+    closeButton.onclick = function(e) { wrapper.parentNode.removeChild(wrapper); };
+    wrapper.appendChild(closeButton);
+    const box = wrapper.getBoundingClientRect();
+    wrapper.style.top = ((window.innerHeight - box.height) / 2) + "px";
+    wrapper.style.left = ((window.innerWidth - box.width) / 2) + "px";
+  };
+  openSelectPrompt(title, buttons, callback);
+};
+
+/* The rest of this file contains the diff-match-patch class from
  * https://github.com/google/diff-match-patch/blob/master/javascript/diff_match_patch_uncompressed.js
  * I have modified this file to:
  *   1. Delete the match function
@@ -50566,29 +50645,13 @@ diff_match_patch.prototype.diff_prettyHtml = function(diffs) {
         .replace(pattern_gt, '&gt;').replace(pattern_para, '<br>');
     switch (op) {
       case DIFF_INSERT:
-        html[x] = '<ins style="background:#e6ffe6;">' + text + '</ins>';
+        html[x] = '<ins class="diff" style="background:#e6ffe6;">' + text + '</ins>';
         break;
       case DIFF_DELETE:
-        html[x] = '<del style="background:#ffe6e6;">' + text + '</del>';
+        html[x] = '<del class="diff" style="background:#ffe6e6;">' + text + '</del>';
         break;
       case DIFF_EQUAL:
-        let lines = text.split("<br>");
-        const L = lines.length;
-        if (x === 0 && L > 3) {
-          lines = lines.slice(L - 3);
-          lines.unshift("⋮");
-        } else if (x === diffs.length - 1 & L > 3) {
-          lines = lines.slice(0, 3);
-          lines.push("⋮");
-        } else if (L > 6) {
-          const firstSection = lines.slice(0, 3);
-          if (firstSection[firstSection.length - 1].length > 0) { firstSection.push(""); }
-          firstSection.push("⋮");
-          if (lines[L - 3].length > 0) { firstSection.push(""); }
-          lines = lines.slice(L - 3);
-          lines = firstSection.concat(lines);
-        }
-        html[x] = '<span>' + lines.join('<br>') + '</span>';
+        html[x] = '<span>' + text + '</span>';
         break;
     }
   }
@@ -51401,48 +51464,11 @@ function takeSnapshot() {
   })
 }
 
-function showDiff() {
+function showDiffMenuItem() {
   return new MenuItem_1({
     label: "Show diff...",
     run(state, _, view) {
-      const title = "Show the difference since:";
-      const buttons = [];
-      const snapshots = state.doc.attrs.snapshots;
-      if (state.doc.attrs.snapshots.length === 0) {
-        alert('There are no snapshots to diff.');
-        return
-      }
-      for (let i = 0; i < state.doc.attrs.snapshots.length; i++) {
-        buttons.push({
-          textContent: (new Date(snapshots[i].date)).toISOString().replace(/T.+/, "") + "  " + snapshots[i].message,
-          pos: i
-        });
-      }
-      const callback = pos => {
-        const dmp = new diff_match_patch();
-        const text1 = state.doc.attrs.snapshots[pos].content;
-        const text2 = hurmetMarkdownSerializer.serialize(state.doc, new Map(), false, true);
-        dmp.Diff_Timeout = 2;
-        dmp.Diff_EditCost = 4;
-        let d = dmp.diff_main(text1, text2);
-        dmp.diff_cleanupSemantic(d);
-        const ds = dmp.diff_prettyHtml(d);
-        const wrapper = document.body.appendChild(document.createElement("div"));
-        wrapper.className = "ProseMirror-prompt";
-        wrapper.style = "width: 650px; max-height: 500px; overflow: scroll;";
-        wrapper.id = "";
-        wrapper.innerHTML = ds;
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "ProseMirror-prompt-cancel";
-        button.textContent = "Close";
-        button.onclick = function(e) { wrapper.parentNode.removeChild(wrapper); };
-        wrapper.appendChild(button);
-        const box = wrapper.getBoundingClientRect();
-        wrapper.style.top = ((window.innerHeight - box.height) / 2) + "px";
-        wrapper.style.left = ((window.innerWidth - box.width) / 2) + "px";
-      };
-      openSelectPrompt(title, buttons, callback);
+      showDiff(state);
     }
   })
 }
@@ -51877,7 +51903,7 @@ function buildMenuItems(schema) {
   r.recalcAll = reCalcAll();
   r.deleteComments = deleteComments();
   r.takeSnapshot = takeSnapshot();
-  r.showDiff = showDiff();
+  r.showDiffMenuItem = showDiffMenuItem();
   r.deleteSnapshots = deleteSnapshots();
   r.print = print();
 
@@ -52088,7 +52114,7 @@ function buildMenuItems(schema) {
     r.saveFile,
     r.saveFileAs,
     r.takeSnapshot,
-    r.showDiff,
+    r.showDiffMenuItem,
     r.deleteSnapshots,
     r.pagesize,
     r.print
