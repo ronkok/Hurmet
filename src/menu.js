@@ -653,13 +653,13 @@ function insertComment(nodeType) {
       const parent = resolvedPos.parent
       if (parent.type.name === "comment") { return }
       const tr = state.tr
-      let pos = 0
       // Anchor the comment at a point preceding the parent block.
       const blockPos = resolvedPos.before(resolvedPos.depth)
-      tr.insert(blockPos, nodeType.create())
-      pos = blockPos + 1
-      tr.setSelection(TextSelection.create(tr.doc, pos))
-      view.dispatch(tr)
+      tr.insert(blockPos, schema.nodeFromJSON(JSON.parse(
+        `{"type":"comment", "content":[{"type":"paragraph","content":[]}]}`
+      )))
+      tr.setSelection(TextSelection.create(tr.doc, blockPos + 1))
+      dispatch(tr)
     }
   })
 }
