@@ -14457,7 +14457,7 @@ function addRow(tr, ref, row) {
   for (var i = 0; i < row; i++) { rowPos += table.child(i).nodeSize; }
   var cells = [], refRow = row > 0 ? -1 : 0;
   if (rowIsHeader(map, table, row + refRow))
-    { refRow = row == 0 || row == map.height ? null : 0; }
+    { refRow = 0; }
   for (var col = 0, index = map.width * row; col < map.width; col++, index++) {
     // Covered by a rowspan cell
     if (row > 0 && row < map.height && map.map[index] == map.map[index - map.width]) {
