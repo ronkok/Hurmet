@@ -301,7 +301,7 @@ export const nodes = {
 
   // A list item (`<li>`) spec.
   list_item: {
-    content: "paragraph block*",
+    content: "block*",
     parseDOM: [{tag: "li"}],
     toDOM() { return ["li", 0] },
     defining: true
