@@ -614,8 +614,8 @@ rules.set("fence", {
 });
 rules.set("alert", {
   isLeaf: false,
-  match: blockRegex(/^(?: *> \[!(NOTE|TIP|IMPORTANT|WARNING)\])((?:\n *>(?! *\[!)[^\n]*)+)(?:\n *)+\n/),
-  // Alert for note |tip | important | warning
+  match: blockRegex(/^(?: *> \[!(NOTE|TIP|IMPORTANT|WARNING|EPIGRAPH)\])((?:\n *>(?! *\[!)[^\n]*)+)(?:\n *)+\n/),
+  // Alert for note |tip | important | warning |epigraph
   parse: function(capture, state) {
     const cap = capture[2].replace(/\n *> ?/gm, "\n").replace(/^\n/, "")
     const content = parse(cap, state)

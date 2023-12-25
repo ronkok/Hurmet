@@ -505,6 +505,14 @@ li.ProseMirror-selectednode:after {
   margin-left: 0; margin-right: 0;
 }
 
+.ProseMirror blockquote.epigraph {
+  padding-left: 3em;
+  padding-right: 3em;
+  border: none;
+  margin: 1.75em 0 1.75em 0;
+  font-style: italic;
+}
+
 .ProseMirror-example-setup-style img {
   cursor: default;
 }

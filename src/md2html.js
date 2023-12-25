@@ -266,6 +266,9 @@ const nodes = {
   hidden(node) {
     return htmlTag("div", ast2html(node.content), { class: 'hidden' }) + "\n"
   },
+  epigraph(node) {
+    return htmlTag("blockquote", ast2html(node.content), { class: 'epigraph' }) + "\n"
+  },
   note(node) {
     return htmlTag("div", ast2html(node.content), { class: 'note' }) + "\n"
   },

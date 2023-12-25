@@ -101,6 +101,15 @@ export const nodes = {
     toDOM() { return ['div', { class: 'boxed' }, 0] }
   },
 
+  // Epigraph
+  epigraph: {
+    content: "block+",
+    group: "block",
+    defining: true,
+	  parseDOM: [{tag: "blockquote.epigraph"}],
+    toDOM() { return ['blockquote', { class: 'epigraph' }, 0] }
+  },
+
   // :: NodeSpec A blockquote (`<blockquote>`) wrapping one or more blocks.
   blockquote: {
     content: "block+",

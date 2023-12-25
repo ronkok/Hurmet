@@ -1185,6 +1185,11 @@ export function buildMenuItems(schema) {
       title: "Wrap in block quote",
       icon: icons.blockquote
     })
+  if ((type = schema.nodes.epigraph))
+    r.wrapEpigraph = wrapItem(type, {
+      title: "Wrap in an epigraph",
+      label: "Epigraph"
+    })
   if ((type = schema.nodes.centered))
     r.wrapCentered = wrapItem(type, {
       title: "Center block",
@@ -1403,8 +1408,9 @@ export function buildMenuItems(schema) {
       r.tighten,
       r.wrapBlockQuote,
       r.blockDropDown = new Dropdown([
-        r.wrapCentered,
         r.wrapIndent,
+        r.wrapCentered,
+        r.wrapEpigraph,
         r.wrapBoxed,
         r.wrapNote,
         r.wrapTip,

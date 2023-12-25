@@ -110,6 +110,9 @@ const hurmetNodes =  {
       state.wrapBlock("", null, node, () => state.renderContent(node), "boxed")
     }
   },
+  epigraph(state, node) {
+    state.wrapBlock("> ", null, node, () => state.renderContent(node), "epigraph")
+  },
   note(state, node) {
     state.wrapBlock("> ", null, node, () => state.renderContent(node), "note")
   },
