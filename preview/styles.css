@@ -513,6 +513,11 @@ li.ProseMirror-selectednode:after {
   font-style: italic;
 }
 
+.ProseMirror blockquote.epigraph div.right-justified {
+  margin-top: -0.5em;
+  font-style: normal;
+}
+
 .ProseMirror-example-setup-style img {
   cursor: default;
 }
@@ -749,6 +754,7 @@ ul.toc span + span {
 
 .ProseMirror div.indented { margin-left: 2em; }
 .ProseMirror div.centered { text-align: center; }
+.ProseMirror div.right-justified { text-align: right; }
 .ProseMirror div.boxed { width: fit-content; min-width: 2em; border: 1px solid #000; }
 .ProseMirror div.boxed p { line-height: 1.2; margin: 4px; }
 

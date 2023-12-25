@@ -92,6 +92,15 @@ export const nodes = {
     toDOM () { return ['div', { class: 'centered' }, 0] },
   },
 
+  // A right-justified div.
+  right_justified: {
+    content: "block+",
+    group: "block",
+    defining: true,
+    parseDOM: [{tag: "div.right-justified"}],
+    toDOM () { return ['div', { class: 'right-justified' }, 0] },
+  },
+
   // A boxed div.
   boxed: {
     content: "block+",

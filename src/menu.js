@@ -1195,6 +1195,11 @@ export function buildMenuItems(schema) {
       title: "Center block",
       label: "Centered"
     })
+  if ((type = schema.nodes.right_justified))
+    r.wrapRightJustified = wrapItem(type, {
+      title: "Right-justify block",
+      label: "Right-justifed"
+    })
   if ((type = schema.nodes.indented))
     r.wrapIndent = wrapItem(type, {
       title: "Indent block  Alt-I",
@@ -1410,6 +1415,7 @@ export function buildMenuItems(schema) {
       r.blockDropDown = new Dropdown([
         r.wrapIndent,
         r.wrapCentered,
+        r.wrapRightJustified,
         r.wrapEpigraph,
         r.wrapBoxed,
         r.wrapNote,

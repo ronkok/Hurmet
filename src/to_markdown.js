@@ -103,6 +103,13 @@ const hurmetNodes =  {
        state.wrapBlock("", null, node, () => state.renderContent(node), "centered")
     }
   },
+  right_justified(state, node) {
+    if (state.isGFM) {
+      state.renderContent(node)
+    } else {
+       state.wrapBlock("", null, node, () => state.renderContent(node), "right_justified")
+    }
+  },
   boxed(state, node) {
     if (state.isGFM) {
       state.renderContent(node)
@@ -111,7 +118,11 @@ const hurmetNodes =  {
     }
   },
   epigraph(state, node) {
-    state.wrapBlock("> ", null, node, () => state.renderContent(node), "epigraph")
+    if (state.isGFM) {
+      state.wrapBlock("> ", null, node, () => state.renderContent(node))
+    } else {
+      state.wrapBlock("> ", null, node, () => state.renderContent(node), "epigraph")
+    }
   },
   note(state, node) {
     state.wrapBlock("> ", null, node, () => state.renderContent(node), "note")
@@ -463,7 +474,7 @@ export class MarkdownSerializerState {
         if (nodeType) { this.write(`> [!${nodeType.toUpperCase()}]\n`) }
       } else {
         this.divFence += ":::"
-        this.write(`${this.delim}${this.divFence} ${nodeType}\n`)
+        this.write(`${this.divFence} ${nodeType}\n`)
       }
     }
     this.write(firstDelim || delim)
