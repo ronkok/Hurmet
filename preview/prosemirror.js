@@ -25403,7 +25403,7 @@ const textRange = (str, index) => {
  *     > [!note] or [!tip] or [!important] or [!warning]
  *     > Content of note
  * 13. Fenced divs, similar to Pandoc.
- *     ::: (centered|comment|indented|boxed|header)
+ *     ::: (centered|right_justified|comment|indented|boxed|header)
  *     Block elements
  *     :::
  *     Nested divs are distinguished by number of colons. Minimum three.
@@ -25982,8 +25982,8 @@ rules.set("fence", {
 });
 rules.set("alert", {
   isLeaf: false,
-  match: blockRegex(/^(?: *> \[!(NOTE|TIP|IMPORTANT|WARNING)\])((?:\n *>(?! *\[!)[^\n]*)+)(?:\n *)+\n/),
-  // Alert for note |tip | important | warning
+  match: blockRegex(/^(?: *> \[!(NOTE|TIP|IMPORTANT|WARNING|EPIGRAPH)\])((?:\n *>(?! *\[!)[^\n]*)+)(?:\n *)+\n/),
+  // Alert for note |tip | important | warning |epigraph
   parse: function(capture, state) {
     const cap = capture[2].replace(/\n *> ?/gm, "\n").replace(/^\n/, "");
     const content = parse(cap, state);
@@ -26029,8 +26029,8 @@ rules.set("dd", {  // description details
 });
 rules.set("special_div", {
   isLeaf: false,
-  match: blockRegex(/^(:{3,}) ?(indented|comment|centered|boxed|header|hidden) *\n([\s\S]+?)\n+\1 *(?:\n{2,}|\s*$)/),
-  // indented or centered or boxed or comment div, or <header>
+  match: blockRegex(/^(:{3,}) ?(indented|comment|centered|right_justified|boxed|header|hidden) *\n([\s\S]+?)\n+\1 *(?:\n{2,}|\s*$)/),
+  // indented or centered or right-justified or boxed or comment div, or <header>
   parse: function(capture, state) {
     const content = parse(capture[3], state);
     return { type: capture[2], content };
@@ -33536,8 +33536,14 @@ const nodes$1 = {
   centered(node) {
     return htmlTag("div", ast2html(node.content), { class: 'centered' }) + "\n"
   },
+  right_justified(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'right_justified' }) + "\n"
+  },
   hidden(node) {
     return htmlTag("div", ast2html(node.content), { class: 'hidden' }) + "\n"
+  },
+  epigraph(node) {
+    return htmlTag("blockquote", ast2html(node.content), { class: 'epigraph' }) + "\n"
   },
   note(node) {
     return htmlTag("div", ast2html(node.content), { class: 'note' }) + "\n"
@@ -47138,6 +47144,15 @@ const nodes = {
     toDOM () { return ['div', { class: 'centered' }, 0] },
   },
 
+  // A right-justified div.
+  right_justified: {
+    content: "block+",
+    group: "block",
+    defining: true,
+    parseDOM: [{tag: "div.right-justified"}],
+    toDOM () { return ['div', { class: 'right-justified' }, 0] },
+  },
+
   // A boxed div.
   boxed: {
     content: "block+",
@@ -47145,6 +47160,15 @@ const nodes = {
     defining: true,
 	  parseDOM: [{tag: "div.boxed"}],
     toDOM() { return ['div', { class: 'boxed' }, 0] }
+  },
+
+  // Epigraph
+  epigraph: {
+    content: "block+",
+    group: "block",
+    defining: true,
+	  parseDOM: [{tag: "blockquote.epigraph"}],
+    toDOM() { return ['blockquote', { class: 'epigraph' }, 0] }
   },
 
   // :: NodeSpec A blockquote (`<blockquote>`) wrapping one or more blocks.
@@ -48138,11 +48162,25 @@ const hurmetNodes =  {
        state.wrapBlock("", null, node, () => state.renderContent(node), "centered");
     }
   },
+  right_justified(state, node) {
+    if (state.isGFM) {
+      state.renderContent(node);
+    } else {
+       state.wrapBlock("", null, node, () => state.renderContent(node), "right_justified");
+    }
+  },
   boxed(state, node) {
     if (state.isGFM) {
       state.renderContent(node);
     } else {
       state.wrapBlock("", null, node, () => state.renderContent(node), "boxed");
+    }
+  },
+  epigraph(state, node) {
+    if (state.isGFM) {
+      state.wrapBlock("> ", null, node, () => state.renderContent(node));
+    } else {
+      state.wrapBlock("> ", null, node, () => state.renderContent(node), "epigraph");
     }
   },
   note(state, node) {
@@ -48495,7 +48533,7 @@ class MarkdownSerializerState {
         if (nodeType) { this.write(`> [!${nodeType.toUpperCase()}]\n`); }
       } else {
         this.divFence += ":::";
-        this.write(`${this.delim}${this.divFence} ${nodeType}\n`);
+        this.write(`${this.divFence} ${nodeType}\n`);
       }
     }
     this.write(firstDelim || delim);
@@ -51964,10 +52002,20 @@ function buildMenuItems(schema) {
       title: "Wrap in block quote",
       icon: icons_1.blockquote
     });
+  if ((type = schema.nodes.epigraph))
+    r.wrapEpigraph = wrapItem_1(type, {
+      title: "Wrap in an epigraph",
+      label: "Epigraph"
+    });
   if ((type = schema.nodes.centered))
     r.wrapCentered = wrapItem_1(type, {
       title: "Center block",
       label: "Centered"
+    });
+  if ((type = schema.nodes.right_justified))
+    r.wrapRightJustified = wrapItem_1(type, {
+      title: "Right-justify block",
+      label: "Right-justifed"
     });
   if ((type = schema.nodes.indented))
     r.wrapIndent = wrapItem_1(type, {
@@ -51978,7 +52026,7 @@ function buildMenuItems(schema) {
     r.wrapBoxed = wrapItem_1(type, {
       title: "Draw box around block",
       label: "Boxed"
-  });
+    });
   if ((type = schema.nodes.note))
     r.wrapNote = wrapItem_1(type, {
       title: "Note alert",
@@ -52009,13 +52057,20 @@ function buildMenuItems(schema) {
       title: "Change to code block",
       icon: icons_1.code
     });
-  if ((type = schema.nodes.heading))
-    for (let i = 1; i <= 6; i++)
+  if ((type = schema.nodes.heading)) {
+    for (let i = 1; i <= 6; i++) {
       r["makeHead" + i] = blockTypeItem_1(type, {
         title: "Change to heading " + i,
         label: "\xa0H" + i + "\xa0",
         attrs: { level: i }
       });
+    }
+    r.table_caption = blockTypeItem_1(type, {
+      title: "Table Caption",
+      label: "Table Caption (same as H6)",
+      attrs: { level: 6 }
+    });
+  }
   if ((type = schema.nodes.horizontal_rule)) {
     let hr = type;
     r.insertHorizontalRule = new MenuItem_1({
@@ -52180,8 +52235,11 @@ function buildMenuItems(schema) {
       r.tighten,
       r.wrapBlockQuote,
       r.blockDropDown = new Dropdown_1([
-        r.wrapCentered,
         r.wrapIndent,
+        r.wrapCentered,
+        r.wrapRightJustified,
+        r.wrapEpigraph,
+        r.table_caption,
         r.wrapBoxed,
         r.wrapNote,
         r.wrapTip,

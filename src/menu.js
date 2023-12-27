@@ -1209,7 +1209,7 @@ export function buildMenuItems(schema) {
     r.wrapBoxed = wrapItem(type, {
       title: "Draw box around block",
       label: "Boxed"
-  })
+    })
   if ((type = schema.nodes.note))
     r.wrapNote = wrapItem(type, {
       title: "Note alert",
@@ -1240,13 +1240,20 @@ export function buildMenuItems(schema) {
       title: "Change to code block",
       icon: icons.code
     })
-  if ((type = schema.nodes.heading))
-    for (let i = 1; i <= 6; i++)
+  if ((type = schema.nodes.heading)) {
+    for (let i = 1; i <= 6; i++) {
       r["makeHead" + i] = blockTypeItem(type, {
         title: "Change to heading " + i,
         label: "\xa0H" + i + "\xa0",
         attrs: { level: i }
       })
+    }
+    r.table_caption = blockTypeItem(type, {
+      title: "Table Caption",
+      label: "Table Caption (same as H6)",
+      attrs: { level: 6 }
+    })
+  }
   if ((type = schema.nodes.horizontal_rule)) {
     let hr = type
     r.insertHorizontalRule = new MenuItem({
@@ -1417,6 +1424,7 @@ export function buildMenuItems(schema) {
         r.wrapCentered,
         r.wrapRightJustified,
         r.wrapEpigraph,
+        r.table_caption,
         r.wrapBoxed,
         r.wrapNote,
         r.wrapTip,

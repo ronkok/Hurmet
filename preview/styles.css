@@ -1038,6 +1038,9 @@ math .special-fraction { font-family: "Times New Roman"; }
 .ProseMirror table.striped tbody tr:nth-child(even) {
    background-color: #f6f8fa;
 }
+.ProseMirror table.striped th {
+  background-color: #fff;
+}
 .ProseMirror table.striped th { font-weight: 600 }
 
 /* Column alignment. Apply these classes to the table node. */

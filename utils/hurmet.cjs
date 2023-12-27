@@ -9094,7 +9094,7 @@ const textRange = (str, index) => {
  *     > [!note] or [!tip] or [!important] or [!warning]
  *     > Content of note
  * 13. Fenced divs, similar to Pandoc.
- *     ::: (centered|comment|indented|boxed|header)
+ *     ::: (centered|right_justified|comment|indented|boxed|header)
  *     Block elements
  *     :::
  *     Nested divs are distinguished by number of colons. Minimum three.
@@ -9673,8 +9673,8 @@ rules.set("fence", {
 });
 rules.set("alert", {
   isLeaf: false,
-  match: blockRegex(/^(?: *> \[!(NOTE|TIP|IMPORTANT|WARNING)\])((?:\n *>(?! *\[!)[^\n]*)+)(?:\n *)+\n/),
-  // Alert for note |tip | important | warning
+  match: blockRegex(/^(?: *> \[!(NOTE|TIP|IMPORTANT|WARNING|EPIGRAPH)\])((?:\n *>(?! *\[!)[^\n]*)+)(?:\n *)+\n/),
+  // Alert for note |tip | important | warning |epigraph
   parse: function(capture, state) {
     const cap = capture[2].replace(/\n *> ?/gm, "\n").replace(/^\n/, "");
     const content = parse(cap, state);
@@ -9720,8 +9720,8 @@ rules.set("dd", {  // description details
 });
 rules.set("special_div", {
   isLeaf: false,
-  match: blockRegex(/^(:{3,}) ?(indented|comment|centered|boxed|header|hidden) *\n([\s\S]+?)\n+\1 *(?:\n{2,}|\s*$)/),
-  // indented or centered or boxed or comment div, or <header>
+  match: blockRegex(/^(:{3,}) ?(indented|comment|centered|right_justified|boxed|header|hidden) *\n([\s\S]+?)\n+\1 *(?:\n{2,}|\s*$)/),
+  // indented or centered or right-justified or boxed or comment div, or <header>
   parse: function(capture, state) {
     const content = parse(capture[3], state);
     return { type: capture[2], content };
@@ -17227,8 +17227,14 @@ const nodes = {
   centered(node) {
     return htmlTag("div", ast2html(node.content), { class: 'centered' }) + "\n"
   },
+  right_justified(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'right_justified' }) + "\n"
+  },
   hidden(node) {
     return htmlTag("div", ast2html(node.content), { class: 'hidden' }) + "\n"
+  },
+  epigraph(node) {
+    return htmlTag("blockquote", ast2html(node.content), { class: 'epigraph' }) + "\n"
   },
   note(node) {
     return htmlTag("div", ast2html(node.content), { class: 'note' }) + "\n"
