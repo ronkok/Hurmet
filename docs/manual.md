@@ -2488,7 +2488,7 @@ for which I am very grateful.
 
 <br>
 
-Copyright © 2020-2023 Ron Kok. Released under the [MIT License][]
+Copyright © 2020-2024 Ron Kok. Released under the [MIT License][]
 
 <br>
 
