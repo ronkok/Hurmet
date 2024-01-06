@@ -16374,12 +16374,12 @@ const findPageBreaks = (view, state, purpose, tocSchema, startLevel, endLevel = 
         if (element.tagName === "H1" &&
             element.getBoundingClientRect().top - top > 0.75 * pageHeight) {
           // prevent an H1 near the bottom of the
-          element.style.breakBefore = "page";
+          if (!headerExists) { element.style.breakBefore = "page"; }
           break
         }
         if (headingRegEx.test(element.tagName)) {
           if (doesNotFit(i + 1, editor, pageHeight, top)) { // Prevent a heading orphan
-            element.style.breakBefore = "page";
+            if (!headerExists) { element.style.breakBefore = "page"; }
             break
           }
         }
