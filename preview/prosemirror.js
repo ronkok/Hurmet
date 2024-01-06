@@ -16221,7 +16221,8 @@ const unitTeXFromString = str => {
 const headsRegEx = /^H[1-6]$/;
 const levelRegEx = /(\d+)(?:[^\d]+(\d+))?/;
 const lists$1 = ["OL", "UL"];
-const blockRegEx$1 = /^(centered|indented)$/;
+const blockRegEx$1 = /^(centered|indented|right_justified)$/;
+const headingRegEx = /^H[1-6]$/;
 const forToC = 0;
 const forPrint = 1;
 
@@ -16261,6 +16262,19 @@ const renderToC = (tocArray, ul) => {
     pageNum.textContent = String(item[2]).trim();
     li.appendChild(pageNum);
     ul.appendChild(li);
+  }
+};
+
+const doesNotFit = (iNext, editor, pageHeight, top) => {
+  if (iNext >= editor.children.length - 1) { return false }
+  const element = editor.children[iNext];
+  if (pageHeight > bottomOf(element) - top) { return false }
+  if (element.children.length > 1 && (lists$1.includes(element.tagName) ||
+         (element.tagName === "DIV" && blockRegEx$1.test(element.className)))) {
+    const firstBot = bottomOf(element.children[0]);
+    return (firstBot - top > pageHeight)
+  } else {
+    return true
   }
 };
 
@@ -16309,9 +16323,9 @@ const findPageBreaks = (view, state, purpose, tocSchema, startLevel, endLevel = 
     header.classList.add("header");
     header.innerHTML = header.innerHTML.replace("$PAGE", '<span class="page-display"></span>');
     const headerRect = document.getElementsByTagName("header")[0].getBoundingClientRect();
-    pageHeight = pageHeight - 139 /*margins*/  -  (headerRect.bottom - headerRect.top);
+    pageHeight = pageHeight - 121 /* 16 mm margins*/  -  (headerRect.bottom - headerRect.top);
   } else {
-    pageHeight = pageHeight - 139;
+    pageHeight = pageHeight - 121;
   }
 
   const numPasses = purpose === forPrint ? 2 : 1;
@@ -16358,14 +16372,16 @@ const findPageBreaks = (view, state, purpose, tocSchema, startLevel, endLevel = 
         }
 
         if (element.tagName === "H1" &&
-          element.getBoundingClientRect().top - top > 0.75 * pageHeight) {
-          // Prevent a H1 near the bottom of a page.
+            element.getBoundingClientRect().top - top > 0.75 * pageHeight) {
+          // prevent an H1 near the bottom of the
+          element.style.breakBefore = "page";
           break
         }
-        if (element.tagName === "H2" &&
-          element.getBoundingClientRect().top - top > 0.85 * pageHeight) {
-          // Prevent a H2 near the bottom of a page.
-          break
+        if (headingRegEx.test(element.tagName)) {
+          if (doesNotFit(i + 1, editor, pageHeight, top)) { // Prevent a heading orphan
+            element.style.breakBefore = "page";
+            break
+          }
         }
 
         const bottom = bottomOf(element);
@@ -17430,11 +17446,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6263","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.6337","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.3618","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.3724","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -17443,10 +17459,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4642","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4600","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9260","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.8509","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9320","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.8130","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -17466,7 +17482,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.86905","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.86210","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -17474,23 +17490,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.6314","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.5297","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["3.9993","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["91.9045","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["4.0194","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["90.8100","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["156.33","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["158.57","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1433.66","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1439.64","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -17501,7 +17517,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["18.7231","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["18.6066","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -17531,7 +17547,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.1050","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0921","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -36924,7 +36940,7 @@ defineFunction({
     allowedInText: true,
     argTypes: ["raw", "raw"]
   },
-  handler({ parser, token }, args, optArgs) {
+  handler({ parser, breakOnTokenText, token }, args, optArgs) {
     const model = optArgs[0] && assertNodeType(optArgs[0], "raw").string;
     let color = "";
     if (model) {
@@ -36934,15 +36950,8 @@ defineFunction({
       color = validateColor(assertNodeType(args[0], "raw").string, parser.gullet.macros, token);
     }
 
-    // Set macro \current@color in current namespace to store the current
-    // color, mimicking the behavior of color.sty.
-    // This is currently used just to correctly color a \right
-    // that follows a \color command.
-    parser.gullet.macros.set("\\current@color", color);
-
     // Parse out the implicit body that should be colored.
-    // Since \color nodes should not be nested, break on \color.
-    const body = parser.parseExpression(true, "\\color");
+    const body = parser.parseExpression(true, breakOnTokenText);
 
     return {
       type: "color",
@@ -37482,18 +37491,10 @@ defineFunction({
     argTypes: ["primitive"]
   },
   handler: (context, args) => {
-    // \left case below triggers parsing of \right in
-    //   `const right = parser.parseFunction();`
-    // uses this return value.
-    const color = context.parser.gullet.macros.get("\\current@color");
-    if (color && typeof color !== "string") {
-      throw new ParseError("\\current@color set to non-string in \\right");
-    }
     return {
       type: "leftright-right",
       mode: context.parser.mode,
-      delim: checkDelimiter(args[0], context).text,
-      color // undefined if not set via \color
+      delim: checkDelimiter(args[0], context).text
     };
   }
 });
@@ -37522,8 +37523,7 @@ defineFunction({
       mode: parser.mode,
       body,
       left: delim.text,
-      right: right.delim,
-      rightColor: right.color
+      right: right.delim
     };
   },
   mathmlBuilder: (group, style) => {
@@ -37546,7 +37546,6 @@ defineFunction({
     if (group.right === "\u2216" || group.right.indexOf("arrow") > -1) {
       rightNode.setAttribute("stretchy", "true");
     }
-    if (group.rightColor) { rightNode.style.color =  group.rightColor; }
     inner.push(rightNode);
 
     return makeRow(inner);
@@ -46822,7 +46821,7 @@ class Style {
  * https://mit-license.org/
  */
 
-const version = "0.10.20";
+const version = "0.10.21";
 
 function postProcess(block) {
   const labelMap = {};
