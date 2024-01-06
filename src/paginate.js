@@ -5,7 +5,8 @@ import { clone } from "./utils"
 const headsRegEx = /^H[1-6]$/
 const levelRegEx = /(\d+)(?:[^\d]+(\d+))?/
 const lists = ["OL", "UL"]
-const blockRegEx = /^(centered|indented)$/
+const blockRegEx = /^(centered|indented|right_justified)$/
+const headingRegEx = /^H[1-6]$/
 export const forToC = 0
 export const forPrint = 1
 
@@ -45,6 +46,19 @@ export const renderToC = (tocArray, ul) => {
     pageNum.textContent = String(item[2]).trim()
     li.appendChild(pageNum)
     ul.appendChild(li)
+  }
+}
+
+const doesNotFit = (iNext, editor, pageHeight, top) => {
+  if (iNext >= editor.children.length - 1) { return false }
+  const element = editor.children[iNext];
+  if (pageHeight > bottomOf(element) - top) { return false }
+  if (element.children.length > 1 && (lists.includes(element.tagName) ||
+         (element.tagName === "DIV" && blockRegEx.test(element.className)))) {
+    const firstBot = bottomOf(element.children[0])
+    return (firstBot - top > pageHeight)
+  } else {
+    return true
   }
 }
 
@@ -93,9 +107,9 @@ export const findPageBreaks = (view, state, purpose, tocSchema, startLevel, endL
     header.classList.add("header")
     header.innerHTML = header.innerHTML.replace("$PAGE", '<span class="page-display"></span>')
     const headerRect = document.getElementsByTagName("header")[0].getBoundingClientRect()
-    pageHeight = pageHeight - 139 /*margins*/  -  (headerRect.bottom - headerRect.top)
+    pageHeight = pageHeight - 121 /* 16 mm margins*/  -  (headerRect.bottom - headerRect.top)
   } else {
-    pageHeight = pageHeight - 139
+    pageHeight = pageHeight - 121
   }
 
   const numPasses = purpose === forPrint ? 2 : 1
@@ -142,14 +156,16 @@ export const findPageBreaks = (view, state, purpose, tocSchema, startLevel, endL
         }
 
         if (element.tagName === "H1" &&
-          element.getBoundingClientRect().top - top > 0.75 * pageHeight) {
-          // Prevent a H1 near the bottom of a page.
+            element.getBoundingClientRect().top - top > 0.75 * pageHeight) {
+          // prevent an H1 near the bottom of the
+          element.style.breakBefore = "page"
           break
         }
-        if (element.tagName === "H2" &&
-          element.getBoundingClientRect().top - top > 0.85 * pageHeight) {
-          // Prevent a H2 near the bottom of a page.
-          break
+        if (headingRegEx.test(element.tagName)) {
+          if (doesNotFit(i + 1, editor, pageHeight, top)) { // Prevent a heading orphan
+            element.style.breakBefore = "page"
+            break
+          }
         }
 
         const bottom = bottomOf(element)
