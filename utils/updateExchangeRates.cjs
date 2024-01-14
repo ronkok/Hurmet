@@ -2,7 +2,7 @@ const fs = require('fs') // Node.js file system
 const ecbData = fs.readFileSync('utils/ECB Exchange Rates.xml').toString('utf8')
 let unitModule = fs.readFileSync('src/units.js').toString('utf8')
 
-const rateRegEx = /currency="([^"]+)" rate="([^"]+)"/g
+const rateRegEx = /currency='([^']+)' rate='([^']+)'/g
 
 let match;
 while ((match = rateRegEx.exec(ecbData)) !== null) {
