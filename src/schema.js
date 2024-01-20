@@ -266,6 +266,15 @@ export const nodes = {
     }
   },
 
+  footnote: {
+    group: "inline",
+    content: "inline*",
+    inline: true,
+    atom: true,
+    toDOM: () => ["footnote", 0],
+    parseDOM: [{tag: "footnote"}]
+  },
+
   // Table of contents
   toc: {
     atom: true,

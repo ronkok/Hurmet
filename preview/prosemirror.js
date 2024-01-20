@@ -9489,7 +9489,7 @@ DOMObserver.prototype.flush = function flush () {
   }
 
   var sel = this.view.root.getSelection();
-  var newSel = !this.suppressingSelectionUpdates && !this.currentSelection.eq(sel) && hasSelection(this.view) ;
+  var newSel = !this.suppressingSelectionUpdates && !this.currentSelection.eq(sel) && hasSelection(this.view) && !this.ignoreSelectionChange(sel);
 
   var from = -1, to = -1, typeOver = false, added = [];
   if (this.view.editable) {
@@ -16216,269 +16216,6 @@ const unitTeXFromString = str => {
   return unit + "}}"
 };
 
-// Items related to pagination and Table of Contents
-
-const headsRegEx = /^H[1-6]$/;
-const levelRegEx = /(\d+)(?:[^\d]+(\d+))?/;
-const lists$1 = ["OL", "UL"];
-const blockRegEx$1 = /^(centered|indented|right_justified)$/;
-const headingRegEx = /^H[1-6]$/;
-const forToC = 0;
-const forPrint = 1;
-
-const findTOC = doc => {
-  // Called by a print event.
-  // Is there a Table of Contents node?
-  let tocNode = undefined;
-  let nodePos = 0;
-  doc.nodesBetween(0, doc.content.size, function(node, pos) {
-    if (node.type.name === "toc") {
-      tocNode = node;
-      nodePos = pos;
-    }
-  });
-  return [tocNode, nodePos]
-};
-
-const tocLevels = entry => {
-  // Determine the start and end heading levels
-  const parts = entry.match(levelRegEx);
-  const startLevel = Number(parts[1]);
-  const endLevel = Number(parts[2] ? parts[2] : startLevel);
-  return [startLevel, endLevel]
-};
-
-const renderToC = (tocArray, ul) => {
-  // Called by schema.js. Renders a Table of Contents.
-  ul.innerHTML = "";
-  ul.className = "toc";
-  for (const item of tocArray) {
-    const li = document.createElement("li");
-    if (item[1] > 0) { li.style.marginLeft = String(1.5 * item[1]) + "em"; }
-    const title = document.createElement("span");
-    title.textContent = item[0].trim();
-    li.appendChild(title);
-    const pageNum = document.createElement("span");
-    pageNum.textContent = String(item[2]).trim();
-    li.appendChild(pageNum);
-    ul.appendChild(li);
-  }
-};
-
-const doesNotFit = (iNext, editor, pageHeight, top) => {
-  if (iNext >= editor.children.length - 1) { return false }
-  const element = editor.children[iNext];
-  if (pageHeight > bottomOf(element) - top) { return false }
-  if (element.children.length > 1 && (lists$1.includes(element.tagName) ||
-         (element.tagName === "DIV" && blockRegEx$1.test(element.className)))) {
-    const firstBot = bottomOf(element.children[0]);
-    return (firstBot - top > pageHeight)
-  } else {
-    return true
-  }
-};
-
-const bottomOf = element => {
-  let bottom = element.getBoundingClientRect().bottom;
-  const images = element.getElementsByTagName("img");
-  for (let i = 0; i < images.length; i++) {
-    bottom = Math.max(bottom, images[i].getBoundingClientRect().bottom);
-  }
-  const svgs = element.getElementsByTagName("svg");
-  for (let i = 0; i < svgs.length; i++) {
-    bottom = Math.max(bottom, svgs[i].getBoundingClientRect().bottom);
-  }
-  return bottom
-};
-
-const findPageBreaks = (view, state, purpose, tocSchema, startLevel, endLevel = 0) => {
-  const doc = state.doc;
-  const headerExists = doc.nodeAt(0).type.name === "header";
-  let tocNode;
-  let nodePos = 0;
-  if (purpose === forPrint) {
-    [tocNode, nodePos] = findTOC(doc);
-    if (tocNode) {
-      startLevel = tocNode.attrs.start;
-      endLevel = tocNode.attrs.end;
-    }
-  }
-  let tocRegEx;
-  if (endLevel > 0) {
-    let targetStr = "^(";
-    for (let i = startLevel; i <= endLevel; i++) {
-      targetStr += "H" + i + "|";
-    }
-    targetStr = targetStr.slice(0, -1) + ")$";
-    tocRegEx = targetStr.length > 0 ? RegExp(targetStr) : null;
-  }
-  const tocArray = [];
-  const destination = document.getElementById("print-div");
-  const frag = document.createDocumentFragment();
-  let header;
-  let pageHeight = doc.attrs.pageSize === "letter" ? 11 * 96 : 297 / 25.4 * 96;
-  if (headerExists) {
-    // eslint-disable-next-line max-len
-    header = document.getElementsByTagName("header")[0].childNodes[0].childNodes[0].cloneNode(true);
-    header.classList.add("header");
-    header.innerHTML = header.innerHTML.replace("$PAGE", '<span class="page-display"></span>');
-    const headerRect = document.getElementsByTagName("header")[0].getBoundingClientRect();
-    pageHeight = pageHeight - 121 /* 16 mm margins*/  -  (headerRect.bottom - headerRect.top);
-  } else {
-    pageHeight = pageHeight - 121;
-  }
-
-  const numPasses = purpose === forPrint ? 2 : 1;
-
-  let packet = [];
-  destination.innerHTML = "";
-
-  for (let iPass = 0; iPass < numPasses; iPass++) {
-    const [editor] = document.getElementsByClassName("ProseMirror-example-setup-style");
-    const source = editor.cloneNode(true);
-    const numEls = source.childNodes.length;
-    let prevElement = { index: headerExists ? 0 : -1, all: true };
-    let iStart = prevElement.all ? prevElement.index + 1 : prevElement.index;
-    let pageNum = 1;  // Loop will increment pageNum. Odd numbers will be on recto side.
-    while (iStart < numEls) {
-      const top = prevElement.all
-        ? editor.children[iStart].getBoundingClientRect().top
-        : editor.children[iStart].children[prevElement.end].getBoundingClientRect().top;
-      packet = [];
-
-      // Iterate on the top level elements. Check the bottom coordinate of each.
-      for (let i = iStart; i < numEls; i++) {
-        const element = editor.children[i]; // A top level element.
-        let elementData = { index: i, all: true };
-
-        if (i === iStart && !prevElement.all) {
-          // Continue to print a block that was begun on the previous page.
-          elementData = { index: i, all: false, tag: element.tagName,
-            class: element.className, start: prevElement.end };
-          for (let j = prevElement.end; j < element.children.length; j++) {
-            const bot = bottomOf(element.children[j]);
-            if (bot - top > pageHeight) {
-              elementData.end = j - 1;
-              break
-            }
-          }
-          if (!elementData.end) { elementData.end = element.children.length; }
-          packet.push(elementData);
-          if (elementData.end < element.children.length) {
-            break
-          } else {
-            continue
-          }
-        }
-
-        if (element.tagName === "H1" &&
-            element.getBoundingClientRect().top - top > 0.75 * pageHeight) {
-          // prevent an H1 near the bottom of the
-          if (!headerExists) { element.style.breakBefore = "page"; }
-          break
-        }
-        if (headingRegEx.test(element.tagName)) {
-          if (doesNotFit(i + 1, editor, pageHeight, top)) { // Prevent a heading orphan
-            if (!headerExists) { element.style.breakBefore = "page"; }
-            break
-          }
-        }
-
-        const bottom = bottomOf(element);
-        if (pageHeight > bottom - top) {
-          packet.push(elementData);
-        } else {
-          // element runs past the bottom of the page.
-          // Check if element is a list or an (indented|centered) div
-          if (element.children.length > 1 && (lists$1.includes(element.tagName) ||
-          (element.tagName === "DIV" && blockRegEx$1.test(element.className)))) {
-            const firstBot = bottomOf(element.children[0]);
-            if (firstBot - top > pageHeight) {
-              if (headsRegEx.test(editor.children[i - 1].tagName)) {
-                packet.pop();
-                if (iPass === 0 && tocRegEx && tocRegEx.test(editor.children[i - 1].tagName)) {
-                  tocArray.pop();
-                }
-              }
-              break
-            }
-            for (let j = 0; j < element.children.length; j++) {
-              const bot = bottomOf(element.children[j]);
-              if (bot - top > pageHeight) {
-                elementData = { index: i, all: false, tag: element.tagName,
-                  class: element.className, start: 0, end: j - 1 };
-                break
-              }
-            }
-            if (elementData.end < element.children.length) {
-              packet.push(elementData);
-              break
-            }
-          }
-          if (headsRegEx.test(editor.children[i - 1].tagName)) {
-            packet.pop();
-            if (iPass === 0 && tocRegEx && tocRegEx.test(editor.children[i - 1].tagName)) {
-              tocArray.pop();
-            }
-          }
-          break
-        }
-        if (iPass === 0 && tocRegEx && tocRegEx.test(element.tagName)) {
-          const level = Number(element.tagName.slice(1)) - startLevel;
-          tocArray.push([element.textContent, level, pageNum]);
-        }
-      }
-
-      // The loop has found enough elements to fill a page.
-      if (purpose === forPrint && iPass === 1) {
-        // Copy the identified elements to the destination div.
-        if (headerExists && pageNum > 1) {
-          frag.append(header.cloneNode(true));
-        }
-        // Create a body div
-        const div = document.createElement("div");
-        div.className = "print-body";
-        for (const elementData of packet) {
-          const i = elementData.index;
-          if (elementData.all) {
-            div.append(source.children[i].cloneNode(true));
-          } else {
-            const el = document.createElement(elementData.tag);
-            if (elementData.class) { el.className = elementData.class; }
-            if (elementData.tag === "OL" && elementData.start > 0) {
-              el.setAttribute("start", elementData.start);
-            }
-            for (let j = elementData.start; j < elementData.end; j++) {
-              el.append(source.children[i].children[j].cloneNode(true));
-            }
-            div.append(el);
-          }
-        }
-        frag.append(div);
-        destination.append(frag);
-      }
-      prevElement = clone(packet[packet.length - 1]);
-      iStart = prevElement.all ? prevElement.index + 1 : prevElement.index;
-      pageNum += 1;
-    }
-    if (purpose === forPrint && tocNode && iPass === 0) {
-      // Write a TOC into the document, so that pagination will be correct.
-      const attrs = {
-        start: tocNode.attrs.start,
-        end: tocNode.attrs.end,
-        body: tocArray
-      };
-      const tr = state.tr;
-      tr.replaceWith(nodePos, nodePos + 1, tocSchema.createAndFill(attrs));
-      view.dispatch(tr);
-    }
-  }
-  // That concludes the loop.
-  if (purpose === forToC) {
-    return tocArray
-  }
-};
-
 // unit exponents of a number with no unit.
 const allZeros = Object.freeze([0, 0, 0, 0, 0, 0, 0, 0]);
 
@@ -16511,45 +16248,6 @@ const dt = Object.freeze({
   DICTIONARY: 524288,
   MACRO: 1048576
 });
-
-const renderSVG = dwg => {
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  Object.keys(dwg.attrs).forEach(key => {
-    if (key === "float") {
-      svg.style.float = dwg.attrs.float;
-    } else {
-      svg.setAttribute(key, dwg.attrs[key]);
-    }
-  });
-  dwg.children.forEach(el => {
-    const node = document.createElementNS("http://www.w3.org/2000/svg", el.tag);
-    Object.keys(el.attrs).forEach(attr => {
-      if (el.tag === "title") {
-        node.appendChild(document.createTextNode(el.attrs["text"]));
-      } else {
-        node.setAttribute(attr, el.attrs[attr]);
-      }
-    });
-    if (el.tag === "text") {
-      el.children.forEach(child => {
-        const tspan = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
-        if (child.attrs) {
-          Object.keys(child.attrs).forEach(mark => {
-            tspan.setAttribute(mark, child.attrs[mark]);
-          });
-        }
-        tspan.appendChild(document.createTextNode(child.text));
-        node.appendChild(tspan);
-      });
-    } else if (el.tag === "defs") {
-      const styleNode = document.createElementNS("http://www.w3.org/2000/svg", "style");
-      styleNode.appendChild(document.createTextNode(el.style));
-      node.appendChild(styleNode);
-    }
-    svg.appendChild(node);
-  });
-  return svg
-};
 
 const errorMessages = Object.freeze({
   EN: {
@@ -16794,7 +16492,7 @@ const abs$1 = r => {
   return [numerator, r[1]]
 };
 
-const increment$1 = r => [r[0] + r[1], r[1]];
+const increment$2 = r => [r[0] + r[1], r[1]];
 
 const decrement$1 = r => [r[0] - r[1], r[1]];
 
@@ -17021,7 +16719,7 @@ const factorial = (n) => {
   if (lessThan(n, [BigInt(101), iOne])) {
     return fromString(preComputedFactorials[toNumber(n)])
   } else {
-    return lanczos$1(increment$1(n))
+    return lanczos$1(increment$2(n))
   }
 };
 
@@ -17075,7 +16773,7 @@ const Rnl = Object.freeze({
   sign,
   negate: negate$1,
   abs: abs$1,
-  increment: increment$1,
+  increment: increment$2,
   decrement: decrement$1,
   exp: exp$1,
   floor,
@@ -17446,11 +17144,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6337","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.6375","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.3724","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.3309","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -17459,10 +17157,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4600","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4634","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9320","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.8130","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9350","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.8451","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -17482,7 +17180,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.86210","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.85950","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -17490,23 +17188,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.5297","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.5599","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["4.0194","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["90.8100","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["4.0917","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["90.7350","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["158.57","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["159.17","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1439.64","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1438.73","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -17517,7 +17215,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["18.6066","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["18.4931","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -17547,7 +17245,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.0921","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0942","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -18418,7 +18116,7 @@ const divide = (x, y) => {
   }
 };
 
-const increment = z => [Rnl.increment(z[0]), z[1]];
+const increment$1 = z => [Rnl.increment(z[0]), z[1]];
 const decrement = z => [Rnl.decrement(z[0]), z[1]];
 
 const inverse = z => {
@@ -18507,7 +18205,7 @@ const power = (x, y) =>{
 
 const acosh = z => {
   // acosh(z) = log( z + √(z - 1) × √(z + 1) )
-  return log(add(z, multiply(sqrt(decrement(z)), sqrt(increment(z)))))
+  return log(add(z, multiply(sqrt(decrement(z)), sqrt(increment$1(z)))))
 };
 
 const asinh = z => {
@@ -18518,7 +18216,7 @@ const asinh = z => {
 
 const atanh = z => {
   // atanh(z) = [ log(1+z) - log(1-z) ] / 2
-  return divide(subtract(log(increment(z)), log(subtract([Rnl.one, Rnl.zero], z))), [Rnl.two, Rnl.zero])
+  return divide(subtract(log(increment$1(z)), log(subtract([Rnl.one, Rnl.zero], z))), [Rnl.two, Rnl.zero])
 };
 
 const asin = z => {
@@ -18528,7 +18226,7 @@ const asin = z => {
 
 const atan = z => {
   // (Log(1 + iz) - Log(1 - iz)) / (2 * i)  cf Kahan
-  const term1 = log(increment(multiply(j, z)));
+  const term1 = log(increment$1(multiply(j, z)));
   const term2 = log(subtract([Rnl.one, Rnl.zero],(multiply(j, z))));
   return divide(subtract(term1, term2), [Rnl.zero, Rnl.two])  
 };
@@ -18607,7 +18305,7 @@ const Cpx = Object.freeze({
   conjugate,
   angle,
   inverse,
-  increment,
+  increment: increment$1,
   decrement,
   isComplex,
   add,
@@ -22304,174 +22002,1219 @@ const parse$1 = (
   return isCalc ? [tex, rpn, dependencies] : tex
 };
 
-function insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat) {
-  // hurmetVars is a key:value store of variable names and attributes.
-  // This function is called to insert an assignment into hurmetVars.
-  const formatSpec = hurmetVars.format ? hurmetVars.format.value : "h15";
+/**
+ * md2ast() returns an AST that matches the memory structure  of a Hurmet.app document.
+ * Elsewhere, Hurmet uses the AST to create either a live Hurmet doc or a static HTML doc.
+ *
+ * ## Restrictions
+ *
+ * 1. **_bold-italic_** must use both * & _ delimiters. Hurmet will fail on ***wat***.
+ * 2. "Shortcut" reference links [ref] are not recognized.
+ *
+ * ## Extensions
+ *
+ * 1. Hurmet inline calculation is delimited ¢`…`.
+ *    Hurmet display calculation is delimited ¢¢…¢¢.
+ * 2. LaTeX inline math is delimited $…$.
+ *    No space allowed after 1st $ or before 2nd $. No digit after 2nd $.
+ *    LaTeX display math is delimited  $$ … $$.
+ * 3. ~subscript~
+ * 4. ~~strikethrough~~
+ * 5. Pipe tables as per Github Flavored Markdown (GFM).
+ * 6. Grid tables as per Pandoc and reStructuredText
+ * 7. Empty paragraphs: A line consisting only of "¶".
+ * 8. Attributes for reference link definitions
+ *      [id]: target
+ *      {.class #id width=number}
+ * 9. Figure/Caption for images. Format is a paragraph that consists entirely of:
+ *    !![caption][id]
+ * 10. Table directives. They are placed on the line after the table. The format is:
+ *     {.class #id width="num1 num2 …" caption}
+ * 11. Lists that allow the user to pick list ordering.
+ *        1. →  1. 2. 3.  etc.
+ *        A. →  A. B. C.  etc. (future)
+ *        a) →  (a) (b) (c)  etc. (future)
+ * 12. Alerts per GFM
+ *     > [!note] or [!tip] or [!important] or [!warning] or [!epigraph]
+ *     > Content of note
+ * 13. Fenced divs, similar to Pandoc.
+ *     ::: (centered|right_justified|comment|indented|boxed|header)
+ *     Block elements
+ *     :::
+ *     Nested divs are distinguished by number of colons. Minimum three.
+ * 14. Table of Contents
+ *     {.toc start=N end=N}
+ * 15. Definition lists, per Pandoc.  (future)
+ * 16. [^1] is a reference to a footnote.
+ *     [^1]: The body of the footnote is deferred, similar to reference links.
+ * 17. [#1] is a reference to a citation. (future)
+ *     [#1]: The body of the citation is deferred, similar to reference links.
+ * 18. Line blocks begin with "| ", as per Pandoc. (future)
+ *
+ * hurmetMark.js copyright (c) 2021 - 2023 Ron Kok
+ *
+ * This file has been adapted (and heavily modified) from Simple-Markdown.
+ * Simple-Markdown copyright (c) 2014-2019 Khan Academy & Aria Buckles.
+ *
+ * Portions of Simple-Markdown were adapted from marked.js copyright (c) 2011-2014
+ * Christopher Jeffrey (https://github.com/chjj/).
+ *
+ * LICENSE (MIT):
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 
-  if (!Array.isArray(attrs.name)) {
-    // This is the typical case.
-    hurmetVars[attrs.name] = attrs;
-    if (changedVars) {
-      changedVars.add(attrs.name);
+
+const CR_NEWLINE_R = /\r\n?/g;
+const FORMFEED_R = /\f/g;
+const CLASS_R = /(?:^| )\.([a-z-]+)(?: |$)/;
+const WIDTH_R = /(?:^| )width="?([\d.a-z]+"?)(?: |$)/;
+const COL_WIDTHS_R = /(?:^| )colWidths="([^"]*)"/;
+const ID_R = /(?:^| )#([a-z-]+)(?: |$)/;
+const leadingSpaceRegEx$1 = /^ +/;
+const trailingSpaceRegEx = / +$/;
+
+// Turn various whitespace into easy-to-process whitespace
+const preprocess = function(source) {
+  return source.replace(CR_NEWLINE_R, "\n").replace(FORMFEED_R, "");
+};
+
+// Creates a match function for an inline scoped element from a regex
+const inlineRegex = function(regex) {
+  const match = function(source, state) {
+    return state.inline ? regex.exec(source) : null
+  };
+  match.regex = regex;
+  return match;
+};
+
+// Creates a match function for a block scoped element from a regex
+const blockRegex = function(regex) {
+  const match = function(source, state) {
+    return state.inline ? null : regex.exec(source)
+  };
+  match.regex = regex;
+  return match;
+};
+
+// Creates a match function from a regex, ignoring block/inline scope
+const anyScopeRegex = function(regex) {
+  const match = function(source, state) {
+    return regex.exec(source);
+  };
+  match.regex = regex;
+  return match;
+};
+
+const UNESCAPE_URL_R = /\\([^0-9A-Za-z\s])/g;
+const unescapeUrl = function(rawUrlString) {
+  return rawUrlString.replace(UNESCAPE_URL_R, "$1");
+};
+
+const parseList = (str, state) => {
+  const items = str.replace(LIST_BLOCK_END_R, "\n").match(LIST_ITEM_R);
+  const isTight = !/\n\n/.test(str.replace(/\n*$/, ""));
+  const itemContent = items.map(function(item, i) {
+    // We need to see how far indented this item is:
+    const prefixCapture = LIST_ITEM_PREFIX_R.exec(item);
+    const space = prefixCapture ? prefixCapture[0].length : 0;
+    // And then we construct a regex to "unindent" the subsequent
+    // lines of the items by that amount:
+    const spaceRegex = new RegExp("^ {1," + space + "}", "gm");
+
+    // Before processing the item, we need a couple things
+    const contentStr = item
+      // remove indents on trailing lines:
+      .replace(spaceRegex, "")
+      // remove the bullet:
+      .replace(LIST_ITEM_PREFIX_R, "");
+
+    // backup our state for restoration afterwards. We're going to
+    // want to set state._list to true, and state.inline depending
+    // on our list's looseness.
+    const oldStateInline = state.inline;
+    const oldStateList = state._list;
+    state._list = true;
+    const oldStateTightness = state.isTight;
+    state.isTight = isTight;
+
+    // Parse the list item
+    state.inline = isTight;
+    const adjustedContent = contentStr.replace(LIST_ITEM_END_R, "");
+    const content = parse(adjustedContent, state);
+    const result = isTight
+      ? { type: "tight_list_item", content: [{ "type": "paragraph", "content": content }] }
+      : { type: "list_item", content };
+
+    // Restore our state before returning
+    state.inline = oldStateInline;
+    state._list = oldStateList;
+    state.isTight = oldStateTightness;
+    return result;
+  });
+
+  return itemContent
+};
+
+const TABLES = (function() {
+  const TABLE_ROW_SEPARATOR_TRIM = /^ *[|+] *| *[|+] *$/g;
+  const TABLE_RIGHT_ALIGN = /^[-=]+:$/;
+  const TABLE_CENTER_ALIGN = /^:[-=]+:$/;
+
+  const parseTableAlign = function(source) {
+    // Inspect ":" characters to set column justification.
+    // Return class names that specify center or right justification on specific columns.
+    source = source.replace(TABLE_ROW_SEPARATOR_TRIM, "");
+    const alignArr = source.trim().split(/[|+]/);
+    let alignStr = "";
+    for (let i = 0; i < alignArr.length; i++) {
+      alignStr += TABLE_CENTER_ALIGN.test(alignArr[i])
+        ? ` c${String(i + 1)}c`
+        : (TABLE_RIGHT_ALIGN.test(alignArr[i])
+        ? ` c${String(i + 1)}r`
+        : "");
     }
+    return alignStr.trim()
+  };
 
-  } else if (attrs.value === null) {
-    for (let i = 0; i < attrs.name.length; i++) {
-      hurmetVars[attrs.name[i]] = { value: null };
+  const tableDirectives = (directives, align) => {
+    // Get CSS class, ID, and column widths, if any.
+    if (!directives && align === "") { return ["", "", null] }
+    const userDefClass = CLASS_R.exec(directives);
+    let myClass = (userDefClass) ? userDefClass[1] : "";
+    if (align.length > 0) { myClass += (myClass.length > 0 ? " " : "") + align; }
+    const userDefId = ID_R.exec(directives);
+    const myID = (userDefId) ? userDefId[1] : "";
+    const colWidthMatch = COL_WIDTHS_R.exec(directives);
+    const colWidths = (colWidthMatch) ? colWidthMatch[1].split(" ") : null;
+    return [myClass, myID, colWidths]
+  };
+
+  const pipeRegEx = /(?<!\\)\|/;  // eslint doesn't like look behind. Disregard the warning.
+
+  const parsePipeTableRow = function(source, parse, state, colWidths, inHeader) {
+    const cells = source.trim().split(pipeRegEx);
+    cells.shift();
+    cells.pop();
+    const tableRow = [{ type: "tableSeparator" }];
+    for (const str of cells) {
+      const cell = parse(str.trim(), state);
+      tableRow.push(...cell);
+      tableRow.push({ type: "tableSeparator" });
     }
+//    const tableRow = parse(source.trim(), state);
+    consolidate(tableRow);
+  //  state.inTable = prevInTable;
 
-  } else if (isMatrix(attrs)) {
-    // Assign to a matrix of names
-    const isQuantity = Boolean(attrs.dtype & dt.QUANTITY);
-    let resultDisplay = attrs.resultdisplay;
-    resultDisplay = resultDisplay.replace(/\\(begin|end){[bp]matrix}/g, "").trim();
-    const displays = resultDisplay.split(/&|\\\\/);
-    if (attrs.dtype & dt.MATRIX) {
-      // A 2 dimensional matrix.
-      const dtype = attrs.dtype - dt.MATRIX;
-      const numRows = isQuantity ? attrs.value.plain.length : attrs.value.length;
-      const numCols = attrs.name.length / numRows;
-      let iName = 0;
-      for (let i = 0; i < numRows; i++) {
-        for (let j = 0; j < numCols; j++) {
-          const value = isQuantity
-            ? { plain: attrs.value.plain[i][j], inBaseUnits: attrs.value.inBaseUnits[i][j] }
-            : attrs.value[i][j];
-          hurmetVars[attrs.name[i]] = {
-            name: attrs.name[iName],
-            value,
-            resultdisplay: isQuantity
-              ? parse$1(displays[iName].trim() + " '" + attrs.unit + "'")
-              : displays[iName].trim(),
-            expos: attrs.expos,
-            unit: isQuantity ? attrs.unit : undefined,
-            dtype
-          };
-          if (changedVars) { changedVars.add(attrs.name[i]); }
-          iName += 1;
+    const row = {
+      type: "table_row",
+      content: []
+    };
+    let j = -1;
+    tableRow.forEach(function(node, i) {
+      if (node.type === "text") {
+        if (i > 0 && tableRow[i - 1].type === "tableSeparator") {
+          node.text = node.text.replace(leadingSpaceRegEx$1, "");
+        }
+        if (i < tableRow.length - 1) {
+          node.text = node.text.replace(trailingSpaceRegEx, "");
         }
       }
-    } else {
-      // Assign to a vector of names.
-      const isColumn = Boolean(attrs.dtype & dt.COLUMNVECTOR);
-      const dtype = attrs.dtype - (isColumn ? dt.COLUMNVECTOR : dt.ROWVECTOR);
-      for (let i = 0; i < attrs.name.length; i++) {
-        const value = isQuantity
-          ? { plain: attrs.value.plain[i], inBaseUnits: attrs.value.inBaseUnits[i] }
-          : attrs.value[i];
-        hurmetVars[attrs.name[i]] = {
-          name: attrs.name[i],
-          value,
-          resultdisplay: isQuantity
-            ? parse$1(displays[i].trim() + " '" + attrs.unit + "'")
-            : displays[i].trim(),
-          expos: attrs.expos,
-          unit: isQuantity ? attrs.unit : undefined,
-          dtype
-        };
-        if (changedVars) { changedVars.add(attrs.name[i]); }
-      }
-    }
-
-  // From this point forward, we're dealing with multiple assignment
-  } else if (attrs.dtype & dt.MAP) {
-    const unit = attrs.unit;
-    const unitName = unit && unit.name ? unit.name : undefined;
-    const dtype = attrs.dtype - dt.MAP;
-    let i = 0;
-    if (attrs.dtype & dt.QUANTITY) {
-      for (const value of attrs.value.data.plain) {
-        const result = {
-          value: { plain: value },
-          expos: attrs.expos,
-          factor: attrs.factor,
-          dtype
-        };
-        result.resultdisplay = format(value, formatSpec, decimalFormat);
-        if (unitName) { result.resultdisplay += " " + unitTeXFromString(unitName); }
-        hurmetVars[attrs.name[i]] = result;
-        if (changedVars) { changedVars.add(attrs.name[i]); }
-        i += 1;
-      }
-      i = 0;
-      for (const value of attrs.value.data.inBaseUnits) {
-        hurmetVars[attrs.name[i]].value.inBaseUnits = value;
-        i += 1;
-      }
-    } else {
-      for (const value of attrs.value.data) {
-        const result = { value, expos: attrs.expos, factor: attrs.factor, dtype };
-        result.resultdisplay = Rnl.isRational(value)
-          ? format(value, formatSpec, decimalFormat)
-          : String(value);
-        if (unitName) { result.resultdisplay += " " + unitTeXFromString(unitName); }
-        hurmetVars[attrs.name[i]] = result;
-        if (changedVars) { changedVars.add(attrs.name[i]); }
-        i += 1;
-      }
-    }
-  } else if (attrs.dtype === dt.DATAFRAME) {
-    const isSingleRow = attrs.value.data[0].length === 1;
-    for (let i = 0; i < attrs.name.length; i++) {
-      let dtype = attrs.value.dtype[i];
-      let value = isSingleRow ? undefined : [];
-      for (let j = 0; j < attrs.value.data[0].length; j++) {
-        const datum = attrs.value.data[i][j];
-        const val = (dtype & dt.RATIONAL) ? Rnl.fromString(datum) : datum;
-        if (isSingleRow) {
-          value = val;
-        } else {
-          value.push(val);
+      if (node.type === "tableSeparator") {
+        if (i !== tableRow.length - 1) {  // Filter out the row's  last table separator
+          // Create a new cell
+          j += 1;
+          row.content.push({
+            "type": inHeader ? "table_header" : "table_cell",
+            "attrs": {
+              "colspan": 1,
+              "rowspan": 1,
+              "colwidth": (colWidths) ? [Number(colWidths[j])] : null,
+              "background": null
+            },
+            content: (state.inHtml ? [] : [{ "type": "paragraph", "content": [] }])
+          });
         }
-      }
-      if (!isSingleRow) { dtype += dt.COLUMNVECTOR; }
-      const result = {
-        value,
-        unit: attrs.unit[attrs.value.units[i]],
-        dtype
-      };
-      if ((dtype & dt.RATIONAL) && isSingleRow) {
-        result.resultdisplay = parse$1(format(value));
-      } else if (dtype & dt.RATIONAL) {
-        result.resultdisplay = Matrix.display({ value, dtype }, formatSpec, decimalFormat)
-            + parse$1(`'${attrs.value.units[i]}'`);
+      } else if (state.inHtml) {
+        // For direct to HTML, write the inline contents directly into the <td> element.
+        // row   cell    content      text
+        row.content[j].content.push(node);
       } else {
-        result.resultdisplay = parse$1(value);
+        // Hurmet.app table cells always contain a paragraph.
+        // row   cell  paragraph  content      text
+        row.content[j].content[0].content.push(node);
       }
-      if (attrs.value.units[i]) {
-        result.value = { plain: result.value };
-        const unit = attrs.unit[attrs.value.units[i]];
-        result.value.inBaseUnits = isSingleRow
-          ? Rnl.multiply(Rnl.add(result.value.plain, unit.gauge), unit.factor)
-          : result.value.plain.map(e => Rnl.multiply(Rnl.add(e, unit.gauge), unit.factor));
-        result.expos = unit.expos;
+    });
+
+    return row;
+  };
+
+  const parsePipeTable = function() {
+    return function(capture, state) {
+      state.inline = true;
+      const align = parseTableAlign(capture[2]);
+      const [myClass, myID, colWidths] = tableDirectives(capture[4], align);
+      const table = {
+        type: "table",
+        attrs: {},
+        content: []
+      };
+      if (myID) { table.attrs.id = myID; }
+      if (myClass) { table.attrs.class = myClass; }
+      if (colWidths && state.inHtml) {
+        let sum = 0;
+        colWidths.forEach(el => { sum += Number(el); } );
+        table.attrs.style = `width: ${sum}px`;
+        const colGroup = { type: "colGroup", content: [] };
+        for (const width of colWidths) {
+          colGroup.content.push({ type: "col", attrs: [{ style: `width: ${width}px` }] });
+        }
+        table.content.push(colGroup);
+      }
+      if (!/^\|+$/.test(capture[1])) {
+        table.content.push(parsePipeTableRow(capture[1], parse, state, colWidths, true));
+      }
+      const tableBody = capture[3].trim().split("\n");
+      tableBody.forEach(row => {
+        table.content.push(parsePipeTableRow(row, parse, state, colWidths, false));
+      });
+      state.inline = false;
+      return table
+    };
+  };
+
+  const headerRegEx = /^\+:?=/;
+  const gridSplit = / *\n/g;
+  const cellCornerRegEx = /^\+[-=:]+\+[+=:-]+\+$/g;
+
+  const parseGridTable = function() {
+    return function(capture, state) {
+      const topBorder = capture[2];
+      const lines = capture[1].slice(0, -1).split(gridSplit);
+
+      // Does the grid table contain a line separating header from table body?
+      let headerExists = false;
+      let headerSepLine = lines.length + 10;
+      for (let i = 0; i < lines.length; i++) {
+        if (headerRegEx.test(lines[i])) {
+          headerExists = true;
+          headerSepLine = i;
+          break
+        }
       }
 
-      hurmetVars[attrs.name[i]] = result;
-      if (changedVars) { changedVars.add(attrs.name[i]); }
-    }
-  } else if (attrs.dtype === dt.TUPLE) {
-    let i = 0;
-    for (const value of attrs.value.values()) {
-      hurmetVars[attrs.name[i]] = value;
-      if (changedVars) { changedVars.add(attrs.name[i]); }
-      i += 1;
-    }
-  } else if (attrs.dtype === dt.MODULE) {
-    if (attrs.name.length !== attrs.value.length) {
-      return errorOprnd("MULT_MIS")
+      // Get column justification
+      const alignrow = headerExists ? lines[headerSepLine] : topBorder.slice(1);
+      const align = parseTableAlign(alignrow);
+      const [myClass, myID, colWidths] = tableDirectives(capture[3], align);
+
+      // Read the top & left borders to find a first draft of cell corner locations.
+      const colSeps = [0];
+      for (let j = 1; j < topBorder.length; j++) {
+        if (topBorder.charAt(j) === "+") { colSeps.push(j); }
+      }
+      const rowSeps = [0];
+      for (let i = 1; i < lines.length; i++) {
+        if (lines[i].charAt(0) === "+") { rowSeps.push(i); }
+      }
+
+      // Look for the cell corner locations that don't appear on top or left border
+      let rowSepIndex = 0;
+      while (rowSepIndex < rowSeps.length) {
+        // Find the next row separator
+        let nextRow = 0;
+        const isValid = new Array(colSeps.length).fill(true);
+        for (let i = rowSeps[rowSepIndex] + 1; i < lines.length; i++) {
+          for (let k = 0; k < colSeps.length; k++) {
+            if (!isValid[k]) { continue }
+            if ("+|".indexOf(lines[i][colSeps[k]]) === -1) { isValid[k] = false; continue }
+            if (lines[i][colSeps[k]] === "+") {
+              nextRow = i;
+              break
+            }
+          }
+          if (nextRow !== 0) { break }
+        }
+        if (!rowSeps.includes(nextRow)) {
+          rowSeps.splice(rowSepIndex + 1, 0, nextRow);
+        }
+
+        // Check the next horizontal border for new cell corners
+        rowSepIndex += 1;
+        const border = lines[nextRow];
+        for (let j = 0; j < colSeps.length - 1; j++) {
+          let cellBorder = border.slice(colSeps[j], colSeps[j + 1] + 1);
+          if (cellCornerRegEx.test(cellBorder)) {
+            cellBorder = cellBorder.slice(1, -1);
+            let pos = cellBorder.indexOf("+") + 1;
+            let k = 1;
+            while (pos > 0) {
+              colSeps.splice(j + k, 0, colSeps[j] + pos);
+              pos = cellBorder.indexOf("+", pos) + 1;
+              k += 1;
+            }
+          }
+        }
+      }
+
+      const numCols = colSeps.length - 1;
+      const numRows = rowSeps.length - 1;
+      const gridTable = [];
+
+      // Create default rows and cells. They may be merged later.
+      for (let i = 0; i < numRows; i++) {
+        const row = new Array(numCols);
+        for (let j = 0; j < numCols; j++) { row[j] = { rowspan: 1 }; }
+        gridTable.push(row);
+      }
+
+      for (let i = 0; i < numRows; i++) {
+        const row = gridTable[i];
+        // Determine the actual rowspan and colspan of each cell.
+        for (let j = 0; j < numCols; j++) {
+          const cell = row[j];
+          if (cell.rowspan === 0) { continue }
+          cell.colspan = 1;
+          const lastTextRow = lines[rowSeps[i + 1] - 1];
+          for (let k = j + 1; k < colSeps.length; k++) {
+            if (lastTextRow.charAt(colSeps[k]) === "|") { break }
+            cell.colspan += 1;
+            row[k].rowspan = 0;
+          }
+          for (let k = i + 1; k < rowSeps.length; k++) {
+            const ch = lines[rowSeps[k]].charAt(colSeps[j] + 1);
+            if ("-=:".indexOf(ch) > -1) { break }
+            cell.rowspan += 1;
+            for (let jj = 0; jj < cell.colspan; jj++) {
+              gridTable[k][j + jj].rowspan = 0;
+            }
+          }
+          // Now that we know the cell extents, get the cell contents.
+          const xStart = colSeps[j] + 2;
+          const xEnd = colSeps[j + cell.colspan] - 1;
+          const yStart = rowSeps[i] + 1;
+          const yEnd = rowSeps[i + cell.rowspan];
+          let str = "";
+          for (let ii = yStart; ii < yEnd; ii++) {
+            str += lines[ii].slice(xStart, xEnd).replace(/ +$/, "") + "\n";
+          }
+          cell.blob = str.slice(0, -1).replace(/^\n+/, "");
+
+          cell.inHeader = (headerExists && yStart < headerSepLine);
+
+          if (colWidths) {
+            // Set an attribute used by ProseMirror.
+            const cellWidth = cell.colspan === 0 ? null : [];
+            for (let k = 0; k < cell.colspan; k++) {
+              cellWidth.push(Number(colWidths[j + k]));
+            }
+            cell.width = cellWidth;
+          }
+        }
+      }
+
+      const table = {
+        type: "table",
+        attrs: {},
+        content: []
+      };
+      if (myID) { table.attrs.id = myID; }
+      if (myClass) { table.attrs.class = myClass; }
+      let k = 0;
+      if (colWidths && state.inHtml) {
+        let sum = 0;
+        colWidths.forEach(el => { sum += Number(el); } );
+        table.attrs.style = `width: ${sum}px`;
+        const colGroup = { type: "colGroup", attrs: null, content: [] };
+        for (const width of colWidths) {
+          colGroup.content.push({ type: "col", attrs: [{ style: `width: ${width}px` }] });
+        }
+        table.content.push(colGroup);
+        k = 1;
+      }
+      for (let i = 0; i < numRows; i++) {
+        table.content.push({ type: "table_row", content: [] } );
+        for (let j = 0; j < numCols; j++) {
+          if (gridTable[i][j].rowspan === 0) { continue }
+          const cell = gridTable[i][j];
+          state.inline = false;
+          let content = parse(cell.blob, state);
+          if (state.inHtml && content.length === 1 && content[0].type === "paragraph") {
+            content = content[0].content;
+          }
+          if (content.length === 1 && content[0].type === "null") {
+            content = [{ type: "paragraph", content: [] }];
+          }
+          table.content[i + k].content.push({
+            "type": cell.inHeader ? "table_header" : "table_cell",
+            "attrs": {
+              "colspan": cell.colspan,
+              "rowspan": cell.rowspan,
+              "colwidth": (colWidths) ? cell.width : null,
+              "background": null
+            },
+            content: content
+          });
+        }
+      }
+      state.inline = false;
+      return table
+    };
+  };
+
+  return {
+    parsePipeTable: parsePipeTable(),
+    PIPE_TABLE_REGEX: /^(\|.*)\n\|([-:]+[-| :]*)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
+    parseGridTable: parseGridTable(),
+    GRID_TABLE_REGEX: /^((\+(?:[-:=]+\+)+)\n(?:[+|][^\n]+[+|] *\n)+)(?:\{([^\n}]+)\}\n)?\n*/
+  };
+})();
+
+const LINK_INSIDE = "(?:\\[[^\\]]*\\]|[^\\[\\]]|\\](?=[^\\[]*\\]))*";
+const LINK_HREF_AND_TITLE =
+  "\\s*<?((?:\\([^)]*\\)|[^\\s\\\\]|\\\\.)*?)>?(?:\\s+['\"]([\\s\\S]*?)['\"])?\\s*";
+
+const linkIndex = marks => {
+  for (let i = 0; i < marks.length; i++) {
+    if (marks[i].type === "link") { return i }
+  }
+};
+
+const parseRef = function(capture, state, refNode) {
+  // Handle implicit refs: [title][<ref>], ![alt or caption][<ref>]
+  let ref = capture[2] ? capture[2] : capture[1];
+  ref = ref.replace(/\s+/g, " ");
+
+  // We store defs in state._defs (_ to deconflict with client-defined state).
+  if (state._defs && state._defs[ref]) {
+    const def = state._defs[ref];
+    if (refNode.type === "figure") {
+      refNode = { type: "figure", content: [
+        { type: "figimg", attrs: def.attrs },
+        { type: "figcaption", content: parseInline(refNode.attrs.alt, state) }
+      ] };
+      refNode.content[0].attrs.src = def.target;
+    } else if (refNode.type === "image") {
+      if (def.target.indexOf("\n") > -1) {
+        refNode = { type: "calculation", attrs: { entry: def.target } };
+      } else {
+        refNode.attrs = def.attrs;
+        refNode.attrs.src = def.target;
+      }
     } else {
-      let i = 0;
-      for (const value of attrs.value.values()) {
-        const result = clone(value);
-        hurmetVars[attrs.name[i]] = result;
-        if (changedVars) { changedVars.add(attrs.name[i]); }
-        i += 1;
+      // refNode is a link
+      refNode.attrs.href = def.target;
+    }
+  }
+  return refNode;
+};
+
+const parseTextMark = (capture, state, mark) => {
+  const text = parseInline(capture, state);
+  if (Array.isArray(text) && text.length === 0) { return text }
+  consolidate(text);
+  for (const range of text) {
+    if (range.marks) {
+      range.marks.push({ type: mark });
+    } else {
+      range.marks = [{ type: mark }];
+    }
+  }
+  return text
+};
+
+const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<(?:\/?(?:!DOCTYPE html|body|li|br|hr|(?:div|article|details|input|label|ul|ol|dl|main|nav)(?: (?:class|for|id|style|type)=(["'])[A-Za-z0-9_.:;\- ]+\2){0,2})|\/?html(?: lang=(["'])[a-z]+\3)?)>[^\n]*?(?:\n|$))/;
+
+// Rules must be applied in a specific order, so use a Map instead of an object.
+const rules = new Map();
+rules.set("html", {
+  isLeaf: true,
+  match: blockRegex(BLOCK_HTML),
+  parse: function(capture, state) {
+    if (!state.inHtml) { return null }
+    return { type: "html", text: capture[0] }
+  }
+});
+rules.set("htmlComment", {
+  isLeaf: true,
+  match: blockRegex(/^ *<!--[^>]+-->[^\n]*\n/),
+  parse: function(capture, state) {
+    return { type: "null" }
+  }
+}),
+rules.set("lheading", {
+  isLeaf: false,
+  match: blockRegex(/^([^\n]+)\n *(=|-){3,} *(?:\n *)+\n/),
+  parse: function(capture, state) {
+    return {
+      type: "heading",
+      attrs: { level: capture[2] === '=' ? 1 : 2 },
+      content: parseInline(capture[1].trim(), state)
+    };
+  }
+});
+rules.set("heading", {
+  isLeaf: false,
+  match: blockRegex(/^ *(#{1,6})([^\n]+?)#* *(?:\n *)+\n/),
+  parse: function(capture, state) {
+    return {
+      attrs: { level: capture[1].length },
+      content: parseInline(capture[2].trim(), state)
+    };
+  }
+});
+rules.set("dt", {  // description term
+  isLeaf: false,
+  match: blockRegex(/^(([^\n]*)\n)(?=<dd>|\n: )/),
+  parse: function(capture, state) {
+    return { content: parseInline(capture[2].trim(), state) }
+  }
+});
+rules.set("horizontal_rule", {
+  isLeaf: true,
+  match: blockRegex(/^( *[-*_]){3,} *(?:\n *)+\n/),
+  parse: function(capture, parse, state) {
+    return { type: "horizontal_rule" };
+  }
+});
+rules.set("codeBlock", {
+  isLeaf: true,
+  match: blockRegex(/^(?:(?:\t| {4})[^\n]+\n*)+(?:\n *)+\n/),
+  parse: function(capture, state) {
+    const content = capture[0].replace(/^(\t| {4})/gm, '').replace(/\n+$/, '');
+    return {
+      type: "code_block",
+      content: [{ type: "text", text: content }]
+    };
+  }
+});
+rules.set("fence", {
+  isLeaf: true,
+  match: blockRegex(/^(```|~~~) *(?:(\S+) *)?\n([\s\S]+?)\n?\1 *(?:\n *)+\n/),
+  parse: function(capture, state) {
+    return {
+      type: "code_block",
+//      lang: capture[2] || undefined,
+      content: [{ type: "text", text: capture[3] }]
+    };
+  }
+});
+rules.set("alert", {
+  isLeaf: false,
+  match: blockRegex(/^(?: *> \[!(NOTE|TIP|IMPORTANT|WARNING|EPIGRAPH)\])((?:\n *>(?! *\[!)[^\n]*)+)(?:\n *)+\n/),
+  // Alert for note |tip | important | warning |epigraph
+  parse: function(capture, state) {
+    const cap = capture[2].replace(/\n *> ?/gm, "\n").replace(/^\n/, "");
+    const content = parse(cap, state);
+    return { type: capture[1].toLowerCase(), content }
+  }
+});
+rules.set("blockquote", {
+  isLeaf: false,
+  match: blockRegex(/^>([^\n]*(?:\n *>[^\n]*)*)(?:\n *)+\n/),
+  parse: function(capture, state) {
+    const content = capture[1].replace(/\n *> ?/gm, "\n");
+    return { content: parse(content, state) };
+  }
+});
+rules.set("ordered_list", {
+  isLeaf: false,
+  // Hurmet accepts lists w/o a preceding blank line, so the list RegEx
+  // is an anyScopeRegex. parse() will test if a list is a the beginning of a line.
+  match: anyScopeRegex(/^( {0,3})(\d{1,9}[.)]) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:\d{1,9}\.) )\n*|\s*$)/),
+  parse: function(capture, state) {
+    const start = Number(capture[2].replace(/\) *$/, "").trim());
+    return { attrs: { order: start }, content: parseList(capture[0], state, capture[1]) }
+  }
+});
+rules.set("bullet_list", {
+  isLeaf: false,
+  // See note above re: anyScopeRegex
+  match: anyScopeRegex(/^( {0,3})([*+-]) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:[*+-]) )\n*|\s*$)/),
+  parse: function(capture, state) {
+    return { content: parseList(capture[0], state, capture[1]) }
+  }
+});
+rules.set("dd", {  // description details
+  isLeaf: false,
+  match: blockRegex(/^:( +)[\s\S]+?(?:\n{2,}(?! |:)(?!\1)\n*|\s*$)/),
+  parse: function(capture, state) {
+    let div = " " + capture[0].slice(1);
+    const indent = 1 + capture[1].length;
+    const spaceRegex = new RegExp("^ {" + indent + "," + indent + "}", "gm");
+    div = div.replace(spaceRegex, ""); // remove indents on trailing lines:
+    return { content: parse(div, state) };
+  }
+});
+rules.set("special_div", {
+  isLeaf: false,
+  match: blockRegex(/^(:{3,}) ?(indented|comment|centered|right_justified|boxed|header|hidden) *\n([\s\S]+?)\n+\1 *(?:\n{2,}|\s*$)/),
+  // indented or centered or right-justified or boxed or comment div, or <header>
+  parse: function(capture, state) {
+    const content = parse(capture[3], state);
+    return { type: capture[2], content };
+  }
+});
+rules.set("figure", {
+  isLeaf: true,
+  match: blockRegex(/^!!\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\] *(?:\n *)+\n/),
+  parse: function(capture, state) {
+    return parseRef(capture, state, {
+      type: "figure",
+      attrs: { alt: capture[1] }
+    });
+  }
+});
+rules.set("def", {
+  isLeaf: true,
+  match: blockRegex(/^\[([^\]\n]+)\]: *(?:¢(`+)([\s\S]*?[^`])\2(?!`)|<?([^\n>]*)>? *(?:\n\{([^\n}]*)\})?)/),
+  // Link reference definitions were handled in md2ast().
+  parse: function(capture, state) { return { type: "null" } }
+});
+rules.set("toc", {
+  isLeaf: true,
+  match: blockRegex(/^{\.toc start=(\d) end=(\d)}\n/),
+  parse: function(capture, state) {
+    return { attrs: { start: Number(capture[1]), end: Number(capture[2]), body: [] } }
+  }
+});
+rules.set("pipeTable", {
+  isLeaf: false,
+  match: blockRegex(TABLES.PIPE_TABLE_REGEX),
+  parse: TABLES.parsePipeTable
+});
+rules.set("gridTable", {
+  isLeaf: false,
+  match: blockRegex(TABLES.GRID_TABLE_REGEX),
+  parse: TABLES.parseGridTable
+});
+rules.set("displayTeX", {
+  isLeaf: true,
+  match: blockRegex(/^\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$ *(?:\n|$)/),
+  parse: function(capture, state) {
+    const tex = capture[1].trim();
+    return { type: "tex", attrs: { tex, displayMode: true } }
+  }
+});
+rules.set("newline", {
+  isLeaf: true,
+  match: blockRegex(/^(?:\n *)*\n/),
+  parse: function() { return { type: "null" } }
+});
+rules.set("emptyParagraph", {
+  isLeaf: true,
+  match: blockRegex(/^¶(?:\n *)+\n/),
+  parse: function(capture, state) {
+    return { type: "paragraph", content: [] }
+  }
+});
+rules.set("paragraph", {
+  isLeaf: false,
+  match: blockRegex(/^((?:[^\n]|\n(?! *\n))+)(?:\n *)+\n/),
+  parse: function(capture, state) {
+    return { type: "paragraph", content: parseInline(capture[1], state) }
+  }
+});
+rules.set("escape", {
+  // We don't allow escaping numbers, letters, or spaces here so that
+  // backslashes used in plain text still get rendered. But allowing
+  // escaping anything else provides a very flexible escape mechanism,
+  // regardless of how this grammar is extended.
+  isLeaf: true,
+  match: inlineRegex(/^\\([^0-9A-Za-z\s])/),
+  parse: function(capture, state) {
+    return {
+      type: "text",
+      text: capture[1]
+    };
+  }
+});
+rules.set("tableSeparator", {
+  isLeaf: true,
+  match: function(source, state) {
+    if (!state.inTable) { return null }
+    return /^ *\| */.exec(source);
+  },
+  parse: function() {
+    return { type: "tableSeparator" };
+  }
+});
+rules.set("link", {
+  isLeaf: true,
+  match: inlineRegex(
+    new RegExp("^\\[(" + LINK_INSIDE + ")\\]\\(" + LINK_HREF_AND_TITLE + "\\)")
+  ),
+  parse: function(capture, state) {
+    const textNode = parseTextMark(capture[1], state, "link" )[0];
+    const i = linkIndex(textNode.marks);
+    textNode.marks[i].attrs = { href: unescapeUrl(capture[2]) };
+    return textNode
+  }
+});
+rules.set("image", {
+  isLeaf: true,
+  match: inlineRegex(
+    new RegExp("^!\\[(" + LINK_INSIDE + ")\\]\\(" + LINK_HREF_AND_TITLE + "\\)")
+  ),
+  parse: function(capture, state) {
+    return { attrs: { alt: capture[1], src: unescapeUrl(capture[2]) } }
+  }
+});
+rules.set("reflink", {
+  isLeaf: true,
+  match: inlineRegex(/^\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]/),
+  parse: function(capture, state) {
+    const defIndex = capture[2] ? capture[2] : capture[1];
+    const textNode = parseTextMark(capture[1], state, "link" )[0];
+    const i = linkIndex(textNode.marks);
+    textNode.marks[i].attrs = { href: state._defs[defIndex].target };
+    return textNode
+  }
+});
+rules.set("footnote", {
+  isLeaf: true,
+  match: inlineRegex(/^\[\^(\d+)\]/),
+  parse: function(capture, state) {
+    const index = Number(capture[1]) - 1;
+    return { type: "footnote", content: parseInline(state.footnotes[index], state) }
+  }
+});
+rules.set("refimage", {
+  isLeaf: true,
+  match: inlineRegex(/^!\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]/),
+  parse: function(capture, state) {
+    return parseRef(capture, state, {
+      type: "image",
+      attrs: { alt: capture[1] }
+    });
+  }
+});
+rules.set("autolink", {
+  isLeaf: true,
+  match: inlineRegex(/^<([^: >]+:\/[^ >]+)>/),
+  parse: function(capture, state) {
+    const textNode = parseTextMark(capture[1], state, "link" )[0];
+    const i = linkIndex(textNode.marks);
+    textNode.marks[i].attrs = { href: unescapeUrl(capture[1]) };
+    return textNode
+  }
+});
+rules.set("code", {
+  isLeaf: true,
+  match: inlineRegex(/^(`+)([\s\S]*?[^`])\1(?!`)/),
+  parse: function(capture, state) {
+    const text = capture[2].trim();
+    return [{ type: "text", text, marks: [{ type: "code" }] }]
+  }
+});
+rules.set("tex", {
+  isLeaf: true,
+  match: inlineRegex(/^(?:\$\$((?:\\[\s\S]|[^\\])+?)\$\$|\$(?!\s|$)((?:(?:\\[\s\S]|[^\\])+?)?)(?<=[^\s\\$])\$(?![0-9$]))/),
+  parse: function(capture, state) {
+    if (capture[1]) {
+      const tex = capture[1].trim();
+      return { type: "tex", attrs: { tex, displayMode: true } }
+    } else {
+      const tex = capture[2].trim();
+      return { type: "tex", attrs: { tex, displayMode: false } }
+    }
+  }
+});
+rules.set("calculation", {
+  isLeaf: true,
+  match: anyScopeRegex(/^(?:¢(`+)([\s\S]*?[^`])\1(?!`)|¢¢\n?((?:\\[\s\S]|[^\\])+?)\n?¢¢)/),
+  parse: function(capture, state) {
+    if (capture[2]) {
+      let entry = capture[2].trim();
+      if (!/^(?:function|draw\()/.test(entry) && entry.indexOf("``") === -1) {
+        entry = entry.replace(/\n/g, " ");
+      }
+      return { attrs: { entry } }
+    } else {
+      const entry = capture[3].trim();
+      return { attrs: { entry, displayMode: true } }
+    }
+  }
+});
+rules.set("em", {
+  isLeaf: true,
+  match: inlineRegex(/^([_*])(?!\s|\1)((?:\\[\s\S]|[^\\])+?)\1/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[2], state, "em" )
+  }
+});
+rules.set("strong", {
+  isLeaf: true,
+  match: inlineRegex(/^(\*\*|__)(?=\S)((?:\\[\s\S]|[^\\])+?)\1/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[2], state, "strong" )
+  }
+});
+rules.set("del", {
+  isLeaf: true,
+  match: inlineRegex(/^<del>([\s\S]*?)<\/del>/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "strikethru" )
+  }
+});
+rules.set("strikethru", {
+  isLeaf: true,
+  match: inlineRegex(/^~~(?=\S)((?:\\[\s\S]|~(?!~)|[^\s~\\]|\s(?!~~))+?)~~/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "strikethru" )
+  }
+});
+rules.set("superscript", {
+  isLeaf: true,
+  match: inlineRegex(/^<sup>([\s\S]*?)<\/sup>/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "superscript" )
+  }
+});
+rules.set("subscript", {
+  isLeaf: true,
+  match: inlineRegex(/^<sub>([\s\S]*?)<\/sub>/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "subscript" )
+  }
+});
+rules.set("tilde", {
+  isLeaf: true,
+  match: inlineRegex(/^~((?:\\[\s\S]|[^\\])+?)~/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "subscript" )
+  }
+});rules.set("underline", {
+  isLeaf: true,
+  match: inlineRegex(/^<u>([\s\S]*?)<\/u>/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "underline" )
+  }
+});
+rules.set("highlight", {
+  isLeaf: true,
+  match: inlineRegex(/^<mark>([\s\S]*?)<\/mark>/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "highlight" )
+  }
+});
+rules.set("hard_break", {
+  isLeaf: true,
+  match: anyScopeRegex(/^(\\| {2})\n/),
+  parse: function() { return { text: "\n" } }
+});
+rules.set("inline_break", {
+  isLeaf: true,
+  match: anyScopeRegex(/^<br>/),
+  parse: function() { return { type: "hard_break", text: "\n" } }
+});
+rules.set("span", {
+  isLeaf: true,
+  match: inlineRegex(/^<span [a-z =":]+>[^<]+<\/span>/),
+  parse: function(capture, state) {
+    return !state.inHtml ? null : { type: "html", text: capture[0] }
+  }
+});
+rules.set("text", {
+  // We break on symbol characters, double newlines, or double-space-newlines.
+  isLeaf: true,
+  match: anyScopeRegex(/^[\s\S]+?(?=[_*`#>|\\\-+=![({$¢¶<~+:]|\n\n| {2,}\n|\d+[.)]|\w+:\S|$)/),
+  parse: function(capture, state) {
+    return {
+      text: capture[0].replace(/\n/g, " ")
+    };
+  }
+});
+
+const lists$1 = ["bullet_list", "ordered_list"];
+const LIST_LOOKBEHIND_R = /(?:\n)( *)$/;
+
+const parse = (source, state) => {
+  if (!state.inline) { source += "\n\n"; }
+  source = preprocess(source);
+  const result = [];
+  while (source) {
+    // store the best match and its rule:
+    let capture = null;
+    let ruleName = null;
+    let rule = null;
+    for (const [currRuleName, currRule] of rules) {
+      capture = currRule.match(source, state);
+      if (capture) {
+        rule = currRule;
+        ruleName = currRuleName;
+
+        if (lists$1.includes(ruleName)) {
+          // Lists are complicated because we do not require a blank line before a list.
+          const prevCaptureStr = state.prevCapture == null ? "" : state.prevCapture;
+          const isStartOfLineCapture = LIST_LOOKBEHIND_R.test(prevCaptureStr);
+          if (isStartOfLineCapture) {
+            if (state.inline) {
+              // We matched a list that does not have a preceding blank line.
+              // Finish the current block element before beginning the list.
+              state.remainder = capture[0];
+              return result
+            } else {
+              break
+            }
+          }
+        } else {
+          break
+        }
+
       }
     }
-  } else ;
-}
+    const parsed = rule.parse(capture, state);
+    if (Array.isArray(parsed)) {
+      Array.prototype.push.apply(result, parsed);
+    } else {
+      if (parsed.type == null) { parsed.type = ruleName; }
+      result.push(parsed);
+    }
+    state.prevCapture = capture[0];
+    source = source.substring(capture[0].length);
+    if (state.remainder) {
+      // Prepend a list.
+      source = state.remainder + "\n\n" + source;
+      state.remainder = "";
+    }
+  }
+  return result
+};
+
+
+
+/**
+ * Parse some content with the parser `parse`, with state.inline
+ * set to true. Useful for block elements; not generally necessary
+ * to be used by inline elements (where state.inline is already true.
+ */
+const parseInline = function(content, state) {
+  const isCurrentlyInline = state.inline || false;
+  state.inline = true;
+  const result = parse(content, state);
+  state.inline = isCurrentlyInline;
+  return result;
+};
+
+
+// recognize a `*` `-`, `+`, `1.`, `2.`... list bullet
+const LIST_BULLET = "(?:[*+-]|\\d+[\\.\\)])";
+// recognize the start of a list item:
+// leading space plus a bullet plus a space (`   * `)
+const LIST_ITEM_PREFIX = "( *)(" + LIST_BULLET + ") +";
+const LIST_ITEM_PREFIX_R = new RegExp("^" + LIST_ITEM_PREFIX);
+// recognize an individual list item:
+//  * hi
+//    this is part of the same item
+//
+//    as is this, which is a new paragraph in the same item
+//
+//  * but this is not part of the same item
+const LIST_ITEM_R = new RegExp(
+  LIST_ITEM_PREFIX + "[^\\n]*(?:\\n" + "(?!\\1" + LIST_BULLET + " )[^\\n]*)*(\n|$)",
+  "gm"
+);
+const BLOCK_END_R = /\n{2,}$/;
+// recognize the end of a paragraph block inside a list item:
+// two or more newlines at end end of the item
+const LIST_BLOCK_END_R = BLOCK_END_R;
+const LIST_ITEM_END_R = / *\n+$/;
+
+const consolidate = arr => {
+  if (Array.isArray(arr) && arr.length > 0) {
+    // Group any text nodes together into a single string output.
+    for (let i = arr.length - 1; i > 0; i--) {
+      const node = arr[i];
+      const prevNode = arr[i - 1];
+      if (node.type === 'text' && prevNode.type === 'text' &&
+          !node.marks && !prevNode.marks) {
+        prevNode.text += node.text;
+        arr.splice(i, 1);
+      } else if ((node.type === 'indented' && prevNode.type === 'indented') ||
+                 (node.type === 'centered' && prevNode.type === 'centered')) {
+        prevNode.content = prevNode.content.concat(node.content);
+        arr.splice(i, 1);
+      } else if (node.type === "null") {
+        arr.splice(i, 1);
+      } else if (!rules.has(node.type) || !rules.get(node.type).isLeaf) {
+        consolidate(node.content);
+      }
+    }
+
+    if (!rules.has(arr[0].type) || !rules.get(arr[0].type).isLeaf) {
+      consolidate(arr[0].content);
+    }
+  }
+};
+
+const populateTOC = ast => {
+  let tocNode;
+  for (const node of ast) {
+    if (node.type === "toc") { tocNode = node; break }
+  }
+  if (!tocNode) { return }
+  const start = tocNode.attrs.start;
+  const end = tocNode.attrs.end;
+  for (const node of ast) {
+    if (node.type === "heading") {
+      const level = node.attrs.level;
+      if (start <= level && level <= end) {
+        const tocEntry = [];
+        let str = "";
+        for (const range of node.content) { str += range.text; }
+        tocEntry.push(str);
+        tocEntry.push(level);
+        tocEntry.push(0); // page number unknown
+        tocEntry.push(0); // element number unknown
+        tocNode.attrs.body.push(tocEntry);
+      }
+    }
+  }
+};
+
+const metadataRegEx = /^---+\n((?:[A-Za-z0-9][A-Za-z0-9 _-]*:[^\n]+\n(?:[ \t]+[^\n]+\n)*)+)---+\n/;
+const metadataItemRegEx = /^[A-Za-z0-9][A-Za-z0-9 _-]*:[^\n]+\n(?:[ \t]+[^\n]+\n)*/;
+const hurmetMetadataNames = ["decimalFormat", "fontSize", "pageSize"];
+
+const parseMetadata = str => {
+  const metadata = {};
+  let capture = str.match(metadataItemRegEx);
+  while (capture) {
+    const item = capture[0].split(":");
+    const key = item[0].trim().replace(/ /g, "");
+    if (hurmetMetadataNames.includes(key)) {
+      const value = item[1].slice(0, -1).trim().replace(/ *\n[ \t]*/g, " ");
+      metadata[key] = value;
+    }
+    str = str.slice(capture[0].length);
+    capture = str.match(metadataItemRegEx);
+  }
+  return metadata
+};
+
+const dateMessageRegEx = /^date:([^\n]+)\nmessage:([^\n]+)\n/;
+
+const inlineMd2ast = md => {
+  const state = { inline: true, _defs: {}, prevCapture: "", remainder: "", inHtml: false };
+  const ast = parse(md, state);
+  if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") {
+    ast.shift();
+  }
+  consolidate(ast);
+  return ast
+};
+
+const md2ast = (md, inHtml = false) => {
+  // First, check for a metadata preamble
+  let metadata = false;
+  if (metadataRegEx.test(md)) {
+    const match = metadataRegEx.exec(md);
+    metadata = parseMetadata(match[1]);
+    md = md.slice(match[0].length);
+  }
+
+  // Second, get all the link reference definitions
+  const state = {
+    inline: false,
+    _defs: {},
+    footnotes: [],
+    prevCapture: "",
+    remainder: "",
+    inHtml
+  };
+  const defRegEx = /\n *\[([^\]\n]+)\]: *(?:¢(`+)([\s\S]*?[^`])\2(?!`)|<?([^\n>]*)>? *(?:\n\{([^\n}]*)\})?)(?=\n)/gm;
+  const footnoteDefRegEx = /\n *\[\^\d+\]: *([^\n]*)(?=\n)/gm;
+  let capture;
+  while ((capture = defRegEx.exec(md)) !== null) {
+    const def = capture[1].replace(/\s+/g, " ");
+    const target = capture[4] || capture[3].trim();
+    const directives = capture[5] || "";
+
+    const attrs = { alt: def };
+    if (directives) {
+      const matchClass = CLASS_R.exec(directives);
+      const matchWidth = WIDTH_R.exec(directives);
+      const matchID = ID_R.exec(directives);
+      if (matchClass) { attrs.class = matchClass[1]; }
+      if (matchWidth) { attrs.width = matchWidth[1]; }
+      if (matchID)    { attrs.id = matchID[1]; }
+    }
+    state._defs[def] = { target, attrs };
+  }
+
+  // Next, get all the footnote definitions
+  capture = null;
+  while ((capture = footnoteDefRegEx.exec(md)) !== null) {
+    state.footnotes.push(capture[1].trim());
+  }
+
+  // Find out if there are any snapshots.
+  let snapshotStrings = [];
+  let gotSnapshot = false;
+  if (metadata) {
+    snapshotStrings = md.split("<!--SNAPSHOT-->\n");
+    if (snapshotStrings.length > 1) {
+      gotSnapshot = true;
+      md = snapshotStrings.shift();
+    }
+  }
+
+  // Find out if there are any fallbacks for fetched files
+  let fallbackStrings = [];
+  if (metadata) {
+    fallbackStrings = md.split("<!--FALLBACKS-->\n");
+    if (fallbackStrings.length > 1) {
+      md = fallbackStrings.shift();
+    } else {
+      fallbackStrings = null;
+    }
+  }
+
+  // Proceed to parse the document.
+  const ast = parse(md, state);
+  if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") {
+    ast.shift();
+  }
+  consolidate(ast);
+  populateTOC(ast);
+  if (metadata) {
+    if (fallbackStrings) {
+      metadata.fallbacks = JSON.parse(fallbackStrings.pop().trim());
+    }
+    if (gotSnapshot) {
+      const snapshots = [];
+      for (const str of snapshotStrings) {
+        const capture = dateMessageRegEx.exec(str);
+        snapshots.push({
+          date: capture[1] ? Date.parse(capture[1].trim()) : undefined,
+          message: capture[2] ? capture[2].trim() : undefined,
+          content: capture ? str.slice(capture[0].length) : str
+        });
+      }
+      metadata.snapshots = snapshots;
+    }
+    return { type: "doc", attrs: metadata, content: ast }
+  } else {
+    return ast
+  }
+};
 
 /*
  * This file deals with Hurmet maps, which are similar to hash maps.
@@ -25383,1197 +26126,174 @@ const textRange = (str, index) => {
   return { value, unit: null, dtype: dt.STRING }
 };
 
-/**
- * md2ast() returns an AST that matches the memory structure  of a Hurmet.app document.
- * Elsewhere, Hurmet uses the AST to create either a live Hurmet doc or a static HTML doc.
- *
- * ## Restrictions
- *
- * 1. **_bold-italic_** must use both * & _ delimiters. Hurmet will fail on ***wat***.
- * 2. "Shortcut" reference links [ref] are not recognized.
- *
- * ## Extensions
- *
- * 1. Hurmet inline calculation is delimited ¢`…`.
- *    Hurmet display calculation is delimited ¢¢…¢¢.
- * 2. LaTeX inline math is delimited $…$.
- *    No space allowed after 1st $ or before 2nd $. No digit after 2nd $.
- *    LaTeX display math is delimited  $$ … $$.
- * 3. ~subscript~
- * 4. ~~strikethrough~~
- * 5. Pipe tables as per Github Flavored Markdown (GFM).
- * 6. Grid tables as per Pandoc and reStructuredText
- * 7. Empty paragraphs: A line consisting only of "¶".
- * 8. Attributes for reference link definitions
- *      [id]: target
- *      {.class #id width=number}
- * 9. Figure/Caption for images. Format is a paragraph that consists entirely of:
- *    !![caption][id]
- * 10. Table directives. They are placed on the line after the table. The format is:
- *     {.class #id width="num1 num2 …" caption}
- * 11. Lists that allow the user to pick list ordering.
- *        1. →  1. 2. 3.  etc.
- *        A. →  A. B. C.  etc. (future)
- *        a) →  (a) (b) (c)  etc. (future)
- * 12. Alerts per GFM
- *     > [!note] or [!tip] or [!important] or [!warning]
- *     > Content of note
- * 13. Fenced divs, similar to Pandoc.
- *     ::: (centered|right_justified|comment|indented|boxed|header)
- *     Block elements
- *     :::
- *     Nested divs are distinguished by number of colons. Minimum three.
- * 14. Table of Contents
- *     {.toc start=N end=N}
- * 15. Definition lists, per Pandoc.  (future)
- * 16. [^1] is a reference to a footnote. (future)
- *     [^1]: The body of the footnote is deferred, similar to reference links.
- * 17. [#1] is a reference to a citation. (future)
- *     [#1]: The body of the citation is deferred, similar to reference links.
- * 18. Line blocks begin with "| ", as per Pandoc. (future)
- *
- * hurmetMark.js copyright (c) 2021 - 2023 Ron Kok
- *
- * This file has been adapted (and heavily modified) from Simple-Markdown.
- * Simple-Markdown copyright (c) 2014-2019 Khan Academy & Aria Buckles.
- *
- * Portions of Simple-Markdown were adapted from marked.js copyright (c) 2011-2014
- * Christopher Jeffrey (https://github.com/chjj/).
- *
- * LICENSE (MIT):
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
+function insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat) {
+  // hurmetVars is a key:value store of variable names and attributes.
+  // This function is called to insert an assignment into hurmetVars.
+  const formatSpec = hurmetVars.format ? hurmetVars.format.value : "h15";
 
-
-const CR_NEWLINE_R = /\r\n?/g;
-const FORMFEED_R = /\f/g;
-const CLASS_R = /(?:^| )\.([a-z-]+)(?: |$)/;
-const WIDTH_R = /(?:^| )width="?([\d.a-z]+"?)(?: |$)/;
-const COL_WIDTHS_R = /(?:^| )colWidths="([^"]*)"/;
-const ID_R = /(?:^| )#([a-z-]+)(?: |$)/;
-const leadingSpaceRegEx$1 = /^ +/;
-const trailingSpaceRegEx = / +$/;
-
-// Turn various whitespace into easy-to-process whitespace
-const preprocess = function(source) {
-  return source.replace(CR_NEWLINE_R, "\n").replace(FORMFEED_R, "");
-};
-
-// Creates a match function for an inline scoped element from a regex
-const inlineRegex = function(regex) {
-  const match = function(source, state) {
-    return state.inline ? regex.exec(source) : null
-  };
-  match.regex = regex;
-  return match;
-};
-
-// Creates a match function for a block scoped element from a regex
-const blockRegex = function(regex) {
-  const match = function(source, state) {
-    return state.inline ? null : regex.exec(source)
-  };
-  match.regex = regex;
-  return match;
-};
-
-// Creates a match function from a regex, ignoring block/inline scope
-const anyScopeRegex = function(regex) {
-  const match = function(source, state) {
-    return regex.exec(source);
-  };
-  match.regex = regex;
-  return match;
-};
-
-const UNESCAPE_URL_R = /\\([^0-9A-Za-z\s])/g;
-const unescapeUrl = function(rawUrlString) {
-  return rawUrlString.replace(UNESCAPE_URL_R, "$1");
-};
-
-const parseList = (str, state) => {
-  const items = str.replace(LIST_BLOCK_END_R, "\n").match(LIST_ITEM_R);
-  const isTight = !/\n\n/.test(str.replace(/\n*$/, ""));
-  const itemContent = items.map(function(item, i) {
-    // We need to see how far indented this item is:
-    const prefixCapture = LIST_ITEM_PREFIX_R.exec(item);
-    const space = prefixCapture ? prefixCapture[0].length : 0;
-    // And then we construct a regex to "unindent" the subsequent
-    // lines of the items by that amount:
-    const spaceRegex = new RegExp("^ {1," + space + "}", "gm");
-
-    // Before processing the item, we need a couple things
-    const contentStr = item
-      // remove indents on trailing lines:
-      .replace(spaceRegex, "")
-      // remove the bullet:
-      .replace(LIST_ITEM_PREFIX_R, "");
-
-    // backup our state for restoration afterwards. We're going to
-    // want to set state._list to true, and state.inline depending
-    // on our list's looseness.
-    const oldStateInline = state.inline;
-    const oldStateList = state._list;
-    state._list = true;
-    const oldStateTightness = state.isTight;
-    state.isTight = isTight;
-
-    // Parse the list item
-    state.inline = isTight;
-    const adjustedContent = contentStr.replace(LIST_ITEM_END_R, "");
-    const content = parse(adjustedContent, state);
-    const result = isTight
-      ? { type: "tight_list_item", content: [{ "type": "paragraph", "content": content }] }
-      : { type: "list_item", content };
-
-    // Restore our state before returning
-    state.inline = oldStateInline;
-    state._list = oldStateList;
-    state.isTight = oldStateTightness;
-    return result;
-  });
-
-  return itemContent
-};
-
-const TABLES = (function() {
-  const TABLE_ROW_SEPARATOR_TRIM = /^ *[|+] *| *[|+] *$/g;
-  const TABLE_RIGHT_ALIGN = /^[-=]+:$/;
-  const TABLE_CENTER_ALIGN = /^:[-=]+:$/;
-
-  const parseTableAlign = function(source) {
-    // Inspect ":" characters to set column justification.
-    // Return class names that specify center or right justification on specific columns.
-    source = source.replace(TABLE_ROW_SEPARATOR_TRIM, "");
-    const alignArr = source.trim().split(/[|+]/);
-    let alignStr = "";
-    for (let i = 0; i < alignArr.length; i++) {
-      alignStr += TABLE_CENTER_ALIGN.test(alignArr[i])
-        ? ` c${String(i + 1)}c`
-        : (TABLE_RIGHT_ALIGN.test(alignArr[i])
-        ? ` c${String(i + 1)}r`
-        : "");
+  if (!Array.isArray(attrs.name)) {
+    // This is the typical case.
+    hurmetVars[attrs.name] = attrs;
+    if (changedVars) {
+      changedVars.add(attrs.name);
     }
-    return alignStr.trim()
-  };
 
-  const tableDirectives = (directives, align) => {
-    // Get CSS class, ID, and column widths, if any.
-    if (!directives && align === "") { return ["", "", null] }
-    const userDefClass = CLASS_R.exec(directives);
-    let myClass = (userDefClass) ? userDefClass[1] : "";
-    if (align.length > 0) { myClass += (myClass.length > 0 ? " " : "") + align; }
-    const userDefId = ID_R.exec(directives);
-    const myID = (userDefId) ? userDefId[1] : "";
-    const colWidthMatch = COL_WIDTHS_R.exec(directives);
-    const colWidths = (colWidthMatch) ? colWidthMatch[1].split(" ") : null;
-    return [myClass, myID, colWidths]
-  };
-
-  const pipeRegEx = /(?<!\\)\|/;  // eslint doesn't like look behind. Disregard the warning.
-
-  const parsePipeTableRow = function(source, parse, state, colWidths, inHeader) {
-    const cells = source.trim().split(pipeRegEx);
-    cells.shift();
-    cells.pop();
-    const tableRow = [{ type: "tableSeparator" }];
-    for (const str of cells) {
-      const cell = parse(str.trim(), state);
-      tableRow.push(...cell);
-      tableRow.push({ type: "tableSeparator" });
+  } else if (attrs.value === null) {
+    for (let i = 0; i < attrs.name.length; i++) {
+      hurmetVars[attrs.name[i]] = { value: null };
     }
-//    const tableRow = parse(source.trim(), state);
-    consolidate(tableRow);
-  //  state.inTable = prevInTable;
 
-    const row = {
-      type: "table_row",
-      content: []
-    };
-    let j = -1;
-    tableRow.forEach(function(node, i) {
-      if (node.type === "text") {
-        if (i > 0 && tableRow[i - 1].type === "tableSeparator") {
-          node.text = node.text.replace(leadingSpaceRegEx$1, "");
-        }
-        if (i < tableRow.length - 1) {
-          node.text = node.text.replace(trailingSpaceRegEx, "");
-        }
-      }
-      if (node.type === "tableSeparator") {
-        if (i !== tableRow.length - 1) {  // Filter out the row's  last table separator
-          // Create a new cell
-          j += 1;
-          row.content.push({
-            "type": inHeader ? "table_header" : "table_cell",
-            "attrs": {
-              "colspan": 1,
-              "rowspan": 1,
-              "colwidth": (colWidths) ? [Number(colWidths[j])] : null,
-              "background": null
-            },
-            content: (state.inHtml ? [] : [{ "type": "paragraph", "content": [] }])
-          });
-        }
-      } else if (state.inHtml) {
-        // For direct to HTML, write the inline contents directly into the <td> element.
-        // row   cell    content      text
-        row.content[j].content.push(node);
-      } else {
-        // Hurmet.app table cells always contain a paragraph.
-        // row   cell  paragraph  content      text
-        row.content[j].content[0].content.push(node);
-      }
-    });
-
-    return row;
-  };
-
-  const parsePipeTable = function() {
-    return function(capture, state) {
-      state.inline = true;
-      const align = parseTableAlign(capture[2]);
-      const [myClass, myID, colWidths] = tableDirectives(capture[4], align);
-      const table = {
-        type: "table",
-        attrs: {},
-        content: []
-      };
-      if (myID) { table.attrs.id = myID; }
-      if (myClass) { table.attrs.class = myClass; }
-      if (colWidths && state.inHtml) {
-        let sum = 0;
-        colWidths.forEach(el => { sum += Number(el); } );
-        table.attrs.style = `width: ${sum}px`;
-        const colGroup = { type: "colGroup", content: [] };
-        for (const width of colWidths) {
-          colGroup.content.push({ type: "col", attrs: [{ style: `width: ${width}px` }] });
-        }
-        table.content.push(colGroup);
-      }
-      if (!/^\|+$/.test(capture[1])) {
-        table.content.push(parsePipeTableRow(capture[1], parse, state, colWidths, true));
-      }
-      const tableBody = capture[3].trim().split("\n");
-      tableBody.forEach(row => {
-        table.content.push(parsePipeTableRow(row, parse, state, colWidths, false));
-      });
-      state.inline = false;
-      return table
-    };
-  };
-
-  const headerRegEx = /^\+:?=/;
-  const gridSplit = / *\n/g;
-  const cellCornerRegEx = /^\+[-=:]+\+[+=:-]+\+$/g;
-
-  const parseGridTable = function() {
-    return function(capture, state) {
-      const topBorder = capture[2];
-      const lines = capture[1].slice(0, -1).split(gridSplit);
-
-      // Does the grid table contain a line separating header from table body?
-      let headerExists = false;
-      let headerSepLine = lines.length + 10;
-      for (let i = 0; i < lines.length; i++) {
-        if (headerRegEx.test(lines[i])) {
-          headerExists = true;
-          headerSepLine = i;
-          break
-        }
-      }
-
-      // Get column justification
-      const alignrow = headerExists ? lines[headerSepLine] : topBorder.slice(1);
-      const align = parseTableAlign(alignrow);
-      const [myClass, myID, colWidths] = tableDirectives(capture[3], align);
-
-      // Read the top & left borders to find a first draft of cell corner locations.
-      const colSeps = [0];
-      for (let j = 1; j < topBorder.length; j++) {
-        if (topBorder.charAt(j) === "+") { colSeps.push(j); }
-      }
-      const rowSeps = [0];
-      for (let i = 1; i < lines.length; i++) {
-        if (lines[i].charAt(0) === "+") { rowSeps.push(i); }
-      }
-
-      // Look for the cell corner locations that don't appear on top or left border
-      let rowSepIndex = 0;
-      while (rowSepIndex < rowSeps.length) {
-        // Find the next row separator
-        let nextRow = 0;
-        const isValid = new Array(colSeps.length).fill(true);
-        for (let i = rowSeps[rowSepIndex] + 1; i < lines.length; i++) {
-          for (let k = 0; k < colSeps.length; k++) {
-            if (!isValid[k]) { continue }
-            if ("+|".indexOf(lines[i][colSeps[k]]) === -1) { isValid[k] = false; continue }
-            if (lines[i][colSeps[k]] === "+") {
-              nextRow = i;
-              break
-            }
-          }
-          if (nextRow !== 0) { break }
-        }
-        if (!rowSeps.includes(nextRow)) {
-          rowSeps.splice(rowSepIndex + 1, 0, nextRow);
-        }
-
-        // Check the next horizontal border for new cell corners
-        rowSepIndex += 1;
-        const border = lines[nextRow];
-        for (let j = 0; j < colSeps.length - 1; j++) {
-          let cellBorder = border.slice(colSeps[j], colSeps[j + 1] + 1);
-          if (cellCornerRegEx.test(cellBorder)) {
-            cellBorder = cellBorder.slice(1, -1);
-            let pos = cellBorder.indexOf("+") + 1;
-            let k = 1;
-            while (pos > 0) {
-              colSeps.splice(j + k, 0, colSeps[j] + pos);
-              pos = cellBorder.indexOf("+", pos) + 1;
-              k += 1;
-            }
-          }
-        }
-      }
-
-      const numCols = colSeps.length - 1;
-      const numRows = rowSeps.length - 1;
-      const gridTable = [];
-
-      // Create default rows and cells. They may be merged later.
+  } else if (isMatrix(attrs)) {
+    // Assign to a matrix of names
+    const isQuantity = Boolean(attrs.dtype & dt.QUANTITY);
+    let resultDisplay = attrs.resultdisplay;
+    resultDisplay = resultDisplay.replace(/\\(begin|end){[bp]matrix}/g, "").trim();
+    const displays = resultDisplay.split(/&|\\\\/);
+    if (attrs.dtype & dt.MATRIX) {
+      // A 2 dimensional matrix.
+      const dtype = attrs.dtype - dt.MATRIX;
+      const numRows = isQuantity ? attrs.value.plain.length : attrs.value.length;
+      const numCols = attrs.name.length / numRows;
+      let iName = 0;
       for (let i = 0; i < numRows; i++) {
-        const row = new Array(numCols);
-        for (let j = 0; j < numCols; j++) { row[j] = { rowspan: 1 }; }
-        gridTable.push(row);
-      }
-
-      for (let i = 0; i < numRows; i++) {
-        const row = gridTable[i];
-        // Determine the actual rowspan and colspan of each cell.
         for (let j = 0; j < numCols; j++) {
-          const cell = row[j];
-          if (cell.rowspan === 0) { continue }
-          cell.colspan = 1;
-          const lastTextRow = lines[rowSeps[i + 1] - 1];
-          for (let k = j + 1; k < colSeps.length; k++) {
-            if (lastTextRow.charAt(colSeps[k]) === "|") { break }
-            cell.colspan += 1;
-            row[k].rowspan = 0;
-          }
-          for (let k = i + 1; k < rowSeps.length; k++) {
-            const ch = lines[rowSeps[k]].charAt(colSeps[j] + 1);
-            if ("-=:".indexOf(ch) > -1) { break }
-            cell.rowspan += 1;
-            for (let jj = 0; jj < cell.colspan; jj++) {
-              gridTable[k][j + jj].rowspan = 0;
-            }
-          }
-          // Now that we know the cell extents, get the cell contents.
-          const xStart = colSeps[j] + 2;
-          const xEnd = colSeps[j + cell.colspan] - 1;
-          const yStart = rowSeps[i] + 1;
-          const yEnd = rowSeps[i + cell.rowspan];
-          let str = "";
-          for (let ii = yStart; ii < yEnd; ii++) {
-            str += lines[ii].slice(xStart, xEnd).replace(/ +$/, "") + "\n";
-          }
-          cell.blob = str.slice(0, -1).replace(/^\n+/, "");
-
-          cell.inHeader = (headerExists && yStart < headerSepLine);
-
-          if (colWidths) {
-            // Set an attribute used by ProseMirror.
-            const cellWidth = cell.colspan === 0 ? null : [];
-            for (let k = 0; k < cell.colspan; k++) {
-              cellWidth.push(Number(colWidths[j + k]));
-            }
-            cell.width = cellWidth;
-          }
+          const value = isQuantity
+            ? { plain: attrs.value.plain[i][j], inBaseUnits: attrs.value.inBaseUnits[i][j] }
+            : attrs.value[i][j];
+          hurmetVars[attrs.name[i]] = {
+            name: attrs.name[iName],
+            value,
+            resultdisplay: isQuantity
+              ? parse$1(displays[iName].trim() + " '" + attrs.unit + "'")
+              : displays[iName].trim(),
+            expos: attrs.expos,
+            unit: isQuantity ? attrs.unit : undefined,
+            dtype
+          };
+          if (changedVars) { changedVars.add(attrs.name[i]); }
+          iName += 1;
         }
       }
-
-      const table = {
-        type: "table",
-        attrs: {},
-        content: []
-      };
-      if (myID) { table.attrs.id = myID; }
-      if (myClass) { table.attrs.class = myClass; }
-      let k = 0;
-      if (colWidths && state.inHtml) {
-        let sum = 0;
-        colWidths.forEach(el => { sum += Number(el); } );
-        table.attrs.style = `width: ${sum}px`;
-        const colGroup = { type: "colGroup", attrs: null, content: [] };
-        for (const width of colWidths) {
-          colGroup.content.push({ type: "col", attrs: [{ style: `width: ${width}px` }] });
-        }
-        table.content.push(colGroup);
-        k = 1;
+    } else {
+      // Assign to a vector of names.
+      const isColumn = Boolean(attrs.dtype & dt.COLUMNVECTOR);
+      const dtype = attrs.dtype - (isColumn ? dt.COLUMNVECTOR : dt.ROWVECTOR);
+      for (let i = 0; i < attrs.name.length; i++) {
+        const value = isQuantity
+          ? { plain: attrs.value.plain[i], inBaseUnits: attrs.value.inBaseUnits[i] }
+          : attrs.value[i];
+        hurmetVars[attrs.name[i]] = {
+          name: attrs.name[i],
+          value,
+          resultdisplay: isQuantity
+            ? parse$1(displays[i].trim() + " '" + attrs.unit + "'")
+            : displays[i].trim(),
+          expos: attrs.expos,
+          unit: isQuantity ? attrs.unit : undefined,
+          dtype
+        };
+        if (changedVars) { changedVars.add(attrs.name[i]); }
       }
-      for (let i = 0; i < numRows; i++) {
-        table.content.push({ type: "table_row", content: [] } );
-        for (let j = 0; j < numCols; j++) {
-          if (gridTable[i][j].rowspan === 0) { continue }
-          const cell = gridTable[i][j];
-          state.inline = false;
-          let content = parse(cell.blob, state);
-          if (state.inHtml && content.length === 1 && content[0].type === "paragraph") {
-            content = content[0].content;
-          }
-          if (content.length === 1 && content[0].type === "null") {
-            content = [{ type: "paragraph", content: [] }];
-          }
-          table.content[i + k].content.push({
-            "type": cell.inHeader ? "table_header" : "table_cell",
-            "attrs": {
-              "colspan": cell.colspan,
-              "rowspan": cell.rowspan,
-              "colwidth": (colWidths) ? cell.width : null,
-              "background": null
-            },
-            content: content
-          });
-        }
+    }
+
+  // From this point forward, we're dealing with multiple assignment
+  } else if (attrs.dtype & dt.MAP) {
+    const unit = attrs.unit;
+    const unitName = unit && unit.name ? unit.name : undefined;
+    const dtype = attrs.dtype - dt.MAP;
+    let i = 0;
+    if (attrs.dtype & dt.QUANTITY) {
+      for (const value of attrs.value.data.plain) {
+        const result = {
+          value: { plain: value },
+          expos: attrs.expos,
+          factor: attrs.factor,
+          dtype
+        };
+        result.resultdisplay = format(value, formatSpec, decimalFormat);
+        if (unitName) { result.resultdisplay += " " + unitTeXFromString(unitName); }
+        hurmetVars[attrs.name[i]] = result;
+        if (changedVars) { changedVars.add(attrs.name[i]); }
+        i += 1;
       }
-      state.inline = false;
-      return table
-    };
-  };
-
-  return {
-    parsePipeTable: parsePipeTable(),
-    PIPE_TABLE_REGEX: /^(\|.*)\n\|([-:]+[-| :]*)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
-    parseGridTable: parseGridTable(),
-    GRID_TABLE_REGEX: /^((\+(?:[-:=]+\+)+)\n(?:[+|][^\n]+[+|] *\n)+)(?:\{([^\n}]+)\}\n)?\n*/
-  };
-})();
-
-const LINK_INSIDE = "(?:\\[[^\\]]*\\]|[^\\[\\]]|\\](?=[^\\[]*\\]))*";
-const LINK_HREF_AND_TITLE =
-  "\\s*<?((?:\\([^)]*\\)|[^\\s\\\\]|\\\\.)*?)>?(?:\\s+['\"]([\\s\\S]*?)['\"])?\\s*";
-
-const linkIndex = marks => {
-  for (let i = 0; i < marks.length; i++) {
-    if (marks[i].type === "link") { return i }
-  }
-};
-
-const parseRef = function(capture, state, refNode) {
-  // Handle implicit refs: [title][<ref>], ![alt or caption][<ref>]
-  let ref = capture[2] ? capture[2] : capture[1];
-  ref = ref.replace(/\s+/g, " ");
-
-  // We store defs in state._defs (_ to deconflict with client-defined state).
-  if (state._defs && state._defs[ref]) {
-    const def = state._defs[ref];
-    if (refNode.type === "figure") {
-      refNode = { type: "figure", content: [
-        { type: "figimg", attrs: def.attrs },
-        { type: "figcaption", content: parseInline(refNode.attrs.alt, state) }
-      ] };
-      refNode.content[0].attrs.src = def.target;
-    } else if (refNode.type === "image") {
-      if (def.target.indexOf("\n") > -1) {
-        refNode = { type: "calculation", attrs: { entry: def.target } };
-      } else {
-        refNode.attrs = def.attrs;
-        refNode.attrs.src = def.target;
+      i = 0;
+      for (const value of attrs.value.data.inBaseUnits) {
+        hurmetVars[attrs.name[i]].value.inBaseUnits = value;
+        i += 1;
       }
     } else {
-      // refNode is a link
-      refNode.attrs.href = def.target;
-    }
-  }
-  return refNode;
-};
-
-const parseTextMark = (capture, state, mark) => {
-  const text = parseInline(capture, state);
-  if (Array.isArray(text) && text.length === 0) { return text }
-  consolidate(text);
-  for (const range of text) {
-    if (range.marks) {
-      range.marks.push({ type: mark });
-    } else {
-      range.marks = [{ type: mark }];
-    }
-  }
-  return text
-};
-
-const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<(?:\/?(?:!DOCTYPE html|body|li|br|hr|(?:div|article|details|input|label|ul|ol|dl|main|nav)(?: (?:class|for|id|style|type)=(["'])[A-Za-z0-9_.:;\- ]+\2){0,2})|\/?html(?: lang=(["'])[a-z]+\3)?)>[^\n]*?(?:\n|$))/;
-
-// Rules must be applied in a specific order, so use a Map instead of an object.
-const rules = new Map();
-rules.set("html", {
-  isLeaf: true,
-  match: blockRegex(BLOCK_HTML),
-  parse: function(capture, state) {
-    if (!state.inHtml) { return null }
-    return { type: "html", text: capture[0] }
-  }
-});
-rules.set("htmlComment", {
-  isLeaf: true,
-  match: blockRegex(/^ *<!--[^>]+-->[^\n]*\n/),
-  parse: function(capture, state) {
-    return { type: "null" }
-  }
-}),
-rules.set("lheading", {
-  isLeaf: false,
-  match: blockRegex(/^([^\n]+)\n *(=|-){3,} *(?:\n *)+\n/),
-  parse: function(capture, state) {
-    return {
-      type: "heading",
-      attrs: { level: capture[2] === '=' ? 1 : 2 },
-      content: parseInline(capture[1].trim(), state)
-    };
-  }
-});
-rules.set("heading", {
-  isLeaf: false,
-  match: blockRegex(/^ *(#{1,6})([^\n]+?)#* *(?:\n *)+\n/),
-  parse: function(capture, state) {
-    return {
-      attrs: { level: capture[1].length },
-      content: parseInline(capture[2].trim(), state)
-    };
-  }
-});
-rules.set("dt", {  // description term
-  isLeaf: false,
-  match: blockRegex(/^(([^\n]*)\n)(?=<dd>|\n: )/),
-  parse: function(capture, state) {
-    return { content: parseInline(capture[2].trim(), state) }
-  }
-});
-rules.set("horizontal_rule", {
-  isLeaf: true,
-  match: blockRegex(/^( *[-*_]){3,} *(?:\n *)+\n/),
-  parse: function(capture, parse, state) {
-    return { type: "horizontal_rule" };
-  }
-});
-rules.set("codeBlock", {
-  isLeaf: true,
-  match: blockRegex(/^(?:(?:\t| {4})[^\n]+\n*)+(?:\n *)+\n/),
-  parse: function(capture, state) {
-    const content = capture[0].replace(/^(\t| {4})/gm, '').replace(/\n+$/, '');
-    return {
-      type: "code_block",
-      content: [{ type: "text", text: content }]
-    };
-  }
-});
-rules.set("fence", {
-  isLeaf: true,
-  match: blockRegex(/^(```|~~~) *(?:(\S+) *)?\n([\s\S]+?)\n?\1 *(?:\n *)+\n/),
-  parse: function(capture, state) {
-    return {
-      type: "code_block",
-//      lang: capture[2] || undefined,
-      content: [{ type: "text", text: capture[3] }]
-    };
-  }
-});
-rules.set("alert", {
-  isLeaf: false,
-  match: blockRegex(/^(?: *> \[!(NOTE|TIP|IMPORTANT|WARNING|EPIGRAPH)\])((?:\n *>(?! *\[!)[^\n]*)+)(?:\n *)+\n/),
-  // Alert for note |tip | important | warning |epigraph
-  parse: function(capture, state) {
-    const cap = capture[2].replace(/\n *> ?/gm, "\n").replace(/^\n/, "");
-    const content = parse(cap, state);
-    return { type: capture[1].toLowerCase(), content }
-  }
-});
-rules.set("blockquote", {
-  isLeaf: false,
-  match: blockRegex(/^>([^\n]*(?:\n *>[^\n]*)*)(?:\n *)+\n/),
-  parse: function(capture, state) {
-    const content = capture[1].replace(/\n *> ?/gm, "\n");
-    return { content: parse(content, state) };
-  }
-});
-rules.set("ordered_list", {
-  isLeaf: false,
-  // Hurmet accepts lists w/o a preceding blank line, so the list RegEx
-  // is an anyScopeRegex. parse() will test if a list is a the beginning of a line.
-  match: anyScopeRegex(/^( {0,3})(\d{1,9}[.)]) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:\d{1,9}\.) )\n*|\s*$)/),
-  parse: function(capture, state) {
-    const start = Number(capture[2].replace(/\) *$/, "").trim());
-    return { attrs: { order: start }, content: parseList(capture[0], state, capture[1]) }
-  }
-});
-rules.set("bullet_list", {
-  isLeaf: false,
-  // See note above re: anyScopeRegex
-  match: anyScopeRegex(/^( {0,3})([*+-]) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:[*+-]) )\n*|\s*$)/),
-  parse: function(capture, state) {
-    return { content: parseList(capture[0], state, capture[1]) }
-  }
-});
-rules.set("dd", {  // description details
-  isLeaf: false,
-  match: blockRegex(/^:( +)[\s\S]+?(?:\n{2,}(?! |:)(?!\1)\n*|\s*$)/),
-  parse: function(capture, state) {
-    let div = " " + capture[0].slice(1);
-    const indent = 1 + capture[1].length;
-    const spaceRegex = new RegExp("^ {" + indent + "," + indent + "}", "gm");
-    div = div.replace(spaceRegex, ""); // remove indents on trailing lines:
-    return { content: parse(div, state) };
-  }
-});
-rules.set("special_div", {
-  isLeaf: false,
-  match: blockRegex(/^(:{3,}) ?(indented|comment|centered|right_justified|boxed|header|hidden) *\n([\s\S]+?)\n+\1 *(?:\n{2,}|\s*$)/),
-  // indented or centered or right-justified or boxed or comment div, or <header>
-  parse: function(capture, state) {
-    const content = parse(capture[3], state);
-    return { type: capture[2], content };
-  }
-});
-rules.set("figure", {
-  isLeaf: true,
-  match: blockRegex(/^!!\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\] *(?:\n *)+\n/),
-  parse: function(capture, state) {
-    return parseRef(capture, state, {
-      type: "figure",
-      attrs: { alt: capture[1] }
-    });
-  }
-});
-rules.set("def", {
-  isLeaf: true,
-  match: blockRegex(/^\[([^\]\n]+)\]: *(?:¢(`+)([\s\S]*?[^`])\2(?!`)|<?([^\n>]*)>? *(?:\n\{([^\n}]*)\})?)/),
-  // Link reference definitions were handled in md2ast().
-  parse: function(capture, state) { return { type: "null" } }
-});
-rules.set("toc", {
-  isLeaf: true,
-  match: blockRegex(/^{\.toc start=(\d) end=(\d)}\n/),
-  parse: function(capture, state) {
-    return { attrs: { start: Number(capture[1]), end: Number(capture[2]), body: [] } }
-  }
-});
-rules.set("pipeTable", {
-  isLeaf: false,
-  match: blockRegex(TABLES.PIPE_TABLE_REGEX),
-  parse: TABLES.parsePipeTable
-});
-rules.set("gridTable", {
-  isLeaf: false,
-  match: blockRegex(TABLES.GRID_TABLE_REGEX),
-  parse: TABLES.parseGridTable
-});
-rules.set("displayTeX", {
-  isLeaf: true,
-  match: blockRegex(/^\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$ *(?:\n|$)/),
-  parse: function(capture, state) {
-    const tex = capture[1].trim();
-    return { type: "tex", attrs: { tex, displayMode: true } }
-  }
-});
-rules.set("newline", {
-  isLeaf: true,
-  match: blockRegex(/^(?:\n *)*\n/),
-  parse: function() { return { type: "null" } }
-});
-rules.set("emptyParagraph", {
-  isLeaf: true,
-  match: blockRegex(/^¶(?:\n *)+\n/),
-  parse: function(capture, state) {
-    return { type: "paragraph", content: [] }
-  }
-});
-rules.set("paragraph", {
-  isLeaf: false,
-  match: blockRegex(/^((?:[^\n]|\n(?! *\n))+)(?:\n *)+\n/),
-  parse: function(capture, state) {
-    return { type: "paragraph", content: parseInline(capture[1], state) }
-  }
-});
-rules.set("escape", {
-  // We don't allow escaping numbers, letters, or spaces here so that
-  // backslashes used in plain text still get rendered. But allowing
-  // escaping anything else provides a very flexible escape mechanism,
-  // regardless of how this grammar is extended.
-  isLeaf: true,
-  match: inlineRegex(/^\\([^0-9A-Za-z\s])/),
-  parse: function(capture, state) {
-    return {
-      type: "text",
-      text: capture[1]
-    };
-  }
-});
-rules.set("tableSeparator", {
-  isLeaf: true,
-  match: function(source, state) {
-    if (!state.inTable) { return null }
-    return /^ *\| */.exec(source);
-  },
-  parse: function() {
-    return { type: "tableSeparator" };
-  }
-});
-rules.set("link", {
-  isLeaf: true,
-  match: inlineRegex(
-    new RegExp("^\\[(" + LINK_INSIDE + ")\\]\\(" + LINK_HREF_AND_TITLE + "\\)")
-  ),
-  parse: function(capture, state) {
-    const textNode = parseTextMark(capture[1], state, "link" )[0];
-    const i = linkIndex(textNode.marks);
-    textNode.marks[i].attrs = { href: unescapeUrl(capture[2]) };
-    return textNode
-  }
-});
-rules.set("image", {
-  isLeaf: true,
-  match: inlineRegex(
-    new RegExp("^!\\[(" + LINK_INSIDE + ")\\]\\(" + LINK_HREF_AND_TITLE + "\\)")
-  ),
-  parse: function(capture, state) {
-    return { attrs: { alt: capture[1], src: unescapeUrl(capture[2]) } }
-  }
-});
-rules.set("reflink", {
-  isLeaf: true,
-  match: inlineRegex(/^\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]/),
-  parse: function(capture, state) {
-    const defIndex = capture[2] ? capture[2] : capture[1];
-    const textNode = parseTextMark(capture[1], state, "link" )[0];
-    const i = linkIndex(textNode.marks);
-    textNode.marks[i].attrs = { href: state._defs[defIndex].target };
-    return textNode
-  }
-});
-rules.set("refimage", {
-  isLeaf: true,
-  match: inlineRegex(/^!\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]/),
-  parse: function(capture, state) {
-    return parseRef(capture, state, {
-      type: "image",
-      attrs: { alt: capture[1] }
-    });
-  }
-});
-rules.set("autolink", {
-  isLeaf: true,
-  match: inlineRegex(/^<([^: >]+:\/[^ >]+)>/),
-  parse: function(capture, state) {
-    const textNode = parseTextMark(capture[1], state, "link" )[0];
-    const i = linkIndex(textNode.marks);
-    textNode.marks[i].attrs = { href: unescapeUrl(capture[1]) };
-    return textNode
-  }
-});
-rules.set("code", {
-  isLeaf: true,
-  match: inlineRegex(/^(`+)([\s\S]*?[^`])\1(?!`)/),
-  parse: function(capture, state) {
-    const text = capture[2].trim();
-    return [{ type: "text", text, marks: [{ type: "code" }] }]
-  }
-});
-rules.set("tex", {
-  isLeaf: true,
-  match: inlineRegex(/^(?:\$\$((?:\\[\s\S]|[^\\])+?)\$\$|\$(?!\s|$)((?:(?:\\[\s\S]|[^\\])+?)?)(?<=[^\s\\$])\$(?![0-9$]))/),
-  parse: function(capture, state) {
-    if (capture[1]) {
-      const tex = capture[1].trim();
-      return { type: "tex", attrs: { tex, displayMode: true } }
-    } else {
-      const tex = capture[2].trim();
-      return { type: "tex", attrs: { tex, displayMode: false } }
-    }
-  }
-});
-rules.set("calculation", {
-  isLeaf: true,
-  match: anyScopeRegex(/^(?:¢(`+)([\s\S]*?[^`])\1(?!`)|¢¢\n?((?:\\[\s\S]|[^\\])+?)\n?¢¢)/),
-  parse: function(capture, state) {
-    if (capture[2]) {
-      let entry = capture[2].trim();
-      if (!/^(?:function|draw\()/.test(entry) && entry.indexOf("``") === -1) {
-        entry = entry.replace(/\n/g, " ");
+      for (const value of attrs.value.data) {
+        const result = { value, expos: attrs.expos, factor: attrs.factor, dtype };
+        result.resultdisplay = Rnl.isRational(value)
+          ? format(value, formatSpec, decimalFormat)
+          : String(value);
+        if (unitName) { result.resultdisplay += " " + unitTeXFromString(unitName); }
+        hurmetVars[attrs.name[i]] = result;
+        if (changedVars) { changedVars.add(attrs.name[i]); }
+        i += 1;
       }
-      return { attrs: { entry } }
-    } else {
-      const entry = capture[3].trim();
-      return { attrs: { entry, displayMode: true } }
     }
-  }
-});
-rules.set("em", {
-  isLeaf: true,
-  match: inlineRegex(/^([_*])(?!\s|\1)((?:\\[\s\S]|[^\\])+?)\1/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[2], state, "em" )
-  }
-});
-rules.set("strong", {
-  isLeaf: true,
-  match: inlineRegex(/^(\*\*|__)(?=\S)((?:\\[\s\S]|[^\\])+?)\1/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[2], state, "strong" )
-  }
-});
-rules.set("del", {
-  isLeaf: true,
-  match: inlineRegex(/^<del>([\s\S]*?)<\/del>/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "strikethru" )
-  }
-});
-rules.set("strikethru", {
-  isLeaf: true,
-  match: inlineRegex(/^~~(?=\S)((?:\\[\s\S]|~(?!~)|[^\s~\\]|\s(?!~~))+?)~~/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "strikethru" )
-  }
-});
-rules.set("superscript", {
-  isLeaf: true,
-  match: inlineRegex(/^<sup>([\s\S]*?)<\/sup>/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "superscript" )
-  }
-});
-rules.set("subscript", {
-  isLeaf: true,
-  match: inlineRegex(/^<sub>([\s\S]*?)<\/sub>/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "subscript" )
-  }
-});
-rules.set("tilde", {
-  isLeaf: true,
-  match: inlineRegex(/^~((?:\\[\s\S]|[^\\])+?)~/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "subscript" )
-  }
-});rules.set("underline", {
-  isLeaf: true,
-  match: inlineRegex(/^<u>([\s\S]*?)<\/u>/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "underline" )
-  }
-});
-rules.set("highlight", {
-  isLeaf: true,
-  match: inlineRegex(/^<mark>([\s\S]*?)<\/mark>/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "highlight" )
-  }
-});
-rules.set("hard_break", {
-  isLeaf: true,
-  match: anyScopeRegex(/^(\\| {2})\n/),
-  parse: function() { return { text: "\n" } }
-});
-rules.set("inline_break", {
-  isLeaf: true,
-  match: anyScopeRegex(/^<br>/),
-  parse: function() { return { type: "hard_break", text: "\n" } }
-});
-rules.set("span", {
-  isLeaf: true,
-  match: inlineRegex(/^<span [a-z =":]+>[^<]+<\/span>/),
-  parse: function(capture, state) {
-    return !state.inHtml ? null : { type: "html", text: capture[0] }
-  }
-});
-rules.set("text", {
-  // We break on symbol characters, double newlines, or double-space-newlines.
-  isLeaf: true,
-  match: anyScopeRegex(/^[\s\S]+?(?=[_*`#>|\\\-+=![({$¢¶<~+:]|\n\n| {2,}\n|\d+[.)]|\w+:\S|$)/),
-  parse: function(capture, state) {
-    return {
-      text: capture[0].replace(/\n/g, " ")
-    };
-  }
-});
-
-const lists = ["bullet_list", "ordered_list"];
-const LIST_LOOKBEHIND_R = /(?:\n)( *)$/;
-
-const parse = (source, state) => {
-  if (!state.inline) { source += "\n\n"; }
-  source = preprocess(source);
-  const result = [];
-  while (source) {
-    // store the best match and its rule:
-    let capture = null;
-    let ruleName = null;
-    let rule = null;
-    for (const [currRuleName, currRule] of rules) {
-      capture = currRule.match(source, state);
-      if (capture) {
-        rule = currRule;
-        ruleName = currRuleName;
-
-        if (lists.includes(ruleName)) {
-          // Lists are complicated because we do not require a blank line before a list.
-          const prevCaptureStr = state.prevCapture == null ? "" : state.prevCapture;
-          const isStartOfLineCapture = LIST_LOOKBEHIND_R.test(prevCaptureStr);
-          if (isStartOfLineCapture) {
-            if (state.inline) {
-              // We matched a list that does not have a preceding blank line.
-              // Finish the current block element before beginning the list.
-              state.remainder = capture[0];
-              return result
-            } else {
-              break
-            }
-          }
+  } else if (attrs.dtype === dt.DATAFRAME) {
+    const isSingleRow = attrs.value.data[0].length === 1;
+    for (let i = 0; i < attrs.name.length; i++) {
+      let dtype = attrs.value.dtype[i];
+      let value = isSingleRow ? undefined : [];
+      for (let j = 0; j < attrs.value.data[0].length; j++) {
+        const datum = attrs.value.data[i][j];
+        const val = (dtype & dt.RATIONAL) ? Rnl.fromString(datum) : datum;
+        if (isSingleRow) {
+          value = val;
         } else {
-          break
+          value.push(val);
         }
-
       }
+      if (!isSingleRow) { dtype += dt.COLUMNVECTOR; }
+      const result = {
+        value,
+        unit: attrs.unit[attrs.value.units[i]],
+        dtype
+      };
+      if ((dtype & dt.RATIONAL) && isSingleRow) {
+        result.resultdisplay = parse$1(format(value));
+      } else if (dtype & dt.RATIONAL) {
+        result.resultdisplay = Matrix.display({ value, dtype }, formatSpec, decimalFormat)
+            + parse$1(`'${attrs.value.units[i]}'`);
+      } else {
+        result.resultdisplay = parse$1(value);
+      }
+      if (attrs.value.units[i]) {
+        result.value = { plain: result.value };
+        const unit = attrs.unit[attrs.value.units[i]];
+        result.value.inBaseUnits = isSingleRow
+          ? Rnl.multiply(Rnl.add(result.value.plain, unit.gauge), unit.factor)
+          : result.value.plain.map(e => Rnl.multiply(Rnl.add(e, unit.gauge), unit.factor));
+        result.expos = unit.expos;
+      }
+
+      hurmetVars[attrs.name[i]] = result;
+      if (changedVars) { changedVars.add(attrs.name[i]); }
     }
-    const parsed = rule.parse(capture, state);
-    if (Array.isArray(parsed)) {
-      Array.prototype.push.apply(result, parsed);
+  } else if (attrs.dtype === dt.TUPLE) {
+    let i = 0;
+    for (const value of attrs.value.values()) {
+      hurmetVars[attrs.name[i]] = value;
+      if (changedVars) { changedVars.add(attrs.name[i]); }
+      i += 1;
+    }
+  } else if (attrs.dtype === dt.MODULE) {
+    if (attrs.name.length !== attrs.value.length) {
+      return errorOprnd("MULT_MIS")
     } else {
-      if (parsed.type == null) { parsed.type = ruleName; }
-      result.push(parsed);
-    }
-    state.prevCapture = capture[0];
-    source = source.substring(capture[0].length);
-    if (state.remainder) {
-      // Prepend a list.
-      source = state.remainder + "\n\n" + source;
-      state.remainder = "";
-    }
-  }
-  return result
-};
-
-
-
-/**
- * Parse some content with the parser `parse`, with state.inline
- * set to true. Useful for block elements; not generally necessary
- * to be used by inline elements (where state.inline is already true.
- */
-const parseInline = function(content, state) {
-  const isCurrentlyInline = state.inline || false;
-  state.inline = true;
-  const result = parse(content, state);
-  state.inline = isCurrentlyInline;
-  return result;
-};
-
-
-// recognize a `*` `-`, `+`, `1.`, `2.`... list bullet
-const LIST_BULLET = "(?:[*+-]|\\d+[\\.\\)])";
-// recognize the start of a list item:
-// leading space plus a bullet plus a space (`   * `)
-const LIST_ITEM_PREFIX = "( *)(" + LIST_BULLET + ") +";
-const LIST_ITEM_PREFIX_R = new RegExp("^" + LIST_ITEM_PREFIX);
-// recognize an individual list item:
-//  * hi
-//    this is part of the same item
-//
-//    as is this, which is a new paragraph in the same item
-//
-//  * but this is not part of the same item
-const LIST_ITEM_R = new RegExp(
-  LIST_ITEM_PREFIX + "[^\\n]*(?:\\n" + "(?!\\1" + LIST_BULLET + " )[^\\n]*)*(\n|$)",
-  "gm"
-);
-const BLOCK_END_R = /\n{2,}$/;
-// recognize the end of a paragraph block inside a list item:
-// two or more newlines at end end of the item
-const LIST_BLOCK_END_R = BLOCK_END_R;
-const LIST_ITEM_END_R = / *\n+$/;
-
-const consolidate = arr => {
-  if (Array.isArray(arr) && arr.length > 0) {
-    // Group any text nodes together into a single string output.
-    for (let i = arr.length - 1; i > 0; i--) {
-      const node = arr[i];
-      const prevNode = arr[i - 1];
-      if (node.type === 'text' && prevNode.type === 'text' &&
-          !node.marks && !prevNode.marks) {
-        prevNode.text += node.text;
-        arr.splice(i, 1);
-      } else if ((node.type === 'indented' && prevNode.type === 'indented') ||
-                 (node.type === 'centered' && prevNode.type === 'centered')) {
-        prevNode.content = prevNode.content.concat(node.content);
-        arr.splice(i, 1);
-      } else if (node.type === "null") {
-        arr.splice(i, 1);
-      } else if (!rules.has(node.type) || !rules.get(node.type).isLeaf) {
-        consolidate(node.content);
+      let i = 0;
+      for (const value of attrs.value.values()) {
+        const result = clone(value);
+        hurmetVars[attrs.name[i]] = result;
+        if (changedVars) { changedVars.add(attrs.name[i]); }
+        i += 1;
       }
     }
-
-    if (!rules.has(arr[0].type) || !rules.get(arr[0].type).isLeaf) {
-      consolidate(arr[0].content);
-    }
-  }
-};
-
-const populateTOC = ast => {
-  let tocNode;
-  for (const node of ast) {
-    if (node.type === "toc") { tocNode = node; break }
-  }
-  if (!tocNode) { return }
-  const start = tocNode.attrs.start;
-  const end = tocNode.attrs.end;
-  for (const node of ast) {
-    if (node.type === "heading") {
-      const level = node.attrs.level;
-      if (start <= level && level <= end) {
-        const tocEntry = [];
-        let str = "";
-        for (const range of node.content) { str += range.text; }
-        tocEntry.push(str);
-        tocEntry.push(level);
-        tocEntry.push(0); // page number unknown
-        tocEntry.push(0); // element number unknown
-        tocNode.attrs.body.push(tocEntry);
-      }
-    }
-  }
-};
-
-const metadataRegEx = /^---+\n((?:[A-Za-z0-9][A-Za-z0-9 _-]*:[^\n]+\n(?:[ \t]+[^\n]+\n)*)+)---+\n/;
-const metadataItemRegEx = /^[A-Za-z0-9][A-Za-z0-9 _-]*:[^\n]+\n(?:[ \t]+[^\n]+\n)*/;
-const hurmetMetadataNames = ["decimalFormat", "fontSize", "pageSize"];
-
-const parseMetadata = str => {
-  const metadata = {};
-  let capture = str.match(metadataItemRegEx);
-  while (capture) {
-    const item = capture[0].split(":");
-    const key = item[0].trim().replace(/ /g, "");
-    if (hurmetMetadataNames.includes(key)) {
-      const value = item[1].slice(0, -1).trim().replace(/ *\n[ \t]*/g, " ");
-      metadata[key] = value;
-    }
-    str = str.slice(capture[0].length);
-    capture = str.match(metadataItemRegEx);
-  }
-  return metadata
-};
-
-const dateMessageRegEx = /^date:([^\n]+)\nmessage:([^\n]+)\n/;
-
-const inlineMd2ast = md => {
-  const state = { inline: true, _defs: {}, prevCapture: "", remainder: "", inHtml: false };
-  const ast = parse(md, state);
-  if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") {
-    ast.shift();
-  }
-  consolidate(ast);
-  return ast
-};
-
-const md2ast = (md, inHtml = false) => {
-  // First, check for a metadata preamble
-  let metadata = false;
-  if (metadataRegEx.test(md)) {
-    const match = metadataRegEx.exec(md);
-    metadata = parseMetadata(match[1]);
-    md = md.slice(match[0].length);
-  }
-
-  // Second, get all the link reference definitions
-  const state = { inline: false, _defs: {}, prevCapture: "", remainder: "", inHtml };
-  const defRegEx = /\n *\[([^\]\n]+)\]: *(?:¢(`+)([\s\S]*?[^`])\2(?!`)|<?([^\n>]*)>? *(?:\n\{([^\n}]*)\})?)(?=\n)/gm;
-  let capture;
-  while ((capture = defRegEx.exec(md)) !== null) {
-    const def = capture[1].replace(/\s+/g, " ");
-    const target = capture[4] || capture[3].trim();
-    const directives = capture[5] || "";
-
-    const attrs = { alt: def };
-    if (directives) {
-      const matchClass = CLASS_R.exec(directives);
-      const matchWidth = WIDTH_R.exec(directives);
-      const matchID = ID_R.exec(directives);
-      if (matchClass) { attrs.class = matchClass[1]; }
-      if (matchWidth) { attrs.width = matchWidth[1]; }
-      if (matchID)    { attrs.id = matchID[1]; }
-    }
-    state._defs[def] = { target, attrs };
-  }
-
-  // Find out if there are any snapshots.
-  let snapshotStrings = [];
-  let gotSnapshot = false;
-  if (metadata) {
-    snapshotStrings = md.split("<!--SNAPSHOT-->\n");
-    if (snapshotStrings.length > 1) {
-      gotSnapshot = true;
-      md = snapshotStrings.shift();
-    }
-  }
-
-  // Find out if there are any fallbacks for fetched files
-  let fallbackStrings = [];
-  if (metadata) {
-    fallbackStrings = md.split("<!--FALLBACKS-->\n");
-    if (fallbackStrings.length > 1) {
-      md = fallbackStrings.shift();
-    } else {
-      fallbackStrings = null;
-    }
-  }
-
-  // Proceed to parse the document.
-  const ast = parse(md, state);
-  if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") {
-    ast.shift();
-  }
-  consolidate(ast);
-  populateTOC(ast);
-  if (metadata) {
-    if (fallbackStrings) {
-      metadata.fallbacks = JSON.parse(fallbackStrings.pop().trim());
-    }
-    if (gotSnapshot) {
-      const snapshots = [];
-      for (const str of snapshotStrings) {
-        const capture = dateMessageRegEx.exec(str);
-        snapshots.push({
-          date: capture[1] ? Date.parse(capture[1].trim()) : undefined,
-          message: capture[2] ? capture[2].trim() : undefined,
-          content: capture ? str.slice(capture[0].length) : str
-        });
-      }
-      metadata.snapshots = snapshots;
-    }
-    return { type: "doc", attrs: metadata, content: ast }
-  } else {
-    return ast
-  }
-};
+  } else ;
+}
 
 const startSvg = _ => {
   return {
@@ -32722,31 +32442,6 @@ const compile = (inputStr, decimalFormat = "1,000,000.") => {
   return attrs
 };
 
-// This function is not used by the Hurmet.app page.
-// It is provided for use by unit tests and by the demo box in the manual page.
-// If you are looking for the app's main calculation module, try evaluate.js.
-const calculate = (
-  entry,
-  vars = {},
-  inDraftMode = false,
-  decimalFormat = "1,000,000."
-) => {
-  let attrs = compile(entry, decimalFormat);
-  if (attrs.rpn) {
-    attrs = evaluate(clone(attrs), vars, decimalFormat);
-  } else if (attrs.dtype && attrs.dtype === dt.DRAWING) {
-    attrs = evaluateDrawing(attrs, vars, decimalFormat);
-  }
-  if (attrs.name) {
-    insertOneHurmetVar(vars, attrs);
-  }
-  return attrs.dtype && attrs.dtype === dt.DRAWING
-   ? attrs
-   : inDraftMode
-   ? attrs.alt
-   : attrs.tex
-};
-
 /*
  *  This module organizes one or two passes through the data structure of a Hurmet
  *  document, calling for a calculation to be done on each Hurmet calculation cell.
@@ -33511,6 +33206,7 @@ const nodes$1 = {
     if (node.attrs.width) { attributes.width = node.attrs.width; }
     return htmlTag("img", "", attributes, false) + "\n";
   },
+  footnote(node)   { return htmlTag("footnote", "") },
   calculation(node) {
     if (node.attrs.dtype && node.attrs.dtype === dt.DRAWING) {
       const svg = writeSVG(node.attrs.resultdisplay);
@@ -33631,6 +33327,21 @@ const getTOCitems = (ast, tocArray, start, end, node) => {
   }
 };
 
+const getFootnotes = (ast, footnotes) => {
+  if (Array.isArray(ast)) {
+    for (let i = 0; i < ast.length; i++) {
+      getFootnotes(ast[i], footnotes);
+    }
+  } else if (ast && ast.type === "footnote") {
+    footnotes.push(ast.content);
+  // eslint-disable-next-line no-prototype-builtins
+  } else if (ast.hasOwnProperty("content")) {
+    for (let j = 0; j < ast.content.length; j++) {
+      getFootnotes(ast.content[j], footnotes);
+    }
+  }
+};
+
 const ast2html = ast => {
   // Return HTML.
   let html = "";
@@ -33661,8 +33372,9 @@ const wrapWithHead = (html, title, attrs) => {
 </head>
 <body>
 <article class="ProseMirror ${fontClass}">
+<div class="ProseMirror-setup">
 `;
-  return head + html + "\n</article>\n</body>\n</html>"
+  return head + html + "\n</div></article>\n</body>\n</html>"
 };
 
 async function md2html(md, title = "", inHtml = false) {
@@ -33686,12 +33398,476 @@ async function md2html(md, title = "", inHtml = false) {
   // Write the HTML
   let html = ast2html(ast);
 
+  // Write the footnotes, if any.
+  const footnotes = [];
+  getFootnotes(ast, footnotes);
+  if (footnotes.length > 0) {
+    html += "\n<hr>\n<ol>\n";
+    for (const footnote of footnotes) {
+      html += "<li><p>" + ast2html(footnote) + "</p></li>\n";
+    }
+    html += "</ol>\n";
+  }
+
   if (title.length > 0) {
     html = wrapWithHead(html, title, ast.attrs);
   }
 
   return html
 }
+
+// Items related to pagination and Table of Contents
+
+const headsRegEx = /^H[1-6]$/;
+const levelRegEx = /(\d+)(?:[^\d]+(\d+))?/;
+const lists = ["OL", "UL"];
+const blockRegEx$1 = /^(centered|indented|right_justified)$/;
+const forToC = 0;
+const forPrint = 1;
+
+const findTOC = doc => {
+  // Called by a print event.
+  // Is there a Table of Contents node?
+  let tocNode = undefined;
+  let nodePos = 0;
+  doc.nodesBetween(0, doc.content.size, function(node, pos) {
+    if (node.type.name === "toc") {
+      tocNode = node;
+      nodePos = pos;
+    }
+  });
+  return [tocNode, nodePos]
+};
+
+const tocLevels = entry => {
+  // Determine the start and end heading levels
+  const parts = entry.match(levelRegEx);
+  const startLevel = Number(parts[1]);
+  const endLevel = Number(parts[2] ? parts[2] : startLevel);
+  return [startLevel, endLevel]
+};
+
+const renderToC = (tocArray, ul) => {
+  // Called by schema.js. Renders a Table of Contents.
+  ul.innerHTML = "";
+  ul.className = "toc";
+  for (const item of tocArray) {
+    const li = document.createElement("li");
+    if (item[1] > 0) { li.style.marginLeft = String(1.5 * item[1]) + "em"; }
+    const title = document.createElement("span");
+    title.textContent = item[0].trim();
+    li.appendChild(title);
+    const pageNum = document.createElement("span");
+    pageNum.textContent = String(item[2]).trim();
+    li.appendChild(pageNum);
+    ul.appendChild(li);
+  }
+};
+
+const bottomOf = element => {
+  let bottom = element.getBoundingClientRect().bottom;
+  const images = element.getElementsByTagName("img");
+  for (let i = 0; i < images.length; i++) {
+    bottom = Math.max(bottom, images[i].getBoundingClientRect().bottom);
+  }
+  const svgs = element.getElementsByTagName("svg");
+  for (let i = 0; i < svgs.length; i++) {
+    bottom = Math.max(bottom, svgs[i].getBoundingClientRect().bottom);
+  }
+  return bottom
+};
+
+const footnoteContents = textNodes => {
+  let text = "";
+  let innerHTML = "";
+  for (const node of textNodes) {
+    text += node.text;
+    let span = sanitizeText(node.text);
+    for (const mark of node.marks) {
+      const tag = tagName[mark.type.name];
+      span = `<${tag}>${span}</${tag}>`;
+    }
+    innerHTML += span;
+  }
+  return { text, innerHTML }
+};
+
+const getTop = (editor, pageData) => {
+  // Find the y-coordinate at the top of the next page
+  const prevElement = pageData[pageData.length - 1];
+  const iStart = prevElement.all ? 0 : prevElement.end + 1;
+  const top = prevElement.all
+    ? editor.children[prevElement.index + 1].getBoundingClientRect().top
+    : editor.children[prevElement.index].children[iStart].getBoundingClientRect().top;
+  return top
+};
+
+const increment = oldPageData => {
+  const pageData = clone(oldPageData);
+  pageData.start = pageData.end;
+  pageData.end += 1;
+  return pageData
+};
+
+const findPageBreaks = (view, state, purpose, tocSchema, startLevel, endLevel = 0) => {
+  const doc = state.doc;
+  const headerExists = doc.nodeAt(0).type.name === "header";
+  let tocNode;
+  let nodePos = 0;
+  if (purpose === forPrint) {
+    [tocNode, nodePos] = findTOC(doc);
+    if (tocNode) {
+      startLevel = tocNode.attrs.start;
+      endLevel = tocNode.attrs.end;
+    }
+  }
+  let tocRegEx;
+  if (endLevel > 0) {
+    let targetStr = "^(";
+    for (let i = startLevel; i <= endLevel; i++) {
+      targetStr += "H" + i + "|";
+    }
+    targetStr = targetStr.slice(0, -1) + ")$";
+    tocRegEx = targetStr.length > 0 ? RegExp(targetStr) : null;
+  }
+  const tocArray = [];
+  let header;
+  // Note: 1 inch = 96 px
+  let grossPageHeight = doc.attrs.pageSize === "letter" ? 11 * 96 : 297 / 25.4 * 96;
+  grossPageHeight = grossPageHeight - 121;   // 16 mm margins
+  let pageHeight = grossPageHeight;          // w/o accounting for header
+  let headerHeight = 0;
+  if (headerExists) {
+    // eslint-disable-next-line max-len
+    header = document.getElementsByTagName("header")[0].children[0].children[0].cloneNode(true);
+    header.classList.add("header");
+    header.innerHTML = header.innerHTML.replace(
+      "$PAGE",
+      '&nbsp;<span class="page-display"></span>'
+    );
+    const headerRect = document.getElementsByTagName("header")[0].getBoundingClientRect();
+    headerHeight = headerRect.bottom - headerRect.top;
+  }
+
+  // Spin up a canvas for measurement of footnote width
+  const measurementCanvas = document.createElement('canvas');
+  const ctx =  measurementCanvas.getContext('2d');
+  ctx.font = `${String(doc.attrs.fontSize)}pt Calibri, san-serif`;
+  const lineBoxHeight = doc.attrs.fontSize === 12 ? 19.2 : 16;
+  const footnoteBotMargin = doc.attrs.fontSize === 12 ? 16 : 13.333;
+
+  // Get the content of each footnote
+  const footnotes = [];
+  doc.nodesBetween(0, doc.content.size, function(node, pos) {
+    if (node.type.name === "footnote") {
+      footnotes.push(footnoteContents(node.content.content));
+    }
+  });
+
+  // A closed function for checking footnote height
+  const checkFootnotes = (element, noteBlockHeight) => {
+    // Check for footnote(s) in the element
+    const local = { numFootnotes: 0, deltaBlock: 0 };
+    const footnoteNodeList = element.querySelectorAll("footnote");
+    if (footnoteNodeList.length > 0) {
+      local.deltaBlock += noteBlockHeight === 0 ? 25 : 0; // <hr> is 25 px high
+      // eslint-disable-next-line no-unused-vars
+      for (const node of footnoteNodeList) {
+        const text = footnotes[numFootnotes].text;
+        // A footnote has 620 px available width. We'll use 615 to allow for text styles.
+        const numLines = Math.ceil(ctx.measureText(text).width / 615);
+        local.deltaBlock += (numLines * lineBoxHeight) + footnoteBotMargin;
+        local.numFootnotes += 1;
+      }
+    }
+    return local
+  };
+
+  // A second closed function, to split the elements into pages.
+  const pageSplit = (iParent, iStart, iPass, pageData, elementData, top) => {
+    const elements = iParent === null ? editor.children : editor.children[iParent].children;
+    for (let i = iStart; i < elements.length; i++) {
+      const el = elements[i];
+      elementData = (iParent === null) ? { index: i, all: true } : elementData;
+
+      if (iParent === null && el.children.length > 1 && (lists.includes(el.tagName) ||
+             (el.tagName === "DIV" && blockRegEx$1.test(el.className)))) {
+        elementData.all = false;
+        elementData.start = 0;
+        elementData.end = 0;
+        elementData.tagName = el.tagName;
+        elementData.className = el.className;
+        elementData.breaks = [];
+        // Recursive call. Loop thru the children of the current top-level element.
+        [pageData, top] = pageSplit(i, 0, iPass, pageData, elementData, top);
+        continue
+
+      } else {
+        if (el.tagName === "H1" && el.getBoundingClientRect().top - top > 0.75 * pageHeight) {
+          // prevent an H1 near the bottom of the page
+          if (purpose === forPrint && iPass === 1) {
+            pageHeight = populatePage(pageData, gap);
+          }
+          top = getTop(editor, pageData);
+          pageData = [elementData];
+          [noteBlockHeight, prevNumNotes, pageNum] = [0, numFootnotes, pageNum + 1];
+          if (iParent !== null) { elementData = increment(elementData); }
+          if (iPass === 0 && tocRegEx && tocRegEx.test(el.tagName)) {
+            const level = Number(el.tagName.slice(1)) - startLevel;
+            tocArray.push([el.textContent, level, pageNum]);
+          }
+          continue
+        }
+
+        if (headsRegEx.test(el.tagName)) {
+          // This element is a heading.
+          // Look ahead one element. Prevent a heading orphan.
+          let nextFits = true;  // default
+          if (i + 1 === elements.length) {
+            nextFits = true;
+          } else {
+            const element = elements[i + 1];
+            let next = checkFootnotes(element, noteBlockHeight);
+            if (pageHeight - (noteBlockHeight + next.deltaBlock) > bottomOf(element) - top) {
+              nextFits = true;
+            } else if (element.children.length > 1 && (lists.includes(element.tagName) ||
+                   (element.tagName === "DIV" && blockRegEx$1.test(element.className)))) {
+              const firstBot = bottomOf(element.children[0]);
+              next = checkFootnotes(element.children[0], noteBlockHeight);
+              nextFits = (firstBot - top > pageHeight - (noteBlockHeight + next.deltaBlock));
+            } else {
+              nextFits = false;
+            }
+          }
+          if (!nextFits) {
+            if (!headerExists) {
+              if (iParent === null) {
+                elementData.breakBefore = true;
+              } else {
+                elementData.breaks.push(i);
+              }
+            }
+            if (purpose === forPrint && iPass === 1) {
+              pageHeight = populatePage(pageData, gap);
+            }
+            top = getTop(editor, pageData);
+            pageData = [elementData];
+            [noteBlockHeight, prevNumNotes, pageNum] = [0, numFootnotes, pageNum + 1];
+            if (iParent !== null) { elementData = increment(elementData); }
+            if (iPass === 0 && tocRegEx && tocRegEx.test(el.tagName)) {
+              const level = Number(el.tagName.slice(1)) - startLevel;
+              tocArray.push([el.textContent, level, pageNum]);
+            }
+            continue
+          }
+        }
+
+        const bottom = bottomOf(el);
+        const local = checkFootnotes(el, noteBlockHeight);
+
+        if (pageHeight - (noteBlockHeight + local.deltaBlock) > bottom - top) {
+          numFootnotes += local.numFootnotes;
+          noteBlockHeight += local.deltaBlock;
+          if (iParent === null) {
+            pageData.push(elementData);
+          } else {
+            elementData.end += 1;
+          }
+          // Update the gap between the text and the footnote block
+          gap = pageHeight - noteBlockHeight - (bottom - top);
+        } else {
+          if (purpose === forPrint && iPass === 1) {
+            if (iParent !== null) { pageData.push(clone(elementData)); }
+            pageHeight = populatePage(pageData, gap);
+          }
+          top = getTop(editor, pageData);
+          if (iParent !== null) { elementData.start = i; }
+          pageData = [clone(elementData)];
+          [noteBlockHeight, prevNumNotes, pageNum] = [0, numFootnotes, pageNum + 1];
+          if (iParent !== null) { elementData = increment(elementData); }
+        }
+
+        if (iPass === 0 && tocRegEx && tocRegEx.test(el.tagName)) {
+          const level = Number(el.tagName.slice(1)) - startLevel;
+          tocArray.push([el.textContent, level, pageNum]);
+        }
+      }
+    }
+    if (iParent !== null) {
+      if (elementData.start === 0 &&
+          elementData.end === editor.children[iParent].children.length) {
+        elementData.all = true; // Transfer in one block
+      }
+      pageData.push(elementData);
+    } else if (purpose === forPrint && iPass === 1) {
+      pageHeight = populatePage(pageData, gap);
+    }
+    return [pageData, top]
+  };
+
+  // A third closed function, to create one printed page.
+  const populatePage = (pageData, gap) => {
+    // Copy the identified elements to the destination div.
+    const page = document.createDocumentFragment();
+    if (headerExists && pageNum > 1) {
+      page.append(header.cloneNode(true));
+    }
+    // Create a body div
+    const div = document.createElement("div");
+    div.className = "print-body";
+    for (const elementData of pageData) {
+      const i = elementData.index;
+      if (elementData.all) {
+        div.append(editor.children[i].cloneNode(true));
+        if (elementData.breakBefore) {
+          div.lastChild.style.breakBefore = "page";
+        }
+      } else {
+        const el = document.createElement(elementData.tagName);
+        if (elementData.className) { el.classList.add(elementData.className); }
+        if (elementData.breaks.includes(i)) { el.style["break-before"] = "page"; }
+        if (elementData.tagName === "OL" && elementData.start > 0) {
+          el.setAttribute("start", elementData.start);
+        }
+        for (let j = elementData.start; j < elementData.end; j++) {
+          el.appendChild(editor.children[i].children[j].cloneNode(true));
+        }
+        div.append(el);
+      }
+    }
+    page.append(div);
+    if (numFootnotes > prevNumNotes) {
+      // Write footnotes at the bottom of the page.
+      if (gap > 0) {
+        const spacer = document.createElement("div");
+        spacer.style.height = (gap - 2) + "px";
+        page.append(spacer);
+      }
+      page.append(document.createElement("hr"));
+      const ol = document.createElement("ol");
+      if (prevNumNotes > 0) {
+        ol.setAttribute("start", String(prevNumNotes + 1));
+      }
+      for (let j = prevNumNotes; j < numFootnotes; j++) {
+        const graf = document.createElement("p");
+        graf.innerHTML = footnotes[j].innerHTML;
+        const li = document.createElement("li");
+        li.appendChild(graf);
+        ol.appendChild(li);
+      }
+      page.append(ol);
+      prevNumNotes = numFootnotes;
+    }
+    destination.append(page);
+    return grossPageHeight - headerHeight
+  };
+
+  // Now that the closed functions are written, proceed to pagination
+  const [editor] = document.getElementsByClassName("ProseMirror-setup");
+  const destination = document.getElementById("print-div");
+  destination.innerHTML = "";
+  let numFootnotes = 0;
+  let prevNumNotes = 0;
+  let noteBlockHeight = 0;
+  let gap = 0;
+  let pageNum = 1;
+
+  // For printing, make two passes of the next loop.
+  //   (0) Update the Table of Contents.
+  //   (1) Copy elements to the print div.
+  // Otherwise, one pass to populate the table of contents.
+  const numPasses = purpose === forPrint ? 2 : 1;
+  for (let iPass = 0; iPass < numPasses; iPass++) {
+    const iStart = headerExists ? 1 : 0;
+    const top = editor.children[0].getBoundingClientRect().top;
+
+    pageSplit(null, iStart, iPass, [], null, top);
+
+    if (iPass === 0 && purpose === forPrint && tocNode) {
+      // Write a Table of Contents into the document, with correct page numbers.
+      const attrs = {
+        start: tocNode.attrs.start,
+        end: tocNode.attrs.end,
+        body: tocArray
+      };
+      const tr = state.tr;
+      tr.replaceWith(nodePos, nodePos + 1, tocSchema.createAndFill(attrs));
+      view.dispatch(tr);
+    }
+    pageNum = 1;
+    numFootnotes = 0;
+    prevNumNotes = 0;
+    noteBlockHeight = 0;
+  }
+
+  if (purpose === forToC) {
+    return tocArray
+  }
+};
+
+const renderSVG = dwg => {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  Object.keys(dwg.attrs).forEach(key => {
+    if (key === "float") {
+      svg.style.float = dwg.attrs.float;
+    } else {
+      svg.setAttribute(key, dwg.attrs[key]);
+    }
+  });
+  dwg.children.forEach(el => {
+    const node = document.createElementNS("http://www.w3.org/2000/svg", el.tag);
+    Object.keys(el.attrs).forEach(attr => {
+      if (el.tag === "title") {
+        node.appendChild(document.createTextNode(el.attrs["text"]));
+      } else {
+        node.setAttribute(attr, el.attrs[attr]);
+      }
+    });
+    if (el.tag === "text") {
+      el.children.forEach(child => {
+        const tspan = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
+        if (child.attrs) {
+          Object.keys(child.attrs).forEach(mark => {
+            tspan.setAttribute(mark, child.attrs[mark]);
+          });
+        }
+        tspan.appendChild(document.createTextNode(child.text));
+        node.appendChild(tspan);
+      });
+    } else if (el.tag === "defs") {
+      const styleNode = document.createElementNS("http://www.w3.org/2000/svg", "style");
+      styleNode.appendChild(document.createTextNode(el.style));
+      node.appendChild(styleNode);
+    }
+    svg.appendChild(node);
+  });
+  return svg
+};
+
+// This function is not used by the Hurmet.app page.
+// It is provided for use by unit tests and by the demo box in the manual page.
+// If you are looking for the app's main calculation module, try evaluate.js.
+const calculate = (
+  entry,
+  vars = {},
+  inDraftMode = false,
+  decimalFormat = "1,000,000."
+) => {
+  let attrs = compile(entry, decimalFormat);
+  if (attrs.rpn) {
+    attrs = evaluate(clone(attrs), vars, decimalFormat);
+  } else if (attrs.dtype && attrs.dtype === dt.DRAWING) {
+    attrs = evaluateDrawing(attrs, vars, decimalFormat);
+  }
+  if (attrs.name) {
+    insertOneHurmetVar(vars, attrs);
+  }
+  return attrs.dtype && attrs.dtype === dt.DRAWING
+   ? attrs
+   : inDraftMode
+   ? attrs.alt
+   : attrs.tex
+};
 
 /**
  * This is the ParseError class, which is the main error thrown by Temml
@@ -47331,6 +47507,15 @@ const nodes = {
     }
   },
 
+  footnote: {
+    group: "inline",
+    content: "inline*",
+    inline: true,
+    atom: true,
+    toDOM: () => ["footnote", 0],
+    parseDOM: [{tag: "footnote"}]
+  },
+
   // Table of contents
   toc: {
     atom: true,
@@ -48135,10 +48320,17 @@ class MarkdownSerializer {
   // :: (Node, ?Object) → string
   // Serialize the content of the given node to
   // [CommonMark](http://commonmark.org/).
-  serialize(content, paths, isGFM = false, forSnapshot = false) {
-    let state = new MarkdownSerializerState(this.nodes, this.marks, paths, isGFM);
+  serialize(content, paths, footnotes, isGFM = false, forSnapshot = false) {
+    let state = new MarkdownSerializerState(this.nodes, this.marks, paths, footnotes, isGFM);
     state.renderContent(content);
-    // Write the link and image paths, unless this is done for a snapshot.
+
+    // Write the footnotes
+    for (let i = 0; i < state.footnotes.length; i++) {
+      state.write("\n[^" + String(i + 1) + "]: ");
+      state.renderInline(state.footnotes[i]);
+      state.write("\n");
+    }
+  // Write the link and image paths, unless this is done for a snapshot.
     if (!forSnapshot) {
       for (const [key, value] of state.paths.entries()) {
         state.write("\n[" + key + "]: " + value + "\n");
@@ -48271,11 +48463,16 @@ const hurmetNodes =  {
     state.renderTable(node, state.delim, state.isGFM);
     state.closeBlock(node);
   },
+  footnote(state, node) {
+    const note = node.content;
+    state.footnotes.push(note);
+    state.write(`[^${state.footnotes.length}]`);
+  },
   figure(state, node) {
     let caption;
     if (!state.isGFM) {
       const figureCaption = node.content.content[1];
-      const figureState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, false);
+      const figureState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, this.footnotes, false);
       figureState.renderInline(figureCaption);
       caption = figureState.out;
     } else {
@@ -48508,10 +48705,11 @@ const colWidthPicker = [0, 80, 50, 35];
 // methods related to markdown serialization. Instances are passed to
 // node and mark serialization methods (see `toMarkdown`).
 class MarkdownSerializerState {
-  constructor(nodes, marks, paths, isGFM) {
+  constructor(nodes, marks, paths, footnotes, isGFM) {
     this.nodes = nodes;
     this.marks = marks;
     this.paths = paths;
+    this.footnotes = footnotes;
     this.isGFM = isGFM;
     this.delim = this.out = "";
     this.divFence = "";
@@ -48758,7 +48956,7 @@ class MarkdownSerializerState {
     const mergedCells = [];
     // Do we need a reStructuredText grid table? Or is a GFM pipe table enough?
     let isRst = !isGFM && numRowsInHeading > 1;
-    let tableState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, this.isGFM);
+    let tableState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, this.footnotes, this.isGFM);
     tableState.lineLimit = numCols > 3 ? 25 : colWidthPicker[numCols];
     let i = 0;
     let j = 0;
@@ -50918,6 +51116,11 @@ const hurmetIcons = {
     height: 1024,
     path: "M512 219q-116 0-218 39t-161 107-59 145q0 64 40 122t115 100l49 28-15 54q-13 52-40 98 86-36 157-97l24-21 32 3q39 4 74 4 116 0 218-39t161-107 59-145-59-145-161-107-218-39zM1024 512q0 99-68 183t-186 133-257 48q-40 0-82-4-113 100-262 138-28 8-65 12h-2q-8 0-15-6t-9-15v-0q-1-2-0-6t1-5 2-5l3-5t4-4 4-5q4-4 17-19t19-21 17-22 18-29 15-33 14-43q-89-50-141-125t-51-160q0-99 68-183t186-133 257-48 257 48 186 133 68 183z"
   },
+  footnote: {
+    width: 16,
+    height: 16,
+    path: "M3.032 13l0.9-3h4.137l0.9 3h1.775l-3-10h-3.488l-3 10h1.776zM5.432 5h1.137l0.9 3h-2.937l0.9-3zM11 13l2.5-4 2.5 4h-5z M13.5 2h-1c-0.276 0-0.5-0.224-0.5-0.5s0.224-0.5 0.5-0.5h2c0.276 0 0.5-0.224 0.5-0.5s-0.224-0.5-0.5-0.5h-2c-0.827 0-1.5 0.673-1.5 1.5 0 0.384 0.145 0.734 0.383 1 0.275 0.307 0.674 0.5 1.117 0.5h1c0.276 0 0.5 0.224 0.5 0.5s-0.224 0.5-0.5 0.5h-2c-0.276 0-0.5 0.224-0.5 0.5s0.224 0.5 0.5 0.5h2c0.827 0 1.5-0.673 1.5-1.5 0-0.384-0.145-0.734-0.383-1-0.275-0.307-0.674-0.5-1.117-0.5z"
+  },
   scroll: {
     width: 512,
     height: 512,
@@ -51156,7 +51359,30 @@ const print = () => {
       window.print();
     }
   })
-}; 
+};
+
+const footnote = (nodeType) => {
+  return new MenuItem_1({
+    title: "Insert footnote",
+    icon: hurmetIcons.footnote,
+    select(state) {
+      return insertPoint(state.doc, state.selection.from, schema.nodes.footnote) != null
+    },
+    run(state, dispatch) {
+      let {empty, $from, $to} = state.selection, content = Fragment.empty;
+      if (!empty && $from.sameParent($to) && $from.parent.inlineContent) {
+        content = $from.parent.content.cut($from.parentOffset, $to.parentOffset);
+      }
+      const tr = state.tr;
+      tr.replaceSelectionWith(schema.nodes.footnote.create(null, content));
+      if (content.content.length === 0) {
+        tr.setSelection(NodeSelection.create(tr.doc, $from.pos));
+      }
+      dispatch(tr);
+      //dispatch(state.tr.replaceSelectionWith(schema.nodes.footnote.create(null, content)));
+    }
+  })
+};
 
 const findTable = selection =>
   findParentNode(
@@ -51245,7 +51471,7 @@ fontSize: ${state.doc.attrs.fontSize}
 pageSize: ${state.doc.attrs.pageSize}
 ---------------
 
-` + hurmetMarkdownSerializer.serialize(state.doc, new Map());
+` + hurmetMarkdownSerializer.serialize(state.doc, new Map(), []);
 
   // Save some fetched data as a fallback for when the internet is down.
   let gottaFallback = false;
@@ -51332,7 +51558,7 @@ function openFile() {
 }
 
 function copyText(state, isGFM) {
-  const text = hurmetMarkdownSerializer.serialize(state.selection.content().content, new Map(), isGFM);
+  const text = hurmetMarkdownSerializer.serialize(state.selection.content().content, new Map(), [], isGFM);
   const type = "text/plain";
   const blob = new Blob([text], { type });
   const data = [new ClipboardItem({ [type]: blob })];
@@ -51505,7 +51731,7 @@ function takeSnapshot() {
         fields: { message: new TextField({ label: "Commit message", required: true }) },
         callback(attrs) {
           const dateStr = new Date().toISOString().replace(/T.+/, "");
-          let md = hurmetMarkdownSerializer.serialize(state.doc, new Map(), false, true);
+          let md = hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, true);
           // Ignore path definitions
           md = md.replace(/\n\n\[[^\]]+\\: .+/, "");
           state.doc.attrs.snapshots.push({ message: attrs.message, date: dateStr, content: md });
@@ -51993,6 +52219,7 @@ function buildMenuItems(schema) {
 
   if ((type = schema.nodes.image)) r.imageUpload = uploadImage(type);
   if ((type = schema.nodes.image)) r.imageLink = insertImage(type);
+  if ((type = schema.nodes.footnote)) r.footnote = footnote();
   if ((type = schema.nodes.toc)) r.toc = insertToC(type);
   r.macroButton = macroButton();
   if ((type = schema.nodes.calculation)) r.insertCalclation = mathMenuItem(type, "calculation");
@@ -52221,6 +52448,7 @@ function buildMenuItems(schema) {
     r.insertHorizontalRule,
     r.imageUpload,
     r.imageLink,
+    r.footnote,
     r.toc,
     r.insertCalclation,
     r.insertTeX,
@@ -53602,6 +53830,110 @@ class TexView {
   stopEvent() { return true }
 }
 
+class FootnoteView {
+  constructor(node, view, getPos) {
+    // We'll need these later
+    this.node = node;
+    this.outerView = view;
+    this.getPos = getPos;
+
+    // The node's representation in the editor (empty, for now)
+    this.dom = document.createElement("footnote");
+    // These are used when the footnote is selected
+    this.innerView = null;
+  }
+
+  selectNode() {
+    this.dom.classList.add("ProseMirror-selectednode");
+    if (!this.innerView) { this.open(); }
+  }
+
+  deselectNode() {
+    this.dom.classList.remove("ProseMirror-selectednode");
+    if (this.innerView) { this.close(); }
+  }
+
+  open() {
+    const tooltip = this.dom.appendChild(document.createElement("div"));
+    tooltip.className = "footnote-tooltip";
+    this.innerView = new EditorView(tooltip, {
+      // Create a whole new editor in the node.
+      state: EditorState.create({
+        doc: this.node,
+        plugins: [keymap({
+          "Mod-z": () => undo(this.outerView.state, this.outerView.dispatch),
+          "Mod-y": () => redo(this.outerView.state, this.outerView.dispatch),
+          'Mod-b': toggleMark(schema.marks.strong),
+          'Mod-i': toggleMark(schema.marks.em),
+          'Mod-`': toggleMark(schema.marks.code),
+          'Mod-,': toggleMark(schema.marks.subscript),
+          'Mod-.': toggleMark(schema.marks.superscript),
+          'Mod-u': toggleMark(schema.marks.underline)
+        })]
+      }),
+      dispatchTransaction: this.dispatchInner.bind(this),
+      handleDOMEvents: {
+        mousedown: () => {
+          if (this.outerView.hasFocus()) { this.innerView.focus(); }
+        }
+      }
+    });
+  }
+
+  close() {
+    this.innerView.destroy();
+    this.innerView = null;
+    this.dom.textContent = "";
+  }
+
+  dispatchInner(tr) {
+    const { state, transactions } = this.innerView.state.applyTransaction(tr);
+    this.innerView.updateState(state);
+
+    if (!tr.getMeta("fromOutside")) {
+      const outerTr = this.outerView.state.tr;
+      const offsetMap = StepMap.offset(this.getPos() + 1);
+      for (let i = 0; i < transactions.length; i++) {
+        const steps = transactions[i].steps;
+        for (let j = 0; j < steps.length; j++) {
+          outerTr.step(steps[j].map(offsetMap));
+        }
+      }
+      if (outerTr.docChanged) { this.outerView.dispatch(outerTr); }
+    }
+  }
+
+  update(node) {
+    if (!node.sameMarkup(this.node)) { return false }
+    this.node = node;
+    if (this.innerView) {
+      const state = this.innerView.state;
+      const start = node.content.findDiffStart(state.doc.content);
+      if (start != null) {
+        let { a: endA, b: endB } = node.content.findDiffEnd(state.doc.content);
+        const overlap = start - Math.min(endA, endB);
+        if (overlap > 0) { endA += overlap; endB += overlap; }
+        this.innerView.dispatch(
+          state.tr
+            .replace(start, endB, node.slice(start, endA))
+            .setMeta("fromOutside", true));
+      }
+    }
+    return true
+  }
+
+  destroy() {
+    if (this.innerView) { this.close(); }
+  }
+
+  stopEvent(event) {
+    return this.innerView && this.innerView.dom.contains(event.target)
+  }
+
+  ignoreMutation() { return true }
+
+}
+
 // Prosemirror core modules
 
 // Bundle together the plugins.
@@ -53616,7 +53948,7 @@ function pmSetup(options) {
     history(),
     columnResizing(),
     tableEditing(),
-    new Plugin({  props: { attributes: { class: "ProseMirror-example-setup-style" } } })
+    new Plugin({  props: { attributes: { class: "ProseMirror-setup" } } })
   ]
 }
 
@@ -53627,7 +53959,8 @@ window.view = new EditorView(document.querySelector("#editor"), {
   }),
   nodeViews: {
     calculation(node, view) { return new CalcView(node, view) },
-    tex(node, view) { return new TexView(node, view) }
+    tex(node, view) { return new TexView(node, view) },
+    footnote(node, view, getPos) { return new FootnoteView(node, view, getPos) }
   },
   clipboardTextSerializer: (content, view) => {
     // If the selection consists of a single calc with a numeric result, return the result.

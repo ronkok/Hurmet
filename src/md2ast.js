@@ -32,7 +32,7 @@
  *        A. →  A. B. C.  etc. (future)
  *        a) →  (a) (b) (c)  etc. (future)
  * 12. Alerts per GFM
- *     > [!note] or [!tip] or [!important] or [!warning]
+ *     > [!note] or [!tip] or [!important] or [!warning] or [!epigraph]
  *     > Content of note
  * 13. Fenced divs, similar to Pandoc.
  *     ::: (centered|right_justified|comment|indented|boxed|header)
@@ -42,7 +42,7 @@
  * 14. Table of Contents
  *     {.toc start=N end=N}
  * 15. Definition lists, per Pandoc.  (future)
- * 16. [^1] is a reference to a footnote. (future)
+ * 16. [^1] is a reference to a footnote.
  *     [^1]: The body of the footnote is deferred, similar to reference links.
  * 17. [#1] is a reference to a citation. (future)
  *     [#1]: The body of the citation is deferred, similar to reference links.
@@ -784,6 +784,14 @@ rules.set("reflink", {
     return textNode
   }
 });
+rules.set("footnote", {
+  isLeaf: true,
+  match: inlineRegex(/^\[\^(\d+)\]/),
+  parse: function(capture, state) {
+    const index = Number(capture[1]) - 1
+    return { type: "footnote", content: parseInline(state.footnotes[index], state) }
+  }
+})
 rules.set("refimage", {
   isLeaf: true,
   match: inlineRegex(/^!\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]/),
@@ -1120,8 +1128,16 @@ export const md2ast = (md, inHtml = false) => {
   }
 
   // Second, get all the link reference definitions
-  const state = { inline: false, _defs: {}, prevCapture: "", remainder: "", inHtml }
+  const state = {
+    inline: false,
+    _defs: {},
+    footnotes: [],
+    prevCapture: "",
+    remainder: "",
+    inHtml
+  }
   const defRegEx = /\n *\[([^\]\n]+)\]: *(?:¢(`+)([\s\S]*?[^`])\2(?!`)|<?([^\n>]*)>? *(?:\n\{([^\n}]*)\})?)(?=\n)/gm
+  const footnoteDefRegEx = /\n *\[\^\d+\]: *([^\n]*)(?=\n)/gm
   let capture
   while ((capture = defRegEx.exec(md)) !== null) {
     const def = capture[1].replace(/\s+/g, " ")
@@ -1138,6 +1154,12 @@ export const md2ast = (md, inHtml = false) => {
       if (matchID)    { attrs.id = matchID[1] }
     }
     state._defs[def] = { target, attrs }
+  }
+
+  // Next, get all the footnote definitions
+  capture = null
+  while ((capture = footnoteDefRegEx.exec(md)) !== null) {
+    state.footnotes.push(capture[1].trim())
   }
 
   // Find out if there are any snapshots.

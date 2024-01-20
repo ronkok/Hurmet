@@ -48,10 +48,17 @@ export class MarkdownSerializer {
   // :: (Node, ?Object) → string
   // Serialize the content of the given node to
   // [CommonMark](http://commonmark.org/).
-  serialize(content, paths, isGFM = false, forSnapshot = false) {
-    let state = new MarkdownSerializerState(this.nodes, this.marks, paths, isGFM)
+  serialize(content, paths, footnotes, isGFM = false, forSnapshot = false) {
+    let state = new MarkdownSerializerState(this.nodes, this.marks, paths, footnotes, isGFM)
     state.renderContent(content)
-    // Write the link and image paths, unless this is done for a snapshot.
+
+    // Write the footnotes
+    for (let i = 0; i < state.footnotes.length; i++) {
+      state.write("\n[^" + String(i + 1) + "]: ")
+      state.renderInline(state.footnotes[i])
+      state.write("\n")
+    }
+  // Write the link and image paths, unless this is done for a snapshot.
     if (!forSnapshot) {
       for (const [key, value] of state.paths.entries()) {
         state.write("\n[" + key + "]: " + value + "\n")
@@ -199,11 +206,16 @@ const hurmetNodes =  {
     state.renderTable(node, state.delim, state.isGFM)
     state.closeBlock(node)
   },
+  footnote(state, node) {
+    const note = node.content;
+    state.footnotes.push(note)
+    state.write(`[^${state.footnotes.length}]`)
+  },
   figure(state, node) {
     let caption
     if (!state.isGFM) {
       const figureCaption = node.content.content[1]
-      const figureState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, false)
+      const figureState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, this.footnotes, false)
       figureState.renderInline(figureCaption)
       caption = figureState.out
     } else {
@@ -436,10 +448,11 @@ const colWidthPicker = [0, 80, 50, 35];
 // methods related to markdown serialization. Instances are passed to
 // node and mark serialization methods (see `toMarkdown`).
 export class MarkdownSerializerState {
-  constructor(nodes, marks, paths, isGFM) {
+  constructor(nodes, marks, paths, footnotes, isGFM) {
     this.nodes = nodes
     this.marks = marks
     this.paths = paths
+    this.footnotes = footnotes
     this.isGFM = isGFM
     this.delim = this.out = ""
     this.divFence = ""
@@ -686,7 +699,7 @@ export class MarkdownSerializerState {
     const mergedCells = [];
     // Do we need a reStructuredText grid table? Or is a GFM pipe table enough?
     let isRst = !isGFM && numRowsInHeading > 1;
-    let tableState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, this.isGFM)
+    let tableState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, this.footnotes, this.isGFM)
     tableState.lineLimit = numCols > 3 ? 25 : colWidthPicker[numCols];
     let i = 0
     let j = 0

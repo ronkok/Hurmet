@@ -1,5 +1,11 @@
 import { schema } from "./schema"
 import { openMathPrompt } from "./mathprompt"
+import { EditorState } from "prosemirror-state"
+import { EditorView } from "prosemirror-view"
+import { toggleMark } from "prosemirror-commands"
+import { keymap } from "prosemirror-keymap"
+import { undo, redo } from "prosemirror-history"
+import { StepMap } from "prosemirror-transform"
 import hurmet from "./hurmet"
 
 // nodeviews.js
@@ -68,4 +74,108 @@ export class TexView {
     this.dom.classList.remove("ProseMirror-selectednode")
   }
   stopEvent() { return true }
+}
+
+export class FootnoteView {
+  constructor(node, view, getPos) {
+    // We'll need these later
+    this.node = node
+    this.outerView = view
+    this.getPos = getPos
+
+    // The node's representation in the editor (empty, for now)
+    this.dom = document.createElement("footnote")
+    // These are used when the footnote is selected
+    this.innerView = null
+  }
+
+  selectNode() {
+    this.dom.classList.add("ProseMirror-selectednode")
+    if (!this.innerView) { this.open() }
+  }
+
+  deselectNode() {
+    this.dom.classList.remove("ProseMirror-selectednode")
+    if (this.innerView) { this.close() }
+  }
+
+  open() {
+    const tooltip = this.dom.appendChild(document.createElement("div"))
+    tooltip.className = "footnote-tooltip"
+    this.innerView = new EditorView(tooltip, {
+      // Create a whole new editor in the node.
+      state: EditorState.create({
+        doc: this.node,
+        plugins: [keymap({
+          "Mod-z": () => undo(this.outerView.state, this.outerView.dispatch),
+          "Mod-y": () => redo(this.outerView.state, this.outerView.dispatch),
+          'Mod-b': toggleMark(schema.marks.strong),
+          'Mod-i': toggleMark(schema.marks.em),
+          'Mod-`': toggleMark(schema.marks.code),
+          'Mod-,': toggleMark(schema.marks.subscript),
+          'Mod-.': toggleMark(schema.marks.superscript),
+          'Mod-u': toggleMark(schema.marks.underline)
+        })]
+      }),
+      dispatchTransaction: this.dispatchInner.bind(this),
+      handleDOMEvents: {
+        mousedown: () => {
+          if (this.outerView.hasFocus()) { this.innerView.focus() }
+        }
+      }
+    })
+  }
+
+  close() {
+    this.innerView.destroy()
+    this.innerView = null
+    this.dom.textContent = ""
+  }
+
+  dispatchInner(tr) {
+    const { state, transactions } = this.innerView.state.applyTransaction(tr)
+    this.innerView.updateState(state)
+
+    if (!tr.getMeta("fromOutside")) {
+      const outerTr = this.outerView.state.tr
+      const offsetMap = StepMap.offset(this.getPos() + 1)
+      for (let i = 0; i < transactions.length; i++) {
+        const steps = transactions[i].steps
+        for (let j = 0; j < steps.length; j++) {
+          outerTr.step(steps[j].map(offsetMap))
+        }
+      }
+      if (outerTr.docChanged) { this.outerView.dispatch(outerTr) }
+    }
+  }
+
+  update(node) {
+    if (!node.sameMarkup(this.node)) { return false }
+    this.node = node
+    if (this.innerView) {
+      const state = this.innerView.state
+      const start = node.content.findDiffStart(state.doc.content)
+      if (start != null) {
+        let { a: endA, b: endB } = node.content.findDiffEnd(state.doc.content)
+        const overlap = start - Math.min(endA, endB)
+        if (overlap > 0) { endA += overlap; endB += overlap }
+        this.innerView.dispatch(
+          state.tr
+            .replace(start, endB, node.slice(start, endA))
+            .setMeta("fromOutside", true))
+      }
+    }
+    return true
+  }
+
+  destroy() {
+    if (this.innerView) { this.close() }
+  }
+
+  stopEvent(event) {
+    return this.innerView && this.innerView.dom.contains(event.target)
+  }
+
+  ignoreMutation() { return true }
+
 }

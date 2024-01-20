@@ -16,7 +16,7 @@ import { schema } from "./schema"
 import { buildMenuItems } from "./menu"
 import { buildKeymap } from "./keymap"
 import { buildInputRules } from "./inputrules"
-import { CalcView, TexView } from "./nodeviews"
+import { CalcView, TexView, FootnoteView } from "./nodeviews"
 import hurmet from "./hurmet"
 
 // Bundle together the plugins.
@@ -31,7 +31,7 @@ function pmSetup(options) {
     history(),
     columnResizing(),
     tableEditing(),
-    new state.Plugin({  props: { attributes: { class: "ProseMirror-example-setup-style" } } })
+    new state.Plugin({  props: { attributes: { class: "ProseMirror-setup" } } })
   ]
 }
 
@@ -42,7 +42,8 @@ window.view = new view.EditorView(document.querySelector("#editor"), {
   }),
   nodeViews: {
     calculation(node, view) { return new CalcView(node, view) },
-    tex(node, view) { return new TexView(node, view) }
+    tex(node, view) { return new TexView(node, view) },
+    footnote(node, view, getPos) { return new FootnoteView(node, view, getPos) }
   },
   clipboardTextSerializer: (content, view) => {
     // If the selection consists of a single calc with a numeric result, return the result.

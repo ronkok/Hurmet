@@ -37,7 +37,7 @@ const SANITIZE_TEXT_CODES = {
   "/": "&#x2F;",
   "`": "&#96;"
 };
-const sanitizeText = function(text /* : Attr */) {
+export const sanitizeText = function(text /* : Attr */) {
   return String(text).replace(SANITIZE_TEXT_R, function(chr) {
     return SANITIZE_TEXT_CODES[chr];
   });
@@ -70,7 +70,7 @@ const htmlTag = (tagName, content, attributes = {}, isClosed = true) => {
   }
 };
 
-const tagName = {
+export const tagName = {
   em: "em",
   strong: "strong",
   code: "code",
@@ -222,6 +222,7 @@ const nodes = {
     if (node.attrs.width) { attributes.width = node.attrs.width }
     return htmlTag("img", "", attributes, false) + "\n";
   },
+  footnote(node)   { return htmlTag("footnote", "") },
   calculation(node) {
     if (node.attrs.dtype && node.attrs.dtype === dt.DRAWING) {
       const svg = writeSVG(node.attrs.resultdisplay)
@@ -342,6 +343,21 @@ const getTOCitems = (ast, tocArray, start, end, node) => {
   }
 }
 
+const getFootnotes = (ast, footnotes) => {
+  if (Array.isArray(ast)) {
+    for (let i = 0; i < ast.length; i++) {
+      getFootnotes(ast[i], footnotes)
+    }
+  } else if (ast && ast.type === "footnote") {
+    footnotes.push(ast.content)
+  // eslint-disable-next-line no-prototype-builtins
+  } else if (ast.hasOwnProperty("content")) {
+    for (let j = 0; j < ast.content.length; j++) {
+      getFootnotes(ast.content[j], footnotes)
+    }
+  }
+}
+
 const ast2html = ast => {
   // Return HTML.
   let html = ""
@@ -372,8 +388,9 @@ const wrapWithHead = (html, title, attrs) => {
 </head>
 <body>
 <article class="ProseMirror ${fontClass}">
+<div class="ProseMirror-setup">
 `
-  return head + html + "\n</article>\n</body>\n</html>"
+  return head + html + "\n</div></article>\n</body>\n</html>"
 }
 
 export async function md2html(md, title = "", inHtml = false) {
@@ -396,6 +413,17 @@ export async function md2html(md, title = "", inHtml = false) {
 
   // Write the HTML
   let html = ast2html(ast)
+
+  // Write the footnotes, if any.
+  const footnotes = [];
+  getFootnotes(ast, footnotes)
+  if (footnotes.length > 0) {
+    html += "\n<hr>\n<ol>\n"
+    for (const footnote of footnotes) {
+      html += "<li><p>" + ast2html(footnote) + "</p></li>\n"
+    }
+    html += "</ol>\n"
+  }
 
   if (title.length > 0) {
     html = wrapWithHead(html, title, ast.attrs)

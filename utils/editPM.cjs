@@ -15,8 +15,8 @@ match = /table\.style\.minWidth = totalWidth \+ "px";\s+}/.exec(str)
 const L = match.index + match[0].length
 str = str.slice(0, L) + "\n    table.className = node.attrs.class" + str.slice(L + 1)
 
-match = /&& !this\.ignoreSelectionChange\(sel\)/.exec(str)
-str = str.slice(0, match.index) + str.slice(match.index + match[0].length)
+//match = /&& !this\.ignoreSelectionChange\(sel\)/.exec(str)
+//str = str.slice(0, match.index) + str.slice(match.index + match[0].length)
 
 // Fix a bug in prosemirror-tables. When creating a new row inside a table
 // header, the refRow should always be zero.

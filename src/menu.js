@@ -12,6 +12,7 @@ import {
 } from "prosemirror-menu"
 import { NodeSelection, TextSelection } from "prosemirror-state"
 import { insertPoint } from "prosemirror-transform"
+import { Fragment } from "prosemirror-model"
 import { lift, selectParentNode, toggleMark } from "prosemirror-commands"
 import { schema, wrapInList } from "./schema"
 import { TextField, TextAreaField, openPrompt } from "./prompt"
@@ -86,6 +87,11 @@ const hurmetIcons = {
     width: 1024,
     height: 1024,
     path: "M512 219q-116 0-218 39t-161 107-59 145q0 64 40 122t115 100l49 28-15 54q-13 52-40 98 86-36 157-97l24-21 32 3q39 4 74 4 116 0 218-39t161-107 59-145-59-145-161-107-218-39zM1024 512q0 99-68 183t-186 133-257 48q-40 0-82-4-113 100-262 138-28 8-65 12h-2q-8 0-15-6t-9-15v-0q-1-2-0-6t1-5 2-5l3-5t4-4 4-5q4-4 17-19t19-21 17-22 18-29 15-33 14-43q-89-50-141-125t-51-160q0-99 68-183t186-133 257-48 257 48 186 133 68 183z"
+  },
+  footnote: {
+    width: 16,
+    height: 16,
+    path: "M3.032 13l0.9-3h4.137l0.9 3h1.775l-3-10h-3.488l-3 10h1.776zM5.432 5h1.137l0.9 3h-2.937l0.9-3zM11 13l2.5-4 2.5 4h-5z M13.5 2h-1c-0.276 0-0.5-0.224-0.5-0.5s0.224-0.5 0.5-0.5h2c0.276 0 0.5-0.224 0.5-0.5s-0.224-0.5-0.5-0.5h-2c-0.827 0-1.5 0.673-1.5 1.5 0 0.384 0.145 0.734 0.383 1 0.275 0.307 0.674 0.5 1.117 0.5h1c0.276 0 0.5 0.224 0.5 0.5s-0.224 0.5-0.5 0.5h-2c-0.276 0-0.5 0.224-0.5 0.5s0.224 0.5 0.5 0.5h2c0.827 0 1.5-0.673 1.5-1.5 0-0.384-0.145-0.734-0.383-1-0.275-0.307-0.674-0.5-1.117-0.5z"
   },
   scroll: {
     width: 512,
@@ -325,7 +331,30 @@ const print = () => {
       window.print()
     }
   })
-} 
+}
+
+const footnote = (nodeType) => {
+  return new MenuItem({
+    title: "Insert footnote",
+    icon: hurmetIcons.footnote,
+    select(state) {
+      return insertPoint(state.doc, state.selection.from, schema.nodes.footnote) != null
+    },
+    run(state, dispatch) {
+      let {empty, $from, $to} = state.selection, content = Fragment.empty;
+      if (!empty && $from.sameParent($to) && $from.parent.inlineContent) {
+        content = $from.parent.content.cut($from.parentOffset, $to.parentOffset)
+      }
+      const tr = state.tr
+      tr.replaceSelectionWith(schema.nodes.footnote.create(null, content))
+      if (content.content.length === 0) {
+        tr.setSelection(NodeSelection.create(tr.doc, $from.pos))
+      }
+      dispatch(tr)
+      //dispatch(state.tr.replaceSelectionWith(schema.nodes.footnote.create(null, content)));
+    }
+  })
+}
 
 const findTable = selection =>
   findParentNode(
@@ -414,7 +443,7 @@ fontSize: ${state.doc.attrs.fontSize}
 pageSize: ${state.doc.attrs.pageSize}
 ---------------
 
-` + hurmetMarkdownSerializer.serialize(state.doc, new Map())
+` + hurmetMarkdownSerializer.serialize(state.doc, new Map(), [])
 
   // Save some fetched data as a fallback for when the internet is down.
   let gottaFallback = false
@@ -501,7 +530,7 @@ function openFile() {
 }
 
 function copyText(state, isGFM) {
-  const text = hurmetMarkdownSerializer.serialize(state.selection.content().content, new Map(), isGFM)
+  const text = hurmetMarkdownSerializer.serialize(state.selection.content().content, new Map(), [], isGFM)
   const type = "text/plain"
   const blob = new Blob([text], { type })
   const data = [new ClipboardItem({ [type]: blob })];
@@ -675,7 +704,7 @@ function takeSnapshot() {
         fields: { message: new TextField({ label: "Commit message", required: true }) },
         callback(attrs) {
           const dateStr = new Date().toISOString().replace(/T.+/, "")
-          let md = hurmetMarkdownSerializer.serialize(state.doc, new Map(), false, true)
+          let md = hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, true)
           // Ignore path definitions
           md = md.replace(/\n\n\[[^\]]+\\: .+/, "")
           state.doc.attrs.snapshots.push({ message: attrs.message, date: dateStr, content: md })
@@ -1163,6 +1192,7 @@ export function buildMenuItems(schema) {
 
   if ((type = schema.nodes.image)) r.imageUpload = uploadImage(type)
   if ((type = schema.nodes.image)) r.imageLink = insertImage(type)
+  if ((type = schema.nodes.footnote)) r.footnote = footnote(type)
   if ((type = schema.nodes.toc)) r.toc = insertToC(type)
   r.macroButton = macroButton()
   if ((type = schema.nodes.calculation)) r.insertCalclation = mathMenuItem(type, "calculation")
@@ -1393,6 +1423,7 @@ export function buildMenuItems(schema) {
     r.insertHorizontalRule,
     r.imageUpload,
     r.imageLink,
+    r.footnote,
     r.toc,
     r.insertCalclation,
     r.insertTeX,

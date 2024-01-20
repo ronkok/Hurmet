@@ -1471,11 +1471,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6337","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.6375","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.3724","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.3309","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -1484,10 +1484,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4600","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4634","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9320","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.8130","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9350","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.8451","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -1507,7 +1507,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.86210","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.85950","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1515,23 +1515,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.5297","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.5599","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["4.0194","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["90.8100","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["4.0917","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["90.7350","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["158.57","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["159.17","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1439.64","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1438.73","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1542,7 +1542,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["18.6066","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["18.4931","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -1572,7 +1572,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.0921","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0942","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -9441,7 +9441,7 @@ const textRange = (str, index) => {
  *        A. →  A. B. C.  etc. (future)
  *        a) →  (a) (b) (c)  etc. (future)
  * 12. Alerts per GFM
- *     > [!note] or [!tip] or [!important] or [!warning]
+ *     > [!note] or [!tip] or [!important] or [!warning] or [!epigraph]
  *     > Content of note
  * 13. Fenced divs, similar to Pandoc.
  *     ::: (centered|right_justified|comment|indented|boxed|header)
@@ -9451,7 +9451,7 @@ const textRange = (str, index) => {
  * 14. Table of Contents
  *     {.toc start=N end=N}
  * 15. Definition lists, per Pandoc.  (future)
- * 16. [^1] is a reference to a footnote. (future)
+ * 16. [^1] is a reference to a footnote.
  *     [^1]: The body of the footnote is deferred, similar to reference links.
  * 17. [#1] is a reference to a citation. (future)
  *     [#1]: The body of the citation is deferred, similar to reference links.
@@ -10193,6 +10193,14 @@ rules.set("reflink", {
     return textNode
   }
 });
+rules.set("footnote", {
+  isLeaf: true,
+  match: inlineRegex(/^\[\^(\d+)\]/),
+  parse: function(capture, state) {
+    const index = Number(capture[1]) - 1;
+    return { type: "footnote", content: parseInline(state.footnotes[index], state) }
+  }
+});
 rules.set("refimage", {
   isLeaf: true,
   match: inlineRegex(/^!\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]/),
@@ -10529,8 +10537,16 @@ const md2ast = (md, inHtml = false) => {
   }
 
   // Second, get all the link reference definitions
-  const state = { inline: false, _defs: {}, prevCapture: "", remainder: "", inHtml };
+  const state = {
+    inline: false,
+    _defs: {},
+    footnotes: [],
+    prevCapture: "",
+    remainder: "",
+    inHtml
+  };
   const defRegEx = /\n *\[([^\]\n]+)\]: *(?:¢(`+)([\s\S]*?[^`])\2(?!`)|<?([^\n>]*)>? *(?:\n\{([^\n}]*)\})?)(?=\n)/gm;
+  const footnoteDefRegEx = /\n *\[\^\d+\]: *([^\n]*)(?=\n)/gm;
   let capture;
   while ((capture = defRegEx.exec(md)) !== null) {
     const def = capture[1].replace(/\s+/g, " ");
@@ -10547,6 +10563,12 @@ const md2ast = (md, inHtml = false) => {
       if (matchID)    { attrs.id = matchID[1]; }
     }
     state._defs[def] = { target, attrs };
+  }
+
+  // Next, get all the footnote definitions
+  capture = null;
+  while ((capture = footnoteDefRegEx.exec(md)) !== null) {
+    state.footnotes.push(capture[1].trim());
   }
 
   // Find out if there are any snapshots.
@@ -17536,6 +17558,7 @@ const nodes = {
     if (node.attrs.width) { attributes.width = node.attrs.width; }
     return htmlTag("img", "", attributes, false) + "\n";
   },
+  footnote(node)   { return htmlTag("footnote", "") },
   calculation(node) {
     if (node.attrs.dtype && node.attrs.dtype === dt.DRAWING) {
       const svg = writeSVG(node.attrs.resultdisplay);
@@ -17656,6 +17679,21 @@ const getTOCitems = (ast, tocArray, start, end, node) => {
   }
 };
 
+const getFootnotes = (ast, footnotes) => {
+  if (Array.isArray(ast)) {
+    for (let i = 0; i < ast.length; i++) {
+      getFootnotes(ast[i], footnotes);
+    }
+  } else if (ast && ast.type === "footnote") {
+    footnotes.push(ast.content);
+  // eslint-disable-next-line no-prototype-builtins
+  } else if (ast.hasOwnProperty("content")) {
+    for (let j = 0; j < ast.content.length; j++) {
+      getFootnotes(ast.content[j], footnotes);
+    }
+  }
+};
+
 const ast2html = ast => {
   // Return HTML.
   let html = "";
@@ -17686,8 +17724,9 @@ const wrapWithHead = (html, title, attrs) => {
 </head>
 <body>
 <article class="ProseMirror ${fontClass}">
+<div class="ProseMirror-setup">
 `;
-  return head + html + "\n</article>\n</body>\n</html>"
+  return head + html + "\n</div></article>\n</body>\n</html>"
 };
 
 async function md2html(md, title = "", inHtml = false) {
@@ -17710,6 +17749,17 @@ async function md2html(md, title = "", inHtml = false) {
 
   // Write the HTML
   let html = ast2html(ast);
+
+  // Write the footnotes, if any.
+  const footnotes = [];
+  getFootnotes(ast, footnotes);
+  if (footnotes.length > 0) {
+    html += "\n<hr>\n<ol>\n";
+    for (const footnote of footnotes) {
+      html += "<li><p>" + ast2html(footnote) + "</p></li>\n";
+    }
+    html += "</ol>\n";
+  }
 
   if (title.length > 0) {
     html = wrapWithHead(html, title, ast.attrs);
