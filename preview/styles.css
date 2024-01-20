@@ -507,7 +507,6 @@ li.ProseMirror-selectednode:after {
   padding-right: 3em;
   border: none;
   margin: 1.75em 0 1.75em 0;
-  font-style: italic;
 }
 
 .ProseMirror blockquote.epigraph div.right-justified {

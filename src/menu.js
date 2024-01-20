@@ -11,9 +11,9 @@ import {
   MenuItem
 } from "prosemirror-menu"
 import { NodeSelection, TextSelection } from "prosemirror-state"
-import { insertPoint } from "prosemirror-transform"
+import { insertPoint, findWrapping } from "prosemirror-transform"
 import { Fragment } from "prosemirror-model"
-import { lift, selectParentNode, toggleMark } from "prosemirror-commands"
+import { lift, selectParentNode, toggleMark, wrapIn } from "prosemirror-commands"
 import { schema, wrapInList } from "./schema"
 import { TextField, TextAreaField, openPrompt } from "./prompt"
 import { openSelectPrompt } from "./selectprompt"
@@ -667,6 +667,30 @@ function insertImage(nodeType) {
   })
 }
 
+function wrapInEpigraph(nodeType) {
+  return new MenuItem({
+    title: "Wrap in an epigraph",
+    label: "Epigraph",
+    enable(state) {
+      return canInsert(state, nodeType)
+    },
+    run(state, dispatch) {
+      const {$from, $to} = state.selection
+      let resolvedPos = state.doc.resolve(state.selection.from)
+      const from = resolvedPos.before(resolvedPos.depth)
+      resolvedPos = state.doc.resolve(state.selection.to)
+      const to = resolvedPos.after(resolvedPos.depth)
+      const tr = state.tr
+      tr.addMark(from, to, schema.marks.em.create())
+      let range = $from.blockRange($to)
+      const wrapping = range && findWrapping(range, schema.nodes.epigraph)
+      if (!wrapping) return false
+      tr.wrap(range, wrapping)
+      dispatch(tr)
+    }
+  })
+}
+
 function insertComment(nodeType) {
   return new MenuItem({
     title: "Insert a comment",
@@ -674,7 +698,7 @@ function insertComment(nodeType) {
     enable(state) {
       return canInsert(state, nodeType)
     },
-    run(state, dispatch, view) {
+    run(state, dispatch) {
       if (state.selection instanceof NodeSelection && state.selection.node.type.name == "comment") {
         return
       }
@@ -1216,10 +1240,7 @@ export function buildMenuItems(schema) {
       icon: icons.blockquote
     })
   if ((type = schema.nodes.epigraph))
-    r.wrapEpigraph = wrapItem(type, {
-      title: "Wrap in an epigraph",
-      label: "Epigraph"
-    })
+    r.wrapEpigraph = wrapInEpigraph(type)
   if ((type = schema.nodes.centered))
     r.wrapCentered = wrapItem(type, {
       title: "Center block",
