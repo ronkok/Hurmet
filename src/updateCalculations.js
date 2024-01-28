@@ -14,7 +14,7 @@ import { clone, addTextEscapes } from "./utils"
  *
  *  To be more precise, this module is called:
  *    1. When an author submits one calculation cell, or
- *    2. When a new Hurmet.app instance has opened (from index.js), or
+ *    2. When a new Hurmet.org instance has opened (from index.js), or
  *    3. When a user has opened a new file         (from openFile.js), or
  *    4. When a recalculate-all has been called, possibly after a paste. (from menu.js)
  *

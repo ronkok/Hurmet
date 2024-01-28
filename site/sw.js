@@ -1,6 +1,6 @@
-// A service worker to enable offline use of Hurmet.app
+// A service worker to enable offline use of Hurmet.org
 
-const cacheName = "hurmet-2024-01-27"
+const cacheName = "hurmet-2024-01-28"
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(cacheName));
@@ -15,11 +15,11 @@ const addResourcesToCache = async(resources) => {
 self.addEventListener("install", (event) => {
   event.waitUntil(
     addResourcesToCache([
-      'https://hurmet.app/offline.html',
-      'https://hurmet.app/prosemirror.min.js',
-      'https://hurmet.app/styles.min.css',
-      'https://hurmet.app/latinmodernmath.woff2',
-      'https://hurmet.app/Temml.woff2'
+      'https://hurmet.org/offline.html',
+      'https://hurmet.org/prosemirror.min.js',
+      'https://hurmet.org/styles.min.css',
+      'https://hurmet.org/latinmodernmath.woff2',
+      'https://hurmet.org/Temml.woff2'
     ])
   )
 })
@@ -37,7 +37,7 @@ self.addEventListener('fetch', (event) => {
         return fetchedResponse;
       }).catch(() => {
         // If the network is unavailable, get
-        return cache.match('https://hurmet.app/offline.html');
+        return cache.match('https://hurmet.org/offline.html');
       });
     }));
   } else if (event.request.destination === 'script' || event.request.destination === 'style') {

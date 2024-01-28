@@ -1,6 +1,6 @@
 
 /**
- * md2ast() returns an AST that matches the memory structure  of a Hurmet.app document.
+ * md2ast() returns an AST that matches the memory structure  of a Hurmet.org document.
  * Elsewhere, Hurmet uses the AST to create either a live Hurmet doc or a static HTML doc.
  *
  * ## Restrictions

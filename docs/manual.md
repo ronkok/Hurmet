@@ -23,11 +23,11 @@ Hurmet calculations are much easier to read and check than spreadsheet
 calculations. Hurmet does not hide the active expressions and intermediate
 values of a calculation. They’re all open for review in the displayed document.
 
-You are welcome to use the [Hurmet.app][] web page under terms of the
+You are welcome to use the [Hurmet.org][] web page under terms of the
 [MIT License][]. The source code is available in Hurmet’s GitHub
 [repository][].
 
-[Hurmet.app]: index.html
+[Hurmet.org]: index.html
 [MIT License]: https://opensource.org/licenses/MIT/
 [repository]: https://github.com/ronkok/Hurmet
 
@@ -304,7 +304,7 @@ And now, on to the main event, Hurmet’s calculations.
 Create a cell
 
 : Hurmet calculation cells display math and perform numeric calculations. To create
-  a calculation cell in  Hurmet.app, select a spot in the document, then click the
+  a calculation cell in  Hurmet.org, select a spot in the document, then click the
   ![C][] button or type **Alt c**.
 
   While in a cell,\
@@ -1044,7 +1044,7 @@ Data Frame
     A fetch example:
 
     ```
-    wideFlanges = fetch("https://hurmet.app/example.tsv") = !
+    wideFlanges = fetch("https://hurmet.org/example.tsv") = !
     ```
 
     That example loads in this data:
@@ -2276,7 +2276,7 @@ end
 A Hurmet document can load an entire module into one variable with a import
 statement. The following statement will import a file that contains the text above.
 
-`mod = import("https://hurmet.app/smallModule.txt") = !`
+`mod = import("https://hurmet.org/smallModule.txt") = !`
 
 After a module has been imported and loaded into a variable, its functions and
 values can be called by writing the module name and variable/function name in
@@ -2292,7 +2292,7 @@ The Hurmet variable name `importedParameters` has a special purpose. It loads
 module values into multiple variables instead of into one variable. An example
 of such an import is:
 
-`importedParameters = import("https://hurmet.app/parent.txt") = !`
+`importedParameters = import("https://hurmet.org/parent.txt") = !`
 
 That statement will render like this:
 
@@ -2303,7 +2303,7 @@ That statement will render like this:
 n_c, σ_a, σ_as, μ_s, σ_p;
 p_pl, ρ_g, C_e, I_s, V_w;
 EC, k_zt, α, z_g, SC;
-S_DS, S_D1, I_E,,} = import("https://hurmet.app/parent.txt") `
+S_DS, S_D1, I_E,,} = import("https://hurmet.org/parent.txt") `
 
 </div>
 
@@ -2425,7 +2425,7 @@ To get element-wise multiplication of two matrices, the operator symbol must be
 ####  Offline
 
 If Hurmet does not work offline, it may be because the browser is deleting cookies.
-If that is the case, whitelist "hurmet.app".
+If that is the case, whitelist "hurmet.org".
 
 ## Gists
 

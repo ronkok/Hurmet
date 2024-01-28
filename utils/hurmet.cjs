@@ -2,10 +2,10 @@
 
 /*
  * Hurmet, copyright (c) by Ron Kok
- * Distributed under an MIT license: https://Hurmet.app/LICENSE.txt
+ * Distributed under an MIT license: https://hurmet.org/LICENSE.txt
  *
  * Hurmet adds calculation cells to the ProseMirror rich text editor.
- * See https://Hurmet.app and https://Hurmet.app/docs/en/manual.html
+ * See https://hurmet.org and https://hurmet.org/docs/en/manual.html
  */
 
 // utils.js
@@ -9059,7 +9059,7 @@ const textRange = (str, index) => {
 };
 
 /**
- * md2ast() returns an AST that matches the memory structure  of a Hurmet.app document.
+ * md2ast() returns an AST that matches the memory structure  of a Hurmet.org document.
  * Elsewhere, Hurmet uses the AST to create either a live Hurmet doc or a static HTML doc.
  *
  * ## Restrictions
@@ -16419,7 +16419,7 @@ const compile = (inputStr, decimalFormat = "1,000,000.") => {
   return attrs
 };
 
-// This function is not used by the Hurmet.app page.
+// This function is not used by the hurmet.org page.
 // It is provided for use by unit tests and by the demo box in the manual page.
 // If you are looking for the app's main calculation module, try evaluate.js.
 const calculate = (
@@ -16451,7 +16451,7 @@ const calculate = (
  *
  *  To be more precise, this module is called:
  *    1. When an author submits one calculation cell, or
- *    2. When a new Hurmet.app instance has opened (from index.js), or
+ *    2. When a new Hurmet.org instance has opened (from index.js), or
  *    3. When a user has opened a new file         (from openFile.js), or
  *    4. When a recalculate-all has been called, possibly after a paste. (from menu.js)
  *
@@ -30809,11 +30809,11 @@ var temml = {
 /*
  * This file bundles together and exposes the calculation parts of Hurmet.
  * I use Rollup to create a UMD module from this code.
- * That way, one file can expose the same functionality to (1) the Hurmet.app web page,
+ * That way, one file can expose the same functionality to (1) the Hurmet.org web page,
  * (2) the REPL in the reference manual, (3) the script that transpiles
  * the Hurmet reference manual from Markdown to HTML, and (4) unit testing.
  *
- * Some of Hurmet’s exported functions are valuable only to the Hurmet.app web page.
+ * Some of Hurmet’s exported functions are valuable only to the Hurmet.org web page.
  * If you wish to use Hurmet’s math parsing and/or calculation abilities,
  * the two functions you want are:
  *   parse(entry: string, decimalFormat?: string)

@@ -323,14 +323,14 @@ And some more
 A paragraph
 
 
-[1]: https://hurmet.app/
+[1]: https://hurmet.org/
 
-[2]: https://hurmet.app/
+[2]: https://hurmet.org/
 
-[3]: https://hurmet.app/
+[3]: https://hurmet.org/
 
-[4]: https://hurmet.app/images/IsoTankCourses.svg
+[4]: https://hurmet.org/images/IsoTankCourses.svg
 {.inline alt="4"}
 
-[tank]: https://hurmet.app/images/IsoTankCourses.svg
+[tank]: https://hurmet.org/images/IsoTankCourses.svg
 {.inline alt="tank"}

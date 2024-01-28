@@ -4,7 +4,7 @@ import { compile } from "./compile"
 import { evaluate, evaluateDrawing } from "./evaluate"
 import { clone } from "./utils"
 
-// This function is not used by the Hurmet.app page.
+// This function is not used by the hurmet.org page.
 // It is provided for use by unit tests and by the demo box in the manual page.
 // If you are looking for the app's main calculation module, try evaluate.js.
 export const calculate = (

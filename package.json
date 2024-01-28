@@ -1,8 +1,8 @@
 {
   "name": "hurmet",
-  "version": "2023.05.225",
+  "version": "2024.01.28",
   "description": "Rich text editor on the web, featuring live calculations.",
-  "homepage": "https://hurmet.app",
+  "homepage": "https://hurmet.org",
   "license": "MIT",
   "packageManager": "yarn@3.2.2",
   "private": true,

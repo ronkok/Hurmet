@@ -1,9 +1,9 @@
 /*
  * Hurmet, copyright (c) by Ron Kok
- * Distributed under an MIT license: https://Hurmet.app/LICENSE.txt
+ * Distributed under an MIT license: https://hurmet.org/LICENSE.txt
  *
  * Hurmet adds calculation cells to the ProseMirror rich text editor.
- * See https://Hurmet.app and https://Hurmet.app/docs/en/manual.html
+ * See https://hurmet.org and https://hurmet.org/docs/en/manual.html
  */
 
 // utils.js
