@@ -1,12 +1,12 @@
 // A service worker to enable offline use of Hurmet.org
 
-const cacheName = "hurmet-2024-01-30-01"
+const cacheName = "hurmet-2024-01-30-02"
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(cacheName));
 });
 
-function cleanResponse(response) {
+/*function cleanResponse(response) {
   const clonedResponse = response.clone();
 
   // Not all browsers support the Response.body stream, so fall back to reading
@@ -23,7 +23,7 @@ function cleanResponse(response) {
       statusText: clonedResponse.statusText
     });
   });
-}
+}*/
 
 const addResourcesToCache = async(resources) => {
   const cache = await caches.open(cacheName)
@@ -52,7 +52,7 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(caches.open(cacheName).then((cache) => {
       // Go to the network first
       return fetch(event.request.url).then((fetchedResponse) => {
-        cache.put(event.request, cleanResponse(fetchedResponse));
+        //cache.put(event.request, fetchedResponse.clone());
         return fetchedResponse;
       }).catch(() => {
         // If the network is unavailable, get
