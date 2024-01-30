@@ -1,6 +1,6 @@
 // A service worker to enable offline use of Hurmet.org
 
-const cacheName = "hurmet-2024-01-30-05"
+const cacheName = "hurmet-2024-01-30-06"
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(cacheName));
@@ -25,22 +25,20 @@ self.addEventListener('install', (event) => {
   });
 }*/
 
-const addResourcesToCache = async(resources) => {
-  const cache = await caches.open(cacheName)
-  await cache.addAll(resources)
-  console.log(cacheName, caches[cacheName])
-}
-
 // Pre-cache the offline page, JavaScript, CSS, and fonts.
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    addResourcesToCache([
-      '/offline.html',
-      '/prosemirror.min.js',
-      '/styles.min.css',
-      '/latinmodernmath.woff2',
-      '/Temml.woff2'
-    ])
+    caches
+      .open(cacheName)
+      .then((cache) =>
+        cache.addAll([
+          '/offline.html',
+          '/prosemirror.min.js',
+          '/styles.min.css',
+          '/latinmodernmath.woff2',
+          '/Temml.woff2'
+        ])
+      )
   )
 })
 
@@ -76,7 +74,7 @@ self.addEventListener('fetch', (event) => {
     // Get a font from the cache
     event.respondWith(caches.open(cacheName).then((cache) => {
       // Go to the cache first
-      console.log("hi", cache)
+      console.log(cache)
       return cache.match(event.request.url).then((cachedResponse) => {
         // Return a cached response if we have one
         if (cachedResponse) {
