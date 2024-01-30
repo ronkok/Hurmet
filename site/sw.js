@@ -1,6 +1,6 @@
 // A service worker to enable offline use of Hurmet.org
 
-const cacheName = "hurmet-2024-01-30-03"
+const cacheName = "hurmet-2024-01-30-04"
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(cacheName));
@@ -75,6 +75,7 @@ self.addEventListener('fetch', (event) => {
     // Get a font from the cache
     event.respondWith(caches.open(cacheName).then((cache) => {
       // Go to the cache first
+      console.log(cache)
       return cache.match(event.request.url).then((cachedResponse) => {
         // Return a cached response if we have one
         if (cachedResponse) {
