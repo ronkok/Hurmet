@@ -1,6 +1,6 @@
 // A service worker to enable offline use of Hurmet.app
 
-const cacheName = "hurmet-2024-01-31-08"
+const cacheName = "hurmet-2024-01-31-14"
 
 const addResourcesToCache = async(resources) => {
   const cache = await caches.open(cacheName)
@@ -8,11 +8,13 @@ const addResourcesToCache = async(resources) => {
   self.skipWaiting()
 }
 
-// Pre-cache the offline page and fonts.
+// Pre-cache the offline page, JavaScript, CSS, and fonts.
 self.addEventListener("install", (event) => {
   event.waitUntil(
     addResourcesToCache([
       '/offline.html',
+      '/prosemirror.min.js',
+      '/styles.min.css',
       '/latinmodernmath.woff2',
       '/Temml.woff2'
     ])
@@ -32,7 +34,6 @@ self.addEventListener('fetch', (event) => {
         return fetchedResponse;
       }).catch(() => {
         // If the network is unavailable, get
-        cache.keys().then(key => { console.log(key) })
         return cache.match('/offline.html');
       });
     }));
@@ -41,8 +42,6 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(caches.open(cacheName).then((cache) => {
       // Go to the network first
       return fetch(event.request.url).then((fetchedResponse) => {
-        cache.put(event.request, fetchedResponse.clone());
-        cache.keys().then(key => { console.log(key) })
         return fetchedResponse;
       }).catch(() => {
         // If the network is unavailable, get the cached version
@@ -61,10 +60,6 @@ self.addEventListener('fetch', (event) => {
 
         // Otherwise, hit the network
         return fetch(event.request).then((fetchedResponse) => {
-          // Add the network response to the cache for later visits
-          //cache.put(event.request, fetchedResponse.clone());
-
-          // Return the network response
           return fetchedResponse;
         })
       })
