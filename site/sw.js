@@ -1,6 +1,6 @@
 // A service worker to enable offline use of Hurmet.org
 
-const cacheName = "hurmet-2024-01-30-08"
+const cacheName = "hurmet-2024-01-30-09"
 
 const urls = [
   '/offline.html',
@@ -48,6 +48,7 @@ self.addEventListener("install", (event) => {
       )
     )
   )
+  console.log(caches[cacheName])
 })
 
 // The purpose of this worker is to enable offline use, not primarily to speed startup.
