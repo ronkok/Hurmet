@@ -1,14 +1,12 @@
 // A service worker to enable offline use of Hurmet.app
 
-const cacheName = "hurmet-2024-01-31"
-
-self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(cacheName));
-});
+const cacheName = "hurmet-2024-01-31-07"
 
 const addResourcesToCache = async(resources) => {
   const cache = await caches.open(cacheName)
   await cache.addAll(resources)
+  cache.keys().then(key => { console.log(key) })
+  self.skipWaiting()
 }
 
 // Pre-cache the offline page, JavaScript, CSS, and fonts.
@@ -37,6 +35,7 @@ self.addEventListener('fetch', (event) => {
         return fetchedResponse;
       }).catch(() => {
         // If the network is unavailable, get
+        cache.keys().then(key => { console.log(key) })
         return cache.match('/offline.html');
       });
     }));
