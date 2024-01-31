@@ -1,6 +1,6 @@
 // A service worker to enable offline use of Hurmet.org
 
-const cacheName = "hurmet-2024-01-30-09"
+const cacheName = "hurmet-2024-01-30-10"
 
 const urls = [
   '/offline.html',
@@ -29,27 +29,18 @@ const urls = [
   });
 }*/
 
-// Pre-cache the offline page, JavaScript, CSS, and fonts.
+const addResourcesToCache = async() => {
+  const cache = await caches.open(cacheName)
+  Promise.all(
+    urls.map(url => { cache.add(url) })
+  ).then(_ => { console.log(caches[cacheName]) })
+};
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches
-      .open(cacheName)
-      .then((cache) =>
-        Promise.all(
-          urls.map(url => { cache.add(url) }
-        )
-        /*cache.addAll([
-          '/offline.html',
-          '/prosemirror.min.js',
-          '/styles.min.css',
-          '/latinmodernmath.woff2',
-          '/Temml.woff2'
-        ])*/
-      )
-    )
-  )
-  console.log(caches[cacheName])
-})
+    addResourcesToCache()
+  );
+});
 
 // The purpose of this worker is to enable offline use, not primarily to speed startup.
 // Hurmet is in active development and I always want to load the most current JS.
