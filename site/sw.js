@@ -1,46 +1,28 @@
-// A service worker to enable offline use of Hurmet.org
+// A service worker to enable offline use of Hurmet.app
 
-const cacheName = "hurmet-2024-01-30-10"
+const cacheName = "hurmet-2024-01-31"
 
-const urls = [
-  '/offline.html',
-  '/prosemirror.min.js',
-  '/styles.min.css',
-  '/latinmodernmath.woff2',
-  '/Temml.woff2'
-];
+self.addEventListener('install', (event) => {
+  event.waitUntil(caches.open(cacheName));
+});
 
-/*function cleanResponse(response) {
-  const clonedResponse = response.clone();
-
-  // Not all browsers support the Response.body stream, so fall back to reading
-  // the entire body into memory as a blob.
-  const bodyPromise = 'body' in clonedResponse ?
-    Promise.resolve(clonedResponse.body) :
-    clonedResponse.blob();
-
-  return bodyPromise.then((body) => {
-    // new Response() is happy when passed either a stream or a Blob.
-    return new Response(body, {
-      headers: clonedResponse.headers,
-      status: clonedResponse.status,
-      statusText: clonedResponse.statusText
-    });
-  });
-}*/
-
-const addResourcesToCache = async() => {
+const addResourcesToCache = async(resources) => {
   const cache = await caches.open(cacheName)
-  Promise.all(
-    urls.map(url => { cache.add(url) })
-  ).then(_ => { console.log(caches[cacheName]) })
-};
+  await cache.addAll(resources)
+}
 
+// Pre-cache the offline page, JavaScript, CSS, and fonts.
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    addResourcesToCache()
-  );
-});
+    addResourcesToCache([
+      '/offline.html',
+      '/prosemirror.min.js',
+      '/styles.min.css',
+      '/latinmodernmath.woff2',
+      '/Temml.woff2'
+    ])
+  )
+})
 
 // The purpose of this worker is to enable offline use, not primarily to speed startup.
 // Hurmet is in active development and I always want to load the most current JS.
@@ -74,7 +56,6 @@ self.addEventListener('fetch', (event) => {
     // Get a font from the cache
     event.respondWith(caches.open(cacheName).then((cache) => {
       // Go to the cache first
-      console.log(cache)
       return cache.match(event.request.url).then((cachedResponse) => {
         // Return a cached response if we have one
         if (cachedResponse) {
@@ -84,7 +65,7 @@ self.addEventListener('fetch', (event) => {
         // Otherwise, hit the network
         return fetch(event.request).then((fetchedResponse) => {
           // Add the network response to the cache for later visits
-          cache.put(event.request, fetchedResponse.clone());
+          //cache.put(event.request, fetchedResponse.clone());
 
           // Return the network response
           return fetchedResponse;
