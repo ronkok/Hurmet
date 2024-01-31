@@ -5,17 +5,14 @@ const cacheName = "hurmet-2024-01-31-07"
 const addResourcesToCache = async(resources) => {
   const cache = await caches.open(cacheName)
   await cache.addAll(resources)
-  cache.keys().then(key => { console.log(key) })
   self.skipWaiting()
 }
 
-// Pre-cache the offline page, JavaScript, CSS, and fonts.
+// Pre-cache the offline page and fonts.
 self.addEventListener("install", (event) => {
   event.waitUntil(
     addResourcesToCache([
       '/offline.html',
-      '/prosemirror.min.js',
-      '/styles.min.css',
       '/latinmodernmath.woff2',
       '/Temml.woff2'
     ])
@@ -44,7 +41,8 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(caches.open(cacheName).then((cache) => {
       // Go to the network first
       return fetch(event.request.url).then((fetchedResponse) => {
-        //cache.put(event.request, fetchedResponse.clone());
+        cache.put(event.request, fetchedResponse.clone());
+        cache.keys().then(key => { console.log(key) })
         return fetchedResponse;
       }).catch(() => {
         // If the network is unavailable, get the cached version
