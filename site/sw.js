@@ -1,6 +1,14 @@
 // A service worker to enable offline use of Hurmet.org
 
-const cacheName = "hurmet-2024-01-30-07"
+const cacheName = "hurmet-2024-01-30-08"
+
+const urls = [
+  '/offline.html',
+  '/prosemirror.min.js',
+  '/styles.min.css',
+  '/latinmodernmath.woff2',
+  '/Temml.woff2'
+];
 
 /*function cleanResponse(response) {
   const clonedResponse = response.clone();
@@ -27,14 +35,18 @@ self.addEventListener("install", (event) => {
     caches
       .open(cacheName)
       .then((cache) =>
-        cache.addAll([
+        Promise.all(
+          urls.map(url => { cache.add(url) }
+        )
+        /*cache.addAll([
           '/offline.html',
           '/prosemirror.min.js',
           '/styles.min.css',
           '/latinmodernmath.woff2',
           '/Temml.woff2'
-        ])
+        ])*/
       )
+    )
   )
 })
 
@@ -59,7 +71,7 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(caches.open(cacheName).then((cache) => {
       // Go to the network first
       return fetch(event.request.url).then((fetchedResponse) => {
-        cache.put(event.request, fetchedResponse.clone());
+        //cache.put(event.request, fetchedResponse.clone());
         return fetchedResponse;
       }).catch(() => {
         // If the network is unavailable, get the cached version
