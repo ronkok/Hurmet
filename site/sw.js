@@ -25,7 +25,16 @@ self.addEventListener("install", (event) => {
 // Hurmet is in active development and I always want to load the most current JS.
 // So go to the network first. If network is unavailable, get the cache.
 self.addEventListener('fetch', (event) => {
-  if (event.request.mode === 'navigate') {
+  let request = event.request;
+  if (request.mode === 'navigate') {
+    // Replace the request w/request which has redirect: 'follow'
+    request = new Request(request.url, {
+      method: 'GET',
+      headers: request.headers,
+      mode: 'cors',
+      credentials: request.credentials,
+      redirect: 'follow'
+    })
     // Open the cache
     event.respondWith(caches.open(cacheName).then((cache) => {
       if (!navigator.onLine) {
@@ -33,32 +42,32 @@ self.addEventListener('fetch', (event) => {
         return cache.match('/offline.html')
       }
       // Else go to the network
-      return fetch(event.request.url).then((fetchedResponse) => {
+      return fetch(request.url).then((fetchedResponse) => {
         return fetchedResponse;
       })
     }));
-  } else if (event.request.destination === 'script' || event.request.destination === 'style') {
+  } else if (request.destination === 'script' || request.destination === 'style') {
     // This also calls for network first. Open the cache.
     event.respondWith(caches.open(cacheName).then((cache) => {
       // Go to the network first
-      return fetch(event.request.url).then((fetchedResponse) => {
+      return fetch(request.url).then((fetchedResponse) => {
         return fetchedResponse;
       }).catch(() => {
         // If the network is unavailable, get the cached version
-        return cache.match(event.request.url);
+        return cache.match(request.url);
       });
     }));
-  } else if (event.request.destination === 'font') {
+  } else if (request.destination === 'font') {
     // Get a font from the cache
     event.respondWith(caches.open(cacheName).then((cache) => {
       // Go to the cache first
-      return cache.match(event.request.url).then((cachedResponse) => {
+      return cache.match(request.url).then((cachedResponse) => {
         // Return a cached response if we have one
         if (cachedResponse) {
           return cachedResponse;
         }
         // Otherwise, hit the network
-        return fetch(event.request).then((fetchedResponse) => {
+        return fetch(request).then((fetchedResponse) => {
           return fetchedResponse;
         })
       })
