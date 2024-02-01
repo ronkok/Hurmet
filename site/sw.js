@@ -41,9 +41,11 @@ self.addEventListener('fetch', (event) => {
       if (!navigator.onLine) {
         // Put up the offline page
         let response = cache.match('/offline.html')
+        console.log("1st", response)
         if (response.redirected ) {
           response = cleanRedirect(response)
         }
+        console.log("2nd", response)
         return response
       }
       // Else go to the network
