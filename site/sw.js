@@ -5,7 +5,6 @@ const cacheName = "hurmet-2024-02-01"
 const addResourcesToCache = async(resources) => {
   const cache = await caches.open(cacheName)
   await cache.addAll(resources)
-  self.skipWaiting()
 }
 
 // Pre-cache the offline page, JavaScript, CSS, and fonts.
@@ -21,25 +20,6 @@ self.addEventListener("install", (event) => {
   )
 })
 
-async function cleanRedirect(response) {
-  const clonedResponse = response.clone();
-
-  // Not all browsers support the Response.body stream, so fall back
-  // to reading the entire body into memory as a blob.
-  const bodyPromise = 'body' in clonedResponse
-    ? Promise.resolve(clonedResponse.body)
-    : clonedResponse.blob()
-
-  const body = await bodyPromise
-
-  // new Response() is happy when passed either a stream or a Blob.
-  return new Response(body, {
-    headers: clonedResponse.headers,
-    status: clonedResponse.status,
-    statusText: clonedResponse.statusText
-  });
-}
-
 // The purpose of this worker is to enable offline use, not primarily to speed startup.
 // Hurmet is in active development and I always want to load the most current JS.
 // So go to the network first. If network is unavailable, get the cache.
@@ -49,11 +29,9 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(caches.open(cacheName).then((cache) => {
       if (!navigator.onLine) {
         // Put up the offline page
-        cache.keys().then(key => { console.log(key) })
-        cache.match('/offline.html').then((response) => {
-          console.log(response)
+        return cache.match('/offline.html').then((response) => {
+          return response
         })
-        return cache.match('/offline.html')
       }
       // Else go to the network
       return fetch(event.request.url).then((fetchedResponse) => {
