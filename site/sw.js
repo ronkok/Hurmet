@@ -1,6 +1,6 @@
 // A service worker to enable offline use of Hurmet.app
 
-const cacheName = "hurmet-2024-01-31-24"
+const cacheName = "hurmet-2024-01-31-25"
 
 const addResourcesToCache = async(resources) => {
   const cache = await caches.open(cacheName)
@@ -25,10 +25,11 @@ self.addEventListener("install", (event) => {
 // Hurmet is in active development and I always want to load the most current JS.
 // So go to the network first. If network is unavailable, get the cache.
 self.addEventListener('fetch', (event) => {
+  console.log("1st")
   if (event.request.mode === 'navigate') {
     // Open the cache
     event.respondWith(caches.open(cacheName).then((cache) => {
-      console.log("First")
+      console.log("2nd")
       if (!navigator.onLine) {
         console.log("Hi")
         // Put up the offline page
