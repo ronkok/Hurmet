@@ -49,7 +49,9 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(caches.open(cacheName).then((cache) => {
       if (!navigator.onLine) {
         // Put up the offline page
-        const response = cleanRedirect(cache.match('/offline.html'))
+        let response = cache.match('/offline.html')
+        console.log(response)
+        response = cleanRedirect(response)
         return response
       }
       // Else go to the network
