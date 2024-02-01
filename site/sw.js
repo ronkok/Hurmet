@@ -27,7 +27,7 @@ self.addEventListener("install", (event) => {
 self.addEventListener('fetch', (event) => {
   let request = event.request;
   if (request.mode === 'navigate') {
-    // The request should have: redirect: 'follow'
+    // Replace the request w/request which has redirect: 'follow'
     request = new Request(request.url, {
       method: 'GET',
       headers: request.headers,
@@ -40,10 +40,8 @@ self.addEventListener('fetch', (event) => {
           .then( response => {
             return response;  // network first
           })
-          .catch( () => {
-            caches.open(cacheName).then((cache) => {
-              return cache.match('/offline.html')  // Put up the offline page
-            })
+          .catch(_ => {
+            return caches.match('/offline.html')
           })
         );
     return
