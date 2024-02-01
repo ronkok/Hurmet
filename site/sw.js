@@ -1,12 +1,10 @@
 // A service worker to enable offline use of Hurmet.app
 
-const cacheName = "hurmet-2024-01-31-16"
+const cacheName = "hurmet-2024-01-31-22"
 
 const addResourcesToCache = async(resources) => {
   const cache = await caches.open(cacheName)
   await cache.addAll(resources)
-  cache.keys().then(key => { console.log(key) })
-  console.log(cache.match('/offline.html'))
   self.skipWaiting()
 }
 
@@ -30,14 +28,14 @@ self.addEventListener('fetch', (event) => {
   if (event.request.mode === 'navigate') {
     // Open the cache
     event.respondWith(caches.open(cacheName).then((cache) => {
-      // Go to the network first
+      if (!navigator.onLine) {
+        // Put up the offline page
+        return cache.match('/offline.html')
+      }
+      // Else go to the network
       return fetch(event.request.url).then((fetchedResponse) => {
-        //cache.put(event.request, fetchedResponse.clone());
         return fetchedResponse;
-      }).catch(() => {
-        // If the network is unavailable, get
-        return cache.match('/offline.html');
-      });
+      })
     }));
   } else if (event.request.destination === 'script' || event.request.destination === 'style') {
     // This also calls for network first. Open the cache.
@@ -47,7 +45,6 @@ self.addEventListener('fetch', (event) => {
         return fetchedResponse;
       }).catch(() => {
         // If the network is unavailable, get the cached version
-        console.log(cache.match(event.request.url))
         return cache.match(event.request.url);
       });
     }));
@@ -60,7 +57,6 @@ self.addEventListener('fetch', (event) => {
         if (cachedResponse) {
           return cachedResponse;
         }
-
         // Otherwise, hit the network
         return fetch(event.request).then((fetchedResponse) => {
           return fetchedResponse;
