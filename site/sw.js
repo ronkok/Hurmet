@@ -50,7 +50,9 @@ self.addEventListener('fetch', (event) => {
       if (!navigator.onLine) {
         // Put up the offline page
         cache.keys().then(key => { console.log(key) })
-        cache.match('/offline.html').then((response) => { console.log(response) })
+        cache.match('/offline.html').then((response) => {
+          console.log(response)
+        })
         return cache.match('/offline.html')
       }
       // Else go to the network
