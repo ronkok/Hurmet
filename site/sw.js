@@ -26,11 +26,11 @@ self.addEventListener("install", (event) => {
 // So go to the network first. If network is unavailable, get the cache.
 self.addEventListener('fetch', (event) => {
   if (event.request.mode === 'navigate') {
+    console.log(event.request)
     // Open the cache
     event.respondWith(caches.open(cacheName).then((cache) => {
       if (!navigator.onLine) {
         // Put up the offline page
-        cache.keys().then(key => { console.log(key) })
         return cache.match('/offline.html')
       }
       // Else go to the network
