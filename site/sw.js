@@ -24,7 +24,16 @@ self.addEventListener("install", (event) => {
 async function cleanRedirect(response) {
   const clonedResponse = response.clone();
 
-  return new Response(await clonedResponse.blob(), {
+  // Not all browsers support the Response.body stream, so fall back
+  // to reading the entire body into memory as a blob.
+  const bodyPromise = 'body' in clonedResponse
+    ? Promise.resolve(clonedResponse.body)
+    : clonedResponse.blob()
+
+  const body = await bodyPromise
+
+  // new Response() is happy when passed either a stream or a Blob.
+  return new Response(body, {
     headers: clonedResponse.headers,
     status: clonedResponse.status,
     statusText: clonedResponse.statusText
@@ -40,12 +49,7 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(caches.open(cacheName).then((cache) => {
       if (!navigator.onLine) {
         // Put up the offline page
-        let response = cache.match('/offline.html')
-        console.log("1st", response)
-        if (response.redirected ) {
-          response = cleanRedirect(response)
-        }
-        console.log("2nd", response)
+        const response = cleanRedirect(cache.match('/offline.html'))
         return response
       }
       // Else go to the network
