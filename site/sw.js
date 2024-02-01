@@ -25,8 +25,8 @@ self.addEventListener("install", (event) => {
 // Hurmet is in active development and I always want to load the most current JS.
 // So go to the network first. If network is unavailable, get the cache.
 self.addEventListener('fetch', (event) => {
+  console.log(event.request)
   if (event.request.mode === 'navigate') {
-    console.log(event.request)
     // Open the cache
     event.respondWith(caches.open(cacheName).then((cache) => {
       if (!navigator.onLine) {
