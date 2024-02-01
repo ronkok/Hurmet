@@ -29,7 +29,17 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(caches.open(cacheName).then((cache) => {
       if (!navigator.onLine) {
         // Put up the offline page
-        return cache.match('/offline.html').then((response) => {
+        return cache.match('/offline.html').then((value) => {
+          const response = new Response(value.body, {
+            bodyUsed: false,
+            headers: value.headers,
+            ok: true,
+            redirected: false,
+            status: 200,
+            statusText: "",
+            type: "basic",
+            url: "https://hurmet.org/offline"
+          })
           return response
         })
       }
