@@ -27,9 +27,15 @@ self.addEventListener('fetch', (event) => {
   if (event.request.mode === 'navigate') {
     // Open the cache
     event.respondWith(caches.open(cacheName).then((cache) => {
-      if (!navigator.onLine) {
-        // Put up the offline page
+      // Go to the network first
+      return fetch(event.request.url).then((fetchedResponse) => {
+        //cache.put(event.request, fetchedResponse.clone());
+        return fetchedResponse;
+      }).catch(() => {
+        // If the network is unavailable, put up the offline page
         return cache.match('/offline.html').then((value) => {
+          // This cached response has `redirected: true`. The browser won't render it that way.
+          // So build a new response. Same as cached value, except with `redirected: false`.
           const response = new Response(value.body, {
             bodyUsed: false,
             headers: value.headers,
@@ -42,11 +48,7 @@ self.addEventListener('fetch', (event) => {
           })
           return response
         })
-      }
-      // Else go to the network
-      return fetch(event.request.url).then((fetchedResponse) => {
-        return fetchedResponse;
-      })
+      });
     }));
   } else if (event.request.destination === 'script' || event.request.destination === 'style') {
     // This also calls for network first. Open the cache.
