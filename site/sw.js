@@ -5,15 +5,6 @@ const cacheName = "hurmet-2024-02-01"
 const addResourcesToCache = async(resources) => {
   const cache = await caches.open(cacheName)
   await cache.addAll(resources)
-  fetch('/offline.html').then((response) => {
-    if (!response.ok) {
-      throw new TypeError("Bad response status");
-    }
-    const editedResponse = response.clone()
-    editedResponse.mode = 'same-origin'
-    editedResponse.redirect = 'manual'
-    cache.put('/offline.html', editedResponse);
-  })
   self.skipWaiting()
 }
 
@@ -21,6 +12,7 @@ const addResourcesToCache = async(resources) => {
 self.addEventListener("install", (event) => {
   event.waitUntil(
     addResourcesToCache([
+      '/offline.html',
       '/prosemirror.min.js',
       '/styles.min.css',
       '/latinmodernmath.woff2',
@@ -28,6 +20,16 @@ self.addEventListener("install", (event) => {
     ])
   )
 })
+
+async function cleanRedirect(response) {
+  const clonedResponse = response.clone();
+
+  return new Response(await clonedResponse.blob(), {
+    headers: clonedResponse.headers,
+    status: clonedResponse.status,
+    statusText: clonedResponse.statusText
+  });
+}
 
 // The purpose of this worker is to enable offline use, not primarily to speed startup.
 // Hurmet is in active development and I always want to load the most current JS.
@@ -38,7 +40,11 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(caches.open(cacheName).then((cache) => {
       if (!navigator.onLine) {
         // Put up the offline page
-        return cache.match('/offline.html')
+        let response = cache.match('/offline.html')
+        if (response.redirected ) {
+          response = cleanRedirect(response)
+        }
+        return response
       }
       // Else go to the network
       return fetch(event.request.url).then((fetchedResponse) => {
