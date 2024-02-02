@@ -21238,6 +21238,10 @@ const parse$1 = (
       }
 
       case tt.UNIT: {  //  e.g.  'meters'
+        if (delims.length > 1 && delims[delims.length - 1].delimType === dMATRIX) {
+          token.output = "\\text{Error. Write a unit name outside a matrix, not inside. "
+              + "Apply one unit to the entire matrix.}";
+        }
         popTexTokens(14, true);
         texStack.push({ prec: 14, pos: op.pos, ttype: tt.UNIT, closeDelim: "" });
         if (isCalc) {
