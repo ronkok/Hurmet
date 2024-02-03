@@ -44,7 +44,7 @@ export const identifyRange = (df, args) => {
 
   let iStart
   let iEnd
-  const rowList = [];
+  let rowList = [];
   let columnList = [];
 
   // Find what must be returned. I.e. populate rowList and columnList
@@ -123,15 +123,11 @@ export const identifyRange = (df, args) => {
     iEnd = args.length
     if (df.value.rowMap && df.value.rowMap[args[iEnd - 1].value]) {
       // A row list
-      for (const arg of args) {
-        rowList.push(arg.value)
-      }
+      rowList = args.map(arg => arg.value)
       columnList = columnListFromRange(0, df.value.data.length - 1) // All the columns.
     } else {
       // A column list
-      for (const arg of args) {
-        columnList.push(df.value.columnMap[arg.value])
-      }
+      columnList = args.map(arg => df.value.columnMap[arg.value])
     }
   }
   return [rowList, columnList, iStart, iEnd]
