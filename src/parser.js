@@ -411,7 +411,7 @@ export const parse = (
           if (delim.delimType === dDICTIONARY && delim.open.length > 3) {
             tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + 2)
             op.closeDelim = delim.close
-          } else if (delim.delimType === dMATRIX) {
+          } else if (delim.delimType === dMATRIX || delim.delimType === dACCESSOR) {
             const inc = tex.slice(op.pos, op.pos + 1) === "\\" ? 2 : 1
             tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + inc)
             op.closeDelim = delim.close
@@ -1177,9 +1177,10 @@ export const parse = (
         popTexTokens(1, okToAppend)
         posOfPrevRun = tex.length
         const delim = delims[delims.length - 1]
-        if (delim.delimType === dPAREN && ([";", "\t"].includes(token.input) ||
-            token.input === "," && isFollowedBySpaceOrNewline)) {
-          delim.delimType = dMATRIX
+        if ((delim.delimType === dPAREN || delim.delimType === dACCESSOR)
+            && ([";", "\t"].includes(token.input)
+            || token.input === "," && isFollowedBySpaceOrNewline)) {
+          delim.delimType = delim.delimType === dPAREN ? dMATRIX : dACCESSOR
           const ch = delim.name === "["
             ? "b"
             : delim.name === "("

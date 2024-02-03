@@ -118,11 +118,20 @@ export const identifyRange = (df, args) => {
     if (df.dtype === dt.DATAFRAME) { df.value.usedRows.add(iStart) }
     columnList.push(df.value.columnMap[args[0].value])
   } else {
-    // Default for args is a list of column names
+    // Default for args is a list of (row|column) names
     iStart = 0
     iEnd = args.length
-    for (const arg of args) {
-      columnList.push(df.value.columnMap[arg.value])
+    if (df.value.rowMap && df.value.rowMap[args[iEnd - 1].value]) {
+      // A row list
+      for (const arg of args) {
+        rowList.push(arg.value)
+      }
+      columnList = columnListFromRange(0, df.value.data.length - 1) // All the columns.
+    } else {
+      // A column list
+      for (const arg of args) {
+        columnList.push(df.value.columnMap[arg.value])
+      }
     }
   }
   return [rowList, columnList, iStart, iEnd]
