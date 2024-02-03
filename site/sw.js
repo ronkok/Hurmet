@@ -54,6 +54,7 @@ self.addEventListener('fetch', event => {
     event.respondWith(caches.open(cacheName).then(cache => {
       // Go to the network first
       return fetch(event.request.url).then(fetchedResponse => {
+        console.log(fetchedResponse)
         return fetchedResponse;
       }).catch(() => {
         // If the network is unavailable, get the cached version
