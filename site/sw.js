@@ -1,6 +1,6 @@
 // A service worker to enable offline use of Hurmet.app
 
-const cacheName = "hurmet-2024-02-02"
+const cacheName = "hurmet-2024-02-03"
 
 const addResourcesToCache = async(resources) => {
   const cache = await caches.open(cacheName)
@@ -20,58 +20,57 @@ self.addEventListener("install", (event) => {
   )
 })
 
-// The purpose of this worker is to enable offline use, not primarily to speed startup.
+// Take a navigation response and replace it with one whose `redirected` value is false.
+const cleanResponse = response => {
+  return new Response(response.body, {
+    bodyUsed: false,
+    headers: response.headers,
+    ok: true,
+    redirected: false,
+    status: 200,
+    statusText: "",
+    type: "basic",
+    url: response.url
+  })
+}
+
+// The purpose of this worker is to enable offline use, not to speed startup.
 // Hurmet is in active development and I always want to load the most current JS.
-// So go to the network first. If network is unavailable, get the cache.
-self.addEventListener('fetch', (event) => {
+// So, in most cases, go to the network first. If network is unavailable, get the cache.
+self.addEventListener('fetch', event => {
   if (event.request.mode === 'navigate') {
     // Open the cache
-    event.respondWith(caches.open(cacheName).then((cache) => {
+    event.respondWith(caches.open(cacheName).then(cache => {
       // Go to the network first
-      return fetch(event.request.url).then((fetchedResponse) => {
-        //cache.put(event.request, fetchedResponse.clone());
+      return fetch(event.request.url).then(fetchedResponse => {
         return fetchedResponse;
       }).catch(() => {
         // If the network is unavailable, put up the offline page
-        return cache.match('/offline.html').then((value) => {
-          // This cached response has `redirected: true`. The browser won't render it that way.
-          // So build a new response. Same as cached value, except with `redirected: false`.
-          const response = new Response(value.body, {
-            bodyUsed: false,
-            headers: value.headers,
-            ok: true,
-            redirected: false,
-            status: 200,
-            statusText: "",
-            type: "basic",
-            url: "https://hurmet.org/offline"
-          })
-          return response
-        })
+        return cache.match('/offline.html').then(response => cleanResponse(response))
       });
     }));
   } else if (event.request.destination === 'script' || event.request.destination === 'style') {
     // This also calls for network first. Open the cache.
-    event.respondWith(caches.open(cacheName).then((cache) => {
+    event.respondWith(caches.open(cacheName).then(cache => {
       // Go to the network first
-      return fetch(event.request.url).then((fetchedResponse) => {
+      return fetch(event.request.url).then(fetchedResponse => {
         return fetchedResponse;
       }).catch(() => {
         // If the network is unavailable, get the cached version
-        return cache.match(event.request.url);
+        return cache.match(event.request.url)
       });
     }));
   } else if (event.request.destination === 'font') {
-    // Get a font from the cache
-    event.respondWith(caches.open(cacheName).then((cache) => {
-      // Go to the cache first
-      return cache.match(event.request.url).then((cachedResponse) => {
+    // Fonts are the only files for which we go cache-first.
+    event.respondWith(caches.open(cacheName).then(cache => {
+      // Go to the cache
+      return cache.match(event.request.url).then(cachedResponse => {
         // Return a cached response if we have one
         if (cachedResponse) {
           return cachedResponse;
         }
         // Otherwise, hit the network
-        return fetch(event.request).then((fetchedResponse) => {
+        return fetch(event.request).then(fetchedResponse => {
           return fetchedResponse;
         })
       })
