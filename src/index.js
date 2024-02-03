@@ -13,10 +13,12 @@ import { fixTables } from "prosemirror-tables"
 
 // Hurmet customized modules
 import { schema } from "./schema"
+import { dt } from "./constants"
 import { buildMenuItems } from "./menu"
 import { buildKeymap } from "./keymap"
 import { buildInputRules } from "./inputrules"
 import { CalcView, TexView, FootnoteView } from "./nodeviews"
+import { DataFrame } from "./dataframe"
 import hurmet from "./hurmet"
 
 // Bundle together the plugins.
@@ -52,13 +54,16 @@ window.view = new view.EditorView(document.querySelector("#editor"), {
         && content.content.content[0].content && content.content.content[0].content.content
         && content.content.content[0].content.content.length === 1
         && content.content.content[0].content.content[0].type.name === "calculation") {
-      const value = content.content.content[0].content.content[0].attrs.value
+      const attrs = content.content.content[0].content.content[0].attrs
+      const value = attrs.value
       if (value.plain && hurmet.Rnl.isRational(value.plain)) {
         return hurmet.Rnl.toNumber(value.plain)
-      }
-      if (hurmet.Rnl.isRational(value)) { return hurmet.Rnl.toNumber(value) }
-      if (Array.isArray(value) && hurmet.Rnl.isRational(value[0])) {
+      } else if (hurmet.Rnl.isRational(value)) {
+        return hurmet.Rnl.toNumber(value)
+      } else if (Array.isArray(value) && hurmet.Rnl.isRational(value[0])) {
         return value.map(e => hurmet.Rnl.toNumber(e))
+      } else if (attrs.dtype === dt.DATAFRAME) {
+        return DataFrame.displayAlt(value)
       }
       return value
     } else {
