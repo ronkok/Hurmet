@@ -230,6 +230,14 @@ export class TextAreaField extends Field {
   }
 }
 
+export class CodeField extends Field {
+  render() {
+    const wrapper = document.createElement('pre')
+    wrapper.appendChild(document.createElement('code'))
+    wrapper.firstChild.textContent = this.options.value
+    return wrapper
+  }
+}
 
 // ::- A field class for dropdown fields based on a plain `<select>`
 // tag. Expects an option `options`, which should be an array of

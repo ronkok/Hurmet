@@ -17144,11 +17144,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6483","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.6468","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.3366","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.3471","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -17157,10 +17157,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4607","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4556","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9396","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.7994","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9315","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.8111","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -17180,7 +17180,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.85368","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.85263","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -17188,23 +17188,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.4933","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.5090","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["4.0057","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["90.3690","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["3.9685","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["90.2320","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["160.62","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["159.58","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1451.08","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1440.70","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -17215,7 +17215,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["18.6582","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["18.5579","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -17245,7 +17245,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.0871","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0883","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -17338,7 +17338,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "dscf":["0.028316846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "dyn":["0.00001","1","0","0",[1,1,-2,0,0,0,0,0]],
 "dyne":["0.00001","1","0","0",[1,1,-2,0,0,0,0,0]],
-"eV":["1.602176462e-19","1","0","0",[2,1,-2,0,0,0,0,0]],
+"eV":["1.602176462e-19","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
 "electric horsepower":["746","1","0","0",[2,1,-3,0,0,0,0,0]],
 "electrical horsepower":["746","1","0","0",[2,1,-3,0,0,0,0,0]],
 "electron volt":["1.602176462e-19","1","0","0",[2,1,-2,0,0,0,0,0]],
@@ -18885,7 +18885,7 @@ const identifyRange = (df, args) => {
 
   let iStart;
   let iEnd;
-  const rowList = [];
+  let rowList = [];
   let columnList = [];
 
   // Find what must be returned. I.e. populate rowList and columnList
@@ -18959,11 +18959,16 @@ const identifyRange = (df, args) => {
     if (df.dtype === dt.DATAFRAME) { df.value.usedRows.add(iStart); }
     columnList.push(df.value.columnMap[args[0].value]);
   } else {
-    // Default for args is a list of column names
+    // Default for args is a list of (row|column) names
     iStart = 0;
     iEnd = args.length;
-    for (const arg of args) {
-      columnList.push(df.value.columnMap[arg.value]);
+    if (df.value.rowMap && df.value.rowMap[args[iEnd - 1].value]) {
+      // A row list
+      rowList = args.map(arg => arg.value);
+      columnList = columnListFromRange(0, df.value.data.length - 1); // All the columns.
+    } else {
+      // A column list
+      columnList = args.map(arg => df.value.columnMap[arg.value]);
     }
   }
   return [rowList, columnList, iStart, iEnd]
@@ -20929,7 +20934,7 @@ const parse$1 = (
           if (delim.delimType === dDICTIONARY && delim.open.length > 3) {
             tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + 2);
             op.closeDelim = delim.close;
-          } else if (delim.delimType === dMATRIX) {
+          } else if (delim.delimType === dMATRIX || delim.delimType === dACCESSOR) {
             const inc = tex.slice(op.pos, op.pos + 1) === "\\" ? 2 : 1;
             tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + inc);
             op.closeDelim = delim.close;
@@ -21695,9 +21700,10 @@ const parse$1 = (
         popTexTokens(1, okToAppend);
         posOfPrevRun = tex.length;
         const delim = delims[delims.length - 1];
-        if (delim.delimType === dPAREN && ([";", "\t"].includes(token.input) ||
-            token.input === "," && isFollowedBySpaceOrNewline)) {
-          delim.delimType = dMATRIX;
+        if ((delim.delimType === dPAREN || delim.delimType === dACCESSOR)
+            && ([";", "\t"].includes(token.input)
+            || token.input === "," && isFollowedBySpaceOrNewline)) {
+          delim.delimType = delim.delimType === dPAREN ? dMATRIX : dACCESSOR;
           const ch = delim.name === "["
             ? "b"
             : delim.name === "("
@@ -48269,6 +48275,15 @@ class TextField extends Field {
   }
 }
 
+class CodeField extends Field {
+  render() {
+    const wrapper = document.createElement('pre');
+    wrapper.appendChild(document.createElement('code'));
+    wrapper.firstChild.textContent = this.options.value;
+    return wrapper
+  }
+}
+
 const prefix = "ProseMirror-prompt";
 
 function openSelectPrompt(title, buttons, callback) {
@@ -51409,7 +51424,20 @@ const print = () => {
   })
 };
 
-const footnote = (nodeType) => {
+const hint = (label, promptTitle, text) => {
+  return new MenuItem_1({
+    label: label,
+    run(state) {
+      const promptOptions = {
+        title: promptTitle,
+        fields: {code: new CodeField({ value: text })}
+      };
+      openPrompt(promptOptions);
+    }
+  })
+};
+
+const footnote = () => {
   return new MenuItem_1({
     title: "Insert footnote",
     icon: hurmetIcons.footnote,
@@ -51427,7 +51455,6 @@ const footnote = (nodeType) => {
         tr.setSelection(NodeSelection.create(tr.doc, $from.pos));
       }
       dispatch(tr);
-      //dispatch(state.tr.replaceSelectionWith(schema.nodes.footnote.create(null, content)));
     }
   })
 };
@@ -52446,22 +52473,44 @@ function buildMenuItems(schema) {
       window.open("manual.html");
     } 
   });
-  r.hint = blockTypeItem_1(type, {
-    title: "Math Quick Reference",
-    label: "Q",
-    enable() {
-      return true
-    },
-    run() {
-      const body = document.getElementsByTagName("body")[0];
-      if (body.className === "show-hint") {
-        body.className = "";
-      } else {
-        body.className = "show-hint";
-        document.getElementById("hint").style.top = String(window.scrollY + 40) + "px";
-      }
-    } 
-  });
+
+  r.accessors = hint("Accessors…", "Accessors", `vector[number]
+vector[start:finish]
+matrix[rowNum, colNum]
+dataFrame.rowName.colName
+dataframe.colName[rowNum]
+dataframe["rowName"]["colName"]
+dataframe["rowName1"; "rowName2"]["col1", "col2"]`);
+  r.display = hint("Display…", "Display Selectors", `? - display entire equation
+@ - display result only
+% - omit echo
+! - hide result`);
+  r.letters = hint("Letters…", "Letters", `Γ Δ Θ Λ Ξ Π Σ Φ Ψ Ω
+α β γ δ ε ζ η θ ι κ λ μ
+ν ξ π ρ σ τ υ ϕ χ ψ ω
+ℂ ℍ ℕ ℚ ℝ ℤ ℏ ℓ
+𝒜 ℬ 𝒞 𝒟 ℰ ℱ 𝒢 ℋ ℐ 𝒦 ℒ ℳ
+𝒩 𝒪 𝒫 𝒬 ℛ 𝒮 𝒯 𝒰 𝒱 𝒲 𝒳 𝒴 𝒵
+bar hat vec harpoon dot ddot tilde`);
+  r.markup = hint("Markup…", "Markup", `a_subscript   b^exponent   x′
+(a+b) / (c+d)    1//2    2///3
+[1; 2; 3]    (a, b; c, d)
+[start:step:end] = ?
+{a if b; c otherwise}`);
+  r.symbols = hint("Symbols…", "Symbols", `∀ ∃ ∞ ︀€ ¥ £ ø ✓ ° ′
+√ ∛ × * · ∘ ∕ ‖ ∠ ÷ ± ∓ ⊻ ¬ 
+≤ ≥ ≠ ≅ ≈ ∈ ∉ ⋐ ≡ ≔ → ← ↔ ⇒
+⎾ ⏋ ⎿ ⏌ ⟨ ⟩ ∧ ∨ ⋁ ∩ ⋂ ∪ ⋃ ∑ ∫ ∬ ∇`);
+
+  r.hintDropDown = new Dropdown_1([
+    r.accessors,
+    r.display,
+    r.letters,
+    r.markup,
+    r.symbols
+  ],
+  { label: "Q", title: "Quick Reference" }
+  );
 
   // Now that the menu buttons are created, assemble them into the menu.
   
@@ -52521,7 +52570,7 @@ function buildMenuItems(schema) {
     r.toc,
     r.insertCalclation,
     r.insertTeX,
-    r.macroButton,
+    //r.macroButton,
     r.insertComment
   ]];
 
@@ -52591,7 +52640,7 @@ function buildMenuItems(schema) {
     r.typeMenu,
     r.blockMenu,
     r.tableMenu,
-    [[r.help]]
+    [[r.help, r.hintDropDown]]
   );
 
   return r
@@ -54038,13 +54087,16 @@ window.view = new EditorView(document.querySelector("#editor"), {
         && content.content.content[0].content && content.content.content[0].content.content
         && content.content.content[0].content.content.length === 1
         && content.content.content[0].content.content[0].type.name === "calculation") {
-      const value = content.content.content[0].content.content[0].attrs.value;
+      const attrs = content.content.content[0].content.content[0].attrs;
+      const value = attrs.value;
       if (value.plain && hurmet.Rnl.isRational(value.plain)) {
         return hurmet.Rnl.toNumber(value.plain)
-      }
-      if (hurmet.Rnl.isRational(value)) { return hurmet.Rnl.toNumber(value) }
-      if (Array.isArray(value) && hurmet.Rnl.isRational(value[0])) {
+      } else if (hurmet.Rnl.isRational(value)) {
+        return hurmet.Rnl.toNumber(value)
+      } else if (Array.isArray(value) && hurmet.Rnl.isRational(value[0])) {
         return value.map(e => hurmet.Rnl.toNumber(e))
+      } else if (attrs.dtype === dt.DATAFRAME) {
+        return DataFrame.displayAlt(value)
       }
       return value
     } else {
