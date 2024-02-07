@@ -1400,26 +1400,30 @@ dataframe["rowName1"; "rowName2"]["col1", "col2"]`)
   r.letters = hint("Letters…", "Letters", `Γ Δ Θ Λ Ξ Π Σ Φ Ψ Ω
 α β γ δ ε ζ η θ ι κ λ μ
 ν ξ π ρ σ τ υ ϕ χ ψ ω
+𝐀 𝐁 𝐂 𝐃 𝐄 𝐅 𝐆 𝐇 𝐈 𝐉 𝐊 𝐋 𝐌
+𝐍 𝐎 𝐏 𝐐 𝐑 𝐒 𝐓 𝐔 𝐕 𝐖 𝐗 𝐘 𝐙
+𝐚 𝐛 𝐜 𝐝 𝐞 𝐟 𝐠 𝐡 𝐢 𝐣 𝐤 𝐥 𝐦
+𝐧 𝐨 𝐩 𝐪 𝐫 𝐬 𝐭 𝐮 𝐯 𝐰 𝐱 𝐲 𝐳
 ℂ ℍ ℕ ℚ ℝ ℤ ℏ ℓ
 𝒜 ℬ 𝒞 𝒟 ℰ ℱ 𝒢 ℋ ℐ 𝒦 ℒ ℳ
 𝒩 𝒪 𝒫 𝒬 ℛ 𝒮 𝒯 𝒰 𝒱 𝒲 𝒳 𝒴 𝒵
 bar hat vec harpoon dot ddot tilde`)
-  r.markup = hint("Markup…", "Markup", `a_subscript   b^exponent   x′
-(a+b) / (c+d)    1//2    2///3
-[1; 2; 3]    (a, b; c, d)
-[start:step:end] = ?
-{a if b; c otherwise}`)
   r.symbols = hint("Symbols…", "Symbols", `∀ ∃ ∞ ︀€ ¥ £ ø ✓ ° ′
 √ ∛ × * · ∘ ∕ ‖ ∠ ÷ ± ∓ ⊻ ¬ 
 ≤ ≥ ≠ ≅ ≈ ∈ ∉ ⋐ ≡ ≔ → ← ↔ ⇒
 ⎾ ⏋ ⎿ ⏌ ⟨ ⟩ ∧ ∨ ⋁ ∩ ⋂ ∪ ⋃ ∑ ∫ ∬ ∇`)
+  r.syntax = hint("Syntax", "Syntax", `a_subscript   b^exponent   x′
+(a+b) / (c+d)    1//2    2///3
+[1; 2; 3]    (a, b; c, d)
+[start:step:end] = ?
+{a if b; c otherwise}`)
 
   r.hintDropDown = new Dropdown([
     r.accessors,
     r.display,
     r.letters,
-    r.markup,
-    r.symbols
+    r.symbols,
+    r.syntax
   ],
   { label: "Q", title: "Quick Reference" }
   )
