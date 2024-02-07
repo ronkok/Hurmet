@@ -1551,8 +1551,8 @@ bar hat vec harpoon dot ddot tilde`)
     r.insertMenu,
     r.typeMenu,
     r.blockMenu,
-    r.tableMenu,
-    [[r.help, r.hintDropDown]]
+    [[r.help, r.hintDropDown]],
+    r.tableMenu
   )
 
   return r
