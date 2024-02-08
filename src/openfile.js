@@ -66,6 +66,7 @@ async function getFile(view, schema, format) {
   view.state.doc.attrs.fileHandle = fileHandle
   // Now update the rest of the document.
   handleContents(view, schema, contents, format)
+  document.title = fileHandle.name.replace(/\.md$/, "")
 }
 
 export function readFile(state, _, view, schema, format) {

@@ -505,6 +505,7 @@ pageSize: ${state.doc.attrs.pageSize}
     const blob = new Blob([str], {type: "text/plain;charset=utf-8"})
     saveAs(blob, "HurmetFile.md", { autoBom : false })
     state.doc.attrs.saveIsValid = false
+    document.name = "Hurmet.org"
   }
 }
 
