@@ -20121,6 +20121,7 @@ const mathOperators = new Set([
 
 const colors = new Set([
   "blue",
+  "firebrick",
   "gray",
   "green",
   "orange",
@@ -49368,6 +49369,7 @@ async function getFile(view, schema, format) {
   view.state.doc.attrs.fileHandle = fileHandle;
   // Now update the rest of the document.
   handleContents(view, schema, contents, format);
+  document.title = fileHandle.name.replace(/\.md$/, "");
 }
 
 function readFile(state, _, view, schema, format) {
@@ -51596,6 +51598,7 @@ pageSize: ${state.doc.attrs.pageSize}
     const blob = new Blob([str], {type: "text/plain;charset=utf-8"});
     FileSaverExports.saveAs(blob, "HurmetFile.md", { autoBom : false });
     state.doc.attrs.saveIsValid = false;
+    document.name = "Hurmet.org";
   }
 }
 

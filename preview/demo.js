@@ -4448,6 +4448,7 @@ const mathOperators = new Set([
 
 const colors = new Set([
   "blue",
+  "firebrick",
   "gray",
   "green",
   "orange",
