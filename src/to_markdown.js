@@ -288,18 +288,20 @@ const hurmetNodes =  {
         writeTex(state, node.attrs.displayMode, tex)
       }
     } else {
+      const displaySelector = node.attrs.md ? node.attrs.displaySelector : ""
+      let md = node.attrs.md ? node.attrs.md : entry
       if (!node.attrs.displayMode) {
         const ticks = backticksFor({ text: entry, isText: true }, -1).trim()
-        entry = "¢" + ticks + " " + entry + " " + ticks
+        md = "¢" + displaySelector + ticks + " " + md + " " + ticks
       }
       if (node.attrs.entry.slice(0, 5) === "draw(") {
         const ref = getRef(node, state)
         state.paths.set(ref, entry)
         state.write(isNaN(ref) ? `![${ref}][]` : `![][${ref}]`)
       } else if (node.attrs.displayMode) {
-        state.write("¢¢ " + entry + " ¢¢")
+        state.write("¢¢" + displaySelector + " " + md + " ¢¢")
       } else {
-        state.write(entry)
+        state.write(md)
       }
     }
   }

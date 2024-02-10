@@ -408,7 +408,6 @@ export const nodes = {
       // By keeping this data when the author submits a cell, I avoid having to
       // redo the work each time a cell calculation is updated with a new variable value.
       // Most of this info is kept only during run-time.
-      // When the author saves a file, I write only the entry input.
       // (What isn't saved cannot break a document.)
       // When a document is re-opened, all but the entries must be recalculated.
       entry: { default: "" }, //          Raw string input by the author, edited for decimal.
@@ -416,6 +415,8 @@ export const nodes = {
       name: {default: null}, //           Name of cell, as in "x" from x = 12
       tex: {default: ""}, //              The string I pass to Temml for final rendering.
       alt: {default: ""}, //              The string I render when in draft mode.
+      md:  {default: null}, //            The Markdown string in the saved document
+      displaySelector: {default: ""}, //  Display selector: (??|?|%%|%|@@|@|!!|!)
       rpn: {default: null}, //            RPN from parser.js, for calculation.
       dependencies: {default: []}, //     For use in avoiding unnecesary calculations
       inDraftMode: {default: false},

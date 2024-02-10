@@ -493,6 +493,10 @@ const linkIndex = marks => {
   }
 }
 
+// Pattern to find Hurmet calculation results.
+// This will be replaced in the entry with the display selector.
+const resultRegEx = /〔[^〕]*〕/
+
 const parseRef = function(capture, state, refNode) {
   // Handle implicit refs: [title][<ref>], ![alt or caption][<ref>]
   let ref = capture[2] ? capture[2] : capture[1];
@@ -835,16 +839,22 @@ rules.set("tex", {
 });
 rules.set("calculation", {
   isLeaf: true,
-  match: anyScopeRegex(/^(?:¢(`+)([\s\S]*?[^`])\1(?!`)|¢¢\n?((?:\\[\s\S]|[^\\])+?)\n?¢¢)/),
+  match: anyScopeRegex(/^(?:¢(\?\?|\?|%%|%|@@|@)?(`+)([\s\S]*?[^`])\2(?!`)|¢¢(\?\?|\?|%%|%|@@|@)?\n?((?:\\[\s\S]|[^\\])+?)\n?¢¢)/),
   parse: function(capture, state) {
-    if (capture[2]) {
-      let entry = capture[2].trim()
+    if (capture[3]) {
+      let entry = capture[3].trim()
+      if (capture[1]) {
+        entry = entry.replace(resultRegEx, capture[1])
+      }
       if (!/^(?:function|draw\()/.test(entry) && entry.indexOf("``") === -1) {
         entry = entry.replace(/\n/g, " ")
       }
       return { attrs: { entry } }
     } else {
-      const entry = capture[3].trim()
+      let entry = capture[5].trim()
+      if (capture[4]) {
+        entry = entry.replace(resultRegEx, capture[4])
+      }
       return { attrs: { entry, displayMode: true } }
     }
   }
