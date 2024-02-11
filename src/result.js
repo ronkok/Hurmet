@@ -211,7 +211,7 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, assert, is
       let pos = stmt.tex.lastIndexOf("%")
       stmt.tex = stmt.tex.slice(0, pos).replace(/% *$/, "") + resultDisplay + stmt.tex.slice(pos + 1)
       stmt.displaySelector = stmt.altresulttemplate.indexOf("%%") > -1 ? "%%" : "%"
-      pos = stmt.alt.lastIndexOf("stmt.displaySelector")
+      pos = stmt.alt.lastIndexOf(stmt.displaySelector)
       stmt.md = stmt.alt.slice(0, pos) + `〔${altResultDisplay}〕`
           + stmt.alt.slice(pos + stmt.displaySelector.length)
       stmt.alt = stmt.alt.slice(0, pos) + altResultDisplay
