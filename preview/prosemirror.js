@@ -23776,7 +23776,7 @@ const formatResult = (stmt, result, formatSpec, decimalFormat, assert, isUnitAwa
       let pos = stmt.tex.lastIndexOf("%");
       stmt.tex = stmt.tex.slice(0, pos).replace(/% *$/, "") + resultDisplay + stmt.tex.slice(pos + 1);
       stmt.displaySelector = stmt.altresulttemplate.indexOf("%%") > -1 ? "%%" : "%";
-      pos = stmt.alt.lastIndexOf("stmt.displaySelector");
+      pos = stmt.alt.lastIndexOf(stmt.displaySelector);
       stmt.md = stmt.alt.slice(0, pos) + `〔${altResultDisplay}〕`
           + stmt.alt.slice(pos + stmt.displaySelector.length);
       stmt.alt = stmt.alt.slice(0, pos) + altResultDisplay
@@ -54157,10 +54157,58 @@ if (["BD", "IN", "LK", "MV", "MP", "PK"].includes(userRegion)) {
 }
 // default is 1.000.000,
 
-const fix = fixTables(window.view.state);
-if (fix) { window.view.state = window.view.state.apply(fix.setMeta("addToHistory", false)); }
+const tidyUp = _ => {
+  const fix = fixTables(window.view.state);
+  if (fix) { window.view.state = window.view.state.apply(fix.setMeta("addToHistory", false)); }
 
-hurmet.updateCalculations(window.view, schema.nodes.calculation, true);
+  hurmet.updateCalculations(window.view, schema.nodes.calculation, true);
 
-document.execCommand("enableObjectResizing", false, false);
-document.execCommand("enableInlineTableEditing", false, false);
+  document.execCommand("enableObjectResizing", false, false);
+  document.execCommand("enableInlineTableEditing", false, false);
+};
+
+const loadRemoteFile = md => {
+  // eslint-disable-next-line no-undef
+  const ast = hurmet.md2ast(md);
+  let doc = {
+    type: "doc",
+    "attrs": {
+      "decimalFormat": "1,000,000.",
+      "inDraftMode": false,
+      "fontSize": 12,
+      "fileHandle": null,
+      "pageSize": "letter"
+    },
+    "content": ast
+  };
+  doc = JSON.parse(JSON.stringify(doc));
+  window.view.dispatch(
+    window.view.state.tr.replaceWith(
+      0,
+      window.view.state.doc.content.size,
+      schema.nodeFromJSON(doc))
+  );
+  tidyUp();
+};
+
+const gistRegEx = /^https:\/\/gist\.githubusercontent\.com\/.+\.md$/;
+async function loadURL(hash) {
+  const url = decodeURIComponent(hash.slice(1));
+  if (gistRegEx.test(url)) {
+    const response = await fetch(url);
+    if (response.ok) { // if HTTP-status is 200-299
+      // get the response body (the method explained below)
+      const str = await response.text();
+      loadRemoteFile(str);
+    }
+  } else {
+    tidyUp();
+  }
+}
+
+const hash = location.hash;
+if (hash && hash.length > 1) {
+  loadURL(hash);
+} else {
+  tidyUp();
+}
