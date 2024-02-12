@@ -135,6 +135,9 @@ export function insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat
       }
       if ((dtype & dt.RATIONAL) && isSingleRow) {
         result.resultdisplay = parse(format(value))
+        if (result.unit && result.unit.name) {
+          result.resultdisplay += " " + parse(`'${result.unit.name}'`)
+        }
       } else if (dtype & dt.RATIONAL) {
         result.resultdisplay = Matrix.display({ value, dtype }, formatSpec, decimalFormat)
             + parse(`'${attrs.value.units[i]}'`)

@@ -26290,6 +26290,9 @@ function insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat) {
       };
       if ((dtype & dt.RATIONAL) && isSingleRow) {
         result.resultdisplay = parse$1(format(value));
+        if (result.unit && result.unit.name) {
+          result.resultdisplay += " " + parse$1(`'${result.unit.name}'`);
+        }
       } else if (dtype & dt.RATIONAL) {
         result.resultdisplay = Matrix.display({ value, dtype }, formatSpec, decimalFormat)
             + parse$1(`'${attrs.value.units[i]}'`);

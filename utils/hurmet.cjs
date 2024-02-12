@@ -6119,6 +6119,9 @@ function insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat) {
       };
       if ((dtype & dt.RATIONAL) && isSingleRow) {
         result.resultdisplay = parse$1(format(value));
+        if (result.unit && result.unit.name) {
+          result.resultdisplay += " " + parse$1(`'${result.unit.name}'`);
+        }
       } else if (dtype & dt.RATIONAL) {
         result.resultdisplay = Matrix.display({ value, dtype }, formatSpec, decimalFormat)
             + parse$1(`'${attrs.value.units[i]}'`);
@@ -6698,7 +6701,7 @@ const formatResult = (stmt, result, formatSpec, decimalFormat, assert, isUnitAwa
       let pos = stmt.tex.lastIndexOf("%");
       stmt.tex = stmt.tex.slice(0, pos).replace(/% *$/, "") + resultDisplay + stmt.tex.slice(pos + 1);
       stmt.displaySelector = stmt.altresulttemplate.indexOf("%%") > -1 ? "%%" : "%";
-      pos = stmt.alt.lastIndexOf("stmt.displaySelector");
+      pos = stmt.alt.lastIndexOf(stmt.displaySelector);
       stmt.md = stmt.alt.slice(0, pos) + `〔${altResultDisplay}〕`
           + stmt.alt.slice(pos + stmt.displaySelector.length);
       stmt.alt = stmt.alt.slice(0, pos) + altResultDisplay
