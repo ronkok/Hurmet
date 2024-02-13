@@ -27,7 +27,9 @@ nav {
   margin: 0 auto;
   background: #fff;
   font-size: 14px;
-  height: 66px
+  min-height: 66px;
+  display: flex;
+  justify-content: space-around;
 }
 
 nav * {
