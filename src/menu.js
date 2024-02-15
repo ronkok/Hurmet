@@ -988,7 +988,14 @@ function setFontSize(size) {
     label: String(size) + " pt",
     run(state, _, view) {
       state.doc.attrs.fontSize = size
-      document.getElementById("editor").className = size === 12 ? "pica" : "long-primer"
+      const ed = document.getElementById("editor-content")
+      if (ed.classList.contains("pica")) {
+        ed.classList.add("long-primer")
+        ed.classList.remove("pica")
+      } else {
+        ed.classList.add("pica")
+        ed.classList.remove("long-primer")
+      }
       document.getElementById("print-div").className = size === 12 ? "ProseMirror pica" : "ProseMirror long-primer"
     }
   })

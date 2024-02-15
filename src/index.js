@@ -33,7 +33,9 @@ function pmSetup(options) {
     history(),
     columnResizing(),
     tableEditing(),
-    new state.Plugin({  props: { attributes: { class: "ProseMirror-setup" } } })
+    new state.Plugin({  props: {
+      attributes: { class: "ProseMirror-setup pica", id: "editor-content" }
+    } })
   ]
 }
 

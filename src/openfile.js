@@ -28,7 +28,14 @@ const handleContents = (view, schema, str, format) => {
     doc = JSON.parse(JSON.stringify(doc))
   }
   const fontSize = (doc.attrs.fontSize) ? Number(doc.attrs.fontSize) : 12
-  document.getElementById("editor").className = fontSize === 12 ? "pica" : "long-primer"
+  const ed = document.getElementById("editor-content")
+  if (ed.classList.contains("pica")) {
+    ed.classList.add("long-primer")
+    ed.classList.remove("pica")
+  } else {
+    ed.classList.add("pica")
+    ed.classList.remove("long-primer")
+  }
   document.getElementById("print-div").className = fontSize === 12
     ? "ProseMirror pica"
     : "ProseMirror long-primer"

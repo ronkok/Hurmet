@@ -49390,7 +49390,14 @@ const handleContents = (view, schema, str, format) => {
     doc = JSON.parse(JSON.stringify(doc));
   }
   const fontSize = (doc.attrs.fontSize) ? Number(doc.attrs.fontSize) : 12;
-  document.getElementById("editor").className = fontSize === 12 ? "pica" : "long-primer";
+  const ed = document.getElementById("editor-content");
+  if (ed.classList.contains("pica")) {
+    ed.classList.add("long-primer");
+    ed.classList.remove("pica");
+  } else {
+    ed.classList.add("pica");
+    ed.classList.remove("long-primer");
+  }
   document.getElementById("print-div").className = fontSize === 12
     ? "ProseMirror pica"
     : "ProseMirror long-primer";
@@ -52139,7 +52146,14 @@ function setFontSize(size) {
     label: String(size) + " pt",
     run(state, _, view) {
       state.doc.attrs.fontSize = size;
-      document.getElementById("editor").className = size === 12 ? "pica" : "long-primer";
+      const ed = document.getElementById("editor-content");
+      if (ed.classList.contains("pica")) {
+        ed.classList.add("long-primer");
+        ed.classList.remove("pica");
+      } else {
+        ed.classList.add("pica");
+        ed.classList.remove("long-primer");
+      }
       document.getElementById("print-div").className = size === 12 ? "ProseMirror pica" : "ProseMirror long-primer";
     }
   })
@@ -54132,7 +54146,9 @@ function pmSetup(options) {
     history(),
     columnResizing(),
     tableEditing(),
-    new Plugin({  props: { attributes: { class: "ProseMirror-setup" } } })
+    new Plugin({  props: {
+      attributes: { class: "ProseMirror-setup pica", id: "editor-content" }
+    } })
   ]
 }
 
