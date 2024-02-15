@@ -10,6 +10,10 @@
 
 // utils.js
 
+const isValidIdentifier$1 = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/;
+// Detect string interpolation ${varName}
+const interpolateRegEx = /\$\{[^}\s]+\}/g;
+
 const clone = obj => {
   // Clone a JavaScript object.
   // That is, make a deep copy that does not contain any reference to the original object.
@@ -1062,6 +1066,106 @@ const format = (num, specStr = "h3", decimalFormat = "1,000,000.") => {
       }
     }
   }
+};
+
+/*
+ * Hurmet operands often have numeric values. Sometimes they are the numbers originally
+ * input by the writer, henceforward known as "plain". Sometimes we work instead with
+ * values that have been converted to SI base units. It turns out that operands inside
+ * evalRpn() can often get by with less information than in the original cell assignment attrs.
+ * Some details for various data types:
+ *
+ * RATIONAL operand: { value: plain, unit: allZeros, dtype: RATIONAL }
+ * RATIONAL cell attrs: ditto.
+ * Note: "allZeros" is the array of unit-checking exponents for a number: [0,0,0,0,0,0,0,0,0]
+ *
+ * RATIONAL + QUANTITY unit-unaware operand: same as RATIONAL.
+ * RATIONAL + QUANTITY unit-AWARE oprnd: {
+ *   value: inBaseUnits, unit: expos, dtype: RATIONAL + QUANTITY
+ * }
+ * RATIONAL + QUANTITY cell attrs include both of the above and also a `resultdisplay` string.
+ *
+ * RATIONAL + ROWVECTOR is the same as RATIONAL except the value is an array of plains.
+ * RATIONAL + ROWVECTOR + QUANTITY is the same as RATIONAL + QUANTITY except values are arrays.
+ * COLUMNVECTOR is the same as ROWVECTOR exept that they are treated differently by operators.
+ * MATRIX indicates that values are each an array of row vectors.
+ * *
+ * A MAP's values are all the same data type and all have the same unit of measure.
+ * MAP oprnd: {name, value: see below, unit: {name, factor, gauge, expos}, dtype: dMAP + ...}
+ *    where: value is: {name1: value, name2: value} or
+ *    where value is: {plain: {name1: value, name2: value},
+ *                     inBaseUnits: {name1: value, name2: value},
+ *                     etc}
+ * A `resultdisplay` string is always in a MAP's cell attrs and sometimes in an operand.
+ *
+ * ERROR operand: { value: error message, unit: undefined, dtype: ERROR }
+ *
+ * When this module creates Hurmet operands, it does not make defensive copies of
+ * cell attributes. The deep data is referenced. So Hurmet evaluate.js must copy whenever
+ * operators or functions might change a cell attribute.
+ *
+ */
+
+const fromAssignment = (cellAttrs, unitAware) => {
+  // Get the value that was assigned to a variable. Load it into an operand.
+  if (cellAttrs.value === null) {
+    // Return an error message.
+    const insert = (cellAttrs.name) ? cellAttrs.name : "?";
+    return errorOprnd("NULL", insert)
+  }
+
+  const oprnd = Object.create(null);
+  oprnd.dtype = cellAttrs.dtype;
+  oprnd.name = cellAttrs.name;
+
+  // Get the unit data.
+  const dtype = cellAttrs.dtype;
+  if (dtype === dt.STRING || dtype === dt.BOOLEAN || dtype === dt.DRAWING ||
+      dtype === dt.MODULE || dtype === dt.NULL) {
+    oprnd.unit = null;
+  } else if (cellAttrs.unit) {
+    oprnd.unit = clone(cellAttrs.unit);
+  } else {
+    oprnd.unit = null;
+  }
+
+  // Get the value.
+  if (cellAttrs.dtype & dt.QUANTITY) {
+    // Here we discard some of the cellAttrs information. In a unit-aware calculation,
+    // number, matrix, and map operands contain only the value.inBaseUnits.
+    if (cellAttrs.dtype & dt.MAP) {
+      oprnd.value = clone(cellAttrs.value);
+      oprnd.value.data = unitAware
+        ? oprnd.value.data.inBaseUnits
+        : oprnd.value.data.plain;
+    } else {
+      oprnd.value = Object.freeze(unitAware
+        ? clone(cellAttrs.value.inBaseUnits)
+        : clone(cellAttrs.value.plain)
+      );
+    }
+    oprnd.dtype = cellAttrs.dtype - dt.QUANTITY;
+
+  } else if (cellAttrs.dtype === dt.STRING) {
+    const str = cellAttrs.value;
+    const ch = str.charAt(0);
+    const chEnd = str.charAt(str.length - 1);
+    oprnd.value = ch === '"' && chEnd === '"' ? str.slice(1, -1).trim() : str.trim();
+
+  } else if (cellAttrs.dtype === dt.DATAFRAME) {
+    // For data frames, Hurmet employs copy-on-write tactics.
+    // So at this point, we can pass a reference to the value
+    oprnd.value = cellAttrs.value;
+
+    // Note the only operations on data frames are: (1) access, and (2) concatenate.
+    // That's where the copy-on-write takes place.
+
+  } else {
+    // For all other data types, we employ copy-on-read. So we return a deep copy from here.
+    oprnd.value = clone(cellAttrs.value);
+  }
+
+  return Object.freeze(oprnd)
 };
 
 // units.js
@@ -3052,7 +3156,7 @@ const hasUnitRow = lines => {
   return false
 };
 
-const dataFrameFromTSV = str => {
+const dataFrameFromTSV = (str, vars) => {
   // Load a TSV string into a data frame.
   // Data frames are loaded column-wise. The subordinate data structures are:
   let data = [];   // where the main data lives, not including column names or units.
@@ -3065,6 +3169,28 @@ const dataFrameFromTSV = str => {
   const usedRows = new Set();
 
   if (str.charAt(0) === "`") { str = str.slice(1); }
+
+  if (vars) {
+    // Substitute values in for string interpolation, ${…}
+    const matches = arrayOfRegExMatches(interpolateRegEx, str);
+    for (let i = matches.length - 1; i >= 0; i--) {
+      const mch = matches[i];
+      const varName = mch.value.slice(2, -1);
+      let value = "";
+      if (varName === "undefined") {
+        value = "";
+      } else if (varName === "j" && !vars.j) {
+        value = "j";
+      } else {
+        const cellAttrs = vars[varName];
+        if (!cellAttrs) { return errorOprnd("V_NAME", varName) }
+        const oprnd = fromAssignment(cellAttrs, false);
+        if (oprnd.dtype === dt.ERROR) { return oprnd }
+        value = Rnl.isRational(oprnd.value) ? String(Rnl.toNumber(oprnd.value)) : oprnd.value;
+      }
+      str = str.slice(0, mch.index) + value + str.slice(mch.index + mch.length);
+    }
+  }
 
   // It's tab-separated values, so we can use splits to load in the data.
   const lines = str.split(/\r?\n/g);
@@ -3387,7 +3513,6 @@ const quickDisplay = str => {
 };
 
 // The next 40 lines contain helper functions for display().
-const isValidIdentifier$2 = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/;
 const accentRegEx$1 = /^([^\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]+)([\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1])(.+)?/;
 const subscriptRegEx = /([^_]+)(_[^']+)?(.*)?/;
 const accentFromChar$1 = Object.freeze({
@@ -3411,7 +3536,7 @@ const accentFromChar$1 = Object.freeze({
 const formatColumnName = str => {
   // We can't call parse(str) because that would be a circular dependency.
   // So this module needs its own function to format dataframe column names.
-  if (!isValidIdentifier$2.test(str)) {
+  if (!isValidIdentifier$1.test(str)) {
     return "\\text{" + addTextEscapes(str) + "}"
   } else {
     // Format it like a Hurmet identifier.
@@ -3549,7 +3674,7 @@ const display$1 = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHead
         ? format(datum, formatSpec, decimalFormat) + "&"
         : Cpx.isComplex(datum)
         ? Cpx.display(datum, formatSpec, decimalFormat)[0] + "&"
-        : "\\text{" + datum + "} &";
+        : "\\text{" + addTextEscapes(datum) + "} &";
       } else {
         str += mixedFractionRegEx.test(datum)
           ? format(Rnl.fromString(datum), formatSpec, decimalFormat) + "&"
@@ -5174,6 +5299,11 @@ const parse$1 = (
         tex += token.output;
         if (isCalc) {
           rpn += token.input;
+          // Identify string interpolation
+          const matches = arrayOfRegExMatches(interpolateRegEx, token.input);
+          for (const match of matches) {
+            dependencies.push(match.value.slice(2, -1));
+          }
         }
         okToAppend = true;
         break
@@ -6288,106 +6418,6 @@ const map = Object.freeze({
   convertToBaseUnits,
   range
 });
-
-/*
- * Hurmet operands often have numeric values. Sometimes they are the numbers originally
- * input by the writer, henceforward known as "plain". Sometimes we work instead with
- * values that have been converted to SI base units. It turns out that operands inside
- * evalRpn() can often get by with less information than in the original cell assignment attrs.
- * Some details for various data types:
- *
- * RATIONAL operand: { value: plain, unit: allZeros, dtype: RATIONAL }
- * RATIONAL cell attrs: ditto.
- * Note: "allZeros" is the array of unit-checking exponents for a number: [0,0,0,0,0,0,0,0,0]
- *
- * RATIONAL + QUANTITY unit-unaware operand: same as RATIONAL.
- * RATIONAL + QUANTITY unit-AWARE oprnd: {
- *   value: inBaseUnits, unit: expos, dtype: RATIONAL + QUANTITY
- * }
- * RATIONAL + QUANTITY cell attrs include both of the above and also a `resultdisplay` string.
- *
- * RATIONAL + ROWVECTOR is the same as RATIONAL except the value is an array of plains.
- * RATIONAL + ROWVECTOR + QUANTITY is the same as RATIONAL + QUANTITY except values are arrays.
- * COLUMNVECTOR is the same as ROWVECTOR exept that they are treated differently by operators.
- * MATRIX indicates that values are each an array of row vectors.
- * *
- * A MAP's values are all the same data type and all have the same unit of measure.
- * MAP oprnd: {name, value: see below, unit: {name, factor, gauge, expos}, dtype: dMAP + ...}
- *    where: value is: {name1: value, name2: value} or
- *    where value is: {plain: {name1: value, name2: value},
- *                     inBaseUnits: {name1: value, name2: value},
- *                     etc}
- * A `resultdisplay` string is always in a MAP's cell attrs and sometimes in an operand.
- *
- * ERROR operand: { value: error message, unit: undefined, dtype: ERROR }
- *
- * When this module creates Hurmet operands, it does not make defensive copies of
- * cell attributes. The deep data is referenced. So Hurmet evaluate.js must copy whenever
- * operators or functions might change a cell attribute.
- *
- */
-
-const fromAssignment = (cellAttrs, unitAware) => {
-  // Get the value that was assigned to a variable. Load it into an operand.
-  if (cellAttrs.value === null) {
-    // Return an error message.
-    const insert = (cellAttrs.name) ? cellAttrs.name : "?";
-    return errorOprnd("NULL", insert)
-  }
-
-  const oprnd = Object.create(null);
-  oprnd.dtype = cellAttrs.dtype;
-  oprnd.name = cellAttrs.name;
-
-  // Get the unit data.
-  const dtype = cellAttrs.dtype;
-  if (dtype === dt.STRING || dtype === dt.BOOLEAN || dtype === dt.DRAWING ||
-      dtype === dt.MODULE || dtype === dt.NULL) {
-    oprnd.unit = null;
-  } else if (cellAttrs.unit) {
-    oprnd.unit = clone(cellAttrs.unit);
-  } else {
-    oprnd.unit = null;
-  }
-
-  // Get the value.
-  if (cellAttrs.dtype & dt.QUANTITY) {
-    // Here we discard some of the cellAttrs information. In a unit-aware calculation,
-    // number, matrix, and map operands contain only the value.inBaseUnits.
-    if (cellAttrs.dtype & dt.MAP) {
-      oprnd.value = clone(cellAttrs.value);
-      oprnd.value.data = unitAware
-        ? oprnd.value.data.inBaseUnits
-        : oprnd.value.data.plain;
-    } else {
-      oprnd.value = Object.freeze(unitAware
-        ? clone(cellAttrs.value.inBaseUnits)
-        : clone(cellAttrs.value.plain)
-      );
-    }
-    oprnd.dtype = cellAttrs.dtype - dt.QUANTITY;
-
-  } else if (cellAttrs.dtype === dt.STRING) {
-    const str = cellAttrs.value;
-    const ch = str.charAt(0);
-    const chEnd = str.charAt(str.length - 1);
-    oprnd.value = ch === '"' && chEnd === '"' ? str.slice(1, -1).trim() : str.trim();
-
-  } else if (cellAttrs.dtype === dt.DATAFRAME) {
-    // For data frames, Hurmet employs copy-on-write tactics.
-    // So at this point, we can pass a reference to the value
-    oprnd.value = cellAttrs.value;
-
-    // Note the only operations on data frames are: (1) access, and (2) concatenate.
-    // That's where the copy-on-write takes place.
-
-  } else {
-    // For all other data types, we employ copy-on-read. So we return a deep copy from here.
-    oprnd.value = clone(cellAttrs.value);
-  }
-
-  return Object.freeze(oprnd)
-};
 
 function propertyFromDotAccessor(parent, index, unitAware) {
   const property = Object.create(null);
@@ -13997,7 +14027,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
       stack.push(Object.freeze({ value: str, unit: null, dtype: dt.STRING }));
 
     } else if (/^``/.test(tkn)) {
-      stack.push(DataFrame.dataFrameFromTSV(tablessTrim(tkn.slice(2, -2))));
+      stack.push(DataFrame.dataFrameFromTSV(tablessTrim(tkn.slice(2, -2)), vars));
 
     } else if (ch === '`') {
       // A rich text literal
@@ -15871,7 +15901,7 @@ const valueFromLiteral = (str, name, decimalFormat) => {
   }
 };
 
-const isValidIdentifier$1 = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/;
+const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/;
 const keywordRegEx = /^(if|elseif|else|return|throw|while|for|break|print|end)(\u2002|\b)/;
 const drawCommandRegEx = /^(title|frame|view|axes|grid|stroke|strokewidth|strokedasharray|fill|fontsize|fontweight|fontstyle|fontfamily|marker|line|path|plot|curve|rect|circle|ellipse|arc|text|dot|leader|dimension)\b/;
 const leadingSpaceRegEx = /^[\t ]+/;
@@ -15889,12 +15919,12 @@ const testForStatement = str => {
   const pos = str.indexOf("=");
   if (pos === -1) { return false }
   const leadStr = str.slice(0, pos).replace(leadingSpaceRegEx, "").trim();
-  if (isValidIdentifier$1.test(leadStr)) { return true }
+  if (isValidIdentifier.test(leadStr)) { return true }
   if (leadStr.indexOf(",") === -1) { return false }
   let result = true;
   const arry = leadStr.split(",");
   arry.forEach(e => {
-    if (!isValidIdentifier$1.test(e.trim())) { result = false; }
+    if (!isValidIdentifier.test(e.trim())) { result = false; }
   });
   return result
 };
@@ -16168,7 +16198,6 @@ const containsOperator = /[+\-×·*∘⌧/^%‰&√!¡|‖&=<>≟≠≤≥∈∉
 const mustDoCalculation = /^(``.+``|[$$£¥\u20A0-\u20CF]?(\?{1,2}|@{1,2}|%{1,2}|!{1,2})[^=!(?@%!{})]*)$/;
 const assignDataFrameRegEx = /^[^=]+=\s*``[\s\S]+`` *\n/;
 const currencyRegEx = /^[$£¥\u20A0-\u20CF]/;
-const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/;
 const matrixOfNames = /^[([](?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*[,;].+[)\]]$/;
 const isKeyWord = /^(π|true|false|root|if|else|elseif|and|or|otherwise|mod|for|while|break|return|throw)$/;
 const testRegEx = /^(@{1,2})test /;
@@ -16285,7 +16314,7 @@ const compile = (inputStr, decimalFormat = "1,000,000.") => {
           const potentialIdentifiers = leadStr.split(/[,;]/);
           for (let i = 0; i < potentialIdentifiers.length; i++) {
             const candidate = potentialIdentifiers[i].trim();
-            if (isKeyWord.test(candidate) || !isValidIdentifier.test(candidate)) {
+            if (isKeyWord.test(candidate) || !isValidIdentifier$1.test(candidate)) {
               // leadStr is not a list of valid identifiers.
               // So this isn't a valid calculation statement. Let's finish early.
               return shortcut(str, decimalFormat)
@@ -16295,7 +16324,7 @@ const compile = (inputStr, decimalFormat = "1,000,000.") => {
           name = potentialIdentifiers.map(e => e.trim());
 
         } else {
-          if (isValidIdentifier.test(leadStr) && !isKeyWord.test(leadStr)) {
+          if (isValidIdentifier$1.test(leadStr) && !isKeyWord.test(leadStr)) {
             name = leadStr;
           } else {
             // The "=" sign is inside an expression. There is no lead identifier.
@@ -16312,7 +16341,7 @@ const compile = (inputStr, decimalFormat = "1,000,000.") => {
     } else if (isDataFrameAssigment) {
       name = mainStr;
       expression = trailStr;
-    } else  if (isValidIdentifier.test(mainStr) && !isKeyWord.test(mainStr)) {
+    } else  if (isValidIdentifier$1.test(mainStr) && !isKeyWord.test(mainStr)) {
       // No calculation display selector is present,
       // but there is one "=" and a valid idendtifier.
       // It may be an assignment statement.

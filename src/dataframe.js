@@ -1,6 +1,8 @@
 import { dt, allZeros } from "./constants" // operand type enumeration
 import { Rnl } from "./rational"
-import { clone, addTextEscapes, unitTeXFromString, tablessTrim } from "./utils"
+import { clone, addTextEscapes, unitTeXFromString, tablessTrim,
+         isValidIdentifier, interpolateRegEx, arrayOfRegExMatches } from "./utils"
+import { fromAssignment } from "./operand.js"
 import { unitFromUnitName } from "./units"
 import { errorOprnd } from "./error"
 import { Matrix, isMatrix } from "./matrix"
@@ -234,7 +236,7 @@ const hasUnitRow = lines => {
   return false
 }
 
-const dataFrameFromTSV = str => {
+const dataFrameFromTSV = (str, vars) => {
   // Load a TSV string into a data frame.
   // Data frames are loaded column-wise. The subordinate data structures are:
   let data = [];   // where the main data lives, not including column names or units.
@@ -247,6 +249,28 @@ const dataFrameFromTSV = str => {
   const usedRows = new Set()
 
   if (str.charAt(0) === "`") { str = str.slice(1) }
+
+  if (vars) {
+    // Substitute values in for string interpolation, ${…}
+    const matches = arrayOfRegExMatches(interpolateRegEx, str)
+    for (let i = matches.length - 1; i >= 0; i--) {
+      const mch = matches[i];
+      const varName = mch.value.slice(2, -1)
+      let value = ""
+      if (varName === "undefined") {
+        value = ""
+      } else if (varName === "j" && !vars.j) {
+        value = "j"
+      } else {
+        const cellAttrs = vars[varName];
+        if (!cellAttrs) { return errorOprnd("V_NAME", varName) }
+        const oprnd = fromAssignment(cellAttrs, false)
+        if (oprnd.dtype === dt.ERROR) { return oprnd }
+        value = Rnl.isRational(oprnd.value) ? String(Rnl.toNumber(oprnd.value)) : oprnd.value
+      }
+      str = str.slice(0, mch.index) + value + str.slice(mch.index + mch.length)
+    }
+  }
 
   // It's tab-separated values, so we can use splits to load in the data.
   const lines = str.split(/\r?\n/g)
@@ -569,7 +593,6 @@ const quickDisplay = str => {
 }
 
 // The next 40 lines contain helper functions for display().
-const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/
 const accentRegEx = /^([^\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]+)([\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1])(.+)?/
 const subscriptRegEx = /([^_]+)(_[^']+)?(.*)?/
 const accentFromChar = Object.freeze({
@@ -731,7 +754,7 @@ const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHeadin
         ? format(datum, formatSpec, decimalFormat) + "&"
         : Cpx.isComplex(datum)
         ? Cpx.display(datum, formatSpec, decimalFormat)[0] + "&"
-        : "\\text{" + datum + "} &"
+        : "\\text{" + addTextEscapes(datum) + "} &"
       } else {
         str += mixedFractionRegEx.test(datum)
           ? format(Rnl.fromString(datum), formatSpec, decimalFormat) + "&"

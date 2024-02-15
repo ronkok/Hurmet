@@ -231,3 +231,40 @@ You can also get patterned live loads by marking a load type with an asterisk:
 1.2	1.6`` ```¢` beamDiagram(beam, loadFactors) = @ `
 
 ¶
+
+¶
+
+¶
+
+¶
+
+¶
+
+¶
+
+¶
+
+¶
+
+¶
+
+¶
+
+¶
+
+¶
+
+To get diagrams that automatically update with new data, use string interpolation
+to define values. For instance, you can write `${L_1}` to get the value of ¢` L_1 `.
+
+¢` L_1 = 10 ft`,    ¢`L_2 = 14 ft`
+
+¢```
+beam = ``#item	value
+plan	△ ${L_1}′ △ ${L_2}′ △
+E	29000 ksi
+I	131 in⁴
+dead	-0.031 kips/ft
+live	-0.4 kips/ft
+live	-2 kips, 4′`` = %
+```

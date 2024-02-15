@@ -1,4 +1,5 @@
-﻿import { addTextEscapes, numeralFromSuperScript } from "./utils"
+﻿import { addTextEscapes, numeralFromSuperScript,
+         interpolateRegEx, arrayOfRegExMatches } from "./utils"
 import { tt, lex } from "./lexer"
 import { Rnl } from "./rational"
 
@@ -673,6 +674,11 @@ export const parse = (
         tex += token.output
         if (isCalc) {
           rpn += token.input
+          // Identify string interpolation
+          const matches = arrayOfRegExMatches(interpolateRegEx, token.input)
+          for (const match of matches) {
+            dependencies.push(match.value.slice(2, -1))
+          }
         }
         okToAppend = true
         break

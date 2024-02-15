@@ -8,6 +8,10 @@
 
 // utils.js
 
+export const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/
+// Detect string interpolation ${varName}
+export const interpolateRegEx = /\$\{[^}\s]+\}/g
+
 export const clone = obj => {
   // Clone a JavaScript object.
   // That is, make a deep copy that does not contain any reference to the original object.

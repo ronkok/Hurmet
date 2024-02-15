@@ -1,11 +1,14 @@
 // Read a Markdown file, run the calcs, and write an HTML file.
 const fs = require('fs')
 const hurmet = require('./hurmet.cjs')
+const temml = require('./temml.cjs');
+// eslint-disable-next-line no-undef
+globalThis.temml = temml;
 const titleRegEx = /([^.\\/]+)\.md$/;  // A helper.
 
 // The main function has to be async.
 (async function main() {
-  const inputPath = 'docs/Root-Finding.md'
+  const inputPath = 'docs/Beam-Diagrams.md'
   const title = titleRegEx.exec(inputPath)[1];
   const outputPath = `site/guides/${title}.html`
   // Read the file.

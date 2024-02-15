@@ -180,7 +180,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
       stack.push(Object.freeze({ value: str, unit: null, dtype: dt.STRING }))
 
     } else if (/^``/.test(tkn)) {
-      stack.push(DataFrame.dataFrameFromTSV(tablessTrim(tkn.slice(2, -2))))
+      stack.push(DataFrame.dataFrameFromTSV(tablessTrim(tkn.slice(2, -2)), vars))
 
     } else if (ch === '`') {
       // A rich text literal

@@ -363,7 +363,7 @@ a[5:end]  # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong><
 <p>Note that within the unit literal, it is not necessary to write <code>^</code> to indicate a numeric exponent. Also, a dot or a hyphen within a compound unit name will be rendered as a half-high dot.</p>
 <p>Only one division solidus, <strong>/</strong>, may be written into a compound unit.</p></dd>
 <dt id='matrix'>Matrix</dt>
-<dd><p>A Hurmet <em>matrix</em> is a one or two dimensional arrangement of matrix elements. A Hurmet matrix element can be a number, a string, <code>true</code>, <code>false</code>, or an exprression that resolves to one of those simple types.</p>
+<dd><p>A Hurmet <em>matrix</em> is a one or two dimensional arrangement of matrix elements. A Hurmet matrix element can be a number, a string, <code>true</code>, <code>false</code>, or an exprression that resolves to one of those simple types.s</p>
 <p>A matrix literal is written between delimiters, either <code>( )</code> or <code>[ ]</code> or <code>{: }</code>. Matrix elements are horizontally separated by tabs or commas. Matrix rows are separated by semi-colons. So this: <code>(1, 0; 0, 1)</code> renders as <span class='hurmet-calc' data-entry='(1, 0; 0, 1)'><math><mrow><mo fence="true" form="prefix">(</mo><mtable columnalign="center center"><mtr><mtd style="padding-left:0em;"><mn>1</mn></mtd><mtd style="padding-right:0em;"><mn>0</mn></mtd></mtr><mtr><mtd style="padding-left:0em;"><mn>0</mn></mtd><mtd style="padding-right:0em;"><mn>1</mn></mtd></mtr></mtable><mo fence="true" form="postfix">)</mo></mrow></math></span>.</p>
 <p>A Hurmet <em>vector</em> is a one dimensional array. Write a vector literal with values separated by commas or semi-colons, but not both.</p>
 <table><tr><th>Input</th>
@@ -477,6 +477,12 @@ W4X13	13	3.83	4.16	4.06	0.28	11.3	5.46``'><math><mtable columnalign="left left l
 <p><span class='hurmet-calc' data-entry="P_a = matrix2table(P, [&quot;D&quot;, &quot;L&quot;, &quot;S&quot;], [&quot;Col A&quot;, &quot;Col B&quot;]) = ``#	D	L	S
 Col A	10	21.1	15
 Col B	11	25	14`` 'kips'"><math><mrow><mi>P</mi><msub><mrow></mrow><mtext>a</mtext></msub><mo>=</mo><mi>matrix2table</mi><mo>⁡</mo><mrow><mo fence="true" form="prefix">(</mo><mi>P</mi><mo separator="true">,</mo><mspace width="0.2222em"></mspace><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center center center"><mtr><mtd style="padding-left:0em;"><mtext>D</mtext></mtd><mtd><mtext>L</mtext></mtd><mtd style="padding-right:0em;"><mtext>S</mtext></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow><mo separator="true">,</mo><mspace width="0.2222em"></mspace><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center center"><mtr><mtd style="padding-left:0em;"><mtext>Col A</mtext></mtd><mtd style="padding-right:0em;"><mtext>Col B</mtext></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow><mo fence="true" form="postfix">)</mo></mrow></mrow><mrow><mo>=</mo><mtable columnalign="left center center center"><mtr><mtd class="tml-left" style="border-bottom:0.06em solid;padding:0.5ex 0.4em 0.5ex 0em;border-right:0.06em solid;"><mrow></mrow></mtd><mtd style="border-bottom:0.06em solid;padding:0.5ex 0.4em 0.5ex 0.4em;"><mi>D</mi></mtd><mtd style="border-bottom:0.06em solid;padding:0.5ex 0.4em 0.5ex 0.4em;"><mi>L</mi></mtd><mtd style="border-bottom:0.06em solid;padding:0.5ex 0em 0.5ex 0.4em;"><mi>S</mi></mtd></mtr><mtr><mtd class="tml-left" style="padding:0.5ex 0.4em 0.5ex 0em;border-right:0.06em solid;"><mtext>Col A</mtext></mtd><mtd style="padding:0.5ex 0.4em 0.5ex 0.4em;"><mn>10</mn></mtd><mtd style="padding:0.5ex 0.4em 0.5ex 0.4em;"><mn>21.1</mn></mtd><mtd style="padding:0.5ex 0em 0.5ex 0.4em;"><mn>15</mn></mtd></mtr><mtr><mtd class="tml-left" style="padding:0.5ex 0.4em 0.5ex 0em;border-right:0.06em solid;"><mtext>Col B</mtext></mtd><mtd style="padding:0.5ex 0.4em 0.5ex 0.4em;"><mn>11</mn></mtd><mtd style="padding:0.5ex 0.4em 0.5ex 0.4em;"><mn>25</mn></mtd><mtd style="padding:0.5ex 0em 0.5ex 0.4em;"><mn>14</mn></mtd></mtr></mtable><mspace width="0.2778em"></mspace><mtext>kips</mtext></mrow></math></span></p></dd>
+<dt id='string-interpolation'>String Interpolation</dt>
+<dd><p>Hurmet can do string interpolation, but only inside a data frame or a map, not inside other strings. So data frames can update automatically with values from variables defined elsewhere.</p>
+<p>Use <code>${</code> before a variable name and <code>}</code> after. Hurmet will write the variable value into that spot in the data. The value will not be unit-aware. Here’s an example.</p>
+<pre><code>w_dead = 25 lbf/ft
+w = ``dead	live	snow
+${w_dead}	30	40`` &#x27;lbf/ft&#x27; = %</code></pre><p>Note that you must do a calculation. It’s not reading a literal value.</p></dd>
 </dl>
 <h2 id='expressions'>Expressions</h2>
 <p>Hurmet calculations are meant to be recognizeable to anyone familiar with standard math notation. That is a broad statement. Here are many nuances:</p>
@@ -1097,7 +1103,8 @@ const titleRegEx = /([^.\\/]+)\.md$/;  // A helper.
 <li class="tight"><p><a href='#unit'>Unit</a></p></li>
 <li class="tight"><p><a href='#matrix'>Matrix</a></p></li>
 <li class="tight"><p><a href='#data-frame'>Data Frame</a></p></li>
-<li class="tight"><p><a href='#map'>Map</a></p></li></ul>
+<li class="tight"><p><a href='#map'>Map</a></p></li>
+<li class="tight"><p><a href='#string-interpolation'>String Interpolation</a></p></li></ul>
 </details>
 </li>
 <li>

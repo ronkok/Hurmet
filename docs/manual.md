@@ -877,7 +877,7 @@ Matrix
 
 :   A Hurmet _matrix_ is a one or two dimensional arrangement of matrix elements.
     A Hurmet matrix element can be a number, a string, `true`, `false`, or an
-    exprression that resolves to one of those simple types.
+    exprression that resolves to one of those simple types.s
 
     A matrix literal is written between delimiters, either `( )` or `[ ]` or
     `{: }`. Matrix elements are horizontally separated by tabs or commas.
@@ -1126,6 +1126,23 @@ Map
     ¢``` P_a = matrix2table(P, ["D", "L", "S"], ["Col A", "Col B"]) = ``#	D	L	S
     Col A	10	21.1	15
     Col B	11	25	14`` 'kips' ```
+
+String Interpolation
+
+:   Hurmet can do string interpolation, but only inside a data frame or a map, not
+    inside other strings. So data frames can update automatically with values from
+    variables defined elsewhere.
+
+    Use `${` before a variable name and `}` after. Hurmet will write the variable
+    value into that spot in the data. The value will not be unit-aware. Here’s an example.
+
+    ```
+    w_dead = 25 lbf/ft
+    w = ``dead	live	snow
+    ${w_dead}	30	40`` 'lbf/ft' = %
+    ```
+
+    Note that you must do a calculation. It’s not reading a literal value.
 
 </dl>
 
@@ -2558,6 +2575,7 @@ Copyright © 2020-2024 Ron Kok. Released under the [MIT License][]
 * [Matrix](#matrix)
 * [Data Frame](#data-frame)
 * [Map](#map)
+* [String Interpolation](#string-interpolation)
 
 </details>
 </li>
