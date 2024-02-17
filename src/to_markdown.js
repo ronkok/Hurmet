@@ -296,7 +296,7 @@ const hurmetNodes =  {
       }
       if (node.attrs.entry.slice(0, 5) === "draw(") {
         const ref = getRef(node, state)
-        state.paths.set(ref, entry)
+        state.paths.set(ref, "¢` " + entry + " `")
         state.write(isNaN(ref) ? `![${ref}][]` : `![][${ref}]`)
       } else if (node.attrs.displayMode) {
         state.write("¢¢" + displaySelector + " " + md + " ¢¢")
