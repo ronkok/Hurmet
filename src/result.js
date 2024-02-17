@@ -195,7 +195,7 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, assert, is
       if (!testRegEx.test(stmt.entry)) {
         const pos = stmt.entry.lastIndexOf(stmt.displaySelector)
         stmt.md = stmt.entry.slice(0, pos) + `〔${altResultDisplay}〕`
-            + stmt.alt.slice(pos + stmt.displaySelector.length)
+            + stmt.entry.slice(pos + stmt.displaySelector.length)
       }
       stmt.alt = stmt.altresulttemplate.replace(/@@?/, altResultDisplay)
     } else if (stmt.resulttemplate.indexOf("?") > -1) {
