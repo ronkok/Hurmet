@@ -68,7 +68,7 @@ export function openMathPrompt(options) {
   const L = jar.toString().length
   jar.restore({ start: L, end: L, dir: undefined })
 
-  editor.addEventListener("blur", _ => { close() })
+  editor.addEventListener("blur", close )
 
   const mathDisplay = wrapper.appendChild(document.createElement("div"))
   mathDisplay.setAttribute("class", "math-display")
@@ -136,8 +136,10 @@ export function openMathPrompt(options) {
       wrapper.parentNode.firstChild.removeAttribute("style")
     }
     options.callback(params)
+    editor.removeEventListener('blur', close)
     if (wrapper.parentNode) {
-      wrapper.parentNode.removeChild(wrapper)
+      wrapper.remove()
+      //wrapper.parentNode.removeChild(wrapper)
     }
   }
 
