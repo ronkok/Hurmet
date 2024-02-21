@@ -1111,6 +1111,8 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             if (functionName === "plot") {
               args.splice(1, 0, decimalFormat)
               oprnd = plot(...args)
+            } else if (functionName === "path") {
+              oprnd = draw.functions[functionName](args[0], args.slice(1))
             } else {
               oprnd = draw.functions[functionName](...args)
             }
@@ -1446,8 +1448,9 @@ const plot = (svg, decimalFormat, fun, numPoints, xMin, xMax) => {
   } else {
     //TODO: error message.
   }
-  const pth = { value: pathValue, unit: null, dtype: dt.MATRIX + dt.RATIONAL }
-  return draw.functions.path(svg, pth, "L")
+  const point = { value: pathValue[0], unit: null, dtype: dt.ROWVECTOR + dt.RATIONAL }
+  const pth = { value: pathValue.slice(1), unit: null, dtype: dt.MATRIX + dt.RATIONAL }
+  return draw.functions.path(svg, [point, pth])
 }
 
 const elementFromIterable = (iterable, index, step) => {

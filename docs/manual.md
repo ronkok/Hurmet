@@ -2043,18 +2043,29 @@ line [_x_, _y_; _u_, _v_]
 
 : Draws a straight line from coordinate point _x_, _y_ to coordinate point _u_, _v_.
 
-path  [_x₁_, _y₁_; _x₂_, _y₂_; …; _xₙ_, _yₙ_]<span class="optional">, "L", or "T", or [r₁; r₂; …; rₙ]</span>
+path  [_x₁_, _y₁_], [_x₂_, _y₂_; …; _xₙ_, _yₙ_], etc
 
 : Draws a path connecting all the points in the matrix.
   
-  The second (optional) argument defines the type of line segments. "L" will
-  draw straight segments. "T" will fit a curve to the points. A vector of
-  numbers will define arc radii for each segment (**0** indicates a straight
-  line segment).
-
-curve  [_x₁_, _y₁_; _x₂_, _y₂_; …; _xₙ_, _yₙ_]
-
-: Fits a quadratic bezier curve to each point.
+  The first argument defines the point at the start of the path. Then each subsequent
+  argument defines another point or points.
+  
+  <details><summary>It can get more complicated…</summary>
+  
+  Path segments can have different shapes:
+  
+  1. A line segment, indicated by a vector with the segment's end point: [_x_~end~, _y_~end~]
+  
+  2. A move (invisible segment), indicated by a 3-element vector: [_x_~end~, _y_~end~, 0]
+  
+  3. A circular arc, indicated by a 5-element vector:\
+     [_x_~end~, _y_~end~, radius, sweepFlag, 0]\
+     (The sweep flag is 0 for an arc drawn counter-clockwise, 1 for clockwise.)
+  
+  If a path has contiguous segments of the same shape, you can write them all into a
+  single argument, with the segments separated by semi-colons. [_x₂_, _y₂_; …; _xₙ_, _yₙ_]
+  
+  </details>
 
 circle  [_x_, _y_], _r_
 

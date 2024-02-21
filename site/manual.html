@@ -859,11 +859,16 @@ end</code></pre><p>… which results in this plot …</p>
 <dd><p>Sets the default marker symbol that is drawn at the endpoints of lines and paths. Dots are also set along the intermediate points of paths and curves.</p></dd>
 <dt id='line-[<em>x</em>,-<em>y</em>;-<em>u</em>,-<em>v</em>]'>line [<em>x</em>, <em>y</em>; <em>u</em>, <em>v</em>]</dt>
 <dd><p>Draws a straight line from coordinate point <em>x</em>, <em>y</em> to coordinate point <em>u</em>, <em>v</em>.</p></dd>
-<dt id='path-[<em>x₁</em>,-<em>y₁</em>;-<em>x₂</em>,-<em>y₂</em>;-…;-<em>xₙ</em>,-<em>yₙ</em>]<span-class="optional">,-"l",-or-"t",-or-[r₁;-r₂;-…;-rₙ]</span>'>path  [<em>x₁</em>, <em>y₁</em>; <em>x₂</em>, <em>y₂</em>; …; <em>xₙ</em>, <em>yₙ</em>]<span class="optional">, "L", or "T", or [r₁; r₂; …; rₙ]</span></dt>
+<dt id='path-[<em>x₁</em>,-<em>y₁</em>],-[<em>x₂</em>,-<em>y₂</em>;-…;-<em>xₙ</em>,-<em>yₙ</em>],-etc'>path  [<em>x₁</em>, <em>y₁</em>], [<em>x₂</em>, <em>y₂</em>; …; <em>xₙ</em>, <em>yₙ</em>], etc</dt>
 <dd><p>Draws a path connecting all the points in the matrix.</p>
-<p>The second (optional) argument defines the type of line segments. &quot;L&quot; will draw straight segments. &quot;T&quot; will fit a curve to the points. A vector of numbers will define arc radii for each segment (<strong>0</strong> indicates a straight line segment).</p></dd>
-<dt id='curve-[<em>x₁</em>,-<em>y₁</em>;-<em>x₂</em>,-<em>y₂</em>;-…;-<em>xₙ</em>,-<em>yₙ</em>]'>curve  [<em>x₁</em>, <em>y₁</em>; <em>x₂</em>, <em>y₂</em>; …; <em>xₙ</em>, <em>yₙ</em>]</dt>
-<dd><p>Fits a quadratic bezier curve to each point.</p></dd>
+<p>The first argument defines the point at the start of the path. Then each subsequent argument defines another point or points.</p>
+<details><summary>It can get more complicated…</summary>
+<p>Path segments can have different shapes:</p>
+<ol><li><p>A line segment, indicated by a vector with the segment&#x27;s end point: [<em>x</em><sub>end</sub>, <em>y</em><sub>end</sub>]</p></li>
+<li><p>A move (invisible segment), indicated by a 3-element vector: [<em>x</em><sub>end</sub>, <em>y</em><sub>end</sub>, 0]</p></li>
+<li><p>A circular arc, indicated by a 5-element vector:<br>[<em>x</em><sub>end</sub>, <em>y</em><sub>end</sub>, radius, sweepFlag, 0]<br>(The sweep flag is 0 for an arc drawn counter-clockwise, 1 for clockwise.)</p></li></ol>
+<p>If a path has contiguous segments of the same shape, you can write them all into a single argument, with the segments separated by semi-colons. [<em>x₂</em>, <em>y₂</em>; …; <em>xₙ</em>, <em>yₙ</em>]</p>
+</details></dd>
 <dt id='circle-[<em>x</em>,-<em>y</em>],-<em>r</em>'>circle  [<em>x</em>, <em>y</em>], <em>r</em></dt>
 <dd><p>Draws a circle of radius <em>r</em>, centered at point <em>x</em>, <em>y</em>.</p></dd>
 <dt id='dot-[<em>x</em>,-<em>y</em>]<span-class="optional">,-"open"-|-"closed",-"label",-position</span>'>dot  [<em>x</em>, <em>y</em>]<span class="optional">, "open" | "closed", "label", position</span></dt>

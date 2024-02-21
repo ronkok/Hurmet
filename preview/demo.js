@@ -10766,6 +10766,21 @@ const markerDot = (center, attrs, s, f) => { // coordinates in units, radius in 
   return node
 };
 
+const rationals2numbers = array => {
+  const newArray = [];
+  for (let i = 0; i < array.length; i++) {
+    const element = array[i];
+    if (element.dtype) {
+      newArray[i] = rationals2numbers(element.value);
+    } else if (Rnl.isRational(element)) {
+      newArray[i] = Rnl.toNumber(element);
+    } else {
+      newArray[i] = rationals2numbers(element);
+    }
+  }
+  return newArray
+};
+
 const arrowhead = (svg, p, q) => { // draw arrowhead at q (in units)
   const attrs = svg.temp;
   const v = [p[0] * attrs.xunitlength + attrs.origin[0], attrs.height -
@@ -10778,10 +10793,12 @@ const arrowhead = (svg, p, q) => { // draw arrowhead at q (in units)
     u = [u[0] / d, u[1] / d];
     const z = attrs.marker === "markerdot" ? 3 : attrs.isDim ? 0 : 1;
     const up = [-u[1], u[0]];
+    const L = d > 12 ? 12.5 : 7.8125;
+    const S = d > 12 ? 3 : 1.875;
     const node = { tag: "path", attrs: {} };
-    node.attrs.d = "M " + (w[0] - 12.5 * u[0] - 3 * up[0]) + "," +
-      (w[1] - 12.5 * u[1] - 3 * up[1]) + " L " + (w[0] - z * u[0]) + "," + (w[1] - z * u[1]) +
-      " L " + (w[0] - 12.5 * u[0] + 3 * up[0]) + "," + (w[1] - 12.5 * u[1] + 3 * up[1]) + " z";
+    node.attrs.d = "M " + (w[0] - L * u[0] - S * up[0]) + "," +
+      (w[1] - L * u[1] - S * up[1]) + " L " + (w[0] - z * u[0]) + "," + (w[1] - z * u[1]) +
+      " L " + (w[0] - L * u[0] + S * up[0]) + "," + (w[1] - L * u[1] + S * up[1]) + " z";
     if (attrs.isDim) {
       node.attrs.stroke = "none";
     } else {
@@ -10853,6 +10870,11 @@ const textLocal = (svg, p, str, pos) => {
   }
   svg.children.push(textNode);
   return svg
+};
+
+const pointText = (point, attrs) => {
+  return (point[0] * attrs.xunitlength + attrs.origin[0]).toFixed(4) + ","
+    + (attrs.height - point[1] * attrs.yunitlength - attrs.origin[1]).toFixed(4)
 };
 
 const functions$1 = {
@@ -11053,40 +11075,43 @@ const functions$1 = {
     return { value: svg, unit: null, dtype: dt.DRAWING }
   },
 
-  path(svgOprnd, plistOprnd, c) {
+  path(svgOprnd, args) {
     const svg = svgOprnd.value;
     const attrs = svg.temp;
+    if (args[0].dtype !== dt.STRING) {
+      args = rationals2numbers(args);
+    }
     const node = { tag: "path", attrs: {} };
     // Get the "d" attribute of a path
     let str = "";
-    let plist;
-    if (typeof plistOprnd === "string") {
-      str = plistOprnd.value;
-    } else {
-      plist = plistOprnd.value.map(row => row.map(e => Rnl.toNumber(e)));
-      if (c == null) {
-        c = new Array(plist.length).fill("L");
-        c[0] = "M";
-      } else if (c.dtype === dt.STRING) {
-        c = new Array(plist.length).fill(c.value);
-        c[0] = "M";
-      } else if (typeof c === "string") {
-        c = new Array(plist.length).fill(c);
-        c[0] = "M";
-      } else if ((c.dtype & dt.ROWVECTOR) || (c.dtype & dt.COLUMNVECTOR)) {
-        c = c.value.map(e => {
-          if (Rnl.isZero(e)) { return "L" }
-          const radius = Rnl.toNumber(e) * attrs.xunitlength;
-          return `A${radius} ${radius} 0 0 0 `
-        });
-        c.unshift("M");
-      } else {
-        c = new Array(plist.length).fill("L");
-        c[0] = "M";
-      }
-      for (let i = 0; i < plist.length; i++) {
-        str += c[i] + (plist[i][0] * attrs.xunitlength + attrs.origin[0]) + ","
-            + (attrs.height - plist[i][1] * attrs.yunitlength - attrs.origin[1]) + " ";
+    for (let i = 0; i < args.length; i++) {
+      const el = args[i];
+      if (i === 0) {
+        if (el.dtype && el.dtype === dt.STRING) {
+          str = args[i].value;
+        } else {
+          str += "M" + pointText(el, attrs);
+        }
+      } else if (typeof el[0] === "number") {
+        if (el.length === 2) {
+          str += " L" + pointText(el, attrs);
+        } else if (el.length === 3) {
+          str += " M" + pointText(el, attrs);
+        } else if (el.length === 5) {
+          const r = String(el[2] * attrs.xunitlength);
+          const sweep = String(el[3]);
+          str += ` A${r},${r} 0 0 ${sweep} ${pointText(el, attrs)}`;
+        }
+      } else if (el[0].length === 2) {
+        for (let j = 0; j < el.length; j++) {
+          str +=  " L" + pointText(el[j], attrs);
+        }
+      } else if (el[0].length === 5) {
+        for (let j = 0; j < el.length; j++) {
+          const r = String(el[j][2] * attrs.xunitlength);
+          const sweep = String(el[j][3]);
+          str += ` A${r},${r} 0 0 ${sweep} ${pointText(el[j], attrs)}`;
+        }
       }
     }
     node.attrs.d = str;
@@ -11096,21 +11121,42 @@ const functions$1 = {
     }
     node.attrs.stroke = attrs.stroke;
     node.attrs.fill = attrs.fill;
-    if (attrs.marker === "dot" || attrs.marker === "arrowdot") {
-      for (let i = 0; i < plist.length; i++) {
-        if (c !== "C" && c !== "T" || i !== 1 && i !== 2) {
-          svg.children.push(markerDot(plist[i], attrs, attrs.markerstroke, attrs.markerfill));
+    if (attrs.marker === "dot") {
+      for (let i = 0; i < args.length; i++) {
+        const el = args[i];
+        if (typeof el[0] === "number") {
+          svg.children.push(markerDot(el, attrs, attrs.markerstroke, attrs.markerfill));
+        } else {
+          for (const row of el) {
+            svg.children.push(markerDot(row, attrs, attrs.markerstroke, attrs.markerfill));
+          }
         }
       }
-    } else if (attrs.marker === "arrow") {
-      arrowhead(svg, plist[plist.length - 2], plist[plist.length - 1]);
+    } else if (attrs.marker === "arrow" || attrs.marker === "arrowdot") {
+      const lastEl = args[args.length - 1];
+      if (typeof lastEl[0] !== "number") {
+        const end = lastEl[lastEl.length - 1];
+        arrowhead(svg, lastEl[lastEl.length - 2], end);
+        if (attrs.marker === "arrowdot") {
+          svg.children.push(markerDot(end, attrs, attrs.markerstroke, attrs.markerfill));
+        }
+      } else if (typeof lastEl[0] === "number") {
+        const prevEl = args[args.length - 2];
+        const end = lastEl;
+        let start;
+        if (typeof prevEl[0] === "number") {
+          start = prevEl;
+        } else {
+          start = prevEl[prevEl.length - 1];
+        }
+        arrowhead(svg, start, end);
+        if (attrs.marker === "arrowdot") {
+          svg.children.push(markerDot(end, attrs, attrs.markerstroke, attrs.markerfill));
+        }
+      }
     }
     svg.children.push(node);
     return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  curve(svgOprnd, plist) {
-    return functions$1.path(svgOprnd, plist, "T")
   },
 
   rect(svgOprnd, m, r) { // opposite corners in units, rounded by radius
@@ -11262,11 +11308,17 @@ const functions$1 = {
     const marker = svgOprnd.value.temp.marker;
     svgOprnd.value.temp.marker = "arrow";
     svgOprnd.value.temp.isDim = true;
-    const plistCopy = clone(plistOprnd);
+    const startPoint = {
+      value: clone(plistOprnd.value[plistOprnd.value.length - 1]),
+      unit: null,
+      dtype: dt.RATIONAL + dt.ROWVECTOR
+    };
+    const plistCopy = clone(plistOprnd); // Copy to an un-frozen object.
+    plistCopy.value.pop();
     plistCopy.value.reverse();
-    svgOprnd = this.path(svgOprnd, plistCopy, "L");
-    const p = plistCopy.value[0].map(e => Rnl.toNumber(e));
-    const q = plistCopy.value[1].map(e => Rnl.toNumber(e));
+    svgOprnd = this.path(svgOprnd, [startPoint, plistCopy]);
+    const p = rationals2numbers(startPoint.value);
+    const q = rationals2numbers(plistCopy.value[0]);
     let pos = "right";
     if (Math.abs(p[0] - q[0]) >= Math.abs(p[1] - q[1])) {
       pos = p[0] >= q[0] ? "right" : "left";
@@ -15308,6 +15360,8 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             if (functionName === "plot") {
               args.splice(1, 0, decimalFormat);
               oprnd = plot(...args);
+            } else if (functionName === "path") {
+              oprnd = draw.functions[functionName](args[0], args.slice(1));
             } else {
               oprnd = draw.functions[functionName](...args);
             }
@@ -15639,8 +15693,9 @@ const plot = (svg, decimalFormat, fun, numPoints, xMin, xMax) => {
       pathValue = arg.value.map((e, i) => [e, funResult.value[i]]);
     }
   } else ;
-  const pth = { value: pathValue, unit: null, dtype: dt.MATRIX + dt.RATIONAL };
-  return draw.functions.path(svg, pth, "L")
+  const point = { value: pathValue[0], unit: null, dtype: dt.ROWVECTOR + dt.RATIONAL };
+  const pth = { value: pathValue.slice(1), unit: null, dtype: dt.MATRIX + dt.RATIONAL };
+  return draw.functions.path(svg, [point, pth])
 };
 
 const elementFromIterable = (iterable, index, step) => {
