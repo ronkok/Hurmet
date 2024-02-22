@@ -52514,7 +52514,15 @@ function permalink() {
       const symbols = /[\r\n%#"()<>?[\\\]^`{|}]/g;
       const md = hurmetMarkdownSerializer.serialize(state.doc, new Map(), []);
       if (md && md.length > 0) {
-        location.hash = "#" + md.replace(symbols, encodeURIComponent);
+        const hash = "#" + md.replace(symbols, encodeURIComponent);
+        if (hash.length > 32000) {
+          alert(`A URL this long will not work.\nFor best results, limit to one page and do not include embedded images.`);
+        } else {
+          if (hash.length > 5000) {
+            alert(`A URL this long may not work in some browsers.\nFor best results, limit to one page and do not include embedded images.`);
+          }
+          location.hash = hash;
+        }
       }
     }
   })
