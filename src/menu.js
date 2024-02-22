@@ -532,6 +532,20 @@ function saveFileAs() {
   })
 }
 
+function permalink() {
+  return new MenuItem({
+    title: "Create a permalink URL in the address bar",
+    label: "Create permalink",
+    run(state, _, view) {
+      const symbols = /[\r\n%#"()<>?[\\\]^`{|}]/g
+      const md = hurmetMarkdownSerializer.serialize(state.doc, new Map(), [])
+      if (md && md.length > 0) {
+        location.hash = "#" + md.replace(symbols, encodeURIComponent)
+      }
+    }
+  })
+}
+
 function openFile() {
   return new MenuItem({
     title: "Open file...",
@@ -1177,6 +1191,7 @@ export function buildMenuItems(schema) {
   r.openFile = openFile()
   r.saveFile = saveFile()
   r.saveFileAs = saveFileAs()
+  r.permalink = permalink()
   r.insertHeader = insertHeader()
 
   r.dot = setDecimalFormat("1000000.")
@@ -1450,6 +1465,7 @@ bar hat vec harpoon dot ddot tilde`)
     r.openFile,
     r.saveFile,
     r.saveFileAs,
+    r.permalink,
     r.takeSnapshot,
     r.showDiffMenuItem,
     r.deleteSnapshots,

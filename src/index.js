@@ -102,48 +102,18 @@ const tidyUp = _ => {
   document.execCommand("enableInlineTableEditing", false, false)
 }
 
-const loadRemoteFile = md => {
-  // eslint-disable-next-line no-undef
+const hash = location.hash
+if (hash && hash.length > 1) {
+  const md = decodeURIComponent(hash.slice(1))
   const ast = hurmet.md2ast(md)
-  let doc = {
-    type: "doc",
-    "attrs": {
-      "decimalFormat": "1,000,000.",
-      "inDraftMode": false,
-      "fontSize": 12,
-      "fileHandle": null,
-      "pageSize": "letter"
-    },
-    "content": ast
-  }
-  doc = JSON.parse(JSON.stringify(doc))
+  const fragment = { type: "fragment", content: ast }
   window.view.dispatch(
     window.view.state.tr.replaceWith(
       0,
       window.view.state.doc.content.size,
-      schema.nodeFromJSON(doc))
+      schema.nodeFromJSON(fragment)
+    )
   )
-  tidyUp()
+  hurmet.updateCalculations(window.view, schema.nodes.calculation, true)
 }
-
-const gistRegEx = /^https:\/\/gist\.githubusercontent\.com\/.+\.md$/
-async function loadURL(hash) {
-  const url = decodeURIComponent(hash.slice(1))
-  if (gistRegEx.test(url)) {
-    const response = await fetch(url);
-    if (response.ok) { // if HTTP-status is 200-299
-      // get the response body (the method explained below)
-      const str = await response.text()
-      loadRemoteFile(str)
-    }
-  } else {
-    tidyUp()
-  }
-}
-
-const hash = location.hash
-if (hash && hash.length > 1) {
-  loadURL(hash)
-} else {
-  tidyUp()
-}
+tidyUp()
