@@ -191,10 +191,6 @@ const pointText = (point, attrs) => {
     + (attrs.height - point[1] * attrs.yunitlength - attrs.origin[1]).toFixed(4)
 }
 
-const pointToNumbers = (point, attrs) => {
-  return [Rnl.toNumber(point[0]), Rnl.toNumber(point[1])]
-}
-
 const functions = {
   // Set attributes
   stroke(svgOprnd, color) {

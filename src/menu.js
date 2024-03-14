@@ -11,7 +11,7 @@ import {
   MenuItem
 } from "prosemirror-menu"
 import { NodeSelection, TextSelection } from "prosemirror-state"
-import { insertPoint, findWrapping } from "prosemirror-transform"
+import { insertPoint, findWrapping, liftTarget } from "prosemirror-transform"
 import { Fragment } from "prosemirror-model"
 import { lift, selectParentNode, toggleMark, wrapIn } from "prosemirror-commands"
 import { schema, wrapInList } from "./schema"
@@ -1085,10 +1085,59 @@ function tableStyle(title, className, icon) {
 // :: MenuItem
 // Menu item for the `lift` command.
 const liftItem = new MenuItem({
-  title: "Lift out of enclosing block",
-  run: lift,
+  title: "Lift (unwrap) out of enclosing block",
+  run(state, dispatch)  {
+    let {$from, $to} = state.selection
+    let range = $from.blockRange($to), target = range && liftTarget(range)
+    const depth = range.depth
+    if (target == null) return false
+    const tr = state.tr
+    if ($from.node(-1).type.name == "centered") {
+      // We're lifting out of a "centered" block. Set math zone displayMode to false.
+      state.doc.nodesBetween($from.before(depth + 1), $to.after(depth + 1), function(node, pos) {
+        if (node.type.name === "calculation" || node.type.name === "tex") {
+          const nodeAttrs = node.attrs
+          nodeAttrs.displayMode = false
+          tr.replaceWith(pos, pos + 1, schema.nodes[node.type.name].createAndFill(nodeAttrs))
+        }
+      })
+    }
+    tr.lift(range, target).scrollIntoView()
+    if (dispatch) dispatch(tr)
+    return true
+  },
   select: state => lift(state),
   icon: icons.lift
+})
+
+// :: MenuItem
+// Menu item for the `center` command.
+const centerBlock = new MenuItem({
+  title: "Center block",
+  label: "Centered",
+  run(state, dispatch)  {
+    let {$from, $to} = state.selection
+    let range = $from.blockRange($to)
+    const depth = $from.depth
+    const wrapping = range && findWrapping(range, schema.nodes.centered)
+    if (!wrapping) return false
+    const tr = state.tr
+    state.doc.nodesBetween($from.before(depth), $to.after(depth), function(node, pos) {
+      if (node.type.name === "calculation" || node.type.name === "tex") {
+        if (state.doc.resolve(pos).parent.childCount === 1) {
+          const nodeAttrs = node.attrs
+          nodeAttrs.displayMode = true
+          tr.replaceWith(pos, pos + 1, schema.nodes[node.type.name].createAndFill(nodeAttrs))
+        }
+      }
+    })
+    tr.wrap(range, wrapping).scrollIntoView()
+    if (dispatch) dispatch(tr)
+    return true
+  },
+  select(state) {
+    return wrapIn(schema.nodes.centered)(state)
+  }
 })
 
 // :: MenuItem
@@ -1285,10 +1334,7 @@ export function buildMenuItems(schema) {
   if ((type = schema.nodes.epigraph))
     r.wrapEpigraph = wrapInEpigraph(type)
   if ((type = schema.nodes.centered))
-    r.wrapCentered = wrapItem(type, {
-      title: "Center block",
-      label: "Centered"
-    })
+    r.wrapCentered = centerBlock
   if ((type = schema.nodes.right_justified))
     r.wrapRightJustified = wrapItem(type, {
       title: "Right-justify block",

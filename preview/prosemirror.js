@@ -33600,7 +33600,7 @@ const proceedAfterFetch = (
             : evaluate(attrs, hurmetVars, decimalFormat);
         }
         if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat); }
-        attrs.displayMode = nodeAttrs.displayMode;
+        //attrs.displayMode = nodeAttrs.displayMode
       } catch (err) {
         attrs.tex = "\\text{" + attrs.entry + " = " + err + "}";
       }
@@ -35775,6 +35775,7 @@ defineSymbol(math, mathord, "\u2609", "\\astrosun", true);
 defineSymbol(math, mathord, "\u263c", "\\sun", true);
 defineSymbol(math, mathord, "\u263e", "\\leftmoon", true);
 defineSymbol(math, mathord, "\u263d", "\\rightmoon", true);
+defineSymbol(math, mathord, "\u2295", "\\Earth");
 
 // AMS Negated Binary Relations
 defineSymbol(math, rel, "\u226e", "\\nless", true);
@@ -36001,6 +36002,8 @@ defineSymbol(math, bin, "\u22c8", "\\Join");
 defineSymbol(math, bin, "\u27d5", "\\leftouterjoin", true);
 defineSymbol(math, bin, "\u27d6", "\\rightouterjoin", true);
 defineSymbol(math, bin, "\u27d7", "\\fullouterjoin", true);
+
+defineSymbol(math, bin, "\u2238", "\\dotminus", true); // stix
 
 // AMS Arrows
 // Note: unicode-math maps \u21e2 to their own function \rightdasharrow.
@@ -36770,9 +36773,11 @@ const consolidateText = mrow => {
 };
 
 const numberRegEx$1 = /^[0-9]$/;
-const isCommaOrDot = node => {
-  return (node.type === "atom" && node.text === ",") ||
-         (node.type === "textord" && node.text === ".")
+const isDotOrComma = (node, followingNode) => {
+  return ((node.type === "textord" && node.text === ".") ||
+    (node.type === "atom" && node.text === ",")) &&
+    // Don't consolidate if there is a space after the comma.
+    node.loc && followingNode.loc && node.loc.end === followingNode.loc.start
 };
 const consolidateNumbers = expression => {
   // Consolidate adjacent numbers. We want to return <mn>1,506.3</mn>,
@@ -36795,7 +36800,8 @@ const consolidateNumbers = expression => {
 
   // Determine if numeral groups are separated by a comma or dot.
   for (let i = nums.length - 1; i > 0; i--) {
-    if (nums[i - 1].end === nums[i].start - 2 && isCommaOrDot(expression[nums[i].start - 1])) {
+    if (nums[i - 1].end === nums[i].start - 2 &&
+      isDotOrComma(expression[nums[i].start - 1], expression[nums[i].start])) {
       // Merge the two groups.
       nums[i - 1].end = nums[i].end;
       nums.splice(i, 1);
@@ -39861,6 +39867,21 @@ defineFunction({
   }
 });
 
+const isLongVariableName = (group, font) => {
+  if (font !== "mathrm" || group.body.type !== "ordgroup" || group.body.body.length === 1) {
+    return false
+  }
+  if (group.body.body[0].type !== "mathord") { return false }
+  for (let i = 1; i < group.body.body.length; i++) {
+    const parseNodeType = group.body.body[i].type;
+    if (!(parseNodeType ===  "mathord" ||
+    (parseNodeType ===  "textord" && !isNaN(group.body.body[i].text)))) {
+      return false
+    }
+  }
+  return true
+};
+
 const mathmlBuilder$6 = (group, style) => {
   const font = group.font;
   const newStyle = style.withFont(font);
@@ -39872,6 +39893,20 @@ const mathmlBuilder$6 = (group, style) => {
     return mathGroup
   }
   // Check if it is possible to consolidate elements into a single <mi> element.
+  if (isLongVariableName(group, font)) {
+    // This is a \mathrm{…} group. It gets special treatment because symbolsOrd.js
+    // wraps <mi> elements with <mrow>s to work around a Firefox bug.
+    const mi = mathGroup.children[0].children[0];
+    delete mi.attributes.mathvariant;
+    for (let i = 1; i < mathGroup.children.length; i++) {
+      mi.children[0].text += mathGroup.children[i].type === "mn"
+        ? mathGroup.children[i].children[0].text
+        : mathGroup.children[i].children[0].children[0].text;
+    }
+    // Wrap in a <mrow> to prevent the same Firefox bug.
+    const bogus = new mathMLTree.MathNode("mtext", new mathMLTree.TextNode("\u200b"));
+    return new mathMLTree.MathNode("mrow", [bogus, mi])
+  }
   let canConsolidate = mathGroup.children[0].type === "mo";
   for (let i = 1; i < mathGroup.children.length; i++) {
     if (mathGroup.children[i].type === "mo" && font === "boldsymbol") {
@@ -47921,7 +47956,7 @@ class Style {
  * https://mit-license.org/
  */
 
-const version = "0.10.22";
+const version = "0.10.23";
 
 function postProcess(block) {
   const labelMap = {};
@@ -48629,9 +48664,16 @@ const nodes = {
           wrap: "="
         });
       }
+      if (node.attrs.displayMode) {
+        dom.firstChild.style.display = "inline-block";
+      }
       // Before writing to DOM, I filter out most of the run-time info in node.attrs.
       dom.dataset.entry = node.attrs.entry;
-      if (node.attrs.displayMode) { dom.dataset.display = "true"; }
+      if (node.attrs.displayMode) {
+        dom.dataset.display = "true";
+      } else if ("display" in dom.dataset) {
+        delete dom.dataset.display;
+      }
       return dom
     }
   },
@@ -48652,8 +48694,15 @@ const nodes = {
       dom.classList = "hurmet-tex";
       const tex = node.attrs.tex;
       dom.dataset.tex = tex;
-      if (node.attrs.displayMode) { dom.dataset.display = "true"; }
+      if (node.attrs.displayMode) {
+        dom.dataset.display = "true";
+      } else if ("display" in dom.dataset) {
+        delete dom.dataset.display;
+      }
       hurmet.render(tex, dom, { displayMode: node.attrs.displayMode, wrap: "=" });
+      if (node.attrs.displayMode) {
+        dom.firstChild.style.display = "inline-block";
+      }
       return dom
     }
   },
@@ -53058,10 +53107,59 @@ function tableStyle(title, className, icon) {
 // :: MenuItem
 // Menu item for the `lift` command.
 const liftItem = new MenuItem({
-  title: "Lift out of enclosing block",
-  run: lift,
+  title: "Lift (unwrap) out of enclosing block",
+  run(state, dispatch)  {
+    let {$from, $to} = state.selection;
+    let range = $from.blockRange($to), target = range && liftTarget(range);
+    const depth = range.depth;
+    if (target == null) return false
+    const tr = state.tr;
+    if ($from.node(-1).type.name == "centered") {
+      // We're lifting out of a "centered" block. Set math zone displayMode to false.
+      state.doc.nodesBetween($from.before(depth + 1), $to.after(depth + 1), function(node, pos) {
+        if (node.type.name === "calculation" || node.type.name === "tex") {
+          const nodeAttrs = node.attrs;
+          nodeAttrs.displayMode = false;
+          tr.replaceWith(pos, pos + 1, schema.nodes[node.type.name].createAndFill(nodeAttrs));
+        }
+      });
+    }
+    tr.lift(range, target).scrollIntoView();
+    if (dispatch) dispatch(tr);
+    return true
+  },
   select: state => lift(state),
   icon: icons.lift
+});
+
+// :: MenuItem
+// Menu item for the `center` command.
+const centerBlock = new MenuItem({
+  title: "Center block",
+  label: "Centered",
+  run(state, dispatch)  {
+    let {$from, $to} = state.selection;
+    let range = $from.blockRange($to);
+    const depth = $from.depth;
+    const wrapping = range && findWrapping(range, schema.nodes.centered);
+    if (!wrapping) return false
+    const tr = state.tr;
+    state.doc.nodesBetween($from.before(depth), $to.after(depth), function(node, pos) {
+      if (node.type.name === "calculation" || node.type.name === "tex") {
+        if (state.doc.resolve(pos).parent.childCount === 1) {
+          const nodeAttrs = node.attrs;
+          nodeAttrs.displayMode = true;
+          tr.replaceWith(pos, pos + 1, schema.nodes[node.type.name].createAndFill(nodeAttrs));
+        }
+      }
+    });
+    tr.wrap(range, wrapping).scrollIntoView();
+    if (dispatch) dispatch(tr);
+    return true
+  },
+  select(state) {
+    return wrapIn(schema.nodes.centered)(state)
+  }
 });
 
 // :: MenuItem
@@ -53258,10 +53356,7 @@ function buildMenuItems(schema) {
   if ((type = schema.nodes.epigraph))
     r.wrapEpigraph = wrapInEpigraph(type);
   if ((type = schema.nodes.centered))
-    r.wrapCentered = wrapItem(type, {
-      title: "Center block",
-      label: "Centered"
-    });
+    r.wrapCentered = centerBlock;
   if ((type = schema.nodes.right_justified))
     r.wrapRightJustified = wrapItem(type, {
       title: "Right-justify block",
@@ -54828,7 +54923,6 @@ function openMathPrompt(options) {
     editor.removeEventListener('blur', close);
     if (wrapper.parentNode) {
       wrapper.remove();
-      //wrapper.parentNode.removeChild(wrapper)
     }
   };
 
@@ -54850,7 +54944,13 @@ function openMathPrompt(options) {
   });
 }
 
-// nodeviews.js
+const isDisplayMode = (dom, view) => {
+  const $from = view.state.selection.$from;
+  const parentNode = $from.node($from.depth);
+  const grandParent = dom.parentNode.parentNode;
+  return dom.parentNode.nodeName === "P" && parentNode.childCount === 1 &&
+      grandParent.nodeName === "DIV" && grandParent.classList.contains("centered")
+};
 
 class CalcView {
   constructor(node, view) {
@@ -54861,8 +54961,10 @@ class CalcView {
 
   selectNode() {
     if (this.dom.children.length > 1) { return }
+    const displayMode = isDisplayMode(this.dom, this.outerView);
     this.dom.classList.add("ProseMirror-selectednode");
     const attrs = this.node.attrs;
+    attrs.displayMode = displayMode;
     const pos = this.outerView.state.selection.from;
     // A CalcView node is a ProseMirror atom. It does not enable direct ProseMirror editing.
     // Instead we temporarily open a text editor instance in the node location.
@@ -54892,8 +54994,10 @@ class TexView {
   }
 
   selectNode() {
+    const displayMode = isDisplayMode(this.dom, this.outerView);
     this.dom.classList.add("ProseMirror-selectednode");
     const attrs = this.node.attrs;
+    attrs.displayMode = displayMode;
     openMathPrompt({
       // Create a user interface for TeX that is similar to CalcView.
       // The need for a text editor instance is not as great here as it is in CalcView,

@@ -285,7 +285,7 @@ const proceedAfterFetch = (
             : evaluate(attrs, hurmetVars, decimalFormat)
         }
         if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat) }
-        attrs.displayMode = nodeAttrs.displayMode
+        //attrs.displayMode = nodeAttrs.displayMode
       } catch (err) {
         attrs.tex = "\\text{" + attrs.entry + " = " + err + "}"
       }

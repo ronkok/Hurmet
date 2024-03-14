@@ -139,7 +139,6 @@ export function openMathPrompt(options) {
     editor.removeEventListener('blur', close)
     if (wrapper.parentNode) {
       wrapper.remove()
-      //wrapper.parentNode.removeChild(wrapper)
     }
   }
 

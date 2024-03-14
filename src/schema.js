@@ -464,9 +464,16 @@ export const nodes = {
           wrap: "="
         })
       }
+      if (node.attrs.displayMode) {
+        dom.firstChild.style.display = "inline-block"
+      }
       // Before writing to DOM, I filter out most of the run-time info in node.attrs.
       dom.dataset.entry = node.attrs.entry
-      if (node.attrs.displayMode) { dom.dataset.display = "true" }
+      if (node.attrs.displayMode) {
+        dom.dataset.display = "true"
+      } else if ("display" in dom.dataset) {
+        delete dom.dataset.display
+      }
       return dom
     }
   },
@@ -487,8 +494,15 @@ export const nodes = {
       dom.classList = "hurmet-tex"
       const tex = node.attrs.tex
       dom.dataset.tex = tex
-      if (node.attrs.displayMode) { dom.dataset.display = "true" }
+      if (node.attrs.displayMode) {
+        dom.dataset.display = "true"
+      } else if ("display" in dom.dataset) {
+        delete dom.dataset.display
+      }
       hurmet.render(tex, dom, { displayMode: node.attrs.displayMode, wrap: "=" })
+      if (node.attrs.displayMode) {
+        dom.firstChild.style.display = "inline-block"
+      }
       return dom
     }
   },
