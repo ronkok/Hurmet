@@ -501,6 +501,8 @@ Unicode range 1D49C to 1D4B5.
     letter-spacing: normal;
     word-wrap: normal;
     direction: ltr;
+    /* Prevent Firefox from omitting the dot on i or j. */
+    font-feature-settings: "dtls" off;
   }
   
   math * {
