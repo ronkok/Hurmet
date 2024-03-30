@@ -322,13 +322,18 @@ const findParentNode = predicate => selection => {
   }
 }
 
+// Export printHurmet so that it is available in keymap.js
+export function printHurmet(state, view) {
+  findPageBreaks(view, state, forPrint, schema.nodes.toc)
+  window.print()
+}
+
 const print = () => {
   return new MenuItem({
     title: "Print",
     label: "Print…",
     run(state, _, view) {
-      findPageBreaks(view, state, forPrint, schema.nodes.toc)
-      window.print()
+      printHurmet(state, view)
     }
   })
 }
