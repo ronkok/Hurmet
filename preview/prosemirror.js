@@ -17954,7 +17954,7 @@ const fromAssignment = (cellAttrs, unitAware) => {
 /*
  *  Unit-aware calculation is a core feature of Hurmet.
  *  Dimensional analysis is used to verify that a calculation contains compatible units.
- *  Example: Check unit compatibility for:  L = '145 N·m'/'15.2 lbf' = ?? feet
+ *  Example: Check unit compatibility for:  L = 145 'N·m'/15.2 'lbf' = ?? feet
  *  Analysis step 1: first operand:  N·m →  mass¹·length²·time⁻²
  *                   2nd  operand:  lbf →  mass¹·length¹·time⁻²
  *  Note the exponents of those two operands. When terms multiply, we add exponents.
@@ -18006,11 +18006,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6607","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.6461","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.4032","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.4633","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -18019,10 +18019,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4672","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4702","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9766","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.8144","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9793","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.8421","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -18042,7 +18042,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.85510","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.85773","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -18050,23 +18050,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.4594","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.4868","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["3.9799","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["90.1365","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["4.0725","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["90.3283","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["163.45","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["164.10","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1458.67","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1464.09","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -18077,7 +18077,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["17.9179","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["17.9104","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -18107,7 +18107,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.0811","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0841","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -21245,6 +21245,14 @@ const lexOneWord = (str, prevToken) => {
   }
 };
 
+// Support a unit name written w/o a space after a number
+const unitStartRegEx = /^(?:[A-Za-z°ʹ″$£¥₨₪€ÅΩ℃℉ΩKÅ]|ʹʹ)/;
+const unitNameRegEx = /^(((?:[A-Za-z][A-Za-zōö]*\$?|[°ʹ″$£¥₨₪€ÅΩ℃℉ΩKÅ]|ʹʹ)(?:(?:(?:(?:\^|\^-)[1-9][0-9]*)|(?:\^\(-?[1-9][0-9]*\))|⁻?[¹²³\u2074-\u2079][⁰¹²³\u2074-\u2079]*))?)(?:[*·.•×]\2)*)(?:\/\1)?/;
+const lexUnitName = str => {
+  const match = unitNameRegEx.exec(str);
+  return [match[0], unitTeXFromString(match[0]), tt.UNIT, ""]
+};
+
 const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
   // Get the next token in str. Return an array with the token's information:
   // [input, TeX output, type, associated close delimiter]
@@ -21494,7 +21502,8 @@ const numFromSupChars = str => {
 const colorSpecRegEx = /^(#([a-f0-9]{6}|[a-f0-9]{3})|[a-z]+|\([^)]+\))/i;
 const accentRegEx = /^(?:.|\uD835.)[\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]_/;
 
-const factors = /^[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133\uD835[({√∛∜]/;
+const factorsAfterSpace = /^[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133\uD835]/;
+const factors = /^[[({√∛∜]/;
 
 const setUpIf = (rpn, tokenInput, exprStack, delim) => {
   // The Hurmet CASES expression acts lazily. To accommodate that, push the
@@ -21554,9 +21563,9 @@ const exponentOfFunction = (str, decimalFormat, isCalc) => {
   }
 };
 
-const testForImplicitMult = (prevToken, texStack, str) => {
+const testForImplicitMult = (prevToken, texStack, str, isFollowedBySpace) => {
   // Some math expressions imply a multiplication without writing an explicit operator token.
-  // Examples:  e = m c², y = 3(2+5), n = (a+5)x, z = 5 + 2i
+  // Examples:  e = m c², y = 3(2+5), n = (a+5) x, z = 5 + 2 j2
   // Hurmet writes the echo expression with a more explicit written form of multiplication.
   // The echo shows each multiplication in one of three ways: a x b,  a · b, or (a)(b)
   // This sub is going to determine if such an adjustment is required for the current position.
@@ -21601,14 +21610,16 @@ const testForImplicitMult = (prevToken, texStack, str) => {
       }
     }
   }
-  if (isPreceededByFactor && nextCharIsFactor(str, prevToken.ttype)) { return true }
+  if (isPreceededByFactor && nextCharIsFactor(str, prevToken.ttype, isFollowedBySpace)) {
+    return true
+  }
   return false
 };
 
 const multiplicands = new Set([tt.ORD, tt.VAR, tt.NUM, tt.LONGVAR, tt.RIGHTBRACKET,
   tt.CURRENCY, tt.SUPCHAR, tt.BIG_OPERATOR]);
 
-const nextCharIsFactor = (str, tokenType) => {
+const nextCharIsFactor = (str, tokenType, isFollowedBySpace) => {
   const st = str.replace(leadingLaTeXSpaceRegEx, "");
   const fc = st.charAt(0);
 
@@ -21617,7 +21628,7 @@ const nextCharIsFactor = (str, tokenType) => {
     if (fc === "|" || fc === "‖") ; else if (/^[({[√∛∜∑0-9]/.test(st) && multiplicands.has(tokenType)) {
       return true
     } else {
-      if (factors.test(fc)) {
+      if (factors.test(fc) || (isFollowedBySpace && factorsAfterSpace.test(fc))) {
         fcMeetsTest = !/^(if|and|atop|or|else|elseif|otherwise|not|for|in|while|end)\b/.test(st);
       }
     }
@@ -21903,7 +21914,7 @@ const parse$1 = (
     mustLex = true; // default
 
     isImplicitMult = isPrecededBySpace && okToAppend &&
-                     testForImplicitMult(prevToken, texStack, str);
+                     testForImplicitMult(prevToken, texStack, str, isFollowedBySpace);
     if (isCalc) {
       if (prevToken.input === "⌧" && rpnStack.length > 1
             && rpnStack[rpnStack.length - 2].symbol === "∑"
@@ -21927,13 +21938,15 @@ const parse$1 = (
     }
 
     if (mustLex) {
-      const tkn = lex(str, decimalFormat, prevToken, inRealTime);
+      const tkn = prevToken.ttype === tt.NUM && !isFollowedBySpace && unitStartRegEx.test(str)
+        ? lexUnitName(str)                                // something like the "m" in "5m"
+        : lex(str, decimalFormat, prevToken, inRealTime);  // default
       token = { input: tkn[0], output: tkn[1], ttype: tkn[2], closeDelim: tkn[3] };
       str = str.substring(token.input.length);
       isFollowedBySpace = leadingSpaceRegEx$2.test(str) || /^(˽|\\quad|\\qquad)+/.test(str);
       isFollowedBySpaceOrNewline = /^[ \n]/.test(str);
       str = str.replace(leadingSpaceRegEx$2, "");
-      followedByFactor = nextCharIsFactor(str, token.ttype);
+      followedByFactor = nextCharIsFactor(str, token.ttype, isFollowedBySpace);
     }
 
     if (token.input === "!" && (isPrecededBySpace || !endOfOrd.has(prevToken.ttype))) {
@@ -22030,7 +22043,7 @@ const parse$1 = (
         okToAppend = true;
 
         if (!isFollowedBySpace && followedByFactor) {
-          // We've encountered something like the expression "2a".
+          // We've encountered something like the expression "2(a)".
           popTexTokens(2, okToAppend);
           if (isCalc) {
             rpnPrec = rpnPrecFromType[tt.MULT];
@@ -22752,7 +22765,7 @@ const parse$1 = (
           if ((token.input === ")" &&
             // eslint-disable-next-line max-len
             !(topDelim.delimType === dFUNCTION && str.charAt(0) === "[" && !isFollowedBySpace) &&
-            nextCharIsFactor(str, tt.RIGHTBRACKET)) ||
+            nextCharIsFactor(str, tt.RIGHTBRACKET, isFollowedBySpace)) ||
             (token.input === "]" && /^\(/.test(str) ||
              topDelim.delimType === dMATRIX && /^\[/.test(str))) {
             // Implicit multiplication between parens, as in (2)(3)

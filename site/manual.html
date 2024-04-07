@@ -339,17 +339,19 @@ a[5:end]  # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong><
 <p>Also, the character <strong>°</strong> is now a unit name. So one can also write a polar notation as <span class='hurmet-calc' data-entry='r∠θ°'><math><mrow><mi>r</mi><mi>∠</mi><mi>θ</mi><mi>°</mi></mrow></math></span> and the phase angle will be unit-aware. The characters <code>ooo</code> will auto-correct into °</p>
 <p>Examples:</p>
 <div class="indented"><p><span class='hurmet-calc' data-entry='z_1 = 2 + j 3'><math><mrow><mi>z</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo>=</mo><mn>2</mn><mo>+</mo><mi>j</mi><mn>3</mn></mrow></math></span></p>
-<p><span class='hurmet-calc' data-entry='z_2 = 4∠30°'><math><mrow><mi>z</mi><msub><mrow></mrow><mtext>2</mtext></msub><mo>=</mo><mn>4</mn><mi>∠</mi><mn>30</mn><mi>°</mi></mrow></math></span></p>
-<p><span class='hurmet-calc' data-entry='z = z_1 + z_2  = \blue((2 + j 3) + ( 4∠30°)) = 5.46 + j 5'><math><mrow><mi>z</mi><mo>=</mo><mi>z</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo>+</mo><mi>z</mi><msub><mrow></mrow><mtext>2</mtext></msub></mrow><mrow><mo>=</mo><mo form="prefix" stretchy="false" style="color:#0000FF;">(</mo><mn style="color:#0000FF;">2</mn><mo style="color:#0000FF;">+</mo><mi style="color:#0000FF;">j</mi><mn style="color:#0000FF;">3</mn><mo form="postfix" stretchy="false" style="color:#0000FF;">)</mo><mo style="color:#0000FF;">+</mo><mo form="prefix" stretchy="false" style="color:#0000FF;">(</mo><mn style="color:#0000FF;">4</mn><mi style="color:#0000FF;">∠</mi><mn style="color:#0000FF;">30</mn><mi style="color:#0000FF;">°</mi><mo form="postfix" stretchy="false" style="color:#0000FF;">)</mo></mrow><mrow><mo>=</mo><mn>5.46</mn><mo>+</mo><mi>j</mi><mn>5</mn></mrow></math></span></p></div></dd>
+<p><span class='hurmet-calc' data-entry='z_2 = 4∠30°'><math><mrow><mi>z</mi><msub><mrow></mrow><mtext>2</mtext></msub><mo>=</mo><mn>4</mn><mi>∠</mi><mn>30</mn><mtext>°</mtext></mrow></math></span></p>
+<p><span class='hurmet-calc' data-entry='z = z_1 + z_2  = \blue((2 + j 3) + ( 4∠30°)) = 5.46 + j 5'><math><mrow><mi>z</mi><mo>=</mo><mi>z</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo>+</mo><mi>z</mi><msub><mrow></mrow><mtext>2</mtext></msub></mrow><mrow><mo>=</mo><mo form="prefix" stretchy="false" style="color:#0000FF;">(</mo><mn style="color:#0000FF;">2</mn><mo style="color:#0000FF;">+</mo><mi style="color:#0000FF;">j</mi><mn style="color:#0000FF;">3</mn><mo form="postfix" stretchy="false" style="color:#0000FF;">)</mo><mo style="color:#0000FF;">+</mo><mo form="prefix" stretchy="false" style="color:#0000FF;">(</mo><mn style="color:#0000FF;">4</mn><mi style="color:#0000FF;">∠</mi><mn style="color:#0000FF;">30</mn><mtext style="color:#0000FF;">°</mtext><mo form="postfix" stretchy="false" style="color:#0000FF;">)</mo></mrow><mrow><mo>=</mo><mn>5.46</mn><mo>+</mo><mi>j</mi><mn>5</mn></mrow></math></span></p></div></dd>
 <dt id='unit'>Unit</dt>
-<dd><p>A Humet <em>unit</em> can be applied to a numeric value. There are three ways to write a Hurmet unit.</p>
-<ol><li class="tight"><p>A unit name between apostrophes, aka single straight quotation marks, written after a numeric value.</p></li>
+<dd><p>A Humet <em>unit</em> can be applied to a numeric value. There are four ways to write a Hurmet unit.</p>
+<ol><li class="tight"><p>A unit name written directly after a number, with no intervening space.</p></li>
+<li class="tight"><p>A unit name between apostrophes, aka single straight quotation marks, written after a numeric value. A unit written this way can contain a space, like <code>fluid ounce</code>.</p></li>
 <li class="tight"><p>A unit symbol written after a numeric value.</p></li>
 <li class="tight"><p>A currency symbol written before a non-negative number.</p></li></ol>
 <table><tr><th>Input</th>
 <th>Renders as</th></tr>
+<tr><td><code>4.2meters</code></td><td><span class='hurmet-calc' data-entry='4.2meters'><math><mrow><mn>4.2</mn><mspace width="0.2778em"></mspace><mtext>meters</mtext></mrow></math></span></td></tr>
 <tr><td><code>4.2 &#x27;meters&#x27;</code></td><td><span class='hurmet-calc' data-entry="4.2 'meters'"><math><mrow><mn>4.2</mn><mspace width="0.2778em"></mspace><mtext>meters</mtext></mrow></math></span></td></tr>
-<tr><td><code>30°</code></td><td><span class='hurmet-calc' data-entry='30°'><math><mrow><mn>30</mn><mi>°</mi></mrow></math></span></td></tr>
+<tr><td><code>30°</code></td><td><span class='hurmet-calc' data-entry='30°'><math><mrow><mn>30</mn><mtext>°</mtext></mrow></math></span></td></tr>
 <tr><td><code>$25.10</code></td><td><span class='hurmet-calc' data-entry='$25.10'><math><mrow><mi>$</mi><mn>25.10</mn></mrow></math></span></td></tr>
 <tr><td><code>10 &#x27;N·m/s&#x27;</code></td><td><span class='hurmet-calc' data-entry="10 'N·m/s'"><math><mrow><mn>10</mn><mspace width="0.2778em"></mspace><mrow><mtext>N</mtext><mspace width="0.0556em"></mspace><mo lspace="0em" rspace="0em">⋅</mo><mspace width="0.0556em"></mspace><mtext>m/s</mtext></mrow></mrow></math></span></td></tr>
 <tr><td><code>[2.1; 15.3] &#x27;feet&#x27;</code></td><td><span class='hurmet-calc' data-entry="[2.1; 15.3] 'feet'"><math><mrow><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center"><mtr><mtd style="padding-left:0em;padding-right:0em;"><mn>2.1</mn></mtd></mtr><mtr><mtd style="padding-left:0em;padding-right:0em;"><mn>15.3</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow><mspace width="0.2778em"></mspace><mtext>feet</mtext></mrow></math></span></td></tr></table>
@@ -492,7 +494,7 @@ ${w_dead}	30	40`` &#x27;lbf/ft&#x27; = %</code></pre><p>Note that you must do a 
 <dd><p>If you write <span class='hurmet-calc' data-entry='π'><math><mi>π</mi></math></span> into an expression, Hurmet uses a value of 3.1415926535897932384626433832795028841971693993751.</p></dd>
 <dt id='<em>e</em>'><em>e</em></dt>
 <dd><p>Hurmet will treat <span class='hurmet-calc' data-entry='e'><math><mi>e</mi></math></span> just like any other variable most of the time. But if <span class='hurmet-calc' data-entry='e'><math><mi>e</mi></math></span> is the base of an exponent, for example: <span class='hurmet-calc' data-entry='e^x'><math><msup><mi>e</mi><mi>x</mi></msup></math></span>, then Hurmet will take <span class='hurmet-calc' data-entry='e'><math><mi>e</mi></math></span> to mean 2.7182818284590452353602874713527.</p></dd>
-<dt id='<em>im</em>'><em>im</em></dt>
+<dt id='<em>j</em>'><em>j</em></dt>
 <dd><p><span class='hurmet-calc' data-entry='j'><math><mi>j</mi></math></span> = <span class='hurmet-calc' data-entry='√(-1)'><math><msqrt><mrow><mtext>-</mtext><mn>1</mn></mrow></msqrt></math></span>. This value can be overwritten by a Hurmet assignment.</p></dd>
 <dt id='ℏ'>ℏ</dt>
 <dd><p>For ℏ, Hurmet uses a value of 1.054571817 × 10⁻³⁴ J·s.</p></dd>
@@ -512,7 +514,7 @@ ${w_dead}	30	40`` &#x27;lbf/ft&#x27; = %</code></pre><p>Note that you must do a 
 <tr><td>·</td><td><span class='hurmet-calc' data-entry='a ⋅ b'><math><mrow><mi>a</mi><mo>⋅</mo><mi>b</mi></mrow></math></span></td><td>Multiplication of numbers.<br>Dot product of vectors or matrices.<br>auto-correct: dot between two spaces.</td></tr>
 <tr><td><p></p></td><td><span class='hurmet-calc' data-entry='(2)(4)'><math><mrow><mo form="prefix" stretchy="false">(</mo><mn>2</mn><mo form="postfix" stretchy="false">)</mo><mo form="prefix" stretchy="false">(</mo><mn>4</mn><mo form="postfix" stretchy="false">)</mo></mrow></math></span></td><td>Multiplication</td></tr>
 <tr><td><p></p></td><td> <code>a b</code></td><td>Multiplication. (A space acts as an operator when between variables.)</td></tr>
-<tr><td><p></p></td><td><span class='hurmet-calc' data-entry='2 a'><math><mrow><mn>2</mn><mspace width="0.1667em"></mspace><mi>a</mi></mrow></math></span></td><td>Multiplication</td></tr>
+<tr><td><p></p></td><td><code>2L</code></td><td>Number and unit (2 liters).<br>Not a multiplication if no space.</td></tr>
 <tr><td><p></p></td><td><span class='hurmet-calc' data-entry='a2'><math><mrow><mrow><mi mathvariant="normal">a</mi></mrow><mn>2</mn></mrow></math></span></td><td>Not a multiplication if no space.<br>Hurmet reads “a2” as an identifier.</td></tr>
 <tr><td><p></p></td><td><span class='hurmet-calc' data-entry='sin(2)'><math><mrow><mrow><mi>sin</mi><mo>⁡</mo></mrow><mo form="prefix" stretchy="false">(</mo><mn>2</mn><mo form="postfix" stretchy="false">)</mo></mrow></math></span></td><td>Function</td></tr>
 <tr><td><p></p></td><td>a (2)</td><td>Multiplication if a space exists before the open paren.</td></tr>

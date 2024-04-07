@@ -835,20 +835,23 @@ Complex Number
 Unit
 
 :   A Humet _unit_ can be applied to a numeric value.
-    There are three ways to write a Hurmet unit.
+    There are four ways to write a Hurmet unit.
 
-    1. A unit name between apostrophes, aka single straight quotation marks,
-       written after a numeric value.
-    2. A unit symbol written after a numeric value.
-    3. A currency symbol written before a non-negative number.
+    1. A unit name written directly after a number, with no intervening space. 
+    2. A unit name between apostrophes, aka single straight quotation marks,
+       written after a numeric value. A unit written this way can contain a space,
+       like `fluid ounce`.
+    3. A unit symbol written after a numeric value.
+    4. A currency symbol written before a non-negative number.
 
     | Input                  | Renders as              |
     |------------------------|-------------------------|
-    | `4.2 'meters'`         | ¢`4.2 'meters'`          |
-    | `30°`                  | ¢`30°`                   |
-    | `$25.10`               | ¢`$25.10`                |
-    | `10 'N·m/s'`           | ¢`10 'N·m/s'`            |
-    | `[2.1; 15.3] 'feet'`   | ¢`[2.1; 15.3] 'feet'`    |
+    | `4.2meters`            | ¢`4.2meters`            |
+    | `4.2 'meters'`         | ¢`4.2 'meters'`         |
+    | `30°`                  | ¢`30°`                  |
+    | `$25.10`               | ¢`$25.10`               |
+    | `10 'N·m/s'`           | ¢`10 'N·m/s'`           |
+    | `[2.1; 15.3] 'feet'`   | ¢`[2.1; 15.3] 'feet'`   |
 
     ![number or matrix or map apostrophe unit-name apostrophe](images/unit-railroad.svg)
 
@@ -1167,7 +1170,7 @@ _e_
   ¢`e` is the base of an exponent, for example: ¢`e^x`, then Hurmet will take
   ¢`e` to mean 2.7182818284590452353602874713527.
 
-_im_
+_j_
 
 : ¢`j` = ¢`√(-1)`. This value can be overwritten by a Hurmet assignment.
 
@@ -1211,7 +1214,8 @@ _im_
 |               |  `a b`               | Multiplication. (A space acts as an         |
 |               |                      | operator when between variables.)           |
 +---------------+----------------------+---------------------------------------------+
-|               | ¢`2 a`               | Multiplication                              |
+|               | `2L`                 | Number and unit (2 liters).\                |
+|               |                      | Not a multiplication if no space.           |
 +---------------+----------------------+---------------------------------------------+
 |               | ¢`a2`                | Not a multiplication if no space.\          |
 |               |                      | Hurmet reads “a2” as an identifier.         |

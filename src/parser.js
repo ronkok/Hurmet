@@ -1,6 +1,6 @@
 ﻿import { addTextEscapes, numeralFromSuperScript,
          interpolateRegEx, arrayOfRegExMatches } from "./utils"
-import { tt, lex } from "./lexer"
+import { tt, lex, unitStartRegEx, lexUnitName } from "./lexer"
 import { Rnl } from "./rational"
 
 /*
@@ -86,7 +86,8 @@ const numFromSupChars = str => {
 const colorSpecRegEx = /^(#([a-f0-9]{6}|[a-f0-9]{3})|[a-z]+|\([^)]+\))/i
 const accentRegEx = /^(?:.|\uD835.)[\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]_/
 
-const factors = /^[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133\uD835[({√∛∜]/
+const factorsAfterSpace = /^[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133\uD835]/
+const factors = /^[[({√∛∜]/
 
 const setUpIf = (rpn, tokenInput, exprStack, delim) => {
   // The Hurmet CASES expression acts lazily. To accommodate that, push the
@@ -146,9 +147,9 @@ const exponentOfFunction = (str, decimalFormat, isCalc) => {
   }
 }
 
-const testForImplicitMult = (prevToken, texStack, str) => {
+const testForImplicitMult = (prevToken, texStack, str, isFollowedBySpace) => {
   // Some math expressions imply a multiplication without writing an explicit operator token.
-  // Examples:  e = m c², y = 3(2+5), n = (a+5)x, z = 5 + 2i
+  // Examples:  e = m c², y = 3(2+5), n = (a+5) x, z = 5 + 2 j2
   // Hurmet writes the echo expression with a more explicit written form of multiplication.
   // The echo shows each multiplication in one of three ways: a x b,  a · b, or (a)(b)
   // This sub is going to determine if such an adjustment is required for the current position.
@@ -193,14 +194,16 @@ const testForImplicitMult = (prevToken, texStack, str) => {
       }
     }
   }
-  if (isPreceededByFactor && nextCharIsFactor(str, prevToken.ttype)) { return true }
+  if (isPreceededByFactor && nextCharIsFactor(str, prevToken.ttype, isFollowedBySpace)) {
+    return true
+  }
   return false
 }
 
 const multiplicands = new Set([tt.ORD, tt.VAR, tt.NUM, tt.LONGVAR, tt.RIGHTBRACKET,
   tt.CURRENCY, tt.SUPCHAR, tt.BIG_OPERATOR])
 
-const nextCharIsFactor = (str, tokenType) => {
+const nextCharIsFactor = (str, tokenType, isFollowedBySpace) => {
   const st = str.replace(leadingLaTeXSpaceRegEx, "")
   const fc = st.charAt(0)
 
@@ -211,7 +214,7 @@ const nextCharIsFactor = (str, tokenType) => {
     } else if (/^[({[√∛∜∑0-9]/.test(st) && multiplicands.has(tokenType)) {
       return true
     } else {
-      if (factors.test(fc)) {
+      if (factors.test(fc) || (isFollowedBySpace && factorsAfterSpace.test(fc))) {
         fcMeetsTest = !/^(if|and|atop|or|else|elseif|otherwise|not|for|in|while|end)\b/.test(st)
       }
     }
@@ -497,7 +500,7 @@ export const parse = (
     mustLex = true // default
 
     isImplicitMult = isPrecededBySpace && okToAppend &&
-                     testForImplicitMult(prevToken, texStack, str)
+                     testForImplicitMult(prevToken, texStack, str, isFollowedBySpace)
     if (isCalc) {
       if (prevToken.input === "⌧" && rpnStack.length > 1
             && rpnStack[rpnStack.length - 2].symbol === "∑"
@@ -521,13 +524,15 @@ export const parse = (
     }
 
     if (mustLex) {
-      const tkn = lex(str, decimalFormat, prevToken, inRealTime)
+      const tkn = prevToken.ttype === tt.NUM && !isFollowedBySpace && unitStartRegEx.test(str)
+        ? lexUnitName(str)                                // something like the "m" in "5m"
+        : lex(str, decimalFormat, prevToken, inRealTime)  // default
       token = { input: tkn[0], output: tkn[1], ttype: tkn[2], closeDelim: tkn[3] }
       str = str.substring(token.input.length)
       isFollowedBySpace = leadingSpaceRegEx.test(str) || /^(˽|\\quad|\\qquad)+/.test(str)
       isFollowedBySpaceOrNewline = /^[ \n]/.test(str)
       str = str.replace(leadingSpaceRegEx, "")
-      followedByFactor = nextCharIsFactor(str, token.ttype)
+      followedByFactor = nextCharIsFactor(str, token.ttype, isFollowedBySpace)
     }
 
     if (token.input === "!" && (isPrecededBySpace || !endOfOrd.has(prevToken.ttype))) {
@@ -624,7 +629,7 @@ export const parse = (
         okToAppend = true
 
         if (!isFollowedBySpace && followedByFactor) {
-          // We've encountered something like the expression "2a".
+          // We've encountered something like the expression "2(a)".
           popTexTokens(2, okToAppend)
           if (isCalc) {
             rpnPrec = rpnPrecFromType[tt.MULT];
@@ -1346,7 +1351,7 @@ export const parse = (
           if ((token.input === ")" &&
             // eslint-disable-next-line max-len
             !(topDelim.delimType === dFUNCTION && str.charAt(0) === "[" && !isFollowedBySpace) &&
-            nextCharIsFactor(str, tt.RIGHTBRACKET)) ||
+            nextCharIsFactor(str, tt.RIGHTBRACKET, isFollowedBySpace)) ||
             (token.input === "]" && /^\(/.test(str) ||
              topDelim.delimType === dMATRIX && /^\[/.test(str))) {
             // Implicit multiplication between parens, as in (2)(3)

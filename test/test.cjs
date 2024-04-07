@@ -31,6 +31,7 @@ const parserTests = [
     "\\begin{cases}a &\\mathrel{\\mathrm{if}}b \\\\ c &\\mathrel{\\mathrm{if}}d \\end{cases}"
   ],
   ["f_c′=4500 'psi'", "f{_\\text{c}'} = 4{,}500 \\; {\\text{psi}}"],
+  ["f_c′=4500psi", "f{_\\text{c}'} = 4{,}500 \\; {\\text{psi}}"],
   ["root 3 x", "\\sqrt[3]{x}"],
   ["sqrt(a b)", "\\sqrt{a b}"],
   ["sin^2 x", "\\sin^{2}{x}"],
@@ -52,7 +53,7 @@ const parserTests = [
     "β_1 = {0.85 if f_c′ <= 4000; 0.65 if f_c′ >= 8000; 0.85 - f_c′/20000 otherwise}",
     "β{_\\text{1}} = \\begin{cases}0.85 &\\mathrel{\\mathrm{if}}f{_\\text{c}'} ≤ 4{,}000 \\\\ 0.65 &\\mathrel{\\mathrm{if}}f{_\\text{c}'} ≥ 8{,}000 \\\\ 0.85 - \\dfrac{f{_\\text{c}'}}{20{,}000}&\\mathrel{\\mathrm{otherwise}}\\end{cases}"
   ],
-  ["x = (-b +- sqrt(b^2-4a c))/(2 a)", "x = \\dfrac{\\text{-} b ± \\sqrt{b^{2}- 4 a c}}{2 \\, a}"],
+  ["x = (-b +- sqrt(b^2-4 a c))/(2 a)", "x = \\dfrac{\\text{-} b ± \\sqrt{b^{2}- 4 \\, a c}}{2 \\, a}"],
   [
     `f(x) = \\int_(-∞)^∞ \\hat f (ξ)  e^(2 π i ξ x)  "d" ξ`,
     "f(x)= \\displaystyle\\int_{\\text{-} ∞}^{∞}\\hat{f} (ξ) e^{2 \\, π i ξ x}\\text{d}ξ"
@@ -104,7 +105,7 @@ const parserTests = [
     "σ^2 = 1/(n (n-1)) (n ∑_(i=1)^n x_i^2 - (∑_(i=1)^n x_k)^2)",
     "σ^{2}= \\dfrac{1}{n (n - 1)}\\left(n \\displaystyle∑_{i = 1}^{n} x{_\\text{i}}^{2}- \\left(\\displaystyle∑_{i = 1}^{n} x{_\\text{k}} \\right)^{2}\\right)"
   ],
-  ["(2n)!!/(2n+1)^2", "\\dfrac{(2 n)!!}{(2 n + 1)^{2}}"],
+  ["(2 n)!!/(2 n+1)^2", "\\dfrac{(2 \\, n)!!}{(2 \\, n + 1)^{2}}"],
   ["(1	2; 3	4)", "\\begin{pmatrix}1 & 2 \\\\ 3 & 4 \\end{pmatrix}"],
   ["cos⁻¹ 0.5", "\\cos^{\\text{-}1}{0.5}"]
 ]
@@ -462,6 +463,8 @@ end`, vars)
     [`testWhile(3) = @`, `®3/1 function testWhile 1`, `6`],
     [`testBreak() = @`, `function testBreak 0`, `6`],
     [`testThrow() = @`, `function testThrow 0`, `Error.`],
+    [`2 'ft' + 3 'inch' = @@ inch`, `®2/1 applyUnit ft ®3/1 applyUnit inch +`, '27 inch'],
+    [`2ft + 3inch = @@ inch`, `®2/1 applyUnit ft ®3/1 applyUnit inch +`, '27 inch'],
     [`2 'ft' + 3 'inch' = @@ V`, `®2/1 applyUnit ft ®3/1 applyUnit inch +`, 'Error. Calculated units are not compatible with the desired result unit: V'],
     [`[1; 2] < [2; 4] = @`, `®1/1 ®2/1 matrix 2 1 ®2/1 ®4/1 matrix 2 1 <`, `[true; true]`],
     [`[3; 2] < [2; 4] = @`, `®3/1 ®2/1 matrix 2 1 ®2/1 ®4/1 matrix 2 1 <`, `[false; true]`],
@@ -496,7 +499,7 @@ end`, vars)
     [`5!! = @`, "®5/1 !!", "15"],
     [`30!! = @`, "®30/1 !!", "42,849,873,690,624,000"],
     [`newton(x → cos x, y → -sin y, 1.5) = @`, `"x" "¿x§cos" → "y" "¿y§sin§~" → ®15/10 function newton 3`, "1.5707963267949"],
-    [`4 ∑_(n=1)³ 2n + 3 = @`, `®4/1 "n" ®1/1 ®3/1 "®2/1§¿n§⌧" ∑ ⌧ ®3/1 +`, "51"],
+    [`4 ∑_(n=1)³ 2 n + 3 = @`, `®4/1 "n" ®1/1 ®3/1 "®2/1§¿n§⌧" ∑ ⌧ ®3/1 +`, "51"],
     [`∑_(n=0)⁴ 2 n = @`, `"n" ®0/1 ®4/1 "®2/1§¿n§⌧" ∑`, "20"],
     [`1 'in⁻¹' × 2 'in⁻²' = @@ in⁻³`, `®1/1 applyUnit in⁻¹ ®2/1 applyUnit in⁻² ×`, "2 in⁻³"]
   ]

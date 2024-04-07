@@ -703,6 +703,14 @@ const lexOneWord = (str, prevToken) => {
   }
 }
 
+// Support a unit name written w/o a space after a number
+export const unitStartRegEx = /^(?:[A-Za-z°ʹ″$£¥₨₪€ÅΩ℃℉ΩKÅ]|ʹʹ)/
+const unitNameRegEx = /^(((?:[A-Za-z][A-Za-zōö]*\$?|[°ʹ″$£¥₨₪€ÅΩ℃℉ΩKÅ]|ʹʹ)(?:(?:(?:(?:\^|\^-)[1-9][0-9]*)|(?:\^\(-?[1-9][0-9]*\))|⁻?[¹²³\u2074-\u2079][⁰¹²³\u2074-\u2079]*))?)(?:[*·.•×]\2)*)(?:\/\1)?/
+export const lexUnitName = str => {
+  const match = unitNameRegEx.exec(str)
+  return [match[0], unitTeXFromString(match[0]), tt.UNIT, ""]
+}
+
 export const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
   // Get the next token in str. Return an array with the token's information:
   // [input, TeX output, type, associated close delimiter]
