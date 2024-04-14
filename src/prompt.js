@@ -1,5 +1,26 @@
 const prefix = "ProseMirror-prompt"
 
+function insertHint(params) {
+  if (params.inMathZone) {
+    const range = new Range()
+    range.setStart(params.textNode, params.start)
+    range.setEnd(params.textNode, params.end)
+    const hintNode = document.createElement('text')
+    hintNode.innerHTML = params.str
+    range.deleteContents()
+    range.insertNode(hintNode)
+    const sel = window.getSelection()
+    sel.removeAllRanges()
+    sel.addRange(range)
+    sel.collapseToEnd()
+  } else {
+    const tr = params.state.tr
+    tr.replaceSelectionWith(params.state.schema.text(params.str))
+    params.dispatch(tr)
+  }
+  document.getElementsByClassName("ProseMirror-prompt")[0].remove()
+}
+
 export function openPrompt(options) {
   const wrapper = document.body.appendChild(document.createElement("div"))
   wrapper.className = prefix
@@ -11,7 +32,7 @@ export function openPrompt(options) {
     if (wrapper.parentNode) { wrapper.parentNode.removeChild(wrapper) }
   }
 
-  const domFields = []
+  const domFields = [];
   // eslint-disable-next-line guard-for-in
   for (const name in options.fields) {
     domFields.push(options.fields[name].render())
@@ -73,6 +94,87 @@ export function openPrompt(options) {
     checkbox = { checked: false }
   }
 
+  if (options.hints) {
+    const sel = document.getSelection()
+    let node = sel.anchorNode
+    let inMathZone = false
+    let start = -1
+    let end = -1
+    if (node.nodeType === 3 && node.parentNode.parentNode.classList.contains("math-code")) {
+      inMathZone = true
+      start = Math.min(sel.anchorOffset, sel.extentOffset)
+      end = Math.max(sel.anchorOffset, sel.extentOffset)
+    } else if (node.nodeType === 1 && node.parentNode.classList.contains("math-code")) {
+      inMathZone = true
+      node = node.firstChild
+      start = node.length
+      end = node.length
+    } else {
+      start = options.state.selection.$from
+      end = options.state.selection.$to
+    }
+
+    if (options.title === "Display Selectors") {
+      const hintButtons = form.appendChild(document.createElement("table"))
+      hintButtons.className = "ProseMirror grid c1c c2c"
+      hintButtons.appendChild(document.createElement("tr"))
+      hintButtons.firstChild.append(document.createElement("th"))
+      hintButtons.firstChild.firstChild.textContent = "Regular"
+      hintButtons.firstChild.append(document.createElement("th"))
+      hintButtons.firstChild.children[1].textContent = "Unit-Aware"
+      hintButtons.firstChild.append(document.createElement("th"))
+      hintButtons.firstChild.children[2].textContent = "How much to display?"
+      for (let i = 0; i < 4; i++) {
+        hintButtons.appendChild(document.createElement("tr"))
+        for (let j = 0; j < 3; j++) {
+          hintButtons.children[i + 1].append(document.createElement("td"))
+          if (j < 2) {
+            const button = document.createElement("button")
+            button.className = "hint-button"
+            button.textContent = options.hints[i][j];
+            const params = { inMathZone, start, end }
+            if (inMathZone) {
+              params.textNode = node
+            } else {
+              params.state = options.state
+              params.dispatch = options.dispatch
+            }
+            params.str = button.textContent
+            button.addEventListener('click', (event) => insertHint(params))
+            hintButtons.children[i + 1].children[j].append(button)
+          } else {
+            hintButtons.children[i + 1].children[j].textContent = options.hints[i][j];
+          }
+        }
+      }
+    } else {
+      const hintButtons = form.appendChild(document.createElement("div"))
+      for (const hintRow of options.hints) {
+        for (const hint of hintRow) {
+          const button = document.createElement("button")
+          button.className = "hint-button"
+          const params = { inMathZone, start, end }
+          if (inMathZone) {
+            params.textNode = node
+          } else {
+            params.state = options.state
+            params.dispatch = options.dispatch
+          }
+          if (options.title === "Copy Accent") {
+            button.innerHTML = hint[0];
+            params.str = hint[1];
+          } else {
+            button.innerHTML = hint
+            params.str = hint
+          }
+          button.addEventListener('click', (event) => insertHint(params))
+          hintButtons.appendChild(button)
+        }
+        hintButtons.appendChild(document.createElement("br"))
+      }
+    }
+  }
+
   const buttons = form.appendChild(document.createElement("div"))
   buttons.className = prefix + "-buttons"
   buttons.appendChild(submitButton)
@@ -99,7 +201,9 @@ export function openPrompt(options) {
     params.checkbox = checkbox.checked
     if (params) {
       close()
-      options.callback(params)
+      if (options.callback) {
+        options.callback(params)
+      }
     }
   }
 

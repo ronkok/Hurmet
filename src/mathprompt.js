@@ -68,7 +68,13 @@ export function openMathPrompt(options) {
   const L = jar.toString().length
   jar.restore({ start: L, end: L, dir: undefined })
 
-  editor.addEventListener("blur", close )
+  const closeIfNotHint = _ => {
+    // Close, unless the math zone was blurred to click on a hint.
+    if (document.getElementsByClassName("ProseMirror-prompt").length === 0) {
+      close()
+    }
+  }
+  editor.addEventListener("blur", closeIfNotHint )
 
   const mathDisplay = wrapper.appendChild(document.createElement("div"))
   mathDisplay.setAttribute("class", "math-display")

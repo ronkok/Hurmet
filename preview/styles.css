@@ -413,7 +413,7 @@ li.ProseMirror-selectednode:after {
   position: relative;
   min-height: 1em;
   color: #666;
-  padding: 1px 83px;
+  padding: 1px 20Spx;
   top: 0; left: 0; right: 0;
   border-bottom: 1px solid silver;
   background: white;
@@ -445,6 +445,15 @@ li.ProseMirror-selectednode:after {
 .ProseMirror-icon span {
   vertical-align: text-top;
 }
+
+.math-button {
+  /*border-top: solid 1px;*/
+  background-color: #cde6f7;
+}
+.math-button + div {
+  background-color: white;
+}
+
 .ProseMirror-gapcursor {
   display: none;
   pointer-events: none;
@@ -579,6 +588,11 @@ figure figcaption {
   padding: 4px;
   color: #666;
   border: none; background: transparent;
+}
+
+.hint-button {
+  background-color: white;
+  border: none;
 }
 
 .ProseMirror-invalid {
@@ -1075,10 +1089,11 @@ math .special-fraction { font-family: "Times New Roman"; }
 }
 
 /* Table styles */
-.ProseMirror table.grid td, .ProseMirror table.grid th {
+table.grid { border-collapse: collapse; }
+table.grid td, table.grid th {
   border: 1px solid #ddd;
 }
-.ProseMirror table.grid th { font-weight: 600 }
+table.grid th { font-weight: 600 }
 
 .ProseMirror table.nogrid td, .ProseMirror table.nogrid th {
   border: none;

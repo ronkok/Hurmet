@@ -49080,6 +49080,27 @@ const schema = new Schema({nodes, marks});
 
 const prefix$1 = "ProseMirror-prompt";
 
+function insertHint(params) {
+  if (params.inMathZone) {
+    const range = new Range();
+    range.setStart(params.textNode, params.start);
+    range.setEnd(params.textNode, params.end);
+    const hintNode = document.createElement('text');
+    hintNode.innerHTML = params.str;
+    range.deleteContents();
+    range.insertNode(hintNode);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    sel.collapseToEnd();
+  } else {
+    const tr = params.state.tr;
+    tr.replaceSelectionWith(params.state.schema.text(params.str));
+    params.dispatch(tr);
+  }
+  document.getElementsByClassName("ProseMirror-prompt")[0].remove();
+}
+
 function openPrompt(options) {
   const wrapper = document.body.appendChild(document.createElement("div"));
   wrapper.className = prefix$1;
@@ -49153,6 +49174,87 @@ function openPrompt(options) {
     checkbox = { checked: false };
   }
 
+  if (options.hints) {
+    const sel = document.getSelection();
+    let node = sel.anchorNode;
+    let inMathZone = false;
+    let start = -1;
+    let end = -1;
+    if (node.nodeType === 3 && node.parentNode.parentNode.classList.contains("math-code")) {
+      inMathZone = true;
+      start = Math.min(sel.anchorOffset, sel.extentOffset);
+      end = Math.max(sel.anchorOffset, sel.extentOffset);
+    } else if (node.nodeType === 1 && node.parentNode.classList.contains("math-code")) {
+      inMathZone = true;
+      node = node.firstChild;
+      start = node.length;
+      end = node.length;
+    } else {
+      start = options.state.selection.$from;
+      end = options.state.selection.$to;
+    }
+
+    if (options.title === "Display Selectors") {
+      const hintButtons = form.appendChild(document.createElement("table"));
+      hintButtons.className = "ProseMirror grid c1c c2c";
+      hintButtons.appendChild(document.createElement("tr"));
+      hintButtons.firstChild.append(document.createElement("th"));
+      hintButtons.firstChild.firstChild.textContent = "Regular";
+      hintButtons.firstChild.append(document.createElement("th"));
+      hintButtons.firstChild.children[1].textContent = "Unit-Aware";
+      hintButtons.firstChild.append(document.createElement("th"));
+      hintButtons.firstChild.children[2].textContent = "How much to display?";
+      for (let i = 0; i < 4; i++) {
+        hintButtons.appendChild(document.createElement("tr"));
+        for (let j = 0; j < 3; j++) {
+          hintButtons.children[i + 1].append(document.createElement("td"));
+          if (j < 2) {
+            const button = document.createElement("button");
+            button.className = "hint-button";
+            button.textContent = options.hints[i][j];
+            const params = { inMathZone, start, end };
+            if (inMathZone) {
+              params.textNode = node;
+            } else {
+              params.state = options.state;
+              params.dispatch = options.dispatch;
+            }
+            params.str = button.textContent;
+            button.addEventListener('click', (event) => insertHint(params));
+            hintButtons.children[i + 1].children[j].append(button);
+          } else {
+            hintButtons.children[i + 1].children[j].textContent = options.hints[i][j];
+          }
+        }
+      }
+    } else {
+      const hintButtons = form.appendChild(document.createElement("div"));
+      for (const hintRow of options.hints) {
+        for (const hint of hintRow) {
+          const button = document.createElement("button");
+          button.className = "hint-button";
+          const params = { inMathZone, start, end };
+          if (inMathZone) {
+            params.textNode = node;
+          } else {
+            params.state = options.state;
+            params.dispatch = options.dispatch;
+          }
+          if (options.title === "Copy Accent") {
+            button.innerHTML = hint[0];
+            params.str = hint[1];
+          } else {
+            button.innerHTML = hint;
+            params.str = hint;
+          }
+          button.addEventListener('click', (event) => insertHint(params));
+          hintButtons.appendChild(button);
+        }
+        hintButtons.appendChild(document.createElement("br"));
+      }
+    }
+  }
+
   const buttons = form.appendChild(document.createElement("div"));
   buttons.className = prefix$1 + "-buttons";
   buttons.appendChild(submitButton);
@@ -49179,7 +49281,9 @@ function openPrompt(options) {
     params.checkbox = checkbox.checked;
     if (params) {
       close();
-      options.callback(params);
+      if (options.callback) {
+        options.callback(params);
+      }
     }
   };
 
@@ -49294,15 +49398,6 @@ class TextField extends Field {
     input.value = this.options.value || "";
     input.autocomplete = "off";
     return input
-  }
-}
-
-class CodeField extends Field {
-  render() {
-    const wrapper = document.createElement('pre');
-    wrapper.appendChild(document.createElement('code'));
-    wrapper.firstChild.textContent = this.options.value;
-    return wrapper
   }
 }
 
@@ -52463,14 +52558,13 @@ const print = () => {
   })
 };
 
-const hint = (label, promptTitle, text) => {
+const hint = (label, buttonTitle, promptTitle, className, hints) => {
   return new MenuItem({
     label: label,
-    run(state) {
-      const promptOptions = {
-        title: promptTitle,
-        fields: {code: new CodeField({ value: text })}
-      };
+    title: buttonTitle,
+    class: className,
+    run(state, dispatch, view) {
+      const promptOptions = { title: promptTitle, hints, state, dispatch };
       openPrompt(promptOptions);
     }
   })
@@ -53028,7 +53122,9 @@ function insertMath(state, view, encoding) {
 function mathMenuItem(nodeType, encoding) {
   return new MenuItem({
     title: "Insert " + ((encoding === "calculation") ? "a calculation cell  Alt-C" : "a TeX cell"),
-    icon: (encoding === "calculation") ? hurmetIcons.C : hurmetIcons.T,
+    label: (encoding === "calculation") ? " ℂ " : " 𝕋 ",
+    //icon: (encoding === "calculation") ? hurmetIcons.C : hurmetIcons.T,
+    class: "math-button",
     enable(state) { return canInsert(state, nodeType) },
     run(state, _, view) {
       insertMath(state, view, encoding);
@@ -53590,46 +53686,46 @@ function buildMenuItems(schema) {
     } 
   });
 
-  r.accessors = hint("Accessors…", "Accessors", `vector[number]
-vector[start:finish]
-matrix[rowNum, colNum]
-dataFrame.rowName.colName
-dataframe.colName[rowNum]
-dataframe["rowName"]["colName"]
-dataframe["rowName1"; "rowName2"]["col1", "col2"]`);
-  r.display = hint("Display…", "Display Selectors", `? - display entire equation
-@ - display result only
-% - omit echo
-! - hide result`);
-  r.letters = hint("Letters…", "Letters", `Γ Δ Θ Λ Ξ Π Σ Φ Ψ Ω
-α β γ δ ε ζ η θ ι κ λ μ
-ν ξ π ρ σ τ υ ϕ χ ψ ω
-𝐀 𝐁 𝐂 𝐃 𝐄 𝐅 𝐆 𝐇 𝐈 𝐉 𝐊 𝐋 𝐌
-𝐍 𝐎 𝐏 𝐐 𝐑 𝐒 𝐓 𝐔 𝐕 𝐖 𝐗 𝐘 𝐙
-𝐚 𝐛 𝐜 𝐝 𝐞 𝐟 𝐠 𝐡 𝐢 𝐣 𝐤 𝐥 𝐦
-𝐧 𝐨 𝐩 𝐪 𝐫 𝐬 𝐭 𝐮 𝐯 𝐰 𝐱 𝐲 𝐳
-ℂ ℍ ℕ ℚ ℝ ℤ ℏ ℓ
-𝒜 ℬ 𝒞 𝒟 ℰ ℱ 𝒢 ℋ ℐ 𝒦 ℒ ℳ
-𝒩 𝒪 𝒫 𝒬 ℛ 𝒮 𝒯 𝒰 𝒱 𝒲 𝒳 𝒴 𝒵
-bar hat vec harpoon dot ddot tilde`);
-  r.symbols = hint("Symbols…", "Symbols", `∀ ∃ ∞ ︀€ ¥ £ ø ✓ ° ′
-√ ∛ × * · ∘ ∕ ‖ ∠ ÷ ± ∓ ⊻ ¬ 
-≤ ≥ ≠ ≅ ≈ ∈ ∉ ⋐ ≡ ≔ → ← ↔ ⇒
-⎾ ⏋ ⎿ ⏌ ⟨ ⟩ ∧ ∨ ⋁ ∩ ⋂ ∪ ⋃ ∑ ∫ ∬ ∇`);
-  r.syntax = hint("Syntax", "Syntax", `a_subscript   b^exponent   x′
-(a+b) / (c+d)    1//2    2///3
-[1; 2; 3]    (a, b; c, d)
-[start:step:end] = ?
-{a if b; c otherwise}`);
+  r.accessors = hint("Accessors…", "Accessors", "Accessors", "",
+    [['vector[number]'],
+    ['vector[start:finish]'],
+    ['matrix[rowNum, colNum]'],
+    ['dataFrame.rowName.colName'],
+    ['dataframe.colName[rowNum]'],
+    ['dataframe["rowName"]["colName"]'],
+    ['dataframe["rowName1"; "rowName2"]["col1", "col2"]']]);
+  r.display = hint(" ?…", "Display Selectors", "Display Selectors", "math-button",
+    [["?", "??", "All"],
+    ["%", "%%", "Omit blue echo"],
+    ["!", "!!", "Omit result"],
+    ["@", "@@", "Result only"]]);
+  r.letters = hint(" Ω…", "Letters…", "Copy Letter", "math-button",
+    [["Γ", "Δ", "Θ", "Λ", "Ξ", "Π", "Σ", "Φ", "Ψ", "Ω"],
+    ["α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ"],
+    ["ν", "ξ", "π", "ρ", "σ", "τ", "υ", "ϕ", "χ", "ψ", "ω"],
+    ["ℂ", "ℍ", "ℕ", "ℚ", "ℝ", "ℤ", "ℏ", "ℓ"],
+    ["𝒜", "ℬ", "𝒞", "𝒟", "ℰ", "ℱ", "𝒢", "ℋ", "ℐ", "𝒦", "ℒ", "ℳ"],
+    ["𝒩", "𝒪", "𝒫", "𝒬", "ℛ", "𝒮", "𝒯", "𝒰", "𝒱", "𝒲", "𝒳", "𝒴", "𝒵"]]);
+  r.symbols = hint(" √…", "Symbols…", "Copy Symbol", "math-button",
+    [["∀", "∃", "∞", "︀€", "¥", "£", "ø", "✓", "°", "′"],
+    ["√", "∛", "×", "*", "·", "∘", "∕", "‖", "∠", "÷", "±", "∓", "⊻", "¬"],
+    ["≤", "≥", "≠", "≅", "≈", "∈", "∉", "⋐", "≡", "≔", "→", "←", "↔", "⇒"],
+    ["⎾", "⏋", "⎿", "⏌", "⟨", "⟩", "∧", "∨", "⋁", "∩", "⋂", "∪", "⋃", "∑", "∫", "∬", "∇"]]);
+  r.accents = hint(" â…", "Accents…", "Copy Accent", "math-button",
+    [[["acute", "\u0301"], ["bar", "\u0305"], ["breve", "\u0306"], ["check", "\u030c"], ["dot", "\u0307"], ["ddot", "\u0308"], ["grave", "\u0300"], ["hat", "\u0302"]],
+    [["harpoon", "\u20d1"], ["leftharpoon", "\u20d0"], ["leftrightvec", "\u20e1"], ["leftvec", "\u20d6"], ["ring", "\u030a"], ["tilde", "\u0303"], ["vec", "\u20d7"], ["ul", "\u0332"]]]);
+  r.syntax = hint("Syntax…", "Syntax", "Syntax", "",
+    [['a_subscript', 'b^exponent', 'x′'],
+    ['(a+b) / (c+d)', '1//2', '2///3'],
+    ['[1; 2; 3]', '(a, b; c, d)'],
+    ['[start:step:end] = ?'],
+    ['{a if b; c otherwise}']]);
 
   r.hintDropDown = new Dropdown([
     r.accessors,
-    r.display,
-    r.letters,
-    r.symbols,
     r.syntax
   ],
-  { label: "Q", title: "Quick Reference" }
+  { label: "Q", title: "Quick Reference", class: "math-button" }
   );
 
   // Now that the menu buttons are created, assemble them into the menu.
@@ -53689,9 +53785,6 @@ bar hat vec harpoon dot ddot tilde`);
     r.imageLink,
     r.footnote,
     r.toc,
-    r.insertCalclation,
-    r.insertTeX,
-    //r.macroButton,
     r.insertComment
   ]];
 
@@ -53754,13 +53847,24 @@ bar hat vec harpoon dot ddot tilde`);
   r.pasteAsMarkdown = pasteAsMarkdown();
   r.Markdown = new Dropdown([r.copyAsMarkdown, r.copyAsGFM, r.pasteAsMarkdown], {label: "𝐌"});
 
+  r.math = [[
+    r.insertCalclation,
+    r.display,
+    r.insertTeX,
+    r.letters,
+    r.symbols,
+    r.accents,
+    r.hintDropDown
+  ]];
+
   r.fullMenu = r.fileMenu.concat(
     [[undoItem, redoItem, r.Markdown]],
     r.inlineMenu,
     r.insertMenu,
     r.typeMenu,
     r.blockMenu,
-    [[r.help, r.hintDropDown]],
+    r.math,
+    [[r.help]],
     r.tableMenu
   );
 
@@ -54960,7 +55064,13 @@ function openMathPrompt(options) {
   const L = jar.toString().length;
   jar.restore({ start: L, end: L, dir: undefined });
 
-  editor.addEventListener("blur", close );
+  const closeIfNotHint = _ => {
+    // Close, unless the math zone was blurred to click on a hint.
+    if (document.getElementsByClassName("ProseMirror-prompt").length === 0) {
+      close();
+    }
+  };
+  editor.addEventListener("blur", closeIfNotHint );
 
   const mathDisplay = wrapper.appendChild(document.createElement("div"));
   mathDisplay.setAttribute("class", "math-display");

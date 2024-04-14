@@ -338,14 +338,13 @@ const print = () => {
   })
 }
 
-const hint = (label, promptTitle, text) => {
+const hint = (label, buttonTitle, promptTitle, className, hints) => {
   return new MenuItem({
     label: label,
-    run(state) {
-      const promptOptions = {
-        title: promptTitle,
-        fields: {code: new CodeField({ value: text })}
-      }
+    title: buttonTitle,
+    class: className,
+    run(state, dispatch, view) {
+      const promptOptions = { title: promptTitle, hints, state, dispatch }
       openPrompt(promptOptions)
     }
   })
@@ -904,7 +903,9 @@ export function insertMath(state, view, encoding) {
 function mathMenuItem(nodeType, encoding) {
   return new MenuItem({
     title: "Insert " + ((encoding === "calculation") ? "a calculation cell  Alt-C" : "a TeX cell"),
-    icon: (encoding === "calculation") ? hurmetIcons.C : hurmetIcons.T,
+    label: (encoding === "calculation") ? " ℂ " : " 𝕋 ",
+    //icon: (encoding === "calculation") ? hurmetIcons.C : hurmetIcons.T,
+    class: "math-button",
     enable(state) { return canInsert(state, nodeType) },
     run(state, _, view) {
       insertMath(state, view, encoding);
@@ -1468,46 +1469,46 @@ export function buildMenuItems(schema) {
     } 
   })
 
-  r.accessors = hint("Accessors…", "Accessors", `vector[number]
-vector[start:finish]
-matrix[rowNum, colNum]
-dataFrame.rowName.colName
-dataframe.colName[rowNum]
-dataframe["rowName"]["colName"]
-dataframe["rowName1"; "rowName2"]["col1", "col2"]`)
-  r.display = hint("Display…", "Display Selectors", `? - display entire equation
-@ - display result only
-% - omit echo
-! - hide result`)
-  r.letters = hint("Letters…", "Letters", `Γ Δ Θ Λ Ξ Π Σ Φ Ψ Ω
-α β γ δ ε ζ η θ ι κ λ μ
-ν ξ π ρ σ τ υ ϕ χ ψ ω
-𝐀 𝐁 𝐂 𝐃 𝐄 𝐅 𝐆 𝐇 𝐈 𝐉 𝐊 𝐋 𝐌
-𝐍 𝐎 𝐏 𝐐 𝐑 𝐒 𝐓 𝐔 𝐕 𝐖 𝐗 𝐘 𝐙
-𝐚 𝐛 𝐜 𝐝 𝐞 𝐟 𝐠 𝐡 𝐢 𝐣 𝐤 𝐥 𝐦
-𝐧 𝐨 𝐩 𝐪 𝐫 𝐬 𝐭 𝐮 𝐯 𝐰 𝐱 𝐲 𝐳
-ℂ ℍ ℕ ℚ ℝ ℤ ℏ ℓ
-𝒜 ℬ 𝒞 𝒟 ℰ ℱ 𝒢 ℋ ℐ 𝒦 ℒ ℳ
-𝒩 𝒪 𝒫 𝒬 ℛ 𝒮 𝒯 𝒰 𝒱 𝒲 𝒳 𝒴 𝒵
-bar hat vec harpoon dot ddot tilde`)
-  r.symbols = hint("Symbols…", "Symbols", `∀ ∃ ∞ ︀€ ¥ £ ø ✓ ° ′
-√ ∛ × * · ∘ ∕ ‖ ∠ ÷ ± ∓ ⊻ ¬ 
-≤ ≥ ≠ ≅ ≈ ∈ ∉ ⋐ ≡ ≔ → ← ↔ ⇒
-⎾ ⏋ ⎿ ⏌ ⟨ ⟩ ∧ ∨ ⋁ ∩ ⋂ ∪ ⋃ ∑ ∫ ∬ ∇`)
-  r.syntax = hint("Syntax", "Syntax", `a_subscript   b^exponent   x′
-(a+b) / (c+d)    1//2    2///3
-[1; 2; 3]    (a, b; c, d)
-[start:step:end] = ?
-{a if b; c otherwise}`)
+  r.accessors = hint("Accessors…", "Accessors", "Accessors", "",
+    [['vector[number]'],
+    ['vector[start:finish]'],
+    ['matrix[rowNum, colNum]'],
+    ['dataFrame.rowName.colName'],
+    ['dataframe.colName[rowNum]'],
+    ['dataframe["rowName"]["colName"]'],
+    ['dataframe["rowName1"; "rowName2"]["col1", "col2"]']])
+  r.display = hint(" ?…", "Display Selectors", "Display Selectors", "math-button",
+    [["?", "??", "All"],
+    ["%", "%%", "Omit blue echo"],
+    ["!", "!!", "Omit result"],
+    ["@", "@@", "Result only"]])
+  r.letters = hint(" Ω…", "Letters…", "Copy Letter", "math-button",
+    [["Γ", "Δ", "Θ", "Λ", "Ξ", "Π", "Σ", "Φ", "Ψ", "Ω"],
+    ["α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ"],
+    ["ν", "ξ", "π", "ρ", "σ", "τ", "υ", "ϕ", "χ", "ψ", "ω"],
+    ["ℂ", "ℍ", "ℕ", "ℚ", "ℝ", "ℤ", "ℏ", "ℓ"],
+    ["𝒜", "ℬ", "𝒞", "𝒟", "ℰ", "ℱ", "𝒢", "ℋ", "ℐ", "𝒦", "ℒ", "ℳ"],
+    ["𝒩", "𝒪", "𝒫", "𝒬", "ℛ", "𝒮", "𝒯", "𝒰", "𝒱", "𝒲", "𝒳", "𝒴", "𝒵"]])
+  r.symbols = hint(" √…", "Symbols…", "Copy Symbol", "math-button",
+    [["∀", "∃", "∞", "︀€", "¥", "£", "ø", "✓", "°", "′"],
+    ["√", "∛", "×", "*", "·", "∘", "∕", "‖", "∠", "÷", "±", "∓", "⊻", "¬"],
+    ["≤", "≥", "≠", "≅", "≈", "∈", "∉", "⋐", "≡", "≔", "→", "←", "↔", "⇒"],
+    ["⎾", "⏋", "⎿", "⏌", "⟨", "⟩", "∧", "∨", "⋁", "∩", "⋂", "∪", "⋃", "∑", "∫", "∬", "∇"]])
+  r.accents = hint(" â…", "Accents…", "Copy Accent", "math-button",
+    [[["acute", "\u0301"], ["bar", "\u0305"], ["breve", "\u0306"], ["check", "\u030c"], ["dot", "\u0307"], ["ddot", "\u0308"], ["grave", "\u0300"], ["hat", "\u0302"]],
+    [["harpoon", "\u20d1"], ["leftharpoon", "\u20d0"], ["leftrightvec", "\u20e1"], ["leftvec", "\u20d6"], ["ring", "\u030a"], ["tilde", "\u0303"], ["vec", "\u20d7"], ["ul", "\u0332"]]])
+  r.syntax = hint("Syntax…", "Syntax", "Syntax", "",
+    [['a_subscript', 'b^exponent', 'x′'],
+    ['(a+b) / (c+d)', '1//2', '2///3'],
+    ['[1; 2; 3]', '(a, b; c, d)'],
+    ['[start:step:end] = ?'],
+    ['{a if b; c otherwise}']])
 
   r.hintDropDown = new Dropdown([
     r.accessors,
-    r.display,
-    r.letters,
-    r.symbols,
     r.syntax
   ],
-  { label: "Q", title: "Quick Reference" }
+  { label: "Q", title: "Quick Reference", class: "math-button" }
   )
 
   // Now that the menu buttons are created, assemble them into the menu.
@@ -1567,9 +1568,6 @@ bar hat vec harpoon dot ddot tilde`)
     r.imageLink,
     r.footnote,
     r.toc,
-    r.insertCalclation,
-    r.insertTeX,
-    //r.macroButton,
     r.insertComment
   ]]
 
@@ -1632,13 +1630,24 @@ bar hat vec harpoon dot ddot tilde`)
   r.pasteAsMarkdown = pasteAsMarkdown()
   r.Markdown = new Dropdown([r.copyAsMarkdown, r.copyAsGFM, r.pasteAsMarkdown], {label: "𝐌"})
 
+  r.math = [[
+    r.insertCalclation,
+    r.display,
+    r.insertTeX,
+    r.letters,
+    r.symbols,
+    r.accents,
+    r.hintDropDown
+  ]]
+
   r.fullMenu = r.fileMenu.concat(
     [[undoItem, redoItem, r.Markdown]],
     r.inlineMenu,
     r.insertMenu,
     r.typeMenu,
     r.blockMenu,
-    [[r.help, r.hintDropDown]],
+    r.math,
+    [[r.help]],
     r.tableMenu
   )
 
