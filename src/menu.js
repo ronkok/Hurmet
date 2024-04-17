@@ -895,7 +895,7 @@ function mathMenuItem(nodeType, encoding) {
     title: "Insert " + ((encoding === "calculation") ? "a calculation cell  Alt-C" : "a TeX cell"),
     label: (encoding === "calculation") ? " ℂ " : " 𝕋 ",
     //icon: (encoding === "calculation") ? hurmetIcons.C : hurmetIcons.T,
-    class: "math-button",
+    class: (encoding === "tex") ? "math-button" : "mb-left",
     enable(state) { return canInsert(state, nodeType) },
     run(state, _, view) {
       insertMath(state, view, encoding);
@@ -1467,12 +1467,12 @@ export function buildMenuItems(schema) {
     ['dataframe.colName[rowNum]'],
     ['dataframe["rowName"]["colName"]'],
     ['dataframe["rowName1"; "rowName2"]["col1", "col2"]']])
-  r.display = hint(" ?…", "Display Selectors", "Display Selectors", "math-button",
+  r.display = hint(" ?… ", "Display Selectors", "Display Selectors", "math-button",
     [["?", "??", "All"],
     ["%", "%%", "Omit blue echo"],
     ["!", "!!", "Omit result"],
     ["@", "@@", "Result only"]])
-  r.letters = hint(" Ω…", "Letters…", "Copy Letter", "math-button",
+  r.letters = hint(" Ω… ", "Letters…", "Copy Letter", "math-button",
     [["Γ", "Δ", "Θ", "Λ", "Ξ", "Π", "Σ", "Φ", "Ψ", "Ω"],
     ["α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ"],
     ["ν", "ξ", "π", "ρ", "σ", "τ", "υ", "ϕ", "χ", "ψ", "ω"],
@@ -1483,12 +1483,12 @@ export function buildMenuItems(schema) {
     ["ℂ", "ℍ", "ℕ", "ℚ", "ℝ", "ℤ", "ℏ", "ℓ"],
     ["𝒜", "ℬ", "𝒞", "𝒟", "ℰ", "ℱ", "𝒢", "ℋ", "ℐ", "𝒦", "ℒ", "ℳ"],
     ["𝒩", "𝒪", "𝒫", "𝒬", "ℛ", "𝒮", "𝒯", "𝒰", "𝒱", "𝒲", "𝒳", "𝒴", "𝒵"]])
-  r.symbols = hint(" √…", "Symbols…", "Copy Symbol", "math-button",
+  r.symbols = hint(" √… ", "Symbols…", "Copy Symbol", "math-button",
     [["∀", "∃", "∞", "︀€", "¥", "£", "ø", "✓", "°", "′"],
     ["√", "∛", "×", "*", "·", "∘", "∕", "‖", "∠", "÷", "±", "∓", "⊻", "¬"],
     ["≤", "≥", "≠", "≅", "≈", "∈", "∉", "⋐", "≡", "≔", "→", "←", "↔", "⇒"],
     ["⎾", "⏋", "⎿", "⏌", "⟨", "⟩", "∧", "∨", "⋁", "∩", "⋂", "∪", "⋃", "∑", "∫", "∬", "∇"]])
-  r.accents = hint(" â…", "Accents…", "Copy Accent", "math-button",
+  r.accents = hint(" â… ", "Accents…", "Copy Accent", "math-button",
     [[["acute", "\u0301"], ["bar", "\u0305"], ["breve", "\u0306"], ["check", "\u030c"], ["dot", "\u0307"], ["ddot", "\u0308"], ["grave", "\u0300"], ["hat", "\u0302"]],
     [["harpoon", "\u20d1"], ["leftharpoon", "\u20d0"], ["leftrightvec", "\u20e1"], ["leftvec", "\u20d6"], ["ring", "\u030a"], ["tilde", "\u0303"], ["vec", "\u20d7"], ["ul", "\u0332"]]])
   r.syntax = hint("Syntax…", "Syntax", "Syntax", "",
@@ -1497,13 +1497,36 @@ export function buildMenuItems(schema) {
     ['[1; 2; 3]', '(a, b; c, d)'],
     ['[start:step:end] = ?'],
     ['{a if b; c otherwise}']])
+  r.trig = hint("Trigonometry…", "Trigonometry", "Trigonometry Functions", "",
+    [["cos", "sin", "tan", "sec", "csc", "cot"],
+    ["acos", "asin", "atan", "atan2", "asec", "acsc", "acot"],
+    ["cosd", "sind", "tand", "secd", "cscd", "cotd"],
+    ["acosd", "asind", "atand", "asecd", "acscd", "acotd"]])
+  r.hyperbolic = hint("Hyperbolic…", "Hyperbolic", "Hyperbolic Functions", "",
+    [["cosh", "sinh", "tanh", "sech", "csch", "coth"],
+    ["acosh", "asinh", "atanh", "asech", "acsch", "acoth"]])
+  r.math = hint("Math…", "Math", "Math Functions", "",
+    [["ln", "log", "log10", "log2", "logn"],
+    ["binomial", "exp", "factorial", "lfact", "lgamma", "gamma", "Γ"],
+    ["isnan", "Int", "abs", "ceil", "floor", "sign"],
+    ["conj", "imag", "real", "angle"],
+    ["gcd", "hypot", "rand", "rms", "mod", "rem"],
+    ["format", "round", "roundSig", "roundn"]])
+  r.matrix = hint("Matrix…", "Matrix", "Matrix Functions", "",
+    [["length", "accumulate", "findmax", "hcat", "vcat"],
+    ["lerp", "trace", "transpose", "ones", "zeros", "matrix2table"]])
+  r.reducers = hint("Reducer…", "Reducer", "Reducer Functions", "",
+    [["accumulate", "dataframe", "findfirst", "matrix2table"],
+    ["min", "max", "sum", "mean", "median"],
+    ["product", "range", "stddev", "variance"]])
+  r.string = hint("String…", "String", "String Functions", "",
+    [["fetch", "Char", "count", "number", "string"]])
+  r.functionsDropDown = new Dropdown([r.trig, r.hyperbolic, r.math, r.matrix, r.reducers, r.string],
+    { label: " 𝑓", title: "Functions", class: "math-dropdown" })
 
-  r.hintDropDown = new Dropdown([
-    r.accessors,
-    r.syntax
-  ],
-  { label: "Q", title: "Quick Reference", class: "math-button" }
-  )
+  r.hintDropDown = new Dropdown(
+    [r.accessors, r.syntax],
+    { label: "Q", title: "Quick Reference", class: "md-right" })
 
   // Now that the menu buttons are created, assemble them into the menu.
   
@@ -1626,11 +1649,12 @@ export function buildMenuItems(schema) {
 
   r.math = [[
     r.insertCalclation,
-    r.display,
     r.insertTeX,
     r.letters,
     r.symbols,
     r.accents,
+    r.display,
+    r.functionsDropDown,
     r.hintDropDown
   ]]
 

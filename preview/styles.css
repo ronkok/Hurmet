@@ -447,11 +447,33 @@ li.ProseMirror-selectednode:after {
 }
 
 .math-button {
-  /*border-top: solid 1px;*/
-  background-color: #cde6f7;
+  font-size: 18px;
+  border-top: solid 1px;
+  border-bottom: solid 1px;
+  margin-left: -3px;
 }
-.math-button + div {
-  background-color: white;
+.mb-left {
+  font-size: 18px;
+  border-top: solid 1px;
+  border-bottom: solid 1px;
+  margin-left: -3px;
+  border-left: solid 1px;
+}
+.math-dropdown {
+  font-size: 18px;
+  border-top: solid 1px;
+  border-bottom: solid 1px;
+  margin-left: -7px;
+}
+.md-right {
+  font-size: 18px;
+  border-top: solid 1px;
+  border-bottom: solid 1px;
+  border-right: solid 1px;
+  margin-left: -7px;
+}
+.math-dropdown + *, .md-right + * {
+  font-size: 16px;
 }
 
 .ProseMirror-gapcursor {
