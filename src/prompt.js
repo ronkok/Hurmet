@@ -61,23 +61,51 @@ export function openPrompt(options) {
   })
 
   if (options.radioButtons) {
-    // Create buttons for image placement.
+    // Create buttons for image placement or rounding criteria.
     const radioGroup = document.createElement("div")
+    radioGroup.style.display = "flex"
+    radioGroup.style["flex-direction"] = options.radioButtons.direction
     const current = options.radioButtons.current
-    options.radioButtons.labels.forEach(label => {
+    options.radioButtons.buttons.forEach(btn => {
+      const span = document.createElement("span")
       const button = document.createElement("input")
       button.type = "radio"
       button.name = options.radioButtons.name
-      button.value = label
-      button.setAttribute('id', label)
-      if (label === current) { button.setAttribute("checked", null) }
+      button.value = btn[0]; // label
+      button.setAttribute('id', btn[0])
+      if (btn[0] === current) { button.setAttribute("checked", null) }
       const labelTag = document.createElement("label")
-      labelTag.setAttribute("for", label)
-      labelTag.appendChild(document.createTextNode(label))
-      radioGroup.appendChild(button)
-      radioGroup.appendChild(labelTag)
+      labelTag.setAttribute("for", btn[1])
+      labelTag.appendChild(document.createTextNode(btn[1]))
+      span.appendChild(button)
+      span.appendChild(labelTag)
+      radioGroup.appendChild(span)
     })
-    form.appendChild(radioGroup)
+    if (options.radioButtons.name !== "rounding") {
+      form.appendChild(radioGroup)
+    } else {
+      const container = document.createElement("div")
+      container.style.display = "flex"
+      container.style["flex-direction"] = "row"
+      container.style["align-items"] = "center"
+      container.appendChild(radioGroup)
+      const digitDiv = document.createElement("div")
+      digitDiv.style.display = "flex"
+      digitDiv.style["flex-direction"] = "column"
+      digitDiv.style.margin = "3em"
+      const digitLabel = document.createElement("label")
+      digitDiv.appendChild(digitLabel)
+      digitLabel.setAttribute("for", "digits")
+      digitLabel.textContent = "Number of digits"
+      const digitBox = document.createElement("input")
+      digitBox.setAttribute("type", "text")
+      digitBox.setAttribute("name", "digits")
+      digitBox.style.width = "3em"
+      digitBox.setAttribute("value", options.numDigits)
+      digitDiv.appendChild(digitBox)
+      container.appendChild(digitDiv)
+      form.appendChild(container)
+    }
   }
 
   let checkbox
@@ -194,6 +222,9 @@ export function openPrompt(options) {
     const params = getValues(options.fields, domFields)
     if (options.radioButtons && !checkbox.checked) {
       params.class = form[options.radioButtons.name].value
+      if (options.radioButtons.name === "rounding") {
+        params.value = form[options.radioButtons.name].value + form.digits.value
+      }
     }
     if (options.src && !params.src) {
       params.src = options.src
@@ -234,7 +265,9 @@ export function openPrompt(options) {
   })
 
   const input = form.elements[0]
-  if (input) { input.focus() }
+  if (input && input.type && input.type === "text") {
+    input.focus()
+  }
 }
 
 function getValues(fields, domFields) {

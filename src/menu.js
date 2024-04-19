@@ -660,7 +660,8 @@ function insertImage(nodeType) {
         },
         radioButtons: {
           name: "position",
-          labels: ["inline", "left", "center", "right"],
+          direction: "row",
+          buttons: [["inline", "inline"], ["left", "left"],  ["center", "center"], ["right", "right"]],
           current: attrs && attrs.class ? attrs.class : "inline"
         },
         callback(attrs) {
@@ -689,6 +690,65 @@ function insertImage(nodeType) {
         promptOptions.checkbox = {
           name: "Include a caption",
           checked: false
+        }
+      }
+      openPrompt(promptOptions)
+    }
+  })
+}
+
+function setRoundingCriteria(nodeType) {
+  return new MenuItem({
+    title: "Insert link to image or edit existing image",
+    label: " .#… ",
+    class: "math-button",
+    enable(state) {
+      return canInsert(state, nodeType)
+    },
+    run(state, _, view) {
+      // Get the current loading criteria.
+      let formatSpec = "h3" // default
+      const currentPos = state.selection.$from.pos
+      state.doc.nodesBetween(0, currentPos, function(node, pos) {
+        if (node.type.name === "calculation" && node.attrs.name === "format") {
+          formatSpec = node.attrs.value
+        }
+      })
+      const promptOptions = {
+        title: "Rounding Criteria",
+        radioButtons: {
+          name: "rounding",
+          direction: "column",
+          buttons: [
+            ["f", "Digits after decimal (f)"],
+            ["r", "Significant digits (r)"],
+            ["h", "Significant digits in fraction (h)"],
+            ["S", "Scientific (S)"],
+            ["N", "Engineering (N)"],
+            ["e", "Programmer (e)"],
+            ["k", "SI prefix (k)"],
+            ["%", "Percentage (%)"],
+            ["t", "Truncate to integer (t)"],
+            ["b", "Binary (b)"],
+            ["x", "Hexadecimal (x)"]
+          ],
+          current: formatSpec.slice(0, 1)
+        },
+        numDigits: formatSpec.slice(1),
+        callback(params) {
+          let spec = params.value
+          const numDigits = spec.slice(1)
+          if (numDigits.length === 0) { spec += "0"}
+          if (isNaN(numDigits)) {
+            alert("Invalid number of digits")
+            return
+          }
+          const attrs = hurmet.compile(`format = "${spec}"`)
+          const tr = view.state.tr
+          tr.replaceSelectionWith(schema.nodes.calculation.createAndFill(attrs))
+          view.dispatch(tr)
+          hurmet.updateCalculations(view, schema.nodes.calculation, true)
+          view.focus()
         }
       }
       openPrompt(promptOptions)
@@ -1472,7 +1532,7 @@ export function buildMenuItems(schema) {
     ["%", "%%", "Omit blue echo"],
     ["!", "!!", "Omit result"],
     ["@", "@@", "Result only"]])
-  r.letters = hint(" Ω… ", "Letters…", "Copy Letter", "math-button",
+  r.letters = hint(" Ω… ", "Letters…", "Letters", "math-button",
     [["Γ", "Δ", "Θ", "Λ", "Ξ", "Π", "Σ", "Φ", "Ψ", "Ω"],
     ["α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ"],
     ["ν", "ξ", "π", "ρ", "σ", "τ", "υ", "ϕ", "χ", "ψ", "ω"],
@@ -1483,12 +1543,12 @@ export function buildMenuItems(schema) {
     ["ℂ", "ℍ", "ℕ", "ℚ", "ℝ", "ℤ", "ℏ", "ℓ"],
     ["𝒜", "ℬ", "𝒞", "𝒟", "ℰ", "ℱ", "𝒢", "ℋ", "ℐ", "𝒦", "ℒ", "ℳ"],
     ["𝒩", "𝒪", "𝒫", "𝒬", "ℛ", "𝒮", "𝒯", "𝒰", "𝒱", "𝒲", "𝒳", "𝒴", "𝒵"]])
-  r.symbols = hint(" √… ", "Symbols…", "Copy Symbol", "math-button",
+  r.symbols = hint(" √… ", "Symbols…", "Symbols", "math-button",
     [["∀", "∃", "∞", "︀€", "¥", "£", "ø", "✓", "°", "′"],
     ["√", "∛", "×", "*", "·", "∘", "∕", "‖", "∠", "÷", "±", "∓", "⊻", "¬"],
     ["≤", "≥", "≠", "≅", "≈", "∈", "∉", "⋐", "≡", "≔", "→", "←", "↔", "⇒"],
     ["⎾", "⏋", "⎿", "⏌", "⟨", "⟩", "∧", "∨", "⋁", "∩", "⋂", "∪", "⋃", "∑", "∫", "∬", "∇"]])
-  r.accents = hint(" â… ", "Accents…", "Copy Accent", "math-button",
+  r.accents = hint(" â… ", "Accents…", "Accents", "math-button",
     [[["acute", "\u0301"], ["bar", "\u0305"], ["breve", "\u0306"], ["check", "\u030c"], ["dot", "\u0307"], ["ddot", "\u0308"], ["grave", "\u0300"], ["hat", "\u0302"]],
     [["harpoon", "\u20d1"], ["leftharpoon", "\u20d0"], ["leftrightvec", "\u20e1"], ["leftvec", "\u20d6"], ["ring", "\u030a"], ["tilde", "\u0303"], ["vec", "\u20d7"], ["ul", "\u0332"]]])
   r.syntax = hint("Syntax…", "Syntax", "Syntax", "",
@@ -1523,7 +1583,7 @@ export function buildMenuItems(schema) {
     [["fetch", "Char", "count", "number", "string"]])
   r.functionsDropDown = new Dropdown([r.trig, r.hyperbolic, r.math, r.matrix, r.reducers, r.string],
     { label: " 𝑓", title: "Functions", class: "math-dropdown" })
-
+  r.rounding = setRoundingCriteria(schema.nodes.calculation)
   r.hintDropDown = new Dropdown(
     [r.accessors, r.syntax],
     { label: "Q", title: "Quick Reference", class: "md-right" })
@@ -1654,6 +1714,7 @@ export function buildMenuItems(schema) {
     r.symbols,
     r.accents,
     r.display,
+    r.rounding,
     r.functionsDropDown,
     r.hintDropDown
   ]]
