@@ -425,7 +425,8 @@ Accents and Primes
 
 Units
 
-: After a number, write a Hurmet _unit_ between two single quotation marks,
+: After a number, write a Hurmet _unit_ directly after a number, with no intervening
+  space, like this: `5meters`, or between two single quotation marks,
   like this: `5 'meters'`. Or, prepend a currency symbol to a number, e.g. `$30`.
 
 Unit-Aware Calcs
@@ -433,7 +434,7 @@ Unit-Aware Calcs
 : Hurmet can automatically handle unit conversions of quantities. To call for a
   unit-aware calculations, write `??` instead of `?` where you want the result to
   appear. Example:\
-  `2 × 3.1 'm' = ?? ft` results in ¢`2 × (3.1 'm') = 13.1 ft`.
+  `2 × 3.1m = ?? ft` results in ¢`2 × (3.1m) = 13.1 ft`.
 
   This is covered in more detail [below](#unit-aware-calculations).
 
@@ -616,9 +617,9 @@ It’s quite simple to assign a value to a variable:
 +===================================+====================+
 | ![identifier = value][assignment] | `x = 5`            |
 |                                   +--------------------+
-|                                   | `L = 3.1 'm'`      |
+|                                   | `L = 3.1 m`        |
 |                                   +--------------------+
-|                                   | `w = 100 'lbf/ft'` |
+|                                   | `w = 100 lbf/ft`   |
 |                                   +--------------------+
 |                                   | name = "James"     |
 +-----------------------------------+--------------------+
@@ -636,7 +637,7 @@ result should appear. Here are some examples:
 | `A = 2 × 4 = ?`                | ¢`A = 2 × 4 = 8`                                      |
 | `x = 2 A = ?`                  | ¢`x = 2 A = \color(blue)((2)(8)) \color(black) = 16`  |
 | `x = 2 A = %`                  | ¢`x = 2 A = 16`                                       |
-| `A = 2 'm' × 4 'feet' = ?? m²` | ¢`A = 2'm' × 4 'feet' = 2.4384 'm²'`                  |
+| `A = 2m × 4feet = ?? m²`       | ¢`A = 2m × 4 'feet' = 2.4384m²`                       |
 {.table-no-wrap}
 
 The statement form is more precisely defined as:
@@ -1698,12 +1699,13 @@ Also, a unit-less number can be multiplied times a data frame that has numeric v
 
 Hurmet has a data type called a [quantity](#quantity) that contains both a
 numeric magnitude and a unit of measure. In a Hurmet calculation editing box,
-you transform a number into a quantity literal by appending a unit name between
+you transform a number into a quantity literal by appending a unit name.
+Either omit any space before the unit name or write the unit name between
 single quotation marks. Examples:
 
-+--------------+---------------+------------+
-| `4 'meters'` | `7.1 'ft3/s'` | `11 'N·m'` |
-+--------------+---------------+------------+
++-----------+---------------+---------+
+| `4meters` | `7.1 'ft3/s'` | `11N·m` |
++-----------+---------------+---------+
 {.nogrid}
 
 Hurmet has a **unit-aware** calculation mode that automatically handles unit
@@ -1712,34 +1714,34 @@ unit-compatible. You specify unit-aware mode by writing two question marks
 instead of one in the place where you want a result to appear. So if you open
 a Hurmet calculation cell and write:
 
-`4 'ft' + 3 'yards' = ?? m`
+`4ft + 3 'yards' = ?? m`
 
 … the result will render as:
 
-¢`4 'ft' + 3 'yards' = 3.9624 'm'`
+¢`4ft + 3 'yards' = 3.9624 'm'`
 
 You can create composite units on the fly and Hurmet will still convert them
 automatically.
 
-¢`(3 'kW·hr' × (20 'min')) / (800 'lbf' × 1 'h') = 1.0116402439486971731 'km'`
+¢`(3kW·hr × (20min)) / (800lbf × 1h) = 1.0116402439486971731 'km'`
 
 If you try to add quantities with non-compatible units, Hurmet will return an
 error message:
 
-¢`3 'm' + 2 'V' = \color(firebrick) "Error. Adding incompatible units."`
+¢`3m + 2V = \color(firebrick) "Error. Adding incompatible units."`
 
 If the calculated units are non-compatible with the units specified for the
 result display, Hurmet will return an error message:
 
-¢`3 'm' + 2 'ft' = \color(firebrick) "Error. Calculated units are not
+¢`3m + 2ft = \color(firebrick) "Error. Calculated units are not
 compatible with the desired result unit:"\, "V"`
 
 If you assign a quantity to a variable, a unit-aware calculation will call the
 variable’s entire quantity, not just the numeric value.
 
-¢`L = 3 'ft'`
+¢`L = 3ft`
 
-¢`L_2 = 2 L = \color(blue)(2) (3 'ft') \color(black) = 1.8288 'm'`
+¢`L_2 = 2 L = \color(blue)(2) (3ft) \color(black) = 1.8288 'm'`
 
 If you assign a quantity to a variable, you can still call the variable from a
 non-unit-aware calculation. Such a calculation will call the scalar value, not
