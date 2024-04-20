@@ -188,7 +188,7 @@ export function openPrompt(options) {
             params.state = options.state
             params.dispatch = options.dispatch
           }
-          if (options.title === "Copy Accent") {
+          if (options.title === "Accents") {
             button.innerHTML = hint[0];
             params.str = hint[1];
           } else {
