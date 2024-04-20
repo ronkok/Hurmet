@@ -1139,7 +1139,6 @@ table.grid th { font-weight: 600 }
 .ProseMirror table.three-rules tr:last-child td { border-bottom: 2px solid #111111; }
 
 .ProseMirror table.four-rules th { border-top: 2px solid #111111; border-bottom: 1px solid #111111; }
-.ProseMirror table.four-rules tr:nth-child(5n) td { padding-bottom: 1em; }
 .ProseMirror table.four-rules tr:last-child td { border-top: 1px solid #111111; border-bottom: 2px solid #111111; }
 
 .ProseMirror table.striped th, .ProseMirror table.striped td { border: 1px solid #ddd }
