@@ -29,10 +29,10 @@ const handleContents = (view, schema, str, format) => {
   }
   const fontSize = (doc.attrs.fontSize) ? Number(doc.attrs.fontSize) : 12
   const ed = document.getElementById("editor-content")
-  if (ed.classList.contains("pica")) {
+  if (fontSize === 10 && ed.classList.contains("pica")) {
     ed.classList.add("long-primer")
     ed.classList.remove("pica")
-  } else {
+  } else if (fontSize === 12 && ed.classList.contains("long-primer")) {
     ed.classList.add("pica")
     ed.classList.remove("long-primer")
   }
