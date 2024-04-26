@@ -251,10 +251,10 @@ const hurmetNodes =  {
     // We use reference links and defer the image paths to the end of the document.
     const ref = getRef(node, state)
     state.paths.set(ref, path)
-    if (ref === node.attrs.alt) {
-      state.write(`![${node.attrs.alt}][]`)
-    } else {
+    if (node.attrs.alt && ref !== node.attrs.alt) {
       state.write(`![${node.attrs.alt}][${ref}]`)
+    } else {
+      state.write(`![${ref}][]`)
     }
 
   },
@@ -297,7 +297,7 @@ const hurmetNodes =  {
       if (node.attrs.entry.slice(0, 5) === "draw(") {
         const ref = getRef(node, state)
         state.paths.set(ref, "¢` " + entry + " `")
-        state.write(isNaN(ref) ? `![${ref}][]` : `![][${ref}]`)
+        state.write(!`[${ref}][]`)
       } else if (node.attrs.displayMode) {
         state.write("¢¢" + displaySelector + " " + md + " ¢¢")
       } else {
@@ -366,15 +366,25 @@ const titleRegEx = /\n *title +"([^\n]+)" *\n/
 
 const getRef = (node, state) => {
   // We use reference links and defer the image paths to the end of the document.
+  console.log(node.type.name)
   let ref = node.type.name === "image"
     ? node.attrs.alt
     : node.type.name === "figimg"
     ? node.content.content[0].attrs.alt
     : null
   if (node.attrs.entry && titleRegEx.test(node.attrs.entry)) {
+    // node is a draw environment in a calculation node. Get the title.
     ref = titleRegEx.exec(node.attrs.entry)[1].trim()
   }
+  if ((!isNaN(ref)) && Number(ref) % 1 === 0) {
+    // ref is an integer. We cannot use it because it might duplicate one of the
+    // sequential integers we use for items without a defined ref.
+    ref = null
+  }
+
+  // Get the index number of this path
   const num = isNaN(state.paths.size) ? "1" : String(state.paths.size + 1)
+  // Now set the final ref
   if (ref) {
     // Determine if ref has already been used
     for (const key of state.paths.keys()) {

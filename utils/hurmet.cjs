@@ -9254,6 +9254,8 @@ const unescapeUrl = function(rawUrlString) {
   return rawUrlString.replace(UNESCAPE_URL_R, "$1");
 };
 
+const isNotAnInteger = str => isNaN(str) || Number(str) % 1 !== 0;
+
 const parseList = (str, state) => {
   const items = str.replace(LIST_BLOCK_END_R, "\n").match(LIST_ITEM_R);
   const isTight = !/\n\n/.test(str.replace(/\n*$/, ""));
@@ -9806,10 +9808,11 @@ rules.set("figure", {
   isLeaf: true,
   match: blockRegex(/^!!\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\] *(?:\n *)+\n/),
   parse: function(capture, state) {
-    return parseRef(capture, state, {
-      type: "figure",
-      attrs: { alt: capture[1] }
-    });
+    if (isNotAnInteger(capture[1])) {
+      return parseRef(capture, state, { type: "figure", attrs: { alt: capture[1] } });
+    } else {
+      return parseRef(capture, state, { type: "figure" });
+    }
   }
 });
 rules.set("def", {
@@ -9904,7 +9907,11 @@ rules.set("image", {
     new RegExp("^!\\[(" + LINK_INSIDE + ")\\]\\(" + LINK_HREF_AND_TITLE + "\\)")
   ),
   parse: function(capture, state) {
-    return { attrs: { alt: capture[1], src: unescapeUrl(capture[2]) } }
+    if (isNotAnInteger(capture[1])) {
+      return { attrs: { alt: capture[1], src: unescapeUrl(capture[2]) } }
+    } else {
+      return { attrs: { src: unescapeUrl(capture[2]) } }
+    }
   }
 });
 rules.set("reflink", {
@@ -9930,10 +9937,11 @@ rules.set("refimage", {
   isLeaf: true,
   match: inlineRegex(/^!\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]/),
   parse: function(capture, state) {
-    return parseRef(capture, state, {
-      type: "image",
-      attrs: { alt: capture[1] }
-    });
+    //if (isNotAnInteger(capture[1])) {
+    return parseRef(capture, state, { type: "image", attrs: { alt: capture[1] } });
+    //} else {
+    //  return parseRef(capture, state, { type: "image" });
+   // }
   }
 });
 rules.set("autolink", {
@@ -10284,7 +10292,7 @@ const md2ast = (md, inHtml = false) => {
     const target = capture[4] || capture[3].trim();
     const directives = capture[5] || "";
 
-    const attrs = { alt: def };
+    const attrs = isNotAnInteger(def) ? { alt: def } : {};
     if (directives) {
       const matchClass = CLASS_R.exec(directives);
       const matchWidth = WIDTH_R.exec(directives);

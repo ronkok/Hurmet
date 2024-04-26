@@ -523,13 +523,10 @@ export const marks = {
   // defaults to the empty string. Rendered and parsed as an `<a>`
   // element.
   link: {
-    attrs: {
-      href: {},
-      title: {default: null}
-    },
+    attrs: { href: {} },
     inclusive: false,
     parseDOM: [{tag: "a[href]", getAttrs(dom) {
-      return {href: dom.getAttribute("href"), title: dom.getAttribute("title")}
+      return {href: dom.getAttribute("href")}
     }}],
     toDOM(node) {
       node.attrs.title = node.attrs.href

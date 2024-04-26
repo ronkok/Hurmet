@@ -23039,6 +23039,8 @@ const unescapeUrl = function(rawUrlString) {
   return rawUrlString.replace(UNESCAPE_URL_R, "$1");
 };
 
+const isNotAnInteger = str => isNaN(str) || Number(str) % 1 !== 0;
+
 const parseList = (str, state) => {
   const items = str.replace(LIST_BLOCK_END_R, "\n").match(LIST_ITEM_R);
   const isTight = !/\n\n/.test(str.replace(/\n*$/, ""));
@@ -23591,10 +23593,11 @@ rules.set("figure", {
   isLeaf: true,
   match: blockRegex(/^!!\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\] *(?:\n *)+\n/),
   parse: function(capture, state) {
-    return parseRef(capture, state, {
-      type: "figure",
-      attrs: { alt: capture[1] }
-    });
+    if (isNotAnInteger(capture[1])) {
+      return parseRef(capture, state, { type: "figure", attrs: { alt: capture[1] } });
+    } else {
+      return parseRef(capture, state, { type: "figure" });
+    }
   }
 });
 rules.set("def", {
@@ -23689,7 +23692,11 @@ rules.set("image", {
     new RegExp("^!\\[(" + LINK_INSIDE + ")\\]\\(" + LINK_HREF_AND_TITLE + "\\)")
   ),
   parse: function(capture, state) {
-    return { attrs: { alt: capture[1], src: unescapeUrl(capture[2]) } }
+    if (isNotAnInteger(capture[1])) {
+      return { attrs: { alt: capture[1], src: unescapeUrl(capture[2]) } }
+    } else {
+      return { attrs: { src: unescapeUrl(capture[2]) } }
+    }
   }
 });
 rules.set("reflink", {
@@ -23715,10 +23722,11 @@ rules.set("refimage", {
   isLeaf: true,
   match: inlineRegex(/^!\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]/),
   parse: function(capture, state) {
-    return parseRef(capture, state, {
-      type: "image",
-      attrs: { alt: capture[1] }
-    });
+    //if (isNotAnInteger(capture[1])) {
+    return parseRef(capture, state, { type: "image", attrs: { alt: capture[1] } });
+    //} else {
+    //  return parseRef(capture, state, { type: "image" });
+   // }
   }
 });
 rules.set("autolink", {
@@ -24069,7 +24077,7 @@ const md2ast = (md, inHtml = false) => {
     const target = capture[4] || capture[3].trim();
     const directives = capture[5] || "";
 
-    const attrs = { alt: def };
+    const attrs = isNotAnInteger(def) ? { alt: def } : {};
     if (directives) {
       const matchClass = CLASS_R.exec(directives);
       const matchWidth = WIDTH_R.exec(directives);
@@ -48825,13 +48833,10 @@ const marks = {
   // defaults to the empty string. Rendered and parsed as an `<a>`
   // element.
   link: {
-    attrs: {
-      href: {},
-      title: {default: null}
-    },
+    attrs: { href: {} },
     inclusive: false,
     parseDOM: [{tag: "a[href]", getAttrs(dom) {
-      return {href: dom.getAttribute("href"), title: dom.getAttribute("title")}
+      return {href: dom.getAttribute("href")}
     }}],
     toDOM(node) {
       node.attrs.title = node.attrs.href;
@@ -49721,10 +49726,10 @@ const hurmetNodes =  {
     // We use reference links and defer the image paths to the end of the document.
     const ref = getRef(node, state);
     state.paths.set(ref, path);
-    if (ref === node.attrs.alt) {
-      state.write(`![${node.attrs.alt}][]`);
-    } else {
+    if (node.attrs.alt && ref !== node.attrs.alt) {
       state.write(`![${node.attrs.alt}][${ref}]`);
+    } else {
+      state.write(`![${ref}][]`);
     }
 
   },
@@ -49767,7 +49772,7 @@ const hurmetNodes =  {
       if (node.attrs.entry.slice(0, 5) === "draw(") {
         const ref = getRef(node, state);
         state.paths.set(ref, "¢` " + entry + " `");
-        state.write(isNaN(ref) ? `![${ref}][]` : `![][${ref}]`);
+        state.write(!`[${ref}][]`);
       } else if (node.attrs.displayMode) {
         state.write("¢¢" + displaySelector + " " + md + " ¢¢");
       } else {
@@ -49836,15 +49841,25 @@ const titleRegEx = /\n *title +"([^\n]+)" *\n/;
 
 const getRef = (node, state) => {
   // We use reference links and defer the image paths to the end of the document.
+  console.log(node.type.name);
   let ref = node.type.name === "image"
     ? node.attrs.alt
     : node.type.name === "figimg"
     ? node.content.content[0].attrs.alt
     : null;
   if (node.attrs.entry && titleRegEx.test(node.attrs.entry)) {
+    // node is a draw environment in a calculation node. Get the title.
     ref = titleRegEx.exec(node.attrs.entry)[1].trim();
   }
+  if ((!isNaN(ref)) && Number(ref) % 1 === 0) {
+    // ref is an integer. We cannot use it because it might duplicate one of the
+    // sequential integers we use for items without a defined ref.
+    ref = null;
+  }
+
+  // Get the index number of this path
   const num = isNaN(state.paths.size) ? "1" : String(state.paths.size + 1);
+  // Now set the final ref
   if (ref) {
     // Determine if ref has already been used
     for (const key of state.paths.keys()) {
