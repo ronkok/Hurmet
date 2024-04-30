@@ -332,7 +332,7 @@ const dataFrameFromTSV = (str, vars) => {
     })
   }
 
-  // Data is loaded in. Finish by determining the operand type of each column
+  // Data is loaded in. Determinine the operand type of each column
   for (let j = 0; j < data.length; j++) {
     for (let i = 0; i < data[0].length; i++) {
       const datum = data[j][i]
@@ -696,7 +696,8 @@ const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHeadin
   const numCols = data.length
   const writeRowNums = numRows > 5 && !df.rowMap
   const isMap = !df.dtype
-  let str = "\\begin{array}{"
+  let str = "\\renewcommand{\\arraycolsep}{8pt}\\renewcommand{\\arraystretch}{1.15}"
+  str += "\\begin{array}{"
   str += df.rowMap
     ? "l|"
     : writeRowNums
