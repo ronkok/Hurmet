@@ -20033,7 +20033,7 @@ const dataFrameFromTSV = (str, vars) => {
     });
   }
 
-  // Data is loaded in. Finish by determining the operand type of each column
+  // Data is loaded in. Determinine the operand type of each column
   for (let j = 0; j < data.length; j++) {
     for (let i = 0; i < data[0].length; i++) {
       const datum = data[j][i];
@@ -20397,7 +20397,8 @@ const display$1 = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHead
   const numCols = data.length;
   const writeRowNums = numRows > 5 && !df.rowMap;
   const isMap = !df.dtype;
-  let str = "\\begin{array}{";
+  let str = "\\renewcommand{\\arraycolsep}{8pt}\\renewcommand{\\arraystretch}{1.15}";
+  str += "\\begin{array}{";
   str += df.rowMap
     ? "l|"
     : writeRowNums
@@ -31124,6 +31125,9 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             o3.unit = null;
             o3.dtype = dt.STRING;
           } else if ((o1.dtype & dt.DATAFRAME) && isVector(o2) && tkn !== "vcat") {
+            o3 = DataFrame.append(o1, o2, vars.format.value, unitAware);
+            if (o3.dtype === dt.ERROR) { return o3 }
+          } else if (isVector(o1) && (o2.dtype & dt.DATAFRAME) && tkn !== "vcat") {
             o3 = DataFrame.append(o1, o2, vars.format.value, unitAware);
             if (o3.dtype === dt.ERROR) { return o3 }
           } else if (((o1.dtype & dt.DATAFRAME) && shape2 === "scalar") ||
