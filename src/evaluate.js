@@ -425,6 +425,9 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           } else if ((o1.dtype & dt.DATAFRAME) && isVector(o2) && tkn !== "vcat") {
             o3 = DataFrame.append(o1, o2, vars.format.value, unitAware)
             if (o3.dtype === dt.ERROR) { return o3 }
+          } else if (isVector(o1) && (o2.dtype & dt.DATAFRAME) && tkn !== "vcat") {
+            o3 = DataFrame.append(o1, o2, vars.format.value, unitAware)
+            if (o3.dtype === dt.ERROR) { return o3 }
           } else if (((o1.dtype & dt.DATAFRAME) && shape2 === "scalar") ||
                      (shape1 === "scalar" && (o2.dtype & dt.DATAFRAME))) {
             o3 = DataFrame.append(o1, o2, vars.format.value, unitAware)
