@@ -507,7 +507,16 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           // Accessor of a object's property in dot notation
           const o2 = stack.pop()
           const o1 = stack.pop()
-          const property = propertyFromDotAccessor(o1, o2, unitAware)
+          let property
+          if (o1.dtype === dt.DATAFRAME && tokens.length - i > 2 && tokens[i + 2] === ".") {
+            // Skip creation of a vector and go straight to a call to a single cell
+            const o3 = { value: tokens[i + 1].replace(/"/g, ""), unit: null, dtype: dt.STRING }
+            const args =  (o2.value in o1.value.columnMap) ? [o3, o2] : [o2, o3];
+            property = DataFrame.range(o1, args, unitAware)
+            i += 2
+          } else {
+            property = propertyFromDotAccessor(o1, o2, unitAware)
+          }
           if (property.dtype === dt.ERROR) { return property }
           stack.push(Object.freeze(property))
           break
