@@ -112,13 +112,13 @@ export const identifyRange = (df, args) => {
       columnList.push(df.columnIndicator[colName])
     }
   } else if (args.length === 2 && args[0].dtype === dt.STRING && df.value.rowMap
-    && args[0].value in df.value.rowMap && args[1].dtype === dt.STRING &&
-    df.value.columnMap && args[0].value in df.value.columnMap) {
+    && (args[0].value in df.value.rowMap) && args[1].dtype === dt.STRING &&
+    df.value.columnMap && (args[1].value in df.value.columnMap)) {
     // Return a single cell value
     iStart = df.value.rowMap[args[0].value]
     iEnd = iStart
     if (df.dtype === dt.DATAFRAME) { df.value.usedRows.add(iStart) }
-    columnList.push(df.value.columnMap[args[0].value])
+    columnList.push(df.value.columnMap[args[1].value])
   } else {
     // Default for args is a list of (row|column) names
     iStart = 0

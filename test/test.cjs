@@ -394,6 +394,7 @@ end`, vars)
     ["wideFlanges[2] = @", `¿wideFlanges ®2/1 [] 1`, "[49; 31; 18]"],
     ["wideFlanges.W8X31.area = @", `¿wideFlanges "W8X31" . "area" .`, "9.13"],
     ["wideFlanges.W8X31.area = @@ in²", `¿wideFlanges "W8X31" . "area" .`, "9.13 in²"],
+    ['wideFlanges["W8X31", "area"] = @@ in²', `¿wideFlanges "W8X31" "area" [] 2`, "9.13 in²"],
     [`wideFlanges[["W10X49"; "W8X31"]]["area", "d"] = @`, `¿wideFlanges "W10X49" "W8X31" matrix 2 1 [] 1 "area" "d" [] 2`, "``area	d\nin^2	in\n14.4	10\n9.13	8``"],
     ['"ab" & "cd" = @', `"ab" "cd" &`, 'abcd'],
     [`1.2 & 3.4 = @`, `®12/10 ®34/10 &`, "[1.2, 3.4]"],
