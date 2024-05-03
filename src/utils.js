@@ -42,6 +42,10 @@ export const clone = obj => {
     return copy
   }
 
+  if (obj instanceof Set) {
+    return new Set([...obj])
+  }
+
   if (typeof obj === "object") {
     const copy = Object.create(null)
     Object.entries(obj).forEach(([key, value]) => {
