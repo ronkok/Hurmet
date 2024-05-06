@@ -742,7 +742,7 @@ export class MarkdownSerializerState {
             const L = tableState.out.length
             tableState.renderContent(cell)
             // Each table cell contains an array of strings.
-            const cellContent = tableState.out.slice(L).replace(/^\n+/, "").split("\n")
+            const cellContent = tableState.out.slice(L).replace(/^\n+/, "").replace(/\n+$/, "").split("\n")
             table[i][j] = cellContent
             if (cellContent.length > 1 && !isGFM) { isRst = true }
             // Get width of cell.

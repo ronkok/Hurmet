@@ -664,6 +664,7 @@ ul.toc span + span {
   min-height: 20px;
   color: black;
   direction: ltr;
+  tab-size: 3;
 }
 .long-primer .math-code { font-size: 12px; }
 .math-code form {

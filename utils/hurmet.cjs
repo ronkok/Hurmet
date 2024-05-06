@@ -44,6 +44,10 @@ const clone = obj => {
     return copy
   }
 
+  if (obj instanceof Set) {
+    return new Set([...obj])
+  }
+
   if (typeof obj === "object") {
     const copy = Object.create(null);
     Object.entries(obj).forEach(([key, value]) => {
@@ -1225,11 +1229,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6392","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.6330","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.5208","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.4916","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -1238,10 +1242,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4632","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4682","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9779","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.7638","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9744","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.7798","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -1261,7 +1265,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.85643","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.85573","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1269,23 +1273,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.3873","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.3961","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["4.0798","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["89.3191","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["3.9943","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["89.6710","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["168.03","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["164.62","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1474.65","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1460.24","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1296,7 +1300,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["18.4672","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["18.2086","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -1326,7 +1330,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.0714","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0744","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -3032,13 +3036,13 @@ const identifyRange = (df, args) => {
       columnList.push(df.columnIndicator[colName]);
     }
   } else if (args.length === 2 && args[0].dtype === dt.STRING && df.value.rowMap
-    && args[0].value in df.value.rowMap && args[1].dtype === dt.STRING &&
-    df.value.columnMap && args[0].value in df.value.columnMap) {
+    && (args[0].value in df.value.rowMap) && args[1].dtype === dt.STRING &&
+    df.value.columnMap && (args[1].value in df.value.columnMap)) {
     // Return a single cell value
     iStart = df.value.rowMap[args[0].value];
     iEnd = iStart;
     if (df.dtype === dt.DATAFRAME) { df.value.usedRows.add(iStart); }
-    columnList.push(df.value.columnMap[args[0].value]);
+    columnList.push(df.value.columnMap[args[1].value]);
   } else {
     // Default for args is a list of (row|column) names
     iStart = 0;
@@ -9536,8 +9540,8 @@ const TABLES = (function() {
             }
           }
           // Now that we know the cell extents, get the cell contents.
-          const xStart = colSeps[j] + 2;
-          const xEnd = colSeps[j + cell.colspan] - 1;
+          const xStart = colSeps[j] + 1;
+          const xEnd = colSeps[j + cell.colspan];
           const yStart = rowSeps[i] + 1;
           const yEnd = rowSeps[i + cell.rowspan];
           let str = "";
@@ -9545,6 +9549,12 @@ const TABLES = (function() {
             str += lines[ii].slice(xStart, xEnd).replace(/ +$/, "") + "\n";
           }
           cell.blob = str.slice(0, -1).replace(/^\n+/, "");
+          const leadingSpacesMatch = /^ +/.exec(cell.blob);
+          if (leadingSpacesMatch) {
+            const numLeadingSpaces = leadingSpacesMatch[0].length;
+            const spaceRegEx = new RegExp("^" + " ".repeat(numLeadingSpaces), "gm");
+            cell.blob = cell.blob.replace(spaceRegEx, "");
+          }
 
           cell.inHeader = (headerExists && yStart < headerSepLine);
 
@@ -14428,7 +14438,16 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           // Accessor of a object's property in dot notation
           const o2 = stack.pop();
           const o1 = stack.pop();
-          const property = propertyFromDotAccessor(o1, o2, unitAware);
+          let property;
+          if (o1.dtype === dt.DATAFRAME && tokens.length - i > 2 && tokens[i + 2] === ".") {
+            // Skip creation of a vector and go straight to a call to a single cell
+            const o3 = { value: tokens[i + 1].replace(/"/g, ""), unit: null, dtype: dt.STRING };
+            const args =  (o2.value in o1.value.columnMap) ? [o3, o2] : [o2, o3];
+            property = DataFrame.range(o1, args, unitAware);
+            i += 2;
+          } else {
+            property = propertyFromDotAccessor(o1, o2, unitAware);
+          }
           if (property.dtype === dt.ERROR) { return property }
           stack.push(Object.freeze(property));
           break

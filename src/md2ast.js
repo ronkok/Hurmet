@@ -405,8 +405,8 @@ const TABLES = (function() {
             }
           }
           // Now that we know the cell extents, get the cell contents.
-          const xStart = colSeps[j] + 2
-          const xEnd = colSeps[j + cell.colspan] - 1
+          const xStart = colSeps[j] + 1
+          const xEnd = colSeps[j + cell.colspan]
           const yStart = rowSeps[i] + 1
           const yEnd = rowSeps[i + cell.rowspan]
           let str = ""
@@ -414,6 +414,12 @@ const TABLES = (function() {
             str += lines[ii].slice(xStart, xEnd).replace(/ +$/, "") + "\n"
           }
           cell.blob = str.slice(0, -1).replace(/^\n+/, "")
+          const leadingSpacesMatch = /^ +/.exec(cell.blob)
+          if (leadingSpacesMatch) {
+            const numLeadingSpaces = leadingSpacesMatch[0].length
+            const spaceRegEx = new RegExp("^" + " ".repeat(numLeadingSpaces), "gm")
+            cell.blob = cell.blob.replace(spaceRegEx, "")
+          }
 
           cell.inHeader = (headerExists && yStart < headerSepLine)
 
