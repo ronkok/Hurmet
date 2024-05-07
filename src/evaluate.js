@@ -514,6 +514,14 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             const args =  (o2.value in o1.value.columnMap) ? [o3, o2] : [o2, o3];
             property = DataFrame.range(o1, args, unitAware)
             i += 2
+          } else if (o1.dtype === dt.DATAFRAME && tokens.length - i > 3
+                && tokens[i + 2] === "[]" && tokens[i + 3] === "1"
+                && tokens[i + 1].slice(0, 1) === '"') {
+            // Skip creation of a vector and go straight to a call to a single cell
+            const o3 = { value: tokens[i + 1].replace(/"/g, ""), unit: null, dtype: dt.STRING }
+            const args =  (o2.value in o1.value.columnMap) ? [o3, o2] : [o2, o3];
+            property = DataFrame.range(o1, args, unitAware)
+            i += 3
           } else {
             property = propertyFromDotAccessor(o1, o2, unitAware)
           }
@@ -531,7 +539,26 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const o1 = stack.pop()
           let property
           if (o1.dtype & dt.DATAFRAME) {
-            property = DataFrame.range(o1, args, unitAware)
+            if (args.length === 1 && args[0].dtype === dt.STRING && tokens.length - i > 2
+                  && tokens[i + 2] === ".") {
+              // Skip creation of a vector and go straight to a call to a single cell
+              const o2 = args[0];
+              const o3 = { value: tokens[i + 1].replace(/"/g, ""), unit: null, dtype: dt.STRING }
+              const newArgs =  (o2.value in o1.value.columnMap) ? [o3, o2] : [o2, o3];
+              property = DataFrame.range(o1, newArgs, unitAware)
+              i += 2
+            } else if (args.length === 1 && args[0].dtype === dt.STRING
+                && tokens.length - i > 3 && tokens[i + 2] === "[]" && tokens[i + 3] === "1"
+                && tokens[i + 1].slice(0, 1) === '"') {
+              // Skip creation of a vector and go straight to a call to a single cell
+              const o2 = args[0];
+              const o3 = { value: tokens[i + 1].replace(/"/g, ""), unit: null, dtype: dt.STRING }
+              const newArgs =  (o2.value in o1.value.columnMap) ? [o3, o2] : [o2, o3];
+              property = DataFrame.range(o1, newArgs, unitAware)
+              i += 3
+            } else {
+              property = DataFrame.range(o1, args, unitAware)
+            }
 
           } else if (o1.dtype & dt.MAP) {
             property = map.range(o1, args, unitAware)
