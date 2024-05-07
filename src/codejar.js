@@ -1,11 +1,16 @@
 /* eslint-disable */
 
 /* I've revised this version of CodeJar for Hurmet math zones.
- * I've removed history and highlighting. They each had a delay and Hurmet
- * needs speed in order to update a view of the math with every keystroke.
+ * I've removed CodeJare history. It had a delay and Hurmet needs speed
+ * in order to update a view of the math with every keystroke.
  */
 
 import { boldPrevChar } from "./autocorrect"
+
+const highlight = (editor) => {
+  const code = editor.textContent.replace(/\t/gm, '<span style="background-color: lemonchiffon">\t</span>')
+  editor.innerHTML = code
+}
 
 export const codeJar = (editor, isMathPrompt) => {
   const options = {
@@ -20,6 +25,7 @@ export const codeJar = (editor, isMathPrompt) => {
 
   const listeners = []
   let callback
+  let prev
 
   editor.setAttribute("contenteditable", "plaintext-only")
   editor.setAttribute("spellcheck", "false")
@@ -28,10 +34,20 @@ export const codeJar = (editor, isMathPrompt) => {
   editor.style.overflowY = "auto"
   editor.style.whiteSpace = "pre-wrap"
 
+  const doHighlight = (editor) => {
+    highlight(editor)
+  }
+  
   let isLegacy = false // true if plaintext-only is not supported
 
   if (editor.contentEditable !== "plaintext-only") isLegacy = true
   if (isLegacy) editor.setAttribute("contenteditable", "true")
+
+  const debounceHighlight = debounce(() => {
+    const pos = save()
+    doHighlight(editor)
+    restore(pos)
+  }, 30)
 
   const on = (type, fn) => {
     listeners.push([type, fn])
@@ -56,6 +72,7 @@ export const codeJar = (editor, isMathPrompt) => {
       event.preventDefault()
     }
     if (event.defaultPrevented) return
+    prev = toString()
     if (options.preserveIdent) handleNewLine(event)
     else legacyNewLineFix(event)
     if (options.catchTab) handleTabCharacters(event)
@@ -66,6 +83,7 @@ export const codeJar = (editor, isMathPrompt) => {
   ;on("keyup", event => {
     if (event.defaultPrevented) return
     if (event.isComposing) return
+    if (prev !== toString()) debounceHighlight()
     if (callback) callback(toString())
   })
 
@@ -317,6 +335,7 @@ export const codeJar = (editor, isMathPrompt) => {
       .replace(/\r/g, "")
     const pos = save()
     insert(text)
+    doHighlight(editor)
     restore({ start: pos.start + text.length, end: pos.start + text.length })
   }
 
@@ -351,6 +370,14 @@ export const codeJar = (editor, isMathPrompt) => {
     document.execCommand("insertHTML", false, text)
   }
 
+  function debounce(cb, wait) {
+    let timeout = 0
+    return (...args) => {
+      clearTimeout(timeout)
+      timeout = window.setTimeout(() => cb(...args), wait)
+    }
+  }
+
   function findPadding(text) {
     // Find beginning of previous line.
     let i = text.length - 1
@@ -383,6 +410,7 @@ export const codeJar = (editor, isMathPrompt) => {
     },
     updateCode(code) {
       editor.textContent = code
+      doHighlight(editor)
     },
     onUpdate(cb) {
       callback = cb
