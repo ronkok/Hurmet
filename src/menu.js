@@ -699,7 +699,7 @@ function insertImage(nodeType) {
 
 function setRoundingCriteria(nodeType) {
   return new MenuItem({
-    title: "Insert link to image or edit existing image",
+    title: "Insert rounding criteria",
     label: " .#… ",
     class: "math-button",
     enable(state) {
