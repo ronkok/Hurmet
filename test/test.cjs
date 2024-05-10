@@ -334,6 +334,7 @@ end`, vars)
   // Calculations.
   const calcTests = [
     // input string, expected RPN, expected result
+    [`wideFlanges.area.end = @`, `¿wideFlanges "area" . "end" .`, "5.26"],
     ["b = @", "¿b", "true"],
     ["str[2] = @", "¿str ®2/1 [] 1", "b"],
     ["str[2:4] = @", "¿str ®2/1 ®4/1 : [] 1", "bcd"],
@@ -401,6 +402,9 @@ end`, vars)
     ['wideFlanges["W8X31"]["area"] = @@ in²', `¿wideFlanges "W8X31" [] 1 "area" [] 1`, "9.13 in²"],
     ['wideFlanges["W8X31", "area"] = @@ in²', `¿wideFlanges "W8X31" "area" [] 2`, "9.13 in²"],
     [`wideFlanges[["W10X49"; "W8X31"]]["area", "d"] = @`, `¿wideFlanges "W10X49" "W8X31" matrix 2 1 [] 1 "area" "d" [] 2`, "``area	d\nin^2	in\n14.4	10\n9.13	8``"],
+    [`wideFlanges[2:3, 2] = @`, `¿wideFlanges ®2/1 ®3/1 : ®2/1 [] 2`, `[31; 18]`],
+    [`wideFlanges[2, 2] = @`, `¿wideFlanges ®2/1 ®2/1 [] 2`, `31`],
+    [`wideFlanges.W8X31.end = @`, `¿wideFlanges "W8X31" . "end" .`, "2.02"],
     ['"ab" & "cd" = @', `"ab" "cd" &`, 'abcd'],
     [`1.2 & 3.4 = @`, `®12/10 ®34/10 &`, "[1.2, 3.4]"],
     [`vector & 3.6 = @`, `¿vector ®36/10 &`, "[2.1; -15.3; 11; 3.6]"],

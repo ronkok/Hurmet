@@ -42,6 +42,7 @@ const errorMessages = Object.freeze({
     SINGULAR:  "Error. Matrix is singular and cannot be inverted.",
     BAD_ROW_NAME:     "Error. Data frame does not have a row named @.",
     BAD_COLUMN_NAME:  "Error. Data frame does not have a column named @.",
+    BAD_COLUMN_TYPE:  "Error. A map must have only one data type and one unit.",
     SINGLE_ARG:"Error. A call to a data frame must have two arguments in the brackets.",
     BAD_TYPE:  "Error. Unrecognized data type for $@$.",
     CONCAT:    "Error. Cannot add strings. Use \"&\" if concatenation is desired.",

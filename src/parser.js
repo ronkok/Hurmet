@@ -415,10 +415,16 @@ export const parse = (
           if (delim.delimType === dDICTIONARY && delim.open.length > 3) {
             tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + 2)
             op.closeDelim = delim.close
-          } else if (delim.delimType === dMATRIX || delim.delimType === dACCESSOR) {
+          } else if (delim.delimType === dMATRIX) {
             const inc = tex.slice(op.pos, op.pos + 1) === "\\" ? 2 : 1
             tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + inc)
             op.closeDelim = delim.close
+          } else if (delim.delimType === dACCESSOR) {
+            const inc = tex.slice(op.pos, op.pos + 1) === "\\" ? 2 : 1
+            const addTall = delim.isTall && delim.open.indexOf("\\begin") === -1
+            tex = tex.slice(0, op.pos) + (addTall ? "\\left" : "") + delim.open
+                + tex.slice(op.pos + inc)
+            op.closeDelim = (addTall ? "\\right" : "") + delim.close
           } else if (delim.delimType === dCASES) {
             tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + 2)
             op.closeDelim = delim.close
@@ -1201,7 +1207,9 @@ export const parse = (
             : "B"
           delim.open = `\\begin{${ch}matrix}`
           delim.close = `\\end{${ch}matrix}`
-          delim.isTall = true
+          for (let i = delims.length - 1; i > 0; i--) {
+            delims[i].isTall = true
+          }
         }
         if (isCalc) {
           if (prevToken.ttype === tt.LEFTBRACKET && delim.delimType === dACCESSOR) {

@@ -61,8 +61,8 @@ export const identifyRange = (df, args) => {
       } else if (args[i].dtype === dt.RATIONAL) {
         columnList.push(Rnl.toNumber(args[i].value))
       } else if (args[i].dtype === dt.RANGE) {
-        const jStart = Rnl.toNumber(args[i].value[0])
-        const jEnd = Rnl.toNumber(args[i].value[1])
+        const jStart = Rnl.toNumber(args[i].value[0]) - 1
+        const jEnd = Rnl.toNumber(args[i].value[2]) - 1
         for (let j = jStart; j <= jEnd; j++) {
           columnList.push(j)
         }
@@ -74,12 +74,15 @@ export const identifyRange = (df, args) => {
     iEnd = df.value.data[0].length - 1
     columnList.push(Rnl.toNumber(args[0].value) - 1)
   } else if (args.length === 1 && args[0].dtype === dt.RANGE) {
-    iStart = Rnl.toNumber(args[0].value[0]) - 1
-    iEnd = Rnl.toNumber(args[0].value[1]) - 1
+    columnList = columnListFromRange(
+      Rnl.toNumber(args[0].value[0]) - 1,
+      Rnl.toNumber(args[0].value[2]) - 1
+    )
+    iStart = 0
+    iEnd = df.value.data[0].length - 1
     if (df.dtype === dt.DATAFRAME) {
       for (let i = iStart; i <= iEnd; i++) { df.value.usedRows.add(i) }
     }
-    columnList = columnListFromRange(0, df.value.data.length - 1)
   } else if (args.length === 1 && args[0].dtype === dt.STRING) {
     // Only one indicator has been given.
     // Check both the rowMap and the columnMap.
@@ -111,14 +114,56 @@ export const identifyRange = (df, args) => {
     for (const colName of args[0].value) {
       columnList.push(df.columnIndicator[colName])
     }
-  } else if (args.length === 2 && args[0].dtype === dt.STRING && df.value.rowMap
-    && (args[0].value in df.value.rowMap) && args[1].dtype === dt.STRING &&
-    df.value.columnMap && (args[1].value in df.value.columnMap)) {
-    // Return a single cell value
-    iStart = df.value.rowMap[args[0].value]
-    iEnd = iStart
-    if (df.dtype === dt.DATAFRAME) { df.value.usedRows.add(iStart) }
-    columnList.push(df.value.columnMap[args[1].value])
+  } else if (args.length === 2) {
+    // Get rows
+    if (args[0].dtype === dt.STRING) {
+      if (df.value.rowMap && args[0].value in df.value.rowMap) {
+        iStart = df.value.rowMap[args[0].value]
+        iEnd = iStart
+      } else if (args[0].value === "end") {
+        iStart = df.value.data[0].length - 1
+        iEnd = iStart
+      } else {
+        iStart = 0
+        iEnd = df.value.data.length - 1
+      }
+    } else if (args[0].dtype === dt.RATIONAL) {
+      iStart = Rnl.toNumber(args[0].value) - 1
+      iEnd = iStart
+    } else if (args[0].dtype === dt.RANGE) {
+      iStart = Rnl.toNumber(args[0].value[0]) - 1
+      iEnd = Rnl.toNumber(args[0].value[2]) - 1
+    } else {
+      // TODO: Error message
+    }
+    if (df.dtype === dt.DATAFRAME) {
+      for (let i = iStart; i <= iEnd; i++) {
+        df.value.usedRows.add(i)
+      }
+    }
+
+    // Get columns
+    if (args[0].dtype === dt.STRING && df.value.columnMap
+        && (args[0].value in df.value.columnMap)) {
+      columnList.push(df.value.columnMap[args[0].value])
+    }
+    if (args[1].dtype === dt.STRING && df.value.columnMap
+        && (args[1].value in df.value.columnMap)) {
+      columnList.push(df.value.columnMap[args[1].value])
+    } else if (args[1].dtype === dt.STRING && args[1].value === "end") {
+      columnList.push(df.value.headings.length - 1)
+    } else if (args[1].dtype === dt.RATIONAL) {
+      columnList.push(Rnl.toNumber(args[1].value) - 1)
+    } else if (args[1].dtype === dt.RANGE) {
+      const jStart = Rnl.toNumber(args[1].value[0]) - 1
+      const jEnd = Rnl.toNumber(args[1].value[2]) - 1
+      for (let i = jStart; i <= jEnd; i++) {
+        columnList.push(df.value.columnMap[Rnl.toNumber(args[1].value) - 1])
+      }
+    } else {
+      // TODO: Error message
+    }
+
   } else {
     // Default for args is a list of (row|column) names
     iStart = 0
@@ -136,8 +181,8 @@ export const identifyRange = (df, args) => {
 }
 
 const range = (df, args, unitAware) => {
-  let unit = Object.create(null)
   const [rowList, columnList, iStart, iEnd] = identifyRange(df, args)
+  let unit = Object.create(null)
   if (rowList.dtype && rowList.dtype === dt.ERROR) { return rowList }
   if (rowList.length === 0 && iStart === iEnd && columnList.length === 1) {
     // Return one value.
@@ -172,7 +217,6 @@ const range = (df, args, unitAware) => {
     } else {
       return newdf
     }
-
   } else {
     // Return a data frame.
     const headings = [];
@@ -217,7 +261,6 @@ const range = (df, args, unitAware) => {
   }
 }
 
-// const numberRegEx = new RegExp(Rnl.numberPattern + "$")
 const numberRegEx = new RegExp("^(?:=|" + Rnl.numberPattern.slice(1) + "$)")
 const mixedFractionRegEx = /^-?(?:[0-9]+(?: [0-9]+\/[0-9]+))$/
 const escRegEx = /^\\#/
@@ -613,6 +656,7 @@ const accentFromChar = Object.freeze({
   "\u20d7": "\\vec",
   "\u20e1": "\\overleftrightarrow"
 })
+
 export const formatColumnName = str => {
   // We can't call parse(str) because that would be a circular dependency.
   // So this module needs its own function to format dataframe column names.

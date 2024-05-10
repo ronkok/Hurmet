@@ -1523,10 +1523,13 @@ export function buildMenuItems(schema) {
     [['vector[number]'],
     ['vector[start:finish]'],
     ['matrix[rowNum, colNum]'],
+    ['matrix[startRowNum,:finishRowNum, startColNum:finishColNum]'],
+    ['dataframe["rowName", "colName"]'],
     ['dataFrame.rowName.colName'],
+    ['dataFrame.colName.rowName'],
+    ['dataFrame.colName.end'],
     ['dataframe.colName[rowNum]'],
-    ['dataframe["rowName"]["colName"]'],
-    ['dataframe["rowName1"; "rowName2"]["col1", "col2"]']])
+    ['dataframe[["rowName1"; "rowName2"]]["col1", "col2"]']])
   r.display = hint(" ?… ", "Display Selectors", "Display Selectors", "math-button",
     [["?", "??", "All"],
     ["%", "%%", "Omit blue echo"],

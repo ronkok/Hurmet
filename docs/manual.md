@@ -593,11 +593,13 @@ also make one those letters bold by typing it and then typing **Ctrl+B**.
 | ¢```DF = ``#name	w	area              | DF["B"]\              | An entire row\    |
 |  	in	in²                             | DF.area\              | Column vector\    |
 |  A	4	10                              | DF.B.area\            | 22\               |
-|  B	6	22``   ```                      | DF["B"].area\         | 22\               |
+|  B	6	22                              | DF.area.B\            | 22\               |
+|  C	9	59``   ```                      | DF.area.end\          | 59\               |
 |                                      | DF["B", "area"]\      | 22\               |
-|                                      | DF.w[1]               | 4                 |
+|                                      | DF.w[1]\              | 4\                |
+|                                      | DF[["A"; "C"], area]  | [10; 59]          |
 +--------------------------------------+-----------------------+-------------------+
-{.grid}
+{.grid colWidths="235 210 180"}
 
 </div>
 

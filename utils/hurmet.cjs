@@ -275,6 +275,7 @@ const errorMessages = Object.freeze({
     SINGULAR:  "Error. Matrix is singular and cannot be inverted.",
     BAD_ROW_NAME:     "Error. Data frame does not have a row named @.",
     BAD_COLUMN_NAME:  "Error. Data frame does not have a column named @.",
+    BAD_COLUMN_TYPE:  "Error. A map must have only one data type and one unit.",
     SINGLE_ARG:"Error. A call to a data frame must have two arguments in the brackets.",
     BAD_TYPE:  "Error. Unrecognized data type for $@$.",
     CONCAT:    "Error. Cannot add strings. Use \"&\" if concatenation is desired.",
@@ -2985,8 +2986,8 @@ const identifyRange = (df, args) => {
       } else if (args[i].dtype === dt.RATIONAL) {
         columnList.push(Rnl.toNumber(args[i].value));
       } else if (args[i].dtype === dt.RANGE) {
-        const jStart = Rnl.toNumber(args[i].value[0]);
-        const jEnd = Rnl.toNumber(args[i].value[1]);
+        const jStart = Rnl.toNumber(args[i].value[0]) - 1;
+        const jEnd = Rnl.toNumber(args[i].value[2]) - 1;
         for (let j = jStart; j <= jEnd; j++) {
           columnList.push(j);
         }
@@ -2998,12 +2999,15 @@ const identifyRange = (df, args) => {
     iEnd = df.value.data[0].length - 1;
     columnList.push(Rnl.toNumber(args[0].value) - 1);
   } else if (args.length === 1 && args[0].dtype === dt.RANGE) {
-    iStart = Rnl.toNumber(args[0].value[0]) - 1;
-    iEnd = Rnl.toNumber(args[0].value[1]) - 1;
+    columnList = columnListFromRange(
+      Rnl.toNumber(args[0].value[0]) - 1,
+      Rnl.toNumber(args[0].value[2]) - 1
+    );
+    iStart = 0;
+    iEnd = df.value.data[0].length - 1;
     if (df.dtype === dt.DATAFRAME) {
       for (let i = iStart; i <= iEnd; i++) { df.value.usedRows.add(i); }
     }
-    columnList = columnListFromRange(0, df.value.data.length - 1);
   } else if (args.length === 1 && args[0].dtype === dt.STRING) {
     // Only one indicator has been given.
     // Check both the rowMap and the columnMap.
@@ -3035,14 +3039,52 @@ const identifyRange = (df, args) => {
     for (const colName of args[0].value) {
       columnList.push(df.columnIndicator[colName]);
     }
-  } else if (args.length === 2 && args[0].dtype === dt.STRING && df.value.rowMap
-    && (args[0].value in df.value.rowMap) && args[1].dtype === dt.STRING &&
-    df.value.columnMap && (args[1].value in df.value.columnMap)) {
-    // Return a single cell value
-    iStart = df.value.rowMap[args[0].value];
-    iEnd = iStart;
-    if (df.dtype === dt.DATAFRAME) { df.value.usedRows.add(iStart); }
-    columnList.push(df.value.columnMap[args[1].value]);
+  } else if (args.length === 2) {
+    // Get rows
+    if (args[0].dtype === dt.STRING) {
+      if (df.value.rowMap && args[0].value in df.value.rowMap) {
+        iStart = df.value.rowMap[args[0].value];
+        iEnd = iStart;
+      } else if (args[0].value === "end") {
+        iStart = df.value.data[0].length - 1;
+        iEnd = iStart;
+      } else {
+        iStart = 0;
+        iEnd = df.value.data.length - 1;
+      }
+    } else if (args[0].dtype === dt.RATIONAL) {
+      iStart = Rnl.toNumber(args[0].value) - 1;
+      iEnd = iStart;
+    } else if (args[0].dtype === dt.RANGE) {
+      iStart = Rnl.toNumber(args[0].value[0]) - 1;
+      iEnd = Rnl.toNumber(args[0].value[2]) - 1;
+    } else ;
+    if (df.dtype === dt.DATAFRAME) {
+      for (let i = iStart; i <= iEnd; i++) {
+        df.value.usedRows.add(i);
+      }
+    }
+
+    // Get columns
+    if (args[0].dtype === dt.STRING && df.value.columnMap
+        && (args[0].value in df.value.columnMap)) {
+      columnList.push(df.value.columnMap[args[0].value]);
+    }
+    if (args[1].dtype === dt.STRING && df.value.columnMap
+        && (args[1].value in df.value.columnMap)) {
+      columnList.push(df.value.columnMap[args[1].value]);
+    } else if (args[1].dtype === dt.STRING && args[1].value === "end") {
+      columnList.push(df.value.headings.length - 1);
+    } else if (args[1].dtype === dt.RATIONAL) {
+      columnList.push(Rnl.toNumber(args[1].value) - 1);
+    } else if (args[1].dtype === dt.RANGE) {
+      const jStart = Rnl.toNumber(args[1].value[0]) - 1;
+      const jEnd = Rnl.toNumber(args[1].value[2]) - 1;
+      for (let i = jStart; i <= jEnd; i++) {
+        columnList.push(df.value.columnMap[Rnl.toNumber(args[1].value) - 1]);
+      }
+    } else ;
+
   } else {
     // Default for args is a list of (row|column) names
     iStart = 0;
@@ -3060,8 +3102,8 @@ const identifyRange = (df, args) => {
 };
 
 const range$1 = (df, args, unitAware) => {
-  let unit = Object.create(null);
   const [rowList, columnList, iStart, iEnd] = identifyRange(df, args);
+  let unit = Object.create(null);
   if (rowList.dtype && rowList.dtype === dt.ERROR) { return rowList }
   if (rowList.length === 0 && iStart === iEnd && columnList.length === 1) {
     // Return one value.
@@ -3096,7 +3138,6 @@ const range$1 = (df, args, unitAware) => {
     } else {
       return newdf
     }
-
   } else {
     // Return a data frame.
     const headings = [];
@@ -3141,7 +3182,6 @@ const range$1 = (df, args, unitAware) => {
   }
 };
 
-// const numberRegEx = new RegExp(Rnl.numberPattern + "$")
 const numberRegEx$5 = new RegExp("^(?:=|" + Rnl.numberPattern.slice(1) + "$)");
 const mixedFractionRegEx = /^-?(?:[0-9]+(?: [0-9]+\/[0-9]+))$/;
 const escRegEx = /^\\#/;
@@ -3537,6 +3577,7 @@ const accentFromChar$1 = Object.freeze({
   "\u20d7": "\\vec",
   "\u20e1": "\\overleftrightarrow"
 });
+
 const formatColumnName = str => {
   // We can't call parse(str) because that would be a circular dependency.
   // So this module needs its own function to format dataframe column names.
@@ -5053,10 +5094,16 @@ const parse$1 = (
           if (delim.delimType === dDICTIONARY && delim.open.length > 3) {
             tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + 2);
             op.closeDelim = delim.close;
-          } else if (delim.delimType === dMATRIX || delim.delimType === dACCESSOR) {
+          } else if (delim.delimType === dMATRIX) {
             const inc = tex.slice(op.pos, op.pos + 1) === "\\" ? 2 : 1;
             tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + inc);
             op.closeDelim = delim.close;
+          } else if (delim.delimType === dACCESSOR) {
+            const inc = tex.slice(op.pos, op.pos + 1) === "\\" ? 2 : 1;
+            const addTall = delim.isTall && delim.open.indexOf("\\begin") === -1;
+            tex = tex.slice(0, op.pos) + (addTall ? "\\left" : "") + delim.open
+                + tex.slice(op.pos + inc);
+            op.closeDelim = (addTall ? "\\right" : "") + delim.close;
           } else if (delim.delimType === dCASES) {
             tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + 2);
             op.closeDelim = delim.close;
@@ -5839,7 +5886,9 @@ const parse$1 = (
             : "B";
           delim.open = `\\begin{${ch}matrix}`;
           delim.close = `\\end{${ch}matrix}`;
-          delim.isTall = true;
+          for (let i = delims.length - 1; i > 0; i--) {
+            delims[i].isTall = true;
+          }
         }
         if (isCalc) {
           if (prevToken.ttype === tt.LEFTBRACKET && delim.delimType === dACCESSOR) {
@@ -14445,6 +14494,14 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             const args =  (o2.value in o1.value.columnMap) ? [o3, o2] : [o2, o3];
             property = DataFrame.range(o1, args, unitAware);
             i += 2;
+          } else if (o1.dtype === dt.DATAFRAME && tokens.length - i > 3
+                && tokens[i + 2] === "[]" && tokens[i + 3] === "1"
+                && tokens[i + 1].slice(0, 1) === '"') {
+            // Skip creation of a vector and go straight to a call to a single cell
+            const o3 = { value: tokens[i + 1].replace(/"/g, ""), unit: null, dtype: dt.STRING };
+            const args =  (o2.value in o1.value.columnMap) ? [o3, o2] : [o2, o3];
+            property = DataFrame.range(o1, args, unitAware);
+            i += 3;
           } else {
             property = propertyFromDotAccessor(o1, o2, unitAware);
           }
@@ -14462,7 +14519,26 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const o1 = stack.pop();
           let property;
           if (o1.dtype & dt.DATAFRAME) {
-            property = DataFrame.range(o1, args, unitAware);
+            if (args.length === 1 && args[0].dtype === dt.STRING && tokens.length - i > 2
+                  && tokens[i + 2] === ".") {
+              // Skip creation of a vector and go straight to a call to a single cell
+              const o2 = args[0];
+              const o3 = { value: tokens[i + 1].replace(/"/g, ""), unit: null, dtype: dt.STRING };
+              const newArgs =  (o2.value in o1.value.columnMap) ? [o3, o2] : [o2, o3];
+              property = DataFrame.range(o1, newArgs, unitAware);
+              i += 2;
+            } else if (args.length === 1 && args[0].dtype === dt.STRING
+                && tokens.length - i > 3 && tokens[i + 2] === "[]" && tokens[i + 3] === "1"
+                && tokens[i + 1].slice(0, 1) === '"') {
+              // Skip creation of a vector and go straight to a call to a single cell
+              const o2 = args[0];
+              const o3 = { value: tokens[i + 1].replace(/"/g, ""), unit: null, dtype: dt.STRING };
+              const newArgs =  (o2.value in o1.value.columnMap) ? [o3, o2] : [o2, o3];
+              property = DataFrame.range(o1, newArgs, unitAware);
+              i += 3;
+            } else {
+              property = DataFrame.range(o1, args, unitAware);
+            }
 
           } else if (o1.dtype & dt.MAP) {
             property = map.range(o1, args, unitAware);
