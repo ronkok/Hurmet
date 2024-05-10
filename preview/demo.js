@@ -3471,23 +3471,17 @@ const range$1 = (df, args, unitAware) => {
     return { value, unit, dtype }
 
   } else if (columnList.length === 1) {
-    // Return data from one column, in a column vector or a quantity
+    // Return data from one column, in a column vector
     const j = columnList[0];
     const unitName = df.value.units[j] ? df.value.units[j] : {};
     unit = (df.unit && df.unit[unitName]) ? df.unit[unitName] : { expos: null };
-    const value = df.value.data[j].slice(iStart, iEnd + 1).map(e => valueFromDatum(e));
-    const dtype = df.value.dtype[j] + dt.COLUMNVECTOR;
-    const newdf = { value, name: df.value.headings[j], unit, dtype };
-    if (unitAware && unit.gauge) {
-      return {
-        value: Matrix.convertToBaseUnits(newdf, unit.gauge, unit.factor),
-        name: df.value.headings[j],
-        unit: { expos: clone(unit.expos) },
-        dtype: dt.RATIONAL + dt.COLUMNVECTOR
-      }
-    } else {
-      return newdf
+    let value = df.value.data[j].slice(iStart, iEnd + 1).map(e => valueFromDatum(e));
+    let dtype = df.value.dtype[j] + dt.COLUMNVECTOR;
+    if (dtype & dt.QUANTITY) { dtype -= dt.QUANTITY; }
+    if ((dtype & dt.RATIONAL) && unitAware && unit.gauge) {
+      value = value.map(el => Rnl.multiply(Rnl.add(el, unit.gauge), unit.factor));
     }
+    return { value, name: df.value.headings[j], unit, dtype }
   } else {
     // Return a data frame.
     const headings = [];
