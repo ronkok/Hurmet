@@ -220,7 +220,7 @@ export function openPrompt(options) {
 
   const submit = () => {
     const params = getValues(options.fields, domFields)
-    if (options.radioButtons && !checkbox.checked) {
+    if (options.radioButtons) {
       params.class = form[options.radioButtons.name].value
       if (options.radioButtons.name === "rounding") {
         params.value = form[options.radioButtons.name].value + form.digits.value

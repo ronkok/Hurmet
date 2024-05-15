@@ -670,7 +670,7 @@ function insertImage(nodeType) {
             const str = attrs.alt ? attrs.alt : "caption"
             const caption = schema.nodes.figcaption.createAndFill(null, [schema.text(str)])
             const image = schema.nodes.figimg.createAndFill(attrs)
-            tr.replaceSelectionWith(schema.nodes.figure.createAndFill(null, [image, caption]))
+            tr.replaceSelectionWith(schema.nodes.figure.createAndFill(attrs, [image, caption]))
           } else {
             tr.replaceSelectionWith(nodeType.createAndFill(attrs))
           }

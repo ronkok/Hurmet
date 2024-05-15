@@ -250,12 +250,13 @@ export const nodes = {
 
   figure: {
     content: "block{2}",
+    attrs: { class: {default: "inline"} },
     group: "block",
     marks: "",
-    parseDOM: [{tag: "figure"}],
-    toDOM() {                         
-      return ["figure", 0] 
-    }
+    parseDOM: [{tag: "figure", getAttrs(dom) {
+      return { class: dom.getAttribute("class") }
+    }}],
+    toDOM(node) { return ["figure", node.attrs, 0] }
   },
   figcaption: {
     content: "inline*",

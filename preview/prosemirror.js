@@ -48748,12 +48748,13 @@ const nodes = {
 
   figure: {
     content: "block{2}",
+    attrs: { class: {default: "inline"} },
     group: "block",
     marks: "",
-    parseDOM: [{tag: "figure"}],
-    toDOM() {                         
-      return ["figure", 0] 
-    }
+    parseDOM: [{tag: "figure", getAttrs(dom) {
+      return { class: dom.getAttribute("class") }
+    }}],
+    toDOM(node) { return ["figure", node.attrs, 0] }
   },
   figcaption: {
     content: "inline*",
@@ -49493,7 +49494,7 @@ function openPrompt(options) {
 
   const submit = () => {
     const params = getValues(options.fields, domFields);
-    if (options.radioButtons && !checkbox.checked) {
+    if (options.radioButtons) {
       params.class = form[options.radioButtons.name].value;
       if (options.radioButtons.name === "rounding") {
         params.value = form[options.radioButtons.name].value + form.digits.value;
@@ -53126,7 +53127,7 @@ function insertImage(nodeType) {
             const str = attrs.alt ? attrs.alt : "caption";
             const caption = schema.nodes.figcaption.createAndFill(null, [schema.text(str)]);
             const image = schema.nodes.figimg.createAndFill(attrs);
-            tr.replaceSelectionWith(schema.nodes.figure.createAndFill(null, [image, caption]));
+            tr.replaceSelectionWith(schema.nodes.figure.createAndFill(attrs, [image, caption]));
           } else {
             tr.replaceSelectionWith(nodeType.createAndFill(attrs));
           }
