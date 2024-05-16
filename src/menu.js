@@ -651,7 +651,6 @@ function insertImage(nodeType) {
       const promptOptions = {
         title: attrs && attrs.src ? "Edit image" : "Insert image",
         fields: {
-//          src: new TextField({ label: "File path", required: true, value: attrs && attrs.src }),
           alt: new TextField({
             label: "Description",
             value: attrs ? attrs.alt : state.doc.textBetween(from, to, " ")
