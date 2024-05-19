@@ -19,7 +19,7 @@ import { TextField, CodeField, TextAreaField, openPrompt } from "./prompt"
 import { openSelectPrompt } from "./selectprompt"
 import { isInTable, addColumnBefore, deleteColumn,
   addRowBefore, deleteRow, mergeCells, splitCell,
-  toggleHeaderColumn, deleteTable, CellSelection,
+  toggleHeaderColumn, CellSelection,
   TableMap } from "prosemirror-tables"
 
 import hurmet from "./hurmet"
@@ -127,6 +127,11 @@ const hurmetIcons = {
     width: 24,
     height: 24,
     path: "M2,19 C2,20.6568542 3.34314575,22 5,22 L19,22 C20.6568542,22 22,20.6568542 22,19 L22,5 C22,3.34314575 20.6568542,2 19,2 L5,2 C3.34314575,2 2,3.34314575 2,5 L2,19 Z M-1.16403344e-15,19 L-3.0678068e-16,5 C-6.44957556e-16,2.23857625 2.23857625,0 5,0 L19,0 C21.7614237,0 24,2.23857625 24,5 L24,19 C24,21.7614237 21.7614237,24 19,24 L5,24 C2.23857625,24 9.50500275e-16,21.7614237 -1.16403344e-15,19 Z M12,10 C12.5522847,10 13,10.4477153 13,11 L13,13 C13,13.5522847 12.5522847,14 12,14 C11.4477153,14 11,13.5522847 11,13 L11,11 C11,10.4477153 11.4477153,10 12,10 Z M12,16 C12.5522847,16 13,16.4477153 13,17 L13,20 C13,20.5522847 12.5522847,21 12,21 C11.4477153,21 11,20.5522847 11,20 L11,17 C11,16.4477153 11.4477153,16 12,16 Z M12,3 C12.5522847,3 13,3.44771525 13,4 L13,7 C13,7.55228475 12.5522847,8 12,8 C11.4477153,8 11,7.55228475 11,7 L11,4 C11,3.44771525 11.4477153,3 12,3 Z"
+  },
+  table_caption: {
+    width: 24,
+    height: 24,
+    path: "M17,18 L17,22 L19,22 C20.6568542,22,22,20.6568542,22,19 L22,18 L17,18 Z M15,18 L9,18 L9,22 L15,22 L15,18 Z M17,16 L22,16 L22,12 L17,12 L17,16 Z M15,16 L15,12 L9,12 L9,16 L15,16 Z M17,10 L22,10 L22,9 C22,9,22,6,19,6 L17,6 L17,10 Z M15,10 L15,6 L9,6 L9,10 L15,10 Z M24,16.1768671 L24,19 C24,21.7614237,21.7614237,24,19,24 L5,24 C2.23857625,24,0,21.7614237,0,19 L0,9 C0,6,2,4,5,4 L19,4 C21.7614237,4,24,6.23857625,24,9 L24,7.82313285 C24.0122947,7.88054124,24.0187107,7.93964623,24.0187107,8 C24.0187107,8.06035377,24.0122947,8.11945876,24,8.17686715 L24,15.8231329 C24.0122947,15.8805412,24.0187107,15.9396462,24.0187107,16 C24.0187107,16.0603538,24.0122947,16.1194588,24,16.1768671 Z M7,6 L5,6 C3.34314575,6,2,7.34314575,2,9 L2,10 L7,10 L7,6 Z M2,12 L2,16 L7,16 L7,12 L2,12 Z M2,18 L2,19 C2,20.6568542,3.34314575,22,5,22 L7,22 L7,18 L2,18 Z M4,0 H20 V1.75 H4 Z"
   },
   delete_col: {
     width: 24,
@@ -633,6 +638,69 @@ function uploadImage(nodeType) {
   })
 }
 
+function insertTableCaption() {
+  return new MenuItem({
+    title: "Insert or delete caption…",
+    icon: hurmetIcons.table_caption,
+    select(state) {
+      return isInTable(state)
+    },
+    run(state, _, view) {
+      const table = findTable(state.selection)
+      let tableStart = 0
+      let tableEnd = 0
+      let depth = -1
+      let inFigure = false
+      let $from = state.selection.$from
+      const resolvedPos = state.doc.resolve(state.selection.from)
+      for (let d = $from.depth; d >= 0; d--) {
+        if ($from.node(d).type.name === "table") {
+          tableStart = resolvedPos.before(d)
+          tableEnd = resolvedPos.after(d)
+          inFigure = d > 0 && $from.node(d - 1).type.name === "figure"
+          depth = d
+          break
+        }
+      }
+      if (inFigure) {
+        // Delete the existing figure & caption, but keep the table.
+        const figureStart = resolvedPos.before(depth - 1)
+        const figureEnd = resolvedPos.after(depth - 1)
+        const tr = state.tr
+        tr.replaceWith(figureStart, figureEnd, table.node)
+        view.dispatch(tr)
+        view.focus()
+      } else {
+        // Wrap the table in a figure and insert a caption
+        let attrs = null
+        const promptOptions = {
+          title: "Insert Table Caption",
+          fields: { caption: new TextField({
+            label: "Caption",
+            value: attrs ? attrs.caption : ""
+          }) },
+          radioButtons: {
+            name: "position",
+            direction: "row",
+            buttons: [["auto", "auto"], ["left", "left"], ["right", "right"]],
+            current: attrs && attrs.class ? attrs.class : "auto"
+          },
+          callback(attrs) {
+            const str = attrs.caption ? attrs.caption : "caption"
+            const caption = schema.nodes.figcaption.createAndFill({class: "top-caption"}, [schema.text(str)])
+            attrs.class += " top-caption"
+            const tr = state.tr
+            tr.replaceWith(tableStart, tableEnd, schema.nodes.figure.createAndFill(attrs, [table.node, caption]))
+            view.dispatch(tr)
+            view.focus()
+          }
+        }
+        openPrompt(promptOptions)
+      }
+    }
+  })
+}
+
 function insertImage(nodeType) {
   return new MenuItem({
     title: "Insert link to image or edit existing image",
@@ -1029,13 +1097,39 @@ function toggleDraftMode() {
 
 function tableItem(title, icon, cmd, cell) {
   return new MenuItem({
-    title: title,
+    title: "title",
     icon: hurmetIcons[icon],
     select(state) {
       return isInTable(state)
     },
     run(state, dispatch) {
       cmd(state, dispatch)
+    }
+  })
+}
+
+function deleteTable() {
+  return new MenuItem({
+    title: "Delete Table",
+    icon: hurmetIcons["delete_table"],
+    select(state) {
+      return isInTable(state)
+    },
+    run(state, dispatch) {
+      const $pos = state.selection.$anchor;
+      for (let d = $pos.depth; d > 0; d--) {
+        const node = $pos.node(d)
+        if (node.type.spec.tableRole == 'table') {
+          const parent = $pos.node(d - 1)
+          if (parent.type.name == 'figure') {
+            dispatch(state.tr.delete($pos.before(d - 1), $pos.after(d -1)).scrollIntoView())
+          } else {
+            dispatch(state.tr.delete($pos.before(d), $pos.after(d)).scrollIntoView())
+          }
+          break
+        }
+      }
+      return false
     }
   })
 }
@@ -1443,11 +1537,6 @@ export function buildMenuItems(schema) {
         attrs: { level: i }
       })
     }
-    r.table_caption = blockTypeItem(type, {
-      title: "Table Caption",
-      label: "Table Caption (same as H6)",
-      attrs: { level: 6 }
-    })
   }
   if ((type = schema.nodes.horizontal_rule)) {
     let hr = type
@@ -1477,7 +1566,7 @@ export function buildMenuItems(schema) {
   }
 
   let cell = type
-  r.deleteTable = tableItem("Delete table", "delete_table", deleteTable, cell)
+  r.deleteTable = deleteTable() //tableItem("Delete table", "delete_table", deleteTable, cell)
   r.addRowBefore = tableItem("Insert row before", "add_row_before", addRowBefore, cell)
   r.deleteRow = tableItem("Delete row", "delete_row", deleteRow, cell)
   r.addColumnBefore = tableItem("Insert column before", "add_col_before", addColumnBefore, cell)
@@ -1495,6 +1584,7 @@ export function buildMenuItems(schema) {
       splitCell(state, dispatch)
     }
   })
+  r.insertTableCaption = insertTableCaption()
   r.grid = tableStyle("Grid", "grid", "grid")
   r.nogrid = tableStyle("No borders", "nogrid", "nogrid")
   r.oneRule = tableStyle("Border below header", "one-rule", "oneRule")
@@ -1674,7 +1764,6 @@ export function buildMenuItems(schema) {
         r.wrapCentered,
         r.wrapRightJustified,
         r.wrapEpigraph,
-        r.table_caption,
         r.wrapBoxed,
         r.wrapNote,
         r.wrapTip,
@@ -1698,6 +1787,7 @@ export function buildMenuItems(schema) {
     r.deleteRow,
     r.deleteColumn,
     r.toggleCellMerge,
+    r.insertTableCaption,
     r.alignColLeft,
     r.alignColCenter,
     r.alignColRight,

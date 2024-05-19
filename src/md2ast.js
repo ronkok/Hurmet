@@ -80,7 +80,8 @@
 
 const CR_NEWLINE_R = /\r\n?/g;
 const FORMFEED_R = /\f/g;
-const CLASS_R = /(?:^| )\.([a-z-]+)(?: |$)/
+const CLASS_R = /(?:^| )\.([a-z-]+)(?: |&|$)/
+const floatRegEx = /float="(left|right)"/
 const WIDTH_R = /(?:^| )width="?([\d.a-z]+"?)(?: |$)/
 const COL_WIDTHS_R = /(?:^| )colWidths="([^"]*)"/
 const ID_R = /(?:^| )#([a-z-]+)(?: |$)/
@@ -267,8 +268,8 @@ const TABLES = (function() {
   const parsePipeTable = function() {
     return function(capture, state) {
       state.inline = true
-      const align = parseTableAlign(capture[2])
-      const [myClass, myID, colWidths] = tableDirectives(capture[4], align)
+      const align = parseTableAlign(capture[3])
+      const [myClass, myID, colWidths] = tableDirectives(capture[5], align)
       const table = {
         type: "table",
         attrs: {},
@@ -286,15 +287,28 @@ const TABLES = (function() {
         }
         table.content.push(colGroup)
       }
-      if (!/^\|+$/.test(capture[1])) {
-        table.content.push(parsePipeTableRow(capture[1], parse, state, colWidths, true))
+      if (!/^\|+$/.test(capture[2])) {
+        table.content.push(parsePipeTableRow(capture[2], parse, state, colWidths, true))
       }
-      const tableBody = capture[3].trim().split("\n")
+      const tableBody = capture[4].trim().split("\n")
       tableBody.forEach(row => {
         table.content.push(parsePipeTableRow(row, parse, state, colWidths, false))
       })
       state.inline = false;
-      return table
+      if (capture[1]) {
+        const figure = { type: "figure", attrs: { class: "top-caption" }, content: [
+          table,
+          { type: "figcaption", attrs: { class: "top-caption" },
+            content: parseInline(capture[1], state) }
+        ] }
+        if (capture[5]) {
+          const match = floatRegEx.exec(capture[5])
+          if (match) { figure.attrs.class += " " + match[1] }
+        }
+        return figure
+      } else {
+        return table
+      }
     };
   };
 
@@ -304,8 +318,8 @@ const TABLES = (function() {
 
   const parseGridTable = function() {
     return function(capture, state) {
-      const topBorder = capture[2]
-      const lines = capture[1].slice(0, -1).split(gridSplit)
+      const topBorder = capture[3];
+      const lines = capture[2].slice(0, -1).split(gridSplit)
 
       // Does the grid table contain a line separating header from table body?
       let headerExists = false
@@ -321,7 +335,7 @@ const TABLES = (function() {
       // Get column justification
       const alignrow = headerExists ? lines[headerSepLine] : topBorder.slice(1)
       const align = parseTableAlign(alignrow)
-      const [myClass, myID, colWidths] = tableDirectives(capture[3], align)
+      const [myClass, myID, colWidths] = tableDirectives(capture[4], align)
 
       // Read the top & left borders to find a first draft of cell corner locations.
       const colSeps = [0]
@@ -479,15 +493,28 @@ const TABLES = (function() {
         }
       }
       state.inline = false
-      return table
+      if (capture[1]) {
+        const figure = { type: "figure", attrs: { class: "top-caption" }, content: [
+          table,
+          { type: "figcaption", attrs: { class: "top-caption" },
+            content: parseInline(capture[1], state) }
+        ] }
+        if (capture[4]) {
+          const match = floatRegEx.exec(capture[4])
+          if (match) { figure.attrs.class += " " + match[1] }
+        }
+        return figure
+      } else {
+        return table
+      }
     };
   };
 
   return {
     parsePipeTable: parsePipeTable(),
-    PIPE_TABLE_REGEX: /^(\|.*)\n\|([-:]+[-| :]*)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
+    PIPE_TABLE_REGEX: /^(?:table: ([\S\s]+)\n(?=\|))?(\|.*)\n\|([-:]+[-| :]*)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
     parseGridTable: parseGridTable(),
-    GRID_TABLE_REGEX: /^((\+(?:[-:=]+\+)+)\n(?:[+|][^\n]+[+|] *\n)+)(?:\{([^\n}]+)\}\n)?\n*/
+    GRID_TABLE_REGEX: /^(?:table: ([\S\s]+)\n(?=\|))?((\+(?:[-:=]+\+)+)\n(?:[+|][^\n]+[+|] *\n)+)(?:\{([^\n}]+)\}\n)?\n*/
   };
 })();
 

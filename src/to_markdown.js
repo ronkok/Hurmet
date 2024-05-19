@@ -203,7 +203,7 @@ const hurmetNodes =  {
     state.closeBlock(node)
   },
   table(state, node) {
-    state.renderTable(node, state.delim, state.isGFM)
+    state.renderTable(node, state.delim, null, state.isGFM)
     state.closeBlock(node)
   },
   footnote(state, node) {
@@ -213,29 +213,43 @@ const hurmetNodes =  {
   },
   figure(state, node) {
     let caption
-    if (!state.isGFM) {
-      const figureCaption = node.content.content[1]
-      const figureState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, this.footnotes, false)
-      figureState.renderInline(figureCaption)
-      caption = figureState.out
+    if (node.content.content[0].type.name === "table") {
+      const figureCaption = node.content.content[1];
+      state.write("table: ")
+      state.renderInline(figureCaption)
+      state.closeBlock(figureCaption)
+      const L = state.out.length
+      const table = node.content.content[0];
+      const float = node.attrs.class.replace("top-caption", "").trim()
+      state.renderTable(table, state.delim, float, state.isGFM)
+      state.closeBlock(table)
+      // Get rid of the newline between the caption and the table.
+      state.out = state.out.slice(0, L) + state.out.slice(L + 1)
     } else {
-      caption = node.attrs.alt
-    }
-    const ref = getRef(node, state)
-    const attrs = node.content.content[0].attrs // image attributes
-    let path = attrs.src
-    if (!state.isGFM && (attrs.width || attrs.alt)) {
-      path += "\n{"
-      if (attrs.width && !isNaN(attrs.width)) { path += " width=" + attrs.width }
-      if (attrs.alt) { path += ' alt="' + state.esc(attrs.alt) + '"' }
-      path += "}"
-    }
-    // We use reference links and defer the image paths to the end of the document.
-    state.paths.set(ref, path)
-    if (ref === caption) {
-      state.write(`!![${caption}][]\n\n`)
-    } else {
-      state.write(`!![${caption}][${ref}]\n\n`)
+      if (!state.isGFM) {
+        const figureCaption = node.content.content[1]
+        const figureState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, this.footnotes, false)
+        figureState.renderInline(figureCaption)
+        caption = figureState.out
+      } else {
+        caption = node.attrs.alt
+      }
+      const ref = getRef(node, state)
+      const attrs = node.content.content[0].attrs // image attributes
+      let path = attrs.src
+      if (!state.isGFM && (attrs.width || attrs.alt)) {
+        path += "\n{"
+        if (attrs.width && !isNaN(attrs.width)) { path += " width=" + attrs.width }
+        if (attrs.alt) { path += ' alt="' + state.esc(attrs.alt) + '"' }
+        path += "}"
+      }
+      // We use reference links and defer the image paths to the end of the document.
+      state.paths.set(ref, path)
+      if (ref === caption) {
+        state.write(`!![${caption}][]\n\n`)
+      } else {
+        state.write(`!![${caption}][${ref}]\n\n`)
+      }
     }
     
   },
@@ -675,7 +689,7 @@ export class MarkdownSerializerState {
     return justify === "r" ? (pad + str) : (str + pad)
   }
 
-  renderTable(node, delim, isGFM) {
+  renderTable(node, delim, float, isGFM) {
     const rows = node.content.content
     let numCols = rows[0].content.content.length
     for (let i = 1; i < rows.length; i++) {
@@ -810,10 +824,11 @@ export class MarkdownSerializerState {
         break
       }
     }
-    const className = node.attrs.class.replace(/ c\d+[cr]/g, "") // remove column justification
-    if (!isGFM) {
-      this.write(`\n${delim}{.${className} colWidths="${colWidths.trim()}"}\n`)
-    }
+    const className = node.attrs.class.replace(/ c\d+[cr]/g, "").replace(/ +/g, "") // remove column justification
+    let directive = `\n${delim}{.${className}`
+    if (float && float === "left" || float === "right") { directive += ` float="${float}"` }
+    directive += ` colWidths="${colWidths.trim()}"}\n`
+    if (!isGFM) { this.write(directive) }
   }
 
   // :: (string, ?bool) → string

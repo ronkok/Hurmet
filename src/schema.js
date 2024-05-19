@@ -249,8 +249,8 @@ export const nodes = {
   },
 
   figure: {
-    content: "block{2}",
-    attrs: { class: {default: "inline"} },
+    content: "block figcaption",
+    attrs: { class: {default: "auto"} },
     group: "block",
     marks: "",
     parseDOM: [{tag: "figure", getAttrs(dom) {
@@ -260,10 +260,13 @@ export const nodes = {
   },
   figcaption: {
     content: "inline*",
+    attrs: { class: {default: null} },
     group: "block",
-    parseDOM: [{tag: "figcaption"}],
-    toDOM() { 
-      return ["figcaption", 0] 
+    parseDOM: [{tag: "figcaption", getAttrs(dom) {
+      return { class: dom.getAttribute("class") }
+    }}],
+    toDOM(node) { 
+      return ["figcaption", node.attrs, 0] 
     }
   },
 

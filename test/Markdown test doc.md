@@ -6,7 +6,7 @@ pageSize: letter
 
 # Hurmet Markdown Input Test
 
-Paragraphs are blocks of text separated by empty lines. For a hard line break,
+Paragraphs are blocks of text separated by empty lines. For a hard line-break,
 Hurmet writes a backslash, `\`, at the end of a line, like this:\
 Hurmet also reads two spaces at the end of a line as a line break, line this:\
 Otherwise, newlines in a paragraph are treated as spaces.
@@ -70,7 +70,7 @@ Special divs can contain more than one paragraph.
 > [!WARNING]
 > Negative potential consequences of an action.
 
->  Check a blockquote after an alert.
+>  `Check a blockquote after an alert.`
 
 ### TeX
 
@@ -123,8 +123,6 @@ link][3]. And here is an auto-link: <http://example.com/>
 Here’s an inline tank ![tank][] image.
 
 While we’re doing images, let’s display a Hurmet drawing.
-
-![Tank Dimensions][]
 
 ### Lists
 
@@ -270,7 +268,7 @@ However, we use `:` in the header border to show column alignment. Pandoc does
 the same thing.
 
 +-----------+------------------------------+
-| Heading 1 |  Merged Heading              |
+| Heading 1 | Merged Heading               |
 +:=========:+==============================+
 | datum 1   | merged cell                  |
 +-----------+--------------------+---------+
@@ -308,6 +306,21 @@ Grid tables can also be written without a header. Just omit the `====` border.
 | √   | Roots                                   |
 {.grid colWidths="null null"}
 
+#### Table Captions
+
+table: View
+| H1 | H2   | H3     |
+|----|:----:|:------:|
+| s1 | 12   | 55     |
+| s2 | 9\.5 | 28\.44 |
+{.three-rules float="right" colWidths="53 73 62"}
+
+A table can be placed within a figure. The figure then may have a caption
+applied to it. The entire figure can be floated right or left.
+
+The caption is preceded by the string "table: ", as per Pandoc. The float is
+written into the table directives.
+
 #### Inline Style
 
 Hurmet standard notation: _italic_, **bold**, and _**bold-italic**_.
@@ -334,39 +347,7 @@ A paragraph
 [3]: https://hurmet.org/
 
 [4]: https://hurmet.org/images/IsoTankCourses.svg
-{.inline alt="4"}
+{.inline}
 
 [tank]: https://hurmet.org/images/IsoTankCourses.svg
 {.inline alt="tank"}
-
-[Tank Dimensions]: ¢` draw()
-    title "Tank Dimensions"
-    frame 252, 459, "inline"
-    view -12, 15, -3.5
-    rect [-11, -1.5; 11, 0]
-    rect [-9, 0; -8, 19]
-    rect [8, 0; 9, 19]
-    rect [-9, 19; 9, 20]
-    line [-8, 17; 8, 17]
-    line [-5, 16.5; -2, 16.5]
-    line [-4.5, 16; -2.5, 16]
-    line [-4, 15.5; -3, 15.5]
-    dimension [1, 0; 1, 17; 1, 10], "H~L~"
-    dimension [11, 0; 9, 19; 12.5, 10], "H"
-    marker "arrow"
-    line [-10, 12; -9, 12]
-    line [-7, 12; -8, 12]
-    text [-7, 12], "t~w~", "right"
-    line [-5, 1; -5, 0]
-    line [-5, -2.5; -5, -1.5]
-    text [-5, 1.25], "t~b~", "above"
-    line [-5, 21; -5, 20]
-    line [-5, 18; -5, 19]
-    text [-5, 21.25], "t~r~", "above"
-    marker "none"
-    circle [0, 34], 11
-    circle [0, 34], 9
-    dimension [-8, 34; 8, 34; 0, 34], "D"
-    strokedasharray "5 5"
-    circle [0, 34], 8
-end `

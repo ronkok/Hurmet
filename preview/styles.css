@@ -557,10 +557,21 @@ figure img {
   margin-left: auto;
   margin-right: auto;
 }
-
+figure.top-caption {
+  display: table;
+}
 figure figcaption {
   text-align: center;
   margin-top: 2px;
+}
+figure figcaption.top-caption {
+  display: table-caption;
+  caption-side: top;
+  font-size: 95%;
+  font-weight: bold;
+}
+figure.right, figure.left {
+  margin: 0px 10px 5px 10px
 }
 
 .ProseMirror-prompt {
