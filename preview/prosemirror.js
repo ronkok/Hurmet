@@ -16120,20 +16120,6 @@ function goToNextCell(direction) {
     return true;
   };
 }
-function deleteTable(state, dispatch) {
-  const $pos = state.selection.$anchor;
-  for (let d = $pos.depth; d > 0; d--) {
-    const node = $pos.node(d);
-    if (node.type.spec.tableRole == "table") {
-      if (dispatch)
-        dispatch(
-          state.tr.delete($pos.before(d), $pos.after(d)).scrollIntoView()
-        );
-      return true;
-    }
-  }
-  return false;
-}
 
 // src/index.ts
 function tableEditing({
@@ -18011,11 +17997,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6305","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.6281","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.5486","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.5645","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -18024,10 +18010,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4757","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4784","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9784","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.8095","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9855","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.8370","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -18047,7 +18033,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.86023","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.85685","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -18055,23 +18041,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.4329","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.4600","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["4.0161","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["90.1330","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["4.0318","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["90.3883","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["168.25","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["168.96","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1476.01","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1471.55","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -18082,7 +18068,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["18.0713","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["18.0889","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -18112,7 +18098,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.0795","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0844","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -23043,7 +23029,8 @@ const parse$1 = (
 
 const CR_NEWLINE_R = /\r\n?/g;
 const FORMFEED_R = /\f/g;
-const CLASS_R = /(?:^| )\.([a-z-]+)(?: |$)/;
+const CLASS_R = /(?:^| )\.([a-z-]+)(?: |&|$)/;
+const floatRegEx = /float="(left|right)"/;
 const WIDTH_R = /(?:^| )width="?([\d.a-z]+"?)(?: |$)/;
 const COL_WIDTHS_R = /(?:^| )colWidths="([^"]*)"/;
 const ID_R = /(?:^| )#([a-z-]+)(?: |$)/;
@@ -23230,8 +23217,8 @@ const TABLES = (function() {
   const parsePipeTable = function() {
     return function(capture, state) {
       state.inline = true;
-      const align = parseTableAlign(capture[2]);
-      const [myClass, myID, colWidths] = tableDirectives(capture[4], align);
+      const align = parseTableAlign(capture[3]);
+      const [myClass, myID, colWidths] = tableDirectives(capture[5], align);
       const table = {
         type: "table",
         attrs: {},
@@ -23249,15 +23236,28 @@ const TABLES = (function() {
         }
         table.content.push(colGroup);
       }
-      if (!/^\|+$/.test(capture[1])) {
-        table.content.push(parsePipeTableRow(capture[1], parse, state, colWidths, true));
+      if (!/^\|+$/.test(capture[2])) {
+        table.content.push(parsePipeTableRow(capture[2], parse, state, colWidths, true));
       }
-      const tableBody = capture[3].trim().split("\n");
+      const tableBody = capture[4].trim().split("\n");
       tableBody.forEach(row => {
         table.content.push(parsePipeTableRow(row, parse, state, colWidths, false));
       });
       state.inline = false;
-      return table
+      if (capture[1]) {
+        const figure = { type: "figure", attrs: { class: "top-caption" }, content: [
+          table,
+          { type: "figcaption", attrs: { class: "top-caption" },
+            content: parseInline(capture[1], state) }
+        ] };
+        if (capture[5]) {
+          const match = floatRegEx.exec(capture[5]);
+          if (match) { figure.attrs.class += " " + match[1]; }
+        }
+        return figure
+      } else {
+        return table
+      }
     };
   };
 
@@ -23267,8 +23267,8 @@ const TABLES = (function() {
 
   const parseGridTable = function() {
     return function(capture, state) {
-      const topBorder = capture[2];
-      const lines = capture[1].slice(0, -1).split(gridSplit);
+      const topBorder = capture[3];
+      const lines = capture[2].slice(0, -1).split(gridSplit);
 
       // Does the grid table contain a line separating header from table body?
       let headerExists = false;
@@ -23284,7 +23284,7 @@ const TABLES = (function() {
       // Get column justification
       const alignrow = headerExists ? lines[headerSepLine] : topBorder.slice(1);
       const align = parseTableAlign(alignrow);
-      const [myClass, myID, colWidths] = tableDirectives(capture[3], align);
+      const [myClass, myID, colWidths] = tableDirectives(capture[4], align);
 
       // Read the top & left borders to find a first draft of cell corner locations.
       const colSeps = [0];
@@ -23442,15 +23442,28 @@ const TABLES = (function() {
         }
       }
       state.inline = false;
-      return table
+      if (capture[1]) {
+        const figure = { type: "figure", attrs: { class: "top-caption" }, content: [
+          table,
+          { type: "figcaption", attrs: { class: "top-caption" },
+            content: parseInline(capture[1], state) }
+        ] };
+        if (capture[4]) {
+          const match = floatRegEx.exec(capture[4]);
+          if (match) { figure.attrs.class += " " + match[1]; }
+        }
+        return figure
+      } else {
+        return table
+      }
     };
   };
 
   return {
     parsePipeTable: parsePipeTable(),
-    PIPE_TABLE_REGEX: /^(\|.*)\n\|([-:]+[-| :]*)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
+    PIPE_TABLE_REGEX: /^(?:table: ([\S\s]+)\n(?=\|))?(\|.*)\n\|([-:]+[-| :]*)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
     parseGridTable: parseGridTable(),
-    GRID_TABLE_REGEX: /^((\+(?:[-:=]+\+)+)\n(?:[+|][^\n]+[+|] *\n)+)(?:\{([^\n}]+)\}\n)?\n*/
+    GRID_TABLE_REGEX: /^(?:table: ([\S\s]+)\n(?=\|))?((\+(?:[-:=]+\+)+)\n(?:[+|][^\n]+[+|] *\n)+)(?:\{([^\n}]+)\}\n)?\n*/
   };
 })();
 
@@ -48747,8 +48760,8 @@ const nodes = {
   },
 
   figure: {
-    content: "block{2}",
-    attrs: { class: {default: "inline"} },
+    content: "block figcaption",
+    attrs: { class: {default: "auto"} },
     group: "block",
     marks: "",
     parseDOM: [{tag: "figure", getAttrs(dom) {
@@ -48758,10 +48771,13 @@ const nodes = {
   },
   figcaption: {
     content: "inline*",
+    attrs: { class: {default: null} },
     group: "block",
-    parseDOM: [{tag: "figcaption"}],
-    toDOM() { 
-      return ["figcaption", 0] 
+    parseDOM: [{tag: "figcaption", getAttrs(dom) {
+      return { class: dom.getAttribute("class") }
+    }}],
+    toDOM(node) { 
+      return ["figcaption", node.attrs, 0] 
     }
   },
 
@@ -49867,7 +49883,7 @@ const hurmetNodes =  {
     state.closeBlock(node);
   },
   table(state, node) {
-    state.renderTable(node, state.delim, state.isGFM);
+    state.renderTable(node, state.delim, null, state.isGFM);
     state.closeBlock(node);
   },
   footnote(state, node) {
@@ -49877,29 +49893,43 @@ const hurmetNodes =  {
   },
   figure(state, node) {
     let caption;
-    if (!state.isGFM) {
+    if (node.content.content[0].type.name === "table") {
       const figureCaption = node.content.content[1];
-      const figureState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, this.footnotes, false);
-      figureState.renderInline(figureCaption);
-      caption = figureState.out;
+      state.write("table: ");
+      state.renderInline(figureCaption);
+      state.closeBlock(figureCaption);
+      const L = state.out.length;
+      const table = node.content.content[0];
+      const float = node.attrs.class.replace("top-caption", "").trim();
+      state.renderTable(table, state.delim, float, state.isGFM);
+      state.closeBlock(table);
+      // Get rid of the newline between the caption and the table.
+      state.out = state.out.slice(0, L) + state.out.slice(L + 1);
     } else {
-      caption = node.attrs.alt;
-    }
-    const ref = getRef(node, state);
-    const attrs = node.content.content[0].attrs; // image attributes
-    let path = attrs.src;
-    if (!state.isGFM && (attrs.width || attrs.alt)) {
-      path += "\n{";
-      if (attrs.width && !isNaN(attrs.width)) { path += " width=" + attrs.width; }
-      if (attrs.alt) { path += ' alt="' + state.esc(attrs.alt) + '"'; }
-      path += "}";
-    }
-    // We use reference links and defer the image paths to the end of the document.
-    state.paths.set(ref, path);
-    if (ref === caption) {
-      state.write(`!![${caption}][]\n\n`);
-    } else {
-      state.write(`!![${caption}][${ref}]\n\n`);
+      if (!state.isGFM) {
+        const figureCaption = node.content.content[1];
+        const figureState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, this.footnotes, false);
+        figureState.renderInline(figureCaption);
+        caption = figureState.out;
+      } else {
+        caption = node.attrs.alt;
+      }
+      const ref = getRef(node, state);
+      const attrs = node.content.content[0].attrs; // image attributes
+      let path = attrs.src;
+      if (!state.isGFM && (attrs.width || attrs.alt)) {
+        path += "\n{";
+        if (attrs.width && !isNaN(attrs.width)) { path += " width=" + attrs.width; }
+        if (attrs.alt) { path += ' alt="' + state.esc(attrs.alt) + '"'; }
+        path += "}";
+      }
+      // We use reference links and defer the image paths to the end of the document.
+      state.paths.set(ref, path);
+      if (ref === caption) {
+        state.write(`!![${caption}][]\n\n`);
+      } else {
+        state.write(`!![${caption}][${ref}]\n\n`);
+      }
     }
     
   },
@@ -50339,7 +50369,7 @@ class MarkdownSerializerState {
     return justify === "r" ? (pad + str) : (str + pad)
   }
 
-  renderTable(node, delim, isGFM) {
+  renderTable(node, delim, float, isGFM) {
     const rows = node.content.content;
     let numCols = rows[0].content.content.length;
     for (let i = 1; i < rows.length; i++) {
@@ -50474,10 +50504,11 @@ class MarkdownSerializerState {
         break
       }
     }
-    const className = node.attrs.class.replace(/ c\d+[cr]/g, ""); // remove column justification
-    if (!isGFM) {
-      this.write(`\n${delim}{.${className} colWidths="${colWidths.trim()}"}\n`);
-    }
+    const className = node.attrs.class.replace(/ c\d+[cr]/g, "").replace(/ +/g, ""); // remove column justification
+    let directive = `\n${delim}{.${className}`;
+    if (float && float === "left" || float === "right") { directive += ` float="${float}"`; }
+    directive += ` colWidths="${colWidths.trim()}"}\n`;
+    if (!isGFM) { this.write(directive); }
   }
 
   // :: (string, ?bool) → string
@@ -52585,6 +52616,11 @@ const hurmetIcons = {
     height: 24,
     path: "M2,19 C2,20.6568542 3.34314575,22 5,22 L19,22 C20.6568542,22 22,20.6568542 22,19 L22,5 C22,3.34314575 20.6568542,2 19,2 L5,2 C3.34314575,2 2,3.34314575 2,5 L2,19 Z M-1.16403344e-15,19 L-3.0678068e-16,5 C-6.44957556e-16,2.23857625 2.23857625,0 5,0 L19,0 C21.7614237,0 24,2.23857625 24,5 L24,19 C24,21.7614237 21.7614237,24 19,24 L5,24 C2.23857625,24 9.50500275e-16,21.7614237 -1.16403344e-15,19 Z M12,10 C12.5522847,10 13,10.4477153 13,11 L13,13 C13,13.5522847 12.5522847,14 12,14 C11.4477153,14 11,13.5522847 11,13 L11,11 C11,10.4477153 11.4477153,10 12,10 Z M12,16 C12.5522847,16 13,16.4477153 13,17 L13,20 C13,20.5522847 12.5522847,21 12,21 C11.4477153,21 11,20.5522847 11,20 L11,17 C11,16.4477153 11.4477153,16 12,16 Z M12,3 C12.5522847,3 13,3.44771525 13,4 L13,7 C13,7.55228475 12.5522847,8 12,8 C11.4477153,8 11,7.55228475 11,7 L11,4 C11,3.44771525 11.4477153,3 12,3 Z"
   },
+  table_caption: {
+    width: 24,
+    height: 24,
+    path: "M17,18 L17,22 L19,22 C20.6568542,22,22,20.6568542,22,19 L22,18 L17,18 Z M15,18 L9,18 L9,22 L15,22 L15,18 Z M17,16 L22,16 L22,12 L17,12 L17,16 Z M15,16 L15,12 L9,12 L9,16 L15,16 Z M17,10 L22,10 L22,9 C22,9,22,6,19,6 L17,6 L17,10 Z M15,10 L15,6 L9,6 L9,10 L15,10 Z M24,16.1768671 L24,19 C24,21.7614237,21.7614237,24,19,24 L5,24 C2.23857625,24,0,21.7614237,0,19 L0,9 C0,6,2,4,5,4 L19,4 C21.7614237,4,24,6.23857625,24,9 L24,7.82313285 C24.0122947,7.88054124,24.0187107,7.93964623,24.0187107,8 C24.0187107,8.06035377,24.0122947,8.11945876,24,8.17686715 L24,15.8231329 C24.0122947,15.8805412,24.0187107,15.9396462,24.0187107,16 C24.0187107,16.0603538,24.0122947,16.1194588,24,16.1768671 Z M7,6 L5,6 C3.34314575,6,2,7.34314575,2,9 L2,10 L7,10 L7,6 Z M2,12 L2,16 L7,16 L7,12 L2,12 Z M2,18 L2,19 C2,20.6568542,3.34314575,22,5,22 L7,22 L7,18 L2,18 Z M4,0 H20 V1.75 H4 Z"
+  },
   delete_col: {
     width: 24,
     height: 24,
@@ -53090,6 +53126,67 @@ function uploadImage(nodeType) {
   })
 }
 
+function insertTableCaption() {
+  return new MenuItem({
+    title: "Insert or delete caption…",
+    icon: hurmetIcons.table_caption,
+    select(state) {
+      return isInTable(state)
+    },
+    run(state, _, view) {
+      const table = findTable(state.selection);
+      let tableStart = 0;
+      let tableEnd = 0;
+      let depth = -1;
+      let inFigure = false;
+      let $from = state.selection.$from;
+      const resolvedPos = state.doc.resolve(state.selection.from);
+      for (let d = $from.depth; d >= 0; d--) {
+        if ($from.node(d).type.name === "table") {
+          tableStart = resolvedPos.before(d);
+          tableEnd = resolvedPos.after(d);
+          inFigure = d > 0 && $from.node(d - 1).type.name === "figure";
+          depth = d;
+          break
+        }
+      }
+      if (inFigure) {
+        // Delete the existing figure & caption, but keep the table.
+        const figureStart = resolvedPos.before(depth - 1);
+        const figureEnd = resolvedPos.after(depth - 1);
+        const tr = state.tr;
+        tr.replaceWith(figureStart, figureEnd, table.node);
+        view.dispatch(tr);
+        view.focus();
+      } else {
+        const promptOptions = {
+          title: "Insert Table Caption",
+          fields: { caption: new TextField({
+            label: "Caption",
+            value: ""
+          }) },
+          radioButtons: {
+            name: "position",
+            direction: "row",
+            buttons: [["auto", "auto"], ["left", "left"], ["right", "right"]],
+            current: "auto"
+          },
+          callback(attrs) {
+            const str = attrs.caption ? attrs.caption : "caption";
+            const caption = schema.nodes.figcaption.createAndFill({class: "top-caption"}, [schema.text(str)]);
+            attrs.class += " top-caption";
+            const tr = state.tr;
+            tr.replaceWith(tableStart, tableEnd, schema.nodes.figure.createAndFill(attrs, [table.node, caption]));
+            view.dispatch(tr);
+            view.focus();
+          }
+        };
+        openPrompt(promptOptions);
+      }
+    }
+  })
+}
+
 function insertImage(nodeType) {
   return new MenuItem({
     title: "Insert link to image or edit existing image",
@@ -53108,7 +53205,6 @@ function insertImage(nodeType) {
       const promptOptions = {
         title: attrs && attrs.src ? "Edit image" : "Insert image",
         fields: {
-//          src: new TextField({ label: "File path", required: true, value: attrs && attrs.src }),
           alt: new TextField({
             label: "Description",
             value: attrs ? attrs.alt : state.doc.textBetween(from, to, " ")
@@ -53237,17 +53333,24 @@ function wrapInEpigraph(nodeType) {
   })
 }
 
-function insertComment(nodeType) {
+function toggleComment(nodeType) {
   return new MenuItem({
-    title: "Insert a comment",
+    title: "Insert or delete a comment",
     icon: hurmetIcons.comment,
     enable(state) {
       return canInsert(state, nodeType)
     },
     run(state, dispatch) {
-      if (state.selection instanceof NodeSelection && state.selection.node.type.name == "comment") {
-        return
+      // This is a toggle switch.
+      // If we are inside a comment bubble, delete it.
+      const $pos = state.selection.$anchor;
+      for (let d = $pos.depth; d > 0; d--) {
+        if ($pos.node(d).type.name == 'comment') {
+          dispatch(state.tr.delete($pos.before(d), $pos.after(d)).scrollIntoView());
+          return false
+        }
       }
+      // Where not in a comment, insert a new one.
       const resolvedPos = state.doc.resolve(state.selection.from);
       const parent = resolvedPos.parent;
       if (parent.type.name === "comment") { return }
@@ -53486,13 +53589,39 @@ function toggleDraftMode() {
 
 function tableItem(title, icon, cmd, cell) {
   return new MenuItem({
-    title: title,
+    title: "title",
     icon: hurmetIcons[icon],
     select(state) {
       return isInTable(state)
     },
     run(state, dispatch) {
       cmd(state, dispatch);
+    }
+  })
+}
+
+function deleteTable() {
+  return new MenuItem({
+    title: "Delete Table",
+    icon: hurmetIcons["delete_table"],
+    select(state) {
+      return isInTable(state)
+    },
+    run(state, dispatch) {
+      const $pos = state.selection.$anchor;
+      for (let d = $pos.depth; d > 0; d--) {
+        const node = $pos.node(d);
+        if (node.type.spec.tableRole == 'table') {
+          const parent = $pos.node(d - 1);
+          if (parent.type.name == 'figure') {
+            dispatch(state.tr.delete($pos.before(d - 1), $pos.after(d -1)).scrollIntoView());
+          } else {
+            dispatch(state.tr.delete($pos.before(d), $pos.after(d)).scrollIntoView());
+          }
+          break
+        }
+      }
+      return false
     }
   })
 }
@@ -53825,7 +53954,7 @@ function buildMenuItems(schema) {
   r.macroButton = macroButton();
   if ((type = schema.nodes.calculation)) r.insertCalclation = mathMenuItem(type, "calculation");
   if ((type = schema.nodes.tex)) r.insertTeX = mathMenuItem(type, "tex");
-  if ((type = schema.nodes.comment)) r.insertComment = insertComment(type);
+  if ((type = schema.nodes.comment)) r.toggleComment = toggleComment(type);
   if ((type = schema.nodes.tight_list_item)) r.tighten = tighten();
 
   if ((type = schema.nodes.bullet_list))
@@ -53900,11 +54029,6 @@ function buildMenuItems(schema) {
         attrs: { level: i }
       });
     }
-    r.table_caption = blockTypeItem(type, {
-      title: "Table Caption",
-      label: "Table Caption (same as H6)",
-      attrs: { level: 6 }
-    });
   }
   if ((type = schema.nodes.horizontal_rule)) {
     let hr = type;
@@ -53932,7 +54056,7 @@ function buildMenuItems(schema) {
       }
     });
   }
-  r.deleteTable = tableItem("Delete table", "delete_table", deleteTable);
+  r.deleteTable = deleteTable(); //tableItem("Delete table", "delete_table", deleteTable, cell)
   r.addRowBefore = tableItem("Insert row before", "add_row_before", addRowBefore);
   r.deleteRow = tableItem("Delete row", "delete_row", deleteRow);
   r.addColumnBefore = tableItem("Insert column before", "add_col_before", addColumnBefore);
@@ -53950,6 +54074,7 @@ function buildMenuItems(schema) {
       splitCell(state, dispatch);
     }
   });
+  r.insertTableCaption = insertTableCaption();
   r.grid = tableStyle("Grid", "grid", "grid");
   r.nogrid = tableStyle("No borders", "nogrid", "nogrid");
   r.oneRule = tableStyle("Border below header", "one-rule", "oneRule");
@@ -54102,7 +54227,7 @@ function buildMenuItems(schema) {
     r.imageLink,
     r.footnote,
     r.toc,
-    r.insertComment
+    r.toggleComment
   ]];
 
   r.headingDropDown = new Dropdown([
@@ -54129,7 +54254,6 @@ function buildMenuItems(schema) {
         r.wrapCentered,
         r.wrapRightJustified,
         r.wrapEpigraph,
-        r.table_caption,
         r.wrapBoxed,
         r.wrapNote,
         r.wrapTip,
@@ -54153,6 +54277,7 @@ function buildMenuItems(schema) {
     r.deleteRow,
     r.deleteColumn,
     r.toggleCellMerge,
+    r.insertTableCaption,
     r.alignColLeft,
     r.alignColCenter,
     r.alignColRight,

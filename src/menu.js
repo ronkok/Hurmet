@@ -847,17 +847,24 @@ function wrapInEpigraph(nodeType) {
   })
 }
 
-function insertComment(nodeType) {
+function toggleComment(nodeType) {
   return new MenuItem({
-    title: "Insert a comment",
+    title: "Insert or delete a comment",
     icon: hurmetIcons.comment,
     enable(state) {
       return canInsert(state, nodeType)
     },
     run(state, dispatch) {
-      if (state.selection instanceof NodeSelection && state.selection.node.type.name == "comment") {
-        return
+      // This is a toggle switch.
+      // If we are inside a comment bubble, delete it.
+      const $pos = state.selection.$anchor;
+      for (let d = $pos.depth; d > 0; d--) {
+        if ($pos.node(d).type.name == 'comment') {
+          dispatch(state.tr.delete($pos.before(d), $pos.after(d)).scrollIntoView())
+          return false
+        }
       }
+      // Where not in a comment, insert a new one.
       const resolvedPos = state.doc.resolve(state.selection.from)
       const parent = resolvedPos.parent
       if (parent.type.name === "comment") { return }
@@ -1462,7 +1469,7 @@ export function buildMenuItems(schema) {
   r.macroButton = macroButton()
   if ((type = schema.nodes.calculation)) r.insertCalclation = mathMenuItem(type, "calculation")
   if ((type = schema.nodes.tex)) r.insertTeX = mathMenuItem(type, "tex")
-  if ((type = schema.nodes.comment)) r.insertComment = insertComment(type)
+  if ((type = schema.nodes.comment)) r.toggleComment = toggleComment(type)
   if ((type = schema.nodes.tight_list_item)) r.tighten = tighten()
 
   if ((type = schema.nodes.bullet_list))
@@ -1737,7 +1744,7 @@ export function buildMenuItems(schema) {
     r.imageLink,
     r.footnote,
     r.toc,
-    r.insertComment
+    r.toggleComment
   ]]
 
   r.headingDropDown = new Dropdown([

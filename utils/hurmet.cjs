@@ -1230,11 +1230,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6305","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.6281","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.5486","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.5645","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -1243,10 +1243,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4757","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4784","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9784","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.8095","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9855","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.8370","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -1266,7 +1266,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.86023","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.85685","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1274,23 +1274,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.4329","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.4600","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["4.0161","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["90.1330","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["4.0318","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["90.3883","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["168.25","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["168.96","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1476.01","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1471.55","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1301,7 +1301,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["18.0713","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["18.0889","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -1331,7 +1331,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.0795","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0844","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -9258,7 +9258,8 @@ const textRange = (str, index) => {
 
 const CR_NEWLINE_R = /\r\n?/g;
 const FORMFEED_R = /\f/g;
-const CLASS_R = /(?:^| )\.([a-z-]+)(?: |$)/;
+const CLASS_R = /(?:^| )\.([a-z-]+)(?: |&|$)/;
+const floatRegEx = /float="(left|right)"/;
 const WIDTH_R = /(?:^| )width="?([\d.a-z]+"?)(?: |$)/;
 const COL_WIDTHS_R = /(?:^| )colWidths="([^"]*)"/;
 const ID_R = /(?:^| )#([a-z-]+)(?: |$)/;
@@ -9445,8 +9446,8 @@ const TABLES = (function() {
   const parsePipeTable = function() {
     return function(capture, state) {
       state.inline = true;
-      const align = parseTableAlign(capture[2]);
-      const [myClass, myID, colWidths] = tableDirectives(capture[4], align);
+      const align = parseTableAlign(capture[3]);
+      const [myClass, myID, colWidths] = tableDirectives(capture[5], align);
       const table = {
         type: "table",
         attrs: {},
@@ -9464,15 +9465,28 @@ const TABLES = (function() {
         }
         table.content.push(colGroup);
       }
-      if (!/^\|+$/.test(capture[1])) {
-        table.content.push(parsePipeTableRow(capture[1], parse, state, colWidths, true));
+      if (!/^\|+$/.test(capture[2])) {
+        table.content.push(parsePipeTableRow(capture[2], parse, state, colWidths, true));
       }
-      const tableBody = capture[3].trim().split("\n");
+      const tableBody = capture[4].trim().split("\n");
       tableBody.forEach(row => {
         table.content.push(parsePipeTableRow(row, parse, state, colWidths, false));
       });
       state.inline = false;
-      return table
+      if (capture[1]) {
+        const figure = { type: "figure", attrs: { class: "top-caption" }, content: [
+          table,
+          { type: "figcaption", attrs: { class: "top-caption" },
+            content: parseInline(capture[1], state) }
+        ] };
+        if (capture[5]) {
+          const match = floatRegEx.exec(capture[5]);
+          if (match) { figure.attrs.class += " " + match[1]; }
+        }
+        return figure
+      } else {
+        return table
+      }
     };
   };
 
@@ -9482,8 +9496,8 @@ const TABLES = (function() {
 
   const parseGridTable = function() {
     return function(capture, state) {
-      const topBorder = capture[2];
-      const lines = capture[1].slice(0, -1).split(gridSplit);
+      const topBorder = capture[3];
+      const lines = capture[2].slice(0, -1).split(gridSplit);
 
       // Does the grid table contain a line separating header from table body?
       let headerExists = false;
@@ -9499,7 +9513,7 @@ const TABLES = (function() {
       // Get column justification
       const alignrow = headerExists ? lines[headerSepLine] : topBorder.slice(1);
       const align = parseTableAlign(alignrow);
-      const [myClass, myID, colWidths] = tableDirectives(capture[3], align);
+      const [myClass, myID, colWidths] = tableDirectives(capture[4], align);
 
       // Read the top & left borders to find a first draft of cell corner locations.
       const colSeps = [0];
@@ -9657,15 +9671,28 @@ const TABLES = (function() {
         }
       }
       state.inline = false;
-      return table
+      if (capture[1]) {
+        const figure = { type: "figure", attrs: { class: "top-caption" }, content: [
+          table,
+          { type: "figcaption", attrs: { class: "top-caption" },
+            content: parseInline(capture[1], state) }
+        ] };
+        if (capture[4]) {
+          const match = floatRegEx.exec(capture[4]);
+          if (match) { figure.attrs.class += " " + match[1]; }
+        }
+        return figure
+      } else {
+        return table
+      }
     };
   };
 
   return {
     parsePipeTable: parsePipeTable(),
-    PIPE_TABLE_REGEX: /^(\|.*)\n\|([-:]+[-| :]*)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
+    PIPE_TABLE_REGEX: /^(?:table: ([\S\s]+)\n(?=\|))?(\|.*)\n\|([-:]+[-| :]*)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
     parseGridTable: parseGridTable(),
-    GRID_TABLE_REGEX: /^((\+(?:[-:=]+\+)+)\n(?:[+|][^\n]+[+|] *\n)+)(?:\{([^\n}]+)\}\n)?\n*/
+    GRID_TABLE_REGEX: /^(?:table: ([\S\s]+)\n(?=\|))?((\+(?:[-:=]+\+)+)\n(?:[+|][^\n]+[+|] *\n)+)(?:\{([^\n}]+)\}\n)?\n*/
   };
 })();
 
