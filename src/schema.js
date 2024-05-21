@@ -351,7 +351,13 @@ export const nodes = {
     content: "table_row+",
     tableRole: "table",
     group: "block",
-    attrs: { class: { default: 'grid' } },
+    attrs: {
+      class: { default: 'grid' },
+      tableName: { default: "" },
+      positions: { default: [] },  // Column-wise list of spreadsheet cell positions
+      columnMap: { default: {} },
+      dependencies: { default: null }
+    },
     parseDOM: [{tag: "table", getAttrs(dom) {
       return { class: dom.getAttribute('class') || "grid" }
     }}],
@@ -366,7 +372,7 @@ export const nodes = {
     toDOM() { return ["tr", 0] }
   },
   table_cell: {
-    content: "block+",
+    content: "block+|spreadsheet_cell",
     attrs: {
       colspan: {default: 1},
       rowspan: {default: 1},
@@ -399,6 +405,36 @@ export const nodes = {
     defining: true,
     parseDOM: [{tag: "header"}],
     toDOM() { return ["header", 0] }
+  },
+
+  spreadsheet_cell: {
+    atom: true,
+    defining: false,
+    marks: "",
+    group: "inline",
+    inline: true,
+    attrs: {
+      entry: { default: "" },
+      name: { default: "" },
+      rpn: { default: "" },
+      entry: { default: "" },
+      value: { default: null },
+      dependencies: {default: []},
+      display: { default: "" },
+      unit: {default: null},
+      dtype: {default: 0},
+    },
+    parseDOM: [{tag: "span.hurmet-cell",  getAttrs(dom) {
+      return { entry: dom.getAttribute('data-entry') }
+    }}],
+    toDOM(node) {
+      let dom
+      dom = document.createElement('span')
+      dom.classList = "hurmet-cell"
+      dom.dataset.entry = node.attrs.entry
+      dom.textContent = node.attrs.display
+      return dom
+    }
   },
 
   calculation: {

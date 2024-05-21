@@ -86,6 +86,25 @@ export class TexView {
   stopEvent() { return true }
 }
 
+export class CellView {
+  // For a spreadsheet cell
+  constructor(node, view) {
+    this.node = node
+    this.outerView = view
+    this.dom = schema.nodes.spreadsheet_cell.spec.toDOM(node)
+  }
+
+  selectNode() {
+    if (this.dom.children.length > 1) { return }
+    this.dom.classList.add("ProseMirror-selectednode")
+  }
+
+  deselectNode() {
+    this.dom.classList.remove("ProseMirror-selectednode")
+  }
+  stopEvent() { return true }
+}
+
 export class FootnoteView {
   constructor(node, view, getPos) {
     // We'll need these later
