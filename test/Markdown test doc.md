@@ -70,7 +70,7 @@ Special divs can contain more than one paragraph.
 > [!WARNING]
 > Negative potential consequences of an action.
 
->  `Check a blockquote after an alert.`
+>  Check a blockquote after an alert.
 
 ### TeX
 
@@ -318,8 +318,35 @@ table: View
 A table can be placed within a figure. The figure then may have a caption
 applied to it. The entire figure can be floated right or left.
 
-The caption is preceded by the string "table: ", as per Pandoc. The float is
+The caption is preceded by the string `table: `, as per Pandoc. The float is
 written into the table directives.
+
+Next, let’s make sure that we can read nested tables.
+
++===========================================+===========================================+
+| table: Caption\                           | +-----------------------------+---------+ |
+| with a newline                            | | Item                        | weight\ | |
+| +-----------------------------+---------+ | |                             | psf     | |
+| | Item                        | weight\ | | +=============================+=========+ |
+| |                             | psf     | | | 2 layers asphalt shingles   | 8       | |
+| +=============================+=========+ | +-----------------------------+---------+ |
+| | 2 layers asphalt shingles   | 8       | | | 1/2″ plywood                | 1\.5    | |
+| +-----------------------------+---------+ | +-----------------------------+---------+ |
+| | 1/2″ plywood                | 1\.5    | | | insulation, R19 fiberglass  | 0\.6    | |
+| +-----------------------------+---------+ | +-----------------------------+---------+ |
+| | insulation, R19 fiberglass  | 0\.6    | | | trusses at 16″ o.c.         | 2\.5    | |
+| +-----------------------------+---------+ | +-----------------------------+---------+ |
+| | trusses at 16″ o.c.         | 2\.5    | | | 5/8″ gypsum board           | 2\.5    | |
+| +-----------------------------+---------+ | +-----------------------------+---------+ |
+| | 5/8″ gypsum board           | 2\.5    | | | lights, HVAC, miscellaneous | 1\.5    | |
+| +-----------------------------+---------+ | +-----------------------------+---------+ |
+| | lights, HVAC, miscellaneous | 1\.5    | | | total                       | =Σ      | |
+| +-----------------------------+---------+ | +-----------------------------+---------+ |
+| | total                       | =Σ      | | {.four-rules colWidths="201 72"}          |
+| +-----------------------------+---------+ |                                           |
+| {.four-rules colWidths="201 72"}          |                                           |
++-------------------------------------------+-------------------------------------------+
+{.nogrid colWidths="318 318"}
 
 #### Inline Style
 
