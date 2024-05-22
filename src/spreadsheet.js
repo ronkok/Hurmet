@@ -1,6 +1,5 @@
 
-export const cellPositions = (doc, inputPos) => {
-  // Return a column-wise array of cell positions
+export const sheetLimits = (doc, inputPos) => {
   // First, find the extent of the table
   let tableStart = 0
   let tableEnd = 0
@@ -12,30 +11,20 @@ export const cellPositions = (doc, inputPos) => {
       break
     }
   }
-  // Now traverse the table
-  const rows = [];
+  // Get the extent of the document that the transaction will replace.
   let i = -1
+  let startOfRow1 = 0
+  let endOfLastRow = 0
   doc.nodesBetween(tableStart, tableEnd, function(node, pos) {
     if (node.type.name === "table_row") {
-      rows.push([])
       i += 1
-    } else if (node.type.name === "table_cell") {
-      rows[i].push(pos + 1)
+      if (i === 1) { startOfRow1 = pos }
+      endOfLastRow = pos + node.nodeSize
     }
   })
-  // Transpose the array
-  const positions = [];
-  for (let j = 0; j < rows[0].length; j++) {
-    positions.push([])
-  }
-  for (let i = 0; i < rows.length; i++) {
-    for (let j = 0; j < rows[0].length; j++) {
-      positions[j].push(rows[i][j])
-    }
-  }
-  return positions
+  return [tableStart, tableEnd, startOfRow1, endOfLastRow]
 }
 
-export const compileCells = (inputStr, doc, inputPos, decimalFormat = "1,000,000.") {
+export const compileCell = (entry, decimalFormat = "1,000,000.") {
 
 }

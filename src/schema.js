@@ -353,9 +353,12 @@ export const nodes = {
     group: "block",
     attrs: {
       class: { default: 'grid' },
-      tableName: { default: "" },
-      positions: { default: [] },  // Column-wise list of spreadsheet cell positions
+      isSpreadsheet: { default: false },
+      sheetName: { default: "" },
       columnMap: { default: {} },
+      unitMap: { default: {} },
+      units: { default: {} },
+      rowMap: { default: {} },
       dependencies: { default: null }
     },
     parseDOM: [{tag: "table", getAttrs(dom) {
