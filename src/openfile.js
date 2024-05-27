@@ -56,7 +56,7 @@ const handleContents = (view, schema, str, format) => {
   if (doc.attrs.fallbacks) { view.state.doc.attrs.fallbacks = doc.attrs.fallbacks }
 
   // Update all the calculation nodes and refresh the document display.
-  hurmet.updateCalculations(view, schema.nodes.calculation, true)
+  hurmet.updateCalculations(view, true)
   view.state.doc.attrs.fallbacks = {}
 }
 

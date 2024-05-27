@@ -85,6 +85,7 @@ const numFromSupChars = str => {
 
 const colorSpecRegEx = /^(#([a-f0-9]{6}|[a-f0-9]{3})|[a-z]+|\([^)]+\))/i
 const accentRegEx = /^(?:.|\uD835.)[\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]_/
+const spreadsheetCellRegEx = /^[A-Z](\d+|Z)$/
 
 const factorsAfterSpace = /^[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133\uD835]/
 const factors = /^[[({√∛∜]/
@@ -302,7 +303,8 @@ export const parse = (
   str,
   decimalFormat = "1,000,000.",
   isCalc = false,     // true when parsing the blue echo of an expression
-  inRealTime = false  // true when updating a rendering with every keystroke in the editor.
+  inRealTime = false, // true when updating a rendering with every keystroke in the editor.
+  sheetName = ""      // The RPN for a spreadsheet cell differs from other variables.
 ) => {
   // Variable definitions
   let tex = ""
@@ -713,7 +715,7 @@ export const parse = (
           rpn += '"' + token.input + '"' // a loop index variable name.
         } else {
           // We're in the echo of a Hurmet calculation.
-          if (/^(\.[^.]|\[)/.test(str) || token.input === "im") {
+          if (/^(\.[^.]|\[)/.test(str)) {
             // When the blue echo has an index in a bracket, e.g., varName[index], it renders
             // the name of the variable, not the value. The value of the value of the index.
             token.output = token.ttype === tt.LONGVAR
@@ -723,8 +725,12 @@ export const parse = (
             token.output = token.input
             token.output = (posArrow > 0 ? "" : "〖") + token.output
           }
-          rpn += token.input === "im" ? "im" : "¿" + token.input
-          if (token.input !== "im") { dependencies.push(token.input) }
+          if (sheetName && spreadsheetCellRegEx.test(token.input)) {
+            rpn += "¿" + sheetName + tokenSep + `"${token.input}"` + tokenSep + "."
+          } else {
+            rpn += "¿" + token.input
+          }
+          dependencies.push(token.input)
         }
 
         tex += token.output + (str.charAt(0) === "." ? "" : " ")

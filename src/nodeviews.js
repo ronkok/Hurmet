@@ -39,7 +39,7 @@ export class CalcView {
       outerView: this.outerView,
       dom: this.dom,
       callback(attrs) {
-        hurmet.updateCalculations(this.outerView, schema.nodes.calculation, false, attrs, pos)
+        hurmet.updateCalculations(this.outerView, false, attrs, pos)
       }
     })
   }
@@ -87,7 +87,10 @@ export class TexView {
 }
 
 export class CellView {
-  // For a spreadsheet cell
+  // For a spreadsheet cell.
+  // This just freezes the cell. If an author wants to edit anything in
+  // a spreadsheet, they have to toggle the sheet out of spreadsheet mode
+  // and into table mode. In table mode, this CellView is not active.
   constructor(node, view) {
     this.node = node
     this.outerView = view

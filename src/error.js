@@ -93,7 +93,8 @@ const errorMessages = Object.freeze({
     BAD_TRANS:  "Error. Only a matrix can be transposed.",
     BAD_ARGS:   "Error. Wrong number of arguments to function @",
     BAD_SUM:    "Error. Second argument to sum function must be 1 or 2.",
-    ZERO_STEP:  "Error. Step value must be > zero."
+    ZERO_STEP:  "Error. Step value must be > zero.",
+    SHEET_INDEX:"Error. Bad column or row index."
   }
 })
 

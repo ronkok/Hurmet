@@ -16998,7 +16998,8 @@ const dt = Object.freeze({
   DRAWING: 131072,
   RICHTEXT: 262144,
   DICTIONARY: 524288,
-  MACRO: 1048576
+  MACRO: 1048576,
+  SPREADSHEET: 2097152
 });
 
 const errorMessages = Object.freeze({
@@ -17093,7 +17094,8 @@ const errorMessages = Object.freeze({
     BAD_TRANS:  "Error. Only a matrix can be transposed.",
     BAD_ARGS:   "Error. Wrong number of arguments to function @",
     BAD_SUM:    "Error. Second argument to sum function must be 1 or 2.",
-    ZERO_STEP:  "Error. Step value must be > zero."
+    ZERO_STEP:  "Error. Step value must be > zero.",
+    SHEET_INDEX:"Error. Bad column or row index."
   }
 });
 
@@ -17138,7 +17140,7 @@ const intAbs$1 = i => i >= iZero ? i : BigInt(-1) * i;  // absolute value of a B
 
 // eslint-disable-next-line max-len
 const numberPattern = "^(-?)(?:(0x[0-9A-Fa-f]+)|([0-9]+)(?: ([0-9]+)\\/([0-9]+)|(?:\\.([0-9]+))?(?:e([+-]?[0-9]+)|(%))?))";
-const numberRegEx$6 = new RegExp(numberPattern);
+const numberRegEx$7 = new RegExp(numberPattern);
 // Capturing groups:
 //    [1] sign
 //    [2] hexadecimal integer
@@ -17154,7 +17156,7 @@ const fromNumber = num => {
   if (Number.isInteger(num)) {
     return [BigInt(num), iOne]
   } else {
-    const parts = num.toExponential().match(numberRegEx$6);
+    const parts = num.toExponential().match(numberRegEx$7);
     const decimalFrac = parts[6] || "";
     const exp = BigInt(parts[7]) - BigInt(decimalFrac.length);
     if (exp < 0) {
@@ -17171,7 +17173,7 @@ const fromNumber = num => {
 
 const fromString = str => {
   // Convert an author's input string to a number.
-  const parts = str.match(numberRegEx$6);
+  const parts = str.match(numberRegEx$7);
   let r;
   if (parts[5]) {
     // mixed fraction
@@ -17931,6 +17933,9 @@ const fromAssignment = (cellAttrs, unitAware) => {
 
     // Note the only operations on data frames are: (1) access, and (2) concatenate.
     // That's where the copy-on-write takes place.
+
+  } else if (cellAttrs.dtype === dt.SPREADSHEET) {
+    return cellAttrs
 
   } else {
     // For all other data types, we employ copy-on-read. So we return a deep copy from here.
@@ -19716,7 +19721,7 @@ const valueFromDatum = datum => {
   ? true
   : datum === "false"
   ? false
-  : numberRegEx$5.test(datum)
+  : numberRegEx$6.test(datum)
   ? Rnl.fromString(datum)
   : datum === ""
   ? undefined
@@ -19943,7 +19948,7 @@ const range$1 = (df, args, unitAware) => {
   }
 };
 
-const numberRegEx$5 = new RegExp("^(?:=|" + Rnl.numberPattern.slice(1) + "$)");
+const numberRegEx$6 = new RegExp("^(?:=|" + Rnl.numberPattern.slice(1) + "$)");
 const mixedFractionRegEx = /^-?(?:[0-9]+(?: [0-9]+\/[0-9]+))$/;
 const escRegEx = /^\\#/;
 
@@ -19952,11 +19957,11 @@ const hasUnitRow = lines => {
   if (lines.length < 3) { return false }
   const units = lines[1].split("\t").map(el => el.trim());
   for (const unitName of units) {
-    if (numberRegEx$5.test(unitName)) { return false }
+    if (numberRegEx$6.test(unitName)) { return false }
   }
   const firstDataLine = lines[2].split("\t").map(el => el.trim());
   for (const datum of firstDataLine) {
-    if (numberRegEx$5.test(datum)) { return true }
+    if (numberRegEx$6.test(datum)) { return true }
   }
   return false
 };
@@ -20063,7 +20068,7 @@ const dataFrameFromTSV = (str, vars) => {
       const datum = data[j][i];
       if (datum === "") { continue } // undefined datum.
       dtype.push(
-        numberRegEx$5.test(datum)
+        numberRegEx$6.test(datum)
         ? dt.RATIONAL + ((units.length > 0 && units[j].length > 0) ? dt.QUANTITY : 0)
         : (datum === "true" || datum === "false")
         ? dt.BOOLEAN
@@ -20295,12 +20300,12 @@ const quickDisplay = str => {
     let gotUnits = false;
     let gotAnswer = false;
     for (let j = 0; j < cells[1].length; j++) {
-      if (numberRegEx$5.test(cells[1][j])) { gotAnswer = true; break }
+      if (numberRegEx$6.test(cells[1][j])) { gotAnswer = true; break }
     }
     if (!gotAnswer) {
       // line[1] had no numbers. If any numbers are in line[2] then line[1] is units.
       for (let j = 0; j < cells[2].length; j++) {
-        if (numberRegEx$5.test(cells[2][j])) { gotUnits = true; break }
+        if (numberRegEx$6.test(cells[2][j])) { gotUnits = true; break }
       }
     }
 
@@ -20485,7 +20490,7 @@ const display$1 = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHead
       } else {
         str += mixedFractionRegEx.test(datum)
           ? format(Rnl.fromString(datum), formatSpec, decimalFormat) + "&"
-          : numberRegEx$5.test(datum)
+          : numberRegEx$6.test(datum)
           ? displayNum(datum, colInfo[j], cellInfo[j][i], decimalFormat) + "&"
           : datum === ""
           ? "&"
@@ -20625,7 +20630,7 @@ const tt = Object.freeze({
 });
 
 const minusRegEx = /^-(?![-=<>:])/;
-const numberRegEx$4 = new RegExp(Rnl.numberPattern);
+const numberRegEx$5 = new RegExp(Rnl.numberPattern);
 const unitRegEx = /^(?:'[^']+'|[°ΩÅK])/;
 
 const texFromNumStr = (numParts, decimalFormat) => {
@@ -21395,7 +21400,7 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
   if (minusRegEx.test(str)) {
     if (isUnary(prevToken)) {
       // Check if the unary minus is part of a number
-      const numParts = str.match(numberRegEx$4);
+      const numParts = str.match(numberRegEx$5);
       if (numParts) {
         // numbers
         st = texFromNumStr(numParts, decimalFormat);
@@ -21405,7 +21410,7 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
     return ["-", "-", tt.ADD, ""]
   }
 
-  const numParts = str.match(numberRegEx$4);
+  const numParts = str.match(numberRegEx$5);
   if (numParts) {
     // numbers
     st = texFromNumStr(numParts, decimalFormat);
@@ -21527,6 +21532,7 @@ const numFromSupChars = str => {
 
 const colorSpecRegEx = /^(#([a-f0-9]{6}|[a-f0-9]{3})|[a-z]+|\([^)]+\))/i;
 const accentRegEx = /^(?:.|\uD835.)[\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]_/;
+const spreadsheetCellRegEx = /^[A-Z](\d+|Z)$/;
 
 const factorsAfterSpace = /^[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133\uD835]/;
 const factors = /^[[({√∛∜]/;
@@ -21677,7 +21683,7 @@ const endOfOrd = new Set([tt.ORD, tt.VAR, tt.NUM, tt.LONGVAR, tt.RIGHTBRACKET, t
 // I use \xa0 to precede the combining arrow accent character \u20D7.
 const leadingSpaceRegEx$2 = /^[ \f\r\v\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]+/;
 const leadingLaTeXSpaceRegEx = /^(˽|\\quad|\\qquad)+/;
-const sumRegEx = /\\∑_¿([^\xa0]+)([^=]+)\xa0=(\xa0[^^]+)\xa0\^\xa0([^∑]+)\xa0∑/;
+const sumRegEx$1 = /\\∑_¿([^\xa0]+)([^=]+)\xa0=(\xa0[^^]+)\xa0\^\xa0([^∑]+)\xa0∑/;
 
 /* eslint-disable indent-legacy */
 const rpnPrecFromType = [
@@ -21742,7 +21748,8 @@ const parse$1 = (
   str,
   decimalFormat = "1,000,000.",
   isCalc = false,     // true when parsing the blue echo of an expression
-  inRealTime = false  // true when updating a rendering with every keystroke in the editor.
+  inRealTime = false, // true when updating a rendering with every keystroke in the editor.
+  sheetName = ""      // The RPN for a spreadsheet cell differs from other variables.
 ) => {
   // Variable definitions
   let tex = "";
@@ -22153,7 +22160,7 @@ const parse$1 = (
           rpn += '"' + token.input + '"'; // a loop index variable name.
         } else {
           // We're in the echo of a Hurmet calculation.
-          if (/^(\.[^.]|\[)/.test(str) || token.input === "im") {
+          if (/^(\.[^.]|\[)/.test(str)) {
             // When the blue echo has an index in a bracket, e.g., varName[index], it renders
             // the name of the variable, not the value. The value of the value of the index.
             token.output = token.ttype === tt.LONGVAR
@@ -22163,8 +22170,12 @@ const parse$1 = (
             token.output = token.input;
             token.output = (posArrow > 0 ? "" : "〖") + token.output;
           }
-          rpn += token.input === "im" ? "im" : "¿" + token.input;
-          if (token.input !== "im") { dependencies.push(token.input); }
+          if (sheetName && spreadsheetCellRegEx.test(token.input)) {
+            rpn += "¿" + sheetName + tokenSep + `"${token.input}"` + tokenSep + ".";
+          } else {
+            rpn += "¿" + token.input;
+          }
+          dependencies.push(token.input);
         }
 
         tex += token.output + (str.charAt(0) === "." ? "" : " ");
@@ -22907,13 +22918,13 @@ const parse$1 = (
     while (rpnStack.length > 0) {
       rpn += tokenSep + rpnStack.pop().symbol;
     }
-    let sum = sumRegEx.exec(rpn);
+    let sum = sumRegEx$1.exec(rpn);
     while (sum) {
       // We've matched a ∑_(i=0)^n … term. Edit the index variable and the local RPN.
       indexVariable = sum[1];
       rpn = rpn.slice(0, sum.index) + '"' + sum[1] + '"' + sum[2] + sum[3] + tokenSep
         + '"' + sum[4].replace(/\u00a0/g, "§") + '"\xa0∑' + rpn.slice(sum.index + sum[0].length);
-      sum = sumRegEx.exec(rpn);
+      sum = sumRegEx$1.exec(rpn);
     }
     if (numFreeCommas > 0) {
       rpn += tokenSep + "tuple" + tokenSep + String(numFreeCommas + 1);
@@ -24347,6 +24358,9 @@ function propertyFromDotAccessor(parent, index, unitAware) {
 
   } else if (parent.dtype & dt.DATAFRAME) {
     return DataFrame.range(parent, [index], unitAware)
+
+  } else if (parent.dtype === dt.SPREADSHEET) {
+    return fromAssignment(parent.value[index.value], unitAware)
 
   } else if ((parent.dtype === dt.STRING || (parent.dtype & dt.ARRAY)) &&
     index.dtype === dt.RATIONAL) {
@@ -28722,12 +28736,12 @@ text, tspan { font: 12px Arial; }`
 }
 
 const ftRegEx = /′/g;
-const numberRegEx$3 = new RegExp(Rnl.numberPattern);
+const numberRegEx$4 = new RegExp(Rnl.numberPattern);
 const lengths = ["ft", "m", "cm", "mm"];
 const metricLengths = ["m", "cm", "mm"];
 
 const readNumber = str => {
-  const matches = numberRegEx$3.exec(str);
+  const matches = numberRegEx$4.exec(str);
   if (matches) {
     const numStr = matches[0];
     return [Rnl.fromString(numStr), numStr.length];
@@ -28757,7 +28771,7 @@ const readInputData = data => {
   // Read the top line of data.
   // It contains the geometry, connectivity, and node fixity.
   const layout = data[1][0].trim();
-  if (numberRegEx$3.test(layout)) { input.nodes.push("continuous"); }
+  if (numberRegEx$4.test(layout)) { input.nodes.push("continuous"); }
   const elements = layout.split(/ +/g);
   for (let k = 0; k < elements.length; k++) {
     switch (elements[k]) {
@@ -28804,7 +28818,7 @@ const readInputData = data => {
       }
     }
   }
-  if (numberRegEx$3.test(elements[elements.length - 1])) { input.nodes.push("continuous"); }
+  if (numberRegEx$4.test(elements[elements.length - 1])) { input.nodes.push("continuous"); }
 
   // Read the rest of the data.
   for (let i = 1; i < data[0].length; i++) {
@@ -31785,6 +31799,13 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
+        case "spreadsheetSum": {
+          const arg = stack.pop();
+          const spreadsheet = stack.pop();
+          stack.push(spreadsheetSum(spreadsheet, arg.value, unitAware));
+          break
+        }
+
         case "rand": {
           const numArgs = Number(tokens[i + 1]);
           i += 1;
@@ -32547,6 +32568,29 @@ const errorResult = (stmt, result) => {
   return [stmt, result]
 };
 
+const spreadsheetSum = (sheet, index, unitAware) => {
+  let sum = Rnl.zero;
+  if (/^[A-Z]$/.test(index)) {
+    // Sum a column
+    const L = Object.keys(sheet.rowMap).length;
+    for (let i = 1; i <= L - 1; i++) {
+      const cellOprnd = fromAssignment(sheet.value[index + String(i)], unitAware);
+      sum = Rnl.add(sum, cellOprnd.value);
+    }
+  } else if (isNaN(index)) {
+    return errorOprnd("SHEET_INDEX")
+  } else {
+    // Sum a row
+    const L = Object.keys(sheet.columnMap).length;
+    for (let j = 1; j <= L - 1; j++) {
+      const cellName = String.fromCodePoint(65 + j) + index;
+      const cellOprnd = fromAssignment(sheet.value[cellName], unitAware);
+      sum = Rnl.add(sum, cellOprnd.value);
+    }
+  }
+  return { value: sum, unit: allZeros, dtype: dt.RATIONAL }
+};
+
 const conditionResult = (stmt, oprnd, unitAware) => {
   let result = Object.create(null);
   result.value = oprnd.dtype === dt.DATAFRAME
@@ -32561,7 +32605,7 @@ const conditionResult = (stmt, oprnd, unitAware) => {
   }
 
   // Check unit compatibility.
-  if (result.dtype !== dt.ERROR && unitAware && stmt.resultdisplay.indexOf("!") === -1 &&
+  if (result.dtype !== dt.ERROR && unitAware && stmt.altresulttemplate.indexOf("!") === -1 &&
     (stmt.unit && stmt.unit.expos ||
       (result.unit && result.unit.expos && Array.isArray(result.unit.expos)))) {
     const expos = (stmt.unit && stmt.unit.expos) ? stmt.unit.expos : allZeros;
@@ -32682,8 +32726,8 @@ const evaluateDrawing = (stmt, vars, decimalFormat = "1,000,000.") => {
 };
 
 const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
-  stmt.tex = stmt.template;
-  stmt.alt = stmt.altTemplate;
+  stmt.tex = stmt.template ? stmt.template : "";
+  stmt.alt = stmt.altTemplate ? stmt.altTemplate : "";
   const isUnitAware = /\?\?|!!|%%|@@|¡¡/.test(stmt.resulttemplate);
 
   const formatSpec = vars.format ? vars.format.value : "h15";
@@ -32711,7 +32755,7 @@ const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
   return stmt
 };
 
-const numberRegEx$2 = new RegExp(Rnl.numberPattern);
+const numberRegEx$3 = new RegExp(Rnl.numberPattern);
 const matrixRegEx = /^[([] *(?:(?:-?[0-9.]+|"[^"]+"|true|false) *[,;\t]? *)+[)\]]/;
 /* eslint-disable max-len */
 
@@ -32848,7 +32892,7 @@ const valueFromLiteral = (str, name, decimalFormat) => {
     return [[realPart, imPart], allZeros, dt.COMPLEX, resultDisplay]
 
   } else {
-    const match = numberRegEx$2.exec(str);
+    const match = numberRegEx$3.exec(str);
     if (match) {
       // str begins with a number.
       const numStr = match[0];
@@ -33577,7 +33621,6 @@ const workWithFetchedTexts = (
   doc,
   inDraftMode,
   decimalFormat,
-  calcNodeSchema,
   isCalcAll,
   nodeAttrs,
   curPos,
@@ -33603,20 +33646,19 @@ const workWithFetchedTexts = (
       : nodeAttrs.entry;
     const attrs = processFetchedString(entry, texts[i], hurmetVars, decimalFormat);
     attrs.inDraftMode = inDraftMode;
-    tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs));
+    tr.replaceWith(pos, pos + 1, state.schema.nodes.calculation.createAndFill(attrs));
     if (attrs.name) {
       insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat);
     }
   }
   // There. Fetches are done and are loaded into the document.
   // Now proceed to the rest of the work.
-  proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr);
+  proceedAfterFetch(view, isCalcAll, nodeAttrs, curPos, hurmetVars, tr);
 
 };
 
 const workAsync = (
   view,
-  calcNodeSchema,
   isCalcAll,
   nodeAttrs,
   curPos,
@@ -33639,7 +33681,7 @@ const workAsync = (
         }
       });
     }
-    workWithFetchedTexts(view, doc, inDraftMode, decimalFormat, calcNodeSchema, isCalcAll,
+    workWithFetchedTexts(view, doc, inDraftMode, decimalFormat, isCalcAll,
       nodeAttrs, curPos, hurmetVars, fetchPositions, texts);
   } else {
     Promise.all(
@@ -33665,7 +33707,7 @@ const workAsync = (
         return r.text()
       }))
     }).then((texts) => {
-      workWithFetchedTexts(view, doc, inDraftMode, decimalFormat, calcNodeSchema, isCalcAll,
+      workWithFetchedTexts(view, doc, inDraftMode, decimalFormat, isCalcAll,
         nodeAttrs, curPos, hurmetVars, fetchPositions, texts);
     });
   }
@@ -33673,7 +33715,6 @@ const workAsync = (
 
 const proceedAfterFetch = (
   view,
-  calcNodeSchema,
   isCalcAll,
   nodeAttrs,
   curPos,
@@ -33685,13 +33726,14 @@ const proceedAfterFetch = (
   //   2. After we know that no fetch statements need be processed.
   const doc = view.state.doc;
   const decimalFormat = doc.attrs.decimalFormat;
+  const calcSchema = view.state.schema.nodes.calculation;
   // Create a set to track which variable have a changed value.
   const changedVars = isCalcAll ? null : new Set();
 
   if (!isCalcAll && (nodeAttrs.name || nodeAttrs.rpn ||
     (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING))) {
     // Load hurmetVars with values from earlier in the document.
-    doc.nodesBetween(0, curPos, function(node) {
+    doc.nodesBetween(0, curPos, function(node, pos) {
       if (node.type.name === "calculation") {
         const attrs = node.attrs;
         if (attrs.name) {
@@ -33701,6 +33743,20 @@ const proceedAfterFetch = (
             });
           } else {
             insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat);
+          }
+        }
+      } else if (node.attrs.isSpreadsheet) {
+        const sheetName = node.attrs.name;
+        hurmetVars[sheetName] = node.attrs;
+        hurmetVars[sheetName].dtype = dt.SPREADSHEET;
+        hurmetVars[sheetName].value = {};
+        const numRows = node.content.content.length;
+        const numCols = node.content.content[0].content.content.length;
+        // Proceed column-wise thru the table.
+        for (let j = 0; j < numCols; j++) {
+          for (let i = 1; i < numRows; i++) {
+            const cell = node.content.content[i].content.content[j].content.content[0];
+            hurmetVars[sheetName].value[cell.attrs.name] = cell.attrs;
           }
         }
       }
@@ -33716,22 +33772,46 @@ const proceedAfterFetch = (
     // Calculate the current node.
     if (!fetchRegEx.test(nodeAttrs.entry)) {
       // This is the typical calculation statement. We'll evalutate it.
-      let attrs = clone(nodeAttrs); // compile was already run in mathprompt.js.
-      // The mathPrompt dialog box did not have accesss to hurmetVars, so it
-      // did not do unit conversions on the result template. Do that first.
-      try {
-        // Proceed to do the calculation of the cell.
-        if (attrs.rpn || (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING)) {
-          attrs = attrs.dtype && attrs.dtype === dt.DRAWING
-            ? evaluateDrawing(attrs, hurmetVars, decimalFormat)
-            : evaluate(attrs, hurmetVars, decimalFormat);
+      if (!nodeAttrs.isSpreadsheet) {
+        let attrs = clone(nodeAttrs); // compile was already run in mathprompt.js.
+        try {
+          // Do the calculation of the cell.
+          if (attrs.rpn || (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING)) {
+            attrs = attrs.dtype && attrs.dtype === dt.DRAWING
+              ? evaluateDrawing(attrs, hurmetVars, decimalFormat)
+              : evaluate(attrs, hurmetVars, decimalFormat);
+          }
+          if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat); }
+        } catch (err) {
+          attrs.tex = "\\text{" + attrs.entry + " = " + err + "}";
         }
-        if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat); }
-        //attrs.displayMode = nodeAttrs.displayMode
-      } catch (err) {
-        attrs.tex = "\\text{" + attrs.entry + " = " + err + "}";
+        tr.replaceWith(curPos, curPos + 1, calcSchema.createAndFill(attrs));
+      } else {
+        const tableNode = doc.nodeAt(curPos);
+        const table = tableNode.toJSON();
+        const sheetName = table.attrs.name;
+        hurmetVars[sheetName] = table.attrs;
+        hurmetVars[sheetName].dtype = dt.SPREADSHEET;
+        hurmetVars[sheetName].rowMap = table.attrs.rowMap;
+        hurmetVars[sheetName].value = {};
+        const numRows = table.content.length;
+        const numCols = table.content[0].content.length;
+        // Proceed column-wise thru the table.
+        for (let j = 0; j < numCols; j++) {
+          for (let i = 1; i < numRows; i++) {
+            const cell = table.content[i].content[j].content[0];
+            if (cell.attrs.rpn) {
+              cell.attrs.altresulttemplate = cell.attrs.entry.slice(1, 2) === "=" ? "@@" : "@";
+              cell.attrs.resulttemplate = cell.attrs.altresulttemplate;
+              cell.attrs = evaluate(cell.attrs, hurmetVars, decimalFormat);
+              cell.attrs.display = cell.attrs.alt;
+            }
+            hurmetVars[sheetName].value[cell.attrs.name] = cell.attrs;
+          }
+        }
+        tr.replaceWith(curPos, curPos + tableNode.nodeSize,
+                       view.state.schema.nodeFromJSON(table));
       }
-      tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(attrs));
     }
   }
 
@@ -33764,7 +33844,7 @@ const proceedAfterFetch = (
             attrs.tex = "\\text{" + attrs.entry + " = " + err + "}";
           }
           if (isCalcAll || attrs.rpn || mustRedraw) {
-            tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs));
+            tr.replaceWith(pos, pos + 1, calcSchema.createAndFill(attrs));
           }
         } else if (attrs.name && attrs.value) {
           insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat);
@@ -33794,12 +33874,12 @@ const proceedAfterFetch = (
 
 function updateCalculations(
   view,
-  calcNodeSchema,
   isCalcAll = false,
   nodeAttrs,
   curPos
 ) {
   const doc = view.state.doc;
+  const calcSchema = view.state.schema.nodes.calculation;
 
   if (!(isCalcAll || nodeAttrs.name || nodeAttrs.rpn ||
       (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING))) {
@@ -33811,7 +33891,7 @@ function updateCalculations(
     }
     const tr = state.tr;
     try {
-      tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs));
+      tr.replaceWith(curPos, curPos + 1, calcSchema.createAndFill(nodeAttrs));
     } catch (err) {
       // nada
     } finally {
@@ -33855,7 +33935,7 @@ function updateCalculations(
 
   if (urls.length > 0) {
     // We have to fetch some remote data. Asynchronous work ahead.
-    workAsync(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos,
+    workAsync(view, isCalcAll, nodeAttrs, curPos,
               hurmetVars, urls, fetchPositions);
   } else {
     // Skip the fetches and go directly to work that we can do synchronously.
@@ -33865,7 +33945,7 @@ function updateCalculations(
       state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1));
     }
     const tr = state.tr;
-    proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr);
+    proceedAfterFetch(view, isCalcAll, nodeAttrs, curPos, hurmetVars, tr);
   }
 }
 
@@ -34382,6 +34462,13 @@ const wrapWithHead = (html, title, attrs) => {
 <div class="ProseMirror-setup">
 `;
   return head + html + "\n</div></article>\n</body>\n</html>"
+};
+
+const syncMD2html = md => {
+  // A synchronous function for Markdown snippets.
+  // Use md2html() for entire documents.
+  const ast = md2ast(md);
+  return ast2html(ast)
 };
 
 async function md2html(md, title = "", inHtml = false) {
@@ -45651,7 +45738,7 @@ const smallCaps = Object.freeze({
 // "mathord" and "textord" ParseNodes created in Parser.js from symbol Groups in
 // src/symbols.js.
 
-const numberRegEx = /^\d(?:[\d,.]*\d)?$/;
+const numberRegEx$2 = /^\d(?:[\d,.]*\d)?$/;
 const latinRegEx = /[A-Ba-z]/;
 const primes = new Set(["\\prime", "\\dprime", "\\trprime", "\\qprime",
   "\\backprime", "\\backdprime", "\\backtrprime"]);
@@ -45707,7 +45794,7 @@ defineFunctionBuilders({
     const variant = getVariant(group, style) || "normal";
 
     let node;
-    if (numberRegEx.test(group.text)) {
+    if (numberRegEx$2.test(group.text)) {
       const tag = group.mode === "text" ? "mtext" : "mn";
       if (variant === "italic" || variant === "bold-italic") {
         return italicNumber(text, variant, tag)
@@ -48862,7 +48949,16 @@ const nodes = {
     content: "table_row+",
     tableRole: "table",
     group: "block",
-    attrs: { class: { default: 'grid' } },
+    attrs: {
+      class: { default: 'grid' },
+      isSpreadsheet: { default: false },
+      name: { default: "" },
+      columnMap: { default: {} },
+      unitMap: { default: [] },
+      units: { default: {} },
+      rowMap: { default: {} },
+      dependencies: { default: null }
+    },
     parseDOM: [{tag: "table", getAttrs(dom) {
       return { class: dom.getAttribute('class') || "grid" }
     }}],
@@ -48877,7 +48973,7 @@ const nodes = {
     toDOM() { return ["tr", 0] }
   },
   table_cell: {
-    content: "block+",
+    content: "block+|spreadsheet_cell",
     attrs: {
       colspan: {default: 1},
       rowspan: {default: 1},
@@ -48910,6 +49006,37 @@ const nodes = {
     defining: true,
     parseDOM: [{tag: "header"}],
     toDOM() { return ["header", 0] }
+  },
+
+  spreadsheet_cell: {
+    atom: true,
+    defining: false,
+    marks: "",
+    group: "block",
+    attrs: {
+      entry: { default: "" },
+      name: { default: "" },
+      rpn: { default: "" },
+      resulttemplate: { default: "@" },
+      value: { default: null },
+      dependencies: {default: []},
+      display: { default: "" },
+      unit: {default: null},
+      dtype: {default: 0},
+    },
+    parseDOM: [{tag: "span.hurmet-cell",  getAttrs(dom) {
+      return { entry: dom.getAttribute('data-entry') }
+    }}],
+    toDOM(node) {
+      let dom;
+      dom = document.createElement('div');
+      dom.classList = "hurmet-cell";
+      dom.dataset.entry = node.attrs.entry;
+      dom.innerHTML = node.attrs.display
+        ? node.attrs.display
+        : node.attrs.entry;
+      return dom
+    }
   },
 
   calculation: {
@@ -50745,7 +50872,7 @@ const handleContents = (view, schema, str, format) => {
   if (doc.attrs.fallbacks) { view.state.doc.attrs.fallbacks = doc.attrs.fallbacks; }
 
   // Update all the calculation nodes and refresh the document display.
-  hurmet.updateCalculations(view, schema.nodes.calculation, true);
+  hurmet.updateCalculations(view, true);
   view.state.doc.attrs.fallbacks = {};
 };
 
@@ -52517,6 +52644,249 @@ diff_match_patch.prototype.diff_fromDelta = function(text1, delta) {
   return diffs;
 };
 
+/* eslint-disable no-alert */
+
+const numberRegEx = new RegExp(Rnl.numberPattern);
+const cellRefRegEx = /"[A-Z][1-9]\d*"/g;
+const sumRegEx = /¿(up|left)([\xa0§])sum[\xa0§]1(?=[\xa0§]|$)/g;
+const endRegEx = /([\xa0§]|^)¿([A-Z])_end([\xa0§]|$)/g;
+// TODO: Edit the regex so that the sheetName is a valid identifier
+const sheetNameRegEx = /^[\w]+\b/;
+
+const sheetLimits = (doc, inputPos) => {
+  // Find the extent of the table
+  let tableStart = 0;
+  let tableEnd = 0;
+  let parent;
+  for (let d = inputPos.depth; d > 0; d--) {
+    const node = inputPos.node(d);
+    if (node.type.spec.tableRole === 'table') {
+      tableStart = inputPos.before(d);
+      tableEnd =  inputPos.after(d);
+      parent = inputPos.node(d - 1);
+      break
+    }
+  }
+  return [tableStart, tableEnd, parent]
+};
+
+const compileCell = (attrs, sheetAttrs, unit, previousRPN, prevResultTemplate, prevUnit,
+                     decimalFormat = "1,000,000.") => {
+  const newAttrs = { entry: attrs.entry, name: attrs.name };
+  const entry = attrs.entry;
+  const numRows = Object.keys(sheetAttrs.rowMap).length;
+  if (entry.length === 0) {
+    newAttrs.value = null;
+    newAttrs.dtype = dt.NULL;
+  } else if (entry.slice(0, 1) === "=") {
+    // Get the RPN of an expression
+    const expression = entry.replace(/^==?/, "").trim();
+    // TODO: Revise the parser to handle spreadsheet cell names & sheetname
+    // eslint-disable-next-line prefer-const
+    let [_, rpn, dependencies] = parse$1(expression, decimalFormat, true, false, sheetAttrs.name);
+
+    // Implement sum(up) and sum(left)
+    // Orig RPN:    ¿up sum 1
+    // Desired RPN: ¿sheetName "D" spreadsheetSum   or   ¿sheetName "3" spreadsheetSum
+    let sumMatch;
+    while ((sumMatch = sumRegEx.exec(rpn)) !== null) {
+      const str = sumMatch[1] === "up" ? attrs.name.slice(0, 1) : attrs.name.slice(1, 2);
+      rpn = rpn.slice(0, sumMatch.index) + `¿${sheetAttrs.name}` + sumMatch[2]
+            + `"${str}"` + sumMatch[2] + "spreadsheetSum"
+            + rpn.slice(sumMatch.index + sumMatch[0].length);
+    }
+
+    // Implement A_end
+    // Orig RPN:    ¿A_end
+    // Desired RPN: sheetname "A6" .
+    let endMatch;
+    while ((endMatch = endRegEx.exec(rpn)) !== null) {
+      const tokenSep = endMatch[1]
+        ? endMatch[1]
+        : endMatch[3]
+        ? endMatch[3]
+        : "\xa0";
+      rpn = rpn.slice(0, endMatch.index) + endMatch[1] + '¿' + sheetAttrs.name + tokenSep + '"'
+            + endMatch[2] + numRows + '"' + tokenSep + "."
+            + endMatch[3] + rpn.slice(endMatch.index + endMatch[0].length);
+    }
+
+    newAttrs.rpn = rpn;
+    newAttrs.dependencies = dependencies;
+    newAttrs.resulttemplate = (entry.length > 1 &&  entry.slice(1, 2) !== "=")
+      ? "@@"
+      : "@";
+    newAttrs.unit = unit ? unit : { factor: Rnl.one, gauge: Rnl.zero, expos: allZeros };
+  } else if (entry === '"' || entry === '“') {
+    // The ditto of the previous cell's RPN
+    let rpn = previousRPN;
+    const matches = arrayOfRegExMatches(cellRefRegEx, rpn);
+    for (let i = matches.length - 1; i >= 0; i--) {
+      const match = matches[i];
+      const rowNum = Math.min(numRows, Number(match.value.slice(2, -1)) + 1);
+      rpn = rpn.slice(0, match.index + 2) + String(rowNum)
+          + rpn.slice(match.index + match.length - 1);
+    }
+    newAttrs.rpn = rpn;
+    newAttrs.resulttemplate = prevResultTemplate;
+    newAttrs.unit = prevUnit;
+    // TODO: unitAware, dependencies
+  } else {
+    // A literal value
+    const numCandidate = entry.replace(/,/g, "");
+    if (numberRegEx.test(numCandidate)) {
+      let value = Rnl.fromString(numCandidate);
+      let dtype = dt.RATIONAL;
+      if (unit) {
+        value = {
+          plain: value,
+          inBaseUnits: Rnl.multiply(Rnl.add(value, unit.gauge), unit.factor)
+        };
+        dtype += dt.QUANTITY;
+      }
+      newAttrs.value = value;
+      newAttrs.dtype = dtype;
+    } else if (entry === "true" || entry === "false") {
+      newAttrs.value = Boolean(entry);
+      newAttrs.dtype = dt.BOOLEAN;
+    } else if (complexRegEx.test(entry)) {
+      // eslint-disable-next-line no-unused-vars
+      const [value, unit, dtype, _] = valueFromLiteral(entry, attrs.name, decimalFormat);
+      newAttrs.value = value;
+      newAttrs.dtype = dtype;
+    } else {
+      newAttrs.value = entry;
+      newAttrs.dtype = dt.STRING;
+    }
+  }
+  return newAttrs
+};
+
+const tableToSheet = (state, view, table) => {
+  // Copy table to an object w/o all the ProseMirror methods.
+  const tableObj = table.toJSON();
+  tableObj.attrs.isSpreadsheet = true;
+  tableObj.attrs.columnMap = {};
+  tableObj.attrs.rowMap = {};
+  tableObj.attrs.unitMap = [];
+  tableObj.attrs.units = {};
+  tableObj.attrs.dependencies = {};
+
+  const [tableStart, tableEnd, parent] = sheetLimits(state.doc, state.selection.$from);
+
+  // Get the spreadsheet's name
+  if (parent.content.content === 1 ||
+      parent.content.content[1].type.name !== "figcaption") {
+    alert("Table must have a caption that begins with the spreadsheet’s name.");
+  }
+  const caption = parent.content.content[1];
+  const str = caption.textContent;
+  if (str.length === 0) {
+    alert("Table caption must contain a string that begins with the spreadsheet’s name.");
+    return
+  }
+  const match = sheetNameRegEx.exec(str);
+  if (!match) {
+    alert("Table caption must begin with a valid identifier for the spreadsheet’s name.");
+    return
+  }
+  const sheetName = match[0];
+  tableObj.attrs.name = sheetName;
+
+  // Freeze the cells.
+  const numRows = tableObj.content.length;
+  const numCols = tableObj.content[0].content.length;
+  const decimalFormat = state.doc.decimalFormat;
+  // Proceed column-wise thru the table.
+  for (let j = 0; j < numCols; j++) {
+    let previousRPN = "";
+    let prevResultTemplate;
+    let prevUnit;
+    for (let i = 0; i < numRows; i++) {
+      const cell = table.content.content[i].content.content[j];
+      const cellName = String.fromCodePoint(65 + j) + String(i);
+      let entry;
+      if (i === 0) {
+        entry = hurmetMarkdownSerializer.serialize(cell, new Map(), []);
+        const str = cell.textContent;
+        let heading = "";
+        let unitName = "";
+        const posNewline = entry.indexOf("\\\n");
+        if (posNewline === -1) {
+          heading = cell.textContent.trim();
+        } else {
+          const rawUnitName = entry.slice(posNewline + 2);
+          // TODO: Accommodate Markdown exponents in unitName
+          unitName = rawUnitName.trim();
+          heading = str.slice(0, str.length - rawUnitName.length).trim();
+        }
+        tableObj.attrs.columnMap[heading] = j;
+        if (unitName.length > 0) {
+          const unit = unitFromUnitName(unitName);
+          if (unit.dtype && unit.dtype === dt.ERROR) {
+            unitName = "";
+          } else {
+            tableObj.attrs.units[unitName] = unit;
+          }
+        }
+        tableObj.attrs.unitMap.push(unitName);
+      } else {
+        // A data cell, not a top row heading
+        entry = cell.textContent;
+        if (j === 0) { tableObj.attrs.rowMap[entry] = i; }
+      }
+      const newCell = { type: "spreadsheet_cell", attrs: { entry } };
+      if (i === 0) {
+        newCell.attrs.display = syncMD2html(entry);
+      } else {
+        newCell.attrs.name = cellName;
+        const unit = (tableObj.attrs.unitMap[j] === "")
+          ? tableObj.attrs.units[tableObj.attrs.unitMap[j]]
+          : null;
+        newCell.attrs = compileCell(newCell.attrs, tableObj.attrs, unit, previousRPN,
+                                    prevResultTemplate, prevUnit, decimalFormat);
+        if (newCell.attrs.rpn) {
+          previousRPN = newCell.attrs.rpn;
+          prevResultTemplate = newCell.attrs.prevResultTemplate;
+          prevUnit = unit;
+        }
+      }
+      tableObj.content[i].content[j].content = [newCell];
+    }
+  }
+
+  const tr = state.tr;
+  tr.replaceWith(tableStart, tableEnd, state.schema.nodeFromJSON(tableObj));
+  view.dispatch(tr);
+  hurmet.updateCalculations(view, false, tableObj.attrs, tableStart);
+};
+
+const sheetToTable = (state, view, table) => {
+  const tableObj = table.toJSON();
+  tableObj.attrs = { class: tableObj.attrs.class, isSpreadsheet: false };
+  // Un-freeze the data cells. Display the entries.
+  const rows = tableObj.content;
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i].content;
+    for (let j = 0; j < row.length; j++) {
+      if (i === 0) {
+        row[j].content = md2ast(row[j].content[0].attrs.entry);
+      } else {
+        const text = row[j].content[0].attrs.entry;
+        if (text.length > 0) {
+          row[j].content = [{ type: "paragraph", content: [{ type: "text", text }] }];
+        } else {
+          row[j].content = [{ type: "paragraph", content: [] }];
+        }
+      }
+    }
+  }
+  const [tableStart, tableEnd, _] = sheetLimits(state.doc, state.selection.$from);
+  const tr = state.tr;
+  tr.replaceWith(tableStart, tableEnd, state.schema.nodeFromJSON(tableObj));
+  view.dispatch(tr);
+};
+
 /* eslint-disable */
 
 // Menu icons that are not included in node-module menu.js
@@ -52630,6 +53000,11 @@ const hurmetIcons = {
     width: 24,
     height: 24,
     path: "M13.2546893,15 C12.8333806,15.6040072 12.5048858,16.2775651 12.2898787,17 L5,17 C2.23857625,17 3.38176876e-16,14.7614237 0,12 C-1.2263553e-15,9.23857625 2.23857625,7 5,7 L19,7 C21.7614237,7 24,9.23857625 24,12 C24,12.6294813 23.8836754,13.2317936 23.6713497,13.7866134 C23.1547532,13.3234155 22.5689168,12.9358807 21.9312708,12.6414391 C21.9762852,12.4347751 22,12.220157 22,12 C22,10.3431458 20.6568542,9 19,9 L5,9 C3.34314575,9 2,10.3431458 2,12 C2,13.6568542 3.34314575,15 5,15 L13.2546893,15 Z M19,14 C21.7600532,14.0033061 23.9966939,16.2399468 24,19 C24,21.7614237 21.7614237,24 19,24 C16.2385763,24 14,21.7614237 14,19 C14,16.2385763 16.2385763,14 19,14 Z M16.5,19.9375 L21.5,19.9375 C22.017767,19.9375 22.4375,19.517767 22.4375,19 C22.4375,18.482233 22.017767,18.0625 21.5,18.0625 L16.5,18.0625 C15.982233,18.0625 15.5625,18.482233 15.5625,19 C15.5625,19.517767 15.982233,19.9375 16.5,19.9375 Z"
+  },
+  spreadsheet: {
+    width: 24,
+    height: 24,
+    path: "M17 22 L 19 22 C20.6569 22 22 20.6569 22 19 L22 7 L 22 5 C 22 3.3431 20.6569 2 19 2 L7 2 L5 2 C 3.3431 2 3 3.3431 2 5 L2 17 L2 19 C 2 20.6569 3.3431 22 5 22 L7 22 Z M24,16.1768671 L24,19 C24,21.7614237 21.7614237,24 19,24 L5,24 C2.23857625,24 2.11453371e-15,21.7614237 1.77635684e-15,19 L0,5 C-3.38176876e-16,2.23857625 2.23857625,2.28362215e-15 5,0 L19,0 C21.7614237,-5.07265313e-16 24,2.23857625 24,5 L24,7.82313285 C24.0122947,7.88054124 24.0187107,7.93964623 24.0187107,8 C24.0187107,8.06035377 24.0122947,8.11945876 24,8.17686715 L24,15.8231329 C24.0122947,15.8805412 24.0187107,15.9396462 24.0187107,16 C24.0187107,16.0603538 24.0122947,16.1194588 24,16.1768671 Z M19 7 H5 V10 H19 Z M19 14 H5 V17 H19 Z"
   },
   grid: {
     width: 16,
@@ -53091,7 +53466,7 @@ function pasteAsMarkdown() {
           view.dispatch(
             view.state.tr.replaceWith($from.pos, $to.pos, schema.nodeFromJSON(fragment))
           );
-          hurmet.updateCalculations(view, schema.nodes.calculation, true);
+          hurmet.updateCalculations(view, true);
         });
     }
   })
@@ -53182,6 +53557,24 @@ function insertTableCaption() {
           }
         };
         openPrompt(promptOptions);
+      }
+    }
+  })
+}
+
+function toggleSpreadsheet() {
+  return new MenuItem({
+    title: "Toggle Table ⇄ Spreadsheet",
+    icon: hurmetIcons.spreadsheet,
+    select(state) {
+      return isInTable(state)
+    },
+    run(state, _, view) {
+      const table = findTable(state.selection);
+      if (table.node.attrs.isSpreadsheet) {
+        sheetToTable(state, view, table.node);
+      } else {
+        tableToSheet(state, view, table.node);
       }
     }
   })
@@ -53300,7 +53693,7 @@ function setRoundingCriteria(nodeType) {
           const tr = view.state.tr;
           tr.replaceSelectionWith(schema.nodes.calculation.createAndFill(attrs));
           view.dispatch(tr);
-          hurmet.updateCalculations(view, schema.nodes.calculation, true);
+          hurmet.updateCalculations(view, true);
           view.focus();
         }
       };
@@ -53433,7 +53826,7 @@ function expandHurmetMacro(state, view) {
           view.dispatch(
             view.state.tr.replaceWith(textTo - name.length, textTo, schema.nodeFromJSON(fragment))
           );
-          hurmet.updateCalculations(view, schema.nodes.calculation, true);
+          hurmet.updateCalculations(view, true);
         }
       }
     });
@@ -53631,7 +54024,7 @@ function reCalcAll() {
     title: "Recalculate all",
     icon: hurmetIcons.recalc,
     run(state, _, view) {
-      hurmet.updateCalculations(view, schema.nodes.calculation, true);
+      hurmet.updateCalculations(view, true);
     }
   })
 }
@@ -53641,7 +54034,7 @@ function setDecimalFormat(label) {
     label: label,
     run(state, _, view) {
       state.doc.attrs.decimalFormat = label;
-      hurmet.updateCalculations(view, schema.nodes.calculation, true);
+      hurmet.updateCalculations(view, true);
     }
   })
 }
@@ -54075,6 +54468,7 @@ function buildMenuItems(schema) {
     }
   });
   r.insertTableCaption = insertTableCaption();
+  r.toggleSpreadsheet = toggleSpreadsheet();
   r.grid = tableStyle("Grid", "grid", "grid");
   r.nogrid = tableStyle("No borders", "nogrid", "nogrid");
   r.oneRule = tableStyle("Border below header", "one-rule", "oneRule");
@@ -54281,7 +54675,8 @@ function buildMenuItems(schema) {
     r.alignColLeft,
     r.alignColCenter,
     r.alignColRight,
-    r.tableStyle
+    r.tableStyle,
+    r.toggleSpreadsheet
   ])];
 
   r.copyAsMarkdown = copyAsMarkdown();
@@ -55665,7 +56060,7 @@ class CalcView {
       outerView: this.outerView,
       dom: this.dom,
       callback(attrs) {
-        hurmet.updateCalculations(this.outerView, schema.nodes.calculation, false, attrs, pos);
+        hurmet.updateCalculations(this.outerView, false, attrs, pos);
       }
     });
   }
@@ -55893,7 +56288,7 @@ const tidyUp = _ => {
   const fix = fixTables(window.view.state);
   if (fix) { window.view.state = window.view.state.apply(fix.setMeta("addToHistory", false)); }
 
-  hurmet.updateCalculations(window.view, schema.nodes.calculation, true);
+  hurmet.updateCalculations(window.view, true);
 
   document.execCommand("enableObjectResizing", false, false);
   document.execCommand("enableInlineTableEditing", false, false);
@@ -55911,6 +56306,6 @@ if (hash && hash.length > 1) {
       schema.nodeFromJSON(fragment)
     )
   );
-  hurmet.updateCalculations(window.view, schema.nodes.calculation, true);
+  hurmet.updateCalculations(window.view, true);
 }
 tidyUp();

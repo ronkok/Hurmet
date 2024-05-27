@@ -13,6 +13,9 @@ export function propertyFromDotAccessor(parent, index, unitAware) {
   } else if (parent.dtype & dt.DATAFRAME) {
     return DataFrame.range(parent, [index], unitAware)
 
+  } else if (parent.dtype === dt.SPREADSHEET) {
+    return fromAssignment(parent.value[index.value], unitAware)
+
   } else if ((parent.dtype === dt.STRING || (parent.dtype & dt.ARRAY)) &&
     index.dtype === dt.RATIONAL) {
     const indexVal = Rnl.toNumber(index.value)

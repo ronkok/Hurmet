@@ -94,6 +94,9 @@ export const fromAssignment = (cellAttrs, unitAware) => {
     // Note the only operations on data frames are: (1) access, and (2) concatenate.
     // That's where the copy-on-write takes place.
 
+  } else if (cellAttrs.dtype === dt.SPREADSHEET) {
+    return cellAttrs
+
   } else {
     // For all other data types, we employ copy-on-read. So we return a deep copy from here.
     oprnd.value = clone(cellAttrs.value)

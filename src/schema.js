@@ -354,9 +354,9 @@ export const nodes = {
     attrs: {
       class: { default: 'grid' },
       isSpreadsheet: { default: false },
-      sheetName: { default: "" },
+      name: { default: "" },
       columnMap: { default: {} },
-      unitMap: { default: {} },
+      unitMap: { default: [] },
       units: { default: {} },
       rowMap: { default: {} },
       dependencies: { default: null }
@@ -414,13 +414,12 @@ export const nodes = {
     atom: true,
     defining: false,
     marks: "",
-    group: "inline",
-    inline: true,
+    group: "block",
     attrs: {
       entry: { default: "" },
       name: { default: "" },
       rpn: { default: "" },
-      entry: { default: "" },
+      resulttemplate: { default: "@" },
       value: { default: null },
       dependencies: {default: []},
       display: { default: "" },
@@ -432,10 +431,12 @@ export const nodes = {
     }}],
     toDOM(node) {
       let dom
-      dom = document.createElement('span')
+      dom = document.createElement('div')
       dom.classList = "hurmet-cell"
       dom.dataset.entry = node.attrs.entry
-      dom.textContent = node.attrs.display
+      dom.innerHTML = node.attrs.display
+        ? node.attrs.display
+        : node.attrs.entry
       return dom
     }
   },

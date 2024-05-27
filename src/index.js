@@ -96,7 +96,7 @@ const tidyUp = _ => {
   const fix = fixTables(window.view.state)
   if (fix) { window.view.state = window.view.state.apply(fix.setMeta("addToHistory", false)) }
 
-  hurmet.updateCalculations(window.view, schema.nodes.calculation, true)
+  hurmet.updateCalculations(window.view, true)
 
   document.execCommand("enableObjectResizing", false, false)
   document.execCommand("enableInlineTableEditing", false, false)
@@ -114,6 +114,6 @@ if (hash && hash.length > 1) {
       schema.nodeFromJSON(fragment)
     )
   )
-  hurmet.updateCalculations(window.view, schema.nodes.calculation, true)
+  hurmet.updateCalculations(window.view, true)
 }
 tidyUp()

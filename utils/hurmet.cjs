@@ -231,7 +231,8 @@ const dt = Object.freeze({
   DRAWING: 131072,
   RICHTEXT: 262144,
   DICTIONARY: 524288,
-  MACRO: 1048576
+  MACRO: 1048576,
+  SPREADSHEET: 2097152
 });
 
 const errorMessages = Object.freeze({
@@ -1164,6 +1165,9 @@ const fromAssignment = (cellAttrs, unitAware) => {
 
     // Note the only operations on data frames are: (1) access, and (2) concatenate.
     // That's where the copy-on-write takes place.
+
+  } else if (cellAttrs.dtype === dt.SPREADSHEET) {
+    oprnd.value = cellAttrs.value;
 
   } else {
     // For all other data types, we employ copy-on-read. So we return a deep copy from here.
@@ -4760,6 +4764,7 @@ const numFromSupChars = str => {
 
 const colorSpecRegEx = /^(#([a-f0-9]{6}|[a-f0-9]{3})|[a-z]+|\([^)]+\))/i;
 const accentRegEx = /^(?:.|\uD835.)[\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]_/;
+const spreadsheetCellRegEx = /^([A-Z](\d+|Ω)|Σ)$/;
 
 const factorsAfterSpace = /^[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133\uD835]/;
 const factors = /^[[({√∛∜]/;
@@ -4975,7 +4980,8 @@ const parse$1 = (
   str,
   decimalFormat = "1,000,000.",
   isCalc = false,     // true when parsing the blue echo of an expression
-  inRealTime = false  // true when updating a rendering with every keystroke in the editor.
+  inRealTime = false, // true when updating a rendering with every keystroke in the editor.
+  sheetName = ""      // The RPN for a spreadsheet cell differs from other variables.
 ) => {
   // Variable definitions
   let tex = "";
@@ -5386,7 +5392,7 @@ const parse$1 = (
           rpn += '"' + token.input + '"'; // a loop index variable name.
         } else {
           // We're in the echo of a Hurmet calculation.
-          if (/^(\.[^.]|\[)/.test(str) || token.input === "im") {
+          if (/^(\.[^.]|\[)/.test(str)) {
             // When the blue echo has an index in a bracket, e.g., varName[index], it renders
             // the name of the variable, not the value. The value of the value of the index.
             token.output = token.ttype === tt.LONGVAR
@@ -5396,8 +5402,12 @@ const parse$1 = (
             token.output = token.input;
             token.output = (posArrow > 0 ? "" : "〖") + token.output;
           }
-          rpn += token.input === "im" ? "im" : "¿" + token.input;
-          if (token.input !== "im") { dependencies.push(token.input); }
+          if (sheetName && spreadsheetCellRegEx.test(token.input)) {
+            rpn += "¿" + sheetName + tokenSep + `"${token.input}"` + tokenSep + ".";
+          } else {
+            rpn += "¿" + token.input;
+          }
+          dependencies.push(token.input);
         }
 
         tex += token.output + (str.charAt(0) === "." ? "" : " ");
@@ -6487,6 +6497,9 @@ function propertyFromDotAccessor(parent, index, unitAware) {
 
   } else if (parent.dtype & dt.DATAFRAME) {
     return DataFrame.range(parent, [index], unitAware)
+
+  } else if (parent.dtype === dt.SPREADSHEET) {
+    return fromAssignment(parent.value[index.value], unitAware)
 
   } else if ((parent.dtype === dt.STRING || (parent.dtype & dt.ARRAY)) &&
     index.dtype === dt.RATIONAL) {
@@ -14596,6 +14609,19 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
+        case "Σ": {
+          // Sum a spreadsheet column
+          const colName = stack.pop().value;
+          const spreadsheet = stack.pop();
+          let sum = Rnl.zero;
+          for (let i = 1; i <= spreadsheet.rowMap.length - 1; i++) {
+            const cellOprnd = fromAssignment(spreadsheet.value[colName + i], unitAware);
+            sum = Rnl.add(sum, cellOprnd.value);
+          }
+          stack.push({ value: sum, unit: allZeros, dtype: dt.RATIONAL });
+          break
+        }
+
         case ":": {
           // range separator.
           const end = stack.pop();
@@ -15915,8 +15941,8 @@ const evaluateDrawing = (stmt, vars, decimalFormat = "1,000,000.") => {
 };
 
 const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
-  stmt.tex = stmt.template;
-  stmt.alt = stmt.altTemplate;
+  stmt.tex = stmt.template ? stmt.template : "";
+  stmt.alt = stmt.altTemplate ? stmt.altTemplate : "";
   const isUnitAware = /\?\?|!!|%%|@@|¡¡/.test(stmt.resulttemplate);
 
   const formatSpec = vars.format ? vars.format.value : "h15";
@@ -16835,7 +16861,6 @@ const workWithFetchedTexts = (
   doc,
   inDraftMode,
   decimalFormat,
-  calcNodeSchema,
   isCalcAll,
   nodeAttrs,
   curPos,
@@ -16861,20 +16886,19 @@ const workWithFetchedTexts = (
       : nodeAttrs.entry;
     const attrs = processFetchedString(entry, texts[i], hurmetVars, decimalFormat);
     attrs.inDraftMode = inDraftMode;
-    tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs));
+    tr.replaceWith(pos, pos + 1, state.schema.nodes.calculation.createAndFill(attrs));
     if (attrs.name) {
       insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat);
     }
   }
   // There. Fetches are done and are loaded into the document.
   // Now proceed to the rest of the work.
-  proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr);
+  proceedAfterFetch(view, isCalcAll, nodeAttrs, curPos, hurmetVars, tr);
 
 };
 
 const workAsync = (
   view,
-  calcNodeSchema,
   isCalcAll,
   nodeAttrs,
   curPos,
@@ -16897,7 +16921,7 @@ const workAsync = (
         }
       });
     }
-    workWithFetchedTexts(view, doc, inDraftMode, decimalFormat, calcNodeSchema, isCalcAll,
+    workWithFetchedTexts(view, doc, inDraftMode, decimalFormat, isCalcAll,
       nodeAttrs, curPos, hurmetVars, fetchPositions, texts);
   } else {
     Promise.all(
@@ -16923,7 +16947,7 @@ const workAsync = (
         return r.text()
       }))
     }).then((texts) => {
-      workWithFetchedTexts(view, doc, inDraftMode, decimalFormat, calcNodeSchema, isCalcAll,
+      workWithFetchedTexts(view, doc, inDraftMode, decimalFormat, isCalcAll,
         nodeAttrs, curPos, hurmetVars, fetchPositions, texts);
     });
   }
@@ -16931,7 +16955,6 @@ const workAsync = (
 
 const proceedAfterFetch = (
   view,
-  calcNodeSchema,
   isCalcAll,
   nodeAttrs,
   curPos,
@@ -16943,13 +16966,14 @@ const proceedAfterFetch = (
   //   2. After we know that no fetch statements need be processed.
   const doc = view.state.doc;
   const decimalFormat = doc.attrs.decimalFormat;
+  const calcSchema = view.state.schema.nodes.calculation;
   // Create a set to track which variable have a changed value.
   const changedVars = isCalcAll ? null : new Set();
 
   if (!isCalcAll && (nodeAttrs.name || nodeAttrs.rpn ||
     (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING))) {
     // Load hurmetVars with values from earlier in the document.
-    doc.nodesBetween(0, curPos, function(node) {
+    doc.nodesBetween(0, curPos, function(node, pos) {
       if (node.type.name === "calculation") {
         const attrs = node.attrs;
         if (attrs.name) {
@@ -16959,6 +16983,18 @@ const proceedAfterFetch = (
             });
           } else {
             insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat);
+          }
+        }
+      } else if (node.attrs.isSpreadsheet) {
+        const sheetName = node.attrs.name;
+        hurmetVars[sheetName] = {};
+        const numRows = node.content.content.length;
+        const numCols = node.content.content[0].content.content.length;
+        // Proceed column-wise thru the table.
+        for (let j = 0; j < numCols; j++) {
+          for (let i = 0; i < numRows; i++) {
+            const cell = node.content.content[i].content.content[j];
+            hurmetVars[sheetName][cell.name] = cell.attrs;
           }
         }
       }
@@ -16975,10 +17011,8 @@ const proceedAfterFetch = (
     if (!fetchRegEx.test(nodeAttrs.entry)) {
       // This is the typical calculation statement. We'll evalutate it.
       let attrs = clone(nodeAttrs); // compile was already run in mathprompt.js.
-      // The mathPrompt dialog box did not have accesss to hurmetVars, so it
-      // did not do unit conversions on the result template. Do that first.
       try {
-        // Proceed to do the calculation of the cell.
+        // Do the calculation of the cell.
         if (attrs.rpn || (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING)) {
           attrs = attrs.dtype && attrs.dtype === dt.DRAWING
             ? evaluateDrawing(attrs, hurmetVars, decimalFormat)
@@ -16989,7 +17023,7 @@ const proceedAfterFetch = (
       } catch (err) {
         attrs.tex = "\\text{" + attrs.entry + " = " + err + "}";
       }
-      tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(attrs));
+      tr.replaceWith(curPos, curPos + 1, calcSchema.createAndFill(attrs));
     }
   }
 
@@ -17022,7 +17056,7 @@ const proceedAfterFetch = (
             attrs.tex = "\\text{" + attrs.entry + " = " + err + "}";
           }
           if (isCalcAll || attrs.rpn || mustRedraw) {
-            tr.replaceWith(pos, pos + 1, calcNodeSchema.createAndFill(attrs));
+            tr.replaceWith(pos, pos + 1, calcSchema.createAndFill(attrs));
           }
         } else if (attrs.name && attrs.value) {
           insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat);
@@ -17052,12 +17086,12 @@ const proceedAfterFetch = (
 
 function updateCalculations(
   view,
-  calcNodeSchema,
   isCalcAll = false,
   nodeAttrs,
   curPos
 ) {
   const doc = view.state.doc;
+  const calcSchema = view.state.schema.nodes.calculation;
 
   if (!(isCalcAll || nodeAttrs.name || nodeAttrs.rpn ||
       (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING))) {
@@ -17069,7 +17103,7 @@ function updateCalculations(
     }
     const tr = state.tr;
     try {
-      tr.replaceWith(curPos, curPos + 1, calcNodeSchema.createAndFill(nodeAttrs));
+      tr.replaceWith(curPos, curPos + 1, calcSchema.createAndFill(nodeAttrs));
     } catch (err) {
       // nada
     } finally {
@@ -17113,7 +17147,7 @@ function updateCalculations(
 
   if (urls.length > 0) {
     // We have to fetch some remote data. Asynchronous work ahead.
-    workAsync(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos,
+    workAsync(view, isCalcAll, nodeAttrs, curPos,
               hurmetVars, urls, fetchPositions);
   } else {
     // Skip the fetches and go directly to work that we can do synchronously.
@@ -17123,7 +17157,7 @@ function updateCalculations(
       state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1));
     }
     const tr = state.tr;
-    proceedAfterFetch(view, calcNodeSchema, isCalcAll, nodeAttrs, curPos, hurmetVars, tr);
+    proceedAfterFetch(view, isCalcAll, nodeAttrs, curPos, hurmetVars, tr);
   }
 }
 

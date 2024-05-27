@@ -29,6 +29,7 @@ import { readFile } from "./openfile"
 import { saveAs } from "filesaver.js-npm"
 import { findPageBreaks, forToC, forPrint } from "./paginate.js"
 import { showDiff } from "./diffMatchPatch"
+import { sheetToTable, tableToSheet } from "./spreadsheet.js"
 import { dt } from "./constants.js"
 
 // Menu icons that are not included in node-module menu.js
@@ -142,6 +143,11 @@ const hurmetIcons = {
     width: 24,
     height: 24,
     path: "M13.2546893,15 C12.8333806,15.6040072 12.5048858,16.2775651 12.2898787,17 L5,17 C2.23857625,17 3.38176876e-16,14.7614237 0,12 C-1.2263553e-15,9.23857625 2.23857625,7 5,7 L19,7 C21.7614237,7 24,9.23857625 24,12 C24,12.6294813 23.8836754,13.2317936 23.6713497,13.7866134 C23.1547532,13.3234155 22.5689168,12.9358807 21.9312708,12.6414391 C21.9762852,12.4347751 22,12.220157 22,12 C22,10.3431458 20.6568542,9 19,9 L5,9 C3.34314575,9 2,10.3431458 2,12 C2,13.6568542 3.34314575,15 5,15 L13.2546893,15 Z M19,14 C21.7600532,14.0033061 23.9966939,16.2399468 24,19 C24,21.7614237 21.7614237,24 19,24 C16.2385763,24 14,21.7614237 14,19 C14,16.2385763 16.2385763,14 19,14 Z M16.5,19.9375 L21.5,19.9375 C22.017767,19.9375 22.4375,19.517767 22.4375,19 C22.4375,18.482233 22.017767,18.0625 21.5,18.0625 L16.5,18.0625 C15.982233,18.0625 15.5625,18.482233 15.5625,19 C15.5625,19.517767 15.982233,19.9375 16.5,19.9375 Z"
+  },
+  spreadsheet: {
+    width: 24,
+    height: 24,
+    path: "M17 22 L 19 22 C20.6569 22 22 20.6569 22 19 L22 7 L 22 5 C 22 3.3431 20.6569 2 19 2 L7 2 L5 2 C 3.3431 2 3 3.3431 2 5 L2 17 L2 19 C 2 20.6569 3.3431 22 5 22 L7 22 Z M24,16.1768671 L24,19 C24,21.7614237 21.7614237,24 19,24 L5,24 C2.23857625,24 2.11453371e-15,21.7614237 1.77635684e-15,19 L0,5 C-3.38176876e-16,2.23857625 2.23857625,2.28362215e-15 5,0 L19,0 C21.7614237,-5.07265313e-16 24,2.23857625 24,5 L24,7.82313285 C24.0122947,7.88054124 24.0187107,7.93964623 24.0187107,8 C24.0187107,8.06035377 24.0122947,8.11945876 24,8.17686715 L24,15.8231329 C24.0122947,15.8805412 24.0187107,15.9396462 24.0187107,16 C24.0187107,16.0603538 24.0122947,16.1194588 24,16.1768671 Z M19 7 H5 V10 H19 Z M19 14 H5 V17 H19 Z"
   },
   grid: {
     width: 16,
@@ -603,7 +609,7 @@ function pasteAsMarkdown() {
           view.dispatch(
             view.state.tr.replaceWith($from.pos, $to.pos, schema.nodeFromJSON(fragment))
           )
-          hurmet.updateCalculations(view, schema.nodes.calculation, true)
+          hurmet.updateCalculations(view, true)
         })
     }
   })
@@ -696,6 +702,24 @@ function insertTableCaption() {
           }
         }
         openPrompt(promptOptions)
+      }
+    }
+  })
+}
+
+function toggleSpreadsheet() {
+  return new MenuItem({
+    title: "Toggle Table ⇄ Spreadsheet",
+    icon: hurmetIcons.spreadsheet,
+    select(state) {
+      return isInTable(state)
+    },
+    run(state, _, view) {
+      const table = findTable(state.selection)
+      if (table.node.attrs.isSpreadsheet) {
+        sheetToTable(state, view, table.node)
+      } else {
+        tableToSheet(state, view, table.node)
       }
     }
   })
@@ -814,7 +838,7 @@ function setRoundingCriteria(nodeType) {
           const tr = view.state.tr
           tr.replaceSelectionWith(schema.nodes.calculation.createAndFill(attrs))
           view.dispatch(tr)
-          hurmet.updateCalculations(view, schema.nodes.calculation, true)
+          hurmet.updateCalculations(view, true)
           view.focus()
         }
       }
@@ -948,7 +972,7 @@ export function expandHurmetMacro(state, view) {
           view.dispatch(
             view.state.tr.replaceWith(textTo - name.length, textTo, schema.nodeFromJSON(fragment))
           )
-          hurmet.updateCalculations(view, schema.nodes.calculation, true)
+          hurmet.updateCalculations(view, true)
         }
       }
     })
@@ -1146,7 +1170,7 @@ function reCalcAll() {
     title: "Recalculate all",
     icon: hurmetIcons.recalc,
     run(state, _, view) {
-      hurmet.updateCalculations(view, schema.nodes.calculation, true)
+      hurmet.updateCalculations(view, true)
     }
   })
 }
@@ -1156,7 +1180,7 @@ function setDecimalFormat(label) {
     label: label,
     run(state, _, view) {
       state.doc.attrs.decimalFormat = label
-      hurmet.updateCalculations(view, schema.nodes.calculation, true)
+      hurmet.updateCalculations(view, true)
     }
   })
 }
@@ -1592,6 +1616,7 @@ export function buildMenuItems(schema) {
     }
   })
   r.insertTableCaption = insertTableCaption()
+  r.toggleSpreadsheet = toggleSpreadsheet()
   r.grid = tableStyle("Grid", "grid", "grid")
   r.nogrid = tableStyle("No borders", "nogrid", "nogrid")
   r.oneRule = tableStyle("Border below header", "one-rule", "oneRule")
@@ -1798,7 +1823,8 @@ export function buildMenuItems(schema) {
     r.alignColLeft,
     r.alignColCenter,
     r.alignColRight,
-    r.tableStyle
+    r.tableStyle,
+    r.toggleSpreadsheet
   ])];
 
   r.copyAsMarkdown = copyAsMarkdown()

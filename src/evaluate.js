@@ -1017,6 +1017,13 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
+        case "spreadsheetSum": {
+          const arg = stack.pop()
+          const spreadsheet = stack.pop()
+          stack.push(spreadsheetSum(spreadsheet, arg.value, unitAware))
+          break
+        }
+
         case "rand": {
           const numArgs = Number(tokens[i + 1])
           i += 1
@@ -1785,6 +1792,29 @@ const errorResult = (stmt, result) => {
   return [stmt, result]
 }
 
+const spreadsheetSum = (sheet, index, unitAware) => {
+  let sum = Rnl.zero
+  if (/^[A-Z]$/.test(index)) {
+    // Sum a column
+    const L = Object.keys(sheet.rowMap).length
+    for (let i = 1; i <= L - 1; i++) {
+      const cellOprnd = fromAssignment(sheet.value[index + String(i)], unitAware)
+      sum = Rnl.add(sum, cellOprnd.value)
+    }
+  } else if (isNaN(index)) {
+    return errorOprnd("SHEET_INDEX")
+  } else {
+    // Sum a row
+    const L = Object.keys(sheet.columnMap).length
+    for (let j = 1; j <= L - 1; j++) {
+      const cellName = String.fromCodePoint(65 + j) + index
+      const cellOprnd = fromAssignment(sheet.value[cellName], unitAware)
+      sum = Rnl.add(sum, cellOprnd.value)
+    }
+  }
+  return { value: sum, unit: allZeros, dtype: dt.RATIONAL }
+}
+
 const conditionResult = (stmt, oprnd, unitAware) => {
   let result = Object.create(null)
   result.value = oprnd.dtype === dt.DATAFRAME
@@ -1799,7 +1829,7 @@ const conditionResult = (stmt, oprnd, unitAware) => {
   }
 
   // Check unit compatibility.
-  if (result.dtype !== dt.ERROR && unitAware && stmt.resultdisplay.indexOf("!") === -1 &&
+  if (result.dtype !== dt.ERROR && unitAware && stmt.altresulttemplate.indexOf("!") === -1 &&
     (stmt.unit && stmt.unit.expos ||
       (result.unit && result.unit.expos && Array.isArray(result.unit.expos)))) {
     const expos = (stmt.unit && stmt.unit.expos) ? stmt.unit.expos : allZeros
@@ -1920,8 +1950,8 @@ export const evaluateDrawing = (stmt, vars, decimalFormat = "1,000,000.") => {
 }
 
 export const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
-  stmt.tex = stmt.template
-  stmt.alt = stmt.altTemplate
+  stmt.tex = stmt.template ? stmt.template : ""
+  stmt.alt = stmt.altTemplate ? stmt.altTemplate : ""
   const isUnitAware = /\?\?|!!|%%|@@|¡¡/.test(stmt.resulttemplate)
 
   const formatSpec = vars.format ? vars.format.value : "h15"

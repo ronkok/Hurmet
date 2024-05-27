@@ -358,7 +358,7 @@ const getFootnotes = (ast, footnotes) => {
   }
 }
 
-const ast2html = ast => {
+export const ast2html = ast => {
   // Return HTML.
   let html = ""
   if (Array.isArray(ast)) {
@@ -391,6 +391,13 @@ const wrapWithHead = (html, title, attrs) => {
 <div class="ProseMirror-setup">
 `
   return head + html + "\n</div></article>\n</body>\n</html>"
+}
+
+export const syncMD2html = md => {
+  // A synchronous function for Markdown snippets.
+  // Use md2html() for entire documents.
+  const ast = md2ast(md)
+  return ast2html(ast)
 }
 
 export async function md2html(md, title = "", inHtml = false) {
