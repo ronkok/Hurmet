@@ -5,6 +5,10 @@ import { fromAssignment } from "./operand.js"
 import { errorOprnd } from "./error"
 import { Rnl } from "./rational"
 
+const endRegEx = /^[A-Z]_end$/
+const alphaRegEx = /^[A-Z]$/
+const intRegEx = /^\d+$/
+
 export function propertyFromDotAccessor(parent, index, unitAware) {
   const property = Object.create(null)
   if (parent.dtype & dt.MAP) {
@@ -14,7 +18,11 @@ export function propertyFromDotAccessor(parent, index, unitAware) {
     return DataFrame.range(parent, [index], unitAware)
 
   } else if (parent.dtype === dt.SPREADSHEET) {
-    return fromAssignment(parent.value[index.value], unitAware)
+    let key = index.value
+    if (endRegEx.test(key)) {
+      key = key.slice(0, 1) + Object.keys(parent.rowMap).length
+    }
+    return fromAssignment(parent.value[key], unitAware)
 
   } else if ((parent.dtype === dt.STRING || (parent.dtype & dt.ARRAY)) &&
     index.dtype === dt.RATIONAL) {
@@ -48,4 +56,39 @@ export function propertyFromDotAccessor(parent, index, unitAware) {
   } else {
     return errorOprnd("NO_PROP", parent.name)
   }
+}
+
+export const cellOprnd = (sheet, args, unitAware) => {
+  if (args.length === 1) {
+    let key = args[0].value
+    if (endRegEx.test(key)) {
+      key = key.slice(0, 1) + Object.keys(sheet.rowMap).length
+    }
+    return fromAssignment(parent.value[key], unitAware)
+  }
+  let cellName = ""
+  const key0 = args[0].value
+  const key1 = args[1].value
+  if (sheet.columnMap[key0] || alphaRegEx.test(key0)) {
+    cellName = sheet.columnMap[key0] ? sheet.columnMap[key0] : key0
+    if (sheet.rowMap[key1]) {
+      cellName += sheet.rowMap[key1];
+    } else if (intRegEx.test(key1)) {
+      cellName += key1
+    } else {
+      // ERROR Message
+    }
+  } else if (sheet.columnMap[key1]  || alphaRegEx.test(key0)) {
+    cellName = sheet.columnMap[key1] ? sheet.columnMap[key1] : key1
+    if (sheet.rowMap[key0]) {
+      cellName += sheet.rowMap[key0];
+    } else if (intRegEx.test(key0)) {
+      cellName += key0
+    } else {
+      // ERROR Message
+    }
+  } else {
+    // ERROR
+  }
+  return fromAssignment(sheet.value[cellName], unitAware)
 }

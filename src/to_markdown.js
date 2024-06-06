@@ -1,4 +1,5 @@
-import hurmet from "./hurmet"
+import { parse } from "./parser"
+import { dt } from "./constants"
 
 /* eslint-disable */
 // ::- A specification for serializing a ProseMirror document as
@@ -213,14 +214,14 @@ const hurmetNodes =  {
   },
   figure(state, node) {
     let caption
-    if (node.content.content[0].type.name === "table") {
-      const figureCaption = node.content.content[1];
+    if (node.content.content[1].type.name === "table") {
+      const figureCaption = node.content.content[0];
       state.write("table: ")
       state.renderInline(figureCaption)
       state.closeBlock(figureCaption)
       const L = state.out.length
-      const table = node.content.content[0];
-      const float = node.attrs.class.replace("top-caption", "").trim()
+      const table = node.content.content[1];
+      const float = node.attrs.class.trim()
       state.renderTable(table, state.delim, float, state.isGFM)
       state.closeBlock(table)
       // Get rid of the newline between the caption and the table.
@@ -298,7 +299,7 @@ const hurmetNodes =  {
         }
       } else {
         // Convert calculation field to TeX
-        const tex = hurmet.parse(entry)
+        const tex = parse(entry)
         writeTex(state, node.attrs.displayMode, tex)
       }
     } else {
@@ -311,7 +312,7 @@ const hurmetNodes =  {
       if (node.attrs.entry.slice(0, 5) === "draw(") {
         const ref = getRef(node, state)
         state.paths.set(ref, "¢` " + entry + " `")
-        state.write(!`[${ref}][]`)
+        state.write(`![${ref}][]`)
       } else if (node.attrs.displayMode) {
         state.write("¢¢" + displaySelector + " " + md + " ¢¢")
       } else {
@@ -380,7 +381,6 @@ const titleRegEx = /\n *title +"([^\n]+)" *\n/
 
 const getRef = (node, state) => {
   // We use reference links and defer the image paths to the end of the document.
-  console.log(node.type.name)
   let ref = node.type.name === "image"
     ? node.attrs.alt
     : node.type.name === "figimg"
@@ -690,6 +690,7 @@ export class MarkdownSerializerState {
   }
 
   renderTable(node, delim, float, isGFM) {
+    const isSpreadsheet = "dtype" in node.attrs ? node.attrs.dtype === dt.SPREADSHEET : false
     const rows = node.content.content
     let numCols = rows[0].content.content.length
     for (let i = 1; i < rows.length; i++) {
@@ -754,7 +755,11 @@ export class MarkdownSerializerState {
             mergedCells.push([i, j, jPM])
           } else {
             const L = tableState.out.length
-            tableState.renderContent(cell)
+            if (isSpreadsheet) {
+              tableState.write(cell.content.content[0].attrs.entry)
+            } else {
+              tableState.renderContent(cell)
+            }
             // Each table cell contains an array of strings.
             const cellContent = tableState.out.slice(L).replace(/^\n+/, "").replace(/\n+$/, "").split("\n")
             table[i][j] = cellContent
@@ -787,7 +792,11 @@ export class MarkdownSerializerState {
       for (let m = 1; m < colSpan[i][j]; m++) { width += colWidth[j + m] + 3 }
       tableState.lineLimit = width
       const L = tableState.out.length
-      tableState.renderContent(cell)
+      if (isSpreadsheet) {
+        tableState.write(cell.content.content[0].attrs.entry)
+      } else {
+        tableState.renderContent(cell)
+      }
       table[i][j] = tableState.out.slice(L).replace(/^\n+/, "").split("\n")
     }
 
@@ -824,8 +833,11 @@ export class MarkdownSerializerState {
         break
       }
     }
-    const className = node.attrs.class.replace(/ c\d+[cr]/g, "").replace(/ +/g, "") // remove column justification
-    let directive = `\n${delim}{.${className}`
+    const className = node.attrs.class.replace(/ c\d+[cr]/g, "")
+    const tableName = "name" in node.attrs ? node.attrs.name : ""
+    let directive = `\n${delim}{`
+    if (tableName) { directive += `#${tableName} ` } 
+    directive += `.${className.trim()}`
     if (float && float === "left" || float === "right") { directive += ` float="${float}"` }
     directive += ` colWidths="${colWidths.trim()}"}\n`
     if (!isGFM) { this.write(directive) }

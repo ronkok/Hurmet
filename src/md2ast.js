@@ -25,30 +25,34 @@
  *      {.class #id width=number}
  * 9. Figure/Caption for images. Format is a paragraph that consists entirely of:
  *    !![caption][id]
- * 10. Table directives. They are placed on the line after the table. The format is:
- *     {.class #id width="num1 num2 …" caption}
- * 11. Lists that allow the user to pick list ordering.
+ * 10. Figure/Caption for tables.
+ *     The caption is on the line above a table and is preceded by `table: `, as per Pandoc.
+ * 11. Table directives. They are placed on the line after the table. The format is:
+ *     {#id .class float="(left|right)" width="num1 num2 …"}
+ *     Float is applied only to a table inside a figure.
+ *     A spreadsheet will include " spreadsheet" in `.class` The id will be the sheet's name.
+ * 12. Lists that allow the user to pick list ordering.
  *        1. →  1. 2. 3.  etc.
  *        A. →  A. B. C.  etc. (future)
  *        a) →  (a) (b) (c)  etc. (future)
- * 12. Alerts per GFM
+ * 13. Alerts per GFM
  *     > [!note] or [!tip] or [!important] or [!warning] or [!epigraph]
  *     > Content of note
- * 13. Fenced divs, similar to Pandoc.
+ * 14. Fenced divs, similar to Pandoc.
  *     ::: (centered|right_justified|comment|indented|boxed|header)
  *     Block elements
  *     :::
  *     Nested divs are distinguished by number of colons. Minimum three.
- * 14. Table of Contents
+ * 15. Table of Contents
  *     {.toc start=N end=N}
- * 15. Definition lists, per Pandoc.  (future)
- * 16. [^1] is a reference to a footnote.
+ * 16. Definition lists, per Pandoc.  (future)
+ * 17. [^1] is a reference to a footnote.
  *     [^1]: The body of the footnote is deferred, similar to reference links.
- * 17. [#1] is a reference to a citation. (future)
+ * 18. [#1] is a reference to a citation. (future)
  *     [#1]: The body of the citation is deferred, similar to reference links.
- * 18. Line blocks begin with "| ", as per Pandoc. (future)
+ * 19. Line blocks begin with "| ", as per Pandoc. (future)
  *
- * hurmetMark.js copyright (c) 2021 - 2023 Ron Kok
+ * copyright (c) 2021 - 2024 Ron Kok
  *
  * This file has been adapted (and heavily modified) from Simple-Markdown.
  * Simple-Markdown copyright (c) 2014-2019 Khan Academy & Aria Buckles.
@@ -77,14 +81,16 @@
  * THE SOFTWARE.
  */
 
+import { dt } from "./constants"
 
 const CR_NEWLINE_R = /\r\n?/g;
 const FORMFEED_R = /\f/g;
 const CLASS_R = /(?:^| )\.([a-z-]+)(?: |&|$)/
+const tableClassRegEx = /(?:^| )\.([a-z- ]+)(?: colWidths=| width=| float=|&|$)/
 const floatRegEx = /float="(left|right)"/
 const WIDTH_R = /(?:^| )width="?([\d.a-z]+"?)(?: |$)/
 const COL_WIDTHS_R = /(?:^| )colWidths="([^"]*)"/
-const ID_R = /(?:^| )#([a-z-]+)(?: |$)/
+const ID_R = /(?:^| )#([A-Za-z][A-Za-z0-9]*)(?: |$)/
 const leadingSpaceRegEx = /^ +/
 const trailingSpaceRegEx = / +$/
 
@@ -196,31 +202,33 @@ const TABLES = (function() {
   const tableDirectives = (directives, align) => {
     // Get CSS class, ID, and column widths, if any.
     if (!directives && align === "") { return ["", "", null] }
-    const userDefClass = CLASS_R.exec(directives)
+    const userDefClass = tableClassRegEx.exec(directives)
     let myClass = (userDefClass) ? userDefClass[1] : ""
+    const isSpreadsheet = myClass && myClass.split(" ").includes("spreadsheet")
     if (align.length > 0) { myClass += (myClass.length > 0 ? " " : "") + align }
     const userDefId = ID_R.exec(directives)
     const myID = (userDefId) ? userDefId[1] : ""
     const colWidthMatch = COL_WIDTHS_R.exec(directives)
     const colWidths = (colWidthMatch) ? colWidthMatch[1].split(" ") : null
-    return [myClass, myID, colWidths]
+    return [myClass, myID, isSpreadsheet, colWidths]
   }
 
   const pipeRegEx = /(?<!\\)\|/  // eslint doesn't like look behind. Disregard the warning.
 
-  const parsePipeTableRow = function(source, parse, state, colWidths, inHeader) {
+  const parsePipeTableRow = function(source, parse, state, isSpreadsheet,
+                                     colWidths, inHeader) {
     const cells = source.trim().split(pipeRegEx)
     cells.shift()
     cells.pop()
     const tableRow = [{ type: "tableSeparator" }]
     for (const str of cells) {
-      const cell = parse(str.trim(), state)
+      const cell = isSpreadsheet
+        ? [{ type: "spreadsheet_cell", attrs: { entry: str.trim() } }]
+        : parse(str.trim(), state)
       tableRow.push(...cell)
       tableRow.push({ type: "tableSeparator" })
     }
-//    const tableRow = parse(source.trim(), state);
     consolidate(tableRow)
-  //  state.inTable = prevInTable;
 
     const row = {
       type: "table_row",
@@ -248,10 +256,13 @@ const TABLES = (function() {
               "colwidth": (colWidths) ? [Number(colWidths[j])] : null,
               "background": null
             },
-            content: (state.inHtml ? [] : [{ "type": "paragraph", "content": [] }])
+            content: (state.inHtml || isSpreadsheet
+              ? []
+              : [{ "type": "paragraph", "content": [] }]
+            )
           });
         }
-      } else if (state.inHtml) {
+      } else if (state.inHtml || isSpreadsheet) {
         // For direct to HTML, write the inline contents directly into the <td> element.
         // row   cell    content      text
         row.content[j].content.push(node)
@@ -269,14 +280,15 @@ const TABLES = (function() {
     return function(capture, state) {
       state.inline = true
       const align = parseTableAlign(capture[3])
-      const [myClass, myID, colWidths] = tableDirectives(capture[5], align)
+      const [myClass, myID, isSpreadsheet, colWidths] = tableDirectives(capture[5], align)
       const table = {
         type: "table",
         attrs: {},
         content: []
       }
-      if (myID) { table.attrs.id = myID }
+      if (myID) { table.attrs.name = myID }
       if (myClass) { table.attrs.class = myClass }
+      if (isSpreadsheet) { table.attrs.dtype = dt.SPREADSHEET }
       if (colWidths && state.inHtml) {
         let sum = 0
         colWidths.forEach(el => { sum += Number(el) } )
@@ -288,22 +300,23 @@ const TABLES = (function() {
         table.content.push(colGroup)
       }
       if (!/^\|+$/.test(capture[2])) {
-        table.content.push(parsePipeTableRow(capture[2], parse, state, colWidths, true))
+        table.content.push(parsePipeTableRow(capture[2], parse, state, isSpreadsheet,
+                                             colWidths, true))
       }
       const tableBody = capture[4].trim().split("\n")
       tableBody.forEach(row => {
-        table.content.push(parsePipeTableRow(row, parse, state, colWidths, false))
+        table.content.push(parsePipeTableRow(row, parse, state, isSpreadsheet,
+                                             colWidths, false))
       })
       state.inline = false;
       if (capture[1]) {
-        const figure = { type: "figure", attrs: { class: "top-caption" }, content: [
-          table,
-          { type: "figcaption", attrs: { class: "top-caption" },
-            content: parseInline(capture[1], state) }
+        const figure = { type: "figure", attrs: { class: "" }, content: [
+          { type: "figcaption", content: parseInline(capture[1], state) },
+          table
         ] }
         if (capture[5]) {
           const match = floatRegEx.exec(capture[5])
-          if (match) { figure.attrs.class += " " + match[1] }
+          if (match) { figure.attrs.class = match[1] }
         }
         return figure
       } else {
@@ -335,7 +348,7 @@ const TABLES = (function() {
       // Get column justification
       const alignrow = headerExists ? lines[headerSepLine] : topBorder.slice(1)
       const align = parseTableAlign(alignrow)
-      const [myClass, myID, colWidths] = tableDirectives(capture[4], align)
+      const [myClass, myID, isSpreadsheet, colWidths] = tableDirectives(capture[4], align)
 
       // Read the top & left borders to find a first draft of cell corner locations.
       const colSeps = [0]
@@ -453,8 +466,9 @@ const TABLES = (function() {
         attrs: {},
         content: []
       }
-      if (myID) { table.attrs.id = myID }
+      if (myID) { table.attrs.name = myID }
       if (myClass) { table.attrs.class = myClass }
+      if (isSpreadsheet) { table.attrs.dtype = dt.SPREADSHEET }
       let k = 0
       if (colWidths && state.inHtml) {
         let sum = 0
@@ -471,9 +485,11 @@ const TABLES = (function() {
         table.content.push({ type: "table_row", content: [] } )
         for (let j = 0; j < numCols; j++) {
           if (gridTable[i][j].rowspan === 0) { continue }
-          const cell = gridTable[i][j]
+          const cell = gridTable[i][j];
           state.inline = false
-          let content = parse(cell.blob, state)
+          let content = isSpreadsheet
+            ? [{ type: "spreadsheet_cell", attrs: { entry: cell.blob.trim() } }]
+            : parse(cell.blob, state)
           if (state.inHtml && content.length === 1 && content[0].type === "paragraph") {
             content = content[0].content
           }
@@ -494,14 +510,13 @@ const TABLES = (function() {
       }
       state.inline = false
       if (capture[1]) {
-        const figure = { type: "figure", attrs: { class: "top-caption" }, content: [
-          table,
-          { type: "figcaption", attrs: { class: "top-caption" },
-            content: parseInline(capture[1], state) }
+        const figure = { type: "figure", attrs: { class: "" }, content: [
+          { type: "figcaption", attrs: null, content: parseInline(capture[1], state) },
+          table
         ] }
         if (capture[4]) {
           const match = floatRegEx.exec(capture[4])
-          if (match) { figure.attrs.class += " " + match[1] }
+          if (match) { figure.attrs.class = match[1] }
         }
         return figure
       } else {
@@ -512,9 +527,9 @@ const TABLES = (function() {
 
   return {
     parsePipeTable: parsePipeTable(),
-    PIPE_TABLE_REGEX: /^(?:table: ((?:[^\n]|\n(?!\|))*)\n)?(\|.*)\n\|([-:]+[-| :]*)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
+    PIPE_TABLE_REGEX: /^(?:: ((?:[^\n]|\n(?!\||:|<\/dl>))*)\n)?(\|.*)\n\|([-:]+[-| :]*)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
     parseGridTable: parseGridTable(),
-    GRID_TABLE_REGEX: /^(?:table: ((?:[^\n]|\n(?!\+))*)\n)?((\+(?:[-:=]+\+)+)\n(?:[+|][^\n]+[+|] *\n)+)(?:\{([^\n}]+)\}\n)?\n*/
+    GRID_TABLE_REGEX: /^(?:: ((?:[^\n]|\n(?!\+|:|<\/dl>))*)\n)?((\+(?:[-:=]+\+)+)\n(?:[+|][^\n]+[+|] *\n)+)(?:\{([^\n}]+)\}\n)?\n*/
   };
 })();
 
@@ -541,7 +556,7 @@ const parseRef = function(capture, state, refNode) {
   if (state._defs && state._defs[ref]) {
     const def = state._defs[ref];
     if (refNode.type === "figure") {
-      refNode = { type: "figure", content: [
+      refNode = { type: "figure", attrs: def.attrs, content: [
         { type: "figimg", attrs: def.attrs },
         { type: "figcaption", content: parseInline(refNode.attrs.alt, state) }
       ] }
@@ -617,7 +632,7 @@ rules.set("heading", {
 });
 rules.set("dt", {  // description term
   isLeaf: false,
-  match: blockRegex(/^(([^\n]*)\n)(?=<dd>|\n: )/),
+  match: blockRegex(/^(([^\n]*)\n)(?=<dd>|\n: [^\n]+\n[^|+])/),
   parse: function(capture, state) {
     return { content: parseInline(capture[2].trim(), state) }
   }
@@ -687,17 +702,6 @@ rules.set("bullet_list", {
     return { content: parseList(capture[0], state, capture[1]) }
   }
 });
-rules.set("dd", {  // description details
-  isLeaf: false,
-  match: blockRegex(/^:( +)[\s\S]+?(?:\n{2,}(?! |:)(?!\1)\n*|\s*$)/),
-  parse: function(capture, state) {
-    let div = " " + capture[0].slice(1)
-    const indent = 1 + capture[1].length
-    const spaceRegex = new RegExp("^ {" + indent + "," + indent + "}", "gm");
-    div = div.replace(spaceRegex, "") // remove indents on trailing lines:
-    return { content: parse(div, state) };
-  }
-});
 rules.set("special_div", {
   isLeaf: false,
   match: blockRegex(/^(:{3,}) ?(indented|comment|centered|right_justified|boxed|header|hidden) *\n([\s\S]+?)\n+\1 *(?:\n{2,}|\s*$)/),
@@ -740,6 +744,17 @@ rules.set("gridTable", {
   isLeaf: false,
   match: blockRegex(TABLES.GRID_TABLE_REGEX),
   parse: TABLES.parseGridTable
+});
+rules.set("dd", {  // description details
+  isLeaf: false,
+  match: blockRegex(/^:( +)[\s\S]+?(?:\n{2,}(?! |:)(?!\1)\n*|\s*$)/),
+  parse: function(capture, state) {
+    let div = " " + capture[0].slice(1)
+    const indent = 1 + capture[1].length
+    const spaceRegex = new RegExp("^ {" + indent + "," + indent + "}", "gm");
+    div = div.replace(spaceRegex, "") // remove indents on trailing lines:
+    return { content: parse(div, state) };
+  }
 });
 rules.set("displayTeX", {
   isLeaf: true,

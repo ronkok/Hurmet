@@ -31,6 +31,7 @@ import { findPageBreaks, forToC, forPrint } from "./paginate.js"
 import { showDiff } from "./diffMatchPatch"
 import { sheetToTable, tableToSheet } from "./spreadsheet.js"
 import { dt } from "./constants.js"
+import { clone } from "./utils.js"
 
 // Menu icons that are not included in node-module menu.js
 const hurmetIcons = {
@@ -644,7 +645,7 @@ function uploadImage(nodeType) {
   })
 }
 
-function insertTableCaption() {
+function toggleTableCaption() {
   return new MenuItem({
     title: "Insert or delete caption…",
     icon: hurmetIcons.table_caption,
@@ -693,10 +694,10 @@ function insertTableCaption() {
           },
           callback(attrs) {
             const str = attrs.caption ? attrs.caption : "caption"
-            const caption = schema.nodes.figcaption.createAndFill({class: "top-caption"}, [schema.text(str)])
+            const caption = schema.nodes.figcaption.createAndFill(null, [schema.text(str)])
             attrs.class += " top-caption"
             const tr = state.tr
-            tr.replaceWith(tableStart, tableEnd, schema.nodes.figure.createAndFill(attrs, [table.node, caption]))
+            tr.replaceWith(tableStart, tableEnd, schema.nodes.figure.createAndFill(attrs, [caption, table.node]))
             view.dispatch(tr)
             view.focus()
           }
@@ -715,11 +716,21 @@ function toggleSpreadsheet() {
       return isInTable(state)
     },
     run(state, _, view) {
-      const table = findTable(state.selection)
-      if (table.node.attrs.isSpreadsheet) {
-        sheetToTable(state, view, table.node)
+      let table = findTable(state.selection)
+      let tableObj
+      let tableStart = 0
+      let tableEnd = 0
+      const fromSpreadsheet = ("dtype" in table.node.attrs) && table.node.attrs.dtype === dt.SPREADSHEET
+      if (fromSpreadsheet) {
+        [tableObj, tableStart, tableEnd] = sheetToTable(state, table.node)
       } else {
-        tableToSheet(state, view, table.node)
+        [tableObj, tableStart, tableEnd] = tableToSheet(state, table.node)
+      }
+      const tr = state.tr
+      tr.replaceWith(tableStart, tableEnd, state.schema.nodeFromJSON(tableObj))
+      view.dispatch(tr)
+      if (!fromSpreadsheet) {
+        hurmet.updateCalculations(view, false, tableObj.attrs, tableStart)    
       }
     }
   })
@@ -755,6 +766,10 @@ function insertImage(nodeType) {
           buttons: [["inline", "inline"], ["left", "left"],  ["center", "center"], ["right", "right"]],
           current: attrs && attrs.class ? attrs.class : "inline"
         },
+        checkbox: {
+          name: "Include a caption",
+          checked: false
+        },
         callback(attrs) {
           const tr = view.state.tr
           if (attrs.checkbox) {
@@ -776,12 +791,6 @@ function insertImage(nodeType) {
         }
       } else if (attrs && attrs.src) {
         promptOptions.src = attrs.src
-      }
-      if (!attrs) {
-        promptOptions.checkbox = {
-          name: "Include a caption",
-          checked: false
-        }
       }
       openPrompt(promptOptions)
     }
@@ -1230,7 +1239,8 @@ function tableStyle(title, className, icon) {
       // classes[0] defines a table style: grid, striped, etc.
       // The rest of the classes all set a column alignment: c1c, c2r, c3c, etc.
       // We don't write a "c1l" because the default alignment is left.
-      const classes = table.node.attrs.class.split(" ")
+      const attrs = clone(table.node.attrs)
+      const classes = attrs.class.split(" ")
       const tr = state.tr
       if (/^align/.test(className)) {
         const align = className.slice(6, 7) //  l  c  r
@@ -1254,8 +1264,7 @@ function tableStyle(title, className, icon) {
       } else {
         classes[0] = className
       }
-      const classList = classes.join(" ").replace(/ {2,}/g, " ")
-      const attrs = { class: classList }
+      attrs.class = classes.join(" ").replace(/ {2,}/g, " ")
       tr.setNodeMarkup(table.pos, undefined, attrs)
       dispatch(tr)
     } 
@@ -1615,7 +1624,7 @@ export function buildMenuItems(schema) {
       splitCell(state, dispatch)
     }
   })
-  r.insertTableCaption = insertTableCaption()
+  r.toggleTableCaption = toggleTableCaption()
   r.toggleSpreadsheet = toggleSpreadsheet()
   r.grid = tableStyle("Grid", "grid", "grid")
   r.nogrid = tableStyle("No borders", "nogrid", "nogrid")
@@ -1819,7 +1828,7 @@ export function buildMenuItems(schema) {
     r.deleteRow,
     r.deleteColumn,
     r.toggleCellMerge,
-    r.insertTableCaption,
+    r.toggleTableCaption,
     r.alignColLeft,
     r.alignColCenter,
     r.alignColRight,

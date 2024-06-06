@@ -249,7 +249,7 @@ export const nodes = {
   },
 
   figure: {
-    content: "block figcaption",
+    content: "block{2,2}",
     attrs: { class: {default: "auto"} },
     group: "block",
     marks: "",
@@ -353,19 +353,32 @@ export const nodes = {
     group: "block",
     attrs: {
       class: { default: 'grid' },
-      isSpreadsheet: { default: false },
       name: { default: "" },
       columnMap: { default: {} },
       unitMap: { default: [] },
       units: { default: {} },
       rowMap: { default: {} },
-      dependencies: { default: null }
+      dependencies: { default: null },
+      dtype: { default: dt.NULL }  // or dt.SPREADSHEET
     },
     parseDOM: [{tag: "table", getAttrs(dom) {
-      return { class: dom.getAttribute('class') || "grid" }
+      const className = dom.getAttribute('class')
+      const dtype = className.indexOf(" spreadsheet") > -1 ? dt.SPREADSHEET : 0
+      return {
+        class: className || "grid",
+        name: dom.getAttribute('id'),
+        dtype
+      }
     }}],
     toDOM(node) {
-      return ['table', { class: node.attrs.class }, ["tbody", 0]]
+      // ProseMirror does not use this toDOM().
+      // Instead, it uses the TableView class in prosemirror-tables.
+      // That's why editPM inserts some code into prosemirror.js.
+      return [
+        'table',
+        { class: node.attrs.class, id: node.attrs.name },
+        ["tbody", 0]
+      ]
     }
   },
   table_row: {
@@ -426,7 +439,7 @@ export const nodes = {
       unit: {default: null},
       dtype: {default: 0},
     },
-    parseDOM: [{tag: "span.hurmet-cell",  getAttrs(dom) {
+    parseDOM: [{tag: "div.hurmet-cell",  getAttrs(dom) {
       return { entry: dom.getAttribute('data-entry') }
     }}],
     toDOM(node) {

@@ -557,16 +557,11 @@ figure img {
   margin-left: auto;
   margin-right: auto;
 }
-figure.top-caption {
-  display: table;
-}
 figure figcaption {
   text-align: center;
   margin-top: 2px;
 }
-figure figcaption.top-caption {
-  display: table-caption;
-  caption-side: top;
+figcaption:first-child {
   font-size: 95%;
   font-weight: bold;
 }

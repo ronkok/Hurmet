@@ -76,7 +76,7 @@ document range by selecting text, then clicking one of the menu bar buttons:
 | ![merge][] ![table-caption][]        | Delete column, Toggle cell merge,  |
 | ![align-left][] ![align-center][]    | Toggle table caption, Align left,  |
 | ![align-right][] Tbl Style           | Align center, Align right,         |
-|                                      | Set table style                    |
+| ![spreadsheet][]                     | Set table style, Toggle spreadsheet|
 +--------------------------------------+------------------------------------+
 | ![information][]  **Q**              | Information, Quick Reference       |
 +--------------------------------------+------------------------------------+
@@ -110,6 +110,7 @@ document range by selecting text, then clicking one of the menu bar buttons:
 [delete-table]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath d='M19 14a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm-2.5 5.938h5a.937.937 0 1 0 0-1.875h-5a.937.937 0 1 0 0 1.875ZM12.29 17H9v5h3.674c.356.75.841 1.426 1.427 2H5a5 5 0 0 1-5-5V5a5 5 0 0 1 5-5h14a5 5 0 0 1 5 5v2.823a.843.843 0 0 1 0 .354V14.1a7.018 7.018 0 0 0-2-1.427V9h-5v3.29a6.972 6.972 0 0 0-2 .965V9H9v6h4.255a6.972 6.972 0 0 0-.965 2ZM17 7h5V5a3 3 0 0 0-3-3h-2v5Zm-2 0V2H9v5h6ZM7 2H5a3 3 0 0 0-3 3v2h5V2ZM2 9v6h5V9H2Zm0 8v2a3 3 0 0 0 3 3h2v-5H2Z'/%3E%3C/svg%3E
 [delete-row]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath d='M13.255 15a6.972 6.972 0 0 0-.965 2H5A5 5 0 0 1 5 7h14a5 5 0 0 1 4.671 6.787 7.01 7.01 0 0 0-1.74-1.146A3 3 0 0 0 19 9H5a3 3 0 0 0 0 6h8.255ZM19 14a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm-2.5 5.938h5a.937.937 0 1 0 0-1.875h-5a.937.937 0 1 0 0 1.875Z'/%3E%3C/svg%3E
 [delete-column]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath d='M12.641 21.931a7.01 7.01 0 0 0 1.146 1.74A5 5 0 0 1 7 19V5a5 5 0 1 1 10 0v7.29a6.972 6.972 0 0 0-2 .965V5a3 3 0 0 0-6 0v14a3 3 0 0 0 3.641 2.931ZM19 14a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm-2.5 5.938h5a.937.937 0 1 0 0-1.875h-5a.937.937 0 1 0 0 1.875Z'/%3E%3C/svg%3E
+[spreadsheet]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath d='M17 22 L 19 22 C20.6569 22 22 20.6569 22 19 L22 7 L 22 5 C 22 3.3431 20.6569 2 19 2 L7 2 L5 2 C 3.3431 2 3 3.3431 2 5 L2 17 L2 19 C 2 20.6569 3.3431 22 5 22 L7 22 Z M24,16.1768671 L24,19 C24,21.7614237 21.7614237,24 19,24 L5,24 C2.23857625,24 2.11453371e-15,21.7614237 1.77635684e-15,19 L0,5 C-3.38176876e-16,2.23857625 2.23857625,2.28362215e-15 5,0 L19,0 C21.7614237,-5.07265313e-16 24,2.23857625 24,5 L24,7.82313285 C24.0122947,7.88054124 24.0187107,7.93964623 24.0187107,8 C24.0187107,8.06035377 24.0122947,8.11945876 24,8.17686715 L24,15.8231329 C24.0122947,15.8805412 24.0187107,15.9396462 24.0187107,16 C24.0187107,16.0603538 24.0122947,16.1194588 24,16.1768671 Z M19 7 H5 V10 H19 Z M19 14 H5 V17 H19 Z'/%3E%3C/svg%3E
 [merge]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath d='M2 19a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V5a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v14Zm-2 0V5a5 5 0 0 1 5-5h14a5 5 0 0 1 5 5v14a5 5 0 0 1-5 5H5a5 5 0 0 1-5-5Zm12-9a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0v-2a1 1 0 0 1 1-1Zm0 6a1 1 0 0 1 1 1v3a1 1 0 0 1-2 0v-3a1 1 0 0 1 1-1Zm0-13a1 1 0 0 1 1 1v3a1 1 0 0 1-2 0V4a1 1 0 0 1 1-1Z'/%3E%3C/svg%3E
 [table-caption]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath d='M17,18 L17,22 L19,22 C20.6568542,22,22,20.6568542,22,19 L22,18 L17,18 Z M15,18 L9,18 L9,22 L15,22 L15,18 Z M17,16 L22,16 L22,12 L17,12 L17,16 Z M15,16 L15,12 L9,12 L9,16 L15,16 Z M17,10 L22,10 L22,9 C22,9,22,6,19,6 L17,6 L17,10 Z M15,10 L15,6 L9,6 L9,10 L15,10 Z M24,16.1768671 L24,19 C24,21.7614237,21.7614237,24,19,24 L5,24 C2.23857625,24,0,21.7614237,0,19 L0,9 C0,6,2,4,5,4 L19,4 C21.7614237,4,24,6.23857625,24,9 L24,7.82313285 C24.0122947,7.88054124,24.0187107,7.93964623,24.0187107,8 C24.0187107,8.06035377,24.0122947,8.11945876,24,8.17686715 L24,15.8231329 C24.0122947,15.8805412,24.0187107,15.9396462,24.0187107,16 C24.0187107,16.0603538,24.0122947,16.1194588,24,16.1768671 Z M7,6 L5,6 C3.34314575,6,2,7.34314575,2,9 L2,10 L7,10 L7,6 Z M2,12 L2,16 L7,16 L7,12 L2,12 Z M2,18 L2,19 C2,20.6568542,3.34314575,22,5,22 L7,22 L7,18 L2,18 Z M4,0 H20 V1.75 H4 Z'/%3E%3C/svg%3E
 [align-left]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 1h16v2H0zm0 3h10v2H0zm0 6h10v2H0zm0-3h16v2H0zm0 6h16v2H0z'/%3E%3C/svg%3E
@@ -273,6 +274,28 @@ Grid tables
 |           | * block       |         |
 |           | * elements    |         |
 +-----------+---------------+---------+
+```
+
+Table in a Figure
+
+```
+: Write the caption just above the table, preceded by a :
+| Head 1  |  Head 2  | Head 3  |
+|:--------|:--------:|---------|
+| datum 1 | datum 2  | datum 3 |
+| datum 4 | datum 5  | datum 6 |
+{.grid float=right}
+```
+
+Spreadsheet
+
+```
+: sheetName, then the caption
+| Head 1  |  Head 2  | Head 3  |
+|:--------|:--------:|---------|
+| datum 1 | 2300     | =2*B1   |
+| datum 4 | 4.3      | "       |
+{#sheetname .grid spreadsheet}
 ```
 
 [link id]: http://a.com
@@ -1776,6 +1799,121 @@ If you are curious about some of the more unusual units, such as “survey foot�
 or “nautical mile”, I recommend Russ Rowlett’s
 [dictionary of units of measurement](http://www.ibiblio.org/units/).
 
+## Spreadsheets
+
+Sometimes vectors are just too awkward. For those times, Hurmet can include
+simple spreadsheets. The section below contains an example.
+
+#### Vertical Distribution of Seismic Force
+
+From earlier analysis
+
+::: indented
+¢` V_base = 400kips `, base shear        ¢` T = 0.75 sec `, fundamental period
+of the structure
+:::
+
+From ASCE-16 section 12.8.3, Equivalent Lateral Procedure
+
+::: indented
+¢%` k = {   1 if T ≤ 0.5;   2 if T ≥ 2.5;   1 + (T - 0.5) / 2 otherwise } = 1.125 `
+
+¢` C_vs = (w × h^k) / (Σ (w × h^k)) `, vertical distribution coefficient, Eq.
+12.8-12
+
+¢` F = C_vs V_base `, local force, Eq. 12.8-11
+:::
+
+¶
+
+: dist: Vertical Distribution of Seismic Force
++--------+----------+---------+-------------------+-----------+--------------+--------+
+| Floor  | Weight\  | Height\ | w × h<sup>k</sup> | C~vs~     | Force\       | Shear\ |
+|        | kips     | ft      |                   |           | kips         | kips   |
++========+:========:+:=======:+:=================:+:=========:+:============:+:======:+
+| roof   | 950      | 70      | 113,100           | 0.2899    | 116.0        | 116.0  |
++--------+----------+---------+-------------------+-----------+--------------+--------+
+| fifth  | 1,250    | 56      | 115,800           | 0.2968    | 118.7        | 234.7  |
++--------+----------+---------+-------------------+-----------+--------------+--------+
+| fourth | 1,250    | 42      | 83,770            | 0.2147    | 85.90        | 320.6  |
++--------+----------+---------+-------------------+-----------+--------------+--------+
+| third  | 1,250    | 28      | 53,080            | 0.1361    | 54.44        | 375.0  |
++--------+----------+---------+-------------------+-----------+--------------+--------+
+| second | 1,250    | 14      | 24,340            | 0.06240   | 24.96        | 400    |
++--------+----------+---------+-------------------+-----------+--------------+--------+
+| total  | 5,950    | 0       | 390,100           |           | 400          | 400    |
++--------+----------+---------+-------------------+-----------+--------------+--------+
+{#dist .four-rules colWidths="70 71 62 73 88 74 76"}
+
+Next, let’s look at the underlying formulas of that spreadsheet.
+
+¶
+
+: seis: Same table. Toggled to show formulas.
++--------+----------+---------+-------------------+------------+---------------+---------+
+| Floor  | Weight\  | Height\ | w × h<sup>k</sup> | C~vs~      | Force\        | Shear\  |
+|        | kips     | ft      |                   |            | kips          | kips    |
++========+:========:+:=======:+:=================:+:==========:+:=============:+:=======:+
+| roof   | 950      | 70      | =B1×C1^k          | =D1/D\_end | ==E1× V\_base | =F1     |
++--------+----------+---------+-------------------+------------+---------------+---------+
+| fifth  | 1,250    | 56      | "                 | "          | "             | =G1+F2  |
++--------+----------+---------+-------------------+------------+---------------+---------+
+| fourth | "        | 42      | "                 | "          | "             | "       |
++--------+----------+---------+-------------------+------------+---------------+---------+
+| third  | "        | 28      | "                 | "          | "             | "       |
++--------+----------+---------+-------------------+------------+---------------+---------+
+| second | "        | 14      | "                 | "          | "             | "       |
++--------+----------+---------+-------------------+------------+---------------+---------+
+| total  | =sum(up) | 0       | =sum(up)          | ¶          | =sum(up)      | =F\_end |
++--------+----------+---------+-------------------+------------+---------------+---------+
+{.grid colWidths="70 71 62 73 88 74 76 null"}
+
+This example illustrates several things about Hurmet spreadsheets.
+
+ 1.  Spreadsheets start out as a Hurmet table.
+
+ 2.  A spreadsheet must have a caption. The caption’s first word will be the
+    spreadsheet’s name. Create a table caption by selecting a table and tapping
+    the ![table-caption][] button.
+
+ 3.  After all editing is complete, toggle the table into a spreadsheet by tapping
+    the ![spreadsheet][] button. Hurmet spreadsheets toggle the entire table, not
+    just one cell.
+
+ 4.  No merged cells are allowed
+
+ 5.  The top row contains headings, not formulas.
+
+ 6.  A unit-of-measure can be assigned to a column. Type a newline (Shift-Enter) into
+    a heading and write the unit’s name on the second line.
+
+ 7.  Cells can contain data: numbers, strings, true, or false. Spreadsheet cells cannot
+    contain matrices.
+
+ 8.  Cells can also contain a formula.
+
+    1.  Formulas start with an `=` sign and can contain references to other cells or to
+        variables in the Hurmet document.
+
+    2.  Refer to a cell with `A1` format. No range names or R1C1 references. The row
+        number is indexed so that number 1 refers to the first data row. A
+        formula cannot refer to a heading.
+
+    3.  Refer to a column’s bottom cell with `_end` format. Example: `B_end`.
+
+    4.  To make a cell unit-aware, start the formula with a double `==` sign.
+
+    5.  A formula can contain the functions `sum(up)` or `sum(left)`.
+
+ 9.  A  single `"` mark will be treated as a _ditto_ instruction. Hurmet will treat
+    that cell as a copy of the data or formula above it, with adjusted row numbers.
+
+10.  Order of calculation is column-wise.
+
+11.  Hurmet math zones outside the spreadsheet can refer to a spreadsheet cell with
+    the sheet name, column heading, and row heading. An exterior cell that
+    calls `dist.Shear.total = ?` would get `400` for a result.
+
 ## Numeral display
 
 There are two aspects to how numbers are displayed: (1) decimal separators, and
@@ -2514,7 +2652,7 @@ for which I am very grateful.
 
 *   [ProseMirror](http://prosemirror.net), an extendable rich-text editor by Marijn Haverbeke.
 
-*   [Temml](https://temml.org/), a LaTeX-to-MathML library.
+*   [Temml](https://temml.org/), a LaTeX-to-MathML library, maintained by me.
 
 *   [CodeJar](https://medv.io/codejar/), a light-weight text editor, by Anton Medvedev.
 
@@ -2621,6 +2759,7 @@ Copyright © 2020-2024 Ron Kok. Released under the [MIT License][]
 
 </details>
 </li>
+<li><a href="#spreadsheets">Spreadsheets</a></li>
 <li><a href="#numeral-display">Numeral Display</a></li>
 <li><a href="#tests">Tests</a></li>
 <li><a href="#drawings">Drawings</a></li>

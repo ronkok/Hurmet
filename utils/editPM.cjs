@@ -8,12 +8,12 @@ const fs = require('fs')  // Node.js file system
 let str = fs.readFileSync('preview/prosemirror.js').toString('utf8')
 let match = /  this\.colgroup/.exec(str)
 str = str.slice(0, match.index)
-  + "  this.table.className = node.attrs.class;\n"
+  + "  this.table.className = node.attrs.class;\n    this.table.id = node.attrs.name;\n   "
   + str.slice(match.index + 1);
 
 match = /table\.style\.minWidth = totalWidth \+ "px";\s+}/.exec(str)
 const L = match.index + match[0].length
-str = str.slice(0, L) + "\n    table.className = node.attrs.class" + str.slice(L + 1)
+str = str.slice(0, L) + "\n    table.className = node.attrs.class\n    table.id = node.attrs.name" + str.slice(L + 1)
 
 //match = /&& !this\.ignoreSelectionChange\(sel\)/.exec(str)
 //str = str.slice(0, match.index) + str.slice(match.index + match[0].length)

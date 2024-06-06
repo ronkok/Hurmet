@@ -14,7 +14,7 @@ const titleRegEx = /([^.\\/]+)\.md$/;  // A helper.
   // Read the file.
   const md = fs.readFileSync(inputPath).toString('utf8')
   // Run the calculations and convert to HTML.
-  let html = await hurmet.md2html(md, title.replace("-", " "), true)
+  let html = await hurmet.hurmet2html(md, title.replace("-", " "), true)
   html = html.replace("<body>", `<body>
   <nav>
    <ul>

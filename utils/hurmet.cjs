@@ -327,7 +327,8 @@ const errorMessages = Object.freeze({
     BAD_TRANS:  "Error. Only a matrix can be transposed.",
     BAD_ARGS:   "Error. Wrong number of arguments to function @",
     BAD_SUM:    "Error. Second argument to sum function must be 1 or 2.",
-    ZERO_STEP:  "Error. Step value must be > zero."
+    ZERO_STEP:  "Error. Step value must be > zero.",
+    SHEET_INDEX:"Error. Bad column or row index."
   }
 });
 
@@ -372,7 +373,7 @@ const intAbs$1 = i => i >= iZero ? i : BigInt(-1) * i;  // absolute value of a B
 
 // eslint-disable-next-line max-len
 const numberPattern = "^(-?)(?:(0x[0-9A-Fa-f]+)|([0-9]+)(?: ([0-9]+)\\/([0-9]+)|(?:\\.([0-9]+))?(?:e([+-]?[0-9]+)|(%))?))";
-const numberRegEx$6 = new RegExp(numberPattern);
+const numberRegEx$7 = new RegExp(numberPattern);
 // Capturing groups:
 //    [1] sign
 //    [2] hexadecimal integer
@@ -388,7 +389,7 @@ const fromNumber = num => {
   if (Number.isInteger(num)) {
     return [BigInt(num), iOne]
   } else {
-    const parts = num.toExponential().match(numberRegEx$6);
+    const parts = num.toExponential().match(numberRegEx$7);
     const decimalFrac = parts[6] || "";
     const exp = BigInt(parts[7]) - BigInt(decimalFrac.length);
     if (exp < 0) {
@@ -405,7 +406,7 @@ const fromNumber = num => {
 
 const fromString = str => {
   // Convert an author's input string to a number.
-  const parts = str.match(numberRegEx$6);
+  const parts = str.match(numberRegEx$7);
   let r;
   if (parts[5]) {
     // mixed fraction
@@ -1167,7 +1168,7 @@ const fromAssignment = (cellAttrs, unitAware) => {
     // That's where the copy-on-write takes place.
 
   } else if (cellAttrs.dtype === dt.SPREADSHEET) {
-    oprnd.value = cellAttrs.value;
+    return cellAttrs
 
   } else {
     // For all other data types, we employ copy-on-read. So we return a deep copy from here.
@@ -2953,7 +2954,7 @@ const valueFromDatum = datum => {
   ? true
   : datum === "false"
   ? false
-  : numberRegEx$5.test(datum)
+  : numberRegEx$6.test(datum)
   ? Rnl.fromString(datum)
   : datum === ""
   ? undefined
@@ -3180,7 +3181,7 @@ const range$1 = (df, args, unitAware) => {
   }
 };
 
-const numberRegEx$5 = new RegExp("^(?:=|" + Rnl.numberPattern.slice(1) + "$)");
+const numberRegEx$6 = new RegExp("^(?:=|" + Rnl.numberPattern.slice(1) + "$)");
 const mixedFractionRegEx = /^-?(?:[0-9]+(?: [0-9]+\/[0-9]+))$/;
 const escRegEx = /^\\#/;
 
@@ -3189,11 +3190,11 @@ const hasUnitRow = lines => {
   if (lines.length < 3) { return false }
   const units = lines[1].split("\t").map(el => el.trim());
   for (const unitName of units) {
-    if (numberRegEx$5.test(unitName)) { return false }
+    if (numberRegEx$6.test(unitName)) { return false }
   }
   const firstDataLine = lines[2].split("\t").map(el => el.trim());
   for (const datum of firstDataLine) {
-    if (numberRegEx$5.test(datum)) { return true }
+    if (numberRegEx$6.test(datum)) { return true }
   }
   return false
 };
@@ -3300,7 +3301,7 @@ const dataFrameFromTSV = (str, vars) => {
       const datum = data[j][i];
       if (datum === "") { continue } // undefined datum.
       dtype.push(
-        numberRegEx$5.test(datum)
+        numberRegEx$6.test(datum)
         ? dt.RATIONAL + ((units.length > 0 && units[j].length > 0) ? dt.QUANTITY : 0)
         : (datum === "true" || datum === "false")
         ? dt.BOOLEAN
@@ -3532,12 +3533,12 @@ const quickDisplay = str => {
     let gotUnits = false;
     let gotAnswer = false;
     for (let j = 0; j < cells[1].length; j++) {
-      if (numberRegEx$5.test(cells[1][j])) { gotAnswer = true; break }
+      if (numberRegEx$6.test(cells[1][j])) { gotAnswer = true; break }
     }
     if (!gotAnswer) {
       // line[1] had no numbers. If any numbers are in line[2] then line[1] is units.
       for (let j = 0; j < cells[2].length; j++) {
-        if (numberRegEx$5.test(cells[2][j])) { gotUnits = true; break }
+        if (numberRegEx$6.test(cells[2][j])) { gotUnits = true; break }
       }
     }
 
@@ -3722,7 +3723,7 @@ const display$1 = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHead
       } else {
         str += mixedFractionRegEx.test(datum)
           ? format(Rnl.fromString(datum), formatSpec, decimalFormat) + "&"
-          : numberRegEx$5.test(datum)
+          : numberRegEx$6.test(datum)
           ? displayNum(datum, colInfo[j], cellInfo[j][i], decimalFormat) + "&"
           : datum === ""
           ? "&"
@@ -3862,7 +3863,7 @@ const tt = Object.freeze({
 });
 
 const minusRegEx = /^-(?![-=<>:])/;
-const numberRegEx$4 = new RegExp(Rnl.numberPattern);
+const numberRegEx$5 = new RegExp(Rnl.numberPattern);
 const unitRegEx = /^(?:'[^']+'|[°ΩÅK])/;
 
 const texFromNumStr = (numParts, decimalFormat) => {
@@ -4632,7 +4633,7 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
   if (minusRegEx.test(str)) {
     if (isUnary(prevToken)) {
       // Check if the unary minus is part of a number
-      const numParts = str.match(numberRegEx$4);
+      const numParts = str.match(numberRegEx$5);
       if (numParts) {
         // numbers
         st = texFromNumStr(numParts, decimalFormat);
@@ -4642,7 +4643,7 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
     return ["-", "-", tt.ADD, ""]
   }
 
-  const numParts = str.match(numberRegEx$4);
+  const numParts = str.match(numberRegEx$5);
   if (numParts) {
     // numbers
     st = texFromNumStr(numParts, decimalFormat);
@@ -4764,7 +4765,7 @@ const numFromSupChars = str => {
 
 const colorSpecRegEx = /^(#([a-f0-9]{6}|[a-f0-9]{3})|[a-z]+|\([^)]+\))/i;
 const accentRegEx = /^(?:.|\uD835.)[\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]_/;
-const spreadsheetCellRegEx = /^([A-Z](\d+|Ω)|Σ)$/;
+const spreadsheetCellRegEx = /^[A-Z](\d+|_end)$/;
 
 const factorsAfterSpace = /^[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133\uD835]/;
 const factors = /^[[({√∛∜]/;
@@ -4915,7 +4916,7 @@ const endOfOrd = new Set([tt.ORD, tt.VAR, tt.NUM, tt.LONGVAR, tt.RIGHTBRACKET, t
 // I use \xa0 to precede the combining arrow accent character \u20D7.
 const leadingSpaceRegEx$2 = /^[ \f\r\v\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]+/;
 const leadingLaTeXSpaceRegEx = /^(˽|\\quad|\\qquad)+/;
-const sumRegEx = /\\∑_¿([^\xa0]+)([^=]+)\xa0=(\xa0[^^]+)\xa0\^\xa0([^∑]+)\xa0∑/;
+const sumRegEx$1 = /\\∑_¿([^\xa0]+)([^=]+)\xa0=(\xa0[^^]+)\xa0\^\xa0([^∑]+)\xa0∑/;
 
 /* eslint-disable indent-legacy */
 const rpnPrecFromType = [
@@ -6150,13 +6151,13 @@ const parse$1 = (
     while (rpnStack.length > 0) {
       rpn += tokenSep + rpnStack.pop().symbol;
     }
-    let sum = sumRegEx.exec(rpn);
+    let sum = sumRegEx$1.exec(rpn);
     while (sum) {
       // We've matched a ∑_(i=0)^n … term. Edit the index variable and the local RPN.
       indexVariable = sum[1];
       rpn = rpn.slice(0, sum.index) + '"' + sum[1] + '"' + sum[2] + sum[3] + tokenSep
         + '"' + sum[4].replace(/\u00a0/g, "§") + '"\xa0∑' + rpn.slice(sum.index + sum[0].length);
-      sum = sumRegEx.exec(rpn);
+      sum = sumRegEx$1.exec(rpn);
     }
     if (numFreeCommas > 0) {
       rpn += tokenSep + "tuple" + tokenSep + String(numFreeCommas + 1);
@@ -6490,6 +6491,10 @@ const map = Object.freeze({
   range
 });
 
+const endRegEx = /^[A-Z]_end$/;
+const alphaRegEx = /^[A-Z]$/;
+const intRegEx = /^\d+$/;
+
 function propertyFromDotAccessor(parent, index, unitAware) {
   const property = Object.create(null);
   if (parent.dtype & dt.MAP) {
@@ -6499,7 +6504,11 @@ function propertyFromDotAccessor(parent, index, unitAware) {
     return DataFrame.range(parent, [index], unitAware)
 
   } else if (parent.dtype === dt.SPREADSHEET) {
-    return fromAssignment(parent.value[index.value], unitAware)
+    let key = index.value;
+    if (endRegEx.test(key)) {
+      key = key.slice(0, 1) + Object.keys(parent.rowMap).length;
+    }
+    return fromAssignment(parent.value[key], unitAware)
 
   } else if ((parent.dtype === dt.STRING || (parent.dtype & dt.ARRAY)) &&
     index.dtype === dt.RATIONAL) {
@@ -6534,6 +6543,35 @@ function propertyFromDotAccessor(parent, index, unitAware) {
     return errorOprnd("NO_PROP", parent.name)
   }
 }
+
+const cellOprnd = (sheet, args, unitAware) => {
+  if (args.length === 1) {
+    let key = args[0].value;
+    if (endRegEx.test(key)) {
+      key = key.slice(0, 1) + Object.keys(sheet.rowMap).length;
+    }
+    return fromAssignment(parent.value[key], unitAware)
+  }
+  let cellName = "";
+  const key0 = args[0].value;
+  const key1 = args[1].value;
+  if (sheet.columnMap[key0] || alphaRegEx.test(key0)) {
+    cellName = sheet.columnMap[key0] ? sheet.columnMap[key0] : key0;
+    if (sheet.rowMap[key1]) {
+      cellName += sheet.rowMap[key1];
+    } else if (intRegEx.test(key1)) {
+      cellName += key1;
+    } else ;
+  } else if (sheet.columnMap[key1]  || alphaRegEx.test(key0)) {
+    cellName = sheet.columnMap[key1] ? sheet.columnMap[key1] : key1;
+    if (sheet.rowMap[key0]) {
+      cellName += sheet.rowMap[key0];
+    } else if (intRegEx.test(key0)) {
+      cellName += key0;
+    } else ;
+  } else ;
+  return fromAssignment(sheet.value[cellName], unitAware)
+};
 
 const display = (tuple, formatSpec = "h3", decimalFormat = "1,000,000.") => {
   if (tuple.size === 0) { return "" }
@@ -9190,92 +9228,14 @@ const textRange = (str, index) => {
   return { value, unit: null, dtype: dt.STRING }
 };
 
-/**
- * md2ast() returns an AST that matches the memory structure  of a Hurmet.org document.
- * Elsewhere, Hurmet uses the AST to create either a live Hurmet doc or a static HTML doc.
- *
- * ## Restrictions
- *
- * 1. **_bold-italic_** must use both * & _ delimiters. Hurmet will fail on ***wat***.
- * 2. "Shortcut" reference links [ref] are not recognized.
- *
- * ## Extensions
- *
- * 1. Hurmet inline calculation is delimited ¢`…`.
- *    Hurmet display calculation is delimited ¢¢…¢¢.
- * 2. LaTeX inline math is delimited $…$.
- *    No space allowed after 1st $ or before 2nd $. No digit after 2nd $.
- *    LaTeX display math is delimited  $$ … $$.
- * 3. ~subscript~
- * 4. ~~strikethrough~~
- * 5. Pipe tables as per Github Flavored Markdown (GFM).
- * 6. Grid tables as per Pandoc and reStructuredText
- * 7. Empty paragraphs: A line consisting only of "¶".
- * 8. Attributes for reference link definitions
- *      [id]: target
- *      {.class #id width=number}
- * 9. Figure/Caption for images. Format is a paragraph that consists entirely of:
- *    !![caption][id]
- * 10. Table directives. They are placed on the line after the table. The format is:
- *     {.class #id width="num1 num2 …" caption}
- * 11. Lists that allow the user to pick list ordering.
- *        1. →  1. 2. 3.  etc.
- *        A. →  A. B. C.  etc. (future)
- *        a) →  (a) (b) (c)  etc. (future)
- * 12. Alerts per GFM
- *     > [!note] or [!tip] or [!important] or [!warning] or [!epigraph]
- *     > Content of note
- * 13. Fenced divs, similar to Pandoc.
- *     ::: (centered|right_justified|comment|indented|boxed|header)
- *     Block elements
- *     :::
- *     Nested divs are distinguished by number of colons. Minimum three.
- * 14. Table of Contents
- *     {.toc start=N end=N}
- * 15. Definition lists, per Pandoc.  (future)
- * 16. [^1] is a reference to a footnote.
- *     [^1]: The body of the footnote is deferred, similar to reference links.
- * 17. [#1] is a reference to a citation. (future)
- *     [#1]: The body of the citation is deferred, similar to reference links.
- * 18. Line blocks begin with "| ", as per Pandoc. (future)
- *
- * hurmetMark.js copyright (c) 2021 - 2023 Ron Kok
- *
- * This file has been adapted (and heavily modified) from Simple-Markdown.
- * Simple-Markdown copyright (c) 2014-2019 Khan Academy & Aria Buckles.
- *
- * Portions of Simple-Markdown were adapted from marked.js copyright (c) 2011-2014
- * Christopher Jeffrey (https://github.com/chjj/).
- *
- * LICENSE (MIT):
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
-
-
 const CR_NEWLINE_R = /\r\n?/g;
 const FORMFEED_R = /\f/g;
 const CLASS_R = /(?:^| )\.([a-z-]+)(?: |&|$)/;
+const tableClassRegEx = /(?:^| )\.([a-z- ]+)(?: colWidths=| width=| float=|&|$)/;
 const floatRegEx = /float="(left|right)"/;
 const WIDTH_R = /(?:^| )width="?([\d.a-z]+"?)(?: |$)/;
 const COL_WIDTHS_R = /(?:^| )colWidths="([^"]*)"/;
-const ID_R = /(?:^| )#([a-z-]+)(?: |$)/;
+const ID_R = /(?:^| )#([A-Za-z][A-Za-z0-9]*)(?: |$)/;
 const leadingSpaceRegEx$1 = /^ +/;
 const trailingSpaceRegEx = / +$/;
 
@@ -9387,31 +9347,33 @@ const TABLES = (function() {
   const tableDirectives = (directives, align) => {
     // Get CSS class, ID, and column widths, if any.
     if (!directives && align === "") { return ["", "", null] }
-    const userDefClass = CLASS_R.exec(directives);
+    const userDefClass = tableClassRegEx.exec(directives);
     let myClass = (userDefClass) ? userDefClass[1] : "";
+    const isSpreadsheet = myClass && myClass.split(" ").includes("spreadsheet");
     if (align.length > 0) { myClass += (myClass.length > 0 ? " " : "") + align; }
     const userDefId = ID_R.exec(directives);
     const myID = (userDefId) ? userDefId[1] : "";
     const colWidthMatch = COL_WIDTHS_R.exec(directives);
     const colWidths = (colWidthMatch) ? colWidthMatch[1].split(" ") : null;
-    return [myClass, myID, colWidths]
+    return [myClass, myID, isSpreadsheet, colWidths]
   };
 
   const pipeRegEx = /(?<!\\)\|/;  // eslint doesn't like look behind. Disregard the warning.
 
-  const parsePipeTableRow = function(source, parse, state, colWidths, inHeader) {
+  const parsePipeTableRow = function(source, parse, state, isSpreadsheet,
+                                     colWidths, inHeader) {
     const cells = source.trim().split(pipeRegEx);
     cells.shift();
     cells.pop();
     const tableRow = [{ type: "tableSeparator" }];
     for (const str of cells) {
-      const cell = parse(str.trim(), state);
+      const cell = isSpreadsheet
+        ? [{ type: "spreadsheet_cell", attrs: { entry: str.trim() } }]
+        : parse(str.trim(), state);
       tableRow.push(...cell);
       tableRow.push({ type: "tableSeparator" });
     }
-//    const tableRow = parse(source.trim(), state);
     consolidate(tableRow);
-  //  state.inTable = prevInTable;
 
     const row = {
       type: "table_row",
@@ -9439,10 +9401,13 @@ const TABLES = (function() {
               "colwidth": (colWidths) ? [Number(colWidths[j])] : null,
               "background": null
             },
-            content: (state.inHtml ? [] : [{ "type": "paragraph", "content": [] }])
+            content: (state.inHtml || isSpreadsheet
+              ? []
+              : [{ "type": "paragraph", "content": [] }]
+            )
           });
         }
-      } else if (state.inHtml) {
+      } else if (state.inHtml || isSpreadsheet) {
         // For direct to HTML, write the inline contents directly into the <td> element.
         // row   cell    content      text
         row.content[j].content.push(node);
@@ -9460,14 +9425,15 @@ const TABLES = (function() {
     return function(capture, state) {
       state.inline = true;
       const align = parseTableAlign(capture[3]);
-      const [myClass, myID, colWidths] = tableDirectives(capture[5], align);
+      const [myClass, myID, isSpreadsheet, colWidths] = tableDirectives(capture[5], align);
       const table = {
         type: "table",
         attrs: {},
         content: []
       };
-      if (myID) { table.attrs.id = myID; }
+      if (myID) { table.attrs.name = myID; }
       if (myClass) { table.attrs.class = myClass; }
+      if (isSpreadsheet) { table.attrs.dtype = dt.SPREADSHEET; }
       if (colWidths && state.inHtml) {
         let sum = 0;
         colWidths.forEach(el => { sum += Number(el); } );
@@ -9479,22 +9445,23 @@ const TABLES = (function() {
         table.content.push(colGroup);
       }
       if (!/^\|+$/.test(capture[2])) {
-        table.content.push(parsePipeTableRow(capture[2], parse, state, colWidths, true));
+        table.content.push(parsePipeTableRow(capture[2], parse, state, isSpreadsheet,
+                                             colWidths, true));
       }
       const tableBody = capture[4].trim().split("\n");
       tableBody.forEach(row => {
-        table.content.push(parsePipeTableRow(row, parse, state, colWidths, false));
+        table.content.push(parsePipeTableRow(row, parse, state, isSpreadsheet,
+                                             colWidths, false));
       });
       state.inline = false;
       if (capture[1]) {
-        const figure = { type: "figure", attrs: { class: "top-caption" }, content: [
-          table,
-          { type: "figcaption", attrs: { class: "top-caption" },
-            content: parseInline(capture[1], state) }
+        const figure = { type: "figure", attrs: { class: "" }, content: [
+          { type: "figcaption", content: parseInline(capture[1], state) },
+          table
         ] };
         if (capture[5]) {
           const match = floatRegEx.exec(capture[5]);
-          if (match) { figure.attrs.class += " " + match[1]; }
+          if (match) { figure.attrs.class = match[1]; }
         }
         return figure
       } else {
@@ -9526,7 +9493,7 @@ const TABLES = (function() {
       // Get column justification
       const alignrow = headerExists ? lines[headerSepLine] : topBorder.slice(1);
       const align = parseTableAlign(alignrow);
-      const [myClass, myID, colWidths] = tableDirectives(capture[4], align);
+      const [myClass, myID, isSpreadsheet, colWidths] = tableDirectives(capture[4], align);
 
       // Read the top & left borders to find a first draft of cell corner locations.
       const colSeps = [0];
@@ -9644,8 +9611,9 @@ const TABLES = (function() {
         attrs: {},
         content: []
       };
-      if (myID) { table.attrs.id = myID; }
+      if (myID) { table.attrs.name = myID; }
       if (myClass) { table.attrs.class = myClass; }
+      if (isSpreadsheet) { table.attrs.dtype = dt.SPREADSHEET; }
       let k = 0;
       if (colWidths && state.inHtml) {
         let sum = 0;
@@ -9664,7 +9632,9 @@ const TABLES = (function() {
           if (gridTable[i][j].rowspan === 0) { continue }
           const cell = gridTable[i][j];
           state.inline = false;
-          let content = parse(cell.blob, state);
+          let content = isSpreadsheet
+            ? [{ type: "spreadsheet_cell", attrs: { entry: cell.blob.trim() } }]
+            : parse(cell.blob, state);
           if (state.inHtml && content.length === 1 && content[0].type === "paragraph") {
             content = content[0].content;
           }
@@ -9685,14 +9655,13 @@ const TABLES = (function() {
       }
       state.inline = false;
       if (capture[1]) {
-        const figure = { type: "figure", attrs: { class: "top-caption" }, content: [
-          table,
-          { type: "figcaption", attrs: { class: "top-caption" },
-            content: parseInline(capture[1], state) }
+        const figure = { type: "figure", attrs: { class: "" }, content: [
+          { type: "figcaption", attrs: null, content: parseInline(capture[1], state) },
+          table
         ] };
         if (capture[4]) {
           const match = floatRegEx.exec(capture[4]);
-          if (match) { figure.attrs.class += " " + match[1]; }
+          if (match) { figure.attrs.class = match[1]; }
         }
         return figure
       } else {
@@ -9703,9 +9672,9 @@ const TABLES = (function() {
 
   return {
     parsePipeTable: parsePipeTable(),
-    PIPE_TABLE_REGEX: /^(?:table: ((?:[^\n]|\n(?!\|))*)\n)?(\|.*)\n\|([-:]+[-| :]*)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
+    PIPE_TABLE_REGEX: /^(?:: ((?:[^\n]|\n(?!\||:|<\/dl>))*)\n)?(\|.*)\n\|([-:]+[-| :]*)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
     parseGridTable: parseGridTable(),
-    GRID_TABLE_REGEX: /^(?:table: ((?:[^\n]|\n(?!\+))*)\n)?((\+(?:[-:=]+\+)+)\n(?:[+|][^\n]+[+|] *\n)+)(?:\{([^\n}]+)\}\n)?\n*/
+    GRID_TABLE_REGEX: /^(?:: ((?:[^\n]|\n(?!\+|:|<\/dl>))*)\n)?((\+(?:[-:=]+\+)+)\n(?:[+|][^\n]+[+|] *\n)+)(?:\{([^\n}]+)\}\n)?\n*/
   };
 })();
 
@@ -9732,7 +9701,7 @@ const parseRef = function(capture, state, refNode) {
   if (state._defs && state._defs[ref]) {
     const def = state._defs[ref];
     if (refNode.type === "figure") {
-      refNode = { type: "figure", content: [
+      refNode = { type: "figure", attrs: def.attrs, content: [
         { type: "figimg", attrs: def.attrs },
         { type: "figcaption", content: parseInline(refNode.attrs.alt, state) }
       ] };
@@ -9808,7 +9777,7 @@ rules.set("heading", {
 });
 rules.set("dt", {  // description term
   isLeaf: false,
-  match: blockRegex(/^(([^\n]*)\n)(?=<dd>|\n: )/),
+  match: blockRegex(/^(([^\n]*)\n)(?=<dd>|\n: [^\n]+\n[^|+])/),
   parse: function(capture, state) {
     return { content: parseInline(capture[2].trim(), state) }
   }
@@ -9878,17 +9847,6 @@ rules.set("bullet_list", {
     return { content: parseList(capture[0], state, capture[1]) }
   }
 });
-rules.set("dd", {  // description details
-  isLeaf: false,
-  match: blockRegex(/^:( +)[\s\S]+?(?:\n{2,}(?! |:)(?!\1)\n*|\s*$)/),
-  parse: function(capture, state) {
-    let div = " " + capture[0].slice(1);
-    const indent = 1 + capture[1].length;
-    const spaceRegex = new RegExp("^ {" + indent + "," + indent + "}", "gm");
-    div = div.replace(spaceRegex, ""); // remove indents on trailing lines:
-    return { content: parse(div, state) };
-  }
-});
 rules.set("special_div", {
   isLeaf: false,
   match: blockRegex(/^(:{3,}) ?(indented|comment|centered|right_justified|boxed|header|hidden) *\n([\s\S]+?)\n+\1 *(?:\n{2,}|\s*$)/),
@@ -9931,6 +9889,17 @@ rules.set("gridTable", {
   isLeaf: false,
   match: blockRegex(TABLES.GRID_TABLE_REGEX),
   parse: TABLES.parseGridTable
+});
+rules.set("dd", {  // description details
+  isLeaf: false,
+  match: blockRegex(/^:( +)[\s\S]+?(?:\n{2,}(?! |:)(?!\1)\n*|\s*$)/),
+  parse: function(capture, state) {
+    let div = " " + capture[0].slice(1);
+    const indent = 1 + capture[1].length;
+    const spaceRegex = new RegExp("^ {" + indent + "," + indent + "}", "gm");
+    div = div.replace(spaceRegex, ""); // remove indents on trailing lines:
+    return { content: parse(div, state) };
+  }
 });
 rules.set("displayTeX", {
   isLeaf: true,
@@ -11968,12 +11937,12 @@ text, tspan { font: 12px Arial; }`
 }
 
 const ftRegEx = /′/g;
-const numberRegEx$3 = new RegExp(Rnl.numberPattern);
+const numberRegEx$4 = new RegExp(Rnl.numberPattern);
 const lengths = ["ft", "m", "cm", "mm"];
 const metricLengths = ["m", "cm", "mm"];
 
 const readNumber = str => {
-  const matches = numberRegEx$3.exec(str);
+  const matches = numberRegEx$4.exec(str);
   if (matches) {
     const numStr = matches[0];
     return [Rnl.fromString(numStr), numStr.length];
@@ -12003,7 +11972,7 @@ const readInputData = data => {
   // Read the top line of data.
   // It contains the geometry, connectivity, and node fixity.
   const layout = data[1][0].trim();
-  if (numberRegEx$3.test(layout)) { input.nodes.push("continuous"); }
+  if (numberRegEx$4.test(layout)) { input.nodes.push("continuous"); }
   const elements = layout.split(/ +/g);
   for (let k = 0; k < elements.length; k++) {
     switch (elements[k]) {
@@ -12050,7 +12019,7 @@ const readInputData = data => {
       }
     }
   }
-  if (numberRegEx$3.test(elements[elements.length - 1])) { input.nodes.push("continuous"); }
+  if (numberRegEx$4.test(elements[elements.length - 1])) { input.nodes.push("continuous"); }
 
   // Read the rest of the data.
   for (let i = 1; i < data[0].length; i++) {
@@ -14522,19 +14491,29 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const o2 = stack.pop();
           const o1 = stack.pop();
           let property;
-          if (o1.dtype === dt.DATAFRAME && tokens.length - i > 2 && tokens[i + 2] === ".") {
+          if ((o1.dtype === dt.DATAFRAME || o1.dtype === dt.SPREADSHEET)
+                && tokens.length - i > 2 && tokens[i + 2] === ".") {
             // Skip creation of a vector and go straight to a call to a single cell
             const o3 = { value: tokens[i + 1].replace(/"/g, ""), unit: null, dtype: dt.STRING };
-            const args =  (o2.value in o1.value.columnMap) ? [o3, o2] : [o2, o3];
-            property = DataFrame.range(o1, args, unitAware);
+            const args = o1.dtype === dt.SPREADSHEET
+              ? [o2, o3]
+              : (o2.value in o1.value.columnMap)
+              ? [o3, o2]
+              : [o2, o3];
+            property = o1.dtype === dt.DATAFRAME
+              ? DataFrame.range(o1, args, unitAware)
+              : cellOprnd(o1, args, unitAware);
             i += 2;
-          } else if (o1.dtype === dt.DATAFRAME && tokens.length - i > 3
+          } else if ((o1.dtype === dt.DATAFRAME || o1.dtype === dt.SPREADSHEET)
+                && tokens.length - i > 3
                 && tokens[i + 2] === "[]" && tokens[i + 3] === "1"
                 && tokens[i + 1].slice(0, 1) === '"') {
             // Skip creation of a vector and go straight to a call to a single cell
             const o3 = { value: tokens[i + 1].replace(/"/g, ""), unit: null, dtype: dt.STRING };
             const args =  (o2.value in o1.value.columnMap) ? [o3, o2] : [o2, o3];
-            property = DataFrame.range(o1, args, unitAware);
+            property = o1.dtype === dt.DATAFRAME
+              ? DataFrame.range(o1, args, unitAware)
+              : cellOprnd(o1, args, unitAware);
             i += 3;
           } else {
             property = propertyFromDotAccessor(o1, o2, unitAware);
@@ -14606,19 +14585,6 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           }
           if (property.dtype === dt.ERROR) { return property }
           stack.push(Object.freeze(property));
-          break
-        }
-
-        case "Σ": {
-          // Sum a spreadsheet column
-          const colName = stack.pop().value;
-          const spreadsheet = stack.pop();
-          let sum = Rnl.zero;
-          for (let i = 1; i <= spreadsheet.rowMap.length - 1; i++) {
-            const cellOprnd = fromAssignment(spreadsheet.value[colName + i], unitAware);
-            sum = Rnl.add(sum, cellOprnd.value);
-          }
-          stack.push({ value: sum, unit: allZeros, dtype: dt.RATIONAL });
           break
         }
 
@@ -15041,6 +15007,13 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           output.value = Object.freeze(value);
           output.dtype = dtype;
           stack.push(Object.freeze(output));
+          break
+        }
+
+        case "spreadsheetSum": {
+          const arg = stack.pop();
+          const spreadsheet = stack.pop();
+          stack.push(spreadsheetSum(spreadsheet, arg.value, unitAware));
           break
         }
 
@@ -15806,6 +15779,31 @@ const errorResult = (stmt, result) => {
   return [stmt, result]
 };
 
+const spreadsheetSum = (sheet, index, unitAware) => {
+  let sum = Rnl.zero;
+  if (/^[A-Z]$/.test(index)) {
+    // Sum a column
+    const L = Object.keys(sheet.rowMap).length;
+    for (let i = 1; i <= L - 1; i++) {
+      const cellOprnd = fromAssignment(sheet.value[index + String(i)], unitAware);
+      if (cellOprnd.dtype === dt.ERROR) { return cellOprnd }
+      sum = Rnl.add(sum, cellOprnd.value);
+    }
+  } else if (isNaN(index)) {
+    return errorOprnd("SHEET_INDEX")
+  } else {
+    // Sum a row
+    const L = Object.keys(sheet.columnMap).length;
+    for (let j = 1; j <= L - 1; j++) {
+      const cellName = String.fromCodePoint(65 + j) + index;
+      const cellOprnd = fromAssignment(sheet.value[cellName], unitAware);
+      if (cellOprnd.dtype === dt.ERROR) { return cellOprnd }
+      sum = Rnl.add(sum, cellOprnd.value);
+    }
+  }
+  return { value: sum, unit: allZeros, dtype: dt.RATIONAL }
+};
+
 const conditionResult = (stmt, oprnd, unitAware) => {
   let result = Object.create(null);
   result.value = oprnd.dtype === dt.DATAFRAME
@@ -15820,7 +15818,7 @@ const conditionResult = (stmt, oprnd, unitAware) => {
   }
 
   // Check unit compatibility.
-  if (result.dtype !== dt.ERROR && unitAware && stmt.resultdisplay.indexOf("!") === -1 &&
+  if (result.dtype !== dt.ERROR && unitAware && stmt.altresulttemplate.indexOf("!") === -1 &&
     (stmt.unit && stmt.unit.expos ||
       (result.unit && result.unit.expos && Array.isArray(result.unit.expos)))) {
     const expos = (stmt.unit && stmt.unit.expos) ? stmt.unit.expos : allZeros;
@@ -15970,7 +15968,7 @@ const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
   return stmt
 };
 
-const numberRegEx$2 = new RegExp(Rnl.numberPattern);
+const numberRegEx$3 = new RegExp(Rnl.numberPattern);
 const matrixRegEx = /^[([] *(?:(?:-?[0-9.]+|"[^"]+"|true|false) *[,;\t]? *)+[)\]]/;
 /* eslint-disable max-len */
 
@@ -16107,7 +16105,7 @@ const valueFromLiteral = (str, name, decimalFormat) => {
     return [[realPart, imPart], allZeros, dt.COMPLEX, resultDisplay]
 
   } else {
-    const match = numberRegEx$2.exec(str);
+    const match = numberRegEx$3.exec(str);
     if (match) {
       // str begins with a number.
       const numStr = match[0];
@@ -16733,6 +16731,567 @@ const calculate = (
    : attrs.tex
 };
 
+const sanitizeUrl = function(url) {
+  if (url == null) {
+    return null;
+  }
+  try {
+    const prot = decodeURIComponent(url)
+      .replace(/[^A-Za-z0-9/:]/g, "")
+      .toLowerCase();
+    if (
+      prot.indexOf("javascript:") === 0 ||
+      prot.indexOf("vbscript:") === 0 ||
+      prot.indexOf("data:") === 0
+    ) {
+      return null;
+    }
+  } catch (e) {
+    // decodeURIComponent sometimes throws a URIError
+    // See `decodeURIComponent('a%AFc');`
+    // http://stackoverflow.com/questions/9064536/javascript-decodeuricomponent-malformed-uri-exception
+    return null;
+  }
+  return url;
+};
+
+const SANITIZE_TEXT_R = /[<>&"']/g;
+const SANITIZE_TEXT_CODES = {
+  "<": "&lt;",
+  ">": "&gt;",
+  "&": "&amp;",
+  '"': "&quot;",
+  "'": "&#x27;",
+  "/": "&#x2F;",
+  "`": "&#96;"
+};
+const sanitizeText = function(text /* : Attr */) {
+  return String(text).replace(SANITIZE_TEXT_R, function(chr) {
+    return SANITIZE_TEXT_CODES[chr];
+  });
+};
+
+const htmlTag = (tagName, content, attributes = {}, isClosed = true) => {
+  let attributeString = "";
+  for (const attr in attributes) {
+    if (Object.prototype.hasOwnProperty.call(attributes, attr)) {
+      const attribute = attributes[attr];
+    // Removes falsey attributes
+      if (attribute) {
+        const sanitizedAttribute = attr === "src"
+          ? attribute.replace(/</g, "%3C").replace(/>/g, "%3E")
+          : sanitizeText(attribute);
+        attributeString += " " + sanitizeText(attr) + '="' + sanitizedAttribute + '"';
+      }
+    }
+  }
+
+  const unclosedTag = "<" + tagName + attributeString + ">";
+
+  if (isClosed) {
+    if (content.charAt(content.length - 1) === "\n") {
+      content = content.slice(0, -1);
+    }
+    return unclosedTag + content + "</" + tagName + ">";
+  } else {
+    return unclosedTag;
+  }
+};
+
+const tagName = {
+  em: "em",
+  strong: "strong",
+  code: "code",
+  strikethru: "del",
+  subscript: "sub",
+  superscript: "sup",
+  underline: "u",
+  highlight: "mark"
+};
+
+const quoteRegEx = /"/g;
+const dataStr = str => {
+  if (str.indexOf("'") === -1) {
+    return `'${str}'`
+  } else if (str.indexOf('"') === -1) {
+    return `"${str}"`
+  } else {
+    return `"${str.replace(quoteRegEx, "&quot;")}"`
+  }
+};
+
+const writeSVG = dwg => {
+  let svg = '<svg xmlns="http://www.w3.org/2000/svg"';
+  Object.keys(dwg.attrs).forEach(key => {
+    svg += ` ${key}='${dwg.attrs[key]}'`;
+  });
+  svg += ">\n";
+  dwg.children.forEach(el => {
+    svg += `<${el.tag}`;
+    Object.keys(el.attrs).forEach(attr => {
+      if (el.tag !== "title") {
+        svg += ` ${attr}='${el.attrs[attr]}'`;
+      }
+    });
+    svg += ">\n";
+    if (el.tag === "text") {
+      el.children.forEach(child => {
+        svg += '<tspan';
+        if (child.attrs) {
+          Object.keys(child.attrs).forEach(mark => {
+            svg += ` ${mark}='${child.attrs[mark]}'`;
+          });
+        }
+        svg += `>${sanitizeText(child.text)}</tspan>`;
+      });
+    } else if (el.tag === "defs") {
+      svg += `<style>${sanitizeText(el.style)}</style>`;
+    } else if (el.tag === "title") {
+      svg += sanitizeText(el.attrs.text);
+    }
+    svg += `</${el.tag}>\n`;
+  });
+  svg += "</svg>";
+  return svg
+};
+
+const functionOrModuleRegEx = /^ *(?:function|module) /;
+
+const writeTOC = node => {
+  let toc = "<ul class='toc'>\n";
+  for (const item of node.attrs.body) {
+    let li = "  <li";
+    if (item[1] > 0) { li += ` style= 'margin-left: ${String(1.5 * item[1])}em'`; }
+    li += `><span>${item[0]}</span><span>0</span></li>\n`;
+    toc += li;
+  }
+  return toc + "</ul>\n"
+};
+
+const headingText = content => {
+  let str = "";
+  for (const node of content) {
+    if (node.type && node.type === "text") {
+      str += node.text;
+    }
+  }
+  return sanitizeText(str)
+};
+
+const headings = [];
+
+const nodes = {
+  html(node) { return node.text },
+  heading(node) {
+    const text = headingText(node.content);
+    let tag = "h" + node.attrs.level;
+    tag = htmlTag(tag, text);
+    if (!headings.includes(text)) {
+    // Add an id so others can link to it.
+      tag = tag.slice(0, 3) + " id='" + text.toLowerCase().replace(/,/g, "").replace(/\s+/g, '-') + "'" + tag.slice(3);
+      headings.push(text);
+    }
+    return tag + "\n"
+  },
+  paragraph(node)  { return htmlTag("p", ast2html(node.content)) + "\n" },
+  blockquote(node) { return htmlTag("blockquote", ast2html(node.content)) },
+  code_block(node) {
+    return htmlTag("pre", htmlTag("code", sanitizeText(node.content[0].text)))
+  },
+  hard_break(node) { return "<br>" },
+  def(node)        { return "" },
+  newline(node)    { return "\n" },
+  horizontal_rule(node) { return "<hr>\n" },
+  ordered_list(node) {
+    const attributes = node.attrs.order !== 1 ? { start: node.attrs.order } : undefined;
+    return htmlTag("ol", ast2html(node.content), attributes) + "\n"
+  },
+  bullet_list(node)  { return htmlTag("ul", ast2html(node.content)) + "\n" },
+  list_item(node)    { return htmlTag("li", ast2html(node.content)) + "\n" },
+  tight_list_item(node) {
+    return htmlTag("li", ast2html(node.content), { class: "tight" }) + "\n"
+  },
+  table(node) {
+    const attributes = ("dtype" in node.attrs) && node.attrs.dtype === dt.SPREADSHEET
+      ? {  class: node.attrs.class, dtype: dt.SPREADSHEET }
+      : {  class: node.attrs.class };
+    return htmlTag("table", ast2html(node.content), attributes) + "\n"
+  },
+  colGroup(node)     {
+    return "\n" + htmlTag("colgroup", ast2html(node.content), node.attrs) + "\n"
+  },
+  col(node)          { return htmlTag("col", "", node.attrs[0], false) },
+  table_row(node)    { return htmlTag("tr", ast2html(node.content)) + "\n" },
+  table_header(node) {
+    const attributes = {};
+    if (node.attrs.colspan !== 1) { attributes.colspan = node.attrs.colspan; }
+    if (node.attrs.rowspan !== 1) { attributes.rowspan = node.attrs.rowspan; }
+    return htmlTag("th", ast2html(node.content), attributes) + "\n"
+  },
+  table_cell(node) {
+    const attributes = {};
+    if (node.attrs.colspan !== 1) { attributes.colspan = node.attrs.colspan; }
+    if (node.attrs.rowspan !== 1) { attributes.rowspan = node.attrs.rowspan; }
+    return htmlTag("td", ast2html(node.content), attributes)
+  },
+  spreadsheet_cell(node) {
+    const display = node.attrs.display ? node.attrs.display : node.attrs.entry;
+    return `<div class='hurmet-cell' data-entry=${dataStr(node.attrs.entry)}>` + display
+           + '</div>'
+  },
+  link(node) {
+    const attributes = { href: sanitizeUrl(node.attrs.href), title: node.attrs.title };
+    return htmlTag("a", ast2html(node.content), attributes);
+  },
+  image(node) {
+    const attributes = { src: node.attrs.src };
+    if (node.attrs.alt)   { attributes.alt = node.attrs.alt; }
+    if (node.attrs.class) { attributes.class = node.attrs.class; }
+    if (node.attrs.id)    { attributes.id = node.attrs.id; }
+    if (node.attrs.width) { attributes.width = node.attrs.width; }
+    return htmlTag("img", "", attributes, false);
+  },
+  figure(node)     { return htmlTag("figure", ast2html(node.content)) + "\n" },
+  figcaption(node) { return htmlTag("figcaption", ast2html(node.content)) },
+  figimg(node) {
+    const attributes = { src: node.attrs.src, class: "figimg" };
+    if (node.attrs.alt)   { attributes.alt = node.attrs.alt; }
+    if (node.attrs.id)    { attributes.id = node.attrs.id; }
+    if (node.attrs.width) { attributes.width = node.attrs.width; }
+    return htmlTag("img", "", attributes, false) + "\n";
+  },
+  footnote(node)   { return htmlTag("footnote", "") },
+  calculation(node) {
+    if (node.attrs.dtype && node.attrs.dtype === dt.DRAWING) {
+      const svg = writeSVG(node.attrs.resultdisplay);
+      const style = svg.indexOf('float="right"' > -1) ? " style='float: right;'" : "";
+      return `<span class='hurmet-calc' data-entry=${dataStr(node.attrs.entry)}${style}>` +
+        `${svg}</span>`
+    } else if (node.attrs.dtype && node.attrs.dtype === dt.MODULE &&
+               functionOrModuleRegEx.test(node.attrs.entry)) {
+      return `<span class='hurmet-calc' data-entry=${dataStr(node.attrs.entry)}>`
+        + `<span class='hmt-code'>${sanitizeText(node.attrs.entry)}</span></span>`
+    } else {
+      const tex = node.attrs.tex ? node.attrs.tex : parse$1(node.attrs.entry);
+      // eslint-disable-next-line no-undef
+      const mathML = globalThis.temml.renderToString(
+        tex,
+        { trust: true, wrap: "=", displayMode: (node.attrs.displayMode || false) }
+      );
+      const tag = node.attrs.displayMode ? "p" : "span";
+      return `<${tag} class='hurmet-calc' data-entry=${dataStr(node.attrs.entry)}>` +
+              `${mathML}</${tag}>`
+    }
+  },
+  tex(node) {
+    // eslint-disable-next-line no-undef
+    const mathML = globalThis.temml.renderToString(
+      node.attrs.tex,
+      { trust: true, displayMode: (node.attrs.displayMode || false) }
+    );
+    const tag = node.attrs.displayMode ? "p" : "span";
+    return `<${tag} class='hurmet-tex' data-entry=${dataStr(node.attrs.tex)}>` +
+            `${mathML}</${tag}>`
+  },
+  indented(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'indented' }) + "\n"
+  },
+  boxed(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'boxed' }) + "\n"
+  },
+  centered(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'centered' }) + "\n"
+  },
+  right_justified(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'right_justified' }) + "\n"
+  },
+  hidden(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'hidden' }) + "\n"
+  },
+  epigraph(node) {
+    return htmlTag("blockquote", ast2html(node.content), { class: 'epigraph' }) + "\n"
+  },
+  note(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'note' }) + "\n"
+  },
+  tip(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'tip' }) + "\n"
+  },
+  important(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'important' }) + "\n"
+  },
+  warning(node) {
+    return htmlTag("div", ast2html(node.content), { class: 'warning' }) + "\n"
+  },
+  header(node)   {
+    return htmlTag("header", ast2html(node.content)) + "\n"
+  },
+  toc(node)      { return writeTOC(node) },
+  comment(node)  {
+    return htmlTag("aside", ast2html(node.content), { class: 'comment' }) + "\n"
+  },
+  dt(node)    {
+    let text = ast2html(node.content);
+    let tag = htmlTag("dt", text);
+    // Add id so others can link to it.
+    const pos = text.indexOf("(");
+    if (pos > -1) { text = text.slice(0, pos).replace("_", "-"); }
+    tag = tag.slice(0, 3) + " id='" + text.toLowerCase().replace(/\s+/g, '-') + "'" + tag.slice(3);
+    return tag + "\n"
+  },
+  dd(node)    { return htmlTag("dd", ast2html(node.content)) + "\n" },
+  text(node) {
+    const text = sanitizeText(node.text);
+    if (!node.marks) {
+      return text
+    } else {
+      let span = text;
+      for (const mark of node.marks) {
+        if (mark.type === "link") {
+          let tag = `<a href='${mark.attrs.href}'`;
+          if (mark.attrs.title) { tag += ` title='${mark.attrs.title}''`; }
+          span = tag + ">" + span + "</a>";
+        } else {
+          const tag = tagName[mark.type];
+          span = `<${tag}>${span}</${tag}>`;
+        }
+      }
+      return span
+    }
+  }
+};
+
+const getFootnotes = (ast, footnotes) => {
+  if (Array.isArray(ast)) {
+    for (let i = 0; i < ast.length; i++) {
+      getFootnotes(ast[i], footnotes);
+    }
+  } else if (ast && ast.type === "footnote") {
+    footnotes.push(ast.content);
+  // eslint-disable-next-line no-prototype-builtins
+  } else if (ast.hasOwnProperty("content")) {
+    for (let j = 0; j < ast.content.length; j++) {
+      getFootnotes(ast.content[j], footnotes);
+    }
+  }
+};
+
+const ast2html = ast => {
+  // Return HTML.
+  let html = "";
+  if (Array.isArray(ast)) {
+    for (let i = 0; i < ast.length; i++) {
+      html += ast2html(ast[i]);
+    }
+  } else if (ast && ast.type === "doc") {
+    html += ast2html(ast.content);
+  } else if (ast && ast.type !== "null") {
+    html += nodes[ast.type](ast);
+  }
+  return html
+};
+
+const ast2text = ast => {
+  let text = "";
+  if (Array.isArray(ast)) {
+    for (let i = 0; i < ast.length; i++) {
+      text += ast2text(ast[i]);
+    }
+  } else if (typeof ast === "object" && "content" in ast) {
+    for (let i = 0; i < ast.content.length; i++) {
+      text += ast2text(ast.content[i]);
+    }
+  } else if ((ast && ast.type === "text")) {
+    text += ast.text;
+  } else if (ast && ast.type === "hard_break") {
+    text += "\n";
+  } else if (ast && ast.type !== "null") {
+    text += "";
+  }
+  return text
+};
+
+const md2text = md => {
+  // Get the text content of some inlne Markdown
+  const ast = md2ast(md, false);
+  return ast2text(ast)
+};
+
+const md2html = (md, inHtml = false) => {
+  const ast = md2ast(md, inHtml);
+  let html = ast2html(ast);
+
+  // Write the footnotes, if any.
+  const footnotes = [];
+  getFootnotes(ast, footnotes);
+  if (footnotes.length > 0) {
+    html += "\n<hr>\n<ol>\n";
+    for (const footnote of footnotes) {
+      html += "<li><p>" + ast2html(footnote) + "</p></li>\n";
+    }
+    html += "</ol>\n";
+  }
+  return html
+};
+
+/* eslint-disable no-alert */
+
+const numberRegEx$2 = new RegExp(Rnl.numberPattern);
+const cellRefRegEx = /"[A-Z][1-9]\d*"/g;
+const sumRegEx = /¿(up|left)([\xa0§])sum[\xa0§]1(?=[\xa0§]|$)/g;
+
+// Compile a spreadsheet cell.
+
+const compileCell = (attrs, sheetAttrs, unit, previousAttrs,
+                            decimalFormat = "1,000,000.") => {
+  const newAttrs = { entry: attrs.entry, name: attrs.name };
+  const entry = attrs.entry;
+  const numRows = Object.keys(sheetAttrs.rowMap).length;
+  if (entry.length === 0) {
+    newAttrs.value = null;
+    newAttrs.dtype = dt.NULL;
+  } else if (entry.slice(0, 1) === "=") {
+    // Get the RPN of an expression
+    const expression = entry.replace(/^==?/, "").trim();
+    // TODO: Revise the parser to handle spreadsheet cell names & sheetname
+    // eslint-disable-next-line prefer-const
+    let [_, rpn, dependencies] = parse$1(expression, decimalFormat, true, false, sheetAttrs.name);
+
+    // Implement sum(up) and sum(left)
+    // Orig RPN:    ¿up sum 1
+    // Desired RPN: ¿sheetName "D" spreadsheetSum   or   ¿sheetName "3" spreadsheetSum
+    let sumMatch;
+    while ((sumMatch = sumRegEx.exec(rpn)) !== null) {
+      const str = sumMatch[1] === "up" ? attrs.name.slice(0, 1) : attrs.name.slice(1, 2);
+      rpn = rpn.slice(0, sumMatch.index) + `¿${sheetAttrs.name}` + sumMatch[2]
+            + `"${str}"` + sumMatch[2] + "spreadsheetSum"
+            + rpn.slice(sumMatch.index + sumMatch[0].length);
+    }
+
+    newAttrs.rpn = rpn;
+    newAttrs.dependencies = dependencies;
+    newAttrs.resulttemplate = (entry.length > 1 &&  entry.slice(1, 2) === "=")
+      ? "@@"
+      : "@";
+    newAttrs.unit = unit ? unit : { factor: Rnl.one, gauge: Rnl.zero, expos: allZeros };
+  } else if (entry === '"' || entry === '“') {
+    // The ditto of the previous cell
+    if (previousAttrs.rpn) {
+      let rpn = previousAttrs.rpn;
+      const matches = arrayOfRegExMatches(cellRefRegEx, rpn);
+      for (let i = matches.length - 1; i >= 0; i--) {
+        const match = matches[i];
+        const rowNum = Math.min(numRows, Number(match.value.slice(2, -1)) + 1);
+        rpn = rpn.slice(0, match.index + 2) + String(rowNum)
+            + rpn.slice(match.index + match.length - 1);
+      }
+      newAttrs.rpn = rpn;
+      newAttrs.resulttemplate = previousAttrs.resulttemplate;
+      newAttrs.unit = previousAttrs.unit;
+    } else {
+      newAttrs.value = previousAttrs.value;
+      newAttrs.dtype = previousAttrs.dtype;
+      newAttrs.display = previousAttrs.display ? previousAttrs.display : previousAttrs.entry;
+    }
+    // TODO: unitAware, dependencies
+  } else {
+    // A literal value
+    const numCandidate = entry.replace(/,/g, "");
+    if (numberRegEx$2.test(numCandidate)) {
+      let value = Rnl.fromString(numCandidate);
+      let dtype = dt.RATIONAL;
+      if (unit) {
+        value = {
+          plain: value,
+          inBaseUnits: Rnl.multiply(Rnl.add(value, unit.gauge), unit.factor)
+        };
+        dtype += dt.QUANTITY;
+      }
+      newAttrs.value = value;
+      newAttrs.dtype = dtype;
+    } else if (entry === "true" || entry === "false") {
+      newAttrs.value = Boolean(entry);
+      newAttrs.dtype = dt.BOOLEAN;
+    } else if (complexRegEx.test(entry)) {
+      // eslint-disable-next-line no-unused-vars
+      const [value, unit, dtype, _] = valueFromLiteral(entry, attrs.name, decimalFormat);
+      newAttrs.value = value;
+      newAttrs.dtype = dtype;
+    } else {
+      newAttrs.value = entry;
+      newAttrs.dtype = dt.STRING;
+    }
+  }
+  return newAttrs
+};
+
+// Compile a spreadsheet
+
+const compileSheet = (table, decimalFormat = "1,000,000") => {
+  // The cell entries and the sheet name are already known.
+  // Proceed to compile the rest of the table and cell attributes.
+  // Stop short of calculations.
+  table.attrs.columnMap = {};
+  table.attrs.rowMap = {};
+  table.attrs.unitMap = [];
+  table.attrs.units = {};
+  table.attrs.dependencies = {};
+  table.attrs.dtype = dt.SPREADSHEET;
+  if (table.content[0].type === "colGroup") { table.content.shift(); }
+
+  const numRows = table.content.length;
+  const numCols = table.content[0].content.length;
+  // Proceed column-wise thru the table.
+  for (let j = 0; j < numCols; j++) {
+    let previousAttrs = {};
+    for (let i = 0; i < numRows; i++) {
+      const cell = table.content[i].content[j].content[0];
+      const cellName = String.fromCodePoint(65 + j) + String(i);
+      const entry = cell.attrs.entry;
+      if (i === 0) {
+        const str = md2text(entry);
+        let heading = "";
+        let unitName = "";
+        const posNewline = str.indexOf("\n");
+        if (posNewline === -1) {
+          heading = str.trim();
+        } else {
+          unitName = str.slice(posNewline + 1).trim();
+          heading = str.slice(0, posNewline).trim();
+        }
+        table.attrs.columnMap[heading] = cellName.slice(0, 1);
+        if (unitName.length > 0) {
+          const unit = unitFromUnitName(unitName);
+          if (unit.dtype && unit.dtype === dt.ERROR) {
+            unitName = "";
+          } else {
+            table.attrs.units[unitName] = unit;
+          }
+        }
+        table.attrs.unitMap.push(unitName);
+      } else {
+        // A data cell, not a top row heading
+        if (j === 0) { table.attrs.rowMap[entry] = i; }
+      }
+      const newCell = { type: "spreadsheet_cell", attrs: { entry } };
+      if (i === 0) {
+        newCell.attrs.display = md2html(entry);
+      } else {
+        newCell.attrs.name = cellName;
+        const unit = (table.attrs.unitMap[j].length > 0)
+          ? table.attrs.units[table.attrs.unitMap[j]]
+          : null;
+        newCell.attrs = compileCell(newCell.attrs, table.attrs, unit, previousAttrs,
+                                    decimalFormat);
+        previousAttrs = newCell.attrs;
+        previousAttrs.unit = unit;
+      }
+      table.content[i].content[j].content = [newCell];
+    }
+  }
+  return table
+};
+
 /*
  *  This module organizes one or two passes through the data structure of a Hurmet
  *  document, calling for a calculation to be done on each Hurmet calculation cell.
@@ -16985,16 +17544,18 @@ const proceedAfterFetch = (
             insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat);
           }
         }
-      } else if (node.attrs.isSpreadsheet) {
+      } else if (("dtype" in node.attrs) && node.attrs.dtype === dt.SPREADSHEET) {
         const sheetName = node.attrs.name;
-        hurmetVars[sheetName] = {};
+        const sheetAttrs = clone(node.attrs);
+        sheetAttrs.value = {};
+        hurmetVars[sheetName] = sheetAttrs;
         const numRows = node.content.content.length;
         const numCols = node.content.content[0].content.content.length;
         // Proceed column-wise thru the table.
         for (let j = 0; j < numCols; j++) {
-          for (let i = 0; i < numRows; i++) {
-            const cell = node.content.content[i].content.content[j];
-            hurmetVars[sheetName][cell.name] = cell.attrs;
+          for (let i = 1; i < numRows; i++) {
+            const cell = node.content.content[i].content.content[j].content.content[0];
+            hurmetVars[sheetName].value[cell.attrs.name] = clone(cell.attrs);
           }
         }
       }
@@ -17010,20 +17571,47 @@ const proceedAfterFetch = (
     // Calculate the current node.
     if (!fetchRegEx.test(nodeAttrs.entry)) {
       // This is the typical calculation statement. We'll evalutate it.
-      let attrs = clone(nodeAttrs); // compile was already run in mathprompt.js.
-      try {
-        // Do the calculation of the cell.
-        if (attrs.rpn || (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING)) {
-          attrs = attrs.dtype && attrs.dtype === dt.DRAWING
-            ? evaluateDrawing(attrs, hurmetVars, decimalFormat)
-            : evaluate(attrs, hurmetVars, decimalFormat);
+      if (!(("dtype" in nodeAttrs) && nodeAttrs.dtype === dt.SPREADSHEET)) {
+        let attrs = clone(nodeAttrs); // compile was already run in mathprompt.js.
+        try {
+          // Do the calculation of the cell.
+          if (attrs.rpn || (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING)) {
+            attrs = attrs.dtype && attrs.dtype === dt.DRAWING
+              ? evaluateDrawing(attrs, hurmetVars, decimalFormat)
+              : evaluate(attrs, hurmetVars, decimalFormat);
+          }
+          if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat); }
+        } catch (err) {
+          attrs.tex = "\\text{" + attrs.entry + " = " + err + "}";
         }
-        if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat); }
-        //attrs.displayMode = nodeAttrs.displayMode
-      } catch (err) {
-        attrs.tex = "\\text{" + attrs.entry + " = " + err + "}";
+        tr.replaceWith(curPos, curPos + 1, calcSchema.createAndFill(attrs));
+      } else {
+        // Calculate all the cells in a spreadsheet
+        const tableNode = doc.nodeAt(curPos);
+        const table = tableNode.toJSON();
+        const sheetName = table.attrs.name;
+        const sheet = clone(table.attrs);
+        delete sheet["value"];
+        sheet.value = {};
+        hurmetVars[sheetName] = sheet;
+        const numRows = table.content.length;
+        const numCols = table.content[0].content.length;
+        // Proceed column-wise thru the table.
+        for (let j = 0; j < numCols; j++) {
+          for (let i = 1; i < numRows; i++) {
+            const cell = table.content[i].content[j].content[0];
+            if (cell.attrs.rpn) {
+              cell.attrs.altresulttemplate = cell.attrs.resulttemplate;
+              cell.attrs = evaluate(cell.attrs, hurmetVars, decimalFormat);
+              cell.attrs.display = cell.attrs.alt;
+            }
+            hurmetVars[sheetName].value[cell.attrs.name] = cell.attrs;
+          }
+        }
+        changedVars.add(sheetName);
+        tr.replaceWith(curPos, curPos + tableNode.nodeSize,
+                       view.state.schema.nodeFromJSON(table));
       }
-      tr.replaceWith(curPos, curPos + 1, calcSchema.createAndFill(attrs));
     }
   }
 
@@ -17072,6 +17660,32 @@ const proceedAfterFetch = (
           }
         }
       }
+    } else if (("dtype" in node.attrs) && node.attrs.dtype === dt.SPREADSHEET
+                && pos !== curPos) {
+      // Calculate all the cells in a spreadsheet
+      let table = clone(node.toJSON());
+      if (isCalcAll) {
+        table = compileSheet(table, decimalFormat);
+      }
+      const sheetName = table.attrs.name;
+      hurmetVars[sheetName] = table.attrs;
+      hurmetVars[sheetName].value = {};
+      const numRows = table.content.length;
+      const numCols = table.content[0].content.length;
+      // Proceed column-wise thru the table.
+      for (let j = 0; j < numCols; j++) {
+        for (let i = 1; i < numRows; i++) {
+          const cell = table.content[i].content[j].content[0];
+          if (cell.attrs.rpn) {
+            cell.attrs.altresulttemplate = cell.attrs.resulttemplate;
+            cell.attrs = evaluate(cell.attrs, hurmetVars, decimalFormat);
+            cell.attrs.display = cell.attrs.alt;
+          }
+          hurmetVars[sheetName].value[cell.attrs.name] = cell.attrs;
+        }
+      }
+      if (!isCalcAll) { changedVars.add(sheetName); }
+      tr.replaceWith(pos, pos + node.nodeSize, view.state.schema.nodeFromJSON(table));
     }
   });
 
@@ -17205,8 +17819,9 @@ const getCalcNodes = (ast, calcNodes) => {
     }
   } else if (ast && ast.type === "calculation") {
     calcNodes.push(ast);
-  // eslint-disable-next-line no-prototype-builtins
-  } else if (ast.hasOwnProperty("content")) {
+  } else if (ast && ast.type === "table" && "name" in ast.attrs) {
+    calcNodes.push(ast);
+  } else if ("content" in ast) {
     for (let j = 0; j < ast.content.length; j++) {
       getCalcNodes(ast.content[j], calcNodes);
     }
@@ -17265,19 +17880,43 @@ async function updateCalcs(doc) {
   // Make a pass through the calculation nodes and calculate each result.
   try {
     for (const node of calcNodes) {
-      if (!helpers.fetchRegEx.test(node.attrs.entry)) {
-        const entry = node.attrs.entry;
-        let attrs = compile(entry, decimalFormat);
-        attrs.displayMode = node.attrs.displayMode;
-        const mustDraw = attrs.dtype && attrs.dtype === dt.DRAWING;
-        if (attrs.rpn || mustDraw) {
-          attrs = attrs.rpn
-            ? evaluate(attrs, hurmetVars, decimalFormat)
-            : evaluateDrawing(attrs, hurmetVars, decimalFormat);
+      if (node.attrs.type === "calculation") {
+        if (!helpers.fetchRegEx.test(node.attrs.entry)) {
+          const entry = node.attrs.entry;
+          let attrs = compile(entry, decimalFormat);
+          attrs.displayMode = node.attrs.displayMode;
+          const mustDraw = attrs.dtype && attrs.dtype === dt.DRAWING;
+          if (attrs.rpn || mustDraw) {
+            attrs = attrs.rpn
+              ? evaluate(attrs, hurmetVars, decimalFormat)
+              : evaluateDrawing(attrs, hurmetVars, decimalFormat);
+          }
+          if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat); }
+          // When we modify a node, we are also mutating the container doc.
+          node.attrs = attrs;
         }
-        if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat); }
-        // When we modify a node, we are also mutating the container doc.
-        node.attrs = attrs;
+      } else if ("dtype" in node.attrs && node.attrs.dtype === dt.SPREADSHEET) {
+        // node is a spreadsheet
+        const sheet = compileSheet(node, decimalFormat);
+        const sheetName = sheet.attrs.name;
+        hurmetVars[sheetName] = sheet.attrs;
+        hurmetVars[sheetName].value = {};
+        const numRows = sheet.content.length;
+        const numCols = sheet.content[0].content.length;
+        // Proceed column-wise thru the sheet.
+        for (let j = 0; j < numCols; j++) {
+          for (let i = 1; i < numRows; i++) {
+            const cell = sheet.content[i].content[j].content[0];
+            if (cell.attrs.rpn) {
+              cell.attrs.altresulttemplate = cell.attrs.resulttemplate;
+              cell.attrs = evaluate(cell.attrs, hurmetVars, decimalFormat);
+              cell.attrs.display = cell.attrs.alt;
+            }
+            hurmetVars[sheetName].value[cell.attrs.name] = cell.attrs;
+          }
+        }
+        node.attrs = sheet.attrs;
+        node.content = sheet.content;
       }
     }
     return doc
@@ -17285,326 +17924,6 @@ async function updateCalcs(doc) {
     console.log(err); // eslint-disable-line no-console
   }
 }
-
-const sanitizeUrl = function(url) {
-  if (url == null) {
-    return null;
-  }
-  try {
-    const prot = decodeURIComponent(url)
-      .replace(/[^A-Za-z0-9/:]/g, "")
-      .toLowerCase();
-    if (
-      prot.indexOf("javascript:") === 0 ||
-      prot.indexOf("vbscript:") === 0 ||
-      prot.indexOf("data:") === 0
-    ) {
-      return null;
-    }
-  } catch (e) {
-    // decodeURIComponent sometimes throws a URIError
-    // See `decodeURIComponent('a%AFc');`
-    // http://stackoverflow.com/questions/9064536/javascript-decodeuricomponent-malformed-uri-exception
-    return null;
-  }
-  return url;
-};
-
-const SANITIZE_TEXT_R = /[<>&"']/g;
-const SANITIZE_TEXT_CODES = {
-  "<": "&lt;",
-  ">": "&gt;",
-  "&": "&amp;",
-  '"': "&quot;",
-  "'": "&#x27;",
-  "/": "&#x2F;",
-  "`": "&#96;"
-};
-const sanitizeText = function(text /* : Attr */) {
-  return String(text).replace(SANITIZE_TEXT_R, function(chr) {
-    return SANITIZE_TEXT_CODES[chr];
-  });
-};
-
-const htmlTag = (tagName, content, attributes = {}, isClosed = true) => {
-  let attributeString = "";
-  for (const attr in attributes) {
-    if (Object.prototype.hasOwnProperty.call(attributes, attr)) {
-      const attribute = attributes[attr];
-    // Removes falsey attributes
-      if (attribute) {
-        const sanitizedAttribute = attr === "src"
-          ? attribute.replace(/</g, "%3C").replace(/>/g, "%3E")
-          : sanitizeText(attribute);
-        attributeString += " " + sanitizeText(attr) + '="' + sanitizedAttribute + '"';
-      }
-    }
-  }
-
-  const unclosedTag = "<" + tagName + attributeString + ">";
-
-  if (isClosed) {
-    if (content.charAt(content.length - 1) === "\n") {
-      content = content.slice(0, -1);
-    }
-    return unclosedTag + content + "</" + tagName + ">";
-  } else {
-    return unclosedTag;
-  }
-};
-
-const tagName = {
-  em: "em",
-  strong: "strong",
-  code: "code",
-  strikethru: "del",
-  subscript: "sub",
-  superscript: "sup",
-  underline: "u",
-  highlight: "mark"
-};
-
-const quoteRegEx = /"/g;
-const dataStr = str => {
-  if (str.indexOf("'") === -1) {
-    return `'${str}'`
-  } else if (str.indexOf('"') === -1) {
-    return `"${str}"`
-  } else {
-    return `"${str.replace(quoteRegEx, "&quot;")}"`
-  }
-};
-
-const writeSVG = dwg => {
-  let svg = '<svg xmlns="http://www.w3.org/2000/svg"';
-  Object.keys(dwg.attrs).forEach(key => {
-    svg += ` ${key}='${dwg.attrs[key]}'`;
-  });
-  svg += ">\n";
-  dwg.children.forEach(el => {
-    svg += `<${el.tag}`;
-    Object.keys(el.attrs).forEach(attr => {
-      if (el.tag !== "title") {
-        svg += ` ${attr}='${el.attrs[attr]}'`;
-      }
-    });
-    svg += ">\n";
-    if (el.tag === "text") {
-      el.children.forEach(child => {
-        svg += '<tspan';
-        if (child.attrs) {
-          Object.keys(child.attrs).forEach(mark => {
-            svg += ` ${mark}='${child.attrs[mark]}'`;
-          });
-        }
-        svg += `>${sanitizeText(child.text)}</tspan>`;
-      });
-    } else if (el.tag === "defs") {
-      svg += `<style>${sanitizeText(el.style)}</style>`;
-    } else if (el.tag === "title") {
-      svg += sanitizeText(el.attrs.text);
-    }
-    svg += `</${el.tag}>\n`;
-  });
-  svg += "</svg>";
-  return svg
-};
-
-const functionOrModuleRegEx = /^ *(?:function|module) /;
-
-const writeTOC = node => {
-  let toc = "<ul class='toc'>\n";
-  for (const item of node.attrs.body) {
-    let li = "  <li";
-    if (item[1] > 0) { li += ` style= 'margin-left: ${String(1.5 * item[1])}em'`; }
-    li += `><span>${item[0]}</span><span>0</span></li>\n`;
-    toc += li;
-  }
-  return toc + "</ul>\n"
-};
-
-const headingText = content => {
-  let str = "";
-  for (const node of content) {
-    if (node.type && node.type === "text") {
-      str += node.text;
-    }
-  }
-  return sanitizeText(str)
-};
-
-const headings = [];
-
-const nodes = {
-  html(node) { return node.text },
-  heading(node) {
-    const text = headingText(node.content);
-    let tag = "h" + node.attrs.level;
-    tag = htmlTag(tag, text);
-    if (!headings.includes(text)) {
-    // Add an id so others can link to it.
-      tag = tag.slice(0, 3) + " id='" + text.toLowerCase().replace(/,/g, "").replace(/\s+/g, '-') + "'" + tag.slice(3);
-      headings.push(text);
-    }
-    return tag + "\n"
-  },
-  paragraph(node)  { return htmlTag("p", ast2html(node.content)) + "\n" },
-  blockquote(node) { return htmlTag("blockquote", ast2html(node.content)) },
-  code_block(node) {
-    return htmlTag("pre", htmlTag("code", sanitizeText(node.content[0].text)))
-  },
-  hard_break(node) { return "<br>" },
-  def(node)        { return "" },
-  newline(node)    { return "\n" },
-  horizontal_rule(node) { return "<hr>\n" },
-  ordered_list(node) {
-    const attributes = node.attrs.order !== 1 ? { start: node.attrs.order } : undefined;
-    return htmlTag("ol", ast2html(node.content), attributes) + "\n"
-  },
-  bullet_list(node)  { return htmlTag("ul", ast2html(node.content)) + "\n" },
-  list_item(node)    { return htmlTag("li", ast2html(node.content)) + "\n" },
-  tight_list_item(node) {
-    return htmlTag("li", ast2html(node.content), { class: "tight" }) + "\n"
-  },
-  table(node)        { return htmlTag("table", ast2html(node.content), node.attrs) + "\n" },
-  colGroup(node)     {
-    return "\n" + htmlTag("colgroup", ast2html(node.content), node.attrs) + "\n"
-  },
-  col(node)          { return htmlTag("col", "", node.attrs[0], false) },
-  table_row(node)    { return htmlTag("tr", ast2html(node.content)) + "\n" },
-  table_header(node) {
-    const attributes = {};
-    if (node.attrs.colspan !== 1) { attributes.colspan = node.attrs.colspan; }
-    if (node.attrs.rowspan !== 1) { attributes.rowspan = node.attrs.rowspan; }
-    return htmlTag("th", ast2html(node.content), attributes) + "\n"
-  },
-  table_cell(node) {
-    const attributes = {};
-    if (node.attrs.colspan !== 1) { attributes.colspan = node.attrs.colspan; }
-    if (node.attrs.rowspan !== 1) { attributes.rowspan = node.attrs.rowspan; }
-    return htmlTag("td", ast2html(node.content), attributes)
-  },
-  link(node) {
-    const attributes = { href: sanitizeUrl(node.attrs.href), title: node.attrs.title };
-    return htmlTag("a", ast2html(node.content), attributes);
-  },
-  image(node) {
-    const attributes = { src: node.attrs.src };
-    if (node.attrs.alt)   { attributes.alt = node.attrs.alt; }
-    if (node.attrs.class) { attributes.class = node.attrs.class; }
-    if (node.attrs.id)    { attributes.id = node.attrs.id; }
-    if (node.attrs.width) { attributes.width = node.attrs.width; }
-    return htmlTag("img", "", attributes, false);
-  },
-  figure(node)     { return htmlTag("figure", ast2html(node.content)) + "\n" },
-  figcaption(node) { return htmlTag("figcaption", ast2html(node.content)) },
-  figimg(node) {
-    const attributes = { src: node.attrs.src, class: "figimg" };
-    if (node.attrs.alt)   { attributes.alt = node.attrs.alt; }
-    if (node.attrs.id)    { attributes.id = node.attrs.id; }
-    if (node.attrs.width) { attributes.width = node.attrs.width; }
-    return htmlTag("img", "", attributes, false) + "\n";
-  },
-  footnote(node)   { return htmlTag("footnote", "") },
-  calculation(node) {
-    if (node.attrs.dtype && node.attrs.dtype === dt.DRAWING) {
-      const svg = writeSVG(node.attrs.resultdisplay);
-      const style = svg.indexOf('float="right"' > -1) ? " style='float: right;'" : "";
-      return `<span class='hurmet-calc' data-entry=${dataStr(node.attrs.entry)}${style}>` +
-        `${svg}</span>`
-    } else if (node.attrs.dtype && node.attrs.dtype === dt.MODULE &&
-               functionOrModuleRegEx.test(node.attrs.entry)) {
-      return `<span class='hurmet-calc' data-entry=${dataStr(node.attrs.entry)}>`
-        + `<span class='hmt-code'>${sanitizeText(node.attrs.entry)}</span></span>`
-    } else {
-      const tex = node.attrs.tex ? node.attrs.tex : parse$1(node.attrs.entry);
-      // eslint-disable-next-line no-undef
-      const mathML = globalThis.temml.renderToString(
-        tex,
-        { trust: true, wrap: "=", displayMode: (node.attrs.displayMode || false) }
-      );
-      const tag = node.attrs.displayMode ? "p" : "span";
-      return `<${tag} class='hurmet-calc' data-entry=${dataStr(node.attrs.entry)}>` +
-              `${mathML}</${tag}>`
-    }
-  },
-  tex(node) {
-    // eslint-disable-next-line no-undef
-    const mathML = globalThis.temml.renderToString(
-      node.attrs.tex,
-      { trust: true, displayMode: (node.attrs.displayMode || false) }
-    );
-    const tag = node.attrs.displayMode ? "p" : "span";
-    return `<${tag} class='hurmet-tex' data-entry=${dataStr(node.attrs.tex)}>` +
-            `${mathML}</${tag}>`
-  },
-  indented(node) {
-    return htmlTag("div", ast2html(node.content), { class: 'indented' }) + "\n"
-  },
-  boxed(node) {
-    return htmlTag("div", ast2html(node.content), { class: 'boxed' }) + "\n"
-  },
-  centered(node) {
-    return htmlTag("div", ast2html(node.content), { class: 'centered' }) + "\n"
-  },
-  right_justified(node) {
-    return htmlTag("div", ast2html(node.content), { class: 'right_justified' }) + "\n"
-  },
-  hidden(node) {
-    return htmlTag("div", ast2html(node.content), { class: 'hidden' }) + "\n"
-  },
-  epigraph(node) {
-    return htmlTag("blockquote", ast2html(node.content), { class: 'epigraph' }) + "\n"
-  },
-  note(node) {
-    return htmlTag("div", ast2html(node.content), { class: 'note' }) + "\n"
-  },
-  tip(node) {
-    return htmlTag("div", ast2html(node.content), { class: 'tip' }) + "\n"
-  },
-  important(node) {
-    return htmlTag("div", ast2html(node.content), { class: 'important' }) + "\n"
-  },
-  warning(node) {
-    return htmlTag("div", ast2html(node.content), { class: 'warning' }) + "\n"
-  },
-  header(node)   {
-    return htmlTag("header", ast2html(node.content)) + "\n"
-  },
-  toc(node)      { return writeTOC(node) },
-  comment(node)  {
-    return htmlTag("aside", ast2html(node.content), { class: 'comment' }) + "\n"
-  },
-  dt(node)    {
-    let text = ast2html(node.content);
-    let tag = htmlTag("dt", text);
-    // Add id so others can link to it.
-    const pos = text.indexOf("(");
-    if (pos > -1) { text = text.slice(0, pos).replace("_", "-"); }
-    tag = tag.slice(0, 3) + " id='" + text.toLowerCase().replace(/\s+/g, '-') + "'" + tag.slice(3);
-    return tag + "\n"
-  },
-  dd(node)    { return htmlTag("dd", ast2html(node.content)) + "\n" },
-  text(node) {
-    const text = sanitizeText(node.text);
-    if (!node.marks) {
-      return text
-    } else {
-      let span = text;
-      for (const mark of node.marks) {
-        if (mark.type === "link") {
-          let tag = `<a href='${mark.attrs.href}'`;
-          if (mark.attrs.title) { tag += ` title='${mark.attrs.title}''`; }
-          span = tag + ">" + span + "</a>";
-        } else {
-          const tag = tagName[mark.type];
-          span = `<${tag}>${span}</${tag}>`;
-        }
-      }
-      return span
-    }
-  }
-};
 
 const getTOCitems = (ast, tocArray, start, end, node) => {
   if (Array.isArray(ast)) {
@@ -17624,36 +17943,6 @@ const getTOCitems = (ast, tocArray, start, end, node) => {
       getTOCitems(ast.content[j], tocArray, start, end, node);
     }
   }
-};
-
-const getFootnotes = (ast, footnotes) => {
-  if (Array.isArray(ast)) {
-    for (let i = 0; i < ast.length; i++) {
-      getFootnotes(ast[i], footnotes);
-    }
-  } else if (ast && ast.type === "footnote") {
-    footnotes.push(ast.content);
-  // eslint-disable-next-line no-prototype-builtins
-  } else if (ast.hasOwnProperty("content")) {
-    for (let j = 0; j < ast.content.length; j++) {
-      getFootnotes(ast.content[j], footnotes);
-    }
-  }
-};
-
-const ast2html = ast => {
-  // Return HTML.
-  let html = "";
-  if (Array.isArray(ast)) {
-    for (let i = 0; i < ast.length; i++) {
-      html += ast2html(ast[i]);
-    }
-  } else if (ast && ast.type === "doc") {
-    html += ast2html(ast.content);
-  } else if (ast && ast.type !== "null") {
-    html += nodes[ast.type](ast);
-  }
-  return html
 };
 
 const wrapWithHead = (html, title, attrs) => {
@@ -17676,11 +17965,19 @@ const wrapWithHead = (html, title, attrs) => {
   return head + html + "\n</div></article>\n</body>\n</html>"
 };
 
-async function md2html(md, title = "", inHtml = false) {
-  // Convert the Markdown to an AST that matches the Hurmet internal data structure.
+async function hurmet2html(md, title = "", inHtml = false) {
+  // Convert a Hurmet document to HTML.
+
+  // A Hurmet document is written in Markdown.
+  //     To extent possible, it matches GitHub Flavored Markdown (GFM)
+  //     For extensions beyond GFM, it matches, to the extent possible, Pandoc
+  //     For calculations, Hurmet has its own format.
+
+  // Start by converting the Markdown to an AST that matches
+  // the Hurmet internal data structure.
   let ast = md2ast(md, inHtml);
 
-  // Populate a Table of Contents, if any exists.
+  // Populate a Hurmet Table of Contents, if any exists.
   const tocCapture = /\n *\n{\.toc start=(\d) end=(\d)}\n/.exec(md);
   if (tocCapture) {
     const start = Number(tocCapture[1]);
@@ -17691,22 +17988,12 @@ async function md2html(md, title = "", inHtml = false) {
     node[0].attrs.body = tocArray;
   }
 
-  // Perform calculations
+  // Perform Hurmet calculations
+  // This is asynchronous because a caclulation may need to fetch some remote data.
   ast = await updateCalcs(ast);
 
   // Write the HTML
   let html = ast2html(ast);
-
-  // Write the footnotes, if any.
-  const footnotes = [];
-  getFootnotes(ast, footnotes);
-  if (footnotes.length > 0) {
-    html += "\n<hr>\n<ol>\n";
-    for (const footnote of footnotes) {
-      html += "<li><p>" + ast2html(footnote) + "</p></li>\n";
-    }
-    html += "</ol>\n";
-  }
 
   if (title.length > 0) {
     html = wrapWithHead(html, title, ast.attrs);
@@ -31349,6 +31636,7 @@ var hurmet = {
   compile,
   md2ast,
   md2html,
+  hurmet2html,
   scanModule,
   updateCalculations,
   render,

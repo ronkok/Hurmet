@@ -78,6 +78,241 @@ Say that we want to build a cylindrical water tank in 5-foot courses.
 <p><span class="hurmet-calc" data-entry="𝐭_h= 𝐩_hydro D = ?? kips/ft"></span>, hoop tension in each course</p>
 <p>Vectors can replace many spreadsheet calculations. Then all of the expressions and values are open to view. That extra information helps you to avoid the errors that creep into spreadsheets.</p>
 
+<h2>Spreadsheets</h2>
+<p>Sometimes vectors are just too awkward. For those times, Hurmet can include simple spreadsheets.</p>
+<h4>Vertical Distribution of&nbsp;Seismic Force</h4>
+<p>From earlier analysis</p>
+<div class="indented">
+   <p>
+      <span class="hurmet-calc" data-entry="V_base = 400kips"></span>
+      , base shear&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+      <span class="hurmet-calc" data-entry="T = 0.75 sec"></span>
+      , fundamental period of the structure
+   </p>
+</div>
+<p>From&nbsp;ASCE-16 section&nbsp;12.8.3, Equivalent Lateral Procedure</p>
+<div class="indented">
+   <p><span class="hurmet-calc" data-entry="k = {   1 if T < 0.5;   2 if T > 2.5;   1 + (T - 0.5) / 2 otherwise } = %"></span></p>
+   <p><span class="hurmet-calc" data-entry="C_vs = (w × h^k) / (Σ (w × h^k))"></span>, vertical distribution coefficient,&nbsp;Eq. 12.8-12</p>
+   <p><span class="hurmet-calc" data-entry="F = C_vs V_base"></span>, local design force,&nbsp;Eq. 12.8-11</p>
+</div>
+<figure class="top-caption">
+   <table class="four-rules spreadsheet c2c c3c c4c c5c c6c c7c c8c" id="dist" style="min-width: 539px;">
+      <colgroup>
+         <col style="width: 70px;">
+         <col style="width: 71px;">
+         <col style="width: 62px;">
+         <col style="width: 73px;">
+         <col style="width: 88px;">
+         <col style="width: 74px;">
+         <col style="width: 76px;">
+         <col>
+      </colgroup>
+      <tbody>
+         <tr>
+            <th data-colwidth="70">
+               <div class="hurmet-cell" data-entry="Floor" contenteditable="false">
+                  <p>Floor</p>
+               </div>
+            </th>
+            <th data-colwidth="71">
+               <div class="hurmet-cell" data-entry="Weight<br>kips" contenteditable="false">
+                  <p>Weight<br>kips</p>
+               </div>
+            </th>
+            <th data-colwidth="62">
+               <div class="hurmet-cell" data-entry="Height<br>ft" contenteditable="false">
+                  <p>Height<br>ft</p>
+               </div>
+            </th>
+            <th data-colwidth="73">
+               <div class="hurmet-cell" data-entry="w × h<sup>k</sup>" contenteditable="false">
+                  <p>w × h<sup>k</sup></p>
+               </div>
+            </th>
+            <th data-colwidth="88">
+               <div class="hurmet-cell" data-entry="C~vs~" contenteditable="false">
+                  <p>C<sub>vs</sub></p>
+               </div>
+            </th>
+            <th data-colwidth="74">
+               <div class="hurmet-cell" data-entry="Force<br>kips" contenteditable="false">
+                  <p>Force<br>kips</p>
+               </div>
+            </th>
+            <th data-colwidth="76">
+               <div class="hurmet-cell" data-entry="Shear<br>kips" contenteditable="false">
+                  <p>Shear<br>kips</p>
+               </div>
+            </th>
+            <th data-colwidth="">
+               <div class="hurmet-cell" data-entry="Overturning<br>kip·ft" contenteditable="false">
+                  <p>Overturning<br>kip·ft</p>
+               </div>
+            </th>
+         </tr>
+         <tr>
+            <td data-colwidth="70">
+               <div class="hurmet-cell" data-entry="roof" contenteditable="false">roof</div>
+            </td>
+            <td data-colwidth="71">
+               <div class="hurmet-cell" data-entry="950" contenteditable="false">950</div>
+            </td>
+            <td data-colwidth="62">
+               <div class="hurmet-cell" data-entry="70" contenteditable="false">70</div>
+            </td>
+            <td data-colwidth="73">
+               <div class="hurmet-cell" data-entry="=B1×C1^k" contenteditable="false">113,100</div>
+            </td>
+            <td data-colwidth="88">
+               <div class="hurmet-cell" data-entry="=D1/D_end" contenteditable="false">0.2899</div>
+            </td>
+            <td data-colwidth="74">
+               <div class="hurmet-cell" data-entry="==E1× V_base" contenteditable="false">116.0</div>
+            </td>
+            <td data-colwidth="76">
+               <div class="hurmet-cell" data-entry="=F1" contenteditable="false">116.0</div>
+            </td>
+            <td data-colwidth="">
+               <div class="hurmet-cell" data-entry="0" contenteditable="false">0</div>
+            </td>
+         </tr>
+         <tr>
+            <td data-colwidth="70">
+               <div class="hurmet-cell" data-entry="fifth" contenteditable="false">fifth</div>
+            </td>
+            <td data-colwidth="71">
+               <div class="hurmet-cell" data-entry="1,250" contenteditable="false">1,250</div>
+            </td>
+            <td data-colwidth="62">
+               <div class="hurmet-cell" data-entry="56" contenteditable="false">56</div>
+            </td>
+            <td data-colwidth="73">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">115,800</div>
+            </td>
+            <td data-colwidth="88">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">0.2968</div>
+            </td>
+            <td data-colwidth="74">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">118.7</div>
+            </td>
+            <td data-colwidth="76">
+               <div class="hurmet-cell" data-entry="=G1+F2" contenteditable="false">234.7</div>
+            </td>
+            <td data-colwidth="">
+               <div class="hurmet-cell" data-entry="=H1+G1×(C1-C2)" contenteditable="false">1,624</div>
+            </td>
+         </tr>
+         <tr>
+            <td data-colwidth="70">
+               <div class="hurmet-cell" data-entry="fourth" contenteditable="false">fourth</div>
+            </td>
+            <td data-colwidth="71">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">1,250</div>
+            </td>
+            <td data-colwidth="62">
+               <div class="hurmet-cell" data-entry="42" contenteditable="false">42</div>
+            </td>
+            <td data-colwidth="73">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">83,770</div>
+            </td>
+            <td data-colwidth="88">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">0.2147</div>
+            </td>
+            <td data-colwidth="74">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">85.90</div>
+            </td>
+            <td data-colwidth="76">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">320.6</div>
+            </td>
+            <td data-colwidth="">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">4,910</div>
+            </td>
+         </tr>
+         <tr>
+            <td data-colwidth="70">
+               <div class="hurmet-cell" data-entry="third" contenteditable="false">third</div>
+            </td>
+            <td data-colwidth="71">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">1,250</div>
+            </td>
+            <td data-colwidth="62">
+               <div class="hurmet-cell" data-entry="28" contenteditable="false">28</div>
+            </td>
+            <td data-colwidth="73">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">53,080</div>
+            </td>
+            <td data-colwidth="88">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">0.1361</div>
+            </td>
+            <td data-colwidth="74">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">54.44</div>
+            </td>
+            <td data-colwidth="76">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">375.0</div>
+            </td>
+            <td data-colwidth="">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">9,398</div>
+            </td>
+         </tr>
+         <tr>
+            <td data-colwidth="70">
+               <div class="hurmet-cell" data-entry="second" contenteditable="false">second</div>
+            </td>
+            <td data-colwidth="71">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">1,250</div>
+            </td>
+            <td data-colwidth="62">
+               <div class="hurmet-cell" data-entry="14" contenteditable="false">14</div>
+            </td>
+            <td data-colwidth="73">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">24,340</div>
+            </td>
+            <td data-colwidth="88">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">0.06240</div>
+            </td>
+            <td data-colwidth="74">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">24.96</div>
+            </td>
+            <td data-colwidth="76">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">400.0</div>
+            </td>
+            <td data-colwidth="">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">14,650</div>
+            </td>
+         </tr>
+         <tr>
+            <td data-colwidth="70">
+               <div class="hurmet-cell" data-entry="total" contenteditable="false">total</div>
+            </td>
+            <td data-colwidth="71">
+               <div class="hurmet-cell" data-entry="=sum(up)" contenteditable="false">5,950</div>
+            </td>
+            <td data-colwidth="62">
+               <div class="hurmet-cell" data-entry="0" contenteditable="false">0</div>
+            </td>
+            <td data-colwidth="73">
+               <div class="hurmet-cell" data-entry="=sum(up)" contenteditable="false">390,100</div>
+            </td>
+            <td data-colwidth="88">
+               <div class="hurmet-cell" data-entry="" contenteditable="false"></div>
+            </td>
+            <td data-colwidth="74">
+               <div class="hurmet-cell" data-entry="=sum(up)" contenteditable="false">400.0</div>
+            </td>
+            <td data-colwidth="76">
+               <div class="hurmet-cell" data-entry="=F_end" contenteditable="false">400.0</div>
+            </td>
+            <td data-colwidth="">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">20,250</div>
+            </td>
+         </tr>
+      </tbody>
+   </table>
+   <figcaption class="top-caption">dist: Vertical Distribution of Seismic Force</figcaption>
+</figure>
+<p>To edit a spreadsheet, select some part of the sheet and tap the <img src="images/spreadsheetButton.svg" alt="spreadsheet button" width="16"> button. In Hurmet spreadsheets, you toggle the entire sheet, not just one cell.</p>
+
 <h2>Data Frames</h2>
 <p>Data can be stored in a tabular format:            <span class="hurmet-calc" data-entry="rebar = ``
 #size	diameter	area

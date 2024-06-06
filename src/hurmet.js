@@ -2,6 +2,7 @@ import { parse } from "./parser"
 import { calculate } from "./calculate"
 import { md2ast } from "./md2ast"
 import { md2html } from "./md2html"
+import { hurmet2html } from "./hurmet2html.js"
 import { compile } from "./compile"
 import temml from "./temml.js"
 import { scanModule } from "./module"
@@ -35,6 +36,7 @@ export default {
   compile,
   md2ast,
   md2html,
+  hurmet2html,
   scanModule,
   updateCalculations,
   render,

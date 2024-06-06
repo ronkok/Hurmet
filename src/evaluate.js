@@ -8,7 +8,7 @@ import { unitFromUnitName, unitsAreCompatible } from "./units"
 import { Matrix, isMatrix, isVector } from "./matrix"
 import { map } from "./map"
 import { DataFrame } from "./dataframe"
-import { propertyFromDotAccessor } from "./property"
+import { propertyFromDotAccessor, cellOprnd } from "./property"
 import { textRange, findfirst } from "./text"
 import { compare } from "./compare"
 import { errorOprnd } from "./error"
@@ -508,19 +508,29 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const o2 = stack.pop()
           const o1 = stack.pop()
           let property
-          if (o1.dtype === dt.DATAFRAME && tokens.length - i > 2 && tokens[i + 2] === ".") {
+          if ((o1.dtype === dt.DATAFRAME || o1.dtype === dt.SPREADSHEET)
+                && tokens.length - i > 2 && tokens[i + 2] === ".") {
             // Skip creation of a vector and go straight to a call to a single cell
             const o3 = { value: tokens[i + 1].replace(/"/g, ""), unit: null, dtype: dt.STRING }
-            const args =  (o2.value in o1.value.columnMap) ? [o3, o2] : [o2, o3];
-            property = DataFrame.range(o1, args, unitAware)
+            const args = o1.dtype === dt.SPREADSHEET
+              ? [o2, o3]
+              : (o2.value in o1.value.columnMap)
+              ? [o3, o2]
+              : [o2, o3];
+            property = o1.dtype === dt.DATAFRAME
+              ? DataFrame.range(o1, args, unitAware)
+              : cellOprnd(o1, args, unitAware)
             i += 2
-          } else if (o1.dtype === dt.DATAFRAME && tokens.length - i > 3
+          } else if ((o1.dtype === dt.DATAFRAME || o1.dtype === dt.SPREADSHEET)
+                && tokens.length - i > 3
                 && tokens[i + 2] === "[]" && tokens[i + 3] === "1"
                 && tokens[i + 1].slice(0, 1) === '"') {
             // Skip creation of a vector and go straight to a call to a single cell
             const o3 = { value: tokens[i + 1].replace(/"/g, ""), unit: null, dtype: dt.STRING }
             const args =  (o2.value in o1.value.columnMap) ? [o3, o2] : [o2, o3];
-            property = DataFrame.range(o1, args, unitAware)
+            property = o1.dtype === dt.DATAFRAME
+              ? DataFrame.range(o1, args, unitAware)
+              : cellOprnd(o1, args, unitAware)
             i += 3
           } else {
             property = propertyFromDotAccessor(o1, o2, unitAware)
@@ -1799,6 +1809,7 @@ const spreadsheetSum = (sheet, index, unitAware) => {
     const L = Object.keys(sheet.rowMap).length
     for (let i = 1; i <= L - 1; i++) {
       const cellOprnd = fromAssignment(sheet.value[index + String(i)], unitAware)
+      if (cellOprnd.dtype === dt.ERROR) { return cellOprnd }
       sum = Rnl.add(sum, cellOprnd.value)
     }
   } else if (isNaN(index)) {
@@ -1809,6 +1820,7 @@ const spreadsheetSum = (sheet, index, unitAware) => {
     for (let j = 1; j <= L - 1; j++) {
       const cellName = String.fromCodePoint(65 + j) + index
       const cellOprnd = fromAssignment(sheet.value[cellName], unitAware)
+      if (cellOprnd.dtype === dt.ERROR) { return cellOprnd }
       sum = Rnl.add(sum, cellOprnd.value)
     }
   }

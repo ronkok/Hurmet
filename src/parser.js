@@ -85,7 +85,7 @@ const numFromSupChars = str => {
 
 const colorSpecRegEx = /^(#([a-f0-9]{6}|[a-f0-9]{3})|[a-z]+|\([^)]+\))/i
 const accentRegEx = /^(?:.|\uD835.)[\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]_/
-const spreadsheetCellRegEx = /^[A-Z](\d+|Z)$/
+const spreadsheetCellRegEx = /^[A-Z](\d+|_end)$/
 
 const factorsAfterSpace = /^[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133\uD835]/
 const factors = /^[[({√∛∜]/

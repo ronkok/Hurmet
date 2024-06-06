@@ -11,6 +11,22 @@ Hurmet writes a backslash, `\`, at the end of a line, like this:\
 Hurmet also reads two spaces at the end of a line as a line break, line this:\
 Otherwise, newlines in a paragraph are treated as spaces.
 
+## Inline Style
+
+Hurmet standard notation: _italic_, **bold**, and _**bold-italic**_.
+
+A paragraph with alternate _italic_, **bold**, and _**bold-italic**_.
+
+Hurmet writes a sub~script~ with tildes. It can also read a sub~script~ written
+with HTML tags.
+
+### Code Blocks
+
+```
+Here is some code.
+And some more 
+```
+
 Two consecutive blank lines parse like a single blank line. Like the two
 preceding lines.
 
@@ -48,11 +64,15 @@ This div is centered.
 Special divs can contain more than one paragraph.
 :::
 
->  The grand-daddy of all these special divs is the blockquote.
+> ```
+> The grand-daddy of all these special divs is the blockquote.
+> ```
 >
 > The Hurmet schema for blockquote is the template for other special divs.
 
->  A second blockquote
+> ```
+> A second blockquote
+> ```
 
 ¶
 
@@ -70,7 +90,9 @@ Special divs can contain more than one paragraph.
 > [!WARNING]
 > Negative potential consequences of an action.
 
->  Check a blockquote after an alert.
+> ```
+> Check a blockquote after an alert.
+> ```
 
 ### TeX
 
@@ -111,22 +133,42 @@ Hurmet calculations also have a display mode, written between `¢¢` delimiters:
 
 ¢¢ E = m c² ¢¢
 
-### Links
+## Links
 
 Here is a [regular link][1] and here is a [reference link][2]. Another [ref
 link][3]. And here is an auto-link: <http://example.com/>
 
-### Images
-
-![4][]
+## Images
 
 Here’s an inline tank ![tank][] image.
 
+!![Tank Isometric][5]
+
+The nearby tank image has been placed in a figure with a float-right directive
+and a caption. Notice the double exclamation mark!! That indicates a figure.
+We'll fill out the paragraph with some Lorem ipsum dolor sit amet,
+consectetur adipiscing elit, sed do eiusmod tempor
+incididunt ut labore et dolore magna aliqua. Dolor sit amet consectetur
+adipiscing elit pellentesque habitant morbi. Sit amet risus nullam eget felis
+eget. Velit dignissim sodales ut eu sem integer vitae justo. Sit amet nulla
+facilisi morbi tempus iaculis urna. Duis at consectetur lorem donec massa
+sapien faucibus et molestie. Placerat in egestas erat imperdiet. Faucibus et
+molestie ac feugiat. Elit sed vulputate mi sit amet mauris commodo quis. Lectus
+proin nibh nisl condimentum id. At ultrices mi tempus imperdiet nulla malesuada
+pellentesque. Lacus vestibulum sed arcu non odio. Congue nisi vitae suscipit
+tellus mauris a. Ut faucibus pulvinar elementum integer enim neque volutpat ac.
+Justo laoreet sit amet cursus sit amet dictum sit amet. Elementum integer enim
+neque volutpat ac tincidunt vitae semper quis. Sed adipiscing diam donec
+adipiscing tristique risus nec feugiat.
+
 While we’re doing images, let’s display a Hurmet drawing.
 
-### Lists
+![Tank Dimensions][]
 
-First, test that an inline asterisk does not create a list: \* Not a list item.
+## Lists
+
+First, test that an inline asterisk does not\
+create a list: * Not a list item.
 
 *   A bullet list
 
@@ -156,22 +198,14 @@ First, test that an inline asterisk does not create a list: \* Not a list item.
          1.  macintosh
          2.  red
 
-                  
-
       2.  bananas
-
-            
-
-      
 
 
 A list can be started in the line after a paragraph. An empty line is
 unnecessary. 
-
 *   A list can be started in the line after a (loose) list item.
 
 *   An empty line is unnecessary.     
-
     *   apples
 
     *   bananas
@@ -222,7 +256,7 @@ Ordered lists can begin with numbers other than one.
        *   a bullet list
        *   Yay!
 
-        
+## Tables
 
 #### Pipe Tables
 
@@ -308,7 +342,7 @@ Grid tables can also be written without a header. Just omit the `====` border.
 
 #### Table Captions
 
-table: View
+: View
 | H1 | H2   | H3     |
 |----|:----:|:------:|
 | s1 | 12   | 55     |
@@ -318,13 +352,13 @@ table: View
 A table can be placed within a figure. The figure then may have a caption
 applied to it. The entire figure can be floated right or left.
 
-The caption is preceded by the string `table: `, as per Pandoc. The float is
-written into the table directives.
+The caption is preceded by `:`, as per Pandoc. The float is written into the
+table directives.
 
 Next, let’s make sure that we can read nested tables.
 
 +===========================================+===========================================+
-| table: Caption\                           | +-----------------------------+---------+ |
+| : Caption\                                | +-----------------------------+---------+ |
 | with a newline                            | | Item                        | weight\ | |
 | +-----------------------------+---------+ | |                             | psf     | |
 | | Item                        | weight\ | | +=============================+=========+ |
@@ -332,15 +366,15 @@ Next, let’s make sure that we can read nested tables.
 | +=============================+=========+ | +-----------------------------+---------+ |
 | | 2 layers asphalt shingles   | 8       | | | 1/2″ plywood                | 1\.5    | |
 | +-----------------------------+---------+ | +-----------------------------+---------+ |
-| | 1/2″ plywood                | 1\.5    | | | insulation, R19 fiberglass  | 0\.6    | |
+| | 1/2″ plywood                | 1.5     | | | insulation, R19 fiberglass  | 0\.6    | |
 | +-----------------------------+---------+ | +-----------------------------+---------+ |
-| | insulation, R19 fiberglass  | 0\.6    | | | trusses at 16″ o.c.         | 2\.5    | |
+| | insulation, R19 fiberglass  | 0.6     | | | trusses at 16″ o.c.         | 2\.5    | |
 | +-----------------------------+---------+ | +-----------------------------+---------+ |
-| | trusses at 16″ o.c.         | 2\.5    | | | 5/8″ gypsum board           | 2\.5    | |
+| | trusses at 16″ o.c.         | 2.5     | | | 5/8″ gypsum board           | 2\.5    | |
 | +-----------------------------+---------+ | +-----------------------------+---------+ |
-| | 5/8″ gypsum board           | 2\.5    | | | lights, HVAC, miscellaneous | 1\.5    | |
+| | 5/8″ gypsum board           | 2.5     | | | lights, HVAC, miscellaneous | 1\.5    | |
 | +-----------------------------+---------+ | +-----------------------------+---------+ |
-| | lights, HVAC, miscellaneous | 1\.5    | | | total                       | =Σ      | |
+| | lights, HVAC, miscellaneous | 1.5     | | | total                       | =Σ      | |
 | +-----------------------------+---------+ | +-----------------------------+---------+ |
 | | total                       | =Σ      | | {.four-rules colWidths="201 72"}          |
 | +-----------------------------+---------+ |                                           |
@@ -348,23 +382,54 @@ Next, let’s make sure that we can read nested tables.
 +-------------------------------------------+-------------------------------------------+
 {.nogrid colWidths="318 318"}
 
-#### Inline Style
+## Spreadsheets
 
-Hurmet standard notation: _italic_, **bold**, and _**bold-italic**_.
+Tables can be converted into spreadsheets. The section below contains an
+example.
 
-A paragraph with alternate _italic_, **bold**, and _**bold-italic**_.
+¢` format = "h4" `
 
-Hurmet writes a sub~script~ with tildes. It can also read a sub~script~ written
-with HTML tags.
+#### Vertical Distribution of Seismic Force
 
-### Code Blocks
+From earlier analysis
 
-```
-Here is some code.
-And some more 
-```
+::: indented
+¢` V_base = 400kips `, base shear        ¢` T = 0.75 sec `, fundamental period
+of the structure
+:::
 
-A paragraph
+From ASCE-16 section 12.8.3, Equivalent Lateral Procedure
+
+::: indented
+¢%` k = {   1 if T ≤ 0.5;   2 if T ≥ 2.5;   1 + (T - 0.5) / 2 otherwise } =
+〔1.125〕 `
+
+¢` C_vs = (w × h^k) / (Σ (w × h^k)) `, vertical distribution coefficient, Eq.
+12.8-12
+
+¢` F = C_vs V_base `, local force, Eq. 12.8-11
+:::
+
+: dist: Vertical Distribution of Seismic Force
++--------+----------+---------+-------------------+-----------+--------------+--------+----------------+
+| Floor  | Weight\  | Height\ | w × h<sup>k</sup> | C~vs~     | Force\       | Shear\ | Overturning\   |
+|        | kips     | ft      |                   |           | kips         | kips   | kip·ft         |
++========+:========:+:=======:+:=================:+:=========:+:============:+:======:+:==============:+
+| roof   | 950      | 70      | =B1×C1^k          | =D1/D_end | ==E1× V_base | =F1    | 0              |
++--------+----------+---------+-------------------+-----------+--------------+--------+----------------+
+| fifth  | 1,250    | 56      | "                 | "         | "            | =G1+F2 | =H1+G1×(C1-C2) |
++--------+----------+---------+-------------------+-----------+--------------+--------+----------------+
+| fourth | "        | 42      | "                 | "         | "            | "      | "              |
++--------+----------+---------+-------------------+-----------+--------------+--------+----------------+
+| third  | "        | 28      | "                 | "         | "            | "      | "              |
++--------+----------+---------+-------------------+-----------+--------------+--------+----------------+
+| second | "        | 14      | "                 | "         | "            | "      | "              |
++--------+----------+---------+-------------------+-----------+--------------+--------+----------------+
+| total  | =sum(up) | 0       | =sum(up)          |           | =sum(up)     | =F_end | "              |
++--------+----------+---------+-------------------+-----------+--------------+--------+----------------+
+{#dist .four-rules spreadsheet colWidths="70 71 62 73 88 74 76 null"}
+
+## 
 
 
 [1]: https://hurmet.org/
@@ -373,8 +438,40 @@ A paragraph
 
 [3]: https://hurmet.org/
 
-[4]: https://hurmet.org/images/IsoTankCourses.svg
-{.inline}
-
 [tank]: https://hurmet.org/images/IsoTankCourses.svg
 {.inline alt="tank"}
+
+[5]: https://hurmet.org/images/IsoTankCourses.svg
+{.right alt="tank"}
+
+[Tank Dimensions]: ¢` draw()
+    title "Tank Dimensions"
+    frame 252, 459, "right"
+    view -12, 15, -3.5
+    rect [-11, -1.5; 11, 0]
+    rect [-9, 0; -8, 19]
+    rect [8, 0; 9, 19]
+    rect [-9, 19; 9, 20]
+    line [-8, 17; 8, 17]
+    line [-5, 16.5; -2, 16.5]
+    line [-4.5, 16; -2.5, 16]
+    line [-4, 15.5; -3, 15.5]
+    dimension [1, 0; 1, 17; 1, 10], "H~L~"
+    dimension [11, 0; 9, 19; 12.5, 10], "H"
+    marker "arrow"
+    line [-10, 12; -9, 12]
+    line [-7, 12; -8, 12]
+    text [-7, 12], "t~w~", "right"
+    line [-5, 1; -5, 0]
+    line [-5, -2.5; -5, -1.5]
+    text [-5, 1.25], "t~b~", "above"
+    line [-5, 21; -5, 20]
+    line [-5, 18; -5, 19]
+    text [-5, 21.25], "t~r~", "above"
+    marker "none"
+    circle [0, 34], 11
+    circle [0, 34], 9
+    dimension [-8, 34; 8, 34; 0, 34], "D"
+    strokedasharray "5 5"
+    circle [0, 34], 8
+end `

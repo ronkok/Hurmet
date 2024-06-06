@@ -1,6 +1,5 @@
 import { parse } from "./parser.js"
 import { md2ast } from "./md2ast.js"
-import { updateCalcs } from "./updateCalcsForCLI.js"
 import { dt } from "./constants"
 
 const sanitizeUrl = function(url) {
@@ -140,7 +139,7 @@ const writeTOC = node => {
   return toc + "</ul>\n"
 }
 
-const headingText = content => {
+export const headingText = content => {
   let str = ""
   for (const node of content) {
     if (node.type && node.type === "text") {
@@ -183,7 +182,12 @@ const nodes = {
   tight_list_item(node) {
     return htmlTag("li", ast2html(node.content), { class: "tight" }) + "\n"
   },
-  table(node)        { return htmlTag("table", ast2html(node.content), node.attrs) + "\n" },
+  table(node) {
+    const attributes = ("dtype" in node.attrs) && node.attrs.dtype === dt.SPREADSHEET
+      ? {  class: node.attrs.class, dtype: dt.SPREADSHEET }
+      : {  class: node.attrs.class }
+    return htmlTag("table", ast2html(node.content), attributes) + "\n"
+  },
   colGroup(node)     {
     return "\n" + htmlTag("colgroup", ast2html(node.content), node.attrs) + "\n"
   },
@@ -200,6 +204,11 @@ const nodes = {
     if (node.attrs.colspan !== 1) { attributes.colspan = node.attrs.colspan }
     if (node.attrs.rowspan !== 1) { attributes.rowspan = node.attrs.rowspan }
     return htmlTag("td", ast2html(node.content), attributes)
+  },
+  spreadsheet_cell(node) {
+    const display = node.attrs.display ? node.attrs.display : node.attrs.entry
+    return `<div class='hurmet-cell' data-entry=${dataStr(node.attrs.entry)}>` + display
+           + '</div>'
   },
   link(node) {
     const attributes = { href: sanitizeUrl(node.attrs.href), title: node.attrs.title };
@@ -314,31 +323,11 @@ const nodes = {
           if (mark.attrs.title) { tag += ` title='${mark.attrs.title}''` }
           span = tag + ">" + span + "</a>"
         } else {
-          const tag = tagName[mark.type]
+          const tag = tagName[mark.type];
           span = `<${tag}>${span}</${tag}>`
         }
       }
       return span
-    }
-  }
-}
-
-const getTOCitems = (ast, tocArray, start, end, node) => {
-  if (Array.isArray(ast)) {
-    for (let i = 0; i < ast.length; i++) {
-      getTOCitems(ast[i], tocArray, start, end, node)
-    }
-  } else if (ast && ast.type === "heading") {
-    const level = ast.attrs.level
-    if (start <= level && level <= end) {
-      tocArray.push([headingText(ast.content), level - start])
-    }
-  } else if (ast.type === "toc") {
-    node.push(ast)
-  // eslint-disable-next-line no-prototype-builtins
-  } else if (ast.hasOwnProperty("content")) {
-    for (let j = 0; j < ast.content.length; j++) {
-      getTOCitems(ast.content[j], tocArray, start, end, node)
     }
   }
 }
@@ -373,52 +362,34 @@ export const ast2html = ast => {
   return html
 }
 
-const wrapWithHead = (html, title, attrs) => {
-  title = title ? title : "Hurmet doc"
-  const fontClass = attrs && attrs.fontSize
-    ? { "10": "long-primer", "12": "pica", "18": "great-primer" }[attrs.fontSize]
-    : "long-primer"
-  const head = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>${title}</title>
-  <link rel="stylesheet" href="./styles.css">
-</head>
-<body>
-<article class="ProseMirror ${fontClass}">
-<div class="ProseMirror-setup">
-`
-  return head + html + "\n</div></article>\n</body>\n</html>"
-}
-
-export const syncMD2html = md => {
-  // A synchronous function for Markdown snippets.
-  // Use md2html() for entire documents.
-  const ast = md2ast(md)
-  return ast2html(ast)
-}
-
-export async function md2html(md, title = "", inHtml = false) {
-  // Convert the Markdown to an AST that matches the Hurmet internal data structure.
-  let ast = md2ast(md, inHtml)
-
-  // Populate a Table of Contents, if any exists.
-  const tocCapture = /\n *\n{\.toc start=(\d) end=(\d)}\n/.exec(md)
-  if (tocCapture) {
-    const start = Number(tocCapture[1])
-    const end = Number(tocCapture[2])
-    const tocArray = [];
-    const node = [];
-    getTOCitems(ast, tocArray, start, end, node)
-    node[0].attrs.body = tocArray
+const ast2text = ast => {
+  let text = ""
+  if (Array.isArray(ast)) {
+    for (let i = 0; i < ast.length; i++) {
+      text += ast2text(ast[i])
+    }
+  } else if (typeof ast === "object" && "content" in ast) {
+    for (let i = 0; i < ast.content.length; i++) {
+      text += ast2text(ast.content[i])
+    }
+  } else if ((ast && ast.type === "text")) {
+    text += ast.text
+  } else if (ast && ast.type === "hard_break") {
+    text += "\n"
+  } else if (ast && ast.type !== "null") {
+    text += ""
   }
+  return text
+}
 
-  // Perform calculations
-  ast = await updateCalcs(ast)
+export const md2text = md => {
+  // Get the text content of some inlne Markdown
+  const ast = md2ast(md, false)
+  return ast2text(ast)
+}
 
-  // Write the HTML
+export const md2html = (md, inHtml = false) => {
+  const ast = md2ast(md, inHtml)
   let html = ast2html(ast)
 
   // Write the footnotes, if any.
@@ -431,10 +402,5 @@ export async function md2html(md, title = "", inHtml = false) {
     }
     html += "</ol>\n"
   }
-
-  if (title.length > 0) {
-    html = wrapWithHead(html, title, ast.attrs)
-  }
-
   return html
 }

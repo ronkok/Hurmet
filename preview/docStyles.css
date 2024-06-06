@@ -124,16 +124,20 @@ sup {
 sub {
     bottom: -0.25em;
 }
-figure,
-figure img {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
+figure,figure img { display: block; }
+figure { margin: 5px auto 5px auto; }
 figure figcaption {
   text-align: center;
   margin-top: 2px;
 }
+figcaption:first-child {
+  font-size: 95%;
+  font-weight: bold;
+}
+figure.right, figure.left {
+  margin: 0px 10px 5px 10px
+}
+
 .reduced {
     font-size: 80%;
 }
@@ -236,6 +240,9 @@ table.grid th {
     vertical-align: middle;
 }
 table.grid p { text-align: left; }
+table.four-rules th { border-top: 2px solid #111111; border-bottom: 1px solid #111111; }
+table.four-rules tr:last-child td { border-top: 1px solid #111111; border-bottom: 2px solid #111111; }
+
 table.markup {
     margin-left: 0;
     white-space: nowrap;

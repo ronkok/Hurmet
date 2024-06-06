@@ -5,6 +5,7 @@ import { compile } from "./compile"
 import { evaluate, evaluateDrawing } from "./evaluate"
 import { scanModule } from "./module"
 import { DataFrame } from "./dataframe"
+import { compileSheet } from "./spreadsheet"
 import { clone, addTextEscapes } from "./utils"
 
 /*
@@ -259,18 +260,18 @@ const proceedAfterFetch = (
             insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat)
           }
         }
-      } else if (node.attrs.isSpreadsheet) {
+      } else if (("dtype" in node.attrs) && node.attrs.dtype === dt.SPREADSHEET) {
         const sheetName = node.attrs.name
-        hurmetVars[sheetName] = node.attrs
-        hurmetVars[sheetName].dtype = dt.SPREADSHEET
-        hurmetVars[sheetName].value = {}
+        const sheetAttrs = clone(node.attrs)
+        sheetAttrs.value = {}
+        hurmetVars[sheetName] = sheetAttrs
         const numRows = node.content.content.length
         const numCols = node.content.content[0].content.content.length
         // Proceed column-wise thru the table.
         for (let j = 0; j < numCols; j++) {
           for (let i = 1; i < numRows; i++) {
             const cell = node.content.content[i].content.content[j].content.content[0];
-            hurmetVars[sheetName].value[cell.attrs.name] = cell.attrs
+            hurmetVars[sheetName].value[cell.attrs.name] = clone(cell.attrs)
           }
         }
       }
@@ -286,7 +287,7 @@ const proceedAfterFetch = (
     // Calculate the current node.
     if (!fetchRegEx.test(nodeAttrs.entry)) {
       // This is the typical calculation statement. We'll evalutate it.
-      if (!nodeAttrs.isSpreadsheet) {
+      if (!(("dtype" in nodeAttrs) && nodeAttrs.dtype === dt.SPREADSHEET)) {
         let attrs = clone(nodeAttrs) // compile was already run in mathprompt.js.
         try {
           // Do the calculation of the cell.
@@ -301,13 +302,14 @@ const proceedAfterFetch = (
         }
         tr.replaceWith(curPos, curPos + 1, calcSchema.createAndFill(attrs))
       } else {
+        // Calculate all the cells in a spreadsheet
         const tableNode = doc.nodeAt(curPos)
         const table = tableNode.toJSON()
         const sheetName = table.attrs.name
-        hurmetVars[sheetName] = table.attrs
-        hurmetVars[sheetName].dtype = dt.SPREADSHEET
-        hurmetVars[sheetName].rowMap = table.attrs.rowMap
-        hurmetVars[sheetName].value = {}
+        const sheet = clone(table.attrs)
+        delete sheet["value"]
+        sheet.value = {}
+        hurmetVars[sheetName] = sheet
         const numRows = table.content.length
         const numCols = table.content[0].content.length
         // Proceed column-wise thru the table.
@@ -315,14 +317,14 @@ const proceedAfterFetch = (
           for (let i = 1; i < numRows; i++) {
             const cell = table.content[i].content[j].content[0];
             if (cell.attrs.rpn) {
-              cell.attrs.altresulttemplate = cell.attrs.entry.slice(1, 2) === "=" ? "@@" : "@"
-              cell.attrs.resulttemplate = cell.attrs.altresulttemplate
+              cell.attrs.altresulttemplate = cell.attrs.resulttemplate
               cell.attrs = evaluate(cell.attrs, hurmetVars, decimalFormat)
               cell.attrs.display = cell.attrs.alt
             }
             hurmetVars[sheetName].value[cell.attrs.name] = cell.attrs
           }
         }
+        changedVars.add(sheetName)
         tr.replaceWith(curPos, curPos + tableNode.nodeSize,
                        view.state.schema.nodeFromJSON(table))
       }
@@ -374,6 +376,32 @@ const proceedAfterFetch = (
           }
         }
       }
+    } else if (("dtype" in node.attrs) && node.attrs.dtype === dt.SPREADSHEET
+                && pos !== curPos) {
+      // Calculate all the cells in a spreadsheet
+      let table = clone(node.toJSON())
+      if (isCalcAll) {
+        table = compileSheet(table, decimalFormat)
+      }
+      const sheetName = table.attrs.name
+      hurmetVars[sheetName] = table.attrs
+      hurmetVars[sheetName].value = {}
+      const numRows = table.content.length
+      const numCols = table.content[0].content.length
+      // Proceed column-wise thru the table.
+      for (let j = 0; j < numCols; j++) {
+        for (let i = 1; i < numRows; i++) {
+          const cell = table.content[i].content[j].content[0];
+          if (cell.attrs.rpn) {
+            cell.attrs.altresulttemplate = cell.attrs.resulttemplate
+            cell.attrs = evaluate(cell.attrs, hurmetVars, decimalFormat)
+            cell.attrs.display = cell.attrs.alt
+          }
+          hurmetVars[sheetName].value[cell.attrs.name] = cell.attrs
+        }
+      }
+      if (!isCalcAll) { changedVars.add(sheetName) }
+      tr.replaceWith(pos, pos + node.nodeSize, view.state.schema.nodeFromJSON(table))
     }
   })
 

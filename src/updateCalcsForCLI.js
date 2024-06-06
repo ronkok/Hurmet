@@ -1,4 +1,5 @@
 import { compile } from "./compile"
+import { compileSheet } from "./spreadsheet"
 import { evaluate, evaluateDrawing } from "./evaluate"
 import { dt } from "./constants"
 import { helpers } from "./updateCalculations"
@@ -41,8 +42,9 @@ const getCalcNodes = (ast, calcNodes) => {
     }
   } else if (ast && ast.type === "calculation") {
     calcNodes.push(ast)
-  // eslint-disable-next-line no-prototype-builtins
-  } else if (ast.hasOwnProperty("content")) {
+  } else if (ast && ast.type === "table" && "name" in ast.attrs) {
+    calcNodes.push(ast)
+  } else if ("content" in ast) {
     for (let j = 0; j < ast.content.length; j++) {
       getCalcNodes(ast.content[j], calcNodes)
     }
@@ -101,19 +103,43 @@ export async function updateCalcs(doc) {
   // Make a pass through the calculation nodes and calculate each result.
   try {
     for (const node of calcNodes) {
-      if (!helpers.fetchRegEx.test(node.attrs.entry)) {
-        const entry = node.attrs.entry
-        let attrs = compile(entry, decimalFormat)
-        attrs.displayMode = node.attrs.displayMode
-        const mustDraw = attrs.dtype && attrs.dtype === dt.DRAWING
-        if (attrs.rpn || mustDraw) {
-          attrs = attrs.rpn
-            ? evaluate(attrs, hurmetVars, decimalFormat)
-            : evaluateDrawing(attrs, hurmetVars, decimalFormat)
+      if (node.attrs.type === "calculation") {
+        if (!helpers.fetchRegEx.test(node.attrs.entry)) {
+          const entry = node.attrs.entry
+          let attrs = compile(entry, decimalFormat)
+          attrs.displayMode = node.attrs.displayMode
+          const mustDraw = attrs.dtype && attrs.dtype === dt.DRAWING
+          if (attrs.rpn || mustDraw) {
+            attrs = attrs.rpn
+              ? evaluate(attrs, hurmetVars, decimalFormat)
+              : evaluateDrawing(attrs, hurmetVars, decimalFormat)
+          }
+          if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat) }
+          // When we modify a node, we are also mutating the container doc.
+          node.attrs = attrs
         }
-        if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat) }
-        // When we modify a node, we are also mutating the container doc.
-        node.attrs = attrs
+      } else if ("dtype" in node.attrs && node.attrs.dtype === dt.SPREADSHEET) {
+        // node is a spreadsheet
+        const sheet = compileSheet(node, decimalFormat)
+        const sheetName = sheet.attrs.name
+        hurmetVars[sheetName] = sheet.attrs
+        hurmetVars[sheetName].value = {}
+        const numRows = sheet.content.length
+        const numCols = sheet.content[0].content.length
+        // Proceed column-wise thru the sheet.
+        for (let j = 0; j < numCols; j++) {
+          for (let i = 1; i < numRows; i++) {
+            const cell = sheet.content[i].content[j].content[0];
+            if (cell.attrs.rpn) {
+              cell.attrs.altresulttemplate = cell.attrs.resulttemplate
+              cell.attrs = evaluate(cell.attrs, hurmetVars, decimalFormat)
+              cell.attrs.display = cell.attrs.alt
+            }
+            hurmetVars[sheetName].value[cell.attrs.name] = cell.attrs
+          }
+        }
+        node.attrs = sheet.attrs
+        node.content = sheet.content
       }
     }
     return doc
