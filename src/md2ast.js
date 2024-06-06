@@ -26,7 +26,7 @@
  * 9. Figure/Caption for images. Format is a paragraph that consists entirely of:
  *    !![caption][id]
  * 10. Figure/Caption for tables.
- *     The caption is on the line above a table and is preceded by `table: `, as per Pandoc.
+ *     The caption is on the line above a table and is preceded by `: `, as per Pandoc.
  * 11. Table directives. They are placed on the line after the table. The format is:
  *     {#id .class float="(left|right)" width="num1 num2 …"}
  *     Float is applied only to a table inside a figure.
