@@ -1816,7 +1816,7 @@ of the structure
 From ASCE-16 section 12.8.3, Equivalent Lateral Procedure
 
 ::: indented
-¢%` k = {   1 if T ≤ 0.5;   2 if T ≥ 2.5;   1 + (T - 0.5) / 2 otherwise } = 1.125 `
+¢%` k = {   1 if T ≤ 0.5;   2 if T ≥ 2.5;   1 + (T - 0.5) // 2 otherwise } = 1.125 `
 
 ¢` C_vs = (w × h^k) / (Σ (w × h^k)) `, vertical distribution coefficient, Eq.
 12.8-12
