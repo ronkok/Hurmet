@@ -33418,7 +33418,7 @@ const conditionResult = (stmt, oprnd, unitAware) => {
   }
 
   // Check unit compatibility.
-  if (result.dtype !== dt.ERROR && unitAware && stmt.altresulttemplate.indexOf("!") === -1 &&
+  if (result.dtype !== dt.ERROR && unitAware && stmt.resultdisplay.indexOf("!") === -1 &&
     (stmt.unit && stmt.unit.expos ||
       (result.unit && result.unit.expos && Array.isArray(result.unit.expos)))) {
     const expos = (stmt.unit && stmt.unit.expos) ? stmt.unit.expos : allZeros;
@@ -35396,6 +35396,8 @@ const compileCell = (attrs, sheetAttrs, unit, previousAttrs,
     newAttrs.resulttemplate = (entry.length > 1 &&  entry.slice(1, 2) === "=")
       ? "@@"
       : "@";
+    newAttrs.altresulttemplate = newAttrs.resulttemplate;
+    newAttrs.resultdisplay = newAttrs.resulttemplate;
     newAttrs.unit = unit ? unit : { factor: Rnl.one, gauge: Rnl.zero, expos: allZeros };
   } else if (entry === '"' || entry === '“') {
     // The ditto of the previous cell
@@ -35410,6 +35412,8 @@ const compileCell = (attrs, sheetAttrs, unit, previousAttrs,
       }
       newAttrs.rpn = rpn;
       newAttrs.resulttemplate = previousAttrs.resulttemplate;
+      newAttrs.altresulttemplate = newAttrs.resulttemplate;
+      newAttrs.resultdisplay = newAttrs.resulttemplate;
       newAttrs.unit = previousAttrs.unit;
     } else {
       newAttrs.value = previousAttrs.value;
@@ -35897,7 +35901,6 @@ const proceedAfterFetch = (
           for (let i = 1; i < numRows; i++) {
             const cell = table.content[i].content[j].content[0];
             if (cell.attrs.rpn) {
-              cell.attrs.altresulttemplate = cell.attrs.resulttemplate;
               cell.attrs = evaluate(cell.attrs, hurmetVars, decimalFormat);
               cell.attrs.display = cell.attrs.alt;
             }
@@ -35973,7 +35976,6 @@ const proceedAfterFetch = (
         for (let i = 1; i < numRows; i++) {
           const cell = table.content[i].content[j].content[0];
           if (cell.attrs.rpn) {
-            cell.attrs.altresulttemplate = cell.attrs.resulttemplate;
             cell.attrs = evaluate(cell.attrs, hurmetVars, decimalFormat);
             cell.attrs.display = cell.attrs.alt;
           }
@@ -50367,6 +50369,8 @@ const nodes = {
       name: { default: "" },
       rpn: { default: "" },
       resulttemplate: { default: "@" },
+      altresulttemplate: { default: "@" },
+      resultdisplay: { default: "@" },
       value: { default: null },
       dependencies: {default: []},
       display: { default: "" },
@@ -53713,10 +53717,16 @@ function insertImage(nodeType) {
       return canInsert(state, nodeType)
     },
     run(state, _, view) {
-      let { from, to } = state.selection,
-        attrs = null;
-      if (state.selection instanceof NodeSelection && state.selection.node.type == nodeType)
+      let { from, to } = state.selection;
+      let attrs = null;
+      if (state.selection instanceof NodeSelection && state.selection.node.type == nodeType) {
         attrs = state.selection.node.attrs;
+      }
+      const resolvedPos = state.doc.resolve(from);
+      const parent = resolvedPos.parent;
+      const inFigure = parent.type.name === "figure";
+      const parentStart = inFigure ? from - 1 : 0;
+      const parentEnd = inFigure ? from - 1 + parent.nodeSize : 0;
       const promptOptions = {
         title: attrs && attrs.src ? "Edit image" : "Insert image",
         fields: {
@@ -53734,16 +53744,21 @@ function insertImage(nodeType) {
         },
         checkbox: {
           name: "Include a caption",
-          checked: false
+          checked: inFigure
         },
         callback(attrs) {
           const tr = view.state.tr;
-          if (attrs.checkbox) {
+          if (attrs.checkbox && !inFigure) {
+            // Wrap with a figure and write a caption
             const str = attrs.alt ? attrs.alt : "caption";
             const caption = schema.nodes.figcaption.createAndFill(null, [schema.text(str)]);
             const image = schema.nodes.figimg.createAndFill(attrs);
             tr.replaceSelectionWith(schema.nodes.figure.createAndFill(attrs, [image, caption]));
+          } else if (inFigure && !attrs.checkbox) {
+            // Remove the wrapping figure and caption
+            tr.replaceWith(parentStart, parentEnd, nodeType.createAndFill(attrs));
           } else {
+            // Insert an image w/o a caption
             tr.replaceSelectionWith(nodeType.createAndFill(attrs));
           }
           view.dispatch(tr);

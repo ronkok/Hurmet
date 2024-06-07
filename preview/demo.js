@@ -16168,7 +16168,7 @@ const conditionResult = (stmt, oprnd, unitAware) => {
   }
 
   // Check unit compatibility.
-  if (result.dtype !== dt.ERROR && unitAware && stmt.altresulttemplate.indexOf("!") === -1 &&
+  if (result.dtype !== dt.ERROR && unitAware && stmt.resultdisplay.indexOf("!") === -1 &&
     (stmt.unit && stmt.unit.expos ||
       (result.unit && result.unit.expos && Array.isArray(result.unit.expos)))) {
     const expos = (stmt.unit && stmt.unit.expos) ? stmt.unit.expos : allZeros;
@@ -17523,6 +17523,8 @@ const compileCell = (attrs, sheetAttrs, unit, previousAttrs,
     newAttrs.resulttemplate = (entry.length > 1 &&  entry.slice(1, 2) === "=")
       ? "@@"
       : "@";
+    newAttrs.altresulttemplate = newAttrs.resulttemplate;
+    newAttrs.resultdisplay = newAttrs.resulttemplate;
     newAttrs.unit = unit ? unit : { factor: Rnl.one, gauge: Rnl.zero, expos: allZeros };
   } else if (entry === '"' || entry === '“') {
     // The ditto of the previous cell
@@ -17537,6 +17539,8 @@ const compileCell = (attrs, sheetAttrs, unit, previousAttrs,
       }
       newAttrs.rpn = rpn;
       newAttrs.resulttemplate = previousAttrs.resulttemplate;
+      newAttrs.altresulttemplate = newAttrs.resulttemplate;
+      newAttrs.resultdisplay = newAttrs.resulttemplate;
       newAttrs.unit = previousAttrs.unit;
     } else {
       newAttrs.value = previousAttrs.value;
@@ -17951,7 +17955,6 @@ const proceedAfterFetch = (
           for (let i = 1; i < numRows; i++) {
             const cell = table.content[i].content[j].content[0];
             if (cell.attrs.rpn) {
-              cell.attrs.altresulttemplate = cell.attrs.resulttemplate;
               cell.attrs = evaluate(cell.attrs, hurmetVars, decimalFormat);
               cell.attrs.display = cell.attrs.alt;
             }
@@ -18027,7 +18030,6 @@ const proceedAfterFetch = (
         for (let i = 1; i < numRows; i++) {
           const cell = table.content[i].content[j].content[0];
           if (cell.attrs.rpn) {
-            cell.attrs.altresulttemplate = cell.attrs.resulttemplate;
             cell.attrs = evaluate(cell.attrs, hurmetVars, decimalFormat);
             cell.attrs.display = cell.attrs.alt;
           }

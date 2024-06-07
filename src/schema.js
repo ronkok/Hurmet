@@ -433,6 +433,8 @@ export const nodes = {
       name: { default: "" },
       rpn: { default: "" },
       resulttemplate: { default: "@" },
+      altresulttemplate: { default: "@" },
+      resultdisplay: { default: "@" },
       value: { default: null },
       dependencies: {default: []},
       display: { default: "" },
