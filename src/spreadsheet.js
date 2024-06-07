@@ -67,6 +67,8 @@ export const compileCell = (attrs, sheetAttrs, unit, previousAttrs,
     newAttrs.resulttemplate = (entry.length > 1 &&  entry.slice(1, 2) === "=")
       ? "@@"
       : "@"
+    newAttrs.altresulttemplate = newAttrs.resulttemplate
+    newAttrs.resultdisplay = newAttrs.resulttemplate
     newAttrs.unit = unit ? unit : { factor: Rnl.one, gauge: Rnl.zero, expos: allZeros }
   } else if (entry === '"' || entry === '“') {
     // The ditto of the previous cell
@@ -81,6 +83,8 @@ export const compileCell = (attrs, sheetAttrs, unit, previousAttrs,
       }
       newAttrs.rpn = rpn
       newAttrs.resulttemplate = previousAttrs.resulttemplate
+      newAttrs.altresulttemplate = newAttrs.resulttemplate
+      newAttrs.resultdisplay = newAttrs.resulttemplate
       newAttrs.unit = previousAttrs.unit
     } else {
       newAttrs.value = previousAttrs.value

@@ -317,7 +317,6 @@ const proceedAfterFetch = (
           for (let i = 1; i < numRows; i++) {
             const cell = table.content[i].content[j].content[0];
             if (cell.attrs.rpn) {
-              cell.attrs.altresulttemplate = cell.attrs.resulttemplate
               cell.attrs = evaluate(cell.attrs, hurmetVars, decimalFormat)
               cell.attrs.display = cell.attrs.alt
             }
@@ -393,7 +392,6 @@ const proceedAfterFetch = (
         for (let i = 1; i < numRows; i++) {
           const cell = table.content[i].content[j].content[0];
           if (cell.attrs.rpn) {
-            cell.attrs.altresulttemplate = cell.attrs.resulttemplate
             cell.attrs = evaluate(cell.attrs, hurmetVars, decimalFormat)
             cell.attrs.display = cell.attrs.alt
           }
