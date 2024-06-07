@@ -427,9 +427,9 @@ From ASCE-16 section 12.8.3, Equivalent Lateral Procedure
 +--------+----------+---------+-------------------+-----------+--------------+--------+----------------+
 | total  | =sum(up) | 0       | =sum(up)          |           | =sum(up)     | =F_end | "              |
 +--------+----------+---------+-------------------+-----------+--------------+--------+----------------+
-{#dist .four-rules spreadsheet colWidths="70 71 62 73 88 74 76 null"}
+{#dist ."four-rules spreadsheet" colWidths="70 71 62 73 88 74 76 null"}
 
-## 
+¢` V_bottom = dist.Shear.total = ?? kips `
 
 
 [1]: https://hurmet.org/

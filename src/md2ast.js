@@ -28,7 +28,8 @@
  * 10. Figure/Caption for tables.
  *     The caption is on the line above a table and is preceded by `: `, as per Pandoc.
  * 11. Table directives. They are placed on the line after the table. The format is:
- *     {#id .class float="(left|right)" width="num1 num2 …"}
+ *     {#id .class float="(left|right)" colWidths="num1 num2 …"}
+ *     {."class1 class2"}  ←  Alternate class syntax for when there is > 1 classname
  *     Float is applied only to a table inside a figure.
  *     A spreadsheet will include " spreadsheet" in `.class` The id will be the sheet's name.
  * 12. Lists that allow the user to pick list ordering.
@@ -86,7 +87,7 @@ import { dt } from "./constants"
 const CR_NEWLINE_R = /\r\n?/g;
 const FORMFEED_R = /\f/g;
 const CLASS_R = /(?:^| )\.([a-z-]+)(?: |&|$)/
-const tableClassRegEx = /(?:^| )\.([a-z- ]+)(?: colWidths=| width=| float=|&|$)/
+const tableClassRegEx = /(?:^| )\.(?:([a-z-]+)(?: |$)|"([^"]+)")/
 const floatRegEx = /float="(left|right)"/
 const WIDTH_R = /(?:^| )width="?([\d.a-z]+"?)(?: |$)/
 const COL_WIDTHS_R = /(?:^| )colWidths="([^"]*)"/
@@ -203,7 +204,9 @@ const TABLES = (function() {
     // Get CSS class, ID, and column widths, if any.
     if (!directives && align === "") { return ["", "", null] }
     const userDefClass = tableClassRegEx.exec(directives)
-    let myClass = (userDefClass) ? userDefClass[1] : ""
+    let myClass = userDefClass
+      ? (userDefClass[1] ? userDefClass[1] : userDefClass[2] )
+      : ""
     const isSpreadsheet = myClass && myClass.split(" ").includes("spreadsheet")
     if (align.length > 0) { myClass += (myClass.length > 0 ? " " : "") + align }
     const userDefId = ID_R.exec(directives)

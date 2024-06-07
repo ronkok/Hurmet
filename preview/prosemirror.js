@@ -22964,7 +22964,7 @@ const parse$1 = (
 const CR_NEWLINE_R = /\r\n?/g;
 const FORMFEED_R = /\f/g;
 const CLASS_R = /(?:^| )\.([a-z-]+)(?: |&|$)/;
-const tableClassRegEx = /(?:^| )\.([a-z- ]+)(?: colWidths=| width=| float=|&|$)/;
+const tableClassRegEx = /(?:^| )\.(?:([a-z-]+)(?: |$)|"([^"]+)")/;
 const floatRegEx = /float="(left|right)"/;
 const WIDTH_R = /(?:^| )width="?([\d.a-z]+"?)(?: |$)/;
 const COL_WIDTHS_R = /(?:^| )colWidths="([^"]*)"/;
@@ -23081,7 +23081,9 @@ const TABLES = (function() {
     // Get CSS class, ID, and column widths, if any.
     if (!directives && align === "") { return ["", "", null] }
     const userDefClass = tableClassRegEx.exec(directives);
-    let myClass = (userDefClass) ? userDefClass[1] : "";
+    let myClass = userDefClass
+      ? (userDefClass[1] ? userDefClass[1] : userDefClass[2] )
+      : "";
     const isSpreadsheet = myClass && myClass.split(" ").includes("spreadsheet");
     if (align.length > 0) { myClass += (myClass.length > 0 ? " " : "") + align; }
     const userDefId = ID_R.exec(directives);
@@ -34531,7 +34533,7 @@ const hurmetNodes =  {
     let caption;
     if (node.content.content[1].type.name === "table") {
       const figureCaption = node.content.content[0];
-      state.write("table: ");
+      state.write(": ");
       state.renderInline(figureCaption);
       state.closeBlock(figureCaption);
       const L = state.out.length;
@@ -35148,11 +35150,12 @@ class MarkdownSerializerState {
         break
       }
     }
-    const className = node.attrs.class.replace(/ c\d+[cr]/g, "");
+    let className = node.attrs.class.replace(/ c\d+[cr]/g, "").trim();
+    if (className.indexOf(" ") > -1) { className = `"${className}"`; }
     const tableName = "name" in node.attrs ? node.attrs.name : "";
     let directive = `\n${delim}{`;
     if (tableName) { directive += `#${tableName} `; } 
-    directive += `.${className.trim()}`;
+    directive += `.${className}`;
     if (float && float === "left" || float === "right") { directive += ` float="${float}"`; }
     directive += ` colWidths="${colWidths.trim()}"}\n`;
     if (!isGFM) { this.write(directive); }

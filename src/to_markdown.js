@@ -216,7 +216,7 @@ const hurmetNodes =  {
     let caption
     if (node.content.content[1].type.name === "table") {
       const figureCaption = node.content.content[0];
-      state.write("table: ")
+      state.write(": ")
       state.renderInline(figureCaption)
       state.closeBlock(figureCaption)
       const L = state.out.length
@@ -833,11 +833,12 @@ export class MarkdownSerializerState {
         break
       }
     }
-    const className = node.attrs.class.replace(/ c\d+[cr]/g, "")
+    let className = node.attrs.class.replace(/ c\d+[cr]/g, "").trim()
+    if (className.indexOf(" ") > -1) { className = `"${className}"` }
     const tableName = "name" in node.attrs ? node.attrs.name : ""
     let directive = `\n${delim}{`
     if (tableName) { directive += `#${tableName} ` } 
-    directive += `.${className.trim()}`
+    directive += `.${className}`
     if (float && float === "left" || float === "right") { directive += ` float="${float}"` }
     directive += ` colWidths="${colWidths.trim()}"}\n`
     if (!isGFM) { this.write(directive) }
