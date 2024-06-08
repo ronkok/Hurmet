@@ -9581,7 +9581,7 @@ const textRange = (str, index) => {
 const CR_NEWLINE_R = /\r\n?/g;
 const FORMFEED_R = /\f/g;
 const CLASS_R = /(?:^| )\.([a-z-]+)(?: |&|$)/;
-const tableClassRegEx = /(?:^| )\.([a-z- ]+)(?: colWidths=| width=| float=|&|$)/;
+const tableClassRegEx = /(?:^| )\.(?:([a-z-]+)(?: |$)|"([^"]+)")/;
 const floatRegEx = /float="(left|right)"/;
 const WIDTH_R = /(?:^| )width="?([\d.a-z]+"?)(?: |$)/;
 const COL_WIDTHS_R = /(?:^| )colWidths="([^"]*)"/;
@@ -9698,7 +9698,9 @@ const TABLES = (function() {
     // Get CSS class, ID, and column widths, if any.
     if (!directives && align === "") { return ["", "", null] }
     const userDefClass = tableClassRegEx.exec(directives);
-    let myClass = (userDefClass) ? userDefClass[1] : "";
+    let myClass = userDefClass
+      ? (userDefClass[1] ? userDefClass[1] : userDefClass[2] )
+      : "";
     const isSpreadsheet = myClass && myClass.split(" ").includes("spreadsheet");
     if (align.length > 0) { myClass += (myClass.length > 0 ? " " : "") + align; }
     const userDefId = ID_R.exec(directives);
