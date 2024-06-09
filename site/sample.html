@@ -92,11 +92,12 @@ Say that we want to build a cylindrical water tank in 5-foot courses.
 </div>
 <p>From&nbsp;ASCE-16 section&nbsp;12.8.3, Equivalent Lateral Procedure</p>
 <div class="indented">
-   <p><span class="hurmet-calc" data-entry="k = {   1 if T < 0.5;   2 if T > 2.5;   1 + (T - 0.5) / 2 otherwise } = %"></span></p>
+   <p><span class="hurmet-calc" data-entry="k = {   1 if T ≤ 0.5;   2 if T ≥ 2.5;   1 + (T - 0.5) // 2 otherwise } = %"></span></p>
    <p><span class="hurmet-calc" data-entry="C_vs = (w × h^k) / (Σ (w × h^k))"></span>, vertical distribution coefficient,&nbsp;Eq. 12.8-12</p>
    <p><span class="hurmet-calc" data-entry="F = C_vs V_base"></span>, local design force,&nbsp;Eq. 12.8-11</p>
 </div>
-<figure class="top-caption">
+<figure>
+   <figcaption>dist: Vertical Distribution of Seismic Force</figcaption>
    <table class="four-rules spreadsheet c2c c3c c4c c5c c6c c7c c8c" id="dist" style="min-width: 539px;">
       <colgroup>
          <col style="width: 70px;">
@@ -309,18 +310,17 @@ Say that we want to build a cylindrical water tank in 5-foot courses.
          </tr>
       </tbody>
    </table>
-   <figcaption class="top-caption">dist: Vertical Distribution of Seismic Force</figcaption>
 </figure>
 <p>To edit a spreadsheet, select some part of the sheet and tap the <img src="images/spreadsheetButton.svg" alt="spreadsheet button" width="16"> button. In Hurmet spreadsheets, you toggle the entire sheet, not just one cell.</p>
 
 <h2>Data Frames</h2>
 <p>Data can be stored in a tabular format:            <span class="hurmet-calc" data-entry="rebar = ``
 #size	diameter	area
-    	in     	in²
-#3  	0.375  	0.11
-#4  	0.5    	0.2
-#5  	0.625  	0.31
-#6  	0.75   	0.44``"></span></p>
+     	in     	in²
+#3   	0.375  	0.11
+#4   	0.5    	0.2
+#5   	0.625  	0.31
+#6   	0.75   	0.44``"></span></p>
 <p>Later, you can access the data:<br><span class="hurmet-calc" data-entry='A = rebar["#3"].area = ?? in²'></span></p>
 
 <h2 id="remote-data">Remote Data</h2>
