@@ -502,9 +502,9 @@ Display Mode
 +---------------+-----------------+------------------------------+-------------------------------+
 | `x_subscript` | ¢`x_subscript`  | `{:a, b; c, d:}`             | ¢`{:a, b; c, d:}`             |
 +---------------+-----------------+------------------------------+-------------------------------+
-| `x_(a+b)`     | ¢`x_(a+b)`      | `[1:4...] = ?`               | ¢`[1; 2; 3; 4]`               |
+| `x_(a+b)`     | ¢`x_(a+b)`      | `[1:4] = ?`                  | ¢`[1; 2; 3; 4]`               |
 +---------------+-----------------+------------------------------+-------------------------------+
-| `x′`          | ¢`x′`           | `[1:2:5...] = ?`             | ¢`[1; 3; 5]`                  |
+| `x′`          | ¢`x′`           | `[1:2:5] = ?`                | ¢`[1; 3; 5]`                  |
 +---------------+-----------------+------------------------------+-------------------------------+
 | `|x|  ‖x‖`    | ¢`|x|˽˽˽‖x‖`    | `{a if b;` \                 | ¢`{a if b; c otherwise}`      |
 |               |                 | `c otherwise}`               |                               |
@@ -537,7 +537,7 @@ Auto-correct kicks in when you type a space inside a math zone.
 |----------|------|--------------|------------|------------|---------|----------|------|
 | xx       | ×    | sqrt         | √          | Gamma      | Γ       | alpha    | α    |
 | .        | ·    | root 3       | ∛          | Delta      | Δ       | beta     | β    |
-| ' '      | ′    | x^2          | x²         | Theta      | Θ       | gamma    | γ    |
+| ' '      | ′    | x\^2         | x²         | Theta      | Θ       | gamma    | γ    |
 | oo       | ∞    | bb M         | 𝐌         | Lambda     | Λ       | delta    | δ    |
 | ooo      | °    | bbb E        | 𝔼         | Xi         | Ξ       | epsilon  | ε    |
 | `///`    | ∕    | cc P         | 𝒫         | Pi         | Π       | zeta     | ζ    |
@@ -545,7 +545,7 @@ Auto-correct kicks in when you type a space inside a math zone.
 | `>=`     | ≥    | \\floor      | ⎿⏌         | Phi        | Φ       | theta    | θ    |
 | `<>`     | ≠    | `<<`         | ⟨          | Psi        | Ψ       | iota     | ι    |
 |          |      | `>>`         | ⟩          | Omega      | Ω       | kappa    | κ    |
-| ~=       | ≅    | ^^           | ∧          | y bar      | y̅      | lambda   | λ    |
+| ~=       | ≅    | \^\^         | \∧         | y bar      | y̅      | lambda   | λ    |
 | \~~      | ≈    | vv           | ∨          | θ hat      | ¢` θ̂ `  | mu       | μ    |
 | \\in     | ∈    | vvv          | ⋁          | P vec      | ¢` P⃗ `  | nu       | ν    |
 | \\notin  | ∉    | nn           | ∩          | P harpoon  | ¢` P⃑ `  | xi       | ξ    |
@@ -923,14 +923,14 @@ Matrix
     | `[]`            | ¢`[]`             |
         
     Another way to create a Hurmet column vector is to write a range of numbers between
-    brackets; the form is `[start:step:end...]`.
+    brackets; the form is `[start:step:end]`.
     A Hurmet calculation of that form will return a column vector with every number
     in the range. The step size is optional (default = 1). Examples:
     
-    |    Input         |       Result               |
-    |------------------|----------------------------|
-    | `[2:5...] = ?`   | ¢`[2:5...] = [2; 3; 4; 5]` |
-    | `[1:2:5...] = ?` | ¢`[1:2:5...] = [1; 3; 5]`  |
+    |    Input      |       Result            |
+    |---------------|-------------------------|
+    | `[2:5] = ?`   | ¢`[2:5] = [2; 3; 4; 5]` |
+    | `[1:2:5] = ?` | ¢`[1:2:5] = [1; 3; 5]`  |
 
     You can call individual elements with index integers between brackets, as in
     `𝐕[5]` or `𝐌[1, 3]`. You can use a variable name for the index if the variable
@@ -1256,7 +1256,7 @@ _j_
 +---------------+----------------------+---------------------------------------------+
 | ///           | ¢`8///2`             | Division displayed inline                   |
 +---------------+----------------------+---------------------------------------------+
-| ^             | ¢`3^2`               | Exponent                                    |
+| \^            | ¢`3^2`               | Exponent                                    |
 +---------------+----------------------+---------------------------------------------+
 | &             | ¢`s_1 & s_2`         | Concatenate strings or horizontally         |
 |               |                      | concatenate vectors, or append numbers      |
@@ -1629,7 +1629,7 @@ To resolve this ambiguity, Hurmet performs operations with the following precede
 +---------------+---------------------------------------------------------------+
 | \! %          | Factorials and percents are done first.                       |
 +---------------+---------------------------------------------------------------+
-| ^             | Then exponents, from right to left.                           |
+| \^            | Then exponents, from right to left.                           |
 +---------------+---------------------------------------------------------------+
 | √             | Roots                                                         |
 +---------------+---------------------------------------------------------------+
@@ -1864,7 +1864,7 @@ Next, let’s look at the underlying formulas of that spreadsheet.
 +--------+----------+---------+-------------------+------------+---------------+---------+
 | second | "        | 14      | "                 | "          | "             | "       |
 +--------+----------+---------+-------------------+------------+---------------+---------+
-| total  | =sum(up) | 0       | =sum(up)          | ¶          | =sum(up)      | =F\_end |
+| total  | =sum(up) | 0       | =sum(up)          |            | =sum(up)      | =F\_end |
 +--------+----------+---------+-------------------+------------+---------------+---------+
 {.grid colWidths="70 71 62 73 88 74 76 null"}
 
