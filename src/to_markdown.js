@@ -849,9 +849,9 @@ export class MarkdownSerializerState {
   // content. If `startOfLine` is true, also escape characters that
   // has special meaning only at the start of the line.
   esc(str, startOfLine) {
-    str = str.replace(/([`*\\¢\$<\[_~])/g, "\\$1")
+    str = str.replace(/([`*\\¢\$<\[_~^])/g, "\\$1")
     if (startOfLine) {
-      str = str.replace(/^(\#|:|\-|\*|\+|>)/, "\\$1").replace(/^(\d+)\./, "$1\\.")
+      str = str.replace(/^(\#|:|\-|\*|\+|>)/, "\\$1").replace(/^(\d+)\.(?= )/, "$1\\.")
     }
     return str
   }
