@@ -1041,7 +1041,7 @@ Data Frame
     content of the top left cell begins with a hash tag, #.
 
     A dataframe literal can also show totals on the bottom line, via the
-    `sumAbove()` function. So this input:
+    `sum(up)` function. So this input:
 
     ```
     roof = ``#Item             	weight
@@ -1052,7 +1052,7 @@ Data Frame
     trusses at 16 inch o.c.    	2.5
     5/8 inch gypsum board      	2.5
     lights, HVAC, miscellaneous	1.5
-    total                      	sumAbove()``
+    total                      	=sum(up)``
     ```
 
     will render like this:\
@@ -1064,7 +1064,7 @@ Data Frame
     trusses at 16 inch o.c.    	2.5
     5/8 inch gypsum board      	2.5
     lights, HVAC, miscellaneous	1.5
-    total                      	sumAbove()`` ```
+    total                      	=sum(up)`` ```
 
     Data frames can be quite large, so Hurmet has a `fetch(url)` function to load
     data from a remote TSV file into a data frame. Since Hurmet runs in a browser,

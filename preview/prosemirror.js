@@ -20048,7 +20048,7 @@ const dataFrameFromTSV = (str, vars) => {
     row += 1;
     line.split('\t').forEach((datum, col) => {
       datum = datum.trim();
-      if (datum === "sumAbove()") {
+      if (datum === "=sum(up)") {
         let sum = Rnl.zero;
         for (const num of data[col]) {
           if (!isNaN(num)) {
@@ -35166,9 +35166,9 @@ class MarkdownSerializerState {
   // content. If `startOfLine` is true, also escape characters that
   // has special meaning only at the start of the line.
   esc(str, startOfLine) {
-    str = str.replace(/([`*\\¢\$<\[_~])/g, "\\$1");
+    str = str.replace(/([`*\\¢\$<\[_~^])/g, "\\$1");
     if (startOfLine) {
-      str = str.replace(/^(\#|:|\-|\*|\+|>)/, "\\$1").replace(/^(\d+)\./, "$1\\.");
+      str = str.replace(/^(\#|:|\-|\*|\+|>)/, "\\$1").replace(/^(\d+)\.(?= )/, "$1\\.");
     }
     return str
   }

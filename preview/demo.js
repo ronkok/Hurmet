@@ -3629,7 +3629,7 @@ const dataFrameFromTSV = (str, vars) => {
     row += 1;
     line.split('\t').forEach((datum, col) => {
       datum = datum.trim();
-      if (datum === "sumAbove()") {
+      if (datum === "=sum(up)") {
         let sum = Rnl.zero;
         for (const num of data[col]) {
           if (!isNaN(num)) {
