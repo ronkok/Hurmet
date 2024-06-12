@@ -1080,7 +1080,7 @@ end</code></pre><p>A Hurmet document can load an entire module into one variable
 <p>If you create your own Gists, you&#x27;ll see that the addresses of the raw files are very long. If you want a permalink to your file, delete the 40 random characters after &quot;/raw/&quot;. Github keeps a copy of every draft of your file and the random part after &quot;/raw/&quot; is the revision ID.</p>
 <h2 id='batch-mode'>Batch Mode</h2>
 <p>Suppose you want to operate in batch mode and run the calculations on an entire document, or multiple documents, all at once. You can do that.</p>
-<p>There is an altenate version of Hurmet that runs in Node.js from a command-line interface (CLI). It exposes one method, <code>md2html()</code>, which takes Markdown input and returns an HTML document. The code below shows how one might apply it in Node.js:</p>
+<p>There is an altenate version of Hurmet that runs in Node.js from a command-line interface (CLI). It exposes one method, <code>hurmet2html()</code>, which takes Hurmet’s version of Markdown input and returns an HTML document. The code below shows how one might apply it in Node.js:</p>
 <pre><code>// Read a Markdown file, run the calcs, and write an HTML file.
 const fs = require(&#x27;fs&#x27;)
 const hurmet = require(&#x27;filePath/hurmet.cjs&#x27;)
@@ -1096,7 +1096,7 @@ const titleRegEx = /([^.\\/]+)\.md$/;  // A helper.
   // Read the file.
   const md = fs.readFileSync(inputPath).toString(&#x27;utf8&#x27;)
   // Run the calculations and convert to HTML.
-  const html = await hurmet.md2html(md, title)
+  const html = await hurmet.hurmet2html(md, title)
   fs.writeFileSync(outputPath, html)
 })();</code></pre><p>In the code above, you need to customize the <code>filePath</code> and <code>fileName</code> callouts. </p>
 <p>The HTML file <code>&lt;head&gt;</code> contains references to a CSS (style) file and two fonts. You can get those files, and the <code>hurmet.js</code> file that runs all this, from Hurmet’s <a href='https://github.com/ronkok/Hurmet'>GitHub repository</a>. Find the green button labeled “code” and get a zip file.</p>
