@@ -2547,9 +2547,9 @@ Suppose you want to operate in batch mode and run the calculations on an entire
 document, or multiple documents, all at once. You can do that.
 
 There is an altenate version of Hurmet that runs in Node.js from a command-line
-interface (CLI). It exposes one method, `md2html()`, which takes Markdown input
-and returns an HTML document. The code below shows how one might apply it in
-Node.js:
+interface (CLI). It exposes one method, `hurmet2html()`, which takes Hurmet’s
+version of Markdown input and returns an HTML document. The code below shows how
+one might apply it in Node.js:
 
 ```
 // Read a Markdown file, run the calcs, and write an HTML file.
@@ -2567,7 +2567,7 @@ const titleRegEx = /([^.\\/]+)\.md$/;  // A helper.
   // Read the file.
   const md = fs.readFileSync(inputPath).toString('utf8')
   // Run the calculations and convert to HTML.
-  const html = await hurmet.md2html(md, title)
+  const html = await hurmet.hurmet2html(md, title)
   fs.writeFileSync(outputPath, html)
 })();
 ```
