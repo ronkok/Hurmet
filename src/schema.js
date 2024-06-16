@@ -474,7 +474,6 @@ export const nodes = {
       name: {default: null}, //           Name of cell, as in "x" from x = 12
       tex: {default: ""}, //              The string I pass to Temml for final rendering.
       alt: {default: ""}, //              The string I render when in draft mode.
-      md:  {default: null}, //            The Markdown string in the saved document
       displaySelector: {default: ""}, //  Display selector: (??|?|%%|%|@@|@|!!|!)
       rpn: {default: null}, //            RPN from parser.js, for calculation.
       dependencies: {default: []}, //     For use in avoiding unnecesary calculations

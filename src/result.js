@@ -192,19 +192,12 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, assert, is
     if (stmt.resulttemplate.indexOf("@") > -1) {
       stmt.tex = stmt.resultdisplay
       stmt.displaySelector = stmt.altresulttemplate.indexOf("@@") > -1 ? "@@" : "@"
-      if (!testRegEx.test(stmt.entry)) {
-        const pos = stmt.entry.lastIndexOf(stmt.displaySelector)
-        stmt.md = stmt.entry.slice(0, pos) + `〔${altResultDisplay}〕`
-            + stmt.entry.slice(pos + stmt.displaySelector.length)
-      }
       stmt.alt = stmt.altresulttemplate.replace(/@@?/, altResultDisplay)
     } else if (stmt.resulttemplate.indexOf("?") > -1) {
       let pos = stmt.tex.lastIndexOf("?")
       stmt.tex = stmt.tex.slice(0, pos).replace(/\? *$/, "") + resultDisplay + stmt.tex.slice(pos + 1)
       stmt.displaySelector = stmt.altresulttemplate.indexOf("??") > -1 ? "??" : "?"
       pos = stmt.alt.lastIndexOf(stmt.displaySelector)
-      stmt.md = stmt.alt.slice(0, pos) + `〔${altResultDisplay}〕`
-          + stmt.alt.slice(pos + stmt.displaySelector.length)
       stmt.alt = stmt.alt.slice(0, pos) + altResultDisplay
           + stmt.alt.slice(pos + stmt.displaySelector.length)
     } else if (stmt.resulttemplate.indexOf("%") > -1) {
@@ -212,8 +205,6 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, assert, is
       stmt.tex = stmt.tex.slice(0, pos).replace(/% *$/, "") + resultDisplay + stmt.tex.slice(pos + 1)
       stmt.displaySelector = stmt.altresulttemplate.indexOf("%%") > -1 ? "%%" : "%"
       pos = stmt.alt.lastIndexOf(stmt.displaySelector)
-      stmt.md = stmt.alt.slice(0, pos) + `〔${altResultDisplay}〕`
-          + stmt.alt.slice(pos + stmt.displaySelector.length)
       stmt.alt = stmt.alt.slice(0, pos) + altResultDisplay
           + stmt.alt.slice(pos + stmt.displaySelector.length)
     }
