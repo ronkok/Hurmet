@@ -6491,8 +6491,9 @@ const map = Object.freeze({
   range
 });
 
-const endRegEx = /^[A-Z]_end$/;
+const endRegEx = /_end$/;
 const alphaRegEx = /^[A-Z]$/;
+const cellParts = /^([^\d]+)(\d+)?$/;
 const intRegEx = /^\d+$/;
 
 function propertyFromDotAccessor(parent, index, unitAware) {
@@ -6506,9 +6507,42 @@ function propertyFromDotAccessor(parent, index, unitAware) {
   } else if (parent.dtype === dt.SPREADSHEET) {
     let key = index.value;
     if (endRegEx.test(key)) {
-      key = key.slice(0, 1) + Object.keys(parent.rowMap).length;
+      // Return the cell at the bottom of a column
+      key = key.slice(0, -4);
+      if (!alphaRegEx.test(key)) { key = parent.columnMap[key]; }
+      key = key + Object.keys(parent.rowMap).length;
+      return fromAssignment(parent.value[key], unitAware)
     }
-    return fromAssignment(parent.value[key], unitAware)
+    const parts = key.match(cellParts);
+    let colIndex = parts[1];
+    if (!alphaRegEx.test(colIndex)) { colIndex = parent.columnMap[colIndex]; }
+    if (parts[2]) {
+      return fromAssignment(parent.value[colIndex + parts[2]], unitAware)
+    } else {
+      // Return data from one column, in a column vector
+      const v = [];
+      let unit = null;
+      let dtype = null;
+      if (parent.value[colIndex + 1].dtype & dt.RATIONAL) {
+        for (let i = 1; i <= Object.keys(parent.rowMap).length; i++) {
+          if (unitAware) {
+            v.push(parent.value[colIndex + i].value.inBaseUnits);
+          } else {
+            v.push(parent.value[colIndex + i].value.plain);
+          }
+        }
+        unit = unitAware
+          ? parent.units[parent.unitMap[colIndex.codePointAt(0) - 65]]
+          : allZeros;
+        dtype = dt.RATIONAL + dt.COLUMNVECTOR;
+      } else {
+        for (let i = 1; i < Object.keys(parent.rowMap).length; i++) {
+          v.push(parent.value[colIndex + i].value);
+        }
+        dtype = parent.value(colIndex + 1).dtype + dt.COLUMNVECTOR;
+      }
+      return { value: v, unit, dtype }
+    }
 
   } else if ((parent.dtype === dt.STRING || (parent.dtype & dt.ARRAY)) &&
     index.dtype === dt.RATIONAL) {
