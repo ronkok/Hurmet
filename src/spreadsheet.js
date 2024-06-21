@@ -30,7 +30,8 @@ export const sheetLimits = (doc, inputPos) => {
 }
 
 const numberRegEx = new RegExp(Rnl.numberPattern)
-const cellRefRegEx = /"[A-Z][1-9]\d*"/g
+const cellRefRegEx = /"[A-Z][1-9]+"/g
+const innerRefRegEx = /^(?:[A-Z](?:\d+|_end)|up|left)$/
 const sumRegEx = /¿(up|left)([\xa0§])sum[\xa0§]1(?=[\xa0§]|$)/g
 const spreadsheetRegEx = / spreadsheet\b/
 
@@ -50,6 +51,12 @@ export const compileCell = (attrs, sheetAttrs, unit, previousAttrs,
     // TODO: Revise the parser to handle spreadsheet cell names & sheetname
     // eslint-disable-next-line prefer-const
     let [_, rpn, dependencies] = parse(expression, decimalFormat, true, false, sheetAttrs.name)
+    const outerDependencies = new Set()
+    for (const dependency of dependencies) {
+      if (!innerRefRegEx.test(dependency)) {
+        outerDependencies.add(dependency)
+      }
+    }
 
     // Implement sum(up) and sum(left)
     // Orig RPN:    ¿up sum 1
@@ -63,7 +70,9 @@ export const compileCell = (attrs, sheetAttrs, unit, previousAttrs,
     }
 
     newAttrs.rpn = rpn
-    newAttrs.dependencies = dependencies
+    newAttrs.dependencies = outerDependencies.size > 0
+      ? [...(outerDependencies.values())]
+      : [];
     newAttrs.resulttemplate = (entry.length > 1 &&  entry.slice(1, 2) === "=")
       ? "@@"
       : "@"
@@ -133,7 +142,7 @@ export const compileSheet = (table, decimalFormat = "1,000,000") => {
   table.attrs.rowMap = {}
   table.attrs.unitMap = [];
   table.attrs.units = {}
-  table.attrs.dependencies = {}
+  table.attrs.dependencies = [];
   table.attrs.dtype = dt.SPREADSHEET
   if (table.content[0].type === "colGroup") { table.content.shift() }
 
@@ -183,6 +192,13 @@ export const compileSheet = (table, decimalFormat = "1,000,000") => {
                                     decimalFormat)
         previousAttrs = newCell.attrs
         previousAttrs.unit = unit
+        if (newCell.attrs.dependencies) {
+          for (const d of newCell.attrs.dependencies) {
+            if (!table.attrs.dependencies.includes(d)) {
+              table.attrs.dependencies.push(d)
+            }
+          }
+        }
       }
       table.content[i].content[j].content = [newCell];
     }

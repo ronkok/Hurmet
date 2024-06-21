@@ -45,8 +45,8 @@ import { clone, addTextEscapes } from "./utils"
 *
 * But now consider a user who wants to Undo twice. The first Undo retreats to a condition in
 * which a cell is open. The user thinks a second Undo will change the PM document. But no!
-* Because the cell is open, the CodeMirror plain text editor is active and the Undo is captured
-* by CodeMirror. An Undo affects CodeMirror but not the outer document. It's very confusing!
+* Because the cell is open, the codejar plain text editor is active and the Undo is captured
+* by codejar. An Undo affects codejar but not the outer document. It's very confusing!
 * So the Undo should return to a condition in which the cell is closed. That's why I change
 * the PM state.selection object _before_ I create the PM transaction. I don't want an Undo to
 * open that cell and so I don't want the Undo to finish with the selection point inside the
@@ -379,27 +379,35 @@ const proceedAfterFetch = (
                 && pos !== curPos) {
       // Calculate all the cells in a spreadsheet
       let table = clone(node.toJSON())
+      let mustCalc = false
       if (isCalcAll) {
         table = compileSheet(table, decimalFormat)
-      }
-      const sheetName = table.attrs.name
-      hurmetVars[sheetName] = table.attrs
-      hurmetVars[sheetName].value = {}
-      const numRows = table.content.length
-      const numCols = table.content[0].content.length
-      // Proceed column-wise thru the table.
-      for (let j = 0; j < numCols; j++) {
-        for (let i = 1; i < numRows; i++) {
-          const cell = table.content[i].content[j].content[0];
-          if (cell.attrs.rpn) {
-            cell.attrs = evaluate(cell.attrs, hurmetVars, decimalFormat)
-            cell.attrs.display = cell.attrs.alt
-          }
-          hurmetVars[sheetName].value[cell.attrs.name] = cell.attrs
+        mustCalc = true
+      } else {
+        for (const varName of table.attrs.dependencies) {
+          if (changedVars.has(varName)) { mustCalc = true; break }
         }
       }
-      if (!isCalcAll) { changedVars.add(sheetName) }
-      tr.replaceWith(pos, pos + node.nodeSize, view.state.schema.nodeFromJSON(table))
+      if (mustCalc) {
+        const sheetName = table.attrs.name
+        hurmetVars[sheetName] = table.attrs
+        hurmetVars[sheetName].value = {}
+        const numRows = table.content.length
+        const numCols = table.content[0].content.length
+        // Proceed column-wise thru the table.
+        for (let j = 0; j < numCols; j++) {
+          for (let i = 1; i < numRows; i++) {
+            const cell = table.content[i].content[j].content[0];
+            if (cell.attrs.rpn) {
+              cell.attrs = evaluate(cell.attrs, hurmetVars, decimalFormat)
+              cell.attrs.display = cell.attrs.alt
+            }
+            hurmetVars[sheetName].value[cell.attrs.name] = cell.attrs
+          }
+        }
+        if (!isCalcAll) { changedVars.add(sheetName) }
+        tr.replaceWith(pos, pos + node.nodeSize, view.state.schema.nodeFromJSON(table))
+      }
     }
   })
 
