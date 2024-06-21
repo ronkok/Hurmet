@@ -1235,11 +1235,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6156","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.6031","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.7321","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.8107","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -1248,10 +1248,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4704","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4632","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9534","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.7529","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9537","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.7602","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -1271,7 +1271,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.84205","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.84531","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1279,23 +1279,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.3470","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.3401","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["3.9848","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["89.2660","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["4.0097","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["89.3150","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["167.80","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["169.82","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1480.80","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1484.58","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1306,7 +1306,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["19.8471","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["19.5271","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -1336,7 +1336,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.0686","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0688","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -16443,7 +16443,7 @@ const scanAssignment = (lines, decimalFormat, iStart) => {
 
 const containsOperator = /[+\-×·*∘⌧/^%‰&√!¡|‖&=<>≟≠≤≥∈∉⋐∧∨⊻¬]|\xa0(function|mod|\\atop|root|sum|abs|cos|sin|tan|acos|asin|atan|sec|csc|cot|asec|acsc|acot|exp|log|ln|log10|log2|cosh|sinh|tanh|sech|csch|coth|acosh|asinh|atanh|asech|acsch|acoth|gamma|Γ|lgamma|logΓ|lfact|cosd|sind|tand|acosd|asind|atand|secd|cscd|cotd|asecd|acscd|acotd|real|imag|angle|Char|round|sqrt|sign|\?{}|%|⎾⏋|⎿⏌|\[\]|\(\))\xa0/;
 const mustDoCalculation = /^(``.+``|[$$£¥\u20A0-\u20CF]?(\?{1,2}|@{1,2}|%{1,2}|!{1,2})[^=!(?@%!{})]*)$/;
-const assignDataFrameRegEx = /^[^=]+=\s*``[\s\S]+`` *\n?/;
+const assignDataFrameRegEx = /^[^=]+=\s*``[\s\S]+``/;
 const currencyRegEx = /^[$£¥\u20A0-\u20CF]/;
 const matrixOfNames = /^[([](?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*[,;].+[)\]]$/;
 const isKeyWord = /^(π|true|false|root|if|else|elseif|and|or|otherwise|mod|for|while|break|return|throw)$/;
@@ -17164,7 +17164,8 @@ const md2html = (md, inHtml = false) => {
 /* eslint-disable no-alert */
 
 const numberRegEx$2 = new RegExp(Rnl.numberPattern);
-const cellRefRegEx = /"[A-Z][1-9]\d*"/g;
+const cellRefRegEx = /"[A-Z][1-9]+"/g;
+const innerRefRegEx = /^(?:[A-Z](?:\d+|_end)|up|left)$/;
 const sumRegEx = /¿(up|left)([\xa0§])sum[\xa0§]1(?=[\xa0§]|$)/g;
 
 // Compile a spreadsheet cell.
@@ -17183,6 +17184,12 @@ const compileCell = (attrs, sheetAttrs, unit, previousAttrs,
     // TODO: Revise the parser to handle spreadsheet cell names & sheetname
     // eslint-disable-next-line prefer-const
     let [_, rpn, dependencies] = parse$1(expression, decimalFormat, true, false, sheetAttrs.name);
+    const outerDependencies = new Set();
+    for (const dependency of dependencies) {
+      if (!innerRefRegEx.test(dependency)) {
+        outerDependencies.add(dependency);
+      }
+    }
 
     // Implement sum(up) and sum(left)
     // Orig RPN:    ¿up sum 1
@@ -17196,7 +17203,9 @@ const compileCell = (attrs, sheetAttrs, unit, previousAttrs,
     }
 
     newAttrs.rpn = rpn;
-    newAttrs.dependencies = dependencies;
+    newAttrs.dependencies = outerDependencies.size > 0
+      ? [...(outerDependencies.values())]
+      : [];
     newAttrs.resulttemplate = (entry.length > 1 &&  entry.slice(1, 2) === "=")
       ? "@@"
       : "@";
@@ -17266,7 +17275,7 @@ const compileSheet = (table, decimalFormat = "1,000,000") => {
   table.attrs.rowMap = {};
   table.attrs.unitMap = [];
   table.attrs.units = {};
-  table.attrs.dependencies = {};
+  table.attrs.dependencies = [];
   table.attrs.dtype = dt.SPREADSHEET;
   if (table.content[0].type === "colGroup") { table.content.shift(); }
 
@@ -17316,6 +17325,13 @@ const compileSheet = (table, decimalFormat = "1,000,000") => {
                                     decimalFormat);
         previousAttrs = newCell.attrs;
         previousAttrs.unit = unit;
+        if (newCell.attrs.dependencies) {
+          for (const d of newCell.attrs.dependencies) {
+            if (!table.attrs.dependencies.includes(d)) {
+              table.attrs.dependencies.push(d);
+            }
+          }
+        }
       }
       table.content[i].content[j].content = [newCell];
     }
@@ -17360,8 +17376,8 @@ const compileSheet = (table, decimalFormat = "1,000,000") => {
 *
 * But now consider a user who wants to Undo twice. The first Undo retreats to a condition in
 * which a cell is open. The user thinks a second Undo will change the PM document. But no!
-* Because the cell is open, the CodeMirror plain text editor is active and the Undo is captured
-* by CodeMirror. An Undo affects CodeMirror but not the outer document. It's very confusing!
+* Because the cell is open, the codejar plain text editor is active and the Undo is captured
+* by codejar. An Undo affects codejar but not the outer document. It's very confusing!
 * So the Undo should return to a condition in which the cell is closed. That's why I change
 * the PM state.selection object _before_ I create the PM transaction. I don't want an Undo to
 * open that cell and so I don't want the Undo to finish with the selection point inside the
@@ -17694,27 +17710,35 @@ const proceedAfterFetch = (
                 && pos !== curPos) {
       // Calculate all the cells in a spreadsheet
       let table = clone(node.toJSON());
+      let mustCalc = false;
       if (isCalcAll) {
         table = compileSheet(table, decimalFormat);
-      }
-      const sheetName = table.attrs.name;
-      hurmetVars[sheetName] = table.attrs;
-      hurmetVars[sheetName].value = {};
-      const numRows = table.content.length;
-      const numCols = table.content[0].content.length;
-      // Proceed column-wise thru the table.
-      for (let j = 0; j < numCols; j++) {
-        for (let i = 1; i < numRows; i++) {
-          const cell = table.content[i].content[j].content[0];
-          if (cell.attrs.rpn) {
-            cell.attrs = evaluate(cell.attrs, hurmetVars, decimalFormat);
-            cell.attrs.display = cell.attrs.alt;
-          }
-          hurmetVars[sheetName].value[cell.attrs.name] = cell.attrs;
+        mustCalc = true;
+      } else {
+        for (const varName of table.attrs.dependencies) {
+          if (changedVars.has(varName)) { mustCalc = true; break }
         }
       }
-      if (!isCalcAll) { changedVars.add(sheetName); }
-      tr.replaceWith(pos, pos + node.nodeSize, view.state.schema.nodeFromJSON(table));
+      if (mustCalc) {
+        const sheetName = table.attrs.name;
+        hurmetVars[sheetName] = table.attrs;
+        hurmetVars[sheetName].value = {};
+        const numRows = table.content.length;
+        const numCols = table.content[0].content.length;
+        // Proceed column-wise thru the table.
+        for (let j = 0; j < numCols; j++) {
+          for (let i = 1; i < numRows; i++) {
+            const cell = table.content[i].content[j].content[0];
+            if (cell.attrs.rpn) {
+              cell.attrs = evaluate(cell.attrs, hurmetVars, decimalFormat);
+              cell.attrs.display = cell.attrs.alt;
+            }
+            hurmetVars[sheetName].value[cell.attrs.name] = cell.attrs;
+          }
+        }
+        if (!isCalcAll) { changedVars.add(sheetName); }
+        tr.replaceWith(pos, pos + node.nodeSize, view.state.schema.nodeFromJSON(table));
+      }
     }
   });
 
@@ -19672,6 +19696,10 @@ defineSymbol(math, op, "\u2210", "\\coprod");
 defineSymbol(math, op, "\u22c1", "\\bigvee");
 defineSymbol(math, op, "\u22c0", "\\bigwedge");
 defineSymbol(math, op, "\u2a04", "\\biguplus");
+defineSymbol(math, op, "\u2a04", "\\bigcupplus");
+defineSymbol(math, op, "\u2a03", "\\bigcupdot");
+defineSymbol(math, op, "\u2a07", "\\bigdoublevee");
+defineSymbol(math, op, "\u2a08", "\\bigdoublewedge");
 defineSymbol(math, op, "\u22c2", "\\bigcap");
 defineSymbol(math, op, "\u22c3", "\\bigcup");
 defineSymbol(math, op, "\u222b", "\\int");
@@ -23066,6 +23094,7 @@ defineMacro("\\standardstate", "\\text{\\tiny\\char`⦵}");
  *    4. The ~bond forms are composed entirely of \rule elements.
  *    5. Two dashes in _getBond are wrapped in braces to suppress spacing. i.e., {-}
  *    6. The electron dot uses \textbullet instead of \bullet.
+ *    7. \smash[T] has been removed. (WebKit hides anything inside \smash{…})
  *
  *    This code, as other Temml code, is released under the MIT license.
  * 
@@ -24478,8 +24507,12 @@ defineMacro("\\tripleDashBetweenDoubleLine", `\\kern0.075em\\mathrlap{\\mathrlap
             res += "{\\vphantom{X}}";
             res += "^{\\hphantom{"+(b5.b||"")+"}}_{\\hphantom{"+(b5.p||"")+"}}";
             res += "{\\vphantom{X}}";
-            res += "^{\\smash[t]{\\vphantom{2}}\\mathllap{"+(b5.b||"")+"}}";
-            res += "_{\\vphantom{2}\\mathllap{\\smash[t]{"+(b5.p||"")+"}}}";
+            // In the next two lines, I've removed \smash[t] (ron)
+            // TODO: Revert \smash[t] when WebKit properly renders <mpadded> w/height="0"
+            //res += "^{\\smash[t]{\\vphantom{2}}\\mathllap{"+(b5.b||"")+"}}";
+            res += "^{\\vphantom{2}\\mathllap{"+(b5.b||"")+"}}";
+            //res += "_{\\vphantom{2}\\mathllap{\\smash[t]{"+(b5.p||"")+"}}}";
+            res += "_{\\vphantom{2}\\mathllap{"+(b5.p||"")+"}}";
           }
           //
           // o
@@ -24499,7 +24532,10 @@ defineMacro("\\tripleDashBetweenDoubleLine", `\\kern0.075em\\mathrlap{\\mathrlap
               res += "^{"+b5.d+"}";
             }
             if (b5.q) {
-              res += "_{\\smash[t]{"+b5.q+"}}";
+              // In the next line, I've removed \smash[t] (ron)
+              // TODO: Revert \smash[t] when WebKit properly renders <mpadded> w/height="0"
+              //res += "_{\\smash[t]{"+b5.q+"}}";
+              res += "_{"+b5.q+"}";
             }
           } else if (buf.dType === 'oxidation') {
             if (b5.d) {
@@ -24511,14 +24547,20 @@ defineMacro("\\tripleDashBetweenDoubleLine", `\\kern0.075em\\mathrlap{\\mathrlap
               // TODO: Reinstate \vphantom{X} when the Firefox bug is fixed.
 //              res += "{\\vphantom{X}}";
               res += "{{}}";
-              res += "_{\\smash[t]{"+b5.q+"}}";
+              // In the next line, I've removed \smash[t] (ron)
+              // TODO: Revert \smash[t] when WebKit properly renders <mpadded> w/height="0"
+              //res += "_{\\smash[t]{"+b5.q+"}}";
+              res += "_{"+b5.q+"}";
             }
           } else {
             if (b5.q) {
               // TODO: Reinstate \vphantom{X} when the Firefox bug is fixed.
 //              res += "{\\vphantom{X}}";
               res += "{{}}";
-              res += "_{\\smash[t]{"+b5.q+"}}";
+              // In the next line, I've removed \smash[t] (ron)
+              // TODO: Revert \smash[t] when WebKit properly renders <mpadded> w/height="0"
+              //res += "_{\\smash[t]{"+b5.q+"}}";
+              res += "_{"+b5.q+"}";
             }
             if (b5.d) {
               // TODO: Reinstate \vphantom{X} when the Firefox bug is fixed.
@@ -27407,6 +27449,9 @@ const singleCharBigOps = {
   "\u2a04": "\\biguplus",
   "\u2a05": "\\bigsqcap",
   "\u2a06": "\\bigsqcup",
+  "\u2a03": "\\bigcupdot",
+  "\u2a07": "\\bigdoublevee",
+  "\u2a08": "\\bigdoublewedge",
   "\u2a09": "\\bigtimes"
 };
 
@@ -27417,8 +27462,12 @@ defineFunction({
     "\\bigvee",
     "\\bigwedge",
     "\\biguplus",
+    "\\bigcupplus",
+    "\\bigcupdot",
     "\\bigcap",
     "\\bigcup",
+    "\\bigdoublevee",
+    "\\bigdoublewedge",
     "\\intop",
     "\\prod",
     "\\sum",
@@ -31422,7 +31471,7 @@ class Style {
  * https://mit-license.org/
  */
 
-const version = "0.10.27";
+const version = "0.10.28";
 
 function postProcess(block) {
   const labelMap = {};
