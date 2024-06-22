@@ -34,6 +34,7 @@ const cellRefRegEx = /"[A-Z][1-9]+"/g
 const innerRefRegEx = /^(?:[A-Z](?:\d+|_end)|up|left)$/
 const sumRegEx = /¿(up|left)([\xa0§])sum[\xa0§]1(?=[\xa0§]|$)/g
 const spreadsheetRegEx = / spreadsheet\b/
+const grafRegEx = /\n\n/
 
 // Compile a spreadsheet cell.
 
@@ -231,8 +232,6 @@ export const tableToSheet = (state, tableNode) => {
   // Copy tableNode to an object w/o all the ProseMirror methods.
   let table = tableNode.toJSON()
   table.attrs.name = sheetName
-  table.attrs.class += " spreadsheet"
-  table.attrs.dtype = dt.SPREADSHEET
 
   // Get the cell entries.
   const numRows = table.content.length
@@ -241,9 +240,10 @@ export const tableToSheet = (state, tableNode) => {
   for (let j = 0; j < numCols; j++) {
     for (let i = 0; i < numRows; i++) {
       const cell = tableNode.content.content[i].content.content[j];
-      const entry = (i === 0)
+      let entry = (i === 0)
         ? hurmetMarkdownSerializer.serialize(cell, new Map(), [])
         : cell.textContent
+      if (i === 0) { entry = entry.replace(grafRegEx, "\\\n") }
       const newCell = { type: "spreadsheet_cell", attrs: { entry } }
       if (i === 0) { newCell.attrs.display = md2html(entry) }
       table.content[i].content[j].content = [newCell];
@@ -251,6 +251,8 @@ export const tableToSheet = (state, tableNode) => {
   }
   const decimalFormat = state.doc.decimalFormat
   table = compileSheet(table, decimalFormat)
+  table.attrs.class += " spreadsheet"
+  table.attrs.dtype = dt.SPREADSHEET
   return [table, tableStart, tableEnd]
 }
 

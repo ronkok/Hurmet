@@ -720,7 +720,8 @@ function toggleSpreadsheet() {
       let tableObj
       let tableStart = 0
       let tableEnd = 0
-      const fromSpreadsheet = ("dtype" in table.node.attrs) && table.node.attrs.dtype === dt.SPREADSHEET
+      const fromSpreadsheet = table.node.content.content[0].content.content[0].content.content[0].type.name
+                                 === "spreadsheet_cell"
       if (fromSpreadsheet) {
         [tableObj, tableStart, tableEnd] = sheetToTable(state, table.node)
       } else {
