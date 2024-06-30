@@ -971,7 +971,9 @@ const gridTable = (table, numCols, numRowsInHeading, rowSpan, colSpan, colWidth,
       const endRow = current[j].row + rowSpan[current[j].row][j] - 1
       if (table[current[j].row][j].length > current[j].line) {
         // Write one line from one cell.
-        str += " " + table[current[j].row][j][current[j].line] + " |"
+        let cellStr = table[current[j].row][j][current[j].line];
+        if (cellStr === "¶") { cellStr = " " }
+        str += " " + cellStr + " |"
         current[j].line += 1
         if (current[j].line < table[current[j].row][j].length) {
           rowIsEmptied[endRow] = false
