@@ -339,7 +339,11 @@ const hurmetMarks = {
   code: {open(_state, _mark, parent, index) { return backticksFor(parent.child(index), -1) },
          close(_state, _mark, parent, index) { return backticksFor(parent.child(index - 1), 1) },
          escape: false},
-  superscript: {open: "<sup>", close: "</sup>", expelEnclosingWhitespace: true},
+  superscript: {
+    open(state)  { return state.isGFM ? "<sup>" : "^" },
+    close(state) { return state.isGFM ? "</sup>" : "^" },
+    expelEnclosingWhitespace: true
+  },
   subscript: {
     open(state)  { return state.isGFM ? "<sub>" : "~" },
     close(state) { return state.isGFM ? "</sub>" : "~" },

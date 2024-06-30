@@ -10472,6 +10472,13 @@ rules.set("superscript", {
     return parseTextMark(capture[1], state, "superscript" )
   }
 });
+rules.set("carat", {
+  isLeaf: true,
+  match: inlineRegex(/^\^((?:\\[\s\S]|[^\\])+?)\^/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "superscript" )
+  }
+});
 rules.set("subscript", {
   isLeaf: true,
   match: inlineRegex(/^<sub>([\s\S]*?)<\/sub>/),
@@ -10485,7 +10492,8 @@ rules.set("tilde", {
   parse: function(capture, state) {
     return parseTextMark(capture[1], state, "subscript" )
   }
-});rules.set("underline", {
+});
+rules.set("underline", {
   isLeaf: true,
   match: inlineRegex(/^<u>([\s\S]*?)<\/u>/),
   parse: function(capture, state) {
@@ -10519,7 +10527,7 @@ rules.set("span", {
 rules.set("text", {
   // We break on symbol characters, double newlines, or double-space-newlines.
   isLeaf: true,
-  match: anyScopeRegex(/^[\s\S]+?(?=[_*`#>|\\\-+=![({$¢¶<~+:]|\n\n| {2,}\n|\d+[.)]|\w+:\S|$)/),
+  match: anyScopeRegex(/^[\s\S]+?(?=[_*`#>|\\\-+=![({$¢¶<~^+:]|\n\n| {2,}\n|\d+[.)]|\w+:\S|$)/),
   parse: function(capture, state) {
     return {
       text: capture[0].replace(/\n/g, " ")
