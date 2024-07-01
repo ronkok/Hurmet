@@ -7338,7 +7338,8 @@ const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat) => {
     }
     needsParens = needsParens && !isParened;
 
-    if (hvar.dtype === dt.DATAFRAME || (hvar.dtype & dt.MAP)) {
+    if (hvar.dtype === dt.DATAFRAME || (hvar.dtype & dt.MAP)
+        || hvar.resultdisplay.slice(0, 1) === "!") {
       display = "\\mathrm{" + parse$1(vars[varName].name) + "}";
     } else {
       display = hvar.resultdisplay;
@@ -15877,18 +15878,22 @@ const elementFromIterable = (iterable, index, step) => {
   // A helper function. This is called by `for` loops in evalCustomFunction()
   let value;
   let nextIndex = Rnl.increment(index);
+  const i = Rnl.toNumber(index);
   let dtype = 0;
   if (iterable.dtype === dt.RANGE) {
     value = index;
     nextIndex = Rnl.add(index, step);
     dtype = dt.RATIONAL;
-  } else if ((iterable.dtype === dt.STRING) &&
-    iterable.value[Rnl.fromNumber(index)] === "\uD835") {
-    value = Rnl.fromNumber(iterable.value[index] + iterable.value[index + 1]);
-    nextIndex = Rnl.add(index, 2);
+  } else if (iterable.dtype === dt.STRING) {
+    if (iterable.value.slice(i - 1, i) === "\uD835") {
+      value = "\uD835" + iterable.value.slice(i + 1, i + 2);
+      nextIndex = Rnl.add(index, 1);
+    } else {
+      value = iterable.value.slice(i, i + 1);
+    }
     dtype = dt.STRING;
   } else {
-    value = iterable.value[Rnl.toNumber(index)];
+    value = iterable.value[i];
     dtype = (iterable.dtype & dt.STRING)
       ? dt.STRING
       : (iterable.dtype & dt.ROWVECTOR)
@@ -16028,7 +16033,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
           const iterable = evalRpn(tokens.join("\u00A0"), vars,
                                    decimalFormat, isUnitAware, lib);
           ctrl.index = (iterable.dtype & dt.RANGE) ? iterable.value[0] : Rnl.fromNumber(0);
-          ctrl.step = (iterable.dtype & dt.RANGE) ? iterable.value[1] : Rnl.fromNumber(0);
+          ctrl.step = (iterable.dtype & dt.RANGE) ? iterable.value[1] : Rnl.fromNumber(1);
           ctrl.endIndex = (iterable.dtype & dt.RANGE)
             ? iterable.value[2]
             : Rnl.fromNumber(iterable.value.length - 1);
@@ -16689,7 +16694,9 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
     let _;
     if (expression) {
       [, rpn, _] = parse$1(expression, decimalFormat, true);
-      if (name === "for") { rpn = rpn.replace(/\u00a0in\u00a0/, "\u00a0"); }
+      if (name === "for") {
+        rpn = rpn.replace(/\u00a0in\u00a0/, "\u00a0").replace(/\u00a0in$/, "");
+      }
     }
     const stype = isStatement ? "statement" : name;
     if (isStatement && /[,;]/.test(name)) {

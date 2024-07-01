@@ -188,7 +188,9 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
     let _
     if (expression) {
       [, rpn, _] = parse(expression, decimalFormat, true)
-      if (name === "for") { rpn = rpn.replace(/\u00a0in\u00a0/, "\u00a0") }
+      if (name === "for") {
+        rpn = rpn.replace(/\u00a0in\u00a0/, "\u00a0").replace(/\u00a0in$/, "")
+      }
     }
     const stype = isStatement ? "statement" : name
     if (isStatement && /[,;]/.test(name)) {

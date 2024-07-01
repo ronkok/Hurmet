@@ -288,6 +288,22 @@ hurmet.calculate(`function testFor(a, b)
    return sum
 end`, vars)
 
+hurmet.calculate(`function reverse(str)
+   rev = ""
+   for ch in str
+      rev = ch & rev
+   end
+   return rev
+end`, vars)
+
+hurmet.calculate(`function sumVec(V)
+  sum = 0
+  for el in V
+    sum = sum + el
+  end
+  return sum
+end`, vars)
+
 hurmet.calculate(`function testWhile(b)
    sum = 0
    i = 1
@@ -470,6 +486,8 @@ end`, vars)
     [`2 (4∠30°) = @@`, `®2/1 ®4/1 ®30/1 applyUnit ° ∠ ⌧`, "6.92820323027551 + j 4"],
     [`⎿33.2⏌ = @`, `®332/10 ⎿⏌`, `33`],
     [`testFor(1, 3) = @`, `®1/1 ®3/1 function testFor 2`, `6`],
+    [`reverse("abc") = @`, `"abc" function reverse 1`, "cba"],
+    [`sumVec(vector) = @`, `¿vector function sumVec 1`, `-2.2`],
     [`testWhile(3) = @`, `®3/1 function testWhile 1`, `6`],
     [`testBreak() = @`, `function testBreak 0`, `6`],
     [`testThrow() = @`, `function testThrow 0`, `Error.`],
