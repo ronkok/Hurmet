@@ -2191,29 +2191,14 @@ line [_x_, _y_; _u_, _v_]
 
 : Draws a straight line from coordinate point _x_, _y_ to coordinate point _u_, _v_.
 
-path  [_x₁_, _y₁_], [_x₂_, _y₂_; …; _xₙ_, _yₙ_], etc
+path  (_x₁_, _y₁_; _x₂_, _y₂_; …; _xₙ_, _yₙ_)       or\
+path  (_x₁_, _y₁_, 0; _x₂_, _y₂_, _r₂_; …; _xₙ_, _yₙ_, _rₙ_)
 
 : Draws a path connecting all the points in the matrix.
   
-  The first argument defines the point at the start of the path. Then each subsequent
-  argument defines another point or points.
-  
-  <details><summary>It can get more complicated…</summary>
-  
-  Path segments can have different shapes:
-  
-  1. A line segment, indicated by a vector with the segment's end point: [_x_~end~, _y_~end~]
-  
-  2. A move (invisible segment), indicated by a 3-element vector: [_x_~end~, _y_~end~, 0]
-  
-  3. A circular arc, indicated by a 5-element vector:\
-     [_x_~end~, _y_~end~, radius, sweepFlag, 0]\
-     (The sweep flag is 0 for an arc drawn counter-clockwise, 1 for clockwise.)
-  
-  If a path has contiguous segments of the same shape, you can write them all into a
-  single argument, with the segments separated by semi-colons. [_x₂_, _y₂_; …; _xₙ_, _yₙ_]
-  
-  </details>
+  Use the second form of the statement if the path contains any circular arcs. In that case,
+  `rₙ` is the radius of the arc. Write a positive radius for arcs drawn counter-clockwise
+  and write a negative radius for arcs drawn clockwise.
 
 circle  [_x_, _y_], _r_
 
@@ -2246,7 +2231,7 @@ text  [_x_, _y_], "_string_"<span class="optional">, position</span>
   "aboveright", "belowleft", or "belowright". The default is "middle".
 
   The string can be styled with Markdown inline styles: \__italic_\_, \*\***bold**\*\*,
-  \``code`\`, `~`~subscript~`~`, and `~~`~~strikethrough~~`~~`.
+  \``code`\`, `~`~subscript~`~`, `^`^superscript^`^`, and `~~`~~strikethrough~~`~~`.
 
 leader [_x₁_, _y₁_; _x₂_, _y₂_<span class="optional">; x₃, y₃; etc</span>], "_note_"
 

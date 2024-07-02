@@ -1504,9 +1504,8 @@ const plot = (svg, decimalFormat, fun, numPoints, xMin, xMax) => {
   } else {
     //TODO: error message.
   }
-  const point = { value: pathValue[0], unit: null, dtype: dt.ROWVECTOR + dt.RATIONAL }
-  const pth = { value: pathValue.slice(1), unit: null, dtype: dt.MATRIX + dt.RATIONAL }
-  return draw.functions.path(svg, [point, pth])
+  const path = { value: pathValue, unit: null, dtype: dt.MATRIX + dt.RATIONAL }
+  return draw.functions.path(svg, [path])
 }
 
 const elementFromIterable = (iterable, index, step) => {

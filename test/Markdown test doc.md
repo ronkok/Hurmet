@@ -64,15 +64,11 @@ This div is centered.
 Special divs can contain more than one paragraph.
 :::
 
-> ```
-> The grand-daddy of all these special divs is the blockquote.
-> ```
+>  The grand-daddy of all these special divs is the blockquote.
 >
 > The Hurmet schema for blockquote is the template for other special divs.
 
-> ```
-> A second blockquote
-> ```
+>  A second blockquote
 
 ¶
 
@@ -90,19 +86,17 @@ Special divs can contain more than one paragraph.
 > [!WARNING]
 > Negative potential consequences of an action.
 
-> ```
-> Check a blockquote after an alert.
-> ```
+>  `Check a blockquote after an alert.`
 
 ### TeX
 
 Hurmet reads inline TeX written between `$` delimiters:\
 The obligatory logo: $\TeX$. A second TeX on the same line: $\frac a b + c_2$.
 
-As in Pandoc, the opening \$ must have a non-space character immediately to its
-right, and the closing \$ must have a non-space character immediately to its
-left. The closing \$ must not be followed immediately by a digit. Thus,
-\$20,000 and \$30,000 won’t parse as math.
+As in Pandoc, the opening $ must have a non-space character immediately to its
+right, and the closing $ must have a non-space character immediately to its
+left. The closing $ must not be followed immediately by a digit. Thus,
+$20,000 and $30,000 won’t parse as math.
 
 Display TeX is written between `$$` delimiters:
 
@@ -119,7 +113,7 @@ For inline calculations, the delimiters are `` ¢`…` ``:
 
 ¢` L = 3 'ft' `. Another calc on the same line: ¢` w = 0.2 'kips/ft' `
 
-¢??` M = (w L²)/8 = 〔0.225〕 kip-ft `
+¢` M = (w L²)/8 = ?? kip-ft `
 
 Hurmet data frame literals are written between double backticks: ``` `` ```. In that case, the calculation delimiters use triple backticks: ```` ``` ````:
 
@@ -146,24 +140,23 @@ Here’s an inline tank ![tank][] image.
 
 The nearby tank image has been placed in a figure with a float-right directive
 and a caption. Notice the double exclamation mark!! That indicates a figure.
-We'll fill out the paragraph with some Lorem ipsum dolor sit amet,
-consectetur adipiscing elit, sed do eiusmod tempor
-incididunt ut labore et dolore magna aliqua. Dolor sit amet consectetur
-adipiscing elit pellentesque habitant morbi. Sit amet risus nullam eget felis
-eget. Velit dignissim sodales ut eu sem integer vitae justo. Sit amet nulla
-facilisi morbi tempus iaculis urna. Duis at consectetur lorem donec massa
-sapien faucibus et molestie. Placerat in egestas erat imperdiet. Faucibus et
-molestie ac feugiat. Elit sed vulputate mi sit amet mauris commodo quis. Lectus
-proin nibh nisl condimentum id. At ultrices mi tempus imperdiet nulla malesuada
-pellentesque. Lacus vestibulum sed arcu non odio. Congue nisi vitae suscipit
-tellus mauris a. Ut faucibus pulvinar elementum integer enim neque volutpat ac.
-Justo laoreet sit amet cursus sit amet dictum sit amet. Elementum integer enim
-neque volutpat ac tincidunt vitae semper quis. Sed adipiscing diam donec
-adipiscing tristique risus nec feugiat.
+We'll fill out the paragraph with some Lorem ipsum dolor sit amet, consectetur
+adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna
+aliqua. Dolor sit amet consectetur adipiscing elit pellentesque habitant morbi.
+Sit amet risus nullam eget felis eget. Velit dignissim sodales ut eu sem
+integer vitae justo. Sit amet nulla facilisi morbi tempus iaculis urna. Duis at
+consectetur lorem donec massa sapien faucibus et molestie. Placerat in egestas
+erat imperdiet. Faucibus et molestie ac feugiat. Elit sed vulputate mi sit amet
+mauris commodo quis. Lectus proin nibh nisl condimentum id. At ultrices mi
+tempus imperdiet nulla malesuada pellentesque. Lacus vestibulum sed arcu non
+odio. Congue nisi vitae suscipit tellus mauris a. Ut faucibus pulvinar
+elementum integer enim neque volutpat ac. Justo laoreet sit amet cursus sit
+amet dictum sit amet. Elementum integer enim neque volutpat ac tincidunt vitae
+semper quis. Sed adipiscing diam donec adipiscing tristique risus nec feugiat.
 
-While we’re doing images, let’s display a Hurmet drawing.
+While we’re doing images, let’s display a few Hurmet drawings.
 
-![Tank Dimensions][]
+![Tank Dimensions][]           ![Angle][]         ![Angle 2][]
 
 ## Lists
 
@@ -198,14 +191,22 @@ create a list: * Not a list item.
          1.  macintosh
          2.  red
 
+                  
+
       2.  bananas
+
+            
+
+      
 
 
 A list can be started in the line after a paragraph. An empty line is
-unnecessary. 
+unnecessary.  
+
 *   A list can be started in the line after a (loose) list item.
 
-*   An empty line is unnecessary.     
+*   An empty line is unnecessary.   
+
     *   apples
 
     *   bananas
@@ -256,16 +257,18 @@ Ordered lists can begin with numbers other than one.
        *   a bullet list
        *   Yay!
 
+        
+
 ## Tables
 
 #### Pipe Tables
 
 A typical pipe table:
 
-| Head 1  | Head 2  | Head 3                |
-|---------|:-------:|-----------------------|
-| datum 1 | datum 2 | datum 3               |
-| datum 4 | datum 5 | ¢?` x = 2 + 2 = 〔4〕 ` |
+| Head 1  | Head 2  | Head 3             |
+|---------|:-------:|--------------------|
+| datum 1 | datum 2 | datum 3            |
+| datum 4 | datum 5 | ¢` x = 2 + 2 = ? ` |
 {.grid colWidths="null null null"}
 
 We can write a pipe table without a heading. Its top line consists of empty
@@ -291,9 +294,9 @@ format, we use the grid table from reStructuredText. Like the example below:
 +========+===========================+========+=============+================+
 | b      | Binary                    | 5      | b           | 0b101          |
 +--------+---------------------------+--------+-------------+----------------+
-| e or E | A programmer’s version of | 22,000 | e3          | 2\.20e4        |
+| e or E | A programmer’s version of | 22,000 | e3          | 2.20e4         |
 |        | scientific notation.      |        +-------------+----------------+
-|        | Rounds to _N_             |        | E3          | 2\.20E4        |
+|        | Rounds to _N_             |        | E3          | 2.20E4         |
 |        | significant digits.       |        |             |                |
 +--------+---------------------------+--------+-------------+----------------+
 {.grid colWidths="null null null null null"}
@@ -336,17 +339,17 @@ Grid tables can also be written without a header. Just omit the `====` border.
 |||
 |-----|:---------------------------------------:|
 | ! % | Factorials and percents are done first. |
-| ^   | Then exponents, from right to left.     |
+| \^  | Then exponents, from right to left.     |
 | √   | Roots                                   |
 {.grid colWidths="null null"}
 
 #### Table Captions
 
 : View
-| H1 | H2   | H3     |
-|----|:----:|:------:|
-| s1 | 12   | 55     |
-| s2 | 9\.5 | 28\.44 |
+| H1 | H2  | H3    |
+|----|:---:|:-----:|
+| s1 | 12  | 55    |
+| s2 | 9.5 | 28.44 |
 {.three-rules float="right" colWidths="53 73 62"}
 
 A table can be placed within a figure. The figure then may have a caption
@@ -364,15 +367,15 @@ Next, let’s make sure that we can read nested tables.
 | | Item                        | weight\ | | +=============================+=========+ |
 | |                             | psf     | | | 2 layers asphalt shingles   | 8       | |
 | +=============================+=========+ | +-----------------------------+---------+ |
-| | 2 layers asphalt shingles   | 8       | | | 1/2″ plywood                | 1\.5    | |
+| | 2 layers asphalt shingles   | 8       | | | 1/2″ plywood                | 1.5     | |
 | +-----------------------------+---------+ | +-----------------------------+---------+ |
-| | 1/2″ plywood                | 1.5     | | | insulation, R19 fiberglass  | 0\.6    | |
+| | 1/2″ plywood                | 1.5     | | | insulation, R19 fiberglass  | 0.6     | |
 | +-----------------------------+---------+ | +-----------------------------+---------+ |
-| | insulation, R19 fiberglass  | 0.6     | | | trusses at 16″ o.c.         | 2\.5    | |
+| | insulation, R19 fiberglass  | 0.6     | | | trusses at 16″ o.c.         | 2.5     | |
 | +-----------------------------+---------+ | +-----------------------------+---------+ |
-| | trusses at 16″ o.c.         | 2.5     | | | 5/8″ gypsum board           | 2\.5    | |
+| | trusses at 16″ o.c.         | 2.5     | | | 5/8″ gypsum board           | 2.5     | |
 | +-----------------------------+---------+ | +-----------------------------+---------+ |
-| | 5/8″ gypsum board           | 2.5     | | | lights, HVAC, miscellaneous | 1\.5    | |
+| | 5/8″ gypsum board           | 2.5     | | | lights, HVAC, miscellaneous | 1.5     | |
 | +-----------------------------+---------+ | +-----------------------------+---------+ |
 | | lights, HVAC, miscellaneous | 1.5     | | | total                       | =Σ      | |
 | +-----------------------------+---------+ | +-----------------------------+---------+ |
@@ -401,8 +404,7 @@ of the structure
 From ASCE-16 section 12.8.3, Equivalent Lateral Procedure
 
 ::: indented
-¢%` k = {   1 if T ≤ 0.5;   2 if T ≥ 2.5;   1 + (T - 0.5) / 2 otherwise } =
-〔1.125〕 `
+¢` k = {   1 if T ≤ 0.5;   2 if T ≥ 2.5;   1 + (T - 0.5) / 2 otherwise } = % `
 
 ¢` C_vs = (w × h^k) / (Σ (w × h^k)) `, vertical distribution coefficient, Eq.
 12.8-12
@@ -442,11 +444,11 @@ From ASCE-16 section 12.8.3, Equivalent Lateral Procedure
 {.inline alt="tank"}
 
 [5]: https://hurmet.org/images/IsoTankCourses.svg
-{.right alt="tank"}
+{.right alt="Tank Isometric"}
 
 [Tank Dimensions]: ¢` draw()
     title "Tank Dimensions"
-    frame 252, 459, "right"
+    frame 252, 459, "inline"
     view -12, 15, -3.5
     rect [-11, -1.5; 11, 0]
     rect [-9, 0; -8, 19]
@@ -474,4 +476,22 @@ From ASCE-16 section 12.8.3, Equivalent Lateral Procedure
     dimension [-8, 34; 8, 34; 0, 34], "D"
     strokedasharray "5 5"
     circle [0, 34], 8
+end `
+
+[Angle]: ¢` draw()
+    title "Angle"
+    frame 150, 150
+    view -0.2, 3.8, -0.2, 3.8
+    strokewidth 1
+    fill "#EEEEEE"
+    path (0, 3, 0; 3, 3, 0; 2.75, 2.75, -0.25; 0.5, 2.75, 0; 0.25, 2.5, 0.25; 0.25, 0.25, 0; 0, 0, -0.25; 0, 3, 0)
+end `
+
+[Angle 2]: ¢` draw()
+    title "Angle 2"
+    frame 150, 150
+    view -0.2, 3.8, -0.2, 3.8
+    fill "#EEEEEE"
+    strokewidth 1
+    path (0, 3, 0; 0, 0, 0; 0.25, 0.25, 0.25; 0.25, 2.5, 0; 0.5, 2.75, -0.25; 2.75, 2.75, 0; 3, 3, 0.25; 0, 3, 0)
 end `

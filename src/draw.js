@@ -392,39 +392,30 @@ const functions = {
   path(svgOprnd, args) {
     const svg = svgOprnd.value
     const attrs = svg.temp
-    if (args[0].dtype !== dt.STRING) {
-      args = rationals2numbers(args)
-    }
     const node = { tag: "path", attrs: {} }
     // Get the "d" attribute of a path
     let str = ""
-    for (let i = 0; i < args.length; i++) {
-      const el = args[i];
-      if (i === 0) {
-        if (el.dtype && el.dtype === dt.STRING) {
-          str = args[i].value
-        } else {
-          str += "M" + pointText(el, attrs)
+    if (args[0].dtype && args[0].dtype === dt.STRING) {
+      str = args[0].value
+    } else {
+      const segs = rationals2numbers(args[0].value)
+      if (segs[0].length === 2) {
+        // A path made up of line segments
+        str = "M" + pointText(segs[0], attrs) + " L"
+        for (let i = 1; i < segs.length; i++) {
+          str += " " + pointText(segs[i], attrs)
         }
-      } else if (typeof el[0] === "number") {
-        if (el.length === 2) {
-          str += " L" + pointText(el, attrs)
-        } else if (el.length === 3) {
-          str += " M" + pointText(el, attrs)
-        } else if (el.length === 5) {
-          const r = String(el[2] * attrs.xunitlength)
-          const sweep = String(el[3])
-          str += ` A${r},${r} 0 0 ${sweep} ${pointText(el, attrs)}`
-        }
-      } else if (el[0].length === 2) {
-        for (let j = 0; j < el.length; j++) {
-          str +=  " L" + pointText(el[j], attrs)
-        }
-      } else if (el[0].length === 5) {
-        for (let j = 0; j < el.length; j++) {
-          const r = String(el[j][2] * attrs.xunitlength)
-          const sweep = String(el[j][3])
-          str += ` A${r},${r} 0 0 ${sweep} ${pointText(el[j], attrs)}`
+      } else if (segs[0].length === 3) {
+        // Some segments are circular arcs.
+        str = "M" + pointText(segs[0], attrs)
+        for (let i = 1; i < segs.length; i++) {
+          if (segs[i][2] === 0) {
+            str += " L" + pointText(segs[i], attrs)
+          } else {
+            const r = String(Math.abs(segs[i][2]) * attrs.xunitlength)
+            const sweep = Math.sign(segs[i][2]) > 0 ? 0 : 1
+            str += ` A${r},${r} 0 0 ${sweep} ${pointText(segs[i], attrs)}`
+          }
         }
       }
     }
@@ -447,16 +438,16 @@ const functions = {
         }
       }
     } else if (attrs.marker === "arrow" || attrs.marker === "arrowdot") {
-      const lastEl = args[args.length - 1];
-      if (typeof lastEl[0] !== "number") {
-        const end = lastEl[lastEl.length - 1]
-        arrowhead(svg, lastEl[lastEl.length - 2], end)
+      const segs = rationals2numbers(args[0].value)
+      if (typeof segs[0] !== "number") {
+        const end = segs[segs.length - 1]
+        arrowhead(svg, segs[segs.length - 2], end)
         if (attrs.marker === "arrowdot") {
           svg.children.push(markerDot(end, attrs, attrs.markerstroke, attrs.markerfill))
         }
-      } else if (typeof lastEl[0] === "number") {
+      } else if (typeof segs[0] === "number") {
         const prevEl = args[args.length - 2];
-        const end = lastEl
+        const end = segs
         let start
         if (typeof prevEl[0] === "number") {
           start = prevEl
@@ -622,17 +613,11 @@ const functions = {
     const marker = svgOprnd.value.temp.marker
     svgOprnd.value.temp.marker = "arrow"
     svgOprnd.value.temp.isDim = true
-    const startPoint = {
-      value: clone(plistOprnd.value[plistOprnd.value.length - 1]),
-      unit: null,
-      dtype: dt.RATIONAL + dt.ROWVECTOR
-    }
     const plistCopy = clone(plistOprnd) // Copy to an un-frozen object.
-    plistCopy.value.pop()
     plistCopy.value.reverse()
-    svgOprnd = this.path(svgOprnd, [startPoint, plistCopy])
-    const p = rationals2numbers(startPoint.value)
-    const q = rationals2numbers(plistCopy.value[0])
+    svgOprnd = this.path(plistCopy)
+    const p = rationals2numbers(plistCopy.value[0])
+    const q = rationals2numbers(plistCopy.value[plistCopy.value.length - 1])
     let pos = "right"
     if (Math.abs(p[0] - q[0]) >= Math.abs(p[1] - q[1])) {
       pos = p[0] >= q[0] ? "right" : "left"
