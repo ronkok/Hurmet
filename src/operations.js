@@ -203,7 +203,11 @@ const dtype = {
       ? t0
       : t0 - dt.COLUMNVECTOR + dt.MATRIX
     },
-    columnVector(t0, t1, tkn) { return tkn === "&" ? t0 - dt.COLUMNVECTOR + dt.MATRIX : t0 },
+    columnVector(t0, t1, tkn) {
+      return tkn === "&" || tkn === "hcat"
+        ? t0 - dt.COLUMNVECTOR + dt.MATRIX
+        : t0
+    },
     matrix(t0, t1, tkn) { return t1 }
   },
   matrix: {
