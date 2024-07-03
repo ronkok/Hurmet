@@ -8,7 +8,7 @@ const titleRegEx = /([^.\\/]+)\.md$/;  // A helper.
 
 // The main function has to be async.
 (async function main() {
-  const inputPath = 'docs/Beam-Diagrams.md'
+  const inputPath = 'docs/Areas.md'
   const title = titleRegEx.exec(inputPath)[1];
   const outputPath = `site/guides/${title}.html`
   // Read the file.
