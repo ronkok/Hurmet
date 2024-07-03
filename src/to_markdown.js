@@ -237,9 +237,11 @@ const hurmetNodes =  {
       }
       const ref = getRef(node, state)
       const attrs = node.content.content[0].attrs // image attributes
+      if (node.attrs.class) { attrs.class = node.attrs.class }
       let path = attrs.src
-      if (!state.isGFM && (attrs.width || attrs.alt)) {
+      if (!state.isGFM && (attrs.class || attrs.width || attrs.alt)) {
         path += "\n{"
+        if (attrs.class) { path += "." + state.esc(attrs.class) }
         if (attrs.width && !isNaN(attrs.width)) { path += " width=" + attrs.width }
         if (attrs.alt) { path += ' alt="' + state.esc(attrs.alt) + '"' }
         path += "}"

@@ -90,6 +90,7 @@ const CLASS_R = /(?:^| )\.([a-z-]+)(?: |&|$)/
 const tableClassRegEx = /(?:^| )\.(?:([a-z-]+)(?: |$)|"([^"]+)")/
 const floatRegEx = /float="(left|right)"/
 const WIDTH_R = /(?:^| )width="?([\d.a-z]+"?)(?: |$)/
+const ALT_R = /(?:^| )alt="([A-Za-z\d ]+)"(?: |$)/
 const COL_WIDTHS_R = /(?:^| )colWidths="([^"]*)"/
 const ID_R = /(?:^| )#([A-Za-z][A-Za-z0-9]*)(?: |$)/
 const leadingSpaceRegEx = /^ +/
@@ -564,6 +565,7 @@ const parseRef = function(capture, state, refNode) {
         { type: "figcaption", content: parseInline(refNode.attrs.alt, state) }
       ] }
       refNode.content[0].attrs.src = def.target
+      if (def.attrs.alt) { refNode.content[0].attrs.alt = def.attrs.alt }
     } else if (refNode.type === "image") {
       if (def.target.indexOf("\n") > -1) {
         refNode = { type: "calculation", attrs: { entry: def.target } }
@@ -1225,9 +1227,11 @@ export const md2ast = (md, inHtml = false) => {
     if (directives) {
       const matchClass = CLASS_R.exec(directives)
       const matchWidth = WIDTH_R.exec(directives)
+      const matchAlt = ALT_R.exec(directives)
       const matchID = ID_R.exec(directives)
       if (matchClass) { attrs.class = matchClass[1] }
       if (matchWidth) { attrs.width = matchWidth[1] }
+      if (matchAlt)   { attrs.alt = matchAlt[1] }
       if (matchID)    { attrs.id = matchID[1] }
     }
     state._defs[def] = { target, attrs }
