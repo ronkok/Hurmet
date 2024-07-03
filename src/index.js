@@ -62,8 +62,18 @@ window.view = new view.EditorView(document.querySelector("#editor"), {
         return hurmet.Rnl.toNumber(value.plain)
       } else if (hurmet.Rnl.isRational(value)) {
         return hurmet.Rnl.toNumber(value)
-      } else if (Array.isArray(value) && hurmet.Rnl.isRational(value[0])) {
-        return value.map(e => hurmet.Rnl.toNumber(e))
+      } else if (attrs.dtype === dt.ROWVECTOR + dt.RATIONAL
+                 || attrs.dtype === dt.COLUMNVECTOR + dt.RATIONAL) {
+        const sep = (attrs.dtype & dt.ROWVECTOR) ? ", " : "; "
+        return "[" + value.map(e => String(hurmet.Rnl.toNumber(e))).join(sep) + "]"
+      } else if ((attrs.dtype & dt.ROWVECTOR) || (attrs.dtype & dt.COLUMNVECTOR)) {
+        const sep = (attrs.dtype & dt.ROWVECTOR) ? ", " : "; "
+        return "[" + value.map(e => String(e)).join(sep) + "]"
+      } else if (attrs.dtype === dt.MATRIX + dt.RATIONAL) {
+        // eslint-disable-next-line max-len
+        return "(" + value.map(row => row.map(e => String(hurmet.Rnl.toNumber(e))).join(", ")).join(";\n") + ")"
+      } else if (attrs.dtype & dt.MATRIX) {
+        return "(" + value.map(row => row.map(e => String(e)).join(", ")).join(";\n") + ")"
       } else if (attrs.dtype === dt.DATAFRAME) {
         return DataFrame.displayAlt(value)
       }

@@ -56479,7 +56479,6 @@ window.view = new EditorView(document.querySelector("#editor"), {
       } else if (hurmet.Rnl.isRational(value)) {
         return hurmet.Rnl.toNumber(value)
       } else if (Array.isArray(value) && hurmet.Rnl.isRational(value[0])) {
-        return value.map(e => hurmet.Rnl.toNumber(e))
       } else if (attrs.dtype === dt.DATAFRAME) {
         return DataFrame.displayAlt(value)
       }
