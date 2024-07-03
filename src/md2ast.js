@@ -550,6 +550,7 @@ const linkIndex = marks => {
 // Pattern to find Hurmet calculation results.
 // This will be replaced in the entry with the display selector.
 const resultRegEx = /〔[^〕]*〕/
+const drawRegEx = /^draw\(/
 
 const parseRef = function(capture, state, refNode) {
   // Handle implicit refs: [title][<ref>], ![alt or caption][<ref>]
@@ -567,8 +568,9 @@ const parseRef = function(capture, state, refNode) {
       refNode.content[0].attrs.src = def.target
       if (def.attrs.alt) { refNode.content[0].attrs.alt = def.attrs.alt }
     } else if (refNode.type === "image") {
-      if (def.target.indexOf("\n") > -1) {
-        refNode = { type: "calculation", attrs: { entry: def.target } }
+      if (drawRegEx.test(def.target)) {
+        const entry = def.target.replace(/\\n/g, "\n")
+        return { type: "calculation", attrs: { entry } }
       } else {
         refNode.attrs = def.attrs
         refNode.attrs.src = def.target
@@ -1215,13 +1217,13 @@ export const md2ast = (md, inHtml = false) => {
     remainder: "",
     inHtml
   }
-  const defRegEx = /\n *\[([^\]\n]+)\]: *(?:¢(`+)([\s\S]*?[^`])\2(?!`)|<?([^\n>]*)>? *(?:\n\{([^\n}]*)\})?)(?=\n)/gm
+  const defRegEx = /\n *\[([^\]\n]+)\]: *([^\n]*) *(?:\n\{([^\n}]*)\})?(?=\n)/gm
   const footnoteDefRegEx = /\n *\[\^\d+\]: *([^\n]*)(?=\n)/gm
   let capture
   while ((capture = defRegEx.exec(md)) !== null) {
     const def = capture[1].replace(/\s+/g, " ")
-    const target = capture[4] || capture[3].trim();
-    const directives = capture[5] || "";
+    const target = capture[2].trim();
+    const directives = capture[3] || "";
 
     const attrs = isNotAnInteger(def) ? { alt: def } : {}
     if (directives) {

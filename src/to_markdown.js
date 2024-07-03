@@ -307,7 +307,7 @@ const hurmetNodes =  {
     } else {
       if (node.attrs.entry.slice(0, 5) === "draw(") {
         const ref = getRef(node, state)
-        state.paths.set(ref, "¢` " + entry + " `")
+        state.paths.set(ref,entry.replace(/\n/g, "\\n"))
         state.write(`![${ref}][]`)
       } else if (node.attrs.displayMode) {
         state.write("¢¢" + " " + entry + " ¢¢")

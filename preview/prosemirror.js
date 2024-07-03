@@ -20134,7 +20134,7 @@ const dataFrameFromVectors = (vectors, formatSpec) => {
     const colDtype = vector.dtype - vectorType;
     data.push(vector.value.map(e => datumFromValue(e, colDtype, formatSpec)));
     dtype.push(colDtype);
-    if (vector.unit.name) {
+    if (vector.unit && vector.unit.name) {
       units.push(vector.unit.name);
       if (!unitMap[vector.unit.name]) {
         const unit = unitFromUnitName(vector.unit.name);
@@ -23427,6 +23427,7 @@ const linkIndex = marks => {
 // Pattern to find Hurmet calculation results.
 // This will be replaced in the entry with the display selector.
 const resultRegEx = /〔[^〕]*〕/;
+const drawRegEx$1 = /^draw\(/;
 
 const parseRef = function(capture, state, refNode) {
   // Handle implicit refs: [title][<ref>], ![alt or caption][<ref>]
@@ -23444,8 +23445,9 @@ const parseRef = function(capture, state, refNode) {
       refNode.content[0].attrs.src = def.target;
       if (def.attrs.alt) { refNode.content[0].attrs.alt = def.attrs.alt; }
     } else if (refNode.type === "image") {
-      if (def.target.indexOf("\n") > -1) {
-        refNode = { type: "calculation", attrs: { entry: def.target } };
+      if (drawRegEx$1.test(def.target)) {
+        const entry = def.target.replace(/\\n/g, "\n");
+        return { type: "calculation", attrs: { entry } }
       } else {
         refNode.attrs = def.attrs;
         refNode.attrs.src = def.target;
@@ -24092,13 +24094,13 @@ const md2ast = (md, inHtml = false) => {
     remainder: "",
     inHtml
   };
-  const defRegEx = /\n *\[([^\]\n]+)\]: *(?:¢(`+)([\s\S]*?[^`])\2(?!`)|<?([^\n>]*)>? *(?:\n\{([^\n}]*)\})?)(?=\n)/gm;
+  const defRegEx = /\n *\[([^\]\n]+)\]: *([^\n]*) *(?:\n\{([^\n}]*)\})?(?=\n)/gm;
   const footnoteDefRegEx = /\n *\[\^\d+\]: *([^\n]*)(?=\n)/gm;
   let capture;
   while ((capture = defRegEx.exec(md)) !== null) {
     const def = capture[1].replace(/\s+/g, " ");
-    const target = capture[4] || capture[3].trim();
-    const directives = capture[5] || "";
+    const target = capture[2].trim();
+    const directives = capture[3] || "";
 
     const attrs = isNotAnInteger(def) ? { alt: def } : {};
     if (directives) {
@@ -34656,7 +34658,7 @@ const hurmetNodes =  {
     } else {
       if (node.attrs.entry.slice(0, 5) === "draw(") {
         const ref = getRef(node, state);
-        state.paths.set(ref, "¢` " + entry + " `");
+        state.paths.set(ref,entry.replace(/\n/g, "\\n"));
         state.write(`![${ref}][]`);
       } else if (node.attrs.displayMode) {
         state.write("¢¢" + " " + entry + " ¢¢");
@@ -56478,7 +56480,18 @@ window.view = new EditorView(document.querySelector("#editor"), {
         return hurmet.Rnl.toNumber(value.plain)
       } else if (hurmet.Rnl.isRational(value)) {
         return hurmet.Rnl.toNumber(value)
-      } else if (Array.isArray(value) && hurmet.Rnl.isRational(value[0])) {
+      } else if (attrs.dtype === dt.ROWVECTOR + dt.RATIONAL
+                 || attrs.dtype === dt.COLUMNVECTOR + dt.RATIONAL) {
+        const sep = (attrs.dtype & dt.ROWVECTOR) ? ", " : "; ";
+        return "[" + value.map(e => String(hurmet.Rnl.toNumber(e))).join(sep) + "]"
+      } else if ((attrs.dtype & dt.ROWVECTOR) || (attrs.dtype & dt.COLUMNVECTOR)) {
+        const sep = (attrs.dtype & dt.ROWVECTOR) ? ", " : "; ";
+        return "[" + value.map(e => String(e)).join(sep) + "]"
+      } else if (attrs.dtype === dt.MATRIX + dt.RATIONAL) {
+        // eslint-disable-next-line max-len
+        return "(" + value.map(row => row.map(e => String(hurmet.Rnl.toNumber(e))).join(", ")).join(";\n") + ")"
+      } else if (attrs.dtype & dt.MATRIX) {
+        return "(" + value.map(row => row.map(e => String(e)).join(", ")).join(";\n") + ")"
       } else if (attrs.dtype === dt.DATAFRAME) {
         return DataFrame.displayAlt(value)
       }
