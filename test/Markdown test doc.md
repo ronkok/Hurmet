@@ -444,7 +444,7 @@ From ASCE-16 section 12.8.3, Equivalent Lateral Procedure
 {.inline alt="tank"}
 
 [5]: https://hurmet.org/images/IsoTankCourses.svg
-{.right alt="Tank Isometric"}
+{.right alt="Tank Iso"}
 
 [Tank Dimensions]: ¢` draw()
     title "Tank Dimensions"

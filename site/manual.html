@@ -939,16 +939,9 @@ end</code></pre><p>… which results in this plot …</p>
 <dd><p>Sets the default marker symbol that is drawn at the endpoints of lines and paths. Dots are also set along the intermediate points of paths and curves.</p></dd>
 <dt id='line-[<em>x</em>,-<em>y</em>;-<em>u</em>,-<em>v</em>]'>line [<em>x</em>, <em>y</em>; <em>u</em>, <em>v</em>]</dt>
 <dd><p>Draws a straight line from coordinate point <em>x</em>, <em>y</em> to coordinate point <em>u</em>, <em>v</em>.</p></dd>
-<dt id='path-[<em>x₁</em>,-<em>y₁</em>],-[<em>x₂</em>,-<em>y₂</em>;-…;-<em>xₙ</em>,-<em>yₙ</em>],-etc'>path  [<em>x₁</em>, <em>y₁</em>], [<em>x₂</em>, <em>y₂</em>; …; <em>xₙ</em>, <em>yₙ</em>], etc</dt>
+<p>path  (<em>x₁</em>, <em>y₁</em>; <em>x₂</em>, <em>y₂</em>; …; <em>xₙ</em>, <em>yₙ</em>)       or<br>path  (<em>x₁</em>, <em>y₁</em>, 0; <em>x₂</em>, <em>y₂</em>, <em>r₂</em>; …; <em>xₙ</em>, <em>yₙ</em>, <em>rₙ</em>)</p>
 <dd><p>Draws a path connecting all the points in the matrix.</p>
-<p>The first argument defines the point at the start of the path. Then each subsequent argument defines another point or points.</p>
-<details><summary>It can get more complicated…</summary>
-<p>Path segments can have different shapes:</p>
-<ol><li><p>A line segment, indicated by a vector with the segment&#x27;s end point: [<em>x</em><sub>end</sub>, <em>y</em><sub>end</sub>]</p></li>
-<li><p>A move (invisible segment), indicated by a 3-element vector: [<em>x</em><sub>end</sub>, <em>y</em><sub>end</sub>, 0]</p></li>
-<li><p>A circular arc, indicated by a 5-element vector:<br>[<em>x</em><sub>end</sub>, <em>y</em><sub>end</sub>, radius, sweepFlag, 0]<br>(The sweep flag is 0 for an arc drawn counter-clockwise, 1 for clockwise.)</p></li></ol>
-<p>If a path has contiguous segments of the same shape, you can write them all into a single argument, with the segments separated by semi-colons. [<em>x₂</em>, <em>y₂</em>; …; <em>xₙ</em>, <em>yₙ</em>]</p>
-</details></dd>
+<p>Use the second form of the statement if the path contains any circular arcs. In that case, <code>rₙ</code> is the radius of the arc. Write a positive radius for arcs drawn counter-clockwise and write a negative radius for arcs drawn clockwise.</p></dd>
 <dt id='circle-[<em>x</em>,-<em>y</em>],-<em>r</em>'>circle  [<em>x</em>, <em>y</em>], <em>r</em></dt>
 <dd><p>Draws a circle of radius <em>r</em>, centered at point <em>x</em>, <em>y</em>.</p></dd>
 <dt id='dot-[<em>x</em>,-<em>y</em>]<span-class="optional">,-"open"-|-"closed",-"label",-position</span>'>dot  [<em>x</em>, <em>y</em>]<span class="optional">, "open" | "closed", "label", position</span></dt>
@@ -962,7 +955,7 @@ end</code></pre><p>… which results in this plot …</p>
 <dt id='text-[<em>x</em>,-<em>y</em>],-&quot;<em>string</em>&quot;<span-class="optional">,-position</span>'>text  [<em>x</em>, <em>y</em>], &quot;<em>string</em>&quot;<span class="optional">, position</span></dt>
 <dd><p>Writes the string at a point keyed to coordinates <em>x</em>, <em>y</em>.</p>
 <p><em>position</em> can be &quot;above&quot;, &quot;below&quot;, &quot;middle&quot;, &quot;left&quot;, &quot;right&quot;, &quot;aboveleft&quot;, &quot;aboveright&quot;, &quot;belowleft&quot;, or &quot;belowright&quot;. The default is &quot;middle&quot;.</p>
-<p>The string can be styled with Markdown inline styles: _<em>italic</em>_, **<strong>bold</strong>**, `<code>code</code>`, <code>~</code><sub>subscript</sub><code>~</code>, and <code>~~</code><del>strikethrough</del><code>~~</code>.</p></dd>
+<p>The string can be styled with Markdown inline styles: _<em>italic</em>_, **<strong>bold</strong>**, `<code>code</code>`, <code>~</code><sub>subscript</sub><code>~</code>, <code>^</code><sup>superscript</sup><code>^</code>, and <code>~~</code><del>strikethrough</del><code>~~</code>.</p></dd>
 <dt id='leader-[<em>x₁</em>,-<em>y₁</em>;-<em>x₂</em>,-<em>y₂</em><span-class="optional">;-x₃,-y₃;-etc</span>],-&quot;<em>note</em>&quot;'>leader [<em>x₁</em>, <em>y₁</em>; <em>x₂</em>, <em>y₂</em><span class="optional">; x₃, y₃; etc</span>], &quot;<em>note</em>&quot;</dt>
 <dd><p>Writes a note with an arrow pointing to a location.</p></dd>
 <dt id='dimension-[<em>x₁</em>,-<em>y₁</em>;-<em>x₂</em>,-<em>y₂</em>;-<span-class="optional">x₃,-y₃;-etc;</span>-<em>xlabel</em>,-<em>ylabel</em>],-&quot;<em>label</em>&quot;-or-[&quot;<em>label₁</em>&quot;,-&quot;<em>label₂</em>&quot;,-etc.]'>dimension [<em>x₁</em>, <em>y₁</em>; <em>x₂</em>, <em>y₂</em>; <span class="optional">x₃, y₃; etc;</span> <em>xLabel</em>, <em>yLabel</em>], &quot;<em>label</em>&quot; or [&quot;<em>label₁</em>&quot;, &quot;<em>label₂</em>&quot;, etc.]</dt>

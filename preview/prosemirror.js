@@ -22967,6 +22967,7 @@ const CLASS_R = /(?:^| )\.([a-z-]+)(?: |&|$)/;
 const tableClassRegEx = /(?:^| )\.(?:([a-z-]+)(?: |$)|"([^"]+)")/;
 const floatRegEx = /float="(left|right)"/;
 const WIDTH_R = /(?:^| )width="?([\d.a-z]+"?)(?: |$)/;
+const ALT_R = /(?:^| )alt="([A-Za-z\d ]+)"(?: |$)/;
 const COL_WIDTHS_R = /(?:^| )colWidths="([^"]*)"/;
 const ID_R = /(?:^| )#([A-Za-z][A-Za-z0-9]*)(?: |$)/;
 const leadingSpaceRegEx$1 = /^ +/;
@@ -23441,6 +23442,7 @@ const parseRef = function(capture, state, refNode) {
         { type: "figcaption", content: parseInline(refNode.attrs.alt, state) }
       ] };
       refNode.content[0].attrs.src = def.target;
+      if (def.attrs.alt) { refNode.content[0].attrs.alt = def.attrs.alt; }
     } else if (refNode.type === "image") {
       if (def.target.indexOf("\n") > -1) {
         refNode = { type: "calculation", attrs: { entry: def.target } };
@@ -24102,9 +24104,11 @@ const md2ast = (md, inHtml = false) => {
     if (directives) {
       const matchClass = CLASS_R.exec(directives);
       const matchWidth = WIDTH_R.exec(directives);
+      const matchAlt = ALT_R.exec(directives);
       const matchID = ID_R.exec(directives);
       if (matchClass) { attrs.class = matchClass[1]; }
       if (matchWidth) { attrs.width = matchWidth[1]; }
+      if (matchAlt)   { attrs.alt = matchAlt[1]; }
       if (matchID)    { attrs.id = matchID[1]; }
     }
     state._defs[def] = { target, attrs };
@@ -26997,7 +27001,11 @@ const dtype = {
       ? t0
       : t0 - dt.COLUMNVECTOR + dt.MATRIX
     },
-    columnVector(t0, t1, tkn) { return tkn === "&" ? t0 - dt.COLUMNVECTOR + dt.MATRIX : t0 },
+    columnVector(t0, t1, tkn) {
+      return tkn === "&" || tkn === "hcat"
+        ? t0 - dt.COLUMNVECTOR + dt.MATRIX
+        : t0
+    },
     matrix(t0, t1, tkn) { return t1 }
   },
   matrix: {
@@ -28448,39 +28456,30 @@ const functions$1 = {
   path(svgOprnd, args) {
     const svg = svgOprnd.value;
     const attrs = svg.temp;
-    if (args[0].dtype !== dt.STRING) {
-      args = rationals2numbers(args);
-    }
     const node = { tag: "path", attrs: {} };
     // Get the "d" attribute of a path
     let str = "";
-    for (let i = 0; i < args.length; i++) {
-      const el = args[i];
-      if (i === 0) {
-        if (el.dtype && el.dtype === dt.STRING) {
-          str = args[i].value;
-        } else {
-          str += "M" + pointText(el, attrs);
+    if (args[0].dtype && args[0].dtype === dt.STRING) {
+      str = args[0].value;
+    } else {
+      const segs = rationals2numbers(args[0].value);
+      if (segs[0].length === 2) {
+        // A path made up of line segments
+        str = "M" + pointText(segs[0], attrs) + " L";
+        for (let i = 1; i < segs.length; i++) {
+          str += " " + pointText(segs[i], attrs);
         }
-      } else if (typeof el[0] === "number") {
-        if (el.length === 2) {
-          str += " L" + pointText(el, attrs);
-        } else if (el.length === 3) {
-          str += " M" + pointText(el, attrs);
-        } else if (el.length === 5) {
-          const r = String(el[2] * attrs.xunitlength);
-          const sweep = String(el[3]);
-          str += ` A${r},${r} 0 0 ${sweep} ${pointText(el, attrs)}`;
-        }
-      } else if (el[0].length === 2) {
-        for (let j = 0; j < el.length; j++) {
-          str +=  " L" + pointText(el[j], attrs);
-        }
-      } else if (el[0].length === 5) {
-        for (let j = 0; j < el.length; j++) {
-          const r = String(el[j][2] * attrs.xunitlength);
-          const sweep = String(el[j][3]);
-          str += ` A${r},${r} 0 0 ${sweep} ${pointText(el[j], attrs)}`;
+      } else if (segs[0].length === 3) {
+        // Some segments are circular arcs.
+        str = "M" + pointText(segs[0], attrs);
+        for (let i = 1; i < segs.length; i++) {
+          if (segs[i][2] === 0) {
+            str += " L" + pointText(segs[i], attrs);
+          } else {
+            const r = String(Math.abs(segs[i][2]) * attrs.xunitlength);
+            const sweep = Math.sign(segs[i][2]) > 0 ? 0 : 1;
+            str += ` A${r},${r} 0 0 ${sweep} ${pointText(segs[i], attrs)}`;
+          }
         }
       }
     }
@@ -28503,16 +28502,16 @@ const functions$1 = {
         }
       }
     } else if (attrs.marker === "arrow" || attrs.marker === "arrowdot") {
-      const lastEl = args[args.length - 1];
-      if (typeof lastEl[0] !== "number") {
-        const end = lastEl[lastEl.length - 1];
-        arrowhead(svg, lastEl[lastEl.length - 2], end);
+      const segs = rationals2numbers(args[0].value);
+      if (typeof segs[0] !== "number") {
+        const end = segs[segs.length - 1];
+        arrowhead(svg, segs[segs.length - 2], end);
         if (attrs.marker === "arrowdot") {
           svg.children.push(markerDot(end, attrs, attrs.markerstroke, attrs.markerfill));
         }
-      } else if (typeof lastEl[0] === "number") {
+      } else if (typeof segs[0] === "number") {
         const prevEl = args[args.length - 2];
-        const end = lastEl;
+        const end = segs;
         let start;
         if (typeof prevEl[0] === "number") {
           start = prevEl;
@@ -28678,17 +28677,11 @@ const functions$1 = {
     const marker = svgOprnd.value.temp.marker;
     svgOprnd.value.temp.marker = "arrow";
     svgOprnd.value.temp.isDim = true;
-    const startPoint = {
-      value: clone(plistOprnd.value[plistOprnd.value.length - 1]),
-      unit: null,
-      dtype: dt.RATIONAL + dt.ROWVECTOR
-    };
     const plistCopy = clone(plistOprnd); // Copy to an un-frozen object.
-    plistCopy.value.pop();
     plistCopy.value.reverse();
-    svgOprnd = this.path(svgOprnd, [startPoint, plistCopy]);
-    const p = rationals2numbers(startPoint.value);
-    const q = rationals2numbers(plistCopy.value[0]);
+    svgOprnd = this.path(plistCopy);
+    const p = rationals2numbers(plistCopy.value[0]);
+    const q = rationals2numbers(plistCopy.value[plistCopy.value.length - 1]);
     let pos = "right";
     if (Math.abs(p[0] - q[0]) >= Math.abs(p[1] - q[1])) {
       pos = p[0] >= q[0] ? "right" : "left";
@@ -33119,9 +33112,8 @@ const plot = (svg, decimalFormat, fun, numPoints, xMin, xMax) => {
       pathValue = arg.value.map((e, i) => [e, funResult.value[i]]);
     }
   } else ;
-  const point = { value: pathValue[0], unit: null, dtype: dt.ROWVECTOR + dt.RATIONAL };
-  const pth = { value: pathValue.slice(1), unit: null, dtype: dt.MATRIX + dt.RATIONAL };
-  return draw.functions.path(svg, [point, pth])
+  const path = { value: pathValue, unit: null, dtype: dt.MATRIX + dt.RATIONAL };
+  return draw.functions.path(svg, [path])
 };
 
 const elementFromIterable = (iterable, index, step) => {
@@ -34058,7 +34050,7 @@ const scanAssignment = (lines, decimalFormat, iStart) => {
 
 const containsOperator = /[+\-×·*∘⌧/^%‰&√!¡|‖&=<>≟≠≤≥∈∉⋐∧∨⊻¬]|\xa0(function|mod|\\atop|root|sum|abs|cos|sin|tan|acos|asin|atan|sec|csc|cot|asec|acsc|acot|exp|log|ln|log10|log2|cosh|sinh|tanh|sech|csch|coth|acosh|asinh|atanh|asech|acsch|acoth|gamma|Γ|lgamma|logΓ|lfact|cosd|sind|tand|acosd|asind|atand|secd|cscd|cotd|asecd|acscd|acotd|real|imag|angle|Char|round|sqrt|sign|\?{}|%|⎾⏋|⎿⏌|\[\]|\(\))\xa0/;
 const mustDoCalculation = /^(``.+``|[$$£¥\u20A0-\u20CF]?(\?{1,2}|@{1,2}|%{1,2}|!{1,2})[^=!(?@%!{})]*)$/;
-const assignDataFrameRegEx = /^[^=]+=\s*``[\s\S]+``/;
+const assignDataFrameRegEx = /^[^=]+=\s*``[\s\S]+``\s*$/;
 const currencyRegEx = /^[$£¥\u20A0-\u20CF]/;
 const matrixOfNames = /^[([](?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*[,;].+[)\]]$/;
 const isKeyWord = /^(π|true|false|root|if|else|elseif|and|or|otherwise|mod|for|while|break|return|throw)$/;
@@ -34594,9 +34586,11 @@ const hurmetNodes =  {
       }
       const ref = getRef(node, state);
       const attrs = node.content.content[0].attrs; // image attributes
+      if (node.attrs.class) { attrs.class = node.attrs.class; }
       let path = attrs.src;
-      if (!state.isGFM && (attrs.width || attrs.alt)) {
+      if (!state.isGFM && (attrs.class || attrs.width || attrs.alt)) {
         path += "\n{";
+        if (attrs.class) { path += "." + state.esc(attrs.class); }
         if (attrs.width && !isNaN(attrs.width)) { path += " width=" + attrs.width; }
         if (attrs.alt) { path += ' alt="' + state.esc(attrs.alt) + '"'; }
         path += "}";
