@@ -439,7 +439,7 @@ const dataFrameFromVectors = (vectors, formatSpec) => {
     const colDtype = vector.dtype - vectorType
     data.push(vector.value.map(e => datumFromValue(e, colDtype, formatSpec)))
     dtype.push(colDtype)
-    if (vector.unit.name) {
+    if (vector.unit && vector.unit.name) {
       units.push(vector.unit.name)
       if (!unitMap[vector.unit.name]) {
         const unit = unitFromUnitName(vector.unit.name)
