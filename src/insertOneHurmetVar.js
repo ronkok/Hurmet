@@ -159,6 +159,7 @@ export function insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat
   } else if (attrs.dtype === dt.TUPLE) {
     let i = 0
     for (const value of attrs.value.values()) {
+      if (value.name) { value.name = attrs.name[i] }
       hurmetVars[attrs.name[i]] = value
       if (changedVars) { changedVars.add(attrs.name[i]) }
       i += 1
