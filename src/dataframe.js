@@ -34,7 +34,7 @@ const datumFromValue = (value, dtype, formatSpec) => {
     ? "true"
     : value === false
     ? "false"
-    : value = undefined
+    : value === undefined
     ? ""
     : (dtype === dt.RATIONAL)
     ? format(value, formatSpec, "1000000.")
@@ -741,12 +741,12 @@ const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHeadin
     : writeRowNums
     ? "r|"
     : ""
-  for (let j = 1; j < numCols; j++) {
+  for (let j = 0; j < numCols; j++) {
     str += isMap
       ? "c "
       : numRows === 1
       ? "c "
-      : Rnl.isRational(data[j][0])
+      : (df.dtype[j] & dt.RATIONAL)
       ? "r "
       : "l "
   }

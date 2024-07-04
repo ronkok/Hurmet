@@ -49,8 +49,8 @@ export class MarkdownSerializer {
   // :: (Node, ?Object) → string
   // Serialize the content of the given node to
   // [CommonMark](http://commonmark.org/).
-  serialize(content, paths, footnotes, isGFM = false, forSnapshot = false) {
-    let state = new MarkdownSerializerState(this.nodes, this.marks, paths, footnotes, isGFM)
+  serialize(content, paths, footnotes, isGFM = false, forSnapshot = false, withResults = false) {
+    let state = new MarkdownSerializerState(this.nodes, this.marks, paths, footnotes, isGFM, withResults)
     state.renderContent(content)
 
     // Write the footnotes
@@ -229,7 +229,7 @@ const hurmetNodes =  {
     } else {
       if (!state.isGFM) {
         const figureCaption = node.content.content[1]
-        const figureState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, this.footnotes, false)
+        const figureState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, this.footnotes, false, false)
         figureState.renderInline(figureCaption)
         caption = figureState.out
       } else {
@@ -309,6 +309,16 @@ const hurmetNodes =  {
         const ref = getRef(node, state)
         state.paths.set(ref,entry.replace(/\n/g, "\\n"))
         state.write(`![${ref}][]`)
+      } else if (state.withResults) {
+        const displaySelector = node.attrs.md ? node.attrs.displaySelector : ""
+        let md = node.attrs.md ? node.attrs.md : entry
+        if (node.attrs.displayMode) {
+          state.write("¢¢" + displaySelector + " " + md + " ¢¢")
+        } else {
+          const ticks = backticksFor({ text: entry, isText: true }, -1).trim()
+          md = "¢" + displaySelector + ticks + " " + md + " " + ticks
+          state.write(md)
+        }
       } else if (node.attrs.displayMode) {
         state.write("¢¢" + " " + entry + " ¢¢")
       } else {
@@ -475,12 +485,13 @@ const colWidthPicker = [0, 80, 50, 35];
 // methods related to markdown serialization. Instances are passed to
 // node and mark serialization methods (see `toMarkdown`).
 export class MarkdownSerializerState {
-  constructor(nodes, marks, paths, footnotes, isGFM) {
+  constructor(nodes, marks, paths, footnotes, isGFM, withResults) {
     this.nodes = nodes
     this.marks = marks
     this.paths = paths
     this.footnotes = footnotes
     this.isGFM = isGFM
+    this.withResults = withResults
     this.delim = this.out = ""
     this.divFence = ""
     this.closed = false
@@ -727,7 +738,8 @@ export class MarkdownSerializerState {
     const mergedCells = [];
     // Do we need a reStructuredText grid table? Or is a GFM pipe table enough?
     let isRst = !isGFM && numRowsInHeading > 1;
-    let tableState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, this.footnotes, this.isGFM)
+    let tableState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths,
+                                                this.footnotes, this.isGFM, this.withResults)
     tableState.lineLimit = numCols > 3 ? 25 : colWidthPicker[numCols];
     let i = 0
     let j = 0

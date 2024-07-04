@@ -2966,7 +2966,9 @@ const datumFromValue = (value, dtype, formatSpec) => {
     ? "true"
     : value === false
     ? "false"
-    : value = (dtype === dt.RATIONAL)
+    : value === undefined
+    ? ""
+    : (dtype === dt.RATIONAL)
     ? format(value, formatSpec, "1000000.")
     : value
 };
@@ -3667,12 +3669,12 @@ const display$1 = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHead
     : writeRowNums
     ? "r|"
     : "";
-  for (let j = 1; j < numCols; j++) {
+  for (let j = 0; j < numCols; j++) {
     str += isMap
       ? "c "
       : numRows === 1
       ? "c "
-      : Rnl.isRational(data[j][0])
+      : (df.dtype[j] & dt.RATIONAL)
       ? "r "
       : "l ";
   }
@@ -6345,6 +6347,7 @@ function insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat) {
   } else if (attrs.dtype === dt.TUPLE) {
     let i = 0;
     for (const value of attrs.value.values()) {
+      if (value.name) { value.name = attrs.name[i]; }
       hurmetVars[attrs.name[i]] = value;
       if (changedVars) { changedVars.add(attrs.name[i]); }
       i += 1;
@@ -6858,12 +6861,19 @@ const formatResult = (stmt, result, formatSpec, decimalFormat, assert, isUnitAwa
     if (stmt.resulttemplate.indexOf("@") > -1) {
       stmt.tex = stmt.resultdisplay;
       stmt.displaySelector = stmt.altresulttemplate.indexOf("@@") > -1 ? "@@" : "@";
+      if (!testRegEx$1.test(stmt.entry)) {
+        const pos = stmt.entry.lastIndexOf(stmt.displaySelector);
+        stmt.md = stmt.entry.slice(0, pos) + `〔${altResultDisplay}〕`
+            + stmt.entry.slice(pos + stmt.displaySelector.length);
+      }
       stmt.alt = stmt.altresulttemplate.replace(/@@?/, altResultDisplay);
     } else if (stmt.resulttemplate.indexOf("?") > -1) {
       let pos = stmt.tex.lastIndexOf("?");
       stmt.tex = stmt.tex.slice(0, pos).replace(/\? *$/, "") + resultDisplay + stmt.tex.slice(pos + 1);
       stmt.displaySelector = stmt.altresulttemplate.indexOf("??") > -1 ? "??" : "?";
       pos = stmt.alt.lastIndexOf(stmt.displaySelector);
+      stmt.md = stmt.alt.slice(0, pos) + `〔${altResultDisplay}〕`
+          + stmt.alt.slice(pos + stmt.displaySelector.length);
       stmt.alt = stmt.alt.slice(0, pos) + altResultDisplay
           + stmt.alt.slice(pos + stmt.displaySelector.length);
     } else if (stmt.resulttemplate.indexOf("%") > -1) {
@@ -6871,6 +6881,8 @@ const formatResult = (stmt, result, formatSpec, decimalFormat, assert, isUnitAwa
       stmt.tex = stmt.tex.slice(0, pos).replace(/% *$/, "") + resultDisplay + stmt.tex.slice(pos + 1);
       stmt.displaySelector = stmt.altresulttemplate.indexOf("%%") > -1 ? "%%" : "%";
       pos = stmt.alt.lastIndexOf(stmt.displaySelector);
+      stmt.md = stmt.alt.slice(0, pos) + `〔${altResultDisplay}〕`
+          + stmt.alt.slice(pos + stmt.displaySelector.length);
       stmt.alt = stmt.alt.slice(0, pos) + altResultDisplay
           + stmt.alt.slice(pos + stmt.displaySelector.length);
     }

@@ -19735,7 +19735,9 @@ const datumFromValue = (value, dtype, formatSpec) => {
     ? "true"
     : value === false
     ? "false"
-    : value = (dtype === dt.RATIONAL)
+    : value === undefined
+    ? ""
+    : (dtype === dt.RATIONAL)
     ? format(value, formatSpec, "1000000.")
     : value
 };
@@ -20436,12 +20438,12 @@ const display$1 = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHead
     : writeRowNums
     ? "r|"
     : "";
-  for (let j = 1; j < numCols; j++) {
+  for (let j = 0; j < numCols; j++) {
     str += isMap
       ? "c "
       : numRows === 1
       ? "c "
-      : Rnl.isRational(data[j][0])
+      : (df.dtype[j] & dt.RATIONAL)
       ? "r "
       : "l ";
   }
@@ -25157,6 +25159,7 @@ function insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat) {
   } else if (attrs.dtype === dt.TUPLE) {
     let i = 0;
     for (const value of attrs.value.values()) {
+      if (value.name) { value.name = attrs.name[i]; }
       hurmetVars[attrs.name[i]] = value;
       if (changedVars) { changedVars.add(attrs.name[i]); }
       i += 1;
@@ -25670,12 +25673,19 @@ const formatResult = (stmt, result, formatSpec, decimalFormat, assert, isUnitAwa
     if (stmt.resulttemplate.indexOf("@") > -1) {
       stmt.tex = stmt.resultdisplay;
       stmt.displaySelector = stmt.altresulttemplate.indexOf("@@") > -1 ? "@@" : "@";
+      if (!testRegEx$1.test(stmt.entry)) {
+        const pos = stmt.entry.lastIndexOf(stmt.displaySelector);
+        stmt.md = stmt.entry.slice(0, pos) + `〔${altResultDisplay}〕`
+            + stmt.entry.slice(pos + stmt.displaySelector.length);
+      }
       stmt.alt = stmt.altresulttemplate.replace(/@@?/, altResultDisplay);
     } else if (stmt.resulttemplate.indexOf("?") > -1) {
       let pos = stmt.tex.lastIndexOf("?");
       stmt.tex = stmt.tex.slice(0, pos).replace(/\? *$/, "") + resultDisplay + stmt.tex.slice(pos + 1);
       stmt.displaySelector = stmt.altresulttemplate.indexOf("??") > -1 ? "??" : "?";
       pos = stmt.alt.lastIndexOf(stmt.displaySelector);
+      stmt.md = stmt.alt.slice(0, pos) + `〔${altResultDisplay}〕`
+          + stmt.alt.slice(pos + stmt.displaySelector.length);
       stmt.alt = stmt.alt.slice(0, pos) + altResultDisplay
           + stmt.alt.slice(pos + stmt.displaySelector.length);
     } else if (stmt.resulttemplate.indexOf("%") > -1) {
@@ -25683,6 +25693,8 @@ const formatResult = (stmt, result, formatSpec, decimalFormat, assert, isUnitAwa
       stmt.tex = stmt.tex.slice(0, pos).replace(/% *$/, "") + resultDisplay + stmt.tex.slice(pos + 1);
       stmt.displaySelector = stmt.altresulttemplate.indexOf("%%") > -1 ? "%%" : "%";
       pos = stmt.alt.lastIndexOf(stmt.displaySelector);
+      stmt.md = stmt.alt.slice(0, pos) + `〔${altResultDisplay}〕`
+          + stmt.alt.slice(pos + stmt.displaySelector.length);
       stmt.alt = stmt.alt.slice(0, pos) + altResultDisplay
           + stmt.alt.slice(pos + stmt.displaySelector.length);
     }
@@ -34415,8 +34427,8 @@ class MarkdownSerializer {
   // :: (Node, ?Object) → string
   // Serialize the content of the given node to
   // [CommonMark](http://commonmark.org/).
-  serialize(content, paths, footnotes, isGFM = false, forSnapshot = false) {
-    let state = new MarkdownSerializerState(this.nodes, this.marks, paths, footnotes, isGFM);
+  serialize(content, paths, footnotes, isGFM = false, forSnapshot = false, withResults = false) {
+    let state = new MarkdownSerializerState(this.nodes, this.marks, paths, footnotes, isGFM, withResults);
     state.renderContent(content);
 
     // Write the footnotes
@@ -34580,7 +34592,7 @@ const hurmetNodes =  {
     } else {
       if (!state.isGFM) {
         const figureCaption = node.content.content[1];
-        const figureState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, this.footnotes, false);
+        const figureState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, this.footnotes, false, false);
         figureState.renderInline(figureCaption);
         caption = figureState.out;
       } else {
@@ -34660,6 +34672,16 @@ const hurmetNodes =  {
         const ref = getRef(node, state);
         state.paths.set(ref,entry.replace(/\n/g, "\\n"));
         state.write(`![${ref}][]`);
+      } else if (state.withResults) {
+        const displaySelector = node.attrs.md ? node.attrs.displaySelector : "";
+        let md = node.attrs.md ? node.attrs.md : entry;
+        if (node.attrs.displayMode) {
+          state.write("¢¢" + displaySelector + " " + md + " ¢¢");
+        } else {
+          const ticks = backticksFor({ text: entry, isText: true }, -1).trim();
+          md = "¢" + displaySelector + ticks + " " + md + " " + ticks;
+          state.write(md);
+        }
       } else if (node.attrs.displayMode) {
         state.write("¢¢" + " " + entry + " ¢¢");
       } else {
@@ -34826,12 +34848,13 @@ const colWidthPicker = [0, 80, 50, 35];
 // methods related to markdown serialization. Instances are passed to
 // node and mark serialization methods (see `toMarkdown`).
 class MarkdownSerializerState {
-  constructor(nodes, marks, paths, footnotes, isGFM) {
+  constructor(nodes, marks, paths, footnotes, isGFM, withResults) {
     this.nodes = nodes;
     this.marks = marks;
     this.paths = paths;
     this.footnotes = footnotes;
     this.isGFM = isGFM;
+    this.withResults = withResults;
     this.delim = this.out = "";
     this.divFence = "";
     this.closed = false;
@@ -35078,7 +35101,8 @@ class MarkdownSerializerState {
     const mergedCells = [];
     // Do we need a reStructuredText grid table? Or is a GFM pipe table enough?
     let isRst = !isGFM && numRowsInHeading > 1;
-    let tableState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, this.footnotes, this.isGFM);
+    let tableState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths,
+                                                this.footnotes, this.isGFM, this.withResults);
     tableState.lineLimit = numCols > 3 ? 25 : colWidthPicker[numCols];
     let i = 0;
     let j = 0;
@@ -50501,6 +50525,7 @@ const nodes = {
       name: {default: null}, //           Name of cell, as in "x" from x = 12
       tex: {default: ""}, //              The string I pass to Temml for final rendering.
       alt: {default: ""}, //              The string I render when in draft mode.
+      md:  {default: null}, //            The Markdown string in the saved document
       displaySelector: {default: ""}, //  Display selector: (??|?|%%|%|@@|@|!!|!)
       rpn: {default: null}, //            RPN from parser.js, for calculation.
       dependencies: {default: []}, //     For use in avoiding unnecesary calculations
@@ -53523,7 +53548,7 @@ fontSize: ${state.doc.attrs.fontSize}
 pageSize: ${state.doc.attrs.pageSize}
 ---------------
 
-` + hurmetMarkdownSerializer.serialize(state.doc, new Map(), []);
+` + hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, false, false);
 
   // Save some fetched data as a fallback for when the internet is down.
   let gottaFallback = false;
@@ -53606,7 +53631,7 @@ function permalink() {
     label: "Create permalink",
     run(state, _, view) {
       const symbols = /[\r\n%#"()<>?[\\\]^`{|}]/g;
-      const md = hurmetMarkdownSerializer.serialize(state.doc, new Map(), []);
+      const md = hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, false, false);
       if (md && md.length > 0) {
         const hash = "#" + md.replace(symbols, encodeURIComponent);
         if (hash.length > 32000) {
@@ -53632,8 +53657,8 @@ function openFile() {
   })
 }
 
-function copyText(state, isGFM) {
-  const text = hurmetMarkdownSerializer.serialize(state.selection.content().content, new Map(), [], isGFM);
+function copyText(state, isGFM, withResults = false) {
+  const text = hurmetMarkdownSerializer.serialize(state.selection.content().content, new Map(), [], isGFM, false, withResults);
   const type = "text/plain";
   const blob = new Blob([text], { type });
   const data = [new ClipboardItem({ [type]: blob })];
@@ -53645,6 +53670,15 @@ function copyAsMarkdown() {
     label: "Copy as Hurmet Markdown",
     run(state, _, view) {
       copyText(state, false);
+    }
+  })
+}
+
+function copyAsMarkdownWithResults() {
+  return new MenuItem({
+    label: "Copy as MD w/Results",
+    run(state, _, view) {
+      copyText(state, false, true);
     }
   })
 }
@@ -53995,7 +54029,7 @@ function takeSnapshot() {
         fields: { message: new TextField({ label: "Commit message", required: true }) },
         callback(attrs) {
           const dateStr = new Date().toISOString().replace(/T.+/, "");
-          let md = hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, true);
+          let md = hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, true, false);
           // Ignore path definitions
           md = md.replace(/\n\n\[[^\]]+\\: .+/, "");
           state.doc.attrs.snapshots.push({ message: attrs.message, date: dateStr, content: md });
@@ -54906,9 +54940,10 @@ function buildMenuItems(schema) {
   ])];
 
   r.copyAsMarkdown = copyAsMarkdown();
+  r.copyAsMarkdownWithResults = copyAsMarkdownWithResults();
   r.copyAsGFM = copyAsGFM();
   r.pasteAsMarkdown = pasteAsMarkdown();
-  r.Markdown = new Dropdown([r.copyAsMarkdown, r.copyAsGFM, r.pasteAsMarkdown], {label: "𝐌"});
+  r.Markdown = new Dropdown([r.copyAsMarkdown, r.copyAsMarkdownWithResults, r.copyAsGFM, r.pasteAsMarkdown], {label: "𝐌"});
 
   r.math = [[
     r.insertCalclation,

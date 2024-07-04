@@ -461,7 +461,7 @@ fontSize: ${state.doc.attrs.fontSize}
 pageSize: ${state.doc.attrs.pageSize}
 ---------------
 
-` + hurmetMarkdownSerializer.serialize(state.doc, new Map(), [])
+` + hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, false, false)
 
   // Save some fetched data as a fallback for when the internet is down.
   let gottaFallback = false
@@ -544,7 +544,7 @@ function permalink() {
     label: "Create permalink",
     run(state, _, view) {
       const symbols = /[\r\n%#"()<>?[\\\]^`{|}]/g
-      const md = hurmetMarkdownSerializer.serialize(state.doc, new Map(), [])
+      const md = hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, false, false)
       if (md && md.length > 0) {
         const hash = "#" + md.replace(symbols, encodeURIComponent)
         if (hash.length > 32000) {
@@ -570,8 +570,8 @@ function openFile() {
   })
 }
 
-function copyText(state, isGFM) {
-  const text = hurmetMarkdownSerializer.serialize(state.selection.content().content, new Map(), [], isGFM)
+function copyText(state, isGFM, withResults = false) {
+  const text = hurmetMarkdownSerializer.serialize(state.selection.content().content, new Map(), [], isGFM, false, withResults)
   const type = "text/plain"
   const blob = new Blob([text], { type })
   const data = [new ClipboardItem({ [type]: blob })];
@@ -583,6 +583,15 @@ function copyAsMarkdown() {
     label: "Copy as Hurmet Markdown",
     run(state, _, view) {
       copyText(state, false)
+    }
+  })
+}
+
+function copyAsMarkdownWithResults() {
+  return new MenuItem({
+    label: "Copy as MD w/Results",
+    run(state, _, view) {
+      copyText(state, false, true)
     }
   })
 }
@@ -936,7 +945,7 @@ function takeSnapshot() {
         fields: { message: new TextField({ label: "Commit message", required: true }) },
         callback(attrs) {
           const dateStr = new Date().toISOString().replace(/T.+/, "")
-          let md = hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, true)
+          let md = hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, true, false)
           // Ignore path definitions
           md = md.replace(/\n\n\[[^\]]+\\: .+/, "")
           state.doc.attrs.snapshots.push({ message: attrs.message, date: dateStr, content: md })
@@ -1849,9 +1858,10 @@ export function buildMenuItems(schema) {
   ])];
 
   r.copyAsMarkdown = copyAsMarkdown()
+  r.copyAsMarkdownWithResults = copyAsMarkdownWithResults()
   r.copyAsGFM = copyAsGFM()
   r.pasteAsMarkdown = pasteAsMarkdown()
-  r.Markdown = new Dropdown([r.copyAsMarkdown, r.copyAsGFM, r.pasteAsMarkdown], {label: "𝐌"})
+  r.Markdown = new Dropdown([r.copyAsMarkdown, r.copyAsMarkdownWithResults, r.copyAsGFM, r.pasteAsMarkdown], {label: "𝐌"})
 
   r.math = [[
     r.insertCalclation,
