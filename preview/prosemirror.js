@@ -23574,10 +23574,18 @@ rules.set("ordered_list", {
   isLeaf: false,
   // Hurmet accepts lists w/o a preceding blank line, so the list RegEx
   // is an anyScopeRegex. parse() will test if a list is a the beginning of a line.
-  match: anyScopeRegex(/^( {0,3})(\d{1,9}[.)]) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:\d{1,9}\.) )\n*|\s*$)/),
+  match: anyScopeRegex(/^( {0,3})(?:(?:(\d{1,9})|([A-Z])|([a-z]))[.)]) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:\d{1,9}\.) )\n*|\s*$)/),
   parse: function(capture, state) {
-    const start = Number(capture[2].replace(/\) *$/, "").trim());
-    return { attrs: { order: start }, content: parseList(capture[0], state, capture[1]) }
+    const start = capture[2]
+      ? Number(capture[2])
+      : capture[3]
+      ? capture[3].codePointAt(0) - 64
+      : capture[4].codePointAt(0) - 96;
+    const className = capture[2] ? "decimal" : capture[3] ? "upper-alpha" : "lower-alpha";
+    return {
+      attrs: { class: className, order: start },
+      content: parseList(capture[0], state, capture[1])
+    }
   }
 });
 rules.set("bullet_list", {
@@ -23971,8 +23979,8 @@ const parseInline = function(content, state) {
 };
 
 
-// recognize a `*` `-`, `+`, `1.`, `2.`... list bullet
-const LIST_BULLET = "(?:[*+-]|\\d+[\\.\\)])";
+// recognize a `*` `-`, `+`, `1.`, `2.`, `A.`, `a,`... list bullet
+const LIST_BULLET = "(?:[*+-]|(?:\\d+|[A-Za-z])[\\.\\)])";
 // recognize the start of a list item:
 // leading space plus a bullet plus a space (`   * `)
 const LIST_ITEM_PREFIX = "( *)(" + LIST_BULLET + ") +";
@@ -24347,7 +24355,7 @@ const nodes$1 = {
   newline(node)    { return "\n" },
   horizontal_rule(node) { return "<hr>\n" },
   ordered_list(node) {
-    const attributes = node.attrs.order !== 1 ? { start: node.attrs.order } : undefined;
+    const attributes = { class: node.attrs.class, start: node.attrs.order };
     return htmlTag("ol", ast2html(node.content), attributes) + "\n"
   },
   bullet_list(node)  { return htmlTag("ul", ast2html(node.content)) + "\n" },
@@ -34537,16 +34545,21 @@ const hurmetNodes =  {
     state.renderList(node, "    ", () => (node.attrs.bullet || "*") + "   ");
   },
   ordered_list(state, node) {
-    let start = node.attrs.order || 1;
+    const start = node.attrs.order || 1;
+    const className = state.isGFM ? "decimal" : node.attrs.class;
     let maxW = String(start + node.childCount - 1).length;
     let space = state.repeat(" ", maxW + 2);
     state.renderList(node, space, i => {
-      let nStr = String(start + i);
+      let nStr = className === "decimal"
+        ? String(start + i)
+        : className === "upper-alpha"
+        ? String.fromCodePoint(start + i + 64)  // A-Z
+        : String.fromCodePoint(start + i + 96);  // a-z
       return state.repeat(" ", maxW - nStr.length) + nStr + ".  "
     });
     // Write a 2nd blank line after an <ol>, to prevent an adjacent <ol> from
     // continuing the same numbering.
-    state.write(state.delim + "\n");
+    if (state.delim === "")  { state.write("\n"); }
   },
   list_item(state, node) {
     state.renderContent(node);
@@ -35227,7 +35240,7 @@ class MarkdownSerializerState {
   esc(str, startOfLine) {
     str = str.replace(/([`*\\¢\$<\[_~^])/g, "\\$1");
     if (startOfLine) {
-      str = str.replace(/^(\#|:|\-|\*|\+|>)/, "\\$1").replace(/^(\d+)\.(?= )/, "$1\\.");
+      str = str.replace(/^(\#|:|\-|\*|\+|>)/, "\\$1").replace(/^(\d+|[A-Za-z])\.(?= )/, "$1\\.");
     }
     return str
   }
@@ -50355,14 +50368,23 @@ const nodes = {
   },
 
   ordered_list: {
-    attrs: {order: {default: 1}},
+    attrs: { class: { default: "decimal" }, order: {default: 1}},
     content: "list_item+|tight_list_item+",
     group: "block",
     parseDOM: [{tag: "ol", getAttrs(dom) {
-      return {order: dom.hasAttribute("start") ? + dom.getAttribute("start") : 1}
+      return {
+        class: dom.getAttribute("class"),
+        order: dom.hasAttribute("start") ? + dom.getAttribute("start") : 1
+      }
     }}],
     toDOM(node) {
-      return node.attrs.order == 1 ? ["ol", 0] : ["ol", {start: node.attrs.order}, 0]
+      return node.attrs.order == 1 && node.attrs.class === "decimal"
+      ? ["ol", 0]
+      : node.attrs.order == 1
+      ? ["ol", { class: node.attrs.class }, 0]
+      : node.attrs.class === "decimal"
+      ? ["ol", {start: node.attrs.order}, 0]
+      : ["ol", {class: node.attrs.class, start: node.attrs.order}, 0]
     }
   },
   
@@ -55314,8 +55336,17 @@ function blockQuoteRule(nodeType) {
 // Given a list node type, returns an input rule that turns a number
 // followed by a dot at the start of a textblock into an ordered list.
 function orderedListRule(nodeType) {
-  return wrappingInputRule(/^(\d+)\.\s$/, nodeType, match => ({order: +match[1]}),
-                           (match, node) => node.childCount + node.attrs.order == +match[1])
+  return wrappingInputRule(
+    /^(?:(\d+)|([A-Z])|([a-z]))\.\s$/,
+    nodeType, match => ({
+      class: match[2] ? "upper-alpha" : match[3] ? "lower-alpha" : "decimal",
+      order: match[1]
+        ? +match[1]
+        : match[2]
+        ? match[2].codePointAt(0) - 64
+        : match[3].codePointAt(0) - 96
+    }),
+    (match, node) => match[1] ? node.childCount + node.attrs.order === +match[1] : false)
 }
 
 // : (NodeType) → InputRule
@@ -55340,7 +55371,7 @@ function codeBlockRule(nodeType) {
 // the number of `#` signs.
 function headingRule(nodeType, maxLevel) {
   return textblockTypeInputRule(new RegExp("^(#{1," + maxLevel + "})\\s$"),
-                                nodeType, match => ({level: match[1].length}))
+                                nodeType, match => ({ level: match[1].length }))
 }
 
 // : (Schema) → Plugin
@@ -55348,12 +55379,12 @@ function headingRule(nodeType, maxLevel) {
 // code blocks, and heading.
 function buildInputRules(schema) {
   let rules = smartQuotes.concat(ellipsis, emDash), type;
-  if (type = schema.nodes.blockquote) rules.push(blockQuoteRule(type));
-  if (type = schema.nodes.ordered_list) rules.push(orderedListRule(type));
-  if (type = schema.nodes.bullet_list) rules.push(bulletListRule(type));
-  if (type = schema.nodes.code_block) rules.push(codeBlockRule(type));
-  if (type = schema.nodes.heading) rules.push(headingRule(type, 6));
-  return inputRules({rules})
+  if (type = schema.nodes.blockquote) { rules.push(blockQuoteRule(type)); }
+  if (type = schema.nodes.ordered_list) { rules.push(orderedListRule(type)); }
+  if (type = schema.nodes.bullet_list) { rules.push(bulletListRule(type)); }
+  if (type = schema.nodes.code_block) { rules.push(codeBlockRule(type)); }
+  if (type = schema.nodes.heading) { rules.push(headingRule(type, 6)); }
+  return inputRules({ rules })
 }
 
 // autocorrect.js

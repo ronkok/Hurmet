@@ -304,14 +304,23 @@ export const nodes = {
   },
 
   ordered_list: {
-    attrs: {order: {default: 1}},
+    attrs: { class: { default: "decimal" }, order: {default: 1}},
     content: "list_item+|tight_list_item+",
     group: "block",
     parseDOM: [{tag: "ol", getAttrs(dom) {
-      return {order: dom.hasAttribute("start") ? + dom.getAttribute("start") : 1}
+      return {
+        class: dom.getAttribute("class"),
+        order: dom.hasAttribute("start") ? + dom.getAttribute("start") : 1
+      }
     }}],
     toDOM(node) {
-      return node.attrs.order == 1 ? ["ol", 0] : ["ol", {start: node.attrs.order}, 0]
+      return node.attrs.order == 1 && node.attrs.class === "decimal"
+      ? ["ol", 0]
+      : node.attrs.order == 1
+      ? ["ol", { class: node.attrs.class }, 0]
+      : node.attrs.class === "decimal"
+      ? ["ol", {start: node.attrs.order}, 0]
+      : ["ol", {class: node.attrs.class, start: node.attrs.order}, 0]
     }
   },
   

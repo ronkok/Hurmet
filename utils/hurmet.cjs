@@ -9881,10 +9881,18 @@ rules.set("ordered_list", {
   isLeaf: false,
   // Hurmet accepts lists w/o a preceding blank line, so the list RegEx
   // is an anyScopeRegex. parse() will test if a list is a the beginning of a line.
-  match: anyScopeRegex(/^( {0,3})(\d{1,9}[.)]) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:\d{1,9}\.) )\n*|\s*$)/),
+  match: anyScopeRegex(/^( {0,3})(?:(?:(\d{1,9})|([A-Z])|([a-z]))[.)]) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:\d{1,9}\.) )\n*|\s*$)/),
   parse: function(capture, state) {
-    const start = Number(capture[2].replace(/\) *$/, "").trim());
-    return { attrs: { order: start }, content: parseList(capture[0], state, capture[1]) }
+    const start = capture[2]
+      ? Number(capture[2])
+      : capture[3]
+      ? capture[3].codePointAt(0) - 64
+      : capture[4].codePointAt(0) - 96;
+    const className = capture[2] ? "decimal" : capture[3] ? "upper-alpha" : "lower-alpha";
+    return {
+      attrs: { class: className, order: start },
+      content: parseList(capture[0], state, capture[1])
+    }
   }
 });
 rules.set("bullet_list", {
@@ -10278,8 +10286,8 @@ const parseInline = function(content, state) {
 };
 
 
-// recognize a `*` `-`, `+`, `1.`, `2.`... list bullet
-const LIST_BULLET = "(?:[*+-]|\\d+[\\.\\)])";
+// recognize a `*` `-`, `+`, `1.`, `2.`, `A.`, `a,`... list bullet
+const LIST_BULLET = "(?:[*+-]|(?:\\d+|[A-Za-z])[\\.\\)])";
 // recognize the start of a list item:
 // leading space plus a bullet plus a space (`   * `)
 const LIST_ITEM_PREFIX = "( *)(" + LIST_BULLET + ") +";
@@ -16951,7 +16959,7 @@ const nodes = {
   newline(node)    { return "\n" },
   horizontal_rule(node) { return "<hr>\n" },
   ordered_list(node) {
-    const attributes = node.attrs.order !== 1 ? { start: node.attrs.order } : undefined;
+    const attributes = { class: node.attrs.class, start: node.attrs.order };
     return htmlTag("ol", ast2html(node.content), attributes) + "\n"
   },
   bullet_list(node)  { return htmlTag("ul", ast2html(node.content)) + "\n" },

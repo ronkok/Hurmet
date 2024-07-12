@@ -191,13 +191,7 @@ create a list: * Not a list item.
          1.  macintosh
          2.  red
 
-                  
-
       2.  bananas
-
-            
-
-      
 
 
 A list can be started in the line after a paragraph. An empty line is
@@ -245,8 +239,25 @@ Ordered lists can begin with numbers other than one.
 5.  Item 5
 6.  Item 6
 
+¶
 
-*   Bullet lists can contain
+A. Ordered lists can begin …
+
+B. … with a letter.
+
+    1. The second level of such a list …
+
+    2. … will start with decimals.
+
+¶
+
+a. Ordered lists can also begin with …
+
+b. … a lower-case letter.
+
+¶
+
+*   Bullet lists can contain …
 
 *   … nested lists that are
 
@@ -257,7 +268,6 @@ Ordered lists can begin with numbers other than one.
        *   a bullet list
        *   Yay!
 
-        
 
 ## Tables
 

@@ -76,7 +76,7 @@
 <tr><td><code>* List</code><br><code>* List</code><br><code>* List</code></td><td><ul><li class="tight"><p>List</p></li>
 <li class="tight"><p>List</p></li>
 <li class="tight"><p>List</p></li></ul></td></tr>
-<tr><td><code>1. One</code><br><code>2. Two</code><br><code>3. Three</code></td><td><ol><li class="tight"><p>One</p></li>
+<tr><td><code>1. One</code><br><code>2. Two</code><br><code>3. Three</code></td><td><ol class="decimal" start="1"><li class="tight"><p>One</p></li>
 <li class="tight"><p>Two</p></li>
 <li class="tight"><p>Three</p></li></ol></td></tr>
 <tr><td><code>```</code> <br><code>#code block</code> <br><code>print &quot;Hi!&quot;</code> <br><code>```</code></td><td><pre><code># code block
@@ -362,7 +362,7 @@ a[5:end]  # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong><
 <p><span class='hurmet-calc' data-entry='z = z_1 + z_2  = \blue((2 + j 3) + ( 4∠30°)) = 5.46 + j 5'><math><mrow><mi>z</mi><mo>=</mo><mi>z</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo>+</mo><mi>z</mi><msub><mrow></mrow><mtext>2</mtext></msub></mrow><mrow><mo>=</mo><mo form="prefix" stretchy="false" style="color:#0000FF;">(</mo><mn style="color:#0000FF;">2</mn><mo style="color:#0000FF;">+</mo><mi style="color:#0000FF;">j</mi><mn style="color:#0000FF;">3</mn><mo form="postfix" stretchy="false" style="color:#0000FF;">)</mo><mo style="color:#0000FF;">+</mo><mo form="prefix" stretchy="false" style="color:#0000FF;">(</mo><mn style="color:#0000FF;">4</mn><mi style="color:#0000FF;">∠</mi><mn style="color:#0000FF;">30</mn><mtext style="color:#0000FF;">°</mtext><mo form="postfix" stretchy="false" style="color:#0000FF;">)</mo></mrow><mrow><mo>=</mo><mn>5.46</mn><mo>+</mo><mi>j</mi><mn>5</mn></mrow></math></span></p></div></dd>
 <dt id='unit'>Unit</dt>
 <dd><p>A Humet <em>unit</em> can be applied to a numeric value. There are four ways to write a Hurmet unit.</p>
-<ol><li class="tight"><p>A unit name written directly after a number, with no intervening space.</p></li>
+<ol class="decimal" start="1"><li class="tight"><p>A unit name written directly after a number, with no intervening space.</p></li>
 <li class="tight"><p>A unit name between apostrophes, aka single straight quotation marks, written after a numeric value. A unit written this way can contain a space, like <code>fluid ounce</code>.</p></li>
 <li class="tight"><p>A unit symbol written after a numeric value.</p></li>
 <li class="tight"><p>A currency symbol written before a non-negative number.</p></li></ol>
@@ -804,7 +804,7 @@ ${w_dead}	30	40`` &#x27;lbf/ft&#x27; = %</code></pre><p>Note that you must do a 
 <tr><td>second</td><td>&quot;</td><td>14</td><td>&quot;</td><td>&quot;</td><td>&quot;</td><td>&quot;</td></tr>
 <tr><td>total</td><td>=sum(up)</td><td>0</td><td>=sum(up)</td><td><p></p></td><td>=sum(up)</td><td>=F_end</td></tr></table></figure>
 <p>This example illustrates several things about Hurmet spreadsheets.</p>
-<ol><li><p>Spreadsheets start out as a Hurmet table.</p></li>
+<ol class="decimal" start="1"><li><p>Spreadsheets start out as a Hurmet table.</p></li>
 <li><p>A spreadsheet must have a caption. The caption’s first word will be the spreadsheet’s name. Create a table caption by selecting a table and tapping the <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath d='M17,18 L17,22 L19,22 C20.6568542,22,22,20.6568542,22,19 L22,18 L17,18 Z M15,18 L9,18 L9,22 L15,22 L15,18 Z M17,16 L22,16 L22,12 L17,12 L17,16 Z M15,16 L15,12 L9,12 L9,16 L15,16 Z M17,10 L22,10 L22,9 C22,9,22,6,19,6 L17,6 L17,10 Z M15,10 L15,6 L9,6 L9,10 L15,10 Z M24,16.1768671 L24,19 C24,21.7614237,21.7614237,24,19,24 L5,24 C2.23857625,24,0,21.7614237,0,19 L0,9 C0,6,2,4,5,4 L19,4 C21.7614237,4,24,6.23857625,24,9 L24,7.82313285 C24.0122947,7.88054124,24.0187107,7.93964623,24.0187107,8 C24.0187107,8.06035377,24.0122947,8.11945876,24,8.17686715 L24,15.8231329 C24.0122947,15.8805412,24.0187107,15.9396462,24.0187107,16 C24.0187107,16.0603538,24.0122947,16.1194588,24,16.1768671 Z M7,6 L5,6 C3.34314575,6,2,7.34314575,2,9 L2,10 L7,10 L7,6 Z M2,12 L2,16 L7,16 L7,12 L2,12 Z M2,18 L2,19 C2,20.6568542,3.34314575,22,5,22 L7,22 L7,18 L2,18 Z M4,0 H20 V1.75 H4 Z'/%3E%3C/svg%3E" alt="table-caption"> button.</p></li>
 <li><p>After all editing is complete, toggle the table into a spreadsheet by tapping the <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath d='M17 22 L 19 22 C20.6569 22 22 20.6569 22 19 L22 7 L 22 5 C 22 3.3431 20.6569 2 19 2 L7 2 L5 2 C 3.3431 2 3 3.3431 2 5 L2 17 L2 19 C 2 20.6569 3.3431 22 5 22 L7 22 Z M24,16.1768671 L24,19 C24,21.7614237 21.7614237,24 19,24 L5,24 C2.23857625,24 2.11453371e-15,21.7614237 1.77635684e-15,19 L0,5 C-3.38176876e-16,2.23857625 2.23857625,2.28362215e-15 5,0 L19,0 C21.7614237,-5.07265313e-16 24,2.23857625 24,5 L24,7.82313285 C24.0122947,7.88054124 24.0187107,7.93964623 24.0187107,8 C24.0187107,8.06035377 24.0122947,8.11945876 24,8.17686715 L24,15.8231329 C24.0122947,15.8805412 24.0187107,15.9396462 24.0187107,16 C24.0187107,16.0603538 24.0122947,16.1194588 24,16.1768671 Z M19 7 H5 V10 H19 Z M19 14 H5 V17 H19 Z'/%3E%3C/svg%3E" alt="spreadsheet"> button. Hurmet spreadsheets toggle the entire table, not just one cell.</p></li>
 <li><p>No merged cells are allowed</p></li>
@@ -812,13 +812,13 @@ ${w_dead}	30	40`` &#x27;lbf/ft&#x27; = %</code></pre><p>Note that you must do a 
 <li><p>A unit-of-measure can be assigned to a column. Type a newline (Shift-Enter) into a heading and write the unit’s name on the second line.</p></li>
 <li><p>Cells can contain data: numbers, strings, true, or false. Spreadsheet cells cannot contain matrices.</p></li>
 <li><p>Cells can also contain a formula.</p>
-<ol><li><p>Formulas start with an <code>=</code> sign and can contain references to other cells or to variables in the Hurmet document.</p></li>
+<ol class="decimal" start="1"><li><p>Formulas start with an <code>=</code> sign and can contain references to other cells or to variables in the Hurmet document.</p></li>
 <li><p>Refer to a cell with <code>A1</code> format. No range names or R1C1 references. The row number is indexed so that number 1 refers to the first data row. A formula cannot refer to a heading.</p></li>
 <li><p>Refer to a column’s bottom cell with <code>_end</code> format. Example: <code>B_end</code>.</p></li>
 <li><p>To make a cell unit-aware, start the formula with a double <code>==</code> sign.</p></li>
 <li><p>A formula can contain the functions <code>sum(up)</code> or <code>sum(left)</code>.</p></li></ol></li>
 <li><p>A  single <code>&quot;</code> mark will be treated as a <em>ditto</em> instruction. Hurmet will treat that cell as a copy of the data or formula above it, with adjusted row numbers.</p></li></ol>
-<ol start="10"><li><p>Order of calculation is column-wise.</p></li>
+<ol class="decimal" start="10"><li><p>Order of calculation is column-wise.</p></li>
 <li><p>Hurmet math zones outside the spreadsheet can refer to a spreadsheet cell with the sheet name, column heading, and row heading. An exterior cell that calls <code>dist.Shear.total = ?</code> would get <code>400</code> for a result.</p></li></ol>
 <h2 id='numeral-display'>Numeral display</h2>
 <p>There are two aspects to how numbers are displayed: (1) decimal separators, and (2) rounding format for results.</p>

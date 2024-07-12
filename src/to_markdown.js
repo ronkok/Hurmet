@@ -174,16 +174,21 @@ const hurmetNodes =  {
     state.renderList(node, "    ", () => (node.attrs.bullet || "*") + "   ")
   },
   ordered_list(state, node) {
-    let start = node.attrs.order || 1
+    const start = node.attrs.order || 1
+    const className = state.isGFM ? "decimal" : node.attrs.class
     let maxW = String(start + node.childCount - 1).length
     let space = state.repeat(" ", maxW + 2)
     state.renderList(node, space, i => {
-      let nStr = String(start + i)
+      let nStr = className === "decimal"
+        ? String(start + i)
+        : className === "upper-alpha"
+        ? String.fromCodePoint(start + i + 64)  // A-Z
+        : String.fromCodePoint(start + i + 96)  // a-z
       return state.repeat(" ", maxW - nStr.length) + nStr + ".  "
     })
     // Write a 2nd blank line after an <ol>, to prevent an adjacent <ol> from
     // continuing the same numbering.
-    state.write(state.delim + "\n")
+    if (state.delim === "")  { state.write("\n") }
   },
   list_item(state, node) {
     state.renderContent(node)
@@ -864,7 +869,7 @@ export class MarkdownSerializerState {
   esc(str, startOfLine) {
     str = str.replace(/([`*\\¢\$<\[_~^])/g, "\\$1")
     if (startOfLine) {
-      str = str.replace(/^(\#|:|\-|\*|\+|>)/, "\\$1").replace(/^(\d+)\.(?= )/, "$1\\.")
+      str = str.replace(/^(\#|:|\-|\*|\+|>)/, "\\$1").replace(/^(\d+|[A-Za-z])\.(?= )/, "$1\\.")
     }
     return str
   }

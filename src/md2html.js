@@ -174,7 +174,7 @@ const nodes = {
   newline(node)    { return "\n" },
   horizontal_rule(node) { return "<hr>\n" },
   ordered_list(node) {
-    const attributes = node.attrs.order !== 1 ? { start: node.attrs.order } : undefined
+    const attributes = { class: node.attrs.class, start: node.attrs.order }
     return htmlTag("ol", ast2html(node.content), attributes) + "\n"
   },
   bullet_list(node)  { return htmlTag("ul", ast2html(node.content)) + "\n" },
