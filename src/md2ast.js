@@ -34,7 +34,8 @@
  *     A spreadsheet will include " spreadsheet" in `.class` The id will be the sheet's name.
  * 12. Lists that allow the user to pick list ordering.
  *        1. →  1. 2. 3.  etc.
- *        A. →  A. B. C.  etc. (future)
+ *        A. →  A. B. C.  etc.
+ *        a. →  a. b. c.  etc.
  *        a) →  (a) (b) (c)  etc. (future)
  * 13. Alerts per GFM
  *     > [!note] or [!tip] or [!important] or [!warning] or [!epigraph]

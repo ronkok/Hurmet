@@ -225,6 +225,14 @@ A newline is indicated by a backslash, `\`, at the end of a line.
 | `2. Two`\                                | 2. Two                    |
 | `3. Three`                               | 3. Three                  |
 +------------------------------------------+---------------------------+
+| `a. Item a`\                             | a. Item a                 |
+| `b. Item b`\                             | b. Item b                 |
+| `c. Item c`                              | c. Item c                 |
++------------------------------------------+---------------------------+
+| `A. Item A`\                             | A. Item A                 |
+| `B. Item B`\                             | B. Item B                 |
+| `C. Item C`                              | C. Item C                 |
++------------------------------------------+---------------------------+
 | ````  ``` ```` \                         | ```                       |
 | `#code block` \                          | # code block              |
 | `print "Hi!"` \                          | print "Hi!"               |

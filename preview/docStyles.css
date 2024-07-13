@@ -336,12 +336,21 @@ ol li {
     line-height: 1.35;
     margin-top: 0.5em;
 }
+ol.upper-alpha li {
+    list-style-type:upper-alpha;
+}
+ol.lower-alpha li {
+    list-style-type: lower-alpha;
+}
 ul li {
     list-style-type: disc;
     line-height: 1.35;
     margin-top: 0.5em;
     position: relative;
     left: 1.8em;
+}
+li.tight {
+    margin-top: 0em;
 }
 li p {
     margin: 0;
