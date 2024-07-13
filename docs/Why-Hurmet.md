@@ -102,3 +102,10 @@ Incompatible units return an error message:
 
 Need to make a change? No problem. Re-define a variable with a new value. Hurmet
 will immediately recalculate all the dependencies.
+
+## Reason #5: Chatbot Coordination
+
+Hurmet makes it easy to co-author with a chatbot. Hurmet’s native file format is
+Markdown, a light-weight markup format. Chatbots know Markdown well. Just tell
+your chatbot to write its work in Markdown. Then copy it and invoke the
+**M▾|Paste from Markdown** command.
