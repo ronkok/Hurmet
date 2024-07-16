@@ -4475,8 +4475,8 @@ const miscSymbols = Object.freeze({
   "…": ["…", "…", tt.ORD, ""],
 
   ":": [":", "{:}", tt.RANGE, ""], // range separator
-  ",": [",", ",\\:", tt.SEP, ""], // function argument or vector row separator
-  "\t": ["\t", " & ", tt.SEP, ""],  // matrix element separator
+  ",": [",", ",\\:", tt.SEP, ""], // function argument or matrix element separator
+  "\t": ["\t", " & ", tt.SEP, ""],  // dataframe element separator
   ";": [";", " \\\\ ", tt.SEP, ""], // row separator
 
   "$": ["$", "\\$", tt.CURRENCY, ""],
