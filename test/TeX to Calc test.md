@@ -1,5 +1,6 @@
 This document is written to test Hurmet’s conversion from TeX to Hurmet
-calculation format. Copy it and invoke Ctrl+Shift+v.
+calculation format. Copy it and invoke Ctrl+Shift+v. Hurmet will paste,
+not the TeX, but the equivalent Hurmet calculation script.
 
 $\sqrt{f_c'} = 3000 \text{psi} = 3 \mathrm{ksi} = \Gamma(\hat{\theta}) = \sin \alpha = \cos(y)$
 
