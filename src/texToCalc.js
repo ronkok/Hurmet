@@ -8,9 +8,13 @@ import { tt, lex } from "./lexer"
 */
 
 // Delimiter types
-const FRAC = 1
-const TFRAC = 2
-const BINARY = 3
+const PAREN = 1 // default
+const FRAC = 2
+const TFRAC = 4
+const BINARY = 8
+const ENV = 16  // environment
+const CASES = 32
+const SUB = 64
 
 const  charAccents = {
   "\\bar": "\u0304",
@@ -34,6 +38,7 @@ const leadingSpaceRegEx = /^\s+/
 const trailingSpaceRegEx = / +$/
 const inlineFracRegEx = /^\/(?!\/)/
 const ignoreRegEx = /^\\(left(?!\.)|right(?!\.)|middle|big|Big|bigg|Bigg)/
+const subRegEx = /^\("([A-Za-z\u0391-\u03c9][A-Za-z0-9\u0391-\u03c9]*)"$/
 const enviroRegEx = /^\\begin\{(?:(cases)|(|p|b|B|v|V)matrix)\}/
 const endEnviroRegEx = /^\\end\{(?:cases|(?:|p|b|B|v|V)matrix)\}/
 // eslint-disable-next-line max-len
@@ -119,7 +124,7 @@ export const texToCalc = str => {
   let calc = ""
   let token = {}
   let prevToken = { input: "", output: "", ttype: 50 }
-  const delims = [{ ch: "", pos: -1, env: false }] ; // delimiter stack
+  const delims = [{ ch: "", pos: -1, type: 0 }] ; // delimiter stack
   let splitLongVars = true
 
   // Trim the input string
@@ -157,11 +162,11 @@ export const texToCalc = str => {
       const match = enviroRegEx.exec(str)
       if (match[1]) {
         // {cases} environment
-        delims.push({ ch: ":}", pos: calc.length, env: true })
+        delims.push({ ch: ":}", pos: calc.length, type: ENV + CASES })
         calc += "{"
       } else {
         const matrixType = match[2] ? match[2] : "m"
-        delims.push({ ch: matrices[matrixType][1], pos: calc.length, env: true })
+        delims.push({ ch: matrices[matrixType][1], pos: calc.length, type: ENV })
         calc += matrices[matrixType][0];
       }
       str = eatMatch(str, match)
@@ -173,7 +178,7 @@ export const texToCalc = str => {
       if (match[0].indexOf("cases") > -1) {
         // {cases} environment. Clean up the if statements
         let casesText = calc.slice(delim.pos + 1)
-        casesText = casesText.replace(/, "if *"/g, "if ")
+        casesText = casesText.replace(/"if *"/g, "if ")
         calc = calc.slice(0, delim.pos + 1) + casesText
       }
       calc += delim.ch
@@ -192,25 +197,20 @@ export const texToCalc = str => {
 
     switch (token.ttype) {
       case tt.SPACE: //      spaces and newlines
-      case tt.ADD: //        infix add/subtract operators, + -
-      case tt.MULT: //       infix mult/divide operators, × * · // ÷
-      case tt.REL: //        relational operators, e.g  < == →
+        calc += token.output
+        break
+
       case tt.SUPCHAR:
-      case tt.FACTORIAL:
-        if (token.input === "&" && delims[delims.length - 1].env) {
-          if (delims[delims.length - 1].closeDelim !== ":}") {
-            calc += ", "
-          }
-        } else {
-          calc += token.output
-        }
+        if (calc.slice(-1) === " ") { calc = calc.slice(-1) }
+        calc += token.output
         break
 
       case tt.SUB:
       case tt.SUP:
         calc += token.output
         if (str.length > 0 && str.charAt(0) === "{") {
-          delims.push({ ch: ")", pos: calc.length, env: false })
+          const delimType = token.ttype === tt.SUB ? SUB : PAREN
+          delims.push({ ch: ")", pos: calc.length, type: delimType })
           calc += "("
           str = eatOneChar(str)
         }
@@ -219,9 +219,20 @@ export const texToCalc = str => {
       case tt.NUM:
       case tt.ORD:
       case tt.VAR:
+      case tt.ADD: //        infix add/subtract operators, + -
+      case tt.MULT: //       infix mult/divide operators, × * · // ÷
+      case tt.REL: //        relational operators, e.g  < == →
       case tt.BIN: //    infix math operators that render but don't calc, e.g. \bowtie
       case tt.BIG_OPERATOR:  // integral, sum, etc
-        calc += token.output + " "
+      case tt.FACTORIAL:
+        if (token.input === "&" && (delims[delims.length - 1].type & ENV)) {
+          // Write a comma separator for environments (except cases)
+          if (delims[delims.length - 1].type === ENV) {
+            calc += ", "
+          }
+        } else {
+          calc += token.output + " "
+        }
         break
 
       case tt.LONGVAR:
@@ -230,17 +241,17 @@ export const texToCalc = str => {
 
       case tt.ACCENT: {
         if (charAccents[token.input] && bracedCharRegEx.test(str)) {
-          delims.push({ ch: charAccents[token.input], pos: calc.length, env: false })
+          delims.push({ ch: charAccents[token.input], pos: calc.length, type: PAREN })
           str = eatOneChar(str)
         } else if ( token.input === "\\mathrm") {
           splitLongVars = false
-          delims.push({ ch: '', pos: calc.length, env: false })
+          delims.push({ ch: '', pos: calc.length, type: PAREN })
           str = eatOneChar(str)
         } else {
           calc += token.output
           if (str.length > 0 && str.charAt(0) === "{") {
             calc += "("
-            delims.push( { ch: ")", pos: calc.length, env: false })
+            delims.push( { ch: ")", pos: calc.length, type: PAREN })
             str = eatOneChar(str)
           }
         }
@@ -249,14 +260,14 @@ export const texToCalc = str => {
 
       case tt.UNARY: {
         if (token.input === "\\text") {
-          delims.push({ ch: '"', pos: calc.length, env: false })
+          delims.push({ ch: '"', pos: calc.length, type: PAREN })
           calc += '"'
           splitLongVars = false
           str =  str.slice(1)
         } else {
           calc += token.output
           if (str.length > 0 && str.charAt(0) === "{") {
-            delims.push({ ch: ")", pos: calc.length, env: false })
+            delims.push({ ch: ")", pos: calc.length, type: PAREN })
             calc +=  '('
             str = eatOneChar(str)
           }
@@ -266,15 +277,15 @@ export const texToCalc = str => {
 
       case tt.BINARY: {
         const pos = calc.length
-        if (token.input === "\\dfrac") {
+        if (token.input === "\\frac" || token.input === "\\dfrac") {
           calc += "("
-          delims.push({ ch: FRAC, pos, env: false })
-        } else if (token.input === "\\frac" || token.input === "\\tfrac") {
+          delims.push({ ch: ")/(", pos, type: FRAC })
+        } else if (token.input === "\\tfrac") {
           calc += "("
-          delims.push({ ch: TFRAC, pos, env: false })
+          delims.push({ ch: ")//(", pos, type: TFRAC })
         } else {
           calc += token.input + "{"
-          delims.push({ ch: BINARY, pos, env: false })
+          delims.push({ ch: "}{", pos, type: BINARY })
         }
         str = eatOneChar(str)
         break
@@ -285,7 +296,7 @@ export const texToCalc = str => {
         calc = calc.slice(0, pos) + "(" + calc.slice(pos + 1)
         delims.pop()
         calc += token.input === "\\over" ? ")/(" : ")" + token.input + "("
-        delims.push({ ch: ")", pos: calc.length - 1, env: false })
+        delims.push({ ch: ")", pos: calc.length - 1, type: PAREN })
         break
       }
 
@@ -295,7 +306,7 @@ export const texToCalc = str => {
         const match = openParenRegEx.exec(str)
         if (match) {
           calc += "("
-          delims.push({ ch: ")", pos, env: false })
+          delims.push({ ch: ")", pos, type: PAREN })
           str = eatMatch(str, match)
         } else {
           calc += " "
@@ -304,13 +315,13 @@ export const texToCalc = str => {
       }
 
       case tt.LEFTBRACKET: {
-        delims.push({ ch: token.closeDelim, pos: calc.length, env: false })
+        delims.push({ ch: token.closeDelim, pos: calc.length, type: PAREN })
         calc += token.output
         break
       }
 
       case tt.SEP: {
-        const inEnvironment = delims[delims.length - 1].env
+        const inEnvironment = (delims[delims.length - 1].type & ENV)
         if (token.input === "//" && inEnvironment) {
           calc += ";"
         } else {
@@ -323,20 +334,29 @@ export const texToCalc = str => {
         const delim = delims.pop()
         calc = calc.replace(trailingSpaceRegEx, "")
         if (/ $/.test(calc)) { calc = calc.slice(0, -1) }
-        if (delim.ch === FRAC) {
+        if (delim.type === FRAC) {
           calc += ") / ("
           str = eatOneChar(str)
-          delims.push({ ch: ")", pos: calc.length - 1, env: false })
-        } else if (delim.ch === TFRAC) {
+          delims.push({ ch: ")", pos: calc.length - 1, type: PAREN })
+        } else if (delim.type === TFRAC) {
           calc += ")//("
           str = eatOneChar(str)
-          delims.push({ ch: ")", pos: calc.length - 1, env: false })
-        } else if (delim.ch === BINARY) {
+          delims.push({ ch: ")", pos: calc.length - 1, type: PAREN })
+        } else if (delim.type === BINARY) {
           calc += "}{"
           str = eatOneChar(str)
-          delims.push({ ch: "}", pos: calc.length - 1, env: false })
+          delims.push({ ch: "}", pos: calc.length - 1, type: PAREN })
+        } else if (delim.type === SUB) {
+          let subText = calc.slice(delim.pos)
+          if (subRegEx.test(subText)) {
+            // Replace _("subscript") with _subscript
+            subText = subText.replace(subRegEx, "$1")
+            calc = calc.slice(0, delim.pos) + subText + " "
+          } else {
+            calc += delim.ch + " "
+          }
         } else {
-          calc += delim.ch
+          calc += delim.ch + " "
         }
         if (delim.ch === '"' || delim.ch === "") { splitLongVars = true }
         break
