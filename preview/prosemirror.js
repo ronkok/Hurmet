@@ -23194,7 +23194,7 @@ const texToCalc = str => {
         break
 
       case tt.SUPCHAR:
-        if (calc.slice(-1) === " ") { calc = calc.slice(-1); }
+        if (calc.slice(-1) === " ") { calc = calc.slice(0, -1); }
         calc += token.output;
         break
 
