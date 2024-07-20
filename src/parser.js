@@ -223,7 +223,7 @@ const nextCharIsFactor = (str, tokenType, isFollowedBySpace) => {
   return fcMeetsTest
 }
 
-const cloneToken = token => {
+export const cloneToken = token => {
   return {
     input: token.input,
     output: token.output,
@@ -535,7 +535,7 @@ export const parse = (
       const tkn = prevToken.ttype === tt.NUM && !isFollowedBySpace && unitStartRegEx.test(str)
         ? lexUnitName(str)                                // something like the "m" in "5m"
         : lex(str, decimalFormat, prevToken, inRealTime)  // default
-      token = { input: tkn[0], output: tkn[1], ttype: tkn[2], closeDelim: tkn[3] }
+      token = { input: tkn[0], output: tkn[1], ttype: tkn[3], closeDelim: tkn[4] }
       str = str.substring(token.input.length)
       isFollowedBySpace = leadingSpaceRegEx.test(str) || /^(˽|\\quad|\\qquad)+/.test(str)
       isFollowedBySpaceOrNewline = /^[ \n]/.test(str)
@@ -1050,8 +1050,8 @@ export const parse = (
         break
 
       case tt.FACTORIAL:
-        popTexTokens(14, true)
-        texStack.push({ prec: 14, pos: op.pos, ttype: tt.FACTORIAL, closeDelim: "" })
+        popTexTokens(12, true)
+        texStack.push({ prec: 12, pos: op.pos, ttype: tt.FACTORIAL, closeDelim: "" })
         if (isCalc) {
           popRpnTokens(rpnPrecFromType[tt.FACTORIAL])
           rpn += tokenSep + token.output
@@ -1210,6 +1210,10 @@ export const parse = (
             ? "p"
             : delim.name === "{:"
             ? ""
+            : delim.name === "|"
+            ? "v"
+            : delim.name === "‖"
+            ? "V"
             : "B"
           delim.open = `\\begin{${ch}matrix}`
           delim.close = `\\end{${ch}matrix}`
@@ -1392,13 +1396,14 @@ export const parse = (
           isRightDelim =
             texStack[texStack.length - 1].ttype === tt.LEFTRIGHT ||
             texStack[texStack.length - 1].closeDelim === "\u27E9" || // Dirac ket
-            texStack[texStack.length - 1].closeDelim === "\\right." ||
-            texStack[texStack.length - 1].closeDelim === "\\end{vmatrix}"
+            texStack[texStack.length - 1].closeDelim === "\\right."
         }
         if (isRightDelim) {
           // Treat as a right delimiter
-          topDelim.close = token.input === "|" ? "|" : "‖"
-          texStack[texStack.length - 1].closeDelim = topDelim.close
+          if (topDelim.delimType !== dMATRIX) {
+            topDelim.close = token.input === "|" ? "|" : "‖"
+            texStack[texStack.length - 1].closeDelim = topDelim.close
+          }
           popTexTokens(0, okToAppend)
           delims.pop()
           if (isCalc) {

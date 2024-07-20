@@ -16924,10 +16924,10 @@ const numeralFromSuperScript = ch => {
 };
 
 // Trim spaces except for tabs. This is used to read tab-separated values (TSV).
-const leadingSpaceRegEx$3 = /^[ \r\n\f]+/;
-const trailingSpaceRegEx$1 = /[ \r\n\f]+$/;
+const leadingSpaceRegEx$4 = /^[ \r\n\f]+/;
+const trailingSpaceRegEx$2 = /[ \r\n\f]+$/;
 const tablessTrim = str => {
-  return str.replace(leadingSpaceRegEx$3, "").replace(trailingSpaceRegEx$1, "")
+  return str.replace(leadingSpaceRegEx$4, "").replace(trailingSpaceRegEx$2, "")
 };
 
 const midDotRegEx = /^(\*|·|\.|-[A-Za-z])/;
@@ -18004,11 +18004,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6076","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.6276","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.9104","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["6.0303","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -18017,10 +18017,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4834","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4938","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9747","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.8984","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9688","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.9165","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -18040,7 +18040,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.84029","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.84280","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -18048,23 +18048,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.5019","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.5049","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["3.9529","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["90.9585","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["3.9805","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["91.1170","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["172.87","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["171.61","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1497.89","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1511.37","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -18075,7 +18075,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["19.3112","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["19.5065","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -20686,269 +20686,291 @@ const isUnary = (prevToken) => {
 const wordRegEx = /^(?:(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u212C\u2130\u2131\u210B\u2110\u2112\u2133\u211B\u212F\u210A\u2113\u2134]|(?:\uD835[\uDC00-\udc33\udc9c-\udccf\udd38-\udd50]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*|!in|-->|->|left\.|right\.|log10|log2)/;
 
 const words = Object.freeze({
-  //       input,    tex output,               type, closeDelim
-  "true": ["true", "\\mathord{\\text{true}}", tt.BOOLEAN, ""],
-  "false": ["false", "\\mathord{\\text{false}}", tt.BOOLEAN, ""],
-  cos: ["cos", "\\cos", tt.FUNCTION, ""],
-  cosd: ["cosd", "\\operatorname{\\cos_d}", tt.FUNCTION, ""],
-  if: ["if", "\\mathrel{\\mathrm{if}}", tt.LOGIC, ""],
-  else: ["else", "\\mathrel{\\mathrm{else}}", tt.LOGIC, ""],
-  elseif: ["elseif", "\\mathrel{\\mathrm{elseif}}", tt.LOGIC, ""],
-  and: ["and", "\\mathrel{\\mathrm{and}}", tt.LOGIC, ""],
-  or: ["or", "\\mathrel{\\mathrm{or}}", tt.LOGIC, ""],
-  for: ["for", "\\mathrel{\\mathrm{for}}", tt.KEYWORD, ""],
-  while: ["while", "\\mathrel{\\mathrm{while}}", tt.KEYWORD, ""],
-  in: ["in", "\\mathrel{\\mathrm{in}}", tt.REL, ""],
-  "!in": ["!in", "\\mathrel{\\mathrm{!in}}", tt.REL, ""],
-  break: ["break", "\\mathrel{\\mathrm{break}}", tt.KEYWORD, ""],
-  to: ["to", "\\mathbin{\\mathrm{to}}", tt.TO, "" ],
-  throw: ["throw", "\\mathrel{\\mathrm{throw}}", tt.UNARY, ""],
-  print: ["print", "\\mathrel{\\mathrm{print}}", tt.UNARY, ""],
-  return: ["return", "\\mathrel{\\mathrm{return}}", tt.RETURN, ""],
-  sqrt: ["sqrt", "\\sqrt", tt.UNARY, ""],
-  otherwise: ["otherwise", "\\mathrel{\\mathrm{otherwise}}", tt.LOGIC, ""],
-  root: ["root", "\\sqrt", tt.BINARY, ""],
-  sin: ["sin", "\\sin", tt.FUNCTION, ""],
-  sind: ["sind", "\\operatorname{\\sin_d}", tt.FUNCTION, ""],
-  tan: ["tan", "\\tan", tt.FUNCTION, ""],
-  tand: ["tand", "\\operatorname{\\tan_d}", tt.FUNCTION, ""],
-  cotd: ["cotd", "\\operatorname{\\cot_d}", tt.FUNCTION, ""],
-  secd: ["secd", "\\operatorname{\\sec_d}", tt.FUNCTION, ""],
-  cscd: ["cscd", "\\operatorname{\\csc_d}", tt.FUNCTION, ""],
-  log: ["log", "\\log", tt.FUNCTION, ""],
-  ln: ["ln", "\\ln", tt.FUNCTION, ""],
-  log10: ["log10", "\\log_{10}", tt.FUNCTION, ""],
-  log2: ["log2", "\\log_{2}", tt.FUNCTION, ""],
-  "log!": ["log!", "\\operatorname{log!}", tt.FUNCTION, ""],
-  pi: ["pi", "\\mathrm{pi}", tt.ORD, ""],
-  π: ["π", "π", tt.ORD, ""],
-  "ℓ": ["ℓ", "ℓ", tt.VAR, ""],
+  //       input,    tex output,          calc output, type, closeDelim
+  "true": ["true", "\\mathord{\\text{true}}", "true", tt.BOOLEAN, ""],
+  "false": ["false", "\\mathord{\\text{false}}", "false", tt.BOOLEAN, ""],
+  cos: ["cos", "\\cos", "cos", tt.FUNCTION, ""],
+  cosd: ["cosd", "\\operatorname{\\cos_d}", "cosd", tt.FUNCTION, ""],
+  if: ["if", "\\mathrel{\\mathrm{if}}", "if", tt.LOGIC, ""],
+  else: ["else", "\\mathrel{\\mathrm{else}}", "else", tt.LOGIC, ""],
+  elseif: ["elseif", "\\mathrel{\\mathrm{elseif}}", "elseif", tt.LOGIC, ""],
+  and: ["and", "\\mathrel{\\mathrm{and}}", "and", tt.LOGIC, ""],
+  or: ["or", "\\mathrel{\\mathrm{or}}", "or", tt.LOGIC, ""],
+  for: ["for", "\\mathrel{\\mathrm{for}}", "for", tt.KEYWORD, ""],
+  while: ["while", "\\mathrel{\\mathrm{while}}", "while", tt.KEYWORD, ""],
+  in: ["in", "\\mathrel{\\mathrm{in}}", "in", tt.REL, ""],
+  "!in": ["!in", "\\mathrel{\\mathrm{!in}}", "∉", tt.REL, ""],
+  break: ["break", "\\mathrel{\\mathrm{break}}", "break", tt.KEYWORD, ""],
+  to: ["to", "\\mathbin{\\mathrm{to}}", "to", tt.TO, "" ],
+  throw: ["throw", "\\mathrel{\\mathrm{throw}}", "throw", tt.UNARY, ""],
+  print: ["print", "\\mathrel{\\mathrm{print}}", "print", tt.UNARY, ""],
+  return: ["return", "\\mathrel{\\mathrm{return}}", "print", tt.RETURN, ""],
+  sqrt: ["sqrt", "\\sqrt", "√", tt.UNARY, ""],
+  otherwise: ["otherwise", "\\mathrel{\\mathrm{otherwise}}", "otherwise", tt.LOGIC, ""],
+  root: ["root", "\\sqrt", "root", tt.BINARY, ""],
+  sin: ["sin", "\\sin", "sin", tt.FUNCTION, ""],
+  sind: ["sind", "\\operatorname{\\sin_d}", "sind", tt.FUNCTION, ""],
+  tan: ["tan", "\\tan", "tan", tt.FUNCTION, ""],
+  tand: ["tand", "\\operatorname{\\tan_d}", "tand", tt.FUNCTION, ""],
+  cotd: ["cotd", "\\operatorname{\\cot_d}", "cotd", tt.FUNCTION, ""],
+  secd: ["secd", "\\operatorname{\\sec_d}", "secd", tt.FUNCTION, ""],
+  cscd: ["cscd", "\\operatorname{\\csc_d}", "cscd", tt.FUNCTION, ""],
+  log: ["log", "\\log", "log", tt.FUNCTION, ""],
+  ln: ["ln", "\\ln", "ln", tt.FUNCTION, ""],
+  log10: ["log10", "\\log_{10}", "log10", tt.FUNCTION, ""],
+  log2: ["log2", "\\log_{2}", "log2", tt.FUNCTION, ""],
+  "log!": ["log!", "\\operatorname{log!}", "log!", tt.FUNCTION, ""],
+  pi: ["pi", "\\mathrm{pi}", "π", tt.ORD, ""],
+  π: ["π", "π", "π", tt.ORD, ""],
+  "ℓ": ["ℓ", "ℓ", "ℓ", tt.VAR, ""],
   // A few arrows are placed here to give them priority over other arrows
-  "->": ["->", "\u2192", tt.REL, ""], // right arrow
-  "-->": ["-->", "\\xrightarrow", tt.UNARY, ""],
-  "<-->": ["<-->", "\\xrightleftarrows", tt.UNARY, ""]
+  "->": ["->", "\u2192", "\u2192", tt.REL, ""], // right arrow
+  "-->": ["-->", "\\xrightarrow", "-->", tt.UNARY, ""],
+  "<-->": ["<-->", "\\xrightleftarrows", "<-->", tt.UNARY, ""]
 });
 
 const miscRegEx = /^([/÷\u2215_:,;\t^+\\\-–−*∗×∘⊗⦼⊙√∛∜·.%|╏‖¦><=≈≟≠≡≤≥≅∈∉∋∌⊂⊄⊆⊈⊃⊇⊉!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃∫∬∮∑([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7$£¥€₨₩₪]+)/;
 
 const miscSymbols = Object.freeze({
   //    input, output, type,  closeDelim
-  "#": ["#", "#", tt.COMMENT, ""],
-  "/": ["/", "\\dfrac{", tt.DIV, ""],   // displaystyle fraction
-  "//": ["//", "\\tfrac{", tt.DIV, ""], // textstyle fraction
-  "///": ["///", "/", tt.MULT, ""],     // inline (shilling) fraction
-  "\u2215": ["\u2215", "\u2215", tt.MULT, ""], // inline (shilling) fraction
-  "÷": ["÷", "÷", tt.MULT, ""],
-  "./": ["./", "\\mathbin{.'}", tt.MULT, ""],
-  "_": ["_", "_", tt.SUB, ""],
-  "^": ["^", "^", tt.SUP, ""],
-  ".^": [".^", "\\mathbin{.^}", tt.SUP, ""],
-  "+": ["+", "+", tt.ADD, ""],
-  "-": ["-", "-", tt.ADD, ""],
-  "–": ["-", "-", tt.ADD, ""], // \u2013 en dash
-  "−": ["-", "-", tt.ADD, ""], // \u2212 math minus
-  ".+": [".+", "\\mathbin{.+}", tt.ADD, ""],
-  ".-": [".-", "\\mathbin{.-}", tt.ADD, ""],
-  "*": ["*", "*", tt.MULT, ""],
-  "∗": ["∗", "∗", tt.MULT, ""],
-  "×": ["×", "×", tt.MULT, ""],
-  "∘": ["∘", "∘", tt.MULT, ""], // U+2218
-  "⊗": ["⊗", "⊗", tt.MULT, ""],
-  ".*": [".*", "\\mathbin{.*}", tt.MULT, ""],
-  "√": ["√", "\\sqrt", tt.UNARY, ""],
-  "\u221B": ["\u221B", "\\sqrt[3]", tt.UNARY, ""],
-  "\u221C": ["\u221C", "\\sqrt[4]", tt.UNARY, ""],
-  "+-": ["+-", "\u00B1", tt.BIN, ""],
-  "**": ["**", "\\star", tt.BIN, ""],
-  "·": ["·", "\u22C5", tt.MULT, ""], // dot operator
-  "...": ["...", "\\dots", tt.RANGE, ""],
-  "%": ["%", "\\%", tt.FACTORIAL, ""],
-  "-:": ["-:", "÷", tt.MULT, ""],
-  "=": ["=", "=", tt.REL, ""],
-  "≈": ["≈", "≈", tt.REL, ""],
-  "==": ["==", "⩵", tt.REL, ""],
-  "≡": ["≡", "≡", tt.REL, ""],
-  ">": [">", "\\gt", tt.REL, ""],
-  "\u226f": ["\u226f", "\\ngtr", tt.REL, ""],
-  "<": ["<", "\\lt", tt.REL, ""],
-  "\u226e": ["\u226e", "\\nless", tt.REL, ""],
-  "?=": ["?=", "\u225F", tt.REL, ""],
-  "≟": ["≟", "\u225F", tt.REL, ""],
-  "≠": ["≠", "≠", tt.REL, ""],
-  "!=": ["!=", "≠", tt.REL, ""],
-  "<>": ["<>", "≠", tt.REL, ""],
-  ":=": [":=", "\u2254", tt.REL, ""],
-  "<=": ["<=", "≤", tt.REL, ""],
-  "≤": ["≤", "≤", tt.REL, ""],
-  ">=": [">=", "\u2265", tt.REL, ""],
-  "≥": ["≥", "≥", tt.REL, ""],
-  "-=": ["-=", "\u2261", tt.REL, ""],
-  "~=": ["~=", "\u2245", tt.REL, ""],
-  "≅": ["≅", "≅", tt.REL, ""],
-  "~~": ["~~", "\u2248", tt.REL, ""],
-  "~": ["~", "\\sim", tt.REL, ""],
-  "=>": ["=>", "\u21D2", tt.REL, ""],
-  "⟶": ["⟶", "\\xrightarrow", tt.UNARY, ""],
-  "⟵": ["⟵", "\\xleftarrow", tt.UNARY, ""],
+  "#": ["#", "#", "#", tt.COMMENT, ""],
+  "/": ["/", "\\dfrac{", "///", tt.DIV, ""],   // displaystyle fraction
+  "//": ["//", "\\tfrac{", "//", tt.DIV, ""], // textstyle fraction
+  "///": ["///", "/", "\u2215", tt.MULT, ""],     // inline (shilling) fraction
+  "\u2215": ["\u2215", "\u2215", "\u2215", tt.MULT, ""], // inline (shilling) fraction
+  "÷": ["÷", "÷", "÷", tt.MULT, ""],
+  "./": ["./", "\\mathbin{.'}", "./", tt.MULT, ""],
+  "_": ["_", "_", "_", tt.SUB, ""],
+  "^": ["^", "^", "^", tt.SUP, ""],
+  ".^": [".^", "\\mathbin{.^}", ".^", tt.SUP, ""],
+  "+": ["+", "+", "+", tt.ADD, ""],
+  "-": ["-", "-", "-", tt.ADD, ""],
+  "–": ["-", "-", "-", tt.ADD, ""], // \u2013 en dash
+  "−": ["-", "-", "-", tt.ADD, ""], // \u2212 math minus
+  ".+": [".+", "\\mathbin{.+}", ".+", tt.ADD, ""],
+  ".-": [".-", "\\mathbin{.-}", ".-", tt.ADD, ""],
+  "*": ["*", "*", "*", tt.MULT, ""],
+  "∗": ["∗", "∗", "∗", tt.MULT, ""],
+  "×": ["×", "×", "×", tt.MULT, ""],
+  "∘": ["∘", "∘", "∘", tt.MULT, ""], // U+2218
+  "⊗": ["⊗", "⊗", "⊗", tt.MULT, ""],
+  ".*": [".*", "\\mathbin{.*}", ".*", tt.MULT, ""],
+  "√": ["√", "\\sqrt", "√", tt.UNARY, ""],
+  "\u221B": ["\u221B", "\\sqrt[3]", "\u221B", tt.UNARY, ""],
+  "\u221C": ["\u221C", "\\sqrt[4]", "\u221C", tt.UNARY, ""],
+  "+-": ["+-", "\u00B1", "\u00B1", tt.BIN, ""],
+  "**": ["**", "\\star", "**", tt.BIN, ""],
+  "·": ["·", "\u22C5", "·", tt.MULT, ""], // dot operator
+  "...": ["...", "\\dots", "...", tt.RANGE, ""],
+  "\\dots": ["\\dots", "\\dots", "...", tt.RANGE, ""],
+  "%": ["%", "\\%", "%", tt.FACTORIAL, ""],
+  "-:": ["-:", "÷", "÷", tt.MULT, ""],
+  "=": ["=", "=", "=", tt.REL, ""],
+  "≈": ["≈", "≈", "≈", tt.REL, ""],
+  "==": ["==", "⩵", "==", tt.REL, ""],
+  "≡": ["≡", "≡", "≡", tt.REL, ""],
+  ">": [">", "\\gt", ">", tt.REL, ""],
+  "\u226f": ["\u226f", "\\ngtr", "\u226f", tt.REL, ""],
+  "<": ["<", "\\lt", "<", tt.REL, ""],
+  "\u226e": ["\u226e", "\\nless", "\u226e", tt.REL, ""],
+  "?=": ["?=", "\u225F", "\u225F", tt.REL, ""],
+  "≟": ["≟", "\u225F", "\u225F", tt.REL, ""],
+  "≠": ["≠", "≠", "≠", tt.REL, ""],
+  "!=": ["!=", "≠", "≠", tt.REL, ""],
+  "<>": ["<>", "≠", "≠", tt.REL, ""],
+  ":=": [":=", "\u2254", "\u2254", tt.REL, ""],
+  "<=": ["<=", "≤", "≤", tt.REL, ""],
+  "≤": ["≤", "≤", "≤", tt.REL, ""],
+  ">=": [">=", "\u2265", "\u2265", tt.REL, ""],
+  "≥": ["≥", "≥", "≥", tt.REL, ""],
+  "-=": ["-=", "\u2261", "\u2261", tt.REL, ""],
+  "~=": ["~=", "\u2245", "\u2245", tt.REL, ""],
+  "≅": ["≅", "≅", "≅", tt.REL, ""],
+  "~~": ["~~", "\u2248", "\u2248", tt.REL, ""],
+  "~": ["~", "\\sim", "˽", tt.REL, ""],
+  "=>": ["=>", "\u21D2", "\u21D2", tt.REL, ""],
   "⇒": ["⇒", "\u21D2", tt.REL, ""],
-  "<=>": ["<=>", "\u21D4", tt.REL, ""],
-  "-<": ["-<", "\u227A", tt.REL, ""],
-  ">-": [">-", "\u227B", tt.REL, ""],
-  "-<=": ["-<=", "\u2AAF", tt.REL, ""],
-  ">-=": [">-=", "\u2AB0", tt.REL, ""],
-  "_|_": ["_|_", "\\bot", tt.REL, ""],
-  "|--": ["|--", "\u22A2", tt.REL, ""],
-  "|==": ["|==", "\\models", tt.REL, ""],
-  "∈": ["∈", "∈", tt.REL, ""],
-  "∉": ["∉", "∉", tt.REL, ""],
-  "∋": ["∋", "∋", tt.REL, ""],
-  "∌": ["∌", "∌", tt.REL, ""],
-  "⊂": ["⊂", "⊂", tt.REL, ""],
-  "⊃": ["⊃", "⊃", tt.REL, ""],
-  "⊄": ["⊄", "⊄", tt.REL, ""],
-  "⊅": ["⊅", "⊅", tt.REL, ""],
-  "⊆": ["⊆", "⊆", tt.REL, ""],
-  "⊈": ["⊈", "⊈", tt.REL, ""],
-  "⊇": ["⊇", "⊇", tt.REL, ""],
-  "⊉": ["⊉", "⊉", tt.REL, ""],
-  "▪": ["▪", "\\mathrel{▪}", tt.REL, ""],
+  "⟶": ["⟶", "\\xrightarrow", "⟶", tt.UNARY, ""],
+  "⟵": ["⟵", "\\xleftarrow", "⟵", tt.UNARY, ""],
+  "<=>": ["<=>", "\u21D4", "\u21D4", tt.REL, ""],
+  "-<": ["-<", "\u227A", "\u227A", tt.REL, ""],
+  ">-": [">-", "\u227B", "\u227B", tt.REL, ""],
+  "-<=": ["-<=", "\u2AAF", "\u2AAF", tt.REL, ""],
+  ">-=": [">-=", "\u2AB0", "\u2AB0", tt.REL, ""],
+  "_|_": ["_|_", "\\bot", "_|_", tt.REL, ""],
+  "|--": ["|--", "\u22A2", "\u22A2", tt.REL, ""],
+  "|==": ["|==", "\\models", "⊨", tt.REL, ""],
+  "∈": ["∈", "∈", "∈", tt.REL, ""],
+  "∉": ["∉", "∉", "∉", tt.REL, ""],
+  "∋": ["∋", "∋", "∋", tt.REL, ""],
+  "∌": ["∌", "∌", "∌", tt.REL, ""],
+  "⊂": ["⊂", "⊂", "⊂", tt.REL, ""],
+  "⊃": ["⊃", "⊃", "⊃", tt.REL, ""],
+  "⊄": ["⊄", "⊄", "⊄", tt.REL, ""],
+  "⊅": ["⊅", "⊅", "⊅", tt.REL, ""],
+  "⊆": ["⊆", "⊆", "⊆", tt.REL, ""],
+  "⊈": ["⊈", "⊈", "⊈", tt.REL, ""],
+  "⊇": ["⊇", "⊇", "⊇", tt.REL, ""],
+  "⊉": ["⊉", "⊉", "⊉", tt.REL, ""],
+  "▪": ["▪", "\\mathrel{▪}", "▪", tt.REL, ""],
 
-  "!": ["!", "!", tt.FACTORIAL, ""],
-  "‼": ["‼", "!!", tt.FACTORIAL, ""],
-  "!!": ["!!", "!!", tt.FACTORIAL, ""],
-  "¡": ["¡", "¡", tt.FACTORIAL, ""],
-  "&": ["&", "\\mathbin{\\&}", tt.ADD, ""], // string concatenator
-  "&_": ["&_", "\\mathbin{\\underline{\\&}}", tt.ADD, ""], // concatenate to bottom
-  "′": ["′", "'", tt.PRIME, ""],
-  "″": ["″", "''", tt.PRIME, ""],
-  "′′": ["′′", "''", tt.PRIME, ""],
-  "′′′": ["′′′", "'''", tt.PRIME, ""],
+  "!": ["!", "!", "!", tt.FACTORIAL, ""],
+  "‼": ["‼", "!!", "‼", tt.FACTORIAL, ""],
+  "!!": ["!!", "!!", "‼", tt.FACTORIAL, ""],
+  "¡": ["¡", "¡", "¡", tt.FACTORIAL, ""],
+  "&": ["&", "\\mathbin{\\&}", "&", tt.ADD, ""], // string concatenator
+  "&_": ["&_", "\\mathbin{\\underline{\\&}}", "&_", tt.ADD, ""], // concatenate to bottom
+  "′": ["′", "'", "′", tt.PRIME, ""],
+  "″": ["″", "''", "″", tt.PRIME, ""],
+  "′′": ["′′", "''", "′′", tt.PRIME, ""],
+  "′′′": ["′′′", "'''", "′′′", tt.PRIME, ""],
 
-  "∀": ["∀", "∀", tt.LOGIC, ""],
-  "∃": ["∃", "∃", tt.LOGIC, ""],
-  "∧": ["∧", "∧", tt.LOGIC, ""],
-  "∨": ["∨", "∨", tt.LOGIC, ""],
-  "⊻": ["⊻", "⊻", tt.LOGIC, ""], // xor
-  "¬": ["¬", "¬", tt.UNARY, ""], // logical not
-  "&&": ["&&", "{\\;\\&\\&\\;}", tt.LOGIC, ""],
+  "∀": ["∀", "∀", "∀", tt.LOGIC, ""],
+  "∃": ["∃", "∃", "∃", tt.LOGIC, ""],
+  "∧": ["∧", "∧", "∧", tt.LOGIC, ""],
+  "∨": ["∨", "∨", "∨", tt.LOGIC, ""],
+  "⊻": ["⊻", "⊻", "⊻", tt.LOGIC, ""], // xor
+  "¬": ["¬", "¬", "¬", tt.UNARY, ""], // logical not
+  "&&": ["&&", "{\\;\\&\\&\\;}", "&&", tt.LOGIC, ""],
 
-  "\u222B": ["\u222B", "\\displaystyle\u222B", tt.BIG_OPERATOR, ""], // \int
-  "\u222C": ["\u222C", "\\displaystyle\u222C", tt.BIG_OPERATOR, ""], // \iint
-  "\u222E": ["\u222E", "\\displaystyle\u222E", tt.BIG_OPERATOR, ""], // \oint
-  "\u2211": ["\u2211", "\\displaystyle\u2211", tt.BIG_OPERATOR, ""], // \sum
+  "\u222B": ["\u222B", "\\displaystyle\u222B", "\u222B", tt.BIG_OPERATOR, ""], // \int
+  "\u222C": ["\u222C", "\\displaystyle\u222C", "\u222C", tt.BIG_OPERATOR, ""], // \iint
+  "\u222E": ["\u222E", "\\displaystyle\u222E", "\u222E", tt.BIG_OPERATOR, ""], // \oint
+  "\u2211": ["\u2211", "\\displaystyle\u2211", "\u2211", tt.BIG_OPERATOR, ""], // \sum
 
-  "(": ["(", "(", tt.LEFTBRACKET, ")"],
-  "[": ["[", "[", tt.LEFTBRACKET, "]"],
-  "{": ["{", "\\{", tt.LEFTBRACKET, "\\}"],
-  "{:": ["{:", "{", tt.LEFTBRACKET, "}"],
-  "⟨": ["⟨", "⟨", tt.LEFTBRACKET, "⟩"],
-  ")": [")", ")", tt.RIGHTBRACKET, ""],
-  "]": ["]", "]", tt.RIGHTBRACKET, ""],
-  "}": ["}", "\\}", tt.RIGHTBRACKET, ""],
-  "⟩": ["⟩", "⟩", tt.RIGHTBRACKET, ""],
-  ":}": [":}", "}", tt.RIGHTBRACKET, ""],
-  "|": ["|", "|", tt.LEFTRIGHT, ""],
-  "||": ["||", "\\mathbin{||}", tt.BIN, ""],
-  "\\|": ["\\|", "‖", tt.LEFTRIGHT, ""],
-  "‖": ["‖", "‖", tt.LEFTRIGHT, ""],
-  "<<": ["<<", "\u27E8", tt.LEFTBRACKET, "\u27E9"],
-  ">>": [">>", "\u27E9", tt.RIGHTBRACKET, ""],
-  "\u23BF": ["\u23BF", "\\lfloor ", tt.LEFTBRACKET, "\\rfloor "],
-  "\u230B": ["\u230B", "\\rfloor ", tt.RIGHTBRACKET, ""],
-  "\u23CC": ["\u23CC", "\\rfloor ", tt.RIGHTBRACKET, ""],
-  "\u2308": ["\u2308", "\\lceil ", tt.LEFTBRACKET, "\\rceil "],
-  "\u23BE": ["\u23BE", "\\lceil ", tt.LEFTBRACKET, "\\rceil "],
-  "\u2309": ["\u2309", "\\rceil ", tt.RIGHTBRACKET, ""],
-  "\u23CB": ["\u23CB", "\\rceil ", tt.RIGHTBRACKET, ""],
-  "\u3016": ["\u3016", "{", tt.LEFTBRACKET, "}"],
-  "\u3017": ["\u3017", "}", tt.RIGHTBRACKET, ""],
-  "¦": ["¦", "\\mid ", tt.REL, ""],
+  "(": ["(", "(", "(", tt.LEFTBRACKET, ")"],
+  "[": ["[", "[", "[", tt.LEFTBRACKET, "]"],
+  "{": ["{", "\\{", "{", tt.LEFTBRACKET, "\\}"],
+  "{:": ["{:", "{", "{:", tt.LEFTBRACKET, "}"],
+  "⟨": ["⟨", "⟨", "⟨", tt.LEFTBRACKET, "⟩"],
+  ")": [")", ")", ")", tt.RIGHTBRACKET, ""],
+  "]": ["]", "]", "]", tt.RIGHTBRACKET, ""],
+  "}": ["}", "\\}", "}", tt.RIGHTBRACKET, ""],
+  "⟩": ["⟩", "⟩", "⟩", tt.RIGHTBRACKET, ""],
+  ":}": [":}", "}", ":}", tt.RIGHTBRACKET, ""],
+  "|": ["|", "|", "|", tt.LEFTRIGHT, ""],
+  "||": ["||", "\\mathbin{||}", "||", tt.BIN, ""],
+  "\\|": ["\\|", "‖", "‖", tt.LEFTRIGHT, ""],
+  "‖": ["‖", "‖", "‖", tt.LEFTRIGHT, ""],
+  "<<": ["<<", "\u27E8", "\u27E8", tt.LEFTBRACKET, "\u27E9"],
+  ">>": [">>", "\u27E9", "\u27E9", tt.RIGHTBRACKET, ""],
+  "\u230A": ["\u230A", "\\lfloor ", "\u230A", tt.LEFTBRACKET, "\u230B"],
+  "\u23BF": ["\u23BF", "\\lfloor ", "\u230A", tt.LEFTBRACKET, "\u230B"],
+  "\u230B": ["\u230B", "\\rfloor ", "\u230B", tt.RIGHTBRACKET, ""],
+  "\u23CC": ["\u23CC", "\\rfloor ", "\u230B", tt.RIGHTBRACKET, ""],
+  "\u2308": ["\u2308", "\\lceil ", "\u2308", tt.LEFTBRACKET, "\u2309"],
+  "\u23BE": ["\u23BE", "\\lceil ", "\u2308", tt.LEFTBRACKET, "\u2309"],
+  "\u2309": ["\u2309", "\\rceil ", "\u2309", tt.RIGHTBRACKET, ""],
+  "\u23CB": ["\u23CB", "\\rceil ", "\u2309", tt.RIGHTBRACKET, ""],
+  "\u3016": ["\u3016", "{", "\u3016", tt.LEFTBRACKET, "\u3017"],
+  "\u3017": ["\u3017", "}", "\u3017", tt.RIGHTBRACKET, "\u3017"],
+  "¦": ["¦", "\\mid ", "¦", tt.REL, ""],
 
   // double-struck, i.e. blackboard bold
-  "ℂ": ["ℂ", "\u2102", tt.ORD, ""],
-  "ℕ": ["ℕ", "\u2115", tt.ORD, ""],
-  "ℚ": ["ℚ", "\u211A", tt.ORD, ""],
-  "ℝ": ["ℝ", "\u211D", tt.ORD, ""],
-  "ℤ": ["ℤ", "\u2124", tt.ORD, ""],
+  "ℂ": ["ℂ", "\u2102", "ℂ", tt.ORD, ""],
+  "ℕ": ["ℕ", "\u2115", "ℕ", tt.ORD, ""],
+  "ℚ": ["ℚ", "\u211A", "ℚ", tt.ORD, ""],
+  "ℝ": ["ℝ", "\u211D", "ℝ", tt.ORD, ""],
+  "ℤ": ["ℤ", "\u2124", "ℤ", tt.ORD, ""],
 
-  "ℏ": ["ℏ", "ℏ", tt.ORD, ""],
+  "ℏ": ["ℏ", "ℏ", "ℏ", tt.ORD, ""],
 
   //arrows
-  "\u2192": ["\u2192", "\u2192", tt.REL, ""],
-  "\u2190": ["\u2190", "\u2190", tt.REL, ""], // left arrow
-  ">->": [">->", "\u21a3", tt.REL, ""], // \rightarrowtail
-  "->>": ["->>", "\u21a0", tt.REL, ""], // \twoheadrightarrow
-  "|->": ["|->", "\u21a6", tt.REL, ""], // \mapsto
+  "\u2192": ["\u2192", "\u2192", "\u2192", tt.REL, ""],
+  "\u2190": ["\u2190", "\u2190", "\u2190", tt.REL, ""], // left arrow
+  ">->": [">->", "\u21a3", "\u21a3", tt.REL, ""], // \rightarrowtail
+  "->>": ["->>", "\u21a0", "\u21a0", tt.REL, ""], // \twoheadrightarrow
+  "|->": ["|->", "\u21a6", "\u21a6", tt.REL, ""], // \mapsto
 
   // extensible arrows
-  "<--": ["<--", "\\xleftarrow", tt.UNARY, ""],
-  "==>": ["==>", "\\xRightarrow", tt.UNARY, ""],
-  "<==": ["<==", "\\xLeftarrow", tt.UNARY, ""],
-  "<-->": ["<-->", "\\xleftrightarrow", tt.UNARY, ""],
-  "<==>": ["<==>", "\\xLeftrightarrow", tt.UNARY, ""],
+  "<--": ["<--", "\\xleftarrow", "\u27f5", tt.UNARY, ""],
+  "==>": ["==>", "\\xRightarrow", "==>", tt.UNARY, ""],
+  "<==": ["<==", "\\xLeftarrow", "<==", tt.UNARY, ""],
+  "<-->": ["<-->", "\\xleftrightarrow", "<-->", tt.UNARY, ""],
+  "<==>": ["<==>", "\\xLeftrightarrow", "<==>", tt.UNARY, ""],
 
-  "\u2220": ["\u2220", "\u2220", tt.ANGLE, ""],
-  "✓": ["✓", "✓", tt.ORD, ""],
-  "˽": ["˽", "~", tt.SPACE, ""],  // "~" is a no-break space in LaTeX.
-  "\\;": ["\\;", ";\\:", tt.SEP, ""],
-  "…": ["…", "…", tt.ORD, ""],
+  "\u2220": ["\u2220", "\u2220", "\u2220", tt.ANGLE, ""],
+  "✓": ["✓", "✓", "✓", tt.ORD, ""],
+  "˽": ["˽", "~", "˽", tt.SPACE, ""],  // "~" is a no-break space in LaTeX.
+  "\\;": ["\\;", ";\\:", "\\;", tt.SEP, ""],
+  "…": ["…", "…", "…", tt.ORD, ""],
 
-  ":": [":", "{:}", tt.RANGE, ""], // range separator
-  ",": [",", ",\\:", tt.SEP, ""], // function argument or matrix element separator
-  "\t": ["\t", " & ", tt.SEP, ""],  // dataframe element separator
-  ";": [";", " \\\\ ", tt.SEP, ""], // row separator
+  ":": [":", "{:}", ":", tt.RANGE, ""], // range separator
+  ",": [",", ",\\:", ",", tt.SEP, ""], // function argument or matrix element separator
+  "\t": ["\t", " & ", "\t", tt.SEP, ""],  // dataframe element separator
+  ";": [";", " \\\\ ", ";", tt.SEP, ""], // row separator
+  "\\\\": ["\\\\", " \\\\ ", ";", tt.SEP, ""], // row separator
 
-  "$": ["$", "\\$", tt.CURRENCY, ""],
-  "£": ["£", "£", tt.CURRENCY, ""],
-  "¥": ["¥", "¥", tt.CURRENCY, ""],
-  "€": ["€", "€", tt.CURRENCY, ""],
-  "₨": ["₨", "₨", tt.CURRENCY, ""],
-  "₩": ["₩", "₩", tt.CURRENCY, ""],
-  "₪": ["₪", "₪", tt.CURRENCY, ""]
+  "$": ["$", "\\$", "$", tt.CURRENCY, ""],
+  "£": ["£", "£", "£", tt.CURRENCY, ""],
+  "¥": ["¥", "¥", "¥", tt.CURRENCY, ""],
+  "€": ["€", "€", "€", tt.CURRENCY, ""],
+  "₨": ["₨", "₨", "₨", tt.CURRENCY, ""],
+  "₩": ["₩", "₩", "₩", tt.CURRENCY, ""],
+  "₪": ["₪", "₪", "₪", tt.CURRENCY, ""]
 });
 
 const texFunctionRegEx = /^(\\[A-Za-z]+\.?|\\([:.!\u0020]|'+))/;
 
 const texFunctions = Object.freeze({
   //          input,    output,  type,  closeDelim
-  "\\aleph": ["\\aleph", "\u2135", tt.VAR, ""],
-  "\\beth": ["\\beth", "\u2136", tt.VAR, ""],
-  "\\gimel": ["gimel", "\u2137", tt.VAR, ""],
-  "\\daleth": ["daleth", "\u2138", tt.VAR, ""],
-  "\\atop": ["\\atop", "\\atop{", tt.DIV, ""],
-  "\\cdots": ["\\cdots", "\u22ef", tt.BIN, ""],
-  "\\vdots": ["\\vdots", "\u22ee", tt.BIN, ""],
-  "\\ddots": ["\\ddots", "\u22f1", tt.BIN, ""],
-  "\\iff": ["\\iff", "\\iff", tt.LOGIC, ""],
-  "\\land": ["\\land", "\\land", tt.BIN, ""],
-  "\\lor": ["\\lor", "\\lor", tt.BIN, ""],
-  "\\ngtr": ["\\ngtr", "\\ngtr", tt.REL, ""],
-  "\\nless": ["\\nless", "\\nless", tt.REL, ""],
-  "\\nleq": ["\\nleq", "\\nleq", tt.REL, ""],
-  "\\ngeq": ["\\ngeq", "\\ngeq", tt.REL, ""],
-  "\\in": ["\\in", "∈", tt.REL, ""],
-  "\\notin": ["\\notin", "∉", tt.REL, ""],
-  "\\subset": ["\\subset", "⊂", tt.REL, ""],
-  "\\subseteq": ["\\subseteq", "⊆", tt.REL, ""],
-  "\\nsubset": ["\\nsubset", "⊄", tt.REL, ""],
-  "\\nsubseteq": ["\\nsubseteq", "⊈", tt.REL, ""],
-  "\\supset": ["\\subset", "⊃", tt.REL, ""],
-  "\\left.": ["\\left.", "\\left.", tt.LEFTBRACKET, "\\right."],
-  "\\right.": ["\\right.", "\\right.", tt.RIGHTBRACKET, ""],
-  "\\mod": ["\\mod", "\\mod", tt.BIN, ""],
-  "\\diamond": ["\\diamond", "\\diamond", tt.ORD, ""],
-  "\\square": ["\\square", "\\square", tt.ORD, ""],
-  "\\int": ["\\int", "\\displaystyle\\int", tt.BIG_OPERATOR, ""],
-  "\\iint": ["\\iint", "\\displaystyle\\iint", tt.BIG_OPERATOR, ""],
-  "\\iiint": ["\\iiint", "\\displaystyle\\iiint", tt.BIG_OPERATOR, ""],
-  "\\oint": ["\\oint", "\\displaystyle\\oint", tt.BIG_OPERATOR, ""],
-  "\\oiint": ["\\oiint", "\\displaystyle\\oiint", tt.BIG_OPERATOR, ""],
-  "\\oiiint": ["\\oiiint", "\\displaystyle\\oiiint", tt.BIG_OPERATOR, ""],
-  "\\over": ["\\over", "\\dfrac{", tt.DIV],
-  "\\sum": ["\\sum", "\\displaystyle\\sum", tt.BIG_OPERATOR, ""],
-  "\\prod": ["\\prod", "\\displaystyle\\prod", tt.BIG_OPERATOR, ""],
-  "\\quad": ["\\quad", "\\quad", tt.SPACE, ""],
-  "\\qquad": ["\\qquad", "\\qquad", tt.SPACE, ""]
+  "\\aleph": ["\\aleph", "\u2135", "\u2135", tt.VAR, ""],
+  "\\beth": ["\\beth", "\u2136", "\u2136", tt.VAR, ""],
+  "\\gimel": ["\\gimel", "\u2137", "\u2137", tt.VAR, ""],
+  "\\daleth": ["\\daleth", "\u2138", "\u2138", tt.VAR, ""],
+  "\\ast": ["\\ast", "∗", "∗", tt.MULT, ""],
+  "\\div": ["\\div", "÷", "÷", tt.MULT, ""],
+  "\\times": ["\\times", "×", "×", tt.MULT, ""],
+  "\\circ": ["\\circ", "∘", "∘", tt.MULT, ""], // U+2218
+  "\\nabla": ["\\nabla", "∇", "∇", tt.ORD, ""],
+  "\\otimes": ["\\otimes", "⊗", "⊗", tt.MULT, ""],
+  "\\ne": ["\\ne", "≠", "≠", tt.REL, ""],
+  "\\cdot": ["\\cdot", "\u22C5", "·", tt.MULT, ""], // dot operator
+  "\\le": ["\\le", "≤", "≤", tt.REL, ""],
+  "\\ge": ["\\ge", "≥", "≥", tt.REL, ""],
+  "\\equiv": ["\\equiv", "\u2261", "\u2261", tt.REL, ""],
+  "\\cong": ["\\cong", "≅", "≅", tt.REL, ""],
+  "\\approx": ["\\approx", "\u2248", "\u2248", tt.REL, ""],
+  "\\Rightarrow": ["\\Rightarrow", "\u21D2", "\u21D2", tt.REL, ""],
+  "\\forall": ["\\forall", "∀", "∀", tt.LOGIC, ""],
+  "\\exists": ["\\exists", "∃", "∃", tt.LOGIC, ""],
+  "\\infty": ["\\infty", "∞", "∞", tt.ORD, ""],
+  "\\sqrt": ["\\sqrt", "\\sqrt", "√", tt.UNARY, ""],
+  "\\atop": ["\\atop", "\\atop{", "\\atop", tt.DIV, ""],
+  "\\cdots": ["\\cdots", "\u22ef", "\u22ef", tt.BIN, ""],
+  "\\vdots": ["\\vdots", "\u22ee", "\u22ee", tt.BIN, ""],
+  "\\ddots": ["\\ddots", "\u22f1", "\u22f1", tt.BIN, ""],
+  "\\iff": ["\\iff", "\\iff", "\\iff", tt.LOGIC, ""],
+  "\\land": ["\\land", "\\land", "\\land", tt.BIN, ""],
+  "\\lor": ["\\lor", "\\lor", "\\lor", tt.BIN, ""],
+  "\\ngtr": ["\\ngtr", "\\ngtr", "\u226f", tt.REL, ""],
+  "\\nless": ["\\nless", "\\nless", "\u226E", tt.REL, ""],
+  "\\nleq": ["\\nleq", "\\nleq", "\u2270", tt.REL, ""],
+  "\\ngeq": ["\\ngeq", "\\ngeq", "\u2271", tt.REL, ""],
+  "\\in": ["\\in", "∈", "∈", tt.REL, ""],
+  "\\notin": ["\\notin", "∉", "∉", tt.REL, ""],
+  "\\subset": ["\\subset", "⊂", "⊂", tt.REL, ""],
+  "\\subseteq": ["\\subseteq", "⊆", "⊆", tt.REL, ""],
+  "\\nsubset": ["\\nsubset", "⊄", "⊄", tt.REL, ""],
+  "\\nsubseteq": ["\\nsubseteq", "⊈", "⊈", tt.REL, ""],
+  "\\supset": ["\\supset", "⊃", "⊃", tt.REL, ""],
+  "\\left.": ["\\left.", "\\left.", "{:", tt.LEFTBRACKET, "\\right."],
+  "\\right.": ["\\right.", "\\right.", ":}", tt.RIGHTBRACKET, ""],
+  "\\mod": ["\\mod", "\\mod", "\\mod", tt.BIN, ""],
+  "\\lim": ["\\lim", "\\lim", "\\lim", tt.ORD, ""],
+  "\\diamond": ["\\diamond", "\\diamond", "\\diamond", tt.ORD, ""],
+  "\\square": ["\\square", "\\square", "\\square", tt.ORD, ""],
+  "\\int": ["\\int", "\\displaystyle\\int", "\u222B", tt.BIG_OPERATOR, ""],
+  "\\iint": ["\\iint", "\\displaystyle\\iint", "\u222C", tt.BIG_OPERATOR, ""],
+  "\\iiint": ["\\iiint", "\\displaystyle\\iiint", "\\iiint", tt.BIG_OPERATOR, ""],
+  "\\oint": ["\\oint", "\\displaystyle\\oint", "\u222E", tt.BIG_OPERATOR, ""],
+  "\\oiint": ["\\oiint", "\\displaystyle\\oiint", "\\oiint", tt.BIG_OPERATOR, ""],
+  "\\oiiint": ["\\oiiint", "\\displaystyle\\oiiint", "\\oiiint", tt.BIG_OPERATOR, ""],
+  "\\over": ["\\over", "\\dfrac{", "\\over", tt.DIV],
+  "\\sum": ["\\sum", "\\displaystyle\\sum", "\u2211", tt.BIG_OPERATOR, ""],
+  "\\prod": ["\\prod", "\\displaystyle\\prod", "\\prod", tt.BIG_OPERATOR, ""],
+  "\\quad": ["\\quad", "\\quad", "\\quad", tt.SPACE, ""],
+  "\\qquad": ["\\qquad", "\\qquad", "\\qquad", tt.SPACE, ""]
 });
 
 const accents$1 = new Set([
@@ -21020,7 +21042,6 @@ const mathOperators = new Set([
   "exp",
   "gcd",
   "lg",
-  "lim",
   "ln",
   "log",
   "max",
@@ -21063,8 +21084,8 @@ const unaries = new Set([
   "pu",
   "rlap",
   "sout",
-  "sqrt",
   "tag",
+  "text",
   "textbf",
   "textit",
   "textmd",
@@ -21111,26 +21132,26 @@ const texREL = new Set([
   "Bumpeq", "Colonapprox", "Coloneq", "Coloneqq", "Colonsim", "Darr", "Doteq", "Downarrow",
   "Eqcolon", "Eqqcolon", "Harr", "Larr", "Leftarrow", "Leftrightarrow", "Lleftarrow",
   "Longleftarrow", "Longleftrightarrow", "Longrightarrow", "Lrarr", "Lsh", "Rarr",
-  "Rightarrow", "Rrightarrow", "Rsh", "Supset", "Subset", "Uarr", "Uparrow", "Updownarrow",
-  "Vdash", "Vvdash", "approx", "approxeq", "asymp", "backepsilon", "backsim", "backsimeq",
+  "Rrightarrow", "Rsh", "Supset", "Subset", "Uarr", "Uparrow", "Updownarrow",
+  "Vdash", "Vvdash", "approxeq", "asymp", "backepsilon", "backsim", "backsimeq",
   "between", "bowtie", "bumpeq", "circeq", "circlearrowleft", "circlearrowright",
-  "colonapprox", "coloneq", "coloneqq", "colonsim", "cong", "curlyeqprec", "curlyeqsucc",
+  "colonapprox", "coloneq", "coloneqq", "colonsim", "curlyeqprec", "curlyeqsucc",
   "curvearrowleft", "curvearrowright", "dArr", "darr", "dashleftarrow", "dashrightarrow",
   "dashv", "dblcolon", "doteq", "doteqdot", "downarrow", "downdownarrows", "downharpoonleft",
   "downharpoonright", "eqcirc", "eqcolon", "eqqcolon", "eqsim", "eqslantgtr", "eqslantless",
-  "equiv", "fallingdotseq", "frown", "ge", "geq", "geqq", "geqslant", "gets", "gg", "ggg",
+  "fallingdotseq", "frown", "geq", "geqq", "geqslant", "gets", "gg", "ggg",
   "gggtr", "gnapprox", "gneq", "gneqq", "gnsim", "gt", "gtrapprox", "gtreqless", "gtreqqless",
-  "gtrless", "gtrsim", "gvertneqq", "hArr", "harr", "hookleftarrow", "hookrightarrow", "iff",
-  "impliedby", "implies", "in", "isin", "Join", "gets", "impliedby", "implies", "in",
-  "lArr", "larr", "le", "leadsto", "leftarrow", "leftarrowtail", "leftharpoondown",
+  "gtrless", "gtrsim", "gvertneqq", "hArr", "harr", "hookleftarrow", "hookrightarrow",
+  "impliedby", "implies", "isin", "Join", "gets", "impliedby", "implies",
+  "lArr", "larr", "leadsto", "leftarrow", "leftarrowtail", "leftharpoondown",
   "leftharpoonup", "leftleftarrows", "leftrightarrow", "leftrightarrows", "leftrightharpoons",
   "leftrightsquigarrow", "leq", "leqq", "leqslant", "lessapprox", "lesseqgtr", "lesseqqgtr",
   "lessgtr", "lesssim", "ll", "lll", "llless", "lnapprox", "lneq", "lneqq", "lnsim",
   "longleftarrow", "longleftrightarrow", "longmapsto", "longrightarrow", "looparrowleft",
   "looparrowright", "lrArr", "lrarr", "lt", "lvertneqq", "mapsto", "mid", "models",
   "multimap", "nLeftarrow", "nLeftrightarrow", "nRightarrow", "nVDash", "nVdash", "ncong",
-  "ne", "nearrow", "neq", "nexists", "ngeq", "ngeqq", "ngeqslant", "ngtr", "ni", "nleftarrow",
-  "nleftrightarrow", "nleq", "nleqq", "nleqslant", "nless", "nmid", "notin", "notni",
+  "nearrow", "neq", "nexists", "ngeq", "ngeqq", "ngeqslant", "ngtr", "ni", "nleftarrow",
+  "nleftrightarrow", "nleq", "nleqq", "nleqslant", "nless", "nmid", "notni",
   "nparallel", "nprec", "npreceq", "nrightarrow", "nshortmid", "nshortparallel", "nsim",
   "nsubseteq", "nsubseteqq", "nsucc", "nsucceq", "nsupseteq", "nsupseteqq", "ntriangleleft",
   "ntrianglelefteq", "ntriangleright", "ntrianglerighteq", "nvDash", "nvdash", "nwarrow",
@@ -21151,7 +21172,7 @@ const texREL = new Set([
 
 const superRegEx = /^⁻?[²³¹⁰⁴⁵⁶⁷⁸⁹]+/;
 
-const cloneToken$1 = tkn => [tkn[0], tkn[1], tkn[2], tkn[3]];
+const cloneToken$1 = tkn => [tkn[0], tkn[1], tkn[2], tkn[3], tkn[4]];
 
 const accentFromChar = Object.freeze({
   "\u0300": "\\grave",
@@ -21228,21 +21249,21 @@ const lexOneWord = (str, prevToken) => {
     } else if (/^\(/.test(fc)) {
       // word is followed by an open paren. Treat it as a function name
       return (prevToken.ttype === tt.ACCENT)
-        ? [match, match + "}{", tt.FUNCTION, ""]
+        ? [match, match + "}{", match + "}{", tt.FUNCTION, ""]
         : match === "sqrt"
-        ? [match, "\\sqrt", tt.UNARY, ""]
+        ? [match, "\\sqrt", "√", tt.UNARY, ""]
         : match === "f"
-        ? [match, match, tt.FUNCTION, ""]
+        ? [match, match, "f", tt.FUNCTION, ""]
         : mathOperators.has(match)
-        ? [match, "\\" + match, tt.FUNCTION, ""]
-        : [match, "\\operatorname{" + groupSubscript(match) + "}", tt.FUNCTION, ""]
+        ? [match, "\\" + match, match, tt.FUNCTION, ""]
+        : [match, "\\operatorname{" + groupSubscript(match) + "}", match, tt.FUNCTION, ""]
     } else if (prevToken.ttype === tt.ACCESSOR) {
-      return [match, match, tt.PROPERTY, ""]
+      return [match, match, match, tt.PROPERTY, ""]
     } else if (/[_\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]/.test(match)) {
       let identifier = "";
       if (match.indexOf("_") === -1) {
         identifier = checkForTrailingAccent(match);
-        return [match, identifier, (match.length > 2) ? tt.LONGVAR : tt.VAR, ""]
+        return [match, identifier, match, (match.length > 2) ? tt.LONGVAR : tt.VAR, ""]
       } else {
         const segments = match.split("_");
         for (let i = segments.length - 1; i >= 0; i--) {
@@ -21263,18 +21284,19 @@ const lexOneWord = (str, prevToken) => {
           // This helps Cambria Math to supply the correct size radical.
           identifier = identifier.slice(0, pos) + "{" + identifier.slice(pos) + "}";
         }
-        return [match, identifier, (segments[0].length > 1) ? tt.LONGVAR : tt.VAR, ""]
+        return [match, identifier, match, (segments[0].length > 1) ? tt.LONGVAR : tt.VAR, ""]
       }
     } else if (match.length === 2 & match.charAt(0) === "\uD835") {
-      return [match, match, tt.VAR, ""]
+      return [match, match, match, tt.VAR, ""]
     } else if (match.length > 1) {
-      return [match, match, tt.LONGVAR, ""]
+      return [match, match, match, tt.LONGVAR, ""]
     } else {
       // Return a single character variable name
       if (match.charAt(0) === "\uD835") {
-        return [match.substring(0, 2), match.substring(0, 2), tt.VAR, ""]
+        return [match.substring(0, 2), match.substring(0, 2),
+          match.substring(0, 2), tt.VAR, ""]
       } else {
-        return [match.charAt(0), match.charAt(0), tt.VAR, ""]
+        return [match.charAt(0), match.charAt(0), match.charAt(0), tt.VAR, ""]
       }
     }
   }
@@ -21285,7 +21307,7 @@ const unitStartRegEx = /^(?:[A-Za-z°ʹ″$£¥₨₪€ÅΩ℃℉ΩKÅ]|ʹ�
 const unitNameRegEx = /^(((?:[A-Za-z][A-Za-zōö]*\$?|[°ʹ″$£¥₨₪€ÅΩ℃℉ΩKÅ]|ʹʹ)(?:(?:(?:(?:\^|\^-)[1-9][0-9]*)|(?:\^\(-?[1-9][0-9]*\))|⁻?[¹²³\u2074-\u2079][⁰¹²³\u2074-\u2079]*))?)(?:[*·.•×]\2)*)(?:\/\1)?/;
 const lexUnitName = str => {
   const match = unitNameRegEx.exec(str);
-  return [match[0], unitTeXFromString(match[0]), tt.UNIT, ""]
+  return [match[0], unitTeXFromString(match[0]), match[0], tt.UNIT, ""]
 };
 
 const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
@@ -21300,9 +21322,9 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
     pos = str.indexOf('"""', 3);
     if (pos > 0) {
       st = str.slice(3, pos);
-      return ['"""' + st + '"""', st, tt.MACRO, ""]
+      return ['"""' + st + '"""', st, st, tt.MACRO, ""]
     } else {
-      return [str, str.slice(3), tt.MACRO, ""]
+      return [str, str.slice(3), str.slice(3), tt.MACRO, ""]
     }
   }
 
@@ -21312,9 +21334,9 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
     if (pos > 0) {
       // Disallow \r or \n by truncating the string.
       st = str.substring(1, pos).replace(/\r?\n.*/, "");
-      return ['"' + st + '"', st, tt.STRING, ""]
+      return ['"' + st + '"', st, st, tt.STRING, ""]
     } else {
-      return [str, str.replace(/\r?\n.*/, ""), tt.STRING, ""]
+      return [str, str.replace(/\r?\n.*/, ""), str.replace(/\r?\n.*/, ""), tt.STRING, ""]
     }
   }
 
@@ -21329,7 +21351,7 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
     if (pos > -1) {
       st = st.slice(0, pos);
     }
-    return [`#${st}`, `\\text{\\texttt{ \\#${st}}}`, tt.COMMENT, ""]
+    return [`#${st}`, `\\text{\\texttt{ \\#${st}}}`, `#${st}`, tt.COMMENT, ""]
   }
 
   if (/^``/.test(str)) {
@@ -21344,7 +21366,7 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
       const dataStructure = DataFrame.dataFrameFromTSV(st);
       tex = DataFrame.display(dataStructure.value, "h3", decimalFormat);
     }
-    return ["``" + inputStr + "``", tex, tt.DATAFRAME, ""]
+    return ["``" + inputStr + "``", tex, inputStr, tt.DATAFRAME, ""]
   }
 
   if (str.charAt(0) === '`') {
@@ -21354,9 +21376,9 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
     if (pos > 0) {
       // Disallow \r or \n by truncating the string.
       st = str.substring(1, pos).replace(/\r?\n.*/, "");
-      return ['`' + st + '`', st, tt.RICHTEXT, ""]
+      return ['`' + st + '`', st, st, tt.RICHTEXT, ""]
     } else {
-      return [str, str.replace(/\r?\n.*/, ""), tt.RICHTEXT, ""]
+      return [str, str.replace(/\r?\n.*/, ""), str, tt.RICHTEXT, ""]
     }
   }
 
@@ -21365,10 +21387,10 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
     pos = str.indexOf("'", 1);
     if (pos > 0) {
       st = str.substring(1, pos);
-      return ["'" + st + "'", unitTeXFromString(st), tt.UNIT, ""]
+      return ["'" + st + "'", unitTeXFromString(st), st, tt.UNIT, ""]
     } else {
       // One of the unambiguous unit symbols, like ° or Å
-      return [str.charAt(0), str.charAt(0), tt.UNIT, ""]
+      return [str.charAt(0), str.charAt(0), str.charAt(0), tt.UNIT, ""]
     }
   }
 
@@ -21377,28 +21399,32 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
   if (matchObj) {
     // TeX control word, starting with backslash. e.g. \, or \circ
     const match = matchObj[0];
-    st = match.substring(1);
+    st = match.slice(1);
     if (accents$1.has(st)) {
-      return [match, match, tt.ACCENT, ""]
+      return [match, match, match, tt.ACCENT, ""]
     }
     if (unaries.has(st)) {
-      return [match, match, tt.UNARY, ""]
+      return [match, match, match, tt.UNARY, ""]
     }
     if (colors.has(st)) {
-      return [match, "\\textcolor{" + st + "}", tt.UNARY, ""]
+      return [match, "\\textcolor{" + st + "}", match, tt.UNARY, ""]
     }
     if (binaries.has(st)) {
-      return [match, match, tt.BINARY, ""]
+      return [match, match, match, tt.BINARY, ""]
     }
     if (texREL.has(st)) {
-      return [match, match, tt.REL, ""]
+      return [match, match, match, tt.REL, ""]
     }
     const texFunc = texFunctions[match];
     if (texFunc) {
       return cloneToken$1(texFunc)
     }
+    if (mathOperators.has(st)) {
+      return [match, match, st, tt.FUNCTION, ""]
+    }
+
     // default case is a mathord. So I have not enumerated any ORDs
-    return [match, match, tt.ORD, ""]
+    return [match, match, match, tt.ORD, ""]
   }
 
   if (minusRegEx.test(str)) {
@@ -21408,22 +21434,22 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
       if (numParts) {
         // numbers
         st = texFromNumStr(numParts, decimalFormat);
-        return [numParts[0], st, tt.NUM, ""]
+        return [numParts[0], st, numParts[0], tt.NUM, ""]
       }
     }
-    return ["-", "-", tt.ADD, ""]
+    return ["-", "-", "-", tt.ADD, ""]
   }
 
   const numParts = str.match(numberRegEx$5);
   if (numParts) {
     // numbers
     st = texFromNumStr(numParts, decimalFormat);
-    return [numParts[0], st, tt.NUM, ""]
+    return [numParts[0], st, numParts[0], tt.NUM, ""]
   }
 
   // Before lexing for a word, find underscores before a group
   if (/^_[([{]/.test(str)) {
-    return ["_", "_", tt.SUB, ""]
+    return ["_", "_", "_", tt.SUB, ""]
   }
 
   const word = lexOneWord(str, prevToken);
@@ -21431,7 +21457,7 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
 
   const nums = superRegEx.exec(str);
   if (nums) {
-    return [nums[0], nums[0], tt.SUPCHAR, ""]
+    return [nums[0], nums[0], nums[0], tt.SUPCHAR, ""]
   }
 
   //return maximal initial substring of str that appears in misc names
@@ -21439,7 +21465,7 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
   if (matchObj) {
     const match = matchObj[0];
     for (let i = match.length; i >= 1; i--) {
-      st = match.substr(0, i);
+      st = match.slice(0, i);
       if (miscSymbols[st]) { return cloneToken$1(miscSymbols[st]) }
     }
   }
@@ -21450,9 +21476,9 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
     prevToken.ttype === tt.STRING || prevToken.input === "]" || prevToken.input === ")" ||
     prevToken.ttype === tt.PROPERTY)) {
     // Suppress the spacing of the accessor dot.
-    return [".", "{.}", tt.ACCESSOR, ""]
+    return [".", "{.}", ",", tt.ACCESSOR, ""]
   }
-  return [c1, addTextEscapes(c1), tt.VAR, ""]
+  return [c1, addTextEscapes(c1), c1, tt.VAR, ""]
 };
 
 /*
@@ -21556,7 +21582,7 @@ const setUpIf = (rpn, tokenInput, exprStack, delim) => {
 
 const functionExpoRegEx = /^[\^⁻⁰¹²³\u2074-\u2079]/;
 
-const openParenRegEx$1 = /^ *\(/;
+const openParenRegEx$2 = /^ *\(/;
 
 const exponentOfFunction = (str, decimalFormat, isCalc) => {
   // As in: sin²()
@@ -21564,7 +21590,7 @@ const exponentOfFunction = (str, decimalFormat, isCalc) => {
   if (str.charAt(0) !== "^") {
     expoInput = /^⁻?[⁰¹²³\u2074-\u2079⁻]+/.exec(str)[0];
     expoInput = expoInput.split("").map(ch => numeralFromSuperScript(ch)).join("");
-  } else if (!openParenRegEx$1.test(str.slice(1))) {
+  } else if (!openParenRegEx$2.test(str.slice(1))) {
     expoInput = lex(str.slice(1), decimalFormat, { input: "", output: "", ttype: 50 })[0];
   } else {
     // The exponent is in parens. Find its extent.
@@ -21685,7 +21711,7 @@ const endOfOrd = new Set([tt.ORD, tt.VAR, tt.NUM, tt.LONGVAR, tt.RIGHTBRACKET, t
 
 // The RegEx below is equal to /^\s+/ except it omits \n, \t, and the no-break space \xa0.
 // I use \xa0 to precede the combining arrow accent character \u20D7.
-const leadingSpaceRegEx$2 = /^[ \f\r\v\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]+/;
+const leadingSpaceRegEx$3 = /^[ \f\r\v\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]+/;
 const leadingLaTeXSpaceRegEx = /^(˽|\\quad|\\qquad)+/;
 const sumRegEx$1 = /\\∑_¿([^\xa0]+)([^=]+)\xa0=(\xa0[^^]+)\xa0\^\xa0([^∑]+)\xa0∑/;
 
@@ -21928,7 +21954,7 @@ const parse$1 = (
   };
 
   // With the closed functions out of the way, execute the main parse loop.
-  str = str.replace(leadingSpaceRegEx$2, ""); //       trim leading white space from string
+  str = str.replace(leadingSpaceRegEx$3, ""); //       trim leading white space from string
   str = str.replace(/\s+$/, ""); //                  trim trailing white space
 
   while (str.length > 0) {
@@ -21984,11 +22010,11 @@ const parse$1 = (
       const tkn = prevToken.ttype === tt.NUM && !isFollowedBySpace && unitStartRegEx.test(str)
         ? lexUnitName(str)                                // something like the "m" in "5m"
         : lex(str, decimalFormat, prevToken, inRealTime);  // default
-      token = { input: tkn[0], output: tkn[1], ttype: tkn[2], closeDelim: tkn[3] };
+      token = { input: tkn[0], output: tkn[1], ttype: tkn[3], closeDelim: tkn[4] };
       str = str.substring(token.input.length);
-      isFollowedBySpace = leadingSpaceRegEx$2.test(str) || /^(˽|\\quad|\\qquad)+/.test(str);
+      isFollowedBySpace = leadingSpaceRegEx$3.test(str) || /^(˽|\\quad|\\qquad)+/.test(str);
       isFollowedBySpaceOrNewline = /^[ \n]/.test(str);
-      str = str.replace(leadingSpaceRegEx$2, "");
+      str = str.replace(leadingSpaceRegEx$3, "");
       followedByFactor = nextCharIsFactor(str, token.ttype, isFollowedBySpace);
     }
 
@@ -22499,8 +22525,8 @@ const parse$1 = (
         break
 
       case tt.FACTORIAL:
-        popTexTokens(14, true);
-        texStack.push({ prec: 14, pos: op.pos, ttype: tt.FACTORIAL, closeDelim: "" });
+        popTexTokens(12, true);
+        texStack.push({ prec: 12, pos: op.pos, ttype: tt.FACTORIAL, closeDelim: "" });
         if (isCalc) {
           popRpnTokens(rpnPrecFromType[tt.FACTORIAL]);
           rpn += tokenSep + token.output;
@@ -22659,6 +22685,10 @@ const parse$1 = (
             ? "p"
             : delim.name === "{:"
             ? ""
+            : delim.name === "|"
+            ? "v"
+            : delim.name === "‖"
+            ? "V"
             : "B";
           delim.open = `\\begin{${ch}matrix}`;
           delim.close = `\\end{${ch}matrix}`;
@@ -22841,13 +22871,14 @@ const parse$1 = (
           isRightDelim =
             texStack[texStack.length - 1].ttype === tt.LEFTRIGHT ||
             texStack[texStack.length - 1].closeDelim === "\u27E9" || // Dirac ket
-            texStack[texStack.length - 1].closeDelim === "\\right." ||
-            texStack[texStack.length - 1].closeDelim === "\\end{vmatrix}";
+            texStack[texStack.length - 1].closeDelim === "\\right.";
         }
         if (isRightDelim) {
           // Treat as a right delimiter
-          topDelim.close = token.input === "|" ? "|" : "‖";
-          texStack[texStack.length - 1].closeDelim = topDelim.close;
+          if (topDelim.delimType !== dMATRIX) {
+            topDelim.close = token.input === "|" ? "|" : "‖";
+            texStack[texStack.length - 1].closeDelim = topDelim.close;
+          }
           popTexTokens(0, okToAppend);
           delims.pop();
           if (isCalc) {
@@ -22961,6 +22992,360 @@ const parse$1 = (
   }
 
   return isCalc ? [tex, rpn, dependencies] : tex
+};
+
+/*
+ * teXtoCalc.js
+ * This file takes a text string and compiles from TeX to Hurmet calculation format.
+ *
+*/
+
+// Delimiter types
+const FRAC = 1;
+const TFRAC = 2;
+const BINARY = 3;
+
+const  charAccents = {
+  "\\bar": "\u0304",
+  "\\grave": "\u0300",
+  "\\acute": "\u0301",
+  "\\hat": "\u0302",
+  "\\tilde": "\u0303",
+  "\\dot": "\u0307",
+  "\\ddot": "\u0308",
+  "\\mathring": "\u030A",
+  "\\check": "\u030C",
+  "\\underline": "\u0332",
+  "\\overleftharpoon": "\u20d0",
+  "\\overrightharpoon": "\u20d1",
+  "\\overleftarrow": "\u20d6",
+  "\\vec": "\u20d7",
+  "\\overleftrightarrow": "\u20e1"
+};
+const openParenRegEx$1 = /^ *(?:\\(?:left|big|Big|bigg|Bigg))? *\(/;
+const leadingSpaceRegEx$2 = /^\s+/;
+const trailingSpaceRegEx$1 = / +$/;
+const inlineFracRegEx = /^\/(?!\/)/;
+const ignoreRegEx = /^\\(left(?!\.)|right(?!\.)|middle|big|Big|bigg|Bigg)/;
+const enviroRegEx = /^\\begin\{(?:(cases)|(|p|b|B|v|V)matrix)\}/;
+const endEnviroRegEx = /^\\end\{(?:cases|(?:|p|b|B|v|V)matrix)\}/;
+// eslint-disable-next-line max-len
+const greekAlternatives = "Alpha|Beta|Gamma|Delta|Epsilon|Zeta|Eta|Theta|Iota|Kappa|Lambda|Mu|Nu|Xi|Omicron|Pi|Rho|Sigma|Tau|Upsilon|Phi|Chi|Psi|Omega|alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|omicron|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega|varphi";
+const greekRegEx = RegExp("^\\\\(" + greekAlternatives + ")\\b");
+// eslint-disable-next-line max-len
+const bracedCharRegEx = RegExp("^\\{([A-Za-z0-9\u0391-\u03c9]|\\\\(" + greekAlternatives + "))\\}");
+const greekLetters = {
+  Alpha: "Α",
+  Beta: "Β",
+  Gamma: "Γ",
+  Delta: "Δ",
+  Epsilon: "Ε",
+  Zeta: "Ζ",
+  Eta: "Η",
+  Theta: "Θ",
+  Iota: "Ι",
+  Kappa: "Κ",
+  Lambda: "Λ",
+  Mu: "Μ",
+  Nu: "Ν",
+  Xi: "Ξ",
+  Omicron: "Ο",
+  Pi: "Π",
+  Rho: "Ρ",
+  Sigma: "Σ",
+  Tau: "Τ",
+  Upsilon: "Υ",
+  Phi: "Φ",
+  Chi: "Χ",
+  Psi: "Ψ",
+  Omega: "Ω",
+  alpha: "α",
+  beta: "β",
+  gamma: "γ",
+  delta: "δ",
+  epsilon: "ε",
+  zeta: "ζ",
+  eta: "η",
+  theta: "θ",
+  iota: "ι",
+  kappa: "κ",
+  lambda: "λ",
+  mu: "μ",
+  nu: "ν",
+  xi: "ξ",
+  omicron: "ο",
+  pi: "π",
+  rho: "ρ",
+  sigma: "σ",
+  tau: "τ",
+  upsilon: "υ",
+  phi: "ϕ",
+  chi: "χ",
+  psi: "ψ",
+  omega: "ω",
+  varphi: "φ"
+};
+
+const matrices = {
+  m: ["{:", ":}"],
+  p: ["(", ")"],
+  b: ["[", "]"],
+  B: ["{", "}"],
+  v: ["|", "|"],
+  V: ["‖", "‖"]
+};
+
+const eatOneChar = str => {
+  str = str.slice(1);
+  str = str.replace(leadingSpaceRegEx$2, "");
+  return str
+};
+
+const eatMatch = (str, match) => {
+  str = str.slice(match[0].length);
+  str = str.replace(leadingSpaceRegEx$2, "");
+  return str
+};
+
+const texToCalc = str => {
+  // Variable definitions
+  let calc = "";
+  let token = {};
+  let prevToken = { input: "", output: "", ttype: 50 };
+  const delims = [{ ch: "", pos: -1, env: false }] ; // delimiter stack
+  let splitLongVars = true;
+
+  // Trim the input string
+  str = str.replace(leadingSpaceRegEx$2, ""); //       trim leading white space from string
+  str = str.replace(/\s+$/, ""); //                  trim trailing white space
+
+  // Execute the main parse loop.
+  while (str.length > 0) {
+    // Get the next token.
+
+    while (str.length > 0 && str.charAt(0) === "'") {
+      // The lexer will not handle an apostrophe properly. Lex it locally.
+      calc += "′";
+      str = eatOneChar(str);
+    }
+
+    while (inlineFracRegEx.test(str)) {
+      calc += "\u2215"; // ∕
+      str = eatOneChar(str);
+    }
+
+    while (str.length > 0 && str.charAt(0) === "\n") {
+      calc += "\n";
+      str = eatOneChar(str);
+    }
+
+    while (greekRegEx.test(str)) {
+      const greekFunction = greekRegEx.exec(str)[0];
+      calc += greekLetters[greekFunction.slice(1)] + " ";
+      str = str.slice(greekFunction.length);
+      str = str.replace(leadingSpaceRegEx$2, "");
+    }
+
+    while (enviroRegEx.test(str)) {
+      const match = enviroRegEx.exec(str);
+      if (match[1]) {
+        // {cases} environment
+        delims.push({ ch: ":}", pos: calc.length, env: true });
+        calc += "{";
+      } else {
+        const matrixType = match[2] ? match[2] : "m";
+        delims.push({ ch: matrices[matrixType][1], pos: calc.length, env: true });
+        calc += matrices[matrixType][0];
+      }
+      str = eatMatch(str, match);
+    }
+
+    while (endEnviroRegEx.test(str)) {
+      const match = endEnviroRegEx.exec(str);
+      const delim = delims.pop();
+      if (match[0].indexOf("cases") > -1) {
+        // {cases} environment. Clean up the if statements
+        let casesText = calc.slice(delim.pos + 1);
+        casesText = casesText.replace(/, "if *"/g, "if ");
+        calc = calc.slice(0, delim.pos + 1) + casesText;
+      }
+      calc += delim.ch;
+      str = eatMatch(str, match);
+    }
+
+    while (ignoreRegEx.test(str)) {
+      const match = ignoreRegEx.exec(str);
+      str = eatMatch(str, match);
+    }
+
+    const tkn = lex(str, "10000000.", prevToken);
+    token = { input: tkn[0], output: tkn[2], ttype: tkn[3], closeDelim: tkn[4] };
+    str = str.slice(token.input.length);
+    str = str.replace(leadingSpaceRegEx$2, "");
+
+    switch (token.ttype) {
+      case tt.SPACE: //      spaces and newlines
+      case tt.ADD: //        infix add/subtract operators, + -
+      case tt.MULT: //       infix mult/divide operators, × * · // ÷
+      case tt.REL: //        relational operators, e.g  < == →
+      case tt.SUPCHAR:
+      case tt.FACTORIAL:
+        if (token.input === "&" && delims[delims.length - 1].env) {
+          if (delims[delims.length - 1].closeDelim !== ":}") {
+            calc += ", ";
+          }
+        } else {
+          calc += token.output;
+        }
+        break
+
+      case tt.SUB:
+      case tt.SUP:
+        calc += token.output;
+        if (str.length > 0 && str.charAt(0) === "{") {
+          delims.push({ ch: ")", pos: calc.length, env: false });
+          calc += "(";
+          str = eatOneChar(str);
+        }
+        break
+
+      case tt.NUM:
+      case tt.ORD:
+      case tt.VAR:
+      case tt.BIN: //    infix math operators that render but don't calc, e.g. \bowtie
+      case tt.BIG_OPERATOR:  // integral, sum, etc
+        calc += token.output + " ";
+        break
+
+      case tt.LONGVAR:
+        calc += splitLongVars ? token.output.split("").join(" ") + " " : token.output;
+        break
+
+      case tt.ACCENT: {
+        if (charAccents[token.input] && bracedCharRegEx.test(str)) {
+          delims.push({ ch: charAccents[token.input], pos: calc.length, env: false });
+          str = eatOneChar(str);
+        } else if ( token.input === "\\mathrm") {
+          splitLongVars = false;
+          delims.push({ ch: '', pos: calc.length, env: false });
+          str = eatOneChar(str);
+        } else {
+          calc += token.output;
+          if (str.length > 0 && str.charAt(0) === "{") {
+            calc += "(";
+            delims.push( { ch: ")", pos: calc.length, env: false });
+            str = eatOneChar(str);
+          }
+        }
+        break
+      }
+
+      case tt.UNARY: {
+        if (token.input === "\\text") {
+          delims.push({ ch: '"', pos: calc.length, env: false });
+          calc += '"';
+          splitLongVars = false;
+          str =  str.slice(1);
+        } else {
+          calc += token.output;
+          if (str.length > 0 && str.charAt(0) === "{") {
+            delims.push({ ch: ")", pos: calc.length, env: false });
+            calc +=  '(';
+            str = eatOneChar(str);
+          }
+        }
+        break
+      }
+
+      case tt.BINARY: {
+        const pos = calc.length;
+        if (token.input === "\\dfrac") {
+          calc += "(";
+          delims.push({ ch: FRAC, pos, env: false });
+        } else if (token.input === "\\frac" || token.input === "\\tfrac") {
+          calc += "(";
+          delims.push({ ch: TFRAC, pos, env: false });
+        } else {
+          calc += token.input + "{";
+          delims.push({ ch: BINARY, pos, env: false });
+        }
+        str = eatOneChar(str);
+        break
+      }
+
+      case tt.DIV: {
+        const pos = delims[delims.length - 1].pos;
+        calc = calc.slice(0, pos) + "(" + calc.slice(pos + 1);
+        delims.pop();
+        calc += token.input === "\\over" ? ")/(" : ")" + token.input + "(";
+        delims.push({ ch: ")", pos: calc.length - 1, env: false });
+        break
+      }
+
+      case tt.FUNCTION: {
+        calc += token.output;
+        const pos = calc.length;
+        const match = openParenRegEx$1.exec(str);
+        if (match) {
+          calc += "(";
+          delims.push({ ch: ")", pos, env: false });
+          str = eatMatch(str, match);
+        } else {
+          calc += " ";
+        }
+        break
+      }
+
+      case tt.LEFTBRACKET: {
+        delims.push({ ch: token.closeDelim, pos: calc.length, env: false });
+        calc += token.output;
+        break
+      }
+
+      case tt.SEP: {
+        const inEnvironment = delims[delims.length - 1].env;
+        if (token.input === "//" && inEnvironment) {
+          calc += ";";
+        } else {
+          calc += token.output;
+        }
+        break
+      }
+
+      case tt.RIGHTBRACKET: {
+        const delim = delims.pop();
+        calc = calc.replace(trailingSpaceRegEx$1, "");
+        if (/ $/.test(calc)) { calc = calc.slice(0, -1); }
+        if (delim.ch === FRAC) {
+          calc += ") / (";
+          str = eatOneChar(str);
+          delims.push({ ch: ")", pos: calc.length - 1, env: false });
+        } else if (delim.ch === TFRAC) {
+          calc += ")//(";
+          str = eatOneChar(str);
+          delims.push({ ch: ")", pos: calc.length - 1, env: false });
+        } else if (delim.ch === BINARY) {
+          calc += "}{";
+          str = eatOneChar(str);
+          delims.push({ ch: "}", pos: calc.length - 1, env: false });
+        } else {
+          calc += delim.ch;
+        }
+        if (delim.ch === '"' || delim.ch === "") { splitLongVars = true; }
+        break
+      }
+
+      default:
+        calc += token.output;
+    }
+
+    prevToken = cloneToken(token);
+  }
+  calc = calc.replace(/ {2,}/g, " "); // Replace multiple spaces with single space.
+  calc = calc.replace(/\s+(?=[_^'′!)}\]〗])/g, ""); // Delete spaces before right delims
+  calc = calc.replace(/\s+$/, ""); //                 Delete trailing space
+
+  return calc
 };
 
 const CR_NEWLINE_R = /\r\n?/g;
@@ -23783,7 +24168,12 @@ rules.set("tex", {
       return { type: "tex", attrs: { tex, displayMode: true } }
     } else {
       const tex = capture[2].trim();
-      return { type: "tex", attrs: { tex, displayMode: false } }
+      if (state.convertTex) {
+        const entry = texToCalc(tex);
+        return { type: "calculation", attrs: { entry, displayMode: false } }
+      } else {
+        return { type: "tex", attrs: { tex, displayMode: false } }
+      }
     }
   }
 });
@@ -24086,7 +24476,7 @@ const inlineMd2ast = md => {
   return ast
 };
 
-const md2ast = (md, inHtml = false) => {
+const md2ast = (md, inHtml = false, convertTex = false) => {
   // First, check for a metadata preamble
   let metadata = false;
   if (metadataRegEx.test(md)) {
@@ -24102,7 +24492,8 @@ const md2ast = (md, inHtml = false) => {
     footnotes: [],
     prevCapture: "",
     remainder: "",
-    inHtml
+    inHtml,
+    convertTex
   };
   const defRegEx = /\n *\[([^\]\n]+)\]: *([^\n]*) *(?:\n\{([^\n}]*)\})?(?=\n)/gm;
   const footnoteDefRegEx = /\n *\[\^\d+\]: *([^\n]*)(?=\n)/gm;
@@ -53715,6 +54106,20 @@ function copyAsGFM() {
   })
 }
 
+function convertAndPasteFromMarkdown(view) {
+  navigator.clipboard
+  .readText()
+  .then((clipText) => {
+    const ast = hurmet.md2ast(clipText, false, true);
+    const fragment = { type: "fragment", content: ast };
+    const {$from, $to} = view.state.selection;
+    view.dispatch(
+      view.state.tr.replaceWith($from.pos, $to.pos, schema.nodeFromJSON(fragment))
+    );
+    hurmet.updateCalculations(view, true);
+  });
+}
+
 function pasteAsMarkdown() {
   return new MenuItem({
     label: "Paste from Markdown",
@@ -55261,6 +55666,7 @@ function buildKeymap(schema, mapKeys) {
 
   bind("Ctrl-s", (state, _, view) => { saveFileAsMarkdown(state, view); return true });
   bind("Ctrl-p", (state, _, view) => { printHurmet(state, view); return true });
+  bind("Ctrl-Shift-v", (state, _, view) => { convertAndPasteFromMarkdown(view); return true });
   bind("Alt-j", (state, _, view) => { readFile(state, _, view, schema, "hurmet"); return true });
   bind("Mod-z", undo);
   bind("Shift-Mod-z", redo);

@@ -606,6 +606,20 @@ function copyAsGFM() {
   })
 }
 
+export function convertAndPasteFromMarkdown(view) {
+  navigator.clipboard
+  .readText()
+  .then((clipText) => {
+    const ast = hurmet.md2ast(clipText, false, true)
+    const fragment = { type: "fragment", content: ast }
+    const {$from, $to} = view.state.selection
+    view.dispatch(
+      view.state.tr.replaceWith($from.pos, $to.pos, schema.nodeFromJSON(fragment))
+    )
+    hurmet.updateCalculations(view, true)
+  })
+}
+
 function pasteAsMarkdown() {
   return new MenuItem({
     label: "Paste from Markdown",

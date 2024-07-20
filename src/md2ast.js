@@ -84,6 +84,7 @@
  */
 
 import { dt } from "./constants"
+import { texToCalc } from "./texToCalc"
 
 const CR_NEWLINE_R = /\r\n?/g;
 const FORMFEED_R = /\f/g;
@@ -905,7 +906,12 @@ rules.set("tex", {
       return { type: "tex", attrs: { tex, displayMode: true } }
     } else {
       const tex = capture[2].trim()
-      return { type: "tex", attrs: { tex, displayMode: false } }
+      if (state.convertTex) {
+        const entry = texToCalc(tex)
+        return { type: "calculation", attrs: { entry, displayMode: false } }
+      } else {
+        return { type: "tex", attrs: { tex, displayMode: false } }
+      }
     }
   }
 });
@@ -1208,7 +1214,7 @@ export const inlineMd2ast = md => {
   return ast
 }
 
-export const md2ast = (md, inHtml = false) => {
+export const md2ast = (md, inHtml = false, convertTex = false) => {
   // First, check for a metadata preamble
   let metadata = false
   if (metadataRegEx.test(md)) {
@@ -1224,7 +1230,8 @@ export const md2ast = (md, inHtml = false) => {
     footnotes: [],
     prevCapture: "",
     remainder: "",
-    inHtml
+    inHtml,
+    convertTex
   }
   const defRegEx = /\n *\[([^\]\n]+)\]: *([^\n]*) *(?:\n\{([^\n}]*)\})?(?=\n)/gm
   const footnoteDefRegEx = /\n *\[\^\d+\]: *([^\n]*)(?=\n)/gm
