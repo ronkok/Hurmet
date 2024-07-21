@@ -778,7 +778,12 @@ rules.set("displayTeX", {
   match: blockRegex(/^\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$ *(?:\n|$)/),
   parse: function(capture, state) {
     const tex = capture[1].trim()
-    return { type: "tex", attrs: { tex, displayMode: true } }
+    if (state.convertTex) {
+      const entry = texToCalc(tex)
+      return { type: "calculation", attrs: { entry, displayMode: true } }
+    } else {
+      return { type: "tex", attrs: { tex, displayMode: true } }
+    }
   }
 })
 rules.set("newline", {
@@ -903,7 +908,12 @@ rules.set("tex", {
   parse: function(capture, state) {
     if (capture[1]) {
       const tex = capture[1].trim()
-      return { type: "tex", attrs: { tex, displayMode: true } }
+      if (state.convertTex) {
+        const entry = texToCalc(tex)
+        return { type: "calculation", attrs: { entry, displayMode: true } }
+      } else {
+        return { type: "tex", attrs: { tex, displayMode: true } }
+      }
     } else {
       const tex = capture[2].trim()
       if (state.convertTex) {
