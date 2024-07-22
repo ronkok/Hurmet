@@ -268,6 +268,28 @@ b. … a lower-case letter.
        *   a bullet list
        *   Yay!
 
+Text imported from a chatbot often includes lists whose subordinate lists do not
+have a preceeding blank line. So let’s import a list of that type.
+
+- Preliminary Design:
+    - Determine the height of the wall, soil properties, and any surcharge loads.
+    - Calculate the active earth pressure using Rankine's theory or Coulomb's method.
+    - Consider any water pressure (hydrostatic or hydrodynamic) if applicable.
+- Wall Stability Checks:
+    - Wall Overturning Check:
+        - Ensure the resisting moment (due to self-weight and soil pressure) exceeds the overturning moment.
+        - Moment equilibrium: $M_{\text{resisting}} \geq M_{\text{overturning}}$
+    - Soil Bearing Pressure:
+        - Check the bearing pressure at the base of the wall.
+        - Bearing capacity: $\sigma_{\text{bearing}} = \frac{P_{\text{total}}}{A_{\text{base}}} \leq \sigma_{\text{allowable}}$
+- Flexural Reinforcement Requirements:
+    - Calculate the bending moment at the base of the wall.
+    - Design the reinforcement (usually steel bars) to resist this moment.
+    - Use ACI 318 or other relevant codes for reinforcement design.
+- Foundation Analysis and Design:
+    - Design the foundation slab (usually reinforced concrete) to support the wall.
+    - Consider soil reactions, settlement, and reinforcement requirements.
+    - Use software like spMats for detailed analysis.
 
 ## Tables
 
@@ -456,52 +478,8 @@ From ASCE-16 section 12.8.3, Equivalent Lateral Procedure
 [5]: https://hurmet.org/images/IsoTankCourses.svg
 {.right alt="Tank Iso"}
 
-[Tank Dimensions]: ¢` draw()
-    title "Tank Dimensions"
-    frame 252, 459, "inline"
-    view -12, 15, -3.5
-    rect [-11, -1.5; 11, 0]
-    rect [-9, 0; -8, 19]
-    rect [8, 0; 9, 19]
-    rect [-9, 19; 9, 20]
-    line [-8, 17; 8, 17]
-    line [-5, 16.5; -2, 16.5]
-    line [-4.5, 16; -2.5, 16]
-    line [-4, 15.5; -3, 15.5]
-    dimension [1, 0; 1, 17; 1, 10], "H~L~"
-    dimension [11, 0; 9, 19; 12.5, 10], "H"
-    marker "arrow"
-    line [-10, 12; -9, 12]
-    line [-7, 12; -8, 12]
-    text [-7, 12], "t~w~", "right"
-    line [-5, 1; -5, 0]
-    line [-5, -2.5; -5, -1.5]
-    text [-5, 1.25], "t~b~", "above"
-    line [-5, 21; -5, 20]
-    line [-5, 18; -5, 19]
-    text [-5, 21.25], "t~r~", "above"
-    marker "none"
-    circle [0, 34], 11
-    circle [0, 34], 9
-    dimension [-8, 34; 8, 34; 0, 34], "D"
-    strokedasharray "5 5"
-    circle [0, 34], 8
-end `
+[Tank Dimensions]: draw()\n    title "Tank Dimensions"\n    frame 252, 459, "inline"\n    view -12, 15, -3.5\n    rect [-11, -1.5; 11, 0]\n    rect [-9, 0; -8, 19]\n    rect [8, 0; 9, 19]\n    rect [-9, 19; 9, 20]\n    line [-8, 17; 8, 17]\n    line [-5, 16.5; -2, 16.5]\n    line [-4.5, 16; -2.5, 16]\n    line [-4, 15.5; -3, 15.5]\n    dimension [1, 0; 1, 17; 1, 10], "H~L~"\n    dimension [11, 0; 9, 19; 12.5, 10], "H"\n    marker "arrow"\n    line [-10, 12; -9, 12]\n    line [-7, 12; -8, 12]\n    text [-7, 12], "t~w~", "right"\n    line [-5, 1; -5, 0]\n    line [-5, -2.5; -5, -1.5]\n    text [-5, 1.25], "t~b~", "above"\n    line [-5, 21; -5, 20]\n    line [-5, 18; -5, 19]\n    text [-5, 21.25], "t~r~", "above"\n    marker "none"\n    circle [0, 34], 11\n    circle [0, 34], 9\n    dimension [-8, 34; 8, 34; 0, 34], "D"\n    strokedasharray "5 5"\n    circle [0, 34], 8\nend
 
-[Angle]: ¢` draw()
-    title "Angle"
-    frame 150, 150
-    view -0.2, 3.8, -0.2, 3.8
-    strokewidth 1
-    fill "#EEEEEE"
-    path (0, 3, 0; 3, 3, 0; 2.75, 2.75, -0.25; 0.5, 2.75, 0; 0.25, 2.5, 0.25; 0.25, 0.25, 0; 0, 0, -0.25; 0, 3, 0)
-end `
+[Angle]: draw()\n    title "Angle"\n    frame 150, 150\n    view -0.2, 3.8, -0.2, 3.8\n    strokewidth 1\n    fill "#EEEEEE"\n    path (0, 3, 0; 3, 3, 0; 2.75, 2.75, -0.25; 0.5, 2.75, 0; 0.25, 2.5, 0.25; 0.25, 0.25, 0; 0, 0, -0.25; 0, 3, 0)\nend
 
-[Angle 2]: ¢` draw()
-    title "Angle 2"
-    frame 150, 150
-    view -0.2, 3.8, -0.2, 3.8
-    fill "#EEEEEE"
-    strokewidth 1
-    path (0, 3, 0; 0, 0, 0; 0.25, 0.25, 0.25; 0.25, 2.5, 0; 0.5, 2.75, -0.25; 2.75, 2.75, 0; 3, 3, 0.25; 0, 3, 0)
-end `
+[Angle 2]: draw()\n    title "Angle 2"\n    frame 150, 150\n    view -0.2, 3.8, -0.2, 3.8\n    fill "#EEEEEE"\n    strokewidth 1\n    path (0, 3, 0; 0, 0, 0; 0.25, 0.25, 0.25; 0.25, 2.5, 0; 0.5, 2.75, -0.25; 2.75, 2.75, 0; 3, 3, 0.25; 0, 3, 0)\nend
