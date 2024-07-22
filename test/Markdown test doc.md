@@ -93,6 +93,8 @@ Special divs can contain more than one paragraph.
 Hurmet reads inline TeX written between `$` delimiters:\
 The obligatory logo: $\TeX$. A second TeX on the same line: $\frac a b + c_2$.
 
+GitHub accepts ``$`…`$``, so we will, too. Like this: $`\int_{n=0}^\infty x^2`$
+
 As in Pandoc, the opening $ must have a non-space character immediately to its
 right, and the closing $ must have a non-space character immediately to its
 left. The closing $ must not be followed immediately by a digit. Thus,

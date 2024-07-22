@@ -12,7 +12,7 @@
  *
  * 1. Hurmet inline calculation is delimited ¢`…`, where "…" is the entry input by the author.
  *    Hurmet display calculation is delimited ¢¢…¢¢.
- * 2. LaTeX inline math is delimited $…$.
+ * 2. LaTeX inline math is delimited $…$ or $`…`$.
  *    No space allowed after 1st $ or before 2nd $. No digit after 2nd $.
  *    LaTeX display math is delimited  $$ … $$.
  * 3. ~subscript~
@@ -936,7 +936,7 @@ rules.set("code", {
 });
 rules.set("tex", {
   isLeaf: true,
-  match: inlineRegex(/^(?:\$\$((?:\\[\s\S]|[^\\])+?)\$\$|\$(?!\s|$)((?:(?:\\[\s\S]|[^\\])+?)?)(?<=[^\s\\$])\$(?![0-9$]))/),
+  match: inlineRegex(/^(?:\$\$((?:\\[\s\S]|[^\\])+?)\$\$|\$(`+)((?:(?:\\[\s\S]|[^\\])+?)?)\2\$(?![0-9$])|\$(?!\s|\$)((?:(?:\\[\s\S]|[^\\])+?)?)(?<=[^\s\\$])\$(?![0-9$]))/),
   parse: function(capture, state) {
     if (capture[1]) {
       const tex = capture[1].trim()
@@ -947,7 +947,7 @@ rules.set("tex", {
         return { type: "tex", attrs: { tex, displayMode: true } }
       }
     } else {
-      const tex = capture[2].trim()
+      const tex = (capture[3] ? capture[3] : capture[4]).trim()
       if (state.convertTex) {
         const entry = texToCalc(tex)
         return { type: "calculation", attrs: { entry, displayMode: false } }

@@ -9726,9 +9726,51 @@ const unescapeUrl = function(rawUrlString) {
 
 const isNotAnInteger = str => isNaN(str) || Number(str) % 1 !== 0;
 
+const indentRegEx = /^ +/;
+const insertNewlines = str => {
+  // Lists are unlike other blocks in one respect.
+  // A list might not have a preceding blank line, if the list is inside another list.
+  // Since the RegEx patterns all depend on that blank line, we will scan the top-level
+  // list and insert blank lines where needed.
+  const lines = str.split("\n");
+  let numLines = lines.length;
+  let i = 0;
+  let prevIndent = 0;
+  let prevLineWasEmpty = true;
+  while (i < numLines) {
+    const line = lines[i];
+    const isEmptyLine = (line === "");
+    if (!isEmptyLine) {
+      if (LIST_ITEM_PREFIX_R.test(line)) {
+        const match = indentRegEx.exec(line);
+        const indent = match ? match[0].length : 0;
+        if (indent !== prevIndent && !prevLineWasEmpty) {
+          // This line starts a new list and needs a preceeding blank line
+          lines.splice(i, 0, "");
+          i += 1;
+          numLines += 1;
+          prevLineWasEmpty = true;
+          continue
+        }
+        prevIndent = indent;
+      }
+    }
+    prevLineWasEmpty = isEmptyLine;
+    i += 1;
+  }
+  return lines.join("\n")
+};
+
 const parseList = (str, state) => {
-  const items = str.replace(LIST_BLOCK_END_R, "\n").match(LIST_ITEM_R);
+  str = str.replace(LIST_BLOCK_END_R, "\n");
+  if (!state.inList) {
+    str = insertNewlines(str);
+  }
+  const items = str.match(LIST_ITEM_R);
   const isTight = !/\n\n/.test(str.replace(/\n*$/, ""));
+  // Backup our state for restoration afterwards.
+  const oldStateList = state.inList;
+  state.inList = true;
   const itemContent = items.map(function(item, i) {
     // We need to see how far indented this item is:
     const prefixCapture = LIST_ITEM_PREFIX_R.exec(item);
@@ -9744,14 +9786,8 @@ const parseList = (str, state) => {
       // remove the bullet:
       .replace(LIST_ITEM_PREFIX_R, "");
 
-    // backup our state for restoration afterwards. We're going to
-    // want to set state._list to true, and state.inline depending
-    // on our list's looseness.
+    // Backup our state for restoration afterwards.
     const oldStateInline = state.inline;
-    const oldStateList = state._list;
-    state._list = true;
-    const oldStateTightness = state.isTight;
-    state.isTight = isTight;
 
     // Parse the list item
     state.inline = isTight;
@@ -9763,11 +9799,10 @@ const parseList = (str, state) => {
 
     // Restore our state before returning
     state.inline = oldStateInline;
-    state._list = oldStateList;
-    state.isTight = oldStateTightness;
     return result;
   });
 
+  state.inList = oldStateList;
   return itemContent
 };
 
@@ -10284,9 +10319,7 @@ rules.set("blockquote", {
 });
 rules.set("ordered_list", {
   isLeaf: false,
-  // Hurmet accepts lists w/o a preceding blank line, so the list RegEx
-  // is an anyScopeRegex. parse() will test if a list is a the beginning of a line.
-  match: anyScopeRegex(/^( {0,3})(?:(?:(\d{1,9})|([A-Z])|([a-z]))[.)]) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:\d{1,9}\.) )\n*|\s*$)/),
+  match: blockRegex(/^( {0,3})(?:(?:(\d{1,9})|([A-Z])|([a-z]))[.)]) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:\d{1,9}\.) )\n*|\s*$)/),
   parse: function(capture, state) {
     const start = capture[2]
       ? Number(capture[2])
@@ -10302,8 +10335,7 @@ rules.set("ordered_list", {
 });
 rules.set("bullet_list", {
   isLeaf: false,
-  // See note above re: anyScopeRegex
-  match: anyScopeRegex(/^( {0,3})([*+-]) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:[*+-]) )\n*|\s*$)/),
+  match: blockRegex(/^( {0,3})([*+-]) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:[*+-]) )\n*|\s*$)/),
   parse: function(capture, state) {
     return { content: parseList(capture[0], state, capture[1]) }
   }
@@ -10367,7 +10399,12 @@ rules.set("displayTeX", {
   match: blockRegex(/^\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$ *(?:\n|$)/),
   parse: function(capture, state) {
     const tex = capture[1].trim();
-    return { type: "tex", attrs: { tex, displayMode: true } }
+    if (state.convertTex) {
+      const entry = texToCalc(tex);
+      return { type: "calculation", attrs: { entry, displayMode: true } }
+    } else {
+      return { type: "tex", attrs: { tex, displayMode: true } }
+    }
   }
 });
 rules.set("newline", {
@@ -10488,13 +10525,18 @@ rules.set("code", {
 });
 rules.set("tex", {
   isLeaf: true,
-  match: inlineRegex(/^(?:\$\$((?:\\[\s\S]|[^\\])+?)\$\$|\$(?!\s|$)((?:(?:\\[\s\S]|[^\\])+?)?)(?<=[^\s\\$])\$(?![0-9$]))/),
+  match: inlineRegex(/^(?:\$\$((?:\\[\s\S]|[^\\])+?)\$\$|\$(`+)((?:(?:\\[\s\S]|[^\\])+?)?)\2\$(?![0-9$])|\$(?!\s|\$)((?:(?:\\[\s\S]|[^\\])+?)?)(?<=[^\s\\$])\$(?![0-9$]))/),
   parse: function(capture, state) {
     if (capture[1]) {
       const tex = capture[1].trim();
-      return { type: "tex", attrs: { tex, displayMode: true } }
+      if (state.convertTex) {
+        const entry = texToCalc(tex);
+        return { type: "calculation", attrs: { entry, displayMode: true } }
+      } else {
+        return { type: "tex", attrs: { tex, displayMode: true } }
+      }
     } else {
-      const tex = capture[2].trim();
+      const tex = (capture[3] ? capture[3] : capture[4]).trim();
       if (state.convertTex) {
         const entry = texToCalc(tex);
         return { type: "calculation", attrs: { entry, displayMode: false } }
@@ -10624,8 +10666,6 @@ rules.set("text", {
   }
 });
 
-const lists = ["bullet_list", "ordered_list"];
-const LIST_LOOKBEHIND_R = /(?:\n)( *)$/;
 
 const parse = (source, state) => {
   if (!state.inline) { source += "\n\n"; }
@@ -10641,25 +10681,7 @@ const parse = (source, state) => {
       if (capture) {
         rule = currRule;
         ruleName = currRuleName;
-
-        if (lists.includes(ruleName)) {
-          // Lists are complicated because we do not require a blank line before a list.
-          const prevCaptureStr = state.prevCapture == null ? "" : state.prevCapture;
-          const isStartOfLineCapture = LIST_LOOKBEHIND_R.test(prevCaptureStr);
-          if (isStartOfLineCapture) {
-            if (state.inline) {
-              // We matched a list that does not have a preceding blank line.
-              // Finish the current block element before beginning the list.
-              state.remainder = capture[0];
-              return result
-            } else {
-              break
-            }
-          }
-        } else {
-          break
-        }
-
+        break
       }
     }
     const parsed = rule.parse(capture, state);
@@ -10671,11 +10693,6 @@ const parse = (source, state) => {
     }
     state.prevCapture = capture[0];
     source = source.substring(capture[0].length);
-    if (state.remainder) {
-      // Prepend a list.
-      source = state.remainder + "\n\n" + source;
-      state.remainder = "";
-    }
   }
   return result
 };
@@ -10794,7 +10811,7 @@ const parseMetadata = str => {
 const dateMessageRegEx = /^date:([^\n]+)\nmessage:([^\n]+)\n/;
 
 const inlineMd2ast = md => {
-  const state = { inline: true, _defs: {}, prevCapture: "", remainder: "", inHtml: false };
+  const state = { inline: true, _defs: {}, prevCapture: "", inList: false, inHtml: false };
   const ast = parse(md, state);
   if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") {
     ast.shift();
@@ -10815,10 +10832,10 @@ const md2ast = (md, inHtml = false, convertTex = false) => {
   // Second, get all the link reference definitions
   const state = {
     inline: false,
+    inList: false,
     _defs: {},
     footnotes: [],
     prevCapture: "",
-    remainder: "",
     inHtml,
     convertTex
   };
