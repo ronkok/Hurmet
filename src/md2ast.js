@@ -173,8 +173,9 @@ const insertNewlines = str => {
 }
 
 const parseList = (str, state) => {
-  str = str.replace(LIST_BLOCK_END_R, "\n")
   if (!state.inList) {
+    // This is a top-level list.
+    str = str.replace(LIST_BLOCK_END_R, "\n")
     str = insertNewlines(str)
   }
   const items = str.match(LIST_ITEM_R);
