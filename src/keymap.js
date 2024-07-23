@@ -11,8 +11,7 @@ import {
 import { wrapInList, splitListItem, liftListItem, sinkListItem } from "./schema"
 import { undo, redo } from "prosemirror-history"
 import { undoInputRule } from "prosemirror-inputrules"
-import { insertMath, saveFileAsMarkdown, expandHurmetMacro, printHurmet,
-         convertAndPasteFromMarkdown } from "./menu"
+import { insertMath, saveFileAsMarkdown, expandHurmetMacro, printHurmet } from "./menu"
 import { readFile } from "./openfile"
 import { goToNextCell } from "prosemirror-tables"
 
@@ -63,7 +62,6 @@ export function buildKeymap(schema, mapKeys) {
 
   bind("Ctrl-s", (state, _, view) => { saveFileAsMarkdown(state, view); return true })
   bind("Ctrl-p", (state, _, view) => { printHurmet(state, view); return true })
-  bind("Ctrl-Shift-v", (state, _, view) => { convertAndPasteFromMarkdown(view); return true })
   bind("Alt-j", (state, _, view) => { readFile(state, _, view, schema, "hurmet"); return true })
   bind("Mod-z", undo)
   bind("Shift-Mod-z", redo)

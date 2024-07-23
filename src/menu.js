@@ -606,28 +606,14 @@ function copyAsGFM() {
   })
 }
 
-export function convertAndPasteFromMarkdown(view) {
-  navigator.clipboard
-  .readText()
-  .then((clipText) => {
-    const ast = hurmet.md2ast(clipText, false, true)
-    const fragment = { type: "fragment", content: ast }
-    const {$from, $to} = view.state.selection
-    view.dispatch(
-      view.state.tr.replaceWith($from.pos, $to.pos, schema.nodeFromJSON(fragment))
-    )
-    hurmet.updateCalculations(view, true)
-  })
-}
-
-function pasteAsMarkdown() {
+function pasteAsMarkdown(doTexConversion) {
   return new MenuItem({
-    label: "Paste from Markdown",
+    label: (doTexConversion ? "Convert TeX and Paste" : "Paste from Markdown"),
     run(state, _, view) {
       navigator.clipboard
         .readText()
         .then((clipText) => {
-          const ast = hurmet.md2ast(clipText)
+          const ast = hurmet.md2ast(clipText, false, doTexConversion)
           const fragment = { type: "fragment", content: ast }
           const {$from, $to} = state.selection
           view.dispatch(
@@ -1874,8 +1860,15 @@ export function buildMenuItems(schema) {
   r.copyAsMarkdown = copyAsMarkdown()
   r.copyAsMarkdownWithResults = copyAsMarkdownWithResults()
   r.copyAsGFM = copyAsGFM()
-  r.pasteAsMarkdown = pasteAsMarkdown()
-  r.Markdown = new Dropdown([r.copyAsMarkdown, r.copyAsMarkdownWithResults, r.copyAsGFM, r.pasteAsMarkdown], {label: "𝐌"})
+  r.pasteAsMarkdown = pasteAsMarkdown(false)
+  r.convertAndPaste = pasteAsMarkdown(true)
+  r.Markdown = new Dropdown([
+    r.copyAsMarkdown,
+    r.copyAsMarkdownWithResults,
+    r.copyAsGFM,
+    r.pasteAsMarkdown,
+    r.convertAndPaste
+  ], {label: "𝐌"})
 
   r.math = [[
     r.insertCalclation,

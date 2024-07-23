@@ -4158,7 +4158,9 @@ const texFunctions = Object.freeze({
   "\\ne": ["\\ne", "≠", "≠", tt.REL, ""],
   "\\cdot": ["\\cdot", "\u22C5", "·", tt.MULT, ""], // dot operator
   "\\le": ["\\le", "≤", "≤", tt.REL, ""],
+  "\\leq": ["\\leq", "≤", "≤", tt.REL, ""],
   "\\ge": ["\\ge", "≥", "≥", tt.REL, ""],
+  "\\geq": ["\\geq", "≥", "≥", tt.REL, ""],
   "\\equiv": ["\\equiv", "\u2261", "\u2261", tt.REL, ""],
   "\\cong": ["\\cong", "≅", "≅", tt.REL, ""],
   "\\approx": ["\\approx", "\u2248", "\u2248", tt.REL, ""],
@@ -4347,6 +4349,45 @@ const unaries = new Set([
   "xtwoheadrightarrow"
 ]);
 
+const greek = {
+  alpha: "α",
+  beta: "β",
+  chi: "χ",
+  delta: "δ",
+  Delta: "Δ",
+  epsilon: "ε",
+  varepsilon: "\u025B",
+  eta: "\u03B7",
+  gamma: "γ",
+  Gamma: "Γ",
+  iota: "\u03B9",
+  kappa: "\u03BA",
+  lambda: "λ",
+  Lambda: "Λ",
+  mu: "μ",
+  nu: "\u03BD",
+  omega: "ω",
+  Omega: "Ω",
+  phi: "\u03D5",
+  varphi: "\u03C6",
+  Phi: "\u03A6",
+  pi: "π",
+  Pi: "Π",
+  psi: "ψ",
+  Psi: "Ψ",
+  rho: "ρ",
+  sigma: "σ",
+  Sigma: "Σ",
+  tau: "τ",
+  theta: "θ",
+  vartheta: "\u03D1",
+  Theta: "Θ",
+  upsilon: "\u03C5",
+  xi: "\u03BE",
+  Xi: "\u039E",
+  zeta: "\u03B6"
+};
+
 const binaries = new Set([
   "dfrac",
   "frac",
@@ -4370,13 +4411,13 @@ const texREL = new Set([
   "curvearrowleft", "curvearrowright", "dArr", "darr", "dashleftarrow", "dashrightarrow",
   "dashv", "dblcolon", "doteq", "doteqdot", "downarrow", "downdownarrows", "downharpoonleft",
   "downharpoonright", "eqcirc", "eqcolon", "eqqcolon", "eqsim", "eqslantgtr", "eqslantless",
-  "fallingdotseq", "frown", "geq", "geqq", "geqslant", "gets", "gg", "ggg",
+  "fallingdotseq", "frown", "geqq", "geqslant", "gets", "gg", "ggg",
   "gggtr", "gnapprox", "gneq", "gneqq", "gnsim", "gt", "gtrapprox", "gtreqless", "gtreqqless",
   "gtrless", "gtrsim", "gvertneqq", "hArr", "harr", "hookleftarrow", "hookrightarrow",
   "impliedby", "implies", "isin", "Join", "gets", "impliedby", "implies",
   "lArr", "larr", "leadsto", "leftarrow", "leftarrowtail", "leftharpoondown",
   "leftharpoonup", "leftleftarrows", "leftrightarrow", "leftrightarrows", "leftrightharpoons",
-  "leftrightsquigarrow", "leq", "leqq", "leqslant", "lessapprox", "lesseqgtr", "lesseqqgtr",
+  "leftrightsquigarrow", "leqq", "leqslant", "lessapprox", "lesseqgtr", "lesseqqgtr",
   "lessgtr", "lesssim", "ll", "lll", "llless", "lnapprox", "lneq", "lneqq", "lnsim",
   "longleftarrow", "longleftrightarrow", "longmapsto", "longrightarrow", "looparrowleft",
   "looparrowright", "lrArr", "lrarr", "lt", "lvertneqq", "mapsto", "mid", "models",
@@ -4652,6 +4693,10 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
     }
     if (mathOperators.has(st)) {
       return [match, match, st, tt.FUNCTION, ""]
+    }
+    if (greek[st]) {
+      const ch = greek[st];
+      return [match, ch, ch, tt.VAR, ""]
     }
 
     // default case is a mathord. So I have not enumerated any ORDs
@@ -9762,8 +9807,9 @@ const insertNewlines = str => {
 };
 
 const parseList = (str, state) => {
-  str = str.replace(LIST_BLOCK_END_R, "\n");
   if (!state.inList) {
+    // This is a top-level list.
+    str = str.replace(LIST_BLOCK_END_R, "\n");
     str = insertNewlines(str);
   }
   const items = str.match(LIST_ITEM_R);
