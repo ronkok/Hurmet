@@ -590,6 +590,7 @@ function copyAsMarkdown() {
 function copyAsMarkdownWithResults() {
   return new MenuItem({
     label: "Copy as MD w/Results",
+    title: "Copy as Markdown. Include human-readable results.",
     run(state, _, view) {
       copyText(state, false, true)
     }
@@ -609,6 +610,9 @@ function copyAsGFM() {
 function pasteAsMarkdown(doTexConversion) {
   return new MenuItem({
     label: (doTexConversion ? "Convert TeX and Paste" : "Paste from Markdown"),
+    title: doTexConversion 
+      ? "Given Markdown text, convert the LaTeX parts to Hurmet calclations, then paste."
+      : "Paste Markdown text into the document.",
     run(state, _, view) {
       navigator.clipboard
         .readText()
