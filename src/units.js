@@ -49,7 +49,7 @@ export const unitsAreCompatible = (a, b) => {
 
 // JSON.parse() is faster than a big object literal
 // eslint-disable-next-line max-len
-const prefixFactor = JSON.parse('{"Y":1e24,"yotta":1e24,"Z":1e21,"zetta":1e21,"E":1e18,"exa":1e18,"P":1e15,"peta":1e15,"T":1e12,"tera":1e12,"G":1e9,"giga":1e9,"M":1e6,"mega":1e6,"k":1000,"kilo":1000,"h":100,"hecto":100,"deka":10,"d":0.1,"deci":0.1,"c":0.01,"centi":0.01,"m":0.001,"milli":0.001,"µ":1e-6,"\u00B5":1e-6,"micro":1e-6,"n":1e-9,"nano":1e-9,"p":1e-12,"pico":1e-12,"f":1e-15,"femto":1e-15,"a":1e-18,"atto":1e-18,"z":1e-21,"zepto":1e-21,"y":1e-24,"yocto":1e-24,"Ki":1024,"kibi":1024,"Mi":1048576,"mebi":1048576,"Gi":1073741824,"gibi":1073741824,"Ti":1099511627776,"tebi":1099511627776}')
+const prefixFactor = JSON.parse('{"Y":1e24,"yotta":1e24,"Z":1e21,"zetta":1e21,"E":1e18,"exa":1e18,"P":1e15,"peta":1e15,"T":1e12,"tera":1e12,"G":1e9,"giga":1e9,"M":1e6,"mega":1e6,"k":1000,"kilo":1000,"h":100,"hecto":100,"deka":10,"d":0.1,"deci":0.1,"c":0.01,"centi":0.01,"m":0.001,"milli":0.001,"µ":1e-6,"\u00B5":1e-6,"\u03bc":1e-6,"micro":1e-6,"n":1e-9,"nano":1e-9,"p":1e-12,"pico":1e-12,"f":1e-15,"femto":1e-15,"a":1e-18,"atto":1e-18,"z":1e-21,"zepto":1e-21,"y":1e-24,"yocto":1e-24,"Ki":1024,"kibi":1024,"Mi":1048576,"mebi":1048576,"Gi":1073741824,"gibi":1073741824,"Ti":1099511627776,"tebi":1099511627776}')
 
 export const currencySymbols = "$£¥₨₪€"
 
@@ -403,6 +403,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "mgd":["3785.411784","86400","0","0",[3,0,-1,0,0,0,0,0]],
 "mho":["1","1","0","0",[-2,-1,3,2,0,0,0,0]],
 "mi":["1609.344","1","0","0",[1,0,0,0,0,0,0,0]],
+"micron":["0.000001","1","0","0",[1,0,0,0,0,0,0,0]],
 "mil":["0.0000254","1","0","0",[1,0,0,0,0,0,0,0]],
 "mile":["1609.344","1","0","0",[1,0,0,0,0,0,0,0]],
 "min":["60","1","0","0",[0,0,1,0,0,0,0,0]],
@@ -616,6 +617,8 @@ const synonyms = Object.freeze({
   "¥": "JPY"
 })
 
+const siPrefixRegEx = /^(yotta|zetta|exa|peta|tera|giga|mega|kilo|hecto|deka|deci|centi|milli|micro|nano|pico|femto|atto|zepto|yocto)/
+
 const unitFromWord = (inputStr) => {
   const str = inputStr.trim()
   const L = str.length
@@ -651,11 +654,11 @@ const unitFromWord = (inputStr) => {
         }
       }
 
-      let prefix = ""
+      prefix = ""
       if (L > 3) {
-        const match = /^(yotta|zetta|exa|peta|tera|giga|mega|kilo|hecto|deka|deci|centi|milli|micro|nano|pico|femto|atto|zepto|yocto)/.exec(word)
-        if (match) {
-          prefix = match[0].value
+        const match = siPrefixRegEx.exec(word)
+        if (match && word !== "micron") {
+          prefix = match[0];
           doTheSearch = true
           word = word.slice(prefix.length)
         }
@@ -664,7 +667,7 @@ const unitFromWord = (inputStr) => {
       // We're in the second pass. Try an SI short-form prefix.
       doTheSearch = false
       prefix = word.charAt(0)
-      if ("YZEPTGMkhdcmnpfazyµμ".indexOf(prefix) > -1) {
+      if ("YZEPTGMkhdcmnpfazyµμµ".indexOf(prefix) > -1) {
         doTheSearch = true
         word = word.substring(1)
       }

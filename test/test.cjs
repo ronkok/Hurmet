@@ -492,6 +492,7 @@ end`, vars)
     [`testBreak() = @`, `function testBreak 0`, `6`],
     [`testThrow() = @`, `function testThrow 0`, `Error.`],
     [`2 'ft' + 3 'inch' = @@ inch`, `®2/1 applyUnit ft ®3/1 applyUnit inch +`, '27 inch'],
+    [`1micron = @@ m`, "®1/1 applyUnit micron", "0.000001 m"],
     [`2ft + 3inch = @@ inch`, `®2/1 applyUnit ft ®3/1 applyUnit inch +`, '27 inch'],
     [`2 'ft' + 3 'inch' = @@ V`, `®2/1 applyUnit ft ®3/1 applyUnit inch +`, 'Error. Calculated units are not compatible with the desired result unit: V'],
     [`[1; 2] < [2; 4] = @`, `®1/1 ®2/1 matrix 2 1 ®2/1 ®4/1 matrix 2 1 <`, `[true; true]`],

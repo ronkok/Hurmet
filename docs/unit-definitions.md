@@ -369,6 +369,7 @@ I recommend Russ Rowlett’s [dictionary of units of measurement](http://www.ibi
 | mgd                   | 3785.411784/86400              | 0       | 0        | 3  | 0  | -1 | 0  | 0  | 0 | 0  | 0 | million gal/day                  |
 | mho                   | 1                              | 0       | 0        | -2 | -1 | 3  | 2  | 0  | 0 | 0  | 0 | reciprocal of ohm                |
 | mi                    | 1609.344                       | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | miles                            |
+| micron                | 0.000001                       | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 |                                  |
 | mil                   | 0.0000254                      | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | 0.001 inch                       |
 | mile                  | 1609.344                       | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | 5280 feet                        |
 | min                   | 60                             | 0       | 0        | 0  | 0  | 1  | 0  | 0  | 0 | 0  | 0 | minute                           |
