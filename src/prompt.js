@@ -134,9 +134,15 @@ export function openPrompt(options) {
       end = Math.max(sel.anchorOffset, sel.extentOffset)
     } else if (node.nodeType === 1 && node.parentNode.classList.contains("math-code")) {
       inMathZone = true
-      node = node.firstChild
-      start = node.length
-      end = node.length
+      if (node.children.length > 0) {
+        node = node.firstChild
+        start = node.length
+        end = node.length
+      } else {
+        // Empty math zone, i.e., no text node children.
+        start = 0
+        end = 0
+      }
     } else {
       start = options.state.selection.$from
       end = options.state.selection.$to
