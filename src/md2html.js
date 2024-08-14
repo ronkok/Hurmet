@@ -17,6 +17,7 @@ const sanitizeUrl = function(url) {
     ) {
       return null;
     }
+  // eslint-disable-next-line no-unused-vars
   } catch (e) {
     // decodeURIComponent sometimes throws a URIError
     // See `decodeURIComponent('a%AFc');`

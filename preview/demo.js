@@ -305,12 +305,6 @@ const autoCorrect = (jar, preText, postText) => {
   }
 };
 
-const boldPrevChar = preText => {
-  if (preText.length === 0) { return null }
-  const ch = preText.charAt(preText.length - 1);
-  return fontedChar(ch, "bb")
-};
-
 const renderSVG = dwg => {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   Object.keys(dwg.attrs).forEach(key => {
@@ -711,13 +705,13 @@ const iTwo = BigInt(2);
 const zero = [iZero, iOne];
 const one = [iOne, iOne];
 const two = [iTwo, iOne];
-const pi$1 = [BigInt(31415926535897932384626433832795028841971693993751),
-  BigInt(10000000000000000000000000000000000000000000000000)];
-const e$1 = [BigInt(2718281828459045235360287471352662497757247093699959574966),
-  BigInt(1000000000000000000000000000000000000000000000000000000000)];
+const pi$1 = [BigInt("31415926535897932384626433832795028841971693993751"),
+  BigInt("10000000000000000000000000000000000000000000000000")];
+const e$1 = [BigInt("2718281828459045235360287471352662497757247093699959574966"),
+  BigInt("1000000000000000000000000000000000000000000000000000000000")];
 // reduced Planck constant
 const hbar = [BigInt(1054571817),
-  BigInt(10000000000000000000000000000000000000000000)];
+  BigInt("10000000000000000000000000000000000000000000")];
 
 const intAbs$1 = i => i >= iZero ? i : BigInt(-1) * i;  // absolute value of a BigInt
 
@@ -889,6 +883,7 @@ const power$1 = (a, b) => {
         : areEqual(mod(b, two), one)
         ? fromNumber(-1 * (-1 * toNumber(a)) ** toNumber(b))
         : errorOprnd("BAD_ROOT");
+    // eslint-disable-next-line no-unused-vars
     } catch (err) {
       result = fromNumber(toNumber(a) ** toNumber(b));
     }
@@ -16799,7 +16794,6 @@ const conditionResult = (stmt, oprnd, unitAware) => {
 };
 
 const evaluateDrawing = (stmt, vars, decimalFormat = "1,000,000.") => {
-  // eslint-disable-next-line no-prototype-builtins
   const udf = stmt.value;
   const args = [];
   for (let i = 0; i < udf.parameters.length; i++) {
@@ -17629,6 +17623,7 @@ const sanitizeUrl = function(url) {
     ) {
       return null;
     }
+  // eslint-disable-next-line no-unused-vars
   } catch (e) {
     // decodeURIComponent sometimes throws a URIError
     // See `decodeURIComponent('a%AFc');`
@@ -18627,6 +18622,7 @@ function updateCalculations(
     const tr = state.tr;
     try {
       tr.replaceWith(curPos, curPos + 1, calcSchema.createAndFill(nodeAttrs));
+    // eslint-disable-next-line no-unused-vars
     } catch (err) {
       // nada
     } finally {
@@ -32628,18 +32624,6 @@ const codeJar = (editor, isMathPrompt) => {
   }
 
   ;on("keydown", event => {
-    // The next five lines are Hurmet customization. Not part of vanilla CodeJar.
-    if (isMathPrompt && event.keyCode === 13 && !event.shiftKey) return
-    if (isMathPrompt && event.keyCode === 66 && event.ctrlKey) {
-      // Make the previous letter bold.
-      const preText = textBeforeCursor(editor);
-      const ch = boldPrevChar(preText);
-      if (ch) {
-        const L = preText.length;
-        editor.textContent = preText.slice(0, -1) + ch + textAfterCursor(editor);
-        restore({ start: L, end: L, dir: undefined });
-      }
-    }
     if (event.keyCode === 65 && event.ctrlKey ) {
       window.getSelection().selectAllChildren(editor);
       event.preventDefault();
@@ -33060,7 +33044,6 @@ const renderMath = (jar, demoOutput) => {
   let entry = jar.toString();
   const selText = selectedText();
   if (selText.length === 0) {
-    // eslint-disable-next-line no-undef
     autoCorrect(jar, textBeforeCursor(editor), textAfterCursor(editor));
   }
   entry = jar.toString();
@@ -33120,7 +33103,7 @@ const prompts = {
 
 // Start the demonstration editor
 const editor = document.getElementById("demo-input");
-const jar = codeJar(editor, false);
+const jar = codeJar(editor);
 const demoOutput = document.getElementById("demo-output");
 editor.addEventListener("input", e => {
   renderMath(jar, demoOutput);

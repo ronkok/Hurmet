@@ -51,12 +51,12 @@ export const nodes = {
     // can not reach doc.attrs. So any user change to document metadata will be
     // outside the undo stack.
     attrs: {
-      decimalFormat: {default: '1,000,000.' },
-      inDraftMode: { default: false },  // boolean
-      saveIsValid: { default: false }, // boolean
-      fileHandle: { default: null },
-      fontSize: { default: 12 },       // 12 | 10
-      pageSize: { default: "letter" }, // letter | A4
+      decimalFormat: { default: '1,000,000.', validate: "string" },
+      inDraftMode: { default: false, validate: "boolean" },
+      saveIsValid: { default: false, validate: "boolean" },
+      fileHandle: { default: null, validate: "null|string" },
+      fontSize: { default: 12, validate: "number|string" },       // 12 | 10
+      pageSize: { default: "letter", validate: "string" }, // letter | A4
       snapshots: { default: [] },
       fallbacks: { default: {} }       // Fallback data, in case fetched files are unavailable
     }
@@ -175,7 +175,7 @@ export const nodes = {
   // should hold the number 1 to 6. Parsed and serialized as `<h1>` to
   // `<h6>` elements.
   heading: {
-    attrs: {level: {default: 1}},
+    attrs: {level: { default: 1, validate: "number" }},
     content: "inline*",
     group: "block",
     defining: true,
@@ -210,10 +210,10 @@ export const nodes = {
   image: {
     inline: true,
     attrs: {
-      src: {},
-      alt: {default: null},
-      width: {default: null},
-      class: {default: "inline"}
+      src: { validate: "string" },
+      alt: {default: null, validate: "null|string"},
+      width: {default: null, validate: "null|string"},
+      class: {default: "inline", validate: "string"}
     },
     group: "inline",
     draggable: true,
@@ -231,9 +231,9 @@ export const nodes = {
   // :: NodeSpec A block image (`<img>`) node, for inclusion in a <figure>
   figimg: {
     attrs: {
-      src: {},
-      alt: {default: null},
-      width: {default: null},
+      src: {validate: "string"},
+      alt: {default: null, validate: "null|string"},
+      width: {default: null, validate: "null|string"},
     },
     group: "block",
     draggable: false,
@@ -250,7 +250,7 @@ export const nodes = {
 
   figure: {
     content: "block{2,2}",
-    attrs: { class: {default: "auto"} },
+    attrs: { class: {default: "auto", validate: "string"} },
     group: "block",
     marks: "",
     parseDOM: [{tag: "figure", getAttrs(dom) {
@@ -260,7 +260,7 @@ export const nodes = {
   },
   figcaption: {
     content: "inline*",
-    attrs: { class: {default: null} },
+    attrs: { class: {default: null, validate: "null|string"} },
     group: "block",
     parseDOM: [{tag: "figcaption", getAttrs(dom) {
       return { class: dom.getAttribute("class") }
@@ -283,8 +283,8 @@ export const nodes = {
   toc: {
     atom: true,
     attrs: {
-      start: { default: 1 },
-      end:   { default: 2 },
+      start: { default: 1, validate: "number" },
+      end:   { default: 2, validate: "number" },
       body:  { default: [] }
     },
     group: "block",
@@ -304,7 +304,7 @@ export const nodes = {
   },
 
   ordered_list: {
-    attrs: { class: { default: "decimal" }, order: {default: 1}},
+    attrs: { class: { default: "decimal", validate: "string" }, order: {default: 1, validate: "number"}},
     content: "list_item+|tight_list_item+",
     group: "block",
     parseDOM: [{tag: "ol", getAttrs(dom) {
@@ -361,14 +361,14 @@ export const nodes = {
     tableRole: "table",
     group: "block",
     attrs: {
-      class: { default: 'grid' },
-      name: { default: "" },
+      class: { default: 'grid', validate: "string" },
+      name: { default: "", validate: "string" },
       columnMap: { default: {} },
       unitMap: { default: [] },
       units: { default: {} },
       rowMap: { default: {} },
       dependencies: { default: null },
-      dtype: { default: dt.NULL }  // or dt.SPREADSHEET
+      dtype: { default: dt.NULL, validate: "number" }  // or dt.SPREADSHEET
     },
     parseDOM: [{tag: "table", getAttrs(dom) {
       const className = dom.getAttribute('class')
@@ -399,8 +399,8 @@ export const nodes = {
   table_cell: {
     content: "block+|spreadsheet_cell",
     attrs: {
-      colspan: {default: 1},
-      rowspan: {default: 1},
+      colspan: {default: 1, validate: "number"},
+      rowspan: {default: 1, validate: "number"},
       colwidth: {default: null},
       background: {default: null}
     },

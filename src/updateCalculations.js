@@ -440,6 +440,7 @@ export function updateCalculations(
     const tr = state.tr
     try {
       tr.replaceWith(curPos, curPos + 1, calcSchema.createAndFill(nodeAttrs))
+    // eslint-disable-next-line no-unused-vars
     } catch (err) {
       // nada
     } finally {

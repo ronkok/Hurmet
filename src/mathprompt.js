@@ -9,7 +9,6 @@ const functionRegEx = /^(?:private +)?function (?:[A-Za-zıȷ\u0391-\u03C9\u03D5
 const dotFromCommaForStorage = (str) => {
   // Lex for strings, numbers, and identifiers
   let match
-  // eslint-disable-next-line no-cond-assign
   while ((match = commaRegEx.exec(str)) != null) {
     if ("0123456789".indexOf(match[0].charAt(0)) > -1) {
       // Change comma decimal to dot decimal.
@@ -22,7 +21,6 @@ const dotFromCommaForStorage = (str) => {
 
 const commaFromDotForDisplay = (str) => {
   let match
-  // eslint-disable-next-line no-cond-assign
   while ((match = dotRegEx.exec(str)) !== null) {
     if ("0123456789".indexOf(match[0].charAt(0)) > -1) {
       // Change dot decimal to comma decimal.
@@ -86,7 +84,6 @@ export function openMathPrompt(options) {
       // Check if an auto-correct is needed (after a user types a space.)
       const selText = selectedText(editor)
       if (selText.length === 0) {
-        // eslint-disable-next-line no-undef
         autoCorrect(jar, textBeforeCursor(editor), textAfterCursor(editor))
       }
       tex = jar.toString()
@@ -107,6 +104,7 @@ export function openMathPrompt(options) {
           wrap: "=",
           errorColor: "#fff"
         })
+      // eslint-disable-next-line no-unused-vars
       } catch (err) {
         while (mathDisplay.lastChild) {
           mathDisplay.removeChild(mathDisplay.lastChild)

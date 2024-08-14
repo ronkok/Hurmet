@@ -31,7 +31,6 @@ const renderMath = (jar, demoOutput) => {
   let entry = jar.toString()
   const selText = selectedText(editor)
   if (selText.length === 0) {
-    // eslint-disable-next-line no-undef
     autoCorrect(jar, textBeforeCursor(editor), textAfterCursor(editor))
   }
   entry = jar.toString()

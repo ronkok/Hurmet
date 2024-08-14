@@ -123,7 +123,6 @@ export const findPageBreaks = (view, state, purpose, tocSchema, startLevel, endL
   let pageHeight = grossPageHeight          // w/o accounting for header
   let headerHeight = 0
   if (headerExists) {
-    // eslint-disable-next-line max-len
     header = document.getElementsByTagName("header")[0].children[0].children[0].cloneNode(true)
     header.classList.add("header")
     header.innerHTML = header.innerHTML.replace(

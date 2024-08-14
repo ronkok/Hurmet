@@ -361,13 +361,13 @@ const iTwo = BigInt(2);
 const zero = [iZero, iOne];
 const one = [iOne, iOne];
 const two = [iTwo, iOne];
-const pi$1 = [BigInt(31415926535897932384626433832795028841971693993751),
-  BigInt(10000000000000000000000000000000000000000000000000)];
-const e$1 = [BigInt(2718281828459045235360287471352662497757247093699959574966),
-  BigInt(1000000000000000000000000000000000000000000000000000000000)];
+const pi$1 = [BigInt("31415926535897932384626433832795028841971693993751"),
+  BigInt("10000000000000000000000000000000000000000000000000")];
+const e$1 = [BigInt("2718281828459045235360287471352662497757247093699959574966"),
+  BigInt("1000000000000000000000000000000000000000000000000000000000")];
 // reduced Planck constant
 const hbar = [BigInt(1054571817),
-  BigInt(10000000000000000000000000000000000000000000)];
+  BigInt("10000000000000000000000000000000000000000000")];
 
 const intAbs$1 = i => i >= iZero ? i : BigInt(-1) * i;  // absolute value of a BigInt
 
@@ -539,6 +539,7 @@ const power$1 = (a, b) => {
         : areEqual(mod(b, two), one)
         ? fromNumber(-1 * (-1 * toNumber(a)) ** toNumber(b))
         : errorOprnd("BAD_ROOT");
+    // eslint-disable-next-line no-unused-vars
     } catch (err) {
       result = fromNumber(toNumber(a) ** toNumber(b));
     }
@@ -16449,7 +16450,6 @@ const conditionResult = (stmt, oprnd, unitAware) => {
 };
 
 const evaluateDrawing = (stmt, vars, decimalFormat = "1,000,000.") => {
-  // eslint-disable-next-line no-prototype-builtins
   const udf = stmt.value;
   const args = [];
   for (let i = 0; i < udf.parameters.length; i++) {
@@ -17279,6 +17279,7 @@ const sanitizeUrl = function(url) {
     ) {
       return null;
     }
+  // eslint-disable-next-line no-unused-vars
   } catch (e) {
     // decodeURIComponent sometimes throws a URIError
     // See `decodeURIComponent('a%AFc');`
@@ -18277,6 +18278,7 @@ function updateCalculations(
     const tr = state.tr;
     try {
       tr.replaceWith(curPos, curPos + 1, calcSchema.createAndFill(nodeAttrs));
+    // eslint-disable-next-line no-unused-vars
     } catch (err) {
       // nada
     } finally {

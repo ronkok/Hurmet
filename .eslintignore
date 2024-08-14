@@ -1,9 +1,0 @@
-**/node_modules/*
-site/*
-**/*.min.mjs
-schema.js
-keymap.js
-inputrules.js
-currencyRates.js
-katex.js
-temml.js

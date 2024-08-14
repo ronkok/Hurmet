@@ -16,13 +16,13 @@ const iTwo = BigInt(2)
 const zero = [iZero, iOne]
 const one = [iOne, iOne]
 const two = [iTwo, iOne]
-const pi = [BigInt(31415926535897932384626433832795028841971693993751),
-  BigInt(10000000000000000000000000000000000000000000000000)]
-const e = [BigInt(2718281828459045235360287471352662497757247093699959574966),
-  BigInt(1000000000000000000000000000000000000000000000000000000000)]
+const pi = [BigInt("31415926535897932384626433832795028841971693993751"),
+  BigInt("10000000000000000000000000000000000000000000000000")]
+const e = [BigInt("2718281828459045235360287471352662497757247093699959574966"),
+  BigInt("1000000000000000000000000000000000000000000000000000000000")]
 // reduced Planck constant
 const hbar = [BigInt(1054571817),
-  BigInt(10000000000000000000000000000000000000000000)]
+  BigInt("10000000000000000000000000000000000000000000")]
 
 const intAbs = i => i >= iZero ? i : BigInt(-1) * i  // absolute value of a BigInt
 
@@ -198,6 +198,7 @@ const power = (a, b) => {
         : areEqual(mod(b, two), one)
         ? fromNumber(-1 * (-1 * toNumber(a)) ** toNumber(b))
         : errorOprnd("BAD_ROOT")
+    // eslint-disable-next-line no-unused-vars
     } catch (err) {
       result = fromNumber(toNumber(a) ** toNumber(b))
     }
