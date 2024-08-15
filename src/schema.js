@@ -402,7 +402,7 @@ export const nodes = {
       colspan: {default: 1, validate: "number"},
       rowspan: {default: 1, validate: "number"},
       colwidth: {default: null},
-      background: {default: null}
+      background: {default: null, validate: "null|string"}
     },
     tableRole: "cell",
     isolating: true,
@@ -412,10 +412,10 @@ export const nodes = {
   table_header: {
     content: "block+",
     attrs: {
-      colspan: {default: 1},
-      rowspan: {default: 1},
+      colspan: {default: 1, validate: "number"},
+      rowspan: {default: 1, validate: "number"},
       colwidth: {default: null},
-      background: {default: null}
+      background: {default: null, validate: "null|string"}
     },
     tableRole: "header_cell",
     isolating: true,
@@ -438,17 +438,17 @@ export const nodes = {
     marks: "",
     group: "block",
     attrs: {
-      entry: { default: "" },
-      name: { default: "" },
-      rpn: { default: "" },
-      resulttemplate: { default: "@" },
-      altresulttemplate: { default: "@" },
-      resultdisplay: { default: "@" },
+      entry: { default: "", validate: "string" },
+      name: { default: "", validate: "string" },
+      rpn: { default: "", validate: "string" },
+      resulttemplate: { default: "@", validate: "string" },
+      altresulttemplate: { default: "@", validate: "string" },
+      resultdisplay: { default: "@", validate: "string" },
       value: { default: null },
       dependencies: {default: []},
-      display: { default: "" },
+      display: { default: "", validate: "string" },
       unit: {default: null},
-      dtype: {default: 0},
+      dtype: {default: 0, validate: "number"},
     },
     parseDOM: [{tag: "div.hurmet-cell",  getAttrs(dom) {
       return { entry: dom.getAttribute('data-entry') }
@@ -552,7 +552,10 @@ export const nodes = {
     marks: "",
     group: "inline",
     inline: true,
-    attrs: { tex: {default: ""}, displayMode: { default: false } },
+    attrs: {
+      tex: {default: "", validate: "string"},
+      displayMode: { default: false, validate: "boolean" }
+    },
     parseDOM: [{tag: "span.hurmet-tex",  getAttrs(dom) {
       const displayMode = Boolean(dom.getAttribute('data-display')) || false
       return { tex: dom.getAttribute('data-tex'), displayMode }
