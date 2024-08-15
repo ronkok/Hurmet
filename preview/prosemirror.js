@@ -36952,7 +36952,7 @@ async function updateCalcs(doc) {
   // Make a pass through the calculation nodes and calculate each result.
   try {
     for (const node of calcNodes) {
-      if (node.attrs.type === "calculation") {
+      if (node.type === "calculation") {
         if (!helpers.fetchRegEx.test(node.attrs.entry)) {
           const entry = node.attrs.entry;
           let attrs = compile(entry, decimalFormat);
