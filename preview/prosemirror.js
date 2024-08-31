@@ -18198,11 +18198,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6496","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.6301","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["6.1332","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["6.2155","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -18211,10 +18211,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.5076","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.4941","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9460","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.9512","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9416","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.8585","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -18234,7 +18234,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.84645","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.84120","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -18242,23 +18242,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.7023","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.6455","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["4.0966","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["93.6635","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["4.0245","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["92.9485","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["160.94","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["161.19","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1481.16","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1478.60","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -18269,7 +18269,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["21.4092","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["21.7581","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -18299,7 +18299,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.1163","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.1087","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -21276,16 +21276,19 @@ const unaries = new Set([
   "clap",
   "color",
   "llap",
+  "longdiv",
   "mathclap",
   "not",
   "operatorname",
   "phantom",
+  "phase",
   "pu",
   "rlap",
   "sout",
   "tag",
   "text",
   "textbf",
+  "textcircled",
   "textit",
   "textmd",
   "textnormal",
@@ -37270,6 +37273,7 @@ var utils = {
  * default settings.
  */
 
+
 /**
  * The main Settings object
  */
@@ -37562,7 +37566,7 @@ class Span {
   }
 }
 
-class TextNode$1 {
+let TextNode$1 = class TextNode {
   constructor(text) {
     this.text = text;
   }
@@ -37572,7 +37576,7 @@ class TextNode$1 {
   toMarkup() {
     return utils.escape(this.text);
   }
-}
+};
 
 /*
  * This node represents an image embed (<img>) element.
@@ -37625,6 +37629,12 @@ class Img {
 }
 
 //
+/**
+ * These objects store data about MathML nodes.
+ * The `toNode` and `toMarkup` functions  create namespaced DOM nodes and
+ * HTML text markup respectively.
+ */
+
 
 function newDocumentFragment(children) {
   return new DocumentFragment(children);
@@ -37794,6 +37804,7 @@ var mathMLTree = {
 /**
  * This file provides support for building horizontal stretchy elements.
  */
+
 
 // TODO: Remove when Chromium stretches \widetilde & \widehat
 const estimatedWidth = node => {
@@ -38331,6 +38342,7 @@ defineSymbol(math, bin, "\u22d3", "\\Cup", true);
 defineSymbol(math, bin, "\u2a5e", "\\doublebarwedge", true);
 defineSymbol(math, bin, "\u229f", "\\boxminus", true);
 defineSymbol(math, bin, "\u229e", "\\boxplus", true);
+defineSymbol(math, bin, "\u29C4", "\\boxslash", true);
 defineSymbol(math, bin, "\u22c7", "\\divideontimes", true);
 defineSymbol(math, bin, "\u22c9", "\\ltimes", true);
 defineSymbol(math, bin, "\u22ca", "\\rtimes", true);
@@ -39120,6 +39132,7 @@ function setLineBreaks(expression, wrapMode, isDisplayMode) {
  * parser.
  */
 
+
 /**
  * Takes a symbol and converts it into a MathML text node after performing
  * optional replacement from symbols.js.
@@ -39630,6 +39643,7 @@ defineFunction({
  * calculateSize to convert other units into CSS units.
  */
 
+
 const ptPerUnit = {
   // Convert to CSS (Postscipt) points, not TeX points
   // https://en.wikibooks.org/wiki/LaTeX/Lengths and
@@ -40064,7 +40078,7 @@ function parseCD(parser) {
   parser.gullet.beginGroup();
   parser.gullet.macros.set("\\cr", "\\\\\\relax");
   parser.gullet.beginGroup();
-  while (true) { // eslint-disable-line no-constant-condition
+  while (true) {
     // Get the parse nodes for the next row.
     parsedRows.push(parser.parseExpression(false, "\\\\"));
     parser.gullet.endGroup();
@@ -40518,6 +40532,7 @@ defineFunction({
 });
 
 // Row breaks within tabular environments, and line breaks at top level
+
 
 // \DeclareRobustCommand\\{...\@xnewline}
 defineFunction({
@@ -41152,52 +41167,62 @@ const mathmlBuilder$8 = (group, style) => {
       padding$1()
     ]);
   } else {
-    node = new mathMLTree.MathNode("mrow", [buildGroup$1(group.body, style)]);
+    node = new mathMLTree.MathNode("menclose", [buildGroup$1(group.body, style)]);
   }
   switch (group.label) {
     case "\\overline":
-      node.style.padding = "0.1em 0 0 0";
-      node.style.borderTop = "0.065em solid";
+      node.setAttribute("notation", "top"); // for Firefox & WebKit
+      node.classes.push("tml-overline");    // for Chromium
       break
     case "\\underline":
-      node.style.padding = "0 0 0.1em 0";
-      node.style.borderBottom = "0.065em solid";
+      node.setAttribute("notation", "bottom");
+      node.classes.push("tml-underline");
       break
     case "\\cancel":
-      // We can't use an inline background-gradient. It does not work client-side.
-      // So set a class and put the rule in the external CSS file.
-      node.classes.push("tml-cancel");
+      node.setAttribute("notation", "updiagonalstrike");
+      node.children.push(new mathMLTree.MathNode("mrow", [], ["tml-cancel", "upstrike"]));
       break
     case "\\bcancel":
-      node.classes.push("tml-bcancel");
+      node.setAttribute("notation", "downdiagonalstrike");
+      node.children.push(new mathMLTree.MathNode("mrow", [], ["tml-cancel", "downstrike"]));
       break
-    /*
+    case "\\sout":
+      node.setAttribute("notation", "horizontalstrike");
+      node.children.push(new mathMLTree.MathNode("mrow", [], ["tml-cancel", "sout"]));
+      break
+    case "\\xcancel":
+      node.setAttribute("notation", "updiagonalstrike downdiagonalstrike");
+      node.classes.push("tml-xcancel");
+      break
     case "\\longdiv":
       node.setAttribute("notation", "longdiv");
+      node.classes.push("longdiv-top");
+      node.children.push(new mathMLTree.MathNode("mrow", [], ["longdiv-arc"]));
       break
     case "\\phase":
       node.setAttribute("notation", "phasorangle");
-      break */
-    case "\\angl":
-      node.style.padding = "0.03889em 0.03889em 0 0.03889em";
-      node.style.borderTop = "0.049em solid";
-      node.style.borderRight = "0.049em solid";
-      node.style.marginRight = "0.03889em";
+      node.classes.push("phasor-bottom");
+      node.children.push(new mathMLTree.MathNode("mrow", [], ["phasor-angle"]));
       break
-    case "\\sout":
-      node.style.backgroundImage = 'linear-gradient(black, black)';
-      node.style.backgroundRepeat = 'no-repeat';
-      node.style.backgroundSize = '100% 1.5px';
-      node.style.backgroundPosition = '0 center';
+    case "\\textcircled":
+      node.setAttribute("notation", "circle");
+      node.classes.push("circle-pad");
+      node.children.push(new mathMLTree.MathNode("mrow", [], ["textcircle"]));
+      break
+    case "\\angl":
+      node.setAttribute("notation", "actuarial");
+      node.classes.push("actuarial");
       break
     case "\\boxed":
       // \newcommand{\boxed}[1]{\fbox{\m@th$\displaystyle#1$}} from amsmath.sty
-      node.style = { padding: "3pt 0 3pt 0", border: "1px solid" };
+      node.setAttribute("notation", "box");
+      node.classes.push("tml-box");
       node.setAttribute("scriptlevel", "0");
       node.setAttribute("displaystyle", "true");
       break
     case "\\fbox":
-      node.style = { padding: "3pt", border: "1px solid" };
+      node.setAttribute("notation", "box");
+      node.classes.push("tml-fbox");
       break
     case "\\fcolorbox":
     case "\\colorbox": {
@@ -41210,14 +41235,11 @@ const mathmlBuilder$8 = (group, style) => {
       const style = { padding: "3pt 0 3pt 0" };
 
       if (group.label === "\\fcolorbox") {
-        style.border = "0.06em solid " + String(group.borderColor);
+        style.border = "0.0667em solid " + String(group.borderColor);
       }
       node.style = style;
       break
     }
-    case "\\xcancel":
-      node.classes.push("tml-xcancel");
-      break
   }
   if (group.backgroundColor) {
     node.setAttribute("mathbackground", group.backgroundColor);
@@ -41310,8 +41332,8 @@ defineFunction({
 
 defineFunction({
   type: "enclose",
-  names: ["\\angl", "\\cancel", "\\bcancel", "\\xcancel", "\\sout", "\\overline", "\\boxed"],
-   // , "\\phase", "\\longdiv"
+  names: ["\\angl", "\\cancel", "\\bcancel", "\\xcancel", "\\sout", "\\overline",
+    "\\boxed", "\\longdiv", "\\phase"],
   props: {
     numArgs: 1
   },
@@ -41332,6 +41354,28 @@ defineFunction({
   names: ["\\underline"],
   props: {
     numArgs: 1,
+    allowedInText: true
+  },
+  handler({ parser, funcName }, args) {
+    const body = args[0];
+    return {
+      type: "enclose",
+      mode: parser.mode,
+      label: funcName,
+      body
+    };
+  },
+  mathmlBuilder: mathmlBuilder$8
+});
+
+
+defineFunction({
+  type: "enclose",
+  names: ["\\textcircled"],
+  props: {
+    numArgs: 1,
+    argTypes: ["text"],
+    allowedInArgument: true,
     allowedInText: true
   },
   handler({ parser, funcName }, args) {
@@ -41371,6 +41415,9 @@ function defineEnvironment({ type, names, props, handler, mathmlBuilder }) {
 }
 
 // In TeX, there are actually three sets of dimensions, one for each of
+// textstyle, scriptstyle, and scriptscriptstyle.  These are
+// provided in the the arrays below, in that order.
+//
 
 // Math style is not quite the same thing as script level.
 const StyleLevel = {
@@ -41396,6 +41443,7 @@ function defineMacro(name, body) {
  * Predefined macros for Temml.
  * This can be used to define some commands in terms of others.
  */
+
 const macros = _macros;
 
 //////////////////////////////////////////////////////////////////////
@@ -44114,7 +44162,6 @@ function parseArray(
   // Test for \hline at the top of the array.
   hLinesBeforeRow.push(getHLines(parser));
 
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     // Parse each cell in its own group (namespace)
     let cell = parser.parseExpression(false, singleRow ? "\\end" : "\\\\");
@@ -45816,6 +45863,7 @@ defineFunction({
 
 // Horizontal spacing commands
 
+
 // TODO: \hskip and \mskip should support plus and minus in lengths
 
 defineFunction({
@@ -46419,6 +46467,13 @@ const mathmlBuilder$2 = (group, style) => {
     node = new MathNode("mo", [makeText(group.name, group.mode)]);
     if (noSuccessor.includes(group.name)) {
       node.setAttribute("largeop", "false");
+    } else if (group.limits) {
+      // This is a workaround for a MathML/Chromium bug.
+      // This is being applied to singleCharBigOps, which are not really stretchy.
+      // But by setting the stretchy attribute, Chromium will vertically center
+      // big ops around the math axis. This is needed since STIX TWO does not do so.
+      // TODO: Remove this hack when MathML & Chromium fix their problem.
+      node.setAttribute("stretchy", "true");
     } else {
       node.setAttribute("movablelimits", "false");
     }
@@ -48049,9 +48104,12 @@ const styleWithFont = (group, style) => {
     return style.withTextFontFamily(textFontFamilies[font]);
   } else if (textFontWeights[font]) {
     return style.withTextFontWeight(textFontWeights[font]);
-  } else {
-    return style.withTextFontShape(textFontShapes[font]);
+  } else if (font === "\\emph") {
+    return style.fontShape === "textit"
+      ? style.withTextFontShape("textup")
+      : style.withTextFontShape("textit")
   }
+  return style.withTextFontShape(textFontShapes[font])
 };
 
 defineFunction({
@@ -48069,7 +48127,8 @@ defineFunction({
     "\\textmd",
     // Font Shapes
     "\\textit",
-    "\\textup"
+    "\\textup",
+    "\\emph"
   ],
   props: {
     numArgs: 1,
@@ -48209,6 +48268,7 @@ class Token {
  * kinds.
  */
 
+
 /* The following tokenRegex
  * - matches typical whitespace (but not NBSP etc.) using its first two groups
  * - does not match any control character \x00-\x1f except whitespace
@@ -48316,6 +48376,7 @@ class Lexer {
  * `set` takes time proportional to the depth of group nesting.
  */
 
+
 class Namespace {
   /**
    * Both arguments are optional.  The first argument is an object of
@@ -48418,6 +48479,7 @@ class Namespace {
  * This file contains the “gullet” where macros are expanded
  * until only non-macro tokens remain.
  */
+
 
 // List of commands that act like macros but aren't defined as a macro,
 // function, or symbol.  Used in `isDefined`.
@@ -50490,7 +50552,7 @@ class Style {
  * https://mit-license.org/
  */
 
-const version = "0.10.28";
+const version = "0.10.29";
 
 function postProcess(block) {
   const labelMap = {};
@@ -50539,6 +50601,14 @@ function postProcess(block) {
 }
 
 /* eslint no-console:0 */
+/**
+ * This is the main entry point for Temml. Here, we expose functions for
+ * rendering expressions either to DOM nodes or to markup strings.
+ *
+ * We also expose the ParseError class to check if errors thrown from Temml are
+ * errors in the expression, or errors in javascript handling.
+ */
+
 
 /**
  * @type {import('./temml').render}
