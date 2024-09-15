@@ -1180,7 +1180,7 @@ String Interpolation
     ```
     w_dead = 25 lbf/ft
     w = ``dead	live	snow
-    ${w_dead}	30	40`` 'lbf/ft' = %
+    ${w_dead}	30	40`` 'lbf/ft' = %% lbf/ft
     ```
 
     Note that you must do a calculation. It’s not reading a literal value.

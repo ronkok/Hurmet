@@ -1343,8 +1343,13 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
               output.unit.expos = o1.unit.expos.map((e, j) => e + unit.expos[j])
               output.value = Matrix.convertToBaseUnits(o1, unit.gauge, unit.factor)
             } else if (o1.dtype & dt.MAP) {
-              output.unit = unitFromUnitName(o1.unit)
+              output.unit = unit
               output.value = o1.value
+              output.value.data = map.convertToBaseUnits(
+                o1.value.data,
+                unit.gauge,
+                unit.factor
+              )
             } else {
               output.unit.expos = o1.unit.expos.map((e, j) => e + unit.expos[j])
               output.value = Rnl.multiply(Rnl.add(o1.value, unit.gauge), unit.factor)
