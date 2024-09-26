@@ -1684,7 +1684,10 @@ export function buildMenuItems(schema) {
     ['dataFrame.colName.rowName'],
     ['dataFrame.colName.end'],
     ['dataframe.colName[rowNum]'],
-    ['dataframe[["rowName1"; "rowName2"]]["col1", "col2"]']])
+    ['dataframe[["rowName1"; "rowName2"]]["col1", "col2"]'],
+    ['spreadsheet.A1'],
+    ['spreadsheet.A'],
+    ['spreadsheet.colName']])
   r.display = hint(" ?… ", "Display Selectors", "Display Selectors", "math-button",
     [["?", "??", "All"],
     ["%", "%%", "Omit blue echo"],
