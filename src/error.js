@@ -72,6 +72,7 @@ const errorMessages = Object.freeze({
     PRIVATE:   "Error. Function @ is not private.",
     INT_ARG:   "Error. The @ function can take only integers as arguments.",
     BAD_KEY:   "Error. Data structure does not contain key \"@\".",
+    BAD_SHT_KEY: "Error. Spreadsheet does not contain key \"@\".",
     NUM_KEY:   "Error. A key must be a string, not a number.",
     IMMUT_UDF: `Error. Variable @ already contains a user-defined function.
                 Hurmet cannot assign a different value to @.`,

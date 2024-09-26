@@ -27,17 +27,13 @@ export function propertyFromDotAccessor(parent, index, unitAware) {
       key = key + Object.keys(parent.rowMap).length
       return fromAssignment(parent.value[key], unitAware)
     }
-    const parts = key.match(cellParts)
-    let colIndex = parts[1];
-    if (!alphaRegEx.test(colIndex)) { colIndex = parent.columnMap[colIndex] }
-    if (parts[2]) {
-      return fromAssignment(parent.value[colIndex + parts[2]], unitAware)
-    } else {
+    if (key in parent.columnMap || alphaRegEx.test(key)) {
       // Return data from one column, in a column vector
+      const colIndex = alphaRegEx.test(key) ? key : parent.columnMap[key];
       const v = [];
       let unit = null
       let dtype = null
-      if (parent.value[colIndex + 1].dtype & dt.RATIONAL) {
+      if (parent.value[colIndex + "1"].dtype & dt.RATIONAL) {
         for (let i = 1; i <= Object.keys(parent.rowMap).length; i++) {
           if (unitAware) {
             v.push(parent.value[colIndex + i].value.inBaseUnits)
@@ -53,9 +49,17 @@ export function propertyFromDotAccessor(parent, index, unitAware) {
         for (let i = 1; i < Object.keys(parent.rowMap).length; i++) {
           v.push(parent.value[colIndex + i].value)
         }
-        dtype = parent.value(colIndex + 1).dtype + dt.COLUMNVECTOR
+        dtype = parent.value[colIndex + "1"].dtype + dt.COLUMNVECTOR
       }
       return { value: v, unit, dtype }
+    } else {
+      const parts = key.match(cellParts)
+      const colIndex = parts[1];
+      if (parts[2]) {
+        return fromAssignment(parent.value[colIndex + parts[2]], unitAware)
+      } else {
+        return errorOprnd("BAD_SHT_KEY", key)
+      }
     }
 
   } else if ((parent.dtype === dt.STRING || (parent.dtype & dt.ARRAY)) &&
