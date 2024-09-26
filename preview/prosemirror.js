@@ -17268,6 +17268,7 @@ const errorMessages = Object.freeze({
     PRIVATE:   "Error. Function @ is not private.",
     INT_ARG:   "Error. The @ function can take only integers as arguments.",
     BAD_KEY:   "Error. Data structure does not contain key \"@\".",
+    BAD_SHT_KEY: "Error. Spreadsheet does not contain key \"@\".",
     NUM_KEY:   "Error. A key must be a string, not a number.",
     IMMUT_UDF: `Error. Variable @ already contains a user-defined function.
                 Hurmet cannot assign a different value to @.`,
@@ -18198,11 +18199,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6542","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.6274","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["6.2147","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["6.1976","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -18211,10 +18212,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.5061","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.5065","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9387","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.8634","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9448","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.8438","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -18234,7 +18235,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.84475","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.83518","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -18242,23 +18243,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.6411","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.6576","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["4.1105","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["92.9880","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["4.2010","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["92.8955","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["156.17","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["159.58","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1474.21","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1486.62","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -18269,7 +18270,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["21.5637","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["21.5915","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -18299,7 +18300,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.1081","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.1119","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -26010,17 +26011,13 @@ function propertyFromDotAccessor(parent, index, unitAware) {
       key = key + Object.keys(parent.rowMap).length;
       return fromAssignment(parent.value[key], unitAware)
     }
-    const parts = key.match(cellParts);
-    let colIndex = parts[1];
-    if (!alphaRegEx.test(colIndex)) { colIndex = parent.columnMap[colIndex]; }
-    if (parts[2]) {
-      return fromAssignment(parent.value[colIndex + parts[2]], unitAware)
-    } else {
+    if (key in parent.columnMap || alphaRegEx.test(key)) {
       // Return data from one column, in a column vector
+      const colIndex = alphaRegEx.test(key) ? key : parent.columnMap[key];
       const v = [];
       let unit = null;
       let dtype = null;
-      if (parent.value[colIndex + 1].dtype & dt.RATIONAL) {
+      if (parent.value[colIndex + "1"].dtype & dt.RATIONAL) {
         for (let i = 1; i <= Object.keys(parent.rowMap).length; i++) {
           if (unitAware) {
             v.push(parent.value[colIndex + i].value.inBaseUnits);
@@ -26036,9 +26033,17 @@ function propertyFromDotAccessor(parent, index, unitAware) {
         for (let i = 1; i < Object.keys(parent.rowMap).length; i++) {
           v.push(parent.value[colIndex + i].value);
         }
-        dtype = parent.value(colIndex + 1).dtype + dt.COLUMNVECTOR;
+        dtype = parent.value[colIndex + "1"].dtype + dt.COLUMNVECTOR;
       }
       return { value: v, unit, dtype }
+    } else {
+      const parts = key.match(cellParts);
+      const colIndex = parts[1];
+      if (parts[2]) {
+        return fromAssignment(parent.value[colIndex + parts[2]], unitAware)
+      } else {
+        return errorOprnd("BAD_SHT_KEY", key)
+      }
     }
 
   } else if ((parent.dtype === dt.STRING || (parent.dtype & dt.ARRAY)) &&
@@ -55543,7 +55548,10 @@ function buildMenuItems(schema) {
     ['dataFrame.colName.rowName'],
     ['dataFrame.colName.end'],
     ['dataframe.colName[rowNum]'],
-    ['dataframe[["rowName1"; "rowName2"]]["col1", "col2"]']]);
+    ['dataframe[["rowName1"; "rowName2"]]["col1", "col2"]'],
+    ['spreadsheet.A1'],
+    ['spreadsheet.A'],
+    ['spreadsheet.colName']]);
   r.display = hint(" ?… ", "Display Selectors", "Display Selectors", "math-button",
     [["?", "??", "All"],
     ["%", "%%", "Omit blue echo"],
