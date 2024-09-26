@@ -636,6 +636,13 @@ also make one those letters bold by typing it and then typing **Ctrl+B**.
 |                                      | DF.w[1]\              | 4\                |
 |                                      | DF[["A"; "C"], area]  | [10; 59]          |
 +--------------------------------------+-----------------------+-------------------+
+| : sheet: Spreadsheet                 | sheet.B2\             | 400 \             |
+| | Item | Amt | Dbl   |               | sheet.B or\           | ¢`[500; 400]`     |
+| |:-----|----:|-------|               | sheet.Amt             |                   |
+| | 1st  | 500 | =2*B1 |               |                       |                   |
+| | 2nd  | 400 | "     |               |                       |                   |
+| {#sheet ."spreadsheet"}              |                       |                   |
++--------------------------------------+-----------------------+-------------------+
 {.grid colWidths="235 210 180"}
 
 </div>

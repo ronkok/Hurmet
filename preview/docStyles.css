@@ -243,6 +243,8 @@ table.grid p { text-align: left; }
 table.four-rules th { border-top: 2px solid #111111; border-bottom: 1px solid #111111; }
 table.four-rules tr:last-child td { border-top: 1px solid #111111; border-bottom: 2px solid #111111; }
 
+table.spreadsheet { margin-left: 0; }
+
 table.markup {
     margin-left: 0;
     white-space: nowrap;
