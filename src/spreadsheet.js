@@ -42,7 +42,6 @@ export const compileCell = (attrs, sheetAttrs, unit, previousAttrs,
                             decimalFormat = "1,000,000.") => {
   const newAttrs = { entry: attrs.entry, name: attrs.name }
   const entry = attrs.entry
-  const numRows = Object.keys(sheetAttrs.rowMap).length
   if (entry.length === 0) {
     newAttrs.value = null
     newAttrs.dtype = dt.NULL
@@ -87,9 +86,9 @@ export const compileCell = (attrs, sheetAttrs, unit, previousAttrs,
       const matches = arrayOfRegExMatches(cellRefRegEx, rpn)
       for (let i = matches.length - 1; i >= 0; i--) {
         const match = matches[i];
-        const rowNum = Math.min(numRows, Number(match.value.slice(2, -1)) + 1)
+        const rowNum = Math.min(sheetAttrs.numRows - 1, Number(match.value.slice(2, -1)) + 1)
         rpn = rpn.slice(0, match.index + 2) + String(rowNum)
-            + rpn.slice(match.index + match.length - 1)
+            + rpn.slice(match.index + match.length - String(rowNum).length)
       }
       newAttrs.rpn = rpn
       newAttrs.resulttemplate = previousAttrs.resulttemplate
@@ -139,6 +138,7 @@ export const compileSheet = (table, decimalFormat = "1,000,000") => {
   // The cell entries and the sheet name are already known.
   // Proceed to compile the rest of the table and cell attributes.
   // Stop short of calculations.
+  table.attrs.numRows = table.content.length
   table.attrs.columnMap = {}
   table.attrs.rowMap = {}
   table.attrs.unitMap = [];
