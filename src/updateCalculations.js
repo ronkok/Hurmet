@@ -312,6 +312,7 @@ const proceedAfterFetch = (
         hurmetVars[sheetName] = sheet
         const numRows = table.content.length
         const numCols = table.content[0].content.length
+        table.attrs.rowMap = {}
         // Proceed column-wise thru the table.
         for (let j = 0; j < numCols; j++) {
           for (let i = 1; i < numRows; i++) {
@@ -319,6 +320,9 @@ const proceedAfterFetch = (
             if (cell.attrs.rpn) {
               cell.attrs = evaluate(cell.attrs, hurmetVars, decimalFormat)
               cell.attrs.display = cell.attrs.alt
+              if (j === 0) { table.attrs.rowMap[cell.attrs.alt] = i }
+            } else if (j === 0 && typeof cell.attrs.value === "string") {
+              table.attrs.rowMap[cell.attrs.value] = i
             }
             hurmetVars[sheetName].value[cell.attrs.name] = cell.attrs
           }
@@ -394,6 +398,7 @@ const proceedAfterFetch = (
         hurmetVars[sheetName].value = {}
         const numRows = table.content.length
         const numCols = table.content[0].content.length
+        table.attrs.rowMap = {}
         // Proceed column-wise thru the table.
         for (let j = 0; j < numCols; j++) {
           for (let i = 1; i < numRows; i++) {
@@ -401,6 +406,9 @@ const proceedAfterFetch = (
             if (cell.attrs.rpn) {
               cell.attrs = evaluate(cell.attrs, hurmetVars, decimalFormat)
               cell.attrs.display = cell.attrs.alt
+              if (j === 0) { table.attrs.rowMap[cell.attrs.alt] = i }
+            } else if (j === 0 && typeof cell.attrs.value === "string") {
+              table.attrs.rowMap[cell.attrs.value] = i
             }
             hurmetVars[sheetName].value[cell.attrs.name] = cell.attrs
           }
