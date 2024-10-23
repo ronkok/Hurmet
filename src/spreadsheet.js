@@ -148,6 +148,7 @@ export const compileSheet = (table, decimalFormat = "1,000,000") => {
   if (table.content[0].type === "colGroup") { table.content.shift() }
 
   const numRows = table.content.length
+  table.attrs.numRows = numRows
   const numCols = table.content[0].content.length
   // Proceed column-wise thru the table.
   for (let j = 0; j < numCols; j++) {

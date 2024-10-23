@@ -363,6 +363,7 @@ export const nodes = {
     attrs: {
       class: { default: 'grid', validate: "string" },
       name: { default: "", validate: "string" },
+      numRows: { default: 0, validage: "number" }, // Used in spreadsheetSum
       columnMap: { default: {} },
       unitMap: { default: [] },
       units: { default: {} },

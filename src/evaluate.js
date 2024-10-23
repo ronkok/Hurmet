@@ -1814,7 +1814,7 @@ const spreadsheetSum = (sheet, index, unitAware) => {
   let sum = Rnl.zero
   if (/^[A-Z]$/.test(index)) {
     // Sum a column
-    const L = Object.keys(sheet.rowMap).length
+    const L = sheet.numRows - 1 // Do not include the top row.
     for (let i = 1; i <= L - 1; i++) {
       const cellOprnd = fromAssignment(sheet.value[index + String(i)], unitAware)
       if (cellOprnd.dtype === dt.ERROR) { return cellOprnd }
