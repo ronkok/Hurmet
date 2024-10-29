@@ -241,8 +241,10 @@ const errorMessages = Object.freeze({
     ERR_FUNC:  "@",
     BAD_FUN_NM:"Error. Unrecognized function name \"@\".",
     DIV:       "Error. Divide by zero.",
-    NAN:       "Error. Value of $@$ is not a numeric.",
+    NAN:       "Error. Value of $@$ is not numeric.",
     NANARG:    "Error. Argument to function $@$ must be numeric.",
+    // eslint-disable-next-line max-len
+    NANEL:     "Error. A numeric vector must have numeric elements. The value of $@$ is not numeric.",
     NULL:      "Error. Missing value for $@$.", // $@$ will be italic in TeX
     BAD_EQ:    'Error. Use "==" instead of "=" to check for equality.',
     V_NAME:    "Error. Variable $@$ not found.",
@@ -6607,11 +6609,15 @@ function propertyFromDotAccessor(parent, index, unitAware) {
       let unit = null;
       let dtype = null;
       if (parent.value[colIndex + "1"].dtype & dt.RATIONAL) {
-        for (let i = 1; i <= Object.keys(parent.rowMap).length; i++) {
+        for (let i = 1; i < parent.numRows; i++) {
+          const cell = parent.value[colIndex + i];
+          if (!(cell.dtype & dt.RATIONAL)) {
+            return errorOprnd("NANEL", cell.name)
+          }
           if (unitAware) {
-            v.push(parent.value[colIndex + i].value.inBaseUnits);
+            v.push(cell.value.inBaseUnits);
           } else {
-            v.push(parent.value[colIndex + i].value.plain);
+            v.push(cell.value.plain);
           }
         }
         unit = unitAware
@@ -6619,7 +6625,7 @@ function propertyFromDotAccessor(parent, index, unitAware) {
           : allZeros;
         dtype = dt.RATIONAL + dt.COLUMNVECTOR;
       } else {
-        for (let i = 1; i < Object.keys(parent.rowMap).length; i++) {
+        for (let i = 1; i < parent.numRows; i++) {
           v.push(parent.value[colIndex + i].value);
         }
         dtype = parent.value[colIndex + "1"].dtype + dt.COLUMNVECTOR;

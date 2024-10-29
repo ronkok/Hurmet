@@ -34,11 +34,15 @@ export function propertyFromDotAccessor(parent, index, unitAware) {
       let unit = null
       let dtype = null
       if (parent.value[colIndex + "1"].dtype & dt.RATIONAL) {
-        for (let i = 1; i <= Object.keys(parent.rowMap).length; i++) {
+        for (let i = 1; i < parent.numRows; i++) {
+          const cell = parent.value[colIndex + i];
+          if (!(cell.dtype & dt.RATIONAL)) {
+            return errorOprnd("NANEL", cell.name)
+          }
           if (unitAware) {
-            v.push(parent.value[colIndex + i].value.inBaseUnits)
+            v.push(cell.value.inBaseUnits)
           } else {
-            v.push(parent.value[colIndex + i].value.plain)
+            v.push(cell.value.plain)
           }
         }
         unit = unitAware
@@ -46,7 +50,7 @@ export function propertyFromDotAccessor(parent, index, unitAware) {
           : allZeros
         dtype = dt.RATIONAL + dt.COLUMNVECTOR
       } else {
-        for (let i = 1; i < Object.keys(parent.rowMap).length; i++) {
+        for (let i = 1; i < parent.numRows; i++) {
           v.push(parent.value[colIndex + i].value)
         }
         dtype = parent.value[colIndex + "1"].dtype + dt.COLUMNVECTOR

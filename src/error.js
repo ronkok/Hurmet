@@ -7,8 +7,10 @@ const errorMessages = Object.freeze({
     ERR_FUNC:  "@",
     BAD_FUN_NM:"Error. Unrecognized function name \"@\".",
     DIV:       "Error. Divide by zero.",
-    NAN:       "Error. Value of $@$ is not a numeric.",
+    NAN:       "Error. Value of $@$ is not numeric.",
     NANARG:    "Error. Argument to function $@$ must be numeric.",
+    // eslint-disable-next-line max-len
+    NANEL:     "Error. A numeric vector must have numeric elements. The value of $@$ is not numeric.",
     NULL:      "Error. Missing value for $@$.", // $@$ will be italic in TeX
     BAD_EQ:    'Error. Use "==" instead of "=" to check for equality.',
     V_NAME:    "Error. Variable $@$ not found.",
