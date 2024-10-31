@@ -78,7 +78,7 @@ document range by selecting text, then clicking one of the menu bar buttons:
 | ![align-right][] Tbl Style           | Align center, Align right,         |
 | ![spreadsheet][]                     | Set table style, Toggle spreadsheet|
 +--------------------------------------+------------------------------------+
-| ![information][]  **Q**              | Information, Quick Reference       |
+| ![information][]                     | Information                        |
 +--------------------------------------+------------------------------------+
 
 [recalc]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 9a7.982 7.982 0 0 0 2.709 6l1.323-1.5a6 6 0 1 1 8.212-8.743L10.001 7h6V1l-2.343 2.343A8 8 0 0 0 .001 9z'/%3E%3C/svg%3E
