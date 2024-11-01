@@ -91,7 +91,7 @@ const binaryShapesOf = (o1, o2) => {
 }
 
 const matrixMults = { "×": "cross", "·": "dot", "∘": "circ", ".*": "circ",
-  "*": "multiply", "∗": "multiply", "⌧": "multiply" }
+  "*": "multiply", "∗": "multiply", "⌧": "multiply", "modulo": "modulo" }
 
 const nextToken = (tokens, i) => {
   if (tokens.length < i + 2) { return undefined }
@@ -404,6 +404,22 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             ? dt.COMPLEX
             : Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn)
           stack.push(Object.freeze(power))
+          break
+        }
+
+        case "modulo": {
+          if (unitAware) { return errorOprnd( "UNIT_UN", "modulo" ) }
+          const o2 = stack.pop()
+          const o1 = stack.pop()
+          if (!(o1.dtype & dt.RATIONAL) || !(o2.dtype & dt.RATIONAL)) {
+            return errorOprnd("NAN_OP")
+          }
+          const [shape1, shape2, _] = binaryShapesOf(o1, o2)
+          const result = Object.create(null)
+          result.unit = allZeros
+          result.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, "modulo")
+          result.value = Operators.binary[shape1][shape2]["modulo"](o1.value, o2.value)
+          stack.push(Object.freeze(result))
           break
         }
 

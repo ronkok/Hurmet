@@ -17221,6 +17221,7 @@ const errorMessages = Object.freeze({
     UNIT_ARG:  "Error. Unit mis-match between arguments to function @.",
     UNIT_COL:  "Error. Data frame column @ has no units. Do not make a unit-aware call to it.",
     UNIT_AWARE: "Error. Calculation must be unit-aware in order to apply unit @",
+    UNIT_UN:    "Error. Hurmet does not do unit aware calculations involving @",
     DATE:      "Error. Date required.",
     LOGIC:     "Error. Logic operation “@” on a non-boolean value.",
     FACT:      "Error. Factorial may be applied only to a unit-less non-negative integer.",
@@ -20811,7 +20812,7 @@ const tt = Object.freeze({
   UNIT: 19, //    unit-of-measure, e.g., 'meters' or °
   BIN: 20, //     binary infix operators that render but don't calculate, e.g., ± \cdots
   ADD: 21, //     binary infix addition or subtraction operator: + -
-  MULT: 22, //    binary infix multiplication or division operator: × * · // ÷
+  MULT: 22, //    binary infix multiplication or division operator: × * · // ÷ modulo
   REL: 23, //     relational operator:  ≟ > < ≤ ≥ etc.
   LOGIC: 24, //   if and or xor else otherwise
   SEP: 25, //     argument separators, cell separators and row separators: , ;
@@ -20908,6 +20909,7 @@ const words = Object.freeze({
   sqrt: ["sqrt", "\\sqrt", "√", tt.UNARY, ""],
   otherwise: ["otherwise", "\\mathrel{\\mathrm{otherwise}}", "otherwise", tt.LOGIC, ""],
   root: ["root", "\\sqrt", "root", tt.BINARY, ""],
+  modulo: ["modulo", "\\mathbin{modulo}", "modulo", tt.MULT],
   sin: ["sin", "\\sin", "sin", tt.FUNCTION, ""],
   sind: ["sind", "\\operatorname{\\sin_d}", "sind", tt.FUNCTION, ""],
   tan: ["tan", "\\tan", "tan", tt.FUNCTION, ""],
@@ -21121,6 +21123,7 @@ const texFunctions = Object.freeze({
   "\\ast": ["\\ast", "∗", "∗", tt.MULT, ""],
   "\\div": ["\\div", "÷", "÷", tt.MULT, ""],
   "\\times": ["\\times", "×", "×", tt.MULT, ""],
+  "\\bmod": ["\\bmod", "\\bmod", "modulo", tt.MULT],
   "\\circ": ["\\circ", "∘", "∘", tt.MULT, ""], // U+2218
   "\\nabla": ["\\nabla", "∇", "∇", tt.ORD, ""],
   "\\otimes": ["\\otimes", "⊗", "⊗", tt.MULT, ""],
@@ -21939,7 +21942,7 @@ const nextCharIsFactor = (str, tokenType, isFollowedBySpace) => {
       return true
     } else {
       if (factors.test(fc) || (isFollowedBySpace && factorsAfterSpace.test(fc))) {
-        fcMeetsTest = !/^(if|and|atop|or|else|elseif|otherwise|not|for|in|while|end)\b/.test(st);
+        fcMeetsTest = !/^(if|and|atop|or|else|elseif|modulo|otherwise|not|for|in|while|end)\b/.test(st);
       }
     }
   }
@@ -22276,7 +22279,7 @@ const parse$1 = (
       case tt.SPACE: //      spaces and newlines
       case tt.BIN: //        infix math operators that render but don't calc, e.g. \bowtie
       case tt.ADD: //        infix add/subtract operators, + -
-      case tt.MULT: //       infix mult/divide operators, × * · // ÷
+      case tt.MULT: //       infix mult/divide operators, × * · // ÷ modulo \bmod
       case tt.REL: //        relational operators, e.g  < == →
       case tt.BIG_OPERATOR: { // int, sum, lim, etc
         if (token.output.length > 0 && "- +".indexOf(token.output) > -1) {
@@ -27751,6 +27754,7 @@ const binary = {
           ? Cpx.power([x, Rnl.zero], y)
           : Rnl.power(x, y)
       },
+      modulo(x, y)   { return Rnl.mod(x, y) },
       hypot(x, y)    { return Rnl.hypot(x, y) },
       rem(x, y)      { return Rnl.rem(x, y) },
       and(x, y)      { return x && y },
@@ -27778,6 +27782,7 @@ const binary = {
       multiply(x, v) { return v.map(e => Rnl.multiply(x, e)) },
       divide(x, v)   { return v.map(e => Rnl.divide(x, e)) },
       power(x, v)    { return v.map(e => Rnl.power(x, e)) },
+      modulo(x, v)   { return v.map(e => Rnl.mod(x, e)) },
       rem(x, v)      { return v.map(e => Rnl.rem(x, e)) },
       and(x, v)      { return v.map(e => x && e) },
       or(x, v)       { return v.map(e => x || e) },
@@ -27792,6 +27797,7 @@ const binary = {
       multiply(x, m) { return m.map(row => row.map(e => Rnl.multiply(x, e))) },
       divide(x, m)   { return m.map(row => row.map(e => Rnl.divide(x, e))) },
       power(x, m)    { return m.map(row => row.map(e => Rnl.power(x, e))) },
+      modulo(x, m)   { return m.map(row => row.map(e => Rnl.mod(x, e))) },
       rem(x, m)      { return m.map(row => row.map(e => Rnl.rem(x, e))) },
       and(x, m)      { return m.map(row => row.map(e => x && e)) },
       or(x, m)       { return m.map(row => row.map(e => x || e)) },
@@ -27850,6 +27856,13 @@ const binary = {
       power(scalar, map) {
         map.data =  map.data.map(col => Rnl.isRational(col[0])
           ? col.map(e => Rnl.power(scalar, e))
+          : col
+        );
+        return map
+      },
+      modulo(scalar, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.mod(scalar, e))
           : col
         );
         return map
@@ -27920,6 +27933,7 @@ const binary = {
       multiply(v, x) { return v.map(e => Rnl.multiply(e, x)) },
       divide(v, x)   { return v.map(e => Rnl.divide(e, x)) },
       power(v, x)    { return v.map(e => Rnl.power(e, x)) },
+      modulo(v, x)   { return v.map(e => Rnl.mod(e, x)) },
       rem(v, x)      { return v.map(e => Rnl.rem(e, x)) },
       and(v, x)      { return v.map(e => e && x) },
       or(v, x)       { return v.map(e => e || x) },
@@ -27971,7 +27985,7 @@ const binary = {
       },
       modulo(x, y) {
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((e, i) => Rnl.modulo(e, y[i]))
+        return x.map((e, i) => Rnl.mod(e, y[i]))
       },
       and(x, y) {
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
@@ -28024,7 +28038,7 @@ const binary = {
         return errorOprnd("MIS_ELNUM")
       },
       modulo(x, y) {
-        if (x.length === 1 && y.length === 1) { return [Rnl.modulo(x[0], y[0])] }
+        if (x.length === 1 && y.length === 1) { return [Rnl.mod(x[0], y[0])] }
         return errorOprnd("MIS_ELNUM")
       },
       and(x, y) {
@@ -28069,6 +28083,10 @@ const binary = {
       power(v, m) {
         if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
         return m.map(row => row.map((e, i) => Rnl.power(v[i], e)))
+      },
+      modulo(v, m) {
+        if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
+        return m.map(row => row.map((e, i) => Rnl.mod(v[i], e)))
       },
       concat(v, m) {
         if (v.length !== m[0].length) { return errorOprnd("BAD_CONCAT") }
@@ -28121,7 +28139,7 @@ const binary = {
         return errorOprnd("MIS_ELNUM")
       },
       modulo(x, y) {
-        if (x.length === 1 && y.length === 1) { return [Rnl.modulo(x[0], y[0])] }
+        if (x.length === 1 && y.length === 1) { return [Rnl.mod(x[0], y[0])] }
         return errorOprnd("MIS_ELNUM")
       },
       and(x, y) {
@@ -28179,6 +28197,10 @@ const binary = {
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
         return x.map((e, i) => Rnl.power(e, y[i]))
       },
+      modulo(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.mod(e, y[i]))
+      },
       rem(x, y) {
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
         return x.map((e, i) => Rnl.rem(e, y[i]))
@@ -28227,6 +28249,10 @@ const binary = {
         if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
         return m.map((row, i) => row.map(e => Rnl.power(v[i], e)))
       },
+      mod(v, m) {
+        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
+        return m.map((row, i) => row.map(e => Rnl.mod(v[i], e)))
+      },
       concat(v, m) {
         if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
         return m.map((row, i) => [v[i], ...row])
@@ -28266,6 +28292,13 @@ const binary = {
       power(vector, map) {
         map.data =  map.data.map(col => Rnl.isRational(col[0])
           ? col.map((e, i) => Rnl.power(vector[i], e))
+          : col
+        );
+        return map
+      },
+      modulo(vector, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.mod(vector[i], e))
           : col
         );
         return map
@@ -28315,7 +28348,8 @@ const binary = {
         }
         return m.map(row => row.map(e => Rnl.power(e, x)))
       },
-      rem(m, x)   { return m.map(row => row.map(e => Rnl.rem(e, x))) }
+      modulo(m, x) { return m.map(row => row.map(e => Rnl.mod(e, x))) },
+      rem(m, x)    { return m.map(row => row.map(e => Rnl.rem(e, x))) }
     },
     rowVector: {
       add(m, v)      { return m.map(row => row.map((e, i) => Rnl.add(e, v[i]) )) },
@@ -28324,7 +28358,8 @@ const binary = {
       circ(m, v) { return m.map(row => row.map((e, i) => Rnl.multiply(e, v[i]) )) },
       divide(m, v)   { return m.map(row => row.map((e, i) => Rnl.divide(e, v[i]) )) },
       power(m, v)    { return m.map(row => row.map((e, i) => Rnl.power(e, v[i]) )) },
-      modulo(m, v)   { return m.map(row => row.map((e, i) => Rnl.modulo(e, v[i]) )) },
+      modulo(m, v)   { return m.map(row => row.map((e, i) => Rnl.mod(e, v[i]) )) },
+      rem(m, v)      { return m.map(row => row.map((e, i) => Rnl.rem(e, v[i]) )) },
       unshift(m, v) {
         if (m[0].length !== v.length) { return errorOprnd("MIS_ELNUM") }
         return [...m, v]
@@ -28341,7 +28376,8 @@ const binary = {
       circ(m, v) { return m.map((row, i) => row.map(e => Rnl.multiply(e, v[i]) )) },
       divide(m, v)   { return m.map((row, i) => row.map(e => Rnl.divide(e, v[i]) )) },
       power(m, v)    { return m.map((row, i) => row.map(e => Rnl.power(e, v[i]) )) },
-      rem(m, v)   { return m.map((row, i) => row.map(e => Rnl.rem(e, v[i]) )) },
+      modulo(m, v)   { return m.map((row, i) => row.map(e => Rnl.mod(e, v[i]) )) },
+      rem(m, v)      { return m.map((row, i) => row.map(e => Rnl.rem(e, v[i]) )) },
       concat(m, v) {
         if (m.length !== v.length) { return errorOprnd("MIS_ELNUM") }
         return m.map((row, i) => [...row, v[i]])
@@ -28385,6 +28421,11 @@ const binary = {
         if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
         if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
         return x.map((m, i) => m.map((n, j) => Rnl.power(n, y[i][j])))
+      },
+      modulo(x, y) {
+        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
+        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((m, i) => m.map((n, j) => Rnl.mod(n, y[i][j])))
       },
       rem(x, y) {
         if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
@@ -28477,6 +28518,13 @@ const binary = {
         );
         return map
       },
+      modulo(map, scalar) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.mod(e, scalar))
+          : col
+        );
+        return map
+      },
       rem(map, scalar) {
         map.data =  map.data.map(col => Rnl.isRational(col[0])
           ? col.map(e => Rnl.rem(e, scalar))
@@ -28538,6 +28586,13 @@ const binary = {
       power(map, vector) {
         map.data =  map.data.map(col => Rnl.isRational(col[0])
           ? col.map((e, i) => Rnl.power(e, vector[i]))
+          : col
+        );
+        return map
+      },
+      modulo(map, vector) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.mod(e, vector[i]))
           : col
         );
         return map
@@ -32410,7 +32465,7 @@ const binaryShapesOf = (o1, o2) => {
 };
 
 const matrixMults = { "×": "cross", "·": "dot", "∘": "circ", ".*": "circ",
-  "*": "multiply", "∗": "multiply", "⌧": "multiply" };
+  "*": "multiply", "∗": "multiply", "⌧": "multiply", "modulo": "modulo" };
 
 const nextToken = (tokens, i) => {
   if (tokens.length < i + 2) { return undefined }
@@ -32723,6 +32778,22 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             ? dt.COMPLEX
             : Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn);
           stack.push(Object.freeze(power));
+          break
+        }
+
+        case "modulo": {
+          if (unitAware) { return errorOprnd( "UNIT_UN", "modulo" ) }
+          const o2 = stack.pop();
+          const o1 = stack.pop();
+          if (!(o1.dtype & dt.RATIONAL) || !(o2.dtype & dt.RATIONAL)) {
+            return errorOprnd("NAN_OP")
+          }
+          const [shape1, shape2, _] = binaryShapesOf(o1, o2);
+          const result = Object.create(null);
+          result.unit = allZeros;
+          result.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, "modulo");
+          result.value = Operators.binary[shape1][shape2]["modulo"](o1.value, o2.value);
+          stack.push(Object.freeze(result));
           break
         }
 

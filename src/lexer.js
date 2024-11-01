@@ -34,7 +34,7 @@ export const tt = Object.freeze({
   UNIT: 19, //    unit-of-measure, e.g., 'meters' or °
   BIN: 20, //     binary infix operators that render but don't calculate, e.g., ± \cdots
   ADD: 21, //     binary infix addition or subtraction operator: + -
-  MULT: 22, //    binary infix multiplication or division operator: × * · // ÷
+  MULT: 22, //    binary infix multiplication or division operator: × * · // ÷ modulo
   REL: 23, //     relational operator:  ≟ > < ≤ ≥ etc.
   LOGIC: 24, //   if and or xor else otherwise
   SEP: 25, //     argument separators, cell separators and row separators: , ;
@@ -131,6 +131,7 @@ const words = Object.freeze({
   sqrt: ["sqrt", "\\sqrt", "√", tt.UNARY, ""],
   otherwise: ["otherwise", "\\mathrel{\\mathrm{otherwise}}", "otherwise", tt.LOGIC, ""],
   root: ["root", "\\sqrt", "root", tt.BINARY, ""],
+  modulo: ["modulo", "\\mathbin{modulo}", "modulo", tt.MULT],
   sin: ["sin", "\\sin", "sin", tt.FUNCTION, ""],
   sind: ["sind", "\\operatorname{\\sin_d}", "sind", tt.FUNCTION, ""],
   tan: ["tan", "\\tan", "tan", tt.FUNCTION, ""],
@@ -344,6 +345,7 @@ const texFunctions = Object.freeze({
   "\\ast": ["\\ast", "∗", "∗", tt.MULT, ""],
   "\\div": ["\\div", "÷", "÷", tt.MULT, ""],
   "\\times": ["\\times", "×", "×", tt.MULT, ""],
+  "\\bmod": ["\\bmod", "\\bmod", "modulo", tt.MULT],
   "\\circ": ["\\circ", "∘", "∘", tt.MULT, ""], // U+2218
   "\\nabla": ["\\nabla", "∇", "∇", tt.ORD, ""],
   "\\otimes": ["\\otimes", "⊗", "⊗", tt.MULT, ""],

@@ -25,6 +25,7 @@ const errorMessages = Object.freeze({
     UNIT_ARG:  "Error. Unit mis-match between arguments to function @.",
     UNIT_COL:  "Error. Data frame column @ has no units. Do not make a unit-aware call to it.",
     UNIT_AWARE: "Error. Calculation must be unit-aware in order to apply unit @",
+    UNIT_UN:    "Error. Hurmet does not do unit aware calculations involving @",
     DATE:      "Error. Date required.",
     LOGIC:     "Error. Logic operation “@” on a non-boolean value.",
     FACT:      "Error. Factorial may be applied only to a unit-less non-negative integer.",

@@ -33,6 +33,7 @@ const parserTests = [
   ["f_c′=4500 'psi'", "f{_\\text{c}'} = 4{,}500 \\; {\\text{psi}}"],
   ["f_c′=4500psi", "f{_\\text{c}'} = 4{,}500 \\; {\\text{psi}}"],
   ["root 3 x", "\\sqrt[3]{x}"],
+  ["5 modulo 4", "5 \\mathbin{modulo} 4"],
   ["sqrt(a b)", "\\sqrt{a b}"],
   ["sin^2 x", "\\sin^{2}{x}"],
   ["sin^(-1) x", "\\sin^{\\text{-}1}{x}"],
@@ -351,6 +352,7 @@ end`, vars)
   const calcTests = [
     // input string, expected RPN, expected result
     [`wideFlanges.area.end = @`, `¿wideFlanges "area" . "end" .`, "5.26"],
+    [`5 modulo 4 = @`, `®5/1 ®4/1 modulo`, "1"],
     ["b = @", "¿b", "true"],
     ["str[2] = @", "¿str ®2/1 [] 1", "b"],
     ["str[2:4] = @", "¿str ®2/1 ®4/1 : [] 1", "bcd"],

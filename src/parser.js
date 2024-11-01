@@ -216,7 +216,7 @@ const nextCharIsFactor = (str, tokenType, isFollowedBySpace) => {
       return true
     } else {
       if (factors.test(fc) || (isFollowedBySpace && factorsAfterSpace.test(fc))) {
-        fcMeetsTest = !/^(if|and|atop|or|else|elseif|otherwise|not|for|in|while|end)\b/.test(st)
+        fcMeetsTest = !/^(if|and|atop|or|else|elseif|modulo|otherwise|not|for|in|while|end)\b/.test(st)
       }
     }
   }
@@ -553,7 +553,7 @@ export const parse = (
       case tt.SPACE: //      spaces and newlines
       case tt.BIN: //        infix math operators that render but don't calc, e.g. \bowtie
       case tt.ADD: //        infix add/subtract operators, + -
-      case tt.MULT: //       infix mult/divide operators, × * · // ÷
+      case tt.MULT: //       infix mult/divide operators, × * · // ÷ modulo \bmod
       case tt.REL: //        relational operators, e.g  < == →
       case tt.BIG_OPERATOR: { // int, sum, lim, etc
         if (token.output.length > 0 && "- +".indexOf(token.output) > -1) {

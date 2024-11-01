@@ -246,6 +246,7 @@ const binary = {
           ? Cpx.power([x, Rnl.zero], y)
           : Rnl.power(x, y)
       },
+      modulo(x, y)   { return Rnl.mod(x, y) },
       hypot(x, y)    { return Rnl.hypot(x, y) },
       rem(x, y)      { return Rnl.rem(x, y) },
       and(x, y)      { return x && y },
@@ -273,6 +274,7 @@ const binary = {
       multiply(x, v) { return v.map(e => Rnl.multiply(x, e)) },
       divide(x, v)   { return v.map(e => Rnl.divide(x, e)) },
       power(x, v)    { return v.map(e => Rnl.power(x, e)) },
+      modulo(x, v)   { return v.map(e => Rnl.mod(x, e)) },
       rem(x, v)      { return v.map(e => Rnl.rem(x, e)) },
       and(x, v)      { return v.map(e => x && e) },
       or(x, v)       { return v.map(e => x || e) },
@@ -287,6 +289,7 @@ const binary = {
       multiply(x, m) { return m.map(row => row.map(e => Rnl.multiply(x, e))) },
       divide(x, m)   { return m.map(row => row.map(e => Rnl.divide(x, e))) },
       power(x, m)    { return m.map(row => row.map(e => Rnl.power(x, e))) },
+      modulo(x, m)   { return m.map(row => row.map(e => Rnl.mod(x, e))) },
       rem(x, m)      { return m.map(row => row.map(e => Rnl.rem(x, e))) },
       and(x, m)      { return m.map(row => row.map(e => x && e)) },
       or(x, m)       { return m.map(row => row.map(e => x || e)) },
@@ -345,6 +348,13 @@ const binary = {
       power(scalar, map) {
         map.data =  map.data.map(col => Rnl.isRational(col[0])
           ? col.map(e => Rnl.power(scalar, e))
+          : col
+        )
+        return map
+      },
+      modulo(scalar, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.mod(scalar, e))
           : col
         )
         return map
@@ -415,6 +425,7 @@ const binary = {
       multiply(v, x) { return v.map(e => Rnl.multiply(e, x)) },
       divide(v, x)   { return v.map(e => Rnl.divide(e, x)) },
       power(v, x)    { return v.map(e => Rnl.power(e, x)) },
+      modulo(v, x)   { return v.map(e => Rnl.mod(e, x)) },
       rem(v, x)      { return v.map(e => Rnl.rem(e, x)) },
       and(v, x)      { return v.map(e => e && x) },
       or(v, x)       { return v.map(e => e || x) },
@@ -466,7 +477,7 @@ const binary = {
       },
       modulo(x, y) {
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((e, i) => Rnl.modulo(e, y[i]))
+        return x.map((e, i) => Rnl.mod(e, y[i]))
       },
       and(x, y) {
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
@@ -519,7 +530,7 @@ const binary = {
         return errorOprnd("MIS_ELNUM")
       },
       modulo(x, y) {
-        if (x.length === 1 && y.length === 1) { return [Rnl.modulo(x[0], y[0])] }
+        if (x.length === 1 && y.length === 1) { return [Rnl.mod(x[0], y[0])] }
         return errorOprnd("MIS_ELNUM")
       },
       and(x, y) {
@@ -564,6 +575,10 @@ const binary = {
       power(v, m) {
         if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
         return m.map(row => row.map((e, i) => Rnl.power(v[i], e)))
+      },
+      modulo(v, m) {
+        if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
+        return m.map(row => row.map((e, i) => Rnl.mod(v[i], e)))
       },
       concat(v, m) {
         if (v.length !== m[0].length) { return errorOprnd("BAD_CONCAT") }
@@ -616,7 +631,7 @@ const binary = {
         return errorOprnd("MIS_ELNUM")
       },
       modulo(x, y) {
-        if (x.length === 1 && y.length === 1) { return [Rnl.modulo(x[0], y[0])] }
+        if (x.length === 1 && y.length === 1) { return [Rnl.mod(x[0], y[0])] }
         return errorOprnd("MIS_ELNUM")
       },
       and(x, y) {
@@ -674,6 +689,10 @@ const binary = {
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
         return x.map((e, i) => Rnl.power(e, y[i]))
       },
+      modulo(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.mod(e, y[i]))
+      },
       rem(x, y) {
         if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
         return x.map((e, i) => Rnl.rem(e, y[i]))
@@ -722,6 +741,10 @@ const binary = {
         if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
         return m.map((row, i) => row.map(e => Rnl.power(v[i], e)))
       },
+      mod(v, m) {
+        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
+        return m.map((row, i) => row.map(e => Rnl.mod(v[i], e)))
+      },
       concat(v, m) {
         if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
         return m.map((row, i) => [v[i], ...row])
@@ -761,6 +784,13 @@ const binary = {
       power(vector, map) {
         map.data =  map.data.map(col => Rnl.isRational(col[0])
           ? col.map((e, i) => Rnl.power(vector[i], e))
+          : col
+        )
+        return map
+      },
+      modulo(vector, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.mod(vector[i], e))
           : col
         )
         return map
@@ -810,7 +840,8 @@ const binary = {
         }
         return m.map(row => row.map(e => Rnl.power(e, x)))
       },
-      rem(m, x)   { return m.map(row => row.map(e => Rnl.rem(e, x))) }
+      modulo(m, x) { return m.map(row => row.map(e => Rnl.mod(e, x))) },
+      rem(m, x)    { return m.map(row => row.map(e => Rnl.rem(e, x))) }
     },
     rowVector: {
       add(m, v)      { return m.map(row => row.map((e, i) => Rnl.add(e, v[i]) )) },
@@ -819,7 +850,8 @@ const binary = {
       circ(m, v) { return m.map(row => row.map((e, i) => Rnl.multiply(e, v[i]) )) },
       divide(m, v)   { return m.map(row => row.map((e, i) => Rnl.divide(e, v[i]) )) },
       power(m, v)    { return m.map(row => row.map((e, i) => Rnl.power(e, v[i]) )) },
-      modulo(m, v)   { return m.map(row => row.map((e, i) => Rnl.modulo(e, v[i]) )) },
+      modulo(m, v)   { return m.map(row => row.map((e, i) => Rnl.mod(e, v[i]) )) },
+      rem(m, v)      { return m.map(row => row.map((e, i) => Rnl.rem(e, v[i]) )) },
       unshift(m, v) {
         if (m[0].length !== v.length) { return errorOprnd("MIS_ELNUM") }
         return [...m, v]
@@ -836,7 +868,8 @@ const binary = {
       circ(m, v) { return m.map((row, i) => row.map(e => Rnl.multiply(e, v[i]) )) },
       divide(m, v)   { return m.map((row, i) => row.map(e => Rnl.divide(e, v[i]) )) },
       power(m, v)    { return m.map((row, i) => row.map(e => Rnl.power(e, v[i]) )) },
-      rem(m, v)   { return m.map((row, i) => row.map(e => Rnl.rem(e, v[i]) )) },
+      modulo(m, v)   { return m.map((row, i) => row.map(e => Rnl.mod(e, v[i]) )) },
+      rem(m, v)      { return m.map((row, i) => row.map(e => Rnl.rem(e, v[i]) )) },
       concat(m, v) {
         if (m.length !== v.length) { return errorOprnd("MIS_ELNUM") }
         return m.map((row, i) => [...row, v[i]])
@@ -880,6 +913,11 @@ const binary = {
         if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
         if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
         return x.map((m, i) => m.map((n, j) => Rnl.power(n, y[i][j])))
+      },
+      modulo(x, y) {
+        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
+        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((m, i) => m.map((n, j) => Rnl.mod(n, y[i][j])))
       },
       rem(x, y) {
         if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
@@ -972,6 +1010,13 @@ const binary = {
         )
         return map
       },
+      modulo(map, scalar) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.mod(e, scalar))
+          : col
+        )
+        return map
+      },
       rem(map, scalar) {
         map.data =  map.data.map(col => Rnl.isRational(col[0])
           ? col.map(e => Rnl.rem(e, scalar))
@@ -1033,6 +1078,13 @@ const binary = {
       power(map, vector) {
         map.data =  map.data.map(col => Rnl.isRational(col[0])
           ? col.map((e, i) => Rnl.power(e, vector[i]))
+          : col
+        )
+        return map
+      },
+      modulo(map, vector) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.mod(e, vector[i]))
           : col
         )
         return map
