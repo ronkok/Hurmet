@@ -87,15 +87,15 @@ window.view = new view.EditorView(document.querySelector("#editor"), {
 
 // Set decimal separator display per the browser language.
 const userLanguageTag = navigator.language || navigator.userLanguage
-const parts = userLanguageTag.match(/([A-Za-z]{1,2})-(\w{1,3})(?:-(\w{2,3}))?/)
+const parts = userLanguageTag.match(/([A-Za-z]{1,2})(?:-(\w{1,3})(?:-(\w{2,3}))?)?/)
 const userLanguage = parts[1];
-const userRegion = parts[3] ? parts[3] : parts[2];
+const userRegion = parts[3] ? parts[3] : (parts[2] ? parts[2] : "");
 if (["BD", "IN", "LK", "MV", "MP", "PK"].includes(userRegion)) {
   window.view.state.doc.attrs.decimalFormat = "1,00,000."  // south Asia
-} else if (userLanguage === "en" ||
+} else if (userLanguage === "en" || (userRegion.length > 0 &&
   ["BN", "BU", "BW", "DO", "EG", "ET", "GH", "GT", "GY", "HN", "IE", "IL", "JO", "JP", "KE",
     "KH", "KP", "KR", "LB", "LY", "MM", "MN", "MT", "MX", "MY", "NG", "NI", "PA", "PH", "PR",
-    "QA", "PS", "SG", "SV", "TH", "TW", "TZ", "UG", "ZW"].includes(userRegion)) {
+    "QA", "PS", "SG", "SV", "TH", "TW", "TZ", "UG", "ZW"].includes(userRegion))) {
   window.view.state.doc.attrs.decimalFormat = "1,000,000."
 } else if (userLanguage === "zh") {
   window.view.state.doc.attrs.decimalFormat = "1,0000,0000."  // China
