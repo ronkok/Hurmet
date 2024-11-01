@@ -22038,6 +22038,7 @@ const parse$1 = (
   let token = {};
   let prevToken = { input: "", output: "", ttype: 50 };
   const dependencies = [];
+  const exponentPrec = rpnPrecFromType[tt.SUP];
   let mustLex = true;
   let mustAlign = false;
   let posOfPrevRun = 0;
@@ -22070,7 +22071,9 @@ const parse$1 = (
       while (rpnStack.length > 0) {
         const topPrec = rpnStack[rpnStack.length - 1].prec;
         //                         exponents, from right to left.
-        if (topPrec < rpnPrec || (topPrec === 13 && rpnPrec === 13)) { break }
+        if (topPrec < rpnPrec || (topPrec === exponentPrec && rpnPrec === exponentPrec)) {
+          break
+        }
         const symbol = rpnStack.pop().symbol;
         if (symbol === "→") {
           rpn = rpn.slice(0, posArrow + 1) + '"'

@@ -352,6 +352,7 @@ end`, vars)
   const calcTests = [
     // input string, expected RPN, expected result
     [`wideFlanges.area.end = @`, `¿wideFlanges "area" . "end" .`, "5.26"],
+    [`2^3^4 = @`, "®2/1 ®3/1 ®4/1 ^ ^", "2,417,851,639,229,258,349,412,352"],
     [`5 modulo 4 = @`, `®5/1 ®4/1 modulo`, "1"],
     ["b = @", "¿b", "true"],
     ["str[2] = @", "¿str ®2/1 [] 1", "b"],
