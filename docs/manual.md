@@ -763,7 +763,7 @@ Variable names and function names must be written in the form of a valid _identi
     written after it. Hurmet will render the accent above the letter, as in ¢`θ̂`.
 *   Primes may be appended to the very end, as in: ¢`f_c′`.
 *   The following keywords may not be used as variable names: `π`, `ℏ`, `pi`,
-    `true`, `false`, `root`, `if`, `else`, `elseif`, `otherwise`, `end`, `and`, `or`, `in`, `to`.
+    `true`, `false`, `root`, `if`, `else`, `elseif`, `modulo`, `otherwise`, `end`, `and`, `or`, `in`, `to`.
 
    ![letter letter-or-digit-or-accent prime](images/identifier-railroad.svg)
 
