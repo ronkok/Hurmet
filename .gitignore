@@ -5,10 +5,7 @@ preview/prosemirror.js
 preview/demo.js
 preview/styles.min.css
 preview/Temml.woff2
-preview/server.cjs
 site/prosemirror.min.js
 site/demo.min.js
-site/server.cjs
 utils/ECB Exchange Rates.xml
 utils/hurmet.cjs
-site/server.cjs
