@@ -57434,8 +57434,8 @@ window.view = new EditorView(document.querySelector("#editor"), {
 // Set decimal separator display per the browser language.
 const userLanguageTag = navigator.language || navigator.userLanguage;
 const parts = userLanguageTag.match(/([A-Za-z]{1,2})(?:-(\w{1,3})(?:-(\w{2,3}))?)?/);
-const userLanguage = parts[1];
-const userRegion = parts[3] ? parts[3] : (parts[2] ? parts[2] : "");
+const userLanguage = (parts[1]).toLowerCase();
+const userRegion = (parts[3] ? parts[3] : (parts[2] ? parts[2] : "")).toUpperCase();
 if (["BD", "IN", "LK", "MV", "MP", "PK"].includes(userRegion)) {
   window.view.state.doc.attrs.decimalFormat = "1,00,000.";  // south Asia
 } else if (userLanguage === "en" || (userRegion.length > 0 &&
@@ -57445,8 +57445,9 @@ if (["BD", "IN", "LK", "MV", "MP", "PK"].includes(userRegion)) {
   window.view.state.doc.attrs.decimalFormat = "1,000,000.";
 } else if (userLanguage === "zh") {
   window.view.state.doc.attrs.decimalFormat = "1,0000,0000.";  // China
+} else {
+  window.view.state.doc.attrs.decimalFormat = "1 000 000,"; // Europe, S America, much of Africa
 }
-// default is 1.000.000,
 
 const tidyUp = _ => {
   const fix = fixTables(window.view.state);
