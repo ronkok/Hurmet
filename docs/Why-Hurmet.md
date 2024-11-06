@@ -49,12 +49,13 @@ right.
 
 An engineering calculation is not complete when you have demonstrated a result
 to yourself. You must also communicate your work to others. Among those others are:
-*   the designer with whom you are working
-*   the designer’s checker
-*   your checker
-*   the engineer-of-record (who may or may not be the same person as your checker)
-*   the official who issues a building permit
-*   yourself, five years from now when the client wants a modification
+
+* the designer with whom you are working
+* the designer’s checker
+* your checker
+* the engineer-of-record (who may or may not be the same person as your checker)
+* the official who issues a building permit
+* yourself, five years from now when the client wants a modification
 
 Everyone on that list is busy. They don’t have time to finish work that is only
 partly written down. They don’t have time to decipher cryptic comments. You
