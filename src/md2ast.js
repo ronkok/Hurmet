@@ -731,25 +731,25 @@ rules.set("blockquote", {
 });
 rules.set("ordered_list", {
   isLeaf: false,
-  match: blockRegex(/^( {0,3})(?:(?:(\d{1,9})|([A-Z])|([a-z]))[.)]) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:\d{1,9}\.) )\n*|\s*$)/),
+  match: blockRegex(/^(?:(?:(\d{1,9})|([A-Z])|([a-z]))[.)]) [\s\S]+?(?:\n{2,}(?!(?:\d{1,9}\.) )\n*|\s*$)/),
   parse: function(capture, state) {
-    const start = capture[2]
-      ? Number(capture[2])
-      : capture[3]
-      ? capture[3].codePointAt(0) - 64
-      : capture[4].codePointAt(0) - 96
+    const start = capture[1]
+      ? Number(capture[1])
+      : capture[2]
+      ? capture[2].codePointAt(0) - 64
+      : capture[3].codePointAt(0) - 96
     const className = capture[2] ? "decimal" : capture[3] ? "upper-alpha" : "lower-alpha"
     return {
       attrs: { class: className, order: start },
-      content: parseList(capture[0], state, capture[1])
+      content: parseList(capture[0], state)
     }
   }
 })
 rules.set("bullet_list", {
   isLeaf: false,
-  match: blockRegex(/^( {0,3})([*+-]) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:[*+-]) )\n*|\s*$)/),
+  match: blockRegex(/^([*+-]) [\s\S]+?(?:\n{2,}(?!(?:[*+-]) )\n*|\s*$)/),
   parse: function(capture, state) {
-    return { content: parseList(capture[0], state, capture[1]) }
+    return { content: parseList(capture[0], state) }
   }
 });
 rules.set("special_div", {
@@ -833,7 +833,7 @@ rules.set("emptyParagraph", {
 });
 rules.set("paragraph", {
   isLeaf: false,
-  match: blockRegex(/^((?:[^\n]|\n(?! *\n))+)(?:\n *)+\n/),
+  match: blockRegex(/^((?:[^\n]|\n(?!(?: *\n|(?=[*+-] )|(?=(?:\d{1,9}|[A-Za-z])[.)] ))))+)\n(?:(?: *\n)+|(?=[*+-] )|(?=(?:\d{1,9}|[A-Za-z])[.)] ))/),
   parse: function(capture, state) {
     return { type: "paragraph", content: parseInline(capture[1], state) }
   }
