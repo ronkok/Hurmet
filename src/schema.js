@@ -47,7 +47,7 @@ export const nodes = {
   // :: NodeSpec The top level document node.
   doc: {
     content: "block+",
-    // Hurmet uses doc.attrs for document metadata, but ProseMirror transacations
+    // Hurmet uses doc.attrs for document metadata, but ProseMirror transactions
     // can not reach doc.attrs. So any user change to document metadata will be
     // outside the undo stack.
     attrs: {
