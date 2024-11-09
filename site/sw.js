@@ -1,6 +1,6 @@
 // A service worker to enable offline use of Hurmet.app
 
-const cacheName = "hurmet-2024-11-9"
+const cacheName = "hurmet-2024-11-9-1"
 
 const addResourcesToCache = async(resources) => {
   const cache = await caches.open(cacheName)
@@ -39,6 +39,9 @@ self.addEventListener("install", (event) => {
   )
 })
 
+const manualRegEx = /manual\.html$/
+const unitsRegEx = /unit-definitions\.html$/
+
 // Take a navigation response and replace it with one whose `redirected` value is false.
 const cleanResponse = response => {
   return new Response(response.body, {
@@ -60,20 +63,20 @@ self.addEventListener('fetch', event => {
   if (event.request.mode === 'navigate') {
     // Open the cache
     event.respondWith(caches.open(cacheName).then(cache => {
-      // Go to the cache first only for the user's manual.
-      return cache.match(event.request.url).then(cachedResponse => {
-        // Return a cached response if we have one
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-        // If not the manual, go to the network first
-        return fetch(event.request.url).then(fetchedResponse => {
-          return cleanResponse(fetchedResponse)
-        }).catch(() => {
-          // If the network is unavailable, put up the offline page
+      // Go to the network first
+      return fetch(event.request.url).then(fetchedResponse => {
+        return cleanResponse(fetchedResponse)
+      }).catch(() => {
+        // If the network is unavailable, put up the offline or manual page
+        console.log(cacheName)
+        if (manualRegEx.test(cacheName)) {
+          return cache.match('/manual.html').then(response => cleanResponse(response))
+        } else if (unitsRegEx.test(cacheName)) {
+          return cache.match('/unit-definitions.html').then(response => cleanResponse(response))
+        } else {
           return cache.match('/offline.html').then(response => cleanResponse(response))
-        });
-      })
+        }
+      });
     }));
   } else if (event.request.destination === 'script' || event.request.destination === 'style') {
     // This also calls for network first. Open the cache.
