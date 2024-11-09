@@ -1,6 +1,6 @@
 // A service worker to enable offline use of Hurmet.app
 
-const cacheName = "hurmet-2024-11-9-3"
+const cacheName = "hurmet-2024-11-9-4"
 
 const addResourcesToCache = async(resources) => {
   const cache = await caches.open(cacheName)
@@ -39,9 +39,6 @@ self.addEventListener("install", (event) => {
   )
 })
 
-const manualRegEx = /manual\.html$/
-const unitsRegEx = /unit-definitions\.html$/
-
 // Take a navigation response and replace it with one whose `redirected` value is false.
 const cleanResponse = response => {
   return new Response(response.body, {
@@ -68,10 +65,9 @@ self.addEventListener('fetch', event => {
         return cleanResponse(fetchedResponse)
       }).catch(() => {
         // If the network is unavailable, put up the offline or manual page
-        console.log(event.request.url)
-        if (manualRegEx.test(event.request.url)) {
+        if (event.request.url === "https://hurmet.org/manual.html") {
           return cache.match('/manual.html').then(response => cleanResponse(response))
-        } else if (unitsRegEx.test(event.request.url)) {
+        } else if (event.request.url === "https://hurmet.org/unit-definitions.html") {
           return cache.match('/unit-definitions.html').then(response => cleanResponse(response))
         } else {
           return cache.match('/offline.html').then(response => cleanResponse(response))
