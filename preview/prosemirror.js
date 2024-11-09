@@ -24267,25 +24267,25 @@ rules.set("blockquote", {
 });
 rules.set("ordered_list", {
   isLeaf: false,
-  match: blockRegex(/^( {0,3})(?:(?:(\d{1,9})|([A-Z])|([a-z]))[.)]) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:\d{1,9}\.) )\n*|\s*$)/),
+  match: blockRegex(/^(?:(?:(\d{1,9})|([A-Z])|([a-z]))[.)]) [\s\S]+?(?:\n{2,}(?!(?:\d{1,9}\.) )\n*|\s*$)/),
   parse: function(capture, state) {
-    const start = capture[2]
-      ? Number(capture[2])
-      : capture[3]
-      ? capture[3].codePointAt(0) - 64
-      : capture[4].codePointAt(0) - 96;
+    const start = capture[1]
+      ? Number(capture[1])
+      : capture[2]
+      ? capture[2].codePointAt(0) - 64
+      : capture[3].codePointAt(0) - 96;
     const className = capture[2] ? "decimal" : capture[3] ? "upper-alpha" : "lower-alpha";
     return {
       attrs: { class: className, order: start },
-      content: parseList(capture[0], state, capture[1])
+      content: parseList(capture[0], state)
     }
   }
 });
 rules.set("bullet_list", {
   isLeaf: false,
-  match: blockRegex(/^( {0,3})([*+-]) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:[*+-]) )\n*|\s*$)/),
+  match: blockRegex(/^([*+-]) [\s\S]+?(?:\n{2,}(?!(?:[*+-]) )\n*|\s*$)/),
   parse: function(capture, state) {
-    return { content: parseList(capture[0], state, capture[1]) }
+    return { content: parseList(capture[0], state) }
   }
 });
 rules.set("special_div", {
@@ -24369,7 +24369,7 @@ rules.set("emptyParagraph", {
 });
 rules.set("paragraph", {
   isLeaf: false,
-  match: blockRegex(/^((?:[^\n]|\n(?! *\n))+)(?:\n *)+\n/),
+  match: blockRegex(/^((?:[^\n]|\n(?!(?: *\n|(?=[*+-] )|(?=(?:\d{1,9}|[A-Za-z])[.)] ))))+)\n(?:(?: *\n)+|(?=[*+-] )|(?=(?:\d{1,9}|[A-Za-z])[.)] ))/),
   parse: function(capture, state) {
     return { type: "paragraph", content: parseInline(capture[1], state) }
   }
@@ -26255,12 +26255,13 @@ const formatResult = (stmt, result, formatSpec, decimalFormat, assert, isUnitAwa
           ",\\text{ ok }✓";
         altResultDisplay = stmt.entry.replace(testRegEx$1, "") + ", ok ✓";
       } else {
-        const op = compRegEx.exec(stmt.rpn).slice(1);
+        const op = compRegEx.exec(stmt.rpn)[0].slice(1);
         const negOp = negatedComp[op];
         if (assert) {
           const assertStr = assert.value.replace(/\.$/, "");
+          const addendum = stmt.entry.replace(testRegEx$1, "").replace(op, negOp[0]);
           resultDisplay = "\\colorbox{Salmon}{" + assertStr + ", but $" +
-              parse$1(stmt.entry.replace(testRegEx$1, "").replace(op, negOp[0])) + "$}";
+              parse$1(addendum) + "$}";
           altResultDisplay = assertStr + ", but " +
               stmt.entry.replace(testRegEx$1, "").replace(op, negOp[1]);
         } else {
@@ -26366,7 +26367,9 @@ const formatResult = (stmt, result, formatSpec, decimalFormat, assert, isUnitAwa
     }
 
     // Write the string to be plugged into echos of dependent nodes
-    stmt.resultdisplay = stmt.resulttemplate.replace(/(\? *\??|@ *@?|%%?)/, resultDisplay);
+    const resultCapture = /(\? *\??|@ *@?|%%?)/.exec(stmt.resulttemplate);
+    stmt.resultdisplay = stmt.resulttemplate.slice(0, resultCapture.index) + resultDisplay +
+      stmt.resulttemplate.slice(resultCapture.index + resultCapture[0].length);
 
     // Write the TeX for this node
     if (stmt.resulttemplate.indexOf("@") > -1) {
@@ -50951,7 +50954,7 @@ const nodes = {
   // :: NodeSpec The top level document node.
   doc: {
     content: "block+",
-    // Hurmet uses doc.attrs for document metadata, but ProseMirror transacations
+    // Hurmet uses doc.attrs for document metadata, but ProseMirror transactions
     // can not reach doc.attrs. So any user change to document metadata will be
     // outside the undo stack.
     attrs: {

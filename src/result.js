@@ -75,12 +75,13 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, assert, is
           ",\\text{ ok }✓"
         altResultDisplay = stmt.entry.replace(testRegEx, "") + ", ok ✓"
       } else {
-        const op = compRegEx.exec(stmt.rpn).slice(1)
+        const op = compRegEx.exec(stmt.rpn)[0].slice(1)
         const negOp = negatedComp[op]
         if (assert) {
           const assertStr = assert.value.replace(/\.$/, "")
+          const addendum = stmt.entry.replace(testRegEx, "").replace(op, negOp[0])
           resultDisplay = "\\colorbox{Salmon}{" + assertStr + ", but $" +
-              parse(stmt.entry.replace(testRegEx, "").replace(op, negOp[0])) + "$}"
+              parse(addendum) + "$}"
           altResultDisplay = assertStr + ", but " +
               stmt.entry.replace(testRegEx, "").replace(op, negOp[1])
         } else {
@@ -186,7 +187,9 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, assert, is
     }
 
     // Write the string to be plugged into echos of dependent nodes
-    stmt.resultdisplay = stmt.resulttemplate.replace(/(\? *\??|@ *@?|%%?)/, resultDisplay)
+    const resultCapture = /(\? *\??|@ *@?|%%?)/.exec(stmt.resulttemplate)
+    stmt.resultdisplay = stmt.resulttemplate.slice(0, resultCapture.index) + resultDisplay +
+      stmt.resulttemplate.slice(resultCapture.index + resultCapture[0].length)
 
     // Write the TeX for this node
     if (stmt.resulttemplate.indexOf("@") > -1) {
