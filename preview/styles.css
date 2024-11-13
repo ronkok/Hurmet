@@ -172,6 +172,7 @@ article {
 }
 
 /* For printed documents */
+/* Note: page size & margins are set in the index.html <style> element. */
 @media screen {
   #print-div { display: none; }
 }
