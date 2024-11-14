@@ -1,3 +1,5 @@
+
+
 * { margin: 0; }
 
 body {
@@ -410,13 +412,13 @@ summary {
 .optional {
     color: orange
 }
-.mobile-menu {
+#mobile-menu {
     position: absolute;
     background: #fff;
     border: 1px solid #aaa;
     padding-right: 3em;
 }
-.mobile-menu summary:after {
+#mobile-menu summary:after {
     content: none;
 }
 .toc {
@@ -467,6 +469,20 @@ summary {
     }
     .margin-note:focus {
         position: inherit;
+    }
+    input#navicon-checkbox {
+      display: none;
+    }
+    label#navicon {
+      position: relative;
+      display: block;
+      cursor: pointer;
+    }
+    ul#mobile-menu {
+      display: none;
+    }
+    input:checked~ul#mobile-menu {
+      display: block;
     }
 }
 #mobile-nav li {

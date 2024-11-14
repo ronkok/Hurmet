@@ -2818,12 +2818,10 @@ Copyright © 2020-2024 Ron Kok. Released under the [MIT License][]
 </div>
 </nav>
 
-<div id="mobile-nav">
-<div id="navicon">
-<details><summary><img src="data:image/svg+xml;utf8,%3Csvg width='512px' height='512px'%3E%3Crect x='96' y='241' width='320' height='32'/%3E%3Crect x='96' y='145' width='320' height='32'/%3E%3Crect x='96' y='337' width='320' height='32'/%3E%3C/svg%3E" alt='≡' width='24'></summary>
-  <ul class="mobile-menu">
-    <li><a href="#top">Top</a></li>
-    <li><a href="#math-editor">Calculation</a></li>
+<div id="mobile-nav"><input id="navicon-checkbox" type="checkbox" name="navicon-checkbox" /><label for="navicon-checkbox" id="navicon"><img src="./images/navicon.svg"  alt='≡' width='24'></label>
+  <ul id="mobile-menu">
+    <li><a href="#editor-basics">Editor</a></li>
+    <li><a href="#calculation-forms">Calculations</a></li>
     <li><a href="#identifiers">Identifiers</a></li>
     <li><a href="#data-types">Data Types</a></li>
     <li><a href="#expressions">Expressions</a></li>
@@ -2832,8 +2830,6 @@ Copyright © 2020-2024 Ron Kok. Released under the [MIT License][]
     <li><a href="#user-defined-functions">UDFs</a></li>
     <li><a href="#remote-modules">Modules</a></li>
   </ul>
-</details>
-  </div>
 </div>
 
 <div id="demo">
