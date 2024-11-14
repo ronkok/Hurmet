@@ -1892,47 +1892,47 @@ Next, let’s look at the underlying formulas of that spreadsheet.
 
 This example illustrates several things about Hurmet spreadsheets.
 
- 1.  Spreadsheets start out as a Hurmet table.
+1.  Spreadsheets start out as a Hurmet table.
 
- 2.  A spreadsheet must have a caption. The caption’s first word will be the
+2.  A spreadsheet must have a caption. The caption’s first word will be the
     spreadsheet’s name. Create a table caption by selecting a table and tapping
     the ![table-caption][] button.
 
- 3.  After all editing is complete, toggle the table into a spreadsheet by tapping
+3.  After all editing is complete, toggle the table into a spreadsheet by tapping
     the ![spreadsheet][] button. Hurmet spreadsheets toggle the entire table, not
     just one cell.
 
- 4.  No merged cells are allowed
+4.  No merged cells are allowed
 
- 5.  The top row contains headings, not formulas.
+5.  The top row contains headings, not formulas.
 
- 6.  A unit-of-measure can be assigned to a column. Type a newline (Shift-Enter) into
+6.  A unit-of-measure can be assigned to a column. Type a newline (Shift-Enter) into
     a heading and write the unit’s name on the second line.
 
- 7.  Cells can contain data: numbers, strings, true, or false. Spreadsheet cells cannot
+7.  Cells can contain data: numbers, strings, true, or false. Spreadsheet cells cannot
     contain matrices.
 
- 8.  Cells can also contain a formula.
+8.  Cells can also contain a formula.
 
-    1.  Formulas start with an `=` sign and can contain references to other cells or to
+    a.  Formulas start with an `=` sign and can contain references to other cells or to
         variables in the Hurmet document.
 
-    2.  Refer to a cell with `A1` format. No range names or R1C1 references. The row
+    b.  Refer to a cell with `A1` format. No range names or R1C1 references. The row
         number is indexed so that number 1 refers to the first data row. A
         formula cannot refer to a heading.
 
-    3.  Refer to a column’s bottom cell with `_end` format. Example: `B_end`.
+    c.  Refer to a column’s bottom cell with `_end` format. Example: `B_end`.
 
-    4.  To make a cell unit-aware, start the formula with a double `==` sign.
+    d.  To make a cell unit-aware, start the formula with a double `==` sign.
 
-    5.  A formula can contain the functions `sum(up)` or `sum(left)`.
+    e.  A formula can contain the functions `sum(up)` or `sum(left)`.
 
- 9.  A  single `"` mark will be treated as a _ditto_ instruction. Hurmet will treat
-    that cell as a copy of the data or formula above it, with adjusted row numbers.
+9.   A  single `"` mark will be treated as a _ditto_ instruction. Hurmet will treat
+     that cell as a copy of the data or formula above it, with adjusted row numbers.
 
-10.  Order of calculation is column-wise.
+10. Order of calculation is column-wise.
 
-11.  Hurmet math zones outside the spreadsheet can refer to a spreadsheet cell with
+11. Hurmet math zones outside the spreadsheet can refer to a spreadsheet cell with
     the sheet name, column heading, and row heading. An exterior cell that
     calls `dist.Shear.total = ?` would get `400` for a result.
 
@@ -2818,9 +2818,12 @@ Copyright © 2020-2024 Ron Kok. Released under the [MIT License][]
 </div>
 </nav>
 
-<div id="mobile-nav"><input id="navicon-checkbox" type="checkbox" name="navicon-checkbox" /><label for="navicon-checkbox" id="navicon"><img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='512px' height='512px'%3E%3Crect x='96' y='241' width='320' height='32'/%3E%3Crect x='96' y='145' width='320' height='32'/%3E%3Crect x='96' y='337' width='320' height='32'/%3E%3C/svg%3E"  alt='≡' width='24'></label>
+<div id="mobile-nav">
+<input id="navicon-checkbox" type="checkbox">
+<label for="navicon-checkbox" id="navicon"><img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='512px' height='512px'%3E%3Crect x='96' y='241' width='320' height='32'/%3E%3Crect x='96' y='145' width='320' height='32'/%3E%3Crect x='96' y='337' width='320' height='32'/%3E%3C/svg%3E" alt='≡' width='24'></label>
   <ul id="mobile-menu">
     <li><a href="#editor-basics">Editor</a></li>
+    <li><a href="#calculation-tutorial">Tutorial</a></li>
     <li><a href="#calculation-forms">Calculations</a></li>
     <li><a href="#identifiers">Identifiers</a></li>
     <li><a href="#data-types">Data Types</a></li>

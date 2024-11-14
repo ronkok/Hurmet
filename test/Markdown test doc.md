@@ -271,7 +271,7 @@ b. … a lower-case letter.
        *   Yay!
 
 Text imported from a chatbot often includes lists whose subordinate lists do not
-have a preceeding blank line. So let’s import a list of that type.
+have a preceding blank line. So let’s import a list of that type.
 
 - Preliminary Design:
     - Determine the height of the wall, soil properties, and any surcharge loads.

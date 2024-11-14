@@ -10692,7 +10692,7 @@ const parseTextMark = (capture, state, mark) => {
   return text
 };
 
-const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<(?:\/?(?:!DOCTYPE html|body|li|br|hr|(?:div|article|details|input|label|ul|ol|dl|main|nav)(?: (?:class|for|id|style|type)=(["'])[A-Za-z0-9_.:;\- ]+\2){0,2})|\/?html(?: lang=(["'])[a-z]+\3)?)>[^\n]*?(?:\n|$))/;
+const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|label|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<(?:\/?(?:!DOCTYPE html|body|li|br|hr|(?:div|article|details|input|ul|ol|dl|main|nav)(?: (?:class|id|name|style|type)=(["'])[A-Za-z0-9_.:;\- ]+\2){0,2})|\/?html(?: lang=(["'])[a-z]+\3)?)>[^\n]*?(?:\n|$))/;
 
 // Rules must be applied in a specific order, so use a Map instead of an object.
 const rules = new Map();
@@ -10788,13 +10788,13 @@ rules.set("blockquote", {
 });
 rules.set("ordered_list", {
   isLeaf: false,
-  match: blockRegex(/^(?:(?:(\d{1,9})|([A-Z])|([a-z]))[.)]) [\s\S]+?(?:\n{2,}(?!(?:\d{1,9}\.) )\n*|\s*$)/),
+  match: blockRegex(/^( {0,3})(?:(?:(\d{1,9})|([A-Z])|([a-z]))[.)]) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:\d{1,9}\.) )\n*|\s*$)/),
   parse: function(capture, state) {
-    const start = capture[1]
-      ? Number(capture[1])
-      : capture[2]
-      ? capture[2].codePointAt(0) - 64
-      : capture[3].codePointAt(0) - 96;
+    const start = capture[2]
+      ? Number(capture[2])
+      : capture[3]
+      ? capture[3].codePointAt(0) - 64
+      : capture[4].codePointAt(0) - 96;
     const className = capture[2] ? "decimal" : capture[3] ? "upper-alpha" : "lower-alpha";
     return {
       attrs: { class: className, order: start },
@@ -10804,7 +10804,7 @@ rules.set("ordered_list", {
 });
 rules.set("bullet_list", {
   isLeaf: false,
-  match: blockRegex(/^([*+-]) [\s\S]+?(?:\n{2,}(?!(?:[*+-]) )\n*|\s*$)/),
+  match: blockRegex(/^( {0,3})([*+-]) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:[*+-]) )\n*|\s*$)/),
   parse: function(capture, state) {
     return { content: parseList(capture[0], state) }
   }
