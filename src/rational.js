@@ -130,6 +130,7 @@ const isZero = r => r[0] === iZero
 
 const isNegative = r => r[0] < iZero
 const isPositive = r => r[0] > iZero
+const intSign = i => i >= iZero ? iOne : BigInt(-1)
 const sign = r => isPositive(r) ? one : isZero(r) ? zero : negate(one)
 
 const negate = r => [BigInt(-1) * r[0], r[1]]
@@ -346,7 +347,7 @@ const toString = (r, numDigitsAfterDecimal) => {
       const residue = newNumerator % denominator
       if (numDigitsAfterDecimal === 0) {
         return (intAbs(iTwo * residue) >= intAbs(denominator))
-          ? String(quotient + iOne)
+          ? String((intAbs(quotient) + iOne) * intSign(quotient))
           : result
       }
       if (intAbs(iTwo * residue) >= intAbs(denominator)) {
