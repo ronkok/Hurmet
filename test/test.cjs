@@ -442,6 +442,7 @@ end`, vars)
     [`vcat(vector[1:2]^T, matrix)  = @`, `¿vector ®1/1 ®2/1 : [] 1 ¿T ^ ¿matrix vcat`, "(2.1, -15.3; 2.1, 7.5; -15.3, 33)"],
     [`matrix & matrix = @`, `¿matrix ¿matrix &`, "(2.1, 7.5, 2.1, 7.5; -15.3, 33, -15.3, 33)"],
     [`vcat(matrix, matrix) = @`, `¿matrix ¿matrix vcat`, "(2.1, 7.5; -15.3, 33; 2.1, 7.5; -15.3, 33)"],
+    [`vcat(3, 4) = @`, "®3/1 ®4/1 vcat", "[3; 4]"],
     [`rebar & radius = @`, `¿rebar ¿radius &`, "``	diameter	area	radius\nunit	in	in²	in\n#3	0.375	0.11	0.375\n#4	0.5	0.2	0.25\n#5	0.625	0.31	0.3125\n#6	0.75	0.44	0.375``"],
     ["2 frameRow = @", `®2/1 ¿frameRow ⌧`, "``#4	#5	area\n0.44	0.62	0.88``"],
     [`(2)(4) + 1 = @`, `®2/1 ®4/1 ⌧ ®1/1 +`, "9"],

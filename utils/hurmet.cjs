@@ -8276,7 +8276,7 @@ const dtype = {
   // return the resulting data type.
   scalar: {
     scalar(t0, t1, tkn)     {
-      return (tkn === "&" || tkn === "hcat" || tkn === "hcat")
+      return (tkn === "&" || tkn === "hcat" || tkn === "vcat")
         ? t0 + ((tkn === "&" || tkn === "hcat") ? dt.ROWVECTOR : dt.COLUMNVECTOR )
         : t0
     },
