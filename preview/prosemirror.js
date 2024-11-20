@@ -54491,7 +54491,9 @@ pageSize: ${state.doc.attrs.pageSize}
 
 function saveFile() {
   return new MenuItem({
-    title: "Save file   Ctrl-S",
+    title: window.showOpenFilePicker
+      ? "Save file   Ctrl-S"
+      : '"Save" works only in Chrome or Edge.',
     label: "Save",
     enable(state) {
       return state.doc.attrs.saveIsValid
@@ -54504,8 +54506,12 @@ function saveFile() {
 
 function saveFileAs() {
   return new MenuItem({
-    title: "Save file as…",
-    label: "Save as…",
+    title: window.showOpenFilePicker
+      ? "Save file as…"
+      : "Download file…",
+    label: window.showOpenFilePicker
+      ? "Save as…"
+      : "Download file…",
     run(state, _, view) {
       saveFileAsMarkdown(state, view, true);
     }
