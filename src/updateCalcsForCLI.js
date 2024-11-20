@@ -126,6 +126,7 @@ export async function updateCalcs(doc) {
         hurmetVars[sheetName].value = {}
         const numRows = sheet.content.length
         const numCols = sheet.content[0].content.length
+        sheet.attrs.rowMap = {}
         // Proceed column-wise thru the sheet.
         for (let j = 0; j < numCols; j++) {
           for (let i = 1; i < numRows; i++) {
@@ -134,6 +135,9 @@ export async function updateCalcs(doc) {
               cell.attrs.altresulttemplate = cell.attrs.resulttemplate
               cell.attrs = evaluate(cell.attrs, hurmetVars, decimalFormat)
               cell.attrs.display = cell.attrs.alt
+              if (j === 0) { sheet.attrs.rowMap[cell.attrs.alt] = i }
+            } else if (j === 0 && typeof cell.attrs.value === "string") {
+              sheet.attrs.rowMap[cell.attrs.value] = i
             }
             hurmetVars[sheetName].value[cell.attrs.name] = cell.attrs
           }
