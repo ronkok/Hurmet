@@ -1271,6 +1271,11 @@ table.grid th { font-weight: 600 }
 }
 .ProseMirror table.striped th { font-weight: 600 }
 
+td, th {
+  -webkit-print-color-adjust: exact;  /* Chrome & Edge */
+          print-color-adjust: exact;
+}
+
 /* Column alignment. Apply these classes to the table node. */
 /* This is not Atlassian CSS. It's specific to Hurmet. */
 .c1r td:nth-child(1), .c1r th:nth-child(1),
