@@ -882,8 +882,9 @@ div.warning > *:first-child::before {
 
 /*
 The Latin Modern fonts are released under the GUST font license, which is
-legally equivalent to the LaTeX Project Public License. The fonts can be
-obtained from several TeX distributions or package managers.
+legally equivalent to the LaTeX Project Public License. See the files in this
+directory for details. The fonts can be obtained from several TeX distributions
+or package managers.
 
 The Latin Modern WOFF font has been obtained from
 http://www.gust.org.pl/projects/e-foundry/
@@ -943,6 +944,12 @@ mo.tml-prime {
 /* Prevent f' from overlapping in Chromium */
 mo.prime-pad {
   padding-left: 0.08em;
+}
+
+/* \cancel & \phase use background images. Get them to print. */
+menclose {
+  -webkit-print-color-adjust: exact;  /* Chrome & Edge */
+          print-color-adjust: exact;
 }
 
 /* Array cell justification in Firefox & WebKit */
@@ -1117,7 +1124,7 @@ math > mrow {
 }
 
 body {
-  counter-reset: tmlEqnNo pageNum 1;
+  counter-reset: tmlEqnNo;
 }
 
 .ProseMirror {
