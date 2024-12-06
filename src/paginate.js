@@ -87,11 +87,11 @@ const getTop = (editor, pageData) => {
   return top
 }
 
-const increment = oldPageData => {
-  const pageData = clone(oldPageData)
-  pageData.start = pageData.end
-  pageData.end += 1
-  return pageData
+const increment = oldElementData => {
+  const elementData = clone(oldElementData)
+  elementData.start = elementData.end
+  elementData.end += 1
+  return elementData
 }
 
 export const findPageBreaks = (view, state, purpose, tocSchema, startLevel, endLevel = 0) => {
@@ -260,6 +260,7 @@ export const findPageBreaks = (view, state, purpose, tocSchema, startLevel, endL
           // Update the gap between the text and the footnote block
           gap = pageHeight - noteBlockHeight - (bottom - top)
         } else {
+          // The element does not fit onto the current page.
           if (purpose === forPrint && iPass === 1) {
             if (iParent !== null) { pageData.push(clone(elementData)) }
             pageHeight = populatePage(pageData, gap)
