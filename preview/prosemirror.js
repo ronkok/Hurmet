@@ -17324,6 +17324,7 @@ const errorOprnd = (errorCode, messageInsert) => {
 const iZero = BigInt(0);
 const iOne = BigInt(1);
 const iTwo = BigInt(2);
+const iTen = BigInt(10);
 const zero = [iZero, iOne];
 const one = [iOne, iOne];
 const two = [iTwo, iOne];
@@ -17359,13 +17360,13 @@ const fromNumber = num => {
     const decimalFrac = parts[6] || "";
     const exp = BigInt(parts[7]) - BigInt(decimalFrac.length);
     if (exp < 0) {
-      return [BigInt(parts[1] + parts[3] + decimalFrac), BigInt(10) ** -exp]
+      return [BigInt(parts[1] + parts[3] + decimalFrac), iTen ** -exp]
     } else if (parts[5]) {
       const denominator = BigInt(parts[5]);
       return normalize(
         [BigInt(parts[1] + parts[3]) * denominator + BigInt(parts[4]) ])
     } else {
-      return normalize([BigInt(parts[1] + parts[3] + decimalFrac) * BigInt(10) ** exp, iOne])
+      return normalize([BigInt(parts[1] + parts[3] + decimalFrac) * iTen ** exp, iOne])
     }
   }
 };
@@ -17394,8 +17395,8 @@ const fromString = str => {
       ? BigInt(-2) - BigInt(decimalFrac.length)  // percentage.
       : BigInt(0) - BigInt(decimalFrac.length);
     r = (exp < 0)
-      ? [numerator, BigInt(10) ** -exp]
-      : normalize([numerator * BigInt(10) ** exp, iOne]);
+      ? [numerator, iTen ** -exp]
+      : normalize([numerator * iTen ** exp, iOne]);
   }
   if (parts[1]) { r = negate$1(r); }
   return r
@@ -17638,7 +17639,7 @@ const toString = (r, numDigitsAfterDecimal) => {
     return "0"
   } else if (numDigitsAfterDecimal < 0) {
     const N = -numDigitsAfterDecimal;
-    const significand = toString(divide$1(r, [BigInt(10) ** BigInt(N), iOne]), 0);
+    const significand = toString(divide$1(r, [iTen ** BigInt(N), iOne]), 0);
     return significand + "0".repeat(N)
   } else {
     const [numerator, denominator] = normalize(r);
@@ -17649,7 +17650,8 @@ const toString = (r, numDigitsAfterDecimal) => {
       result += "." + "0".repeat(numDigitsAfterDecimal);
     } else if (remainder !== iZero) {
       remainder = intAbs$1(remainder);
-      const newNumerator = remainder * (BigInt(10) ** BigInt(numDigitsAfterDecimal));
+      const bigNumDigitsAfterDecimal = (iTen ** BigInt(numDigitsAfterDecimal));
+      const newNumerator = remainder * bigNumDigitsAfterDecimal;
       let fractus = newNumerator / denominator;
       const residue = newNumerator % denominator;
       if (numDigitsAfterDecimal === 0) {
@@ -17659,6 +17661,10 @@ const toString = (r, numDigitsAfterDecimal) => {
       }
       if (intAbs$1(iTwo * residue) >= intAbs$1(denominator)) {
         fractus = fractus + iOne;
+        if (fractus === bigNumDigitsAfterDecimal) {
+          return String((intAbs$1(quotient) + iOne) * intSign(quotient)) +
+            "." + "0".repeat(numDigitsAfterDecimal)
+        }
       }
       result += "." + String(fractus).padStart(numDigitsAfterDecimal, "0");
     }
