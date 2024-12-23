@@ -17447,7 +17447,7 @@ const abs$1 = r => {
   return [numerator, r[1]]
 };
 
-const increment$2 = r => [r[0] + r[1], r[1]];
+const increment$1 = r => [r[0] + r[1], r[1]];
 
 const decrement$1 = r => [r[0] - r[1], r[1]];
 
@@ -17675,7 +17675,7 @@ const factorial = (n) => {
   if (lessThan(n, [BigInt(101), iOne])) {
     return fromString(preComputedFactorials[toNumber(n)])
   } else {
-    return lanczos$1(increment$2(n))
+    return lanczos$1(increment$1(n))
   }
 };
 
@@ -17729,7 +17729,7 @@ const Rnl = Object.freeze({
   sign,
   negate: negate$1,
   abs: abs$1,
-  increment: increment$2,
+  increment: increment$1,
   decrement: decrement$1,
   exp: exp$1,
   floor,
@@ -19178,7 +19178,7 @@ const divide = (x, y) => {
   }
 };
 
-const increment$1 = z => [Rnl.increment(z[0]), z[1]];
+const increment = z => [Rnl.increment(z[0]), z[1]];
 const decrement = z => [Rnl.decrement(z[0]), z[1]];
 
 const inverse = z => {
@@ -19267,7 +19267,7 @@ const power = (x, y) =>{
 
 const acosh = z => {
   // acosh(z) = log( z + √(z - 1) × √(z + 1) )
-  return log(add(z, multiply(sqrt(decrement(z)), sqrt(increment$1(z)))))
+  return log(add(z, multiply(sqrt(decrement(z)), sqrt(increment(z)))))
 };
 
 const asinh = z => {
@@ -19278,7 +19278,7 @@ const asinh = z => {
 
 const atanh = z => {
   // atanh(z) = [ log(1+z) - log(1-z) ] / 2
-  return divide(subtract(log(increment$1(z)), log(subtract([Rnl.one, Rnl.zero], z))), [Rnl.two, Rnl.zero])
+  return divide(subtract(log(increment(z)), log(subtract([Rnl.one, Rnl.zero], z))), [Rnl.two, Rnl.zero])
 };
 
 const asin = z => {
@@ -19288,7 +19288,7 @@ const asin = z => {
 
 const atan = z => {
   // (Log(1 + iz) - Log(1 - iz)) / (2 * i)  cf Kahan
-  const term1 = log(increment$1(multiply(j, z)));
+  const term1 = log(increment(multiply(j, z)));
   const term2 = log(subtract([Rnl.one, Rnl.zero],(multiply(j, z))));
   return divide(subtract(term1, term2), [Rnl.zero, Rnl.two])  
 };
@@ -19367,7 +19367,7 @@ const Cpx = Object.freeze({
   conjugate,
   angle,
   inverse,
-  increment: increment$1,
+  increment,
   decrement,
   isComplex,
   add,
@@ -25278,14 +25278,22 @@ const md2html = (md, inHtml = false) => {
 
 const headsRegEx = /^H[1-6]$/;
 const levelRegEx = /(\d+)(?:[^\d]+(\d+))?/;
-const lists = ["OL", "UL"];
-const blockRegEx$1 = /^(centered|indented|right_justified)$/;
 const forToC = 0;
-const forPrint = 1;
+
+const bottomOf = element => {
+  let bottom = element.getBoundingClientRect().bottom;
+  const images = element.getElementsByTagName("img");
+  for (let i = 0; i < images.length; i++) {
+    bottom = Math.max(bottom, images[i].getBoundingClientRect().bottom);
+  }
+  const svgs = element.getElementsByTagName("svg");
+  for (let i = 0; i < svgs.length; i++) {
+    bottom = Math.max(bottom, svgs[i].getBoundingClientRect().bottom);
+  }
+  return bottom
+};
 
 const findTOC = doc => {
-  // Called by a print event.
-  // Is there a Table of Contents node?
   let tocNode = undefined;
   let nodePos = 0;
   doc.nodesBetween(0, doc.content.size, function(node, pos) {
@@ -25305,6 +25313,21 @@ const tocLevels = entry => {
   return [startLevel, endLevel]
 };
 
+const footnoteContents = textNodes => {
+  let text = "";
+  let innerHTML = "";
+  for (const node of textNodes) {
+    text += node.text;
+    let span = sanitizeText(node.text);
+    for (const mark of node.marks) {
+      const tag = tagName[mark.type.name];
+      span = `<${tag}>${span}</${tag}>`;
+    }
+    innerHTML += span;
+  }
+  return { text, innerHTML }
+};
+
 const renderToC = (tocArray, ul) => {
   // Called by schema.js. Renders a Table of Contents.
   ul.innerHTML = "";
@@ -25322,96 +25345,260 @@ const renderToC = (tocArray, ul) => {
   }
 };
 
-const bottomOf = element => {
-  let bottom = element.getBoundingClientRect().bottom;
-  const images = element.getElementsByTagName("img");
-  for (let i = 0; i < images.length; i++) {
-    bottom = Math.max(bottom, images[i].getBoundingClientRect().bottom);
-  }
-  const svgs = element.getElementsByTagName("svg");
-  for (let i = 0; i < svgs.length; i++) {
-    bottom = Math.max(bottom, svgs[i].getBoundingClientRect().bottom);
-  }
-  return bottom
-};
-
-const footnoteContents = textNodes => {
-  let text = "";
-  let innerHTML = "";
-  for (const node of textNodes) {
-    text += node.text;
-    let span = sanitizeText(node.text);
-    for (const mark of node.marks) {
-      const tag = tagName[mark.type.name];
-      span = `<${tag}>${span}</${tag}>`;
+const getDraftTocArray = (doc, startLevel, endLevel) => {
+  const tocArray = [];
+  doc.nodesBetween(0, doc.content.size, function(node, pos) {
+    if (node.type.name === "heading" && startLevel <= node.attrs.level
+                                     && node.attrs.level <= endLevel) {
+      tocArray.push([node.textContent, node.attrs.level, 0]);
     }
-    innerHTML += span;
+  });
+  return tocArray
+};
+
+// Check footnote height
+const getElementFootnoteData = (element, footnotes, ftNote, ctx ) => {
+  // Check for footnote(s) in the element
+  ftNote.numFtNotesInElem = 0;
+  ftNote.elemNotesHeight = 0;
+  const footnoteNodeList = element.querySelectorAll("footnote");
+  if (footnoteNodeList.length > 0) {
+    if (ftNote.end === -1) {
+      // The current page has no previous footnotes.
+      ftNote.elemNotesHeight += ftNote.hrHeight;  // For the <hr> above the footnote block
+      ftNote.end = ftNote.start - 1;
+    }
+    for (let i = ftNote.totalNum; i < ftNote.totalNum + footnoteNodeList.length; i++) {
+      const text = footnotes[i].text;
+      // A footnote has 620 px available width. We'll use 615 to allow for text styles.
+      const numLines = Math.ceil(ctx.measureText(text).width / 615);
+      ftNote.elemNotesHeight += (numLines * ftNote.lineBoxHeight) + ftNote.botMargin;
+      ftNote.numFtNotesInElem += 1;
+    }
   }
-  return { text, innerHTML }
 };
 
-const getTop = (editor, pageData) => {
-  // Find the y-coordinate at the top of the next page
-  const prevElement = pageData[pageData.length - 1];
-  const iStart = prevElement.all ? 0 : prevElement.end + 1;
-  const top = prevElement.all
-    ? editor.children[prevElement.index + 1].getBoundingClientRect().top
-    : editor.children[prevElement.index].children[iStart].getBoundingClientRect().top;
-  return top
+const populatePage = (startElement, endElement, header, pageNum, pageTop,
+          pageHeight, headerHeight, ftNote, footnotes, destination, listIndex) => {
+  // Create a page
+  const page = document.createDocumentFragment();
+  if (header && pageNum > 1) {
+    const printHeader = header.cloneNode(true);
+    printHeader.style.breakBefore = "page";
+    page.append(printHeader);
+  }
+  // Create a body div
+  const printBody = document.createElement("div");
+  printBody.className = "print-body";
+  if (!(header && pageNum > 1)) {
+    printBody.style.breakBefore = "page";
+  }
+
+  // Define the appropriate range of elements and append a copy of the range.
+  const range = new Range();
+  range.setStartBefore(startElement);
+  range.setEndAfter(endElement);
+  printBody.appendChild(range.cloneContents());
+  if (listIndex >= 0) {
+    // The page break occurred in the middle of an ordered list. Fix the start.
+    const lists = printBody.getElementsByTagName("OL");
+    lists[0].setAttribute("start", String(listIndex + 2));
+  }
+  page.appendChild(printBody);
+
+  if (ftNote.end >= 0) {
+    // Write footnotes at the bottom of the page.
+    const bodyHeight = endElement.getBoundingClientRect().bottom - pageTop;
+    const gap = pageHeight - headerHeight - bodyHeight - ftNote.pageNotesHeight;
+    if (gap > 0) {
+      const spacer = document.createElement("div");
+      spacer.style.height = (gap - 2) + "px";
+      page.append(spacer);
+    }
+    page.append(document.createElement("hr"));
+    const ol = document.createElement("ol");
+    if (ftNote.start > 0) {
+      ol.setAttribute("start", String(ftNote.start + 1));
+    }
+    for (let j = ftNote.start; j <= ftNote.end; j++) {
+      const graf = document.createElement("p");
+      graf.innerHTML = footnotes[j].innerHTML;
+      const li = document.createElement("li");
+      li.appendChild(graf);
+      ol.appendChild(li);
+    }
+    page.append(ol);
+  }
+  // Append the page
+  destination.append(page);
+
+  // Check if the ending page break occcurred in the middle of an ordered list
+  listIndex = (endElement.tagName === "LI" && endElement.parentElement.tagName === "OL")
+    ? [...endElement.parentElement.children].indexOf(endElement)
+    : -1;
+  return listIndex
 };
 
-const increment = oldElementData => {
-  const elementData = clone(oldElementData);
-  elementData.start = elementData.end;
-  elementData.end += 1;
-  return elementData
+const turnThePage = (topElement, pageNum, stdHdrHeight, ftNote, editor) => {
+  // Set some values for the next page.
+  ftNote.pageNotesHeight = 0;
+  ftNote.start = ftNote.totalNum;
+  ftNote.end = -1;
+  pageNum += 1;
+  const top = topElement
+    ? topElement.getBoundingClientRect().top
+    : editor.getBoundingClientRect().bottom;
+  return [topElement, null, pageNum, stdHdrHeight, top];
 };
 
-const findPageBreaks = (view, state, purpose, tocSchema, startLevel, endLevel = 0) => {
-  const doc = state.doc;
-  const headerExists = doc.nodeAt(0).type.name === "header";
-  let tocNode;
-  let nodePos = 0;
-  if (purpose === forPrint) {
-    [tocNode, nodePos] = findTOC(doc);
-    if (tocNode) {
+
+
+function paginate(view, tocSchema, purpose, startLevel, endLevel) {
+  const doc = view.state.doc;
+  const [tocNode, nodePos] = findTOC(doc);
+  if (startLevel || tocNode) {
+    if (tocNode && !startLevel) {
       startLevel = tocNode.attrs.start;
       endLevel = tocNode.attrs.end;
     }
+    const tocArray = getDraftTocArray(doc, startLevel, endLevel);
+    // Write a Table of Contents into the document.
+    // TODO: Dispatch a transaction only if necessary to get the length correct.
+    const attrs = {
+      start: tocNode.attrs.start,
+      end: tocNode.attrs.end,
+      body: tocArray
+    };
+    const tr = view.state.tr;
+    tr.replaceWith(nodePos, nodePos + 1, tocSchema.createAndFill(attrs));
+    view.dispatch(tr);
   }
-  let tocRegEx;
-  if (endLevel > 0) {
-    let targetStr = "^(";
-    for (let i = startLevel; i <= endLevel; i++) {
-      targetStr += "H" + i + "|";
+
+  // Note: 1 inch = 96 px & 16 mm margins = 121 px
+  const pageHeight = (doc.attrs.pageSize === "letter" ? 11 * 96 : 297 / 25.4 * 96) - 121;
+
+  // A closed function
+  const isOrphan = nextElement => {
+    if (!nextElement) { return false }
+    const rect = nextElement.getBoundingClientRect();
+    if (pageHeight - headerHeight - ftNote.pageNotesHeight - minElemHeight <
+      rect.top - pageTop) {
+      return true
     }
-    targetStr = targetStr.slice(0, -1) + ")$";
-    tocRegEx = targetStr.length > 0 ? RegExp(targetStr) : null;
+    if (nextElement.tagName === "DIV" && nextElement.className === "tableWrapper") {
+      if (pageHeight - headerHeight - ftNote.pageNotesHeight < rect.bottom - pageTop) {
+        return true
+      }
+    }
+
+    let imageBottom = rect.top;
+    const images = nextElement.getElementsByTagName("img");
+    if (images.length > 0) {
+      imageBottom = images[0].getBoundingClientRect().bottom;
+    }
+    const svgs = nextElement.getElementsByTagName("svg");
+    if (svgs.length > 0) {
+      imageBottom = Math.max(imageBottom, svgs[0].getBoundingClientRect().bottom);
+    }
+    return (pageHeight - headerHeight - ftNote.pageNotesHeight < imageBottom - pageTop)
+  };
+
+  // This closed function is the main effort. A recursive function to work thru the doc.
+  function processChildren(element) {
+    const children = element.children;
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i];
+      const bottom = bottomOf(child);
+      const rect = child.getBoundingClientRect();
+      // Get the next element in the doc
+      let el = child;
+      let nextElement = el.nextElementSibling;
+      while (nextElement === null && el.className !== "editor") {
+        el = el.parentElement;
+        nextElement = el.nextElementSibling;
+      }
+      // Investigate the element for footnotes
+      getElementFootnoteData(child, footnotes, ftNote, ctx);
+
+      if (child.tagName === "H1" && rect.top - pageTop > 0.75 * pageHeight) {
+        // Prevent an H1 heading near the bottom of the page. Start a new page.
+        listIndex = populatePage(startElement, endElement, header, pageNum, pageTop,
+                pageHeight, headerHeight, ftNote, footnotes, destination, listIndex)
+        ;[startElement, endElement, pageNum, headerHeight, pageTop] =
+            turnThePage(child, pageNum, stdHdrHeight, ftNote, editor);
+
+      } else if (headsRegEx.test(child.tagName) && isOrphan(nextElement)) {
+        // Prevent a heading directly above an orphan. Start a new page.
+        listIndex = populatePage(startElement, endElement, header, pageNum, pageTop,
+                 pageHeight, headerHeight, ftNote, footnotes, destination, listIndex)
+        ;[startElement, endElement, pageNum, headerHeight, pageTop] =
+            turnThePage(child, pageNum, stdHdrHeight, ftNote, editor);
+
+      } else if ((child.tagName === "OL" || child.tagName === "UL") &&
+                  rect.botton - pageTop < 32) {
+        // Prevent a list orphan.
+        listIndex = populatePage(startElement, endElement, header, pageNum, pageTop,
+                pageHeight, headerHeight, ftNote, footnotes, destination, listIndex)
+        ;[startElement, endElement, pageNum, headerHeight, pageTop] =
+            turnThePage(child, pageNum, stdHdrHeight, ftNote, editor);
+
+      } else if (pageHeight - headerHeight - ftNote.pageNotesHeight - ftNote.elemNotesHeight
+                  >= bottom - pageTop) {
+        // Include this element in the page.
+        endElement = child;
+        ftNote.pageNotesHeight += ftNote.elemNotesHeight;
+        ftNote.totalNum += ftNote.numFtNotesInElem;
+        ftNote.end += ftNote.numFtNotesInElem;
+
+      } else if (child.tagName !== "P" &&
+          !(child.tagName === "DIV" && child.className === "tableWrapper")) {
+        // Examime the children of this element. Maybe some of them fit onto the page.
+        processChildren(child);
+
+      } else {
+        // Wrap up the current page and start a new page.
+        listIndex = populatePage(startElement, endElement, header, pageNum, pageTop,
+                 pageHeight, headerHeight, ftNote, footnotes, destination, listIndex)
+        ;[startElement, endElement, pageNum, headerHeight, pageTop] =
+            turnThePage(child, pageNum, stdHdrHeight, ftNote, editor);
+      }
+    }
   }
-  const tocArray = [];
-  let header;
-  // Note: 1 inch = 96 px
-  let grossPageHeight = doc.attrs.pageSize === "letter" ? 11 * 96 : 297 / 25.4 * 96;
-  grossPageHeight = grossPageHeight - 121;   // 16 mm margins
-  let pageHeight = grossPageHeight;          // w/o accounting for header
+
+  // Now proceed to paginate the document.
+  const [editor] = document.getElementsByClassName("ProseMirror-setup");
+  let pageTop = editor.children[0].getBoundingClientRect().top;
+  const destination = document.getElementById("print-div");
+  destination.innerHTML = "";
+  let startElement = editor.children[0];
+  let endElement = null;
+  let header = null;
+  let stdHdrHeight = 0;
   let headerHeight = 0;
-  if (headerExists) {
+  let listIndex = -1;
+  const ftNote = { totalNum: 0, start: 0, end: -1, pageNotesHeight: 0 };
+  const minElemHeight = 3.2 * doc.attrs.fontSize;
+  let pageNum = 1;
+
+  if (doc.nodeAt(0).type.name === "header") {
     header = document.getElementsByTagName("header")[0].children[0].children[0].cloneNode(true);
     header.classList.add("header");
     header.innerHTML = header.innerHTML.replace(
       "$PAGE",
       '&nbsp;<span class="page-display"></span>'
     );
-    const headerRect = document.getElementsByTagName("header")[0].getBoundingClientRect();
-    headerHeight = headerRect.bottom - headerRect.top;
+    const origHeader = document.getElementsByTagName("header")[0];
+    const headerRect = origHeader.getBoundingClientRect();
+    stdHdrHeight = headerRect.bottom - headerRect.top;
   }
 
   // Spin up a canvas for measurement of footnote width
   const measurementCanvas = document.createElement('canvas');
   const ctx =  measurementCanvas.getContext('2d');
   ctx.font = `${String(doc.attrs.fontSize)}pt Calibri, san-serif`;
-  const lineBoxHeight = doc.attrs.fontSize === 12 ? 19.2 : 16;
-  const footnoteBotMargin = doc.attrs.fontSize === 12 ? 16 : 13.333;
+  ftNote.hrHeight = doc.attrs.fontSize === 12 ? 33 : 29;
+  ftNote.lineBoxHeight = doc.attrs.fontSize === 12 ? 19.2 : 16;
+  ftNote.botMargin = doc.attrs.fontSize === 12 ? 16 : 13.333;
 
   // Get the content of each footnote
   const footnotes = [];
@@ -25421,247 +25608,11 @@ const findPageBreaks = (view, state, purpose, tocSchema, startLevel, endLevel = 
     }
   });
 
-  // A closed function for checking footnote height
-  const checkFootnotes = (element, noteBlockHeight) => {
-    // Check for footnote(s) in the element
-    const local = { numFootnotes: 0, deltaBlock: 0 };
-    const footnoteNodeList = element.querySelectorAll("footnote");
-    if (footnoteNodeList.length > 0) {
-      local.deltaBlock += noteBlockHeight === 0 ? 25 : 0; // <hr> is 25 px high
-      // eslint-disable-next-line no-unused-vars
-      for (const node of footnoteNodeList) {
-        const text = footnotes[numFootnotes].text;
-        // A footnote has 620 px available width. We'll use 615 to allow for text styles.
-        const numLines = Math.ceil(ctx.measureText(text).width / 615);
-        local.deltaBlock += (numLines * lineBoxHeight) + footnoteBotMargin;
-        local.numFootnotes += 1;
-      }
-    }
-    return local
-  };
-
-  // A second closed function, to split the elements into pages.
-  const pageSplit = (iParent, iStart, iPass, pageData, elementData, top) => {
-    const elements = iParent === null ? editor.children : editor.children[iParent].children;
-    for (let i = iStart; i < elements.length; i++) {
-      const el = elements[i];
-      elementData = (iParent === null) ? { index: i, all: true } : elementData;
-
-      if (iParent === null && el.children.length > 1 && (lists.includes(el.tagName) ||
-             (el.tagName === "DIV" && blockRegEx$1.test(el.className)))) {
-        elementData.all = false;
-        elementData.start = 0;
-        elementData.end = 0;
-        elementData.tagName = el.tagName;
-        elementData.className = el.className;
-        elementData.breaks = [];
-        // Recursive call. Loop thru the children of the current top-level element.
-        [pageData, top] = pageSplit(i, 0, iPass, pageData, elementData, top);
-        continue
-
-      } else {
-        if (el.tagName === "H1" && el.getBoundingClientRect().top - top > 0.75 * pageHeight) {
-          // prevent an H1 near the bottom of the page
-          if (purpose === forPrint && iPass === 1) {
-            pageHeight = populatePage(pageData, gap);
-          }
-          top = getTop(editor, pageData);
-          pageData = [elementData];
-          [noteBlockHeight, prevNumNotes, pageNum] = [0, numFootnotes, pageNum + 1];
-          if (iParent !== null) { elementData = increment(elementData); }
-          if (iPass === 0 && tocRegEx && tocRegEx.test(el.tagName)) {
-            const level = Number(el.tagName.slice(1)) - startLevel;
-            tocArray.push([el.textContent, level, pageNum]);
-          }
-          continue
-        }
-
-        if (headsRegEx.test(el.tagName)) {
-          // This element is a heading.
-          // Look ahead one element. Prevent a heading orphan.
-          let nextFits = true;  // default
-          if (i + 1 === elements.length) {
-            nextFits = true;
-          } else {
-            const element = elements[i + 1];
-            let next = checkFootnotes(element, noteBlockHeight);
-            if (pageHeight - (noteBlockHeight + next.deltaBlock) > bottomOf(element) - top) {
-              nextFits = true;
-            } else if (element.children.length > 1 && (lists.includes(element.tagName) ||
-                   (element.tagName === "DIV" && blockRegEx$1.test(element.className)))) {
-              const firstBot = bottomOf(element.children[0]);
-              next = checkFootnotes(element.children[0], noteBlockHeight);
-              nextFits = (firstBot - top > pageHeight - (noteBlockHeight + next.deltaBlock));
-            } else {
-              nextFits = false;
-            }
-          }
-          if (!nextFits) {
-            if (!headerExists) {
-              if (iParent === null) {
-                elementData.breakBefore = true;
-              } else {
-                elementData.breaks.push(i);
-              }
-            }
-            if (purpose === forPrint && iPass === 1) {
-              pageHeight = populatePage(pageData, gap);
-            }
-            top = getTop(editor, pageData);
-            pageData = [elementData];
-            [noteBlockHeight, prevNumNotes, pageNum] = [0, numFootnotes, pageNum + 1];
-            if (iParent !== null) { elementData = increment(elementData); }
-            if (iPass === 0 && tocRegEx && tocRegEx.test(el.tagName)) {
-              const level = Number(el.tagName.slice(1)) - startLevel;
-              tocArray.push([el.textContent, level, pageNum]);
-            }
-            continue
-          }
-        }
-
-        const bottom = bottomOf(el);
-        const local = checkFootnotes(el, noteBlockHeight);
-
-        if (pageHeight - (noteBlockHeight + local.deltaBlock) > bottom - top) {
-          numFootnotes += local.numFootnotes;
-          noteBlockHeight += local.deltaBlock;
-          if (iParent === null) {
-            pageData.push(elementData);
-          } else {
-            elementData.end += 1;
-          }
-          // Update the gap between the text and the footnote block
-          gap = pageHeight - noteBlockHeight - (bottom - top);
-        } else {
-          // The element does not fit onto the current page.
-          if (purpose === forPrint && iPass === 1) {
-            if (iParent !== null) { pageData.push(clone(elementData)); }
-            pageHeight = populatePage(pageData, gap);
-          }
-          top = getTop(editor, pageData);
-          if (iParent !== null) { elementData.start = i; }
-          pageData = [clone(elementData)];
-          [noteBlockHeight, prevNumNotes, pageNum] = [0, numFootnotes, pageNum + 1];
-          if (iParent !== null) { elementData = increment(elementData); }
-        }
-
-        if (iPass === 0 && tocRegEx && tocRegEx.test(el.tagName)) {
-          const level = Number(el.tagName.slice(1)) - startLevel;
-          tocArray.push([el.textContent, level, pageNum]);
-        }
-      }
-    }
-    if (iParent !== null) {
-      if (elementData.start === 0 &&
-          elementData.end === editor.children[iParent].children.length) {
-        elementData.all = true; // Transfer in one block
-      }
-      pageData.push(elementData);
-    } else if (purpose === forPrint && iPass === 1) {
-      pageHeight = populatePage(pageData, gap);
-    }
-    return [pageData, top]
-  };
-
-  // A third closed function, to create one printed page.
-  const populatePage = (pageData, gap) => {
-    // Copy the identified elements to the destination div.
-    const page = document.createDocumentFragment();
-    if (headerExists && pageNum > 1) {
-      page.append(header.cloneNode(true));
-    }
-    // Create a body div
-    const div = document.createElement("div");
-    div.className = "print-body";
-    for (const elementData of pageData) {
-      const i = elementData.index;
-      if (elementData.all) {
-        div.append(editor.children[i].cloneNode(true));
-        if (elementData.breakBefore) {
-          div.lastChild.style.breakBefore = "page";
-        }
-      } else {
-        const el = document.createElement(elementData.tagName);
-        if (elementData.className) { el.classList.add(elementData.className); }
-        if (elementData.breaks.includes(i)) { el.style["break-before"] = "page"; }
-        if (elementData.tagName === "OL" && elementData.start > 0) {
-          el.setAttribute("start", elementData.start);
-        }
-        for (let j = elementData.start; j < elementData.end; j++) {
-          el.appendChild(editor.children[i].children[j].cloneNode(true));
-        }
-        div.append(el);
-      }
-    }
-    page.append(div);
-    if (numFootnotes > prevNumNotes) {
-      // Write footnotes at the bottom of the page.
-      if (gap > 0) {
-        const spacer = document.createElement("div");
-        spacer.style.height = (gap - 2) + "px";
-        page.append(spacer);
-      }
-      page.append(document.createElement("hr"));
-      const ol = document.createElement("ol");
-      if (prevNumNotes > 0) {
-        ol.setAttribute("start", String(prevNumNotes + 1));
-      }
-      for (let j = prevNumNotes; j < numFootnotes; j++) {
-        const graf = document.createElement("p");
-        graf.innerHTML = footnotes[j].innerHTML;
-        const li = document.createElement("li");
-        li.appendChild(graf);
-        ol.appendChild(li);
-      }
-      page.append(ol);
-      prevNumNotes = numFootnotes;
-    }
-    destination.append(page);
-    return grossPageHeight - headerHeight
-  };
-
-  // Now that the closed functions are written, proceed to pagination
-  const [editor] = document.getElementsByClassName("ProseMirror-setup");
-  const destination = document.getElementById("print-div");
-  destination.innerHTML = "";
-  let numFootnotes = 0;
-  let prevNumNotes = 0;
-  let noteBlockHeight = 0;
-  let gap = 0;
-  let pageNum = 1;
-
-  // For printing, make two passes of the next loop.
-  //   (0) Update the Table of Contents.
-  //   (1) Copy elements to the print div.
-  // Otherwise, one pass to populate the table of contents.
-  const numPasses = purpose === forPrint ? 2 : 1;
-  for (let iPass = 0; iPass < numPasses; iPass++) {
-    const iStart = headerExists ? 1 : 0;
-    const top = editor.children[0].getBoundingClientRect().top;
-
-    pageSplit(null, iStart, iPass, [], null, top);
-
-    if (iPass === 0 && purpose === forPrint && tocNode) {
-      // Write a Table of Contents into the document, with correct page numbers.
-      const attrs = {
-        start: tocNode.attrs.start,
-        end: tocNode.attrs.end,
-        body: tocArray
-      };
-      const tr = state.tr;
-      tr.replaceWith(nodePos, nodePos + 1, tocSchema.createAndFill(attrs));
-      view.dispatch(tr);
-    }
-    pageNum = 1;
-    numFootnotes = 0;
-    prevNumNotes = 0;
-    noteBlockHeight = 0;
-  }
-
-  if (purpose === forToC) {
-    return tocArray
-  }
-};
+  // Start the pagination.
+  processChildren(editor);
+  populatePage(startElement, editor, header, pageNum, pageTop, pageHeight, headerHeight,
+    ftNote, footnotes, destination, listIndex);
+}
 
 const renderSVG = dwg => {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -54309,8 +54260,8 @@ const findParentNode = predicate => selection => {
 };
 
 // Export printHurmet so that it is available in keymap.js
-function printHurmet(state, view) {
-  findPageBreaks(view, state, forPrint, schema.nodes.toc);
+function printHurmet(view) {
+  paginate(view, schema.nodes.toc);
   window.print();
 }
 
@@ -54319,7 +54270,7 @@ const print = () => {
     title: "Print",
     label: "Print…",
     run(state, _, view) {
-      printHurmet(state, view);
+      printHurmet(view);
     }
   })
 };
@@ -55040,7 +54991,7 @@ function insertToC(nodeType) {
           const same = $from.sharedDepth($to);
           const startPos = same !== 0 ? $from.before(same) : $from.pos;
           const endPos = same !== 0 ? $from.after(same) : startPos + 1;
-          attrs.body = findPageBreaks(view, state, forToC, schema.nodes.toc, attrs.start, attrs.end);
+          attrs.body = paginate(view, schema.nodes.toc, forToC,  attrs.start, attrs.end);
           dispatch(state.tr.replaceWith(startPos, endPos, nodeType.createAndFill(attrs)));
         }
       });
@@ -56155,7 +56106,7 @@ function buildKeymap(schema, mapKeys) {
   }
 
   bind("Ctrl-s", (state, _, view) => { saveFileAsMarkdown(state, view); return true });
-  bind("Ctrl-p", (state, _, view) => { printHurmet(state, view); return true });
+  bind("Ctrl-p", (state, _, view) => { printHurmet(view); return true });
   bind("Alt-j", (state, _, view) => { readFile(state, _, view, schema, "hurmet"); return true });
   bind("Mod-z", undo);
   bind("Shift-Mod-z", redo);

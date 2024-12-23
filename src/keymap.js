@@ -61,7 +61,7 @@ export function buildKeymap(schema, mapKeys) {
   }
 
   bind("Ctrl-s", (state, _, view) => { saveFileAsMarkdown(state, view); return true })
-  bind("Ctrl-p", (state, _, view) => { printHurmet(state, view); return true })
+  bind("Ctrl-p", (state, _, view) => { printHurmet(view); return true })
   bind("Alt-j", (state, _, view) => { readFile(state, _, view, schema, "hurmet"); return true })
   bind("Mod-z", undo)
   bind("Shift-Mod-z", redo)

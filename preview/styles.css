@@ -173,9 +173,10 @@ article {
 
 /* For printed documents */
 /* Note: page size & margins are set in the index.html <style> element. */
+/*
 @media screen {
   #print-div { display: none; }
-}
+}*/
 div #print-div { width: 672px; font-size: 12pt; counter-increment: pageNum; }
 div #print-div .long-primer { font-size: 10 pt; }
 .header { break-before: page; counter-increment: pageNum; }
@@ -1196,7 +1197,9 @@ math .special-fraction { font-family: "Times New Roman"; }
   padding: 2px 3px;
 }
 .ProseMirror table p { line-height: 1.2; margin: 2px 0 2px 0; }
+/* print header */
 .ProseMirror header table p  { line-height: 1.6; }
+.ProseMirror table.header p  { line-height: 1.6; }
 .ProseMirror td > *, .ProseMirror th > *,
 .ProseMirror td > *:first-child {
   margin-top: 2px;
