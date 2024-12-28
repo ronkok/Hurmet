@@ -337,8 +337,11 @@ export function paginate(view, tocSchema, purpose, startLevel, endLevel) {
 
   // Start the pagination.
   processChildren(editor)
-  populatePage(startElement, editor, header, pageNum, pageTop, pageHeight, headerHeight,
-    ftNote, footnotes, destination, listIndex)
+  populatePage(
+    startElement, editor.lastChild, header,
+    pageNum, pageTop, pageHeight, headerHeight,
+    ftNote, footnotes, destination, listIndex
+  )
 }
 
 
