@@ -174,10 +174,9 @@ article {
 
 /* For printed documents */
 /* Note: page size & margins are set in the index.html <style> element. */
-/*
 @media screen {
   #print-div { display: none; }
-}*/
+}
 div #print-div { width: 672px; font-size: 12pt; counter-increment: pageNum; }
 div #print-div .long-primer { font-size: 10 pt; }
 .header { break-before: page; counter-increment: pageNum; }
