@@ -32,12 +32,11 @@ const findTOC = doc => {
   return [tocNode, nodePos]
 }
 
-export const tocLevels = entry => {
+export const tocLevels = (entry, attrs) => {
   // Determine the start and end heading levels
   const parts = entry.match(levelRegEx)
-  const startLevel = Number(parts[1])
-  const endLevel = Number(parts[2] ? parts[2] : startLevel)
-  return [startLevel, endLevel]
+  attrs.tocStartLevel = Number(parts[1])
+  attrs.tocEndLevel = Number(parts[2] ? parts[2] : attrs.tocStartLevel)
 }
 
 const footnoteContents = textNodes => {
@@ -72,44 +71,83 @@ export const renderToC = (tocArray, ul) => {
   }
 }
 
-const getDraftTocArray = (doc, startLevel, endLevel) => {
+const getDraftTocArray = (doc, attrs) => {
   const tocArray = [];
   doc.nodesBetween(0, doc.content.size, function(node, pos) {
-    if (node.type.name === "heading" && startLevel <= node.attrs.level
-                                     && node.attrs.level <= endLevel) {
-      tocArray.push([node.textContent, node.attrs.level, 0])
+    if (node.type.name === "heading" && attrs.tocStartLevel <= node.attrs.level
+                                     && node.attrs.level <= attrs.tocEndLevel) {
+      tocArray.push([node.textContent, node.attrs.level, -1])
     }
   })
   return tocArray
 }
 
+const numHeads = (fragment, attrs) => {
+  if (attrs.tocEndLevel === 0) { return 0 }
+  let numHeadings = 0
+  for (let i = attrs.tocStartLevel; i <= attrs.tocEndLevel; i++) {
+    const headings = fragment.getElementsByTagName("H" + String(i))
+    numHeadings += headings.length
+  }
+  return numHeadings
+}
+
 // Check footnote height
-const getElementFootnoteData = (element, footnotes, ftNote, ctx ) => {
+const getElementFootnoteData = (element, attrs, ctx ) => {
   // Check for footnote(s) in the element
-  ftNote.numFtNotesInElem = 0
-  ftNote.elemNotesHeight = 0
+  attrs.ftNote.numFtNotesInElem = 0
+  attrs.ftNote.elemNotesHeight = 0
   const footnoteNodeList = element.querySelectorAll("footnote")
   if (footnoteNodeList.length > 0) {
-    if (ftNote.end === -1) {
+    if (attrs.ftNote.end === -1) {
       // The current page has no previous footnotes.
-      ftNote.elemNotesHeight += ftNote.hrHeight  // For the <hr> above the footnote block
-      ftNote.end = ftNote.start - 1
+      attrs.ftNote.elemNotesHeight += attrs.ftNote.hrHeight  // For the <hr>
+      attrs.ftNote.end = attrs.ftNote.start - 1
     }
-    for (let i = ftNote.totalNum; i < ftNote.totalNum + footnoteNodeList.length; i++) {
-      const text = footnotes[i].text;
+    for (let i = attrs.ftNote.totalNum;
+             i < attrs.ftNote.totalNum + footnoteNodeList.length; i++) {
+      const text = attrs.footnotes[i].text;
       // A footnote has 620 px available width. We'll use 615 to allow for text styles.
       const numLines = Math.ceil(ctx.measureText(text).width / 615)
-      ftNote.elemNotesHeight += (numLines * ftNote.lineBoxHeight) + ftNote.botMargin
-      ftNote.numFtNotesInElem += 1
+      attrs.ftNote.elemNotesHeight += (numLines * attrs.ftNote.lineBoxHeight) +
+                                       attrs.ftNote.botMargin
+      attrs.ftNote.numFtNotesInElem += 1
     }
   }
 }
 
-const populatePage = (startElement, endElement, header, pageNum, pageTop,
-          pageHeight, headerHeight, ftNote, footnotes, destination, listIndex) => {
-  // Create a page
+const isOrphan = (nextElement, attrs) => {
+  // Is nextElement an orphan?
+  if (!nextElement) { return false }
+  const rect = nextElement.getBoundingClientRect()
+  if (attrs.pageHeight - attrs.headerHeight - attrs.ftNote.pageNotesHeight -
+      attrs.minElemHeight - attrs.tocAdjustment <  rect.top - attrs.pageTop) {
+    return true
+  }
+  if (nextElement.tagName === "DIV" && nextElement.className === "tableWrapper") {
+    if (attrs.pageHeight - attrs.headerHeight - attrs.ftNote.pageNotesHeight -
+      attrs.tocAdjustment < rect.bottom - attrs.pageTop) {
+      return true
+    }
+  }
+
+  let imageBottom = rect.top
+  const images = nextElement.getElementsByTagName("img")
+  if (images.length > 0) {
+    imageBottom = images[0].getBoundingClientRect().bottom
+  }
+  const svgs = nextElement.getElementsByTagName("svg")
+  if (svgs.length > 0) {
+    imageBottom = Math.max(imageBottom, svgs[0].getBoundingClientRect().bottom)
+  }
+  return (attrs.pageHeight - attrs.headerHeight - attrs.ftNote.pageNotesHeight -
+          attrs.tocAdjustment < imageBottom - attrs.pageTop)
+}
+
+const populatePage = (startElement, endElement, header, destination, attrs) => {
+  // Create a page in `print-div` and populate it with elements.
   const page = document.createDocumentFragment()
-  if (header && pageNum > 1) {
+  if (header && attrs.pageNum > 0) {
     const printHeader = header.cloneNode(true)
     printHeader.style.breakBefore = "page"
     page.append(printHeader)
@@ -117,26 +155,50 @@ const populatePage = (startElement, endElement, header, pageNum, pageTop,
   // Create a body div
   const printBody = document.createElement("div")
   printBody.className = "print-body"
-  if (!(header && pageNum > 1)) {
+  if (!(header && attrs.pageNum > 0)) {
     printBody.style.breakBefore = "page"
   }
 
   // Define the appropriate range of elements and append a copy of the range.
   const range = new Range()
-  range.setStartBefore(startElement)
-  range.setEndAfter(endElement)
+
+  if (attrs.pageTopChild === -1 || (attrs.pageTopChild === 0 && attrs.pageTopOffset === 0)) {
+    range.setStartBefore(startElement)
+  } else {
+    range.setStart(startElement.childNodes[attrs.pageTopChild], attrs.pageTopOffset)
+  }
+  if (attrs.pageBottomChild === -1) {
+    range.setEndAfter(endElement)
+  } else {
+    range.setEnd(endElement.childNodes[attrs.pageBottomChild], attrs.pageBottomOffset)
+  }
+
   printBody.appendChild(range.cloneContents())
-  if (listIndex >= 0) {
+  if (attrs.listIndex >= 0) {
     // The page break occurred in the middle of an ordered list. Fix the start.
     const lists = printBody.getElementsByTagName("OL")
-    lists[0].setAttribute("start", String(listIndex + 2))
+    lists[0].setAttribute("start", String(attrs.listIndex + 2))
   }
   page.appendChild(printBody)
 
-  if (ftNote.end >= 0) {
+  // Update table of contents array
+  const numHeadingsInThisPage = numHeads(printBody, attrs)
+  if (numHeadingsInThisPage > 0) {
+    let j = 0
+    for (let i = 0; i < attrs.tocArray.length; i++) {
+      if (attrs.tocArray[i][2] === -1) { j = i; break }
+    }
+    for (let i = 0; i < numHeadingsInThisPage; i++) {
+      attrs.tocArray[j][2] = attrs.pageNum
+      j += 1
+    }
+  }
+
+  if (attrs.ftNote.end >= 0) {
     // Write footnotes at the bottom of the page.
-    const bodyHeight = endElement.getBoundingClientRect().bottom - pageTop
-    const gap = pageHeight - headerHeight - bodyHeight - ftNote.pageNotesHeight
+    const bodyHeight = endElement.getBoundingClientRect().bottom - attrs.pageTop
+    const gap = attrs.pageHeight - attrs.headerHeight - bodyHeight -
+                attrs.ftNote.pageNotesHeight
     if (gap > 0) {
       const spacer = document.createElement("div")
       spacer.style.height = (gap - 2) + "px"
@@ -144,12 +206,12 @@ const populatePage = (startElement, endElement, header, pageNum, pageTop,
     }
     page.append(document.createElement("hr"))
     const ol = document.createElement("ol")
-    if (ftNote.start > 0) {
-      ol.setAttribute("start", String(ftNote.start + 1))
+    if (attrs.ftNote.start > 0) {
+      ol.setAttribute("start", String(attrs.ftNote.start + 1))
     }
-    for (let j = ftNote.start; j <= ftNote.end; j++) {
+    for (let j = attrs.ftNote.start; j <= attrs.ftNote.end; j++) {
       const graf = document.createElement("p")
-      graf.innerHTML = footnotes[j].innerHTML
+      graf.innerHTML = attrs.footnotes[j].innerHTML
       const li = document.createElement("li")
       li.appendChild(graf)
       ol.appendChild(li)
@@ -160,82 +222,54 @@ const populatePage = (startElement, endElement, header, pageNum, pageTop,
   destination.append(page)
 
   // Check if the ending page break occcurred in the middle of an ordered list
-  listIndex = (endElement.tagName === "LI" && endElement.parentElement.tagName === "OL")
+  attrs.listIndex = (endElement.tagName === "LI" && endElement.parentElement.tagName === "OL")
     ? [...endElement.parentElement.children].indexOf(endElement)
     : -1
-  return listIndex
+  return
 }
 
-const turnThePage = (topElement, pageNum, stdHdrHeight, ftNote, editor) => {
+const turnThePage = (topElement, attrs, editor) => {
   // Set some values for the next page.
-  ftNote.pageNotesHeight = 0
-  ftNote.start = ftNote.totalNum
-  ftNote.end = -1
-  pageNum += 1
-  const top = topElement
+  attrs.headerHeight = attrs.stdHdrHeight
+  attrs.ftNote.pageNotesHeight = 0
+  attrs.ftNote.start = attrs.ftNote.totalNum
+  attrs.ftNote.end = -1
+  attrs.pageNum += 1
+  if (topElement) {
+    if (attrs.pageBottomChild >= 0 && attrs.pageBottomOffset > 0) {
+      const range = new Range()
+      const textNode = topElement.childNodes[attrs.pageBottomChild];
+      range.setStart(textNode, attrs.pageBottomOffset)
+      range.setEnd(textNode, attrs.pageBottomOffset + 1)
+      attrs.pageTop = range.getBoundingClientRect().top
+    } else {
+      attrs.pageTop = topElement.getBoundingClientRect().top
+    }
+  }  else {
+    attrs.pageTop = editor.getBoundingClientRect().bottom
+  }
+  /*attrs.pageTop = topElement
     ? topElement.getBoundingClientRect().top
-    : editor.getBoundingClientRect().bottom
-  return [topElement, null, pageNum, stdHdrHeight, top];
+    : editor.getBoundingClientRect().bottom */
+  attrs.pageTopChild = attrs.pageBottomChild
+  attrs.pageTopOffset = attrs.pageBottomOffset
+  attrs.pageBottomChild = -1
+  attrs.pageBottomOffset = 0
+  return [topElement, null]
 }
 
+export function paginate(view, tocSchema, purpose, tocStartLevel, tocEndLevel) {
 
-
-export function paginate(view, tocSchema, purpose, startLevel, endLevel) {
-  const doc = view.state.doc
-  const [tocNode, nodePos] = findTOC(doc)
-  if (startLevel || tocNode) {
-    if (tocNode && !startLevel) {
-      startLevel = tocNode.attrs.start
-      endLevel = tocNode.attrs.end
-    }
-    const tocArray = getDraftTocArray(doc, startLevel, endLevel)
-    // Write a Table of Contents into the document.
-    // TODO: Dispatch a transaction only if necessary to get the length correct.
-    const attrs = {
-      start: tocNode.attrs.start,
-      end: tocNode.attrs.end,
-      body: tocArray
-    }
-    const tr = view.state.tr
-    tr.replaceWith(nodePos, nodePos + 1, tocSchema.createAndFill(attrs))
-    view.dispatch(tr)
-  }
-
-  // Note: 1 inch = 96 px & 16 mm margins = 121 px
-  const pageHeight = (doc.attrs.pageSize === "letter" ? 11 * 96 : 297 / 25.4 * 96) - 121
-
-  // A closed function
-  const isOrphan = nextElement => {
-    if (!nextElement) { return false }
-    const rect = nextElement.getBoundingClientRect()
-    if (pageHeight - headerHeight - ftNote.pageNotesHeight - minElemHeight <
-      rect.top - pageTop) {
-      return true
-    }
-    if (nextElement.tagName === "DIV" && nextElement.className === "tableWrapper") {
-      if (pageHeight - headerHeight - ftNote.pageNotesHeight < rect.bottom - pageTop) {
-        return true
-      }
-    }
-
-    let imageBottom = rect.top
-    const images = nextElement.getElementsByTagName("img")
-    if (images.length > 0) {
-      imageBottom = images[0].getBoundingClientRect().bottom
-    }
-    const svgs = nextElement.getElementsByTagName("svg")
-    if (svgs.length > 0) {
-      imageBottom = Math.max(imageBottom, svgs[0].getBoundingClientRect().bottom)
-    }
-    return (pageHeight - headerHeight - ftNote.pageNotesHeight < imageBottom - pageTop)
-  }
-
-  // This closed function is the main effort. A recursive function to work thru the doc.
+  // This closed function is recursive. It will work thru the entire doc.
   function processChildren(element) {
     const children = element.children
     for (let i = 0; i < children.length; i++) {
       const child = children[i];
       const bottom = bottomOf(child)
+      attrs.tocAdjustment = 0
+      if (mustAdjustToC && attrs.pageTop <= attrs.tocTop && attrs.tocTop < bottom) {
+        attrs.tocAdjustment = deltaToC
+      }
       const rect = child.getBoundingClientRect()
       // Get the next element in the doc
       let el = child
@@ -244,69 +278,129 @@ export function paginate(view, tocSchema, purpose, startLevel, endLevel) {
         el = el.parentElement
         nextElement = el.nextElementSibling
       }
-      // Investigate the element for footnotes
-      getElementFootnoteData(child, footnotes, ftNote, ctx)
+      // Find out if child contains any footnotes.
+      getElementFootnoteData(child, attrs, ctx)
 
-      if (child.tagName === "H1" && rect.top - pageTop > 0.75 * pageHeight) {
+      if (child.tagName === "H1" && rect.top - attrs.pageTop > 0.75 * attrs.pageHeight) {
         // Prevent an H1 heading near the bottom of the page. Start a new page.
-        listIndex = populatePage(startElement, endElement, header, pageNum, pageTop,
-                pageHeight, headerHeight, ftNote, footnotes, destination, listIndex)
-        ;[startElement, endElement, pageNum, headerHeight, pageTop] =
-            turnThePage(child, pageNum, stdHdrHeight, ftNote, editor)
+        populatePage(startElement, endElement, header, destination, attrs)
+        ;[startElement, endElement] = turnThePage(child, attrs, editor)
 
-      } else if (headsRegEx.test(child.tagName) && isOrphan(nextElement)) {
+      } else if (headsRegEx.test(child.tagName) && isOrphan(nextElement, attrs)) {
         // Prevent a heading directly above an orphan. Start a new page.
-        listIndex = populatePage(startElement, endElement, header, pageNum, pageTop,
-                 pageHeight, headerHeight, ftNote, footnotes, destination, listIndex)
-        ;[startElement, endElement, pageNum, headerHeight, pageTop] =
-            turnThePage(child, pageNum, stdHdrHeight, ftNote, editor)
+        populatePage(startElement, endElement, header, destination, attrs)
+        ;[startElement, endElement] = turnThePage(child, attrs, editor)
 
       } else if ((child.tagName === "OL" || child.tagName === "UL") &&
-                  rect.botton - pageTop < 32) {
-        // Prevent a list orphan.
-        listIndex = populatePage(startElement, endElement, header, pageNum, pageTop,
-                pageHeight, headerHeight, ftNote, footnotes, destination, listIndex)
-        ;[startElement, endElement, pageNum, headerHeight, pageTop] =
-            turnThePage(child, pageNum, stdHdrHeight, ftNote, editor)
+                  rect.botton - attrs.pageTop < 32) {
+        // Prevent a list orphan. Insist on more than one item on a page.
+        populatePage(startElement, endElement, header, destination, attrs)
+        ;[startElement, endElement] = turnThePage(child, attrs, editor)
 
-      } else if (pageHeight - headerHeight - ftNote.pageNotesHeight - ftNote.elemNotesHeight
-                  >= bottom - pageTop) {
-        // Include this element in the page.
+      } else if (attrs.pageHeight - attrs.headerHeight - attrs.ftNote.pageNotesHeight -
+                 attrs.ftNote.elemNotesHeight >= bottom + attrs.tocAdjustment -
+                 attrs.pageTop) {
+        // Add this element to the printed page.
         endElement = child
-        ftNote.pageNotesHeight += ftNote.elemNotesHeight
-        ftNote.totalNum += ftNote.numFtNotesInElem
-        ftNote.end += ftNote.numFtNotesInElem
+        attrs.ftNote.pageNotesHeight += attrs.ftNote.elemNotesHeight
+        attrs.ftNote.totalNum += attrs.ftNote.numFtNotesInElem
+        attrs.ftNote.end += attrs.ftNote.numFtNotesInElem
 
       } else if (child.tagName !== "P" &&
           !(child.tagName === "DIV" && child.className === "tableWrapper")) {
         // Examime the children of this element. Maybe some of them fit onto the page.
         processChildren(child)
 
+        // TODO: Prevent orphan
+      } else if (child.tagName === "P" || child.tagName === "PRE" && rect.height > 40) {
+        // We may break in the middle of a long paragraph.
+        const elem = child.tagName === "PRE" ? child.childNodes[0] : child
+        const yMax = attrs.pageTop + attrs.pageHeight - attrs.headerHeight -
+                     attrs.ftNote.pageNotesHeight - attrs.ftNote.elemNotesHeight -
+                     attrs.tocAdjustment
+        const [childIndex, offset] = findParagraphOverflowPoint(elem, yMax)
+        if (childIndex === -1 || (childIndex === 0 && offset === 0)) {
+          // Put the entire paragraph onto the next page
+          populatePage(startElement, endElement, header, destination, attrs)
+          ;[startElement, endElement] = turnThePage(child, attrs, editor)
+        } else {
+          // Split the paragraph
+          attrs.pageBottomChild = childIndex
+          attrs.pageBottomOffset = offset
+          populatePage(startElement, child, header, destination, attrs)
+          ;[startElement, endElement] = turnThePage(child, attrs, editor)
+        }
+
       } else {
         // Wrap up the current page and start a new page.
-        listIndex = populatePage(startElement, endElement, header, pageNum, pageTop,
-                 pageHeight, headerHeight, ftNote, footnotes, destination, listIndex)
-        ;[startElement, endElement, pageNum, headerHeight, pageTop] =
-            turnThePage(child, pageNum, stdHdrHeight, ftNote, editor)
+        populatePage(startElement, endElement, header, destination, attrs)
+        ;[startElement, endElement] = turnThePage(nextElement, attrs, editor)
       }
     }
   }
 
-  // Now proceed to paginate the document.
+  // That completes the closed function. Now proceed to paginate the document.
+  const doc = view.state.doc
   const [editor] = document.getElementsByClassName("ProseMirror-setup")
-  let pageTop = editor.children[0].getBoundingClientRect().top
+  let header = null
+  // Create an attrs object to hold several values.
+  // Otherwise, the populatePage() function would have to pass ~15 parameters.
+  const attrs = {
+    pageNum: 0,
+    pageTop: 0,
+    pageHeight: 0,
+    minElemHeight: 3.2 * doc.attrs.fontSize,
+    stdHdrHeight: 26,  // top & bot margin of a paragraph
+    headerHeight: 26,
+    tocArray: null,
+    tocStartLevel: tocStartLevel,
+    tocEndLevel: tocEndLevel,
+    tocAdjustment: 0,
+    ftNote: { totalNum: 0, start: 0, end: -1, pageNotesHeight: 0 },
+    footNotes: [],
+    listIndex: -1,
+    pageTopChild: -1,
+    pageTopOffset: 0,
+    pageBottomChild: -1,
+    pageBottomOffset: 0
+  }
+
+  // Collect info about the Table of Contents, if any.
+  let mustAdjustToC = false
+  let deltaToC = 0
+  const [tocNode, nodePos] = findTOC(doc)
+  if (tocStartLevel || tocNode) {
+    if (tocNode && !tocStartLevel) {
+      attrs.tocStartLevel = tocNode.attrs.start
+      attrs.tocEndLevel = tocNode.attrs.end
+    }
+    attrs.tocArray = getDraftTocArray(doc, attrs)
+    if ((!tocNode) || tocNode.attrs.body.length !== attrs.tocArray.length) {
+      // Get a corrected height of the Table of Contents
+      mustAdjustToC = true
+      const tocElem = editor.getElementsByClassName("toc")
+      if (tocElem.length > 0) { attrs.tocTop = tocElem[0].getBoundingClientRect().top }
+      // How much taller will the revised ToC be than the existing ToC?
+      const deltaPerLine = doc.attrs.fontSize === 10 ? 16 : 19.195
+      if (tocNode) {
+        deltaToC = (attrs.tocArray.length - tocNode.attrs.body.length) * deltaPerLine
+      } else {
+        const tocMargin = doc.attrs.fontSize === 10 ? 20 : 24
+        deltaToC = attrs.tocArray.length * deltaPerLine + tocMargin
+      }
+    }
+  }
+
+  // Note: 1 inch = 96 px & 16 mm margins = 121 px
+  attrs.pageHeight = (doc.attrs.pageSize === "letter" ? 11 * 96 : 297 / 25.4 * 96) - 121
+  attrs.pageTop = editor.children[0].getBoundingClientRect().top
   const destination = document.getElementById("print-div")
   destination.innerHTML = ""
   let startElement = editor.children[0];
   let endElement = null
-  let header = null
-  let stdHdrHeight = 0
-  let headerHeight = 0
-  let listIndex = -1
-  const ftNote = { totalNum: 0, start: 0, end: -1, pageNotesHeight: 0 }
-  const minElemHeight = 3.2 * doc.attrs.fontSize
-  let pageNum = 1
+  attrs.pageNum = 0
 
+  // Get info about the print header, if any.
   if (doc.nodeAt(0).type.name === "header") {
     header = document.getElementsByTagName("header")[0].children[0].children[0].cloneNode(true)
     header.classList.add("header")
@@ -316,72 +410,169 @@ export function paginate(view, tocSchema, purpose, startLevel, endLevel) {
     )
     const origHeader = document.getElementsByTagName("header")[0];
     const headerRect = origHeader.getBoundingClientRect()
-    stdHdrHeight = headerRect.bottom - headerRect.top
+    attrs.stdHdrHeight = headerRect.bottom - headerRect.top
   }
 
   // Spin up a canvas for measurement of footnote width
   const measurementCanvas = document.createElement('canvas')
   const ctx =  measurementCanvas.getContext('2d')
   ctx.font = `${String(doc.attrs.fontSize)}pt Calibri, san-serif`
-  ftNote.hrHeight = doc.attrs.fontSize === 12 ? 33 : 29
-  ftNote.lineBoxHeight = doc.attrs.fontSize === 12 ? 19.2 : 16
-  ftNote.botMargin = doc.attrs.fontSize === 12 ? 16 : 13.333
+  attrs.ftNote.hrHeight = doc.attrs.fontSize === 12 ? 33 : 29
+  attrs.ftNote.lineBoxHeight = doc.attrs.fontSize === 12 ? 19.2 : 16
+  attrs.ftNote.botMargin = doc.attrs.fontSize === 12 ? 16 : 13.333
 
   // Get the content of each footnote
-  const footnotes = [];
   doc.nodesBetween(0, doc.content.size, function(node, pos) {
     if (node.type.name === "footnote") {
-      footnotes.push(footnoteContents(node.content.content))
+      attrs.footnotes.push(footnoteContents(node.content.content))
     }
   })
 
-  // Start the pagination.
+  // Start the pagination with a call to a recursive function.
   processChildren(editor)
-  populatePage(
-    startElement, editor.lastChild, header,
-    pageNum, pageTop, pageHeight, headerHeight,
-    ftNote, footnotes, destination, listIndex
-  )
+
+  // Create the final page.
+  populatePage(startElement, editor.lastChild, header, destination, attrs)
+
+  // Update the Table of Contents in the document.
+  if (attrs.tocArray && purpose === forPrint) {
+    const tocAttrs = {
+      start: tocNode.attrs.start,
+      end: tocNode.attrs.end,
+      body: attrs.tocArray
+    }
+    const tr = view.state.tr
+    tr.replaceWith(nodePos, nodePos + 1, tocSchema.createAndFill(tocAttrs))
+    view.dispatch(tr)
+    // Copy the editor ToC to the print-div
+    const editorToC = editor.getElementsByClassName("toc")[0];
+    const printToC = destination.getElementsByClassName("toc")[0];
+    printToC.innerHTML = editorToC.innerHTML
+  }
+  return attrs.tocArray
 }
 
 
-
-
-
-function findOverflowingSpan(paragraphNode, paragraphYCoordinate, maxHeightAllowed) {
-  const spans = Array.from(paragraphNode.getElementsByTagName('span'))
-
-  function measureHeight(node) {
-    const rect = node.getBoundingClientRect()
-    return rect.bottom - paragraphYCoordinate
-  }
-
-  function binarySearchTextNode(spanNode, start, end, maxHeight) {
-    while (start < end) {
-      const mid = Math.floor((start + end) / 2)
-      const textNode = spanNode.childNodes[mid]
-      textNode.splitText(textNode.length / 2)
-
-      if (measureHeight(spanNode) > maxHeight) {
-        end = mid
-      } else {
-        start = mid + 1
+const binarySearchForOverflow = (textNode, yMax) => {
+  // Do a binary search to find the approximate point of overflow.
+  let rngStart = 0
+  let rngEnd = textNode.length
+  let offset = Math.floor(textNode.length / 2)
+  const topRange = new Range()
+  topRange.setStart(textNode, 0)
+  const bottomRange = new Range
+  bottomRange.setEnd(textNode, textNode.length)
+  let topRect
+  let bottomRect
+  while (rngEnd - rngStart > 2) {
+    topRange.setStart(textNode, rngStart)
+    topRange.setEnd(textNode, rngStart + offset)
+    topRect = topRange.getBoundingClientRect()
+    if (topRect.bottom < yMax) {
+      if (yMax - topRect.bottom < 40) {
+        // We're close to the break. Shift to linear search.
+        return rngStart + offset
       }
-
-      spanNode.normalize()
+      rngStart = rngStart + offset
+      offset = Math.floor((rngEnd - rngStart) / 2)
+    } else {
+      bottomRange.setStart(textNode, rngStart + offset)
+      bottomRange.setEnd(textNode, rngEnd)
+      bottomRect = bottomRange.getBoundingClientRect()
+      if (bottomRect.top > yMax) {
+        rngEnd = rngStart + offset
+        offset = Math.floor((rngEnd - rngStart) / 2)
+      } else {
+        // The break occurs in the overlap of topRect and bottomRect. Which
+        // means that rngStart + offset occurs in the last line before the break.
+        return rngStart + offset
+      }
     }
-    return start
   }
+  return rngStart + offset
+}
 
-  for (let i = 0; i < spans.length; i++) {
-    const span = spans[i]
-    const spanBottom = measureHeight(span)
+// TODO: Include hyphens
+const nonBreak = /^[\S\u202F\u00A0]$/
 
-    if (spanBottom > maxHeightAllowed) {
-      const textNodeIndex = binarySearchTextNode(span, 0, span.childNodes.length - 1, maxHeightAllowed)
-      return { spanIndex: i, textNodeIndex }
+const linearSearchForOverflow = (textNode, yMax, offset) => {
+  // `offset` is near the overflow point.
+  // Do a linear search to find the exact point.
+  const str = textNode.wholeText
+  let char = ""
+  const range = new Range()
+  range.setStart(textNode, offset)
+  let prevWordEnd = offset
+  let startIndex = 0
+  for (let i = offset; i < str.length; i++) {
+    char = str.slice(i, i + 1)
+    if (nonBreak.test(char)) {
+      startIndex = i;
+      prevWordEnd = i - 1
+      break
     }
   }
+  for (let i = startIndex; i < str.length; i++) {
+    char = str.slice(i, i + 1)
+    if (!nonBreak.test(char)) {
+      range.setEnd(textNode, i)
+      console.log(range.toString())
+      if (range.getBoundingClientRect().bottom > yMax) {
+        for (let j = prevWordEnd + 1; j < str.length; j++) {
+          char = str.slice(j, j + 1)
+          if (nonBreak.test(char)) {
+            return j - 1
+          }
+        }
+        return textNode.length
+      }
+      prevWordEnd = i - 1
+    }
+  }
+  return textNode.length
+}
 
-  return { spanIndex: -1, textNodeIndex: -1 }
+const unsplittableClasses = ["hurmet-calc", "hurmet-tex"];
+const unsplittableTags = ["IMG", "FIGCAPTION", "BR", "FOOTNOTE"];
+
+const findParagraphOverflowPoint = (paragraph, yMax) => {
+  // Find the page break inside the <p> or <code>.
+  const range = new Range()
+
+  for (let i = 0; i < paragraph.childNodes.length; i++) {
+    const grafChild = paragraph.childNodes[i];
+    let rect
+    if (grafChild.nodeType === 3) {
+      range.setStartBefore(grafChild)
+      range.setEndAfter(grafChild)
+      rect = range.getBoundingClientRect()
+    } else {
+      rect = grafChild.getBoundingClientRect()
+    }
+
+    if (rect.bottom < yMax) { continue }
+
+    if (grafChild.nodeType === 3) {
+      // The child node is a text node.
+      let offset = binarySearchForOverflow(grafChild, yMax)
+      offset = linearSearchForOverflow(grafChild, yMax, offset)
+      return [i, offset]
+    } else {
+      // The child node is a tagged element. Find out if it can be split.
+      if (unsplittableClasses.includes(grafChild.className) ||
+          unsplittableTags.includes(grafChild.tagName)) {
+        if (i === 0) {
+          return [-1, 0]
+        } else {
+          return [i, 0]
+        }
+      }
+      // The child node is a span. Find where to split it.
+      // Note: ProseMirror does not nest spans more than one level deep.
+      let offset = binarySearchForOverflow(grafChild.childNodes[0], yMax)
+      offset = linearSearchForOverflow(grafChild.childNodes[0], yMax, offset)
+      return [i, offset]
+    }
+  }
+  return [-1, 0]
 }
