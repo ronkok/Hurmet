@@ -21,6 +21,7 @@ body {
   position: relative;
 }
 .long-primer { font-size: 10pt; }
+.pica        { font-size: 12pt; }
 
 nav {
   max-width: 838px;
@@ -1196,7 +1197,9 @@ math .special-fraction { font-family: "Times New Roman"; }
   padding: 2px 3px;
 }
 .ProseMirror table p { line-height: 1.2; margin: 2px 0 2px 0; }
+/* print header */
 .ProseMirror header table p  { line-height: 1.6; }
+.ProseMirror table.header p  { line-height: 1.6; }
 .ProseMirror td > *, .ProseMirror th > *,
 .ProseMirror td > *:first-child {
   margin-top: 2px;
@@ -1301,6 +1304,14 @@ td, th {
 /*
  * This section deals with CSS for the printed page.
  */
+
+/* Make the printed width match the width of the screen doc.
+   This is less wide than letter size page w/0.75 inch margin.
+   By making this less wide, we are less exposed to printer variance. */
+.print-body,
+#print-div > table,
+#print-div hr,
+#print-div ol { width: 650px; margin-left: auto; margin-right: auto;  }
 
 @media print {
   

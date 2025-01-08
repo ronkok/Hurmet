@@ -27,7 +27,7 @@ import { draftMode } from "./draftMode"
 import { hurmetMarkdownSerializer } from "./to_markdown"
 import { readFile } from "./openfile"
 import { saveAs } from "filesaver.js-npm"
-import { findPageBreaks, forToC, forPrint } from "./paginate.js"
+import { paginate, forToC, forPrint } from "./paginate.js"
 import { showDiff } from "./diffMatchPatch"
 import { sheetToTable, tableToSheet } from "./spreadsheet.js"
 import { dt } from "./constants.js"
@@ -325,8 +325,8 @@ const findParentNode = predicate => selection => {
 }
 
 // Export printHurmet so that it is available in keymap.js
-export function printHurmet(state, view) {
-  findPageBreaks(view, state, forPrint, schema.nodes.toc)
+export function printHurmet(view) {
+  paginate(view, schema.nodes.toc, forPrint)
   window.print()
 }
 
@@ -335,7 +335,7 @@ const print = () => {
     title: "Print",
     label: "Print…",
     run(state, _, view) {
-      printHurmet(state, view)
+      printHurmet(view)
     }
   })
 }
@@ -1059,7 +1059,7 @@ function insertToC(nodeType) {
           const same = $from.sharedDepth($to)
           const startPos = same !== 0 ? $from.before(same) : $from.pos
           const endPos = same !== 0 ? $from.after(same) : startPos + 1
-          attrs.body = findPageBreaks(view, state, forToC, schema.nodes.toc, attrs.start, attrs.end)
+          attrs.body = paginate(view, schema.nodes.toc, forToC,  attrs.start, attrs.end)
           dispatch(state.tr.replaceWith(startPos, endPos, nodeType.createAndFill(attrs)))
         }
       })
