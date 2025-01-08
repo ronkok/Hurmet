@@ -242,8 +242,11 @@ const turnThePage = (topElement, attrs, editor) => {
       range.setStart(textNode, attrs.pageBottomOffset)
       range.setEnd(textNode, attrs.pageBottomOffset + 1)
       attrs.pageTop = range.getBoundingClientRect().top
+      attrs.topMargin = 0
     } else {
       attrs.pageTop = topElement.getBoundingClientRect().top
+      const computedStyle = window.getComputedStyle(topElement)
+      attrs.topMargin = computedStyle.marginTop
     }
   }  else {
     attrs.pageTop = editor.getBoundingClientRect().bottom
@@ -306,13 +309,12 @@ export function paginate(view, tocSchema, purpose, tocStartLevel, tocEndLevel) {
         attrs.ftNote.totalNum += attrs.ftNote.numFtNotesInElem
         attrs.ftNote.end += attrs.ftNote.numFtNotesInElem
 
-      } else if (child.tagName !== "P" &&
-          !(child.tagName === "DIV" && child.className === "tableWrapper")) {
+      } else if ((child.tagName !== "P" && child.tagName !== "PRE") &&
+        !(child.tagName === "DIV" && child.className === "tableWrapper")) {
         // Examime the children of this element. Maybe some of them fit onto the page.
-        processChildren(child)
+        processChildren(child) // A recursive call.
 
-        // TODO: Prevent orphan
-      } else if (child.tagName === "P" || child.tagName === "PRE" && rect.height > 40) {
+      } else if ((child.tagName === "P" || child.tagName === "PRE") && rect.height > 64) {
         // We may break in the middle of a long paragraph.
         const elem = child.tagName === "PRE" ? child.childNodes[0] : child
         const yMax = attrs.pageTop + attrs.pageHeight - attrs.headerHeight -
@@ -334,7 +336,7 @@ export function paginate(view, tocSchema, purpose, tocStartLevel, tocEndLevel) {
       } else {
         // Wrap up the current page and start a new page.
         populatePage(startElement, endElement, header, destination, attrs)
-        ;[startElement, endElement] = turnThePage(nextElement, attrs, editor)
+        ;[startElement, endElement] = turnThePage(child, attrs, editor)
       }
     }
   }
@@ -350,8 +352,8 @@ export function paginate(view, tocSchema, purpose, tocStartLevel, tocEndLevel) {
     pageTop: 0,
     pageHeight: 0,
     minElemHeight: 3.2 * doc.attrs.fontSize,
-    stdHdrHeight: 26,  // top & bot margin of a paragraph
-    headerHeight: 26,
+    stdHdrHeight: 0,
+    headerHeight: 0,
     tocArray: null,
     tocStartLevel: tocStartLevel,
     tocEndLevel: tocEndLevel,
@@ -483,9 +485,9 @@ const binarySearchForOverflow = (textNode, yMax) => {
         rngEnd = rngStart + offset
         offset = Math.floor((rngEnd - rngStart) / 2)
       } else {
-        // The break occurs in the overlap of topRect and bottomRect. Which
-        // means that rngStart + offset occurs in the last line before the break.
-        return rngStart + offset
+        // The currenct index occurs in the overlap of topRect and bottomRect.
+        // Subtract 280 to reliably get to a space in the previous line.
+        return Math.max(rngStart + offset - 280, 0)
       }
     }
   }
@@ -516,7 +518,6 @@ const linearSearchForOverflow = (textNode, yMax, offset) => {
     char = str.slice(i, i + 1)
     if (!nonBreak.test(char)) {
       range.setEnd(textNode, i)
-      console.log(range.toString())
       if (range.getBoundingClientRect().bottom > yMax) {
         for (let j = prevWordEnd + 1; j < str.length; j++) {
           char = str.slice(j, j + 1)
