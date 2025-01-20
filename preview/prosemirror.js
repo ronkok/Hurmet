@@ -17179,7 +17179,7 @@ const dt = Object.freeze({
   BOOLEANFROMCOMPARISON: 12, // 4 + 8, useful for chained comparisons
   STRING: 16,
   QUANTITY: 32, // Contains both a magnitude and a unit-of-measure
-  DATE: 64, //     Not currently used
+  DATE: 64, //     Number of seconds after start of Jan 1, 1970, UTC.
   RANGE: 128, //   as in:  1:10
   TUPLE: 256, //   Used for multiple assignment from a module.
   MAP: 512,  //    A key:value store with all the same data type the same unit
@@ -17294,7 +17294,8 @@ const errorMessages = Object.freeze({
     BAD_ARGS:   "Error. Wrong number of arguments to function @",
     BAD_SUM:    "Error. Second argument to sum function must be 1 or 2.",
     ZERO_STEP:  "Error. Step value must be > zero.",
-    SHEET_INDEX:"Error. Bad column or row index."
+    SHEET_INDEX:"Error. Bad column or row index.",
+    UNSAVED:    "Error. The current document has not been saved."
   }
 });
 
@@ -17933,14 +17934,17 @@ const formattedDecimal = (numStr, decimalFormat, truncateTrailingZeros) => {
   }
 };
 
-const parseFormatSpec = str => {
-  // Do the RegEx once, at compile time, not every time a number is formatted.
-  //
-  // str ≔ "Tn", where:
-  //    T = type, [bEefhkmNnprSstx%], default: "h"
-  //    n = number of digits, [0-9]+, default: 15
-  //
-  //    Possible future additions: complex number format [∠°]
+const validateFormatSpec = str => {
+  /*
+   * Use a RegEx to determine if a format specification string is valid.
+   * Return the string if valid. Return an error message otherwise.
+   *
+   * str ≔ "Tn∠° (w, m-d-y L)?", where:
+   *    T = type, [bEefhkmNnprSstx%], default: "h"
+   *    n = number of digits, [0-9]+, default: 15
+   *    ∠ = optional. Specifies polar notation for complex numbers
+   *    ° = optional. Specifies polar noation in degrees
+   */
 
   const match = formatRegEx.exec(str);
   if (!match) {
@@ -20788,6 +20792,85 @@ const DataFrame = Object.freeze({
   range: range$1
 });
 
+const dateFormatRegEx = /^(?:(w{3,4}), )?(y{1,4}|m{3,4}|d{1,2})([- .]| de )(m{2,4}|d{1,2})([- .]|, | de )(y{4}|d{2})(?: ([a-z]{2,3}))?$/;
+// Capturing groups:
+//  [1] weekday, optional
+//  [2] day, month, or year
+//  [3] separator between first & second [dmy]
+//  [4] day or month
+//  [5] separator
+//  [6] day or year
+//  [7] language code, optional
+
+
+const dateRegEx$1 = /^'(\d{4})-(\d{1,2})-(\d{1,2})'$/;
+const dateInSecondsFromIsoString = dateStr => {
+  // Return the number of seconds after the start January 1, 1970, UTC.
+  const match = dateStr.match(dateRegEx$1);
+  const timeZoneOffset = new Date().getTimezoneOffset() / 60; // in hours
+  const date = new Date( match[1], match[2] - 1, match[3], -timeZoneOffset );
+  return Math.floor(date.getTime() / 1000) // seconds after Jan 1, 1970, UTC
+};
+
+const dateInSecondsFromToday = _ => {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const isoString = `'${year}-${month}-${day}'`;
+  return dateInSecondsFromIsoString(isoString)
+};
+
+const dateRPN = dateStr => {
+  return "⌾" + String(dateInSecondsFromIsoString(dateStr))
+};
+
+const dateDisplayFromIsoString = (str, dateFormatSpec, inExpression = false) => {
+  const rnlDate = [BigInt(dateInSecondsFromIsoString(str)), BigInt(1)];
+  return formatDate(rnlDate, dateFormatSpec, inExpression)
+};
+
+const processDMY = (dmy, date, language, inExpression) => {
+  return dmy === "d"
+    ? String(date.getUTCDate())
+    : dmy === "dd"
+    ? String(date.getUTCDate()).padStart(2, '0')
+    : dmy === "mm"
+    ? String(date.getUTCMonth() + 1).padStart(2, '0')
+    : dmy === "mmm" || (inExpression && dmy === "mmmm")
+    ? new Intl.DateTimeFormat(language, { month: 'short', timeZone: 'GMT' }).format(date)
+    : dmy === "mmmm"
+    ? new Intl.DateTimeFormat(language, { month: 'long', timeZone: 'GMT' }).format(date)
+    : String(date.getUTCFullYear())
+};
+
+const formatDate = (dateValue, dateFormatSpec, inExpression = false) => {
+  // dateValue = number of seconds after start of January 1, 1970
+  const date = new Date(Rnl.toNumber(dateValue) * 1000);
+
+  if (!dateFormatSpec || dateFormatSpec === "yyyy-mm-dd" ||
+    (inExpression && dateFormatSpec.indexOf("de") > -1)) {
+    return "\\text{" + date.toISOString().split("T")[0] + "}"
+  }
+
+  const match = dateFormatRegEx.exec(dateFormatSpec);
+  const language = match[7] ? match[7] : "en";
+
+  let str = "";
+  if (match[1]) {
+    const length = match[1].length === "3" ? "short" : "long";
+    str += new Intl.DateTimeFormat(language, { weekday: length, timeZone: 'GMT' }).format(date);
+    str += ", ";
+  }
+  str += processDMY(match[2], date, language, inExpression);
+  str += match[3];
+  str += processDMY(match[4], date, language, inExpression);
+  str += match[5];
+  str += processDMY(match[6], date, language, inExpression);
+
+  return "\\text{" + str + "}"
+};
+
 /*
  * lexer.js
  * This file supports parser.js.
@@ -20838,12 +20921,14 @@ const tt = Object.freeze({
   DATAFRAME: 40,
   RICHTEXT: 41,
   BOOLEAN: 42,
-  MACRO: 43
+  MACRO: 43,
+  DATE: 44  // Input format is 'yyyy-mm-dd'
 });
 
 const minusRegEx = /^-(?![-=<>:])/;
 const numberRegEx$5 = new RegExp(Rnl.numberPattern);
 const unitRegEx = /^(?:'[^']+'|[°ΩÅK])/;
+const dateRegEx = /^'\d{4}-\d{1,2}-\d{1,2}'/;
 
 const texFromNumStr = (numParts, decimalFormat) => {
   let num = "";
@@ -20878,6 +20963,7 @@ const isUnary = (prevToken) => {
     case tt.NUM:
     case tt.ORD:
     case tt.VAR:
+    case tt.DATE:
     case tt.RIGHTBRACKET:
     case tt.LONGVAR:
     case tt.UNIT:
@@ -21567,7 +21653,7 @@ const lexUnitName = str => {
   return [match[0], unitTeXFromString(match[0]), match[0], tt.UNIT, ""]
 };
 
-const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
+const lex = (str, formats, prevToken, inRealTime = false) => {
   // Get the next token in str. Return an array with the token's information:
   // [input, TeX output, type, associated close delimiter]
   let pos = 0;
@@ -21621,7 +21707,7 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
       tex = DataFrame.quickDisplay(st);
     } else {
       const dataStructure = DataFrame.dataFrameFromTSV(st);
-      tex = DataFrame.display(dataStructure.value, "h3", decimalFormat);
+      tex = DataFrame.display(dataStructure.value, "h3", formats.decimalFormat);
     }
     return ["``" + inputStr + "``", tex, inputStr, tt.DATAFRAME, ""]
   }
@@ -21640,11 +21726,17 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
   }
 
   if (unitRegEx.test(str)) {
-    // String between single quotation marks. That signals a tt.UNIT.
+    // String between single quotation marks. That signals a tt.UNIT or a tt.DATE.
     pos = str.indexOf("'", 1);
     if (pos > 0) {
       st = str.substring(1, pos);
-      return ["'" + st + "'", unitTeXFromString(st), st, tt.UNIT, ""]
+      const strWithDelimiters = "'" + st + "'";
+      if (dateRegEx.test(str)) {
+        const dateTex = dateDisplayFromIsoString(strWithDelimiters, formats.dateFormat, true);
+        return [strWithDelimiters, dateTex, st, tt.DATE, ""]
+      } else {
+        return [strWithDelimiters, unitTeXFromString(st), st, tt.UNIT, ""]
+      }
     } else {
       // One of the unambiguous unit symbols, like ° or Å
       return [str.charAt(0), str.charAt(0), str.charAt(0), tt.UNIT, ""]
@@ -21694,7 +21786,7 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
       const numParts = str.match(numberRegEx$5);
       if (numParts) {
         // numbers
-        st = texFromNumStr(numParts, decimalFormat);
+        st = texFromNumStr(numParts, formats.decimalFormat);
         return [numParts[0], st, numParts[0], tt.NUM, ""]
       }
     }
@@ -21704,7 +21796,7 @@ const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
   const numParts = str.match(numberRegEx$5);
   if (numParts) {
     // numbers
-    st = texFromNumStr(numParts, decimalFormat);
+    st = texFromNumStr(numParts, formats.decimalFormat);
     return [numParts[0], st, numParts[0], tt.NUM, ""]
   }
 
@@ -21758,9 +21850,9 @@ const builtInFunctions = new Set([
   "cot", "cotd", "coth", "count", "csc", "cscd", "csch", "exp",
   "factorial", "fetch", "findmax", "floor", "format", "gamma", "gcd", "hcat",
   "hypot", "imag", "isnan", "length", "lerp", "ln", "log", "log10", "log2", "lfact", "lgamma",
-  "logn", "mod", "number", "ones", "real", "rem", "rms", "round", "roundSig", "roundn", "sec",
-  "secd", "sech", "sech", "sign", "sin", "sind", "sinh", "startSvg", "string", "tan", "tand",
-  "tanh", "tanh", "trace", "transpose", "vcat", "zeros", "Γ"
+  "logn", "mod", "number", "ones", "real", "rem", "rms", "round", "roundSig", "roundn",
+  "savedate", "sec", "secd", "sech", "sech", "sign", "sin", "sind", "sinh", "startSvg",
+  "string", "tan", "tand", "tanh", "tanh", "today", "trace", "transpose", "vcat", "zeros", "Γ"
 ]);
 
 const builtInReducerFunctions = new Set(["accumulate", "beamDiagram", "dataframe",
@@ -21782,6 +21874,7 @@ const checkForUnaryMinus = (token, prevToken) => {
     case tt.NUM:
     case tt.ORD:
     case tt.VAR:
+    case tt.DATE:
     case tt.RIGHTBRACKET:
     case tt.LONGVAR:
     case tt.PROPERTY:
@@ -21852,7 +21945,7 @@ const exponentOfFunction = (str, decimalFormat, isCalc) => {
     expoInput = /^⁻?[⁰¹²³\u2074-\u2079⁻]+/.exec(str)[0];
     expoInput = expoInput.split("").map(ch => numeralFromSuperScript(ch)).join("");
   } else if (!openParenRegEx$2.test(str.slice(1))) {
-    expoInput = lex(str.slice(1), decimalFormat, { input: "", output: "", ttype: 50 })[0];
+    expoInput = lex(str.slice(1), { decimalFormat }, { input: "", output: "", ttype: 50 })[0];
   } else {
     // The exponent is in parens. Find its extent.
     expoInput = "(";
@@ -21878,10 +21971,10 @@ const exponentOfFunction = (str, decimalFormat, isCalc) => {
     : expoInput;
 
   if (isCalc) {
-    const expoOutput = parse$1(parseInput, decimalFormat, true);
+    const expoOutput = parse$1(parseInput, { decimalFormat }, true);
     return [expoInput, "{" + expoOutput[0] + "}", expoOutput[1]]
   } else {
-    const expoTex = parse$1(parseInput, decimalFormat, false);
+    const expoTex = parse$1(parseInput, { decimalFormat }, false);
     return [expoInput, "{" + expoTex + "}", ""]
   }
 };
@@ -21968,7 +22061,8 @@ const cloneToken = token => {
   }
 };
 
-const endOfOrd = new Set([tt.ORD, tt.VAR, tt.NUM, tt.LONGVAR, tt.RIGHTBRACKET, tt.SUPCHAR]);
+const endOfOrd = new Set([tt.ORD, tt.VAR, tt.NUM, tt.DATE, tt.LONGVAR,
+  tt.RIGHTBRACKET, tt.SUPCHAR]);
 
 // The RegEx below is equal to /^\s+/ except it omits \n, \t, and the no-break space \xa0.
 // I use \xa0 to precede the combining arrow accent character \u20D7.
@@ -21986,7 +22080,7 @@ const rpnPrecFromType = [
       13, 17, 16, -1, 15,
       14, 10,  3,  2, 11,
       -1, -1,  4,  3, -1,
-      -1, -1, -1
+      -1, -1, -1, -1
 ];
 
 const texPrecFromType = [
@@ -21997,8 +22091,8 @@ const texPrecFromType = [
        2,  2,  1,  1,  1,
        2, -1, 15,  2, 14,
       13,  9, -1,  1, -1,
-      15, -1,  1,  -1, 2,
-       2,  2,  2
+      15, -1,  1, -1,  2,
+       2,  2,  2,  2
 ];
 /* eslint-enable indent-legacy */
 
@@ -22037,7 +22131,7 @@ const dDISTRIB = 10; //         A probability distribution defined by a confiden
 
 const parse$1 = (
   str,
-  decimalFormat = "1,000,000.",
+  formats = { decimalFormat: "1,000,000.", dateFormat: "yyy-mm-dd" },
   isCalc = false,     // true when parsing the blue echo of an expression
   inRealTime = false, // true when updating a rendering with every keystroke in the editor.
   sheetName = ""      // The RPN for a spreadsheet cell differs from other variables.
@@ -22273,7 +22367,7 @@ const parse$1 = (
     if (mustLex) {
       const tkn = prevToken.ttype === tt.NUM && !isFollowedBySpace && unitStartRegEx.test(str)
         ? lexUnitName(str)                                // something like the "m" in "5m"
-        : lex(str, decimalFormat, prevToken, inRealTime);  // default
+        : lex(str, formats, prevToken, inRealTime);  // default
       token = { input: tkn[0], output: tkn[1], ttype: tkn[3], closeDelim: tkn[4] };
       str = str.substring(token.input.length);
       isFollowedBySpace = leadingSpaceRegEx$3.test(str) || /^(˽|\\quad|\\qquad)+/.test(str);
@@ -22361,11 +22455,16 @@ const parse$1 = (
 
       case tt.NUM:
       case tt.ORD:
+      case tt.DATE:
         popTexTokens(2, okToAppend);
         if (isCalc) {
           // Numbers and ORDs get appended directly onto rpn. Pass -1 to suppress an rpn pop.
           popRpnTokens(-1);
-          rpn += token.ttype === tt.NUM ? rationalRPN(token.input) : token.input;
+          rpn += token.ttype === tt.NUM
+            ? rationalRPN(token.input)
+            : token.ttype === tt.DATE
+            ? dateRPN(token.input)
+            : token.input;
         }
         if (isPrecededBySpace) { posOfPrevRun = tex.length; }
         if (isCalc &&
@@ -22404,7 +22503,7 @@ const parse$1 = (
         const ch = token.input.charAt(0);
         if (isCalc) { rpn += ch + token.output + ch; }
         if (isPrecededBySpace) { posOfPrevRun = tex.length; }
-        token.output = token.output === "`" ? "`" : parse$1(token.output, decimalFormat, false);
+        token.output = token.output === "`" ? "`" : parse$1(token.output, formats, false);
         tex += "{" + token.output + "}";
         okToAppend = true;
         break
@@ -22664,7 +22763,8 @@ const parse$1 = (
         posOfPrevRun = tex.length;
         // Is there an exponent on the function name?
         if (functionExpoRegEx.test(str)) {
-          const [expoInput, expoTex, expoRPN] = exponentOfFunction(str, decimalFormat, isCalc);
+          // eslint-disable-next-line max-len
+          const [expoInput, expoTex, expoRPN] = exponentOfFunction(str, formats.decimalFormat, isCalc);
           if (isCalc && expoRPN === `®-1/1` && trigFunctions.has(token.input)) {
             // Inverse trig function.
             token.input = "a" + token.input;
@@ -24748,7 +24848,8 @@ const populateTOC = ast => {
 
 const metadataRegEx = /^---+\n((?:[A-Za-z0-9][A-Za-z0-9 _-]*:[^\n]+\n(?:[ \t]+[^\n]+\n)*)+)---+\n/;
 const metadataItemRegEx = /^[A-Za-z0-9][A-Za-z0-9 _-]*:[^\n]+\n(?:[ \t]+[^\n]+\n)*/;
-const hurmetMetadataNames = ["decimalFormat", "fontSize", "pageSize"];
+const hurmetMetadataNames = ["decimalFormat", "dateFormat", "fontSize",
+  "pageSize", "saveDate"];
 
 const parseMetadata = str => {
   const metadata = {};
@@ -26420,8 +26521,9 @@ const negatedComp = {
   "<=": ["\\ngeq ", "!≥"]
 };
 
-const formatResult = (stmt, result, formatSpec, decimalFormat, assert, isUnitAware) => {
+const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAware) => {
   if (!result) { return stmt }
+  const decimalFormat = formats.decimalFormat;
 
   if (result.dtype === dt.DRAWING) {
     stmt.resultdisplay = result.value;
@@ -26528,7 +26630,7 @@ const formatResult = (stmt, result, formatSpec, decimalFormat, assert, isUnitAwa
       altResultDisplay = result.value;
 
     } else if (result.dtype & dt.RICHTEXT) {
-      resultDisplay = parse$1(result.value, decimalFormat, false);
+      resultDisplay = parse$1(result.value, formats, false);
       altResultDisplay = result.value;
 
     } else if (result.dtype & dt.BOOLEAN) {
@@ -26538,6 +26640,15 @@ const formatResult = (stmt, result, formatSpec, decimalFormat, assert, isUnitAwa
     } else if (result.dtype === dt.COMPLEX) {
       const z = result.value;
       [resultDisplay, altResultDisplay] = Cpx.display(z, formatSpec, decimalFormat);
+
+    } else if (result.dtype === dt.DATE) {
+      resultDisplay = formatDate(result.value, formats.dateFormat);
+      if (resultDisplay.dtype && resultDisplay.dtype === dt.ERROR) {
+        resultDisplay = "\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}";
+        altResultDisplay = resultDisplay.value;
+      } else {
+        altResultDisplay = resultDisplay.slice(6, -1); // Remove \text{ }
+      }
 
     } else if (result.value.plain) {
       resultDisplay = format(result.value.plain, formatSpec, decimalFormat);
@@ -26636,7 +26747,7 @@ const testValue = oprnd => {
 const varRegEx = /〖[^〗]*〗/;
 const openParenRegEx = /(?:[([{|‖]|[^\\][,;:](?:\\:)?)$/;
 
-const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat) => {
+const plugValsIntoEcho = (str, vars, unitAware, formatSpec, formats) => {
   // For each variable name in the echo string, substitute a value.
   // The parser surrounded those names with 〖〗 delimiters.
   let match;
@@ -26667,7 +26778,7 @@ const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat) => {
           if (!hvar) { return errorOprnd("V_NAME", propName) }
           const stmt = { resulttemplate: "@", altresulttemplate: "@" };
           hvar.resultdisplay = formatResult(stmt, hvar, formatSpec, null,
-                decimalFormat).resultdisplay;
+                formats).resultdisplay;
         }
       }
     } else if (!vars[varName] && varName === "T") {
@@ -27886,6 +27997,9 @@ const dtype = {
   // return the resulting data type.
   scalar: {
     scalar(t0, t1, tkn)     {
+      if (t0 === dt.DATE || t1 === dt.DATE) {
+        return t0 === t1 ? dt.RATIONAL : dt.DATE
+      }
       return (tkn === "&" || tkn === "hcat" || tkn === "vcat")
         ? t0 + ((tkn === "&" || tkn === "hcat") ? dt.ROWVECTOR : dt.COLUMNVECTOR )
         : t0
@@ -32681,19 +32795,19 @@ const nextToken = (tokens, i) => {
 // array of function names that return a real number from a complex argument.
 const arfn = ["abs", "angle", "imag", "real", "Γ", "gamma"];
 
-const stringFromOperand = (oprnd, decimalFormat) => {
+const stringFromOperand = (oprnd, formats) => {
   return oprnd.dtype === dt.STRING
     ? oprnd.value
     : oprnd.dtype === dt.RATIONAL
-    ? format(oprnd.value, "h15", decimalFormat)
+    ? format(oprnd.value, "h15", formats.decimalFormat)
     : isMatrix(oprnd.dtype)
-    ? Matrix.displayAlt(oprnd, "h15", decimalFormat)
+    ? Matrix.displayAlt(oprnd, "h15", formats)
     : (oprnd.dtype & dt.MAP)
-    ? DataFrame.displayAlt(oprnd.value, "h15", decimalFormat)
+    ? DataFrame.displayAlt(oprnd.value, "h15", formats)
     : oprnd.value
 };
 
-const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
+const evalRpn = (rpn, vars, formats, unitAware, lib) => {
   // This is the function that does calculations with the rpn string.
   const tokens = rpn.split("\u00A0");
   const stack = [];
@@ -32703,7 +32817,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
     const ch = tkn.charAt(0);
 
     if (ch === "®") {
-      // A rational number.
+      // A rational number.⌾
       const r = new Array(2);
       const pos = tkn.indexOf("/");
       r[0] = BigInt(tkn.slice(1, pos));   // numerator
@@ -32714,6 +32828,14 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
       num.unit.expos = allZeros;
       num.dtype = dt.RATIONAL;
       stack.push(Object.freeze(num));
+
+    } else if (ch === "⌾") {
+      const date = Object.create(null);
+      date.value = [BigInt(tkn.slice(1)), BigInt(1)];
+      date.unit = Object.create(null);
+      date.unit.expos = [0, 0, 1, 0, 0, 0, 0, 0],
+      date.dtype = dt.DATE;
+      stack.push(Object.freeze(date));
 
     } else if (ch === "©") {
       // A complex number.
@@ -32839,8 +32961,8 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const o2 = stack.pop();
           const o1 = stack.pop();
           const op = tkn === "+" || tkn === ".+" ? "add" : "subtract";
-          if (!(((o1.dtype & dt.RATIONAL) || (o1.dtype & dt.COMPLEX)) &&
-                ((o2.dtype & dt.RATIONAL) || (o2.dtype & dt.COMPLEX)))) {
+          if (!(((o1.dtype & dt.RATIONAL) || (o1.dtype & dt.DATE) || (o1.dtype & dt.COMPLEX))
+           && ((o2.dtype & dt.RATIONAL) || (o2.dtype & dt.DATE) || (o2.dtype & dt.COMPLEX)))) {
             return errorOprnd("NAN_OP")
           }
           if (unitAware) {
@@ -32886,8 +33008,8 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           if ((tkn === "*" || tkn === "∗")
                && o1.dtype === dt.STRING && o1.dtype === dt.STRING) {
             // Julia's string concatenation operator
-            const str1 = stringFromOperand(o1, decimalFormat);
-            const str2 = stringFromOperand(o2, decimalFormat);
+            const str1 = stringFromOperand(o1, formats);
+            const str2 = stringFromOperand(o2, formats);
             return { value: str1 + str2, unit: null, dtype: dt.STRING }
           }
           if (!(((o1.dtype & dt.RATIONAL) || (o1.dtype & dt.COMPLEX)) &&
@@ -33013,8 +33135,8 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const [shape1, shape2, _] = binaryShapesOf(o1, o2);
           let o3 = Object.create(null);
           if (o1.dtype === dt.STRING && o1.dtype === dt.STRING) {
-            const str1 = stringFromOperand(o1, decimalFormat);
-            const str2 = stringFromOperand(o2, decimalFormat);
+            const str1 = stringFromOperand(o1, formats);
+            const str2 = stringFromOperand(o2, formats);
             o3.value = str1 + str2;
             o3.unit = null;
             o3.dtype = dt.STRING;
@@ -33457,6 +33579,20 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
+        case "today":
+        case "savedate" : {
+          if (tkn === "savedate" && !vars["@savedate"]) {
+            return errorOprnd("UNSAVED")
+          }
+          const oprnd = { unit: [0, 0, 1, 0, 0, 0, 0, 0], dtype: dt.DATE };
+          const numSeconds = tkn === "today"
+            ? dateInSecondsFromToday()
+            : dateInSecondsFromIsoString("'" + vars["@savedate"] + "'");
+          oprnd.value = Rnl.fromNumber(numSeconds);
+          stack.push(oprnd);
+          break
+        }
+
         case "Int": {
           const arg = stack.pop();
           const output = Object.create(null);
@@ -33704,13 +33840,6 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
-        case "format": {
-          const formatSpec = stack.pop().value;
-          const str = format(stack.pop().value, formatSpec);
-          stack.push({ value: str, unit: null, dtype: dt.STRING });
-          break
-        }
-
         case "lerp": {
           // linear interpolation function
           const args = new Array(3);
@@ -33761,7 +33890,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           let oprnd;
           if (vars.svg && (functionName === "plot" || (draw.functions[functionName]))) {
             if (functionName === "plot") {
-              args.splice(1, 0, decimalFormat);
+              args.splice(1, 0, formats.decimalFormat);
               oprnd = plot(...args);
             } else if (functionName === "path") {
               oprnd = draw.functions[functionName](args[0], args.slice(1));
@@ -33775,16 +33904,16 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             const udf = lib[functionName];
             if (udf === undefined) { return errorOprnd("F_NAME", functionName) }
             if (udf.dtype === dt.ERROR) { return udf }
-            oprnd = evalCustomFunction(udf, args, decimalFormat, unitAware, lib);
+            oprnd = evalCustomFunction(udf, args, formats, unitAware, lib);
             i += 1;
           } else if (lib && lib[functionName]) {
             // A module, "lib", was passed to this instance of evalRpn().
             const udf = lib[functionName];
-            oprnd = evalCustomFunction(udf, args, decimalFormat, unitAware, lib);
+            oprnd = evalCustomFunction(udf, args, formats, unitAware, lib);
           } else if (vars[functionName] && vars[functionName].dtype === dt.MODULE) {
             // User-defined function from a calculation node.
             const udf = vars[functionName]["value"];
-            oprnd = evalCustomFunction(udf, args, decimalFormat, unitAware);
+            oprnd = evalCustomFunction(udf, args, formats, unitAware);
           } else {
             return errorOprnd("BAD_FUN_NM", functionName)
           }
@@ -33903,7 +34032,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             const val = Operators.condition[shapeOf(conditions[j])](conditions[j].value);
             if (val) {
               const rpnLocal = tokens[i + j + 1].replace(/§/g, "\u00A0");
-              const oprnd = evalRpn(rpnLocal, vars, decimalFormat, unitAware, lib);
+              const oprnd = evalRpn(rpnLocal, vars, formats, unitAware, lib);
               if (oprnd.dtype === dt.ERROR) { return oprnd }
               stack.push(oprnd);
               break
@@ -34036,7 +34165,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           let sum = Rnl.zero;
           while (Rnl.lessThanOrEqualTo(index, endOfRange)) {
             vars[parameter] = { value: index, unit: allZeros, dtype: dt.RATIONAL };
-            const localResult = evalRpn(rpnLocal, vars, decimalFormat, false);
+            const localResult = evalRpn(rpnLocal, vars, formats, false);
             sum = Rnl.add(sum, localResult.value);
             index = Rnl.add(index, Rnl.one);
           }
@@ -34073,7 +34202,7 @@ const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
   return oprnd
 };
 
-const plot = (svg, decimalFormat, fun, numPoints, xMin, xMax) => {
+const plot = (svg, formats, fun, numPoints, xMin, xMax) => {
   // Plot a function.
   // To avoid a circular reference, this function has to be here instead of in draw.js.
   const attrs = svg.value.temp;
@@ -34089,15 +34218,15 @@ const plot = (svg, decimalFormat, fun, numPoints, xMin, xMax) => {
   let funResult;
   let pathValue;
   if (fun.value.dtype && fun.value.dtype === dt.MODULE) {
-    funResult = evalCustomFunction(fun.value, [arg], decimalFormat, false);
+    funResult = evalCustomFunction(fun.value, [arg], formats, false);
     pathValue = arg.value.map((e, i) => [e, funResult.value[i]]);
   } else if (fun.dtype === dt.STRING) {
     if (/§matrix§1§2$/.test(fun.value)) {
       arg.name = "t";
-      pathValue = evalRpn(fun.value.replace(/§/g, "\xa0"), { t: arg }, decimalFormat, false).value;
+      pathValue = evalRpn(fun.value.replace(/§/g, "\xa0"), { t: arg }, formats, false).value;
     } else {
       arg.name = "x";
-      funResult = evalRpn(fun.value.replace(/§/g, "\xa0"), { x: arg }, decimalFormat, false);
+      funResult = evalRpn(fun.value.replace(/§/g, "\xa0"), { x: arg }, formats, false);
       pathValue = arg.value.map((e, i) => [e, funResult.value[i]]);
     }
   } else ;
@@ -34139,7 +34268,7 @@ const elementFromIterable = (iterable, index, step) => {
 
 const loopTypes = ["while", "for"];
 
-const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
+const evalCustomFunction = (udf, args, formats, isUnitAware, lib) => {
   // UDF stands for "user-defined function"
   // lib is short for library. If not omitted, it contains a module with more functions.
 
@@ -34174,7 +34303,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
     switch (stype) {
       case "statement": {
         if (control[level].condition) {
-          const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib);
+          const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib);
           if (result.dtype === dt.ERROR) {
             // eslint-disable-next-line no-console
             console.log(statement.rpn);
@@ -34183,7 +34312,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
           if (statement.name) {
             statement.resultdisplay = isUnitAware ? "!!" : "!";
             const [stmt, _] = conditionResult(statement, result, isUnitAware);
-            insertOneHurmetVar(vars, stmt, null, decimalFormat);
+            insertOneHurmetVar(vars, stmt, null, formats);
           }
         }
         break
@@ -34191,7 +34320,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
 
       case "if": {
         if (control[level].condition) {
-          const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib);
+          const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib);
           if (result.dtype === dt.ERROR) { return result }
           const val = Operators.condition[shapeOf(result)](result.value);
           control.push({
@@ -34211,7 +34340,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
           i = control[level].endOfBlock;
           control.pop();
         } else {
-          const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib);
+          const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib);
           if (result.dtype === dt.ERROR) { return result }
           const val = Operators.condition[shapeOf(result)](result.value);
           control[control.length - 1].condition = val;
@@ -34236,7 +34365,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
             rpn: statement.rpn,
             endOfBlock: statement.endOfBlock
           };
-          const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib);
+          const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib);
           if (result.dtype === dt.ERROR) { return result }
           const val = Operators.condition[shapeOf(result)](result.value);
           cntrl.condition = val;
@@ -34262,7 +34391,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
           const tokens = statement.rpn.split("\u00A0");
           ctrl.dummyVariable = tokens.shift().slice(1);
           const iterable = evalRpn(tokens.join("\u00A0"), vars,
-                                   decimalFormat, isUnitAware, lib);
+                                   formats, isUnitAware, lib);
           ctrl.index = (iterable.dtype & dt.RANGE) ? iterable.value[0] : Rnl.fromNumber(0);
           ctrl.step = (iterable.dtype & dt.RANGE) ? iterable.value[1] : Rnl.fromNumber(1);
           ctrl.endIndex = (iterable.dtype & dt.RANGE)
@@ -34304,7 +34433,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
           if (i < control[level].endOfBlock) { i = control[level].endOfBlock; }
           control.pop();
         } else if (control[level].type === "while") {
-          const result = evalRpn(control[level].rpn, vars, decimalFormat, isUnitAware, lib);
+          const result = evalRpn(control[level].rpn, vars, formats, isUnitAware, lib);
           if (result.dtype === dt.ERROR) { return result }
           control[level].condition = result.value;
           if (control[level].condition) {
@@ -34338,7 +34467,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
       case "return":
         if (control[level].condition) {
           if (statement.rpn) {
-            const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib);
+            const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib);
             return result
           } else {
             return { value: Rnl.zero, unit: allZeros, dtype: dt.RATIONAL }
@@ -34349,7 +34478,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
       case "print":
         if (control[level].condition) {
           if (statement.rpn) {
-            const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib);
+            const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib);
             if (result.dtype === dt.ERROR) { return result }
             const msg = result.dtype === dt.RATIONAL
               ? Rnl.toNumber(result.value)
@@ -34369,7 +34498,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
       case "throw":
         if (control[level].condition) {
           if (statement.rpn) {
-            const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib);
+            const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib);
             return { value: result.value, unit: null, dtype: dt.ERROR }
           } else {
             return { value: statement.rpn, unit: null, dtype: dt.ERROR }
@@ -34442,9 +34571,13 @@ const conditionResult = (stmt, oprnd, unitAware) => {
   if (result.dtype !== dt.ERROR && unitAware && stmt.resultdisplay.indexOf("!") === -1 &&
     (stmt.unit && stmt.unit.expos ||
       (result.unit && result.unit.expos && Array.isArray(result.unit.expos)))) {
-    const expos = (stmt.unit && stmt.unit.expos) ? stmt.unit.expos : allZeros;
+    const expos = result.dtype === dt.DATE && stmt.unit === undefined
+      ? [0, 0, 1, 0, 0, 0, 0, 0]
+      : stmt.unit && stmt.unit.expos
+      ? stmt.unit.expos
+      : allZeros;
     if (!unitsAreCompatible(result.unit.expos, expos)) {
-      const message = stmt.unit.expos ? "UNIT_RES" : "UNIT_MISS";
+      const message = stmt.unit && stmt.unit.expos ? "UNIT_RES" : "UNIT_MISS";
       result = errorOprnd(message);
     }
   }
@@ -34538,14 +34671,18 @@ const conditionResult = (stmt, oprnd, unitAware) => {
   return [stmt, result]
 };
 
-const evaluateDrawing = (stmt, vars, decimalFormat = "1,000,000.") => {
+const evaluateDrawing = (
+  stmt,
+  vars,
+  formats = { decimalFormat: "1,000,000.", dateFormat: "yyyy-mm-dd" }
+) => {
   const udf = stmt.value;
   const args = [];
   for (let i = 0; i < udf.parameters.length; i++) {
     const argName = udf.parameters[i].name;
-    args.push(evalRpn("¿" + argName, vars, decimalFormat, false, {}));
+    args.push(evalRpn("¿" + argName, vars, formats, false, {}));
   }
-  const funcResult = evalCustomFunction(udf, args, decimalFormat, false, {});
+  const funcResult = evalCustomFunction(udf, args, formats, false, {});
   if (funcResult.dtype === dt.ERROR) {
     stmt.error = true;
     stmt.tex = "\\textcolor{firebrick}{\\text{" + funcResult.value + "}}";
@@ -34558,7 +34695,11 @@ const evaluateDrawing = (stmt, vars, decimalFormat = "1,000,000.") => {
   return stmt
 };
 
-const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
+const evaluate = (
+  stmt,
+  vars,
+  formats = { decimalFormat: "1,000,000.", dateFormat: "yyyy-mm-dd" }
+) => {
   stmt.tex = stmt.template ? stmt.template : "";
   stmt.alt = stmt.altTemplate ? stmt.altTemplate : "";
   const isUnitAware = /\?\?|!!|%%|@@|¡¡/.test(stmt.resulttemplate);
@@ -34566,8 +34707,7 @@ const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
   const formatSpec = vars.format ? vars.format.value : "h15";
 
   if (stmt.tex.indexOf("〖") > -1) {
-    // eslint-disable-next-line max-len
-    const eqnWithVals = plugValsIntoEcho(stmt.tex, vars, isUnitAware, formatSpec, decimalFormat);
+    const eqnWithVals = plugValsIntoEcho(stmt.tex, vars, isUnitAware, formatSpec, formats);
     if (eqnWithVals.dtype && eqnWithVals.dtype === dt.ERROR) {
       const [newStmt, _] = errorResult(stmt, eqnWithVals);
       return newStmt
@@ -34577,13 +34717,13 @@ const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
   }
 
   if (stmt.rpn) {
-    let oprnd = evalRpn(stmt.rpn, vars, decimalFormat, isUnitAware);
+    let oprnd = evalRpn(stmt.rpn, vars, formats, isUnitAware);
     if (oprnd.dtype === dt.ERROR) { [stmt, oprnd] = errorResult(stmt, oprnd); return stmt}
     let result;
     [stmt, result] = conditionResult(stmt, oprnd, isUnitAware);
     if (stmt.error) { return stmt }
     const assert = vars.assert ? vars.assert : null;
-    stmt = formatResult(stmt, result, formatSpec, decimalFormat, assert, isUnitAware);
+    stmt = formatResult(stmt, result, formatSpec, formats, assert, isUnitAware);
   }
   return stmt
 };
@@ -34642,7 +34782,7 @@ const literalWithUnit = (oprnd, tex, unitStr) => {
   }
 };
 
-const valueFromLiteral = (str, name, decimalFormat) => {
+const valueFromLiteral = (str, name, formats) => {
   // Read a literal string and return a value
   // The return should take the form: [value, unit, dtype, resultDisplay]
 
@@ -34661,17 +34801,17 @@ const valueFromLiteral = (str, name, decimalFormat) => {
   } else if (/^\x22.+\x22/.test(str)) {
     // str contains text between quotation marks
     if (name === "format") {
-      return parseFormatSpec(str.slice(1, -1).trim())
+      return validateFormatSpec(str.slice(1, -1).trim())
     } else {
-      const tex = parse$1(str, decimalFormat);
+      const tex = parse$1(str, formats);
       return [str.slice(1, -1), undefined, dt.STRING, tex]
     }
 
   } else if (matrixRegEx.test(str)) {
     // We're processing a matrix
     const matrixStr = matrixRegEx.exec(str)[0];
-    const [tex, rpn, _] = parse$1(matrixStr, decimalFormat, true);
-    const oprnd = evalRpn(rpn, {}, decimalFormat, false, {});
+    const [tex, rpn, _] = parse$1(matrixStr, formats, true);
+    const oprnd = evalRpn(rpn, {}, formats, false, {});
     const unitStr = str.slice(matrixStr.length).trim();
     return literalWithUnit(oprnd, tex, unitStr)
 
@@ -34683,7 +34823,7 @@ const valueFromLiteral = (str, name, decimalFormat) => {
     const oprnd = DataFrame.dataFrameFromTSV(tsv);
     if (oprnd.dtype === dt.DATAFRAME) {
       return [oprnd.value, oprnd.unit, dt.DATAFRAME,
-        DataFrame.display(oprnd.value, "h3", decimalFormat)]
+        DataFrame.display(oprnd.value, "h3", formats.decimalFormat)]
     } else {
       // It's a Hurmet Map
       const unitStr = str.slice(pos + 2).trim();
@@ -34700,12 +34840,12 @@ const valueFromLiteral = (str, name, decimalFormat) => {
         };
       }
       return [oprnd.value, unit, oprnd.dtype,
-        DataFrame.display(oprnd.value, "h3", decimalFormat) + "\\;" + unitDisplay]
+        DataFrame.display(oprnd.value, "h3", formats.decimalFormat) + "\\;" + unitDisplay]
     }
 
   } else if (complexRegEx.test(str)) {
     // str is a complex number.
-    const resultDisplay = parse$1(str, decimalFormat);
+    const resultDisplay = parse$1(str, formats);
     const parts = str.match(complexRegEx);
     let realPart;
     let imPart;
@@ -34724,14 +34864,19 @@ const valueFromLiteral = (str, name, decimalFormat) => {
     }
     return [[realPart, imPart], allZeros, dt.COMPLEX, resultDisplay]
 
+  } else if (dateRegEx$1.test(str)) {
+    const rnlDate = [BigInt(dateInSecondsFromIsoString(str)), BigInt(1)];
+    const dateTex = formatDate(rnlDate, formats.dateFormat);
+    return [rnlDate, { expos: [0, 0, 1, 0, 0, 0, 0, 0] }, dt.DATE, dateTex]
+
   } else {
     const match = numberRegEx$3.exec(str);
     if (match) {
       // str begins with a number.
       const numStr = match[0];
       const unitStr = str.slice(numStr.length).trim();
-      const [tex, rpn, _] = parse$1(numStr, decimalFormat, true);
-      const oprnd = evalRpn(rpn, {}, decimalFormat, false, {});
+      const [tex, rpn, _] = parse$1(numStr, formats, true);
+      const oprnd = evalRpn(rpn, {}, formats, false, {});
       return literalWithUnit(oprnd, tex, unitStr)
 
     } else {
@@ -34781,7 +34926,7 @@ const stripComment = str => {
   return str.trim()
 };
 
-const scanModule = (str, decimalFormat) => {
+const scanModule = (str, formats) => {
   // Scan the code and break it down into individual lines of code.
   // Assemble the lines into functions and assign each function to parent.
   const parent = Object.create(null);
@@ -34799,13 +34944,13 @@ const scanModule = (str, decimalFormat) => {
 
     if (functionRegEx$1.test(line) || drawRegEx.test(line)) {
       // This line starts a new function.
-      const [funcObj, endLineNum] = scanFunction(lines, decimalFormat, i);
+      const [funcObj, endLineNum] = scanFunction(lines, formats, i);
       if (funcObj.dtype && funcObj.dtype === dt.ERROR) { return funcObj }
       parent[funcObj.name] = funcObj;
       i = endLineNum;
     } else if (testForStatement(line)) {
       // This line starts a Hurmet assignment.
-      const [stmt, endLineNum] = scanAssignment(lines, decimalFormat, i);
+      const [stmt, endLineNum] = scanAssignment(lines, formats, i);
       parent[stmt.name] = stmt;
       i = endLineNum;
     }
@@ -34823,7 +34968,7 @@ const handleTSV = (expression, lines, startLineNum) => {
   }
 };
 
-const scanFunction = (lines, decimalFormat, startLineNum) => {
+const scanFunction = (lines, formats, startLineNum) => {
   const line1 = stripComment(lines[startLineNum]);
   let isDraw = line1.charAt(0) === "d";
   const posParen = line1.indexOf("(");
@@ -34843,7 +34988,7 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
     const name = parts[0];
     let defaultVal = { name, value: null, dtype: null };
     if (parts[1]) {
-      const [value, unit, dtype, resultDisplay] = valueFromLiteral(parts[1], "", decimalFormat);
+      const [value, unit, dtype, resultDisplay] = valueFromLiteral(parts[1], "", formats);
       defaultVal = { name, value, unit, dtype, resultDisplay };
     }
     parameters.push({ name, default: defaultVal });
@@ -34923,7 +35068,7 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
     let rpn = "";
     let _;
     if (expression) {
-      [, rpn, _] = parse$1(expression, decimalFormat, true);
+      [, rpn, _] = parse$1(expression, formats, true);
       if (name === "for") {
         rpn = rpn.replace(/\u00a0in\u00a0/, "\u00a0").replace(/\u00a0in$/, "");
       }
@@ -34958,7 +35103,7 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
   return [errorOprnd("END_MISS", functionName), 0]
 };
 
-const scanAssignment = (lines, decimalFormat, iStart) => {
+const scanAssignment = (lines, formats, iStart) => {
   let prevLineEndedInContinuation = false;
   let str = "";
   let iEnd = iStart;
@@ -35003,7 +35148,7 @@ const scanAssignment = (lines, decimalFormat, iStart) => {
     }
     iEnd = j;
   }
-  const [value, unit, dtype, resultDisplay] = valueFromLiteral(trailStr, name, decimalFormat);
+  const [value, unit, dtype, resultDisplay] = valueFromLiteral(trailStr, name, formats);
   const stmt = { name, value, unit, dtype, resultDisplay };
   return [stmt, iEnd]
 };
@@ -35044,13 +35189,16 @@ const matrixOfNames = /^[([](?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\
 const isKeyWord = /^(π|true|false|root|if|else|elseif|and|or|otherwise|mod|for|while|break|return|throw)$/;
 const testRegEx = /^(@{1,2})test /;
 
-const shortcut = (str, decimalFormat) => {
+const shortcut = (str, formats) => {
   // No calculation in str. Parse it just for presentation.
-  const tex = parse$1(str, decimalFormat);
+  const tex = parse$1(str, formats);
   return { entry: str, tex, alt: str }
 };
 
-const compile = (inputStr, decimalFormat = "1,000,000.") => {
+const compile = (
+  inputStr,
+  formats = { decimalFormat: "1,000,000.", dateFormat: "yyyy-mm-dd" }
+) => {
   let leadStr = "";
   let mainStr = "";
   let trailStr = "";
@@ -35086,7 +35234,7 @@ const compile = (inputStr, decimalFormat = "1,000,000.") => {
       const posParen = inputStr.indexOf("(");
       name = inputStr.slice(posFn + 8, posParen).trim();
     }
-    const module = scanModule(inputStr, decimalFormat);
+    const module = scanModule(inputStr, formats);
     const isError = module.dtype && module.dtype === dt.ERROR;
     if (isError) {
       // eslint-disable-next-line no-alert
@@ -35108,7 +35256,7 @@ const compile = (inputStr, decimalFormat = "1,000,000.") => {
 
   if (testRegEx.test(inputStr)) {
     str = str.replace(testRegEx, "").trim();
-    const [_, rpn, dependencies] = parse$1(str, decimalFormat, true);
+    const [_, rpn, dependencies] = parse$1(str, formats, true);
     const resulttemplate = testRegEx.exec(inputStr)[1];
     return { entry: inputStr, template: "", rpn, dependencies, resulttemplate,
       altresulttemplate: resulttemplate, resultdisplay: "" }
@@ -35159,7 +35307,7 @@ const compile = (inputStr, decimalFormat = "1,000,000.") => {
             if (isKeyWord.test(candidate) || !isValidIdentifier$1.test(candidate)) {
               // leadStr is not a list of valid identifiers.
               // So this isn't a valid calculation statement. Let's finish early.
-              return shortcut(str, decimalFormat)
+              return shortcut(str, formats)
             }
           }
           // multiple assignment.
@@ -35190,18 +35338,18 @@ const compile = (inputStr, decimalFormat = "1,000,000.") => {
       // input has form:  name = trailStr
       name = mainStr;
       if (trailStr === "") {
-        const tex = parse$1(str, decimalFormat);
+        const tex = parse$1(str, formats);
         return { entry: str, tex, alt: str }
       }
     } else {
       // input has form:  mainStr = trailStr.
       // It almost works as an assignment statment, but mainStr is not a valid identifier.
       // So we'll finish early.
-      return shortcut(str, decimalFormat)
+      return shortcut(str, formats)
     }
   } else {
     // str contains no "=" character. Let's fnish early.
-    return shortcut(str, decimalFormat)
+    return shortcut(str, formats)
   }
 
   if (expression.length > 0) {
@@ -35213,7 +35361,7 @@ const compile = (inputStr, decimalFormat = "1,000,000.") => {
 
     } else {
       // Parse the expression. Stop short of doing the calculation.
-      [echo, rpn, dependencies] = parse$1(expression, decimalFormat, true);
+      [echo, rpn, dependencies] = parse$1(expression, formats, true);
 
       // Shoulld we display an echo of the expression, with values shown for each variable?
       if (suppressResultDisplay || displayResultOnly || echo.indexOf("〖") === -1
@@ -35254,9 +35402,9 @@ const compile = (inputStr, decimalFormat = "1,000,000.") => {
     } else {
       if (unit) {
         resultDisplay = trailStr.trim().replace(/([^ ?!@%]+)$/, "'" + "$1" + "'");
-        resultDisplay = parse$1(resultDisplay, decimalFormat).replace(/\\%/g, "%").replace("@ @", "@@");
+        resultDisplay = parse$1(resultDisplay, formats).replace(/\\%/g, "%").replace("@ @", "@@");
       } else {
-        resultDisplay = parse$1(trailStr, decimalFormat).replace(/\\%/g, "%").replace("@ @", "@@");
+        resultDisplay = parse$1(trailStr, formats).replace(/\\%/g, "%").replace("@ @", "@@");
       }
       resultDisplay = resultDisplay.replace(/\\text\{(\?\??|%%?)\}/, "$1");
       resultDisplay = resultDisplay.replace(/([?%]) ([?%])/, "$1" + "$2");
@@ -35265,9 +35413,9 @@ const compile = (inputStr, decimalFormat = "1,000,000.") => {
   } else {
     // trailStr may be a static value in an assignment statement.
     // Check if trailStr is a valid literal.
-    [value, unit, dtype, resultDisplay] = valueFromLiteral(trailStr, name, decimalFormat);
+    [value, unit, dtype, resultDisplay] = valueFromLiteral(trailStr, name, formats);
 
-    if (dtype === dt.ERROR) { return shortcut(str, decimalFormat) }
+    if (dtype === dt.ERROR) { return shortcut(str, formats) }
     rpn = "";
   }
 
@@ -35275,7 +35423,7 @@ const compile = (inputStr, decimalFormat = "1,000,000.") => {
   let eqn = "";
   let altEqn = "";
   if (!displayResultOnly) {
-    eqn = parse$1(mainStr, decimalFormat);
+    eqn = parse$1(mainStr, formats);
     if (mustAlign) {
       eqn = "\\begin{aligned}" + eqn;
       const pos = eqn.indexOf("=");
@@ -35335,13 +35483,13 @@ const calculate = (
   entry,
   vars = {},
   inDraftMode = false,
-  decimalFormat = "1,000,000."
+  formats = { decimalFormat: "1,000,000.", dateFormat: "yyy-mm-dd" }
 ) => {
-  let attrs = compile(entry, decimalFormat);
+  let attrs = compile(entry, formats);
   if (attrs.rpn) {
-    attrs = evaluate(clone(attrs), vars, decimalFormat);
+    attrs = evaluate(clone(attrs), vars, formats);
   } else if (attrs.dtype && attrs.dtype === dt.DRAWING) {
-    attrs = evaluateDrawing(attrs, vars, decimalFormat);
+    attrs = evaluateDrawing(attrs, vars, formats);
   }
   if (attrs.name) {
     insertOneHurmetVar(vars, attrs);
@@ -36411,7 +36559,7 @@ const grafRegEx = /\n\n/;
 // Compile a spreadsheet cell.
 
 const compileCell = (attrs, sheetAttrs, unit, previousAttrs,
-                            decimalFormat = "1,000,000.") => {
+                            formats = "1,000,000.") => {
   const newAttrs = { entry: attrs.entry, name: attrs.name };
   const entry = attrs.entry;
   if (entry.length === 0) {
@@ -36422,7 +36570,7 @@ const compileCell = (attrs, sheetAttrs, unit, previousAttrs,
     const expression = entry.replace(/^==?/, "").trim();
     // TODO: Revise the parser to handle spreadsheet cell names & sheetname
     // eslint-disable-next-line prefer-const
-    let [_, rpn, dependencies] = parse$1(expression, decimalFormat, true, false, sheetAttrs.name);
+    let [_, rpn, dependencies] = parse$1(expression, formats, true, false, sheetAttrs.name);
     const outerDependencies = new Set();
     for (const dependency of dependencies) {
       if (!innerRefRegEx.test(dependency)) {
@@ -36493,7 +36641,7 @@ const compileCell = (attrs, sheetAttrs, unit, previousAttrs,
       newAttrs.dtype = dt.BOOLEAN;
     } else if (complexRegEx.test(entry)) {
       // eslint-disable-next-line no-unused-vars
-      const [value, unit, dtype, _] = valueFromLiteral(entry, attrs.name, decimalFormat);
+      const [value, unit, dtype, _] = valueFromLiteral(entry, attrs.name, formats);
       newAttrs.value = value;
       newAttrs.dtype = dtype;
     } else {
@@ -36506,7 +36654,7 @@ const compileCell = (attrs, sheetAttrs, unit, previousAttrs,
 
 // Compile a spreadsheet
 
-const compileSheet = (table, decimalFormat = "1,000,000") => {
+const compileSheet = (table, formats) => {
   // The cell entries and the sheet name are already known.
   // Proceed to compile the rest of the table and cell attributes.
   // Stop short of calculations.
@@ -36563,7 +36711,7 @@ const compileSheet = (table, decimalFormat = "1,000,000") => {
           ? table.attrs.units[table.attrs.unitMap[j]]
           : null;
         newCell.attrs = compileCell(newCell.attrs, table.attrs, unit, previousAttrs,
-                                    decimalFormat);
+                                    formats);
         previousAttrs = newCell.attrs;
         previousAttrs.unit = unit;
         if (newCell.attrs.dependencies) {
@@ -36622,8 +36770,11 @@ const tableToSheet = (state, tableNode) => {
       table.content[i].content[j].content = [newCell];
     }
   }
-  const decimalFormat = state.doc.decimalFormat;
-  table = compileSheet(table, decimalFormat);
+  const formats = {
+    decimalFormat: state.doc.attrs.decimalFormat,
+    dateFormat: state.doc.attrs.dateFormat
+  };
+  table = compileSheet(table, formats);
   table.attrs.class += " spreadsheet";
   table.attrs.dtype = dt.SPREADSHEET;
   return [table, tableStart, tableEnd]
@@ -36711,11 +36862,11 @@ const urlFromEntry = entry => {
 };
 
 // Helper function.
-const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
+const processFetchedString = (entry, text, hurmetVars, formats) => {
   const attrs = Object.create(null);
   attrs.entry = entry;
   attrs.name = entry.replace(/=.+$/, "").trim();
-  let str = parse$1(entry.replace(/\s*=\s*[$$£¥\u20A0-\u20CF]?(?:!{1,2}).*$/, ""), decimalFormat);
+  let str = parse$1(entry.replace(/\s*=\s*[$$£¥\u20A0-\u20CF]?(?:!{1,2}).*$/, ""), formats);
   const url = urlFromEntry(entry);
   if (/\.(?:tsv|txt)$/.test(url)) {
     // Shorten the URL.
@@ -36733,7 +36884,7 @@ const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
     return attrs
   }
   const data = importRegEx.test(entry)
-    ? scanModule(text, decimalFormat)     // import code
+    ? scanModule(text, formats)     // import code
     : DataFrame.dataFrameFromTSV(text);    // fetch data
 
   // Append the data to attrs
@@ -36781,7 +36932,7 @@ const workWithFetchedTexts = (
   view,
   doc,
   inDraftMode,
-  decimalFormat,
+  formats,
   isCalcAll,
   nodeAttrs,
   curPos,
@@ -36805,11 +36956,11 @@ const workWithFetchedTexts = (
     const entry = isCalcAll
       ? doc.nodeAt(pos).attrs.entry
       : nodeAttrs.entry;
-    const attrs = processFetchedString(entry, texts[i], hurmetVars, decimalFormat);
+    const attrs = processFetchedString(entry, texts[i], hurmetVars, formats);
     attrs.inDraftMode = inDraftMode;
     tr.replaceWith(pos, pos + 1, state.schema.nodes.calculation.createAndFill(attrs));
     if (attrs.name) {
-      insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat);
+      insertOneHurmetVar(hurmetVars, attrs, null, formats.decimalFormat);
     }
   }
   // There. Fetches are done and are loaded into the document.
@@ -36831,7 +36982,10 @@ const workAsync = (
   // Here we fetch the remote data.
   const doc = view.state.doc;
   const inDraftMode = doc.attrs.inDraftMode;
-  const decimalFormat = doc.attrs.decimalFormat;
+  const formats = {
+    decimalFormat: doc.attrs.decimalFormat,
+    dateFormat: doc.attrs.dateFormat
+  };
 
   if (!navigator.onLine) {
     const texts = [];
@@ -36842,7 +36996,7 @@ const workAsync = (
         }
       });
     }
-    workWithFetchedTexts(view, doc, inDraftMode, decimalFormat, isCalcAll,
+    workWithFetchedTexts(view, doc, inDraftMode, formats, isCalcAll,
       nodeAttrs, curPos, hurmetVars, fetchPositions, texts);
   } else {
     Promise.all(
@@ -36868,7 +37022,7 @@ const workAsync = (
         return r.text()
       }))
     }).then((texts) => {
-      workWithFetchedTexts(view, doc, inDraftMode, decimalFormat, isCalcAll,
+      workWithFetchedTexts(view, doc, inDraftMode, formats, isCalcAll,
         nodeAttrs, curPos, hurmetVars, fetchPositions, texts);
     });
   }
@@ -36886,7 +37040,10 @@ const proceedAfterFetch = (
   //   1. After remote, fetched data has been processed, or
   //   2. After we know that no fetch statements need be processed.
   const doc = view.state.doc;
-  const decimalFormat = doc.attrs.decimalFormat;
+  const formats = {
+    decimalFormat: doc.attrs.decimalFormat,
+    dateFormat: doc.attrs.dateFormat
+  };
   const calcSchema = view.state.schema.nodes.calculation;
   // Create a set to track which variable have a changed value.
   const changedVars = isCalcAll ? null : new Set();
@@ -36903,7 +37060,7 @@ const proceedAfterFetch = (
               hurmetVars[key] =  value;
             });
           } else {
-            insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat);
+            insertOneHurmetVar(hurmetVars, attrs, null, formats.decimalFormat);
           }
         }
       } else if (("dtype" in node.attrs) && node.attrs.dtype === dt.SPREADSHEET) {
@@ -36926,7 +37083,7 @@ const proceedAfterFetch = (
     // Hoist any user-defined functions located below the selection.
     doc.nodesBetween(curPos + 1, doc.content.size, function(node, pos) {
       if (node.type.name === "calculation" && node.attrs.dtype === dt.MODULE) {
-        insertOneHurmetVar(hurmetVars, node.attrs, null, decimalFormat);
+        insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat);
       }
     });
 
@@ -36939,10 +37096,12 @@ const proceedAfterFetch = (
           // Do the calculation of the cell.
           if (attrs.rpn || (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING)) {
             attrs = attrs.dtype && attrs.dtype === dt.DRAWING
-              ? evaluateDrawing(attrs, hurmetVars, decimalFormat)
-              : evaluate(attrs, hurmetVars, decimalFormat);
+              ? evaluateDrawing(attrs, hurmetVars, formats)
+              : evaluate(attrs, hurmetVars, formats);
           }
-          if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat); }
+          if (attrs.name) {
+            insertOneHurmetVar(hurmetVars, attrs, changedVars, formats.decimalFormat);
+          }
         } catch (err) {
           attrs.tex = "\\text{" + attrs.entry + " = " + err + "}";
         }
@@ -36964,7 +37123,7 @@ const proceedAfterFetch = (
           for (let i = 1; i < numRows; i++) {
             const cell = table.content[i].content[j].content[0];
             if (cell.attrs.rpn) {
-              cell.attrs = evaluate(cell.attrs, hurmetVars, decimalFormat);
+              cell.attrs = evaluate(cell.attrs, hurmetVars, formats);
               cell.attrs.display = cell.attrs.alt;
               if (j === 0) { table.attrs.rowMap[cell.attrs.alt] = i; }
             } else if (j === 0 && typeof cell.attrs.value === "string") {
@@ -36989,7 +37148,7 @@ const proceedAfterFetch = (
       if (notFetched) {
         const entry = node.attrs.entry;
         let attrs = isCalcAll
-          ? compile(entry, decimalFormat)
+          ? compile(entry, formats)
           : clone(node.attrs);
         attrs.displayMode = node.attrs.displayMode;
         const mustRedraw = attrs.dtype && attrs.dtype === dt.DRAWING &&
@@ -36999,11 +37158,11 @@ const proceedAfterFetch = (
             if (attrs.rpn || mustRedraw) {
               attrs.error = false;
               attrs = attrs.rpn // attrs.dtype && attrs.dtype === dt.DRAWING
-                ? evaluate(attrs, hurmetVars, decimalFormat)
-                : evaluateDrawing(attrs, hurmetVars, decimalFormat);
+                ? evaluate(attrs, hurmetVars, formats)
+                : evaluateDrawing(attrs, hurmetVars, formats);
             }
             if (attrs.name) {
-              insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat);
+              insertOneHurmetVar(hurmetVars, attrs, changedVars, formats.decimalFormat);
             }
           } catch (err) {
             attrs.tex = "\\text{" + attrs.entry + " = " + err + "}";
@@ -37012,7 +37171,7 @@ const proceedAfterFetch = (
             tr.replaceWith(pos, pos + 1, calcSchema.createAndFill(attrs));
           }
         } else if (attrs.name && attrs.value) {
-          insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat);
+          insertOneHurmetVar(hurmetVars, attrs, null, formats.decimalFormat);
         }
       } else if (node.attrs.name && !(isCalcAll && node.attrs.isFetch)) {
         if (node.attrs.name) {
@@ -37021,7 +37180,7 @@ const proceedAfterFetch = (
               hurmetVars[key] =  value;
             });
           } else {
-            insertOneHurmetVar(hurmetVars, node.attrs, null, decimalFormat);
+            insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat);
           }
         }
       }
@@ -37031,7 +37190,7 @@ const proceedAfterFetch = (
       let table = clone(node.toJSON());
       let mustCalc = false;
       if (isCalcAll) {
-        table = compileSheet(table, decimalFormat);
+        table = compileSheet(table, formats);
         mustCalc = true;
       } else {
         for (const varName of table.attrs.dependencies) {
@@ -37050,7 +37209,7 @@ const proceedAfterFetch = (
           for (let i = 1; i < numRows; i++) {
             const cell = table.content[i].content[j].content[0];
             if (cell.attrs.rpn) {
-              cell.attrs = evaluate(cell.attrs, hurmetVars, decimalFormat);
+              cell.attrs = evaluate(cell.attrs, hurmetVars, formats);
               cell.attrs.display = cell.attrs.alt;
               if (j === 0) { table.attrs.rowMap[cell.attrs.alt] = i; }
             } else if (j === 0 && typeof cell.attrs.value === "string") {
@@ -37107,6 +37266,11 @@ function updateCalculations(
   // Create an object in which we'll hold variable values.
   const hurmetVars = Object.create(null);
   hurmetVars.format = { value: "h15" }; // default rounding format
+  hurmetVars["@savedate"] = doc.attrs.saveDate;
+  const formats = {
+    decimalFormat: doc.attrs.decimalFormat,
+    dateFormat: doc.attrs.dateFormat
+  };
 
   // Get an array of all the URLs called by fetch statements.
   const urls = [];
@@ -37127,11 +37291,11 @@ function updateCalculations(
           urls.push(urlFromEntry(entry));
           fetchPositions.push(pos);
         } else if (/^function /.test(entry)) {
-          node.attrs = compile(entry, doc.attrs.decimalFormat);
-          insertOneHurmetVar(hurmetVars, node.attrs, null, doc.attrs.decimalFormat);
+          node.attrs = compile(entry, formats);
+          insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat);
         }
       } else if (node.attrs.isFetch || (node.attrs.dtype && node.attrs.dtype === dt.MODULE)) {
-        insertOneHurmetVar(hurmetVars, node.attrs, null, doc.attrs.decimalFormat);
+        insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat);
       }
     });
   }
@@ -37211,7 +37375,11 @@ async function updateCalcs(doc) {
   // Create an object in which we'll hold variable values.
   const hurmetVars = Object.create(null);
   hurmetVars.format = { value: "h15" }; // default rounding format
-  const decimalFormat = doc.attrs ? doc.attrs.decimalFormat : '1,000,000.';
+  hurmetVars["@savedate"] = doc.attrs.saveDate;
+  const formats = {
+    decimalFormat: doc.attrs.decimalFormat,
+    dateFormat: doc.attrs.dateFormat
+  };
 
   // Create an array of all the calculation nodes in the document
   const calcNodes = [];
@@ -37227,8 +37395,8 @@ async function updateCalcs(doc) {
       urls.push(helpers.urlFromEntry(entry));
       callers.push(node);
     } else if (/^function /.test(entry)) {
-      node.attrs = compile(entry, decimalFormat);
-      insertOneHurmetVar(hurmetVars, node.attrs, null, decimalFormat);
+      node.attrs = compile(entry, formats);
+      insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat);
     }
   }
 
@@ -37240,14 +37408,14 @@ async function updateCalcs(doc) {
       const node = callers[i];
       const entry = node.attrs.entry;
       // When we modify a node, we are also mutating the container doc.
-      node.attrs = helpers.processFetchedString(entry, texts[i], hurmetVars, decimalFormat);
+      node.attrs = helpers.processFetchedString(entry, texts[i], hurmetVars, formats);
       if (node.attrs.name) {
         if (node.attrs.name === "importedParameters") {
           Object.entries(node.attrs.value).forEach(([key, value]) => {
             hurmetVars[key] =  value;
           });
         } else {
-          insertOneHurmetVar(hurmetVars, node.attrs, null, decimalFormat);
+          insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat);
         }
       }
     }
@@ -37260,21 +37428,23 @@ async function updateCalcs(doc) {
       if (node.type === "calculation") {
         if (!helpers.fetchRegEx.test(node.attrs.entry)) {
           const entry = node.attrs.entry;
-          let attrs = compile(entry, decimalFormat);
+          let attrs = compile(entry, formats);
           attrs.displayMode = node.attrs.displayMode;
           const mustDraw = attrs.dtype && attrs.dtype === dt.DRAWING;
           if (attrs.rpn || mustDraw) {
             attrs = attrs.rpn
-              ? evaluate(attrs, hurmetVars, decimalFormat)
-              : evaluateDrawing(attrs, hurmetVars, decimalFormat);
+              ? evaluate(attrs, hurmetVars, formats)
+              : evaluateDrawing(attrs, hurmetVars, formats);
           }
-          if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat); }
+          if (attrs.name) {
+            insertOneHurmetVar(hurmetVars, attrs, null, formats.decimalFormat);
+          }
           // When we modify a node, we are also mutating the container doc.
           node.attrs = attrs;
         }
       } else if ("dtype" in node.attrs && node.attrs.dtype === dt.SPREADSHEET) {
         // node is a spreadsheet
-        const sheet = compileSheet(node, decimalFormat);
+        const sheet = compileSheet(node, formats);
         const sheetName = sheet.attrs.name;
         hurmetVars[sheetName] = sheet.attrs;
         hurmetVars[sheetName].value = {};
@@ -37287,7 +37457,7 @@ async function updateCalcs(doc) {
             const cell = sheet.content[i].content[j].content[0];
             if (cell.attrs.rpn) {
               cell.attrs.altresulttemplate = cell.attrs.resulttemplate;
-              cell.attrs = evaluate(cell.attrs, hurmetVars, decimalFormat);
+              cell.attrs = evaluate(cell.attrs, hurmetVars, formats);
               cell.attrs.display = cell.attrs.alt;
               if (j === 0) { sheet.attrs.rowMap[cell.attrs.alt] = i; }
             } else if (j === 0 && typeof cell.attrs.value === "string") {
@@ -51105,8 +51275,9 @@ var temml = {
  * Some of Hurmet’s exported functions are valuable only to the Hurmet.org web page.
  * If you wish to use Hurmet’s math parsing and/or calculation abilities,
  * the two functions you want are:
- *   parse(entry: string, decimalFormat?: string)
- *   calculate(entry: string, vars?: Object, draftMode?: boolean, decimalFormat?: string)
+ *   parse(entry: string, formats?: { decimalFormat: string, dateFormat: string })
+ *   calculate(entry: string, vars?: Object, draftMode?: boolean,
+ *             formats?: { decimalFormat: string, dateFormat: string })
  *
  *   parse() returns a TeX string.
  *   calculate() returns either a TeX string or a string in Hurmet calculation syntax.
@@ -51176,9 +51347,11 @@ const nodes = {
     // outside the undo stack.
     attrs: {
       decimalFormat: { default: '1,000,000.', validate: "string" },
+      dateFormat: { default: 'yyyy-mm-dd', validate: "string" },
       inDraftMode: { default: false, validate: "boolean" },
       saveIsValid: { default: false, validate: "boolean" },
       fileHandle: { default: null, validate: "null|string" },
+      saveDate: { default: null, validate: "null|string" },
       fontSize: { default: 12, validate: "number|string" },       // 12 | 10
       pageSize: { default: "letter", validate: "string" }, // letter | A4
       snapshots: { default: [] },
@@ -52198,9 +52371,12 @@ function openPrompt(options) {
   const submit = () => {
     const params = getValues(options.fields, domFields);
     if (options.radioButtons) {
-      params.class = form[options.radioButtons.name].value;
       if (options.radioButtons.name === "rounding") {
         params.value = form[options.radioButtons.name].value + form.digits.value;
+      } else if (options.radioButtons.name === "dateFormat") {
+        params.format = form[options.radioButtons.name].value;
+      } else {
+        params.class = form[options.radioButtons.name].value;
       }
     }
     if (options.src && !params.src) {
@@ -52254,7 +52430,9 @@ function getValues(fields, domFields) {
   for (const name in fields) {
     const field = fields[name];
     const dom = domFields[i++];
-    const value = field.read(dom);
+    const value = dom.tagname === "INPUT"
+      ? field.read(dom)
+      : field.read(dom.lastChild);
     const bad = field.validate(value);
     if (bad) {
       reportInvalid(dom, bad);
@@ -52327,7 +52505,17 @@ class TextField extends Field {
     input.placeholder = this.options.label;
     input.value = this.options.value || "";
     input.autocomplete = "off";
-    return input
+    if (this.options.leader) {
+      input.style.width = "50px";
+      const leader = document.createElement("span");
+      leader.textContent = this.options.leader;
+      const div = document.createElement("div");
+      div.appendChild(leader);
+      div.appendChild(input);
+      return div
+    } else {
+      return input
+    }
   }
 }
 
@@ -52432,8 +52620,11 @@ const handleContents = (view, schema, str, format) => {
   view.dispatch(
     view.state.tr.replaceWith(0, view.state.doc.content.size, schema.nodeFromJSON(doc))
   );
+  // A ProseMirror transaction does not reach the document metadata.
+  // Write the metadate separately.
   view.state.doc.attrs.fontSize = fontSize;
   view.state.doc.attrs.pageSize = pageSize;
+  if (doc.attrs.saveDate) { view.state.doc.attrs.saveDate = doc.attrs.saveDate; }
   if (doc.attrs.snapshots) { view.state.doc.attrs.snapshots = doc.attrs.snapshots; }
   if (doc.attrs.fallbacks) { view.state.doc.attrs.fallbacks = doc.attrs.fallbacks; }
 
@@ -54638,6 +54829,8 @@ function saveFileAsMarkdown(state, view, isSaveAs = false) {
 decimalFormat: ${state.doc.attrs.decimalFormat}
 fontSize: ${state.doc.attrs.fontSize}
 pageSize: ${state.doc.attrs.pageSize}
+dateFormat: ${state.doc.attrs.dateFormat}
+saveDate: ${new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60 * 1000).toISOString().split("T")[0]}
 ---------------
 
 ` + hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, false, false);
@@ -55401,6 +55594,63 @@ function setDecimalFormat(label) {
   })
 }
 
+const setDateFormat = new MenuItem({
+  label: "Date format...",
+  title: "Set date format",
+  run(state, _, view) {
+    let currentFormat = state.doc.attrs.dateFormat;
+    const match = dateFormatRegEx.exec(currentFormat);
+    const prependWeekday = match[1] ? true : false;
+    if (prependWeekday) {
+      currentFormat = currentFormat.slice(match[1].length + 1).trim();
+    }
+    if (match[7]) {
+      currentFormat = currentFormat.slice(0, -match[7].length).trim();
+    }
+    const promptOptions = {
+      title: "Date Format",
+      radioButtons: {
+        name: "dateFormat",
+        direction: "column",
+        buttons: [
+          ["yyyy-mm-dd", "yyyy-mm-dd"],
+          ["dd.mm.yyyy", "dd.mm.yyyy"],
+          ["d mmmm yyyy", "d mmmm yyyy"],
+          ["d mmm yyyy", "d mmm yyyy"],
+          ["mmmm d, yyyy", "mmmm d, yyyy"],
+          ["mmm d, yyyy", "mmm d, yyyy"],
+          ["d de mmmm de yyyy", "d de mmmm de yyyy"]
+        ],
+        current: currentFormat
+      },
+      checkbox: {
+        name: "Prepend weekday",
+        checked: prependWeekday
+      },
+      fields: {
+        language: new TextField({
+          label: "Language code",
+          leader: "Language code",
+          value: match[7] ? match[7] : "en",
+          required: false
+        })
+      },
+      callback(attrs) {
+        let dateFormat = attrs.format;
+        if (attrs.checkbox) {
+          dateFormat = (dateFormat.indexOf("mmmm") > -1 ? "wwww" : "www" ) + ", " + dateFormat;
+        }
+        if (attrs.language && attrs.language !== "en") {
+          dateFormat += " " + attrs.language;
+        }
+        state.doc.attrs.dateFormat = dateFormat;
+        hurmet.updateCalculations(view, true);
+      }
+    };
+    openPrompt(promptOptions);
+  }
+});
+
 function setFontSize(size) {
   return new MenuItem({
     label: String(size) + " pt",
@@ -55934,10 +56184,11 @@ function buildMenuItems(schema) {
   let cut = arr => arr.filter(x => x);
   
   r.fontsize = new DropdownSubmenu([r.pica, r.longprimer], { label: "Font size" });
+  r.dateFormat = setDateFormat;
   r.pagesize = new DropdownSubmenu([r.letter, r.A4], { label: "Page size" });
   r.separators = new DropdownSubmenu(
     [r.dot, r.commadot, r.lakh, r.cn, r.comma, r.spacecomma, r.apostrophecomma, r.dotcomma],
-    {title: "Set decimal format", label: "Set Decimal"}
+    {title: "Set decimal format", label: "Decimal format"}
   );
   r.fileDropDown = new Dropdown([
     r.openFile,
@@ -55955,6 +56206,7 @@ function buildMenuItems(schema) {
   r.documentDropDown = new Dropdown([
     r.separators,
     r.fontsize,
+    r.dateFormat,
     r.toggleDraftMode,
     r.insertHeader,
     r.deleteComments
@@ -57335,7 +57587,11 @@ function openMathPrompt(options) {
       if (decimalSymbol === ",") { tex = dotFromCommaForStorage(tex); }
       isUDF = functionRegEx.test(tex);
       if (!isUDF) {
-        tex = hurmet.parse(tex, options.decimalFormat, false, true);
+        const formats = {
+          decimalFormat: options.outerView.state.doc.attrs.decimalFormat,
+          dateFormat: options.outerView.state.doc.attrs.dateFormat
+        };
+        tex = hurmet.parse(tex, formats, false, true);
       }
     } else {
       tex = code;
@@ -57377,9 +57633,13 @@ function openMathPrompt(options) {
     if (isCalculation && decimalSymbol === ",") {
       mathString = dotFromCommaForStorage(mathString);
     }
+    const formats = {
+      decimalFormat: options.outerView.state.doc.attrs.decimalFormat,
+      dateFormat: options.outerView.state.doc.attrs.dateFormat
+    };
     const params = (isTex)
       ? { tex: mathString }
-      : hurmet.compile(mathString, options.decimalFormat);
+      : hurmet.compile(mathString, formats);
     params.displayMode = options.attrs.displayMode;
     if (wrapper.parentNode) {
       wrapper.parentNode.firstChild.removeAttribute("style");

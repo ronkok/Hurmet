@@ -32,6 +32,7 @@ import { showDiff } from "./diffMatchPatch"
 import { sheetToTable, tableToSheet } from "./spreadsheet.js"
 import { dt } from "./constants.js"
 import { clone } from "./utils.js"
+import { dateFormatRegEx } from "./date"
 
 // Menu icons that are not included in node-module menu.js
 const hurmetIcons = {
@@ -459,6 +460,8 @@ export function saveFileAsMarkdown(state, view, isSaveAs = false) {
 decimalFormat: ${state.doc.attrs.decimalFormat}
 fontSize: ${state.doc.attrs.fontSize}
 pageSize: ${state.doc.attrs.pageSize}
+dateFormat: ${state.doc.attrs.dateFormat}
+saveDate: ${new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60 * 1000).toISOString().split("T")[0]}
 ---------------
 
 ` + hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, false, false)
@@ -1225,6 +1228,63 @@ function setDecimalFormat(label) {
   })
 }
 
+const setDateFormat = new MenuItem({
+  label: "Date format...",
+  title: "Set date format",
+  run(state, _, view) {
+    let currentFormat = state.doc.attrs.dateFormat
+    const match = dateFormatRegEx.exec(currentFormat)
+    const prependWeekday = match[1] ? true : false
+    if (prependWeekday) {
+      currentFormat = currentFormat.slice(match[1].length + 1).trim()
+    }
+    if (match[7]) {
+      currentFormat = currentFormat.slice(0, -match[7].length).trim()
+    }
+    const promptOptions = {
+      title: "Date Format",
+      radioButtons: {
+        name: "dateFormat",
+        direction: "column",
+        buttons: [
+          ["yyyy-mm-dd", "yyyy-mm-dd"],
+          ["dd.mm.yyyy", "dd.mm.yyyy"],
+          ["d mmmm yyyy", "d mmmm yyyy"],
+          ["d mmm yyyy", "d mmm yyyy"],
+          ["mmmm d, yyyy", "mmmm d, yyyy"],
+          ["mmm d, yyyy", "mmm d, yyyy"],
+          ["d de mmmm de yyyy", "d de mmmm de yyyy"]
+        ],
+        current: currentFormat
+      },
+      checkbox: {
+        name: "Prepend weekday",
+        checked: prependWeekday
+      },
+      fields: {
+        language: new TextField({
+          label: "Language code",
+          leader: "Language code",
+          value: match[7] ? match[7] : "en",
+          required: false
+        })
+      },
+      callback(attrs) {
+        let dateFormat = attrs.format
+        if (attrs.checkbox) {
+          dateFormat = (dateFormat.indexOf("mmmm") > -1 ? "wwww" : "www" ) + ", " + dateFormat
+        }
+        if (attrs.language && attrs.language !== "en") {
+          dateFormat += " " + attrs.language
+        }
+        state.doc.attrs.dateFormat = dateFormat
+        hurmet.updateCalculations(view, true)
+      }
+    }
+    openPrompt(promptOptions)
+  }
+})
+
 function setFontSize(size) {
   return new MenuItem({
     label: String(size) + " pt",
@@ -1760,10 +1820,11 @@ export function buildMenuItems(schema) {
   let cut = arr => arr.filter(x => x)
   
   r.fontsize = new DropdownSubmenu([r.pica, r.longprimer], { label: "Font size" })
+  r.dateFormat = setDateFormat
   r.pagesize = new DropdownSubmenu([r.letter, r.A4], { label: "Page size" })
   r.separators = new DropdownSubmenu(
     [r.dot, r.commadot, r.lakh, r.cn, r.comma, r.spacecomma, r.apostrophecomma, r.dotcomma],
-    {title: "Set decimal format", label: "Set Decimal"}
+    {title: "Set decimal format", label: "Decimal format"}
   )
   r.fileDropDown = new Dropdown([
     r.openFile,
@@ -1781,6 +1842,7 @@ export function buildMenuItems(schema) {
   r.documentDropDown = new Dropdown([
     r.separators,
     r.fontsize,
+    r.dateFormat,
     r.toggleDraftMode,
     r.insertHeader,
     r.deleteComments

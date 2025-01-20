@@ -65,11 +65,11 @@ const urlFromEntry = entry => {
 }
 
 // Helper function.
-const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
+const processFetchedString = (entry, text, hurmetVars, formats) => {
   const attrs = Object.create(null)
   attrs.entry = entry
   attrs.name = entry.replace(/=.+$/, "").trim()
-  let str = parse(entry.replace(/\s*=\s*[$$£¥\u20A0-\u20CF]?(?:!{1,2}).*$/, ""), decimalFormat)
+  let str = parse(entry.replace(/\s*=\s*[$$£¥\u20A0-\u20CF]?(?:!{1,2}).*$/, ""), formats)
   const url = urlFromEntry(entry)
   if (/\.(?:tsv|txt)$/.test(url)) {
     // Shorten the URL.
@@ -87,7 +87,7 @@ const processFetchedString = (entry, text, hurmetVars, decimalFormat) => {
     return attrs
   }
   const data = importRegEx.test(entry)
-    ? scanModule(text, decimalFormat)     // import code
+    ? scanModule(text, formats)     // import code
     : DataFrame.dataFrameFromTSV(text)    // fetch data
 
   // Append the data to attrs
@@ -135,7 +135,7 @@ const workWithFetchedTexts = (
   view,
   doc,
   inDraftMode,
-  decimalFormat,
+  formats,
   isCalcAll,
   nodeAttrs,
   curPos,
@@ -159,11 +159,11 @@ const workWithFetchedTexts = (
     const entry = isCalcAll
       ? doc.nodeAt(pos).attrs.entry
       : nodeAttrs.entry
-    const attrs = processFetchedString(entry, texts[i], hurmetVars, decimalFormat)
+    const attrs = processFetchedString(entry, texts[i], hurmetVars, formats)
     attrs.inDraftMode = inDraftMode
     tr.replaceWith(pos, pos + 1, state.schema.nodes.calculation.createAndFill(attrs))
     if (attrs.name) {
-      insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat)
+      insertOneHurmetVar(hurmetVars, attrs, null, formats.decimalFormat)
     }
   }
   // There. Fetches are done and are loaded into the document.
@@ -185,7 +185,10 @@ const workAsync = (
   // Here we fetch the remote data.
   const doc = view.state.doc
   const inDraftMode = doc.attrs.inDraftMode
-  const decimalFormat = doc.attrs.decimalFormat
+  const formats = {
+    decimalFormat: doc.attrs.decimalFormat,
+    dateFormat: doc.attrs.dateFormat
+  }
 
   if (!navigator.onLine) {
     const texts = [];
@@ -196,7 +199,7 @@ const workAsync = (
         }
       })
     }
-    workWithFetchedTexts(view, doc, inDraftMode, decimalFormat, isCalcAll,
+    workWithFetchedTexts(view, doc, inDraftMode, formats, isCalcAll,
       nodeAttrs, curPos, hurmetVars, fetchPositions, texts)
   } else {
     Promise.all(
@@ -222,7 +225,7 @@ const workAsync = (
         return r.text()
       }))
     }).then((texts) => {
-      workWithFetchedTexts(view, doc, inDraftMode, decimalFormat, isCalcAll,
+      workWithFetchedTexts(view, doc, inDraftMode, formats, isCalcAll,
         nodeAttrs, curPos, hurmetVars, fetchPositions, texts)
     })
   }
@@ -240,7 +243,10 @@ const proceedAfterFetch = (
   //   1. After remote, fetched data has been processed, or
   //   2. After we know that no fetch statements need be processed.
   const doc = view.state.doc
-  const decimalFormat = doc.attrs.decimalFormat
+  const formats = {
+    decimalFormat: doc.attrs.decimalFormat,
+    dateFormat: doc.attrs.dateFormat
+  }
   const calcSchema = view.state.schema.nodes.calculation
   // Create a set to track which variable have a changed value.
   const changedVars = isCalcAll ? null : new Set()
@@ -257,7 +263,7 @@ const proceedAfterFetch = (
               hurmetVars[key] =  value
             })
           } else {
-            insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat)
+            insertOneHurmetVar(hurmetVars, attrs, null, formats.decimalFormat)
           }
         }
       } else if (("dtype" in node.attrs) && node.attrs.dtype === dt.SPREADSHEET) {
@@ -280,7 +286,7 @@ const proceedAfterFetch = (
     // Hoist any user-defined functions located below the selection.
     doc.nodesBetween(curPos + 1, doc.content.size, function(node, pos) {
       if (node.type.name === "calculation" && node.attrs.dtype === dt.MODULE) {
-        insertOneHurmetVar(hurmetVars, node.attrs, null, decimalFormat)
+        insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat)
       }
     })
 
@@ -293,10 +299,12 @@ const proceedAfterFetch = (
           // Do the calculation of the cell.
           if (attrs.rpn || (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING)) {
             attrs = attrs.dtype && attrs.dtype === dt.DRAWING
-              ? evaluateDrawing(attrs, hurmetVars, decimalFormat)
-              : evaluate(attrs, hurmetVars, decimalFormat)
+              ? evaluateDrawing(attrs, hurmetVars, formats)
+              : evaluate(attrs, hurmetVars, formats)
           }
-          if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat) }
+          if (attrs.name) {
+            insertOneHurmetVar(hurmetVars, attrs, changedVars, formats.decimalFormat)
+          }
         } catch (err) {
           attrs.tex = "\\text{" + attrs.entry + " = " + err + "}"
         }
@@ -318,7 +326,7 @@ const proceedAfterFetch = (
           for (let i = 1; i < numRows; i++) {
             const cell = table.content[i].content[j].content[0];
             if (cell.attrs.rpn) {
-              cell.attrs = evaluate(cell.attrs, hurmetVars, decimalFormat)
+              cell.attrs = evaluate(cell.attrs, hurmetVars, formats)
               cell.attrs.display = cell.attrs.alt
               if (j === 0) { table.attrs.rowMap[cell.attrs.alt] = i }
             } else if (j === 0 && typeof cell.attrs.value === "string") {
@@ -343,7 +351,7 @@ const proceedAfterFetch = (
       if (notFetched) {
         const entry = node.attrs.entry
         let attrs = isCalcAll
-          ? compile(entry, decimalFormat)
+          ? compile(entry, formats)
           : clone(node.attrs)
         attrs.displayMode = node.attrs.displayMode
         const mustRedraw = attrs.dtype && attrs.dtype === dt.DRAWING &&
@@ -353,11 +361,11 @@ const proceedAfterFetch = (
             if (attrs.rpn || mustRedraw) {
               attrs.error = false
               attrs = attrs.rpn // attrs.dtype && attrs.dtype === dt.DRAWING
-                ? evaluate(attrs, hurmetVars, decimalFormat)
-                : evaluateDrawing(attrs, hurmetVars, decimalFormat)
+                ? evaluate(attrs, hurmetVars, formats)
+                : evaluateDrawing(attrs, hurmetVars, formats)
             }
             if (attrs.name) {
-              insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat)
+              insertOneHurmetVar(hurmetVars, attrs, changedVars, formats.decimalFormat)
             }
           } catch (err) {
             attrs.tex = "\\text{" + attrs.entry + " = " + err + "}"
@@ -366,7 +374,7 @@ const proceedAfterFetch = (
             tr.replaceWith(pos, pos + 1, calcSchema.createAndFill(attrs))
           }
         } else if (attrs.name && attrs.value) {
-          insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat)
+          insertOneHurmetVar(hurmetVars, attrs, null, formats.decimalFormat)
         }
       } else if (node.attrs.name && !(isCalcAll && node.attrs.isFetch)) {
         if (node.attrs.name) {
@@ -375,7 +383,7 @@ const proceedAfterFetch = (
               hurmetVars[key] =  value
             })
           } else {
-            insertOneHurmetVar(hurmetVars, node.attrs, null, decimalFormat)
+            insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat)
           }
         }
       }
@@ -385,7 +393,7 @@ const proceedAfterFetch = (
       let table = clone(node.toJSON())
       let mustCalc = false
       if (isCalcAll) {
-        table = compileSheet(table, decimalFormat)
+        table = compileSheet(table, formats)
         mustCalc = true
       } else {
         for (const varName of table.attrs.dependencies) {
@@ -404,7 +412,7 @@ const proceedAfterFetch = (
           for (let i = 1; i < numRows; i++) {
             const cell = table.content[i].content[j].content[0];
             if (cell.attrs.rpn) {
-              cell.attrs = evaluate(cell.attrs, hurmetVars, decimalFormat)
+              cell.attrs = evaluate(cell.attrs, hurmetVars, formats)
               cell.attrs.display = cell.attrs.alt
               if (j === 0) { table.attrs.rowMap[cell.attrs.alt] = i }
             } else if (j === 0 && typeof cell.attrs.value === "string") {
@@ -461,6 +469,11 @@ export function updateCalculations(
   // Create an object in which we'll hold variable values.
   const hurmetVars = Object.create(null)
   hurmetVars.format = { value: "h15" } // default rounding format
+  hurmetVars["@savedate"] = doc.attrs.saveDate
+  const formats = {
+    decimalFormat: doc.attrs.decimalFormat,
+    dateFormat: doc.attrs.dateFormat
+  }
 
   // Get an array of all the URLs called by fetch statements.
   const urls = [];
@@ -481,11 +494,11 @@ export function updateCalculations(
           urls.push(urlFromEntry(entry))
           fetchPositions.push(pos)
         } else if (/^function /.test(entry)) {
-          node.attrs = compile(entry, doc.attrs.decimalFormat)
-          insertOneHurmetVar(hurmetVars, node.attrs, null, doc.attrs.decimalFormat)
+          node.attrs = compile(entry, formats)
+          insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat)
         }
       } else if (node.attrs.isFetch || (node.attrs.dtype && node.attrs.dtype === dt.MODULE)) {
-        insertOneHurmetVar(hurmetVars, node.attrs, null, doc.attrs.decimalFormat)
+        insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat)
       }
     })
   }

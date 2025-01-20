@@ -11,13 +11,13 @@ export const calculate = (
   entry,
   vars = {},
   inDraftMode = false,
-  decimalFormat = "1,000,000."
+  formats = { decimalFormat: "1,000,000.", dateFormat: "yyy-mm-dd" }
 ) => {
-  let attrs = compile(entry, decimalFormat)
+  let attrs = compile(entry, formats)
   if (attrs.rpn) {
-    attrs = evaluate(clone(attrs), vars, decimalFormat)
+    attrs = evaluate(clone(attrs), vars, formats)
   } else if (attrs.dtype && attrs.dtype === dt.DRAWING) {
-    attrs = evaluateDrawing(attrs, vars, decimalFormat)
+    attrs = evaluateDrawing(attrs, vars, formats)
   }
   if (attrs.name) {
     insertOneHurmetVar(vars, attrs)

@@ -172,6 +172,9 @@ const dtype = {
   // return the resulting data type.
   scalar: {
     scalar(t0, t1, tkn)     {
+      if (t0 === dt.DATE || t1 === dt.DATE) {
+        return t0 === t1 ? dt.RATIONAL : dt.DATE
+      }
       return (tkn === "&" || tkn === "hcat" || tkn === "vcat")
         ? t0 + ((tkn === "&" || tkn === "hcat") ? dt.ROWVECTOR : dt.COLUMNVECTOR )
         : t0

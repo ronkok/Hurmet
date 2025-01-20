@@ -39,7 +39,7 @@ const grafRegEx = /\n\n/
 // Compile a spreadsheet cell.
 
 export const compileCell = (attrs, sheetAttrs, unit, previousAttrs,
-                            decimalFormat = "1,000,000.") => {
+                            formats = "1,000,000.") => {
   const newAttrs = { entry: attrs.entry, name: attrs.name }
   const entry = attrs.entry
   if (entry.length === 0) {
@@ -50,7 +50,7 @@ export const compileCell = (attrs, sheetAttrs, unit, previousAttrs,
     const expression = entry.replace(/^==?/, "").trim()
     // TODO: Revise the parser to handle spreadsheet cell names & sheetname
     // eslint-disable-next-line prefer-const
-    let [_, rpn, dependencies] = parse(expression, decimalFormat, true, false, sheetAttrs.name)
+    let [_, rpn, dependencies] = parse(expression, formats, true, false, sheetAttrs.name)
     const outerDependencies = new Set()
     for (const dependency of dependencies) {
       if (!innerRefRegEx.test(dependency)) {
@@ -121,7 +121,7 @@ export const compileCell = (attrs, sheetAttrs, unit, previousAttrs,
       newAttrs.dtype = dt.BOOLEAN
     } else if (complexRegEx.test(entry)) {
       // eslint-disable-next-line no-unused-vars
-      const [value, unit, dtype, _] = valueFromLiteral(entry, attrs.name, decimalFormat)
+      const [value, unit, dtype, _] = valueFromLiteral(entry, attrs.name, formats)
       newAttrs.value = value
       newAttrs.dtype = dtype
     } else {
@@ -134,7 +134,7 @@ export const compileCell = (attrs, sheetAttrs, unit, previousAttrs,
 
 // Compile a spreadsheet
 
-export const compileSheet = (table, decimalFormat = "1,000,000") => {
+export const compileSheet = (table, formats) => {
   // The cell entries and the sheet name are already known.
   // Proceed to compile the rest of the table and cell attributes.
   // Stop short of calculations.
@@ -191,7 +191,7 @@ export const compileSheet = (table, decimalFormat = "1,000,000") => {
           ? table.attrs.units[table.attrs.unitMap[j]]
           : null
         newCell.attrs = compileCell(newCell.attrs, table.attrs, unit, previousAttrs,
-                                    decimalFormat)
+                                    formats)
         previousAttrs = newCell.attrs
         previousAttrs.unit = unit
         if (newCell.attrs.dependencies) {
@@ -250,8 +250,11 @@ export const tableToSheet = (state, tableNode) => {
       table.content[i].content[j].content = [newCell];
     }
   }
-  const decimalFormat = state.doc.decimalFormat
-  table = compileSheet(table, decimalFormat)
+  const formats = {
+    decimalFormat: state.doc.attrs.decimalFormat,
+    dateFormat: state.doc.attrs.dateFormat
+  }
+  table = compileSheet(table, formats)
   table.attrs.class += " spreadsheet"
   table.attrs.dtype = dt.SPREADSHEET
   return [table, tableStart, tableEnd]

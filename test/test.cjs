@@ -196,13 +196,15 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
   const numStr = resultFormatterTests[i][0]
   const formatSpec = resultFormatterTests[i][1] || "h15"
   const decimalFormat = resultFormatterTests[i][2] || "1,000,000."
+  const dateFormat = resultFormatterTests[i][2] || "yyyy-mm-dd"
+  const formats = { decimalFormat, dateFormat }
   const expectedOutput = resultFormatterTests[i][3]
   const formatVars = { format: { value: formatSpec } }
-  const output = hurmet.calculate(numStr + "= @", formatVars, false, decimalFormat)
+  const output = hurmet.calculate(numStr + "= @", formatVars, false, formats)
   if (output !== expectedOutput) {
     numErrors += 1
     console.log("input numStr:    " + numStr)
-    console.log("input format:    " + formatSpec + " " + decimalFormat)
+    console.log("input format:    " + formatSpec + " " + formats)
     console.log("expected output: " + expectedOutput)
     console.log("actual output:   " + output)
     console.log("")
@@ -557,7 +559,7 @@ end`, vars)
     const pos = inputStr.lastIndexOf("=")
     let str = pos > -1 ? inputStr.slice(0, pos).trim() : inputStr
     str = str.replace(testRegEx, "")
-    const [_, rpn] = hurmet.parse(str, "1,000,000.", true)
+    const [_, rpn] = hurmet.parse(str, { decimalFormat:"1,000,000.", dateFormat: "2025-01-19" }, true)
     const output = hurmet.calculate(inputStr, vars, true)
     if (output !== expectedOutput || rpn !== expectedRPN) {
       numErrors += 1

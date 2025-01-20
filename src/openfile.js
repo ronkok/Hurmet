@@ -50,8 +50,11 @@ const handleContents = (view, schema, str, format) => {
   view.dispatch(
     view.state.tr.replaceWith(0, view.state.doc.content.size, schema.nodeFromJSON(doc))
   )
+  // A ProseMirror transaction does not reach the document metadata.
+  // Write the metadate separately.
   view.state.doc.attrs.fontSize = fontSize
   view.state.doc.attrs.pageSize = pageSize
+  if (doc.attrs.saveDate) { view.state.doc.attrs.saveDate = doc.attrs.saveDate }
   if (doc.attrs.snapshots) { view.state.doc.attrs.snapshots = doc.attrs.snapshots }
   if (doc.attrs.fallbacks) { view.state.doc.attrs.fallbacks = doc.attrs.fallbacks }
 

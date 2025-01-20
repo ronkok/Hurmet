@@ -98,7 +98,8 @@ const errorMessages = Object.freeze({
     BAD_ARGS:   "Error. Wrong number of arguments to function @",
     BAD_SUM:    "Error. Second argument to sum function must be 1 or 2.",
     ZERO_STEP:  "Error. Step value must be > zero.",
-    SHEET_INDEX:"Error. Bad column or row index."
+    SHEET_INDEX:"Error. Bad column or row index.",
+    UNSAVED:    "Error. The current document has not been saved."
   }
 })
 

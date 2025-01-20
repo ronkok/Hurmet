@@ -37,7 +37,7 @@
 <p>Snapshots and diffs are displayed in Markdown format.</p>
 <h3 id='print-header'>Print Header</h3>
 <p>You can create a print header in any document by clicking the File | Print Header menu choice. Later, when you click the File | Print… menu choice, the header will be printed at the top of every page (except the cover page). The header is a table and it should remain a table. Otherwise, edit it any way you want.</p>
-<p>If you write <code>$PAGE</code> into a print header, Hurmet will print page numbers at that location.</p>
+<p>If you write <code>$PAGE</code> into a print header, Hurmet will print page numbers at that location. The calculation field <code>savedate() = @@</code> will print the date on which the document was most recently saved.</p>
 <h3 id='macro-expansion'>Macro Expansion</h3>
 <p>To expand a macro, (1) write the macro name in your document, put the selection point after the name, and then (2) hit the <img src="data:image/svg+xml;utf8,%3Csvg height='16' width='16' viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M426.667 0c-46.933 0-85.333 38.4-85.333 85.333V192c0 12.8 8.533 21.333 21.333 21.333h128c12.8 0 21.333-8.533 21.333-21.333V85.333C512 38.4 473.6 0 426.667 0zm42.666 170.667H384V85.333c0-23.467 19.2-42.667 42.667-42.667s42.667 19.2 42.667 42.667v85.334zM362.667 384c-12.8 0-21.333 8.533-21.333 21.333v21.333c0 12.8 8.533 21.333 21.333 21.333S384 439.467 384 426.667v-21.333c0-12.801-8.533-21.334-21.333-21.334z M362.667 405.333c-12.8 0-21.333 8.533-21.333 21.333 0 23.467-19.2 42.667-42.667 42.667S256 450.133 256 426.667v-21.333c0-12.8-8.533-21.333-21.333-21.333-12.8 0-21.333 8.533-21.333 21.333v21.333c0 46.933 38.4 85.333 85.333 85.333S384 473.6 384 426.667c0-12.8-8.533-21.334-21.333-21.334z M426.667 0h-320c-36.267 0-64 27.733-64 64v341.333c0 12.8 8.533 21.333 21.333 21.333s21.333-8.533 21.333-21.333V64c0-12.8 8.533-21.333 21.333-21.333H352c-6.4 12.8-10.667 27.733-10.667 42.667v320c0 12.8 8.533 21.333 21.333 21.333S384 418.133 384 405.333v-320c0-23.467 19.2-42.667 42.667-42.667C454.4 42.667 454.4 0 426.667 0z M298.667 469.333c-23.467 0-42.667-19.2-42.667-42.667v-21.333c0-12.8-8.533-21.333-21.333-21.333H21.333C8.533 384 0 392.533 0 405.333v21.333C0 473.6 38.4 512 85.333 512h213.333c27.734 0 27.734-42.667.001-42.667zm-213.334 0c-23.467 0-42.667-19.2-42.667-42.667h170.667c0 14.933 4.267 29.867 10.667 42.667H85.333zM192 106.667h-42.667C136.533 106.667 128 115.2 128 128s8.533 21.333 21.333 21.333H192c12.8 0 21.333-8.533 21.333-21.333S204.8 106.667 192 106.667zM277.333 192h-42.667c-12.8 0-21.333 8.533-21.333 21.333 0 12.8 8.533 21.333 21.333 21.333h42.667c12.8 0 21.333-8.533 21.333-21.333.001-12.8-8.533-21.333-21.333-21.333zM277.333 106.667H256c-12.8 0-21.333 8.533-21.333 21.333S243.2 149.333 256 149.333h21.333c12.8 0 21.333-8.533 21.333-21.333s-8.533-21.333-21.333-21.333zM192 277.333h-42.667c-12.8 0-21.333 8.533-21.333 21.333 0 12.8 8.533 21.333 21.333 21.333H192c12.8 0 21.333-8.533 21.333-21.333 0-12.799-8.533-21.333-21.333-21.333zM277.333 277.333H256c-12.8 0-21.333 8.533-21.333 21.333 0 12.8 8.533 21.333 21.333 21.333h21.333c12.8 0 21.333-8.533 21.333-21.333.001-12.799-8.533-21.333-21.333-21.333zM149.333 192c-12.8 0-21.333 8.533-21.333 21.333 0 12.8 8.533 21.333 21.333 21.333 12.8 0 21.333-8.533 21.333-21.333.001-12.8-8.533-21.333-21.333-21.333z'/%3E%3C/svg%3E" alt="scroll"> button or type <strong>Alt+E</strong>. Hurmet will replace the macro name with the macro expansion.</p>
 <p>To learn how to write macros or how to import macros, see the <a href='#macros'>macros</a> section, below.</p>
@@ -515,6 +515,18 @@ Col B	11	25	14`` 'kips'"><math><mrow><mi>P</mi><msub><mrow></mrow><mtext>a</mtex
 <pre><code>w_dead = 25 lbf/ft
 w = ``dead	live	snow
 ${w_dead}	30	40`` &#x27;lbf/ft&#x27; = %% lbf/ft</code></pre><p>Note that you must do a calculation. It’s not reading a literal value.</p></dd>
+<dt id='date'>Date</dt>
+<dd><p>A Hurmet <em>date</em> literal is input between single quotation marks with numerals in format: <code>&#x27;yyyy-mm-dd&#x27;</code>.</p>
+<p>You can add or subtract a time to a date to get a new date. The calculation must be unit-aware.  For example:<br><code>&#x27;2025-01-12&#x27; + 12weeks = ??</code>.</p>
+<p>The default return format is <code>yyyy-mm-dd</code>, but you can specify a format and a language code in the Docs | Date format menu. All These are valid date displays:</p>
+<table class="nogrid"><tr><td><code>yyyy-mm-dd</code></td><td>2025-01-09</td></tr>
+<tr><td><code>dd.mm.yyyy</code></td><td>09.01.2025</td></tr>
+<tr><td><code>d mmmm yyyy</code></td><td>9 January 2025</td></tr>
+<tr><td><code>d mmm yyyy</code></td><td>9 Jan 2025</td></tr>
+<tr><td><code>mmmm d, yyyy</code></td><td>January 9, 2025</td></tr>
+<tr><td><code>mmm d, yyyy</code></td><td>Jan 9, 2025</td></tr>
+<tr><td><code>d de mmmm de yyyy</code></td><td>9 de enero de 2025</td></tr></table>
+<p>Hurmet has two functions that relate to dates: The <code>today()</code> function and the <code>savedate()</code> function, which returns the date on which the current document was saved.</p></dd>
 </dl>
 <h2 id='expressions'>Expressions</h2>
 <p>Hurmet calculations are meant to be recognizeable to anyone familiar with standard math notation. That is a broad statement. Here are many nuances:</p>
@@ -676,6 +688,8 @@ ${w_dead}	30	40`` &#x27;lbf/ft&#x27; = %% lbf/ft</code></pre><p>Note that you mu
 <dd><p>Remainder. This functions divides <em>x</em> by <em>y</em>, and returns the remainder.</p></dd>
 <dt id='round'>round(<em>x</em>, <em>spec</em>)</dt>
 <dd><p>Rounds a real number <em>x</em>.<br>To round to an integer, omit the spec.<br>To round to <em>n</em> significant digits, write the spec as &quot;r<em>n</em>&quot;, e.g., &quot;r3&quot;.<br>To round to <em>n</em> places after the decimal, write the spec as &quot;f<em>n</em>&quot;.</p></dd>
+<dt id='savedate'>savedate()</dt>
+<dd><p>Returns the date on which the current document was saved.</p></dd>
 <dt id='sign'>sign(<em>x</em>)</dt>
 <dd><p>Returns <span class='hurmet-calc' data-entry='{1 if x > 0; -1 if x < 0; 0 otherwise}'><math><mrow><mo fence="true" form="prefix">{</mo><mtable><mtr><mtd class="tml-left" style="padding:0.5ex 0em 0.5ex 0em;"><mn>1</mn></mtd><mtd class="tml-left" style="padding:0.5ex 0em 0.5ex 1em;"><mrow><mrow><mspace width="0.2778em"></mspace><mrow><mtext></mtext><mi>if</mi></mrow><mspace width="0.2778em"></mspace></mrow><mi>x</mi><mo>&gt;</mo><mn>0</mn></mrow></mtd></mtr><mtr><mtd class="tml-left" style="padding:0.5ex 0em 0.5ex 0em;"><mrow><mtext>-</mtext><mn>1</mn></mrow></mtd><mtd class="tml-left" style="padding:0.5ex 0em 0.5ex 1em;"><mrow><mrow><mspace width="0.2778em"></mspace><mrow><mtext></mtext><mi>if</mi></mrow><mspace width="0.2778em"></mspace></mrow><mi>x</mi><mo>&lt;</mo><mn>0</mn></mrow></mtd></mtr><mtr><mtd class="tml-left" style="padding:0.5ex 0em 0.5ex 0em;"><mn>0</mn></mtd><mtd class="tml-left" style="padding:0.5ex 0em 0.5ex 1em;"><mrow><mspace width="0.2778em"></mspace><mrow><mtext></mtext><mi>otherwise</mi></mrow><mspace width="0.2778em"></mspace></mrow></mtd></mtr></mtable><mo fence="true" form="postfix"></mo></mrow></math></span><br>Real numbers only.</p></dd>
 <dt id='string'>string(<em>x</em>, <em>spec</em>)</dt>
@@ -684,6 +698,8 @@ ${w_dead}	30	40`` &#x27;lbf/ft&#x27; = %% lbf/ft</code></pre><p>Note that you mu
 <dd><p>Functions that accumulate a result from a list of arguments or a vector. Real numbers only.</p></dd>
 <dt id='sum'>sum(<em>M</em>, <em>n</em>)</dt>
 <dd><p>Takes a matrix and sums either the rows or the columns.<br><code>sum(𝐌, 1)</code> will sum the columns and return a row vector.<br><code>sum(𝐌, 2)</code> will sum the rows and return a column vector.</p></dd>
+<dt id='today'>today()</dt>
+<dd><p>Returns the current date.</p></dd>
 <dt id='transpose'>transpose(<em>M</em>)</dt>
 <dd><p>Transpose a matrix.</p></dd>
 <dt id='vcat'>vcat(<em>v</em>, <em>x</em>)</dt>
@@ -835,7 +851,7 @@ ${w_dead}	30	40`` &#x27;lbf/ft&#x27; = %% lbf/ft</code></pre><p>Note that you mu
 <h2 id='numeral-display'>Numeral display</h2>
 <p>There are two aspects to how numbers are displayed: (1) decimal separators, and (2) rounding format for results.</p>
 <h3 id='decimal-separator'>Decimal separator</h3>
-<p>In some countries, the usual decimal separator symbol is a dot. Other countries use a comma. Hurmet starts up with a decimal separator based upon the browser’s language setting. Hurmet also allows the reader (not the document author) to select which display they prefer. Just use the use the drop-down menu labeled Doc | Set Decimal.</p>
+<p>In some countries, the usual decimal separator symbol is a dot. Other countries use a comma. Hurmet starts up with a decimal separator based upon the browser’s language setting. Hurmet also allows the reader (not the document author) to select which display they prefer. Use the use the drop-down menu labeled Doc | Set Decimal.</p>
 <p>The same menu choice also selects how Hurmet displays thousands separators.</p>
 <p>This menu choice changes nothing internally. It changes only the display. All Hurmet documents are saved with numbers that have a dot decimal and no thousands separator.</p>
 <h3 id='rounding-of-results'>Rounding of Results</h3>
@@ -1194,6 +1210,7 @@ const titleRegEx = /([^.\\/]+)\.md$/;  // A helper.
 <li class="tight"><p><a href='#matrix'>Matrix</a></p></li>
 <li class="tight"><p><a href='#data-frame'>Data Frame</a></p></li>
 <li class="tight"><p><a href='#map'>Map</a></p></li>
+<li class="tight"><p><a href='#date'>Date</a></p></li>
 <li class="tight"><p><a href='#string-interpolation'>String Interpolation</a></p></li></ul>
 </details>
 </li>

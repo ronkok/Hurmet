@@ -1202,7 +1202,8 @@ const populateTOC = ast => {
 
 const metadataRegEx = /^---+\n((?:[A-Za-z0-9][A-Za-z0-9 _-]*:[^\n]+\n(?:[ \t]+[^\n]+\n)*)+)---+\n/
 const metadataItemRegEx = /^[A-Za-z0-9][A-Za-z0-9 _-]*:[^\n]+\n(?:[ \t]+[^\n]+\n)*/
-const hurmetMetadataNames = ["decimalFormat", "fontSize", "pageSize"]
+const hurmetMetadataNames = ["decimalFormat", "dateFormat", "fontSize",
+  "pageSize", "saveDate"];
 
 const parseMetadata = str => {
   const metadata = {}

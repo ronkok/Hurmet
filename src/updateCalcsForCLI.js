@@ -57,7 +57,11 @@ export async function updateCalcs(doc) {
   // Create an object in which we'll hold variable values.
   const hurmetVars = Object.create(null)
   hurmetVars.format = { value: "h15" } // default rounding format
-  const decimalFormat = doc.attrs ? doc.attrs.decimalFormat : '1,000,000.'
+  hurmetVars["@savedate"] = doc.attrs.saveDate
+  const formats = {
+    decimalFormat: doc.attrs.decimalFormat,
+    dateFormat: doc.attrs.dateFormat
+  }
 
   // Create an array of all the calculation nodes in the document
   const calcNodes = [];
@@ -73,8 +77,8 @@ export async function updateCalcs(doc) {
       urls.push(helpers.urlFromEntry(entry))
       callers.push(node)
     } else if (/^function /.test(entry)) {
-      node.attrs = compile(entry, decimalFormat)
-      insertOneHurmetVar(hurmetVars, node.attrs, null, decimalFormat)
+      node.attrs = compile(entry, formats)
+      insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat)
     }
   }
 
@@ -86,14 +90,14 @@ export async function updateCalcs(doc) {
       const node = callers[i]
       const entry = node.attrs.entry
       // When we modify a node, we are also mutating the container doc.
-      node.attrs = helpers.processFetchedString(entry, texts[i], hurmetVars, decimalFormat)
+      node.attrs = helpers.processFetchedString(entry, texts[i], hurmetVars, formats)
       if (node.attrs.name) {
         if (node.attrs.name === "importedParameters") {
           Object.entries(node.attrs.value).forEach(([key, value]) => {
             hurmetVars[key] =  value
           })
         } else {
-          insertOneHurmetVar(hurmetVars, node.attrs, null, decimalFormat)
+          insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat)
         }
       }
     }
@@ -106,21 +110,23 @@ export async function updateCalcs(doc) {
       if (node.type === "calculation") {
         if (!helpers.fetchRegEx.test(node.attrs.entry)) {
           const entry = node.attrs.entry
-          let attrs = compile(entry, decimalFormat)
+          let attrs = compile(entry, formats)
           attrs.displayMode = node.attrs.displayMode
           const mustDraw = attrs.dtype && attrs.dtype === dt.DRAWING
           if (attrs.rpn || mustDraw) {
             attrs = attrs.rpn
-              ? evaluate(attrs, hurmetVars, decimalFormat)
-              : evaluateDrawing(attrs, hurmetVars, decimalFormat)
+              ? evaluate(attrs, hurmetVars, formats)
+              : evaluateDrawing(attrs, hurmetVars, formats)
           }
-          if (attrs.name) { insertOneHurmetVar(hurmetVars, attrs, null, decimalFormat) }
+          if (attrs.name) {
+            insertOneHurmetVar(hurmetVars, attrs, null, formats.decimalFormat)
+          }
           // When we modify a node, we are also mutating the container doc.
           node.attrs = attrs
         }
       } else if ("dtype" in node.attrs && node.attrs.dtype === dt.SPREADSHEET) {
         // node is a spreadsheet
-        const sheet = compileSheet(node, decimalFormat)
+        const sheet = compileSheet(node, formats)
         const sheetName = sheet.attrs.name
         hurmetVars[sheetName] = sheet.attrs
         hurmetVars[sheetName].value = {}
@@ -133,7 +139,7 @@ export async function updateCalcs(doc) {
             const cell = sheet.content[i].content[j].content[0];
             if (cell.attrs.rpn) {
               cell.attrs.altresulttemplate = cell.attrs.resulttemplate
-              cell.attrs = evaluate(cell.attrs, hurmetVars, decimalFormat)
+              cell.attrs = evaluate(cell.attrs, hurmetVars, formats)
               cell.attrs.display = cell.attrs.alt
               if (j === 0) { sheet.attrs.rowMap[cell.attrs.alt] = i }
             } else if (j === 0 && typeof cell.attrs.value === "string") {

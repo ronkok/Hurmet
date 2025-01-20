@@ -19,6 +19,7 @@ import { formatResult } from "./result"
 import { Cpx } from "./complex"
 import { draw } from "./draw"
 import { beamDiagram } from "./beam/beamAnalysis.js"
+import { dateInSecondsFromIsoString, dateInSecondsFromToday } from "./date"
 
 // evaluate.js
 
@@ -101,19 +102,19 @@ const nextToken = (tokens, i) => {
 // array of function names that return a real number from a complex argument.
 const arfn = ["abs", "angle", "imag", "real", "Γ", "gamma"]
 
-const stringFromOperand = (oprnd, decimalFormat) => {
+const stringFromOperand = (oprnd, formats) => {
   return oprnd.dtype === dt.STRING
     ? oprnd.value
     : oprnd.dtype === dt.RATIONAL
-    ? format(oprnd.value, "h15", decimalFormat)
+    ? format(oprnd.value, "h15", formats.decimalFormat)
     : isMatrix(oprnd.dtype)
-    ? Matrix.displayAlt(oprnd, "h15", decimalFormat)
+    ? Matrix.displayAlt(oprnd, "h15", formats)
     : (oprnd.dtype & dt.MAP)
-    ? DataFrame.displayAlt(oprnd.value, "h15", decimalFormat)
+    ? DataFrame.displayAlt(oprnd.value, "h15", formats)
     : oprnd.value
 }
 
-export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
+export const evalRpn = (rpn, vars, formats, unitAware, lib) => {
   // This is the function that does calculations with the rpn string.
   const tokens = rpn.split("\u00A0")
   const stack = []
@@ -123,7 +124,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
     const ch = tkn.charAt(0)
 
     if (ch === "®") {
-      // A rational number.
+      // A rational number.⌾
       const r = new Array(2)
       const pos = tkn.indexOf("/")
       r[0] = BigInt(tkn.slice(1, pos))   // numerator
@@ -134,6 +135,14 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
       num.unit.expos = allZeros
       num.dtype = dt.RATIONAL
       stack.push(Object.freeze(num))
+
+    } else if (ch === "⌾") {
+      const date = Object.create(null)
+      date.value = [BigInt(tkn.slice(1)), BigInt(1)];
+      date.unit = Object.create(null)
+      date.unit.expos = [0, 0, 1, 0, 0, 0, 0, 0],
+      date.dtype = dt.DATE
+      stack.push(Object.freeze(date))
 
     } else if (ch === "©") {
       // A complex number.
@@ -259,8 +268,8 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const o2 = stack.pop()
           const o1 = stack.pop()
           const op = tkn === "+" || tkn === ".+" ? "add" : "subtract"
-          if (!(((o1.dtype & dt.RATIONAL) || (o1.dtype & dt.COMPLEX)) &&
-                ((o2.dtype & dt.RATIONAL) || (o2.dtype & dt.COMPLEX)))) {
+          if (!(((o1.dtype & dt.RATIONAL) || (o1.dtype & dt.DATE) || (o1.dtype & dt.COMPLEX))
+           && ((o2.dtype & dt.RATIONAL) || (o2.dtype & dt.DATE) || (o2.dtype & dt.COMPLEX)))) {
             return errorOprnd("NAN_OP")
           }
           if (unitAware) {
@@ -306,8 +315,8 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           if ((tkn === "*" || tkn === "∗")
                && o1.dtype === dt.STRING && o1.dtype === dt.STRING) {
             // Julia's string concatenation operator
-            const str1 = stringFromOperand(o1, decimalFormat)
-            const str2 = stringFromOperand(o2, decimalFormat)
+            const str1 = stringFromOperand(o1, formats)
+            const str2 = stringFromOperand(o2, formats)
             return { value: str1 + str2, unit: null, dtype: dt.STRING }
           }
           if (!(((o1.dtype & dt.RATIONAL) || (o1.dtype & dt.COMPLEX)) &&
@@ -433,8 +442,8 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           const [shape1, shape2, _] = binaryShapesOf(o1, o2)
           let o3 = Object.create(null)
           if (o1.dtype === dt.STRING && o1.dtype === dt.STRING) {
-            const str1 = stringFromOperand(o1, decimalFormat)
-            const str2 = stringFromOperand(o2, decimalFormat)
+            const str1 = stringFromOperand(o1, formats)
+            const str2 = stringFromOperand(o2, formats)
             o3.value = str1 + str2
             o3.unit = null
             o3.dtype = dt.STRING
@@ -877,6 +886,20 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
+        case "today":
+        case "savedate" : {
+          if (tkn === "savedate" && !vars["@savedate"]) {
+            return errorOprnd("UNSAVED")
+          }
+          const oprnd = { unit: [0, 0, 1, 0, 0, 0, 0, 0], dtype: dt.DATE }
+          const numSeconds = tkn === "today"
+            ? dateInSecondsFromToday()
+            : dateInSecondsFromIsoString("'" + vars["@savedate"] + "'")
+          oprnd.value = Rnl.fromNumber(numSeconds)
+          stack.push(oprnd)
+          break
+        }
+
         case "Int": {
           const arg = stack.pop()
           const output = Object.create(null)
@@ -1124,13 +1147,6 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           break
         }
 
-        case "format": {
-          const formatSpec = stack.pop().value
-          const str = format(stack.pop().value, formatSpec)
-          stack.push({ value: str, unit: null, dtype: dt.STRING })
-          break
-        }
-
         case "lerp": {
           // linear interpolation function
           const args = new Array(3)
@@ -1181,7 +1197,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           let oprnd
           if (vars.svg && (functionName === "plot" || (draw.functions[functionName]))) {
             if (functionName === "plot") {
-              args.splice(1, 0, decimalFormat)
+              args.splice(1, 0, formats.decimalFormat)
               oprnd = plot(...args)
             } else if (functionName === "path") {
               oprnd = draw.functions[functionName](args[0], args.slice(1))
@@ -1195,16 +1211,16 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             const udf = lib[functionName]
             if (udf === undefined) { return errorOprnd("F_NAME", functionName) }
             if (udf.dtype === dt.ERROR) { return udf }
-            oprnd = evalCustomFunction(udf, args, decimalFormat, unitAware, lib)
+            oprnd = evalCustomFunction(udf, args, formats, unitAware, lib)
             i += 1
           } else if (lib && lib[functionName]) {
             // A module, "lib", was passed to this instance of evalRpn().
             const udf = lib[functionName]
-            oprnd = evalCustomFunction(udf, args, decimalFormat, unitAware, lib)
+            oprnd = evalCustomFunction(udf, args, formats, unitAware, lib)
           } else if (vars[functionName] && vars[functionName].dtype === dt.MODULE) {
             // User-defined function from a calculation node.
             const udf = vars[functionName]["value"]
-            oprnd = evalCustomFunction(udf, args, decimalFormat, unitAware)
+            oprnd = evalCustomFunction(udf, args, formats, unitAware)
           } else {
             return errorOprnd("BAD_FUN_NM", functionName)
           }
@@ -1323,7 +1339,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
             const val = Operators.condition[shapeOf(conditions[j])](conditions[j].value)
             if (val) {
               const rpnLocal = tokens[i + j + 1].replace(/§/g, "\u00A0")
-              const oprnd = evalRpn(rpnLocal, vars, decimalFormat, unitAware, lib)
+              const oprnd = evalRpn(rpnLocal, vars, formats, unitAware, lib)
               if (oprnd.dtype === dt.ERROR) { return oprnd }
               stack.push(oprnd)
               break
@@ -1456,7 +1472,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
           let sum = Rnl.zero
           while (Rnl.lessThanOrEqualTo(index, endOfRange)) {
             vars[parameter] = { value: index, unit: allZeros, dtype: dt.RATIONAL }
-            const localResult = evalRpn(rpnLocal, vars, decimalFormat, false)
+            const localResult = evalRpn(rpnLocal, vars, formats, false)
             sum = Rnl.add(sum, localResult.value)
             index = Rnl.add(index, Rnl.one)
           }
@@ -1495,7 +1511,7 @@ export const evalRpn = (rpn, vars, decimalFormat, unitAware, lib) => {
   return oprnd
 }
 
-const plot = (svg, decimalFormat, fun, numPoints, xMin, xMax) => {
+const plot = (svg, formats, fun, numPoints, xMin, xMax) => {
   // Plot a function.
   // To avoid a circular reference, this function has to be here instead of in draw.js.
   const attrs = svg.value.temp
@@ -1511,15 +1527,15 @@ const plot = (svg, decimalFormat, fun, numPoints, xMin, xMax) => {
   let funResult
   let pathValue
   if (fun.value.dtype && fun.value.dtype === dt.MODULE) {
-    funResult = evalCustomFunction(fun.value, [arg], decimalFormat, false)
+    funResult = evalCustomFunction(fun.value, [arg], formats, false)
     pathValue = arg.value.map((e, i) => [e, funResult.value[i]])
   } else if (fun.dtype === dt.STRING) {
     if (/§matrix§1§2$/.test(fun.value)) {
       arg.name = "t"
-      pathValue = evalRpn(fun.value.replace(/§/g, "\xa0"), { t: arg }, decimalFormat, false).value
+      pathValue = evalRpn(fun.value.replace(/§/g, "\xa0"), { t: arg }, formats, false).value
     } else {
       arg.name = "x"
-      funResult = evalRpn(fun.value.replace(/§/g, "\xa0"), { x: arg }, decimalFormat, false)
+      funResult = evalRpn(fun.value.replace(/§/g, "\xa0"), { x: arg }, formats, false)
       pathValue = arg.value.map((e, i) => [e, funResult.value[i]])
     }
   } else {
@@ -1563,7 +1579,7 @@ const elementFromIterable = (iterable, index, step) => {
 
 const loopTypes = ["while", "for"];
 
-const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
+const evalCustomFunction = (udf, args, formats, isUnitAware, lib) => {
   // UDF stands for "user-defined function"
   // lib is short for library. If not omitted, it contains a module with more functions.
 
@@ -1598,7 +1614,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
     switch (stype) {
       case "statement": {
         if (control[level].condition) {
-          const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib)
+          const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib)
           if (result.dtype === dt.ERROR) {
             // eslint-disable-next-line no-console
             console.log(statement.rpn)
@@ -1607,7 +1623,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
           if (statement.name) {
             statement.resultdisplay = isUnitAware ? "!!" : "!"
             const [stmt, _] = conditionResult(statement, result, isUnitAware)
-            insertOneHurmetVar(vars, stmt, null, decimalFormat)
+            insertOneHurmetVar(vars, stmt, null, formats)
           }
         }
         break
@@ -1615,7 +1631,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
 
       case "if": {
         if (control[level].condition) {
-          const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib)
+          const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib)
           if (result.dtype === dt.ERROR) { return result }
           const val = Operators.condition[shapeOf(result)](result.value)
           control.push({
@@ -1635,7 +1651,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
           i = control[level].endOfBlock
           control.pop()
         } else {
-          const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib)
+          const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib)
           if (result.dtype === dt.ERROR) { return result }
           const val = Operators.condition[shapeOf(result)](result.value)
           control[control.length - 1].condition = val
@@ -1660,7 +1676,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
             rpn: statement.rpn,
             endOfBlock: statement.endOfBlock
           }
-          const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib)
+          const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib)
           if (result.dtype === dt.ERROR) { return result }
           const val = Operators.condition[shapeOf(result)](result.value)
           cntrl.condition = val
@@ -1686,7 +1702,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
           const tokens = statement.rpn.split("\u00A0")
           ctrl.dummyVariable = tokens.shift().slice(1)
           const iterable = evalRpn(tokens.join("\u00A0"), vars,
-                                   decimalFormat, isUnitAware, lib)
+                                   formats, isUnitAware, lib)
           ctrl.index = (iterable.dtype & dt.RANGE) ? iterable.value[0] : Rnl.fromNumber(0)
           ctrl.step = (iterable.dtype & dt.RANGE) ? iterable.value[1] : Rnl.fromNumber(1)
           ctrl.endIndex = (iterable.dtype & dt.RANGE)
@@ -1728,7 +1744,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
           if (i < control[level].endOfBlock) { i = control[level].endOfBlock }
           control.pop()
         } else if (control[level].type === "while") {
-          const result = evalRpn(control[level].rpn, vars, decimalFormat, isUnitAware, lib)
+          const result = evalRpn(control[level].rpn, vars, formats, isUnitAware, lib)
           if (result.dtype === dt.ERROR) { return result }
           control[level].condition = result.value
           if (control[level].condition) {
@@ -1762,7 +1778,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
       case "return":
         if (control[level].condition) {
           if (statement.rpn) {
-            const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib)
+            const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib)
             return result
           } else {
             return { value: Rnl.zero, unit: allZeros, dtype: dt.RATIONAL }
@@ -1773,7 +1789,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
       case "print":
         if (control[level].condition) {
           if (statement.rpn) {
-            const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib)
+            const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib)
             if (result.dtype === dt.ERROR) { return result }
             const msg = result.dtype === dt.RATIONAL
               ? Rnl.toNumber(result.value)
@@ -1793,7 +1809,7 @@ const evalCustomFunction = (udf, args, decimalFormat, isUnitAware, lib) => {
       case "throw":
         if (control[level].condition) {
           if (statement.rpn) {
-            const result = evalRpn(statement.rpn, vars, decimalFormat, isUnitAware, lib)
+            const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib)
             return { value: result.value, unit: null, dtype: dt.ERROR }
           } else {
             return { value: statement.rpn, unit: null, dtype: dt.ERROR }
@@ -1868,9 +1884,13 @@ const conditionResult = (stmt, oprnd, unitAware) => {
   if (result.dtype !== dt.ERROR && unitAware && stmt.resultdisplay.indexOf("!") === -1 &&
     (stmt.unit && stmt.unit.expos ||
       (result.unit && result.unit.expos && Array.isArray(result.unit.expos)))) {
-    const expos = (stmt.unit && stmt.unit.expos) ? stmt.unit.expos : allZeros
+    const expos = result.dtype === dt.DATE && stmt.unit === undefined
+      ? [0, 0, 1, 0, 0, 0, 0, 0]
+      : stmt.unit && stmt.unit.expos
+      ? stmt.unit.expos
+      : allZeros
     if (!unitsAreCompatible(result.unit.expos, expos)) {
-      const message = stmt.unit.expos ? "UNIT_RES" : "UNIT_MISS"
+      const message = stmt.unit && stmt.unit.expos ? "UNIT_RES" : "UNIT_MISS"
       result = errorOprnd(message)
     }
   }
@@ -1964,14 +1984,18 @@ const conditionResult = (stmt, oprnd, unitAware) => {
   return [stmt, result]
 }
 
-export const evaluateDrawing = (stmt, vars, decimalFormat = "1,000,000.") => {
+export const evaluateDrawing = (
+  stmt,
+  vars,
+  formats = { decimalFormat: "1,000,000.", dateFormat: "yyyy-mm-dd" }
+) => {
   const udf = stmt.value
   const args = [];
   for (let i = 0; i < udf.parameters.length; i++) {
     const argName = udf.parameters[i].name
-    args.push(evalRpn("¿" + argName, vars, decimalFormat, false, {}))
+    args.push(evalRpn("¿" + argName, vars, formats, false, {}))
   }
-  const funcResult = evalCustomFunction(udf, args, decimalFormat, false, {})
+  const funcResult = evalCustomFunction(udf, args, formats, false, {})
   if (funcResult.dtype === dt.ERROR) {
     stmt.error = true
     stmt.tex = "\\textcolor{firebrick}{\\text{" + funcResult.value + "}}"
@@ -1984,7 +2008,11 @@ export const evaluateDrawing = (stmt, vars, decimalFormat = "1,000,000.") => {
   return stmt
 }
 
-export const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
+export const evaluate = (
+  stmt,
+  vars,
+  formats = { decimalFormat: "1,000,000.", dateFormat: "yyyy-mm-dd" }
+) => {
   stmt.tex = stmt.template ? stmt.template : ""
   stmt.alt = stmt.altTemplate ? stmt.altTemplate : ""
   const isUnitAware = /\?\?|!!|%%|@@|¡¡/.test(stmt.resulttemplate)
@@ -1992,8 +2020,7 @@ export const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
   const formatSpec = vars.format ? vars.format.value : "h15"
 
   if (stmt.tex.indexOf("〖") > -1) {
-    // eslint-disable-next-line max-len
-    const eqnWithVals = plugValsIntoEcho(stmt.tex, vars, isUnitAware, formatSpec, decimalFormat)
+    const eqnWithVals = plugValsIntoEcho(stmt.tex, vars, isUnitAware, formatSpec, formats)
     if (eqnWithVals.dtype && eqnWithVals.dtype === dt.ERROR) {
       const [newStmt, _] = errorResult(stmt, eqnWithVals)
       return newStmt
@@ -2003,13 +2030,13 @@ export const evaluate = (stmt, vars, decimalFormat = "1,000,000.") => {
   }
 
   if (stmt.rpn) {
-    let oprnd = evalRpn(stmt.rpn, vars, decimalFormat, isUnitAware)
+    let oprnd = evalRpn(stmt.rpn, vars, formats, isUnitAware)
     if (oprnd.dtype === dt.ERROR) { [stmt, oprnd] = errorResult(stmt, oprnd); return stmt}
     let result
     [stmt, result] = conditionResult(stmt, oprnd, isUnitAware)
     if (stmt.error) { return stmt }
     const assert = vars.assert ? vars.assert : null
-    stmt = formatResult(stmt, result, formatSpec, decimalFormat, assert, isUnitAware)
+    stmt = formatResult(stmt, result, formatSpec, formats, assert, isUnitAware)
   }
   return stmt
 }

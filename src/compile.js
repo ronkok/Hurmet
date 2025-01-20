@@ -41,13 +41,16 @@ const matrixOfNames = /^[([](?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\
 const isKeyWord = /^(π|true|false|root|if|else|elseif|and|or|otherwise|mod|for|while|break|return|throw)$/
 const testRegEx = /^(@{1,2})test /
 
-const shortcut = (str, decimalFormat) => {
+const shortcut = (str, formats) => {
   // No calculation in str. Parse it just for presentation.
-  const tex = parse(str, decimalFormat)
+  const tex = parse(str, formats)
   return { entry: str, tex, alt: str }
 }
 
-export const compile = (inputStr, decimalFormat = "1,000,000.") => {
+export const compile = (
+  inputStr,
+  formats = { decimalFormat: "1,000,000.", dateFormat: "yyyy-mm-dd" }
+) => {
   let leadStr = ""
   let mainStr = ""
   let trailStr = ""
@@ -83,7 +86,7 @@ export const compile = (inputStr, decimalFormat = "1,000,000.") => {
       const posParen = inputStr.indexOf("(")
       name = inputStr.slice(posFn + 8, posParen).trim()
     }
-    const module = scanModule(inputStr, decimalFormat)
+    const module = scanModule(inputStr, formats)
     const isError = module.dtype && module.dtype === dt.ERROR
     if (isError) {
       // eslint-disable-next-line no-alert
@@ -105,7 +108,7 @@ export const compile = (inputStr, decimalFormat = "1,000,000.") => {
 
   if (testRegEx.test(inputStr)) {
     str = str.replace(testRegEx, "").trim()
-    const [_, rpn, dependencies] = parse(str, decimalFormat, true)
+    const [_, rpn, dependencies] = parse(str, formats, true)
     const resulttemplate = testRegEx.exec(inputStr)[1];
     return { entry: inputStr, template: "", rpn, dependencies, resulttemplate,
       altresulttemplate: resulttemplate, resultdisplay: "" }
@@ -156,7 +159,7 @@ export const compile = (inputStr, decimalFormat = "1,000,000.") => {
             if (isKeyWord.test(candidate) || !isValidIdentifier.test(candidate)) {
               // leadStr is not a list of valid identifiers.
               // So this isn't a valid calculation statement. Let's finish early.
-              return shortcut(str, decimalFormat)
+              return shortcut(str, formats)
             }
           }
           // multiple assignment.
@@ -187,18 +190,18 @@ export const compile = (inputStr, decimalFormat = "1,000,000.") => {
       // input has form:  name = trailStr
       name = mainStr
       if (trailStr === "") {
-        const tex = parse(str, decimalFormat)
+        const tex = parse(str, formats)
         return { entry: str, tex, alt: str }
       }
     } else {
       // input has form:  mainStr = trailStr.
       // It almost works as an assignment statment, but mainStr is not a valid identifier.
       // So we'll finish early.
-      return shortcut(str, decimalFormat)
+      return shortcut(str, formats)
     }
   } else {
     // str contains no "=" character. Let's fnish early.
-    return shortcut(str, decimalFormat)
+    return shortcut(str, formats)
   }
 
   if (expression.length > 0) {
@@ -210,7 +213,7 @@ export const compile = (inputStr, decimalFormat = "1,000,000.") => {
 
     } else {
       // Parse the expression. Stop short of doing the calculation.
-      [echo, rpn, dependencies] = parse(expression, decimalFormat, true)
+      [echo, rpn, dependencies] = parse(expression, formats, true)
 
       // Shoulld we display an echo of the expression, with values shown for each variable?
       if (suppressResultDisplay || displayResultOnly || echo.indexOf("〖") === -1
@@ -251,9 +254,9 @@ export const compile = (inputStr, decimalFormat = "1,000,000.") => {
     } else {
       if (unit) {
         resultDisplay = trailStr.trim().replace(/([^ ?!@%]+)$/, "'" + "$1" + "'")
-        resultDisplay = parse(resultDisplay, decimalFormat).replace(/\\%/g, "%").replace("@ @", "@@")
+        resultDisplay = parse(resultDisplay, formats).replace(/\\%/g, "%").replace("@ @", "@@")
       } else {
-        resultDisplay = parse(trailStr, decimalFormat).replace(/\\%/g, "%").replace("@ @", "@@")
+        resultDisplay = parse(trailStr, formats).replace(/\\%/g, "%").replace("@ @", "@@")
       }
       resultDisplay = resultDisplay.replace(/\\text\{(\?\??|%%?)\}/, "$1")
       resultDisplay = resultDisplay.replace(/([?%]) ([?%])/, "$1" + "$2")
@@ -262,9 +265,9 @@ export const compile = (inputStr, decimalFormat = "1,000,000.") => {
   } else {
     // trailStr may be a static value in an assignment statement.
     // Check if trailStr is a valid literal.
-    [value, unit, dtype, resultDisplay] = valueFromLiteral(trailStr, name, decimalFormat)
+    [value, unit, dtype, resultDisplay] = valueFromLiteral(trailStr, name, formats)
 
-    if (dtype === dt.ERROR) { return shortcut(str, decimalFormat) }
+    if (dtype === dt.ERROR) { return shortcut(str, formats) }
     rpn = ""
   }
 
@@ -272,7 +275,7 @@ export const compile = (inputStr, decimalFormat = "1,000,000.") => {
   let eqn = ""
   let altEqn = ""
   if (!displayResultOnly) {
-    eqn = parse(mainStr, decimalFormat)
+    eqn = parse(mainStr, formats)
     if (mustAlign) {
       eqn = "\\begin{aligned}" + eqn
       const pos = eqn.indexOf("=")

@@ -2,6 +2,7 @@
 import { Rnl } from "./rational"
 import { formattedDecimal, texFromMixedFraction } from "./format"
 import { DataFrame } from "./dataframe"
+import { dateDisplayFromIsoString } from "./date"
 
 /*
  * lexer.js
@@ -53,12 +54,14 @@ export const tt = Object.freeze({
   DATAFRAME: 40,
   RICHTEXT: 41,
   BOOLEAN: 42,
-  MACRO: 43
+  MACRO: 43,
+  DATE: 44  // Input format is 'yyyy-mm-dd'
 })
 
 const minusRegEx = /^-(?![-=<>:])/
 const numberRegEx = new RegExp(Rnl.numberPattern)
 const unitRegEx = /^(?:'[^']+'|[°ΩÅK])/
+const dateRegEx = /^'\d{4}-\d{1,2}-\d{1,2}'/
 
 export const texFromNumStr = (numParts, decimalFormat) => {
   let num = ""
@@ -93,6 +96,7 @@ const isUnary = (prevToken) => {
     case tt.NUM:
     case tt.ORD:
     case tt.VAR:
+    case tt.DATE:
     case tt.RIGHTBRACKET:
     case tt.LONGVAR:
     case tt.UNIT:
@@ -782,7 +786,7 @@ export const lexUnitName = str => {
   return [match[0], unitTeXFromString(match[0]), match[0], tt.UNIT, ""]
 }
 
-export const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
+export const lex = (str, formats, prevToken, inRealTime = false) => {
   // Get the next token in str. Return an array with the token's information:
   // [input, TeX output, type, associated close delimiter]
   let pos = 0
@@ -836,7 +840,7 @@ export const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
       tex = DataFrame.quickDisplay(st)
     } else {
       const dataStructure = DataFrame.dataFrameFromTSV(st)
-      tex = DataFrame.display(dataStructure.value, "h3", decimalFormat)
+      tex = DataFrame.display(dataStructure.value, "h3", formats.decimalFormat)
     }
     return ["``" + inputStr + "``", tex, inputStr, tt.DATAFRAME, ""]
   }
@@ -855,11 +859,17 @@ export const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
   }
 
   if (unitRegEx.test(str)) {
-    // String between single quotation marks. That signals a tt.UNIT.
+    // String between single quotation marks. That signals a tt.UNIT or a tt.DATE.
     pos = str.indexOf("'", 1)
     if (pos > 0) {
       st = str.substring(1, pos)
-      return ["'" + st + "'", unitTeXFromString(st), st, tt.UNIT, ""]
+      const strWithDelimiters = "'" + st + "'"
+      if (dateRegEx.test(str)) {
+        const dateTex = dateDisplayFromIsoString(strWithDelimiters, formats.dateFormat, true)
+        return [strWithDelimiters, dateTex, st, tt.DATE, ""]
+      } else {
+        return [strWithDelimiters, unitTeXFromString(st), st, tt.UNIT, ""]
+      }
     } else {
       // One of the unambiguous unit symbols, like ° or Å
       return [str.charAt(0), str.charAt(0), str.charAt(0), tt.UNIT, ""]
@@ -909,7 +919,7 @@ export const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
       const numParts = str.match(numberRegEx)
       if (numParts) {
         // numbers
-        st = texFromNumStr(numParts, decimalFormat)
+        st = texFromNumStr(numParts, formats.decimalFormat)
         return [numParts[0], st, numParts[0], tt.NUM, ""]
       }
     }
@@ -919,7 +929,7 @@ export const lex = (str, decimalFormat, prevToken, inRealTime = false) => {
   const numParts = str.match(numberRegEx)
   if (numParts) {
     // numbers
-    st = texFromNumStr(numParts, decimalFormat)
+    st = texFromNumStr(numParts, formats.decimalFormat)
     return [numParts[0], st, numParts[0], tt.NUM, ""]
   }
 

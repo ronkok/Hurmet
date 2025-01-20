@@ -45,7 +45,7 @@ const stripComment = str => {
   return str.trim()
 }
 
-export const scanModule = (str, decimalFormat) => {
+export const scanModule = (str, formats) => {
   // Scan the code and break it down into individual lines of code.
   // Assemble the lines into functions and assign each function to parent.
   const parent = Object.create(null)
@@ -63,13 +63,13 @@ export const scanModule = (str, decimalFormat) => {
 
     if (functionRegEx.test(line) || drawRegEx.test(line)) {
       // This line starts a new function.
-      const [funcObj, endLineNum] = scanFunction(lines, decimalFormat, i)
+      const [funcObj, endLineNum] = scanFunction(lines, formats, i)
       if (funcObj.dtype && funcObj.dtype === dt.ERROR) { return funcObj }
       parent[funcObj.name] = funcObj
       i = endLineNum
     } else if (testForStatement(line)) {
       // This line starts a Hurmet assignment.
-      const [stmt, endLineNum] = scanAssignment(lines, decimalFormat, i)
+      const [stmt, endLineNum] = scanAssignment(lines, formats, i)
       parent[stmt.name] = stmt
       i = endLineNum
     }
@@ -87,7 +87,7 @@ const handleTSV = (expression, lines, startLineNum) => {
   }
 }
 
-const scanFunction = (lines, decimalFormat, startLineNum) => {
+const scanFunction = (lines, formats, startLineNum) => {
   const line1 = stripComment(lines[startLineNum])
   let isDraw = line1.charAt(0) === "d"
   const posParen = line1.indexOf("(")
@@ -107,7 +107,7 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
     const name = parts[0]
     let defaultVal = { name, value: null, dtype: null }
     if (parts[1]) {
-      const [value, unit, dtype, resultDisplay] = valueFromLiteral(parts[1], "", decimalFormat)
+      const [value, unit, dtype, resultDisplay] = valueFromLiteral(parts[1], "", formats)
       defaultVal = { name, value, unit, dtype, resultDisplay }
     }
     parameters.push({ name, default: defaultVal })
@@ -187,7 +187,7 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
     let rpn = ""
     let _
     if (expression) {
-      [, rpn, _] = parse(expression, decimalFormat, true)
+      [, rpn, _] = parse(expression, formats, true)
       if (name === "for") {
         rpn = rpn.replace(/\u00a0in\u00a0/, "\u00a0").replace(/\u00a0in$/, "")
       }
@@ -222,7 +222,7 @@ const scanFunction = (lines, decimalFormat, startLineNum) => {
   return [errorOprnd("END_MISS", functionName), 0]
 }
 
-const scanAssignment = (lines, decimalFormat, iStart) => {
+const scanAssignment = (lines, formats, iStart) => {
   let prevLineEndedInContinuation = false
   let str = ""
   let iEnd = iStart
@@ -267,7 +267,7 @@ const scanAssignment = (lines, decimalFormat, iStart) => {
     }
     iEnd = j
   }
-  const [value, unit, dtype, resultDisplay] = valueFromLiteral(trailStr, name, decimalFormat)
+  const [value, unit, dtype, resultDisplay] = valueFromLiteral(trailStr, name, formats)
   const stmt = { name, value, unit, dtype, resultDisplay }
   return [stmt, iEnd]
 }

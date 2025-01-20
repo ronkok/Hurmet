@@ -227,9 +227,12 @@ export function openPrompt(options) {
   const submit = () => {
     const params = getValues(options.fields, domFields)
     if (options.radioButtons) {
-      params.class = form[options.radioButtons.name].value
       if (options.radioButtons.name === "rounding") {
         params.value = form[options.radioButtons.name].value + form.digits.value
+      } else if (options.radioButtons.name === "dateFormat") {
+        params.format = form[options.radioButtons.name].value
+      } else {
+        params.class = form[options.radioButtons.name].value
       }
     }
     if (options.src && !params.src) {
@@ -283,7 +286,9 @@ function getValues(fields, domFields) {
   for (const name in fields) {
     const field = fields[name]
     const dom = domFields[i++]
-    const value = field.read(dom)
+    const value = dom.tagname === "INPUT"
+      ? field.read(dom)
+      : field.read(dom.lastChild)
     const bad = field.validate(value)
     if (bad) {
       reportInvalid(dom, bad)
@@ -356,7 +361,17 @@ export class TextField extends Field {
     input.placeholder = this.options.label
     input.value = this.options.value || ""
     input.autocomplete = "off"
-    return input
+    if (this.options.leader) {
+      input.style.width = "50px"
+      const leader = document.createElement("span")
+      leader.textContent = this.options.leader
+      const div = document.createElement("div")
+      div.appendChild(leader)
+      div.appendChild(input)
+      return div
+    } else {
+      return input
+    }
   }
 }
 

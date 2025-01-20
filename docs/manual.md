@@ -143,7 +143,8 @@ top of every page (except the cover page). The header is a table and it should
 remain a table. Otherwise, edit it any way you want.
 
 If you write `$PAGE` into a print header, Hurmet will print page numbers at
-that location.
+that location. The calculation field `savedate() = @@` will print the date on which the
+document was most recently saved.
 
 ### Macro Expansion
 
@@ -1192,6 +1193,33 @@ String Interpolation
 
     Note that you must do a calculation. It’s not reading a literal value.
 
+Date
+
+:   A Hurmet _date_ literal is input between single quotation marks with numerals in format:
+    `'yyyy-mm-dd'`.
+    
+    You can add or subtract a time to a date to get a new date. The calculation must
+    be unit-aware.  For example:\
+    `'2025-01-12' + 12weeks = ??`.
+    
+    The default return format is `yyyy-mm-dd`, but you can specify a format and
+    a language code in the Docs | Date format menu. All These are valid date displays:
+
+    ||||
+    |:--------------------|:-------------------|
+    | `yyyy-mm-dd`        | 2025-01-09         |
+    | `dd.mm.yyyy`        | 09.01.2025         |
+    | `d mmmm yyyy`       | 9 January 2025     |
+    | `d mmm yyyy`        | 9 Jan 2025         |
+    | `mmmm d, yyyy`      | January 9, 2025    |
+    | `mmm d, yyyy`       | Jan 9, 2025        |
+    | `d de mmmm de yyyy` | 9 de enero de 2025 |
+    {.nogrid}
+    
+    Hurmet has two functions that relate to dates: The `today()` function and the
+    `savedate()` function, which returns the date on which the current document
+    was saved.
+
 </dl>
 
 ## Expressions
@@ -1599,6 +1627,10 @@ round(_x_, _spec_)
   To round to _n_ significant digits, write the spec as "r_n_", e.g., "r3".\
   To round to _n_ places after the decimal, write the spec as "f_n_".
 
+savedate()
+
+: Returns the date on which the current document was saved.
+
 sign(_x_)
 
 : Returns ¢`{1 if x > 0; -1 if x < 0; 0 otherwise}`<br>Real numbers only.
@@ -1619,6 +1651,10 @@ sum(_M_, _n_)
 : Takes a matrix and sums either the rows or the columns.\
   `sum(𝐌, 1)` will sum the columns and return a row vector.\
   `sum(𝐌, 2)` will sum the rows and return a column vector.
+
+today()
+
+: Returns the current date.
 
 transpose(_M_)
 
@@ -1946,7 +1982,7 @@ There are two aspects to how numbers are displayed: (1) decimal separators, and
 In some countries, the usual decimal separator symbol is a dot. Other countries
 use a comma. Hurmet starts up with a decimal separator based upon the browser’s
 language setting. Hurmet also allows the reader (not the document author) to
-select which display they prefer. Just use the use the drop-down menu labeled
+select which display they prefer. Use the use the drop-down menu labeled
 Doc | Set Decimal.
 
 The same menu choice also selects how Hurmet displays thousands separators.
@@ -2739,6 +2775,7 @@ Copyright © 2020-2024 Ron Kok. Released under the [MIT License][]
 * [Matrix](#matrix)
 * [Data Frame](#data-frame)
 * [Map](#map)
+* [Date](#date)
 * [String Interpolation](#string-interpolation)
 
 </details>

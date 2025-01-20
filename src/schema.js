@@ -52,9 +52,11 @@ export const nodes = {
     // outside the undo stack.
     attrs: {
       decimalFormat: { default: '1,000,000.', validate: "string" },
+      dateFormat: { default: 'yyyy-mm-dd', validate: "string" },
       inDraftMode: { default: false, validate: "boolean" },
       saveIsValid: { default: false, validate: "boolean" },
       fileHandle: { default: null, validate: "null|string" },
+      saveDate: { default: null, validate: "null|string" },
       fontSize: { default: 12, validate: "number|string" },       // 12 | 10
       pageSize: { default: "letter", validate: "string" }, // letter | A4
       snapshots: { default: [] },

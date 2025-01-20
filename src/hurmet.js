@@ -19,8 +19,9 @@ import { Rnl } from "./rational"
  * Some of Hurmet’s exported functions are valuable only to the Hurmet.org web page.
  * If you wish to use Hurmet’s math parsing and/or calculation abilities,
  * the two functions you want are:
- *   parse(entry: string, decimalFormat?: string)
- *   calculate(entry: string, vars?: Object, draftMode?: boolean, decimalFormat?: string)
+ *   parse(entry: string, formats?: { decimalFormat: string, dateFormat: string })
+ *   calculate(entry: string, vars?: Object, draftMode?: boolean,
+ *             formats?: { decimalFormat: string, dateFormat: string })
  *
  *   parse() returns a TeX string.
  *   calculate() returns either a TeX string or a string in Hurmet calculation syntax.

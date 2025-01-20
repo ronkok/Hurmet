@@ -14,7 +14,7 @@ export const dt = Object.freeze({
   BOOLEANFROMCOMPARISON: 12, // 4 + 8, useful for chained comparisons
   STRING: 16,
   QUANTITY: 32, // Contains both a magnitude and a unit-of-measure
-  DATE: 64, //     Not currently used
+  DATE: 64, //     Number of seconds after start of Jan 1, 1970, UTC.
   RANGE: 128, //   as in:  1:10
   TUPLE: 256, //   Used for multiple assignment from a module.
   MAP: 512,  //    A key:value store with all the same data type the same unit

@@ -14,7 +14,7 @@ import { formatResult } from "./result"
 const varRegEx = /〖[^〗]*〗/
 const openParenRegEx = /(?:[([{|‖]|[^\\][,;:](?:\\:)?)$/
 
-export const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat) => {
+export const plugValsIntoEcho = (str, vars, unitAware, formatSpec, formats) => {
   // For each variable name in the echo string, substitute a value.
   // The parser surrounded those names with 〖〗 delimiters.
   let match
@@ -45,7 +45,7 @@ export const plugValsIntoEcho = (str, vars, unitAware, formatSpec, decimalFormat
           if (!hvar) { return errorOprnd("V_NAME", propName) }
           const stmt = { resulttemplate: "@", altresulttemplate: "@" }
           hvar.resultdisplay = formatResult(stmt, hvar, formatSpec, null,
-                decimalFormat).resultdisplay
+                formats).resultdisplay
         }
       }
     } else if (!vars[varName] && varName === "T") {

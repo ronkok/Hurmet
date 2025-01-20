@@ -157,14 +157,17 @@ export const formattedDecimal = (numStr, decimalFormat, truncateTrailingZeros) =
   }
 }
 
-export const parseFormatSpec = str => {
-  // Do the RegEx once, at compile time, not every time a number is formatted.
-  //
-  // str ≔ "Tn", where:
-  //    T = type, [bEefhkmNnprSstx%], default: "h"
-  //    n = number of digits, [0-9]+, default: 15
-  //
-  //    Possible future additions: complex number format [∠°]
+export const validateFormatSpec = str => {
+  /*
+   * Use a RegEx to determine if a format specification string is valid.
+   * Return the string if valid. Return an error message otherwise.
+   *
+   * str ≔ "Tn∠° (w, m-d-y L)?", where:
+   *    T = type, [bEefhkmNnprSstx%], default: "h"
+   *    n = number of digits, [0-9]+, default: 15
+   *    ∠ = optional. Specifies polar notation for complex numbers
+   *    ° = optional. Specifies polar noation in degrees
+   */
 
   const match = formatRegEx.exec(str)
   if (!match) {

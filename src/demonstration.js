@@ -25,7 +25,7 @@ hurmet.calculate(`wideFlanges =` + wideFlanges, hurmetVars)
 const dict = `{"#4": 0.22, "#5": 0.31} 'in2'`
 hurmet.calculate(`barArea =` + dict, hurmetVars)
 const module = "E = 29000 'ksi'\n\nv = [4, 6, 8]\n\nfunction multiply(a, b)\n  return a × b\nend"
-hurmetVars["mod"] = hurmet.scanModule(module, "1,000,000.")
+hurmetVars["mod"] = hurmet.scanModule(module, { decimalFormat: "1,000,000.", dateFormat: "yyy-mm-dd" })
 
 const renderMath = (jar, demoOutput) => {
   let entry = jar.toString()

@@ -2,6 +2,7 @@
          interpolateRegEx, arrayOfRegExMatches } from "./utils"
 import { tt, lex, unitStartRegEx, lexUnitName } from "./lexer"
 import { Rnl } from "./rational"
+import { dateRPN } from "./date"
 
 /*
  * parser.js
@@ -19,9 +20,9 @@ const builtInFunctions = new Set([
   "cot", "cotd", "coth", "count", "csc", "cscd", "csch", "exp",
   "factorial", "fetch", "findmax", "floor", "format", "gamma", "gcd", "hcat",
   "hypot", "imag", "isnan", "length", "lerp", "ln", "log", "log10", "log2", "lfact", "lgamma",
-  "logn", "mod", "number", "ones", "real", "rem", "rms", "round", "roundSig", "roundn", "sec",
-  "secd", "sech", "sech", "sign", "sin", "sind", "sinh", "startSvg", "string", "tan", "tand",
-  "tanh", "tanh", "trace", "transpose", "vcat", "zeros", "Γ"
+  "logn", "mod", "number", "ones", "real", "rem", "rms", "round", "roundSig", "roundn",
+  "savedate", "sec", "secd", "sech", "sech", "sign", "sin", "sind", "sinh", "startSvg",
+  "string", "tan", "tand", "tanh", "tanh", "today", "trace", "transpose", "vcat", "zeros", "Γ"
 ])
 
 const builtInReducerFunctions = new Set(["accumulate", "beamDiagram", "dataframe",
@@ -43,6 +44,7 @@ const checkForUnaryMinus = (token, prevToken) => {
     case tt.NUM:
     case tt.ORD:
     case tt.VAR:
+    case tt.DATE:
     case tt.RIGHTBRACKET:
     case tt.LONGVAR:
     case tt.PROPERTY:
@@ -114,7 +116,7 @@ const exponentOfFunction = (str, decimalFormat, isCalc) => {
     expoInput = /^⁻?[⁰¹²³\u2074-\u2079⁻]+/.exec(str)[0]
     expoInput = expoInput.split("").map(ch => numeralFromSuperScript(ch)).join("")
   } else if (!openParenRegEx.test(str.slice(1))) {
-    expoInput = lex(str.slice(1), decimalFormat, { input: "", output: "", ttype: 50 })[0]
+    expoInput = lex(str.slice(1), { decimalFormat }, { input: "", output: "", ttype: 50 })[0]
   } else {
     // The exponent is in parens. Find its extent.
     expoInput = "("
@@ -140,10 +142,10 @@ const exponentOfFunction = (str, decimalFormat, isCalc) => {
     : expoInput
 
   if (isCalc) {
-    const expoOutput = parse(parseInput, decimalFormat, true)
+    const expoOutput = parse(parseInput, { decimalFormat }, true)
     return [expoInput, "{" + expoOutput[0] + "}", expoOutput[1]]
   } else {
-    const expoTex = parse(parseInput, decimalFormat, false)
+    const expoTex = parse(parseInput, { decimalFormat }, false)
     return [expoInput, "{" + expoTex + "}", ""]
   }
 }
@@ -232,7 +234,8 @@ export const cloneToken = token => {
   }
 }
 
-const endOfOrd = new Set([tt.ORD, tt.VAR, tt.NUM, tt.LONGVAR, tt.RIGHTBRACKET, tt.SUPCHAR])
+const endOfOrd = new Set([tt.ORD, tt.VAR, tt.NUM, tt.DATE, tt.LONGVAR,
+  tt.RIGHTBRACKET, tt.SUPCHAR])
 
 // The RegEx below is equal to /^\s+/ except it omits \n, \t, and the no-break space \xa0.
 // I use \xa0 to precede the combining arrow accent character \u20D7.
@@ -250,7 +253,7 @@ const rpnPrecFromType = [
       13, 17, 16, -1, 15,
       14, 10,  3,  2, 11,
       -1, -1,  4,  3, -1,
-      -1, -1, -1
+      -1, -1, -1, -1
 ]
 
 const texPrecFromType = [
@@ -261,8 +264,8 @@ const texPrecFromType = [
        2,  2,  1,  1,  1,
        2, -1, 15,  2, 14,
       13,  9, -1,  1, -1,
-      15, -1,  1,  -1, 2,
-       2,  2,  2
+      15, -1,  1, -1,  2,
+       2,  2,  2,  2
 ]
 /* eslint-enable indent-legacy */
 
@@ -301,7 +304,7 @@ const dDISTRIB = 10 //         A probability distribution defined by a confidenc
 
 export const parse = (
   str,
-  decimalFormat = "1,000,000.",
+  formats = { decimalFormat: "1,000,000.", dateFormat: "yyy-mm-dd" },
   isCalc = false,     // true when parsing the blue echo of an expression
   inRealTime = false, // true when updating a rendering with every keystroke in the editor.
   sheetName = ""      // The RPN for a spreadsheet cell differs from other variables.
@@ -537,7 +540,7 @@ export const parse = (
     if (mustLex) {
       const tkn = prevToken.ttype === tt.NUM && !isFollowedBySpace && unitStartRegEx.test(str)
         ? lexUnitName(str)                                // something like the "m" in "5m"
-        : lex(str, decimalFormat, prevToken, inRealTime)  // default
+        : lex(str, formats, prevToken, inRealTime)  // default
       token = { input: tkn[0], output: tkn[1], ttype: tkn[3], closeDelim: tkn[4] }
       str = str.substring(token.input.length)
       isFollowedBySpace = leadingSpaceRegEx.test(str) || /^(˽|\\quad|\\qquad)+/.test(str)
@@ -625,11 +628,16 @@ export const parse = (
 
       case tt.NUM:
       case tt.ORD:
+      case tt.DATE:
         popTexTokens(2, okToAppend)
         if (isCalc) {
           // Numbers and ORDs get appended directly onto rpn. Pass -1 to suppress an rpn pop.
           popRpnTokens(-1)
-          rpn += token.ttype === tt.NUM ? rationalRPN(token.input) : token.input
+          rpn += token.ttype === tt.NUM
+            ? rationalRPN(token.input)
+            : token.ttype === tt.DATE
+            ? dateRPN(token.input)
+            : token.input
         }
         if (isPrecededBySpace) { posOfPrevRun = tex.length }
         if (isCalc &&
@@ -668,7 +676,7 @@ export const parse = (
         const ch = token.input.charAt(0)
         if (isCalc) { rpn += ch + token.output + ch }
         if (isPrecededBySpace) { posOfPrevRun = tex.length }
-        token.output = token.output === "`" ? "`" : parse(token.output, decimalFormat, false)
+        token.output = token.output === "`" ? "`" : parse(token.output, formats, false)
         tex += "{" + token.output + "}"
         okToAppend = true
         break
@@ -928,7 +936,8 @@ export const parse = (
         posOfPrevRun = tex.length
         // Is there an exponent on the function name?
         if (functionExpoRegEx.test(str)) {
-          const [expoInput, expoTex, expoRPN] = exponentOfFunction(str, decimalFormat, isCalc)
+          // eslint-disable-next-line max-len
+          const [expoInput, expoTex, expoRPN] = exponentOfFunction(str, formats.decimalFormat, isCalc)
           if (isCalc && expoRPN === `®-1/1` && trigFunctions.has(token.input)) {
             // Inverse trig function.
             token.input = "a" + token.input

@@ -90,7 +90,11 @@ export function openMathPrompt(options) {
       if (decimalSymbol === ",") { tex = dotFromCommaForStorage(tex) }
       isUDF = functionRegEx.test(tex)
       if (!isUDF) {
-        tex = hurmet.parse(tex, options.decimalFormat, false, true)
+        const formats = {
+          decimalFormat: options.outerView.state.doc.attrs.decimalFormat,
+          dateFormat: options.outerView.state.doc.attrs.dateFormat
+        }
+        tex = hurmet.parse(tex, formats, false, true)
       }
     } else {
       tex = code
@@ -132,9 +136,13 @@ export function openMathPrompt(options) {
     if (isCalculation && decimalSymbol === ",") {
       mathString = dotFromCommaForStorage(mathString)
     }
+    const formats = {
+      decimalFormat: options.outerView.state.doc.attrs.decimalFormat,
+      dateFormat: options.outerView.state.doc.attrs.dateFormat
+    }
     const params = (isTex)
       ? { tex: mathString }
-      : hurmet.compile(mathString, options.decimalFormat)
+      : hurmet.compile(mathString, formats)
     params.displayMode = options.attrs.displayMode
     if (wrapper.parentNode) {
       wrapper.parentNode.firstChild.removeAttribute("style")

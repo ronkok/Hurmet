@@ -2,6 +2,7 @@ import { dt } from "./constants"
 import { Rnl } from "./rational"
 import { parse } from "./parser"
 import { format } from "./format"
+import { formatDate } from "./date"
 import { addTextEscapes, clone } from "./utils"
 import { Matrix, isMatrix, isVector } from "./matrix"
 import { DataFrame } from "./dataframe"
@@ -40,8 +41,9 @@ const negatedComp = {
   "<=": ["\\ngeq ", "!≥"]
 }
 
-export const formatResult = (stmt, result, formatSpec, decimalFormat, assert, isUnitAware) => {
+export const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAware) => {
   if (!result) { return stmt }
+  const decimalFormat = formats.decimalFormat
 
   if (result.dtype === dt.DRAWING) {
     stmt.resultdisplay = result.value
@@ -148,7 +150,7 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, assert, is
       altResultDisplay = result.value
 
     } else if (result.dtype & dt.RICHTEXT) {
-      resultDisplay = parse(result.value, decimalFormat, false)
+      resultDisplay = parse(result.value, formats, false)
       altResultDisplay = result.value
 
     } else if (result.dtype & dt.BOOLEAN) {
@@ -158,6 +160,15 @@ export const formatResult = (stmt, result, formatSpec, decimalFormat, assert, is
     } else if (result.dtype === dt.COMPLEX) {
       const z = result.value;
       [resultDisplay, altResultDisplay] = Cpx.display(z, formatSpec, decimalFormat)
+
+    } else if (result.dtype === dt.DATE) {
+      resultDisplay = formatDate(result.value, formats.dateFormat)
+      if (resultDisplay.dtype && resultDisplay.dtype === dt.ERROR) {
+        resultDisplay = "\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}"
+        altResultDisplay = resultDisplay.value
+      } else {
+        altResultDisplay = resultDisplay.slice(6, -1) // Remove \text{ }
+      }
 
     } else if (result.value.plain) {
       resultDisplay = format(result.value.plain, formatSpec, decimalFormat)
