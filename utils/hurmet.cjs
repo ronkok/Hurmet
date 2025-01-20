@@ -3885,7 +3885,7 @@ const processDMY = (dmy, date, language, inExpression) => {
 const formatDate = (dateValue, dateFormatSpec, inExpression = false) => {
   // dateValue = number of seconds after start of January 1, 1970
   const date = new Date(Rnl.toNumber(dateValue) * 1000);
-  const textType = inExpression ? "text" : "textsf"; 
+  const textType = inExpression ? "text" : "textsf";
 
   if (!dateFormatSpec || dateFormatSpec === "yyyy-mm-dd" ||
     (inExpression && dateFormatSpec.indexOf("de") > -1)) {
