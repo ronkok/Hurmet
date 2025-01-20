@@ -186,7 +186,16 @@ const resultFormatterTests = [
   ["0.151" , "p3", "", "15.1\\%"],
   ["0.151" , "p2", "", "15\\%"],
   ["0.151" , "p1", "", "20\\%"],
-  ["-0.151" , "p1", "", "-20\\%"]
+  ["-0.151" , "p1", "", "-20\\%"],
+  ["'2025-01-09'", "", "yyyy-mm-dd", "\\textsf{2025-01-09}"],
+  ["'2025-01-09'", "", "dd.mm.yyyy", "\\textsf{09.01.2025}"],
+  ["'2025-01-09'", "", "d mmmm yyyy", "\\textsf{9 January 2025}"],
+  ["'2025-01-09'", "", "d mmm yyyy", "\\textsf{9 Jan 2025}"],
+  ["'2025-01-09'", "", "mmmm d, yyyy", "\\textsf{January 9, 2025}"],
+  ["'2025-01-09'", "", "mmm d, yyyy", "\\textsf{Jan 9, 2025}"],
+  ["'2025-01-09'", "", "d de mmmm de yyyy es", "\\textsf{9 de enero de 2025}"],
+  ["'2025-01-09'", "", "wwww, mmmm d, yyyy", "\\textsf{Thursday, January 9, 2025}"],
+  ["'2025-01-09'", "", "wwww, d de mmmm de yyyy es", "\\textsf{jueves, 9 de enero de 2025}"]
 ];
 
 console.log("Now testing the result formatter…")
@@ -245,7 +254,8 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     ["barArea = ``\\#4	#5	area\n 0.22	0.31	0.44`` 'in2'", "barArea = @", ""],
     ["unitLessBarArea = ``\\#4	#5	area\n 0.22	0.31	0.44``", "unitLessBarArea = @", ""],
     ["rebar = ``#name	diameter	area\nunit	in	in²\n#3	0.375	0.11\n#4	0.5	0.2\n#5	0.625	0.31\n#6	0.75	0.44``", "rebar = @", ""],
-    ["wideFlanges = ``#name	weight	area	d	bf	tw	tf	Ix	Sx	rx	Iy	Sy	ry\nunit	lbf/ft	in^2	in	in	in	in	in^4	in^3	in	in^4	in^3	in\nW10X49	49	14.4	10	10	0.34	0.56	272	54.6	4.35	93.4	18.7	2.54\nW8X31	31	9.13	8	8	0.285	0.435	110	27.5	3.47	37.1	9.27	2.02\nW8X18	18	5.26	8.14	5.25	0.23	0.33	61.9	15.2	3.43	7.97	3.04	1.23``", "wideFlanges = @", ""]
+    ["wideFlanges = ``#name	weight	area	d	bf	tw	tf	Ix	Sx	rx	Iy	Sy	ry\nunit	lbf/ft	in^2	in	in	in	in	in^4	in^3	in	in^4	in^3	in\nW10X49	49	14.4	10	10	0.34	0.56	272	54.6	4.35	93.4	18.7	2.54\nW8X31	31	9.13	8	8	0.285	0.435	110	27.5	3.47	37.1	9.27	2.02\nW8X18	18	5.26	8.14	5.25	0.23	0.33	61.9	15.2	3.43	7.97	3.04	1.23``", "wideFlanges = @", ""],
+    ["aDate = '2025-01-20'", "aDate = @", "2025-01-20"]
   ]
 
   console.log("Now testing assignments…")
@@ -545,7 +555,10 @@ end`, vars)
     [`newton(x → cos x, y → -sin y, 1.5) = @`, `"x" "¿x§cos" → "y" "¿y§sin§~" → ®15/10 function newton 3`, "1.5707963267949"],
     [`4 ∑_(n=1)³ 2 n + 3 = @`, `®4/1 "n" ®1/1 ®3/1 "®2/1§¿n§⌧" ∑ ⌧ ®3/1 +`, "51"],
     [`∑_(n=0)⁴ 2 n = @`, `"n" ®0/1 ®4/1 "®2/1§¿n§⌧" ∑`, "20"],
-    [`1 'in⁻¹' × 2 'in⁻²' = @@ in⁻³`, `®1/1 applyUnit in⁻¹ ®2/1 applyUnit in⁻² ×`, "2 in⁻³"]
+    [`1 'in⁻¹' × 2 'in⁻²' = @@ in⁻³`, `®1/1 applyUnit in⁻¹ ®2/1 applyUnit in⁻² ×`, "2 in⁻³"],
+    [`'2025-01-20' + 12weeks = @@`, "⌾1737331200 ®12/1 applyUnit weeks +", "2025-04-14"],
+    [`savedate() = @@`, "savedate", "Error. The current document has not been saved."],
+    [`aDate + 12weeks = @@`, "¿aDate ®12/1 applyUnit weeks +", "2025-04-14"]
   ]
 
   const testRegEx = /^(@{1,2})test /
@@ -559,7 +572,7 @@ end`, vars)
     const pos = inputStr.lastIndexOf("=")
     let str = pos > -1 ? inputStr.slice(0, pos).trim() : inputStr
     str = str.replace(testRegEx, "")
-    const [_, rpn] = hurmet.parse(str, { decimalFormat:"1,000,000.", dateFormat: "2025-01-19" }, true)
+    const [_, rpn] = hurmet.parse(str, { decimalFormat:"1,000,000.", dateFormat: "yyy-mm-dd" }, true)
     const output = hurmet.calculate(inputStr, vars, true)
     if (output !== expectedOutput || rpn !== expectedRPN) {
       numErrors += 1

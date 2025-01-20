@@ -1195,15 +1195,15 @@ String Interpolation
 
 Date
 
-:   A Hurmet _date_ literal is input between single quotation marks with numerals in format:
-    `'yyyy-mm-dd'`.
+:   A Hurmet _date_ literal is input between single quotation marks with numerals in
+    ISO 8601 format: `'yyyy-mm-dd'`.
     
     You can add or subtract a time to a date to get a new date. The calculation must
     be unit-aware.  For example:\
     `'2025-01-12' + 12weeks = ??`.
     
     The default return format is `yyyy-mm-dd`, but you can specify a format and
-    a language code in the Docs | Date format menu. All These are valid date displays:
+    a language code in the Docs | Date format… menu. All These are valid date displays:
 
     ||||
     |:--------------------|:-------------------|
@@ -1215,6 +1215,9 @@ Date
     | `mmm d, yyyy`       | Jan 9, 2025        |
     | `d de mmmm de yyyy` | 9 de enero de 2025 |
     {.nogrid}
+    
+    In Date format…, you can also choose to a prepend a weekday. Hurmet will then show
+    a weekday in its results, but not inside the body of an expression.
     
     Hurmet has two functions that relate to dates: The `today()` function and the
     `savedate()` function, which returns the date on which the current document
@@ -2662,7 +2665,6 @@ such as calculation cells, indented paragraphs, and merged cells in tables.
 ## Coming Attractions
 
 *   A `distribution` data type, to enable calculations with uncertainty
-*   A `date` data type
 
 ## Other Resources
 

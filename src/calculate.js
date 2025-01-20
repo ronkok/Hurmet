@@ -11,7 +11,7 @@ export const calculate = (
   entry,
   vars = {},
   inDraftMode = false,
-  formats = { decimalFormat: "1,000,000.", dateFormat: "yyy-mm-dd" }
+  formats = { decimalFormat: "1,000,000.", dateFormat: "yyyy-mm-dd" }
 ) => {
   let attrs = compile(entry, formats)
   if (attrs.rpn) {

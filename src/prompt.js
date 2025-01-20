@@ -65,6 +65,7 @@ export function openPrompt(options) {
     const radioGroup = document.createElement("div")
     radioGroup.style.display = "flex"
     radioGroup.style["flex-direction"] = options.radioButtons.direction
+    radioGroup.style.margin = "8px 0 8px 0"
     const current = options.radioButtons.current
     options.radioButtons.buttons.forEach(btn => {
       const span = document.createElement("span")

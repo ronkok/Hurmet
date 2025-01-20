@@ -18,7 +18,7 @@ const builtInFunctions = new Set([
   "acsch", "angle", "asec", "asecd", "asech", "asin", "asind", "asinh", "atan", "atan2",
   "atand", "atanh", "binomial", "ceil", "conj", "cos", "cosd", "cosh",
   "cot", "cotd", "coth", "count", "csc", "cscd", "csch", "exp",
-  "factorial", "fetch", "findmax", "floor", "format", "gamma", "gcd", "hcat",
+  "factorial", "fetch", "findmax", "floor", "gamma", "gcd", "hcat",
   "hypot", "imag", "isnan", "length", "lerp", "ln", "log", "log10", "log2", "lfact", "lgamma",
   "logn", "mod", "number", "ones", "real", "rem", "rms", "round", "roundSig", "roundn",
   "savedate", "sec", "secd", "sech", "sech", "sign", "sin", "sind", "sinh", "startSvg",

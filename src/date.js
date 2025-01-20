@@ -55,17 +55,18 @@ const processDMY = (dmy, date, language, inExpression) => {
 export const formatDate = (dateValue, dateFormatSpec, inExpression = false) => {
   // dateValue = number of seconds after start of January 1, 1970
   const date = new Date(Rnl.toNumber(dateValue) * 1000)
+  const textType = inExpression ? "text" : "textsf"
 
   if (!dateFormatSpec || dateFormatSpec === "yyyy-mm-dd" ||
     (inExpression && dateFormatSpec.indexOf("de") > -1)) {
-    return "\\text{" + date.toISOString().split("T")[0] + "}"
+    return `\\${textType}{${date.toISOString().split("T")[0]}}`
   }
 
   const match = dateFormatRegEx.exec(dateFormatSpec)
   const language = match[7] ? match[7] : "en"
 
   let str = ""
-  if (match[1]) {
+  if (match[1] && !inExpression) {
     const length = match[1].length === "3" ? "short" : "long"
     str += new Intl.DateTimeFormat(language, { weekday: length, timeZone: 'GMT' }).format(date)
     str += ", "
@@ -76,6 +77,6 @@ export const formatDate = (dateValue, dateFormatSpec, inExpression = false) => {
   str += match[5];
   str += processDMY(match[6], date, language, inExpression)
 
-  return "\\text{" + str + "}"
+  return `\\${textType}{${str}}`
 }
 

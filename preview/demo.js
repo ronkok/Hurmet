@@ -4229,17 +4229,18 @@ const processDMY = (dmy, date, language, inExpression) => {
 const formatDate = (dateValue, dateFormatSpec, inExpression = false) => {
   // dateValue = number of seconds after start of January 1, 1970
   const date = new Date(Rnl.toNumber(dateValue) * 1000);
+  const textType = inExpression ? "text" : "textsf"; 
 
   if (!dateFormatSpec || dateFormatSpec === "yyyy-mm-dd" ||
     (inExpression && dateFormatSpec.indexOf("de") > -1)) {
-    return "\\text{" + date.toISOString().split("T")[0] + "}"
+    return `\\${textType}{${date.toISOString().split("T")[0]}}`
   }
 
   const match = dateFormatRegEx.exec(dateFormatSpec);
   const language = match[7] ? match[7] : "en";
 
   let str = "";
-  if (match[1]) {
+  if (match[1] && !inExpression) {
     const length = match[1].length === "3" ? "short" : "long";
     str += new Intl.DateTimeFormat(language, { weekday: length, timeZone: 'GMT' }).format(date);
     str += ", ";
@@ -4250,7 +4251,7 @@ const formatDate = (dateValue, dateFormatSpec, inExpression = false) => {
   str += match[5];
   str += processDMY(match[6], date, language, inExpression);
 
-  return "\\text{" + str + "}"
+  return `\\${textType}{${str}}`
 };
 
 /*
@@ -5230,7 +5231,7 @@ const builtInFunctions = new Set([
   "acsch", "angle", "asec", "asecd", "asech", "asin", "asind", "asinh", "atan", "atan2",
   "atand", "atanh", "binomial", "ceil", "conj", "cos", "cosd", "cosh",
   "cot", "cotd", "coth", "count", "csc", "cscd", "csch", "exp",
-  "factorial", "fetch", "findmax", "floor", "format", "gamma", "gcd", "hcat",
+  "factorial", "fetch", "findmax", "floor", "gamma", "gcd", "hcat",
   "hypot", "imag", "isnan", "length", "lerp", "ln", "log", "log10", "log2", "lfact", "lgamma",
   "logn", "mod", "number", "ones", "real", "rem", "rms", "round", "roundSig", "roundn",
   "savedate", "sec", "secd", "sech", "sech", "sign", "sin", "sind", "sinh", "startSvg",
@@ -7389,7 +7390,7 @@ const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAware) =>
         resultDisplay = "\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}";
         altResultDisplay = resultDisplay.value;
       } else {
-        altResultDisplay = resultDisplay.slice(6, -1); // Remove \text{ }
+        altResultDisplay = resultDisplay.replace(/^\\text(?:sf)?{/, "").slice(0, -1);
       }
 
     } else if (result.value.plain) {
@@ -15945,7 +15946,7 @@ const evalRpn = (rpn, vars, formats, unitAware, lib) => {
           if (tkn === "savedate" && !vars["@savedate"]) {
             return errorOprnd("UNSAVED")
           }
-          const oprnd = { unit: [0, 0, 1, 0, 0, 0, 0, 0], dtype: dt.DATE };
+          const oprnd = { unit: { expos: [0, 0, 1, 0, 0, 0, 0, 0] }, dtype: dt.DATE };
           const numSeconds = tkn === "today"
             ? dateInSecondsFromToday()
             : dateInSecondsFromIsoString("'" + vars["@savedate"] + "'");
@@ -17844,7 +17845,7 @@ const calculate = (
   entry,
   vars = {},
   inDraftMode = false,
-  formats = { decimalFormat: "1,000,000.", dateFormat: "yyy-mm-dd" }
+  formats = { decimalFormat: "1,000,000.", dateFormat: "yyyy-mm-dd" }
 ) => {
   let attrs = compile(entry, formats);
   if (attrs.rpn) {

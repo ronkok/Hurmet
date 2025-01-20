@@ -516,9 +516,9 @@ Col B	11	25	14`` 'kips'"><math><mrow><mi>P</mi><msub><mrow></mrow><mtext>a</mtex
 w = ``dead	live	snow
 ${w_dead}	30	40`` &#x27;lbf/ft&#x27; = %% lbf/ft</code></pre><p>Note that you must do a calculation. It’s not reading a literal value.</p></dd>
 <dt id='date'>Date</dt>
-<dd><p>A Hurmet <em>date</em> literal is input between single quotation marks with numerals in format: <code>&#x27;yyyy-mm-dd&#x27;</code>.</p>
+<dd><p>A Hurmet <em>date</em> literal is input between single quotation marks with numerals in ISO 8601 format: <code>&#x27;yyyy-mm-dd&#x27;</code>.</p>
 <p>You can add or subtract a time to a date to get a new date. The calculation must be unit-aware.  For example:<br><code>&#x27;2025-01-12&#x27; + 12weeks = ??</code>.</p>
-<p>The default return format is <code>yyyy-mm-dd</code>, but you can specify a format and a language code in the Docs | Date format menu. All These are valid date displays:</p>
+<p>The default return format is <code>yyyy-mm-dd</code>, but you can specify a format and a language code in the Docs | Date format… menu. All These are valid date displays:</p>
 <table class="nogrid"><tr><td><code>yyyy-mm-dd</code></td><td>2025-01-09</td></tr>
 <tr><td><code>dd.mm.yyyy</code></td><td>09.01.2025</td></tr>
 <tr><td><code>d mmmm yyyy</code></td><td>9 January 2025</td></tr>
@@ -526,6 +526,7 @@ ${w_dead}	30	40`` &#x27;lbf/ft&#x27; = %% lbf/ft</code></pre><p>Note that you mu
 <tr><td><code>mmmm d, yyyy</code></td><td>January 9, 2025</td></tr>
 <tr><td><code>mmm d, yyyy</code></td><td>Jan 9, 2025</td></tr>
 <tr><td><code>d de mmmm de yyyy</code></td><td>9 de enero de 2025</td></tr></table>
+<p>In Date format…, you can also choose to a prepend a weekday. Hurmet will then show a weekday in its results, but not inside the body of an expression.</p>
 <p>Hurmet has two functions that relate to dates: The <code>today()</code> function and the <code>savedate()</code> function, which returns the date on which the current document was saved.</p></dd>
 </dl>
 <h2 id='expressions'>Expressions</h2>
@@ -1135,8 +1136,7 @@ const titleRegEx = /([^.\\/]+)\.md$/;  // A helper.
 <p>Say that you have written a calculation. It’s awesome and you want to share it so that others can use it as a template. An easy way to share work is via a GitHub <a href='https://gist.github.com/'>Gist</a>. Then anyone can view it, download it, or comment on it. Here’s an <a href='https://gist.githubusercontent.com/ronkok/7fec7d11f6fb6a031e5a0827e3531d68/raw/EndPlateConnectionExample.md'>example</a>.</p>
 <p>Hurmet’s version of Markdown adds some extensions that GitHub does not recognize, such as calculation cells, indented paragraphs, and merged cells in tables.</p>
 <h2 id='coming-attractions'>Coming Attractions</h2>
-<ul><li class="tight"><p>A <code>distribution</code> data type, to enable calculations with uncertainty</p></li>
-<li class="tight"><p>A <code>date</code> data type</p></li></ul>
+<ul><li class="tight"><p>A <code>distribution</code> data type, to enable calculations with uncertainty</p></li></ul>
 <h2 id='other-resources'>Other Resources</h2>
 <p>Civil and structural engineers may also find these items useful:</p>
 <ul><li class="tight"><p>Concrete Column Interaction <a href='https://observablehq.com/@ronkok/concrete-column-interaction-diagram'>Diagram</a></p></li>

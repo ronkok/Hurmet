@@ -891,7 +891,7 @@ export const evalRpn = (rpn, vars, formats, unitAware, lib) => {
           if (tkn === "savedate" && !vars["@savedate"]) {
             return errorOprnd("UNSAVED")
           }
-          const oprnd = { unit: [0, 0, 1, 0, 0, 0, 0, 0], dtype: dt.DATE }
+          const oprnd = { unit: { expos: [0, 0, 1, 0, 0, 0, 0, 0] }, dtype: dt.DATE }
           const numSeconds = tkn === "today"
             ? dateInSecondsFromToday()
             : dateInSecondsFromIsoString("'" + vars["@savedate"] + "'")
