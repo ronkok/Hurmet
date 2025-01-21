@@ -1808,7 +1808,9 @@ export function buildMenuItems(schema) {
     ["product", "range", "stddev", "variance"]])
   r.string = hint("String…", "String", "String Functions", "",
     [["fetch", "Char", "count", "number", "string"]])
-  r.functionsDropDown = new Dropdown([r.trig, r.hyperbolic, r.math, r.matrix, r.reducers, r.string],
+  r.date = hint("Date…", "Date", "Date functions", "",
+    [["today", "savedate", ""]])
+  r.functionsDropDown = new Dropdown([r.trig, r.hyperbolic, r.math, r.matrix, r.reducers, r.string, r.date],
     { label: " 𝑓", title: "Functions", class: "math-dropdown" })
   r.rounding = setRoundingCriteria(schema.nodes.calculation)
   r.hintDropDown = new Dropdown(

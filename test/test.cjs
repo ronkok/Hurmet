@@ -187,15 +187,15 @@ const resultFormatterTests = [
   ["0.151" , "p2", "", "15\\%"],
   ["0.151" , "p1", "", "20\\%"],
   ["-0.151" , "p1", "", "-20\\%"],
-  ["'2025-01-09'", "", "yyyy-mm-dd", "\\textsf{2025-01-09}"],
-  ["'2025-01-09'", "", "dd.mm.yyyy", "\\textsf{09.01.2025}"],
-  ["'2025-01-09'", "", "d mmmm yyyy", "\\textsf{9 January 2025}"],
-  ["'2025-01-09'", "", "d mmm yyyy", "\\textsf{9 Jan 2025}"],
-  ["'2025-01-09'", "", "mmmm d, yyyy", "\\textsf{January 9, 2025}"],
-  ["'2025-01-09'", "", "mmm d, yyyy", "\\textsf{Jan 9, 2025}"],
-  ["'2025-01-09'", "", "d de mmmm de yyyy es", "\\textsf{9 de enero de 2025}"],
-  ["'2025-01-09'", "", "wwww, mmmm d, yyyy", "\\textsf{Thursday, January 9, 2025}"],
-  ["'2025-01-09'", "", "wwww, d de mmmm de yyyy es", "\\textsf{jueves, 9 de enero de 2025}"]
+  ["'2025-01-09'", "", "yyyy-mm-dd", "\\class{date-result}{\\text{2025-01-09}}"],
+  ["'2025-01-09'", "", "dd.mm.yyyy", "\\class{date-result}{\\text{09.01.2025}}"],
+  ["'2025-01-09'", "", "d mmmm yyyy", "\\class{date-result}{\\text{9 January 2025}}"],
+  ["'2025-01-09'", "", "d mmm yyyy", "\\class{date-result}{\\text{9 Jan 2025}}"],
+  ["'2025-01-09'", "", "mmmm d, yyyy", "\\class{date-result}{\\text{January 9, 2025}}"],
+  ["'2025-01-09'", "", "mmm d, yyyy", "\\class{date-result}{\\text{Jan 9, 2025}}"],
+  ["'2025-01-09'", "", "d de mmmm de yyyy es", "\\class{date-result}{\\text{9 de enero de 2025}}"],
+  ["'2025-01-09'", "", "wwww, mmmm d, yyyy", "\\class{date-result}{\\text{Thursday, January 9, 2025}}"],
+  ["'2025-01-09'", "", "wwww, d de mmmm de yyyy es", "\\class{date-result}{\\text{jueves, 9 de enero de 2025}}"]
 ];
 
 console.log("Now testing the result formatter…")

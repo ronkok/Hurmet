@@ -4229,11 +4229,14 @@ const processDMY = (dmy, date, language, inExpression) => {
 const formatDate = (dateValue, dateFormatSpec, inExpression = false) => {
   // dateValue = number of seconds after start of January 1, 1970
   const date = new Date(Rnl.toNumber(dateValue) * 1000);
-  const textType = inExpression ? "text" : "textsf";
+  // Write results in the document's main font.
+  const dateClass = inExpression ? "" : "\\class{date-result}{";
 
   if (!dateFormatSpec || dateFormatSpec === "yyyy-mm-dd" ||
     (inExpression && dateFormatSpec.indexOf("de") > -1)) {
-    return `\\${textType}{${date.toISOString().split("T")[0]}}`
+    let result = `${dateClass}\\text{${date.toISOString().split("T")[0]}}`;
+    if (!inExpression)  { result += "}"; }
+    return result
   }
 
   const match = dateFormatRegEx.exec(dateFormatSpec);
@@ -4251,7 +4254,9 @@ const formatDate = (dateValue, dateFormatSpec, inExpression = false) => {
   str += match[5];
   str += processDMY(match[6], date, language, inExpression);
 
-  return `\\${textType}{${str}}`
+  let result = `${dateClass}\\text{${str}}`;
+  if (!inExpression)  { result += "}"; }
+  return result
 };
 
 /*
@@ -7390,7 +7395,7 @@ const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAware) =>
         resultDisplay = "\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}";
         altResultDisplay = resultDisplay.value;
       } else {
-        altResultDisplay = resultDisplay.replace(/^\\text(?:sf)?{/, "").slice(0, -1);
+        altResultDisplay = resultDisplay.slice(26, -2);
       }
 
     } else if (result.value.plain) {

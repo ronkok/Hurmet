@@ -531,7 +531,8 @@ export const nodes = {
         const tex = node.attrs.tex
         hurmet.render(tex, dom, {
           displayMode: node.attrs.displayMode,
-          trust: (context) => context.command === '\\class' && context.class === "special-fraction",
+          trust: (context) => context.command === '\\class' && 
+            (context.class === "special-fraction" || context.class === "date-result"),
           wrap: "="
         })
       }

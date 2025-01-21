@@ -167,7 +167,7 @@ export const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAw
         resultDisplay = "\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}"
         altResultDisplay = resultDisplay.value
       } else {
-        altResultDisplay = resultDisplay.replace(/^\\text(?:sf)?{/, "").slice(0, -1)
+        altResultDisplay = resultDisplay.slice(26, -2)
       }
 
     } else if (result.value.plain) {

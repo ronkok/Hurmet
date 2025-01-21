@@ -55,11 +55,14 @@ const processDMY = (dmy, date, language, inExpression) => {
 export const formatDate = (dateValue, dateFormatSpec, inExpression = false) => {
   // dateValue = number of seconds after start of January 1, 1970
   const date = new Date(Rnl.toNumber(dateValue) * 1000)
-  const textType = inExpression ? "text" : "textsf"
+  // Write results in the document's main font.
+  const dateClass = inExpression ? "" : "\\class{date-result}{"
 
   if (!dateFormatSpec || dateFormatSpec === "yyyy-mm-dd" ||
     (inExpression && dateFormatSpec.indexOf("de") > -1)) {
-    return `\\${textType}{${date.toISOString().split("T")[0]}}`
+    let result = `${dateClass}\\text{${date.toISOString().split("T")[0]}}`
+    if (!inExpression)  { result += "}" }
+    return result
   }
 
   const match = dateFormatRegEx.exec(dateFormatSpec)
@@ -77,6 +80,8 @@ export const formatDate = (dateValue, dateFormatSpec, inExpression = false) => {
   str += match[5];
   str += processDMY(match[6], date, language, inExpression)
 
-  return `\\${textType}{${str}}`
+  let result = `${dateClass}\\text{${str}}`
+  if (!inExpression)  { result += "}" }
+  return result
 }
 
