@@ -108,7 +108,8 @@ const parserTests = [
   ],
   ["(2 n)!!/(2 n+1)^2", "\\dfrac{(2 \\, n)!!}{(2 \\, n + 1)^{2}}"],
   ["(1	2; 3	4)", "\\begin{pmatrix}1 & 2 \\\\ 3 & 4 \\end{pmatrix}"],
-  ["cos⁻¹ 0.5", "\\cos^{\\text{-}1}{0.5}"]
+  ["cos⁻¹ 0.5", "\\cos^{\\text{-}1}{0.5}"],
+  ["(1/2 A + 1/2 B) / 8 =", "\\dfrac{\\frac{1}{2}\\, A + \\frac{1}{2}\\, B}{8}="]
 ]
 
 console.log("Now testing the parser…")
