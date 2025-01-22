@@ -23557,7 +23557,7 @@ const texToCalc = str => {
       str = eatMatch(str, match);
     }
 
-    const tkn = lex(str, "10000000.", prevToken);
+    const tkn = lex(str, { decimalFormat: "10000000.", dateFormat: "yyyy-mm-dd" }, prevToken);
     token = { input: tkn[0], output: tkn[2], ttype: tkn[3], closeDelim: tkn[4] };
     str = str.slice(token.input.length);
     str = str.replace(leadingSpaceRegEx$2, "");
@@ -52442,7 +52442,7 @@ function getValues(fields, domFields) {
   for (const name in fields) {
     const field = fields[name];
     const dom = domFields[i++];
-    const value = dom.tagname === "INPUT"
+    const value = dom.tagName === "INPUT"
       ? field.read(dom)
       : field.read(dom.lastChild);
     const bad = field.validate(value);

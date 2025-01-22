@@ -287,7 +287,7 @@ function getValues(fields, domFields) {
   for (const name in fields) {
     const field = fields[name]
     const dom = domFields[i++]
-    const value = dom.tagname === "INPUT"
+    const value = dom.tagName === "INPUT"
       ? field.read(dom)
       : field.read(dom.lastChild)
     const bad = field.validate(value)
