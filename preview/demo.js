@@ -10998,9 +10998,9 @@ rules.set("dd", {  // description details
 });
 rules.set("displayTeX", {
   isLeaf: true,
-  match: blockRegex(/^\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$ *(?:\n|$)/),
+  match: blockRegex(/^(?:\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$|\\\[\n?((?:\\[\s\S]|[^\\])+?)\n?\\\]) *(?:\n|$)/),
   parse: function(capture, state) {
-    const tex = capture[1].trim();
+    const tex = (capture[1] ? capture[1] : capture[2]).trim();
     if (state.convertTex) {
       const entry = texToCalc(tex);
       return { type: "calculation", attrs: { entry, displayMode: true } }
@@ -11034,7 +11034,7 @@ rules.set("escape", {
   // escaping anything else provides a very flexible escape mechanism,
   // regardless of how this grammar is extended.
   isLeaf: true,
-  match: inlineRegex(/^\\([^0-9A-Za-z\s])/),
+  match: inlineRegex(/^\\([^0-9A-Za-z()\s])/),
   parse: function(capture, state) {
     return {
       type: "text",
@@ -11127,10 +11127,10 @@ rules.set("code", {
 });
 rules.set("tex", {
   isLeaf: true,
-  match: inlineRegex(/^(?:\$\$((?:\\[\s\S]|[^\\])+?)\$\$|\$(`+)((?:(?:\\[\s\S]|[^\\])+?)?)\2\$(?![0-9$])|\$(?!\s|\$)((?:(?:\\[\s\S]|[^\\])+?)?)(?<=[^\s\\$])\$(?![0-9$]))/),
+  match: inlineRegex(/^(?:\$\$((?:\\[\s\S]|[^\\])+?)\$\$|\\\(((?:\\[\s\S]|[^\\])+?)\\\)|\$(`+)((?:(?:\\[\s\S]|[^\\])+?)?)\3\$(?![0-9$])|\$(?!\s|\$)((?:(?:\\[\s\S]|[^\\])+?)?)(?<=[^\s\\$])\$(?![0-9$]))/),
   parse: function(capture, state) {
-    if (capture[1]) {
-      const tex = capture[1].trim();
+    if (capture[1] || capture[2]) {
+      const tex = (capture[1] ? capture[1] : capture[2]).trim();
       if (state.convertTex) {
         const entry = texToCalc(tex);
         return { type: "calculation", attrs: { entry, displayMode: true } }
@@ -11138,7 +11138,7 @@ rules.set("tex", {
         return { type: "tex", attrs: { tex, displayMode: true } }
       }
     } else {
-      const tex = (capture[3] ? capture[3] : capture[4]).trim();
+      const tex = (capture[4] ? capture[4] : capture[5]).trim();
       if (state.convertTex) {
         const entry = texToCalc(tex);
         return { type: "calculation", attrs: { entry, displayMode: false } }
