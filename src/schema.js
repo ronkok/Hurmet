@@ -537,7 +537,9 @@ export const nodes = {
         })
       }
       if (node.attrs.displayMode) {
-        dom.firstChild.style.display = "inline-block"
+        dom.style.display = "flex"
+        dom.style.justifyContent = "center"
+        dom.style.margin = "0.5em 0"
       }
       // Before writing to DOM, I filter out most of the run-time info in node.attrs.
       dom.dataset.entry = node.attrs.entry
@@ -576,7 +578,9 @@ export const nodes = {
       }
       hurmet.render(tex, dom, { displayMode: node.attrs.displayMode, wrap: "=" })
       if (node.attrs.displayMode) {
-        dom.firstChild.style.display = "inline-block"
+        dom.style.display = "flex"
+        dom.style.justifyContent = "center"
+        dom.style.margin = "0.5em 0"
       }
       return dom
     }

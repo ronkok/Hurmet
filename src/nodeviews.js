@@ -8,14 +8,6 @@ import { undo, redo } from "prosemirror-history"
 import { StepMap } from "prosemirror-transform"
 import hurmet from "./hurmet"
 
-const isDisplayMode = (dom, view) => {
-  const $from = view.state.selection.$from
-  const parentNode = $from.node($from.depth)
-  const grandParent = dom.parentNode.parentNode
-  return dom.parentNode.nodeName === "P" && parentNode.childCount === 1 &&
-      grandParent.nodeName === "DIV" && grandParent.classList.contains("centered")
-}
-
 export class CalcView {
   constructor(node, view) {
     this.node = node
@@ -25,10 +17,8 @@ export class CalcView {
 
   selectNode() {
     if (this.dom.children.length > 1) { return }
-    const displayMode = isDisplayMode(this.dom, this.outerView)
     this.dom.classList.add("ProseMirror-selectednode")
     const attrs = this.node.attrs
-    attrs.displayMode = displayMode
     const pos = this.outerView.state.selection.from
     // A CalcView node is a ProseMirror atom. It does not enable direct ProseMirror editing.
     // Instead we temporarily open a text editor instance in the node location.
@@ -58,10 +48,8 @@ export class TexView {
   }
 
   selectNode() {
-    const displayMode = isDisplayMode(this.dom, this.outerView)
     this.dom.classList.add("ProseMirror-selectednode")
     const attrs = this.node.attrs
-    attrs.displayMode = displayMode
     openMathPrompt({
       // Create a user interface for TeX that is similar to CalcView.
       // The need for a text editor instance is not as great here as it is in CalcView,

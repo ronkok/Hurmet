@@ -2,7 +2,16 @@
 decimalFormat: 1,000,000.
 fontSize: 12
 pageSize: letter
+saveDate: 2025-01-10
 ---------------
+
+::: header
++-------------------------------------+---+----------------------+
+| **Hurmet** | Markdown Test Document | ¶ | Page \$PAGE\         |
+|  Calculations                       |   | ¢` savedate() = @@ ` |
++=====================================+===+=====================:+
+{.one-rule colWidths="343 null null"}
+:::
 
 # Hurmet Markdown Input Test
 
@@ -17,7 +26,7 @@ Hurmet standard notation: _italic_, **bold**, and _**bold-italic**_.
 
 A paragraph with alternate _italic_, **bold**, and _**bold-italic**_.
 
-Hurmet writes a sub~script~ with tildes. It can also read a sub~script~ written
+Hurmet writes a sub~script~ with tildes. It can also read a sub<sub>script</sub> written
 with HTML tags.
 
 ### Code Blocks
@@ -26,6 +35,7 @@ with HTML tags.
 Here is some code.
 And some more 
 ```
+
 
 Two consecutive blank lines parse like a single blank line. Like the two
 preceding lines.
@@ -66,7 +76,7 @@ Special divs can contain more than one paragraph.
 
 >  The grand-daddy of all these special divs is the blockquote.
 >
-> The Hurmet schema for blockquote is the template for other special divs.
+> The Hurmet schema for blockquote is the template for alerts, like the ones below.
 
 >  A second blockquote
 
@@ -93,17 +103,32 @@ Special divs can contain more than one paragraph.
 Hurmet reads inline TeX written between `$` delimiters:\
 The obligatory logo: $\TeX$. A second TeX on the same line: $\frac a b + c_2$.
 
-GitHub accepts ``$`…`$``, so we will, too. Like this: $`\int_{n=0}^\infty x^2`$
-
 As in Pandoc, the opening $ must have a non-space character immediately to its
 right, and the closing $ must have a non-space character immediately to its
 left. The closing $ must not be followed immediately by a digit. Thus,
 $20,000 and $30,000 won’t parse as math.
 
-Display TeX is written between `$$` delimiters:
+GitHub accepts ``$`…`$``, so we will, too. Like this: $`\int_{n=0}^\infty x^2`$
+
+Hurmet can read Markdown input from a chatbot. For that purpose, it can also
+read TeX input in `\(…\)` format, like this: \( \TeX \).
+
+Display mode TeX is written between `$$` delimiters:
 
 $$ \oint_C \vec{B}\circ d\vec{l} = \mu_0 \left( I_{\text{enc}} + \varepsilon_0
 \frac{d}{d t} \int_S \vec{E} \circ \hat{n}\; d a \right) $$
+
+The display mode TeX can make up its own paragraph or it can be a span of
+$$ \text{Display mode } \TeX $$
+inside a paragraph.
+
+To accommodate chatbots, Hurmet also reads Display TeX in `\[…\]` format:
+
+\[ \TeX \text{ that makes up its own paragraph.} \]
+
+Or display mode TeX inside a
+\[ e = m c^2 \]
+paragraph of other text.
 
 While we’re here, let’s test the equation numbering system.
 

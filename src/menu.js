@@ -454,8 +454,7 @@ function sleep (time) {
 
 // Export saveFileAsMarkdown so that it is available in keymap.js
 export function saveFileAsMarkdown(state, view, isSaveAs = false) {
-  // Prune the Hurmet math parts down to just the entry. Then stringify it.
-  pruneHurmet(state, view)
+  pruneHurmet(state, view)   // Prune away any empty Hurmet math zones.
   let str = `---------------
 decimalFormat: ${state.doc.attrs.decimalFormat}
 fontSize: ${state.doc.attrs.fontSize}
@@ -1081,11 +1080,6 @@ export function insertMath(state, view, encoding) {
   const tr = view.state.tr
   const pos = tr.selection.from
 
-  // Check if the cell should be type set as display mode.
-  const resolvedPos = state.doc.resolve(pos)
-  const grandParent = state.doc.resolve(resolvedPos.before(resolvedPos.depth)).parent
-  if (grandParent.type.name === "centered") { attrs.displayMode = true }
-
   tr.replaceSelectionWith(nodeType.createAndFill(attrs))
   tr.setSelection(NodeSelection.create(tr.doc, pos))
   view.dispatch(tr)
@@ -1103,6 +1097,29 @@ function mathMenuItem(nodeType, encoding) {
     }
   })
 }
+
+const toggleDisplayMode = new MenuItem({
+  title: "Toggle display mode of the selected math cell",
+  label: "ⅆ  ",
+  class: "math-button",
+  run: (state, _, view) => {
+  // Check if the cell should be type set as display mode.
+  const tr = state.tr
+  const pos = tr.selection.from
+  const node = state.selection.node
+  if (node  && (node.type.name === "calculation" || node.type.name === "tex")) {
+    const attrs = clone(node.attrs)
+    attrs.displayMode = !node.attrs.displayMode
+    const schemaNode = node.type.name === "calculation"
+      ? schema.nodes.calculation
+      : schema.nodes.tex
+    tr.replaceWith(pos, pos + node.nodeSize, schemaNode.createAndFill(attrs))
+    view.dispatch(tr)
+    view.focus()
+    }
+  }
+})
+
 
 const createTable = (schema, rowsCount = 3, colsCount = 3, withHeaderRow = true) => {
   const cells = [];
@@ -1740,6 +1757,7 @@ export function buildMenuItems(schema) {
     } 
   })
 
+  r.toggleDisplayMode = toggleDisplayMode
   r.accessors = hint("Accessors…", "Accessors", "Accessors", "",
     [['vector[number]'],
     ['vector[start:finish]'],
@@ -1950,6 +1968,7 @@ export function buildMenuItems(schema) {
   r.math = [[
     r.insertCalclation,
     r.insertTeX,
+    r.toggleDisplayMode,
     r.letters,
     r.symbols,
     r.accents,

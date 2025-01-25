@@ -123,7 +123,7 @@ print &quot;Hi!&quot;</code></pre></td></tr>
 {#sheetname .&quot;grid spreadsheet&quot;}</code></pre></details>
 <h3 id='tex'>TeX</h3>
 <p>Besides its calculation cells, Hurmet also has cells that emulate the math mode of <span class='hurmet-calc' data-entry='\TeX'><math><mrow><mtext>T</mtext><mspace width="-0.1667em" style="margin-left:-0.1667em;"></mspace><mpadded voffset="-0.2155em" style="padding:0 0 0.2155em 0;"><mstyle scriptlevel="0" displaystyle="false"><mtext>E</mtext></mstyle></mpadded><mspace width="-0.125em" style="margin-left:-0.125em;"></mspace><mtext>X</mtext></mrow></math></span> (pronounced <em>tech</em>). These cells display, but do not calculate, math. You can create a TeX cell by clicking the <img src="data:image/svg+xml;utf8,%3Csvg height='16' width='16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M.8 4.5V.3c.1-.5.6-.2 1-.3h12.8c.4.2.2.7.3 1v3.5c-.4.7-1.1-.1-1-.7a4 4 0 0 0-2.7-2.7C10.8 1 9.8.6 9.7 1v12.8c0 .8.3 1.5 1.2 1.3.6-.2 1.6.5.8.9H3.9c-.8-.6.4-1 1-.9 1 .2 1-.8 1-1.6V.8c-1.2.2-2.6.5-3.4 1.5-.7.7-.8 1.6-1 2.4-.2.2-.6.1-.7-.2ZM2.6 1c.4-.2.3-.2 0-.2h-1V2ZM9 7.8v-7H6.8l-.1 13.5c.1.4-.4 1 .2.9H9c-.3-.5.1-1.2 0-1.7Zm4.8-6.1c.1 0 .4.5.3 0V.9h-1.3l1 .9z'/%3E%3C/svg%3E" alt="T"> button. Type <strong>Enter</strong> to save the cell.</p>
-<p>To create a cell in TeX display mode, create the cell in a paragraph with no other contents, then set the paragraph justification to Centered.</p>
+<p>To create a cell in TeX display mode, create the cell, then re-open it and tap the “ⅆ” button.</p>
 <p>For more information about TeX and LaTeX, good places to start are the Wikibooks pages for writing <a href='https://en.wikibooks.org/wiki/LaTeX/Mathematics'>math</a> and <a href='https://en.wikibooks.org/wiki/LaTeX/Advanced_Mathematics'>advanced math</a>; and the Temml <a href='https://temml.org/'>home page</a> and <a href='https://temml.org/docs/en/supported.html'>supported-functions</a> page.</p>
 <p>Hurmet calculation cells use a different syntax than TeX. In calculation cells, the syntax is more akin to a programming language, yet it renders like mathematics.</p>
 <p>And now, on to the main event, Hurmet’s calculations.</p>
@@ -596,7 +596,7 @@ ${w_dead}	30	40`` &#x27;lbf/ft&#x27; = %% lbf/ft</code></pre><p>Note that you mu
 <tr><td>or<br>||<br>∨</td><td>if <em>a</em> or <em>b</em><br>if <em>a</em> || <em>b</em><br>if <em>a</em> ∨ <em>b</em></td><td>Logical or</td></tr>
 <tr><td>⊻</td><td><p></p></td><td>Logical xor</td></tr>
 <tr><td>¬<br>!</td><td>if ¬ <em>a</em><br>if !a</td><td>Logical not</td></tr>
-<tr><td>:</td><td>𝐕[2:3] <br>for <em>i</em> in 1:3</td><td>| Range separator</td></tr></table>
+<tr><td>:</td><td>𝐕<p class='hurmet-tex' data-entry='2:3'><math display="block" class="tml-display" style="display:block math;"><mrow><mn>2</mn><mo lspace="0.2222em" rspace="0.2222em">:</mo><mn>3</mn></mrow></math></p> <br>for <em>i</em> in 1:3</td><td>| Range separator</td></tr></table>
 </div>
 <h2 id='functions'>Functions</h2>
 <p>Hurmet treats an <a href='#identifiers'>identifier</a> as a function name if it is placed directly before an open parenthesis. So a term like <span class='hurmet-calc' data-entry='sinh(x)'><math><mrow><mrow><mi>sinh</mi><mo>⁡</mo></mrow><mo form="prefix" stretchy="false">(</mo><mi>x</mi><mo form="postfix" stretchy="false">)</mo></mrow></math></span> is a function.</p>
@@ -867,7 +867,7 @@ ${w_dead}	30	40`` &#x27;lbf/ft&#x27; = %% lbf/ft</code></pre><p>Note that you mu
 <th>Use one of:</th>
 <th>Default</th></tr>
 <tr><td>T</td><td>Type of rounding</td><td>bEefhkNnprSstx%</td><td>h</td></tr>
-<tr><td>N</td><td>Number of digits</td><td>[0-9]+</td><td>15</td></tr>
+<tr><td>N</td><td>Number of digits</td><td><p class='hurmet-tex' data-entry='0-9'><math display="block" class="tml-display" style="display:block math;"><mrow><mn>0</mn><mo>−</mo><mn>9</mn></mrow></math></p>+</td><td>15</td></tr>
 <tr><td>∠</td><td>Optional polar</td><td>∠ °</td><td></td></tr></table>
 <h4 id='type-of-rounding'>Type of rounding</h4>
 <p>Let <em>N</em> be the number of digits specified. Then:</p>

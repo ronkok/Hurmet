@@ -24323,7 +24323,7 @@ rules.set("lheading", {
 });
 rules.set("heading", {
   isLeaf: false,
-  match: blockRegex(/^ *(#{1,6})([^\n]+?)#* *(?:\n *)+\n/),
+  match: blockRegex(/^ *(#{1,6})([^\n]+?)#*\n*\n/),
   parse: function(capture, state) {
     return {
       attrs: { level: capture[1].length },
@@ -24464,7 +24464,7 @@ rules.set("dd", {  // description details
 });
 rules.set("displayTeX", {
   isLeaf: true,
-  match: blockRegex(/^(?:\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$|\\\[\n?((?:\\[\s\S]|[^\\])+?)\n?\\\]) *(?:\n|$)/),
+  match: blockRegex(/^ *(?:\$\$\n? *((?:\\[\s\S]|[^\\])+?)\n?\$\$|\\\[\n? *((?:\\[\s\S]|[^\\])+?)\n?\\\]) *(?:\n|$)/),
   parse: function(capture, state) {
     const tex = (capture[1] ? capture[1] : capture[2]).trim();
     if (state.convertTex) {
@@ -24492,6 +24492,34 @@ rules.set("paragraph", {
   match: blockRegex(/^((?:[^\n]|\n(?!(?: *\n|(?=[*+-] )|(?=(?:\d{1,9}|[A-Za-z])[.)] ))))+)\n(?:(?: *\n)+|(?=[*+-] )|(?=(?:\d{1,9}|[A-Za-z])[.)] ))/),
   parse: function(capture, state) {
     return { type: "paragraph", content: parseInline(capture[1], state) }
+  }
+});
+// Position tex ahead of escape in order to capture \[...\] math.
+rules.set("tex", {
+  isLeaf: true,
+  match: inlineRegex(/^(?:\\\[((?:\\[\s\S]|[^\\])+?)\\\]|\$\$((?:\\[\s\S]|[^\\])+?)\$\$|\\\(((?:\\[\s\S]|[^\\])+?)\\\)|\$(`+)((?:(?:\\[\s\S]|[^\\])+?)?)\4\$(?![0-9$])|\$(?!\s|\$)((?:(?:\\[\s\S]|[^\\])+?)?)(?<=[^\s\\$])\$(?![0-9$]))/),
+  parse: function(capture, state) {
+    if (capture[1] || capture[2]) {
+      const tex = (capture[1] ? capture[1] : capture[2]).trim();
+      if (state.convertTex) {
+        const entry = texToCalc(tex);
+        return { type: "calculation", attrs: { entry, displayMode: true } }
+      } else {
+        return { type: "tex", attrs: { tex, displayMode: true } }
+      }
+    } else {
+      const tex = (capture[3]
+        ? capture[3]
+        : capture[5]
+        ? capture[5]
+        : capture[6]).trim();
+      if (state.convertTex) {
+        const entry = texToCalc(tex);
+        return { type: "calculation", attrs: { entry, displayMode: false } }
+      } else {
+        return { type: "tex", attrs: { tex, displayMode: false } }
+      }
+    }
   }
 });
 rules.set("escape", {
@@ -24589,29 +24617,6 @@ rules.set("code", {
   parse: function(capture, state) {
     const text = capture[2].trim();
     return [{ type: "text", text, marks: [{ type: "code" }] }]
-  }
-});
-rules.set("tex", {
-  isLeaf: true,
-  match: inlineRegex(/^(?:\$\$((?:\\[\s\S]|[^\\])+?)\$\$|\\\(((?:\\[\s\S]|[^\\])+?)\\\)|\$(`+)((?:(?:\\[\s\S]|[^\\])+?)?)\3\$(?![0-9$])|\$(?!\s|\$)((?:(?:\\[\s\S]|[^\\])+?)?)(?<=[^\s\\$])\$(?![0-9$]))/),
-  parse: function(capture, state) {
-    if (capture[1] || capture[2]) {
-      const tex = (capture[1] ? capture[1] : capture[2]).trim();
-      if (state.convertTex) {
-        const entry = texToCalc(tex);
-        return { type: "calculation", attrs: { entry, displayMode: true } }
-      } else {
-        return { type: "tex", attrs: { tex, displayMode: true } }
-      }
-    } else {
-      const tex = (capture[4] ? capture[4] : capture[5]).trim();
-      if (state.convertTex) {
-        const entry = texToCalc(tex);
-        return { type: "calculation", attrs: { entry, displayMode: false } }
-      } else {
-        return { type: "tex", attrs: { tex, displayMode: false } }
-      }
-    }
   }
 });
 rules.set("calculation", {
@@ -35787,7 +35792,7 @@ const hurmetNodes =  {
   },
   tex(state, node) {
     const tex = node.attrs.tex.trim();
-    writeTex(state, node.attrs.displayMode, tex);
+    writeTex(state, node.attrs.displayMode, !state.close, tex);
   },
   calculation(state, node) {
     let entry = node.attrs.entry.trim().replace(/\n(?: *\n)+/g, "\n").replace(/\n/gm, "\n" + state.delim);
@@ -35797,12 +35802,12 @@ const hurmetNodes =  {
           // A calculation cell that displays only the result.
           state.write(node.attrs.alt);
         } else {
-          writeTex(state, node.attrs.displayMode, node.attrs.tex);
+          writeTex(state, node.attrs.displayMode, !state.close, node.attrs.tex);
         }
       } else {
         // Convert calculation field to TeX
         const tex = parse$1(entry);
-        writeTex(state, node.attrs.displayMode, tex);
+        writeTex(state, node.attrs.displayMode, !state.close, tex);
       }
     } else {
       if (node.attrs.entry.slice(0, 5) === "draw(") {
@@ -35820,7 +35825,12 @@ const hurmetNodes =  {
           state.write(md);
         }
       } else if (node.attrs.displayMode) {
-        state.write("¢¢" + " " + entry + " ¢¢");
+        if (!state.close) {
+          // We're inside a paragraph.
+          state.write("\n" + state.delim + "¢¢" + " " + entry + " ¢¢" + "\n" + state.delim);
+        } else {
+          state.write("¢¢ " + entry + " ¢¢");
+        }
       } else {
         const ticks = backticksFor({ text: entry, isText: true }, -1).trim();
         state.write("¢" + ticks + " " + entry + " " + ticks);
@@ -35963,16 +35973,21 @@ function limitLineLength(str, prevLength, delim, limit) {
 }
 
 const newlineRegEx = /\n/gm;
-const dollarRegEx = /([^ \\])\$/g;
-const writeTex = (state, displayMode, tex) => {
+const writeTex = (state, displayMode, inParagraph, tex) => {
   tex = tex.replace(newlineRegEx, "\n" + state.delim);
-  // Precede a nested $ with a space.
-  // Prevents Markdown parser from mis-identifying nested $ as an ending $.
-  tex = tex.replace(dollarRegEx, "$1 $");
   if (displayMode) {
-    state.write("$$ " + tex + " $$");
+    if (inParagraph) {
+      state.write("\n" + state.delim + "$$ " + tex + " $$" + "\n" + state.delim);
+    } else {
+      state.write("$$ " + tex + " $$");
+    }
   } else {
-    state.write("$" + tex + "$");
+    if (tex.indexOf("$") > -1) {
+      const ticks = backticksFor({ text: tex, isText: true }, -1).trim();
+      state.write("$" + ticks + tex + ticks + "$");
+    } else {
+      state.write("$" + tex + "$");
+    }
   }
 };
 
@@ -51842,7 +51857,9 @@ const nodes = {
         });
       }
       if (node.attrs.displayMode) {
-        dom.firstChild.style.display = "inline-block";
+        dom.style.display = "flex";
+        dom.style.justifyContent = "center";
+        dom.style.margin = "0.5em 0";
       }
       // Before writing to DOM, I filter out most of the run-time info in node.attrs.
       dom.dataset.entry = node.attrs.entry;
@@ -51881,7 +51898,9 @@ const nodes = {
       }
       hurmet.render(tex, dom, { displayMode: node.attrs.displayMode, wrap: "=" });
       if (node.attrs.displayMode) {
-        dom.firstChild.style.display = "inline-block";
+        dom.style.display = "flex";
+        dom.style.justifyContent = "center";
+        dom.style.margin = "0.5em 0";
       }
       return dom
     }
@@ -54835,8 +54854,7 @@ function sleep (time) {
 
 // Export saveFileAsMarkdown so that it is available in keymap.js
 function saveFileAsMarkdown(state, view, isSaveAs = false) {
-  // Prune the Hurmet math parts down to just the entry. Then stringify it.
-  pruneHurmet(state, view);
+  pruneHurmet(state, view);   // Prune away any empty Hurmet math zones.
   let str = `---------------
 decimalFormat: ${state.doc.attrs.decimalFormat}
 fontSize: ${state.doc.attrs.fontSize}
@@ -55459,11 +55477,6 @@ function insertMath(state, view, encoding) {
   const tr = view.state.tr;
   const pos = tr.selection.from;
 
-  // Check if the cell should be type set as display mode.
-  const resolvedPos = state.doc.resolve(pos);
-  const grandParent = state.doc.resolve(resolvedPos.before(resolvedPos.depth)).parent;
-  if (grandParent.type.name === "centered") { attrs.displayMode = true; }
-
   tr.replaceSelectionWith(nodeType.createAndFill(attrs));
   tr.setSelection(NodeSelection.create(tr.doc, pos));
   view.dispatch(tr);
@@ -55481,6 +55494,29 @@ function mathMenuItem(nodeType, encoding) {
     }
   })
 }
+
+const toggleDisplayMode = new MenuItem({
+  title: "Toggle display mode of the selected math cell",
+  label: "ⅆ  ",
+  class: "math-button",
+  run: (state, _, view) => {
+  // Check if the cell should be type set as display mode.
+  const tr = state.tr;
+  const pos = tr.selection.from;
+  const node = state.selection.node;
+  if (node  && (node.type.name === "calculation" || node.type.name === "tex")) {
+    const attrs = clone(node.attrs);
+    attrs.displayMode = !node.attrs.displayMode;
+    const schemaNode = node.type.name === "calculation"
+      ? schema.nodes.calculation
+      : schema.nodes.tex;
+    tr.replaceWith(pos, pos + node.nodeSize, schemaNode.createAndFill(attrs));
+    view.dispatch(tr);
+    view.focus();
+    }
+  }
+});
+
 
 const createTable = (schema, rowsCount = 3, colsCount = 3, withHeaderRow = true) => {
   const cells = [];
@@ -56116,6 +56152,7 @@ function buildMenuItems(schema) {
     } 
   });
 
+  r.toggleDisplayMode = toggleDisplayMode;
   r.accessors = hint("Accessors…", "Accessors", "Accessors", "",
     [['vector[number]'],
     ['vector[start:finish]'],
@@ -56326,6 +56363,7 @@ function buildMenuItems(schema) {
   r.math = [[
     r.insertCalclation,
     r.insertTeX,
+    r.toggleDisplayMode,
     r.letters,
     r.symbols,
     r.accents,
@@ -57657,6 +57695,12 @@ function openMathPrompt(options) {
     params.displayMode = options.attrs.displayMode;
     if (wrapper.parentNode) {
       wrapper.parentNode.firstChild.removeAttribute("style");
+      if (!params.displayMode && wrapper.dataset['data-display'] &&
+                                 wrapper.dataset['data-display'] === "true") {
+        params.displayMode = true;
+      } else if (params.displayMode && !wrapper.dataset['data-display']) {
+        params.displayMode = false;
+      }
     }
     options.callback(params);
     editor.removeEventListener('blur', close);
@@ -57683,14 +57727,6 @@ function openMathPrompt(options) {
   });
 }
 
-const isDisplayMode = (dom, view) => {
-  const $from = view.state.selection.$from;
-  const parentNode = $from.node($from.depth);
-  const grandParent = dom.parentNode.parentNode;
-  return dom.parentNode.nodeName === "P" && parentNode.childCount === 1 &&
-      grandParent.nodeName === "DIV" && grandParent.classList.contains("centered")
-};
-
 class CalcView {
   constructor(node, view) {
     this.node = node;
@@ -57700,10 +57736,8 @@ class CalcView {
 
   selectNode() {
     if (this.dom.children.length > 1) { return }
-    const displayMode = isDisplayMode(this.dom, this.outerView);
     this.dom.classList.add("ProseMirror-selectednode");
     const attrs = this.node.attrs;
-    attrs.displayMode = displayMode;
     const pos = this.outerView.state.selection.from;
     // A CalcView node is a ProseMirror atom. It does not enable direct ProseMirror editing.
     // Instead we temporarily open a text editor instance in the node location.
@@ -57733,10 +57767,8 @@ class TexView {
   }
 
   selectNode() {
-    const displayMode = isDisplayMode(this.dom, this.outerView);
     this.dom.classList.add("ProseMirror-selectednode");
     const attrs = this.node.attrs;
-    attrs.displayMode = displayMode;
     openMathPrompt({
       // Create a user interface for TeX that is similar to CalcView.
       // The need for a text editor instance is not as great here as it is in CalcView,

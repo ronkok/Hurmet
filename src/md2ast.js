@@ -12,9 +12,9 @@
  *
  * 1. Hurmet inline calculation is delimited ¢`…`, where "…" is the entry input by the author.
  *    Hurmet display calculation is delimited ¢¢…¢¢.
- * 2. LaTeX inline math is delimited $…$ or $`…`$.
+ * 2. LaTeX inline math is delimited $…$ or $`…`$. \(…\) is also recognized.
  *    No space allowed after 1st $ or before 2nd $. No digit after 2nd $.
- *    LaTeX display math is delimited  $$ … $$.
+ *    LaTeX display math is delimited  $$ … $$. \[…\] is also recognized.
  * 3. ~subscript~
  * 4. ~~strikethrough~~
  * 5. Pipe tables as per Github Flavored Markdown (GFM).
@@ -54,7 +54,7 @@
  *     [#1]: The body of the citation is deferred, similar to reference links.
  * 19. Line blocks begin with "| ", as per Pandoc. (future)
  *
- * copyright (c) 2021 - 2024 Ron Kok
+ * copyright (c) 2021 - 2025 Ron Kok
  *
  * This file has been adapted (and heavily modified) from Simple-Markdown.
  * Simple-Markdown copyright (c) 2014-2019 Khan Academy & Aria Buckles.
@@ -667,7 +667,7 @@ rules.set("lheading", {
 });
 rules.set("heading", {
   isLeaf: false,
-  match: blockRegex(/^ *(#{1,6})([^\n]+?)#* *(?:\n *)+\n/),
+  match: blockRegex(/^ *(#{1,6})([^\n]+?)#*\n*\n/),
   parse: function(capture, state) {
     return {
       attrs: { level: capture[1].length },
@@ -808,7 +808,7 @@ rules.set("dd", {  // description details
 });
 rules.set("displayTeX", {
   isLeaf: true,
-  match: blockRegex(/^(?:\$\$\n?((?:\\[\s\S]|[^\\])+?)\n?\$\$|\\\[\n?((?:\\[\s\S]|[^\\])+?)\n?\\\]) *(?:\n|$)/),
+  match: blockRegex(/^ *(?:\$\$\n? *((?:\\[\s\S]|[^\\])+?)\n?\$\$|\\\[\n? *((?:\\[\s\S]|[^\\])+?)\n?\\\]) *(?:\n|$)/),
   parse: function(capture, state) {
     const tex = (capture[1] ? capture[1] : capture[2]).trim()
     if (state.convertTex) {
@@ -836,6 +836,34 @@ rules.set("paragraph", {
   match: blockRegex(/^((?:[^\n]|\n(?!(?: *\n|(?=[*+-] )|(?=(?:\d{1,9}|[A-Za-z])[.)] ))))+)\n(?:(?: *\n)+|(?=[*+-] )|(?=(?:\d{1,9}|[A-Za-z])[.)] ))/),
   parse: function(capture, state) {
     return { type: "paragraph", content: parseInline(capture[1], state) }
+  }
+});
+// Position tex ahead of escape in order to capture \[...\] math.
+rules.set("tex", {
+  isLeaf: true,
+  match: inlineRegex(/^(?:\\\[((?:\\[\s\S]|[^\\])+?)\\\]|\$\$((?:\\[\s\S]|[^\\])+?)\$\$|\\\(((?:\\[\s\S]|[^\\])+?)\\\)|\$(`+)((?:(?:\\[\s\S]|[^\\])+?)?)\4\$(?![0-9$])|\$(?!\s|\$)((?:(?:\\[\s\S]|[^\\])+?)?)(?<=[^\s\\$])\$(?![0-9$]))/),
+  parse: function(capture, state) {
+    if (capture[1] || capture[2]) {
+      const tex = (capture[1] ? capture[1] : capture[2]).trim()
+      if (state.convertTex) {
+        const entry = texToCalc(tex)
+        return { type: "calculation", attrs: { entry, displayMode: true } }
+      } else {
+        return { type: "tex", attrs: { tex, displayMode: true } }
+      }
+    } else {
+      const tex = (capture[3]
+        ? capture[3]
+        : capture[5]
+        ? capture[5]
+        : capture[6]).trim()
+      if (state.convertTex) {
+        const entry = texToCalc(tex)
+        return { type: "calculation", attrs: { entry, displayMode: false } }
+      } else {
+        return { type: "tex", attrs: { tex, displayMode: false } }
+      }
+    }
   }
 });
 rules.set("escape", {
@@ -933,29 +961,6 @@ rules.set("code", {
   parse: function(capture, state) {
     const text = capture[2].trim()
     return [{ type: "text", text, marks: [{ type: "code" }] }]
-  }
-});
-rules.set("tex", {
-  isLeaf: true,
-  match: inlineRegex(/^(?:\$\$((?:\\[\s\S]|[^\\])+?)\$\$|\\\(((?:\\[\s\S]|[^\\])+?)\\\)|\$(`+)((?:(?:\\[\s\S]|[^\\])+?)?)\3\$(?![0-9$])|\$(?!\s|\$)((?:(?:\\[\s\S]|[^\\])+?)?)(?<=[^\s\\$])\$(?![0-9$]))/),
-  parse: function(capture, state) {
-    if (capture[1] || capture[2]) {
-      const tex = (capture[1] ? capture[1] : capture[2]).trim()
-      if (state.convertTex) {
-        const entry = texToCalc(tex)
-        return { type: "calculation", attrs: { entry, displayMode: true } }
-      } else {
-        return { type: "tex", attrs: { tex, displayMode: true } }
-      }
-    } else {
-      const tex = (capture[4] ? capture[4] : capture[5]).trim()
-      if (state.convertTex) {
-        const entry = texToCalc(tex)
-        return { type: "calculation", attrs: { entry, displayMode: false } }
-      } else {
-        return { type: "tex", attrs: { tex, displayMode: false } }
-      }
-    }
   }
 });
 rules.set("calculation", {

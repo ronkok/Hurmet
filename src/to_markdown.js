@@ -292,7 +292,7 @@ const hurmetNodes =  {
   },
   tex(state, node) {
     const tex = node.attrs.tex.trim()
-    writeTex(state, node.attrs.displayMode, tex)
+    writeTex(state, node.attrs.displayMode, !state.close, tex)
   },
   calculation(state, node) {
     let entry = node.attrs.entry.trim().replace(/\n(?: *\n)+/g, "\n").replace(/\n/gm, "\n" + state.delim)
@@ -302,12 +302,12 @@ const hurmetNodes =  {
           // A calculation cell that displays only the result.
           state.write(node.attrs.alt)
         } else {
-          writeTex(state, node.attrs.displayMode, node.attrs.tex)
+          writeTex(state, node.attrs.displayMode, !state.close, node.attrs.tex)
         }
       } else {
         // Convert calculation field to TeX
         const tex = parse(entry)
-        writeTex(state, node.attrs.displayMode, tex)
+        writeTex(state, node.attrs.displayMode, !state.close, tex)
       }
     } else {
       if (node.attrs.entry.slice(0, 5) === "draw(") {
@@ -325,7 +325,12 @@ const hurmetNodes =  {
           state.write(md)
         }
       } else if (node.attrs.displayMode) {
-        state.write("¢¢" + " " + entry + " ¢¢")
+        if (!state.close) {
+          // We're inside a paragraph.
+          state.write("\n" + state.delim + "¢¢" + " " + entry + " ¢¢" + "\n" + state.delim)
+        } else {
+          state.write("¢¢ " + entry + " ¢¢")
+        }
       } else {
         const ticks = backticksFor({ text: entry, isText: true }, -1).trim()
         state.write("¢" + ticks + " " + entry + " " + ticks)
@@ -468,16 +473,21 @@ function limitLineLength(str, prevLength, delim, limit) {
 }
 
 const newlineRegEx = /\n/gm
-const dollarRegEx = /([^ \\])\$/g
-const writeTex = (state, displayMode, tex) => {
+const writeTex = (state, displayMode, inParagraph, tex) => {
   tex = tex.replace(newlineRegEx, "\n" + state.delim)
-  // Precede a nested $ with a space.
-  // Prevents Markdown parser from mis-identifying nested $ as an ending $.
-  tex = tex.replace(dollarRegEx, "$1 $")
   if (displayMode) {
-    state.write("$$ " + tex + " $$")
+    if (inParagraph) {
+      state.write("\n" + state.delim + "$$ " + tex + " $$" + "\n" + state.delim)
+    } else {
+      state.write("$$ " + tex + " $$")
+    }
   } else {
-    state.write("$" + tex + "$")
+    if (tex.indexOf("$") > -1) {
+      const ticks = backticksFor({ text: tex, isText: true }, -1).trim()
+      state.write("$" + ticks + tex + ticks + "$")
+    } else {
+      state.write("$" + tex + "$")
+    }
   }
 }
 

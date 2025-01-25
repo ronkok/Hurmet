@@ -324,8 +324,8 @@ of ¢` \TeX ` (pronounced _tech_). These cells display, but do not calculate, ma
 You can create a TeX cell by clicking the ![T][] button. Type **Enter** to
 save the cell.
 
-To create a cell in TeX display mode, create the cell in a paragraph with no other
-contents, then set the paragraph justification to Centered.
+To create a cell in TeX display mode, create the cell, then re-open it and tap the
+“ⅆ” button.
 
 For more information about TeX and LaTeX, good places to start are the Wikibooks
 pages for writing [math][] and [advanced math][]; and the Temml [home page][]
