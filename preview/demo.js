@@ -4533,8 +4533,8 @@ const miscSymbols = Object.freeze({
   ":}": [":}", "}", ":}", tt.RIGHTBRACKET, ""],
   "|": ["|", "|", "|", tt.LEFTRIGHT, ""],
   "||": ["||", "\\mathbin{||}", "||", tt.BIN, ""],
-  "\\|": ["\\|", "‖", "‖", tt.LEFTRIGHT, ""],
-  "‖": ["‖", "‖", "‖", tt.LEFTRIGHT, ""],
+  "\\|": ["\\|", "\\|", "‖", tt.LEFTRIGHT, ""],
+  "‖": ["‖", "\\|", "‖", tt.LEFTRIGHT, ""],
   "<<": ["<<", "\u27E8", "\u27E8", tt.LEFTBRACKET, "\u27E9"],
   ">>": [">>", "\u27E9", "\u27E9", tt.RIGHTBRACKET, ""],
   "\u230A": ["\u230A", "\\lfloor ", "\u230A", tt.LEFTBRACKET, "\u230B"],
@@ -6632,7 +6632,7 @@ const parse$1 = (
         if (isRightDelim) {
           // Treat as a right delimiter
           if (topDelim.delimType !== dMATRIX) {
-            topDelim.close = token.input === "|" ? "|" : "‖";
+            topDelim.close = token.input === "|" ? "|" : "\\|";
             texStack[texStack.length - 1].closeDelim = topDelim.close;
           }
           popTexTokens(0, okToAppend);
@@ -6654,15 +6654,15 @@ const parse$1 = (
             prec: 0,
             pos: tex.length,
             ttype: tt.LEFTRIGHT,
-            closeDelim: token.input === "|" ? "|" : "‖"
+            closeDelim: token.input === "|" ? "|" : "\\|"
           });
 
           delims.push({
             delimType: dPAREN,
             name: token.input,
             isTall: false,
-            open: token.input === "|" ? "|" : "‖",
-            close: token.input === "|" ? "|" : "‖",
+            open: token.input === "|" ? "|" : "\\|",
+            close: token.input === "|" ? "|" : "\\|",
             numArgs: 1,
             numRows: 1,
             rpnPos: rpn.length,
@@ -6673,7 +6673,7 @@ const parse$1 = (
             rpnStack.push({ prec: 0, symbol: token.output });
           }
 
-          tex += token.input === "|" ? "|" : "‖";
+          tex += token.input === "|" ? "|" : "\\|";
           posOfPrevRun = tex.length;
           okToAppend = false;
         }
@@ -8650,7 +8650,7 @@ const unary = {
         for (let i = 0; i < m.length; i++) {
           sum = Rnl.add(sum, sumOfSquares(m[i]));
         }
-        return sum.sqrt()
+        return Rnl.sqrt(sum)
       }
     },
     negate(m)    { return m.map(row => row.map(e => Rnl.negate(e))) },
@@ -15770,7 +15770,8 @@ const evalRpn = (rpn, vars, formats, unitAware, lib) => {
         }
 
         case "|":
-        case "‖": {
+        case "‖":
+        case "\\|": {
             // Find |x| or ‖x‖
           const o1 = stack.pop();
           if (!((o1.dtype & dt.RATIONAL) || o1.dtype === dt.COMPLEX)) {
@@ -17095,8 +17096,8 @@ const evaluate = (
   if (stmt.rpn) {
     let oprnd = evalRpn(stmt.rpn, vars, formats, isUnitAware);
     if (oprnd.dtype === dt.ERROR) { [stmt, oprnd] = errorResult(stmt, oprnd); return stmt}
-    let result;
-    [stmt, result] = conditionResult(stmt, oprnd, isUnitAware);
+    let result
+    ;[stmt, result] = conditionResult(stmt, oprnd, isUnitAware);
     if (stmt.error) { return stmt }
     const assert = vars.assert ? vars.assert : null;
     stmt = formatResult(stmt, result, formatSpec, formats, assert, isUnitAware);

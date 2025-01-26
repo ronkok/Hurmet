@@ -109,7 +109,8 @@ const parserTests = [
   ["(2 n)!!/(2 n+1)^2", "\\dfrac{(2 \\, n)!!}{(2 \\, n + 1)^{2}}"],
   ["(1	2; 3	4)", "\\begin{pmatrix}1 & 2 \\\\ 3 & 4 \\end{pmatrix}"],
   ["cos⁻¹ 0.5", "\\cos^{\\text{-}1}{0.5}"],
-  ["(1/2 A + 1/2 B) / 8 =", "\\dfrac{\\frac{1}{2}\\, A + \\frac{1}{2}\\, B}{8}="]
+  ["(1/2 A + 1/2 B) / 8 =", "\\dfrac{\\frac{1}{2}\\, A + \\frac{1}{2}\\, B}{8}="],
+  ["‖a‖", "\\|a \\|"]
 ]
 
 console.log("Now testing the parser…")
@@ -559,7 +560,9 @@ end`, vars)
     [`1 'in⁻¹' × 2 'in⁻²' = @@ in⁻³`, `®1/1 applyUnit in⁻¹ ®2/1 applyUnit in⁻² ×`, "2 in⁻³"],
     [`'2025-01-20' + 12weeks = @@`, "⌾1737331200 ®12/1 applyUnit weeks +", "2025-04-14"],
     [`savedate() = @@`, "savedate", "Error. The current document has not been saved."],
-    [`aDate + 12weeks = @@`, "¿aDate ®12/1 applyUnit weeks +", "2025-04-14"]
+    [`aDate + 12weeks = @@`, "¿aDate ®12/1 applyUnit weeks +", "2025-04-14"],
+    [`‖vector‖ = @`, "¿vector \\|", "18.9604852258585"],
+    [`‖matrix‖ = @`, "¿matrix \\|", "37.1987903029117"]
   ]
 
   const testRegEx = /^(@{1,2})test /

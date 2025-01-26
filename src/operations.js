@@ -71,7 +71,7 @@ const unary = {
         for (let i = 0; i < m.length; i++) {
           sum = Rnl.add(sum, sumOfSquares(m[i]))
         }
-        return sum.sqrt()
+        return Rnl.sqrt(sum)
       } else {
         // TODO: ||matrix|| when matrix is not square.
       }

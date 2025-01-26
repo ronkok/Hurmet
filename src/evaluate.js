@@ -701,7 +701,8 @@ export const evalRpn = (rpn, vars, formats, unitAware, lib) => {
         }
 
         case "|":
-        case "‖": {
+        case "‖":
+        case "\\|": {
             // Find |x| or ‖x‖
           const o1 = stack.pop()
           if (!((o1.dtype & dt.RATIONAL) || o1.dtype === dt.COMPLEX)) {
@@ -2033,7 +2034,7 @@ export const evaluate = (
     let oprnd = evalRpn(stmt.rpn, vars, formats, isUnitAware)
     if (oprnd.dtype === dt.ERROR) { [stmt, oprnd] = errorResult(stmt, oprnd); return stmt}
     let result
-    [stmt, result] = conditionResult(stmt, oprnd, isUnitAware)
+    ;[stmt, result] = conditionResult(stmt, oprnd, isUnitAware)
     if (stmt.error) { return stmt }
     const assert = vars.assert ? vars.assert : null
     stmt = formatResult(stmt, result, formatSpec, formats, assert, isUnitAware)
