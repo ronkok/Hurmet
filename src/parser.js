@@ -1417,7 +1417,7 @@ export const parse = (
         if (isRightDelim) {
           // Treat as a right delimiter
           if (topDelim.delimType !== dMATRIX) {
-            topDelim.close = token.input === "|" ? "|" : "\\|"
+            topDelim.close = token.input === "|" ? "|" : "‖"
             texStack[texStack.length - 1].closeDelim = topDelim.close
           }
           popTexTokens(0, okToAppend)
@@ -1439,15 +1439,15 @@ export const parse = (
             prec: 0,
             pos: tex.length,
             ttype: tt.LEFTRIGHT,
-            closeDelim: token.input === "|" ? "|" : "\\|"
+            closeDelim: token.input === "|" ? "|" : "‖"
           })
 
           delims.push({
             delimType: dPAREN,
             name: token.input,
             isTall: false,
-            open: token.input === "|" ? "|" : "\\|",
-            close: token.input === "|" ? "|" : "\\|",
+            open: token.input === "|" ? "|" : "‖",
+            close: token.input === "|" ? "|" : "‖",
             numArgs: 1,
             numRows: 1,
             rpnPos: rpn.length,
@@ -1458,7 +1458,7 @@ export const parse = (
             rpnStack.push({ prec: 0, symbol: token.output })
           }
 
-          tex += token.input === "|" ? "|" : "\\|"
+          tex += token.input === "|" ? "|" : "‖"
           posOfPrevRun = tex.length
           okToAppend = false
         }

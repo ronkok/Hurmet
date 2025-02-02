@@ -701,8 +701,7 @@ export const evalRpn = (rpn, vars, formats, unitAware, lib) => {
         }
 
         case "|":
-        case "‖":
-        case "\\|": {
+        case "‖": {
             // Find |x| or ‖x‖
           const o1 = stack.pop()
           if (!((o1.dtype & dt.RATIONAL) || o1.dtype === dt.COMPLEX)) {
