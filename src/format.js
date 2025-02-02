@@ -136,7 +136,7 @@ const formattedInteger = (intStr, decimalFormat) => {
       (thousandsSeparator === ",")
       ? "{,}"
       : (thousandsSeparator === " ")
-      ? "\\:"
+      ? "\u2008"
       : (thousandsSeparator === "’")
       ? "’"
       : "."
