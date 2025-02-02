@@ -824,7 +824,7 @@ div.right-justified { text-align: right; }
 div.boxed {
   width: fit-content;
   min-width: 2em;
-  text-box: trim-both text text;
+  text-box: trim-start cap;
   border: 1px solid #000;
 }
 div.boxed p { line-height: 1.2; margin: 4px; }
