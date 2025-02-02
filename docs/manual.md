@@ -1810,6 +1810,9 @@ automatically.
 
 ¢`(3kW·hr × (20min)) / (800lbf × 1h) = 1.0116402439486971731 'km'`
 
+Use spaces to separate compound units from adjacent variables.\
+`20N*m` is a compound unit, but `20N * m` is 20 Newtons times variable `m`.
+
 If you try to add quantities with non-compatible units, Hurmet will return an
 error message:
 
