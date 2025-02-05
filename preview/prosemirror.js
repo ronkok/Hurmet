@@ -35443,7 +35443,9 @@ const compile = (
     if (mustAlign) {
       eqn = "\\begin{aligned}" + eqn;
       const pos = eqn.indexOf("=");
-      eqn = eqn.slice(0, pos) + "&" + eqn.slice(pos);
+      if (pos !== -1) {
+        eqn = eqn.slice(0, pos) + "&" + eqn.slice(pos);
+      }
     }
     const alignChar = mustAlign ? "\\\\ &" : "";
     altEqn = mainStr;
