@@ -1,5 +1,5 @@
 ﻿import { dt, allZeros } from "./constants" // operand type enumeration
-import { exponentRegEx, numeralFromSuperScript } from "./utils"
+import { exponentRegEx, numeralFromSuperScript, memoizeFunction } from "./utils"
 import { Rnl } from "./rational"
 import { errorOprnd } from "./error"
 
@@ -731,7 +731,7 @@ const opOrNumRegEx = /[0-9·\-⁰¹²³\u2074-\u2079⁻/^()]/
 const numeralRegEx = /[0-9-]/
 const opRegEx = /^[·/\-^]$/
 
-export const unitFromUnitName = (inputStr) => {
+export const unitFromUnitName = memoizeFunction(function(inputStr) {
 
   // TODO: Handle ° ʹ ″
 
@@ -936,5 +936,4 @@ export const unitFromUnitName = (inputStr) => {
   u.factor = Object.freeze(factors.pop())
   u.expos = Object.freeze(expoStack.pop())
   return Object.freeze(u)
-}
-
+})

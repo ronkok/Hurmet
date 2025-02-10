@@ -403,6 +403,15 @@ const clone = obj => {
   throw new Error("Unable to clone obj! Its type isn't supported.")
 };
 
+const memoizeFunction = passedFunction => {
+  const cache = {};
+  return function(x) {
+    if (x in cache) { return cache[x] }
+    cache[x] = passedFunction(x);
+    return cache[x]
+  }
+};
+
 // A function to return an array containing all matches to a RegEx pattern.
 const arrayOfRegExMatches = (regex, text) => {
   if (regex.constructor !== RegExp) { throw new Error('not RegExp') }
@@ -2264,7 +2273,7 @@ const opOrNumRegEx = /[0-9·\-⁰¹²³\u2074-\u2079⁻/^()]/;
 const numeralRegEx = /[0-9-]/;
 const opRegEx = /^[·/\-^]$/;
 
-const unitFromUnitName = (inputStr) => {
+const unitFromUnitName = memoizeFunction(function(inputStr) {
 
   // TODO: Handle ° ʹ ″
 
@@ -2469,7 +2478,7 @@ const unitFromUnitName = (inputStr) => {
   u.factor = Object.freeze(factors.pop());
   u.expos = Object.freeze(expoStack.pop());
   return Object.freeze(u)
-};
+});
 
 /* eslint-disable */
 

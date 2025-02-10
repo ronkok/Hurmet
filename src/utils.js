@@ -57,6 +57,15 @@ export const clone = obj => {
   throw new Error("Unable to clone obj! Its type isn't supported.")
 }
 
+export const memoizeFunction = passedFunction => {
+  const cache = {}
+  return function(x) {
+    if (x in cache) { return cache[x] }
+    cache[x] = passedFunction(x)
+    return cache[x]
+  }
+}
+
 // A function to return an array containing all matches to a RegEx pattern.
 export const arrayOfRegExMatches = (regex, text) => {
   if (regex.constructor !== RegExp) { throw new Error('not RegExp') }
