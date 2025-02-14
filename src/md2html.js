@@ -160,7 +160,7 @@ const nodes = {
     tag = htmlTag(tag, text)
     if (!headings.includes(text)) {
     // Add an id so others can link to it.
-      tag = tag.slice(0, 3) + " id='" + text.toLowerCase().replace(/,/g, "").replace(/\s+/g, '-') + "'" + tag.slice(3)
+      tag = tag.slice(0, 3) + " id='" + text.toLowerCase().replace(/,\(\)/g, "").replace(/\s+/g, '-') + "'" + tag.slice(3)
       headings.push(text)
     }
     return tag + "\n"
