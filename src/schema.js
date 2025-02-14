@@ -375,7 +375,10 @@ export const nodes = {
     },
     parseDOM: [{tag: "table", getAttrs(dom) {
       const className = dom.getAttribute('class')
-      const dtype = className.indexOf(" spreadsheet") > -1 ? dt.SPREADSHEET : 0
+      let dtype = 0
+      if (className) {
+        dtype = className.indexOf(" spreadsheet") > -1 ? dt.SPREADSHEET : 0
+      }
       return {
         class: className || "grid",
         name: dom.getAttribute('id'),
