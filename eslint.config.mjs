@@ -21,7 +21,6 @@ export default [{
         "**/keymap.js",
         "**/inputrules.js",
         "**/currencyRates.js",
-        "**/katex.js",
         "**/temml.js",
     ],
 }, ...compat.extends("eslint:recommended"), {

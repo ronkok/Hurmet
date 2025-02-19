@@ -34537,7 +34537,10 @@ const evalCustomFunction = (udf, args, formats, isUnitAware, lib) => {
 
 const errorResult = (stmt, result) => {
   stmt.value = null;
-  stmt.resultDisplay = "\\textcolor{firebrick}{\\text{" + result.value.replace(/%/g, "\\%") + "}}";
+  // Wrap the message in a \mathord so that browsers will put
+  // operator spacing on the previous = sign.
+  stmt.resultDisplay = "\\mathord{\\textcolor{firebrick}{\\text{" +
+                        result.value.replace(/%/g, "\\%") + "}}}";
   stmt.altResultDisplay = result.value;
   stmt.error = true;
   stmt.dtype = dt.ERROR;
