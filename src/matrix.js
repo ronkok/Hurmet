@@ -427,7 +427,9 @@ const operandFromTokenStack = (tokenStack, numRows, numCols) => {
       for (let i = 0; i < tokenStack[0].value.length; i++) {
         array[i] = []
         for (let j = 0; j < numArgs; j++) {
-          array[i][j] = tokenStack[j].value[i]
+          const token = tokenStack[j].value[i];
+          if (token.unit && token.unit.isConverted) { return errorOprnd("UNIT_IN_MAT") }
+          array[i][j] = token.value
         }
       }
       for (let i = 0; i < numArgs; i++) { tokenStack.pop() }
@@ -436,7 +438,9 @@ const operandFromTokenStack = (tokenStack, numRows, numCols) => {
       array = new Array(numArgs)
       dtype += numRows === 1 ? dt.ROWVECTOR : dt.COLUMNVECTOR
       for (let j = numArgs - 1; j >= 0; j--) {
-        array[j] = tokenStack.pop().value
+        const token = tokenStack.pop()
+        if (token.unit && token.unit.isConverted) { return errorOprnd("UNIT_IN_MAT") }
+        array[j] = token.value
       }
     }
     Object.freeze((array))
@@ -455,7 +459,9 @@ const operandFromTokenStack = (tokenStack, numRows, numCols) => {
     }
     for (let k = numRows - 1; k >= 0; k--) {
       for (let j = numCols - 1; j >= 0; j--) {
-        array[k][j] =  tokenStack.pop().value
+        const token = tokenStack.pop()
+        if (token.unit && token.unit.isConverted) { return errorOprnd("UNIT_IN_MAT") }
+        array[k][j] =  token.value
       }
     }
     Object.freeze((array))

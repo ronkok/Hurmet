@@ -1541,9 +1541,9 @@ hcat(_v_, _x_)
 : Horizontal concatenation of: two strings, or two matrices, or an element onto
   a vector, or a variable onto a map, or a vector onto a data frame.
 
-hypot(_x_, _y_)
+hypot(_x~1~_, _x~2~_, …, _x~n~_)
 
-: ¢`√(x² + y²)`   …done in a way that avoids overflow. Real numbers only.
+: ¢`√(x_1^2 + x_2^2 + ⋯ + x_n^2)`   …done in a way that avoids overflow. Real numbers only.
 
 imag(_z_)
 

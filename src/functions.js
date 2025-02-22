@@ -580,7 +580,7 @@ const binary = {
     return Rnl.fromNumber(Math.atan2(Rnl.toNumber(y), Rnl.toNumber(x)))
   },
   hypot([x, y]) {
-    // sqrt(x^2)
+    // sqrt(x^2 + y^2)
     // https://www.johndcook.com/blog/2010/06/02/whats-so-hard-about-finding-a-hypotenuse/
     const max = Rnl.max(x, y)
     const r = Rnl.divide(Rnl.min(x, y), max)

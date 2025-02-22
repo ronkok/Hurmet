@@ -342,7 +342,9 @@ const errorMessages = Object.freeze({
     BAD_SUM:    "Error. Second argument to sum function must be 1 or 2.",
     ZERO_STEP:  "Error. Step value must be > zero.",
     SHEET_INDEX:"Error. Bad column or row index.",
-    UNSAVED:    "Error. The current document has not been saved."
+    UNSAVED:    "Error. The current document has not been saved.",
+    UNIT_IN_MAT:"Error. Matrix elements cannot contain a unit." +
+                " Write the unit outside the matrix."
   }
 });
 
@@ -1177,6 +1179,10 @@ const fromAssignment = (cellAttrs, unitAware) => {
       );
     }
     oprnd.dtype = cellAttrs.dtype - dt.QUANTITY;
+    // Delete the factor and gauge information
+    if (unitAware) {
+      oprnd.unit = { expos: oprnd.unit.expos, isConverted: true };
+    }
 
   } else if (cellAttrs.dtype === dt.STRING) {
     const str = cellAttrs.value;
@@ -1241,10 +1247,7 @@ const unitsAreCompatible = (a, b) => {
   if (!Array.isArray(a) || !Array.isArray(b)) { return false }
   // Compare the exponents in the arrays.
   if (a.length !== b.length) { return false }
-  for (let i = 0; i < a.length; ++i) {
-    if (a[i] !== b[i]) { return false }
-  }
-  return true
+  return a.every((value, index) => value === b[index])
 };
 
 // JSON.parse() is faster than a big object literal
@@ -1260,11 +1263,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6514","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.6394","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["6.0127","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["5.9751","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -1275,8 +1278,8 @@ const unitTable = Object.freeze(JSON.parse(`{
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CAD":["1.4856","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9442","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.6141","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9420","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.5933","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -1296,7 +1299,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.83215","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.82760","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1304,23 +1307,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.1554","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.1327","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["3.7341","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["90.8100","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["3.7211","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["90.6598","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["160.09","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["157.46","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1509.50","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1500.16","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1331,7 +1334,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["21.3146","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["21.2714","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -1361,7 +1364,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.0478","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0465","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -2869,7 +2872,9 @@ const operandFromTokenStack = (tokenStack, numRows, numCols) => {
       for (let i = 0; i < tokenStack[0].value.length; i++) {
         array[i] = [];
         for (let j = 0; j < numArgs; j++) {
-          array[i][j] = tokenStack[j].value[i];
+          const token = tokenStack[j].value[i];
+          if (token.unit && token.unit.isConverted) { return errorOprnd("UNIT_IN_MAT") }
+          array[i][j] = token.value;
         }
       }
       for (let i = 0; i < numArgs; i++) { tokenStack.pop(); }
@@ -2878,7 +2883,9 @@ const operandFromTokenStack = (tokenStack, numRows, numCols) => {
       array = new Array(numArgs);
       dtype += numRows === 1 ? dt.ROWVECTOR : dt.COLUMNVECTOR;
       for (let j = numArgs - 1; j >= 0; j--) {
-        array[j] = tokenStack.pop().value;
+        const token = tokenStack.pop();
+        if (token.unit && token.unit.isConverted) { return errorOprnd("UNIT_IN_MAT") }
+        array[j] = token.value;
       }
     }
     Object.freeze((array));
@@ -2897,7 +2904,9 @@ const operandFromTokenStack = (tokenStack, numRows, numCols) => {
     }
     for (let k = numRows - 1; k >= 0; k--) {
       for (let j = numCols - 1; j >= 0; j--) {
-        array[k][j] =  tokenStack.pop().value;
+        const token = tokenStack.pop();
+        if (token.unit && token.unit.isConverted) { return errorOprnd("UNIT_IN_MAT") }
+        array[k][j] =  token.value;
       }
     }
     Object.freeze((array));
@@ -4903,15 +4912,15 @@ const builtInFunctions = new Set([
   "atand", "atanh", "binomial", "ceil", "conj", "cos", "cosd", "cosh",
   "cot", "cotd", "coth", "count", "csc", "cscd", "csch", "exp",
   "factorial", "fetch", "findmax", "floor", "gamma", "gcd", "hcat",
-  "hypot", "imag", "isnan", "length", "lerp", "ln", "log", "log10", "log2", "lfact", "lgamma",
+  "imag", "isnan", "length", "lerp", "ln", "log", "log10", "log2", "lfact", "lgamma",
   "logn", "mod", "number", "ones", "real", "rem", "rms", "round", "roundSig", "roundn",
   "savedate", "sec", "secd", "sech", "sech", "sign", "sin", "sind", "sinh", "startSvg",
   "string", "tan", "tand", "tanh", "tanh", "today", "trace", "transpose", "vcat", "zeros", "Γ"
 ]);
 
 const builtInReducerFunctions = new Set(["accumulate", "beamDiagram", "dataframe",
-  "findfirst", "matrix2table", "max", "mean", "median", "min", "product", "rand", "range",
-  "stddev", "sum", "variance"
+  "findfirst", "hypot", "matrix2table", "max", "mean", "median", "min", "product", "rand",
+  "range", "stddev", "sum", "variance"
 ]);
 
 const trigFunctions = new Set(["cos", "cosd", "cot", "cotd", "csc", "cscd", "sec", "secd",
@@ -7838,7 +7847,7 @@ const binary$1 = {
     return Rnl.fromNumber(Math.atan2(Rnl.toNumber(y), Rnl.toNumber(x)))
   },
   hypot([x, y]) {
-    // sqrt(x^2)
+    // sqrt(x^2 + y^2)
     // https://www.johndcook.com/blog/2010/06/02/whats-so-hard-about-finding-a-hypotenuse/
     const max = Rnl.max(x, y);
     const r = Rnl.divide(Rnl.min(x, y), max);
@@ -15593,7 +15602,6 @@ const evalRpn = (rpn, vars, formats, unitAware, lib) => {
 
         case "logn":
         case "atan2":
-        case "hypot":
         case "gcd":
         case "rms":
         case "binomial":
@@ -15619,6 +15627,32 @@ const evalRpn = (rpn, vars, formats, unitAware, lib) => {
           output.dtype = dtype;
           stack.push(Object.freeze(output));
           break
+        }
+
+        case "hypot": {
+          const numArgs = Number(tokens[i + 1]);
+          i += 1;
+
+          const args = [];
+          args.push(stack.pop());
+          if (!(args[0].dtype & dt.RATIONAL)) { return errorOprnd("") }
+          let expos = null;
+          let dtype = 0;
+          for (let j = 0; j < numArgs - 1; j++) {
+            args.push(stack.pop());
+            if (!(args[1].dtype & dt.RATIONAL)) { return errorOprnd("") }
+            expos = unitAware ? Functions.functionExpos("hypot", args) : allZeros;
+            const [value, localDtype] = multivarFunction("binary", "hypot", args);
+            if (localDtype === dt.ERROR) { return value }
+            dtype = localDtype;
+            args.pop();
+            args.pop();
+            args.push({ value, unit: { expos }, dtype });
+          }
+          const output = Object.freeze(args[0]);
+          stack.push(output);
+          break
+
         }
 
         case "today":

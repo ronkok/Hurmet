@@ -99,7 +99,9 @@ const errorMessages = Object.freeze({
     BAD_SUM:    "Error. Second argument to sum function must be 1 or 2.",
     ZERO_STEP:  "Error. Step value must be > zero.",
     SHEET_INDEX:"Error. Bad column or row index.",
-    UNSAVED:    "Error. The current document has not been saved."
+    UNSAVED:    "Error. The current document has not been saved.",
+    UNIT_IN_MAT:"Error. Matrix elements cannot contain a unit." +
+                " Write the unit outside the matrix."
   }
 })
 

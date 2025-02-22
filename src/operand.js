@@ -79,6 +79,10 @@ export const fromAssignment = (cellAttrs, unitAware) => {
       )
     }
     oprnd.dtype = cellAttrs.dtype - dt.QUANTITY
+    // Delete the factor and gauge information
+    if (unitAware) {
+      oprnd.unit = { expos: oprnd.unit.expos, isConverted: true }
+    }
 
   } else if (cellAttrs.dtype === dt.STRING) {
     const str = cellAttrs.value

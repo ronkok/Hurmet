@@ -858,7 +858,6 @@ export const evalRpn = (rpn, vars, formats, unitAware, lib) => {
 
         case "logn":
         case "atan2":
-        case "hypot":
         case "gcd":
         case "rms":
         case "binomial":
@@ -884,6 +883,32 @@ export const evalRpn = (rpn, vars, formats, unitAware, lib) => {
           output.dtype = dtype
           stack.push(Object.freeze(output))
           break
+        }
+
+        case "hypot": {
+          const numArgs = Number(tokens[i + 1])
+          i += 1
+
+          const args = [];
+          args.push(stack.pop())
+          if (!(args[0].dtype & dt.RATIONAL)) { return errorOprnd("") }
+          let expos = null
+          let dtype = 0
+          for (let j = 0; j < numArgs - 1; j++) {
+            args.push(stack.pop())
+            if (!(args[1].dtype & dt.RATIONAL)) { return errorOprnd("") }
+            expos = unitAware ? Functions.functionExpos("hypot", args) : allZeros
+            const [value, localDtype] = multivarFunction("binary", "hypot", args)
+            if (localDtype === dt.ERROR) { return value }
+            dtype = localDtype
+            args.pop()
+            args.pop()
+            args.push({ value, unit: { expos }, dtype })
+          }
+          const output = Object.freeze(args[0])
+          stack.push(output)
+          break
+
         }
 
         case "today":

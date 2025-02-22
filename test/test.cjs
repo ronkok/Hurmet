@@ -562,8 +562,10 @@ end`, vars)
     [`savedate() = @@`, "savedate", "Error. The current document has not been saved."],
     [`aDate + 12weeks = @@`, "¿aDate ®12/1 applyUnit weeks +", "2025-04-14"],
     [`‖vector‖ = @`, "¿vector ‖", "18.9604852258585"],
-    [`‖matrix‖ = @`, "¿matrix ‖", "37.1987903029117"]
-  ]
+    [`‖matrix‖ = @`, "¿matrix ‖", "37.1987903029117"],
+    [`hypot(3, 4) = @`, `®3/1 ®4/1 hypot 2`, "5"],
+    [`hypot(3, 4, 5) = @`, `®3/1 ®4/1 ®5/1 hypot 3`, "7.07106781186548"],
+  ];
 
   const testRegEx = /^(@{1,2})test /
   console.log("Now testing calculations…")

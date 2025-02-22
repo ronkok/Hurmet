@@ -19,15 +19,15 @@ const builtInFunctions = new Set([
   "atand", "atanh", "binomial", "ceil", "conj", "cos", "cosd", "cosh",
   "cot", "cotd", "coth", "count", "csc", "cscd", "csch", "exp",
   "factorial", "fetch", "findmax", "floor", "gamma", "gcd", "hcat",
-  "hypot", "imag", "isnan", "length", "lerp", "ln", "log", "log10", "log2", "lfact", "lgamma",
+  "imag", "isnan", "length", "lerp", "ln", "log", "log10", "log2", "lfact", "lgamma",
   "logn", "mod", "number", "ones", "real", "rem", "rms", "round", "roundSig", "roundn",
   "savedate", "sec", "secd", "sech", "sech", "sign", "sin", "sind", "sinh", "startSvg",
   "string", "tan", "tand", "tanh", "tanh", "today", "trace", "transpose", "vcat", "zeros", "Γ"
 ])
 
 const builtInReducerFunctions = new Set(["accumulate", "beamDiagram", "dataframe",
-  "findfirst", "matrix2table", "max", "mean", "median", "min", "product", "rand", "range",
-  "stddev", "sum", "variance"
+  "findfirst", "hypot", "matrix2table", "max", "mean", "median", "min", "product", "rand",
+  "range", "stddev", "sum", "variance"
 ])
 
 const trigFunctions = new Set(["cos", "cosd", "cot", "cotd", "csc", "cscd", "sec", "secd",
