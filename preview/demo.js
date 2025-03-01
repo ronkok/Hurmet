@@ -1607,11 +1607,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.6394","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.6741","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["5.9751","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["6.0712","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -1620,10 +1620,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.4856","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.5019","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9420","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["7.5933","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9394","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["7.5782","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -1643,7 +1643,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.82760","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.82608","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1651,23 +1651,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.1327","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.0980","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["3.7211","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["90.6598","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["3.7457","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["90.9710","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["157.46","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["156.96","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1500.16","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1519.92","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -1678,7 +1678,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["21.2714","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["21.2191","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -1708,7 +1708,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.0465","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.0411","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -19286,7 +19286,7 @@ class ParseError {
       if (start === input.length) {
         error += " at end of input: ";
       } else {
-        error += " at position " + (start + 1) + ": ";
+        error += " at position " + (start + 1) + ": \n";
       }
 
       // Underline token in question using combining underscores
@@ -21267,7 +21267,7 @@ function setLineBreaks(expression, wrapMode, isDisplayMode) {
     }
     block.push(node);
     if (node.type && node.type === "mo" && node.children.length === 1 &&
-        !Object.hasOwn(node.attributes, "movablelimits")) {
+        !Object.prototype.hasOwnProperty.call(node.attributes, "movablelimits")) {
       const ch = node.children[0].text;
       if (openDelims.indexOf(ch) > -1) {
         level += 1;
@@ -22240,6 +22240,30 @@ defineFunction({
 });
 
 /**
+ * All registered environments.
+ * `environments.js` exports this same dictionary again and makes it public.
+ * `Parser.js` requires this dictionary via `environments.js`.
+ */
+const _environments = {};
+
+function defineEnvironment({ type, names, props, handler, mathmlBuilder }) {
+  // Set default values of environments.
+  const data = {
+    type,
+    numArgs: props.numArgs || 0,
+    allowedInText: false,
+    numOptionalArgs: 0,
+    handler
+  };
+  for (let i = 0; i < names.length; ++i) {
+    _environments[names[i]] = data;
+  }
+  if (mathmlBuilder) {
+    _mathmlGroupBuilders[type] = mathmlBuilder;
+  }
+}
+
+/**
  * Asserts that the node is of the given type and returns it with stricter
  * typing. Throws if the node's type does not match.
  */
@@ -22532,1178 +22556,144 @@ defineFunction({
   }
 });
 
-// \@char is an internal function that takes a grouped decimal argument like
-// {123} and converts into symbol with code 123.  It is used by the *macro*
-// \char defined in macros.js.
-defineFunction({
-  type: "textord",
-  names: ["\\@char"],
-  props: {
-    numArgs: 1,
-    allowedInText: true
-  },
-  handler({ parser, token }, args) {
-    const arg = assertNodeType(args[0], "ordgroup");
-    const group = arg.body;
-    let number = "";
-    for (let i = 0; i < group.length; i++) {
-      const node = assertNodeType(group[i], "textord");
-      number += node.text;
-    }
-    const code = parseInt(number);
-    if (isNaN(code)) {
-      throw new ParseError(`\\@char has non-numeric argument ${number}`, token)
-    }
-    return {
-      type: "textord",
-      mode: parser.mode,
-      text: String.fromCodePoint(code)
-    }
+const ordGroup = (body) => {
+  return {
+    "type": "ordgroup",
+    "mode": "math",
+    "body": body,
+    "semisimple": true
   }
-});
-
-// Helpers
-const htmlRegEx = /^(#[a-f0-9]{3}|#?[a-f0-9]{6})$/i;
-const htmlOrNameRegEx = /^(#[a-f0-9]{3}|#?[a-f0-9]{6}|[a-z]+)$/i;
-const RGBregEx = /^ *\d{1,3} *(?:, *\d{1,3} *){2}$/;
-const rgbRegEx = /^ *[10](?:\.\d*)? *(?:, *[10](?:\.\d*)? *){2}$/;
-const xcolorHtmlRegEx = /^[a-f0-9]{6}$/i;
-const toHex = num => {
-  let str = num.toString(16);
-  if (str.length === 1) { str = "0" + str; }
-  return str
 };
 
-// Colors from Tables 4.1 and 4.2 of the xcolor package.
-// Table 4.1 (lower case) RGB values are taken from chroma and xcolor.dtx.
-// Table 4.2 (Capitalizzed) values were sampled, because Chroma contains a unreliable
-// conversion from cmyk to RGB. See https://tex.stackexchange.com/a/537274.
-const xcolors = JSON.parse(`{
-  "Apricot": "#ffb484",
-  "Aquamarine": "#08b4bc",
-  "Bittersweet": "#c84c14",
-  "blue": "#0000FF",
-  "Blue": "#303494",
-  "BlueGreen": "#08b4bc",
-  "BlueViolet": "#503c94",
-  "BrickRed": "#b8341c",
-  "brown": "#BF8040",
-  "Brown": "#802404",
-  "BurntOrange": "#f8941c",
-  "CadetBlue": "#78749c",
-  "CarnationPink": "#f884b4",
-  "Cerulean": "#08a4e4",
-  "CornflowerBlue": "#40ace4",
-  "cyan": "#00FFFF",
-  "Cyan": "#08acec",
-  "Dandelion": "#ffbc44",
-  "darkgray": "#404040",
-  "DarkOrchid": "#a8548c",
-  "Emerald": "#08ac9c",
-  "ForestGreen": "#089c54",
-  "Fuchsia": "#90348c",
-  "Goldenrod": "#ffdc44",
-  "gray": "#808080",
-  "Gray": "#98949c",
-  "green": "#00FF00",
-  "Green": "#08a44c",
-  "GreenYellow": "#e0e474",
-  "JungleGreen": "#08ac9c",
-  "Lavender": "#f89cc4",
-  "lightgray": "#c0c0c0",
-  "lime": "#BFFF00",
-  "LimeGreen": "#90c43c",
-  "magenta": "#FF00FF",
-  "Magenta": "#f0048c",
-  "Mahogany": "#b0341c",
-  "Maroon": "#b03434",
-  "Melon": "#f89c7c",
-  "MidnightBlue": "#086494",
-  "Mulberry": "#b03c94",
-  "NavyBlue": "#086cbc",
-  "olive": "#7F7F00",
-  "OliveGreen": "#407c34",
-  "orange": "#FF8000",
-  "Orange": "#f8843c",
-  "OrangeRed": "#f0145c",
-  "Orchid": "#b074ac",
-  "Peach": "#f8945c",
-  "Periwinkle": "#8074bc",
-  "PineGreen": "#088c74",
-  "pink": "#ff7f7f",
-  "Plum": "#98248c",
-  "ProcessBlue": "#08b4ec",
-  "purple": "#BF0040",
-  "Purple": "#a0449c",
-  "RawSienna": "#983c04",
-  "red": "#ff0000",
-  "Red": "#f01c24",
-  "RedOrange": "#f86434",
-  "RedViolet": "#a0246c",
-  "Rhodamine": "#f0549c",
-  "Royallue": "#0874bc",
-  "RoyalPurple": "#683c9c",
-  "RubineRed": "#f0047c",
-  "Salmon": "#f8948c",
-  "SeaGreen": "#30bc9c",
-  "Sepia": "#701404",
-  "SkyBlue": "#48c4dc",
-  "SpringGreen": "#c8dc64",
-  "Tan": "#e09c74",
-  "teal": "#007F7F",
-  "TealBlue": "#08acb4",
-  "Thistle": "#d884b4",
-  "Turquoise": "#08b4cc",
-  "violet": "#800080",
-  "Violet": "#60449c",
-  "VioletRed": "#f054a4",
-  "WildStrawberry": "#f0246c",
-  "yellow": "#FFFF00",
-  "Yellow": "#fff404",
-  "YellowGreen": "#98cc6c",
-  "YellowOrange": "#ffa41c"
-}`);
-
-const colorFromSpec = (model, spec) => {
-  let color = "";
-  if (model === "HTML") {
-    if (!htmlRegEx.test(spec)) {
-      throw new ParseError("Invalid HTML input.")
-    }
-    color = spec;
-  } else if (model === "RGB") {
-    if (!RGBregEx.test(spec)) {
-      throw new ParseError("Invalid RGB input.")
-    }
-    spec.split(",").map(e => { color += toHex(Number(e.trim())); });
-  } else {
-    if (!rgbRegEx.test(spec)) {
-      throw new ParseError("Invalid rbg input.")
-    }
-    spec.split(",").map(e => {
-      const num = Number(e.trim());
-      if (num > 1) { throw new ParseError("Color rgb input must be < 1.") }
-      color += toHex(Number((num * 255).toFixed(0)));
-    });
+const phantom = (body, type) => {
+  return {
+    "type": type,
+    "mode": "math",
+    "body": ordGroup(body)
   }
-  if (color.charAt(0) !== "#") { color = "#" + color; }
-  return color
 };
 
-const validateColor = (color, macros, token) => {
-  const macroName = `\\\\color@${color}`; // from \defineColor.
-  const match = htmlOrNameRegEx.exec(color);
-  if (!match) { throw new ParseError("Invalid color: '" + color + "'", token) }
-  // We allow a 6-digit HTML color spec without a leading "#".
-  // This follows the xcolor package's HTML color model.
-  // Predefined color names are all missed by this RegEx pattern.
-  if (xcolorHtmlRegEx.test(color)) {
-    return "#" + color
-  } else if (color.charAt(0) === "#") {
-    return color
-  } else if (macros.has(macroName)) {
-    color = macros.get(macroName).tokens[0].text;
-  } else if (xcolors[color]) {
-    color = xcolors[color];
-  }
-  return color
-};
-
-const mathmlBuilder$9 = (group, style) => {
-  // In LaTeX, color is not supposed to change the spacing of any node.
-  // So instead of wrapping the group in an <mstyle>, we apply
-  // the color individually to each node and return a document fragment.
-  let expr = buildExpression(group.body, style.withColor(group.color));
-  expr = expr.map(e => {
-    e.style.color = group.color;
-    return e
-  });
-  return mathMLTree.newDocumentFragment(expr)
-};
-
-defineFunction({
-  type: "color",
-  names: ["\\textcolor"],
-  props: {
-    numArgs: 2,
-    numOptionalArgs: 1,
-    allowedInText: true,
-    argTypes: ["raw", "raw", "original"]
-  },
-  handler({ parser, token }, args, optArgs) {
-    const model = optArgs[0] && assertNodeType(optArgs[0], "raw").string;
-    let color = "";
-    if (model) {
-      const spec = assertNodeType(args[0], "raw").string;
-      color = colorFromSpec(model, spec);
-    } else {
-      color = validateColor(assertNodeType(args[0], "raw").string, parser.gullet.macros, token);
-    }
-    const body = args[1];
-    return {
-      type: "color",
-      mode: parser.mode,
-      color,
-      isTextColor: true,
-      body: ordargument(body)
-    }
-  },
-  mathmlBuilder: mathmlBuilder$9
-});
-
-defineFunction({
-  type: "color",
-  names: ["\\color"],
-  props: {
-    numArgs: 1,
-    numOptionalArgs: 1,
-    allowedInText: true,
-    argTypes: ["raw", "raw"]
-  },
-  handler({ parser, breakOnTokenText, token }, args, optArgs) {
-    const model = optArgs[0] && assertNodeType(optArgs[0], "raw").string;
-    let color = "";
-    if (model) {
-      const spec = assertNodeType(args[0], "raw").string;
-      color = colorFromSpec(model, spec);
-    } else {
-      color = validateColor(assertNodeType(args[0], "raw").string, parser.gullet.macros, token);
-    }
-
-    // Parse out the implicit body that should be colored.
-    const body = parser.parseExpression(true, breakOnTokenText, true);
-
-    return {
-      type: "color",
-      mode: parser.mode,
-      color,
-      isTextColor: false,
-      body
-    }
-  },
-  mathmlBuilder: mathmlBuilder$9
-});
-
-defineFunction({
-  type: "color",
-  names: ["\\definecolor"],
-  props: {
-    numArgs: 3,
-    allowedInText: true,
-    argTypes: ["raw", "raw", "raw"]
-  },
-  handler({ parser, funcName, token }, args) {
-    const name = assertNodeType(args[0], "raw").string;
-    if (!/^[A-Za-z]+$/.test(name)) {
-      throw new ParseError("Color name must be latin letters.", token)
-    }
-    const model = assertNodeType(args[1], "raw").string;
-    if (!["HTML", "RGB", "rgb"].includes(model)) {
-      throw new ParseError("Color model must be HTML, RGB, or rgb.", token)
-    }
-    const spec = assertNodeType(args[2], "raw").string;
-    const color = colorFromSpec(model, spec);
-    parser.gullet.macros.set(`\\\\color@${name}`, { tokens: [{ text: color }], numArgs: 0 });
-    return { type: "internal", mode: parser.mode }
-  }
-  // No mathmlBuilder. The point of \definecolor is to set a macro.
-});
-
-// Row breaks within tabular environments, and line breaks at top level
-
-
-// \DeclareRobustCommand\\{...\@xnewline}
-defineFunction({
-  type: "cr",
-  names: ["\\\\"],
-  props: {
-    numArgs: 0,
-    numOptionalArgs: 0,
-    allowedInText: true
-  },
-
-  handler({ parser }, args, optArgs) {
-    const size = parser.gullet.future().text === "[" ? parser.parseSizeGroup(true) : null;
-    const newLine = !parser.settings.displayMode;
-    return {
-      type: "cr",
-      mode: parser.mode,
-      newLine,
-      size: size && assertNodeType(size, "size").value
-    }
-  },
-
-  // The following builder is called only at the top level,
-  // not within tabular/array environments.
-
-  mathmlBuilder(group, style) {
-    // MathML 3.0 calls for newline to occur in an <mo> or an <mspace>.
-    // Ref: https://www.w3.org/TR/MathML3/chapter3.html#presm.linebreaking
-    const node = new mathMLTree.MathNode("mo");
-    if (group.newLine) {
-      node.setAttribute("linebreak", "newline");
-      if (group.size) {
-        const size = calculateSize(group.size, style);
-        node.setAttribute("height", size.number + size.unit);
-      }
-    }
-    return node
-  }
-});
-
-const globalMap = {
-  "\\global": "\\global",
-  "\\long": "\\\\globallong",
-  "\\\\globallong": "\\\\globallong",
-  "\\def": "\\gdef",
-  "\\gdef": "\\gdef",
-  "\\edef": "\\xdef",
-  "\\xdef": "\\xdef",
-  "\\let": "\\\\globallet",
-  "\\futurelet": "\\\\globalfuture"
-};
-
-const checkControlSequence = (tok) => {
-  const name = tok.text;
-  if (/^(?:[\\{}$&#^_]|EOF)$/.test(name)) {
-    throw new ParseError("Expected a control sequence", tok);
-  }
-  return name;
-};
-
-const getRHS = (parser) => {
-  let tok = parser.gullet.popToken();
-  if (tok.text === "=") {
-    // consume optional equals
-    tok = parser.gullet.popToken();
-    if (tok.text === " ") {
-      // consume one optional space
-      tok = parser.gullet.popToken();
-    }
-  }
-  return tok;
-};
-
-const letCommand = (parser, name, tok, global) => {
-  let macro = parser.gullet.macros.get(tok.text);
-  if (macro == null) {
-    // don't expand it later even if a macro with the same name is defined
-    // e.g., \let\foo=\frac \def\frac{\relax} \frac12
-    tok.noexpand = true;
-    macro = {
-      tokens: [tok],
-      numArgs: 0,
-      // reproduce the same behavior in expansion
-      unexpandable: !parser.gullet.isExpandable(tok.text)
-    };
-  }
-  parser.gullet.macros.set(name, macro, global);
-};
-
-// <assignment> -> <non-macro assignment>|<macro assignment>
-// <non-macro assignment> -> <simple assignment>|\global<non-macro assignment>
-// <macro assignment> -> <definition>|<prefix><macro assignment>
-// <prefix> -> \global|\long|\outer
-defineFunction({
-  type: "internal",
-  names: [
-    "\\global",
-    "\\long",
-    "\\\\globallong" // can’t be entered directly
-  ],
-  props: {
-    numArgs: 0,
-    allowedInText: true
-  },
-  handler({ parser, funcName }) {
-    parser.consumeSpaces();
-    const token = parser.fetch();
-    if (globalMap[token.text]) {
-      // Temml doesn't have \par, so ignore \long
-      if (funcName === "\\global" || funcName === "\\\\globallong") {
-        token.text = globalMap[token.text];
-      }
-      return assertNodeType(parser.parseFunction(), "internal");
-    }
-    throw new ParseError(`Invalid token after macro prefix`, token);
-  }
-});
-
-// Basic support for macro definitions: \def, \gdef, \edef, \xdef
-// <definition> -> <def><control sequence><definition text>
-// <def> -> \def|\gdef|\edef|\xdef
-// <definition text> -> <parameter text><left brace><balanced text><right brace>
-defineFunction({
-  type: "internal",
-  names: ["\\def", "\\gdef", "\\edef", "\\xdef"],
-  props: {
-    numArgs: 0,
-    allowedInText: true,
-    primitive: true
-  },
-  handler({ parser, funcName }) {
-    let tok = parser.gullet.popToken();
-    const name = tok.text;
-    if (/^(?:[\\{}$&#^_]|EOF)$/.test(name)) {
-      throw new ParseError("Expected a control sequence", tok);
-    }
-
-    let numArgs = 0;
-    let insert;
-    const delimiters = [[]];
-    // <parameter text> contains no braces
-    while (parser.gullet.future().text !== "{") {
-      tok = parser.gullet.popToken();
-      if (tok.text === "#") {
-        // If the very last character of the <parameter text> is #, so that
-        // this # is immediately followed by {, TeX will behave as if the {
-        // had been inserted at the right end of both the parameter text
-        // and the replacement text.
-        if (parser.gullet.future().text === "{") {
-          insert = parser.gullet.future();
-          delimiters[numArgs].push("{");
-          break;
-        }
-
-        // A parameter, the first appearance of # must be followed by 1,
-        // the next by 2, and so on; up to nine #’s are allowed
-        tok = parser.gullet.popToken();
-        if (!/^[1-9]$/.test(tok.text)) {
-          throw new ParseError(`Invalid argument number "${tok.text}"`);
-        }
-        if (parseInt(tok.text) !== numArgs + 1) {
-          throw new ParseError(`Argument number "${tok.text}" out of order`);
-        }
-        numArgs++;
-        delimiters.push([]);
-      } else if (tok.text === "EOF") {
-        throw new ParseError("Expected a macro definition");
-      } else {
-        delimiters[numArgs].push(tok.text);
-      }
-    }
-    // replacement text, enclosed in '{' and '}' and properly nested
-    let { tokens } = parser.gullet.consumeArg();
-    if (insert) {
-      tokens.unshift(insert);
-    }
-
-    if (funcName === "\\edef" || funcName === "\\xdef") {
-      tokens = parser.gullet.expandTokens(tokens);
-      if (tokens.length > parser.gullet.settings.maxExpand) {
-        throw new ParseError("Too many expansions in an " + funcName);
-      }
-      tokens.reverse(); // to fit in with stack order
-    }
-    // Final arg is the expansion of the macro
-    parser.gullet.macros.set(
-      name,
-      { tokens, numArgs, delimiters },
-      funcName === globalMap[funcName]
-    );
-    return { type: "internal", mode: parser.mode };
-  }
-});
-
-// <simple assignment> -> <let assignment>
-// <let assignment> -> \futurelet<control sequence><token><token>
-//     | \let<control sequence><equals><one optional space><token>
-// <equals> -> <optional spaces>|<optional spaces>=
-defineFunction({
-  type: "internal",
-  names: [
-    "\\let",
-    "\\\\globallet" // can’t be entered directly
-  ],
-  props: {
-    numArgs: 0,
-    allowedInText: true,
-    primitive: true
-  },
-  handler({ parser, funcName }) {
-    const name = checkControlSequence(parser.gullet.popToken());
-    parser.gullet.consumeSpaces();
-    const tok = getRHS(parser);
-    letCommand(parser, name, tok, funcName === "\\\\globallet");
-    return { type: "internal", mode: parser.mode };
-  }
-});
-
-// ref: https://www.tug.org/TUGboat/tb09-3/tb22bechtolsheim.pdf
-defineFunction({
-  type: "internal",
-  names: [
-    "\\futurelet",
-    "\\\\globalfuture" // can’t be entered directly
-  ],
-  props: {
-    numArgs: 0,
-    allowedInText: true,
-    primitive: true
-  },
-  handler({ parser, funcName }) {
-    const name = checkControlSequence(parser.gullet.popToken());
-    const middle = parser.gullet.popToken();
-    const tok = parser.gullet.popToken();
-    letCommand(parser, name, tok, funcName === "\\\\globalfuture");
-    parser.gullet.pushToken(tok);
-    parser.gullet.pushToken(middle);
-    return { type: "internal", mode: parser.mode };
-  }
-});
-
-defineFunction({
-  type: "internal",
-  names: ["\\newcommand", "\\renewcommand", "\\providecommand"],
-  props: {
-    numArgs: 0,
-    allowedInText: true,
-    primitive: true
-  },
-  handler({ parser, funcName }) {
-    let name = "";
-    const tok = parser.gullet.popToken();
-    if (tok.text === "{") {
-      name = checkControlSequence(parser.gullet.popToken());
-      parser.gullet.popToken();
-    } else {
-      name = checkControlSequence(tok);
-    }
-
-    const exists = parser.gullet.isDefined(name);
-    if (exists && funcName === "\\newcommand") {
-      throw new ParseError(
-        `\\newcommand{${name}} attempting to redefine ${name}; use \\renewcommand`
-      );
-    }
-    if (!exists && funcName === "\\renewcommand") {
-      throw new ParseError(
-        `\\renewcommand{${name}} when command ${name} does not yet exist; use \\newcommand`
-      );
-    }
-
-    let numArgs = 0;
-    if (parser.gullet.future().text === "[") {
-      let tok = parser.gullet.popToken();
-      tok = parser.gullet.popToken();
-      if (!/^[0-9]$/.test(tok.text)) {
-        throw new ParseError(`Invalid number of arguments: "${tok.text}"`);
-      }
-      numArgs = parseInt(tok.text);
-      tok = parser.gullet.popToken();
-      if (tok.text !== "]") {
-        throw new ParseError(`Invalid argument "${tok.text}"`);
-      }
-    }
-
-    // replacement text, enclosed in '{' and '}' and properly nested
-    const { tokens } = parser.gullet.consumeArg();
-
-    if (!(funcName === "\\providecommand" && parser.gullet.macros.has(name))) {
-      // Ignore \providecommand
-      parser.gullet.macros.set(
-        name,
-        { tokens, numArgs }
-      );
-    }
-
-    return { type: "internal", mode: parser.mode };
-
-  }
-});
-
-// Extra data needed for the delimiter handler down below
-const delimiterSizes = {
-  "\\bigl": { mclass: "mopen", size: 1 },
-  "\\Bigl": { mclass: "mopen", size: 2 },
-  "\\biggl": { mclass: "mopen", size: 3 },
-  "\\Biggl": { mclass: "mopen", size: 4 },
-  "\\bigr": { mclass: "mclose", size: 1 },
-  "\\Bigr": { mclass: "mclose", size: 2 },
-  "\\biggr": { mclass: "mclose", size: 3 },
-  "\\Biggr": { mclass: "mclose", size: 4 },
-  "\\bigm": { mclass: "mrel", size: 1 },
-  "\\Bigm": { mclass: "mrel", size: 2 },
-  "\\biggm": { mclass: "mrel", size: 3 },
-  "\\Biggm": { mclass: "mrel", size: 4 },
-  "\\big": { mclass: "mord", size: 1 },
-  "\\Big": { mclass: "mord", size: 2 },
-  "\\bigg": { mclass: "mord", size: 3 },
-  "\\Bigg": { mclass: "mord", size: 4 }
-};
-
-const delimiters = [
-  "(",
-  "\\lparen",
-  ")",
-  "\\rparen",
-  "[",
-  "\\lbrack",
-  "]",
-  "\\rbrack",
-  "\\{",
-  "\\lbrace",
-  "\\}",
-  "\\rbrace",
-  "⦇",
-  "\\llparenthesis",
-  "⦈",
-  "\\rrparenthesis",
-  "\\lfloor",
-  "\\rfloor",
-  "\u230a",
-  "\u230b",
-  "\\lceil",
-  "\\rceil",
-  "\u2308",
-  "\u2309",
-  "<",
-  ">",
-  "\\langle",
-  "\u27e8",
-  "\\rangle",
-  "\u27e9",
-  "\\lAngle",
-  "\u27ea",
-  "\\rAngle",
-  "\u27eb",
-  "\\llangle",
-  "⦉",
-  "\\rrangle",
-  "⦊",
-  "\\lt",
-  "\\gt",
-  "\\lvert",
-  "\\rvert",
-  "\\lVert",
-  "\\rVert",
-  "\\lgroup",
-  "\\rgroup",
-  "\u27ee",
-  "\u27ef",
-  "\\lmoustache",
-  "\\rmoustache",
-  "\u23b0",
-  "\u23b1",
-  "\\llbracket",
-  "\\rrbracket",
-  "\u27e6",
-  "\u27e6",
-  "\\lBrace",
-  "\\rBrace",
-  "\u2983",
-  "\u2984",
-  "/",
-  "\\backslash",
-  "|",
-  "\\vert",
-  "\\|",
-  "\\Vert",
-  "\u2016",
-  "\\uparrow",
-  "\\Uparrow",
-  "\\downarrow",
-  "\\Downarrow",
-  "\\updownarrow",
-  "\\Updownarrow",
-  "."
-];
-
-// Export isDelimiter for benefit of parser.
-const dels = ["}", "\\left", "\\middle", "\\right"];
-const isDelimiter = str => str.length > 0 &&
-  (delimiters.includes(str) || delimiterSizes[str] || dels.includes(str));
-
-// Metrics of the different sizes. Found by looking at TeX's output of
-// $\bigl| // \Bigl| \biggl| \Biggl| \showlists$
-// Used to create stacked delimiters of appropriate sizes in makeSizedDelim.
-const sizeToMaxHeight = [0, 1.2, 1.8, 2.4, 3.0];
-
-// Delimiter functions
-function checkDelimiter(delim, context) {
-  const symDelim = checkSymbolNodeType(delim);
-  if (symDelim && delimiters.includes(symDelim.text)) {
-    // If a character is not in the MathML operator dictionary, it will not stretch.
-    // Replace such characters w/characters that will stretch.
-    if (["<", "\\lt"].includes(symDelim.text)) { symDelim.text = "⟨"; }
-    if ([">", "\\gt"].includes(symDelim.text)) { symDelim.text = "⟩"; }
-    return symDelim;
-  } else if (symDelim) {
-    throw new ParseError(`Invalid delimiter '${symDelim.text}' after '${context.funcName}'`, delim);
-  } else {
-    throw new ParseError(`Invalid delimiter type '${delim.type}'`, delim);
-  }
-}
-
-//                               /         \
-const needExplicitStretch = ["\u002F", "\u005C", "\\backslash", "\\vert", "|"];
-
-defineFunction({
-  type: "delimsizing",
-  names: [
-    "\\bigl",
-    "\\Bigl",
-    "\\biggl",
-    "\\Biggl",
-    "\\bigr",
-    "\\Bigr",
-    "\\biggr",
-    "\\Biggr",
-    "\\bigm",
-    "\\Bigm",
-    "\\biggm",
-    "\\Biggm",
-    "\\big",
-    "\\Big",
-    "\\bigg",
-    "\\Bigg"
-  ],
-  props: {
-    numArgs: 1,
-    argTypes: ["primitive"]
-  },
-  handler: (context, args) => {
-    const delim = checkDelimiter(args[0], context);
-
-    return {
-      type: "delimsizing",
-      mode: context.parser.mode,
-      size: delimiterSizes[context.funcName].size,
-      mclass: delimiterSizes[context.funcName].mclass,
-      delim: delim.text
-    };
-  },
-  mathmlBuilder: (group) => {
-    const children = [];
-
-    if (group.delim === ".") { group.delim = ""; }
-    children.push(makeText(group.delim, group.mode));
-
-    const node = new mathMLTree.MathNode("mo", children);
-
-    if (group.mclass === "mopen" || group.mclass === "mclose") {
-      // Only some of the delimsizing functions act as fences, and they
-      // return "mopen" or "mclose" mclass.
-      node.setAttribute("fence", "true");
-    } else {
-      // Explicitly disable fencing if it's not a fence, to override the
-      // defaults.
-      node.setAttribute("fence", "false");
-    }
-    if (needExplicitStretch.includes(group.delim) || group.delim.indexOf("arrow") > -1) {
-      // We have to explicitly set stretchy to true.
-      node.setAttribute("stretchy", "true");
-    }
-    node.setAttribute("symmetric", "true"); // Needed for tall arrows in Firefox.
-    node.setAttribute("minsize", sizeToMaxHeight[group.size] + "em");
-    node.setAttribute("maxsize", sizeToMaxHeight[group.size] + "em");
-    return node;
-  }
-});
-
-function assertParsed(group) {
-  if (!group.body) {
-    throw new Error("Bug: The leftright ParseNode wasn't fully parsed.");
-  }
-}
-
-defineFunction({
-  type: "leftright-right",
-  names: ["\\right"],
-  props: {
-    numArgs: 1,
-    argTypes: ["primitive"]
-  },
-  handler: (context, args) => {
-    return {
-      type: "leftright-right",
-      mode: context.parser.mode,
-      delim: checkDelimiter(args[0], context).text
-    };
-  }
-});
-
-defineFunction({
-  type: "leftright",
-  names: ["\\left"],
-  props: {
-    numArgs: 1,
-    argTypes: ["primitive"]
-  },
-  handler: (context, args) => {
-    const delim = checkDelimiter(args[0], context);
-
-    const parser = context.parser;
-    // Parse out the implicit body
-    ++parser.leftrightDepth;
-    // parseExpression stops before '\\right' or `\\middle`
-    let body = parser.parseExpression(false, null, true);
-    let nextToken = parser.fetch();
-    while (nextToken.text === "\\middle") {
-      // `\middle`, from the ε-TeX package, ends one group and starts another group.
-      // We had to parse this expression with `breakOnMiddle` enabled in order
-      // to get TeX-compliant parsing of \over.
-      // But we do not want, at this point, to end on \middle, so continue
-      // to parse until we fetch a `\right`.
-      parser.consume();
-      const middle = parser.fetch().text;
-      if (!symbols.math[middle]) {
-        throw new ParseError(`Invalid delimiter '${middle}' after '\\middle'`);
-      }
-      checkDelimiter({ type: "atom", mode: "math", text: middle }, { funcName: "\\middle" });
-      body.push({ type: "middle", mode: "math", delim: middle });
-      parser.consume();
-      body = body.concat(parser.parseExpression(false, null, true));
-      nextToken = parser.fetch();
-    }
-    --parser.leftrightDepth;
-    // Check the next token
-    parser.expect("\\right", false);
-    const right = assertNodeType(parser.parseFunction(), "leftright-right");
-    return {
-      type: "leftright",
-      mode: parser.mode,
-      body,
-      left: delim.text,
-      right: right.delim
-    };
-  },
-  mathmlBuilder: (group, style) => {
-    assertParsed(group);
-    const inner = buildExpression(group.body, style);
-
-    if (group.left === ".") { group.left = ""; }
-    const leftNode = new mathMLTree.MathNode("mo", [makeText(group.left, group.mode)]);
-    leftNode.setAttribute("fence", "true");
-    leftNode.setAttribute("form", "prefix");
-    if (group.left === "/" || group.left === "\u005C" || group.left.indexOf("arrow") > -1) {
-      leftNode.setAttribute("stretchy", "true");
-    }
-    inner.unshift(leftNode);
-
-    if (group.right === ".") { group.right = ""; }
-    const rightNode = new mathMLTree.MathNode("mo", [makeText(group.right, group.mode)]);
-    rightNode.setAttribute("fence", "true");
-    rightNode.setAttribute("form", "postfix");
-    if (group.right === "\u2216" || group.right.indexOf("arrow") > -1) {
-      rightNode.setAttribute("stretchy", "true");
-    }
-    if (group.body.length > 0) {
-      const lastElement = group.body[group.body.length - 1];
-      if (lastElement.type === "color" && !lastElement.isTextColor) {
-        // \color is a switch. If the last element is of type "color" then
-        // the user set the \color switch and left it on.
-        // A \right delimiter turns the switch off, but the delimiter itself gets the color.
-        rightNode.setAttribute("mathcolor", lastElement.color);
-      }
-    }
-    inner.push(rightNode);
-
-    return makeRow(inner);
-  }
-});
-
-defineFunction({
-  type: "middle",
-  names: ["\\middle"],
-  props: {
-    numArgs: 1,
-    argTypes: ["primitive"]
-  },
-  handler: (context, args) => {
-    const delim = checkDelimiter(args[0], context);
-    if (!context.parser.leftrightDepth) {
-      throw new ParseError("\\middle without preceding \\left", delim);
-    }
-
-    return {
-      type: "middle",
-      mode: context.parser.mode,
-      delim: delim.text
-    };
-  },
-  mathmlBuilder: (group, style) => {
-    const textNode = makeText(group.delim, group.mode);
-    const middleNode = new mathMLTree.MathNode("mo", [textNode]);
-    middleNode.setAttribute("fence", "true");
-    if (group.delim.indexOf("arrow") > -1) {
-      middleNode.setAttribute("stretchy", "true");
-    }
-    // The next line is not semantically correct, but
-    // Chromium fails to stretch if it is not there.
-    middleNode.setAttribute("form", "prefix");
-    // MathML gives 5/18em spacing to each <mo> element.
-    // \middle should get delimiter spacing instead.
-    middleNode.setAttribute("lspace", "0.05em");
-    middleNode.setAttribute("rspace", "0.05em");
-    return middleNode;
-  }
-});
-
-const padding$1 = _ => {
-  const node = new mathMLTree.MathNode("mspace");
-  node.setAttribute("width", "3pt");
-  return node
-};
-
-const mathmlBuilder$8 = (group, style) => {
-  let node;
-  if (group.label.indexOf("colorbox") > -1 || group.label === "\\boxed") {
-    // MathML core does not support +width attribute in <mpadded>.
-    // Firefox does not reliably add side padding.
-    // Insert <mspace>
-    node = new mathMLTree.MathNode("mrow", [
-      padding$1(),
-      buildGroup$1(group.body, style),
-      padding$1()
-    ]);
-  } else {
-    node = new mathMLTree.MathNode("menclose", [buildGroup$1(group.body, style)]);
-  }
-  switch (group.label) {
-    case "\\overline":
-      node.setAttribute("notation", "top"); // for Firefox & WebKit
-      node.classes.push("tml-overline");    // for Chromium
-      break
-    case "\\underline":
-      node.setAttribute("notation", "bottom");
-      node.classes.push("tml-underline");
-      break
-    case "\\cancel":
-      node.setAttribute("notation", "updiagonalstrike");
-      node.children.push(new mathMLTree.MathNode("mrow", [], ["tml-cancel", "upstrike"]));
-      break
-    case "\\bcancel":
-      node.setAttribute("notation", "downdiagonalstrike");
-      node.children.push(new mathMLTree.MathNode("mrow", [], ["tml-cancel", "downstrike"]));
-      break
-    case "\\sout":
-      node.setAttribute("notation", "horizontalstrike");
-      node.children.push(new mathMLTree.MathNode("mrow", [], ["tml-cancel", "sout"]));
-      break
-    case "\\xcancel":
-      node.setAttribute("notation", "updiagonalstrike downdiagonalstrike");
-      node.classes.push("tml-xcancel");
-      break
-    case "\\longdiv":
-      node.setAttribute("notation", "longdiv");
-      node.classes.push("longdiv-top");
-      node.children.push(new mathMLTree.MathNode("mrow", [], ["longdiv-arc"]));
-      break
-    case "\\phase":
-      node.setAttribute("notation", "phasorangle");
-      node.classes.push("phasor-bottom");
-      node.children.push(new mathMLTree.MathNode("mrow", [], ["phasor-angle"]));
-      break
-    case "\\textcircled":
-      node.setAttribute("notation", "circle");
-      node.classes.push("circle-pad");
-      node.children.push(new mathMLTree.MathNode("mrow", [], ["textcircle"]));
-      break
-    case "\\angl":
-      node.setAttribute("notation", "actuarial");
-      node.classes.push("actuarial");
-      break
-    case "\\boxed":
-      // \newcommand{\boxed}[1]{\fbox{\m@th$\displaystyle#1$}} from amsmath.sty
-      node.setAttribute("notation", "box");
-      node.classes.push("tml-box");
-      node.setAttribute("scriptlevel", "0");
-      node.setAttribute("displaystyle", "true");
-      break
-    case "\\fbox":
-      node.setAttribute("notation", "box");
-      node.classes.push("tml-fbox");
-      break
-    case "\\fcolorbox":
-    case "\\colorbox": {
-      // <menclose> doesn't have a good notation option for \colorbox.
-      // So use <mpadded> instead. Set some attributes that come
-      // included with <menclose>.
-      //const fboxsep = 3; // 3 pt from LaTeX source2e
-      //node.setAttribute("height", `+${2 * fboxsep}pt`)
-      //node.setAttribute("voffset", `${fboxsep}pt`)
-      const style = { padding: "3pt 0 3pt 0" };
-
-      if (group.label === "\\fcolorbox") {
-        style.border = "0.0667em solid " + String(group.borderColor);
-      }
-      node.style = style;
-      break
-    }
-  }
-  if (group.backgroundColor) {
-    node.setAttribute("mathbackground", group.backgroundColor);
-  }
-  return node;
-};
-
-defineFunction({
-  type: "enclose",
-  names: ["\\colorbox"],
-  props: {
-    numArgs: 2,
-    numOptionalArgs: 1,
-    allowedInText: true,
-    argTypes: ["raw", "raw", "text"]
-  },
-  handler({ parser, funcName }, args, optArgs) {
-    const model = optArgs[0] && assertNodeType(optArgs[0], "raw").string;
-    let color = "";
-    if (model) {
-      const spec = assertNodeType(args[0], "raw").string;
-      color = colorFromSpec(model, spec);
-    } else {
-      color = validateColor(assertNodeType(args[0], "raw").string, parser.gullet.macros);
-    }
-    const body = args[1];
-    return {
-      type: "enclose",
-      mode: parser.mode,
-      label: funcName,
-      backgroundColor: color,
-      body
-    };
-  },
-  mathmlBuilder: mathmlBuilder$8
-});
-
-defineFunction({
-  type: "enclose",
-  names: ["\\fcolorbox"],
-  props: {
-    numArgs: 3,
-    numOptionalArgs: 1,
-    allowedInText: true,
-    argTypes: ["raw", "raw", "raw", "text"]
-  },
-  handler({ parser, funcName }, args, optArgs) {
-    const model = optArgs[0] && assertNodeType(optArgs[0], "raw").string;
-    let borderColor = "";
-    let backgroundColor;
-    if (model) {
-      const borderSpec = assertNodeType(args[0], "raw").string;
-      const backgroundSpec = assertNodeType(args[0], "raw").string;
-      borderColor = colorFromSpec(model, borderSpec);
-      backgroundColor = colorFromSpec(model, backgroundSpec);
-    } else {
-      borderColor = validateColor(assertNodeType(args[0], "raw").string, parser.gullet.macros);
-      backgroundColor = validateColor(assertNodeType(args[1], "raw").string, parser.gullet.macros);
-    }
-    const body = args[2];
-    return {
-      type: "enclose",
-      mode: parser.mode,
-      label: funcName,
-      backgroundColor,
-      borderColor,
-      body
-    };
-  },
-  mathmlBuilder: mathmlBuilder$8
-});
-
-defineFunction({
-  type: "enclose",
-  names: ["\\fbox"],
-  props: {
-    numArgs: 1,
-    argTypes: ["hbox"],
-    allowedInText: true
-  },
-  handler({ parser }, args) {
-    return {
-      type: "enclose",
-      mode: parser.mode,
-      label: "\\fbox",
-      body: args[0]
-    };
-  }
-});
-
-defineFunction({
-  type: "enclose",
-  names: ["\\angl", "\\cancel", "\\bcancel", "\\xcancel", "\\sout", "\\overline",
-    "\\boxed", "\\longdiv", "\\phase"],
-  props: {
-    numArgs: 1
-  },
-  handler({ parser, funcName }, args) {
-    const body = args[0];
-    return {
-      type: "enclose",
-      mode: parser.mode,
-      label: funcName,
-      body
-    };
-  },
-  mathmlBuilder: mathmlBuilder$8
-});
-
-defineFunction({
-  type: "enclose",
-  names: ["\\underline"],
-  props: {
-    numArgs: 1,
-    allowedInText: true
-  },
-  handler({ parser, funcName }, args) {
-    const body = args[0];
-    return {
-      type: "enclose",
-      mode: parser.mode,
-      label: funcName,
-      body
-    };
-  },
-  mathmlBuilder: mathmlBuilder$8
-});
-
-
-defineFunction({
-  type: "enclose",
-  names: ["\\textcircled"],
-  props: {
-    numArgs: 1,
-    argTypes: ["text"],
-    allowedInArgument: true,
-    allowedInText: true
-  },
-  handler({ parser, funcName }, args) {
-    const body = args[0];
-    return {
-      type: "enclose",
-      mode: parser.mode,
-      label: funcName,
-      body
-    };
-  },
-  mathmlBuilder: mathmlBuilder$8
-});
-
-/**
- * All registered environments.
- * `environments.js` exports this same dictionary again and makes it public.
- * `Parser.js` requires this dictionary via `environments.js`.
+/*
+ * A helper for \bordermatrix.
+ * parseArray() has parsed the tokens as if the environment
+ * was \begin{matrix}. That parse tree is this function’s input.
+ * Here, we rearrange the parse tree to get one that will
+ * result in TeX \bordermatrix.
+ * The final result includes a {pmatrix}, which is the bottom
+ * half of a <mover> element. The top of the <mover> contains
+ * the \bordermatrix headings. The top section also contains the
+ * contents of the bottom {pmatrix}. Those elements are hidden via
+ * \hphantom, but they ensure that column widths are the same top and
+ * bottom.
+ *
+ * We also create a left {matrix} with a single column that contains
+ * elements shifted out of the matrix. The left {matrix} also
+ * contains \vphantom copies of the other {pmatrix} elements.
+ * As before, this ensures consistent row heights of left and main.
  */
-const _environments = {};
 
-function defineEnvironment({ type, names, props, handler, mathmlBuilder }) {
-  // Set default values of environments.
-  const data = {
-    type,
-    numArgs: props.numArgs || 0,
-    allowedInText: false,
-    numOptionalArgs: 0,
-    handler
+const bordermatrixParseTree = (matrix, delimiters) => {
+  const body = matrix.body;
+  body[0].shift(); // dispose of top left cell
+
+  // Create an array for the left column
+  const leftColumnBody = new Array(body.length - 1).fill().map(() => []);
+  for (let i = 1; i < body.length; i++) {
+    // The visible part of the cell
+    leftColumnBody[i - 1].push(body[i].shift());
+    // A vphantom with contents from the pmatrix, to set minimum cell height
+    const phantomBody = [];
+    for (let j = 0; j < body[i].length; j++) {
+      phantomBody.push(structuredClone(body[i][j]));
+    }
+    leftColumnBody[i - 1].push(phantom(phantomBody, "vphantom"));
+  }
+
+  // Create an array for the top row
+  const topRowBody = new Array(body.length).fill().map(() => []);
+  for (let j = 0; j < body[0].length; j++) {
+    topRowBody[0].push(structuredClone(body[0][j]));
+  }
+  // Copy the rest of the pmatrix, but squashed via \hphantom
+  for (let i = 1; i < body.length; i++) {
+    for (let j = 0; j < body[0].length; j++) {
+      topRowBody[i].push(phantom(structuredClone(body[i][j]).body, "hphantom"));
+    }
+  }
+
+  // Squash the top row of the main {pmatrix}
+  for (let j = 0; j < body[0].length; j++) {
+    body[0][j] = phantom(structuredClone(body[0][j]).body, "hphantom");
+  }
+
+  // Now wrap the arrays in the proper parse nodes.
+
+  const leftColumn = {
+    type: "array",
+    mode: "math",
+    body: leftColumnBody,
+    cols: [{ type: "align", align: "c" }],
+    rowGaps: new Array(leftColumnBody.length - 1).fill(null),
+    hLinesBeforeRow: new Array(leftColumnBody.length + 1).fill().map(() => []),
+    envClasses: [],
+    scriptLevel: "text",
+    arraystretch: 1,
+    labels: new Array(leftColumnBody.length).fill(""),
+    arraycolsep: { "number": 0.04, unit: "em" }
   };
-  for (let i = 0; i < names.length; ++i) {
-    _environments[names[i]] = data;
-  }
-  if (mathmlBuilder) {
-    _mathmlGroupBuilders[type] = mathmlBuilder;
-  }
-}
+
+  const topRow = {
+    type: "array",
+    mode: "math",
+    body: topRowBody,
+    cols: new Array(topRowBody.length).fill({ type: "align", align: "c" }),
+    rowGaps: new Array(topRowBody.length - 1).fill(null),
+    hLinesBeforeRow: new Array(topRowBody.length + 1).fill().map(() => []),
+    envClasses: [],
+    scriptLevel: "text",
+    arraystretch: 1,
+    labels: new Array(topRowBody.length).fill(""),
+    arraycolsep: null
+  };
+
+  const topWrapper = {
+    type: "styling",
+    mode: "math",
+    scriptLevel: "text", // Must set this explicitly.
+    body: [topRow]       // Default level is "script".
+  };
+
+  const container = {
+    type: "leftright",
+    mode: "math",
+    body: [matrix],
+    left: delimiters ? delimiters[0] : "(",
+    right: delimiters ? delimiters[1] : ")",
+    rightColor: undefined
+  };
+
+  const base = {
+    type: "op",   // The base of a TeX \overset
+    mode: "math",
+    limits: true,
+    alwaysHandleSupSub: true,
+    parentIsSupSub: true,
+    symbol: false,
+    stack: true,
+    suppressBaseShift: true,
+    body: [container]
+  };
+
+  const mover = {
+    type: "supsub",  // We're using the MathML equivalent
+    mode: "math",    // of TeX \overset.
+    base: base,      // That keeps the {pmatrix} aligned with
+    sup: topWrapper, // the math centerline.
+    sub: null
+  };
+
+  return ordGroup([leftColumn, mover])
+};
 
 /**
  * Lexing or parsing positional information for error reporting.
@@ -26494,6 +25484,7 @@ function parseArray(
 },
   scriptLevel
 ) {
+  const endToken = envClasses && envClasses.includes("bordermatrix") ? "}" : "\\end";
   parser.gullet.beginGroup();
   if (!singleRow) {
     // \cr is equivalent to \\ without the optional size argument (see below)
@@ -26567,7 +25558,7 @@ function parseArray(
         }
       }
       parser.consume();
-    } else if (next === "\\end") {
+    } else if (next === endToken) {
       endRow();
       // Arrays terminate newlines with `\crcr` which consumes a `\cr` if
       // the last line is empty.  However, AMS environments keep the
@@ -26604,7 +25595,7 @@ function parseArray(
       body.push(row);
       beginRow();
     } else {
-      throw new ParseError("Expected & or \\\\ or \\cr or \\end", parser.nextToken);
+      throw new ParseError("Expected & or \\\\ or \\cr or " + endToken, parser.nextToken);
     }
   }
 
@@ -26652,7 +25643,7 @@ const glue = group => {
   return glueNode
 };
 
-const mathmlBuilder$7 = function(group, style) {
+const mathmlBuilder$9 = function(group, style) {
   const tbl = [];
   const numRows = group.body.length;
   const hlines = group.hLinesBeforeRow;
@@ -26737,23 +25728,44 @@ const mathmlBuilder$7 = function(group, style) {
         });
       }
     }
+
+    // Check for \hphantom \from \bordermatrix
+    let mustSquashRow = true;
+    for (let j = 0; j < mtr.children.length; j++) {
+      const child = mtr.children[j].children[0];
+      if (!(child && child.type === "mpadded" && child.attributes.height === "0px")) {
+        mustSquashRow = false;
+        break
+      }
+    }
+    if (mustSquashRow) {
+      // All the cell contents are \hphantom. Squash the padding.
+      for (let j = 0; j < mtr.children.length; j++) {
+        mtr.children[j].style.paddingTop = "0";
+        mtr.children[j].style.paddingBottom = "0";
+      }
+    }
+
     tbl.push(mtr);
   }
 
-  if (group.envClasses.length > 0) {
-    if (group.arraystretch && group.arraystretch !== 1) {
-      // In LaTeX, \arraystretch is a factor applied to a 12pt strut height.
-      // It defines a baseline to baseline distance.
-      // Here, we do an approximation of that approach.
-      const pad = String(1.4 * group.arraystretch - 0.8) + "ex";
-      for (let i = 0; i < tbl.length; i++) {
-        for (let j = 0; j < tbl[i].children.length; j++) {
-          tbl[i].children[j].style.paddingTop = pad;
-          tbl[i].children[j].style.paddingBottom = pad;
-        }
+  if (group.arraystretch && group.arraystretch !== 1) {
+    // In LaTeX, \arraystretch is a factor applied to a 12pt strut height.
+    // It defines a baseline to baseline distance.
+    // Here, we do an approximation of that approach.
+    const pad = String(1.4 * group.arraystretch - 0.8) + "ex";
+    for (let i = 0; i < tbl.length; i++) {
+      for (let j = 0; j < tbl[i].children.length; j++) {
+        tbl[i].children[j].style.paddingTop = pad;
+        tbl[i].children[j].style.paddingBottom = pad;
       }
     }
-    let sidePadding = group.envClasses.includes("abut")
+  }
+
+  let sidePadding;
+  let sidePadUnit;
+  if (group.envClasses.length > 0) {
+    sidePadding = group.envClasses.includes("abut")
       ? "0"
       : group.envClasses.includes("cases")
       ? "0"
@@ -26762,13 +25774,14 @@ const mathmlBuilder$7 = function(group, style) {
       : group.envClasses.includes("cd")
       ? "0.25"
       : "0.4"; // default side padding
-    let sidePadUnit = "em";
-    if (group.arraycolsep) {
-      const arraySidePad = calculateSize(group.arraycolsep, style);
-      sidePadding = arraySidePad.number.toFixed(4);
-      sidePadUnit = arraySidePad.unit;
-    }
-
+    sidePadUnit = "em";
+  }
+  if (group.arraycolsep) {
+    const arraySidePad = calculateSize(group.arraycolsep, style);
+    sidePadding = arraySidePad.number.toFixed(4);
+    sidePadUnit = arraySidePad.unit;
+  }
+  if (sidePadding) {
     const numCols = tbl.length === 0 ? 0 : tbl[0].children.length;
 
     const sidePad = (j, hand) => {
@@ -26790,7 +25803,18 @@ const mathmlBuilder$7 = function(group, style) {
         tbl[i].children[j].style.paddingRight = `${sidePad(j, 1)}${sidePadUnit}`;
       }
     }
+  }
+  if (group.envClasses.length === 0) {
+    // Set zero padding on side of the matrix
+    for (let i = 0; i < tbl.length; i++) {
+      tbl[i].children[0].style.paddingLeft = "0em";
+      if (tbl[i].children.length === tbl[0].children.length) {
+        tbl[i].children[tbl[i].children.length - 1].style.paddingRight = "0em";
+      }
+    }
+  }
 
+  if (group.envClasses.length > 0) {
     // Justification
     const align = group.envClasses.includes("align") || group.envClasses.includes("alignat");
     for (let i = 0; i < tbl.length; i++) {
@@ -26814,14 +25838,6 @@ const mathmlBuilder$7 = function(group, style) {
         for (const cell of row.children) {
           cell.classes.push("tml-left");
         }
-      }
-    }
-  } else {
-    // Set zero padding on side of the matrix
-    for (let i = 0; i < tbl.length; i++) {
-      tbl[i].children[0].style.paddingLeft = "0em";
-      if (tbl[i].children.length === tbl[0].children.length) {
-        tbl[i].children[tbl[i].children.length - 1].style.paddingRight = "0em";
       }
     }
   }
@@ -27058,10 +26074,10 @@ defineEnvironment({
     };
     return parseArray(context.parser, res, dCellStyle(context.envName));
   },
-  mathmlBuilder: mathmlBuilder$7
+  mathmlBuilder: mathmlBuilder$9
 });
 
-// The matrix environments of amsmath builds on the array environment
+// The matrix environments of amsmath build on the array environment
 // of LaTeX, which is discussed above.
 // The mathtools package adds starred versions of the same environments.
 // These have an optional argument to choose left|center|right justification.
@@ -27121,6 +26137,10 @@ defineEnvironment({
     const res = parseArray(context.parser, payload, "text");
     res.cols = new Array(res.body[0].length).fill({ type: "align", align: colAlign });
     const [arraystretch, arraycolsep] = arrayGaps(context.parser.gullet.macros);
+    res.arraystretch = arraystretch;
+    if (arraycolsep && !(arraycolsep === 6 && arraycolsep === "pt")) {
+      res.arraycolsep = arraycolsep;
+    }
     return delimiters
       ? {
         type: "leftright",
@@ -27128,13 +26148,29 @@ defineEnvironment({
         body: [res],
         left: delimiters[0],
         right: delimiters[1],
-        rightColor: undefined, // \right uninfluenced by \color in array
-        arraystretch,
-        arraycolsep
+        rightColor: undefined // \right uninfluenced by \color in array
       }
       : res;
   },
-  mathmlBuilder: mathmlBuilder$7
+  mathmlBuilder: mathmlBuilder$9
+});
+
+defineEnvironment({
+  type: "array",
+  names: ["bordermatrix"],
+  props: {
+    numArgs: 0
+  },
+  handler(context) {
+    const payload = { cols: [], envClasses: ["bordermatrix"] };
+    const res = parseArray(context.parser, payload, "text");
+    res.cols = new Array(res.body[0].length).fill({ type: "align", align: "c" });
+    res.envClasses = [];
+    res.arraystretch = 1;
+    if (context.envName === "matrix") { return res}
+    return bordermatrixParseTree(res, context.delimiters)
+  },
+  mathmlBuilder: mathmlBuilder$9
 });
 
 defineEnvironment({
@@ -27149,7 +26185,7 @@ defineEnvironment({
     res.envClasses = ["small"];
     return res;
   },
-  mathmlBuilder: mathmlBuilder$7
+  mathmlBuilder: mathmlBuilder$9
 });
 
 defineEnvironment({
@@ -27187,7 +26223,7 @@ defineEnvironment({
     }
     return res;
   },
-  mathmlBuilder: mathmlBuilder$7
+  mathmlBuilder: mathmlBuilder$9
 });
 
 // A cases environment (in amsmath.sty) is almost equivalent to
@@ -27217,7 +26253,7 @@ defineEnvironment({
       rightColor: undefined
     };
   },
-  mathmlBuilder: mathmlBuilder$7
+  mathmlBuilder: mathmlBuilder$9
 });
 
 // In the align environment, one uses ampersands, &, to specify number of
@@ -27231,7 +26267,7 @@ defineEnvironment({
     numArgs: 0
   },
   handler: alignedHandler,
-  mathmlBuilder: mathmlBuilder$7
+  mathmlBuilder: mathmlBuilder$9
 });
 
 // alignat environment is like an align environment, but one must explicitly
@@ -27243,7 +26279,7 @@ defineEnvironment({
     numArgs: 1
   },
   handler: alignedHandler,
-  mathmlBuilder: mathmlBuilder$7
+  mathmlBuilder: mathmlBuilder$9
 });
 
 // A gathered environment is like an array environment with one centered
@@ -27268,7 +26304,7 @@ defineEnvironment({
     };
     return parseArray(context.parser, res, "display");
   },
-  mathmlBuilder: mathmlBuilder$7
+  mathmlBuilder: mathmlBuilder$9
 });
 
 defineEnvironment({
@@ -27289,7 +26325,7 @@ defineEnvironment({
     };
     return parseArray(context.parser, res, "display");
   },
-  mathmlBuilder: mathmlBuilder$7
+  mathmlBuilder: mathmlBuilder$9
 });
 
 defineEnvironment({
@@ -27308,7 +26344,7 @@ defineEnvironment({
     };
     return parseArray(context.parser, res, "display");
   },
-  mathmlBuilder: mathmlBuilder$7
+  mathmlBuilder: mathmlBuilder$9
 });
 
 defineEnvironment({
@@ -27321,7 +26357,7 @@ defineEnvironment({
     validateAmsEnvironmentContext(context);
     return parseCD(context.parser);
   },
-  mathmlBuilder: mathmlBuilder$7
+  mathmlBuilder: mathmlBuilder$9
 });
 
 // Catch \hline outside array environment
@@ -27339,6 +26375,1195 @@ defineFunction({
 });
 
 const environments = _environments;
+
+// \bordermatrix  from TeXbook pp 177 & 361
+// Optional argument from Herbert Voß, Math mode, p 20
+// Ref: https://tug.ctan.org/obsolete/info/math/voss/mathmode/Mathmode.pdf
+
+defineFunction({
+  type: "bordermatrix",
+  names: ["\\bordermatrix", "\\matrix"],
+  props: {
+    numArgs: 0,
+    numOptionalArgs: 1
+  },
+  handler: ({ parser, funcName }, args, optArgs) => {
+    // Find out if the author has defined custom delimiters
+    let delimiters = ["(", ")"];
+    if (funcName === "\\bordermatrix" && optArgs[0] && optArgs[0].body) {
+      const body = optArgs[0].body;
+      if (body.length === 2 && body[0].type === "atom" && body[1].type === "atom") {
+        if (body[0].family === "open" && body[1].family === "close") {
+          delimiters = [body[0].text, body[1].text];
+        }
+      }
+    }
+    // consume the opening brace
+    parser.consumeSpaces();
+    parser.consume();
+
+    // Pass control to the environment handler in array.js.
+    const env = environments["bordermatrix"];
+    const context = {
+      mode: parser.mode,
+      envName: funcName.slice(1),
+      delimiters,
+      parser
+    };
+    const result = env.handler(context);
+    parser.expect("}", true);
+    return result
+  }
+});
+
+// \@char is an internal function that takes a grouped decimal argument like
+// {123} and converts into symbol with code 123.  It is used by the *macro*
+// \char defined in macros.js.
+defineFunction({
+  type: "textord",
+  names: ["\\@char"],
+  props: {
+    numArgs: 1,
+    allowedInText: true
+  },
+  handler({ parser, token }, args) {
+    const arg = assertNodeType(args[0], "ordgroup");
+    const group = arg.body;
+    let number = "";
+    for (let i = 0; i < group.length; i++) {
+      const node = assertNodeType(group[i], "textord");
+      number += node.text;
+    }
+    const code = parseInt(number);
+    if (isNaN(code)) {
+      throw new ParseError(`\\@char has non-numeric argument ${number}`, token)
+    }
+    return {
+      type: "textord",
+      mode: parser.mode,
+      text: String.fromCodePoint(code)
+    }
+  }
+});
+
+// Helpers
+const htmlRegEx = /^(#[a-f0-9]{3}|#?[a-f0-9]{6})$/i;
+const htmlOrNameRegEx = /^(#[a-f0-9]{3}|#?[a-f0-9]{6}|[a-z]+)$/i;
+const RGBregEx = /^ *\d{1,3} *(?:, *\d{1,3} *){2}$/;
+const rgbRegEx = /^ *[10](?:\.\d*)? *(?:, *[10](?:\.\d*)? *){2}$/;
+const xcolorHtmlRegEx = /^[a-f0-9]{6}$/i;
+const toHex = num => {
+  let str = num.toString(16);
+  if (str.length === 1) { str = "0" + str; }
+  return str
+};
+
+// Colors from Tables 4.1 and 4.2 of the xcolor package.
+// Table 4.1 (lower case) RGB values are taken from chroma and xcolor.dtx.
+// Table 4.2 (Capitalizzed) values were sampled, because Chroma contains a unreliable
+// conversion from cmyk to RGB. See https://tex.stackexchange.com/a/537274.
+const xcolors = JSON.parse(`{
+  "Apricot": "#ffb484",
+  "Aquamarine": "#08b4bc",
+  "Bittersweet": "#c84c14",
+  "blue": "#0000FF",
+  "Blue": "#303494",
+  "BlueGreen": "#08b4bc",
+  "BlueViolet": "#503c94",
+  "BrickRed": "#b8341c",
+  "brown": "#BF8040",
+  "Brown": "#802404",
+  "BurntOrange": "#f8941c",
+  "CadetBlue": "#78749c",
+  "CarnationPink": "#f884b4",
+  "Cerulean": "#08a4e4",
+  "CornflowerBlue": "#40ace4",
+  "cyan": "#00FFFF",
+  "Cyan": "#08acec",
+  "Dandelion": "#ffbc44",
+  "darkgray": "#404040",
+  "DarkOrchid": "#a8548c",
+  "Emerald": "#08ac9c",
+  "ForestGreen": "#089c54",
+  "Fuchsia": "#90348c",
+  "Goldenrod": "#ffdc44",
+  "gray": "#808080",
+  "Gray": "#98949c",
+  "green": "#00FF00",
+  "Green": "#08a44c",
+  "GreenYellow": "#e0e474",
+  "JungleGreen": "#08ac9c",
+  "Lavender": "#f89cc4",
+  "lightgray": "#c0c0c0",
+  "lime": "#BFFF00",
+  "LimeGreen": "#90c43c",
+  "magenta": "#FF00FF",
+  "Magenta": "#f0048c",
+  "Mahogany": "#b0341c",
+  "Maroon": "#b03434",
+  "Melon": "#f89c7c",
+  "MidnightBlue": "#086494",
+  "Mulberry": "#b03c94",
+  "NavyBlue": "#086cbc",
+  "olive": "#7F7F00",
+  "OliveGreen": "#407c34",
+  "orange": "#FF8000",
+  "Orange": "#f8843c",
+  "OrangeRed": "#f0145c",
+  "Orchid": "#b074ac",
+  "Peach": "#f8945c",
+  "Periwinkle": "#8074bc",
+  "PineGreen": "#088c74",
+  "pink": "#ff7f7f",
+  "Plum": "#98248c",
+  "ProcessBlue": "#08b4ec",
+  "purple": "#BF0040",
+  "Purple": "#a0449c",
+  "RawSienna": "#983c04",
+  "red": "#ff0000",
+  "Red": "#f01c24",
+  "RedOrange": "#f86434",
+  "RedViolet": "#a0246c",
+  "Rhodamine": "#f0549c",
+  "Royallue": "#0874bc",
+  "RoyalPurple": "#683c9c",
+  "RubineRed": "#f0047c",
+  "Salmon": "#f8948c",
+  "SeaGreen": "#30bc9c",
+  "Sepia": "#701404",
+  "SkyBlue": "#48c4dc",
+  "SpringGreen": "#c8dc64",
+  "Tan": "#e09c74",
+  "teal": "#007F7F",
+  "TealBlue": "#08acb4",
+  "Thistle": "#d884b4",
+  "Turquoise": "#08b4cc",
+  "violet": "#800080",
+  "Violet": "#60449c",
+  "VioletRed": "#f054a4",
+  "WildStrawberry": "#f0246c",
+  "yellow": "#FFFF00",
+  "Yellow": "#fff404",
+  "YellowGreen": "#98cc6c",
+  "YellowOrange": "#ffa41c"
+}`);
+
+const colorFromSpec = (model, spec) => {
+  let color = "";
+  if (model === "HTML") {
+    if (!htmlRegEx.test(spec)) {
+      throw new ParseError("Invalid HTML input.")
+    }
+    color = spec;
+  } else if (model === "RGB") {
+    if (!RGBregEx.test(spec)) {
+      throw new ParseError("Invalid RGB input.")
+    }
+    spec.split(",").map(e => { color += toHex(Number(e.trim())); });
+  } else {
+    if (!rgbRegEx.test(spec)) {
+      throw new ParseError("Invalid rbg input.")
+    }
+    spec.split(",").map(e => {
+      const num = Number(e.trim());
+      if (num > 1) { throw new ParseError("Color rgb input must be < 1.") }
+      color += toHex(Number((num * 255).toFixed(0)));
+    });
+  }
+  if (color.charAt(0) !== "#") { color = "#" + color; }
+  return color
+};
+
+const validateColor = (color, macros, token) => {
+  const macroName = `\\\\color@${color}`; // from \defineColor.
+  const match = htmlOrNameRegEx.exec(color);
+  if (!match) { throw new ParseError("Invalid color: '" + color + "'", token) }
+  // We allow a 6-digit HTML color spec without a leading "#".
+  // This follows the xcolor package's HTML color model.
+  // Predefined color names are all missed by this RegEx pattern.
+  if (xcolorHtmlRegEx.test(color)) {
+    return "#" + color
+  } else if (color.charAt(0) === "#") {
+    return color
+  } else if (macros.has(macroName)) {
+    color = macros.get(macroName).tokens[0].text;
+  } else if (xcolors[color]) {
+    color = xcolors[color];
+  }
+  return color
+};
+
+const mathmlBuilder$8 = (group, style) => {
+  // In LaTeX, color is not supposed to change the spacing of any node.
+  // So instead of wrapping the group in an <mstyle>, we apply
+  // the color individually to each node and return a document fragment.
+  let expr = buildExpression(group.body, style.withColor(group.color));
+  expr = expr.map(e => {
+    e.style.color = group.color;
+    return e
+  });
+  return mathMLTree.newDocumentFragment(expr)
+};
+
+defineFunction({
+  type: "color",
+  names: ["\\textcolor"],
+  props: {
+    numArgs: 2,
+    numOptionalArgs: 1,
+    allowedInText: true,
+    argTypes: ["raw", "raw", "original"]
+  },
+  handler({ parser, token }, args, optArgs) {
+    const model = optArgs[0] && assertNodeType(optArgs[0], "raw").string;
+    let color = "";
+    if (model) {
+      const spec = assertNodeType(args[0], "raw").string;
+      color = colorFromSpec(model, spec);
+    } else {
+      color = validateColor(assertNodeType(args[0], "raw").string, parser.gullet.macros, token);
+    }
+    const body = args[1];
+    return {
+      type: "color",
+      mode: parser.mode,
+      color,
+      isTextColor: true,
+      body: ordargument(body)
+    }
+  },
+  mathmlBuilder: mathmlBuilder$8
+});
+
+defineFunction({
+  type: "color",
+  names: ["\\color"],
+  props: {
+    numArgs: 1,
+    numOptionalArgs: 1,
+    allowedInText: true,
+    argTypes: ["raw", "raw"]
+  },
+  handler({ parser, breakOnTokenText, token }, args, optArgs) {
+    const model = optArgs[0] && assertNodeType(optArgs[0], "raw").string;
+    let color = "";
+    if (model) {
+      const spec = assertNodeType(args[0], "raw").string;
+      color = colorFromSpec(model, spec);
+    } else {
+      color = validateColor(assertNodeType(args[0], "raw").string, parser.gullet.macros, token);
+    }
+
+    // Parse out the implicit body that should be colored.
+    const body = parser.parseExpression(true, breakOnTokenText, true);
+
+    return {
+      type: "color",
+      mode: parser.mode,
+      color,
+      isTextColor: false,
+      body
+    }
+  },
+  mathmlBuilder: mathmlBuilder$8
+});
+
+defineFunction({
+  type: "color",
+  names: ["\\definecolor"],
+  props: {
+    numArgs: 3,
+    allowedInText: true,
+    argTypes: ["raw", "raw", "raw"]
+  },
+  handler({ parser, funcName, token }, args) {
+    const name = assertNodeType(args[0], "raw").string;
+    if (!/^[A-Za-z]+$/.test(name)) {
+      throw new ParseError("Color name must be latin letters.", token)
+    }
+    const model = assertNodeType(args[1], "raw").string;
+    if (!["HTML", "RGB", "rgb"].includes(model)) {
+      throw new ParseError("Color model must be HTML, RGB, or rgb.", token)
+    }
+    const spec = assertNodeType(args[2], "raw").string;
+    const color = colorFromSpec(model, spec);
+    parser.gullet.macros.set(`\\\\color@${name}`, { tokens: [{ text: color }], numArgs: 0 });
+    return { type: "internal", mode: parser.mode }
+  }
+  // No mathmlBuilder. The point of \definecolor is to set a macro.
+});
+
+// Row breaks within tabular environments, and line breaks at top level
+
+
+// \DeclareRobustCommand\\{...\@xnewline}
+defineFunction({
+  type: "cr",
+  names: ["\\\\"],
+  props: {
+    numArgs: 0,
+    numOptionalArgs: 0,
+    allowedInText: true
+  },
+
+  handler({ parser }, args, optArgs) {
+    const size = parser.gullet.future().text === "[" ? parser.parseSizeGroup(true) : null;
+    const newLine = !parser.settings.displayMode;
+    return {
+      type: "cr",
+      mode: parser.mode,
+      newLine,
+      size: size && assertNodeType(size, "size").value
+    }
+  },
+
+  // The following builder is called only at the top level,
+  // not within tabular/array environments.
+
+  mathmlBuilder(group, style) {
+    // MathML 3.0 calls for newline to occur in an <mo> or an <mspace>.
+    // Ref: https://www.w3.org/TR/MathML3/chapter3.html#presm.linebreaking
+    const node = new mathMLTree.MathNode("mo");
+    if (group.newLine) {
+      node.setAttribute("linebreak", "newline");
+      if (group.size) {
+        const size = calculateSize(group.size, style);
+        node.setAttribute("height", size.number + size.unit);
+      }
+    }
+    return node
+  }
+});
+
+const globalMap = {
+  "\\global": "\\global",
+  "\\long": "\\\\globallong",
+  "\\\\globallong": "\\\\globallong",
+  "\\def": "\\gdef",
+  "\\gdef": "\\gdef",
+  "\\edef": "\\xdef",
+  "\\xdef": "\\xdef",
+  "\\let": "\\\\globallet",
+  "\\futurelet": "\\\\globalfuture"
+};
+
+const checkControlSequence = (tok) => {
+  const name = tok.text;
+  if (/^(?:[\\{}$&#^_]|EOF)$/.test(name)) {
+    throw new ParseError("Expected a control sequence", tok);
+  }
+  return name;
+};
+
+const getRHS = (parser) => {
+  let tok = parser.gullet.popToken();
+  if (tok.text === "=") {
+    // consume optional equals
+    tok = parser.gullet.popToken();
+    if (tok.text === " ") {
+      // consume one optional space
+      tok = parser.gullet.popToken();
+    }
+  }
+  return tok;
+};
+
+const letCommand = (parser, name, tok, global) => {
+  let macro = parser.gullet.macros.get(tok.text);
+  if (macro == null) {
+    // don't expand it later even if a macro with the same name is defined
+    // e.g., \let\foo=\frac \def\frac{\relax} \frac12
+    tok.noexpand = true;
+    macro = {
+      tokens: [tok],
+      numArgs: 0,
+      // reproduce the same behavior in expansion
+      unexpandable: !parser.gullet.isExpandable(tok.text)
+    };
+  }
+  parser.gullet.macros.set(name, macro, global);
+};
+
+// <assignment> -> <non-macro assignment>|<macro assignment>
+// <non-macro assignment> -> <simple assignment>|\global<non-macro assignment>
+// <macro assignment> -> <definition>|<prefix><macro assignment>
+// <prefix> -> \global|\long|\outer
+defineFunction({
+  type: "internal",
+  names: [
+    "\\global",
+    "\\long",
+    "\\\\globallong" // can’t be entered directly
+  ],
+  props: {
+    numArgs: 0,
+    allowedInText: true
+  },
+  handler({ parser, funcName }) {
+    parser.consumeSpaces();
+    const token = parser.fetch();
+    if (globalMap[token.text]) {
+      // Temml doesn't have \par, so ignore \long
+      if (funcName === "\\global" || funcName === "\\\\globallong") {
+        token.text = globalMap[token.text];
+      }
+      return assertNodeType(parser.parseFunction(), "internal");
+    }
+    throw new ParseError(`Invalid token after macro prefix`, token);
+  }
+});
+
+// Basic support for macro definitions: \def, \gdef, \edef, \xdef
+// <definition> -> <def><control sequence><definition text>
+// <def> -> \def|\gdef|\edef|\xdef
+// <definition text> -> <parameter text><left brace><balanced text><right brace>
+defineFunction({
+  type: "internal",
+  names: ["\\def", "\\gdef", "\\edef", "\\xdef"],
+  props: {
+    numArgs: 0,
+    allowedInText: true,
+    primitive: true
+  },
+  handler({ parser, funcName }) {
+    let tok = parser.gullet.popToken();
+    const name = tok.text;
+    if (/^(?:[\\{}$&#^_]|EOF)$/.test(name)) {
+      throw new ParseError("Expected a control sequence", tok);
+    }
+
+    let numArgs = 0;
+    let insert;
+    const delimiters = [[]];
+    // <parameter text> contains no braces
+    while (parser.gullet.future().text !== "{") {
+      tok = parser.gullet.popToken();
+      if (tok.text === "#") {
+        // If the very last character of the <parameter text> is #, so that
+        // this # is immediately followed by {, TeX will behave as if the {
+        // had been inserted at the right end of both the parameter text
+        // and the replacement text.
+        if (parser.gullet.future().text === "{") {
+          insert = parser.gullet.future();
+          delimiters[numArgs].push("{");
+          break;
+        }
+
+        // A parameter, the first appearance of # must be followed by 1,
+        // the next by 2, and so on; up to nine #’s are allowed
+        tok = parser.gullet.popToken();
+        if (!/^[1-9]$/.test(tok.text)) {
+          throw new ParseError(`Invalid argument number "${tok.text}"`);
+        }
+        if (parseInt(tok.text) !== numArgs + 1) {
+          throw new ParseError(`Argument number "${tok.text}" out of order`);
+        }
+        numArgs++;
+        delimiters.push([]);
+      } else if (tok.text === "EOF") {
+        throw new ParseError("Expected a macro definition");
+      } else {
+        delimiters[numArgs].push(tok.text);
+      }
+    }
+    // replacement text, enclosed in '{' and '}' and properly nested
+    let { tokens } = parser.gullet.consumeArg();
+    if (insert) {
+      tokens.unshift(insert);
+    }
+
+    if (funcName === "\\edef" || funcName === "\\xdef") {
+      tokens = parser.gullet.expandTokens(tokens);
+      if (tokens.length > parser.gullet.settings.maxExpand) {
+        throw new ParseError("Too many expansions in an " + funcName);
+      }
+      tokens.reverse(); // to fit in with stack order
+    }
+    // Final arg is the expansion of the macro
+    parser.gullet.macros.set(
+      name,
+      { tokens, numArgs, delimiters },
+      funcName === globalMap[funcName]
+    );
+    return { type: "internal", mode: parser.mode };
+  }
+});
+
+// <simple assignment> -> <let assignment>
+// <let assignment> -> \futurelet<control sequence><token><token>
+//     | \let<control sequence><equals><one optional space><token>
+// <equals> -> <optional spaces>|<optional spaces>=
+defineFunction({
+  type: "internal",
+  names: [
+    "\\let",
+    "\\\\globallet" // can’t be entered directly
+  ],
+  props: {
+    numArgs: 0,
+    allowedInText: true,
+    primitive: true
+  },
+  handler({ parser, funcName }) {
+    const name = checkControlSequence(parser.gullet.popToken());
+    parser.gullet.consumeSpaces();
+    const tok = getRHS(parser);
+    letCommand(parser, name, tok, funcName === "\\\\globallet");
+    return { type: "internal", mode: parser.mode };
+  }
+});
+
+// ref: https://www.tug.org/TUGboat/tb09-3/tb22bechtolsheim.pdf
+defineFunction({
+  type: "internal",
+  names: [
+    "\\futurelet",
+    "\\\\globalfuture" // can’t be entered directly
+  ],
+  props: {
+    numArgs: 0,
+    allowedInText: true,
+    primitive: true
+  },
+  handler({ parser, funcName }) {
+    const name = checkControlSequence(parser.gullet.popToken());
+    const middle = parser.gullet.popToken();
+    const tok = parser.gullet.popToken();
+    letCommand(parser, name, tok, funcName === "\\\\globalfuture");
+    parser.gullet.pushToken(tok);
+    parser.gullet.pushToken(middle);
+    return { type: "internal", mode: parser.mode };
+  }
+});
+
+defineFunction({
+  type: "internal",
+  names: ["\\newcommand", "\\renewcommand", "\\providecommand"],
+  props: {
+    numArgs: 0,
+    allowedInText: true,
+    primitive: true
+  },
+  handler({ parser, funcName }) {
+    let name = "";
+    const tok = parser.gullet.popToken();
+    if (tok.text === "{") {
+      name = checkControlSequence(parser.gullet.popToken());
+      parser.gullet.popToken();
+    } else {
+      name = checkControlSequence(tok);
+    }
+
+    const exists = parser.gullet.isDefined(name);
+    if (exists && funcName === "\\newcommand") {
+      throw new ParseError(
+        `\\newcommand{${name}} attempting to redefine ${name}; use \\renewcommand`
+      );
+    }
+    if (!exists && funcName === "\\renewcommand") {
+      throw new ParseError(
+        `\\renewcommand{${name}} when command ${name} does not yet exist; use \\newcommand`
+      );
+    }
+
+    let numArgs = 0;
+    if (parser.gullet.future().text === "[") {
+      let tok = parser.gullet.popToken();
+      tok = parser.gullet.popToken();
+      if (!/^[0-9]$/.test(tok.text)) {
+        throw new ParseError(`Invalid number of arguments: "${tok.text}"`);
+      }
+      numArgs = parseInt(tok.text);
+      tok = parser.gullet.popToken();
+      if (tok.text !== "]") {
+        throw new ParseError(`Invalid argument "${tok.text}"`);
+      }
+    }
+
+    // replacement text, enclosed in '{' and '}' and properly nested
+    const { tokens } = parser.gullet.consumeArg();
+
+    if (!(funcName === "\\providecommand" && parser.gullet.macros.has(name))) {
+      // Ignore \providecommand
+      parser.gullet.macros.set(
+        name,
+        { tokens, numArgs }
+      );
+    }
+
+    return { type: "internal", mode: parser.mode };
+
+  }
+});
+
+// Extra data needed for the delimiter handler down below
+const delimiterSizes = {
+  "\\bigl": { mclass: "mopen", size: 1 },
+  "\\Bigl": { mclass: "mopen", size: 2 },
+  "\\biggl": { mclass: "mopen", size: 3 },
+  "\\Biggl": { mclass: "mopen", size: 4 },
+  "\\bigr": { mclass: "mclose", size: 1 },
+  "\\Bigr": { mclass: "mclose", size: 2 },
+  "\\biggr": { mclass: "mclose", size: 3 },
+  "\\Biggr": { mclass: "mclose", size: 4 },
+  "\\bigm": { mclass: "mrel", size: 1 },
+  "\\Bigm": { mclass: "mrel", size: 2 },
+  "\\biggm": { mclass: "mrel", size: 3 },
+  "\\Biggm": { mclass: "mrel", size: 4 },
+  "\\big": { mclass: "mord", size: 1 },
+  "\\Big": { mclass: "mord", size: 2 },
+  "\\bigg": { mclass: "mord", size: 3 },
+  "\\Bigg": { mclass: "mord", size: 4 }
+};
+
+const delimiters = [
+  "(",
+  "\\lparen",
+  ")",
+  "\\rparen",
+  "[",
+  "\\lbrack",
+  "]",
+  "\\rbrack",
+  "\\{",
+  "\\lbrace",
+  "\\}",
+  "\\rbrace",
+  "⦇",
+  "\\llparenthesis",
+  "⦈",
+  "\\rrparenthesis",
+  "\\lfloor",
+  "\\rfloor",
+  "\u230a",
+  "\u230b",
+  "\\lceil",
+  "\\rceil",
+  "\u2308",
+  "\u2309",
+  "<",
+  ">",
+  "\\langle",
+  "\u27e8",
+  "\\rangle",
+  "\u27e9",
+  "\\lAngle",
+  "\u27ea",
+  "\\rAngle",
+  "\u27eb",
+  "\\llangle",
+  "⦉",
+  "\\rrangle",
+  "⦊",
+  "\\lt",
+  "\\gt",
+  "\\lvert",
+  "\\rvert",
+  "\\lVert",
+  "\\rVert",
+  "\\lgroup",
+  "\\rgroup",
+  "\u27ee",
+  "\u27ef",
+  "\\lmoustache",
+  "\\rmoustache",
+  "\u23b0",
+  "\u23b1",
+  "\\llbracket",
+  "\\rrbracket",
+  "\u27e6",
+  "\u27e6",
+  "\\lBrace",
+  "\\rBrace",
+  "\u2983",
+  "\u2984",
+  "/",
+  "\\backslash",
+  "|",
+  "\\vert",
+  "\\|",
+  "\\Vert",
+  "\u2016",
+  "\\uparrow",
+  "\\Uparrow",
+  "\\downarrow",
+  "\\Downarrow",
+  "\\updownarrow",
+  "\\Updownarrow",
+  "."
+];
+
+// Export isDelimiter for benefit of parser.
+const dels = ["}", "\\left", "\\middle", "\\right"];
+const isDelimiter = str => str.length > 0 &&
+  (delimiters.includes(str) || delimiterSizes[str] || dels.includes(str));
+
+// Metrics of the different sizes. Found by looking at TeX's output of
+// $\bigl| // \Bigl| \biggl| \Biggl| \showlists$
+// Used to create stacked delimiters of appropriate sizes in makeSizedDelim.
+const sizeToMaxHeight = [0, 1.2, 1.8, 2.4, 3.0];
+
+// Delimiter functions
+function checkDelimiter(delim, context) {
+  const symDelim = checkSymbolNodeType(delim);
+  if (symDelim && delimiters.includes(symDelim.text)) {
+    // If a character is not in the MathML operator dictionary, it will not stretch.
+    // Replace such characters w/characters that will stretch.
+    if (["<", "\\lt"].includes(symDelim.text)) { symDelim.text = "⟨"; }
+    if ([">", "\\gt"].includes(symDelim.text)) { symDelim.text = "⟩"; }
+    return symDelim;
+  } else if (symDelim) {
+    throw new ParseError(`Invalid delimiter '${symDelim.text}' after '${context.funcName}'`, delim);
+  } else {
+    throw new ParseError(`Invalid delimiter type '${delim.type}'`, delim);
+  }
+}
+
+//                               /         \
+const needExplicitStretch = ["\u002F", "\u005C", "\\backslash", "\\vert", "|"];
+
+defineFunction({
+  type: "delimsizing",
+  names: [
+    "\\bigl",
+    "\\Bigl",
+    "\\biggl",
+    "\\Biggl",
+    "\\bigr",
+    "\\Bigr",
+    "\\biggr",
+    "\\Biggr",
+    "\\bigm",
+    "\\Bigm",
+    "\\biggm",
+    "\\Biggm",
+    "\\big",
+    "\\Big",
+    "\\bigg",
+    "\\Bigg"
+  ],
+  props: {
+    numArgs: 1,
+    argTypes: ["primitive"]
+  },
+  handler: (context, args) => {
+    const delim = checkDelimiter(args[0], context);
+
+    return {
+      type: "delimsizing",
+      mode: context.parser.mode,
+      size: delimiterSizes[context.funcName].size,
+      mclass: delimiterSizes[context.funcName].mclass,
+      delim: delim.text
+    };
+  },
+  mathmlBuilder: (group) => {
+    const children = [];
+
+    if (group.delim === ".") { group.delim = ""; }
+    children.push(makeText(group.delim, group.mode));
+
+    const node = new mathMLTree.MathNode("mo", children);
+
+    if (group.mclass === "mopen" || group.mclass === "mclose") {
+      // Only some of the delimsizing functions act as fences, and they
+      // return "mopen" or "mclose" mclass.
+      node.setAttribute("fence", "true");
+    } else {
+      // Explicitly disable fencing if it's not a fence, to override the
+      // defaults.
+      node.setAttribute("fence", "false");
+    }
+    if (needExplicitStretch.includes(group.delim) || group.delim.indexOf("arrow") > -1) {
+      // We have to explicitly set stretchy to true.
+      node.setAttribute("stretchy", "true");
+    }
+    node.setAttribute("symmetric", "true"); // Needed for tall arrows in Firefox.
+    node.setAttribute("minsize", sizeToMaxHeight[group.size] + "em");
+    node.setAttribute("maxsize", sizeToMaxHeight[group.size] + "em");
+    return node;
+  }
+});
+
+function assertParsed(group) {
+  if (!group.body) {
+    throw new Error("Bug: The leftright ParseNode wasn't fully parsed.");
+  }
+}
+
+defineFunction({
+  type: "leftright-right",
+  names: ["\\right"],
+  props: {
+    numArgs: 1,
+    argTypes: ["primitive"]
+  },
+  handler: (context, args) => {
+    return {
+      type: "leftright-right",
+      mode: context.parser.mode,
+      delim: checkDelimiter(args[0], context).text
+    };
+  }
+});
+
+defineFunction({
+  type: "leftright",
+  names: ["\\left"],
+  props: {
+    numArgs: 1,
+    argTypes: ["primitive"]
+  },
+  handler: (context, args) => {
+    const delim = checkDelimiter(args[0], context);
+
+    const parser = context.parser;
+    // Parse out the implicit body
+    ++parser.leftrightDepth;
+    // parseExpression stops before '\\right' or `\\middle`
+    let body = parser.parseExpression(false, null, true);
+    let nextToken = parser.fetch();
+    while (nextToken.text === "\\middle") {
+      // `\middle`, from the ε-TeX package, ends one group and starts another group.
+      // We had to parse this expression with `breakOnMiddle` enabled in order
+      // to get TeX-compliant parsing of \over.
+      // But we do not want, at this point, to end on \middle, so continue
+      // to parse until we fetch a `\right`.
+      parser.consume();
+      const middle = parser.fetch().text;
+      if (!symbols.math[middle]) {
+        throw new ParseError(`Invalid delimiter '${middle}' after '\\middle'`);
+      }
+      checkDelimiter({ type: "atom", mode: "math", text: middle }, { funcName: "\\middle" });
+      body.push({ type: "middle", mode: "math", delim: middle });
+      parser.consume();
+      body = body.concat(parser.parseExpression(false, null, true));
+      nextToken = parser.fetch();
+    }
+    --parser.leftrightDepth;
+    // Check the next token
+    parser.expect("\\right", false);
+    const right = assertNodeType(parser.parseFunction(), "leftright-right");
+    return {
+      type: "leftright",
+      mode: parser.mode,
+      body,
+      left: delim.text,
+      right: right.delim
+    };
+  },
+  mathmlBuilder: (group, style) => {
+    assertParsed(group);
+    const inner = buildExpression(group.body, style);
+
+    if (group.left === ".") { group.left = ""; }
+    const leftNode = new mathMLTree.MathNode("mo", [makeText(group.left, group.mode)]);
+    leftNode.setAttribute("fence", "true");
+    leftNode.setAttribute("form", "prefix");
+    if (group.left === "/" || group.left === "\u005C" || group.left.indexOf("arrow") > -1) {
+      leftNode.setAttribute("stretchy", "true");
+    }
+    inner.unshift(leftNode);
+
+    if (group.right === ".") { group.right = ""; }
+    const rightNode = new mathMLTree.MathNode("mo", [makeText(group.right, group.mode)]);
+    rightNode.setAttribute("fence", "true");
+    rightNode.setAttribute("form", "postfix");
+    if (group.right === "\u2216" || group.right.indexOf("arrow") > -1) {
+      rightNode.setAttribute("stretchy", "true");
+    }
+    if (group.body.length > 0) {
+      const lastElement = group.body[group.body.length - 1];
+      if (lastElement.type === "color" && !lastElement.isTextColor) {
+        // \color is a switch. If the last element is of type "color" then
+        // the user set the \color switch and left it on.
+        // A \right delimiter turns the switch off, but the delimiter itself gets the color.
+        rightNode.setAttribute("mathcolor", lastElement.color);
+      }
+    }
+    inner.push(rightNode);
+
+    return makeRow(inner);
+  }
+});
+
+defineFunction({
+  type: "middle",
+  names: ["\\middle"],
+  props: {
+    numArgs: 1,
+    argTypes: ["primitive"]
+  },
+  handler: (context, args) => {
+    const delim = checkDelimiter(args[0], context);
+    if (!context.parser.leftrightDepth) {
+      throw new ParseError("\\middle without preceding \\left", delim);
+    }
+
+    return {
+      type: "middle",
+      mode: context.parser.mode,
+      delim: delim.text
+    };
+  },
+  mathmlBuilder: (group, style) => {
+    const textNode = makeText(group.delim, group.mode);
+    const middleNode = new mathMLTree.MathNode("mo", [textNode]);
+    middleNode.setAttribute("fence", "true");
+    if (group.delim.indexOf("arrow") > -1) {
+      middleNode.setAttribute("stretchy", "true");
+    }
+    // The next line is not semantically correct, but
+    // Chromium fails to stretch if it is not there.
+    middleNode.setAttribute("form", "prefix");
+    // MathML gives 5/18em spacing to each <mo> element.
+    // \middle should get delimiter spacing instead.
+    middleNode.setAttribute("lspace", "0.05em");
+    middleNode.setAttribute("rspace", "0.05em");
+    return middleNode;
+  }
+});
+
+const padding$1 = _ => {
+  const node = new mathMLTree.MathNode("mspace");
+  node.setAttribute("width", "3pt");
+  return node
+};
+
+const mathmlBuilder$7 = (group, style) => {
+  let node;
+  if (group.label.indexOf("colorbox") > -1 || group.label === "\\boxed") {
+    // MathML core does not support +width attribute in <mpadded>.
+    // Firefox does not reliably add side padding.
+    // Insert <mspace>
+    node = new mathMLTree.MathNode("mrow", [
+      padding$1(),
+      buildGroup$1(group.body, style),
+      padding$1()
+    ]);
+  } else {
+    node = new mathMLTree.MathNode("menclose", [buildGroup$1(group.body, style)]);
+  }
+  switch (group.label) {
+    case "\\overline":
+      node.setAttribute("notation", "top"); // for Firefox & WebKit
+      node.classes.push("tml-overline");    // for Chromium
+      break
+    case "\\underline":
+      node.setAttribute("notation", "bottom");
+      node.classes.push("tml-underline");
+      break
+    case "\\cancel":
+      node.setAttribute("notation", "updiagonalstrike");
+      node.children.push(new mathMLTree.MathNode("mrow", [], ["tml-cancel", "upstrike"]));
+      break
+    case "\\bcancel":
+      node.setAttribute("notation", "downdiagonalstrike");
+      node.children.push(new mathMLTree.MathNode("mrow", [], ["tml-cancel", "downstrike"]));
+      break
+    case "\\sout":
+      node.setAttribute("notation", "horizontalstrike");
+      node.children.push(new mathMLTree.MathNode("mrow", [], ["tml-cancel", "sout"]));
+      break
+    case "\\xcancel":
+      node.setAttribute("notation", "updiagonalstrike downdiagonalstrike");
+      node.classes.push("tml-xcancel");
+      break
+    case "\\longdiv":
+      node.setAttribute("notation", "longdiv");
+      node.classes.push("longdiv-top");
+      node.children.push(new mathMLTree.MathNode("mrow", [], ["longdiv-arc"]));
+      break
+    case "\\phase":
+      node.setAttribute("notation", "phasorangle");
+      node.classes.push("phasor-bottom");
+      node.children.push(new mathMLTree.MathNode("mrow", [], ["phasor-angle"]));
+      break
+    case "\\textcircled":
+      node.setAttribute("notation", "circle");
+      node.classes.push("circle-pad");
+      node.children.push(new mathMLTree.MathNode("mrow", [], ["textcircle"]));
+      break
+    case "\\angl":
+      node.setAttribute("notation", "actuarial");
+      node.classes.push("actuarial");
+      break
+    case "\\boxed":
+      // \newcommand{\boxed}[1]{\fbox{\m@th$\displaystyle#1$}} from amsmath.sty
+      node.setAttribute("notation", "box");
+      node.classes.push("tml-box");
+      node.setAttribute("scriptlevel", "0");
+      node.setAttribute("displaystyle", "true");
+      break
+    case "\\fbox":
+      node.setAttribute("notation", "box");
+      node.classes.push("tml-fbox");
+      break
+    case "\\fcolorbox":
+    case "\\colorbox": {
+      // <menclose> doesn't have a good notation option for \colorbox.
+      // So use <mpadded> instead. Set some attributes that come
+      // included with <menclose>.
+      //const fboxsep = 3; // 3 pt from LaTeX source2e
+      //node.setAttribute("height", `+${2 * fboxsep}pt`)
+      //node.setAttribute("voffset", `${fboxsep}pt`)
+      const style = { padding: "3pt 0 3pt 0" };
+
+      if (group.label === "\\fcolorbox") {
+        style.border = "0.0667em solid " + String(group.borderColor);
+      }
+      node.style = style;
+      break
+    }
+  }
+  if (group.backgroundColor) {
+    node.setAttribute("mathbackground", group.backgroundColor);
+  }
+  return node;
+};
+
+defineFunction({
+  type: "enclose",
+  names: ["\\colorbox"],
+  props: {
+    numArgs: 2,
+    numOptionalArgs: 1,
+    allowedInText: true,
+    argTypes: ["raw", "raw", "text"]
+  },
+  handler({ parser, funcName }, args, optArgs) {
+    const model = optArgs[0] && assertNodeType(optArgs[0], "raw").string;
+    let color = "";
+    if (model) {
+      const spec = assertNodeType(args[0], "raw").string;
+      color = colorFromSpec(model, spec);
+    } else {
+      color = validateColor(assertNodeType(args[0], "raw").string, parser.gullet.macros);
+    }
+    const body = args[1];
+    return {
+      type: "enclose",
+      mode: parser.mode,
+      label: funcName,
+      backgroundColor: color,
+      body
+    };
+  },
+  mathmlBuilder: mathmlBuilder$7
+});
+
+defineFunction({
+  type: "enclose",
+  names: ["\\fcolorbox"],
+  props: {
+    numArgs: 3,
+    numOptionalArgs: 1,
+    allowedInText: true,
+    argTypes: ["raw", "raw", "raw", "text"]
+  },
+  handler({ parser, funcName }, args, optArgs) {
+    const model = optArgs[0] && assertNodeType(optArgs[0], "raw").string;
+    let borderColor = "";
+    let backgroundColor;
+    if (model) {
+      const borderSpec = assertNodeType(args[0], "raw").string;
+      const backgroundSpec = assertNodeType(args[0], "raw").string;
+      borderColor = colorFromSpec(model, borderSpec);
+      backgroundColor = colorFromSpec(model, backgroundSpec);
+    } else {
+      borderColor = validateColor(assertNodeType(args[0], "raw").string, parser.gullet.macros);
+      backgroundColor = validateColor(assertNodeType(args[1], "raw").string, parser.gullet.macros);
+    }
+    const body = args[2];
+    return {
+      type: "enclose",
+      mode: parser.mode,
+      label: funcName,
+      backgroundColor,
+      borderColor,
+      body
+    };
+  },
+  mathmlBuilder: mathmlBuilder$7
+});
+
+defineFunction({
+  type: "enclose",
+  names: ["\\fbox"],
+  props: {
+    numArgs: 1,
+    argTypes: ["hbox"],
+    allowedInText: true
+  },
+  handler({ parser }, args) {
+    return {
+      type: "enclose",
+      mode: parser.mode,
+      label: "\\fbox",
+      body: args[0]
+    };
+  }
+});
+
+defineFunction({
+  type: "enclose",
+  names: ["\\angl", "\\cancel", "\\bcancel", "\\xcancel", "\\sout", "\\overline",
+    "\\boxed", "\\longdiv", "\\phase"],
+  props: {
+    numArgs: 1
+  },
+  handler({ parser, funcName }, args) {
+    const body = args[0];
+    return {
+      type: "enclose",
+      mode: parser.mode,
+      label: funcName,
+      body
+    };
+  },
+  mathmlBuilder: mathmlBuilder$7
+});
+
+defineFunction({
+  type: "enclose",
+  names: ["\\underline"],
+  props: {
+    numArgs: 1,
+    allowedInText: true
+  },
+  handler({ parser, funcName }, args) {
+    const body = args[0];
+    return {
+      type: "enclose",
+      mode: parser.mode,
+      label: funcName,
+      body
+    };
+  },
+  mathmlBuilder: mathmlBuilder$7
+});
+
+
+defineFunction({
+  type: "enclose",
+  names: ["\\textcircled"],
+  props: {
+    numArgs: 1,
+    argTypes: ["text"],
+    allowedInArgument: true,
+    allowedInText: true
+  },
+  handler({ parser, funcName }, args) {
+    const body = args[0];
+    return {
+      type: "enclose",
+      mode: parser.mode,
+      label: funcName,
+      body
+    };
+  },
+  mathmlBuilder: mathmlBuilder$7
+});
 
 // Environment delimiters. HTML/MathML rendering is defined in the corresponding
 // defineEnvironment definitions.
@@ -32918,7 +33143,7 @@ class Style {
  * https://mit-license.org/
  */
 
-const version = "0.10.34";
+const version = "0.11.01";
 
 function postProcess(block) {
   const labelMap = {};
@@ -32979,9 +33204,271 @@ function postProcess(block) {
     mtext.appendChild(document.createTextNode(str));
     const math =  document.createElementNS("http://www.w3.org/1998/Math/MathML", "math");
     math.appendChild(mtext);
+    ref.textContent = '';
     ref.appendChild(math);
   });
 }
+
+const findEndOfMath = function(delimiter, text, startIndex) {
+  // Adapted from
+  // https://github.com/Khan/perseus/blob/master/src/perseus-markdown.jsx
+  let index = startIndex;
+  let braceLevel = 0;
+
+  const delimLength = delimiter.length;
+
+  while (index < text.length) {
+    const character = text[index];
+
+    if (braceLevel <= 0 && text.slice(index, index + delimLength) === delimiter) {
+      return index;
+    } else if (character === "\\") {
+      index++;
+    } else if (character === "{") {
+      braceLevel++;
+    } else if (character === "}") {
+      braceLevel--;
+    }
+
+    index++;
+  }
+
+  return -1;
+};
+
+const escapeRegex = function(string) {
+  return string.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
+};
+
+const amsRegex = /^\\(?:begin|(?:eq)?ref){/;
+
+const splitAtDelimiters = function(text, delimiters) {
+  let index;
+  const data = [];
+
+  const regexLeft = new RegExp(
+    "(" + delimiters.map((x) => escapeRegex(x.left)).join("|") + ")"
+  );
+
+  while (true) {
+    index = text.search(regexLeft);
+    if (index === -1) {
+      break;
+    }
+    if (index > 0) {
+      data.push({
+        type: "text",
+        data: text.slice(0, index)
+      });
+      text = text.slice(index); // now text starts with delimiter
+    }
+    // ... so this always succeeds:
+    const i = delimiters.findIndex((delim) => text.startsWith(delim.left));
+    index = findEndOfMath(delimiters[i].right, text, delimiters[i].left.length);
+    if (index === -1) {
+      break;
+    }
+    const rawData = text.slice(0, index + delimiters[i].right.length);
+    const math = amsRegex.test(rawData)
+      ? rawData
+      : text.slice(delimiters[i].left.length, index);
+    data.push({
+      type: "math",
+      data: math,
+      rawData,
+      display: delimiters[i].display
+    });
+    text = text.slice(index + delimiters[i].right.length);
+  }
+
+  if (text !== "") {
+    data.push({
+      type: "text",
+      data: text
+    });
+  }
+
+  return data;
+};
+
+const defaultDelimiters = [
+  { left: "$$", right: "$$", display: true },
+  { left: "\\(", right: "\\)", display: false },
+  // LaTeX uses $…$, but it ruins the display of normal `$` in text:
+  // {left: "$", right: "$", display: false},
+  // $ must come after $$
+
+  // Render AMS environments even if outside $$…$$ delimiters.
+  { left: "\\begin{equation}", right: "\\end{equation}", display: true },
+  { left: "\\begin{equation*}", right: "\\end{equation*}", display: true },
+  { left: "\\begin{align}", right: "\\end{align}", display: true },
+  { left: "\\begin{align*}", right: "\\end{align*}", display: true },
+  { left: "\\begin{alignat}", right: "\\end{alignat}", display: true },
+  { left: "\\begin{alignat*}", right: "\\end{alignat*}", display: true },
+  { left: "\\begin{gather}", right: "\\end{gather}", display: true },
+  { left: "\\begin{gather*}", right: "\\end{gather*}", display: true },
+  { left: "\\begin{CD}", right: "\\end{CD}", display: true },
+  // Ditto \ref & \eqref
+  { left: "\\ref{", right: "}", display: false },
+  { left: "\\eqref{", right: "}", display: false },
+
+  { left: "\\[", right: "\\]", display: true }
+];
+
+const firstDraftDelimiters = {
+  "$": [
+         { left: "$$", right: "$$", display: true },
+         { left: "$`", right: "`$", display: false },
+         { left: "$", right: "$", display: false }
+  ],
+  "(": [
+    { left: "\\[", right: "\\]", display: true },
+    { left: "\\(", right: "\\)", display: false }
+  ]
+};
+
+const amsDelimiters = [
+  { left: "\\begin{equation}", right: "\\end{equation}", display: true },
+  { left: "\\begin{equation*}", right: "\\end{equation*}", display: true },
+  { left: "\\begin{align}", right: "\\end{align}", display: true },
+  { left: "\\begin{align*}", right: "\\end{align*}", display: true },
+  { left: "\\begin{alignat}", right: "\\end{alignat}", display: true },
+  { left: "\\begin{alignat*}", right: "\\end{alignat*}", display: true },
+  { left: "\\begin{gather}", right: "\\end{gather}", display: true },
+  { left: "\\begin{gather*}", right: "\\end{gather*}", display: true },
+  { left: "\\begin{CD}", right: "\\end{CD}", display: true },
+  { left: "\\ref{", right: "}", display: false },
+  { left: "\\eqref{", right: "}", display: false }
+];
+
+const delimitersFromKey = key => {
+  if (key === "$" || key === "(") {
+    return firstDraftDelimiters[key];
+  } else if (key === "$+" || key === "(+") {
+    const firstDraft = firstDraftDelimiters[key.slice(0, 1)];
+    return firstDraft.concat(amsDelimiters)
+  } else if (key === "ams") {
+    return amsDelimiters
+  } else if (key === "all") {
+    return (firstDraftDelimiters["("]).concat(firstDraftDelimiters["$"]).concat(amsDelimiters)
+  } else {
+    return defaultDelimiters
+  }
+};
+
+/* Note: optionsCopy is mutated by this method. If it is ever exposed in the
+ * API, we should copy it before mutating.
+ */
+const renderMathInText = function(text, optionsCopy) {
+  const data = splitAtDelimiters(text, optionsCopy.delimiters);
+  if (data.length === 1 && data[0].type === "text") {
+    // There is no formula in the text.
+    // Let's return null which means there is no need to replace
+    // the current text node with a new one.
+    return null;
+  }
+
+  const fragment = document.createDocumentFragment();
+
+  for (let i = 0; i < data.length; i++) {
+    if (data[i].type === "text") {
+      fragment.appendChild(document.createTextNode(data[i].data));
+    } else {
+      const span = document.createElement("span");
+      let math = data[i].data;
+      // Override any display mode defined in the settings with that
+      // defined by the text itself
+      optionsCopy.displayMode = data[i].display;
+      try {
+        if (optionsCopy.preProcess) {
+          math = optionsCopy.preProcess(math);
+        }
+        // Importing render() from temml.js would be a circular dependency.
+        // So call the global version.
+        // eslint-disable-next-line no-undef
+        temml.render(math, span, optionsCopy);
+      } catch (e) {
+        if (!(e instanceof ParseError)) {
+          throw e;
+        }
+        optionsCopy.errorCallback(
+          "Temml auto-render: Failed to parse `" + data[i].data + "` with ",
+          e
+        );
+        fragment.appendChild(document.createTextNode(data[i].rawData));
+        continue;
+      }
+      fragment.appendChild(span);
+    }
+  }
+
+  return fragment;
+};
+
+const renderElem = function(elem, optionsCopy) {
+  for (let i = 0; i < elem.childNodes.length; i++) {
+    const childNode = elem.childNodes[i];
+    if (childNode.nodeType === 3) {
+      // Text node
+      const frag = renderMathInText(childNode.textContent, optionsCopy);
+      if (frag) {
+        i += frag.childNodes.length - 1;
+        elem.replaceChild(frag, childNode);
+      }
+    } else if (childNode.nodeType === 1) {
+      // Element node
+      const className = " " + childNode.className + " ";
+      const shouldRender =
+        optionsCopy.ignoredTags.indexOf(childNode.nodeName.toLowerCase()) === -1 &&
+        optionsCopy.ignoredClasses.every((x) => className.indexOf(" " + x + " ") === -1);
+
+      if (shouldRender) {
+        renderElem(childNode, optionsCopy);
+      }
+    }
+    // Otherwise, it's something else, and ignore it.
+  }
+};
+
+const renderMathInElement = function(elem, options) {
+  if (!elem) {
+    throw new Error("No element provided to render");
+  }
+
+  const optionsCopy = {};
+
+  // Object.assign(optionsCopy, option)
+  for (const option in options) {
+    if (Object.prototype.hasOwnProperty.call(options, option)) {
+      optionsCopy[option] = options[option];
+    }
+  }
+
+  if (optionsCopy.fences) {
+    optionsCopy.delimiters = delimitersFromKey(optionsCopy.fences);
+  } else {
+    optionsCopy.delimiters = optionsCopy.delimiters || defaultDelimiters;
+  }
+  optionsCopy.ignoredTags = optionsCopy.ignoredTags || [
+    "script",
+    "noscript",
+    "style",
+    "textarea",
+    "pre",
+    "code",
+    "option"
+  ];
+  optionsCopy.ignoredClasses = optionsCopy.ignoredClasses || [];
+  // eslint-disable-next-line no-console
+  optionsCopy.errorCallback = optionsCopy.errorCallback || console.error;
+
+  // Enable sharing of global macros defined via `\gdef` between different
+  // math elements within a single call to `renderMathInElement`.
+  optionsCopy.macros = optionsCopy.macros || {};
+
+  renderElem(elem, optionsCopy);
+  postProcess(elem);
+};
 
 /* eslint no-console:0 */
 /**
@@ -33076,7 +33563,7 @@ const renderError = function(error, expression, options) {
   if (options.throwOnError || !(error instanceof ParseError)) {
     throw error;
   }
-  const node = new Span(["temml-error"], [new TextNode$1(expression + "\n" + error.toString())]);
+  const node = new Span(["temml-error"], [new TextNode$1(expression + "\n\n" + error.toString())]);
   node.style.color = options.errorColor;
   node.style.whiteSpace = "pre-line";
   return node;
@@ -33102,7 +33589,7 @@ const renderToMathMLTree = function(expression, options) {
 };
 
 /** @type {import('./temml').default} */
-var temml = {
+var temml$1 = {
   /**
    * Current Temml version
    */
@@ -33117,6 +33604,11 @@ var temml = {
    * for sending to the client.
    */
   renderToString,
+  /**
+   * Finds all the math delimiters in a given element of a running HTML document
+   * and converts the contents of each instance into a <math> element.
+   */
+  renderMathInElement,
   /**
    * Post-process an entire HTML block.
    * Writes AMS auto-numbers and implements \ref{}.
@@ -33178,7 +33670,7 @@ var temml = {
  */
 
 const render = (tex, dom, options) => {
-  temml.render(tex, dom, options);
+  temml$1.render(tex, dom, options);
 };
 
 var hurmet = {
