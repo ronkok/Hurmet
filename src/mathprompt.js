@@ -1,5 +1,6 @@
 import { autoCorrect } from "./autocorrect"
 import { codeJar, selectedText, textBeforeCursor, textAfterCursor } from "./codejar"
+import { findWordAtClickPos, positionOfDefinition } from "./findDefinition"
 import hurmet from "./hurmet"
 
 const commaRegEx = /"[^"]*"|[0-9]+,[0-9]+|[A-Za-zıȷ\u0391-\u03D5\uD835][A-Za-z0-9_ıȷ\u0391-\u03D5\uD835\uDC00-\uDFFF]/g
@@ -174,6 +175,25 @@ export function openMathPrompt(options) {
       // Submit upon Enter. (Shift-Enter creates a newline.)
       e.preventDefault()
       submit()
+    }
+  })
+
+  editor.addEventListener("pointerup", e => {
+    if (e.ctrlKey || e.metaKey) {
+      // Check if the clicked-on word is a previously defined variable
+      const word = findWordAtClickPos(jar.toString(), jar.pos())
+      if (word) {
+        const defPos = positionOfDefinition(word, options.outerView.state.doc, options.pos)
+        if (defPos > -1) {
+          // Hand control to the callback, which will scroll to the definition.
+          e.preventDefault()
+          if (wrapper.parentNode) {
+            wrapper.parentNode.classList.remove("ProseMirror-selectednode")
+          }
+          options.callback2(defPos)
+          close()
+        }
+      }
     }
   })
 }

@@ -34070,6 +34070,10 @@ const codeJar = (editor, isMathPrompt) => {
     return window.getSelection()
   }
 
+  function pos() {
+    return window.getSelection().anchorOffset
+  }
+
   return {
     updateOptions(newOptions) {
       Object.assign(options, newOptions);
@@ -34082,6 +34086,7 @@ const codeJar = (editor, isMathPrompt) => {
       callback = cb;
     },
     toString,
+    pos,
     save,
     restore,
     destroy() {

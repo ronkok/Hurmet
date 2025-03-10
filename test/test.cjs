@@ -558,7 +558,7 @@ end`, vars)
     [`4 ∑_(n=1)³ 2 n + 3 = @`, `®4/1 "n" ®1/1 ®3/1 "®2/1§¿n§⌧" ∑ ⌧ ®3/1 +`, "51"],
     [`∑_(n=0)⁴ 2 n = @`, `"n" ®0/1 ®4/1 "®2/1§¿n§⌧" ∑`, "20"],
     [`1 'in⁻¹' × 2 'in⁻²' = @@ in⁻³`, `®1/1 applyUnit in⁻¹ ®2/1 applyUnit in⁻² ×`, "2 in⁻³"],
-    [`'2025-01-20' + 12weeks = @@`, "⌾1737331200 ®12/1 applyUnit weeks +", "2025-04-14"],
+    [`'2025-01-20' + 12weeks = @@`, "⌾1737334800 ®12/1 applyUnit weeks +", "2025-04-14"],
     [`savedate() = @@`, "savedate", "Error. The current document has not been saved."],
     [`aDate + 12weeks = @@`, "¿aDate ®12/1 applyUnit weeks +", "2025-04-14"],
     [`‖vector‖ = @`, "¿vector ‖", "18.9604852258585"],

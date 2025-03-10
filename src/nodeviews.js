@@ -28,8 +28,15 @@ export class CalcView {
       attrs: attrs,
       outerView: this.outerView,
       dom: this.dom,
+      pos: pos,
       callback(attrs) {
         hurmet.updateCalculations(this.outerView, false, attrs, pos)
+      },
+      callback2(defPos) {
+        // Scroll to a variable definition.
+        const definitionTop = this.outerView.coordsAtPos(defPos).top
+        const boundingTop = this.outerView.dom.getBoundingClientRect().top
+        window.scrollTo(0, definitionTop - boundingTop)
       }
     })
   }

@@ -58224,6 +58224,10 @@ const codeJar = (editor, isMathPrompt) => {
     return window.getSelection()
   }
 
+  function pos() {
+    return window.getSelection().anchorOffset
+  }
+
   return {
     updateOptions(newOptions) {
       Object.assign(options, newOptions);
@@ -58236,6 +58240,7 @@ const codeJar = (editor, isMathPrompt) => {
       callback = cb;
     },
     toString,
+    pos,
     save,
     restore,
     destroy() {
@@ -58284,6 +58289,30 @@ function textAfterCursor(editor) {
   r.setStart(r0.endContainer, r0.endOffset);
   return r.toString()
 }
+
+const findWordAtClickPos = (str, clickPos) => {
+  // Split the string into words and punctuation/symbols
+  const words = str.split(/([\w\dı_\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133\uD835\uDC00-\udc33\udc9c-\udcb5′]+)/);
+  let currentPos = 0;
+  for (let word of words) {
+    currentPos += word.length;
+    if (clickPos < currentPos) {
+      word = word.replace(/^\d/, "");
+      return isValidIdentifier$1.test(word) ? word : null
+    }
+  }
+  return null
+};
+
+const positionOfDefinition = (word, doc, nodePos) => {
+  let definitionPos = -1;
+  doc.nodesBetween(0, nodePos, function(node, pos) {
+    if (node.type.name === "calculation" && node.attrs.name && node.attrs.name === word) {
+      definitionPos = pos;
+    }
+  });
+  return definitionPos
+};
 
 const commaRegEx = /"[^"]*"|[0-9]+,[0-9]+|[A-Za-zıȷ\u0391-\u03D5\uD835][A-Za-z0-9_ıȷ\u0391-\u03D5\uD835\uDC00-\uDFFF]/g;
 const dotRegEx = /"[^"]*"|[0-9]+\.[0-9]+|[A-Za-zıȷ\u0391-\u03D5\uD835][A-Za-z0-9_ıȷ\u0391-\u03D5\uD835\uDC00-\uDFFF]/g;
@@ -58459,6 +58488,25 @@ function openMathPrompt(options) {
       submit();
     }
   });
+
+  editor.addEventListener("pointerup", e => {
+    if (e.ctrlKey || e.metaKey) {
+      // Check if the clicked-on word is a previously defined variable
+      const word = findWordAtClickPos(jar.toString(), jar.pos());
+      if (word) {
+        const defPos = positionOfDefinition(word, options.outerView.state.doc, options.pos);
+        if (defPos > -1) {
+          // Hand control to the callback, which will scroll to the definition.
+          e.preventDefault();
+          if (wrapper.parentNode) {
+            wrapper.parentNode.classList.remove("ProseMirror-selectednode");
+          }
+          options.callback2(defPos);
+          close();
+        }
+      }
+    }
+  });
 }
 
 class CalcView {
@@ -58481,8 +58529,15 @@ class CalcView {
       attrs: attrs,
       outerView: this.outerView,
       dom: this.dom,
+      pos: pos,
       callback(attrs) {
         hurmet.updateCalculations(this.outerView, false, attrs, pos);
+      },
+      callback2(defPos) {
+        // Scroll to a variable definition.
+        const definitionTop = this.outerView.coordsAtPos(defPos).top;
+        const boundingTop = this.outerView.dom.getBoundingClientRect().top;
+        window.scrollTo(0, definitionTop - boundingTop);
       }
     });
   }
