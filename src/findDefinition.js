@@ -17,8 +17,17 @@ export const findWordAtClickPos = (str, clickPos) => {
 export const positionOfDefinition = (word, doc, nodePos) => {
   let definitionPos = -1
   doc.nodesBetween(0, nodePos, function(node, pos) {
-    if (node.type.name === "calculation" && node.attrs.name && node.attrs.name === word) {
-      definitionPos = pos
+    if (node.type.name === "calculation" && node.attrs.name) {
+      if (node.attrs.name === word) {
+        definitionPos = pos
+      } else if (Array.isArray(node.attrs.name)) {
+        for (const def of node.attrs.name) {
+          if (def === word) {
+            definitionPos = pos
+            break
+          }
+        }
+      }
     }
   })
   return definitionPos
