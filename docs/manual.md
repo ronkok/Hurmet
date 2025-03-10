@@ -347,10 +347,11 @@ Create a cell
   ![C][] button or type **Alt c**.
 
   While in a cell,\
-        **Enter** will close and update the cell.\
-        **Shift-Enter** will create a newline inside the cell.\
-        **Esc** will close the cell without updating it.\
-        Clicking elsewhere will also close the cell.
+     **Enter** will close and update the cell.\
+     **Shift-Enter** will create a newline inside the cell.\
+     **Ctrl-click** on a variable name will go to its definition.\
+     **Esc** will close the cell without updating it.\
+     Clicking elsewhere will also close the cell.
 
 <div id="statement-container">
 
