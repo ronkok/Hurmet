@@ -2246,7 +2246,8 @@ const unitFromWord = (inputStr) => {
       if (unitArray[0] === "0") {
         return errorOprnd("CURRENCY")
       } else {
-        u.factor = Rnl.reciprocal(Rnl.fromString(unitArray[0]));
+        // eslint-disable-next-line no-undef
+        u.factor = Rnl.reciprocal(Rnl.fromString(currencyExchangeRates[currencyCode]));
       }
     } else {
       // TODO: Change factor table to integers and use BigInt() instead of Rnl.fromString

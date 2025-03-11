@@ -55,7 +55,7 @@
     "minify": "terser preview/prosemirror.js -o site/prosemirror.min.js -m && terser preview/demo.js -o site/demo.min.js -m",
     "copypm": "node utils/copyPM.cjs",
     "build": "yarn hurmet && yarn demo && yarn pm && yarn minify && yarn docs",
-    "rates": "node utils/updateExchangeRates.cjs",
+    "rates": "node utils/updateExchangeRates.cjs && node utils/buildDocs.cjs",
     "docs": "node utils/buildDocs.cjs",
     "test": "yarn test:lint && node test/test.cjs",
     "test:lint": "eslint src",
