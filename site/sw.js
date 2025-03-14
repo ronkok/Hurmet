@@ -1,6 +1,6 @@
 // A service worker to enable offline use of Hurmet.app
 
-const cacheName = "hurmet-2025-03-14"
+const cacheName = "hurmet-2025-03-14-1"
 
 const addResourcesToCache = async(resources) => {
   const cache = await caches.open(cacheName)
@@ -56,7 +56,7 @@ const cleanResponse = response => {
 }
 
 self.addEventListener('fetch', event => {
-  if (cacheFirst.includes(event.request.destination) || event.request.url === "https://hurmet.org/manual.html") {
+  if (cacheFirst.includes(event.request.destination)) {
     // Javascript, CSS, fonts, images and the manual are the files for which we go cache-first.
     event.respondWith(caches.open(cacheName).then(cache => {
       // Go to the cache
@@ -79,7 +79,9 @@ self.addEventListener('fetch', event => {
         return cleanResponse(fetchedResponse)
       }).catch(() => {
         // If the network is unavailable, put up the offline page
-        if (event.request.url === "https://hurmet.org/unit-definitions.html") {
+        if (event.request.url === "https://hurmet.org/manual.html") {
+          return cache.match('/manual.html').then(response => cleanResponse(response))
+        } else if (event.request.url === "https://hurmet.org/unit-definitions.html") {
           return cache.match('/unit-definitions.html').then(response => cleanResponse(response))
         } else {
           return cache.match('/offline.html').then(response => cleanResponse(response))
