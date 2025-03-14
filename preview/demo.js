@@ -16935,8 +16935,8 @@ const errorResult = (stmt, result) => {
   stmt.value = null;
   // Wrap the message in a \mathord so that browsers will put
   // operator spacing on the previous = sign.
-  stmt.resultDisplay = "\\mathord{\\textcolor{firebrick}{\\text{" +
-                        result.value.replace(/%/g, "\\%") + "}}}";
+  stmt.resultDisplay = "\\textcolor{firebrick}{\\text{" +
+                        result.value.replace(/%/g, "\\%") + "}}";
   stmt.altResultDisplay = result.value;
   stmt.error = true;
   stmt.dtype = dt.ERROR;
@@ -18558,7 +18558,7 @@ const compileSheet = (table, formats) => {
 const fetchRegEx = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′* *= *(?:fetch|import)\(/;
 const importRegEx = /^[^=]+= *import/;
 const fileErrorRegEx = /^Error while reading file. Status Code: \d*$/;
-const textRegEx = /\\text{[^}]+}/;
+const textRegEx$1 = /\\text{[^}]+}/;
 
 const urlFromEntry = entry => {
   // Get the URL from the entry input string.
@@ -18576,7 +18576,7 @@ const processFetchedString = (entry, text, hurmetVars, formats) => {
   if (/\.(?:tsv|txt)$/.test(url)) {
     // Shorten the URL.
     const fileName = url.replace(/.+\//, "");
-    const match = textRegEx.exec(str);
+    const match = textRegEx$1.exec(str);
     str = str.slice(0, match.index) + "\\text{" + addTextEscapes(fileName) + "})";
   }
   attrs.tex = str;
@@ -19023,7 +19023,7 @@ function updateCalculations(
 
 const helpers = Object.freeze({
   fetchRegEx,
-  textRegEx,
+  textRegEx: textRegEx$1,
   urlFromEntry,
   processFetchedString
 });
@@ -21030,7 +21030,7 @@ defineSymbol(text, accent, "\u02d9", "\\."); // dot above
 defineSymbol(text, accent, "\u00b8", "\\c"); // cedilla
 defineSymbol(text, accent, "\u02da", "\\r"); // ring above
 defineSymbol(text, accent, "\u02c7", "\\v"); // caron
-defineSymbol(text, accent, "\u00a8", '\\"'); // diaresis
+defineSymbol(text, accent, "\u00a8", '\\"'); // diaeresis
 defineSymbol(text, accent, "\u02dd", "\\H"); // double acute
 defineSymbol(math, accent, "\u02ca", "\\'"); // acute
 defineSymbol(math, accent, "\u02cb", "\\`"); // grave
@@ -21042,7 +21042,7 @@ defineSymbol(math, accent, "\u02d9", "\\."); // dot above
 defineSymbol(math, accent, "\u00b8", "\\c"); // cedilla
 defineSymbol(math, accent, "\u02da", "\\r"); // ring above
 defineSymbol(math, accent, "\u02c7", "\\v"); // caron
-defineSymbol(math, accent, "\u00a8", '\\"'); // diaresis
+defineSymbol(math, accent, "\u00a8", '\\"'); // diaeresis
 defineSymbol(math, accent, "\u02dd", "\\H"); // double acute
 
 // These ligatures are detected and created in Parser.js's `formLigatures`.
@@ -22010,17 +22010,17 @@ const calculateSize = function(sizeValue, style) {
 
 // Helper functions
 
-const padding$2 = width => {
+const padding$1 = width => {
   const node = new mathMLTree.MathNode("mspace");
   node.setAttribute("width", width + "em");
   return node
 };
 
 const paddedNode = (group, lspace = 0.3, rspace = 0, mustSmash = false) => {
-  if (group == null && rspace === 0) { return padding$2(lspace) }
+  if (group == null && rspace === 0) { return padding$1(lspace) }
   const row = group ? [group] : [];
-  if (lspace !== 0)   { row.unshift(padding$2(lspace)); }
-  if (rspace > 0) { row.push(padding$2(rspace)); }
+  if (lspace !== 0)   { row.unshift(padding$1(lspace)); }
+  if (rspace > 0) { row.push(padding$1(rspace)); }
   if (mustSmash) {
     // Used for the bottom arrow in a {CD} environment
     const mpadded = new mathMLTree.MathNode("mpadded", row);
@@ -22147,8 +22147,8 @@ defineFunction({
     const node = munderoverNode(group.name, group.body, group.below, style);
     // Create operator spacing for a relation.
     const row = [node];
-    row.unshift(padding$2(0.2778));
-    row.push(padding$2(0.2778));
+    row.unshift(padding$1(0.2778));
+    row.push(padding$1(0.2778));
     return new mathMLTree.MathNode("mrow", row)
   }
 });
@@ -22223,13 +22223,13 @@ defineFunction({
       botNode.setAttribute("width", "0.5em");
       wrapper = new mathMLTree.MathNode(
         "mpadded",
-        [padding$2(0.2778), botNode, raiseNode, padding$2(0.2778)]
+        [padding$1(0.2778), botNode, raiseNode, padding$1(0.2778)]
       );
     } else {
       raiseNode.setAttribute("width", (group.name === "\\equilibriumRight" ? "0.5em" : "0"));
       wrapper = new mathMLTree.MathNode(
         "mpadded",
-        [padding$2(0.2778), raiseNode, botArrow, padding$2(0.2778)]
+        [padding$1(0.2778), raiseNode, botArrow, padding$1(0.2778)]
       );
     }
 
@@ -27325,7 +27325,7 @@ defineFunction({
   }
 });
 
-const padding$1 = _ => {
+const padding = _ => {
   const node = new mathMLTree.MathNode("mspace");
   node.setAttribute("width", "3pt");
   return node
@@ -27338,9 +27338,9 @@ const mathmlBuilder$7 = (group, style) => {
     // Firefox does not reliably add side padding.
     // Insert <mspace>
     node = new mathMLTree.MathNode("mrow", [
-      padding$1(),
+      padding(),
       buildGroup$1(group.body, style),
-      padding$1()
+      padding()
     ]);
   } else {
     node = new mathMLTree.MathNode("menclose", [buildGroup$1(group.body, style)]);
@@ -28740,12 +28740,6 @@ defineFunction({
 
 const textAtomTypes = ["text", "textord", "mathord", "atom"];
 
-const padding = width => {
-  const node = new mathMLTree.MathNode("mspace");
-  node.setAttribute("width", width + "em");
-  return node
-};
-
 function mathmlBuilder$3(group, style) {
   let node;
   const inner = buildExpression(group.body, style);
@@ -28781,17 +28775,17 @@ function mathmlBuilder$3(group, style) {
       if (doSpacing ) {
         if (group.mclass === "mbin") {
           // medium space
-          node.children.unshift(padding(0.2222));
-          node.children.push(padding(0.2222));
+          node.children.unshift(padding$1(0.2222));
+          node.children.push(padding$1(0.2222));
         } else if (group.mclass === "mrel") {
           // thickspace
-          node.children.unshift(padding(0.2778));
-          node.children.push(padding(0.2778));
+          node.children.unshift(padding$1(0.2778));
+          node.children.push(padding$1(0.2778));
         } else if (group.mclass === "mpunct") {
-          node.children.push(padding(0.1667));
+          node.children.push(padding$1(0.1667));
         } else if (group.mclass === "minner") {
-          node.children.unshift(padding(0.0556));  // 1 mu is the most likely option
-          node.children.push(padding(0.0556));
+          node.children.unshift(padding$1(0.0556));  // 1 mu is the most likely option
+          node.children.push(padding$1(0.0556));
         }
       }
     } else {
@@ -28861,14 +28855,19 @@ defineFunction({
         break
       }
     }
-    return {
-      type: "mclass",
-      mode: parser.mode,
-      mclass: "m" + funcName.slice(5),
-      body: ordargument(mustPromote ? mord : body),
-      isCharacterBox,
-      mustPromote
-    };
+    if (mustPromote && funcName === "\\mathord" && mord.type === "mathord"
+                    && mord.text.length > 1) {
+      return mord
+    } else {
+      return {
+        type: "mclass",
+        mode: parser.mode,
+        mclass: "m" + funcName.slice(5),
+        body: ordargument(mustPromote ? mord : body),
+        isCharacterBox,
+        mustPromote
+      };
+    }
   },
   mathmlBuilder: mathmlBuilder$3
 });
@@ -29430,7 +29429,7 @@ const mathmlBuilder$1 = (group, style) => {
   for (let i = 0; i < expression.length; i++) {
     let node = expression[i];
     if (node instanceof mathMLTree.MathNode) {
-      if (node.type === "mrow" && node.children.length === 1 &&
+      if ((node.type === "mrow" || node.type === "mpadded") && node.children.length === 1 &&
           node.children[0] instanceof mathMLTree.MathNode) {
         node = node.children[0];
       }
@@ -30048,7 +30047,7 @@ const symbolRegEx = /^m(over|under|underover)$/;
 defineFunctionBuilders({
   type: "supsub",
   mathmlBuilder(group, style) {
-    // Is the inner group a relevant horizonal brace?
+    // Is the inner group a relevant horizontal brace?
     let isBrace = false;
     let isOver;
     let isSup;
@@ -30231,6 +30230,14 @@ defineFunctionBuilders({
       // ":" is not in the MathML operator dictionary. Give it BIN spacing.
       node.attributes.lspace = "0.2222em";
       node.attributes.rspace = "0.2222em";
+    } else if (group.needsSpacing) {
+      // Fix a MathML bug that occurs when a <mo> is between two <mtext> elements.
+      if (group.family === "bin") {
+        return new mathMLTree.MathNode("mrow", [padding$1(0.222), node, padding$1(0.222)])
+      } else {
+        // REL spacing
+        return new mathMLTree.MathNode("mrow", [padding$1(0.2778), node, padding$1(0.2778)])
+      }
     }
     return node;
   }
@@ -30598,7 +30605,9 @@ defineFunctionBuilders({
       node.setAttribute("mathvariant", "normal");
       if (text.text.length === 1) {
         // A Firefox bug will apply spacing here, but there should be none. Fix it.
-        node = new mathMLTree.MathNode("mrow", [node]);
+        node = new mathMLTree.MathNode("mpadded", [node]);
+        node.setAttribute("lspace", "0");
+        node.setAttribute("rspace", "0");
       }
     }
     return node
@@ -31977,6 +31986,7 @@ var unicodeSymbols = {
 
 const binLeftCancellers = ["bin", "op", "open", "punct", "rel"];
 const sizeRegEx = /([-+]?) *(\d+(?:\.\d*)?|\.\d+) *([a-z]{2})/;
+const textRegEx = /^ *\\text/;
 
 /**
  * This file contains the parser used to parse out a TeX expression from the
@@ -32887,6 +32897,11 @@ class Parser {
           loc,
           text
         };
+        if ((family === "rel" || family === "bin") && this.prevAtomType === "text") {
+          if (textRegEx.test(loc.lexer.input.slice(loc.end))) {
+            s.needsSpacing = true;  // Fix a MathML bug.
+          }
+        }
       } else {
         if (asciiFromScript[text]) {
           // Unicode 14 disambiguates chancery from roundhand.
@@ -33144,7 +33159,7 @@ class Style {
  * https://mit-license.org/
  */
 
-const version = "0.11.01";
+const version = "0.11.02";
 
 function postProcess(block) {
   const labelMap = {};

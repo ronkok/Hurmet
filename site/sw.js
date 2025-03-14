@@ -1,11 +1,13 @@
 // A service worker to enable offline use of Hurmet.app
 
-const cacheName = "hurmet-2025-03-11"
+const cacheName = "hurmet-2025-03-14"
 
 const addResourcesToCache = async(resources) => {
   const cache = await caches.open(cacheName)
   await cache.addAll(resources)
 }
+
+const cacheFirst = ["script", "style", "font", "image"];
 
 // Pre-cache the offline page, manual, unit page, JavaScript, CSS, and fonts.
 self.addEventListener("install", (event) => {
@@ -53,40 +55,9 @@ const cleanResponse = response => {
   })
 }
 
-// The purpose of this worker is to enable offline use, not to speed startup.
-// Hurmet is in active development and I always want to load the most current JS.
-// So, in most cases, go to the network first. If the network is unavailable, get the cache.
 self.addEventListener('fetch', event => {
-  if (event.request.mode === 'navigate') {
-    // Open the cache
-    event.respondWith(caches.open(cacheName).then(cache => {
-      // Go to the network first
-      return fetch(event.request.url).then(fetchedResponse => {
-        return cleanResponse(fetchedResponse)
-      }).catch(() => {
-        // If the network is unavailable, put up the offline or manual page
-        if (event.request.url === "https://hurmet.org/manual.html") {
-          return cache.match('/manual.html').then(response => cleanResponse(response))
-        } else if (event.request.url === "https://hurmet.org/unit-definitions.html") {
-          return cache.match('/unit-definitions.html').then(response => cleanResponse(response))
-        } else {
-          return cache.match('/offline.html').then(response => cleanResponse(response))
-        }
-      });
-    }));
-  } else if (event.request.destination === 'script' || event.request.destination === 'style') {
-    // This also calls for network first. Open the cache.
-    event.respondWith(caches.open(cacheName).then(cache => {
-      // Go to the network first
-      return fetch(event.request.url).then(fetchedResponse => {
-        return fetchedResponse;
-      }).catch(() => {
-        // If the network is unavailable, get the cached version
-        return cache.match(event.request.url)
-      });
-    }));
-  } else if (event.request.destination === 'font' || event.request.destination === 'image') {
-    // Fonts and images are the only files for which we go cache-first.
+  if (cacheFirst.includes(event.request.destination) || event.request.url === "https://hurmet.org/manual.html") {
+    // Javascript, CSS, fonts, images and the manual are the files for which we go cache-first.
     event.respondWith(caches.open(cacheName).then(cache => {
       // Go to the cache
       return cache.match(event.request.url).then(cachedResponse => {
@@ -100,6 +71,21 @@ self.addEventListener('fetch', event => {
         })
       })
     }))
+  } else if (event.request.mode === 'navigate') {
+    // HTML pages
+    event.respondWith(caches.open(cacheName).then(cache => {
+      // Go to the network first
+      return fetch(event.request.url).then(fetchedResponse => {
+        return cleanResponse(fetchedResponse)
+      }).catch(() => {
+        // If the network is unavailable, put up the offline page
+        if (event.request.url === "https://hurmet.org/unit-definitions.html") {
+          return cache.match('/unit-definitions.html').then(response => cleanResponse(response))
+        } else {
+          return cache.match('/offline.html').then(response => cleanResponse(response))
+        }
+      });
+    }));
   } else {
     return;
   }
