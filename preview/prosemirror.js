@@ -58805,18 +58805,24 @@ const tidyUp = _ => {
   document.execCommand("enableInlineTableEditing", false, false);
 };
 
-const hash = location.hash;
+let hash = location.hash;
 if (hash && hash.length > 1) {
-  const md = decodeURIComponent(hash.slice(1));
-  const ast = hurmet.md2ast(md);
-  const fragment = { type: "fragment", content: ast };
-  window.view.dispatch(
-    window.view.state.tr.replaceWith(
-      0,
-      window.view.state.doc.content.size,
-      schema.nodeFromJSON(fragment)
-    )
-  );
-  hurmet.updateCalculations(window.view, true);
+  hash = hash.slice(1);
+  const anchor = document.getElementById(hash);
+  if (anchor) {
+    anchor.scrollIntoView({ behavior: 'smooth' });
+  } else {
+    const md = decodeURIComponent(hash);
+    const ast = hurmet.md2ast(md);
+    const fragment = { type: "fragment", content: ast };
+    window.view.dispatch(
+      window.view.state.tr.replaceWith(
+        0,
+        window.view.state.doc.content.size,
+        schema.nodeFromJSON(fragment)
+      )
+    );
+    hurmet.updateCalculations(window.view, true);
+  }
 }
 tidyUp();
