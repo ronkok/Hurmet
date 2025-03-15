@@ -1,6 +1,6 @@
 // A service worker to enable offline use of Hurmet.app
 
-const cacheName = "hurmet-2025-03-14-1"
+const cacheName = "hurmet-2025-03-15"
 
 const addResourcesToCache = async(resources) => {
   const cache = await caches.open(cacheName)
@@ -57,7 +57,7 @@ const cleanResponse = response => {
 
 self.addEventListener('fetch', event => {
   if (cacheFirst.includes(event.request.destination)) {
-    // Javascript, CSS, fonts, images and the manual are the files for which we go cache-first.
+    // Javascript, CSS, fonts, and images are the files for which we go cache-first.
     event.respondWith(caches.open(cacheName).then(cache => {
       // Go to the cache
       return cache.match(event.request.url).then(cachedResponse => {

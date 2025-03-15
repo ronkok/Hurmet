@@ -3,59 +3,420 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hurmet.org</title>
-  <script>const currencyExchangeRates = { AUD: "1.7357", BGN: "1.9558", BRL: "6.3688", CAD: "1.5731", CHF: "0.9608", CNY: "7.8929", CZK: "24.963", DKK: "7.4587", EUR: "1.0", GBP: "0.84374", HKD: "8.4784", HUF: "401.78", IDR: "17937.42", ILS: "3.9800", INR: "95.1455", ISK: "146.90", JPY: "161.52", KRW: "1586.56", MXN: "22.2142", MYR: "4.8155", NOK: "11.6340", NZD: "1.9130", PHP: "62.518", PLN: "4.2003", RON: "4.9771", SEK: "10.9815", SGD: "1.4535", THB: "36.855", TRY: "39.9270", USD: "1.0912", ZAR: "19.9287" }</script>
-  <link rel="stylesheet" href="styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hurmet Sample</title>
+  <link rel="manifest" href="/app.webmanifest">
+  <link rel="icon" href="./images/favicon.svg">
+  <link rel="stylesheet" href="/styles.min.css">
   <style id="pageStyle">@media print {@page{size: letter; margin: 16mm 0.75in 16mm 0.75in;}}</style>
+  <script>const currencyExchangeRates = { AUD: "1.7237", BGN: "1.9558", BRL: "6.2683", CAD: "1.5691", CHF: "0.9641", CNY: "7.8822", CZK: "25.014", DKK: "7.4601", EUR: "1.0", GBP: "0.84183", HKD: "8.4635", HUF: "399.48", IDR: "17811.63", ILS: "4.0019", INR: "94.6655", ISK: "145.90", JPY: "161.88", KRW: "1582.87", MXN: "21.7571", MYR: "4.8418", NOK: "11.6200", NZD: "1.8985", PHP: "62.372", PLN: "4.1723", RON: "4.9768", SEK: "11.0538", SGD: "1.4536", THB: "36.658", TRY: "39.9381", USD: "1.0889", ZAR: "19.7832" }</script>
 </head>
 
 <body>
 <nav>
   <div id="small-title">Hurmet</div>
   <ul>
-    <li><a href="/sample.html" target="_blank">Sample</a></li>
-    <li><a href="/manual.html#calculation-tutorial" target="_blank">Tutorial</a></li>
+    <li><a href="/index.html" target="_blank">Home</a></li>
     <li><a href="/manual.html" target="_blank">Documentation</a></li>
-    <li><details><summary>Formulas</summary><ul>
-      <li><a href="guides/Computing-Pi.html" target="_blank">Computing Pi</a></li>
-      <li><a href="guides/Financial.html" target="_blank">Financial</a></li>
-    </ul></details></li>
-    <li><details><summary>Guides</summary><ul>
-      <li><a href="guides/Why-Hurmet.html" target="_blank">Why Hurmet?</a></li>
-      <li><a href="guides/Beam-Diagrams.html" target="_blank">Beam Diagrams</a></li>
-      <li><a href="guides/Concrete-Column-Interaction.html" target="_blank">Concrete Column Interaction</a></li>
-    </ul></details></li>
     <li><a href="https://github.com/ronkok/Hurmet" target="_blank">GitHub</a></li>
   </ul>
 </nav>
-
+ 
 <div id="promotion">
-<div id="title">Hurmet</div>
-<p id="slogan">A notebook for<br>calculations</p>
-</div>
-
+  <div id="title">Hurmet</div>
+  <p id="slogan">A notebook for<br>calculations</p>
+  </div>
 <article>
-  
+ 
 <div id=editor style="margin-bottom: 23px"></div>
 <div style="display: none" id="content">
 
-   <p>This is editable text. You can focus it and start typing. All calculations will update if you press <strong>Enter</strong> to close a calculation cell.</p>
-   <p>This week’s example:</p>
-   <h3>Simple span beam</h3>
-   <p><span class="hurmet-calc" data-entry="L = 12 'feet'"></span>, length</p>
-   <p><span class="hurmet-calc" data-entry="w = 110 'lbf/ft'"></span>, uniform line load</p>
-   <p><span class="hurmet-calc" data-entry="P = 1000 'lbf'"></span>, mid-span point load</p>
-   <p><span class="hurmet-calc" data-entry="V = (w L)/2 + P/2 = ?? lbf"></span>, maximum shear</p>
-   <p><span class="hurmet-calc" data-entry="M = (w L^2)/8 + (P L)/4 = ?? lbf-ft"></span>, max bending moment</p>
+<h2 href="welcome">Welcome</h2>
+<p>Create documents with working, well-documented calculations!</p>
+<p>This is a live text editor. You can click anywhere and start typing. The calculation cells are also live. You can click on one and edit it. They will all update if you close a calculation cell with <strong>Enter</strong>.</p>
 
-   <h2>Drawings</h2>
+<h2 href="calculations">Calculations</h2>
+<p>To create a calculation cell, select a spot and type <strong>Alt+C</strong> or hit the <img src="./images/C.svg" alt="C" class="inline"> button. Write your calculation into the cell and write a “?” sign where the result should appear. Hit the <strong>Enter</strong> key and a completed calculation will appear, like these:</p>
+<p><span class="hurmet-calc" data-entry="1//8 × 0.375 × 13.5² = ?"></span></p>
+<p>You can assign a result to a variable:</p>
+<p><span class="hurmet-calc" data-entry="L = 24 + 17/2 = ?"></span></p>
+<p>… and then use the variable in a calculation:</p>
+<p><span class="hurmet-calc" data-entry="L_2 = 2 L + 4 = ?"></span></p>
 
-  <p>Hurmet’s <em>draw</em> environment enables function plotting. For instance, to get a sine wave, one can write the following code into a math zone:</p>
+<h2 href="rounding-results">Rounding Results</h2>
+<p>You can define how numeric results are rounded. The next line specifies that subsequent decimal
+fractions will be rounded so that no more than 3 significant digits appear.</p>
+<p><span class="hurmet-calc" data-entry="format = &quot;h3&quot;"></span></p>
 
-  <table class="nogrid">
-  <tbody>
+<h2 href="unit-aware-calculations">Unit-Aware Calculations</h2>
+<p>Physical units can be part of your calculations. Hurmet will automatically convert the units.<br>
+Write a number and a unit name together with no space, as in <code>20meters</code> or write a unit name between single quotes, as in <code> 4 'nautical miles'</code>, and write a <code>??</code> where you want the result of a unit-aware calc.</p>
+<p><span class="hurmet-calc" data-entry="P = 10000V·20 'amps' = ?? kW"></span></p>
+<p><span class="hurmet-calc" data-entry="A = 4acres"></span></p>
+<p><span class="hurmet-calc" data-entry="L = A/100 'feet' = ?? m"></span></p>
+<p><span class="hurmet-calc" data-entry="L_square = √A = ?? m"></span></p>
+<p><span class="hurmet-calc" data-entry="F = 200 'lbf/ft'· 100 'm/min'· 2 'hrs' = ?? kN"></span></p>
+<p>Hurmet also does a unit-compatibility check.</p>
+<p><span class="hurmet-calc" data-entry="oops = 3 'm' + 2 'hours' = ??"></span></p>
+
+<h2 href="vectors">Vectors</h2>
+<p>Calculations<img src="images/IsoTankCourses.svg" alt="Tank Iso" width="230" class="right"> can be done on vectors.
+Say that we want to build a cylindrical water tank in 5-foot courses.
+<table class="nogrid"><tbody>
   <tr>
+    <td data-colwidth="204"><p><span class="hurmet-calc" data-entry="D = 25 'ft'"></span>, tank diameter</p></td>
+    <td><p><span class="hurmet-calc" data-entry="h = 5 'ft'"></span>, course height</p></td>
+  </tr>
+  <tr>
+    <td data-colwidth="204"><p><span class="hurmet-calc" data-entry="H = 20 'ft'"></span>, tank height</p></td>
+    <td><p><span class="hurmet-calc" data-entry="γ_w = 62.4 'lbf/ft3'"></span>, water density</p></td>
+  </tr>
+</tbody></table>
+<p>We’ll calculate values for each course, all at once, using vectors. Each vector element represents one course. </p>
+<p>The next line creates a vector. The syntax is <code>[start:step:end]</code>.</p>
+<p><span class="hurmet-calc" data-entry="𝐡 = [h:h:H] = ? ft"></span>, water depth at the bottom of each course</p>
+<p><span class="hurmet-calc" data-entry="𝐩_hydro = γ_w· 𝐡 = ?? psf"></span>, lateral hydrostatic pressure</p>
+<p><span class="hurmet-calc" data-entry="𝐭_h= 𝐩_hydro D = ?? kips/ft"></span>, hoop tension in each course</p>
+<p>Vectors can replace many spreadsheet calculations. Then all of the expressions and values are open to view. That extra information helps you to avoid the errors that creep into spreadsheets.</p>
+
+<h2 href="spreadsheets">Spreadsheets</h2>
+<p>Sometimes vectors are just too awkward. For those times, Hurmet can include simple spreadsheets.</p>
+<h4>Vertical Distribution of&nbsp;Seismic Force</h4>
+<p>From earlier analysis</p>
+<div class="indented">
+   <p>
+      <span class="hurmet-calc" data-entry="V_base = 400kips"></span>
+      , base shear&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;
+      <span class="hurmet-calc" data-entry="T = 0.75 sec"></span>
+      , fundamental period of the structure
+   </p>
+</div>
+<p>From&nbsp;ASCE-16 section&nbsp;12.8.3, Equivalent Lateral Procedure</p>
+<div class="indented">
+   <p><span class="hurmet-calc" data-entry="k = {   1 if T ≤ 0.5;   2 if T ≥ 2.5;   1 + (T - 0.5) // 2 otherwise } = %"></span></p>
+   <p><span class="hurmet-calc" data-entry="C_vs = (w × h^k) / (Σ (w × h^k))"></span>, vertical distribution coefficient,&nbsp;Eq. 12.8-12</p>
+   <p><span class="hurmet-calc" data-entry="F = C_vs V_base"></span>, local design force,&nbsp;Eq. 12.8-11</p>
+</div>
+<figure>
+   <figcaption>dist: Vertical Distribution of Seismic Force</figcaption>
+   <table class="four-rules spreadsheet c2c c3c c4c c5c c6c c7c c8c" id="dist" style="min-width: 539px;">
+      <colgroup>
+         <col style="width: 70px;">
+         <col style="width: 71px;">
+         <col style="width: 62px;">
+         <col style="width: 73px;">
+         <col style="width: 88px;">
+         <col style="width: 74px;">
+         <col style="width: 76px;">
+         <col>
+      </colgroup>
+      <tbody>
+         <tr>
+            <th data-colwidth="70">
+               <div class="hurmet-cell" data-entry="Floor" contenteditable="false">
+                  <p>Floor</p>
+               </div>
+            </th>
+            <th data-colwidth="71">
+               <div class="hurmet-cell" data-entry="Weight<br>kips" contenteditable="false">
+                  <p>Weight<br>kips</p>
+               </div>
+            </th>
+            <th data-colwidth="62">
+               <div class="hurmet-cell" data-entry="Height<br>ft" contenteditable="false">
+                  <p>Height<br>ft</p>
+               </div>
+            </th>
+            <th data-colwidth="73">
+               <div class="hurmet-cell" data-entry="w × h^k^" contenteditable="false">
+                  <p>w × h<sup>k</sup></p>
+               </div>
+            </th>
+            <th data-colwidth="88">
+               <div class="hurmet-cell" data-entry="C~vs~" contenteditable="false">
+                  <p>C<sub>vs</sub></p>
+               </div>
+            </th>
+            <th data-colwidth="74">
+               <div class="hurmet-cell" data-entry="Force<br>kips" contenteditable="false">
+                  <p>Force<br>kips</p>
+               </div>
+            </th>
+            <th data-colwidth="76">
+               <div class="hurmet-cell" data-entry="Shear<br>kips" contenteditable="false">
+                  <p>Shear<br>kips</p>
+               </div>
+            </th>
+            <th data-colwidth="">
+               <div class="hurmet-cell" data-entry="Overturning<br>kip·ft" contenteditable="false">
+                  <p>Overturning<br>kip·ft</p>
+               </div>
+            </th>
+         </tr>
+         <tr>
+            <td data-colwidth="70">
+               <div class="hurmet-cell" data-entry="roof" contenteditable="false">roof</div>
+            </td>
+            <td data-colwidth="71">
+               <div class="hurmet-cell" data-entry="950" contenteditable="false">950</div>
+            </td>
+            <td data-colwidth="62">
+               <div class="hurmet-cell" data-entry="70" contenteditable="false">70</div>
+            </td>
+            <td data-colwidth="73">
+               <div class="hurmet-cell" data-entry="=B1×C1^k" contenteditable="false">113,100</div>
+            </td>
+            <td data-colwidth="88">
+               <div class="hurmet-cell" data-entry="=D1/D_end" contenteditable="false">0.2899</div>
+            </td>
+            <td data-colwidth="74">
+               <div class="hurmet-cell" data-entry="==E1× V_base" contenteditable="false">116.0</div>
+            </td>
+            <td data-colwidth="76">
+               <div class="hurmet-cell" data-entry="=F1" contenteditable="false">116.0</div>
+            </td>
+            <td data-colwidth="">
+               <div class="hurmet-cell" data-entry="0" contenteditable="false">0</div>
+            </td>
+         </tr>
+         <tr>
+            <td data-colwidth="70">
+               <div class="hurmet-cell" data-entry="fifth" contenteditable="false">fifth</div>
+            </td>
+            <td data-colwidth="71">
+               <div class="hurmet-cell" data-entry="1,250" contenteditable="false">1,250</div>
+            </td>
+            <td data-colwidth="62">
+               <div class="hurmet-cell" data-entry="56" contenteditable="false">56</div>
+            </td>
+            <td data-colwidth="73">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">115,800</div>
+            </td>
+            <td data-colwidth="88">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">0.2968</div>
+            </td>
+            <td data-colwidth="74">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">118.7</div>
+            </td>
+            <td data-colwidth="76">
+               <div class="hurmet-cell" data-entry="=G1+F2" contenteditable="false">234.7</div>
+            </td>
+            <td data-colwidth="">
+               <div class="hurmet-cell" data-entry="=H1+G1×(C1-C2)" contenteditable="false">1,624</div>
+            </td>
+         </tr>
+         <tr>
+            <td data-colwidth="70">
+               <div class="hurmet-cell" data-entry="fourth" contenteditable="false">fourth</div>
+            </td>
+            <td data-colwidth="71">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">1,250</div>
+            </td>
+            <td data-colwidth="62">
+               <div class="hurmet-cell" data-entry="42" contenteditable="false">42</div>
+            </td>
+            <td data-colwidth="73">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">83,770</div>
+            </td>
+            <td data-colwidth="88">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">0.2147</div>
+            </td>
+            <td data-colwidth="74">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">85.90</div>
+            </td>
+            <td data-colwidth="76">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">320.6</div>
+            </td>
+            <td data-colwidth="">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">4,910</div>
+            </td>
+         </tr>
+         <tr>
+            <td data-colwidth="70">
+               <div class="hurmet-cell" data-entry="third" contenteditable="false">third</div>
+            </td>
+            <td data-colwidth="71">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">1,250</div>
+            </td>
+            <td data-colwidth="62">
+               <div class="hurmet-cell" data-entry="28" contenteditable="false">28</div>
+            </td>
+            <td data-colwidth="73">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">53,080</div>
+            </td>
+            <td data-colwidth="88">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">0.1361</div>
+            </td>
+            <td data-colwidth="74">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">54.44</div>
+            </td>
+            <td data-colwidth="76">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">375.0</div>
+            </td>
+            <td data-colwidth="">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">9,398</div>
+            </td>
+         </tr>
+         <tr>
+            <td data-colwidth="70">
+               <div class="hurmet-cell" data-entry="second" contenteditable="false">second</div>
+            </td>
+            <td data-colwidth="71">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">1,250</div>
+            </td>
+            <td data-colwidth="62">
+               <div class="hurmet-cell" data-entry="14" contenteditable="false">14</div>
+            </td>
+            <td data-colwidth="73">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">24,340</div>
+            </td>
+            <td data-colwidth="88">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">0.06240</div>
+            </td>
+            <td data-colwidth="74">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">24.96</div>
+            </td>
+            <td data-colwidth="76">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">400.0</div>
+            </td>
+            <td data-colwidth="">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">14,650</div>
+            </td>
+         </tr>
+         <tr>
+            <td data-colwidth="70">
+               <div class="hurmet-cell" data-entry="total" contenteditable="false">total</div>
+            </td>
+            <td data-colwidth="71">
+               <div class="hurmet-cell" data-entry="=sum(up)" contenteditable="false">5,950</div>
+            </td>
+            <td data-colwidth="62">
+               <div class="hurmet-cell" data-entry="0" contenteditable="false">0</div>
+            </td>
+            <td data-colwidth="73">
+               <div class="hurmet-cell" data-entry="=sum(up)" contenteditable="false">390,100</div>
+            </td>
+            <td data-colwidth="88">
+               <div class="hurmet-cell" data-entry="" contenteditable="false"></div>
+            </td>
+            <td data-colwidth="74">
+               <div class="hurmet-cell" data-entry="=sum(up)" contenteditable="false">400.0</div>
+            </td>
+            <td data-colwidth="76">
+               <div class="hurmet-cell" data-entry="=F_end" contenteditable="false">400.0</div>
+            </td>
+            <td data-colwidth="">
+               <div class="hurmet-cell" data-entry='"' contenteditable="false">20,250</div>
+            </td>
+         </tr>
+      </tbody>
+   </table>
+</figure>
+<p>To edit a spreadsheet, select some part of the sheet and tap the <img src="images/spreadsheetButton.svg" alt="spreadsheet button" width="16"> button. In Hurmet spreadsheets, you toggle the entire sheet, not just one cell.</p>
+
+<h2 href="data-frames">Data Frames</h2>
+<p>Data can be stored in a tabular format:            <span class="hurmet-calc" data-entry="rebar = ``
+#size	diameter	area
+     	in     	in²
+#3   	0.375  	0.11
+#4   	0.5    	0.2
+#5   	0.625  	0.31
+#6   	0.75   	0.44``"></span></p>
+<p>Later, you can access the data:<br><span class="hurmet-calc" data-entry='A = rebar["#3"].area = ?? in²'></span></p>
+
+<h2 id="remote-data">Remote Data</h2>
+<p>Such data can be stored in a remote file. Say that we want to engineer a steel end-plate connection. The calculation could begin by fetching a chunk of data about steel shapes and loading that data into a variable, like this:</p>
+<p><span class="hurmet-calc" data-entry="wideFlanges = fetch(&quot;https://gist.githubusercontent.com/ronkok/d2ae5b3c74889e71c7bb8422b6017067/raw/AISC-v15-wideFlanges.tsv&quot;) = !"></span></p>
+<p>From that, we can load data into variables for individual dimensions.</p>
+
+<h4 href="beam-properties">Beam properties<img src="images/EndPlateConnection.svg" alt="End Plate Connection" width="250" class="right">:</h4>
+<p><span class="hurmet-calc" data-entry="b_bf, t_bf, t_bw, d_b = wideFlanges.W16X57[&quot;bf&quot;, &quot;tf&quot;, &quot;tw&quot;, &quot;d&quot;] = !"></span></p>
+
+<h4 href="column-properties">Column properties:</h4>
+<p><span class="hurmet-calc" data-entry="A_c, b_cf, t_cf, t_cw, d_c, k_c = wideFlanges.W14X109[&quot;A&quot;, &quot;bf&quot;, &quot;tf&quot;, &quot;tw&quot;, &quot;d&quot;, &quot;kdes&quot;] = !"></span></p>
+<p>Now we can use those variables to do calculations. For an actual steel connection of this sort, a calculation would typically run to about three pages. We’ll do just a few lines.</p>
+
+<table class="nogrid"><tbody>
+  <tr>
+    <th data-colwidth="296"><p><strong>Steel properties</strong></p></th>
+    <th><p><strong>Factored reactions at end of beam (from analysis results)</strong></p></th>
+  </tr>
+  <tr>
+    <td data-colwidth="296"><p><span class="hurmet-calc" data-entry="F_y = 50 'ksi'"></span>, yield strength</p></td>
+    <td><p><span class="hurmet-calc" data-entry="V = 150 'kips'"></span>, shear</p></td>
+  </tr>
+  <tr>
+    <td data-colwidth="296"><p><span class="hurmet-calc" data-entry="E = 29000 'ksi'"></span>, modulus of elasticity</p></td>
+    <td><p><span class="hurmet-calc" data-entry="M = 220 'k·ft'"></span>, bending moment</p></td>
+  </tr>
+</tbody></table>
+
+<h4>Check panel zone</h4>
+<p><span class="hurmet-calc" data-entry="F_u = M/(0.95 d_c) = ?? kips"></span>, panel zone shear demand</p>
+<p><span class="hurmet-calc" data-entry="P_r = 142 'kips'"></span>, axial load demand in column from structural analysis</p>
+<p><span class="hurmet-calc" data-entry="P_c = 0.6 F_y A_c = ?? kips"></span></p>
+<p><span class="hurmet-calc" data-entry="ϕR_n = {
+   0.9 × 0.6 F_y d_c t_cw if P_r ≤ 0.4 P_c;
+   0.9 × 0.6 F_y d_c t_cw (1.4 - P_r//P_c) otherwise
+} = %% kips"></span>
+   <span class="hurmet-calc" data-entry='{">  Fᵤ , ok" if ϕR_n > F_u; \red("<  Fᵤ, ng, doubler plates required") otherwise} = @'></span> </p>
+<div class="boxed">
+  <p>Draw a box around your conclusion. It will draw attention.</p>
+</div>
+
+<h2 href="rational-numbers">Rational Numbers</h2>
+<p>Hurmet numbers are rational numbers of arbitrary precision. Unlike most programming languages, Hurmet will do the following comparison correctly:</p>
+<p><span class="hurmet-calc" data-entry="(0.2 + 0.1 == 0.3) = ?"></span></p>
+
+<p>Hurmet can handle bigger numbers than many languages: </p>
+<p><span class="hurmet-calc" data-entry="569936821221962380720³+ (-569936821113563493509)³ 
+  + (-472715493453327032)³= ?"></span></p>
+
+<p></p>
+
+<h3 href="matrix-inversion">Matrix Inversion</h3>
+
+<p>Hurmet can solve a system of linear equations via matrix inversion.</p>
+<p>The system:   <span class="hurmet-calc" data-entry="{:3 x + 2 y + z = 39; 2 x + 3 y + z = 34; x + 2 y + 3 z = 26}"></span>   when restated in matrix format is:   <span class="hurmet-calc" data-entry="(3, 2, 1; 2, 3, 1; 1, 2, 3) [x; y; z] = [39; 34; 26]"></span></p>
+<p>We can invert the first matrix and multiply it times both sides. That solves for each variable.</p>
+<p><span class="hurmet-calc" data-entry="[x; y; z] = (3, 2, 1; 2, 3, 1; 1, 2, 3)⁻¹ [39; 34; 26] = ?"></span></p>
+
+<h2 href="reviews">Reviews</h2>
+<aside class="comment">Don’t forget diffs.</aside>
+<p>Reviewers can write comments that are visibly different than the document.</p>
+<p>You can save a document snapshot and later display the difference between the snapshot and the current document.</p>
+
+<h2 href="annotations">Annotations</h2>
+<div class="tip">
+  <p>A section can be given an annotation, like this tip. The available annotations are “Note”, “Tip”, “Important”, and “Warning”.</p>
+</div>
+
+<h2 href="user-defined-functions">User-Defined Functions</h2>
+<p>You can write your own Hurmet functions. The one below implements an infinite series developed by Francois Viète in 1597, to estimate the value of π. He derived this series:</p>
+<div class="indented">
+   <p><span class="hurmet-calc" data-entry="2/π = √2/2 · (√(2+ √2))/2 · √(2 + √(2+ √2))/2 \cdots"></span></p>
+</div>
+<p>Here’s the function:</p>
+<p><span class="hurmet-calc" data-entry="function viete(numTerms)
+   product = 1
+   radicand = 0
+   for i in 1:numTerms
+      radicand = √(2.0 + radicand)
+      product = product × (radicand / 2)
+   end
+   return 2 / product
+end"></span></p>
+<p>… and now we’ll call the function and tell it to calculate the first ten terms of the series:</p>
+<p><span class="hurmet-calc" data-entry="format = &quot;h8&quot;"></span></p>
+<p><span class="hurmet-calc" data-entry="approximatePi = viete(10) = ?"></span>, good to 6 significant digits. Not bad for ten terms.</p>
+
+<h2 href="drawings">Drawings</h2>
+
+<p>Hurmet’s <em>draw</em> environment enables function plotting. For instance, to get a sine wave, one can write the following code into a math zone:</p>
+
+<table class="nogrid">
+<tbody>
+<tr>
   <td data-colwidth="298"><pre><code>draw()
     title "sin x"
     frame 250, 150
@@ -74,18 +435,18 @@ end</code></pre></td>
     plot sin(x), 51
     text [1.6, 1.35], &quot;sin x&quot;
 end"></span></p></td>
-  </tr>
-  </tbody>
-  </table>
-  <p></p>
+</tr>
+</tbody>
+</table>
+<p></p>
 </div> <!-- editor -->
 
 <div id="print-div" class="ProseMirror pica"></div>
 </article>
 
-<div id="copyright">Copyright © 2020-2025 Ron Kok. Released under the <a href="https://opensource.org/licenses/MIT">MIT License</a></div>
+<div id="copyright">Copyright © 2020-2024 Ron Kok. Released under the <a href="https://opensource.org/licenses/MIT">MIT License</a></div>
 
-<script type="module" src="prosemirror.js"></script>
+<script type="module" src="/prosemirror.min.js"></script>
 <script>
   window.addEventListener('beforeunload', function (e) {
 	// If changes have been made, put up a dialog box to warn the user.

@@ -29,7 +29,7 @@ offline = offline.replace(scriptRegEx, "<script>" + currencies + "<")
 fs.writeFileSync('site/offline.html', offline, { encoding: 'utf8' })
 
 let sample = fs.readFileSync('site/sample.html').toString('utf8')
-sample = preview.replace(scriptRegEx, "<script>" + currencies + "<")
+sample = sample.replace(scriptRegEx, "<script>" + currencies + "<")
 fs.writeFileSync('site/sample.html', sample, { encoding: 'utf8' })
 
 let manual = fs.readFileSync('docs/manual.md').toString('utf8')
