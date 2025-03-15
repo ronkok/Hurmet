@@ -31,11 +31,11 @@
 <div id=editor style="margin-bottom: 23px"></div>
 <div style="display: none" id="content">
 
-<h2 href="welcome">Welcome</h2>
+<h2 id="welcome">Welcome</h2>
 <p>Create documents with working, well-documented calculations!</p>
 <p>This is a live text editor. You can click anywhere and start typing. The calculation cells are also live. You can click on one and edit it. They will all update if you close a calculation cell with <strong>Enter</strong>.</p>
 
-<h2 href="calculations">Calculations</h2>
+<h2 id="calculations">Calculations</h2>
 <p>To create a calculation cell, select a spot and type <strong>Alt+C</strong> or hit the <img src="./images/C.svg" alt="C" class="inline"> button. Write your calculation into the cell and write a “?” sign where the result should appear. Hit the <strong>Enter</strong> key and a completed calculation will appear, like these:</p>
 <p><span class="hurmet-calc" data-entry="1//8 × 0.375 × 13.5² = ?"></span></p>
 <p>You can assign a result to a variable:</p>
@@ -43,12 +43,12 @@
 <p>… and then use the variable in a calculation:</p>
 <p><span class="hurmet-calc" data-entry="L_2 = 2 L + 4 = ?"></span></p>
 
-<h2 href="rounding-results">Rounding Results</h2>
+<h2 id="rounding-results">Rounding Results</h2>
 <p>You can define how numeric results are rounded. The next line specifies that subsequent decimal
 fractions will be rounded so that no more than 3 significant digits appear.</p>
 <p><span class="hurmet-calc" data-entry="format = &quot;h3&quot;"></span></p>
 
-<h2 href="unit-aware-calculations">Unit-Aware Calculations</h2>
+<h2 id="unit-aware-calculations">Unit-Aware Calculations</h2>
 <p>Physical units can be part of your calculations. Hurmet will automatically convert the units.<br>
 Write a number and a unit name together with no space, as in <code>20meters</code> or write a unit name between single quotes, as in <code> 4 'nautical miles'</code>, and write a <code>??</code> where you want the result of a unit-aware calc.</p>
 <p><span class="hurmet-calc" data-entry="P = 10000V·20 'amps' = ?? kW"></span></p>
@@ -59,7 +59,7 @@ Write a number and a unit name together with no space, as in <code>20meters</cod
 <p>Hurmet also does a unit-compatibility check.</p>
 <p><span class="hurmet-calc" data-entry="oops = 3 'm' + 2 'hours' = ??"></span></p>
 
-<h2 href="vectors">Vectors</h2>
+<h2 id="vectors">Vectors</h2>
 <p>Calculations<img src="images/IsoTankCourses.svg" alt="Tank Iso" width="230" class="right"> can be done on vectors.
 Say that we want to build a cylindrical water tank in 5-foot courses.
 <table class="nogrid"><tbody>
@@ -79,7 +79,7 @@ Say that we want to build a cylindrical water tank in 5-foot courses.
 <p><span class="hurmet-calc" data-entry="𝐭_h= 𝐩_hydro D = ?? kips/ft"></span>, hoop tension in each course</p>
 <p>Vectors can replace many spreadsheet calculations. Then all of the expressions and values are open to view. That extra information helps you to avoid the errors that creep into spreadsheets.</p>
 
-<h2 href="spreadsheets">Spreadsheets</h2>
+<h2 id="spreadsheets">Spreadsheets</h2>
 <p>Sometimes vectors are just too awkward. For those times, Hurmet can include simple spreadsheets.</p>
 <h4>Vertical Distribution of&nbsp;Seismic Force</h4>
 <p>From earlier analysis</p>
@@ -314,7 +314,7 @@ Say that we want to build a cylindrical water tank in 5-foot courses.
 </figure>
 <p>To edit a spreadsheet, select some part of the sheet and tap the <img src="images/spreadsheetButton.svg" alt="spreadsheet button" width="16"> button. In Hurmet spreadsheets, you toggle the entire sheet, not just one cell.</p>
 
-<h2 href="data-frames">Data Frames</h2>
+<h2 id="data-frames">Data Frames</h2>
 <p>Data can be stored in a tabular format:            <span class="hurmet-calc" data-entry="rebar = ``
 #size	diameter	area
      	in     	in²
@@ -329,10 +329,10 @@ Say that we want to build a cylindrical water tank in 5-foot courses.
 <p><span class="hurmet-calc" data-entry="wideFlanges = fetch(&quot;https://gist.githubusercontent.com/ronkok/d2ae5b3c74889e71c7bb8422b6017067/raw/AISC-v15-wideFlanges.tsv&quot;) = !"></span></p>
 <p>From that, we can load data into variables for individual dimensions.</p>
 
-<h4 href="beam-properties">Beam properties<img src="images/EndPlateConnection.svg" alt="End Plate Connection" width="250" class="right">:</h4>
+<h4 id="beam-properties">Beam properties<img src="images/EndPlateConnection.svg" alt="End Plate Connection" width="250" class="right">:</h4>
 <p><span class="hurmet-calc" data-entry="b_bf, t_bf, t_bw, d_b = wideFlanges.W16X57[&quot;bf&quot;, &quot;tf&quot;, &quot;tw&quot;, &quot;d&quot;] = !"></span></p>
 
-<h4 href="column-properties">Column properties:</h4>
+<h4 id="column-properties">Column properties:</h4>
 <p><span class="hurmet-calc" data-entry="A_c, b_cf, t_cf, t_cw, d_c, k_c = wideFlanges.W14X109[&quot;A&quot;, &quot;bf&quot;, &quot;tf&quot;, &quot;tw&quot;, &quot;d&quot;, &quot;kdes&quot;] = !"></span></p>
 <p>Now we can use those variables to do calculations. For an actual steel connection of this sort, a calculation would typically run to about three pages. We’ll do just a few lines.</p>
 
@@ -364,7 +364,7 @@ Say that we want to build a cylindrical water tank in 5-foot courses.
   <p>Draw a box around your conclusion. It will draw attention.</p>
 </div>
 
-<h2 href="rational-numbers">Rational Numbers</h2>
+<h2 id="rational-numbers">Rational Numbers</h2>
 <p>Hurmet numbers are rational numbers of arbitrary precision. Unlike most programming languages, Hurmet will do the following comparison correctly:</p>
 <p><span class="hurmet-calc" data-entry="(0.2 + 0.1 == 0.3) = ?"></span></p>
 
@@ -374,24 +374,24 @@ Say that we want to build a cylindrical water tank in 5-foot courses.
 
 <p></p>
 
-<h3 href="matrix-inversion">Matrix Inversion</h3>
+<h3 id="matrix-inversion">Matrix Inversion</h3>
 
 <p>Hurmet can solve a system of linear equations via matrix inversion.</p>
 <p>The system:   <span class="hurmet-calc" data-entry="{:3 x + 2 y + z = 39; 2 x + 3 y + z = 34; x + 2 y + 3 z = 26}"></span>   when restated in matrix format is:   <span class="hurmet-calc" data-entry="(3, 2, 1; 2, 3, 1; 1, 2, 3) [x; y; z] = [39; 34; 26]"></span></p>
 <p>We can invert the first matrix and multiply it times both sides. That solves for each variable.</p>
 <p><span class="hurmet-calc" data-entry="[x; y; z] = (3, 2, 1; 2, 3, 1; 1, 2, 3)⁻¹ [39; 34; 26] = ?"></span></p>
 
-<h2 href="reviews">Reviews</h2>
+<h2 id="reviews">Reviews</h2>
 <aside class="comment">Don’t forget diffs.</aside>
 <p>Reviewers can write comments that are visibly different than the document.</p>
 <p>You can save a document snapshot and later display the difference between the snapshot and the current document.</p>
 
-<h2 href="annotations">Annotations</h2>
+<h2 id="annotations">Annotations</h2>
 <div class="tip">
   <p>A section can be given an annotation, like this tip. The available annotations are “Note”, “Tip”, “Important”, and “Warning”.</p>
 </div>
 
-<h2 href="user-defined-functions">User-Defined Functions</h2>
+<h2 id="user-defined-functions">User-Defined Functions</h2>
 <p>You can write your own Hurmet functions. The one below implements an infinite series developed by Francois Viète in 1597, to estimate the value of π. He derived this series:</p>
 <div class="indented">
    <p><span class="hurmet-calc" data-entry="2/π = √2/2 · (√(2+ √2))/2 · √(2 + √(2+ √2))/2 \cdots"></span></p>
@@ -410,7 +410,7 @@ end"></span></p>
 <p><span class="hurmet-calc" data-entry="format = &quot;h8&quot;"></span></p>
 <p><span class="hurmet-calc" data-entry="approximatePi = viete(10) = ?"></span>, good to 6 significant digits. Not bad for ten terms.</p>
 
-<h2 href="drawings">Drawings</h2>
+<h2 id="drawings">Drawings</h2>
 
 <p>Hurmet’s <em>draw</em> environment enables function plotting. For instance, to get a sine wave, one can write the following code into a math zone:</p>
 
