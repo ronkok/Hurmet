@@ -812,7 +812,7 @@ rules.set("displayTeX", {
   parse: function(capture, state) {
     const tex = (capture[1] ? capture[1] : capture[2]).trim()
     if (state.convertTex) {
-      const entry = texToCalc(tex)
+      const entry = texToCalc(tex, true)
       return { type: "calculation", attrs: { entry, displayMode: true } }
     } else {
       return { type: "tex", attrs: { tex, displayMode: true } }
@@ -846,7 +846,7 @@ rules.set("tex", {
     if (capture[1]) {
       const tex = (capture[1]).trim()
       if (state.convertTex) {
-        const entry = texToCalc(tex)
+        const entry = texToCalc(tex, true)
         return { type: "calculation", attrs: { entry, displayMode: true } }
       } else {
         return { type: "tex", attrs: { tex, displayMode: true } }
@@ -860,7 +860,7 @@ rules.set("tex", {
         ? capture[5]
         : capture[6]).trim()
       if (state.convertTex) {
-        const entry = texToCalc(tex)
+        const entry = texToCalc(tex, false)
         return { type: "calculation", attrs: { entry, displayMode: false } }
       } else {
         return { type: "tex", attrs: { tex, displayMode: false } }

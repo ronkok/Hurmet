@@ -119,7 +119,7 @@ const eatMatch = (str, match) => {
   return str
 }
 
-export const texToCalc = str => {
+export const texToCalc = (str, displayMode = false) => {
   // Variable definitions
   let calc = ""
   let token = {}
@@ -277,10 +277,10 @@ export const texToCalc = str => {
 
       case tt.BINARY: {
         const pos = calc.length
-        if (token.input === "\\frac" || token.input === "\\dfrac") {
+        if (token.input === "\\dfrac" || (token.input === "\\frac" && displayMode)) {
           calc += "("
           delims.push({ ch: ")/(", pos, type: FRAC })
-        } else if (token.input === "\\tfrac") {
+        } else if (token.input === "\\tfrac" || (token.input === "\\frac" && !displayMode)) {
           calc += "("
           delims.push({ ch: ")//(", pos, type: TFRAC })
         } else {
