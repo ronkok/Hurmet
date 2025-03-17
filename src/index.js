@@ -35,7 +35,12 @@ function pmSetup(options) {
     tableEditing(),
     new state.Plugin({  props: {
       attributes: { class: "ProseMirror-setup pica", id: "editor-content" }
-    } })
+    } }),
+    new state.Plugin({ props: { clipboardTextParser(text, _, plain) {
+      if (plain) { return text }
+      const ast = hurmet.md2ast(text, false, false)
+      return schema.nodeFromJSON({ type: "fragment", content: ast })
+    } } })
   ]
 }
 
