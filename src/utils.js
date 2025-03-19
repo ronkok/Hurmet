@@ -69,7 +69,7 @@ export const memoizeFunction = passedFunction => {
 // A function to return an array containing all matches to a RegEx pattern.
 export const arrayOfRegExMatches = (regex, text) => {
   if (regex.constructor !== RegExp) { throw new Error('not RegExp') }
-  const result = []
+  const result = [];
   let match = null
 
   /* eslint-disable no-cond-assign */

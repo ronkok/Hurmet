@@ -33,6 +33,8 @@ import { sheetToTable, tableToSheet } from "./spreadsheet.js"
 import { dt } from "./constants.js"
 import { clone } from "./utils.js"
 import { dateFormatRegEx } from "./date"
+import { parse } from "./parser.js"
+import { texToCalc } from "./texToCalc.js"
 
 // Menu icons that are not included in node-module menu.js
 const hurmetIcons = {
@@ -615,28 +617,6 @@ function copyAsGFM() {
   })
 }
 
-function pasteAsMarkdown(doTexConversion) {
-  return new MenuItem({
-    label: (doTexConversion ? "Convert TeX and Paste" : "Paste from Markdown"),
-    title: doTexConversion 
-      ? "Given Markdown text, convert the LaTeX parts to Hurmet calclations, then paste."
-      : "Paste Markdown text into the document.",
-    run(state, _, view) {
-      navigator.clipboard
-        .readText()
-        .then((clipText) => {
-          const ast = hurmet.md2ast(clipText, false, doTexConversion)
-          const fragment = { type: "fragment", content: ast }
-          const {$from, $to} = state.selection
-          view.dispatch(
-            view.state.tr.replaceWith($from.pos, $to.pos, schema.nodeFromJSON(fragment))
-          )
-          hurmet.updateCalculations(view, true)
-        })
-    }
-  })
-}
-
 function uploadImage(nodeType) {
   return new MenuItem({
     title: "Upload image file",
@@ -1069,19 +1049,37 @@ function insertToC(nodeType) {
   })
 }
 
-export function insertMath(state, view, encoding) {
-  // Create a new math cell.
+export function insertOrToggleMath(state, view, encoding) {
   // This function is exported so that it can be called from keymap.js.
   const nodeType = (encoding === "calculation") ? schema.nodes.calculation : schema.nodes.tex
-  let attrs = (encoding === "calculation") ? { entry: "" } : { tex: "" }
-  if (state.selection instanceof NodeSelection && state.selection.node.type == nodeType) {
-    attrs = state.selection.node.attrs
+  const targetType = (encoding === "calculation") ? "tex" : "calculation"
+  const { from, to } = state.selection
+  const tr = state.tr
+  if (to - from > 0) {
+    // Toggle the math cells
+    state.doc.nodesBetween(from, to, function(node, pos) {
+      if (node.type.name === targetType) {
+        const attrs = clone(node.attrs)
+        if (encoding === "tex") {
+          attrs.tex = parse(attrs.entry)
+          delete attrs.entry
+          tr.replaceWith(pos, pos + 1, schema.nodes.tex.createAndFill(attrs))
+        } else {
+          attrs.entry = texToCalc(attrs.tex)
+          tr.replaceWith(pos, pos + 1, schema.nodes.calculation.createAndFill(attrs))
+        }
+      }
+    })
+  } else {
+    // Create a new math cell.
+    let attrs = (encoding === "calculation") ? { entry: "" } : { tex: "" }
+    if (state.selection instanceof NodeSelection && state.selection.node.type == nodeType) {
+      attrs = state.selection.node.attrs
+    }
+    const pos = tr.selection.from
+    tr.replaceSelectionWith(nodeType.createAndFill(attrs))
+    tr.setSelection(NodeSelection.create(tr.doc, pos))
   }
-  const tr = view.state.tr
-  const pos = tr.selection.from
-
-  tr.replaceSelectionWith(nodeType.createAndFill(attrs))
-  tr.setSelection(NodeSelection.create(tr.doc, pos))
   view.dispatch(tr)
 }
 
@@ -1089,34 +1087,48 @@ function mathMenuItem(nodeType, encoding) {
   return new MenuItem({
     title: "Insert " + ((encoding === "calculation") ? "a calculation cell  Alt-C" : "a TeX cell"),
     label: (encoding === "calculation") ? " ℂ " : " 𝕋 ",
-    //icon: (encoding === "calculation") ? hurmetIcons.C : hurmetIcons.T,
     class: (encoding === "tex") ? "math-button" : "mb-left",
     enable(state) { return canInsert(state, nodeType) },
     run(state, _, view) {
-      insertMath(state, view, encoding);
+      insertOrToggleMath(state, view, encoding);
     }
   })
 }
 
 const toggleDisplayMode = new MenuItem({
-  title: "Toggle display mode of the selected math cell",
+  title: "Toggle display mode of the selected math cell(s)",
   label: "ⅆ  ",
   class: "math-button",
   run: (state, _, view) => {
-  // Check if the cell should be type set as display mode.
-  const tr = state.tr
-  const pos = tr.selection.from
-  const node = state.selection.node
-  if (node  && (node.type.name === "calculation" || node.type.name === "tex")) {
-    const attrs = clone(node.attrs)
-    attrs.displayMode = !node.attrs.displayMode
-    const schemaNode = node.type.name === "calculation"
-      ? schema.nodes.calculation
-      : schema.nodes.tex
-    tr.replaceWith(pos, pos + node.nodeSize, schemaNode.createAndFill(attrs))
+    const tr = state.tr
+    const { from, to } = state.selection
+    if (to - from > 0) {
+      state.doc.nodesBetween(from, to, function(node, pos) {
+        if (node.type.name === "calculation" || node.type.name === "tex") {
+          const attrs = clone(node.attrs)
+          attrs.displayMode = false
+          if (node.type.name === "tex") {
+            tr.replaceWith(pos, pos + 1, schema.nodes.tex.createAndFill(attrs))
+          } else {
+            tr.replaceWith(pos, pos + 1, schema.nodes.calculation.createAndFill(attrs))
+          }
+        }
+      })
+    } else {
+      // Check if the cell should be type set as display mode.
+      const pos = tr.selection.from
+      const node = state.selection.node
+      if (node  && (node.type.name === "calculation" || node.type.name === "tex")) {
+        const attrs = clone(node.attrs)
+        attrs.displayMode = !node.attrs.displayMode
+        const schemaNode = node.type.name === "calculation"
+          ? schema.nodes.calculation
+          : schema.nodes.tex
+        tr.replaceWith(pos, pos + node.nodeSize, schemaNode.createAndFill(attrs))
+      }
+    }
     view.dispatch(tr)
     view.focus()
-    }
   }
 })
 
@@ -1955,14 +1967,10 @@ export function buildMenuItems(schema) {
   r.copyAsMarkdown = copyAsMarkdown()
   r.copyAsMarkdownWithResults = copyAsMarkdownWithResults()
   r.copyAsGFM = copyAsGFM()
-  r.pasteAsMarkdown = pasteAsMarkdown(false)
-  r.convertAndPaste = pasteAsMarkdown(true)
   r.Markdown = new Dropdown([
     r.copyAsMarkdown,
     r.copyAsMarkdownWithResults,
-    r.copyAsGFM,
-    r.pasteAsMarkdown,
-    r.convertAndPaste
+    r.copyAsGFM
   ], {label: "𝐌"})
 
   r.math = [[

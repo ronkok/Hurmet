@@ -23,6 +23,7 @@ str = str.slice(0, L) + "\n    table.className = node.attrs.class\n    table.id 
 str = str.replace("refRow = row == 0 || row == map.height ? null : 0;", "refRow = 0;")
 
 // Insert a Hurmet Recalc-All command after each paste event.
+// This modifies function doPaste() in prosemirror-view
 match = /"paste"\)\);/.exec(str)
 str = str.slice(0, match.index + match[0].length)
   + "\n    hurmet.updateCalculations(view, view.state.schema.nodes.calculation, true);\n"

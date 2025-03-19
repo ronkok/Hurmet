@@ -42,7 +42,6 @@ document range by selecting text, then clicking one of the menu bar buttons:
 +--------------------------------------+------------------------------------+
 | \                                    | Open…, Save…, Save as…, \          |
 | **File▾**                            | Create a permalink URL,\           |
-|                                      | Import/Export to Markdown,\        |
 |                                      | Take a snapshot, Show diff, \      |
 |                                      | Set Page Size, Print               |
 +--------------------------------------+------------------------------------+
@@ -146,6 +145,12 @@ remain a table. Otherwise, edit it any way you want.
 If you write `$PAGE` into a print header, Hurmet will print page numbers at
 that location. The calculation field `savedate() = @@` will print the date on which the
 document was most recently saved.
+
+### Paste
+
+Use **Ctrl-V** to paste into a Hurmet document. Hurmet recognizes either HTML or plain text.
+So you can copy and paste from another Hurmet document or from a chatbot. If a chatbot writes
+math, instruct it to write in Markdown format. Then the math will paste nicely into Hurmet.
 
 ### Macro Expansion
 
