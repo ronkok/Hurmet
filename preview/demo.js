@@ -10040,7 +10040,7 @@ const eatMatch = (str, match) => {
   return str
 };
 
-const texToCalc = str => {
+const texToCalc = (str, displayMode = false) => {
   // Variable definitions
   let calc = "";
   let token = {};
@@ -10198,10 +10198,10 @@ const texToCalc = str => {
 
       case tt.BINARY: {
         const pos = calc.length;
-        if (token.input === "\\frac" || token.input === "\\dfrac") {
+        if (token.input === "\\dfrac" || (token.input === "\\frac" && displayMode)) {
           calc += "(";
           delims.push({ ch: ")/(", pos, type: FRAC });
-        } else if (token.input === "\\tfrac") {
+        } else if (token.input === "\\tfrac" || (token.input === "\\frac" && !displayMode)) {
           calc += "(";
           delims.push({ ch: ")//(", pos, type: TFRAC });
         } else {
@@ -11022,7 +11022,7 @@ rules.set("displayTeX", {
   parse: function(capture, state) {
     const tex = (capture[1] ? capture[1] : capture[2]).trim();
     if (state.convertTex) {
-      const entry = texToCalc(tex);
+      const entry = texToCalc(tex, true);
       return { type: "calculation", attrs: { entry, displayMode: true } }
     } else {
       return { type: "tex", attrs: { tex, displayMode: true } }
@@ -11053,22 +11053,24 @@ rules.set("tex", {
   isLeaf: true,
   match: inlineRegex(/^(?:\\\[((?:\\[\s\S]|[^\\])+?)\\\]|\$\$((?:\\[\s\S]|[^\\])+?)\$\$|\\\(((?:\\[\s\S]|[^\\])+?)\\\)|\$(`+)((?:(?:\\[\s\S]|[^\\])+?)?)\4\$(?![0-9$])|\$(?!\s|\$)((?:(?:\\[\s\S]|[^\\])+?)?)(?<=[^\s\\$])\$(?![0-9$]))/),
   parse: function(capture, state) {
-    if (capture[1] || capture[2]) {
-      const tex = (capture[1] ? capture[1] : capture[2]).trim();
+    if (capture[1]) {
+      const tex = (capture[1]).trim();
       if (state.convertTex) {
-        const entry = texToCalc(tex);
+        const entry = texToCalc(tex, true);
         return { type: "calculation", attrs: { entry, displayMode: true } }
       } else {
         return { type: "tex", attrs: { tex, displayMode: true } }
       }
     } else {
-      const tex = (capture[3]
+      const tex = (capture[2]
+        ? capture[2]
+        : capture[3]
         ? capture[3]
         : capture[5]
         ? capture[5]
         : capture[6]).trim();
       if (state.convertTex) {
-        const entry = texToCalc(tex);
+        const entry = texToCalc(tex, false);
         return { type: "calculation", attrs: { entry, displayMode: false } }
       } else {
         return { type: "tex", attrs: { tex, displayMode: false } }

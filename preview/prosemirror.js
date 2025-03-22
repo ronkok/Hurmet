@@ -21153,10 +21153,10 @@ const miscSymbols = Object.freeze({
   "¬": ["¬", "¬", "¬", tt.UNARY, ""], // logical not
   "&&": ["&&", "{\\;\\&\\&\\;}", "&&", tt.LOGIC, ""],
 
-  "\u222B": ["\u222B", "\\displaystyle\u222B", "\u222B", tt.BIG_OPERATOR, ""], // \int
-  "\u222C": ["\u222C", "\\displaystyle\u222C", "\u222C", tt.BIG_OPERATOR, ""], // \iint
-  "\u222E": ["\u222E", "\\displaystyle\u222E", "\u222E", tt.BIG_OPERATOR, ""], // \oint
-  "\u2211": ["\u2211", "\\displaystyle\u2211", "\u2211", tt.BIG_OPERATOR, ""], // \sum
+  "∫": ["∫", "∫", "∫", tt.BIG_OPERATOR, ""], // \int
+  "∬": ["∬", "∬", "∬", tt.BIG_OPERATOR, ""], // \iint
+  "∮": ["∮", "∮", "∮", tt.BIG_OPERATOR, ""], // \oint
+  "\u2211": ["\u2211", "\u2211", "\u2211", tt.BIG_OPERATOR, ""], // \sum
 
   "(": ["(", "(", "(", tt.LEFTBRACKET, ")"],
   "[": ["[", "[", "[", tt.LEFTBRACKET, "]"],
@@ -21220,6 +21220,7 @@ const miscSymbols = Object.freeze({
   "\t": ["\t", " & ", "\t", tt.SEP, ""],  // dataframe element separator
   ";": [";", " \\\\ ", ";", tt.SEP, ""], // row separator
   "\\\\": ["\\\\", " \\\\ ", ";", tt.SEP, ""], // row separator
+  "\\cr": ["\\cr", " \\\\ ", ";", tt.SEP, ""], // row separator
 
   "$": ["$", "\\$", "$", tt.CURRENCY, ""],
   "£": ["£", "£", "£", tt.CURRENCY, ""],
@@ -21230,10 +21231,10 @@ const miscSymbols = Object.freeze({
   "₪": ["₪", "₪", "₪", tt.CURRENCY, ""]
 });
 
-const texFunctionRegEx = /^(\\[A-Za-z]+\.?|\\([:.!\u0020]|'+))/;
+const texFunctionRegEx = /^(\\[A-Za-z]+\.?|\\([:.!\u0020\u220F-\u2211\u222B-\u2230]|'+))/;
 
 const texFunctions = Object.freeze({
-  //          input,    output,  type,  closeDelim
+  //       input, tex output, calc output,  type,  closeDelim
   "\\aleph": ["\\aleph", "\u2135", "\u2135", tt.VAR, ""],
   "\\beth": ["\\beth", "\u2136", "\u2136", tt.VAR, ""],
   "\\gimel": ["\\gimel", "\u2137", "\u2137", tt.VAR, ""],
@@ -21283,17 +21284,35 @@ const texFunctions = Object.freeze({
   "\\lim": ["\\lim", "\\lim", "\\lim", tt.ORD, ""],
   "\\diamond": ["\\diamond", "\\diamond", "\\diamond", tt.ORD, ""],
   "\\square": ["\\square", "\\square", "\\square", tt.ORD, ""],
-  "\\int": ["\\int", "\\displaystyle\\int", "\u222B", tt.BIG_OPERATOR, ""],
-  "\\iint": ["\\iint", "\\displaystyle\\iint", "\u222C", tt.BIG_OPERATOR, ""],
-  "\\iiint": ["\\iiint", "\\displaystyle\\iiint", "\\iiint", tt.BIG_OPERATOR, ""],
-  "\\oint": ["\\oint", "\\displaystyle\\oint", "\u222E", tt.BIG_OPERATOR, ""],
-  "\\oiint": ["\\oiint", "\\displaystyle\\oiint", "\\oiint", tt.BIG_OPERATOR, ""],
-  "\\oiiint": ["\\oiiint", "\\displaystyle\\oiiint", "\\oiiint", tt.BIG_OPERATOR, ""],
+  "\\int": ["\\int", "∫", "∫", tt.BIG_OPERATOR, ""],
+  "\\iint": ["\\iint", "∬", "∬", tt.BIG_OPERATOR, ""],
+  "\\iiint": ["\\iiint", "∭", "∭", tt.BIG_OPERATOR, ""],
+  "\\oint": ["\\oint", "∮", "∮", tt.BIG_OPERATOR, ""],
+  "\\oiint": ["\\oiint", "∯", "∯", tt.BIG_OPERATOR, ""],
+  "\\oiiint": ["\\oiiint", "∰", "∰", tt.BIG_OPERATOR, ""],
+  "\\∫": ["\\∫", "\\displaystyle∫", "\\∫", tt.BIG_OPERATOR, ""],
+  "\\∬": ["\\∬", "\\displaystyle∬", "\\∬", tt.BIG_OPERATOR, ""],
+  "\\∭": ["\\∭", "\\displaystyle∭", "\\∭", tt.BIG_OPERATOR, ""],
+  "\\∮": ["\\∮", "\\displaystyle∮", "\\∮", tt.BIG_OPERATOR, ""],
+  "\\∯": ["\\∯", "\\displaystyle∯", "\\∯", tt.BIG_OPERATOR, ""],
+  "\\∰": ["\\∰", "\\displaystyle∰", "\\∰", tt.BIG_OPERATOR, ""],
   "\\over": ["\\over", "\\dfrac{", "\\over", tt.DIV],
-  "\\sum": ["\\sum", "\\displaystyle\\sum", "\u2211", tt.BIG_OPERATOR, ""],
-  "\\prod": ["\\prod", "\\displaystyle\\prod", "\\prod", tt.BIG_OPERATOR, ""],
+  "\\sum": ["\\sum", "\\displaystyle∑", "∑", tt.BIG_OPERATOR, ""],
+  "\\∑": ["\\∑", "∑", "\\∑", tt.BIG_OPERATOR, ""],
+  "\\prod": ["\\prod", "∏", "∏", tt.BIG_OPERATOR, ""],
+  "\\∏": ["\\∏", "\\displaystyle∏", "\\∏", tt.BIG_OPERATOR, ""],
   "\\quad": ["\\quad", "\\quad", "\\quad", tt.SPACE, ""],
-  "\\qquad": ["\\qquad", "\\qquad", "\\qquad", tt.SPACE, ""]
+  "\\qquad": ["\\qquad", "\\qquad", "\\qquad", tt.SPACE, ""],
+  "\\align": ["\\align", "\\begin{align}", "\\align", tt.UNARY, "\\end{align}"],
+  "\\cases": ["\\cases", "\\begin{cases}", "\\cases", tt.UNARY, "\\end{cases}"],
+  "\\rcases": ["\\rcases", "\\begin{rcases}", "\\rcases", tt.UNARY, "\\end{rcases}"],
+  "\\smallmatrix": ["\\smallmatrix", "\\begin{smallmatrix}", "\\smallmatrix", tt.UNARY, "\\end{smallmatrix}"],
+  "\\bordermatrix": ["\\bordermatrix", "\\bordermatrix", "\\bordermatrix", tt.UNARY, "}"],
+  "\\equation": ["\\equation", "\\begin{equation}", "\\equation", tt.UNARY, "\\end{equation}"],
+  "\\split": ["\\split", "\\begin{split}", "\\split", tt.UNARY, "\\end{split}"],
+  "\\gather": ["\\gather", "\\begin{gather}", "\\gather", tt.UNARY, "\\end{gather}"],
+  "\\CD": ["\\CD", "\\begin{CD}", "\\CD", tt.UNARY, "\\end{CD}"],
+  "\\multline": ["\\multline", "\\begin{multline}", "\\multline", tt.UNARY, "\\end{multline}"]
 });
 
 const accents$1 = new Set([
@@ -21681,7 +21700,7 @@ const lexUnitName = str => {
 
 const lex = (str, formats, prevToken, inRealTime = false) => {
   // Get the next token in str. Return an array with the token's information:
-  // [input, TeX output, type, associated close delimiter]
+  // [input, TeX output, calc output, type, associated close delimiter]
   let pos = 0;
   let st = "";
   let matchObj;
@@ -21888,6 +21907,9 @@ const builtInReducerFunctions = new Set(["accumulate", "beamDiagram", "dataframe
 
 const trigFunctions = new Set(["cos", "cosd", "cot", "cotd", "csc", "cscd", "sec", "secd",
   "sin", "sind", "tand", "tan"]);
+
+const enviroFunctions = new Set(["\\cases", "\\rcases", "\\smallmatrix", "\\equation",
+  "\\split", "\\align", "\\CD", "\\multline"]);
 
 const rationalRPN = numStr => {
   // Return a representation of a rational number that is recognized by evalRPN().
@@ -22277,7 +22299,7 @@ const parse$1 = (
           if (delim.delimType === dDICTIONARY && delim.open.length > 3) {
             tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + 2);
             op.closeDelim = delim.close;
-          } else if (delim.delimType === dMATRIX) {
+          } else if (delim.delimType === dMATRIX && delim.open.length > 1) {
             const inc = tex.slice(op.pos, op.pos + 1) === "\\" ? 2 : 1;
             tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + inc);
             op.closeDelim = delim.close;
@@ -22911,6 +22933,23 @@ const parse$1 = (
             // User is in the middle of writing a color spec. Avoid an error message.
             tex += "{";
           }
+        } else if (enviroFunctions.has(token.input)) {
+          str = str.slice(1);
+          texStack.pop();
+          texStack.push({ prec: 0, pos: tex.length,
+            ttype: tt.ENVIRONMENT, closeDelim: token.closeDelim });
+          delims.push({
+            name: token.input,
+            delimType: dMATRIX,
+            isTall: true,
+            open: token.output,
+            close: token.closeDelim,
+            numArgs: 1,
+            numRows: 1,
+            isPrecededByDiv: prevToken.ttype === tt.DIV,
+            isFuncParen: false,
+            isControlWordParen: true
+          });
         } else {
           tex += "{";
         }
@@ -23053,7 +23092,7 @@ const parse$1 = (
           delim.delimType = dACCESSOR;
         } else {
           // This may change to a MATRIX, but for now we'll say it's a paren.
-          delim.delimType = dPAREN;
+          delim.delimType = prevToken.input === "\\bordermatrix" ? dMATRIX : dPAREN;
           delim.name = token.input;
         }
         delims.push(delim);
@@ -23400,8 +23439,7 @@ const FRAC = 2;
 const TFRAC = 4;
 const BINARY = 8;
 const ENV = 16;  // environment
-const CASES = 32;
-const SUB = 64;
+const SUB = 32;
 
 const  charAccents = {
   "\\bar": "\u0304",
@@ -23426,8 +23464,8 @@ const trailingSpaceRegEx$1 = / +$/;
 const inlineFracRegEx = /^\/(?!\/)/;
 const ignoreRegEx = /^\\(left(?!\.)|right(?!\.)|middle|big|Big|bigg|Bigg)/;
 const subRegEx = /^\("([A-Za-z\u0391-\u03c9][A-Za-z0-9\u0391-\u03c9]*)"$/;
-const enviroRegEx = /^\\begin\{(?:(cases)|(|p|b|B|v|V)matrix)\}/;
-const endEnviroRegEx = /^\\end\{(?:cases|(?:|p|b|B|v|V)matrix)\}/;
+const enviroRegEx = /^\\begin\{(?:(cases|rcases|align|equation|split|gather)|(|p|b|B|v|V)matrix)\}/;
+const endEnviroRegEx = /^\\end\{(?:(cases|rcases|align|equation|split|gather)|(|p|b|B|v|V)matrix)\}/;
 // eslint-disable-next-line max-len
 const greekAlternatives = "Alpha|Beta|Gamma|Delta|Epsilon|Zeta|Eta|Theta|Iota|Kappa|Lambda|Mu|Nu|Xi|Omicron|Pi|Rho|Sigma|Tau|Upsilon|Phi|Chi|Psi|Omega|alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|omicron|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega|varphi";
 const greekRegEx = RegExp("^\\\\(" + greekAlternatives + ")\\b");
@@ -23506,7 +23544,7 @@ const eatMatch = (str, match) => {
   return str
 };
 
-const texToCalc = str => {
+const texToCalc = (str, displayMode = false) => {
   // Variable definitions
   let calc = "";
   let token = {};
@@ -23548,11 +23586,11 @@ const texToCalc = str => {
     while (enviroRegEx.test(str)) {
       const match = enviroRegEx.exec(str);
       if (match[1]) {
-        // {cases} environment
-        delims.push({ ch: ":}", pos: calc.length, type: ENV + CASES });
-        calc += "{";
+        delims.push({ ch: "}", pos: calc.length, type: ENV });
+        calc += `\\${match[1]}{`;
       } else {
-        const matrixType = match[2] ? match[2] : "m";
+        let matrixType = match[2];
+        if (matrixType.length === 0) { matrixType = "m"; }
         delims.push({ ch: matrices[matrixType][1], pos: calc.length, type: ENV });
         calc += matrices[matrixType][0];
       }
@@ -23562,12 +23600,13 @@ const texToCalc = str => {
     while (endEnviroRegEx.test(str)) {
       const match = endEnviroRegEx.exec(str);
       const delim = delims.pop();
-      if (match[0].indexOf("cases") > -1) {
+      /*if (match[1] && match[1].indexOf("cases") > -1) {
+        // TODO: Hurmet if statement in place of cases
         // {cases} environment. Clean up the if statements
-        let casesText = calc.slice(delim.pos + 1);
-        casesText = casesText.replace(/"if *"/g, "if ");
-        calc = calc.slice(0, delim.pos + 1) + casesText;
-      }
+        let casesText = calc.slice(delim.pos + 1)
+        casesText = casesText.replace(/"if *"/g, "if ")
+        calc = calc.slice(0, delim.pos + 1) + casesText
+      }*/
       calc += delim.ch;
       str = eatMatch(str, match);
     }
@@ -23654,7 +23693,11 @@ const texToCalc = str => {
         } else {
           calc += token.output;
           if (str.length > 0 && str.charAt(0) === "{") {
-            delims.push({ ch: ")", pos: calc.length, type: PAREN });
+            delims.push({
+              ch: ")",
+              pos: calc.length,
+              type: token.input === "\\bordermatrix" ? ENV : PAREN
+            });
             calc +=  '(';
             str = eatOneChar(str);
           }
@@ -23664,10 +23707,10 @@ const texToCalc = str => {
 
       case tt.BINARY: {
         const pos = calc.length;
-        if (token.input === "\\frac" || token.input === "\\dfrac") {
+        if (token.input === "\\dfrac" || (token.input === "\\frac" && displayMode)) {
           calc += "(";
           delims.push({ ch: ")/(", pos, type: FRAC });
-        } else if (token.input === "\\tfrac") {
+        } else if (token.input === "\\tfrac" || (token.input === "\\frac" && !displayMode)) {
           calc += "(";
           delims.push({ ch: ")//(", pos, type: TFRAC });
         } else {
@@ -23708,11 +23751,11 @@ const texToCalc = str => {
       }
 
       case tt.SEP: {
-        const inEnvironment = (delims[delims.length - 1].type & ENV);
-        if (token.input === "//" && inEnvironment) {
+        const inEnvironment = (delims[delims.length - 1].type === ENV);
+        if ((token.input === "\\\\" || token.input === "\\cr") && inEnvironment) {
           calc += ";";
         } else {
-          calc += token.output;
+          calc += (token.input === "&" && inEnvironment) ?  "," : token.output;
         }
         break
       }
@@ -24488,7 +24531,7 @@ rules.set("displayTeX", {
   parse: function(capture, state) {
     const tex = (capture[1] ? capture[1] : capture[2]).trim();
     if (state.convertTex) {
-      const entry = texToCalc(tex);
+      const entry = texToCalc(tex, true);
       return { type: "calculation", attrs: { entry, displayMode: true } }
     } else {
       return { type: "tex", attrs: { tex, displayMode: true } }
@@ -24519,22 +24562,24 @@ rules.set("tex", {
   isLeaf: true,
   match: inlineRegex(/^(?:\\\[((?:\\[\s\S]|[^\\])+?)\\\]|\$\$((?:\\[\s\S]|[^\\])+?)\$\$|\\\(((?:\\[\s\S]|[^\\])+?)\\\)|\$(`+)((?:(?:\\[\s\S]|[^\\])+?)?)\4\$(?![0-9$])|\$(?!\s|\$)((?:(?:\\[\s\S]|[^\\])+?)?)(?<=[^\s\\$])\$(?![0-9$]))/),
   parse: function(capture, state) {
-    if (capture[1] || capture[2]) {
-      const tex = (capture[1] ? capture[1] : capture[2]).trim();
+    if (capture[1]) {
+      const tex = (capture[1]).trim();
       if (state.convertTex) {
-        const entry = texToCalc(tex);
+        const entry = texToCalc(tex, true);
         return { type: "calculation", attrs: { entry, displayMode: true } }
       } else {
         return { type: "tex", attrs: { tex, displayMode: true } }
       }
     } else {
-      const tex = (capture[3]
+      const tex = (capture[2]
+        ? capture[2]
+        : capture[3]
         ? capture[3]
         : capture[5]
         ? capture[5]
         : capture[6]).trim();
       if (state.convertTex) {
-        const entry = texToCalc(tex);
+        const entry = texToCalc(tex, false);
         return { type: "calculation", attrs: { entry, displayMode: false } }
       } else {
         return { type: "tex", attrs: { tex, displayMode: false } }
@@ -40975,7 +41020,7 @@ const bordermatrixParseTree = (matrix, delimiters) => {
     // A vphantom with contents from the pmatrix, to set minimum cell height
     const phantomBody = [];
     for (let j = 0; j < body[i].length; j++) {
-      phantomBody.push(structuredClone(body[i][j]));
+      phantomBody.push(body[i][j]);
     }
     leftColumnBody[i - 1].push(phantom(phantomBody, "vphantom"));
   }
@@ -40983,18 +41028,18 @@ const bordermatrixParseTree = (matrix, delimiters) => {
   // Create an array for the top row
   const topRowBody = new Array(body.length).fill().map(() => []);
   for (let j = 0; j < body[0].length; j++) {
-    topRowBody[0].push(structuredClone(body[0][j]));
+    topRowBody[0].push(body[0][j]);
   }
   // Copy the rest of the pmatrix, but squashed via \hphantom
   for (let i = 1; i < body.length; i++) {
     for (let j = 0; j < body[0].length; j++) {
-      topRowBody[i].push(phantom(structuredClone(body[i][j]).body, "hphantom"));
+      topRowBody[i].push(phantom(body[i][j].body, "hphantom"));
     }
   }
 
   // Squash the top row of the main {pmatrix}
   for (let j = 0; j < body[0].length; j++) {
-    body[0][j] = phantom(structuredClone(body[0][j]).body, "hphantom");
+    body[0][j] = phantom(body[0][j].body, "hphantom");
   }
 
   // Now wrap the arrays in the proper parse nodes.
@@ -55765,28 +55810,6 @@ function copyAsGFM() {
   })
 }
 
-function pasteAsMarkdown(doTexConversion) {
-  return new MenuItem({
-    label: (doTexConversion ? "Convert TeX and Paste" : "Paste from Markdown"),
-    title: doTexConversion 
-      ? "Given Markdown text, convert the LaTeX parts to Hurmet calclations, then paste."
-      : "Paste Markdown text into the document.",
-    run(state, _, view) {
-      navigator.clipboard
-        .readText()
-        .then((clipText) => {
-          const ast = hurmet.md2ast(clipText, false, doTexConversion);
-          const fragment = { type: "fragment", content: ast };
-          const {$from, $to} = state.selection;
-          view.dispatch(
-            view.state.tr.replaceWith($from.pos, $to.pos, schema.nodeFromJSON(fragment))
-          );
-          hurmet.updateCalculations(view, true);
-        });
-    }
-  })
-}
-
 function uploadImage(nodeType) {
   return new MenuItem({
     title: "Upload image file",
@@ -56216,54 +56239,88 @@ function insertToC(nodeType) {
   })
 }
 
-function insertMath(state, view, encoding) {
-  // Create a new math cell.
+function insertOrToggleMath(state, view, encoding) {
   // This function is exported so that it can be called from keymap.js.
   const nodeType = (encoding === "calculation") ? schema.nodes.calculation : schema.nodes.tex;
-  let attrs = (encoding === "calculation") ? { entry: "" } : { tex: "" };
-  if (state.selection instanceof NodeSelection && state.selection.node.type == nodeType) {
-    attrs = state.selection.node.attrs;
+  const targetType = (encoding === "calculation") ? "tex" : "calculation";
+  const { from, to } = state.selection;
+  const tr = state.tr;
+  if (to - from > 0) {
+    // Toggle the math cells
+    state.doc.nodesBetween(from, to, function(node, pos) {
+      if (node.type.name === targetType) {
+        const attrs = clone(node.attrs);
+        if (encoding === "tex") {
+          attrs.tex = parse$1(attrs.entry);
+          delete attrs.entry;
+          tr.replaceWith(pos, pos + 1, schema.nodes.tex.createAndFill(attrs));
+        } else {
+          attrs.entry = texToCalc(attrs.tex);
+          tr.replaceWith(pos, pos + 1, schema.nodes.calculation.createAndFill(attrs));
+        }
+      }
+    });
+  } else {
+    // Create a new math cell.
+    let attrs = (encoding === "calculation") ? { entry: "" } : { tex: "" };
+    if (state.selection instanceof NodeSelection && state.selection.node.type == nodeType) {
+      attrs = state.selection.node.attrs;
+    }
+    const pos = tr.selection.from;
+    tr.replaceSelectionWith(nodeType.createAndFill(attrs));
+    tr.setSelection(NodeSelection.create(tr.doc, pos));
   }
-  const tr = view.state.tr;
-  const pos = tr.selection.from;
-
-  tr.replaceSelectionWith(nodeType.createAndFill(attrs));
-  tr.setSelection(NodeSelection.create(tr.doc, pos));
   view.dispatch(tr);
 }
 
 function mathMenuItem(nodeType, encoding) {
   return new MenuItem({
-    title: "Insert " + ((encoding === "calculation") ? "a calculation cell  Alt-C" : "a TeX cell"),
+    title: "Insert " + ((encoding === "calculation")
+      ? "a calculation cell  Alt-C\nor convert multiple TeX cells to calculation"
+      : "a TeX cell\nor convert multiple calculation cells to TeX"),
     label: (encoding === "calculation") ? " ℂ " : " 𝕋 ",
-    //icon: (encoding === "calculation") ? hurmetIcons.C : hurmetIcons.T,
     class: (encoding === "tex") ? "math-button" : "mb-left",
     enable(state) { return canInsert(state, nodeType) },
     run(state, _, view) {
-      insertMath(state, view, encoding);
+      insertOrToggleMath(state, view, encoding);
     }
   })
 }
 
 const toggleDisplayMode = new MenuItem({
-  title: "Toggle display mode of the selected math cell",
+  title: "Toggle display mode of the selected math cell(s)",
   label: "ⅆ  ",
   class: "math-button",
   run: (state, _, view) => {
-  // Check if the cell should be type set as display mode.
-  const tr = state.tr;
-  const pos = tr.selection.from;
-  const node = state.selection.node;
-  if (node  && (node.type.name === "calculation" || node.type.name === "tex")) {
-    const attrs = clone(node.attrs);
-    attrs.displayMode = !node.attrs.displayMode;
-    const schemaNode = node.type.name === "calculation"
-      ? schema.nodes.calculation
-      : schema.nodes.tex;
-    tr.replaceWith(pos, pos + node.nodeSize, schemaNode.createAndFill(attrs));
+    const tr = state.tr;
+    const { from, to } = state.selection;
+    if (to - from > 1) {
+      state.doc.nodesBetween(from, to, function(node, pos) {
+        if (node.type.name === "calculation" || node.type.name === "tex") {
+          const attrs = clone(node.attrs);
+          attrs.displayMode = false;
+          if (node.type.name === "tex") {
+            tr.replaceWith(pos, pos + 1, schema.nodes.tex.createAndFill(attrs));
+          } else {
+            tr.replaceWith(pos, pos + 1, schema.nodes.calculation.createAndFill(attrs));
+          }
+        }
+      });
+    } else {
+      // Check if the cell should be type set as display mode.
+      const pos = tr.selection.from;
+      const node = state.selection.node;
+      if (node  && (node.type.name === "calculation" || node.type.name === "tex")) {
+        const attrs = clone(node.attrs);
+        attrs.displayMode = !node.attrs.displayMode;
+        const schemaNode = node.type.name === "calculation"
+          ? schema.nodes.calculation
+          : schema.nodes.tex;
+        tr.replaceWith(pos, pos + node.nodeSize, schemaNode.createAndFill(attrs));
+      }
+    }
     view.dispatch(tr);
     view.focus();
-    }
   }
 });
 
@@ -57100,14 +57157,10 @@ function buildMenuItems(schema) {
   r.copyAsMarkdown = copyAsMarkdown();
   r.copyAsMarkdownWithResults = copyAsMarkdownWithResults();
   r.copyAsGFM = copyAsGFM();
-  r.pasteAsMarkdown = pasteAsMarkdown(false);
-  r.convertAndPaste = pasteAsMarkdown(true);
   r.Markdown = new Dropdown([
     r.copyAsMarkdown,
     r.copyAsMarkdownWithResults,
-    r.copyAsGFM,
-    r.pasteAsMarkdown,
-    r.convertAndPaste
+    r.copyAsGFM
   ], {label: "𝐌"});
 
   r.math = [[
@@ -57427,7 +57480,7 @@ function buildKeymap(schema, mapKeys) {
   if ((type = schema.marks.underline)) bind("Mod-u", toggleMark(type));
   if ((type = schema.nodes.calculation)) {
     bind("Alt-c", (state, _, view) => {
-      insertMath(state, view, "calculation");
+      insertOrToggleMath(state, view, "calculation");
       return true
     });
   }
@@ -57622,8 +57675,12 @@ const autoCorrections = {
   xx: "×",
   "\\int": "∫",
   "\\iint": "∬",
+  "\\iiint": "∭",
   "\\oint": "∮",
+  "\\oiint": "∯",
+  "\\oiiint": "∰",
   "\\sum": "∑",
+  "\\prod": "∏",
   nn: "∩", // cap
   nnn: "⋂",
   uu: "∪", // cup
@@ -58727,7 +58784,12 @@ function pmSetup(options) {
     tableEditing(),
     new Plugin({  props: {
       attributes: { class: "ProseMirror-setup pica", id: "editor-content" }
-    } })
+    } }),
+    new Plugin({ props: { clipboardTextParser(text, _, plain) {
+      if (plain) { return text }
+      const ast = hurmet.md2ast(text, false, false);
+      return schema.nodeFromJSON({ type: "fragment", content: ast })
+    } } })
   ]
 }
 
