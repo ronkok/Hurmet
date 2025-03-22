@@ -33,6 +33,9 @@ const builtInReducerFunctions = new Set(["accumulate", "beamDiagram", "dataframe
 const trigFunctions = new Set(["cos", "cosd", "cot", "cotd", "csc", "cscd", "sec", "secd",
   "sin", "sind", "tand", "tan"])
 
+const enviroFunctions = new Set(["\\cases", "\\rcases", "\\smallmatrix", "\\equation",
+  "\\split", "\\align", "\\CD", "\\multline"])
+
 const rationalRPN = numStr => {
   // Return a representation of a rational number that is recognized by evalRPN().
   const num = Rnl.fromString(numStr)
@@ -424,7 +427,7 @@ export const parse = (
           if (delim.delimType === dDICTIONARY && delim.open.length > 3) {
             tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + 2)
             op.closeDelim = delim.close
-          } else if (delim.delimType === dMATRIX) {
+          } else if (delim.delimType === dMATRIX && delim.open.length > 1) {
             const inc = tex.slice(op.pos, op.pos + 1) === "\\" ? 2 : 1
             tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + inc)
             op.closeDelim = delim.close
@@ -1058,6 +1061,23 @@ export const parse = (
             // User is in the middle of writing a color spec. Avoid an error message.
             tex += "{"
           }
+        } else if (enviroFunctions.has(token.input)) {
+          str = str.slice(1)
+          texStack.pop()
+          texStack.push({ prec: 0, pos: tex.length,
+            ttype: tt.ENVIRONMENT, closeDelim: token.closeDelim })
+          delims.push({
+            name: token.input,
+            delimType: dMATRIX,
+            isTall: true,
+            open: token.output,
+            close: token.closeDelim,
+            numArgs: 1,
+            numRows: 1,
+            isPrecededByDiv: prevToken.ttype === tt.DIV,
+            isFuncParen: false,
+            isControlWordParen: true
+          })
         } else {
           tex += "{"
         }
@@ -1200,7 +1220,7 @@ export const parse = (
           delim.delimType = dACCESSOR
         } else {
           // This may change to a MATRIX, but for now we'll say it's a paren.
-          delim.delimType = dPAREN
+          delim.delimType = prevToken.input === "\\bordermatrix" ? dMATRIX : dPAREN
           delim.name = token.input
         }
         delims.push(delim)

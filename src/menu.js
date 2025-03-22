@@ -1085,7 +1085,9 @@ export function insertOrToggleMath(state, view, encoding) {
 
 function mathMenuItem(nodeType, encoding) {
   return new MenuItem({
-    title: "Insert " + ((encoding === "calculation") ? "a calculation cell  Alt-C" : "a TeX cell"),
+    title: "Insert " + ((encoding === "calculation")
+      ? "a calculation cell  Alt-C\nor convert multiple TeX cells to calculation"
+      : "a TeX cell\nor convert multiple calculation cells to TeX"),
     label: (encoding === "calculation") ? " ℂ " : " 𝕋 ",
     class: (encoding === "tex") ? "math-button" : "mb-left",
     enable(state) { return canInsert(state, nodeType) },
@@ -1102,7 +1104,7 @@ const toggleDisplayMode = new MenuItem({
   run: (state, _, view) => {
     const tr = state.tr
     const { from, to } = state.selection
-    if (to - from > 0) {
+    if (to - from > 1) {
       state.doc.nodesBetween(from, to, function(node, pos) {
         if (node.type.name === "calculation" || node.type.name === "tex") {
           const attrs = clone(node.attrs)

@@ -261,10 +261,10 @@ const miscSymbols = Object.freeze({
   "¬": ["¬", "¬", "¬", tt.UNARY, ""], // logical not
   "&&": ["&&", "{\\;\\&\\&\\;}", "&&", tt.LOGIC, ""],
 
-  "\u222B": ["\u222B", "\\displaystyle\u222B", "\u222B", tt.BIG_OPERATOR, ""], // \int
-  "\u222C": ["\u222C", "\\displaystyle\u222C", "\u222C", tt.BIG_OPERATOR, ""], // \iint
-  "\u222E": ["\u222E", "\\displaystyle\u222E", "\u222E", tt.BIG_OPERATOR, ""], // \oint
-  "\u2211": ["\u2211", "\\displaystyle\u2211", "\u2211", tt.BIG_OPERATOR, ""], // \sum
+  "∫": ["∫", "∫", "∫", tt.BIG_OPERATOR, ""], // \int
+  "∬": ["∬", "∬", "∬", tt.BIG_OPERATOR, ""], // \iint
+  "∮": ["∮", "∮", "∮", tt.BIG_OPERATOR, ""], // \oint
+  "\u2211": ["\u2211", "\u2211", "\u2211", tt.BIG_OPERATOR, ""], // \sum
 
   "(": ["(", "(", "(", tt.LEFTBRACKET, ")"],
   "[": ["[", "[", "[", tt.LEFTBRACKET, "]"],
@@ -328,6 +328,7 @@ const miscSymbols = Object.freeze({
   "\t": ["\t", " & ", "\t", tt.SEP, ""],  // dataframe element separator
   ";": [";", " \\\\ ", ";", tt.SEP, ""], // row separator
   "\\\\": ["\\\\", " \\\\ ", ";", tt.SEP, ""], // row separator
+  "\\cr": ["\\cr", " \\\\ ", ";", tt.SEP, ""], // row separator
 
   "$": ["$", "\\$", "$", tt.CURRENCY, ""],
   "£": ["£", "£", "£", tt.CURRENCY, ""],
@@ -338,10 +339,10 @@ const miscSymbols = Object.freeze({
   "₪": ["₪", "₪", "₪", tt.CURRENCY, ""]
 })
 
-const texFunctionRegEx = /^(\\[A-Za-z]+\.?|\\([:.!\u0020]|'+))/
+const texFunctionRegEx = /^(\\[A-Za-z]+\.?|\\([:.!\u0020\u220F-\u2211\u222B-\u2230]|'+))/
 
 const texFunctions = Object.freeze({
-  //          input,    output,  type,  closeDelim
+  //       input, tex output, calc output,  type,  closeDelim
   "\\aleph": ["\\aleph", "\u2135", "\u2135", tt.VAR, ""],
   "\\beth": ["\\beth", "\u2136", "\u2136", tt.VAR, ""],
   "\\gimel": ["\\gimel", "\u2137", "\u2137", tt.VAR, ""],
@@ -391,17 +392,35 @@ const texFunctions = Object.freeze({
   "\\lim": ["\\lim", "\\lim", "\\lim", tt.ORD, ""],
   "\\diamond": ["\\diamond", "\\diamond", "\\diamond", tt.ORD, ""],
   "\\square": ["\\square", "\\square", "\\square", tt.ORD, ""],
-  "\\int": ["\\int", "\\displaystyle\\int", "\u222B", tt.BIG_OPERATOR, ""],
-  "\\iint": ["\\iint", "\\displaystyle\\iint", "\u222C", tt.BIG_OPERATOR, ""],
-  "\\iiint": ["\\iiint", "\\displaystyle\\iiint", "\\iiint", tt.BIG_OPERATOR, ""],
-  "\\oint": ["\\oint", "\\displaystyle\\oint", "\u222E", tt.BIG_OPERATOR, ""],
-  "\\oiint": ["\\oiint", "\\displaystyle\\oiint", "\\oiint", tt.BIG_OPERATOR, ""],
-  "\\oiiint": ["\\oiiint", "\\displaystyle\\oiiint", "\\oiiint", tt.BIG_OPERATOR, ""],
+  "\\int": ["\\int", "∫", "∫", tt.BIG_OPERATOR, ""],
+  "\\iint": ["\\iint", "∬", "∬", tt.BIG_OPERATOR, ""],
+  "\\iiint": ["\\iiint", "∭", "∭", tt.BIG_OPERATOR, ""],
+  "\\oint": ["\\oint", "∮", "∮", tt.BIG_OPERATOR, ""],
+  "\\oiint": ["\\oiint", "∯", "∯", tt.BIG_OPERATOR, ""],
+  "\\oiiint": ["\\oiiint", "∰", "∰", tt.BIG_OPERATOR, ""],
+  "\\∫": ["\\∫", "\\displaystyle∫", "\\∫", tt.BIG_OPERATOR, ""],
+  "\\∬": ["\\∬", "\\displaystyle∬", "\\∬", tt.BIG_OPERATOR, ""],
+  "\\∭": ["\\∭", "\\displaystyle∭", "\\∭", tt.BIG_OPERATOR, ""],
+  "\\∮": ["\\∮", "\\displaystyle∮", "\\∮", tt.BIG_OPERATOR, ""],
+  "\\∯": ["\\∯", "\\displaystyle∯", "\\∯", tt.BIG_OPERATOR, ""],
+  "\\∰": ["\\∰", "\\displaystyle∰", "\\∰", tt.BIG_OPERATOR, ""],
   "\\over": ["\\over", "\\dfrac{", "\\over", tt.DIV],
-  "\\sum": ["\\sum", "\\displaystyle\\sum", "\u2211", tt.BIG_OPERATOR, ""],
-  "\\prod": ["\\prod", "\\displaystyle\\prod", "\\prod", tt.BIG_OPERATOR, ""],
+  "\\sum": ["\\sum", "\\displaystyle∑", "∑", tt.BIG_OPERATOR, ""],
+  "\\∑": ["\\∑", "∑", "\\∑", tt.BIG_OPERATOR, ""],
+  "\\prod": ["\\prod", "∏", "∏", tt.BIG_OPERATOR, ""],
+  "\\∏": ["\\∏", "\\displaystyle∏", "\\∏", tt.BIG_OPERATOR, ""],
   "\\quad": ["\\quad", "\\quad", "\\quad", tt.SPACE, ""],
-  "\\qquad": ["\\qquad", "\\qquad", "\\qquad", tt.SPACE, ""]
+  "\\qquad": ["\\qquad", "\\qquad", "\\qquad", tt.SPACE, ""],
+  "\\align": ["\\align", "\\begin{align}", "\\align", tt.UNARY, "\\end{align}"],
+  "\\cases": ["\\cases", "\\begin{cases}", "\\cases", tt.UNARY, "\\end{cases}"],
+  "\\rcases": ["\\rcases", "\\begin{rcases}", "\\rcases", tt.UNARY, "\\end{rcases}"],
+  "\\smallmatrix": ["\\smallmatrix", "\\begin{smallmatrix}", "\\smallmatrix", tt.UNARY, "\\end{smallmatrix}"],
+  "\\bordermatrix": ["\\bordermatrix", "\\bordermatrix", "\\bordermatrix", tt.UNARY, "}"],
+  "\\equation": ["\\equation", "\\begin{equation}", "\\equation", tt.UNARY, "\\end{equation}"],
+  "\\split": ["\\split", "\\begin{split}", "\\split", tt.UNARY, "\\end{split}"],
+  "\\gather": ["\\gather", "\\begin{gather}", "\\gather", tt.UNARY, "\\end{gather}"],
+  "\\CD": ["\\CD", "\\begin{CD}", "\\CD", tt.UNARY, "\\end{CD}"],
+  "\\multline": ["\\multline", "\\begin{multline}", "\\multline", tt.UNARY, "\\end{multline}"]
 })
 
 const accents = new Set([
@@ -789,7 +808,7 @@ export const lexUnitName = str => {
 
 export const lex = (str, formats, prevToken, inRealTime = false) => {
   // Get the next token in str. Return an array with the token's information:
-  // [input, TeX output, type, associated close delimiter]
+  // [input, TeX output, calc output, type, associated close delimiter]
   let pos = 0
   let st = ""
   let matchObj

@@ -89,8 +89,12 @@ const autoCorrections = {
   xx: "×",
   "\\int": "∫",
   "\\iint": "∬",
+  "\\iiint": "∭",
   "\\oint": "∮",
+  "\\oiint": "∯",
+  "\\oiiint": "∰",
   "\\sum": "∑",
+  "\\prod": "∏",
   nn: "∩", // cap
   nnn: "⋂",
   uu: "∪", // cup

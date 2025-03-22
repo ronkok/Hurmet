@@ -13,8 +13,7 @@ const FRAC = 2
 const TFRAC = 4
 const BINARY = 8
 const ENV = 16  // environment
-const CASES = 32
-const SUB = 64
+const SUB = 32
 
 const  charAccents = {
   "\\bar": "\u0304",
@@ -39,8 +38,8 @@ const trailingSpaceRegEx = / +$/
 const inlineFracRegEx = /^\/(?!\/)/
 const ignoreRegEx = /^\\(left(?!\.)|right(?!\.)|middle|big|Big|bigg|Bigg)/
 const subRegEx = /^\("([A-Za-z\u0391-\u03c9][A-Za-z0-9\u0391-\u03c9]*)"$/
-const enviroRegEx = /^\\begin\{(?:(cases)|(|p|b|B|v|V)matrix)\}/
-const endEnviroRegEx = /^\\end\{(?:cases|(?:|p|b|B|v|V)matrix)\}/
+const enviroRegEx = /^\\begin\{(?:(cases|rcases|align|equation|split|gather)|(|p|b|B|v|V)matrix)\}/
+const endEnviroRegEx = /^\\end\{(?:(cases|rcases|align|equation|split|gather)|(|p|b|B|v|V)matrix)\}/
 // eslint-disable-next-line max-len
 const greekAlternatives = "Alpha|Beta|Gamma|Delta|Epsilon|Zeta|Eta|Theta|Iota|Kappa|Lambda|Mu|Nu|Xi|Omicron|Pi|Rho|Sigma|Tau|Upsilon|Phi|Chi|Psi|Omega|alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|omicron|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega|varphi"
 const greekRegEx = RegExp("^\\\\(" + greekAlternatives + ")\\b")
@@ -161,11 +160,11 @@ export const texToCalc = (str, displayMode = false) => {
     while (enviroRegEx.test(str)) {
       const match = enviroRegEx.exec(str)
       if (match[1]) {
-        // {cases} environment
-        delims.push({ ch: ":}", pos: calc.length, type: ENV + CASES })
-        calc += "{"
+        delims.push({ ch: "}", pos: calc.length, type: ENV })
+        calc += `\\${match[1]}{`
       } else {
-        const matrixType = match[2] ? match[2] : "m"
+        let matrixType = match[2];
+        if (matrixType.length === 0) { matrixType = "m" }
         delims.push({ ch: matrices[matrixType][1], pos: calc.length, type: ENV })
         calc += matrices[matrixType][0];
       }
@@ -175,12 +174,13 @@ export const texToCalc = (str, displayMode = false) => {
     while (endEnviroRegEx.test(str)) {
       const match = endEnviroRegEx.exec(str)
       const delim = delims.pop()
-      if (match[0].indexOf("cases") > -1) {
+      /*if (match[1] && match[1].indexOf("cases") > -1) {
+        // TODO: Hurmet if statement in place of cases
         // {cases} environment. Clean up the if statements
         let casesText = calc.slice(delim.pos + 1)
         casesText = casesText.replace(/"if *"/g, "if ")
         calc = calc.slice(0, delim.pos + 1) + casesText
-      }
+      }*/
       calc += delim.ch
       str = eatMatch(str, match)
     }
@@ -267,7 +267,11 @@ export const texToCalc = (str, displayMode = false) => {
         } else {
           calc += token.output
           if (str.length > 0 && str.charAt(0) === "{") {
-            delims.push({ ch: ")", pos: calc.length, type: PAREN })
+            delims.push({
+              ch: ")",
+              pos: calc.length,
+              type: token.input === "\\bordermatrix" ? ENV : PAREN
+            })
             calc +=  '('
             str = eatOneChar(str)
           }
@@ -321,11 +325,11 @@ export const texToCalc = (str, displayMode = false) => {
       }
 
       case tt.SEP: {
-        const inEnvironment = (delims[delims.length - 1].type & ENV)
-        if (token.input === "//" && inEnvironment) {
+        const inEnvironment = (delims[delims.length - 1].type === ENV)
+        if ((token.input === "\\\\" || token.input === "\\cr") && inEnvironment) {
           calc += ";"
         } else {
-          calc += token.output
+          calc += (token.input === "&" && inEnvironment) ?  "," : token.output
         }
         break
       }
