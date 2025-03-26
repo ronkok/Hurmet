@@ -34,7 +34,7 @@ import { dt } from "./constants.js"
 import { clone } from "./utils.js"
 import { dateFormatRegEx } from "./date"
 import { parse } from "./parser.js"
-import { texToCalc } from "./texToCalc.js"
+import { tex2Calc } from "./tex2Calc.js"
 
 // Menu icons that are not included in node-module menu.js
 const hurmetIcons = {
@@ -1065,7 +1065,8 @@ export function insertOrToggleMath(state, view, encoding) {
           delete attrs.entry
           tr.replaceWith(pos, pos + 1, schema.nodes.tex.createAndFill(attrs))
         } else {
-          attrs.entry = texToCalc(attrs.tex)
+          attrs.entry = tex2Calc(attrs.tex)
+          attrs.tex = parse(attrs.entry)
           tr.replaceWith(pos, pos + 1, schema.nodes.calculation.createAndFill(attrs))
         }
       }

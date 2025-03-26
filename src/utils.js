@@ -85,6 +85,35 @@ export const arrayOfRegExMatches = (regex, text) => {
   return result
 }
 
+export const verbatimArg = str => {
+  if (str[0] !== "{" && str[0] !== "(" && str[0] !== "[") {
+    return ""
+  }
+  const openDelimiter = str[0];
+  const closeDelimiter = openDelimiter === "{"
+    ? "}"
+    : openDelimiter === "["
+    ? "]"
+    : ")"
+  let result = ""
+  let level = 1
+  for (let i = 1; i < str.length; i++) {
+    const char = str[i];
+    if (char === openDelimiter && ((openDelimiter === "(" || openDelimiter === "[")
+      || (i === 1 || str[i - 1] !== "\\"))) {
+      level += 1
+    } else if (char === closeDelimiter && ((closeDelimiter === ")" || closeDelimiter === "]")
+        || (i === 1 || str[i - 1] !== "\\"))) {
+      level -= 1
+    }
+    if (level === 0) {
+      return result
+    }
+    result += char
+  }
+  return ""
+}
+
 const textAccent = {
   "\u0300": "`",
   "\u0301": "'",

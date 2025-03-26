@@ -3,6 +3,7 @@ import { calculate } from "./calculate"
 import { md2ast } from "./md2ast"
 import { md2html } from "./md2html"
 import { hurmet2html } from "./hurmet2html.js"
+import { tex2Calc } from "./tex2Calc.js"
 import { compile } from "./compile"
 import temml from "./temml.js"
 import { scanModule } from "./module"
@@ -39,6 +40,7 @@ export default {
   md2html,
   hurmet2html,
   scanModule,
+  tex2Calc,
   updateCalculations,
   render,
   Rnl

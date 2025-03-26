@@ -57,9 +57,9 @@ const parserTests = [
   ["x = (-b +- sqrt(b^2-4 a c))/(2 a)", "x = \\dfrac{\\text{-} b ± \\sqrt{b^{2}- 4 \\, a c}}{2 \\, a}"],
   [
     `f(x) = \\int_(-∞)^∞ \\hat f (ξ)  e^(2 π i ξ x)  "d" ξ`,
-    "f(x)= \\displaystyle\\int_{\\text{-} ∞}^{∞}\\hat{f} (ξ) e^{2 \\, π i ξ x}\\text{d}ξ"
+    "f(x)= ∫_{\\text{-} ∞}^{∞}\\hat{f} (ξ) e^{2 \\, π i ξ x}\\text{d}ξ"
   ],
-  ["\\int_(-∞)^∞ \\hat f", "\\displaystyle\\int_{\\text{-} ∞}^{∞}\\hat{f}"],
+  ["\\int_(-∞)^∞ \\hat f", "∫_{\\text{-} ∞}^{∞}\\hat{f}"],
   [
     "r = 1/((|cos θ|^p + |sin θ|^p)^(1///p))",
     "r = \\dfrac{1}{(|\\cos{θ}|^{p}+ |\\sin{θ}|^{p})^{1 / p}}"
@@ -79,7 +79,7 @@ const parserTests = [
   ],
   ["H^2 = \\dot a/a", "H^{2}= \\dfrac{\\dot{a}}{a}"],
   ["P = (1.2(D/H))", "P = \\left(1.2 \\left(\\dfrac{D}{H}\\right)\\right)"],
-  ["M = \\mathcal O(a b)/5", "M = \\dfrac{\\mathcal{O}{(a b)}}{5}"],
+  ["M = (\\mathcal O (a b))/5", "M = \\dfrac{\\mathcal{O}(a b)}{5}"],
   [
     "c_s = (n_c A_s)/b (√(1 + (2 b d)/(n_c A_s))-1)",
     "c{_\\text{s}} = \\dfrac{n{_\\text{c}} A{_\\text{s}}}{b} \\left(\\sqrt{1 + \\dfrac{2 \\, b d}{n{_\\text{c}} A{_\\text{s}}}}- 1 \\right)"
@@ -104,7 +104,7 @@ const parserTests = [
   ],
   [
     "σ^2 = 1/(n (n-1)) (n ∑_(i=1)^n x_i^2 - (∑_(i=1)^n x_k)^2)",
-    "σ^{2}= \\dfrac{1}{n (n - 1)}\\left(n \\displaystyle∑_{i = 1}^{n} x{_\\text{i}}^{2}- \\left(\\displaystyle∑_{i = 1}^{n} x{_\\text{k}} \\right)^{2}\\right)"
+    "σ^{2}= \\dfrac{1}{n (n - 1)}\\left(n ∑_{i = 1}^{n} x{_\\text{i}}^{2}- \\left(∑_{i = 1}^{n} x{_\\text{k}} \\right)^{2}\\right)"
   ],
   ["(2 n)!!/(2 n+1)^2", "\\dfrac{(2 \\, n)!!}{(2 \\, n + 1)^{2}}"],
   ["(1	2; 3	4)", "\\begin{pmatrix}1 & 2 \\\\ 3 & 4 \\end{pmatrix}"],
@@ -258,7 +258,42 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     ["rebar = ``#name	diameter	area\nunit	in	in²\n#3	0.375	0.11\n#4	0.5	0.2\n#5	0.625	0.31\n#6	0.75	0.44``", "rebar = @", ""],
     ["wideFlanges = ``#name	weight	area	d	bf	tw	tf	Ix	Sx	rx	Iy	Sy	ry\nunit	lbf/ft	in^2	in	in	in	in	in^4	in^3	in	in^4	in^3	in\nW10X49	49	14.4	10	10	0.34	0.56	272	54.6	4.35	93.4	18.7	2.54\nW8X31	31	9.13	8	8	0.285	0.435	110	27.5	3.47	37.1	9.27	2.02\nW8X18	18	5.26	8.14	5.25	0.23	0.33	61.9	15.2	3.43	7.97	3.04	1.23``", "wideFlanges = @", ""],
     ["aDate = '2025-01-20'", "aDate = @", "2025-01-20"]
-  ]
+  ];
+
+  const tex2CalcTests = [
+    ["\\sqrt{f_c'} = 3000", "√(f_c′) = 3000"],
+    ["3000 \\text{psi} = 3 \\mathrm{ksi}", '3000 "psi"= 3 ksi'],
+    ["\\Gamma(\\hat{\\theta}) = \\sin \\alpha = \\cos(y)", "Γ (θ̂) = sin α = cos(y)"],
+    ["\\frac{a + b}{c + d} = \\tfrac{a + b}{c + d} = \\dfrac{wL^2}{c + d}", "(a + b)//(c + d) = (a + b)//(c + d) = (w L^2) / (c + d)"],
+    ["\\approx a/b = f(a, b) = \\frac{9}{128}ql^2", "≈ a ∕ b = f(a, b) = (9)//(128) q l^2"],
+    ["= {a + c \\over c +d} \\approx", "= (a + c)/(c + d) ≈"],
+    ["\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}", "(a, b; c, d)"],
+    ["\\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix}", "[a, b; c, d]"],
+    ["\\begin{cases} a &\\text{if } b \\\\ c &\\text{if } d \\end{cases}", '\\cases(a, "if "b; c, "if "d)'],
+    [
+      "x^2 + x^{a + b}! \\ast x¹² \\times F_i = M_{\\text{max}} \\pm F_{a + c} + \\cancel{M} + \\mathbf{M}",
+      "x^2 + x^(a + b)! ∗ x¹²× F_i = M_max ± F_(a + c) + \\cancel(M) + 𝐌"
+    ],
+    ['\\frac a b', '(a)//(b)'],
+    ['\\sqrt[3]{4} + \\sqrt[5]{8}', '∛(4) + root(5)(8)'],
+    ['M_i + M_\\text{abc} + M_\\mathrm{abc} + M_{abc}', 'M_i + M_abc + M_abc + M_abc']
+  ];
+
+  console.log("Now testing tex2Calc…")
+  console.log("")
+  for (let i = 0; i < tex2CalcTests.length; i++) {
+    numTests += 1
+    const input = tex2CalcTests[i][0]
+    const output = hurmet.tex2Calc(input)
+    const expectedOutput = tex2CalcTests[i][1]
+    if (output !== expectedOutput) {
+      numErrors += 1
+      console.log("input:    " + input)
+      console.log("expected: " + expectedOutput)
+      console.log("actual:   " + output)
+      console.log("")
+    }
+  }
 
   console.log("Now testing assignments…")
   console.log("")

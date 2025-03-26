@@ -89,8 +89,12 @@ const autoCorrections = {
   xx: "×",
   "\\int": "∫",
   "\\iint": "∬",
+  "\\iiint": "∭",
   "\\oint": "∮",
+  "\\oiint": "∯",
+  "\\oiiint": "∰",
   "\\sum": "∑",
+  "\\prod": "∏",
   nn: "∩", // cap
   nnn: "⋂",
   uu: "∪", // cup
@@ -429,6 +433,35 @@ const arrayOfRegExMatches = (regex, text) => {
   /* eslint-enable no-cond-assign */
 
   return result
+};
+
+const verbatimArg = str => {
+  if (str[0] !== "{" && str[0] !== "(" && str[0] !== "[") {
+    return ""
+  }
+  const openDelimiter = str[0];
+  const closeDelimiter = openDelimiter === "{"
+    ? "}"
+    : openDelimiter === "["
+    ? "]"
+    : ")";
+  let result = "";
+  let level = 1;
+  for (let i = 1; i < str.length; i++) {
+    const char = str[i];
+    if (char === openDelimiter && ((openDelimiter === "(" || openDelimiter === "[")
+      || (i === 1 || str[i - 1] !== "\\"))) {
+      level += 1;
+    } else if (char === closeDelimiter && ((closeDelimiter === ")" || closeDelimiter === "]")
+        || (i === 1 || str[i - 1] !== "\\"))) {
+      level -= 1;
+    }
+    if (level === 0) {
+      return result
+    }
+    result += char;
+  }
+  return ""
 };
 
 const textAccent = {
@@ -4535,10 +4568,10 @@ const miscSymbols = Object.freeze({
   "¬": ["¬", "¬", "¬", tt.UNARY, ""], // logical not
   "&&": ["&&", "{\\;\\&\\&\\;}", "&&", tt.LOGIC, ""],
 
-  "\u222B": ["\u222B", "\\displaystyle\u222B", "\u222B", tt.BIG_OPERATOR, ""], // \int
-  "\u222C": ["\u222C", "\\displaystyle\u222C", "\u222C", tt.BIG_OPERATOR, ""], // \iint
-  "\u222E": ["\u222E", "\\displaystyle\u222E", "\u222E", tt.BIG_OPERATOR, ""], // \oint
-  "\u2211": ["\u2211", "\\displaystyle\u2211", "\u2211", tt.BIG_OPERATOR, ""], // \sum
+  "∫": ["∫", "∫", "∫", tt.BIG_OPERATOR, ""], // \int
+  "∬": ["∬", "∬", "∬", tt.BIG_OPERATOR, ""], // \iint
+  "∮": ["∮", "∮", "∮", tt.BIG_OPERATOR, ""], // \oint
+  "\u2211": ["\u2211", "\u2211", "\u2211", tt.BIG_OPERATOR, ""], // \sum
 
   "(": ["(", "(", "(", tt.LEFTBRACKET, ")"],
   "[": ["[", "[", "[", tt.LEFTBRACKET, "]"],
@@ -4598,10 +4631,11 @@ const miscSymbols = Object.freeze({
   "…": ["…", "…", "…", tt.ORD, ""],
 
   ":": [":", "{:}", ":", tt.RANGE, ""], // range separator
-  ",": [",", ",\\:", ",", tt.SEP, ""], // function argument or matrix element separator
+  ",": [",", ",\\:", ", ", tt.SEP, ""], // function argument or matrix element separator
   "\t": ["\t", " & ", "\t", tt.SEP, ""],  // dataframe element separator
   ";": [";", " \\\\ ", ";", tt.SEP, ""], // row separator
   "\\\\": ["\\\\", " \\\\ ", ";", tt.SEP, ""], // row separator
+  "\\cr": ["\\cr", " \\\\ ", ";", tt.SEP, ""], // row separator
 
   "$": ["$", "\\$", "$", tt.CURRENCY, ""],
   "£": ["£", "£", "£", tt.CURRENCY, ""],
@@ -4612,10 +4646,10 @@ const miscSymbols = Object.freeze({
   "₪": ["₪", "₪", "₪", tt.CURRENCY, ""]
 });
 
-const texFunctionRegEx = /^(\\[A-Za-z]+\.?|\\([:.!\u0020]|'+))/;
+const texFunctionRegEx = /^(\\[A-Za-z]+\.?|\\([:.!\u0020\u220F-\u2211\u222B-\u2230]|'+))/;
 
 const texFunctions = Object.freeze({
-  //          input,    output,  type,  closeDelim
+  //       input, tex output, calc output,  type,  closeDelim
   "\\aleph": ["\\aleph", "\u2135", "\u2135", tt.VAR, ""],
   "\\beth": ["\\beth", "\u2136", "\u2136", tt.VAR, ""],
   "\\gimel": ["\\gimel", "\u2137", "\u2137", tt.VAR, ""],
@@ -4623,6 +4657,7 @@ const texFunctions = Object.freeze({
   "\\ast": ["\\ast", "∗", "∗", tt.MULT, ""],
   "\\div": ["\\div", "÷", "÷", tt.MULT, ""],
   "\\times": ["\\times", "×", "×", tt.MULT, ""],
+  "\\pm": ["\\pm", "±", "±", tt.BIN, ""],
   "\\bmod": ["\\bmod", "\\bmod", "modulo", tt.MULT],
   "\\circ": ["\\circ", "∘", "∘", tt.MULT, ""], // U+2218
   "\\nabla": ["\\nabla", "∇", "∇", tt.ORD, ""],
@@ -4665,17 +4700,36 @@ const texFunctions = Object.freeze({
   "\\lim": ["\\lim", "\\lim", "\\lim", tt.ORD, ""],
   "\\diamond": ["\\diamond", "\\diamond", "\\diamond", tt.ORD, ""],
   "\\square": ["\\square", "\\square", "\\square", tt.ORD, ""],
-  "\\int": ["\\int", "\\displaystyle\\int", "\u222B", tt.BIG_OPERATOR, ""],
-  "\\iint": ["\\iint", "\\displaystyle\\iint", "\u222C", tt.BIG_OPERATOR, ""],
-  "\\iiint": ["\\iiint", "\\displaystyle\\iiint", "\\iiint", tt.BIG_OPERATOR, ""],
-  "\\oint": ["\\oint", "\\displaystyle\\oint", "\u222E", tt.BIG_OPERATOR, ""],
-  "\\oiint": ["\\oiint", "\\displaystyle\\oiint", "\\oiint", tt.BIG_OPERATOR, ""],
-  "\\oiiint": ["\\oiiint", "\\displaystyle\\oiiint", "\\oiiint", tt.BIG_OPERATOR, ""],
+  "\\int": ["\\int", "∫", "∫", tt.BIG_OPERATOR, ""],
+  "\\iint": ["\\iint", "∬", "∬", tt.BIG_OPERATOR, ""],
+  "\\iiint": ["\\iiint", "∭", "∭", tt.BIG_OPERATOR, ""],
+  "\\oint": ["\\oint", "∮", "∮", tt.BIG_OPERATOR, ""],
+  "\\oiint": ["\\oiint", "∯", "∯", tt.BIG_OPERATOR, ""],
+  "\\oiiint": ["\\oiiint", "∰", "∰", tt.BIG_OPERATOR, ""],
+  "\\∫": ["\\∫", "\\displaystyle∫", "\\∫", tt.BIG_OPERATOR, ""],
+  "\\∬": ["\\∬", "\\displaystyle∬", "\\∬", tt.BIG_OPERATOR, ""],
+  "\\∭": ["\\∭", "\\displaystyle∭", "\\∭", tt.BIG_OPERATOR, ""],
+  "\\∮": ["\\∮", "\\displaystyle∮", "\\∮", tt.BIG_OPERATOR, ""],
+  "\\∯": ["\\∯", "\\displaystyle∯", "\\∯", tt.BIG_OPERATOR, ""],
+  "\\∰": ["\\∰", "\\displaystyle∰", "\\∰", tt.BIG_OPERATOR, ""],
   "\\over": ["\\over", "\\dfrac{", "\\over", tt.DIV],
-  "\\sum": ["\\sum", "\\displaystyle\\sum", "\u2211", tt.BIG_OPERATOR, ""],
-  "\\prod": ["\\prod", "\\displaystyle\\prod", "\\prod", tt.BIG_OPERATOR, ""],
+  "\\sum": ["\\sum", "\\displaystyle∑", "∑", tt.BIG_OPERATOR, ""],
+  "\\∑": ["\\∑", "∑", "\\∑", tt.BIG_OPERATOR, ""],
+  "\\prod": ["\\prod", "∏", "∏", tt.BIG_OPERATOR, ""],
+  "\\∏": ["\\∏", "\\displaystyle∏", "\\∏", tt.BIG_OPERATOR, ""],
   "\\quad": ["\\quad", "\\quad", "\\quad", tt.SPACE, ""],
-  "\\qquad": ["\\qquad", "\\qquad", "\\qquad", tt.SPACE, ""]
+  "\\qquad": ["\\qquad", "\\qquad", "\\qquad", tt.SPACE, ""],
+  "\\align": ["\\align", "\\begin{align}", "\\align", tt.UNARY, "\\end{align}"],
+  "\\cases": ["\\cases", "\\begin{cases}", "\\cases", tt.UNARY, "\\end{cases}"],
+  "\\rcases": ["\\rcases", "\\begin{rcases}", "\\rcases", tt.UNARY, "\\end{rcases}"],
+  "\\smallmatrix": ["\\smallmatrix", "\\begin{smallmatrix}", "\\smallmatrix", tt.UNARY,
+    "\\end{smallmatrix}"],
+  "\\bordermatrix": ["\\bordermatrix", "\\bordermatrix", "\\bordermatrix", tt.UNARY, "}"],
+  "\\equation": ["\\equation", "\\begin{equation}", "\\equation", tt.UNARY, "\\end{equation}"],
+  "\\split": ["\\split", "\\begin{split}", "\\split", tt.UNARY, "\\end{split}"],
+  "\\gather": ["\\gather", "\\begin{gather}", "\\gather", tt.UNARY, "\\end{gather}"],
+  "\\CD": ["\\CD", "\\begin{CD}", "\\CD", tt.UNARY, "\\end{CD}"],
+  "\\multline": ["\\multline", "\\begin{multline}", "\\multline", tt.UNARY, "\\end{multline}"]
 });
 
 const accents = new Set([
@@ -4693,17 +4747,7 @@ const accents = new Set([
   "frak",
   "grave",
   "hat",
-  "mathbb",
-  "mathbf",
-  "mathcal",
-  "mathfrak",
-  "mathit",
-  "mathnormal",
   "mathring",
-  "mathrm",
-  "mathscr",
-  "mathsf",
-  "mathtt",
   "overbrace",
   "overgroup",
   "overleftarrow",
@@ -4777,18 +4821,35 @@ const colors = new Set([
 const unaries = new Set([
   "bcancel",
   "boxed",
+  "Bra",
+  "bra",
+  "braket",
   "cancel",
-  // Hurmet does not support \ce.
+  "ce",
   "clap",
   "color",
+  "Ket",
+  "ket",
+  "label",
   "llap",
   "longdiv",
   "mathclap",
+  "mathbb",
+  "mathbf",
+  "mathcal",
+  "mathfrak",
+  "mathit",
+  "mathnormal",
+  "mathrm",
+  "mathscr",
+  "mathsf",
+  "mathtt",
   "not",
   "operatorname",
   "phantom",
   "phase",
   "pu",
+  "reflectbox",
   "rlap",
   "sout",
   "tag",
@@ -5063,7 +5124,7 @@ const lexUnitName = str => {
 
 const lex = (str, formats, prevToken, inRealTime = false) => {
   // Get the next token in str. Return an array with the token's information:
-  // [input, TeX output, type, associated close delimiter]
+  // [input, TeX output, calc output, type, associated close delimiter]
   let pos = 0;
   let st = "";
   let matchObj;
@@ -5271,6 +5332,12 @@ const builtInReducerFunctions = new Set(["accumulate", "beamDiagram", "dataframe
 const trigFunctions = new Set(["cos", "cosd", "cot", "cotd", "csc", "cscd", "sec", "secd",
   "sin", "sind", "tand", "tan"]);
 
+const verbatimUnaries = new Set(["\\ce", "\\pu", "\\label", "\\color", "\\mathrm",
+  "\\text"]);
+
+const enviroFunctions = new Set(["\\cases", "\\rcases", "\\smallmatrix", "\\equation",
+  "\\split", "\\align", "\\CD", "\\multline"]);
+
 const rationalRPN = numStr => {
   // Return a representation of a rational number that is recognized by evalRPN().
   const num = Rnl.fromString(numStr);
@@ -5322,7 +5389,6 @@ const numFromSupChars = str => {
   return num
 };
 
-const colorSpecRegEx = /^(#([a-f0-9]{6}|[a-f0-9]{3})|[a-z]+|\([^)]+\))/i;
 const accentRegEx = /^(?:.|\uD835.)[\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]_/;
 const spreadsheetCellRegEx = /^[A-Z](\d+|_end)$/;
 const dfracRegEx = /\\dfrac{/g;
@@ -5659,7 +5725,7 @@ const parse$1 = (
           if (delim.delimType === dDICTIONARY && delim.open.length > 3) {
             tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + 2);
             op.closeDelim = delim.close;
-          } else if (delim.delimType === dMATRIX) {
+          } else if (delim.delimType === dMATRIX && delim.open.length > 1) {
             const inc = tex.slice(op.pos, op.pos + 1) === "\\" ? 2 : 1;
             tex = tex.slice(0, op.pos) + delim.open + tex.slice(op.pos + inc);
             op.closeDelim = delim.close;
@@ -6270,34 +6336,50 @@ const parse$1 = (
       case tt.UNARY: // e.g. bb, hat, or sqrt, or xrightarrow, hides parens
         popTexTokens(1, okToAppend);
         posOfPrevRun = tex.length;
-        texStack.push({ prec: 12, pos: tex.length, ttype: tt.UNARY, closeDelim: "}" });
-        if (isCalc) {
-          rpnStack.push({ prec: rpnPrecFromType[tt.UNARY], symbol: token.input });
-          if (prevToken.input === "⌧") { tex += "×"; }
-        }
-        tex += token.output;
+        if (verbatimUnaries.has(token.input)) {
+          const arg = verbatimArg(str);
+          tex += token.output + "{" + arg + "}";
+          str = str.slice(arg.length + 2);
+          str = str.replace(leadingSpaceRegEx$3, "");
+          token.ttype = tt.RIGHTBRACKET;
+          okToAppend = true;
+        } else {
+          texStack.push({ prec: 12, pos: tex.length, ttype: tt.UNARY, closeDelim: "}" });
+          if (isCalc) {
+            rpnStack.push({ prec: rpnPrecFromType[tt.UNARY], symbol: token.input });
+            if (prevToken.input === "⌧") { tex += "×"; }
+          }
+          tex += token.output;
 
-        if (/det|inf/.test(token.input) && str.charAt(0) === "_") {
-          texStack.push({ prec: 15, pos: tex.length, ttype: tt.SUB, closeDelim: "}" });
-          token = { input: "_", output: "_", ttype: tt.SUB };
-          tex += "_{";
-          str = str.substring(1);
-          str = str.replace(/^\s+/, "");
-        } else if (token.input === "\\color") {
-          const colorMatch = colorSpecRegEx.exec(str);
-          if (colorMatch) {
-            tex += "{" + colorMatch[0].replace(/[()]/g, "") + "}";
+          if (/det|inf/.test(token.input) && str.charAt(0) === "_") {
+            texStack.push({ prec: 15, pos: tex.length, ttype: tt.SUB, closeDelim: "}" });
+            token = { input: "_", output: "_", ttype: tt.SUB };
+            tex += "_{";
+            str = str.substring(1);
+            str = str.replace(/^\s+/, "");
+          } else if (enviroFunctions.has(token.input)) {
+            str = str.slice(1);
             texStack.pop();
-            str = str.slice(colorMatch[0].length).trim();
+            texStack.push({ prec: 0, pos: tex.length,
+              ttype: tt.ENVIRONMENT, closeDelim: token.closeDelim });
+            delims.push({
+              name: token.input,
+              delimType: dMATRIX,
+              isTall: true,
+              open: token.output,
+              close: token.closeDelim,
+              numArgs: 1,
+              numRows: 1,
+              isPrecededByDiv: prevToken.ttype === tt.DIV,
+              isFuncParen: false,
+              isControlWordParen: true
+            });
           } else {
-            // User is in the middle of writing a color spec. Avoid an error message.
             tex += "{";
           }
-        } else {
-          tex += "{";
+          delims[delims.length - 1].isTall = true;
+          okToAppend = false;
         }
-        delims[delims.length - 1].isTall = true;
-        okToAppend = false;
         break
 
       case tt.FACTORIAL:
@@ -6435,7 +6517,7 @@ const parse$1 = (
           delim.delimType = dACCESSOR;
         } else {
           // This may change to a MATRIX, but for now we'll say it's a paren.
-          delim.delimType = dPAREN;
+          delim.delimType = prevToken.input === "\\bordermatrix" ? dMATRIX : dPAREN;
           delim.name = token.input;
         }
         delims.push(delim);
@@ -9925,7 +10007,6 @@ const textRange = (str, index) => {
 /*
  * teXtoCalc.js
  * This file takes a text string and compiles from TeX to Hurmet calculation format.
- *
 */
 
 // Delimiter types
@@ -9934,8 +10015,6 @@ const FRAC = 2;
 const TFRAC = 4;
 const BINARY = 8;
 const ENV = 16;  // environment
-const CASES = 32;
-const SUB = 64;
 
 const  charAccents = {
   "\\bar": "\u0304",
@@ -9959,12 +10038,13 @@ const leadingSpaceRegEx$2 = /^\s+/;
 const trailingSpaceRegEx$1 = / +$/;
 const inlineFracRegEx = /^\/(?!\/)/;
 const ignoreRegEx = /^\\(left(?!\.)|right(?!\.)|middle|big|Big|bigg|Bigg)/;
-const subRegEx = /^\("([A-Za-z\u0391-\u03c9][A-Za-z0-9\u0391-\u03c9]*)"$/;
-const enviroRegEx = /^\\begin\{(?:(cases)|(|p|b|B|v|V)matrix)\}/;
-const endEnviroRegEx = /^\\end\{(?:cases|(?:|p|b|B|v|V)matrix)\}/;
+const textSubRegEx = /^(?:(?:\\text|\\mathrm)?{([A-Za-z\u0391-\u03c9][A-Za-z0-9\u0391-\u03c9]*)}|{(?:\\text|\\mathrm)\{([A-Za-z\u0391-\u03c9][A-Za-z0-9\u0391-\u03c9]*)}})/;
+const enviroRegEx = /^\\begin\{(?:(cases|rcases|align|equation|split|gather|CD|multline|smallmatrix)|(|p|b|B|v|V)matrix)\}/;
+const endEnviroRegEx = /^\\end\{(?:(cases|rcases|align|equation|split|gather|CD|multline|smallmatrix)|(|p|b|B|v|V)matrix)\}/;
 // eslint-disable-next-line max-len
 const greekAlternatives = "Alpha|Beta|Gamma|Delta|Epsilon|Zeta|Eta|Theta|Iota|Kappa|Lambda|Mu|Nu|Xi|Omicron|Pi|Rho|Sigma|Tau|Upsilon|Phi|Chi|Psi|Omega|alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|omicron|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega|varphi";
 const greekRegEx = RegExp("^\\\\(" + greekAlternatives + ")\\b");
+const mathOperatorRegEx = /^\\(arcsin|arccos|arctan|arctg|arcctg|arg|ch|cos|cosec|cosh|cot|cotg|coth|csc|ctg|cth|deg|dim|exp|hom|ker|lg|ln|log|sec|sin|sinh|sh|sgn|tan|tanh|tg|th|max|min|gcd)\b/;
 // eslint-disable-next-line max-len
 const bracedCharRegEx = RegExp("^\\{([A-Za-z0-9\u0391-\u03c9]|\\\\(" + greekAlternatives + "))\\}");
 const greekLetters = {
@@ -10018,6 +10098,7 @@ const greekLetters = {
   omega: "ω",
   varphi: "φ"
 };
+const boldRegEx = /^\\mathbf{([A-Za-z])}/;
 
 const matrices = {
   m: ["{:", ":}"],
@@ -10028,10 +10109,18 @@ const matrices = {
   V: ["‖", "‖"]
 };
 
-const eatOneChar = str => {
-  str = str.slice(1);
+const donotConvert = ["\\begin{CD}"];
+
+const eatOpenBrace = str => {
+  if (str.length === 0) { return ["", true] }
+  let didNotFindBrace = false;
+  if (str[0] === "{") {
+    str = str.slice(1);
+  } else {
+    didNotFindBrace = true;
+  }
   str = str.replace(leadingSpaceRegEx$2, "");
-  return str
+  return [str, didNotFindBrace]
 };
 
 const eatMatch = (str, match) => {
@@ -10040,81 +10129,103 @@ const eatMatch = (str, match) => {
   return str
 };
 
-const texToCalc = (str, displayMode = false) => {
+const tex2Calc = (str, displayMode = false) => {
   // Variable definitions
   let calc = "";
   let token = {};
   let prevToken = { input: "", output: "", ttype: 50 };
   const delims = [{ ch: "", pos: -1, type: 0 }] ; // delimiter stack
   let splitLongVars = true;
+  let waitingForUnbracedArg = false;
+  let justGotUnbracedArg = false;
 
   // Trim the input string
-  str = str.replace(leadingSpaceRegEx$2, ""); //       trim leading white space from string
-  str = str.replace(/\s+$/, ""); //                  trim trailing white space
+  str = str.replace(leadingSpaceRegEx$2, ""); //  trim leading white space
+  str = str.replace(/\s+$/, ""); //             trim trailing white space
 
   // Execute the main parse loop.
-  while (str.length > 0) {
+  while (str.length > 0 || justGotUnbracedArg) {
     // Get the next token.
-
-    while (str.length > 0 && str.charAt(0) === "'") {
-      // The lexer will not handle an apostrophe properly. Lex it locally.
-      calc += "′";
-      str = eatOneChar(str);
-    }
-
-    while (inlineFracRegEx.test(str)) {
-      calc += "\u2215"; // ∕
-      str = eatOneChar(str);
-    }
 
     while (str.length > 0 && str.charAt(0) === "\n") {
       calc += "\n";
-      str = eatOneChar(str);
-    }
-
-    while (greekRegEx.test(str)) {
-      const greekFunction = greekRegEx.exec(str)[0];
-      calc += greekLetters[greekFunction.slice(1)] + " ";
-      str = str.slice(greekFunction.length);
       str = str.replace(leadingSpaceRegEx$2, "");
     }
 
-    while (enviroRegEx.test(str)) {
+    if (justGotUnbracedArg) {
+      token = { input: "", output: "", ttype: tt.RIGHTBRACKET, closeDelim: "" };
+      justGotUnbracedArg = false;
+
+    } else if (str.length > 0 && str.charAt(0) === "'") {
+      // The lexer will not handle an apostrophe properly. Lex it locally.
+      token = { input: "'", output: "′", ttype: tt.PRIME, closeDelim: "" };
+      str = str.slice(1);
+      str = str.replace(leadingSpaceRegEx$2, "");
+
+    } else if (inlineFracRegEx.test(str)) {
+      token = { input: "/", output: "\u2215", ttype: tt.MULT, closeDelim: "" };
+      str = str.slice(1);
+      str = str.replace(leadingSpaceRegEx$2, "");
+
+    } else if (mathOperatorRegEx.test(str)) {
+      const match = mathOperatorRegEx.exec(str);
+      token = { input: match[0], output: match[1], ttype: tt.FUNCTION, closeDelim: "" };
+      str = eatMatch(str, match);
+
+    } else if (greekRegEx.test(str)) {
+      const match = greekRegEx.exec(str);
+      token = {
+        input: match[0],
+        output: greekLetters[match[0].slice(1)],
+        ttype: tt.VAR,
+        closeDelim: ""
+      };
+      str = eatMatch(str, match);
+
+    } else if (boldRegEx.test(str)) {
+      const match = boldRegEx.exec(str);
+      const codePoint = match[1].codePointAt(0);
+      const offset = codePoint < 91 ? 0x1D3BF : 0x1D3B9;
+      const ch = String.fromCodePoint(codePoint + offset);
+      token = { input: match[0], output: ch, ttype: tt.VAR, closeDelim: "" };
+      str = eatMatch(str, match);
+
+    } else if (enviroRegEx.test(str)) {
       const match = enviroRegEx.exec(str);
       if (match[1]) {
-        // {cases} environment
-        delims.push({ ch: ":}", pos: calc.length, type: ENV + CASES });
-        calc += "{";
+        if (donotConvert.includes(match[0])) { return `"Unable to convert ${match[1]}"` }
+        token = { input: match[0], output:`\\${match[1]}(`,
+          ttype: tt.ENVIRONMENT, closeDelim: ")" };
       } else {
-        const matrixType = match[2] ? match[2] : "m";
-        delims.push({ ch: matrices[matrixType][1], pos: calc.length, type: ENV });
-        calc += matrices[matrixType][0];
+        const matrixType = match[2] || "m";
+        token = { input: match[0], output: matrices[matrixType][0],
+          ttype: tt.ENVIRONMENT, closeDelim: matrices[matrixType][1] };
       }
       str = eatMatch(str, match);
-    }
 
-    while (endEnviroRegEx.test(str)) {
+    } else if (endEnviroRegEx.test(str)) {
       const match = endEnviroRegEx.exec(str);
-      const delim = delims.pop();
-      if (match[0].indexOf("cases") > -1) {
-        // {cases} environment. Clean up the if statements
-        let casesText = calc.slice(delim.pos + 1);
-        casesText = casesText.replace(/"if *"/g, "if ");
-        calc = calc.slice(0, delim.pos + 1) + casesText;
-      }
-      calc += delim.ch;
+      token = { input: match[0], output: match[1], ttype: tt.RIGHTBRACKET, closeDelim: "" };
       str = eatMatch(str, match);
-    }
 
-    while (ignoreRegEx.test(str)) {
+    } else if (ignoreRegEx.test(str)) {
       const match = ignoreRegEx.exec(str);
       str = eatMatch(str, match);
-    }
 
-    const tkn = lex(str, { decimalFormat: "10000000.", dateFormat: "yyyy-mm-dd" }, prevToken);
-    token = { input: tkn[0], output: tkn[2], ttype: tkn[3], closeDelim: tkn[4] };
-    str = str.slice(token.input.length);
-    str = str.replace(leadingSpaceRegEx$2, "");
+    } else {
+      // Many, many symbols are the same in TeX and in Hurmet calcs.
+      // So we can use the Hurmet lexer to identify them.
+      const tkn = lex(str, { decimalFormat: "10000000.", dateFormat: "yyyy-mm-dd" }, prevToken);
+      if (donotConvert.includes(tkn[0])) { return `'"Unable to convert ${tkn[1]}"` }
+      if (waitingForUnbracedArg && (tkn[3] === tt.LONGVAR || tkn[3] === tt.NUM)) {
+        token = { input: tkn[0][0], output: tkn[2][0], ttype: tkn[3], closeDelim: "" };
+        str = str.slice(1);
+      } else {
+        token = { input: tkn[0], output: tkn[2], ttype: tkn[3], closeDelim: tkn[4] };
+        str = str.slice(token.input.length);
+      }
+      str = str.replace(leadingSpaceRegEx$2, "");
+    }
 
     switch (token.ttype) {
       case tt.SPACE: //      spaces and newlines
@@ -10122,18 +10233,23 @@ const texToCalc = (str, displayMode = false) => {
         break
 
       case tt.SUPCHAR:
-        if (calc.slice(-1) === " ") { calc = calc.slice(0, -1); }
+        calc = calc.replace(trailingSpaceRegEx$1, "");
         calc += token.output;
         break
 
       case tt.SUB:
       case tt.SUP:
+        calc = calc.replace(trailingSpaceRegEx$1, "");
         calc += token.output;
-        if (str.length > 0 && str.charAt(0) === "{") {
-          const delimType = token.ttype === tt.SUB ? SUB : PAREN;
-          delims.push({ ch: ")", pos: calc.length, type: delimType });
+        if (token.ttype === tt.SUB && textSubRegEx.test(str)) {
+          const match = textSubRegEx.exec(str);
+          const subscript = match[1] ? match[1] : match[2];
+          calc += subscript + " ";
+          str = str.slice(match[0].length);
+        } else if (str.length > 0 && str.charAt(0) === "{") {
+          [str, waitingForUnbracedArg] = eatOpenBrace(str);
+          delims.push({ ch: ")", pos: calc.length, type: PAREN });
           calc += "(";
-          str = eatOneChar(str);
         }
         break
 
@@ -10145,53 +10261,77 @@ const texToCalc = (str, displayMode = false) => {
       case tt.REL: //        relational operators, e.g  < == →
       case tt.BIN: //    infix math operators that render but don't calc, e.g. \bowtie
       case tt.BIG_OPERATOR:  // integral, sum, etc
-      case tt.FACTORIAL:
-        if (token.input === "&" && (delims[delims.length - 1].type & ENV)) {
-          // Write a comma separator for environments (except cases)
-          if (delims[delims.length - 1].type === ENV) {
-            calc += ", ";
-          }
+      case tt.FACTORIAL: {
+        if (token.input === "&" && (delims[delims.length - 1].type === ENV)) {
+          calc += ", ";   // Write a comma separator for environments
         } else {
           calc += token.output + " ";
         }
+        if (waitingForUnbracedArg) {
+          justGotUnbracedArg = true;
+          waitingForUnbracedArg = false;
+        }
         break
+      }
 
       case tt.LONGVAR:
         calc += splitLongVars ? token.output.split("").join(" ") + " " : token.output;
         break
 
+      case tt.PRIME:
+        calc = calc.trim() + token.output;
+        break
+
       case tt.ACCENT: {
         if (charAccents[token.input] && bracedCharRegEx.test(str)) {
           delims.push({ ch: charAccents[token.input], pos: calc.length, type: PAREN });
-          str = eatOneChar(str);
-        } else if ( token.input === "\\mathrm") {
-          splitLongVars = false;
-          delims.push({ ch: '', pos: calc.length, type: PAREN });
-          str = eatOneChar(str);
+          [str, waitingForUnbracedArg] = eatOpenBrace(str);
         } else {
           calc += token.output;
           if (str.length > 0 && str.charAt(0) === "{") {
             calc += "(";
             delims.push( { ch: ")", pos: calc.length, type: PAREN });
-            str = eatOneChar(str);
+            [str, waitingForUnbracedArg] = eatOpenBrace(str);
           }
         }
         break
       }
 
       case tt.UNARY: {
-        if (token.input === "\\text") {
-          delims.push({ ch: '"', pos: calc.length, type: PAREN });
-          calc += '"';
-          splitLongVars = false;
-          str =  str.slice(1);
-        } else {
-          calc += token.output;
-          if (str.length > 0 && str.charAt(0) === "{") {
-            delims.push({ ch: ")", pos: calc.length, type: PAREN });
-            calc +=  '(';
-            str = eatOneChar(str);
+        if (verbatimUnaries.has(token.input)) {
+          const arg = verbatimArg(str);
+          calc += token.input === "\\text"
+            ? '"' + arg + '"'
+            : token.input === "\\mathrm" && arg.length > 1 && arg.indexOf(" ") === -1
+            ? arg
+            : token.input + "(" + arg + ")";
+          if (token.input === "\\mathrm" && waitingForUnbracedArg) {
+            justGotUnbracedArg = true;
+            waitingForUnbracedArg = false;
           }
+          str = str.slice(arg.length + 2);
+          str = str.replace(leadingSpaceRegEx$2, "");
+        } else if (token.input === "\\sqrt") {
+          if (str.slice(0, 1) === "[") {
+            const root = verbatimArg(str);
+            str = str.slice(root.length + 2);
+            str = str.replace(leadingSpaceRegEx$2, "");
+            calc += (root === "3") ? "∛(" : (root === "4") ? "∜(" : `root(${root})(`;
+          } else {
+            calc += "√(";
+          }
+          delims.push({ ch: ")", pos: calc.length, type: PAREN });
+          [str, waitingForUnbracedArg] = eatOpenBrace(str);
+        } else {
+          calc += token.output + "(";
+          if (str.length > 0 && str.charAt(0) === "{") {
+            delims.push({
+              ch: ")",
+              pos: calc.length,
+              type: token.input === "\\bordermatrix" ? ENV : PAREN
+            });
+          }
+          [str, waitingForUnbracedArg] = eatOpenBrace(str);
         }
         break
       }
@@ -10205,18 +10345,17 @@ const texToCalc = (str, displayMode = false) => {
           calc += "(";
           delims.push({ ch: ")//(", pos, type: TFRAC });
         } else {
-          calc += token.input + "{";
-          delims.push({ ch: "}{", pos, type: BINARY });
-        }
-        str = eatOneChar(str);
+          calc += token.input + "(";
+          delims.push({ ch: ")(", pos, type: BINARY });
+        }        [str, waitingForUnbracedArg] = eatOpenBrace(str);
         break
       }
 
-      case tt.DIV: {
+      case tt.DIV: {   // \over, \atop
         const pos = delims[delims.length - 1].pos;
         calc = calc.slice(0, pos) + "(" + calc.slice(pos + 1);
         delims.pop();
-        calc += token.input === "\\over" ? ")/(" : ")" + token.input + "(";
+        calc += token.input === "\\over" ? ")/(" : ")" + token.output + "(";
         delims.push({ ch: ")", pos: calc.length - 1, type: PAREN });
         break
       }
@@ -10235,47 +10374,42 @@ const texToCalc = (str, displayMode = false) => {
         break
       }
 
-      case tt.LEFTBRACKET: {
-        delims.push({ ch: token.closeDelim, pos: calc.length, type: PAREN });
+      case tt.LEFTBRACKET:
+      case tt.ENVIRONMENT:   {
+        delims.push({
+          ch: token.closeDelim,
+          pos: calc.length,
+          type: token.ttype === tt.ENVIRONMENT ? ENV : PAREN
+        });
         calc += token.output;
         break
       }
 
       case tt.SEP: {
-        const inEnvironment = (delims[delims.length - 1].type & ENV);
-        if (token.input === "//" && inEnvironment) {
-          calc += ";";
+        const inEnvironment = (delims[delims.length - 1].type === ENV);
+        if ((token.input === "\\\\" || token.input === "\\cr") && inEnvironment) {
+          calc += "; ";
         } else {
-          calc += token.output;
+          calc += (token.input === "&" && inEnvironment) ?  ", " : token.output;
         }
         break
       }
 
       case tt.RIGHTBRACKET: {
+        // TODO: Check for cases environment and convert to Hurmet IF, if possible
         const delim = delims.pop();
         calc = calc.replace(trailingSpaceRegEx$1, "");
-        if (/ $/.test(calc)) { calc = calc.slice(0, -1); }
-        if (delim.type === FRAC) {
-          calc += ") / (";
-          str = eatOneChar(str);
+
+        if (delim.type === FRAC || delim.type === TFRAC) {
+          calc += delim.type === FRAC ? ") / (" : ")//(";
           delims.push({ ch: ")", pos: calc.length - 1, type: PAREN });
-        } else if (delim.type === TFRAC) {
-          calc += ")//(";
-          str = eatOneChar(str);
-          delims.push({ ch: ")", pos: calc.length - 1, type: PAREN });
+          [str, waitingForUnbracedArg] = eatOpenBrace(str);
+
         } else if (delim.type === BINARY) {
-          calc += "}{";
-          str = eatOneChar(str);
-          delims.push({ ch: "}", pos: calc.length - 1, type: PAREN });
-        } else if (delim.type === SUB) {
-          let subText = calc.slice(delim.pos);
-          if (subRegEx.test(subText)) {
-            // Replace _("subscript") with _subscript
-            subText = subText.replace(subRegEx, "$1");
-            calc = calc.slice(0, delim.pos) + subText + " ";
-          } else {
-            calc += delim.ch + " ";
-          }
+          calc += ")(";
+          delims.push({ ch: ")", pos: calc.length - 1, type: PAREN });
+          [str, waitingForUnbracedArg] = eatOpenBrace(str);
+
         } else {
           calc += delim.ch + " ";
         }
@@ -10289,8 +10423,9 @@ const texToCalc = (str, displayMode = false) => {
 
     prevToken = cloneToken(token);
   }
+
   calc = calc.replace(/ {2,}/g, " "); // Replace multiple spaces with single space.
-  calc = calc.replace(/\s+(?=[_^'′!)}\]〗])/g, ""); // Delete spaces before right delims
+  calc = calc.replace(/\s+(?=[_^'′!,;)}\]〗])/g, ""); // Delete spaces before right delims
   calc = calc.replace(/\s+$/, ""); //                 Delete trailing space
 
   return calc
@@ -11022,7 +11157,7 @@ rules.set("displayTeX", {
   parse: function(capture, state) {
     const tex = (capture[1] ? capture[1] : capture[2]).trim();
     if (state.convertTex) {
-      const entry = texToCalc(tex, true);
+      const entry = tex2Calc(tex, true);
       return { type: "calculation", attrs: { entry, displayMode: true } }
     } else {
       return { type: "tex", attrs: { tex, displayMode: true } }
@@ -11056,7 +11191,7 @@ rules.set("tex", {
     if (capture[1]) {
       const tex = (capture[1]).trim();
       if (state.convertTex) {
-        const entry = texToCalc(tex, true);
+        const entry = tex2Calc(tex, true);
         return { type: "calculation", attrs: { entry, displayMode: true } }
       } else {
         return { type: "tex", attrs: { tex, displayMode: true } }
@@ -11070,7 +11205,7 @@ rules.set("tex", {
         ? capture[5]
         : capture[6]).trim();
       if (state.convertTex) {
-        const entry = texToCalc(tex, false);
+        const entry = tex2Calc(tex, false);
         return { type: "calculation", attrs: { entry, displayMode: false } }
       } else {
         return { type: "tex", attrs: { tex, displayMode: false } }
@@ -22607,7 +22742,7 @@ const bordermatrixParseTree = (matrix, delimiters) => {
     // A vphantom with contents from the pmatrix, to set minimum cell height
     const phantomBody = [];
     for (let j = 0; j < body[i].length; j++) {
-      phantomBody.push(structuredClone(body[i][j]));
+      phantomBody.push(body[i][j]);
     }
     leftColumnBody[i - 1].push(phantom(phantomBody, "vphantom"));
   }
@@ -22615,18 +22750,18 @@ const bordermatrixParseTree = (matrix, delimiters) => {
   // Create an array for the top row
   const topRowBody = new Array(body.length).fill().map(() => []);
   for (let j = 0; j < body[0].length; j++) {
-    topRowBody[0].push(structuredClone(body[0][j]));
+    topRowBody[0].push(body[0][j]);
   }
   // Copy the rest of the pmatrix, but squashed via \hphantom
   for (let i = 1; i < body.length; i++) {
     for (let j = 0; j < body[0].length; j++) {
-      topRowBody[i].push(phantom(structuredClone(body[i][j]).body, "hphantom"));
+      topRowBody[i].push(phantom(body[i][j].body, "hphantom"));
     }
   }
 
   // Squash the top row of the main {pmatrix}
   for (let j = 0; j < body[0].length; j++) {
-    body[0][j] = phantom(structuredClone(body[0][j]).body, "hphantom");
+    body[0][j] = phantom(body[0][j].body, "hphantom");
   }
 
   // Now wrap the arrays in the proper parse nodes.
@@ -33699,6 +33834,7 @@ var hurmet = {
   md2html,
   hurmet2html,
   scanModule,
+  tex2Calc,
   updateCalculations,
   render,
   Rnl

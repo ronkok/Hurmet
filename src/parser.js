@@ -1,5 +1,5 @@
 ﻿import { addTextEscapes, numeralFromSuperScript,
-         interpolateRegEx, arrayOfRegExMatches } from "./utils"
+         interpolateRegEx, arrayOfRegExMatches, verbatimArg } from "./utils"
 import { tt, lex, unitStartRegEx, lexUnitName } from "./lexer"
 import { Rnl } from "./rational"
 import { dateRPN } from "./date"
@@ -32,6 +32,9 @@ const builtInReducerFunctions = new Set(["accumulate", "beamDiagram", "dataframe
 
 const trigFunctions = new Set(["cos", "cosd", "cot", "cotd", "csc", "cscd", "sec", "secd",
   "sin", "sind", "tand", "tan"])
+
+export const verbatimUnaries = new Set(["\\ce", "\\pu", "\\label", "\\color", "\\mathrm",
+  "\\text"])
 
 const enviroFunctions = new Set(["\\cases", "\\rcases", "\\smallmatrix", "\\equation",
   "\\split", "\\align", "\\CD", "\\multline"])
@@ -88,7 +91,6 @@ const numFromSupChars = str => {
   return num
 }
 
-const colorSpecRegEx = /^(#([a-f0-9]{6}|[a-f0-9]{3})|[a-z]+|\([^)]+\))/i
 const accentRegEx = /^(?:.|\uD835.)[\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]_/
 const spreadsheetCellRegEx = /^[A-Z](\d+|_end)$/
 const dfracRegEx = /\\dfrac{/g
@@ -1038,51 +1040,50 @@ export const parse = (
       case tt.UNARY: // e.g. bb, hat, or sqrt, or xrightarrow, hides parens
         popTexTokens(1, okToAppend)
         posOfPrevRun = tex.length
-        texStack.push({ prec: 12, pos: tex.length, ttype: tt.UNARY, closeDelim: "}" })
-        if (isCalc) {
-          rpnStack.push({ prec: rpnPrecFromType[tt.UNARY], symbol: token.input })
-          if (prevToken.input === "⌧") { tex += "×" }
-        }
-        tex += token.output
+        if (verbatimUnaries.has(token.input)) {
+          const arg = verbatimArg(str)
+          tex += token.output + "{" + arg + "}"
+          str = str.slice(arg.length + 2)
+          str = str.replace(leadingSpaceRegEx, "")
+          token.ttype = tt.RIGHTBRACKET
+          okToAppend = true
+        } else {
+          texStack.push({ prec: 12, pos: tex.length, ttype: tt.UNARY, closeDelim: "}" })
+          if (isCalc) {
+            rpnStack.push({ prec: rpnPrecFromType[tt.UNARY], symbol: token.input })
+            if (prevToken.input === "⌧") { tex += "×" }
+          }
+          tex += token.output
 
-        if (/det|inf/.test(token.input) && str.charAt(0) === "_") {
-          texStack.push({ prec: 15, pos: tex.length, ttype: tt.SUB, closeDelim: "}" })
-          token = { input: "_", output: "_", ttype: tt.SUB }
-          tex += "_{"
-          str = str.substring(1)
-          str = str.replace(/^\s+/, "")
-        } else if (token.input === "\\color") {
-          const colorMatch = colorSpecRegEx.exec(str)
-          if (colorMatch) {
-            tex += "{" + colorMatch[0].replace(/[()]/g, "") + "}"
+          if (/det|inf/.test(token.input) && str.charAt(0) === "_") {
+            texStack.push({ prec: 15, pos: tex.length, ttype: tt.SUB, closeDelim: "}" })
+            token = { input: "_", output: "_", ttype: tt.SUB }
+            tex += "_{"
+            str = str.substring(1)
+            str = str.replace(/^\s+/, "")
+          } else if (enviroFunctions.has(token.input)) {
+            str = str.slice(1)
             texStack.pop()
-            str = str.slice(colorMatch[0].length).trim()
+            texStack.push({ prec: 0, pos: tex.length,
+              ttype: tt.ENVIRONMENT, closeDelim: token.closeDelim })
+            delims.push({
+              name: token.input,
+              delimType: dMATRIX,
+              isTall: true,
+              open: token.output,
+              close: token.closeDelim,
+              numArgs: 1,
+              numRows: 1,
+              isPrecededByDiv: prevToken.ttype === tt.DIV,
+              isFuncParen: false,
+              isControlWordParen: true
+            })
           } else {
-            // User is in the middle of writing a color spec. Avoid an error message.
             tex += "{"
           }
-        } else if (enviroFunctions.has(token.input)) {
-          str = str.slice(1)
-          texStack.pop()
-          texStack.push({ prec: 0, pos: tex.length,
-            ttype: tt.ENVIRONMENT, closeDelim: token.closeDelim })
-          delims.push({
-            name: token.input,
-            delimType: dMATRIX,
-            isTall: true,
-            open: token.output,
-            close: token.closeDelim,
-            numArgs: 1,
-            numRows: 1,
-            isPrecededByDiv: prevToken.ttype === tt.DIV,
-            isFuncParen: false,
-            isControlWordParen: true
-          })
-        } else {
-          tex += "{"
+          delims[delims.length - 1].isTall = true
+          okToAppend = false
         }
-        delims[delims.length - 1].isTall = true
-        okToAppend = false
         break
 
       case tt.FACTORIAL:
