@@ -157,7 +157,7 @@ const words = Object.freeze({
   "<-->": ["<-->", "\\xrightleftarrows", "<-->", tt.UNARY, ""]
 })
 
-const miscRegEx = /^([/÷\u2215_:,;\t^+\\\-–−*∗×∘⊗⦼⊙√∛∜·.%|╏‖¦><=≈≟≠≡≤≥≅∈∉∋∌⊂⊄⊆⊈⊃⊇⊉!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃∫∬∮∑([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7$£¥€₨₩₪]+)/
+const miscRegEx = /^([/÷\u2215_:,;\t^+\\\-–−*∗×∘⊗⦼⊙√∛∜·.%|╏‖¦><=≈≟≠≡≤≥≅∈∉∋∌⊂⊄⊆⊈⊃⊇⊉!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7$£¥€₨₩₪]+)/
 
 const miscSymbols = Object.freeze({
   //    input, output, type,  closeDelim
@@ -260,11 +260,6 @@ const miscSymbols = Object.freeze({
   "⊻": ["⊻", "⊻", "⊻", tt.LOGIC, ""], // xor
   "¬": ["¬", "¬", "¬", tt.UNARY, ""], // logical not
   "&&": ["&&", "{\\;\\&\\&\\;}", "&&", tt.LOGIC, ""],
-
-  "∫": ["∫", "∫", "∫", tt.BIG_OPERATOR, ""], // \int
-  "∬": ["∬", "∬", "∬", tt.BIG_OPERATOR, ""], // \iint
-  "∮": ["∮", "∮", "∮", tt.BIG_OPERATOR, ""], // \oint
-  "\u2211": ["\u2211", "\u2211", "\u2211", tt.BIG_OPERATOR, ""], // \sum
 
   "(": ["(", "(", "(", tt.LEFTBRACKET, ")"],
   "[": ["[", "[", "[", tt.LEFTBRACKET, "]"],
@@ -973,6 +968,12 @@ export const lex = (str, formats, prevToken, inRealTime = false) => {
   const nums = superRegEx.exec(str)
   if (nums) {
     return [nums[0], nums[0], nums[0], tt.SUPCHAR, ""]
+  }
+
+  const bigOperators = "∑∫∬∭⨌∮∯∰⨍⨚⨙∏∐"
+  if (bigOperators.indexOf(str[0]) > -1) {
+    const ch = str[0];
+    return [ch, ch, ch, tt.BIG_OPERATOR, ""]
   }
 
   //return maximal initial substring of str that appears in misc names
