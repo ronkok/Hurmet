@@ -402,7 +402,7 @@ const texFunctions = Object.freeze({
   "\\∰": ["\\∰", "\\displaystyle∰", "\\∰", tt.BIG_OPERATOR, ""],
   "\\over": ["\\over", "\\dfrac{", "\\over", tt.DIV],
   "\\sum": ["\\sum", "\\displaystyle∑", "∑", tt.BIG_OPERATOR, ""],
-  "\\∑": ["\\∑", "∑", "\\∑", tt.BIG_OPERATOR, ""],
+  "\\∑": ["\\∑", "\\displaystyle∑", "\\∑", tt.BIG_OPERATOR, ""],
   "\\prod": ["\\prod", "∏", "∏", tt.BIG_OPERATOR, ""],
   "\\∏": ["\\∏", "\\displaystyle∏", "\\∏", tt.BIG_OPERATOR, ""],
   "\\quad": ["\\quad", "\\quad", "\\quad", tt.SPACE, ""],
