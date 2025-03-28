@@ -37,7 +37,7 @@ export const verbatimUnaries = new Set(["\\ce", "\\pu", "\\label", "\\color", "\
   "\\text"])
 
 const enviroFunctions = new Set(["\\cases", "\\rcases", "\\smallmatrix", "\\equation",
-  "\\split", "\\align", "\\CD", "\\multline"])
+  "\\gather", "\\split", "\\align", "\\CD", "\\multline"])
 
 const rationalRPN = numStr => {
   // Return a representation of a rational number that is recognized by evalRPN().
