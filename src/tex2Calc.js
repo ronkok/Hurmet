@@ -13,6 +13,7 @@ const FRAC = 2
 const TFRAC = 4
 const BINARY = 8
 const ENV = 16  // environment
+const CASES = 32 // cases environment
 
 const  charAccents = {
   "\\bar": "\u0304",
@@ -39,6 +40,7 @@ const ignoreRegEx = /^\\(left(?!\.)|right(?!\.)|middle|big|Big|bigg|Bigg)/
 const textSubRegEx = /^(?:(?:\\text|\\mathrm)?{([A-Za-z\u0391-\u03c9][A-Za-z0-9\u0391-\u03c9]*)}|{(?:\\text|\\mathrm)\{([A-Za-z\u0391-\u03c9][A-Za-z0-9\u0391-\u03c9]*)}})/
 const enviroRegEx = /^\\begin\{(?:(cases|rcases|align|equation|split|gather|CD|multline|smallmatrix)|(|p|b|B|v|V)matrix)\}/
 const endEnviroRegEx = /^\\end\{(?:(cases|rcases|align|equation|split|gather|CD|multline|smallmatrix)|(|p|b|B|v|V)matrix)\}/
+const ifRegEx = /^(?:\\(?:mathrm|text|mathrel{\\mathrm){)?(if|otherwise)\b/
 // eslint-disable-next-line max-len
 const greekAlternatives = "Alpha|Beta|Gamma|Delta|Epsilon|Zeta|Eta|Theta|Iota|Kappa|Lambda|Mu|Nu|Xi|Omicron|Pi|Rho|Sigma|Tau|Upsilon|Phi|Chi|Psi|Omega|alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|omicron|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega|varphi"
 const greekRegEx = RegExp("^\\\\(" + greekAlternatives + ")\\b")
@@ -180,6 +182,22 @@ export const tex2Calc = (str, displayMode = false) => {
       }
       str = eatMatch(str, match)
 
+    } else if (delims[delims.length - 1].type === CASES && ifRegEx.test(str)) {
+      const match = ifRegEx.exec(str)
+      const lastChar = calc.trim().slice(-1)
+      if (lastChar === "&" || lastChar === ",") {
+        calc = calc.trim().slice(0, -1)
+      }
+      token = { input: match[0], output: match[1], ttype: tt.LOGIC, closeDelim: "" }
+      str = eatMatch(str, match)
+      if (match[0].indexOf("{") > -1) {
+        str = str.slice(1).trim()
+        const pos = match[0].lastIndexOf("{")
+        if (pos > -1 && pos !== match[0].indexOf("{")) {
+          str = str.slice(1).trim()
+        }
+      }
+
     } else if (boldRegEx.test(str)) {
       const match = boldRegEx.exec(str)
       const codePoint = match[1].codePointAt(0)
@@ -192,8 +210,13 @@ export const tex2Calc = (str, displayMode = false) => {
       const match = enviroRegEx.exec(str)
       if (match[1]) {
         if (donotConvert.includes(match[0])) { return `"Unable to convert ${match[1]}"` }
-        token = { input: match[0], output:`\\${match[1]}(`,
-          ttype: tt.ENVIRONMENT, closeDelim: ")" }
+        const posAmp = str.indexOf("&")
+        if (ifRegEx.test(str.slice(posAmp + 1).trim())) {
+          token = { input: match[0], output: "{", ttype: tt.ENVIRONMENT, closeDelim: "}" }
+        } else {
+          token = { input: match[0], output:`\\${match[1]}(`,
+            ttype: tt.ENVIRONMENT, closeDelim: ")" }
+        }
       } else {
         const matrixType = match[2] || "m"
         token = { input: match[0], output: matrices[matrixType][0],
@@ -226,8 +249,16 @@ export const tex2Calc = (str, displayMode = false) => {
     }
 
     switch (token.ttype) {
-      case tt.SPACE: //      spaces and newlines
+      case tt.SPACE: //  spaces and newlines
         calc += token.output
+        break
+
+      case tt.MULT: //         inline mult/divide operators, × * · /// ÷
+      case tt.REL: //          relational operators, e.g  < > == →
+      case tt.BIN: //          infix math operators that render but don't calc, e.g. \bowtie
+      case tt.BIG_OPERATOR: // integral, sum, etc
+      case tt.LOGIC: //        if, and, or, ∀, ∃, ∧, ∨, etc
+        calc += token.output + " "
         break
 
       case tt.SUPCHAR:
@@ -236,7 +267,7 @@ export const tex2Calc = (str, displayMode = false) => {
         break
 
       case tt.SUB:
-      case tt.SUP:
+      case tt.SUP: {
         calc = calc.replace(trailingSpaceRegEx, "")
         calc += token.output
         if (token.ttype === tt.SUB && textSubRegEx.test(str)) {
@@ -250,21 +281,22 @@ export const tex2Calc = (str, displayMode = false) => {
           calc += "("
         }
         break
+      }
 
-      case tt.NUM:
-      case tt.ORD:
-      case tt.VAR:
-      case tt.ADD: //        infix add/subtract operators, + -
-      case tt.MULT: //       infix mult/divide operators, × * · // ÷
-      case tt.REL: //        relational operators, e.g  < == →
-      case tt.BIN: //    infix math operators that render but don't calc, e.g. \bowtie
-      case tt.BIG_OPERATOR:  // integral, sum, etc
-      case tt.FACTORIAL: {
-        if (token.input === "&" && (delims[delims.length - 1].type === ENV)) {
+      case tt.ADD: { //        infix add/subtract operators, + -
+        const dType = delims[delims.length - 1].type
+        if (token.input === "&" && (dType === ENV || dType === CASES)) {
           calc += ", "   // Write a comma separator for environments
         } else {
           calc += token.output + " "
         }
+        break
+      }
+
+      case tt.NUM:
+      case tt.ORD:
+      case tt.VAR: {
+        calc += token.output + " "
         if (waitingForUnbracedArg) {
           justGotUnbracedArg = true
           waitingForUnbracedArg = false
@@ -276,8 +308,9 @@ export const tex2Calc = (str, displayMode = false) => {
         calc += splitLongVars ? token.output.split("").join(" ") + " " : token.output
         break
 
+      case tt.FACTORIAL:
       case tt.PRIME:
-        calc = calc.trim() + token.output
+        calc = calc.trim() + token.output + " "
         break
 
       case tt.ACCENT: {
@@ -374,11 +407,15 @@ export const tex2Calc = (str, displayMode = false) => {
       }
 
       case tt.LEFTBRACKET:
-      case tt.ENVIRONMENT:   {
+      case tt.ENVIRONMENT: {
         delims.push({
           ch: token.closeDelim,
           pos: calc.length,
-          type: token.ttype === tt.ENVIRONMENT ? ENV : PAREN
+          type: token.ttype === tt.ENVIRONMENT && token.closeDelim === "}"
+            ? CASES
+            : token.ttype === tt.ENVIRONMENT
+            ? ENV
+            : PAREN
         })
         calc += token.output
         break
@@ -389,7 +426,7 @@ export const tex2Calc = (str, displayMode = false) => {
         if ((token.input === "\\\\" || token.input === "\\cr") && inEnvironment) {
           calc += "; "
         } else {
-          calc += (token.input === "&" && inEnvironment) ?  ", " : token.output
+          calc += (token.input === "&" && inEnvironment) ?  ", " : token.output + " "
         }
         break
       }

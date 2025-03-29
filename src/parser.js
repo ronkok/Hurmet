@@ -300,7 +300,7 @@ const dNOTHING = 0
 const dPAREN = 1 //           () or [] or {}, but not one of the use cases below
 const dFUNCTION = 2 //        sin(x)
 const dACCESSOR = 3 //        identifier[index] or identifier[start:step:end]
-const dMATRIX = 4 //          [1; 2] or (1 \t 2; 3 \t 4)
+const dMATRIX = 4 //          [1; 2] or (1, 2; 3, 4)
 const dVECTORFROMRANGE = 5 // [start:end] or [start:step:end]
 const dDICTIONARY = 6 //      {key => value, key => value}
 const dCASES = 7 //           { a if b; c otherwise }
@@ -1138,9 +1138,10 @@ export const parse = (
           }
         }
         if (topDelim.delimType === dCASES && ["if", "otherwise"].includes(token.input)) {
-          tex += "&"
+          tex += `& \\text{${token.input}}~ `
+        } else {
+          tex += token.output
         }
-        tex += token.output
         if (isCalc) {
           if (topDelim.delimType === dCASES &&
             (token.input === "if" || token.input === "otherwise")) {
@@ -1265,7 +1266,8 @@ export const parse = (
           rpn += tokenSep
           popRpnTokens(1)
         }
-        if (delim.delimType === dMATRIX && token.input === ",") {
+        if ((delim.delimType === dMATRIX || delim.delimType === dCASES )
+          && token.input === ",") {
           token.output = " & "
         }
 

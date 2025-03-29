@@ -28,7 +28,7 @@ const parserTests = [
   ["(a	b; c	d)", "\\begin{pmatrix}a & b \\\\ c & d \\end{pmatrix}"],
   [
     "{a if b; c if d}",
-    "\\begin{cases}a &\\mathrel{\\mathrm{if}}b \\\\ c &\\mathrel{\\mathrm{if}}d \\end{cases}"
+    "\\begin{cases}a & \\text{if}~ b \\\\ c & \\text{if}~ d \\end{cases}"
   ],
   ["f_c′=4500 'psi'", "f{_\\text{c}'} = 4{,}500 \\; {\\text{psi}}"],
   ["f_c′=4500psi", "f{_\\text{c}'} = 4{,}500 \\; {\\text{psi}}"],
@@ -52,7 +52,7 @@ const parserTests = [
   ["((n (n+1))/2)", "\\left(\\dfrac{n (n + 1)}{2}\\right)"],
   [
     "β_1 = {0.85 if f_c′ <= 4000; 0.65 if f_c′ >= 8000; 0.85 - f_c′/20000 otherwise}",
-    "β{_\\text{1}} = \\begin{cases}0.85 &\\mathrel{\\mathrm{if}}f{_\\text{c}'} ≤ 4{,}000 \\\\ 0.65 &\\mathrel{\\mathrm{if}}f{_\\text{c}'} ≥ 8{,}000 \\\\ 0.85 - \\dfrac{f{_\\text{c}'}}{20{,}000}&\\mathrel{\\mathrm{otherwise}}\\end{cases}"
+    "β{_\\text{1}} = \\begin{cases}0.85 & \\text{if}~ f{_\\text{c}'} ≤ 4{,}000 \\\\ 0.65 & \\text{if}~ f{_\\text{c}'} ≥ 8{,}000 \\\\ 0.85 - \\dfrac{f{_\\text{c}'}}{20{,}000}& \\text{otherwise}~ \\end{cases}"
   ],
   ["x = (-b +- sqrt(b^2-4 a c))/(2 a)", "x = \\dfrac{\\text{-} b ± \\sqrt{b^{2}- 4 \\, a c}}{2 \\, a}"],
   [
@@ -269,7 +269,7 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     ["= {a + c \\over c +d} \\approx", "= (a + c)/(c + d) ≈"],
     ["\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}", "(a, b; c, d)"],
     ["\\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix}", "[a, b; c, d]"],
-    ["\\begin{cases} a &\\text{if } b \\\\ c &\\text{if } d \\end{cases}", '\\cases(a, "if "b; c, "if "d)'],
+    ["\\begin{cases} a &\\text{if } b \\\\ c &\\text{if } d \\end{cases}", '{a if b; c if d}'],
     [
       "x^2 + x^{a + b}! \\ast x¹² \\times F_i = M_{\\text{max}} \\pm F_{a + c} + \\cancel{M} + \\mathbf{M}",
       "x^2 + x^(a + b)! ∗ x¹²× F_i = M_max ± F_(a + c) + \\cancel(M) + 𝐌"
