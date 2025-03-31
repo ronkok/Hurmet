@@ -75,7 +75,7 @@ const parserTests = [
   ["(exp(-exp(u)))/((u+γ)^2+π^2)", "\\dfrac{\\exp(\\text{-} \\exp(u))}{(u + γ)^{2}+ π^{2}}"],
   [
     'α = ``B	C	D\n7.0	9.5	11.5``["C"]',
-    "α = \\renewcommand{\\arraycolsep}{8pt}\\renewcommand{\\arraystretch}{1.15}\\begin{array}{c c c}{B}&{C}&{D} \\\\ \\hline 7&9.5&11.5\\end{array}[\\text{C}]"
+    "α = \\renewcommand{\\arraycolsep}{8pt}\\renewcommand{\\arraystretch}{1.15}\\begin{array}{ccc}{B}&{C}&{D} \\\\ \\hline 7&9.5&11.5\\end{array}[\\text{C}]"
   ],
   ["H^2 = \\dot a/a", "H^{2}= \\dfrac{\\dot{a}}{a}"],
   ["P = (1.2(D/H))", "P = \\left(1.2 \\left(\\dfrac{D}{H}\\right)\\right)"],

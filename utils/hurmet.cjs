@@ -3678,7 +3678,7 @@ const isNotEmpty = row => {
 };
 
 const getNumInfo =  df => {
-  // Gather info for in setting numbers on a decimal tab.
+  // Gather info for use in setting numbers on a decimal tab.
   const data = df.data.plain ? df.data.plain : df.data;
   const numCols = data.length;
   const colInfo = new Array(numCols);
@@ -3686,19 +3686,27 @@ const getNumInfo =  df => {
   const DFisRational = !df.dtype && Rnl.isRational(data[0][0]);
   for (let j = 0; j < numCols; j++) {
     if (DFisRational || (df.dtype && df.dtype[j] & dt.RATIONAL)) {
-      colInfo[j] = { hasAlignChar: false, maxLenAfterAlignChar: 0 };
+      colInfo[j] = {
+        hasAlignChar: false,
+        maxLenBeforeAlignChar: 0,
+        maxLenAfterAlignChar: 0
+      };
       cellInfo[j] = [];
       for (let i = 0; i < data[0].length; i++) {
         const datum = data[j][i];
         const pos = datum.indexOf(".");
         const hasAlignChar = pos > -1;
+        const lenBeforeAlignChar = hasAlignChar ? pos : datum.length;
         const lenAfterAlignChar = hasAlignChar ? datum.length - pos - 1 : 0;
-        cellInfo[j].push({ hasAlignChar, lenAfterAlignChar });
+        cellInfo[j].push({ hasAlignChar, lenBeforeAlignChar, lenAfterAlignChar });
         if (hasAlignChar) {
           colInfo[j].hasAlignChar = true;
           if (lenAfterAlignChar > colInfo[j].maxLenAfterAlignChar) {
             colInfo[j].maxLenAfterAlignChar = lenAfterAlignChar;
           }
+        }
+        if (lenBeforeAlignChar > colInfo[j].maxLenBeforeAlignChar) {
+          colInfo[j].maxLenBeforeAlignChar = lenBeforeAlignChar;
         }
       }
     }
@@ -3707,7 +3715,14 @@ const getNumInfo =  df => {
 };
 
 const displayNum = (datum, colInfo, cellInfo, decimalFormat) => {
-  let str = formattedDecimal(datum, decimalFormat);
+  let str = "";
+  const m = colInfo.maxLenBeforeAlignChar - cellInfo.lenBeforeAlignChar;
+  if ( m > 0) {
+    str = "\\phantom{" + "0".repeat(m) + "}";
+  }
+
+  str += formattedDecimal(datum, decimalFormat);
+
   const n = colInfo.maxLenAfterAlignChar - cellInfo.lenAfterAlignChar;
   if (colInfo.hasAlignChar && (n > 0 || !cellInfo.hasAlignChar)) {
     str += "\\phantom{";
@@ -3737,15 +3752,9 @@ const display$1 = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHead
     ? "r|"
     : "";
   for (let j = 0; j < numCols; j++) {
-    str += isMap
-      ? "c "
-      : numRows === 1
-      ? "c "
-      : (df.dtype[j] & dt.RATIONAL)
-      ? "r "
-      : "l ";
+    str += "c";
   }
-  str = str.slice(0, -1) + "}";
+  str += "}";
 
   if (!omitHeading) {
     // Write the column names
