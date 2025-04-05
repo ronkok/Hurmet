@@ -1,19 +1,19 @@
-import { cloneToken, verbatimUnaries } from "./parser"
+import { cloneToken, verbatims } from "./parser"
 import { tt, lex } from "./lexer"
 import { verbatimArg } from "./utils.js"
 
 /*
  * teXtoCalc.js
- * This file takes a text string and compiles from TeX to Hurmet calculation format.
+ * This file takes a text string and converts from TeX to Hurmet calculation format.
 */
 
 // Delimiter types
 const PAREN = 1 // default
 const FRAC = 2
-const TFRAC = 4
-const BINARY = 8
-const ENV = 16  // environment
-const CASES = 32 // cases environment
+const TFRAC = 3
+const BINARY = 4
+const ENV = 5  // environment
+const CASES = 6 // cases environment
 
 const  charAccents = {
   "\\bar": "\u0304",
@@ -38,8 +38,8 @@ const trailingSpaceRegEx = / +$/
 const inlineFracRegEx = /^\/(?!\/)/
 const ignoreRegEx = /^\\(left(?!\.)|right(?!\.)|middle|big|Big|bigg|Bigg)/
 const textSubRegEx = /^(?:(?:\\text|\\mathrm)?{([A-Za-z\u0391-\u03c9][A-Za-z0-9\u0391-\u03c9]*)}|{(?:\\text|\\mathrm)\{([A-Za-z\u0391-\u03c9][A-Za-z0-9\u0391-\u03c9]*)}})/
-const enviroRegEx = /^\\begin\{(?:(cases|rcases|align|equation|split|gather|CD|multline|smallmatrix)|(|p|b|B|v|V)matrix)\}/
-const endEnviroRegEx = /^\\end\{(?:(cases|rcases|align|equation|split|gather|CD|multline|smallmatrix)|(|p|b|B|v|V)matrix)\}/
+const enviroRegEx = /^(?:\\begin\{(?:(align|alignat|array|cases|rcases|subarray|equation|split|gather|CD|multline|smallmatrix)|(|p|b|B|v|V)matrix)\}|(\\bordermatrix)\b)/
+const endEnviroRegEx = /^\\end\{(?:(align|alignat|array|cases|rcases|subarray|equation|split|gather|CD|multline|smallmatrix)|(|p|b|B|v|V)matrix)\}/
 const ifRegEx = /^(?:\\(?:mathrm|text|mathrel{\\mathrm){)?(if|otherwise)\b/
 // eslint-disable-next-line max-len
 const greekAlternatives = "Alpha|Beta|Gamma|Delta|Epsilon|Zeta|Eta|Theta|Iota|Kappa|Lambda|Mu|Nu|Xi|Omicron|Pi|Rho|Sigma|Tau|Upsilon|Phi|Chi|Psi|Omega|alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|omicron|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega|varphi"
@@ -212,15 +212,19 @@ export const tex2Calc = (str, displayMode = false) => {
         if (donotConvert.includes(match[0])) { return `"Unable to convert ${match[1]}"` }
         const posAmp = str.indexOf("&")
         if (ifRegEx.test(str.slice(posAmp + 1).trim())) {
+          // Change a TeX cases environment to a Hurmet { if } statement
           token = { input: match[0], output: "{", ttype: tt.ENVIRONMENT, closeDelim: "}" }
         } else {
-          token = { input: match[0], output:`\\${match[1]}(`,
+          token = { input: match[0], output:`\\${match[1]}`,
             ttype: tt.ENVIRONMENT, closeDelim: ")" }
         }
-      } else {
+      } else if (match[2]) {
         const matrixType = match[2] || "m"
         token = { input: match[0], output: matrices[matrixType][0],
           ttype: tt.ENVIRONMENT, closeDelim: matrices[matrixType][1] }
+      } else {
+        // \bordermatrix
+        token = { input: match[0], output: match[3], ttype: tt.ENVIRONMENT, closeDelim: ")" }
       }
       str = eatMatch(str, match)
 
@@ -329,7 +333,7 @@ export const tex2Calc = (str, displayMode = false) => {
       }
 
       case tt.UNARY: {
-        if (verbatimUnaries.has(token.input)) {
+        if (verbatims.has(token.input)) {
           const arg = verbatimArg(str)
           calc += token.input === "\\text"
             ? '"' + arg + '"'
@@ -359,7 +363,7 @@ export const tex2Calc = (str, displayMode = false) => {
             delims.push({
               ch: ")",
               pos: calc.length,
-              type: token.input === "\\bordermatrix" ? ENV : PAREN
+              type: token.input === PAREN
             })
           }
           [str, waitingForUnbracedArg] = eatOpenBrace(str)
@@ -378,7 +382,7 @@ export const tex2Calc = (str, displayMode = false) => {
         } else {
           calc += token.input + "("
           delims.push({ ch: ")(", pos, type: BINARY })
-        };
+        }
         [str, waitingForUnbracedArg] = eatOpenBrace(str)
         break
       }
@@ -411,13 +415,27 @@ export const tex2Calc = (str, displayMode = false) => {
         delims.push({
           ch: token.closeDelim,
           pos: calc.length,
-          type: token.ttype === tt.ENVIRONMENT && token.closeDelim === "}"
+          type: token.input === "\\bordermatrix"
+            ? ENV
+            : token.ttype === tt.ENVIRONMENT && token.closeDelim === "}"
             ? CASES
             : token.ttype === tt.ENVIRONMENT
             ? ENV
             : PAREN
         })
         calc += token.output
+        if (verbatims.has(token.output) ||
+          (token.output === "\\bordermatrix" && str.slice(0, 1) === "[")) {
+          const arg = verbatimArg(str)
+          calc += token.output === "\\bordermatrix" ? "[" + arg + "]" : "(" + arg + ")"
+          str = str.slice(arg.length + 2)
+          str = str.replace(leadingSpaceRegEx, "")
+        }
+        if (token.output === "\\bordermatrix") {
+          str = str.slice(1)
+          str = str.replace(leadingSpaceRegEx, "")
+        }
+        if (token.output.slice(0, 1) === "\\") { calc += "(" }
         break
       }
 
@@ -432,7 +450,6 @@ export const tex2Calc = (str, displayMode = false) => {
       }
 
       case tt.RIGHTBRACKET: {
-        // TODO: Check for cases environment and convert to Hurmet IF, if possible
         const delim = delims.pop()
         calc = calc.replace(trailingSpaceRegEx, "")
 

@@ -407,17 +407,21 @@ const texFunctions = Object.freeze({
   "\\∏": ["\\∏", "\\displaystyle∏", "\\∏", tt.BIG_OPERATOR, ""],
   "\\quad": ["\\quad", "\\quad", "\\quad", tt.SPACE, ""],
   "\\qquad": ["\\qquad", "\\qquad", "\\qquad", tt.SPACE, ""],
-  "\\align": ["\\align", "\\begin{align}", "\\align", tt.UNARY, "\\end{align}"],
-  "\\cases": ["\\cases", "\\begin{cases}", "\\cases", tt.UNARY, "\\end{cases}"],
-  "\\rcases": ["\\rcases", "\\begin{rcases}", "\\rcases", tt.UNARY, "\\end{rcases}"],
-  "\\smallmatrix": ["\\smallmatrix", "\\begin{smallmatrix}", "\\smallmatrix", tt.UNARY,
-    "\\end{smallmatrix}"],
-  "\\bordermatrix": ["\\bordermatrix", "\\bordermatrix", "\\bordermatrix", tt.UNARY, "}"],
-  "\\equation": ["\\equation", "\\begin{equation}", "\\equation", tt.UNARY, "\\end{equation}"],
-  "\\split": ["\\split", "\\begin{split}", "\\split", tt.UNARY, "\\end{split}"],
-  "\\gather": ["\\gather", "\\begin{gather}", "\\gather", tt.UNARY, "\\end{gather}"],
-  "\\CD": ["\\CD", "\\begin{CD}", "\\CD", tt.UNARY, "\\end{CD}"],
-  "\\multline": ["\\multline", "\\begin{multline}", "\\multline", tt.UNARY, "\\end{multline}"]
+  "\\align": ["\\align", "\\begin{align}", "\\align", tt.ENVIRONMENT, "\\end{align}"],
+  /* eslint-disable max-len */
+  "\\alignat": ["\\alignat", "\\begin{alignat}", "\\alignat", tt.ENVIRONMENT, "\\end{alignat}"],
+  "\\array": ["\\array", "\\begin{array}", "\\array", tt.ENVIRONMENT, "\\end{array}"],
+  "\\subarray": ["\\subarray", "\\begin{subarray}", "\\subarray", tt.ENVIRONMENT, "\\end{subarray}"],
+  "\\cases": ["\\cases", "\\begin{cases}", "\\cases", tt.ENVIRONMENT, "\\end{cases}"],
+  "\\rcases": ["\\rcases", "\\begin{rcases}", "\\rcases", tt.ENVIRONMENT, "\\end{rcases}"],
+  "\\smallmatrix": ["\\smallmatrix", "\\begin{smallmatrix}", "\\smallmatrix", tt.ENVIRONMENT, "\\end{smallmatrix}"],
+  "\\bordermatrix": ["\\bordermatrix", "\\bordermatrix", "\\bordermatrix", tt.ENVIRONMENT, "}"],
+  "\\equation": ["\\equation", "\\begin{equation}", "\\equation", tt.ENVIRONMENT, "\\end{equation}"],
+  "\\split": ["\\split", "\\begin{split}", "\\split", tt.ENVIRONMENT, "\\end{split}"],
+  "\\gather": ["\\gather", "\\begin{gather}", "\\gather", tt.ENVIRONMENT, "\\end{gather}"],
+  "\\CD": ["\\CD", "\\begin{CD}", "\\CD", tt.ENVIRONMENT, "\\end{CD}"],
+  "\\multline": ["\\multline", "\\begin{multline}", "\\multline", tt.ENVIRONMENT, "\\end{multline}"]
+  /* eslint-enable max-len */
 })
 
 const accents = new Set([

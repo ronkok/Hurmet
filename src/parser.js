@@ -33,11 +33,8 @@ const builtInReducerFunctions = new Set(["accumulate", "beamDiagram", "dataframe
 const trigFunctions = new Set(["cos", "cosd", "cot", "cotd", "csc", "cscd", "sec", "secd",
   "sin", "sind", "tand", "tan"])
 
-export const verbatimUnaries = new Set(["\\ce", "\\pu", "\\label", "\\color", "\\mathrm",
-  "\\text"])
-
-const enviroFunctions = new Set(["\\cases", "\\rcases", "\\smallmatrix", "\\equation",
-  "\\gather", "\\split", "\\align", "\\CD", "\\multline"])
+export const verbatims = new Set(["\\alignat", "\\array", "\\ce", "\\color", "\\label",
+  "\\mathrm", "\\pu", "\\subarray", "\\text"])
 
 const rationalRPN = numStr => {
   // Return a representation of a rational number that is recognized by evalRPN().
@@ -306,7 +303,8 @@ const dDICTIONARY = 6 //      {key => value, key => value}
 const dCASES = 7 //           { a if b; c otherwise }
 const dBINOMIAL = 8
 const dSUBSCRIPT = 9 //       Parens around a subscript do not get converted into matrices.
-const dDISTRIB = 10 //         A probability distribution defined by a confidence interval.
+const dDISTRIB = 10 //        A probability distribution defined by a confidence interval.
+const dENVIRONMENT = 11 //   \align{...}, etc. Stand in for LaTeX AMS environments
 
 export const parse = (
   str,
@@ -1037,12 +1035,43 @@ export const parse = (
         break
       }
 
+      case tt.ENVIRONMENT: {
+        popTexTokens(1, okToAppend)
+        posOfPrevRun = tex.length
+        tex += token.output
+        if (verbatims.has(token.input) ||
+          (token.input === "\\bordermatrix" && str.slice(0, 1) === "[")) {
+          const arg = verbatimArg(str)
+          tex += token.output === "\\bordermatrix" ? "[" + arg + "]" : "{" + arg + "}"
+          str = str.slice(arg.length + 2)
+        }
+        if (token.output === "\\bordermatrix") { tex += "{" }
+        str = str.slice(1)
+        str = str.replace(leadingSpaceRegEx, "")
+        texStack.push({ prec: 0, pos: tex.length,
+          ttype: tt.ENVIRONMENT, closeDelim: token.closeDelim })
+        delims.push({
+          name: token.input,
+          delimType: dENVIRONMENT,
+          isTall: true,
+          open: token.output,
+          close: token.closeDelim,
+          numArgs: 1,
+          numRows: 1,
+          isPrecededByDiv: prevToken.ttype === tt.DIV,
+          isFuncParen: false,
+          isControlWordParen: true
+        })
+        okToAppend = true
+        break
+      }
+
       case tt.UNARY: // e.g. bb, hat, or sqrt, or xrightarrow, hides parens
         popTexTokens(1, okToAppend)
         posOfPrevRun = tex.length
-        if (verbatimUnaries.has(token.input)) {
+        if (verbatims.has(token.input)) {
           const arg = verbatimArg(str)
-          tex += token.output + "{" + arg + "}"
+          tex += token.output + arg + "}"
           str = str.slice(arg.length + 2)
           str = str.replace(leadingSpaceRegEx, "")
           token.ttype = tt.RIGHTBRACKET
@@ -1061,23 +1090,6 @@ export const parse = (
             tex += "_{"
             str = str.substring(1)
             str = str.replace(/^\s+/, "")
-          } else if (enviroFunctions.has(token.input)) {
-            str = str.slice(1)
-            texStack.pop()
-            texStack.push({ prec: 0, pos: tex.length,
-              ttype: tt.ENVIRONMENT, closeDelim: token.closeDelim })
-            delims.push({
-              name: token.input,
-              delimType: dMATRIX,
-              isTall: true,
-              open: token.output,
-              close: token.closeDelim,
-              numArgs: 1,
-              numRows: 1,
-              isPrecededByDiv: prevToken.ttype === tt.DIV,
-              isFuncParen: false,
-              isControlWordParen: true
-            })
           } else {
             tex += "{"
           }
@@ -1222,7 +1234,7 @@ export const parse = (
           delim.delimType = dACCESSOR
         } else {
           // This may change to a MATRIX, but for now we'll say it's a paren.
-          delim.delimType = prevToken.input === "\\bordermatrix" ? dMATRIX : dPAREN
+          delim.delimType = dPAREN
           delim.name = token.input
         }
         delims.push(delim)
@@ -1266,7 +1278,8 @@ export const parse = (
           rpn += tokenSep
           popRpnTokens(1)
         }
-        if ((delim.delimType === dMATRIX || delim.delimType === dCASES )
+        if ((delim.delimType === dMATRIX || delim.delimType === dCASES
+          || delim.delimType === dENVIRONMENT )
           && token.input === ",") {
           token.output = " & "
         }
