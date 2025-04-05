@@ -84,7 +84,6 @@
  */
 
 import { dt } from "./constants"
-import { tex2Calc } from "./tex2Calc"
 
 const CR_NEWLINE_R = /\r\n?/g;
 const FORMFEED_R = /\f/g;
@@ -811,12 +810,7 @@ rules.set("displayTeX", {
   match: blockRegex(/^ *(?:\$\$\n? *((?:\\[\s\S]|[^\\])+?)\n?\$\$|\\\[\n? *((?:\\[\s\S]|[^\\])+?)\n?\\\]) *(?:\n|$)/),
   parse: function(capture, state) {
     const tex = (capture[1] ? capture[1] : capture[2]).trim()
-    if (state.convertTex) {
-      const entry = tex2Calc(tex, true)
-      return { type: "calculation", attrs: { entry, displayMode: true } }
-    } else {
-      return { type: "tex", attrs: { tex, displayMode: true } }
-    }
+    return { type: "tex", attrs: { tex, displayMode: true } }
   }
 })
 rules.set("newline", {
@@ -845,12 +839,7 @@ rules.set("tex", {
   parse: function(capture, state) {
     if (capture[1]) {
       const tex = (capture[1]).trim()
-      if (state.convertTex) {
-        const entry = tex2Calc(tex, true)
-        return { type: "calculation", attrs: { entry, displayMode: true } }
-      } else {
-        return { type: "tex", attrs: { tex, displayMode: true } }
-      }
+      return { type: "tex", attrs: { tex, displayMode: true } }
     } else {
       const tex = (capture[2]
         ? capture[2]
@@ -859,12 +848,7 @@ rules.set("tex", {
         : capture[5]
         ? capture[5]
         : capture[6]).trim()
-      if (state.convertTex) {
-        const entry = tex2Calc(tex, false)
-        return { type: "calculation", attrs: { entry, displayMode: false } }
-      } else {
-        return { type: "tex", attrs: { tex, displayMode: false } }
-      }
+      return { type: "tex", attrs: { tex, displayMode: false } }
     }
   }
 });
@@ -1240,7 +1224,7 @@ export const inlineMd2ast = md => {
   return ast
 }
 
-export const md2ast = (md, inHtml = false, convertTex = false) => {
+export const md2ast = (md, inHtml = false) => {
   // First, check for a metadata preamble
   let metadata = false
   if (metadataRegEx.test(md)) {
@@ -1256,8 +1240,7 @@ export const md2ast = (md, inHtml = false, convertTex = false) => {
     _defs: {},
     footnotes: [],
     prevCapture: "",
-    inHtml,
-    convertTex
+    inHtml
   }
   const defRegEx = /\n *\[([^\]\n]+)\]: *([^\n]*) *(?:\n\{([^\n}]*)\})?(?=\n)/gm
   const footnoteDefRegEx = /\n *\[\^\d+\]: *([^\n]*)(?=\n)/gm

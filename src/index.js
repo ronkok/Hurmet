@@ -38,7 +38,7 @@ function pmSetup(options) {
     } }),
     new state.Plugin({ props: { clipboardTextParser(text, _, plain) {
       if (plain) { return text }
-      const ast = hurmet.md2ast(text, false, false)
+      const ast = hurmet.md2ast(text, false)
       return schema.nodeFromJSON({ type: "fragment", content: ast })
     } } })
   ]
