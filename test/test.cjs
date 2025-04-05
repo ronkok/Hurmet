@@ -270,6 +270,11 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     ["\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}", "(a, b; c, d)"],
     ["\\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix}", "[a, b; c, d]"],
     ["\\begin{cases} a &\\text{if } b \\\\ c &\\text{if } d \\end{cases}", '{a if b; c if d}'],
+    ["\\begin{array}{cc} a & b \\\\ c & d\\end{array}", "\\array(cc)(a, b; c, d)"],
+    ["\\sum_{\\begin{subarray}{l} i\\in\\Lambda\\\\ 0 \\lt j > n \\end{subarray}}", "∑_(\\subarray(l)(i ∈ Λ; 0 \\lt j > n))"],
+    ["\\begin{alignat}{2} 10&x+ &3&y = 2 \\\\ 3&x+&13&y = 4 \\end{alignat}", "\\alignat(2)(10, x +, 3, y = 2; 3, x +, 13, y = 4)"],
+    ["\\bordermatrix{ & 1 & 2 & 3 \\\\ 1 & A & B & C \\\\ 2 & D & E & F}", "\\bordermatrix(, 1, 2, 3; 1, A, B, C; 2, D, E, F)"],
+    ["\\bordermatrix[{[]}]{ & 1 & 2 & 3 \\\\ 1 & A & B & C \\\\ 2 & D & E & F}", "\\bordermatrix[{[]}](, 1, 2, 3; 1, A, B, C; 2, D, E, F)"],
     [
       "x^2 + x^{a + b}! \\ast x¹² \\times F_i = M_{\\text{max}} \\pm F_{a + c} + \\cancel{M} + \\mathbf{M}",
       "x^2 + x^(a + b)! ∗ x¹²× F_i = M_max ± F_(a + c) + \\cancel(M) + 𝐌"
