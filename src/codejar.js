@@ -8,7 +8,13 @@
 import { boldPrevChar } from "./autocorrect"
 
 const highlight = (editor) => {
-  const code = editor.textContent.replace(/\t/gm, '<span style="background-color: lemonchiffon">\t</span>')
+  const code = editor.textContent
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;")
+    .replace(/\t/gm, '<span style="background-color: lemonchiffon">\t</span>')
   editor.innerHTML = code
 }
 
@@ -89,7 +95,6 @@ export const codeJar = (editor, isMathPrompt) => {
 
   ;on("paste", event => {
     handlePaste(event)
-    if (callback) callback(toString())
   })
 
   function save() {
