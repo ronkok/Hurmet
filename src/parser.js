@@ -33,8 +33,8 @@ const builtInReducerFunctions = new Set(["accumulate", "beamDiagram", "dataframe
 const trigFunctions = new Set(["cos", "cosd", "cot", "cotd", "csc", "cscd", "sec", "secd",
   "sin", "sind", "tand", "tan"])
 
-export const verbatims = new Set(["\\alignat", "\\array", "\\ce", "\\color", "\\label",
-  "\\mathrm", "\\pu", "\\subarray", "\\text"])
+export const verbatims = new Set(["\\alignat", "\\array", "\\ce", "\\color", "\\colorbox",
+  "\\label", "\\mathrm", "\\pu", "\\subarray", "\\tag", "\\text", "\\textcolor"])
 
 const rationalRPN = numStr => {
   // Return a representation of a rational number that is recognized by evalRPN().
@@ -466,7 +466,7 @@ export const parse = (
       tex += op.closeDelim
 
       if (op.closeDelim.slice(-1) === "{") {
-        // We just closed the first part of a binary function, e.g. root()(),
+        // We just closed the first part of a binary function, root()(),
         // or a function exponent (sin^2 θ) or function subscript (log_10)
         if (op.ttype === tt.BINARY) {
           texStack.push({ prec: 12, pos: op.pos, ttype: tt.UNARY, closeDelim: "}" })
@@ -1008,12 +1008,24 @@ export const parse = (
       case tt.BINARY: { // e.g. root(3)(x)
         popTexTokens(1, okToAppend)
         posOfPrevRun = tex.length
-        const binCD = token.input === "root" ? "]{" : "}{"
-        texStack.push({ prec: 12, pos: tex.length, ttype: tt.BINARY, closeDelim: binCD })
-        if (isCalc) {
+        if (token.input === "root") {
+          texStack.push({ prec: 12, pos: tex.length, ttype: tt.BINARY, closeDelim: "]{" })
+          tex += "\\sqrt["
+        } else if (verbatims.has(token.input)) {
+          texStack.push({ prec: 0, pos: tex.length, ttype: tt.UNARY, closeDelim: "}" })
+          const arg = verbatimArg(str)
+          tex += token.output + "{" + arg + "}{"
+          str = str.slice(arg.length + 2)
+          str = str.replace(leadingSpaceRegEx, "")
+          str = str.slice(1)
+          str = str.replace(leadingSpaceRegEx, "")
+        } else {
+          texStack.push({ prec: 12, pos: tex.length, ttype: tt.BINARY, closeDelim: "}{" })
+          tex += token.output + "{"
+        }
+        if (isCalc && token.input === "root") {
           rpnStack.push({ prec: rpnPrecFromType[tt.BINARY], symbol: token.output })
         }
-        tex += token.output + (token.input === "root" ? "[" : "{")
         delims[delims.length - 1].isTall = true
         okToAppend = false
         break

@@ -618,13 +618,14 @@ const greek = {
 }
 
 const binaries = new Set([
+  "colorbox",
   "dfrac",
   "frac",
   "lower",
   "overset",
   "raisebox",
   "stackrel",
-  "tag",
+  "textcolor",
   "tfrac",
   "underset"
 ])

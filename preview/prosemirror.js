@@ -21337,17 +21337,21 @@ const texFunctions = Object.freeze({
   "\\∏": ["\\∏", "\\displaystyle∏", "\\∏", tt.BIG_OPERATOR, ""],
   "\\quad": ["\\quad", "\\quad", "\\quad", tt.SPACE, ""],
   "\\qquad": ["\\qquad", "\\qquad", "\\qquad", tt.SPACE, ""],
-  "\\align": ["\\align", "\\begin{align}", "\\align", tt.UNARY, "\\end{align}"],
-  "\\cases": ["\\cases", "\\begin{cases}", "\\cases", tt.UNARY, "\\end{cases}"],
-  "\\rcases": ["\\rcases", "\\begin{rcases}", "\\rcases", tt.UNARY, "\\end{rcases}"],
-  "\\smallmatrix": ["\\smallmatrix", "\\begin{smallmatrix}", "\\smallmatrix", tt.UNARY,
-    "\\end{smallmatrix}"],
-  "\\bordermatrix": ["\\bordermatrix", "\\bordermatrix", "\\bordermatrix", tt.UNARY, "}"],
-  "\\equation": ["\\equation", "\\begin{equation}", "\\equation", tt.UNARY, "\\end{equation}"],
-  "\\split": ["\\split", "\\begin{split}", "\\split", tt.UNARY, "\\end{split}"],
-  "\\gather": ["\\gather", "\\begin{gather}", "\\gather", tt.UNARY, "\\end{gather}"],
-  "\\CD": ["\\CD", "\\begin{CD}", "\\CD", tt.UNARY, "\\end{CD}"],
-  "\\multline": ["\\multline", "\\begin{multline}", "\\multline", tt.UNARY, "\\end{multline}"]
+  "\\align": ["\\align", "\\begin{align}", "\\align", tt.ENVIRONMENT, "\\end{align}"],
+  /* eslint-disable max-len */
+  "\\alignat": ["\\alignat", "\\begin{alignat}", "\\alignat", tt.ENVIRONMENT, "\\end{alignat}"],
+  "\\array": ["\\array", "\\begin{array}", "\\array", tt.ENVIRONMENT, "\\end{array}"],
+  "\\subarray": ["\\subarray", "\\begin{subarray}", "\\subarray", tt.ENVIRONMENT, "\\end{subarray}"],
+  "\\cases": ["\\cases", "\\begin{cases}", "\\cases", tt.ENVIRONMENT, "\\end{cases}"],
+  "\\rcases": ["\\rcases", "\\begin{rcases}", "\\rcases", tt.ENVIRONMENT, "\\end{rcases}"],
+  "\\smallmatrix": ["\\smallmatrix", "\\begin{smallmatrix}", "\\smallmatrix", tt.ENVIRONMENT, "\\end{smallmatrix}"],
+  "\\bordermatrix": ["\\bordermatrix", "\\bordermatrix", "\\bordermatrix", tt.ENVIRONMENT, "}"],
+  "\\equation": ["\\equation", "\\begin{equation}", "\\equation", tt.ENVIRONMENT, "\\end{equation}"],
+  "\\split": ["\\split", "\\begin{split}", "\\split", tt.ENVIRONMENT, "\\end{split}"],
+  "\\gather": ["\\gather", "\\begin{gather}", "\\gather", tt.ENVIRONMENT, "\\end{gather}"],
+  "\\CD": ["\\CD", "\\begin{CD}", "\\CD", tt.ENVIRONMENT, "\\end{CD}"],
+  "\\multline": ["\\multline", "\\begin{multline}", "\\multline", tt.ENVIRONMENT, "\\end{multline}"]
+  /* eslint-enable max-len */
 });
 
 const accents$1 = new Set([
@@ -21544,13 +21548,14 @@ const greek = {
 };
 
 const binaries = new Set([
+  "colorbox",
   "dfrac",
   "frac",
   "lower",
   "overset",
   "raisebox",
   "stackrel",
-  "tag",
+  "textcolor",
   "tfrac",
   "underset"
 ]);
@@ -21956,11 +21961,8 @@ const builtInReducerFunctions = new Set(["accumulate", "beamDiagram", "dataframe
 const trigFunctions = new Set(["cos", "cosd", "cot", "cotd", "csc", "cscd", "sec", "secd",
   "sin", "sind", "tand", "tan"]);
 
-const verbatimUnaries = new Set(["\\ce", "\\pu", "\\label", "\\color", "\\mathrm",
-  "\\text"]);
-
-const enviroFunctions = new Set(["\\cases", "\\rcases", "\\smallmatrix", "\\equation",
-  "\\gather", "\\split", "\\align", "\\CD", "\\multline"]);
+const verbatims = new Set(["\\alignat", "\\array", "\\ce", "\\color", "\\colorbox",
+  "\\label", "\\mathrm", "\\pu", "\\subarray", "\\tag", "\\text", "\\textcolor"]);
 
 const rationalRPN = numStr => {
   // Return a representation of a rational number that is recognized by evalRPN().
@@ -22226,7 +22228,8 @@ const dDICTIONARY = 6; //      {key => value, key => value}
 const dCASES = 7; //           { a if b; c otherwise }
 const dBINOMIAL = 8;
 const dSUBSCRIPT = 9; //       Parens around a subscript do not get converted into matrices.
-const dDISTRIB = 10; //         A probability distribution defined by a confidence interval.
+const dDISTRIB = 10; //        A probability distribution defined by a confidence interval.
+const dENVIRONMENT = 11; //   \align{...}, etc. Stand in for LaTeX AMS environments
 
 const parse$1 = (
   str,
@@ -22388,7 +22391,7 @@ const parse$1 = (
       tex += op.closeDelim;
 
       if (op.closeDelim.slice(-1) === "{") {
-        // We just closed the first part of a binary function, e.g. root()(),
+        // We just closed the first part of a binary function, root()(),
         // or a function exponent (sin^2 θ) or function subscript (log_10)
         if (op.ttype === tt.BINARY) {
           texStack.push({ prec: 12, pos: op.pos, ttype: tt.UNARY, closeDelim: "}" });
@@ -22930,12 +22933,24 @@ const parse$1 = (
       case tt.BINARY: { // e.g. root(3)(x)
         popTexTokens(1, okToAppend);
         posOfPrevRun = tex.length;
-        const binCD = token.input === "root" ? "]{" : "}{";
-        texStack.push({ prec: 12, pos: tex.length, ttype: tt.BINARY, closeDelim: binCD });
-        if (isCalc) {
+        if (token.input === "root") {
+          texStack.push({ prec: 12, pos: tex.length, ttype: tt.BINARY, closeDelim: "]{" });
+          tex += "\\sqrt[";
+        } else if (verbatims.has(token.input)) {
+          texStack.push({ prec: 0, pos: tex.length, ttype: tt.UNARY, closeDelim: "}" });
+          const arg = verbatimArg(str);
+          tex += token.output + "{" + arg + "}{";
+          str = str.slice(arg.length + 2);
+          str = str.replace(leadingSpaceRegEx$3, "");
+          str = str.slice(1);
+          str = str.replace(leadingSpaceRegEx$3, "");
+        } else {
+          texStack.push({ prec: 12, pos: tex.length, ttype: tt.BINARY, closeDelim: "}{" });
+          tex += token.output + "{";
+        }
+        if (isCalc && token.input === "root") {
           rpnStack.push({ prec: rpnPrecFromType[tt.BINARY], symbol: token.output });
         }
-        tex += token.output + (token.input === "root" ? "[" : "{");
         delims[delims.length - 1].isTall = true;
         okToAppend = false;
         break
@@ -22957,12 +22972,43 @@ const parse$1 = (
         break
       }
 
+      case tt.ENVIRONMENT: {
+        popTexTokens(1, okToAppend);
+        posOfPrevRun = tex.length;
+        tex += token.output;
+        if (verbatims.has(token.input) ||
+          (token.input === "\\bordermatrix" && str.slice(0, 1) === "[")) {
+          const arg = verbatimArg(str);
+          tex += token.output === "\\bordermatrix" ? "[" + arg + "]" : "{" + arg + "}";
+          str = str.slice(arg.length + 2);
+        }
+        if (token.output === "\\bordermatrix") { tex += "{"; }
+        str = str.slice(1);
+        str = str.replace(leadingSpaceRegEx$3, "");
+        texStack.push({ prec: 0, pos: tex.length,
+          ttype: tt.ENVIRONMENT, closeDelim: token.closeDelim });
+        delims.push({
+          name: token.input,
+          delimType: dENVIRONMENT,
+          isTall: true,
+          open: token.output,
+          close: token.closeDelim,
+          numArgs: 1,
+          numRows: 1,
+          isPrecededByDiv: prevToken.ttype === tt.DIV,
+          isFuncParen: false,
+          isControlWordParen: true
+        });
+        okToAppend = true;
+        break
+      }
+
       case tt.UNARY: // e.g. bb, hat, or sqrt, or xrightarrow, hides parens
         popTexTokens(1, okToAppend);
         posOfPrevRun = tex.length;
-        if (verbatimUnaries.has(token.input)) {
+        if (verbatims.has(token.input)) {
           const arg = verbatimArg(str);
-          tex += token.output + "{" + arg + "}";
+          tex += token.output + arg + "}";
           str = str.slice(arg.length + 2);
           str = str.replace(leadingSpaceRegEx$3, "");
           token.ttype = tt.RIGHTBRACKET;
@@ -22981,23 +23027,6 @@ const parse$1 = (
             tex += "_{";
             str = str.substring(1);
             str = str.replace(/^\s+/, "");
-          } else if (enviroFunctions.has(token.input)) {
-            str = str.slice(1);
-            texStack.pop();
-            texStack.push({ prec: 0, pos: tex.length,
-              ttype: tt.ENVIRONMENT, closeDelim: token.closeDelim });
-            delims.push({
-              name: token.input,
-              delimType: dMATRIX,
-              isTall: true,
-              open: token.output,
-              close: token.closeDelim,
-              numArgs: 1,
-              numRows: 1,
-              isPrecededByDiv: prevToken.ttype === tt.DIV,
-              isFuncParen: false,
-              isControlWordParen: true
-            });
           } else {
             tex += "{";
           }
@@ -23142,7 +23171,7 @@ const parse$1 = (
           delim.delimType = dACCESSOR;
         } else {
           // This may change to a MATRIX, but for now we'll say it's a paren.
-          delim.delimType = prevToken.input === "\\bordermatrix" ? dMATRIX : dPAREN;
+          delim.delimType = dPAREN;
           delim.name = token.input;
         }
         delims.push(delim);
@@ -23186,7 +23215,8 @@ const parse$1 = (
           rpn += tokenSep;
           popRpnTokens(1);
         }
-        if ((delim.delimType === dMATRIX || delim.delimType === dCASES )
+        if ((delim.delimType === dMATRIX || delim.delimType === dCASES
+          || delim.delimType === dENVIRONMENT )
           && token.input === ",") {
           token.output = " & ";
         }
@@ -23478,470 +23508,6 @@ const parse$1 = (
   return isCalc ? [tex, rpn, dependencies] : tex
 };
 
-/*
- * teXtoCalc.js
- * This file takes a text string and compiles from TeX to Hurmet calculation format.
-*/
-
-// Delimiter types
-const PAREN = 1; // default
-const FRAC = 2;
-const TFRAC = 4;
-const BINARY = 8;
-const ENV = 16;  // environment
-const CASES = 32; // cases environment
-
-const  charAccents = {
-  "\\bar": "\u0304",
-  "\\grave": "\u0300",
-  "\\acute": "\u0301",
-  "\\hat": "\u0302",
-  "\\tilde": "\u0303",
-  "\\dot": "\u0307",
-  "\\ddot": "\u0308",
-  "\\mathring": "\u030A",
-  "\\check": "\u030C",
-  "\\underline": "\u0332",
-  "\\overleftharpoon": "\u20d0",
-  "\\overrightharpoon": "\u20d1",
-  "\\overleftarrow": "\u20d6",
-  "\\vec": "\u20d7",
-  "\\overleftrightarrow": "\u20e1"
-};
-const openParenRegEx$1 = /^ *(?:\\(?:left|big|Big|bigg|Bigg))? *\(/;
-const leadingSpaceRegEx$2 = /^\s+/;
-const trailingSpaceRegEx$1 = / +$/;
-const inlineFracRegEx = /^\/(?!\/)/;
-const ignoreRegEx = /^\\(left(?!\.)|right(?!\.)|middle|big|Big|bigg|Bigg)/;
-const textSubRegEx = /^(?:(?:\\text|\\mathrm)?{([A-Za-z\u0391-\u03c9][A-Za-z0-9\u0391-\u03c9]*)}|{(?:\\text|\\mathrm)\{([A-Za-z\u0391-\u03c9][A-Za-z0-9\u0391-\u03c9]*)}})/;
-const enviroRegEx = /^\\begin\{(?:(cases|rcases|align|equation|split|gather|CD|multline|smallmatrix)|(|p|b|B|v|V)matrix)\}/;
-const endEnviroRegEx = /^\\end\{(?:(cases|rcases|align|equation|split|gather|CD|multline|smallmatrix)|(|p|b|B|v|V)matrix)\}/;
-const ifRegEx = /^(?:\\(?:mathrm|text|mathrel{\\mathrm){)?(if|otherwise)\b/;
-// eslint-disable-next-line max-len
-const greekAlternatives = "Alpha|Beta|Gamma|Delta|Epsilon|Zeta|Eta|Theta|Iota|Kappa|Lambda|Mu|Nu|Xi|Omicron|Pi|Rho|Sigma|Tau|Upsilon|Phi|Chi|Psi|Omega|alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|omicron|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega|varphi";
-const greekRegEx = RegExp("^\\\\(" + greekAlternatives + ")\\b");
-const mathOperatorRegEx = /^\\(arcsin|arccos|arctan|arctg|arcctg|arg|ch|cos|cosec|cosh|cot|cotg|coth|csc|ctg|cth|deg|dim|exp|hom|ker|lg|ln|log|sec|sin|sinh|sh|sgn|tan|tanh|tg|th|max|min|gcd)\b/;
-// eslint-disable-next-line max-len
-const bracedCharRegEx = RegExp("^\\{([A-Za-z0-9\u0391-\u03c9]|\\\\(" + greekAlternatives + "))\\}");
-const greekLetters = {
-  Alpha: "Α",
-  Beta: "Β",
-  Gamma: "Γ",
-  Delta: "Δ",
-  Epsilon: "Ε",
-  Zeta: "Ζ",
-  Eta: "Η",
-  Theta: "Θ",
-  Iota: "Ι",
-  Kappa: "Κ",
-  Lambda: "Λ",
-  Mu: "Μ",
-  Nu: "Ν",
-  Xi: "Ξ",
-  Omicron: "Ο",
-  Pi: "Π",
-  Rho: "Ρ",
-  Sigma: "Σ",
-  Tau: "Τ",
-  Upsilon: "Υ",
-  Phi: "Φ",
-  Chi: "Χ",
-  Psi: "Ψ",
-  Omega: "Ω",
-  alpha: "α",
-  beta: "β",
-  gamma: "γ",
-  delta: "δ",
-  epsilon: "ε",
-  zeta: "ζ",
-  eta: "η",
-  theta: "θ",
-  iota: "ι",
-  kappa: "κ",
-  lambda: "λ",
-  mu: "μ",
-  nu: "ν",
-  xi: "ξ",
-  omicron: "ο",
-  pi: "π",
-  rho: "ρ",
-  sigma: "σ",
-  tau: "τ",
-  upsilon: "υ",
-  phi: "ϕ",
-  chi: "χ",
-  psi: "ψ",
-  omega: "ω",
-  varphi: "φ"
-};
-const boldRegEx = /^\\mathbf{([A-Za-z])}/;
-
-const matrices = {
-  m: ["{:", ":}"],
-  p: ["(", ")"],
-  b: ["[", "]"],
-  B: ["{", "}"],
-  v: ["|", "|"],
-  V: ["‖", "‖"]
-};
-
-const donotConvert = ["\\begin{CD}"];
-
-const eatOpenBrace = str => {
-  if (str.length === 0) { return ["", true] }
-  let didNotFindBrace = false;
-  if (str[0] === "{") {
-    str = str.slice(1);
-  } else {
-    didNotFindBrace = true;
-  }
-  str = str.replace(leadingSpaceRegEx$2, "");
-  return [str, didNotFindBrace]
-};
-
-const eatMatch = (str, match) => {
-  str = str.slice(match[0].length);
-  str = str.replace(leadingSpaceRegEx$2, "");
-  return str
-};
-
-const tex2Calc = (str, displayMode = false) => {
-  // Variable definitions
-  let calc = "";
-  let token = {};
-  let prevToken = { input: "", output: "", ttype: 50 };
-  const delims = [{ ch: "", pos: -1, type: 0 }] ; // delimiter stack
-  let splitLongVars = true;
-  let waitingForUnbracedArg = false;
-  let justGotUnbracedArg = false;
-
-  // Trim the input string
-  str = str.replace(leadingSpaceRegEx$2, ""); //  trim leading white space
-  str = str.replace(/\s+$/, ""); //             trim trailing white space
-
-  // Execute the main parse loop.
-  while (str.length > 0 || justGotUnbracedArg) {
-    // Get the next token.
-
-    while (str.length > 0 && str.charAt(0) === "\n") {
-      calc += "\n";
-      str = str.replace(leadingSpaceRegEx$2, "");
-    }
-
-    if (justGotUnbracedArg) {
-      token = { input: "", output: "", ttype: tt.RIGHTBRACKET, closeDelim: "" };
-      justGotUnbracedArg = false;
-
-    } else if (str.length > 0 && str.charAt(0) === "'") {
-      // The lexer will not handle an apostrophe properly. Lex it locally.
-      token = { input: "'", output: "′", ttype: tt.PRIME, closeDelim: "" };
-      str = str.slice(1);
-      str = str.replace(leadingSpaceRegEx$2, "");
-
-    } else if (inlineFracRegEx.test(str)) {
-      token = { input: "/", output: "\u2215", ttype: tt.MULT, closeDelim: "" };
-      str = str.slice(1);
-      str = str.replace(leadingSpaceRegEx$2, "");
-
-    } else if (mathOperatorRegEx.test(str)) {
-      const match = mathOperatorRegEx.exec(str);
-      token = { input: match[0], output: match[1], ttype: tt.FUNCTION, closeDelim: "" };
-      str = eatMatch(str, match);
-
-    } else if (greekRegEx.test(str)) {
-      const match = greekRegEx.exec(str);
-      token = {
-        input: match[0],
-        output: greekLetters[match[0].slice(1)],
-        ttype: tt.VAR,
-        closeDelim: ""
-      };
-      str = eatMatch(str, match);
-
-    } else if (delims[delims.length - 1].type === CASES && ifRegEx.test(str)) {
-      const match = ifRegEx.exec(str);
-      const lastChar = calc.trim().slice(-1);
-      if (lastChar === "&" || lastChar === ",") {
-        calc = calc.trim().slice(0, -1);
-      }
-      token = { input: match[0], output: match[1], ttype: tt.LOGIC, closeDelim: "" };
-      str = eatMatch(str, match);
-      if (match[0].indexOf("{") > -1) {
-        str = str.slice(1).trim();
-        const pos = match[0].lastIndexOf("{");
-        if (pos > -1 && pos !== match[0].indexOf("{")) {
-          str = str.slice(1).trim();
-        }
-      }
-
-    } else if (boldRegEx.test(str)) {
-      const match = boldRegEx.exec(str);
-      const codePoint = match[1].codePointAt(0);
-      const offset = codePoint < 91 ? 0x1D3BF : 0x1D3B9;
-      const ch = String.fromCodePoint(codePoint + offset);
-      token = { input: match[0], output: ch, ttype: tt.VAR, closeDelim: "" };
-      str = eatMatch(str, match);
-
-    } else if (enviroRegEx.test(str)) {
-      const match = enviroRegEx.exec(str);
-      if (match[1]) {
-        if (donotConvert.includes(match[0])) { return `"Unable to convert ${match[1]}"` }
-        const posAmp = str.indexOf("&");
-        if (ifRegEx.test(str.slice(posAmp + 1).trim())) {
-          token = { input: match[0], output: "{", ttype: tt.ENVIRONMENT, closeDelim: "}" };
-        } else {
-          token = { input: match[0], output:`\\${match[1]}(`,
-            ttype: tt.ENVIRONMENT, closeDelim: ")" };
-        }
-      } else {
-        const matrixType = match[2] || "m";
-        token = { input: match[0], output: matrices[matrixType][0],
-          ttype: tt.ENVIRONMENT, closeDelim: matrices[matrixType][1] };
-      }
-      str = eatMatch(str, match);
-
-    } else if (endEnviroRegEx.test(str)) {
-      const match = endEnviroRegEx.exec(str);
-      token = { input: match[0], output: match[1], ttype: tt.RIGHTBRACKET, closeDelim: "" };
-      str = eatMatch(str, match);
-
-    } else if (ignoreRegEx.test(str)) {
-      const match = ignoreRegEx.exec(str);
-      str = eatMatch(str, match);
-
-    } else {
-      // Many, many symbols are the same in TeX and in Hurmet calcs.
-      // So we can use the Hurmet lexer to identify them.
-      const tkn = lex(str, { decimalFormat: "10000000.", dateFormat: "yyyy-mm-dd" }, prevToken);
-      if (donotConvert.includes(tkn[0])) { return `'"Unable to convert ${tkn[1]}"` }
-      if (waitingForUnbracedArg && (tkn[3] === tt.LONGVAR || tkn[3] === tt.NUM)) {
-        token = { input: tkn[0][0], output: tkn[2][0], ttype: tkn[3], closeDelim: "" };
-        str = str.slice(1);
-      } else {
-        token = { input: tkn[0], output: tkn[2], ttype: tkn[3], closeDelim: tkn[4] };
-        str = str.slice(token.input.length);
-      }
-      str = str.replace(leadingSpaceRegEx$2, "");
-    }
-
-    switch (token.ttype) {
-      case tt.SPACE: //  spaces and newlines
-        calc += token.output;
-        break
-
-      case tt.MULT: //         inline mult/divide operators, × * · /// ÷
-      case tt.REL: //          relational operators, e.g  < > == →
-      case tt.BIN: //          infix math operators that render but don't calc, e.g. \bowtie
-      case tt.BIG_OPERATOR: // integral, sum, etc
-      case tt.LOGIC: //        if, and, or, ∀, ∃, ∧, ∨, etc
-        calc += token.output + " ";
-        break
-
-      case tt.SUPCHAR:
-        calc = calc.replace(trailingSpaceRegEx$1, "");
-        calc += token.output;
-        break
-
-      case tt.SUB:
-      case tt.SUP: {
-        calc = calc.replace(trailingSpaceRegEx$1, "");
-        calc += token.output;
-        if (token.ttype === tt.SUB && textSubRegEx.test(str)) {
-          const match = textSubRegEx.exec(str);
-          const subscript = match[1] ? match[1] : match[2];
-          calc += subscript + " ";
-          str = str.slice(match[0].length);
-        } else if (str.length > 0 && str.charAt(0) === "{") {
-          [str, waitingForUnbracedArg] = eatOpenBrace(str);
-          delims.push({ ch: ")", pos: calc.length, type: PAREN });
-          calc += "(";
-        }
-        break
-      }
-
-      case tt.ADD: { //        infix add/subtract operators, + -
-        const dType = delims[delims.length - 1].type;
-        if (token.input === "&" && (dType === ENV || dType === CASES)) {
-          calc += ", ";   // Write a comma separator for environments
-        } else {
-          calc += token.output + " ";
-        }
-        break
-      }
-
-      case tt.NUM:
-      case tt.ORD:
-      case tt.VAR: {
-        calc += token.output + " ";
-        if (waitingForUnbracedArg) {
-          justGotUnbracedArg = true;
-          waitingForUnbracedArg = false;
-        }
-        break
-      }
-
-      case tt.LONGVAR:
-        calc += splitLongVars ? token.output.split("").join(" ") + " " : token.output;
-        break
-
-      case tt.FACTORIAL:
-      case tt.PRIME:
-        calc = calc.trim() + token.output + " ";
-        break
-
-      case tt.ACCENT: {
-        if (charAccents[token.input] && bracedCharRegEx.test(str)) {
-          delims.push({ ch: charAccents[token.input], pos: calc.length, type: PAREN });
-          [str, waitingForUnbracedArg] = eatOpenBrace(str);
-        } else {
-          calc += token.output;
-          if (str.length > 0 && str.charAt(0) === "{") {
-            calc += "(";
-            delims.push( { ch: ")", pos: calc.length, type: PAREN });
-            [str, waitingForUnbracedArg] = eatOpenBrace(str);
-          }
-        }
-        break
-      }
-
-      case tt.UNARY: {
-        if (verbatimUnaries.has(token.input)) {
-          const arg = verbatimArg(str);
-          calc += token.input === "\\text"
-            ? '"' + arg + '"'
-            : token.input === "\\mathrm" && arg.length > 1 && arg.indexOf(" ") === -1
-            ? arg
-            : token.input + "(" + arg + ")";
-          if (token.input === "\\mathrm" && waitingForUnbracedArg) {
-            justGotUnbracedArg = true;
-            waitingForUnbracedArg = false;
-          }
-          str = str.slice(arg.length + 2);
-          str = str.replace(leadingSpaceRegEx$2, "");
-        } else if (token.input === "\\sqrt") {
-          if (str.slice(0, 1) === "[") {
-            const root = verbatimArg(str);
-            str = str.slice(root.length + 2);
-            str = str.replace(leadingSpaceRegEx$2, "");
-            calc += (root === "3") ? "∛(" : (root === "4") ? "∜(" : `root(${root})(`;
-          } else {
-            calc += "√(";
-          }
-          delims.push({ ch: ")", pos: calc.length, type: PAREN });
-          [str, waitingForUnbracedArg] = eatOpenBrace(str);
-        } else {
-          calc += token.output + "(";
-          if (str.length > 0 && str.charAt(0) === "{") {
-            delims.push({
-              ch: ")",
-              pos: calc.length,
-              type: token.input === "\\bordermatrix" ? ENV : PAREN
-            });
-          }
-          [str, waitingForUnbracedArg] = eatOpenBrace(str);
-        }
-        break
-      }
-
-      case tt.BINARY: {
-        const pos = calc.length;
-        if (token.input === "\\dfrac" || (token.input === "\\frac" && displayMode)) {
-          calc += "(";
-          delims.push({ ch: ")/(", pos, type: FRAC });
-        } else if (token.input === "\\tfrac" || (token.input === "\\frac" && !displayMode)) {
-          calc += "(";
-          delims.push({ ch: ")//(", pos, type: TFRAC });
-        } else {
-          calc += token.input + "(";
-          delims.push({ ch: ")(", pos, type: BINARY });
-        }        [str, waitingForUnbracedArg] = eatOpenBrace(str);
-        break
-      }
-
-      case tt.DIV: {   // \over, \atop
-        const pos = delims[delims.length - 1].pos;
-        calc = calc.slice(0, pos) + "(" + calc.slice(pos + 1);
-        delims.pop();
-        calc += token.input === "\\over" ? ")/(" : ")" + token.output + "(";
-        delims.push({ ch: ")", pos: calc.length - 1, type: PAREN });
-        break
-      }
-
-      case tt.FUNCTION: {
-        calc += token.output;
-        const pos = calc.length;
-        const match = openParenRegEx$1.exec(str);
-        if (match) {
-          calc += "(";
-          delims.push({ ch: ")", pos, type: PAREN });
-          str = eatMatch(str, match);
-        } else {
-          calc += " ";
-        }
-        break
-      }
-
-      case tt.LEFTBRACKET:
-      case tt.ENVIRONMENT: {
-        delims.push({
-          ch: token.closeDelim,
-          pos: calc.length,
-          type: token.ttype === tt.ENVIRONMENT && token.closeDelim === "}"
-            ? CASES
-            : token.ttype === tt.ENVIRONMENT
-            ? ENV
-            : PAREN
-        });
-        calc += token.output;
-        break
-      }
-
-      case tt.SEP: {
-        const inEnvironment = (delims[delims.length - 1].type === ENV);
-        if ((token.input === "\\\\" || token.input === "\\cr") && inEnvironment) {
-          calc += "; ";
-        } else {
-          calc += (token.input === "&" && inEnvironment) ?  ", " : token.output + " ";
-        }
-        break
-      }
-
-      case tt.RIGHTBRACKET: {
-        // TODO: Check for cases environment and convert to Hurmet IF, if possible
-        const delim = delims.pop();
-        calc = calc.replace(trailingSpaceRegEx$1, "");
-
-        if (delim.type === FRAC || delim.type === TFRAC) {
-          calc += delim.type === FRAC ? ") / (" : ")//(";
-          delims.push({ ch: ")", pos: calc.length - 1, type: PAREN });
-          [str, waitingForUnbracedArg] = eatOpenBrace(str);
-
-        } else if (delim.type === BINARY) {
-          calc += ")(";
-          delims.push({ ch: ")", pos: calc.length - 1, type: PAREN });
-          [str, waitingForUnbracedArg] = eatOpenBrace(str);
-
-        } else {
-          calc += delim.ch + " ";
-        }
-        if (delim.ch === '"' || delim.ch === "") { splitLongVars = true; }
-        break
-      }
-
-      default:
-        calc += token.output;
-    }
-
-    prevToken = cloneToken(token);
-  }
-
-  calc = calc.replace(/ {2,}/g, " "); // Replace multiple spaces with single space.
-  calc = calc.replace(/\s+(?=[_^'′!,;)}\]〗])/g, ""); // Delete spaces before right delims
-  calc = calc.replace(/\s+$/, ""); //                 Delete trailing space
-
-  return calc
-};
-
 const CR_NEWLINE_R = /\r\n?/g;
 const FORMFEED_R = /\f/g;
 const CLASS_R = /(?:^| )\.([a-z-]+)(?: |&|$)/;
@@ -23951,8 +23517,8 @@ const WIDTH_R = /(?:^| )width="?([\d.a-z]+"?)(?: |$)/;
 const ALT_R = /(?:^| )alt="([A-Za-z\d ]+)"(?: |$)/;
 const COL_WIDTHS_R = /(?:^| )colWidths="([^"]*)"/;
 const ID_R = /(?:^| )#([A-Za-z][A-Za-z0-9]*)(?: |$)/;
-const leadingSpaceRegEx$1 = /^ +/;
-const trailingSpaceRegEx = / +$/;
+const leadingSpaceRegEx$2 = /^ +/;
+const trailingSpaceRegEx$1 = / +$/;
 
 // Turn various whitespace into easy-to-process whitespace
 const preprocess = function(source) {
@@ -24136,10 +23702,10 @@ const TABLES = (function() {
     tableRow.forEach(function(node, i) {
       if (node.type === "text") {
         if (i > 0 && tableRow[i - 1].type === "tableSeparator") {
-          node.text = node.text.replace(leadingSpaceRegEx$1, "");
+          node.text = node.text.replace(leadingSpaceRegEx$2, "");
         }
         if (i < tableRow.length - 1) {
-          node.text = node.text.replace(trailingSpaceRegEx, "");
+          node.text = node.text.replace(trailingSpaceRegEx$1, "");
         }
       }
       if (node.type === "tableSeparator") {
@@ -24667,12 +24233,7 @@ rules.set("displayTeX", {
   match: blockRegex(/^ *(?:\$\$\n? *((?:\\[\s\S]|[^\\])+?)\n?\$\$|\\\[\n? *((?:\\[\s\S]|[^\\])+?)\n?\\\]) *(?:\n|$)/),
   parse: function(capture, state) {
     const tex = (capture[1] ? capture[1] : capture[2]).trim();
-    if (state.convertTex) {
-      const entry = tex2Calc(tex, true);
-      return { type: "calculation", attrs: { entry, displayMode: true } }
-    } else {
-      return { type: "tex", attrs: { tex, displayMode: true } }
-    }
+    return { type: "tex", attrs: { tex, displayMode: true } }
   }
 });
 rules.set("newline", {
@@ -24701,12 +24262,7 @@ rules.set("tex", {
   parse: function(capture, state) {
     if (capture[1]) {
       const tex = (capture[1]).trim();
-      if (state.convertTex) {
-        const entry = tex2Calc(tex, true);
-        return { type: "calculation", attrs: { entry, displayMode: true } }
-      } else {
-        return { type: "tex", attrs: { tex, displayMode: true } }
-      }
+      return { type: "tex", attrs: { tex, displayMode: true } }
     } else {
       const tex = (capture[2]
         ? capture[2]
@@ -24715,12 +24271,7 @@ rules.set("tex", {
         : capture[5]
         ? capture[5]
         : capture[6]).trim();
-      if (state.convertTex) {
-        const entry = tex2Calc(tex, false);
-        return { type: "calculation", attrs: { entry, displayMode: false } }
-      } else {
-        return { type: "tex", attrs: { tex, displayMode: false } }
-      }
+      return { type: "tex", attrs: { tex, displayMode: false } }
     }
   }
 });
@@ -25096,7 +24647,7 @@ const inlineMd2ast = md => {
   return ast
 };
 
-const md2ast = (md, inHtml = false, convertTex = false) => {
+const md2ast = (md, inHtml = false) => {
   // First, check for a metadata preamble
   let metadata = false;
   if (metadataRegEx.test(md)) {
@@ -25112,8 +24663,7 @@ const md2ast = (md, inHtml = false, convertTex = false) => {
     _defs: {},
     footnotes: [],
     prevCapture: "",
-    inHtml,
-    convertTex
+    inHtml
   };
   const defRegEx = /\n *\[([^\]\n]+)\]: *([^\n]*) *(?:\n\{([^\n}]*)\})?(?=\n)/gm;
   const footnoteDefRegEx = /\n *\[\^\d+\]: *([^\n]*)(?=\n)/gm;
@@ -26962,7 +26512,7 @@ const testValue = oprnd => {
  */
 
 const varRegEx = /〖[^〗]*〗/;
-const openParenRegEx = /(?:[([{|‖]|[^\\][,;:](?:\\:)?)$/;
+const openParenRegEx$1 = /(?:[([{|‖]|[^\\][,;:](?:\\:)?)$/;
 
 const plugValsIntoEcho = (str, vars, unitAware, formatSpec, formats) => {
   // For each variable name in the echo string, substitute a value.
@@ -27033,7 +26583,7 @@ const plugValsIntoEcho = (str, vars, unitAware, formatSpec, formats) => {
     let isParened = false; // Is the match already nested inside parens?
     if (pos > 0) {
       const pStr = str.slice(0, pos).trim();
-      if (openParenRegEx.test(pStr)) {
+      if (openParenRegEx$1.test(pStr)) {
         const fStr = str.slice(pos + varName.length + 2).trim();
         isParened = fStr.length > 0 && /^([)|‖\]},;:]|\\right)/.test(fStr);
       } else if (/^\\begin{[bp]matrix}/.test(hvar.resultdisplay)) {
@@ -35134,7 +34684,7 @@ const valueFromLiteral = (str, name, formats) => {
 const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/;
 const keywordRegEx = /^(if|elseif|else|return|throw|while|for|break|print|end)(\u2002|\b)/;
 const drawCommandRegEx = /^(title|frame|view|axes|grid|stroke|strokewidth|strokedasharray|fill|fontsize|fontweight|fontstyle|fontfamily|marker|line|path|plot|curve|rect|circle|ellipse|arc|text|dot|leader|dimension)\b/;
-const leadingSpaceRegEx = /^[\t ]+/;
+const leadingSpaceRegEx$1 = /^[\t ]+/;
 const oneLinerRegEx = /^( *)if ([^\n`]+) +(return|throw|print|break)\b([^\n]+)?(?: end)? *\n/gm;
 
 // If you change functionRegEx, then also change it in mathprompt.js.
@@ -35148,7 +34698,7 @@ const lexRegEx = /"[^"]*"|``.*|`[^`]*`|'[^']*'|#|[^"`'#]+/g;
 const testForStatement = str => {
   const pos = str.indexOf("=");
   if (pos === -1) { return false }
-  const leadStr = str.slice(0, pos).replace(leadingSpaceRegEx, "").trim();
+  const leadStr = str.slice(0, pos).replace(leadingSpaceRegEx$1, "").trim();
   if (isValidIdentifier.test(leadStr)) { return true }
   if (leadStr.indexOf(",") === -1) { return false }
   let result = true;
@@ -37810,6 +37360,488 @@ async function hurmet2html(md, title = "", inHtml = false) {
   return html
 }
 
+/*
+ * teXtoCalc.js
+ * This file takes a text string and converts from TeX to Hurmet calculation format.
+*/
+
+// Delimiter types
+const PAREN = 1; // default
+const FRAC = 2;
+const TFRAC = 3;
+const BINARY = 4;
+const ENV = 5;  // environment
+const CASES = 6; // cases environment
+
+const  charAccents = {
+  "\\bar": "\u0304",
+  "\\grave": "\u0300",
+  "\\acute": "\u0301",
+  "\\hat": "\u0302",
+  "\\tilde": "\u0303",
+  "\\dot": "\u0307",
+  "\\ddot": "\u0308",
+  "\\mathring": "\u030A",
+  "\\check": "\u030C",
+  "\\underline": "\u0332",
+  "\\overleftharpoon": "\u20d0",
+  "\\overrightharpoon": "\u20d1",
+  "\\overleftarrow": "\u20d6",
+  "\\vec": "\u20d7",
+  "\\overleftrightarrow": "\u20e1"
+};
+const openParenRegEx = /^ *(?:\\(?:left|big|Big|bigg|Bigg))? *\(/;
+const leadingSpaceRegEx = /^\s+/;
+const trailingSpaceRegEx = / +$/;
+const inlineFracRegEx = /^\/(?!\/)/;
+const ignoreRegEx = /^\\(left(?!\.)|right(?!\.)|middle|big|Big|bigg|Bigg)/;
+const textSubRegEx = /^(?:(?:\\text|\\mathrm)?{([A-Za-z\u0391-\u03c9][A-Za-z0-9\u0391-\u03c9]*)}|{(?:\\text|\\mathrm)\{([A-Za-z\u0391-\u03c9][A-Za-z0-9\u0391-\u03c9]*)}})/;
+const enviroRegEx = /^(?:\\begin\{(?:(align|alignat|array|cases|rcases|subarray|equation|split|gather|CD|multline|smallmatrix)|(|p|b|B|v|V)matrix)\}|(\\bordermatrix)\b)/;
+const endEnviroRegEx = /^\\end\{(?:(align|alignat|array|cases|rcases|subarray|equation|split|gather|CD|multline|smallmatrix)|(|p|b|B|v|V)matrix)\}/;
+const ifRegEx = /^(?:\\(?:mathrm|text|mathrel{\\mathrm){)?(if|otherwise)\b/;
+// eslint-disable-next-line max-len
+const greekAlternatives = "Alpha|Beta|Gamma|Delta|Epsilon|Zeta|Eta|Theta|Iota|Kappa|Lambda|Mu|Nu|Xi|Omicron|Pi|Rho|Sigma|Tau|Upsilon|Phi|Chi|Psi|Omega|alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|omicron|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega|varphi";
+const greekRegEx = RegExp("^\\\\(" + greekAlternatives + ")\\b");
+const mathOperatorRegEx = /^\\(arcsin|arccos|arctan|arctg|arcctg|arg|ch|cos|cosec|cosh|cot|cotg|coth|csc|ctg|cth|deg|dim|exp|hom|ker|lg|ln|log|sec|sin|sinh|sh|sgn|tan|tanh|tg|th|max|min|gcd)\b/;
+// eslint-disable-next-line max-len
+const bracedCharRegEx = RegExp("^\\{([A-Za-z0-9\u0391-\u03c9]|\\\\(" + greekAlternatives + "))\\}");
+const greekLetters = {
+  Alpha: "Α",
+  Beta: "Β",
+  Gamma: "Γ",
+  Delta: "Δ",
+  Epsilon: "Ε",
+  Zeta: "Ζ",
+  Eta: "Η",
+  Theta: "Θ",
+  Iota: "Ι",
+  Kappa: "Κ",
+  Lambda: "Λ",
+  Mu: "Μ",
+  Nu: "Ν",
+  Xi: "Ξ",
+  Omicron: "Ο",
+  Pi: "Π",
+  Rho: "Ρ",
+  Sigma: "Σ",
+  Tau: "Τ",
+  Upsilon: "Υ",
+  Phi: "Φ",
+  Chi: "Χ",
+  Psi: "Ψ",
+  Omega: "Ω",
+  alpha: "α",
+  beta: "β",
+  gamma: "γ",
+  delta: "δ",
+  epsilon: "ε",
+  zeta: "ζ",
+  eta: "η",
+  theta: "θ",
+  iota: "ι",
+  kappa: "κ",
+  lambda: "λ",
+  mu: "μ",
+  nu: "ν",
+  xi: "ξ",
+  omicron: "ο",
+  pi: "π",
+  rho: "ρ",
+  sigma: "σ",
+  tau: "τ",
+  upsilon: "υ",
+  phi: "ϕ",
+  chi: "χ",
+  psi: "ψ",
+  omega: "ω",
+  varphi: "φ"
+};
+const boldRegEx = /^\\mathbf{([A-Za-z])}/;
+
+const matrices = {
+  m: ["{:", ":}"],
+  p: ["(", ")"],
+  b: ["[", "]"],
+  B: ["{", "}"],
+  v: ["|", "|"],
+  V: ["‖", "‖"]
+};
+
+const donotConvert = ["\\begin{CD}"];
+
+const eatOpenBrace = str => {
+  if (str.length === 0) { return ["", true] }
+  let didNotFindBrace = false;
+  if (str[0] === "{") {
+    str = str.slice(1);
+  } else {
+    didNotFindBrace = true;
+  }
+  str = str.replace(leadingSpaceRegEx, "");
+  return [str, didNotFindBrace]
+};
+
+const eatMatch = (str, match) => {
+  str = str.slice(match[0].length);
+  str = str.replace(leadingSpaceRegEx, "");
+  return str
+};
+
+const tex2Calc = (str, displayMode = false) => {
+  // Variable definitions
+  let calc = "";
+  let token = {};
+  let prevToken = { input: "", output: "", ttype: 50 };
+  const delims = [{ ch: "", pos: -1, type: 0 }] ; // delimiter stack
+  let splitLongVars = true;
+  let waitingForUnbracedArg = false;
+  let justGotUnbracedArg = false;
+
+  // Trim the input string
+  str = str.replace(leadingSpaceRegEx, ""); //  trim leading white space
+  str = str.replace(/\s+$/, ""); //             trim trailing white space
+
+  // Execute the main parse loop.
+  while (str.length > 0 || justGotUnbracedArg) {
+    // Get the next token.
+
+    while (str.length > 0 && str.charAt(0) === "\n") {
+      calc += "\n";
+      str = str.replace(leadingSpaceRegEx, "");
+    }
+
+    if (justGotUnbracedArg) {
+      token = { input: "", output: "", ttype: tt.RIGHTBRACKET, closeDelim: "" };
+      justGotUnbracedArg = false;
+
+    } else if (str.length > 0 && str.charAt(0) === "'") {
+      // The lexer will not handle an apostrophe properly. Lex it locally.
+      token = { input: "'", output: "′", ttype: tt.PRIME, closeDelim: "" };
+      str = str.slice(1);
+      str = str.replace(leadingSpaceRegEx, "");
+
+    } else if (inlineFracRegEx.test(str)) {
+      token = { input: "/", output: "\u2215", ttype: tt.MULT, closeDelim: "" };
+      str = str.slice(1);
+      str = str.replace(leadingSpaceRegEx, "");
+
+    } else if (mathOperatorRegEx.test(str)) {
+      const match = mathOperatorRegEx.exec(str);
+      token = { input: match[0], output: match[1], ttype: tt.FUNCTION, closeDelim: "" };
+      str = eatMatch(str, match);
+
+    } else if (greekRegEx.test(str)) {
+      const match = greekRegEx.exec(str);
+      token = {
+        input: match[0],
+        output: greekLetters[match[0].slice(1)],
+        ttype: tt.VAR,
+        closeDelim: ""
+      };
+      str = eatMatch(str, match);
+
+    } else if (delims[delims.length - 1].type === CASES && ifRegEx.test(str)) {
+      const match = ifRegEx.exec(str);
+      const lastChar = calc.trim().slice(-1);
+      if (lastChar === "&" || lastChar === ",") {
+        calc = calc.trim().slice(0, -1);
+      }
+      token = { input: match[0], output: match[1], ttype: tt.LOGIC, closeDelim: "" };
+      str = eatMatch(str, match);
+      if (match[0].indexOf("{") > -1) {
+        str = str.slice(1).trim();
+        const pos = match[0].lastIndexOf("{");
+        if (pos > -1 && pos !== match[0].indexOf("{")) {
+          str = str.slice(1).trim();
+        }
+      }
+
+    } else if (boldRegEx.test(str)) {
+      const match = boldRegEx.exec(str);
+      const codePoint = match[1].codePointAt(0);
+      const offset = codePoint < 91 ? 0x1D3BF : 0x1D3B9;
+      const ch = String.fromCodePoint(codePoint + offset);
+      token = { input: match[0], output: ch, ttype: tt.VAR, closeDelim: "" };
+      str = eatMatch(str, match);
+
+    } else if (enviroRegEx.test(str)) {
+      const match = enviroRegEx.exec(str);
+      if (match[1]) {
+        if (donotConvert.includes(match[0])) { return `"Unable to convert ${match[1]}"` }
+        const posAmp = str.indexOf("&");
+        if (ifRegEx.test(str.slice(posAmp + 1).trim())) {
+          // Change a TeX cases environment to a Hurmet { if } statement
+          token = { input: match[0], output: "{", ttype: tt.ENVIRONMENT, closeDelim: "}" };
+        } else {
+          token = { input: match[0], output:`\\${match[1]}`,
+            ttype: tt.ENVIRONMENT, closeDelim: ")" };
+        }
+      } else if (match[2]) {
+        const matrixType = match[2] || "m";
+        token = { input: match[0], output: matrices[matrixType][0],
+          ttype: tt.ENVIRONMENT, closeDelim: matrices[matrixType][1] };
+      } else {
+        // \bordermatrix
+        token = { input: match[0], output: match[3], ttype: tt.ENVIRONMENT, closeDelim: ")" };
+      }
+      str = eatMatch(str, match);
+
+    } else if (endEnviroRegEx.test(str)) {
+      const match = endEnviroRegEx.exec(str);
+      token = { input: match[0], output: match[1], ttype: tt.RIGHTBRACKET, closeDelim: "" };
+      str = eatMatch(str, match);
+
+    } else if (ignoreRegEx.test(str)) {
+      const match = ignoreRegEx.exec(str);
+      str = eatMatch(str, match);
+
+    } else {
+      // Many, many symbols are the same in TeX and in Hurmet calcs.
+      // So we can use the Hurmet lexer to identify them.
+      const tkn = lex(str, { decimalFormat: "10000000.", dateFormat: "yyyy-mm-dd" }, prevToken);
+      if (donotConvert.includes(tkn[0])) { return `'"Unable to convert ${tkn[1]}"` }
+      if (waitingForUnbracedArg && (tkn[3] === tt.LONGVAR || tkn[3] === tt.NUM)) {
+        token = { input: tkn[0][0], output: tkn[2][0], ttype: tkn[3], closeDelim: "" };
+        str = str.slice(1);
+      } else {
+        token = { input: tkn[0], output: tkn[2], ttype: tkn[3], closeDelim: tkn[4] };
+        str = str.slice(token.input.length);
+      }
+      str = str.replace(leadingSpaceRegEx, "");
+    }
+
+    switch (token.ttype) {
+      case tt.SPACE: //  spaces and newlines
+        calc += token.output;
+        break
+
+      case tt.MULT: //         inline mult/divide operators, × * · /// ÷
+      case tt.REL: //          relational operators, e.g  < > == →
+      case tt.BIN: //          infix math operators that render but don't calc, e.g. \bowtie
+      case tt.BIG_OPERATOR: // integral, sum, etc
+      case tt.LOGIC: //        if, and, or, ∀, ∃, ∧, ∨, etc
+        calc += token.output + " ";
+        break
+
+      case tt.SUPCHAR:
+        calc = calc.replace(trailingSpaceRegEx, "");
+        calc += token.output;
+        break
+
+      case tt.SUB:
+      case tt.SUP: {
+        calc = calc.replace(trailingSpaceRegEx, "");
+        calc += token.output;
+        if (token.ttype === tt.SUB && textSubRegEx.test(str)) {
+          const match = textSubRegEx.exec(str);
+          const subscript = match[1] ? match[1] : match[2];
+          calc += subscript + " ";
+          str = str.slice(match[0].length);
+        } else if (str.length > 0 && str.charAt(0) === "{") {
+          [str, waitingForUnbracedArg] = eatOpenBrace(str);
+          delims.push({ ch: ")", pos: calc.length, type: PAREN });
+          calc += "(";
+        }
+        break
+      }
+
+      case tt.ADD: { //        infix add/subtract operators, + -
+        const dType = delims[delims.length - 1].type;
+        if (token.input === "&" && (dType === ENV || dType === CASES)) {
+          calc += ", ";   // Write a comma separator for environments
+        } else {
+          calc += token.output + " ";
+        }
+        break
+      }
+
+      case tt.NUM:
+      case tt.ORD:
+      case tt.VAR: {
+        calc += token.output + " ";
+        if (waitingForUnbracedArg) {
+          justGotUnbracedArg = true;
+          waitingForUnbracedArg = false;
+        }
+        break
+      }
+
+      case tt.LONGVAR:
+        calc += splitLongVars ? token.output.split("").join(" ") + " " : token.output;
+        break
+
+      case tt.FACTORIAL:
+      case tt.PRIME:
+        calc = calc.trim() + token.output + " ";
+        break
+
+      case tt.ACCENT: {
+        if (charAccents[token.input] && bracedCharRegEx.test(str)) {
+          delims.push({ ch: charAccents[token.input], pos: calc.length, type: PAREN });
+          [str, waitingForUnbracedArg] = eatOpenBrace(str);
+        } else {
+          calc += token.output;
+          if (str.length > 0 && str.charAt(0) === "{") {
+            calc += "(";
+            delims.push( { ch: ")", pos: calc.length, type: PAREN });
+            [str, waitingForUnbracedArg] = eatOpenBrace(str);
+          }
+        }
+        break
+      }
+
+      case tt.UNARY: {
+        if (verbatims.has(token.input)) {
+          const arg = verbatimArg(str);
+          calc += token.input === "\\text"
+            ? '"' + arg + '"'
+            : token.input === "\\mathrm" && arg.length > 1 && arg.indexOf(" ") === -1
+            ? arg
+            : token.input + "(" + arg + ")";
+          if (token.input === "\\mathrm" && waitingForUnbracedArg) {
+            justGotUnbracedArg = true;
+            waitingForUnbracedArg = false;
+          }
+          str = str.slice(arg.length + 2);
+          str = str.replace(leadingSpaceRegEx, "");
+        } else if (token.input === "\\sqrt") {
+          if (str.slice(0, 1) === "[") {
+            const root = verbatimArg(str);
+            str = str.slice(root.length + 2);
+            str = str.replace(leadingSpaceRegEx, "");
+            calc += (root === "3") ? "∛(" : (root === "4") ? "∜(" : `root(${root})(`;
+          } else {
+            calc += "√(";
+          }
+          delims.push({ ch: ")", pos: calc.length, type: PAREN });
+          [str, waitingForUnbracedArg] = eatOpenBrace(str);
+        } else {
+          calc += token.output + "(";
+          if (str.length > 0 && str.charAt(0) === "{") {
+            delims.push({
+              ch: ")",
+              pos: calc.length,
+              type: token.input === PAREN
+            });
+          }
+          [str, waitingForUnbracedArg] = eatOpenBrace(str);
+        }
+        break
+      }
+
+      case tt.BINARY: {
+        const pos = calc.length;
+        if (token.input === "\\dfrac" || (token.input === "\\frac" && displayMode)) {
+          calc += "(";
+          delims.push({ ch: ")/(", pos, type: FRAC });
+        } else if (token.input === "\\tfrac" || (token.input === "\\frac" && !displayMode)) {
+          calc += "(";
+          delims.push({ ch: ")//(", pos, type: TFRAC });
+        } else {
+          calc += token.input + "(";
+          delims.push({ ch: ")(", pos, type: BINARY });
+        }
+        [str, waitingForUnbracedArg] = eatOpenBrace(str);
+        break
+      }
+
+      case tt.DIV: {   // \over, \atop
+        const pos = delims[delims.length - 1].pos;
+        calc = calc.slice(0, pos) + "(" + calc.slice(pos + 1);
+        delims.pop();
+        calc += token.input === "\\over" ? ")/(" : ")" + token.output + "(";
+        delims.push({ ch: ")", pos: calc.length - 1, type: PAREN });
+        break
+      }
+
+      case tt.FUNCTION: {
+        calc += token.output;
+        const pos = calc.length;
+        const match = openParenRegEx.exec(str);
+        if (match) {
+          calc += "(";
+          delims.push({ ch: ")", pos, type: PAREN });
+          str = eatMatch(str, match);
+        } else {
+          calc += " ";
+        }
+        break
+      }
+
+      case tt.LEFTBRACKET:
+      case tt.ENVIRONMENT: {
+        delims.push({
+          ch: token.closeDelim,
+          pos: calc.length,
+          type: token.input === "\\bordermatrix"
+            ? ENV
+            : token.ttype === tt.ENVIRONMENT && token.closeDelim === "}"
+            ? CASES
+            : token.ttype === tt.ENVIRONMENT
+            ? ENV
+            : PAREN
+        });
+        calc += token.output;
+        if (verbatims.has(token.output) ||
+          (token.output === "\\bordermatrix" && str.slice(0, 1) === "[")) {
+          const arg = verbatimArg(str);
+          calc += token.output === "\\bordermatrix" ? "[" + arg + "]" : "(" + arg + ")";
+          str = str.slice(arg.length + 2);
+          str = str.replace(leadingSpaceRegEx, "");
+        }
+        if (token.output === "\\bordermatrix") {
+          str = str.slice(1);
+          str = str.replace(leadingSpaceRegEx, "");
+        }
+        if (token.output.slice(0, 1) === "\\") { calc += "("; }
+        break
+      }
+
+      case tt.SEP: {
+        const inEnvironment = (delims[delims.length - 1].type === ENV);
+        if ((token.input === "\\\\" || token.input === "\\cr") && inEnvironment) {
+          calc += "; ";
+        } else {
+          calc += (token.input === "&" && inEnvironment) ?  ", " : token.output + " ";
+        }
+        break
+      }
+
+      case tt.RIGHTBRACKET: {
+        const delim = delims.pop();
+        calc = calc.replace(trailingSpaceRegEx, "");
+
+        if (delim.type === FRAC || delim.type === TFRAC) {
+          calc += delim.type === FRAC ? ") / (" : ")//(";
+          delims.push({ ch: ")", pos: calc.length - 1, type: PAREN });
+          [str, waitingForUnbracedArg] = eatOpenBrace(str);
+
+        } else if (delim.type === BINARY) {
+          calc += ")(";
+          delims.push({ ch: ")", pos: calc.length - 1, type: PAREN });
+          [str, waitingForUnbracedArg] = eatOpenBrace(str);
+
+        } else {
+          calc += delim.ch + " ";
+        }
+        if (delim.ch === '"' || delim.ch === "") { splitLongVars = true; }
+        break
+      }
+
+      default:
+        calc += token.output;
+    }
+
+    prevToken = cloneToken(token);
+  }
+
+  calc = calc.replace(/ {2,}/g, " "); // Replace multiple spaces with single space.
+  calc = calc.replace(/\s+(?=[_^'′!,;)}\]〗])/g, ""); // Delete spaces before right delims
+  calc = calc.replace(/\s+$/, ""); //                 Delete trailing space
+
+  return calc
+};
+
 /**
  * This is the ParseError class, which is the main error thrown by Temml
  * functions when something has gone wrong. This is used to distinguish internal
@@ -38993,9 +39025,6 @@ defineSymbol(math, textord, "\u29eb", "\\blacklozenge");
 defineSymbol(math, textord, "\u2605", "\\bigstar");
 defineSymbol(math, textord, "\u2222", "\\sphericalangle", true);
 defineSymbol(math, textord, "\u2201", "\\complement", true);
-// unicode-math maps U+F0 to \matheth. We map to AMS function \eth
-defineSymbol(math, textord, "\u00f0", "\\eth", true);
-defineSymbol(text, textord, "\u00f0", "\u00f0");
 defineSymbol(math, textord, "\u2571", "\\diagup");
 defineSymbol(math, textord, "\u2572", "\\diagdown");
 defineSymbol(math, textord, "\u25a1", "\\square");
@@ -39355,6 +39384,46 @@ defineSymbol(math, mathord, "\u03e1", "\\sampi", true);
 defineSymbol(math, mathord, "\u03da", "\\Stigma", true);
 defineSymbol(math, mathord, "\u03db", "\\stigma", true);
 defineSymbol(math, mathord, "\u2aeb", "\\Bot");
+
+// unicode-math maps U+F0 to \matheth. We map to AMS function \eth
+defineSymbol(math, textord, "\u00f0", "\\eth", true); // ð
+defineSymbol(text, textord, "\u00f0", "\u00f0");
+// Extended ASCII and non-ASCII Letters
+defineSymbol(math, textord, "\u00C5", "\\AA"); // Å
+defineSymbol(text, textord, "\u00C5", "\\AA", true);
+defineSymbol(math, textord, "\u00C6", "\\AE", true); // Æ
+defineSymbol(text, textord, "\u00C6", "\\AE", true);
+defineSymbol(math, textord, "\u00D0", "\\DH", true); // Ð
+defineSymbol(text, textord, "\u00D0", "\\DH", true);
+defineSymbol(math, textord, "\u00DE", "\\TH", true); // Þ
+defineSymbol(text, textord, "\u00DE", "\\TH", true);
+defineSymbol(math, textord, "\u00DF", "\\ss", true); // ß
+defineSymbol(text, textord, "\u00DF", "\\ss", true);
+defineSymbol(math, textord, "\u00E5", "\\aa"); // å
+defineSymbol(text, textord, "\u00E5", "\\aa", true);
+defineSymbol(math, textord, "\u00E6", "\\ae", true); // æ
+defineSymbol(text, textord, "\u00E6", "\\ae", true);
+defineSymbol(math, textord, "\u00F0", "\\dh"); // ð
+defineSymbol(text, textord, "\u00F0", "\\dh", true);
+defineSymbol(math, textord, "\u00FE", "\\th", true); // þ
+defineSymbol(text, textord, "\u00FE", "\\th", true);
+defineSymbol(math, textord, "\u0110", "\\DJ", true); // Đ
+defineSymbol(text, textord, "\u0110", "\\DJ", true);
+defineSymbol(math, textord, "\u0111", "\\dj", true); // đ
+defineSymbol(text, textord, "\u0111", "\\dj", true);
+defineSymbol(math, textord, "\u0141", "\\L", true); // Ł
+defineSymbol(text, textord, "\u0141", "\\L", true);
+defineSymbol(math, textord, "\u0141", "\\l", true); // ł
+defineSymbol(text, textord, "\u0141", "\\l", true);
+defineSymbol(math, textord, "\u014A", "\\NG", true); // Ŋ
+defineSymbol(text, textord, "\u014A", "\\NG", true);
+defineSymbol(math, textord, "\u014B", "\\ng", true); // ŋ
+defineSymbol(text, textord, "\u014B", "\\ng", true);
+defineSymbol(math, textord, "\u0152", "\\OE", true); // Œ
+defineSymbol(text, textord, "\u0152", "\\OE", true);
+defineSymbol(math, textord, "\u0153", "\\oe", true); // œ
+defineSymbol(text, textord, "\u0153", "\\oe", true);
+
 defineSymbol(math, bin, "\u2217", "\u2217", true);
 defineSymbol(math, bin, "+", "+");
 defineSymbol(math, bin, "\u2217", "*");
@@ -39563,13 +39632,8 @@ defineSymbol(math, textord, "\u0131", "\u0131");
 defineSymbol(math, textord, "\u0237", "\u0237");
 defineSymbol(text, textord, "\u0131", "\\i", true);
 defineSymbol(text, textord, "\u0237", "\\j", true);
-defineSymbol(text, textord, "\u00df", "\\ss", true);
-defineSymbol(text, textord, "\u00e6", "\\ae", true);
-defineSymbol(text, textord, "\u0153", "\\oe", true);
 defineSymbol(text, textord, "\u00f8", "\\o", true);
 defineSymbol(math, mathord, "\u00f8", "\\o", true);
-defineSymbol(text, textord, "\u00c6", "\\AE", true);
-defineSymbol(text, textord, "\u0152", "\\OE", true);
 defineSymbol(text, textord, "\u00d8", "\\O", true);
 defineSymbol(math, mathord, "\u00d8", "\\O", true);
 defineSymbol(text, accent, "\u02ca", "\\'"); // acute
@@ -44228,7 +44292,7 @@ const mathmlBuilder$9 = function(group, style) {
     const numColumns = group.body[0].length;
     // Fill out a short row with empty <mtd> elements.
     for (let k = 0; k < numColumns - rw.length; k++) {
-      row.push(new mathMLTree.MathNode("mtd", [], style));
+      row.push(new mathMLTree.MathNode("mtd", [], [], style));
     }
     if (group.autoTag) {
       const tag = group.tags[i];
@@ -44688,7 +44752,9 @@ defineEnvironment({
       }
     }
     const res = parseArray(context.parser, payload, "text");
-    res.cols = new Array(res.body[0].length).fill({ type: "align", align: colAlign });
+    res.cols = res.body.length > 0
+      ? new Array(res.body[0].length).fill({ type: "align", align: colAlign })
+      : [];
     const [arraystretch, arraycolsep] = arrayGaps(context.parser.gullet.macros);
     res.arraystretch = arraystretch;
     if (arraycolsep && !(arraycolsep === 6 && arraycolsep === "pt")) {
@@ -44717,7 +44783,9 @@ defineEnvironment({
   handler(context) {
     const payload = { cols: [], envClasses: ["bordermatrix"] };
     const res = parseArray(context.parser, payload, "text");
-    res.cols = new Array(res.body[0].length).fill({ type: "align", align: "c" });
+    res.cols = res.body.length > 0
+      ? new Array(res.body[0].length).fill({ type: "align", align: "c" })
+      : [];
     res.envClasses = [];
     res.arraystretch = 1;
     if (context.envName === "matrix") { return res}
@@ -45151,6 +45219,9 @@ const mathmlBuilder$8 = (group, style) => {
   // So instead of wrapping the group in an <mstyle>, we apply
   // the color individually to each node and return a document fragment.
   let expr = buildExpression(group.body, style.withColor(group.color));
+  if (expr.length === 0) {
+    expr.push(new mathMLTree.MathNode("mrow"));
+  }
   expr = expr.map(e => {
     e.style.color = group.color;
     return e
@@ -46237,17 +46308,20 @@ const mathmlBuilder$6 = (group, style) => {
   // Check if it is possible to consolidate elements into a single <mi> element.
   if (isLongVariableName(group, font)) {
     // This is a \mathrm{…} group. It gets special treatment because symbolsOrd.js
-    // wraps <mi> elements with <mrow>s to work around a Firefox bug.
-    const mi = mathGroup.children[0].children[0];
+    // wraps <mi> elements with <mpadded>s to work around a Firefox bug.
+    const mi = mathGroup.children[0].children[0].children
+      ? mathGroup.children[0].children[0]
+      : mathGroup.children[0];
     delete mi.attributes.mathvariant;
     for (let i = 1; i < mathGroup.children.length; i++) {
-      mi.children[0].text += mathGroup.children[i].type === "mn"
-        ? mathGroup.children[i].children[0].text
-        : mathGroup.children[i].children[0].children[0].text;
+      mi.children[0].text += mathGroup.children[i].children[0].children
+        ? mathGroup.children[i].children[0].children[0].text
+        : mathGroup.children[i].children[0].text;
     }
-    // Wrap in a <mrow> to prevent the same Firefox bug.
-    const bogus = new mathMLTree.MathNode("mtext", new mathMLTree.TextNode("\u200b"));
-    return new mathMLTree.MathNode("mrow", [bogus, mi])
+    // Wrap in a <mpadded> to prevent the same Firefox bug.
+    const mpadded = new mathMLTree.MathNode("mpadded", [mi]);
+    mpadded.setAttribute("lspace", "0");
+    return mpadded
   }
   let canConsolidate = mathGroup.children[0].type === "mo";
   for (let i = 1; i < mathGroup.children.length; i++) {
@@ -47737,8 +47811,13 @@ defineFunction({
     "\u2a00",
     "\u2a01",
     "\u2a02",
+    "\u2a03",
     "\u2a04",
-    "\u2a06"
+    "\u2a05",
+    "\u2a06",
+    "\u2a07",
+    "\u2a08",
+    "\u2a09"
   ],
   props: {
     numArgs: 0
@@ -49159,7 +49238,6 @@ defineFunctionBuilders({
         // A Firefox bug will apply spacing here, but there should be none. Fix it.
         node = new mathMLTree.MathNode("mpadded", [node]);
         node.setAttribute("lspace", "0");
-        node.setAttribute("rspace", "0");
       }
     }
     return node
@@ -51711,7 +51789,7 @@ class Style {
  * https://mit-license.org/
  */
 
-const version = "0.11.02";
+const version = "0.11.03";
 
 function postProcess(block) {
   const labelMap = {};
@@ -58044,7 +58122,13 @@ const boldPrevChar = preText => {
 
 
 const highlight = (editor) => {
-  const code = editor.textContent.replace(/\t/gm, '<span style="background-color: lemonchiffon">\t</span>');
+  const code = editor.textContent
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;")
+    .replace(/\t/gm, '<span style="background-color: lemonchiffon">\t</span>');
   editor.innerHTML = code;
 };
 
@@ -58125,7 +58209,6 @@ const codeJar = (editor, isMathPrompt) => {
 
   ;on("paste", event => {
     handlePaste(event);
-    if (callback) callback(toString());
   });
 
   function save() {
@@ -58926,7 +59009,7 @@ function pmSetup(options) {
     } }),
     new Plugin({ props: { clipboardTextParser(text, _, plain) {
       if (plain) { return text }
-      const ast = hurmet.md2ast(text, false, false);
+      const ast = hurmet.md2ast(text, false);
       return schema.nodeFromJSON({ type: "fragment", content: ast })
     } } })
   ]
