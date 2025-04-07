@@ -108,5 +108,5 @@ will immediately recalculate all the dependencies.
 
 Hurmet makes it easy to co-author with a chatbot. Hurmet’s native file format is
 Markdown, a light-weight markup format. Chatbots know Markdown well. Just tell
-your chatbot to write its work in Markdown. Then copy it and invoke the
-**M▾|Paste from Markdown** command.
+your chatbot to write its work in Markdown. Then copy it and paste into your
+document with Ctrl-V.
