@@ -226,7 +226,7 @@ const hurmetNodes =  {
       state.closeBlock(figureCaption)
       const L = state.out.length
       const table = node.content.content[1];
-      const float = node.attrs.class.trim()
+      const float = node.attrs.class ? node.attrs.class.trim() : "auto"
       state.renderTable(table, state.delim, float, state.isGFM)
       state.closeBlock(table)
       // Get rid of the newline between the caption and the table.
