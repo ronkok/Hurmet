@@ -13924,7 +13924,7 @@ function locateDiagrams(beam, extremes) {
   const momentMin = beam.convention === 1 ? Math.abs(mMin) : mMax;
   let yM = momentMax > 0.0005
     ? botOfV + 12 + momentMax * mScale + 40
-    : botOfV + 12;
+    : botOfV + 12 + 40;
   yM = Math.round(yM);
   let yMax = yM;
 
@@ -13940,7 +13940,7 @@ function locateDiagrams(beam, extremes) {
     const botOfM = momentMin > (0.05 * momentMax)
       ? yM + momentMin * mScale + 14
       : yM + 14;
-    yDeflection = botOfM + 60 + deflectionMax * deflectionScale;
+    yDeflection = botOfM + 40 + deflectionMax * deflectionScale;
     yDeflection = Math.round(yDeflection);
     yMax = yDeflection;
     if (Math.abs(deflectionMin) > 0.2 * (deflectionMax - deflectionMin)) {
@@ -14324,7 +14324,7 @@ function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combinations
       xText = beam.xDiagram + beam.xScale * xDeflectionMax;
       yText = yDeflection - deflectionScale * deflectionMax - 2;
       if (beam.SI) {
-        sText = round$1(deflectionMax * f, 1) + " mm";
+        sText = (deflectionMax * f).toFixed(0) + " mm";
       } else {
         sText = round$1(deflectionMax * f, 2) + '″';
       }
@@ -14334,7 +14334,7 @@ function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combinations
       xText = beam.xDiagram + beam.xScale * xDeflectionMin;
       yText = yDeflection - deflectionScale * deflectionMin + 13;
       if (beam.SI) {
-        sText = round$1(f * deflectionMin, 1) + " mm";
+        sText = (f * deflectionMin).toFixed(0) + " mm";
       } else {
         sText = round$1(f * deflectionMin, 2) + '″';
       }

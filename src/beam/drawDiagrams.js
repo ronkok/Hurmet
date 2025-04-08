@@ -371,7 +371,7 @@ export function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combi
       xText = beam.xDiagram + beam.xScale * xDeflectionMax
       yText = yDeflection - deflectionScale * deflectionMax - 2
       if (beam.SI) {
-        sText = round(deflectionMax * f, 1) + " mm"
+        sText = (deflectionMax * f).toFixed(0) + " mm"
       } else {
         sText = round(deflectionMax * f, 2) + '″'
       }
@@ -381,7 +381,7 @@ export function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combi
       xText = beam.xDiagram + beam.xScale * xDeflectionMin
       yText = yDeflection - deflectionScale * deflectionMin + 13
       if (beam.SI) {
-        sText = round(f * deflectionMin, 1) + " mm"
+        sText = (f * deflectionMin).toFixed(0) + " mm"
       } else {
         sText = round(f * deflectionMin, 2) + '″'
       }
