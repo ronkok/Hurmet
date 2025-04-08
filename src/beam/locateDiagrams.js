@@ -19,7 +19,7 @@ export function locateDiagrams(beam, extremes) {
   const momentMin = beam.convention === 1 ? Math.abs(mMin) : mMax
   let yM = momentMax > 0.0005
     ? botOfV + 12 + momentMax * mScale + 40
-    : botOfV + 12 + 35
+    : botOfV + 12 + 40
   yM = Math.round(yM)
   let yMax = yM
 
