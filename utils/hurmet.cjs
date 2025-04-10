@@ -4377,16 +4377,22 @@ const texFunctions = Object.freeze({
   "\\qquad": ["\\qquad", "\\qquad", "\\qquad", tt.SPACE, ""],
   "\\align": ["\\align", "\\begin{align}", "\\align", tt.ENVIRONMENT, "\\end{align}"],
   /* eslint-disable max-len */
+  "\\aligned": ["\\aligned", "\\begin{aligned}", "\\aligned", tt.ENVIRONMENT, "\\end{aligned}"],
   "\\alignat": ["\\alignat", "\\begin{alignat}", "\\alignat", tt.ENVIRONMENT, "\\end{alignat}"],
+  "\\alignedat": ["\\alignedat", "\\begin{alignedat}", "\\alignedat", tt.ENVIRONMENT, "\\end{alignedat}"],
   "\\array": ["\\array", "\\begin{array}", "\\array", tt.ENVIRONMENT, "\\end{array}"],
+  "\\darray": ["\\darray", "\\begin{darray}", "\\darray", tt.ENVIRONMENT, "\\end{darray}"],
   "\\subarray": ["\\subarray", "\\begin{subarray}", "\\subarray", tt.ENVIRONMENT, "\\end{subarray}"],
   "\\cases": ["\\cases", "\\begin{cases}", "\\cases", tt.ENVIRONMENT, "\\end{cases}"],
+  "\\dcases": ["\\dcases", "\\begin{dcases}", "\\dcases", tt.ENVIRONMENT, "\\end{dcases}"],
   "\\rcases": ["\\rcases", "\\begin{rcases}", "\\rcases", tt.ENVIRONMENT, "\\end{rcases}"],
+  "\\drcases": ["\\drcases", "\\begin{drcases}", "\\drcases", tt.ENVIRONMENT, "\\end{drcases}"],
   "\\smallmatrix": ["\\smallmatrix", "\\begin{smallmatrix}", "\\smallmatrix", tt.ENVIRONMENT, "\\end{smallmatrix}"],
   "\\bordermatrix": ["\\bordermatrix", "\\bordermatrix", "\\bordermatrix", tt.ENVIRONMENT, "}"],
   "\\equation": ["\\equation", "\\begin{equation}", "\\equation", tt.ENVIRONMENT, "\\end{equation}"],
   "\\split": ["\\split", "\\begin{split}", "\\split", tt.ENVIRONMENT, "\\end{split}"],
   "\\gather": ["\\gather", "\\begin{gather}", "\\gather", tt.ENVIRONMENT, "\\end{gather}"],
+  "\\gathered": ["\\gathered", "\\begin{gathered}", "\\gathered", tt.ENVIRONMENT, "\\end{gathered}"],
   "\\CD": ["\\CD", "\\begin{CD}", "\\CD", tt.ENVIRONMENT, "\\end{CD}"],
   "\\multline": ["\\multline", "\\begin{multline}", "\\multline", tt.ENVIRONMENT, "\\end{multline}"]
   /* eslint-enable max-len */
@@ -4999,8 +5005,9 @@ const builtInReducerFunctions = new Set(["accumulate", "beamDiagram", "dataframe
 const trigFunctions = new Set(["cos", "cosd", "cot", "cotd", "csc", "cscd", "sec", "secd",
   "sin", "sind", "tand", "tan"]);
 
-const verbatims = new Set(["\\alignat", "\\array", "\\ce", "\\color", "\\colorbox",
-  "\\label", "\\mathrm", "\\pu", "\\subarray", "\\tag", "\\text", "\\textcolor"]);
+const verbatims = new Set(["\\alignat", "\\alignedat", "\\array", "\\darray", "\\ce",
+  "\\color", "\\colorbox", "\\label", "\\mathrm", "\\pu", "\\subarray", "\\tag", "\\text",
+  "\\textcolor"]);
 
 const rationalRPN = numStr => {
   // Return a representation of a rational number that is recognized by evalRPN().
@@ -6046,7 +6053,7 @@ const parse$1 = (
         posOfPrevRun = tex.length;
         if (verbatims.has(token.input)) {
           const arg = verbatimArg(str);
-          tex += token.output + arg + "}";
+          tex += token.output + "{" + arg + "}";
           str = str.slice(arg.length + 2);
           str = str.replace(leadingSpaceRegEx$3, "");
           token.ttype = tt.RIGHTBRACKET;
@@ -18682,8 +18689,8 @@ const trailingSpaceRegEx = / +$/;
 const inlineFracRegEx = /^\/(?!\/)/;
 const ignoreRegEx = /^\\(left(?!\.)|right(?!\.)|middle|big|Big|bigg|Bigg)/;
 const textSubRegEx = /^(?:(?:\\text|\\mathrm)?{([A-Za-z\u0391-\u03c9][A-Za-z0-9\u0391-\u03c9]*)}|{(?:\\text|\\mathrm)\{([A-Za-z\u0391-\u03c9][A-Za-z0-9\u0391-\u03c9]*)}})/;
-const enviroRegEx = /^(?:\\begin\{(?:(align|alignat|array|cases|rcases|subarray|equation|split|gather|CD|multline|smallmatrix)|(|p|b|B|v|V)matrix)\}|(\\bordermatrix)\b)/;
-const endEnviroRegEx = /^\\end\{(?:(align|alignat|array|cases|rcases|subarray|equation|split|gather|CD|multline|smallmatrix)|(|p|b|B|v|V)matrix)\}/;
+const enviroRegEx = /^(?:\\begin\{(?:(align(?:ed)?|align(?:ed)?at|d?array|d?cases|d?rcases|subarray|equation|split|gather(?:ed)?|CD|multline|smallmatrix)|(|p|b|B|v|V)matrix)\}|(\\bordermatrix)\b)/;
+const endEnviroRegEx = /^\\end\{(?:(align(?:ed)?|align(?:ed)?at|d?array|d?cases|d?rcases|subarray|equation|split|gather(?:ed)?|CD|multline|smallmatrix)|(|p|b|B|v|V)matrix)\}/;
 const ifRegEx = /^(?:\\(?:mathrm|text|mathrel{\\mathrm){)?(if|otherwise)\b/;
 // eslint-disable-next-line max-len
 const greekAlternatives = "Alpha|Beta|Gamma|Delta|Epsilon|Zeta|Eta|Theta|Iota|Kappa|Lambda|Mu|Nu|Xi|Omicron|Pi|Rho|Sigma|Tau|Upsilon|Phi|Chi|Psi|Omega|alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|omicron|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega|varphi";
@@ -18774,7 +18781,6 @@ const eatMatch = (str, match) => {
 };
 
 const tex2Calc = (str, displayMode = false) => {
-  // Variable definitions
   let calc = "";
   let token = {};
   let prevToken = { input: "", output: "", ttype: 50 };
@@ -18801,7 +18807,7 @@ const tex2Calc = (str, displayMode = false) => {
       justGotUnbracedArg = false;
 
     } else if (str.length > 0 && str.charAt(0) === "'") {
-      // The lexer will not handle an apostrophe properly. Lex it locally.
+      // The Hurmet lexer will not handle an apostrophe properly. Lex it locally.
       token = { input: "'", output: "′", ttype: tt.PRIME, closeDelim: "" };
       str = str.slice(1);
       str = str.replace(leadingSpaceRegEx, "");
@@ -18855,7 +18861,7 @@ const tex2Calc = (str, displayMode = false) => {
       if (match[1]) {
         if (donotConvert.includes(match[0])) { return `"Unable to convert ${match[1]}"` }
         const posAmp = str.indexOf("&");
-        if (ifRegEx.test(str.slice(posAmp + 1).trim())) {
+        if (match[1] === "cases" && ifRegEx.test(str.slice(posAmp + 1).trim())) {
           // Change a TeX cases environment to a Hurmet { if } statement
           token = { input: match[0], output: "{", ttype: tt.ENVIRONMENT, closeDelim: "}" };
         } else {
@@ -19007,7 +19013,7 @@ const tex2Calc = (str, displayMode = false) => {
             delims.push({
               ch: ")",
               pos: calc.length,
-              type: token.input === PAREN
+              type: PAREN
             });
           }
           [str, waitingForUnbracedArg] = eatOpenBrace(str);
@@ -19023,6 +19029,12 @@ const tex2Calc = (str, displayMode = false) => {
         } else if (token.input === "\\tfrac" || (token.input === "\\frac" && !displayMode)) {
           calc += "(";
           delims.push({ ch: ")//(", pos, type: TFRAC });
+        } else if (verbatims.has(token.input)) {
+          const arg = verbatimArg(str);
+          calc += token.input + "(" + arg + ")(";
+          str = str.slice(arg.length + 2);
+          str = str.replace(leadingSpaceRegEx, "");
+          delims.push({ ch: ")", pos, type: PAREN });
         } else {
           calc += token.input + "(";
           delims.push({ ch: ")(", pos, type: BINARY });

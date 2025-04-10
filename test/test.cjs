@@ -270,7 +270,9 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     ["\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}", "(a, b; c, d)"],
     ["\\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix}", "[a, b; c, d]"],
     ["\\begin{cases} a &\\text{if } b \\\\ c &\\text{if } d \\end{cases}", '{a if b; c if d}'],
+    ["\\begin{rcases} a &\\text{if } b \\\\ c &\\text{if } d \\end{rcases}", '\\rcases(a, "if "b; c, "if "d)'],
     ["\\begin{array}{cc} a & b \\\\ c & d\\end{array}", "\\array(cc)(a, b; c, d)"],
+    ["\\begin{darray}{cc} a & b \\\\ c & d\\end{darray}", "\\darray(cc)(a, b; c, d)"],
     ["\\sum_{\\begin{subarray}{l} i\\in\\Lambda\\\\ 0 \\lt j > n \\end{subarray}}", "∑_(\\subarray(l)(i ∈ Λ; 0 \\lt j > n))"],
     ["\\begin{alignat}{2} 10&x+ &3&y = 2 \\\\ 3&x+&13&y = 4 \\end{alignat}", "\\alignat(2)(10, x +, 3, y = 2; 3, x +, 13, y = 4)"],
     ["\\bordermatrix{ & 1 & 2 & 3 \\\\ 1 & A & B & C \\\\ 2 & D & E & F}", "\\bordermatrix(, 1, 2, 3; 1, A, B, C; 2, D, E, F)"],
@@ -281,7 +283,8 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     ],
     ['\\frac a b', '(a)//(b)'],
     ['\\sqrt[3]{4} + \\sqrt[5]{8}', '∛(4) + root(5)(8)'],
-    ['M_i + M_\\text{abc} + M_\\mathrm{abc} + M_{abc}', 'M_i + M_abc + M_abc + M_abc']
+    ['M_i + M_\\text{abc} + M_\\mathrm{abc} + M_{abc}', 'M_i + M_abc + M_abc + M_abc'],
+    [`\\textcolor{blue}{F=ma}`, "\\textcolor(blue)(F = m a)"]
   ];
 
   console.log("Now testing tex2Calc…")

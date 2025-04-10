@@ -409,16 +409,22 @@ const texFunctions = Object.freeze({
   "\\qquad": ["\\qquad", "\\qquad", "\\qquad", tt.SPACE, ""],
   "\\align": ["\\align", "\\begin{align}", "\\align", tt.ENVIRONMENT, "\\end{align}"],
   /* eslint-disable max-len */
+  "\\aligned": ["\\aligned", "\\begin{aligned}", "\\aligned", tt.ENVIRONMENT, "\\end{aligned}"],
   "\\alignat": ["\\alignat", "\\begin{alignat}", "\\alignat", tt.ENVIRONMENT, "\\end{alignat}"],
+  "\\alignedat": ["\\alignedat", "\\begin{alignedat}", "\\alignedat", tt.ENVIRONMENT, "\\end{alignedat}"],
   "\\array": ["\\array", "\\begin{array}", "\\array", tt.ENVIRONMENT, "\\end{array}"],
+  "\\darray": ["\\darray", "\\begin{darray}", "\\darray", tt.ENVIRONMENT, "\\end{darray}"],
   "\\subarray": ["\\subarray", "\\begin{subarray}", "\\subarray", tt.ENVIRONMENT, "\\end{subarray}"],
   "\\cases": ["\\cases", "\\begin{cases}", "\\cases", tt.ENVIRONMENT, "\\end{cases}"],
+  "\\dcases": ["\\dcases", "\\begin{dcases}", "\\dcases", tt.ENVIRONMENT, "\\end{dcases}"],
   "\\rcases": ["\\rcases", "\\begin{rcases}", "\\rcases", tt.ENVIRONMENT, "\\end{rcases}"],
+  "\\drcases": ["\\drcases", "\\begin{drcases}", "\\drcases", tt.ENVIRONMENT, "\\end{drcases}"],
   "\\smallmatrix": ["\\smallmatrix", "\\begin{smallmatrix}", "\\smallmatrix", tt.ENVIRONMENT, "\\end{smallmatrix}"],
   "\\bordermatrix": ["\\bordermatrix", "\\bordermatrix", "\\bordermatrix", tt.ENVIRONMENT, "}"],
   "\\equation": ["\\equation", "\\begin{equation}", "\\equation", tt.ENVIRONMENT, "\\end{equation}"],
   "\\split": ["\\split", "\\begin{split}", "\\split", tt.ENVIRONMENT, "\\end{split}"],
   "\\gather": ["\\gather", "\\begin{gather}", "\\gather", tt.ENVIRONMENT, "\\end{gather}"],
+  "\\gathered": ["\\gathered", "\\begin{gathered}", "\\gathered", tt.ENVIRONMENT, "\\end{gathered}"],
   "\\CD": ["\\CD", "\\begin{CD}", "\\CD", tt.ENVIRONMENT, "\\end{CD}"],
   "\\multline": ["\\multline", "\\begin{multline}", "\\multline", tt.ENVIRONMENT, "\\end{multline}"]
   /* eslint-enable max-len */

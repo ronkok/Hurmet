@@ -33,8 +33,9 @@ const builtInReducerFunctions = new Set(["accumulate", "beamDiagram", "dataframe
 const trigFunctions = new Set(["cos", "cosd", "cot", "cotd", "csc", "cscd", "sec", "secd",
   "sin", "sind", "tand", "tan"])
 
-export const verbatims = new Set(["\\alignat", "\\array", "\\ce", "\\color", "\\colorbox",
-  "\\label", "\\mathrm", "\\pu", "\\subarray", "\\tag", "\\text", "\\textcolor"])
+export const verbatims = new Set(["\\alignat", "\\alignedat", "\\array", "\\darray", "\\ce",
+  "\\color", "\\colorbox", "\\label", "\\mathrm", "\\pu", "\\subarray", "\\tag", "\\text",
+  "\\textcolor"])
 
 const rationalRPN = numStr => {
   // Return a representation of a rational number that is recognized by evalRPN().
@@ -1083,7 +1084,7 @@ export const parse = (
         posOfPrevRun = tex.length
         if (verbatims.has(token.input)) {
           const arg = verbatimArg(str)
-          tex += token.output + arg + "}"
+          tex += token.output + "{" + arg + "}"
           str = str.slice(arg.length + 2)
           str = str.replace(leadingSpaceRegEx, "")
           token.ttype = tt.RIGHTBRACKET
