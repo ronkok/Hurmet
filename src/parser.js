@@ -34,8 +34,8 @@ const trigFunctions = new Set(["cos", "cosd", "cot", "cotd", "csc", "cscd", "sec
   "sin", "sind", "tand", "tan"])
 
 export const verbatims = new Set(["\\alignat", "\\alignedat", "\\array", "\\darray", "\\ce",
-  "\\color", "\\colorbox", "\\label", "\\mathrm", "\\pu", "\\subarray", "\\tag", "\\text",
-  "\\textcolor"])
+  "\\color", "\\colorbox", "\\hskip", "\\hspace", "\\label", "\\kern", "\\mathrm", "\\mkern",
+  "\\mskin", "\\pu", "\\subarray", "\\tag", "\\text", "\\textcolor"])
 
 const rationalRPN = numStr => {
   // Return a representation of a rational number that is recognized by evalRPN().

@@ -284,7 +284,9 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     ['\\frac a b', '(a)//(b)'],
     ['\\sqrt[3]{4} + \\sqrt[5]{8}', '∛(4) + root(5)(8)'],
     ['M_i + M_\\text{abc} + M_\\mathrm{abc} + M_{abc}', 'M_i + M_abc + M_abc + M_abc'],
-    [`\\textcolor{blue}{F=ma}`, "\\textcolor(blue)(F = m a)"]
+    [`\\textcolor{blue}{F=ma}`, "\\textcolor(blue)(F = m a)"],
+    [`a\\kern2emb`, "a \\kern(2em)b"],
+    [`a\\kern{2em}b`, "a \\kern(2em)b"]
   ];
 
   console.log("Now testing tex2Calc…")
