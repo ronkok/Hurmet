@@ -21456,6 +21456,10 @@ const unaries = new Set([
   "ce",
   "clap",
   "color",
+  "hphantom",
+  "hskip",
+  "hspace",
+  "kern",
   "Ket",
   "ket",
   "label",
@@ -21472,6 +21476,8 @@ const unaries = new Set([
   "mathscr",
   "mathsf",
   "mathtt",
+  "mkern",
+  "mskip",
   "not",
   "operatorname",
   "phantom",
@@ -21493,6 +21499,7 @@ const unaries = new Set([
   "texttt",
   "textup",
   "vcenter",
+  "vphantom",
   "xLeftarrow",
   "xLeftrightarrow",
   "xRightarrow",
@@ -21968,8 +21975,8 @@ const trigFunctions = new Set(["cos", "cosd", "cot", "cotd", "csc", "cscd", "sec
   "sin", "sind", "tand", "tan"]);
 
 const verbatims = new Set(["\\alignat", "\\alignedat", "\\array", "\\darray", "\\ce",
-  "\\color", "\\colorbox", "\\label", "\\mathrm", "\\pu", "\\subarray", "\\tag", "\\text",
-  "\\textcolor"]);
+  "\\color", "\\colorbox", "\\hskip", "\\hspace", "\\label", "\\kern", "\\mathrm", "\\mkern",
+  "\\mskin", "\\pu", "\\subarray", "\\tag", "\\text", "\\textcolor"]);
 
 const rationalRPN = numStr => {
   // Return a representation of a rational number that is recognized by evalRPN().
@@ -37412,6 +37419,7 @@ const greekRegEx = RegExp("^\\\\(" + greekAlternatives + ")\\b");
 const mathOperatorRegEx = /^\\(arcsin|arccos|arctan|arctg|arcctg|arg|ch|cos|cosec|cosh|cot|cotg|coth|csc|ctg|cth|deg|dim|exp|hom|ker|lg|ln|log|sec|sin|sinh|sh|sgn|tan|tanh|tg|th|max|min|gcd)\b/;
 // eslint-disable-next-line max-len
 const bracedCharRegEx = RegExp("^\\{([A-Za-z0-9\u0391-\u03c9]|\\\\(" + greekAlternatives + "))\\}");
+const distanceRegEx = /^[-+]?[0-9.]+(?:em|ex|mu|pt|mm|cm|in|bp|pc|dd|cc|nd|nc|sp)/;
 const greekLetters = {
   Alpha: "Α",
   Beta: "Β",
@@ -37474,6 +37482,8 @@ const matrices = {
   V: ["‖", "‖"]
 };
 
+const kerns = ["\\kern", "\\mkern", "\\mskip", "\\hskip"];
+
 const donotConvert = ["\\begin{CD}"];
 
 const eatOpenBrace = str => {
@@ -37492,6 +37502,12 @@ const eatMatch = (str, match) => {
   str = str.slice(match[0].length);
   str = str.replace(leadingSpaceRegEx, "");
   return str
+};
+
+const unbracedDistance = str => {
+  const match = distanceRegEx.exec(str);
+  if (!match) { return "" }
+  return match[0]
 };
 
 const tex2Calc = (str, displayMode = false) => {
@@ -37698,7 +37714,14 @@ const tex2Calc = (str, displayMode = false) => {
 
       case tt.UNARY: {
         if (verbatims.has(token.input)) {
-          const arg = verbatimArg(str);
+          let arg = "";
+          if (kerns.includes(token.input) && str[0] !== "{") {
+            arg = unbracedDistance(str);
+            str = str.slice(arg.length);
+          } else {
+            arg = verbatimArg(str);
+            str = str.slice(arg.length + 2);
+          }
           calc += token.input === "\\text"
             ? '"' + arg + '"'
             : token.input === "\\mathrm" && arg.length > 1 && arg.indexOf(" ") === -1
@@ -37708,7 +37731,6 @@ const tex2Calc = (str, displayMode = false) => {
             justGotUnbracedArg = true;
             waitingForUnbracedArg = false;
           }
-          str = str.slice(arg.length + 2);
           str = str.replace(leadingSpaceRegEx, "");
         } else if (token.input === "\\sqrt") {
           if (str.slice(0, 1) === "[") {
@@ -56467,51 +56489,63 @@ function insertToC(nodeType) {
   })
 }
 
-function insertOrToggleMath(state, view, encoding) {
+function insertMath(state, view, encoding) {
   // This function is exported so that it can be called from keymap.js.
   const nodeType = (encoding === "calculation") ? schema.nodes.calculation : schema.nodes.tex;
-  const targetType = (encoding === "calculation") ? "tex" : "calculation";
-  const { from, to } = state.selection;
-  const tr = state.tr;
-  if (to - from > 0) {
-    // Toggle the math cells
-    state.doc.nodesBetween(from, to, function(node, pos) {
-      if (node.type.name === targetType) {
-        const attrs = clone(node.attrs);
-        if (encoding === "tex") {
-          attrs.tex = parse$1(attrs.entry);
-          delete attrs.entry;
-          tr.replaceWith(pos, pos + 1, schema.nodes.tex.createAndFill(attrs));
-        } else {
-          attrs.entry = tex2Calc(attrs.tex);
-          attrs.tex = parse$1(attrs.entry);
-          tr.replaceWith(pos, pos + 1, schema.nodes.calculation.createAndFill(attrs));
-        }
-      }
-    });
-  } else {
-    // Create a new math cell.
-    let attrs = (encoding === "calculation") ? { entry: "" } : { tex: "" };
-    if (state.selection instanceof NodeSelection && state.selection.node.type == nodeType) {
-      attrs = state.selection.node.attrs;
-    }
-    const pos = tr.selection.from;
-    tr.replaceSelectionWith(nodeType.createAndFill(attrs));
-    tr.setSelection(NodeSelection.create(tr.doc, pos));
+  // Create a new math cell.
+  let attrs = (encoding === "calculation") ? { entry: "" } : { tex: "" };
+  if (state.selection instanceof NodeSelection && state.selection.node.type == nodeType) {
+    attrs = state.selection.node.attrs;
   }
+  const tr = state.tr;
+  const pos = tr.selection.from;
+  tr.replaceSelectionWith(nodeType.createAndFill(attrs));
+  tr.setSelection(NodeSelection.create(tr.doc, pos));
   view.dispatch(tr);
 }
 
 function mathMenuItem(nodeType, encoding) {
   return new MenuItem({
     title: "Insert " + ((encoding === "calculation")
-      ? "a calculation cell  Alt-C\nor convert multiple TeX cells to calculation"
-      : "a TeX cell\nor convert multiple calculation cells to TeX"),
+      ? "a calculation cell  Alt-C"
+      : "a TeX cell"),
     label: (encoding === "calculation") ? " ℂ " : " 𝕋 ",
     class: (encoding === "tex") ? "math-button" : "mb-left",
     enable(state) { return canInsert(state, nodeType) },
     run(state, _, view) {
-      insertOrToggleMath(state, view, encoding);
+      insertMath(state, view, encoding);
+    }
+  })
+}
+
+function toggleMathItem(originalNodeType, desiredEncoding) {
+  return new MenuItem({
+    label: "Convert " + ((desiredEncoding === "calculation")
+      ? "selected TeX cells into calculation cells"
+      : "selected calculation cells into TeX cells"),
+    enable(state) { return canInsert(state, originalNodeType) },
+    run(state, _, view) {
+      const targetType = (desiredEncoding === "calculation") ? "tex" : "calculation";
+      const { from, to } = state.selection;
+      const tr = state.tr;
+      if (to - from > 0) {
+        // Toggle the math cells
+        state.doc.nodesBetween(from, to, function(node, pos) {
+          if (node.type.name === targetType) {
+            const attrs = clone(node.attrs);
+            if (desiredEncoding === "tex") {
+              attrs.tex = parse$1(attrs.entry);
+              delete attrs.entry;
+              tr.replaceWith(pos, pos + 1, schema.nodes.tex.createAndFill(attrs));
+            } else {
+              attrs.entry = tex2Calc(attrs.tex);
+              attrs.tex = parse$1(attrs.entry);
+              tr.replaceWith(pos, pos + 1, schema.nodes.calculation.createAndFill(attrs));
+            }
+          }
+        });
+        view.dispatch(tr);
+      }
     }
   })
 }
@@ -57041,8 +57075,14 @@ function buildMenuItems(schema) {
   if ((type = schema.nodes.footnote)) r.footnote = footnote();
   if ((type = schema.nodes.toc)) r.toc = insertToC(type);
   r.macroButton = macroButton();
-  if ((type = schema.nodes.calculation)) r.insertCalclation = mathMenuItem(type, "calculation");
-  if ((type = schema.nodes.tex)) r.insertTeX = mathMenuItem(type, "tex");
+  if ((type = schema.nodes.calculation)) {
+    r.insertCalclation = mathMenuItem(type, "calculation");
+    r.convertCalc2Tex = toggleMathItem(type, "tex");
+  } 
+  if ((type = schema.nodes.tex)) {
+    r.insertTeX = mathMenuItem(type, "tex");
+    r.convertTex2Calc = toggleMathItem(type, "calculation");
+  }
   if ((type = schema.nodes.comment)) r.toggleComment = toggleComment(type);
   if ((type = schema.nodes.tight_list_item)) r.tighten = tighten();
 
@@ -57264,7 +57304,7 @@ function buildMenuItems(schema) {
   r.rounding = setRoundingCriteria(schema.nodes.calculation);
   r.hintDropDown = new Dropdown(
     [r.accessors, r.syntax],
-    { label: "Q", title: "Quick Reference", class: "md-right" });
+    { label: "Q", title: "Quick Reference", class: "math-dropdown" });
 
   // Now that the menu buttons are created, assemble them into the menu.
   
@@ -57392,6 +57432,11 @@ function buildMenuItems(schema) {
     r.copyAsGFM
   ], {label: "𝐌"});
 
+  r.toggleMath = new Dropdown([
+    r.convertTex2Calc,
+    r.convertCalc2Tex
+  ], {label: "ℂ↔𝕋", class: "md-right"});
+
   r.math = [[
     r.insertCalclation,
     r.insertTeX,
@@ -57402,7 +57447,8 @@ function buildMenuItems(schema) {
     r.display,
     r.rounding,
     r.functionsDropDown,
-    r.hintDropDown
+    r.hintDropDown,
+    r.toggleMath
   ]];
 
   r.fullMenu = r.fileMenu.concat(
@@ -57709,7 +57755,7 @@ function buildKeymap(schema, mapKeys) {
   if ((type = schema.marks.underline)) bind("Mod-u", toggleMark(type));
   if ((type = schema.nodes.calculation)) {
     bind("Alt-c", (state, _, view) => {
-      insertOrToggleMath(state, view, "calculation");
+      insertMath(state, view, "calculation");
       return true
     });
   }

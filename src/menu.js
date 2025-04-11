@@ -1049,51 +1049,63 @@ function insertToC(nodeType) {
   })
 }
 
-export function insertOrToggleMath(state, view, encoding) {
+export function insertMath(state, view, encoding) {
   // This function is exported so that it can be called from keymap.js.
   const nodeType = (encoding === "calculation") ? schema.nodes.calculation : schema.nodes.tex
-  const targetType = (encoding === "calculation") ? "tex" : "calculation"
-  const { from, to } = state.selection
-  const tr = state.tr
-  if (to - from > 0) {
-    // Toggle the math cells
-    state.doc.nodesBetween(from, to, function(node, pos) {
-      if (node.type.name === targetType) {
-        const attrs = clone(node.attrs)
-        if (encoding === "tex") {
-          attrs.tex = parse(attrs.entry)
-          delete attrs.entry
-          tr.replaceWith(pos, pos + 1, schema.nodes.tex.createAndFill(attrs))
-        } else {
-          attrs.entry = tex2Calc(attrs.tex)
-          attrs.tex = parse(attrs.entry)
-          tr.replaceWith(pos, pos + 1, schema.nodes.calculation.createAndFill(attrs))
-        }
-      }
-    })
-  } else {
-    // Create a new math cell.
-    let attrs = (encoding === "calculation") ? { entry: "" } : { tex: "" }
-    if (state.selection instanceof NodeSelection && state.selection.node.type == nodeType) {
-      attrs = state.selection.node.attrs
-    }
-    const pos = tr.selection.from
-    tr.replaceSelectionWith(nodeType.createAndFill(attrs))
-    tr.setSelection(NodeSelection.create(tr.doc, pos))
+  // Create a new math cell.
+  let attrs = (encoding === "calculation") ? { entry: "" } : { tex: "" }
+  if (state.selection instanceof NodeSelection && state.selection.node.type == nodeType) {
+    attrs = state.selection.node.attrs
   }
+  const tr = state.tr
+  const pos = tr.selection.from
+  tr.replaceSelectionWith(nodeType.createAndFill(attrs))
+  tr.setSelection(NodeSelection.create(tr.doc, pos))
   view.dispatch(tr)
 }
 
 function mathMenuItem(nodeType, encoding) {
   return new MenuItem({
     title: "Insert " + ((encoding === "calculation")
-      ? "a calculation cell  Alt-C\nor convert multiple TeX cells to calculation"
-      : "a TeX cell\nor convert multiple calculation cells to TeX"),
+      ? "a calculation cell  Alt-C"
+      : "a TeX cell"),
     label: (encoding === "calculation") ? " ℂ " : " 𝕋 ",
     class: (encoding === "tex") ? "math-button" : "mb-left",
     enable(state) { return canInsert(state, nodeType) },
     run(state, _, view) {
-      insertOrToggleMath(state, view, encoding);
+      insertMath(state, view, encoding);
+    }
+  })
+}
+
+function toggleMathItem(originalNodeType, desiredEncoding) {
+  return new MenuItem({
+    label: "Convert " + ((desiredEncoding === "calculation")
+      ? "selected TeX cells into calculation cells"
+      : "selected calculation cells into TeX cells"),
+    enable(state) { return canInsert(state, originalNodeType) },
+    run(state, _, view) {
+      const targetType = (desiredEncoding === "calculation") ? "tex" : "calculation"
+      const { from, to } = state.selection
+      const tr = state.tr
+      if (to - from > 0) {
+        // Toggle the math cells
+        state.doc.nodesBetween(from, to, function(node, pos) {
+          if (node.type.name === targetType) {
+            const attrs = clone(node.attrs)
+            if (desiredEncoding === "tex") {
+              attrs.tex = parse(attrs.entry)
+              delete attrs.entry
+              tr.replaceWith(pos, pos + 1, schema.nodes.tex.createAndFill(attrs))
+            } else {
+              attrs.entry = tex2Calc(attrs.tex)
+              attrs.tex = parse(attrs.entry)
+              tr.replaceWith(pos, pos + 1, schema.nodes.calculation.createAndFill(attrs))
+            }
+          }
+        })
+        view.dispatch(tr)
+      }
     }
   })
 }
@@ -1623,8 +1635,14 @@ export function buildMenuItems(schema) {
   if ((type = schema.nodes.footnote)) r.footnote = footnote(type)
   if ((type = schema.nodes.toc)) r.toc = insertToC(type)
   r.macroButton = macroButton()
-  if ((type = schema.nodes.calculation)) r.insertCalclation = mathMenuItem(type, "calculation")
-  if ((type = schema.nodes.tex)) r.insertTeX = mathMenuItem(type, "tex")
+  if ((type = schema.nodes.calculation)) {
+    r.insertCalclation = mathMenuItem(type, "calculation")
+    r.convertCalc2Tex = toggleMathItem(type, "tex")
+  } 
+  if ((type = schema.nodes.tex)) {
+    r.insertTeX = mathMenuItem(type, "tex")
+    r.convertTex2Calc = toggleMathItem(type, "calculation")
+  }
   if ((type = schema.nodes.comment)) r.toggleComment = toggleComment(type)
   if ((type = schema.nodes.tight_list_item)) r.tighten = tighten()
 
@@ -1848,7 +1866,7 @@ export function buildMenuItems(schema) {
   r.rounding = setRoundingCriteria(schema.nodes.calculation)
   r.hintDropDown = new Dropdown(
     [r.accessors, r.syntax],
-    { label: "Q", title: "Quick Reference", class: "md-right" })
+    { label: "Q", title: "Quick Reference", class: "math-dropdown" })
 
   // Now that the menu buttons are created, assemble them into the menu.
   
@@ -1976,6 +1994,11 @@ export function buildMenuItems(schema) {
     r.copyAsGFM
   ], {label: "𝐌"})
 
+  r.toggleMath = new Dropdown([
+    r.convertTex2Calc,
+    r.convertCalc2Tex
+  ], {label: "ℂ↔𝕋", class: "md-right"})
+
   r.math = [[
     r.insertCalclation,
     r.insertTeX,
@@ -1986,7 +2009,8 @@ export function buildMenuItems(schema) {
     r.display,
     r.rounding,
     r.functionsDropDown,
-    r.hintDropDown
+    r.hintDropDown,
+    r.toggleMath
   ]]
 
   r.fullMenu = r.fileMenu.concat(

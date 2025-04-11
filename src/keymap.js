@@ -11,7 +11,7 @@ import {
 import { wrapInList, splitListItem, liftListItem, sinkListItem } from "./schema"
 import { undo, redo } from "prosemirror-history"
 import { undoInputRule } from "prosemirror-inputrules"
-import { insertOrToggleMath, saveFileAsMarkdown, expandHurmetMacro, printHurmet } from "./menu"
+import { insertMath, saveFileAsMarkdown, expandHurmetMacro, printHurmet } from "./menu"
 import { readFile } from "./openfile"
 import { goToNextCell } from "prosemirror-tables"
 
@@ -84,7 +84,7 @@ export function buildKeymap(schema, mapKeys) {
   if ((type = schema.marks.underline)) bind("Mod-u", toggleMark(type))
   if ((type = schema.nodes.calculation)) {
     bind("Alt-c", (state, _, view) => {
-      insertOrToggleMath(state, view, "calculation")
+      insertMath(state, view, "calculation")
       return true
     })
   }
