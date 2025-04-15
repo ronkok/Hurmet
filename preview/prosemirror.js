@@ -40332,9 +40332,6 @@ function buildMathML(tree, texExpression, style, settings) {
   if (settings.xml) {
     math.setAttribute("xmlns", "http://www.w3.org/1998/Math/MathML");
   }
-  if (wrapper.style.width) {
-    math.style.width = "100%";
-  }
   if (settings.displayMode) {
     math.setAttribute("display", "block");
     math.style.display = "block math"; // necessary in Chromium.
@@ -48430,7 +48427,8 @@ defineFunction({
   names: ["\\relax"],
   props: {
     numArgs: 0,
-    allowedInText: true
+    allowedInText: true,
+    allowedInArgument: true
   },
   handler({ parser }) {
     return {
@@ -50846,6 +50844,7 @@ class Parser {
       if (!atom) {
         break;
       } else if (atom.type === "internal") {
+        // Internal nodes do not appear in parse tree
         continue;
       }
       body.push(atom);
@@ -50920,7 +50919,11 @@ class Parser {
     const symbol = symbolToken.text;
     this.consume();
     this.consumeSpaces(); // ignore spaces before sup/subscript argument
-    const group = this.parseGroup(name);
+    // Skip over allowed internal nodes such as \relax
+    let group;
+    do {
+      group = this.parseGroup(name);
+    } while (group.type && group.type === "internal")
 
     if (!group) {
       throw new ParseError("Expected group after '" + symbol + "'", symbolToken);
@@ -50964,9 +50967,15 @@ class Parser {
     // \left(x\right)^2 work correctly.
     const base = this.parseGroup("atom", breakOnTokenText);
 
+    // Internal nodes (e.g. \relax) cannot support super/subscripts.
+    // Instead we will pick up super/subscripts with blank base next round.
+    if (base && base.type === "internal") {
+      return base
+    }
+
     // In text mode, we don't have superscripts or subscripts
     if (this.mode === "text") {
-      return base;
+      return base
     }
 
     // Note that base may be empty (i.e. null) at this point.
@@ -51823,7 +51832,7 @@ class Style {
  * https://mit-license.org/
  */
 
-const version = "0.11.03";
+const version = "0.11.05";
 
 function postProcess(block) {
   const labelMap = {};
@@ -58818,15 +58827,6 @@ function openMathPrompt(options) {
       ? { tex: mathString }
       : hurmet.compile(mathString, formats);
     params.displayMode = options.attrs.displayMode;
-    if (wrapper.parentNode) {
-      wrapper.parentNode.firstChild.removeAttribute("style");
-      if (!params.displayMode && wrapper.dataset['data-display'] &&
-                                 wrapper.dataset['data-display'] === "true") {
-        params.displayMode = true;
-      } else if (params.displayMode && !wrapper.dataset['data-display']) {
-        params.displayMode = false;
-      }
-    }
     options.callback(params);
     editor.removeEventListener('blur', close);
     if (wrapper.parentNode) {
