@@ -145,15 +145,6 @@ export function openMathPrompt(options) {
       ? { tex: mathString }
       : hurmet.compile(mathString, formats)
     params.displayMode = options.attrs.displayMode
-    if (wrapper.parentNode) {
-      wrapper.parentNode.firstChild.removeAttribute("style")
-      if (!params.displayMode && wrapper.dataset['data-display'] &&
-                                 wrapper.dataset['data-display'] === "true") {
-        params.displayMode = true
-      } else if (params.displayMode && !wrapper.dataset['data-display']) {
-        params.displayMode = false
-      }
-    }
     options.callback(params)
     editor.removeEventListener('blur', close)
     if (wrapper.parentNode) {
