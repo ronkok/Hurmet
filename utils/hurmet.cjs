@@ -3902,8 +3902,10 @@ const dateRegEx$1 = /^'(\d{4})-(\d{1,2})-(\d{1,2})'$/;
 const dateInSecondsFromIsoString = dateStr => {
   // Return the number of seconds after the start January 1, 1970, UTC.
   const match = dateStr.match(dateRegEx$1);
-  const timeZoneOffset = new Date().getTimezoneOffset() / 60; // in hours
-  const date = new Date( match[1], match[2] - 1, match[3], -timeZoneOffset );
+  const year = match[1];
+  const month = match[2].padStart(2, "0");
+  const day = match[3].padStart(2, "0");
+  const date = new Date(`${year}-${month}-${day}`);  // UTC
   return Math.floor(date.getTime() / 1000) // seconds after Jan 1, 1970, UTC
 };
 
