@@ -591,8 +591,8 @@ also make one those letters bold by typing it and then typing **Ctrl+B**.
 `-->`, `<--`, and `<-->` will auto correct into extensible arrows, as in:
 ¢` A ⟶"note" B `.
 
-`<space>` auto-corrects to `˽` in the text editor, which renders as a space.
-
+The `˽` character is Hurmet’s non-breaking space. To get it, type `\` and hit the space
+bar twice.
 
 #### Display Selectors
 
