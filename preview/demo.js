@@ -5068,6 +5068,8 @@ const checkForTrailingAccent = word => {
   }
 };
 
+const openParenRegEx$3 = /^\(/;
+
 const lexOneWord = (str, prevToken) => {
   const matchObj = wordRegEx.exec(str);
   if (matchObj) {
@@ -5079,7 +5081,9 @@ const lexOneWord = (str, prevToken) => {
     const word = words[match];
     if (word && fc !== "′") {
       return word
-    } else if (/^\(/.test(fc)) {
+    }
+    const isFollowedByOpenParen = openParenRegEx$3.test(fc);
+    if (isFollowedByOpenParen) {
       // word is followed by an open paren. Treat it as a function name
       return (prevToken.ttype === tt.ACCENT)
         ? [match, match + "}{", match + "}{", tt.FUNCTION, ""]
@@ -5122,6 +5126,7 @@ const lexOneWord = (str, prevToken) => {
     } else if (match.length === 2 & match.charAt(0) === "\uD835") {
       return [match, match, match, tt.VAR, ""]
     } else if (match.length > 1) {
+      if (match === "mod") { return [match, "\\bmod", match, tt.BIN, ""] }
       return [match, match, match, tt.LONGVAR, ""]
     } else {
       // Return a single character variable name
@@ -5538,6 +5543,7 @@ const testForImplicitMult = (prevToken, texStack, str, isFollowedBySpace) => {
 const multiplicands = new Set([tt.ORD, tt.VAR, tt.NUM, tt.LONGVAR, tt.RIGHTBRACKET,
   tt.CURRENCY, tt.SUPCHAR, tt.BIG_OPERATOR]);
 
+const wordOpRegEx = /^(?:(?:if|and|atop|or|else|elseif|modulo|otherwise|not|for|in|while|end)\b|mod )/;
 const nextCharIsFactor = (str, tokenType, isFollowedBySpace) => {
   const st = str.replace(leadingLaTeXSpaceRegEx, "");
   const fc = st.charAt(0);
@@ -5548,7 +5554,7 @@ const nextCharIsFactor = (str, tokenType, isFollowedBySpace) => {
       return true
     } else {
       if (factors.test(fc) || (isFollowedBySpace && factorsAfterSpace.test(fc))) {
-        fcMeetsTest = !/^(if|and|atop|or|else|elseif|modulo|otherwise|not|for|in|while|end)\b/.test(st);
+        fcMeetsTest = !wordOpRegEx.test(st);
       }
     }
   }
@@ -5925,7 +5931,10 @@ const parse$1 = (
             rpn += "\\∑";
             token.input === "∑";
           }
-          rpnStack.push({ prec: rpnPrecFromType[token.ttype], symbol: token.input });
+          rpnStack.push({
+            prec: rpnPrecFromType[token.ttype],
+            symbol: token.input === "mod" ? "modulo" : token.input
+          });
         }
 
         okToAppend = true;

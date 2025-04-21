@@ -210,6 +210,7 @@ const testForImplicitMult = (prevToken, texStack, str, isFollowedBySpace) => {
 const multiplicands = new Set([tt.ORD, tt.VAR, tt.NUM, tt.LONGVAR, tt.RIGHTBRACKET,
   tt.CURRENCY, tt.SUPCHAR, tt.BIG_OPERATOR])
 
+const wordOpRegEx = /^(?:(?:if|and|atop|or|else|elseif|modulo|otherwise|not|for|in|while|end)\b|mod )/
 const nextCharIsFactor = (str, tokenType, isFollowedBySpace) => {
   const st = str.replace(leadingLaTeXSpaceRegEx, "")
   const fc = st.charAt(0)
@@ -222,7 +223,7 @@ const nextCharIsFactor = (str, tokenType, isFollowedBySpace) => {
       return true
     } else {
       if (factors.test(fc) || (isFollowedBySpace && factorsAfterSpace.test(fc))) {
-        fcMeetsTest = !/^(if|and|atop|or|else|elseif|modulo|otherwise|not|for|in|while|end)\b/.test(st)
+        fcMeetsTest = !wordOpRegEx.test(st)
       }
     }
   }
@@ -599,7 +600,10 @@ export const parse = (
             rpn += "\\∑"
             token.input === "∑"
           }
-          rpnStack.push({ prec: rpnPrecFromType[token.ttype], symbol: token.input })
+          rpnStack.push({
+            prec: rpnPrecFromType[token.ttype],
+            symbol: token.input === "mod" ? "modulo" : token.input
+          })
         }
 
         okToAppend = true

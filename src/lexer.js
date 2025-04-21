@@ -750,6 +750,8 @@ const checkForTrailingAccent = word => {
   }
 }
 
+const openParenRegEx = /^\(/
+
 const lexOneWord = (str, prevToken) => {
   const matchObj = wordRegEx.exec(str)
   if (matchObj) {
@@ -761,7 +763,9 @@ const lexOneWord = (str, prevToken) => {
     const word = words[match]
     if (word && fc !== "′") {
       return word
-    } else if (/^\(/.test(fc)) {
+    }
+    const isFollowedByOpenParen = openParenRegEx.test(fc)
+    if (isFollowedByOpenParen) {
       // word is followed by an open paren. Treat it as a function name
       return (prevToken.ttype === tt.ACCENT)
         ? [match, match + "}{", match + "}{", tt.FUNCTION, ""]
@@ -804,6 +808,7 @@ const lexOneWord = (str, prevToken) => {
     } else if (match.length === 2 & match.charAt(0) === "\uD835") {
       return [match, match, match, tt.VAR, ""]
     } else if (match.length > 1) {
+      if (match === "mod") { return [match, "\\bmod", match, tt.BIN, ""] }
       return [match, match, match, tt.LONGVAR, ""]
     } else {
       // Return a single character variable name
