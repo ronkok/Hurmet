@@ -450,6 +450,26 @@ async function writeFile(fileHandle, contents) {
   await writable.close();
 }
 
+async function saveFileViaFileSystemAPI(str, doc) {
+  try {
+    const fileHandle = await window.showSaveFilePicker({
+      suggestedName: 'hurmet.md',
+      types: [{
+          description: 'Markdown Files',
+          accept: { 'text/plain': ['.md'] },
+        }],
+    })
+    const writableStream = await fileHandle.createWritable()
+    await writableStream.write(str)   // Write data to the file
+    await writableStream.close()
+    doc.attrs.fileHandle = fileHandle
+    doc.attrs.saveIsValid = true
+    document.title = fileHandle.name.replace(/\.md$/, "")
+  } catch (error) {
+    console.error('Error saving file:', error);
+  }
+}
+
 function sleep (time) {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
@@ -509,7 +529,9 @@ saveDate: ${new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60 
     writeFile(state.doc.attrs.fileHandle, str)
     sleep(500).then(() => {
       button.classList.remove("ProseMirror-menu-active")
-    });
+    })
+  } else if (window.showOpenFilePicker) {
+    saveFileViaFileSystemAPI(str, state.doc)
   } else {
     // Legacy method for Firefox and Safari
     const blob = new Blob([str], {type: "text/plain;charset=utf-8"})

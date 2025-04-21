@@ -35006,7 +35006,7 @@ const mustDoCalculation = /^(``.+``|[$$£¥\u20A0-\u20CF]?(\?{1,2}|@{1,2}|%{1,2}
 const assignDataFrameRegEx = /^[^=]+=\s*``[\s\S]+``\s*$/;
 const currencyRegEx = /^[$£¥\u20A0-\u20CF]/;
 const matrixOfNames = /^[([](?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*[,;].+[)\]]$/;
-const isKeyWord = /^(π|true|false|root|if|else|elseif|and|or|otherwise|mod|for|while|break|return|throw)$/;
+const isKeyWord = /^(π|pi|ℏ|true|false|root|if|in|else|elseif|and|or|otherwise|mod|modulo|for|while|end|break|return|throw)$/;
 const testRegEx = /^(@{1,2})test /;
 
 const shortcut = (str, formats) => {
@@ -55913,6 +55913,39 @@ async function writeFile(fileHandle, contents) {
   await writable.close();
 }
 
+async function saveFileViaFileSystemAPI(str, doc) {
+  try {
+    // Create a new file handle
+    const fileHandle = await window.showSaveFilePicker({
+      suggestedName: 'hurmet.md',
+      types: [
+        {
+          description: 'Markdown Files',
+          accept: { 'text/plain': ['.md'] },
+        },
+      ],
+    });
+
+    // Create a writable stream
+    const writableStream = await fileHandle.createWritable();
+
+    // Write data to the file
+    await writableStream.write(str);
+
+    // Close the writable stream
+    await writableStream.close();
+
+    doc.attrs.fileHandle = fileHandle;
+    doc.attrs.saveIsValid = true;
+    document.title = fileHandle.name.replace(/\.md$/, "");
+
+    console.log('File saved successfully!');
+  } catch (error) {
+    console.error('Error saving file:', error);
+  }
+}
+
+
 function sleep (time) {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
@@ -55973,6 +56006,8 @@ saveDate: ${new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60 
     sleep(500).then(() => {
       button.classList.remove("ProseMirror-menu-active");
     });
+  } else if (window.showOpenFilePicker) {
+    saveFileViaFileSystemAPI(str, state.doc);
   } else {
     // Legacy method for Firefox and Safari
     const blob = new Blob([str], {type: "text/plain;charset=utf-8"});
