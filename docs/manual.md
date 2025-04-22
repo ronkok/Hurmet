@@ -40,7 +40,7 @@ document range by selecting text, then clicking one of the menu bar buttons:
 +:-------------------------------------+:-----------------------------------+
 | **≡**                                | Navigate…                          |
 +--------------------------------------+------------------------------------+
-| \                                    | Open…, Save…, Save as…, \          |
+| \                                    | Open…, Save, Save as…, \           |
 | **File▾**                            | Create a permalink URL,\           |
 |                                      | Take a snapshot, Show diff, \      |
 |                                      | Set Page Size, Print               |
