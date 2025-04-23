@@ -95,6 +95,7 @@ const autoCorrections = {
   "\\oiiint": "∰",
   "\\sum": "∑",
   "\\prod": "∏",
+  "\\star": "⋆",
   nn: "∩", // cap
   nnn: "⋂",
   uu: "∪", // cup
