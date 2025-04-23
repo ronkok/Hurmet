@@ -157,7 +157,7 @@ const words = Object.freeze({
   "<-->": ["<-->", "\\xrightleftarrows", "<-->", tt.UNARY, ""]
 })
 
-const miscRegEx = /^([/÷\u2215_:,;\t^+\\\-–−*∗×∘⊗⦼⊙√∛∜·.%|╏‖¦><=≈≟≠≡≤≥≅∈∉∋∌⊂⊄⊆⊈⊃⊇⊉!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7$£¥€₨₩₪]+)/
+const miscRegEx = /^([/÷\u2215_:,;\t^+\\\-–−*∗×∘⊗⦼⊙⋆√∛∜·.%|╏‖¦><=≈≟≠≡≤≥≅∈∉∋∌⊂⊄⊆⊈⊃⊇⊉!¡‼¬∧∨⊻~#?⇒⟶⟵→←&@′″∀∃([{⟨⌊⎿⌈⎾〖〗⏋⌉⏌⌋⟩}\])˽∣ℂℕℚℝℤℓℏ∠¨ˆˉ˙˜▪✓\u00A0\u20D7$£¥€₨₩₪]+)/
 
 const miscSymbols = Object.freeze({
   //    input, output, type,  closeDelim
@@ -188,6 +188,7 @@ const miscSymbols = Object.freeze({
   "\u221C": ["\u221C", "\\sqrt[4]", "\u221C", tt.UNARY, ""],
   "+-": ["+-", "\u00B1", "\u00B1", tt.BIN, ""],
   "**": ["**", "\\star", "**", tt.BIN, ""],
+  "⋆": ["⋆", "⋆", "⋆", "tt.BIN", ""],
   "·": ["·", "\u22C5", "·", tt.MULT, ""], // dot operator
   "...": ["...", "\\dots", "...", tt.RANGE, ""],
   "\\dots": ["\\dots", "\\dots", "...", tt.RANGE, ""],
@@ -388,6 +389,7 @@ const texFunctions = Object.freeze({
   "\\lim": ["\\lim", "\\lim", "\\lim", tt.ORD, ""],
   "\\diamond": ["\\diamond", "\\diamond", "\\diamond", tt.ORD, ""],
   "\\square": ["\\square", "\\square", "\\square", tt.ORD, ""],
+  "\\star": ["\\star", "⋆", "⋆", tt.BIN, ""],
   "\\int": ["\\int", "∫", "∫", tt.BIG_OPERATOR, ""],
   "\\iint": ["\\iint", "∬", "∬", tt.BIG_OPERATOR, ""],
   "\\iiint": ["\\iiint", "∭", "∭", tt.BIG_OPERATOR, ""],
