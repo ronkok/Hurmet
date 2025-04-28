@@ -193,6 +193,8 @@ I recommend Russ Rowlett’s [dictionary of units of measurement](http://www.ibi
 | ch                    | 735.49875                      | 0       | 0        | 2  | 1  | -3 | 0  | 0  | 0 | 0  | 0 | chevaux                          |
 | chain                 | 79200/3937                     | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | 66 survey feet                   |
 | cheval vapeur         | 735.49875                      | 0       | 0        | 2  | 1  | -3 | 0  | 0  | 0 | 0  | 0 | metric hp                        |
+| cmHg                  | 1330                           | 0       | 0        | -1 | 1  | -2 | 0  | 0  | 0 | 0  | 0 |                                  |
+| cmH₂O                 | 98.08                          | 0       | 0        | -1 | 1  | -2 | 0  | 0  | 0 | 0  | 0 |                                  |
 | cmil                  | 5.06707479097497e-10           | 0       | 0        | 2  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | circular mils                    |
 | cmm                   | 0.00001                        | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | centi-milli-meter = 0.01 mm      |
 | constant              | 1                              | 0       | 0        | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | constant, i.e. non-dimensional   |
@@ -247,7 +249,8 @@ I recommend Russ Rowlett’s [dictionary of units of measurement](http://www.ibi
 | fps                   | 0.3048                         | 0       | 0        | 1  | 0  | -1 | 0  | 0  | 0 | 0  | 0 | feet/sec                         |
 | franklin              | 0.00000000033356               | 0       | siWord   | 0  | 0  | 1  | 1  | 0  | 0 | 0  | 0 | statcoulomb                      |
 | ft                    | 0.3048                         | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | feet                             |
-| ft water              | 2988.874                       | 0       | 0        | -1 | 1  | -2 | 0  | 0  | 0 | 0  | 0 | 62.4 psf                         |
+| ft water              | 2989                           | 0       | 0        | -1 | 1  | -2 | 0  | 0  | 0 | 0  | 0 | 62.4 psf                         |
+| ftH₂O                 | 2989                           | 0       | 0        | -1 | 1  | -2 | 0  | 0  | 0 | 0  | 0 | 62.4 psf                         |
 | ftc                   | 10.7639104167097               | 0       | 0        | -2 | 0  | 0  | 0  | 0  | 0 | 1  | 0 | footcandle                       |
 | ftl                   | 3.426259                       | 0       | 0        | -2 | 0  | 0  | 0  | 0  | 0 | 1  | 0 | luminance                        |
 | furlong               | 201.168                        | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | 660 feet                         |
@@ -296,7 +299,9 @@ I recommend Russ Rowlett’s [dictionary of units of measurement](http://www.ibi
 | hpS                   | 9812.5                         | 0       | 0        | 2  | 1  | -3 | 0  | 0  | 0 | 0  | 0 | steam horsepower                 |
 | hr                    | 3600                           | 0       | 0        | 0  | 0  | 1  | 0  | 0  | 0 | 0  | 0 |                                  |
 | in                    | 0.0254                         | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | inch                             |
-| in Hg                 | 3863.8                         | 0       | 0        | -1 | 1  | -2 | 0  | 0  | 0 | 0  | 0 |                                  |
+| in Hg                 | 3378                           | 0       | 0        | -1 | 1  | -2 | 0  | 0  | 0 | 0  | 0 |                                  |
+| inHg                  | 3378                           | 0       | 0        | -1 | 1  | -2 | 0  | 0  | 0 | 0  | 0 |                                  |
+| inH₂O                 | 249.1                          | 0       | 0        | -1 | 1  | -2 | 0  | 0  | 0 | 0  | 0 |                                  |
 | inch                  | 0.0254                         | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 |                                  |
 | inche                 | 0.0254                         | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 |                                  |
 | jansky                | 1e-26                          | 0       | 0        | 0  | 1  | -2 | 0  | 0  | 0 | 0  | 0 | radio flux density               |
@@ -353,6 +358,7 @@ I recommend Russ Rowlett’s [dictionary of units of measurement](http://www.ibi
 | lx                    | 1                              | 0       | siSymbol | -2 | 0  | 0  | 0  | 0  | 0 | 1  | 0 | lux                              |
 | m                     | 1                              | 0       | siSymbol | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | meter                            |
 | mD                    | 9.869233e-16                   | 0       | 0        | 2  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | millidarcy                       |
+| mH₂O                  | 9808                           | 0       | 0        | -1 | 1  | -2 | 0  | 0  | 0 | 0  | 0 |                                  |
 | marathon              | 42195                          | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | ~26 mi                           |
 | marla                 | 25.29285264                    | 0       | 0        | 2  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | 272.25 ft²                       |
 | mas                   | 3.14159265358979/648000000     | 0       | 0        | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | milli-arcsec                     |
@@ -377,6 +383,7 @@ I recommend Russ Rowlett’s [dictionary of units of measurement](http://www.ibi
 | moa                   | 3.14159265358979/10800         | 0       | 0        | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | arcminute                        |
 | mol                   | 6.02214179e+23                 | 0       | 0        | 0  | 0  | 0  | 0  | 0  | 1 | 0  | 0 | mole                             |
 | mole                  | 6.02214179e+23                 | 0       | 0        | 0  | 0  | 0  | 0  | 0  | 1 | 0  | 0 | amount of substance for PV=nRT   |
+| mmHg                  | 133                            | 0       | 0        | -1 | 1  | -2 | 0  | 0  | 0 | 0  | 0 |                                  |
 | mpg                   | 1609.344/0.003785411784        | 0       | 0        | -2 | 0  | 0  | 0  | 0  | 0 | 0  | 0 | miles/gal                        |
 | mph                   | 0.44704                        | 0       | 0        | 1  | 0  | -1 | 0  | 0  | 0 | 0  | 0 | miles/hour                       |
 | mt                    | 1000                           | 0       | 0        | 0  | 1  | 0  | 0  | 0  | 0 | 0  | 0 | metric ton                       |
