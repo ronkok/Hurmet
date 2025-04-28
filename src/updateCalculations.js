@@ -6,7 +6,7 @@ import { evaluate, evaluateDrawing } from "./evaluate"
 import { scanModule } from "./module"
 import { DataFrame } from "./dataframe"
 import { compileSheet } from "./spreadsheet"
-import { clone, addTextEscapes } from "./utils"
+import { clone, addTextEscapes, isValidIdentifier } from "./utils"
 
 /*
  *  This module organizes one or two passes through the data structure of a Hurmet
@@ -53,7 +53,8 @@ import { clone, addTextEscapes } from "./utils"
 * cell. Before creating the transaction, I move the selection point to just after the cell.
 */
 
-const fetchRegEx = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′* *= *(?:fetch|import)\(/
+// eslint-disable-next-line max-len
+const fetchRegEx = new RegExp(isValidIdentifier.source.slice(0, -1) + " *= *(?:fetch|import)\\(")
 const importRegEx = /^[^=]+= *import/
 const fileErrorRegEx = /^Error while reading file. Status Code: \d*$/
 const textRegEx = /\\text{[^}]+}/

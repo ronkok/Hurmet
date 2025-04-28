@@ -1,11 +1,10 @@
 import { dt } from "./constants.js"
 import { tablessTrim } from "./utils.js"
 import { valueFromLiteral } from "./literal"
-import { arrayOfRegExMatches } from "./utils"
+import { arrayOfRegExMatches, isValidIdentifier } from "./utils"
 import { parse } from "./parser.js"
 import { errorOprnd } from "./error.js"
 
-const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/
 const keywordRegEx = /^(if|elseif|else|return|throw|while|for|break|print|end)(\u2002|\b)/
 const drawCommandRegEx = /^(title|frame|view|axes|grid|stroke|strokewidth|strokedasharray|fill|fontsize|fontweight|fontstyle|fontfamily|marker|line|path|plot|curve|rect|circle|ellipse|arc|text|dot|leader|dimension)\b/
 const leadingSpaceRegEx = /^[\t ]+/
@@ -13,7 +12,8 @@ const oneLinerRegEx = /^( *)if ([^\n`]+) +(return|throw|print|break)\b([^\n]+)?(
 
 // If you change functionRegEx, then also change it in mathprompt.js.
 // It isn't called from there in order to avoid duplicating Hurmet code inside ProseMirror.js.
-export const functionRegEx = /^function (?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*\(/
+// eslint-disable-next-line max-len
+export const functionRegEx = new RegExp("^function " + isValidIdentifier.source.slice(1, -1) + "\\(")
 export const moduleRegEx = /^module ([A-Za-z][A-Za-z0-9]*)/
 export const drawRegEx = /^draw\(/
 const startSvgRegEx = /^startSvg\(\)/
