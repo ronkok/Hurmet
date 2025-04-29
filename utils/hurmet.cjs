@@ -10,7 +10,7 @@
 
 // utils.js
 
-const isValidIdentifier$1 = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/;
+const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/;
 // Detect string interpolation ${varName}
 const interpolateRegEx = /\$\{[^}\s]+\}/g;
 
@@ -3655,7 +3655,7 @@ const accentFromChar$1 = Object.freeze({
 const formatColumnName = str => {
   // We can't call parse(str) because that would be a circular dependency.
   // So this module needs its own function to format dataframe column names.
-  if (!isValidIdentifier$1.test(str)) {
+  if (!isValidIdentifier.test(str)) {
     return "\\text{" + addTextEscapes(str) + "}"
   } else {
     // Format it like a Hurmet identifier.
@@ -4086,7 +4086,8 @@ const isUnary = (prevToken) => {
   }
 };
 
-const wordRegEx = /^(?:(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u212C\u2130\u2131\u210B\u2110\u2112\u2133\u211B\u212F\u210A\u2113\u2134]|(?:\uD835[\uDC00-\udc33\udc9c-\udccf\udd38-\udd50]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*|!in|-->|->|left\.|right\.|log10|log2)/;
+// eslint-disable-next-line max-len
+const wordRegEx = new RegExp("^(?:" + isValidIdentifier.source.slice(1, -3) + "|!in|-->|->|left\\.|right\\.)");
 
 const words = Object.freeze({
   //       input,    tex output,          calc output, type, closeDelim
@@ -16731,7 +16732,6 @@ const valueFromLiteral = (str, name, formats) => {
   }
 };
 
-const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/;
 const keywordRegEx = /^(if|elseif|else|return|throw|while|for|break|print|end)(\u2002|\b)/;
 const drawCommandRegEx = /^(title|frame|view|axes|grid|stroke|strokewidth|strokedasharray|fill|fontsize|fontweight|fontstyle|fontfamily|marker|line|path|plot|curve|rect|circle|ellipse|arc|text|dot|leader|dimension)\b/;
 const leadingSpaceRegEx$1 = /^[\t ]+/;
@@ -16739,7 +16739,8 @@ const oneLinerRegEx = /^( *)if ([^\n`]+) +(return|throw|print|break)\b([^\n]+)?(
 
 // If you change functionRegEx, then also change it in mathprompt.js.
 // It isn't called from there in order to avoid duplicating Hurmet code inside ProseMirror.js.
-const functionRegEx = /^function (?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*\(/;
+// eslint-disable-next-line max-len
+const functionRegEx = new RegExp("^function " + isValidIdentifier.source.slice(1, -1) + "\\(");
 const moduleRegEx = /^module ([A-Za-z][A-Za-z0-9]*)/;
 const drawRegEx = /^draw\(/;
 const startSvgRegEx = /^startSvg\(\)/;
@@ -17030,7 +17031,8 @@ const containsOperator = /[+\-×·*∘⌧/^%‰&√!¡|‖&=<>≟≠≤≥∈∉
 const mustDoCalculation = /^(``.+``|[$$£¥\u20A0-\u20CF]?(\?{1,2}|@{1,2}|%{1,2}|!{1,2})[^=!(?@%!{})]*)$/;
 const assignDataFrameRegEx = /^[^=]+=\s*``[\s\S]+``\s*$/;
 const currencyRegEx = /^[$£¥\u20A0-\u20CF]/;
-const matrixOfNames = /^[([](?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*[,;].+[)\]]$/;
+// eslint-disable-next-line max-len
+const matrixOfNames = new RegExp("^[([]" + isValidIdentifier.source.slice(1, -1) + "[,;].+[)\\]]$");
 const isKeyWord = /^(π|pi|ℏ|true|false|root|if|in|else|elseif|and|or|otherwise|mod|modulo|for|while|end|break|return|throw)$/;
 const testRegEx = /^(@{1,2})test /;
 
@@ -17149,7 +17151,7 @@ const compile = (
           const potentialIdentifiers = leadStr.split(/[,;]/);
           for (let i = 0; i < potentialIdentifiers.length; i++) {
             const candidate = potentialIdentifiers[i].trim();
-            if (isKeyWord.test(candidate) || !isValidIdentifier$1.test(candidate)) {
+            if (isKeyWord.test(candidate) || !isValidIdentifier.test(candidate)) {
               // leadStr is not a list of valid identifiers.
               // So this isn't a valid calculation statement. Let's finish early.
               return shortcut(str, formats)
@@ -17159,7 +17161,7 @@ const compile = (
           name = potentialIdentifiers.map(e => e.trim());
 
         } else {
-          if (isValidIdentifier$1.test(leadStr) && !isKeyWord.test(leadStr)) {
+          if (isValidIdentifier.test(leadStr) && !isKeyWord.test(leadStr)) {
             name = leadStr;
           } else {
             // The "=" sign is inside an expression. There is no lead identifier.
@@ -17176,7 +17178,7 @@ const compile = (
     } else if (isDataFrameAssigment) {
       name = mainStr;
       expression = trailStr;
-    } else  if (isValidIdentifier$1.test(mainStr) && !isKeyWord.test(mainStr)) {
+    } else  if (isValidIdentifier.test(mainStr) && !isKeyWord.test(mainStr)) {
       // No calculation display selector is present,
       // but there is one "=" and a valid idendtifier.
       // It may be an assignment statement.
@@ -17976,7 +17978,8 @@ const compileSheet = (table, formats) => {
 * cell. Before creating the transaction, I move the selection point to just after the cell.
 */
 
-const fetchRegEx = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′* *= *(?:fetch|import)\(/;
+// eslint-disable-next-line max-len
+const fetchRegEx = new RegExp(isValidIdentifier.source.slice(0, -1) + " *= *(?:fetch|import)\\(");
 const importRegEx = /^[^=]+= *import/;
 const fileErrorRegEx = /^Error while reading file. Status Code: \d*$/;
 const textRegEx$1 = /\\text{[^}]+}/;
