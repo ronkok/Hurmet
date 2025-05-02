@@ -245,7 +245,7 @@ print &quot;Hi!&quot;</code></pre></td></tr>
 <tr><td>|||</td><td>¦</td><td>\iint</td><td>∬</td><td>HH</td><td>ℍ</td><td>\hbar</td><td>ℏ</td></tr>
 <tr><td>\|</td><td>‖</td><td>ii</td><td><span class='hurmet-calc' data-entry='√(-1)'><math><msqrt><mrow><mtext>-</mtext><mn>1</mn></mrow></msqrt></math></span></td><td>NN</td><td>ℕ</td><td>\ell</td><td>ℓ</td></tr>
 <tr><td>/_</td><td>∠</td><td>OO</td><td><span class='hurmet-calc' data-entry='O︀'><math><mrow><mi>O</mi><mtext>︀</mtext></mrow></math></span></td><td>QQ</td><td>ℚ</td><td>\euro</td><td>€</td></tr>
-<tr><td></td><td></td><td>\c</td><td>¢</td><td>RR</td><td>ℝ</td><td>\yen</td><td>¥</td></tr>
+<tr><td>_2</td><td>₂</td><td>\c</td><td>¢</td><td>RR</td><td>ℝ</td><td>\yen</td><td>¥</td></tr>
 <tr><td></td><td></td><td></td><td></td><td>ZZ</td><td>ℤ</td><td></td><td></td></tr></table>
 <p>The font corrections, e.g., <code>bb …</code> work on any letter from A to Z or a to z. You can also make one those letters bold by typing it and then typing <strong>Ctrl+B</strong>.</p>
 <p><code>--&gt;</code>, <code>&lt;--</code>, and <code>&lt;--&gt;</code> will auto correct into extensible arrows, as in: <span class='hurmet-calc' data-entry='A ⟶"note" B'><math><mrow><mi>A</mi><mrow><mspace width="0.2778em"></mspace><mover accent="false"><mo stretchy="true" lspace="0" rspace="0">→</mo><mover><mrow><mspace width="0.4286em"></mspace><mtext>note</mtext><mspace width="0.4286em"></mspace></mrow><mspace width="3.5000em"></mspace></mover></mover><mspace width="0.2778em"></mspace></mrow><mi>B</mi></mrow></math></span>.</p>
@@ -318,15 +318,15 @@ print &quot;Hi!&quot;</code></pre></td></tr>
 <p>I try to resist the temptation to overuse the <strong>%</strong> selector. When I review work done by another engineer, I can do without the blue echo if variable values are assigned directly above the equation where they are used. Otherwise I get grumpy. You don’t want a grumpy reviewer.</p>
 <p>One last variation is possible when assigning values from a single-row data frame. You can assign such values to more than one variable at a time, like this:</p>
 <pre><code>A, I, w_self = beam[&quot;A&quot;, &quot;Ix&quot;, &quot;weight&quot;] = !!</code></pre><h2 id='identifiers'>Identifiers</h2>
-<p>Variable names and function names must be written in the form of a valid <em>identifier</em>.</p>
-<ul><li><p>Identifiers may be multiple characters long.</p></li>
-<li><p>The first character must be a letter from the Latin or Greek alphabet. It may be bold or capitalized calligraphic Latin, or ℏ, or ℓ.</p></li>
-<li><p>Subsequent characters may be letters or numerals (0123456789).</p></li>
-<li><p>An under-score within an identifier is allowed and will be interpreted to mean the start of a subscript.</p></li>
-<li><p>If an identifier has only one letter, then an accent character may be written after it. Hurmet will render the accent above the letter, as in <span class='hurmet-calc' data-entry='θ̂'><math><mover><mi>θ</mi><mo stretchy="false" class="tml-capshift" style="math-style:normal;math-depth:0;">^</mo></mover></math></span>.</p></li>
-<li><p>Primes may be appended to the very end, as in: <span class='hurmet-calc' data-entry='f_c′'><math><mrow><mi>f</mi><msubsup><mrow></mrow><mtext>c</mtext><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msubsup></mrow></math></span>.</p></li>
-<li><p>The following keywords may not be used as variable names: <code>π</code>, <code>ℏ</code>, <code>pi</code>, <code>true</code>, <code>false</code>, <code>root</code>, <code>if</code>, <code>else</code>, <code>elseif</code>, <code>mod</code>, <code>modulo</code>, <code>otherwise</code>, <code>end</code>, <code>and</code>, <code>or</code>, <code>in</code>, <code>to</code>.</p>
-<p><img src="images/identifier-railroad.svg" alt="letter letter-or-digit-or-accent prime"></p></li></ul>
+<p><em>Identifier</em> is another word for <em>variable name or function name</em>. Hurmet will recognize some words as valid identifiers:</p>
+<ul><li class="tight"><p>They may be multiple characters long.</p></li>
+<li class="tight"><p>The first character must be a letter from the Latin or Greek alphabet. It may be bold or capitalized calligraphic Latin, or ℏ, or ℓ.</p></li>
+<li class="tight"><p>Subsequent characters may be letters or numerals (0123456789).</p></li>
+<li class="tight"><p>An under-score is allowed and will be interpreted as the start of a subscript.</p></li>
+<li class="tight"><p>If an identifier has only one letter, then an accent character may be written after it. Hurmet will render the accent above the letter, as in <span class='hurmet-calc' data-entry='θ̂'><math><mover><mi>θ</mi><mo stretchy="false" class="tml-capshift" style="math-style:normal;math-depth:0;">^</mo></mover></math></span>.</p></li>
+<li class="tight"><p>Primes may be appended to the very end, as in: <span class='hurmet-calc' data-entry='f_c′'><math><mrow><mi>f</mi><msubsup><mrow></mrow><mtext>c</mtext><mo lspace="0em" rspace="0em" class="tml-prime">′</mo></msubsup></mrow></math></span>.</p></li>
+<li class="tight"><p>The following keywords may not be used as variable names: <code>π</code>, <code>ℏ</code>, <code>pi</code>, <code>true</code>, <code>false</code>, <code>root</code>, <code>if</code>, <code>else</code>, <code>elseif</code>, <code>mod</code>, <code>modulo</code>, <code>otherwise</code>, <code>end</code>, <code>and</code>, <code>or</code>, <code>in</code>, <code>to</code>.</p></li></ul>
+<p><img src="images/identifier-railroad.svg" alt="letter letter-or-digit-or-accent prime"></p>
 <p>The names of those accents are:</p>
 <table><tr><td>grave</td><td>acute</td><td>hat</td><td>tilde</td></tr>
 <tr><td>bar</td><td>breve</td><td>dot</td><td>ddot</td></tr>
@@ -340,11 +340,11 @@ print &quot;Hi!&quot;</code></pre></td></tr>
 <th>Example result</th></tr>
 <tr><td>Greek letter</td><td>Type the name of the letter.</td><td>gamma</td><td>γ</td></tr>
 <tr><td>Capital Greek letter</td><td>Capitalize the name’s first letter.</td><td>Gamma</td><td>Γ</td></tr>
-<tr><td>Bold letter</td><td>Type “bb”, then space, then the desired letter.</td><td>bb M</td><td>𝐌</td></tr>
-<tr><td>Calligraphic capital letter</td><td>Type “cc”, then space, then the desired letter.</td><td>cc P</td><td>𝒫</td></tr>
+<tr><td>Bold letter</td><td>Type “bb”, then space, then the desired letter,<br>or type the letter, then <strong>Ctrl-B</strong>.</td><td>bb M</td><td>𝐌</td></tr>
+<tr><td>Calligraphic capital letter</td><td>Type “cc”, then space, then the desired letter.</td><td>cc N</td><td>ℕ</td></tr>
 <tr><td>Accent</td><td>Type the name of the accent.</td><td>y bar</td><td><span class='hurmet-calc' data-entry='y̅'><math><mover><mi>y</mi><mo stretchy="false" class="tml-xshift" style="math-style:normal;math-depth:0;">‾</mo></mover></math></span></td></tr>
 <tr><td>Prime</td><td>Type two apostrophes.</td><td>&#x27;&#x27;</td><td>′</td></tr></table>
-<p>Hurmet will render single Latin letter variable names in <em>italic</em>. Function names and multi-letter variable names are rendered in upright font. As a convention, I personally use <strong>bold</strong> letters for variables that contain vectors or matrices.</p>
+<p>Hurmet will render single Latin or Greek letter variable names in <em>italic</em>. Function names and multi-letter variable names are rendered in upright font. As a convention, I personally use <strong>bold</strong> letters for variables that contain vectors or matrices.</p>
 <h2 id='data-types'>Data Types</h2>
 <dl class="bold-term">
 <dt id='boolean'>Boolean</dt>
@@ -356,7 +356,7 @@ print &quot;Hi!&quot;</code></pre></td></tr>
 a[2]      # returns &quot;b&quot;
 a[2:4]    # returns &quot;bcd&quot;
 a[5:end]  # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong></p>
-<p>Strings will be rendered as math if they are delimited with single backticks instead of double quotes. So somthing like <code>`M_n`</code> will return as <span class='hurmet-calc' data-entry='M_n'><math><mrow><mi>M</mi><msub><mrow></mrow><mtext>n</mtext></msub></mrow></math></span>. This is useful mostly when a calculation checks a condition and reports whether some computed variable can be accepted.</p></dd>
+<p>Strings will be rendered as math if they are delimited with single backticks instead of double quotes. So something like <code>`M_n`</code> will return as <span class='hurmet-calc' data-entry='M_n'><math><mrow><mi>M</mi><msub><mrow></mrow><mtext>n</mtext></msub></mrow></math></span>. This is useful mostly when a calculation checks a condition and reports whether some computed variable can be accepted.</p></dd>
 <dt id='number'>Number</dt>
 <dd><p>Enter as integers (33), decimals (2.45), percentages (3.2%), scientific notation (3.1e4), mixed fractions (3 ⁷⁄₈) or hexadecimal (0x2A).</p></dd>
 <p><img src="images/NumberRailroad.svg" alt="integers, decimals, percentages, scientific notation, mixed fractions, or hexadecimal"></p>
@@ -368,24 +368,24 @@ a[5:end]  # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong><
 <dd><p>One can write a complex number in two forms:</p>
 <ul><li><p><span class='hurmet-calc' data-entry='a ± j b'><math><mrow><mi>a</mi><mo>±</mo><mi>j</mi><mi>b</mi></mrow></math></span>    The letter <code>j</code> is identical to <span class='hurmet-calc' data-entry='√(-1)'><math><msqrt><mrow><mtext>-</mtext><mn>1</mn></mrow></msqrt></math></span> by Hurmet definition. Write a space after the j, as in <code>2 - j 3</code>.</p></li>
 <li><p><span class='hurmet-calc' data-entry='r∠θ'><math><mrow><mi>r</mi><mi>∠</mi><mi>θ</mi></mrow></math></span>    The characters <code>/_</code> will auto-correct into ∠ and <span class='hurmet-calc' data-entry='θ'><math><mi>θ</mi></math></span> is in radians.</p></li></ul>
-<p>Also, the character <strong>°</strong> is now a unit name. So one can also write a polar notation as <span class='hurmet-calc' data-entry='r∠θ°'><math><mrow><mi>r</mi><mi>∠</mi><mi>θ</mi><mi>°</mi></mrow></math></span> and the phase angle will be unit-aware. The characters <code>ooo</code> will auto-correct into °</p>
+<p>Also, the character <strong>°</strong> is a unit name. So one can also write a polar notation as <span class='hurmet-calc' data-entry='r∠θ°'><math><mrow><mi>r</mi><mi>∠</mi><mi>θ</mi><mi>°</mi></mrow></math></span> and the phase angle will be unit-aware. The characters <code>ooo</code> will auto-correct into °</p>
 <p>Examples:</p>
 <div class="indented"><p><span class='hurmet-calc' data-entry='z_1 = 2 + j 3'><math><mrow><mi>z</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo>=</mo><mn>2</mn><mo>+</mo><mi>j</mi><mn>3</mn></mrow></math></span></p>
 <p><span class='hurmet-calc' data-entry='z_2 = 4∠30°'><math><mrow><mi>z</mi><msub><mrow></mrow><mtext>2</mtext></msub><mo>=</mo><mn>4</mn><mi>∠</mi><mn>30</mn><mtext>°</mtext></mrow></math></span></p>
 <p><span class='hurmet-calc' data-entry='z = z_1 + z_2  = \blue((2 + j 3) + ( 4∠30°)) = 5.46 + j 5'><math><mrow><mi>z</mi><mo>=</mo><mi>z</mi><msub><mrow></mrow><mtext>1</mtext></msub><mo>+</mo><mi>z</mi><msub><mrow></mrow><mtext>2</mtext></msub></mrow><mrow><mo>=</mo><mo form="prefix" stretchy="false" style="color:#0000FF;">(</mo><mn style="color:#0000FF;">2</mn><mo style="color:#0000FF;">+</mo><mi style="color:#0000FF;">j</mi><mn style="color:#0000FF;">3</mn><mo form="postfix" stretchy="false" style="color:#0000FF;">)</mo><mo style="color:#0000FF;">+</mo><mo form="prefix" stretchy="false" style="color:#0000FF;">(</mo><mn style="color:#0000FF;">4</mn><mi style="color:#0000FF;">∠</mi><mn style="color:#0000FF;">30</mn><mtext style="color:#0000FF;">°</mtext><mo form="postfix" stretchy="false" style="color:#0000FF;">)</mo></mrow><mrow><mo>=</mo><mn>5.46</mn><mo>+</mo><mi>j</mi><mn>5</mn></mrow></math></span></p></div></dd>
 <dt id='unit'>Unit</dt>
 <dd><p>A Humet <em>unit</em> can be applied to a numeric value. There are four ways to write a Hurmet unit.</p>
-<ol class="decimal" start="1"><li class="tight"><p>A unit name written directly after a number, with no intervening space.</p></li>
+<ol class="decimal" start="1"><li class="tight"><p>A unit name or compound unit written directly after a number, with no intervening space.</p></li>
 <li class="tight"><p>A unit name between apostrophes, aka single straight quotation marks, written after a numeric value. A unit written this way can contain a space, like <code>fluid ounce</code>.</p></li>
 <li class="tight"><p>A unit symbol written after a numeric value.</p></li>
 <li class="tight"><p>A currency symbol written before a non-negative number.</p></li></ol>
 <table><tr><th>Input</th>
 <th>Renders as</th></tr>
 <tr><td><code>4.2meters</code></td><td><span class='hurmet-calc' data-entry='4.2meters'><math><mrow><mn>4.2</mn><mspace width="0.2778em"></mspace><mtext>meters</mtext></mrow></math></span></td></tr>
-<tr><td><code>4.2 &#x27;meters&#x27;</code></td><td><span class='hurmet-calc' data-entry="4.2 'meters'"><math><mrow><mn>4.2</mn><mspace width="0.2778em"></mspace><mtext>meters</mtext></mrow></math></span></td></tr>
+<tr><td><code>20m/s</code></td><td><span class='hurmet-calc' data-entry='20m/s'><math><mrow><mn>20</mn><mspace width="0.2778em"></mspace><mtext>m/s</mtext></mrow></math></span></td></tr>
 <tr><td><code>30°</code></td><td><span class='hurmet-calc' data-entry='30°'><math><mrow><mn>30</mn><mtext>°</mtext></mrow></math></span></td></tr>
 <tr><td><code>$25.10</code></td><td><span class='hurmet-calc' data-entry='$25.10'><math><mrow><mi>$</mi><mn>25.10</mn></mrow></math></span></td></tr>
-<tr><td><code>10 &#x27;N·m/s&#x27;</code></td><td><span class='hurmet-calc' data-entry="10 'N·m/s'"><math><mrow><mn>10</mn><mspace width="0.2778em"></mspace><mrow><mtext>N</mtext><mspace width="0.0556em"></mspace><mo lspace="0em" rspace="0em">⋅</mo><mspace width="0.0556em"></mspace><mtext>m/s</mtext></mrow></mrow></math></span></td></tr>
+<tr><td><code>10 &#x27;nautical miles&#x27;</code></td><td><span class='hurmet-calc' data-entry="10 'nautical miles'"><math><mrow><mn>10</mn><mspace width="0.2778em"></mspace><mtext>nautical miles</mtext></mrow></math></span></td></tr>
 <tr><td><code>[2.1; 15.3] &#x27;feet&#x27;</code></td><td><span class='hurmet-calc' data-entry="[2.1; 15.3] 'feet'"><math><mrow><mrow><mo fence="true" form="prefix">[</mo><mtable columnalign="center"><mtr><mtd style="padding-left:0em;padding-right:0em;"><mn>2.1</mn></mtd></mtr><mtr><mtd style="padding-left:0em;padding-right:0em;"><mn>15.3</mn></mtd></mtr></mtable><mo fence="true" form="postfix">]</mo></mrow><mspace width="0.2778em"></mspace><mtext>feet</mtext></mrow></math></span></td></tr></table>
 <p><img src="images/unit-railroad.svg" alt="number or matrix or map apostrophe unit-name apostrophe"></p>
 <p>Hurmet treats the number and the unit together as a single <em>quantity</em>. Quantities are useful in <a href='#unit-aware-calculations'>unit-aware calculations</a> which do automatic unit conversion and also check for unit compatibility.</p>
@@ -397,8 +397,8 @@ a[5:end]  # returns &quot;efg&quot;</code></pre><p><strong>Math String</strong><
 <p>Note that within the unit literal, it is not necessary to write <code>^</code> to indicate a numeric exponent. Also, a dot or a hyphen within a compound unit name will be rendered as a half-high dot.</p>
 <p>Only one division solidus, <strong>/</strong>, may be written into a compound unit.</p></dd>
 <dt id='matrix'>Matrix</dt>
-<dd><p>A Hurmet <em>matrix</em> is a one or two dimensional arrangement of matrix elements. A Hurmet matrix element can be a number, a string, <code>true</code>, <code>false</code>, or an exprression that resolves to one of those simple types.s</p>
-<p>A matrix literal is written between delimiters, either <code>( )</code> or <code>[ ]</code> or <code>{: }</code>. Matrix elements are horizontally separated by tabs or commas. Matrix rows are separated by semi-colons. So this: <code>(1, 0; 0, 1)</code> renders as <span class='hurmet-calc' data-entry='(1, 0; 0, 1)'><math><mrow><mo fence="true" form="prefix">(</mo><mtable columnalign="center center"><mtr><mtd style="padding-left:0em;"><mn>1</mn></mtd><mtd style="padding-right:0em;"><mn>0</mn></mtd></mtr><mtr><mtd style="padding-left:0em;"><mn>0</mn></mtd><mtd style="padding-right:0em;"><mn>1</mn></mtd></mtr></mtable><mo fence="true" form="postfix">)</mo></mrow></math></span>.</p>
+<dd><p>A Hurmet <em>matrix</em> is a one or two dimensional arrangement of matrix elements. A Hurmet matrix element can be a number, a string, <code>true</code>, <code>false</code>, or an exprression that resolves to one of those simple types.</p>
+<p>A matrix literal is written between delimiters, either <code>( )</code> or <code>[ ]</code> or <code>{: }</code>. Matrix elements are horizontally separated by tabs or commas. Matrix rows are separated by semi-colons. So this:<br><code>(1, 0; 0, 1)</code> renders as <span class='hurmet-calc' data-entry='(1, 0; 0, 1)'><math><mrow><mo fence="true" form="prefix">(</mo><mtable columnalign="center center"><mtr><mtd style="padding-left:0em;"><mn>1</mn></mtd><mtd style="padding-right:0em;"><mn>0</mn></mtd></mtr><mtr><mtd style="padding-left:0em;"><mn>0</mn></mtd><mtd style="padding-right:0em;"><mn>1</mn></mtd></mtr></mtable><mo fence="true" form="postfix">)</mo></mrow></math></span>.</p>
 <p>A Hurmet <em>vector</em> is a one dimensional array. Write a vector literal with values separated by commas or semi-colons, but not both.</p>
 <table><tr><th>Input</th>
 <th>Renders as</th></tr>
@@ -553,7 +553,7 @@ ${w_dead}	30	40`` &#x27;lbf/ft&#x27; = %% lbf/ft</code></pre><p>Note that you mu
 <tr><td>+</td><td>2 + 2</td><td>Addition</td></tr>
 <tr><td>–</td><td>5 - 3</td><td>Subtraction</td></tr>
 <tr><td>-</td><td><span class='hurmet-calc' data-entry='-4'><math><mrow><mtext>-</mtext><mn>4</mn></mrow></math></span></td><td>Unary minus</td></tr>
-<tr><td rowspan="2">*</td><td><span class='hurmet-calc' data-entry='2 * 4'><math><mrow><mn>2</mn><mo>*</mo><mn>4</mn></mrow></math></span></td><td>Multiplication of numbers or matrices.\</td></tr>
+<tr><td rowspan="2">*</td><td><span class='hurmet-calc' data-entry='2 * 4'><math><mrow><mn>2</mn><mo>*</mo><mn>4</mn></mrow></math></span></td><td>Multiplication of numbers or matrices.</td></tr>
 <tr><td><code>&quot;s1&quot;*&quot;s2&quot;</code></td><td>Concatenation of strings</td></tr>
 <tr><td>×</td><td>2 × 4</td><td>Multiplication of numbers.<br>Cross product of three-vectors.<br>auto-correct: <strong>xx</strong></td></tr>
 <tr><td>·</td><td><span class='hurmet-calc' data-entry='a ⋅ b'><math><mrow><mi>a</mi><mo>⋅</mo><mi>b</mi></mrow></math></span></td><td>Multiplication of numbers.<br>Dot product of vectors or matrices.<br>auto-correct: dot between two spaces.</td></tr>
@@ -599,7 +599,7 @@ ${w_dead}	30	40`` &#x27;lbf/ft&#x27; = %% lbf/ft</code></pre><p>Note that you mu
 <tr><td>or<br>||<br>∨</td><td>if <em>a</em> or <em>b</em><br>if <em>a</em> || <em>b</em><br>if <em>a</em> ∨ <em>b</em></td><td>Logical or</td></tr>
 <tr><td>⊻</td><td><p></p></td><td>Logical xor</td></tr>
 <tr><td>¬<br>!</td><td>if ¬ <em>a</em><br>if !a</td><td>Logical not</td></tr>
-<tr><td>:</td><td>𝐕<p class='hurmet-tex' data-entry='2:3'><math display="block" class="tml-display" style="display:block math;"><mrow><mn>2</mn><mo lspace="0.2222em" rspace="0.2222em">:</mo><mn>3</mn></mrow></math></p> <br>for <em>i</em> in 1:3</td><td>| Range separator</td></tr></table>
+<tr><td>:</td><td>𝐕[2:3] <br>for <em>i</em> in 1:3</td><td>| Range separator</td></tr></table>
 </div>
 <h2 id='functions'>Functions</h2>
 <p>Hurmet treats an <a href='#identifiers'>identifier</a> as a function name if it is placed directly before an open parenthesis. So a term like <span class='hurmet-calc' data-entry='sinh(x)'><math><mrow><mrow><mi>sinh</mi><mo>⁡</mo></mrow><mo form="prefix" stretchy="false">(</mo><mi>x</mi><mo form="postfix" stretchy="false">)</mo></mrow></math></span> is a function.</p>
@@ -626,7 +626,7 @@ ${w_dead}	30	40`` &#x27;lbf/ft&#x27; = %% lbf/ft</code></pre><p>Note that you mu
 <dd><p>Complex conjugate of a complex number.</p></dd>
 <dt id='cos'>cos(𝜃), sin(𝜃), tan(𝜃), sec(𝜃), csc(𝜃), cot(𝜃)</dt>
 <dd><p>Trigonometry functions.</p>
-<p>The trig functions listed above will assume that a real argument is in radians unless you tell it otherwise. You can tell it otherwise by just writing in a unit, as in: <code>tan(45°)</code> and running a unit-aware calculation.</p>
+<p>The trig functions listed above will assume that a real argument is in radians unless you tell it otherwise. You can tell it otherwise by writing in a unit, as in: <code>tan(45°)</code> and running a unit-aware calculation.</p>
 <p>Complex numbers are also valid arguments.</p>
 <p>A positive integer written as a superscript after a trig function name will return the function result raised to a power.<br>So that: <span class='hurmet-calc' data-entry='sin^2 θ = (sin θ)^2'><math><mrow><msup><mi>sin</mi><mn>2</mn></msup><mo>⁡</mo><mspace width="0.1667em"></mspace><mi>θ</mi><mo>=</mo><mo form="prefix" stretchy="false">(</mo><mrow><mi>sin</mi><mo>⁡</mo><mspace width="0.1667em"></mspace></mrow><mi>θ</mi><msup><mo form="postfix" stretchy="false">)</mo><mn>2</mn></msup></mrow></math></span>.</p>
 <p>A superscript <sup>-1</sup> indicates an inverse function. In other words, <span class='hurmet-calc' data-entry='cos^(-1) x = acos(x)'><math><mrow><msup><mi>cos</mi><mrow><mtext>-</mtext><mn>1</mn></mrow></msup><mo>⁡</mo><mspace width="0.1667em"></mspace><mi>x</mi><mo>=</mo><mi>acos</mi><mo>⁡</mo><mo form="prefix" stretchy="false">(</mo><mi>x</mi><mo form="postfix" stretchy="false">)</mo></mrow></math></span>.</p>
@@ -769,7 +769,7 @@ ${w_dead}	30	40`` &#x27;lbf/ft&#x27; = %% lbf/ft</code></pre><p>Note that you mu
 <p><code>4ft + 3 &#x27;yards&#x27; = ?? m</code></p>
 <p>… the result will render as:</p>
 <p><span class='hurmet-calc' data-entry="4ft + 3 'yards' = 3.9624 'm'"><math><mrow><mn>4</mn><mspace width="0.2778em"></mspace><mtext>ft</mtext><mo>+</mo><mn>3</mn><mspace width="0.2778em"></mspace><mtext>yards</mtext><mo>=</mo><mn>3.9624</mn><mspace width="0.2778em"></mspace><mtext>m</mtext></mrow></math></span></p>
-<p>You can create composite units on the fly and Hurmet will still convert them automatically.</p>
+<p>You can create composite units on the fly and Hurmet will convert them automatically.</p>
 <p><span class='hurmet-calc' data-entry="(3kW·hr × (20min)) / (800lbf × 1h) = 1.0116402439486971731 'km'"><math><mrow><mstyle displaystyle="true" scriptlevel="0"><mfrac><mrow><mn>3</mn><mspace width="0.2778em"></mspace><mrow><mtext>kW</mtext><mspace width="0.0556em"></mspace><mo lspace="0em" rspace="0em">⋅</mo><mspace width="0.0556em"></mspace><mtext>hr</mtext></mrow><mo>×</mo><mo form="prefix" stretchy="false">(</mo><mn>20</mn><mspace width="0.2778em"></mspace><mtext>min</mtext><mo form="postfix" stretchy="false" lspace="0em" rspace="0em">)</mo></mrow><mrow><mn>800</mn><mspace width="0.2778em"></mspace><mtext>lbf</mtext><mo>×</mo><mn>1</mn><mspace width="0.2778em"></mspace><mtext>h</mtext></mrow></mfrac></mstyle><mo>=</mo><mn>1.0116402439486971731</mn><mspace width="0.2778em"></mspace><mtext>km</mtext></mrow></math></span></p>
 <p>Use spaces to separate compound units from adjacent variables.<br><code>20N*m</code> is a compound unit, but <code>20N * m</code> is 20 Newtons times variable <code>m</code>.</p>
 <p>If you try to add quantities with non-compatible units, Hurmet will return an error message:</p>

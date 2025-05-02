@@ -754,6 +754,8 @@ const checkForTrailingAccent = word => {
 }
 
 const openParenRegEx = /^\(/
+const subOrAccentRegEx = /[_₀-₉\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]/
+const subRegEx = /[_₀-₉]/
 
 const lexOneWord = (str, prevToken) => {
   const matchObj = wordRegEx.exec(str)
@@ -781,20 +783,20 @@ const lexOneWord = (str, prevToken) => {
         : [match, "\\operatorname{" + groupSubscript(match) + "}", match, tt.FUNCTION, ""]
     } else if (prevToken.ttype === tt.ACCESSOR) {
       return [match, match, match, tt.PROPERTY, ""]
-    } else if (/[_\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]/.test(match)) {
+    } else if (subOrAccentRegEx.test(match)) {
       let identifier = ""
-      if (match.indexOf("_") === -1) {
+      if (!subRegEx.test(match)) {
         identifier = checkForTrailingAccent(match)
         return [match, identifier, match, (match.length > 2) ? tt.LONGVAR : tt.VAR, ""]
       } else {
-        const segments = match.split("_")
-        for (let i = segments.length - 1; i >= 0; i--) {
-          segments[i] = checkForTrailingAccent(segments[i])
-          if (i > 0) {
-            segments[i] = "_\\text{" + segments[i] + "}"
-          }
-        }
-        identifier = segments.join("")
+        const subMatch = subRegEx.exec(match)
+        let base = match.slice(0, subMatch.index)
+        let subscript = match.slice(subMatch.index)
+        base = checkForTrailingAccent(base)
+        subscript = subscript[0] === "_"
+          ? "_\\text{" + subscript.slice(1) + "}"
+          : subscript;
+        identifier = base + subscript
         const primes = /^′*/.exec(str.slice(match.length))
         if (primes) {
           match += primes[0]
@@ -806,7 +808,7 @@ const lexOneWord = (str, prevToken) => {
           // This helps Cambria Math to supply the correct size radical.
           identifier = identifier.slice(0, pos) + "{" + identifier.slice(pos) + "}"
         }
-        return [match, identifier, match, (segments[0].length > 1) ? tt.LONGVAR : tt.VAR, ""]
+        return [match, identifier, match, (base.length > 1) ? tt.LONGVAR : tt.VAR, ""]
       }
     } else if (match.length === 2 & match.charAt(0) === "\uD835") {
       return [match, match, match, tt.VAR, ""]

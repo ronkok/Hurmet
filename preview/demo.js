@@ -1,6 +1,6 @@
 // autocorrect.js
 
-const autoCorrectRegEx = /([?:<>\-~/_!]=| \.| \*|~~|\+-|-\+|<-->|<->|<>|<--|<-|-->|->|=>|-:|\^\^|\\\||\/\/\/|\b(bar|hat|vec|tilde|dot|ddot|ul)|\b(bb|bbb|cc|ff|ss) [A-Za-z]|\\?[A-Za-z]{2,}|\\c|\\ |\\o|root [234]|<<|>>|\^-?[0-9]+|\|\|\||\/_|''|""|00)\s$/;
+const autoCorrectRegEx = /([?:<>\-~/_!]=| \.| \*|~~|\+-|-\+|<-->|<->|<>|<--|<-|-->|->|=>|-:|\^\^|\\\||\/\/\/|\b(bar|hat|vec|tilde|dot|ddot|ul)|\b(bb|bbb|cc|ff|ss) [A-Za-z]|\\?[A-Za-z]{2,}|_[0-9]+|\\c|\\ |\\o|root [234]|<<|>>|\^-?[0-9]+|\|\|\||\/_|''|""|00)\s$/;
 
 const accents$1 = {
   acute: "\u0301",
@@ -268,10 +268,13 @@ const fontedChar = (ch, accentName) => {
   }
 };
 
+const subscriptNumerals = numStr => {
+  return Array.from(numStr).map(ch => String.fromCodePoint(0x2080 + Number(ch))).join('')
+};
+
 const autoCorrect = (jar, preText, postText) => {
   // Auto-correct math in real time.
   // jar is an instance of a CodeJar editing box.
-//  const pos = doc.getCursor()
   if (preText.length > 0 && preText.slice(-1) === " ") {
     // Auto-correct only after the user hits the space bar.
     const matches = autoCorrectRegEx.exec(preText);
@@ -281,6 +284,13 @@ const autoCorrect = (jar, preText, postText) => {
       const accent = accents$1[word];
       if (accent) {
         const newStr = preText.slice(0, -(matches[0].length + 1)) + accent;
+        jar.updateCode(newStr + postText);
+        // Move the cursor to the correct location
+        const L = newStr.length;
+        jar.restore({ start: L, end: L, dir: undefined });
+      } else if (word[0] === "_") {
+        // Create Unicode numeric superscript
+        const newStr = preText.slice(0, -matches[0].length) + subscriptNumerals(word.slice(1));
         jar.updateCode(newStr + postText);
         // Move the cursor to the correct location
         const L = newStr.length;
@@ -359,7 +369,8 @@ const renderSVG = dwg => {
 
 // utils.js
 
-const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))[A-Za-z0-9_\u0391-\u03C9\u03D5\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]*′*$/;
+// If you modify, isValidIdentifier, also modify functionRegEx in mathprompt.js
+const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))(?:[A-Za-z0-9\u0391-\u03C9\u03D5]+|[\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1])?(?:_[A-Za-z0-9\u0391-\u03C9\u03D5]+|[₀-₉]+)?′*$/;
 // Detect string interpolation ${varName}
 const interpolateRegEx = /\$\{[^}\s]+\}/g;
 
@@ -5079,6 +5090,8 @@ const checkForTrailingAccent = word => {
 };
 
 const openParenRegEx$3 = /^\(/;
+const subOrAccentRegEx = /[_₀-₉\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]/;
+const subRegEx = /[_₀-₉]/;
 
 const lexOneWord = (str, prevToken) => {
   const matchObj = wordRegEx.exec(str);
@@ -5106,20 +5119,20 @@ const lexOneWord = (str, prevToken) => {
         : [match, "\\operatorname{" + groupSubscript(match) + "}", match, tt.FUNCTION, ""]
     } else if (prevToken.ttype === tt.ACCESSOR) {
       return [match, match, match, tt.PROPERTY, ""]
-    } else if (/[_\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1]/.test(match)) {
+    } else if (subOrAccentRegEx.test(match)) {
       let identifier = "";
-      if (match.indexOf("_") === -1) {
+      if (!subRegEx.test(match)) {
         identifier = checkForTrailingAccent(match);
         return [match, identifier, match, (match.length > 2) ? tt.LONGVAR : tt.VAR, ""]
       } else {
-        const segments = match.split("_");
-        for (let i = segments.length - 1; i >= 0; i--) {
-          segments[i] = checkForTrailingAccent(segments[i]);
-          if (i > 0) {
-            segments[i] = "_\\text{" + segments[i] + "}";
-          }
-        }
-        identifier = segments.join("");
+        const subMatch = subRegEx.exec(match);
+        let base = match.slice(0, subMatch.index);
+        let subscript = match.slice(subMatch.index);
+        base = checkForTrailingAccent(base);
+        subscript = subscript[0] === "_"
+          ? "_\\text{" + subscript.slice(1) + "}"
+          : subscript;
+        identifier = base + subscript;
         const primes = /^′*/.exec(str.slice(match.length));
         if (primes) {
           match += primes[0];
@@ -5131,7 +5144,7 @@ const lexOneWord = (str, prevToken) => {
           // This helps Cambria Math to supply the correct size radical.
           identifier = identifier.slice(0, pos) + "{" + identifier.slice(pos) + "}";
         }
-        return [match, identifier, match, (segments[0].length > 1) ? tt.LONGVAR : tt.VAR, ""]
+        return [match, identifier, match, (base.length > 1) ? tt.LONGVAR : tt.VAR, ""]
       }
     } else if (match.length === 2 & match.charAt(0) === "\uD835") {
       return [match, match, match, tt.VAR, ""]
@@ -5455,6 +5468,18 @@ const setUpIf = (rpn, tokenInput, exprStack, delim) => {
 const functionExpoRegEx = /^[\^⁻⁰¹²³\u2074-\u2079]/;
 
 const openParenRegEx$2 = /^ *\(/;
+
+const numSubRegEx = /_([0-9]+)(?=(′|$))/;
+const checkForNumericSubscript = varName => {
+  // If a name has a numeric subscript, e.g. x_2, convert it to Unicode subscript, x₂
+  const match = numSubRegEx.exec(varName);
+  if (!match) { return varName }
+  const numStr = match[1];
+  const subChars = Array.from(numStr)
+     .map(ch => String.fromCodePoint(0x2080 + Number(ch))).join('');
+  return varName.slice(0, match.index) + subChars +
+    varName.slice(match.index + match[0].length)
+};
 
 const exponentOfFunction = (str, decimalFormat, isCalc) => {
   // As in: sin²()
@@ -6083,6 +6108,7 @@ const parse$1 = (
               ? "\\mathrm{" + token.output + "}"
               : token.output;
           } else {
+            token.input = checkForNumericSubscript(token.input);
             token.output = token.input;
             token.output = (posArrow > 0 ? "" : "〖") + token.output;
           }
@@ -17424,11 +17450,11 @@ const compile = (
     if (isDraw) {
       name = "draw";
     } else if (isModule) {
-      name = moduleRegEx.exec(inputStr)[1].trim();
+      name = checkForNumericSubscript(moduleRegEx.exec(inputStr)[1].trim());
     } else if (!isModule) {
       const posFn = inputStr.indexOf("function");
       const posParen = inputStr.indexOf("(");
-      name = inputStr.slice(posFn + 8, posParen).trim();
+      name = checkForNumericSubscript(inputStr.slice(posFn + 8, posParen).trim());
     }
     const module = scanModule(inputStr, formats);
     const isError = module.dtype && module.dtype === dt.ERROR;
@@ -17507,11 +17533,11 @@ const compile = (
             }
           }
           // multiple assignment.
-          name = potentialIdentifiers.map(e => e.trim());
+          name = potentialIdentifiers.map(e => checkForNumericSubscript(e.trim()));
 
         } else {
           if (isValidIdentifier.test(leadStr) && !isKeyWord.test(leadStr)) {
-            name = leadStr;
+            name = checkForNumericSubscript(leadStr);
           } else {
             // The "=" sign is inside an expression. There is no lead identifier.
             // This statement does not assign a value to a variable. But it may do a calc.
@@ -17525,14 +17551,14 @@ const compile = (
         expression = mainStr;
       }
     } else if (isDataFrameAssigment) {
-      name = mainStr;
+      name = checkForNumericSubscript(mainStr);
       expression = trailStr;
     } else  if (isValidIdentifier.test(mainStr) && !isKeyWord.test(mainStr)) {
       // No calculation display selector is present,
       // but there is one "=" and a valid idendtifier.
       // It may be an assignment statement.
       // input has form:  name = trailStr
-      name = mainStr;
+      name = checkForNumericSubscript(mainStr);
       if (trailStr === "") {
         const tex = parse$1(str, formats);
         return { entry: str, tex, alt: str }

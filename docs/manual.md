@@ -580,7 +580,7 @@ Auto-correct kicks in when you type a space inside a math zone.
 | \|\|\|   | ¦    | \\iint       | ∬          | HH         | ℍ       | \\hbar   | ℏ    |
 | \\\|     | ‖    | ii           | ¢` √(-1) `  | NN         | ℕ       | \\ell    | ℓ    |
 | /_       | ∠    | OO           | ¢` O︀ `      | QQ         | ℚ       | \\euro   | €    |
-|          |      | \\c          | ¢          | RR         | ℝ       | \\yen    | ¥    |
+| _2       | ₂    | \\c          | ¢          | RR         | ℝ       | \\yen    | ¥    |
 |          |      |              |            | ZZ         | ℤ       |          |      |
 {.auto-correct}
 
@@ -758,21 +758,21 @@ A, I, w_self = beam["A", "Ix", "weight"] = !!
 
 ## Identifiers
 
-Variable names and function names must be written in the form of a valid _identifier_.
+*Identifier* is another word for *variable name or function name*. Hurmet will
+recognize some words as valid identifiers:
 
-*   Identifiers may be multiple characters long.
+*   They may be multiple characters long.
 *   The first character must be a letter from the Latin or Greek alphabet.
     It may be bold or capitalized calligraphic Latin, or ℏ, or ℓ.
 *   Subsequent characters may be letters or numerals (0123456789).
-*   An under-score within an identifier is allowed and will be interpreted
-    to mean the start of a subscript.
+*   An under-score is allowed and will be interpreted as the start of a subscript.
 *   If an identifier has only one letter, then an accent character may be
     written after it. Hurmet will render the accent above the letter, as in ¢`θ̂`.
 *   Primes may be appended to the very end, as in: ¢`f_c′`.
 *   The following keywords may not be used as variable names: `π`, `ℏ`, `pi`,
     `true`, `false`, `root`, `if`, `else`, `elseif`, `mod`, `modulo`, `otherwise`, `end`, `and`, `or`, `in`, `to`.
 
-   ![letter letter-or-digit-or-accent prime](images/identifier-railroad.svg)
+![letter letter-or-digit-or-accent prime](images/identifier-railroad.svg)
 
 The names of those accents are:
 
@@ -787,16 +787,31 @@ Hurmet’s auto-correct can help create identifiers.
 
 <div id="identi-correct"></div>
 
-| To create:           | … do this and hit the space bar                 | Example input | Example result |
-|----------------------|-------------------------------------------------|---------------|----------------|
-| Greek letter         | Type the name of the letter.                    | gamma         | γ              |
-| Capital Greek letter | Capitalize the name’s first letter.             | Gamma         | Γ              |
-| Bold letter          | Type “bb”, then space, then the desired letter. | bb M          | 𝐌              |
-| Calligraphic capital letter  | Type “cc”, then space, then the desired letter. | cc P  | 𝒫              |
-| Accent               | Type the name of the accent.                    | y bar         | ¢`y̅`           |
-| Prime                | Type two apostrophes.                           | ''            | ′              |
++----------------------+--------------------------+---------------+----------------+
+| To create:           | … do this and hit the    | Example input | Example result |
+|                      | space bar                |               |                |
++:=====================+:=========================+===============+================+
+| Greek letter         | Type the name of the     | gamma         | γ              |
+|                      | letter.                  |               |                |
++----------------------+--------------------------+---------------+----------------+
+| Capital Greek letter | Capitalize the name’s    | Gamma         | Γ              |
+|                      | first letter.            |               |                |
++----------------------+--------------------------+---------------+----------------+
+| Bold letter          | Type “bb”, then space,   | bb M          | 𝐌             |
+|                      | then the desired letter,\|               |                |
+|                      | or type the letter, then |               |                |
+|                      | **Ctrl-B**.              |               |                |
++----------------------+--------------------------+---------------+----------------+
+| Calligraphic capital | Type “cc”, then space,   | cc N          | ℕ              |
+| letter               | then the desired letter. |               |                |
++----------------------+--------------------------+---------------+----------------+
+| Accent               | Type the name of the     | y bar         | ¢` y̅ `        |
+|                      | accent.                  |               |                |
++----------------------+--------------------------+---------------+----------------+
+| Prime                | Type two apostrophes.    | ''            | ′              |
++----------------------+--------------------------+---------------+----------------+
 
-Hurmet will render single Latin letter variable names in _italic_. Function
+Hurmet will render single Latin or Greek letter variable names in _italic_. Function
 names and multi-letter variable names are rendered in upright font. As a
 convention, I personally use **bold** letters for variables that contain
 vectors or matrices.
@@ -832,7 +847,7 @@ String
     **Math String**
 
     Strings will be rendered as math if they are delimited with single backticks
-    instead of double quotes. So somthing like `` `M_n` `` will return as ¢`M_n`.
+    instead of double quotes. So something like `` `M_n` `` will return as ¢`M_n`.
     This is useful mostly when a calculation checks a condition and reports whether
     some computed variable can be accepted.
 
@@ -869,7 +884,7 @@ Complex Number
 
     * ¢`r∠θ`    The characters `/_` will auto-correct into ∠ and ¢`θ` is in radians.
 
-    Also, the character **°** is now a unit name. So one can also write a polar
+    Also, the character **°** is a unit name. So one can also write a polar
     notation as ¢`r∠θ°` and the phase angle will be unit-aware.
     The characters `ooo` will auto-correct into °
 
@@ -888,7 +903,8 @@ Unit
 :   A Humet _unit_ can be applied to a numeric value.
     There are four ways to write a Hurmet unit.
 
-    1. A unit name written directly after a number, with no intervening space. 
+    1. A unit name or compound unit written directly after a number,
+       with no intervening space. 
     2. A unit name between apostrophes, aka single straight quotation marks,
        written after a numeric value. A unit written this way can contain a space,
        like `fluid ounce`.
@@ -898,10 +914,10 @@ Unit
     | Input                  | Renders as              |
     |------------------------|-------------------------|
     | `4.2meters`            | ¢`4.2meters`            |
-    | `4.2 'meters'`         | ¢`4.2 'meters'`         |
+    | `20m/s`                | ¢`20m/s`                |
     | `30°`                  | ¢`30°`                  |
     | `$25.10`               | ¢`$25.10`               |
-    | `10 'N·m/s'`           | ¢`10 'N·m/s'`           |
+    | `10 'nautical miles'`  | ¢`10 'nautical miles'`  |
     | `[2.1; 15.3] 'feet'`   | ¢`[2.1; 15.3] 'feet'`   |
 
     ![number or matrix or map apostrophe unit-name apostrophe](images/unit-railroad.svg)
@@ -932,12 +948,12 @@ Matrix
 
 :   A Hurmet _matrix_ is a one or two dimensional arrangement of matrix elements.
     A Hurmet matrix element can be a number, a string, `true`, `false`, or an
-    exprression that resolves to one of those simple types.s
+    exprression that resolves to one of those simple types.
 
     A matrix literal is written between delimiters, either `( )` or `[ ]` or
     `{: }`. Matrix elements are horizontally separated by tabs or commas.
-    Matrix rows are separated by semi-colons. So this: `(1, 0; 0, 1)` renders
-    as ¢`(1, 0; 0, 1)`.
+    Matrix rows are separated by semi-colons. So this:\
+    `(1, 0; 0, 1)` renders as ¢`(1, 0; 0, 1)`.
     
     A Hurmet _vector_ is a one dimensional array. Write a vector
     literal with values separated by commas or semi-colons, but not both.
@@ -1278,7 +1294,7 @@ _j_
 +---------------+----------------------+---------------------------------------------+
 | \-            | ¢`-4`                | Unary minus                                 |
 +---------------+----------------------+---------------------------------------------+
-| \*            | ¢`2 * 4`             | Multiplication of numbers or matrices.\     |
+| \*            | ¢`2 * 4`             | Multiplication of numbers or matrices.      |
 |               +----------------------+---------------------------------------------+
 |               | `"s1"*"s2"`          | Concatenation of strings                    |
 +---------------+----------------------+---------------------------------------------+
@@ -1408,7 +1424,7 @@ _j_
 | ¬\            |  if ¬ _a_\           | Logical not                                 |
 | !             |  if !a               |                                             |
 +---------------+----------------------+---------------------------------------------+
-| :             | 𝐕\[2:3\] \           | Range separator                             |
+| :             | 𝐕[2:3] \             | Range separator                             |
 |               | for _i_ in 1:3       |                                             |
 +---------------+----------------------+---------------------------------------------+
 {#op-table .grid width=35em}
@@ -1480,7 +1496,7 @@ cos(𝜃), sin(𝜃), tan(𝜃), sec(𝜃), csc(𝜃), cot(𝜃)
 : Trigonometry functions.
 
   The trig functions listed above will assume that a real argument is in
-  radians unless you tell it otherwise. You can tell it otherwise by just
+  radians unless you tell it otherwise. You can tell it otherwise by
   writing in a unit, as in: `tan(45°)` and running a unit-aware calculation.
 
   Complex numbers are also valid arguments.
@@ -1813,7 +1829,7 @@ a Hurmet calculation cell and write:
 
 ¢`4ft + 3 'yards' = 3.9624 'm'`
 
-You can create composite units on the fly and Hurmet will still convert them
+You can create composite units on the fly and Hurmet will convert them
 automatically.
 
 ¢`(3kW·hr × (20min)) / (800lbf × 1h) = 1.0116402439486971731 'km'`

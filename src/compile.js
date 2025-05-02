@@ -1,4 +1,4 @@
-﻿import { parse } from "./parser"
+﻿import { parse, checkForNumericSubscript } from "./parser"
 import { dt, allZeros } from "./constants"
 import { isValidIdentifier } from "./utils"
 import { valueFromLiteral } from "./literal"
@@ -81,11 +81,11 @@ export const compile = (
     if (isDraw) {
       name = "draw"
     } else if (isModule) {
-      name = moduleRegEx.exec(inputStr)[1].trim()
+      name = checkForNumericSubscript(moduleRegEx.exec(inputStr)[1].trim())
     } else if (!isModule) {
       const posFn = inputStr.indexOf("function")
       const posParen = inputStr.indexOf("(")
-      name = inputStr.slice(posFn + 8, posParen).trim()
+      name = checkForNumericSubscript(inputStr.slice(posFn + 8, posParen).trim())
     }
     const module = scanModule(inputStr, formats)
     const isError = module.dtype && module.dtype === dt.ERROR
@@ -164,11 +164,11 @@ export const compile = (
             }
           }
           // multiple assignment.
-          name = potentialIdentifiers.map(e => e.trim())
+          name = potentialIdentifiers.map(e => checkForNumericSubscript(e.trim()))
 
         } else {
           if (isValidIdentifier.test(leadStr) && !isKeyWord.test(leadStr)) {
-            name = leadStr
+            name = checkForNumericSubscript(leadStr)
           } else {
             // The "=" sign is inside an expression. There is no lead identifier.
             // This statement does not assign a value to a variable. But it may do a calc.
@@ -182,14 +182,14 @@ export const compile = (
         expression = mainStr
       }
     } else if (isDataFrameAssigment) {
-      name = mainStr
+      name = checkForNumericSubscript(mainStr)
       expression = trailStr
     } else  if (isValidIdentifier.test(mainStr) && !isKeyWord.test(mainStr)) {
       // No calculation display selector is present,
       // but there is one "=" and a valid idendtifier.
       // It may be an assignment statement.
       // input has form:  name = trailStr
-      name = mainStr
+      name = checkForNumericSubscript(mainStr)
       if (trailStr === "") {
         const tex = parse(str, formats)
         return { entry: str, tex, alt: str }

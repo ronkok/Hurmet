@@ -257,7 +257,9 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     ["unitLessBarArea = ``\\#4	#5	area\n 0.22	0.31	0.44``", "unitLessBarArea = @", ""],
     ["rebar = ``#name	diameter	area\nunit	in	in²\n#3	0.375	0.11\n#4	0.5	0.2\n#5	0.625	0.31\n#6	0.75	0.44``", "rebar = @", ""],
     ["wideFlanges = ``#name	weight	area	d	bf	tw	tf	Ix	Sx	rx	Iy	Sy	ry\nunit	lbf/ft	in^2	in	in	in	in	in^4	in^3	in	in^4	in^3	in\nW10X49	49	14.4	10	10	0.34	0.56	272	54.6	4.35	93.4	18.7	2.54\nW8X31	31	9.13	8	8	0.285	0.435	110	27.5	3.47	37.1	9.27	2.02\nW8X18	18	5.26	8.14	5.25	0.23	0.33	61.9	15.2	3.43	7.97	3.04	1.23``", "wideFlanges = @", ""],
-    ["aDate = '2025-01-20'", "aDate = @", "2025-01-20"]
+    ["aDate = '2025-01-20'", "aDate = @", "2025-01-20"],
+    ["x_2= 4", "x₂ = @", "4"],
+    ["f_2′= 4", "f₂′ = @", "4"]
   ];
 
   const tex2CalcTests = [

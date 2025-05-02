@@ -1,6 +1,6 @@
 ﻿// autocorrect.js
 
-const autoCorrectRegEx = /([?:<>\-~/_!]=| \.| \*|~~|\+-|-\+|<-->|<->|<>|<--|<-|-->|->|=>|-:|\^\^|\\\||\/\/\/|\b(bar|hat|vec|tilde|dot|ddot|ul)|\b(bb|bbb|cc|ff|ss) [A-Za-z]|\\?[A-Za-z]{2,}|\\c|\\ |\\o|root [234]|<<|>>|\^-?[0-9]+|\|\|\||\/_|''|""|00)\s$/
+const autoCorrectRegEx = /([?:<>\-~/_!]=| \.| \*|~~|\+-|-\+|<-->|<->|<>|<--|<-|-->|->|=>|-:|\^\^|\\\||\/\/\/|\b(bar|hat|vec|tilde|dot|ddot|ul)|\b(bb|bbb|cc|ff|ss) [A-Za-z]|\\?[A-Za-z]{2,}|_[0-9]+|\\c|\\ |\\o|root [234]|<<|>>|\^-?[0-9]+|\|\|\||\/_|''|""|00)\s$/
 
 const accents = {
   acute: "\u0301",
@@ -268,10 +268,13 @@ const fontedChar = (ch, accentName) => {
   }
 }
 
+const subscriptNumerals = numStr => {
+  return Array.from(numStr).map(ch => String.fromCodePoint(0x2080 + Number(ch))).join('')
+}
+
 export const autoCorrect = (jar, preText, postText) => {
   // Auto-correct math in real time.
   // jar is an instance of a CodeJar editing box.
-//  const pos = doc.getCursor()
   if (preText.length > 0 && preText.slice(-1) === " ") {
     // Auto-correct only after the user hits the space bar.
     const matches = autoCorrectRegEx.exec(preText)
@@ -281,6 +284,13 @@ export const autoCorrect = (jar, preText, postText) => {
       const accent = accents[word]
       if (accent) {
         const newStr = preText.slice(0, -(matches[0].length + 1)) + accent
+        jar.updateCode(newStr + postText)
+        // Move the cursor to the correct location
+        const L = newStr.length
+        jar.restore({ start: L, end: L, dir: undefined })
+      } else if (word[0] === "_") {
+        // Create Unicode numeric superscript
+        const newStr = preText.slice(0, -matches[0].length) + subscriptNumerals(word.slice(1))
         jar.updateCode(newStr + postText)
         // Move the cursor to the correct location
         const L = newStr.length
