@@ -24226,11 +24226,16 @@ rules.set("bullet_list", {
 });
 rules.set("special_div", {
   isLeaf: false,
-  match: blockRegex(/^(:{3,}) ?(indented|comment|centered|right_justified|boxed|header|hidden) *\n([\s\S]+?)\n+\1 *(?:\n{2,}|\s*$)/),
+  match: blockRegex(/^(:{3,}) ?(indented|comment|centered|right_justified|boxed|header\*?|hidden) *\n([\s\S]+?)\n+\1 *(?:\n{2,}|\s*$)/),
   // indented or centered or right-justified or boxed or comment div, or <header>
   parse: function(capture, state) {
     const content = parse(capture[3], state);
-    return { type: capture[2], content };
+    const blockType = capture[2];
+    if (blockType === "header*") {
+      return { type: "header", attrs: { headerPages: "all" }, content };
+    } else {
+      return { type: blockType, content };
+    }
   }
 });
 rules.set("figure", {
@@ -25345,7 +25350,7 @@ const isOrphan = (nextElement, attrs) => {
 const populatePage = (startElement, endElement, header, destination, attrs) => {
   // Create a page in `print-div` and populate it with elements.
   const page = document.createDocumentFragment();
-  if (header && attrs.pageNum > 0) {
+  if (header && (attrs.pageNum > 0 || attrs.headerPages === "all")) {
     const printHeader = header.cloneNode(true);
     printHeader.style.breakBefore = "page";
     page.append(printHeader);
@@ -25353,7 +25358,7 @@ const populatePage = (startElement, endElement, header, destination, attrs) => {
   // Create a body div
   const printBody = document.createElement("div");
   printBody.className = "print-body";
-  if (!(header && attrs.pageNum > 0)) {
+  if (!(header && attrs.pageNum > 0 || attrs.headerPages === "all")) {
     printBody.style.breakBefore = "page";
   }
 
@@ -25552,6 +25557,7 @@ function paginate(view, tocSchema, purpose, tocStartLevel, tocEndLevel) {
     minElemHeight: 3.2 * doc.attrs.fontSize,
     stdHdrHeight: 0,
     headerHeight: 0,
+    headerPages: "allButOne",
     tocArray: null,
     tocStartLevel: tocStartLevel,
     tocEndLevel: tocEndLevel,
@@ -25611,6 +25617,7 @@ function paginate(view, tocSchema, purpose, tocStartLevel, tocEndLevel) {
     const origHeader = document.getElementsByTagName("header")[0];
     const headerRect = origHeader.getBoundingClientRect();
     attrs.stdHdrHeight = headerRect.bottom - headerRect.top;
+    attrs.headerPages = doc.nodeAt(0).attrs.headerPages;
   }
 
   // Spin up a canvas for measurement of footnote width
@@ -35873,6 +35880,7 @@ class MarkdownSerializerState {
         if (nodeType) { this.write(`> [!${nodeType.toUpperCase()}]\n`); }
       } else {
         this.divFence += ":::";
+        if (nodeType === "header" && node.attrs.headerPages === "all") { nodeType = "header*"; }
         this.write(`${this.divFence} ${nodeType}\n`);
       }
     }
@@ -52843,6 +52851,7 @@ const nodes = {
   // Hurmet uses the <header> element for print-headers
   header: {
     content: "table",
+    attrs: { headerPages: { default: "allButOne", validate: "string" } },
     group: "block",
     defining: true,
     parseDOM: [{tag: "header"}],
@@ -53500,6 +53509,8 @@ function openPrompt(options) {
         params.value = form[options.radioButtons.name].value + form.digits.value;
       } else if (options.radioButtons.name === "dateFormat") {
         params.format = form[options.radioButtons.name].value;
+      } else if (options.radioButtons.name === "headerPages") {
+        params.headerPages = form[options.radioButtons.name].value;
       } else {
         params.class = form[options.radioButtons.name].value;
       }
@@ -55723,27 +55734,65 @@ function canInsert(state, nodeType) {
 function insertHeader(state, dispatch) {
   return new MenuItem({
     title: "Insert a print header",
-    label: "Print header",
+    label: "Print header…",
     enable() {
       return true
     },
     run(state, dispatch) {
       window.scrollTo(0, 0);
 
-      // Don't overwrite an existing header.
-      if (state.doc.nodeAt(0).type.name === "header") { return }
-
-      // Insert the <header> element and an enclosed one-row <table>.
-      dispatch(state.tr.insert(0, schema.nodeFromJSON(JSON.parse(
-        `{"type":"header","content":[{"type":"table","attrs":{"class":"one-rule c2c c3r"},
+      const promptOptions = {
+        title: "Print header on:",
+        radioButtons: {
+          name: "headerPages",
+          direction: "column",
+          buttons: [["all", "all pages"], ["allButOne", "all but first page"]]
+        },
+        callback(params) {
+          // Don't overwrite an existing header.
+          if (state.doc.nodeAt(0).type.name === "header") {
+            const header = state.doc.nodeAt(0);
+            if (header.attrs.headerPages !== params.headerPages) {
+              const attrs = { headerPages: params.headerPages };
+              const tr = view.state.tr;
+              tr.setNodeMarkup(0, null, attrs);
+              dispatch(tr);
+            }
+          } else {
+            // Insert the <header> element and an nested one-row <table>.
+            dispatch(state.tr.insert(0, schema.nodeFromJSON(JSON.parse(
+            `{"type":"header", "attrs": {"headerPages": "${params.headerPages}"},"content":[{"type":"table","attrs":{"class":"one-rule c2c c3r"},
 "content":[{"type":"table_row","content":[{"type":"table_header","content":[
 {"type":"paragraph","content":[{"type":"text","text":"left"}]}]},
 {"type":"table_header","content":[{"type":"paragraph","content":[{"type":"text","text":"center"}]}]},
 {"type":"table_header","content":[{"type":"paragraph","content":[{"type":"text","text":"$PAGE"}]}]}]}]}]}`
-      ))));
+            ))));
+          }
+        }
+      };
+      openPrompt(promptOptions);
     }
   })
 }
+
+
+const removeHeader = () => {
+  return new MenuItem({
+    title: "Remove print header",
+    label: "Remove print header",
+    enable(state) {
+      return state.doc.nodeAt(0).type.name === "header"
+    },
+    run(state, dispatch) {
+      if (state.doc.nodeAt(0).type.name === "header") {
+        window.scrollTo(0, 0);
+        const end = state.doc.nodeAt(0).nodeSize;
+        dispatch(state.tr.delete(0, end));
+      }
+    }
+  })
+};
+
 
 const navigate = () => {
   return new MenuItem({
@@ -57085,6 +57134,7 @@ function buildMenuItems(schema) {
   r.saveFileAs = saveFileAs();
   r.permalink = permalink();
   r.insertHeader = insertHeader();
+  r.removeHeader = removeHeader();
 
   r.dot = setDecimalFormat("1000000.");
   r.commadot = setDecimalFormat("1,000,000.");
@@ -57407,6 +57457,7 @@ function buildMenuItems(schema) {
     r.dateFormat,
     r.toggleDraftMode,
     r.insertHeader,
+    r.removeHeader,
     r.deleteComments
   ],
   { label: "Doc" }

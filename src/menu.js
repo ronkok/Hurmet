@@ -231,27 +231,65 @@ function canInsert(state, nodeType) {
 export function insertHeader(state, dispatch) {
   return new MenuItem({
     title: "Insert a print header",
-    label: "Print header",
+    label: "Print header…",
     enable() {
       return true
     },
     run(state, dispatch) {
       window.scrollTo(0, 0)
 
-      // Don't overwrite an existing header.
-      if (state.doc.nodeAt(0).type.name === "header") { return }
-
-      // Insert the <header> element and an enclosed one-row <table>.
-      dispatch(state.tr.insert(0, schema.nodeFromJSON(JSON.parse(
-        `{"type":"header","content":[{"type":"table","attrs":{"class":"one-rule c2c c3r"},
+      const promptOptions = {
+        title: "Print header on:",
+        radioButtons: {
+          name: "headerPages",
+          direction: "column",
+          buttons: [["all", "all pages"], ["allButOne", "all but first page"]]
+        },
+        callback(params) {
+          // Don't overwrite an existing header.
+          if (state.doc.nodeAt(0).type.name === "header") {
+            const header = state.doc.nodeAt(0)
+            if (header.attrs.headerPages !== params.headerPages) {
+              const attrs = { headerPages: params.headerPages }
+              const tr = view.state.tr
+              tr.setNodeMarkup(0, null, attrs)
+              dispatch(tr)
+            }
+          } else {
+            // Insert the <header> element and an nested one-row <table>.
+            dispatch(state.tr.insert(0, schema.nodeFromJSON(JSON.parse(
+            `{"type":"header", "attrs": {"headerPages": "${params.headerPages}"},"content":[{"type":"table","attrs":{"class":"one-rule c2c c3r"},
 "content":[{"type":"table_row","content":[{"type":"table_header","content":[
 {"type":"paragraph","content":[{"type":"text","text":"left"}]}]},
 {"type":"table_header","content":[{"type":"paragraph","content":[{"type":"text","text":"center"}]}]},
 {"type":"table_header","content":[{"type":"paragraph","content":[{"type":"text","text":"$PAGE"}]}]}]}]}]}`
-      ))))
+            ))))
+          }
+        }
+      }
+      openPrompt(promptOptions)
     }
   })
 }
+
+
+const removeHeader = () => {
+  return new MenuItem({
+    title: "Remove print header",
+    label: "Remove print header",
+    enable(state) {
+      return state.doc.nodeAt(0).type.name === "header"
+    },
+    run(state, dispatch) {
+      if (state.doc.nodeAt(0).type.name === "header") {
+        window.scrollTo(0, 0)
+        const end = state.doc.nodeAt(0).nodeSize
+        dispatch(state.tr.delete(0, end))
+      }
+    }
+  })
+}
+
 
 const navigate = () => {
   return new MenuItem({
@@ -1596,6 +1634,7 @@ export function buildMenuItems(schema) {
   r.saveFileAs = saveFileAs()
   r.permalink = permalink()
   r.insertHeader = insertHeader()
+  r.removeHeader = removeHeader()
 
   r.dot = setDecimalFormat("1000000.")
   r.commadot = setDecimalFormat("1,000,000.")
@@ -1920,6 +1959,7 @@ export function buildMenuItems(schema) {
     r.dateFormat,
     r.toggleDraftMode,
     r.insertHeader,
+    r.removeHeader,
     r.deleteComments
   ],
   { label: "Doc" }

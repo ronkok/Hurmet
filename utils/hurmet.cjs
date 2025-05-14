@@ -10416,11 +10416,16 @@ rules.set("bullet_list", {
 });
 rules.set("special_div", {
   isLeaf: false,
-  match: blockRegex(/^(:{3,}) ?(indented|comment|centered|right_justified|boxed|header|hidden) *\n([\s\S]+?)\n+\1 *(?:\n{2,}|\s*$)/),
+  match: blockRegex(/^(:{3,}) ?(indented|comment|centered|right_justified|boxed|header\*?|hidden) *\n([\s\S]+?)\n+\1 *(?:\n{2,}|\s*$)/),
   // indented or centered or right-justified or boxed or comment div, or <header>
   parse: function(capture, state) {
     const content = parse(capture[3], state);
-    return { type: capture[2], content };
+    const blockType = capture[2];
+    if (blockType === "header*") {
+      return { type: "header", attrs: { headerPages: "all" }, content };
+    } else {
+      return { type: blockType, content };
+    }
   }
 });
 rules.set("figure", {

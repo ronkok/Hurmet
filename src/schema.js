@@ -432,6 +432,7 @@ export const nodes = {
   // Hurmet uses the <header> element for print-headers
   header: {
     content: "table",
+    attrs: { headerPages: { default: "allButOne", validate: "string" } },
     group: "block",
     defining: true,
     parseDOM: [{tag: "header"}],

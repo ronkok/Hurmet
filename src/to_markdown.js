@@ -540,6 +540,7 @@ export class MarkdownSerializerState {
         if (nodeType) { this.write(`> [!${nodeType.toUpperCase()}]\n`) }
       } else {
         this.divFence += ":::"
+        if (nodeType === "header" && node.attrs.headerPages === "all") { nodeType = "header*" }
         this.write(`${this.divFence} ${nodeType}\n`)
       }
     }

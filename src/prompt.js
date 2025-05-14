@@ -232,6 +232,8 @@ export function openPrompt(options) {
         params.value = form[options.radioButtons.name].value + form.digits.value
       } else if (options.radioButtons.name === "dateFormat") {
         params.format = form[options.radioButtons.name].value
+      } else if (options.radioButtons.name === "headerPages") {
+        params.headerPages = form[options.radioButtons.name].value
       } else {
         params.class = form[options.radioButtons.name].value
       }

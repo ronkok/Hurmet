@@ -147,7 +147,7 @@ const isOrphan = (nextElement, attrs) => {
 const populatePage = (startElement, endElement, header, destination, attrs) => {
   // Create a page in `print-div` and populate it with elements.
   const page = document.createDocumentFragment()
-  if (header && attrs.pageNum > 0) {
+  if (header && (attrs.pageNum > 0 || attrs.headerPages === "all")) {
     const printHeader = header.cloneNode(true)
     printHeader.style.breakBefore = "page"
     page.append(printHeader)
@@ -155,7 +155,7 @@ const populatePage = (startElement, endElement, header, destination, attrs) => {
   // Create a body div
   const printBody = document.createElement("div")
   printBody.className = "print-body"
-  if (!(header && attrs.pageNum > 0)) {
+  if (!(header && attrs.pageNum > 0 || attrs.headerPages === "all")) {
     printBody.style.breakBefore = "page"
   }
 
@@ -354,6 +354,7 @@ export function paginate(view, tocSchema, purpose, tocStartLevel, tocEndLevel) {
     minElemHeight: 3.2 * doc.attrs.fontSize,
     stdHdrHeight: 0,
     headerHeight: 0,
+    headerPages: "allButOne",
     tocArray: null,
     tocStartLevel: tocStartLevel,
     tocEndLevel: tocEndLevel,
@@ -413,6 +414,7 @@ export function paginate(view, tocSchema, purpose, tocStartLevel, tocEndLevel) {
     const origHeader = document.getElementsByTagName("header")[0];
     const headerRect = origHeader.getBoundingClientRect()
     attrs.stdHdrHeight = headerRect.bottom - headerRect.top
+    attrs.headerPages = doc.nodeAt(0).attrs.headerPages
   }
 
   // Spin up a canvas for measurement of footnote width
