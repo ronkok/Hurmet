@@ -842,13 +842,11 @@ rules.set("tex", {
   isLeaf: true,
   match: inlineRegex(/^(?:\\\[((?:\\[\s\S]|[^\\])+?)\\\]|\$\$((?:\\[\s\S]|[^\\])+?)\$\$|\\\(((?:\\[\s\S]|[^\\])+?)\\\)|\$(`+)((?:(?:\\[\s\S]|[^\\])+?)?)\4\$(?![0-9$])|\$(?!\s|\$)((?:(?:\\[\s\S]|[^\\])+?)?)(?<=[^\s\\$])\$(?![0-9$]))/),
   parse: function(capture, state) {
-    if (capture[1]) {
-      const tex = (capture[1]).trim()
+    if (capture[1] || capture[2]) {
+      const tex = (capture[1] ? capture[1] : capture[2]).trim()
       return { type: "tex", attrs: { tex, displayMode: true } }
     } else {
-      const tex = (capture[2]
-        ? capture[2]
-        : capture[3]
+      const tex = (capture[3]
         ? capture[3]
         : capture[5]
         ? capture[5]
@@ -887,10 +885,17 @@ rules.set("link", {
     new RegExp("^\\[(" + LINK_INSIDE + ")\\]\\(" + LINK_HREF_AND_TITLE + "\\)")
   ),
   parse: function(capture, state) {
-    const textNode = parseTextMark(capture[1], state, "link" )[0]
-    const i = linkIndex(textNode.marks)
-    textNode.marks[i].attrs = { href: unescapeUrl(capture[2]) }
-    return textNode
+    const content = parseInline(capture[1], state)
+    if (content.length === 1 && content[0].type === "text") {
+      // From within Hurmet.org, all links can contain text only.
+      const textNode = parseTextMark(capture[1], state, "link" )[0];
+      const i = linkIndex(textNode.marks)
+      textNode.marks[i].attrs = { href: unescapeUrl(capture[2]) }
+      return textNode
+    } else {
+      // For use in creating HTML docs from Markdown.
+      return [{ type: "link", attrs: { href: unescapeUrl(capture[2]) }, content }]
+    }
   }
 });
 rules.set("image", {
