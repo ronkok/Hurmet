@@ -65,12 +65,14 @@ export async function hurmet2html(md, title = "", inHtml = false) {
     node[0].attrs.body = tocArray
   }
 
-  // Perform Hurmet calculations
+  // Perform Hurmet calculations.
   // This is asynchronous because a caclulation may need to fetch some remote data.
   ast = await updateCalcs(ast)
 
   // Write the HTML
   let html = ast2html(ast)
+  // If you edit the next line, do the same in md2html.js.
+  html = html.replace(/<\/a><a href='[^']*'>/g, "")
 
   if (title.length > 0) {
     html = wrapWithHead(html, title, ast.attrs)

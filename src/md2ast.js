@@ -886,15 +886,16 @@ rules.set("link", {
   ),
   parse: function(capture, state) {
     const content = parseInline(capture[1], state)
-    if (content.length === 1 && content[0].type === "text") {
-      // From within Hurmet.org, all links can contain text only.
-      const textNode = parseTextMark(capture[1], state, "link" )[0];
-      const i = linkIndex(textNode.marks)
-      textNode.marks[i].attrs = { href: unescapeUrl(capture[2]) }
-      return textNode
+    let useParseTextMark = true
+    for (const node of content) {
+      if (node.type !== "text") { useParseTextMark = false; break }
+    }
+    if (useParseTextMark) {
+      return parseTextMark(capture[1], state, "link", unescapeUrl(capture[2]))
     } else {
-      // For use in creating HTML docs from Markdown.
-      return [{ type: "link", attrs: { href: unescapeUrl(capture[2]) }, content }]
+      // In Hurmet documents, links can contain only text, not math or footnotes.
+      // So the next line of code is for the parsing of an HTML document, not a Hurmet doc.
+      return [{ type: "link_node", attrs: { href: unescapeUrl(capture[2]) }, content }]
     }
   }
 });
@@ -916,9 +917,8 @@ rules.set("reflink", {
   match: inlineRegex(/^\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]/),
   parse: function(capture, state) {
     const defIndex = capture[2] ? capture[2] : capture[1];
-    const textNode = parseTextMark(capture[1], state, "link" )[0];
-    const i = linkIndex(textNode.marks)
-    textNode.marks[i].attrs = { href: state._defs[defIndex].target }
+    const href = state._defs[defIndex].target
+    const textNode = parseTextMark(capture[1], state, "link", href)
     return textNode
   }
 });

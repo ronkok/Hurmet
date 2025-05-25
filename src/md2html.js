@@ -211,8 +211,10 @@ const nodes = {
     return `<div class='hurmet-cell' data-entry=${dataStr(node.attrs.entry)}>` + display
            + '</div>'
   },
-  link(node) {
-    const attributes = { href: sanitizeUrl(node.attrs.href), title: node.attrs.title };
+  link_node(node) {
+    // This node type is not in Hurmet. It is used for creation of HTML documents.
+    const href = sanitizeUrl(node.attrs.href)
+    const attributes = { href, title: href };
     return htmlTag("a", ast2html(node.content), attributes);
   },
   image(node) {
@@ -318,15 +320,22 @@ const nodes = {
       return text
     } else {
       let span = text
-      for (const mark of node.marks) {
+      let iLink = -1
+      for (let i = 0; i < node.marks.length; i++) {
+        const mark = node.marks[i];
         if (mark.type === "link") {
-          let tag = `<a href='${mark.attrs.href}'`
-          if (mark.attrs.title) { tag += ` title='${mark.attrs.title}''` }
-          span = tag + ">" + span + "</a>"
+          iLink = i
         } else {
           const tag = tagName[mark.type];
           span = `<${tag}>${span}</${tag}>`
         }
+      }
+      if (iLink >= 0) {
+        // The <a> tag must be the outermost tag on text elements.
+        // That enables the regex replace trick used in md2html() below.
+        const mark = node.marks[iLink];
+        const tag = `<a href='${mark.attrs.href}'`
+        span = tag + ">" + span + "</a>"
       }
       return span
     }
@@ -392,6 +401,8 @@ export const md2text = md => {
 export const md2html = (md, inHtml = false) => {
   const ast = md2ast(md, inHtml)
   let html = ast2html(ast)
+  // If you edit the next line, do the same in hurmet2html.js.
+  html = html.replace(/<\/a><a href='[^']*'>/g, "")
 
   // Write the footnotes, if any.
   const footnotes = [];

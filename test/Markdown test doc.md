@@ -29,6 +29,8 @@ A paragraph with alternate _italic_, **bold**, and _**bold-italic**_.
 Hurmet writes a sub~script~ with tildes. It can also read a sub<sub>script</sub> written
 with HTML tags.
 
+Hurmet can have a [_nested **editable** link_][1].
+
 ### Code Blocks
 
 ```
