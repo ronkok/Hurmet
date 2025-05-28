@@ -1,6 +1,6 @@
 {
   "name": "hurmet",
-  "version": "2025.04.22",
+  "version": "2025.05.28",
   "description": "Rich text editor on the web, featuring live calculations.",
   "homepage": "https://hurmet.org",
   "license": "MIT",
@@ -54,7 +54,7 @@
     "demo": "rollup --config utils/rollup.demo.config.js",
     "minify": "terser preview/prosemirror.js -o site/prosemirror.min.js -m && terser preview/demo.js -o site/demo.min.js -m",
     "copypm": "node utils/copyPM.cjs",
-    "build": "yarn hurmet && yarn demo && yarn pm && yarn minify && yarn docs",
+    "build": "yarn hurmet && yarn demo && yarn pm && yarn minify",
     "rates": "node utils/updateExchangeRates.cjs",
     "docs": "node utils/buildDocs.cjs",
     "test": "yarn test:lint && node test/test.cjs",

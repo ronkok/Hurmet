@@ -213,10 +213,8 @@ const nodes = {
            + '</div>'
   },
   link_node(node) {
-    // This node type is not in Hurmet. It is used for creation of HTML documents.
     const href = sanitizeUrl(node.attrs.href)
-    const attributes = { href, title: href };
-    return htmlTag("a", ast2html(node.content), attributes);
+    return htmlTag("a", ast2html(node.content), { href, title: href })
   },
   image(node) {
     const attributes = { src: node.attrs.src };

@@ -12,7 +12,7 @@ import {
 } from "prosemirror-menu"
 import { NodeSelection, TextSelection } from "prosemirror-state"
 import { insertPoint, findWrapping, liftTarget } from "prosemirror-transform"
-import { Fragment } from "prosemirror-model"
+import { Fragment, Slice } from "prosemirror-model"
 import { lift, selectParentNode, toggleMark, wrapIn } from "prosemirror-commands"
 import { schema, wrapInList } from "./schema"
 import { TextField, CodeField, TextAreaField, openPrompt } from "./prompt"
@@ -1544,6 +1544,15 @@ function linkItem(markType) {
       return !state.selection.empty
     },
     run(state, dispatch, view) {
+      const {$from, $to} = state.selection
+      if ($from.pos === $to.pos) { return false }
+      const content = state.doc.slice($from.pos, $to.pos, false).content.content
+      if (content.length === 1 && content[0].type.name === "link_node") {
+        // Delete the link_node. Keep the content.
+        const slice = new Slice(content[0].content, 0, 0)
+        dispatch(state.tr.replace($from.pos, $to.pos, slice))
+        return true
+      }
       if (markActive(state, markType)) {
         toggleMark(markType)(state, dispatch)
         return true
@@ -1554,7 +1563,27 @@ function linkItem(markType) {
           href: new TextField({ label: "Link target", required: true })
         },
         callback(attrs) {
-          toggleMark(markType, attrs)(view.state, view.dispatch)
+          const {$from, $to} = state.selection
+          const content = state.doc.slice($from.pos, $to.pos, false).content.content
+          let allText = true
+          let allInline = true
+          for (const node of content) {
+            if (node.type.name !== "text") { allText = false }
+            if (node.type.spec.group !== "inline") { allInline = false }
+          }
+          if (!allInline) {
+            return false
+          } else if (allText) {
+            toggleMark(markType, attrs)(view.state, view.dispatch)
+          } else {
+            // The selection contains math or a footnote. Don't use a text mark.
+            const href = attrs.href
+            dispatch(state.tr.replaceWith(
+              $from.pos,
+              $to.pos, 
+              schema.nodes.link_node.createAndFill({href, title: href}, content)
+            ))
+          }
           view.focus()
         }
       })

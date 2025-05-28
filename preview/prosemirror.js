@@ -18255,11 +18255,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.7458","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.7569","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["6.3650","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["6.4721","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -18268,10 +18268,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.5640","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.5630","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9381","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["8.0659","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9299","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["8.1197","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -18291,7 +18291,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.84270","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.83820","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -18299,23 +18299,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.7478","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["8.8508","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["3.9758","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["95.8200","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["4.0931","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["96.5520","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["163.05","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["161.13","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1563.17","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1555.77","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -18326,7 +18326,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["21.8169","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["21.8540","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -18356,7 +18356,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.1194","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.1301","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -24093,15 +24093,17 @@ const parseRef = function(capture, state, refNode) {
   return refNode;
 };
 
-const parseTextMark = (capture, state, mark) => {
+const parseTextMark = (capture, state, mark, href) => {
   const text = parseInline(capture, state);
   if (Array.isArray(text) && text.length === 0) { return text }
   consolidate(text);
+  const markObj = { type: mark };
+  if (href) { markObj.attrs = { href }; }
   for (const range of text) {
     if (range.marks) {
-      range.marks.push({ type: mark });
+      range.marks.push(markObj);
     } else {
-      range.marks = [{ type: mark }];
+      range.marks = [markObj];
     }
   }
   return text
@@ -24315,13 +24317,11 @@ rules.set("tex", {
   isLeaf: true,
   match: inlineRegex(/^(?:\\\[((?:\\[\s\S]|[^\\])+?)\\\]|\$\$((?:\\[\s\S]|[^\\])+?)\$\$|\\\(((?:\\[\s\S]|[^\\])+?)\\\)|\$(`+)((?:(?:\\[\s\S]|[^\\])+?)?)\4\$(?![0-9$])|\$(?!\s|\$)((?:(?:\\[\s\S]|[^\\])+?)?)(?<=[^\s\\$])\$(?![0-9$]))/),
   parse: function(capture, state) {
-    if (capture[1]) {
-      const tex = (capture[1]).trim();
+    if (capture[1] || capture[2]) {
+      const tex = (capture[1] ? capture[1] : capture[2]).trim();
       return { type: "tex", attrs: { tex, displayMode: true } }
     } else {
-      const tex = (capture[2]
-        ? capture[2]
-        : capture[3]
+      const tex = (capture[3]
         ? capture[3]
         : capture[5]
         ? capture[5]
@@ -24360,10 +24360,20 @@ rules.set("link", {
     new RegExp("^\\[(" + LINK_INSIDE + ")\\]\\(" + LINK_HREF_AND_TITLE + "\\)")
   ),
   parse: function(capture, state) {
-    const textNode = parseTextMark(capture[1], state, "link" )[0];
-    const i = linkIndex(textNode.marks);
-    textNode.marks[i].attrs = { href: unescapeUrl(capture[2]) };
-    return textNode
+    const content = parseInline(capture[1], state);
+    let useParseTextMark = true;
+    for (const node of content) {
+      if (node.type !== "text") { useParseTextMark = false; break }
+    }
+    if (useParseTextMark) {
+      // This is the Prosemirror default method for editable links.
+      return parseTextMark(capture[1], state, "link", unescapeUrl(capture[2]))
+    } else {
+      // When a link contains a nodeView, e.g. math, the text mark method has an edge case bug.
+      // So the Hurmet schema has a custom "link_node".
+      const href = unescapeUrl(capture[2]);
+      return [{ type: "link_node", attrs: { href, title: href }, content }]
+    }
   }
 });
 rules.set("image", {
@@ -24384,9 +24394,8 @@ rules.set("reflink", {
   match: inlineRegex(/^\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]/),
   parse: function(capture, state) {
     const defIndex = capture[2] ? capture[2] : capture[1];
-    const textNode = parseTextMark(capture[1], state, "link" )[0];
-    const i = linkIndex(textNode.marks);
-    textNode.marks[i].attrs = { href: state._defs[defIndex].target };
+    const href = state._defs[defIndex].target;
+    const textNode = parseTextMark(capture[1], state, "link", href);
     return textNode
   }
 });
@@ -24948,6 +24957,7 @@ const headingText = content => {
 };
 
 const headings = [];
+const headingLinkRegEx = /[,()]/g;
 
 const nodes$1 = {
   html(node) { return node.text },
@@ -24957,7 +24967,7 @@ const nodes$1 = {
     tag = htmlTag(tag, text);
     if (!headings.includes(text)) {
     // Add an id so others can link to it.
-      tag = tag.slice(0, 3) + " id='" + text.toLowerCase().replace(/,\(\)/g, "").replace(/\s+/g, '-') + "'" + tag.slice(3);
+      tag = tag.slice(0, 3) + " id='" + text.toLowerCase().replace(headingLinkRegEx, "").replace(/\s+/g, '-') + "'" + tag.slice(3);
       headings.push(text);
     }
     return tag + "\n"
@@ -25008,9 +25018,9 @@ const nodes$1 = {
     return `<div class='hurmet-cell' data-entry=${dataStr(node.attrs.entry)}>` + display
            + '</div>'
   },
-  link(node) {
-    const attributes = { href: sanitizeUrl(node.attrs.href), title: node.attrs.title };
-    return htmlTag("a", ast2html(node.content), attributes);
+  link_node(node) {
+    const href = sanitizeUrl(node.attrs.href);
+    return htmlTag("a", ast2html(node.content), { href, title: href })
   },
   image(node) {
     const attributes = { src: node.attrs.src };
@@ -25115,15 +25125,22 @@ const nodes$1 = {
       return text
     } else {
       let span = text;
-      for (const mark of node.marks) {
+      let iLink = -1;
+      for (let i = 0; i < node.marks.length; i++) {
+        const mark = node.marks[i];
         if (mark.type === "link") {
-          let tag = `<a href='${mark.attrs.href}'`;
-          if (mark.attrs.title) { tag += ` title='${mark.attrs.title}''`; }
-          span = tag + ">" + span + "</a>";
+          iLink = i;
         } else {
           const tag = tagName[mark.type];
           span = `<${tag}>${span}</${tag}>`;
         }
+      }
+      if (iLink >= 0) {
+        // The <a> tag must be the outermost tag on text elements.
+        // That enables the regex replace trick used in md2html() below.
+        const mark = node.marks[iLink];
+        const tag = `<a href='${mark.attrs.href}'`;
+        span = tag + ">" + span + "</a>";
       }
       return span
     }
@@ -25189,6 +25206,8 @@ const md2text = md => {
 const md2html = (md, inHtml = false) => {
   const ast = md2ast(md, inHtml);
   let html = ast2html(ast);
+  // If you edit the next line, do the same in hurmet2html.js.
+  html = html.replace(/<\/a><a href='[^']*'>/g, "");
 
   // Write the footnotes, if any.
   const footnotes = [];
@@ -35557,6 +35576,13 @@ const hurmetNodes =  {
     state.footnotes.push(note);
     state.write(`[^${state.footnotes.length}]`);
   },
+  link_node(state, node) {
+    state.write("[");
+    state.renderInline(node.content);
+    state.write("](");
+    state.write(state.esc(node.attrs.href));
+    state.write(")");
+  },
   figure(state, node) {
     let caption;
     if (node.content.content[1].type.name === "table") {
@@ -37406,12 +37432,14 @@ async function hurmet2html(md, title = "", inHtml = false) {
     node[0].attrs.body = tocArray;
   }
 
-  // Perform Hurmet calculations
+  // Perform Hurmet calculations.
   // This is asynchronous because a caclulation may need to fetch some remote data.
   ast = await updateCalcs(ast);
 
   // Write the HTML
   let html = ast2html(ast);
+  // If you edit the next line, do the same in md2html.js.
+  html = html.replace(/<\/a><a href='[^']*'>/g, "");
 
   if (title.length > 0) {
     html = wrapWithHead(html, title, ast.attrs);
@@ -53015,6 +53043,20 @@ const nodes = {
     isolating: true,
     parseDOM: [{tag: "aside.comment"}],
     toDOM(node) { return ["aside", { class: 'comment' }, 0] }
+  },
+
+  link_node: {
+    group: "inline",
+    content: "inline*",
+    attrs: { href: { default: "" }, title: { default: "" } },
+    inline: true,
+    atom: true,
+    toDOM(node) {
+      return ["a", node.attrs, 0]
+    },
+    parseDOM: [{tag: "a[href]", getAttrs(dom) {
+      return {href: dom.getAttribute("href")}
+    }}]
   }
 
 };
@@ -57044,6 +57086,15 @@ function linkItem(markType) {
       return !state.selection.empty
     },
     run(state, dispatch, view) {
+      const {$from, $to} = state.selection;
+      if ($from.pos === $to.pos) { return false }
+      const content = state.doc.slice($from.pos, $to.pos, false).content.content;
+      if (content.length === 1 && content[0].type.name === "link_node") {
+        // Delete the link_node. Keep the content.
+        const slice = new Slice(content[0].content, 0, 0);
+        dispatch(state.tr.replace($from.pos, $to.pos, slice));
+        return true
+      }
       if (markActive(state, markType)) {
         toggleMark(markType)(state, dispatch);
         return true
@@ -57054,7 +57105,27 @@ function linkItem(markType) {
           href: new TextField({ label: "Link target", required: true })
         },
         callback(attrs) {
-          toggleMark(markType, attrs)(view.state, view.dispatch);
+          const {$from, $to} = state.selection;
+          const content = state.doc.slice($from.pos, $to.pos, false).content.content;
+          let allText = true;
+          let allInline = true;
+          for (const node of content) {
+            if (node.type.name !== "text") { allText = false; }
+            if (node.type.spec.group !== "inline") { allInline = false; }
+          }
+          if (!allInline) {
+            return false
+          } else if (allText) {
+            toggleMark(markType, attrs)(view.state, view.dispatch);
+          } else {
+            // The selection contains math or a footnote. Don't use a text mark.
+            const href = attrs.href;
+            dispatch(state.tr.replaceWith(
+              $from.pos,
+              $to.pos, 
+              schema.nodes.link_node.createAndFill({href, title: href}, content)
+            ));
+          }
           view.focus();
         }
       });

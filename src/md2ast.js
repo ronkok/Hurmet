@@ -620,15 +620,17 @@ const parseRef = function(capture, state, refNode) {
   return refNode;
 };
 
-const parseTextMark = (capture, state, mark) => {
+const parseTextMark = (capture, state, mark, href) => {
   const text = parseInline(capture, state)
   if (Array.isArray(text) && text.length === 0) { return text }
   consolidate(text)
+  const markObj = { type: mark }
+  if (href) { markObj.attrs = { href } }
   for (const range of text) {
     if (range.marks) {
-      range.marks.push({ type: mark })
+      range.marks.push(markObj)
     } else {
-      range.marks = [{ type: mark }]
+      range.marks = [markObj]
     }
   }
   return text
@@ -891,11 +893,13 @@ rules.set("link", {
       if (node.type !== "text") { useParseTextMark = false; break }
     }
     if (useParseTextMark) {
+      // This is the Prosemirror default method for editable links.
       return parseTextMark(capture[1], state, "link", unescapeUrl(capture[2]))
     } else {
-      // In Hurmet documents, links can contain only text, not math or footnotes.
-      // So the next line of code is for the parsing of an HTML document, not a Hurmet doc.
-      return [{ type: "link_node", attrs: { href: unescapeUrl(capture[2]) }, content }]
+      // When a link contains a nodeView, e.g. math, the text mark method has an edge case bug.
+      // So the Hurmet schema has a custom "link_node".
+      const href = unescapeUrl(capture[2])
+      return [{ type: "link_node", attrs: { href, title: href }, content }]
     }
   }
 });

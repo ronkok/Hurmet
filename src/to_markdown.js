@@ -217,6 +217,13 @@ const hurmetNodes =  {
     state.footnotes.push(note)
     state.write(`[^${state.footnotes.length}]`)
   },
+  link_node(state, node) {
+    state.write("[")
+    state.renderInline(node.content)
+    state.write("](")
+    state.write(state.esc(node.attrs.href))
+    state.write(")")
+  },
   figure(state, node) {
     let caption
     if (node.content.content[1].type.name === "table") {

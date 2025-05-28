@@ -596,6 +596,20 @@ export const nodes = {
     isolating: true,
     parseDOM: [{tag: "aside.comment"}],
     toDOM(node) { return ["aside", { class: 'comment' }, 0] }
+  },
+
+  link_node: {
+    group: "inline",
+    content: "inline*",
+    attrs: { href: { default: "" }, title: { default: "" } },
+    inline: true,
+    atom: true,
+    toDOM(node) {
+      return ["a", node.attrs, 0]
+    },
+    parseDOM: [{tag: "a[href]", getAttrs(dom) {
+      return {href: dom.getAttribute("href")}
+    }}]
   }
 
 }
