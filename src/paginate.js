@@ -549,6 +549,11 @@ const findParagraphOverflowPoint = (paragraph, yMax) => {
       range.setStartBefore(grafChild)
       range.setEndAfter(grafChild)
       rect = range.getBoundingClientRect()
+    } else if (unsplittableClasses.includes(grafChild.className)) {
+      const mathChild = grafChild.childNodes[0];
+      range.setStartBefore(mathChild)
+      range.setEndAfter(mathChild)
+      rect = range.getBoundingClientRect()
     } else {
       rect = grafChild.getBoundingClientRect()
     }
@@ -559,6 +564,7 @@ const findParagraphOverflowPoint = (paragraph, yMax) => {
       // The child node is a text node.
       let offset = binarySearchForOverflow(grafChild, yMax)
       offset = linearSearchForOverflow(grafChild, yMax, offset)
+      if (offset < 0) { return [-1, 0] }
       return [i, offset]
     } else {
       // The child node is a tagged element. Find out if it can be split.
@@ -574,6 +580,7 @@ const findParagraphOverflowPoint = (paragraph, yMax) => {
       // Note: ProseMirror does not nest spans more than one level deep.
       let offset = binarySearchForOverflow(grafChild.childNodes[0], yMax)
       offset = linearSearchForOverflow(grafChild.childNodes[0], yMax, offset)
+      if (offset < 0) { return [-1, 0] }
       return [i, offset]
     }
   }
