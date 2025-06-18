@@ -236,7 +236,10 @@ const turnThePage = (topElement, attrs, editor) => {
   attrs.ftNote.end = -1
   attrs.pageNum += 1
   if (topElement) {
-    if (attrs.pageBottomChild >= 0 && attrs.pageBottomOffset > 0) {
+    if (topElement.classList.contains("page-break")) {
+      attrs.pageTop = topElement.getBoundingClientRect().bottom
+      attrs.topMargin = 0
+    } else if (attrs.pageBottomChild >= 0 && attrs.pageBottomOffset > 0) {
       const range = new Range()
       const textNode = topElement.childNodes[attrs.pageBottomChild];
       range.setStart(textNode, attrs.pageBottomOffset)
@@ -261,6 +264,10 @@ const turnThePage = (topElement, attrs, editor) => {
   return [topElement, null]
 }
 
+const containsPageBreak = element => {
+  return element.getElementsByClassName('page-break').length > 0
+}
+
 export function paginate(view, tocSchema, purpose, tocStartLevel, tocEndLevel) {
 
   // This closed function is recursive. It will work thru the entire doc.
@@ -268,6 +275,11 @@ export function paginate(view, tocSchema, purpose, tocStartLevel, tocEndLevel) {
     const children = element.children
     for (let i = 0; i < children.length; i++) {
       const child = children[i];
+      if (child.classList.contains("page-break")) {
+        populatePage(startElement, endElement, header, destination, attrs)
+        ;[startElement, endElement] = turnThePage(child, attrs, editor)
+        continue
+      }
       const bottom = bottomOf(child)
       attrs.tocAdjustment = 0
       if (mustAdjustToC && attrs.pageTop <= attrs.tocTop && attrs.tocTop < bottom) {
@@ -302,7 +314,7 @@ export function paginate(view, tocSchema, purpose, tocStartLevel, tocEndLevel) {
 
       } else if (attrs.pageHeight - attrs.headerHeight - attrs.ftNote.pageNotesHeight -
                  attrs.ftNote.elemNotesHeight >= bottom + attrs.tocAdjustment -
-                 attrs.pageTop) {
+                 attrs.pageTop && !containsPageBreak(child)) {
         // Add this element to the printed page.
         endElement = child
         attrs.ftNote.pageNotesHeight += attrs.ftNote.elemNotesHeight

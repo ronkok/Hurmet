@@ -1,6 +1,5 @@
 /* eslint-disable */
 import {
-  wrapItem,
   blockTypeItem,
   Dropdown,
   joinUpItem,
@@ -82,6 +81,11 @@ const hurmetIcons = {
     width: 1024,
     height: 1024,
     path: "M512 219q-116 0-218 39t-161 107-59 145q0 64 40 122t115 100l49 28-15 54q-13 52-40 98 86-36 157-97l24-21 32 3q39 4 74 4 116 0 218-39t161-107 59-145-59-145-161-107-218-39zM1024 512q0 99-68 183t-186 133-257 48q-40 0-82-4-113 100-262 138-28 8-65 12h-2q-8 0-15-6t-9-15v-0q-1-2-0-6t1-5 2-5l3-5t4-4 4-5q4-4 17-19t19-21 17-22 18-29 15-33 14-43q-89-50-141-125t-51-160q0-99 68-183t186-133 257-48 257 48 186 133 68 183z"
+  },
+  pagebreak: {
+    width: 16,
+    height: 16,
+    path: "M0 8h2v1h-2zM3 8h3v1h-3zM7 8h2v1h-2zM10 8h3v1h-3zM14 8h2v1h-2zM13.75 0l0.25 7h-12l0.25-7h0.5l0.25 6h10l0.25-6zM2.25 16l-0.25-6h12l-0.25 6h-0.5l-0.25-5h-10l-0.25 5z"
   },
   footnote: {
     width: 16,
@@ -929,28 +933,64 @@ function setRoundingCriteria(nodeType) {
   })
 }
 
-function wrapInEpigraph(nodeType) {
-  return new MenuItem({
-    title: "Wrap in an epigraph",
-    label: "Epigraph",
+function wrapItem(nodeType, attrs) {
+  const menuObj = {
     enable(state) {
       return canInsert(state, nodeType)
     },
     run(state, dispatch) {
       const {$from, $to} = state.selection
-      let resolvedPos = state.doc.resolve(state.selection.from)
-      const from = resolvedPos.before(resolvedPos.depth)
-      resolvedPos = state.doc.resolve(state.selection.to)
-      const to = resolvedPos.after(resolvedPos.depth)
       const tr = state.tr
-      tr.addMark(from, to, schema.marks.em.create())
+
+      // Find page break breakPositions, if any
+      const breakPositions = [];
+      state.doc.nodesBetween($from.pos, $to.pos, function(node, pos) {
+        if (node.type.name === "page_break") { breakPositions.push(pos) }
+      })      
+
+      if (attrs.label && attrs.label === "Epigraph") {
+        let resolvedPos = state.doc.resolve(state.selection.from)
+        const from = resolvedPos.before(resolvedPos.depth)
+        resolvedPos = state.doc.resolve(state.selection.to)
+        const to = resolvedPos.after(resolvedPos.depth)
+        // I set emphasis as inline. User has option to change it.
+        tr.addMark(from, to, schema.marks.em.create())
+      }
+
+      // Apply the wrap
       let range = $from.blockRange($to)
-      const wrapping = range && findWrapping(range, schema.nodes.epigraph)
+      const depth = $from.depth
+      const wrapping = range && findWrapping(range, nodeType)
       if (!wrapping) return false
+
+      if (attrs.label && attrs.label === "Centered") {
+        // Change math nodes to display mode.
+        state.doc.nodesBetween($from.before(depth), $to.after(depth), function(node, pos) {
+          if (node.type.name === "calculation" || node.type.name === "tex") {
+            if (state.doc.resolve(pos).parent.childCount === 1) {
+              const nodeAttrs = node.attrs
+              nodeAttrs.displayMode = true
+              tr.replaceWith(pos, pos + 1, schema.nodes[node.type.name].createAndFill(nodeAttrs))
+            }
+          }
+        })
+      }
+
       tr.wrap(range, wrapping)
+
+      // Delete the page breaks
+      for (let i = breakPositions.length - 1; i >=0 ; i--) {
+        const pos = tr.mapping.map(breakPositions[i])
+        tr.delete(pos, pos + 1)
+      }
+
       dispatch(tr)
     }
+  }
+  Object.keys(attrs).forEach((attr) => {
+    menuObj[attr] = attrs[attr];  // Add title and (label or icon)
   })
+  return new MenuItem(menuObj)
 }
 
 function toggleComment(nodeType) {
@@ -1495,36 +1535,6 @@ const liftItem = new MenuItem({
 })
 
 // :: MenuItem
-// Menu item for the `center` command.
-const centerBlock = new MenuItem({
-  title: "Center block",
-  label: "Centered",
-  run(state, dispatch)  {
-    let {$from, $to} = state.selection
-    let range = $from.blockRange($to)
-    const depth = $from.depth
-    const wrapping = range && findWrapping(range, schema.nodes.centered)
-    if (!wrapping) return false
-    const tr = state.tr
-    state.doc.nodesBetween($from.before(depth), $to.after(depth), function(node, pos) {
-      if (node.type.name === "calculation" || node.type.name === "tex") {
-        if (state.doc.resolve(pos).parent.childCount === 1) {
-          const nodeAttrs = node.attrs
-          nodeAttrs.displayMode = true
-          tr.replaceWith(pos, pos + 1, schema.nodes[node.type.name].createAndFill(nodeAttrs))
-        }
-      }
-    })
-    tr.wrap(range, wrapping).scrollIntoView()
-    if (dispatch) dispatch(tr)
-    return true
-  },
-  select(state) {
-    return wrapIn(schema.nodes.centered)(state)
-  }
-})
-
-// :: MenuItem
 // Menu item for the `selectParentNode` command.
 const selectParentNodeItem = new MenuItem({
   title: "Select parent node",
@@ -1752,9 +1762,15 @@ export function buildMenuItems(schema) {
       icon: icons.blockquote
     })
   if ((type = schema.nodes.epigraph))
-    r.wrapEpigraph = wrapInEpigraph(type)
+    r.wrapEpigraph = wrapItem(type, {
+      title: "Wrap in an epigraph",
+      label: "Epigraph"
+    })
   if ((type = schema.nodes.centered))
-    r.wrapCentered = centerBlock
+    r.wrapCentered = wrapItem(type, {
+      title: "Center block",
+      label: "Centered"
+    })
   if ((type = schema.nodes.right_justified))
     r.wrapRightJustified = wrapItem(type, {
       title: "Right-justify block",
@@ -1819,6 +1835,19 @@ export function buildMenuItems(schema) {
       },
       run(state, dispatch) {
         dispatch(state.tr.replaceSelectionWith(hr.create()))
+      }
+    })
+  }
+  if ((type = schema.nodes.page_break)) {
+    let pageBreak = type
+    r.pageBreak = new MenuItem({
+      title: "Insert page break (top level only)",
+      icon: hurmetIcons.pagebreak,
+      enable(state) {
+        return canInsert(state, pageBreak) && state.selection.$from.depth <= 1
+      },
+      run(state, dispatch) {
+        dispatch(state.tr.replaceSelectionWith(pageBreak.create()))
       }
     })
   }
@@ -2014,6 +2043,7 @@ export function buildMenuItems(schema) {
   r.insertMenu = [[
     r.toggleLink,
     r.insertHorizontalRule,
+    r.pageBreak,
     r.imageUpload,
     r.imageLink,
     r.footnote,

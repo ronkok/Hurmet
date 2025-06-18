@@ -686,6 +686,14 @@ ul.toc span + span {
   padding-left: 0.33em;
   background: white
 }
+div.page-break {
+  width: 129%;
+  height: 1em;
+  margin-left: -15%;
+  background-color: #F5F5F5;
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+}
 
 .math-code {
   display: inline-block;
@@ -1404,7 +1412,7 @@ td, th {
 
 @media print {
   
-  #title, nav, header, #slogan, #editor, #content, #copyright, #hint, .hidden {
+  #title, nav, header, #slogan, #editor, #content, #copyright, #hint, .hidden, .page-break {
     display: none;
   }
 

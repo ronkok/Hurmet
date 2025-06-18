@@ -47,12 +47,14 @@
  *     Nested divs are distinguished by number of colons. Minimum three.
  * 15. Table of Contents
  *     {.toc start=N end=N}
- * 16. Definition lists, per Pandoc.  (future)
- * 17. [^1] is a reference to a footnote.
+ * 16. Page break, per Pandoc
+ *     \\newpage
+ * 17. Definition lists, per Pandoc.  (future)
+ * 18. [^1] is a reference to a footnote.
  *     [^1]: The body of the footnote is deferred, similar to reference links.
- * 18. [#1] is a reference to a citation. (future)
+ * 19. [#1] is a reference to a citation. (future)
  *     [#1]: The body of the citation is deferred, similar to reference links.
- * 19. Line blocks begin with "| ", as per Pandoc. (future)
+ * 20. Line blocks begin with "| ", as per Pandoc. (future)
  *
  * copyright (c) 2021 - 2025 Ron Kok
  *
@@ -688,6 +690,13 @@ rules.set("horizontal_rule", {
   match: blockRegex(/^( *[-*_]){3,} *(?:\n *)+\n/),
   parse: function(capture, parse, state) {
     return { type: "horizontal_rule" };
+  }
+});
+rules.set("page_break", {
+  isLeaf: true,
+  match: blockRegex(/^\\newpage\n\n/),
+  parse: function(capture, parse, state) {
+    return { type: "page_break" };
   }
 });
 rules.set("codeBlock", {

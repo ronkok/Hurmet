@@ -166,6 +166,13 @@ export const nodes = {
     toDOM() { return ['div', { class: 'warning' }, 0] }
   },
 
+  page_break: {
+    atom: true,
+    group: "block",
+	  parseDOM: [{tag: "div.page-break"}],
+    toDOM() { return ['div', { class: 'page-break' }, 0] }
+  },
+
   // :: NodeSpec A horizontal rule (`<hr>`).
   horizontal_rule: {
     group: "block",
@@ -711,7 +718,23 @@ export function wrapInList(listType, attrs) {
     }
     let wrap = findWrapping(outerRange, listType, attrs, range)
     if (!wrap) return false
-    if (dispatch) dispatch(doWrapInList(state.tr, range, wrap, doJoin, listType).scrollIntoView())
+    let tr = state.tr
+
+    // Find page break breakPositions, if any
+    const breakPositions = [];
+    state.doc.nodesBetween($from.pos, $to.pos, function(node, pos) {
+      if (node.type.name === "page_break") { breakPositions.push(pos) }
+    })
+
+    tr = doWrapInList(state.tr, range, wrap, doJoin, listType).scrollIntoView()
+
+    // Delete the page breaks
+    for (let i = breakPositions.length - 1; i >=0 ; i--) {
+      const pos = tr.mapping.map(breakPositions[i])
+      tr.delete(pos -1, pos + 2) // Delete the <li> wrapped around the \newpage
+    }
+
+    if (dispatch) dispatch(tr)
     return true
   }
 }
