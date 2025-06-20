@@ -1263,7 +1263,6 @@ footnote::after {
 
 /* This section modifies Temml math CSS */
 math   { font-size: 1em; }
-math .special-fraction { font-family: "Times New Roman"; }
 math .date-result {
   font-family: Calibri, 'Helvetica Neue', Arial, Cambria, sans-serif;
 }

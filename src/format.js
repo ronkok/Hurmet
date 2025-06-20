@@ -40,9 +40,7 @@ const subscript = str => {
 }
 
 export const texFromMixedFraction = (numParts) => {
-  return (numParts[1] ? "-" : "") +
-    numParts[3] + "\\,\\class{special-fraction}{\\text{" +
-    superscript(numParts[4]) + "\u2044" + subscript(numParts[5]) + "}}"
+  return (numParts[1] ? "-" : "") + numParts[3] + `\\,\\sfrac{${numParts[4]}}{${numParts[5]}}`
 }
 
 const intAbs = i => i >= BigInt(0) ? i : BigInt(-1) * i  // absolute value of a BigInt

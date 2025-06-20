@@ -110,7 +110,8 @@ const parserTests = [
   ["(1	2; 3	4)", "\\begin{pmatrix}1 & 2 \\\\ 3 & 4 \\end{pmatrix}"],
   ["cos⁻¹ 0.5", "\\cos^{\\text{-}1}{0.5}"],
   ["(1/2 A + 1/2 B) / 8 =", "\\dfrac{\\frac{1}{2}\\, A + \\frac{1}{2}\\, B}{8}="],
-  ["‖a‖", "‖a ‖"]
+  ["‖a‖", "‖a ‖"],
+  ["5 2/3", "5\\,\\sfrac{2}{3}"]
 ]
 
 console.log("Now testing the parser…")
@@ -613,7 +614,8 @@ end`, vars)
     [`‖matrix‖ = @`, "¿matrix ‖", "37.1987903029117"],
     [`hypot(3, 4) = @`, `®3/1 ®4/1 hypot 2`, "5"],
     [`hypot(3, 4, 5) = @`, `®3/1 ®4/1 ®5/1 hypot 3`, "7.07106781186548"],
-    [`5 mod 3 = @`, `®5/1 ®3/1 modulo`, "2"]
+    [`5 mod 3 = @`, `®5/1 ®3/1 modulo`, "2"],
+    [`5 2/3 + 1 1/3 = @`, `®17/3 ®4/3 +`, "7"]
   ];
 
   const testRegEx = /^(@{1,2})test /
