@@ -104,8 +104,6 @@ export function openMathPrompt(options) {
       try {
         hurmet.render(tex, mathDisplay, {
           displayMode: options.attrs.displayMode,
-          trust: (context) => context.command === '\\class' &&
-                              context.class === "special-fraction",
           wrap: "=",
           errorColor: "#fff"
         })
