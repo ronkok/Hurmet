@@ -179,7 +179,7 @@ article {
 }
 div #print-div { width: 672px; font-size: 12pt; counter-increment: pageNum; }
 div #print-div .long-primer { font-size: 10 pt; }
-.header { break-before: page; counter-increment: pageNum; }
+.header { counter-increment: pageNum; }
 .page-display::after { content: counter(pageNum); }
 th {
   font-weight: normal;
@@ -1415,9 +1415,11 @@ td, th {
     display: none;
   }
 
-  img     { max-width: 100%; }
-  ul, img { page-break-inside: avoid; }
-  
+  img {
+    max-width: 100%;
+    page-break-inside: avoid;
+  }
+
   body {
     background: #fff;
     color: #000;

@@ -25357,13 +25357,13 @@ const populatePage = (startElement, endElement, header, destination, attrs) => {
   const page = document.createDocumentFragment();
   if (header && (attrs.pageNum > 0 || attrs.headerPages === "all")) {
     const printHeader = header.cloneNode(true);
-    printHeader.style.breakBefore = "page";
+    if (attrs.pageNum > 0) { printHeader.style.breakBefore = "page"; }
     page.append(printHeader);
   }
   // Create a body div
   const printBody = document.createElement("div");
   printBody.className = "print-body";
-  if (!(header && attrs.pageNum > 0 || attrs.headerPages === "all")) {
+  if (attrs.pageNum > 0  && !header) {
     printBody.style.breakBefore = "page";
   }
 
