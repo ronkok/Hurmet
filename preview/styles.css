@@ -1417,7 +1417,7 @@ td, th {
 
   img {
     max-width: 100%;
-    page-break-inside: avoid;
+    break-inside: avoid;
   }
 
   body {
