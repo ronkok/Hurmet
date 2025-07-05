@@ -16,45 +16,46 @@
  *    No space allowed after 1st $ or before 2nd $. No digit after 2nd $.
  *    LaTeX display math is delimited  $$ … $$. \[…\] is also recognized.
  * 3. ~subscript~
- * 4. ~~strikethrough~~
- * 5. Pipe tables as per Github Flavored Markdown (GFM).
- * 6. Grid tables as per Pandoc and reStructuredText
- * 7. Empty paragraphs: A line consisting only of "¶".
- * 8. Attributes for reference link definitions
+ * 4. ^superscript^
+ * 5. ~~strikethrough~~
+ * 6. Pipe tables as per Github Flavored Markdown (GFM).
+ * 7. Grid tables as per Pandoc and reStructuredText
+ * 8. Empty paragraphs: A line consisting only of "¶".
+ * 9. Attributes for reference link definitions
  *      [id]: target
  *      {.class #id width=number}
- * 9. Figure/Caption for images. Format is a paragraph that consists entirely of:
+ * 10.Figure/Caption for images. Format is a paragraph that consists entirely of:
  *    !![caption][id]
- * 10. Figure/Caption for tables.
+ * 11. Figure/Caption for tables.
  *     The caption is on the line above a table and is preceded by `: `, as per Pandoc.
- * 11. Table directives. They are placed on the line after the table. The format is:
+ * 12. Table directives. They are placed on the line after the table. The format is:
  *     {#id .class float="(left|right)" colWidths="num1 num2 …"}
  *     {."class1 class2"}  ←  Alternate class syntax for when there is > 1 classname
  *     Float is applied only to a table inside a figure.
  *     A spreadsheet will include " spreadsheet" in `.class` The id will be the sheet's name.
- * 12. Lists that allow the user to pick list ordering.
+ * 13. Lists that allow the user to pick list ordering.
  *        1. →  1. 2. 3.  etc.
  *        A. →  A. B. C.  etc.
  *        a. →  a. b. c.  etc.
  *        a) →  (a) (b) (c)  etc. (future)
- * 13. Alerts per GFM
+ * 14. Alerts per GFM
  *     > [!note] or [!tip] or [!important] or [!warning] or [!epigraph]
  *     > Content of note
- * 14. Fenced divs, similar to Pandoc.
+ * 15. Fenced divs, similar to Pandoc.
  *     ::: (centered|right_justified|comment|indented|boxed|header)
  *     Block elements
  *     :::
  *     Nested divs are distinguished by number of colons. Minimum three.
- * 15. Table of Contents
+ * 16. Table of Contents
  *     {.toc start=N end=N}
- * 16. Page break, per Pandoc
+ * 17. Page break, per Pandoc
  *     \\newpage
- * 17. Definition lists, per Pandoc.  (future)
- * 18. [^1] is a reference to a footnote.
+ * 18. Definition lists, per Pandoc.  (future)
+ * 19. [^1] is a reference to a footnote.
  *     [^1]: The body of the footnote is deferred, similar to reference links.
- * 19. [#1] is a reference to a citation. (future)
+ * 20. [#1] is a reference to a citation. (future)
  *     [#1]: The body of the citation is deferred, similar to reference links.
- * 20. Line blocks begin with "| ", as per Pandoc. (future)
+ * 21. Line blocks begin with "| ", as per Pandoc. (future)
  *
  * copyright (c) 2021 - 2025 Ron Kok
  *
