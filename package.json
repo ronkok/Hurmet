@@ -36,7 +36,8 @@
     "prosemirror-state": "^1.4.3",
     "prosemirror-tables": "^1.4.0",
     "prosemirror-transform": "^1.10.0",
-    "prosemirror-view": "^1.33.10"
+    "prosemirror-view": "^1.33.10",
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.1.0",
@@ -52,6 +53,7 @@
     "hurmet": "rollup --config utils/rollup.hurmet.config.js",
     "pm": "rollup --config utils/rollup.prosemirror.config.js && node utils/editPM.cjs",
     "demo": "rollup --config utils/rollup.demo.config.js",
+    "bw": "rollup --config utils/rollup.watch.config.js",
     "minify": "terser preview/prosemirror.js -o site/prosemirror.min.js -m && terser preview/demo.js -o site/demo.min.js -m",
     "copypm": "node utils/copyPM.cjs",
     "build": "yarn hurmet && yarn demo && yarn pm && yarn minify",

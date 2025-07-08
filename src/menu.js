@@ -24,7 +24,7 @@ import { isInTable, addColumnBefore, deleteColumn,
 import hurmet from "./hurmet"
 import { draftMode } from "./draftMode"
 import { hurmetMarkdownSerializer } from "./to_markdown"
-import { readFile } from "./openfile"
+import { readFile, handleContents } from "./openfile"
 import { saveAs } from "filesaver.js-npm"
 import { paginate, forToC, forPrint } from "./paginate.js"
 import { showDiff } from "./diffMatchPatch"
@@ -640,6 +640,32 @@ function openFile() {
     label: "Open…",
     run(state, _, view) {
       readFile(state, _, view, schema, "markdown")
+    }
+  })
+}
+
+function liveReload() {
+  return new MenuItem({
+    title: "Open a websocket and listen for updates.",
+    label: "Live reload...",
+    run(state, _, view) {
+      const promptOptions = {
+        title: "Listen for updates at websocket port:",
+        fields: { ws: new TextField({ label: "Websocket", value: "3000" }) },
+        callback(attrs) {
+          if (attrs.ws && /^\d+$/.test(attrs.ws)) {
+            const socket = new WebSocket(`ws://localhost:${attrs.ws}`)
+            socket.addEventListener('message', event => {
+              const msg = JSON.parse(event.data)
+              if (msg.type === 'update') {
+                // Replace the current document with the update.
+                handleContents(view, schema, msg.content, 'markdown')
+              }
+            })
+          }
+        }
+      }
+      openPrompt(promptOptions)
     }
   })
 }
@@ -1672,6 +1698,7 @@ export function buildMenuItems(schema) {
   r.saveFile = saveFile()
   r.saveFileAs = saveFileAs()
   r.permalink = permalink()
+  r.liveReload = liveReload()
   r.insertHeader = insertHeader()
   r.removeHeader = removeHeader()
 
@@ -2003,6 +2030,7 @@ export function buildMenuItems(schema) {
     r.saveFile,
     r.saveFileAs,
     r.permalink,
+    r.liveReload,
     r.takeSnapshot,
     r.showDiffMenuItem,
     r.deleteSnapshots,

@@ -1,6 +1,6 @@
 import hurmet from "./hurmet"
 
-const handleContents = (view, schema, str, format) => {
+export const handleContents = (view, schema, str, format) => {
   // Strip the BOM, if any, from the beginning of the result string.
   if (/^ï»¿/.test(str)) { str = str.substring(3) }
 
