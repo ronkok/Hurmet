@@ -10,52 +10,53 @@
  *
  * ## Extensions
  *
- * 1. Hurmet inline calculation is delimited ¢`…`, where "…" is the entry input by the author.
+ * 1. Hurmet has a meta-document section at the top of the file, similar to MultiMarkdown.
+ * 2. Hurmet inline calculation is delimited ¢`…`, where "…" is the entry input by the author.
  *    Hurmet display calculation is delimited ¢¢…¢¢.
- * 2. LaTeX inline math is delimited $…$ or $`…`$. \(…\) is also recognized.
+ * 3. LaTeX inline math is delimited $…$ or $`…`$. \(…\) is also recognized.
  *    No space allowed after 1st $ or before 2nd $. No digit after 2nd $.
  *    LaTeX display math is delimited  $$ … $$. \[…\] is also recognized.
- * 3. ~subscript~
- * 4. ^superscript^
- * 5. ~~strikethrough~~
- * 6. Pipe tables as per Github Flavored Markdown (GFM).
- * 7. Grid tables as per Pandoc and reStructuredText
- * 8. Empty paragraphs: A line consisting only of "¶".
- * 9. Attributes for reference link definitions
- *      [id]: target
- *      {.class #id width=number}
- * 10.Figure/Caption for images. Format is a paragraph that consists entirely of:
- *    !![caption][id]
- * 11. Figure/Caption for tables.
+ * 4. ~subscript~
+ * 5. ^superscript^
+ * 6. ~~strikethrough~~
+ * 7. Pipe tables as per Github Flavored Markdown (GFM).
+ * 8. Grid tables as per Pandoc and reStructuredText
+ * 9. Empty paragraphs: A line consisting only of "¶".
+ * 10. Attributes for reference link definitions
+ *       [id]: target
+ *       {.class #id width=number}
+ * 11. Figure/Caption for images. Format is a paragraph that consists entirely of:
+ *       !![caption][id]
+ * 12. Figure/Caption for tables.
  *     The caption is on the line above a table and is preceded by `: `, as per Pandoc.
- * 12. Table directives. They are placed on the line after the table. The format is:
+ * 13. Table directives. They are placed on the line after the table. The format is:
  *     {#id .class float="(left|right)" colWidths="num1 num2 …"}
  *     {."class1 class2"}  ←  Alternate class syntax for when there is > 1 classname
  *     Float is applied only to a table inside a figure.
  *     A spreadsheet will include " spreadsheet" in `.class` The id will be the sheet's name.
- * 13. Lists that allow the user to pick list ordering.
+ * 14. Lists that allow the user to pick list ordering.
  *        1. →  1. 2. 3.  etc.
  *        A. →  A. B. C.  etc.
  *        a. →  a. b. c.  etc.
  *        a) →  (a) (b) (c)  etc. (future)
- * 14. Alerts per GFM
+ * 15. Alerts per GFM
  *     > [!note] or [!tip] or [!important] or [!warning] or [!epigraph]
  *     > Content of note
- * 15. Fenced divs, similar to Pandoc.
+ * 16. Fenced divs, similar to Pandoc.
  *     ::: (centered|right_justified|comment|indented|boxed|header)
  *     Block elements
  *     :::
  *     Nested divs are distinguished by number of colons. Minimum three.
- * 16. Table of Contents
+ * 17. Table of Contents
  *     {.toc start=N end=N}
- * 17. Page break, per Pandoc
+ * 18. Page break, per Pandoc
  *     \\newpage
- * 18. Definition lists, per Pandoc.  (future)
- * 19. [^1] is a reference to a footnote.
+ * 19. Definition lists, per Pandoc.  (future)
+ * 20. [^1] is a reference to a footnote.
  *     [^1]: The body of the footnote is deferred, similar to reference links.
- * 20. [#1] is a reference to a citation. (future)
+ * 21. [#1] is a reference to a citation. (future)
  *     [#1]: The body of the citation is deferred, similar to reference links.
- * 21. Line blocks begin with "| ", as per Pandoc. (future)
+ * 22. Line blocks begin with "| ", as per Pandoc. (future)
  *
  * copyright (c) 2021 - 2025 Ron Kok
  *
