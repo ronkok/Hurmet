@@ -56258,6 +56258,32 @@ function openFile() {
   })
 }
 
+function liveReload() {
+  return new MenuItem({
+    title: "Open a websocket and listen for updates.",
+    label: "Live reload...",
+    run(state, _, view) {
+      const promptOptions = {
+        title: "Listen for updates at websocket port:",
+        fields: { ws: new TextField({ label: "Websocket", value: "3000" }) },
+        callback(attrs) {
+          if (attrs.ws && /^\d+$/.test(attrs.ws)) {
+            const socket = new WebSocket(`ws://localhost:${attrs.ws}`);
+            socket.addEventListener('message', event => {
+              const msg = JSON.parse(event.data);
+              if (msg.type === 'update') {
+                // Replace the current document with the update.
+                handleContents(view, schema, msg.content, 'markdown');
+              }
+            });
+          }
+        }
+      };
+      openPrompt(promptOptions);
+    }
+  })
+}
+
 function copyText(state, isGFM, withResults = false) {
   const text = hurmetMarkdownSerializer.serialize(state.selection.content().content, new Map(), [], isGFM, false, withResults);
   const type = "text/plain";
@@ -57283,6 +57309,7 @@ function buildMenuItems(schema) {
   r.saveFile = saveFile();
   r.saveFileAs = saveFileAs();
   r.permalink = permalink();
+  r.liveReload = liveReload();
   r.insertHeader = insertHeader();
   r.removeHeader = removeHeader();
 
@@ -57612,6 +57639,7 @@ function buildMenuItems(schema) {
     r.saveFile,
     r.saveFileAs,
     r.permalink,
+    r.liveReload,
     r.takeSnapshot,
     r.showDiffMenuItem,
     r.deleteSnapshots,

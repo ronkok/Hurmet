@@ -102,7 +102,7 @@ pre code {
   font-size: 0.9em;
 }
 
-h1, h2, h3, h5 {
+h1, h2 {
   font-family: Verdana, sans-serif;
   font-variant: small-caps;
   letter-spacing: 0.05em;
@@ -112,8 +112,8 @@ h1, h2, h3, h5 {
 			 
 h1 { font-size: 120%; margin-top: 3em; }
 h2 { font-size: 105%; margin-top: 2em; }
-h3 { font-size: 100%; margin-top: 1em; }
-h4 { font-size: 100%; margin: 1em 0 1em 0; font-weight: bold; }
+h3 { font-size: 105%; margin: 1em 0 1em 0; font-weight: bold; }
+h4 { font-size: 95%; font-weight: bold; }
 h5 { font-size: 110%; text-align: center; }
 h6 { font-size: 95%; font-weight: bold; text-align: center;  margin: 1em 0 1em 0; }
 
