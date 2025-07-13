@@ -673,23 +673,35 @@ It’s quite simple to assign a value to a variable:
 |                                   +--------------------+
 |                                   | `w = 100 lbf/ft`   |
 |                                   +--------------------+
-|                                   | name = "James"     |
+|                                   | `name = "James"`   |
 +-----------------------------------+--------------------+
 
 [assignment]: images/assignment-railroad.svg
+
+<details><summary>Placeholders</summary>
+
+Say that you are writing a template document. Other people will later copy this
+document and use it as a go-by for their own work. A few of the assignments
+should be revised for local conditions.
+
+You can mark an assignment value as a placeholder by writing `_` at the end
+of the assignment. Hurmet will highlight the value on an aqua background. Example,
+this assignment: `p = 35 psi_` will be rendered as: $p = \colorbox{aqua}{35\,\text{psi}}$.
+
+</details>
 
 To calulate an <span id="expression">expression</span> that contains a variable,
 a function, or an operator; write a `?` or `%` or `@` to indicate where the
 result should appear. Here are some examples:
 
 | Input                          | Renders as:                                           |
-|--------------------------------|-------------------------------------------------------|
-| `2 + 2 = ?`                    | ¢`2 + 2 = 4`                                          |
-| `2 + 2 = @`                    | ¢`4`                                                  |
-| `A = 2 × 4 = ?`                | ¢`A = 2 × 4 = 8`                                      |
-| `x = 2 A = ?`                  | ¢`x = 2 A = \color(blue)((2)(8)) \color(black) = 16`  |
-| `x = 2 A = %`                  | ¢`x = 2 A = 16`                                       |
-| `A = 2m × 4feet = ?? m²`       | ¢`A = 2m × 4 'feet' = 2.4384m²`                       |
+|--------------------------------|-----------------------------------------------------|
+| `2 + 2 = ?`                    | ¢`2 + 2 = 4`                                        |
+| `2 + 2 = @`                    | ¢`4`                                                |
+| `A = 2 × 4 = ?`                | ¢`A = 2 × 4 = 8`                                    |
+| `x = 2 A = ?`                  | ¢`x = 2 A = \color(blue)(2)(8) \color(black) = 16`  |
+| `x = 2 A = %`                  | ¢`x = 2 A = 16`                                     |
+| `A = 2m × 4feet = ?? m²`       | ¢`A = 2m × 4 'feet' = 2.4384m²`                     |
 {.table-no-wrap}
 
 The statement form is more precisely defined as:

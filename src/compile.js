@@ -265,8 +265,16 @@ export const compile = (
 
   } else {
     // trailStr may be a static value in an assignment statement.
+    let isPlaceholder = false
+    if (trailStr.slice(-1) === "_") {
+      isPlaceholder = true
+      trailStr = trailStr.slice(0, -1).trim()
+    }
     // Check if trailStr is a valid literal.
-    [value, unit, dtype, resultDisplay] = valueFromLiteral(trailStr, name, formats)
+    ;[value, unit, dtype, resultDisplay] = valueFromLiteral(trailStr, name, formats)
+    if (isPlaceholder) {
+      resultDisplay = "\\colorbox{aqua}{" + resultDisplay + "}"
+    }
 
     if (dtype === dt.ERROR) { return shortcut(str, formats) }
     rpn = ""
