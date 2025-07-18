@@ -1000,7 +1000,7 @@ const gridTable = (table, numCols, numRowsInHeading, rowSpan, colSpan, colWidth,
   const rowIsEmptied = new Array(table.length).fill(false) // Have we written all the row's contents?
   let highestUnemptiedRow = 0
   const rowIsReadyForBorder = new Array(table.length).fill(false)
-  const lines = [topBorder]
+  const lines = [topBorder];
 
   while (current[0].row < table.length) {
     // Each pass in this loop writes one line of the grid table output.
@@ -1013,7 +1013,7 @@ const gridTable = (table, numCols, numRowsInHeading, rowSpan, colSpan, colWidth,
       if (table[current[j].row][j].length > current[j].line) {
         // Write one line from one cell.
         let cellStr = table[current[j].row][j][current[j].line];
-        if (cellStr === "¶") { cellStr = " " }
+        if (cellStr.trim() === "¶") { cellStr = cellStr.replace("¶", " ") }
         str += " " + cellStr + " |"
         current[j].line += 1
         if (current[j].line < table[current[j].row][j].length) {
