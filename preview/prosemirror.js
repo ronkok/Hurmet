@@ -29604,20 +29604,22 @@ const functions$1 = {
   },
 
   leader(svgOprnd, plistOprnd, label) {
+    // A 'leader' is a note with an arrow (leader line) pointing to something.
     const marker = svgOprnd.value.temp.marker;
     svgOprnd.value.temp.marker = "arrow";
     svgOprnd.value.temp.isDim = true;
-    const plistCopy = clone(plistOprnd); // Copy to an un-frozen object.
-    plistCopy.value.reverse();
-    svgOprnd = this.path(plistCopy);
-    const p = rationals2numbers(plistCopy.value[0]);
-    const q = rationals2numbers(plistCopy.value[plistCopy.value.length - 1]);
+    // Draw the arrow
+    svgOprnd = this.path(svgOprnd, [plistOprnd]);
+    // Get the text position
+    const p = rationals2numbers(plistOprnd.value[0]);
+    const q = rationals2numbers(plistOprnd.value[plistOprnd.value.length - 1]);
     let pos = "right";
     if (Math.abs(p[0] - q[0]) >= Math.abs(p[1] - q[1])) {
       pos = p[0] >= q[0] ? "right" : "left";
     } else {
       pos = p[1] < q[1] ? "below" : "above";
     }
+    // Write the text
     const svg = textLocal(svgOprnd.value, p, label.value, pos);
     svg.temp.marker = marker;
     svg.temp.isDim = false;
