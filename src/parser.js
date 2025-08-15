@@ -1,4 +1,4 @@
-﻿import { addTextEscapes, numeralFromSuperScript,
+﻿import { addTextEscapes, numeralFromSuperScript, checkForNumericSubscript,
          interpolateRegEx, arrayOfRegExMatches, verbatimArg } from "./utils"
 import { tt, lex, unitStartRegEx, lexUnitName } from "./lexer"
 import { Rnl } from "./rational"
@@ -112,18 +112,6 @@ const setUpIf = (rpn, tokenInput, exprStack, delim) => {
 const functionExpoRegEx = /^[\^⁻⁰¹²³\u2074-\u2079]/
 
 const openParenRegEx = /^ *\(/
-
-const numSubRegEx = /_([0-9]+)(?=(′|$))/
-export const checkForNumericSubscript = varName => {
-  // If a name has a numeric subscript, e.g. x_2, convert it to Unicode subscript, x₂
-  const match = numSubRegEx.exec(varName)
-  if (!match) { return varName }
-  const numStr = match[1];
-  const subChars = Array.from(numStr)
-     .map(ch => String.fromCodePoint(0x2080 + Number(ch))).join('')
-  return varName.slice(0, match.index) + subChars +
-    varName.slice(match.index + match[0].length)
-}
 
 const exponentOfFunction = (str, decimalFormat, isCalc) => {
   // As in: sin²()

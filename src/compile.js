@@ -1,6 +1,6 @@
-﻿import { parse, checkForNumericSubscript } from "./parser"
+﻿import { parse } from "./parser"
 import { dt, allZeros } from "./constants"
-import { isValidIdentifier } from "./utils"
+import { isValidIdentifier, checkForNumericSubscript } from "./utils"
 import { valueFromLiteral } from "./literal"
 import { functionRegEx, drawRegEx, moduleRegEx, scanModule } from "./module"
 import { unitFromUnitName } from "./units"

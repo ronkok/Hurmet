@@ -1,6 +1,6 @@
 import { dt, allZeros } from "./constants" // operand type enumeration
 import { Rnl } from "./rational"
-import { clone, addTextEscapes, unitTeXFromString, tablessTrim,
+import { clone, addTextEscapes, unitTeXFromString, tablessTrim, checkForNumericSubscript,
          isValidIdentifier, interpolateRegEx, arrayOfRegExMatches } from "./utils"
 import { fromAssignment } from "./operand.js"
 import { unitFromUnitName } from "./units"
@@ -292,7 +292,7 @@ const dataFrameFromTSV = (str, vars) => {
     const matches = arrayOfRegExMatches(interpolateRegEx, str)
     for (let i = matches.length - 1; i >= 0; i--) {
       const mch = matches[i];
-      const varName = mch.value.slice(2, -1)
+      const varName = checkForNumericSubscript(mch.value.slice(2, -1))
       let value = ""
       if (varName === "undefined") {
         value = ""

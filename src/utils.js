@@ -67,6 +67,18 @@ export const memoizeFunction = passedFunction => {
   }
 }
 
+const numSubRegEx = /_([0-9]+)(?=(′|$))/
+export const checkForNumericSubscript = varName => {
+  // If a name has a numeric subscript, e.g. x_2, convert it to Unicode subscript, x₂
+  const match = numSubRegEx.exec(varName)
+  if (!match) { return varName }
+  const numStr = match[1];
+  const subChars = Array.from(numStr)
+     .map(ch => String.fromCodePoint(0x2080 + Number(ch))).join('')
+  return varName.slice(0, match.index) + subChars +
+    varName.slice(match.index + match[0].length)
+}
+
 // A function to return an array containing all matches to a RegEx pattern.
 export const arrayOfRegExMatches = (regex, text) => {
   if (regex.constructor !== RegExp) { throw new Error('not RegExp') }
