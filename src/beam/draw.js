@@ -114,7 +114,11 @@ const momentArrow = (xCtr, yCtr, thetaAtArrowPoint, subtendedAngle, isCounterClo
 
   const path = {
     tag: "path",
-    attrs: { d: `M${xStart} ${yStart}A${r} ${r} 0 ${largeArcFlag} 0 ${xEnd} ${yEnd}` }
+    attrs: {
+      d: `M${xStart} ${yStart}A${r} ${r} 0 ${largeArcFlag} 0 ${xEnd} ${yEnd}`,
+      stroke: 'black',
+      fill: 'none'
+    }
   }
 
   // Draw the arrow head
