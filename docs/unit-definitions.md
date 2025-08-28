@@ -511,6 +511,7 @@ I recommend Russ Rowlett’s [dictionary of units of measurement](http://www.ibi
 | ton TNT               | 4184000000                     | 0       | 0        | 2  | 1  | -2 | 0  | 0  | 0 | 0  | 0 |                                  |
 | ton refrigeration     | 3516.8532                      | 0       | 0        | 2  | 1  | -3 | 0  | 0  | 0 | 0  | 0 | 12 000 BTU/hr                    |
 | tonne                 | 1000                           | 0       | 0        | 0  | 1  | 0  | 0  | 0  | 0 | 0  | 0 | metric ton                       |
+| tonnef                | 9806.65                        | 0       | 0        | 1  | 1  | -2 | 0  | 0  | 0 | 0  | 0 | metric ton force                 |
 | tons TNT              | 4184000000                     | 0       | 0        | 2  | 1  | -2 | 0  | 0  | 0 | 0  | 0 |                                  |
 | tons refrigeration    | 3516.8532                      | 0       | 0        | 2  | 1  | -3 | 0  | 0  | 0 | 0  | 0 |                                  |
 | township              | 93239571.972096                | 0       | 0        | 2  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | 36 mi²                           |
