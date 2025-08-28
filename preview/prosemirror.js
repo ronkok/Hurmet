@@ -36679,7 +36679,10 @@ const tableToSheet = (state, tableNode) => {
       let entry = (i === 0)
         ? hurmetMarkdownSerializer.serialize(cell, new Map(), [])
         : cell.textContent;
-      if (i === 0) { entry = entry.replace(grafRegEx, "\\\n"); }
+      if (i === 0) {
+        entry = entry.replace(grafRegEx, "\\\n");
+        if (entry === "¶") { entry = ""; }
+      }
       const newCell = { type: "spreadsheet_cell", attrs: { entry } };
       if (i === 0) { newCell.attrs.display = md2html(entry); }
       table.content[i].content[j].content = [newCell];
