@@ -18730,6 +18730,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "ton TNT":["4184000000","1","0","0",[2,1,-2,0,0,0,0,0]],
 "ton refrigeration":["3516.8532","1","0","0",[2,1,-3,0,0,0,0,0]],
 "tonne":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
+"tonnef":["9806.65","1","0","0",[1,1,-2,0,0,0,0,0]],
 "tons TNT":["4184000000","1","0","0",[2,1,-2,0,0,0,0,0]],
 "tons refrigeration":["3516.8532","1","0","0",[2,1,-3,0,0,0,0,0]],
 "township":["93239571.972096","1","0","0",[2,0,0,0,0,0,0,0]],
@@ -36703,15 +36704,11 @@ const sheetToTable = (state, tableNode) => {
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i].content;
     for (let j = 0; j < row.length; j++) {
-      if (i === 0) {
-        row[j].content = md2ast(row[j].content[0].attrs.entry);
+      const text = row[j].content[0].attrs.entry;
+      if (text.length > 0) {
+        row[j].content = [{ type: "paragraph", content: [{ type: "text", text }] }];
       } else {
-        const text = row[j].content[0].attrs.entry;
-        if (text.length > 0) {
-          row[j].content = [{ type: "paragraph", content: [{ type: "text", text }] }];
-        } else {
-          row[j].content = [{ type: "paragraph", content: [] }];
-        }
+        row[j].content = [{ type: "paragraph", content: [] }];
       }
     }
   }

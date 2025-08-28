@@ -269,15 +269,11 @@ export const sheetToTable = (state, tableNode) => {
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i].content;
     for (let j = 0; j < row.length; j++) {
-      if (i === 0) {
-        row[j].content = md2ast(row[j].content[0].attrs.entry)
+      const text = row[j].content[0].attrs.entry
+      if (text.length > 0) {
+        row[j].content = [{ type: "paragraph", content: [{ type: "text", text }] }]
       } else {
-        const text = row[j].content[0].attrs.entry
-        if (text.length > 0) {
-          row[j].content = [{ type: "paragraph", content: [{ type: "text", text }] }]
-        } else {
-          row[j].content = [{ type: "paragraph", content: [] }]
-        }
+        row[j].content = [{ type: "paragraph", content: [] }]
       }
     }
   }
