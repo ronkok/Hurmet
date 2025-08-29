@@ -1,7 +1,6 @@
 /* eslint-disable no-alert */
 import { dt, allZeros } from "./constants"
 import { hurmetMarkdownSerializer } from "./to_markdown"
-import { md2ast } from "./md2ast"
 import { md2text, md2html } from "./md2html"
 import { unitFromUnitName } from "./units"
 import { parse } from "./parser"
