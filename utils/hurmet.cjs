@@ -7343,6 +7343,7 @@ const testValue = oprnd => {
 
 const varRegEx = /〖[^〗]*〗/;
 const openParenRegEx$1 = /(?:[([{|‖]|[^\\][,;:](?:\\:)?)$/;
+const placeHolderRegEx = /^\\colorbox{aqua}{/;
 
 const plugValsIntoEcho = (str, vars, unitAware, formatSpec, formats) => {
   // For each variable name in the echo string, substitute a value.
@@ -7397,6 +7398,9 @@ const plugValsIntoEcho = (str, vars, unitAware, formatSpec, formats) => {
         dtype: vars[varName].dtype,
         resultdisplay: vars[varName].resultdisplay
       };
+      if (placeHolderRegEx.test(hvar.resultdisplay)) {
+        hvar.resultdisplay = hvar.resultdisplay.slice(16, -1).trim();
+      }
     }
 
     if (!hvar || !hvar.resultdisplay) {
