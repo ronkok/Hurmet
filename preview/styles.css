@@ -778,7 +778,7 @@ div.page-break {
 }
 
 .ProseMirror {
-  padding: 4px 8px 4px 14px;
+  padding: 0px 8px 4px 14px;
   line-height: 1.2;
   outline: none;
 }
@@ -1422,6 +1422,8 @@ td, th {
   #title, nav, header, #slogan, #editor, #content, #copyright, #hint, .hidden, .page-break {
     display: none;
   }
+
+  article { padding-top: 0;}
 
   img {
     max-width: 100%;
