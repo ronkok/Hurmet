@@ -129,7 +129,8 @@ const markAttribute = {
   strong:     ["font-weight", "bold"],
   code:       ["font-family", "monospace"],
   strikethru: ["text-decoration", "line-through"],
-  subscript:  ["font-size", "0.8em"]
+  subscript:  ["font-size", "0.8em"],
+  superscript: ["font-size", "0.8em"]
 }
 
 const textLocal = (svg, p, str, pos) => {
