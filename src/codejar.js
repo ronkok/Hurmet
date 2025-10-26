@@ -1,7 +1,7 @@
 /* eslint-disable */
 
 /* I've revised this version of CodeJar for Hurmet math zones.
- * I've removed CodeJare history. It had a delay and Hurmet needs speed
+ * I've removed CodeJar history. It had a delay and Hurmet needs speed
  * in order to update a view of the math with every keystroke.
  */
 
