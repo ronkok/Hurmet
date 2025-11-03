@@ -1,4 +1,8 @@
 .yarn
+.yarn/builds/
+.yarn/unplugged/
+.yarn/install-state.gz
+.pnp.*
 node_modules
 src/altParser.js
 preview/prosemirror.js
