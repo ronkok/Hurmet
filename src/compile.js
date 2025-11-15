@@ -276,7 +276,23 @@ export const compile = (
       resultDisplay = "\\colorbox{aqua}{" + resultDisplay + "}"
     }
 
-    if (dtype === dt.ERROR) { return shortcut(str, formats) }
+    if (dtype === dt.ERROR) {
+      // trailStr is not a valid literal. So finish early.
+      if (resultDisplay.length === 0) {
+        return shortcut(str, formats)
+      } else {
+        // trailStr has a valid number but an invalid unit.
+        return {
+          entry: str,
+          resultdisplay: "\\textcolor{firebrick}{\\text{" + resultDisplay + "}}",
+          altResultDisplay: resultDisplay,
+          tex: mainStr + " = \\textcolor{firebrick}{\\text{" + resultDisplay + "}}",
+          alt: mainStr + " = " + resultDisplay,
+          error: true,
+          dtype
+        }
+      }
+    }
     rpn = ""
   }
 

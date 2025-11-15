@@ -43,7 +43,7 @@ const literalWithUnit = (oprnd, tex, unitStr) => {
   if (unitStr.length > 0) {
     [unit, unitDisplay] = unitFromString(unitStr)
     if (unit.dtype && unit.dtype === dt.ERROR) {
-      return [0, null, dt.ERROR, ""]
+      return [0, null, dt.ERROR, unit.value]
     }
     value = oprnd.dtype === dt.RATIONAL
       ? {
