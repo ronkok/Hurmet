@@ -12,6 +12,9 @@ import { dateRegEx, dateInSecondsFromIsoString, formatDate } from "./date"
 
 const numberRegEx = new RegExp(Rnl.numberPattern)
 const matrixRegEx = /^[([] *(?:(?:-?[0-9.]+|"[^"]+"|true|false) *[,;\t]? *)+[)\]]/
+// A regex to check for valid unit strings. Not comprehensive.
+// Only checks for allowed characters. Does not check structure of a compound unit.
+const unitRegEx = /^[a-zäöōA-Z0-9 μµ#$£¥'ʹ″”°()Å₨₪€℃℉ΩΩKÅ^+\-/*.•×\-−·₂⁰¹²³\u2074-\u2079]+$/
 /* eslint-disable max-len */
 
 const numStr = "(-?(?:0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?)))"
@@ -95,6 +98,9 @@ export const valueFromLiteral = (str, name, formats) => {
     const [tex, rpn, _] = parse(matrixStr, formats, true)
     const oprnd = evalRpn(rpn, {}, formats, false, {})
     const unitStr = str.slice(matrixStr.length).trim()
+    if (unitStr.length > 0 && !unitRegEx.test(unitStr)) {
+      return [0, null, dt.ERROR, ""]
+    }
     return literalWithUnit(oprnd, tex, unitStr)
 
   } else if (/^``/.test(str)) {
@@ -157,6 +163,9 @@ export const valueFromLiteral = (str, name, formats) => {
       // str begins with a number.
       const numStr = match[0];
       const unitStr = str.slice(numStr.length).trim()
+      if (unitStr.length > 0 && !unitRegEx.test(unitStr)) {
+        return [0, null, dt.ERROR, ""]
+      }
       const [tex, rpn, _] = parse(numStr, formats, true)
       const oprnd = evalRpn(rpn, {}, formats, false, {})
       return literalWithUnit(oprnd, tex, unitStr)
