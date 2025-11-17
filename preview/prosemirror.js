@@ -18246,11 +18246,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
-"AUD":["1.7710","1","0","AUD",[0,0,0,0,0,0,0,1]],
+"AUD":["1.7847","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
 "At":["1","1","0","siSymbol",[0,0,0,0,1,0,1,0]],
 "Australian dollar":["1","1","0","AUD",[0,0,0,0,0,0,0,1]],
-"BRL":["6.1488","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"BRL":["6.1764","1","0","BRL",[0,0,0,0,0,0,0,1]],
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
@@ -18259,10 +18259,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
-"CAD":["1.6213","1","0","CAD",[0,0,0,0,0,0,0,1]],
+"CAD":["1.6331","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
-"CHF":["0.9318","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["8.2377","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CHF":["0.9185","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"CNY":["8.2655","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
@@ -18282,7 +18282,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
-"GBP":["0.87780","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"GBP":["0.88460","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Gal":["0.01","1","0","siSymbol",[1,0,-2,0,0,0,0,0]],
 "Gi":["10","12.5663706143592","0","siWord",[0,0,0,0,1,0,1,0]],
 "GiB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -18290,23 +18290,23 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Gy":["1","1","0","siSymbol",[2,0,-2,0,0,0,0,0]],
 "H":["1","1","0","siSymbol",[2,1,-2,-2,0,0,0,0]],
 "HK$":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
-"HKD":["8.9945","1","0","HKD",[0,0,0,0,0,0,0,1]],
+"HKD":["9.0517","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "HP":["745.69987158227","1","0","0",[2,1,-3,0,0,0,0,0]],
 "Hong Kong dollar":["1","1","0","HKD",[0,0,0,0,0,0,0,1]],
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"ILS":["3.7406","1","0","ILS",[0,0,0,0,0,0,0,1]],
-"INR":["102.6110","1","0","INR",[0,0,0,0,0,0,0,1]],
+"ILS":["3.7718","1","0","ILS",[0,0,0,0,0,0,0,1]],
+"INR":["103.2865","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
-"JPY":["178.31","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"JPY":["179.22","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
 "K":["1","1","0","0",[0,0,0,0,1,0,0,0]],
 "KiB":["8192","1","0","0",[0,0,0,0,0,1,0,0]],
-"KRW":["1682.57","1","0","KRW",[0,0,0,0,0,0,0,1]],
+"KRW":["1690.71","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "L":["0.001","1","0","siSymbol",[3,0,0,0,0,0,0,0]],
 "Lego stud":["0.008","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "MB":["8388608","1","0","0",[0,0,0,0,0,1,0,0]],
@@ -18317,7 +18317,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "MMscf":["28316.846592","1","0","0",[3,0,0,0,0,0,0,0]],
 "MMscfd":["0.32774128","1","0","0",[3,0,0,0,0,0,0,0]],
 "MT":["1000","1","0","0",[0,1,0,0,0,0,0,0]],
-"MXN":["21.2938","1","0","MXN",[0,0,0,0,0,0,0,1]],
+"MXN":["21.4017","1","0","MXN",[0,0,0,0,0,0,0,1]],
 "Mach":["331.6","1","0","0",[1,0,-1,0,0,0,0,0]],
 "Mbbl":["158.987294928","1","0","0",[3,0,0,0,0,0,0,0]],
 "Mexican Peso":["1","1","0","MXN",[0,0,0,0,0,0,0,1]],
@@ -18347,7 +18347,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "TeX point":["0.0003515","1","0","0",[1,0,0,0,0,0,0,0]],
 "TiB":["8796093022208","1","0","0",[0,0,0,0,0,1,0,0]],
 "US$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"USD":["1.1571","1","0","USD",[0,0,0,0,0,0,0,1]],
+"USD":["1.1648","1","0","USD",[0,0,0,0,0,0,0,1]],
 "V":["1","1","0","siSymbol",[2,1,-3,-1,0,0,0,0]],
 "VA":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
 "W":["1","1","0","siSymbol",[2,1,-3,0,0,0,0,0]],
@@ -20991,7 +20991,7 @@ const tt = Object.freeze({
 
 const minusRegEx = /^-(?![-=<>:])/;
 const numberRegEx$4 = new RegExp(Rnl.numberPattern);
-const unitRegEx = /^(?:'[^']+'|[°ΩÅK])/;
+const unitRegEx$1 = /^(?:'[^']+'|[°ΩÅK])/;
 const dateRegEx = /^'\d{4}-\d{1,2}-\d{1,2}'/;
 
 const texFromNumStr = (numParts, decimalFormat) => {
@@ -21841,7 +21841,7 @@ const lex = (str, formats, prevToken, inRealTime = false) => {
     }
   }
 
-  if (unitRegEx.test(str)) {
+  if (unitRegEx$1.test(str)) {
     // String between single quotation marks. That signals a tt.UNIT or a tt.DATE.
     pos = str.indexOf("'", 1);
     if (pos > 0) {
@@ -34665,6 +34665,9 @@ const evaluate = (
 
 const numberRegEx$2 = new RegExp(Rnl.numberPattern);
 const matrixRegEx = /^[([] *(?:(?:-?[0-9.]+|"[^"]+"|true|false) *[,;\t]? *)+[)\]]/;
+// A regex to check for valid unit strings. Not comprehensive.
+// Only checks for allowed characters. Does not check structure of a compound unit.
+const unitRegEx = /^[a-zäöōA-Z0-9 μµ#$£¥'ʹ″”°()Å₨₪€℃℉ΩΩKÅ^+\-/*.•×\-−·₂⁰¹²³\u2074-\u2079]+$/;
 /* eslint-disable max-len */
 
 const numStr = "(-?(?:0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?)))";
@@ -34696,7 +34699,7 @@ const literalWithUnit = (oprnd, tex, unitStr) => {
   if (unitStr.length > 0) {
     [unit, unitDisplay] = unitFromString(unitStr);
     if (unit.dtype && unit.dtype === dt.ERROR) {
-      return [0, null, dt.ERROR, ""]
+      return [0, null, dt.ERROR, unit.value]
     }
     value = oprnd.dtype === dt.RATIONAL
       ? {
@@ -34748,6 +34751,9 @@ const valueFromLiteral = (str, name, formats) => {
     const [tex, rpn, _] = parse$1(matrixStr, formats, true);
     const oprnd = evalRpn(rpn, {}, formats, false, {});
     const unitStr = str.slice(matrixStr.length).trim();
+    if (unitStr.length > 0 && !unitRegEx.test(unitStr)) {
+      return [0, null, dt.ERROR, ""]
+    }
     return literalWithUnit(oprnd, tex, unitStr)
 
   } else if (/^``/.test(str)) {
@@ -34810,6 +34816,9 @@ const valueFromLiteral = (str, name, formats) => {
       // str begins with a number.
       const numStr = match[0];
       const unitStr = str.slice(numStr.length).trim();
+      if (unitStr.length > 0 && !unitRegEx.test(unitStr)) {
+        return [0, null, dt.ERROR, ""]
+      }
       const [tex, rpn, _] = parse$1(numStr, formats, true);
       const oprnd = evalRpn(rpn, {}, formats, false, {});
       return literalWithUnit(oprnd, tex, unitStr)
@@ -35358,7 +35367,23 @@ const compile = (
       resultDisplay = "\\colorbox{aqua}{" + resultDisplay + "}";
     }
 
-    if (dtype === dt.ERROR) { return shortcut(str, formats) }
+    if (dtype === dt.ERROR) {
+      // trailStr is not a valid literal. So finish early.
+      if (resultDisplay.length === 0) {
+        return shortcut(str, formats)
+      } else {
+        // trailStr has a valid number but an invalid unit.
+        return {
+          entry: str,
+          resultdisplay: "\\textcolor{firebrick}{\\text{" + resultDisplay + "}}",
+          altResultDisplay: resultDisplay,
+          tex: mainStr + " = \\textcolor{firebrick}{\\text{" + resultDisplay + "}}",
+          alt: mainStr + " = " + resultDisplay,
+          error: true,
+          dtype
+        }
+      }
+    }
     rpn = "";
   }
 
@@ -57363,6 +57388,7 @@ function buildMenuItems(schema) {
   r.cn = setDecimalFormat("1,0000,0000.");
   r.comma = setDecimalFormat("1000000,");
   r.spacecomma = setDecimalFormat("1 000 000,");
+  r.spacedot = setDecimalFormat("1 000 000.");
   r.apostrophecomma = setDecimalFormat("1’000’000,");
   r.dotcomma = setDecimalFormat("1.000.000,");
 
@@ -57675,7 +57701,7 @@ function buildMenuItems(schema) {
   r.dateFormat = setDateFormat;
   r.pagesize = new DropdownSubmenu([r.letter, r.A4], { label: "Page size" });
   r.separators = new DropdownSubmenu(
-    [r.dot, r.commadot, r.lakh, r.cn, r.comma, r.spacecomma, r.apostrophecomma, r.dotcomma],
+    [r.dot, r.commadot, r.lakh, r.cn, r.comma, r.spacecomma, r.spacedot, r.apostrophecomma, r.dotcomma],
     {title: "Set decimal format", label: "Decimal format"}
   );
   r.fileDropDown = new Dropdown([

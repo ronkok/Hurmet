@@ -1708,6 +1708,7 @@ export function buildMenuItems(schema) {
   r.cn = setDecimalFormat("1,0000,0000.")
   r.comma = setDecimalFormat("1000000,")
   r.spacecomma = setDecimalFormat("1 000 000,")
+  r.spacedot = setDecimalFormat("1 000 000.")
   r.apostrophecomma = setDecimalFormat("1’000’000,")
   r.dotcomma = setDecimalFormat("1.000.000,")
 
@@ -2022,7 +2023,7 @@ export function buildMenuItems(schema) {
   r.dateFormat = setDateFormat
   r.pagesize = new DropdownSubmenu([r.letter, r.A4], { label: "Page size" })
   r.separators = new DropdownSubmenu(
-    [r.dot, r.commadot, r.lakh, r.cn, r.comma, r.spacecomma, r.apostrophecomma, r.dotcomma],
+    [r.dot, r.commadot, r.lakh, r.cn, r.comma, r.spacecomma, r.spacedot, r.apostrophecomma, r.dotcomma],
     {title: "Set decimal format", label: "Decimal format"}
   )
   r.fileDropDown = new Dropdown([
