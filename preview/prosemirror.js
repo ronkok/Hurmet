@@ -18661,7 +18661,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "rev":["6.28318530717959","1","0","0",[0,0,0,0,0,0,0,0]],
 "rod":["5.0292","1","0","0",[1,0,0,0,0,0,0,0]],
 "roentgen":["0.000258","1","0","siWord",[0,-1,1,1,0,0,0,0]],
-"rpm":["6.28318530717959","3600","0","0",[0,0,-1,0,0,0,0,0]],
+"rpm":["6.28318530717959","60","0","0",[0,0,-1,0,0,0,0,0]],
 "ruble":["1","1","0","RUB",[0,0,0,0,0,0,0,1]],
 "röntgen":["0.000258","1","0","siWord",[0,-1,1,1,0,0,0,0]],
 "s":["1","1","0","siSymbol",[0,0,1,0,0,0,0,0]],
@@ -56509,6 +56509,8 @@ function toggleSpreadsheet() {
   })
 }
 
+const linkProtocol = /^https?:\/\//i;
+
 function insertImage(nodeType) {
   return new MenuItem({
     title: "Insert link to image or edit existing image",
@@ -56551,6 +56553,10 @@ function insertImage(nodeType) {
         },
         callback(attrs) {
           const tr = view.state.tr;
+          if (!linkProtocol.test(attrs.src)) {
+            alert("Error: Image URLs must begin with https:// or http://");
+            return
+          }
           if (attrs.checkbox && !inFigure) {
             // Wrap with a figure and write a caption
             const str = attrs.alt ? attrs.alt : "caption";

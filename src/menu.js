@@ -828,6 +828,8 @@ function toggleSpreadsheet() {
   })
 }
 
+const linkProtocol = /^https?:\/\//i
+
 function insertImage(nodeType) {
   return new MenuItem({
     title: "Insert link to image or edit existing image",
@@ -870,6 +872,10 @@ function insertImage(nodeType) {
         },
         callback(attrs) {
           const tr = view.state.tr
+          if (!linkProtocol.test(attrs.src)) {
+            alert("Error: Image URLs must begin with https:// or http://")
+            return
+          }
           if (attrs.checkbox && !inFigure) {
             // Wrap with a figure and write a caption
             const str = attrs.alt ? attrs.alt : "caption"
