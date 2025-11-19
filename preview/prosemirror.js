@@ -56509,7 +56509,7 @@ function toggleSpreadsheet() {
   })
 }
 
-const linkProtocol = /^https?:\/\//i;
+const linkProtocol = /^(https?:\/\/|data:image\/)/i;
 
 function insertImage(nodeType) {
   return new MenuItem({
