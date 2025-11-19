@@ -443,7 +443,7 @@ I recommend Russ Rowlett’s [dictionary of units of measurement](http://www.ibi
 | rev                   | 6.28318530717959               | 0       | 0        | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | 1 revolution = 2 π radians       |
 | rod                   | 19800/3937                     | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | 16.5 survey feet                 |
 | roentgen              | 0.000258                       | 0       | siWord   | 0  | -1 | 1  | 1  | 0  | 0 | 0  | 0 | radiation exposure               |
-| rpm                   | 6.28318530717959/3600          | 0       | 0        | 0  | 0  | -1 | 0  | 0  | 0 | 0  | 0 | revs/min                         |
+| rpm                   | 6.28318530717959/60            | 0       | 0        | 0  | 0  | -1 | 0  | 0  | 0 | 0  | 0 | revs/min                         |
 | röntgen               | 0.000258                       | 0       | siWord   | 0  | -1 | 1  | 1  | 0  | 0 | 0  | 0 | roentgen                         |
 | s                     | 1                              | 0       | siSymbol | 0  | 0  | 1  | 0  | 0  | 0 | 0  | 0 | SI symbol for second.            |
 | saltspoon             | 0.003785411784/3072            | 0       | 0        | 3  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | 1/4 teaspoon                     |
