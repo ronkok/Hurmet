@@ -56407,10 +56407,20 @@ function uploadImage(nodeType) {
         const reader = new FileReader();
         reader.onload = function(evt) {
           const url = evt.target.result;
-          const pos = view.state.selection.from;
-          view.dispatch(view.state.tr.replaceWith(pos, pos, schema.nodes.image.create(
-            { src: url, alt }
-          )));
+          // Okay, we've got the URL for the image.
+          // Now show a dialog box to set alt text, position, and width.
+          let { from, to } = state.selection;
+          let attrs = {  src: url, alt };
+          const resolvedPos = state.doc.resolve(from);
+          const parent = resolvedPos.parent;
+          const inFigure = parent.type.name === "figure";
+          const parentStart = inFigure ? from - 1 : 0;
+          const parentEnd = inFigure ? from - 1 + parent.nodeSize : 0;
+          const promptOptions = imagePromptOptions(
+            attrs, view, from, to, inFigure, parentStart, parentEnd, nodeType
+          );
+          promptOptions.src = attrs.src;
+          openPrompt(promptOptions);
         };
         reader.readAsDataURL(file);
       };
@@ -56511,7 +56521,55 @@ function toggleSpreadsheet() {
 
 const linkProtocol = /^(https?:\/\/|data:image\/)/i;
 
-function insertImage(nodeType) {
+// A dialog box use for writing a link to an image, editing an image, or uploading an image.
+const imagePromptOptions = (
+  attrs, view, from, to, inFigure, parentStart, parentEnd, nodeType
+) => {
+  return {
+    title: attrs && attrs.src ? "Edit image" : "Insert image",
+    fields: {
+      alt: new TextField({
+        label: "Description",
+        value: attrs ? attrs.alt : view.state.doc.textBetween(from, to, " ")
+      }),
+      width: new TextField({ label: "Width", value: attrs && attrs.width })
+    },
+    radioButtons: {
+      name: "position",
+      direction: "row",
+      buttons: [["inline", "inline"], ["left", "left"],  ["center", "center"], ["right", "right"]],
+      current: attrs && attrs.class ? attrs.class : "inline"
+    },
+    checkbox: {
+      name: "Include a caption",
+      checked: inFigure
+    },
+    callback(attrs) {
+      const tr = view.state.tr;
+      if (attrs.src && !linkProtocol.test(attrs.src)) {
+        alert("Error: Image URLs must begin with https:// or http://");
+        return
+      }
+      if (attrs.checkbox && !inFigure) {
+        // Wrap with a figure and write a caption
+        const str = attrs.alt ? attrs.alt : "caption";
+        const caption = schema.nodes.figcaption.createAndFill(null, [schema.text(str)]);
+        const image = schema.nodes.figimg.createAndFill(attrs);
+        tr.replaceSelectionWith(schema.nodes.figure.createAndFill(attrs, [image, caption]));
+      } else if (inFigure && !attrs.checkbox) {
+        // Remove the wrapping figure and caption
+        tr.replaceWith(parentStart, parentEnd, nodeType.createAndFill(attrs));
+      } else {
+        // Insert an image w/o a caption
+        tr.replaceSelectionWith(nodeType.createAndFill(attrs));
+      }
+      view.dispatch(tr);
+      view.focus();
+    }
+  }
+};
+
+function insertLinkToImage(nodeType) {
   return new MenuItem({
     title: "Insert link to image or edit existing image",
     icon: hurmetIcons.image,
@@ -56532,49 +56590,11 @@ function insertImage(nodeType) {
       const inFigure = parent.type.name === "figure";
       const parentStart = inFigure ? from - 1 : 0;
       const parentEnd = inFigure ? from - 1 + parent.nodeSize : 0;
-      const promptOptions = {
-        title: attrs && attrs.src ? "Edit image" : "Insert image",
-        fields: {
-          alt: new TextField({
-            label: "Description",
-            value: attrs ? attrs.alt : state.doc.textBetween(from, to, " ")
-          }),
-          width: new TextField({ label: "Width", value: attrs && attrs.width })
-        },
-        radioButtons: {
-          name: "position",
-          direction: "row",
-          buttons: [["inline", "inline"], ["left", "left"],  ["center", "center"], ["right", "right"]],
-          current: attrs && attrs.class ? attrs.class : "inline"
-        },
-        checkbox: {
-          name: "Include a caption",
-          checked: inFigure
-        },
-        callback(attrs) {
-          const tr = view.state.tr;
-          if (!linkProtocol.test(attrs.src)) {
-            alert("Error: Image URLs must begin with https:// or http://");
-            return
-          }
-          if (attrs.checkbox && !inFigure) {
-            // Wrap with a figure and write a caption
-            const str = attrs.alt ? attrs.alt : "caption";
-            const caption = schema.nodes.figcaption.createAndFill(null, [schema.text(str)]);
-            const image = schema.nodes.figimg.createAndFill(attrs);
-            tr.replaceSelectionWith(schema.nodes.figure.createAndFill(attrs, [image, caption]));
-          } else if (inFigure && !attrs.checkbox) {
-            // Remove the wrapping figure and caption
-            tr.replaceWith(parentStart, parentEnd, nodeType.createAndFill(attrs));
-          } else {
-            // Insert an image w/o a caption
-            tr.replaceSelectionWith(nodeType.createAndFill(attrs));
-          }
-          view.dispatch(tr);
-          view.focus();
-        }
-      };
+      const promptOptions = imagePromptOptions(
+        attrs, view, from, to, inFigure, parentStart, parentEnd, nodeType
+      );
       if (!(attrs && attrs.src) || (attrs && attrs.src && attrs.src.length < 400)) {
+        // Prepend a src field if no src exists
         promptOptions.fields = {
           src: new TextField({ label: "File path", required: true, value: attrs && attrs.src }),
           ...promptOptions.fields
@@ -57333,7 +57353,7 @@ function wrapListItem(nodeType, options) {
 // **`toggleLink`**`: MenuItem`
 //   : A menu item to toggle the [link mark](#schema-basic.LinkMark).
 //
-// **`insertImage`**`: MenuItem`
+// **`insertLinkToImage`**`: MenuItem`
 //   : A menu item to insert an [image](#schema-basic.Image).
 //
 // **`wrapBulletList`**`: MenuItem`
@@ -57365,7 +57385,7 @@ function wrapListItem(nodeType, options) {
 // scratch:
 //
 // **`insertMenu`**`: Dropdown`
-//   : A dropdown containing the `insertImage` and
+//   : A dropdown containing the `insertLinkToImage` and
 //     `insertHorizontalRule` items.
 //
 // **`typeMenu`**`: Dropdown`
@@ -57445,7 +57465,7 @@ function buildMenuItems(schema) {
   if ((type = schema.marks.link)) r.toggleLink = linkItem(type);
 
   if ((type = schema.nodes.image)) r.imageUpload = uploadImage(type);
-  if ((type = schema.nodes.image)) r.imageLink = insertImage(type);
+  if ((type = schema.nodes.image)) r.imageLink = insertLinkToImage(type);
   if ((type = schema.nodes.footnote)) r.footnote = footnote();
   if ((type = schema.nodes.toc)) r.toc = insertToC(type);
   r.macroButton = macroButton();
