@@ -10316,7 +10316,7 @@ rules.set("html", {
 });
 rules.set("htmlComment", {
   isLeaf: true,
-  match: blockRegex(/^ *<!--[^>]+-->[^\n]*\n/),
+  match: blockRegex(/^ *<!--[\s\S]*?-->[^\n]*\n/),
   parse: function(capture, state) {
     return { type: "null" }
   }

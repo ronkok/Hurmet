@@ -1761,7 +1761,7 @@ question above is: ¢`3 + (4 × 2)= 11`
 
 Hurmet If Expressions enable you to choose between expressions, based upon one or more conditions, as in:
 
-   ¢`β_1 = {0.85 if f_c′ ≤ 4000; 0.65 if f_c′ ≥ 8000; 0.85 - (f_c′ - 4000)//20000 otherwise}`
+   ¢`β_1 = {0.85 if f_c′ ≤ 4000; 0.65 if f_c′ ≥ 8000; 0.85 - (f_c′ - 4000)//20000 otherwise} = 0.825`
 
 This sort of expression is written between the delimiters: `{ }`
 The row separator symbol is **;**
@@ -1773,7 +1773,7 @@ So the example above can be coded this way:
     0.85                         if f_c′ ≤ 4000 ;
     0.65                         if f_c′ ≥ 8000 ;
     0.85 - (f_c′ - 4000)/20000   otherwise
-}
+} = %
 ```
 
 The spaces in that code example are not significant. Hurmet always aligns the
@@ -1784,11 +1784,11 @@ one line. To be precise, the form is:
 
 Conditions may contain logical operators:  and or not ∧  ∨  ¬  ⊻
 
-¢`x = {2 a if a < b and b = 4; a^2 otherwise}`
+¢`x = {2 a if a < b and b = 4; a^2 otherwise} = %`
 
 Chained comparisons are okay.
 
-¢`x = {1.0 if a < b < 5 < d; 1.2 otherwise}`
+¢`x = {1.0 if a < b < 5 < d; 1.2 otherwise} = %`
 
 ## Summation
 
