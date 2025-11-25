@@ -485,7 +485,6 @@ export function updateCalculations(
     if (fetchRegEx.test(entry)) {
       let url = urlFromEntry(entry)
       if (!/\.(tsv|txt)$/.test(url)) {
-        // RegEx to remove everything before the final / in the URL
         const pos = url.lastIndexOf("/")
         url = url.slice(pos + 1)
         // eslint-disable-next-line no-alert
