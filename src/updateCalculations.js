@@ -483,8 +483,17 @@ export function updateCalculations(
     // The author has submitted a single calculation cell.
     const entry = nodeAttrs.entry
     if (fetchRegEx.test(entry)) {
-      urls.push(urlFromEntry(entry))
-      fetchPositions.push(curPos)
+      let url = urlFromEntry(entry)
+      if (!/\.(tsv|txt)$/.test(url)) {
+        // RegEx to remove everything before the final / in the URL
+        const pos = url.lastIndexOf("/")
+        url = url.slice(pos + 1)
+        // eslint-disable-next-line no-alert
+        alert(`Warning: Only .tsv and .txt files can be fetched.\n${url}`)
+      } else {
+        urls.push(url)
+        fetchPositions.push(curPos)
+      }
     }
   } else {
     // We're updating the entire document.
@@ -492,8 +501,16 @@ export function updateCalculations(
       if (node.type.name === "calculation" && !node.attrs.value) {
         const entry = node.attrs.entry
         if (fetchRegEx.test(entry)) {
-          urls.push(urlFromEntry(entry))
-          fetchPositions.push(pos)
+          let url = urlFromEntry(entry)
+          if (!/\.(tsv|txt)$/.test(url)) {
+            const pos = url.lastIndexOf("/")
+            url = url.slice(pos + 1)
+                // eslint-disable-next-line no-alert
+            alert(`Warning: Only .tsv and .txt files can be fetched.\n${url}`)
+          } else {
+            urls.push(url)
+            fetchPositions.push(pos)
+          }
         } else if (/^function /.test(entry)) {
           node.attrs = compile(entry, formats)
           insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat)

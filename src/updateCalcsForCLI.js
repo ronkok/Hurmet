@@ -74,8 +74,16 @@ export async function updateCalcs(doc) {
   for (const node of calcNodes) {
     const entry = node.attrs.entry
     if (helpers.fetchRegEx.test(entry)) {
-      urls.push(helpers.urlFromEntry(entry))
-      callers.push(node)
+      let url = helpers.urlFromEntry(entry)
+      if (!/\.(tsv|txt)$/.test(url)) {
+        const pos = url.lastIndexOf("/")
+        url = url.slice(pos + 1)
+        // eslint-disable-next-line no-console
+        console.log(`Warning: Only .tsv and .txt files can be fetched.\n${url}`)
+      } else {
+        urls.push(url)
+        callers.push(node)
+      }
     } else if (/^function /.test(entry)) {
       node.attrs = compile(entry, formats)
       insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat)
