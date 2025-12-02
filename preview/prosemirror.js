@@ -202,7 +202,7 @@ class Fragment {
     */
     constructor(
     /**
-    @internal
+    The child nodes in this fragment.
     */
     content, size) {
         this.content = content;
@@ -406,7 +406,7 @@ class Fragment {
     position in this fragment. The result object will be reused
     (overwritten) the next time the function is called. @internal
     */
-    findIndex(pos, round = -1) {
+    findIndex(pos) {
         if (pos == 0)
             return retIndex(0, pos);
         if (pos == this.size)
@@ -416,7 +416,7 @@ class Fragment {
         for (let i = 0, curPos = 0;; i++) {
             let cur = this.child(i), end = curPos + cur.nodeSize;
             if (end >= pos) {
-                if (end == pos || round > 0)
+                if (end == pos)
                     return retIndex(i + 1, end);
                 return retIndex(i, curPos);
             }
@@ -812,9 +812,11 @@ function removeRange(content, from, to) {
 function insertInto(content, dist, insert, parent) {
     let { index, offset } = content.findIndex(dist), child = content.maybeChild(index);
     if (offset == dist || child.isText) {
+        if (parent && !parent.canReplace(index, index, insert))
+            return null;
         return content.cut(0, dist).append(insert).append(content.cut(dist));
     }
-    let inner = insertInto(child.content, dist - offset - 1, insert);
+    let inner = insertInto(child.content, dist - offset - 1, insert, child);
     return inner && content.replaceChild(index, child.copy(inner));
 }
 function replace($from, $to, slice) {
@@ -1284,7 +1286,7 @@ structure between the old and new data as much as possible, which a
 tree shape like this (without back pointers) makes easy.
 
 **Do not** directly mutate the properties of a `Node` object. See
-[the guide](/docs/guide/#doc) for more information.
+[the guide](https://prosemirror.net/docs/guide/#doc) for more information.
 */
 let Node$1 = class Node {
     /**
@@ -1314,8 +1316,12 @@ let Node$1 = class Node {
         this.content = content || Fragment.empty;
     }
     /**
+    The array of this node's child nodes.
+    */
+    get children() { return this.content.content; }
+    /**
     The size of this node, as defined by the integer-based [indexing
-    scheme](/docs/guide/#doc.indexing). For text nodes, this is the
+    scheme](https://prosemirror.net/docs/guide/#doc.indexing). For text nodes, this is the
     amount of characters. For other leaf nodes, it is one. For
     non-leaf nodes, it is the size of the content plus two (the
     start and end token).
@@ -1373,7 +1379,7 @@ let Node$1 = class Node {
     `blockSeparator` is given, it will be inserted to separate text
     from different block nodes. If `leafText` is given, it'll be
     inserted for every non-text leaf node encountered, otherwise
-    [`leafText`](https://prosemirror.net/docs/ref/#model.NodeSpec^leafText) will be used.
+    [`leafText`](https://prosemirror.net/docs/ref/#model.NodeSpec.leafText) will be used.
     */
     textBetween(from, to, blockSeparator, leafText) {
         return this.content.textBetween(from, to, blockSeparator, leafText);
@@ -1980,7 +1986,7 @@ function resolveName(stream, name) {
     let result = [];
     for (let typeName in types) {
         let type = types[typeName];
-        if (type.groups.indexOf(name) > -1)
+        if (type.isInGroup(name))
             result.push(type);
     }
     if (result.length == 0)
@@ -2009,16 +2015,14 @@ function parseExprAtom(stream) {
         stream.err("Unexpected token '" + stream.next + "'");
     }
 }
-/**
-Construct an NFA from an expression as returned by the parser. The
-NFA is represented as an array of states, which are themselves
-arrays of edges, which are `{term, to}` objects. The first state is
-the entry state and the last node is the success state.
-
-Note that unlike typical NFAs, the edge ordering in this one is
-significant, in that it is used to contruct filler content when
-necessary.
-*/
+// Construct an NFA from an expression as returned by the parser. The
+// NFA is represented as an array of states, which are themselves
+// arrays of edges, which are `{term, to}` objects. The first state is
+// the entry state and the last node is the success state.
+//
+// Note that unlike typical NFAs, the edge ordering in this one is
+// significant, in that it is used to contruct filler content when
+// necessary.
 function nfa(expr) {
     let nfa = [[]];
     connect(compile(expr, 0), node());
@@ -2258,6 +2262,13 @@ let NodeType$1 = class NodeType {
     directly editable content.
     */
     get isAtom() { return this.isLeaf || !!this.spec.atom; }
+    /**
+    Return true when this node type is part of the given
+    [group](https://prosemirror.net/docs/ref/#model.NodeSpec.group).
+    */
+    isInGroup(group) {
+        return this.groups.indexOf(group) > -1;
+    }
     /**
     The node type's [whitespace](https://prosemirror.net/docs/ref/#model.NodeSpec.whitespace) option.
     */
@@ -2578,8 +2589,8 @@ class Schema {
             let type = this.marks[prop], excl = type.spec.excludes;
             type.excluded = excl == null ? [type] : excl == "" ? [] : gatherMarks(this, excl.split(" "));
         }
-        this.nodeFromJSON = this.nodeFromJSON.bind(this);
-        this.markFromJSON = this.markFromJSON.bind(this);
+        this.nodeFromJSON = json => Node$1.fromJSON(this, json);
+        this.markFromJSON = json => Mark.fromJSON(this, json);
         this.topNodeType = this.nodes[this.spec.topNode || "doc"];
         this.cached.wrappings = Object.create(null);
     }
@@ -2613,20 +2624,6 @@ class Schema {
         if (typeof type == "string")
             type = this.marks[type];
         return type.create(attrs);
-    }
-    /**
-    Deserialize a node from its JSON representation. This method is
-    bound.
-    */
-    nodeFromJSON(json) {
-        return Node$1.fromJSON(this, json);
-    }
-    /**
-    Deserialize a mark from its JSON representation. This method is
-    bound.
-    */
-    markFromJSON(json) {
-        return Mark.fromJSON(this, json);
     }
     /**
     @internal
@@ -2810,7 +2807,7 @@ class DOMParser {
     /**
     Construct a DOM parser using the parsing rules listed in a
     schema's [node specs](https://prosemirror.net/docs/ref/#model.NodeSpec.parseDOM), reordered by
-    [priority](https://prosemirror.net/docs/ref/#model.ParseRule.priority).
+    [priority](https://prosemirror.net/docs/ref/#model.GenericParseRule.priority).
     */
     static fromSchema(schema) {
         return schema.cached.domParser ||
@@ -2903,6 +2900,7 @@ class ParseContext {
         this.options = options;
         this.isOpen = isOpen;
         this.open = 0;
+        this.localPreserveWS = false;
         let topNode = options.topNode, topContext;
         let topOptions = wsOptionsFor(null, options.preserveWhitespace, 0) | (isOpen ? OPT_OPEN_LEFT : 0);
         if (topNode)
@@ -2929,11 +2927,13 @@ class ParseContext {
     }
     addTextNode(dom, marks) {
         let value = dom.nodeValue;
-        let top = this.top;
-        if (top.options & OPT_PRESERVE_WS_FULL ||
+        let top = this.top, preserveWS = (top.options & OPT_PRESERVE_WS_FULL) ? "full"
+            : this.localPreserveWS || (top.options & OPT_PRESERVE_WS) > 0;
+        let { schema } = this.parser;
+        if (preserveWS === "full" ||
             top.inlineContext(dom) ||
             /[^ \t\r\n\u000c]/.test(value)) {
-            if (!(top.options & OPT_PRESERVE_WS)) {
+            if (!preserveWS) {
                 value = value.replace(/[ \t\r\n\u000c]+/g, " ");
                 // If this starts with whitespace, and there is no node before it, or
                 // a hard break, or a text node that ends with whitespace, strip the
@@ -2947,14 +2947,24 @@ class ParseContext {
                         value = value.slice(1);
                 }
             }
-            else if (!(top.options & OPT_PRESERVE_WS_FULL)) {
-                value = value.replace(/\r?\n|\r/g, " ");
-            }
-            else {
+            else if (preserveWS === "full") {
                 value = value.replace(/\r\n?/g, "\n");
             }
+            else if (schema.linebreakReplacement && /[\r\n]/.test(value) && this.top.findWrapping(schema.linebreakReplacement.create())) {
+                let lines = value.split(/\r?\n|\r/);
+                for (let i = 0; i < lines.length; i++) {
+                    if (i)
+                        this.insertNode(schema.linebreakReplacement.create(), marks, true);
+                    if (lines[i])
+                        this.insertNode(schema.text(lines[i]), marks, !/\S/.test(lines[i]));
+                }
+                value = "";
+            }
+            else {
+                value = value.replace(/\r?\n|\r/g, " ");
+            }
             if (value)
-                this.insertNode(this.parser.schema.text(value), marks);
+                this.insertNode(schema.text(value), marks, !/\S/.test(value));
             this.findInText(dom);
         }
         else {
@@ -2964,12 +2974,15 @@ class ParseContext {
     // Try to find a handler for the given tag and use that to parse. If
     // none is found, the element's content nodes are added directly.
     addElement(dom, marks, matchAfter) {
+        let outerWS = this.localPreserveWS, top = this.top;
+        if (dom.tagName == "PRE" || /pre/.test(dom.style && dom.style.whiteSpace))
+            this.localPreserveWS = true;
         let name = dom.nodeName.toLowerCase(), ruleID;
         if (listTags.hasOwnProperty(name) && this.parser.normalizeLists)
             normalizeList(dom);
         let rule = (this.options.ruleFromNode && this.options.ruleFromNode(dom)) ||
             (ruleID = this.parser.matchTag(dom, this, matchAfter));
-        if (rule ? rule.ignore : ignoreTags.hasOwnProperty(name)) {
+        out: if (rule ? rule.ignore : ignoreTags.hasOwnProperty(name)) {
             this.findInside(dom);
             this.ignoreFallback(dom, marks);
         }
@@ -2978,7 +2991,7 @@ class ParseContext {
                 this.open = Math.max(0, this.open - 1);
             else if (rule && rule.skip.nodeType)
                 dom = rule.skip;
-            let sync, top = this.top, oldNeedsBlock = this.needsBlock;
+            let sync, oldNeedsBlock = this.needsBlock;
             if (blockTags.hasOwnProperty(name)) {
                 if (top.content.length && top.content[0].isInline && this.open) {
                     this.open--;
@@ -2990,7 +3003,7 @@ class ParseContext {
             }
             else if (!dom.firstChild) {
                 this.leafFallback(dom, marks);
-                return;
+                break out;
             }
             let innerMarks = rule && rule.skip ? marks : this.readStyles(dom, marks);
             if (innerMarks)
@@ -3004,6 +3017,7 @@ class ParseContext {
             if (innerMarks)
                 this.addElementByRule(dom, rule, innerMarks, rule.consuming === false ? ruleID : undefined);
         }
+        this.localPreserveWS = outerWS;
     }
     // Called for leaf DOM nodes that would otherwise be ignored
     leafFallback(dom, marks) {
@@ -3014,7 +3028,7 @@ class ParseContext {
     ignoreFallback(dom, marks) {
         // Ignored BR nodes should at least create an inline context
         if (dom.nodeName == "BR" && (!this.top.type || !this.top.type.inlineContent))
-            this.findPlace(this.parser.schema.text("-"), marks);
+            this.findPlace(this.parser.schema.text("-"), marks, true);
     }
     // Run any style parser associated with the node's styles. Either
     // return an updated array of marks, or null to indicate some of the
@@ -3062,7 +3076,7 @@ class ParseContext {
                     marks = inner;
                 }
             }
-            else if (!this.insertNode(nodeType.create(rule.attrs), marks)) {
+            else if (!this.insertNode(nodeType.create(rule.attrs), marks, dom.nodeName == "BR")) {
                 this.leafFallback(dom, marks);
             }
         }
@@ -3079,7 +3093,7 @@ class ParseContext {
         }
         else if (rule.getContent) {
             this.findInside(dom);
-            rule.getContent(dom, this.parser.schema).forEach(node => this.insertNode(node, marks));
+            rule.getContent(dom, this.parser.schema).forEach(node => this.insertNode(node, marks, false));
         }
         else {
             let contentDOM = dom;
@@ -3091,6 +3105,7 @@ class ParseContext {
                 contentDOM = rule.contentElement;
             this.findAround(dom, contentDOM, true);
             this.addAll(contentDOM, marks);
+            this.findAround(dom, contentDOM, false);
         }
         if (sync && this.sync(startIn))
             this.open--;
@@ -3109,19 +3124,22 @@ class ParseContext {
     // Try to find a way to fit the given node type into the current
     // context. May add intermediate wrappers and/or leave non-solid
     // nodes that we're in.
-    findPlace(node, marks) {
+    findPlace(node, marks, cautious) {
         let route, sync;
-        for (let depth = this.open; depth >= 0; depth--) {
+        for (let depth = this.open, penalty = 0; depth >= 0; depth--) {
             let cx = this.nodes[depth];
             let found = cx.findWrapping(node);
-            if (found && (!route || route.length > found.length)) {
+            if (found && (!route || route.length > found.length + penalty)) {
                 route = found;
                 sync = cx;
                 if (!found.length)
                     break;
             }
-            if (cx.solid)
-                break;
+            if (cx.solid) {
+                if (cautious)
+                    break;
+                penalty += 2;
+            }
         }
         if (!route)
             return null;
@@ -3131,13 +3149,13 @@ class ParseContext {
         return marks;
     }
     // Try to insert the given node, adjusting the context when needed.
-    insertNode(node, marks) {
+    insertNode(node, marks, cautious) {
         if (node.isInline && this.needsBlock && !this.top.type) {
             let block = this.textblockFromContext();
             if (block)
                 marks = this.enterInner(block, null, marks);
         }
-        let innerMarks = this.findPlace(node, marks);
+        let innerMarks = this.findPlace(node, marks, cautious);
         if (innerMarks) {
             this.closeExtra();
             let top = this.top;
@@ -3155,7 +3173,7 @@ class ParseContext {
     // Try to start a node of the given type, adjusting the context when
     // necessary.
     enter(type, attrs, marks, preserveWS) {
-        let innerMarks = this.findPlace(type.create(attrs), marks);
+        let innerMarks = this.findPlace(type.create(attrs), marks, false);
         if (innerMarks)
             innerMarks = this.enterInner(type, attrs, marks, true, preserveWS);
         return innerMarks;
@@ -3193,14 +3211,18 @@ class ParseContext {
     finish() {
         this.open = 0;
         this.closeExtra(this.isOpen);
-        return this.nodes[0].finish(this.isOpen || this.options.topOpen);
+        return this.nodes[0].finish(!!(this.isOpen || this.options.topOpen));
     }
     sync(to) {
-        for (let i = this.open; i >= 0; i--)
+        for (let i = this.open; i >= 0; i--) {
             if (this.nodes[i] == to) {
                 this.open = i;
                 return true;
             }
+            else if (this.localPreserveWS) {
+                this.nodes[i].options |= OPT_PRESERVE_WS;
+            }
+        }
         return false;
     }
     get currentPos() {
@@ -3269,7 +3291,7 @@ class ParseContext {
                     let next = depth > 0 || (depth == 0 && useRoot) ? this.nodes[depth].type
                         : option && depth >= minDepth ? option.node(depth - minDepth).type
                             : null;
-                    if (!next || (next.name != part && next.groups.indexOf(part) == -1))
+                    if (!next || (next.name != part && !next.isInGroup(part)))
                         return false;
                     depth--;
                 }
@@ -3547,6 +3569,8 @@ function renderSpec(doc, structure, xmlNS, blockArraysIn) {
                 let space = name.indexOf(" ");
                 if (space > 0)
                     dom.setAttributeNS(name.slice(0, space), name.slice(space + 1), attrs[name]);
+                else if (name == "style" && dom.style)
+                    dom.style.cssText = attrs[name];
                 else
                     dom.setAttribute(name, attrs[name]);
             }
@@ -3756,18 +3780,14 @@ A mapping represents a pipeline of zero or more [step
 maps](https://prosemirror.net/docs/ref/#transform.StepMap). It has special provisions for losslessly
 handling mapping positions through a series of steps in which some
 steps are inverted versions of earlier steps. (This comes up when
-‘[rebasing](/docs/guide/#transform.rebasing)’ steps for
+‘[rebasing](https://prosemirror.net/docs/guide/#transform.rebasing)’ steps for
 collaboration or history management.)
 */
 class Mapping {
     /**
     Create a new mapping with the given position maps.
     */
-    constructor(
-    /**
-    The step maps in this mapping.
-    */
-    maps = [], 
+    constructor(maps, 
     /**
     @internal
     */
@@ -3780,23 +3800,22 @@ class Mapping {
     /**
     The end position in the `maps` array.
     */
-    to = maps.length) {
-        this.maps = maps;
+    to = maps ? maps.length : 0) {
         this.mirror = mirror;
         this.from = from;
         this.to = to;
+        this._maps = maps || [];
+        this.ownData = !(maps || mirror);
     }
+    /**
+    The step maps in this mapping.
+    */
+    get maps() { return this._maps; }
     /**
     Create a mapping that maps only through a part of this one.
     */
     slice(from = 0, to = this.maps.length) {
-        return new Mapping(this.maps, this.mirror, from, to);
-    }
-    /**
-    @internal
-    */
-    copy() {
-        return new Mapping(this.maps.slice(), this.mirror && this.mirror.slice(), this.from, this.to);
+        return new Mapping(this._maps, this.mirror, from, to);
     }
     /**
     Add a step map to the end of this mapping. If `mirrors` is
@@ -3804,18 +3823,23 @@ class Mapping {
     image of this one.
     */
     appendMap(map, mirrors) {
-        this.to = this.maps.push(map);
+        if (!this.ownData) {
+            this._maps = this._maps.slice();
+            this.mirror = this.mirror && this.mirror.slice();
+            this.ownData = true;
+        }
+        this.to = this._maps.push(map);
         if (mirrors != null)
-            this.setMirror(this.maps.length - 1, mirrors);
+            this.setMirror(this._maps.length - 1, mirrors);
     }
     /**
     Add all the step maps in a given mapping to this one (preserving
     mirroring information).
     */
     appendMapping(mapping) {
-        for (let i = 0, startSize = this.maps.length; i < mapping.maps.length; i++) {
+        for (let i = 0, startSize = this._maps.length; i < mapping._maps.length; i++) {
             let mirr = mapping.getMirror(i);
-            this.appendMap(mapping.maps[i], mirr != null && mirr < i ? startSize + mirr : undefined);
+            this.appendMap(mapping._maps[i], mirr != null && mirr < i ? startSize + mirr : undefined);
         }
     }
     /**
@@ -3841,9 +3865,9 @@ class Mapping {
     Append the inverse of the given mapping to this one.
     */
     appendMappingInverted(mapping) {
-        for (let i = mapping.maps.length - 1, totalSize = this.maps.length + mapping.maps.length; i >= 0; i--) {
+        for (let i = mapping.maps.length - 1, totalSize = this._maps.length + mapping._maps.length; i >= 0; i--) {
             let mirr = mapping.getMirror(i);
-            this.appendMap(mapping.maps[i].invert(), mirr != null && mirr > i ? totalSize - mirr - 1 : undefined);
+            this.appendMap(mapping._maps[i].invert(), mirr != null && mirr > i ? totalSize - mirr - 1 : undefined);
         }
     }
     /**
@@ -3861,7 +3885,7 @@ class Mapping {
         if (this.mirror)
             return this._map(pos, assoc, true);
         for (let i = this.from; i < this.to; i++)
-            pos = this.maps[i].map(pos, assoc);
+            pos = this._maps[i].map(pos, assoc);
         return pos;
     }
     /**
@@ -3875,12 +3899,12 @@ class Mapping {
     _map(pos, assoc, simple) {
         let delInfo = 0;
         for (let i = this.from; i < this.to; i++) {
-            let map = this.maps[i], result = map.mapResult(pos, assoc);
+            let map = this._maps[i], result = map.mapResult(pos, assoc);
             if (result.recover != null) {
                 let corr = this.getMirror(i);
                 if (corr != null && corr > i && corr < this.to) {
                     i = corr;
-                    pos = this.maps[corr].recover(result.recover);
+                    pos = this._maps[corr].recover(result.recover);
                     continue;
                 }
             }
@@ -4285,7 +4309,7 @@ class ReplaceStep extends Step {
         let from = mapping.mapResult(this.from, 1), to = mapping.mapResult(this.to, -1);
         if (from.deletedAcross && to.deletedAcross)
             return null;
-        return new ReplaceStep(from.pos, Math.max(from.pos, to.pos), this.slice);
+        return new ReplaceStep(from.pos, Math.max(from.pos, to.pos), this.slice, this.structure);
     }
     merge(other) {
         if (!(other instanceof ReplaceStep) || other.structure || this.structure)
@@ -4553,13 +4577,17 @@ can be lifted. Will not go across
 function liftTarget(range) {
     let parent = range.parent;
     let content = parent.content.cutByIndex(range.startIndex, range.endIndex);
-    for (let depth = range.depth;; --depth) {
+    for (let depth = range.depth, contentBefore = 0, contentAfter = 0;; --depth) {
         let node = range.$from.node(depth);
-        let index = range.$from.index(depth), endIndex = range.$to.indexAfter(depth);
+        let index = range.$from.index(depth) + contentBefore, endIndex = range.$to.indexAfter(depth) - contentAfter;
         if (depth < range.depth && node.canReplace(index, endIndex, content))
             return depth;
         if (depth == 0 || node.type.spec.isolating || !canCut(node, index, endIndex))
             break;
+        if (index)
+            contentBefore = 1;
+        if (endIndex < node.childCount)
+            contentAfter = 1;
     }
     return null;
 }
@@ -4754,8 +4782,24 @@ function canJoin(doc, pos) {
     return joinable($pos.nodeBefore, $pos.nodeAfter) &&
         $pos.parent.canReplace(index, index + 1);
 }
+function canAppendWithSubstitutedLinebreaks(a, b) {
+    if (!b.content.size)
+        a.type.compatibleContent(b.type);
+    let match = a.contentMatchAt(a.childCount);
+    let { linebreakReplacement } = a.type.schema;
+    for (let i = 0; i < b.childCount; i++) {
+        let child = b.child(i);
+        let type = child.type == linebreakReplacement ? a.type.schema.nodes.text : child.type;
+        match = match.matchType(type);
+        if (!match)
+            return false;
+        if (!a.type.allowsMarks(child.marks))
+            return false;
+    }
+    return match.validEnd;
+}
 function joinable(a, b) {
-    return !!(a && b && !a.isLeaf && a.canAppend(b));
+    return !!(a && b && !a.isLeaf && canAppendWithSubstitutedLinebreaks(a, b));
 }
 /**
 Find an ancestor of the given position that can be joined to the
@@ -4788,8 +4832,31 @@ function joinPoint(doc, pos, dir = -1) {
     }
 }
 function join(tr, pos, depth) {
-    let step = new ReplaceStep(pos - depth, pos + depth, Slice.empty, true);
-    tr.step(step);
+    let convertNewlines = null;
+    let { linebreakReplacement } = tr.doc.type.schema;
+    let $before = tr.doc.resolve(pos - depth), beforeType = $before.node().type;
+    if (linebreakReplacement && beforeType.inlineContent) {
+        let pre = beforeType.whitespace == "pre";
+        let supportLinebreak = !!beforeType.contentMatch.matchType(linebreakReplacement);
+        if (pre && !supportLinebreak)
+            convertNewlines = false;
+        else if (!pre && supportLinebreak)
+            convertNewlines = true;
+    }
+    let mapFrom = tr.steps.length;
+    if (convertNewlines === false) {
+        let $after = tr.doc.resolve(pos + depth);
+        replaceLinebreaks(tr, $after.node(), $after.before(), mapFrom);
+    }
+    if (beforeType.inlineContent)
+        clearIncompatible(tr, pos + depth - 1, beforeType, $before.node().contentMatchAt($before.index()), convertNewlines == null);
+    let mapping = tr.mapping.slice(mapFrom), start = mapping.map(pos - depth);
+    tr.step(new ReplaceStep(start, mapping.map(pos + depth, -1), Slice.empty, true));
+    if (convertNewlines === true) {
+        let $full = tr.doc.resolve(start);
+        replaceNewlines(tr, $full.node(), $full.before(), tr.steps.length);
+    }
+    return tr;
 }
 /**
 Try to find a point where a node of the given type can be inserted
@@ -5171,7 +5238,7 @@ function replaceRange(tr, from, to, slice) {
     let $from = tr.doc.resolve(from), $to = tr.doc.resolve(to);
     if (fitsTrivially($from, $to, slice))
         return tr.step(new ReplaceStep(from, to, slice));
-    let targetDepths = coveredDepths($from, tr.doc.resolve(to));
+    let targetDepths = coveredDepths($from, $to);
     // Can't replace the whole document, so remove 0 if it's present
     if (targetDepths[targetDepths.length - 1] == 0)
         targetDepths.pop();
@@ -5273,7 +5340,8 @@ function deleteRange(tr, from, to) {
             return tr.delete($from.before(depth), $to.after(depth));
     }
     for (let d = 1; d <= $from.depth && d <= $to.depth; d++) {
-        if (from - $from.start(d) == $from.depth - d && to > $from.end(d) && $to.end(d) - to != $to.depth - d)
+        if (from - $from.start(d) == $from.depth - d && to > $from.end(d) && $to.end(d) - to != $to.depth - d &&
+            $from.start(d - 1) == $to.start(d - 1) && $from.node(d - 1).canReplace($from.index(d - 1), $to.index(d - 1)))
             return tr.delete($from.before(d), to);
     }
     tr.delete(from, to);
@@ -5622,19 +5690,26 @@ class Transform {
         return this;
     }
     /**
-    Remove a mark (or a mark of the given type) from the node at
+    Remove a mark (or all marks of the given type) from the node at
     position `pos`.
     */
     removeNodeMark(pos, mark) {
-        if (!(mark instanceof Mark)) {
-            let node = this.doc.nodeAt(pos);
-            if (!node)
-                throw new RangeError("No node at position " + pos);
-            mark = mark.isInSet(node.marks);
-            if (!mark)
-                return this;
+        let node = this.doc.nodeAt(pos);
+        if (!node)
+            throw new RangeError("No node at position " + pos);
+        if (mark instanceof Mark) {
+            if (mark.isInSet(node.marks))
+                this.step(new RemoveNodeMarkStep(pos, mark));
         }
-        this.step(new RemoveNodeMarkStep(pos, mark));
+        else {
+            let set = node.marks, found, steps = [];
+            while (found = mark.isInSet(set)) {
+                steps.push(new RemoveNodeMarkStep(pos, found));
+                set = found.removeFromSet(set);
+            }
+            for (let i = steps.length - 1; i >= 0; i--)
+                this.step(steps[i]);
+        }
         return this;
     }
     /**
@@ -5642,7 +5717,7 @@ class Transform {
     greater than one, any number of nodes above that. By default, the
     parts split off will inherit the node type of the original node.
     This can be changed by passing an array of types and attributes to
-    use after the split.
+    use after the split (with the outermost nodes coming first).
     */
     split(pos, depth = 1, typesAfter) {
         split(this, pos, depth, typesAfter);
@@ -6310,7 +6385,6 @@ class Transaction extends Transform {
         else {
             if (to == null)
                 to = from;
-            to = to == null ? from : to;
             if (!text)
                 return this.deleteRange(from, to);
             let marks = this.storedMarks;
@@ -6319,7 +6393,7 @@ class Transaction extends Transform {
                 marks = to == from ? $from.marks() : $from.marksAcross(this.doc.resolve(to));
             }
             this.replaceRangeWith(from, to, schema.text(text, marks));
-            if (!this.selection.empty)
+            if (!this.selection.empty && this.selection.to == from + text.length)
                 this.setSelection(Selection.near(this.selection.$to));
             return this;
         }
@@ -6515,7 +6589,7 @@ class EditorState {
         return newInstance;
     }
     /**
-    Start a [transaction](https://prosemirror.net/docs/ref/#state.Transaction) from this state.
+    Accessor that constructs and returns a new [transaction](https://prosemirror.net/docs/ref/#state.Transaction) from this state.
     */
     get tr() { return new Transaction(this); }
     /**
@@ -6709,6 +6783,7 @@ const isEquivalentPosition = function (node, off, targetNode, targetOff) {
 };
 const atomElements = /^(img|br|input|textarea|hr)$/i;
 function scanFor(node, off, targetNode, targetOff, dir) {
+    var _a;
     for (;;) {
         if (node == targetNode && off == targetOff)
             return true;
@@ -6721,10 +6796,17 @@ function scanFor(node, off, targetNode, targetOff, dir) {
             node = parent;
         }
         else if (node.nodeType == 1) {
-            node = node.childNodes[off + (dir < 0 ? -1 : 0)];
-            if (node.contentEditable == "false")
-                return false;
-            off = dir < 0 ? nodeSize(node) : 0;
+            let child = node.childNodes[off + (dir < 0 ? -1 : 0)];
+            if (child.nodeType == 1 && child.contentEditable == "false") {
+                if ((_a = child.pmViewDesc) === null || _a === void 0 ? void 0 : _a.ignoreForSelection)
+                    off += dir;
+                else
+                    return false;
+            }
+            else {
+                node = child;
+                off = dir < 0 ? nodeSize(node) : 0;
+            }
         }
         else {
             return false;
@@ -6813,15 +6895,18 @@ function caretFromPoint(doc, x, y) {
     if (doc.caretPositionFromPoint) {
         try { // Firefox throws for this call in hard-to-predict circumstances (#994)
             let pos = doc.caretPositionFromPoint(x, y);
+            // Clip the offset, because Chrome will return a text offset
+            // into <input> nodes, which can't be treated as a regular DOM
+            // offset
             if (pos)
-                return { node: pos.offsetNode, offset: pos.offset };
+                return { node: pos.offsetNode, offset: Math.min(nodeSize(pos.offsetNode), pos.offset) };
         }
         catch (_) { }
     }
     if (doc.caretRangeFromPoint) {
         let range = doc.caretRangeFromPoint(x, y);
         if (range)
-            return { node: range.startContainer, offset: range.startOffset };
+            return { node: range.startContainer, offset: Math.min(nodeSize(range.startContainer), range.startOffset) };
     }
 }
 
@@ -6842,7 +6927,7 @@ const safari = !ie$1 && !!nav && /Apple Computer/.test(nav.vendor);
 // Is true for both iOS and iPadOS for convenience
 const ios = safari && (/Mobile\/\w+/.test(agent) || !!nav && nav.maxTouchPoints > 2);
 const mac$4 = ios || (nav ? /Mac/.test(nav.platform) : false);
-const windows = nav ? /Win/.test(nav.platform) : false;
+const windows$1 = nav ? /Win/.test(nav.platform) : false;
 const android = /Android \d/.test(agent);
 const webkit = !!doc && "webkitFontSmoothing" in doc.documentElement.style;
 const webkit_version = webkit ? +(/\bAppleWebKit\/(\d+)/.exec(navigator.userAgent) || [0, 0])[1] : 0;
@@ -6872,11 +6957,13 @@ function clientRect(node) {
 function scrollRectIntoView(view, rect, startDOM) {
     let scrollThreshold = view.someProp("scrollThreshold") || 0, scrollMargin = view.someProp("scrollMargin") || 5;
     let doc = view.dom.ownerDocument;
-    for (let parent = startDOM || view.dom;; parent = parentNode(parent)) {
+    for (let parent = startDOM || view.dom;;) {
         if (!parent)
             break;
-        if (parent.nodeType != 1)
+        if (parent.nodeType != 1) {
+            parent = parentNode(parent);
             continue;
+        }
         let elt = parent;
         let atTop = elt == doc.body;
         let bounding = atTop ? windowRect(doc) : clientRect(elt);
@@ -6905,8 +6992,10 @@ function scrollRectIntoView(view, rect, startDOM) {
                 rect = { left: rect.left - dX, top: rect.top - dY, right: rect.right - dX, bottom: rect.bottom - dY };
             }
         }
-        if (atTop || /^(fixed|sticky)$/.test(getComputedStyle(parent).position))
+        let pos = atTop ? "fixed" : getComputedStyle(parent).position;
+        if (/^(fixed|sticky)$/.test(pos))
             break;
+        parent = pos == "absolute" ? parent.offsetParent : parentNode(parent);
     }
 }
 // Store the scroll position of the editor's parent nodes, along with
@@ -7026,17 +7115,20 @@ function findOffsetInNode(node, coords) {
 }
 function findOffsetInText(node, coords) {
     let len = node.nodeValue.length;
-    let range = document.createRange();
+    let range = document.createRange(), result;
     for (let i = 0; i < len; i++) {
         range.setEnd(node, i + 1);
         range.setStart(node, i);
         let rect = singleRect(range, 1);
         if (rect.top == rect.bottom)
             continue;
-        if (inRect(coords, rect))
-            return { node, offset: i + (coords.left >= (rect.left + rect.right) / 2 ? 1 : 0) };
+        if (inRect(coords, rect)) {
+            result = { node, offset: i + (coords.left >= (rect.left + rect.right) / 2 ? 1 : 0) };
+            break;
+        }
     }
-    return { node, offset: 0 };
+    range.detach();
+    return result || { node, offset: 0 };
 }
 function inRect(coords, rect) {
     return coords.left >= rect.left - 1 && coords.left <= rect.right + 1 &&
@@ -7067,12 +7159,13 @@ function posFromCaret(view, node, offset, coords) {
     for (let cur = node, sawBlock = false;;) {
         if (cur == view.dom)
             break;
-        let desc = view.docView.nearestDesc(cur, true);
+        let desc = view.docView.nearestDesc(cur, true), rect;
         if (!desc)
             return null;
-        if (desc.dom.nodeType == 1 && (desc.node.isBlock && desc.parent || !desc.contentDOM)) {
-            let rect = desc.dom.getBoundingClientRect();
-            if (desc.node.isBlock && desc.parent) {
+        if (desc.dom.nodeType == 1 && (desc.node.isBlock && desc.parent || !desc.contentDOM) &&
+            // Ignore elements with zero-size bounding rectangles
+            ((rect = desc.dom.getBoundingClientRect()).width || rect.height)) {
+            if (desc.node.isBlock && desc.parent && !/^T(R|BODY|HEAD|FOOT)$/.test(desc.dom.nodeName)) {
                 // Only apply the horizontal test to the innermost block. Vertical for any parent.
                 if (!sawBlock && rect.left > coords.left || rect.top > coords.top)
                     outsideBlock = desc.posBefore;
@@ -7555,8 +7648,15 @@ class ViewDesc {
         for (let i = 0, offset = 0; i < this.children.length; i++) {
             let child = this.children[i], end = offset + child.size;
             if (offset == pos && end != offset) {
-                while (!child.border && child.children.length)
-                    child = child.children[0];
+                while (!child.border && child.children.length) {
+                    for (let i = 0; i < child.children.length; i++) {
+                        let inner = child.children[i];
+                        if (inner.size) {
+                            child = inner;
+                            break;
+                        }
+                    }
+                }
                 return child;
             }
             if (pos < end)
@@ -7667,18 +7767,19 @@ class ViewDesc {
     // custom things with the selection. Note that this falls apart when
     // a selection starts in such a node and ends in another, in which
     // case we just use whatever domFromPos produces as a best effort.
-    setSelection(anchor, head, root, force = false) {
+    setSelection(anchor, head, view, force = false) {
         // If the selection falls entirely in a child, give it to that child
         let from = Math.min(anchor, head), to = Math.max(anchor, head);
         for (let i = 0, offset = 0; i < this.children.length; i++) {
             let child = this.children[i], end = offset + child.size;
             if (from > offset && to < end)
-                return child.setSelection(anchor - offset - child.border, head - offset - child.border, root, force);
+                return child.setSelection(anchor - offset - child.border, head - offset - child.border, view, force);
             offset = end;
         }
         let anchorDOM = this.domFromPos(anchor, anchor ? -1 : 1);
         let headDOM = head == anchor ? anchorDOM : this.domFromPos(head, head ? -1 : 1);
-        let domSel = root.getSelection();
+        let domSel = view.root.getSelection();
+        let selRange = view.domSelectionRange();
         let brKludge = false;
         // On Firefox, using Selection.collapse to put the cursor after a
         // BR node for some reason doesn't always work (#1073). On Safari,
@@ -7709,20 +7810,20 @@ class ViewDesc {
         }
         // Firefox can act strangely when the selection is in front of an
         // uneditable node. See #1163 and https://bugzilla.mozilla.org/show_bug.cgi?id=1709536
-        if (gecko && domSel.focusNode && domSel.focusNode != headDOM.node && domSel.focusNode.nodeType == 1) {
-            let after = domSel.focusNode.childNodes[domSel.focusOffset];
+        if (gecko && selRange.focusNode && selRange.focusNode != headDOM.node && selRange.focusNode.nodeType == 1) {
+            let after = selRange.focusNode.childNodes[selRange.focusOffset];
             if (after && after.contentEditable == "false")
                 force = true;
         }
         if (!(force || brKludge && safari) &&
-            isEquivalentPosition(anchorDOM.node, anchorDOM.offset, domSel.anchorNode, domSel.anchorOffset) &&
-            isEquivalentPosition(headDOM.node, headDOM.offset, domSel.focusNode, domSel.focusOffset))
+            isEquivalentPosition(anchorDOM.node, anchorDOM.offset, selRange.anchorNode, selRange.anchorOffset) &&
+            isEquivalentPosition(headDOM.node, headDOM.offset, selRange.focusNode, selRange.focusOffset))
             return;
         // Selection.extend can be used to create an 'inverted' selection
         // (one where the focus is before the anchor), but not all
         // browsers support it yet.
         let domSelExtended = false;
-        if ((domSel.extend || anchor == head) && !brKludge) {
+        if ((domSel.extend || anchor == head) && !(brKludge && gecko)) {
             domSel.collapse(anchorDOM.node, anchorDOM.offset);
             try {
                 if (anchor != head)
@@ -7792,6 +7893,7 @@ class ViewDesc {
     }
     get domAtom() { return false; }
     get ignoreForCoords() { return false; }
+    get ignoreForSelection() { return false; }
     isText(text) { return false; }
 }
 // A widget desc represents a widget decoration, which is a DOM node
@@ -7836,6 +7938,7 @@ class WidgetViewDesc extends ViewDesc {
         super.destroy();
     }
     get domAtom() { return true; }
+    get ignoreForSelection() { return !!this.widget.type.spec.relaxedSide; }
     get side() { return this.widget.type.side; }
 }
 class CompositionViewDesc extends ViewDesc {
@@ -7863,16 +7966,17 @@ class CompositionViewDesc extends ViewDesc {
 // some cases they will be split more often than would appear
 // necessary.
 class MarkViewDesc extends ViewDesc {
-    constructor(parent, mark, dom, contentDOM) {
+    constructor(parent, mark, dom, contentDOM, spec) {
         super(parent, [], dom, contentDOM);
         this.mark = mark;
+        this.spec = spec;
     }
     static create(parent, mark, inline, view) {
         let custom = view.nodeViews[mark.type.name];
         let spec = custom && custom(mark, view, inline);
         if (!spec || !spec.dom)
             spec = DOMSerializer.renderSpec(document, mark.type.spec.toDOM(mark, inline), null, mark.attrs);
-        return new MarkViewDesc(parent, mark, spec.dom, spec.contentDOM || spec.dom);
+        return new MarkViewDesc(parent, mark, spec.dom, spec.contentDOM || spec.dom, spec);
     }
     parseRule() {
         if ((this.dirty & NODE_DIRTY) || this.mark.type.spec.reparseInView)
@@ -7903,6 +8007,14 @@ class MarkViewDesc extends ViewDesc {
             nodes[i].parent = copy;
         copy.children = nodes;
         return copy;
+    }
+    ignoreMutation(mutation) {
+        return this.spec.ignoreMutation ? this.spec.ignoreMutation(mutation) : super.ignoreMutation(mutation);
+    }
+    destroy() {
+        if (this.spec.destroy)
+            this.spec.destroy();
+        super.destroy();
     }
 }
 // Node view descs are the main, most common type of view desc, and
@@ -8123,17 +8235,18 @@ class NodeViewDesc extends ViewDesc {
     }
     // Mark this node as being the selected node.
     selectNode() {
-        if (this.nodeDOM.nodeType == 1)
+        if (this.nodeDOM.nodeType == 1) {
             this.nodeDOM.classList.add("ProseMirror-selectednode");
-        if (this.contentDOM || !this.node.type.spec.draggable)
-            this.dom.draggable = true;
+            if (this.contentDOM || !this.node.type.spec.draggable)
+                this.nodeDOM.draggable = true;
+        }
     }
     // Remove selected node marking from this node.
     deselectNode() {
         if (this.nodeDOM.nodeType == 1) {
             this.nodeDOM.classList.remove("ProseMirror-selectednode");
             if (this.contentDOM || !this.node.type.spec.draggable)
-                this.dom.removeAttribute("draggable");
+                this.nodeDOM.removeAttribute("draggable");
         }
     }
     get domAtom() { return this.node.isAtom; }
@@ -8223,7 +8336,7 @@ class CustomNodeViewDesc extends NodeViewDesc {
     update(node, outerDeco, innerDeco, view) {
         if (this.dirty == NODE_DIRTY)
             return false;
-        if (this.spec.update) {
+        if (this.spec.update && (this.node.type == node.type || this.spec.multiType)) {
             let result = this.spec.update(node, outerDeco, innerDeco);
             if (result)
                 this.updateInner(node, outerDeco, innerDeco, view);
@@ -8242,9 +8355,9 @@ class CustomNodeViewDesc extends NodeViewDesc {
     deselectNode() {
         this.spec.deselectNode ? this.spec.deselectNode() : super.deselectNode();
     }
-    setSelection(anchor, head, root, force) {
-        this.spec.setSelection ? this.spec.setSelection(anchor, head, root)
-            : super.setSelection(anchor, head, root, force);
+    setSelection(anchor, head, view, force) {
+        this.spec.setSelection ? this.spec.setSelection(anchor, head, view.root)
+            : super.setSelection(anchor, head, view, force);
     }
     destroy() {
         if (this.spec.destroy)
@@ -8541,6 +8654,7 @@ class ViewTreeUpdater {
                     return true;
                 }
                 else if (!locked && (updated = this.recreateWrapper(next, node, outerDeco, innerDeco, view, pos))) {
+                    this.destroyBetween(this.index, i);
                     this.top.children[this.index] = updated;
                     if (updated.contentDOM) {
                         updated.dirty = CONTENT_DIRTY;
@@ -8560,7 +8674,8 @@ class ViewTreeUpdater {
     // identical content, move over its children.
     recreateWrapper(next, node, outerDeco, innerDeco, view, pos) {
         if (next.dirty || node.isAtom || !next.children.length ||
-            !next.node.content.eq(node.content))
+            !next.node.content.eq(node.content) ||
+            !sameOuterDeco(outerDeco, next.outerDeco) || !innerDeco.eq(next.innerDeco))
             return null;
         let wrapper = NodeViewDesc.create(this.top, node, outerDeco, innerDeco, view, pos);
         if (wrapper.contentDOM) {
@@ -8831,9 +8946,9 @@ function selectionFromDOM(view, origin = null) {
     let head = view.docView.posFromDOM(domSel.focusNode, domSel.focusOffset, 1);
     if (head < 0)
         return null;
-    let $head = doc.resolve(head), $anchor, selection;
+    let $head = doc.resolve(head), anchor, selection;
     if (selectionCollapsed(domSel)) {
-        $anchor = $head;
+        anchor = head;
         while (nearestDesc && !nearestDesc.node)
             nearestDesc = nearestDesc.parent;
         let nearestDescNode = nearestDesc.node;
@@ -8844,11 +8959,25 @@ function selectionFromDOM(view, origin = null) {
         }
     }
     else {
-        let anchor = view.docView.posFromDOM(domSel.anchorNode, domSel.anchorOffset, 1);
+        if (domSel instanceof view.dom.ownerDocument.defaultView.Selection && domSel.rangeCount > 1) {
+            let min = head, max = head;
+            for (let i = 0; i < domSel.rangeCount; i++) {
+                let range = domSel.getRangeAt(i);
+                min = Math.min(min, view.docView.posFromDOM(range.startContainer, range.startOffset, 1));
+                max = Math.max(max, view.docView.posFromDOM(range.endContainer, range.endOffset, -1));
+            }
+            if (min < 0)
+                return null;
+            [anchor, head] = max == view.state.selection.anchor ? [max, min] : [min, max];
+            $head = doc.resolve(head);
+        }
+        else {
+            anchor = view.docView.posFromDOM(domSel.anchorNode, domSel.anchorOffset, 1);
+        }
         if (anchor < 0)
             return null;
-        $anchor = doc.resolve(anchor);
     }
+    let $anchor = doc.resolve(anchor);
     if (!selection) {
         let bias = origin == "pointer" || (view.state.selection.head < $head.pos && !inWidget) ? 1 : -1;
         selection = selectionBetween(view, $anchor, $head, bias);
@@ -8888,7 +9017,7 @@ function selectionToDOM(view, force = false) {
             if (!sel.empty && !sel.$from.parent.inlineContent)
                 resetEditableTo = temporarilyEditableNear(view, sel.to);
         }
-        view.docView.setSelection(anchor, head, view.root, force);
+        view.docView.setSelection(anchor, head, view, force);
         if (brokenSelectBetweenUneditable) {
             if (resetEditableFrom)
                 resetEditable(resetEditableFrom);
@@ -8956,24 +9085,14 @@ function removeClassOnSelectionChange(view) {
     });
 }
 function selectCursorWrapper(view) {
-    let domSel = view.domSelection(), range = document.createRange();
+    let domSel = view.domSelection();
     if (!domSel)
         return;
     let node = view.cursorWrapper.dom, img = node.nodeName == "IMG";
     if (img)
-        range.setStart(node.parentNode, domIndex(node) + 1);
+        domSel.collapse(node.parentNode, domIndex(node) + 1);
     else
-        range.setStart(node, 0);
-    let sel = view.state.selection;
-    if (sel.empty) {
-        range.collapse(true);
-    }
-    else {
-        let end = view.domAtPos(sel.to);
-        range.setEnd(end.node, end.offset);
-    }
-    domSel.removeAllRanges();
-    domSel.addRange(range);
+        domSel.collapse(node, 0);
     // Kludge to kill 'control selection' in IE11 when selecting an
     // invisible cursor wrapper, since that would result in those weird
     // resize handles and a selection that considers the absolutely
@@ -9281,7 +9400,7 @@ function setSelFocus(view, node, offset) {
 }
 function findDirection(view, pos) {
     let $pos = view.state.doc.resolve(pos);
-    if (!(chrome || windows) && $pos.parent.inlineContent) {
+    if (!(chrome || windows$1) && $pos.parent.inlineContent) {
         let coords = view.coordsAtPos(pos);
         if (pos > $pos.start()) {
             let before = view.coordsAtPos(pos - 1);
@@ -9451,11 +9570,14 @@ function parseFromClipboard(view, text, html, plainText, $context) {
     let dom, slice;
     if (!html && !text)
         return null;
-    let asText = text && (plainText || inCode || !html);
+    let asText = !!text && (plainText || inCode || !html);
     if (asText) {
         view.someProp("transformPastedText", f => { text = f(text, inCode || plainText, view); });
-        if (inCode)
-            return text ? new Slice(Fragment.from(view.state.schema.text(text.replace(/\r\n?/g, "\n"))), 0, 0) : Slice.empty;
+        if (inCode) {
+            slice = new Slice(Fragment.from(view.state.schema.text(text.replace(/\r\n?/g, "\n"))), 0, 0);
+            view.someProp("transformPasted", f => { slice = f(slice, view, true); });
+            return slice;
+        }
         let parsed = view.someProp("clipboardTextParser", f => f(text, $context, plainText, view));
         if (parsed) {
             slice = parsed;
@@ -9513,7 +9635,7 @@ function parseFromClipboard(view, text, html, plainText, $context) {
             slice = closeSlice(slice, openStart, openEnd);
         }
     }
-    view.someProp("transformPasted", f => { slice = f(slice, view); });
+    view.someProp("transformPasted", f => { slice = f(slice, view, asText); });
     return slice;
 }
 const inlineParents = /^(a|abbr|acronym|b|cite|code|del|em|i|ins|kbd|label|output|q|ruby|s|samp|span|strong|sub|sup|time|u|tt|var)$/i;
@@ -9615,6 +9737,18 @@ let _detachedDoc = null;
 function detachedDoc() {
     return _detachedDoc || (_detachedDoc = document.implementation.createHTMLDocument("title"));
 }
+let _policy = null;
+function maybeWrapTrusted(html) {
+    let trustedTypes = window.trustedTypes;
+    if (!trustedTypes)
+        return html;
+    // With the require-trusted-types-for CSP, Chrome will block
+    // innerHTML, even on a detached document. This wraps the string in
+    // a way that makes the browser allow us to use its parser again.
+    if (!_policy)
+        _policy = trustedTypes.defaultPolicy || trustedTypes.createPolicy("ProseMirrorClipboard", { createHTML: (s) => s });
+    return _policy.createHTML(html);
+}
 function readHTML(html) {
     let metas = /^(\s*<meta [^>]*>)*/.exec(html);
     if (metas)
@@ -9623,7 +9757,7 @@ function readHTML(html) {
     let firstTag = /<([a-z][^>\s]+)/i.exec(html), wrap;
     if (wrap = firstTag && wrapMap[firstTag[1].toLowerCase()])
         html = wrap.map(n => "<" + n + ">").join("") + html + wrap.map(n => "</" + n + ">").reverse().join("");
-    elt.innerHTML = html;
+    elt.innerHTML = maybeWrapTrusted(html);
     if (wrap)
         for (let i = 0; i < wrap.length; i++)
             elt = elt.querySelector(wrap[i]) || elt;
@@ -9675,14 +9809,14 @@ class InputState {
         this.mouseDown = null;
         this.lastKeyCode = null;
         this.lastKeyCodeTime = 0;
-        this.lastClick = { time: 0, x: 0, y: 0, type: "" };
+        this.lastClick = { time: 0, x: 0, y: 0, type: "", button: 0 };
         this.lastSelectionOrigin = null;
         this.lastSelectionTime = 0;
         this.lastIOSEnter = 0;
         this.lastIOSEnterFallbackTimeout = -1;
         this.lastFocus = 0;
         this.lastTouch = 0;
-        this.lastAndroidDelete = 0;
+        this.lastChromeDelete = 0;
         this.composing = false;
         this.compositionNode = null;
         this.composingTimeout = -1;
@@ -9803,8 +9937,9 @@ editHandlers.keypress = (view, _event) => {
     let sel = view.state.selection;
     if (!(sel instanceof TextSelection) || !sel.$from.sameParent(sel.$to)) {
         let text = String.fromCharCode(event.charCode);
-        if (!/[\r\n]/.test(text) && !view.someProp("handleTextInput", f => f(view, sel.$from.pos, sel.$to.pos, text)))
-            view.dispatch(view.state.tr.insertText(text).scrollIntoView());
+        let deflt = () => view.state.tr.insertText(text).scrollIntoView();
+        if (!/[\r\n]/.test(text) && !view.someProp("handleTextInput", f => f(view, sel.$from.pos, sel.$to.pos, text, deflt)))
+            view.dispatch(deflt());
         event.preventDefault();
     }
 };
@@ -9916,13 +10051,14 @@ handlers.mousedown = (view, _event) => {
     view.input.shiftKey = event.shiftKey;
     let flushed = forceDOMFlush(view);
     let now = Date.now(), type = "singleClick";
-    if (now - view.input.lastClick.time < 500 && isNear(event, view.input.lastClick) && !event[selectNodeModifier]) {
+    if (now - view.input.lastClick.time < 500 && isNear(event, view.input.lastClick) && !event[selectNodeModifier] &&
+        view.input.lastClick.button == event.button) {
         if (view.input.lastClick.type == "singleClick")
             type = "doubleClick";
         else if (view.input.lastClick.type == "doubleClick")
             type = "tripleClick";
     }
-    view.input.lastClick = { time: now, x: event.clientX, y: event.clientY, type };
+    view.input.lastClick = { time: now, x: event.clientX, y: event.clientY, type, button: event.button };
     let pos = view.posAtCoords(eventCoords(event));
     if (!pos)
         return;
@@ -9961,7 +10097,7 @@ class MouseDown {
         }
         const target = flushed ? null : event.target;
         const targetDesc = target ? view.docView.nearestDesc(target, true) : null;
-        this.target = targetDesc && targetDesc.dom.nodeType == 1 ? targetDesc.dom : null;
+        this.target = targetDesc && targetDesc.nodeDOM.nodeType == 1 ? targetDesc.nodeDOM : null;
         let { selection } = view.state;
         if (event.button == 0 &&
             targetNode.type.spec.draggable && targetNode.type.spec.selectable !== false ||
@@ -10085,14 +10221,15 @@ editHandlers.compositionstart = editHandlers.compositionupdate = view => {
         let { state } = view, $pos = state.selection.$to;
         if (state.selection instanceof TextSelection &&
             (state.storedMarks ||
-                (!$pos.textOffset && $pos.parentOffset && $pos.nodeBefore.marks.some(m => m.type.spec.inclusive === false)))) {
+                (!$pos.textOffset && $pos.parentOffset && $pos.nodeBefore.marks.some(m => m.type.spec.inclusive === false)) ||
+                chrome && windows$1 && selectionBeforeUneditable(view))) { // Issue #1500
             // Need to wrap the cursor in mark nodes different from the ones in the DOM context
             view.markCursor = view.state.storedMarks || $pos.marks();
             endComposition(view, true);
             view.markCursor = null;
         }
         else {
-            endComposition(view);
+            endComposition(view, !state.selection.empty);
             // In firefox, if the cursor is after but outside a marked node,
             // the inserted text won't inherit the marks. So this moves it
             // inside if necessary.
@@ -10119,6 +10256,13 @@ editHandlers.compositionstart = editHandlers.compositionupdate = view => {
     }
     scheduleComposeEnd(view, timeoutComposition);
 };
+function selectionBeforeUneditable(view) {
+    let { focusNode, focusOffset } = view.domSelectionRange();
+    if (!focusNode || focusNode.nodeType != 1 || focusOffset >= focusNode.childNodes.length)
+        return false;
+    let next = focusNode.childNodes[focusOffset];
+    return next.nodeType == 1 && next.contentEditable == "false";
+}
 editHandlers.compositionend = (view, event) => {
     if (view.composing) {
         view.input.composing = false;
@@ -10173,15 +10317,17 @@ function timestampFromCustomEvent() {
 /**
 @internal
 */
-function endComposition(view, forceUpdate = false) {
+function endComposition(view, restarting = false) {
     if (android && view.domObserver.flushingSoon >= 0)
         return;
     view.domObserver.forceFlush();
     clearComposition(view);
-    if (forceUpdate || view.docView && view.docView.dirty) {
-        let sel = selectionFromDOM(view);
-        if (sel && !sel.eq(view.state.selection))
+    if (restarting || view.docView && view.docView.dirty) {
+        let sel = selectionFromDOM(view), cur = view.state.selection;
+        if (sel && !sel.eq(cur))
             view.dispatch(view.state.tr.setSelection(sel));
+        else if ((view.markCursor || restarting) && !cur.$from.node(cur.$from.sharedDepth(cur.to)).inlineContent)
+            view.dispatch(view.state.tr.deleteSelection());
         else
             view.updateState(view.state);
         return true;
@@ -10302,6 +10448,10 @@ class Dragging {
     }
 }
 const dragCopyModifier = mac$4 ? "altKey" : "ctrlKey";
+function dragMoves(view, event) {
+    let moves = view.someProp("dragCopies", test => !test(event));
+    return moves != null ? moves : !event[dragCopyModifier];
+}
 handlers.dragstart = (view, _event) => {
     let event = _event;
     let mouseDown = view.input.mouseDown;
@@ -10331,7 +10481,7 @@ handlers.dragstart = (view, _event) => {
     event.dataTransfer.effectAllowed = "copyMove";
     if (!brokenClipboardAPI)
         event.dataTransfer.setData("text/plain", text);
-    view.dragging = new Dragging(slice, !event[dragCopyModifier], node);
+    view.dragging = new Dragging(slice, dragMoves(view, event), node);
 };
 handlers.dragend = view => {
     let dragging = view.dragging;
@@ -10341,10 +10491,15 @@ handlers.dragend = view => {
     }, 50);
 };
 editHandlers.dragover = editHandlers.dragenter = (_, e) => e.preventDefault();
-editHandlers.drop = (view, _event) => {
-    let event = _event;
-    let dragging = view.dragging;
-    view.dragging = null;
+editHandlers.drop = (view, event) => {
+    try {
+        handleDrop(view, event, view.dragging);
+    }
+    finally {
+        view.dragging = null;
+    }
+};
+function handleDrop(view, event, dragging) {
     if (!event.dataTransfer)
         return;
     let eventPos = view.posAtCoords(eventCoords(event));
@@ -10353,12 +10508,12 @@ editHandlers.drop = (view, _event) => {
     let $mouse = view.state.doc.resolve(eventPos.pos);
     let slice = dragging && dragging.slice;
     if (slice) {
-        view.someProp("transformPasted", f => { slice = f(slice, view); });
+        view.someProp("transformPasted", f => { slice = f(slice, view, false); });
     }
     else {
         slice = parseFromClipboard(view, getText(event.dataTransfer), brokenClipboardAPI ? null : event.dataTransfer.getData("text/html"), false, $mouse);
     }
-    let move = !!(dragging && !event[dragCopyModifier]);
+    let move = !!(dragging && dragMoves(view, event));
     if (view.someProp("handleDrop", f => f(view, event, slice || Slice.empty, move))) {
         event.preventDefault();
         return;
@@ -10398,7 +10553,7 @@ editHandlers.drop = (view, _event) => {
     }
     view.focus();
     view.dispatch(tr.setMeta("uiEvent", "drop"));
-};
+}
 handlers.focus = view => {
     view.input.lastFocus = Date.now();
     if (!view.focused) {
@@ -10839,6 +10994,7 @@ class DecorationSet {
         }
         return result;
     }
+    forEachSet(f) { f(this); }
 }
 /**
 The empty set of decorations.
@@ -10913,6 +11069,10 @@ class DecorationGroup {
             default: return new DecorationGroup(members.every(m => m instanceof DecorationSet) ? members :
                 members.reduce((r, m) => r.concat(m instanceof DecorationSet ? m : m.members), []));
         }
+    }
+    forEachSet(f) {
+        for (let i = 0; i < this.members.length; i++)
+            this.members[i].forEachSet(f);
     }
 }
 function mapChildren(oldChildren, newLocal, mapping, node, offset, oldOffset, options) {
@@ -11319,6 +11479,17 @@ class DOMObserver {
                 }
             }
         }
+        else if ((chrome || safari) && added.some(n => n.nodeName == "BR") &&
+            (view.input.lastKeyCode == 8 || view.input.lastKeyCode == 46)) {
+            // Chrome/Safari sometimes insert a bogus break node if you
+            // backspace out the last bit of text before an inline-flex node (#1552)
+            for (let node of added)
+                if (node.nodeName == "BR" && node.parentNode) {
+                    let after = node.nextSibling;
+                    if (after && after.nodeType == 1 && after.contentEditable == "false")
+                        node.parentNode.removeChild(node);
+                }
+        }
         let readSel = null;
         // If it looks like the browser has reset the selection to the
         // start of the document after focus, restore the selection from
@@ -11534,7 +11705,7 @@ function ruleFromNode(dom) {
     }
     return null;
 }
-const isInline = /^(a|abbr|acronym|b|bd[io]|big|br|button|cite|code|data(list)?|del|dfn|em|i|ins|kbd|label|map|mark|meter|output|q|ruby|s|samp|small|span|strong|su[bp]|time|u|tt|var)$/i;
+const isInline = /^(a|abbr|acronym|b|bd[io]|big|br|button|cite|code|data(list)?|del|dfn|em|i|img|ins|kbd|label|map|mark|meter|output|q|ruby|s|samp|small|span|strong|su[bp]|time|u|tt|var)$/i;
 function readDOMChange(view, from, to, typeOver, addedNodes) {
     let compositionID = view.input.compositionPendingChanges || (view.composing ? view.input.compositionID : 0);
     view.input.compositionPendingChanges = 0;
@@ -11576,6 +11747,8 @@ function readDOMChange(view, from, to, typeOver, addedNodes) {
     }
     view.input.lastKeyCode = null;
     let change = findDiff(compare.content, parse.doc.content, parse.from, preferredPos, preferredSide);
+    if (change)
+        view.input.domChangeCount++;
     if ((ios && view.input.lastIOSEnter > Date.now() - 225 || android) &&
         addedNodes.some(n => n.nodeType == 1 && !isInline.test(n.nodeName)) &&
         (!change || change.endA >= change.endB) &&
@@ -11601,7 +11774,6 @@ function readDOMChange(view, from, to, typeOver, addedNodes) {
             return;
         }
     }
-    view.input.domChangeCount++;
     // Handle the case where overwriting a selection by typing matches
     // the start or end of the selected content, creating a change
     // that's smaller than what was actually overwritten.
@@ -11632,14 +11804,13 @@ function readDOMChange(view, from, to, typeOver, addedNodes) {
     let $to = parse.doc.resolveNoCache(change.endB - parse.from);
     let $fromA = doc.resolve(change.start);
     let inlineChange = $from.sameParent($to) && $from.parent.inlineContent && $fromA.end() >= change.endA;
-    let nextSel;
     // If this looks like the effect of pressing Enter (or was recorded
     // as being an iOS enter press), just dispatch an Enter key instead.
     if (((ios && view.input.lastIOSEnter > Date.now() - 225 &&
         (!inlineChange || addedNodes.some(n => n.nodeName == "DIV" || n.nodeName == "P"))) ||
-        (!inlineChange && $from.pos < parse.doc.content.size && !$from.sameParent($to) &&
-            (nextSel = Selection.findFrom(parse.doc.resolve($from.pos + 1), 1, true)) &&
-            nextSel.head == $to.pos)) &&
+        (!inlineChange && $from.pos < parse.doc.content.size &&
+            (!$from.sameParent($to) || !$from.parent.inlineContent) &&
+            $from.pos < $to.pos && !/\S/.test(parse.doc.textBetween($from.pos, $to.pos, "", "")))) &&
         view.someProp("handleKeyDown", f => f(view, keyEvent(13, "Enter")))) {
         view.input.lastIOSEnter = 0;
         return;
@@ -11652,11 +11823,11 @@ function readDOMChange(view, from, to, typeOver, addedNodes) {
             view.domObserver.suppressSelectionUpdates(); // #820
         return;
     }
-    // Chrome Android will occasionally, during composition, delete the
+    // Chrome will occasionally, during composition, delete the
     // entire composition and then immediately insert it again. This is
     // used to detect that situation.
-    if (chrome && android && change.endB == change.start)
-        view.input.lastAndroidDelete = Date.now();
+    if (chrome && change.endB == change.start)
+        view.input.lastChromeDelete = Date.now();
     // This tries to detect Android virtual keyboard
     // enter-and-pick-suggestion action. That sometimes (see issue
     // #1059) first fires a DOM mutation, before moving the selection to
@@ -11674,7 +11845,26 @@ function readDOMChange(view, from, to, typeOver, addedNodes) {
         }, 20);
     }
     let chFrom = change.start, chTo = change.endA;
-    let tr, storedMarks, markChange;
+    let mkTr = (base) => {
+        let tr = base || view.state.tr.replace(chFrom, chTo, parse.doc.slice(change.start - parse.from, change.endB - parse.from));
+        if (parse.sel) {
+            let sel = resolveSelection(view, tr.doc, parse.sel);
+            // Chrome will sometimes, during composition, report the
+            // selection in the wrong place. If it looks like that is
+            // happening, don't update the selection.
+            // Edge just doesn't move the cursor forward when you start typing
+            // in an empty block or between br nodes.
+            if (sel && !(chrome && view.composing && sel.empty &&
+                (change.start != change.endB || view.input.lastChromeDelete < Date.now() - 100) &&
+                (sel.head == chFrom || sel.head == tr.mapping.map(chTo) - 1) ||
+                ie$1 && sel.empty && sel.head == chFrom))
+                tr.setSelection(sel);
+        }
+        if (compositionID)
+            tr.setMeta("composition", compositionID);
+        return tr.scrollIntoView();
+    };
+    let markChange;
     if (inlineChange) {
         if ($from.pos == $to.pos) { // Deletion
             // IE11 sometimes weirdly moves the DOM selection around after
@@ -11683,46 +11873,36 @@ function readDOMChange(view, from, to, typeOver, addedNodes) {
                 view.domObserver.suppressSelectionUpdates();
                 setTimeout(() => selectionToDOM(view), 20);
             }
-            tr = view.state.tr.delete(chFrom, chTo);
-            storedMarks = doc.resolve(change.start).marksAcross(doc.resolve(change.endA));
+            let tr = mkTr(view.state.tr.delete(chFrom, chTo));
+            let marks = doc.resolve(change.start).marksAcross(doc.resolve(change.endA));
+            if (marks)
+                tr.ensureMarks(marks);
+            view.dispatch(tr);
         }
         else if ( // Adding or removing a mark
         change.endA == change.endB &&
             (markChange = isMarkChange($from.parent.content.cut($from.parentOffset, $to.parentOffset), $fromA.parent.content.cut($fromA.parentOffset, change.endA - $fromA.start())))) {
-            tr = view.state.tr;
+            let tr = mkTr(view.state.tr);
             if (markChange.type == "add")
                 tr.addMark(chFrom, chTo, markChange.mark);
             else
                 tr.removeMark(chFrom, chTo, markChange.mark);
+            view.dispatch(tr);
         }
         else if ($from.parent.child($from.index()).isText && $from.index() == $to.index() - ($to.textOffset ? 0 : 1)) {
             // Both positions in the same text node -- simply insert text
             let text = $from.parent.textBetween($from.parentOffset, $to.parentOffset);
-            if (view.someProp("handleTextInput", f => f(view, chFrom, chTo, text)))
-                return;
-            tr = view.state.tr.insertText(text, chFrom, chTo);
+            let deflt = () => mkTr(view.state.tr.insertText(text, chFrom, chTo));
+            if (!view.someProp("handleTextInput", f => f(view, chFrom, chTo, text, deflt)))
+                view.dispatch(deflt());
+        }
+        else {
+            view.dispatch(mkTr());
         }
     }
-    if (!tr)
-        tr = view.state.tr.replace(chFrom, chTo, parse.doc.slice(change.start - parse.from, change.endB - parse.from));
-    if (parse.sel) {
-        let sel = resolveSelection(view, tr.doc, parse.sel);
-        // Chrome Android will sometimes, during composition, report the
-        // selection in the wrong place. If it looks like that is
-        // happening, don't update the selection.
-        // Edge just doesn't move the cursor forward when you start typing
-        // in an empty block or between br nodes.
-        if (sel && !(chrome && android && view.composing && sel.empty &&
-            (change.start != change.endB || view.input.lastAndroidDelete < Date.now() - 100) &&
-            (sel.head == chFrom || sel.head == tr.mapping.map(chTo) - 1) ||
-            ie$1 && sel.empty && sel.head == chFrom))
-            tr.setSelection(sel);
+    else {
+        view.dispatch(mkTr());
     }
-    if (storedMarks)
-        tr.ensureMarks(storedMarks);
-    if (compositionID)
-        tr.setMeta("composition", compositionID);
-    view.dispatch(tr.scrollIntoView());
 }
 function resolveSelection(view, doc, parsedSel) {
     if (Math.max(parsedSel.anchor, parsedSel.head) > doc.content.size)
@@ -12050,7 +12230,8 @@ class EditorView {
     */
     scrollToSelection() {
         let startDOM = this.domSelectionRange().focusNode;
-        if (this.someProp("handleScrollToSelection", f => f(this))) ;
+        if (!startDOM || !this.dom.contains(startDOM.nodeType == 1 ? startDOM : startDOM.parentNode)) ;
+        else if (this.someProp("handleScrollToSelection", f => f(this))) ;
         else if (this.state.selection instanceof NodeSelection) {
             let target = this.docView.domAfterPos(this.state.selection.from);
             if (target.nodeType == 1)
@@ -12270,6 +12451,17 @@ class EditorView {
         return doPaste(this, text, null, true, event || new ClipboardEvent("paste"));
     }
     /**
+    Serialize the given slice as it would be if it was copied from
+    this editor. Returns a DOM element that contains a
+    representation of the slice as its children, a textual
+    representation, and the transformed slice (which can be
+    different from the given input due to hooks like
+    [`transformCopied`](https://prosemirror.net/docs/ref/#view.EditorProps.transformCopied)).
+    */
+    serializeForClipboard(slice) {
+        return serializeForClipboard(this, slice);
+    }
+    /**
     Removes the editor from the DOM and destroys all [node
     views](https://prosemirror.net/docs/ref/#view.NodeView).
     */
@@ -12304,22 +12496,6 @@ class EditorView {
         return dispatchEvent(this, event);
     }
     /**
-    Dispatch a transaction. Will call
-    [`dispatchTransaction`](https://prosemirror.net/docs/ref/#view.DirectEditorProps.dispatchTransaction)
-    when given, and otherwise defaults to applying the transaction to
-    the current state and calling
-    [`updateState`](https://prosemirror.net/docs/ref/#view.EditorView.updateState) with the result.
-    This method is bound to the view instance, so that it can be
-    easily passed around.
-    */
-    dispatch(tr) {
-        let dispatchTransaction = this._props.dispatchTransaction;
-        if (dispatchTransaction)
-            dispatchTransaction.call(this, tr);
-        else
-            this.updateState(this.state.apply(tr));
-    }
-    /**
     @internal
     */
     domSelectionRange() {
@@ -12336,6 +12512,13 @@ class EditorView {
         return this.root.getSelection();
     }
 }
+EditorView.prototype.dispatch = function (tr) {
+    let dispatchTransaction = this._props.dispatchTransaction;
+    if (dispatchTransaction)
+        dispatchTransaction.call(this, tr);
+    else
+        this.updateState(this.state.apply(tr));
+};
 function computeDocDeco(view) {
     let attrs = Object.create(null);
     attrs.class = "ProseMirror";
@@ -12987,7 +13170,7 @@ function history(config = {}) {
                 beforeinput(view, e) {
                     let inputType = e.inputType;
                     let command = inputType == "historyUndo" ? undo : inputType == "historyRedo" ? redo : null;
-                    if (!command)
+                    if (!command || !view.editable)
                         return false;
                     e.preventDefault();
                     return command(view.state, view.dispatch);
@@ -13138,7 +13321,8 @@ function keyName(event) {
   return name
 }
 
-const mac$2 = typeof navigator != "undefined" ? /Mac|iP(hone|[oa]d)/.test(navigator.platform) : false;
+const mac$2 = typeof navigator != "undefined" && /Mac|iP(hone|[oa]d)/.test(navigator.platform);
+const windows = typeof navigator != "undefined" && /Win/.test(navigator.platform);
 function normalizeKeyName(name) {
     let parts = name.split(/-(?!$)/), result = parts[parts.length - 1];
     if (result == "Space")
@@ -13244,12 +13428,14 @@ function keydownHandler(bindings) {
                 if (noShift && noShift(view.state, view.dispatch, view))
                     return true;
             }
-            if ((event.shiftKey || event.altKey || event.metaKey || name.charCodeAt(0) > 127) &&
+            if ((event.altKey || event.metaKey || event.ctrlKey) &&
+                // Ctrl-Alt may be used for AltGr on Windows
+                !(windows && event.ctrlKey && event.altKey) &&
                 (baseName = base[event.keyCode]) && baseName != name) {
                 // Try falling back to the keyCode when there's a modifier
                 // active or the character produced isn't ASCII, and our table
                 // produces a different name from the the keyCode. See #668,
-                // #1060
+                // #1060, #1529.
                 let fromCode = map[modifiers(baseName, event)];
                 if (fromCode && fromCode(view.state, view.dispatch, view))
                     return true;
@@ -13365,6 +13551,9 @@ class GapBookmark {
         return GapCursor.valid($pos) ? new GapCursor($pos) : Selection.near($pos);
     }
 }
+function needsGap(type) {
+    return type.isAtom || type.spec.isolating || type.spec.createGapCursor;
+}
 function closedBefore($pos) {
     for (let d = $pos.depth; d >= 0; d--) {
         let index = $pos.index(d), parent = $pos.node(d);
@@ -13376,7 +13565,7 @@ function closedBefore($pos) {
         }
         // See if the node before (or its first ancestor) is closed
         for (let before = parent.child(index - 1);; before = before.lastChild) {
-            if ((before.childCount == 0 && !before.inlineContent) || before.isAtom || before.type.spec.isolating)
+            if ((before.childCount == 0 && !before.inlineContent) || needsGap(before.type))
                 return true;
             if (before.inlineContent)
                 return false;
@@ -13394,7 +13583,7 @@ function closedAfter($pos) {
             continue;
         }
         for (let after = parent.child(index);; after = after.firstChild) {
-            if ((after.childCount == 0 && !after.inlineContent) || after.isAtom || after.type.spec.isolating)
+            if ((after.childCount == 0 && !after.inlineContent) || needsGap(after.type))
                 return true;
             if (after.inlineContent)
                 return false;
@@ -13842,31 +14031,45 @@ function splitBlockAs(splitNode) {
                 dispatch(state.tr.split($from.pos).scrollIntoView());
             return true;
         }
-        if (!$from.parent.isBlock)
+        if (!$from.depth)
             return false;
-        if (dispatch) {
-            let atEnd = $to.parentOffset == $to.parent.content.size;
-            let tr = state.tr;
-            if (state.selection instanceof TextSelection || state.selection instanceof AllSelection)
-                tr.deleteSelection();
-            let deflt = $from.depth == 0 ? null : defaultBlockAt($from.node(-1).contentMatchAt($from.indexAfter(-1)));
-            let types = atEnd && deflt ? [{ type: deflt }] : undefined;
-            let can = canSplit(tr.doc, tr.mapping.map($from.pos), 1, types);
-            if (!types && !can && canSplit(tr.doc, tr.mapping.map($from.pos), 1, deflt ? [{ type: deflt }] : undefined)) {
-                if (deflt)
-                    types = [{ type: deflt }];
-                can = true;
+        let types = [];
+        let splitDepth, deflt, atEnd = false, atStart = false;
+        for (let d = $from.depth;; d--) {
+            let node = $from.node(d);
+            if (node.isBlock) {
+                atEnd = $from.end(d) == $from.pos + ($from.depth - d);
+                atStart = $from.start(d) == $from.pos - ($from.depth - d);
+                deflt = defaultBlockAt($from.node(d - 1).contentMatchAt($from.indexAfter(d - 1)));
+                types.unshift((atEnd && deflt ? { type: deflt } : null));
+                splitDepth = d;
+                break;
             }
-            if (can) {
-                tr.split(tr.mapping.map($from.pos), 1, types);
-                if (!atEnd && !$from.parentOffset && $from.parent.type != deflt) {
-                    let first = tr.mapping.map($from.before()), $first = tr.doc.resolve(first);
-                    if (deflt && $from.node(-1).canReplaceWith($first.index(), $first.index() + 1, deflt))
-                        tr.setNodeMarkup(tr.mapping.map($from.before()), deflt);
-                }
+            else {
+                if (d == 1)
+                    return false;
+                types.unshift(null);
             }
-            dispatch(tr.scrollIntoView());
         }
+        let tr = state.tr;
+        if (state.selection instanceof TextSelection || state.selection instanceof AllSelection)
+            tr.deleteSelection();
+        let splitPos = tr.mapping.map($from.pos);
+        let can = canSplit(tr.doc, splitPos, types.length, types);
+        if (!can) {
+            types[0] = deflt ? { type: deflt } : null;
+            can = canSplit(tr.doc, splitPos, types.length, types);
+        }
+        if (!can)
+            return false;
+        tr.split(splitPos, types.length, types);
+        if (!atEnd && atStart && $from.node(splitDepth).type != deflt) {
+            let first = tr.mapping.map($from.before(splitDepth)), $first = tr.doc.resolve(first);
+            if (deflt && $from.node(splitDepth - 1).canReplaceWith($first.index(), $first.index() + 1, deflt))
+                tr.setNodeMarkup(tr.mapping.map($from.before(splitDepth)), deflt);
+        }
+        if (dispatch)
+            dispatch(tr.scrollIntoView());
         return true;
     };
 }
@@ -13909,10 +14112,7 @@ function joinMaybeClear(state, $pos, dispatch) {
     if (!$pos.parent.canReplace(index, index + 1) || !(after.isTextblock || canJoin(state.doc, $pos.pos)))
         return false;
     if (dispatch)
-        dispatch(state.tr
-            .clearIncompatible($pos.pos, before.type, before.contentMatchAt(before.childCount))
-            .join($pos.pos)
-            .scrollIntoView());
+        dispatch(state.tr.join($pos.pos).scrollIntoView());
     return true;
 }
 function deleteBarrier(state, $cut, dispatch, dir) {
@@ -13930,9 +14130,10 @@ function deleteBarrier(state, $cut, dispatch, dir) {
                 wrap = Fragment.from(conn[i].create(null, wrap));
             wrap = Fragment.from(before.copy(wrap));
             let tr = state.tr.step(new ReplaceAroundStep($cut.pos - 1, end, $cut.pos, end, new Slice(wrap, 1, 0), conn.length, true));
-            let joinAt = end + 2 * conn.length;
-            if (canJoin(tr.doc, joinAt))
-                tr.join(joinAt);
+            let $joinAt = tr.doc.resolve(end + 2 * conn.length);
+            if ($joinAt.nodeAfter && $joinAt.nodeAfter.type == before.type &&
+                canJoin(tr.doc, $joinAt.pos))
+                tr.join($joinAt.pos);
             dispatch(tr.scrollIntoView());
         }
         return true;
@@ -14049,7 +14250,7 @@ function markApplies(doc, ranges, type, enterAtoms) {
         let { $from, $to } = ranges[i];
         let can = $from.depth == 0 ? doc.inlineContent && doc.type.allowsMarkType(type) : false;
         doc.nodesBetween($from.pos, $to.pos, (node, pos) => {
-            if (can || !enterAtoms)
+            if (can || false)
                 return false;
             can = node.inlineContent && node.type.allowsMarkType(type);
         });
@@ -14068,10 +14269,9 @@ marks](https://prosemirror.net/docs/ref/#state.EditorState.storedMarks) instead 
 document.
 */
 function toggleMark(markType, attrs = null, options) {
-    let enterAtoms = (options) !== false;
     return function (state, dispatch) {
         let { empty, $cursor, ranges } = state.selection;
-        if ((empty && !$cursor) || !markApplies(state.doc, ranges, markType, enterAtoms))
+        if ((empty && !$cursor) || !markApplies(state.doc, ranges, markType))
             return false;
         if (dispatch) {
             if ($cursor) {
@@ -14189,12 +14389,10 @@ if (typeof WeakMap != "undefined") {
   let cachePos = 0;
   readFromCache = (key) => {
     for (let i = 0; i < cache.length; i += 2)
-      if (cache[i] == key)
-        return cache[i + 1];
+      if (cache[i] == key) return cache[i + 1];
   };
   addToCache = (key, value) => {
-    if (cachePos == cacheSize)
-      cachePos = 0;
+    if (cachePos == cacheSize) cachePos = 0;
     cache[cachePos++] = key;
     return cache[cachePos++] = value;
   };
@@ -14210,8 +14408,7 @@ var TableMap = class {
   findCell(pos) {
     for (let i = 0; i < this.map.length; i++) {
       const curPos = this.map[i];
-      if (curPos != pos)
-        continue;
+      if (curPos != pos) continue;
       const left = i % this.width;
       const top = i / this.width | 0;
       let right = left + 1;
@@ -14240,12 +14437,10 @@ var TableMap = class {
   nextCell(pos, axis, dir) {
     const { left, right, top, bottom } = this.findCell(pos);
     if (axis == "horiz") {
-      if (dir < 0 ? left == 0 : right == this.width)
-        return null;
+      if (dir < 0 ? left == 0 : right == this.width) return null;
       return this.map[top * this.width + (dir < 0 ? left - 1 : right)];
     } else {
-      if (dir < 0 ? top == 0 : bottom == this.height)
-        return null;
+      if (dir < 0 ? top == 0 : bottom == this.height) return null;
       return this.map[left + this.width * (dir < 0 ? top - 1 : bottom)];
     }
   }
@@ -14279,8 +14474,7 @@ var TableMap = class {
       for (let col = rect.left; col < rect.right; col++) {
         const index = row * this.width + col;
         const pos = this.map[index];
-        if (seen[pos])
-          continue;
+        if (seen[pos]) continue;
         seen[pos] = true;
         if (col == rect.left && col && this.map[index - 1] == pos || row == rect.top && row && this.map[index - this.width] == pos) {
           continue;
@@ -14298,8 +14492,7 @@ var TableMap = class {
       if (i == row) {
         let index = col + row * this.width;
         const rowEndIndex = (row + 1) * this.width;
-        while (index < rowEndIndex && this.map[index] < rowStart)
-          index++;
+        while (index < rowEndIndex && this.map[index] < rowStart) index++;
         return index == rowEndIndex ? rowEnd - 1 : this.map[index];
       }
       rowStart = rowEnd;
@@ -14318,16 +14511,13 @@ function computeMap(table) {
   let mapPos = 0;
   let problems = null;
   const colWidths = [];
-  for (let i = 0, e = width * height; i < e; i++)
-    map[i] = 0;
+  for (let i = 0, e = width * height; i < e; i++) map[i] = 0;
   for (let row = 0, pos = 0; row < height; row++) {
     const rowNode = table.child(row);
     pos++;
     for (let i = 0; ; i++) {
-      while (mapPos < map.length && map[mapPos] != 0)
-        mapPos++;
-      if (i == rowNode.childCount)
-        break;
+      while (mapPos < map.length && map[mapPos] != 0) mapPos++;
+      if (i == rowNode.childCount) break;
       const cellNode = rowNode.child(i);
       const { colspan, rowspan, colwidth } = cellNode.attrs;
       for (let h = 0; h < rowspan; h++) {
@@ -14341,8 +14531,7 @@ function computeMap(table) {
         }
         const start = mapPos + h * width;
         for (let w = 0; w < colspan; w++) {
-          if (map[start + w] == 0)
-            map[start + w] = pos;
+          if (map[start + w] == 0) map[start + w] = pos;
           else
             (problems || (problems = [])).push({
               type: "collision",
@@ -14367,20 +14556,18 @@ function computeMap(table) {
     }
     const expectedPos = (row + 1) * width;
     let missing = 0;
-    while (mapPos < expectedPos)
-      if (map[mapPos++] == 0)
-        missing++;
+    while (mapPos < expectedPos) if (map[mapPos++] == 0) missing++;
     if (missing)
       (problems || (problems = [])).push({ type: "missing", row, n: missing });
     pos++;
   }
+  if (width === 0 || height === 0)
+    (problems || (problems = [])).push({ type: "zero_sized" });
   const tableMap = new TableMap(width, height, map, problems);
   let badWidths = false;
   for (let i = 0; !badWidths && i < colWidths.length; i += 2)
-    if (colWidths[i] != null && colWidths[i + 1] < height)
-      badWidths = true;
-  if (badWidths)
-    findBadColWidths(tableMap, colWidths, table);
+    if (colWidths[i] != null && colWidths[i + 1] < height) badWidths = true;
+  if (badWidths) findBadColWidths(tableMap, colWidths, table);
   return tableMap;
 }
 function findWidth(table) {
@@ -14394,31 +14581,25 @@ function findWidth(table) {
         const prevRow = table.child(j);
         for (let i = 0; i < prevRow.childCount; i++) {
           const cell = prevRow.child(i);
-          if (j + cell.attrs.rowspan > row)
-            rowWidth += cell.attrs.colspan;
+          if (j + cell.attrs.rowspan > row) rowWidth += cell.attrs.colspan;
         }
       }
     for (let i = 0; i < rowNode.childCount; i++) {
       const cell = rowNode.child(i);
       rowWidth += cell.attrs.colspan;
-      if (cell.attrs.rowspan > 1)
-        hasRowSpan = true;
+      if (cell.attrs.rowspan > 1) hasRowSpan = true;
     }
-    if (width == -1)
-      width = rowWidth;
-    else if (width != rowWidth)
-      width = Math.max(width, rowWidth);
+    if (width == -1) width = rowWidth;
+    else if (width != rowWidth) width = Math.max(width, rowWidth);
   }
   return width;
 }
 function findBadColWidths(map, colWidths, table) {
-  if (!map.problems)
-    map.problems = [];
+  if (!map.problems) map.problems = [];
   const seen = {};
   for (let i = 0; i < map.map.length; i++) {
     const pos = map.map[i];
-    if (seen[pos])
-      continue;
+    if (seen[pos]) continue;
     seen[pos] = true;
     const node = table.nodeAt(pos);
     if (!node) {
@@ -14441,11 +14622,9 @@ function findBadColWidths(map, colWidths, table) {
   }
 }
 function freshColWidth(attrs) {
-  if (attrs.colwidth)
-    return attrs.colwidth.slice();
+  if (attrs.colwidth) return attrs.colwidth.slice();
   const result = [];
-  for (let i = 0; i < attrs.colspan; i++)
-    result.push(0);
+  for (let i = 0; i < attrs.colspan; i++) result.push(0);
   return result;
 }
 function tableNodeTypes(schema) {
@@ -14454,8 +14633,7 @@ function tableNodeTypes(schema) {
     result = schema.cached.tableNodeTypes = {};
     for (const name in schema.nodes) {
       const type = schema.nodes[name], role = type.spec.tableRole;
-      if (role)
-        result[role] = type;
+      if (role) result[role] = type;
     }
   }
   return result;
@@ -14472,16 +14650,14 @@ function cellAround($pos) {
 function cellWrapping($pos) {
   for (let d = $pos.depth; d > 0; d--) {
     const role = $pos.node(d).type.spec.tableRole;
-    if (role === "cell" || role === "header_cell")
-      return $pos.node(d);
+    if (role === "cell" || role === "header_cell") return $pos.node(d);
   }
   return null;
 }
 function isInTable(state) {
   const $head = state.selection.$head;
   for (let d = $head.depth; d > 0; d--)
-    if ($head.node(d).type.spec.tableRole == "row")
-      return true;
+    if ($head.node(d).type.spec.tableRole == "row") return true;
   return false;
 }
 function selectionCell(state) {
@@ -14500,8 +14676,7 @@ function selectionCell(state) {
 function cellNear($pos) {
   for (let after = $pos.nodeAfter, pos = $pos.pos; after; after = after.firstChild, pos++) {
     const role = after.type.spec.tableRole;
-    if (role == "cell" || role == "header_cell")
-      return $pos.doc.resolve(pos);
+    if (role == "cell" || role == "header_cell") return $pos.doc.resolve(pos);
   }
   for (let before = $pos.nodeBefore, pos = $pos.pos; before; before = before.lastChild, pos--) {
     const role = before.type.spec.tableRole;
@@ -14530,8 +14705,7 @@ function removeColSpan(attrs, pos, n = 1) {
   if (result.colwidth) {
     result.colwidth = result.colwidth.slice();
     result.colwidth.splice(pos, n);
-    if (!result.colwidth.some((w) => w > 0))
-      result.colwidth = null;
+    if (!result.colwidth.some((w) => w > 0)) result.colwidth = null;
   }
   return result;
 }
@@ -14539,8 +14713,7 @@ function addColSpan(attrs, pos, n = 1) {
   const result = { ...attrs, colspan: attrs.colspan + n };
   if (result.colwidth) {
     result.colwidth = result.colwidth.slice();
-    for (let i = 0; i < n; i++)
-      result.colwidth.splice(pos, 0, 0);
+    for (let i = 0; i < n; i++) result.colwidth.splice(pos, 0, 0);
   }
   return result;
 }
@@ -14593,8 +14766,7 @@ var CellSelection = class _CellSelection extends Selection {
         return _CellSelection.rowSelection($anchorCell, $headCell);
       else if (tableChanged && this.isColSelection())
         return _CellSelection.colSelection($anchorCell, $headCell);
-      else
-        return new _CellSelection($anchorCell, $headCell);
+      else return new _CellSelection($anchorCell, $headCell);
     }
     return TextSelection.between($anchorCell, $headCell);
   }
@@ -14614,8 +14786,7 @@ var CellSelection = class _CellSelection extends Selection {
       const rowContent = [];
       for (let index = row * map.width + rect.left, col = rect.left; col < rect.right; col++, index++) {
         const pos = map.map[index];
-        if (seen[pos])
-          continue;
+        if (seen[pos]) continue;
         seen[pos] = true;
         const cellRect = map.findCell(pos);
         let cell = table.nodeAt(pos);
@@ -14679,8 +14850,7 @@ var CellSelection = class _CellSelection extends Selection {
       tr.doc.resolve(tr.mapping.slice(mapFrom).map(this.to)),
       -1
     );
-    if (sel)
-      tr.setSelection(sel);
+    if (sel) tr.setSelection(sel);
   }
   replaceWith(tr, node) {
     this.replace(tr, new Slice(Fragment.from(node), 0, 0));
@@ -14704,8 +14874,7 @@ var CellSelection = class _CellSelection extends Selection {
   isColSelection() {
     const anchorTop = this.$anchorCell.index(-1);
     const headTop = this.$headCell.index(-1);
-    if (Math.min(anchorTop, headTop) > 0)
-      return false;
+    if (Math.min(anchorTop, headTop) > 0) return false;
     const anchorBottom = anchorTop + this.$anchorCell.nodeAfter.attrs.rowspan;
     const headBottom = headTop + this.$headCell.nodeAfter.attrs.rowspan;
     return Math.max(anchorBottom, headBottom) == this.$headCell.node(-1).childCount;
@@ -14744,8 +14913,7 @@ var CellSelection = class _CellSelection extends Selection {
     const tableStart = this.$anchorCell.start(-1);
     const anchorLeft = map.colCount(this.$anchorCell.pos - tableStart);
     const headLeft = map.colCount(this.$headCell.pos - tableStart);
-    if (Math.min(anchorLeft, headLeft) > 0)
-      return false;
+    if (Math.min(anchorLeft, headLeft) > 0) return false;
     const anchorRight = anchorLeft + this.$anchorCell.nodeAfter.attrs.colspan;
     const headRight = headLeft + this.$headCell.nodeAfter.attrs.colspan;
     return Math.max(anchorRight, headRight) == map.width;
@@ -14812,13 +14980,11 @@ var CellBookmark = class _CellBookmark {
     const $anchorCell = doc.resolve(this.anchor), $headCell = doc.resolve(this.head);
     if ($anchorCell.parent.type.spec.tableRole == "row" && $headCell.parent.type.spec.tableRole == "row" && $anchorCell.index() < $anchorCell.parent.childCount && $headCell.index() < $headCell.parent.childCount && inSameTable($anchorCell, $headCell))
       return new CellSelection($anchorCell, $headCell);
-    else
-      return Selection.near($headCell, 1);
+    else return Selection.near($headCell, 1);
   }
 };
 function drawCellSelection(state) {
-  if (!(state.selection instanceof CellSelection))
-    return null;
+  if (!(state.selection instanceof CellSelection)) return null;
   const cells = [];
   state.selection.forEachCell((node, pos) => {
     cells.push(
@@ -14828,17 +14994,14 @@ function drawCellSelection(state) {
   return DecorationSet.create(state.doc, cells);
 }
 function isCellBoundarySelection({ $from, $to }) {
-  if ($from.pos == $to.pos || $from.pos < $from.pos - 6)
-    return false;
+  if ($from.pos == $to.pos || $from.pos < $to.pos - 6) return false;
   let afterFrom = $from.pos;
   let beforeTo = $to.pos;
   let depth = $from.depth;
   for (; depth >= 0; depth--, afterFrom++)
-    if ($from.after(depth + 1) < $from.end(depth))
-      break;
+    if ($from.after(depth + 1) < $from.end(depth)) break;
   for (let d = $to.depth; d >= 0; d--, beforeTo--)
-    if ($to.before(d + 1) > $to.start(d))
-      break;
+    if ($to.before(d + 1) > $to.start(d)) break;
   return afterFrom == beforeTo && /row|table/.test($from.node(depth).type.spec.tableRole);
 }
 function isTextSelectionAcrossCells({ $from, $to }) {
@@ -14882,30 +15045,27 @@ function normalizeSelection(state, tr, allowTableNodeSelection) {
   } else if (sel instanceof TextSelection && isTextSelectionAcrossCells(sel)) {
     normalize = TextSelection.create(doc, sel.$from.start(), sel.$from.end());
   }
-  if (normalize)
-    (tr || (tr = state.tr)).setSelection(normalize);
+  if (normalize) (tr || (tr = state.tr)).setSelection(normalize);
   return tr;
 }
 var fixTablesKey = new PluginKey("fix-tables");
 function changedDescendants(old, cur, offset, f) {
   const oldSize = old.childCount, curSize = cur.childCount;
-  outer:
-    for (let i = 0, j = 0; i < curSize; i++) {
-      const child = cur.child(i);
-      for (let scan = j, e = Math.min(oldSize, i + 3); scan < e; scan++) {
-        if (old.child(scan) == child) {
-          j = scan + 1;
-          offset += child.nodeSize;
-          continue outer;
-        }
+  outer: for (let i = 0, j = 0; i < curSize; i++) {
+    const child = cur.child(i);
+    for (let scan = j, e = Math.min(oldSize, i + 3); scan < e; scan++) {
+      if (old.child(scan) == child) {
+        j = scan + 1;
+        offset += child.nodeSize;
+        continue outer;
       }
-      f(child, offset);
-      if (j < oldSize && old.child(j).sameMarkup(child))
-        changedDescendants(old.child(j), child, offset + 1, f);
-      else
-        child.nodesBetween(0, child.content.size, f, offset + 1);
-      offset += child.nodeSize;
     }
+    f(child, offset);
+    if (j < oldSize && old.child(j).sameMarkup(child))
+      changedDescendants(old.child(j), child, offset + 1, f);
+    else child.nodesBetween(0, child.content.size, f, offset + 1);
+    offset += child.nodeSize;
+  }
 }
 function fixTables(state, oldState) {
   let tr;
@@ -14913,30 +15073,24 @@ function fixTables(state, oldState) {
     if (node.type.spec.tableRole == "table")
       tr = fixTable(state, node, pos, tr);
   };
-  if (!oldState)
-    state.doc.descendants(check);
+  if (!oldState) state.doc.descendants(check);
   else if (oldState.doc != state.doc)
     changedDescendants(oldState.doc, state.doc, 0, check);
   return tr;
 }
 function fixTable(state, table, tablePos, tr) {
   const map = TableMap.get(table);
-  if (!map.problems)
-    return tr;
-  if (!tr)
-    tr = state.tr;
+  if (!map.problems) return tr;
+  if (!tr) tr = state.tr;
   const mustAdd = [];
-  for (let i = 0; i < map.height; i++)
-    mustAdd.push(0);
+  for (let i = 0; i < map.height; i++) mustAdd.push(0);
   for (let i = 0; i < map.problems.length; i++) {
     const prob = map.problems[i];
     if (prob.type == "collision") {
       const cell = table.nodeAt(prob.pos);
-      if (!cell)
-        continue;
+      if (!cell) continue;
       const attrs = cell.attrs;
-      for (let j = 0; j < attrs.rowspan; j++)
-        mustAdd[prob.row + j] += prob.n;
+      for (let j = 0; j < attrs.rowspan; j++) mustAdd[prob.row + j] += prob.n;
       tr.setNodeMarkup(
         tr.mapping.map(tablePos + 1 + prob.pos),
         null,
@@ -14946,27 +15100,27 @@ function fixTable(state, table, tablePos, tr) {
       mustAdd[prob.row] += prob.n;
     } else if (prob.type == "overlong_rowspan") {
       const cell = table.nodeAt(prob.pos);
-      if (!cell)
-        continue;
+      if (!cell) continue;
       tr.setNodeMarkup(tr.mapping.map(tablePos + 1 + prob.pos), null, {
         ...cell.attrs,
         rowspan: cell.attrs.rowspan - prob.n
       });
     } else if (prob.type == "colwidth mismatch") {
       const cell = table.nodeAt(prob.pos);
-      if (!cell)
-        continue;
+      if (!cell) continue;
       tr.setNodeMarkup(tr.mapping.map(tablePos + 1 + prob.pos), null, {
         ...cell.attrs,
         colwidth: prob.colwidth
       });
+    } else if (prob.type == "zero_sized") {
+      const pos = tr.mapping.map(tablePos);
+      tr.delete(pos, pos + table.nodeSize);
     }
   }
   let first, last;
   for (let i = 0; i < mustAdd.length; i++)
     if (mustAdd[i]) {
-      if (first == null)
-        first = i;
+      if (first == null) first = i;
       last = i;
     }
   for (let i = 0, pos = tablePos + 1; i < map.height; i++) {
@@ -14981,8 +15135,7 @@ function fixTable(state, table, tablePos, tr) {
       const nodes = [];
       for (let j = 0; j < add; j++) {
         const node = tableNodeTypes(state.schema)[role].createAndFill();
-        if (node)
-          nodes.push(node);
+        if (node) nodes.push(node);
       }
       const side = (i == 0 || first == i - 1) && last == i ? pos + 1 : end - 1;
       tr.insert(tr.mapping.map(side), nodes);
@@ -14991,9 +15144,488 @@ function fixTable(state, table, tablePos, tr) {
   }
   return tr.setMeta(fixTablesKey, { fixTables: true });
 }
+
+// src/commands.ts
+function selectedRect(state) {
+  const sel = state.selection;
+  const $pos = selectionCell(state);
+  const table = $pos.node(-1);
+  const tableStart = $pos.start(-1);
+  const map = TableMap.get(table);
+  const rect = sel instanceof CellSelection ? map.rectBetween(
+    sel.$anchorCell.pos - tableStart,
+    sel.$headCell.pos - tableStart
+  ) : map.findCell($pos.pos - tableStart);
+  return { ...rect, tableStart, map, table };
+}
+function addColumn(tr, { map, tableStart, table }, col) {
+  let refColumn = col > 0 ? -1 : 0;
+  if (columnIsHeader(map, table, col + refColumn)) {
+    refColumn = col == 0 || col == map.width ? null : 0;
+  }
+  for (let row = 0; row < map.height; row++) {
+    const index = row * map.width + col;
+    if (col > 0 && col < map.width && map.map[index - 1] == map.map[index]) {
+      const pos = map.map[index];
+      const cell = table.nodeAt(pos);
+      tr.setNodeMarkup(
+        tr.mapping.map(tableStart + pos),
+        null,
+        addColSpan(cell.attrs, col - map.colCount(pos))
+      );
+      row += cell.attrs.rowspan - 1;
+    } else {
+      const type = refColumn == null ? tableNodeTypes(table.type.schema).cell : table.nodeAt(map.map[index + refColumn]).type;
+      const pos = map.positionAt(row, col, table);
+      tr.insert(tr.mapping.map(tableStart + pos), type.createAndFill());
+    }
+  }
+  return tr;
+}
+function addColumnBefore(state, dispatch) {
+  if (!isInTable(state)) return false;
+  if (dispatch) {
+    const rect = selectedRect(state);
+    dispatch(addColumn(state.tr, rect, rect.left));
+  }
+  return true;
+}
+function removeColumn(tr, { map, table, tableStart }, col) {
+  const mapStart = tr.mapping.maps.length;
+  for (let row = 0; row < map.height; ) {
+    const index = row * map.width + col;
+    const pos = map.map[index];
+    const cell = table.nodeAt(pos);
+    const attrs = cell.attrs;
+    if (col > 0 && map.map[index - 1] == pos || col < map.width - 1 && map.map[index + 1] == pos) {
+      tr.setNodeMarkup(
+        tr.mapping.slice(mapStart).map(tableStart + pos),
+        null,
+        removeColSpan(attrs, col - map.colCount(pos))
+      );
+    } else {
+      const start = tr.mapping.slice(mapStart).map(tableStart + pos);
+      tr.delete(start, start + cell.nodeSize);
+    }
+    row += attrs.rowspan;
+  }
+}
+function deleteColumn(state, dispatch) {
+  if (!isInTable(state)) return false;
+  if (dispatch) {
+    const rect = selectedRect(state);
+    const tr = state.tr;
+    if (rect.left == 0 && rect.right == rect.map.width) return false;
+    for (let i = rect.right - 1; ; i--) {
+      removeColumn(tr, rect, i);
+      if (i == rect.left) break;
+      const table = rect.tableStart ? tr.doc.nodeAt(rect.tableStart - 1) : tr.doc;
+      if (!table) {
+        throw RangeError("No table found");
+      }
+      rect.table = table;
+      rect.map = TableMap.get(table);
+    }
+    dispatch(tr);
+  }
+  return true;
+}
+function rowIsHeader(map, table, row) {
+  var _a;
+  const headerCell = tableNodeTypes(table.type.schema).header_cell;
+  for (let col = 0; col < map.width; col++)
+    if (((_a = table.nodeAt(map.map[col + row * map.width])) == null ? void 0 : _a.type) != headerCell)
+      return false;
+  return true;
+}
+function addRow(tr, { map, tableStart, table }, row) {
+  var _a;
+  let rowPos = tableStart;
+  for (let i = 0; i < row; i++) rowPos += table.child(i).nodeSize;
+  const cells = [];
+  let refRow = row > 0 ? -1 : 0;
+  if (rowIsHeader(map, table, row + refRow))
+    refRow = 0;
+  for (let col = 0, index = map.width * row; col < map.width; col++, index++) {
+    if (row > 0 && row < map.height && map.map[index] == map.map[index - map.width]) {
+      const pos = map.map[index];
+      const attrs = table.nodeAt(pos).attrs;
+      tr.setNodeMarkup(tableStart + pos, null, {
+        ...attrs,
+        rowspan: attrs.rowspan + 1
+      });
+      col += attrs.colspan - 1;
+    } else {
+      const type = refRow == null ? tableNodeTypes(table.type.schema).cell : (_a = table.nodeAt(map.map[index + refRow * map.width])) == null ? void 0 : _a.type;
+      const node = type == null ? void 0 : type.createAndFill();
+      if (node) cells.push(node);
+    }
+  }
+  tr.insert(rowPos, tableNodeTypes(table.type.schema).row.create(null, cells));
+  return tr;
+}
+function addRowBefore(state, dispatch) {
+  if (!isInTable(state)) return false;
+  if (dispatch) {
+    const rect = selectedRect(state);
+    dispatch(addRow(state.tr, rect, rect.top));
+  }
+  return true;
+}
+function removeRow(tr, { map, table, tableStart }, row) {
+  let rowPos = 0;
+  for (let i = 0; i < row; i++) rowPos += table.child(i).nodeSize;
+  const nextRow = rowPos + table.child(row).nodeSize;
+  const mapFrom = tr.mapping.maps.length;
+  tr.delete(rowPos + tableStart, nextRow + tableStart);
+  const seen = /* @__PURE__ */ new Set();
+  for (let col = 0, index = row * map.width; col < map.width; col++, index++) {
+    const pos = map.map[index];
+    if (seen.has(pos)) continue;
+    seen.add(pos);
+    if (row > 0 && pos == map.map[index - map.width]) {
+      const attrs = table.nodeAt(pos).attrs;
+      tr.setNodeMarkup(tr.mapping.slice(mapFrom).map(pos + tableStart), null, {
+        ...attrs,
+        rowspan: attrs.rowspan - 1
+      });
+      col += attrs.colspan - 1;
+    } else if (row < map.height && pos == map.map[index + map.width]) {
+      const cell = table.nodeAt(pos);
+      const attrs = cell.attrs;
+      const copy = cell.type.create(
+        { ...attrs, rowspan: cell.attrs.rowspan - 1 },
+        cell.content
+      );
+      const newPos = map.positionAt(row + 1, col, table);
+      tr.insert(tr.mapping.slice(mapFrom).map(tableStart + newPos), copy);
+      col += attrs.colspan - 1;
+    }
+  }
+}
+function deleteRow(state, dispatch) {
+  if (!isInTable(state)) return false;
+  if (dispatch) {
+    const rect = selectedRect(state), tr = state.tr;
+    if (rect.top == 0 && rect.bottom == rect.map.height) return false;
+    for (let i = rect.bottom - 1; ; i--) {
+      removeRow(tr, rect, i);
+      if (i == rect.top) break;
+      const table = rect.tableStart ? tr.doc.nodeAt(rect.tableStart - 1) : tr.doc;
+      if (!table) {
+        throw RangeError("No table found");
+      }
+      rect.table = table;
+      rect.map = TableMap.get(rect.table);
+    }
+    dispatch(tr);
+  }
+  return true;
+}
+function isEmpty(cell) {
+  const c = cell.content;
+  return c.childCount == 1 && c.child(0).isTextblock && c.child(0).childCount == 0;
+}
+function cellsOverlapRectangle({ width, height, map }, rect) {
+  let indexTop = rect.top * width + rect.left, indexLeft = indexTop;
+  let indexBottom = (rect.bottom - 1) * width + rect.left, indexRight = indexTop + (rect.right - rect.left - 1);
+  for (let i = rect.top; i < rect.bottom; i++) {
+    if (rect.left > 0 && map[indexLeft] == map[indexLeft - 1] || rect.right < width && map[indexRight] == map[indexRight + 1])
+      return true;
+    indexLeft += width;
+    indexRight += width;
+  }
+  for (let i = rect.left; i < rect.right; i++) {
+    if (rect.top > 0 && map[indexTop] == map[indexTop - width] || rect.bottom < height && map[indexBottom] == map[indexBottom + width])
+      return true;
+    indexTop++;
+    indexBottom++;
+  }
+  return false;
+}
+function mergeCells(state, dispatch) {
+  const sel = state.selection;
+  if (!(sel instanceof CellSelection) || sel.$anchorCell.pos == sel.$headCell.pos)
+    return false;
+  const rect = selectedRect(state), { map } = rect;
+  if (cellsOverlapRectangle(map, rect)) return false;
+  if (dispatch) {
+    const tr = state.tr;
+    const seen = {};
+    let content = Fragment.empty;
+    let mergedPos;
+    let mergedCell;
+    for (let row = rect.top; row < rect.bottom; row++) {
+      for (let col = rect.left; col < rect.right; col++) {
+        const cellPos = map.map[row * map.width + col];
+        const cell = rect.table.nodeAt(cellPos);
+        if (seen[cellPos] || !cell) continue;
+        seen[cellPos] = true;
+        if (mergedPos == null) {
+          mergedPos = cellPos;
+          mergedCell = cell;
+        } else {
+          if (!isEmpty(cell)) content = content.append(cell.content);
+          const mapped = tr.mapping.map(cellPos + rect.tableStart);
+          tr.delete(mapped, mapped + cell.nodeSize);
+        }
+      }
+    }
+    if (mergedPos == null || mergedCell == null) {
+      return true;
+    }
+    tr.setNodeMarkup(mergedPos + rect.tableStart, null, {
+      ...addColSpan(
+        mergedCell.attrs,
+        mergedCell.attrs.colspan,
+        rect.right - rect.left - mergedCell.attrs.colspan
+      ),
+      rowspan: rect.bottom - rect.top
+    });
+    if (content.size) {
+      const end = mergedPos + 1 + mergedCell.content.size;
+      const start = isEmpty(mergedCell) ? mergedPos + 1 : end;
+      tr.replaceWith(start + rect.tableStart, end + rect.tableStart, content);
+    }
+    tr.setSelection(
+      new CellSelection(tr.doc.resolve(mergedPos + rect.tableStart))
+    );
+    dispatch(tr);
+  }
+  return true;
+}
+function splitCell(state, dispatch) {
+  const nodeTypes = tableNodeTypes(state.schema);
+  return splitCellWithType(({ node }) => {
+    return nodeTypes[node.type.spec.tableRole];
+  })(state, dispatch);
+}
+function splitCellWithType(getCellType) {
+  return (state, dispatch) => {
+    var _a;
+    const sel = state.selection;
+    let cellNode;
+    let cellPos;
+    if (!(sel instanceof CellSelection)) {
+      cellNode = cellWrapping(sel.$from);
+      if (!cellNode) return false;
+      cellPos = (_a = cellAround(sel.$from)) == null ? void 0 : _a.pos;
+    } else {
+      if (sel.$anchorCell.pos != sel.$headCell.pos) return false;
+      cellNode = sel.$anchorCell.nodeAfter;
+      cellPos = sel.$anchorCell.pos;
+    }
+    if (cellNode == null || cellPos == null) {
+      return false;
+    }
+    if (cellNode.attrs.colspan == 1 && cellNode.attrs.rowspan == 1) {
+      return false;
+    }
+    if (dispatch) {
+      let baseAttrs = cellNode.attrs;
+      const attrs = [];
+      const colwidth = baseAttrs.colwidth;
+      if (baseAttrs.rowspan > 1) baseAttrs = { ...baseAttrs, rowspan: 1 };
+      if (baseAttrs.colspan > 1) baseAttrs = { ...baseAttrs, colspan: 1 };
+      const rect = selectedRect(state), tr = state.tr;
+      for (let i = 0; i < rect.right - rect.left; i++)
+        attrs.push(
+          colwidth ? {
+            ...baseAttrs,
+            colwidth: colwidth && colwidth[i] ? [colwidth[i]] : null
+          } : baseAttrs
+        );
+      let lastCell;
+      for (let row = rect.top; row < rect.bottom; row++) {
+        let pos = rect.map.positionAt(row, rect.left, rect.table);
+        if (row == rect.top) pos += cellNode.nodeSize;
+        for (let col = rect.left, i = 0; col < rect.right; col++, i++) {
+          if (col == rect.left && row == rect.top) continue;
+          tr.insert(
+            lastCell = tr.mapping.map(pos + rect.tableStart, 1),
+            getCellType({ node: cellNode, row, col }).createAndFill(attrs[i])
+          );
+        }
+      }
+      tr.setNodeMarkup(
+        cellPos,
+        getCellType({ node: cellNode, row: rect.top, col: rect.left }),
+        attrs[0]
+      );
+      if (sel instanceof CellSelection)
+        tr.setSelection(
+          new CellSelection(
+            tr.doc.resolve(sel.$anchorCell.pos),
+            lastCell ? tr.doc.resolve(lastCell) : void 0
+          )
+        );
+      dispatch(tr);
+    }
+    return true;
+  };
+}
+function deprecated_toggleHeader(type) {
+  return function(state, dispatch) {
+    if (!isInTable(state)) return false;
+    if (dispatch) {
+      const types = tableNodeTypes(state.schema);
+      const rect = selectedRect(state), tr = state.tr;
+      const cells = rect.map.cellsInRect(
+        type == "column" ? {
+          left: rect.left,
+          top: 0,
+          right: rect.right,
+          bottom: rect.map.height
+        } : type == "row" ? {
+          left: 0,
+          top: rect.top,
+          right: rect.map.width,
+          bottom: rect.bottom
+        } : rect
+      );
+      const nodes = cells.map((pos) => rect.table.nodeAt(pos));
+      for (let i = 0; i < cells.length; i++)
+        if (nodes[i].type == types.header_cell)
+          tr.setNodeMarkup(
+            rect.tableStart + cells[i],
+            types.cell,
+            nodes[i].attrs
+          );
+      if (tr.steps.length == 0)
+        for (let i = 0; i < cells.length; i++)
+          tr.setNodeMarkup(
+            rect.tableStart + cells[i],
+            types.header_cell,
+            nodes[i].attrs
+          );
+      dispatch(tr);
+    }
+    return true;
+  };
+}
+function isHeaderEnabledByType(type, rect, types) {
+  const cellPositions = rect.map.cellsInRect({
+    left: 0,
+    top: 0,
+    right: type == "row" ? rect.map.width : 1,
+    bottom: type == "column" ? rect.map.height : 1
+  });
+  for (let i = 0; i < cellPositions.length; i++) {
+    const cell = rect.table.nodeAt(cellPositions[i]);
+    if (cell && cell.type !== types.header_cell) {
+      return false;
+    }
+  }
+  return true;
+}
+function toggleHeader(type, options) {
+  options = options || { useDeprecatedLogic: false };
+  if (options.useDeprecatedLogic) return deprecated_toggleHeader(type);
+  return function(state, dispatch) {
+    if (!isInTable(state)) return false;
+    if (dispatch) {
+      const types = tableNodeTypes(state.schema);
+      const rect = selectedRect(state), tr = state.tr;
+      const isHeaderRowEnabled = isHeaderEnabledByType("row", rect, types);
+      const isHeaderColumnEnabled = isHeaderEnabledByType(
+        "column",
+        rect,
+        types
+      );
+      const isHeaderEnabled = type === "column" ? isHeaderRowEnabled : type === "row" ? isHeaderColumnEnabled : false;
+      const selectionStartsAt = isHeaderEnabled ? 1 : 0;
+      const cellsRect = type == "column" ? {
+        left: 0,
+        top: selectionStartsAt,
+        right: 1,
+        bottom: rect.map.height
+      } : type == "row" ? {
+        left: selectionStartsAt,
+        top: 0,
+        right: rect.map.width,
+        bottom: 1
+      } : rect;
+      const newType = type == "column" ? isHeaderColumnEnabled ? types.cell : types.header_cell : type == "row" ? isHeaderRowEnabled ? types.cell : types.header_cell : types.cell;
+      rect.map.cellsInRect(cellsRect).forEach((relativeCellPos) => {
+        const cellPos = relativeCellPos + rect.tableStart;
+        const cell = tr.doc.nodeAt(cellPos);
+        if (cell) {
+          tr.setNodeMarkup(cellPos, newType, cell.attrs);
+        }
+      });
+      dispatch(tr);
+    }
+    return true;
+  };
+}
+toggleHeader("row", {
+  useDeprecatedLogic: true
+});
+toggleHeader("column", {
+  useDeprecatedLogic: true
+});
+toggleHeader("cell", {
+  useDeprecatedLogic: true
+});
+function findNextCell($cell, dir) {
+  if (dir < 0) {
+    const before = $cell.nodeBefore;
+    if (before) return $cell.pos - before.nodeSize;
+    for (let row = $cell.index(-1) - 1, rowEnd = $cell.before(); row >= 0; row--) {
+      const rowNode = $cell.node(-1).child(row);
+      const lastChild = rowNode.lastChild;
+      if (lastChild) {
+        return rowEnd - 1 - lastChild.nodeSize;
+      }
+      rowEnd -= rowNode.nodeSize;
+    }
+  } else {
+    if ($cell.index() < $cell.parent.childCount - 1) {
+      return $cell.pos + $cell.nodeAfter.nodeSize;
+    }
+    const table = $cell.node(-1);
+    for (let row = $cell.indexAfter(-1), rowStart = $cell.after(); row < table.childCount; row++) {
+      const rowNode = table.child(row);
+      if (rowNode.childCount) return rowStart + 1;
+      rowStart += rowNode.nodeSize;
+    }
+  }
+  return null;
+}
+function goToNextCell(direction) {
+  return function(state, dispatch) {
+    if (!isInTable(state)) return false;
+    const cell = findNextCell(selectionCell(state), direction);
+    if (cell == null) return false;
+    if (dispatch) {
+      const $cell = state.doc.resolve(cell);
+      dispatch(
+        state.tr.setSelection(TextSelection.between($cell, moveCellForward($cell))).scrollIntoView()
+      );
+    }
+    return true;
+  };
+}
+function deleteCellSelection(state, dispatch) {
+  const sel = state.selection;
+  if (!(sel instanceof CellSelection)) return false;
+  if (dispatch) {
+    const tr = state.tr;
+    const baseContent = tableNodeTypes(state.schema).cell.createAndFill().content;
+    sel.forEachCell((cell, pos) => {
+      if (!cell.content.eq(baseContent))
+        tr.replace(
+          tr.mapping.map(pos + 1),
+          tr.mapping.map(pos + cell.nodeSize - 1),
+          new Slice(baseContent, 0, 0)
+        );
+    });
+    if (tr.docChanged) dispatch(tr);
+  }
+  return true;
+}
 function pastedCells(slice) {
-  if (!slice.size)
-    return null;
+  if (!slice.size) return null;
   let { content, openStart, openEnd } = slice;
   while (content.childCount == 1 && (openStart > 0 && openEnd > 0 || content.child(0).type.spec.tableRole == "table")) {
     openStart--;
@@ -15038,11 +15670,9 @@ function ensureRectangular(schema, rows) {
     }
   }
   let width = 0;
-  for (let r = 0; r < widths.length; r++)
-    width = Math.max(width, widths[r]);
+  for (let r = 0; r < widths.length; r++) width = Math.max(width, widths[r]);
   for (let r = 0; r < widths.length; r++) {
-    if (r >= rows.length)
-      rows.push(Fragment.empty);
+    if (r >= rows.length) rows.push(Fragment.empty);
     if (widths[r] < width) {
       const empty = tableNodeTypes(schema).cell.createAndFill();
       const cells = [];
@@ -15122,10 +15752,8 @@ function growTable(tr, map, table, start, width, height, mapFrom) {
       let add;
       if (rowNode.lastChild == null || rowNode.lastChild.type == types.cell)
         add = empty || (empty = types.cell.createAndFill());
-      else
-        add = emptyHead || (emptyHead = types.header_cell.createAndFill());
-      for (let i = map.width; i < width; i++)
-        cells.push(add);
+      else add = emptyHead || (emptyHead = types.header_cell.createAndFill());
+      for (let i = map.width; i < width; i++) cells.push(add);
       tr.insert(tr.mapping.slice(mapFrom).map(rowEnd - 1 + start), cells);
     }
   }
@@ -15138,15 +15766,13 @@ function growTable(tr, map, table, start, width, height, mapFrom) {
       );
     }
     const emptyRow = types.row.create(null, Fragment.from(cells)), rows = [];
-    for (let i = map.height; i < height; i++)
-      rows.push(emptyRow);
+    for (let i = map.height; i < height; i++) rows.push(emptyRow);
     tr.insert(tr.mapping.slice(mapFrom).map(start + table.nodeSize - 2), rows);
   }
   return !!(empty || emptyHead);
 }
 function isolateHorizontal(tr, map, table, start, left, right, top, mapFrom) {
-  if (top == 0 || top == map.height)
-    return false;
+  if (top == 0 || top == map.height) return false;
   let found = false;
   for (let col = left; col < right; col++) {
     const index = top * map.width + col, pos = map.map[index];
@@ -15171,8 +15797,7 @@ function isolateHorizontal(tr, map, table, start, left, right, top, mapFrom) {
   return found;
 }
 function isolateVertical(tr, map, table, start, top, bottom, left, mapFrom) {
-  if (left == 0 || left == map.width)
-    return false;
+  if (left == 0 || left == map.width) return false;
   let found = false;
   for (let row = top; row < bottom; row++) {
     const index = row * map.width + left, pos = map.map[index];
@@ -15219,8 +15844,7 @@ function insertCells(state, dispatch, tableStart, rect, cells) {
     map = TableMap.get(table);
     mapFrom = tr.mapping.maps.length;
   }
-  if (growTable(tr, map, table, tableStart, right, bottom, mapFrom))
-    recomp();
+  if (growTable(tr, map, table, tableStart, right, bottom, mapFrom)) recomp();
   if (isolateHorizontal(tr, map, table, tableStart, left, right, top, mapFrom))
     recomp();
   if (isolateHorizontal(tr, map, table, tableStart, left, right, bottom, mapFrom))
@@ -15263,16 +15887,13 @@ var handleKeyDown = keydownHandler({
   "Mod-Delete": deleteCellSelection
 });
 function maybeSetSelection(state, dispatch, selection) {
-  if (selection.eq(state.selection))
-    return false;
-  if (dispatch)
-    dispatch(state.tr.setSelection(selection).scrollIntoView());
+  if (selection.eq(state.selection)) return false;
+  if (dispatch) dispatch(state.tr.setSelection(selection).scrollIntoView());
   return true;
 }
 function arrow(axis, dir) {
   return (state, dispatch, view) => {
-    if (!view)
-      return false;
+    if (!view) return false;
     const sel = state.selection;
     if (sel instanceof CellSelection) {
       return maybeSetSelection(
@@ -15281,11 +15902,9 @@ function arrow(axis, dir) {
         Selection.near(sel.$headCell, dir)
       );
     }
-    if (axis != "horiz" && !sel.empty)
-      return false;
+    if (axis != "horiz" && !sel.empty) return false;
     const end = atEndOfCell(view, axis, dir);
-    if (end == null)
-      return false;
+    if (end == null) return false;
     if (axis == "horiz") {
       return maybeSetSelection(
         state,
@@ -15296,33 +15915,28 @@ function arrow(axis, dir) {
       const $cell = state.doc.resolve(end);
       const $next = nextCell($cell, axis, dir);
       let newSel;
-      if ($next)
-        newSel = Selection.near($next, 1);
+      if ($next) newSel = Selection.near($next, 1);
       else if (dir < 0)
         newSel = Selection.near(state.doc.resolve($cell.before(-1)), -1);
-      else
-        newSel = Selection.near(state.doc.resolve($cell.after(-1)), 1);
+      else newSel = Selection.near(state.doc.resolve($cell.after(-1)), 1);
       return maybeSetSelection(state, dispatch, newSel);
     }
   };
 }
 function shiftArrow(axis, dir) {
   return (state, dispatch, view) => {
-    if (!view)
-      return false;
+    if (!view) return false;
     const sel = state.selection;
     let cellSel;
     if (sel instanceof CellSelection) {
       cellSel = sel;
     } else {
       const end = atEndOfCell(view, axis, dir);
-      if (end == null)
-        return false;
+      if (end == null) return false;
       cellSel = new CellSelection(state.doc.resolve(end));
     }
     const $head = nextCell(cellSel.$headCell, axis, dir);
-    if (!$head)
-      return false;
+    if (!$head) return false;
     return maybeSetSelection(
       state,
       dispatch,
@@ -15330,36 +15944,14 @@ function shiftArrow(axis, dir) {
     );
   };
 }
-function deleteCellSelection(state, dispatch) {
-  const sel = state.selection;
-  if (!(sel instanceof CellSelection))
-    return false;
-  if (dispatch) {
-    const tr = state.tr;
-    const baseContent = tableNodeTypes(state.schema).cell.createAndFill().content;
-    sel.forEachCell((cell, pos) => {
-      if (!cell.content.eq(baseContent))
-        tr.replace(
-          tr.mapping.map(pos + 1),
-          tr.mapping.map(pos + cell.nodeSize - 1),
-          new Slice(baseContent, 0, 0)
-        );
-    });
-    if (tr.docChanged)
-      dispatch(tr);
-  }
-  return true;
-}
 function handleTripleClick(view, pos) {
   const doc = view.state.doc, $cell = cellAround(doc.resolve(pos));
-  if (!$cell)
-    return false;
+  if (!$cell) return false;
   view.dispatch(view.state.tr.setSelection(new CellSelection($cell)));
   return true;
 }
 function handlePaste(view, _, slice) {
-  if (!isInTable(view.state))
-    return false;
+  if (!isInTable(view.state)) return false;
   let cells = pastedCells(slice);
   const sel = view.state.selection;
   if (sel instanceof CellSelection) {
@@ -15399,8 +15991,7 @@ function handlePaste(view, _, slice) {
 }
 function handleMouseDown(view, startEvent) {
   var _a;
-  if (startEvent.ctrlKey || startEvent.metaKey)
-    return;
+  if (startEvent.ctrlKey || startEvent.metaKey) return;
   const startDOMCell = domInCell(view, startEvent.target);
   let $anchor;
   if (startEvent.shiftKey && view.state.selection instanceof CellSelection) {
@@ -15416,16 +16007,13 @@ function handleMouseDown(view, startEvent) {
     let $head = cellUnderMouse(view, event);
     const starting = tableEditingKey.getState(view.state) == null;
     if (!$head || !inSameTable($anchor2, $head)) {
-      if (starting)
-        $head = $anchor2;
-      else
-        return;
+      if (starting) $head = $anchor2;
+      else return;
     }
     const selection = new CellSelection($anchor2, $head);
     if (starting || !view.state.selection.eq(selection)) {
       const tr = view.state.tr.setSelection(selection);
-      if (starting)
-        tr.setMeta(tableEditingKey, $anchor2.pos);
+      if (starting) tr.setMeta(tableEditingKey, $anchor2.pos);
       view.dispatch(tr);
     }
   }
@@ -15444,24 +16032,20 @@ function handleMouseDown(view, startEvent) {
       $anchor2 = view.state.doc.resolve(anchor);
     } else if (domInCell(view, event.target) != startDOMCell) {
       $anchor2 = cellUnderMouse(view, startEvent);
-      if (!$anchor2)
-        return stop();
+      if (!$anchor2) return stop();
     }
-    if ($anchor2)
-      setCellSelection($anchor2, event);
+    if ($anchor2) setCellSelection($anchor2, event);
   }
   view.root.addEventListener("mouseup", stop);
   view.root.addEventListener("dragstart", stop);
   view.root.addEventListener("mousemove", move);
 }
 function atEndOfCell(view, axis, dir) {
-  if (!(view.state.selection instanceof TextSelection))
-    return null;
+  if (!(view.state.selection instanceof TextSelection)) return null;
   const { $head } = view.state.selection;
   for (let d = $head.depth - 1; d >= 0; d--) {
     const parent = $head.node(d), index = dir < 0 ? $head.index(d) : $head.indexAfter(d);
-    if (index != (dir < 0 ? 0 : parent.childCount))
-      return null;
+    if (index != (dir < 0 ? 0 : parent.childCount)) return null;
     if (parent.type.spec.tableRole == "cell" || parent.type.spec.tableRole == "header_cell") {
       const cellPos = $head.before(d);
       const dirStr = axis == "vert" ? dir > 0 ? "down" : "up" : dir > 0 ? "right" : "left";
@@ -15483,57 +16067,65 @@ function cellUnderMouse(view, event) {
     left: event.clientX,
     top: event.clientY
   });
-  if (!mousePos)
-    return null;
+  if (!mousePos) return null;
   return mousePos ? cellAround(view.state.doc.resolve(mousePos.pos)) : null;
 }
 
 // src/tableview.ts
 var TableView = class {
-  constructor(node, cellMinWidth) {
+  constructor(node, defaultCellMinWidth) {
     this.node = node;
-    this.cellMinWidth = cellMinWidth;
+    this.defaultCellMinWidth = defaultCellMinWidth;
     this.dom = document.createElement("div");
     this.dom.className = "tableWrapper";
     this.table = this.dom.appendChild(document.createElement("table"));
+    this.table.style.setProperty(
+      "--default-cell-min-width",
+      `${defaultCellMinWidth}px`
+    );
     this.table.className = node.attrs.class;
     this.table.id = node.attrs.name;
     this.colgroup = this.table.appendChild(document.createElement("colgroup"));
-    updateColumnsOnResize(node, this.colgroup, this.table, cellMinWidth);
+    updateColumnsOnResize(node, this.colgroup, this.table, defaultCellMinWidth);
     this.contentDOM = this.table.appendChild(document.createElement("tbody"));
   }
   update(node) {
-    if (node.type != this.node.type)
-      return false;
+    if (node.type != this.node.type) return false;
     this.node = node;
-    updateColumnsOnResize(node, this.colgroup, this.table, this.cellMinWidth);
+    updateColumnsOnResize(
+      node,
+      this.colgroup,
+      this.table,
+      this.defaultCellMinWidth
+    );
     return true;
   }
   ignoreMutation(record) {
     return record.type == "attributes" && (record.target == this.table || this.colgroup.contains(record.target));
   }
 };
-function updateColumnsOnResize(node, colgroup, table, cellMinWidth, overrideCol, overrideValue) {
+function updateColumnsOnResize(node, colgroup, table, defaultCellMinWidth, overrideCol, overrideValue) {
   var _a;
   let totalWidth = 0;
   let fixedWidth = true;
   let nextDOM = colgroup.firstChild;
   const row = node.firstChild;
-  if (!row)
-    return;
+  if (!row) return;
   for (let i = 0, col = 0; i < row.childCount; i++) {
     const { colspan, colwidth } = row.child(i).attrs;
     for (let j = 0; j < colspan; j++, col++) {
       const hasWidth = overrideCol == col ? overrideValue : colwidth && colwidth[j];
       const cssWidth = hasWidth ? hasWidth + "px" : "";
-      totalWidth += hasWidth || cellMinWidth;
-      if (!hasWidth)
-        fixedWidth = false;
+      totalWidth += hasWidth || defaultCellMinWidth;
+      if (!hasWidth) fixedWidth = false;
       if (!nextDOM) {
-        colgroup.appendChild(document.createElement("col")).style.width = cssWidth;
+        const col2 = document.createElement("col");
+        col2.style.width = cssWidth;
+        colgroup.appendChild(col2);
       } else {
-        if (nextDOM.style.width != cssWidth)
+        if (nextDOM.style.width != cssWidth) {
           nextDOM.style.width = cssWidth;
+        }
         nextDOM = nextDOM.nextSibling;
       }
     }
@@ -15560,6 +16152,7 @@ var columnResizingPluginKey = new PluginKey(
 function columnResizing({
   handleWidth = 5,
   cellMinWidth = 25,
+  defaultCellMinWidth = 100,
   View = TableView,
   lastColumnResizable = true
 } = {}) {
@@ -15572,7 +16165,7 @@ function columnResizing({
         const tableName = tableNodeTypes(state.schema).table.name;
         if (View && nodeViews) {
           nodeViews[tableName] = (node, view) => {
-            return new View(node, cellMinWidth, view);
+            return new View(node, defaultCellMinWidth, view);
           };
         }
         return new ResizeState(-1, false);
@@ -15588,19 +16181,13 @@ function columnResizing({
       },
       handleDOMEvents: {
         mousemove: (view, event) => {
-          handleMouseMove(
-            view,
-            event,
-            handleWidth,
-            cellMinWidth,
-            lastColumnResizable
-          );
+          handleMouseMove(view, event, handleWidth, lastColumnResizable);
         },
         mouseleave: (view) => {
           handleMouseLeave(view);
         },
         mousedown: (view, event) => {
-          handleMouseDown2(view, event, cellMinWidth);
+          handleMouseDown2(view, event, cellMinWidth, defaultCellMinWidth);
         }
       },
       decorations: (state) => {
@@ -15636,10 +16223,10 @@ var ResizeState = class _ResizeState {
     return state;
   }
 };
-function handleMouseMove(view, event, handleWidth, cellMinWidth, lastColumnResizable) {
+function handleMouseMove(view, event, handleWidth, lastColumnResizable) {
+  if (!view.editable) return;
   const pluginState = columnResizingPluginKey.getState(view.state);
-  if (!pluginState)
-    return;
+  if (!pluginState) return;
   if (!pluginState.dragging) {
     const target = domCellAround(event.target);
     let cell = -1;
@@ -15666,12 +16253,14 @@ function handleMouseMove(view, event, handleWidth, cellMinWidth, lastColumnResiz
   }
 }
 function handleMouseLeave(view) {
+  if (!view.editable) return;
   const pluginState = columnResizingPluginKey.getState(view.state);
   if (pluginState && pluginState.activeHandle > -1 && !pluginState.dragging)
     updateHandle(view, -1);
 }
-function handleMouseDown2(view, event, cellMinWidth) {
+function handleMouseDown2(view, event, cellMinWidth, defaultCellMinWidth) {
   var _a;
+  if (!view.editable) return false;
   const win = (_a = view.dom.ownerDocument.defaultView) != null ? _a : window;
   const pluginState = columnResizingPluginKey.getState(view.state);
   if (!pluginState || pluginState.activeHandle == -1 || pluginState.dragging)
@@ -15699,16 +16288,25 @@ function handleMouseDown2(view, event, cellMinWidth) {
     }
   }
   function move(event2) {
-    if (!event2.which)
-      return finish(event2);
+    if (!event2.which) return finish(event2);
     const pluginState2 = columnResizingPluginKey.getState(view.state);
-    if (!pluginState2)
-      return;
+    if (!pluginState2) return;
     if (pluginState2.dragging) {
       const dragged = draggedWidth(pluginState2.dragging, event2, cellMinWidth);
-      displayColumnWidth(view, pluginState2.activeHandle, dragged, cellMinWidth);
+      displayColumnWidth(
+        view,
+        pluginState2.activeHandle,
+        dragged,
+        defaultCellMinWidth
+      );
     }
   }
+  displayColumnWidth(
+    view,
+    pluginState.activeHandle,
+    width,
+    defaultCellMinWidth
+  );
   win.addEventListener("mouseup", finish);
   win.addEventListener("mousemove", move);
   event.preventDefault();
@@ -15716,8 +16314,7 @@ function handleMouseDown2(view, event, cellMinWidth) {
 }
 function currentColWidth(view, cellPos, { colspan, colwidth }) {
   const width = colwidth && colwidth[colwidth.length - 1];
-  if (width)
-    return width;
+  if (width) return width;
   const dom = view.domAtPos(cellPos);
   const node = dom.node.childNodes[dom.offset];
   let domWidth = node.offsetWidth, parts = colspan;
@@ -15741,21 +16338,18 @@ function edgeCell(view, event, side, handleWidth) {
     left: event.clientX + offset,
     top: event.clientY
   });
-  if (!found)
-    return -1;
+  if (!found) return -1;
   const { pos } = found;
   const $cell = cellAround(view.state.doc.resolve(pos));
-  if (!$cell)
-    return -1;
-  if (side == "right")
-    return $cell.pos;
+  if (!$cell) return -1;
+  if (side == "right") return $cell.pos;
   const map = TableMap.get($cell.node(-1)), start = $cell.start(-1);
   const index = map.map.indexOf($cell.pos - start);
   return index % map.width == 0 ? -1 : start + map.map[index - 1];
 }
-function draggedWidth(dragging, event, cellMinWidth) {
+function draggedWidth(dragging, event, resizeMinWidth) {
   const offset = event.clientX - dragging.startX;
-  return Math.max(cellMinWidth, dragging.startWidth + offset);
+  return Math.max(resizeMinWidth, dragging.startWidth + offset);
 }
 function updateHandle(view, value) {
   view.dispatch(
@@ -15769,21 +16363,18 @@ function updateColumnWidth(view, cell, width) {
   const tr = view.state.tr;
   for (let row = 0; row < map.height; row++) {
     const mapIndex = row * map.width + col;
-    if (row && map.map[mapIndex] == map.map[mapIndex - map.width])
-      continue;
+    if (row && map.map[mapIndex] == map.map[mapIndex - map.width]) continue;
     const pos = map.map[mapIndex];
     const attrs = table.nodeAt(pos).attrs;
     const index = attrs.colspan == 1 ? 0 : col - map.colCount(pos);
-    if (attrs.colwidth && attrs.colwidth[index] == width)
-      continue;
+    if (attrs.colwidth && attrs.colwidth[index] == width) continue;
     const colwidth = attrs.colwidth ? attrs.colwidth.slice() : zeroes(attrs.colspan);
     colwidth[index] = width;
     tr.setNodeMarkup(start + pos, null, { ...attrs, colwidth });
   }
-  if (tr.docChanged)
-    view.dispatch(tr);
+  if (tr.docChanged) view.dispatch(tr);
 }
-function displayColumnWidth(view, cell, width, cellMinWidth) {
+function displayColumnWidth(view, cell, width, defaultCellMinWidth) {
   const $cell = view.state.doc.resolve(cell);
   const table = $cell.node(-1), start = $cell.start(-1);
   const col = TableMap.get(table).colCount($cell.pos - start) + $cell.nodeAfter.attrs.colspan - 1;
@@ -15791,13 +16382,12 @@ function displayColumnWidth(view, cell, width, cellMinWidth) {
   while (dom && dom.nodeName != "TABLE") {
     dom = dom.parentNode;
   }
-  if (!dom)
-    return;
+  if (!dom) return;
   updateColumnsOnResize(
     table,
     dom.firstChild,
     dom,
-    cellMinWidth,
+    defaultCellMinWidth,
     col,
     width
   );
@@ -15806,6 +16396,7 @@ function zeroes(n) {
   return Array(n).fill(0);
 }
 function handleDecorations(state, cell) {
+  var _a;
   const decorations = [];
   const $cell = state.doc.resolve(cell);
   const table = $cell.node(-1);
@@ -15822,498 +16413,21 @@ function handleDecorations(state, cell) {
       const pos = start + cellPos + table.nodeAt(cellPos).nodeSize - 1;
       const dom = document.createElement("div");
       dom.className = "column-resize-handle";
+      if ((_a = columnResizingPluginKey.getState(state)) == null ? void 0 : _a.dragging) {
+        decorations.push(
+          Decoration.node(
+            start + cellPos,
+            start + cellPos + table.nodeAt(cellPos).nodeSize,
+            {
+              class: "column-resize-dragging"
+            }
+          )
+        );
+      }
       decorations.push(Decoration.widget(pos, dom));
     }
   }
   return DecorationSet.create(state.doc, decorations);
-}
-function selectedRect(state) {
-  const sel = state.selection;
-  const $pos = selectionCell(state);
-  const table = $pos.node(-1);
-  const tableStart = $pos.start(-1);
-  const map = TableMap.get(table);
-  const rect = sel instanceof CellSelection ? map.rectBetween(
-    sel.$anchorCell.pos - tableStart,
-    sel.$headCell.pos - tableStart
-  ) : map.findCell($pos.pos - tableStart);
-  return { ...rect, tableStart, map, table };
-}
-function addColumn(tr, { map, tableStart, table }, col) {
-  let refColumn = col > 0 ? -1 : 0;
-  if (columnIsHeader(map, table, col + refColumn)) {
-    refColumn = col == 0 || col == map.width ? null : 0;
-  }
-  for (let row = 0; row < map.height; row++) {
-    const index = row * map.width + col;
-    if (col > 0 && col < map.width && map.map[index - 1] == map.map[index]) {
-      const pos = map.map[index];
-      const cell = table.nodeAt(pos);
-      tr.setNodeMarkup(
-        tr.mapping.map(tableStart + pos),
-        null,
-        addColSpan(cell.attrs, col - map.colCount(pos))
-      );
-      row += cell.attrs.rowspan - 1;
-    } else {
-      const type = refColumn == null ? tableNodeTypes(table.type.schema).cell : table.nodeAt(map.map[index + refColumn]).type;
-      const pos = map.positionAt(row, col, table);
-      tr.insert(tr.mapping.map(tableStart + pos), type.createAndFill());
-    }
-  }
-  return tr;
-}
-function addColumnBefore(state, dispatch) {
-  if (!isInTable(state))
-    return false;
-  if (dispatch) {
-    const rect = selectedRect(state);
-    dispatch(addColumn(state.tr, rect, rect.left));
-  }
-  return true;
-}
-function removeColumn(tr, { map, table, tableStart }, col) {
-  const mapStart = tr.mapping.maps.length;
-  for (let row = 0; row < map.height; ) {
-    const index = row * map.width + col;
-    const pos = map.map[index];
-    const cell = table.nodeAt(pos);
-    const attrs = cell.attrs;
-    if (col > 0 && map.map[index - 1] == pos || col < map.width - 1 && map.map[index + 1] == pos) {
-      tr.setNodeMarkup(
-        tr.mapping.slice(mapStart).map(tableStart + pos),
-        null,
-        removeColSpan(attrs, col - map.colCount(pos))
-      );
-    } else {
-      const start = tr.mapping.slice(mapStart).map(tableStart + pos);
-      tr.delete(start, start + cell.nodeSize);
-    }
-    row += attrs.rowspan;
-  }
-}
-function deleteColumn(state, dispatch) {
-  if (!isInTable(state))
-    return false;
-  if (dispatch) {
-    const rect = selectedRect(state);
-    const tr = state.tr;
-    if (rect.left == 0 && rect.right == rect.map.width)
-      return false;
-    for (let i = rect.right - 1; ; i--) {
-      removeColumn(tr, rect, i);
-      if (i == rect.left)
-        break;
-      const table = rect.tableStart ? tr.doc.nodeAt(rect.tableStart - 1) : tr.doc;
-      if (!table) {
-        throw RangeError("No table found");
-      }
-      rect.table = table;
-      rect.map = TableMap.get(table);
-    }
-    dispatch(tr);
-  }
-  return true;
-}
-function rowIsHeader(map, table, row) {
-  var _a;
-  const headerCell = tableNodeTypes(table.type.schema).header_cell;
-  for (let col = 0; col < map.width; col++)
-    if (((_a = table.nodeAt(map.map[col + row * map.width])) == null ? void 0 : _a.type) != headerCell)
-      return false;
-  return true;
-}
-function addRow(tr, { map, tableStart, table }, row) {
-  var _a;
-  let rowPos = tableStart;
-  for (let i = 0; i < row; i++)
-    rowPos += table.child(i).nodeSize;
-  const cells = [];
-  let refRow = row > 0 ? -1 : 0;
-  if (rowIsHeader(map, table, row + refRow))
-    refRow = 0;
-  for (let col = 0, index = map.width * row; col < map.width; col++, index++) {
-    if (row > 0 && row < map.height && map.map[index] == map.map[index - map.width]) {
-      const pos = map.map[index];
-      const attrs = table.nodeAt(pos).attrs;
-      tr.setNodeMarkup(tableStart + pos, null, {
-        ...attrs,
-        rowspan: attrs.rowspan + 1
-      });
-      col += attrs.colspan - 1;
-    } else {
-      const type = refRow == null ? tableNodeTypes(table.type.schema).cell : (_a = table.nodeAt(map.map[index + refRow * map.width])) == null ? void 0 : _a.type;
-      const node = type == null ? void 0 : type.createAndFill();
-      if (node)
-        cells.push(node);
-    }
-  }
-  tr.insert(rowPos, tableNodeTypes(table.type.schema).row.create(null, cells));
-  return tr;
-}
-function addRowBefore(state, dispatch) {
-  if (!isInTable(state))
-    return false;
-  if (dispatch) {
-    const rect = selectedRect(state);
-    dispatch(addRow(state.tr, rect, rect.top));
-  }
-  return true;
-}
-function removeRow(tr, { map, table, tableStart }, row) {
-  let rowPos = 0;
-  for (let i = 0; i < row; i++)
-    rowPos += table.child(i).nodeSize;
-  const nextRow = rowPos + table.child(row).nodeSize;
-  const mapFrom = tr.mapping.maps.length;
-  tr.delete(rowPos + tableStart, nextRow + tableStart);
-  const seen = /* @__PURE__ */ new Set();
-  for (let col = 0, index = row * map.width; col < map.width; col++, index++) {
-    const pos = map.map[index];
-    if (seen.has(pos))
-      continue;
-    seen.add(pos);
-    if (row > 0 && pos == map.map[index - map.width]) {
-      const attrs = table.nodeAt(pos).attrs;
-      tr.setNodeMarkup(tr.mapping.slice(mapFrom).map(pos + tableStart), null, {
-        ...attrs,
-        rowspan: attrs.rowspan - 1
-      });
-      col += attrs.colspan - 1;
-    } else if (row < map.height && pos == map.map[index + map.width]) {
-      const cell = table.nodeAt(pos);
-      const attrs = cell.attrs;
-      const copy = cell.type.create(
-        { ...attrs, rowspan: cell.attrs.rowspan - 1 },
-        cell.content
-      );
-      const newPos = map.positionAt(row + 1, col, table);
-      tr.insert(tr.mapping.slice(mapFrom).map(tableStart + newPos), copy);
-      col += attrs.colspan - 1;
-    }
-  }
-}
-function deleteRow(state, dispatch) {
-  if (!isInTable(state))
-    return false;
-  if (dispatch) {
-    const rect = selectedRect(state), tr = state.tr;
-    if (rect.top == 0 && rect.bottom == rect.map.height)
-      return false;
-    for (let i = rect.bottom - 1; ; i--) {
-      removeRow(tr, rect, i);
-      if (i == rect.top)
-        break;
-      const table = rect.tableStart ? tr.doc.nodeAt(rect.tableStart - 1) : tr.doc;
-      if (!table) {
-        throw RangeError("No table found");
-      }
-      rect.table = table;
-      rect.map = TableMap.get(rect.table);
-    }
-    dispatch(tr);
-  }
-  return true;
-}
-function isEmpty(cell) {
-  const c = cell.content;
-  return c.childCount == 1 && c.child(0).isTextblock && c.child(0).childCount == 0;
-}
-function cellsOverlapRectangle({ width, height, map }, rect) {
-  let indexTop = rect.top * width + rect.left, indexLeft = indexTop;
-  let indexBottom = (rect.bottom - 1) * width + rect.left, indexRight = indexTop + (rect.right - rect.left - 1);
-  for (let i = rect.top; i < rect.bottom; i++) {
-    if (rect.left > 0 && map[indexLeft] == map[indexLeft - 1] || rect.right < width && map[indexRight] == map[indexRight + 1])
-      return true;
-    indexLeft += width;
-    indexRight += width;
-  }
-  for (let i = rect.left; i < rect.right; i++) {
-    if (rect.top > 0 && map[indexTop] == map[indexTop - width] || rect.bottom < height && map[indexBottom] == map[indexBottom + width])
-      return true;
-    indexTop++;
-    indexBottom++;
-  }
-  return false;
-}
-function mergeCells(state, dispatch) {
-  const sel = state.selection;
-  if (!(sel instanceof CellSelection) || sel.$anchorCell.pos == sel.$headCell.pos)
-    return false;
-  const rect = selectedRect(state), { map } = rect;
-  if (cellsOverlapRectangle(map, rect))
-    return false;
-  if (dispatch) {
-    const tr = state.tr;
-    const seen = {};
-    let content = Fragment.empty;
-    let mergedPos;
-    let mergedCell;
-    for (let row = rect.top; row < rect.bottom; row++) {
-      for (let col = rect.left; col < rect.right; col++) {
-        const cellPos = map.map[row * map.width + col];
-        const cell = rect.table.nodeAt(cellPos);
-        if (seen[cellPos] || !cell)
-          continue;
-        seen[cellPos] = true;
-        if (mergedPos == null) {
-          mergedPos = cellPos;
-          mergedCell = cell;
-        } else {
-          if (!isEmpty(cell))
-            content = content.append(cell.content);
-          const mapped = tr.mapping.map(cellPos + rect.tableStart);
-          tr.delete(mapped, mapped + cell.nodeSize);
-        }
-      }
-    }
-    if (mergedPos == null || mergedCell == null) {
-      return true;
-    }
-    tr.setNodeMarkup(mergedPos + rect.tableStart, null, {
-      ...addColSpan(
-        mergedCell.attrs,
-        mergedCell.attrs.colspan,
-        rect.right - rect.left - mergedCell.attrs.colspan
-      ),
-      rowspan: rect.bottom - rect.top
-    });
-    if (content.size) {
-      const end = mergedPos + 1 + mergedCell.content.size;
-      const start = isEmpty(mergedCell) ? mergedPos + 1 : end;
-      tr.replaceWith(start + rect.tableStart, end + rect.tableStart, content);
-    }
-    tr.setSelection(
-      new CellSelection(tr.doc.resolve(mergedPos + rect.tableStart))
-    );
-    dispatch(tr);
-  }
-  return true;
-}
-function splitCell(state, dispatch) {
-  const nodeTypes = tableNodeTypes(state.schema);
-  return splitCellWithType(({ node }) => {
-    return nodeTypes[node.type.spec.tableRole];
-  })(state, dispatch);
-}
-function splitCellWithType(getCellType) {
-  return (state, dispatch) => {
-    var _a;
-    const sel = state.selection;
-    let cellNode;
-    let cellPos;
-    if (!(sel instanceof CellSelection)) {
-      cellNode = cellWrapping(sel.$from);
-      if (!cellNode)
-        return false;
-      cellPos = (_a = cellAround(sel.$from)) == null ? void 0 : _a.pos;
-    } else {
-      if (sel.$anchorCell.pos != sel.$headCell.pos)
-        return false;
-      cellNode = sel.$anchorCell.nodeAfter;
-      cellPos = sel.$anchorCell.pos;
-    }
-    if (cellNode == null || cellPos == null) {
-      return false;
-    }
-    if (cellNode.attrs.colspan == 1 && cellNode.attrs.rowspan == 1) {
-      return false;
-    }
-    if (dispatch) {
-      let baseAttrs = cellNode.attrs;
-      const attrs = [];
-      const colwidth = baseAttrs.colwidth;
-      if (baseAttrs.rowspan > 1)
-        baseAttrs = { ...baseAttrs, rowspan: 1 };
-      if (baseAttrs.colspan > 1)
-        baseAttrs = { ...baseAttrs, colspan: 1 };
-      const rect = selectedRect(state), tr = state.tr;
-      for (let i = 0; i < rect.right - rect.left; i++)
-        attrs.push(
-          colwidth ? {
-            ...baseAttrs,
-            colwidth: colwidth && colwidth[i] ? [colwidth[i]] : null
-          } : baseAttrs
-        );
-      let lastCell;
-      for (let row = rect.top; row < rect.bottom; row++) {
-        let pos = rect.map.positionAt(row, rect.left, rect.table);
-        if (row == rect.top)
-          pos += cellNode.nodeSize;
-        for (let col = rect.left, i = 0; col < rect.right; col++, i++) {
-          if (col == rect.left && row == rect.top)
-            continue;
-          tr.insert(
-            lastCell = tr.mapping.map(pos + rect.tableStart, 1),
-            getCellType({ node: cellNode, row, col }).createAndFill(attrs[i])
-          );
-        }
-      }
-      tr.setNodeMarkup(
-        cellPos,
-        getCellType({ node: cellNode, row: rect.top, col: rect.left }),
-        attrs[0]
-      );
-      if (sel instanceof CellSelection)
-        tr.setSelection(
-          new CellSelection(
-            tr.doc.resolve(sel.$anchorCell.pos),
-            lastCell ? tr.doc.resolve(lastCell) : void 0
-          )
-        );
-      dispatch(tr);
-    }
-    return true;
-  };
-}
-function deprecated_toggleHeader(type) {
-  return function(state, dispatch) {
-    if (!isInTable(state))
-      return false;
-    if (dispatch) {
-      const types = tableNodeTypes(state.schema);
-      const rect = selectedRect(state), tr = state.tr;
-      const cells = rect.map.cellsInRect(
-        type == "column" ? {
-          left: rect.left,
-          top: 0,
-          right: rect.right,
-          bottom: rect.map.height
-        } : type == "row" ? {
-          left: 0,
-          top: rect.top,
-          right: rect.map.width,
-          bottom: rect.bottom
-        } : rect
-      );
-      const nodes = cells.map((pos) => rect.table.nodeAt(pos));
-      for (let i = 0; i < cells.length; i++)
-        if (nodes[i].type == types.header_cell)
-          tr.setNodeMarkup(
-            rect.tableStart + cells[i],
-            types.cell,
-            nodes[i].attrs
-          );
-      if (tr.steps.length == 0)
-        for (let i = 0; i < cells.length; i++)
-          tr.setNodeMarkup(
-            rect.tableStart + cells[i],
-            types.header_cell,
-            nodes[i].attrs
-          );
-      dispatch(tr);
-    }
-    return true;
-  };
-}
-function isHeaderEnabledByType(type, rect, types) {
-  const cellPositions = rect.map.cellsInRect({
-    left: 0,
-    top: 0,
-    right: type == "row" ? rect.map.width : 1,
-    bottom: type == "column" ? rect.map.height : 1
-  });
-  for (let i = 0; i < cellPositions.length; i++) {
-    const cell = rect.table.nodeAt(cellPositions[i]);
-    if (cell && cell.type !== types.header_cell) {
-      return false;
-    }
-  }
-  return true;
-}
-function toggleHeader(type, options) {
-  options = options || { useDeprecatedLogic: false };
-  if (options.useDeprecatedLogic)
-    return deprecated_toggleHeader(type);
-  return function(state, dispatch) {
-    if (!isInTable(state))
-      return false;
-    if (dispatch) {
-      const types = tableNodeTypes(state.schema);
-      const rect = selectedRect(state), tr = state.tr;
-      const isHeaderRowEnabled = isHeaderEnabledByType("row", rect, types);
-      const isHeaderColumnEnabled = isHeaderEnabledByType(
-        "column",
-        rect,
-        types
-      );
-      const isHeaderEnabled = type === "column" ? isHeaderRowEnabled : type === "row" ? isHeaderColumnEnabled : false;
-      const selectionStartsAt = isHeaderEnabled ? 1 : 0;
-      const cellsRect = type == "column" ? {
-        left: 0,
-        top: selectionStartsAt,
-        right: 1,
-        bottom: rect.map.height
-      } : type == "row" ? {
-        left: selectionStartsAt,
-        top: 0,
-        right: rect.map.width,
-        bottom: 1
-      } : rect;
-      const newType = type == "column" ? isHeaderColumnEnabled ? types.cell : types.header_cell : type == "row" ? isHeaderRowEnabled ? types.cell : types.header_cell : types.cell;
-      rect.map.cellsInRect(cellsRect).forEach((relativeCellPos) => {
-        const cellPos = relativeCellPos + rect.tableStart;
-        const cell = tr.doc.nodeAt(cellPos);
-        if (cell) {
-          tr.setNodeMarkup(cellPos, newType, cell.attrs);
-        }
-      });
-      dispatch(tr);
-    }
-    return true;
-  };
-}
-toggleHeader("row", {
-  useDeprecatedLogic: true
-});
-toggleHeader("column", {
-  useDeprecatedLogic: true
-});
-toggleHeader("cell", {
-  useDeprecatedLogic: true
-});
-function findNextCell($cell, dir) {
-  if (dir < 0) {
-    const before = $cell.nodeBefore;
-    if (before)
-      return $cell.pos - before.nodeSize;
-    for (let row = $cell.index(-1) - 1, rowEnd = $cell.before(); row >= 0; row--) {
-      const rowNode = $cell.node(-1).child(row);
-      const lastChild = rowNode.lastChild;
-      if (lastChild) {
-        return rowEnd - 1 - lastChild.nodeSize;
-      }
-      rowEnd -= rowNode.nodeSize;
-    }
-  } else {
-    if ($cell.index() < $cell.parent.childCount - 1) {
-      return $cell.pos + $cell.nodeAfter.nodeSize;
-    }
-    const table = $cell.node(-1);
-    for (let row = $cell.indexAfter(-1), rowStart = $cell.after(); row < table.childCount; row++) {
-      const rowNode = table.child(row);
-      if (rowNode.childCount)
-        return rowStart + 1;
-      rowStart += rowNode.nodeSize;
-    }
-  }
-  return null;
-}
-function goToNextCell(direction) {
-  return function(state, dispatch) {
-    if (!isInTable(state))
-      return false;
-    const cell = findNextCell(selectionCell(state), direction);
-    if (cell == null)
-      return false;
-    if (dispatch) {
-      const $cell = state.doc.resolve(cell);
-      dispatch(
-        state.tr.setSelection(TextSelection.between($cell, moveCellForward($cell))).scrollIntoView()
-      );
-    }
-    return true;
-  };
 }
 
 // src/index.ts
@@ -16331,10 +16445,8 @@ function tableEditing({
       },
       apply(tr, cur) {
         const set = tr.getMeta(tableEditingKey);
-        if (set != null)
-          return set == -1 ? null : set;
-        if (cur == null || !tr.docChanged)
-          return cur;
+        if (set != null) return set == -1 ? null : set;
+        if (cur == null || !tr.docChanged) return cur;
         const { deleted, pos } = tr.mapping.mapResult(cur);
         return deleted ? null : pos;
       }
@@ -16833,6 +16945,7 @@ class MenuBarView {
         this.widthForMaxHeight = 0;
         this.floating = false;
         this.scrollHandler = null;
+        this.root = editorView.root;
         this.wrapper = crelt("div", { class: prefix$3 + "-wrapper" });
         this.menu = this.wrapper.appendChild(crelt("div", { class: prefix$3 }));
         this.menu.className = prefix$3;
@@ -16857,6 +16970,12 @@ class MenuBarView {
         }
     }
     update() {
+        if (this.editorView.root != this.root) {
+            let { dom, update } = renderGrouped(this.editorView, this.options.content);
+            this.contentUpdate = update;
+            this.menu.replaceChild(dom, this.menu.firstChild);
+            this.root = this.editorView.root;
+        }
         this.contentUpdate(this.editorView.state);
         if (this.floating) {
             this.updateScrollCursor();
@@ -18012,6 +18131,10 @@ const validateFormatSpec = str => {
 };
 
 const angleRegEx = /[∠°]+$/;
+
+const formatFloat = (num, specStr = "h3", decimalFormat = "1,000,000.") => {
+  return format(Rnl.fromNumber(num), specStr, decimalFormat)
+};
 
 const format = (num, specStr = "h3", decimalFormat = "1,000,000.") => {
   if (Rnl.isZero(num)) { return "0" }
@@ -22071,7 +22194,7 @@ const exponentOfFunction = (str, decimalFormat, isCalc) => {
     expoInput = /^⁻?[⁰¹²³\u2074-\u2079⁻]+/.exec(str)[0];
     expoInput = expoInput.split("").map(ch => numeralFromSuperScript(ch)).join("");
   } else if (!openParenRegEx$2.test(str.slice(1))) {
-    expoInput = lex(str.slice(1), { decimalFormat }, { input: "", output: "", ttype: 50 })[0];
+    expoInput = lex(str.slice(1), { decimalFormat }, { input: "", ttype: 50 })[0];
   } else {
     // The exponent is in parens. Find its extent.
     expoInput = "(";
@@ -25581,7 +25704,6 @@ function paginate(view, tocSchema, purpose, tocStartLevel, tocEndLevel) {
     tocEndLevel: tocEndLevel,
     tocAdjustment: 0,
     ftNote: { totalNum: 0, start: 0, end: -1, pageNotesHeight: 0 },
-    footNotes: [],
     listIndex: -1,
     pageTopChild: -1,
     pageTopOffset: 0,
@@ -32040,7 +32162,7 @@ function locateDiagrams(beam, extremes) {
     ? beam.yLoad + 12 + reactionTextHeight + vMax * vScale + 70
     : beam.yLoad + 12 + reactionTextHeight;
   yV = Math.round(yV);
-  const botOfV = vMin < -0.0005
+  const botOfV = vMin < -5e-4
     ? yV + vMin * vScale + 50
     : yV + 70;
   const momentMax = beam.convention === 1 ? mMax : Math.abs(mMin);
@@ -32877,7 +32999,7 @@ const evalRpn = (rpn, vars, formats, unitAware, lib) => {
               return errorOprnd("UNIT_ADD")
             }
           }
-          const [shape1, shape2, _] = binaryShapesOf(o1, o2);
+          const [shape1, shape2] = binaryShapesOf(o1, o2);
           const sum = Object.create(null);
           // See file operations.js for an explanation of what goes on in the next line.
           sum.value = Operators.binary[shape1][shape2][op](o1.value, o2.value);
@@ -32977,7 +33099,7 @@ const evalRpn = (rpn, vars, formats, unitAware, lib) => {
             ? o1.unit.expos.map((e, j) => e - o2.unit.expos[j])
             : allZeros;
           quotient.unit = Object.freeze(unit);
-          const [shape1, shape2, _] = binaryShapesOf(o1, o2);
+          const [shape1, shape2] = binaryShapesOf(o1, o2);
           quotient.value = Operators.binary[shape1][shape2]["divide"](o1.value, o2.value);
           if (quotient.value.dtype && quotient.value.dtype === dt.ERROR) {
             return quotient.value
@@ -33006,7 +33128,7 @@ const evalRpn = (rpn, vars, formats, unitAware, lib) => {
             unit.expos = o1.unit.expos.map(e => e * d);
           }
           power.unit = Object.freeze(unit);
-          const [shape1, shape2, _] = binaryShapesOf(o1, o2);
+          const [shape1, shape2] = binaryShapesOf(o1, o2);
           power.value = Operators.binary[shape1][shape2]["power"](o1.value, o2.value);
           if (power.value.dtype) { return power.value } // Error
           power.dtype = Cpx.isComplex(power.value)
@@ -33023,7 +33145,7 @@ const evalRpn = (rpn, vars, formats, unitAware, lib) => {
           if (!(o1.dtype & dt.RATIONAL) || !(o2.dtype & dt.RATIONAL)) {
             return errorOprnd("NAN_OP")
           }
-          const [shape1, shape2, _] = binaryShapesOf(o1, o2);
+          const [shape1, shape2] = binaryShapesOf(o1, o2);
           const result = Object.create(null);
           result.unit = allZeros;
           result.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, "modulo");
@@ -33039,7 +33161,7 @@ const evalRpn = (rpn, vars, formats, unitAware, lib) => {
           const o2 = stack.pop();
           const o1 = stack.pop();
           const opName = tkn === "vcat" ? "unshift" : "concat";
-          const [shape1, shape2, _] = binaryShapesOf(o1, o2);
+          const [shape1, shape2] = binaryShapesOf(o1, o2);
           let o3 = Object.create(null);
           if (o1.dtype === dt.STRING && o1.dtype === dt.STRING) {
             const str1 = stringFromOperand(o1, formats);
@@ -33892,7 +34014,7 @@ const evalRpn = (rpn, vars, formats, unitAware, lib) => {
             bool.value = compare(tkn, o1.value, o2.value, prevValue);
             bool.dtype = o1.dtype + dt.BOOLEANFROMCOMPARISON;
           } else {
-            const [shape1, shape2, _] = binaryShapesOf(o1, o2);
+            const [shape1, shape2] = binaryShapesOf(o1, o2);
             bool.value = Operators.relations[shape1][shape2].relate(tkn, o1.value,
               o2.value, prevValue);
             bool.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn)
@@ -33921,7 +34043,7 @@ const evalRpn = (rpn, vars, formats, unitAware, lib) => {
           }
           const op = { "and": "and", "&&": "and", "or": "or", "∧": "and",
             "||": "or", "∨": "or", "⊻": "xor" }[tkn];
-          const [shape1, shape2, _] = binaryShapesOf(o1, o2);
+          const [shape1, shape2] = binaryShapesOf(o1, o2);
 
           const bool = Object.create(null);
           bool.unit = null;
@@ -34022,7 +34144,7 @@ const evalRpn = (rpn, vars, formats, unitAware, lib) => {
           if (!((o1.dtype & dt.RATIONAL) & (o2.dtype & dt.RATIONAL))) {
             return errorOprnd("NAN_OP")
           }
-          const [shape1, shape2, _] = binaryShapesOf(o1, o2);
+          const [shape1, shape2] = binaryShapesOf(o1, o2);
           const mod = Object.create(null);
           mod.unit = Object.create(null);
           mod.unit.expos = allZeros;
@@ -36792,7 +36914,7 @@ const sheetToTable = (state, tableNode) => {
       }
     }
   }
-  const [tableStart, tableEnd, _] = sheetLimits(state.doc, state.selection.$from);
+  const [tableStart, tableEnd] = sheetLimits(state.doc, state.selection.$from);
   return [table, tableStart, tableEnd]
 };
 
@@ -37271,8 +37393,16 @@ function updateCalculations(
     // The author has submitted a single calculation cell.
     const entry = nodeAttrs.entry;
     if (fetchRegEx.test(entry)) {
-      urls.push(urlFromEntry(entry));
-      fetchPositions.push(curPos);
+      let url = urlFromEntry(entry);
+      if (!/\.(tsv|txt)$/.test(url)) {
+        const pos = url.lastIndexOf("/");
+        url = url.slice(pos + 1);
+        // eslint-disable-next-line no-alert
+        alert(`Warning: Only .tsv and .txt files can be fetched.\n${url}`);
+      } else {
+        urls.push(url);
+        fetchPositions.push(curPos);
+      }
     }
   } else {
     // We're updating the entire document.
@@ -37280,8 +37410,16 @@ function updateCalculations(
       if (node.type.name === "calculation" && !node.attrs.value) {
         const entry = node.attrs.entry;
         if (fetchRegEx.test(entry)) {
-          urls.push(urlFromEntry(entry));
-          fetchPositions.push(pos);
+          let url = urlFromEntry(entry);
+          if (!/\.(tsv|txt)$/.test(url)) {
+            const pos = url.lastIndexOf("/");
+            url = url.slice(pos + 1);
+                // eslint-disable-next-line no-alert
+            alert(`Warning: Only .tsv and .txt files can be fetched.\n${url}`);
+          } else {
+            urls.push(url);
+            fetchPositions.push(pos);
+          }
         } else if (/^function /.test(entry)) {
           node.attrs = compile(entry, formats);
           insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat);
@@ -37384,8 +37522,16 @@ async function updateCalcs(doc) {
   for (const node of calcNodes) {
     const entry = node.attrs.entry;
     if (helpers.fetchRegEx.test(entry)) {
-      urls.push(helpers.urlFromEntry(entry));
-      callers.push(node);
+      let url = helpers.urlFromEntry(entry);
+      if (!/\.(tsv|txt)$/.test(url)) {
+        const pos = url.lastIndexOf("/");
+        url = url.slice(pos + 1);
+        // eslint-disable-next-line no-console
+        console.log(`Warning: Only .tsv and .txt files can be fetched.\n${url}`);
+      } else {
+        urls.push(url);
+        callers.push(node);
+      }
     } else if (/^function /.test(entry)) {
       node.attrs = compile(entry, formats);
       insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat);
@@ -37686,7 +37832,7 @@ const unbracedDistance = str => {
 const tex2Calc = (str, displayMode = false) => {
   let calc = "";
   let token = {};
-  let prevToken = { input: "", output: "", ttype: 50 };
+  let prevToken = { input: "", ttype: 50 };
   const delims = [{ ch: "", pos: -1, type: 0 }] ; // delimiter stack
   let splitLongVars = true;
   let waitingForUnbracedArg = false;
@@ -52532,7 +52678,7 @@ var temml$1 = {
 
 /*
  * This file bundles together and exposes the calculation parts of Hurmet.
- * I use Rollup to create a UMD module from this code.
+ * I use Rollup to create a CJS module from this code.
  * That way, one file can expose the same functionality to (1) the Hurmet.org web page,
  * (2) the REPL in the reference manual, (3) the script that transpiles
  * the Hurmet reference manual from Markdown to HTML, and (4) unit testing.
@@ -56852,8 +56998,8 @@ function insertToC(nodeType) {
       return canInsert(state, nodeType)
     },
     run(state, dispatch, view) {
-      state.selection;
-        let attrs = null;
+      let { from, to } = state.selection,
+        attrs = null;
       if (state.selection instanceof NodeSelection && state.selection.node.type == nodeType)
         attrs = state.selection.node.attrs;
       if (!attrs) { attrs = { start: 1, end: 2, body: [] }; }
@@ -57888,7 +58034,6 @@ changing two dashes into an emdash, wrapping a paragraph starting
 with `"> "` into a blockquote, or something entirely different.
 */
 class InputRule {
-    // :: (RegExp, union<string, (state: EditorState, match: [string], start: number, end: number) → ?Transaction>)
     /**
     Create an input rule. The rule applies when the user typed
     something and the text directly in front of the cursor matches
@@ -57915,6 +58060,7 @@ class InputRule {
         this.handler = typeof handler == "string" ? stringHandler(handler) : handler;
         this.undoable = options.undoable !== false;
         this.inCode = options.inCode || false;
+        this.inCodeMark = options.inCodeMark !== false;
     }
 }
 function stringHandler(string) {
@@ -57975,6 +58121,8 @@ function run(view, from, to, text, rules, plugin) {
     let textBefore = $from.parent.textBetween(Math.max(0, $from.parentOffset - MAX_MATCH), $from.parentOffset, null, "\ufffc") + text;
     for (let i = 0; i < rules.length; i++) {
         let rule = rules[i];
+        if (!rule.inCodeMark && $from.marks().some(m => m.type.spec.code))
+            continue;
         if ($from.parent.type.spec.code) {
             if (!rule.inCode)
                 continue;
@@ -57983,7 +58131,19 @@ function run(view, from, to, text, rules, plugin) {
             continue;
         }
         let match = rule.match.exec(textBefore);
-        let tr = match && rule.handler(state, match, from - (match[0].length - text.length), to);
+        if (!match || match[0].length < text.length)
+            continue;
+        let startPos = from - (match[0].length - text.length);
+        if (!rule.inCodeMark) {
+            let hasMark = false;
+            state.doc.nodesBetween(startPos, $from.pos, node => {
+                if (node.isInline && node.marks.some(m => m.type.spec.code))
+                    hasMark = true;
+            });
+            if (hasMark)
+                continue;
+        }
+        let tr = rule.handler(state, match, startPos, to);
         if (!tr)
             continue;
         if (rule.undoable)
@@ -58024,27 +58184,27 @@ const undoInputRule = (state, dispatch) => {
 /**
 Converts double dashes to an emdash.
 */
-const emDash = new InputRule(/--$/, "—");
+const emDash = new InputRule(/--$/, "—", { inCodeMark: false });
 /**
 Converts three dots to an ellipsis character.
 */
-const ellipsis = new InputRule(/\.\.\.$/, "…");
+const ellipsis = new InputRule(/\.\.\.$/, "…", { inCodeMark: false });
 /**
 “Smart” opening double quotes.
 */
-const openDoubleQuote = new InputRule(/(?:^|[\s\{\[\(\<'"\u2018\u201C])(")$/, "“");
+const openDoubleQuote = new InputRule(/(?:^|[\s\{\[\(\<'"\u2018\u201C])(")$/, "“", { inCodeMark: false });
 /**
 “Smart” closing double quotes.
 */
-const closeDoubleQuote = new InputRule(/"$/, "”");
+const closeDoubleQuote = new InputRule(/"$/, "”", { inCodeMark: false });
 /**
 “Smart” opening single quotes.
 */
-const openSingleQuote = new InputRule(/(?:^|[\s\{\[\(\<'"\u2018\u201C])(')$/, "‘");
+const openSingleQuote = new InputRule(/(?:^|[\s\{\[\(\<'"\u2018\u201C])(')$/, "‘", { inCodeMark: false });
 /**
 “Smart” closing single quotes.
 */
-const closeSingleQuote = new InputRule(/'$/, "’");
+const closeSingleQuote = new InputRule(/'$/, "’", { inCodeMark: false });
 /**
 Smart-quote related input rules.
 */
@@ -59467,6 +59627,10 @@ class FootnoteView {
 }
 
 // Prosemirror core modules
+
+if (typeof window !== "undefined") {
+  window.hurmet = { round: formatFloat }; // Expose for use by sketch module.
+}
 
 // Bundle together the plugins.
 function pmSetup(options) {

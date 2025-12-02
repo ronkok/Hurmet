@@ -5128,7 +5128,7 @@ const exponentOfFunction = (str, decimalFormat, isCalc) => {
     expoInput = /^⁻?[⁰¹²³\u2074-\u2079⁻]+/.exec(str)[0];
     expoInput = expoInput.split("").map(ch => numeralFromSuperScript(ch)).join("");
   } else if (!openParenRegEx$2.test(str.slice(1))) {
-    expoInput = lex(str.slice(1), { decimalFormat }, { input: "", output: "", ttype: 50 })[0];
+    expoInput = lex(str.slice(1), { decimalFormat }, { input: "", ttype: 50 })[0];
   } else {
     // The exponent is in parens. Find its extent.
     expoInput = "(";
@@ -13998,7 +13998,7 @@ function locateDiagrams(beam, extremes) {
     ? beam.yLoad + 12 + reactionTextHeight + vMax * vScale + 70
     : beam.yLoad + 12 + reactionTextHeight;
   yV = Math.round(yV);
-  const botOfV = vMin < -0.0005
+  const botOfV = vMin < -5e-4
     ? yV + vMin * vScale + 50
     : yV + 70;
   const momentMax = beam.convention === 1 ? mMax : Math.abs(mMin);
@@ -14835,7 +14835,7 @@ const evalRpn = (rpn, vars, formats, unitAware, lib) => {
               return errorOprnd("UNIT_ADD")
             }
           }
-          const [shape1, shape2, _] = binaryShapesOf(o1, o2);
+          const [shape1, shape2] = binaryShapesOf(o1, o2);
           const sum = Object.create(null);
           // See file operations.js for an explanation of what goes on in the next line.
           sum.value = Operators.binary[shape1][shape2][op](o1.value, o2.value);
@@ -14935,7 +14935,7 @@ const evalRpn = (rpn, vars, formats, unitAware, lib) => {
             ? o1.unit.expos.map((e, j) => e - o2.unit.expos[j])
             : allZeros;
           quotient.unit = Object.freeze(unit);
-          const [shape1, shape2, _] = binaryShapesOf(o1, o2);
+          const [shape1, shape2] = binaryShapesOf(o1, o2);
           quotient.value = Operators.binary[shape1][shape2]["divide"](o1.value, o2.value);
           if (quotient.value.dtype && quotient.value.dtype === dt.ERROR) {
             return quotient.value
@@ -14964,7 +14964,7 @@ const evalRpn = (rpn, vars, formats, unitAware, lib) => {
             unit.expos = o1.unit.expos.map(e => e * d);
           }
           power.unit = Object.freeze(unit);
-          const [shape1, shape2, _] = binaryShapesOf(o1, o2);
+          const [shape1, shape2] = binaryShapesOf(o1, o2);
           power.value = Operators.binary[shape1][shape2]["power"](o1.value, o2.value);
           if (power.value.dtype) { return power.value } // Error
           power.dtype = Cpx.isComplex(power.value)
@@ -14981,7 +14981,7 @@ const evalRpn = (rpn, vars, formats, unitAware, lib) => {
           if (!(o1.dtype & dt.RATIONAL) || !(o2.dtype & dt.RATIONAL)) {
             return errorOprnd("NAN_OP")
           }
-          const [shape1, shape2, _] = binaryShapesOf(o1, o2);
+          const [shape1, shape2] = binaryShapesOf(o1, o2);
           const result = Object.create(null);
           result.unit = allZeros;
           result.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, "modulo");
@@ -14997,7 +14997,7 @@ const evalRpn = (rpn, vars, formats, unitAware, lib) => {
           const o2 = stack.pop();
           const o1 = stack.pop();
           const opName = tkn === "vcat" ? "unshift" : "concat";
-          const [shape1, shape2, _] = binaryShapesOf(o1, o2);
+          const [shape1, shape2] = binaryShapesOf(o1, o2);
           let o3 = Object.create(null);
           if (o1.dtype === dt.STRING && o1.dtype === dt.STRING) {
             const str1 = stringFromOperand(o1, formats);
@@ -15850,7 +15850,7 @@ const evalRpn = (rpn, vars, formats, unitAware, lib) => {
             bool.value = compare(tkn, o1.value, o2.value, prevValue);
             bool.dtype = o1.dtype + dt.BOOLEANFROMCOMPARISON;
           } else {
-            const [shape1, shape2, _] = binaryShapesOf(o1, o2);
+            const [shape1, shape2] = binaryShapesOf(o1, o2);
             bool.value = Operators.relations[shape1][shape2].relate(tkn, o1.value,
               o2.value, prevValue);
             bool.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn)
@@ -15879,7 +15879,7 @@ const evalRpn = (rpn, vars, formats, unitAware, lib) => {
           }
           const op = { "and": "and", "&&": "and", "or": "or", "∧": "and",
             "||": "or", "∨": "or", "⊻": "xor" }[tkn];
-          const [shape1, shape2, _] = binaryShapesOf(o1, o2);
+          const [shape1, shape2] = binaryShapesOf(o1, o2);
 
           const bool = Object.create(null);
           bool.unit = null;
@@ -15980,7 +15980,7 @@ const evalRpn = (rpn, vars, formats, unitAware, lib) => {
           if (!((o1.dtype & dt.RATIONAL) & (o2.dtype & dt.RATIONAL))) {
             return errorOprnd("NAN_OP")
           }
-          const [shape1, shape2, _] = binaryShapesOf(o1, o2);
+          const [shape1, shape2] = binaryShapesOf(o1, o2);
           const mod = Object.create(null);
           mod.unit = Object.create(null);
           mod.unit.expos = allZeros;
@@ -18497,8 +18497,16 @@ function updateCalculations(
     // The author has submitted a single calculation cell.
     const entry = nodeAttrs.entry;
     if (fetchRegEx.test(entry)) {
-      urls.push(urlFromEntry(entry));
-      fetchPositions.push(curPos);
+      let url = urlFromEntry(entry);
+      if (!/\.(tsv|txt)$/.test(url)) {
+        const pos = url.lastIndexOf("/");
+        url = url.slice(pos + 1);
+        // eslint-disable-next-line no-alert
+        alert(`Warning: Only .tsv and .txt files can be fetched.\n${url}`);
+      } else {
+        urls.push(url);
+        fetchPositions.push(curPos);
+      }
     }
   } else {
     // We're updating the entire document.
@@ -18506,8 +18514,16 @@ function updateCalculations(
       if (node.type.name === "calculation" && !node.attrs.value) {
         const entry = node.attrs.entry;
         if (fetchRegEx.test(entry)) {
-          urls.push(urlFromEntry(entry));
-          fetchPositions.push(pos);
+          let url = urlFromEntry(entry);
+          if (!/\.(tsv|txt)$/.test(url)) {
+            const pos = url.lastIndexOf("/");
+            url = url.slice(pos + 1);
+                // eslint-disable-next-line no-alert
+            alert(`Warning: Only .tsv and .txt files can be fetched.\n${url}`);
+          } else {
+            urls.push(url);
+            fetchPositions.push(pos);
+          }
         } else if (/^function /.test(entry)) {
           node.attrs = compile(entry, formats);
           insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat);
@@ -18610,8 +18626,16 @@ async function updateCalcs(doc) {
   for (const node of calcNodes) {
     const entry = node.attrs.entry;
     if (helpers.fetchRegEx.test(entry)) {
-      urls.push(helpers.urlFromEntry(entry));
-      callers.push(node);
+      let url = helpers.urlFromEntry(entry);
+      if (!/\.(tsv|txt)$/.test(url)) {
+        const pos = url.lastIndexOf("/");
+        url = url.slice(pos + 1);
+        // eslint-disable-next-line no-console
+        console.log(`Warning: Only .tsv and .txt files can be fetched.\n${url}`);
+      } else {
+        urls.push(url);
+        callers.push(node);
+      }
     } else if (/^function /.test(entry)) {
       node.attrs = compile(entry, formats);
       insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat);
@@ -18912,7 +18936,7 @@ const unbracedDistance = str => {
 const tex2Calc = (str, displayMode = false) => {
   let calc = "";
   let token = {};
-  let prevToken = { input: "", output: "", ttype: 50 };
+  let prevToken = { input: "", ttype: 50 };
   const delims = [{ ch: "", pos: -1, type: 0 }] ; // delimiter stack
   let splitLongVars = true;
   let waitingForUnbracedArg = false;
@@ -33758,7 +33782,7 @@ var temml$1 = {
 
 /*
  * This file bundles together and exposes the calculation parts of Hurmet.
- * I use Rollup to create a UMD module from this code.
+ * I use Rollup to create a CJS module from this code.
  * That way, one file can expose the same functionality to (1) the Hurmet.org web page,
  * (2) the REPL in the reference manual, (3) the script that transpiles
  * the Hurmet reference manual from Markdown to HTML, and (4) unit testing.
