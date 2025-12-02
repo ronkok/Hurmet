@@ -202,6 +202,10 @@ export const validateFormatSpec = str => {
 
 const angleRegEx = /[∠°]+$/
 
+export const formatFloat = (num, specStr = "h3", decimalFormat = "1,000,000.") => {
+  return format(Rnl.fromNumber(num), specStr, decimalFormat)
+}
+
 export const format = (num, specStr = "h3", decimalFormat = "1,000,000.") => {
   if (Rnl.isZero(num)) { return "0" }
 

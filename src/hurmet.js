@@ -12,7 +12,7 @@ import { Rnl } from "./rational"
 
 /*
  * This file bundles together and exposes the calculation parts of Hurmet.
- * I use Rollup to create a UMD module from this code.
+ * I use Rollup to create a CJS module from this code.
  * That way, one file can expose the same functionality to (1) the Hurmet.org web page,
  * (2) the REPL in the reference manual, (3) the script that transpiles
  * the Hurmet reference manual from Markdown to HTML, and (4) unit testing.

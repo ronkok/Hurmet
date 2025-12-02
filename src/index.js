@@ -20,6 +20,11 @@ import { buildInputRules } from "./inputrules"
 import { CalcView, TexView, FootnoteView } from "./nodeviews"
 import { DataFrame } from "./dataframe"
 import hurmet from "./hurmet"
+import { formatFloat as round } from "./format.js"
+
+if (typeof window !== "undefined") {
+  window.hurmet = { round } // Expose for use by sketch module.
+}
 
 // Bundle together the plugins.
 function pmSetup(options) {
