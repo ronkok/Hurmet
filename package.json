@@ -24,30 +24,30 @@
     "src/"
   ],
   "dependencies": {
-    "filesaver.js-npm": "^1.0.1",
-    "prosemirror-commands": "^1.7.1",
-    "prosemirror-dropcursor": "^1.8.2",
-    "prosemirror-gapcursor": "^1.4.0",
-    "prosemirror-history": "^1.5.0",
-    "prosemirror-inputrules": "^1.5.1",
-    "prosemirror-keymap": "^1.2.3",
-    "prosemirror-menu": "^1.2.5",
-    "prosemirror-model": "^1.25.4",
-    "prosemirror-state": "^1.4.4",
-    "prosemirror-tables": "^1.8.1",
-    "prosemirror-transform": "^1.10.5",
-    "prosemirror-view": "^1.41.4",
-    "ws": "^8.18.3"
+    "filesaver.js-npm": "latest",
+    "prosemirror-commands": "latest",
+    "prosemirror-dropcursor": "latest",
+    "prosemirror-gapcursor": "latest",
+    "prosemirror-history": "latest",
+    "prosemirror-inputrules": "latest",
+    "prosemirror-keymap": "latest",
+    "prosemirror-menu": "latest",
+    "prosemirror-model": "latest",
+    "prosemirror-state": "latest",
+    "prosemirror-tables": "latest",
+    "prosemirror-transform": "latest",
+    "prosemirror-view": "latest",
+    "ws": "latest"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.1.0",
-    "@eslint/js": "^9.9.0",
-    "@rollup/plugin-commonjs": "^26.0.1",
-    "@rollup/plugin-node-resolve": "^15.2.3",
-    "eslint": "^9.39.1",
-    "globals": "^16.5.0",
-    "rollup": "^4.53.3",
-    "terser": "^5.44.1"
+    "@eslint/eslintrc": "latest",
+    "@eslint/js": "latest",
+    "@rollup/plugin-commonjs": "latest",
+    "@rollup/plugin-node-resolve": "latest",
+    "eslint": "latest",
+    "globals": "latest",
+    "rollup": "latest",
+    "terser": "latest"
   },
   "scripts": {
     "hurmet": "rollup --config utils/rollup.hurmet.config.js",
@@ -61,6 +61,7 @@
     "docs": "node utils/buildDocs.cjs",
     "test": "yarn test:lint && node test/test.cjs",
     "test:lint": "eslint src",
-    "test:unit": "node test/test.cjs"
+    "test:unit": "node test/test.cjs",
+    "upgrade": "powershell -File ./reset-and-upgrade-all.ps1"
   }
 }
