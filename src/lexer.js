@@ -450,6 +450,7 @@ const accents = new Set([
   "hat",
   "mathring",
   "overbrace",
+  "overbracket",
   "overgroup",
   "overleftarrow",
   "overleftharpoon",
@@ -459,6 +460,7 @@ const accents = new Set([
   "overrightharpoon",
   "tilde",
   "underbrace",
+  "underbracket",
   "undergroup",
   "underleftarrow",
   "underleftrightarrow",
@@ -634,6 +636,7 @@ const greek = {
 }
 
 const binaries = new Set([
+  "cancelto",
   "colorbox",
   "dfrac",
   "frac",
