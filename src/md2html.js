@@ -246,7 +246,6 @@ const nodes = {
         + `<span class='hmt-code'>${sanitizeText(node.attrs.entry)}</span></span>`
     } else {
       const tex = node.attrs.tex ? node.attrs.tex : parse(node.attrs.entry)
-      // eslint-disable-next-line no-undef
       const mathML = globalThis.temml.renderToString(
         tex,
         { trust: true, wrap: "=", displayMode: (node.attrs.displayMode || false) }
@@ -257,7 +256,6 @@ const nodes = {
     }
   },
   tex(node) {
-    // eslint-disable-next-line no-undef
     const mathML = globalThis.temml.renderToString(
       node.attrs.tex,
       { trust: true, displayMode: (node.attrs.displayMode || false) }

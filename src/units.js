@@ -44,16 +44,29 @@ export const unitsAreCompatible = (a, b) => {
   return a.every((value, index) => value === b[index])
 }
 
+const runtimeCurrencyRate = (currencyCode) => {
+  // Enable currency rates to be injected via globalThis at runtime.
+  // They are read from browser <head> or Node: fs.readFileSync('site/currencyRates.json').
+  // Expected shape: { USD: 1.07, GBP: 0.86, ... } where values are per 1 EUR.
+  const cr = (typeof globalThis !== "undefined") ? globalThis.currencyRates : null
+  if (!cr || typeof cr !== "object") { return null }
+
+  const direct = cr[currencyCode]
+  if (typeof direct === "number" || typeof direct === "string") { return direct }
+
+  return null
+}
+
 // JSON.parse() is faster than a big object literal
 // eslint-disable-next-line max-len
 const prefixFactor = JSON.parse('{"Y":1e24,"yotta":1e24,"Z":1e21,"zetta":1e21,"E":1e18,"exa":1e18,"P":1e15,"peta":1e15,"T":1e12,"tera":1e12,"G":1e9,"giga":1e9,"M":1e6,"mega":1e6,"k":1000,"kilo":1000,"h":100,"hecto":100,"deka":10,"d":0.1,"deci":0.1,"c":0.01,"centi":0.01,"m":0.001,"milli":0.001,"µ":1e-6,"\u00B5":1e-6,"\u03bc":1e-6,"micro":1e-6,"n":1e-9,"nano":1e-9,"p":1e-12,"pico":1e-12,"f":1e-15,"femto":1e-15,"a":1e-18,"atto":1e-18,"z":1e-21,"zepto":1e-21,"y":1e-24,"yocto":1e-24,"Ki":1024,"kibi":1024,"Mi":1048576,"mebi":1048576,"Gi":1073741824,"gibi":1073741824,"Ti":1099511627776,"tebi":1099511627776}')
 
-export const currencySymbols = "$£¥₨₪€"
+export const currencySymbols = "$£¥₹₨₪€₣"
 
   //  factor, numerator, denominator,  gauge, prefix|logarithm|currency, exponents
   //  exponent break-down: length, mass, time, elect, temp, amount, lum inten, money
   //  Each money factor is a revised weekly with data from the European Central Bank.
-const unitTable = Object.freeze(JSON.parse(`{
+export const unitTable = Object.freeze(JSON.parse(`{
 "#":["0.45359237", "1","0","0",[0,1,0,0,0,0,0,0]],
 "$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
@@ -67,20 +80,21 @@ const unitTable = Object.freeze(JSON.parse(`{
 "BTU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "BThU":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Bq":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
-"Brazilian Real":["1","1","0","BRL",[0,0,0,0,0,0,0,1]],
-"British Pound":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
+"Brazilian real":["1","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"British pound":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "Btu":["1055.056","1","0","0",[2,1,-2,0,0,0,0,0]],
 "C":["1","1","0","siSymbol",[0,0,1,1,0,0,0,0]],
 "C$":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CAD":["1.6128","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "CCF":["1","1","0","0",[3,0,0,0,0,0,0,0]],
 "CHF":["0.9284","1","0","CHF",[0,0,0,0,0,0,0,1]],
-"CNY":["8.2679","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CNY":["1","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"CN¥":["1","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "CY":["0.764554857984","1","0","0",[3,0,0,0,0,0,0,0]],
 "Calorie":["4186.8","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Canadian dollar":["1","1","0","CAD",[0,0,0,0,0,0,0,1]],
 "Celsius":["1","1","273.15","0",[0,0,0,0,1,0,0,0]],
-"Chinese Yuan":["1","1","0","CNY",[0,0,0,0,0,0,0,1]],
+"Chinese yuan":["1","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "Ci":["37000000000","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
 "Ckm":["100000","1","0","siSymbol",[1,0,0,0,0,0,0,0]],
 "Da":["1.66053872e-24","1","0","siSymbol",[0,1,0,0,0,0,0,0]],
@@ -93,6 +107,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Euro":["1","1","0","EUR",[0,0,0,0,0,0,0,1]],
 "F":["1","1","0","siSymbol",[-2,-1,4,2,0,0,0,0]],
 "Fahrenheit":["5","9","459","0",[0,0,0,0,1,0,0,0]],
+"Fr":["0.9284","1","0","CHF",[0,0,0,0,0,0,0,1]],
 "G":["0.0001","1","0","siSymbol",[-2,-2,-2,-1,0,0,0,0]],
 "GB":["8589934592","1","0","0",[0,0,0,0,0,1,0,0]],
 "GBP":["0.87290","1","0","GBP",[0,0,0,0,0,0,0,1]],
@@ -109,11 +124,11 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Hz":["1","1","0","siSymbol",[0,0,-1,0,0,0,0,0]],
 "ILS":["3.7514","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "INR":["105.7755","1","0","INR",[0,0,0,0,0,0,0,1]],
-"Indian Rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
+"Indian rupee":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "Israeli New Shekel":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "J":["1","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
 "JPY":["183.83","1","0","JPY",[0,0,0,0,0,0,0,1]],
-"Japanese Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"Japanese yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "Joule":["1","1","0","0",[2,1,-2,0,0,0,0,0]],
 "Julian year":["31557600","1","0","0",[0,0,1,0,0,0,0,0]],
 "Jy":["1e-26","1","0","siSymbol",[0,1,-2,0,0,0,0,0]],
@@ -147,8 +162,10 @@ const unitTable = Object.freeze(JSON.parse(`{
 "PiB":["9007199254740990","1","0","0",[0,0,0,0,0,1,0,0]],
 "R":["0.000258","1","0","siSymbol",[0,-1,1,1,0,0,0,0]],
 "R$":["1","1","0","BRL",[0,0,0,0,0,0,0,1]],
+"RMB":["1","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "RT":["3516.8532","1","0","0",[2,1,-3,0,0,0,0,0]],
 "RUB":["1","1","0","RUB",[0,0,0,0,0,0,0,1]],
+"Rs":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "S":["1","1","0","siSymbol",[-2,-1,3,2,0,0,0,0]],
 "SF":["0.09290304","1","0","0",[2,0,0,0,0,0,0,0]],
 "SY":["0.83612736","1","0","0",[2,0,0,0,0,0,0,0]],
@@ -278,6 +295,8 @@ const unitTable = Object.freeze(JSON.parse(`{
 "footlambert":["1","3.14159265358979","0","0",[-2,0,0,0,0,0,1,0]],
 "fortnight":["1209600","1","0","0",[0,0,1,0,0,0,0,0]],
 "fps":["0.3048","1","0","0",[1,0,-1,0,0,0,0,0]],
+"fr":["0.9284","1","0","CHF",[0,0,0,0,0,0,0,1]],
+"franc":["0.9284","1","0","CHF",[0,0,0,0,0,0,0,1]],
 "franklin":["0.00000000033356","1","0","siWord",[0,0,1,1,0,0,0,0]],
 "ft":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "ft water":["2989","1","0","0",[-1,1,-2,0,0,0,0,0]],
@@ -568,6 +587,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "yd":["0.9144","1","0","0",[1,0,0,0,0,0,0,0]],
 "year":["31556952","1","0","0",[0,0,1,0,0,0,0,0]],
 "yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"yuan":["1","1","0","CNY",[0,0,0,0,0,0,0,1]],
 "£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "¥":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
 "°":["3.14159265358979","180","0","0",[0,0,0,0,0,0,0,0]],
@@ -579,7 +599,9 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Å":["0.0000000001","1","0","0",[1,0,0,0,0,0,0,0]],
 "Ω":["1","1","0","siSymbol",[2,1,-3,-2,0,0,0,0]],
 "”":["0.0254","1","0","0",[1,0,0,0,0,0,0,0]],
+"₣":["0.9284","1","0","CHF",[0,0,0,0,0,0,0,1]],
 "₨":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
+"₹":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "₪":["1","1","0","ILS",[0,0,0,0,0,0,0,1]],
 "€":["1","1","0","EUR",[0,0,0,0,0,0,0,1]],
 "℃":["1","1","273.15","0",[0,0,0,0,1,0,0,0]],
@@ -595,30 +617,40 @@ const synonyms = Object.freeze({
   "dollar": "USD",
   "A$": "AUD",
   "Australian dollar": "AUD",
-  "Brazilian Real": "BRL",
+  "Brazilian real": "BRL",
   "real": "BRL",
   "R$": "BRL",
-  "British Pound": "GBP",
+  "British pound": "GBP",
   "£": "GBP",
   "C$": "CAD",
   "Canadian dollar": "CAD",
-  "Chinese Yuan": "CNY",
+  "Chinese yuan": "CNY",
+  "yuan": "CNY",
+  "RMB": "CNY",
+  "CN¥": "CNY",
   "€": "EUR",
   "Euro": "EUR",
   "euro": "EUR",
   "HK$": "HKD",
   "Hong Kong dollar":"HKD",
-  "Indian Rupee": "IDR",
-  "₨": "IDR",
+  "Indian rupee": "INR",
+  "rupee": "INR",
+  "₨": "INR",
+  "₹": "INR",
+  "Rs": "INR",
   "Israeli New Shekel": "ILS",
   "₪": "ILS",
-  "Mexican Peso": "MXN",
-  "Swiss Franc": "CHF",
+  "Mexican peso": "MXN",
+  "Swiss franc": "CHF",
+  "franc": "CHF", // Swiss franc
+  "fr": "CHF",
+  "Fr": "CHF",
+  "₣": "CHF",
   "Won": "KRW",
   "won": "KRW",
   "yen": "JPY",
   "Yen": "JPY",
-  "Japanese Yen": "JPY",
+  "Japanese yen": "JPY",
   "¥": "JPY"
 })
 
@@ -706,7 +738,12 @@ const unitFromWord = (inputStr) => {
       if (unitArray[0] === "0") {
         return errorOprnd("CURRENCY")
       } else {
-        u.factor = Rnl.reciprocal(Rnl.fromString(unitArray[0]))
+        // Call a currency rate from an external source to get up-to-date exchange
+        const rate = runtimeCurrencyRate(currencyCode)
+        if (rate === null) {
+          return errorOprnd("CURRENCY")
+        }
+        u.factor = Rnl.reciprocal(Rnl.fromString(rate))
       }
     } else {
       // TODO: Change factor table to integers and use BigInt() instead of Rnl.fromString

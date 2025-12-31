@@ -1,4 +1,6 @@
 const fs = require('fs') // Node.js file system
+const currencyString = fs.readFileSync('./site/currencyRates.json').toString('utf8')
+globalThis.currencyRates = JSON.parse(currencyString)
 const hurmet = require('./hurmet.cjs');
 // I use md2html.js to build docs for both Hurmet and Temml.
 // If Temml were statically built into md2html, each Temml build

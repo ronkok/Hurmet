@@ -3,7 +3,10 @@
 /* eslint-disable indent-legacy */
 /* eslint-disable no-console */
 
+const fs = require('fs') // Node.js file system
 const hurmet = require('../utils/hurmet.cjs');
+const currencyString = fs.readFileSync('./site/currencyRates.json').toString('utf8')
+globalThis.currencyRates = JSON.parse(currencyString)
 
 /* Unit tests.
  * For unit tests, I merely check if module outputs match their expected output.
@@ -617,7 +620,9 @@ end`, vars)
     [`hypot(3, 4) = @`, `®3/1 ®4/1 hypot 2`, "5"],
     [`hypot(3, 4, 5) = @`, `®3/1 ®4/1 ®5/1 hypot 3`, "7.07106781186548"],
     [`5 mod 3 = @`, `®5/1 ®3/1 modulo`, "2"],
-    [`5 2/3 + 1 1/3 = @`, `®17/3 ®4/3 +`, "7"]
+    [`5 2/3 + 1 1/3 = @`, `®17/3 ®4/3 +`, "7"],
+    [`1USD = @@ USD`, `®1/1 applyUnit USD`, "1 USD"],
+    [`2CAD = C$@@`, `®2/1 applyUnit CAD`, "C$2"]
   ];
 
   const testRegEx = /^(@{1,2})test /

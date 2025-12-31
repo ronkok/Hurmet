@@ -1,8 +1,9 @@
 // Read a Markdown file, run the calcs, and write an HTML file.
 const fs = require('fs')
+const currencyString = fs.readFileSync('./site/currencyRates.json').toString('utf8')
+globalThis.currencyRates = JSON.parse(currencyString)
 const hurmet = require('./hurmet.cjs')
 const temml = require('./temml.cjs');
-// eslint-disable-next-line no-undef
 globalThis.temml = temml;
 
 // This file is typically called as per:   node utils\createGuide.cjs <title>

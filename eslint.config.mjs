@@ -31,7 +31,9 @@ export default [{
             BigInt: true,
         },
 
-        ecmaVersion: 9,
+        // Use modern ECMAScript so globals like `globalThis` are recognized.
+        // (Node engine is >=18, so this is safe.)
+        ecmaVersion: "latest",
         sourceType: "module",
     },
 

@@ -26,7 +26,7 @@ I recommend Russ Rowlett’s [dictionary of units of measurement](http://www.ibi
 |-----------------------|--------------------------------|---------|----------|----|----|----|----|----|---|----|---|----------------------------------|
 | #                     | 0.45359237                     | 0       | 0        | 0  | 1  | 0  | 0  | 0  | 0 | 0  | 0 | pound (mass)                     |
 | $                     | 1                              | 0       | USD      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | US dollar                        |
-| '                     | 0.3048                         | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | Foot                             |
+| '                     | 0.3048                         | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | foot                             |
 | A                     | 1                              | 0       | siSymbol | 0  | 0  | 0  | 1  | 0  | 0 | 0  | 0 | amperes                          |
 | AUD                   | 1                              | 0       | AUD      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 |                                  |
 | Adobe point           | 0.0254/72                      | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | inch/72                          |
@@ -36,20 +36,21 @@ I recommend Russ Rowlett’s [dictionary of units of measurement](http://www.ibi
 | BTU                   | 1055.056                       | 0       | 0        | 2  | 1  | -2 | 0  | 0  | 0 | 0  | 0 | British thermal unit             |
 | BThU                  | 1055.056                       | 0       | 0        | 2  | 1  | -2 | 0  | 0  | 0 | 0  | 0 |                                  |
 | Bq                    | 1                              | 0       | siSymbol | 0  | 0  | -1 | 0  | 0  | 0 | 0  | 0 | becquerel                        |
-| Brazilian Real        | 1                              | 0       | BRL      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 |                                  |
-| British Pound         | 1                              | 0       | GBP      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 |                                  |
+| Brazilian real        | 1                              | 0       | BRL      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 |                                  |
+| British pound         | 1                              | 0       | GBP      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 |                                  |
 | Btu                   | 1055.056                       | 0       | 0        | 2  | 1  | -2 | 0  | 0  | 0 | 0  | 0 | British thermal unit             |
 | C                     | 1                              | 0       | siSymbol | 0  | 0  | 1  | 1  | 0  | 0 | 0  | 0 | coulomb                          |
 | C$                    | 1                              | 0       | CAD      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 |                                  |
-| CAD                   | 1                              | 0       | CAD      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | C$                               |
+| CAD                   | 1                              | 0       | CAD      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | Canadian dollar                  |
 | CCF                   | 2.8316846592                   | 0       | 0        | 3  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | 100 cubic feet                   |
 | CHF                   | 1                              | 0       | CHF      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | Swiss franc                      |
 | CNY                   | 1                              | 0       | CNY      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | Chinese Yuan Renminbi            |
+| CN¥                   | 1                              | 0       | CNY      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 |                                  |
 | CY                    | 0.764554857984                 | 0       | 0        | 3  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | cu yard                          |
 | Calorie               | 4186.8                         | 0       | 0        | 2  | 1  | -2 | 0  | 0  | 0 | 0  | 0 | food calorie                     |
 | Canadian dollar       | 1                              | 0       | CAD      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 |                                  |
 | Celsius               | 1                              | 273.15  | 0        | 0  | 0  | 0  | 0  | 1  | 0 | 0  | 0 |                                  |
-| Chinese Yuan          | 1                              | 0       | CNY      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 |                                  |
+| Chinese yuan          | 1                              | 0       | CNY      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 |                                  |
 | Ci                    | 37000000000                    | 0       | siSymbol | 0  | 0  | -1 | 0  | 0  | 0 | 0  | 0 | curie                            |
 | Ckm                   | 100000                         | 0       | siSymbol | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | 100 km, used for L/100 km        |
 | Da                    | 1.66053872e-24                 | 0       | siSymbol | 0  | 1  | 0  | 0  | 0  | 0 | 0  | 0 |                                  |
@@ -78,11 +79,11 @@ I recommend Russ Rowlett’s [dictionary of units of measurement](http://www.ibi
 | Hz                    | 1                              | 0       | siSymbol | 0  | 0  | -1 | 0  | 0  | 0 | 0  | 0 | hertz                            |
 | ILS                   | 1                              | 0       | ILS      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 |                                  |
 | INR                   | 1                              | 0       | INR      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 |                                  |
-| Indian Rupee          | 1                              | 0       | INR      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 |                                  |
+| Indian rupee          | 1                              | 0       | INR      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 |                                  |
 | Israeli New Shekel    | 1                              | 0       | ILS      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 |                                  |
 | J                     | 1                              | 0       | siSymbol | 2  | 1  | -2 | 0  | 0  | 0 | 0  | 0 | joule                            |
 | JPY                   | 1                              | 0       | JPY      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | yen                              |
-| Japanese Yen          | 1                              | 0       | JPY      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | yen                              |
+| Japanese yen          | 1                              | 0       | JPY      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | yen                              |
 | Joule                 | 1                              | 0       | 0        | 2  | 1  | -2 | 0  | 0  | 0 | 0  | 0 | 1 N·m                            |
 | Julian year           | 31557600                       | 0       | 0        | 0  | 0  | 1  | 0  | 0  | 0 | 0  | 0 | 365.24 days                      |
 | Jy                    | 1e-26                          | 0       | siSymbol | 0  | 1  | -2 | 0  | 0  | 0 | 0  | 0 | jansky                           |
@@ -102,7 +103,7 @@ I recommend Russ Rowlett’s [dictionary of units of measurement](http://www.ibi
 | MXN                   | 1                              | 0       | MXN      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | Mexican peso                     |
 | Mach                  | 331.6                          | 0       | 0        | 1  | 0  | -1 | 0  | 0  | 0 | 0  | 0 | speed relative to speed of sound |
 | Mbbl                  | 158.987294928                  | 0       | 0        | 3  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | 1000 barrels                     |
-| Mexican Peso          | 1                              | 0       | MXN      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 |                                  |
+| Mexican peso          | 1                              | 0       | MXN      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 |                                  |
 | MiB                   | 8388608                        | 0       | 0        | 0  | 0  | 0  | 0  | 0  | 1 | 0  | 0 | megabyte = 8×2^20 bits           |
 | Mscfd                 | 0.00032774128                  | 0       | 0        | 3  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | 1000 std cu ft per day           |
 | Mscfh                 | 0.00786579072                  | 0       | 0        | 3  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | 1000 std cu ft per hour          |
@@ -116,13 +117,14 @@ I recommend Russ Rowlett’s [dictionary of units of measurement](http://www.ibi
 | PiB                   | 9007199254740990               | 0       | 0        | 0  | 0  | 0  | 0  | 0  | 1 | 0  | 0 | pebibyte = 8×2^50 bits           |
 | R                     | 0.000258                       | 0       | siSymbol | 0  | -1 | 1  | 1  | 0  | 0 | 0  | 0 | roentgen                         |
 | R$                    | 1                              | 0       | BRL      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | Brazil real                      |
+| RNB                   | 1                              | 0       | CNY      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | Chinese Yuan Renminbi            |
 | RT                    | 3516.8532                      | 0       | 0        | 2  | 1  | -3 | 0  | 0  | 0 | 0  | 0 | ton refrig'n                     |
-| RUB                   | 1                              | 0       | RUB      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | Russion rouble                |
+| RUB                   | 1                              | 0       | RUB      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | Russion ruble                    |
 | S                     | 1                              | 0       | siSymbol | -2 | -1 | 3  | 2  | 0  | 0 | 0  | 0 | siemen                           |
 | SF                    | 0.09290304                     | 0       | 0        | 2  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | square feet                      |
 | SY                    | 0.83612736                     | 0       | 0        | 2  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | square yards                     |
 | Sv                    | 1                              | 0       | siSymbol | 2  | 0  | -2 | 0  | 0  | 0 | 0  | 0 | sievert                          |
-| Swiss Franc           | 1                              | 0       | CHF      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 |                                  |
+| Swiss franc           | 1                              | 0       | CHF      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 |                                  |
 | T                     | 1                              | 0       | siSymbol | -2 | -2 | -2 | -1 | 0  | 0 | 0  | 0 | tesla (flux density)             |
 | TB                    | 8796093022208                  | 0       | 0        | 0  | 0  | 0  | 0  | 0  | 1 | 0  | 0 | terabyte = 8×2^40 bits           |
 | TWD                   | 1                              | 0       | TWD      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | New Taiwan Dollar                |
@@ -535,6 +537,7 @@ I recommend Russ Rowlett’s [dictionary of units of measurement](http://www.ibi
 | yd                    | 0.9144                         | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 |                                  |
 | year                  | 31556952                       | 0       | 0        | 0  | 0  | 1  | 0  | 0  | 0 | 0  | 0 | avg Gregorian year               |
 | yen                   | 1                              | 0       | JPY      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 |                                  |
+| yuan                  | 1                              | 0       | CNY      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 |                                  |
 | £                     | 1                              | 0       | GBP      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 |                                  |
 | ¥                     | 1                              | 0       | JPY      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 |                                  |
 | °                     | 3.14159265358979/180           | 0       | 0        | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | degree (plane angle)             |
@@ -546,7 +549,9 @@ I recommend Russ Rowlett’s [dictionary of units of measurement](http://www.ibi
 | Å                     | 0.0000000001                   | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | angstrom                         |
 | Ω                     | 1                              | 0       | siSymbol | 2  | 1  | -3 | -2 | 0  | 0 | 0  | 0 | ohm                              |
 | ”                     | 0.0254                         | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | Inch                             |
+| ₣                     | 1                              | 0       | CHF      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | Swiss franc                      |
 | ₨                     | 1                              | 0       | INR      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | Indian Rupee                     |
+| ₹                     | 1                              | 0       | INR      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | Indian Rupee                     |
 | ₪                     | 1                              | 0       | ILS      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | New Skekel                       |
 | €                     | 1                              | 0       | EUR      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | Euro                             |
 | ℃                     | 1                              | 273.15  | 0        | 0  | 0  | 0  | 0  | 1  | 0 | 0  | 0 |                                  |
