@@ -7,7 +7,7 @@
    <link rel="manifest" href="/app.webmanifest">
    <link rel="icon" href="/images/favicon.svg">
    <link rel="stylesheet" href="/docStyles.min.css">
-   <script>globalThis.currencyRates = {"USD":"1.1642","JPY":"183.52","CZK":"24.337","DKK":"7.4724","GBP":"0.86770","HUF":"386.03","PLN":"4.2138","RON":"5.0902","SEK":"10.7480","CHF":"0.9314","ISK":"147.40","NOK":"11.7765","TRY":"50.1841","AUD":"1.7441","BRL":"6.2733","CAD":"1.6163","CNY":"8.1288","HKD":"9.0763","IDR":"19628.24","ILS":"3.6745","INR":"105.0335","KRW":"1699.55","MXN":"20.9879","MYR":"4.7424","NZD":"2.0339","PHP":"68.935","SGD":"1.4984","THB":"36.632","ZAR":"19.2966","EUR":"1.0"}</script>
+   <script>globalThis.currencyRates = {"USD":"1.1617","JPY":"183.67","CZK":"24.286","DKK":"7.4712","GBP":"0.86700","HUF":"385.33","PLN":"4.2248","RON":"5.0908","SEK":"10.7190","CHF":"0.9313","ISK":"146.40","NOK":"11.7203","TRY":"50.2784","AUD":"1.7344","BRL":"6.2411","CAD":"1.6135","CNY":"8.0967","HKD":"9.0613","IDR":"19653.76","ILS":"3.6600","INR":"105.3970","KRW":"1711.10","MXN":"20.5333","MYR":"4.7136","NZD":"2.0179","PHP":"68.995","SGD":"1.4962","THB":"36.535","ZAR":"19.0382","EUR":"1.0"}</script>
 </head>
 
 <body>
