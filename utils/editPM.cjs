@@ -6,9 +6,9 @@ const fs = require('fs')  // Node.js file system
 // 3. Insert a Hurmet Recalc-All command after each paste event.
 
 let str = fs.readFileSync('preview/prosemirror.js').toString('utf8')
-let match = /  this\.colgroup/.exec(str)
+let match = /\t\tthis\.colgroup/.exec(str)
 str = str.slice(0, match.index)
-  + "  this.table.className = node.attrs.class;\n    this.table.id = node.attrs.name;\n   "
+  + "\t\tthis.table.className = node.attrs.class;\n\t\tthis.table.id = node.attrs.name;\n\t"
   + str.slice(match.index + 1);
 
 match = /table\.style\.minWidth = totalWidth \+ "px";\s+}/.exec(str)
