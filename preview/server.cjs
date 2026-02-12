@@ -1,83 +1,131 @@
-// npm-Free Server by The Jared Wilcurt
-// All you need to run this is an installed copy of Node.JS
-// Put this next to the files you want to serve and run: node server.js
+// server.cjs
+const http = require('http');
+const fs = require('fs');              // for watchFile
+const fsp = require('fs').promises;    // for readFile
+const path = require('path');
+const { URL } = require('url');
+const WebSocket = require('ws');
 
-// Require in some of the native stuff that comes with Node
-var http = require('http');
-var url = require('url');
-var path = require('path');
-var fs = require('fs');
-// Port number to use
-var port = process.argv[2] || 8000;
-// Colors for CLI output
-var WHT = '\x27[39m';
-var RED = '\x27[91m';
-var GRN = '\x27[32m';
+// -----------------------------
+// CLI arguments
+// -----------------------------
+const filename = process.argv[2];
+const port = Number(process.argv[3]) || 8000;
 
-// Create the server
-http.createServer(function (request, response) {
+if (!filename) {
+  console.error("Usage: node server.cjs <filename> <port>");
+  process.exit(1);
+}
 
-    // The requested URL, like http://localhost:8000/file.html => /file.html
-    var uri = url.parse(request.url).pathname;
-    // get the /file.html from above and then find it from the current folder
-    var filename = path.join(process.cwd(), uri);
+const ext = path.extname(filename).toLowerCase();
+const fullPath = path.resolve(filename);
+const root = path.dirname(fullPath);
 
-    // Setting up MIME-Type (YOU MAY NEED TO ADD MORE HERE) <--------
-    var contentTypesByExtension = {
-        '.html': 'text/html',
-        '.css':  'text/css',
-        '.js':   'text/javascript',
-        '.json': 'text/json',
-        '.svg':  'image/svg+xml'
-    };
+// -----------------------------
+// MIME types
+// -----------------------------
+const mime = {
+  '.html': 'text/html',
+  '.js': 'text/javascript',
+  '.css': 'text/css',
+  '.json': 'application/json',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.svg': 'image/svg+xml',
+  '.md': 'text/plain'
+};
 
-    // Check if the requested file exists
-    fs.exists(filename, function (exists) {
-        // If it doesn't
-        if (!exists) {
-            // Output a red error pointing to failed request
-            console.log(RED + 'FAIL: ' + filename);
-            // Redirect the browser to the 404 page
-            filename = path.join(process.cwd(), '/404.html');
-        // If the requested URL is a folder, like http://localhost:8000/catpics
-        } else if (fs.statSync(filename).isDirectory()) {
-            // Output a green line to the console explaining what folder was requested
-            console.log(GRN + 'FLDR: ' + WHT + filename);
-            // redirect the user to the index.html in the requested folder
-            filename += '/index.html';
+// -----------------------------
+// Static file server
+// -----------------------------
+const server = http.createServer(async (req, res) => {
+  try {
+    const url = new URL(req.url, `http://${req.headers.host}`);
+
+    let fileToServe;
+
+    if (ext === '.html') {
+      // HTML mode: serve directory
+      const pathname = url.pathname === '/' ? '/index.html' : url.pathname;
+      fileToServe = path.join(root, pathname);
+    } else if (ext === '.md') {
+      // Markdown mode: always serve the single file
+      fileToServe = fullPath;
+    } else {
+      throw new Error("Unsupported file type");
+    }
+
+    const data = await fsp.readFile(fileToServe);
+    const type = mime[path.extname(fileToServe)] || 'text/plain';
+
+    res.writeHead(200, { 'Content-Type': type });
+    res.end(data);
+
+  } catch (err) {
+    res.writeHead(404);
+    res.end('Not found');
+  }
+});
+
+// -----------------------------
+// WebSocket server
+// -----------------------------
+const wss = new WebSocket.Server({ server });
+
+wss.on('connection', ws => {
+  console.log('Hurmet connected for auto-reload');
+});
+
+// -----------------------------
+// File watcher (Windows-safe)
+// -----------------------------
+function sendUpdate(updatedContent) {
+  const message = JSON.stringify({
+    type: 'update',
+    content: updatedContent
+  });
+
+  wss.clients.forEach(client => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(message);
+    }
+  });
+}
+
+if (ext === '.md') {
+  // Markdown mode: watch only the single file
+  fs.watchFile(fullPath, { interval: 300 }, async () => {
+    console.log(`Changed: ${fullPath}`);
+    const updated = await fsp.readFile(fullPath, 'utf8');
+    sendUpdate(updated);
+  });
+
+} else if (ext === '.html') {
+  // HTML mode: watch entire directory
+  function watchRecursive(dir) {
+    fs.readdir(dir, { withFileTypes: true }, (err, entries) => {
+      if (err) return;
+
+      for (const entry of entries) {
+        const p = path.join(dir, entry.name);
+
+        if (entry.isDirectory()) {
+          watchRecursive(p);
+        } else {
+          fs.watchFile(p, { interval: 300 }, async () => {
+            console.log(`Changed: ${p}`);
+            const updated = await fsp.readFile(p, 'utf8');
+            sendUpdate(updated);
+          });
         }
-
-        // Assuming the file exists, read it
-        fs.readFile(filename, 'binary', function (err, file) {
-            // Output a green line to console explaining the file that will be loaded in the browser
-            console.log(GRN + 'FILE: ' + WHT + filename);
-            // If there was an error trying to read the file
-            if (err) {
-                // Put the error in the browser
-                response.writeHead(500, {'Content-Type': 'text/plain'});
-                response.write(err + '\n');
-                response.end();
-                return;
-            }
-
-            // Otherwise, declare a headers object and a var for the MIME-Type
-            var headers = {};
-            var contentType = contentTypesByExtension[path.extname(filename)];
-            // If the requested file has a matching MIME-Type
-            if (contentType) {
-                // Set it in the headers
-                headers['Content-Type'] = contentType;
-            }
-
-            // Output the read file to the browser for it to load
-            response.writeHead(200, headers);
-            response.write(file, 'binary');
-            response.end();
-        });
-
+      }
     });
+  }
 
-}).listen(parseInt(port, 10));
+  watchRecursive(root);
+}
 
-// Message to display when server is started
-console.log(WHT + 'Static file server running at\n  => http://localhost:' + port + '/\nCTRL + C to shutdown');
+// -----------------------------
+server.listen(port, () => {
+  console.log(`Serving ${filename} on http://localhost:${port}`);
+});
