@@ -669,6 +669,7 @@ const unitFromWord = (inputStr) => {
   if (inputStr === "") { return u }
   let word = ""
   let unitArray
+  // eslint-disable-next-line no-useless-assignment
   let doTheSearch = false
   let prefix = ""
   let gotSiPrefixUnit = false
@@ -805,6 +806,7 @@ export const unitFromUnitName = memoizeFunction(function(inputStr) {
   // Parse str for compound units
   const tokenSep = ";"
   let inExponent = false
+  // eslint-disable-next-line no-useless-assignment
   let ch = ""
   let word = ""
   let rpnString = ""

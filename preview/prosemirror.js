@@ -11493,7 +11493,17 @@ class DOMObserver {
                 }
             }
         }
-        if (gecko && added.length) {
+        if (added.some(n => n.nodeName == "BR") && (view.input.lastKeyCode == 8 || view.input.lastKeyCode == 46)) {
+            // Browsers sometimes insert a bogus break node if you
+            // backspace out the last bit of text before an inline-flex node (#1552)
+            for (let node of added)
+                if (node.nodeName == "BR" && node.parentNode) {
+                    let after = node.nextSibling;
+                    if (after && after.nodeType == 1 && after.contentEditable == "false")
+                        node.parentNode.removeChild(node);
+                }
+        }
+        else if (gecko && added.length) {
             let brs = added.filter(n => n.nodeName == "BR");
             if (brs.length == 2) {
                 let [a, b] = brs;
@@ -11510,17 +11520,6 @@ class DOMObserver {
                         br.remove();
                 }
             }
-        }
-        else if ((chrome || safari) && added.some(n => n.nodeName == "BR") &&
-            (view.input.lastKeyCode == 8 || view.input.lastKeyCode == 46)) {
-            // Chrome/Safari sometimes insert a bogus break node if you
-            // backspace out the last bit of text before an inline-flex node (#1552)
-            for (let node of added)
-                if (node.nodeName == "BR" && node.parentNode) {
-                    let after = node.nextSibling;
-                    if (after && after.nodeType == 1 && after.contentEditable == "false")
-                        node.parentNode.removeChild(node);
-                }
         }
         let readSel = null;
         // If it looks like the browser has reset the selection to the

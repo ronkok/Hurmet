@@ -24,6 +24,7 @@ export const plugValsIntoEcho = (str, vars, unitAware, formatSpec, formats) => {
     const matchLength = match[0].length
     const pos = match.index
     let hvar
+    // eslint-disable-next-line no-useless-assignment
     let display = ""
 
     if (varName.indexOf(".") > -1) {

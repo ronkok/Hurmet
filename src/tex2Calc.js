@@ -342,6 +342,7 @@ export const tex2Calc = (str, displayMode = false) => {
 
       case tt.UNARY: {
         if (verbatims.has(token.input)) {
+          // eslint-disable-next-line no-useless-assignment
           let arg = ""
           if (kerns.includes(token.input) && str[0] !== "{") {
             arg = unbracedDistance(str)

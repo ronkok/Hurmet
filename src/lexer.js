@@ -64,6 +64,7 @@ const unitRegEx = /^(?:'[^']+'|[°ΩÅK])/
 const dateRegEx = /^'\d{4}-\d{1,2}-\d{1,2}'/
 
 export const texFromNumStr = (numParts, decimalFormat) => {
+  // eslint-disable-next-line no-useless-assignment
   let num = ""
   if (numParts[2]) {
     // Hexadecimal
@@ -787,6 +788,7 @@ const lexOneWord = (str, prevToken) => {
     } else if (prevToken.ttype === tt.ACCESSOR) {
       return [match, match, match, tt.PROPERTY, ""]
     } else if (subOrAccentRegEx.test(match)) {
+      // eslint-disable-next-line no-useless-assignment
       let identifier = ""
       if (!subRegEx.test(match)) {
         identifier = checkForTrailingAccent(match)
@@ -844,8 +846,10 @@ export const lexUnitName = str => {
 export const lex = (str, formats, prevToken, inRealTime = false) => {
   // Get the next token in str. Return an array with the token's information:
   // [input, TeX output, calc output, type, associated close delimiter]
+  /* eslint-disable no-useless-assignment */
   let pos = 0
   let st = ""
+  /* eslint-enable no-useless-assignment */
   let matchObj
 
   if (str.length > 3 && str.slice(0, 3) === "===") {
@@ -890,6 +894,7 @@ export const lex = (str, formats, prevToken, inRealTime = false) => {
     pos = str.indexOf("`", (str.charAt(2) === "`" ? 3 : 2))
     const inputStr = (pos > 0 ? str.slice(2, pos) : str.slice(2))
     const st = tablessTrim(inputStr)
+    // eslint-disable-next-line no-useless-assignment
     let tex = ""
     if (inRealTime) {
       tex = DataFrame.quickDisplay(st)

@@ -158,6 +158,7 @@ export const compileSheet = (table, formats) => {
       const entry = cell.attrs.entry
       if (i === 0) {
         const str = md2text(entry)
+        // eslint-disable-next-line no-useless-assignment
         let heading = ""
         let unitName = ""
         const posNewline = str.indexOf("\n")

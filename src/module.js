@@ -91,6 +91,7 @@ const scanFunction = (lines, formats, startLineNum) => {
   const line1 = stripComment(lines[startLineNum])
   let isDraw = line1.charAt(0) === "d"
   const posParen = line1.indexOf("(")
+  // eslint-disable-next-line no-useless-assignment
   let functionName = ""
   if (isDraw) {
     functionName = "draw"
@@ -120,11 +121,13 @@ const scanFunction = (lines, formats, startLineNum) => {
     statements: []
   }
 
-  const stackOfCtrls = []
+  const stackOfCtrls = [];
+  /* eslint-disable no-useless-assignment */
   let expression = ""
+  let name = ""
+  /* eslint-enable no-useless-assignment */
   let prevLineEndedInContinuation = false
   let prevLine = ""
-  let name = ""
   let isStatement = false
 
   let j = startLineNum
@@ -216,8 +219,10 @@ const scanFunction = (lines, formats, startLineNum) => {
     isStatement = false
     prevLineEndedInContinuation = false
     prevLine = ""
+    /* eslint-disable no-useless-assignment */
     name = ""
     expression = ""
+    /* eslint-enable no-useless-assignment */
   }
   return [errorOprnd("END_MISS", functionName), 0]
 }

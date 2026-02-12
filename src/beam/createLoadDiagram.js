@@ -94,6 +94,7 @@ text, tspan { font: 12px Arial; }`
   diagram.push({ tag: "path", attrs: { d, stroke: "black", "fill-opacity": "0.0" } })
 
   // Write in the line load values
+  // eslint-disable-next-line no-useless-assignment
   let lastSegUniform = false
   let firstSegment
   let xFirstSegment = 0
@@ -178,6 +179,7 @@ text, tspan { font: 12px Arial; }`
       }
     } else {
       // We've got a distributed sloping load
+      // eslint-disable-next-line no-useless-assignment
       lastSegUniform = false
       const s = i === 0
         ? 0

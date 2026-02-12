@@ -249,18 +249,16 @@ const fontedChar = (ch, accentName) => {
     case "cc": // caligraphic
     case "ff": { // sans-serif
       const code = ch.charCodeAt(0)
-      let newChar = ""
       if (code < 0x0041 || code > 0x007a) { return null }
       const isSmall = code < 0x005b ? 0 : 1
       if (accentName === "cc" && isSmall && code !== 0x006c) { return null }
       if (code > 0x005a && accentName === "bbb") { return null }
       const lowSurrogate = code + lowSurrogateDiff[accentName][isSmall]
       if (wideExceptions.includes(lowSurrogate)) {
-        newChar = accentName === "bbb" ? bbb[ch] : calligraphic[ch]
+        return accentName === "bbb" ? bbb[ch] : calligraphic[ch]
       } else {
-        newChar = "\uD835" + String.fromCharCode(lowSurrogate)
+        return "\uD835" + String.fromCharCode(lowSurrogate)
       }
-      return newChar
     }
 
     default:

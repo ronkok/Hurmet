@@ -180,10 +180,12 @@ const invert = (matrix, returnDeterminant) => {
     return errorOprnd("NONSQUARE")
   }
   const dim = matrix.length
+  /* eslint-disable no-useless-assignment */
   let i = 0
   let ii = 0
   let j = 0
   let temp = Rnl.zero
+  /* eslint-enable no-useless-assignment */
   let determinant = Rnl.one
 
   const C = clone(matrix)
@@ -266,9 +268,11 @@ const submatrix = (oprnd, index, colIndex) => {
   let dtype = oprnd.dtype
 
   // Get the row index
+  /* eslint-disable no-useless-assignment */
   let start = 0
-  let step = 1
   let end = 0
+  /* eslint-enable no-useless-assignment */
+  let step = 1
   if (index.dtype & dt.RANGE) {
     start = Rnl.toNumber(index.value[0])
     step = Rnl.toNumber(index.value[1])

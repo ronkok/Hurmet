@@ -79,6 +79,7 @@ export function openMathPrompt(options) {
   mathDisplay.setAttribute("class", "math-display")
 
   const renderMath = function(code) {
+    // eslint-disable-next-line no-useless-assignment
     let tex = ""
     let isUDF = false
     if (isCalculation) {

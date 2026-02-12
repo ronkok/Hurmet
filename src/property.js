@@ -32,6 +32,7 @@ export function propertyFromDotAccessor(parent, index, unitAware) {
       const colIndex = alphaRegEx.test(key) ? key : parent.columnMap[key];
       const v = [];
       let unit = null
+      // eslint-disable-next-line no-useless-assignment
       let dtype = null
       if (parent.value[colIndex + "1"].dtype & dt.RATIONAL) {
         for (let i = 1; i < parent.numRows; i++) {

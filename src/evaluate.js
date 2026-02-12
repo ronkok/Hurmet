@@ -892,8 +892,10 @@ export const evalRpn = (rpn, vars, formats, unitAware, lib) => {
           const args = [];
           args.push(stack.pop())
           if (!(args[0].dtype & dt.RATIONAL)) { return errorOprnd("") }
+          /* eslint-disable no-useless-assignment */
           let expos = null
           let dtype = 0
+          /* eslint-enable no-useless-assignment */
           for (let j = 0; j < numArgs - 1; j++) {
             args.push(stack.pop())
             if (!(args[1].dtype & dt.RATIONAL)) { return errorOprnd("") }
@@ -1575,6 +1577,7 @@ const elementFromIterable = (iterable, index, step) => {
   let value
   let nextIndex = Rnl.increment(index)
   const i = Rnl.toNumber(index)
+  // eslint-disable-next-line no-useless-assignment
   let dtype = 0
   if (iterable.dtype === dt.RANGE) {
     value = index
@@ -2059,6 +2062,7 @@ export const evaluate = (
 
   if (stmt.rpn) {
     let oprnd = evalRpn(stmt.rpn, vars, formats, isUnitAware)
+    // eslint-disable-next-line no-useless-assignment
     if (oprnd.dtype === dt.ERROR) { [stmt, oprnd] = errorResult(stmt, oprnd); return stmt}
     let result
     ;[stmt, result] = conditionResult(stmt, oprnd, isUnitAware)

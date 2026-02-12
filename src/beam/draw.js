@@ -96,10 +96,12 @@ const momentArrow = (xCtr, yCtr, thetaAtArrowPoint, subtendedAngle, isCounterClo
   const startAnglePrime = startAngle - sgn * (2 * 0.9 * arrowHeadLength / diameter)
   const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1"
 
+  /* eslint-disable no-useless-assignment */
   let xStart = 0
   let yStart = 0
   let xEnd = 0
   let yEnd = 0
+  /* eslint-enable no-useless-assignment */
   if (sgn > 0) {
     xEnd = (xCtr + r * Math.cos(startAnglePrime)).toFixed(2)   // arrow end
     yEnd = (yCtr - r * Math.sin(startAnglePrime)).toFixed(2)

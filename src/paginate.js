@@ -515,6 +515,7 @@ const linearSearchForOverflow = (textNode, yMax, offset) => {
   // `offset` is near the overflow point.
   // Do a linear search to find the exact point.
   const str = textNode.wholeText
+  // eslint-disable-next-line no-useless-assignment
   let char = ""
   const range = new Range()
   range.setStart(textNode, offset)

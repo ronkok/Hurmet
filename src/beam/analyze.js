@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-assignment */
 import { clone } from "../utils"
 
 const dotProduct = (a, b) => a.map((e, i) => (e * b[i])).reduce((m, n) => m + n)
@@ -186,7 +187,7 @@ export function doAnalysis(beam, nodes, spans) {
   //For the live loads, find a different mam due to loads on each individual span.
   for (let loadType = 0; loadType <= 9; loadType++) {
     if (loadType === 0 || gotType[loadType]) {
-      let lastK = 0
+      let lastK = 1
       let doPatterns = false // patterned live loads
       if (loadType === 0) {
         doPatterns = false

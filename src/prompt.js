@@ -127,8 +127,10 @@ export function openPrompt(options) {
     const sel = document.getSelection()
     let node = sel.anchorNode
     let inMathZone = false
+    /* eslint-disable no-useless-assignment */
     let start = -1
     let end = -1
+    /* eslint-enable no-useless-assignment */
     if (node.nodeType === 3 && node.parentNode.parentNode.classList.contains("math-code")) {
       inMathZone = true
       start = Math.min(sel.anchorOffset, sel.extentOffset)

@@ -533,6 +533,7 @@ const functions = {
       (attrs.height - end[1] * attrs.yunitlength - attrs.origin[1])
     node.attrs.d = str
     setStrokeAndFill(node, attrs)
+    // eslint-disable-next-line no-useless-assignment
     let v = 0
     if (attrs.marker === "arrow" || attrs.marker === "arrowdot") {
       const u = [(end[1] - start[1]) / 4, (start[0] - end[0]) / 4];
@@ -620,6 +621,7 @@ const functions = {
     // Get the text position
     const p = rationals2numbers(plistOprnd.value[0])
     const q = rationals2numbers(plistOprnd.value[plistOprnd.value.length - 1])
+    // eslint-disable-next-line no-useless-assignment
     let pos = "right"
     if (Math.abs(p[0] - q[0]) >= Math.abs(p[1] - q[1])) {
       pos = p[0] >= q[0] ? "right" : "left"

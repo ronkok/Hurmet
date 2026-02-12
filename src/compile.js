@@ -52,6 +52,7 @@ export const compile = (
   inputStr,
   formats = { decimalFormat: "1,000,000.", dateFormat: "yyyy-mm-dd" }
 ) => {
+  /* eslint-disable no-useless-assignment */
   let leadStr = ""
   let mainStr = ""
   let trailStr = ""
@@ -72,6 +73,7 @@ export const compile = (
   let unit
   let dtype
   let str = ""
+  /* eslint-enable no-useless-assignment */
 
   const isModule = moduleRegEx.test(inputStr)
   const isDraw = drawRegEx.test(inputStr)

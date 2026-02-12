@@ -83,6 +83,7 @@ export const checkForNumericSubscript = varName => {
 export const arrayOfRegExMatches = (regex, text) => {
   if (regex.constructor !== RegExp) { throw new Error('not RegExp') }
   const result = [];
+  // eslint-disable-next-line no-useless-assignment
   let match = null
 
   /* eslint-disable no-cond-assign */

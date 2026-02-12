@@ -733,6 +733,7 @@ export const multivarFunction = (arity, functionName, args) => {
   } else {
     // We have multiple arguments.
     // Is one of them a vector or a matrix?
+    // eslint-disable-next-line no-useless-assignment
     let iArg = 0;
     let gotVector = false;
     let gotMatrix = false

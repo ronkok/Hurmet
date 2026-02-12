@@ -115,6 +115,7 @@ const openParenRegEx = /^ *\(/
 
 const exponentOfFunction = (str, decimalFormat, isCalc) => {
   // As in: sin²()
+  // eslint-disable-next-line no-useless-assignment
   let expoInput = ""
   if (str.charAt(0) !== "^") {
     expoInput = /^⁻?[⁰¹²³\u2074-\u2079⁻]+/.exec(str)[0]
@@ -321,7 +322,8 @@ export const parse = (
   let token = {}
   let prevToken = { input: "", output: "", ttype: 50 }
   const dependencies = [];
-  const exponentPrec = rpnPrecFromType[tt.SUP]
+  const exponentPrec = rpnPrecFromType[tt.SUP];
+  /* eslint-disable no-useless-assignment */
   let mustLex = true
   let mustAlign = false
   let posOfPrevRun = 0
@@ -339,6 +341,7 @@ export const parse = (
   let pendingFunctionName = ""
   let tokenSep = "\xa0" // no break space
   let rpnPrec = -1
+  /* eslint-enable no-useless-assignment */
   const exprStack = [] // Use for lazy evalulation of ternary (If) expressions
   let numFreeCommas = 0 // # of items in a tuple
   let posArrow = 0
@@ -396,6 +399,7 @@ export const parse = (
     }
 
     //  Pop operators whose precedence ≥ texPrec. Append a close delimiter for each.
+    // eslint-disable-next-line no-useless-assignment
     let delim = {}
     while (texStack[texStack.length - 1].prec >= texPrec &&
       // Also handle exponents, from right to left, as in 3^4^5

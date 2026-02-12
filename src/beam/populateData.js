@@ -182,6 +182,7 @@ export function populateData(input, factorInput) {
   // (1) A "span" is a section of beam between two user-defined nodes.
   // (2) A "segment" is a section of beam between nodes or points of load discontinuity.
   // Each span thus consists of one or more segments.
+  // eslint-disable-next-line no-useless-assignment
   let i = 0
   let cummulativeLength = Rnl.zero
   const nodes = []

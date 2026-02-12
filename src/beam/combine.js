@@ -94,6 +94,7 @@ export function combine(beam, nodes, spans, actions, deflections, comboSet) {
 
         let iDM = 0
         for (let iSpan = 1; iSpan <= numSpans; iSpan++) {
+          /* eslint-disable no-useless-assignment */
           let vMid = 0
           let vEnd = 0
           let mMid = 0
@@ -101,6 +102,7 @@ export function combine(beam, nodes, spans, actions, deflections, comboSet) {
           let slopeEnd = 0
           let deflectionEnd = 0
           let deflectionMid = 0
+          /* eslint-enable no-useless-assignment */
           for (let k = 0; k < spans[iSpan].segments.length; k++) {
             const seg = spans[iSpan].segments[k]
 
@@ -175,6 +177,7 @@ export function combine(beam, nodes, spans, actions, deflections, comboSet) {
             } else {
               // Determine if this combern contains a shear or moment extreme.
               // Start by finding the shear value in the middle of the segment
+              // eslint-disable-next-line no-useless-assignment
               let xCross = 0 // initialze the variable
               if (seg.slope[combern] !== 0) {
                 xCross = -1 * seg.w1f[combern] / seg.slope[combern]

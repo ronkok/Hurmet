@@ -62,12 +62,14 @@ export const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAw
       stmt.resulttemplate.indexOf("@") > -1 ||
       stmt.resulttemplate.indexOf("%") > -1) {
     stmt.value = result.value
+    /* eslint-disable no-useless-assignment */
     let resultDisplay = ""
     let altResultDisplay = ""
     if (stmt.resulttemplate.indexOf("!") > -1) {
       // Suppress display of the result
       resultDisplay = ""
       altResultDisplay = ""
+      /* eslint-enable no-useless-assignment */
       return stmt
 
     } else if (result.dtype & dt.BOOLEAN && testRegEx.test(stmt.entry) &&

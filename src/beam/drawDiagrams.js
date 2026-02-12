@@ -41,6 +41,7 @@ export function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combi
   }
 
   // Draw the reactions.
+  // eslint-disable-next-line no-useless-assignment
   let f = 0
   for (let i = 1; i < nodes.length; i++) {
     const x = beam.xDiagram + beam.xScale * nodes[i].x
@@ -167,6 +168,7 @@ export function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combi
         }
 
         if (seg.Vmax.mid.case === combern || seg.Vmin.mid.case === combern) {
+          // eslint-disable-next-line no-useless-assignment
           let xCross = 0
           if (seg.slope[combern] !== 0) {
             xCross = -1 * seg.w1f[combern] / seg.slope[combern]
@@ -197,6 +199,7 @@ export function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combi
 
         if (seg.Mmax.mid.case === combern || seg.Mmin.mid.case === combern) {
           let xCross = 0 // initialze the variable
+          // eslint-disable-next-line no-useless-assignment
           let mMid = 0
           if (seg.slope[combern] === 0) {
             if (seg.w1f[combern] !== 0) {
@@ -230,9 +233,11 @@ export function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combi
             }
             if (mMid1 > 0 || mMid2 > 0) {
               if (mMid1 > mMid2) {
+                // eslint-disable-next-line no-useless-assignment
                 mMid = mMid1
                 xCross = xCross1
               } else {
+                // eslint-disable-next-line no-useless-assignment
                 mMid = mMid2
                 xCross = xCross2
               }
@@ -364,9 +369,11 @@ export function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combi
     // Insert the max and min deflection values
     beam.deflectionMax = Math.max(Math.abs(deflectionMax), Math.abs(deflectionMin))
     f = beam.SI ? 1000 : (12 / 0.3048)
+    /* eslint-disable no-useless-assignment */
     let sText = ""
     let xText = 0
     let yText = 0
+    /* eslint-enable no-useless-assignment */
     if (deflectionMax > 0.2 * (deflectionMax - deflectionMin)) {
       xText = beam.xDiagram + beam.xScale * xDeflectionMax
       yText = yDeflection - deflectionScale * deflectionMax - 2

@@ -293,6 +293,7 @@ const dataFrameFromTSV = (str, vars) => {
     for (let i = matches.length - 1; i >= 0; i--) {
       const mch = matches[i];
       const varName = checkForNumericSubscript(mch.value.slice(2, -1))
+      // eslint-disable-next-line no-useless-assignment
       let value = ""
       if (varName === "undefined") {
         value = ""
@@ -580,6 +581,7 @@ const quickDisplay = str => {
   // This is called from the lexer for a display that changes with every keystroke.
   if (str === "") { return "" }
   str = str.trim()
+  // eslint-disable-next-line no-useless-assignment
   let arrayFormat = ""
   if (str.charAt(0) === "#") {
     str = str.slice(1).trim()
@@ -590,6 +592,7 @@ const quickDisplay = str => {
   str = addTextEscapes(str)
   const sepRegEx = / *\t */g
   const lines = str.split(/\r?\n/g)
+  // eslint-disable-next-line no-useless-assignment
   let tex = ""
   if (lines.length < 3) {
     tex = "\\begin{matrix}\\text{"
@@ -774,6 +777,7 @@ const display = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHeadin
   if (isNotEmpty(df.units)) {
     if (writeRowNums) { str += "&" }
     for (let j = 0; j < numCols; j++) {
+      // eslint-disable-next-line no-useless-assignment
       let rowTex = ""
       if (df.units[j] && df.units[j].length > 0) {
         const unitTex = unitTeXFromString(df.units[j])

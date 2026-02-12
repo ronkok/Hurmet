@@ -1290,6 +1290,7 @@ export const md2ast = (md, inHtml = false) => {
   }
 
   // Next, get all the footnote definitions
+  // eslint-disable-next-line no-useless-assignment
   capture = null
   while ((capture = footnoteDefRegEx.exec(md)) !== null) {
     state.footnotes.push(capture[1].trim())
