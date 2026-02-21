@@ -37,7 +37,7 @@
     "prosemirror-tables": "latest",
     "prosemirror-transform": "latest",
     "prosemirror-view": "latest",
-    "ws": "^8.19.0"
+    "ws": "latest"
   },
   "devDependencies": {
     "@eslint/eslintrc": "latest",
