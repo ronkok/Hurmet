@@ -16410,7 +16410,7 @@ function hashPath(path) {
 }
 function getIcon(root, icon) {
     let doc = (root.nodeType == 9 ? root : root.ownerDocument) || document;
-    let node = doc.createElement("div");
+    let node = doc.createElement("button");
     node.className = prefix$2;
     if (icon.path) {
         let { path, width, height } = icon;
@@ -16474,23 +16474,28 @@ class MenuItem {
         let spec = this.spec;
         let dom = spec.render ? spec.render(view)
             : spec.icon ? getIcon(view.root, spec.icon)
-                : spec.label ? crelt("div", null, translate(view, spec.label))
+                : spec.label ? crelt("button", null, translate(view, spec.label))
                     : null;
         if (!dom)
             throw new RangeError("MenuItem without icon or label property");
         if (spec.title) {
-            const title = (typeof spec.title === "function" ? spec.title(view.state) : spec.title);
+            let title = (typeof spec.title === "function" ? spec.title(view.state) : spec.title);
             dom.setAttribute("title", translate(view, title));
         }
         if (spec.class)
             dom.classList.add(spec.class);
         if (spec.css)
             dom.style.cssText += spec.css;
-        dom.addEventListener("mousedown", e => {
-            e.preventDefault();
-            if (!dom.classList.contains(prefix$1$1 + "-disabled"))
+        dom.addEventListener("click", e => {
+            if (!dom.classList.contains(prefix$1$1 + "-disabled")) {
+                let setFocus = document.activeElement == dom || document.activeElement == view.dom;
                 spec.run(view.state, view.dispatch, view, e);
+                if (setFocus && document.activeElement == dom)
+                    view.focus();
+            }
         });
+        // Clicking on a menu item should not remove focus from the editor
+        dom.addEventListener("mousedown", e => e.preventDefault());
         function update(state) {
             if (spec.select) {
                 let selected = spec.select(state);
@@ -16502,10 +16507,12 @@ class MenuItem {
             if (spec.enable) {
                 enabled = spec.enable(state) || false;
                 setClass(dom, prefix$1$1 + "-disabled", !enabled);
+                dom.setAttribute("aria-disabled", (!enabled).toString());
             }
             if (spec.active) {
                 let active = enabled && spec.active(state) || false;
                 setClass(dom, prefix$1$1 + "-active", active);
+                dom.setAttribute("aria-pressed", active.toString());
             }
             return true;
         }
@@ -16538,6 +16545,15 @@ class Dropdown {
     */
     options = {}) {
         this.options = options;
+        /**
+        @internal
+        */
+        this.focusables = [];
+        /**
+        @internal
+        */
+        this.focusIndex = 0;
+        this.focusTimeout = -1;
         this.options = options || {};
         this.content = Array.isArray(content) ? content : [content];
     }
@@ -16546,45 +16562,75 @@ class Dropdown {
     */
     render(view) {
         let content = renderDropdownItems(this.content, view);
+        this.focusables = content.focusables;
         let win = view.dom.ownerDocument.defaultView || window;
-        let label = crelt("div", { class: prefix$1$1 + "-dropdown " + (this.options.class || ""),
-            style: this.options.css }, translate(view, this.options.label || ""));
+        let btn = crelt("button", {
+            class: prefix$1$1 + "-dropdown " + (this.options.class || ""),
+            style: this.options.css,
+            "aria-haspopup": "menu",
+            "aria-expanded": "false"
+        }, translate(view, this.options.label || ""));
         if (this.options.title)
-            label.setAttribute("title", translate(view, this.options.title));
-        let wrap = crelt("div", { class: prefix$1$1 + "-dropdown-wrap" }, label);
+            btn.setAttribute("title", translate(view, this.options.title));
+        let wrap = crelt("div", { class: prefix$1$1 + "-dropdown-wrap" }, btn);
         let open = null;
         let listeningOnClose = null;
         let close = () => {
             if (open && open.close()) {
                 open = null;
-                win.removeEventListener("mousedown", listeningOnClose);
+                win.removeEventListener("click", listeningOnClose);
             }
         };
-        label.addEventListener("mousedown", e => {
-            e.preventDefault();
+        btn.addEventListener("click", e => {
             markMenuEvent(e);
             if (open) {
                 close();
             }
             else {
-                open = this.expand(wrap, content.dom);
-                win.addEventListener("mousedown", listeningOnClose = () => {
+                open = this.expand(wrap, content.dom, btn);
+                win.addEventListener("click", listeningOnClose = () => {
                     if (!isMenuEvent(wrap))
                         close();
                 });
+                // If triggered using the keyboard, move focus to first item
+                if (e.detail === 0) {
+                    let focusIndex = findFocusableIndex(this.focusables, -1, 1);
+                    if (focusIndex != null)
+                        this.setFocusIndex(focusIndex);
+                }
+                open.node.addEventListener("keydown", (event) => {
+                    markMenuEvent(event);
+                    if (keyboardMoveFocus(this, event, "vertical")) ;
+                    else if (event.key === "Escape") {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        close();
+                        btn.focus();
+                    }
+                });
+                open.node.addEventListener("focusout", () => {
+                    clearTimeout(this.focusTimeout);
+                    this.focusTimeout = setTimeout(() => {
+                        let active = win.document.activeElement;
+                        if (active && open && !open.node.contains(active))
+                            close();
+                    }, 20);
+                });
             }
         });
+        // Clicking on a dropdown should not remove focus from the editor
+        btn.addEventListener("mousedown", e => e.preventDefault());
         function update(state) {
             let inner = content.update(state);
             wrap.style.display = inner ? "" : "none";
             return inner;
         }
-        return { dom: wrap, update };
+        return { dom: wrap, update, focusable: btn };
     }
     /**
     @internal
     */
-    expand(dom, items) {
+    expand(dom, items, trigger) {
         let menuDOM = crelt("div", { class: prefix$1$1 + "-dropdown-menu " + (this.options.class || "") }, items);
         let done = false;
         function close() {
@@ -16592,20 +16638,72 @@ class Dropdown {
                 return false;
             done = true;
             dom.removeChild(menuDOM);
+            trigger.ariaControlsElements = [];
+            trigger.setAttribute("aria-expanded", "false");
             return true;
         }
         dom.appendChild(menuDOM);
+        trigger.ariaControlsElements = [items];
+        trigger.setAttribute("aria-expanded", "true");
         return { close, node: menuDOM };
     }
+    setFocusIndex(index) {
+        if (this.focusables.length <= 1)
+            return;
+        this.focusables[this.focusIndex].setAttribute("tabindex", "-1");
+        this.focusIndex = index;
+        let nextFocusItem = this.focusables[index];
+        nextFocusItem.setAttribute("tabindex", "0");
+        nextFocusItem.focus();
+    }
+}
+function findFocusableIndex(focusables, startIndex, delta) {
+    let length = focusables.length;
+    for (let i = 0, index = startIndex + delta;; index += delta, i++) {
+        let normIndex = (index + length) % length;
+        if (focusables[normIndex].style.display != "none")
+            return normIndex;
+        if (i == length)
+            return null;
+    }
+}
+function keyboardMoveFocus(control, event, orientation) {
+    let { focusables, focusIndex } = control;
+    let move = event.key == (orientation == "vertical" ? "ArrowDown" : "ArrowRight") ? findFocusableIndex(focusables, focusIndex, 1) :
+        event.key == (orientation == "vertical" ? "ArrowUp" : "ArrowLeft") ? findFocusableIndex(focusables, focusIndex, -1) :
+            event.key == "Home" ? findFocusableIndex(focusables, -1, 1) :
+                event.key == "End" ? findFocusableIndex(focusables, focusables.length, -1) : null;
+    if (move == null)
+        return false;
+    event.preventDefault();
+    event.stopPropagation();
+    control.setFocusIndex(move);
+    return true;
 }
 function renderDropdownItems(items, view) {
-    let rendered = [], updates = [];
+    let elts = [], focusables = [], updates = [];
     for (let i = 0; i < items.length; i++) {
-        let { dom, update } = items[i].render(view);
-        rendered.push(crelt("div", { class: prefix$1$1 + "-dropdown-item" }, dom));
+        let item = items[i];
+        let { dom, update, focusable } = item.render(view);
+        elts.push(crelt("li", {
+            class: `${prefix$1$1}-dropdown-item`,
+            role: "menuitem",
+            "tabindex": "-1"
+        }, dom));
+        focusables.push(focusable || dom);
         updates.push(update);
     }
-    return { dom: rendered, update: combineUpdates(updates, rendered) };
+    function update(state) {
+        let something = false;
+        for (let i = 0; i < elts.length; i++) {
+            let dom = elts[i], up = updates[i](state);
+            if (up)
+                something = true;
+            dom.style.display = up ? "" : "none";
+        }
+        return something;
+    }
+    return { dom: crelt("ul", { role: "menu" }, elts), update, focusables };
 }
 function combineUpdates(updates, nodes) {
     return (state) => {
@@ -16634,6 +16732,15 @@ class DropdownSubmenu {
     */
     options = {}) {
         this.options = options;
+        /**
+        @internal
+        */
+        this.focusables = [];
+        /**
+        @internal
+        */
+        this.focusIndex = 0;
+        this.focusTimeout = -1;
         this.content = Array.isArray(content) ? content : [content];
     }
     /**
@@ -16641,29 +16748,70 @@ class DropdownSubmenu {
     */
     render(view) {
         let items = renderDropdownItems(this.content, view);
+        this.focusables = items.focusables;
         let win = view.dom.ownerDocument.defaultView || window;
-        let label = crelt("div", { class: prefix$1$1 + "-submenu-label" }, translate(view, this.options.label || ""));
-        let wrap = crelt("div", { class: prefix$1$1 + "-submenu-wrap" }, label, crelt("div", { class: prefix$1$1 + "-submenu" }, items.dom));
+        let btn = crelt("button", { class: prefix$1$1 + "-submenu-label" }, translate(view, this.options.label || ""));
+        let wrap = crelt("div", { class: prefix$1$1 + "-submenu-wrap" }, btn, crelt("div", { class: prefix$1$1 + "-submenu" }, items.dom));
         let listeningOnClose = null;
-        label.addEventListener("mousedown", e => {
+        let openSubmenu = (e) => {
             e.preventDefault();
+            e.stopPropagation();
             markMenuEvent(e);
-            setClass(wrap, prefix$1$1 + "-submenu-wrap-active", false);
+            setClass(wrap, prefix$1$1 + "-submenu-wrap-active", true);
             if (!listeningOnClose)
-                win.addEventListener("mousedown", listeningOnClose = () => {
+                win.addEventListener("click", listeningOnClose = () => {
                     if (!isMenuEvent(wrap)) {
                         wrap.classList.remove(prefix$1$1 + "-submenu-wrap-active");
-                        win.removeEventListener("mousedown", listeningOnClose);
+                        win.removeEventListener("click", listeningOnClose);
                         listeningOnClose = null;
                     }
                 });
+            if (!(e.type == "click" && e.detail)) {
+                let focusIndex = findFocusableIndex(this.focusables, -1, 1);
+                if (focusIndex != null)
+                    this.setFocusIndex(focusIndex);
+            }
+        };
+        btn.addEventListener("click", openSubmenu);
+        btn.addEventListener("keydown", e => {
+            if (e.key === "ArrowRight")
+                openSubmenu(e);
+        });
+        // Clicking on an item should not remove focus from the editor
+        btn.addEventListener("mousedown", e => e.preventDefault());
+        items.dom.addEventListener("keydown", (event) => {
+            markMenuEvent(event);
+            if (keyboardMoveFocus(this, event, "vertical")) ;
+            else if (event.key === "Escape" || event.key === "ArrowLeft") {
+                event.preventDefault();
+                event.stopPropagation();
+                setClass(wrap, prefix$1$1 + "-submenu-wrap-active", false);
+                btn.focus();
+            }
+        });
+        items.dom.addEventListener("focusout", () => {
+            clearTimeout(this.focusTimeout);
+            this.focusTimeout = setTimeout(() => {
+                let active = win.document.activeElement;
+                if (active && !items.dom.contains(active))
+                    wrap.classList.remove(prefix$1$1 + "-submenu-wrap-active");
+            }, 20);
         });
         function update(state) {
             let inner = items.update(state);
             wrap.style.display = inner ? "" : "none";
             return inner;
         }
-        return { dom: wrap, update };
+        return { dom: wrap, update, focusable: btn };
+    }
+    setFocusIndex(index) {
+        if (this.focusables.length <= 1)
+            return;
+        this.focusables[this.focusIndex].setAttribute("tabindex", "-1");
+        this.focusIndex = index;
+        let nextFocusItem = this.focusables[index];
+        nextFocusItem.setAttribute("tabindex", "0");
+        nextFocusItem.focus();
     }
 }
 /**
@@ -16674,11 +16822,12 @@ be empty).
 */
 function renderGrouped(view, content) {
     let result = document.createDocumentFragment();
-    let updates = [], separators = [];
+    let updates = [], focusables = [], separators = [];
     for (let i = 0; i < content.length; i++) {
         let items = content[i], localUpdates = [], localNodes = [];
         for (let j = 0; j < items.length; j++) {
-            let { dom, update } = items[j].render(view);
+            let { dom, update, focusable } = items[j].render(view);
+            focusables.push(focusable || dom);
             let span = crelt("span", { class: prefix$1$1 + "item" }, dom);
             result.appendChild(span);
             localNodes.push(span);
@@ -16702,10 +16851,10 @@ function renderGrouped(view, content) {
         }
         return something;
     }
-    return { dom: result, update };
+    return { dom: result, update, focusables };
 }
 function separator() {
-    return crelt("span", { class: prefix$1$1 + "separator" });
+    return crelt("span", { class: prefix$1$1 + "separator", role: "separator" });
 }
 /**
 A set of basic editor-related icons. Contains the properties
@@ -16838,6 +16987,8 @@ class MenuBarView {
     constructor(editorView, options) {
         this.editorView = editorView;
         this.options = options;
+        this.focusables = [];
+        this.focusIndex = 0;
         this.spacer = null;
         this.maxHeight = 0;
         this.widthForMaxHeight = 0;
@@ -16845,15 +16996,21 @@ class MenuBarView {
         this.scrollHandler = null;
         this.root = editorView.root;
         this.wrapper = crelt("div", { class: prefix$3 + "-wrapper" });
-        this.menu = this.wrapper.appendChild(crelt("div", { class: prefix$3 }));
+        this.menu = this.wrapper.appendChild(crelt("div", { class: prefix$3, role: "toolbar" }));
         this.menu.className = prefix$3;
+        this.menu.ariaControlsElements = [editorView.dom];
         if (editorView.dom.parentNode)
             editorView.dom.parentNode.replaceChild(this.wrapper, editorView.dom);
-        this.wrapper.appendChild(editorView.dom);
-        let { dom, update } = renderGrouped(this.editorView, this.options.content);
+        if (options.position === "after") {
+            this.wrapper.insertBefore(editorView.dom, this.wrapper.firstChild);
+        }
+        else {
+            this.wrapper.appendChild(editorView.dom);
+        }
+        let { dom, update, focusables } = renderGrouped(this.editorView, this.options.content);
         this.contentUpdate = update;
+        this.focusables = focusables;
         this.menu.appendChild(dom);
-        this.update();
         if (options.floating && !isIOS()) {
             this.updateFloat();
             let potentialScrollers = getAllWrapping(this.wrapper);
@@ -16866,6 +17023,34 @@ class MenuBarView {
             };
             potentialScrollers.forEach(el => el.addEventListener('scroll', this.scrollHandler));
         }
+        // update focusIndex on focus change
+        for (let i = 0; i < focusables.length; i++) {
+            let focusable = focusables[i];
+            // set `tabindex` to -1 for all but the first focusable item
+            if (i)
+                focusable.setAttribute("tabindex", "-1");
+            focusable.addEventListener("focus", () => {
+                if (this.focusIndex === i)
+                    return;
+                let prevFocusItem = this.focusables[this.focusIndex];
+                prevFocusItem.setAttribute("tabindex", "-1");
+                focusable.setAttribute("tabindex", "0");
+                this.focusIndex = i;
+            });
+        }
+        this.menu.addEventListener("keydown", (event) => {
+            keyboardMoveFocus(this, event, "horizontal");
+        });
+        this.update();
+    }
+    setFocusIndex(index) {
+        if (this.focusables.length <= 1)
+            return;
+        this.focusables[this.focusIndex].setAttribute("tabindex", "-1");
+        this.focusIndex = index;
+        let nextFocusItem = this.focusables[index];
+        nextFocusItem.setAttribute("tabindex", "0");
+        nextFocusItem.focus();
     }
     update() {
         if (this.editorView.root != this.root) {
@@ -16874,7 +17059,13 @@ class MenuBarView {
             this.menu.replaceChild(dom, this.menu.firstChild);
             this.root = this.editorView.root;
         }
+        let active = this.editorView.dom.ownerDocument.activeElement == this.focusables[this.focusIndex];
         this.contentUpdate(this.editorView.state);
+        if (active && this.focusables[this.focusIndex].style.display == "none") {
+            let next = findFocusableIndex(this.focusables, this.focusIndex, 1);
+            if (next != null)
+                this.setFocusIndex(next);
+        }
         if (this.floating) {
             this.updateScrollCursor();
         }
@@ -17045,6 +17236,7 @@ const checkForNumericSubscript = varName => {
 const arrayOfRegExMatches = (regex, text) => {
   if (regex.constructor !== RegExp) { throw new Error('not RegExp') }
   const result = [];
+  // eslint-disable-next-line no-useless-assignment
   let match = null;
 
   /* eslint-disable no-cond-assign */
@@ -18877,6 +19069,7 @@ const unitFromWord = (inputStr) => {
   if (inputStr === "") { return u }
   let word = "";
   let unitArray;
+  // eslint-disable-next-line no-useless-assignment
   let doTheSearch = false;
   let prefix = "";
   let gotSiPrefixUnit = false;
@@ -19013,6 +19206,7 @@ const unitFromUnitName = memoizeFunction(function(inputStr) {
   // Parse str for compound units
   const tokenSep = ";";
   let inExponent = false;
+  // eslint-disable-next-line no-useless-assignment
   let ch = "";
   let word = "";
   let rpnString = "";
@@ -19674,10 +19868,12 @@ const invert = (matrix, returnDeterminant) => {
     return errorOprnd("NONSQUARE")
   }
   const dim = matrix.length;
+  /* eslint-disable no-useless-assignment */
   let i = 0;
   let ii = 0;
   let j = 0;
   let temp = Rnl.zero;
+  /* eslint-enable no-useless-assignment */
   let determinant = Rnl.one;
 
   const C = clone(matrix);
@@ -19760,9 +19956,11 @@ const submatrix = (oprnd, index, colIndex) => {
   let dtype = oprnd.dtype;
 
   // Get the row index
+  /* eslint-disable no-useless-assignment */
   let start = 0;
-  let step = 1;
   let end = 0;
+  /* eslint-enable no-useless-assignment */
+  let step = 1;
   if (index.dtype & dt.RANGE) {
     start = Rnl.toNumber(index.value[0]);
     step = Rnl.toNumber(index.value[1]);
@@ -20307,6 +20505,7 @@ const dataFrameFromTSV = (str, vars) => {
     for (let i = matches.length - 1; i >= 0; i--) {
       const mch = matches[i];
       const varName = checkForNumericSubscript(mch.value.slice(2, -1));
+      // eslint-disable-next-line no-useless-assignment
       let value = "";
       if (varName === "undefined") {
         value = "";
@@ -20594,6 +20793,7 @@ const quickDisplay = str => {
   // This is called from the lexer for a display that changes with every keystroke.
   if (str === "") { return "" }
   str = str.trim();
+  // eslint-disable-next-line no-useless-assignment
   let arrayFormat = "";
   if (str.charAt(0) === "#") {
     str = str.slice(1).trim();
@@ -20604,6 +20804,7 @@ const quickDisplay = str => {
   str = addTextEscapes(str);
   const sepRegEx = / *\t */g;
   const lines = str.split(/\r?\n/g);
+  // eslint-disable-next-line no-useless-assignment
   let tex = "";
   if (lines.length < 3) {
     tex = "\\begin{matrix}\\text{";
@@ -20788,6 +20989,7 @@ const display$1 = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHead
   if (isNotEmpty(df.units)) {
     if (writeRowNums) { str += "&"; }
     for (let j = 0; j < numCols; j++) {
+      // eslint-disable-next-line no-useless-assignment
       let rowTex = "";
       if (df.units[j] && df.units[j].length > 0) {
         const unitTex = unitTeXFromString(df.units[j]);
@@ -21053,6 +21255,7 @@ const unitRegEx$1 = /^(?:'[^']+'|[°ΩÅK])/;
 const dateRegEx = /^'\d{4}-\d{1,2}-\d{1,2}'/;
 
 const texFromNumStr = (numParts, decimalFormat) => {
+  // eslint-disable-next-line no-useless-assignment
   let num = "";
   if (numParts[2]) {
     // Hexadecimal
@@ -21776,6 +21979,7 @@ const lexOneWord = (str, prevToken) => {
     } else if (prevToken.ttype === tt.ACCESSOR) {
       return [match, match, match, tt.PROPERTY, ""]
     } else if (subOrAccentRegEx.test(match)) {
+      // eslint-disable-next-line no-useless-assignment
       let identifier = "";
       if (!subRegEx.test(match)) {
         identifier = checkForTrailingAccent(match);
@@ -21833,8 +22037,10 @@ const lexUnitName = str => {
 const lex = (str, formats, prevToken, inRealTime = false) => {
   // Get the next token in str. Return an array with the token's information:
   // [input, TeX output, calc output, type, associated close delimiter]
+  /* eslint-disable no-useless-assignment */
   let pos = 0;
   let st = "";
+  /* eslint-enable no-useless-assignment */
   let matchObj;
 
   if (str.length > 3 && str.slice(0, 3) === "===") {
@@ -21879,6 +22085,7 @@ const lex = (str, formats, prevToken, inRealTime = false) => {
     pos = str.indexOf("`", (str.charAt(2) === "`" ? 3 : 2));
     const inputStr = (pos > 0 ? str.slice(2, pos) : str.slice(2));
     const st = tablessTrim(inputStr);
+    // eslint-disable-next-line no-useless-assignment
     let tex = "";
     if (inRealTime) {
       tex = DataFrame.quickDisplay(st);
@@ -22127,6 +22334,7 @@ const openParenRegEx$2 = /^ *\(/;
 
 const exponentOfFunction = (str, decimalFormat, isCalc) => {
   // As in: sin²()
+  // eslint-disable-next-line no-useless-assignment
   let expoInput = "";
   if (str.charAt(0) !== "^") {
     expoInput = /^⁻?[⁰¹²³\u2074-\u2079⁻]+/.exec(str)[0];
@@ -22332,6 +22540,7 @@ const parse$1 = (
   let prevToken = { input: "", output: "", ttype: 50 };
   const dependencies = [];
   const exponentPrec = rpnPrecFromType[tt.SUP];
+  /* eslint-disable no-useless-assignment */
   let mustLex = true;
   let mustAlign = false;
   let posOfPrevRun = 0;
@@ -22349,6 +22558,7 @@ const parse$1 = (
   let pendingFunctionName = "";
   let tokenSep = "\xa0"; // no break space
   let rpnPrec = -1;
+  /* eslint-enable no-useless-assignment */
   const exprStack = []; // Use for lazy evalulation of ternary (If) expressions
   let numFreeCommas = 0; // # of items in a tuple
   let posArrow = 0;
@@ -22406,6 +22616,7 @@ const parse$1 = (
     }
 
     //  Pop operators whose precedence ≥ texPrec. Append a close delimiter for each.
+    // eslint-disable-next-line no-useless-assignment
     let delim = {};
     while (texStack[texStack.length - 1].prec >= texPrec &&
       // Also handle exponents, from right to left, as in 3^4^5
@@ -24800,6 +25011,7 @@ const md2ast = (md, inHtml = false) => {
   }
 
   // Next, get all the footnote definitions
+  // eslint-disable-next-line no-useless-assignment
   capture = null;
   while ((capture = footnoteDefRegEx.exec(md)) !== null) {
     state.footnotes.push(capture[1].trim());
@@ -25782,6 +25994,7 @@ const linearSearchForOverflow = (textNode, yMax, offset) => {
   // `offset` is near the overflow point.
   // Do a linear search to find the exact point.
   const str = textNode.wholeText;
+  // eslint-disable-next-line no-useless-assignment
   let char = "";
   const range = new Range();
   range.setStart(textNode, offset);
@@ -26279,6 +26492,7 @@ function propertyFromDotAccessor(parent, index, unitAware) {
       const colIndex = alphaRegEx.test(key) ? key : parent.columnMap[key];
       const v = [];
       let unit = null;
+      // eslint-disable-next-line no-useless-assignment
       let dtype = null;
       if (parent.value[colIndex + "1"].dtype & dt.RATIONAL) {
         for (let i = 1; i < parent.numRows; i++) {
@@ -26496,12 +26710,14 @@ const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAware) =>
       stmt.resulttemplate.indexOf("@") > -1 ||
       stmt.resulttemplate.indexOf("%") > -1) {
     stmt.value = result.value;
+    /* eslint-disable no-useless-assignment */
     let resultDisplay = "";
     let altResultDisplay = "";
     if (stmt.resulttemplate.indexOf("!") > -1) {
       // Suppress display of the result
       resultDisplay = "";
       altResultDisplay = "";
+      /* eslint-enable no-useless-assignment */
       return stmt
 
     } else if (result.dtype & dt.BOOLEAN && testRegEx$1.test(stmt.entry) &&
@@ -26711,6 +26927,7 @@ const plugValsIntoEcho = (str, vars, unitAware, formatSpec, formats) => {
     const matchLength = match[0].length;
     const pos = match.index;
     let hvar;
+    // eslint-disable-next-line no-useless-assignment
     let display = "";
 
     if (varName.indexOf(".") > -1) {
@@ -27531,6 +27748,7 @@ const multivarFunction = (arity, functionName, args) => {
   } else {
     // We have multiple arguments.
     // Is one of them a vector or a matrix?
+    // eslint-disable-next-line no-useless-assignment
     let iArg = 0;
     let gotVector = false;
     let gotMatrix = false;
@@ -29637,6 +29855,7 @@ const functions$1 = {
       (attrs.height - end[1] * attrs.yunitlength - attrs.origin[1]);
     node.attrs.d = str;
     setStrokeAndFill(node, attrs);
+    // eslint-disable-next-line no-useless-assignment
     let v = 0;
     if (attrs.marker === "arrow" || attrs.marker === "arrowdot") {
       const u = [(end[1] - start[1]) / 4, (start[0] - end[0]) / 4];
@@ -29724,6 +29943,7 @@ const functions$1 = {
     // Get the text position
     const p = rationals2numbers(plistOprnd.value[0]);
     const q = rationals2numbers(plistOprnd.value[plistOprnd.value.length - 1]);
+    // eslint-disable-next-line no-useless-assignment
     let pos = "right";
     if (Math.abs(p[0] - q[0]) >= Math.abs(p[1] - q[1])) {
       pos = p[0] >= q[0] ? "right" : "left";
@@ -29988,6 +30208,7 @@ function populateData(input, factorInput) {
   // (1) A "span" is a section of beam between two user-defined nodes.
   // (2) A "segment" is a section of beam between nodes or points of load discontinuity.
   // Each span thus consists of one or more segments.
+  // eslint-disable-next-line no-useless-assignment
   let i = 0;
   let cummulativeLength = Rnl.zero;
   const nodes = [];
@@ -30315,10 +30536,12 @@ const momentArrow = (xCtr, yCtr, thetaAtArrowPoint, subtendedAngle, isCounterClo
   const startAnglePrime = startAngle - sgn * (2 * 0.9 * arrowHeadLength / diameter);
   const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
 
+  /* eslint-disable no-useless-assignment */
   let xStart = 0;
   let yStart = 0;
   let xEnd = 0;
   let yEnd = 0;
+  /* eslint-enable no-useless-assignment */
   if (sgn > 0) {
     xEnd = (xCtr + r * Math.cos(startAnglePrime)).toFixed(2);   // arrow end
     yEnd = (yCtr - r * Math.sin(startAnglePrime)).toFixed(2);
@@ -30491,6 +30714,7 @@ text, tspan { font: 12px Arial; }`
   diagram.push({ tag: "path", attrs: { d, stroke: "black", "fill-opacity": "0.0" } });
 
   // Write in the line load values
+  // eslint-disable-next-line no-useless-assignment
   let lastSegUniform = false;
   let firstSegment;
   let xFirstSegment = 0;
@@ -30575,6 +30799,7 @@ text, tspan { font: 12px Arial; }`
       }
     } else {
       // We've got a distributed sloping load
+      // eslint-disable-next-line no-useless-assignment
       lastSegUniform = false;
       const s = i === 0
         ? 0
@@ -30796,6 +31021,8 @@ const readInputData = data => {
   return input
 };
 
+/* eslint-disable no-useless-assignment */
+
 const dotProduct = (a, b) => a.map((e, i) => (e * b[i])).reduce((m, n) => m + n);
 const isLiveish = (loadType, beam) => beam.getsPattern[loadType];
 
@@ -30976,7 +31203,7 @@ function doAnalysis(beam, nodes, spans) {
   //For the live loads, find a different mam due to loads on each individual span.
   for (let loadType = 0; loadType <= 9; loadType++) {
     if (loadType === 0 || gotType[loadType]) {
-      let lastK = 0;
+      let lastK = 1;
       let doPatterns = false; // patterned live loads
       if (loadType === 0) {
         doPatterns = false;
@@ -31730,6 +31957,7 @@ function combine(beam, nodes, spans, actions, deflections, comboSet) {
 
         let iDM = 0;
         for (let iSpan = 1; iSpan <= numSpans; iSpan++) {
+          /* eslint-disable no-useless-assignment */
           let vMid = 0;
           let vEnd = 0;
           let mMid = 0;
@@ -31737,6 +31965,7 @@ function combine(beam, nodes, spans, actions, deflections, comboSet) {
           let slopeEnd = 0;
           let deflectionEnd = 0;
           let deflectionMid = 0;
+          /* eslint-enable no-useless-assignment */
           for (let k = 0; k < spans[iSpan].segments.length; k++) {
             const seg = spans[iSpan].segments[k];
 
@@ -31811,6 +32040,7 @@ function combine(beam, nodes, spans, actions, deflections, comboSet) {
             } else {
               // Determine if this combern contains a shear or moment extreme.
               // Start by finding the shear value in the middle of the segment
+              // eslint-disable-next-line no-useless-assignment
               let xCross = 0; // initialze the variable
               if (seg.slope[combern] !== 0) {
                 xCross = -1 * seg.w1f[combern] / seg.slope[combern];
@@ -32175,6 +32405,7 @@ function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combinations
   }
 
   // Draw the reactions.
+  // eslint-disable-next-line no-useless-assignment
   let f = 0;
   for (let i = 1; i < nodes.length; i++) {
     const x = beam.xDiagram + beam.xScale * nodes[i].x;
@@ -32301,6 +32532,7 @@ function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combinations
         }
 
         if (seg.Vmax.mid.case === combern || seg.Vmin.mid.case === combern) {
+          // eslint-disable-next-line no-useless-assignment
           let xCross = 0;
           if (seg.slope[combern] !== 0) {
             xCross = -1 * seg.w1f[combern] / seg.slope[combern];
@@ -32331,6 +32563,7 @@ function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combinations
 
         if (seg.Mmax.mid.case === combern || seg.Mmin.mid.case === combern) {
           let xCross = 0; // initialze the variable
+          // eslint-disable-next-line no-useless-assignment
           let mMid = 0;
           if (seg.slope[combern] === 0) {
             if (seg.w1f[combern] !== 0) {
@@ -32364,9 +32597,11 @@ function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combinations
             }
             if (mMid1 > 0 || mMid2 > 0) {
               if (mMid1 > mMid2) {
+                // eslint-disable-next-line no-useless-assignment
                 mMid = mMid1;
                 xCross = xCross1;
               } else {
+                // eslint-disable-next-line no-useless-assignment
                 mMid = mMid2;
                 xCross = xCross2;
               }
@@ -32498,9 +32733,11 @@ function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combinations
     // Insert the max and min deflection values
     beam.deflectionMax = Math.max(Math.abs(deflectionMax), Math.abs(deflectionMin));
     f = beam.SI ? 1000 : (12 / 0.3048);
+    /* eslint-disable no-useless-assignment */
     let sText = "";
     let xText = 0;
     let yText = 0;
+    /* eslint-enable no-useless-assignment */
     if (deflectionMax > 0.2 * (deflectionMax - deflectionMin)) {
       xText = beam.xDiagram + beam.xScale * xDeflectionMax;
       yText = yDeflection - deflectionScale * deflectionMax - 2;
@@ -33550,8 +33787,10 @@ const evalRpn = (rpn, vars, formats, unitAware, lib) => {
           const args = [];
           args.push(stack.pop());
           if (!(args[0].dtype & dt.RATIONAL)) { return errorOprnd("") }
+          /* eslint-disable no-useless-assignment */
           let expos = null;
           let dtype = 0;
+          /* eslint-enable no-useless-assignment */
           for (let j = 0; j < numArgs - 1; j++) {
             args.push(stack.pop());
             if (!(args[1].dtype & dt.RATIONAL)) { return errorOprnd("") }
@@ -34229,6 +34468,7 @@ const elementFromIterable = (iterable, index, step) => {
   let value;
   let nextIndex = Rnl.increment(index);
   const i = Rnl.toNumber(index);
+  // eslint-disable-next-line no-useless-assignment
   let dtype = 0;
   if (iterable.dtype === dt.RANGE) {
     value = index;
@@ -34711,6 +34951,7 @@ const evaluate = (
 
   if (stmt.rpn) {
     let oprnd = evalRpn(stmt.rpn, vars, formats, isUnitAware);
+    // eslint-disable-next-line no-useless-assignment
     if (oprnd.dtype === dt.ERROR) { [stmt, oprnd] = errorResult(stmt, oprnd); return stmt}
     let result
     ;[stmt, result] = conditionResult(stmt, oprnd, isUnitAware);
@@ -34974,6 +35215,7 @@ const scanFunction = (lines, formats, startLineNum) => {
   const line1 = stripComment(lines[startLineNum]);
   let isDraw = line1.charAt(0) === "d";
   const posParen = line1.indexOf("(");
+  // eslint-disable-next-line no-useless-assignment
   let functionName = "";
   if (isDraw) {
     functionName = "draw";
@@ -35004,10 +35246,12 @@ const scanFunction = (lines, formats, startLineNum) => {
   };
 
   const stackOfCtrls = [];
+  /* eslint-disable no-useless-assignment */
   let expression = "";
+  let name = "";
+  /* eslint-enable no-useless-assignment */
   let prevLineEndedInContinuation = false;
   let prevLine = "";
-  let name = "";
   let isStatement = false;
 
   let j = startLineNum;
@@ -35099,8 +35343,10 @@ const scanFunction = (lines, formats, startLineNum) => {
     isStatement = false;
     prevLineEndedInContinuation = false;
     prevLine = "";
+    /* eslint-disable no-useless-assignment */
     name = "";
     expression = "";
+    /* eslint-enable no-useless-assignment */
   }
   return [errorOprnd("END_MISS", functionName), 0]
 };
@@ -35202,6 +35448,7 @@ const compile = (
   inputStr,
   formats = { decimalFormat: "1,000,000.", dateFormat: "yyyy-mm-dd" }
 ) => {
+  /* eslint-disable no-useless-assignment */
   let leadStr = "";
   let mainStr = "";
   let trailStr = "";
@@ -35222,6 +35469,7 @@ const compile = (
   let unit;
   let dtype;
   let str = "";
+  /* eslint-enable no-useless-assignment */
 
   const isModule = moduleRegEx.test(inputStr);
   const isDraw = drawRegEx.test(inputStr);
@@ -36729,6 +36977,7 @@ const compileSheet = (table, formats) => {
       const entry = cell.attrs.entry;
       if (i === 0) {
         const str = md2text(entry);
+        // eslint-disable-next-line no-useless-assignment
         let heading = "";
         let unitName = "";
         const posNewline = str.indexOf("\n");
@@ -37969,6 +38218,7 @@ const tex2Calc = (str, displayMode = false) => {
 
       case tt.UNARY: {
         if (verbatims.has(token.input)) {
+          // eslint-disable-next-line no-useless-assignment
           let arg = "";
           if (kerns.includes(token.input) && str[0] !== "{") {
             arg = unbracedDistance(str);
@@ -53739,8 +53989,10 @@ function openPrompt(options) {
     const sel = document.getSelection();
     let node = sel.anchorNode;
     let inMathZone = false;
+    /* eslint-disable no-useless-assignment */
     let start = -1;
     let end = -1;
+    /* eslint-enable no-useless-assignment */
     if (node.nodeType === 3 && node.parentNode.parentNode.classList.contains("math-code")) {
       inMathZone = true;
       start = Math.min(sel.anchorOffset, sel.extentOffset);
@@ -58704,18 +58956,16 @@ const fontedChar = (ch, accentName) => {
     case "cc": // caligraphic
     case "ff": { // sans-serif
       const code = ch.charCodeAt(0);
-      let newChar = "";
       if (code < 0x0041 || code > 0x007a) { return null }
       const isSmall = code < 0x005b ? 0 : 1;
       if (accentName === "cc" && isSmall && code !== 0x006c) { return null }
       if (code > 0x005a && accentName === "bbb") { return null }
       const lowSurrogate = code + lowSurrogateDiff[accentName][isSmall];
       if (wideExceptions.includes(lowSurrogate)) {
-        newChar = accentName === "bbb" ? bbb[ch] : calligraphic[ch];
+        return accentName === "bbb" ? bbb[ch] : calligraphic[ch]
       } else {
-        newChar = "\uD835" + String.fromCharCode(lowSurrogate);
+        return "\uD835" + String.fromCharCode(lowSurrogate)
       }
-      return newChar
     }
 
     default:
@@ -59357,6 +59607,7 @@ function openMathPrompt(options) {
   mathDisplay.setAttribute("class", "math-display");
 
   const renderMath = function(code) {
+    // eslint-disable-next-line no-useless-assignment
     let tex = "";
     let isUDF = false;
     if (isCalculation) {
