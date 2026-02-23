@@ -21,7 +21,7 @@
  * 6. ~~strikethrough~~
  * 7. Pipe tables as per Github Flavored Markdown (GFM).
  * 8. Grid tables as per Pandoc and reStructuredText
- * 9. Empty paragraphs: A line consisting only of "¶".
+ * 9. Empty paragraphs: A line consisting only of "¶" or "&nbsp;".
  * 10. Attributes for reference link definitions
  *       [id]: target
  *       {.class #id width=number}
@@ -838,7 +838,7 @@ rules.set("newline", {
 });
 rules.set("emptyParagraph", {
   isLeaf: true,
-  match: blockRegex(/^¶(?:\n *)+\n/),
+  match: blockRegex(/^(¶|&nbsp;)(?:\n *)+\n/),
   parse: function(capture, state) {
     return { type: "paragraph", content: [] }
   }

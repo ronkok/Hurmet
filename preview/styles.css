@@ -305,6 +305,37 @@ li.ProseMirror-selectednode:after {
   line-height: 1;
 }
 
+.ProseMirror-menuitem button {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  font-size: inherit;
+  font-family: inherit;
+  padding: 2px 4px;
+}
+
+.ProseMirror-menuitem button svg {
+  padding: 0 2px;
+}
+
+button.math-button {
+  padding: 2px 4px;
+}
+
+button.ProseMirror-menu-dropdown {
+  vertical-align: 1px;
+  cursor: pointer;
+  position: relative;
+  padding-right: 15px;
+}
+
+.ProseMirror-menu-dropdown-menu ol, .ProseMirror-menu-submenu ul, .ProseMirror-menu-submenu ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
 .ProseMirror-tooltip .ProseMirror-menu {
   width: -webkit-fit-content;
   width: fit-content;
@@ -357,6 +388,15 @@ li.ProseMirror-selectednode:after {
   color: #666;
   border: 1px solid #aaa;
   padding: 2px;
+}
+
+.ProseMirror-menu-dropdown-menu ul,
+.ProseMirror-menu-dropdown-menu ol,
+.ProseMirror-menu-submenu ul,
+.ProseMirror-menu-submenu ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .ProseMirror-menu-dropdown-menu {
@@ -448,33 +488,37 @@ li.ProseMirror-selectednode:after {
   vertical-align: text-top;
 }
 
-.math-button {
+button.math-button {
   font-size: 18px;
   border-top: solid 1px;
   border-bottom: solid 1px;
   margin-left: -3px;
 }
-.mb-left {
+button.mb-left {
   font-size: 18px;
   border-top: solid 1px;
   border-bottom: solid 1px;
   margin-left: -3px;
   border-left: solid 1px;
 }
-.math-dropdown {
+button.math-dropdown {
   font-size: 18px;
   border-top: solid 1px;
   border-bottom: solid 1px;
   margin-left: -7px;
+  padding-top: 1px;
+  padding-bottom: 3px;
 }
-.md-right {
+button.md-right {
   font-size: 18px;
   border-top: solid 1px;
   border-bottom: solid 1px;
   border-right: solid 1px;
   margin-left: -7px;
+  padding-top: 1px;
+  padding-bottom: 3px;
 }
-.math-dropdown + *, .md-right + * {
+button.math-dropdown + *, .md-right + * {
   font-size: 16px;
 }
 

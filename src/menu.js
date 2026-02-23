@@ -1874,7 +1874,7 @@ export function buildMenuItems(schema) {
     for (let i = 1; i <= 6; i++) {
       r["makeHead" + i] = blockTypeItem(type, {
         title: "Change to heading " + i,
-        label: "\xa0H" + i + "\xa0",
+        label: "H" + i,
         attrs: { level: i }
       })
     }

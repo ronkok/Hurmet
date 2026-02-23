@@ -85,6 +85,7 @@ const checkForNumericSubscript = varName => {
 const arrayOfRegExMatches = (regex, text) => {
   if (regex.constructor !== RegExp) { throw new Error('not RegExp') }
   const result = [];
+  // eslint-disable-next-line no-useless-assignment
   let match = null;
 
   /* eslint-disable no-cond-assign */
@@ -1913,6 +1914,7 @@ const unitFromWord = (inputStr) => {
   if (inputStr === "") { return u }
   let word = "";
   let unitArray;
+  // eslint-disable-next-line no-useless-assignment
   let doTheSearch = false;
   let prefix = "";
   let gotSiPrefixUnit = false;
@@ -2049,6 +2051,7 @@ const unitFromUnitName = memoizeFunction(function(inputStr) {
   // Parse str for compound units
   const tokenSep = ";";
   let inExponent = false;
+  // eslint-disable-next-line no-useless-assignment
   let ch = "";
   let word = "";
   let rpnString = "";
@@ -2710,10 +2713,12 @@ const invert = (matrix, returnDeterminant) => {
     return errorOprnd("NONSQUARE")
   }
   const dim = matrix.length;
+  /* eslint-disable no-useless-assignment */
   let i = 0;
   let ii = 0;
   let j = 0;
   let temp = Rnl.zero;
+  /* eslint-enable no-useless-assignment */
   let determinant = Rnl.one;
 
   const C = clone(matrix);
@@ -2796,9 +2801,11 @@ const submatrix = (oprnd, index, colIndex) => {
   let dtype = oprnd.dtype;
 
   // Get the row index
+  /* eslint-disable no-useless-assignment */
   let start = 0;
-  let step = 1;
   let end = 0;
+  /* eslint-enable no-useless-assignment */
+  let step = 1;
   if (index.dtype & dt.RANGE) {
     start = Rnl.toNumber(index.value[0]);
     step = Rnl.toNumber(index.value[1]);
@@ -3343,6 +3350,7 @@ const dataFrameFromTSV = (str, vars) => {
     for (let i = matches.length - 1; i >= 0; i--) {
       const mch = matches[i];
       const varName = checkForNumericSubscript(mch.value.slice(2, -1));
+      // eslint-disable-next-line no-useless-assignment
       let value = "";
       if (varName === "undefined") {
         value = "";
@@ -3630,6 +3638,7 @@ const quickDisplay = str => {
   // This is called from the lexer for a display that changes with every keystroke.
   if (str === "") { return "" }
   str = str.trim();
+  // eslint-disable-next-line no-useless-assignment
   let arrayFormat = "";
   if (str.charAt(0) === "#") {
     str = str.slice(1).trim();
@@ -3640,6 +3649,7 @@ const quickDisplay = str => {
   str = addTextEscapes(str);
   const sepRegEx = / *\t */g;
   const lines = str.split(/\r?\n/g);
+  // eslint-disable-next-line no-useless-assignment
   let tex = "";
   if (lines.length < 3) {
     tex = "\\begin{matrix}\\text{";
@@ -3824,6 +3834,7 @@ const display$1 = (df, formatSpec = "h3", decimalFormat = "1,000,000.", omitHead
   if (isNotEmpty(df.units)) {
     if (writeRowNums) { str += "&"; }
     for (let j = 0; j < numCols; j++) {
+      // eslint-disable-next-line no-useless-assignment
       let rowTex = "";
       if (df.units[j] && df.units[j].length > 0) {
         const unitTex = unitTeXFromString(df.units[j]);
@@ -4089,6 +4100,7 @@ const unitRegEx$1 = /^(?:'[^']+'|[°ΩÅK])/;
 const dateRegEx = /^'\d{4}-\d{1,2}-\d{1,2}'/;
 
 const texFromNumStr = (numParts, decimalFormat) => {
+  // eslint-disable-next-line no-useless-assignment
   let num = "";
   if (numParts[2]) {
     // Hexadecimal
@@ -4812,6 +4824,7 @@ const lexOneWord = (str, prevToken) => {
     } else if (prevToken.ttype === tt.ACCESSOR) {
       return [match, match, match, tt.PROPERTY, ""]
     } else if (subOrAccentRegEx.test(match)) {
+      // eslint-disable-next-line no-useless-assignment
       let identifier = "";
       if (!subRegEx.test(match)) {
         identifier = checkForTrailingAccent(match);
@@ -4869,8 +4882,10 @@ const lexUnitName = str => {
 const lex = (str, formats, prevToken, inRealTime = false) => {
   // Get the next token in str. Return an array with the token's information:
   // [input, TeX output, calc output, type, associated close delimiter]
+  /* eslint-disable no-useless-assignment */
   let pos = 0;
   let st = "";
+  /* eslint-enable no-useless-assignment */
   let matchObj;
 
   if (str.length > 3 && str.slice(0, 3) === "===") {
@@ -4915,6 +4930,7 @@ const lex = (str, formats, prevToken, inRealTime = false) => {
     pos = str.indexOf("`", (str.charAt(2) === "`" ? 3 : 2));
     const inputStr = (pos > 0 ? str.slice(2, pos) : str.slice(2));
     const st = tablessTrim(inputStr);
+    // eslint-disable-next-line no-useless-assignment
     let tex = "";
     if (inRealTime) {
       tex = DataFrame.quickDisplay(st);
@@ -5163,6 +5179,7 @@ const openParenRegEx$2 = /^ *\(/;
 
 const exponentOfFunction = (str, decimalFormat, isCalc) => {
   // As in: sin²()
+  // eslint-disable-next-line no-useless-assignment
   let expoInput = "";
   if (str.charAt(0) !== "^") {
     expoInput = /^⁻?[⁰¹²³\u2074-\u2079⁻]+/.exec(str)[0];
@@ -5368,6 +5385,7 @@ const parse$1 = (
   let prevToken = { input: "", output: "", ttype: 50 };
   const dependencies = [];
   const exponentPrec = rpnPrecFromType[tt.SUP];
+  /* eslint-disable no-useless-assignment */
   let mustLex = true;
   let mustAlign = false;
   let posOfPrevRun = 0;
@@ -5385,6 +5403,7 @@ const parse$1 = (
   let pendingFunctionName = "";
   let tokenSep = "\xa0"; // no break space
   let rpnPrec = -1;
+  /* eslint-enable no-useless-assignment */
   const exprStack = []; // Use for lazy evalulation of ternary (If) expressions
   let numFreeCommas = 0; // # of items in a tuple
   let posArrow = 0;
@@ -5442,6 +5461,7 @@ const parse$1 = (
     }
 
     //  Pop operators whose precedence ≥ texPrec. Append a close delimiter for each.
+    // eslint-disable-next-line no-useless-assignment
     let delim = {};
     while (texStack[texStack.length - 1].prec >= texPrec &&
       // Also handle exponents, from right to left, as in 3^4^5
@@ -6962,6 +6982,7 @@ function propertyFromDotAccessor(parent, index, unitAware) {
       const colIndex = alphaRegEx.test(key) ? key : parent.columnMap[key];
       const v = [];
       let unit = null;
+      // eslint-disable-next-line no-useless-assignment
       let dtype = null;
       if (parent.value[colIndex + "1"].dtype & dt.RATIONAL) {
         for (let i = 1; i < parent.numRows; i++) {
@@ -7179,12 +7200,14 @@ const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAware) =>
       stmt.resulttemplate.indexOf("@") > -1 ||
       stmt.resulttemplate.indexOf("%") > -1) {
     stmt.value = result.value;
+    /* eslint-disable no-useless-assignment */
     let resultDisplay = "";
     let altResultDisplay = "";
     if (stmt.resulttemplate.indexOf("!") > -1) {
       // Suppress display of the result
       resultDisplay = "";
       altResultDisplay = "";
+      /* eslint-enable no-useless-assignment */
       return stmt
 
     } else if (result.dtype & dt.BOOLEAN && testRegEx$1.test(stmt.entry) &&
@@ -7394,6 +7417,7 @@ const plugValsIntoEcho = (str, vars, unitAware, formatSpec, formats) => {
     const matchLength = match[0].length;
     const pos = match.index;
     let hvar;
+    // eslint-disable-next-line no-useless-assignment
     let display = "";
 
     if (varName.indexOf(".") > -1) {
@@ -8214,6 +8238,7 @@ const multivarFunction = (arity, functionName, args) => {
   } else {
     // We have multiple arguments.
     // Is one of them a vector or a matrix?
+    // eslint-disable-next-line no-useless-assignment
     let iArg = 0;
     let gotVector = false;
     let gotMatrix = false;
@@ -10540,7 +10565,7 @@ rules.set("newline", {
 });
 rules.set("emptyParagraph", {
   isLeaf: true,
-  match: blockRegex(/^¶(?:\n *)+\n/),
+  match: blockRegex(/^(¶|&nbsp;)(?:\n *)+\n/),
   parse: function(capture, state) {
     return { type: "paragraph", content: [] }
   }
@@ -10992,6 +11017,7 @@ const md2ast = (md, inHtml = false) => {
   }
 
   // Next, get all the footnote definitions
+  // eslint-disable-next-line no-useless-assignment
   capture = null;
   while ((capture = footnoteDefRegEx.exec(md)) !== null) {
     state.footnotes.push(capture[1].trim());
@@ -11577,6 +11603,7 @@ const functions$1 = {
       (attrs.height - end[1] * attrs.yunitlength - attrs.origin[1]);
     node.attrs.d = str;
     setStrokeAndFill(node, attrs);
+    // eslint-disable-next-line no-useless-assignment
     let v = 0;
     if (attrs.marker === "arrow" || attrs.marker === "arrowdot") {
       const u = [(end[1] - start[1]) / 4, (start[0] - end[0]) / 4];
@@ -11664,6 +11691,7 @@ const functions$1 = {
     // Get the text position
     const p = rationals2numbers(plistOprnd.value[0]);
     const q = rationals2numbers(plistOprnd.value[plistOprnd.value.length - 1]);
+    // eslint-disable-next-line no-useless-assignment
     let pos = "right";
     if (Math.abs(p[0] - q[0]) >= Math.abs(p[1] - q[1])) {
       pos = p[0] >= q[0] ? "right" : "left";
@@ -11928,6 +11956,7 @@ function populateData(input, factorInput) {
   // (1) A "span" is a section of beam between two user-defined nodes.
   // (2) A "segment" is a section of beam between nodes or points of load discontinuity.
   // Each span thus consists of one or more segments.
+  // eslint-disable-next-line no-useless-assignment
   let i = 0;
   let cummulativeLength = Rnl.zero;
   const nodes = [];
@@ -12255,10 +12284,12 @@ const momentArrow = (xCtr, yCtr, thetaAtArrowPoint, subtendedAngle, isCounterClo
   const startAnglePrime = startAngle - sgn * (2 * 0.9 * arrowHeadLength / diameter);
   const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
 
+  /* eslint-disable no-useless-assignment */
   let xStart = 0;
   let yStart = 0;
   let xEnd = 0;
   let yEnd = 0;
+  /* eslint-enable no-useless-assignment */
   if (sgn > 0) {
     xEnd = (xCtr + r * Math.cos(startAnglePrime)).toFixed(2);   // arrow end
     yEnd = (yCtr - r * Math.sin(startAnglePrime)).toFixed(2);
@@ -12431,6 +12462,7 @@ text, tspan { font: 12px Arial; }`
   diagram.push({ tag: "path", attrs: { d, stroke: "black", "fill-opacity": "0.0" } });
 
   // Write in the line load values
+  // eslint-disable-next-line no-useless-assignment
   let lastSegUniform = false;
   let firstSegment;
   let xFirstSegment = 0;
@@ -12515,6 +12547,7 @@ text, tspan { font: 12px Arial; }`
       }
     } else {
       // We've got a distributed sloping load
+      // eslint-disable-next-line no-useless-assignment
       lastSegUniform = false;
       const s = i === 0
         ? 0
@@ -12736,6 +12769,8 @@ const readInputData = data => {
   return input
 };
 
+/* eslint-disable no-useless-assignment */
+
 const dotProduct = (a, b) => a.map((e, i) => (e * b[i])).reduce((m, n) => m + n);
 const isLiveish = (loadType, beam) => beam.getsPattern[loadType];
 
@@ -12916,7 +12951,7 @@ function doAnalysis(beam, nodes, spans) {
   //For the live loads, find a different mam due to loads on each individual span.
   for (let loadType = 0; loadType <= 9; loadType++) {
     if (loadType === 0 || gotType[loadType]) {
-      let lastK = 0;
+      let lastK = 1;
       let doPatterns = false; // patterned live loads
       if (loadType === 0) {
         doPatterns = false;
@@ -13670,6 +13705,7 @@ function combine(beam, nodes, spans, actions, deflections, comboSet) {
 
         let iDM = 0;
         for (let iSpan = 1; iSpan <= numSpans; iSpan++) {
+          /* eslint-disable no-useless-assignment */
           let vMid = 0;
           let vEnd = 0;
           let mMid = 0;
@@ -13677,6 +13713,7 @@ function combine(beam, nodes, spans, actions, deflections, comboSet) {
           let slopeEnd = 0;
           let deflectionEnd = 0;
           let deflectionMid = 0;
+          /* eslint-enable no-useless-assignment */
           for (let k = 0; k < spans[iSpan].segments.length; k++) {
             const seg = spans[iSpan].segments[k];
 
@@ -13751,6 +13788,7 @@ function combine(beam, nodes, spans, actions, deflections, comboSet) {
             } else {
               // Determine if this combern contains a shear or moment extreme.
               // Start by finding the shear value in the middle of the segment
+              // eslint-disable-next-line no-useless-assignment
               let xCross = 0; // initialze the variable
               if (seg.slope[combern] !== 0) {
                 xCross = -1 * seg.w1f[combern] / seg.slope[combern];
@@ -14115,6 +14153,7 @@ function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combinations
   }
 
   // Draw the reactions.
+  // eslint-disable-next-line no-useless-assignment
   let f = 0;
   for (let i = 1; i < nodes.length; i++) {
     const x = beam.xDiagram + beam.xScale * nodes[i].x;
@@ -14241,6 +14280,7 @@ function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combinations
         }
 
         if (seg.Vmax.mid.case === combern || seg.Vmin.mid.case === combern) {
+          // eslint-disable-next-line no-useless-assignment
           let xCross = 0;
           if (seg.slope[combern] !== 0) {
             xCross = -1 * seg.w1f[combern] / seg.slope[combern];
@@ -14271,6 +14311,7 @@ function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combinations
 
         if (seg.Mmax.mid.case === combern || seg.Mmin.mid.case === combern) {
           let xCross = 0; // initialze the variable
+          // eslint-disable-next-line no-useless-assignment
           let mMid = 0;
           if (seg.slope[combern] === 0) {
             if (seg.w1f[combern] !== 0) {
@@ -14304,9 +14345,11 @@ function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combinations
             }
             if (mMid1 > 0 || mMid2 > 0) {
               if (mMid1 > mMid2) {
+                // eslint-disable-next-line no-useless-assignment
                 mMid = mMid1;
                 xCross = xCross1;
               } else {
+                // eslint-disable-next-line no-useless-assignment
                 mMid = mMid2;
                 xCross = xCross2;
               }
@@ -14438,9 +14481,11 @@ function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combinations
     // Insert the max and min deflection values
     beam.deflectionMax = Math.max(Math.abs(deflectionMax), Math.abs(deflectionMin));
     f = beam.SI ? 1000 : (12 / 0.3048);
+    /* eslint-disable no-useless-assignment */
     let sText = "";
     let xText = 0;
     let yText = 0;
+    /* eslint-enable no-useless-assignment */
     if (deflectionMax > 0.2 * (deflectionMax - deflectionMin)) {
       xText = beam.xDiagram + beam.xScale * xDeflectionMax;
       yText = yDeflection - deflectionScale * deflectionMax - 2;
@@ -15490,8 +15535,10 @@ const evalRpn = (rpn, vars, formats, unitAware, lib) => {
           const args = [];
           args.push(stack.pop());
           if (!(args[0].dtype & dt.RATIONAL)) { return errorOprnd("") }
+          /* eslint-disable no-useless-assignment */
           let expos = null;
           let dtype = 0;
+          /* eslint-enable no-useless-assignment */
           for (let j = 0; j < numArgs - 1; j++) {
             args.push(stack.pop());
             if (!(args[1].dtype & dt.RATIONAL)) { return errorOprnd("") }
@@ -16169,6 +16216,7 @@ const elementFromIterable = (iterable, index, step) => {
   let value;
   let nextIndex = Rnl.increment(index);
   const i = Rnl.toNumber(index);
+  // eslint-disable-next-line no-useless-assignment
   let dtype = 0;
   if (iterable.dtype === dt.RANGE) {
     value = index;
@@ -16651,6 +16699,7 @@ const evaluate = (
 
   if (stmt.rpn) {
     let oprnd = evalRpn(stmt.rpn, vars, formats, isUnitAware);
+    // eslint-disable-next-line no-useless-assignment
     if (oprnd.dtype === dt.ERROR) { [stmt, oprnd] = errorResult(stmt, oprnd); return stmt}
     let result
     ;[stmt, result] = conditionResult(stmt, oprnd, isUnitAware);
@@ -16914,6 +16963,7 @@ const scanFunction = (lines, formats, startLineNum) => {
   const line1 = stripComment(lines[startLineNum]);
   let isDraw = line1.charAt(0) === "d";
   const posParen = line1.indexOf("(");
+  // eslint-disable-next-line no-useless-assignment
   let functionName = "";
   if (isDraw) {
     functionName = "draw";
@@ -16944,10 +16994,12 @@ const scanFunction = (lines, formats, startLineNum) => {
   };
 
   const stackOfCtrls = [];
+  /* eslint-disable no-useless-assignment */
   let expression = "";
+  let name = "";
+  /* eslint-enable no-useless-assignment */
   let prevLineEndedInContinuation = false;
   let prevLine = "";
-  let name = "";
   let isStatement = false;
 
   let j = startLineNum;
@@ -17039,8 +17091,10 @@ const scanFunction = (lines, formats, startLineNum) => {
     isStatement = false;
     prevLineEndedInContinuation = false;
     prevLine = "";
+    /* eslint-disable no-useless-assignment */
     name = "";
     expression = "";
+    /* eslint-enable no-useless-assignment */
   }
   return [errorOprnd("END_MISS", functionName), 0]
 };
@@ -17142,6 +17196,7 @@ const compile = (
   inputStr,
   formats = { decimalFormat: "1,000,000.", dateFormat: "yyyy-mm-dd" }
 ) => {
+  /* eslint-disable no-useless-assignment */
   let leadStr = "";
   let mainStr = "";
   let trailStr = "";
@@ -17162,6 +17217,7 @@ const compile = (
   let unit;
   let dtype;
   let str = "";
+  /* eslint-enable no-useless-assignment */
 
   const isModule = moduleRegEx.test(inputStr);
   const isDraw = drawRegEx.test(inputStr);
@@ -18011,6 +18067,7 @@ const compileSheet = (table, formats) => {
       const entry = cell.attrs.entry;
       if (i === 0) {
         const str = md2text(entry);
+        // eslint-disable-next-line no-useless-assignment
         let heading = "";
         let unitName = "";
         const posNewline = str.indexOf("\n");
@@ -19175,6 +19232,7 @@ const tex2Calc = (str, displayMode = false) => {
 
       case tt.UNARY: {
         if (verbatims.has(token.input)) {
+          // eslint-disable-next-line no-useless-assignment
           let arg = "";
           if (kerns.includes(token.input) && str[0] !== "{") {
             arg = unbracedDistance(str);
