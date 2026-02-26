@@ -205,7 +205,7 @@ const hurmetNodes =  {
     if (node.content.content.length > 0) {
       state.renderInline(node)
     } else {
-      state.write("¶")
+      state.write(state.isGFM ? "&nbsp;" : "¶")
     }
     if (!state.isGFM) {
       state.out = limitLineLength(state.out, prevLength, state.delim, state.lineLimit)
@@ -802,6 +802,7 @@ export class MarkdownSerializerState {
             }
             // Each table cell contains an array of strings.
             const cellContent = tableState.out.slice(L).replace(/^\n+/, "").replace(/\n+$/, "").split("\n")
+            if (cellContent.length === 1 && cellContent[0] === "&nbsp;") { cellContent[0] = "¶" }
             table[i][j] = cellContent
             if (cellContent.length > 1 && !isGFM) { isRst = true }
             // Get width of cell.
