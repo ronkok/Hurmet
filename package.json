@@ -46,7 +46,7 @@
     "@rollup/plugin-node-resolve": "latest",
     "eslint": "latest",
     "globals": "latest",
-    "rollup": "latest",
+    "rollup": "^4.59.0",
     "terser": "latest"
   },
   "scripts": {
