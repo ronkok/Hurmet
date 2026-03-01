@@ -16410,7 +16410,7 @@ function hashPath(path) {
 }
 function getIcon(root, icon) {
     let doc = (root.nodeType == 9 ? root : root.ownerDocument) || document;
-    let node = doc.createElement("button");
+    let node = doc.createElement("div");
     node.className = prefix$2;
     if (icon.path) {
         let { path, width, height } = icon;
@@ -16474,28 +16474,23 @@ class MenuItem {
         let spec = this.spec;
         let dom = spec.render ? spec.render(view)
             : spec.icon ? getIcon(view.root, spec.icon)
-                : spec.label ? crelt("button", null, translate(view, spec.label))
+                : spec.label ? crelt("div", null, translate(view, spec.label))
                     : null;
         if (!dom)
             throw new RangeError("MenuItem without icon or label property");
         if (spec.title) {
-            let title = (typeof spec.title === "function" ? spec.title(view.state) : spec.title);
+            const title = (typeof spec.title === "function" ? spec.title(view.state) : spec.title);
             dom.setAttribute("title", translate(view, title));
         }
         if (spec.class)
             dom.classList.add(spec.class);
         if (spec.css)
             dom.style.cssText += spec.css;
-        dom.addEventListener("click", e => {
-            if (!dom.classList.contains(prefix$1$1 + "-disabled")) {
-                let setFocus = document.activeElement == dom || document.activeElement == view.dom;
+        dom.addEventListener("mousedown", e => {
+            e.preventDefault();
+            if (!dom.classList.contains(prefix$1$1 + "-disabled"))
                 spec.run(view.state, view.dispatch, view, e);
-                if (setFocus && document.activeElement == dom)
-                    view.focus();
-            }
         });
-        // Clicking on a menu item should not remove focus from the editor
-        dom.addEventListener("mousedown", e => e.preventDefault());
         function update(state) {
             if (spec.select) {
                 let selected = spec.select(state);
@@ -16507,12 +16502,10 @@ class MenuItem {
             if (spec.enable) {
                 enabled = spec.enable(state) || false;
                 setClass(dom, prefix$1$1 + "-disabled", !enabled);
-                dom.setAttribute("aria-disabled", (!enabled).toString());
             }
             if (spec.active) {
                 let active = enabled && spec.active(state) || false;
                 setClass(dom, prefix$1$1 + "-active", active);
-                dom.setAttribute("aria-pressed", active.toString());
             }
             return true;
         }
@@ -16545,15 +16538,6 @@ class Dropdown {
     */
     options = {}) {
         this.options = options;
-        /**
-        @internal
-        */
-        this.focusables = [];
-        /**
-        @internal
-        */
-        this.focusIndex = 0;
-        this.focusTimeout = -1;
         this.options = options || {};
         this.content = Array.isArray(content) ? content : [content];
     }
@@ -16562,75 +16546,45 @@ class Dropdown {
     */
     render(view) {
         let content = renderDropdownItems(this.content, view);
-        this.focusables = content.focusables;
         let win = view.dom.ownerDocument.defaultView || window;
-        let btn = crelt("button", {
-            class: prefix$1$1 + "-dropdown " + (this.options.class || ""),
-            style: this.options.css,
-            "aria-haspopup": "menu",
-            "aria-expanded": "false"
-        }, translate(view, this.options.label || ""));
+        let label = crelt("div", { class: prefix$1$1 + "-dropdown " + (this.options.class || ""),
+            style: this.options.css }, translate(view, this.options.label || ""));
         if (this.options.title)
-            btn.setAttribute("title", translate(view, this.options.title));
-        let wrap = crelt("div", { class: prefix$1$1 + "-dropdown-wrap" }, btn);
+            label.setAttribute("title", translate(view, this.options.title));
+        let wrap = crelt("div", { class: prefix$1$1 + "-dropdown-wrap" }, label);
         let open = null;
         let listeningOnClose = null;
         let close = () => {
             if (open && open.close()) {
                 open = null;
-                win.removeEventListener("click", listeningOnClose);
+                win.removeEventListener("mousedown", listeningOnClose);
             }
         };
-        btn.addEventListener("click", e => {
+        label.addEventListener("mousedown", e => {
+            e.preventDefault();
             markMenuEvent(e);
             if (open) {
                 close();
             }
             else {
-                open = this.expand(wrap, content.dom, btn);
-                win.addEventListener("click", listeningOnClose = () => {
+                open = this.expand(wrap, content.dom);
+                win.addEventListener("mousedown", listeningOnClose = () => {
                     if (!isMenuEvent(wrap))
                         close();
                 });
-                // If triggered using the keyboard, move focus to first item
-                if (e.detail === 0) {
-                    let focusIndex = findFocusableIndex(this.focusables, -1, 1);
-                    if (focusIndex != null)
-                        this.setFocusIndex(focusIndex);
-                }
-                open.node.addEventListener("keydown", (event) => {
-                    markMenuEvent(event);
-                    if (keyboardMoveFocus(this, event, "vertical")) ;
-                    else if (event.key === "Escape") {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        close();
-                        btn.focus();
-                    }
-                });
-                open.node.addEventListener("focusout", () => {
-                    clearTimeout(this.focusTimeout);
-                    this.focusTimeout = setTimeout(() => {
-                        let active = win.document.activeElement;
-                        if (active && open && !open.node.contains(active))
-                            close();
-                    }, 20);
-                });
             }
         });
-        // Clicking on a dropdown should not remove focus from the editor
-        btn.addEventListener("mousedown", e => e.preventDefault());
         function update(state) {
             let inner = content.update(state);
             wrap.style.display = inner ? "" : "none";
             return inner;
         }
-        return { dom: wrap, update, focusable: btn };
+        return { dom: wrap, update };
     }
     /**
     @internal
     */
-    expand(dom, items, trigger) {
+    expand(dom, items) {
         let menuDOM = crelt("div", { class: prefix$1$1 + "-dropdown-menu " + (this.options.class || "") }, items);
         let done = false;
         function close() {
@@ -16638,72 +16592,20 @@ class Dropdown {
                 return false;
             done = true;
             dom.removeChild(menuDOM);
-            trigger.ariaControlsElements = [];
-            trigger.setAttribute("aria-expanded", "false");
             return true;
         }
         dom.appendChild(menuDOM);
-        trigger.ariaControlsElements = [items];
-        trigger.setAttribute("aria-expanded", "true");
         return { close, node: menuDOM };
     }
-    setFocusIndex(index) {
-        if (this.focusables.length <= 1)
-            return;
-        this.focusables[this.focusIndex].setAttribute("tabindex", "-1");
-        this.focusIndex = index;
-        let nextFocusItem = this.focusables[index];
-        nextFocusItem.setAttribute("tabindex", "0");
-        nextFocusItem.focus();
-    }
-}
-function findFocusableIndex(focusables, startIndex, delta) {
-    let length = focusables.length;
-    for (let i = 0, index = startIndex + delta;; index += delta, i++) {
-        let normIndex = (index + length) % length;
-        if (focusables[normIndex].style.display != "none")
-            return normIndex;
-        if (i == length)
-            return null;
-    }
-}
-function keyboardMoveFocus(control, event, orientation) {
-    let { focusables, focusIndex } = control;
-    let move = event.key == (orientation == "vertical" ? "ArrowDown" : "ArrowRight") ? findFocusableIndex(focusables, focusIndex, 1) :
-        event.key == (orientation == "vertical" ? "ArrowUp" : "ArrowLeft") ? findFocusableIndex(focusables, focusIndex, -1) :
-            event.key == "Home" ? findFocusableIndex(focusables, -1, 1) :
-                event.key == "End" ? findFocusableIndex(focusables, focusables.length, -1) : null;
-    if (move == null)
-        return false;
-    event.preventDefault();
-    event.stopPropagation();
-    control.setFocusIndex(move);
-    return true;
 }
 function renderDropdownItems(items, view) {
-    let elts = [], focusables = [], updates = [];
+    let rendered = [], updates = [];
     for (let i = 0; i < items.length; i++) {
-        let item = items[i];
-        let { dom, update, focusable } = item.render(view);
-        elts.push(crelt("li", {
-            class: `${prefix$1$1}-dropdown-item`,
-            role: "menuitem",
-            "tabindex": "-1"
-        }, dom));
-        focusables.push(focusable || dom);
+        let { dom, update } = items[i].render(view);
+        rendered.push(crelt("div", { class: prefix$1$1 + "-dropdown-item" }, dom));
         updates.push(update);
     }
-    function update(state) {
-        let something = false;
-        for (let i = 0; i < elts.length; i++) {
-            let dom = elts[i], up = updates[i](state);
-            if (up)
-                something = true;
-            dom.style.display = up ? "" : "none";
-        }
-        return something;
-    }
-    return { dom: crelt("ul", { role: "menu" }, elts), update, focusables };
+    return { dom: rendered, update: combineUpdates(updates, rendered) };
 }
 function combineUpdates(updates, nodes) {
     return (state) => {
@@ -16732,15 +16634,6 @@ class DropdownSubmenu {
     */
     options = {}) {
         this.options = options;
-        /**
-        @internal
-        */
-        this.focusables = [];
-        /**
-        @internal
-        */
-        this.focusIndex = 0;
-        this.focusTimeout = -1;
         this.content = Array.isArray(content) ? content : [content];
     }
     /**
@@ -16748,70 +16641,29 @@ class DropdownSubmenu {
     */
     render(view) {
         let items = renderDropdownItems(this.content, view);
-        this.focusables = items.focusables;
         let win = view.dom.ownerDocument.defaultView || window;
-        let btn = crelt("button", { class: prefix$1$1 + "-submenu-label" }, translate(view, this.options.label || ""));
-        let wrap = crelt("div", { class: prefix$1$1 + "-submenu-wrap" }, btn, crelt("div", { class: prefix$1$1 + "-submenu" }, items.dom));
+        let label = crelt("div", { class: prefix$1$1 + "-submenu-label" }, translate(view, this.options.label || ""));
+        let wrap = crelt("div", { class: prefix$1$1 + "-submenu-wrap" }, label, crelt("div", { class: prefix$1$1 + "-submenu" }, items.dom));
         let listeningOnClose = null;
-        let openSubmenu = (e) => {
+        label.addEventListener("mousedown", e => {
             e.preventDefault();
-            e.stopPropagation();
             markMenuEvent(e);
-            setClass(wrap, prefix$1$1 + "-submenu-wrap-active", true);
+            setClass(wrap, prefix$1$1 + "-submenu-wrap-active", false);
             if (!listeningOnClose)
-                win.addEventListener("click", listeningOnClose = () => {
+                win.addEventListener("mousedown", listeningOnClose = () => {
                     if (!isMenuEvent(wrap)) {
                         wrap.classList.remove(prefix$1$1 + "-submenu-wrap-active");
-                        win.removeEventListener("click", listeningOnClose);
+                        win.removeEventListener("mousedown", listeningOnClose);
                         listeningOnClose = null;
                     }
                 });
-            if (!(e.type == "click" && e.detail)) {
-                let focusIndex = findFocusableIndex(this.focusables, -1, 1);
-                if (focusIndex != null)
-                    this.setFocusIndex(focusIndex);
-            }
-        };
-        btn.addEventListener("click", openSubmenu);
-        btn.addEventListener("keydown", e => {
-            if (e.key === "ArrowRight")
-                openSubmenu(e);
-        });
-        // Clicking on an item should not remove focus from the editor
-        btn.addEventListener("mousedown", e => e.preventDefault());
-        items.dom.addEventListener("keydown", (event) => {
-            markMenuEvent(event);
-            if (keyboardMoveFocus(this, event, "vertical")) ;
-            else if (event.key === "Escape" || event.key === "ArrowLeft") {
-                event.preventDefault();
-                event.stopPropagation();
-                setClass(wrap, prefix$1$1 + "-submenu-wrap-active", false);
-                btn.focus();
-            }
-        });
-        items.dom.addEventListener("focusout", () => {
-            clearTimeout(this.focusTimeout);
-            this.focusTimeout = setTimeout(() => {
-                let active = win.document.activeElement;
-                if (active && !items.dom.contains(active))
-                    wrap.classList.remove(prefix$1$1 + "-submenu-wrap-active");
-            }, 20);
         });
         function update(state) {
             let inner = items.update(state);
             wrap.style.display = inner ? "" : "none";
             return inner;
         }
-        return { dom: wrap, update, focusable: btn };
-    }
-    setFocusIndex(index) {
-        if (this.focusables.length <= 1)
-            return;
-        this.focusables[this.focusIndex].setAttribute("tabindex", "-1");
-        this.focusIndex = index;
-        let nextFocusItem = this.focusables[index];
-        nextFocusItem.setAttribute("tabindex", "0");
-        nextFocusItem.focus();
+        return { dom: wrap, update };
     }
 }
 /**
@@ -16822,12 +16674,11 @@ be empty).
 */
 function renderGrouped(view, content) {
     let result = document.createDocumentFragment();
-    let updates = [], focusables = [], separators = [];
+    let updates = [], separators = [];
     for (let i = 0; i < content.length; i++) {
         let items = content[i], localUpdates = [], localNodes = [];
         for (let j = 0; j < items.length; j++) {
-            let { dom, update, focusable } = items[j].render(view);
-            focusables.push(focusable || dom);
+            let { dom, update } = items[j].render(view);
             let span = crelt("span", { class: prefix$1$1 + "item" }, dom);
             result.appendChild(span);
             localNodes.push(span);
@@ -16851,10 +16702,10 @@ function renderGrouped(view, content) {
         }
         return something;
     }
-    return { dom: result, update, focusables };
+    return { dom: result, update };
 }
 function separator() {
-    return crelt("span", { class: prefix$1$1 + "separator", role: "separator" });
+    return crelt("span", { class: prefix$1$1 + "separator" });
 }
 /**
 A set of basic editor-related icons. Contains the properties
@@ -16987,8 +16838,6 @@ class MenuBarView {
     constructor(editorView, options) {
         this.editorView = editorView;
         this.options = options;
-        this.focusables = [];
-        this.focusIndex = 0;
         this.spacer = null;
         this.maxHeight = 0;
         this.widthForMaxHeight = 0;
@@ -16996,21 +16845,15 @@ class MenuBarView {
         this.scrollHandler = null;
         this.root = editorView.root;
         this.wrapper = crelt("div", { class: prefix$3 + "-wrapper" });
-        this.menu = this.wrapper.appendChild(crelt("div", { class: prefix$3, role: "toolbar" }));
+        this.menu = this.wrapper.appendChild(crelt("div", { class: prefix$3 }));
         this.menu.className = prefix$3;
-        this.menu.ariaControlsElements = [editorView.dom];
         if (editorView.dom.parentNode)
             editorView.dom.parentNode.replaceChild(this.wrapper, editorView.dom);
-        if (options.position === "after") {
-            this.wrapper.insertBefore(editorView.dom, this.wrapper.firstChild);
-        }
-        else {
-            this.wrapper.appendChild(editorView.dom);
-        }
-        let { dom, update, focusables } = renderGrouped(this.editorView, this.options.content);
+        this.wrapper.appendChild(editorView.dom);
+        let { dom, update } = renderGrouped(this.editorView, this.options.content);
         this.contentUpdate = update;
-        this.focusables = focusables;
         this.menu.appendChild(dom);
+        this.update();
         if (options.floating && !isIOS()) {
             this.updateFloat();
             let potentialScrollers = getAllWrapping(this.wrapper);
@@ -17023,34 +16866,6 @@ class MenuBarView {
             };
             potentialScrollers.forEach(el => el.addEventListener('scroll', this.scrollHandler));
         }
-        // update focusIndex on focus change
-        for (let i = 0; i < focusables.length; i++) {
-            let focusable = focusables[i];
-            // set `tabindex` to -1 for all but the first focusable item
-            if (i)
-                focusable.setAttribute("tabindex", "-1");
-            focusable.addEventListener("focus", () => {
-                if (this.focusIndex === i)
-                    return;
-                let prevFocusItem = this.focusables[this.focusIndex];
-                prevFocusItem.setAttribute("tabindex", "-1");
-                focusable.setAttribute("tabindex", "0");
-                this.focusIndex = i;
-            });
-        }
-        this.menu.addEventListener("keydown", (event) => {
-            keyboardMoveFocus(this, event, "horizontal");
-        });
-        this.update();
-    }
-    setFocusIndex(index) {
-        if (this.focusables.length <= 1)
-            return;
-        this.focusables[this.focusIndex].setAttribute("tabindex", "-1");
-        this.focusIndex = index;
-        let nextFocusItem = this.focusables[index];
-        nextFocusItem.setAttribute("tabindex", "0");
-        nextFocusItem.focus();
     }
     update() {
         if (this.editorView.root != this.root) {
@@ -17059,13 +16874,7 @@ class MenuBarView {
             this.menu.replaceChild(dom, this.menu.firstChild);
             this.root = this.editorView.root;
         }
-        let active = this.editorView.dom.ownerDocument.activeElement == this.focusables[this.focusIndex];
         this.contentUpdate(this.editorView.state);
-        if (active && this.focusables[this.focusIndex].style.display == "none") {
-            let next = findFocusableIndex(this.focusables, this.focusIndex, 1);
-            if (next != null)
-                this.setFocusIndex(next);
-        }
         if (this.floating) {
             this.updateScrollCursor();
         }
@@ -35966,7 +35775,7 @@ const hurmetNodes =  {
     if (node.content.content.length > 0) {
       state.renderInline(node);
     } else {
-      state.write("¶");
+      state.write(state.isGFM ? "&nbsp;" : "¶");
     }
     if (!state.isGFM) {
       state.out = limitLineLength(state.out, prevLength, state.delim, state.lineLimit);
@@ -36563,6 +36372,7 @@ class MarkdownSerializerState {
             }
             // Each table cell contains an array of strings.
             const cellContent = tableState.out.slice(L).replace(/^\n+/, "").replace(/\n+$/, "").split("\n");
+            if (cellContent.length === 1 && cellContent[0] === "&nbsp;") { cellContent[0] = "¶"; }
             table[i][j] = cellContent;
             if (cellContent.length > 1 && !isGFM) { isRst = true; }
             // Get width of cell.
