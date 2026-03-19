@@ -17418,7 +17418,7 @@ const compile = (
     }
 [value, unit, dtype, resultDisplay] = valueFromLiteral(trailStr, name, formats);
     if (isPlaceholder) {
-      resultDisplay = "\\colorbox{aqua}{" + resultDisplay + "}";
+      resultDisplay = "\\colorbox{aqua}{$" + resultDisplay + "$}";
     }
 
     if (dtype === dt.ERROR) {
