@@ -13,7 +13,7 @@ import { formatResult } from "./result"
 
 const varRegEx = /〖[^〗]*〗/
 const openParenRegEx = /(?:[([{|‖]|[^\\][,;:](?:\\:)?)$/
-const placeHolderRegEx = /^\\colorbox{aqua}{(\$)/
+const placeHolderRegEx = /^\\colorbox{aqua}{\$/
 
 export const plugValsIntoEcho = (str, vars, unitAware, formatSpec, formats) => {
   // For each variable name in the echo string, substitute a value.
@@ -70,13 +70,8 @@ export const plugValsIntoEcho = (str, vars, unitAware, formatSpec, formats) => {
         resultdisplay: vars[varName].resultdisplay
       }
       if (placeHolderRegEx.test(hvar.resultdisplay)) {
-        if (placeHolderRegEx.exec(hvar.resultdisplay)[1] === "$") {
-          // Remove colorbox and $ delimiters
-          hvar.resultdisplay = hvar.resultdisplay.slice(17, -2).trim()
-        } else {
-          // Remove colorbox delimiters only
-          hvar.resultdisplay = hvar.resultdisplay.slice(16, -1).trim()
-        }
+        // Remove colorbox and $ delimiters
+        hvar.resultdisplay = hvar.resultdisplay.slice(17, -2).trim()
       }
     }
 
