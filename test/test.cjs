@@ -622,7 +622,8 @@ end`, vars)
     [`5 mod 3 = @`, `®5/1 ®3/1 modulo`, "2"],
     [`5 2/3 + 1 1/3 = @`, `®17/3 ®4/3 +`, "7"],
     [`1USD = @@ USD`, `®1/1 applyUnit USD`, "1 USD"],
-    [`2CAD = C$@@`, `®2/1 applyUnit CAD`, "C$2"]
+    [`2CAD = C$@@`, `®2/1 applyUnit CAD`, "C$2"],
+    [`2 ph = @@ psi`, `®2/1 ¿ph ⌧`, "70 psi"]
   ];
 
   const testRegEx = /^(@{1,2})test /
