@@ -16,6 +16,8 @@ const numMisMatchError = _ => {
   const str = "Error. Mismatch in number of multiple assignment."
   return [`\\textcolor{firebrick}{\\text{${str}}}`, str]
 }
+const percentRegEx = / *\\⦂/
+const times100 = n => Rnl.multiply(n, Rnl.fromNumber(100))
 const testRegEx = /^@{1,2}test /
 const compRegEx = /\u00a0([⩵≠><>≤≥∋∈∉∌⊂⊃⊄⊅]|==|in|!in|!=|=>|<=)$/
 const negatedComp = {
@@ -50,6 +52,8 @@ export const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAw
     delete stmt.resultdisplay.temp
     return stmt
   }
+
+  const isPercent = (stmt.unit && stmt.unit.name && stmt.unit.name === "\\⦂")
 
   const numNames = !stmt.name
     ? 0
@@ -101,16 +105,28 @@ export const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAw
     } else if (isMatrix(result)) {
       resultDisplay = Matrix.display((isUnitAware || result.value.plain)
           ? { value: result.value.plain, dtype: result.dtype }
+          : isPercent && isVector(result)
+          ? { value: result.value.map(e => times100(e)), dtype: result.dtype }
+          : isPercent
+          ? { value: result.value.map(row => row.map(e => times100(e))), dtype: result.dtype }
           : result,
         formatSpec,
         decimalFormat
       )
       altResultDisplay = Matrix.displayAlt((isUnitAware || result.value.plain)
           ? { value: result.value.plain, dtype: result.dtype }
+          : isPercent && isVector(result)
+          ? { value: result.value.map(e => times100(e)), dtype: result.dtype }
+          : isPercent
+          ? { value: result.value.map(row => row.map(e => times100(e))), dtype: result.dtype }
           : result,
         formatSpec,
         decimalFormat
       )
+      if (isPercent) {
+        resultDisplay += "\\%"
+        altResultDisplay += "%"
+      }
 
     } else if (result.dtype === dt.DATAFRAME) {
       if (numNames > 1 && numNames !== result.value.data.length) {
@@ -178,16 +194,18 @@ export const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAw
         resultDisplay = "\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}"
         altResultDisplay = resultDisplay.value
       } else {
-        altResultDisplay = resultDisplay.replace(/{,}/g, ",").replace("\\", "")
+        altResultDisplay = resultDisplay.replace(/{,}/g, ",").replace(/\\/g, "")
       }
 
     } else if (Rnl.isRational(result.value)) {
-      resultDisplay = format(result.value, formatSpec, decimalFormat)
+      resultDisplay = isPercent
+        ? format(times100(result.value), formatSpec, decimalFormat) + "\\%"
+        : format(result.value, formatSpec, decimalFormat)
       if (resultDisplay.dtype && resultDisplay.dtype === dt.ERROR) {
         resultDisplay = "\\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}"
         altResultDisplay = resultDisplay.value
       } else {
-        altResultDisplay = resultDisplay.replace(/{,}/g, ",").replace("\\", "")
+        altResultDisplay = resultDisplay.replace(/{,}/g, ",").replace(/\\/g, "")
       }
 
     } else if (result.dtype === dt.IMAGE) {
@@ -234,6 +252,9 @@ export const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAw
           + stmt.alt.slice(pos + stmt.displaySelector.length)
     }
   }
+  stmt.tex = stmt.tex.replace(percentRegEx, "")
+  if (stmt.md) { stmt.md = stmt.md.replace(percentRegEx, "") }
+  stmt.alt = stmt.alt.replace(percentRegEx, "")
   return stmt
 }
 

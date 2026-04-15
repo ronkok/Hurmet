@@ -7,7 +7,7 @@
    <link rel="manifest" href="/app.webmanifest">
    <link rel="icon" href="/images/favicon.svg">
    <link rel="stylesheet" href="/docStyles.min.css">
-   <script>globalThis.currencyRates = {"USD":"1.1787","JPY":"183.83","BGN":"1.9558","CZK":"24.271","DKK":"7.4694","GBP":"0.87290","HUF":"389.53","PLN":"4.2135","RON":"5.0899","SEK":"10.8055","CHF":"0.9284","ISK":"148.00","NOK":"11.8040","TRY":"50.5072","AUD":"1.7587","BRL":"6.5076","CAD":"1.6128","CNY":"8.2679","HKD":"9.1655","IDR":"19740.28","ILS":"3.7514","INR":"105.7755","KRW":"1707.04","MXN":"21.1015","MYR":"4.7678","NZD":"2.0197","PHP":"69.269","SGD":"1.5135","THB":"36.593","ZAR":"19.6091","EUR":"1.0"}</script>
+   <script>globalThis.currencyRates = {"USD":"1.1685","JPY":"185.70","CZK":"24.401","DKK":"7.4728","GBP":"0.87053","HUF":"377.08","PLN":"4.2558","RON":"5.0932","SEK":"10.8765","CHF":"0.9240","ISK":"143.60","NOK":"11.1265","TRY":"52.1047","AUD":"1.6593","BRL":"5.9584","CAD":"1.6175","CNY":"7.9863","HKD":"9.1551","IDR":"19978.14","ILS":"3.6029","INR":"108.2738","KRW":"1728.78","MXN":"20.3739","MYR":"4.6541","NZD":"2.0019","PHP":"69.883","SGD":"1.4891","THB":"37.503","ZAR":"19.2009","EUR":"1.0"}</script>
 </head>
 <body>
 <main>
@@ -317,10 +317,11 @@ print &quot;Hi!&quot;</code></pre></td></tr>
 <tr><td>%</td><td>%%</td><td>Omits blue echo.</td></tr>
 <tr><td>@</td><td>@@</td><td>Displays only the result, like a spreadsheet cell.</td></tr>
 <tr><td>!</td><td>!!</td><td>Omits the blue echo and the result.<br>Valid only when the result is a data frame.</td></tr></table>
-<p>For an engineer like me, the most common display selector is <strong>??</strong>. I almost always want to see the entire calculation. Seeing the expression and the plugged-in values helps me to avoid the kind of unseen <a href='http://www.eusprig.org/horror-stories.htm'>errors</a> that creep into spreadsheet calculations. And it makes the calculation reviewable by a second set of eyes.</p>
+<p>For an engineer like me, the most common display selector is <strong>??</strong>. I almost always want to see the entire calculation. Seeing the expression and the plugged-in values helps me to avoid the kind of unseen <a href='https://eusprig.org/research-info/horror-stories/'>errors</a> that creep into spreadsheet calculations. And it makes the calculation reviewable by a second set of eyes.</p>
 <p>A doubled selector will prompt a <a href='#unit-aware-calculations'>unit-aware calculation</a>. After you try them, you may wonder how you ever did without them.</p>
 <p>I use the <strong>!</strong> selector mostly when I am assigning a <a href='#data-frame'>chunk of data</a> to a variable.</p>
 <p>I try to resist the temptation to overuse the <strong>%</strong> selector. When I review work done by another engineer, I can do without the blue echo if variable values are assigned directly above the equation where they are used. Otherwise I get grumpy. You don’t want a grumpy reviewer.</p>
+<p>If you want a result to be written as a percentage, e.g. 15%, and you want to suppress the blue echo, you face an ambiguity, because <code>%%</code> returns a unit-aware echo-suppressing statement. To avoid the ambiguity, write <code>%\%</code>. That will write the <code>%</code> into the result.</p>
 <p>One last variation is possible when assigning values from a single-row data frame. You can assign such values to more than one variable at a time, like this:</p>
 <pre><code>A, I, w_self = beam[&quot;A&quot;, &quot;Ix&quot;, &quot;weight&quot;] = !!</code></pre><h2 id='identifiers'>Identifiers</h2>
 <p><em>Identifier</em> is another word for <em>variable name or function name</em>. Hurmet will recognize some words as valid identifiers:</p>

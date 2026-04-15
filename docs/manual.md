@@ -751,7 +751,7 @@ It determines how much of the calculation is displayed.
 For an engineer like me, the most common display selector is **??**. I almost
 always want to see the entire calculation. Seeing the expression and the
 plugged-in values helps me to avoid the kind of unseen
-[errors](http://www.eusprig.org/horror-stories.htm) that creep into spreadsheet
+[errors](https://eusprig.org/research-info/horror-stories/) that creep into spreadsheet
 calculations. And it makes the calculation reviewable by a second set of eyes.
 
 A doubled selector will prompt a [unit-aware calculation](#unit-aware-calculations).
@@ -763,6 +763,10 @@ I try to resist the temptation to overuse the **%** selector. When I review work
 done by another engineer, I can do without the blue echo if variable values are
 assigned directly above the equation where they are used. Otherwise I get grumpy.
 You don’t want a grumpy reviewer.
+
+If you want a result to be written as a percentage, e.g. 15%, and you want to suppress the
+blue echo, you face an ambiguity, because `%%` returns a unit-aware echo-suppressing
+statement. To avoid the ambiguity, write `%\%`. That will write the `%` into the result.
 
 One last variation is possible when assigning values from a single-row data frame.
 You can assign such values to more than one variable at a time, like this:

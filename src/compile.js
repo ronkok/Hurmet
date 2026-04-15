@@ -34,7 +34,8 @@ import { unitFromUnitName } from "./units"
  */
 
 const containsOperator = /[+\-×·*∘⌧/^%‰&√!¡|‖&=<>≟≠≤≥∈∉⋐∧∨⊻¬]|\xa0(function|mod|\\atop|root|sum|abs|cos|sin|tan|acos|asin|atan|sec|csc|cot|asec|acsc|acot|exp|log|ln|log10|log2|cosh|sinh|tanh|sech|csch|coth|acosh|asinh|atanh|asech|acsch|acoth|gamma|Γ|lgamma|logΓ|lfact|cosd|sind|tand|acosd|asind|atand|secd|cscd|cotd|asecd|acscd|acotd|real|imag|angle|Char|round|sqrt|sign|\?{}|%|⎾⏋|⎿⏌|\[\]|\(\))\xa0/
-const mustDoCalculation = /^(?:``.+``|(?:[£¥\u20A0-\u20CF]|(?:[ACR]|HK|US)?\$)?(?:\?{1,2}|@{1,2}|%{1,2}|!{1,2})[^=!(?@%!{})]*)$/
+const mustDoCalculation = /^(?:``.+``|(?:[£¥\u20A0-\u20CF]|(?:[ACR]|HK|US)?\$)?(?:\?{1,2}|@{1,2}|%{1,3}|!{1,2})[^=!(?@!{})]*)$/
+const percentOperatorRegEx = /((?:\?{1,2}|@{1,2}|%{1,2}|!{1,2}) *)%/
 const assignDataFrameRegEx = /^[^=]+=\s*``[\s\S]+``\s*$/
 const currencyRegEx = /^[$£¥\u20A0-\u20CF]/
 // eslint-disable-next-line max-len
@@ -242,6 +243,10 @@ export const compile = (
     leadsWithCurrency = true
     unit = trailStr.charAt(0)
   }
+
+  // Replace a % operator with a placeholder, so that we can test for the
+  // presence of a % operator without worrying about escaped % characters in the trailStr.
+  trailStr = trailStr.replace(percentOperatorRegEx, "$1\\⦂").replace("\\%", "\\⦂")
 
   if (isCalc) {
     // trailStr contains a display selector.

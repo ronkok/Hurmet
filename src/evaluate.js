@@ -175,7 +175,7 @@ export const evalRpn = (rpn, vars, formats, unitAware, lib) => {
         oprnd.unit.expos = allZeros
         oprnd.dtype = dt.COMPLEX
       } else {
-        const cellAttrs = vars[varName]
+        const cellAttrs = vars[varName];
         if (!cellAttrs) { return errorOprnd("V_NAME", varName) }
         oprnd = fromAssignment(cellAttrs, unitAware)
         if (oprnd.dtype === dt.ERROR) { return oprnd }
@@ -1956,10 +1956,11 @@ const conditionResult = (stmt, oprnd, unitAware) => {
   // If unit-aware, convert result to desired result units.
   const unitInResultSpec = (stmt.unit && stmt.unit.factor &&
       (!Rnl.areEqual(stmt.unit.factor, Rnl.one) || stmt.unit.gauge))
+  const isPercent = (stmt.unit && stmt.unit.name && stmt.unit.name === "\\⦂")
   if ((result.dtype & dt.DATAFRAME) ||
       (typeof stmt.resultdisplay === "string" && stmt.resultdisplay.indexOf("!") > -1)) {
     stmt.unit = result.unit
-  } else if (unitAware && (result.dtype & dt.RATIONAL)) {
+  } else if (unitAware && (result.dtype & dt.RATIONAL) && !isPercent) {
     if (!unitInResultSpec & unitsAreCompatible(result.unit.expos, allZeros)) {
       stmt.unit = { factor: Rnl.one, gauge: Rnl.zero, expos: allZeros }
     }
@@ -1982,7 +1983,7 @@ const conditionResult = (stmt, oprnd, unitAware) => {
     }
     stmt.dtype += dt.QUANTITY
     stmt.expos = result.unit.expos
-  } else if (unitInResultSpec) {
+  } else if (unitInResultSpec && !isPercent) {
     // A non-unit aware calculation, but with a unit attached to the result.
     if (result.dtype & dt.MAP) {
       const data = {
@@ -2006,8 +2007,12 @@ const conditionResult = (stmt, oprnd, unitAware) => {
     stmt.dtype += dt.QUANTITY
 
   } else if ((result.dtype & dt.RATIONAL) || (result.dtype & dt.COMPLEX) ) {
-    // A numeric result with no unit specified.
-    stmt.unit = { expos: allZeros }
+    if (isPercent) {
+      // Take no action. The result is a percentage.
+    } else {
+      // A numeric result with no unit specified.
+      stmt.unit = { expos: allZeros }
+    }
   }
   if (Object.prototype.hasOwnProperty.call(result, "value")) {
     stmt.value = result.value

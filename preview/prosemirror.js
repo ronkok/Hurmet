@@ -18505,7 +18505,6 @@ const prefixFactor = JSON.parse('{"Y":1e24,"yotta":1e24,"Z":1e21,"zetta":1e21,"E
 const unitTable = Object.freeze(JSON.parse(`{
 "#":["0.45359237", "1","0","0",[0,1,0,0,0,0,0,0]],
 "$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"£":["1","1","0","GBP",[0,0,0,0,0,0,0,1]],
 "'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
 "AUD":["1.7587","1","0","AUD",[0,0,0,0,0,0,0,1]],
@@ -18621,6 +18620,7 @@ const unitTable = Object.freeze(JSON.parse(`{
 "Wh":["3600","1","0","siSymbol",[2,1,-2,0,0,0,0,0]],
 "Won":["1","1","0","KRW",[0,0,0,0,0,0,0,1]],
 "Yen":["1","1","0","JPY",[0,0,0,0,0,0,0,1]],
+"\\\\⦂":["0.01","1","0","0",[0,0,0,0,0,0,0,0]],
 "a":["31556925.9747","1","0","siSymbol",[0,0,1,0,0,0,0,0]],
 "ac":["4046.8564224","1","0","0",[2,0,0,0,0,0,0,0]],
 "acre":["4046.8564224","1","0","0",[2,0,0,0,0,0,0,0]],
@@ -26700,6 +26700,8 @@ const numMisMatchError = _ => {
   const str = "Error. Mismatch in number of multiple assignment.";
   return [`\\textcolor{firebrick}{\\text{${str}}}`, str]
 };
+const percentRegEx = / *\\⦂/;
+const times100 = n => Rnl.multiply(n, Rnl.fromNumber(100));
 const testRegEx$1 = /^@{1,2}test /;
 const compRegEx = /\u00a0([⩵≠><>≤≥∋∈∉∌⊂⊃⊄⊅]|==|in|!in|!=|=>|<=)$/;
 const negatedComp = {
@@ -26734,6 +26736,8 @@ const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAware) =>
     delete stmt.resultdisplay.temp;
     return stmt
   }
+
+  const isPercent = (stmt.unit && stmt.unit.name && stmt.unit.name === "\\⦂");
 
   const numNames = !stmt.name
     ? 0
@@ -26785,16 +26789,28 @@ const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAware) =>
     } else if (isMatrix(result)) {
       resultDisplay = Matrix.display((isUnitAware || result.value.plain)
           ? { value: result.value.plain, dtype: result.dtype }
+          : isPercent && isVector(result)
+          ? { value: result.value.map(e => times100(e)), dtype: result.dtype }
+          : isPercent
+          ? { value: result.value.map(row => row.map(e => times100(e))), dtype: result.dtype }
           : result,
         formatSpec,
         decimalFormat
       );
       altResultDisplay = Matrix.displayAlt((isUnitAware || result.value.plain)
           ? { value: result.value.plain, dtype: result.dtype }
+          : isPercent && isVector(result)
+          ? { value: result.value.map(e => times100(e)), dtype: result.dtype }
+          : isPercent
+          ? { value: result.value.map(row => row.map(e => times100(e))), dtype: result.dtype }
           : result,
         formatSpec,
         decimalFormat
       );
+      if (isPercent) {
+        resultDisplay += "\\%";
+        altResultDisplay += "%";
+      }
 
     } else if (result.dtype === dt.DATAFRAME) {
       if (numNames > 1 && numNames !== result.value.data.length) {
@@ -26862,16 +26878,18 @@ const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAware) =>
         resultDisplay = "\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}";
         altResultDisplay = resultDisplay.value;
       } else {
-        altResultDisplay = resultDisplay.replace(/{,}/g, ",").replace("\\", "");
+        altResultDisplay = resultDisplay.replace(/{,}/g, ",").replace(/\\/g, "");
       }
 
     } else if (Rnl.isRational(result.value)) {
-      resultDisplay = format(result.value, formatSpec, decimalFormat);
+      resultDisplay = isPercent
+        ? format(times100(result.value), formatSpec, decimalFormat) + "\\%"
+        : format(result.value, formatSpec, decimalFormat);
       if (resultDisplay.dtype && resultDisplay.dtype === dt.ERROR) {
         resultDisplay = "\\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}";
         altResultDisplay = resultDisplay.value;
       } else {
-        altResultDisplay = resultDisplay.replace(/{,}/g, ",").replace("\\", "");
+        altResultDisplay = resultDisplay.replace(/{,}/g, ",").replace(/\\/g, "");
       }
 
     } else if (result.dtype === dt.IMAGE) {
@@ -26918,6 +26936,9 @@ const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAware) =>
           + stmt.alt.slice(pos + stmt.displaySelector.length);
     }
   }
+  stmt.tex = stmt.tex.replace(percentRegEx, "");
+  if (stmt.md) { stmt.md = stmt.md.replace(percentRegEx, ""); }
+  stmt.alt = stmt.alt.replace(percentRegEx, "");
   return stmt
 };
 
@@ -34882,10 +34903,11 @@ const conditionResult = (stmt, oprnd, unitAware) => {
   // If unit-aware, convert result to desired result units.
   const unitInResultSpec = (stmt.unit && stmt.unit.factor &&
       (!Rnl.areEqual(stmt.unit.factor, Rnl.one) || stmt.unit.gauge));
+  const isPercent = (stmt.unit && stmt.unit.name && stmt.unit.name === "\\⦂");
   if ((result.dtype & dt.DATAFRAME) ||
       (typeof stmt.resultdisplay === "string" && stmt.resultdisplay.indexOf("!") > -1)) {
     stmt.unit = result.unit;
-  } else if (unitAware && (result.dtype & dt.RATIONAL)) {
+  } else if (unitAware && (result.dtype & dt.RATIONAL) && !isPercent) {
     if (!unitInResultSpec & unitsAreCompatible(result.unit.expos, allZeros)) {
       stmt.unit = { factor: Rnl.one, gauge: Rnl.zero, expos: allZeros };
     }
@@ -34908,7 +34930,7 @@ const conditionResult = (stmt, oprnd, unitAware) => {
     }
     stmt.dtype += dt.QUANTITY;
     stmt.expos = result.unit.expos;
-  } else if (unitInResultSpec) {
+  } else if (unitInResultSpec && !isPercent) {
     // A non-unit aware calculation, but with a unit attached to the result.
     if (result.dtype & dt.MAP) {
       const data = {
@@ -34932,8 +34954,10 @@ const conditionResult = (stmt, oprnd, unitAware) => {
     stmt.dtype += dt.QUANTITY;
 
   } else if ((result.dtype & dt.RATIONAL) || (result.dtype & dt.COMPLEX) ) {
-    // A numeric result with no unit specified.
-    stmt.unit = { expos: allZeros };
+    if (isPercent) ; else {
+      // A numeric result with no unit specified.
+      stmt.unit = { expos: allZeros };
+    }
   }
   if (Object.prototype.hasOwnProperty.call(result, "value")) {
     stmt.value = result.value;
@@ -35467,7 +35491,8 @@ const scanAssignment = (lines, formats, iStart) => {
  */
 
 const containsOperator = /[+\-×·*∘⌧/^%‰&√!¡|‖&=<>≟≠≤≥∈∉⋐∧∨⊻¬]|\xa0(function|mod|\\atop|root|sum|abs|cos|sin|tan|acos|asin|atan|sec|csc|cot|asec|acsc|acot|exp|log|ln|log10|log2|cosh|sinh|tanh|sech|csch|coth|acosh|asinh|atanh|asech|acsch|acoth|gamma|Γ|lgamma|logΓ|lfact|cosd|sind|tand|acosd|asind|atand|secd|cscd|cotd|asecd|acscd|acotd|real|imag|angle|Char|round|sqrt|sign|\?{}|%|⎾⏋|⎿⏌|\[\]|\(\))\xa0/;
-const mustDoCalculation = /^(?:``.+``|(?:[£¥\u20A0-\u20CF]|(?:[ACR]|HK|US)?\$)?(?:\?{1,2}|@{1,2}|%{1,2}|!{1,2})[^=!(?@%!{})]*)$/;
+const mustDoCalculation = /^(?:``.+``|(?:[£¥\u20A0-\u20CF]|(?:[ACR]|HK|US)?\$)?(?:\?{1,2}|@{1,2}|%{1,3}|!{1,2})[^=!(?@!{})]*)$/;
+const percentOperatorRegEx = /((?:\?{1,2}|@{1,2}|%{1,2}|!{1,2}) *)%/;
 const assignDataFrameRegEx = /^[^=]+=\s*``[\s\S]+``\s*$/;
 const currencyRegEx = /^[$£¥\u20A0-\u20CF]/;
 // eslint-disable-next-line max-len
@@ -35675,6 +35700,10 @@ const compile = (
     leadsWithCurrency = true;
     unit = trailStr.charAt(0);
   }
+
+  // Replace a % operator with a placeholder, so that we can test for the
+  // presence of a % operator without worrying about escaped % characters in the trailStr.
+  trailStr = trailStr.replace(percentOperatorRegEx, "$1\\⦂").replace("\\%", "\\⦂");
 
   if (isCalc) {
     // trailStr contains a display selector.

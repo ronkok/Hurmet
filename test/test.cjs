@@ -265,7 +265,8 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     ["aDate = '2025-01-20'", "aDate = @", "2025-01-20"],
     ["x_2= 4", "x₂ = @", "4"],
     ["f_2′= 4", "f₂′ = @", "4"],
-    ["ph = 35 psi_", "ph = @", "35"] // trailing underscore does not change assigned value
+    ["ph = 35 psi_", "ph = @", "35"], // trailing underscore does not change assigned value
+    ["p = 15%", "p = @", "0.15"]
   ];
 
   const tex2CalcTests = [
@@ -623,7 +624,10 @@ end`, vars)
     [`5 2/3 + 1 1/3 = @`, `®17/3 ®4/3 +`, "7"],
     [`1USD = @@ USD`, `®1/1 applyUnit USD`, "1 USD"],
     [`2CAD = C$@@`, `®2/1 applyUnit CAD`, "C$2"],
-    [`2 ph = @@ psi`, `®2/1 ¿ph ⌧`, "70 psi"]
+    [`2 ph = @@ psi`, `®2/1 ¿ph ⌧`, "70 psi"],
+    [`2/5  =  @%`, `®2/1 ®5/1 /`, "40%"],
+    ["2 p = @%", `®2/1 ¿p ⌧`, "30%"],
+    ["2 p = @@%", `®2/1 ¿p ⌧`, "30%"]
   ];
 
   const testRegEx = /^(@{1,2})test /
