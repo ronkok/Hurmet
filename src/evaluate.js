@@ -722,12 +722,17 @@ export const evalRpn = (rpn, vars, formats, unitAware, lib) => {
           const numRows = Number(tokens[i + 1])
           const numCols = Number(tokens[i + 2])
           i += 2
+          let result
 
-          const result = (stack.length > 0 && stack[stack.length - 1].dtype === dt.RANGE)
-            ? Matrix.operandFromRange(stack.pop().value) // Input was [start:step:end...]
-            : Matrix.operandFromTokenStack(stack, numRows, numCols)
+          if (stack.length > 0 && stack[stack.length - 1].dtype === dt.RANGE) {
+            // Input was [start:step:end]
+            if (unitAware) { return errorOprnd("UNIT_IN_EL") }
+            result = Matrix.operandFromRange(stack.pop().value)
+          } else {
+            result = Matrix.operandFromTokenStack(stack, numRows, numCols)
+          }
           if (result.dtype === dt.ERROR) { return result }
-          stack.push(result)
+          stack.push(Object.freeze(result))
           break
         }
 

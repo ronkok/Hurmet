@@ -101,7 +101,8 @@ const errorMessages = Object.freeze({
     SHEET_INDEX:"Error. Bad column or row index.",
     UNSAVED:    "Error. The current document has not been saved.",
     UNIT_IN_MAT:"Error. Matrix elements cannot contain a unit." +
-                " Write the unit outside the matrix."
+                " Write the unit outside the matrix.",
+    UNIT_IN_EL: "Error. Use a non-unit-aware calculation to construct matrix elements."
   }
 })
 
