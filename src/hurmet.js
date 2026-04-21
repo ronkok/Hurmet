@@ -8,6 +8,7 @@ import { compile } from "./compile"
 import temml from "./temml.js"
 import { scanModule } from "./module"
 import { updateCalculations } from "./updateCalculations"
+import { updateHurmetDocWithResults } from "./updateDoc"
 import { Rnl } from "./rational"
 
 /*
@@ -42,6 +43,7 @@ export default {
   scanModule,
   tex2Calc,
   updateCalculations,
+  updateHurmetDocWithResults,
   render,
   Rnl
 }
