@@ -77,7 +77,7 @@ export const valueFromLiteral = (str, name, formats) => {
     return [0, null, dt.ERROR, ""]
 
   } else if (str === "true" || str === "false") {
-    return [Boolean(str), null, dt.BOOLEAN, `\\mathord{\\text{${str}}}`]
+    return [(str === "true" ? true : false), null, dt.BOOLEAN, `\\mathord{\\text{${str}}}`]
 
   } else if (str.length > 3 && str.slice(0, 3) === '"""') {
     // str contains a macro

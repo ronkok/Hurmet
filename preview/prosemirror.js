@@ -17574,7 +17574,8 @@ const errorMessages = Object.freeze({
     SHEET_INDEX:"Error. Bad column or row index.",
     UNSAVED:    "Error. The current document has not been saved.",
     UNIT_IN_MAT:"Error. Matrix elements cannot contain a unit." +
-                " Write the unit outside the matrix."
+                " Write the unit outside the matrix.",
+    UNIT_IN_EL: "Error. Use a non-unit-aware calculation to construct matrix elements."
   }
 });
 
@@ -24738,7 +24739,11 @@ rules.set("calculation", {
     if (capture[3]) {
       let entry = capture[3].trim();
       if (capture[1]) {
-        entry = entry.replace(resultRegEx, capture[1]);
+        if (entry.slice(0, 1) === "@") {
+          entry = entry.replace(resultRegEx, "").trim();
+        } else {
+          entry = entry.replace(resultRegEx, capture[1]);
+        }
       }
       if (!/^(?:function|draw\()/.test(entry) && entry.indexOf("``") === -1) {
         entry = entry.replace(/\n/g, " ");
@@ -24747,7 +24752,11 @@ rules.set("calculation", {
     } else {
       let entry = capture[5].trim();
       if (capture[4]) {
-        entry = entry.replace(resultRegEx, capture[4]);
+        if (entry.slice(0, 1) === "@") {
+          entry = entry.replace(resultRegEx, "").trim();
+        } else {
+          entry = entry.replace(resultRegEx, capture[4]);
+        }
       }
       return { attrs: { entry, displayMode: true } }
     }
@@ -26910,7 +26919,9 @@ const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAware) =>
     if (stmt.resulttemplate.indexOf("@") > -1) {
       stmt.tex = stmt.resultdisplay;
       stmt.displaySelector = stmt.altresulttemplate.indexOf("@@") > -1 ? "@@" : "@";
-      if (!testRegEx$1.test(stmt.entry)) {
+      if (testRegEx$1.test(stmt.entry)) {
+        stmt.md = stmt.entry + ` 〔${altResultDisplay}〕`;
+      } else {
         const pos = stmt.entry.lastIndexOf(stmt.displaySelector);
         stmt.md = stmt.entry.slice(0, pos) + `〔${altResultDisplay}〕`
             + stmt.entry.slice(pos + stmt.displaySelector.length);
@@ -33675,12 +33686,17 @@ const evalRpn = (rpn, vars, formats, unitAware, lib) => {
           const numRows = Number(tokens[i + 1]);
           const numCols = Number(tokens[i + 2]);
           i += 2;
+          let result;
 
-          const result = (stack.length > 0 && stack[stack.length - 1].dtype === dt.RANGE)
-            ? Matrix.operandFromRange(stack.pop().value) // Input was [start:step:end...]
-            : Matrix.operandFromTokenStack(stack, numRows, numCols);
+          if (stack.length > 0 && stack[stack.length - 1].dtype === dt.RANGE) {
+            // Input was [start:step:end]
+            if (unitAware) { return errorOprnd("UNIT_IN_EL") }
+            result = Matrix.operandFromRange(stack.pop().value);
+          } else {
+            result = Matrix.operandFromTokenStack(stack, numRows, numCols);
+          }
           if (result.dtype === dt.ERROR) { return result }
-          stack.push(result);
+          stack.push(Object.freeze(result));
           break
         }
 
@@ -35090,7 +35106,7 @@ const valueFromLiteral = (str, name, formats) => {
     return [0, null, dt.ERROR, ""]
 
   } else if (str === "true" || str === "false") {
-    return [Boolean(str), null, dt.BOOLEAN, `\\mathord{\\text{${str}}}`]
+    return [(str === "true" ? true : false), null, dt.BOOLEAN, `\\mathord{\\text{${str}}}`]
 
   } else if (str.length > 3 && str.slice(0, 3) === '"""') {
     // str contains a macro
@@ -35804,7 +35820,7 @@ const compile = (
   }
   if (rpn) { attrs.rpn = rpn; }
   if (dependencies.length > 0) { attrs.dependencies = dependencies; }
-  if (value) { attrs.value = value; }
+  if (value || dtype === dt.BOOLEAN) { attrs.value = value; }
   if (unit) {
     if (rpn && !attrs.value) {
       attrs.unit = typeof unit === "string"
@@ -37866,10 +37882,10 @@ async function updateCalcs(doc) {
   }
 }
 
-const getTOCitems = (ast, tocArray, start, end, node) => {
+const getTOCitems$1 = (ast, tocArray, start, end, node) => {
   if (Array.isArray(ast)) {
     for (let i = 0; i < ast.length; i++) {
-      getTOCitems(ast[i], tocArray, start, end, node);
+      getTOCitems$1(ast[i], tocArray, start, end, node);
     }
   } else if (ast && ast.type === "heading") {
     const level = ast.attrs.level;
@@ -37881,7 +37897,7 @@ const getTOCitems = (ast, tocArray, start, end, node) => {
   // eslint-disable-next-line no-prototype-builtins
   } else if (ast.hasOwnProperty("content")) {
     for (let j = 0; j < ast.content.length; j++) {
-      getTOCitems(ast.content[j], tocArray, start, end, node);
+      getTOCitems$1(ast.content[j], tocArray, start, end, node);
     }
   }
 };
@@ -37925,7 +37941,7 @@ async function hurmet2html(md, title = "", inHtml = false) {
     const end = Number(tocCapture[2]);
     const tocArray = [];
     const node = [];
-    getTOCitems(ast, tocArray, start, end, node);
+    getTOCitems$1(ast, tocArray, start, end, node);
     node[0].attrs.body = tocArray;
   }
 
@@ -53114,6 +53130,60 @@ var temml$1 = {
   __defineMacro: defineMacro
 };
 
+const getTOCitems = (ast, tocArray, start, end, node) => {
+  if (Array.isArray(ast)) {
+    for (let i = 0; i < ast.length; i++) {
+      getTOCitems(ast[i], tocArray, start, end, node);
+    }
+  } else if (ast && ast.type === "heading") {
+    const level = ast.attrs.level;
+    if (start <= level && level <= end) {
+      tocArray.push([headingText(ast.content), level - start]);
+    }
+  } else if (ast.type === "toc") {
+    node.push(ast);
+  // eslint-disable-next-line no-prototype-builtins
+  } else if (ast.hasOwnProperty("content")) {
+    for (let j = 0; j < ast.content.length; j++) {
+      getTOCitems(ast.content[j], tocArray, start, end, node);
+    }
+  }
+};
+
+async function updateHurmetDocWithResults(md) {
+  // Update the calculations of a Hurmet document and return a Hurmet Markdown
+  // document with results written inline.
+
+  // A Hurmet document is written in Markdown.
+  //     To extent possible, it matches GitHub Flavored Markdown (GFM)
+  //     For extensions beyond GFM, it matches, to the extent possible, Pandoc
+  //     For calculations, Hurmet has its own format.
+
+  // Start by converting the Markdown to an AST that matches
+  // the Hurmet internal data structure.
+  let ast = md2ast(md, false);
+
+  // Populate a Hurmet Table of Contents, if any exists.
+  const tocCapture = /\n *\n{\.toc start=(\d) end=(\d)}\n/.exec(md);
+  if (tocCapture) {
+    const start = Number(tocCapture[1]);
+    const end = Number(tocCapture[2]);
+    const tocArray = [];
+    const node = [];
+    getTOCitems(ast, tocArray, start, end, node);
+    node[0].attrs.body = tocArray;
+  }
+
+  // Perform Hurmet calculations.
+  // This is asynchronous because a calculation may need to fetch some remote data.
+  ast = await updateCalcs(ast);
+
+  // Write the updated Markdown
+  const updatedMarkdown = hurmetMarkdownSerializer.serialize(ast, new Map(), [],
+                                                             false, false, true);
+  return updatedMarkdown
+}
+
 /*
  * This file bundles together and exposes the calculation parts of Hurmet.
  * I use Rollup to create a CJS module from this code.
@@ -53146,6 +53216,7 @@ var hurmet = {
   scanModule,
   tex2Calc,
   updateCalculations,
+  updateHurmetDocWithResults,
   render,
   Rnl
 };

@@ -348,7 +348,7 @@ export const compile = (
   }
   if (rpn) { attrs.rpn = rpn }
   if (dependencies.length > 0) { attrs.dependencies = dependencies }
-  if (value) { attrs.value = value }
+  if (value || dtype === dt.BOOLEAN) { attrs.value = value }
   if (unit) {
     if (rpn && !attrs.value) {
       attrs.unit = typeof unit === "string"

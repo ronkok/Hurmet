@@ -266,7 +266,8 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     ["x_2= 4", "x₂ = @", "4"],
     ["f_2′= 4", "f₂′ = @", "4"],
     ["ph = 35 psi_", "ph = @", "35"], // trailing underscore does not change assigned value
-    ["p = 15%", "p = @", "0.15"]
+    ["p = 15%", "p = @", "0.15"],
+    ["b2 = false", "b2 = @", "false"]
   ];
 
   const tex2CalcTests = [
@@ -629,7 +630,8 @@ end`, vars)
     ["2 p = @%", `®2/1 ¿p ⌧`, "30%"],
     ["2 p = @@%", `®2/1 ¿p ⌧`, "30%"],
     [`0.2 × 2 = %%`, `®2/10 ®2/1 ×`, "0.2 × 2 = 0.4"],
-    [`0.2 × 2 = %\\%`, `®2/10 ®2/1 ×`, "0.2 × 2 = 40%"]
+    [`0.2 × 2 = %\\%`, `®2/10 ®2/1 ×`, "0.2 × 2 = 40%"],
+    [`b2 or false = @`, "¿b2 false or", "false"]
   ];
 
   const testRegEx = /^(@{1,2})test /
