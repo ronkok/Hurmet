@@ -981,7 +981,11 @@ rules.set("calculation", {
     if (capture[3]) {
       let entry = capture[3].trim()
       if (capture[1]) {
-        entry = entry.replace(resultRegEx, capture[1])
+        if (entry.slice(0, 1) === "@") {
+          entry = entry.replace(resultRegEx, "").trim()
+        } else {
+          entry = entry.replace(resultRegEx, capture[1])
+        }
       }
       if (!/^(?:function|draw\()/.test(entry) && entry.indexOf("``") === -1) {
         entry = entry.replace(/\n/g, " ")
@@ -990,7 +994,11 @@ rules.set("calculation", {
     } else {
       let entry = capture[5].trim()
       if (capture[4]) {
-        entry = entry.replace(resultRegEx, capture[4])
+        if (entry.slice(0, 1) === "@") {
+          entry = entry.replace(resultRegEx, "").trim()
+        } else {
+          entry = entry.replace(resultRegEx, capture[4])
+        }
       }
       return { attrs: { entry, displayMode: true } }
     }

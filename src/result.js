@@ -226,7 +226,9 @@ export const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAw
     if (stmt.resulttemplate.indexOf("@") > -1) {
       stmt.tex = stmt.resultdisplay
       stmt.displaySelector = stmt.altresulttemplate.indexOf("@@") > -1 ? "@@" : "@"
-      if (!testRegEx.test(stmt.entry)) {
+      if (testRegEx.test(stmt.entry)) {
+        stmt.md = stmt.entry + ` 〔${altResultDisplay}〕`
+      } else {
         const pos = stmt.entry.lastIndexOf(stmt.displaySelector)
         stmt.md = stmt.entry.slice(0, pos) + `〔${altResultDisplay}〕`
             + stmt.entry.slice(pos + stmt.displaySelector.length)
