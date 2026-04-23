@@ -26,7 +26,6 @@ I recommend Russ Rowlett’s [dictionary of units of measurement](http://www.ibi
 |-----------------------|--------------------------------|---------|----------|----|----|----|----|----|---|----|---|----------------------------------|
 | #                     | 0.45359237                     | 0       | 0        | 0  | 1  | 0  | 0  | 0  | 0 | 0  | 0 | pound (mass)                     |
 | $                     | 1                              | 0       | USD      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | US dollar                        |
-| '                     | 0.3048                         | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | foot                             |
 | A                     | 1                              | 0       | siSymbol | 0  | 0  | 0  | 1  | 0  | 0 | 0  | 0 | amperes                          |
 | AUD                   | 1                              | 0       | AUD      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 |                                  |
 | Adobe point           | 0.0254/72                      | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | inch/72                          |
@@ -492,7 +491,7 @@ I recommend Russ Rowlett’s [dictionary of units of measurement](http://www.ibi
 | steradian             | 1                              | 0       | 0        | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | SI base for solid angle          |
 | stere                 | 1                              | 0       | 0        | 3  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | m³                               |
 | stoke                 | 0.0001                         | 0       | 0        | 2  | 0  | -1 | 0  | 0  | 0 | 0  | 0 | kinematic viscosity              |
-| stone                 | 6.35029318                     | 0       | 0        | 0  | 1  | 0  | 0  | 0  | 0 | 0  | 0 | 0  | 14 lbm                           |
+| stone                 | 6.35029318                     | 0       | 0        | 0  | 1  | 0  | 0  | 0  | 0 | 0  | 0 | 14 lbm                           |
 | stpd                  | 0.0104998233796296             | 0       | 0        | 0  | 1  | -1 | 0  | 0  | 0 | 0  | 0 | short tons per day               |
 | stunde                | 3600                           | 0       | 0        | 0  | 0  | 1  | 0  | 0  | 0 | 0  | 0 | hour                             |
 | survey feet           | 1200/3937                      | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 |                                  |
@@ -547,8 +546,9 @@ I recommend Russ Rowlett’s [dictionary of units of measurement](http://www.ibi
 | °R                    | 5/9                            | 0       | 0        | 0  | 0  | 0  | 0  | 1  | 0 | 0  | 0 | degree rankin (temp)             |
 | °R                    | 5/9                            | 0       | 0        | 0  | 0  | 0  | 0  | 1  | 0 | 0  | 0 | 5/9 K                            |
 | Å                     | 0.0000000001                   | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | angstrom                         |
+| ′                     | 0.3048                         | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | foot                             |
+| ″                     | 0.0254                         | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | inch                             |
 | Ω                     | 1                              | 0       | siSymbol | 2  | 1  | -3 | -2 | 0  | 0 | 0  | 0 | ohm                              |
-| ”                     | 0.0254                         | 0       | 0        | 1  | 0  | 0  | 0  | 0  | 0 | 0  | 0 | Inch                             |
 | ₣                     | 1                              | 0       | CHF      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | Swiss franc                      |
 | ₨                     | 1                              | 0       | INR      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | Indian Rupee                     |
 | ₹                     | 1                              | 0       | INR      | 0  | 0  | 0  | 0  | 0  | 0 | 0  | 1 | Indian Rupee                     |

@@ -1315,7 +1315,6 @@ const prefixFactor = JSON.parse('{"Y":1e24,"yotta":1e24,"Z":1e21,"zetta":1e21,"E
 const unitTable = Object.freeze(JSON.parse(`{
 "#":["0.45359237", "1","0","0",[0,1,0,0,0,0,0,0]],
 "$":["1","1","0","USD",[0,0,0,0,0,0,0,1]],
-"'":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
 "A":["1","1","0","siSymbol",[0,0,0,1,0,0,0,0]],
 "AUD":["1.7587","1","0","AUD",[0,0,0,0,0,0,0,1]],
 "Adobe point":["0.0254","72","0","0",[1,0,0,0,0,0,0,0]],
@@ -1843,8 +1842,8 @@ const unitTable = Object.freeze(JSON.parse(`{
 "°R":["5","9","0","0",[0,0,0,0,1,0,0,0]],
 "°R":["5","9","0","0",[0,0,0,0,1,0,0,0]],
 "Å":["0.0000000001","1","0","0",[1,0,0,0,0,0,0,0]],
-"Ω":["1","1","0","siSymbol",[2,1,-3,-2,0,0,0,0]],
-"”":["0.0254","1","0","0",[1,0,0,0,0,0,0,0]],
+"′":["0.3048","1","0","0",[1,0,0,0,0,0,0,0]],
+"″":["0.0254","1","0","0",[1,0,0,0,0,0,0,0]],
 "₣":["0.9284","1","0","CHF",[0,0,0,0,0,0,0,1]],
 "₨":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
 "₹":["1","1","0","INR",[0,0,0,0,0,0,0,1]],
@@ -2039,13 +2038,8 @@ const unitFromUnitName = memoizeFunction(function(inputStr) {
     u.factor = Rnl.fromString("0.0174532925199433");
     return u
   } else if (str === "feetInch") {
-    u.unitExpos = [1, 0, 0, 0, 0, 0, 0, 0];
+    u.unitExpos = [1, 0, 0, 0, 0, 0, 0, 0, 0];
     u.factor = Rnl.fromString("0.3048");
-    return u
-  } else if (str === "″" || str === "ʹʹ") {
-    // TODO: Move to unitTable
-    u.unitExpos = [1, 0, 0, 0, 0, 0, 0, 0];
-    u.factor = Rnl.fromString("0.0254");
     return u
   }
 
@@ -4870,8 +4864,8 @@ const lexOneWord = (str, prevToken) => {
 };
 
 // Support a unit name written w/o a space after a number
-const unitStartRegEx = /^(?:[A-Za-z°ʹ″$£¥₨₪€ÅΩ℃℉ΩKÅ]|ʹʹ)/;
-const unitAndExpo = "(?:(?:[A-Za-z][A-Za-zōö]*\\$?|[°ʹ″$£¥₨₪€ÅΩ℃℉ΩKÅ]|ʹʹ)(?:(?:(?:(?:\\^|\\^-)"
+const unitStartRegEx = /^(?:[A-Za-z°′″$£¥₨₪€ÅΩ℃℉ΩKÅ]|ʹʹ)/;
+const unitAndExpo = "(?:(?:[A-Za-z][A-Za-zōö]*\\$?|[°′″$£¥₨₪€ÅΩ℃℉ΩKÅ]|ʹʹ)(?:(?:(?:(?:\\^|\\^-)"
   + "[1-9][0-9]*)|(?:\\^\\(-?[1-9][0-9]*\\))|⁻?[¹²³\\u2074-\\u2079][⁰¹²³\\u2074-\\u2079]*))?)";
 const productOfUnits = "(?:" + unitAndExpo + "(?:[*·.•×]" + unitAndExpo + ")*)";
 const unitNameRegEx = new RegExp("^" + productOfUnits + "(?:\\/" + productOfUnits + ")?");
@@ -16755,7 +16749,7 @@ const numberRegEx$2 = new RegExp(Rnl.numberPattern);
 const matrixRegEx = /^[([] *(?:(?:-?[0-9.]+|"[^"]+"|true|false) *[,;\t]? *)+[)\]]/;
 // A regex to check for valid unit strings. Not comprehensive.
 // Only checks for allowed characters. Does not check structure of a compound unit.
-const unitRegEx = /^[a-zäöōA-Z0-9 μµ#$£¥'ʹ″”°()Å₨₪€℃℉ΩΩKÅ^+\-/*.•×\-−·₂⁰¹²³\u2074-\u2079]+$/;
+const unitRegEx = /^[a-zäöōA-Z0-9 μµ#$£¥'′″°()Å₨₪€℃℉ΩΩKÅ^+\-/*.•×\-−·₂⁰¹²³\u2074-\u2079]+$/;
 /* eslint-disable max-len */
 
 const numStr = "(-?(?:0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?)))";

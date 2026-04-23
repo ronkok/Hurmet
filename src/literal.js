@@ -14,7 +14,7 @@ const numberRegEx = new RegExp(Rnl.numberPattern)
 const matrixRegEx = /^[([] *(?:(?:-?[0-9.]+|"[^"]+"|true|false) *[,;\t]? *)+[)\]]/
 // A regex to check for valid unit strings. Not comprehensive.
 // Only checks for allowed characters. Does not check structure of a compound unit.
-const unitRegEx = /^[a-zäöōA-Z0-9 μµ#$£¥'ʹ″”°()Å₨₪€℃℉ΩΩKÅ^+\-/*.•×\-−·₂⁰¹²³\u2074-\u2079]+$/
+const unitRegEx = /^[a-zäöōA-Z0-9 μµ#$£¥'′″°()Å₨₪€℃℉ΩΩKÅ^+\-/*.•×\-−·₂⁰¹²³\u2074-\u2079]+$/
 /* eslint-disable max-len */
 
 const numStr = "(-?(?:0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?)))"

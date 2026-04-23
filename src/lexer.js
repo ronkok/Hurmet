@@ -833,8 +833,8 @@ const lexOneWord = (str, prevToken) => {
 }
 
 // Support a unit name written w/o a space after a number
-export const unitStartRegEx = /^(?:[A-Za-z°ʹ″$£¥₨₪€ÅΩ℃℉ΩKÅ]|ʹʹ)/
-const unitAndExpo = "(?:(?:[A-Za-z][A-Za-zōö]*\\$?|[°ʹ″$£¥₨₪€ÅΩ℃℉ΩKÅ]|ʹʹ)(?:(?:(?:(?:\\^|\\^-)"
+export const unitStartRegEx = /^(?:[A-Za-z°′″$£¥₨₪€ÅΩ℃℉ΩKÅ]|ʹʹ)/
+const unitAndExpo = "(?:(?:[A-Za-z][A-Za-zōö]*\\$?|[°′″$£¥₨₪€ÅΩ℃℉ΩKÅ]|ʹʹ)(?:(?:(?:(?:\\^|\\^-)"
   + "[1-9][0-9]*)|(?:\\^\\(-?[1-9][0-9]*\\))|⁻?[¹²³\\u2074-\\u2079][⁰¹²³\\u2074-\\u2079]*))?)"
 const productOfUnits = "(?:" + unitAndExpo + "(?:[*·.•×]" + unitAndExpo + ")*)"
 const unitNameRegEx = new RegExp("^" + productOfUnits + "(?:\\/" + productOfUnits + ")?")

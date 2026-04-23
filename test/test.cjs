@@ -631,7 +631,9 @@ end`, vars)
     ["2 p = @@%", `®2/1 ¿p ⌧`, "30%"],
     [`0.2 × 2 = %%`, `®2/10 ®2/1 ×`, "0.2 × 2 = 0.4"],
     [`0.2 × 2 = %\\%`, `®2/10 ®2/1 ×`, "0.2 × 2 = 40%"],
-    [`b2 or false = @`, "¿b2 false or", "false"]
+    [`b2 or false = @`, "¿b2 false or", "false"],
+    [`3′ = @@ inch`, `®3/1 applyUnit ′`, "36 inch"],
+    [`3″ = @@ inch`, `®3/1 applyUnit ″`, "3 inch"]
   ];
 
   const testRegEx = /^(@{1,2})test /
