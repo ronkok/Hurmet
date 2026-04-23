@@ -1901,6 +1901,8 @@ currently has the following default treatment of certain traditional units:
 *   Weights are avoirdupois, unless specifically noted as a troy weight.
 *   **point** is the adobe point = ¹∕₇₂ inch. **TeX point** is also available.
 *   **barrel** and **bbl** are an oil barrel = 42 US gallons.
+*   `′` reads as "foot". That’s a prime, not a single quote mark.
+*   `″` reads as "inch". That’s a double prime, not a double quote mark.
 
 If you are curious about some of the more unusual units, such as “survey foot”
 or “nautical mile”, I recommend Russ Rowlett’s
