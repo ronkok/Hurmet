@@ -251,7 +251,7 @@ const hurmetNodes =  {
       } else {
         caption = node.attrs.alt
       }
-      const ref = getRef(node, state)
+      const defIndex = getDefIndex(state)
       const attrs = node.content.content[0].attrs // image attributes
       if (node.attrs.class) { attrs.class = node.attrs.class }
       let path = attrs.src
@@ -263,11 +263,11 @@ const hurmetNodes =  {
         path += "}"
       }
       // We use reference links and defer the image paths to the end of the document.
-      state.paths.set(ref, path)
-      if (ref === caption) {
-        state.write(`!![${caption}][]\n\n`)
+      state.paths.set(defIndex, path)
+      if (caption) {
+        state.write(`!![${caption}][${defIndex}]\n\n`)
       } else {
-        state.write(`!![${caption}][${ref}]\n\n`)
+        state.write(`!![${defIndex}][]\n\n`)
       }
     }
     
@@ -282,12 +282,12 @@ const hurmetNodes =  {
       path += "}"
     }
     // We use reference links and defer the image paths to the end of the document.
-    const ref = getRef(node, state)
-    state.paths.set(ref, path)
-    if (node.attrs.alt && ref !== node.attrs.alt) {
-      state.write(`![${node.attrs.alt}][${ref}]`)
+    const defIndex = getDefIndex(state)
+    state.paths.set(defIndex, path)
+    if (node.attrs.alt) {
+      state.write(`![${node.attrs.alt}][${defIndex}]`)
     } else {
-      state.write(`![${ref}][]`)
+      state.write(`![${defIndex}][]`)
     }
 
   },
@@ -322,9 +322,15 @@ const hurmetNodes =  {
       }
     } else {
       if (node.attrs.entry.slice(0, 5) === "draw(") {
-        const ref = getRef(node, state)
-        state.paths.set(ref,entry.replace(/\n/g, "\\n"))
-        state.write(`![${ref}][]`)
+        // node is a draw environment in a calculation node.
+        const defIndex = getDefIndex(state)
+        state.paths.set(defIndex, entry.replace(/\n/g, "\\n"))
+        if (titleRegEx.test(node.attrs.entry)) {
+          // Get the title.
+          state.write(`![${titleRegEx.exec(node.attrs.entry)[1].trim()}][${defIndex}]`)
+        } else {
+          state.write(`![${defIndex}][]`)
+        }
       } else if (state.withResults) {
         const displaySelector = node.attrs.md ? node.attrs.displaySelector : ""
         let md = node.attrs.md ? node.attrs.md : entry
@@ -361,11 +367,10 @@ const hurmetMarks = {
       if (isPlainURL(mark, parent, index, -1)) {
         return ">"
       } else {
-        // We use reference links and defer the image paths to the end of the document.
-        const ref = getRef(mark, state)
-        state.paths.set(ref, state.esc(mark.attrs.href))
-        let display = parent.child(index - 1).text
-        return "][" + (display === ref ? "" : ref) + "]"
+        // We use reference links and defer the paths to the end of the document.
+        const defIndex = getDefIndex(state)
+        state.paths.set(defIndex, state.esc(mark.attrs.href))
+        return `][${defIndex}]`
       }
     }
   },
@@ -411,35 +416,12 @@ function isPlainURL(link, parent, index, side) {
 
 const titleRegEx = /\n *title +"([^\n]+)" *\n/
 
-const getRef = (node, state) => {
-  // We use reference links and defer the image paths to the end of the document.
-  let ref = node.type.name === "image"
-    ? node.attrs.alt
-    : node.type.name === "figimg"
-    ? node.content.content[0].attrs.alt
-    : null
-  if (node.attrs.entry && titleRegEx.test(node.attrs.entry)) {
-    // node is a draw environment in a calculation node. Get the title.
-    ref = titleRegEx.exec(node.attrs.entry)[1].trim()
-  }
-  if ((!isNaN(ref)) && Number(ref) % 1 === 0) {
-    // ref is an integer. We cannot use it because it might duplicate one of the
-    // sequential integers we use for items without a defined ref.
-    ref = null
-  }
-
-  // Get the index number of this path
-  const num = isNaN(state.paths.size) ? "1" : String(state.paths.size + 1)
-  // Now set the final ref
-  if (ref) {
-    // Determine if ref has already been used
-    for (const key of state.paths.keys()) {
-      if (key === ref) { return num }
-    }
-    return ref
-  } else {
-    return num
-  }
+const getDefIndex = state => {
+  // We use reference links and defer link paths and image paths to the end of the document.
+  // Get the index number of this path.
+  // We always use index numbers, not the alt text.
+  // That enables a renumbering of the paths when snapshots are taken.
+  return isNaN(state.paths.size) ? "1" : String(state.paths.size + 1)
 }
 
 // Do not line-break on any space that would indicate a heading, list item, etc.
