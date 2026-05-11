@@ -9835,6 +9835,95 @@ const textRange = (str, index) => {
   return { value, unit: null, dtype: dt.STRING }
 };
 
+/**
+ * md2ast() returns an AST that matches the memory structure  of a Hurmet.org document.
+ * Elsewhere, Hurmet uses the AST to create either a live Hurmet doc or a static HTML doc.
+ *
+ * ## Restrictions
+ *
+ * 1. **_bold-italic_** must use both * & _ delimiters. Hurmet will fail on ***wat***.
+ * 2. "Shortcut" reference links [ref] are not recognized.
+ *
+ * ## Extensions
+ *
+ * 1. Hurmet has a meta-document section at the top of the file, similar to MultiMarkdown.
+ * 2. Hurmet inline calculation is delimited ¢`…`, where "…" is the entry input by the author.
+ *    Hurmet display calculation is delimited ¢¢…¢¢.
+ * 3. LaTeX inline math is delimited $…$ or $`…`$. \(…\) is also recognized.
+ *    No space allowed after 1st $ or before 2nd $. No digit after 2nd $.
+ *    LaTeX display math is delimited  $$ … $$. \[…\] is also recognized.
+ * 4. ~subscript~
+ * 5. ^superscript^
+ * 6. ~~strikethrough~~
+ * 7. Pipe tables as per Github Flavored Markdown (GFM).
+ * 8. Grid tables as per Pandoc and reStructuredText
+ * 9. Empty paragraphs: A line consisting only of "¶" or "&nbsp;".
+ * 10. Attributes for reference link definitions
+ *       [id]: target
+ *       {.class #id width=number}
+ * 11. Figure/Caption for images. Format is a paragraph that consists entirely of:
+ *       !![caption][id]
+ * 12. Figure/Caption for tables.
+ *     The caption is on the line above a table and is preceded by `: `, as per Pandoc.
+ * 13. Table directives. They are placed on the line after the table. The format is:
+ *     {#id .class float="(left|right)" colWidths="num1 num2 …"}
+ *     {."class1 class2"}  ←  Alternate class syntax for when there is > 1 classname
+ *     Float is applied only to a table inside a figure.
+ *     A spreadsheet will include " spreadsheet" in `.class` The id will be the sheet's name.
+ * 14. Lists that allow the user to pick list ordering.
+ *        1. →  1. 2. 3.  etc.
+ *        A. →  A. B. C.  etc.
+ *        a. →  a. b. c.  etc.
+ *        a) →  (a) (b) (c)  etc. (future)
+ * 15. Alerts per GFM
+ *     > [!note] or [!tip] or [!important] or [!warning] or [!epigraph]
+ *     > Content of note
+ * 16. Fenced divs, similar to Pandoc.
+ *     ::: (centered|right_justified|comment|indented|boxed|header)
+ *     Block elements
+ *     :::
+ *     Nested divs are distinguished by number of colons. Minimum three.
+ * 17. Table of Contents
+ *     {.toc start=N end=N}
+ * 18. Page break, per Pandoc
+ *     \\newpage
+ * 19. Definition lists, per Pandoc.  (future)
+ * 20. [^1] is a reference to a footnote.
+ *     [^1]: The body of the footnote is deferred, similar to reference links.
+ * 21. [#1] is a reference to a citation. (future)
+ *     [#1]: The body of the citation is deferred, similar to reference links.
+ * 22. Line blocks begin with "| ", as per Pandoc. (future)
+ *
+ * copyright (c) 2021 - 2025 Ron Kok
+ *
+ * This file has been adapted (and heavily modified) from Simple-Markdown.
+ * Simple-Markdown copyright (c) 2014-2019 Khan Academy & Aria Buckles.
+ *
+ * Portions of Simple-Markdown were adapted from marked.js copyright (c) 2011-2014
+ * Christopher Jeffrey (https://github.com/chjj/).
+ *
+ * LICENSE (MIT):
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+
 const CR_NEWLINE_R = /\r\n?/g;
 const FORMFEED_R = /\f/g;
 const CLASS_R = /(?:^| )\.([a-z-]+)(?: |&|$)/;
@@ -10344,9 +10433,8 @@ const parseRef = function(capture, state, refNode) {
   let ref = capture[2] ? capture[2] : capture[1];
   ref = ref.replace(/\s+/g, " ");
 
-  // We store defs in state._defs (_ to deconflict with client-defined state).
-  if (state._defs && state._defs[ref]) {
-    const def = state._defs[ref];
+  if (state.defs && state.defs[ref]) {
+    const def = state.defs[ref];
     if (refNode.type === "figure") {
       refNode = { type: "figure", attrs: def.attrs, content: [
         { type: "figimg", attrs: def.attrs },
@@ -10678,7 +10766,7 @@ rules.set("reflink", {
   match: inlineRegex(/^\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]/),
   parse: function(capture, state) {
     const defIndex = capture[2] ? capture[2] : capture[1];
-    const href = state._defs[defIndex].target;
+    const href = state.defs[defIndex].target;
     const textNode = parseTextMark(capture[1], state, "link", href);
     return textNode
   }
@@ -10993,8 +11081,14 @@ const parseMetadata = str => {
 
 const dateMessageRegEx = /^date:([^\n]+)\nmessage:([^\n]+)\n/;
 
+const buildPathDefString = (def, target, directives) => {
+  return directives
+    ? `[${def}]: ${target}\n{${directives}}`
+    : `[${def}]: ${target}`
+};
+
 const inlineMd2ast = md => {
-  const state = { inline: true, _defs: {}, prevCapture: "", inList: false, inHtml: false };
+  const state = { inline: true, defs: {}, prevCapture: "", inList: false, inHtml: false };
   const ast = parse(md, state);
   if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") {
     ast.shift();
@@ -11016,11 +11110,12 @@ const md2ast = (md, inHtml = false) => {
   const state = {
     inline: false,
     inList: false,
-    _defs: {},
+    defs: {},
     footnotes: [],
     prevCapture: "",
     inHtml
   };
+  const snapshotPathCache = {};
   const defRegEx = /\n *\[([^\]\n]+)\]: *([^\n]*) *(?:\n\{([^\n}]*)\})?(?=\n)/gm;
   const footnoteDefRegEx = /\n *\[\^\d+\]: *([^\n]*)(?=\n)/gm;
   let capture;
@@ -11040,7 +11135,11 @@ const md2ast = (md, inHtml = false) => {
       if (matchAlt)   { attrs.alt = matchAlt[1]; }
       if (matchID)    { attrs.id = matchID[1]; }
     }
-    state._defs[def] = { target, attrs };
+    state.defs[def] = { target, attrs };
+
+    if (!isNotAnInteger(def)) {
+      snapshotPathCache[def] = buildPathDefString(def, target, directives);
+    }
   }
 
   // Next, get all the footnote definitions
@@ -11080,6 +11179,7 @@ const md2ast = (md, inHtml = false) => {
   consolidate(ast);
   populateTOC(ast);
   if (metadata) {
+    metadata.snapshotPathCache = snapshotPathCache;
     if (fallbackStrings) {
       metadata.fallbacks = JSON.parse(fallbackStrings.pop().trim());
     }
@@ -18025,7 +18125,7 @@ class MarkdownSerializer {
   // :: (Node, ?Object) → string
   // Serialize the content of the given node to
   // [CommonMark](http://commonmark.org/).
-  serialize(content, paths, footnotes, isGFM = false, forSnapshot = false, withResults = false) {
+  serialize(content, paths, footnotes, isGFM = false, withResults = false) {
     let state = new MarkdownSerializerState(this.nodes, this.marks, paths, footnotes, isGFM, withResults);
     state.renderContent(content);
 
@@ -18035,11 +18135,9 @@ class MarkdownSerializer {
       state.renderInline(state.footnotes[i]);
       state.write("\n");
     }
-  // Write the link and image paths, unless this is done for a snapshot.
-    if (!forSnapshot) {
-      for (const [key, value] of state.paths.entries()) {
-        state.write("\n[" + key + "]: " + value + "\n");
-      }
+  // Write the link and image paths
+    for (const [key, value] of state.paths.entries()) {
+      state.write("\n[" + key + "]: " + value + "\n");
     }
     return state.out
   }
@@ -18212,7 +18310,7 @@ const hurmetNodes =  {
       } else {
         caption = node.attrs.alt;
       }
-      const ref = getRef(node, state);
+      const defIndex = getDefIndex(state);
       const attrs = node.content.content[0].attrs; // image attributes
       if (node.attrs.class) { attrs.class = node.attrs.class; }
       let path = attrs.src;
@@ -18224,11 +18322,11 @@ const hurmetNodes =  {
         path += "}";
       }
       // We use reference links and defer the image paths to the end of the document.
-      state.paths.set(ref, path);
-      if (ref === caption) {
-        state.write(`!![${caption}][]\n\n`);
+      state.paths.set(defIndex, path);
+      if (caption) {
+        state.write(`!![${caption}][${defIndex}]\n\n`);
       } else {
-        state.write(`!![${caption}][${ref}]\n\n`);
+        state.write(`!![${defIndex}][]\n\n`);
       }
     }
     
@@ -18243,12 +18341,12 @@ const hurmetNodes =  {
       path += "}";
     }
     // We use reference links and defer the image paths to the end of the document.
-    const ref = getRef(node, state);
-    state.paths.set(ref, path);
-    if (node.attrs.alt && ref !== node.attrs.alt) {
-      state.write(`![${node.attrs.alt}][${ref}]`);
+    const defIndex = getDefIndex(state);
+    state.paths.set(defIndex, path);
+    if (node.attrs.alt) {
+      state.write(`![${node.attrs.alt}][${defIndex}]`);
     } else {
-      state.write(`![${ref}][]`);
+      state.write(`![${defIndex}][]`);
     }
 
   },
@@ -18283,9 +18381,15 @@ const hurmetNodes =  {
       }
     } else {
       if (node.attrs.entry.slice(0, 5) === "draw(") {
-        const ref = getRef(node, state);
-        state.paths.set(ref,entry.replace(/\n/g, "\\n"));
-        state.write(`![${ref}][]`);
+        // node is a draw environment in a calculation node.
+        const defIndex = getDefIndex(state);
+        state.paths.set(defIndex, entry.replace(/\n/g, "\\n"));
+        if (titleRegEx.test(node.attrs.entry)) {
+          // Get the title.
+          state.write(`![${titleRegEx.exec(node.attrs.entry)[1].trim()}][${defIndex}]`);
+        } else {
+          state.write(`![${defIndex}][]`);
+        }
       } else if (state.withResults) {
         const displaySelector = node.attrs.md ? node.attrs.displaySelector : "";
         let md = node.attrs.md ? node.attrs.md : entry;
@@ -18322,11 +18426,10 @@ const hurmetMarks = {
       if (isPlainURL(mark, parent, index, -1)) {
         return ">"
       } else {
-        // We use reference links and defer the image paths to the end of the document.
-        const ref = getRef(mark, state);
-        state.paths.set(ref, state.esc(mark.attrs.href));
-        let display = parent.child(index - 1).text;
-        return "][" + (display === ref ? "" : ref) + "]"
+        // We use reference links and defer the paths to the end of the document.
+        const defIndex = getDefIndex(state);
+        state.paths.set(defIndex, state.esc(mark.attrs.href));
+        return `][${defIndex}]`
       }
     }
   },
@@ -18372,35 +18475,12 @@ function isPlainURL(link, parent, index, side) {
 
 const titleRegEx = /\n *title +"([^\n]+)" *\n/;
 
-const getRef = (node, state) => {
-  // We use reference links and defer the image paths to the end of the document.
-  let ref = node.type.name === "image"
-    ? node.attrs.alt
-    : node.type.name === "figimg"
-    ? node.content.content[0].attrs.alt
-    : null;
-  if (node.attrs.entry && titleRegEx.test(node.attrs.entry)) {
-    // node is a draw environment in a calculation node. Get the title.
-    ref = titleRegEx.exec(node.attrs.entry)[1].trim();
-  }
-  if ((!isNaN(ref)) && Number(ref) % 1 === 0) {
-    // ref is an integer. We cannot use it because it might duplicate one of the
-    // sequential integers we use for items without a defined ref.
-    ref = null;
-  }
-
-  // Get the index number of this path
-  const num = isNaN(state.paths.size) ? "1" : String(state.paths.size + 1);
-  // Now set the final ref
-  if (ref) {
-    // Determine if ref has already been used
-    for (const key of state.paths.keys()) {
-      if (key === ref) { return num }
-    }
-    return ref
-  } else {
-    return num
-  }
+const getDefIndex = state => {
+  // We use reference links and defer link paths and image paths to the end of the document.
+  // Get the index number of this path.
+  // We always use index numbers, not the alt text.
+  // That enables a renumbering of the paths when snapshots are taken.
+  return isNaN(state.paths.size) ? "1" : String(state.paths.size + 1)
 };
 
 // Do not line-break on any space that would indicate a heading, list item, etc.
@@ -35200,7 +35280,7 @@ async function updateHurmetDocWithResults(md) {
 
   // Write the updated Markdown
   const updatedMarkdown = hurmetMarkdownSerializer.serialize(ast, new Map(), [],
-                                                             false, false, true);
+                                                             false, true);
   return updatedMarkdown
 }
 

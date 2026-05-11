@@ -127,12 +127,10 @@ const tidyUp = _ => {
 let hash = location.hash
 if (hash && hash.length > 1) {
   hash = hash.slice(1)
-  console.log("Hash on load:", hash)
   const anchor = document.getElementById(hash)
   if (anchor) {
     anchor.scrollIntoView({ behavior: 'smooth' })
   } else if (/^\d+$/.test(hash)) {
-    console.log("websocket port:", hash)
     // Open a websocket and listen for updates.
     const socket = new WebSocket(`ws://localhost:${hash}`)
     socket.addEventListener('message', event => {

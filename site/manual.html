@@ -7,7 +7,7 @@
    <link rel="manifest" href="/app.webmanifest">
    <link rel="icon" href="/images/favicon.svg">
    <link rel="stylesheet" href="/docStyles.min.css">
-   <script>globalThis.currencyRates = {"USD":"1.1797","JPY":"187.72","CZK":"24.317","DKK":"7.4734","GBP":"0.87168","HUF":"362.70","PLN":"4.2328","RON":"5.0989","SEK":"10.8030","CHF":"0.9231","ISK":"144.00","NOK":"11.0170","TRY":"52.9272","AUD":"1.6438","BRL":"5.8707","CAD":"1.6129","CNY":"8.0483","HKD":"9.2382","IDR":"20267.48","ILS":"3.5262","INR":"109.5025","KRW":"1744.76","MXN":"20.3144","MYR":"4.6628","NZD":"2.0032","PHP":"70.865","SGD":"1.5009","THB":"37.839","ZAR":"19.3293","EUR":"1.0"}</script>
+   <script>globalThis.currencyRates = {"USD":"1.1702","JPY":"183.21","CZK":"24.366","DKK":"7.4716","GBP":"0.86625","HUF":"364.85","PLN":"4.2605","RON":"5.1823","SEK":"10.8555","CHF":"0.9190","ISK":"144.00","NOK":"10.9123","TRY":"52.8757","AUD":"1.6371","BRL":"5.8292","CAD":"1.5994","CNY":"7.9910","HKD":"9.1662","IDR":"20297.94","ILS":"3.4553","INR":"111.0695","KRW":"1728.39","MXN":"20.4973","MYR":"4.6457","NZD":"1.9957","PHP":"71.918","SGD":"1.4934","THB":"38.084","ZAR":"19.6480","EUR":"1.0"}</script>
 </head>
 <body>
 <main>
@@ -19,7 +19,7 @@
 <h3 id='editor-basics'>Editor Basics</h3>
 <p>Hurmet provides rich-text editing capabilities. You can apply styles to a document range by selecting text, then clicking one of the menu bar buttons:</p>
 <table><tr><td><strong>≡</strong></td><td>Navigate…</td></tr>
-<tr><td><br><strong>File▾</strong></td><td>Open…, Save, Save as…, <br>Create a permalink URL,<br>Take a snapshot, Show diff, <br>Set Page Size, Print</td></tr>
+<tr><td><br><strong>File▾</strong></td><td>Open…, Save, Save as…, <br>Create a permalink URL,<br>Take a snapshot, Show diff, <br>Revert to snapshot…, <br>Set Page Size, Print</td></tr>
 <tr><td><br><strong>Doc▾</strong></td><td>Set Decimal, Font size, <br>Draft Mode, Print header, <br>Delete all comments</td></tr>
 <tr><td><img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 9a7.982 7.982 0 0 0 2.709 6l1.323-1.5a6 6 0 1 1 8.212-8.743L10.001 7h6V1l-2.343 2.343A8 8 0 0 0 .001 9z'/%3E%3C/svg%3E" alt="recalc"> <code></code></td><td>Recalculate all</td></tr>
 <tr><td><img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M11.904 16C13.681 12.781 13.98 7.87 7 8.034V12L1 6l6-6v3.881c8.359-.218 9.29 7.378 4.904 12.119z'/%3E%3C/svg%3E" alt="undo">  <img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M9 3.881V0l6 6-6 6V8.034C2.02 7.87 2.319 12.781 4.096 16-.29 11.259.641 3.663 9 3.881z'/%3E%3C/svg%3E" alt="redo"></td><td>Undo, Redo</td></tr>
@@ -32,10 +32,11 @@
 <p>You can save your work using <strong>Ctrl-S</strong> or the save command in the File menu. Then reopen it using the File | Open… menu choice. In Chrome and Edge, the save button is smart enough to re-save your work to the same file you opened earlier.  In Firefox and Safari, the save button always works like a Save As… button.</p>
 <h3 id='tracking-changes'>Tracking Changes</h3>
 <p>The <strong>File▾</strong> menu contains commands that enable you to track changes:</p>
-<ul><li class="tight"><p><em>Take a snapshot…</em> will store a snapshot of the current document (not including embedded images)</p></li>
+<ul><li class="tight"><p><em>Take a snapshot…</em> will store a snapshot of the current document.</p></li>
 <li class="tight"><p><em>Show diff…</em> will display the differences between a chosen snapshot and the current document.</p></li>
+<li class="tight"><p><em>Revert to snapshot…</em> will rollback the document to a chosen snapshot.</p></li>
 <li class="tight"><p><em>Delete all snapshots…</em>, for when you no longer need to track changes.</p></li></ul>
-<p>Snapshots and diffs are displayed in Markdown format.</p>
+<p>Diffs are displayed in Markdown format.</p>
 <h3 id='print-header'>Print Header</h3>
 <p>You can create a print header in any document by clicking the File | Print Header menu choice. Later, when you click the File | Print… menu choice, the header will be printed at the top of every page (except the cover page). The header is a table and it should remain a table. Otherwise, edit it any way you want.</p>
 <p>If you write <code>$PAGE</code> into a print header, Hurmet will print page numbers at that location. The calculation field <code>savedate() = @@</code> will print the date on which the document was most recently saved.</p>

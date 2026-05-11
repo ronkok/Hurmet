@@ -53,6 +53,6 @@ export async function updateHurmetDocWithResults(md) {
 
   // Write the updated Markdown
   const updatedMarkdown = hurmetMarkdownSerializer.serialize(ast, new Map(), [],
-                                                             false, false, true)
+                                                             false, true)
   return updatedMarkdown
 }

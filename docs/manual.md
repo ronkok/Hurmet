@@ -43,6 +43,7 @@ document range by selecting text, then clicking one of the menu bar buttons:
 | \                                    | Open…, Save, Save as…, \           |
 | **File▾**                            | Create a permalink URL,\           |
 |                                      | Take a snapshot, Show diff, \      |
+|                                      | Revert to snapshot…, \             |
 |                                      | Set Page Size, Print               |
 +--------------------------------------+------------------------------------+
 | \                                    | Set Decimal, Font size, \          |
@@ -131,11 +132,12 @@ In Firefox and Safari, the save button always works like a Save As… button.
 
 The **File▾** menu contains commands that enable you to track changes:
 
-*   _Take a snapshot…_ will store a snapshot of the current document (not including embedded images)
+*   _Take a snapshot…_ will store a snapshot of the current document.
 *   _Show diff…_ will display the differences between a chosen snapshot and the current document.
+*   _Revert to snapshot…_ will rollback the document to a chosen snapshot. 
 *   _Delete all snapshots…_, for when you no longer need to track changes.
 
-Snapshots and diffs are displayed in Markdown format.
+Diffs are displayed in Markdown format.
 
 ### Print Header
 

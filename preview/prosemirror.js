@@ -23841,6 +23841,95 @@ const parse$1 = (
   return isCalc ? [tex, rpn, dependencies] : tex
 };
 
+/**
+ * md2ast() returns an AST that matches the memory structure  of a Hurmet.org document.
+ * Elsewhere, Hurmet uses the AST to create either a live Hurmet doc or a static HTML doc.
+ *
+ * ## Restrictions
+ *
+ * 1. **_bold-italic_** must use both * & _ delimiters. Hurmet will fail on ***wat***.
+ * 2. "Shortcut" reference links [ref] are not recognized.
+ *
+ * ## Extensions
+ *
+ * 1. Hurmet has a meta-document section at the top of the file, similar to MultiMarkdown.
+ * 2. Hurmet inline calculation is delimited ¢`…`, where "…" is the entry input by the author.
+ *    Hurmet display calculation is delimited ¢¢…¢¢.
+ * 3. LaTeX inline math is delimited $…$ or $`…`$. \(…\) is also recognized.
+ *    No space allowed after 1st $ or before 2nd $. No digit after 2nd $.
+ *    LaTeX display math is delimited  $$ … $$. \[…\] is also recognized.
+ * 4. ~subscript~
+ * 5. ^superscript^
+ * 6. ~~strikethrough~~
+ * 7. Pipe tables as per Github Flavored Markdown (GFM).
+ * 8. Grid tables as per Pandoc and reStructuredText
+ * 9. Empty paragraphs: A line consisting only of "¶" or "&nbsp;".
+ * 10. Attributes for reference link definitions
+ *       [id]: target
+ *       {.class #id width=number}
+ * 11. Figure/Caption for images. Format is a paragraph that consists entirely of:
+ *       !![caption][id]
+ * 12. Figure/Caption for tables.
+ *     The caption is on the line above a table and is preceded by `: `, as per Pandoc.
+ * 13. Table directives. They are placed on the line after the table. The format is:
+ *     {#id .class float="(left|right)" colWidths="num1 num2 …"}
+ *     {."class1 class2"}  ←  Alternate class syntax for when there is > 1 classname
+ *     Float is applied only to a table inside a figure.
+ *     A spreadsheet will include " spreadsheet" in `.class` The id will be the sheet's name.
+ * 14. Lists that allow the user to pick list ordering.
+ *        1. →  1. 2. 3.  etc.
+ *        A. →  A. B. C.  etc.
+ *        a. →  a. b. c.  etc.
+ *        a) →  (a) (b) (c)  etc. (future)
+ * 15. Alerts per GFM
+ *     > [!note] or [!tip] or [!important] or [!warning] or [!epigraph]
+ *     > Content of note
+ * 16. Fenced divs, similar to Pandoc.
+ *     ::: (centered|right_justified|comment|indented|boxed|header)
+ *     Block elements
+ *     :::
+ *     Nested divs are distinguished by number of colons. Minimum three.
+ * 17. Table of Contents
+ *     {.toc start=N end=N}
+ * 18. Page break, per Pandoc
+ *     \\newpage
+ * 19. Definition lists, per Pandoc.  (future)
+ * 20. [^1] is a reference to a footnote.
+ *     [^1]: The body of the footnote is deferred, similar to reference links.
+ * 21. [#1] is a reference to a citation. (future)
+ *     [#1]: The body of the citation is deferred, similar to reference links.
+ * 22. Line blocks begin with "| ", as per Pandoc. (future)
+ *
+ * copyright (c) 2021 - 2025 Ron Kok
+ *
+ * This file has been adapted (and heavily modified) from Simple-Markdown.
+ * Simple-Markdown copyright (c) 2014-2019 Khan Academy & Aria Buckles.
+ *
+ * Portions of Simple-Markdown were adapted from marked.js copyright (c) 2011-2014
+ * Christopher Jeffrey (https://github.com/chjj/).
+ *
+ * LICENSE (MIT):
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+
 const CR_NEWLINE_R = /\r\n?/g;
 const FORMFEED_R = /\f/g;
 const CLASS_R = /(?:^| )\.([a-z-]+)(?: |&|$)/;
@@ -24350,9 +24439,8 @@ const parseRef = function(capture, state, refNode) {
   let ref = capture[2] ? capture[2] : capture[1];
   ref = ref.replace(/\s+/g, " ");
 
-  // We store defs in state._defs (_ to deconflict with client-defined state).
-  if (state._defs && state._defs[ref]) {
-    const def = state._defs[ref];
+  if (state.defs && state.defs[ref]) {
+    const def = state.defs[ref];
     if (refNode.type === "figure") {
       refNode = { type: "figure", attrs: def.attrs, content: [
         { type: "figimg", attrs: def.attrs },
@@ -24684,7 +24772,7 @@ rules.set("reflink", {
   match: inlineRegex(/^\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]/),
   parse: function(capture, state) {
     const defIndex = capture[2] ? capture[2] : capture[1];
-    const href = state._defs[defIndex].target;
+    const href = state.defs[defIndex].target;
     const textNode = parseTextMark(capture[1], state, "link", href);
     return textNode
   }
@@ -24999,8 +25087,14 @@ const parseMetadata = str => {
 
 const dateMessageRegEx = /^date:([^\n]+)\nmessage:([^\n]+)\n/;
 
+const buildPathDefString = (def, target, directives) => {
+  return directives
+    ? `[${def}]: ${target}\n{${directives}}`
+    : `[${def}]: ${target}`
+};
+
 const inlineMd2ast = md => {
-  const state = { inline: true, _defs: {}, prevCapture: "", inList: false, inHtml: false };
+  const state = { inline: true, defs: {}, prevCapture: "", inList: false, inHtml: false };
   const ast = parse(md, state);
   if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") {
     ast.shift();
@@ -25022,11 +25116,12 @@ const md2ast = (md, inHtml = false) => {
   const state = {
     inline: false,
     inList: false,
-    _defs: {},
+    defs: {},
     footnotes: [],
     prevCapture: "",
     inHtml
   };
+  const snapshotPathCache = {};
   const defRegEx = /\n *\[([^\]\n]+)\]: *([^\n]*) *(?:\n\{([^\n}]*)\})?(?=\n)/gm;
   const footnoteDefRegEx = /\n *\[\^\d+\]: *([^\n]*)(?=\n)/gm;
   let capture;
@@ -25046,7 +25141,11 @@ const md2ast = (md, inHtml = false) => {
       if (matchAlt)   { attrs.alt = matchAlt[1]; }
       if (matchID)    { attrs.id = matchID[1]; }
     }
-    state._defs[def] = { target, attrs };
+    state.defs[def] = { target, attrs };
+
+    if (!isNotAnInteger(def)) {
+      snapshotPathCache[def] = buildPathDefString(def, target, directives);
+    }
   }
 
   // Next, get all the footnote definitions
@@ -25086,6 +25185,7 @@ const md2ast = (md, inHtml = false) => {
   consolidate(ast);
   populateTOC(ast);
   if (metadata) {
+    metadata.snapshotPathCache = snapshotPathCache;
     if (fallbackStrings) {
       metadata.fallbacks = JSON.parse(fallbackStrings.pop().trim());
     }
@@ -35901,7 +36001,7 @@ class MarkdownSerializer {
   // :: (Node, ?Object) → string
   // Serialize the content of the given node to
   // [CommonMark](http://commonmark.org/).
-  serialize(content, paths, footnotes, isGFM = false, forSnapshot = false, withResults = false) {
+  serialize(content, paths, footnotes, isGFM = false, withResults = false) {
     let state = new MarkdownSerializerState(this.nodes, this.marks, paths, footnotes, isGFM, withResults);
     state.renderContent(content);
 
@@ -35911,11 +36011,9 @@ class MarkdownSerializer {
       state.renderInline(state.footnotes[i]);
       state.write("\n");
     }
-  // Write the link and image paths, unless this is done for a snapshot.
-    if (!forSnapshot) {
-      for (const [key, value] of state.paths.entries()) {
-        state.write("\n[" + key + "]: " + value + "\n");
-      }
+  // Write the link and image paths
+    for (const [key, value] of state.paths.entries()) {
+      state.write("\n[" + key + "]: " + value + "\n");
     }
     return state.out
   }
@@ -36088,7 +36186,7 @@ const hurmetNodes =  {
       } else {
         caption = node.attrs.alt;
       }
-      const ref = getRef(node, state);
+      const defIndex = getDefIndex(state);
       const attrs = node.content.content[0].attrs; // image attributes
       if (node.attrs.class) { attrs.class = node.attrs.class; }
       let path = attrs.src;
@@ -36100,11 +36198,11 @@ const hurmetNodes =  {
         path += "}";
       }
       // We use reference links and defer the image paths to the end of the document.
-      state.paths.set(ref, path);
-      if (ref === caption) {
-        state.write(`!![${caption}][]\n\n`);
+      state.paths.set(defIndex, path);
+      if (caption) {
+        state.write(`!![${caption}][${defIndex}]\n\n`);
       } else {
-        state.write(`!![${caption}][${ref}]\n\n`);
+        state.write(`!![${defIndex}][]\n\n`);
       }
     }
     
@@ -36119,12 +36217,12 @@ const hurmetNodes =  {
       path += "}";
     }
     // We use reference links and defer the image paths to the end of the document.
-    const ref = getRef(node, state);
-    state.paths.set(ref, path);
-    if (node.attrs.alt && ref !== node.attrs.alt) {
-      state.write(`![${node.attrs.alt}][${ref}]`);
+    const defIndex = getDefIndex(state);
+    state.paths.set(defIndex, path);
+    if (node.attrs.alt) {
+      state.write(`![${node.attrs.alt}][${defIndex}]`);
     } else {
-      state.write(`![${ref}][]`);
+      state.write(`![${defIndex}][]`);
     }
 
   },
@@ -36159,9 +36257,15 @@ const hurmetNodes =  {
       }
     } else {
       if (node.attrs.entry.slice(0, 5) === "draw(") {
-        const ref = getRef(node, state);
-        state.paths.set(ref,entry.replace(/\n/g, "\\n"));
-        state.write(`![${ref}][]`);
+        // node is a draw environment in a calculation node.
+        const defIndex = getDefIndex(state);
+        state.paths.set(defIndex, entry.replace(/\n/g, "\\n"));
+        if (titleRegEx.test(node.attrs.entry)) {
+          // Get the title.
+          state.write(`![${titleRegEx.exec(node.attrs.entry)[1].trim()}][${defIndex}]`);
+        } else {
+          state.write(`![${defIndex}][]`);
+        }
       } else if (state.withResults) {
         const displaySelector = node.attrs.md ? node.attrs.displaySelector : "";
         let md = node.attrs.md ? node.attrs.md : entry;
@@ -36198,11 +36302,10 @@ const hurmetMarks = {
       if (isPlainURL(mark, parent, index, -1)) {
         return ">"
       } else {
-        // We use reference links and defer the image paths to the end of the document.
-        const ref = getRef(mark, state);
-        state.paths.set(ref, state.esc(mark.attrs.href));
-        let display = parent.child(index - 1).text;
-        return "][" + (display === ref ? "" : ref) + "]"
+        // We use reference links and defer the paths to the end of the document.
+        const defIndex = getDefIndex(state);
+        state.paths.set(defIndex, state.esc(mark.attrs.href));
+        return `][${defIndex}]`
       }
     }
   },
@@ -36248,35 +36351,12 @@ function isPlainURL(link, parent, index, side) {
 
 const titleRegEx = /\n *title +"([^\n]+)" *\n/;
 
-const getRef = (node, state) => {
-  // We use reference links and defer the image paths to the end of the document.
-  let ref = node.type.name === "image"
-    ? node.attrs.alt
-    : node.type.name === "figimg"
-    ? node.content.content[0].attrs.alt
-    : null;
-  if (node.attrs.entry && titleRegEx.test(node.attrs.entry)) {
-    // node is a draw environment in a calculation node. Get the title.
-    ref = titleRegEx.exec(node.attrs.entry)[1].trim();
-  }
-  if ((!isNaN(ref)) && Number(ref) % 1 === 0) {
-    // ref is an integer. We cannot use it because it might duplicate one of the
-    // sequential integers we use for items without a defined ref.
-    ref = null;
-  }
-
-  // Get the index number of this path
-  const num = isNaN(state.paths.size) ? "1" : String(state.paths.size + 1);
-  // Now set the final ref
-  if (ref) {
-    // Determine if ref has already been used
-    for (const key of state.paths.keys()) {
-      if (key === ref) { return num }
-    }
-    return ref
-  } else {
-    return num
-  }
+const getDefIndex = state => {
+  // We use reference links and defer link paths and image paths to the end of the document.
+  // Get the index number of this path.
+  // We always use index numbers, not the alt text.
+  // That enables a renumbering of the paths when snapshots are taken.
+  return isNaN(state.paths.size) ? "1" : String(state.paths.size + 1)
 };
 
 // Do not line-break on any space that would indicate a heading, list item, etc.
@@ -53174,7 +53254,7 @@ async function updateHurmetDocWithResults(md) {
 
   // Write the updated Markdown
   const updatedMarkdown = hurmetMarkdownSerializer.serialize(ast, new Map(), [],
-                                                             false, false, true);
+                                                             false, true);
   return updatedMarkdown
 }
 
@@ -53269,8 +53349,9 @@ const nodes = {
       saveDate: { default: null, validate: "null|string" },
       fontSize: { default: 12, validate: "number|string" },       // 12 | 10
       pageSize: { default: "letter", validate: "string" }, // letter | A4
-      snapshots: { default: [] },
-      fallbacks: { default: {} }       // Fallback data, in case fetched files are unavailable
+      snapshots: { default: [] },            // snapshot, not including image and link definitions
+      snapshotPathCache: { default: {} },    // Deduped cache of snapshot image and link definitions
+      fallbacks: { default: {} }             // Fallback data, in case fetched files are unavailable
     }
   },
 
@@ -53453,6 +53534,7 @@ const nodes = {
       src: {validate: "string"},
       alt: {default: null, validate: "null|string"},
       width: {default: null, validate: "null|string"},
+      class: {default: "inline", validate: "string"}
     },
     group: "block",
     draggable: false,
@@ -54953,7 +55035,7 @@ const showDiff = state => {
   const callback = pos => {
     const dmp = new diff_match_patch();
     const text1 = state.doc.attrs.snapshots[pos].content;
-    const text2 = hurmetMarkdownSerializer.serialize(state.doc, new Map(), false, true);
+    const text2 = hurmetMarkdownSerializer.serialize(state.doc, new Map(), false);
     dmp.Diff_Timeout = 2;
     dmp.Diff_EditCost = 4;
     let d = dmp.diff_main(text1, text2);
@@ -56373,6 +56455,200 @@ diff_match_patch.prototype.diff_fromDelta = function(text1, delta) {
   return diffs;
 };
 
+// Some helper functions for handling snapshot content and path definitions in the markdown.
+
+const SNAPSHOT_PATH_DEF_START_R = /^\[(\d+)\]: /gm;
+
+function splitMarkdownPathDefinitions(markdown) {
+  const matches = Array.from(markdown.matchAll(SNAPSHOT_PATH_DEF_START_R));
+  if (matches.length === 0) {
+    return { body: markdown.replace(/\n+$/, ""), pathDefs: {} }
+  }
+
+  const body = markdown.slice(0, matches[0].index).replace(/\n+$/, "");
+  const pathDefs = {};
+
+  for (let i = 0; i < matches.length; i++) {
+    const index = matches[i][1];
+    const start = matches[i].index;
+    const end = i + 1 < matches.length ? matches[i + 1].index : markdown.length;
+    pathDefs[index] = markdown.slice(start, end).replace(/\n+$/, "");
+  }
+
+  return { body, pathDefs }
+}
+
+function pathDefPayload(pathDef) {
+  return pathDef.replace(/^\[\d+\]: /, "")
+}
+
+function renumberMarkdownPathReferences(markdown, indexMap) {
+  let result = markdown.replace(
+    /(\[[^\]]*\]\[)(\d+)(\])/g,
+    (match, open, oldIndex, close) => {
+      const newIndex = indexMap[oldIndex];
+      return newIndex ? `${open}${newIndex}${close}` : match
+    }
+  );
+
+  result = result.replace(
+    /(!!?\[)(\d+)(\]\[\])/g,
+    (match, open, oldIndex, close) => {
+      const newIndex = indexMap[oldIndex];
+      return newIndex ? `${open}${newIndex}${close}` : match
+    }
+  );
+
+  return result
+}
+
+function addDefsToCollection(sourceDefs, dedupeMap, targetDefs) {
+  const indexMap = {};
+  const keys = Object.keys(sourceDefs || {}).sort((a, b) => Number(a) - Number(b));
+
+  for (const oldIndex of keys) {
+    const payload = pathDefPayload(sourceDefs[oldIndex]);
+    let newIndex = dedupeMap.get(payload);
+
+    if (!newIndex) {
+      newIndex = String(dedupeMap.size + 1);
+      dedupeMap.set(payload, newIndex);
+      targetDefs[newIndex] = `[${newIndex}]: ${payload}`;
+    }
+
+    indexMap[oldIndex] = newIndex;
+  }
+
+  return indexMap
+}
+
+function rebuildSnapshotCacheAndContents(
+  existingSnapshots,
+  snapshotPathCache,
+  newSnapshot
+) {
+  const dedupeMap = new Map();
+  const nextCache = {};
+
+  const cacheIndexMap = addDefsToCollection(snapshotPathCache || {}, dedupeMap, nextCache);
+
+  const normalizedSnapshots = existingSnapshots.map(snapshot => {
+    const { body, pathDefs } = splitMarkdownPathDefinitions(snapshot.content);
+    const indexMap = Object.keys(pathDefs).length > 0
+      ? addDefsToCollection(pathDefs, dedupeMap, nextCache)
+      : cacheIndexMap;
+
+    return {
+      ...snapshot,
+      content: renumberMarkdownPathReferences(body, indexMap)
+    }
+  });
+
+  const newIndexMap = addDefsToCollection(newSnapshot.pathDefs, dedupeMap, nextCache);
+
+  return {
+    snapshots: normalizedSnapshots,
+    snapshotPathCache: nextCache,
+    content: renumberMarkdownPathReferences(newSnapshot.body, newIndexMap)
+  }
+}
+
+function mergeSavedMarkdownPathData(
+  currentMarkdown,
+  snapshots = [],
+  snapshotPathCache = {}
+) {
+  const { body: currentBody, pathDefs: currentPathDefs } =
+    splitMarkdownPathDefinitions(currentMarkdown);
+
+  const dedupeMap = new Map();
+  const mergedPathDefs = {};
+
+  const currentIndexMap = addDefsToCollection(currentPathDefs, dedupeMap, mergedPathDefs);
+  const snapshotCacheIndexMap = addDefsToCollection(
+    snapshotPathCache,
+    dedupeMap,
+    mergedPathDefs
+  );
+
+  const normalizedSnapshots = snapshots.map(snapshot => {
+    const { body, pathDefs } = splitMarkdownPathDefinitions(snapshot.content);
+
+    const indexMap = Object.keys(pathDefs).length > 0
+      ? addDefsToCollection(pathDefs, dedupeMap, mergedPathDefs)
+      : snapshotCacheIndexMap;
+
+    return {
+      ...snapshot,
+      content: renumberMarkdownPathReferences(body, indexMap)
+    }
+  });
+
+  return {
+    body: renumberMarkdownPathReferences(currentBody, currentIndexMap),
+    pathDefs: mergedPathDefs,
+    snapshots: normalizedSnapshots
+  }
+}
+
+function stringifyMarkdownPathDefinitions(pathDefs) {
+  return Object.keys(pathDefs || {})
+    .sort((a, b) => Number(a) - Number(b))
+    .map(key => pathDefs[key])
+    .join("\n\n")
+}
+
+function revertToSnapshotByPos(state, view, pos, currentMarkdown, message) {
+  const targetSnapshot = state.doc.attrs.snapshots[pos];
+  if (!targetSnapshot) { return }
+
+  const { body, pathDefs } = splitMarkdownPathDefinitions(currentMarkdown);
+  const rebuilt = rebuildSnapshotCacheAndContents(
+    state.doc.attrs.snapshots,
+    state.doc.attrs.snapshotPathCache,
+    { body, pathDefs }
+  );
+
+  const preservedCurrentSnapshot = {
+    date: new Date().toISOString().replace(/T.+/, ""),
+    message,
+    content: rebuilt.content
+  };
+
+  const allSnapshots = rebuilt.snapshots.concat(preservedCurrentSnapshot);
+  const targetContent = rebuilt.snapshots[pos].content;
+  const pathDefText = stringifyMarkdownPathDefinitions(rebuilt.snapshotPathCache);
+
+  const fileHandle = state.doc.attrs.fileHandle;
+  const inDraftMode = state.doc.attrs.inDraftMode;
+
+  let md = `---------------
+decimalFormat: ${state.doc.attrs.decimalFormat}
+fontSize: ${state.doc.attrs.fontSize}
+pageSize: ${state.doc.attrs.pageSize}
+dateFormat: ${state.doc.attrs.dateFormat}
+saveDate: ${new Date(new Date().getTime()
+  - new Date().getTimezoneOffset() * 60 * 1000).toISOString().split("T")[0]}
+---------------
+
+${targetContent}`;
+
+  if (pathDefText.length > 0) {
+    md += `\n\n${pathDefText}`;
+  }
+
+  for (const item of allSnapshots) {
+    md += `\n\n<!--SNAPSHOT-->\ndate: ${item.date}\nmessage: ${item.message}\n\n`;
+    md += item.content;
+  }
+
+  handleContents(view, schema, md, "markdown");
+
+  view.state.doc.attrs.fileHandle = fileHandle;
+  view.state.doc.attrs.saveIsValid = false;
+  view.state.doc.attrs.inDraftMode = inDraftMode;
+}
+
 /* eslint-disable */
 
 // Menu icons that are not included in node-module menu.js
@@ -56859,6 +57135,21 @@ function sleep (time) {
 // Export saveFileAsMarkdown so that it is available in keymap.js
 function saveFileAsMarkdown(state, view, isSaveAs = false) {
   pruneHurmet(state, view);   // Prune away any empty Hurmet math zones.
+
+  const currentMarkdown = hurmetMarkdownSerializer.serialize(
+    state.doc,
+    new Map(),
+    [],
+    false,
+    false
+  );
+
+  const savedPathData = mergeSavedMarkdownPathData(
+    currentMarkdown,
+    state.doc.attrs.snapshots,
+    state.doc.attrs.snapshotPathCache
+  );
+
   let str = `---------------
 decimalFormat: ${state.doc.attrs.decimalFormat}
 fontSize: ${state.doc.attrs.fontSize}
@@ -56867,7 +57158,12 @@ dateFormat: ${state.doc.attrs.dateFormat}
 saveDate: ${new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60 * 1000).toISOString().split("T")[0]}
 ---------------
 
-` + hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, false, false);
+${savedPathData.body}`;
+
+  const pathDefText = stringifyMarkdownPathDefinitions(savedPathData.pathDefs);
+  if (pathDefText.length > 0) {
+    str += `\n\n${pathDefText}`;
+  }
 
   // Save some fetched data as a fallback for when the internet is down.
   let gottaFallback = false;
@@ -56895,14 +57191,14 @@ saveDate: ${new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60 
     }
   });
   if (gottaFallback) {
-    str += `\n<!--FALLBACKS-->\n` + JSON.stringify(fallbacks);
+    str += `\n\n<!--FALLBACKS-->\n` + JSON.stringify(fallbacks);
   }
 
-  for (const snapshot of state.doc.attrs.snapshots) {
-    str += `\n<!--SNAPSHOT-->\ndate: ${snapshot.date}\nmessage: ${snapshot.message}\n\n`;
+  for (const snapshot of savedPathData.snapshots) {
+    str += `\n\n<!--SNAPSHOT-->\ndate: ${snapshot.date}\nmessage: ${snapshot.message}\n\n`;
     str += snapshot.content;
   }
-  str =  str;
+
   if (window.showOpenFilePicker && state.doc.attrs.saveIsValid && state.doc.attrs.fileHandle && !isSaveAs) {
     // Use the Chromium File System Access API, so users can click to save a document.
     const button = document.getElementsByClassName("ProseMirror-menubar").item(0).children[1];
@@ -56958,7 +57254,7 @@ function permalink() {
     label: "Create permalink",
     run(state, _, view) {
       const symbols = /[\r\n%#"()<>?[\\\]^`{|}]/g;
-      const md = hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, false, false);
+      const md = hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, false);
       if (md && md.length > 0) {
         const hash = "#" + md.replace(symbols, encodeURIComponent);
         if (hash.length > 32000) {
@@ -57011,7 +57307,7 @@ function liveReload() {
 }
 
 function copyText(state, isGFM, withResults = false) {
-  const text = hurmetMarkdownSerializer.serialize(state.selection.content().content, new Map(), [], isGFM, false, withResults);
+  const text = hurmetMarkdownSerializer.serialize(state.selection.content().content, new Map(), [], isGFM, withResults);
   const type = "text/plain";
   const blob = new Blob([text], { type });
   const data = [new ClipboardItem({ [type]: blob })];
@@ -57426,10 +57722,22 @@ function takeSnapshot() {
         fields: { message: new TextField({ label: "Commit message", required: true }) },
         callback(attrs) {
           const dateStr = new Date().toISOString().replace(/T.+/, "");
-          let md = hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, true, false);
-          // Ignore path definitions
-          md = md.replace(/\n\n\[[^\]]+\\: .+/, "");
-          state.doc.attrs.snapshots.push({ message: attrs.message, date: dateStr, content: md });
+          let md = hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, false);
+          const { body, pathDefs } = splitMarkdownPathDefinitions(md);
+
+          const rebuilt = rebuildSnapshotCacheAndContents(
+            state.doc.attrs.snapshots,
+            state.doc.attrs.snapshotPathCache,
+            { body, pathDefs }
+          );
+
+          state.doc.attrs.snapshots = rebuilt.snapshots;
+          state.doc.attrs.snapshotPathCache = rebuilt.snapshotPathCache;
+          state.doc.attrs.snapshots.push({
+            message: attrs.message,
+            date: dateStr,
+            content: rebuilt.content
+          });
         }
       });
     }
@@ -57445,6 +57753,47 @@ function showDiffMenuItem() {
   })
 }
 
+function revertToSnapshot() {
+  return new MenuItem({
+    label: "Revert to snapshot...",
+    run(state, _, view) {
+      const buttons = [];
+      const snapshots = state.doc.attrs.snapshots;
+      if (state.doc.attrs.snapshots.length === 0) {
+        alert('There are no snapshots available.');
+        return
+      }
+      for (let i = 0; i < state.doc.attrs.snapshots.length; i++) {
+        buttons.push({
+          textContent: (new Date(snapshots[i].date)).toISOString().replace(/T.+/, "") + "  " + snapshots[i].message,
+          pos: i
+        });
+      }
+
+      openSelectPrompt("Revert to Snapshot", buttons, pos => {
+        const target = state.doc.attrs.snapshots[pos];
+        const currentMarkdown = hurmetMarkdownSerializer.serialize(
+          state.doc,
+          new Map(),
+          [],
+          false,
+          false
+        );
+        const targetLabel =
+          (new Date(target.date)).toISOString().replace(/T.+/, "") + "  " + target.message;
+
+        revertToSnapshotByPos(
+          state,
+          view,
+          pos,
+          currentMarkdown,
+          `State before revert to ${targetLabel}`
+        );
+      });
+    }
+  })
+}
+
 function deleteSnapshots() {
   return new MenuItem({
     label: "Delete all snapshots...",
@@ -57455,6 +57804,7 @@ function deleteSnapshots() {
         useOkButton: true,
         callback() {
           state.doc.attrs.snapshots = [];
+          state.doc.attrs.snapshotPathCache = {};
         }
       });
     }
@@ -58085,6 +58435,7 @@ function buildMenuItems(schema) {
   r.deleteComments = deleteComments();
   r.takeSnapshot = takeSnapshot();
   r.showDiffMenuItem = showDiffMenuItem();
+  r.revertToSnapshot = revertToSnapshot();
   r.deleteSnapshots = deleteSnapshots();
   r.print = print();
 
@@ -58395,6 +58746,7 @@ function buildMenuItems(schema) {
     r.liveReload,
     r.takeSnapshot,
     r.showDiffMenuItem,
+    r.revertToSnapshot,
     r.deleteSnapshots,
     r.pagesize,
     r.print
@@ -60242,12 +60594,10 @@ const tidyUp = _ => {
 let hash = location.hash;
 if (hash && hash.length > 1) {
   hash = hash.slice(1);
-  console.log("Hash on load:", hash);
   const anchor = document.getElementById(hash);
   if (anchor) {
     anchor.scrollIntoView({ behavior: 'smooth' });
   } else if (/^\d+$/.test(hash)) {
-    console.log("websocket port:", hash);
     // Open a websocket and listen for updates.
     const socket = new WebSocket(`ws://localhost:${hash}`);
     socket.addEventListener('message', event => {

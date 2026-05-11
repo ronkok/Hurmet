@@ -49,7 +49,7 @@ export class MarkdownSerializer {
   // :: (Node, ?Object) → string
   // Serialize the content of the given node to
   // [CommonMark](http://commonmark.org/).
-  serialize(content, paths, footnotes, isGFM = false, forSnapshot = false, withResults = false) {
+  serialize(content, paths, footnotes, isGFM = false, withResults = false) {
     let state = new MarkdownSerializerState(this.nodes, this.marks, paths, footnotes, isGFM, withResults)
     state.renderContent(content)
 
@@ -59,11 +59,9 @@ export class MarkdownSerializer {
       state.renderInline(state.footnotes[i])
       state.write("\n")
     }
-  // Write the link and image paths, unless this is done for a snapshot.
-    if (!forSnapshot) {
-      for (const [key, value] of state.paths.entries()) {
-        state.write("\n[" + key + "]: " + value + "\n")
-      }
+  // Write the link and image paths
+    for (const [key, value] of state.paths.entries()) {
+      state.write("\n[" + key + "]: " + value + "\n")
     }
     return state.out
   }

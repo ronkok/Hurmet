@@ -34,6 +34,13 @@ import { clone } from "./utils.js"
 import { dateFormatRegEx } from "./date"
 import { parse } from "./parser.js"
 import { tex2Calc } from "./tex2Calc.js"
+import {
+  splitMarkdownPathDefinitions,
+  rebuildSnapshotCacheAndContents,
+  mergeSavedMarkdownPathData,
+  stringifyMarkdownPathDefinitions,
+  revertToSnapshotByPos
+} from "./snapshots.js"
 
 // Menu icons that are not included in node-module menu.js
 const hurmetIcons = {
@@ -519,6 +526,21 @@ function sleep (time) {
 // Export saveFileAsMarkdown so that it is available in keymap.js
 export function saveFileAsMarkdown(state, view, isSaveAs = false) {
   pruneHurmet(state, view)   // Prune away any empty Hurmet math zones.
+
+  const currentMarkdown = hurmetMarkdownSerializer.serialize(
+    state.doc,
+    new Map(),
+    [],
+    false,
+    false
+  )
+
+  const savedPathData = mergeSavedMarkdownPathData(
+    currentMarkdown,
+    state.doc.attrs.snapshots,
+    state.doc.attrs.snapshotPathCache
+  )
+
   let str = `---------------
 decimalFormat: ${state.doc.attrs.decimalFormat}
 fontSize: ${state.doc.attrs.fontSize}
@@ -527,7 +549,12 @@ dateFormat: ${state.doc.attrs.dateFormat}
 saveDate: ${new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60 * 1000).toISOString().split("T")[0]}
 ---------------
 
-` + hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, false, false)
+${savedPathData.body}`
+
+  const pathDefText = stringifyMarkdownPathDefinitions(savedPathData.pathDefs)
+  if (pathDefText.length > 0) {
+    str += `\n\n${pathDefText}`
+  }
 
   // Save some fetched data as a fallback for when the internet is down.
   let gottaFallback = false
@@ -555,14 +582,14 @@ saveDate: ${new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60 
     }
   })
   if (gottaFallback) {
-    str += `\n<!--FALLBACKS-->\n` + JSON.stringify(fallbacks)
+    str += `\n\n<!--FALLBACKS-->\n` + JSON.stringify(fallbacks)
   }
 
-  for (const snapshot of state.doc.attrs.snapshots) {
-    str += `\n<!--SNAPSHOT-->\ndate: ${snapshot.date}\nmessage: ${snapshot.message}\n\n`
+  for (const snapshot of savedPathData.snapshots) {
+    str += `\n\n<!--SNAPSHOT-->\ndate: ${snapshot.date}\nmessage: ${snapshot.message}\n\n`
     str += snapshot.content
   }
-  str =  str
+
   if (window.showOpenFilePicker && state.doc.attrs.saveIsValid && state.doc.attrs.fileHandle && !isSaveAs) {
     // Use the Chromium File System Access API, so users can click to save a document.
     const button = document.getElementsByClassName("ProseMirror-menubar").item(0).children[1]
@@ -618,7 +645,7 @@ function permalink() {
     label: "Create permalink",
     run(state, _, view) {
       const symbols = /[\r\n%#"()<>?[\\\]^`{|}]/g
-      const md = hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, false, false)
+      const md = hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, false)
       if (md && md.length > 0) {
         const hash = "#" + md.replace(symbols, encodeURIComponent)
         if (hash.length > 32000) {
@@ -671,7 +698,7 @@ function liveReload() {
 }
 
 function copyText(state, isGFM, withResults = false) {
-  const text = hurmetMarkdownSerializer.serialize(state.selection.content().content, new Map(), [], isGFM, false, withResults)
+  const text = hurmetMarkdownSerializer.serialize(state.selection.content().content, new Map(), [], isGFM, withResults)
   const type = "text/plain"
   const blob = new Blob([text], { type })
   const data = [new ClipboardItem({ [type]: blob })];
@@ -1089,10 +1116,22 @@ function takeSnapshot() {
         fields: { message: new TextField({ label: "Commit message", required: true }) },
         callback(attrs) {
           const dateStr = new Date().toISOString().replace(/T.+/, "")
-          let md = hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, true, false)
-          // Ignore path definitions
-          md = md.replace(/\n\n\[[^\]]+\\: .+/, "")
-          state.doc.attrs.snapshots.push({ message: attrs.message, date: dateStr, content: md })
+          let md = hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, false)
+          const { body, pathDefs } = splitMarkdownPathDefinitions(md)
+
+          const rebuilt = rebuildSnapshotCacheAndContents(
+            state.doc.attrs.snapshots,
+            state.doc.attrs.snapshotPathCache,
+            { body, pathDefs }
+          )
+
+          state.doc.attrs.snapshots = rebuilt.snapshots
+          state.doc.attrs.snapshotPathCache = rebuilt.snapshotPathCache
+          state.doc.attrs.snapshots.push({
+            message: attrs.message,
+            date: dateStr,
+            content: rebuilt.content
+          })
         }
       })
     }
@@ -1108,6 +1147,47 @@ function showDiffMenuItem() {
   })
 }
 
+function revertToSnapshot() {
+  return new MenuItem({
+    label: "Revert to snapshot...",
+    run(state, _, view) {
+      const buttons = [];
+      const snapshots = state.doc.attrs.snapshots
+      if (state.doc.attrs.snapshots.length === 0) {
+        alert('There are no snapshots available.')
+        return
+      }
+      for (let i = 0; i < state.doc.attrs.snapshots.length; i++) {
+        buttons.push({
+          textContent: (new Date(snapshots[i].date)).toISOString().replace(/T.+/, "") + "  " + snapshots[i].message,
+          pos: i
+        })
+      }
+
+      openSelectPrompt("Revert to Snapshot", buttons, pos => {
+        const target = state.doc.attrs.snapshots[pos]
+        const currentMarkdown = hurmetMarkdownSerializer.serialize(
+          state.doc,
+          new Map(),
+          [],
+          false,
+          false
+        )
+        const targetLabel =
+          (new Date(target.date)).toISOString().replace(/T.+/, "") + "  " + target.message
+
+        revertToSnapshotByPos(
+          state,
+          view,
+          pos,
+          currentMarkdown,
+          `State before revert to ${targetLabel}`
+        )
+      })
+    }
+  })
+}
+
 function deleteSnapshots() {
   return new MenuItem({
     label: "Delete all snapshots...",
@@ -1118,6 +1198,7 @@ function deleteSnapshots() {
         useOkButton: true,
         callback() {
           state.doc.attrs.snapshots = [];
+          state.doc.attrs.snapshotPathCache = {};
         }
       })
     }
@@ -1748,6 +1829,7 @@ export function buildMenuItems(schema) {
   r.deleteComments = deleteComments()
   r.takeSnapshot = takeSnapshot()
   r.showDiffMenuItem = showDiffMenuItem()
+  r.revertToSnapshot = revertToSnapshot()
   r.deleteSnapshots = deleteSnapshots()
   r.print = print()
 
@@ -2060,6 +2142,7 @@ export function buildMenuItems(schema) {
     r.liveReload,
     r.takeSnapshot,
     r.showDiffMenuItem,
+    r.revertToSnapshot,
     r.deleteSnapshots,
     r.pagesize,
     r.print

@@ -59,8 +59,9 @@ export const nodes = {
       saveDate: { default: null, validate: "null|string" },
       fontSize: { default: 12, validate: "number|string" },       // 12 | 10
       pageSize: { default: "letter", validate: "string" }, // letter | A4
-      snapshots: { default: [] },
-      fallbacks: { default: {} }       // Fallback data, in case fetched files are unavailable
+      snapshots: { default: [] },            // snapshot, not including image and link definitions
+      snapshotPathCache: { default: {} },    // Deduped cache of snapshot image and link definitions
+      fallbacks: { default: {} }             // Fallback data, in case fetched files are unavailable
     }
   },
 
@@ -243,6 +244,7 @@ export const nodes = {
       src: {validate: "string"},
       alt: {default: null, validate: "null|string"},
       width: {default: null, validate: "null|string"},
+      class: {default: "inline", validate: "string"}
     },
     group: "block",
     draggable: false,

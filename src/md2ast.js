@@ -1,4 +1,3 @@
-
 /**
  * md2ast() returns an AST that matches the memory structure  of a Hurmet.org document.
  * Elsewhere, Hurmet uses the AST to create either a live Hurmet doc or a static HTML doc.
@@ -598,9 +597,8 @@ const parseRef = function(capture, state, refNode) {
   let ref = capture[2] ? capture[2] : capture[1];
   ref = ref.replace(/\s+/g, " ");
 
-  // We store defs in state._defs (_ to deconflict with client-defined state).
-  if (state._defs && state._defs[ref]) {
-    const def = state._defs[ref];
+  if (state.defs && state.defs[ref]) {
+    const def = state.defs[ref];
     if (refNode.type === "figure") {
       refNode = { type: "figure", attrs: def.attrs, content: [
         { type: "figimg", attrs: def.attrs },
@@ -932,7 +930,7 @@ rules.set("reflink", {
   match: inlineRegex(/^\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]/),
   parse: function(capture, state) {
     const defIndex = capture[2] ? capture[2] : capture[1];
-    const href = state._defs[defIndex].target
+    const href = state.defs[defIndex].target
     const textNode = parseTextMark(capture[1], state, "link", href)
     return textNode
   }
@@ -1247,8 +1245,14 @@ const parseMetadata = str => {
 
 const dateMessageRegEx = /^date:([^\n]+)\nmessage:([^\n]+)\n/
 
+const buildPathDefString = (def, target, directives) => {
+  return directives
+    ? `[${def}]: ${target}\n{${directives}}`
+    : `[${def}]: ${target}`
+}
+
 export const inlineMd2ast = md => {
-  const state = { inline: true, _defs: {}, prevCapture: "", inList: false, inHtml: false }
+  const state = { inline: true, defs: {}, prevCapture: "", inList: false, inHtml: false }
   const ast = parse(md, state)
   if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") {
     ast.shift()
@@ -1270,11 +1274,12 @@ export const md2ast = (md, inHtml = false) => {
   const state = {
     inline: false,
     inList: false,
-    _defs: {},
+    defs: {},
     footnotes: [],
     prevCapture: "",
     inHtml
   }
+  const snapshotPathCache = {}
   const defRegEx = /\n *\[([^\]\n]+)\]: *([^\n]*) *(?:\n\{([^\n}]*)\})?(?=\n)/gm
   const footnoteDefRegEx = /\n *\[\^\d+\]: *([^\n]*)(?=\n)/gm
   let capture
@@ -1294,7 +1299,11 @@ export const md2ast = (md, inHtml = false) => {
       if (matchAlt)   { attrs.alt = matchAlt[1] }
       if (matchID)    { attrs.id = matchID[1] }
     }
-    state._defs[def] = { target, attrs }
+    state.defs[def] = { target, attrs }
+
+    if (!isNotAnInteger(def)) {
+      snapshotPathCache[def] = buildPathDefString(def, target, directives)
+    }
   }
 
   // Next, get all the footnote definitions
@@ -1334,6 +1343,7 @@ export const md2ast = (md, inHtml = false) => {
   consolidate(ast)
   populateTOC(ast)
   if (metadata) {
+    metadata.snapshotPathCache = snapshotPathCache
     if (fallbackStrings) {
       metadata.fallbacks = JSON.parse(fallbackStrings.pop().trim())
     }
