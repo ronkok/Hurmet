@@ -53292,8 +53292,7 @@ var hurmet = {
   updateCalculations,
   updateAndSaveWithResults,
   render,
-  Rnl,
-  version: '0.1.0'
+  Rnl
 };
 
 /* eslint-disable */
