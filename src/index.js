@@ -24,7 +24,7 @@ import { formatFloat as round } from "./format.js"
 import { handleContents } from "./openfile"
 
 if (typeof window !== "undefined") {
-  window.hurmet = { round } // Expose for use by sketch module.
+  window.hurmet = { version: hurmet.version, round } // Expose round for use by sketch module.
 }
 
 // Bundle together the plugins.

@@ -45,5 +45,6 @@ export default {
   updateCalculations,
   updateAndSaveWithResults,
   render,
-  Rnl
+  Rnl,
+  version: "0.1.0"
 }
