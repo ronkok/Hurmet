@@ -1,3 +1,4 @@
+const fs = require('fs')
 import { md2ast } from "./md2ast.js"
 import { updateCalcs } from "./updateCalcsForCLI.js"
 import { hurmetMarkdownSerializer } from "./to_markdown"
@@ -23,7 +24,7 @@ const getTOCitems = (ast, tocArray, start, end, node) => {
   }
 }
 
-export async function updateHurmetDocWithResults(md) {
+export async function updateAndSaveWithResults(filepath) {
   // Update the calculations of a Hurmet document and return a Hurmet Markdown
   // document with results written inline.
 
@@ -34,6 +35,7 @@ export async function updateHurmetDocWithResults(md) {
 
   // Start by converting the Markdown to an AST that matches
   // the Hurmet internal data structure.
+  const md = fs.readFileSync(filepath).toString('utf8')
   let ast = md2ast(md, false)
 
   // Populate a Hurmet Table of Contents, if any exists.
@@ -54,5 +56,6 @@ export async function updateHurmetDocWithResults(md) {
   // Write the updated Markdown
   const updatedMarkdown = hurmetMarkdownSerializer.serialize(ast, new Map(), [],
                                                              false, true)
-  return updatedMarkdown
+  fs.writeFileSync(filepath, updatedMarkdown, 'utf8')
+  return { ok: true }
 }

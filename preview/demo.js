@@ -35634,6 +35634,8 @@ var temml$1 = {
   __defineMacro: defineMacro
 };
 
+const fs = require('fs');
+
 const getTOCitems = (ast, tocArray, start, end, node) => {
   if (Array.isArray(ast)) {
     for (let i = 0; i < ast.length; i++) {
@@ -35654,7 +35656,7 @@ const getTOCitems = (ast, tocArray, start, end, node) => {
   }
 };
 
-async function updateHurmetDocWithResults(md) {
+async function updateAndSaveWithResults(filepath) {
   // Update the calculations of a Hurmet document and return a Hurmet Markdown
   // document with results written inline.
 
@@ -35665,6 +35667,7 @@ async function updateHurmetDocWithResults(md) {
 
   // Start by converting the Markdown to an AST that matches
   // the Hurmet internal data structure.
+  const md = fs.readFileSync(filepath).toString('utf8');
   let ast = md2ast(md, false);
 
   // Populate a Hurmet Table of Contents, if any exists.
@@ -35685,7 +35688,8 @@ async function updateHurmetDocWithResults(md) {
   // Write the updated Markdown
   const updatedMarkdown = hurmetMarkdownSerializer.serialize(ast, new Map(), [],
                                                              false, true);
-  return updatedMarkdown
+  fs.writeFileSync(filepath, updatedMarkdown, 'utf8');
+  return true
 }
 
 /*
@@ -35720,7 +35724,7 @@ var hurmet = {
   scanModule,
   tex2Calc,
   updateCalculations,
-  updateHurmetDocWithResults,
+  updateAndSaveWithResults,
   render,
   Rnl
 };
