@@ -8,7 +8,7 @@ import { compile } from "./compile"
 import temml from "./temml.js"
 import { scanModule } from "./module"
 import { updateCalculations } from "./updateCalculations"
-import { updateAndSaveWithResults } from "./updateDoc"
+import { updateAndSave } from "./updateDoc"
 import { Rnl } from "./rational"
 
 /*
@@ -43,7 +43,7 @@ export default {
   scanModule,
   tex2Calc,
   updateCalculations,
-  updateAndSaveWithResults,
+  updateAndSave,
   render,
   Rnl,
   version: "0.1.0"

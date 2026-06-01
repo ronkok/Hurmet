@@ -23,7 +23,7 @@ const getTOCitems = (ast, tocArray, start, end, node) => {
   }
 }
 
-export async function updateAndSaveWithResults(md) {
+export async function updateAndSave(md) {
   // Update the calculations of a Hurmet document and return a Hurmet Markdown
   // document with results written inline.
 

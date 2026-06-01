@@ -12,6 +12,7 @@
  * 1. Hurmet has a meta-document section at the top of the file, similar to MultiMarkdown.
  * 2. Hurmet inline calculation is delimited ¢`…`, where "…" is the entry input by the author.
  *    Hurmet display calculation is delimited ¢¢…¢¢.
+ *    Alternate: ¢©`name = expression = 〔result〕unit`, where "©" is a display selector.
  * 3. LaTeX inline math is delimited $…$ or $`…`$. \(…\) is also recognized.
  *    No space allowed after 1st $ or before 2nd $. No digit after 2nd $.
  *    LaTeX display math is delimited  $$ … $$. \[…\] is also recognized.

@@ -20,7 +20,7 @@ export const showDiff = state => {
   const callback = pos => {
     const dmp = new diff_match_patch()
     const text1 = state.doc.attrs.snapshots[pos].content
-    const text2 = hurmetMarkdownSerializer.serialize(state.doc, new Map(), false)
+    const text2 = hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, true)
     dmp.Diff_Timeout = 2
     dmp.Diff_EditCost = 4
     let d = dmp.diff_main(text1, text2)

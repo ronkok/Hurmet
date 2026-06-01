@@ -532,7 +532,7 @@ export function saveFileAsMarkdown(state, view, isSaveAs = false) {
     new Map(),
     [],
     false,
-    false
+    true // with results
   )
 
   const savedPathData = mergeSavedMarkdownPathData(
@@ -697,8 +697,8 @@ function liveReload() {
   })
 }
 
-function copyText(state, isGFM, withResults = false) {
-  const text = hurmetMarkdownSerializer.serialize(state.selection.content().content, new Map(), [], isGFM, withResults)
+function copyText(state, isGFM) {
+  const text = hurmetMarkdownSerializer.serialize(state.selection.content().content, new Map(), [], isGFM, true)
   const type = "text/plain"
   const blob = new Blob([text], { type })
   const data = [new ClipboardItem({ [type]: blob })];
@@ -710,16 +710,6 @@ function copyAsMarkdown() {
     label: "Copy as Hurmet Markdown",
     run(state, _, view) {
       copyText(state, false)
-    }
-  })
-}
-
-function copyAsMarkdownWithResults() {
-  return new MenuItem({
-    label: "Copy as MD w/Results",
-    title: "Copy as Markdown. Include human-readable results.",
-    run(state, _, view) {
-      copyText(state, false, true)
     }
   })
 }
@@ -1116,7 +1106,7 @@ function takeSnapshot() {
         fields: { message: new TextField({ label: "Commit message", required: true }) },
         callback(attrs) {
           const dateStr = new Date().toISOString().replace(/T.+/, "")
-          let md = hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, false)
+          let md = hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, true)
           const { body, pathDefs } = splitMarkdownPathDefinitions(md)
 
           const rebuilt = rebuildSnapshotCacheAndContents(
@@ -1171,7 +1161,7 @@ function revertToSnapshot() {
           new Map(),
           [],
           false,
-          false
+          true // with results
         )
         const targetLabel =
           (new Date(target.date)).toISOString().replace(/T.+/, "") + "  " + target.message
@@ -2245,11 +2235,9 @@ export function buildMenuItems(schema) {
   ])];
 
   r.copyAsMarkdown = copyAsMarkdown()
-  r.copyAsMarkdownWithResults = copyAsMarkdownWithResults()
   r.copyAsGFM = copyAsGFM()
   r.Markdown = new Dropdown([
     r.copyAsMarkdown,
-    r.copyAsMarkdownWithResults,
     r.copyAsGFM
   ], {label: "𝐌"})
 
