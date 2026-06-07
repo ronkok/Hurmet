@@ -1,4 +1,7 @@
 import hurmet from "./hurmet"
+import { schema } from "./schema"
+import { splitMarkdownPathDefinitions, stringifyMarkdownPathDefinitions } from "./snapshots"
+import { rebuildSnapshotCacheAndContents } from "./snapshots"
 
 export const handleContents = (view, schema, str, format) => {
   // Strip the BOM, if any, from the beginning of the result string.
@@ -105,4 +108,55 @@ export function readFile(state, _, view, schema, format) {
     }
     input.click()
   }
+}
+
+export function revertToSnapshotByPos(state, view, pos, currentMarkdown, message) {
+  const targetSnapshot = state.doc.attrs.snapshots[pos]
+  if (!targetSnapshot) { return }
+
+  const { body, pathDefs } = splitMarkdownPathDefinitions(currentMarkdown)
+  const rebuilt = rebuildSnapshotCacheAndContents(
+    state.doc.attrs.snapshots,
+    state.doc.attrs.snapshotPathCache,
+    { body, pathDefs }
+  )
+
+  const preservedCurrentSnapshot = {
+    date: new Date().toISOString().replace(/T.+/, ""),
+    message,
+    content: rebuilt.content
+  }
+
+  const allSnapshots = rebuilt.snapshots.concat(preservedCurrentSnapshot)
+  const targetContent = rebuilt.snapshots[pos].content
+  const pathDefText = stringifyMarkdownPathDefinitions(rebuilt.snapshotPathCache)
+
+  const fileHandle = state.doc.attrs.fileHandle
+  const inDraftMode = state.doc.attrs.inDraftMode
+
+  let md = `---------------
+decimalFormat: ${state.doc.attrs.decimalFormat}
+fontSize: ${state.doc.attrs.fontSize}
+pageSize: ${state.doc.attrs.pageSize}
+dateFormat: ${state.doc.attrs.dateFormat}
+saveDate: ${new Date(new Date().getTime()
+  - new Date().getTimezoneOffset() * 60 * 1000).toISOString().split("T")[0]}
+---------------
+
+${targetContent}`
+
+  if (pathDefText.length > 0) {
+    md += `\n\n${pathDefText}`
+  }
+
+  for (const item of allSnapshots) {
+    md += `\n\n<!--SNAPSHOT-->\ndate: ${item.date}\nmessage: ${item.message}\n\n`
+    md += item.content
+  }
+
+  handleContents(view, schema, md, "markdown")
+
+  view.state.doc.attrs.fileHandle = fileHandle
+  view.state.doc.attrs.saveIsValid = false
+  view.state.doc.attrs.inDraftMode = inDraftMode
 }

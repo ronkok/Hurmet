@@ -445,7 +445,7 @@ class Fragment {
             return Fragment.empty;
         if (!Array.isArray(value))
             throw new RangeError("Invalid input for Fragment.fromJSON");
-        return new Fragment(value.map(schema.nodeFromJSON));
+        return Fragment.fromArray(value.map(schema.nodeFromJSON));
     }
     /**
     Build a fragment from an array of nodes. Ensures that adjacent
@@ -679,17 +679,6 @@ given an invalid replacement.
 */
 class ReplaceError extends Error {
 }
-/*
-ReplaceError = function(this: any, message: string) {
-  let err = Error.call(this, message)
-  ;(err as any).__proto__ = ReplaceError.prototype
-  return err
-} as any
-
-ReplaceError.prototype = Object.create(Error.prototype)
-ReplaceError.prototype.constructor = ReplaceError
-ReplaceError.prototype.name = "ReplaceError"
-*/
 /**
 A slice represents a piece cut out of a larger document. It
 stores not only a fragment, but also the depth up to which nodes on
@@ -735,7 +724,7 @@ class Slice {
     @internal
     */
     insertAt(pos, fragment) {
-        let content = insertInto(this.content, pos + this.openStart, fragment);
+        let content = insertInto(this.content, pos + this.openStart, fragment, this.openStart + 1, this.openEnd + 1);
         return content && new Slice(content, this.openStart, this.openEnd);
     }
     /**
@@ -809,14 +798,14 @@ function removeRange(content, from, to) {
         throw new RangeError("Removing non-flat range");
     return content.replaceChild(index, child.copy(removeRange(child.content, from - offset - 1, to - offset - 1)));
 }
-function insertInto(content, dist, insert, parent) {
+function insertInto(content, dist, insert, openStart, openEnd, parent) {
     let { index, offset } = content.findIndex(dist), child = content.maybeChild(index);
     if (offset == dist || child.isText) {
-        if (parent && !parent.canReplace(index, index, insert))
+        if (parent && openStart <= 0 && openEnd <= 0 && !parent.canReplace(index, index, insert))
             return null;
         return content.cut(0, dist).append(insert).append(content.cut(dist));
     }
-    let inner = insertInto(child.content, dist - offset - 1, insert, child);
+    let inner = insertInto(child.content, dist - offset - 1, insert, index == 0 ? openStart - 1 : 0, index == content.childCount - 1 ? openEnd - 1 : 0, child);
     return inner && content.replaceChild(index, child.copy(inner));
 }
 function replace($from, $to, slice) {
@@ -1346,10 +1335,11 @@ let Node$1 = class Node {
     */
     forEach(f) { this.content.forEach(f); }
     /**
-    Invoke a callback for all descendant nodes recursively between
+    Invoke a callback for all descendant nodes recursively overlapping
     the given two positions that are relative to start of this
-    node's content. The callback is invoked with the node, its
-    position relative to the original node (method receiver),
+    node's content. This includes all ancestors of the nodes
+    containing the two positions. The callback is invoked with the
+    node, its position relative to the original node (method receiver),
     its parent node, and its child index. When the callback returns
     false for a given node, that node's children will not be
     recursed over. The last parameter can be used to specify a
@@ -3437,6 +3427,8 @@ class DOMSerializer {
     @internal
     */
     serializeNodeInner(node, options) {
+        if (node.isText)
+            return doc$1(options).createTextNode(node.text);
         let { dom, contentDOM } = renderSpec(doc$1(options), this.nodes[node.type.name](node), null, node.attrs);
         if (contentDOM) {
             if (node.isLeaf)
@@ -3471,6 +3463,9 @@ class DOMSerializer {
         return toDOM && renderSpec(doc$1(options), toDOM(mark, inline), null, mark.attrs);
     }
     static renderSpec(doc, structure, xmlNS = null, blockArraysIn) {
+        // Kludge for backwards-compatibility with accidental original behavious
+        if (typeof structure == "string")
+            return { dom: doc.createTextNode(structure) };
         return renderSpec(doc, structure, xmlNS, blockArraysIn);
     }
     /**
@@ -3542,11 +3537,9 @@ function suspiciousAttributesInner(attrs) {
     return result;
 }
 function renderSpec(doc, structure, xmlNS, blockArraysIn) {
-    if (typeof structure == "string")
-        return { dom: doc.createTextNode(structure) };
-    if (structure.nodeType != null)
+    if (structure.nodeType == 1)
         return { dom: structure };
-    if (structure.dom && structure.dom.nodeType != null)
+    if (structure.dom && structure.dom.nodeType == 1)
         return structure;
     let tagName = structure[0], suspicious;
     if (typeof tagName != "string")
@@ -3581,6 +3574,9 @@ function renderSpec(doc, structure, xmlNS, blockArraysIn) {
             if (i < structure.length - 1 || i > start)
                 throw new RangeError("Content hole must be the only child of its parent node");
             return { dom, contentDOM: dom };
+        }
+        else if (typeof child == "string") {
+            dom.appendChild(doc.createTextNode(child));
         }
         else {
             let { dom: inner, contentDOM: innerContent } = renderSpec(doc, child, xmlNS, blockArraysIn);
@@ -16448,6 +16444,7 @@ function getIcon(root, icon) {
     let doc = (root.nodeType == 9 ? root : root.ownerDocument) || document;
     let node = doc.createElement("button");
     node.className = prefix$2;
+    node.type = "button";
     if (icon.path) {
         let { path, width, height } = icon;
         let name = "pm-icon-" + hashPath(path).toString(16);
@@ -16510,7 +16507,7 @@ class MenuItem {
         let spec = this.spec;
         let dom = spec.render ? spec.render(view)
             : spec.icon ? getIcon(view.root, spec.icon)
-                : spec.label ? crelt("button", null, translate(view, spec.label))
+                : spec.label ? crelt("button", { type: "button" }, translate(view, spec.label))
                     : null;
         if (!dom)
             throw new RangeError("MenuItem without icon or label property");
@@ -16601,6 +16598,7 @@ class Dropdown {
         this.focusables = content.focusables;
         let win = view.dom.ownerDocument.defaultView || window;
         let btn = crelt("button", {
+            type: "button",
             class: prefix$1$1 + "-dropdown " + (this.options.class || ""),
             style: this.options.css,
             "aria-haspopup": "menu",
@@ -16640,8 +16638,8 @@ class Dropdown {
                     else if (event.key === "Escape") {
                         event.preventDefault();
                         event.stopPropagation();
-                        close();
                         btn.focus();
+                        close();
                     }
                 });
                 open.node.addEventListener("focusout", () => {
@@ -16786,7 +16784,7 @@ class DropdownSubmenu {
         let items = renderDropdownItems(this.content, view);
         this.focusables = items.focusables;
         let win = view.dom.ownerDocument.defaultView || window;
-        let btn = crelt("button", { class: prefix$1$1 + "-submenu-label" }, translate(view, this.options.label || ""));
+        let btn = crelt("button", { type: "button", class: prefix$1$1 + "-submenu-label" }, translate(view, this.options.label || ""));
         let wrap = crelt("div", { class: prefix$1$1 + "-submenu-wrap" }, btn, crelt("div", { class: prefix$1$1 + "-submenu" }, items.dom));
         let listeningOnClose = null;
         let openSubmenu = (e) => {
@@ -23855,6 +23853,7 @@ const parse$1 = (
  * 1. Hurmet has a meta-document section at the top of the file, similar to MultiMarkdown.
  * 2. Hurmet inline calculation is delimited ¢`…`, where "…" is the entry input by the author.
  *    Hurmet display calculation is delimited ¢¢…¢¢.
+ *    Alternate: ¢©`name = expression = 〔result〕unit`, where "©" is a display selector.
  * 3. LaTeX inline math is delimited $…$ or $`…`$. \(…\) is also recognized.
  *    No space allowed after 1st $ or before 2nd $. No digit after 2nd $.
  *    LaTeX display math is delimited  $$ … $$. \[…\] is also recognized.
@@ -26304,12240 +26303,6 @@ const renderSVG = dwg => {
   return svg
 };
 
-function insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat) {
-  // hurmetVars is a key:value store of variable names and attributes.
-  // This function is called to insert an assignment into hurmetVars.
-  const formatSpec = hurmetVars.format ? hurmetVars.format.value : "h15";
-
-  if (!Array.isArray(attrs.name)) {
-    // This is the typical case.
-    hurmetVars[attrs.name] = attrs;
-    if (changedVars) {
-      changedVars.add(attrs.name);
-    }
-
-  } else if (attrs.value === null) {
-    for (let i = 0; i < attrs.name.length; i++) {
-      hurmetVars[attrs.name[i]] = { value: null };
-    }
-
-  } else if (isMatrix(attrs)) {
-    // Assign to a matrix of names
-    const isQuantity = Boolean(attrs.dtype & dt.QUANTITY);
-    let resultDisplay = attrs.resultdisplay;
-    resultDisplay = resultDisplay.replace(/\\(begin|end){[bp]matrix}/g, "").trim();
-    const displays = resultDisplay.split(/&|\\\\/);
-    if (attrs.dtype & dt.MATRIX) {
-      // A 2 dimensional matrix.
-      const dtype = attrs.dtype - dt.MATRIX;
-      const numRows = isQuantity ? attrs.value.plain.length : attrs.value.length;
-      const numCols = attrs.name.length / numRows;
-      let iName = 0;
-      for (let i = 0; i < numRows; i++) {
-        for (let j = 0; j < numCols; j++) {
-          const value = isQuantity
-            ? { plain: attrs.value.plain[i][j], inBaseUnits: attrs.value.inBaseUnits[i][j] }
-            : attrs.value[i][j];
-          hurmetVars[attrs.name[i]] = {
-            name: attrs.name[iName],
-            value,
-            resultdisplay: isQuantity
-              ? parse$1(displays[iName].trim() + " '" + attrs.unit + "'")
-              : displays[iName].trim(),
-            expos: attrs.expos,
-            unit: isQuantity ? attrs.unit : undefined,
-            dtype
-          };
-          if (changedVars) { changedVars.add(attrs.name[i]); }
-          iName += 1;
-        }
-      }
-    } else {
-      // Assign to a vector of names.
-      const isColumn = Boolean(attrs.dtype & dt.COLUMNVECTOR);
-      const dtype = attrs.dtype - (isColumn ? dt.COLUMNVECTOR : dt.ROWVECTOR);
-      for (let i = 0; i < attrs.name.length; i++) {
-        const value = isQuantity
-          ? { plain: attrs.value.plain[i], inBaseUnits: attrs.value.inBaseUnits[i] }
-          : attrs.value[i];
-        hurmetVars[attrs.name[i]] = {
-          name: attrs.name[i],
-          value,
-          resultdisplay: isQuantity
-            ? parse$1(displays[i].trim() + " '" + attrs.unit + "'")
-            : displays[i].trim(),
-          expos: attrs.expos,
-          unit: isQuantity ? attrs.unit : undefined,
-          dtype
-        };
-        if (changedVars) { changedVars.add(attrs.name[i]); }
-      }
-    }
-
-  // From this point forward, we're dealing with multiple assignment
-  } else if (attrs.dtype & dt.MAP) {
-    const unit = attrs.unit;
-    const unitName = unit && unit.name ? unit.name : undefined;
-    const dtype = attrs.dtype - dt.MAP;
-    let i = 0;
-    if (attrs.dtype & dt.QUANTITY) {
-      for (const value of attrs.value.data.plain) {
-        const result = {
-          value: { plain: value },
-          expos: attrs.expos,
-          factor: attrs.factor,
-          dtype
-        };
-        result.resultdisplay = format(value, formatSpec, decimalFormat);
-        if (unitName) { result.resultdisplay += " " + unitTeXFromString(unitName); }
-        hurmetVars[attrs.name[i]] = result;
-        if (changedVars) { changedVars.add(attrs.name[i]); }
-        i += 1;
-      }
-      i = 0;
-      for (const value of attrs.value.data.inBaseUnits) {
-        hurmetVars[attrs.name[i]].value.inBaseUnits = value;
-        i += 1;
-      }
-    } else {
-      for (const value of attrs.value.data) {
-        const result = { value, expos: attrs.expos, factor: attrs.factor, dtype };
-        result.resultdisplay = Rnl.isRational(value)
-          ? format(value, formatSpec, decimalFormat)
-          : String(value);
-        if (unitName) { result.resultdisplay += " " + unitTeXFromString(unitName); }
-        hurmetVars[attrs.name[i]] = result;
-        if (changedVars) { changedVars.add(attrs.name[i]); }
-        i += 1;
-      }
-    }
-  } else if (attrs.dtype === dt.DATAFRAME) {
-    const isSingleRow = attrs.value.data[0].length === 1;
-    for (let i = 0; i < attrs.name.length; i++) {
-      let dtype = attrs.value.dtype[i];
-      let value = isSingleRow ? undefined : [];
-      for (let j = 0; j < attrs.value.data[0].length; j++) {
-        const datum = attrs.value.data[i][j];
-        const val = (dtype & dt.RATIONAL) ? Rnl.fromString(datum) : datum;
-        if (isSingleRow) {
-          value = val;
-        } else {
-          value.push(val);
-        }
-      }
-      if (!isSingleRow) { dtype += dt.COLUMNVECTOR; }
-      const result = {
-        value,
-        unit: attrs.unit[attrs.value.units[i]],
-        dtype
-      };
-      if ((dtype & dt.RATIONAL) && isSingleRow) {
-        result.resultdisplay = parse$1(format(value));
-        if (result.unit && result.unit.name) {
-          result.resultdisplay += " " + parse$1(`'${result.unit.name}'`);
-        }
-      } else if (dtype & dt.RATIONAL) {
-        result.resultdisplay = Matrix.display({ value, dtype }, formatSpec, decimalFormat)
-            + parse$1(`'${attrs.value.units[i]}'`);
-      } else {
-        result.resultdisplay = parse$1(value);
-      }
-      if (attrs.value.units[i]) {
-        result.value = { plain: result.value };
-        const unit = attrs.unit[attrs.value.units[i]];
-        result.value.inBaseUnits = isSingleRow
-          ? Rnl.multiply(Rnl.add(result.value.plain, unit.gauge), unit.factor)
-          : result.value.plain.map(e => Rnl.multiply(Rnl.add(e, unit.gauge), unit.factor));
-        result.expos = unit.expos;
-      }
-
-      hurmetVars[attrs.name[i]] = result;
-      if (changedVars) { changedVars.add(attrs.name[i]); }
-    }
-  } else if (attrs.dtype === dt.TUPLE) {
-    let i = 0;
-    for (const value of attrs.value.values()) {
-      if (value.name) { value.name = attrs.name[i]; }
-      hurmetVars[attrs.name[i]] = value;
-      if (changedVars) { changedVars.add(attrs.name[i]); }
-      i += 1;
-    }
-  } else if (attrs.dtype === dt.MODULE) {
-    if (attrs.name.length !== attrs.value.length) {
-      return errorOprnd("MULT_MIS")
-    } else {
-      let i = 0;
-      for (const value of attrs.value.values()) {
-        const result = clone(value);
-        hurmetVars[attrs.name[i]] = result;
-        if (changedVars) { changedVars.add(attrs.name[i]); }
-        i += 1;
-      }
-    }
-  } else ;
-}
-
-/*
- * This file deals with Hurmet maps, which are similar to hash maps.
- * In a map, every value is of the same data type and has the same unit-of-measure.
- */
-
-const checkUnitEquality = (u1, u2) => {
-  let x;
-  let y;
-  if (u1.expos && u2.expos) {
-    x = u1.expos;
-    y = u2.expos;
-  } else {
-    x = u1;
-    y = u2;
-  }
-  if (Array.isArray(x)) {
-    if (Array.isArray(y)) {
-      if (x.length !== y.length) { return false }
-      x.forEach((e, i) => { if (e !== y[i]) { return false } });
-      return true
-    } else {
-      return false
-    }
-  } else {
-    return x === y
-  }
-};
-
-const append = (o1, o2, shape1, shape2) => {
-  let map;
-  let scalar;
-  if (o1.dtype & dt.MAP) {
-    if (shape2 !== "scalar") { return errorOprnd("BAD_APPEND", shape2) }
-    map = o1;
-    scalar = o2;
-  } else {
-    if (shape1 !== "scalar") { return errorOprnd("BAD_APPEND", shape1) }
-    map = o2;
-    scalar = o1;
-  }
-  if (!(map.dtype & scalar.dtype)) { errorOprnd("MAP_APPEND"); }
-  if (!checkUnitEquality(map.unit, scalar.unit)) { errorOprnd("UNIT_APEND"); }
-  map.value.set(scalar.name, scalar.value);
-  return map
-};
-
-const convertFromBaseUnits = (data, gauge, factor) => {
-  data = data.map(column => Rnl.isRational(column[0])
-    ? column.map(e => Rnl.divide(e, factor))
-    : column
-  );
-  if (!Rnl.isZero(gauge)) {
-    data = data.map(column => Rnl.isRational(column[0])
-      ? column.map(e => Rnl.subtract(e, gauge))
-      : column
-    );
-  }
-  return data
-};
-
-const convertToBaseUnits = (data, gauge, factor) => {
-  if (!Rnl.isZero(gauge)) {
-    data = data.map(column => Rnl.isRational(column[0])
-      ? column.map(e => Rnl.add(e, gauge))
-      : column
-    );
-  }
-  data = data.map(column => Rnl.isRational(column[0])
-    ? column.map(e => Rnl.multiply(e, factor))
-    : column
-  );
-  return data
-};
-
-const range = (map, keys) => {
-  let unit = clone(map.unit);
-  const [rowList, columnList, iStart, iEnd] = identifyRange(map, keys);
-  if (rowList.length === 0 && iStart === iEnd && columnList.length === 1) {
-    // Return one value.
-    const value = map.value.data[columnList[0]][iStart];
-    return { value, unit, dtype: map.dtype - dt.MAP }
-
-  } else if (columnList.length === 1) {
-    // Return data from one column, in a column vector or a quantity
-    const value = map.value.data[columnList[0]].slice(iStart, iEnd + 1);
-    const dtype = columnList[0] === 0
-      ? dt.COLUMNVECTOR + (typeof value[0] === "string" ? dt.STRING : map.dtype - dt.MAP)
-      : map.dtype - dt.MAP + dt.COLUMNVECTOR;
-    if (columnList[0] === -1) { unit = null; }
-    return { value, unit, dtype }
-
-  } else {
-    // Return a map.
-    const headings = [];
-    const data = [];
-    const columnMap = Object.create(null);
-    const rowMap = rowList.length === 0 ? false : Object.create(null);
-    for (let j = 0; j < columnList.length; j++) {
-      headings.push(map.value.headings[columnList[j]]);
-      columnMap[map.value.headings[j]] = j;
-      if (rowList.length > 0) {
-        const elements = [];
-        for (let i = 0; i < rowList.length; i++) {
-          const rowName = rowList[i];
-          elements.push(map.value.data[columnList[j]][map.value.rowMap[rowName]]);
-          rowMap[rowName] = i;
-        }
-        data.push(elements);
-      } else {
-        data.push(map.value.data[columnList[j]].slice(iStart, iEnd + 1));
-      }
-    }
-    return {
-      value: { data, headings, columnMap, rowMap },
-      unit,
-      dtype: map.dtype
-    }
-  }
-};
-
-const map = Object.freeze({
-  append,
-  convertFromBaseUnits,
-  convertToBaseUnits,
-  range
-});
-
-const endRegEx = /_end$/;
-const alphaRegEx = /^[A-Z]$/;
-const cellParts = /^([^\d]+)(\d+)?$/;
-const intRegEx = /^\d+$/;
-
-function propertyFromDotAccessor(parent, index, unitAware) {
-  const property = Object.create(null);
-  if (parent.dtype & dt.MAP) {
-    return map.range(parent, [index], unitAware)
-
-  } else if (parent.dtype & dt.DATAFRAME) {
-    return DataFrame.range(parent, [index], unitAware)
-
-  } else if (parent.dtype === dt.SPREADSHEET) {
-    let key = index.value;
-    if (endRegEx.test(key)) {
-      // Return the cell at the bottom of a column
-      key = key.slice(0, -4);
-      if (!alphaRegEx.test(key)) { key = parent.columnMap[key]; }
-      key = key + Object.keys(parent.rowMap).length;
-      return fromAssignment(parent.value[key], unitAware)
-    }
-    if (key in parent.columnMap || alphaRegEx.test(key)) {
-      // Return data from one column, in a column vector
-      const colIndex = alphaRegEx.test(key) ? key : parent.columnMap[key];
-      const v = [];
-      let unit = null;
-      // eslint-disable-next-line no-useless-assignment
-      let dtype = null;
-      if (parent.value[colIndex + "1"].dtype & dt.RATIONAL) {
-        for (let i = 1; i < parent.numRows; i++) {
-          const cell = parent.value[colIndex + i];
-          if (!(cell.dtype & dt.RATIONAL)) {
-            return errorOprnd("NANEL", cell.name)
-          }
-          if (unitAware) {
-            v.push(cell.value.inBaseUnits);
-          } else {
-            v.push(cell.value.plain);
-          }
-        }
-        unit = unitAware
-          ? parent.units[parent.unitMap[colIndex.codePointAt(0) - 65]]
-          : allZeros;
-        dtype = dt.RATIONAL + dt.COLUMNVECTOR;
-      } else {
-        for (let i = 1; i < parent.numRows; i++) {
-          v.push(parent.value[colIndex + i].value);
-        }
-        dtype = parent.value[colIndex + "1"].dtype + dt.COLUMNVECTOR;
-      }
-      return { value: v, unit, dtype }
-    } else {
-      const parts = key.match(cellParts);
-      const colIndex = parts[1];
-      if (parts[2]) {
-        return fromAssignment(parent.value[colIndex + parts[2]], unitAware)
-      } else {
-        return errorOprnd("BAD_SHT_KEY", key)
-      }
-    }
-
-  } else if ((parent.dtype === dt.STRING || (parent.dtype & dt.ARRAY)) &&
-    index.dtype === dt.RATIONAL) {
-    const indexVal = Rnl.toNumber(index.value);
-    property.value = parent.value.slice(indexVal - 1, indexVal);
-    property.unit = parent.unit;
-    property.dtype = parent.dtype;
-    return property
-
-  } else if ((parent.dtype === dt.STRING || (parent.dtype & dt.ARRAY)) &&
-        index.dtype === dt.RANGE) {
-    const start = index.value[0] - 1;
-    const step = index.value[1];
-    const end = (index.value[2] === "∞") ? parent.value.length : index.value[2];
-    property.unit = parent.unit;
-    property.dtype = parent.dtype;
-    if (step === 1) {
-      property.value = parent.value.slice(start, end);
-    } else {
-      property.value = [];
-      for (let j = start; j < end; j += step) {
-        property.value.push(parent.value[j]);
-      }
-    }
-    return property
-
-  } else if (parent.dtype === dt.MODULE) {
-    // parent is a module and index has a value assigned to it.
-    return fromAssignment(parent.value[index.value], unitAware)
-
-  } else {
-    return errorOprnd("NO_PROP", parent.name)
-  }
-}
-
-const cellOprnd = (sheet, args, unitAware) => {
-  if (args.length === 1) {
-    let key = args[0].value;
-    if (endRegEx.test(key)) {
-      key = key.slice(0, 1) + Object.keys(sheet.rowMap).length;
-    }
-    return fromAssignment(parent.value[key], unitAware)
-  }
-  let cellName = "";
-  const key0 = args[0].value;
-  const key1 = args[1].value;
-  if (sheet.columnMap[key0] || alphaRegEx.test(key0)) {
-    cellName = sheet.columnMap[key0] ? sheet.columnMap[key0] : key0;
-    if (sheet.rowMap[key1]) {
-      cellName += sheet.rowMap[key1];
-    } else if (intRegEx.test(key1)) {
-      cellName += key1;
-    } else ;
-  } else if (sheet.columnMap[key1]  || alphaRegEx.test(key0)) {
-    cellName = sheet.columnMap[key1] ? sheet.columnMap[key1] : key1;
-    if (sheet.rowMap[key0]) {
-      cellName += sheet.rowMap[key0];
-    } else if (intRegEx.test(key0)) {
-      cellName += key0;
-    } else ;
-  } else ;
-  return fromAssignment(sheet.value[cellName], unitAware)
-};
-
-const display = (tuple, formatSpec = "h3", decimalFormat = "1,000,000.") => {
-  if (tuple.size === 0) { return "" }
-  let str = "\\begin{array}{c}";
-
-  let haveUnits = false;
-  for (const attrs of tuple.values()) {
-    if (attrs.unit && attrs.unit.name) { haveUnits = true; break }
-  }
-
-  // Write the unit names
-  if (haveUnits) {
-    let rowTex = "";
-    for (const attrs of tuple.values()) {
-      if (attrs.unit && attrs.unit.name) {
-        rowTex += unitTeXFromString(attrs.unit.name).replace("\\;\\, ", "");
-      }
-      rowTex += "&";
-    }
-    str += rowTex.slice(0, -1) + " \\\\ ";
-    str += "\\hline ";
-  }
-
-  // Write the data
-  let botRow = "";
-  for (const attrs of tuple.values()) {
-    botRow += format(attrs.value, formatSpec, decimalFormat) + " & ";
-  }
-  str += botRow.slice(0, -1);
-  str += "\\end{array}";
-  return str
-};
-
-const displayAlt = (tuple, formatSpec = "h3") => {
-  if (tuple.size === 0) { return "" }
-  let str = "``";
-
-  let haveUnits = false;
-  for (const attrs of tuple.values()) {
-    if (attrs.unit && attrs.unit.name) { haveUnits = true; break }
-  }
-
-  // Write the unit names
-  if (haveUnits) {
-    let rowTex = "";
-    for (const attrs of tuple.values()) {
-      if (attrs.unit && attrs.unit.name) {
-        rowTex += attrs.unit.name;
-      }
-      rowTex += "\t";
-    }
-    str += rowTex.slice(0, -1) + "\n";
-  }
-
-  // Write the data
-  let botRow = "";
-  for (const attrs of tuple.values()) {
-    botRow += format(attrs.value, formatSpec, "100000.") + "\t";
-  }
-  str += botRow.slice(0, -1);
-  return str + "``"
-};
-
-const Tuple = Object.freeze({
-  display,
-  displayAlt
-});
-
-// A result has been sent here from evaluate.js or updateCalculations.js.
-// Format the result for display.
-
-const numMisMatchError = _ => {
-  const str = "Error. Mismatch in number of multiple assignment.";
-  return [`\\textcolor{firebrick}{\\text{${str}}}`, str]
-};
-const percentRegEx = / *\\⦂/;
-const times100 = n => Rnl.multiply(n, Rnl.fromNumber(100));
-const testRegEx$1 = /^@{1,2}test /;
-const compRegEx = /\u00a0([⩵≠><>≤≥∋∈∉∌⊂⊃⊄⊅]|==|in|!in|!=|=>|<=)$/;
-const negatedComp = {
-  "⩵": ["≠", "≠"],
-  "==": ["≠", "≠"],
-  "≠": ["==", "=="],
-  ">": ["\\ngtr ", "!>"],
-  "<": ["\\nless ", "!<"],
-  "≤": ["\\nleq ", "!≤"],
-  "≥": ["\\ngeq ", "!≥"],
-  "∋": ["∌", "∌"],
-  "∈": ["∉", "∉"],
-  "⊂": ["⊄", "⊄"],
-  "⊃": ["⊅", "⊅"],
-  "∉": ["∈", "∈"],
-  "∌": ["∋", "∋"],
-  "⊄": ["⊂", "⊂"],
-  "⊅": ["⊃", "⊃"],
-  "in": ["∉", "∉"],
-  "!in": ["in", "in"],
-  "!=": ["==", "=="],
-  "=>": ["\\ngeq ", "!≥"],
-  "<=": ["\\ngeq ", "!≥"]
-};
-
-const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAware) => {
-  if (!result) { return stmt }
-  const decimalFormat = formats.decimalFormat;
-
-  if (result.dtype === dt.DRAWING) {
-    stmt.resultdisplay = result.value;
-    delete stmt.resultdisplay.temp;
-    return stmt
-  }
-
-  const isPercent = (stmt.unit && stmt.unit.name && stmt.unit.name === "\\⦂");
-
-  const numNames = !stmt.name
-    ? 0
-    : !Array.isArray(stmt.name)
-    ? 1
-    : stmt.name.length;
-
-  if (stmt.resulttemplate.indexOf("?") > -1 ||
-      stmt.resulttemplate.indexOf("!") > -1 ||
-      stmt.resulttemplate.indexOf("@") > -1 ||
-      stmt.resulttemplate.indexOf("%") > -1) {
-    stmt.value = result.value;
-    /* eslint-disable no-useless-assignment */
-    let resultDisplay = "";
-    let altResultDisplay = "";
-    if (stmt.resulttemplate.indexOf("!") > -1) {
-      // Suppress display of the result
-      resultDisplay = "";
-      altResultDisplay = "";
-      /* eslint-enable no-useless-assignment */
-      return stmt
-
-    } else if (result.dtype & dt.BOOLEAN && testRegEx$1.test(stmt.entry) &&
-      compRegEx.test(stmt.rpn)) {
-      if (testValue(result) === true) {
-        resultDisplay = parse$1(stmt.entry.replace(testRegEx$1, "")) +
-          ",\\text{ ok }✓";
-        altResultDisplay = stmt.entry.replace(testRegEx$1, "") + ", ok ✓";
-      } else {
-        const op = compRegEx.exec(stmt.rpn)[0].slice(1);
-        const negOp = negatedComp[op];
-        if (assert) {
-          const assertStr = assert.value.replace(/\.$/, "");
-          const addendum = stmt.entry.replace(testRegEx$1, "").replace(op, negOp[0]);
-          resultDisplay = "\\colorbox{Salmon}{" + assertStr + ", but $" +
-              parse$1(addendum) + "$}";
-          altResultDisplay = assertStr + ", but " +
-              stmt.entry.replace(testRegEx$1, "").replace(op, negOp[1]);
-        } else {
-          resultDisplay = parse$1(stmt.entry.replace(testRegEx$1, "").replace(op, negOp[0])) +
-              ",\\colorbox{Salmon}{ n.g.}";
-          altResultDisplay = stmt.entry.replace(testRegEx$1, "").replace(op, negOp[1]) +
-              ", n.g.";
-        }
-        // eslint-disable-next-line no-console
-        console.log(altResultDisplay);
-      }
-
-    } else if (isMatrix(result)) {
-      resultDisplay = Matrix.display((isUnitAware || result.value.plain)
-          ? { value: result.value.plain, dtype: result.dtype }
-          : isPercent && isVector(result)
-          ? { value: result.value.map(e => times100(e)), dtype: result.dtype }
-          : isPercent
-          ? { value: result.value.map(row => row.map(e => times100(e))), dtype: result.dtype }
-          : result,
-        formatSpec,
-        decimalFormat
-      );
-      altResultDisplay = Matrix.displayAlt((isUnitAware || result.value.plain)
-          ? { value: result.value.plain, dtype: result.dtype }
-          : isPercent && isVector(result)
-          ? { value: result.value.map(e => times100(e)), dtype: result.dtype }
-          : isPercent
-          ? { value: result.value.map(row => row.map(e => times100(e))), dtype: result.dtype }
-          : result,
-        formatSpec,
-        decimalFormat
-      );
-      if (isPercent) {
-        resultDisplay += "\\%";
-        altResultDisplay += "%";
-      }
-
-    } else if (result.dtype === dt.DATAFRAME) {
-      if (numNames > 1 && numNames !== result.value.data.length) {
-        [resultDisplay, altResultDisplay] = numMisMatchError();
-      } else {
-        const omitHeading = stmt.name && Array.isArray(stmt.name) && stmt.name.length > 1;
-        resultDisplay = DataFrame.display(result.value, formatSpec,
-                                          decimalFormat, omitHeading);
-        altResultDisplay = DataFrame.displayAlt(result.value, formatSpec, omitHeading);
-      }
-
-    } else if (result.dtype & dt.MAP) {
-      let localValue;
-      if (isUnitAware || result.value.data.plain) {
-        localValue = clone(result.value);
-        localValue.data = result.value.data.plain;
-      } else {
-        localValue = result.value;
-      }
-      const omitHeading = stmt.name && Array.isArray(stmt.name) && stmt.name.length > 1;
-      resultDisplay = DataFrame.display(localValue, formatSpec, decimalFormat, omitHeading);
-      altResultDisplay = DataFrame.displayAlt(localValue, formatSpec,
-                                              decimalFormat, omitHeading);
-
-    } else if (result.dtype === dt.TUPLE) {
-      if (numNames > 1 && numNames !== result.value.size) {
-        [resultDisplay, altResultDisplay] = numMisMatchError();
-      } else {
-        resultDisplay = Tuple.display(result.value, formatSpec, decimalFormat);
-        altResultDisplay = Tuple.displayAlt(result.value, formatSpec);
-      }
-
-    } else if (result.dtype & dt.STRING) {
-      resultDisplay = "\\text{" + addTextEscapes(result.value) + "}";
-      if (result.unit) {
-        // This is a hack to return a color
-        resultDisplay = `\\textcolor{${result.unit}}{${resultDisplay}}`;
-      }
-      altResultDisplay = result.value;
-
-    } else if (result.dtype & dt.RICHTEXT) {
-      resultDisplay = parse$1(result.value, formats, false);
-      altResultDisplay = result.value;
-
-    } else if (result.dtype & dt.BOOLEAN) {
-      resultDisplay = "\\text{" + result.value + "}";
-      altResultDisplay = String(result.value);
-
-    } else if (result.dtype === dt.COMPLEX) {
-      const z = result.value;
-      [resultDisplay, altResultDisplay] = Cpx.display(z, formatSpec, decimalFormat);
-
-    } else if (result.dtype === dt.DATE) {
-      resultDisplay = formatDate(result.value, formats.dateFormat);
-      if (resultDisplay.dtype && resultDisplay.dtype === dt.ERROR) {
-        resultDisplay = "\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}";
-        altResultDisplay = resultDisplay.value;
-      } else {
-        altResultDisplay = resultDisplay.slice(26, -2);
-      }
-
-    } else if (result.value.plain) {
-      resultDisplay = format(result.value.plain, formatSpec, decimalFormat);
-      if (resultDisplay.dtype && resultDisplay.dtype === dt.ERROR) {
-        resultDisplay = "\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}";
-        altResultDisplay = resultDisplay.value;
-      } else {
-        altResultDisplay = resultDisplay.replace(/{,}/g, ",").replace(/\\/g, "");
-      }
-
-    } else if (Rnl.isRational(result.value)) {
-      resultDisplay = isPercent
-        ? format(times100(result.value), formatSpec, decimalFormat) + "\\%"
-        : format(result.value, formatSpec, decimalFormat);
-      if (resultDisplay.dtype && resultDisplay.dtype === dt.ERROR) {
-        resultDisplay = "\\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}";
-        altResultDisplay = resultDisplay.value;
-      } else {
-        altResultDisplay = resultDisplay.replace(/{,}/g, ",").replace(/\\/g, "");
-      }
-
-    } else if (result.dtype === dt.IMAGE) {
-      return stmt
-
-    } else {
-      resultDisplay = result.value;
-      altResultDisplay = resultDisplay;
-
-    }
-
-    // Write the string to be plugged into echos of dependent nodes
-    const resultCapture = /(\? *\??|@ *@?|%%?)/.exec(stmt.resulttemplate);
-    stmt.resultdisplay = stmt.resulttemplate.slice(0, resultCapture.index) + resultDisplay +
-      stmt.resulttemplate.slice(resultCapture.index + resultCapture[0].length);
-
-    // Write the TeX for this node
-    if (stmt.resulttemplate.indexOf("@") > -1) {
-      stmt.tex = stmt.resultdisplay;
-      stmt.displaySelector = stmt.altresulttemplate.indexOf("@@") > -1 ? "@@" : "@";
-      if (testRegEx$1.test(stmt.entry)) {
-        stmt.md = stmt.entry + ` 〔${altResultDisplay}〕`;
-      } else {
-        const pos = stmt.entry.lastIndexOf(stmt.displaySelector);
-        stmt.md = stmt.entry.slice(0, pos) + `〔${altResultDisplay}〕`
-            + stmt.entry.slice(pos + stmt.displaySelector.length);
-      }
-      stmt.alt = stmt.altresulttemplate.replace(/@@?/, altResultDisplay);
-    } else if (stmt.resulttemplate.indexOf("?") > -1) {
-      let pos = stmt.tex.lastIndexOf("?");
-      stmt.tex = stmt.tex.slice(0, pos).replace(/\? *$/, "") + resultDisplay + stmt.tex.slice(pos + 1);
-      stmt.displaySelector = stmt.altresulttemplate.indexOf("??") > -1 ? "??" : "?";
-      pos = stmt.alt.lastIndexOf(stmt.displaySelector);
-      stmt.md = stmt.alt.slice(0, pos) + `〔${altResultDisplay}〕`
-          + stmt.alt.slice(pos + stmt.displaySelector.length);
-      stmt.alt = stmt.alt.slice(0, pos) + altResultDisplay
-          + stmt.alt.slice(pos + stmt.displaySelector.length);
-    } else if (stmt.resulttemplate.indexOf("%") > -1) {
-      let pos = stmt.tex.lastIndexOf("%");
-      stmt.tex = stmt.tex.slice(0, pos).replace(/% *$/, "") + resultDisplay + stmt.tex.slice(pos + 1);
-      stmt.displaySelector = stmt.altresulttemplate.indexOf("%%") > -1 ? "%%" : "%";
-      pos = stmt.alt.lastIndexOf(stmt.displaySelector);
-      stmt.md = stmt.alt.slice(0, pos) + `〔${altResultDisplay}〕`
-          + stmt.alt.slice(pos + stmt.displaySelector.length);
-      stmt.alt = stmt.alt.slice(0, pos) + altResultDisplay
-          + stmt.alt.slice(pos + stmt.displaySelector.length);
-    }
-  }
-  stmt.tex = stmt.tex.replace(percentRegEx, "");
-  if (stmt.md) { stmt.md = stmt.md.replace(percentRegEx, ""); }
-  stmt.alt = stmt.alt.replace(percentRegEx, "");
-  return stmt
-};
-
-const testValue = oprnd => {
-  if (isVector(oprnd)) {
-    for (let i = 0; i < oprnd.value.length; i++) {
-      if (!oprnd.value[i]) { return false }
-    }
-  } else if (isMatrix(oprnd)) {
-    for (let i = 0; i < oprnd.value.length; i++) {
-      for (let j = 0; j < oprnd.value[0].length; j++) {
-        if (!oprnd.value[i][j]) { return false }
-      }
-    }
-  } else if (oprnd.dtype & dt.MAP) {
-    for (let j = 0; j < oprnd.value.data.length; j++) {
-      for (let i = 0; i < oprnd.value.data[0].length; i++) {
-        if (!oprnd.value.data[j][i]) { return false }
-      }
-    }
-  } else {
-    return oprnd.value
-  }
-  return true
-};
-
-/*
- *  This module receives a TeX template string and a object containing Hurmet variables.
- *  At each location where the template contains a variable, this module plugs in a TeX string
- *  of the variable's value, for display in the Hurmet blue echo..
- */
-
-const varRegEx = /〖[^〗]*〗/;
-const openParenRegEx$1 = /(?:[([{|‖]|[^\\][,;:](?:\\:)?)$/;
-const placeHolderRegEx = /^\\colorbox{aqua}{\$/;
-
-const plugValsIntoEcho = (str, vars, unitAware, formatSpec, formats) => {
-  // For each variable name in the echo string, substitute a value.
-  // The parser surrounded those names with 〖〗 delimiters.
-  let match;
-  while ((match = varRegEx.exec(str)) !== null) {
-    const varName = match[0].replace(/[〖〗()]/g, "").trim().replace(/'/g, "′");
-    const matchLength = match[0].length;
-    const pos = match.index;
-    let hvar;
-    // eslint-disable-next-line no-useless-assignment
-    let display = "";
-
-    if (varName.indexOf(".") > -1) {
-      // Object with a dot accessor.
-      const names = varName.split(".");
-      const parentName = names[0];
-      if (!vars[parentName]) { return errorOprnd("V_NAME", parentName) }
-      hvar = vars[parentName];
-      if (hvar.dtype === dt.DATAFRAME && names.length === 2) {
-        // This is a dataframe.dict. I don't want to write an entire dictionary into
-        // a blue echo, so display just the names.
-        display = "\\mathrm{" + vars[names[0]].name + "{.}\\mathrm{" + names[1] + "}";
-        return str.substring(0, pos) + display + str.substring(pos + matchLength)
-      } else {
-        // we want to display the property value.
-        for (let i = 1; i < names.length; i++) {
-          const propName = names[i].replace("}", "").replace("\\mathrm{", "").trim();
-          const indexOprnd = { value: propName, unit: null, dtype: dt.STRING };
-          hvar = propertyFromDotAccessor(hvar, indexOprnd, vars);
-          if (!hvar) { return errorOprnd("V_NAME", propName) }
-          const stmt = { resulttemplate: "@", altresulttemplate: "@" };
-          hvar.resultdisplay = formatResult(stmt, hvar, formatSpec, null,
-                formats).resultdisplay;
-        }
-      }
-    } else if (!vars[varName] && varName === "T") {
-      // Transposed matrix
-      hvar = { dtype: dt.RATIONAL, resultdisplay: "\\text{T}" };
-    } else if (varName === "e" && /^\^/.test(str.slice(pos + 3).trim())) {
-      // e^x
-      str = str.substring(0, pos) + "e" + str.substring(pos + matchLength);
-      continue
-    } else if (varName === "j") {
-      // √(-1)
-      str = str.substring(0, pos) + "j" + str.substring(pos + matchLength);
-      continue
-    } else if (!vars[varName]) {
-      return errorOprnd("V_NAME", varName)
-    } else {
-      // Get a clone in order to avoid mutating the inner properties of vars.
-      hvar = {
-        dtype: vars[varName].dtype,
-        resultdisplay: vars[varName].resultdisplay
-      };
-      if (placeHolderRegEx.test(hvar.resultdisplay)) {
-        // Remove colorbox and $ delimiters
-        hvar.resultdisplay = hvar.resultdisplay.slice(17, -2).trim();
-      }
-    }
-
-    if (!hvar || !hvar.resultdisplay) {
-      const insert = (varName) ? varName : "?";
-      return errorOprnd("NULL", insert)
-    } else if (hvar.error) {
-      return errorOprnd("NULL", varName)
-    }
-
-    let needsParens = true; // default
-    if (isMatrix(hvar) || (hvar.dtype & dt.DATAFRAME)) { needsParens = false; }
-    if (unitAware && (hvar.dtype & dt.QUANTITY)) { needsParens = true; }
-
-    let isParened = false; // Is the match already nested inside parens?
-    if (pos > 0) {
-      const pStr = str.slice(0, pos).trim();
-      if (openParenRegEx$1.test(pStr)) {
-        const fStr = str.slice(pos + varName.length + 2).trim();
-        isParened = fStr.length > 0 && /^([)|‖\]},;:]|\\right)/.test(fStr);
-      } else if (/^\\begin{[bp]matrix}/.test(hvar.resultdisplay)) {
-        isParened = /\\end{[bp]matrix}$/.test(hvar.resultdisplay);
-      }
-    }
-    needsParens = needsParens && !isParened;
-
-    if (hvar.dtype === dt.DATAFRAME || (hvar.dtype & dt.MAP)
-        || hvar.resultdisplay.slice(0, 1) === "!") {
-      display = "\\mathrm{" + parse$1(vars[varName].name) + "}";
-    } else {
-      display = hvar.resultdisplay;
-      if (!unitAware) {
-        const posUnit = display.lastIndexOf("{\\text{");
-        if (posUnit > -1) {
-          display = display.slice(0, posUnit).trim()
-                            .replace(/\\; *$/, "").trim();
-        }
-      }
-      if (needsParens) {
-        display = hvar.dtype > 256 ? "\\left(" + display + "\\right)" : "(" + display + ")";
-      }
-    }
-    str = str.substring(0, pos) + display + str.substring(pos + matchLength);
-  }
-  return str
-};
-
-const negativeOne = Object.freeze(Rnl.negate(Rnl.one));
-const oneHalf = [BigInt(1), BigInt(2)];
-const thirty = [BigInt(30), BigInt(1)];
-const fortyFive = [BigInt(45), BigInt(1)];
-const sixty = [BigInt(60), BigInt(1)];
-const ninety = [BigInt(90), BigInt(1)];
-const halfPi = Object.freeze(Rnl.divide(Rnl.pi, Rnl.two));
-
-const functionExpos = (functionName, args) => {
-  const numArgs = args.length;
-
-  const expos = numArgs === 1 ? args[0].unit.expos : null;
-
-  switch (functionName) {
-    case "abs":
-    case "round":
-    case "roundn":
-    case "sign":
-    case "trace":
-    case "fetch":
-      return expos
-
-    case "cos":
-    case "sin":
-    case "tan":
-    case "sec":
-    case "csc":
-    case "cot":
-    case "acos":
-    case "arccos":
-    case "asin":
-    case "arcsin":
-    case "atan":
-    case "arctan":
-    case "asec":
-    case "arcsec":
-    case "acsc":
-    case "arccsc":
-    case "acot":
-    case "arccot":
-    case "cosd":
-    case "sind":
-    case "tand":
-    case "secd":
-    case "cscd":
-    case "cotd":
-    case "acosd":
-    case "asind":
-    case "atand":
-    case "asecd":
-    case "acscd":
-    case "acotd":
-    case "gud":
-      if (!unitsAreCompatible(expos, allZeros)) {
-        return errorOprnd("UNIT_IN", functionName)
-      }
-      return allZeros
-
-    case "exp":
-    case "log":
-    case "ln":
-    case "log10":
-    case "log2":
-    case "logn":
-    case "cosh":
-    case "sinh":
-    case "tanh":
-    case "sech":
-    case "csch":
-    case "coth":
-    case "acosh":
-    case "asinh":
-    case "atanh":
-    case "asech":
-    case "acsch":
-    case "acoth":
-    case "binomial":
-    case "gamma":
-    case "Γ":
-    case "lgamma":
-    case "lfact":
-    case "factorial":
-      if (!unitsAreCompatible(expos, allZeros)) {
-        return errorOprnd("UNIT_IN", functionName)
-      }
-      return allZeros
-
-    case "sqrt":
-      return expos.map(e => e / 2)
-
-    case "gcd":
-    case "mht":
-      if (!unitsAreCompatible(expos, allZeros)) {
-        return errorOprnd("UNIT_IN", functionName)
-      }
-      return functionName === "hmt" ? [1, 0, 0, 0, 0, 0, 0, 0] : allZeros
-
-    case "atan2":
-    case "hypot":
-    case "rms":
-    case "ceil":
-    case "floor":
-    case "sum":
-    case "mean":
-    case "median":
-    case "min":
-    case "max":
-    case "range":
-    case "stddev":
-    case "variance": {
-      const x = args[0].unit.expos;
-      for (let i = 1; i < args.length; i++) {
-        const y = args[i].unit.expos;
-        if (x.length !== y.length) { return errorOprnd("UNIT_ARG", functionName) }
-        for (let j = 0; j < x.length; j++) {
-          if (x[j] !== y[j]) { return errorOprnd("UNIT_ARG", functionName) }
-        }
-      }
-      return functionName === "atan2" ? allZeros : x
-    }
-
-    case "real":
-    case "imag":
-    case "angle":
-    case "conj":
-      return allZeros
-
-    case "product": {
-      const expos = clone(args[0].unit.expos);
-      for (let i = 1; i < args.length; i++) {
-        const p = args[i].unit.expos;
-        expos.map((e, j) => e + p[j]);
-      }
-      return expos
-    }
-
-    default:
-      return errorOprnd("F_NAME", functionName)
-  }
-};
-
-const gamma = x => {
-  if (Rnl.isZero(x)) {
-    return errorOprnd("Γ0")
-  } else if (Rnl.isPositive(x) && Rnl.isInteger(x) && Rnl.lessThan(x, Rnl.fromNumber(101))) {
-    return Rnl.factorial(Rnl.subtract(x, Rnl.one))
-  } else if (Rnl.isNegative(x) && Rnl.isInteger(x)) {
-    return errorOprnd("ΓPOLE")
-  } else if (Rnl.lessThan(x, oneHalf)) {
-    // reflection formula
-    return Rnl.fromNumber(Math.PI / (Math.sin(Math.PI * Rnl.toNumber(x)))
-      * Rnl.toNumber(gamma(Rnl.subtract(Rnl.one, x))))
-  } else {
-    return Rnl.lanczos(x)
-  }
-};
-
-const lgamma = r => {
-  // Returns natural logarithm of the Gamma function.
-  // Ref: https://www.johndcook.com/blog/2010/08/16/how-to-compute-log-factorial/
-  if (Rnl.isZero(r)) { return errorOprnd("Γ0") }
-  if (Rnl.isNegative(r)) { return errorOprnd("LOGΓ") }
-  if (Rnl.areEqual(r, Rnl.one) || Rnl.areEqual(r, Rnl.two)) { return Rnl.zero }
-  if (Rnl.lessThanOrEqualTo(r, Rnl.fromNumber(14))) {
-    return Rnl.fromNumber(Math.log(Rnl.toNumber(gamma(r))))
-  } else {
-    const x = Rnl.toNumber(r);
-    // eslint-disable-next-line max-len
-    const y = (x - 0.5) * Math.log(x) - x + 0.5 * Math.log(2 * Math.PI) + 1 / (12 * x) - 1 / (360 * x ** 3) + 1 / (1260 * x ** 5) - 1 / (1680 * x ** 7) + 5 / (540 * x ** 9);
-    //  Error bounded by: -691/(360360 * x^11), 16 significant digits
-    return Rnl.fromNumber(y)
-  }
-};
-
-const binomial = (n, k) => {
-  // (n \atop k) = n! / (k! (n - k)!)
-  //             = exp(log!(n) - [log!(k) + log!(n - k)])
-  if (Rnl.areEqual(n, k)) { return Rnl.one }
-  if (Rnl.isZero(n)) { return Rnl.zero }
-  if (Rnl.isNegative(k)) { return Rnl.zero }
-  if (Rnl.lessThan(n, k)) { return Rnl.zero }
-
-  if (Rnl.isInteger(n) && Rnl.isInteger(k) && Rnl.isPositive(n) && Rnl.isPositive(k)) {
-    // positive integers
-//    if (Rnl.lessThan(n, twenty)) {
-    return Rnl.divide(Rnl.factorial(n),
-      Rnl.multiply(Rnl.factorial(k), Rnl.factorial(Rnl.subtract(n, k))))
-//    } else {
-//      return Rnl.fromNumber(Math.round(Math.exp(Rnl.toNumber(
-//        Rnl.subtract(lfact(n),
-//          Rnl.add(lfact(k), lfact(Rnl.subtract(n, k))))))))
-//    }
-
-  } else if (Rnl.isInteger(n) && Rnl.isInteger(k) && Rnl.isPositive(k)) {
-    // negative integer n
-    // (-n \atop k) = (-1)^k * multiset(n, k)
-    return Rnl.multiply(Rnl.power(negativeOne, k), multiset(Rnl.negate(n), k))
-
-  } else {
-    // generalized for real or complex arguments
-    // (x \atop y) = Γ(x+1) / ( Γ(y+1) Γ(x-y+1) )
-    return Rnl.divide(
-      gamma(Rnl.increment(n)),
-      Rnl.multiply(gamma(Rnl.increment(k)), gamma(Rnl.increment(Rnl.subtract(n, k))))
-    )
-
-  }
-};
-
-const multiset = (n, k) => {
-  // ((n \atop k)) = ((n+k-1) \atop k)
-  // multiset(n, k) = binomial(n+k-1, k)
-  return binomial(Rnl.add(n, Rnl.decrement(k)), k)
-};
-
-const piOver180 = Rnl.divide(Rnl.pi, [BigInt(180), BigInt(1)]);
-
-const unary$1 = {
-  scalar: {
-    // Functions that take one real argument.
-    abs(x)  { return Rnl.abs(x) },
-    angle(x) { return errorOprnd("NA_REAL", "angle") },
-    real(x)   { return errorOprnd("NA_REAL", "real") },
-    imag(x)   { return errorOprnd("NA_REAL", "imag") },
-    conj(x)   { return errorOprnd("NA_REAL", "conj") },
-    cos(x)  { return Rnl.cos(x) },
-    sin(x)  { return Rnl.sin(x) },
-    tan(x)  { return Rnl.tan(x) },
-    cosh(x) { return Rnl.cosh(x) },
-    sinh(x) { return Rnl.sinh(x) },
-    tanh(x) { return Rnl.tanh(x) },
-    acos(x) {
-      if (Rnl.greaterThan(Rnl.abs(x), Rnl.one)) { return errorOprnd("ATRIG", "acos") }
-      return Rnl.fromNumber(Math.acos(Rnl.toNumber(x)))
-    },
-    asin(x) {
-      if (Rnl.greaterThan(Rnl.abs(x), Rnl.one)) { return errorOprnd("ATRIG", "asin") }
-      return Rnl.fromNumber(Math.asin(Rnl.toNumber(x)))
-    },
-    atan(x) {
-      return Rnl.fromNumber(Math.atan(Rnl.toNumber(x)))
-    },
-    sec(x) {
-      return Rnl.fromNumber(1 / Math.cos(Rnl.toNumber(x)))
-    },
-    csc(x) {
-      return Rnl.fromNumber(1 / Math.sin(Rnl.toNumber(x)))
-    },
-    cot(x) {
-      if (Rnl.isZero(x)) { return errorOprnd("COT", "cotangent") }
-      return  Rnl.fromNumber(1 / Math.tan(Rnl.toNumber(x)))
-    },
-    asec(x) {
-      if (Rnl.greaterThanOrEqualTo(Rnl.abs(x), Rnl.one)) {
-        return errorOprnd("ASEC", "arcecant")
-      }
-      const temp = Math.atn(Math.sqrt(Rnl.toNumber(Rnl.decrement(Rnl.multiply(x, x)))));
-      return  (Rnl.isPositive(x))
-        ? Rnl.fromNumber(temp)
-        : Rnl.fromNumber(temp - Math.PI)
-    },
-    acot(x) {
-      if (Rnl.greaterThanOrEqualTo(Rnl.abs(x), Rnl.one)) {
-        return errorOprnd("ASEC", "acot")
-      }
-      const temp = Math.atn(1 / (Math.sqrt(Rnl.toNumber(Rnl.decrement(Rnl.multiply(x, x))))));
-      return (Rnl.isPositive(x))
-        ? Rnl.fromNumber(temp)
-        : Rnl.fromNumber(temp - Math.PI)
-    },
-    acsc(x) {
-      return Rnl.fromNumber(Math.atn(-Rnl.toNumber(x)) + Math.PI)
-    },
-    exp(x) {
-      return Rnl.exp(x)
-    },
-    log(x) {
-      return Rnl.isZero(x) ? errorOprnd("LOG_ZERO") : Rnl.fromNumber(Math.log(Rnl.toNumber(x)))
-    },
-    ln(x) {
-      return Rnl.isZero(x) ? errorOprnd("LOG_ZERO") : Rnl.fromNumber(Math.log(Rnl.toNumber(x)))
-    },
-    log10(x) {
-      return Rnl.isZero(x)
-        ? errorOprnd("LOG_ZERO")
-        : Rnl.fromNumber(Math.log10(Rnl.toNumber(x)))
-    },
-    log2(x) {
-      return Rnl.isZero(x)
-        ? errorOprnd("LOG_ZERO")
-        : Rnl.fromNumber(Math.log2(Rnl.toNumber(x)))
-    },
-    sech(x) {
-      // sech(n) = 2 / (eⁿ + e⁻ⁿ)
-      const num = Rnl.toNumber(x);
-      return Rnl.fromNumber(2 / (Math.exp(num) + Math.exp(-num)))
-    },
-    csch(x) {
-      // csch(n) = 2 / (eⁿ - e⁻ⁿ)
-      const num = Rnl.toNumber(x);
-      return Rnl.fromNumber(2 / (Math.exp(num) - Math.exp(-num)))
-    },
-    coth(x) {
-      // coth(n) = (eⁿ + e⁻ⁿ) / (eⁿ - e⁻ⁿ)
-      const num = Rnl.toNumber(x);
-      return Rnl.fromNumber(
-        (Math.exp(num) + Math.exp(-num)) / (Math.exp(num) - Math.exp(-num))
-      )
-    },
-    acosh(x) {
-      // acosh(x) = log( x + sqrt(x - 1) × sqrt(x + 1) )
-      const num = Rnl.toNumber(x);
-      return Rnl.fromNumber(Math.log( num + Math.sqrt(num - 1) * Math.sqrt(num + 1) ))
-    },
-    asinh(x) {
-      // asinh(x) = log(x + sqrt(x² + 1))
-      const num = Rnl.toNumber(x);
-      return Rnl.fromNumber(Math.log(num + Math.sqrt(Math.pow(num, 2) + 1)))
-    },
-    atanh(x) {
-      // atanh(x) = [ log(1+x) - log(1-x) ] / 2
-      const num = Rnl.toNumber(x);
-      return Rnl.fromNumber((Math.log(1 + num) - Math.log(1 - num) ) / 2)
-    },
-    asech(x) {
-      // asech(x) = log( [sqrt(-x * x + 1) + 1] / x )
-      if (Rnl.isZero(x)) { return errorOprnd("DIV") }
-      const num = Rnl.toNumber(x);
-      return Rnl.fromNumber(Math.log((Math.sqrt(-num * num + 1) + 1) / num))
-    },
-    ascsh(x) {
-      // acsch(x) = log( sqrt(1 + 1/x²) + 1/x )
-      if (Rnl.isZero(x)) { return errorOprnd("DIV") }
-      const num = Rnl.toNumber(x);
-      return Rnl.fromNumber(Math.log(Math.sqrt(1 + 1 / Math.pow(num, 2)) + 1 / num))
-    },
-    acoth(x) {
-      // acoth(x) = [ log(1 + 1/x) - log(1 - 1/x) ] / 2
-      if (Rnl.isZero(x)) { return errorOprnd("DIV") }
-      const num = Rnl.toNumber(x);
-      return Rnl.fromNumber((Math.log(1 + 1 / num) - Math.log(1 - 1 / num)) / 2)
-    },
-    ceil(x) {
-      return Rnl.ceil(x)
-    },
-    floor(x) {
-      return Rnl.floor(x)
-    },
-    gamma(x) {
-      return gamma(x)
-    },
-    Γ(x) {
-      return gamma(x)
-    },
-    lgamma(x) {
-      if (Rnl.isNegative(x) || Rnl.isZero(x)) { return errorOprnd("LOGΓ") }
-      return lgamma(x)
-    },
-    lfact(x) {
-      if (Rnl.isNegative(x) || !Rnl.isInteger(x)) { return errorOprnd("FACT") }
-      return lgamma(Rnl.add(x, Rnl.one))
-    },
-    factorial(x) {
-      return Rnl.factorial(x)
-    },
-    sign(x) {
-      return Rnl.isPositive(x) ? Rnl.one : Rnl.isZero(x) ? Rnl.zero : negativeOne
-    },
-    cosd(x) {
-      if (Rnl.areEqual(x, ninety)) { return Rnl.zero }
-      if (Rnl.areEqual(x, sixty)) { return oneHalf }
-      return this.cos(Rnl.multiply(x, piOver180))
-    },
-    sind(x) {
-      if (Rnl.areEqual(x, thirty)) { return oneHalf }
-      return this.sin(Rnl.multiply(x, piOver180))
-    },
-    tand(x) {
-      if (Rnl.areEqual(x, fortyFive)) { return Rnl.one }
-      if (Rnl.areEqual(x, ninety)) { return errorOprnd("TAN90", "90°") }
-      return this.tan(Rnl.multiply(x, piOver180))
-    },
-    cotd(x) {
-      return this.cot(Rnl.multiply(x, piOver180))
-    },
-    cscd(x) {
-      return this.csc(Rnl.multiply(x, piOver180))
-    },
-    secd(x) {
-      return this.sec(Rnl.multiply(x, piOver180))
-    },
-    acosd(x) {
-      const y = this.acos(x);
-      return y.dtype ? y : Rnl.divide(y, piOver180)
-    },
-    asind(x) {
-      const y = this.asin(x);
-      return y.dtype ? y : Rnl.divide(y, piOver180)
-    },
-    atand(x) {
-      return Rnl.divide(this.atan(x), piOver180)
-    },
-    acotd(x) {
-      const y = this.acot(x);
-      return y.dtype ? y : Rnl.divide(y, piOver180)
-    },
-    acscd(x) {
-      const y = this.acsc(x);
-      return y.dtype ? y : Rnl.divide(y, piOver180)
-    },
-    asecd(x) {
-      const y = this.asec(x);
-      return y.dtype ? y : Rnl.divide(y, piOver180)
-    },
-    Char(x) {
-      return String.fromCodePoint(Rnl.toNumber(x))
-    },
-    sqrt(x) {
-      const y = [BigInt(1), BigInt(2)];
-      return Cpx.isComplex(x) || (Rnl.isNegative(x))
-          ? Cpx.power([x, Rnl.zero], y)
-          : Rnl.power(x, y)
-    },
-    round(x) {
-      return Rnl.fromString(Rnl.toString(x, 0))
-    }
-  },
-  complex: {
-    // Functions that take one complex argument.
-    abs(z)   { return Cpx.abs(z) },
-    angle(z) { return Cpx.angle(z) },
-    real(z)  { return z[0] },
-    imag(z)  { return z[1] },
-    conj(z)  { return Cpx.conjugate(z) },
-    cos(z)   { return Cpx.cos(z) },
-    sin(z)   { return Cpx.sin(z) },
-    asin(z)  { return Cpx.asin(z) },
-    atan(z)  { return Cpx.atan(z) },
-    acos(z)  { return Cpx.subtract([halfPi, Rnl.zero], Cpx.asin(z))}, // π/2 - arcsin(z)
-    tan(z)   { return Cpx.divide(Cpx.sin(z), Cpx.cos(z)) },
-    cot(z)   { return Cpx.divide(Cpx.cos(z), Cpx.sin(z)) },
-    sec(z) {
-      const c = Cpx.cos(z);
-      return c.dtype ? c : Cpx.inverse(c)
-    },
-    csc(z) {
-      const s = Cpx.sin(z);
-      return s.dtype ? s : Cpx.inverse(s)
-    },
-    asec(z) {
-      // acos(inverse(z))
-      const inv = Cpx.inverse(z);
-      return Cpx.subtract([halfPi, Rnl.zero], Cpx.asin(inv))
-    },
-    acot(z) { return Cpx.atan(Cpx.inverse(z)) },
-    acsc(z) {
-      return Cpx.asin(Cpx.inverse(z))
-    },
-    exp(z) {
-      return Cpx.exp(z)
-    },
-    log(z) {
-      return Cpx.log(z)
-    },
-    ln(z) {
-      return Cpx.log(z)
-    },
-    log10(z) {
-      return Rnl.fromNumber(Math.log10(Rnl.toNumber(z)))
-    },
-    log2(z) {
-      return Rnl.fromNumber(Math.log2(Rnl.toNumber(z)))
-    },
-    cosh(z) {
-      // cosh(z) = (eᶻ + e⁻ᶻ) / 2
-      return Cpx.divide(Cpx.add(Cpx.exp(z), Cpx.exp(Cpx.negate(z))), [Rnl.two, Rnl.zero])
-    },
-    sinh(z) {
-      // sinh(z) = (eᶻ - e⁻ᶻ) / 2
-      return Cpx.divide(Cpx.subtract(Cpx.exp(z), Cpx.exp(Cpx.negate(z))), [Rnl.two, Rnl.zero])
-    },
-    tanh(z) {
-      // tanh(z) = (eᶻ - e⁻ᶻ) / (eᶻ + e⁻ᶻ)
-      const ez = Cpx.exp(z);
-      const eMinuxZ = Cpx.exp(Cpx.negate(z));
-      return Cpx.divide(Cpx.subtract(ez, eMinuxZ), Cpx.add(ez, eMinuxZ))
-    },
-    sech(z) {
-      // sech(z) = 2 / (eᶻ + e⁻ᶻ)
-      return Cpx.divide([Rnl.two, Rnl.zero], Cpx.add(Cpx.exp(z), Cpx.exp(Cpx.negate(z))))
-    },
-    csch(z) {
-      // csch(z) = 2 / (eᶻ - e⁻ᶻ)
-      return Cpx.divide([Rnl.two, Rnl.zero], Cpx.subtract(Cpx.exp(z), Cpx.exp(Cpx.negate(z))))
-    },
-    coth(z) {
-      // coth(z) = (eᶻ + e⁻ᶻ) / (eᶻ - e⁻ᶻ)
-      const ez = Cpx.exp(z);
-      const eMinuxZ = Cpx.exp(Cpx.negate(z));
-      return Cpx.divide(Cpx.add(ez, eMinuxZ), Cpx.subtract(ez, eMinuxZ))
-    },
-    acosh(z) {
-      return Cpx.acosh(z)
-    },
-    asinh(z) {
-      return Cpx.asinh(z)
-    },
-    atanh(z) {
-      return Cpx.atanh(z)
-    },
-    asech(z) {
-      return Cpx.acosh(Cpx.inverse(z))
-    },
-    acsch(z) {
-      return Cpx.asinh(Cpx.inverse(z))
-    },
-    acoth(z) {
-      return Cpx.atanh(Cpx.inverse(z))
-    },
-    ceil(z) {
-      return errorOprnd("NA_COMPL_OP", "ceil")
-    },
-    floor(z) {
-      return errorOprnd("NA_COMPL_OP", "ceil")
-    },
-    gamma(z) {
-      return Cpx.gamma(z)
-    },
-    Γ(z) {
-      return Cpx.gamma(z)
-    },
-    lgamma(z) {
-      // TODO: complex log of gamma()
-      return errorOprnd("NA_COMPL_OP", "lgamma")
-    },
-    factorial(z) {
-      return errorOprnd("NA_COMPL_OP", "factorial")
-    },
-    sign(z) {
-      if (Rnl.isZero(z[1]) && Rnl.isPositive(z[0])) {
-        return Rnl.one
-      } else if (Rnl.isZero(z[1]) && Rnl.isNegative(z[0])) {
-        return Rnl.negate(Rnl.one)
-      } else {
-        return Cpx.divide(z, [Cpx.abs(z), Rnl.zero])
-      }
-    },
-    round(z) {
-      // TODO: complex round function
-      return errorOprnd("NA_COMPL_OP", "round")
-    }
-  }
-};
-
-const binary$1 = {
-  logn([n, x]) {
-    return Rnl.fromNumber(Math.log(Rnl.toNumber(x)) / Math.log(Rnl.toNumber(n)))
-  },
-  roundFixed([x, n]) {
-    return Rnl.fromString(Rnl.toString(x, n))
-  },
-  roundSignificant([x, n]) {
-    return Rnl.fromString(Rnl.toStringSignificant(x, n))
-  },
-  stringFixed([x, n]) {
-    return Rnl.toString(x, n)
-  },
-  stringSignificant([x, n]) {
-    return Rnl.toStringSignificant(x, n)
-  },
-  atan2([x, y]) {
-    return Rnl.fromNumber(Math.atan2(Rnl.toNumber(y), Rnl.toNumber(x)))
-  },
-  hypot([x, y]) {
-    // sqrt(x^2 + y^2)
-    // https://www.johndcook.com/blog/2010/06/02/whats-so-hard-about-finding-a-hypotenuse/
-    const max = Rnl.max(x, y);
-    const r = Rnl.divide(Rnl.min(x, y), max);
-    return Rnl.multiply(max, Rnl.sqrt(Rnl.increment(Rnl.multiply(r, r))))
-  },
-  gcd([m, n]) {
-    return Rnl.gcd(m, n)
-  },
-  rms([x, y]) {
-    return this.hypot(x, y)
-  },
-  binomial([x, y]) {
-    return binomial(x, y)
-  },
-  ones([m, n]) {
-    return Matrix.ones(Rnl.toNumber(m), Rnl.toNumber(n))
-  },
-  zeros([m, n]) {
-    return Matrix.zeros(Rnl.toNumber(m), Rnl.toNumber(n))
-  },
-  mod([x, y]) {
-    return Rnl.mod(x, y)
-  },
-  rem([x, y]) {
-    return Rnl.rem(x, y)
-  }
-};
-
-const reduce = {
-  max(list) {
-    return list.reduce((max, e) => Rnl.max(max, e))
-  },
-  min(list) {
-    return list.reduce((min, e) => Rnl.min(min, e))
-  },
-  sum(list) {
-    return list.reduce((sum, e) => Rnl.add(sum, e))
-  },
-  product(list) {
-    return list.reduce((sum, e) => Rnl.multiply(sum, e))
-  },
-  mean(list) {
-    const sum = this.sum(list);
-    return Rnl.divide(sum, Rnl.fromNumber(list.length))
-  },
-  median(list) {
-    const max = this.max(list);
-    const min = this.min(list);
-    return Rnl.divide(Rnl.add(max, min), Rnl.two)
-  },
-  range(list) {
-    return Rnl.subtract(this.max(list), this.min(list))
-  },
-  variance(list) {
-    const sum = this.sum(list);
-    const mean = Rnl.divide(sum, Rnl.fromNumber(list.length));
-    const num = list.reduce((num, e) => Rnl.add(num, Rnl.pow(Rnl.subtract(e, mean), Rnl.two)));
-    return Rnl.divide(num, Rnl.subtract(Rnl.fromNumber(list.length), Rnl.one))
-  },
-  stddev(list) {
-    const variance = this.variance(list);
-    return Rnl.power(variance, oneHalf)
-  },
-  accumulate(list) {
-    const v = new Array(list.length).fill(0);
-    v[0] = list[0];
-    for (let i = 1; i < list.length; i++) {
-      v[i] = Rnl.add(v[i - 1], list[i]);
-    }
-    return v
-  }
-};
-
-const lerp = (args, unitAware) => {
-  // linear interpolation
-  for (let i = 0; i < 3; i++) {
-    if (!(args[i].dtype & dt.RATIONAL)) { return errorOprnd("") }
-  }
-  let expos = allZeros;
-  if (unitAware) {
-    if (args[0].expos !== args[1].expos) { return errorOprnd("") }
-    if (args[1].expos !== args[2].expos) { return errorOprnd("") }
-    expos = args[0].expos;
-  }
-  const output = Object.create(null);
-  output.unit = Object.create(null);
-  output.unit.expos = expos;
-  output.dtype = dt.RATIONAL;
-
-  const v0 = args[0].value;  // a vector
-  const v1 = args[1].value;  // another vector
-  const x = args[2].value;   // the input value
-  // TODO: Use binary search
-  for (let i = 0; i < v0.length - 1; i++) {
-    if (Rnl.lessThanOrEqualTo(v0[i], x) & Rnl.lessThanOrEqualTo(x, v0[i + 1])) {
-      const slope = Rnl.divide((Rnl.subtract(v1[i + 1], v1[i])),
-        (Rnl.subtract(v0[i + 1], v0[i])));
-      output.value = Rnl.add(v1[i], Rnl.multiply(slope, (Rnl.subtract(x, v0[i]))));
-      return Object.freeze(output)
-    }
-  }
-};
-
-const Functions = Object.freeze({
-  functionExpos,
-  unary: unary$1,
-  binary: binary$1,
-  reduce,
-  lerp
-});
-
-const multivarFunction = (arity, functionName, args) => {
-  // Deal with a function that may have multiple arguments.
-
-  if (args.length === 1) {
-    const list = isVector(args[0])
-      ? args[0].value
-      : (args.dtype & dt.MATRIX)
-      // TODO: fix the next line.
-      ? args[0].value.flat()
-      : args[0].value;
-
-    const value = Functions[arity][functionName](list);
-
-    let dtype = args[0].dtype;
-    if (arity === "reduce" && functionName !== "accumulate") {
-      // Mask off any matrix or vector indicator from the dtype
-      if (dtype & dt.MATRIX) { dtype -= dt.MATRIX; }
-      if (dtype & dt.ROWVECTOR) { dtype -= dt.ROWVECTOR; }
-      if (dtype & dt.COLUMNVECTOR) { dtype -= dt.COLUMNVECTOR; }
-    }
-
-    return [value, dtype]
-
-  } else if (functionName === "sum" && args.length === 2 && isMatrix(args[0])
-    && args[1].dtype === dt.RATIONAL) {
-    if (Rnl.areEqual(args[1].value, Rnl.two)) {
-      const dtype = dt.COLUMNVECTOR + dt.RATIONAL;
-      const result = args[0].value.map(row => row.reduce((sum, e) => Rnl.add(sum, e)));
-      return [ result, dtype ]
-    } else if (Rnl.areEqual(args[1].value, Rnl.one)) {
-      const dtype = dt.ROWVECTOR + dt.RATIONAL;
-      const result = Matrix.transpose(args[0]).value.map(
-        row => row.reduce((sum, e) => Rnl.add(sum, e))
-      );
-      return [ result, dtype ]
-    } else {
-      return [errorOprnd("BAD_SUM"), dt.ERROR]
-    }
-  } else {
-    // We have multiple arguments.
-    // Is one of them a vector or a matrix?
-    // eslint-disable-next-line no-useless-assignment
-    let iArg = 0;
-    let gotVector = false;
-    let gotMatrix = false;
-    let dtype = args[0].dtype;
-
-    for (iArg = 0; iArg < args.length; iArg++) {
-      if (isVector(args[iArg])) {
-        gotVector = true;
-        dtype = args[iArg].dtype;
-        break
-      } else if (isMatrix(args[iArg])) {
-        gotMatrix = true;
-        dtype = args[iArg].dtype;
-        break
-      }
-    }
-    const list = args.map(e => e.value);
-    if (!(gotVector || gotMatrix)) {
-      const result = Functions[arity][functionName](list);
-      return functionName === "zeros" || functionName === "ones"
-        ? [result.value, result.dtype]
-        : [result, args[0].dtype]
-
-    } else {
-      const result = [];
-      if (gotVector) {
-        const listClone = clone(list);
-        for (let i = 0; i < list[iArg].length; i++) {
-          listClone[iArg] = list[iArg][i];
-          result.push(Functions[arity][functionName](listClone));
-        }
-      } else {
-        const listClone = clone(list);
-        for (let i = 0; i < list[iArg].length; i++) {
-          result.push([]);
-          for (let j = 0; j < list[iArg][0].length; j++) {
-            listClone[iArg] = list[iArg][i][j];
-            result[i].push(Functions[arity][functionName](listClone));
-          }
-        }
-      }
-      return [ result, dtype ]
-    }
-  }
-};
-
-// compare.js
-
-const equals = (x, y) => {
-  if (Rnl.isRational(x) && Rnl.isRational(y)) {
-    return Rnl.areEqual(x, y)
-  } else {
-    return x === y
-  }
-};
-
-const compare = (op, x, y, yPrev) => {
-  // If yPrev is defined, then this is part of a chained comparison, e.g.: a < b < c
-  if (x === false && yPrev) { return false }  // The chain is false if any part is false.
-  if (x === true && yPrev) { x = yPrev; }  // Compare this link in the chain.
-
-  switch (op) {
-    case "=":
-      return errorOprnd("BAD_EQ")
-
-    case "==":
-    case "⩵":
-      return equals(x, y)
-
-    case "≠":
-    case "!=":
-    case "/=":
-      if (Rnl.isRational(x) && Rnl.isRational(y)) {
-        return !Rnl.areEqual(x, y)
-      } else {
-        return x !== y
-      }
-
-    case ">":
-      if (Rnl.isRational(x) && Rnl.isRational(y)) {
-        return Rnl.greaterThan(x, y)
-      } else {
-        return x > y
-      }
-
-    case "<":
-      if (Rnl.isRational(x) && Rnl.isRational(y)) {
-        return Rnl.lessThan(x, y)
-      } else {
-        return x < y
-      }
-
-    case "≥":
-    case ">=":
-      if (Rnl.isRational(x) && Rnl.isRational(y)) {
-        return Rnl.greaterThanOrEqualTo(x, y)
-      } else {
-        return x >= y
-      }
-
-    case "≤":
-    case "<=":
-      if (Rnl.isRational(x) && Rnl.isRational(y)) {
-        return Rnl.lessThanOrEqualTo(x, y)
-      } else {
-        return x <= y
-      }
-
-    case "∈":
-    case "in":
-      if (typeof x === "string" && typeof y === "string") {
-        if (Array.from(x).length > 1) { return false }
-        return y.indexOf(x) > -1
-      } else if (Array.isArray(y) && Rnl.isRational(y[0]) && Rnl.isRational(x)) {
-        for (let i = 0; i < y.length; i++) {
-          if (Rnl.areEqual(x, y[i])) { return true }
-        }
-        return false
-      } else if (Array.isArray(y) && !Array.isArray(x)) {
-        for (let i = 0; i < y.length; i++) {
-          if (equals(x, y[i])) { return true }
-        }
-        return false
-      } else if (y instanceof Map) {
-        return y.has(x)
-      } else if (typeof x === "string" && typeof y === "object" &&
-                 Object.hasOwnProperty.call(y, "headings")) {
-        // Is x a property of dataframe y?
-        return Boolean(y.headings.includes(x) ||
-                      (y.rowMap && Object.hasOwnProperty.call(y.rowMap, x)))
-      } else {
-        return errorOprnd("NOT_ARRAY")
-      }
-
-    case "∋":
-      if (typeof x === "string" && typeof y === "string") {
-        if (Array.from(x).length > 1) { return false }
-        return y.indexOf(x) > -1
-      } else if (x instanceof Map) {
-        return x.has(y)
-      } else if (typeof x === "object" && typeof y === "string" &&
-                  Object.hasOwnProperty.call(x, "headings")) {
-        // Is y a property of dataframe x?
-        return Boolean(x.headings.includes(y) ||
-                      (x.rowMap && Object.hasOwnProperty.call(x.rowMap, y)))
-      } else {
-        return errorOprnd("NO_PROP", x.name)
-      }
-
-    case "⊃":
-      if (typeof x === "string" && typeof y === "string") {
-        return x.indexOf(y) > -1
-      } else if (Array.isArray(x) && Array.isArray(y)) {
-        for (let i = 0; i < x.length; i++) {
-          // We test for a contiguous subset
-          if (equals(y[0], x[i])) {
-            if (i + y.length > x.length) { return false }
-            for (let j = 1; j < y.length; j++) {
-              if (!equals(y[j], x[i + j])) { return false }
-            }
-            return true
-          }
-        }
-        return false
-      } else {
-        return errorOprnd("NOT_ARRAY")
-      }
-
-    case "∉":
-    case "!in":
-      if (typeof x === "string" && typeof y === "string") {
-        if (Array.from(x).length === 1) { return false }
-        return y.indexOf(x) === -1
-      } else if (Array.isArray(y) && Rnl.isRational(y[0]) && Rnl.isRational(x)) {
-        for (let i = 0; i < y.length; i++) {
-          if (Rnl.areEqual(x, y[i])) { return false }
-        }
-        return true
-      } else if (Array.isArray(y)) {
-        for (let i = 0; i < y.length; i++) {
-          if (x === y[i]) { return false }
-        }
-        return true
-      } else if (y instanceof Map) {
-        return !y.has(x)
-      } else if (typeof x === "string" && typeof y === "object" &&
-                 Object.hasOwnProperty.call(y, "headings")) {
-        // Is x a property of dataframe x?
-        return !(y.headings.includes(x) ||
-                (y.rowMap && Object.hasOwnProperty.call(y.rowMap, x)))
-      } else {
-        return errorOprnd("NOT_ARRAY")
-      }
-
-    case "∌":
-      if (typeof x === "string" && typeof y === "string") {
-        if (Array.from(y).length === 1) { return false }
-        return x.indexOf(y) === -1
-      } else if (x instanceof Map) {
-        return !x.has(y)
-      } else if (typeof x === "object" && typeof y === "string" &&
-                  Object.hasOwnProperty.call(x, "headings")) {
-        // Is y a property of dataframe x?
-        return !(x.headings.includes(y) ||
-                (x.rowMap && Object.hasOwnProperty.call(x.rowMap, y)))
-      } else {
-        return errorOprnd("NO_PROP", x.name)
-      }
-
-    case "⊄":
-      if (typeof x === "string" && typeof y === "string") {
-        return y.indexOf(x) === -1
-      } else if (Array.isArray(x) && Array.isArray(y)) {
-        // We test for a contiguous subset
-        for (let i = 0; i < y.length; i++) {
-          if (equals(x[0], y[i])) {
-            if (i + x.length > y.length) { continue }
-            let provisional = true;
-            for (let j = 1; j < x.length; j++) {
-              if (!equals(x[j], y[i + j])) {
-                provisional = false;
-                continue
-              }
-            }
-            if (!provisional) { continue }
-            return true
-          }
-        }
-        return false
-      } else {
-        return errorOprnd("NOT_ARRAY")
-      }
-
-    case "⊅":
-      if (typeof x === "string" && typeof y === "string") {
-        return x.indexOf(y) === -1
-      } else if (Array.isArray(x) && Array.isArray(y)) {
-        // We test for a contiguous subset
-        for (let i = 0; i < x.length; i++) {
-          if (equals(y[0], x[i])) {
-            if (i + y.length > x.length) { continue }
-            let provisional = true;
-            for (let j = 1; j < y.length; j++) {
-              if (!equals(y[j], x[i + j])) {
-                provisional = false;
-                continue
-              }
-            }
-            if (!provisional) { continue }
-            return true
-          }
-        }
-        return false
-      } else {
-        return errorOprnd("NOT_ARRAY")
-      }
-  }
-};
-
-// Hurmet math operators are overloaded to handle operands of various shapes.
-// Those shapes being scalars, vectors, matrices, and maps.
-// This file implements the overloading.
-
-// Some helper functions
-const dotProduct$1 = (a, b) => {
-  return a.map((e, j) => Rnl.multiply(e, b[j])).reduce((m, n) => Rnl.add(m, n))
-};
-const sumOfSquares = vector => {
-  return vector.map((e) => Rnl.multiply(e, e)).reduce((m, n) => Rnl.add(m, n))
-};
-const oneTenth = [BigInt(1), BigInt(100)];
-
-// From the object below, calculations.js will call operators using statements
-// that look like this:
-// resultValue = Operations.unary[shape][operator](inputValue)
-
-const unary = {
-  scalar: {
-    abs(x)       { return Rnl.abs(x) },
-    norm(x)      { return Rnl.abs(x) },
-    negate(x)    { return Rnl.negate(x) },
-    exp(x)       { return Rnl.exp(x) },
-    floor(x)     { return Rnl.floor(x) },
-    ceil(x)      { return Rnl.ceil(x) },
-    percent(x)   { return Rnl.multiply(oneTenth, x) },
-    factorial(x) { return Rnl.factorial(x) },
-    doubleFactorial(x) { return Rnl.doubleFactorial(x) },
-    not(x)       { return !x }
-  },
-
-  complex: {
-    abs(z)       { return Cpx.abs(z) },
-    norm(z)      { return Cpx.abs(z) },
-    conjugate(z) { return Cpx.conjugate(z) },
-    negate(z)    { return Cpx.negate(z) },
-    exp(z)       { return Cpx.exp(z) },
-    floor(z)     { return errorOprnd("NA_COMPL_OP", "floor") },
-    ceil(z)      { return errorOprnd("NA_COMPL_OP", "ceil") },
-    percent(z)   { return errorOprnd("NA_COMPL_OP", "percent") },
-    factorial(z) { return errorOprnd("NA_COMPL_OP", "factorial") },
-    doubleFactorial(z) { return errorOprnd("NA_COMPL_OP", "factorial") },
-    not(z)       { return errorOprnd("NA_COMPL_OP", "not") }
-  },
-
-  vector: {
-    abs(v)       { return Rnl.sqrt(sumOfSquares(v)) },   // magnitude of a vector
-    norm(v)      { return Rnl.sqrt(sumOfSquares(v)) },   // ditto
-    negate(v)    { return v.map(e => Rnl.negate(e)) },
-    exp(v)       { return v.map(e => Rnl.exp(e)) },
-    floor(v)     { return v.map(e => Rnl.floor(e)) },
-    ceil(v)      { return v.map(e => Rnl.ceil(e)) },
-    percent(v)   { return v.map(e => Rnl.multiply(oneTenth, e)) },
-    factorial(v) { return v.map(e => Rnl.factorial(e)) },
-    doubleFactorial(v) { return v.map(e => Rnl.doubleFactorial(e)) },
-    not(v)       { return v.map(e => !e) }
-  },
-
-  matrix: {
-    abs(m) { return Matrix.invert(m, true) },
-    norm(m) {
-      if (m.length === m[0].length) {
-        let sum = Rnl.zero;
-        for (let i = 0; i < m.length; i++) {
-          sum = Rnl.add(sum, sumOfSquares(m[i]));
-        }
-        return Rnl.sqrt(sum)
-      }
-    },
-    negate(m)    { return m.map(row => row.map(e => Rnl.negate(e))) },
-    exp(m)       { return m.map(row => row.map(e => Rnl.exp(e))) },
-    floor(m)     { return m.map(row => row.map(e => Rnl.floor(e))) },
-    ceil(m)      { return m.map(row => row.map(e => Rnl.ceil(e))) },
-    percent(m)   { return m.map(row => row.map(e => Rnl.multiply(oneTenth, e))) },
-    factorial(m) { return m.map(row => row.map(e => Rnl.factorial(e))) },
-    doubleFactorial(m) { return m.map(row => row.map(e => Rnl.doubleFactorial(e))) },
-    not(m)       { return m.map(row => row.map(e => !e)) }
-  },
-
-  map: {
-    abs(map) {
-      map.data = map.data.map(column => Rnl.isRational(column[0])
-      ? column.map(e => Rnl.abs(e))
-      : column
-    );
-      return map
-    },
-    negate(map) {
-      map.data = map.data.map(column => Rnl.isRational(column[0])
-      ? column.map(e => Rnl.negate(e))
-      : column
-    );
-      return map
-    },
-    exp(map) {
-      map.data = map.data.map(column => Rnl.isRational(column[0])
-        ? column.map(e => Rnl.exp(e))
-        : column
-      );
-      return map
-    },
-    floor(map) {
-      map.data = map.data.map(column => Rnl.isRational(column[0])
-        ? column.map(e => Rnl.floor(e))
-        : column
-      );
-      return map
-    },
-    ceil(map) {
-      map.data = map.data.map(column => Rnl.isRational(column[0])
-        ? column.map(e => Rnl.ceil(e))
-        : column);
-      return map
-    },
-    percent(map) {
-      map.data = map.data.map(column => Rnl.isRational(column[0])
-        ? column.map(e => Rnl.multiply(oneTenth, e))
-        : column
-      );
-      return map
-    },
-    factorial(map) {
-      map.data = map.data.map(column => Rnl.isRational(column[0])
-        ? column.map(e => Rnl.factorial(e))
-        : column
-      );
-      return map
-    },
-    doubleFactorial(map) {
-      map.data = map.data.map(column => Rnl.isRational(column[0])
-        ? column.map(e => Rnl.doubleFactorial(e))
-        : column
-      );
-      return map
-    },
-    not(map) {
-      map.data = map.data.map(column => typeof column[0] === "boolean"
-       ? column.map(e => !e)
-       : column
-      );
-      return map
-    }
-  }
-};
-
-const condition = {
-  // Deal with booleans. Return a single value, true or false.
-  // If a vector or matrix is received, all elements must be
-  // true in order to return a true. Otherwise return a false.
-  scalar(x) { return x },
-  vector(v) { return v.reduce((prev, curr) => prev && curr, true) },
-  matrix(m) {
-    const row = new Array(m.length);
-    for (let i = 0; i < m.length; i++) {
-      row[i] = m[i].reduce((prev, curr) => prev && curr, true);
-    }
-    return row.reduce((prev, curr) => prev && curr, true)
-  }
-};
-
-const dtype = {
-  // Given the shapes which are operands to a binary operator,
-  // return the resulting data type.
-  scalar: {
-    scalar(t0, t1, tkn)     {
-      if (t0 === dt.DATE || t1 === dt.DATE) {
-        return t0 === t1 ? dt.RATIONAL : dt.DATE
-      }
-      return (tkn === "&" || tkn === "hcat" || tkn === "vcat")
-        ? t0 + ((tkn === "&" || tkn === "hcat") ? dt.ROWVECTOR : dt.COLUMNVECTOR )
-        : t0
-    },
-    complex(t0, t1, tkn)    { return t1 },
-    vector(t0, t1, tkn)     { return t1 },
-    matrix(t0, t1, tkn)     { return t1 },
-    dataFrame(t0, t1, tkn)  { return t1 },
-    map(t0, t1, tkn)        { return t1 }
-  },
-  complex: {
-    scalar(t0, t1, tkn)  { return t0 },
-    complex(t0, t1, tkn) { return t0 }
-  },
-  vector: {
-    scalar(t0, t1, tkn) { return t0 },
-    map(t0, t1, tkn)    { return t1 + (t0 & dt.ROWVECTOR) + (t0 & dt.COLUMNVECTOR) }
-  },
-  rowVector: {
-    rowVector(t0, t1, tkn) { return tkn === "vcat" ? t0 - dt.ROWVECTOR + dt.MATRIX : t0 },
-    columnVector(t0, t1, tkn) { return t0 },
-    matrix(t0, t1, tkn) { return tkn === "multiply" ? t0 : t1 }
-  },
-  columnVector: {
-    rowVector(t0, t1, op) {
-      return op === "dot"
-      ? dt.RATIONAL
-      : op === "cross"
-      ? t0
-      : t0 - dt.COLUMNVECTOR + dt.MATRIX
-    },
-    columnVector(t0, t1, tkn) {
-      return tkn === "&" || tkn === "hcat"
-        ? t0 - dt.COLUMNVECTOR + dt.MATRIX
-        : t0
-    },
-    matrix(t0, t1, tkn) { return t1 }
-  },
-  matrix: {
-    scalar(t0, t1, tkn) { return t0 },
-    rowVector(t0, t1, tkn) { return t0 },
-    columnVector(t0, t1, tkn) { return tkn === "*" || tkn === "⌧" ? t1 : t0 },
-    matrix(t0, t1, tkn) { return t0 },
-    map(t0, t1, tkn)    { return 0 }
-  },
-  dataFrame: {
-    scalar(t0, t1, tkn) { return t0 }
-  },
-  map: {
-    scalar(t0, t1, tkn) { return t0 },
-    vector(t0, t1, tkn) { return t0 },
-    matrix(t0, t1, tkn) { return 0 },
-    map(t0, t1, tkn)    { return t0 }
-  }
-};
-
-
-// The binary operators below are called like this:
-// resultValue = Operations.binary[shape_0][shape_1][operator](input_0, input_1)
-
-const binary = {
-  scalar: {
-    scalar: {
-      // Binary operations on two scalars
-      add(x, y)      { return Rnl.add(x, y) },
-      subtract(x, y) { return Rnl.subtract(x, y) },
-      multiply(x, y) { return Rnl.multiply(x, y) },
-      divide(x, y)   { return Rnl.divide(x, y) },
-      power(x, y)    {
-        // eslint-disable-next-line max-len
-        return Cpx.isComplex(x) || (Rnl.isNegative(x) && Rnl.isPositive(y) && Rnl.lessThan(y, Rnl.one))
-          ? Cpx.power([x, Rnl.zero], y)
-          : Rnl.power(x, y)
-      },
-      modulo(x, y)   { return Rnl.mod(x, y) },
-      hypot(x, y)    { return Rnl.hypot(x, y) },
-      rem(x, y)      { return Rnl.rem(x, y) },
-      and(x, y)      { return x && y },
-      or(x, y)       { return x || y },
-      xor(x, y)      { return x !== y },
-      concat(x, y)   { return [x, y] },
-      unshift(x, y)  { return [x, y] }
-    },
-    complex: {
-      add(x, z)      { return [Rnl.add(x, z[0]), z[1]] },
-      subtract(x, z) { return [Rnl.subtract(x, z[0]), Rnl.negate(z[1])] },
-      multiply(x, z) { return [Rnl.multiply(x, z[0]), Rnl.multiply(x, z[1])] },
-      divide(x, z)   { return Cpx.divide([x, Rnl.zero], z) },
-      power(x, z)    { return Cpx.power([x, Rnl.zero], z) },
-      rem(x, z)      { return errorOprnd("NA_COMPL_OP", "rem") },
-      and(x, z)      { return errorOprnd("NA_COMPL_OP", "and") },
-      or(x, z)       { return errorOprnd("NA_COMPL_OP", "or") },
-      xor(x, z)      { return errorOprnd("NA_COMPL_OP", "xor") }
-    },
-    vector: {
-      // Binary operations with a scalar and a vector.
-      // Perform element-wise operations.
-      add(x, v)      { return v.map(e => Rnl.add(x, e)) },
-      subtract(x, v) { return v.map(e => Rnl.subtract(x, e)) },
-      multiply(x, v) { return v.map(e => Rnl.multiply(x, e)) },
-      divide(x, v)   { return v.map(e => Rnl.divide(x, e)) },
-      power(x, v)    { return v.map(e => Rnl.power(x, e)) },
-      modulo(x, v)   { return v.map(e => Rnl.mod(x, e)) },
-      rem(x, v)      { return v.map(e => Rnl.rem(x, e)) },
-      and(x, v)      { return v.map(e => x && e) },
-      or(x, v)       { return v.map(e => x || e) },
-      xor(x, v)      { return v.map(e => x !== e) },
-      concat(x, v)   { return [x, ...v] }
-    },
-    matrix: {
-      // Binary operations with a scalar and a matrix.
-      // Perform element-wise operations.
-      add(x, m)      { return m.map(row => row.map(e => Rnl.add(x, e))) },
-      subtract(x, m) { return m.map(row => row.map(e => Rnl.subtract(x, e))) },
-      multiply(x, m) { return m.map(row => row.map(e => Rnl.multiply(x, e))) },
-      divide(x, m)   { return m.map(row => row.map(e => Rnl.divide(x, e))) },
-      power(x, m)    { return m.map(row => row.map(e => Rnl.power(x, e))) },
-      modulo(x, m)   { return m.map(row => row.map(e => Rnl.mod(x, e))) },
-      rem(x, m)      { return m.map(row => row.map(e => Rnl.rem(x, e))) },
-      and(x, m)      { return m.map(row => row.map(e => x && e)) },
-      or(x, m)       { return m.map(row => row.map(e => x || e)) },
-      xor(x, m)      { return m.map(row => row.map(e => x !== e)) },
-      concat(x, m)   { return errorOprnd("BAD_CONCAT") }
-    },
-    dataFrame: {
-      multiply(x, df) {
-        df.data = df.data.map(col => isNaN(col[0]) ? col : col.map(e => {
-          let L = e.length;
-          if (e.indexOf(".")) { L -= 1; }
-          return Rnl.toStringSignificant(Rnl.multiply(x, Rnl.fromString(e)), L)
-        }));
-        return df
-      },
-      divide(x, df) {
-        df.data = df.data.map(col => isNaN(col[0]) ? col : col.map(e => {
-          let L = e.length;
-          if (e.indexOf(".")) { L -= 1; }
-          return Rnl.toStringSignificant(Rnl.divide(x, Rnl.fromString(e)), L)
-        }));
-        return df
-      }
-    },
-    map: {
-      // Binary operations with a scalar and a map.
-      // Perform element-wise operations.
-      add(scalar, map) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map(e => Rnl.add(scalar, e))
-          : col
-        );
-        return map
-      },
-      subtract(scalar, map) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map(e => Rnl.subtract(scalar, e))
-          : col
-        );
-        return map
-      },
-      multiply(scalar, map) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map(e => Rnl.multiply(scalar, e))
-          : col
-        );
-        return map
-      },
-      divide(scalar, map) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map(e => Rnl.divide(scalar, e))
-          : col
-        );
-        return map
-      },
-      power(scalar, map) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map(e => Rnl.power(scalar, e))
-          : col
-        );
-        return map
-      },
-      modulo(scalar, map) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map(e => Rnl.mod(scalar, e))
-          : col
-        );
-        return map
-      },
-      rem(scalar, map) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map(e => Rnl.rem(scalar, e))
-          : col
-        );
-        return map
-      },
-      and(scalar, map) {
-        map.data =  map.data.map(col => typeof col[0] === "boolean"
-          ? col.map(e => scalar && e)
-          : col
-        );
-        return map
-      },
-      or(scalar, map) {
-        map.data =  map.data.map(col => typeof col[0] === "boolean"
-          ? col.map(e => scalar || e)
-          : col
-        );
-        return map
-      },
-      xor(scalar, map) {
-        map.data =  map.data.map(col =>  typeof col[0] === "boolean"
-          ? col.map(e => scalar !== e)
-          : col
-        );
-        return map
-      }
-    }
-  },
-
-  complex: {
-    scalar: {
-      add(z, y)      { return [Rnl.add(z[0], y), z[1]] },
-      subtract(z, y) { return [Rnl.subtract(z[0], y), z[1]] },
-      multiply(z, y) { return [Rnl.multiply(z[0], y), Rnl.multiply(z[1], y) ] },
-      divide(z, y)   { return Cpx.divide(z, [y, Rnl.zero]) },
-      power(z, y)    { return Cpx.power(z, [y, Rnl.zero]) },
-      rem(z, y)      { return errorOprnd("NA_COMPL_OP", "rem") },
-      and(z, y)      { return errorOprnd("NA_COMPL_OP", "and") },
-      or(z, y)       { return errorOprnd("NA_COMPL_OP", "or") },
-      xor(z, y)      { return errorOprnd("NA_COMPL_OP", "xor") }
-    },
-    complex: {
-      add(x, y)      { return [Rnl.add(x[0], y[0]), Rnl.add(x[1], y[1])] },
-      subtract(x, y) { return [Rnl.subtract(x[0], y[0]), Rnl.subtract(x[1], y[1])] },
-      multiply(x, y) { return Cpx.multiply(x, y) },
-      divide(x, y)   { return Cpx.divide(x, y) },
-      power(x, y)    { return Cpx.power(x, y) },
-      rem(x, y)      { return errorOprnd("NA_COMPL_OP", "rem") },
-      and(x, y)      { return errorOprnd("NA_COMPL_OP", "and") },
-      or(x, y)       { return errorOprnd("NA_COMPL_OP", "or") },
-      xor(x, y)      { return errorOprnd("NA_COMPL_OP", "xor") }
-
-    }
-  },
-
-  vector: {
-    scalar: {
-      // Binary operations with a vector and a scalar.
-      // Perform element-wise operations.
-      add(v, x)      { return v.map(e => Rnl.add(e, x)) },
-      subtract(v, x) { return v.map(e => Rnl.subtract(e, x)) },
-      multiply(v, x) { return v.map(e => Rnl.multiply(e, x)) },
-      divide(v, x)   { return v.map(e => Rnl.divide(e, x)) },
-      power(v, x)    { return v.map(e => Rnl.power(e, x)) },
-      modulo(v, x)   { return v.map(e => Rnl.mod(e, x)) },
-      rem(v, x)      { return v.map(e => Rnl.rem(e, x)) },
-      and(v, x)      { return v.map(e => e && x) },
-      or(v, x)       { return v.map(e => e || x) },
-      xor(v, x)      { return v.map(e => e !== x) },
-      concat(v, x)   { return [...v, x]}
-    }
-  },
-
-  rowVector: {
-    rowVector: {
-      // Binary operations on two row vectors.
-      add(x, y) {
-        // element-wise addition
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((e, i) => Rnl.add(e, y[i]))
-      },
-      subtract(x, y) {
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((e, i) => Rnl.subtract(e, y[i]))
-      },
-      divide(x, y) {
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((e, i) => Rnl.divide(e, y[i]))
-      },
-      dot(x, y) {
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return dotProduct$1(x, y)
-      },
-      cross(x, y) {
-        if (x.length !== 3 || y.length !== 3) { return errorOprnd("CROSS") }
-        const v = [Rnl.zero, Rnl.zero, Rnl.zero];
-        v[0] = Rnl.subtract(Rnl.multiply(x[1], y[2]), Rnl.multiply(x[2], y[1]));
-        v[1] = Rnl.subtract(Rnl.multiply(x[2], y[0]), Rnl.multiply(x[0], y[2]));
-        v[2] = Rnl.subtract(Rnl.multiply(x[0], y[1]), Rnl.multiply(x[1], y[0]));
-        return v
-      },
-      multiply(x, y) {
-        if (x.length === 1 && y.length === 1) { return [Rnl.multiply(x[0], y[0])] }
-        return errorOprnd("MIS_ELNUM")
-      },
-      circ(x, y) {
-        // Element-wise multiplication
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((e, i) => Rnl.multiply(e, y[i]))
-      },
-      power(x, y) {
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((e, i) => Rnl.power(e, y[i]))
-      },
-      modulo(x, y) {
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((e, i) => Rnl.mod(e, y[i]))
-      },
-      and(x, y) {
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((e, i) => e && y[i])
-      },
-      or(x, y) {
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((e, i) => e || y[i])
-      },
-      xor(x, y) {
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((e, i) => e !== y[i])
-      },
-      concat(x, y) { return x.concat(y) },
-      unshift(x, y) { return [x, y] }
-    },
-    columnVector: {
-      // Binary operations on a row vector and a column vector.
-      // Except for multiplication, these work only if both vectors have only one element.
-      add(x, y) {
-        if (x.length === 1 && y.length === 1) { return [Rnl.add(x[0], y[0])] }
-        return errorOprnd("MIS_ELNUM")
-      },
-      subtract(x, y) {
-        if (x.length === 1 && y.length === 1) { return [Rnl.subtract(x[0], y[0])] }
-        return errorOprnd("MIS_ELNUM")
-      },
-      dot(x, y) {
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return dotProduct$1(x, y)
-      },
-      cross(x, y) {
-        if (x.length !== 3 || y.length !== 3) { return errorOprnd("CROSS") }
-        const v = [Rnl.zero, Rnl.zero, Rnl.zero];
-        v[0] = Rnl.subtract(Rnl.multiply(x[1], y[2]), Rnl.multiply(x[2], y[1]));
-        v[1] = Rnl.subtract(Rnl.multiply(x[2], y[0]), Rnl.multiply(x[0], y[2]));
-        v[2] = Rnl.subtract(Rnl.multiply(x[0], y[1]), Rnl.multiply(x[1], y[0]));
-        return v
-      },
-      multiply(x, y) {
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return dotProduct$1(x, y)
-      },
-      circ(x, y) {
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((e, i) => Rnl.multiply(e, y[i]))
-      },
-      power(x, y) {
-        if (x.length === 1 && y.length === 1) { return [Rnl.power(x[0], y[0])] }
-        return errorOprnd("MIS_ELNUM")
-      },
-      modulo(x, y) {
-        if (x.length === 1 && y.length === 1) { return [Rnl.mod(x[0], y[0])] }
-        return errorOprnd("MIS_ELNUM")
-      },
-      and(x, y) {
-        if (x.length === 1 && y.length === 1) { return [x[0] && y[0]] }
-        return errorOprnd("MIS_ELNUM")
-      },
-      or(x, y) {
-        if (x.length === 1 && y.length === 1) { return [x[0] || y[0]] }
-        return errorOprnd("MIS_ELNUM")
-      },
-      xor(x, y) {
-        if (x.length === 1 && y.length === 1) { return [x[0] !== y[0]] }
-        return errorOprnd("MIS_ELNUM")
-      },
-      concat(x, y)  { return "BAD_CONCAT" },
-      unshift(x, y) { return "BAD_CONCAT" }
-    },
-    matrix: {
-      // Binary operations on a row vector and a 2-D matrix.
-      add(v, m) {
-        // Add the row vector to each row in the matrix
-        if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
-        return m.map(row => row.map((e, i) => Rnl.add(v[i], e)))
-      },
-      subtract(v, m) {
-        if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
-        return m.map(row => row.map((e, i) => Rnl.subtract(v[i], e)))
-      },
-      multiply(v, m) {
-        if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
-        m = m[0].map((x, i) => m.map(y => y[i])); // Transpose m
-        return m.map(row => dotProduct$1(v, row))
-      },
-      circ(v, m) {
-        if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
-        return m.map(row => row.map((e, i) => Rnl.multiply(v[i], e)))
-      },
-      divide(v, m) {
-        if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
-        return m.map(row => row.map((e, i) => Rnl.divide(v[i], e)))
-      },
-      power(v, m) {
-        if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
-        return m.map(row => row.map((e, i) => Rnl.power(v[i], e)))
-      },
-      modulo(v, m) {
-        if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
-        return m.map(row => row.map((e, i) => Rnl.mod(v[i], e)))
-      },
-      concat(v, m) {
-        if (v.length !== m[0].length) { return errorOprnd("BAD_CONCAT") }
-        return m.map((row, i) => [v[i], ...row])
-      },
-      unshift(v, m) {
-        if (v.length !== m[0].length) { return errorOprnd("BAD_CONCAT") }
-        return [v, ...m]
-      }
-    }
-  },
-
-  columnVector: {
-    rowVector: {
-      // Binary operations on a column vector and a row vector.
-      // Except for multiplication, these work only if both vectors have only one element.
-      add(x, y) {
-        if (x.length === 1 && y.length === 1) { return [Rnl.add(x[0], y[0])] }
-        return errorOprnd("MIS_ELNUM")
-      },
-      subtract(x, y) {
-        if (x.length === 1 && y.length === 1) { return [Rnl.subtract(x[0], y[0])] }
-        return errorOprnd("MIS_ELNUM")
-      },
-      dot(x, y) {
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return dotProduct$1(x, y)
-      },
-      cross(x, y) {
-        if (x.length !== 3 || y.length !== 3) { return errorOprnd("CROSS") }
-        const v = [Rnl.zero, Rnl.zero, Rnl.zero];
-        v[0] = Rnl.subtract(Rnl.multiply(x[1], y[2]), Rnl.multiply(x[2], y[1]));
-        v[1] = Rnl.subtract(Rnl.multiply(x[2], y[0]), Rnl.multiply(x[0], y[2]));
-        v[2] = Rnl.subtract(Rnl.multiply(x[0], y[1]), Rnl.multiply(x[1], y[0]));
-        return v
-      },
-      multiply(x, y) {
-        if (x[0].length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map(row => y.map(e => Rnl.multiply(row, e)))
-      },
-      divide(x, y) {
-        return x.map(m => y.map(e => Rnl.divide(m, e)))
-      },
-      circ(x, y) {
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((e, i) => Rnl.multiply(e, y[i]))
-      },
-      power(x, y) {
-        if (x.length === 1 && y.length === 1) { return [Rnl.power(x[0], y[0])] }
-        return errorOprnd("MIS_ELNUM")
-      },
-      modulo(x, y) {
-        if (x.length === 1 && y.length === 1) { return [Rnl.mod(x[0], y[0])] }
-        return errorOprnd("MIS_ELNUM")
-      },
-      and(x, y) {
-        if (x.length === 1 && y.length === 1) { return [x[0] && y[0]] }
-        return errorOprnd("MIS_ELNUM")
-      },
-      or(x, y) {
-        if (x.length === 1 && y.length === 1) { return [x[0] || y[0]] }
-        return errorOprnd("MIS_ELNUM")
-      },
-      xor(x, y) {
-        if (x.length === 1 && y.length === 1) { return [x[0] !== y[0]] }
-        return errorOprnd("MIS_ELNUM")
-      },
-      concat(x, y)  { return "BAD_CONCAT" },
-      unshift(x, y) { return "BAD_CONCAT" }
-    },
-    columnVector: {
-      // Binary operations on two column vectors.
-      add(x, y) {
-        // element-wise addition
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((e, i) => Rnl.add(e, y[i]))
-      },
-      subtract(x, y) {
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((e, i) => Rnl.subtract(e, y[i]))
-      },
-      divide(x, y) {
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((e, i) => Rnl.divide(e, y[i]))
-      },
-      dot(x, y) {
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return dotProduct$1(x, y)
-      },
-      cross(x, y) {
-        if (x.length !== 3 || y.length !== 3) { return errorOprnd("CROSS") }
-        const v = [Rnl.zero, Rnl.zero, Rnl.zero];
-        v[0] = Rnl.subtract(Rnl.multiply(x[1], y[2]), Rnl.multiply(x[2], y[1]));
-        v[1] = Rnl.subtract(Rnl.multiply(x[2], y[0]), Rnl.multiply(x[0], y[2]));
-        v[2] = Rnl.subtract(Rnl.multiply(x[0], y[1]), Rnl.multiply(x[1], y[0]));
-        return v
-      },
-      multiply(x, y) {
-        if (x.length === 1 && y.length === 1) { return [Rnl.multiply(x[0], y[0])] }
-        return errorOprnd("MIS_ELNUM")
-      },
-      circ(x, y) {
-        // Element-wise multiplication
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((e, i) => Rnl.multiply(e, y[i]))
-      },
-      power(x, y) {
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((e, i) => Rnl.power(e, y[i]))
-      },
-      modulo(x, y) {
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((e, i) => Rnl.mod(e, y[i]))
-      },
-      rem(x, y) {
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((e, i) => Rnl.rem(e, y[i]))
-      },
-      and(x, y) {
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((e, i) => e && y[i])
-      },
-      or(x, y) {
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((e, i) => e || y[i])
-      },
-      xor(x, y) {
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((e, i) => e !== y[i])
-      },
-      concat(x, y) {
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((e, i) => [e, y[i]])
-      },
-      unshift(x, y) { return x.concat(y) }
-    },
-    matrix: {
-      // Binary operations on a column vector and a 2-D matrix.
-      add(v, m) {
-        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
-        return m.map((row, i) => row.map(e => Rnl.add(v[i], e)))
-      },
-      subtract(v, m) {
-        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
-        return m.map((row, i) => row.map(e => Rnl.subtract(v[i], e)))
-      },
-      multiply(v, m) {
-        if (m.length !== 1) { return errorOprnd("MIS_ELNUM") }
-        return m.map((row, i) => row.map(e => Rnl.multiply(v[i], e)))
-      },
-      circ(v, m) {
-        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
-        return m.map((row, i) => row.map(e => Rnl.multiply(v[i], e)))
-      },
-      divide(v, m) {
-        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
-        return m.map((row, i) => row.map(e => Rnl.divide(v[i], e)))
-      },
-      power(v, m) {
-        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
-        return m.map((row, i) => row.map(e => Rnl.power(v[i], e)))
-      },
-      mod(v, m) {
-        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
-        return m.map((row, i) => row.map(e => Rnl.mod(v[i], e)))
-      },
-      concat(v, m) {
-        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
-        return m.map((row, i) => [v[i], ...row])
-      },
-      unshift(x, y) { return "BAD_CONCAT" }
-    },
-    map: {
-      // Binary operations between a column vector and a map
-      add(vector, map) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map((e, i) => Rnl.add(vector[i], e))
-          : col
-        );
-        return map
-      },
-      subtract(vector, map) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map((e, i) => Rnl.subtract(vector[i], e))
-          : col
-        );
-        return map
-      },
-      multiply(vector, map) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map((e, i) => Rnl.multiply(vector[i], e))
-          : col
-        );
-        return map
-      },
-      divide(vector, map) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map((e, i) => Rnl.divide(vector[i], e))
-          : col
-        );
-        return map
-      },
-      power(vector, map) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map((e, i) => Rnl.power(vector[i], e))
-          : col
-        );
-        return map
-      },
-      modulo(vector, map) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map((e, i) => Rnl.mod(vector[i], e))
-          : col
-        );
-        return map
-      },
-      rem(vector, map) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map((e, i) => Rnl.rem(vector[i], e))
-          : col
-        );
-        return map
-      },
-      and(vector, map) {
-        map.data =  map.data.map(col => typeof col[0] === "boolean"
-          ? col.map((e, i) => vector[i] && e)
-          : col
-        );
-        return map
-      },
-      or(vector, map) {
-        map.data =  map.data.map(col => typeof col[0] === "boolean"
-          ? col.map((e, i) => vector[i] || e)
-          : col
-        );
-        return map
-      },
-      xor(vector, map) {
-        map.data =  map.data.map(col => typeof col[0] === "boolean"
-          ? col.map((e, i) => vector[i] !== e)
-          : col
-        );
-        return map
-      }
-    }
-  },
-
-  matrix: {
-    scalar: {
-      // Binary operations with a matrix and a scalar.
-      // Perform element-wise operations.
-      add(m, x)      { return m.map(row => row.map(e => Rnl.add(e, x))) },
-      subtract(m, x) { return m.map(row => row.map(e => Rnl.subtract(e, x))) },
-      multiply(m, x) { return m.map(row => row.map(e => Rnl.multiply(e, x))) },
-      divide(m, x)   { return m.map(row => row.map(e => Rnl.divide(e, x))) },
-      power(m, x)    {
-        if (m.length === m[0].length && Rnl.areEqual(x, [BigInt(-1), BigInt(1)])) {
-          return Matrix.invert(m)
-        }
-        return m.map(row => row.map(e => Rnl.power(e, x)))
-      },
-      modulo(m, x) { return m.map(row => row.map(e => Rnl.mod(e, x))) },
-      rem(m, x)    { return m.map(row => row.map(e => Rnl.rem(e, x))) }
-    },
-    rowVector: {
-      add(m, v)      { return m.map(row => row.map((e, i) => Rnl.add(e, v[i]) )) },
-      subtract(m, v) { return m.map(row => row.map((e, i) => Rnl.subtract(e, v[i]) )) },
-      multiply(m, v) { return m.map(row => row.map((e, i) => Rnl.multiply(e, v[i]) )) },
-      circ(m, v) { return m.map(row => row.map((e, i) => Rnl.multiply(e, v[i]) )) },
-      divide(m, v)   { return m.map(row => row.map((e, i) => Rnl.divide(e, v[i]) )) },
-      power(m, v)    { return m.map(row => row.map((e, i) => Rnl.power(e, v[i]) )) },
-      modulo(m, v)   { return m.map(row => row.map((e, i) => Rnl.mod(e, v[i]) )) },
-      rem(m, v)      { return m.map(row => row.map((e, i) => Rnl.rem(e, v[i]) )) },
-      unshift(m, v) {
-        if (m[0].length !== v.length) { return errorOprnd("MIS_ELNUM") }
-        return [...m, v]
-      }
-    },
-    columnVector: {
-      add(m, v)      { return m.map((row, i) => row.map(e => Rnl.add(e, v[i]) )) },
-      subtract(m, v) { return m.map((row, i) => row.map(e => Rnl.subtract(e, v[i]) )) },
-      multiply(m, v) {
-        // Multiply a matrix times a column vector
-        if (m[0].length !== v.length) { return errorOprnd("MIS_ELNUM") }
-        return m.map(row => dotProduct$1(row, v))
-      },
-      circ(m, v) { return m.map((row, i) => row.map(e => Rnl.multiply(e, v[i]) )) },
-      divide(m, v)   { return m.map((row, i) => row.map(e => Rnl.divide(e, v[i]) )) },
-      power(m, v)    { return m.map((row, i) => row.map(e => Rnl.power(e, v[i]) )) },
-      modulo(m, v)   { return m.map((row, i) => row.map(e => Rnl.mod(e, v[i]) )) },
-      rem(m, v)      { return m.map((row, i) => row.map(e => Rnl.rem(e, v[i]) )) },
-      concat(m, v) {
-        if (m.length !== v.length) { return errorOprnd("MIS_ELNUM") }
-        return m.map((row, i) => [...row, v[i]])
-      }
-    },
-    matrix: {
-      // Binary operations on two 2-D matrices.
-      add(x, y) {
-        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
-        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((m, i) => m.map((n, j) => Rnl.add(n, y[i][j])))
-      },
-      subtract(x, y) {
-        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
-        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((m, i) => m.map((n, j) => Rnl.subtract(n, y[i][j])))
-      },
-      dot(x, y) {
-        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
-        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((row, i) => dotProduct$1(row, y[i])).reduce((m, n) => Rnl.add(m, n))
-      },
-      cross(x, y) {
-        return errorOprnd("CROSS")
-      },
-      multiply(x, y) {
-
-      },
-      circ(x, y) {
-        // Element-wise multiplication
-        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
-        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((m, i) => m.map((n, j) => Rnl.multiply(n, y[i][j])))
-      },
-      divide(x, y) {
-        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
-        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((m, i) => m.map((n, j) => Rnl.divide(n, y[i][j])))
-      },
-      power(x, y) {
-        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
-        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((m, i) => m.map((n, j) => Rnl.power(n, y[i][j])))
-      },
-      modulo(x, y) {
-        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
-        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((m, i) => m.map((n, j) => Rnl.mod(n, y[i][j])))
-      },
-      rem(x, y) {
-        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
-        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((m, i) => m.map((n, j) => Rnl.rem(n, y[i][j])))
-      },
-      and(x, y) {
-        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
-        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((m, i) => m.map((n, j) => n && y[i][j]))
-      },
-      or(x, y) {
-        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
-        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((m, i) => m.map((n, j) => n || y[i][j]))
-      },
-      xor(x, y) {
-        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
-        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((m, i) => m.map((n, j) => n !== y[i][j]))
-      },
-      concat(x, y) {
-        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
-        return x.map((row, i) => row.concat(y[i]))
-      },
-      unshift(x, y) {
-        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
-        return x.concat(y)
-      }
-    },
-    map: {
-
-    }
-  },
-
-  dataFrame: {
-    multiply(df, scalar) {
-      df.data = df.data.map(col => isNaN(col[0]) ? col : col.map(e => {
-        let L = e.length;
-        if (e.indexOf(".")) { L -= 1; }
-        return Rnl.toStringSignificant(Rnl.multiply(scalar, Rnl.fromString(e)), L)
-      }));
-      return df
-    },
-    divide(df, scalar) {
-      df.data = df.data.map(col => isNaN(col[0]) ? col : col.map(e => {
-        let L = e.length;
-        if (e.indexOf(".")) { L -= 1; }
-        return Rnl.toStringSignificant(Rnl.divide(scalar, Rnl.fromString(e)), L)
-      }));
-      return df
-    }
-  },
-
-  map: {
-    scalar: {
-      // Binary opertions on a map and a scalar
-      add(map, scalar) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map(e => Rnl.add(e, scalar))
-          : col
-        );
-        return map
-      },
-      subtract(map, scalar) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map(e => Rnl.subtract(e, scalar))
-          : col
-        );
-        return map
-      },
-      multiply(map, scalar) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map(e => Rnl.multiply(e, scalar))
-          : col
-        );
-        return map
-      },
-      divide(map, scalar) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map(e => Rnl.divide(e, scalar))
-          : col
-        );
-        return map
-      },
-      power(map, scalar) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map(e => Rnl.power(e, scalar))
-          : col
-        );
-        return map
-      },
-      modulo(map, scalar) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map(e => Rnl.mod(e, scalar))
-          : col
-        );
-        return map
-      },
-      rem(map, scalar) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map(e => Rnl.rem(e, scalar))
-          : col
-        );
-        return map
-      },
-      and(map, scalar) {
-        map.data =  map.data.map(col => typeof col[0] === "boolean"
-          ? col.map(e => e && scalar)
-          : col
-        );
-        return map
-      },
-      or(map, scalar) {
-        map.data =  map.data.map(col => typeof col[0] === "boolean"
-          ? col.map(e => e || scalar)
-          : col
-        );
-        return map
-      },
-      xor(map, scalar) {
-        map.data =  map.data.map(col => typeof col[0] === "boolean"
-          ? col.map(e => e !== scalar)
-          : col
-        );
-        return map
-      }
-    },
-    columnVector: {
-      add(map, vector) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map((e, i) => Rnl.add(e, vector[i]))
-          : col
-        );
-        return map
-      },
-      subtract(map, vector) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map((e, i) => Rnl.subtract(e, vector[i]))
-          : col
-        );
-        return map
-      },
-      multiply(map, vector) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map((e, i) => Rnl.multiply(e, vector[i]))
-          : col
-        );
-        return map
-      },
-      divide(map, vector) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map((e, i) => Rnl.divide(e, vector[i]))
-          : col
-        );
-        return map
-      },
-      power(map, vector) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map((e, i) => Rnl.power(e, vector[i]))
-          : col
-        );
-        return map
-      },
-      modulo(map, vector) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map((e, i) => Rnl.mod(e, vector[i]))
-          : col
-        );
-        return map
-      },
-      rem(map, vector) {
-        map.data =  map.data.map(col => Rnl.isRational(col[0])
-          ? col.map((e, i) => Rnl.rem(e, vector[i]))
-          : col
-        );
-        return map
-      },
-      and(map, vector) {
-        map.data =  map.data.map(col => typeof col[0] === "boolean"
-          ? col.map((e, i) => e && vector[i])
-          : col
-        );
-        return map
-      },
-      or(map, vector) {
-        map.data =  map.data.map(col => typeof col[0] === "boolean"
-          ? col.map((e, i) => e || vector[i])
-          : col
-        );
-        return map
-      },
-      xor(map, vector) {
-        map.data =  map.data.map(col => typeof col[0] === "boolean"
-          ? col.map((e, i) => e !== vector[i])
-          : col
-        );
-        return map
-      }
-    },
-    matrix: {
-
-    },
-    map: {
-
-    }
-  }
-};
-
-// Binary relations get their own object, separate from other binary operations.
-// That's because Hurmet allows chained comparisons, as in  a < b < c.
-// So we have to pass yPrev as well as the two current operands.
-
-const strOps = ["∈", "in", "∋", "⊇", "∉", "!in", "∌", "⊈", "⊉"];
-
-const relations = {
-  scalar: {
-    scalar: {
-      relate(op, x, y, yPrev) { return compare(op, x, y, yPrev) }
-    },
-    vector: {
-      relate(op, x, v, yPrev) {
-        if (yPrev === undefined) {
-          return v.map(e => compare(op, x, e, undefined))
-        } else if (typeof yPrev !== "object") {
-          return v.map(e => compare(op, x, e, yPrev))
-        } else if (Array.isArray(yPrev)) {
-          return v.map((e, i) => compare(op, x, e, yPrev[i]))
-        } else ;
-      }
-    },
-    matrix: {
-      relate(op, x, m, yPrev) {
-        if (yPrev === undefined) {
-          return m.map(row => row.map(e => compare(op, x, e, undefined)))
-        } else if (typeof yPrev !== "object") {
-          return m.map(row => row.map(e => compare(op, x, e, yPrev)))
-        } else if (Array.isArray(yPrev)) {
-          return m.map((row, i) => row.map((e, j) => compare(op, x, e, yPrev[i][j])))
-        } else ;
-      }
-    },
-    map: {
-      relate(op, x, map, yPrev) {
-        if (yPrev === undefined) {
-          map.data =  map.data.map((column, j) =>
-            j > 0 || typeof column[0] !== "string" || strOps.includes(op)
-            ? column.map(e => compare(op, x, e, undefined))
-            : column
-          );
-          return map
-        }
-      }
-    }
-  },
-  vector: {
-    scalar: {
-      relate(op, v, y, yPrev) {
-        if (yPrev === undefined) {
-          return v.map(e => compare(op, e, y, undefined))
-        } else if (typeof yPrev !== "object") {
-          return v.map(e => compare(op, e, y, yPrev))
-        } else if (Array.isArray(yPrev)) {
-          return v.map((e, i) => compare(op, e, y, yPrev[i]))
-        } else ;
-      }
-    }
-  },
-  rowVector: {
-    rowVector: {
-      relate(op, x, y, yPrev) {
-        if (yPrev === undefined) {
-          return x.map((e, i) => compare(op, e, y[i], undefined))
-        }
-      }
-    },
-    matrix: {
-      relate(op, v, m, yPrev) {
-        if (yPrev === undefined) {
-          if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
-          return m.map(row => row.map((e, i) => compare(op, v[i], e, undefined)))
-        }
-      }
-    }
-  },
-  columnVector: {
-    columnVector: {
-      relate(op, x, y, yPrev) {
-        if (yPrev === undefined) {
-          return x.map((e, i) => compare(op, e, y[i], undefined))
-        }
-      }
-    },
-    map: {
-      relate(op, v, map, yPrev) {
-        if (yPrev === undefined) {
-          map.data =  map.data.map((column, j) =>
-            j > 0 || typeof column[0] !== "string" || strOps.includes(op)
-            ? column.map((e, i) => compare(op, v[i], e, undefined))
-            : column
-          );
-          return map
-        }
-      }
-    }
-  },
-  matrix: {
-    scalar: {
-      relate(op, m, y, yPrev) {
-        if (yPrev === undefined) {
-          return m.map(row => row.map(e => compare(op, e, y, undefined)))
-        } else if (typeof yPrev !== "object") {
-          return m.map(row => row.map(e => compare(op, e, y, yPrev)))
-        } else if (Array.isArray(yPrev)) {
-          return m.map((row, i) => row.map((e, j) => compare(op, e, y, yPrev[i][j])))
-        } else ;
-      }
-    },
-    matrix: {
-      relate(op, m1, m2, yPrev) {
-        if (yPrev === undefined) {
-          return m1.map((e, i) => compare(op, e, m2[i], undefined))
-        }
-      }
-    }
-  }
-};
-
-const isDivByZero = (quotient, shape) => {
-  switch (shape) {
-    case "scalar":
-      return quotient[1] === BigInt(0)
-    case "vector":
-      for (let i = 0; i < quotient.length; i++) {
-        if (quotient[i][1] === BigInt(0)) { return true }
-      }
-      return false
-    case "matrix":
-      for (let i = 0; i < quotient.length; i++) {
-        for (let j = 0; j < quotient[0].length; j++) {
-          if (quotient[i][j][1] === BigInt(0)) { return true }
-        }
-      }
-      return false
-    case "map":
-      for (let j = 0; j < quotient.data[0].length; j++) {
-        if (Rnl.isRational(quotient.data[j][0])) {
-          for (let i = 0; i < quotient.data.length; i++) {
-            if (quotient.data[i][j][1] === BigInt(0)) { return true }
-          }
-        }
-      }
-      return false
-    default:
-      return false
-  }
-};
-
-const Operators = Object.freeze({
-  unary,
-  binary,
-  relations,
-  condition,
-  dtype
-});
-
-const wideCharRegEx = /[\uD800-\uDBFF][\uDC00-\uDFFF][\uFE00\uFE01]?/g;
-
-const findfirst = (searchString, str) => {
-  const index = str.value.indexOf(searchString.value);
-  const wideCharMatches = arrayOfRegExMatches(wideCharRegEx, str.value.slice(0, index));
-  return Rnl.fromNumber(index + wideCharMatches.length + 1)
-};
-
-const textRange = (str, index) => {
-  // Find a range of the string str
-  if (index.dtype !== dt.RATIONAL && index.dtype !== dt.RANGE) {
-    return errorOprnd("STR_INDEX")
-  }
-
-  const strArray = Array.from(str);
-  let value = "";
-  if (index.dtype === dt.RATIONAL) {
-    const pos = Rnl.toNumber(index.value) - 1;
-    value = strArray.at(pos);
-  } else if (index.dtype === dt.RANGE) {
-    const start = Rnl.toNumber(index.value[0]);
-    const step = Rnl.toNumber(index.value[1]);
-    const end = index.value[2] === "∞"
-      ? str.length
-      : Rnl.toNumber(index.value[2]);
-    if (step === 1) {
-      value = strArray.slice(start - 1, end).join("");
-    } else {
-      for (let i = start - 1; i < end; i += step) {
-        value += strArray.at(i);
-      }
-
-    }
-  }
-
-  return { value, unit: null, dtype: dt.STRING }
-};
-
-const startSvg = _ => {
-  return {
-    tag: 'svg',
-    children: [],
-    attrs: {
-      xmlns: "http://www.w3.org/2000/svg",
-      width: 250,
-      height: 250,
-      style: "display: inline;"
-    },
-    temp: {
-      width: 250,
-      height: 250,
-      xmin: 0,
-      xmax: 5,
-      ymin: 0,
-      ymax: 5,
-      xunitlength: 20,  // px
-      yunitlength: 20,  // px
-      origin: [0, 0],   // in px (default is bottom left corner)
-      stroke: "black",
-      strokewidth: 1,
-      strokedasharray: null,
-      fill: "none",
-      fontstyle: "normal",
-      fontfamily: "sans-serif",
-      fontsize: 13.33, // px, ~10 pt
-      fontweight: "normal",
-      markerstrokewidth: 1,
-      markerstroke: "black",
-      markerfill: "yellow",
-      markersize: 4,
-      marker: "none",
-      dotradius: 4,
-      axesstroke: "black",
-      gridstroke: "grey",
-      isDim: false
-    }
-  }
-};
-
-// Helpers
-const setStrokeAndFill = (node, attrs) => {
-  node.attrs["stroke-width"] = attrs.strokewidth;
-  node.attrs.stroke = attrs.stroke;
-  node.attrs.fill = attrs.fill;
-  if (attrs.strokedasharray != null && attrs.strokedasharray !== "none") {
-    node.attrs["stroke-dasharray"] = attrs.strokedasharray;
-  }
-};
-
-const pointZeroRegEx = /\.0+$/;
-const chopZ = str => {
-  const k = str.indexOf(".");
-  if (k === -1) { return str }
-  if (pointZeroRegEx.test(str)) { return str.replace(pointZeroRegEx, "") }
-  let i;
-  for (i = str.length - 1; i > k && str.charAt(i) === "0"; i--) {
-    if (i === k) { i--; }
-  }
-  return str.slice(0, i + 1)
-};
-
-const markerDot = (center, attrs, s, f) => { // coordinates in units, radius in pixel
-  if (s == null) { s = attrs.stroke; }
-  if (f == null) { f = attrs.fill; }
-  const node = { tag: "circle", attrs: {} };
-  node.attrs.cx = center[0] * attrs.xunitlength + attrs.origin[0];
-  node.attrs.cy = attrs.height - center[1] * attrs.yunitlength - attrs.origin[1];
-  node.attrs.r = attrs.markersize;
-  node.attrs["stroke-width"] = attrs.strokewidth;
-  node.attrs.stroke = s;
-  node.attrs.fill = f;
-  return node
-};
-
-const rationals2numbers = array => {
-  const newArray = [];
-  for (let i = 0; i < array.length; i++) {
-    const element = array[i];
-    if (element.dtype) {
-      newArray[i] = rationals2numbers(element.value);
-    } else if (Rnl.isRational(element)) {
-      newArray[i] = Rnl.toNumber(element);
-    } else {
-      newArray[i] = rationals2numbers(element);
-    }
-  }
-  return newArray
-};
-
-const arrowhead = (svg, p, q) => { // draw arrowhead at q (in units)
-  const attrs = svg.temp;
-  const v = [p[0] * attrs.xunitlength + attrs.origin[0], attrs.height -
-             p[1] * attrs.yunitlength - attrs.origin[1]];
-  const w = [q[0] * attrs.xunitlength + attrs.origin[0], attrs.height -
-             q[1] * attrs.yunitlength - attrs.origin[1]];
-  let u = [w[0] - v[0], w[1] - v[1]];
-  const d = Math.sqrt(u[0] * u[0] + u[1] * u[1]);
-  if (d > 0.00000001) {
-    u = [u[0] / d, u[1] / d];
-    const z = attrs.marker === "markerdot" ? 3 : attrs.isDim ? 0 : 1;
-    const up = [-u[1], u[0]];
-    const L = d > 12 ? 12.5 : 7.8125;
-    const S = d > 12 ? 3 : 1.875;
-    const node = { tag: "path", attrs: {} };
-    node.attrs.d = "M " + (w[0] - L * u[0] - S * up[0]) + "," +
-      (w[1] - L * u[1] - S * up[1]) + " L " + (w[0] - z * u[0]) + "," + (w[1] - z * u[1]) +
-      " L " + (w[0] - L * u[0] + S * up[0]) + "," + (w[1] - L * u[1] + S * up[1]) + " z";
-    if (attrs.isDim) {
-      node.attrs.stroke = "none";
-    } else {
-      node.attrs["stroke-width"] = attrs.markerstrokewidth;
-      node.attrs.stroke = attrs.stroke;
-    }
-    node.attrs.fill = attrs.stroke;
-    svg.children.push(node);
-  }
-};
-
-const markAttribute = {
-  em:         ["font-style", "italic"],
-  strong:     ["font-weight", "bold"],
-  code:       ["font-family", "monospace"],
-  strikethru: ["text-decoration", "line-through"],
-  subscript:  ["font-size", "0.8em"],
-  superscript: ["font-size", "0.8em"]
-};
-
-const textLocal = (svg, p, str, pos) => {
-  const attrs = svg.temp;
-  let textanchor = "middle";
-  let dx = 0;
-  let dy = attrs.fontsize / 3;
-  if (pos != null) {
-    if (pos.slice(0, 5) === "above") { dy = -attrs.fontsize / 2; }
-    if (pos.slice(0, 5) === "below") { dy = 1.25 * attrs.fontsize; }
-    if (pos.slice(0, 5) === "right" || pos.slice(5, 10) === "right") {
-      textanchor = "start";
-      dx = attrs.fontsize / 2;
-    }
-    if (pos.slice(0, 4) === "left" || pos.slice(5, 9) === "left") {
-      textanchor = "end";
-      dx = -attrs.fontsize / 2;
-    }
-  }
-  const textNode = { tag: "text", children: [], attrs: {} };
-  textNode.attrs["text"] = str;
-  textNode.attrs.x = p[0] * attrs.xunitlength + attrs.origin[0] + dx;
-  textNode.attrs.y = attrs.height - p[1] * attrs.yunitlength - attrs.origin[1] + dy;
-  textNode.attrs["font-family"] = attrs.fontfamily;
-  textNode.attrs["font-size"] = attrs.fontsize;
-  textNode.attrs["text-anchor"] = textanchor;
-  // Load Markdown into an AST
-  const ast = inlineMd2ast(str);
-  // Load content of AST into <tspan> nodes.
-  if (Array.isArray(ast)) {
-    let prevNodeContainedSubscript = false;
-    for (const markNode of ast) {
-      const tspan = { tag: "tspan", text: markNode.text };
-      let currentNodeContainsSubscript = false;
-      if (markNode.marks) {
-        tspan.attrs = {};
-        for (const mark of markNode.marks) {
-          const markAttr = markAttribute[mark.type];
-          tspan.attrs[markAttr[0]] = markAttr[1];
-          if (mark.type === "subscript") { currentNodeContainsSubscript = true; }
-        }
-      }
-      if (currentNodeContainsSubscript) {
-        if (!prevNodeContainedSubscript) { tspan.attrs.dy  = "2"; }
-      } else if (prevNodeContainedSubscript) {
-        if (!markNode.marks) { tspan.attrs = {}; }
-        tspan.attrs.dy  = "-2";
-      }
-      prevNodeContainedSubscript = currentNodeContainsSubscript;
-      textNode.children.push(tspan);
-    }
-  }
-  svg.children.push(textNode);
-  return svg
-};
-
-const pointText = (point, attrs) => {
-  return (point[0] * attrs.xunitlength + attrs.origin[0]).toFixed(4) + ","
-    + (attrs.height - point[1] * attrs.yunitlength - attrs.origin[1]).toFixed(4)
-};
-
-const functions$1 = {
-  // Set attributes
-  stroke(svgOprnd, color) {
-    svgOprnd.value.temp.stroke = color.value;
-    return svgOprnd
-  },
-
-  strokewidth(svgOprnd, num) {
-    svgOprnd.value.temp.strokewidth = Rnl.toNumber(num.value);
-    return svgOprnd
-  },
-
-  strokedasharray(svgOprnd, str) {
-    svgOprnd.value.temp.strokedasharray = str.value;
-    return svgOprnd
-  },
-
-  fill(svgOprnd, color) {
-    svgOprnd.value.temp.fill = color.value;
-    return svgOprnd
-  },
-
-  fontsize(svgOprnd, size) {
-    svgOprnd.value.temp.fontsize = Rnl.toNumber(size.value);
-    return svgOprnd
-  },
-
-  fontfamily(svgOprnd, str) {
-    svgOprnd.value.temp.fontfamily = str.value; // "sansserif"|"serif"|"fixed"|"monotype"
-    return svgOprnd
-  },
-
-  marker(svgOprnd, str) {
-    svgOprnd.value.temp.marker = str.value; // "none" | "dot" | "arrow" | "arrowdot"
-    return svgOprnd
-  },
-
-  // Initialize the svg.
-
-  title(svgOprnd, strOprnd) {
-    svgOprnd.value.children.push( { tag: "title", attrs: { text: strOprnd.value } });
-    return svgOprnd
-  },
-
-  frame(svgOprnd, width = 250, height = 250, position = "inline") {
-    const svg = svgOprnd.value;
-    const attrs = svg.temp;
-    attrs.width = typeof width === "number" ? width : Rnl.toNumber(width.value);
-    svg.attrs.width = attrs.width;
-    attrs.height = typeof height === "number" ? height : Rnl.toNumber(height.value);
-    svg.attrs.height = attrs.height;
-    if (typeof position !== "string") { position = position.value; }
-    if (position !== "inline") { svg.attrs.float = position; }
-    attrs.xunitlength = attrs.width / (attrs.xmax - attrs.xmin);
-    attrs.yunitlength = attrs.height / (attrs.ymax - attrs.ymin);
-    attrs.origin = [-attrs.xmin * attrs.xunitlength, -attrs.ymin * attrs.yunitlength];
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  view(svgOprnd, xmin = 0, xmax = 5, ymin, ymax) {
-    const svg = svgOprnd.value;
-    const attrs = svg.temp;
-    attrs.xmin = typeof xmin === "number" ? xmin : Rnl.toNumber(xmin.value);
-    attrs.xmax = typeof xmax === "number" ? xmax : Rnl.toNumber(xmax.value);
-    attrs.xunitlength = attrs.width / (attrs.xmax - attrs.xmin);
-    attrs.yunitlength = attrs.xunitlength; // This may change below.
-    if (ymin == null) {
-      attrs.origin = [-attrs.xmin * attrs.xunitlength, attrs.height / 2];
-      attrs.ymin = -attrs.height / (2 * attrs.yunitlength);
-      attrs.ymax = -attrs.ymin;
-    } else {
-      attrs.ymin = Rnl.toNumber(ymin.value);
-      if (ymax != null) {
-        attrs.ymax = Rnl.toNumber(ymax.value);
-        attrs.yunitlength = attrs.height / (attrs.ymax - attrs.ymin);
-      } else {
-        attrs.ymax = attrs.height / attrs.yunitlength + attrs.ymin;
-      }
-      attrs.origin = [-attrs.xmin * attrs.xunitlength, -attrs.ymin * attrs.yunitlength];
-    }
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  // Draw things
-
-  grid(svgOprnd, gdx, gdy, isLocal) {
-    const svg = svgOprnd.value;
-    const attrs = svg.temp;
-    gdx = gdx == null ? attrs.xunitlength : Rnl.toNumber(gdx.value) * attrs.xunitlength;
-    gdy = gdy == null ? gdx : Rnl.toNumber(gdy.value) * attrs.yunitlength;
-    const pnode = { tag: "path", attrs: {} };
-    let str = "";
-    for (let x = attrs.origin[0]; x < attrs.width; x += gdx) {
-      str += " M" + x + ",0 " + x + "," + attrs.height;
-    }
-    for (let x = attrs.origin[0] - gdx; x > 0; x -= gdx) {
-      str += " M" + x + ",0 " + x + "," + attrs.height;
-    }
-    for (let y = attrs.height - attrs.origin[1]; y < attrs.height; y += gdy) {
-      str += " M0," + y + " " + attrs.width + "," + y;
-    }
-    for (let y = attrs.height - attrs.origin[1] - gdy; y > 0; y -= gdy) {
-      str += " M0," + y + " " + attrs.width + "," + y;
-    }
-    pnode.attrs.d = str;
-    pnode.attrs["stroke-width"] = 0.5;
-    pnode.attrs.stroke = attrs.gridstroke;
-    pnode.attrs.fill = attrs.fill;
-    svg.children.push(pnode);
-    if (!isLocal) {
-      return { value: svg, unit: null, dtype: dt.DRAWING }
-    }
-  },
-
-  axes(svgOprnd, dx, dy, labels, gdx, gdy) {
-    let svg = svgOprnd.value;
-    const attrs = svg.temp;
-    dx = (dx == null ? attrs.xunitlength : Rnl.toNumber(dx.value) * attrs.xunitlength);
-    dy = (dy == null ? dx : Rnl.toNumber(dy.value) * attrs.yunitlength);
-    const parentFontsize = attrs.fontsize;
-    attrs.fontsize = Math.min(dx / 2, dy / 2, 10);
-    const ticklength = attrs.fontsize / 4;
-    if (gdx != null) {
-      this.grid(svgOprnd, gdx, gdy, true);
-    }
-    const pnode = { tag: "path", attrs: {} };
-    let str = "M0," + (attrs.height - attrs.origin[1]) + " " + attrs.width + "," +
-      (attrs.height - attrs.origin[1]) + " M" + attrs.origin[0] + ",0 " +
-      attrs.origin[0] + "," + attrs.height;
-    for (let x = attrs.origin[0] + dx; x < attrs.width; x += dx) {
-      str += " M" + x + " " + (attrs.height - attrs.origin[1] + ticklength) + " " + x
-            + "," + (attrs.height - attrs.origin[1] - ticklength);
-    }
-    for (let x = attrs.origin[0] - dx; x > 0; x -= dx) {
-      str += " M" + x + "," + (attrs.height - attrs.origin[1] + ticklength) + " " + x
-            + "," + (attrs.height - attrs.origin[1] - ticklength);
-    }
-    for (let y = attrs.height - attrs.origin[1] + dy; y < attrs.height; y += dy) {
-      str += " M" + (attrs.origin[0] + ticklength) + "," + y + " " +
-                   (attrs.origin[0] - ticklength) + "," + y;
-    }
-    for (let y = attrs.height - attrs.origin[1] - dy; y > 0; y -= dy) {
-      str += " M" + (attrs.origin[0] + ticklength) + "," + y + " " +
-                   (attrs.origin[0] - ticklength) + "," + y;
-    }
-    if (labels != null) {
-      const ldx = dx / attrs.xunitlength;
-      const ldy = dy / attrs.yunitlength;
-      const lx = (attrs.xmin > 0 || attrs.xmax < 0 ? attrs.xmin : 0);
-      const ly = (attrs.ymin > 0 || attrs.ymax < 0 ? attrs.ymin : 0);
-      const lxp = (ly === 0 ? "below" : "above");
-      const lyp = (lx === 0 ? "left" : "right");
-      const ddx = Math.floor(1.1 - Math.log(ldx) / Math.log(10)) + 1;
-      const ddy = Math.floor(1.1 - Math.log(ldy) / Math.log(10)) + 1;
-      for (let x = ldx; x <= attrs.xmax; x += ldx) {
-        svg = textLocal(svg, [x, ly], chopZ(x.toFixed(ddx)), lxp);
-      }
-      for (let x = -ldx; attrs.xmin <= x; x -= ldx) {
-        svg = textLocal(svg, [x, ly], chopZ(x.toFixed(ddx)), lxp);
-      }
-      for (let y = ldy; y <= attrs.ymax; y += ldy) {
-        svg = textLocal(svg, [lx, y], chopZ(y.toFixed(ddy)), lyp);
-      }
-      for (let y = -ldy; attrs.ymin <= y; y -= ldy) {
-        svg = textLocal(svg, [lx, y], chopZ(y.toFixed(ddy)), lyp);
-      }
-    }
-    pnode.attrs.d = str;
-    pnode.attrs["stroke-width"] = 0.5;
-    pnode.attrs.stroke = attrs.axesstroke;
-    pnode.attrs.fill = attrs.fill;
-    svg.temp.fontsize = parentFontsize;
-    svg.children.push(pnode);
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  line(svgOprnd, m) { // segment connecting points p,q (coordinates in units)
-    const svg = svgOprnd.value;
-    const attrs = svg.temp;
-    const node = { tag: "path", attrs: {} };
-    const p = [Rnl.toNumber(m.value[0][0]), Rnl.toNumber(m.value[0][1])];
-    const q = [Rnl.toNumber(m.value[1][0]), Rnl.toNumber(m.value[1][1])];
-    node.attrs.d = "M" + (p[0] * attrs.xunitlength + attrs.origin[0]) + "," +
-      (attrs.height - p[1] * attrs.yunitlength - attrs.origin[1]) + " " +
-      (q[0] * attrs.xunitlength + attrs.origin[0]) + "," + (attrs.height -
-       q[1] * attrs.yunitlength - attrs.origin[1]);
-    setStrokeAndFill(node, attrs);
-    svg.children.push(node);
-    if (attrs.marker === "dot" || attrs.marker === "arrowdot") {
-      svg.children.push(markerDot(p, attrs, attrs.markerstroke, attrs.markerfill));
-      if (attrs.marker === "arrowdot") { arrowhead(svg, p, q); }
-      svg.children.push(markerDot(q, attrs, attrs.markerstroke, attrs.markerfill));
-    } else if (attrs.marker === "arrow") {
-      arrowhead(svg, p, q);
-    }
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  path(svgOprnd, args) {
-    const svg = svgOprnd.value;
-    const attrs = svg.temp;
-    const node = { tag: "path", attrs: {} };
-    // Get the "d" attribute of a path
-    let str = "";
-    if (args[0].dtype && args[0].dtype === dt.STRING) {
-      str = args[0].value;
-    } else {
-      const segs = rationals2numbers(args[0].value);
-      if (segs[0].length === 2) {
-        // A path made up of line segments
-        str = "M" + pointText(segs[0], attrs) + " L";
-        for (let i = 1; i < segs.length; i++) {
-          str += " " + pointText(segs[i], attrs);
-        }
-      } else if (segs[0].length === 3) {
-        // Some segments are circular arcs.
-        str = "M" + pointText(segs[0], attrs);
-        for (let i = 1; i < segs.length; i++) {
-          if (segs[i][2] === 0) {
-            str += " L" + pointText(segs[i], attrs);
-          } else {
-            const r = String(Math.abs(segs[i][2]) * attrs.xunitlength);
-            const sweep = Math.sign(segs[i][2]) > 0 ? 0 : 1;
-            str += ` A${r},${r} 0 0 ${sweep} ${pointText(segs[i], attrs)}`;
-          }
-        }
-      }
-    }
-    node.attrs.d = str;
-    node.attrs["stroke-width"] = attrs.strokewidth;
-    if (attrs.strokedasharray != null) {
-      node.attrs["stroke-dasharray"] = attrs.strokedasharray;
-    }
-    node.attrs.stroke = attrs.stroke;
-    node.attrs.fill = attrs.fill;
-    if (attrs.marker === "dot") {
-      for (let i = 0; i < args.length; i++) {
-        const el = args[i];
-        if (typeof el[0] === "number") {
-          svg.children.push(markerDot(el, attrs, attrs.markerstroke, attrs.markerfill));
-        } else {
-          for (const row of el) {
-            svg.children.push(markerDot(row, attrs, attrs.markerstroke, attrs.markerfill));
-          }
-        }
-      }
-    } else if (attrs.marker === "arrow" || attrs.marker === "arrowdot") {
-      const segs = rationals2numbers(args[0].value);
-      if (typeof segs[0] !== "number") {
-        const end = segs[segs.length - 1];
-        arrowhead(svg, segs[segs.length - 2], end);
-        if (attrs.marker === "arrowdot") {
-          svg.children.push(markerDot(end, attrs, attrs.markerstroke, attrs.markerfill));
-        }
-      } else if (typeof segs[0] === "number") {
-        const prevEl = args[args.length - 2];
-        const end = segs;
-        let start;
-        if (typeof prevEl[0] === "number") {
-          start = prevEl;
-        } else {
-          start = prevEl[prevEl.length - 1];
-        }
-        arrowhead(svg, start, end);
-        if (attrs.marker === "arrowdot") {
-          svg.children.push(markerDot(end, attrs, attrs.markerstroke, attrs.markerfill));
-        }
-      }
-    }
-    svg.children.push(node);
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  rect(svgOprnd, m, r) { // opposite corners in units, rounded by radius
-    const svg = svgOprnd.value;
-    const attrs = svg.temp;
-    const node = { tag: "rect", attrs: {} };
-    const p = [Rnl.toNumber(m.value[0][0]), Rnl.toNumber(m.value[0][1])];
-    const q = [Rnl.toNumber(m.value[1][0]), Rnl.toNumber(m.value[1][1])];
-    node.attrs.x = Math.min(p[0], q[0]) * attrs.xunitlength + attrs.origin[0];
-    node.attrs.y = attrs.height - Math.max(p[1], q[1]) * attrs.yunitlength - attrs.origin[1];
-    node.attrs.width = Math.abs((q[0] - p[0]) * attrs.xunitlength);
-    node.attrs.height = Math.abs((q[1] - p[1]) * attrs.yunitlength);
-    if (r != null) {
-      const rNum = Rnl.toNumber(r.value) * attrs.xunitlength;
-      node.attrs.rx = rNum;
-      node.attrs.ry = rNum;
-    }
-    setStrokeAndFill(node, attrs);
-    svg.children.push(node);
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  circle(svgOprnd, center, radius) { // coordinates in units
-    const svg = svgOprnd.value;
-    const attrs = svg.temp;
-    const node = { tag: "circle", attrs: {} };
-    node.attrs.cx = Rnl.toNumber(center.value[0]) * attrs.xunitlength + attrs.origin[0];
-    node.attrs.cy = attrs.height - Rnl.toNumber(center.value[1]) * attrs.yunitlength
-                  - attrs.origin[1];
-    node.attrs.r = Rnl.toNumber(radius.value) * attrs.xunitlength;
-    setStrokeAndFill(node, attrs);
-    svg.children.push(node);
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  ellipse(svgOprnd, center, rx, ry) { // coordinates in units
-    const svg = svgOprnd.value;
-    const attrs = svg.temp;
-    const node = { tag: "ellipse", attrs: {} };
-    node.attrs.cx = Rnl.toNumber(center.value[0]) * attrs.xunitlength + attrs.origin[0];
-    node.attrs.cy = attrs.height - Rnl.toNumber(center.value[1]) * attrs.yunitlength
-                    - attrs.origin[1];
-    node.attrs.rx = Rnl.toNumber(rx.value) * attrs.xunitlength;
-    node.attrs.ry = Rnl.toNumber(ry.value) * attrs.yunitlength;
-    setStrokeAndFill(node, attrs);
-    svg.children.push(node);
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  arc(svgOprnd, m, radius) { // coordinates in units
-    const svg = svgOprnd.value;
-    const attrs = svg.temp;
-    const node = { tag: "path", attrs: {} };
-    const start = [Rnl.toNumber(m.value[0][0]), Rnl.toNumber(m.value[0][1])];
-    const end = [Rnl.toNumber(m.value[1][0]), Rnl.toNumber(m.value[1][1])];
-    if (radius == null) {
-      const v = [end[0] - start[0], end[1] - start[1]];
-      radius = (Math.sqrt(v[0] * v[0] + v[1] * v[1])) * attrs.yunitlength;
-    } else if (isVector(radius)) {
-      radius = radius.value.map(e => Rnl.toNumber(e) * attrs.yunitlength);
-    } else {
-      radius = Rnl.toNumber(radius.value) * attrs.yunitlength;
-    }
-    let str = "M" + (start[0] * attrs.xunitlength + attrs.origin[0]) + "," +
-      (attrs.height - start[1] * attrs.yunitlength - attrs.origin[1]) + " A";
-    str += Array.isArray(radius) ? radius[0] + "," + radius[1] : radius + "," + radius;
-    str += " 0 0,0 " + (end[0] * attrs.xunitlength + attrs.origin[0]) + "," +
-      (attrs.height - end[1] * attrs.yunitlength - attrs.origin[1]);
-    node.attrs.d = str;
-    setStrokeAndFill(node, attrs);
-    // eslint-disable-next-line no-useless-assignment
-    let v = 0;
-    if (attrs.marker === "arrow" || attrs.marker === "arrowdot") {
-      const u = [(end[1] - start[1]) / 4, (start[0] - end[0]) / 4];
-      v = [(end[0] - start[0]) / 2, (end[1] - start[1]) / 2];
-      v = [start[0] + v[0] + u[0], start[1] + v[1] + u[1]];
-    } else {
-      v = [start[0], start[1]];
-    }
-    if (attrs.marker === "dot" || attrs.marker === "arrowdot") {
-      svg.children.push(markerDot(start, attrs, attrs.markerstroke, attrs.markerfill));
-      if (attrs.marker === "arrowdot") { arrowhead(svg,  v, end); }
-      svg.children.push(markerDot(end, attrs, attrs.markerstroke, attrs.markerfill));
-    } else if (attrs.marker === "arrow") {
-      arrowhead(svg, v, end);
-    }
-    svg.children.push(node);
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  text(svgOprnd, p, str, pos) {
-    const svg = textLocal(
-      svgOprnd.value,
-      [Rnl.toNumber(p.value[0]), Rnl.toNumber(p.value[1])],
-      str.value,
-      pos == null ? null : pos.value
-      );
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  dot(svgOprnd, center, typ, label, pos) {
-    let svg = svgOprnd.value;
-    const attrs = svg.temp;
-    let node;
-    const cx = Rnl.toNumber(center.value[0]) * attrs.xunitlength + attrs.origin[0];
-    const cy = attrs.height - Rnl.toNumber(center.value[1]) * attrs.yunitlength
-             - attrs.origin[1];
-    if (typ.value === "+" || typ.value === "-" || typ.value === "|") {
-      node = { tag: "path", attrs: {} };
-      if (typ.value === "+") {
-        node.attrs.d = " M " + (cx - attrs.ticklength) + "," + cy
-                    + " L " + ( cx + attrs.ticklength) + "," + cy
-                    + " M " + cx + "," + (cy - attrs.ticklength) + " L " + cx
-                    + "," + (cy + attrs.ticklength);
-        node.attrs["stroke-width"] = 0.5;
-        node.attrs.stroke = attrs.axesstroke;
-      } else {
-        if (typ.value === "-") {
-          node.attrs.d = " M " + (cx - attrs.ticklength) + "," + cy
-                       + " L " + (cx + attrs.ticklength) + "," + cy;
-        } else {
-          node.attrs.d = " M " + cx + "," + (cy - attrs.ticklength)
-                       + " L " + cx + "," + (cy + attrs.ticklength);
-        }
-        node.attrs["stroke-width"] = attrs.strokewidth;
-        node.attrs["stroke"] = attrs.stroke;
-      }
-    } else {
-      node = { tag: "circle", attrs: {} };
-      node.attrs.cx = cx;
-      node.attrs.cy = cy;
-      node.attrs.r = attrs.dotradius;
-      node.attrs["stroke-width"] = attrs.strokewidth;
-      node.attrs.stroke = attrs.stroke;
-      node.attrs.fill =  (typ.value === "open" ? "white" : attrs.stroke);
-    }
-    svg.children.push(node);
-    if (label != null) {
-      svg = textLocal(
-        svg,
-        [Rnl.toNumber(center.value[0]), Rnl.toNumber(center.value[1])],
-        label.value,
-        (pos == null ? "below" : pos.value)
-        );
-    }
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  leader(svgOprnd, plistOprnd, label) {
-    // A 'leader' is a note with an arrow (leader line) pointing to something.
-    const marker = svgOprnd.value.temp.marker;
-    svgOprnd.value.temp.marker = "arrow";
-    svgOprnd.value.temp.isDim = true;
-    // Draw the arrow
-    svgOprnd = this.path(svgOprnd, [plistOprnd]);
-    // Get the text position
-    const p = rationals2numbers(plistOprnd.value[0]);
-    const q = rationals2numbers(plistOprnd.value[plistOprnd.value.length - 1]);
-    // eslint-disable-next-line no-useless-assignment
-    let pos = "right";
-    if (Math.abs(p[0] - q[0]) >= Math.abs(p[1] - q[1])) {
-      pos = p[0] >= q[0] ? "right" : "left";
-    } else {
-      pos = p[1] < q[1] ? "below" : "above";
-    }
-    // Write the text
-    const svg = textLocal(svgOprnd.value, p, label.value, pos);
-    svg.temp.marker = marker;
-    svg.temp.isDim = false;
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  dimension(svgOprnd, plistOprnd, label) {
-    const p = clone(plistOprnd.value);
-    const q = p.pop();
-    const origstrokewidth = svgOprnd.value.temp.strokewidth;
-    svgOprnd.value.temp.strokewidth = 0.5;
-    svgOprnd.value.temp.isDim = true; // set small arrowhead
-    let six = Rnl.fromNumber(6 / svgOprnd.value.temp.xunitlength);
-    const pEnd = p[p.length - 1];
-    let svg;
-    // Is the label y-coord between the y-coords of the end points?
-    if ((Rnl.lessThan(p[0][1], q[1]) && Rnl.lessThan(q[1], pEnd[1])) ||
-        (Rnl.lessThan(pEnd[1], q[1]) && Rnl.lessThan(q[1], p[0][1]))) {
-      if (!Rnl.lessThan(pEnd[0], q[0])) { six = Rnl.negate(six); }
-      p.forEach(e => {
-        svgOprnd = this.line(svgOprnd, { value: [
-          [Rnl.add(e[0], six), e[1]],
-          [Rnl.add(q[0], six), e[1]]
-        ] });
-      });
-      svgOprnd.value.temp.marker = "arrow";
-      const pos = Rnl.lessThanOrEqualTo(pEnd[0], q[0]) ? "right" : "left";
-      for (let i = 0; i < p.length - 1; i++) {
-        svgOprnd = this.line(svgOprnd, { value : [[q[0], p[i][1]], [q[0], p[i + 1][1]]],
-          unit: null, dtype: dt.MATRIX });
-        svgOprnd = this.line(svgOprnd, { value : [[q[0], p[i + 1][1]], [q[0], p[i][1]]],
-          unit: null, dtype: dt.MATRIX });
-        const p3 = [
-          Rnl.toNumber(q[0]),
-          (Rnl.toNumber(p[i][1]) + Rnl.toNumber(p[i + 1][1])) / 2
-        ];
-        const str = p.length === 2 ? label.value : label.value[i];
-        svg = textLocal(svgOprnd.value, p3, str, pos);
-      }
-    } else {
-      if (!Rnl.lessThan(pEnd[1], q[1])) { six = Rnl.negate(six); }
-      p.forEach(e => {
-        svgOprnd = this.line(svgOprnd, { value: [
-          [e[0], Rnl.add(e[1], six)],
-          [e[0], Rnl.add(q[1], six)]
-        ] });
-      });
-      svgOprnd.value.temp.marker = "arrow";
-      const pos = Rnl.lessThanOrEqualTo(pEnd[1], q[1]) ? "above" : "below";
-      for (let i = 0; i < p.length - 1; i++) {
-        svgOprnd = this.line(svgOprnd, { value: [ [p[i][0], q[1]], [ p[i + 1][0], q[1]] ],
-          unit: null, dtype: dt.MATRIX });
-        svgOprnd = this.line(svgOprnd, { value: [ [ p[i + 1][0], q[1]], [p[i][0], q[1]] ],
-          unit: null, dtype: dt.MATRIX });
-        const p3 = [
-          (Rnl.toNumber(p[i][0]) + Rnl.toNumber(p[i + 1][0])) / 2,
-          Rnl.toNumber(q[1])
-        ];
-        const str = p.length === 2 ? label.value : label.value[i];
-        svg = textLocal(svgOprnd.value, p3, str, pos);
-      }
-    }
-    svg.temp.strokewidth = origstrokewidth;
-    svg.temp.marker = "none";
-    svg.temp.isDim = false;
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  }
-
-};
-
-const draw = Object.freeze({
-  startSvg,
-  functions: functions$1
-});
-
-// Some helper functions and objects.
-
-// Lengths and x-coordinates are written as rational numbers, not floating point.
-// That way, we can make a lessThanOrEqualTo comparison w/o floating point errors.
-
-const ord = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth"];
-
-const loadTypesFromInput = factorInput => {
-  let doLiveLoadPatterns = false;
-  const headings = factorInput.headings || null;
-  const loadTypeMap = Object.create(null);
-  const getsPattern = new Array(9).fill(false);
-  if (factorInput === "service" || !factorInput) {
-    return [null, getsPattern, 1, doLiveLoadPatterns]
-  }
-  for (let i = 0; i < headings.length; i++) {
-    const loadName = headings[i].replace("*", "");
-    loadTypeMap[loadName] = i + 1;
-    if (headings[i].indexOf("*") > -1) {
-      doLiveLoadPatterns = true;
-      getsPattern[i + 1] = true;
-    }
-  }
-  return [loadTypeMap, getsPattern, headings.length, doLiveLoadPatterns]
-};
-
-const combinationsFromInput = (factorInput, loadTypeMap) => {
-  const data = factorInput.data;
-  const headings = factorInput.headings;
-  const combinations = [];
-  for (let i = 0; i < data[0].length; i++) {
-    const factors = new Array(10).fill(0);
-    for (let j = 0; j < headings.length; j++) {
-      const type = loadTypeMap[headings[j].replace("*", "")];
-      factors[type] = Rnl.toNumber(data[j][i]);
-    }
-    combinations.push(factors);
-  }
-  return combinations
-};
-
-const newNode = (fixity, k, xCoordinate) => {
-  return {
-    fixity,
-    k: (fixity === "spring" ? k : 0),
-    x: xCoordinate,
-    P: [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    M: [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    Pr: [0, 0, 0, 0, 0, 0, 0, 0, 0], // "r" stands for reaction
-    PrMin: [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    Mr: [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    MrMin: [0, 0, 0, 0, 0, 0, 0, 0, 0]
-  }
-};
-
-const incrementDegreesOfFreedom = fixity => {
-  switch (fixity) {
-    case "pinned":
-      return 1
-    case "fixed":
-      return 0
-    case "hinge":
-      return 3
-    default:
-      return 2
-  }
-};
-
-const newSegment = (length, xOfLeftEnd) => {
-  // A "segment" is a beam section between points of load discontinuity.
-  return {
-    length,
-    xOfLeftEnd,
-    // Point load applied at left end of segments.
-    // Array dim'ed to 9 for different load types, e.g., dead, live, wind, etc.
-    P: [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    M: [0, 0, 0, 0, 0, 0, 0, 0, 0],  // point moment
-    Pf: 0, // factored point load at left end
-    Mf: 0,
-    w1: [0, 0, 0, 0, 0, 0, 0, 0, 0], // distributed load at left end of segments.
-    w2: [0, 0, 0, 0, 0, 0, 0, 0, 0], // at right end.
-    Vmax: {
-      left: { value: 0, case: 0 },
-      mid: { value: 0, case: 0, x: 0 },
-      right: { value: 0, case: 0 }
-    },
-    Vmin: {
-      left: { value: 0, case: 0 },
-      mid: { value: 0, case: 0, x: 0 },
-      right: { value: 0, case: 0 }
-    },
-    Mmax: {
-      left: { value: 0, case: 0 },
-      mid: { value: 0, case: 0, x: 0 },
-      right: { value: 0, case: 0 }
-    },
-    Mmin: {
-      left: { value: 0, case: 0 },
-      mid: { value: 0, case: 0, x: 0 },
-      right: { value: 0, case: 0 }
-    }
-  }
-};
-
-const identifySegment = (xGlobal, span) => {
-  // Which segment contains xGlobal?
-  for (let i = 0; i < span.segments.length; i++) {
-    const xSegEnd = Rnl.add(span.segments[i].xOfLeftEnd, span.segments[i].length);
-    if (Rnl.lessThanOrEqualTo(xGlobal, xSegEnd)) { return i }
-  }
-  return -1
-};
-
-const splitSegment = (segments, iSeg, xGlobal) => {
-  // segments` is an array.
-  // We need to split the element at segments[iSeg] into two elements.
-  const length = Rnl.subtract(xGlobal, segments[iSeg].xOfLeftEnd);
-  if (iSeg === 0) {
-    segments.unshift(newSegment(length, segments[0].xOfLeftEnd));
-  } else {
-    const s1 = segments.slice(0, iSeg);
-    s1.push(newSegment(length, segments[iSeg].xOfLeftEnd));
-    segments =  s1.concat(segments.slice(iSeg));
-  }
-  const seg = segments[iSeg + 1];
-  const newSeg = segments[iSeg];
-  for (let i = 0; i < 9; i++) {
-    const slope = (seg.w2[i] - seg.w1[i]) / Rnl.toNumber(seg.length);
-    newSeg.w1[i] = seg.w1[i];
-    newSeg.w2[i] = seg.w1[i];
-    seg.w1[i] = seg.w1[i] + slope * Rnl.toNumber(length);
-    newSeg.P[i] = seg.P[i];
-    seg.P[i] = 0;
-    newSeg.M[i] = seg.M[i];
-    seg.M[i] = 0;
-  }
-  seg.xOfLeftEnd = xGlobal;
-  seg.length = Rnl.subtract(seg.length, newSeg.length);
-  return segments
-};
-
-// Here's the main function of this module.
-// Take the raw input strings, validate them, and load them
-// into data structures for use by the analyze function.
-function populateData(input, factorInput) {
-  const errorMsg = "";
-  const beam = {
-    E: 0, // modulus of elasticity
-    I: 0, // moment of inertia
-    k: 0, // spring constant
-    convention: input.convention
-      ? input.convention
-      : 1, // Plot + moment on comp or tension side.
-    SI: input.SI || false, // boolean. Are we using SI units?
-    doLiveLoadPatterns: input.patterns,
-    gotType: [false, false, false, false, false, false, false, false, false],
-    wMax: 0, // default line load maximum
-    x: 180, // x coordinate of the beam's left end inside the SVG, in px
-    allLoadsAreUniform: true // subject to change below
-  };
-
-  if (input.E === 1 || input.E === 0) {
-    // We don't know E or I, so we won't do a deflection diagram.
-    // But we will still do the shear and moment diagrams.
-    beam.E = 1;
-    beam.I = 1;
-    beam.k = 0;
-  } else {
-    beam.E = input.E;  // Modulus of elasticity
-    beam.I = input.I;  // Moment of inertia, I
-    beam.k = input.k;  // Spring constant
-  }
-  if (beam.E === 1 && beam.I === 1 && input.k !== 0) {
-    return ["E and I are necessary for an analysis with spring supports."]
-  }
-  beam.EI = beam.E * beam.I;
-
-  // Load in node data and span data.
-  // Definitions
-  // (1) A "span" is a section of beam between two user-defined nodes.
-  // (2) A "segment" is a section of beam between nodes or points of load discontinuity.
-  // Each span thus consists of one or more segments.
-  // eslint-disable-next-line no-useless-assignment
-  let i = 0;
-  let cummulativeLength = Rnl.zero;
-  const nodes = [];
-  const spans = [];
-  beam.numDegreesOfFreedom = 0;
-  // eslint-disable-next-line max-len
-  const [loadTypeMap, getsPattern, numLoadTypes, doLiveLoadPatterns] = loadTypesFromInput(factorInput);
-  beam.numLoadTypes = numLoadTypes;
-  beam.getsPattern = getsPattern;
-  beam.doLiveLoadPatterns = doLiveLoadPatterns;
-
-  for (i = 0; i < input.nodes.length; i++) {
-    // Process node input.
-    const fixity = input.nodes[i];
-    if (!fixity) { return [`The ${ord[i]} node designation is invalid.`] }
-    if (fixity === "spring" && input.k === 0) {
-      return ["Error. A model with a spring needs a spring constant, k."]
-    }
-    nodes.push(newNode(fixity, beam.k, cummulativeLength));
-    beam.numDegreesOfFreedom += incrementDegreesOfFreedom(fixity);
-    if (i < input.spanLength.length) {
-      // Process span input.
-      const length = input.spanLength[i];
-      spans.push({
-        length,
-        segments: Array(1).fill(newSegment(length, cummulativeLength))
-      });
-      cummulativeLength = Rnl.add(cummulativeLength, length);
-    }
-  }
-  if (spans.length === 0) { return [`No span lengths.`] }
-  const numSpans =  spans.length;
-  beam.numSegments = numSpans;
-  beam.length = nodes[nodes.length - 1].x;
-
-  // Point Loads
-  for (i = 0; i < input.loads.length; i++) {
-    const load = input.loads[i];
-    if (load.shape === "w") {
-      // Skip the distributed loads for now. We'll pick them up later.
-      continue
-    }
-    if (load.from === 0) { continue }
-    let type = load.type === "none"
-      ? 0
-      : loadTypeMap
-      ? loadTypeMap[load.type]
-      : 1;
-    if (type === 0) {
-      if (beam.comboName !== "service") {
-        return [`The ${ord[i]} load must have a load type defined.`]
-      } else {
-        type = 1; // In a service load analysis, treat unlabled loads as Dead loads.
-      }
-    }
-
-    const P = input.loads[i].P;
-    const M = input.loads[i].M;
-    const x = input.loads[i].from;
-
-    let foundAHome = false;
-    for (let j = 0; j < nodes.length; j++) {
-      if (Rnl.areEqual(x, nodes[j].x)) {
-        nodes[j].P[0] += P;
-        nodes[j].M[0] += M;
-        if (type !== 0) { nodes[j].P[type] += P; }
-        foundAHome = true;
-        break
-      }
-    }
-    if (foundAHome) { continue }
-
-    for (let j = 0; j < spans.length; j++) {
-      if (Rnl.greaterThan(x, nodes[j].x) && Rnl.lessThan(x, nodes[j + 1].x)) {
-        const span = spans[j];
-        const iSeg = identifySegment(x, span);
-        if (Rnl.greaterThan(x, span.segments[iSeg].xOfLeftEnd)) {
-          span.segments = splitSegment(span.segments, iSeg, x);
-          beam.numSegments += 1;
-        }
-        beam.gotType[0] = true;
-        span.segments[iSeg + 1].P[0] += P;      // add to sum of service loads
-        span.segments[iSeg + 1].M[0] += M;
-        if (type !== 0) {
-          beam.gotType[type] = true;
-          span.segments[iSeg + 1].P[type] += P;
-          span.segments[iSeg + 1].M[type] += M;
-        }
-      }
-    }
-  }
-
-  // Distributed loads
-  beam.allLoadsAreUniform = true;  // initialize the variable
-  for (i = 0; i < input.loads.length; i++) {
-    const load = input.loads[i];
-    if (load.shape !== "w") { continue }
-    let type = load.type === "none" ? 0 : loadTypeMap ? loadTypeMap[load.type] : 1;
-    if (type === 0) {
-      if (beam.comboName !== "service") {
-        return [`The ${ord[i]} load must have a load type defined.`]
-      } else {
-        type = 1; // In a service load analysis, treat unlabled loads as Dead loads.
-      }
-    }
-
-    const wStart = load.wStart;
-    const wEnd = load.wEnd;
-
-    if (Math.abs(wStart) > beam.wMax) { beam.wMax = Math.abs(wStart); }
-    if (Math.abs(wEnd) > beam.wMax) { beam.wMax = Math.abs(wEnd); }
-
-    const xStart = load.from;
-    const xEnd = Rnl.isZero(load.to)
-      ? cummulativeLength
-      : load.to;
-
-    const slope = (wEnd - wStart) / Rnl.toNumber(Rnl.subtract(xEnd, xStart));
-    if (slope !== 0) {beam.allLoadsAreUniform = false;}
-
-    let iStartSpan = 0;
-    let iEndSpan = 0;
-    let iStartSeg = 0;
-    let iEndSeg = 0;
-
-    // If necessary, split segments at points of load discontinuity.
-    for (let j = 0; j < spans.length; j++) {
-      if (Rnl.areEqual(xStart, nodes[j].x)) {
-        iStartSpan = j;
-        iStartSeg = 0;
-        break
-      }
-      if (Rnl.greaterThan(xStart, nodes[j].x) && Rnl.lessThan(xStart, nodes[j + 1].x)) {
-        for (let k = 0; k < spans[j].segments.length; k++) {
-          const seg = spans[j].segments[k];
-          if (Rnl.areEqual(xStart, seg.xOfLeftEnd)) {
-            iStartSpan = j;
-            iStartSeg = k;
-            break
-          }
-          const segEnd = k < spans[j].segments.length - 1
-            ? spans[j].segments[k + 1].xOfLeftEnd
-            : nodes[j + 1].x;
-          if (Rnl.greaterThan(xStart, seg.xOfLeftEnd) && Rnl.lessThan(xStart, segEnd)) {
-            spans[j].segments = splitSegment(spans[j].segments, k, xStart);
-            beam.numSegments += 1;
-            iStartSpan = j;
-            iStartSeg = k + 1;
-            break
-          }
-        }
-      }
-    }
-
-    for (let j = 0; j < spans.length; j++) {
-      if (Rnl.areEqual(xEnd, nodes[j + 1].x)) {
-        iEndSpan = j;
-        iEndSeg = spans[j].segments.length - 1;
-        break
-      }
-      if (Rnl.greaterThan(xEnd, nodes[j].x) && Rnl.lessThan(xEnd, nodes[j + 1].x)) {
-        for (let k = 0; k < spans[j].segments.length; k++) {
-          const seg = spans[j].segments[k];
-          const segEnd = k < spans[j].segments.length - 1
-            ? spans[j].segments[k + 1].xOfLeftEnd
-            : nodes[j + 1].x;
-          if (Rnl.areEqual(xEnd, segEnd)) {
-            iEndSpan = j;
-            iEndSeg = k;
-            break
-          }
-          if (Rnl.greaterThan(xEnd, seg.xOfLeftEnd) && Rnl.lessThan(xEnd, segEnd)) {
-            spans[j].segments = splitSegment(spans[j].segments, k, xEnd);
-            beam.numSegments += 1;
-            iEndSpan = j;
-            iEndSeg = k;
-            break
-          }
-        }
-      }
-    }
-
-    // Now apply distributed loads
-    for (let iSpan = iStartSpan; iSpan <= iEndSpan; iSpan++) {
-      const span = spans[iSpan];
-      const startSeg = (iSpan  === iStartSpan ? iStartSeg : 0);
-      const endSeg = (iSpan  === iEndSpan ? iEndSeg : spans[iSpan].segments.length - 1);
-      for (let iSeg = startSeg; iSeg <= endSeg; iSeg++) {
-        const xLeft = span.segments[iSeg].xOfLeftEnd;
-        const w1 = wStart + slope * Rnl.toNumber(Rnl.subtract(xLeft, xStart));
-        const xRight = Rnl.add(span.segments[iSeg].xOfLeftEnd, span.segments[iSeg].length);
-        const w2 = wStart + slope * Rnl.toNumber(Rnl.subtract(xRight, xStart));
-        // add to sum of service loads
-        span.segments[iSeg].w1[0] += w1;
-        span.segments[iSeg].w2[0] += w2;
-        // add to specific load type, e.g., dead, live, etc.
-        span.segments[iSeg].w1[type] += w1;
-        span.segments[iSeg].w2[type] += w2;
-      }
-    }
-
-    beam.gotType[0] = true;
-    if (type !== 0) {
-      beam.gotType[type] = true;
-    }
-  }
-
-  // Henceforward there are no <= comparisons.
-  // Change lengths into floating point numbers.
-  for (let i = 0; i < nodes.length; i++) {
-    nodes[i].x = Rnl.toNumber(nodes[i].x);
-  }
-  for (let i = 0; i < spans.length; i++) {
-    spans[i].length = Rnl.toNumber(spans[i].length);
-    for (let j = 0; j < spans[i].segments.length; j++) {
-      spans[i].segments[j].length = Rnl.toNumber(spans[i].segments[j].length);
-      spans[i].segments[j].xOfLeftEnd = Rnl.toNumber(spans[i].segments[j].xOfLeftEnd);
-    }
-  }
-  beam.length = Rnl.toNumber(beam.length);
-
-  const combinations = typeof factorInput === "string"
-    ? "service"
-    : combinationsFromInput(factorInput, loadTypeMap);
-
-  return [errorMsg, beam, nodes, spans, combinations]
-
-}
-
-// Each of the methods in this module draws some item.
-
-const circle = (x, y, radius) => {
-  return { tag: "circle", attrs: { cx: x, cy: y, r: radius } }
-};
-
-const restraint = (node, beam) => {
-  const value = [];
-  const x = beam.xDiagram + beam.xScale * node.x;
-  if (node.fixity === "hinge" || node.fixity === "proppedHinge") {
-    value.push(circle(beam.xDiagram + beam.xScale * node.x, beam.yLoad, 4));
-  }
-  const path = { tag: "path", attrs: { d: "" } };
-  if (node.fixity === "pinned" || node.fixity === "proppedHinge") {
-    // draw a triangle
-    const y = node.fixity === "pinned" ? beam.yLoad + 0.75 : beam.yLoad + 4;
-    path.attrs.d = `M${x} ${y} l5 10 h-10 z`;
-    path.attrs.style = "fill:#fff; stroke:#000";
-  } else if (node.fixity === "fixed") {
-    const xd = (node.x === 0 ? -1 : 1) * 7;
-    // eslint-disable-next-line max-len
-    path.attrs.d = `M${x} ${beam.yLoad - 7} v14 m0 -14 l${xd} 7 M${x} ${beam.yLoad} l${xd} 7 M${x} ${beam.yLoad + 7} l${xd} 7`;
-  } else if (node.fixity === "spring") {
-    const y = beam.yLoad + .75;
-    path.attrs.d = `M${x} ${y} v3 l6 1.5 -12 3 12 3 -12 3 6 1.5 v3 m-6 0 h12`;
-  }
-  value.push(path);
-  return value
-};
-
-const pointForce = (x, y, load, fixity, isReaction = false) => {
-  const sgn = (load < 0 ? -1 : 1); // -1 is down
-  const lengthAdjustment = fixity === "fixed"
-    ? 7
-    : fixity === "pinned" && isReaction
-    ? 10
-    : fixity === "proppedHinge" && isReaction
-    ? 18
-    : fixity === "hinge"
-    ? 4
-    : fixity === "spring" && isReaction
-    ? 18
-    : 0;
-  const length = 40 - lengthAdjustment;
-  // Reactions are drawn below the beam line. Imposed loads are drawn above the beam line.
-  const yText = y + (isReaction ? 55 : -45);
-  // Set x and y at the tip of the arrowhead
-  if (isReaction) { y += lengthAdjustment + 0.75; } else { y -= 0.75; }
-  if (sgn === -1 && isReaction) { y += length; }
-  if (sgn === 1 && !isReaction) { y -= length; }
-  const arrow = {
-    tag: "path",
-    attrs: {
-      style: "fill: #000; fill-opacity:1.0",
-      // eslint-disable-next-line max-len
-      d: `M${x} ${y} l${sgn * 4} ${sgn * 8} h${-sgn * 3.5} v${sgn * (length - 8)} h${-sgn * 1} v${-sgn * (length - 8)} h${-sgn * 3}z`
-    }
-  };
-  const text = textNode(String(Math.abs(load)), x, yText, "middle");
-  return [arrow, text]
-};
-
-const pointMoment = (x, y, load, isReaction = false) => {
-  let isCounterClockwise = load >= 0; // = (load < 0 ? -1 : 1) // 1 is counter-clockwise
-  load = Math.abs(load);
-  let arrow;
-  let text;
-  if (!isReaction) {
-    arrow = momentArrow(x, y, (isCounterClockwise ? 165 : 15), 150, isCounterClockwise);
-    text = textNode(String(load), x, y - 25, "middle");
-  } else {
-    // The moment is a reaction
-    isCounterClockwise = !isCounterClockwise;
-    if (x < 100) {  // left end
-      arrow = momentArrow(x, y, (isCounterClockwise ? 260 : 100), 140, isCounterClockwise);
-      text = textNode(String(load), x - 15, y - 15, "end");
-    } else {
-      arrow = momentArrow(x, y, (isCounterClockwise ? 80 : 280), 140, isCounterClockwise);
-      text = textNode(String(load), x + 16, y - 15);
-    }
-  }
-  return [...arrow, text]
-};
-
-const momentArrow = (xCtr, yCtr, thetaAtArrowPoint, subtendedAngle, isCounterClockwise) => {
-  // Draw a circular arc with an arrowhead.
-  // Find startAngle and endAngle: the begining and ending of the arc
-  // theta = 0 at 3 o'clock.  theta is + for counterclockwise
-  const startAngle = thetaAtArrowPoint * (Math.PI / 180);
-  const sgn = isCounterClockwise ? 1 : -1;
-  const endAngle = startAngle - sgn * subtendedAngle * (Math.PI / 180);
-  // sgn = 1 for counterclockwise, -1 for clockwise
-  const diameter = 35;
-  const r = diameter / 2; // radius
-  const arrowHeadLength = 8;
-  const startAnglePrime = startAngle - sgn * (2 * 0.9 * arrowHeadLength / diameter);
-  const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
-
-  /* eslint-disable no-useless-assignment */
-  let xStart = 0;
-  let yStart = 0;
-  let xEnd = 0;
-  let yEnd = 0;
-  /* eslint-enable no-useless-assignment */
-  if (sgn > 0) {
-    xEnd = (xCtr + r * Math.cos(startAnglePrime)).toFixed(2);   // arrow end
-    yEnd = (yCtr - r * Math.sin(startAnglePrime)).toFixed(2);
-    xStart = (xCtr + r * Math.cos(endAngle)).toFixed(2);
-    yStart = (yCtr - r * Math.sin(endAngle)).toFixed(2);
-  } else {
-    xStart = (xCtr + r * Math.cos(startAnglePrime)).toFixed(2);
-    yStart = (yCtr - r * Math.sin(startAnglePrime)).toFixed(2);
-    xEnd = (xCtr + r * Math.cos(endAngle)).toFixed(2);
-    yEnd = (yCtr - r * Math.sin(endAngle)).toFixed(2);
-  }
-
-  const path = {
-    tag: "path",
-    attrs: {
-      d: `M${xStart} ${yStart}A${r} ${r} 0 ${largeArcFlag} 0 ${xEnd} ${yEnd}`,
-      stroke: 'black',
-      fill: 'none'
-    }
-  };
-
-  // Draw the arrow head
-  const xTip = xCtr + r * Math.cos(startAngle);
-  const yTip = yCtr - r * Math.sin(startAngle);
-  const alpha = startAngle - sgn * 100 / 180 * Math.PI; // rotate by 100°
-  const beta = 22.5 * Math.PI / 180;    // angle subtended by half-arrowhead
-  const x = Array(3).fill("");
-  const y = Array(3).fill("");
-  x[0] = xTip.toFixed(2);
-  y[0] = yTip.toFixed(2);
-  x[1] = (xTip + arrowHeadLength * Math.cos(alpha - beta)).toFixed(2);
-  y[1] = (yTip - arrowHeadLength * Math.sin(alpha - beta)).toFixed(2);
-  x[2] = (xTip + arrowHeadLength * Math.cos(alpha + beta)).toFixed(2);
-  y[2] = (yTip - arrowHeadLength * Math.sin(alpha + beta)).toFixed(2);
-
-  let points = "";
-  for (let i = 0; i < x.length; i++) {
-    points += `${x[i]} ${y[i]} `;
-  }
-  const polygon = { tag: "polygon", attrs: { points } };
-  return [path, polygon]
-};
-
-const polyline = (x, y) => {
-  let d = `M${x[0]} ${y[0]}`;
-  for (let i = 1; i < x.length; i++) {
-    d += ` L${x[i]} ${y[i]}`;
-  }
-  return { tag: "path", attrs: { d, stroke: "black", "fill-opacity": "0.0" } }
-};
-
-const textNode = (str, x, y, horizAlign) => {
-  const node = { tag: "text", attrs: { x: String(x), y: String(y) } };
-  if (horizAlign === "middle" || horizAlign === "end") {
-    node.attrs["text-anchor"] = horizAlign;
-  }
-  node.children = [{ tag: "tspan", text: str }];
-  return node
-};
-
-const Draw = Object.freeze({
-  pointForce,
-  pointMoment,
-  polyline,
-  restraint,
-  textNode
-});
-
-const round$1 = (num, prec) => {
-  // Round a number to prec significant digits.
-  // Return a string. This is used for display of numbers on the diagram.
-  const str = num.toPrecision(prec);
-  if (str.indexOf("e") === -1) { return str }
-  const pos = str.indexOf("e");
-  const significand = Number.parseFloat(str.slice(0, pos));
-  const exponent = Number.parseFloat(str.slice(pos + 1));
-  return (significand * 10 ** exponent).toString()
-};
-
-function createLoadDiagram(beam, nodes, spans) {
-  beam.xDiagram = 90;  // x coordinate at left end of diagram line, px
-  beam.yLoad = 80;     // y coordiate of load diagram
-  beam.xScale = 300 / nodes[nodes.length - 1].x;
-  const lengthFactor = beam.SI ? 1 : 0.3048;
-  const forceFactor = beam.SI ? 1000 : 4448.2216152605;
-  const momentFactor = beam.SI ? 1000 : 4448.2216152605 * 0.3048;
-  const lineLoadFactor = beam.SI ? 1000 : 4448.2216152605 / 0.3048;
-
-  // Begin the diagram.
-  let diagram = [];
-  diagram.push({ tag: "title", attrs: { text: "Beam Diagram" } });
-  diagram.push({
-    tag: "defs",
-    attrs: {},
-    style: `svg { background-color: #fff; }
-text, tspan { font: 12px Arial; }`
-  });
-  diagram.push(Draw.textNode("loads", 20, beam.yLoad + 2));
-  diagram.push(Draw.textNode(`(${beam.SI ? 'kN, m' : 'kips, ft'})`, 20, beam.yLoad + 16));
-  diagram.push({
-    tag: "path",
-    attrs: { stroke: "black", "stroke-width": "1.5px",
-      d: `M${beam.xDiagram} ${beam.yLoad} h300` }
-  });
-
-  // Draw restraints
-  for (let i = 0; i < nodes.length; i++) {
-    if (nodes[i].fixity !== "continuous") {
-      diagram = diagram.concat(Draw.restraint(nodes[i], beam));
-    }
-  }
-
-  // Write the span length below each span, but only if there are no loads in the way.
-  for (let i = 0; i < spans.length; i++) {
-    let okay = true; // initialize
-    if (spans[i].length * beam.xScale < 30) { continue }
-    if (okay) {
-      for (let j = 1; j < spans[i].segments.length; j++) {
-        if (spans[i].segments[j].P[0] > 0) { okay = false; break }
-      }
-    }
-    if (okay) {
-      const x = beam.xDiagram + beam.xScale * (nodes[i].x + spans[i].length / 2);
-      const unit = beam.SI ? "" : "′";
-      const sText = round$1(spans[i].length / lengthFactor, 3);
-      diagram.push(Draw.textNode(`${sText}${unit}`, x, beam.yLoad + 15));
-    }
-  }
-
-  // Draw nodal loads
-  for (let i = 0; i < nodes.length; i++) {
-    const x = beam.xDiagram + beam.xScale * nodes[i].x;
-    if (Math.abs(nodes[i].P[0]) > 0) {
-      const sText = round$1(nodes[i].P[0] / forceFactor, 3);
-      diagram = diagram.concat(Draw.pointForce(x, beam.yLoad, sText, nodes[i].fixity));
-    }
-    if (Math.abs(nodes[i].M[0]) > 0) {
-      const sText = round$1(nodes[i].M[0] / momentFactor, 3);
-      diagram = diagram.concat(Draw.pointMoment(x, beam.yLoad, sText));
-    }
-  }
-
-  // Draw span loads
-  const wScale = 20 / beam.wMax;
-  let wPrev = 0;
-  let d = `M${beam.xDiagram} ${beam.yLoad}`;
-  for (let i = 0; i < spans.length; i++) {
-    for (let j = 0; j < spans[i].segments.length; j++) {
-      const seg = spans[i].segments[j];
-      const x = beam.xDiagram + beam.xScale * seg.xOfLeftEnd;
-      if (Math.abs(seg.P[0]) > 0) {
-        const sText = round$1(seg.P[0] / forceFactor, 3);
-        diagram = diagram.concat(Draw.pointForce(x, beam.yLoad, sText, "continuous"));
-      }
-      if (Math.abs(seg.M[0]) > 0) {
-        const sText = round$1(seg.M[0] / momentFactor, 3);
-        diagram = diagram.concat(Draw.pointMoment(x, beam.yLoad, sText));
-      }
-      // Draw a line segment for the service load.
-      const xEnd = x + beam.xScale * seg.length;
-      if (seg.w1[0] !== wPrev) {
-        d += `V${beam.yLoad + seg.w1[0] * wScale}`; // vertical load discontinuiy.
-      }
-      const yEnd = beam.yLoad + seg.w2[0] * wScale;
-      d += `L${xEnd} ${yEnd}`;
-      wPrev =  seg.w2[0];
-    }
-  }
-  if (wPrev !== 0) { d += `V${beam.yLoad}`; }
-  diagram.push({ tag: "path", attrs: { d, stroke: "black", "fill-opacity": "0.0" } });
-
-  // Write in the line load values
-  // eslint-disable-next-line no-useless-assignment
-  let lastSegUniform = false;
-  let firstSegment;
-  let xFirstSegment = 0;
-  const segments = [];
-  for (let i = 0; i < spans.length; i++) {
-    for (let j = 0; j < spans[i].segments.length; j++) {
-      segments.push(spans[i].segments[j]);
-    }
-  }
-  const numSegments = segments.length;
-  for (let i = 0; i < segments.length; i++) {
-    const seg = segments[i];
-    if (seg.w1[0] === seg.w2[0] && Math.abs(seg.w1[0]) > 0) {
-      lastSegUniform = true;
-      if (i === 0 || seg.w1[0] !== segments[i - 1].w1[0] || lastSegUniform === false) {
-        firstSegment = i;
-        xFirstSegment = beam.xScale * seg.xOfLeftEnd;
-      }
-      if (i === numSegments - 1 || segments[i + 1].w1[0] !== segments[i + 1].w2[0]
-        || seg.w1[0] !== segments[i + 1].w1[0]) {
-        // This segment is the end of a uniform load.
-        // Find a place to write the load value
-        const lenSegLoad = i < numSegments - 1
-          ? segments[i + 1].xOfLeftEnd - segments[firstSegment].xOfLeftEnd
-          : beam.length - segments[firstSegment].xOfLeftEnd;
-        if (lenSegLoad * beam.xScale > 30) {
-          let noBust = true; // initialize the value
-          const fudge = seg.w1[0] > 0 ? 10 : -4;
-          const yy = beam.yLoad + wScale * seg.w1[0] + fudge;
-          const str = round$1(Math.abs(seg.w1[0] / lineLoadFactor), 3);
-          // try the middle of the uniform load.  See if there is a point load there
-          for (let j = firstSegment + 1; j <= i; j++) {
-            if (beam.xScale * (Math.abs(segments[j].xOfLeftEnd
-              - (segments[firstSegment].xOfLeftEnd + lenSegLoad / 2))) < 35) {
-              if (segments[j].M[0] || segments[j].P[0] !== 0) {
-                noBust = false;
-                break
-              }
-            }
-          }
-          if (noBust) {
-            const x = beam.xDiagram + xFirstSegment + beam.xScale * lenSegLoad / 2;
-            diagram.push(Draw.textNode(str, x, yy));
-          } else {
-            // try the 1/3 point
-            noBust = true;
-            for (let j = firstSegment + 1; j <= i; j++) {
-              if (beam.xScale * (Math.abs(segments[j].xOfLeftEnd
-                - (segments[firstSegment].xOfLeftEnd + lenSegLoad / 3))) < 35) {
-                if (segments[j].M[0] || segments[j].P[0] !== 0) {
-                  noBust = false;
-                  break
-                }
-              }
-            }
-            if (noBust) {
-              const x = beam.xDiagram + xFirstSegment + beam.xScale * lenSegLoad / 3 - 17;
-              diagram.push(Draw.textNode(str, x, yy));
-            } else {
-              // try the 2/3 point
-              noBust = true;
-              for (let j = firstSegment + 1; j <= i; j++) {
-                if (beam.xScale * (Math.abs(segments[j].xOfLeftEnd
-                  - (segments[firstSegment].xOfLeftEnd + 2 * lenSegLoad / 3))) < 5) {
-                  if (segments[j].M[0] || segments[j].P[0] !== 0) {
-                    noBust = false;
-                    break
-                  }
-                }
-              }
-              if (noBust) {
-                const x = beam.xDiagram + xFirstSegment + beam.xScale * 2 * lenSegLoad / 3;
-                diagram.push(Draw.textNode(str, x, yy));
-              } else {
-                if (i === 0) {
-                  diagram.push(Draw.textNode(str, beam.xDiagram  - 35, yy));
-                }
-              }
-            }
-          }
-        }
-      }
-    } else {
-      // We've got a distributed sloping load
-      // eslint-disable-next-line no-useless-assignment
-      lastSegUniform = false;
-      const s = i === 0
-        ? 0
-        : (segments[i - 1].w2[0] - segments[i - 1].w1[0]) / segments[i - 1].length;
-      const s2 = (seg.w2[0] - seg.w1[0]) / seg.length;
-      const s3 = i === numSegments - 1
-        ? 0
-        : (segments[i + 1].w2[0] - segments[i + 1].w1[0]) / segments[i + 1].length;
-      if (Math.abs(s2 - s) > 0.05 || i === 0) {
-        if (Math.abs(seg.w1[0]) > 0.05) {
-          if (seg.length * beam.xScale > 20) {
-            const str = round$1(Math.abs(seg.w1[0] / lineLoadFactor), 3);
-            const x = beam.xDiagram + beam.xScale * seg.xOfLeftEnd;
-            const fudge = seg.w1[0] > 0 ? 10 : -5;
-            const yy = beam.yLoad + wScale * seg.w1[0] + fudge;
-            diagram.push(Draw.textNode(str, x, yy));
-          }
-        }
-      }
-      if (Math.abs(s2 - s3) > 0.05  || i === numSegments - 1
-        || Math.abs(seg.w2[0] - segments[i + 1].w1[0]) > 0) {
-        if (Math.abs(seg.w2[0]) > 0.05) {
-          if (seg.length * beam.xScale > 20) {
-            const str = round$1(Math.abs(seg.w2[0] / lineLoadFactor), 3);
-            const x = beam.xDiagram + beam.xScale * (seg.xOfLeftEnd + seg.length) - 30;
-            const fudge = seg.w2[0] > 0 ? 10 : -5;
-            const yy = beam.yLoad + wScale * seg.w2[0] + fudge;
-            diagram.push(Draw.textNode(str, x, yy));
-          }
-        }
-      }
-    }
-  }
-
-  return diagram
-}
-
-const ftRegEx = /′/g;
-const numberRegEx$3 = new RegExp(Rnl.numberPattern);
-const lengths = ["ft", "m", "cm", "mm"];
-const metricLengths = ["m", "cm", "mm"];
-
-const readNumber = str => {
-  const matches = numberRegEx$3.exec(str);
-  if (matches) {
-    const numStr = matches[0];
-    return [Rnl.fromString(numStr), numStr.length];
-  } else {
-    return ["Error", null]
-  }
-};
-
-const convertToBaseUnit = (num, unitName) => {
-  const unit = unitFromUnitName(unitName);
-  return Rnl.multiply(Rnl.add(num, unit.gauge), unit.factor)
-};
-
-const readInputData = data => {
-  const input = Object.create(null);
-  // Set some defaults
-  input.nodes = [];
-  input.spanLength = [];
-  input.loads = [];
-  input.E = 1;
-  input.I = 1;
-  input.k = 0;
-  input.SI = false;
-  input.convention = 1;
-  // Read the input and overwrite the defaults.
-
-  // Read the top line of data.
-  // It contains the geometry, connectivity, and node fixity.
-  const layout = data[1][0].trim();
-  if (numberRegEx$3.test(layout)) { input.nodes.push("continuous"); }
-  const elements = layout.split(/ +/g);
-  for (let k = 0; k < elements.length; k++) {
-    switch (elements[k]) {
-      case "p":
-      case "△":
-        input.nodes.push("pinned");
-        break
-      case "f":
-      case "⫢":
-        input.nodes.push("fixed");
-        break
-      case "h":
-      case "∘":
-        input.nodes.push("hinged");
-        break
-      case "ph":
-      case "⫯":
-      case "⧊":
-        input.nodes.push("proppedHinge");
-        break
-      case "s":
-      case "⌇":
-        input.nodes.push("spring");
-        break
-      case "-":
-        input.nodes.push("continuous");
-        break
-      default: {
-        const element = elements[k].replace(ftRegEx, "ft");
-        const [L, pos] = readNumber(element);
-        if (typeof L === "string") { return "Error. Non-numeric length." }
-        let unitName = element.slice(pos).trim();
-        if (unitName === "") {
-          if (lengths.includes(elements[k + 1])) {
-            unitName = elements[k + 1];
-            k += 1;
-          } else {
-            unitName = "mm";
-          }
-        }
-        if (metricLengths.includes(unitName)) { input.SI = true; }
-        input.spanLength.push(convertToBaseUnit(L, unitName));
-        break
-      }
-    }
-  }
-  if (numberRegEx$3.test(elements[elements.length - 1])) { input.nodes.push("continuous"); }
-
-  // Read the rest of the data.
-  for (let i = 1; i < data[0].length; i++) {
-    const item = data[0][i].trim();
-    let datum = data[1][i].trim();
-    switch (item) {
-      case "E": {
-        const [E, pos] = readNumber(datum);
-        if (typeof E === "string") { return "Error. Non-numeric E." }
-        const unitName = datum.slice(pos).trim();
-        input.E = Rnl.toNumber(convertToBaseUnit(E, unitName));
-        break
-      }
-
-      case "I": {
-        const [I, pos] = readNumber(datum);
-        if (typeof I === "string") { return "Error. Non-numeric I." }
-        const unitName = datum.slice(pos).trim();
-        input.I = Rnl.toNumber(convertToBaseUnit(I, unitName));
-        break
-      }
-
-      case "k": {
-        const [k, pos] = readNumber(datum);
-        if (typeof k === "string") { return "Error. Non-numeric k." }
-        const unitName = datum.slice(pos).trim();
-        input.k = Rnl.toNumber(convertToBaseUnit(k, unitName));
-        break
-      }
-
-      case "+M": {
-        input.convention = datum.charAt(0).toLowerCase() === "←→" ? 1 : -1;
-        break
-      }
-
-      default: {
-        // Treat as a load
-        const load = Object.create(null);
-        datum = datum.replace(ftRegEx, "ft");
-        const elements = datum.split(",");
-        let str = elements[0];
-        load.type = item;
-        load.from = Rnl.zero;
-        load.to = Rnl.zero;
-        load.P = 0;
-        load.M = 0;
-        load.wStart = 0;
-        load.wEnd = 0;
-        let [num1, pos] = readNumber(str);  // eslint-disable-line prefer-const
-        if (typeof num1 === "string") { return "Error. Non-numeric load." }
-        let num2 = num1;
-        str = str.slice(pos).trim();
-        if (str.slice(0, 1) === ":") {
-          str = str.slice(1).trim();
-          [num2, pos] = readNumber(str);
-          str = str.slice(pos).trim();
-        }
-        const unitName = str.trim();
-        const unit = unitFromUnitName(unitName);
-        // Read the load from & to points, if any
-        let L1 = 0;
-        let L2 = 0;
-        let lengthUnitName = "";
-        if (elements.length > 1) {
-          str = elements[1].trim();
-          [L1, pos] = readNumber(str);
-          str = str.slice(pos).trim();
-          if (str.slice(0, 1) === ":") {
-            str = str.slice(1).trim();
-            [L2, pos] = readNumber(str);
-            str = str.slice(pos).trim();
-          } else {
-            L2 = L1;
-          }
-          lengthUnitName = str.trim();
-          if (lengthUnitName === "") { lengthUnitName = "mm"; }
-        }
-        const expos = unit.expos.join("");
-        if (expos === "01-200000") {
-          load.shape = "w";
-          load.wStart = Rnl.toNumber(convertToBaseUnit(num1, unitName));
-          load.wEnd = Rnl.toNumber(convertToBaseUnit(num2, unitName));
-        } else if (expos === "11-200000") {
-          load.shape = "P";
-          load.P = Rnl.toNumber(convertToBaseUnit(num1, unitName));
-        } else if (expos === "21-200000") {
-          load.shape = "M";
-          load.M = Rnl.toNumber(convertToBaseUnit(num1, unitName));
-        } else {
-          return `Error. ${unitName} is not a force, line load, or moment.`
-        }
-        if (L1 !== 0) { load.from = convertToBaseUnit(L1, lengthUnitName); }
-        if (L2 !== 0) { load.to = convertToBaseUnit(L2, lengthUnitName); }
-        input.loads.push(load);
-      }
-    }
-  }
-  return input
-};
-
-/* eslint-disable no-useless-assignment */
-
-const dotProduct = (a, b) => a.map((e, i) => (e * b[i])).reduce((m, n) => m + n);
-const isLiveish = (loadType, beam) => beam.getsPattern[loadType];
-
-
-function doAnalysis(beam, nodes, spans) {
-  const numNodes = nodes.length;
-  const numSpans = spans.length;
-  const gotType = beam.gotType;
-  const numDegreesOfFreedom = beam.numDegreesOfFreedom;
-  const numEndActions = 4 * numSpans + numNodes; // include the node spring actions.
-  beam.numEndActions = numEndActions;
-  const EI = beam.EI;
-
-  // The Direct Stiffness Method employs matrix methods to solve indeterminate structures.
-  // Textbooks describe the Direct Stiffness Method with one-based matrices.
-  // To avoid confusion, the code below employs arrays as if they were one-based.
-  // Since JavaScript arrays are actually zero-based, we will dimension each array with one
-  // element more than it needs. Then we'll leave array[0] unused. All our loops will be
-  // written as if we had one-based arrays.
-
-  // Prepend elements to arrays `nodes` & `spans` so that they act like 1-based arrays.
-  nodes.unshift(0);
-  spans.unshift(0);
-
-  // Find the Span Stiffness Matrix, SSM
-  // Imagine that a fixed-end span undergoes a displacement, Δ, down at its right end.
-  // (Notice that rotation, θ, is zero at both ends)
-  // ▄                                                         █
-  // █                                                         █
-  // █▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,█──────┬──
-  // █             ▀▀▀▀▀▀▀▄▄▄▄                                 █      │
-  // █                         ▀▀▀▄▄▄▄▄                        █      │ Δ
-  // █                                 ▀▀▀▀▄▄▄▄▄▄              █      │
-  //                                             ▀▀▀▀▀▀▀▀▀▀▀▀▀▀█──────┴──
-  //                                                           █
-  // If we draw the free-body diagram of the span, we would see these forces:
-  // V_left = 6EIΔ/L², upward
-  // M_left = 12EIΔ/L³, clockwise
-  // V_right = 6EIΔ/L², downward
-  // M_right = 12EIΔ/L³, clockwise
-  // The Span Stiffness Matrix is populated, for each span, with just those stiffnesses.
-
-  const ssm = []; // Span Stiffnes Matrix, not yet the Stiffness Matrix.
-  ssm.push([0, 0, 0, 0, 0]);
-  for (let i = 1; i <= numSpans; i++) {
-    const subMatrix = [
-      [0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0]
-    ];
-    subMatrix[1][1] = EI * 12 / spans[i].length ** 3;
-    subMatrix[1][2] = EI * 6 / spans[i].length ** 2;
-    subMatrix[1][3] = -EI * 12 / spans[i].length ** 3;
-    subMatrix[1][4] = EI * 6 / spans[i].length ** 2;
-    subMatrix[2][1] = EI * 6 / spans[i].length ** 2;
-    subMatrix[2][2] = EI * 4 / spans[i].length;
-    subMatrix[2][3] = -EI * 6 / spans[i].length ** 2;
-    subMatrix[2][4] = EI * 2 / spans[i].length;
-    subMatrix[3][1] = -EI * 12 / spans[i].length ** 3;
-    subMatrix[3][2] = -EI * 6 / spans[i].length ** 2;
-    subMatrix[3][3] = EI * 12 / spans[i].length ** 3;
-    subMatrix[3][4] = -EI * 6 / spans[i].length ** 2;
-    subMatrix[4][1] = EI * 6 / spans[i].length ** 2;
-    subMatrix[4][2] = EI * 2 / spans[i].length;
-    subMatrix[4][3] = -EI * 6 / spans[i].length ** 2;
-    subMatrix[4][4] = EI * 4 / spans[i].length;
-    ssm.push(subMatrix);
-  }
-
-  //Find dtm, the Displacement Transformation Matrix
-  const dtm = new Array(numEndActions + 1).fill(0).map(e => {
-    return new Array(numDegreesOfFreedom + 1).fill(0)
-  });
-  let j = 0;
-  for (let i = 1; i <= numNodes; i++) {
-    if (i === 1) {
-      if (nodes[i].fixity === "continuous" || nodes[i].fixity === "spring") {
-        dtm[1][1] = 1;
-        dtm[2][1] = 1;
-        dtm[3][2] = 1;
-        j = 2;
-      } else if (nodes[i].fixity === "fixed") ; else if (nodes[i].fixity === "pinned") {
-        dtm[3][1] = 1;
-        j = 1;
-      }
-    } else if (i === numNodes) {
-      if (nodes[i].fixity === "continuous" || nodes[i].fixity === "spring") {
-        j = j + 1;
-        dtm[5 * numSpans - 1][j] = 1;
-        j = j + 1;
-        dtm[5 * numSpans][j] = 1;
-        dtm[5 * numSpans + 1][j - 1] = 1;
-      } else if (nodes[i].fixity === "fixed") ; else if (nodes[i].fixity === "pinned") {
-        j = j + 1;
-        dtm[5 * numSpans][j] = 1;
-      }
-    } else {
-      if (nodes[i].fixity === "continuous" || nodes[i].fixity === "spring") {
-        j = j + 1;
-        dtm[5 * (i - 1) - 1][j] = 1;
-        dtm[5 * (i - 1) + 1][j] = 1;
-        dtm[5 * (i - 1) + 2][j] = 1;
-        j = j + 1;
-        dtm[5 * (i - 1)][j] = 1;
-        dtm[5 * (i - 1) + 3][j] = 1;
-      } else if (nodes[i].fixity === "hinge") {
-        j = j + 1;
-        dtm[5 * (i - 1) - 1][j] = 1;
-        dtm[5 * (i - 1) + 1][j] = 1;
-        dtm[5 * (i - 1) + 2][j] = 1;
-        j = j + 1;
-        dtm[5 * (i - 1)][j] = 1;
-        j = j + 1;
-        dtm[5 * (i - 1) + 3][j] = 1;
-      } else if (nodes[i].fixity === "proppedHinge") {
-        j = j + 1;
-        dtm[5 * (i - 1)][j] = 1;
-        j = j + 1;
-        dtm[5 * (i - 1) + 3][j] = 1;
-      } else if (nodes[i].fixity === "fixed") ; else if (nodes[i].fixity === "pinned") {
-        j = j + 1;
-        dtm[5 * (i - 1)][j] = 1;
-        dtm[5 * (i - 1) + 3][j] = 1;
-      }
-    }
-  }
-
-  //Now do the first  matrix operations
-  const lsmDtm = createLsmDtm(ssm, dtm, nodes, numEndActions, numDegreesOfFreedom);
-  // Create the Stiffness Matrix.
-  const [sm, bandWidth] = createSM(dtm, lsmDtm, numDegreesOfFreedom);
-
-  let diag = [];
-  let ltm = [];
-  if (numDegreesOfFreedom > 1) {
-    [diag, ltm] = luDecomposition(sm, bandWidth);
-  }
-
-  //Find the number of load patterns
-  beam.containsLive = false;
-  for (let i = 1; i <= beam.numLoadTypes; i++) {
-    if (beam.getsPattern[i]) { beam.containsLive = true; break }
-  }
-  const numPatterns = !beam.containsLive
-    ? 1
-    : !beam.doLiveLoadPatterns
-    ? 1
-    : numSpans > 7
-    ? beam.patterns
-    : 2;
-
-  // Initialize some variables
-  const feam = new Array(numEndActions + 1).fill(0);       // Fixed End Action Matrix
-  const nfm = new Array(numDegreesOfFreedom + 1).fill(0);  // Nodal Force Matrix
-  let mam;  // Member Action Matrix
-  let dm;   // Displacement Matrix
-  const actions = new Array(beam.numLoadTypes);
-  const deflections = new Array(beam.numLoadTypes);
-  for (let i = 0; i <= beam.numLoadTypes; i++) {
-    if (beam.getsPattern[i]) {
-      actions[i] = new Array(numEndActions + 1).fill(0);
-      for (let j = 0; j < actions[i].length; j++) {
-        actions[i][j] = new Array(numDegreesOfFreedom).fill(0);
-      }
-      deflections[i] = new Array(numDegreesOfFreedom + 1).fill(0);
-      for (let j = 0; j < deflections[i].length; j++) {
-        deflections[i][j] = Array(numSpans + 1).fill(0);
-      }
-    } else {
-      actions[i] = new Array(numEndActions).fill(0);
-      deflections[i] = new Array(numDegreesOfFreedom).fill(0);
-    }
-  }
-
-  //Find a Member end Action Matrix, mam for each type of load, Service, D, L, S, W, E, etc
-  //For the live loads, find a different mam due to loads on each individual span.
-  for (let loadType = 0; loadType <= 9; loadType++) {
-    if (loadType === 0 || gotType[loadType]) {
-      let lastK = 1;
-      let doPatterns = false; // patterned live loads
-      if (loadType === 0) {
-        doPatterns = false;
-        lastK = 1;
-      } else if (isLiveish(loadType, beam) && numPatterns > 1) {
-        doPatterns = true;
-        // To do load patterns, we have to get a Member Action Matrix, mam, for each span.
-        lastK = numSpans;
-      } else {
-        doPatterns = false;
-        lastK = 1;
-      }
-
-      for (let k = 1; k <= lastK; k++) {
-        for (let i = 1;  i <= numSpans; i++) {
-          const L = spans[i].length;
-          const iSpring = 5 * i - 4;
-          const i1 = 5 * i - 3;
-          const i2 = 5 * i - 2;
-          const i3 = 5 * i - 1;
-          const i4 = 5 * i;
-
-          // Find the fixed end actions
-          feam[iSpring] = 0;
-          feam[i1] = 0; //The left end reaction if this segment were a fixed/fixed beam.
-          feam[i2] = 0; //The left fixed end moment
-          feam[i3] = 0; //The right end reaction
-          feam[i4] = 0; //The right fixed end moment
-          let applyLoadsFromThisSpan = false;
-          if (!doPatterns) {
-            // We are not doing live load patterns.
-            // So make one pass thru the beam and get a MAM that is the result of all loads.
-            applyLoadsFromThisSpan = true;
-          } else {
-            // We are doing live load patterns.
-            // k = number of spans.
-            // Make k passes thru the beam.
-            // In the kth pass, we calclate a MAM for the entire beam that results from
-            // live loads on just the kth span.
-            // The other spans have FEAM = [0, 0, etc] as their contribution to this MAM.
-            // Having k MAMs will enable us later to superimpose forces for each pattern.
-            applyLoadsFromThisSpan = i === k;
-          }
-
-          if (applyLoadsFromThisSpan) {
-            for (let iSeg = 0; iSeg < spans[i].segments.length; iSeg++) {
-              const seg = spans[i].segments[iSeg];
-              // In the next few lines,
-              // a is the distance from the beginning of the span to the load point.
-              // b is the length of the load.
-              // c is the distance from the end of the load to the right edge of the span.
-              // e is the distance from the left edge of the load to the right end of the span.
-              // d is the distance from the right edge of the load to the left edge of the span
-              let w = 0;
-              let s = 0;
-              const a = seg.xOfLeftEnd - nodes[i].x;
-              let b = seg.length;
-              let c = L - a - b;
-              let d = a + b;
-              const e = b + c;
-              let gotOppSigns = false;
-              let a2 = 0;
-              let b2 = 0;
-              let c2 = 0;
-              let d2 = 0;
-              let e2 = 0;
-
-              if (Math.abs(seg.w1[loadType]) < 0.000000001) { seg.w1[loadType] = 0; }
-              if (Math.abs(seg.w2[loadType]) < 0.000000001) { seg.w2[loadType] = 0; }
-
-              if (seg.w1[loadType] !== 0 && seg.w2[loadType] !== 0 &&
-                      Math.sign(seg.w1[loadType]) !== Math.sign(seg.w2[loadType])) {
-                gotOppSigns = true;
-                w = 0;
-                s = (seg.w2[loadType] - seg.w1[loadType]) / b;   //slope of line load
-                a2 = a - seg.w1[loadType] / s;
-                b2 = d - a2;
-                c2 = c;
-                d2 = d;
-                e2 = d2 - b2;
-                b = a2 - a;
-                d = a + b;
-                c = L - d;
-
-              } else {
-                gotOppSigns = false;
-                w = Math.abs(seg.w1[loadType]) < Math.abs(seg.w2[loadType])
-                  ? seg.w1[loadType]
-                  : seg.w2[loadType];
-              }
-
-              if (a === 0) {
-                feam[iSpring] = seg.P[loadType];
-              } else {
-                //FEA for point loads
-                feam[i2] = feam[i2] + seg.P[loadType] * a * e ** 2 / L ** 2;
-                feam[i4] = feam[i4] - seg.P[loadType] * a ** 2 * e / L ** 2;
-                feam[i2] = feam[i2] - seg.M[loadType] * (-1 + 4 * a / L - 3 * a ** 2 / L ** 2);
-                feam[i4] = feam[i4] - seg.M[loadType] * a / L * (2 - 3 * a / L);
-                feam[i1] = feam[i1] + seg.P[loadType] * e ** 2 / L ** 3 * (3 * a + e);
-                feam[i3] = feam[i3] + seg.P[loadType] * a ** 2 / L ** 3 * (a + 3 * e);
-                feam[i1] = feam[i1] - 6 * seg.M[loadType] * a / L ** 2 * (1 - a / L);
-                feam[i3] = feam[i3] + 6 * seg.M[loadType] * a / L ** 2 * (1 - a / L);
-              }
-
-              //FEA for uniform loads
-              if (w !== 0) {
-                const mA = (w * b / (12 * L ** 2 * b)) * (e ** 3 * (4 * L - 3 * e)
-                    - c ** 3 * (4 * L - 3 * c));
-                feam[i2] = feam[i2] + mA;
-                const mB = (w * b / (12 * L ** 2 * b)) * (d ** 3 * (4 * L - 3 * d)
-                    - a ** 3 * (4 * L - 3 * a));
-                feam[i4] = feam[i4] - mB;
-                feam[i1] = feam[i1] + (w * b / (2 * L)) * (2 * c + b) + (mA - mB) / L;
-                feam[i3] = feam[i3] + (w * b / (2 * L)) * (2 * a + b) + (mB - mA) / L;
-              }
-
-              //FEA for triangular loads
-              if (Math.abs(seg.w1[loadType]) > Math.abs(seg.w2[loadType]) || gotOppSigns) {
-                const wL = seg.w1[loadType] - w;
-                // const wR = 0
-                const wT = wL;
-                const centerOfTriangle = a + b / 3;
-                const wF = wT * d / b;
-                const mA = (wF * L ** 2 / 60) * (d / L) ** 2 * (10 - 10 * d / L
-                    + 3 * d ** 2 / L ** 2)
-                    - ((wF - wT) * L ** 2 / 60) * (a / L) ** 2
-                      * (10 - 10 * a / L + 3 * a ** 2 / L ** 2)
-                    - (wT * L ** 2 / 12) * (a / L) ** 2 * (6 - 8 * a / L + 3 * a ** 2 / L ** 2);
-                feam[i2] = feam[i2] + mA;
-                const mB = (wF * L ** 2 / 60) * (d / L) ** 3 * (5 - 3 * d / L)
-                    - ((wF - wT) * L ** 2 / 60) * (a / L) ** 3 * (5 - 3 * a / L)
-                    - (wT * L ** 2 / 12) * (a / L) ** 3 * (4 - 3 * a / L);
-                feam[i4] = feam[i4] - mB;
-                feam[i1] = feam[i1]
-                          + 0.5 * (wT * b) * (L - centerOfTriangle) / L + (mA - mB) / L;
-                feam[i3] = feam[i3] + 0.5 * (wT * b) * centerOfTriangle / L + (mB - mA) / L;
-
-              } else if (Math.abs(seg.w2[loadType]) > Math.abs(seg.w1[loadType])) {
-                // const wL = 0
-                const wR = seg.w2[loadType] - w;
-                const wT = wR;
-                const centerOfTriangle = a + 2 * b / 3;
-                const wF = wT * e / b;
-                const mA = (wF * L ** 2 / 60) * (e / L) ** 3 * (5 - 3 * e / L)
-                    - ((wF - wT) * L ** 2 / 60) * (c / L) ** 3 * (5 - 3 * c / L)
-                    - (wT * L ** 2 / 12) * (c / L) ** 3 * (4 - 3 * c / L);
-                feam[i2] = feam[i2] + mA;
-                const mB = (wF * L ** 2 / 60) * (e / L) ** 2
-                      * (10 - 10 * e / L + 3 * e ** 2 / L ** 2)
-                    - ((wF - wT) * L ** 2 / 60) * (c / L) ** 2
-                      * (10 - 10 * c / L + 3 * c ** 2 / L ** 2)
-                    - (wT * L ** 2 / 12) * (c / L) ** 2 * (6 - 8 * c / L + 3 * c ** 2 / L ** 2);
-                feam[i4] = feam[i4] - mB;
-                feam[i1] = feam[i1]
-                           + 0.5 * (wT * b) * (L - centerOfTriangle) / L + (mA - mB) / L;
-                feam[i3] = feam[i3] + 0.5 * (wT * b) * centerOfTriangle / L + (mB - mA) / L;
-              }
-              if (gotOppSigns) {
-                //Do the right-hand triangle load
-                // const wL = 0
-                // const wR = seg.w2[loadType]
-                const wT = seg.w2[loadType];
-                const centerOfTriangle = a2 + 2 * b2 / 3;
-                const wF = wT * e2 / b2;
-                const mA = (wF * L ** 2 / 60) * (e2 / L) ** 3 * (5 - 3 * e2 / L)
-                    - ((wF - wT) * L ** 2 / 60) * (c2 / L) ** 3 * (5 - 3 * c2 / L)
-                    - (wT * L ** 2 / 12) * (c2 / L) ** 3 * (4 - 3 * c2 / L);
-                feam[i2] = feam[i2] + mA;
-                const mB = (wF * L ** 2 / 60) * (e2 / L) ** 2
-                    * (10 - 10 * e2 / L + 3 * e2 ** 2 / L ** 2)
-                    - ((wF - wT) * L ** 2 / 60) * (c2 / L) ** 2
-                    * (10 - 10 * c2 / L + 3 * c2 ** 2 / L ** 2)
-                    // eslint-disable-next-line max-len
-                    - (wT * L ** 2 / 12) * (c2 / L) ** 2 * (6 - 8 * c2 / L + 3 * c2 ** 2 / L ** 2);
-                feam[i4] = feam[i4] - mB;
-                feam[i1] = feam[i1]
-                          + 0.5 * (wT * b2) * (L - centerOfTriangle) / L + (mA - mB) / L;
-                feam[i3] = feam[i3] + 0.5 * (wT * b2) * centerOfTriangle / L + (mB - mA) / L;
-              }
-            }
-          }
-        }
-
-        //Find the Nodal Force Matrix, NFM
-        let j = 0;
-        for (let i = 1; i <= numNodes; i++) {
-          if (i === 1) {
-            if (nodes[i].fixity === "continuous" || nodes[i].fixity === "spring") {
-              nfm[1] = -feam[1] - feam[2];
-              nfm[2] = -feam[3];
-              if (isLiveish(loadType, beam) && numPatterns > 1) {
-                if (k === 0) {
-                  nfm[1] = nfm[1] - nodes[1].P[loadType];
-                  nfm[2] = nfm[2] - nodes[1].M[loadType];
-                }
-              } else {
-                nfm[1] = nfm[1] - nodes[1].P[loadType];
-                nfm[2] = nfm[2] - nodes[1].M[loadType];
-              }
-
-              j = 2;
-            } else if (nodes[i].fixity === "fixed") ; else if (nodes[i].fixity === "pinned") {
-              j += 1;
-              nfm[1] = -feam[3];
-              if (isLiveish(loadType, beam) && numPatterns > 1) {
-                if (k === 1) {
-                  nfm[j] = nfm[j] - nodes[1].M[loadType];
-                }
-              } else {
-                nfm[j] = nfm[j] - nodes[1].M[loadType];
-              }
-            }
-          } else if (i === numNodes) {
-            if (nodes[i].fixity === "continuous" || nodes[i].fixity === "spring") {
-              j += 1;
-              nfm[j] = -feam[5 * numSpans - 1] - feam[5 * numSpans + 1];
-              j += 1;
-              nfm[j] = -feam[5 * numSpans];
-              if (isLiveish(loadType, beam) && numPatterns > 1) {
-                if (k === numSpans) {
-                  nfm[j - 1] = nfm[j - 1] - nodes[numNodes].P[loadType];
-                  nfm[j] = nfm[j] - nodes[numNodes].M[loadType];
-                }
-              } else {
-                nfm[j - 1] = nfm[j - 1] - nodes[numNodes].P[loadType];
-                nfm[j] = nfm[j] - nodes[numNodes].M[loadType];
-              }
-            } else if (nodes[i].fixity === "fixed") ; else if (nodes[i].fixity === "pinned") {
-              j += 1;
-              nfm[j] = -feam[5 * numSpans];
-              if (isLiveish(loadType, beam) && numPatterns > 1) {
-                if (k === numSpans) {
-                  nfm[j] = nfm[j] - nodes[numNodes].M[loadType];
-                }
-              } else {
-                nfm[j] = nfm[j] - nodes[numNodes].M[loadType];
-              }
-            }
-          } else {
-            if (nodes[i].fixity === "continuous" || nodes[i].fixity === "spring") {
-              j += 1;
-              nfm[j] = -feam[5 * (i - 1) - 1] - feam[5 * (i - 1) + 1] - feam[5 * (i - 1) + 2];
-              j += 1;
-              nfm[j] = -feam[5 * (i - 1)] - feam[5 * (i - 1) + 3];
-              if ((loadType === 3 || loadType === 5 || loadType === 6) && numPatterns > 1) {
-                if (k === i) {
-                  nfm[j - 1] = nfm[j - 1] - nodes[i].P[loadType];
-                  nfm[j] = nfm[j] - nodes[i].M[loadType];
-                }
-              } else {
-                nfm[j - 1] = nfm[j - 1] - nodes[i].P[loadType];
-                nfm[j] = nfm[j] - nodes[i].M[loadType];
-              }
-            } else if (nodes[i].fixity === "hinge") {
-              j += 1;
-              nfm[j] = -feam[5 * (i - 1) - 1] - feam[5 * (i - 1) + 1] - feam[5 * (i - 1) + 2];
-              j += 1;
-              nfm[j] = -feam[5 * (i - 1)];
-              if ((loadType === 3 || loadType === 5 || loadType === 6) && numPatterns > 1) {
-                if (k === i) {
-                  nfm[j - 1] = nfm[j - 1] - nodes[i].P[loadType];
-                  nfm[j] = nfm[j] - nodes[i].M[loadType];
-                }
-              } else {
-                nfm[j - 1] = nfm[j - 1] - nodes[i].P[loadType];
-                nfm[j] = nfm[j] - nodes[i].M[loadType];
-              }
-
-              j += 1;
-              nfm[j] = -feam[5 * (i - 1) + 3];
-            } else if (nodes[i].fixity === "proppedHinge") {
-              j += 1;
-              nfm[j] = -feam[5 * (i - 1)];
-              j += 1;
-              nfm[j] = -feam[5 * (i - 1) + 3];
-            } else if (nodes[i].fixity === "fixed") ; else if (nodes[i].fixity === "pinned") {
-              j += 1;
-              nfm[j] = -feam[5 * (i - 1)] - feam[5 * (i - 1) + 3];
-              if ((loadType === 3 || loadType === 5 || loadType === 6) && numPatterns > 1) {
-                if (k === i) {
-                  nfm[j] = nfm[j] - nodes[i].M[loadType];
-                }
-              } else {
-                nfm[j] = nfm[j] - nodes[i].M[loadType];
-              }
-            }
-          }
-        }
-
-        //Now do the rest of the matrix operations for the current load type
-        if (numDegreesOfFreedom === 0) {
-          dm = [0];
-        } else if (numDegreesOfFreedom === 1) {
-          dm = [0, nfm[1] / sm[1][1]];
-        } else {
-          dm = solveViaLDLt(diag, ltm, nfm, bandWidth);
-        }
-
-        // Get the Member Action Matrix, MAM.
-        // Multiply lsmDtm times dm, then add the resulting column vector to the FEAM
-        mam = lsmDtm.map(row => dotProduct(row, dm)).map((e, i) => e + feam[i]);
-
-        //Set elements of mam = 0 where fixity so dictates
-        for (let i = 1; i <= numEndActions; i++) {
-          if (Math.abs(mam[i]) < 0.00000000000001) { mam[i] = 0; }
-        }
-
-        if ((!beam.getsPattern[loadType]) || typeof actions[loadType][0] === "number") {
-          actions[loadType] = clone(mam);
-          if (EI !== 1) { deflections[loadType] = clone(dm); }
-        } else {
-          for (let j = 1; j < 5 * numSpans + 1; j++) {
-            actions[loadType][j][k - 1] = mam[j]; //mam for live loads on span k
-          }
-          if (EI !== 1) {
-            for (let j = 1; j <= numDegreesOfFreedom; j++) {
-              deflections[loadType][j][k] = dm[j];
-            }
-          }
-        }
-
-        // Find the reactions
-        if (numPatterns === 1 || !(beam.containsLive && isLiveish(loadType, beam))) {
-          if (nodes[1].fixity === "fixed") {
-            nodes[1].Mr[loadType] = mam[3] + nodes[1].M[loadType];
-          }
-          if (nodes[1].fixity === "spring") {
-            nodes[1].Pr[loadType] = mam[1];
-          } else if (nodes[1].fixity !== "continuous") {
-            nodes[1].Pr[loadType] = -mam[2] - nodes[1].P[loadType];
-          }
-
-          for (let j = 2; j <= numSpans; j++) {
-            if (nodes[j].fixity === "fixed") {
-              nodes[j].Mr[loadType] = mam[5 * (j - 1)]
-                                       + mam[5 * (j - 1) + 3] + nodes[j].M[loadType];
-            }
-            if (nodes[j].fixity === "spring") {
-              nodes[j].Pr[loadType] = mam[5 * (j - 1) + 1];
-            } else if (nodes[j].fixity !== "continuous") {
-              nodes[j].Pr[loadType] = -mam[5 * (j - 1) - 1] - mam[5 * (j - 1) + 2]
-                  - nodes[j].P[loadType];
-            }
-          }
-
-          if (nodes[numNodes].fixity === "fixed") {
-            nodes[numNodes].Mr[loadType] = mam[5 * numSpans] + nodes[numNodes].M[loadType];
-          }
-          if (nodes[numNodes].fixity === "spring") {
-            nodes[numNodes].Pr[loadType] = mam[5 * numSpans + 1];
-          } else if (nodes[numNodes].fixity !== "continuous") {
-            nodes[numNodes].Pr[loadType] = -mam[5 * numSpans - 1] - nodes[numNodes].P[loadType];
-          }
-        } else {
-          let mTest = 0;
-          if (nodes[1].fixity === "fixed") {
-            mTest = mam[3] + nodes[1].M[loadType];
-            if (mTest > 0) { nodes[1].Mr[loadType] = nodes[1].Mr[loadType] + mTest; }
-            if (mTest < 0) { nodes[1].MrMin[loadType] = nodes[1].MrMin[loadType] + mTest; }
-          }
-          let pTest = 0;
-          if (nodes[1].fixity === "spring") {
-            pTest = mam[1];
-          } else if (nodes[1].fixity !== "continuous") {
-            pTest = -mam[2] - nodes[1].P[loadType];
-          }
-          if (pTest > 0) { nodes[1].Pr[loadType] = nodes[1].Pr[loadType] + pTest; }
-          if (pTest < 0) { nodes[1].PrMin[loadType] = nodes[1].PrMin[loadType] + pTest; }
-
-          for (let j = 1; j < numSpans; j++) {
-            if (nodes[j].fixity === "fixed") {
-              mTest = mam[5 * (j - 1)] + mam[5 * (j - 1) + 3] + nodes[j].M[loadType];
-              if (mTest > 0) { nodes[j].Mr[loadType] = nodes[j].Mr[loadType] + mTest; }
-              if (mTest < 0) { nodes[j].MrMin[loadType] = nodes[j].MrMin[loadType] + mTest; }
-            }
-            pTest = 0;
-            if (nodes[j].fixity === "spring") {
-              nodes[j].Pr[loadType] = nodes[j].Pr[loadType] + mam[5 * (j - 1) + 1];
-            } else if (nodes[j].fixity !== "continuous") {
-              pTest = -mam[5 * (j - 1) - 1] - mam[5 * (j - 1) + 2] - nodes[j].P[loadType];
-            }
-            if (pTest > 0) { nodes[j].Pr[loadType] = nodes[j].Pr[loadType] + pTest; }
-            if (pTest < 0) { nodes[j].PrMin[loadType] = nodes[j].PrMin[loadType] + pTest; }
-          }
-
-          if (nodes[numNodes].fixity === "fixed") {
-            mTest = mam[5 * numSpans] + nodes[numSpans].M[loadType];
-            if (mTest > 0) {
-              nodes[numNodes].Mr[loadType] = nodes[numNodes].Mr[loadType] + mTest;
-            }
-            if (mTest < 0) {
-              nodes[numNodes].MrMin[loadType] = nodes[numNodes].MrMin[loadType] + mTest;
-            }
-          }
-
-          pTest = 0;
-          if (nodes[numNodes].fixity === "spring") {
-            nodes[numNodes].Pr[loadType] = nodes[numNodes].Pr[loadType] + mam[5 * numSpans + 1];
-          } else if (nodes[numNodes].fixity !== "continuous") {
-            pTest = -mam[5 * numSpans - 1] - nodes[j].P[loadType];
-          }
-          if (pTest > 0) {
-            nodes[numNodes].Pr[loadType] = nodes[numNodes].Pr[loadType] + pTest;
-          }
-          if (pTest < 0) {
-            nodes[numNodes].PrMin[loadType] = nodes[numNodes].PrMin[loadType] + pTest;
-          }
-        } //finished finding the reactions
-
-      }
-    }
-  }
-  return [actions, deflections]
-}
-
-const createLsmDtm = (ssm, dtm, nodes, numEndActions, numDegreesOfFreedom) => {
-// Create LSM × DTM
-
-  let lsmDtm = new Array(numEndActions + 1).fill(0);
-  lsmDtm = lsmDtm.map(e => new Array(numDegreesOfFreedom + 1).fill(0));
-
-  for (let i = 1; i <= numEndActions; i++) {
-    const iSpan = Math.trunc((i - 1) / 5) + 1;
-    const g = i - 1 - 5 * (iSpan - 1);
-
-    for (let j = 1; j <= numDegreesOfFreedom; j++) {
-      if (g === 0) {
-        lsmDtm[i][j] = nodes[iSpan].k * dtm[i][j];
-      } else {
-        const kStart = 5 * iSpan - 3;
-        const kEnd = 5 * iSpan;
-        let h = 0;
-        for (let k = kStart; k <= kEnd; k++) {
-          h += 1;
-          lsmDtm[i][j] = lsmDtm[i][j] + ssm[iSpan][g][h] * dtm[k][j];
-        }
-      }
-    }
-  }
-  return lsmDtm
-};
-
-const createSM = (dtm, lsmDtm, numDegreesOfFreedom) => {
-  // Create the Stiffness Matrix, SM.
-  // SM = DTM**T × LsmDtm
-  let sm = Array(numDegreesOfFreedom + 1).fill(0);
-  sm = sm.map(e => Array(numDegreesOfFreedom + 1).fill(0));
-  const h = lsmDtm.length - 1;
-  let bandWidth = 1;
-  for (let i = 1; i < dtm[0].length; i++) {
-    for (let j = 1; j <= i; j++) {                       // Only the lower half of SM.
-      for (let k = 1; k <= h; k++) {
-        sm[i][j] = sm[i][j] + dtm[k][i] * lsmDtm[k][j];   // DTM**T, not DTM.
-      }
-      if (sm[i][j] !== 0 && i - j > bandWidth) { bandWidth = i - j;}  // lower band width
-    }
-  }
-  return [sm, bandWidth]
-};
-
-const luDecomposition = (sm, bandWidth) => {
-  // Perform the LU Decomposition of the stiffness matrix, SM.
-  // This is in preparation for the LDL**T matrix solution to come later.
-
-  const diag = new Array(sm.length).fill(0);
-  // Lower Triangular matrix, ltm
-  let ltm = new Array(sm.length).fill(0);
-  ltm = ltm.map(e => new Array(sm.length - 1).fill(0));
-
-  const n = sm.length - 1;    // number of equations
-
-  for (let j = 1; j <= n; j++) {
-    let kStar = Math.max(j - bandWidth, 1);
-    diag[j] = sm[j][j];
-    for (let k = kStar; k <= j - 1; k++) {
-      diag[j] = diag[j] - diag[k] * ltm[j][k] * ltm[j][k];
-    }
-
-    const iMax = Math.min(j + bandWidth, n);
-    for (let i = j + 1; i <= iMax; i++) {
-      kStar =  Math.max(i - bandWidth, 1);
-      let sum = 0;
-      for (let k = kStar; k <= j - 1; k++) {
-        sum = sum + diag[k] * ltm[j][k] * ltm[i][k];
-      }
-      ltm[i][j] = (sm[i][j] - sum) / diag[j];
-    }
-  }
-  return [diag, ltm]
-};
-
-const solveViaLDLt = (diag, ltm, b, bandWidth) => {
-  // Solve for dm() in a system of equations expressed by matrices: SM() × dm() = NFM()
-
-  // This sub// s method is a banded version of the LDL**T solver.
-  // LDL**T takes advantage of the fact that SM is a symmetric, positive-definite matrix.
-  // The algorithm will overwrite b(), which starts out as NFM and ends as dm.
-  // We already have the diag & ltm matrices, so we can go directly to the LU solution.
-
-  const n = b.length - 1;       // number of equations
-
-  // Forward substitution
-  for (let i = 2; i <= n; i++) {
-    const kStar = i - bandWidth < 1 ? 1 : i - bandWidth;
-    for (let k = kStar; k <= i - 1; k++) {
-      b[i] = b[i] - ltm[i][k] * b[k];
-    }
-  }
-
-  // Diagonal scaling and backward substitution
-  b[n] = b[n] / diag[n];
-  for (let i = n - 1; i >= 1; i--) {
-    b[i] = b[i] / diag[i];
-    const kStar = Math.min(n, i + bandWidth);
-    for (let k = i + 1; k <= kStar; k++) {
-      b[i] = b[i] - ltm[k][i] * b[k];
-    }
-  }
-
-  return b
-};
-
-function getLoadPatterns(beam, numSpans) {
-  if (!beam.containsLive || !beam.doLiveLoadPatterns) {
-    // Just one pattern. It includes each span.
-    const pattern = [1];
-    for (let i = 2; i <= numSpans; i++) {
-      pattern.push(i);
-    }
-    return [pattern]
-  } else if (beam.numPatterns === 2 || numSpans > 7) {
-    // Do 2 patterns.  One with all live load on, and one with all live load off.
-    const pattern = [1];
-    for (let i = 2; i <= numSpans; i++) {
-      pattern.push(i);
-    }
-    return [pattern, []]
-  } else {
-    switch (numSpans) {
-      case 1:
-        return [[1], []]
-      case 2:
-        return [[1, 2], [], [1], [2]]
-      case 3:
-        return [[1, 2, 3], [], [1], [2], [3], [1, 2], [1, 3], [2, 3]]
-      case 4:
-        // eslint-disable-next-line max-len
-        return [[1, 2, 3, 4], [], [1], [2], [3], [4], [1, 2], [1, 3], [1, 4], [2, 3], [2, 4], [3, 4], [1, 2, 3], [1, 2, 4], [1, 3, 4], [2, 3, 4]]
-      case 5:
-        // eslint-disable-next-line max-len
-        return [[1, 2, 3, 4, 5], [], [1], [2], [3], [4], [5], [1, 2], [1, 3], [1, 4], [1, 5], [2, 3], [2, 4], [2, 5], [3, 4], [3, 5], [4, 5], [1, 2, 3], [1, 2, 4], [1, 2, 5], [1, 3, 4], [1, 3, 5], [1, 4, 5], [2, 3, 4], [2, 3, 5], [2, 4, 5], [3, 4, 5], [1, 2, 3, 4], [1, 2, 3, 5], [1, 2, 4, 5], [1, 3, 4, 5], [2, 3, 4, 5]]
-      case 6:
-        // eslint-disable-next-line max-len
-        return [[1, 2, 3, 4, 5, 6], [], [1], [2], [3], [4], [5], [6], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [2, 3], [2, 4], [2, 5], [2, 6], [3, 4], [3, 5], [3, 6], [4, 5], [4, 6], [5, 6], [1, 2, 3], [1, 2, 4], [1, 2, 5], [1, 2, 6], [1, 3, 4], [1, 3, 5], [1, 3, 6], [1, 4, 5], [1, 4, 6], [1, 5, 6], [2, 3, 4], [2, 3, 5], [2, 3, 6], [2, 4, 5], [2, 4, 6], [2, 5, 6], [3, 4, 5], [3, 4, 6], [3, 5, 6], [4, 5, 6], [1, 2, 3, 4], [1, 2, 3, 5], [1, 2, 3, 6], [1, 2, 4, 5], [1, 2, 4, 6], [1, 2, 5, 6], [1, 3, 4, 5], [1, 3, 4, 6], [1, 3, 5, 6], [1, 4, 5, 6], [2, 3, 4, 5], [2, 3, 4, 6], [2, 3, 5, 6], [2, 4, 5, 6], [3, 4, 5, 6], [1, 2, 3, 4, 5], [1, 2, 3, 4, 6], [1, 2, 3, 5, 6], [1, 2, 4, 5, 6], [1, 3, 4, 5, 6], [2, 3, 4, 5, 6]]
-      case 7:
-        // eslint-disable-next-line max-len
-        return [[1, 2, 3, 4, 5, 6, 7], [], [1], [2], [3], [4], [5], [6], [7], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [1, 7], [2, 3], [2, 4], [2, 5], [2, 6], [2, 7], [3, 4], [3, 5], [3, 6], [3, 7], [4, 5], [4, 6], [4, 7], [5, 6], [5, 7], [6, 7], [1, 2, 3], [1, 2, 4], [1, 2, 5], [1, 2, 6], [1, 2, 7], [1, 3, 4], [1, 3, 5], [1, 3, 6], [1, 3, 7], [1, 4, 5], [1, 4, 6], [1, 4, 7], [1, 5, 6], [1, 5, 7], [1, 6, 7], [2, 3, 4], [2, 3, 5], [2, 3, 6], [2, 3, 7], [2, 4, 5], [2, 4, 6], [2, 4, 7], [2, 5, 6], [2, 5, 7], [2, 6, 7], [3, 4, 5], [3, 4, 6], [3, 4, 7], [3, 5, 6], [3, 5, 7], [3, 6, 7], [4, 5, 6], [4, 5, 7], [4, 6, 7], [5, 6, 7], [1, 2, 3, 4], [1, 2, 3, 5], [1, 2, 3, 6], [1, 2, 3, 7], [1, 2, 4, 5], [1, 2, 4, 6], [1, 2, 4, 7], [1, 2, 5, 6], [1, 2, 5, 7], [1, 2, 6, 7], [1, 3, 4, 5], [1, 3, 4, 6], [1, 3, 4, 7], [1, 3, 5, 6], [1, 3, 5, 7], [1, 3, 6, 7], [1, 4, 5, 6], [1, 4, 5, 7], [1, 4, 6, 7], [1, 5, 6, 7], [2, 3, 4, 5], [2, 3, 4, 6], [2, 3, 4, 7], [2, 3, 5, 6], [2, 3, 5, 7], [2, 3, 6, 7], [2, 4, 5, 6], [2, 4, 5, 7], [2, 4, 6, 7], [2, 5, 6, 7], [3, 4, 5, 6], [3, 4, 5, 7], [3, 4, 6, 7], [3, 5, 6, 7], [4, 5, 6, 7], [1, 2, 3, 4, 5], [1, 2, 3, 4, 6], [1, 2, 3, 4, 7], [1, 2, 3, 5, 6], [1, 2, 3, 5, 7], [1, 2, 3, 6, 7], [1, 2, 4, 5, 6], [1, 2, 4, 5, 7], [1, 2, 4, 6, 7], [1, 2, 5, 6, 7], [1, 3, 4, 5, 6], [1, 3, 4, 5, 7], [1, 3, 4, 6, 7], [1, 3, 5, 6, 7], [1, 4, 5, 6, 7], [2, 3, 4, 5, 6], [2, 3, 4, 5, 7], [2, 3, 4, 6, 7], [2, 3, 5, 6, 7], [2, 4, 5, 6, 7], [3, 4, 5, 6, 7], [1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 7], [1, 2, 3, 4, 6, 7], [1, 2, 3, 5, 6, 7], [1, 2, 4, 5, 6, 7], [1, 3, 4, 5, 6, 7], [2, 3, 4, 5, 6, 7]]
-        // We cannot get here.
-    }
-  }
-}
-
-function populateMAM(loadFactors, combern, loadPattern, beam, nodes, spans, actions) {
-  let mam = new Array(beam.numEndActions).fill(0); // Member end Action Matrix
-  const numSpans = spans.length - 1;
-  const numNodes = nodes.length - 1;
-  const numPatterns = beam.numPatterns;
-  const didNode = new Array(numNodes);
-
-  // Fill mam with dead load
-  const deadLoadFactor = loadFactors[1];
-  mam = mam.map((e, i) => deadLoadFactor * actions[1][i]);
-  for (let i = 1; i <= numSpans; i++) {
-    nodes[i].Pf = deadLoadFactor * nodes[i].P[1];
-    nodes[i].Mf = deadLoadFactor * nodes[i].M[1];
-    for (let j = 0; j < spans[i].segments.length; j++) {
-      const seg = spans[i].segments[j];
-      seg.w1f[combern] = deadLoadFactor * seg.w1[1];
-      seg.w2f = deadLoadFactor * seg.w2[1];
-      seg.Pf = deadLoadFactor * seg.P[1];
-      seg.Mf = deadLoadFactor * seg.M[1];
-    }
-  }
-
-  // Superimpose the other load types onto mam.
-  for (let iLoadType = 2; iLoadType <= 9; iLoadType++) {
-    const loadFactor = loadFactors[iLoadType];
-    if (loadFactor > 0 && beam.gotType[iLoadType]) {
-      if (!beam.getsPattern[iLoadType] || numPatterns === 1) {
-        mam = mam.map((e, i) => e + loadFactor * actions[iLoadType][i]);
-        for (let i = 1; i <= numSpans; i++) {
-          nodes[i].Pf = nodes[i].Pf + loadFactor * nodes[i].P[iLoadType];
-          nodes[i].Mf = nodes[i].Mf + loadFactor * nodes[i].M[iLoadType];
-          for (let j = 0; j < spans[i].segments.length; j++) {
-            const seg = spans[i].segments[j];
-            seg.w1f[combern] = seg.w1f[combern] + loadFactor * seg.w1[iLoadType];
-            seg.w2f = seg.w2f + loadFactor * seg.w2[iLoadType];
-            seg.Pf = seg.Pf + loadFactor * seg.P[iLoadType];
-            seg.Mf = seg.Mf + loadFactor * seg.M[iLoadType];
-          }
-        }
-      } else {
-        // load case includes live load patterns
-        for (let k = 1; k <= numSpans; k++) {
-          if (loadPattern.includes(k)) {
-            let ii = 0;
-            for (let j = 1; j <= numSpans; j++) {
-              ii = 5 * j - 4;
-              mam[ii] = mam[ii] + loadFactor * actions[iLoadType][ii][k - 1];
-              mam[ii + 1] = mam[ii + 1] + loadFactor * actions[iLoadType][ii + 1][k - 1];
-              mam[ii + 2] = mam[ii + 2] + loadFactor * actions[iLoadType][ii + 2][k - 1];
-              mam[ii + 3] = mam[ii + 3] + loadFactor * actions[iLoadType][ii + 3][k - 1];
-              mam[ii + 4] = mam[ii + 4] + loadFactor * actions[iLoadType][ii + 4][k - 1];
-            }
-            mam[ii + 5] = mam[ii + 5] + loadFactor * actions[iLoadType][ii + 5][k - 1];
-          }
-        }
-
-        // Do node loads.
-        // Include a node load if the span on either side is in the load pattern.
-        didNode.fill(false);
-        for (let i = 1; i <= numSpans; i++) {
-          if (loadPattern.includes(i)) {
-            if (!didNode[i]) {
-              nodes[i].Pf = nodes[i].Pf + loadFactor * nodes[i].P[iLoadType];
-              nodes[i].Mf = nodes[i].Mf + loadFactor * nodes[i].M[iLoadType];
-              didNode[i] = true;
-            }
-            if (!didNode[i + 1]) {
-              nodes[i + 1].Pf = nodes[i + 1].Pf + loadFactor * nodes[i + 1].P[iLoadType];
-              nodes[i + 1].Mf = nodes[i + 1].Mf + loadFactor * nodes[i + 1].M[iLoadType];
-              didNode[i + 1] = true;
-            }
-          }
-          for (let j = 0; j < spans[i].segments.length; j++) {
-            const seg = spans[i].segments[j];
-            if (loadPattern.includes(i)) {
-              seg.w1f[combern] = seg.w1f[combern] + loadFactor * seg.w1[iLoadType];
-              seg.w2f = seg.w2f + loadFactor * seg.w2[iLoadType];
-              seg.Pf = seg.Pf + loadFactor * seg.P[iLoadType];
-              seg.Mf = seg.Mf + loadFactor * seg.M[iLoadType];
-            }
-          }
-        }
-      }
-    }
-  }
-
-  for (let i = 1; i <= numSpans; i++) {
-    for (let j = 0; j < spans[i].segments.length; j++) {
-      const seg = spans[i].segments[j];
-      if (seg.length !== 0) {
-        seg.slope[combern] = (seg.w2f - seg.w1f[combern]) / seg.length;
-      }
-    }
-  }
-  return mam
-}
-
-function combine(beam, nodes, spans, actions, deflections, comboSet) {
-  // We already have member end actions for each load type on each span.
-  // In this function, we superimpose the load combinations and live load patterns and
-  // find the maximum and minimum shears and moments.
-  const numSpans = spans.length - 1;
-  const isService = comboSet === "service";
-  if (isService) { comboSet = [[0, 1, 1, 1, 1, 1, 1, 1, 1, 1]]; }
-  const liveLoadPatterns = getLoadPatterns(beam, numSpans);
-  const numPatterns = liveLoadPatterns.length;
-
-  let vMin = 0;
-  let vMax = 0;
-  let mMin = 0;
-  let mMax = 0;
-  let deflectionMax = 0;
-  let deflMaxCase = 0;
-  let deflectionMin = 0;
-  let deflMinCase = 0;
-
-  // Get ready to do lots of different load combinations.
-  // Definition: "combern" is a conflation of the words "combination" and "pattern".
-  const numComberns = getNumComberns(comboSet, isService, beam, numPatterns);
-
-  for (let i = 1; i <= numSpans; i++) {
-    for (let j = 0; j < spans[i].segments.length; j++) {
-      const seg = spans[i].segments[j];
-      seg.w1f = new Array(numComberns).fill(0);
-      seg.w2f = 0;
-      seg.slope = new Array(numComberns).fill(0);
-      seg.V1 = new Array(numComberns).fill(0);
-      seg.M1 = new Array(numComberns).fill(0);
-      if (beam.EI !== 1) {
-        seg.theta1 = new Array(numPatterns).fill(0);
-        seg.delta1 = new Array(numPatterns).fill(0);
-      }
-    }
-  }
-
-  // The number of interations through this next loop will be a function of
-  // both the number of load combinations and the number of load patterns.
-  // I define "combern" as a conflation of the words "combination" & "pattern"
-  // "combern" will be the loop index as we look at unique combinations of both
-  // load combinations and live load patterns.
-  // Each time through the loop, we;ll get the factored loads and the factored MAM
-  // To do this, we'll make much use of a subroutine called "PopulateMAM"
-  // It's called as:  PopulateMAM  loadFactors, combern, iPattern
-  // The load factors are factors from the ASCE or NBCC load combinations
-
-  // As you can see below, we'll find a unique MAM for each iCombo and live load pattern.
-  // Then, we'll use the MAM to find the segment shears, moments, etc.
-
-  let combern = 0;
-
-  // iCombo 0 is for deflections only. We'll go thru each load pattern.
-  // iCombo 1 thru comboSet.length is for finding shear and moment extremes. As code
-  // requires, this often means testing many load combinations.
-
-  for (let iCombo = 0; iCombo <= comboSet.length; iCombo++) {
-    const  isReqd = iCombo === 0 && beam.EI !== 0
-      ? true  // Go thru each load pattern and find deflection extremes.
-      : isService
-      ? true
-      : isReqdCombo(comboSet[iCombo - 1], beam.gotType);
-
-    if (isReqd) {
-      const loadFactors = iCombo === 0 && beam.EI !== 0
-        ? [0, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        : comboSet[iCombo - 1];
-
-      for (let iPattern = 0; iPattern < numPatterns; iPattern++) {
-        const loadPattern = liveLoadPatterns[iPattern];
-
-        // Get the Member Action Matrix, MAM, for this combern.
-        // A MAM contains the end shears and end moments for each span.
-        const mam = populateMAM(loadFactors, combern, loadPattern, beam, nodes, spans, actions);
-
-        let dm;
-        if (iCombo === 0 && beam.EI !== 1) {
-          // Create a Displacement Matrix, DM, for this load combination and load pattern.
-          dm = new Array(beam.numDegreesOfFreedom + 1).fill(0);
-          for (let iLoadType = 1; iLoadType < 10; iLoadType++) {
-            if (beam.gotType[iLoadType]) {
-              if (beam.getsPattern[iLoadType]) {
-                dm = getLiveDM(dm, deflections[iLoadType], loadPattern, numSpans);
-              } else {
-                dm = dm.map((e, i) => e + deflections[iLoadType][i]);
-              }
-            }
-          }
-        }
-
-        let iDM = 0;
-        for (let iSpan = 1; iSpan <= numSpans; iSpan++) {
-          /* eslint-disable no-useless-assignment */
-          let vMid = 0;
-          let vEnd = 0;
-          let mMid = 0;
-          let mEnd = 0;
-          let slopeEnd = 0;
-          let deflectionEnd = 0;
-          let deflectionMid = 0;
-          /* eslint-enable no-useless-assignment */
-          for (let k = 0; k < spans[iSpan].segments.length; k++) {
-            const seg = spans[iSpan].segments[k];
-
-            if (k === 0) {
-              // The first segment in this span.
-              seg.V1[combern] = -mam[5 * iSpan - 3];
-              seg.M1[combern] = mam[5 * iSpan - 2];
-              if (iCombo === 0 && beam.EI !== 1) {
-                iDM = getThetaAndDelta(nodes[iSpan].fixity, dm, seg, combern, iDM);
-              }
-            } else {
-              // Subsequent segments.
-              seg.V1[combern] = vEnd + seg.Pf;
-              seg.M1[combern] = mEnd - seg.Mf;
-              if (iCombo === 0 && beam.EI !== 1) {
-                seg.theta1[combern] = slopeEnd;
-                seg.delta1[combern] = deflectionEnd;
-              }
-            }
-
-            vEnd = seg.V1[combern] + seg.w1f[combern] * seg.length
-                 + 0.5 * seg.slope[combern] * seg.length ** 2;
-            if (Math.abs(vEnd) < 0.00000000000001) { vEnd = 0; }
-
-            mEnd = seg.M1[combern] + seg.V1[combern] * seg.length
-                 + 0.5 * seg.w1f[combern] * seg.length ** 2
-                 + seg.slope[combern] * seg.length ** 3 / 6;
-            if (Math.abs(mEnd) < 0.00000000000001) { mEnd = 0; }
-
-            if (iCombo === 0) {
-              // Check if this load pattern contains a deflection extreme.
-              if (beam.EI !== 1) {
-                slopeEnd = seg.theta1[combern] + (seg.M1[combern] * seg.length
-                  + 0.5 * seg.V1[combern] * seg.length ** 2
-                  + seg.w1f[combern] * seg.length ** 3 / 6
-                  + seg.slope[combern] * seg.length ** 4 / 24) / beam.EI;
-                deflectionMid = seg.delta1[combern] + seg.theta1[combern] * 0.5 * seg.length
-                    + (0.5 * seg.M1[combern] * (0.5 * seg.length) ** 2
-                    + seg.V1[combern] * (0.5 * seg.length) ** 3 / 6
-                    + seg.w1f[combern] * (0.5 * seg.length) ** 4 / 24
-                    + seg.slope[combern] * (0.5 * seg.length) ** 5 / 120) / beam.EI;
-                deflectionEnd = seg.delta1[combern] + seg.theta1[combern] * seg.length
-                    + (0.5 * seg.M1[combern] * seg.length ** 2
-                        + seg.V1[combern] * seg.length ** 3 / 6
-                    + seg.w1f[combern] * seg.length ** 4 / 24
-                    + seg.slope[combern] * seg.length ** 5 / 120) / beam.EI;
-                if (seg.delta1[combern] > deflectionMax) {
-                  deflectionMax = seg.delta1[combern];
-                  deflMaxCase = combern;
-                }
-                if (seg.delta1[combern] < deflectionMin) {
-                  deflectionMin = seg.delta1[combern];
-                  deflMaxCase = combern;
-                }
-                if (deflectionEnd > deflectionMax) {
-                  deflectionMax = deflectionEnd;
-                  deflMaxCase = combern;
-                }
-                if (deflectionEnd < deflectionMin) {
-                  deflectionMin = deflectionEnd;
-                  deflMinCase = combern;
-                }
-                if (deflectionMid > deflectionMax) {
-                  deflectionMax = deflectionMid;
-                  deflMaxCase = combern;
-                }
-                if (deflectionMid < deflectionMin) {
-                  deflectionMin = deflectionMid;
-                  deflMinCase = combern;
-                }
-              }
-            } else {
-              // Determine if this combern contains a shear or moment extreme.
-              // Start by finding the shear value in the middle of the segment
-              // eslint-disable-next-line no-useless-assignment
-              let xCross = 0; // initialze the variable
-              if (seg.slope[combern] !== 0) {
-                xCross = -1 * seg.w1f[combern] / seg.slope[combern];
-                if (xCross > 0 && xCross < seg.length) {
-                  vMid = seg.V1[combern] + seg.w1f[combern] * xCross
-                        + 0.5 * seg.slope[combern] * xCross ** 2;
-                } else {
-                  vMid = seg.V1[combern] + seg.w1f[combern] * (seg.length / 2)
-                        + 0.5 * seg.slope[combern] * (seg.length / 2) ** 2;
-                }
-              } else {
-                vMid = seg.V1[combern] + seg.w1f[combern] * (seg.length / 2)
-                      + 0.5 * seg.slope[combern] * (seg.length / 2) ** 2;
-              }
-
-              // Find the moment in the middle of the segment
-              xCross = 0; // initialze the variable
-              if (seg.slope[combern] === 0) {
-                if (seg.w1f[combern] !== 0) {
-                  xCross = -seg.V1[combern] / seg.w1f[combern];
-                }
-              } else {
-                if ((seg.w1f[combern] ** 2 - 2 * seg.slope[combern] * seg.V1[combern]) > 0) {
-                  xCross = -(seg.w1f[combern] + Math.sqrt(seg.w1f[combern] ** 2
-                          - 2 * seg.slope[combern] * seg.V1[combern])) / seg.slope[combern];
-                }
-              }
-              if (xCross > 0 && xCross < seg.length) {
-                mMid = seg.M1[combern] + seg.V1[combern] * xCross
-                      + 0.5 * seg.w1f[combern] * xCross ** 2
-                      + seg.slope[combern] * xCross ** 3 / 6;
-              } else {
-                mMid = seg.M1[combern] + seg.V1[combern] * (seg.length / 2)
-                    + 0.5 * seg.w1f[combern] * (seg.length / 2) ** 2
-                    + seg.slope[combern] * (seg.length / 2) ** 3 / 6;
-              }
-
-              // Check for local maximums and minimums
-              if (seg.V1[combern] > seg.Vmax.left.value && seg.V1[combern] > 0.01) {
-                seg.Vmax.left.value = seg.V1[combern];
-                seg.Vmax.left.case = combern;   // This is a case that we// ll want to plot
-                if (seg.V1[combern] > vMax) { vMax = seg.V1[combern]; }
-              }
-
-              if (vMid > seg.Vmax.mid.value && vMid > 0.01) {
-                seg.Vmax.mid.value = vMid;
-                seg.Vmax.mid.case = combern;
-                if (vMid > vMax) { vMax = vMid; }
-              }
-
-              if (vEnd > seg.Vmax.right.value && vEnd > 0.01) {
-                seg.Vmax.right.value = vEnd;
-                seg.Vmax.right.case = combern;
-                if (vEnd > vMax) { vMax = vEnd; }
-              }
-
-              if (seg.V1[combern] < seg.Vmin.left.value && seg.V1[combern] < -0.01) {
-                seg.Vmin.left.value = seg.V1[combern];
-                seg.Vmin.left.case = combern;
-                if (seg.V1[combern] < vMin) { vMin = seg.V1[combern]; }
-              }
-
-              if (vMid < seg.Vmin.mid.value && vMid < -0.01) {
-                seg.Vmin.mid.value = vMid;
-                seg.Vmin.mid.case = combern;
-                if (vMid < vMin) { vMin = vMid; }
-              }
-
-              if (vEnd < seg.Vmin.right.value && vEnd < -0.01) {
-                seg.Vmin.right.value = vEnd;
-                seg.Vmin.right.case = combern;
-                if (vEnd < vMin) { vMin = vEnd; }
-              }
-
-              if (seg.M1[combern] > seg.Mmax.left.value && seg.M1[combern] > 0.01) {
-                seg.Mmax.left.value = seg.M1[combern];
-                seg.Mmax.left.case = combern;
-                if (seg.M1[combern] > mMax) { mMax = seg.M1[combern]; }
-              }
-
-              if (mMid > seg.Mmax.mid.value && mMid > 0.01) {
-                seg.Mmax.mid.value = mMid;
-                seg.Mmax.mid.case = combern;
-                seg.Mmax.mid.x = seg.xOfLeftEnd + xCross;
-                if (mMid > mMax) { mMax = mMid; }
-              }
-
-              if (mEnd > seg.Mmax.right.value && mEnd > 0.01) {
-                seg.Mmax.right.value = mEnd;
-                seg.Mmax.right.case = combern;
-                if (mEnd > mMax) { mMax = mEnd; }
-              }
-
-              if (seg.M1[combern] < seg.Mmin.left.value && seg.M1[combern] < -0.01) {
-                seg.Mmin.left.value = seg.M1[combern];
-                seg.Mmin.left.case = combern;
-                if (seg.M1[combern] < mMin) { mMin = seg.M1[combern]; }
-              }
-
-              if (mMid < seg.Mmin.mid.value && mMid < -0.01) {
-                seg.Mmin.mid.value = mMid;
-                seg.Mmin.mid.case = combern;
-                seg.Mmin.mid.x = seg.xOfLeftEnd + xCross;
-                if (mMid < mMin) { mMin = mMid; }
-              }
-
-              if (mEnd < seg.Mmin.right.value && mEnd < -0.01) {
-                seg.Mmin.right.value = mEnd;
-                seg.Mmin.right.case = combern;
-                if (mEnd < mMin) { mMin = mEnd; }
-              }
-            }
-
-          }
-        }
-        combern += 1;
-      }
-    }
-  }
-  return [vMax, vMin, mMax, mMin, deflectionMax, deflectionMin,
-    deflMaxCase, deflMinCase, numComberns]
-}
-
-const isReqdCombo = (combo, gotType) => {
-  let isDeadLoadOnly = true;
-  for (let j = 2; j < combo.length; j++) {
-    if (combo[j] > 0) {
-      isDeadLoadOnly = false;
-      if (gotType[j]) { return true }
-    }
-  }
-  return isDeadLoadOnly
-};
-
-/*const comboContainsLive = (combo, beam) => {
-  for (let i = 1; i <= beam.numLoadTypes; i++) {
-    if (beam.getsPattern[i] && combo[i] !== 0) { return true }
-  }
-  return false
-}*/
-
-const getNumComberns = (comboSet, isService, beam, numPatterns) => {
-  // We'll do a superposition of forces for each load combination and each live load pattern.
-  // How many is that?
-  // First, count the number of comberns needed to do the deflection superpositions.
-  let numComberns = beam.EI === 1 ? 1 : numPatterns;
-  // Then add a combern for each superposition done to get shears and moments.
-  for (let i = 0; i < comboSet.length; i++) {
-    if (isService || isReqdCombo(comboSet[i], beam.gotType)) {
-      numComberns += numPatterns;
-    }
-  }
-  return numComberns
-};
-
-const getLiveDM = (a, b, loadPattern, numSpans) => {
-  if (Array.isArray(b[1])) {
-    for (let k = 1; k <= numSpans; k++) {
-      if (loadPattern.includes(k)) {
-        a = a.map((e, i) => e + b[i][k]);
-      }
-    }
-  } else {
-    a = a.map((e, i) => e  + b[i]);
-  }
-  return a
-};
-
-const getThetaAndDelta = (fixity, dm, seg, i, iDM) => {
-  if (fixity === "fixed") {
-    seg.delta1[i] = 0;
-    seg.theta1[i] = 0;
-  } else if (fixity === "pinned") {
-    seg.delta1[i] = 0;
-    iDM = iDM + 1;
-    seg.theta1[i] = -dm[iDM];
-  } else if (fixity === "continuous") {
-    iDM = iDM + 1;
-    seg.delta1[i] = -dm[iDM];
-    iDM = iDM + 1;
-    seg.theta1[i] = -dm[iDM];
-  } else if (fixity === "spring") {
-    iDM = iDM + 1;
-    seg.delta1[i] = -dm[iDM];
-    iDM = iDM + 1;
-    seg.theta1[i] = -dm[iDM];
-  } else if (fixity === "proppedHinge") {
-    iDM = iDM + 1;
-    seg.delta1[i] = 0;
-    iDM = iDM + 1;
-    seg.theta1[i] = -dm[iDM];
-  } else if (fixity === "hinge") {
-    iDM = iDM + 1;
-    seg.delta1[i] = -dm[iDM];
-    iDM = iDM + 1;
-    iDM = iDM + 1;
-    seg.theta1[i] = -dm[iDM];
-  }
-  return iDM
-};
-
-// Review the segments. Find out which comberns should be displayed
-function selectCases(spans) {
-  const shearCases = [];
-  const bendingCases = [];
-  for (let i = 1; i < spans.length; i++) {
-    for (let j = 0; j < spans[i].segments.length; j++) {
-      const seg = spans[i].segments[j];
-      if (seg.Vmax.left.value > 0) {
-        if (!shearCases.includes(seg.Vmax.left.case)) {
-          shearCases.push(seg.Vmax.left.case);
-        }
-      }
-      if (seg.Vmin.left.value < 0) {
-        if (!shearCases.includes(seg.Vmin.left.case)) {
-          shearCases.push(seg.Vmin.left.case);
-        }
-      }
-      if (seg.Mmax.left.value > 0) {
-        if (!bendingCases.includes(seg.Mmax.left.case)) {
-          bendingCases.push(seg.Mmax.left.case);
-        }
-      }
-      if (seg.Mmin.left.value < 0) {
-        if (!bendingCases.includes(seg.Mmin.left.case)) {
-          bendingCases.push(seg.Mmin.left.case);
-        }
-      }
-      if (seg.Vmax.mid.value > 0) {
-        if (!shearCases.includes(seg.Vmax.mid.case)) {
-          shearCases.push(seg.Vmax.mid.case);
-        }
-      }
-      if (seg.Vmin.mid.value < 0) {
-        if (!shearCases.includes(seg.Vmin.mid.case)) {
-          shearCases.push(seg.Vmin.mid.case);
-        }
-      }
-      if (seg.Mmax.mid.value > 0) {
-        if (!bendingCases.includes(seg.Mmax.mid.case)) {
-          bendingCases.push(seg.Mmax.mid.case);
-        }
-      }
-      if (seg.Mmin.mid.value < 0) {
-        if (!bendingCases.includes(seg.Mmin.mid.case)) {
-          bendingCases.push(seg.Mmin.mid.case);
-        }
-      }
-      if (seg.Vmax.right.value > 0) {
-        if (!shearCases.includes(seg.Vmax.right.case)) {
-          shearCases.push(seg.Vmax.right.case);
-        }
-      }
-      if (seg.Vmin.right.value < 0) {
-        if (!shearCases.includes(seg.Vmin.right.case)) {
-          shearCases.push(seg.Vmin.right.case);
-        }
-      }
-      if (seg.Mmax.right.value > 0) {
-        if (!bendingCases.includes(seg.Mmax.right.case)) {
-          bendingCases.push(seg.Mmax.right.case);
-        }
-      }
-      if (seg.Mmin.right.value < 0) {
-        if (!bendingCases.includes(seg.Mmin.right.case)) {
-          bendingCases.push(seg.Mmin.right.case);
-        }
-      }
-    }
-  }
-  return [shearCases, bendingCases]
-}
-
-function locateDiagrams(beam, extremes) {
-  // Find the y-coordinates for the shear, moment, and deflection diagrams.
-
-  // First, find out how many reaction vectors will be written onto the load diagram.
-  const [vMax, vMin, mMax, mMin, deflectionMax, deflectionMin, , , ] = extremes;
-
-  const vScale = vMax - vMin > 0 ? 60 / (vMax - vMin) : 0;
-  const mScale = mMax - mMin > 0 ? 60 / (mMax - mMin) : 0;
-  const reactionTextHeight = 16;
-
-  let yV = vMax > 0.0005
-    ? beam.yLoad + 12 + reactionTextHeight + vMax * vScale + 70
-    : beam.yLoad + 12 + reactionTextHeight;
-  yV = Math.round(yV);
-  const botOfV = vMin < -5e-4
-    ? yV + vMin * vScale + 50
-    : yV + 70;
-  const momentMax = beam.convention === 1 ? mMax : Math.abs(mMin);
-  const momentMin = beam.convention === 1 ? Math.abs(mMin) : mMax;
-  let yM = momentMax > 0.0005
-    ? botOfV + 12 + momentMax * mScale + 40
-    : botOfV + 12 + 40;
-  yM = Math.round(yM);
-  let yMax = yM;
-
-  // Get yText for moment
-  let yText = yM - mScale * mMin;
-  if (yText > yMax) { yMax = yText; }
-
-  let yDeflection = 0;
-  let deflectionScale = 0;
-  if (beam.EI !== 1) {
-    // eslint-disable-next-line max-len
-    if (deflectionMax > deflectionMin) { deflectionScale = 30 / (deflectionMax - deflectionMin); }
-    const botOfM = momentMin > (0.05 * momentMax)
-      ? yM + momentMin * mScale + 14
-      : yM + 14;
-    yDeflection = botOfM + 40 + deflectionMax * deflectionScale;
-    yDeflection = Math.round(yDeflection);
-    yMax = yDeflection;
-    if (Math.abs(deflectionMin) > 0.2 * (deflectionMax - deflectionMin)) {
-      yText = yDeflection - deflectionScale * deflectionMin;
-      if (yText > yMax) { yMax = yText; }
-    }
-  }
-  yMax += 20;
-
-  return [yV, yM, yDeflection, vScale, mScale, deflectionScale, yMax]
-
-}
-
-function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combinations) {
-  let diagram = [];
-  // Now go thru the comberns again.  Draw the line work this time.
-  const numSpans = spans.length - 1;
-  const [vMax, vMin, mMax, mMin, , , deflMaxCase, deflMinCase, numComberns] = extremes;
-  const [shearCases, bendingCases] = cases;
-  const [yV, yM, yDeflection, vScale, mScale, deflectionScale] = yCoords;
-  const vSmall = 0.01 * (vMax - vMin);
-  const mSmall = 0.05 * (mMax - mMin);
-  let deflectionMax = 0;
-  let deflectionMin = 0;
-  let xDeflectionMax = 0;
-  let xDeflectionMin = 0;
-  const xIncrement = beam.length / 50;
-  const wV = [];
-  const wVx = [];
-  const wM = [];
-  const wMx = [];
-  const horizAlign = "middle";
-
-  // Draw the horizontal lines for the shear and moment diagrams
-  diagram.push(Draw.textNode("shear", 20, yV + 2));
-  diagram.push(Draw.textNode(`(${beam.SI ? "kN" : "kips"})`, 20, yV + 16));
-  diagram.push({
-    tag: "path",
-    attrs: { d: `M${beam.xDiagram} ${yV} h300`, stroke: "black", "stroke-width": '1.5px' }
-  });
-  diagram.push(Draw.textNode("bending", 20, yM + 2));
-  diagram.push(Draw.textNode(`(${beam.SI ? "kN-m" : "kip-ft"})`, 20, yM + 16));
-  diagram.push({
-    tag: "path",
-    attrs: { d: `M${beam.xDiagram} ${yM} h300`, stroke: "black", "stroke-width": '1.5px' }
-  });
-
-  if (combinations !== "service") {
-    diagram.push(Draw.textNode("factored", 20, yV - 12));
-    diagram.push(Draw.textNode("factored", 20, yM - 12));
-  }
-
-  // Draw the reactions.
-  // eslint-disable-next-line no-useless-assignment
-  let f = 0;
-  for (let i = 1; i < nodes.length; i++) {
-    const x = beam.xDiagram + beam.xScale * nodes[i].x;
-    if (Math.abs(nodes[i].Pr[0]) > 0) {
-      f = 1 / (beam.SI ? 1000 : 4448.2216152605);
-      const sText = round$1(nodes[i].Pr[0] * f, 3);
-      diagram = diagram.concat(Draw.pointForce(x, beam.yLoad, sText, nodes[i].fixity, true));
-    }
-    if (Math.abs(nodes[i].Mr[0]) > 0) {
-      f = 1 / (beam.SI ? 1000 : 4448.2216152605 * 0.3048);
-      const sText = round$1(nodes[i].Mr[0] * f, 3);
-      diagram = diagram.concat(Draw.pointMoment(x, beam.yLoad, sText, true));
-    }
-  }
-
-  for (let combern = 0; combern <= numComberns; combern++) {
-    // Are we in a deflection combern?
-    const inaDeflCase = (deflMinCase === combern || deflMaxCase === combern) && beam.EI !== 1;
-    // Should we plot this combern?
-    if (!(shearCases.includes(combern) || bendingCases.includes(combern) || inaDeflCase)) {
-      continue // Skip this combern.
-    }
-    // This is a combern for which we should plot the line work
-    // Find detailed shear and moments for the diagrams.  And we check local maximums to see
-    // if we should write their values onto the diagram.
-    let lastVend = 0;
-    let lastW2f = 0;
-    const x = inaDeflCase ? [] : [0];
-    const deflection = [];
-    const v = [];
-    const m = [];
-    if (!inaDeflCase) {
-      v.push(0);
-      m.push(0);
-    }
-    let k = 0;
-    for (let i = 1; i <= numSpans; i++) {
-      for (let j = 0; j < spans[i].segments.length; j++) {
-        const seg = spans[i].segments[j];
-        const vEnd = seg.V1[combern] + seg.w1f[combern] * seg.length
-            + 0.5 * seg.slope[combern] * seg.length ** 2;
-        const mEnd = seg.M1[combern] + seg.V1[combern] * seg.length
-          + 0.5 * seg.w1f[combern] * seg.length ** 2 + seg.slope[combern] * seg.length ** 3 / 6;
-        const w2f = seg.w1f[combern] + seg.slope[combern] * seg.length;
-        let deflectionEnd = 0;
-        if (inaDeflCase) {
-          deflectionEnd = seg.delta1[combern] + seg.theta1[combern] * seg.length
-            + (0.5 * seg.M1[combern] * seg.length ** 2 + seg.V1[combern] * seg.length ** 3 / 6
-            + seg.w1f[combern] * seg.length ** 4 / 24
-            + seg.slope[combern] * seg.length ** 5 / 120) / beam.EI;
-        }
-        // Details for line work
-        let xLocal = 0;
-        k += 1;
-        x.push(seg.xOfLeftEnd);
-        if (inaDeflCase) {
-          deflection.push(seg.delta1[combern]);
-          if (seg.delta1[combern] > deflectionMax) {
-            deflectionMax = seg.delta1[combern];
-            xDeflectionMax = seg.xOfLeftEnd;
-          }
-          if (seg.delta1[combern] < deflectionMin) {
-            deflectionMin = seg.delta1[combern];
-            xDeflectionMin = seg.xOfLeftEnd;
-          }
-          if (deflectionEnd > deflectionMax) {
-            deflectionMax = deflectionEnd;
-            xDeflectionMax = seg.xOfLeftEnd + seg.length;
-          }
-          if (deflectionEnd < deflectionMin) {
-            deflectionMin = deflectionEnd;
-            xDeflectionMin = seg.xOfLeftEnd + seg.length;
-          }
-        } else {
-          v.push(seg.V1[combern]);
-          m.push(seg.M1[combern]);
-        }
-
-        for (let ii = 1; ii <= Math.trunc(seg.length / xIncrement); ii++) {
-          k = k + 1;
-          x.push(x[x.length - 1] + xIncrement);
-          xLocal += xIncrement;
-          if (inaDeflCase) {
-            deflection.push(seg.delta1[combern] + seg.theta1[combern] * xLocal
-                + (0.5 * seg.M1[combern] * xLocal ** 2
-                + seg.V1[combern] * xLocal ** 3 / 6 + seg.w1f[combern] * xLocal ** 4 / 24
-                + seg.slope[combern] * xLocal ** 5 / 120) / beam.EI);
-            if (deflection[deflection.length - 1] > deflectionMax) {
-              deflectionMax = deflection[deflection.length - 1];
-              xDeflectionMax = seg.xOfLeftEnd + xLocal;
-            }
-            if (deflection[deflection.length - 1] < deflectionMin) {
-              deflectionMin = deflection[deflection.length - 1];
-              xDeflectionMin = seg.xOfLeftEnd + xLocal;
-            }
-          } else {
-            v.push(seg.V1[combern] + seg.w1f[combern] * xLocal
-              + 0.5 * seg.slope[combern] * xLocal ** 2);
-            m.push(seg.M1[combern] + seg.V1[combern] * xLocal
-              + 0.5 * seg.w1f[combern] * xLocal ** 2 + seg.slope[combern] * xLocal ** 3 / 6);
-          }
-        }
-
-        k += 1;
-        x.push(seg.xOfLeftEnd + seg.length);
-        if (inaDeflCase) {
-          deflection.push(deflectionEnd);
-        } else {
-          v.push(vEnd);
-          m.push(mEnd);
-        }
-
-        // Check for local maximums and minimums
-        if (seg.Vmax.left.case === combern || seg.Vmin.left.case === combern) {
-          // Do we also want to write this value onto the shear diagram?
-          if (i === 1 && j === 0) {
-            if (Math.abs(seg.V1[combern]) > vSmall) {
-              checkVs(seg.V1[combern], 0, wV, wVx, spans, beam.length);
-            }
-          } else if (!(lastW2f === seg.w1f[combern] &&
-              Math.abs(seg.V1[combern] - lastVend) < vSmall)) {
-            checkVs(seg.V1[combern], seg.xOfLeftEnd, wV, wVx, spans, beam.length);
-          }
-        }
-
-        if (seg.Vmax.mid.case === combern || seg.Vmin.mid.case === combern) {
-          // eslint-disable-next-line no-useless-assignment
-          let xCross = 0;
-          if (seg.slope[combern] !== 0) {
-            xCross = -1 * seg.w1f[combern] / seg.slope[combern];
-            if (xCross > 0 && xCross < seg.length) {
-              const vMid = seg.V1[combern] + seg.w1f[combern] * xCross
-                  + 0.5 * seg.slope[combern] * xCross ** 2;
-              checkVs(vMid, seg.xOfLeftEnd + xCross, wV, wVx, spans, beam.length);
-            }
-          }
-        }
-
-        if (seg.Vmax.right.case === combern || seg.Vmin.right.case === combern) {
-          if (Math.abs(vEnd) > vSmall) {
-            checkVs(vEnd, seg.xOfLeftEnd + seg.length, wV, wVx, spans, beam.length);
-          }
-        }
-
-        if (seg.Mmax.left.case === combern || seg.Mmin.left.case === combern) {
-          if (i === 1 && j === 0) {
-            if (Math.abs(seg.M1[combern]) > mSmall) {
-              checkMs(seg.M1[combern], 0, wM, wMx, spans, beam.length, mSmall);
-            }
-          } else {
-            checkMs(seg.M1[combern], seg.xOfLeftEnd, wM,
-              wMx, spans, beam.length, mSmall);
-          }
-        }
-
-        if (seg.Mmax.mid.case === combern || seg.Mmin.mid.case === combern) {
-          let xCross = 0; // initialze the variable
-          // eslint-disable-next-line no-useless-assignment
-          let mMid = 0;
-          if (seg.slope[combern] === 0) {
-            if (seg.w1f[combern] !== 0) {
-              xCross = -seg.V1[combern] / seg.w1f[combern];
-              if (xCross > 0 && xCross < seg.length) {
-                mMid = seg.M1[combern] + seg.V1[combern] * xCross
-                  + 0.5 * seg.w1f[combern] * xCross ** 2 + seg.slope[combern] * xCross ** 3 / 6;
-                checkMs(mMid, seg.xOfLeftEnd + xCross, wM, wMx, spans, beam.length, mSmall);
-              }
-            }
-          } else {
-            let mMid1 = 0;
-            let mMid2 = 0;
-            let xCross1 = 0;
-            let xCross2 = 0;
-            if ((seg.w1f[combern] ** 2 - 2 * seg.slope[combern] * seg.V1[combern]) > 0) {
-              const determinant = Math.sqrt(seg.w1f[combern] ** 2
-                    - 2 * seg.slope[combern] * seg.V1[combern]);
-              xCross1 = -(seg.w1f[combern] - determinant) / seg.slope[combern];
-              xCross2 = -(seg.w1f[combern] + determinant) / seg.slope[combern];
-              if (xCross1 > 0 && xCross1 < seg.length) {
-                xCross = xCross1;
-                mMid1 = seg.M1[combern] + seg.V1[combern] * xCross
-                  + 0.5 * seg.w1f[combern] * xCross ** 2 + seg.slope[combern] * xCross ** 3 / 6;
-              }
-              if (xCross2 > 0 && xCross2 < seg.length) {
-                xCross = xCross2;
-                mMid2 = seg.M1[combern] + seg.V1[combern] * xCross
-                  + 0.5 * seg.w1f[combern] * xCross ** 2 + seg.slope[combern] * xCross ** 3 / 6;
-              }
-            }
-            if (mMid1 > 0 || mMid2 > 0) {
-              if (mMid1 > mMid2) {
-                // eslint-disable-next-line no-useless-assignment
-                mMid = mMid1;
-                xCross = xCross1;
-              } else {
-                // eslint-disable-next-line no-useless-assignment
-                mMid = mMid2;
-                xCross = xCross2;
-              }
-            }
-            if (xCross > 0 && xCross < seg.length) {
-              mMid = seg.M1[combern] + seg.V1[combern] * xCross
-                  + 0.5 * seg.w1f[combern] * xCross ** 2 + seg.slope[combern] * xCross ** 3 / 6;
-              checkMs(mMid, seg.xOfLeftEnd + xCross, wM, wMx, spans, beam.length, mSmall);
-            }
-          }
-        }
-
-        if (seg.Mmax.right.case === combern || seg.Mmin.right.case === combern) {
-          checkMs(mEnd, seg.xOfLeftEnd + seg.length, wM, wMx, spans, beam.length, mSmall);
-        }
-
-        lastW2f = w2f;
-        lastVend = vEnd;
-      }
-    }
-
-    // Plot diagrams
-    const numDataPoints = k;
-
-    // Draw the shear diagrams
-    if (shearCases.includes(combern)) {
-      let xPoly;
-      let yPoly;
-
-      if (beam.allLoadsAreUniform) {
-        // Make the shear diagram out of straight lines.
-        let linearV = new Array(2 * beam.numSegments + 3).fill(0);
-        linearV = linearV.map(e => [0, 0]);
-        k = 1;
-        linearV[k][0] = beam.xDiagram;
-        linearV[k][1] = yV;
-        for (let i = 1; i <= numSpans; i++) {
-          for (let j = 0; j < spans[i].segments.length; j++) {
-            const seg = spans[i].segments[j];
-            k = k + 1;
-            linearV[k][0] = beam.xDiagram + beam.xScale * seg.xOfLeftEnd;
-            linearV[k][1] = yV - vScale * seg.V1[combern];
-            k = k + 1;
-            linearV[k][0] = beam.xDiagram + beam.xScale * (seg.xOfLeftEnd + seg.length);
-            const vEnd = seg.V1[combern] + seg.w1f[combern] * seg.length
-                + 0.5 * seg.slope[combern] * seg.length ** 2;
-            linearV[k][1] = yV - vScale * vEnd;
-          }
-        }
-        k = k + 1;
-        linearV[k][0] = beam.xDiagram + beam.xScale * beam.length;
-        linearV[k][1] = yV;
-        const numOfShearDataPoints = k;
-
-        xPoly = new Array(numOfShearDataPoints - 1);
-        yPoly = new Array(numOfShearDataPoints - 1);
-        for (let ii = 1; ii <= numOfShearDataPoints; ii++) {
-          xPoly[ii - 1] = linearV[ii][0].toFixed(2);
-          yPoly[ii - 1] = linearV[ii][1].toFixed(2);
-        }
-
-      } else {
-        xPoly = new Array(numDataPoints + 1).fill(0);
-        yPoly = new Array(numDataPoints + 1).fill(0);
-        for (let ii = 0; ii < numDataPoints; ii++) {
-          xPoly[ii] = (beam.xDiagram + beam.xScale * x[ii]).toFixed(2); // x(ii)
-          yPoly[ii] = (yV - vScale * v.shift()).toFixed(2);
-        }
-        xPoly[numDataPoints] = beam.xDiagram + 300;
-        yPoly[numDataPoints] = yV;
-      }
-      diagram.push(Draw.polyline(xPoly, yPoly));
-    }
-
-    // Draw the moment diagram
-    if (bendingCases.includes(combern)) {
-      const xPoly = new Array(numDataPoints + 1).fill(0);
-      const yPoly = new Array(numDataPoints + 1).fill(0);
-      for (let ii = 0; ii <= numDataPoints; ii++) {
-        xPoly[ii] = (beam.xDiagram + beam.xScale * x[ii]).toFixed(2); // x(ii)
-        yPoly[ii] = (yM - beam.convention * mScale * m.shift()).toFixed(2); // M(ii)
-      }
-      xPoly[numDataPoints + 1] = beam.xDiagram + 300;
-      yPoly[numDataPoints + 1] = yM;
-      diagram.push(Draw.polyline(xPoly, yPoly));
-    }
-
-    if (inaDeflCase) {
-      // Draw the deflection diagram
-      diagram.push(Draw.textNode("deflection", 20, yDeflection + 2));
-      diagram.push({
-        tag: "path",
-        attrs: { d: `M${beam.xDiagram} ${yDeflection} h300`,
-          stroke: "black", "stroke-width": '1.5px' }
-      });
-      const xPoly = new Array(numDataPoints - 1).fill(0);
-      const yPoly = new Array(numDataPoints - 1).fill(0);
-      xPoly[0] = beam.xDiagram.toFixed(2);
-      yPoly[0] = yDeflection.toFixed(2);
-      for (let ii = 1; ii <= numDataPoints - 1; ii++) {
-        xPoly[ii] = (beam.xDiagram + beam.xScale * x[ii]).toFixed(2); // x(ii)
-        yPoly[ii] = (yDeflection - deflectionScale * deflection[ii]).toFixed(2);
-      }
-      diagram.push(Draw.polyline(xPoly, yPoly));
-    }
-  }
-
-  // Write the values of the local shear maximums onto the diagrams.
-  f = 1 / (beam.SI ? 1000 : 4448.2216152605); // conversion factor for N to kips or MN
-  while (wV.length > 0) {
-    const xText = (beam.xDiagram + beam.xScale * wVx.shift()).toFixed(2);
-    const fudge = wV[0] > 0 ? -2 : 13;
-    const yText = (yV - vScale * wV[0] + fudge).toFixed(2);
-    // horizAlign is middle
-    diagram.push(Draw.textNode(round$1(wV.shift() * f, 3), xText, yText, horizAlign));
-  }
-
-  // Write the values of the local bending maximums onto the diagrams.
-  f = beam.convention / (beam.SI ? 1000 : 4448.2216152605 * 0.3048);
-  while (wM.length > 0) {
-    const xText = (beam.xDiagram + beam.xScale * wMx.shift()).toFixed(2);
-    const fudge = beam.convention * wM[0] > 0 ? -2 : 13;
-    const yText = (yM - beam.convention * mScale * wM[0] + fudge).toFixed(2);
-    const sText = round$1(wM.shift() * f, 3);
-    diagram.push(Draw.textNode(sText, xText, yText, horizAlign));
-  }
-
-  if (beam.EI !== 1) {
-    // Insert the max and min deflection values
-    beam.deflectionMax = Math.max(Math.abs(deflectionMax), Math.abs(deflectionMin));
-    f = beam.SI ? 1000 : (12 / 0.3048);
-    /* eslint-disable no-useless-assignment */
-    let sText = "";
-    let xText = 0;
-    let yText = 0;
-    /* eslint-enable no-useless-assignment */
-    if (deflectionMax > 0.2 * (deflectionMax - deflectionMin)) {
-      xText = beam.xDiagram + beam.xScale * xDeflectionMax;
-      yText = yDeflection - deflectionScale * deflectionMax - 2;
-      if (beam.SI) {
-        sText = (deflectionMax * f).toFixed(0) + " mm";
-      } else {
-        sText = round$1(deflectionMax * f, 2) + '″';
-      }
-      diagram.push(Draw.textNode(sText, xText, yText, horizAlign));
-    }
-    if (Math.abs(deflectionMin) > 0.2 * (deflectionMax - deflectionMin)) {
-      xText = beam.xDiagram + beam.xScale * xDeflectionMin;
-      yText = yDeflection - deflectionScale * deflectionMin + 13;
-      if (beam.SI) {
-        sText = (f * deflectionMin).toFixed(0) + " mm";
-      } else {
-        sText = round$1(f * deflectionMin, 2) + '″';
-      }
-      diagram.push(Draw.textNode(sText, xText, yText, horizAlign));
-    }
-  }
-
-  return diagram
-}
-
-const checkVs = (v, x, wV, wVx, spans, beamLength) => {
-  // Check if we should write this value onto the shear diagram
-  let gottaWrite = true; // initialize the variable
-  const shortDistance = 0.15 * beamLength;
-
-  for (let i = 1; i < spans.length; i++) {
-    for (let k = 0; k < spans[i].segments.length; k++) {
-      const seg = spans[i].segments[k];
-      const xOfRightEnd = seg.xOfLeftEnd + seg.length;
-      if (xOfRightEnd < x -  shortDistance) { continue }
-      if (seg.xOfLeftEnd > x + shortDistance) { continue }
-
-      if (Math.abs(seg.xOfLeftEnd - x) < shortDistance) {
-        if (v > 0) {
-          if (seg.Vmax.left.value > v) {
-            gottaWrite = false;
-            break
-          }
-        } else if (seg.Vmin.left.value < v) {
-          gottaWrite = false;
-          break
-        }
-      }
-
-      const xRightEnd = seg.xOfLeftEnd + seg.length;
-      if (Math.abs(x - xRightEnd < shortDistance)) {
-        if (v > 0) {
-          if (seg.Vmax.right.value > v) {
-            gottaWrite = false;
-            break
-          }
-        } else if (seg.Vmin.right.value < v) {
-          gottaWrite = false;
-          break
-        }
-      }
-    }
-  }
-
-  if (gottaWrite) {
-    wV.push(v);
-    wVx.push(x);
-  }
-};
-
-const checkMs = (m, x, wM, wMx, spans, beamLength, mSmall) => {
-  // Check if we should write this value onto the moment diagram
-  if (Math.abs(m) < mSmall) { return false }
-  let gottaWrite = true; // initialize the variable
-  const shortDistance = 0.15 * beamLength;
-
-  for (let i = 1; i < spans.length; i++) {
-    for (let k = 0; k < spans[i].segments.length; k++) {
-      const seg = spans[i].segments[k];
-      const xOfRightEnd = seg.xOfLeftEnd + seg.length;
-      if (xOfRightEnd < x -  shortDistance) { continue }
-      if (seg.xOfLeftEnd > x + shortDistance) { continue }
-
-      if (Math.abs(seg.xOfLeftEnd - x) < shortDistance) {
-        if (m > 0) {
-          if (seg.Mmax.left.value > m) {
-            gottaWrite = false;
-            break
-          }
-        } else if (seg.Mmin.left.value < m) {
-          gottaWrite = false;
-          break
-        }
-      }
-
-      if (m > 0 && Math.abs(seg.Mmax.mid.x - x) < shortDistance) {
-        if (seg.Mmax.mid.value > m) {
-          gottaWrite = false;
-          break
-        }
-      }
-      if (m < 0 && Math.abs(seg.Mmin.mid.x - x) < shortDistance) {
-        if (seg.Mmin.mid.value < m) {
-          gottaWrite = false;
-          break
-        }
-      }
-
-      const xRightEnd = seg.xOfLeftEnd + seg.length;
-      if (Math.abs(x - xRightEnd < shortDistance)) {
-        if (m > 0) {
-          if (seg.Mmax.right.value > m) {
-            gottaWrite = false;
-            break
-          }
-        } else if (seg.Mmin.right.value < m) {
-          gottaWrite = false;
-          break
-        }
-      }
-    }
-  }
-
-  if (gottaWrite) {
-    wM.push(m);
-    wMx.push(x);
-  }
-};
-
-function error(msg) {
-  if (msg === "") { return { value: "Error", unit: null, dtype: dt.ERROR } }
-  return { value: msg, unit: null, dtype: dt.ERROR }
-}
-
-const beamDiagram = (beamInputData, loadFactorInput) => {
-  // This is the main analysis function.
-
-  // Get raw data from the input dataframe.
-  const beamInput = readInputData(beamInputData);
-  if (typeof beamInput === "string") { return error(beamInput) }
-
-  // Validate input and populate data structures.
-  const [errorMsg, beam, nodes, spans, combinations] = populateData(beamInput, loadFactorInput);
-  if (errorMsg) { return error(errorMsg) }
-
-  // Start the SVG
-  const svg = { tag: 'svg', children: [], attrs: { float: "right" } };
-
-  // Create the first diagram. Show fixities, lengths, and loads.
-  const loadDiagram = createLoadDiagram(beam, nodes, spans);
-  svg.children = svg.children.concat(loadDiagram);
-
-  // Do the linear algebra. For each load type, get member end actions and node displacements.
-  const [actions, deflections] = doAnalysis(beam, nodes, spans);
-
-  // Determine shear, moment, and deflection maximums and minimums by superimposing
-  // the relevent load combinations and live load patterns.
-  const extremes = combine(beam, nodes, spans, actions, deflections, combinations);
-
-  // Decide which combinations get plotted.
-  const cases = selectCases(spans);
-
-  // Find the y coordinates for the shear, moment, and deflection diagrams.
-  const yCoords = locateDiagrams(beam, extremes);
-  const yMax = yCoords[6]; // Diagram overall height in local coords.
-
-  const diagrams = drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combinations);
-  svg.children = svg.children.concat(diagrams);
-
-  // Set the outer dimensions of the diagram.
-  svg.attrs.width = "375"; // px
-  svg.attrs.height = (375 / 450 * yMax).toFixed(0);
-  svg.attrs.viewBox = `0 0 450 ${yMax.toFixed(0)}`;
-
-  return svg
-
-};
-
-// evaluate.js
-
-/*
- *  This module receives an RPN string and a object containing Hurmet variables.
- *  It does the calculation, doing unit-compatibility checks along the way.
- *  It returns a result in two formats: (1) a TeX string that can be displayed and
- *  (2) numeric and unit data that can used for calculations by other cells.
- *
- *  Hurmet does automatic unit conversions and checks for unit compatibility.
- *  Compatibility checks are done by keeping track of the unit exponents.
- *  So for instance if we divide an area by a length, the unit exponent calculation runs as:
- *     LENGTH^2 / LENGTH^1 = LENGTH^(2-1) = LENGTH^1
- *  We keep track of unit exponents for each of 9 base dimensions. That's why
- *  you see an array of 9 integers occuring in the code below.
- *
- *  Inside evalRpn(), Hurmet operands are each an object with three fields:
- *     value: the value of the operand
- *     unit:  holds unit info, either unit name, an array of exponents, or a unitMap
- *     dtype: an integer indicating data type.
- *
- *     Note that an operand can be two data types at once, such as RATIONAL and MATRIX.
- *     In such cases, dtype is the sum of the two underlying integers.
- *     So, in constants.js, we have enumerated the data types in powers of two.
- *     That way, we can use a bit-wise "&" operator to test for an individual type.
- *
- *     Numeric matrices and numeric maps can have math operations done to them.
- *     We distinguish numeric matrices from other matrices by the fact that
- *     (oprnd.dtype & dt.RATIONAL) returns a true if the matrix is numeric.
- *
- *     File operands.js contains further explanation of Hurmet operands.
- */
-
-// Some helper functions
-
-const setComparisons = ["in", "!in", "∈", "∉", "∋", "∌", "⊂", "⊄", "⊃", "⊅"];
-
-const shapeOf = oprnd => {
-  return oprnd.dtype === dt.COMPLEX
-    ? "complex"
-    : oprnd.dtype < 128
-    ? "scalar"
-    : isVector(oprnd)
-    ? "vector"
-    : (oprnd.dtype & dt.MATRIX)
-    ? "matrix"
-    : oprnd.dtype === dt.DATAFRAME
-    ? "dataFrame"
-    : (oprnd.dtype & dt.MAP)
-    ? "map"
-    : "other"
-};
-
-const binaryShapesOf = (o1, o2) => {
-  let shape1 = shapeOf(o1);
-  let shape2 = shapeOf(o2);
-  let needsMultBreakdown = false;
-  if ((isMatrix(o1) || (o1.dtyp & dt.MAP)) && (isMatrix(o2) || (o2.dtype & dt.MAP))) {
-    // If both operands are matrices, we need to return more information.
-    // That enables the various ways to multiply two matrices.
-    needsMultBreakdown = true;
-    if (shape1 === "vector") {
-      shape1 = (o1.dtype & dt.ROWVECTOR) ? "rowVector" : "columnVector";
-    }
-    if (shape2 === "vector") {
-      shape2 = (o2.dtype & dt.ROWVECTOR) ? "rowVector" : "columnVector";
-    }
-  }
-  return [shape1, shape2, needsMultBreakdown]
-};
-
-const matrixMults = { "×": "cross", "·": "dot", "∘": "circ", ".*": "circ",
-  "*": "multiply", "∗": "multiply", "⌧": "multiply", "modulo": "modulo" };
-
-const nextToken = (tokens, i) => {
-  if (tokens.length < i + 2) { return undefined }
-  return tokens[i + 1]
-};
-
-// array of function names that return a real number from a complex argument.
-const arfn = ["abs", "angle", "imag", "real", "Γ", "gamma"];
-
-const stringFromOperand = (oprnd, formats) => {
-  return oprnd.dtype === dt.STRING
-    ? oprnd.value
-    : oprnd.dtype === dt.RATIONAL
-    ? format(oprnd.value, "h15", formats.decimalFormat)
-    : isMatrix(oprnd.dtype)
-    ? Matrix.displayAlt(oprnd, "h15", formats)
-    : (oprnd.dtype & dt.MAP)
-    ? DataFrame.displayAlt(oprnd.value, "h15", formats)
-    : oprnd.value
-};
-
-const evalRpn = (rpn, vars, formats, unitAware, lib) => {
-  // This is the function that does calculations with the rpn string.
-  const tokens = rpn.split("\u00A0");
-  const stack = [];
-  let oPrev;
-  for (let i = 0; i < tokens.length; i++) {
-    const tkn = tokens[i];
-    const ch = tkn.charAt(0);
-
-    if (ch === "®") {
-      // A rational number.⌾
-      const r = new Array(2);
-      const pos = tkn.indexOf("/");
-      r[0] = BigInt(tkn.slice(1, pos));   // numerator
-      r[1] = BigInt(tkn.slice(pos + 1));  // denominator
-      const num = Object.create(null);
-      num.value = r;
-      num.unit = Object.create(null);
-      num.unit.expos = allZeros;
-      num.dtype = dt.RATIONAL;
-      stack.push(Object.freeze(num));
-
-    } else if (ch === "⌾") {
-      const date = Object.create(null);
-      date.value = [BigInt(tkn.slice(1)), BigInt(1)];
-      date.unit = Object.create(null);
-      date.unit.expos = [0, 0, 1, 0, 0, 0, 0, 0],
-      date.dtype = dt.DATE;
-      stack.push(Object.freeze(date));
-
-    } else if (ch === "©") {
-      // A complex number.
-      const ints = tkn.slice(1).split(",");
-      const z = new Array(2);
-      z[0] = [BigInt(ints[0]), BigInt(ints[1])];  // real part
-      z[1] = [BigInt(ints[2]), BigInt(ints[3])];  // imaginary part
-      const num = Object.create(null);
-      num.value = z;
-      num.unit = Object.create(null);
-      num.unit.expos = allZeros;
-      num.dtype = dt.COMPLEX;
-      stack.push(Object.freeze(num));
-
-    } else if (ch === "¿") {
-      // A variable. Get the value from vars
-      const varName = tkn.substring(1);
-      let oprnd = Object.create(null);
-      if (varName === "undefined") {
-        oprnd.value = undefined;
-        oprnd.unit = null;
-        oprnd.dtype = 0;
-      } else if (varName === "T" && nextToken(tokens, i) === "^" &&
-            stack.length > 0 && isMatrix(stack[stack.length - 1])) {
-        i += 1;
-        oprnd = Matrix.transpose(stack.pop());
-      } else if (varName === "j" && !vars.j) {
-        oprnd.value = [Rnl.zero, Rnl.one];
-        oprnd.unit = Object.create(null);
-        oprnd.unit.expos = allZeros;
-        oprnd.dtype = dt.COMPLEX;
-      } else {
-        const cellAttrs = vars[varName];
-        if (!cellAttrs) { return errorOprnd("V_NAME", varName) }
-        oprnd = fromAssignment(cellAttrs, unitAware);
-        if (oprnd.dtype === dt.ERROR) { return oprnd }
-      }
-      stack.push(Object.freeze(oprnd));
-
-    } else if (ch === '"') {
-      // A string literal.
-      const chEnd = tkn.charAt(tkn.length - 1);
-      const str = ch === '"' && chEnd === '"' ? tkn.slice(1, -1) : tkn;
-      stack.push(Object.freeze({ value: str, unit: null, dtype: dt.STRING }));
-
-    } else if (/^``/.test(tkn)) {
-      stack.push(DataFrame.dataFrameFromTSV(tablessTrim(tkn.slice(2, -2)), vars));
-
-    } else if (ch === '`') {
-      // A rich text literal
-      const chEnd = tkn.charAt(tkn.length - 1);
-      const str = ch === '`' && chEnd === '`' ? tkn.slice(1, -1).trim() : tkn.trim();
-      stack.push(Object.freeze({ value: str, unit: null, dtype: dt.RICHTEXT }));
-
-    } else {
-      switch (tkn) {
-        case "true":
-        case "false": {
-          const bool = Object.create(null);
-          bool.value = tkn === "true";
-          bool.unit = null;
-          bool.dtype = dt.BOOLEAN;
-          stack.push(Object.freeze(bool));
-          break
-        }
-
-        case "pi":
-        case "π": {
-          const pi = Object.create(null);
-          pi.value = Rnl.pi;
-          pi.dtype = dt.RATIONAL;
-          pi.unit = Object.create(null);
-          pi.unit.expos = allZeros;
-          stack.push(Object.freeze(pi));
-          break
-        }
-
-        case "e": {
-          const e = Object.create(null);
-          e.value = "e";
-          e.dtype = dt.RATIONAL;
-          e.unit = Object.create(null);
-          e.unit.expos = allZeros;
-          stack.push(Object.freeze(e));
-          break
-        }
-
-        case "ℏ": {
-          // Reduced Plank constant
-          const hbar = Object.create(null);
-          hbar.value = Rnl.hbar;
-          hbar.dtype = dt.RATIONAL;
-          hbar.unit = Object.create(null);
-          hbar.unit.expos = Object.freeze(unitAware ? [2, 1, -1, 0, 0, 0, 0, 0] : allZeros);
-          stack.push(Object.freeze(hbar));
-          break
-        }
-
-        case "∠": {
-          // Complex number in polar notation.
-          const o2 = stack.pop();
-          const o1 = stack.pop();
-          if (o1.dtype !== dt.RATIONAL || o2.dtype !== dt.RATIONAL) {
-            return errorOprnd("NAN_OP")
-          }
-          const theta = Rnl.toNumber(o2.value);
-          const z = Object.create(null);
-          z.value = [
-            Rnl.multiply(o1.value, Rnl.fromNumber(Math.cos(theta))), // real part
-            Rnl.multiply(o1.value, Rnl.fromNumber(Math.sin(theta)))  // imaginary part
-          ];
-          z.unit = Object.create(null);
-          z.unit.expos = allZeros;
-          z.dtype = dt.COMPLEX;
-          stack.push(Object.freeze(z));
-          break
-        }
-
-        case "+":
-        case ".+":
-        case "-":
-        case ".-": {
-          const o2 = stack.pop();
-          const o1 = stack.pop();
-          const op = tkn === "+" || tkn === ".+" ? "add" : "subtract";
-          if (!(((o1.dtype & dt.RATIONAL) || (o1.dtype & dt.DATE) || (o1.dtype & dt.COMPLEX))
-           && ((o2.dtype & dt.RATIONAL) || (o2.dtype & dt.DATE) || (o2.dtype & dt.COMPLEX)))) {
-            return errorOprnd("NAN_OP")
-          }
-          if (unitAware) {
-            if (!unitsAreCompatible(o1.unit.expos, o2.unit.expos)) {
-              return errorOprnd("UNIT_ADD")
-            }
-          }
-          const [shape1, shape2] = binaryShapesOf(o1, o2);
-          const sum = Object.create(null);
-          // See file operations.js for an explanation of what goes on in the next line.
-          sum.value = Operators.binary[shape1][shape2][op](o1.value, o2.value);
-          if (sum.value.dtype && sum.value.dtype === dt.ERROR) { return sum.value }
-          sum.unit = o1.unit;
-          sum.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn);
-          stack.push(Object.freeze(sum));
-          break
-        }
-
-        case "~": {
-          // Unary minus
-          const o1 = stack.pop();
-          if (!((o1.dtype & dt.RATIONAL) || o1.dtype === dt.COMPLEX)) {
-            return errorOprnd("NAN_OP")
-          }
-          const neg = Object.create(null);
-          neg.value = Operators.unary[shapeOf(o1)]["negate"](o1.value);
-          if (neg.value.dtype && neg.value.dtype === dt.ERROR) { return neg.value }
-          neg.unit = o1.unit;
-          neg.dtype = o1.dtype;
-          stack.push(Object.freeze(neg));
-          break
-        }
-
-        case "×":
-        case "·":
-        case "*":
-        case "∗":
-        case "∘":
-        case "⌧": {
-          const oprnd2 = stack.pop();
-          const o2 = oprnd2.dtype === dt.DATAFRAME ? clone(oprnd2) : oprnd2;
-          const o1 = stack.pop();
-          if ((tkn === "*" || tkn === "∗")
-               && o1.dtype === dt.STRING && o1.dtype === dt.STRING) {
-            // Julia's string concatenation operator
-            const str1 = stringFromOperand(o1, formats);
-            const str2 = stringFromOperand(o2, formats);
-            return { value: str1 + str2, unit: null, dtype: dt.STRING }
-          }
-          if (!(((o1.dtype & dt.RATIONAL) || (o1.dtype & dt.COMPLEX)) &&
-            ((o2.dtype & dt.RATIONAL) || (o2.dtype & dt.COMPLEX) ||
-            o2.dtype === dt.DATAFRAME))) {
-            return errorOprnd("NAN_OP")
-          }
-          const product = Object.create(null);
-          let unit = Object.create(null);
-          if (unitAware) {
-            if ((o1.dtype === dt.DATAFRAME && o2.dtype === dt.RATIONAL) ||
-                (o1.dtype === dt.RATIONAL && o2.dtype === dt.DATAFRAME)) {
-              unit = o1.dtype === dt.DATAFRAME ? o1.unit : o2.unit;
-            } else {
-              unit.expos = o1.unit.expos.map((e, j) => e + o2.unit.expos[j]);
-            }
-          } else {
-            unit.expos = allZeros;
-          }
-          product.unit = o2.dtype === dt.DATAFRAME ? clone(o2.unit) : Object.freeze(unit);
-
-          const [shape1, shape2, needsMultBreakdown] = binaryShapesOf(o1, o2);
-          const op = needsMultBreakdown ? matrixMults[tkn] : "multiply";
-
-          product.dtype = (tkn === "∘" || shape1 === "scalar" || shape1 === "map" ||
-            shape1 === "complex" || shape2 === "scalar" ||
-            shape2 === "map" || shape2 === "complex")
-              ? Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, op)
-              : tkn === "·"
-              ? dt.RATIONAL
-              : tkn === "×"
-              ? dt.COLUMNVECTOR
-              : Matrix.multResultType(o1, o2);
-
-          product.value = Operators.binary[shape1][shape2][op](o1.value, o2.value);
-          if (product.value.dtype && product.value.dtype === dt.ERROR) {
-            return product.value
-          }
-
-          stack.push(Object.freeze(product));
-          break
-        }
-
-        case "/":
-        case "./":
-        case "//":
-        case "///":
-        case "\u2215": {
-          const o2 = stack.pop();
-          const o1 = stack.pop();
-          if (!(((o1.dtype & dt.RATIONAL) || o1.dtype === dt.COMPLEX) &&
-                ((o2.dtype & dt.RATIONAL) || o2.dtype === dt.COMPLEX))) {
-            return errorOprnd("NAN_OP")
-          }
-          const quotient = Object.create(null);
-          const unit = Object.create(null);
-          unit.expos = unitAware
-            ? o1.unit.expos.map((e, j) => e - o2.unit.expos[j])
-            : allZeros;
-          quotient.unit = Object.freeze(unit);
-          const [shape1, shape2] = binaryShapesOf(o1, o2);
-          quotient.value = Operators.binary[shape1][shape2]["divide"](o1.value, o2.value);
-          if (quotient.value.dtype && quotient.value.dtype === dt.ERROR) {
-            return quotient.value
-          }
-          quotient.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, "divide");
-          if (isDivByZero(quotient.value, shapeOf(quotient))) { return errorOprnd("DIV") }
-          stack.push(Object.freeze(quotient));
-          break
-        }
-
-        case "^":
-        case ".^": {
-          const o2 = stack.pop();
-          const o1 = stack.pop();
-          if (!(((o1.dtype & dt.RATIONAL) || o1.dtype === dt.COMPLEX) &&
-                ((o2.dtype & dt.RATIONAL) || o2.dtype === dt.COMPLEX) ||
-                (isMatrix(o1) && o2.value === "T"))) {
-            return errorOprnd("NAN_OP")
-          }
-          const power = Object.create(null);
-          const unit = Object.create(null);
-          unit.expos = allZeros;
-          if (unitAware) {
-            // TODO: lots to do here
-            const d = typeof o2.unit === "number" ? o2.unit : Rnl.toNumber(o2.value);
-            unit.expos = o1.unit.expos.map(e => e * d);
-          }
-          power.unit = Object.freeze(unit);
-          const [shape1, shape2] = binaryShapesOf(o1, o2);
-          power.value = Operators.binary[shape1][shape2]["power"](o1.value, o2.value);
-          if (power.value.dtype) { return power.value } // Error
-          power.dtype = Cpx.isComplex(power.value)
-            ? dt.COMPLEX
-            : Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn);
-          stack.push(Object.freeze(power));
-          break
-        }
-
-        case "modulo": {
-          if (unitAware) { return errorOprnd( "UNIT_UN", "modulo" ) }
-          const o2 = stack.pop();
-          const o1 = stack.pop();
-          if (!(o1.dtype & dt.RATIONAL) || !(o2.dtype & dt.RATIONAL)) {
-            return errorOprnd("NAN_OP")
-          }
-          const [shape1, shape2] = binaryShapesOf(o1, o2);
-          const result = Object.create(null);
-          result.unit = allZeros;
-          result.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, "modulo");
-          result.value = Operators.binary[shape1][shape2]["modulo"](o1.value, o2.value);
-          stack.push(Object.freeze(result));
-          break
-        }
-
-        case "&":
-        case "hcat":
-        case "vcat": {
-          // Concatenation
-          const o2 = stack.pop();
-          const o1 = stack.pop();
-          const opName = tkn === "vcat" ? "unshift" : "concat";
-          const [shape1, shape2] = binaryShapesOf(o1, o2);
-          let o3 = Object.create(null);
-          if (o1.dtype === dt.STRING && o1.dtype === dt.STRING) {
-            const str1 = stringFromOperand(o1, formats);
-            const str2 = stringFromOperand(o2, formats);
-            o3.value = str1 + str2;
-            o3.unit = null;
-            o3.dtype = dt.STRING;
-          } else if ((o1.dtype & dt.DATAFRAME) && isVector(o2) && tkn !== "vcat") {
-            o3 = DataFrame.append(o1, o2, vars.format.value, unitAware);
-            if (o3.dtype === dt.ERROR) { return o3 }
-          } else if (isVector(o1) && (o2.dtype & dt.DATAFRAME) && tkn !== "vcat") {
-            o3 = DataFrame.append(o1, o2, vars.format.value, unitAware);
-            if (o3.dtype === dt.ERROR) { return o3 }
-          } else if (((o1.dtype & dt.DATAFRAME) && shape2 === "scalar") ||
-                     (shape1 === "scalar" && (o2.dtype & dt.DATAFRAME))) {
-            o3 = DataFrame.append(o1, o2, vars.format.value, unitAware);
-            if (o3.dtype === dt.ERROR) { return o3 }
-          } else if ((o1.dtype & dt.MAP) || (o2.dtype & dt.MAP)) {
-            o3 = map.append(o1, o2, shape1, shape2);
-            if (o3.dtype === dt.ERROR) { return o3 }
-          } else {
-            if (unitAware) {
-              if (!unitsAreCompatible(o1.unit.expos, o2.unit.expos)) {
-                return errorOprnd("UNIT_ADD")
-              }
-            }
-            o3.value = Operators.binary[shape1][shape2][opName](o1.value, o2.value);
-            if (o3.value.dtype) { return o3.value } // Error
-            o3.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn);
-            if (o1.dtype === dt.COLUMNVECTOR && shape2 === "scalar") {
-              // Appending an element to an empty column vector
-              o3.dtype = o1.dtype + o2.dtype;
-            }
-            o3.unit = o1.unit;
-          }
-          stack.push(Object.freeze(o3));
-          break
-        }
-
-        case "√":
-        case "∛":
-        case "∜": {
-          const index = tkn.charCodeAt(0) - 8728;
-          const pow = [BigInt(1), BigInt(index)];
-          const o1 = stack.pop();
-          if (!((o1.dtype & dt.RATIONAL) || (o1.dtype & dt.COMPLEX))) {
-            return errorOprnd("NAN_OP")
-          }
-          const root = Object.create(null);
-          const unit = Object.create(null);
-          unit.expos = allZeros;
-          if (unitAware) { unit.expos = o1.unit.expos.map(e => e / index); }
-          root.unit = Object.freeze(unit);
-
-          const shape1 = shapeOf(o1);
-          root.value = Operators.binary[shape1]["scalar"]["power"](o1.value, pow);
-          if (root.value.dtype && root.value.dtype === dt.ERROR) { return root.value }
-
-          root.dtype = Cpx.isComplex(root.value)
-            ? dt.COMPLEX
-            : Operators.dtype[shape1]["scalar"](o1.dtype, dt.RATIONAL, tkn);
-
-          stack.push(Object.freeze(root));
-          break
-        }
-
-        case "root": {
-          const o2 = stack.pop();
-          const o1 = stack.pop();
-          if (!((o1.dtype & dt.RATIONAL) & (o2.dtype & dt.RATIONAL))) {
-            return errorOprnd("NAN_OP")
-          }
-          const root = Object.create(null);
-          const unit = Object.create(null);
-          unit.expos = allZeros;
-          if (unitAware) { unit.expos = o2.unit.expos.map(e => e / Number(o1.value[0])); }
-          root.unit = Object.freeze(unit);
-
-          const pow = Rnl.reciprocal(o1.value);
-          const shape1 = shapeOf(o1);
-          root.value = Operators.binary[shape1]["scalar"]["power"](o2.value, pow);
-          if (root.value.dtype && root.value.dtype === dt.ERROR) { return root.value }
-
-          root.dtype = Operators.dtype[shape1]["scalar"](o1.dtype, dt.RATIONAL, tkn);
-          stack.push(Object.freeze(root));
-          break
-        }
-
-        case ".": {
-          // Accessor of a object's property in dot notation
-          const o2 = stack.pop();
-          const o1 = stack.pop();
-          let property;
-          if ((o1.dtype === dt.DATAFRAME || o1.dtype === dt.SPREADSHEET)
-                && tokens.length - i > 2 && tokens[i + 2] === ".") {
-            // Skip creation of a vector and go straight to a call to a single cell
-            const o3 = { value: tokens[i + 1].replace(/"/g, ""), unit: null, dtype: dt.STRING };
-            const args = o1.dtype === dt.SPREADSHEET
-              ? [o2, o3]
-              : (o2.value in o1.value.columnMap)
-              ? [o3, o2]
-              : [o2, o3];
-            property = o1.dtype === dt.DATAFRAME
-              ? DataFrame.range(o1, args, unitAware)
-              : cellOprnd(o1, args, unitAware);
-            i += 2;
-          } else if ((o1.dtype === dt.DATAFRAME || o1.dtype === dt.SPREADSHEET)
-                && tokens.length - i > 3
-                && tokens[i + 2] === "[]" && tokens[i + 3] === "1"
-                && tokens[i + 1].slice(0, 1) === '"') {
-            // Skip creation of a vector and go straight to a call to a single cell
-            const o3 = { value: tokens[i + 1].replace(/"/g, ""), unit: null, dtype: dt.STRING };
-            const args =  (o2.value in o1.value.columnMap) ? [o3, o2] : [o2, o3];
-            property = o1.dtype === dt.DATAFRAME
-              ? DataFrame.range(o1, args, unitAware)
-              : cellOprnd(o1, args, unitAware);
-            i += 3;
-          } else {
-            property = propertyFromDotAccessor(o1, o2, unitAware);
-          }
-          if (property.dtype === dt.ERROR) { return property }
-          stack.push(Object.freeze(property));
-          break
-        }
-
-        case "[]": {
-          // Bracket accessor to a data frame, matrix, string, map, or module.
-          const numArgs = Number(tokens[i + 1]);
-          i += 1;
-          const args = [];
-          for (let j = 0; j < numArgs; j++) { args.unshift(stack.pop()); }
-          const o1 = stack.pop();
-          let property;
-          if (o1.dtype & dt.DATAFRAME) {
-            if (args.length === 1 && args[0].dtype === dt.STRING && tokens.length - i > 2
-                  && tokens[i + 2] === ".") {
-              // Skip creation of a vector and go straight to a call to a single cell
-              const o2 = args[0];
-              const o3 = { value: tokens[i + 1].replace(/"/g, ""), unit: null, dtype: dt.STRING };
-              const newArgs =  (o2.value in o1.value.columnMap) ? [o3, o2] : [o2, o3];
-              property = DataFrame.range(o1, newArgs, unitAware);
-              i += 2;
-            } else if (args.length === 1 && args[0].dtype === dt.STRING
-                && tokens.length - i > 3 && tokens[i + 2] === "[]" && tokens[i + 3] === "1"
-                && tokens[i + 1].slice(0, 1) === '"') {
-              // Skip creation of a vector and go straight to a call to a single cell
-              const o2 = args[0];
-              const o3 = { value: tokens[i + 1].replace(/"/g, ""), unit: null, dtype: dt.STRING };
-              const newArgs =  (o2.value in o1.value.columnMap) ? [o3, o2] : [o2, o3];
-              property = DataFrame.range(o1, newArgs, unitAware);
-              i += 3;
-            } else {
-              property = DataFrame.range(o1, args, unitAware);
-            }
-
-          } else if (o1.dtype & dt.MAP) {
-            property = map.range(o1, args, unitAware);
-
-          } else if (o1.dtype === dt.STRING) {
-            property = textRange(o1.value, args[0]);
-
-          } else if (o1.dtype === dt.MODULE) {
-            if (numArgs === 1) {
-              property = fromAssignment(o1.value[args[0].value], unitAware);
-            } else {
-              // Multiple assignment.
-              property = { value: new Map(), unit: null, dtype: dt.TUPLE };
-              for (let j = 0; j < args.length; j++) {
-                const name = args[j].value;
-                property.value.set(name, fromAssignment(o1.value[name], unitAware));
-              }
-            }
-
-          } else {
-            // o1 is a matrix or a data frame
-            const rowIndex = args[0];
-            const colIndex = (numArgs === 2)
-              ? args[1]
-              : isVector(o1)
-              ? null
-              : { value: Rnl.zero, unit: allZeros, dtype: dt.RATIONAL };
-            property = (o1.dtype & dt.DATAFRAME)
-              ? DataFrame.range(o1, rowIndex, colIndex, unitAware)
-              : Matrix.submatrix(o1, rowIndex, colIndex);
-          }
-          if (property.dtype === dt.ERROR) { return property }
-          stack.push(Object.freeze(property));
-          break
-        }
-
-        case ":": {
-          // range separator.
-          const end = stack.pop();
-          const o1 = stack.pop();
-          if (!(o1.dtype === dt.RATIONAL || o1.dtype === dt.RANGE)) {
-            return errorOprnd("NAN_OP")
-          }
-          const range = Object.create(null);
-          range.unit = null;
-          range.dtype = dt.RANGE;
-          const step = o1.dtype !== dt.RATIONAL
-            ? o1.value[2]
-            : end.value === "∞" || Rnl.lessThanOrEqualTo(o1.value, end.value)
-            ? Rnl.one
-            : Rnl.negate(Rnl.one);
-          range.value = o1.dtype === dt.RATIONAL
-            ? [o1.value, step, end.value]
-            : [o1.value[0], o1.value[2], end.value];
-          stack.push((Object.freeze(range)));
-          break
-        }
-
-        case "normal":
-        case "uniform":
-        case "lognormal": {
-          // eslint-disable-next-line no-unused-vars
-          stack.pop();
-          // eslint-disable-next-line no-unused-vars
-          stack.pop();
-          // low and high define a probablility distribution. They are the ends of a
-          // uniform distribution or they mark the 90% confidence interval of (log)normal.
-          // TODO: Implement probability distributions as a data type.
-          break
-        }
-
-        case "!":
-        case "‼":
-        case "!!": {
-          // TODO: "!!" and "¡"
-          const o1 = stack.pop();
-          if (!(o1.dtype & dt.RATIONAL)) { return errorOprnd("NAN_OP") }
-          if (unitAware) {
-            if (!unitsAreCompatible(o1.unit.expos, allZeros)) { return errorOprnd("FACT") }
-          }
-          const x = o1.value;
-          if (!Rnl.isInteger(x) || Rnl.isNegative(x)) { return errorOprnd("FACT") }
-          const factorial = Object.create(null);
-          factorial.unit = allZeros;
-          factorial.dtype = dt.RATIONAL;
-          factorial.value = tkn === "!"
-            ? Operators.unary[shapeOf(o1)]["factorial"](x)
-            : Operators.unary[shapeOf(o1)]["doubleFactorial"](x);
-          if (factorial.value.dtype) { return factorial.value } // Error
-          stack.push(Object.freeze(factorial));
-          break
-        }
-
-        case "%": {
-          // TODO: per thousand, ‰
-          const o1 = stack.pop();
-          if (!(o1.dtype & dt.RATIONAL)) { return errorOprnd("NAN_OP") }
-          const percentage = Object.create(null);
-          percentage.unit = o1.unit;
-          percentage.dtype = o1.dtype;
-          percentage.value = Operators.unary[shapeOf(o1)]["percent"](o1.value);
-          if (percentage.value) { return percentage.value } // Error
-          stack.push(Object.freeze(percentage));
-          break
-        }
-
-        case "|":
-        case "‖": {
-            // Find |x| or ‖x‖
-          const o1 = stack.pop();
-          if (!((o1.dtype & dt.RATIONAL) || o1.dtype === dt.COMPLEX)) {
-            return errorOprnd("NAN_OP")
-          }
-          const op = tkn === "|" ? "abs" : "norm";
-          const abs = Object.create(null);
-          abs.unit = o1.unit;
-          abs.dtype = dt.RATIONAL;
-          abs.value = Operators.unary[shapeOf(o1)][op](o1.value);
-          if (abs.value.dtype && abs.value.dtype === dt.ERROR) { return abs.value }
-          stack.push(Object.freeze(abs));
-          break
-        }
-
-        case "matrix": {
-          // matrix
-          const numRows = Number(tokens[i + 1]);
-          const numCols = Number(tokens[i + 2]);
-          i += 2;
-          let result;
-
-          if (stack.length > 0 && stack[stack.length - 1].dtype === dt.RANGE) {
-            // Input was [start:step:end]
-            if (unitAware) { return errorOprnd("UNIT_IN_EL") }
-            result = Matrix.operandFromRange(stack.pop().value);
-          } else {
-            result = Matrix.operandFromTokenStack(stack, numRows, numCols);
-          }
-          if (result.dtype === dt.ERROR) { return result }
-          stack.push(Object.freeze(result));
-          break
-        }
-
-        case "tuple": {
-          const numItems = Number(tokens[i + 1]);
-          i += 1;
-          const oprnd = { value: [], unit: null, dtype: dt.TUPLE };
-          for (let j = 0; j < numItems; j++) {
-            oprnd.value.unshift(stack.pop());
-          }
-          stack.push(oprnd);
-          break
-        }
-
-        case "startSvg":
-          stack.push({ value: draw.startSvg(), unit: null, dtype: dt.DRAWING });
-          break
-
-        case "beamDiagram": {
-          const numArgs = Number(tokens[i + 1]);
-          i += 1;
-          let combinations = "service";
-          if (numArgs === 2)  { combinations = stack.pop().value; }
-          const beam = stack.pop();
-          if (!(beam.dtype & dt.MAP)) { return errorOprnd("BAD_TYPE", "beamDiagram") }
-          const diagram = beamDiagram(beam.value.data, combinations);
-          if (diagram.dtype && diagram.dtype === dt.ERROR) { return diagram }
-          stack.push({ value: diagram, resultdisplay: diagram, unit: null, dtype: dt.DRAWING });
-          break
-        }
-
-        case "abs":
-        case "cos":
-        case "sin":
-        case "tan":
-        case "acos":
-        case "asin":
-        case "atan":
-        case "sec":
-        case "csc":
-        case "cot":
-        case "asec":
-        case "acsc":
-        case "acot":
-        case "exp":
-        case "log":
-        case "ln":
-        case "log10":
-        case "log2":
-        case "cosh":
-        case "sinh":
-        case "tanh":
-        case "sech":
-        case "csch":
-        case "coth":
-        case "acosh":
-        case "asinh":
-        case "atanh":
-        case "asech":
-        case "acsch":
-        case "acoth":
-        case "gamma":
-        case "Γ":
-        case "lgamma":
-        case "lfact":
-        case "factorial":
-        case "cosd":
-        case "sind":
-        case "tand":
-        case "acosd":
-        case "asind":
-        case "atand":
-        case "secd":
-        case "cscd":
-        case "cotd":
-        case "asecd":
-        case "acscd":
-        case "acotd":
-        case "real":
-        case "imag":
-        case "angle":
-        case "conj":
-        case "ceil":
-        case "floor":
-        case "Char":
-        case "round":
-        case "sqrt":
-        case "sign": {
-          // Functions with one real or complex argument.
-          const arg = stack.pop();
-          if (!((arg.dtype & dt.RATIONAL) || (arg.dtype & dt.COMPLEX))) {
-            return errorOprnd("UNREAL", tkn)
-          }
-
-          const output = Object.create(null);
-          const unit = Object.create(null);
-          unit.expos = unitAware ? Functions.functionExpos(tkn, [arg]) : allZeros;
-          if (unit.expos.dtype && unit.expos.dtype === dt.ERROR) { return unit.expos }
-          output.unit = tkn === "Char" ? null : Object.freeze(unit);
-
-          const shape = (arg.dtype & dt.RATIONAL) ? "scalar" : "complex";
-          let value;
-          if (arg.dtype & dt.MAP) {
-            value = arg.value;
-            value.data = value.data.map(col => Rnl.isRational(col[0])
-              ? col.map(e => Functions.unary[shape][tkn](e))
-              : col
-            );
-          } else {
-            value = isVector(arg)
-              ? arg.value.map(e => Functions.unary[shape][tkn](e))
-              : isMatrix(arg)
-              ? arg.value.map(row => row.map(e => Functions.unary[shape][tkn](e)))
-              : Functions.unary[shape][tkn](arg.value);
-          }
-          if (value.dtype && value.dtype === dt.ERROR) { return value }
-          output.value = Object.freeze(value);
-
-          output.dtype = tkn === "Char"
-            ? arg.dtype - dt.RATIONAL + dt.STRING
-            : (arg.dtype & dt.COMPLEX) && arfn.includes(tkn)
-            ? arg.dtype - dt.COMPLEX + dt.RATIONAL
-            : arg.dtype;
-
-          stack.push(Object.freeze(output));
-          break
-        }
-
-        case "logn":
-        case "atan2":
-        case "gcd":
-        case "rms":
-        case "binomial":
-        case "ones":
-        case "zeros":
-        case "mod":
-        case "rem": {
-          // Functions with two real arguments.
-          const args = [];
-          args.push(stack.pop());
-          args.unshift(stack.pop());
-          if (!(args[0].dtype & dt.RATIONAL)) { return errorOprnd("") }
-
-          const output = Object.create(null);
-          const unit = Object.create(null);
-          unit.expos = unitAware ? Functions.functionExpos(tkn, args) : allZeros;
-          if (unit.dtype && unit.dtype === dt.ERROR) { return unit }
-          output.unit = Object.freeze(unit);
-
-          const [value, dtype] = multivarFunction("binary", tkn, args);
-          if (dtype === dt.ERROR) { return value }
-          output.value = Object.freeze(value);
-          output.dtype = dtype;
-          stack.push(Object.freeze(output));
-          break
-        }
-
-        case "hypot": {
-          const numArgs = Number(tokens[i + 1]);
-          i += 1;
-
-          const args = [];
-          args.push(stack.pop());
-          if (!(args[0].dtype & dt.RATIONAL)) { return errorOprnd("") }
-          /* eslint-disable no-useless-assignment */
-          let expos = null;
-          let dtype = 0;
-          /* eslint-enable no-useless-assignment */
-          for (let j = 0; j < numArgs - 1; j++) {
-            args.push(stack.pop());
-            if (!(args[1].dtype & dt.RATIONAL)) { return errorOprnd("") }
-            expos = unitAware ? Functions.functionExpos("hypot", args) : allZeros;
-            const [value, localDtype] = multivarFunction("binary", "hypot", args);
-            if (localDtype === dt.ERROR) { return value }
-            dtype = localDtype;
-            args.pop();
-            args.pop();
-            args.push({ value, unit: { expos }, dtype });
-          }
-          const output = Object.freeze(args[0]);
-          stack.push(output);
-          break
-
-        }
-
-        case "today":
-        case "savedate" : {
-          if (tkn === "savedate" && !vars["@savedate"]) {
-            return errorOprnd("UNSAVED")
-          }
-          const oprnd = { unit: { expos: [0, 0, 1, 0, 0, 0, 0, 0] }, dtype: dt.DATE };
-          const numSeconds = tkn === "today"
-            ? dateInSecondsFromToday()
-            : dateInSecondsFromIsoString("'" + vars["@savedate"] + "'");
-          oprnd.value = Rnl.fromNumber(numSeconds);
-          stack.push(oprnd);
-          break
-        }
-
-        case "Int": {
-          const arg = stack.pop();
-          const output = Object.create(null);
-          output.unit = { expos: allZeros };
-          if (!(arg.dtype & dt.BOOLEAN)) { return errorOprnd("LOGIC", "Int") }
-          output.value = isVector(arg)
-            ? arg.value.map(e => Rnl.fromNumber(Number(e)))
-            : isMatrix(arg)
-            ? arg.value.map(row => row.map(e => Rnl.fromNumber(Number(e))))
-            : Rnl.fromNumber(Number(arg.value));
-          output.dtype = arg.dtype - dt.BOOLEAN + dt.RATIONAL;
-          stack.push(Object.freeze(output));
-          break
-        }
-
-        case "number": {
-          const arg = stack.pop();
-          const output = Object.create(null);
-          output.unit = { expos: allZeros };
-          if (!(arg.dtype & dt.STRING)) { return errorOprnd("STRING") }
-          output.value = isVector(arg)
-            ? arg.value.map(e => Rnl.fromString(e))
-            : isMatrix(arg)
-            ? arg.value.map(row => row.map(e => Rnl.fromString(e)))
-            : Rnl.fromString(arg.value);
-          output.dtype = arg.dtype - dt.STRING + dt.RATIONAL;
-          stack.push(Object.freeze(output));
-          break
-        }
-
-        case "findmax": {
-          const arg = stack.pop();
-          let max = arg.value[0];
-          let index = 1;
-          if (!(isVector(arg) && (arg.dtype & dt.RATIONAL))) {
-            return errorOprnd("NOT_VECTOR", "findmax")
-          }
-          for (let i = 1; i < arg.value.length; i++) {
-            if (Rnl.greaterThan(arg.value[i], max)) {
-              max = arg.value[i];
-              index = Rnl.fromNumber(i + 1);
-            }
-          }
-          const tuple = { value: new Map(), unit: null, dtype: dt.TUPLE };
-          tuple.value.set("max", { value: max, unit: allZeros, dtype: dt.RATIONAL });
-          tuple.value.set("index", { value: index, unit: allZeros, dtype: dt.RATIONAL });
-          stack.push(tuple);
-          break
-        }
-
-        case "findfirst": {
-          const numArgs = Number(tokens[i + 1]);
-          i += 1;
-          const args = [];
-          args.push(stack.pop());
-          if (numArgs === 2) {args.unshift(stack.pop()); }
-          const isString = numArgs === 2 && (args[1].dtype & dt.STRING);
-          const output = Object.create(null);
-          output.unit = { expos: allZeros };
-          output.value = isString && isVector(args[1])
-            ? args[1].value.map(e => findfirst(args[0], e))
-            : isString && isMatrix(args[1])
-            ? args[1].value.map(row => row.map(e => findfirst(args[0], e)))
-            : isString
-            ? findfirst(args[0], args[1])
-            : numArgs === 1
-            ? Matrix.findfirst(true, args[0])
-            : isVector(args[1])
-            ? Matrix.findfirst(args[0].value, args[1])
-            : errorOprnd("ERR_FUNC", "Error. Did not understand arguments");
-          if (isString) {
-            output.dtype = args[1].dtype - dt.STRING + dt.RATIONAL;
-          } else {
-            output.dtype = dt.RATIONAL;
-          }
-          stack.push(Object.freeze(output));
-          break
-        }
-
-        case "roundn":
-        case "string": {
-          // Round a numeric value.
-          const spec = stack.pop();
-          const num = stack.pop();
-          if (!(num.dtype & dt.RATIONAL)) { return errorOprnd("") }
-          if (!(spec.dtype & dt.STRING)) { return errorOprnd("") }
-          if (!/(?:[fr])\d+/.test(spec.value)) { return errorOprnd("") }
-          let funcName = "";
-          const output = Object.create(null);
-          if (tkn === "string") {
-            funcName = spec.value.charAt() === "f" ? "stringFixed" : "stringSignificant";
-            output.unit = null;
-            output.dtype = num.dtype - dt.RATIONAL + dt.STRING;
-          } else {
-            funcName = spec.value.charAt() === "f" ? "roundFixed" : "roundSignificant";
-            output.unit = num.unit;
-            output.dtype = num.dtype;
-          }
-          const n = Number(spec.value.slice(1));
-          let value;
-          if (num.dtype & dt.MAP) {
-            value = num.value;
-            value.data = value.data.map(
-              col => Rnl.isRational(col[0])
-                ? col.map(e => Functions.binary[funcName][tkn]([e, n]))
-                : col
-              );
-          } else {
-            value = isVector(num)
-              ? num.value.map(e => Functions.binary[funcName]([e, n]))
-              : isMatrix(num)
-              ? num.value.map(row => row.map(e => Functions.binary[funcName]([e, n])))
-              : Functions.binary[funcName]([num.value, n]);
-          }
-          if (value.dtype && value.dtype === dt.ERROR) { return value }
-          output.value = Object.freeze(value);
-          if (num.name) { output.name = num.name; }
-          stack.push(Object.freeze(output));
-          break
-        }
-
-        case "dataframe":
-        case "max":
-        case "min":
-        case "sum":
-        case "product":
-        case "range":
-        case "mean":
-        case "median":
-        case "variance":
-        case "stddev":
-        case "accumulate": {
-          // Functions that reduce multiple arguments to one result.
-          // TODO: unit-aware reducing functions.
-          const numArgs = Number(tokens[i + 1]);
-          i += 1;
-          const args = [];
-          for (let j = 0; j < numArgs; j++) {
-            const datum = stack.pop();
-            if (tkn !== "dataframe" && !(datum.dtype & dt.RATIONAL)) {
-              return errorOprnd("NANARG", tkn)
-            }
-            args.unshift(datum);
-          }
-
-          if (tkn === "dataframe") {
-            const df = DataFrame.dataFrameFromVectors(args, vars.format.value);
-            if (df.dtype && df.dtype === dt.ERROR) { return df }
-            stack.push(df);
-            break
-          }
-
-          const output = Object.create(null);
-          const unit = Object.create(null);
-          unit.expos = unitAware ? Functions.functionExpos(tkn, args) : allZeros;
-          if (unit.dtype && unit.dtype === dt.ERROR) { return errorOprnd("") }
-          output.unit = Object.freeze(unit);
-
-          const [value, dtype] = multivarFunction("reduce", tkn, args);
-          if (dtype === dt.ERROR) { return value }
-          output.value = Object.freeze(value);
-          output.dtype = dtype;
-          stack.push(Object.freeze(output));
-          break
-        }
-
-        case "spreadsheetSum": {
-          const arg = stack.pop();
-          const spreadsheet = stack.pop();
-          stack.push(spreadsheetSum(spreadsheet, arg.value, unitAware));
-          break
-        }
-
-        case "rand": {
-          const numArgs = Number(tokens[i + 1]);
-          i += 1;
-          if (numArgs === 0) {
-            const value = Rnl.fromNumber(Math.random());
-            stack.push({ value, unit: allZeros, dtype: dt.RATIONAL });
-          } else if (numArgs === 1) {
-            const n = Rnl.toNumber(stack.pop().value);
-            if (!Number.isInteger(n)) { return errorOprnd("INT_ARG", "rand") }
-            const value = new Array(n).fill(0)
-              .map(e => Rnl.fromNumber(Math.random()));
-            stack.push({ value, unit: allZeros, dtype: dt.RATIONAL + dt.COLUMNVECTOR });
-          } else if (numArgs === 2) {
-            const n = Rnl.toNumber(stack.pop().value);
-            if (!Number.isInteger(n)) { return errorOprnd("INT_ARG", "rand") }
-            const m = Rnl.toNumber(stack.pop().value);
-            if (!Number.isInteger(m)) { return errorOprnd("INT_ARG", "rand") }
-            let value = new Array(m).fill(new Array(n).fill(0));
-            value = value.map(row => row.map(e => Rnl.fromNumber(Math.random())));
-            stack.push({ value, unit: allZeros, dtype: dt.RATIONAL + dt.MATRIX });
-          } else {
-            return errorOprnd("BAD_ARGS", "rand")
-          }
-          break
-        }
-
-        case "isnan": {
-          const oprnd = stack.pop();
-          const output = Object.create(null);
-          output.value = !(oprnd.dtype & dt.RATIONAL);
-          output.unit = null;
-          output.dtype = dt.BOOLEAN;
-          stack.push(Object.freeze(output));
-          break
-        }
-
-        case "length": {
-          const arg = stack.pop();
-          const value = arg.value;
-          const length = isVector(arg)
-            ? value.length
-            : (arg.dtype & dt.MATRIX)
-            ? value.length * value[0].length
-            : (arg.dtype === dt.STRING)
-            ? Array.from(value).length
-            : (arg.dtype & dt.MAP)
-            ? arg.keys().value.length
-            : 0;
-          const output = Object.create(null);
-          output.value = Object.freeze(Rnl.fromNumber(length));
-          output.unit = Object.create(null);
-          output.unit.expos = allZeros;
-          output.dtype = dt.RATIONAL;
-          stack.push(Object.freeze(output));
-          break
-        }
-
-        case "count": {
-          const pattern = stack.pop();
-          const str = stack.pop();
-          if (pattern.dtype !== dt.STRING || str.dtype !== dt.STRING) {
-            return errorOprnd("COUNT")
-          }
-          const output = Object.create(null);
-          output.value = Object.freeze(
-            Rnl.fromNumber(str.value.split(pattern.value).length - 1)
-          );
-          output.unit = Object.create(null);
-          output.unit.expos = allZeros;
-          output.dtype = dt.RATIONAL;
-          stack.push(Object.freeze(output));
-          break
-        }
-
-        case "lerp": {
-          // linear interpolation function
-          const args = new Array(3);
-          args[2] = stack.pop();
-          args[1] = stack.pop();
-          args[0] = stack.pop();
-          const result = Functions.lerp(args, unitAware);
-          if (result.dtype === dt.ERROR) { return result }
-          stack.push(result);
-          break
-        }
-
-        case "matrix2table": {
-          const numArgs = Number(tokens[i + 1]);
-          i += 1;
-          const rowNames = numArgs === 3 ? stack.pop().value : [];
-          const colNames = stack.pop().value;
-          const matrix = stack.pop();
-          const result = DataFrame.matrix2table(matrix, colNames, rowNames);
-          if (result.dtype === dt.ERROR) { return result }
-          stack.push(result);
-          break
-        }
-
-        case "transpose":
-          stack.push(Matrix.transpose(stack.pop()));
-          break
-
-        case "trace":
-          stack.push(Matrix.trace(stack.pop()));
-          break
-
-        case "fetch":
-          // fetch() is handled in updateCalculations.js.
-          // It's easier from there to coordinate an async function with ProseMirror.
-          // So if control flow get here, we have an error.
-          return errorOprnd("FETCH")
-
-        case "function": {
-          // User defined function.
-          const functionName = tokens[i + 1];
-          const numArgs = Number(tokens[i + 2]);
-          i += 2;
-          const args = new Array(numArgs);
-          for (let j = numArgs - 1; j >= 0; j--) {
-            args[j] = stack.pop();
-          }
-          let oprnd;
-          if (vars.svg && (functionName === "plot" || (draw.functions[functionName]))) {
-            if (functionName === "plot") {
-              args.splice(1, 0, formats.decimalFormat);
-              oprnd = plot(...args);
-            } else if (functionName === "path") {
-              oprnd = draw.functions[functionName](args[0], args.slice(1));
-            } else {
-              oprnd = draw.functions[functionName](...args);
-            }
-          } else if (nextToken(tokens, i) === ".") {
-            // Function from a module
-            let lib = stack.pop().value;         // remote module
-            if (lib.value) { lib = lib.value; }  // local module
-            const udf = lib[functionName];
-            if (udf === undefined) { return errorOprnd("F_NAME", functionName) }
-            if (udf.dtype === dt.ERROR) { return udf }
-            oprnd = evalCustomFunction(udf, args, formats, unitAware, lib);
-            i += 1;
-          } else if (lib && lib[functionName]) {
-            // A module, "lib", was passed to this instance of evalRpn().
-            const udf = lib[functionName];
-            oprnd = evalCustomFunction(udf, args, formats, unitAware, lib);
-          } else if (vars[functionName] && vars[functionName].dtype === dt.MODULE) {
-            // User-defined function from a calculation node.
-            const udf = vars[functionName]["value"];
-            oprnd = evalCustomFunction(udf, args, formats, unitAware);
-          } else {
-            return errorOprnd("BAD_FUN_NM", functionName)
-          }
-          if (oprnd.dtype === dt.ERROR) { return oprnd }
-          stack.push(oprnd);
-          break
-        }
-
-        case "=":
-        case "==":
-        case "⩵":
-        case "<":
-        case ">":
-        case "<=":
-        case "≤":
-        case ">=":
-        case "≥":
-        case "≠":
-        case "!=":
-        case "∈":
-        case "in":
-        case "∉":
-        case "!in":
-        case "∋":
-        case "∌":
-        case "⊂":
-        case "⊄":
-        case "⊃":
-        case "⊅": {
-          const o2 = stack.pop();
-          const o1 = stack.pop();
-          if (unitAware &&
-            !((o1.dtype & dt.STRING) || (o2.dtype & dt.STRING) ||
-               o1.dtype === dt.NULL || o2.dtype === dt.NULL)) {
-            if (!unitsAreCompatible(o1.unit.expos, o2.unit.expos)) {
-              return errorOprnd("UNIT_COMP")
-            }
-          }
-          const bool = Object.create(null);
-          bool.unit = null;
-          const prevValue = (o1.dtype === dt.BOOLEANFROMCOMPARISON) ? oPrev.value : undefined;
-
-          if (setComparisons.includes(tkn)) {
-            bool.value = compare(tkn, o1.value, o2.value, prevValue);
-            bool.dtype = o1.dtype + dt.BOOLEANFROMCOMPARISON;
-          } else {
-            const [shape1, shape2] = binaryShapesOf(o1, o2);
-            bool.value = Operators.relations[shape1][shape2].relate(tkn, o1.value,
-              o2.value, prevValue);
-            bool.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn)
-                         + dt.BOOLEANFROMCOMPARISON;
-          }
-          if (bool.value.dtype && bool.value.dtype === dt.ERROR) { return bool.value }
-          if (bool.dtype & dt.RATIONAL) { bool.dtype -= dt.RATIONAL; }
-          if (bool.dtype & dt.COMPLEX) { bool.dtype -= dt.COMPLEX; }
-          if (bool.dtype & dt.STRING) { bool.dtype -= dt.STRING; }
-          oPrev = o2;
-          stack.push(Object.freeze(bool));
-          break
-        }
-
-        case "and":
-        case "&&":
-        case "or":
-        case "||":
-        case "∧":
-        case "∨":
-        case "⊻": {
-          const o2 = stack.pop();
-          const o1 = stack.pop();
-          if (!(o1.dtype & dt.BOOLEAN) || !(o2.dtype & dt.BOOLEAN)) {
-            return errorOprnd("LOGIC", tokens[i])
-          }
-          const op = { "and": "and", "&&": "and", "or": "or", "∧": "and",
-            "||": "or", "∨": "or", "⊻": "xor" }[tkn];
-          const [shape1, shape2] = binaryShapesOf(o1, o2);
-
-          const bool = Object.create(null);
-          bool.unit = null;
-          bool.value = Operators.binary[shape1][shape2][op](o1.value, o2.value);
-          if (bool.value.dtype && bool.value.dtype === dt.ERROR) { return bool.value }
-
-          bool.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn);
-          stack.push(Object.freeze(bool));
-          break
-        }
-
-        case "not":
-        case "¬": {
-          const o1 = stack.pop();
-          if (!(o1.dtype & dt.BOOLEAN)) { return errorOprnd("LOGIC", tkn) }
-          const bool = Object.create(null);
-          bool.unit = null;
-          bool.value = Operators.unary[shapeOf(o1)]["not"](o1.value);
-          if (bool.value.dtype && bool.value.dtype === dt.ERROR) { return bool.value }
-          bool.dtype = dt.BOOLEAN;
-          stack.push(Object.freeze(bool));
-          break
-        }
-
-        case "cases": {
-          // A multi-line cases expression. Hurmet's ternary expression.
-          const numArgs = Number(tokens[i + 1]);
-          i += 1;
-          // We evaluate cases expressions lazily. Pop the conditions into an array.
-          const conditions = new Array(numArgs);
-          for (let j = numArgs - 1; j >= 0; j--) {
-            conditions[j] = stack.pop();
-          }
-          // Check each condition.
-          // When we reach the first true condition, evaluate the corresponding expression.
-          for (let j = 0; j < numArgs; j++) {
-            if ((conditions[j].dtype & dt.BOOLEAN) === 0) {
-              return errorOprnd("LOGIC", "if")
-            }
-            const val = Operators.condition[shapeOf(conditions[j])](conditions[j].value);
-            if (val) {
-              const rpnLocal = tokens[i + j + 1].replace(/§/g, "\u00A0");
-              const oprnd = evalRpn(rpnLocal, vars, formats, unitAware, lib);
-              if (oprnd.dtype === dt.ERROR) { return oprnd }
-              stack.push(oprnd);
-              break
-            }
-          }
-          i += numArgs;  // Discard the unused expressions
-          break
-        }
-
-        case "applyUnit": {
-          // Pop a magnitude off the stack and apply a unit.
-          // This happens where a user writes a QUANTITY literal.
-          if (!unitAware) { return errorOprnd("UNIT_AWARE", tokens[i + 1]) }
-          const o1 = stack.pop();
-          if (!(o1.dtype & dt.RATIONAL)) { return errorOprnd("QUANT_NUM") }
-          const unitName = tokens[i + 1];
-          i += 1;
-          const output = Object.create(null);
-          output.unit = Object.create(null);
-          output.dtype = o1.dtype;
-          if (!unitAware) {
-            output.value = o1.value;
-            if (o1.dtype & dt.MAP) {
-              output.unit = unitFromUnitName(unitName);
-            } else {
-              output.unit.name = unitName;
-            }
-          } else {
-            // Convert the magnitude to base units.
-            const unit = unitFromUnitName(unitName);
-            if (unit.dtype && unit.dtype === dt.ERROR) { return unit }
-            if (isMatrix(o1)) {
-              output.unit.expos = o1.unit.expos.map((e, j) => e + unit.expos[j]);
-              output.value = Matrix.convertToBaseUnits(o1, unit.gauge, unit.factor);
-            } else if (o1.dtype & dt.MAP) {
-              output.unit = unit;
-              output.value = o1.value;
-              output.value.data = map.convertToBaseUnits(
-                o1.value.data,
-                unit.gauge,
-                unit.factor
-              );
-            } else {
-              output.unit.expos = o1.unit.expos.map((e, j) => e + unit.expos[j]);
-              output.value = Rnl.multiply(Rnl.add(o1.value, unit.gauge), unit.factor);
-            }
-          }
-          stack.push(Object.freeze(output));
-          break
-        }
-
-        case "rem%": {
-          const o2 = stack.pop();
-          const o1 = stack.pop();
-          if (!((o1.dtype & dt.RATIONAL) & (o2.dtype & dt.RATIONAL))) {
-            return errorOprnd("NAN_OP")
-          }
-          const [shape1, shape2] = binaryShapesOf(o1, o2);
-          const mod = Object.create(null);
-          mod.unit = Object.create(null);
-          mod.unit.expos = allZeros;
-          mod.value = Operators.binary[shape1][shape2]["rem"](o1.value, o2.value);
-          if (mod.value.dtype && mod.value.dtype === dt.ERROR) { return mod.value }
-          mod.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn);
-          stack.push(Object.freeze(mod));
-          break
-        }
-
-        case "⎾⏋":
-        case "⎿⏌": {
-          // ceiling or floor
-          const o1 = stack.pop();
-          if (!(o1.dtype & dt.RATIONAL)) { return errorOprnd("NAN_OP") }
-          if (unitAware) {
-            if (!unitsAreCompatible(o1.unit.expos, allZeros)) {
-              // TODO: Write an error message.
-              { return errorOprnd("") }
-            }
-          }
-          const op = tkn === "⎾⏋" ? "ceil" : "floor";
-          const output = Object.create(null);
-          output.value = Operators.unary[shapeOf(o1)][op](o1.value);
-          if (output.value.dtype && output.value.dtype === dt.ERROR) { return output.value }
-          output.unit = o1.unit;
-          output.dtype = o1.dtype;
-          stack.push(Object.freeze(output));
-          break
-        }
-
-        case "()": {
-          // binomial
-          const args = [];
-          args.unshift(stack.pop());
-          args.unshift(stack.pop());
-          if (unitAware) {
-            if (!unitsAreCompatible(args[0].unit.expos, allZeros) ||
-              !unitsAreCompatible(args[1].unit.expos, allZeros)) {
-              return errorOprnd("BINOM")
-            }
-          }
-          const binom = Object.create(null);
-          binom.unit = Object.create(null);
-          binom.unit.expos = allZeros;
-          const [value, dtype] = multivarFunction("binary", "binomial", args);
-          binom.value = value;
-          binom.dtype = dtype;
-          stack.push(Object.freeze(binom));
-          break
-        }
-
-        case "→": {
-          // Anonymous function, e.g., x → cos x
-          const rpnLocal = stack.pop().value.replace(/§/g, "\xa0");
-          const parameter = stack.pop().value;
-          stack.push({
-            dtype: dt.MODULE,
-            unit: null,
-            value: {
-              parameters: [ { name: parameter }],
-              statements: [{ rpn: rpnLocal, stype: "return" }]
-            } });
-          break
-        }
-
-        case "∑": {
-          const rpnLocal = stack.pop().value.replace(/§/g, "\xa0");
-          const endOfRange = stack.pop().value;
-          let index = stack.pop().value;
-          const parameter = stack.pop().value;
-          let sum = Rnl.zero;
-          while (Rnl.lessThanOrEqualTo(index, endOfRange)) {
-            vars[parameter] = { value: index, unit: allZeros, dtype: dt.RATIONAL };
-            const localResult = evalRpn(rpnLocal, vars, formats, false);
-            sum = Rnl.add(sum, localResult.value);
-            index = Rnl.add(index, Rnl.one);
-          }
-          delete vars[parameter];
-          stack.push({ value: sum, unit: allZeros, dtype: dt.RATIONAL });
-          break
-        }
-
-        case "throw":
-          return { value: stack.pop().value, unit: null, dtype: dt.ERROR }
-
-        case "\\blue":
-        case "\\gray":
-        case "\\green":
-        case "\\orange":
-        case "\\pink":
-        case "\\purple":
-        case "\\red": {
-          const color = clone(stack.pop());
-          if (color.dtype === dt.STRING) { color.unit = tkn.slice(1); }
-          stack.push(color);
-          break
-        }
-          // TODO: Write an error message
-      }
-    }
-  } // next i
-
-  const oprnd = stack.pop();
-  if (stack.length > 0) {
-    return errorOprnd("ERROR")
-  }
-
-  return oprnd
-};
-
-const plot = (svg, formats, fun, numPoints, xMin, xMax) => {
-  // Plot a function.
-  // To avoid a circular reference, this function has to be here instead of in draw.js.
-  const attrs = svg.value.temp;
-  numPoints = (numPoints == null) ? Rnl.fromNumber(250) : numPoints.value;
-  const min = (xMin == null) ? Rnl.fromNumber(attrs.xmin) : xMin.value;
-  const max = (xMax == null) ? Rnl.fromNumber(attrs.xmax) : xMax.value;
-  // Vectorize the evaluation. Start by finding a vector of the input.
-  const step = Rnl.divide(Rnl.subtract(max, min), numPoints);
-  const vector = Matrix.operandFromRange([min, step, max]);
-  // Transpose the row vector into a column vector.
-  const arg = { value: vector.value, unit: null, dtype: dt.COLUMNVECTOR + dt.RATIONAL };
-  // Run the function on the vector.
-  let funResult;
-  let pathValue;
-  if (fun.value.dtype && fun.value.dtype === dt.MODULE) {
-    funResult = evalCustomFunction(fun.value, [arg], formats, false);
-    pathValue = arg.value.map((e, i) => [e, funResult.value[i]]);
-  } else if (fun.dtype === dt.STRING) {
-    if (/§matrix§1§2$/.test(fun.value)) {
-      arg.name = "t";
-      pathValue = evalRpn(fun.value.replace(/§/g, "\xa0"), { t: arg }, formats, false).value;
-    } else {
-      arg.name = "x";
-      funResult = evalRpn(fun.value.replace(/§/g, "\xa0"), { x: arg }, formats, false);
-      pathValue = arg.value.map((e, i) => [e, funResult.value[i]]);
-    }
-  } else ;
-  const path = { value: pathValue, unit: null, dtype: dt.MATRIX + dt.RATIONAL };
-  return draw.functions.path(svg, [path])
-};
-
-const elementFromIterable = (iterable, index, step) => {
-  // A helper function. This is called by `for` loops in evalCustomFunction()
-  let value;
-  let nextIndex = Rnl.increment(index);
-  const i = Rnl.toNumber(index);
-  // eslint-disable-next-line no-useless-assignment
-  let dtype = 0;
-  if (iterable.dtype === dt.RANGE) {
-    value = index;
-    nextIndex = Rnl.add(index, step);
-    dtype = dt.RATIONAL;
-  } else if (iterable.dtype === dt.STRING) {
-    if (iterable.value.slice(i - 1, i) === "\uD835") {
-      value = "\uD835" + iterable.value.slice(i + 1, i + 2);
-      nextIndex = Rnl.add(index, 1);
-    } else {
-      value = iterable.value.slice(i, i + 1);
-    }
-    dtype = dt.STRING;
-  } else {
-    value = iterable.value[i];
-    dtype = (iterable.dtype & dt.STRING)
-      ? dt.STRING
-      : (iterable.dtype & dt.ROWVECTOR)
-      ? iterable.dtype - dt.ROWVECTOR
-      : (iterable.dtype & dt.COLUMNVECTOR)
-      ? iterable.dtype - dt.COLUMNVECTOR
-      : iterable.dtype - dt.MATRIX;
-  }
-  const oprnd = { value: value, unit: iterable.unit, dtype: dtype };
-  return [oprnd, nextIndex]
-};
-
-const loopTypes = ["while", "for"];
-
-const evalCustomFunction = (udf, args, formats, isUnitAware, lib) => {
-  // UDF stands for "user-defined function"
-  // lib is short for library. If not omitted, it contains a module with more functions.
-
-  if (udf.dtype === dt.ERROR) {
-    return udf
-  }
-
-  // Populate the function parameters.
-  if (args.length > udf.parameters.length) { return errorOprnd("NUMARGS", udf.name) }
-  const vars = Object.create(null);
-  for (let i = 0; i < args.length; i++) {
-    vars[udf.parameters[i].name] = args[i];
-  }
-  if (udf.parameters.length > args.length) {
-    for (let i = args.length; i < udf.parameters.length; i++) {
-      vars[udf.parameters[i].name] = udf.parameters[i].default;
-    }
-  }
-  if (udf.dtype === dt.DRAWING) {
-    vars["svg"] = { value: draw.startSvg(), unit: null, dtype: dt.DRAWING };
-  }
-
-  // Execute the function statements.
-  // There will be nested flow of control, of course. So we'll create a
-  // "control" stack. The topmost element contains info about the control
-  // that applies to the current nesting level.
-  const control = [{ type: "if", condition: true, endOfBlock: udf.statements.length - 1 }];
-  for (let i = 0; i < udf.statements.length; i++) {
-    const statement = udf.statements[i];
-    const stype = statement.stype;
-    const level = control.length - 1;
-    switch (stype) {
-      case "statement": {
-        if (control[level].condition) {
-          const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib);
-          if (result.dtype === dt.ERROR) {
-            // eslint-disable-next-line no-console
-            console.log(statement.rpn);
-            return result
-          }
-          if (statement.name) {
-            statement.resultdisplay = isUnitAware ? "!!" : "!";
-            const [stmt, _] = conditionResult(statement, result, isUnitAware);
-            insertOneHurmetVar(vars, stmt, null, formats);
-          }
-        }
-        break
-      }
-
-      case "if": {
-        if (control[level].condition) {
-          const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib);
-          if (result.dtype === dt.ERROR) { return result }
-          const val = Operators.condition[shapeOf(result)](result.value);
-          control.push({
-            type: "if",
-            condition: val,
-            endOfBlock: statement.endOfBlock
-          });
-        } else {
-          // Skip this block
-          i = statement.endOfBlock;
-        }
-        break
-      }
-
-      case "elseif": {
-        if (control[level].type === "if" && control[level].condition) {
-          i = control[level].endOfBlock;
-          control.pop();
-        } else {
-          const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib);
-          if (result.dtype === dt.ERROR) { return result }
-          const val = Operators.condition[shapeOf(result)](result.value);
-          control[control.length - 1].condition = val;
-        }
-        break
-      }
-
-      case "else":
-        if (control[level].type === "if" && control[level].condition) {
-          i = control[level].endOfBlock;
-          control.pop();
-        } else {
-          control[level].condition = true;
-        }
-        break
-
-      case "while": {
-        if (control[level].condition) {
-          const cntrl = {
-            type: "while",
-            startStatement: i,
-            rpn: statement.rpn,
-            endOfBlock: statement.endOfBlock
-          };
-          const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib);
-          if (result.dtype === dt.ERROR) { return result }
-          const val = Operators.condition[shapeOf(result)](result.value);
-          cntrl.condition = val;
-          if (cntrl.condition === true) {
-            control.push(cntrl);
-          } else {
-            i = statement.endOfBlock;
-          }
-        } else {
-          i = statement.endOfBlock;
-        }
-        break
-      }
-
-      case "for": {
-        if (control[level].condition) {
-          const ctrl = {
-            type: "for",
-            condition: true,
-            startStatement: i,
-            endOfBlock: statement.endOfBlock
-          };
-          const tokens = statement.rpn.split("\u00A0");
-          ctrl.dummyVariable = tokens.shift().slice(1);
-          const iterable = evalRpn(tokens.join("\u00A0"), vars,
-                                   formats, isUnitAware, lib);
-          ctrl.index = (iterable.dtype & dt.RANGE) ? iterable.value[0] : Rnl.fromNumber(0);
-          ctrl.step = (iterable.dtype & dt.RANGE) ? iterable.value[1] : Rnl.fromNumber(1);
-          ctrl.endIndex = (iterable.dtype & dt.RANGE)
-            ? iterable.value[2]
-            : Rnl.fromNumber(iterable.value.length - 1);
-          const [oprnd, nextIndex] = elementFromIterable(iterable, ctrl.index, ctrl.step);
-          ctrl.nextIndex = nextIndex;
-          ctrl.iterable = iterable;
-          control.push(ctrl);
-          vars[ctrl.dummyVariable] = oprnd;
-        } else {
-          i = statement.endOfBlock;
-        }
-        break
-      }
-
-      case "break": {
-        if (control[level].condition) {
-          // Find the enclosing loop and pop out of it.
-          for (let j = control.length - 1; j > 0; j--) {
-            if (loopTypes.includes(control[j].type) || j === 0) {
-              i = control[j].endOfBlock;
-              control.pop();
-              break
-            } else {
-              control.pop();
-            }
-          }
-        }
-        break
-      }
-
-      case "end": {
-        // end of code block
-        if (control[level].type === "if" && i >= control[level].endOfBlock) {
-          control.pop();
-        } else if (control[level].type === "if" && control[level].condition) {
-          // Jump ahead to end of if block
-          if (i < control[level].endOfBlock) { i = control[level].endOfBlock; }
-          control.pop();
-        } else if (control[level].type === "while") {
-          const result = evalRpn(control[level].rpn, vars, formats, isUnitAware, lib);
-          if (result.dtype === dt.ERROR) { return result }
-          control[level].condition = result.value;
-          if (control[level].condition) {
-            i = control[level].startStatement;
-          } else {
-            control.pop();
-          }
-        } else if (control[level].type === "for") {
-          control[level].index = control[level].nextIndex;
-          const proceed = Rnl.isRational(control[level].index)
-            && Rnl.isPositive(control[level].step)
-            ? Rnl.lessThanOrEqualTo(control[level].index, control[level].endIndex)
-            : Rnl.isRational(control[level].index)
-            ? Rnl.greaterThanOrEqualTo(control[level].index, control[level].endIndex)
-            : control[level].index <= control[level].endIndex;
-          if (proceed) {
-            const [oprnd, nextIndex] = elementFromIterable(
-              control[level].iterable,
-              control[level].index, control[level].step
-            );
-            vars[control[level].dummyVariable] = oprnd;
-            control[level].nextIndex = nextIndex;
-            i = control[level].startStatement;
-          } else {
-            control.pop();
-          }
-        }
-        break
-      }
-
-      case "return":
-        if (control[level].condition) {
-          if (statement.rpn) {
-            const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib);
-            return result
-          } else {
-            return { value: Rnl.zero, unit: allZeros, dtype: dt.RATIONAL }
-          }
-        }
-        break
-
-      case "print":
-        if (control[level].condition) {
-          if (statement.rpn) {
-            const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib);
-            if (result.dtype === dt.ERROR) { return result }
-            const msg = result.dtype === dt.RATIONAL
-              ? Rnl.toNumber(result.value)
-              : result.dtype === dt.STRING || result.dtype === dt.BOOLEAN
-              ? result.value
-              : isVector(result) && (result.dtype & dt.RATIONAL)
-              ? result.value.map(e => Rnl.toNumber(e))
-              : result.dtype === dt.MATRIX + dt.RATIONAL
-              ? result.value.map(row => row.map(e => Rnl.toNumber(e)))
-              : result.value;
-            // eslint-disable-next-line no-console
-            console.log(msg);
-          }
-        }
-        break
-
-      case "throw":
-        if (control[level].condition) {
-          if (statement.rpn) {
-            const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib);
-            return { value: result.value, unit: null, dtype: dt.ERROR }
-          } else {
-            return { value: statement.rpn, unit: null, dtype: dt.ERROR }
-          }
-        }
-        break
-        // TODO: Error message.
-    }
-  }
-};
-
-const errorResult = (stmt, result) => {
-  stmt.value = null;
-  // Wrap the message in a \mathord so that browsers will put
-  // operator spacing on the previous = sign.
-  stmt.resultDisplay = "\\textcolor{firebrick}{\\text{" +
-                        result.value.replace(/%/g, "\\%") + "}}";
-  stmt.altResultDisplay = result.value;
-  stmt.error = true;
-  stmt.dtype = dt.ERROR;
-  if (stmt.resulttemplate.indexOf("!") > -1) {
-    stmt.tex += "= " + stmt.resultDisplay;
-    stmt.alt += result.value;
-  } else if (stmt.resulttemplate.indexOf("@") > -1) {
-    stmt.tex = stmt.resulttemplate.replace(/@@?/, stmt.resultDisplay);
-    stmt.alt = stmt.altresulttemplate.replace(/@@?/, stmt.altResultDisplay);
-  } else {
-    stmt.tex = stmt.tex.replace(/[?%] *[?%]|[?%]/, stmt.resultDisplay);
-    stmt.alt = stmt.alt.replace(/[?%] *[?%]|[?%]/, stmt.altResultDisplay);
-  }
-  return [stmt, result]
-};
-
-const spreadsheetSum = (sheet, index, unitAware) => {
-  let sum = Rnl.zero;
-  if (/^[A-Z]$/.test(index)) {
-    // Sum a column
-    const L = sheet.numRows - 1; // Do not include the top row.
-    for (let i = 1; i <= L - 1; i++) {
-      const cellOprnd = fromAssignment(sheet.value[index + String(i)], unitAware);
-      if (cellOprnd.dtype === dt.ERROR) { return cellOprnd }
-      sum = Rnl.add(sum, cellOprnd.value);
-    }
-  } else if (isNaN(index)) {
-    return errorOprnd("SHEET_INDEX")
-  } else {
-    // Sum a row
-    const L = Object.keys(sheet.columnMap).length;
-    for (let j = 1; j <= L - 1; j++) {
-      const cellName = String.fromCodePoint(65 + j) + index;
-      const cellOprnd = fromAssignment(sheet.value[cellName], unitAware);
-      if (cellOprnd.dtype === dt.ERROR) { return cellOprnd }
-      sum = Rnl.add(sum, cellOprnd.value);
-    }
-  }
-  return { value: sum, unit: allZeros, dtype: dt.RATIONAL }
-};
-
-const conditionResult = (stmt, oprnd, unitAware) => {
-  let result = Object.create(null);
-  result.value = oprnd.dtype === dt.DATAFRAME
-    ? oprnd.value
-    : clone(oprnd.value);
-  result.unit = clone(oprnd.unit);
-  result.dtype = oprnd.dtype;
-
-  if (result.dtype === dt.COMPLEX && Rnl.isZero(Cpx.imag(result.value))) {
-    result.value = Cpx.real(result.value);
-    result.dtype = 1;
-  }
-
-  // Check unit compatibility.
-  if (result.dtype !== dt.ERROR && unitAware && stmt.resultdisplay.indexOf("!") === -1 &&
-    (stmt.unit && stmt.unit.expos ||
-      (result.unit && result.unit.expos && Array.isArray(result.unit.expos)))) {
-    const expos = result.dtype === dt.DATE && stmt.unit === undefined
-      ? [0, 0, 1, 0, 0, 0, 0, 0]
-      : stmt.unit && stmt.unit.expos
-      ? stmt.unit.expos
-      : allZeros;
-    if (!unitsAreCompatible(result.unit.expos, expos)) {
-      const message = stmt.unit && stmt.unit.expos ? "UNIT_RES" : "UNIT_MISS";
-      result = errorOprnd(message);
-    }
-  }
-  if (result.dtype === dt.ERROR) { return errorResult(stmt, result) }
-
-  // Check for a valid display indicator.
-  if (stmt.resulttemplate && stmt.resulttemplate.indexOf("!") > -1 &&
-    !(result.dtype === dt.DATAFRAME || (result.dtype & dt.MAP) || isMatrix(result)
-    || (result.dtype & dt.TUPLE))) {
-    return errorResult(stmt, errorOprnd("BAD_DISPLAY"))
-  }
-
-  if (result.dtype & dt.RATIONAL) {
-    if (result.dtype & dt.MAP) {
-      result.value.data = result.value.data.map(column => Rnl.isRational(column[0])
-        ? column.map(e => Rnl.normalize(e))
-        : column);
-    } else {
-      result.value = isVector(result)
-        ? result.value.map(e => Rnl.normalize(e))
-        : isMatrix(result)
-        ? result.value.map(row => row.map(e => Rnl.normalize(e)))
-        : result.dtype === dt.RATIONAL
-        ? Rnl.normalize(result.value)
-        : result.value;
-    }
-  } else if (result.dtype === dt.COMPLEX) {
-    result.value = [Rnl.normalize(result.value[0]), Rnl.normalize(result.value[1])];
-  }
-  stmt.dtype = result.dtype;
-
-  // If unit-aware, convert result to desired result units.
-  const unitInResultSpec = (stmt.unit && stmt.unit.factor &&
-      (!Rnl.areEqual(stmt.unit.factor, Rnl.one) || stmt.unit.gauge));
-  const isPercent = (stmt.unit && stmt.unit.name && stmt.unit.name === "\\⦂");
-  if ((result.dtype & dt.DATAFRAME) ||
-      (typeof stmt.resultdisplay === "string" && stmt.resultdisplay.indexOf("!") > -1)) {
-    stmt.unit = result.unit;
-  } else if (unitAware && (result.dtype & dt.RATIONAL) && !isPercent) {
-    if (!unitInResultSpec & unitsAreCompatible(result.unit.expos, allZeros)) {
-      stmt.unit = { factor: Rnl.one, gauge: Rnl.zero, expos: allZeros };
-    }
-    if (result.dtype & dt.MAP) {
-      result.value.data = {
-        plain: map.convertFromBaseUnits(result.value.data, stmt.unit.gauge, stmt.unit.factor),
-        inBaseUnits: result.value.data
-      };
-    } else {
-      result.value = {
-        plain: (isMatrix(result))
-          ? Matrix.convertFromBaseUnits(
-            { value: result.value, dtype: result.dtype },
-            stmt.unit.gauge,
-            stmt.unit.factor
-            )
-          : Rnl.subtract(Rnl.divide(result.value, stmt.unit.factor), stmt.unit.gauge),
-        inBaseUnits: result.value
-      };
-    }
-    stmt.dtype += dt.QUANTITY;
-    stmt.expos = result.unit.expos;
-  } else if (unitInResultSpec && !isPercent) {
-    // A non-unit aware calculation, but with a unit attached to the result.
-    if (result.dtype & dt.MAP) {
-      const data = {
-        plain: result.value.data,
-        inBaseUnits: map.convertToBaseUnits(result.value.data,
-                                            stmt.unit.gauge, stmt.unit.factor)
-      };
-      result.value.data = data;
-    } else {
-      result.value = {
-        plain: result.value,
-        inBaseUnits: (isMatrix(result))
-          ? Matrix.convertToBaseUnits(
-            { value: result.value, dtype: result.dtype },
-            stmt.unit.gauge,
-            stmt.unit.factor
-            )
-          : Rnl.multiply(Rnl.add(result.value, stmt.unit.gauge), stmt.unit.factor)
-      };
-    }
-    stmt.dtype += dt.QUANTITY;
-
-  } else if ((result.dtype & dt.RATIONAL) || (result.dtype & dt.COMPLEX) ) {
-    if (isPercent) ; else {
-      // A numeric result with no unit specified.
-      stmt.unit = { expos: allZeros };
-    }
-  }
-  if (Object.prototype.hasOwnProperty.call(result, "value")) {
-    stmt.value = result.value;
-  }
-  return [stmt, result]
-};
-
-const evaluateDrawing = (
-  stmt,
-  vars,
-  formats = { decimalFormat: "1,000,000.", dateFormat: "yyyy-mm-dd" }
-) => {
-  const udf = stmt.value;
-  const args = [];
-  for (let i = 0; i < udf.parameters.length; i++) {
-    const argName = udf.parameters[i].name;
-    args.push(evalRpn("¿" + argName, vars, formats, false, {}));
-  }
-  const funcResult = evalCustomFunction(udf, args, formats, false, {});
-  if (funcResult.dtype === dt.ERROR) {
-    stmt.error = true;
-    stmt.tex = "\\textcolor{firebrick}{\\text{" + funcResult.value + "}}";
-    stmt.value = null;
-    stmt.dtype = dt.ERROR;
-  } else {
-    stmt.resultdisplay = funcResult.value;
-    delete stmt.resultdisplay.temp;
-  }
-  return stmt
-};
-
-const evaluate = (
-  stmt,
-  vars,
-  formats = { decimalFormat: "1,000,000.", dateFormat: "yyyy-mm-dd" }
-) => {
-  stmt.tex = stmt.template ? stmt.template : "";
-  stmt.alt = stmt.altTemplate ? stmt.altTemplate : "";
-  const isUnitAware = /\?\?|!!|%%|@@|¡¡/.test(stmt.resulttemplate);
-
-  const formatSpec = vars.format ? vars.format.value : "h15";
-
-  if (stmt.tex.indexOf("〖") > -1) {
-    const eqnWithVals = plugValsIntoEcho(stmt.tex, vars, isUnitAware, formatSpec, formats);
-    if (eqnWithVals.dtype && eqnWithVals.dtype === dt.ERROR) {
-      const [newStmt, _] = errorResult(stmt, eqnWithVals);
-      return newStmt
-    } else {
-      stmt.tex = eqnWithVals;
-    }
-  }
-
-  if (stmt.rpn) {
-    let oprnd = evalRpn(stmt.rpn, vars, formats, isUnitAware);
-    // eslint-disable-next-line no-useless-assignment
-    if (oprnd.dtype === dt.ERROR) { [stmt, oprnd] = errorResult(stmt, oprnd); return stmt}
-    let result
-    ;[stmt, result] = conditionResult(stmt, oprnd, isUnitAware);
-    if (stmt.error) { return stmt }
-    const assert = vars.assert ? vars.assert : null;
-    stmt = formatResult(stmt, result, formatSpec, formats, assert, isUnitAware);
-  }
-  return stmt
-};
-
-const numberRegEx$2 = new RegExp(Rnl.numberPattern);
-const matrixRegEx = /^[([] *(?:(?:-?[0-9.]+|"[^"]+"|true|false) *[,;\t]? *)+[)\]]/;
-// A regex to check for valid unit strings. Not comprehensive.
-// Only checks for allowed characters. Does not check structure of a compound unit.
-const unitRegEx = /^[a-zäöōA-Z0-9 μµ#$£¥'′″°()Å₨₪€℃℉ΩΩKÅ^+\-/*.•×\-−·₂⁰¹²³\u2074-\u2079]+$/;
-/* eslint-disable max-len */
-
-const numStr = "(-?(?:0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?)))";
-const nonNegNumStr = "(0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?))";
-const complexRegEx = new RegExp("^" + numStr + "(?: *([+-]) *(?: j *" + nonNegNumStr + "|" + nonNegNumStr + " *∠" + numStr + "(°)?))");
-// const complexRegEx = /^(number)(?: *([+-]) *(non-negative number) *j(number)(°)?)/
-/* eslint-enable max-len */
-// Capturing groups:
-//    [1] First number, either a in a ± b im, or r in r∠θ
-//    [2] + or -. Gives the sign of the imaginary part in an a ± b im.
-//    [3] b, the imaginary part in an a ± b im expression
-//    [4] theta, the argument (phase angle ) of an r∠θ expression
-//    [5] °, optional trailing degree sign in an r∠θ expression
-
-const unitFromString = str => {
-  if (str.length === 0) { return ["", ""] }
-  const unitName = str.replace(/'/g, "").trim();
-  const unit = unitFromUnitName(unitName);
-  const unitDisplay = (unit.dtype && unit.dtype === dt.ERROR)
-    ? ""
-    : unitTeXFromString(unitName);
-  return [unit, unitDisplay]
-};
-
-const literalWithUnit = (oprnd, tex, unitStr) => {
-  let unit = (oprnd.dtype & dt.RATIONAL) ? { expos: allZeros } : null;
-  let unitDisplay = "";
-  let value = oprnd.value;
-  if (unitStr.length > 0) {
-    [unit, unitDisplay] = unitFromString(unitStr);
-    if (unit.dtype && unit.dtype === dt.ERROR) {
-      return [0, null, dt.ERROR, unit.value]
-    }
-    value = oprnd.dtype === dt.RATIONAL
-      ? {
-        plain: oprnd.value,
-        inBaseUnits: Rnl.multiply(Rnl.add(oprnd.value, unit.gauge), unit.factor)
-      }
-      : {
-        plain: oprnd.value,
-        inBaseUnits: Matrix.convertToBaseUnits(oprnd, unit.gauge, unit.factor)
-      };
-  }
-  let dtype = oprnd.dtype;
-  if (unitDisplay.length > 0) {
-    dtype += dt.QUANTITY;
-    return [value, unit, dtype, tex + "\\," + unitDisplay]
-  } else {
-    return [value, unit, dtype, tex]
-  }
-};
-
-const valueFromLiteral = (str, name, formats) => {
-  // Read a literal string and return a value
-  // The return should take the form: [value, unit, dtype, resultDisplay]
-
-  if (/^[({[].* to /.test(str)) {
-    // str defines a quantity distribution, (a to b). That is handled by calculation.js.
-    // This is not a valid literal.
-    return [0, null, dt.ERROR, ""]
-
-  } else if (str === "true" || str === "false") {
-    return [(str === "true" ? true : false), null, dt.BOOLEAN, `\\mathord{\\text{${str}}}`]
-
-  } else if (str.length > 3 && str.slice(0, 3) === '"""') {
-    // str contains a macro
-    return [str.slice(3, -3), undefined, dt.MACRO, ""]
-
-  } else if (/^\x22.+\x22/.test(str)) {
-    // str contains text between quotation marks
-    if (name === "format") {
-      return validateFormatSpec(str.slice(1, -1).trim())
-    } else {
-      const tex = parse$1(str, formats);
-      return [str.slice(1, -1), undefined, dt.STRING, tex]
-    }
-
-  } else if (matrixRegEx.test(str)) {
-    // We're processing a matrix
-    const matrixStr = matrixRegEx.exec(str)[0];
-    const [tex, rpn, _] = parse$1(matrixStr, formats, true);
-    const oprnd = evalRpn(rpn, {}, formats, false, {});
-    const unitStr = str.slice(matrixStr.length).trim();
-    if (unitStr.length > 0 && !unitRegEx.test(unitStr)) {
-      return [0, null, dt.ERROR, ""]
-    }
-    return literalWithUnit(oprnd, tex, unitStr)
-
-  } else if (/^``/.test(str)) {
-    // A TSV between double back ticks.
-    // Read the TSV into a data frame.
-    const pos = str.indexOf("``", 2);
-    const tsv = tablessTrim(str.slice(2, pos));
-    const oprnd = DataFrame.dataFrameFromTSV(tsv);
-    if (oprnd.dtype === dt.DATAFRAME) {
-      return [oprnd.value, oprnd.unit, dt.DATAFRAME,
-        DataFrame.display(oprnd.value, "h3", formats.decimalFormat)]
-    } else {
-      // It's a Hurmet Map
-      const unitStr = str.slice(pos + 2).trim();
-      let unit;
-      let unitDisplay = "";
-      if (unitStr.length > 0) {
-        [unit, unitDisplay] = unitFromString(unitStr);
-        if (unit.dtype && unit.dtype === dt.ERROR) { return [0, null, dt.ERROR, ""] }
-        oprnd.unit = unit;
-        oprnd.dtype = dt.MAP + dt.RATIONAL + dt.QUANTITY;
-        oprnd.value.data = {
-          plain: oprnd.value.data,
-          inBaseUnits: map.convertToBaseUnits(oprnd.value.data, unit.gauge, unit.factor)
-        };
-      }
-      return [oprnd.value, unit, oprnd.dtype,
-        DataFrame.display(oprnd.value, "h3", formats.decimalFormat) + "\\;" + unitDisplay]
-    }
-
-  } else if (complexRegEx.test(str)) {
-    // str is a complex number.
-    const resultDisplay = parse$1(str, formats);
-    const parts = str.match(complexRegEx);
-    let realPart;
-    let imPart;
-    if (parts[3]) {
-      // a + b im expression
-      realPart = Rnl.fromString(parts[1]);
-      imPart = Rnl.fromString(parts[3]);
-      if (parts[2] === "-") { imPart = Rnl.negate(imPart); }
-    } else {
-      // r∠θ expression
-      const r = Rnl.fromString(parts[1]);
-      let theta = Rnl.fromString(parts[4]);
-      if (parts[5]) { theta = Rnl.divide(Rnl.multiply(theta, Rnl.pi), Rnl.fromNumber(180)); }
-      realPart = Rnl.multiply(r, Rnl.fromNumber(Math.cos(Rnl.toNumber(theta))));
-      imPart = Rnl.multiply(r, Rnl.fromNumber(Math.sin(Rnl.toNumber(theta))));
-    }
-    return [[realPart, imPart], allZeros, dt.COMPLEX, resultDisplay]
-
-  } else if (dateRegEx$1.test(str)) {
-    const rnlDate = [BigInt(dateInSecondsFromIsoString(str)), BigInt(1)];
-    const dateTex = formatDate(rnlDate, formats.dateFormat);
-    return [rnlDate, { expos: [0, 0, 1, 0, 0, 0, 0, 0] }, dt.DATE, dateTex]
-
-  } else {
-    const match = numberRegEx$2.exec(str);
-    if (match) {
-      // str begins with a number.
-      const numStr = match[0];
-      const unitStr = str.slice(numStr.length).trim();
-      if (unitStr.length > 0 && !unitRegEx.test(unitStr)) {
-        return [0, null, dt.ERROR, ""]
-      }
-      const [tex, rpn, _] = parse$1(numStr, formats, true);
-      const oprnd = evalRpn(rpn, {}, formats, false, {});
-      return literalWithUnit(oprnd, tex, unitStr)
-
-    } else {
-      // TODO: Preceding currency symbol, e.g., $25.20
-      return [0, null, dt.ERROR, ""]
-    }
-  }
-};
-
-const keywordRegEx = /^(if|elseif|else|return|throw|while|for|break|print|end)(\u2002|\b)/;
-const drawCommandRegEx = /^(title|frame|view|axes|grid|stroke|strokewidth|strokedasharray|fill|fontsize|fontweight|fontstyle|fontfamily|marker|line|path|plot|curve|rect|circle|ellipse|arc|text|dot|leader|dimension)\b/;
-const leadingSpaceRegEx$1 = /^[\t ]+/;
-const oneLinerRegEx = /^( *)if ([^\n`]+) +(return|throw|print|break)\b([^\n]+)?(?: end)? *\n/gm;
-
-// If you change functionRegEx, then also change it in mathprompt.js.
-// It isn't called from there in order to avoid duplicating Hurmet code inside ProseMirror.js.
-// eslint-disable-next-line max-len
-const functionRegEx$1 = new RegExp("^function " + isValidIdentifier.source.slice(1, -1) + "\\(");
-const moduleRegEx = /^module ([A-Za-z][A-Za-z0-9]*)/;
-const drawRegEx = /^draw\(/;
-const startSvgRegEx = /^startSvg\(\)/;
-const lexRegEx = /"[^"]*"|``.*|`[^`]*`|'[^']*'|#|[^"`'#]+/g;
-
-const testForStatement = str => {
-  const pos = str.indexOf("=");
-  if (pos === -1) { return false }
-  const leadStr = str.slice(0, pos).replace(leadingSpaceRegEx$1, "").trim();
-  if (isValidIdentifier.test(leadStr)) { return true }
-  if (leadStr.indexOf(",") === -1) { return false }
-  let result = true;
-  const arry = leadStr.split(",");
-  arry.forEach(e => {
-    if (!isValidIdentifier.test(e.trim())) { result = false; }
-  });
-  return result
-};
-
-const stripComment = str => {
-  // Strip the comment, if any, from the end of a code line.
-  const matches = arrayOfRegExMatches(lexRegEx, str);
-  for (let i = 0; i < matches.length; i++) {
-    if (matches[i].value === "#") {
-      str = str.slice(0, matches[i].index);
-      break
-    }
-  }
-  return str.trim()
-};
-
-const scanModule = (str, formats) => {
-  // Scan the code and break it down into individual lines of code.
-  // Assemble the lines into functions and assign each function to parent.
-  const parent = Object.create(null);
-
-  // Expand one-liners into if ... end blocks.
-  str = str.replace(oneLinerRegEx, "$1if\u2002$2\n$1    $3\u2002$4\n$1end\n");
-
-  // Statements end at a newline.
-  const lines = str.split(/\r?\n/g);
-
-  for (let i = 0; i < lines.length; i++) {
-    // Get a single line of code and strip off any comments.
-    const line = stripComment(lines[i]);
-    if (line.length === 0) { continue }
-
-    if (functionRegEx$1.test(line) || drawRegEx.test(line)) {
-      // This line starts a new function.
-      const [funcObj, endLineNum] = scanFunction(lines, formats, i);
-      if (funcObj.dtype && funcObj.dtype === dt.ERROR) { return funcObj }
-      parent[funcObj.name] = funcObj;
-      i = endLineNum;
-    } else if (testForStatement(line)) {
-      // This line starts a Hurmet assignment.
-      const [stmt, endLineNum] = scanAssignment(lines, formats, i);
-      parent[stmt.name] = stmt;
-      i = endLineNum;
-    }
-  }
-  return { value: parent, unit: null, dtype: dt.MODULE }
-
-};
-
-const handleTSV = (expression, lines, startLineNum) => {
-  for (let i = startLineNum + 1; i < lines.length; i++) {
-    const line = tablessTrim(lines[i]);
-    if (line.length === 0) { continue }
-    expression += "\n" + line;
-    if (line.slice(-2) === "``") { return [expression, i] }
-  }
-};
-
-const scanFunction = (lines, formats, startLineNum) => {
-  const line1 = stripComment(lines[startLineNum]);
-  let isDraw = line1.charAt(0) === "d";
-  const posParen = line1.indexOf("(");
-  // eslint-disable-next-line no-useless-assignment
-  let functionName = "";
-  if (isDraw) {
-    functionName = "draw";
-  } else {
-    const posFn = line1.indexOf("function");
-    functionName = line1.slice(posFn + 8, posParen).trim();
-  }
-
-  const parameterString =  line1.slice(posParen + 1, -1).trim();
-  const parameterSplit = parameterString.length === 0 ? [] : parameterString.split(/ *[,;] */g);
-  const parameters = [];
-  for (const param of parameterSplit) {
-    const parts = param.split(/ *= */);
-    const name = parts[0];
-    let defaultVal = { name, value: null, dtype: null };
-    if (parts[1]) {
-      const [value, unit, dtype, resultDisplay] = valueFromLiteral(parts[1], "", formats);
-      defaultVal = { name, value, unit, dtype, resultDisplay };
-    }
-    parameters.push({ name, default: defaultVal });
-  }
-
-  const funcObj = {
-    name: functionName,
-    dtype: isDraw ? dt.DRAWING : dt.MODULE,
-    parameters,
-    statements: []
-  };
-
-  const stackOfCtrls = [];
-  /* eslint-disable no-useless-assignment */
-  let expression = "";
-  let name = "";
-  /* eslint-enable no-useless-assignment */
-  let prevLineEndedInContinuation = false;
-  let prevLine = "";
-  let isStatement = false;
-
-  let j = startLineNum;
-  for (let i = startLineNum + 1; i < lines.length; i++) {
-    j += 1;
-    let line = stripComment(lines[i]);
-    if (line.length === 0) { continue }
-
-    if (prevLineEndedInContinuation) {
-      // Check if the previous character is a semi-colon just before a matrix literal closes.
-      const lastChar = prevLine.slice(-1);
-      line = lastChar === ";" && "})]".indexOf(line.charAt(0)) > -1
-        ? prevLine.slice(0, -1).trim() + line
-        : lastChar === ";" || lastChar === ","
-        ? prevLine + " " + line
-        : prevLine + line;
-    }
-
-    // Line continuation characters are: { ( [ , ; + -
-    if (/[{([,;]$/.test(line)) {
-      prevLineEndedInContinuation = true;
-      prevLine = line;
-      continue
-    } else if (lines.length > i + 1 && /^\s*[+\-)\]}]/.test(lines[i + 1])) {
-      prevLineEndedInContinuation = true;
-      prevLine = line;
-      continue
-    }
-
-    let isFromOneLiner = false;
-    const keyword = keywordRegEx.exec(line);
-    if (keyword) {
-      name = keyword[1];
-      if (keyword[2]) { isFromOneLiner = true; }
-      expression = line.slice(name.length).trim();
-      if (expression.length > 0 && /^``/.test(expression)) {
-        [expression, i] = handleTSV(expression, lines, i);
-      }
-    } else if (isDraw && drawCommandRegEx.test(line)) {
-      name = "svg";
-      expression = line.indexOf(" ") === -1
-        ? line + "(svg)"
-        : line.replace(" ", "(svg, ") + ")";
-      isStatement = true;
-    } else {
-      if (testForStatement(line)) {
-        // We have an "=" assignment operator.
-        const posEq = line.indexOf("=");
-        name = line.slice(0, posEq - 1).trim();
-        expression = line.slice(posEq + 1).trim();
-        if (/^``/.test(expression)) { [expression, i] = handleTSV(expression, lines, i); }
-        if (startSvgRegEx.test(expression)) { isDraw = true; }
-        isStatement = true;
-      } else {
-        // TODO: We shouldn't get here. Write an error.
-        return [errorOprnd("FUNC_LINE", functionName + ", line " + (j + 1) + "\n" + line), i]
-      }
-    }
-    if (isFromOneLiner) { j -= 1; }
-    let rpn = "";
-    let _;
-    if (expression) {
-      [, rpn, _] = parse$1(expression, formats, true);
-      if (name === "for") {
-        rpn = rpn.replace(/\u00a0in\u00a0/, "\u00a0").replace(/\u00a0in$/, "");
-      }
-    }
-    const stype = isStatement ? "statement" : name;
-    if (isStatement && /[,;]/.test(name)) {
-      name = name.split(/[,;]/).map(e => e.trim());
-    }
-    funcObj.statements.push({ name, rpn, stype });
-    if (stype === "if" || stype === "while" || stype === "for") {
-      stackOfCtrls.push({ type: stype, statementNum: funcObj.statements.length - 1 });
-    } else if (stype === "end") {
-      if (stackOfCtrls.length === 0) {
-        // Finished the current function.
-        if (isDraw) {
-          funcObj.statements.splice(-1, 0, { name: "return", rpn: "¿svg", stype: "return" });
-        }
-        return [funcObj, i]
-      }
-      const ctrl = stackOfCtrls[stackOfCtrls.length - 1];
-      funcObj.statements[ctrl.statementNum].endOfBlock = funcObj.statements.length - 1;
-      stackOfCtrls.pop();
-    }
-
-    // Reset for next statement
-    isStatement = false;
-    prevLineEndedInContinuation = false;
-    prevLine = "";
-    /* eslint-disable no-useless-assignment */
-    name = "";
-    expression = "";
-    /* eslint-enable no-useless-assignment */
-  }
-  return [errorOprnd("END_MISS", functionName), 0]
-};
-
-const scanAssignment = (lines, formats, iStart) => {
-  let prevLineEndedInContinuation = false;
-  let str = "";
-  let iEnd = iStart;
-  for (let i = iStart; i < lines.length; i++) {
-    const line = stripComment(lines[i]);
-    if (line.length === 0) { continue }
-
-    if (prevLineEndedInContinuation) {
-      // Check if the previous character is a semi-colon just before a matrix literal closes.
-      str = str.slice(-1) === ";" && "})]".indexOf(line.charAt(0)) > -1
-        ? str.slice(0, -1).trim() + line
-        : str + line;
-    } else {
-      str = line;
-    }
-
-    // Line continuation characters are: { ( [ , ; + -
-    if (/[{([,;]$/.test(str)) {
-      prevLineEndedInContinuation = true;
-    } else if (lines.length > i + 1 && /^\s*[+\-)\]}]/.test(lines[i + 1])) {
-      prevLineEndedInContinuation = true;
-    } else {
-      iEnd = i;
-      break
-    }
-  }
-
-  const posEquals = str.indexOf("=");
-  let name = str.slice(0, posEquals).trim();
-  if (/[,;]/.test(name)) {
-    name = name.split(/[,;]/).map(e => e.trim());
-  }
-  let trailStr = str.slice(posEquals + 1).trim();
-  if (trailStr.length > 3 && trailStr.slice(0, 3) === '"""') {
-    // We're at a macro, which extends beyond normal line endings.
-    let j = iEnd;
-    let pos = trailStr.indexOf('"""', 3);
-    while (pos < 0 && j < lines.length - 1) {
-      j += 1;
-      trailStr += "\n" + lines[j];
-      pos = trailStr.indexOf('"""', 3);
-    }
-    iEnd = j;
-  }
-  const [value, unit, dtype, resultDisplay] = valueFromLiteral(trailStr, name, formats);
-  const stmt = { name, value, unit, dtype, resultDisplay };
-  return [stmt, iEnd]
-};
-
-/*  compile.js
- *
- *  This module is called when: (1) an author submits a Hurmet calculation dialog box, or
- *  (2) when a new document is opened, or (3) when recalculate-all is called.
- *  Here we do some preparation in a calculation cell prior to calculation.
- *
- *  This module does NOT calculate the result of an expression. It stops just short of that.
- *  How do we choose where to draw the line between tasks done here and tasks done later?
- *  We do as much here as we can without knowing the values that other cells have assigned
- *  to variables. The goal is to minimize the amount of work done by each dependent cell
- *  when an author changes an assigned value.  Later, calculation updates will not have to
- *  repeat the work done in this module, so updates will be faster.
- *
- *  Variable inputStr contains the string that an author wrote into mathPrompt().
- *
- *  From that entry this module will:
- *    1. Determine the name of the cell, as in "x" from "x = 12"
- *    2. Parse the entry string into TeX, to be passed later to Temml for rendering.
- *    3. If the input asks for a calculation:
- *       a. Parse the expression into an echo string (in TeX) with placeholders that will be
- *          filled in later with values when the calculation is done.
- *       b. Compile the expression into RPN (postfix) to be passed later to evaluateRPN().
- *       c. Process the unit of measure, if any, of the result. Save it for later calculation.
- *    4. If an assigned value is static, not dynamically calculated, find its value.
- *    5. Append all the display strings together.
- *    6. Return the result. Hurmet will attach it to ProseMirror "attrs" of that node.
- */
-
-const containsOperator = /[+\-×·*∘⌧/^%‰&√!¡|‖&=<>≟≠≤≥∈∉⋐∧∨⊻¬]|\xa0(function|mod|\\atop|root|sum|abs|cos|sin|tan|acos|asin|atan|sec|csc|cot|asec|acsc|acot|exp|log|ln|log10|log2|cosh|sinh|tanh|sech|csch|coth|acosh|asinh|atanh|asech|acsch|acoth|gamma|Γ|lgamma|logΓ|lfact|cosd|sind|tand|acosd|asind|atand|secd|cscd|cotd|asecd|acscd|acotd|real|imag|angle|Char|round|sqrt|sign|\?{}|%|⎾⏋|⎿⏌|\[\]|\(\))\xa0/;
-const mustDoCalculation = /^(?:``.+``|(?:[£¥\u20A0-\u20CF]|(?:[ACR]|HK|US)?\$)?(?:\?{1,2}|@{1,2}|%{1,3}|!{1,2})[^=!(?@!{})]*)$/;
-const percentOperatorRegEx = /((?:\?{1,2}|@{1,2}|%%|!{1,2}) *)%/;
-const assignDataFrameRegEx = /^[^=]+=\s*``[\s\S]+``\s*$/;
-const currencyRegEx = /^[$£¥\u20A0-\u20CF]/;
-// eslint-disable-next-line max-len
-const matrixOfNames = new RegExp("^[([]" + isValidIdentifier.source.slice(1, -1) + "[,;].+[)\\]]$");
-const isKeyWord = /^(π|pi|ℏ|true|false|root|if|in|else|elseif|and|or|otherwise|mod|modulo|for|while|end|break|return|throw)$/;
-const testRegEx = /^(@{1,2})test /;
-
-const shortcut = (str, formats) => {
-  // No calculation in str. Parse it just for presentation.
-  const tex = parse$1(str, formats);
-  return { entry: str, tex, alt: str }
-};
-
-const compile = (
-  inputStr,
-  formats = { decimalFormat: "1,000,000.", dateFormat: "yyyy-mm-dd" }
-) => {
-  /* eslint-disable no-useless-assignment */
-  let leadStr = "";
-  let mainStr = "";
-  let trailStr = "";
-  let isCalc = false;
-  let suppressResultDisplay = false;
-  let displayResultOnly = false;
-  let omitEcho = false;
-  let mustAlign = false;
-  let posOfFirstEquals = 0;
-  let expression = "";
-  let echo = "";
-  let rpn = "";
-  let dependencies = [];
-  let resultDisplay = "";
-  let name = "";
-  let leadsWithCurrency = false;
-  let value;
-  let unit;
-  let dtype;
-  let str = "";
-  /* eslint-enable no-useless-assignment */
-
-  const isModule = moduleRegEx.test(inputStr);
-  const isDraw = drawRegEx.test(inputStr);
-  if (functionRegEx$1.test(inputStr) || isDraw || isModule) {
-    // This cell contains a custom function.
-    let name = "";
-    if (isDraw) {
-      name = "draw";
-    } else if (isModule) {
-      name = checkForNumericSubscript(moduleRegEx.exec(inputStr)[1].trim());
-    } else if (!isModule) {
-      const posFn = inputStr.indexOf("function");
-      const posParen = inputStr.indexOf("(");
-      name = checkForNumericSubscript(inputStr.slice(posFn + 8, posParen).trim());
-    }
-    const module = scanModule(inputStr, formats);
-    const isError = module.dtype && module.dtype === dt.ERROR;
-    if (isError) {
-      // eslint-disable-next-line no-alert
-      window.alert(module.value);
-    }
-    const attrs = {
-      entry: inputStr,
-      name,
-      value: (isError || isModule) ? module.value : module.value[name],
-      // TODO: what to do with comma decimals?
-      resultdisplay: "\\text{" + name + "}",
-      dtype: isError ? dt.ERROR : name === "draw" ? dt.DRAWING : dt.MODULE,
-      error: isError
-    };
-    return attrs
-  }
-
-  str = inputStr;
-
-  if (testRegEx.test(inputStr)) {
-    str = str.replace(testRegEx, "").trim();
-    const [_, rpn, dependencies] = parse$1(str, formats, true);
-    const resulttemplate = testRegEx.exec(inputStr)[1];
-    return { entry: inputStr, template: "", rpn, dependencies, resulttemplate,
-      altresulttemplate: resulttemplate, resultdisplay: "" }
-  }
-
-  const isDataFrameAssigment = assignDataFrameRegEx.test(str);
-  const posOfLastEquals = isDataFrameAssigment
-    ? str.indexOf("=") + 1
-    : str.lastIndexOf("=") + 1;
-
-  if (posOfLastEquals > 1) {
-    // input has form:  mainStr = trailStr
-    mainStr = str.substring(0, posOfLastEquals - 1).replace(/ +$/, "");
-    if (mainStr.length > 0 && /;\s*$/.test(mainStr)) {
-      mustAlign = true;
-      mainStr = mainStr.replace(/;\s*$/, "");
-    }
-    mainStr = mainStr.trim();
-    trailStr = str.substring(posOfLastEquals).trim();
-
-    if (mustDoCalculation.test(trailStr)) {
-      // trailStr contains a ? or a @ or a % or a !. In other words,
-      // input has form:  mainStr = something [?@%!] something
-      // The [?@%!] signals that the author wants a calculation done.
-      isCalc = true;
-
-      // A ! tells us to calculate and save the result, but to NOT display the result.
-      suppressResultDisplay = trailStr.indexOf("!") > -1;
-
-      // A @ tells us to display only the result.
-      displayResultOnly = trailStr.indexOf("@") > -1;
-
-      omitEcho = trailStr.indexOf("%") > -1;
-
-      posOfFirstEquals = mainStr.indexOf("=") + 1;
-      if (posOfFirstEquals) {
-        // input has form:  leadStr = something = trailStr
-        leadStr = mainStr.slice(0, posOfFirstEquals - 1).trim();
-
-        // Input has form:  name = expression = trailStr, or
-        //                  name1, name2, = expression = trailStr
-        expression = mainStr.substring(posOfFirstEquals).trim();
-        if (matrixOfNames.test(leadStr)) { leadStr = leadStr.slice(1, -1).trim(); }
-        if (/[,;]/.test(leadStr)) {
-          const potentialIdentifiers = leadStr.split(/[,;]/);
-          for (let i = 0; i < potentialIdentifiers.length; i++) {
-            const candidate = potentialIdentifiers[i].trim();
-            if (isKeyWord.test(candidate) || !isValidIdentifier.test(candidate)) {
-              // leadStr is not a list of valid identifiers.
-              // So this isn't a valid calculation statement. Let's finish early.
-              return shortcut(str, formats)
-            }
-          }
-          // multiple assignment.
-          name = potentialIdentifiers.map(e => checkForNumericSubscript(e.trim()));
-
-        } else {
-          if (isValidIdentifier.test(leadStr) && !isKeyWord.test(leadStr)) {
-            name = checkForNumericSubscript(leadStr);
-          } else {
-            // The "=" sign is inside an expression. There is no lead identifier.
-            // This statement does not assign a value to a variable. But it may do a calc.
-            // input has form:  expression = trailStr
-            expression = mainStr;
-          }
-        }
-      } else {
-        // This calculation string contains only one "=" character.
-        // input has form:  expression = trailStr
-        expression = mainStr;
-      }
-    } else if (isDataFrameAssigment) {
-      name = checkForNumericSubscript(mainStr);
-      expression = trailStr;
-    } else  if (isValidIdentifier.test(mainStr) && !isKeyWord.test(mainStr)) {
-      // No calculation display selector is present,
-      // but there is one "=" and a valid idendtifier.
-      // It may be an assignment statement.
-      // input has form:  name = trailStr
-      name = checkForNumericSubscript(mainStr);
-      if (trailStr === "") {
-        const tex = parse$1(str, formats);
-        return { entry: str, tex, alt: str }
-      }
-    } else {
-      // input has form:  mainStr = trailStr.
-      // It almost works as an assignment statment, but mainStr is not a valid identifier.
-      // So we'll finish early.
-      return shortcut(str, formats)
-    }
-  } else {
-    // str contains no "=" character. Let's fnish early.
-    return shortcut(str, formats)
-  }
-
-  if (expression.length > 0) {
-    // The author may want a calculation done on the expression.
-    if (/^\s*fetch\(/.test(expression)) {
-      // fetch() functions are handled in updateCalculations.js, not here.
-      // It's easier from there to send a fetch() callback to a ProseMirror transaction.
-      echo = "";
-
-    } else {
-      // Parse the expression. Stop short of doing the calculation.
-      [echo, rpn, dependencies] = parse$1(expression, formats, true);
-
-      // Shoulld we display an echo of the expression, with values shown for each variable?
-      if (suppressResultDisplay || displayResultOnly || echo.indexOf("〖") === -1
-          || /\u00a0for\u00a0/.test(rpn)) {
-        // No.
-        echo = "";
-      } else if (omitEcho) {
-        echo = "";
-      } else {
-        // The expression calls a variable.
-        // If it also contains an operator or a function, then we need to show the echo.
-        if (containsOperator.test("\xa0" + rpn + "\xa0")) {
-          echo = "\\textcolor{#0000ff}{" + echo + "}";
-        } else {
-          echo = "";
-        }
-      }
-    }
-  }
-
-  // Now let's turn our attention from the expression to the trailStr.
-  if (currencyRegEx.test(trailStr)) {
-    leadsWithCurrency = true;
-    unit = trailStr.charAt(0);
-  }
-
-  // Replace a % operator with a placeholder, so that we can test for the
-  // presence of a % operator without worrying about escaped % characters in the trailStr.
-  trailStr = trailStr.replace(percentOperatorRegEx, "$1\\⦂").replace("\\%", "\\⦂");
-
-  if (isCalc) {
-    // trailStr contains a display selector.
-    value = null;
-
-    if (!leadsWithCurrency) {
-      // Check for a unit, even if it isn't a unit-aware calculation
-      unit = trailStr.replace(/[?@%!']/g, "").trim();
-    }
-
-    if (suppressResultDisplay) {
-      resultDisplay = trailStr;
-    } else {
-      if (unit) {
-        resultDisplay = trailStr.trim().replace(/([^ ?!@%]+)$/, "'" + "$1" + "'");
-        resultDisplay = parse$1(resultDisplay, formats).replace(/\\%/g, "%").replace("@ @", "@@");
-      } else {
-        resultDisplay = parse$1(trailStr, formats).replace(/\\%/g, "%").replace("@ @", "@@");
-      }
-      resultDisplay = resultDisplay.replace(/\\text\{(\?\??|%%?)\}/, "$1");
-      resultDisplay = resultDisplay.replace(/([?%]) ([?%])/, "$1" + "$2");
-    }
-
-  } else {
-    // trailStr may be a static value in an assignment statement.
-    let isPlaceholder = false;
-    if (trailStr.slice(-1) === "_") {
-      isPlaceholder = true;
-      trailStr = trailStr.slice(0, -1).trim();
-    }
-[value, unit, dtype, resultDisplay] = valueFromLiteral(trailStr, name, formats);
-    if (isPlaceholder) {
-      resultDisplay = "\\colorbox{aqua}{$" + resultDisplay + "$}";
-    }
-
-    if (dtype === dt.ERROR) {
-      // trailStr is not a valid literal. So finish early.
-      if (resultDisplay.length === 0) {
-        return shortcut(str, formats)
-      } else {
-        // trailStr has a valid number but an invalid unit.
-        return {
-          entry: str,
-          resultdisplay: "\\textcolor{firebrick}{\\text{" + resultDisplay + "}}",
-          altResultDisplay: resultDisplay,
-          tex: mainStr + " = \\textcolor{firebrick}{\\text{" + resultDisplay + "}}",
-          alt: mainStr + " = " + resultDisplay,
-          error: true,
-          dtype
-        }
-      }
-    }
-    rpn = "";
-  }
-
-  // Assemble the equation to display
-  let eqn = "";
-  let altEqn = "";
-  if (!displayResultOnly) {
-    eqn = parse$1(mainStr, formats);
-    if (mustAlign) {
-      eqn = "\\begin{aligned}" + eqn;
-      const pos = eqn.indexOf("=");
-      if (pos !== -1) {
-        eqn = eqn.slice(0, pos) + "&" + eqn.slice(pos);
-      }
-    }
-    const alignChar = mustAlign ? "\\\\ &" : "";
-    altEqn = mainStr;
-    if (echo.length > 0 && !omitEcho) {
-      eqn += ` ${alignChar}= ` + echo;
-    }
-    if (!suppressResultDisplay) {
-      eqn += " " + (mustAlign ? "\\\\&" : "") + "= " + resultDisplay;
-      altEqn += " = " + trailStr;
-    }
-    if (mustAlign) { eqn += "\\end{aligned}"; }
-  }
-
-  // Populate the object to be returned.
-  // It will eventually be attached to ProseMirror schema attrs, so call it "attrs".
-  const attrs = {
-    entry: str,
-    template: eqn,
-    altTemplate: altEqn,
-    resultdisplay: resultDisplay,
-    dtype: dtype,
-    error: false
-  };
-
-  if (name) { attrs.name = name; }
-  if (isCalc) {
-    attrs.resulttemplate = resultDisplay;
-    attrs.altresulttemplate = trailStr;
-  } else {
-    attrs.tex = eqn;
-    attrs.alt = altEqn;
-  }
-  if (rpn) { attrs.rpn = rpn; }
-  if (dependencies.length > 0) { attrs.dependencies = dependencies; }
-  if (value || dtype === dt.BOOLEAN) { attrs.value = value; }
-  if (unit) {
-    if (rpn && !attrs.value) {
-      attrs.unit = typeof unit === "string"
-        ? unitFromUnitName(unit)
-        : { factor: 1, gauge: 0, expos: allZeros };
-    } else {
-      attrs.unit = Array.isArray(unit) ? { expos:  unit } : unit;
-    }
-  }
-
-  return attrs
-};
-
-// This function is not used by the hurmet.org page.
-// It is provided for use by unit tests and by the demo box in the manual page.
-// If you are looking for the app's main calculation module, try evaluate.js.
-const calculate = (
-  entry,
-  vars = {},
-  inDraftMode = false,
-  formats = { decimalFormat: "1,000,000.", dateFormat: "yyyy-mm-dd" }
-) => {
-  let attrs = compile(entry, formats);
-  if (attrs.rpn) {
-    attrs = evaluate(clone(attrs), vars, formats);
-  } else if (attrs.dtype && attrs.dtype === dt.DRAWING) {
-    attrs = evaluateDrawing(attrs, vars, formats);
-  }
-  if (attrs.name) {
-    insertOneHurmetVar(vars, attrs);
-  }
-  return attrs.dtype && attrs.dtype === dt.DRAWING
-   ? attrs
-   : inDraftMode
-   ? attrs.alt
-   : attrs.tex
-};
-
-/* eslint-disable */
-// ::- A specification for serializing a ProseMirror document as
-// Markdown/CommonMark text.
-class MarkdownSerializer {
-  // :: (Object<(state: MarkdownSerializerState, node: Node, parent: Node, index: number)>, Object)
-  // Construct a serializer with the given configuration. The `nodes`
-  // object should map node names in a given schema to function that
-  // take a serializer state and such a node, and serialize the node.
-  //
-  // The `marks` object should hold objects with `open` and `close`
-  // properties, which hold the strings that should appear before and
-  // after a piece of text marked that way, either directly or as a
-  // function that takes a serializer state and a mark, and returns a
-  // string. `open` and `close` can also be functions, which will be
-  // called as
-  //
-  //     (state: MarkdownSerializerState, mark: Mark,
-  //      parent: Fragment, index: number) → string
-  //
-  // Where `parent` and `index` allow you to inspect the mark's
-  // context to see which nodes it applies to.
-  //
-  // Mark information objects can also have a `mixable` property
-  // which, when `true`, indicates that the order in which the mark's
-  // opening and closing syntax appears relative to other mixable
-  // marks can be varied. (For example, you can say `**a *b***` and
-  // `*a **b***`, but not `` `a *b*` ``.)
-  //
-  // To disable character escaping in a mark, you can give it an
-  // `escape` property of `false`. Such a mark has to have the highest
-  // precedence (must always be the innermost mark).
-  //
-  // The `expelEnclosingWhitespace` mark property causes the
-  // serializer to move enclosing whitespace from inside the marks to
-  // outside the marks. This is necessary for emphasis marks as
-  // CommonMark does not permit enclosing whitespace inside emphasis
-  // marks, see: http://spec.commonmark.org/0.26/#example-330
-  constructor(nodes, marks) {
-    // :: Object<(MarkdownSerializerState, Node)> The node serializer
-    // functions for this serializer.
-    this.nodes = nodes;
-    // :: Object The mark serializer info.
-    this.marks = marks;
-  }
-
-  // :: (Node, ?Object) → string
-  // Serialize the content of the given node to
-  // [CommonMark](http://commonmark.org/).
-  serialize(content, paths, footnotes, isGFM = false, withResults = false) {
-    let state = new MarkdownSerializerState(this.nodes, this.marks, paths, footnotes, isGFM, withResults);
-    state.renderContent(content);
-
-    // Write the footnotes
-    for (let i = 0; i < state.footnotes.length; i++) {
-      state.write("\n[^" + String(i + 1) + "]: ");
-      state.renderInline(state.footnotes[i]);
-      state.write("\n");
-    }
-  // Write the link and image paths
-    for (const [key, value] of state.paths.entries()) {
-      state.write("\n[" + key + "]: " + value + "\n");
-    }
-    return state.out
-  }
-}
-
-const ampRegEx = /=[^=]*@[^=]*$/;
-
-const hurmetNodes =  {
-  blockquote(state, node) {
-    state.wrapBlock("> ", null, node, () => state.renderContent(node));
-  },
-  comment(state, node) {
-    if (state.isGFM) {
-      state.renderContent(node);
-    } else {
-      state.wrapBlock("", null, node, () => state.renderContent(node), "comment");
-    }
-  },
-  indented(state, node) {
-    if (state.isGFM) {
-      state.renderContent(node);
-    } else {
-      state.wrapBlock("", null, node, () => state.renderContent(node), "indented");
-    }
-  },
-  centered(state, node) {
-    if (state.isGFM) {
-      state.renderContent(node);
-    } else {
-       state.wrapBlock("", null, node, () => state.renderContent(node), "centered");
-    }
-  },
-  right_justified(state, node) {
-    if (state.isGFM) {
-      state.renderContent(node);
-    } else {
-       state.wrapBlock("", null, node, () => state.renderContent(node), "right_justified");
-    }
-  },
-  boxed(state, node) {
-    if (state.isGFM) {
-      state.renderContent(node);
-    } else {
-      state.wrapBlock("", null, node, () => state.renderContent(node), "boxed");
-    }
-  },
-  epigraph(state, node) {
-    if (state.isGFM) {
-      state.wrapBlock("> ", null, node, () => state.renderContent(node));
-    } else {
-      state.wrapBlock("> ", null, node, () => state.renderContent(node), "epigraph");
-    }
-  },
-  note(state, node) {
-    state.wrapBlock("> ", null, node, () => state.renderContent(node), "note");
-  },
-  tip(state, node) {
-    state.wrapBlock("> ", null, node, () => state.renderContent(node), (state.isGFM ? "note" : "tip"));
-  },
-  important(state, node) {
-    state.wrapBlock("> ", null, node, () => state.renderContent(node), "important");
-  },
-  warning(state, node) {
-    state.wrapBlock("> ", null, node, () => state.renderContent(node), "warning");
-  },
-  header(state, node) {
-    if (state.isGFM) {
-      state.renderContent(node);
-    } else {
-       state.wrapBlock("", "", node, () => state.renderContent(node), "header");
-    }
-  },
-  code_block(state, node) {
-    state.write("```" + (node.attrs.params || "") + "\n");
-    state.text(node.textContent, false);
-    state.ensureNewLine();
-    state.write("```");
-    state.closeBlock(node);
-  },
-  heading(state, node) {
-    state.write(state.repeat("#", node.attrs.level) + " ");
-    state.renderInline(node);
-    state.closeBlock(node);
-  },
-  toc(state, node) {
-    state.write(`{.toc start=${node.attrs.start} end=${node.attrs.end}}\n\n`);
-  },
-  horizontal_rule(state, node) {
-    state.write(node.attrs.markup || "--------------------");
-    state.closeBlock(node);
-  },
-  page_break(state, node) {
-    state.write("\\newpage");
-    state.closeBlock(node);
-  },
-  bullet_list(state, node) {
-    state.renderList(node, "    ", () => (node.attrs.bullet || "*") + "   ");
-  },
-  ordered_list(state, node) {
-    const start = node.attrs.order || 1;
-    const className = state.isGFM ? "decimal" : node.attrs.class;
-    let maxW = String(start + node.childCount - 1).length;
-    let space = state.repeat(" ", maxW + 2);
-    state.renderList(node, space, i => {
-      let nStr = className === "decimal"
-        ? String(start + i)
-        : className === "upper-alpha"
-        ? String.fromCodePoint(start + i + 64)  // A-Z
-        : String.fromCodePoint(start + i + 96);  // a-z
-      return state.repeat(" ", maxW - nStr.length) + nStr + ".  "
-    });
-    // Write a 2nd blank line after an <ol>, to prevent an adjacent <ol> from
-    // continuing the same numbering.
-    if (state.delim === "")  { state.write("\n"); }
-  },
-  list_item(state, node) {
-    state.renderContent(node);
-  },
-  tight_list_item(state, node) {
-    state.renderInline(node);
-  },
-  paragraph(state, node) {
-    const prevLength = state.out.length;
-    if (node.content.content.length > 0) {
-      state.renderInline(node);
-    } else {
-      state.write(state.isGFM ? "&nbsp;" : "¶");
-    }
-    if (!state.isGFM) {
-      state.out = limitLineLength(state.out, prevLength, state.delim, state.lineLimit);
-    }
-    state.closeBlock(node);
-  },
-  table(state, node) {
-    state.renderTable(node, state.delim, null, state.isGFM);
-    state.closeBlock(node);
-  },
-  footnote(state, node) {
-    const note = node.content;
-    state.footnotes.push(note);
-    state.write(`[^${state.footnotes.length}]`);
-  },
-  link_node(state, node) {
-    state.write("[");
-    state.renderInline(node.content);
-    state.write("](");
-    state.write(state.esc(node.attrs.href));
-    state.write(")");
-  },
-  figure(state, node) {
-    let caption;
-    if (node.content.content[1].type.name === "table") {
-      const figureCaption = node.content.content[0];
-      state.write(": ");
-      state.renderInline(figureCaption);
-      state.closeBlock(figureCaption);
-      const L = state.out.length;
-      const table = node.content.content[1];
-      const float = node.attrs.class ? node.attrs.class.trim() : "auto";
-      state.renderTable(table, state.delim, float, state.isGFM);
-      state.closeBlock(table);
-      // Get rid of the newline between the caption and the table.
-      state.out = state.out.slice(0, L) + state.out.slice(L + 1);
-    } else {
-      if (!state.isGFM) {
-        const figureCaption = node.content.content[1];
-        const figureState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, this.footnotes, false, false);
-        figureState.renderInline(figureCaption);
-        caption = figureState.out;
-      } else {
-        caption = node.attrs.alt;
-      }
-      const defIndex = getDefIndex(state);
-      const attrs = node.content.content[0].attrs; // image attributes
-      if (node.attrs.class) { attrs.class = node.attrs.class; }
-      let path = attrs.src;
-      if (!state.isGFM && (attrs.class || attrs.width || attrs.alt)) {
-        path += "\n{";
-        if (attrs.class) { path += "." + state.esc(attrs.class); }
-        if (attrs.width && !isNaN(attrs.width)) { path += " width=" + attrs.width; }
-        if (attrs.alt) { path += ' alt="' + state.esc(attrs.alt) + '"'; }
-        path += "}";
-      }
-      // We use reference links and defer the image paths to the end of the document.
-      state.paths.set(defIndex, path);
-      if (caption) {
-        state.write(`!![${caption}][${defIndex}]\n\n`);
-      } else {
-        state.write(`!![${defIndex}][]\n\n`);
-      }
-    }
-    
-  },
-  image(state, node) {
-    let path = state.esc(node.attrs.src);
-    if (!state.isGFM && (node.attrs.class || node.attrs.width || node.attrs.alt)) {
-      path += "\n{";
-      if (node.attrs.class) { path += "." + state.esc(node.attrs.class); }
-      if (node.attrs.width && !isNaN(node.attrs.width)) { path += " width=" + node.attrs.width; }
-      if (node.attrs.alt) { path += ' alt="' + state.esc(node.attrs.alt) + '"'; }
-      path += "}";
-    }
-    // We use reference links and defer the image paths to the end of the document.
-    const defIndex = getDefIndex(state);
-    state.paths.set(defIndex, path);
-    if (node.attrs.alt) {
-      state.write(`![${node.attrs.alt}][${defIndex}]`);
-    } else {
-      state.write(`![${defIndex}][]`);
-    }
-
-  },
-  hard_break(state, node, parent, index) {
-    for (let i = index + 1; i < parent.childCount; i++)
-      if (parent.child(i).type != node.type) {
-        state.write("\\\n");
-        return
-      }
-  },
-  text(state, node) {
-    state.text(node.text);
-  },
-  tex(state, node) {
-    const tex = node.attrs.tex.trim();
-    writeTex(state, node.attrs.displayMode, !state.close, tex);
-  },
-  calculation(state, node) {
-    let entry = node.attrs.entry.trim().replace(/\n(?: *\n)+/g, "\n").replace(/\n/gm, "\n" + state.delim);
-    if (state.isGFM) {
-      if (node.attrs.alt && node.attrs.value) {
-        if (ampRegEx.test(entry)) {
-          // A calculation cell that displays only the result.
-          state.write(node.attrs.alt);
-        } else {
-          writeTex(state, node.attrs.displayMode, !state.close, node.attrs.tex);
-        }
-      } else {
-        // Convert calculation field to TeX
-        const tex = parse$1(entry);
-        writeTex(state, node.attrs.displayMode, !state.close, tex);
-      }
-    } else {
-      if (node.attrs.entry.slice(0, 5) === "draw(") {
-        // node is a draw environment in a calculation node.
-        const defIndex = getDefIndex(state);
-        state.paths.set(defIndex, entry.replace(/\n/g, "\\n"));
-        if (titleRegEx.test(node.attrs.entry)) {
-          // Get the title.
-          state.write(`![${titleRegEx.exec(node.attrs.entry)[1].trim()}][${defIndex}]`);
-        } else {
-          state.write(`![${defIndex}][]`);
-        }
-      } else if (state.withResults) {
-        const displaySelector = node.attrs.md ? node.attrs.displaySelector : "";
-        let md = node.attrs.md ? node.attrs.md : entry;
-        if (node.attrs.displayMode) {
-          state.write("¢¢" + displaySelector + " " + md + " ¢¢");
-        } else {
-          const ticks = backticksFor({ text: entry, isText: true }, -1).trim();
-          md = "¢" + displaySelector + ticks + " " + md + " " + ticks;
-          state.write(md);
-        }
-      } else if (node.attrs.displayMode) {
-        if (!state.close) {
-          // We're inside a paragraph.
-          state.write("\n" + state.delim + "¢¢" + " " + entry + " ¢¢" + "\n" + state.delim);
-        } else {
-          state.write("¢¢ " + entry + " ¢¢");
-        }
-      } else {
-        const ticks = backticksFor({ text: entry, isText: true }, -1).trim();
-        state.write("¢" + ticks + " " + entry + " " + ticks);
-      }
-    }
-  }
-};
-
-const hurmetMarks = {
-  em: {open: "_", close: "_", mixable: true, expelEnclosingWhitespace: true},
-  strong: {open: "**", close: "**", mixable: true, expelEnclosingWhitespace: true},
-  link: {
-    open(_state, mark, parent, index) {
-      return isPlainURL(mark, parent, index, 1) ? "<" : "["
-    },
-    close(state, mark, parent, index) {
-      if (isPlainURL(mark, parent, index, -1)) {
-        return ">"
-      } else {
-        // We use reference links and defer the paths to the end of the document.
-        const defIndex = getDefIndex(state);
-        state.paths.set(defIndex, state.esc(mark.attrs.href));
-        return `][${defIndex}]`
-      }
-    }
-  },
-  code: {open(_state, _mark, parent, index) { return backticksFor(parent.child(index), -1) },
-         close(_state, _mark, parent, index) { return backticksFor(parent.child(index - 1), 1) },
-         escape: false},
-  superscript: {
-    open(state)  { return state.isGFM ? "<sup>" : "^" },
-    close(state) { return state.isGFM ? "</sup>" : "^" },
-    expelEnclosingWhitespace: true
-  },
-  subscript: {
-    open(state)  { return state.isGFM ? "<sub>" : "~" },
-    close(state) { return state.isGFM ? "</sub>" : "~" },
-    expelEnclosingWhitespace: true
-  },
-  strikethru: {open: "~~", close: "~~", mixable: true, expelEnclosingWhitespace: true},
-  underline: {open: "<u>", close: "</u>", expelEnclosingWhitespace: true},
-  highlight: {open: "<mark>", close: "</mark>", expelEnclosingWhitespace: true}
-};
-
-// :: MarkdownSerializer
-// A serializer for the schema.
-const hurmetMarkdownSerializer = new MarkdownSerializer(hurmetNodes, hurmetMarks, new Map());
-
-function backticksFor(node, side) {
-  let ticks = /`+/g, m, len = 0;
-  if (node.isText) while (m = ticks.exec(node.text)) len = Math.max(len, m[0].length);
-  let result = len > 0 && side > 0 ? " `" : "`";
-  for (let i = 0; i < len; i++) result += "`";
-  if (len > 0 && side < 0) result += " ";
-  return result
-}
-
-function isPlainURL(link, parent, index, side) {
-  if (!/^\w+:/.test(link.attrs.href)) return false
-  let content = parent.child(index + (side < 0 ? -1 : 0));
-  if (!content.isText || content.text != link.attrs.href || content.marks[content.marks.length - 1] != link) return false
-  if (index == (side < 0 ? 1 : parent.childCount - 1)) return true
-  let next = parent.child(index + (side < 0 ? -2 : 1));
-  return !link.isInSet(next.marks)
-}
-
-const titleRegEx = /\n *title +"([^\n]+)" *\n/;
-
-const getDefIndex = state => {
-  // We use reference links and defer link paths and image paths to the end of the document.
-  // Get the index number of this path.
-  // We always use index numbers, not the alt text.
-  // That enables a renumbering of the paths when snapshots are taken.
-  return isNaN(state.paths.size) ? "1" : String(state.paths.size + 1)
-};
-
-// Do not line-break on any space that would indicate a heading, list item, etc.
-const blockRegEx = /^(?:[>*+-] |#+ |\d+[.)] |[A-B]\. |\-\-\-|```|[iCFHhITWADE]> )/;
-
-function limitLineLength(str, prevLength, delim, limit) {
-  let graf = str.slice(prevLength);
-  if (graf.length <= limit) { return str }
-  if (/``|¢` *(?:function|draw\()/.test(graf)) { return str }
-
-  const leading = "\n" + delim;
-  let result = "";
-  let i = 0;
-  while (graf.length > limit) {
-    const posNewLine = graf.indexOf("\n");
-    const localLimit = limit - (i > 0 ? leading.length : 0);
-    if (posNewLine > -1) {
-      let chunk = graf.slice(0, posNewLine + 1);
-      while (chunk.length > localLimit && chunk.lastIndexOf(" ", localLimit) > -1) {
-        const pos = chunk.lastIndexOf(" ", localLimit);
-        result += chunk.slice(0, pos) + "\n";
-        chunk = chunk.slice(pos + 1);
-      } 
-      result += chunk;
-      graf = graf.slice(posNewLine + 1);
-    } else {
-      let pos = graf.lastIndexOf(" ", localLimit);
-      if (pos === -1) { break }
-      while (blockRegEx.test(graf.slice(pos + 1))) {
-        pos = graf.lastIndexOf(" ", pos - 1);
-        if (pos === -1) { break }
-      }
-      if (pos === -1 || (graf.length - pos < 7 && limit === 80)) { break }
-      result += (i > 0 ? leading : "") + graf.slice(0, pos);
-      graf = graf.slice(pos + 1);
-      i += 1;
-    }
-  }
-  result += (i > 0 ?  leading : "") + graf;
-
-  return str.slice(0, prevLength) + result
-}
-
-const newlineRegEx = /\n/gm;
-const writeTex = (state, displayMode, inParagraph, tex) => {
-  tex = tex.replace(newlineRegEx, "\n" + state.delim);
-  if (displayMode) {
-    if (inParagraph) {
-      state.write("\n" + state.delim + "$$ " + tex + " $$" + "\n" + state.delim);
-    } else {
-      state.write("$$ " + tex + " $$");
-    }
-  } else {
-    if (tex.indexOf("$") > -1) {
-      const ticks = backticksFor({ text: tex, isText: true }, -1).trim();
-      state.write("$" + ticks + tex + ticks + "$");
-    } else {
-      state.write("$" + tex + "$");
-    }
-  }
-};
-
-const justifyRegEx = /c(\d)([cr])/g;
-const trailNewlineRegEx = /\n+$/;
-
-const colWidthPicker = [0, 80, 50, 35];
-
-// ::- This is an object used to track state and expose
-// methods related to markdown serialization. Instances are passed to
-// node and mark serialization methods (see `toMarkdown`).
-class MarkdownSerializerState {
-  constructor(nodes, marks, paths, footnotes, isGFM, withResults) {
-    this.nodes = nodes;
-    this.marks = marks;
-    this.paths = paths;
-    this.footnotes = footnotes;
-    this.isGFM = isGFM;
-    this.withResults = withResults;
-    this.delim = this.out = "";
-    this.divFence = "";
-    this.closed = false;
-    this.lineLimit = 80;
-  }
-
-  flushClose(size) {
-    if (this.closed) {
-      if (!this.atBlank()) this.out += "\n";
-      if (size == null) size = 2;
-      if (size > 1) {
-        let delimMin = this.delim;
-        let trim = /\s+$/.exec(delimMin);
-        if (trim) delimMin = delimMin.slice(0, delimMin.length - trim[0].length);
-        for (let i = 1; i < size; i++)
-          this.out += delimMin + "\n";
-      }
-      this.closed = false;
-    }
-  }
-
-  // :: (string, ?string, Node, ())
-  // Render a block, prefixing each line with `delim`, and the first
-  // line in `firstDelim`. `node` should be the node that is closed at
-  // the end of the block, and `f` is a function that renders the
-  // content of the block.
-  wrapBlock(delim, firstDelim, node, f, nodeType) {
-    let old = this.delim;
-    if (nodeType) {
-      if (delim.length > 0) {
-        if (nodeType) { this.write(`> [!${nodeType.toUpperCase()}]\n`); }
-      } else {
-        this.divFence += ":::";
-        if (nodeType === "header" && node.attrs.headerPages === "all") { nodeType = "header*"; }
-        this.write(`${this.divFence} ${nodeType}\n`);
-      }
-    }
-    this.write(firstDelim || delim);
-    this.delim += delim;
-    f();
-    this.delim = old;
-    if (nodeType && delim.length === 0) {
-      this.out = this.out.replace(trailNewlineRegEx, "") + (`\n${this.delim}${this.divFence}\n`);
-      this.divFence = this.divFence.slice(0, -3);
-    }
-    this.closeBlock(node);
-  }
-
-  atBlank() {
-    return /(^|\n)$/.test(this.out)
-  }
-
-  // :: ()
-  // Ensure the current content ends with a newline.
-  ensureNewLine() {
-    if (!this.atBlank()) this.out += "\n";
-  }
-
-  // :: (?string)
-  // Prepare the state for writing output (closing closed paragraphs,
-  // adding delimiters, and so on), and then optionally add content
-  // (unescaped) to the output.
-  write(content) {
-    this.flushClose();
-    if (this.delim && this.atBlank())
-      this.out += this.delim;
-    if (content) this.out += content;
-  }
-
-  // :: (Node)
-  // Close the block for the given node.
-  closeBlock(node) {
-    this.closed = node;
-  }
-
-  // :: (string, ?bool)
-  // Add the given text to the document. When escape is not `false`,
-  // it will be escaped.
-  text(text, escape) {
-    let lines = text.split("\n");
-    for (let i = 0; i < lines.length; i++) {
-      var startOfLine = this.atBlank() || this.closed;
-      this.write();
-      this.out += escape !== false ? this.esc(lines[i], startOfLine) : lines[i];
-      if (i != lines.length - 1) this.out += "\n";
-    }
-  }
-
-  // :: (Node)
-  // Render the given node as a block.
-  render(node, parent, index) {
-    if (typeof parent == "number") throw new Error("!")
-    this.nodes[node.type.name](this, node, parent, index);
-  }
-
-  // :: (Node)
-  // Render the contents of `parent` as block nodes.
-  renderContent(parent) {
-    parent.forEach((node, _, i) => this.render(node, parent, i));
-  }
-
-  // :: (Node)
-  // Render the contents of `parent` as inline content.
-  renderInline(parent) {
-    let active = [], trailing = "";
-    let progress = (node, _, index) => {
-      let marks = node ? node.marks : [];
-
-      // Remove marks from `hard_break` that are the last node inside
-      // that mark to prevent parser edge cases with new lines just
-      // before closing marks.
-      // (FIXME it'd be nice if we had a schema-agnostic way to
-      // identify nodes that serialize as hard breaks)
-      if (node && node.type.name === "hard_break")
-        marks = marks.filter(m => {
-          if (index + 1 == parent.childCount) return false
-          let next = parent.child(index + 1);
-          return m.isInSet(next.marks) && (!next.isText || /\S/.test(next.text))
-        });
-
-      let leading = trailing;
-      trailing = "";
-      // If whitespace has to be expelled from the node, adjust
-      // leading and trailing accordingly.
-      if (node && node.isText && marks.some(mark => {
-        let info = this.marks[mark.type.name];
-        return info && info.expelEnclosingWhitespace
-      })) {
-        let [_, lead, inner, trail] = /^(\s*)(.*?)(\s*)$/m.exec(node.text);
-        leading += lead;
-        trailing = trail;
-        if (lead || trail) {
-          node = inner ? node.withText(inner) : null;
-          if (!node) marks = active;
-        }
-      }
-
-      let inner = marks.length && marks[marks.length - 1], noEsc = inner && this.marks[inner.type.name].escape === false;
-      let len = marks.length - (noEsc ? 1 : 0);
-
-      // Try to reorder 'mixable' marks, such as em and strong, which
-      // in Markdown may be opened and closed in different order, so
-      // that order of the marks for the token matches the order in
-      // active.
-      outer: for (let i = 0; i < len; i++) {
-        let mark = marks[i];
-        if (!this.marks[mark.type.name].mixable) break
-        for (let j = 0; j < active.length; j++) {
-          let other = active[j];
-          if (!this.marks[other.type.name].mixable) break
-          if (mark.eq(other)) {
-            if (i > j)
-              marks = marks.slice(0, j).concat(mark).concat(marks.slice(j, i)).concat(marks.slice(i + 1, len));
-            else if (j > i)
-              marks = marks.slice(0, i).concat(marks.slice(i + 1, j)).concat(mark).concat(marks.slice(j, len));
-            continue outer
-          }
-        }
-      }
-
-      // Find the prefix of the mark set that didn't change
-      let keep = 0;
-      while (keep < Math.min(active.length, len) && marks[keep].eq(active[keep])) ++keep;
-
-      // Close the marks that need to be closed
-      while (keep < active.length)
-        this.text(this.markString(active.pop(), false, parent, index), false);
-
-      // Output any previously expelled trailing whitespace outside the marks
-      if (leading) this.text(leading);
-
-      // Open the marks that need to be opened
-      if (node) {
-        while (active.length < len) {
-          let add = marks[active.length];
-          active.push(add);
-          this.text(this.markString(add, true, parent, index), false);
-        }
-
-        // Render the node. Special case code marks, since their content
-        // may not be escaped.
-        if (noEsc && node.isText)
-          this.text(this.markString(inner, true, parent, index) + node.text +
-                    this.markString(inner, false, parent, index + 1), false);
-        else
-          this.render(node, parent, index);
-      }
-    };
-    parent.forEach(progress);
-    progress(null, null, parent.childCount);
-  }
-
-  // :: (Node, string, (number) → string)
-  // Render a node's content as a list. `delim` should be the extra
-  // indentation added to all lines except the first in an item,
-  // `firstDelim` is a function going from an item index to a
-  // delimiter for the first line of the item.
-  renderList(node, delim, firstDelim) {
-    this.flushClose();
-    node.forEach((child, _, i) => {
-      if (child.type.name === "tight_list_item") { this.flushClose(1); }
-      this.wrapBlock(delim, firstDelim(i), node, () => this.render(child, node, i));
-    });
-  }
-
-  paddedCell(str, justify, colWidth) {
-    const pad = " ".repeat(colWidth - str.length);
-    return justify === "r" ? (pad + str) : (str + pad)
-  }
-
-  renderTable(node, delim, float, isGFM) {
-    const isSpreadsheet = "dtype" in node.attrs ? node.attrs.dtype === dt.SPREADSHEET : false;
-    const rows = node.content.content;
-    let numCols = rows[0].content.content.length;
-    for (let i = 1; i < rows.length; i++) {
-      numCols = Math.max(numCols, rows[i].content.content.length);
-    }
-    let numRowsInHeading = 0;
-    for (let i = 0; i < rows.length; i++) {
-      if (rows[i].content.content[0].type.name === "table_header") {
-        numRowsInHeading += 1;
-      } else {
-        break
-      }
-    }
-    const tblClasses = node.attrs.class;
-    const justify = new Array(numCols).fill("L"); // default. Will change later.
-    let regExResults;
-    while ((regExResults = justifyRegEx.exec(tblClasses)) !== null) {
-      justify[Number(regExResults[1]) - 1] = regExResults[2];
-    }
-
-    // We're going to make three passes thru the table.
-    // The first pass will get the content of each cell and load it into an array.
-    // To do that, we'll create a temporary MarkdownSerializerState just for the table.
-    const table = new Array(rows.length);
-    const rowSpan = new Array(rows.length);
-    const colSpan = new Array(rows.length);
-    for (let i = 0; i < rows.length; i++) {
-      table[i] = new Array(numCols).fill("");
-      rowSpan[i] = new Array(numCols).fill(1);
-      colSpan[i] = new Array(numCols).fill(1);
-    }
-    const colWidth = new Array(numCols).fill(0);
-    const mergedCells = [];
-    // Do we need a reStructuredText grid table? Or is a GFM pipe table enough?
-    let isRst = !isGFM && numRowsInHeading > 1;
-    let tableState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths,
-                                                this.footnotes, this.isGFM, this.withResults);
-    tableState.lineLimit = numCols > 3 ? 25 : colWidthPicker[numCols];
-    let i = 0;
-    let j = 0;
-    let jPM = 0;
-    while (i < rows.length) {
-      while (j < numCols) {
-        if (rowSpan[i][j] === 0 || colSpan[i][j] === 0) { j += 1; continue }
-        const cell = rows[i].content.content[jPM];
-        if (!cell) { colSpan[i][j] = 0; j += 1; continue }
-        if (cell.attrs.rowspan > 1) {
-          rowSpan[i][j] = cell.attrs.rowspan;
-          for (let ii = i + 1; ii < i + cell.attrs.rowspan; ii++) {
-            rowSpan[ii][j] = 0;
-            colSpan[ii][j] = 0;
-          }
-        }
-        if (cell.attrs.colspan > 1) {
-          colSpan[i][j] = cell.attrs.colspan;
-          for (let jj = j + 1; jj < j + cell.attrs.colspan; jj++) {
-            colSpan[i][jj] = 0;
-          }
-        }
-
-        if (cell.content.content.length > 0) {
-          if (cell.attrs.colspan > 1) {
-            mergedCells.push([i, j, jPM]);
-          } else {
-            const L = tableState.out.length;
-            if (isSpreadsheet) {
-              tableState.write(cell.content.content[0].attrs.entry);
-            } else {
-              tableState.renderContent(cell);
-            }
-            // Each table cell contains an array of strings.
-            const cellContent = tableState.out.slice(L).replace(/^\n+/, "").replace(/\n+$/, "").split("\n");
-            if (cellContent.length === 1 && cellContent[0] === "&nbsp;") { cellContent[0] = "¶"; }
-            table[i][j] = cellContent;
-            if (cellContent.length > 1 && !isGFM) { isRst = true; }
-            // Get width of cell.
-            if (colSpan[i][j] === 1) {
-              for (let line of table[i][j]) {
-                if (line.length > colWidth[j]) {
-                  colWidth[j] = line.length;
-                }
-              }
-            }
-          }
-        }
-        j += cell.attrs.colspan;
-        jPM += 1;
-      }
-      i += 1;
-      j = 0;
-      jPM = 0;
-    }
-
-    // Now we know the column widths, so get the horizontally merged cells.
-    for (const c of mergedCells) {
-      const i = c[0];
-      const j = c[1];
-      const jPM = c[2];
-      const cell = rows[i].content.content[jPM];
-      let width = colWidth[j];
-      for (let m = 1; m < colSpan[i][j]; m++) { width += colWidth[j + m] + 3; }
-      tableState.lineLimit = width;
-      const L = tableState.out.length;
-      if (isSpreadsheet) {
-        tableState.write(cell.content.content[0].attrs.entry);
-      } else {
-        tableState.renderContent(cell);
-      }
-      table[i][j] = tableState.out.slice(L).replace(/^\n+/, "").split("\n");
-    }
-
-    // The second pass. Pad each cell w/spaces.
-    for (let i = 0; i < table.length; i++) {
-      for (let j = 0; j < numCols; j++) {
-        if (rowSpan[i][j] > 0 && colSpan[i][j] > 0) {
-          let width = colWidth[j];
-          for (let m = 1; m < colSpan[i][j]; m++) { width += colWidth[j + m] + 3; }
-          for (let k = 0; k < table[i][j].length; k++) {
-            if (table[i][j][k].indexOf("|") > -1 && !isGFM) { isRst = true; }
-            // Pad the line with spaces
-            table[i][j][k] += " ".repeat(width - table[i][j][k].length);
-          }
-        }
-      }
-    }
-
-    if (mergedCells.length > 0 || tableState.out.indexOf("|") > -1) { isRst = true; }
-
-    // Now the third pass, in which we write output.
-    this.write(isRst
-      ? gridTable(table, numCols, numRowsInHeading, rowSpan, colSpan, colWidth, justify, delim)
-      : pipeTable(table, numCols, colWidth, justify, delim, numRowsInHeading)
-    );
-    // Write the table's class name and column widths.
-    let colWidths = "";
-    for (let i = 0; i < rows.length; i++) {
-      if (rows[i].content.content.length === numCols) {
-        for (const col of rows[i].content.content) {
-          const w = col.attrs.colwidth ? col.attrs.colwidth[0] : null;
-          colWidths += " " + String(w);
-        }
-        break
-      }
-    }
-    let className = node.attrs.class.replace(/ c\d+[cr]/g, "").trim();
-    if (className.indexOf(" ") > -1) { className = `"${className}"`; }
-    const tableName = "name" in node.attrs ? node.attrs.name : "";
-    let directive = `\n${delim}{`;
-    if (tableName) { directive += `#${tableName} `; } 
-    directive += `.${className}`;
-    if (float && float === "left" || float === "right") { directive += ` float="${float}"`; }
-    directive += ` colWidths="${colWidths.trim()}"}\n`;
-    if (!isGFM) { this.write(directive); }
-  }
-
-  // :: (string, ?bool) → string
-  // Escape the given string so that it can safely appear in Markdown
-  // content. If `startOfLine` is true, also escape characters that
-  // has special meaning only at the start of the line.
-  esc(str, startOfLine) {
-    str = str.replace(/([`*\\¢\$<\[_~^])/g, "\\$1");
-    if (startOfLine) {
-      str = str.replace(/^(\#|:|\-|\*|\+|>)/, "\\$1").replace(/^(\d+|[A-Za-z])\.(?= )/, "$1\\.");
-    }
-    return str
-  }
-
-  quote(str) {
-    var wrap = str.indexOf('"') == -1 ? '""' : str.indexOf("'") == -1 ? "''" : "()";
-    return wrap[0] + str + wrap[1]
-  }
-
-  // :: (string, number) → string
-  // Repeat the given string `n` times.
-  repeat(str, n) {
-    let out = "";
-    for (let i = 0; i < n; i++) out += str;
-    return out
-  }
-
-  // : (Mark, bool, string?) → string
-  // Get the markdown string for a given opening or closing mark.
-  markString(mark, open, parent, index) {
-    let info = this.marks[mark.type.name];
-    let value = open ? info.open : info.close;
-    return typeof value == "string" ? value : value(this, mark, parent, index)
-  }
-
-  // :: (string) → { leading: ?string, trailing: ?string }
-  // Get leading and trailing whitespace from a string. Values of
-  // leading or trailing property of the return object will be undefined
-  // if there is no match.
-  getEnclosingWhitespace(text) {
-    return {
-      leading: (text.match(/^(\s+)/) || [])[0],
-      trailing: (text.match(/(\s+)$/) || [])[0]
-    }
-  }
-}
-
-const pipeTable = (table, numCols, colWidth, justify, delim, numRowsInHeading) => {
-  // Write a GFM pipe table
-  let str = "";
-  // Write heading
-  if (numRowsInHeading === 0) {
-    str += "|".repeat(numCols + 1);
-  } else {
-    str += "|";
-    for (let j = 0; j < numCols; j++) {
-      let cell = table[0][j][0];
-      if (cell.trim() === "¶") { cell = cell.replace("¶", " "); }
-      str += " " + cell + " |";
-    }
-  }
-  // Write border
-  str += "\n|";
-  for (let j = 0; j < numCols; j++) {
-    let border = justify[j] === "c" ? ":" : "-";
-    border += "-".repeat(colWidth[j]);
-    border += ("cr".indexOf(justify[j]) > -1 ? ":" : "-") + "|";
-    str += border;
-  }
-  // Write body
-  const startRow = numRowsInHeading === 0 ? 0 : 1;
-  for (let i = startRow; i < table.length; i++) {
-    str += "\n" + (i === 0 ? "" : delim) + "|";
-    for (let j = 0; j < numCols; j++) {
-      let cell = table[i][j][0];
-      if (cell.trim() === "¶") { cell = cell.replace("¶", " "); }
-      str += " " + cell + " |";
-    }
-  }
-  return str
-};
-
-const gridTable = (table, numCols, numRowsInHeading, rowSpan, colSpan, colWidth, justify, delim) => {
-  // Write a reStrucuredText grid table.
-
-  const cellBorder = (ch, isColonRow, i, j) => {
-    let borderStr = "";
-    for (let k = 0; k < colSpan[(i === -1 ? 0 : i)][j]; k++) {
-      borderStr += (isColonRow && justify[j] === "c") ? ":" : ch;
-      borderStr += ch.repeat(colWidth[j + k]);
-      borderStr += (isColonRow && "cr".indexOf(justify[j]) > -1) ? ":" : ch;
-      if (i < colSpan.length - 1 && j + k < colSpan[0].length - 1) {
-        borderStr += colSpan[i + 1][j + k + 1] > 0 ? "+" : ch;
-      } else {
-        borderStr += "+";
-      }
-    }
-    return borderStr
-  };
-
-  // Start by writing the top border.
-  let topBorder = "+";
-  let ch = numRowsInHeading === 0 ? "=" : "-";
-  let isColonRow = ch === "=" || numRowsInHeading === 0;
-  for (let j = 0; j < numCols; j++) {
-    if (rowSpan[0][j] === 0) { continue }
-    topBorder += cellBorder(ch, isColonRow, -1, j);
-  }
-
-  // Set pointers frome the the grid table current location to the array of table content.
-  const current = [];
-  for (let j = 0; j < numCols; j++) {
-    current.push({ row: 0, line: 0 }); // One reference for each column.
-  }
-
-  const rowIsEmptied = new Array(table.length).fill(false); // Have we written all the row's contents?
-  let highestUnemptiedRow = 0;
-  const rowIsReadyForBorder = new Array(table.length).fill(false);
-  const lines = [topBorder];
-
-  while (current[0].row < table.length) {
-    // Each pass in this loop writes one line of the grid table output.
-    rowIsEmptied[highestUnemptiedRow] = true; // Provisional value. Likely to change.
-    let str = delim + "|";
-    for (let j = 0; j < numCols; j++) {
-      if (rowSpan[current[j].row][j] === 0) { continue }
-      if (colSpan[current[j].row][j] === 0) { continue }
-      const endRow = current[j].row + rowSpan[current[j].row][j] - 1;
-      if (table[current[j].row][j].length > current[j].line) {
-        // Write one line from one cell.
-        let cellStr = table[current[j].row][j][current[j].line];
-        if (cellStr.trim() === "¶") { cellStr = cellStr.replace("¶", " "); }
-        str += " " + cellStr + " |";
-        current[j].line += 1;
-        if (current[j].line < table[current[j].row][j].length) {
-          rowIsEmptied[endRow] = false;
-        } else if (colSpan[current[j].row][j] > 1) {
-          // We're in a wide cell.
-          // Check for a collision between a text "|" and a cell border.
-          let posBorder = 0;
-          for (let k = 0; k < j + colSpan[current[j].row][j] - 1; k++) {
-            posBorder += colWidth[k] + 3;
-            if (k >= j && str.charAt(posBorder) === "|") {
-              rowIsEmptied[endRow] = false;
-              break
-            }
-          }
-        }
-      } else if (rowIsReadyForBorder[endRow]) {
-        // Write a border under one cell.
-        if (j === 0) { str = delim + "+"; }
-        ch = numRowsInHeading === endRow + 1 ? "=" : "-";
-        isColonRow = ch === "=";
-        const border = "+" + cellBorder(ch, isColonRow, current[j].row, j);
-        str = str.slice(0, -1) + border.slice(0, -1) + "+";
-      } else {
-        // Other columns are still writing content from this table row.
-        // We can't write a bottom border yet, so write a blank line into one cell.
-        for (let k = 0; k < colSpan[current[j].row][j]; k++) {
-          const corner = k === colSpan[current[j].row][j] - 1 ? "|" : " ";
-          str += " ".repeat(colWidth[j + k] + 2) + corner;
-        }
-      }
-    }
-    if (rowIsReadyForBorder[highestUnemptiedRow]){
-      // We just wrote a bottom border. Change the references to the next table row.
-      for (let j = 0; j < numCols; j++) {
-        if (current[j].row + rowSpan[current[j].row][j] - 1 === highestUnemptiedRow) {
-          current[j].line = 0;
-          current[j].row += rowSpan[current[j].row][j];
-        }
-      }
-      highestUnemptiedRow += 1;
-    } else if (rowIsEmptied[highestUnemptiedRow]) {
-      // The next pass will write a bottom border.
-      rowIsReadyForBorder[highestUnemptiedRow] = true;
-    }
-    lines.push(str);
-  }
-  return lines.join("\n")
-};
-
-/* eslint-disable no-alert */
-
-// TODO: Edit the sheetName regex to ensure that the sheetName is a valid identifier
-const sheetNameRegEx = /^[\w]+\b/;
-
-const sheetLimits = (doc, inputPos) => {
-  // Find the extent of the table
-  let tableStart = 0;
-  let tableEnd = 0;
-  let parent;
-  for (let d = inputPos.depth; d > 0; d--) {
-    const node = inputPos.node(d);
-    if (node.type.spec.tableRole === 'table') {
-      tableStart = inputPos.before(d);
-      tableEnd =  inputPos.after(d);
-      parent = inputPos.node(d - 1);
-      break
-    }
-  }
-  return [tableStart, tableEnd, parent]
-};
-
-const numberRegEx$1 = new RegExp(Rnl.numberPattern);
-const cellRefRegEx = /"[A-Z][1-9]+"/g;
-const innerRefRegEx = /^(?:[A-Z](?:\d+|_end)|up|left)$/;
-const sumRegEx = /¿(up|left)([\xa0§])sum[\xa0§]1(?=[\xa0§]|$)/g;
-const spreadsheetRegEx = / spreadsheet\b/;
-const grafRegEx = /\n\n/;
-
-// Compile a spreadsheet cell.
-
-const compileCell = (attrs, sheetAttrs, unit, previousAttrs,
-                            formats = "1,000,000.") => {
-  const newAttrs = { entry: attrs.entry, name: attrs.name };
-  const entry = attrs.entry;
-  if (entry.length === 0) {
-    newAttrs.value = null;
-    newAttrs.dtype = dt.NULL;
-  } else if (entry.slice(0, 1) === "=") {
-    // Get the RPN of an expression
-    const expression = entry.replace(/^==?/, "").trim();
-    // TODO: Revise the parser to handle spreadsheet cell names & sheetname
-    // eslint-disable-next-line prefer-const
-    let [_, rpn, dependencies] = parse$1(expression, formats, true, false, sheetAttrs.name);
-    const outerDependencies = new Set();
-    for (const dependency of dependencies) {
-      if (!innerRefRegEx.test(dependency)) {
-        outerDependencies.add(dependency);
-      }
-    }
-
-    // Implement sum(up) and sum(left)
-    // Orig RPN:    ¿up sum 1
-    // Desired RPN: ¿sheetName "D" spreadsheetSum   or   ¿sheetName "3" spreadsheetSum
-    let sumMatch;
-    while ((sumMatch = sumRegEx.exec(rpn)) !== null) {
-      const str = sumMatch[1] === "up" ? attrs.name.slice(0, 1) : attrs.name.slice(1, 2);
-      rpn = rpn.slice(0, sumMatch.index) + `¿${sheetAttrs.name}` + sumMatch[2]
-            + `"${str}"` + sumMatch[2] + "spreadsheetSum"
-            + rpn.slice(sumMatch.index + sumMatch[0].length);
-    }
-
-    newAttrs.rpn = rpn;
-    newAttrs.dependencies = outerDependencies.size > 0
-      ? [...(outerDependencies.values())]
-      : [];
-    newAttrs.resulttemplate = (entry.length > 1 &&  entry.slice(1, 2) === "=")
-      ? "@@"
-      : "@";
-    newAttrs.altresulttemplate = newAttrs.resulttemplate;
-    newAttrs.resultdisplay = newAttrs.resulttemplate;
-    newAttrs.unit = unit ? unit : { factor: Rnl.one, gauge: Rnl.zero, expos: allZeros };
-  } else if (entry === '"' || entry === '“') {
-    // The ditto of the previous cell
-    if (previousAttrs.rpn) {
-      let rpn = previousAttrs.rpn;
-      const matches = arrayOfRegExMatches(cellRefRegEx, rpn);
-      for (let i = matches.length - 1; i >= 0; i--) {
-        const match = matches[i];
-        const rowNum = Math.min(sheetAttrs.numRows - 1, Number(match.value.slice(2, -1)) + 1);
-        rpn = rpn.slice(0, match.index + 2) + String(rowNum)
-            + rpn.slice(match.index + match.length - String(rowNum).length);
-      }
-      newAttrs.rpn = rpn;
-      newAttrs.resulttemplate = previousAttrs.resulttemplate;
-      newAttrs.altresulttemplate = newAttrs.resulttemplate;
-      newAttrs.resultdisplay = newAttrs.resulttemplate;
-      newAttrs.unit = previousAttrs.unit;
-    } else {
-      newAttrs.value = previousAttrs.value;
-      newAttrs.dtype = previousAttrs.dtype;
-      newAttrs.display = previousAttrs.display ? previousAttrs.display : previousAttrs.entry;
-    }
-    // TODO: unitAware, dependencies
-  } else {
-    // A literal value
-    const numCandidate = entry.replace(/,/g, "");
-    if (numberRegEx$1.test(numCandidate)) {
-      let value = Rnl.fromString(numCandidate);
-      let dtype = dt.RATIONAL;
-      if (unit) {
-        value = {
-          plain: value,
-          inBaseUnits: Rnl.multiply(Rnl.add(value, unit.gauge), unit.factor)
-        };
-        dtype += dt.QUANTITY;
-      }
-      newAttrs.value = value;
-      newAttrs.dtype = dtype;
-    } else if (entry === "true" || entry === "false") {
-      newAttrs.value = Boolean(entry);
-      newAttrs.dtype = dt.BOOLEAN;
-    } else if (complexRegEx.test(entry)) {
-      // eslint-disable-next-line no-unused-vars
-      const [value, unit, dtype, _] = valueFromLiteral(entry, attrs.name, formats);
-      newAttrs.value = value;
-      newAttrs.dtype = dtype;
-    } else {
-      newAttrs.value = entry;
-      newAttrs.dtype = dt.STRING;
-    }
-  }
-  return newAttrs
-};
-
-// Compile a spreadsheet
-
-const compileSheet = (table, formats) => {
-  // The cell entries and the sheet name are already known.
-  // Proceed to compile the rest of the table and cell attributes.
-  // Stop short of calculations.
-  table.attrs.numRows = table.content.length;
-  table.attrs.columnMap = {};
-  table.attrs.rowMap = {};
-  table.attrs.unitMap = [];
-  table.attrs.units = {};
-  table.attrs.dependencies = [];
-  table.attrs.dtype = dt.SPREADSHEET;
-  if (table.content[0].type === "colGroup") { table.content.shift(); }
-
-  const numRows = table.content.length;
-  table.attrs.numRows = numRows;
-  const numCols = table.content[0].content.length;
-  // Proceed column-wise thru the table.
-  for (let j = 0; j < numCols; j++) {
-    let previousAttrs = {};
-    for (let i = 0; i < numRows; i++) {
-      const cell = table.content[i].content[j].content[0];
-      const cellName = String.fromCodePoint(65 + j) + String(i);
-      const entry = cell.attrs.entry;
-      if (i === 0) {
-        const str = md2text(entry);
-        // eslint-disable-next-line no-useless-assignment
-        let heading = "";
-        let unitName = "";
-        const posNewline = str.indexOf("\n");
-        if (posNewline === -1) {
-          heading = str.trim();
-        } else {
-          unitName = str.slice(posNewline + 1).trim();
-          heading = str.slice(0, posNewline).trim();
-        }
-        table.attrs.columnMap[heading] = cellName.slice(0, 1);
-        if (unitName.length > 0) {
-          const unit = unitFromUnitName(unitName);
-          if (unit.dtype && unit.dtype === dt.ERROR) {
-            unitName = "";
-          } else {
-            table.attrs.units[unitName] = unit;
-          }
-        }
-        table.attrs.unitMap.push(unitName);
-      } else {
-        // A data cell, not a top row heading
-        if (j === 0) { table.attrs.rowMap[entry] = i; }
-      }
-      const newCell = { type: "spreadsheet_cell", attrs: { entry } };
-      if (i === 0) {
-        newCell.attrs.display = md2html(entry);
-      } else {
-        newCell.attrs.name = cellName;
-        const unit = (table.attrs.unitMap[j].length > 0)
-          ? table.attrs.units[table.attrs.unitMap[j]]
-          : null;
-        newCell.attrs = compileCell(newCell.attrs, table.attrs, unit, previousAttrs,
-                                    formats);
-        previousAttrs = newCell.attrs;
-        previousAttrs.unit = unit;
-        if (newCell.attrs.dependencies) {
-          for (const d of newCell.attrs.dependencies) {
-            if (!table.attrs.dependencies.includes(d)) {
-              table.attrs.dependencies.push(d);
-            }
-          }
-        }
-      }
-      table.content[i].content[j].content = [newCell];
-    }
-  }
-  return table
-};
-
-const tableToSheet = (state, tableNode) => {
-  // Get the extent of the table.
-  const [tableStart, tableEnd, parent] = sheetLimits(state.doc, state.selection.$from);
-
-  // Get the spreadsheet's name
-  if (parent.content.content === 1 ||
-      parent.content.content[0].type.name !== "figcaption") {
-    alert("Table must have a caption that begins with the spreadsheet’s name.");
-  }
-  const caption = parent.content.content[0];
-  const str = caption.textContent;
-  if (str.length === 0) {
-    alert("Table caption must contain a string that begins with the spreadsheet’s name.");
-    return
-  }
-  const match = sheetNameRegEx.exec(str);
-  if (!match) {
-    alert("Table caption must begin with a valid identifier for the spreadsheet’s name.");
-    return
-  }
-  const sheetName = match[0];
-
-  // Copy tableNode to an object w/o all the ProseMirror methods.
-  let table = tableNode.toJSON();
-  table.attrs.name = sheetName;
-
-  // Get the cell entries.
-  const numRows = table.content.length;
-  const numCols = table.content[0].content.length;
-  // Proceed column-wise thru the table.
-  for (let j = 0; j < numCols; j++) {
-    for (let i = 0; i < numRows; i++) {
-      const cell = tableNode.content.content[i].content.content[j];
-      let entry = (i === 0)
-        ? hurmetMarkdownSerializer.serialize(cell, new Map(), [])
-        : cell.textContent;
-      if (i === 0) {
-        entry = entry.replace(grafRegEx, "\\\n");
-        if (entry === "¶") { entry = ""; }
-      }
-      const newCell = { type: "spreadsheet_cell", attrs: { entry } };
-      if (i === 0) { newCell.attrs.display = md2html(entry); }
-      table.content[i].content[j].content = [newCell];
-    }
-  }
-  const formats = {
-    decimalFormat: state.doc.attrs.decimalFormat,
-    dateFormat: state.doc.attrs.dateFormat
-  };
-  table = compileSheet(table, formats);
-  table.attrs.class += " spreadsheet";
-  table.attrs.dtype = dt.SPREADSHEET;
-  return [table, tableStart, tableEnd]
-};
-
-const sheetToTable = (state, tableNode) => {
-  const table = tableNode.toJSON();
-  const classes = table.attrs.class.replace(spreadsheetRegEx, "");
-  table.attrs = { class: classes, dtype: dt.NULL };
-  // Un-freeze the data cells. Display the entries.
-  const rows = table.content;
-  for (let i = 0; i < rows.length; i++) {
-    const row = rows[i].content;
-    for (let j = 0; j < row.length; j++) {
-      const text = row[j].content[0].attrs.entry;
-      if (text.length > 0) {
-        row[j].content = [{ type: "paragraph", content: [{ type: "text", text }] }];
-      } else {
-        row[j].content = [{ type: "paragraph", content: [] }];
-      }
-    }
-  }
-  const [tableStart, tableEnd] = sheetLimits(state.doc, state.selection.$from);
-  return [table, tableStart, tableEnd]
-};
-
-/*
- *  This module organizes one or two passes through the data structure of a Hurmet
- *  document, calling for a calculation to be done on each Hurmet calculation cell.
- *  If you are looking for the calculation itself, look at evaluate.js.
- *
- *  To be more precise, this module is called:
- *    1. When an author submits one calculation cell, or
- *    2. When a new Hurmet.org instance has opened (from index.js), or
- *    3. When a user has opened a new file         (from openFile.js), or
- *    4. When a recalculate-all has been called, possibly after a paste. (from menu.js)
- *
- *  Case 1 calculates the submitted cell and all dependent calculation cells.
- *  Cases 2 thru 4 re-calculate the entire document. I.e., isCalcAll is set to true.
- *  After calculation is complete, we send the results to ProseMirror to be
- *  rendered in the document.
- *
- *   This module's main exported function is updateCalculations(…)
- */
-
-/*
-* Note 1: state.selection shenanigans
-*
-* Before creating a ProseMirror (PM) transaction, this module first changes `state.selection`.
-* That is to say, I change the PM state without running that change thru a PM transaction.
-* PM docs advise against that, so I want to explain why I do so.
-*
-* For Undo purposes, a calculation should be atomic.
-* An Undo of a calculation should return the doc to the condition before the
-* calculation cell was edited. That will feel natural to people accustomed to Excel.
-* When a calculation is submitted, Hurmet creates a single PM transaction and into it,
-* Hurmet collects all the changes that the calculation makes to the original cell and
-* also all the changes to dependent cells.
-* When a user submits a calculation, the cell is open, so a PM Undo would ordinarily return
-* the state to a condition that once again has the cell open.
-*
-* But now consider a user who wants to Undo twice. The first Undo retreats to a condition in
-* which a cell is open. The user thinks a second Undo will change the PM document. But no!
-* Because the cell is open, the codejar plain text editor is active and the Undo is captured
-* by codejar. An Undo affects codejar but not the outer document. It's very confusing!
-* So the Undo should return to a condition in which the cell is closed. That's why I change
-* the PM state.selection object _before_ I create the PM transaction. I don't want an Undo to
-* open that cell and so I don't want the Undo to finish with the selection point inside the
-* cell. Before creating the transaction, I move the selection point to just after the cell.
-*/
-
-// eslint-disable-next-line max-len
-const fetchRegEx = new RegExp(isValidIdentifier.source.slice(0, -1) + " *= *(?:fetch|import)\\(");
-const importRegEx = /^[^=]+= *import/;
-const fileErrorRegEx = /^Error while reading file. Status Code: \d*$/;
-const textRegEx$1 = /\\text{[^}]+}/;
-
-const urlFromEntry = entry => {
-  // Get the URL from the entry input string.
-  const str = entry.replace(/^[^()]+\("?/, "");
-  return str.replace(/"?\).*$/, "").trim()
-};
-
-// Helper function.
-const processFetchedString = (entry, text, hurmetVars, formats) => {
-  const attrs = Object.create(null);
-  attrs.entry = entry;
-  attrs.name = entry.replace(/=.+$/, "").trim();
-  let str = parse$1(entry.replace(/\s*=\s*[$$£¥\u20A0-\u20CF]?(?:!{1,2}).*$/, ""), formats);
-  const url = urlFromEntry(entry);
-  if (/\.(?:tsv|txt)$/.test(url)) {
-    // Shorten the URL.
-    const fileName = url.replace(/.+\//, "");
-    const match = textRegEx$1.exec(str);
-    str = str.slice(0, match.index) + "\\text{" + addTextEscapes(fileName) + "})";
-  }
-  attrs.tex = str;
-  attrs.alt = entry;
-  if (text === "File not found." || fileErrorRegEx.test(text)) {
-    attrs.dtype = dt.ERROR;
-    attrs.tex += ` = \\red{\\text{${text}}}`;
-    attrs.alt = " = " + text;
-    attrs.value = null;
-    return attrs
-  }
-  const data = importRegEx.test(entry)
-    ? scanModule(text, formats)     // import code
-    : DataFrame.dataFrameFromTSV(text);    // fetch data
-
-  // Append the data to attrs
-  attrs.value = data.value;
-  attrs.dtype = data.dtype;
-  attrs.unit = data.unit;
-  attrs.isFetch = true;
-  attrs.fallback = data.dtype === dt.MODULE ? text : "";
-  if (data.dtype === dt.MODULE && /^importedParameters *=/.test(entry)) {
-    // Assign to multiple variables, not one namespace.
-    let nameTex = "\\begin{matrix}";
-    let i = 0;
-    Object.entries(data.value).forEach(([key, value]) => {
-      hurmetVars[key] =  value;
-      nameTex += parse$1(value.name) + " & ";
-      i += 1;
-      if (i === 5) {
-        nameTex = nameTex.slice(0, -1) + "\\\\ ";
-        i = 0;
-      }
-    });
-    nameTex = nameTex.slice(0, (i === 0 ? -2 : -1)) + "\\end{matrix}";
-    attrs.tex = attrs.tex.replace("\\mathrm{importedParameters}", nameTex);
-  }
-  return attrs
-};
-
-const mustCalc = (attrs, hurmetVars, changedVars, isCalcAll, isFormat) => {
-  if (isCalcAll || isFormat) { return true }
-  if (attrs.rpn && !(attrs.name && hurmetVars[attrs.name] && hurmetVars[attrs.name].isFetch)) {
-    for (const varName of attrs.dependencies) {
-      if (changedVars.has(varName)) { return true }
-    }
-  }
-  if (attrs.dtype && attrs.dtype === dt.DRAWING && attrs.value.parameters &&
-      attrs.value.parameters.length > 0) {
-    for (const parameter of attrs.value.parameters) {
-      if (changedVars.has(parameter)) { return true }
-    }
-  }
-  return false
-};
-
-const workWithFetchedTexts = (
-  view,
-  doc,
-  inDraftMode,
-  formats,
-  isCalcAll,
-  nodeAttrs,
-  curPos,
-  hurmetVars,
-  fetchPositions,
-  texts
-) => {
-  // At this point, we have the text of each Hurmet fetch and import.
-  // Create a ProseMirror transaction.
-  // Each node update below will be one step in the transaction.
-  const state = view.state;
-  if (state.selection.to === curPos + 1) {
-    // See Note 1 above for an explanation of the state.selection shenanigans.
-    state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1));
-  }
-  const tr = state.tr;
-
-  // Load in the data from the fetch statements
-  for (let i = 0; i < texts.length; i++) {
-    const pos = fetchPositions[i];
-    const entry = isCalcAll
-      ? doc.nodeAt(pos).attrs.entry
-      : nodeAttrs.entry;
-    const attrs = processFetchedString(entry, texts[i], hurmetVars, formats);
-    attrs.inDraftMode = inDraftMode;
-    tr.replaceWith(pos, pos + 1, state.schema.nodes.calculation.createAndFill(attrs));
-    if (attrs.name) {
-      insertOneHurmetVar(hurmetVars, attrs, null, formats.decimalFormat);
-    }
-  }
-  // There. Fetches are done and are loaded into the document.
-  // Now proceed to the rest of the work.
-  proceedAfterFetch(view, isCalcAll, nodeAttrs, curPos, hurmetVars, tr);
-
-};
-
-const workAsync = (
-  view,
-  isCalcAll,
-  nodeAttrs,
-  curPos,
-  hurmetVars,
-  urls,
-  fetchPositions
-) => {
-
-  // Here we fetch the remote data.
-  const doc = view.state.doc;
-  const inDraftMode = doc.attrs.inDraftMode;
-  const formats = {
-    decimalFormat: doc.attrs.decimalFormat,
-    dateFormat: doc.attrs.dateFormat
-  };
-
-  if (!navigator.onLine) {
-    const texts = [];
-    for (const url of urls) {
-      Object.keys(doc.attrs.fallbacks).forEach(function(key) {
-        if (doc.attrs.fallbacks[key].url === url) {
-          texts.push(doc.attrs.fallbacks[key].text);
-        }
-      });
-    }
-    workWithFetchedTexts(view, doc, inDraftMode, formats, isCalcAll,
-      nodeAttrs, curPos, hurmetVars, fetchPositions, texts);
-  } else {
-    Promise.all(
-      urls.map(url => fetch(url, {
-        method: "GET",
-        headers: { "Content-Type": "text/plain;charset=UTF-8" },
-        mode: "cors"
-      }))
-    ).then(fetchResponses => {
-      // The fetch promises have resolved. Now we extract their text.
-      return Promise.all(fetchResponses.map(r => {
-        if (r.status !== 200 && r.status !== 0) {
-          // The fetch failed. Try for a fallback.
-          Object.keys(doc.attrs.fallbacks).forEach(function(key) {
-            if (doc.attrs.fallbacks[key].url === r.url) {
-              return doc.attrs.fallbacks[key].text
-            }
-          });
-          return r.status === 404
-            ? 'File not found.'
-            : 'Error while reading file. Status Code: ' + r.status
-        }
-        return r.text()
-      }))
-    }).then((texts) => {
-      workWithFetchedTexts(view, doc, inDraftMode, formats, isCalcAll,
-        nodeAttrs, curPos, hurmetVars, fetchPositions, texts);
-    });
-  }
-};
-
-const proceedAfterFetch = (
-  view,
-  isCalcAll,
-  nodeAttrs,
-  curPos,
-  hurmetVars,
-  tr
-) => {
-  // This function happens either
-  //   1. After remote, fetched data has been processed, or
-  //   2. After we know that no fetch statements need be processed.
-  const doc = view.state.doc;
-  const formats = {
-    decimalFormat: doc.attrs.decimalFormat,
-    dateFormat: doc.attrs.dateFormat
-  };
-  const calcSchema = view.state.schema.nodes.calculation;
-  // Create a set to track which variable have a changed value.
-  const changedVars = isCalcAll ? null : new Set();
-
-  if (!isCalcAll && (nodeAttrs.name || nodeAttrs.rpn ||
-    (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING))) {
-    // Load hurmetVars with values from earlier in the document.
-    doc.nodesBetween(0, curPos, function(node, pos) {
-      if (node.type.name === "calculation") {
-        const attrs = node.attrs;
-        if (attrs.name) {
-          if (attrs.name === "importedParameters") {
-            Object.entries(attrs.value).forEach(([key, value]) => {
-              hurmetVars[key] =  value;
-            });
-          } else {
-            insertOneHurmetVar(hurmetVars, attrs, null, formats.decimalFormat);
-          }
-        }
-      } else if (("dtype" in node.attrs) && node.attrs.dtype === dt.SPREADSHEET) {
-        const sheetName = node.attrs.name;
-        const sheetAttrs = clone(node.attrs);
-        sheetAttrs.value = {};
-        hurmetVars[sheetName] = sheetAttrs;
-        const numRows = node.content.content.length;
-        const numCols = node.content.content[0].content.content.length;
-        // Proceed column-wise thru the table.
-        for (let j = 0; j < numCols; j++) {
-          for (let i = 1; i < numRows; i++) {
-            const cell = node.content.content[i].content.content[j].content.content[0];
-            hurmetVars[sheetName].value[cell.attrs.name] = clone(cell.attrs);
-          }
-        }
-      }
-    });
-
-    // Hoist any user-defined functions located below the selection.
-    doc.nodesBetween(curPos + 1, doc.content.size, function(node, pos) {
-      if (node.type.name === "calculation" && node.attrs.dtype === dt.MODULE) {
-        insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat);
-      }
-    });
-
-    // Calculate the current node.
-    if (!fetchRegEx.test(nodeAttrs.entry)) {
-      // This is the typical calculation statement. We'll evalutate it.
-      if (!(("dtype" in nodeAttrs) && nodeAttrs.dtype === dt.SPREADSHEET)) {
-        let attrs = clone(nodeAttrs); // compile was already run in mathprompt.js.
-        try {
-          // Do the calculation of the cell.
-          if (attrs.rpn || (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING)) {
-            attrs = attrs.dtype && attrs.dtype === dt.DRAWING
-              ? evaluateDrawing(attrs, hurmetVars, formats)
-              : evaluate(attrs, hurmetVars, formats);
-          }
-          if (attrs.name) {
-            insertOneHurmetVar(hurmetVars, attrs, changedVars, formats.decimalFormat);
-          }
-        } catch (err) {
-          attrs.tex = "\\text{" + attrs.entry + " = " + err + "}";
-        }
-        tr.replaceWith(curPos, curPos + 1, calcSchema.createAndFill(attrs));
-      } else {
-        // Calculate all the cells in a spreadsheet
-        const tableNode = doc.nodeAt(curPos);
-        const table = tableNode.toJSON();
-        const sheetName = table.attrs.name;
-        const sheet = clone(table.attrs);
-        delete sheet["value"];
-        sheet.value = {};
-        hurmetVars[sheetName] = sheet;
-        const numRows = table.content.length;
-        const numCols = table.content[0].content.length;
-        table.attrs.rowMap = {};
-        // Proceed column-wise thru the table.
-        for (let j = 0; j < numCols; j++) {
-          for (let i = 1; i < numRows; i++) {
-            const cell = table.content[i].content[j].content[0];
-            if (cell.attrs.rpn) {
-              cell.attrs = evaluate(cell.attrs, hurmetVars, formats);
-              cell.attrs.display = cell.attrs.alt;
-              if (j === 0) { table.attrs.rowMap[cell.attrs.alt] = i; }
-            } else if (j === 0 && typeof cell.attrs.value === "string") {
-              table.attrs.rowMap[cell.attrs.value] = i;
-            }
-            hurmetVars[sheetName].value[cell.attrs.name] = cell.attrs;
-          }
-        }
-        changedVars.add(sheetName);
-        tr.replaceWith(curPos, curPos + tableNode.nodeSize,
-                       view.state.schema.nodeFromJSON(table));
-      }
-    }
-  }
-
-  // Finally, update calculations after startPos.
-  const startPos = isCalcAll ? 0 : (curPos + 1);
-  const isFormat = (nodeAttrs && nodeAttrs.name && nodeAttrs.name === "format");
-  doc.nodesBetween(startPos, doc.content.size, function(node, pos) {
-    if (node.type.name === "calculation") {
-      const notFetched = isCalcAll ? !fetchRegEx.test(node.attrs.entry) : !node.attrs.isFetch;
-      if (notFetched) {
-        const entry = node.attrs.entry;
-        let attrs = isCalcAll
-          ? compile(entry, formats)
-          : clone(node.attrs);
-        attrs.displayMode = node.attrs.displayMode;
-        const mustRedraw = attrs.dtype && attrs.dtype === dt.DRAWING &&
-          (attrs.rpn || (attrs.value.parameters.length > 0 || isCalcAll));
-        if (mustCalc(attrs, hurmetVars, changedVars, isCalcAll, isFormat)) {
-          try {
-            if (attrs.rpn || mustRedraw) {
-              attrs.error = false;
-              attrs = attrs.rpn // attrs.dtype && attrs.dtype === dt.DRAWING
-                ? evaluate(attrs, hurmetVars, formats)
-                : evaluateDrawing(attrs, hurmetVars, formats);
-            }
-            if (attrs.name) {
-              insertOneHurmetVar(hurmetVars, attrs, changedVars, formats.decimalFormat);
-            }
-          } catch (err) {
-            attrs.tex = "\\text{" + attrs.entry + " = " + err + "}";
-          }
-          if (isCalcAll || attrs.rpn || mustRedraw) {
-            tr.replaceWith(pos, pos + 1, calcSchema.createAndFill(attrs));
-          }
-        } else if (attrs.name && attrs.value) {
-          insertOneHurmetVar(hurmetVars, attrs, null, formats.decimalFormat);
-        }
-      } else if (node.attrs.name && !(isCalcAll && node.attrs.isFetch)) {
-        if (node.attrs.name) {
-          if (node.attrs.name === "importedParameters") {
-            Object.entries(node.attrs.value).forEach(([key, value]) => {
-              hurmetVars[key] =  value;
-            });
-          } else {
-            insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat);
-          }
-        }
-      }
-    } else if (("dtype" in node.attrs) && node.attrs.dtype === dt.SPREADSHEET
-                && pos !== curPos) {
-      // Calculate all the cells in a spreadsheet
-      let table = clone(node.toJSON());
-      let mustCalc = false;
-      if (isCalcAll) {
-        table = compileSheet(table, formats);
-        mustCalc = true;
-      } else {
-        for (const varName of table.attrs.dependencies) {
-          if (changedVars.has(varName)) { mustCalc = true; break }
-        }
-      }
-      if (mustCalc) {
-        const sheetName = table.attrs.name;
-        hurmetVars[sheetName] = table.attrs;
-        hurmetVars[sheetName].value = {};
-        const numRows = table.content.length;
-        const numCols = table.content[0].content.length;
-        table.attrs.rowMap = {};
-        // Proceed column-wise thru the table.
-        for (let j = 0; j < numCols; j++) {
-          for (let i = 1; i < numRows; i++) {
-            const cell = table.content[i].content[j].content[0];
-            if (cell.attrs.rpn) {
-              cell.attrs = evaluate(cell.attrs, hurmetVars, formats);
-              cell.attrs.display = cell.attrs.alt;
-              if (j === 0) { table.attrs.rowMap[cell.attrs.alt] = i; }
-            } else if (j === 0 && typeof cell.attrs.value === "string") {
-              table.attrs.rowMap[cell.attrs.value] = i;
-            }
-            hurmetVars[sheetName].value[cell.attrs.name] = cell.attrs;
-          }
-        }
-        if (!isCalcAll) { changedVars.add(sheetName); }
-        tr.replaceWith(pos, pos + node.nodeSize, view.state.schema.nodeFromJSON(table));
-      }
-    }
-  });
-
-  // All the steps are now loaded into the transaction.
-  // Dispatch the transaction to ProseMirror, which will re-render the document.
-  if (!isCalcAll) {
-    tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)));
-  }
-  view.dispatch(tr);
-  view.focus();
-};
-
-function updateCalculations(
-  view,
-  isCalcAll = false,
-  nodeAttrs,
-  curPos
-) {
-  const doc = view.state.doc;
-  const calcSchema = view.state.schema.nodes.calculation;
-
-  if (!(isCalcAll || nodeAttrs.name || nodeAttrs.rpn ||
-      (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING))) {
-    // No calculation is required. Just render the node and get out.
-    const state = view.state;
-    if (state.selection.to === curPos + 1) {
-      // See Note 1 above for an explanation of the state.selection shenanigans.
-      state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1));
-    }
-    const tr = state.tr;
-    try {
-      tr.replaceWith(curPos, curPos + 1, calcSchema.createAndFill(nodeAttrs));
-    // eslint-disable-next-line no-unused-vars
-    } catch (err) {
-      // nada
-    } finally {
-      view.dispatch(tr);
-      view.focus();
-    }
-    return
-  }
-
-  // Create an object in which we'll hold variable values.
-  const hurmetVars = Object.create(null);
-  hurmetVars.format = { value: "h15" }; // default rounding format
-  hurmetVars["@savedate"] = doc.attrs.saveDate;
-  const formats = {
-    decimalFormat: doc.attrs.decimalFormat,
-    dateFormat: doc.attrs.dateFormat
-  };
-
-  // Get an array of all the URLs called by fetch statements.
-  const urls = [];
-  const fetchPositions = [];
-  if (!isCalcAll) {
-    // The author has submitted a single calculation cell.
-    const entry = nodeAttrs.entry;
-    if (fetchRegEx.test(entry)) {
-      let url = urlFromEntry(entry);
-      if (!/\.(tsv|txt)$/.test(url)) {
-        const pos = url.lastIndexOf("/");
-        url = url.slice(pos + 1);
-        // eslint-disable-next-line no-alert
-        alert(`Warning: Only .tsv and .txt files can be fetched.\n${url}`);
-      } else {
-        urls.push(url);
-        fetchPositions.push(curPos);
-      }
-    }
-  } else {
-    // We're updating the entire document.
-    doc.nodesBetween(0, doc.content.size, function(node, pos) {
-      if (node.type.name === "calculation" && !node.attrs.value) {
-        const entry = node.attrs.entry;
-        if (fetchRegEx.test(entry)) {
-          let url = urlFromEntry(entry);
-          if (!/\.(tsv|txt)$/.test(url)) {
-            const pos = url.lastIndexOf("/");
-            url = url.slice(pos + 1);
-                // eslint-disable-next-line no-alert
-            alert(`Warning: Only .tsv and .txt files can be fetched.\n${url}`);
-          } else {
-            urls.push(url);
-            fetchPositions.push(pos);
-          }
-        } else if (/^function /.test(entry)) {
-          node.attrs = compile(entry, formats);
-          insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat);
-        }
-      } else if (node.attrs.isFetch || (node.attrs.dtype && node.attrs.dtype === dt.MODULE)) {
-        insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat);
-      }
-    });
-  }
-
-  if (urls.length > 0) {
-    // We have to fetch some remote data. Asynchronous work ahead.
-    workAsync(view, isCalcAll, nodeAttrs, curPos,
-              hurmetVars, urls, fetchPositions);
-  } else {
-    // Skip the fetches and go directly to work that we can do synchronously.
-    const state = view.state;
-    if (state.selection.to === curPos + 1) {
-      // See Note 1 above for an explanation of the state.selection shenanigans.
-      state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1));
-    }
-    const tr = state.tr;
-    proceedAfterFetch(view, isCalcAll, nodeAttrs, curPos, hurmetVars, tr);
-  }
-}
-
-const helpers = Object.freeze({
-  fetchRegEx,
-  textRegEx: textRegEx$1,
-  urlFromEntry,
-  processFetchedString
-});
-
-async function fetchTexts(urls) {
-  // Here we fetch remote data.
-  return Promise.all(
-    urls.map(url => fetch(url, {
-      method: "GET",
-      headers: { "Content-Type": "text/plain;charset=UTF-8" },
-      mode: "cors"
-    }))
-  ).then(fetchResponses => {
-    // The fetch promises have resolved. Now we extract their text.
-    return Promise.all(fetchResponses.map(r => {
-      if (r.status !== 200 && r.status !== 0) {
-        return r.status === 404
-          ? 'File not found.'
-          : 'Error while reading file. Status Code: ' + r.status
-      }
-      return r.text()
-    }))
-  }).then((texts) => {
-    // At this point, we have the text of each Hurmet fetch and import.
-    return texts
-  })
-}
-
-async function getRemoteTexts(urls) {
-  // This is necessary to return text, not just a promise of text.
-  return await fetchTexts(urls)
-}
-
-const getCalcNodes = (ast, calcNodes) => {
-  // Create an array of calculation nodes.
-  if (Array.isArray(ast)) {
-    for (let i = 0; i < ast.length; i++) {
-      getCalcNodes(ast[i], calcNodes);
-    }
-  } else if (ast && ast.type === "calculation") {
-    calcNodes.push(ast);
-  } else if (ast && ast.type === "table" && "name" in ast.attrs) {
-    calcNodes.push(ast);
-  } else if ("content" in ast) {
-    for (let j = 0; j < ast.content.length; j++) {
-      getCalcNodes(ast.content[j], calcNodes);
-    }
-  }
-};
-
-async function updateCalcs(doc) {
-  // This function is a lot like what updateCalculations.js does for the Hurmet web site.
-
-  // Create an object in which we'll hold variable values.
-  const hurmetVars = Object.create(null);
-  hurmetVars.format = { value: "h15" }; // default rounding format
-  hurmetVars["@savedate"] = doc.attrs.saveDate;
-  const formats = {
-    decimalFormat: doc.attrs.decimalFormat,
-    dateFormat: doc.attrs.dateFormat
-  };
-
-  // Create an array of all the calculation nodes in the document
-  const calcNodes = [];
-  getCalcNodes(Array.isArray(doc) ? doc : doc.content, calcNodes);
-  if (calcNodes.length === 0) { return doc }
-
-  // Get an array of all the URLs called by fetch statements.
-  const urls = [];
-  const callers = [];
-  for (const node of calcNodes) {
-    const entry = node.attrs.entry;
-    if (helpers.fetchRegEx.test(entry)) {
-      let url = helpers.urlFromEntry(entry);
-      if (!/\.(tsv|txt)$/.test(url)) {
-        const pos = url.lastIndexOf("/");
-        url = url.slice(pos + 1);
-        // eslint-disable-next-line no-console
-        console.log(`Warning: Only .tsv and .txt files can be fetched.\n${url}`);
-      } else {
-        urls.push(url);
-        callers.push(node);
-      }
-    } else if (/^function /.test(entry)) {
-      node.attrs = compile(entry, formats);
-      insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat);
-    }
-  }
-
-  if (urls.length > 0) {
-    // We have to fetch some remote data.
-    const texts = await getRemoteTexts(urls);
-    // Fetches are now complete. Load in the data.
-    for (let i = 0; i < texts.length; i++) {
-      const node = callers[i];
-      const entry = node.attrs.entry;
-      // When we modify a node, we are also mutating the container doc.
-      node.attrs = helpers.processFetchedString(entry, texts[i], hurmetVars, formats);
-      if (node.attrs.name) {
-        if (node.attrs.name === "importedParameters") {
-          Object.entries(node.attrs.value).forEach(([key, value]) => {
-            hurmetVars[key] =  value;
-          });
-        } else {
-          insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat);
-        }
-      }
-    }
-  }
-
-  // Fetches, if any, are now complete and loaded into hurmetVars.
-  // Make a pass through the calculation nodes and calculate each result.
-  try {
-    for (const node of calcNodes) {
-      if (node.type === "calculation") {
-        if (!helpers.fetchRegEx.test(node.attrs.entry)) {
-          const entry = node.attrs.entry;
-          let attrs = compile(entry, formats);
-          attrs.displayMode = node.attrs.displayMode;
-          const mustDraw = attrs.dtype && attrs.dtype === dt.DRAWING;
-          if (attrs.rpn || mustDraw) {
-            attrs = attrs.rpn
-              ? evaluate(attrs, hurmetVars, formats)
-              : evaluateDrawing(attrs, hurmetVars, formats);
-          }
-          if (attrs.name) {
-            insertOneHurmetVar(hurmetVars, attrs, null, formats.decimalFormat);
-          }
-          // When we modify a node, we are also mutating the container doc.
-          node.attrs = attrs;
-        }
-      } else if ("dtype" in node.attrs && node.attrs.dtype === dt.SPREADSHEET) {
-        // node is a spreadsheet
-        const sheet = compileSheet(node, formats);
-        const sheetName = sheet.attrs.name;
-        hurmetVars[sheetName] = sheet.attrs;
-        hurmetVars[sheetName].value = {};
-        const numRows = sheet.content.length;
-        const numCols = sheet.content[0].content.length;
-        sheet.attrs.rowMap = {};
-        // Proceed column-wise thru the sheet.
-        for (let j = 0; j < numCols; j++) {
-          for (let i = 1; i < numRows; i++) {
-            const cell = sheet.content[i].content[j].content[0];
-            if (cell.attrs.rpn) {
-              cell.attrs.altresulttemplate = cell.attrs.resulttemplate;
-              cell.attrs = evaluate(cell.attrs, hurmetVars, formats);
-              cell.attrs.display = cell.attrs.alt;
-              if (j === 0) { sheet.attrs.rowMap[cell.attrs.alt] = i; }
-            } else if (j === 0 && typeof cell.attrs.value === "string") {
-              sheet.attrs.rowMap[cell.attrs.value] = i;
-            }
-            hurmetVars[sheetName].value[cell.attrs.name] = cell.attrs;
-          }
-        }
-        node.attrs = sheet.attrs;
-        node.content = sheet.content;
-      }
-    }
-    return doc
-  } catch (err) {
-    console.log(err); // eslint-disable-line no-console
-  }
-}
-
-const getTOCitems$1 = (ast, tocArray, start, end, node) => {
-  if (Array.isArray(ast)) {
-    for (let i = 0; i < ast.length; i++) {
-      getTOCitems$1(ast[i], tocArray, start, end, node);
-    }
-  } else if (ast && ast.type === "heading") {
-    const level = ast.attrs.level;
-    if (start <= level && level <= end) {
-      tocArray.push([headingText(ast.content), level - start]);
-    }
-  } else if (ast.type === "toc") {
-    node.push(ast);
-  // eslint-disable-next-line no-prototype-builtins
-  } else if (ast.hasOwnProperty("content")) {
-    for (let j = 0; j < ast.content.length; j++) {
-      getTOCitems$1(ast.content[j], tocArray, start, end, node);
-    }
-  }
-};
-
-const wrapWithHead = (html, title, attrs) => {
-  title = title ? title : "Hurmet doc";
-  const fontClass = attrs && attrs.fontSize
-    ? { "10": "long-primer", "12": "pica", "18": "great-primer" }[attrs.fontSize]
-    : "long-primer";
-  const head = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>${title}</title>
-  <link rel="stylesheet" href="./styles.css">
-</head>
-<body>
-<article class="ProseMirror ${fontClass}">
-<div class="ProseMirror-setup">
-`;
-  return head + html + "\n</div></article>\n</body>\n</html>"
-};
-
-async function hurmet2html(md, title = "", inHtml = false) {
-  // Convert a Hurmet document to HTML.
-
-  // A Hurmet document is written in Markdown.
-  //     To extent possible, it matches GitHub Flavored Markdown (GFM)
-  //     For extensions beyond GFM, it matches, to the extent possible, Pandoc
-  //     For calculations, Hurmet has its own format.
-
-  // Start by converting the Markdown to an AST that matches
-  // the Hurmet internal data structure.
-  let ast = md2ast(md, inHtml);
-
-  // Populate a Hurmet Table of Contents, if any exists.
-  const tocCapture = /\n *\n{\.toc start=(\d) end=(\d)}\n/.exec(md);
-  if (tocCapture) {
-    const start = Number(tocCapture[1]);
-    const end = Number(tocCapture[2]);
-    const tocArray = [];
-    const node = [];
-    getTOCitems$1(ast, tocArray, start, end, node);
-    node[0].attrs.body = tocArray;
-  }
-
-  // Perform Hurmet calculations.
-  // This is asynchronous because a caclulation may need to fetch some remote data.
-  ast = await updateCalcs(ast);
-
-  // Write the HTML
-  let html = ast2html(ast);
-  // If you edit the next line, do the same in md2html.js.
-  html = html.replace(/<\/a><a href='[^']*'>/g, "");
-
-  if (title.length > 0) {
-    html = wrapWithHead(html, title, ast.attrs);
-  }
-
-  return html
-}
-
-/*
- * teXtoCalc.js
- * This file takes a text string and converts from TeX to Hurmet calculation format.
-*/
-
-// Delimiter types
-const PAREN = 1; // default
-const FRAC = 2;
-const TFRAC = 3;
-const BINARY = 4;
-const ENV = 5;  // environment
-const CASES = 6; // cases environment
-
-const  charAccents = {
-  "\\bar": "\u0304",
-  "\\grave": "\u0300",
-  "\\acute": "\u0301",
-  "\\hat": "\u0302",
-  "\\tilde": "\u0303",
-  "\\dot": "\u0307",
-  "\\ddot": "\u0308",
-  "\\mathring": "\u030A",
-  "\\check": "\u030C",
-  "\\underline": "\u0332",
-  "\\overleftharpoon": "\u20d0",
-  "\\overrightharpoon": "\u20d1",
-  "\\overleftarrow": "\u20d6",
-  "\\vec": "\u20d7",
-  "\\overleftrightarrow": "\u20e1"
-};
-const openParenRegEx = /^ *(?:\\(?:left|big|Big|bigg|Bigg))? *\(/;
-const leadingSpaceRegEx = /^\s+/;
-const trailingSpaceRegEx = / +$/;
-const inlineFracRegEx = /^\/(?!\/)/;
-const ignoreRegEx = /^\\(left(?!\.)|right(?!\.)|middle|big|Big|bigg|Bigg)/;
-const textSubRegEx = /^(?:(?:\\text|\\mathrm)?{([A-Za-z\u0391-\u03c9][A-Za-z0-9\u0391-\u03c9]*)}|{(?:\\text|\\mathrm)\{([A-Za-z\u0391-\u03c9][A-Za-z0-9\u0391-\u03c9]*)}})/;
-const enviroRegEx = /^(?:\\begin\{(?:(align(?:ed)?|align(?:ed)?at|d?array|d?cases|d?rcases|subarray|equation|split|gather(?:ed)?|CD|multline|smallmatrix)|(|p|b|B|v|V)matrix)\}|(\\bordermatrix)\b)/;
-const endEnviroRegEx = /^\\end\{(?:(align(?:ed)?|align(?:ed)?at|d?array|d?cases|d?rcases|subarray|equation|split|gather(?:ed)?|CD|multline|smallmatrix)|(|p|b|B|v|V)matrix)\}/;
-const ifRegEx = /^(?:\\(?:mathrm|text|mathrel{\\mathrm){)?(if|otherwise)\b/;
-// eslint-disable-next-line max-len
-const greekAlternatives = "Alpha|Beta|Gamma|Delta|Epsilon|Zeta|Eta|Theta|Iota|Kappa|Lambda|Mu|Nu|Xi|Omicron|Pi|Rho|Sigma|Tau|Upsilon|Phi|Chi|Psi|Omega|alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|omicron|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega|varphi";
-const greekRegEx = RegExp("^\\\\(" + greekAlternatives + ")\\b");
-const mathOperatorRegEx = /^\\(arcsin|arccos|arctan|arctg|arcctg|arg|ch|cos|cosec|cosh|cot|cotg|coth|csc|ctg|cth|deg|dim|exp|hom|ker|lg|ln|log|sec|sin|sinh|sh|sgn|tan|tanh|tg|th|max|min|gcd)\b/;
-// eslint-disable-next-line max-len
-const bracedCharRegEx = RegExp("^\\{([A-Za-z0-9\u0391-\u03c9]|\\\\(" + greekAlternatives + "))\\}");
-const distanceRegEx = /^[-+]?[0-9.]+(?:em|ex|mu|pt|mm|cm|in|bp|pc|dd|cc|nd|nc|sp)/;
-const greekLetters = {
-  Alpha: "Α",
-  Beta: "Β",
-  Gamma: "Γ",
-  Delta: "Δ",
-  Epsilon: "Ε",
-  Zeta: "Ζ",
-  Eta: "Η",
-  Theta: "Θ",
-  Iota: "Ι",
-  Kappa: "Κ",
-  Lambda: "Λ",
-  Mu: "Μ",
-  Nu: "Ν",
-  Xi: "Ξ",
-  Omicron: "Ο",
-  Pi: "Π",
-  Rho: "Ρ",
-  Sigma: "Σ",
-  Tau: "Τ",
-  Upsilon: "Υ",
-  Phi: "Φ",
-  Chi: "Χ",
-  Psi: "Ψ",
-  Omega: "Ω",
-  alpha: "α",
-  beta: "β",
-  gamma: "γ",
-  delta: "δ",
-  epsilon: "ε",
-  zeta: "ζ",
-  eta: "η",
-  theta: "θ",
-  iota: "ι",
-  kappa: "κ",
-  lambda: "λ",
-  mu: "μ",
-  nu: "ν",
-  xi: "ξ",
-  omicron: "ο",
-  pi: "π",
-  rho: "ρ",
-  sigma: "σ",
-  tau: "τ",
-  upsilon: "υ",
-  phi: "ϕ",
-  chi: "χ",
-  psi: "ψ",
-  omega: "ω",
-  varphi: "φ"
-};
-const boldRegEx = /^\\mathbf{([A-Za-z])}/;
-
-const matrices = {
-  m: ["{:", ":}"],
-  p: ["(", ")"],
-  b: ["[", "]"],
-  B: ["{", "}"],
-  v: ["|", "|"],
-  V: ["‖", "‖"]
-};
-
-const kerns = ["\\kern", "\\mkern", "\\mskip", "\\hskip"];
-
-const donotConvert = ["\\begin{CD}"];
-
-const eatOpenBrace = str => {
-  if (str.length === 0) { return ["", true] }
-  let didNotFindBrace = false;
-  if (str[0] === "{") {
-    str = str.slice(1);
-  } else {
-    didNotFindBrace = true;
-  }
-  str = str.replace(leadingSpaceRegEx, "");
-  return [str, didNotFindBrace]
-};
-
-const eatMatch = (str, match) => {
-  str = str.slice(match[0].length);
-  str = str.replace(leadingSpaceRegEx, "");
-  return str
-};
-
-const unbracedDistance = str => {
-  const match = distanceRegEx.exec(str);
-  if (!match) { return "" }
-  return match[0]
-};
-
-const tex2Calc = (str, displayMode = false) => {
-  let calc = "";
-  let token = {};
-  let prevToken = { input: "", ttype: 50 };
-  const delims = [{ ch: "", pos: -1, type: 0 }] ; // delimiter stack
-  let splitLongVars = true;
-  let waitingForUnbracedArg = false;
-  let justGotUnbracedArg = false;
-
-  // Trim the input string
-  str = str.replace(leadingSpaceRegEx, ""); //  trim leading white space
-  str = str.replace(/\s+$/, ""); //             trim trailing white space
-
-  // Execute the main parse loop.
-  while (str.length > 0 || justGotUnbracedArg) {
-    // Get the next token.
-
-    while (str.length > 0 && str.charAt(0) === "\n") {
-      calc += "\n";
-      str = str.replace(leadingSpaceRegEx, "");
-    }
-
-    if (justGotUnbracedArg) {
-      token = { input: "", output: "", ttype: tt.RIGHTBRACKET, closeDelim: "" };
-      justGotUnbracedArg = false;
-
-    } else if (str.length > 0 && str.charAt(0) === "'") {
-      // The Hurmet lexer will not handle an apostrophe properly. Lex it locally.
-      token = { input: "'", output: "′", ttype: tt.PRIME, closeDelim: "" };
-      str = str.slice(1);
-      str = str.replace(leadingSpaceRegEx, "");
-
-    } else if (inlineFracRegEx.test(str)) {
-      token = { input: "/", output: "\u2215", ttype: tt.MULT, closeDelim: "" };
-      str = str.slice(1);
-      str = str.replace(leadingSpaceRegEx, "");
-
-    } else if (mathOperatorRegEx.test(str)) {
-      const match = mathOperatorRegEx.exec(str);
-      token = { input: match[0], output: match[1], ttype: tt.FUNCTION, closeDelim: "" };
-      str = eatMatch(str, match);
-
-    } else if (greekRegEx.test(str)) {
-      const match = greekRegEx.exec(str);
-      token = {
-        input: match[0],
-        output: greekLetters[match[0].slice(1)],
-        ttype: tt.VAR,
-        closeDelim: ""
-      };
-      str = eatMatch(str, match);
-
-    } else if (delims[delims.length - 1].type === CASES && ifRegEx.test(str)) {
-      const match = ifRegEx.exec(str);
-      const lastChar = calc.trim().slice(-1);
-      if (lastChar === "&" || lastChar === ",") {
-        calc = calc.trim().slice(0, -1);
-      }
-      token = { input: match[0], output: match[1], ttype: tt.LOGIC, closeDelim: "" };
-      str = eatMatch(str, match);
-      if (match[0].indexOf("{") > -1) {
-        str = str.slice(1).trim();
-        const pos = match[0].lastIndexOf("{");
-        if (pos > -1 && pos !== match[0].indexOf("{")) {
-          str = str.slice(1).trim();
-        }
-      }
-
-    } else if (boldRegEx.test(str)) {
-      const match = boldRegEx.exec(str);
-      const codePoint = match[1].codePointAt(0);
-      const offset = codePoint < 91 ? 0x1D3BF : 0x1D3B9;
-      const ch = String.fromCodePoint(codePoint + offset);
-      token = { input: match[0], output: ch, ttype: tt.VAR, closeDelim: "" };
-      str = eatMatch(str, match);
-
-    } else if (enviroRegEx.test(str)) {
-      const match = enviroRegEx.exec(str);
-      if (match[1]) {
-        if (donotConvert.includes(match[0])) { return `"Unable to convert ${match[1]}"` }
-        const posAmp = str.indexOf("&");
-        if (match[1] === "cases" && ifRegEx.test(str.slice(posAmp + 1).trim())) {
-          // Change a TeX cases environment to a Hurmet { if } statement
-          token = { input: match[0], output: "{", ttype: tt.ENVIRONMENT, closeDelim: "}" };
-        } else {
-          token = { input: match[0], output:`\\${match[1]}`,
-            ttype: tt.ENVIRONMENT, closeDelim: ")" };
-        }
-      } else if (match[2]) {
-        const matrixType = match[2] || "m";
-        token = { input: match[0], output: matrices[matrixType][0],
-          ttype: tt.ENVIRONMENT, closeDelim: matrices[matrixType][1] };
-      } else {
-        // \bordermatrix
-        token = { input: match[0], output: match[3], ttype: tt.ENVIRONMENT, closeDelim: ")" };
-      }
-      str = eatMatch(str, match);
-
-    } else if (endEnviroRegEx.test(str)) {
-      const match = endEnviroRegEx.exec(str);
-      token = { input: match[0], output: match[1], ttype: tt.RIGHTBRACKET, closeDelim: "" };
-      str = eatMatch(str, match);
-
-    } else if (ignoreRegEx.test(str)) {
-      const match = ignoreRegEx.exec(str);
-      str = eatMatch(str, match);
-
-    } else {
-      // Many, many symbols are the same in TeX and in Hurmet calcs.
-      // So we can use the Hurmet lexer to identify them.
-      const tkn = lex(str, { decimalFormat: "10000000.", dateFormat: "yyyy-mm-dd" }, prevToken);
-      if (donotConvert.includes(tkn[0])) { return `'"Unable to convert ${tkn[1]}"` }
-      if (waitingForUnbracedArg && (tkn[3] === tt.LONGVAR || tkn[3] === tt.NUM)) {
-        token = { input: tkn[0][0], output: tkn[2][0], ttype: tkn[3], closeDelim: "" };
-        str = str.slice(1);
-      } else {
-        token = { input: tkn[0], output: tkn[2], ttype: tkn[3], closeDelim: tkn[4] };
-        str = str.slice(token.input.length);
-      }
-      str = str.replace(leadingSpaceRegEx, "");
-    }
-
-    switch (token.ttype) {
-      case tt.SPACE: //  spaces and newlines
-        calc += token.output;
-        break
-
-      case tt.MULT: //         inline mult/divide operators, × * · /// ÷
-      case tt.REL: //          relational operators, e.g  < > == →
-      case tt.BIN: //          infix math operators that render but don't calc, e.g. \bowtie
-      case tt.BIG_OPERATOR: // integral, sum, etc
-      case tt.LOGIC: //        if, and, or, ∀, ∃, ∧, ∨, etc
-        calc += token.output + " ";
-        break
-
-      case tt.SUPCHAR:
-        calc = calc.replace(trailingSpaceRegEx, "");
-        calc += token.output;
-        break
-
-      case tt.SUB:
-      case tt.SUP: {
-        calc = calc.replace(trailingSpaceRegEx, "");
-        calc += token.output;
-        if (token.ttype === tt.SUB && textSubRegEx.test(str)) {
-          const match = textSubRegEx.exec(str);
-          const subscript = match[1] ? match[1] : match[2];
-          calc += subscript + " ";
-          str = str.slice(match[0].length);
-        } else if (str.length > 0 && str.charAt(0) === "{") {
-          [str, waitingForUnbracedArg] = eatOpenBrace(str);
-          delims.push({ ch: ")", pos: calc.length, type: PAREN });
-          calc += "(";
-        }
-        break
-      }
-
-      case tt.ADD: { //        infix add/subtract operators, + -
-        const dType = delims[delims.length - 1].type;
-        if (token.input === "&" && (dType === ENV || dType === CASES)) {
-          calc += ", ";   // Write a comma separator for environments
-        } else {
-          calc += token.output + " ";
-        }
-        break
-      }
-
-      case tt.NUM:
-      case tt.ORD:
-      case tt.VAR: {
-        calc += token.output + " ";
-        if (waitingForUnbracedArg) {
-          justGotUnbracedArg = true;
-          waitingForUnbracedArg = false;
-        }
-        break
-      }
-
-      case tt.LONGVAR:
-        calc += splitLongVars ? token.output.split("").join(" ") + " " : token.output;
-        break
-
-      case tt.FACTORIAL:
-      case tt.PRIME:
-        calc = calc.trim() + token.output + " ";
-        break
-
-      case tt.ACCENT: {
-        if (charAccents[token.input] && bracedCharRegEx.test(str)) {
-          delims.push({ ch: charAccents[token.input], pos: calc.length, type: PAREN });
-          [str, waitingForUnbracedArg] = eatOpenBrace(str);
-        } else {
-          calc += token.output;
-          if (str.length > 0 && str.charAt(0) === "{") {
-            calc += "(";
-            delims.push( { ch: ")", pos: calc.length, type: PAREN });
-            [str, waitingForUnbracedArg] = eatOpenBrace(str);
-          }
-        }
-        break
-      }
-
-      case tt.UNARY: {
-        if (verbatims.has(token.input)) {
-          // eslint-disable-next-line no-useless-assignment
-          let arg = "";
-          if (kerns.includes(token.input) && str[0] !== "{") {
-            arg = unbracedDistance(str);
-            str = str.slice(arg.length);
-          } else {
-            arg = verbatimArg(str);
-            str = str.slice(arg.length + 2);
-          }
-          calc += token.input === "\\text"
-            ? '"' + arg + '"'
-            : token.input === "\\mathrm" && arg.length > 1 && arg.indexOf(" ") === -1
-            ? arg
-            : token.input + "(" + arg + ")";
-          if (token.input === "\\mathrm" && waitingForUnbracedArg) {
-            justGotUnbracedArg = true;
-            waitingForUnbracedArg = false;
-          }
-          str = str.replace(leadingSpaceRegEx, "");
-        } else if (token.input === "\\sqrt") {
-          if (str.slice(0, 1) === "[") {
-            const root = verbatimArg(str);
-            str = str.slice(root.length + 2);
-            str = str.replace(leadingSpaceRegEx, "");
-            calc += (root === "3") ? "∛(" : (root === "4") ? "∜(" : `root(${root})(`;
-          } else {
-            calc += "√(";
-          }
-          delims.push({ ch: ")", pos: calc.length, type: PAREN });
-          [str, waitingForUnbracedArg] = eatOpenBrace(str);
-        } else {
-          calc += token.output + "(";
-          if (str.length > 0 && str.charAt(0) === "{") {
-            delims.push({
-              ch: ")",
-              pos: calc.length,
-              type: PAREN
-            });
-          }
-          [str, waitingForUnbracedArg] = eatOpenBrace(str);
-        }
-        break
-      }
-
-      case tt.BINARY: {
-        const pos = calc.length;
-        if (token.input === "\\dfrac" || (token.input === "\\frac" && displayMode)) {
-          calc += "(";
-          delims.push({ ch: ")/(", pos, type: FRAC });
-        } else if (token.input === "\\tfrac" || (token.input === "\\frac" && !displayMode)) {
-          calc += "(";
-          delims.push({ ch: ")//(", pos, type: TFRAC });
-        } else if (verbatims.has(token.input)) {
-          const arg = verbatimArg(str);
-          calc += token.input + "(" + arg + ")(";
-          str = str.slice(arg.length + 2);
-          str = str.replace(leadingSpaceRegEx, "");
-          delims.push({ ch: ")", pos, type: PAREN });
-        } else {
-          calc += token.input + "(";
-          delims.push({ ch: ")(", pos, type: BINARY });
-        }
-        [str, waitingForUnbracedArg] = eatOpenBrace(str);
-        break
-      }
-
-      case tt.DIV: {   // \over, \atop
-        const pos = delims[delims.length - 1].pos;
-        calc = calc.slice(0, pos) + "(" + calc.slice(pos + 1);
-        delims.pop();
-        calc += token.input === "\\over" ? ")/(" : ")" + token.output + "(";
-        delims.push({ ch: ")", pos: calc.length - 1, type: PAREN });
-        break
-      }
-
-      case tt.FUNCTION: {
-        calc += token.output;
-        const pos = calc.length;
-        const match = openParenRegEx.exec(str);
-        if (match) {
-          calc += "(";
-          delims.push({ ch: ")", pos, type: PAREN });
-          str = eatMatch(str, match);
-        } else {
-          calc += " ";
-        }
-        break
-      }
-
-      case tt.LEFTBRACKET:
-      case tt.ENVIRONMENT: {
-        delims.push({
-          ch: token.closeDelim,
-          pos: calc.length,
-          type: token.input === "\\bordermatrix"
-            ? ENV
-            : token.ttype === tt.ENVIRONMENT && token.closeDelim === "}"
-            ? CASES
-            : token.ttype === tt.ENVIRONMENT
-            ? ENV
-            : PAREN
-        });
-        calc += token.output;
-        if (verbatims.has(token.output) ||
-          (token.output === "\\bordermatrix" && str.slice(0, 1) === "[")) {
-          const arg = verbatimArg(str);
-          calc += token.output === "\\bordermatrix" ? "[" + arg + "]" : "(" + arg + ")";
-          str = str.slice(arg.length + 2);
-          str = str.replace(leadingSpaceRegEx, "");
-        }
-        if (token.output === "\\bordermatrix") {
-          str = str.slice(1);
-          str = str.replace(leadingSpaceRegEx, "");
-        }
-        if (token.output.slice(0, 1) === "\\") { calc += "("; }
-        break
-      }
-
-      case tt.SEP: {
-        const inEnvironment = (delims[delims.length - 1].type === ENV);
-        if ((token.input === "\\\\" || token.input === "\\cr") && inEnvironment) {
-          calc += "; ";
-        } else {
-          calc += (token.input === "&" && inEnvironment) ?  ", " : token.output + " ";
-        }
-        break
-      }
-
-      case tt.RIGHTBRACKET: {
-        const delim = delims.pop();
-        calc = calc.replace(trailingSpaceRegEx, "");
-
-        if (delim.type === FRAC || delim.type === TFRAC) {
-          calc += delim.type === FRAC ? ") / (" : ")//(";
-          delims.push({ ch: ")", pos: calc.length - 1, type: PAREN });
-          [str, waitingForUnbracedArg] = eatOpenBrace(str);
-
-        } else if (delim.type === BINARY) {
-          calc += ")(";
-          delims.push({ ch: ")", pos: calc.length - 1, type: PAREN });
-          [str, waitingForUnbracedArg] = eatOpenBrace(str);
-
-        } else {
-          calc += delim.ch + " ";
-        }
-        if (delim.ch === '"' || delim.ch === "") { splitLongVars = true; }
-        break
-      }
-
-      default:
-        calc += token.output;
-    }
-
-    prevToken = cloneToken(token);
-  }
-
-  calc = calc.replace(/ {2,}/g, " "); // Replace multiple spaces with single space.
-  calc = calc.replace(/\s+(?=[_^'′!,;)}\]〗])/g, ""); // Delete spaces before right delims
-  calc = calc.replace(/\s+$/, ""); //                 Delete trailing space
-
-  return calc
-};
-
 /**
  * This is the ParseError class, which is the main error thrown by Temml
  * functions when something has gone wrong. This is used to distinguish internal
@@ -38715,7 +26480,7 @@ const protocolFromUrl = function(url) {
  * 1/6551.6em with our ptPerEm = 10):
  * http://www.ctex.org/documents/shredder/src/texbook.pdf#page=69
  */
-const round = function(n) {
+const round$1 = function(n) {
   return +n.toFixed(4);
 };
 
@@ -41292,7 +29057,7 @@ const calculateSize = function(sizeValue, style) {
       // In TeX, em and ex do not change size in \scriptstyle.
       if (unit === "ex") { number *= 0.431; }
       number = Math.min(number / emScale(style.level), style.maxSize[0]);
-      return { number: round(number), unit: "em" };
+      return { number: round$1(number), unit: "em" };
     }
     case "bp": {
       if (number > style.maxSize[1]) { number = style.maxSize[1]; }
@@ -41306,11 +29071,11 @@ const calculateSize = function(sizeValue, style) {
     case "nc":
     case "sp": {
       number = Math.min(number * ptPerUnit[unit], style.maxSize[1]);
-      return { number: round(number), unit: "pt" }
+      return { number: round$1(number), unit: "pt" }
     }
     case "mu": {
       number = Math.min(number / 18, style.maxSize[0]);
-      return { number: round(number), unit: "em" }
+      return { number: round$1(number), unit: "em" }
     }
     default:
       throw new ParseError("Invalid unit: '" + unit + "'")
@@ -50075,7 +37840,7 @@ const smallCaps = Object.freeze({
 // "mathord" and "textord" ParseNodes created in Parser.js from symbol Groups in
 // src/symbols.js.
 
-const numberRegEx = /^\d(?:[\d,.]*\d)?$/;
+const numberRegEx$3 = /^\d(?:[\d,.]*\d)?$/;
 const latinRegEx = /[A-Ba-z]/;
 const primes = new Set(["\\prime", "\\dprime", "\\trprime", "\\qprime",
   "\\backprime", "\\backdprime", "\\backtrprime"]);
@@ -50132,7 +37897,7 @@ defineFunctionBuilders({
     const variant = getVariant(group, style) || "normal";
 
     let node;
-    if (numberRegEx.test(group.text)) {
+    if (numberRegEx$3.test(group.text)) {
       const tag = group.mode === "text" ? "mtext" : "mn";
       if (variant === "italic" || variant === "bold-italic") {
         return italicNumber(text, variant, tag)
@@ -50357,7 +38122,7 @@ const makeVerb = (group) => group.body.replace(/ /g, group.star ? "\u2423" : "\x
 
 /** Include this to ensure that all functions are defined. */
 
-const functions = _functions;
+const functions$1 = _functions;
 
 /**
  * The Lexer class handles tokenizing the input in various ways. Since our
@@ -50990,7 +38755,7 @@ class MacroExpander {
   isDefined(name) {
     return (
       this.macros.has(name) ||
-      Object.prototype.hasOwnProperty.call(functions, name ) ||
+      Object.prototype.hasOwnProperty.call(functions$1, name ) ||
       Object.prototype.hasOwnProperty.call(symbols.math, name ) ||
       Object.prototype.hasOwnProperty.call(symbols.text, name ) ||
       Object.prototype.hasOwnProperty.call(implicitCommands, name )
@@ -51004,7 +38769,7 @@ class MacroExpander {
     const macro = this.macros.get(name);
     return macro != null
       ? typeof macro === "string" || typeof macro === "function" || !macro.unexpandable
-      : Object.prototype.hasOwnProperty.call(functions, name ) && !functions[name].primitive;
+      : Object.prototype.hasOwnProperty.call(functions$1, name ) && !functions$1[name].primitive;
   }
 }
 
@@ -51489,7 +39254,7 @@ var unicodeSymbols = {
 
 const binLeftCancellers = ["bin", "op", "open", "punct", "rel"];
 const sizeRegEx = /([-+]?) *(\d+(?:\.\d*)?|\.\d+) *([a-z]{2})/;
-const textRegEx = /^ *\\text/;
+const textRegEx$1 = /^ *\\text/;
 
 /**
  * This file contains the parser used to parse out a TeX expression from the
@@ -51678,7 +39443,7 @@ class Parser {
       if (breakOnMiddle && lex.text === "\\middle") {
         break
       }
-      if (breakOnInfix && functions[lex.text] && functions[lex.text].infix) {
+      if (breakOnInfix && functions$1[lex.text] && functions$1[lex.text].infix) {
         break;
       }
       const atom = this.parseAtom(breakOnTokenText);
@@ -51944,7 +39709,7 @@ class Parser {
   ) {
     const token = this.fetch();
     const func = token.text;
-    const funcData = functions[func];
+    const funcData = functions$1[func];
     if (!funcData) {
       return null;
     }
@@ -51977,7 +39742,7 @@ class Parser {
       token,
       breakOnTokenText
     };
-    const func = functions[name];
+    const func = functions$1[name];
     if (func && func.handler) {
       return func.handler(context, args, optArgs);
     } else {
@@ -52419,7 +40184,7 @@ class Parser {
           text
         };
         if ((family === "rel" || family === "bin") && this.prevAtomType === "text") {
-          if (textRegEx.test(loc.lexer.input.slice(loc.end))) {
+          if (textRegEx$1.test(loc.lexer.input.slice(loc.end))) {
             s.needsSpacing = true;  // Fix a MathML bug.
           }
         }
@@ -53038,7 +40803,7 @@ const renderMathInElement = function(elem, options) {
  * Parse and build an expression, and place that expression in the DOM node
  * given.
  */
-let render$1 = function(expression, baseNode, options = {}) {
+let render = function(expression, baseNode, options = {}) {
   baseNode.textContent = "";
   const alreadyInMathElement = baseNode.tagName.toLowerCase() === "math";
   if (alreadyInMathElement) { options.wrap = "none"; }
@@ -53065,7 +40830,7 @@ if (typeof document !== "undefined") {
           "website has a suitable doctype."
       );
 
-    render$1 = function() {
+    render = function() {
       throw new ParseError("Temml doesn't work in quirks mode.");
     };
   }
@@ -53151,7 +40916,7 @@ var temml$1 = {
    * Renders the given LaTeX into MathML, and adds
    * it as a child to the specified DOM node.
    */
-  render: render$1,
+  render,
   /**
    * Renders the given LaTeX into MathML string,
    * for sending to the client.
@@ -53202,97 +40967,6 @@ var temml$1 = {
    * adds a new macro to builtin macro list
    */
   __defineMacro: defineMacro
-};
-
-const getTOCitems = (ast, tocArray, start, end, node) => {
-  if (Array.isArray(ast)) {
-    for (let i = 0; i < ast.length; i++) {
-      getTOCitems(ast[i], tocArray, start, end, node);
-    }
-  } else if (ast && ast.type === "heading") {
-    const level = ast.attrs.level;
-    if (start <= level && level <= end) {
-      tocArray.push([headingText(ast.content), level - start]);
-    }
-  } else if (ast.type === "toc") {
-    node.push(ast);
-  // eslint-disable-next-line no-prototype-builtins
-  } else if (ast.hasOwnProperty("content")) {
-    for (let j = 0; j < ast.content.length; j++) {
-      getTOCitems(ast.content[j], tocArray, start, end, node);
-    }
-  }
-};
-
-async function updateAndSaveWithResults(md) {
-  // Update the calculations of a Hurmet document and return a Hurmet Markdown
-  // document with results written inline.
-
-  // A Hurmet document is written in Markdown.
-  //     To extent possible, it matches GitHub Flavored Markdown (GFM)
-  //     For extensions beyond GFM, it matches, to the extent possible, Pandoc
-  //     For calculations, Hurmet has its own format.
-
-  // Start by converting the Markdown to an AST that matches
-  // the Hurmet internal data structure.
-  let ast = md2ast(md, false);
-
-  // Populate a Hurmet Table of Contents, if any exists.
-  const tocCapture = /\n *\n{\.toc start=(\d) end=(\d)}\n/.exec(md);
-  if (tocCapture) {
-    const start = Number(tocCapture[1]);
-    const end = Number(tocCapture[2]);
-    const tocArray = [];
-    const node = [];
-    getTOCitems(ast, tocArray, start, end, node);
-    node[0].attrs.body = tocArray;
-  }
-
-  // Perform Hurmet calculations.
-  // This is asynchronous because a calculation may need to fetch some remote data.
-  ast = await updateCalcs(ast);
-
-  // Write the updated Markdown
-  const updatedMarkdown = hurmetMarkdownSerializer.serialize(ast, new Map(), [],
-                                                             false, true);
-  return updatedMarkdown
-}
-
-/*
- * This file bundles together and exposes the calculation parts of Hurmet.
- * I use Rollup to create a CJS module from this code.
- * That way, one file can expose the same functionality to (1) the Hurmet.org web page,
- * (2) the REPL in the reference manual, (3) the script that transpiles
- * the Hurmet reference manual from Markdown to HTML, and (4) unit testing.
- *
- * Some of Hurmet’s exported functions are valuable only to the Hurmet.org web page.
- * If you wish to use Hurmet’s math parsing and/or calculation abilities,
- * the two functions you want are:
- *   parse(entry: string, formats?: { decimalFormat: string, dateFormat: string })
- *   calculate(entry: string, vars?: Object, draftMode?: boolean,
- *             formats?: { decimalFormat: string, dateFormat: string })
- *
- *   parse() returns a TeX string.
- *   calculate() returns either a TeX string or a string in Hurmet calculation syntax.
- */
-
-const render = (tex, dom, options) => {
-  temml$1.render(tex, dom, options);
-};
-
-var hurmet = {
-  parse: parse$1,
-  calculate,
-  compile,
-  md2ast,
-  md2html,
-  hurmet2html,
-  scanModule,
-  tex2Calc,
-  updateCalculations,
-  updateAndSaveWithResults,
-  render,
-  Rnl
 };
 
 /* eslint-disable */
@@ -53832,7 +41506,7 @@ const nodes = {
         dom.firstChild.textContent = node.attrs.alt ? node.attrs.alt : node.attrs.entry;
       } else {
         const tex = node.attrs.tex;
-        hurmet.render(tex, dom, {
+        temml$1.render(tex, dom, {
           displayMode: node.attrs.displayMode,
           trust: (context) => context.command === '\\class' && 
             (context.class === "special-fraction" || context.class === "date-result"),
@@ -53879,7 +41553,7 @@ const nodes = {
       } else if ("display" in dom.dataset) {
         delete dom.dataset.display;
       }
-      hurmet.render(tex, dom, { displayMode: node.attrs.displayMode, wrap: "=" });
+      temml$1.render(tex, dom, { displayMode: node.attrs.displayMode, wrap: "=" });
       if (node.attrs.displayMode) {
         dom.style.display = "flex";
         dom.style.justifyContent = "center";
@@ -54602,6 +42276,12476 @@ function openSelectPrompt(title, buttons, callback) {
   wrapper.style.left = ((window.innerWidth - box.width) / 2) + "px";
 }
 
+function insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat) {
+  // hurmetVars is a key:value store of variable names and attributes.
+  // This function is called to insert an assignment into hurmetVars.
+  const formatSpec = hurmetVars.format ? hurmetVars.format.value : "h15";
+
+  if (!Array.isArray(attrs.name)) {
+    // This is the typical case.
+    hurmetVars[attrs.name] = attrs;
+    if (changedVars) {
+      changedVars.add(attrs.name);
+    }
+
+  } else if (attrs.value === null) {
+    for (let i = 0; i < attrs.name.length; i++) {
+      hurmetVars[attrs.name[i]] = { value: null };
+    }
+
+  } else if (isMatrix(attrs)) {
+    // Assign to a matrix of names
+    const isQuantity = Boolean(attrs.dtype & dt.QUANTITY);
+    let resultDisplay = attrs.resultdisplay;
+    resultDisplay = resultDisplay.replace(/\\(begin|end){[bp]matrix}/g, "").trim();
+    const displays = resultDisplay.split(/&|\\\\/);
+    if (attrs.dtype & dt.MATRIX) {
+      // A 2 dimensional matrix.
+      const dtype = attrs.dtype - dt.MATRIX;
+      const numRows = isQuantity ? attrs.value.plain.length : attrs.value.length;
+      const numCols = attrs.name.length / numRows;
+      let iName = 0;
+      for (let i = 0; i < numRows; i++) {
+        for (let j = 0; j < numCols; j++) {
+          const value = isQuantity
+            ? { plain: attrs.value.plain[i][j], inBaseUnits: attrs.value.inBaseUnits[i][j] }
+            : attrs.value[i][j];
+          hurmetVars[attrs.name[i]] = {
+            name: attrs.name[iName],
+            value,
+            resultdisplay: isQuantity
+              ? parse$1(displays[iName].trim() + " '" + attrs.unit + "'")
+              : displays[iName].trim(),
+            expos: attrs.expos,
+            unit: isQuantity ? attrs.unit : undefined,
+            dtype
+          };
+          if (changedVars) { changedVars.add(attrs.name[i]); }
+          iName += 1;
+        }
+      }
+    } else {
+      // Assign to a vector of names.
+      const isColumn = Boolean(attrs.dtype & dt.COLUMNVECTOR);
+      const dtype = attrs.dtype - (isColumn ? dt.COLUMNVECTOR : dt.ROWVECTOR);
+      for (let i = 0; i < attrs.name.length; i++) {
+        const value = isQuantity
+          ? { plain: attrs.value.plain[i], inBaseUnits: attrs.value.inBaseUnits[i] }
+          : attrs.value[i];
+        hurmetVars[attrs.name[i]] = {
+          name: attrs.name[i],
+          value,
+          resultdisplay: isQuantity
+            ? parse$1(displays[i].trim() + " '" + attrs.unit + "'")
+            : displays[i].trim(),
+          expos: attrs.expos,
+          unit: isQuantity ? attrs.unit : undefined,
+          dtype
+        };
+        if (changedVars) { changedVars.add(attrs.name[i]); }
+      }
+    }
+
+  // From this point forward, we're dealing with multiple assignment
+  } else if (attrs.dtype & dt.MAP) {
+    const unit = attrs.unit;
+    const unitName = unit && unit.name ? unit.name : undefined;
+    const dtype = attrs.dtype - dt.MAP;
+    let i = 0;
+    if (attrs.dtype & dt.QUANTITY) {
+      for (const value of attrs.value.data.plain) {
+        const result = {
+          value: { plain: value },
+          expos: attrs.expos,
+          factor: attrs.factor,
+          dtype
+        };
+        result.resultdisplay = format(value, formatSpec, decimalFormat);
+        if (unitName) { result.resultdisplay += " " + unitTeXFromString(unitName); }
+        hurmetVars[attrs.name[i]] = result;
+        if (changedVars) { changedVars.add(attrs.name[i]); }
+        i += 1;
+      }
+      i = 0;
+      for (const value of attrs.value.data.inBaseUnits) {
+        hurmetVars[attrs.name[i]].value.inBaseUnits = value;
+        i += 1;
+      }
+    } else {
+      for (const value of attrs.value.data) {
+        const result = { value, expos: attrs.expos, factor: attrs.factor, dtype };
+        result.resultdisplay = Rnl.isRational(value)
+          ? format(value, formatSpec, decimalFormat)
+          : String(value);
+        if (unitName) { result.resultdisplay += " " + unitTeXFromString(unitName); }
+        hurmetVars[attrs.name[i]] = result;
+        if (changedVars) { changedVars.add(attrs.name[i]); }
+        i += 1;
+      }
+    }
+  } else if (attrs.dtype === dt.DATAFRAME) {
+    const isSingleRow = attrs.value.data[0].length === 1;
+    for (let i = 0; i < attrs.name.length; i++) {
+      let dtype = attrs.value.dtype[i];
+      let value = isSingleRow ? undefined : [];
+      for (let j = 0; j < attrs.value.data[0].length; j++) {
+        const datum = attrs.value.data[i][j];
+        const val = (dtype & dt.RATIONAL) ? Rnl.fromString(datum) : datum;
+        if (isSingleRow) {
+          value = val;
+        } else {
+          value.push(val);
+        }
+      }
+      if (!isSingleRow) { dtype += dt.COLUMNVECTOR; }
+      const result = {
+        value,
+        unit: attrs.unit[attrs.value.units[i]],
+        dtype
+      };
+      if ((dtype & dt.RATIONAL) && isSingleRow) {
+        result.resultdisplay = parse$1(format(value));
+        if (result.unit && result.unit.name) {
+          result.resultdisplay += " " + parse$1(`'${result.unit.name}'`);
+        }
+      } else if (dtype & dt.RATIONAL) {
+        result.resultdisplay = Matrix.display({ value, dtype }, formatSpec, decimalFormat)
+            + parse$1(`'${attrs.value.units[i]}'`);
+      } else {
+        result.resultdisplay = parse$1(value);
+      }
+      if (attrs.value.units[i]) {
+        result.value = { plain: result.value };
+        const unit = attrs.unit[attrs.value.units[i]];
+        result.value.inBaseUnits = isSingleRow
+          ? Rnl.multiply(Rnl.add(result.value.plain, unit.gauge), unit.factor)
+          : result.value.plain.map(e => Rnl.multiply(Rnl.add(e, unit.gauge), unit.factor));
+        result.expos = unit.expos;
+      }
+
+      hurmetVars[attrs.name[i]] = result;
+      if (changedVars) { changedVars.add(attrs.name[i]); }
+    }
+  } else if (attrs.dtype === dt.TUPLE) {
+    let i = 0;
+    for (const value of attrs.value.values()) {
+      if (value.name) { value.name = attrs.name[i]; }
+      hurmetVars[attrs.name[i]] = value;
+      if (changedVars) { changedVars.add(attrs.name[i]); }
+      i += 1;
+    }
+  } else if (attrs.dtype === dt.MODULE) {
+    if (attrs.name.length !== attrs.value.length) {
+      return errorOprnd("MULT_MIS")
+    } else {
+      let i = 0;
+      for (const value of attrs.value.values()) {
+        const result = clone(value);
+        hurmetVars[attrs.name[i]] = result;
+        if (changedVars) { changedVars.add(attrs.name[i]); }
+        i += 1;
+      }
+    }
+  } else ;
+}
+
+/*
+ * This file deals with Hurmet maps, which are similar to hash maps.
+ * In a map, every value is of the same data type and has the same unit-of-measure.
+ */
+
+const checkUnitEquality = (u1, u2) => {
+  let x;
+  let y;
+  if (u1.expos && u2.expos) {
+    x = u1.expos;
+    y = u2.expos;
+  } else {
+    x = u1;
+    y = u2;
+  }
+  if (Array.isArray(x)) {
+    if (Array.isArray(y)) {
+      if (x.length !== y.length) { return false }
+      x.forEach((e, i) => { if (e !== y[i]) { return false } });
+      return true
+    } else {
+      return false
+    }
+  } else {
+    return x === y
+  }
+};
+
+const append = (o1, o2, shape1, shape2) => {
+  let map;
+  let scalar;
+  if (o1.dtype & dt.MAP) {
+    if (shape2 !== "scalar") { return errorOprnd("BAD_APPEND", shape2) }
+    map = o1;
+    scalar = o2;
+  } else {
+    if (shape1 !== "scalar") { return errorOprnd("BAD_APPEND", shape1) }
+    map = o2;
+    scalar = o1;
+  }
+  if (!(map.dtype & scalar.dtype)) { errorOprnd("MAP_APPEND"); }
+  if (!checkUnitEquality(map.unit, scalar.unit)) { errorOprnd("UNIT_APEND"); }
+  map.value.set(scalar.name, scalar.value);
+  return map
+};
+
+const convertFromBaseUnits = (data, gauge, factor) => {
+  data = data.map(column => Rnl.isRational(column[0])
+    ? column.map(e => Rnl.divide(e, factor))
+    : column
+  );
+  if (!Rnl.isZero(gauge)) {
+    data = data.map(column => Rnl.isRational(column[0])
+      ? column.map(e => Rnl.subtract(e, gauge))
+      : column
+    );
+  }
+  return data
+};
+
+const convertToBaseUnits = (data, gauge, factor) => {
+  if (!Rnl.isZero(gauge)) {
+    data = data.map(column => Rnl.isRational(column[0])
+      ? column.map(e => Rnl.add(e, gauge))
+      : column
+    );
+  }
+  data = data.map(column => Rnl.isRational(column[0])
+    ? column.map(e => Rnl.multiply(e, factor))
+    : column
+  );
+  return data
+};
+
+const range = (map, keys) => {
+  let unit = clone(map.unit);
+  const [rowList, columnList, iStart, iEnd] = identifyRange(map, keys);
+  if (rowList.length === 0 && iStart === iEnd && columnList.length === 1) {
+    // Return one value.
+    const value = map.value.data[columnList[0]][iStart];
+    return { value, unit, dtype: map.dtype - dt.MAP }
+
+  } else if (columnList.length === 1) {
+    // Return data from one column, in a column vector or a quantity
+    const value = map.value.data[columnList[0]].slice(iStart, iEnd + 1);
+    const dtype = columnList[0] === 0
+      ? dt.COLUMNVECTOR + (typeof value[0] === "string" ? dt.STRING : map.dtype - dt.MAP)
+      : map.dtype - dt.MAP + dt.COLUMNVECTOR;
+    if (columnList[0] === -1) { unit = null; }
+    return { value, unit, dtype }
+
+  } else {
+    // Return a map.
+    const headings = [];
+    const data = [];
+    const columnMap = Object.create(null);
+    const rowMap = rowList.length === 0 ? false : Object.create(null);
+    for (let j = 0; j < columnList.length; j++) {
+      headings.push(map.value.headings[columnList[j]]);
+      columnMap[map.value.headings[j]] = j;
+      if (rowList.length > 0) {
+        const elements = [];
+        for (let i = 0; i < rowList.length; i++) {
+          const rowName = rowList[i];
+          elements.push(map.value.data[columnList[j]][map.value.rowMap[rowName]]);
+          rowMap[rowName] = i;
+        }
+        data.push(elements);
+      } else {
+        data.push(map.value.data[columnList[j]].slice(iStart, iEnd + 1));
+      }
+    }
+    return {
+      value: { data, headings, columnMap, rowMap },
+      unit,
+      dtype: map.dtype
+    }
+  }
+};
+
+const map = Object.freeze({
+  append,
+  convertFromBaseUnits,
+  convertToBaseUnits,
+  range
+});
+
+const endRegEx = /_end$/;
+const alphaRegEx = /^[A-Z]$/;
+const cellParts = /^([^\d]+)(\d+)?$/;
+const intRegEx = /^\d+$/;
+
+function propertyFromDotAccessor(parent, index, unitAware) {
+  const property = Object.create(null);
+  if (parent.dtype & dt.MAP) {
+    return map.range(parent, [index], unitAware)
+
+  } else if (parent.dtype & dt.DATAFRAME) {
+    return DataFrame.range(parent, [index], unitAware)
+
+  } else if (parent.dtype === dt.SPREADSHEET) {
+    let key = index.value;
+    if (endRegEx.test(key)) {
+      // Return the cell at the bottom of a column
+      key = key.slice(0, -4);
+      if (!alphaRegEx.test(key)) { key = parent.columnMap[key]; }
+      key = key + Object.keys(parent.rowMap).length;
+      return fromAssignment(parent.value[key], unitAware)
+    }
+    if (key in parent.columnMap || alphaRegEx.test(key)) {
+      // Return data from one column, in a column vector
+      const colIndex = alphaRegEx.test(key) ? key : parent.columnMap[key];
+      const v = [];
+      let unit = null;
+      // eslint-disable-next-line no-useless-assignment
+      let dtype = null;
+      if (parent.value[colIndex + "1"].dtype & dt.RATIONAL) {
+        for (let i = 1; i < parent.numRows; i++) {
+          const cell = parent.value[colIndex + i];
+          if (!(cell.dtype & dt.RATIONAL)) {
+            return errorOprnd("NANEL", cell.name)
+          }
+          if (unitAware) {
+            v.push(cell.value.inBaseUnits);
+          } else {
+            v.push(cell.value.plain);
+          }
+        }
+        unit = unitAware
+          ? parent.units[parent.unitMap[colIndex.codePointAt(0) - 65]]
+          : allZeros;
+        dtype = dt.RATIONAL + dt.COLUMNVECTOR;
+      } else {
+        for (let i = 1; i < parent.numRows; i++) {
+          v.push(parent.value[colIndex + i].value);
+        }
+        dtype = parent.value[colIndex + "1"].dtype + dt.COLUMNVECTOR;
+      }
+      return { value: v, unit, dtype }
+    } else {
+      const parts = key.match(cellParts);
+      const colIndex = parts[1];
+      if (parts[2]) {
+        return fromAssignment(parent.value[colIndex + parts[2]], unitAware)
+      } else {
+        return errorOprnd("BAD_SHT_KEY", key)
+      }
+    }
+
+  } else if ((parent.dtype === dt.STRING || (parent.dtype & dt.ARRAY)) &&
+    index.dtype === dt.RATIONAL) {
+    const indexVal = Rnl.toNumber(index.value);
+    property.value = parent.value.slice(indexVal - 1, indexVal);
+    property.unit = parent.unit;
+    property.dtype = parent.dtype;
+    return property
+
+  } else if ((parent.dtype === dt.STRING || (parent.dtype & dt.ARRAY)) &&
+        index.dtype === dt.RANGE) {
+    const start = index.value[0] - 1;
+    const step = index.value[1];
+    const end = (index.value[2] === "∞") ? parent.value.length : index.value[2];
+    property.unit = parent.unit;
+    property.dtype = parent.dtype;
+    if (step === 1) {
+      property.value = parent.value.slice(start, end);
+    } else {
+      property.value = [];
+      for (let j = start; j < end; j += step) {
+        property.value.push(parent.value[j]);
+      }
+    }
+    return property
+
+  } else if (parent.dtype === dt.MODULE) {
+    // parent is a module and index has a value assigned to it.
+    return fromAssignment(parent.value[index.value], unitAware)
+
+  } else {
+    return errorOprnd("NO_PROP", parent.name)
+  }
+}
+
+const cellOprnd = (sheet, args, unitAware) => {
+  if (args.length === 1) {
+    let key = args[0].value;
+    if (endRegEx.test(key)) {
+      key = key.slice(0, 1) + Object.keys(sheet.rowMap).length;
+    }
+    return fromAssignment(parent.value[key], unitAware)
+  }
+  let cellName = "";
+  const key0 = args[0].value;
+  const key1 = args[1].value;
+  if (sheet.columnMap[key0] || alphaRegEx.test(key0)) {
+    cellName = sheet.columnMap[key0] ? sheet.columnMap[key0] : key0;
+    if (sheet.rowMap[key1]) {
+      cellName += sheet.rowMap[key1];
+    } else if (intRegEx.test(key1)) {
+      cellName += key1;
+    } else ;
+  } else if (sheet.columnMap[key1]  || alphaRegEx.test(key0)) {
+    cellName = sheet.columnMap[key1] ? sheet.columnMap[key1] : key1;
+    if (sheet.rowMap[key0]) {
+      cellName += sheet.rowMap[key0];
+    } else if (intRegEx.test(key0)) {
+      cellName += key0;
+    } else ;
+  } else ;
+  return fromAssignment(sheet.value[cellName], unitAware)
+};
+
+const display = (tuple, formatSpec = "h3", decimalFormat = "1,000,000.") => {
+  if (tuple.size === 0) { return "" }
+  let str = "\\begin{array}{c}";
+
+  let haveUnits = false;
+  for (const attrs of tuple.values()) {
+    if (attrs.unit && attrs.unit.name) { haveUnits = true; break }
+  }
+
+  // Write the unit names
+  if (haveUnits) {
+    let rowTex = "";
+    for (const attrs of tuple.values()) {
+      if (attrs.unit && attrs.unit.name) {
+        rowTex += unitTeXFromString(attrs.unit.name).replace("\\;\\, ", "");
+      }
+      rowTex += "&";
+    }
+    str += rowTex.slice(0, -1) + " \\\\ ";
+    str += "\\hline ";
+  }
+
+  // Write the data
+  let botRow = "";
+  for (const attrs of tuple.values()) {
+    botRow += format(attrs.value, formatSpec, decimalFormat) + " & ";
+  }
+  str += botRow.slice(0, -1);
+  str += "\\end{array}";
+  return str
+};
+
+const displayAlt = (tuple, formatSpec = "h3") => {
+  if (tuple.size === 0) { return "" }
+  let str = "``";
+
+  let haveUnits = false;
+  for (const attrs of tuple.values()) {
+    if (attrs.unit && attrs.unit.name) { haveUnits = true; break }
+  }
+
+  // Write the unit names
+  if (haveUnits) {
+    let rowTex = "";
+    for (const attrs of tuple.values()) {
+      if (attrs.unit && attrs.unit.name) {
+        rowTex += attrs.unit.name;
+      }
+      rowTex += "\t";
+    }
+    str += rowTex.slice(0, -1) + "\n";
+  }
+
+  // Write the data
+  let botRow = "";
+  for (const attrs of tuple.values()) {
+    botRow += format(attrs.value, formatSpec, "100000.") + "\t";
+  }
+  str += botRow.slice(0, -1);
+  return str + "``"
+};
+
+const Tuple = Object.freeze({
+  display,
+  displayAlt
+});
+
+// A result has been sent here from evaluate.js or updateCalculations.js.
+// Format the result for display.
+
+const numMisMatchError = _ => {
+  const str = "Error. Mismatch in number of multiple assignment.";
+  return [`\\textcolor{firebrick}{\\text{${str}}}`, str]
+};
+const percentRegEx = / *\\⦂/;
+const times100 = n => Rnl.multiply(n, Rnl.fromNumber(100));
+const testRegEx$1 = /^@{1,2}test /;
+const compRegEx = /\u00a0([⩵≠><>≤≥∋∈∉∌⊂⊃⊄⊅]|==|in|!in|!=|=>|<=)$/;
+const negatedComp = {
+  "⩵": ["≠", "≠"],
+  "==": ["≠", "≠"],
+  "≠": ["==", "=="],
+  ">": ["\\ngtr ", "!>"],
+  "<": ["\\nless ", "!<"],
+  "≤": ["\\nleq ", "!≤"],
+  "≥": ["\\ngeq ", "!≥"],
+  "∋": ["∌", "∌"],
+  "∈": ["∉", "∉"],
+  "⊂": ["⊄", "⊄"],
+  "⊃": ["⊅", "⊅"],
+  "∉": ["∈", "∈"],
+  "∌": ["∋", "∋"],
+  "⊄": ["⊂", "⊂"],
+  "⊅": ["⊃", "⊃"],
+  "in": ["∉", "∉"],
+  "!in": ["in", "in"],
+  "!=": ["==", "=="],
+  "=>": ["\\ngeq ", "!≥"],
+  "<=": ["\\ngeq ", "!≥"]
+};
+
+const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAware) => {
+  if (!result) { return stmt }
+  const decimalFormat = formats.decimalFormat;
+
+  if (result.dtype === dt.DRAWING) {
+    stmt.resultdisplay = result.value;
+    delete stmt.resultdisplay.temp;
+    return stmt
+  }
+
+  const isPercent = (stmt.unit && stmt.unit.name && stmt.unit.name === "\\⦂");
+
+  const numNames = !stmt.name
+    ? 0
+    : !Array.isArray(stmt.name)
+    ? 1
+    : stmt.name.length;
+
+  if (stmt.resulttemplate.indexOf("?") > -1 ||
+      stmt.resulttemplate.indexOf("!") > -1 ||
+      stmt.resulttemplate.indexOf("@") > -1 ||
+      stmt.resulttemplate.indexOf("%") > -1) {
+    stmt.value = result.value;
+    /* eslint-disable no-useless-assignment */
+    let resultDisplay = "";
+    let altResultDisplay = "";
+    if (stmt.resulttemplate.indexOf("!") > -1) {
+      // Suppress display of the result
+      resultDisplay = "";
+      altResultDisplay = "";
+      /* eslint-enable no-useless-assignment */
+      return stmt
+
+    } else if (result.dtype & dt.BOOLEAN && testRegEx$1.test(stmt.entry) &&
+      compRegEx.test(stmt.rpn)) {
+      if (testValue(result) === true) {
+        resultDisplay = parse$1(stmt.entry.replace(testRegEx$1, "")) +
+          ",\\text{ ok }✓";
+        altResultDisplay = stmt.entry.replace(testRegEx$1, "") + ", ok ✓";
+      } else {
+        const op = compRegEx.exec(stmt.rpn)[0].slice(1);
+        const negOp = negatedComp[op];
+        if (assert) {
+          const assertStr = assert.value.replace(/\.$/, "");
+          const addendum = stmt.entry.replace(testRegEx$1, "").replace(op, negOp[0]);
+          resultDisplay = "\\colorbox{Salmon}{" + assertStr + ", but $" +
+              parse$1(addendum) + "$}";
+          altResultDisplay = assertStr + ", but " +
+              stmt.entry.replace(testRegEx$1, "").replace(op, negOp[1]);
+        } else {
+          resultDisplay = parse$1(stmt.entry.replace(testRegEx$1, "").replace(op, negOp[0])) +
+              ",\\colorbox{Salmon}{ n.g.}";
+          altResultDisplay = stmt.entry.replace(testRegEx$1, "").replace(op, negOp[1]) +
+              ", n.g.";
+        }
+        // eslint-disable-next-line no-console
+        console.log(altResultDisplay);
+      }
+
+    } else if (isMatrix(result)) {
+      resultDisplay = Matrix.display((isUnitAware || result.value.plain)
+          ? { value: result.value.plain, dtype: result.dtype }
+          : isPercent && isVector(result)
+          ? { value: result.value.map(e => times100(e)), dtype: result.dtype }
+          : isPercent
+          ? { value: result.value.map(row => row.map(e => times100(e))), dtype: result.dtype }
+          : result,
+        formatSpec,
+        decimalFormat
+      );
+      altResultDisplay = Matrix.displayAlt((isUnitAware || result.value.plain)
+          ? { value: result.value.plain, dtype: result.dtype }
+          : isPercent && isVector(result)
+          ? { value: result.value.map(e => times100(e)), dtype: result.dtype }
+          : isPercent
+          ? { value: result.value.map(row => row.map(e => times100(e))), dtype: result.dtype }
+          : result,
+        formatSpec,
+        decimalFormat
+      );
+      if (isPercent) {
+        resultDisplay += "\\%";
+        altResultDisplay += "%";
+      }
+
+    } else if (result.dtype === dt.DATAFRAME) {
+      if (numNames > 1 && numNames !== result.value.data.length) {
+        [resultDisplay, altResultDisplay] = numMisMatchError();
+      } else {
+        const omitHeading = stmt.name && Array.isArray(stmt.name) && stmt.name.length > 1;
+        resultDisplay = DataFrame.display(result.value, formatSpec,
+                                          decimalFormat, omitHeading);
+        altResultDisplay = DataFrame.displayAlt(result.value, formatSpec, omitHeading);
+      }
+
+    } else if (result.dtype & dt.MAP) {
+      let localValue;
+      if (isUnitAware || result.value.data.plain) {
+        localValue = clone(result.value);
+        localValue.data = result.value.data.plain;
+      } else {
+        localValue = result.value;
+      }
+      const omitHeading = stmt.name && Array.isArray(stmt.name) && stmt.name.length > 1;
+      resultDisplay = DataFrame.display(localValue, formatSpec, decimalFormat, omitHeading);
+      altResultDisplay = DataFrame.displayAlt(localValue, formatSpec,
+                                              decimalFormat, omitHeading);
+
+    } else if (result.dtype === dt.TUPLE) {
+      if (numNames > 1 && numNames !== result.value.size) {
+        [resultDisplay, altResultDisplay] = numMisMatchError();
+      } else {
+        resultDisplay = Tuple.display(result.value, formatSpec, decimalFormat);
+        altResultDisplay = Tuple.displayAlt(result.value, formatSpec);
+      }
+
+    } else if (result.dtype & dt.STRING) {
+      resultDisplay = "\\text{" + addTextEscapes(result.value) + "}";
+      if (result.unit) {
+        // This is a hack to return a color
+        resultDisplay = `\\textcolor{${result.unit}}{${resultDisplay}}`;
+      }
+      altResultDisplay = result.value;
+
+    } else if (result.dtype & dt.RICHTEXT) {
+      resultDisplay = parse$1(result.value, formats, false);
+      altResultDisplay = result.value;
+
+    } else if (result.dtype & dt.BOOLEAN) {
+      resultDisplay = "\\text{" + result.value + "}";
+      altResultDisplay = String(result.value);
+
+    } else if (result.dtype === dt.COMPLEX) {
+      const z = result.value;
+      [resultDisplay, altResultDisplay] = Cpx.display(z, formatSpec, decimalFormat);
+
+    } else if (result.dtype === dt.DATE) {
+      resultDisplay = formatDate(result.value, formats.dateFormat);
+      if (resultDisplay.dtype && resultDisplay.dtype === dt.ERROR) {
+        resultDisplay = "\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}";
+        altResultDisplay = resultDisplay.value;
+      } else {
+        altResultDisplay = resultDisplay.slice(26, -2);
+      }
+
+    } else if (result.value.plain) {
+      resultDisplay = format(result.value.plain, formatSpec, decimalFormat);
+      if (resultDisplay.dtype && resultDisplay.dtype === dt.ERROR) {
+        resultDisplay = "\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}";
+        altResultDisplay = resultDisplay.value;
+      } else {
+        altResultDisplay = resultDisplay.replace(/{,}/g, ",").replace(/\\/g, "");
+      }
+
+    } else if (Rnl.isRational(result.value)) {
+      resultDisplay = isPercent
+        ? format(times100(result.value), formatSpec, decimalFormat) + "\\%"
+        : format(result.value, formatSpec, decimalFormat);
+      if (resultDisplay.dtype && resultDisplay.dtype === dt.ERROR) {
+        resultDisplay = "\\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}";
+        altResultDisplay = resultDisplay.value;
+      } else {
+        altResultDisplay = resultDisplay.replace(/{,}/g, ",").replace(/\\/g, "");
+      }
+
+    } else if (result.dtype === dt.IMAGE) {
+      return stmt
+
+    } else {
+      resultDisplay = result.value;
+      altResultDisplay = resultDisplay;
+
+    }
+
+    // Write the string to be plugged into echos of dependent nodes
+    const resultCapture = /(\? *\??|@ *@?|%%?)/.exec(stmt.resulttemplate);
+    stmt.resultdisplay = stmt.resulttemplate.slice(0, resultCapture.index) + resultDisplay +
+      stmt.resulttemplate.slice(resultCapture.index + resultCapture[0].length);
+
+    // Write the TeX for this node
+    if (stmt.resulttemplate.indexOf("@") > -1) {
+      stmt.tex = stmt.resultdisplay;
+      stmt.displaySelector = stmt.altresulttemplate.indexOf("@@") > -1 ? "@@" : "@";
+      if (testRegEx$1.test(stmt.entry)) {
+        stmt.md = stmt.entry + ` 〔${altResultDisplay}〕`;
+      } else {
+        const pos = stmt.entry.lastIndexOf(stmt.displaySelector);
+        stmt.md = stmt.entry.slice(0, pos) + `〔${altResultDisplay}〕`
+            + stmt.entry.slice(pos + stmt.displaySelector.length);
+      }
+      stmt.alt = stmt.altresulttemplate.replace(/@@?/, altResultDisplay);
+    } else if (stmt.resulttemplate.indexOf("?") > -1) {
+      let pos = stmt.tex.lastIndexOf("?");
+      stmt.tex = stmt.tex.slice(0, pos).replace(/\? *$/, "") + resultDisplay + stmt.tex.slice(pos + 1);
+      stmt.displaySelector = stmt.altresulttemplate.indexOf("??") > -1 ? "??" : "?";
+      pos = stmt.alt.lastIndexOf(stmt.displaySelector);
+      stmt.md = stmt.alt.slice(0, pos) + `〔${altResultDisplay}〕`
+          + stmt.alt.slice(pos + stmt.displaySelector.length);
+      stmt.alt = stmt.alt.slice(0, pos) + altResultDisplay
+          + stmt.alt.slice(pos + stmt.displaySelector.length);
+    } else if (stmt.resulttemplate.indexOf("%") > -1) {
+      let pos = stmt.tex.lastIndexOf("%");
+      stmt.tex = stmt.tex.slice(0, pos).replace(/% *$/, "") + resultDisplay + stmt.tex.slice(pos + 1);
+      stmt.displaySelector = stmt.altresulttemplate.indexOf("%%") > -1 ? "%%" : "%";
+      pos = stmt.alt.lastIndexOf(stmt.displaySelector);
+      stmt.md = stmt.alt.slice(0, pos) + `〔${altResultDisplay}〕`
+          + stmt.alt.slice(pos + stmt.displaySelector.length);
+      stmt.alt = stmt.alt.slice(0, pos) + altResultDisplay
+          + stmt.alt.slice(pos + stmt.displaySelector.length);
+    }
+  }
+  stmt.tex = stmt.tex.replace(percentRegEx, "");
+  if (stmt.md) { stmt.md = stmt.md.replace(percentRegEx, ""); }
+  stmt.alt = stmt.alt.replace(percentRegEx, "");
+  return stmt
+};
+
+const testValue = oprnd => {
+  if (isVector(oprnd)) {
+    for (let i = 0; i < oprnd.value.length; i++) {
+      if (!oprnd.value[i]) { return false }
+    }
+  } else if (isMatrix(oprnd)) {
+    for (let i = 0; i < oprnd.value.length; i++) {
+      for (let j = 0; j < oprnd.value[0].length; j++) {
+        if (!oprnd.value[i][j]) { return false }
+      }
+    }
+  } else if (oprnd.dtype & dt.MAP) {
+    for (let j = 0; j < oprnd.value.data.length; j++) {
+      for (let i = 0; i < oprnd.value.data[0].length; i++) {
+        if (!oprnd.value.data[j][i]) { return false }
+      }
+    }
+  } else {
+    return oprnd.value
+  }
+  return true
+};
+
+/*
+ *  This module receives a TeX template string and a object containing Hurmet variables.
+ *  At each location where the template contains a variable, this module plugs in a TeX string
+ *  of the variable's value, for display in the Hurmet blue echo..
+ */
+
+const varRegEx = /〖[^〗]*〗/;
+const openParenRegEx$1 = /(?:[([{|‖]|[^\\][,;:](?:\\:)?)$/;
+const placeHolderRegEx = /^\\colorbox{aqua}{\$/;
+
+const plugValsIntoEcho = (str, vars, unitAware, formatSpec, formats) => {
+  // For each variable name in the echo string, substitute a value.
+  // The parser surrounded those names with 〖〗 delimiters.
+  let match;
+  while ((match = varRegEx.exec(str)) !== null) {
+    const varName = match[0].replace(/[〖〗()]/g, "").trim().replace(/'/g, "′");
+    const matchLength = match[0].length;
+    const pos = match.index;
+    let hvar;
+    // eslint-disable-next-line no-useless-assignment
+    let display = "";
+
+    if (varName.indexOf(".") > -1) {
+      // Object with a dot accessor.
+      const names = varName.split(".");
+      const parentName = names[0];
+      if (!vars[parentName]) { return errorOprnd("V_NAME", parentName) }
+      hvar = vars[parentName];
+      if (hvar.dtype === dt.DATAFRAME && names.length === 2) {
+        // This is a dataframe.dict. I don't want to write an entire dictionary into
+        // a blue echo, so display just the names.
+        display = "\\mathrm{" + vars[names[0]].name + "{.}\\mathrm{" + names[1] + "}";
+        return str.substring(0, pos) + display + str.substring(pos + matchLength)
+      } else {
+        // we want to display the property value.
+        for (let i = 1; i < names.length; i++) {
+          const propName = names[i].replace("}", "").replace("\\mathrm{", "").trim();
+          const indexOprnd = { value: propName, unit: null, dtype: dt.STRING };
+          hvar = propertyFromDotAccessor(hvar, indexOprnd, vars);
+          if (!hvar) { return errorOprnd("V_NAME", propName) }
+          const stmt = { resulttemplate: "@", altresulttemplate: "@" };
+          hvar.resultdisplay = formatResult(stmt, hvar, formatSpec, null,
+                formats).resultdisplay;
+        }
+      }
+    } else if (!vars[varName] && varName === "T") {
+      // Transposed matrix
+      hvar = { dtype: dt.RATIONAL, resultdisplay: "\\text{T}" };
+    } else if (varName === "e" && /^\^/.test(str.slice(pos + 3).trim())) {
+      // e^x
+      str = str.substring(0, pos) + "e" + str.substring(pos + matchLength);
+      continue
+    } else if (varName === "j") {
+      // √(-1)
+      str = str.substring(0, pos) + "j" + str.substring(pos + matchLength);
+      continue
+    } else if (!vars[varName]) {
+      return errorOprnd("V_NAME", varName)
+    } else {
+      // Get a clone in order to avoid mutating the inner properties of vars.
+      hvar = {
+        dtype: vars[varName].dtype,
+        resultdisplay: vars[varName].resultdisplay
+      };
+      if (placeHolderRegEx.test(hvar.resultdisplay)) {
+        // Remove colorbox and $ delimiters
+        hvar.resultdisplay = hvar.resultdisplay.slice(17, -2).trim();
+      }
+    }
+
+    if (!hvar || !hvar.resultdisplay) {
+      const insert = (varName) ? varName : "?";
+      return errorOprnd("NULL", insert)
+    } else if (hvar.error) {
+      return errorOprnd("NULL", varName)
+    }
+
+    let needsParens = true; // default
+    if (isMatrix(hvar) || (hvar.dtype & dt.DATAFRAME)) { needsParens = false; }
+    if (unitAware && (hvar.dtype & dt.QUANTITY)) { needsParens = true; }
+
+    let isParened = false; // Is the match already nested inside parens?
+    if (pos > 0) {
+      const pStr = str.slice(0, pos).trim();
+      if (openParenRegEx$1.test(pStr)) {
+        const fStr = str.slice(pos + varName.length + 2).trim();
+        isParened = fStr.length > 0 && /^([)|‖\]},;:]|\\right)/.test(fStr);
+      } else if (/^\\begin{[bp]matrix}/.test(hvar.resultdisplay)) {
+        isParened = /\\end{[bp]matrix}$/.test(hvar.resultdisplay);
+      }
+    }
+    needsParens = needsParens && !isParened;
+
+    if (hvar.dtype === dt.DATAFRAME || (hvar.dtype & dt.MAP)
+        || hvar.resultdisplay.slice(0, 1) === "!") {
+      display = "\\mathrm{" + parse$1(vars[varName].name) + "}";
+    } else {
+      display = hvar.resultdisplay;
+      if (!unitAware) {
+        const posUnit = display.lastIndexOf("{\\text{");
+        if (posUnit > -1) {
+          display = display.slice(0, posUnit).trim()
+                            .replace(/\\; *$/, "").trim();
+        }
+      }
+      if (needsParens) {
+        display = hvar.dtype > 256 ? "\\left(" + display + "\\right)" : "(" + display + ")";
+      }
+    }
+    str = str.substring(0, pos) + display + str.substring(pos + matchLength);
+  }
+  return str
+};
+
+const negativeOne = Object.freeze(Rnl.negate(Rnl.one));
+const oneHalf = [BigInt(1), BigInt(2)];
+const thirty = [BigInt(30), BigInt(1)];
+const fortyFive = [BigInt(45), BigInt(1)];
+const sixty = [BigInt(60), BigInt(1)];
+const ninety = [BigInt(90), BigInt(1)];
+const halfPi = Object.freeze(Rnl.divide(Rnl.pi, Rnl.two));
+
+const functionExpos = (functionName, args) => {
+  const numArgs = args.length;
+
+  const expos = numArgs === 1 ? args[0].unit.expos : null;
+
+  switch (functionName) {
+    case "abs":
+    case "round":
+    case "roundn":
+    case "sign":
+    case "trace":
+    case "fetch":
+      return expos
+
+    case "cos":
+    case "sin":
+    case "tan":
+    case "sec":
+    case "csc":
+    case "cot":
+    case "acos":
+    case "arccos":
+    case "asin":
+    case "arcsin":
+    case "atan":
+    case "arctan":
+    case "asec":
+    case "arcsec":
+    case "acsc":
+    case "arccsc":
+    case "acot":
+    case "arccot":
+    case "cosd":
+    case "sind":
+    case "tand":
+    case "secd":
+    case "cscd":
+    case "cotd":
+    case "acosd":
+    case "asind":
+    case "atand":
+    case "asecd":
+    case "acscd":
+    case "acotd":
+    case "gud":
+      if (!unitsAreCompatible(expos, allZeros)) {
+        return errorOprnd("UNIT_IN", functionName)
+      }
+      return allZeros
+
+    case "exp":
+    case "log":
+    case "ln":
+    case "log10":
+    case "log2":
+    case "logn":
+    case "cosh":
+    case "sinh":
+    case "tanh":
+    case "sech":
+    case "csch":
+    case "coth":
+    case "acosh":
+    case "asinh":
+    case "atanh":
+    case "asech":
+    case "acsch":
+    case "acoth":
+    case "binomial":
+    case "gamma":
+    case "Γ":
+    case "lgamma":
+    case "lfact":
+    case "factorial":
+      if (!unitsAreCompatible(expos, allZeros)) {
+        return errorOprnd("UNIT_IN", functionName)
+      }
+      return allZeros
+
+    case "sqrt":
+      return expos.map(e => e / 2)
+
+    case "gcd":
+    case "mht":
+      if (!unitsAreCompatible(expos, allZeros)) {
+        return errorOprnd("UNIT_IN", functionName)
+      }
+      return functionName === "hmt" ? [1, 0, 0, 0, 0, 0, 0, 0] : allZeros
+
+    case "atan2":
+    case "hypot":
+    case "rms":
+    case "ceil":
+    case "floor":
+    case "sum":
+    case "mean":
+    case "median":
+    case "min":
+    case "max":
+    case "range":
+    case "stddev":
+    case "variance": {
+      const x = args[0].unit.expos;
+      for (let i = 1; i < args.length; i++) {
+        const y = args[i].unit.expos;
+        if (x.length !== y.length) { return errorOprnd("UNIT_ARG", functionName) }
+        for (let j = 0; j < x.length; j++) {
+          if (x[j] !== y[j]) { return errorOprnd("UNIT_ARG", functionName) }
+        }
+      }
+      return functionName === "atan2" ? allZeros : x
+    }
+
+    case "real":
+    case "imag":
+    case "angle":
+    case "conj":
+      return allZeros
+
+    case "product": {
+      const expos = clone(args[0].unit.expos);
+      for (let i = 1; i < args.length; i++) {
+        const p = args[i].unit.expos;
+        expos.map((e, j) => e + p[j]);
+      }
+      return expos
+    }
+
+    default:
+      return errorOprnd("F_NAME", functionName)
+  }
+};
+
+const gamma = x => {
+  if (Rnl.isZero(x)) {
+    return errorOprnd("Γ0")
+  } else if (Rnl.isPositive(x) && Rnl.isInteger(x) && Rnl.lessThan(x, Rnl.fromNumber(101))) {
+    return Rnl.factorial(Rnl.subtract(x, Rnl.one))
+  } else if (Rnl.isNegative(x) && Rnl.isInteger(x)) {
+    return errorOprnd("ΓPOLE")
+  } else if (Rnl.lessThan(x, oneHalf)) {
+    // reflection formula
+    return Rnl.fromNumber(Math.PI / (Math.sin(Math.PI * Rnl.toNumber(x)))
+      * Rnl.toNumber(gamma(Rnl.subtract(Rnl.one, x))))
+  } else {
+    return Rnl.lanczos(x)
+  }
+};
+
+const lgamma = r => {
+  // Returns natural logarithm of the Gamma function.
+  // Ref: https://www.johndcook.com/blog/2010/08/16/how-to-compute-log-factorial/
+  if (Rnl.isZero(r)) { return errorOprnd("Γ0") }
+  if (Rnl.isNegative(r)) { return errorOprnd("LOGΓ") }
+  if (Rnl.areEqual(r, Rnl.one) || Rnl.areEqual(r, Rnl.two)) { return Rnl.zero }
+  if (Rnl.lessThanOrEqualTo(r, Rnl.fromNumber(14))) {
+    return Rnl.fromNumber(Math.log(Rnl.toNumber(gamma(r))))
+  } else {
+    const x = Rnl.toNumber(r);
+    // eslint-disable-next-line max-len
+    const y = (x - 0.5) * Math.log(x) - x + 0.5 * Math.log(2 * Math.PI) + 1 / (12 * x) - 1 / (360 * x ** 3) + 1 / (1260 * x ** 5) - 1 / (1680 * x ** 7) + 5 / (540 * x ** 9);
+    //  Error bounded by: -691/(360360 * x^11), 16 significant digits
+    return Rnl.fromNumber(y)
+  }
+};
+
+const binomial = (n, k) => {
+  // (n \atop k) = n! / (k! (n - k)!)
+  //             = exp(log!(n) - [log!(k) + log!(n - k)])
+  if (Rnl.areEqual(n, k)) { return Rnl.one }
+  if (Rnl.isZero(n)) { return Rnl.zero }
+  if (Rnl.isNegative(k)) { return Rnl.zero }
+  if (Rnl.lessThan(n, k)) { return Rnl.zero }
+
+  if (Rnl.isInteger(n) && Rnl.isInteger(k) && Rnl.isPositive(n) && Rnl.isPositive(k)) {
+    // positive integers
+//    if (Rnl.lessThan(n, twenty)) {
+    return Rnl.divide(Rnl.factorial(n),
+      Rnl.multiply(Rnl.factorial(k), Rnl.factorial(Rnl.subtract(n, k))))
+//    } else {
+//      return Rnl.fromNumber(Math.round(Math.exp(Rnl.toNumber(
+//        Rnl.subtract(lfact(n),
+//          Rnl.add(lfact(k), lfact(Rnl.subtract(n, k))))))))
+//    }
+
+  } else if (Rnl.isInteger(n) && Rnl.isInteger(k) && Rnl.isPositive(k)) {
+    // negative integer n
+    // (-n \atop k) = (-1)^k * multiset(n, k)
+    return Rnl.multiply(Rnl.power(negativeOne, k), multiset(Rnl.negate(n), k))
+
+  } else {
+    // generalized for real or complex arguments
+    // (x \atop y) = Γ(x+1) / ( Γ(y+1) Γ(x-y+1) )
+    return Rnl.divide(
+      gamma(Rnl.increment(n)),
+      Rnl.multiply(gamma(Rnl.increment(k)), gamma(Rnl.increment(Rnl.subtract(n, k))))
+    )
+
+  }
+};
+
+const multiset = (n, k) => {
+  // ((n \atop k)) = ((n+k-1) \atop k)
+  // multiset(n, k) = binomial(n+k-1, k)
+  return binomial(Rnl.add(n, Rnl.decrement(k)), k)
+};
+
+const piOver180 = Rnl.divide(Rnl.pi, [BigInt(180), BigInt(1)]);
+
+const unary$1 = {
+  scalar: {
+    // Functions that take one real argument.
+    abs(x)  { return Rnl.abs(x) },
+    angle(x) { return errorOprnd("NA_REAL", "angle") },
+    real(x)   { return errorOprnd("NA_REAL", "real") },
+    imag(x)   { return errorOprnd("NA_REAL", "imag") },
+    conj(x)   { return errorOprnd("NA_REAL", "conj") },
+    cos(x)  { return Rnl.cos(x) },
+    sin(x)  { return Rnl.sin(x) },
+    tan(x)  { return Rnl.tan(x) },
+    cosh(x) { return Rnl.cosh(x) },
+    sinh(x) { return Rnl.sinh(x) },
+    tanh(x) { return Rnl.tanh(x) },
+    acos(x) {
+      if (Rnl.greaterThan(Rnl.abs(x), Rnl.one)) { return errorOprnd("ATRIG", "acos") }
+      return Rnl.fromNumber(Math.acos(Rnl.toNumber(x)))
+    },
+    asin(x) {
+      if (Rnl.greaterThan(Rnl.abs(x), Rnl.one)) { return errorOprnd("ATRIG", "asin") }
+      return Rnl.fromNumber(Math.asin(Rnl.toNumber(x)))
+    },
+    atan(x) {
+      return Rnl.fromNumber(Math.atan(Rnl.toNumber(x)))
+    },
+    sec(x) {
+      return Rnl.fromNumber(1 / Math.cos(Rnl.toNumber(x)))
+    },
+    csc(x) {
+      return Rnl.fromNumber(1 / Math.sin(Rnl.toNumber(x)))
+    },
+    cot(x) {
+      if (Rnl.isZero(x)) { return errorOprnd("COT", "cotangent") }
+      return  Rnl.fromNumber(1 / Math.tan(Rnl.toNumber(x)))
+    },
+    asec(x) {
+      if (Rnl.greaterThanOrEqualTo(Rnl.abs(x), Rnl.one)) {
+        return errorOprnd("ASEC", "arcecant")
+      }
+      const temp = Math.atn(Math.sqrt(Rnl.toNumber(Rnl.decrement(Rnl.multiply(x, x)))));
+      return  (Rnl.isPositive(x))
+        ? Rnl.fromNumber(temp)
+        : Rnl.fromNumber(temp - Math.PI)
+    },
+    acot(x) {
+      if (Rnl.greaterThanOrEqualTo(Rnl.abs(x), Rnl.one)) {
+        return errorOprnd("ASEC", "acot")
+      }
+      const temp = Math.atn(1 / (Math.sqrt(Rnl.toNumber(Rnl.decrement(Rnl.multiply(x, x))))));
+      return (Rnl.isPositive(x))
+        ? Rnl.fromNumber(temp)
+        : Rnl.fromNumber(temp - Math.PI)
+    },
+    acsc(x) {
+      return Rnl.fromNumber(Math.atn(-Rnl.toNumber(x)) + Math.PI)
+    },
+    exp(x) {
+      return Rnl.exp(x)
+    },
+    log(x) {
+      return Rnl.isZero(x) ? errorOprnd("LOG_ZERO") : Rnl.fromNumber(Math.log(Rnl.toNumber(x)))
+    },
+    ln(x) {
+      return Rnl.isZero(x) ? errorOprnd("LOG_ZERO") : Rnl.fromNumber(Math.log(Rnl.toNumber(x)))
+    },
+    log10(x) {
+      return Rnl.isZero(x)
+        ? errorOprnd("LOG_ZERO")
+        : Rnl.fromNumber(Math.log10(Rnl.toNumber(x)))
+    },
+    log2(x) {
+      return Rnl.isZero(x)
+        ? errorOprnd("LOG_ZERO")
+        : Rnl.fromNumber(Math.log2(Rnl.toNumber(x)))
+    },
+    sech(x) {
+      // sech(n) = 2 / (eⁿ + e⁻ⁿ)
+      const num = Rnl.toNumber(x);
+      return Rnl.fromNumber(2 / (Math.exp(num) + Math.exp(-num)))
+    },
+    csch(x) {
+      // csch(n) = 2 / (eⁿ - e⁻ⁿ)
+      const num = Rnl.toNumber(x);
+      return Rnl.fromNumber(2 / (Math.exp(num) - Math.exp(-num)))
+    },
+    coth(x) {
+      // coth(n) = (eⁿ + e⁻ⁿ) / (eⁿ - e⁻ⁿ)
+      const num = Rnl.toNumber(x);
+      return Rnl.fromNumber(
+        (Math.exp(num) + Math.exp(-num)) / (Math.exp(num) - Math.exp(-num))
+      )
+    },
+    acosh(x) {
+      // acosh(x) = log( x + sqrt(x - 1) × sqrt(x + 1) )
+      const num = Rnl.toNumber(x);
+      return Rnl.fromNumber(Math.log( num + Math.sqrt(num - 1) * Math.sqrt(num + 1) ))
+    },
+    asinh(x) {
+      // asinh(x) = log(x + sqrt(x² + 1))
+      const num = Rnl.toNumber(x);
+      return Rnl.fromNumber(Math.log(num + Math.sqrt(Math.pow(num, 2) + 1)))
+    },
+    atanh(x) {
+      // atanh(x) = [ log(1+x) - log(1-x) ] / 2
+      const num = Rnl.toNumber(x);
+      return Rnl.fromNumber((Math.log(1 + num) - Math.log(1 - num) ) / 2)
+    },
+    asech(x) {
+      // asech(x) = log( [sqrt(-x * x + 1) + 1] / x )
+      if (Rnl.isZero(x)) { return errorOprnd("DIV") }
+      const num = Rnl.toNumber(x);
+      return Rnl.fromNumber(Math.log((Math.sqrt(-num * num + 1) + 1) / num))
+    },
+    ascsh(x) {
+      // acsch(x) = log( sqrt(1 + 1/x²) + 1/x )
+      if (Rnl.isZero(x)) { return errorOprnd("DIV") }
+      const num = Rnl.toNumber(x);
+      return Rnl.fromNumber(Math.log(Math.sqrt(1 + 1 / Math.pow(num, 2)) + 1 / num))
+    },
+    acoth(x) {
+      // acoth(x) = [ log(1 + 1/x) - log(1 - 1/x) ] / 2
+      if (Rnl.isZero(x)) { return errorOprnd("DIV") }
+      const num = Rnl.toNumber(x);
+      return Rnl.fromNumber((Math.log(1 + 1 / num) - Math.log(1 - 1 / num)) / 2)
+    },
+    ceil(x) {
+      return Rnl.ceil(x)
+    },
+    floor(x) {
+      return Rnl.floor(x)
+    },
+    gamma(x) {
+      return gamma(x)
+    },
+    Γ(x) {
+      return gamma(x)
+    },
+    lgamma(x) {
+      if (Rnl.isNegative(x) || Rnl.isZero(x)) { return errorOprnd("LOGΓ") }
+      return lgamma(x)
+    },
+    lfact(x) {
+      if (Rnl.isNegative(x) || !Rnl.isInteger(x)) { return errorOprnd("FACT") }
+      return lgamma(Rnl.add(x, Rnl.one))
+    },
+    factorial(x) {
+      return Rnl.factorial(x)
+    },
+    sign(x) {
+      return Rnl.isPositive(x) ? Rnl.one : Rnl.isZero(x) ? Rnl.zero : negativeOne
+    },
+    cosd(x) {
+      if (Rnl.areEqual(x, ninety)) { return Rnl.zero }
+      if (Rnl.areEqual(x, sixty)) { return oneHalf }
+      return this.cos(Rnl.multiply(x, piOver180))
+    },
+    sind(x) {
+      if (Rnl.areEqual(x, thirty)) { return oneHalf }
+      return this.sin(Rnl.multiply(x, piOver180))
+    },
+    tand(x) {
+      if (Rnl.areEqual(x, fortyFive)) { return Rnl.one }
+      if (Rnl.areEqual(x, ninety)) { return errorOprnd("TAN90", "90°") }
+      return this.tan(Rnl.multiply(x, piOver180))
+    },
+    cotd(x) {
+      return this.cot(Rnl.multiply(x, piOver180))
+    },
+    cscd(x) {
+      return this.csc(Rnl.multiply(x, piOver180))
+    },
+    secd(x) {
+      return this.sec(Rnl.multiply(x, piOver180))
+    },
+    acosd(x) {
+      const y = this.acos(x);
+      return y.dtype ? y : Rnl.divide(y, piOver180)
+    },
+    asind(x) {
+      const y = this.asin(x);
+      return y.dtype ? y : Rnl.divide(y, piOver180)
+    },
+    atand(x) {
+      return Rnl.divide(this.atan(x), piOver180)
+    },
+    acotd(x) {
+      const y = this.acot(x);
+      return y.dtype ? y : Rnl.divide(y, piOver180)
+    },
+    acscd(x) {
+      const y = this.acsc(x);
+      return y.dtype ? y : Rnl.divide(y, piOver180)
+    },
+    asecd(x) {
+      const y = this.asec(x);
+      return y.dtype ? y : Rnl.divide(y, piOver180)
+    },
+    Char(x) {
+      return String.fromCodePoint(Rnl.toNumber(x))
+    },
+    sqrt(x) {
+      const y = [BigInt(1), BigInt(2)];
+      return Cpx.isComplex(x) || (Rnl.isNegative(x))
+          ? Cpx.power([x, Rnl.zero], y)
+          : Rnl.power(x, y)
+    },
+    round(x) {
+      return Rnl.fromString(Rnl.toString(x, 0))
+    }
+  },
+  complex: {
+    // Functions that take one complex argument.
+    abs(z)   { return Cpx.abs(z) },
+    angle(z) { return Cpx.angle(z) },
+    real(z)  { return z[0] },
+    imag(z)  { return z[1] },
+    conj(z)  { return Cpx.conjugate(z) },
+    cos(z)   { return Cpx.cos(z) },
+    sin(z)   { return Cpx.sin(z) },
+    asin(z)  { return Cpx.asin(z) },
+    atan(z)  { return Cpx.atan(z) },
+    acos(z)  { return Cpx.subtract([halfPi, Rnl.zero], Cpx.asin(z))}, // π/2 - arcsin(z)
+    tan(z)   { return Cpx.divide(Cpx.sin(z), Cpx.cos(z)) },
+    cot(z)   { return Cpx.divide(Cpx.cos(z), Cpx.sin(z)) },
+    sec(z) {
+      const c = Cpx.cos(z);
+      return c.dtype ? c : Cpx.inverse(c)
+    },
+    csc(z) {
+      const s = Cpx.sin(z);
+      return s.dtype ? s : Cpx.inverse(s)
+    },
+    asec(z) {
+      // acos(inverse(z))
+      const inv = Cpx.inverse(z);
+      return Cpx.subtract([halfPi, Rnl.zero], Cpx.asin(inv))
+    },
+    acot(z) { return Cpx.atan(Cpx.inverse(z)) },
+    acsc(z) {
+      return Cpx.asin(Cpx.inverse(z))
+    },
+    exp(z) {
+      return Cpx.exp(z)
+    },
+    log(z) {
+      return Cpx.log(z)
+    },
+    ln(z) {
+      return Cpx.log(z)
+    },
+    log10(z) {
+      return Rnl.fromNumber(Math.log10(Rnl.toNumber(z)))
+    },
+    log2(z) {
+      return Rnl.fromNumber(Math.log2(Rnl.toNumber(z)))
+    },
+    cosh(z) {
+      // cosh(z) = (eᶻ + e⁻ᶻ) / 2
+      return Cpx.divide(Cpx.add(Cpx.exp(z), Cpx.exp(Cpx.negate(z))), [Rnl.two, Rnl.zero])
+    },
+    sinh(z) {
+      // sinh(z) = (eᶻ - e⁻ᶻ) / 2
+      return Cpx.divide(Cpx.subtract(Cpx.exp(z), Cpx.exp(Cpx.negate(z))), [Rnl.two, Rnl.zero])
+    },
+    tanh(z) {
+      // tanh(z) = (eᶻ - e⁻ᶻ) / (eᶻ + e⁻ᶻ)
+      const ez = Cpx.exp(z);
+      const eMinuxZ = Cpx.exp(Cpx.negate(z));
+      return Cpx.divide(Cpx.subtract(ez, eMinuxZ), Cpx.add(ez, eMinuxZ))
+    },
+    sech(z) {
+      // sech(z) = 2 / (eᶻ + e⁻ᶻ)
+      return Cpx.divide([Rnl.two, Rnl.zero], Cpx.add(Cpx.exp(z), Cpx.exp(Cpx.negate(z))))
+    },
+    csch(z) {
+      // csch(z) = 2 / (eᶻ - e⁻ᶻ)
+      return Cpx.divide([Rnl.two, Rnl.zero], Cpx.subtract(Cpx.exp(z), Cpx.exp(Cpx.negate(z))))
+    },
+    coth(z) {
+      // coth(z) = (eᶻ + e⁻ᶻ) / (eᶻ - e⁻ᶻ)
+      const ez = Cpx.exp(z);
+      const eMinuxZ = Cpx.exp(Cpx.negate(z));
+      return Cpx.divide(Cpx.add(ez, eMinuxZ), Cpx.subtract(ez, eMinuxZ))
+    },
+    acosh(z) {
+      return Cpx.acosh(z)
+    },
+    asinh(z) {
+      return Cpx.asinh(z)
+    },
+    atanh(z) {
+      return Cpx.atanh(z)
+    },
+    asech(z) {
+      return Cpx.acosh(Cpx.inverse(z))
+    },
+    acsch(z) {
+      return Cpx.asinh(Cpx.inverse(z))
+    },
+    acoth(z) {
+      return Cpx.atanh(Cpx.inverse(z))
+    },
+    ceil(z) {
+      return errorOprnd("NA_COMPL_OP", "ceil")
+    },
+    floor(z) {
+      return errorOprnd("NA_COMPL_OP", "ceil")
+    },
+    gamma(z) {
+      return Cpx.gamma(z)
+    },
+    Γ(z) {
+      return Cpx.gamma(z)
+    },
+    lgamma(z) {
+      // TODO: complex log of gamma()
+      return errorOprnd("NA_COMPL_OP", "lgamma")
+    },
+    factorial(z) {
+      return errorOprnd("NA_COMPL_OP", "factorial")
+    },
+    sign(z) {
+      if (Rnl.isZero(z[1]) && Rnl.isPositive(z[0])) {
+        return Rnl.one
+      } else if (Rnl.isZero(z[1]) && Rnl.isNegative(z[0])) {
+        return Rnl.negate(Rnl.one)
+      } else {
+        return Cpx.divide(z, [Cpx.abs(z), Rnl.zero])
+      }
+    },
+    round(z) {
+      // TODO: complex round function
+      return errorOprnd("NA_COMPL_OP", "round")
+    }
+  }
+};
+
+const binary$1 = {
+  logn([n, x]) {
+    return Rnl.fromNumber(Math.log(Rnl.toNumber(x)) / Math.log(Rnl.toNumber(n)))
+  },
+  roundFixed([x, n]) {
+    return Rnl.fromString(Rnl.toString(x, n))
+  },
+  roundSignificant([x, n]) {
+    return Rnl.fromString(Rnl.toStringSignificant(x, n))
+  },
+  stringFixed([x, n]) {
+    return Rnl.toString(x, n)
+  },
+  stringSignificant([x, n]) {
+    return Rnl.toStringSignificant(x, n)
+  },
+  atan2([x, y]) {
+    return Rnl.fromNumber(Math.atan2(Rnl.toNumber(y), Rnl.toNumber(x)))
+  },
+  hypot([x, y]) {
+    // sqrt(x^2 + y^2)
+    // https://www.johndcook.com/blog/2010/06/02/whats-so-hard-about-finding-a-hypotenuse/
+    const max = Rnl.max(x, y);
+    const r = Rnl.divide(Rnl.min(x, y), max);
+    return Rnl.multiply(max, Rnl.sqrt(Rnl.increment(Rnl.multiply(r, r))))
+  },
+  gcd([m, n]) {
+    return Rnl.gcd(m, n)
+  },
+  rms([x, y]) {
+    return this.hypot(x, y)
+  },
+  binomial([x, y]) {
+    return binomial(x, y)
+  },
+  ones([m, n]) {
+    return Matrix.ones(Rnl.toNumber(m), Rnl.toNumber(n))
+  },
+  zeros([m, n]) {
+    return Matrix.zeros(Rnl.toNumber(m), Rnl.toNumber(n))
+  },
+  mod([x, y]) {
+    return Rnl.mod(x, y)
+  },
+  rem([x, y]) {
+    return Rnl.rem(x, y)
+  }
+};
+
+const reduce = {
+  max(list) {
+    return list.reduce((max, e) => Rnl.max(max, e))
+  },
+  min(list) {
+    return list.reduce((min, e) => Rnl.min(min, e))
+  },
+  sum(list) {
+    return list.reduce((sum, e) => Rnl.add(sum, e))
+  },
+  product(list) {
+    return list.reduce((sum, e) => Rnl.multiply(sum, e))
+  },
+  mean(list) {
+    const sum = this.sum(list);
+    return Rnl.divide(sum, Rnl.fromNumber(list.length))
+  },
+  median(list) {
+    const max = this.max(list);
+    const min = this.min(list);
+    return Rnl.divide(Rnl.add(max, min), Rnl.two)
+  },
+  range(list) {
+    return Rnl.subtract(this.max(list), this.min(list))
+  },
+  variance(list) {
+    const sum = this.sum(list);
+    const mean = Rnl.divide(sum, Rnl.fromNumber(list.length));
+    const num = list.reduce((num, e) => Rnl.add(num, Rnl.pow(Rnl.subtract(e, mean), Rnl.two)));
+    return Rnl.divide(num, Rnl.subtract(Rnl.fromNumber(list.length), Rnl.one))
+  },
+  stddev(list) {
+    const variance = this.variance(list);
+    return Rnl.power(variance, oneHalf)
+  },
+  accumulate(list) {
+    const v = new Array(list.length).fill(0);
+    v[0] = list[0];
+    for (let i = 1; i < list.length; i++) {
+      v[i] = Rnl.add(v[i - 1], list[i]);
+    }
+    return v
+  }
+};
+
+const lerp = (args, unitAware) => {
+  // linear interpolation
+  for (let i = 0; i < 3; i++) {
+    if (!(args[i].dtype & dt.RATIONAL)) { return errorOprnd("") }
+  }
+  let expos = allZeros;
+  if (unitAware) {
+    if (args[0].expos !== args[1].expos) { return errorOprnd("") }
+    if (args[1].expos !== args[2].expos) { return errorOprnd("") }
+    expos = args[0].expos;
+  }
+  const output = Object.create(null);
+  output.unit = Object.create(null);
+  output.unit.expos = expos;
+  output.dtype = dt.RATIONAL;
+
+  const v0 = args[0].value;  // a vector
+  const v1 = args[1].value;  // another vector
+  const x = args[2].value;   // the input value
+  // TODO: Use binary search
+  for (let i = 0; i < v0.length - 1; i++) {
+    if (Rnl.lessThanOrEqualTo(v0[i], x) & Rnl.lessThanOrEqualTo(x, v0[i + 1])) {
+      const slope = Rnl.divide((Rnl.subtract(v1[i + 1], v1[i])),
+        (Rnl.subtract(v0[i + 1], v0[i])));
+      output.value = Rnl.add(v1[i], Rnl.multiply(slope, (Rnl.subtract(x, v0[i]))));
+      return Object.freeze(output)
+    }
+  }
+};
+
+const Functions = Object.freeze({
+  functionExpos,
+  unary: unary$1,
+  binary: binary$1,
+  reduce,
+  lerp
+});
+
+const multivarFunction = (arity, functionName, args) => {
+  // Deal with a function that may have multiple arguments.
+
+  if (args.length === 1) {
+    const list = isVector(args[0])
+      ? args[0].value
+      : (args.dtype & dt.MATRIX)
+      // TODO: fix the next line.
+      ? args[0].value.flat()
+      : args[0].value;
+
+    const value = Functions[arity][functionName](list);
+
+    let dtype = args[0].dtype;
+    if (arity === "reduce" && functionName !== "accumulate") {
+      // Mask off any matrix or vector indicator from the dtype
+      if (dtype & dt.MATRIX) { dtype -= dt.MATRIX; }
+      if (dtype & dt.ROWVECTOR) { dtype -= dt.ROWVECTOR; }
+      if (dtype & dt.COLUMNVECTOR) { dtype -= dt.COLUMNVECTOR; }
+    }
+
+    return [value, dtype]
+
+  } else if (functionName === "sum" && args.length === 2 && isMatrix(args[0])
+    && args[1].dtype === dt.RATIONAL) {
+    if (Rnl.areEqual(args[1].value, Rnl.two)) {
+      const dtype = dt.COLUMNVECTOR + dt.RATIONAL;
+      const result = args[0].value.map(row => row.reduce((sum, e) => Rnl.add(sum, e)));
+      return [ result, dtype ]
+    } else if (Rnl.areEqual(args[1].value, Rnl.one)) {
+      const dtype = dt.ROWVECTOR + dt.RATIONAL;
+      const result = Matrix.transpose(args[0]).value.map(
+        row => row.reduce((sum, e) => Rnl.add(sum, e))
+      );
+      return [ result, dtype ]
+    } else {
+      return [errorOprnd("BAD_SUM"), dt.ERROR]
+    }
+  } else {
+    // We have multiple arguments.
+    // Is one of them a vector or a matrix?
+    // eslint-disable-next-line no-useless-assignment
+    let iArg = 0;
+    let gotVector = false;
+    let gotMatrix = false;
+    let dtype = args[0].dtype;
+
+    for (iArg = 0; iArg < args.length; iArg++) {
+      if (isVector(args[iArg])) {
+        gotVector = true;
+        dtype = args[iArg].dtype;
+        break
+      } else if (isMatrix(args[iArg])) {
+        gotMatrix = true;
+        dtype = args[iArg].dtype;
+        break
+      }
+    }
+    const list = args.map(e => e.value);
+    if (!(gotVector || gotMatrix)) {
+      const result = Functions[arity][functionName](list);
+      return functionName === "zeros" || functionName === "ones"
+        ? [result.value, result.dtype]
+        : [result, args[0].dtype]
+
+    } else {
+      const result = [];
+      if (gotVector) {
+        const listClone = clone(list);
+        for (let i = 0; i < list[iArg].length; i++) {
+          listClone[iArg] = list[iArg][i];
+          result.push(Functions[arity][functionName](listClone));
+        }
+      } else {
+        const listClone = clone(list);
+        for (let i = 0; i < list[iArg].length; i++) {
+          result.push([]);
+          for (let j = 0; j < list[iArg][0].length; j++) {
+            listClone[iArg] = list[iArg][i][j];
+            result[i].push(Functions[arity][functionName](listClone));
+          }
+        }
+      }
+      return [ result, dtype ]
+    }
+  }
+};
+
+// compare.js
+
+const equals = (x, y) => {
+  if (Rnl.isRational(x) && Rnl.isRational(y)) {
+    return Rnl.areEqual(x, y)
+  } else {
+    return x === y
+  }
+};
+
+const compare = (op, x, y, yPrev) => {
+  // If yPrev is defined, then this is part of a chained comparison, e.g.: a < b < c
+  if (x === false && yPrev) { return false }  // The chain is false if any part is false.
+  if (x === true && yPrev) { x = yPrev; }  // Compare this link in the chain.
+
+  switch (op) {
+    case "=":
+      return errorOprnd("BAD_EQ")
+
+    case "==":
+    case "⩵":
+      return equals(x, y)
+
+    case "≠":
+    case "!=":
+    case "/=":
+      if (Rnl.isRational(x) && Rnl.isRational(y)) {
+        return !Rnl.areEqual(x, y)
+      } else {
+        return x !== y
+      }
+
+    case ">":
+      if (Rnl.isRational(x) && Rnl.isRational(y)) {
+        return Rnl.greaterThan(x, y)
+      } else {
+        return x > y
+      }
+
+    case "<":
+      if (Rnl.isRational(x) && Rnl.isRational(y)) {
+        return Rnl.lessThan(x, y)
+      } else {
+        return x < y
+      }
+
+    case "≥":
+    case ">=":
+      if (Rnl.isRational(x) && Rnl.isRational(y)) {
+        return Rnl.greaterThanOrEqualTo(x, y)
+      } else {
+        return x >= y
+      }
+
+    case "≤":
+    case "<=":
+      if (Rnl.isRational(x) && Rnl.isRational(y)) {
+        return Rnl.lessThanOrEqualTo(x, y)
+      } else {
+        return x <= y
+      }
+
+    case "∈":
+    case "in":
+      if (typeof x === "string" && typeof y === "string") {
+        if (Array.from(x).length > 1) { return false }
+        return y.indexOf(x) > -1
+      } else if (Array.isArray(y) && Rnl.isRational(y[0]) && Rnl.isRational(x)) {
+        for (let i = 0; i < y.length; i++) {
+          if (Rnl.areEqual(x, y[i])) { return true }
+        }
+        return false
+      } else if (Array.isArray(y) && !Array.isArray(x)) {
+        for (let i = 0; i < y.length; i++) {
+          if (equals(x, y[i])) { return true }
+        }
+        return false
+      } else if (y instanceof Map) {
+        return y.has(x)
+      } else if (typeof x === "string" && typeof y === "object" &&
+                 Object.hasOwnProperty.call(y, "headings")) {
+        // Is x a property of dataframe y?
+        return Boolean(y.headings.includes(x) ||
+                      (y.rowMap && Object.hasOwnProperty.call(y.rowMap, x)))
+      } else {
+        return errorOprnd("NOT_ARRAY")
+      }
+
+    case "∋":
+      if (typeof x === "string" && typeof y === "string") {
+        if (Array.from(x).length > 1) { return false }
+        return y.indexOf(x) > -1
+      } else if (x instanceof Map) {
+        return x.has(y)
+      } else if (typeof x === "object" && typeof y === "string" &&
+                  Object.hasOwnProperty.call(x, "headings")) {
+        // Is y a property of dataframe x?
+        return Boolean(x.headings.includes(y) ||
+                      (x.rowMap && Object.hasOwnProperty.call(x.rowMap, y)))
+      } else {
+        return errorOprnd("NO_PROP", x.name)
+      }
+
+    case "⊃":
+      if (typeof x === "string" && typeof y === "string") {
+        return x.indexOf(y) > -1
+      } else if (Array.isArray(x) && Array.isArray(y)) {
+        for (let i = 0; i < x.length; i++) {
+          // We test for a contiguous subset
+          if (equals(y[0], x[i])) {
+            if (i + y.length > x.length) { return false }
+            for (let j = 1; j < y.length; j++) {
+              if (!equals(y[j], x[i + j])) { return false }
+            }
+            return true
+          }
+        }
+        return false
+      } else {
+        return errorOprnd("NOT_ARRAY")
+      }
+
+    case "∉":
+    case "!in":
+      if (typeof x === "string" && typeof y === "string") {
+        if (Array.from(x).length === 1) { return false }
+        return y.indexOf(x) === -1
+      } else if (Array.isArray(y) && Rnl.isRational(y[0]) && Rnl.isRational(x)) {
+        for (let i = 0; i < y.length; i++) {
+          if (Rnl.areEqual(x, y[i])) { return false }
+        }
+        return true
+      } else if (Array.isArray(y)) {
+        for (let i = 0; i < y.length; i++) {
+          if (x === y[i]) { return false }
+        }
+        return true
+      } else if (y instanceof Map) {
+        return !y.has(x)
+      } else if (typeof x === "string" && typeof y === "object" &&
+                 Object.hasOwnProperty.call(y, "headings")) {
+        // Is x a property of dataframe x?
+        return !(y.headings.includes(x) ||
+                (y.rowMap && Object.hasOwnProperty.call(y.rowMap, x)))
+      } else {
+        return errorOprnd("NOT_ARRAY")
+      }
+
+    case "∌":
+      if (typeof x === "string" && typeof y === "string") {
+        if (Array.from(y).length === 1) { return false }
+        return x.indexOf(y) === -1
+      } else if (x instanceof Map) {
+        return !x.has(y)
+      } else if (typeof x === "object" && typeof y === "string" &&
+                  Object.hasOwnProperty.call(x, "headings")) {
+        // Is y a property of dataframe x?
+        return !(x.headings.includes(y) ||
+                (x.rowMap && Object.hasOwnProperty.call(x.rowMap, y)))
+      } else {
+        return errorOprnd("NO_PROP", x.name)
+      }
+
+    case "⊄":
+      if (typeof x === "string" && typeof y === "string") {
+        return y.indexOf(x) === -1
+      } else if (Array.isArray(x) && Array.isArray(y)) {
+        // We test for a contiguous subset
+        for (let i = 0; i < y.length; i++) {
+          if (equals(x[0], y[i])) {
+            if (i + x.length > y.length) { continue }
+            let provisional = true;
+            for (let j = 1; j < x.length; j++) {
+              if (!equals(x[j], y[i + j])) {
+                provisional = false;
+                continue
+              }
+            }
+            if (!provisional) { continue }
+            return true
+          }
+        }
+        return false
+      } else {
+        return errorOprnd("NOT_ARRAY")
+      }
+
+    case "⊅":
+      if (typeof x === "string" && typeof y === "string") {
+        return x.indexOf(y) === -1
+      } else if (Array.isArray(x) && Array.isArray(y)) {
+        // We test for a contiguous subset
+        for (let i = 0; i < x.length; i++) {
+          if (equals(y[0], x[i])) {
+            if (i + y.length > x.length) { continue }
+            let provisional = true;
+            for (let j = 1; j < y.length; j++) {
+              if (!equals(y[j], x[i + j])) {
+                provisional = false;
+                continue
+              }
+            }
+            if (!provisional) { continue }
+            return true
+          }
+        }
+        return false
+      } else {
+        return errorOprnd("NOT_ARRAY")
+      }
+  }
+};
+
+// Hurmet math operators are overloaded to handle operands of various shapes.
+// Those shapes being scalars, vectors, matrices, and maps.
+// This file implements the overloading.
+
+// Some helper functions
+const dotProduct$1 = (a, b) => {
+  return a.map((e, j) => Rnl.multiply(e, b[j])).reduce((m, n) => Rnl.add(m, n))
+};
+const sumOfSquares = vector => {
+  return vector.map((e) => Rnl.multiply(e, e)).reduce((m, n) => Rnl.add(m, n))
+};
+const oneTenth = [BigInt(1), BigInt(100)];
+
+// From the object below, calculations.js will call operators using statements
+// that look like this:
+// resultValue = Operations.unary[shape][operator](inputValue)
+
+const unary = {
+  scalar: {
+    abs(x)       { return Rnl.abs(x) },
+    norm(x)      { return Rnl.abs(x) },
+    negate(x)    { return Rnl.negate(x) },
+    exp(x)       { return Rnl.exp(x) },
+    floor(x)     { return Rnl.floor(x) },
+    ceil(x)      { return Rnl.ceil(x) },
+    percent(x)   { return Rnl.multiply(oneTenth, x) },
+    factorial(x) { return Rnl.factorial(x) },
+    doubleFactorial(x) { return Rnl.doubleFactorial(x) },
+    not(x)       { return !x }
+  },
+
+  complex: {
+    abs(z)       { return Cpx.abs(z) },
+    norm(z)      { return Cpx.abs(z) },
+    conjugate(z) { return Cpx.conjugate(z) },
+    negate(z)    { return Cpx.negate(z) },
+    exp(z)       { return Cpx.exp(z) },
+    floor(z)     { return errorOprnd("NA_COMPL_OP", "floor") },
+    ceil(z)      { return errorOprnd("NA_COMPL_OP", "ceil") },
+    percent(z)   { return errorOprnd("NA_COMPL_OP", "percent") },
+    factorial(z) { return errorOprnd("NA_COMPL_OP", "factorial") },
+    doubleFactorial(z) { return errorOprnd("NA_COMPL_OP", "factorial") },
+    not(z)       { return errorOprnd("NA_COMPL_OP", "not") }
+  },
+
+  vector: {
+    abs(v)       { return Rnl.sqrt(sumOfSquares(v)) },   // magnitude of a vector
+    norm(v)      { return Rnl.sqrt(sumOfSquares(v)) },   // ditto
+    negate(v)    { return v.map(e => Rnl.negate(e)) },
+    exp(v)       { return v.map(e => Rnl.exp(e)) },
+    floor(v)     { return v.map(e => Rnl.floor(e)) },
+    ceil(v)      { return v.map(e => Rnl.ceil(e)) },
+    percent(v)   { return v.map(e => Rnl.multiply(oneTenth, e)) },
+    factorial(v) { return v.map(e => Rnl.factorial(e)) },
+    doubleFactorial(v) { return v.map(e => Rnl.doubleFactorial(e)) },
+    not(v)       { return v.map(e => !e) }
+  },
+
+  matrix: {
+    abs(m) { return Matrix.invert(m, true) },
+    norm(m) {
+      if (m.length === m[0].length) {
+        let sum = Rnl.zero;
+        for (let i = 0; i < m.length; i++) {
+          sum = Rnl.add(sum, sumOfSquares(m[i]));
+        }
+        return Rnl.sqrt(sum)
+      }
+    },
+    negate(m)    { return m.map(row => row.map(e => Rnl.negate(e))) },
+    exp(m)       { return m.map(row => row.map(e => Rnl.exp(e))) },
+    floor(m)     { return m.map(row => row.map(e => Rnl.floor(e))) },
+    ceil(m)      { return m.map(row => row.map(e => Rnl.ceil(e))) },
+    percent(m)   { return m.map(row => row.map(e => Rnl.multiply(oneTenth, e))) },
+    factorial(m) { return m.map(row => row.map(e => Rnl.factorial(e))) },
+    doubleFactorial(m) { return m.map(row => row.map(e => Rnl.doubleFactorial(e))) },
+    not(m)       { return m.map(row => row.map(e => !e)) }
+  },
+
+  map: {
+    abs(map) {
+      map.data = map.data.map(column => Rnl.isRational(column[0])
+      ? column.map(e => Rnl.abs(e))
+      : column
+    );
+      return map
+    },
+    negate(map) {
+      map.data = map.data.map(column => Rnl.isRational(column[0])
+      ? column.map(e => Rnl.negate(e))
+      : column
+    );
+      return map
+    },
+    exp(map) {
+      map.data = map.data.map(column => Rnl.isRational(column[0])
+        ? column.map(e => Rnl.exp(e))
+        : column
+      );
+      return map
+    },
+    floor(map) {
+      map.data = map.data.map(column => Rnl.isRational(column[0])
+        ? column.map(e => Rnl.floor(e))
+        : column
+      );
+      return map
+    },
+    ceil(map) {
+      map.data = map.data.map(column => Rnl.isRational(column[0])
+        ? column.map(e => Rnl.ceil(e))
+        : column);
+      return map
+    },
+    percent(map) {
+      map.data = map.data.map(column => Rnl.isRational(column[0])
+        ? column.map(e => Rnl.multiply(oneTenth, e))
+        : column
+      );
+      return map
+    },
+    factorial(map) {
+      map.data = map.data.map(column => Rnl.isRational(column[0])
+        ? column.map(e => Rnl.factorial(e))
+        : column
+      );
+      return map
+    },
+    doubleFactorial(map) {
+      map.data = map.data.map(column => Rnl.isRational(column[0])
+        ? column.map(e => Rnl.doubleFactorial(e))
+        : column
+      );
+      return map
+    },
+    not(map) {
+      map.data = map.data.map(column => typeof column[0] === "boolean"
+       ? column.map(e => !e)
+       : column
+      );
+      return map
+    }
+  }
+};
+
+const condition = {
+  // Deal with booleans. Return a single value, true or false.
+  // If a vector or matrix is received, all elements must be
+  // true in order to return a true. Otherwise return a false.
+  scalar(x) { return x },
+  vector(v) { return v.reduce((prev, curr) => prev && curr, true) },
+  matrix(m) {
+    const row = new Array(m.length);
+    for (let i = 0; i < m.length; i++) {
+      row[i] = m[i].reduce((prev, curr) => prev && curr, true);
+    }
+    return row.reduce((prev, curr) => prev && curr, true)
+  }
+};
+
+const dtype = {
+  // Given the shapes which are operands to a binary operator,
+  // return the resulting data type.
+  scalar: {
+    scalar(t0, t1, tkn)     {
+      if (t0 === dt.DATE || t1 === dt.DATE) {
+        return t0 === t1 ? dt.RATIONAL : dt.DATE
+      }
+      return (tkn === "&" || tkn === "hcat" || tkn === "vcat")
+        ? t0 + ((tkn === "&" || tkn === "hcat") ? dt.ROWVECTOR : dt.COLUMNVECTOR )
+        : t0
+    },
+    complex(t0, t1, tkn)    { return t1 },
+    vector(t0, t1, tkn)     { return t1 },
+    matrix(t0, t1, tkn)     { return t1 },
+    dataFrame(t0, t1, tkn)  { return t1 },
+    map(t0, t1, tkn)        { return t1 }
+  },
+  complex: {
+    scalar(t0, t1, tkn)  { return t0 },
+    complex(t0, t1, tkn) { return t0 }
+  },
+  vector: {
+    scalar(t0, t1, tkn) { return t0 },
+    map(t0, t1, tkn)    { return t1 + (t0 & dt.ROWVECTOR) + (t0 & dt.COLUMNVECTOR) }
+  },
+  rowVector: {
+    rowVector(t0, t1, tkn) { return tkn === "vcat" ? t0 - dt.ROWVECTOR + dt.MATRIX : t0 },
+    columnVector(t0, t1, tkn) { return t0 },
+    matrix(t0, t1, tkn) { return tkn === "multiply" ? t0 : t1 }
+  },
+  columnVector: {
+    rowVector(t0, t1, op) {
+      return op === "dot"
+      ? dt.RATIONAL
+      : op === "cross"
+      ? t0
+      : t0 - dt.COLUMNVECTOR + dt.MATRIX
+    },
+    columnVector(t0, t1, tkn) {
+      return tkn === "&" || tkn === "hcat"
+        ? t0 - dt.COLUMNVECTOR + dt.MATRIX
+        : t0
+    },
+    matrix(t0, t1, tkn) { return t1 }
+  },
+  matrix: {
+    scalar(t0, t1, tkn) { return t0 },
+    rowVector(t0, t1, tkn) { return t0 },
+    columnVector(t0, t1, tkn) { return tkn === "*" || tkn === "⌧" ? t1 : t0 },
+    matrix(t0, t1, tkn) { return t0 },
+    map(t0, t1, tkn)    { return 0 }
+  },
+  dataFrame: {
+    scalar(t0, t1, tkn) { return t0 }
+  },
+  map: {
+    scalar(t0, t1, tkn) { return t0 },
+    vector(t0, t1, tkn) { return t0 },
+    matrix(t0, t1, tkn) { return 0 },
+    map(t0, t1, tkn)    { return t0 }
+  }
+};
+
+
+// The binary operators below are called like this:
+// resultValue = Operations.binary[shape_0][shape_1][operator](input_0, input_1)
+
+const binary = {
+  scalar: {
+    scalar: {
+      // Binary operations on two scalars
+      add(x, y)      { return Rnl.add(x, y) },
+      subtract(x, y) { return Rnl.subtract(x, y) },
+      multiply(x, y) { return Rnl.multiply(x, y) },
+      divide(x, y)   { return Rnl.divide(x, y) },
+      power(x, y)    {
+        // eslint-disable-next-line max-len
+        return Cpx.isComplex(x) || (Rnl.isNegative(x) && Rnl.isPositive(y) && Rnl.lessThan(y, Rnl.one))
+          ? Cpx.power([x, Rnl.zero], y)
+          : Rnl.power(x, y)
+      },
+      modulo(x, y)   { return Rnl.mod(x, y) },
+      hypot(x, y)    { return Rnl.hypot(x, y) },
+      rem(x, y)      { return Rnl.rem(x, y) },
+      and(x, y)      { return x && y },
+      or(x, y)       { return x || y },
+      xor(x, y)      { return x !== y },
+      concat(x, y)   { return [x, y] },
+      unshift(x, y)  { return [x, y] }
+    },
+    complex: {
+      add(x, z)      { return [Rnl.add(x, z[0]), z[1]] },
+      subtract(x, z) { return [Rnl.subtract(x, z[0]), Rnl.negate(z[1])] },
+      multiply(x, z) { return [Rnl.multiply(x, z[0]), Rnl.multiply(x, z[1])] },
+      divide(x, z)   { return Cpx.divide([x, Rnl.zero], z) },
+      power(x, z)    { return Cpx.power([x, Rnl.zero], z) },
+      rem(x, z)      { return errorOprnd("NA_COMPL_OP", "rem") },
+      and(x, z)      { return errorOprnd("NA_COMPL_OP", "and") },
+      or(x, z)       { return errorOprnd("NA_COMPL_OP", "or") },
+      xor(x, z)      { return errorOprnd("NA_COMPL_OP", "xor") }
+    },
+    vector: {
+      // Binary operations with a scalar and a vector.
+      // Perform element-wise operations.
+      add(x, v)      { return v.map(e => Rnl.add(x, e)) },
+      subtract(x, v) { return v.map(e => Rnl.subtract(x, e)) },
+      multiply(x, v) { return v.map(e => Rnl.multiply(x, e)) },
+      divide(x, v)   { return v.map(e => Rnl.divide(x, e)) },
+      power(x, v)    { return v.map(e => Rnl.power(x, e)) },
+      modulo(x, v)   { return v.map(e => Rnl.mod(x, e)) },
+      rem(x, v)      { return v.map(e => Rnl.rem(x, e)) },
+      and(x, v)      { return v.map(e => x && e) },
+      or(x, v)       { return v.map(e => x || e) },
+      xor(x, v)      { return v.map(e => x !== e) },
+      concat(x, v)   { return [x, ...v] }
+    },
+    matrix: {
+      // Binary operations with a scalar and a matrix.
+      // Perform element-wise operations.
+      add(x, m)      { return m.map(row => row.map(e => Rnl.add(x, e))) },
+      subtract(x, m) { return m.map(row => row.map(e => Rnl.subtract(x, e))) },
+      multiply(x, m) { return m.map(row => row.map(e => Rnl.multiply(x, e))) },
+      divide(x, m)   { return m.map(row => row.map(e => Rnl.divide(x, e))) },
+      power(x, m)    { return m.map(row => row.map(e => Rnl.power(x, e))) },
+      modulo(x, m)   { return m.map(row => row.map(e => Rnl.mod(x, e))) },
+      rem(x, m)      { return m.map(row => row.map(e => Rnl.rem(x, e))) },
+      and(x, m)      { return m.map(row => row.map(e => x && e)) },
+      or(x, m)       { return m.map(row => row.map(e => x || e)) },
+      xor(x, m)      { return m.map(row => row.map(e => x !== e)) },
+      concat(x, m)   { return errorOprnd("BAD_CONCAT") }
+    },
+    dataFrame: {
+      multiply(x, df) {
+        df.data = df.data.map(col => isNaN(col[0]) ? col : col.map(e => {
+          let L = e.length;
+          if (e.indexOf(".")) { L -= 1; }
+          return Rnl.toStringSignificant(Rnl.multiply(x, Rnl.fromString(e)), L)
+        }));
+        return df
+      },
+      divide(x, df) {
+        df.data = df.data.map(col => isNaN(col[0]) ? col : col.map(e => {
+          let L = e.length;
+          if (e.indexOf(".")) { L -= 1; }
+          return Rnl.toStringSignificant(Rnl.divide(x, Rnl.fromString(e)), L)
+        }));
+        return df
+      }
+    },
+    map: {
+      // Binary operations with a scalar and a map.
+      // Perform element-wise operations.
+      add(scalar, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.add(scalar, e))
+          : col
+        );
+        return map
+      },
+      subtract(scalar, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.subtract(scalar, e))
+          : col
+        );
+        return map
+      },
+      multiply(scalar, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.multiply(scalar, e))
+          : col
+        );
+        return map
+      },
+      divide(scalar, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.divide(scalar, e))
+          : col
+        );
+        return map
+      },
+      power(scalar, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.power(scalar, e))
+          : col
+        );
+        return map
+      },
+      modulo(scalar, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.mod(scalar, e))
+          : col
+        );
+        return map
+      },
+      rem(scalar, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.rem(scalar, e))
+          : col
+        );
+        return map
+      },
+      and(scalar, map) {
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map(e => scalar && e)
+          : col
+        );
+        return map
+      },
+      or(scalar, map) {
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map(e => scalar || e)
+          : col
+        );
+        return map
+      },
+      xor(scalar, map) {
+        map.data =  map.data.map(col =>  typeof col[0] === "boolean"
+          ? col.map(e => scalar !== e)
+          : col
+        );
+        return map
+      }
+    }
+  },
+
+  complex: {
+    scalar: {
+      add(z, y)      { return [Rnl.add(z[0], y), z[1]] },
+      subtract(z, y) { return [Rnl.subtract(z[0], y), z[1]] },
+      multiply(z, y) { return [Rnl.multiply(z[0], y), Rnl.multiply(z[1], y) ] },
+      divide(z, y)   { return Cpx.divide(z, [y, Rnl.zero]) },
+      power(z, y)    { return Cpx.power(z, [y, Rnl.zero]) },
+      rem(z, y)      { return errorOprnd("NA_COMPL_OP", "rem") },
+      and(z, y)      { return errorOprnd("NA_COMPL_OP", "and") },
+      or(z, y)       { return errorOprnd("NA_COMPL_OP", "or") },
+      xor(z, y)      { return errorOprnd("NA_COMPL_OP", "xor") }
+    },
+    complex: {
+      add(x, y)      { return [Rnl.add(x[0], y[0]), Rnl.add(x[1], y[1])] },
+      subtract(x, y) { return [Rnl.subtract(x[0], y[0]), Rnl.subtract(x[1], y[1])] },
+      multiply(x, y) { return Cpx.multiply(x, y) },
+      divide(x, y)   { return Cpx.divide(x, y) },
+      power(x, y)    { return Cpx.power(x, y) },
+      rem(x, y)      { return errorOprnd("NA_COMPL_OP", "rem") },
+      and(x, y)      { return errorOprnd("NA_COMPL_OP", "and") },
+      or(x, y)       { return errorOprnd("NA_COMPL_OP", "or") },
+      xor(x, y)      { return errorOprnd("NA_COMPL_OP", "xor") }
+
+    }
+  },
+
+  vector: {
+    scalar: {
+      // Binary operations with a vector and a scalar.
+      // Perform element-wise operations.
+      add(v, x)      { return v.map(e => Rnl.add(e, x)) },
+      subtract(v, x) { return v.map(e => Rnl.subtract(e, x)) },
+      multiply(v, x) { return v.map(e => Rnl.multiply(e, x)) },
+      divide(v, x)   { return v.map(e => Rnl.divide(e, x)) },
+      power(v, x)    { return v.map(e => Rnl.power(e, x)) },
+      modulo(v, x)   { return v.map(e => Rnl.mod(e, x)) },
+      rem(v, x)      { return v.map(e => Rnl.rem(e, x)) },
+      and(v, x)      { return v.map(e => e && x) },
+      or(v, x)       { return v.map(e => e || x) },
+      xor(v, x)      { return v.map(e => e !== x) },
+      concat(v, x)   { return [...v, x]}
+    }
+  },
+
+  rowVector: {
+    rowVector: {
+      // Binary operations on two row vectors.
+      add(x, y) {
+        // element-wise addition
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.add(e, y[i]))
+      },
+      subtract(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.subtract(e, y[i]))
+      },
+      divide(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.divide(e, y[i]))
+      },
+      dot(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return dotProduct$1(x, y)
+      },
+      cross(x, y) {
+        if (x.length !== 3 || y.length !== 3) { return errorOprnd("CROSS") }
+        const v = [Rnl.zero, Rnl.zero, Rnl.zero];
+        v[0] = Rnl.subtract(Rnl.multiply(x[1], y[2]), Rnl.multiply(x[2], y[1]));
+        v[1] = Rnl.subtract(Rnl.multiply(x[2], y[0]), Rnl.multiply(x[0], y[2]));
+        v[2] = Rnl.subtract(Rnl.multiply(x[0], y[1]), Rnl.multiply(x[1], y[0]));
+        return v
+      },
+      multiply(x, y) {
+        if (x.length === 1 && y.length === 1) { return [Rnl.multiply(x[0], y[0])] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      circ(x, y) {
+        // Element-wise multiplication
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.multiply(e, y[i]))
+      },
+      power(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.power(e, y[i]))
+      },
+      modulo(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.mod(e, y[i]))
+      },
+      and(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => e && y[i])
+      },
+      or(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => e || y[i])
+      },
+      xor(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => e !== y[i])
+      },
+      concat(x, y) { return x.concat(y) },
+      unshift(x, y) { return [x, y] }
+    },
+    columnVector: {
+      // Binary operations on a row vector and a column vector.
+      // Except for multiplication, these work only if both vectors have only one element.
+      add(x, y) {
+        if (x.length === 1 && y.length === 1) { return [Rnl.add(x[0], y[0])] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      subtract(x, y) {
+        if (x.length === 1 && y.length === 1) { return [Rnl.subtract(x[0], y[0])] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      dot(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return dotProduct$1(x, y)
+      },
+      cross(x, y) {
+        if (x.length !== 3 || y.length !== 3) { return errorOprnd("CROSS") }
+        const v = [Rnl.zero, Rnl.zero, Rnl.zero];
+        v[0] = Rnl.subtract(Rnl.multiply(x[1], y[2]), Rnl.multiply(x[2], y[1]));
+        v[1] = Rnl.subtract(Rnl.multiply(x[2], y[0]), Rnl.multiply(x[0], y[2]));
+        v[2] = Rnl.subtract(Rnl.multiply(x[0], y[1]), Rnl.multiply(x[1], y[0]));
+        return v
+      },
+      multiply(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return dotProduct$1(x, y)
+      },
+      circ(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.multiply(e, y[i]))
+      },
+      power(x, y) {
+        if (x.length === 1 && y.length === 1) { return [Rnl.power(x[0], y[0])] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      modulo(x, y) {
+        if (x.length === 1 && y.length === 1) { return [Rnl.mod(x[0], y[0])] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      and(x, y) {
+        if (x.length === 1 && y.length === 1) { return [x[0] && y[0]] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      or(x, y) {
+        if (x.length === 1 && y.length === 1) { return [x[0] || y[0]] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      xor(x, y) {
+        if (x.length === 1 && y.length === 1) { return [x[0] !== y[0]] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      concat(x, y)  { return "BAD_CONCAT" },
+      unshift(x, y) { return "BAD_CONCAT" }
+    },
+    matrix: {
+      // Binary operations on a row vector and a 2-D matrix.
+      add(v, m) {
+        // Add the row vector to each row in the matrix
+        if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
+        return m.map(row => row.map((e, i) => Rnl.add(v[i], e)))
+      },
+      subtract(v, m) {
+        if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
+        return m.map(row => row.map((e, i) => Rnl.subtract(v[i], e)))
+      },
+      multiply(v, m) {
+        if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
+        m = m[0].map((x, i) => m.map(y => y[i])); // Transpose m
+        return m.map(row => dotProduct$1(v, row))
+      },
+      circ(v, m) {
+        if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
+        return m.map(row => row.map((e, i) => Rnl.multiply(v[i], e)))
+      },
+      divide(v, m) {
+        if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
+        return m.map(row => row.map((e, i) => Rnl.divide(v[i], e)))
+      },
+      power(v, m) {
+        if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
+        return m.map(row => row.map((e, i) => Rnl.power(v[i], e)))
+      },
+      modulo(v, m) {
+        if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
+        return m.map(row => row.map((e, i) => Rnl.mod(v[i], e)))
+      },
+      concat(v, m) {
+        if (v.length !== m[0].length) { return errorOprnd("BAD_CONCAT") }
+        return m.map((row, i) => [v[i], ...row])
+      },
+      unshift(v, m) {
+        if (v.length !== m[0].length) { return errorOprnd("BAD_CONCAT") }
+        return [v, ...m]
+      }
+    }
+  },
+
+  columnVector: {
+    rowVector: {
+      // Binary operations on a column vector and a row vector.
+      // Except for multiplication, these work only if both vectors have only one element.
+      add(x, y) {
+        if (x.length === 1 && y.length === 1) { return [Rnl.add(x[0], y[0])] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      subtract(x, y) {
+        if (x.length === 1 && y.length === 1) { return [Rnl.subtract(x[0], y[0])] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      dot(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return dotProduct$1(x, y)
+      },
+      cross(x, y) {
+        if (x.length !== 3 || y.length !== 3) { return errorOprnd("CROSS") }
+        const v = [Rnl.zero, Rnl.zero, Rnl.zero];
+        v[0] = Rnl.subtract(Rnl.multiply(x[1], y[2]), Rnl.multiply(x[2], y[1]));
+        v[1] = Rnl.subtract(Rnl.multiply(x[2], y[0]), Rnl.multiply(x[0], y[2]));
+        v[2] = Rnl.subtract(Rnl.multiply(x[0], y[1]), Rnl.multiply(x[1], y[0]));
+        return v
+      },
+      multiply(x, y) {
+        if (x[0].length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map(row => y.map(e => Rnl.multiply(row, e)))
+      },
+      divide(x, y) {
+        return x.map(m => y.map(e => Rnl.divide(m, e)))
+      },
+      circ(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.multiply(e, y[i]))
+      },
+      power(x, y) {
+        if (x.length === 1 && y.length === 1) { return [Rnl.power(x[0], y[0])] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      modulo(x, y) {
+        if (x.length === 1 && y.length === 1) { return [Rnl.mod(x[0], y[0])] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      and(x, y) {
+        if (x.length === 1 && y.length === 1) { return [x[0] && y[0]] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      or(x, y) {
+        if (x.length === 1 && y.length === 1) { return [x[0] || y[0]] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      xor(x, y) {
+        if (x.length === 1 && y.length === 1) { return [x[0] !== y[0]] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      concat(x, y)  { return "BAD_CONCAT" },
+      unshift(x, y) { return "BAD_CONCAT" }
+    },
+    columnVector: {
+      // Binary operations on two column vectors.
+      add(x, y) {
+        // element-wise addition
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.add(e, y[i]))
+      },
+      subtract(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.subtract(e, y[i]))
+      },
+      divide(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.divide(e, y[i]))
+      },
+      dot(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return dotProduct$1(x, y)
+      },
+      cross(x, y) {
+        if (x.length !== 3 || y.length !== 3) { return errorOprnd("CROSS") }
+        const v = [Rnl.zero, Rnl.zero, Rnl.zero];
+        v[0] = Rnl.subtract(Rnl.multiply(x[1], y[2]), Rnl.multiply(x[2], y[1]));
+        v[1] = Rnl.subtract(Rnl.multiply(x[2], y[0]), Rnl.multiply(x[0], y[2]));
+        v[2] = Rnl.subtract(Rnl.multiply(x[0], y[1]), Rnl.multiply(x[1], y[0]));
+        return v
+      },
+      multiply(x, y) {
+        if (x.length === 1 && y.length === 1) { return [Rnl.multiply(x[0], y[0])] }
+        return errorOprnd("MIS_ELNUM")
+      },
+      circ(x, y) {
+        // Element-wise multiplication
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.multiply(e, y[i]))
+      },
+      power(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.power(e, y[i]))
+      },
+      modulo(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.mod(e, y[i]))
+      },
+      rem(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => Rnl.rem(e, y[i]))
+      },
+      and(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => e && y[i])
+      },
+      or(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => e || y[i])
+      },
+      xor(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => e !== y[i])
+      },
+      concat(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((e, i) => [e, y[i]])
+      },
+      unshift(x, y) { return x.concat(y) }
+    },
+    matrix: {
+      // Binary operations on a column vector and a 2-D matrix.
+      add(v, m) {
+        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
+        return m.map((row, i) => row.map(e => Rnl.add(v[i], e)))
+      },
+      subtract(v, m) {
+        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
+        return m.map((row, i) => row.map(e => Rnl.subtract(v[i], e)))
+      },
+      multiply(v, m) {
+        if (m.length !== 1) { return errorOprnd("MIS_ELNUM") }
+        return m.map((row, i) => row.map(e => Rnl.multiply(v[i], e)))
+      },
+      circ(v, m) {
+        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
+        return m.map((row, i) => row.map(e => Rnl.multiply(v[i], e)))
+      },
+      divide(v, m) {
+        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
+        return m.map((row, i) => row.map(e => Rnl.divide(v[i], e)))
+      },
+      power(v, m) {
+        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
+        return m.map((row, i) => row.map(e => Rnl.power(v[i], e)))
+      },
+      mod(v, m) {
+        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
+        return m.map((row, i) => row.map(e => Rnl.mod(v[i], e)))
+      },
+      concat(v, m) {
+        if (v.length !== m.length) { return errorOprnd("MIS_ELNUM") }
+        return m.map((row, i) => [v[i], ...row])
+      },
+      unshift(x, y) { return "BAD_CONCAT" }
+    },
+    map: {
+      // Binary operations between a column vector and a map
+      add(vector, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.add(vector[i], e))
+          : col
+        );
+        return map
+      },
+      subtract(vector, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.subtract(vector[i], e))
+          : col
+        );
+        return map
+      },
+      multiply(vector, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.multiply(vector[i], e))
+          : col
+        );
+        return map
+      },
+      divide(vector, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.divide(vector[i], e))
+          : col
+        );
+        return map
+      },
+      power(vector, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.power(vector[i], e))
+          : col
+        );
+        return map
+      },
+      modulo(vector, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.mod(vector[i], e))
+          : col
+        );
+        return map
+      },
+      rem(vector, map) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.rem(vector[i], e))
+          : col
+        );
+        return map
+      },
+      and(vector, map) {
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map((e, i) => vector[i] && e)
+          : col
+        );
+        return map
+      },
+      or(vector, map) {
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map((e, i) => vector[i] || e)
+          : col
+        );
+        return map
+      },
+      xor(vector, map) {
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map((e, i) => vector[i] !== e)
+          : col
+        );
+        return map
+      }
+    }
+  },
+
+  matrix: {
+    scalar: {
+      // Binary operations with a matrix and a scalar.
+      // Perform element-wise operations.
+      add(m, x)      { return m.map(row => row.map(e => Rnl.add(e, x))) },
+      subtract(m, x) { return m.map(row => row.map(e => Rnl.subtract(e, x))) },
+      multiply(m, x) { return m.map(row => row.map(e => Rnl.multiply(e, x))) },
+      divide(m, x)   { return m.map(row => row.map(e => Rnl.divide(e, x))) },
+      power(m, x)    {
+        if (m.length === m[0].length && Rnl.areEqual(x, [BigInt(-1), BigInt(1)])) {
+          return Matrix.invert(m)
+        }
+        return m.map(row => row.map(e => Rnl.power(e, x)))
+      },
+      modulo(m, x) { return m.map(row => row.map(e => Rnl.mod(e, x))) },
+      rem(m, x)    { return m.map(row => row.map(e => Rnl.rem(e, x))) }
+    },
+    rowVector: {
+      add(m, v)      { return m.map(row => row.map((e, i) => Rnl.add(e, v[i]) )) },
+      subtract(m, v) { return m.map(row => row.map((e, i) => Rnl.subtract(e, v[i]) )) },
+      multiply(m, v) { return m.map(row => row.map((e, i) => Rnl.multiply(e, v[i]) )) },
+      circ(m, v) { return m.map(row => row.map((e, i) => Rnl.multiply(e, v[i]) )) },
+      divide(m, v)   { return m.map(row => row.map((e, i) => Rnl.divide(e, v[i]) )) },
+      power(m, v)    { return m.map(row => row.map((e, i) => Rnl.power(e, v[i]) )) },
+      modulo(m, v)   { return m.map(row => row.map((e, i) => Rnl.mod(e, v[i]) )) },
+      rem(m, v)      { return m.map(row => row.map((e, i) => Rnl.rem(e, v[i]) )) },
+      unshift(m, v) {
+        if (m[0].length !== v.length) { return errorOprnd("MIS_ELNUM") }
+        return [...m, v]
+      }
+    },
+    columnVector: {
+      add(m, v)      { return m.map((row, i) => row.map(e => Rnl.add(e, v[i]) )) },
+      subtract(m, v) { return m.map((row, i) => row.map(e => Rnl.subtract(e, v[i]) )) },
+      multiply(m, v) {
+        // Multiply a matrix times a column vector
+        if (m[0].length !== v.length) { return errorOprnd("MIS_ELNUM") }
+        return m.map(row => dotProduct$1(row, v))
+      },
+      circ(m, v) { return m.map((row, i) => row.map(e => Rnl.multiply(e, v[i]) )) },
+      divide(m, v)   { return m.map((row, i) => row.map(e => Rnl.divide(e, v[i]) )) },
+      power(m, v)    { return m.map((row, i) => row.map(e => Rnl.power(e, v[i]) )) },
+      modulo(m, v)   { return m.map((row, i) => row.map(e => Rnl.mod(e, v[i]) )) },
+      rem(m, v)      { return m.map((row, i) => row.map(e => Rnl.rem(e, v[i]) )) },
+      concat(m, v) {
+        if (m.length !== v.length) { return errorOprnd("MIS_ELNUM") }
+        return m.map((row, i) => [...row, v[i]])
+      }
+    },
+    matrix: {
+      // Binary operations on two 2-D matrices.
+      add(x, y) {
+        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
+        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((m, i) => m.map((n, j) => Rnl.add(n, y[i][j])))
+      },
+      subtract(x, y) {
+        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
+        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((m, i) => m.map((n, j) => Rnl.subtract(n, y[i][j])))
+      },
+      dot(x, y) {
+        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
+        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((row, i) => dotProduct$1(row, y[i])).reduce((m, n) => Rnl.add(m, n))
+      },
+      cross(x, y) {
+        return errorOprnd("CROSS")
+      },
+      multiply(x, y) {
+
+      },
+      circ(x, y) {
+        // Element-wise multiplication
+        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
+        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((m, i) => m.map((n, j) => Rnl.multiply(n, y[i][j])))
+      },
+      divide(x, y) {
+        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
+        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((m, i) => m.map((n, j) => Rnl.divide(n, y[i][j])))
+      },
+      power(x, y) {
+        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
+        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((m, i) => m.map((n, j) => Rnl.power(n, y[i][j])))
+      },
+      modulo(x, y) {
+        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
+        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((m, i) => m.map((n, j) => Rnl.mod(n, y[i][j])))
+      },
+      rem(x, y) {
+        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
+        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((m, i) => m.map((n, j) => Rnl.rem(n, y[i][j])))
+      },
+      and(x, y) {
+        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
+        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((m, i) => m.map((n, j) => n && y[i][j]))
+      },
+      or(x, y) {
+        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
+        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((m, i) => m.map((n, j) => n || y[i][j]))
+      },
+      xor(x, y) {
+        if (x.length !== y.length)       { return errorOprnd("MIS_ELNUM") }
+        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((m, i) => m.map((n, j) => n !== y[i][j]))
+      },
+      concat(x, y) {
+        if (x.length !== y.length) { return errorOprnd("MIS_ELNUM") }
+        return x.map((row, i) => row.concat(y[i]))
+      },
+      unshift(x, y) {
+        if (x[0].length !== y[0].length) { return errorOprnd("MIS_ELNUM") }
+        return x.concat(y)
+      }
+    },
+    map: {
+
+    }
+  },
+
+  dataFrame: {
+    multiply(df, scalar) {
+      df.data = df.data.map(col => isNaN(col[0]) ? col : col.map(e => {
+        let L = e.length;
+        if (e.indexOf(".")) { L -= 1; }
+        return Rnl.toStringSignificant(Rnl.multiply(scalar, Rnl.fromString(e)), L)
+      }));
+      return df
+    },
+    divide(df, scalar) {
+      df.data = df.data.map(col => isNaN(col[0]) ? col : col.map(e => {
+        let L = e.length;
+        if (e.indexOf(".")) { L -= 1; }
+        return Rnl.toStringSignificant(Rnl.divide(scalar, Rnl.fromString(e)), L)
+      }));
+      return df
+    }
+  },
+
+  map: {
+    scalar: {
+      // Binary opertions on a map and a scalar
+      add(map, scalar) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.add(e, scalar))
+          : col
+        );
+        return map
+      },
+      subtract(map, scalar) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.subtract(e, scalar))
+          : col
+        );
+        return map
+      },
+      multiply(map, scalar) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.multiply(e, scalar))
+          : col
+        );
+        return map
+      },
+      divide(map, scalar) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.divide(e, scalar))
+          : col
+        );
+        return map
+      },
+      power(map, scalar) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.power(e, scalar))
+          : col
+        );
+        return map
+      },
+      modulo(map, scalar) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.mod(e, scalar))
+          : col
+        );
+        return map
+      },
+      rem(map, scalar) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map(e => Rnl.rem(e, scalar))
+          : col
+        );
+        return map
+      },
+      and(map, scalar) {
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map(e => e && scalar)
+          : col
+        );
+        return map
+      },
+      or(map, scalar) {
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map(e => e || scalar)
+          : col
+        );
+        return map
+      },
+      xor(map, scalar) {
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map(e => e !== scalar)
+          : col
+        );
+        return map
+      }
+    },
+    columnVector: {
+      add(map, vector) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.add(e, vector[i]))
+          : col
+        );
+        return map
+      },
+      subtract(map, vector) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.subtract(e, vector[i]))
+          : col
+        );
+        return map
+      },
+      multiply(map, vector) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.multiply(e, vector[i]))
+          : col
+        );
+        return map
+      },
+      divide(map, vector) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.divide(e, vector[i]))
+          : col
+        );
+        return map
+      },
+      power(map, vector) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.power(e, vector[i]))
+          : col
+        );
+        return map
+      },
+      modulo(map, vector) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.mod(e, vector[i]))
+          : col
+        );
+        return map
+      },
+      rem(map, vector) {
+        map.data =  map.data.map(col => Rnl.isRational(col[0])
+          ? col.map((e, i) => Rnl.rem(e, vector[i]))
+          : col
+        );
+        return map
+      },
+      and(map, vector) {
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map((e, i) => e && vector[i])
+          : col
+        );
+        return map
+      },
+      or(map, vector) {
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map((e, i) => e || vector[i])
+          : col
+        );
+        return map
+      },
+      xor(map, vector) {
+        map.data =  map.data.map(col => typeof col[0] === "boolean"
+          ? col.map((e, i) => e !== vector[i])
+          : col
+        );
+        return map
+      }
+    },
+    matrix: {
+
+    },
+    map: {
+
+    }
+  }
+};
+
+// Binary relations get their own object, separate from other binary operations.
+// That's because Hurmet allows chained comparisons, as in  a < b < c.
+// So we have to pass yPrev as well as the two current operands.
+
+const strOps = ["∈", "in", "∋", "⊇", "∉", "!in", "∌", "⊈", "⊉"];
+
+const relations = {
+  scalar: {
+    scalar: {
+      relate(op, x, y, yPrev) { return compare(op, x, y, yPrev) }
+    },
+    vector: {
+      relate(op, x, v, yPrev) {
+        if (yPrev === undefined) {
+          return v.map(e => compare(op, x, e, undefined))
+        } else if (typeof yPrev !== "object") {
+          return v.map(e => compare(op, x, e, yPrev))
+        } else if (Array.isArray(yPrev)) {
+          return v.map((e, i) => compare(op, x, e, yPrev[i]))
+        } else ;
+      }
+    },
+    matrix: {
+      relate(op, x, m, yPrev) {
+        if (yPrev === undefined) {
+          return m.map(row => row.map(e => compare(op, x, e, undefined)))
+        } else if (typeof yPrev !== "object") {
+          return m.map(row => row.map(e => compare(op, x, e, yPrev)))
+        } else if (Array.isArray(yPrev)) {
+          return m.map((row, i) => row.map((e, j) => compare(op, x, e, yPrev[i][j])))
+        } else ;
+      }
+    },
+    map: {
+      relate(op, x, map, yPrev) {
+        if (yPrev === undefined) {
+          map.data =  map.data.map((column, j) =>
+            j > 0 || typeof column[0] !== "string" || strOps.includes(op)
+            ? column.map(e => compare(op, x, e, undefined))
+            : column
+          );
+          return map
+        }
+      }
+    }
+  },
+  vector: {
+    scalar: {
+      relate(op, v, y, yPrev) {
+        if (yPrev === undefined) {
+          return v.map(e => compare(op, e, y, undefined))
+        } else if (typeof yPrev !== "object") {
+          return v.map(e => compare(op, e, y, yPrev))
+        } else if (Array.isArray(yPrev)) {
+          return v.map((e, i) => compare(op, e, y, yPrev[i]))
+        } else ;
+      }
+    }
+  },
+  rowVector: {
+    rowVector: {
+      relate(op, x, y, yPrev) {
+        if (yPrev === undefined) {
+          return x.map((e, i) => compare(op, e, y[i], undefined))
+        }
+      }
+    },
+    matrix: {
+      relate(op, v, m, yPrev) {
+        if (yPrev === undefined) {
+          if (v.length !== m[0].length) { return errorOprnd("MIS_ELNUM") }
+          return m.map(row => row.map((e, i) => compare(op, v[i], e, undefined)))
+        }
+      }
+    }
+  },
+  columnVector: {
+    columnVector: {
+      relate(op, x, y, yPrev) {
+        if (yPrev === undefined) {
+          return x.map((e, i) => compare(op, e, y[i], undefined))
+        }
+      }
+    },
+    map: {
+      relate(op, v, map, yPrev) {
+        if (yPrev === undefined) {
+          map.data =  map.data.map((column, j) =>
+            j > 0 || typeof column[0] !== "string" || strOps.includes(op)
+            ? column.map((e, i) => compare(op, v[i], e, undefined))
+            : column
+          );
+          return map
+        }
+      }
+    }
+  },
+  matrix: {
+    scalar: {
+      relate(op, m, y, yPrev) {
+        if (yPrev === undefined) {
+          return m.map(row => row.map(e => compare(op, e, y, undefined)))
+        } else if (typeof yPrev !== "object") {
+          return m.map(row => row.map(e => compare(op, e, y, yPrev)))
+        } else if (Array.isArray(yPrev)) {
+          return m.map((row, i) => row.map((e, j) => compare(op, e, y, yPrev[i][j])))
+        } else ;
+      }
+    },
+    matrix: {
+      relate(op, m1, m2, yPrev) {
+        if (yPrev === undefined) {
+          return m1.map((e, i) => compare(op, e, m2[i], undefined))
+        }
+      }
+    }
+  }
+};
+
+const isDivByZero = (quotient, shape) => {
+  switch (shape) {
+    case "scalar":
+      return quotient[1] === BigInt(0)
+    case "vector":
+      for (let i = 0; i < quotient.length; i++) {
+        if (quotient[i][1] === BigInt(0)) { return true }
+      }
+      return false
+    case "matrix":
+      for (let i = 0; i < quotient.length; i++) {
+        for (let j = 0; j < quotient[0].length; j++) {
+          if (quotient[i][j][1] === BigInt(0)) { return true }
+        }
+      }
+      return false
+    case "map":
+      for (let j = 0; j < quotient.data[0].length; j++) {
+        if (Rnl.isRational(quotient.data[j][0])) {
+          for (let i = 0; i < quotient.data.length; i++) {
+            if (quotient.data[i][j][1] === BigInt(0)) { return true }
+          }
+        }
+      }
+      return false
+    default:
+      return false
+  }
+};
+
+const Operators = Object.freeze({
+  unary,
+  binary,
+  relations,
+  condition,
+  dtype
+});
+
+const wideCharRegEx = /[\uD800-\uDBFF][\uDC00-\uDFFF][\uFE00\uFE01]?/g;
+
+const findfirst = (searchString, str) => {
+  const index = str.value.indexOf(searchString.value);
+  const wideCharMatches = arrayOfRegExMatches(wideCharRegEx, str.value.slice(0, index));
+  return Rnl.fromNumber(index + wideCharMatches.length + 1)
+};
+
+const textRange = (str, index) => {
+  // Find a range of the string str
+  if (index.dtype !== dt.RATIONAL && index.dtype !== dt.RANGE) {
+    return errorOprnd("STR_INDEX")
+  }
+
+  const strArray = Array.from(str);
+  let value = "";
+  if (index.dtype === dt.RATIONAL) {
+    const pos = Rnl.toNumber(index.value) - 1;
+    value = strArray.at(pos);
+  } else if (index.dtype === dt.RANGE) {
+    const start = Rnl.toNumber(index.value[0]);
+    const step = Rnl.toNumber(index.value[1]);
+    const end = index.value[2] === "∞"
+      ? str.length
+      : Rnl.toNumber(index.value[2]);
+    if (step === 1) {
+      value = strArray.slice(start - 1, end).join("");
+    } else {
+      for (let i = start - 1; i < end; i += step) {
+        value += strArray.at(i);
+      }
+
+    }
+  }
+
+  return { value, unit: null, dtype: dt.STRING }
+};
+
+const startSvg = _ => {
+  return {
+    tag: 'svg',
+    children: [],
+    attrs: {
+      xmlns: "http://www.w3.org/2000/svg",
+      width: 250,
+      height: 250,
+      style: "display: inline;"
+    },
+    temp: {
+      width: 250,
+      height: 250,
+      xmin: 0,
+      xmax: 5,
+      ymin: 0,
+      ymax: 5,
+      xunitlength: 20,  // px
+      yunitlength: 20,  // px
+      origin: [0, 0],   // in px (default is bottom left corner)
+      stroke: "black",
+      strokewidth: 1,
+      strokedasharray: null,
+      fill: "none",
+      fontstyle: "normal",
+      fontfamily: "sans-serif",
+      fontsize: 13.33, // px, ~10 pt
+      fontweight: "normal",
+      markerstrokewidth: 1,
+      markerstroke: "black",
+      markerfill: "yellow",
+      markersize: 4,
+      marker: "none",
+      dotradius: 4,
+      axesstroke: "black",
+      gridstroke: "grey",
+      isDim: false
+    }
+  }
+};
+
+// Helpers
+const setStrokeAndFill = (node, attrs) => {
+  node.attrs["stroke-width"] = attrs.strokewidth;
+  node.attrs.stroke = attrs.stroke;
+  node.attrs.fill = attrs.fill;
+  if (attrs.strokedasharray != null && attrs.strokedasharray !== "none") {
+    node.attrs["stroke-dasharray"] = attrs.strokedasharray;
+  }
+};
+
+const pointZeroRegEx = /\.0+$/;
+const chopZ = str => {
+  const k = str.indexOf(".");
+  if (k === -1) { return str }
+  if (pointZeroRegEx.test(str)) { return str.replace(pointZeroRegEx, "") }
+  let i;
+  for (i = str.length - 1; i > k && str.charAt(i) === "0"; i--) {
+    if (i === k) { i--; }
+  }
+  return str.slice(0, i + 1)
+};
+
+const markerDot = (center, attrs, s, f) => { // coordinates in units, radius in pixel
+  if (s == null) { s = attrs.stroke; }
+  if (f == null) { f = attrs.fill; }
+  const node = { tag: "circle", attrs: {} };
+  node.attrs.cx = center[0] * attrs.xunitlength + attrs.origin[0];
+  node.attrs.cy = attrs.height - center[1] * attrs.yunitlength - attrs.origin[1];
+  node.attrs.r = attrs.markersize;
+  node.attrs["stroke-width"] = attrs.strokewidth;
+  node.attrs.stroke = s;
+  node.attrs.fill = f;
+  return node
+};
+
+const rationals2numbers = array => {
+  const newArray = [];
+  for (let i = 0; i < array.length; i++) {
+    const element = array[i];
+    if (element.dtype) {
+      newArray[i] = rationals2numbers(element.value);
+    } else if (Rnl.isRational(element)) {
+      newArray[i] = Rnl.toNumber(element);
+    } else {
+      newArray[i] = rationals2numbers(element);
+    }
+  }
+  return newArray
+};
+
+const arrowhead = (svg, p, q) => { // draw arrowhead at q (in units)
+  const attrs = svg.temp;
+  const v = [p[0] * attrs.xunitlength + attrs.origin[0], attrs.height -
+             p[1] * attrs.yunitlength - attrs.origin[1]];
+  const w = [q[0] * attrs.xunitlength + attrs.origin[0], attrs.height -
+             q[1] * attrs.yunitlength - attrs.origin[1]];
+  let u = [w[0] - v[0], w[1] - v[1]];
+  const d = Math.sqrt(u[0] * u[0] + u[1] * u[1]);
+  if (d > 0.00000001) {
+    u = [u[0] / d, u[1] / d];
+    const z = attrs.marker === "markerdot" ? 3 : attrs.isDim ? 0 : 1;
+    const up = [-u[1], u[0]];
+    const L = d > 12 ? 12.5 : 7.8125;
+    const S = d > 12 ? 3 : 1.875;
+    const node = { tag: "path", attrs: {} };
+    node.attrs.d = "M " + (w[0] - L * u[0] - S * up[0]) + "," +
+      (w[1] - L * u[1] - S * up[1]) + " L " + (w[0] - z * u[0]) + "," + (w[1] - z * u[1]) +
+      " L " + (w[0] - L * u[0] + S * up[0]) + "," + (w[1] - L * u[1] + S * up[1]) + " z";
+    if (attrs.isDim) {
+      node.attrs.stroke = "none";
+    } else {
+      node.attrs["stroke-width"] = attrs.markerstrokewidth;
+      node.attrs.stroke = attrs.stroke;
+    }
+    node.attrs.fill = attrs.stroke;
+    svg.children.push(node);
+  }
+};
+
+const markAttribute = {
+  em:         ["font-style", "italic"],
+  strong:     ["font-weight", "bold"],
+  code:       ["font-family", "monospace"],
+  strikethru: ["text-decoration", "line-through"],
+  subscript:  ["font-size", "0.8em"],
+  superscript: ["font-size", "0.8em"]
+};
+
+const textLocal = (svg, p, str, pos) => {
+  const attrs = svg.temp;
+  let textanchor = "middle";
+  let dx = 0;
+  let dy = attrs.fontsize / 3;
+  if (pos != null) {
+    if (pos.slice(0, 5) === "above") { dy = -attrs.fontsize / 2; }
+    if (pos.slice(0, 5) === "below") { dy = 1.25 * attrs.fontsize; }
+    if (pos.slice(0, 5) === "right" || pos.slice(5, 10) === "right") {
+      textanchor = "start";
+      dx = attrs.fontsize / 2;
+    }
+    if (pos.slice(0, 4) === "left" || pos.slice(5, 9) === "left") {
+      textanchor = "end";
+      dx = -attrs.fontsize / 2;
+    }
+  }
+  const textNode = { tag: "text", children: [], attrs: {} };
+  textNode.attrs["text"] = str;
+  textNode.attrs.x = p[0] * attrs.xunitlength + attrs.origin[0] + dx;
+  textNode.attrs.y = attrs.height - p[1] * attrs.yunitlength - attrs.origin[1] + dy;
+  textNode.attrs["font-family"] = attrs.fontfamily;
+  textNode.attrs["font-size"] = attrs.fontsize;
+  textNode.attrs["text-anchor"] = textanchor;
+  // Load Markdown into an AST
+  const ast = inlineMd2ast(str);
+  // Load content of AST into <tspan> nodes.
+  if (Array.isArray(ast)) {
+    let prevNodeContainedSubscript = false;
+    for (const markNode of ast) {
+      const tspan = { tag: "tspan", text: markNode.text };
+      let currentNodeContainsSubscript = false;
+      if (markNode.marks) {
+        tspan.attrs = {};
+        for (const mark of markNode.marks) {
+          const markAttr = markAttribute[mark.type];
+          tspan.attrs[markAttr[0]] = markAttr[1];
+          if (mark.type === "subscript") { currentNodeContainsSubscript = true; }
+        }
+      }
+      if (currentNodeContainsSubscript) {
+        if (!prevNodeContainedSubscript) { tspan.attrs.dy  = "2"; }
+      } else if (prevNodeContainedSubscript) {
+        if (!markNode.marks) { tspan.attrs = {}; }
+        tspan.attrs.dy  = "-2";
+      }
+      prevNodeContainedSubscript = currentNodeContainsSubscript;
+      textNode.children.push(tspan);
+    }
+  }
+  svg.children.push(textNode);
+  return svg
+};
+
+const pointText = (point, attrs) => {
+  return (point[0] * attrs.xunitlength + attrs.origin[0]).toFixed(4) + ","
+    + (attrs.height - point[1] * attrs.yunitlength - attrs.origin[1]).toFixed(4)
+};
+
+const functions = {
+  // Set attributes
+  stroke(svgOprnd, color) {
+    svgOprnd.value.temp.stroke = color.value;
+    return svgOprnd
+  },
+
+  strokewidth(svgOprnd, num) {
+    svgOprnd.value.temp.strokewidth = Rnl.toNumber(num.value);
+    return svgOprnd
+  },
+
+  strokedasharray(svgOprnd, str) {
+    svgOprnd.value.temp.strokedasharray = str.value;
+    return svgOprnd
+  },
+
+  fill(svgOprnd, color) {
+    svgOprnd.value.temp.fill = color.value;
+    return svgOprnd
+  },
+
+  fontsize(svgOprnd, size) {
+    svgOprnd.value.temp.fontsize = Rnl.toNumber(size.value);
+    return svgOprnd
+  },
+
+  fontfamily(svgOprnd, str) {
+    svgOprnd.value.temp.fontfamily = str.value; // "sansserif"|"serif"|"fixed"|"monotype"
+    return svgOprnd
+  },
+
+  marker(svgOprnd, str) {
+    svgOprnd.value.temp.marker = str.value; // "none" | "dot" | "arrow" | "arrowdot"
+    return svgOprnd
+  },
+
+  // Initialize the svg.
+
+  title(svgOprnd, strOprnd) {
+    svgOprnd.value.children.push( { tag: "title", attrs: { text: strOprnd.value } });
+    return svgOprnd
+  },
+
+  frame(svgOprnd, width = 250, height = 250, position = "inline") {
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    attrs.width = typeof width === "number" ? width : Rnl.toNumber(width.value);
+    svg.attrs.width = attrs.width;
+    attrs.height = typeof height === "number" ? height : Rnl.toNumber(height.value);
+    svg.attrs.height = attrs.height;
+    if (typeof position !== "string") { position = position.value; }
+    if (position !== "inline") { svg.attrs.float = position; }
+    attrs.xunitlength = attrs.width / (attrs.xmax - attrs.xmin);
+    attrs.yunitlength = attrs.height / (attrs.ymax - attrs.ymin);
+    attrs.origin = [-attrs.xmin * attrs.xunitlength, -attrs.ymin * attrs.yunitlength];
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  view(svgOprnd, xmin = 0, xmax = 5, ymin, ymax) {
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    attrs.xmin = typeof xmin === "number" ? xmin : Rnl.toNumber(xmin.value);
+    attrs.xmax = typeof xmax === "number" ? xmax : Rnl.toNumber(xmax.value);
+    attrs.xunitlength = attrs.width / (attrs.xmax - attrs.xmin);
+    attrs.yunitlength = attrs.xunitlength; // This may change below.
+    if (ymin == null) {
+      attrs.origin = [-attrs.xmin * attrs.xunitlength, attrs.height / 2];
+      attrs.ymin = -attrs.height / (2 * attrs.yunitlength);
+      attrs.ymax = -attrs.ymin;
+    } else {
+      attrs.ymin = Rnl.toNumber(ymin.value);
+      if (ymax != null) {
+        attrs.ymax = Rnl.toNumber(ymax.value);
+        attrs.yunitlength = attrs.height / (attrs.ymax - attrs.ymin);
+      } else {
+        attrs.ymax = attrs.height / attrs.yunitlength + attrs.ymin;
+      }
+      attrs.origin = [-attrs.xmin * attrs.xunitlength, -attrs.ymin * attrs.yunitlength];
+    }
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  // Draw things
+
+  grid(svgOprnd, gdx, gdy, isLocal) {
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    gdx = gdx == null ? attrs.xunitlength : Rnl.toNumber(gdx.value) * attrs.xunitlength;
+    gdy = gdy == null ? gdx : Rnl.toNumber(gdy.value) * attrs.yunitlength;
+    const pnode = { tag: "path", attrs: {} };
+    let str = "";
+    for (let x = attrs.origin[0]; x < attrs.width; x += gdx) {
+      str += " M" + x + ",0 " + x + "," + attrs.height;
+    }
+    for (let x = attrs.origin[0] - gdx; x > 0; x -= gdx) {
+      str += " M" + x + ",0 " + x + "," + attrs.height;
+    }
+    for (let y = attrs.height - attrs.origin[1]; y < attrs.height; y += gdy) {
+      str += " M0," + y + " " + attrs.width + "," + y;
+    }
+    for (let y = attrs.height - attrs.origin[1] - gdy; y > 0; y -= gdy) {
+      str += " M0," + y + " " + attrs.width + "," + y;
+    }
+    pnode.attrs.d = str;
+    pnode.attrs["stroke-width"] = 0.5;
+    pnode.attrs.stroke = attrs.gridstroke;
+    pnode.attrs.fill = attrs.fill;
+    svg.children.push(pnode);
+    if (!isLocal) {
+      return { value: svg, unit: null, dtype: dt.DRAWING }
+    }
+  },
+
+  axes(svgOprnd, dx, dy, labels, gdx, gdy) {
+    let svg = svgOprnd.value;
+    const attrs = svg.temp;
+    dx = (dx == null ? attrs.xunitlength : Rnl.toNumber(dx.value) * attrs.xunitlength);
+    dy = (dy == null ? dx : Rnl.toNumber(dy.value) * attrs.yunitlength);
+    const parentFontsize = attrs.fontsize;
+    attrs.fontsize = Math.min(dx / 2, dy / 2, 10);
+    const ticklength = attrs.fontsize / 4;
+    if (gdx != null) {
+      this.grid(svgOprnd, gdx, gdy, true);
+    }
+    const pnode = { tag: "path", attrs: {} };
+    let str = "M0," + (attrs.height - attrs.origin[1]) + " " + attrs.width + "," +
+      (attrs.height - attrs.origin[1]) + " M" + attrs.origin[0] + ",0 " +
+      attrs.origin[0] + "," + attrs.height;
+    for (let x = attrs.origin[0] + dx; x < attrs.width; x += dx) {
+      str += " M" + x + " " + (attrs.height - attrs.origin[1] + ticklength) + " " + x
+            + "," + (attrs.height - attrs.origin[1] - ticklength);
+    }
+    for (let x = attrs.origin[0] - dx; x > 0; x -= dx) {
+      str += " M" + x + "," + (attrs.height - attrs.origin[1] + ticklength) + " " + x
+            + "," + (attrs.height - attrs.origin[1] - ticklength);
+    }
+    for (let y = attrs.height - attrs.origin[1] + dy; y < attrs.height; y += dy) {
+      str += " M" + (attrs.origin[0] + ticklength) + "," + y + " " +
+                   (attrs.origin[0] - ticklength) + "," + y;
+    }
+    for (let y = attrs.height - attrs.origin[1] - dy; y > 0; y -= dy) {
+      str += " M" + (attrs.origin[0] + ticklength) + "," + y + " " +
+                   (attrs.origin[0] - ticklength) + "," + y;
+    }
+    if (labels != null) {
+      const ldx = dx / attrs.xunitlength;
+      const ldy = dy / attrs.yunitlength;
+      const lx = (attrs.xmin > 0 || attrs.xmax < 0 ? attrs.xmin : 0);
+      const ly = (attrs.ymin > 0 || attrs.ymax < 0 ? attrs.ymin : 0);
+      const lxp = (ly === 0 ? "below" : "above");
+      const lyp = (lx === 0 ? "left" : "right");
+      const ddx = Math.floor(1.1 - Math.log(ldx) / Math.log(10)) + 1;
+      const ddy = Math.floor(1.1 - Math.log(ldy) / Math.log(10)) + 1;
+      for (let x = ldx; x <= attrs.xmax; x += ldx) {
+        svg = textLocal(svg, [x, ly], chopZ(x.toFixed(ddx)), lxp);
+      }
+      for (let x = -ldx; attrs.xmin <= x; x -= ldx) {
+        svg = textLocal(svg, [x, ly], chopZ(x.toFixed(ddx)), lxp);
+      }
+      for (let y = ldy; y <= attrs.ymax; y += ldy) {
+        svg = textLocal(svg, [lx, y], chopZ(y.toFixed(ddy)), lyp);
+      }
+      for (let y = -ldy; attrs.ymin <= y; y -= ldy) {
+        svg = textLocal(svg, [lx, y], chopZ(y.toFixed(ddy)), lyp);
+      }
+    }
+    pnode.attrs.d = str;
+    pnode.attrs["stroke-width"] = 0.5;
+    pnode.attrs.stroke = attrs.axesstroke;
+    pnode.attrs.fill = attrs.fill;
+    svg.temp.fontsize = parentFontsize;
+    svg.children.push(pnode);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  line(svgOprnd, m) { // segment connecting points p,q (coordinates in units)
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const node = { tag: "path", attrs: {} };
+    const p = [Rnl.toNumber(m.value[0][0]), Rnl.toNumber(m.value[0][1])];
+    const q = [Rnl.toNumber(m.value[1][0]), Rnl.toNumber(m.value[1][1])];
+    node.attrs.d = "M" + (p[0] * attrs.xunitlength + attrs.origin[0]) + "," +
+      (attrs.height - p[1] * attrs.yunitlength - attrs.origin[1]) + " " +
+      (q[0] * attrs.xunitlength + attrs.origin[0]) + "," + (attrs.height -
+       q[1] * attrs.yunitlength - attrs.origin[1]);
+    setStrokeAndFill(node, attrs);
+    svg.children.push(node);
+    if (attrs.marker === "dot" || attrs.marker === "arrowdot") {
+      svg.children.push(markerDot(p, attrs, attrs.markerstroke, attrs.markerfill));
+      if (attrs.marker === "arrowdot") { arrowhead(svg, p, q); }
+      svg.children.push(markerDot(q, attrs, attrs.markerstroke, attrs.markerfill));
+    } else if (attrs.marker === "arrow") {
+      arrowhead(svg, p, q);
+    }
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  path(svgOprnd, args) {
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const node = { tag: "path", attrs: {} };
+    // Get the "d" attribute of a path
+    let str = "";
+    if (args[0].dtype && args[0].dtype === dt.STRING) {
+      str = args[0].value;
+    } else {
+      const segs = rationals2numbers(args[0].value);
+      if (segs[0].length === 2) {
+        // A path made up of line segments
+        str = "M" + pointText(segs[0], attrs) + " L";
+        for (let i = 1; i < segs.length; i++) {
+          str += " " + pointText(segs[i], attrs);
+        }
+      } else if (segs[0].length === 3) {
+        // Some segments are circular arcs.
+        str = "M" + pointText(segs[0], attrs);
+        for (let i = 1; i < segs.length; i++) {
+          if (segs[i][2] === 0) {
+            str += " L" + pointText(segs[i], attrs);
+          } else {
+            const r = String(Math.abs(segs[i][2]) * attrs.xunitlength);
+            const sweep = Math.sign(segs[i][2]) > 0 ? 0 : 1;
+            str += ` A${r},${r} 0 0 ${sweep} ${pointText(segs[i], attrs)}`;
+          }
+        }
+      }
+    }
+    node.attrs.d = str;
+    node.attrs["stroke-width"] = attrs.strokewidth;
+    if (attrs.strokedasharray != null) {
+      node.attrs["stroke-dasharray"] = attrs.strokedasharray;
+    }
+    node.attrs.stroke = attrs.stroke;
+    node.attrs.fill = attrs.fill;
+    if (attrs.marker === "dot") {
+      for (let i = 0; i < args.length; i++) {
+        const el = args[i];
+        if (typeof el[0] === "number") {
+          svg.children.push(markerDot(el, attrs, attrs.markerstroke, attrs.markerfill));
+        } else {
+          for (const row of el) {
+            svg.children.push(markerDot(row, attrs, attrs.markerstroke, attrs.markerfill));
+          }
+        }
+      }
+    } else if (attrs.marker === "arrow" || attrs.marker === "arrowdot") {
+      const segs = rationals2numbers(args[0].value);
+      if (typeof segs[0] !== "number") {
+        const end = segs[segs.length - 1];
+        arrowhead(svg, segs[segs.length - 2], end);
+        if (attrs.marker === "arrowdot") {
+          svg.children.push(markerDot(end, attrs, attrs.markerstroke, attrs.markerfill));
+        }
+      } else if (typeof segs[0] === "number") {
+        const prevEl = args[args.length - 2];
+        const end = segs;
+        let start;
+        if (typeof prevEl[0] === "number") {
+          start = prevEl;
+        } else {
+          start = prevEl[prevEl.length - 1];
+        }
+        arrowhead(svg, start, end);
+        if (attrs.marker === "arrowdot") {
+          svg.children.push(markerDot(end, attrs, attrs.markerstroke, attrs.markerfill));
+        }
+      }
+    }
+    svg.children.push(node);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  rect(svgOprnd, m, r) { // opposite corners in units, rounded by radius
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const node = { tag: "rect", attrs: {} };
+    const p = [Rnl.toNumber(m.value[0][0]), Rnl.toNumber(m.value[0][1])];
+    const q = [Rnl.toNumber(m.value[1][0]), Rnl.toNumber(m.value[1][1])];
+    node.attrs.x = Math.min(p[0], q[0]) * attrs.xunitlength + attrs.origin[0];
+    node.attrs.y = attrs.height - Math.max(p[1], q[1]) * attrs.yunitlength - attrs.origin[1];
+    node.attrs.width = Math.abs((q[0] - p[0]) * attrs.xunitlength);
+    node.attrs.height = Math.abs((q[1] - p[1]) * attrs.yunitlength);
+    if (r != null) {
+      const rNum = Rnl.toNumber(r.value) * attrs.xunitlength;
+      node.attrs.rx = rNum;
+      node.attrs.ry = rNum;
+    }
+    setStrokeAndFill(node, attrs);
+    svg.children.push(node);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  circle(svgOprnd, center, radius) { // coordinates in units
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const node = { tag: "circle", attrs: {} };
+    node.attrs.cx = Rnl.toNumber(center.value[0]) * attrs.xunitlength + attrs.origin[0];
+    node.attrs.cy = attrs.height - Rnl.toNumber(center.value[1]) * attrs.yunitlength
+                  - attrs.origin[1];
+    node.attrs.r = Rnl.toNumber(radius.value) * attrs.xunitlength;
+    setStrokeAndFill(node, attrs);
+    svg.children.push(node);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  ellipse(svgOprnd, center, rx, ry) { // coordinates in units
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const node = { tag: "ellipse", attrs: {} };
+    node.attrs.cx = Rnl.toNumber(center.value[0]) * attrs.xunitlength + attrs.origin[0];
+    node.attrs.cy = attrs.height - Rnl.toNumber(center.value[1]) * attrs.yunitlength
+                    - attrs.origin[1];
+    node.attrs.rx = Rnl.toNumber(rx.value) * attrs.xunitlength;
+    node.attrs.ry = Rnl.toNumber(ry.value) * attrs.yunitlength;
+    setStrokeAndFill(node, attrs);
+    svg.children.push(node);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  arc(svgOprnd, m, radius) { // coordinates in units
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const node = { tag: "path", attrs: {} };
+    const start = [Rnl.toNumber(m.value[0][0]), Rnl.toNumber(m.value[0][1])];
+    const end = [Rnl.toNumber(m.value[1][0]), Rnl.toNumber(m.value[1][1])];
+    if (radius == null) {
+      const v = [end[0] - start[0], end[1] - start[1]];
+      radius = (Math.sqrt(v[0] * v[0] + v[1] * v[1])) * attrs.yunitlength;
+    } else if (isVector(radius)) {
+      radius = radius.value.map(e => Rnl.toNumber(e) * attrs.yunitlength);
+    } else {
+      radius = Rnl.toNumber(radius.value) * attrs.yunitlength;
+    }
+    let str = "M" + (start[0] * attrs.xunitlength + attrs.origin[0]) + "," +
+      (attrs.height - start[1] * attrs.yunitlength - attrs.origin[1]) + " A";
+    str += Array.isArray(radius) ? radius[0] + "," + radius[1] : radius + "," + radius;
+    str += " 0 0,0 " + (end[0] * attrs.xunitlength + attrs.origin[0]) + "," +
+      (attrs.height - end[1] * attrs.yunitlength - attrs.origin[1]);
+    node.attrs.d = str;
+    setStrokeAndFill(node, attrs);
+    // eslint-disable-next-line no-useless-assignment
+    let v = 0;
+    if (attrs.marker === "arrow" || attrs.marker === "arrowdot") {
+      const u = [(end[1] - start[1]) / 4, (start[0] - end[0]) / 4];
+      v = [(end[0] - start[0]) / 2, (end[1] - start[1]) / 2];
+      v = [start[0] + v[0] + u[0], start[1] + v[1] + u[1]];
+    } else {
+      v = [start[0], start[1]];
+    }
+    if (attrs.marker === "dot" || attrs.marker === "arrowdot") {
+      svg.children.push(markerDot(start, attrs, attrs.markerstroke, attrs.markerfill));
+      if (attrs.marker === "arrowdot") { arrowhead(svg,  v, end); }
+      svg.children.push(markerDot(end, attrs, attrs.markerstroke, attrs.markerfill));
+    } else if (attrs.marker === "arrow") {
+      arrowhead(svg, v, end);
+    }
+    svg.children.push(node);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  text(svgOprnd, p, str, pos) {
+    const svg = textLocal(
+      svgOprnd.value,
+      [Rnl.toNumber(p.value[0]), Rnl.toNumber(p.value[1])],
+      str.value,
+      pos == null ? null : pos.value
+      );
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  dot(svgOprnd, center, typ, label, pos) {
+    let svg = svgOprnd.value;
+    const attrs = svg.temp;
+    let node;
+    const cx = Rnl.toNumber(center.value[0]) * attrs.xunitlength + attrs.origin[0];
+    const cy = attrs.height - Rnl.toNumber(center.value[1]) * attrs.yunitlength
+             - attrs.origin[1];
+    if (typ.value === "+" || typ.value === "-" || typ.value === "|") {
+      node = { tag: "path", attrs: {} };
+      if (typ.value === "+") {
+        node.attrs.d = " M " + (cx - attrs.ticklength) + "," + cy
+                    + " L " + ( cx + attrs.ticklength) + "," + cy
+                    + " M " + cx + "," + (cy - attrs.ticklength) + " L " + cx
+                    + "," + (cy + attrs.ticklength);
+        node.attrs["stroke-width"] = 0.5;
+        node.attrs.stroke = attrs.axesstroke;
+      } else {
+        if (typ.value === "-") {
+          node.attrs.d = " M " + (cx - attrs.ticklength) + "," + cy
+                       + " L " + (cx + attrs.ticklength) + "," + cy;
+        } else {
+          node.attrs.d = " M " + cx + "," + (cy - attrs.ticklength)
+                       + " L " + cx + "," + (cy + attrs.ticklength);
+        }
+        node.attrs["stroke-width"] = attrs.strokewidth;
+        node.attrs["stroke"] = attrs.stroke;
+      }
+    } else {
+      node = { tag: "circle", attrs: {} };
+      node.attrs.cx = cx;
+      node.attrs.cy = cy;
+      node.attrs.r = attrs.dotradius;
+      node.attrs["stroke-width"] = attrs.strokewidth;
+      node.attrs.stroke = attrs.stroke;
+      node.attrs.fill =  (typ.value === "open" ? "white" : attrs.stroke);
+    }
+    svg.children.push(node);
+    if (label != null) {
+      svg = textLocal(
+        svg,
+        [Rnl.toNumber(center.value[0]), Rnl.toNumber(center.value[1])],
+        label.value,
+        (pos == null ? "below" : pos.value)
+        );
+    }
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  leader(svgOprnd, plistOprnd, label) {
+    // A 'leader' is a note with an arrow (leader line) pointing to something.
+    const marker = svgOprnd.value.temp.marker;
+    svgOprnd.value.temp.marker = "arrow";
+    svgOprnd.value.temp.isDim = true;
+    // Draw the arrow
+    svgOprnd = this.path(svgOprnd, [plistOprnd]);
+    // Get the text position
+    const p = rationals2numbers(plistOprnd.value[0]);
+    const q = rationals2numbers(plistOprnd.value[plistOprnd.value.length - 1]);
+    // eslint-disable-next-line no-useless-assignment
+    let pos = "right";
+    if (Math.abs(p[0] - q[0]) >= Math.abs(p[1] - q[1])) {
+      pos = p[0] >= q[0] ? "right" : "left";
+    } else {
+      pos = p[1] < q[1] ? "below" : "above";
+    }
+    // Write the text
+    const svg = textLocal(svgOprnd.value, p, label.value, pos);
+    svg.temp.marker = marker;
+    svg.temp.isDim = false;
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  dimension(svgOprnd, plistOprnd, label) {
+    const p = clone(plistOprnd.value);
+    const q = p.pop();
+    const origstrokewidth = svgOprnd.value.temp.strokewidth;
+    svgOprnd.value.temp.strokewidth = 0.5;
+    svgOprnd.value.temp.isDim = true; // set small arrowhead
+    let six = Rnl.fromNumber(6 / svgOprnd.value.temp.xunitlength);
+    const pEnd = p[p.length - 1];
+    let svg;
+    // Is the label y-coord between the y-coords of the end points?
+    if ((Rnl.lessThan(p[0][1], q[1]) && Rnl.lessThan(q[1], pEnd[1])) ||
+        (Rnl.lessThan(pEnd[1], q[1]) && Rnl.lessThan(q[1], p[0][1]))) {
+      if (!Rnl.lessThan(pEnd[0], q[0])) { six = Rnl.negate(six); }
+      p.forEach(e => {
+        svgOprnd = this.line(svgOprnd, { value: [
+          [Rnl.add(e[0], six), e[1]],
+          [Rnl.add(q[0], six), e[1]]
+        ] });
+      });
+      svgOprnd.value.temp.marker = "arrow";
+      const pos = Rnl.lessThanOrEqualTo(pEnd[0], q[0]) ? "right" : "left";
+      for (let i = 0; i < p.length - 1; i++) {
+        svgOprnd = this.line(svgOprnd, { value : [[q[0], p[i][1]], [q[0], p[i + 1][1]]],
+          unit: null, dtype: dt.MATRIX });
+        svgOprnd = this.line(svgOprnd, { value : [[q[0], p[i + 1][1]], [q[0], p[i][1]]],
+          unit: null, dtype: dt.MATRIX });
+        const p3 = [
+          Rnl.toNumber(q[0]),
+          (Rnl.toNumber(p[i][1]) + Rnl.toNumber(p[i + 1][1])) / 2
+        ];
+        const str = p.length === 2 ? label.value : label.value[i];
+        svg = textLocal(svgOprnd.value, p3, str, pos);
+      }
+    } else {
+      if (!Rnl.lessThan(pEnd[1], q[1])) { six = Rnl.negate(six); }
+      p.forEach(e => {
+        svgOprnd = this.line(svgOprnd, { value: [
+          [e[0], Rnl.add(e[1], six)],
+          [e[0], Rnl.add(q[1], six)]
+        ] });
+      });
+      svgOprnd.value.temp.marker = "arrow";
+      const pos = Rnl.lessThanOrEqualTo(pEnd[1], q[1]) ? "above" : "below";
+      for (let i = 0; i < p.length - 1; i++) {
+        svgOprnd = this.line(svgOprnd, { value: [ [p[i][0], q[1]], [ p[i + 1][0], q[1]] ],
+          unit: null, dtype: dt.MATRIX });
+        svgOprnd = this.line(svgOprnd, { value: [ [ p[i + 1][0], q[1]], [p[i][0], q[1]] ],
+          unit: null, dtype: dt.MATRIX });
+        const p3 = [
+          (Rnl.toNumber(p[i][0]) + Rnl.toNumber(p[i + 1][0])) / 2,
+          Rnl.toNumber(q[1])
+        ];
+        const str = p.length === 2 ? label.value : label.value[i];
+        svg = textLocal(svgOprnd.value, p3, str, pos);
+      }
+    }
+    svg.temp.strokewidth = origstrokewidth;
+    svg.temp.marker = "none";
+    svg.temp.isDim = false;
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  }
+
+};
+
+const draw = Object.freeze({
+  startSvg,
+  functions
+});
+
+// Some helper functions and objects.
+
+// Lengths and x-coordinates are written as rational numbers, not floating point.
+// That way, we can make a lessThanOrEqualTo comparison w/o floating point errors.
+
+const ord = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth"];
+
+const loadTypesFromInput = factorInput => {
+  let doLiveLoadPatterns = false;
+  const headings = factorInput.headings || null;
+  const loadTypeMap = Object.create(null);
+  const getsPattern = new Array(9).fill(false);
+  if (factorInput === "service" || !factorInput) {
+    return [null, getsPattern, 1, doLiveLoadPatterns]
+  }
+  for (let i = 0; i < headings.length; i++) {
+    const loadName = headings[i].replace("*", "");
+    loadTypeMap[loadName] = i + 1;
+    if (headings[i].indexOf("*") > -1) {
+      doLiveLoadPatterns = true;
+      getsPattern[i + 1] = true;
+    }
+  }
+  return [loadTypeMap, getsPattern, headings.length, doLiveLoadPatterns]
+};
+
+const combinationsFromInput = (factorInput, loadTypeMap) => {
+  const data = factorInput.data;
+  const headings = factorInput.headings;
+  const combinations = [];
+  for (let i = 0; i < data[0].length; i++) {
+    const factors = new Array(10).fill(0);
+    for (let j = 0; j < headings.length; j++) {
+      const type = loadTypeMap[headings[j].replace("*", "")];
+      factors[type] = Rnl.toNumber(data[j][i]);
+    }
+    combinations.push(factors);
+  }
+  return combinations
+};
+
+const newNode = (fixity, k, xCoordinate) => {
+  return {
+    fixity,
+    k: (fixity === "spring" ? k : 0),
+    x: xCoordinate,
+    P: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    M: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    Pr: [0, 0, 0, 0, 0, 0, 0, 0, 0], // "r" stands for reaction
+    PrMin: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    Mr: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    MrMin: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+  }
+};
+
+const incrementDegreesOfFreedom = fixity => {
+  switch (fixity) {
+    case "pinned":
+      return 1
+    case "fixed":
+      return 0
+    case "hinge":
+      return 3
+    default:
+      return 2
+  }
+};
+
+const newSegment = (length, xOfLeftEnd) => {
+  // A "segment" is a beam section between points of load discontinuity.
+  return {
+    length,
+    xOfLeftEnd,
+    // Point load applied at left end of segments.
+    // Array dim'ed to 9 for different load types, e.g., dead, live, wind, etc.
+    P: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    M: [0, 0, 0, 0, 0, 0, 0, 0, 0],  // point moment
+    Pf: 0, // factored point load at left end
+    Mf: 0,
+    w1: [0, 0, 0, 0, 0, 0, 0, 0, 0], // distributed load at left end of segments.
+    w2: [0, 0, 0, 0, 0, 0, 0, 0, 0], // at right end.
+    Vmax: {
+      left: { value: 0, case: 0 },
+      mid: { value: 0, case: 0, x: 0 },
+      right: { value: 0, case: 0 }
+    },
+    Vmin: {
+      left: { value: 0, case: 0 },
+      mid: { value: 0, case: 0, x: 0 },
+      right: { value: 0, case: 0 }
+    },
+    Mmax: {
+      left: { value: 0, case: 0 },
+      mid: { value: 0, case: 0, x: 0 },
+      right: { value: 0, case: 0 }
+    },
+    Mmin: {
+      left: { value: 0, case: 0 },
+      mid: { value: 0, case: 0, x: 0 },
+      right: { value: 0, case: 0 }
+    }
+  }
+};
+
+const identifySegment = (xGlobal, span) => {
+  // Which segment contains xGlobal?
+  for (let i = 0; i < span.segments.length; i++) {
+    const xSegEnd = Rnl.add(span.segments[i].xOfLeftEnd, span.segments[i].length);
+    if (Rnl.lessThanOrEqualTo(xGlobal, xSegEnd)) { return i }
+  }
+  return -1
+};
+
+const splitSegment = (segments, iSeg, xGlobal) => {
+  // segments` is an array.
+  // We need to split the element at segments[iSeg] into two elements.
+  const length = Rnl.subtract(xGlobal, segments[iSeg].xOfLeftEnd);
+  if (iSeg === 0) {
+    segments.unshift(newSegment(length, segments[0].xOfLeftEnd));
+  } else {
+    const s1 = segments.slice(0, iSeg);
+    s1.push(newSegment(length, segments[iSeg].xOfLeftEnd));
+    segments =  s1.concat(segments.slice(iSeg));
+  }
+  const seg = segments[iSeg + 1];
+  const newSeg = segments[iSeg];
+  for (let i = 0; i < 9; i++) {
+    const slope = (seg.w2[i] - seg.w1[i]) / Rnl.toNumber(seg.length);
+    newSeg.w1[i] = seg.w1[i];
+    newSeg.w2[i] = seg.w1[i];
+    seg.w1[i] = seg.w1[i] + slope * Rnl.toNumber(length);
+    newSeg.P[i] = seg.P[i];
+    seg.P[i] = 0;
+    newSeg.M[i] = seg.M[i];
+    seg.M[i] = 0;
+  }
+  seg.xOfLeftEnd = xGlobal;
+  seg.length = Rnl.subtract(seg.length, newSeg.length);
+  return segments
+};
+
+// Here's the main function of this module.
+// Take the raw input strings, validate them, and load them
+// into data structures for use by the analyze function.
+function populateData(input, factorInput) {
+  const errorMsg = "";
+  const beam = {
+    E: 0, // modulus of elasticity
+    I: 0, // moment of inertia
+    k: 0, // spring constant
+    convention: input.convention
+      ? input.convention
+      : 1, // Plot + moment on comp or tension side.
+    SI: input.SI || false, // boolean. Are we using SI units?
+    doLiveLoadPatterns: input.patterns,
+    gotType: [false, false, false, false, false, false, false, false, false],
+    wMax: 0, // default line load maximum
+    x: 180, // x coordinate of the beam's left end inside the SVG, in px
+    allLoadsAreUniform: true // subject to change below
+  };
+
+  if (input.E === 1 || input.E === 0) {
+    // We don't know E or I, so we won't do a deflection diagram.
+    // But we will still do the shear and moment diagrams.
+    beam.E = 1;
+    beam.I = 1;
+    beam.k = 0;
+  } else {
+    beam.E = input.E;  // Modulus of elasticity
+    beam.I = input.I;  // Moment of inertia, I
+    beam.k = input.k;  // Spring constant
+  }
+  if (beam.E === 1 && beam.I === 1 && input.k !== 0) {
+    return ["E and I are necessary for an analysis with spring supports."]
+  }
+  beam.EI = beam.E * beam.I;
+
+  // Load in node data and span data.
+  // Definitions
+  // (1) A "span" is a section of beam between two user-defined nodes.
+  // (2) A "segment" is a section of beam between nodes or points of load discontinuity.
+  // Each span thus consists of one or more segments.
+  // eslint-disable-next-line no-useless-assignment
+  let i = 0;
+  let cummulativeLength = Rnl.zero;
+  const nodes = [];
+  const spans = [];
+  beam.numDegreesOfFreedom = 0;
+  // eslint-disable-next-line max-len
+  const [loadTypeMap, getsPattern, numLoadTypes, doLiveLoadPatterns] = loadTypesFromInput(factorInput);
+  beam.numLoadTypes = numLoadTypes;
+  beam.getsPattern = getsPattern;
+  beam.doLiveLoadPatterns = doLiveLoadPatterns;
+
+  for (i = 0; i < input.nodes.length; i++) {
+    // Process node input.
+    const fixity = input.nodes[i];
+    if (!fixity) { return [`The ${ord[i]} node designation is invalid.`] }
+    if (fixity === "spring" && input.k === 0) {
+      return ["Error. A model with a spring needs a spring constant, k."]
+    }
+    nodes.push(newNode(fixity, beam.k, cummulativeLength));
+    beam.numDegreesOfFreedom += incrementDegreesOfFreedom(fixity);
+    if (i < input.spanLength.length) {
+      // Process span input.
+      const length = input.spanLength[i];
+      spans.push({
+        length,
+        segments: Array(1).fill(newSegment(length, cummulativeLength))
+      });
+      cummulativeLength = Rnl.add(cummulativeLength, length);
+    }
+  }
+  if (spans.length === 0) { return [`No span lengths.`] }
+  const numSpans =  spans.length;
+  beam.numSegments = numSpans;
+  beam.length = nodes[nodes.length - 1].x;
+
+  // Point Loads
+  for (i = 0; i < input.loads.length; i++) {
+    const load = input.loads[i];
+    if (load.shape === "w") {
+      // Skip the distributed loads for now. We'll pick them up later.
+      continue
+    }
+    if (load.from === 0) { continue }
+    let type = load.type === "none"
+      ? 0
+      : loadTypeMap
+      ? loadTypeMap[load.type]
+      : 1;
+    if (type === 0) {
+      if (beam.comboName !== "service") {
+        return [`The ${ord[i]} load must have a load type defined.`]
+      } else {
+        type = 1; // In a service load analysis, treat unlabled loads as Dead loads.
+      }
+    }
+
+    const P = input.loads[i].P;
+    const M = input.loads[i].M;
+    const x = input.loads[i].from;
+
+    let foundAHome = false;
+    for (let j = 0; j < nodes.length; j++) {
+      if (Rnl.areEqual(x, nodes[j].x)) {
+        nodes[j].P[0] += P;
+        nodes[j].M[0] += M;
+        if (type !== 0) { nodes[j].P[type] += P; }
+        foundAHome = true;
+        break
+      }
+    }
+    if (foundAHome) { continue }
+
+    for (let j = 0; j < spans.length; j++) {
+      if (Rnl.greaterThan(x, nodes[j].x) && Rnl.lessThan(x, nodes[j + 1].x)) {
+        const span = spans[j];
+        const iSeg = identifySegment(x, span);
+        if (Rnl.greaterThan(x, span.segments[iSeg].xOfLeftEnd)) {
+          span.segments = splitSegment(span.segments, iSeg, x);
+          beam.numSegments += 1;
+        }
+        beam.gotType[0] = true;
+        span.segments[iSeg + 1].P[0] += P;      // add to sum of service loads
+        span.segments[iSeg + 1].M[0] += M;
+        if (type !== 0) {
+          beam.gotType[type] = true;
+          span.segments[iSeg + 1].P[type] += P;
+          span.segments[iSeg + 1].M[type] += M;
+        }
+      }
+    }
+  }
+
+  // Distributed loads
+  beam.allLoadsAreUniform = true;  // initialize the variable
+  for (i = 0; i < input.loads.length; i++) {
+    const load = input.loads[i];
+    if (load.shape !== "w") { continue }
+    let type = load.type === "none" ? 0 : loadTypeMap ? loadTypeMap[load.type] : 1;
+    if (type === 0) {
+      if (beam.comboName !== "service") {
+        return [`The ${ord[i]} load must have a load type defined.`]
+      } else {
+        type = 1; // In a service load analysis, treat unlabled loads as Dead loads.
+      }
+    }
+
+    const wStart = load.wStart;
+    const wEnd = load.wEnd;
+
+    if (Math.abs(wStart) > beam.wMax) { beam.wMax = Math.abs(wStart); }
+    if (Math.abs(wEnd) > beam.wMax) { beam.wMax = Math.abs(wEnd); }
+
+    const xStart = load.from;
+    const xEnd = Rnl.isZero(load.to)
+      ? cummulativeLength
+      : load.to;
+
+    const slope = (wEnd - wStart) / Rnl.toNumber(Rnl.subtract(xEnd, xStart));
+    if (slope !== 0) {beam.allLoadsAreUniform = false;}
+
+    let iStartSpan = 0;
+    let iEndSpan = 0;
+    let iStartSeg = 0;
+    let iEndSeg = 0;
+
+    // If necessary, split segments at points of load discontinuity.
+    for (let j = 0; j < spans.length; j++) {
+      if (Rnl.areEqual(xStart, nodes[j].x)) {
+        iStartSpan = j;
+        iStartSeg = 0;
+        break
+      }
+      if (Rnl.greaterThan(xStart, nodes[j].x) && Rnl.lessThan(xStart, nodes[j + 1].x)) {
+        for (let k = 0; k < spans[j].segments.length; k++) {
+          const seg = spans[j].segments[k];
+          if (Rnl.areEqual(xStart, seg.xOfLeftEnd)) {
+            iStartSpan = j;
+            iStartSeg = k;
+            break
+          }
+          const segEnd = k < spans[j].segments.length - 1
+            ? spans[j].segments[k + 1].xOfLeftEnd
+            : nodes[j + 1].x;
+          if (Rnl.greaterThan(xStart, seg.xOfLeftEnd) && Rnl.lessThan(xStart, segEnd)) {
+            spans[j].segments = splitSegment(spans[j].segments, k, xStart);
+            beam.numSegments += 1;
+            iStartSpan = j;
+            iStartSeg = k + 1;
+            break
+          }
+        }
+      }
+    }
+
+    for (let j = 0; j < spans.length; j++) {
+      if (Rnl.areEqual(xEnd, nodes[j + 1].x)) {
+        iEndSpan = j;
+        iEndSeg = spans[j].segments.length - 1;
+        break
+      }
+      if (Rnl.greaterThan(xEnd, nodes[j].x) && Rnl.lessThan(xEnd, nodes[j + 1].x)) {
+        for (let k = 0; k < spans[j].segments.length; k++) {
+          const seg = spans[j].segments[k];
+          const segEnd = k < spans[j].segments.length - 1
+            ? spans[j].segments[k + 1].xOfLeftEnd
+            : nodes[j + 1].x;
+          if (Rnl.areEqual(xEnd, segEnd)) {
+            iEndSpan = j;
+            iEndSeg = k;
+            break
+          }
+          if (Rnl.greaterThan(xEnd, seg.xOfLeftEnd) && Rnl.lessThan(xEnd, segEnd)) {
+            spans[j].segments = splitSegment(spans[j].segments, k, xEnd);
+            beam.numSegments += 1;
+            iEndSpan = j;
+            iEndSeg = k;
+            break
+          }
+        }
+      }
+    }
+
+    // Now apply distributed loads
+    for (let iSpan = iStartSpan; iSpan <= iEndSpan; iSpan++) {
+      const span = spans[iSpan];
+      const startSeg = (iSpan  === iStartSpan ? iStartSeg : 0);
+      const endSeg = (iSpan  === iEndSpan ? iEndSeg : spans[iSpan].segments.length - 1);
+      for (let iSeg = startSeg; iSeg <= endSeg; iSeg++) {
+        const xLeft = span.segments[iSeg].xOfLeftEnd;
+        const w1 = wStart + slope * Rnl.toNumber(Rnl.subtract(xLeft, xStart));
+        const xRight = Rnl.add(span.segments[iSeg].xOfLeftEnd, span.segments[iSeg].length);
+        const w2 = wStart + slope * Rnl.toNumber(Rnl.subtract(xRight, xStart));
+        // add to sum of service loads
+        span.segments[iSeg].w1[0] += w1;
+        span.segments[iSeg].w2[0] += w2;
+        // add to specific load type, e.g., dead, live, etc.
+        span.segments[iSeg].w1[type] += w1;
+        span.segments[iSeg].w2[type] += w2;
+      }
+    }
+
+    beam.gotType[0] = true;
+    if (type !== 0) {
+      beam.gotType[type] = true;
+    }
+  }
+
+  // Henceforward there are no <= comparisons.
+  // Change lengths into floating point numbers.
+  for (let i = 0; i < nodes.length; i++) {
+    nodes[i].x = Rnl.toNumber(nodes[i].x);
+  }
+  for (let i = 0; i < spans.length; i++) {
+    spans[i].length = Rnl.toNumber(spans[i].length);
+    for (let j = 0; j < spans[i].segments.length; j++) {
+      spans[i].segments[j].length = Rnl.toNumber(spans[i].segments[j].length);
+      spans[i].segments[j].xOfLeftEnd = Rnl.toNumber(spans[i].segments[j].xOfLeftEnd);
+    }
+  }
+  beam.length = Rnl.toNumber(beam.length);
+
+  const combinations = typeof factorInput === "string"
+    ? "service"
+    : combinationsFromInput(factorInput, loadTypeMap);
+
+  return [errorMsg, beam, nodes, spans, combinations]
+
+}
+
+// Each of the methods in this module draws some item.
+
+const circle = (x, y, radius) => {
+  return { tag: "circle", attrs: { cx: x, cy: y, r: radius } }
+};
+
+const restraint = (node, beam) => {
+  const value = [];
+  const x = beam.xDiagram + beam.xScale * node.x;
+  if (node.fixity === "hinge" || node.fixity === "proppedHinge") {
+    value.push(circle(beam.xDiagram + beam.xScale * node.x, beam.yLoad, 4));
+  }
+  const path = { tag: "path", attrs: { d: "" } };
+  if (node.fixity === "pinned" || node.fixity === "proppedHinge") {
+    // draw a triangle
+    const y = node.fixity === "pinned" ? beam.yLoad + 0.75 : beam.yLoad + 4;
+    path.attrs.d = `M${x} ${y} l5 10 h-10 z`;
+    path.attrs.style = "fill:#fff; stroke:#000";
+  } else if (node.fixity === "fixed") {
+    const xd = (node.x === 0 ? -1 : 1) * 7;
+    // eslint-disable-next-line max-len
+    path.attrs.d = `M${x} ${beam.yLoad - 7} v14 m0 -14 l${xd} 7 M${x} ${beam.yLoad} l${xd} 7 M${x} ${beam.yLoad + 7} l${xd} 7`;
+  } else if (node.fixity === "spring") {
+    const y = beam.yLoad + .75;
+    path.attrs.d = `M${x} ${y} v3 l6 1.5 -12 3 12 3 -12 3 6 1.5 v3 m-6 0 h12`;
+  }
+  value.push(path);
+  return value
+};
+
+const pointForce = (x, y, load, fixity, isReaction = false) => {
+  const sgn = (load < 0 ? -1 : 1); // -1 is down
+  const lengthAdjustment = fixity === "fixed"
+    ? 7
+    : fixity === "pinned" && isReaction
+    ? 10
+    : fixity === "proppedHinge" && isReaction
+    ? 18
+    : fixity === "hinge"
+    ? 4
+    : fixity === "spring" && isReaction
+    ? 18
+    : 0;
+  const length = 40 - lengthAdjustment;
+  // Reactions are drawn below the beam line. Imposed loads are drawn above the beam line.
+  const yText = y + (isReaction ? 55 : -45);
+  // Set x and y at the tip of the arrowhead
+  if (isReaction) { y += lengthAdjustment + 0.75; } else { y -= 0.75; }
+  if (sgn === -1 && isReaction) { y += length; }
+  if (sgn === 1 && !isReaction) { y -= length; }
+  const arrow = {
+    tag: "path",
+    attrs: {
+      style: "fill: #000; fill-opacity:1.0",
+      // eslint-disable-next-line max-len
+      d: `M${x} ${y} l${sgn * 4} ${sgn * 8} h${-sgn * 3.5} v${sgn * (length - 8)} h${-sgn * 1} v${-sgn * (length - 8)} h${-sgn * 3}z`
+    }
+  };
+  const text = textNode(String(Math.abs(load)), x, yText, "middle");
+  return [arrow, text]
+};
+
+const pointMoment = (x, y, load, isReaction = false) => {
+  let isCounterClockwise = load >= 0; // = (load < 0 ? -1 : 1) // 1 is counter-clockwise
+  load = Math.abs(load);
+  let arrow;
+  let text;
+  if (!isReaction) {
+    arrow = momentArrow(x, y, (isCounterClockwise ? 165 : 15), 150, isCounterClockwise);
+    text = textNode(String(load), x, y - 25, "middle");
+  } else {
+    // The moment is a reaction
+    isCounterClockwise = !isCounterClockwise;
+    if (x < 100) {  // left end
+      arrow = momentArrow(x, y, (isCounterClockwise ? 260 : 100), 140, isCounterClockwise);
+      text = textNode(String(load), x - 15, y - 15, "end");
+    } else {
+      arrow = momentArrow(x, y, (isCounterClockwise ? 80 : 280), 140, isCounterClockwise);
+      text = textNode(String(load), x + 16, y - 15);
+    }
+  }
+  return [...arrow, text]
+};
+
+const momentArrow = (xCtr, yCtr, thetaAtArrowPoint, subtendedAngle, isCounterClockwise) => {
+  // Draw a circular arc with an arrowhead.
+  // Find startAngle and endAngle: the begining and ending of the arc
+  // theta = 0 at 3 o'clock.  theta is + for counterclockwise
+  const startAngle = thetaAtArrowPoint * (Math.PI / 180);
+  const sgn = isCounterClockwise ? 1 : -1;
+  const endAngle = startAngle - sgn * subtendedAngle * (Math.PI / 180);
+  // sgn = 1 for counterclockwise, -1 for clockwise
+  const diameter = 35;
+  const r = diameter / 2; // radius
+  const arrowHeadLength = 8;
+  const startAnglePrime = startAngle - sgn * (2 * 0.9 * arrowHeadLength / diameter);
+  const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+
+  /* eslint-disable no-useless-assignment */
+  let xStart = 0;
+  let yStart = 0;
+  let xEnd = 0;
+  let yEnd = 0;
+  /* eslint-enable no-useless-assignment */
+  if (sgn > 0) {
+    xEnd = (xCtr + r * Math.cos(startAnglePrime)).toFixed(2);   // arrow end
+    yEnd = (yCtr - r * Math.sin(startAnglePrime)).toFixed(2);
+    xStart = (xCtr + r * Math.cos(endAngle)).toFixed(2);
+    yStart = (yCtr - r * Math.sin(endAngle)).toFixed(2);
+  } else {
+    xStart = (xCtr + r * Math.cos(startAnglePrime)).toFixed(2);
+    yStart = (yCtr - r * Math.sin(startAnglePrime)).toFixed(2);
+    xEnd = (xCtr + r * Math.cos(endAngle)).toFixed(2);
+    yEnd = (yCtr - r * Math.sin(endAngle)).toFixed(2);
+  }
+
+  const path = {
+    tag: "path",
+    attrs: {
+      d: `M${xStart} ${yStart}A${r} ${r} 0 ${largeArcFlag} 0 ${xEnd} ${yEnd}`,
+      stroke: 'black',
+      fill: 'none'
+    }
+  };
+
+  // Draw the arrow head
+  const xTip = xCtr + r * Math.cos(startAngle);
+  const yTip = yCtr - r * Math.sin(startAngle);
+  const alpha = startAngle - sgn * 100 / 180 * Math.PI; // rotate by 100°
+  const beta = 22.5 * Math.PI / 180;    // angle subtended by half-arrowhead
+  const x = Array(3).fill("");
+  const y = Array(3).fill("");
+  x[0] = xTip.toFixed(2);
+  y[0] = yTip.toFixed(2);
+  x[1] = (xTip + arrowHeadLength * Math.cos(alpha - beta)).toFixed(2);
+  y[1] = (yTip - arrowHeadLength * Math.sin(alpha - beta)).toFixed(2);
+  x[2] = (xTip + arrowHeadLength * Math.cos(alpha + beta)).toFixed(2);
+  y[2] = (yTip - arrowHeadLength * Math.sin(alpha + beta)).toFixed(2);
+
+  let points = "";
+  for (let i = 0; i < x.length; i++) {
+    points += `${x[i]} ${y[i]} `;
+  }
+  const polygon = { tag: "polygon", attrs: { points } };
+  return [path, polygon]
+};
+
+const polyline = (x, y) => {
+  let d = `M${x[0]} ${y[0]}`;
+  for (let i = 1; i < x.length; i++) {
+    d += ` L${x[i]} ${y[i]}`;
+  }
+  return { tag: "path", attrs: { d, stroke: "black", "fill-opacity": "0.0" } }
+};
+
+const textNode = (str, x, y, horizAlign) => {
+  const node = { tag: "text", attrs: { x: String(x), y: String(y) } };
+  if (horizAlign === "middle" || horizAlign === "end") {
+    node.attrs["text-anchor"] = horizAlign;
+  }
+  node.children = [{ tag: "tspan", text: str }];
+  return node
+};
+
+const Draw = Object.freeze({
+  pointForce,
+  pointMoment,
+  polyline,
+  restraint,
+  textNode
+});
+
+const round = (num, prec) => {
+  // Round a number to prec significant digits.
+  // Return a string. This is used for display of numbers on the diagram.
+  const str = num.toPrecision(prec);
+  if (str.indexOf("e") === -1) { return str }
+  const pos = str.indexOf("e");
+  const significand = Number.parseFloat(str.slice(0, pos));
+  const exponent = Number.parseFloat(str.slice(pos + 1));
+  return (significand * 10 ** exponent).toString()
+};
+
+function createLoadDiagram(beam, nodes, spans) {
+  beam.xDiagram = 90;  // x coordinate at left end of diagram line, px
+  beam.yLoad = 80;     // y coordiate of load diagram
+  beam.xScale = 300 / nodes[nodes.length - 1].x;
+  const lengthFactor = beam.SI ? 1 : 0.3048;
+  const forceFactor = beam.SI ? 1000 : 4448.2216152605;
+  const momentFactor = beam.SI ? 1000 : 4448.2216152605 * 0.3048;
+  const lineLoadFactor = beam.SI ? 1000 : 4448.2216152605 / 0.3048;
+
+  // Begin the diagram.
+  let diagram = [];
+  diagram.push({ tag: "title", attrs: { text: "Beam Diagram" } });
+  diagram.push({
+    tag: "defs",
+    attrs: {},
+    style: `svg { background-color: #fff; }
+text, tspan { font: 12px Arial; }`
+  });
+  diagram.push(Draw.textNode("loads", 20, beam.yLoad + 2));
+  diagram.push(Draw.textNode(`(${beam.SI ? 'kN, m' : 'kips, ft'})`, 20, beam.yLoad + 16));
+  diagram.push({
+    tag: "path",
+    attrs: { stroke: "black", "stroke-width": "1.5px",
+      d: `M${beam.xDiagram} ${beam.yLoad} h300` }
+  });
+
+  // Draw restraints
+  for (let i = 0; i < nodes.length; i++) {
+    if (nodes[i].fixity !== "continuous") {
+      diagram = diagram.concat(Draw.restraint(nodes[i], beam));
+    }
+  }
+
+  // Write the span length below each span, but only if there are no loads in the way.
+  for (let i = 0; i < spans.length; i++) {
+    let okay = true; // initialize
+    if (spans[i].length * beam.xScale < 30) { continue }
+    if (okay) {
+      for (let j = 1; j < spans[i].segments.length; j++) {
+        if (spans[i].segments[j].P[0] > 0) { okay = false; break }
+      }
+    }
+    if (okay) {
+      const x = beam.xDiagram + beam.xScale * (nodes[i].x + spans[i].length / 2);
+      const unit = beam.SI ? "" : "′";
+      const sText = round(spans[i].length / lengthFactor, 3);
+      diagram.push(Draw.textNode(`${sText}${unit}`, x, beam.yLoad + 15));
+    }
+  }
+
+  // Draw nodal loads
+  for (let i = 0; i < nodes.length; i++) {
+    const x = beam.xDiagram + beam.xScale * nodes[i].x;
+    if (Math.abs(nodes[i].P[0]) > 0) {
+      const sText = round(nodes[i].P[0] / forceFactor, 3);
+      diagram = diagram.concat(Draw.pointForce(x, beam.yLoad, sText, nodes[i].fixity));
+    }
+    if (Math.abs(nodes[i].M[0]) > 0) {
+      const sText = round(nodes[i].M[0] / momentFactor, 3);
+      diagram = diagram.concat(Draw.pointMoment(x, beam.yLoad, sText));
+    }
+  }
+
+  // Draw span loads
+  const wScale = 20 / beam.wMax;
+  let wPrev = 0;
+  let d = `M${beam.xDiagram} ${beam.yLoad}`;
+  for (let i = 0; i < spans.length; i++) {
+    for (let j = 0; j < spans[i].segments.length; j++) {
+      const seg = spans[i].segments[j];
+      const x = beam.xDiagram + beam.xScale * seg.xOfLeftEnd;
+      if (Math.abs(seg.P[0]) > 0) {
+        const sText = round(seg.P[0] / forceFactor, 3);
+        diagram = diagram.concat(Draw.pointForce(x, beam.yLoad, sText, "continuous"));
+      }
+      if (Math.abs(seg.M[0]) > 0) {
+        const sText = round(seg.M[0] / momentFactor, 3);
+        diagram = diagram.concat(Draw.pointMoment(x, beam.yLoad, sText));
+      }
+      // Draw a line segment for the service load.
+      const xEnd = x + beam.xScale * seg.length;
+      if (seg.w1[0] !== wPrev) {
+        d += `V${beam.yLoad + seg.w1[0] * wScale}`; // vertical load discontinuiy.
+      }
+      const yEnd = beam.yLoad + seg.w2[0] * wScale;
+      d += `L${xEnd} ${yEnd}`;
+      wPrev =  seg.w2[0];
+    }
+  }
+  if (wPrev !== 0) { d += `V${beam.yLoad}`; }
+  diagram.push({ tag: "path", attrs: { d, stroke: "black", "fill-opacity": "0.0" } });
+
+  // Write in the line load values
+  // eslint-disable-next-line no-useless-assignment
+  let lastSegUniform = false;
+  let firstSegment;
+  let xFirstSegment = 0;
+  const segments = [];
+  for (let i = 0; i < spans.length; i++) {
+    for (let j = 0; j < spans[i].segments.length; j++) {
+      segments.push(spans[i].segments[j]);
+    }
+  }
+  const numSegments = segments.length;
+  for (let i = 0; i < segments.length; i++) {
+    const seg = segments[i];
+    if (seg.w1[0] === seg.w2[0] && Math.abs(seg.w1[0]) > 0) {
+      lastSegUniform = true;
+      if (i === 0 || seg.w1[0] !== segments[i - 1].w1[0] || lastSegUniform === false) {
+        firstSegment = i;
+        xFirstSegment = beam.xScale * seg.xOfLeftEnd;
+      }
+      if (i === numSegments - 1 || segments[i + 1].w1[0] !== segments[i + 1].w2[0]
+        || seg.w1[0] !== segments[i + 1].w1[0]) {
+        // This segment is the end of a uniform load.
+        // Find a place to write the load value
+        const lenSegLoad = i < numSegments - 1
+          ? segments[i + 1].xOfLeftEnd - segments[firstSegment].xOfLeftEnd
+          : beam.length - segments[firstSegment].xOfLeftEnd;
+        if (lenSegLoad * beam.xScale > 30) {
+          let noBust = true; // initialize the value
+          const fudge = seg.w1[0] > 0 ? 10 : -4;
+          const yy = beam.yLoad + wScale * seg.w1[0] + fudge;
+          const str = round(Math.abs(seg.w1[0] / lineLoadFactor), 3);
+          // try the middle of the uniform load.  See if there is a point load there
+          for (let j = firstSegment + 1; j <= i; j++) {
+            if (beam.xScale * (Math.abs(segments[j].xOfLeftEnd
+              - (segments[firstSegment].xOfLeftEnd + lenSegLoad / 2))) < 35) {
+              if (segments[j].M[0] || segments[j].P[0] !== 0) {
+                noBust = false;
+                break
+              }
+            }
+          }
+          if (noBust) {
+            const x = beam.xDiagram + xFirstSegment + beam.xScale * lenSegLoad / 2;
+            diagram.push(Draw.textNode(str, x, yy));
+          } else {
+            // try the 1/3 point
+            noBust = true;
+            for (let j = firstSegment + 1; j <= i; j++) {
+              if (beam.xScale * (Math.abs(segments[j].xOfLeftEnd
+                - (segments[firstSegment].xOfLeftEnd + lenSegLoad / 3))) < 35) {
+                if (segments[j].M[0] || segments[j].P[0] !== 0) {
+                  noBust = false;
+                  break
+                }
+              }
+            }
+            if (noBust) {
+              const x = beam.xDiagram + xFirstSegment + beam.xScale * lenSegLoad / 3 - 17;
+              diagram.push(Draw.textNode(str, x, yy));
+            } else {
+              // try the 2/3 point
+              noBust = true;
+              for (let j = firstSegment + 1; j <= i; j++) {
+                if (beam.xScale * (Math.abs(segments[j].xOfLeftEnd
+                  - (segments[firstSegment].xOfLeftEnd + 2 * lenSegLoad / 3))) < 5) {
+                  if (segments[j].M[0] || segments[j].P[0] !== 0) {
+                    noBust = false;
+                    break
+                  }
+                }
+              }
+              if (noBust) {
+                const x = beam.xDiagram + xFirstSegment + beam.xScale * 2 * lenSegLoad / 3;
+                diagram.push(Draw.textNode(str, x, yy));
+              } else {
+                if (i === 0) {
+                  diagram.push(Draw.textNode(str, beam.xDiagram  - 35, yy));
+                }
+              }
+            }
+          }
+        }
+      }
+    } else {
+      // We've got a distributed sloping load
+      // eslint-disable-next-line no-useless-assignment
+      lastSegUniform = false;
+      const s = i === 0
+        ? 0
+        : (segments[i - 1].w2[0] - segments[i - 1].w1[0]) / segments[i - 1].length;
+      const s2 = (seg.w2[0] - seg.w1[0]) / seg.length;
+      const s3 = i === numSegments - 1
+        ? 0
+        : (segments[i + 1].w2[0] - segments[i + 1].w1[0]) / segments[i + 1].length;
+      if (Math.abs(s2 - s) > 0.05 || i === 0) {
+        if (Math.abs(seg.w1[0]) > 0.05) {
+          if (seg.length * beam.xScale > 20) {
+            const str = round(Math.abs(seg.w1[0] / lineLoadFactor), 3);
+            const x = beam.xDiagram + beam.xScale * seg.xOfLeftEnd;
+            const fudge = seg.w1[0] > 0 ? 10 : -5;
+            const yy = beam.yLoad + wScale * seg.w1[0] + fudge;
+            diagram.push(Draw.textNode(str, x, yy));
+          }
+        }
+      }
+      if (Math.abs(s2 - s3) > 0.05  || i === numSegments - 1
+        || Math.abs(seg.w2[0] - segments[i + 1].w1[0]) > 0) {
+        if (Math.abs(seg.w2[0]) > 0.05) {
+          if (seg.length * beam.xScale > 20) {
+            const str = round(Math.abs(seg.w2[0] / lineLoadFactor), 3);
+            const x = beam.xDiagram + beam.xScale * (seg.xOfLeftEnd + seg.length) - 30;
+            const fudge = seg.w2[0] > 0 ? 10 : -5;
+            const yy = beam.yLoad + wScale * seg.w2[0] + fudge;
+            diagram.push(Draw.textNode(str, x, yy));
+          }
+        }
+      }
+    }
+  }
+
+  return diagram
+}
+
+const ftRegEx = /′/g;
+const numberRegEx$2 = new RegExp(Rnl.numberPattern);
+const lengths = ["ft", "m", "cm", "mm"];
+const metricLengths = ["m", "cm", "mm"];
+
+const readNumber = str => {
+  const matches = numberRegEx$2.exec(str);
+  if (matches) {
+    const numStr = matches[0];
+    return [Rnl.fromString(numStr), numStr.length];
+  } else {
+    return ["Error", null]
+  }
+};
+
+const convertToBaseUnit = (num, unitName) => {
+  const unit = unitFromUnitName(unitName);
+  return Rnl.multiply(Rnl.add(num, unit.gauge), unit.factor)
+};
+
+const readInputData = data => {
+  const input = Object.create(null);
+  // Set some defaults
+  input.nodes = [];
+  input.spanLength = [];
+  input.loads = [];
+  input.E = 1;
+  input.I = 1;
+  input.k = 0;
+  input.SI = false;
+  input.convention = 1;
+  // Read the input and overwrite the defaults.
+
+  // Read the top line of data.
+  // It contains the geometry, connectivity, and node fixity.
+  const layout = data[1][0].trim();
+  if (numberRegEx$2.test(layout)) { input.nodes.push("continuous"); }
+  const elements = layout.split(/ +/g);
+  for (let k = 0; k < elements.length; k++) {
+    switch (elements[k]) {
+      case "p":
+      case "△":
+        input.nodes.push("pinned");
+        break
+      case "f":
+      case "⫢":
+        input.nodes.push("fixed");
+        break
+      case "h":
+      case "∘":
+        input.nodes.push("hinged");
+        break
+      case "ph":
+      case "⫯":
+      case "⧊":
+        input.nodes.push("proppedHinge");
+        break
+      case "s":
+      case "⌇":
+        input.nodes.push("spring");
+        break
+      case "-":
+        input.nodes.push("continuous");
+        break
+      default: {
+        const element = elements[k].replace(ftRegEx, "ft");
+        const [L, pos] = readNumber(element);
+        if (typeof L === "string") { return "Error. Non-numeric length." }
+        let unitName = element.slice(pos).trim();
+        if (unitName === "") {
+          if (lengths.includes(elements[k + 1])) {
+            unitName = elements[k + 1];
+            k += 1;
+          } else {
+            unitName = "mm";
+          }
+        }
+        if (metricLengths.includes(unitName)) { input.SI = true; }
+        input.spanLength.push(convertToBaseUnit(L, unitName));
+        break
+      }
+    }
+  }
+  if (numberRegEx$2.test(elements[elements.length - 1])) { input.nodes.push("continuous"); }
+
+  // Read the rest of the data.
+  for (let i = 1; i < data[0].length; i++) {
+    const item = data[0][i].trim();
+    let datum = data[1][i].trim();
+    switch (item) {
+      case "E": {
+        const [E, pos] = readNumber(datum);
+        if (typeof E === "string") { return "Error. Non-numeric E." }
+        const unitName = datum.slice(pos).trim();
+        input.E = Rnl.toNumber(convertToBaseUnit(E, unitName));
+        break
+      }
+
+      case "I": {
+        const [I, pos] = readNumber(datum);
+        if (typeof I === "string") { return "Error. Non-numeric I." }
+        const unitName = datum.slice(pos).trim();
+        input.I = Rnl.toNumber(convertToBaseUnit(I, unitName));
+        break
+      }
+
+      case "k": {
+        const [k, pos] = readNumber(datum);
+        if (typeof k === "string") { return "Error. Non-numeric k." }
+        const unitName = datum.slice(pos).trim();
+        input.k = Rnl.toNumber(convertToBaseUnit(k, unitName));
+        break
+      }
+
+      case "+M": {
+        input.convention = datum.charAt(0).toLowerCase() === "←→" ? 1 : -1;
+        break
+      }
+
+      default: {
+        // Treat as a load
+        const load = Object.create(null);
+        datum = datum.replace(ftRegEx, "ft");
+        const elements = datum.split(",");
+        let str = elements[0];
+        load.type = item;
+        load.from = Rnl.zero;
+        load.to = Rnl.zero;
+        load.P = 0;
+        load.M = 0;
+        load.wStart = 0;
+        load.wEnd = 0;
+        let [num1, pos] = readNumber(str);  // eslint-disable-line prefer-const
+        if (typeof num1 === "string") { return "Error. Non-numeric load." }
+        let num2 = num1;
+        str = str.slice(pos).trim();
+        if (str.slice(0, 1) === ":") {
+          str = str.slice(1).trim();
+          [num2, pos] = readNumber(str);
+          str = str.slice(pos).trim();
+        }
+        const unitName = str.trim();
+        const unit = unitFromUnitName(unitName);
+        // Read the load from & to points, if any
+        let L1 = 0;
+        let L2 = 0;
+        let lengthUnitName = "";
+        if (elements.length > 1) {
+          str = elements[1].trim();
+          [L1, pos] = readNumber(str);
+          str = str.slice(pos).trim();
+          if (str.slice(0, 1) === ":") {
+            str = str.slice(1).trim();
+            [L2, pos] = readNumber(str);
+            str = str.slice(pos).trim();
+          } else {
+            L2 = L1;
+          }
+          lengthUnitName = str.trim();
+          if (lengthUnitName === "") { lengthUnitName = "mm"; }
+        }
+        const expos = unit.expos.join("");
+        if (expos === "01-200000") {
+          load.shape = "w";
+          load.wStart = Rnl.toNumber(convertToBaseUnit(num1, unitName));
+          load.wEnd = Rnl.toNumber(convertToBaseUnit(num2, unitName));
+        } else if (expos === "11-200000") {
+          load.shape = "P";
+          load.P = Rnl.toNumber(convertToBaseUnit(num1, unitName));
+        } else if (expos === "21-200000") {
+          load.shape = "M";
+          load.M = Rnl.toNumber(convertToBaseUnit(num1, unitName));
+        } else {
+          return `Error. ${unitName} is not a force, line load, or moment.`
+        }
+        if (L1 !== 0) { load.from = convertToBaseUnit(L1, lengthUnitName); }
+        if (L2 !== 0) { load.to = convertToBaseUnit(L2, lengthUnitName); }
+        input.loads.push(load);
+      }
+    }
+  }
+  return input
+};
+
+/* eslint-disable no-useless-assignment */
+
+const dotProduct = (a, b) => a.map((e, i) => (e * b[i])).reduce((m, n) => m + n);
+const isLiveish = (loadType, beam) => beam.getsPattern[loadType];
+
+
+function doAnalysis(beam, nodes, spans) {
+  const numNodes = nodes.length;
+  const numSpans = spans.length;
+  const gotType = beam.gotType;
+  const numDegreesOfFreedom = beam.numDegreesOfFreedom;
+  const numEndActions = 4 * numSpans + numNodes; // include the node spring actions.
+  beam.numEndActions = numEndActions;
+  const EI = beam.EI;
+
+  // The Direct Stiffness Method employs matrix methods to solve indeterminate structures.
+  // Textbooks describe the Direct Stiffness Method with one-based matrices.
+  // To avoid confusion, the code below employs arrays as if they were one-based.
+  // Since JavaScript arrays are actually zero-based, we will dimension each array with one
+  // element more than it needs. Then we'll leave array[0] unused. All our loops will be
+  // written as if we had one-based arrays.
+
+  // Prepend elements to arrays `nodes` & `spans` so that they act like 1-based arrays.
+  nodes.unshift(0);
+  spans.unshift(0);
+
+  // Find the Span Stiffness Matrix, SSM
+  // Imagine that a fixed-end span undergoes a displacement, Δ, down at its right end.
+  // (Notice that rotation, θ, is zero at both ends)
+  // ▄                                                         █
+  // █                                                         █
+  // █▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,█──────┬──
+  // █             ▀▀▀▀▀▀▀▄▄▄▄                                 █      │
+  // █                         ▀▀▀▄▄▄▄▄                        █      │ Δ
+  // █                                 ▀▀▀▀▄▄▄▄▄▄              █      │
+  //                                             ▀▀▀▀▀▀▀▀▀▀▀▀▀▀█──────┴──
+  //                                                           █
+  // If we draw the free-body diagram of the span, we would see these forces:
+  // V_left = 6EIΔ/L², upward
+  // M_left = 12EIΔ/L³, clockwise
+  // V_right = 6EIΔ/L², downward
+  // M_right = 12EIΔ/L³, clockwise
+  // The Span Stiffness Matrix is populated, for each span, with just those stiffnesses.
+
+  const ssm = []; // Span Stiffnes Matrix, not yet the Stiffness Matrix.
+  ssm.push([0, 0, 0, 0, 0]);
+  for (let i = 1; i <= numSpans; i++) {
+    const subMatrix = [
+      [0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0]
+    ];
+    subMatrix[1][1] = EI * 12 / spans[i].length ** 3;
+    subMatrix[1][2] = EI * 6 / spans[i].length ** 2;
+    subMatrix[1][3] = -EI * 12 / spans[i].length ** 3;
+    subMatrix[1][4] = EI * 6 / spans[i].length ** 2;
+    subMatrix[2][1] = EI * 6 / spans[i].length ** 2;
+    subMatrix[2][2] = EI * 4 / spans[i].length;
+    subMatrix[2][3] = -EI * 6 / spans[i].length ** 2;
+    subMatrix[2][4] = EI * 2 / spans[i].length;
+    subMatrix[3][1] = -EI * 12 / spans[i].length ** 3;
+    subMatrix[3][2] = -EI * 6 / spans[i].length ** 2;
+    subMatrix[3][3] = EI * 12 / spans[i].length ** 3;
+    subMatrix[3][4] = -EI * 6 / spans[i].length ** 2;
+    subMatrix[4][1] = EI * 6 / spans[i].length ** 2;
+    subMatrix[4][2] = EI * 2 / spans[i].length;
+    subMatrix[4][3] = -EI * 6 / spans[i].length ** 2;
+    subMatrix[4][4] = EI * 4 / spans[i].length;
+    ssm.push(subMatrix);
+  }
+
+  //Find dtm, the Displacement Transformation Matrix
+  const dtm = new Array(numEndActions + 1).fill(0).map(e => {
+    return new Array(numDegreesOfFreedom + 1).fill(0)
+  });
+  let j = 0;
+  for (let i = 1; i <= numNodes; i++) {
+    if (i === 1) {
+      if (nodes[i].fixity === "continuous" || nodes[i].fixity === "spring") {
+        dtm[1][1] = 1;
+        dtm[2][1] = 1;
+        dtm[3][2] = 1;
+        j = 2;
+      } else if (nodes[i].fixity === "fixed") ; else if (nodes[i].fixity === "pinned") {
+        dtm[3][1] = 1;
+        j = 1;
+      }
+    } else if (i === numNodes) {
+      if (nodes[i].fixity === "continuous" || nodes[i].fixity === "spring") {
+        j = j + 1;
+        dtm[5 * numSpans - 1][j] = 1;
+        j = j + 1;
+        dtm[5 * numSpans][j] = 1;
+        dtm[5 * numSpans + 1][j - 1] = 1;
+      } else if (nodes[i].fixity === "fixed") ; else if (nodes[i].fixity === "pinned") {
+        j = j + 1;
+        dtm[5 * numSpans][j] = 1;
+      }
+    } else {
+      if (nodes[i].fixity === "continuous" || nodes[i].fixity === "spring") {
+        j = j + 1;
+        dtm[5 * (i - 1) - 1][j] = 1;
+        dtm[5 * (i - 1) + 1][j] = 1;
+        dtm[5 * (i - 1) + 2][j] = 1;
+        j = j + 1;
+        dtm[5 * (i - 1)][j] = 1;
+        dtm[5 * (i - 1) + 3][j] = 1;
+      } else if (nodes[i].fixity === "hinge") {
+        j = j + 1;
+        dtm[5 * (i - 1) - 1][j] = 1;
+        dtm[5 * (i - 1) + 1][j] = 1;
+        dtm[5 * (i - 1) + 2][j] = 1;
+        j = j + 1;
+        dtm[5 * (i - 1)][j] = 1;
+        j = j + 1;
+        dtm[5 * (i - 1) + 3][j] = 1;
+      } else if (nodes[i].fixity === "proppedHinge") {
+        j = j + 1;
+        dtm[5 * (i - 1)][j] = 1;
+        j = j + 1;
+        dtm[5 * (i - 1) + 3][j] = 1;
+      } else if (nodes[i].fixity === "fixed") ; else if (nodes[i].fixity === "pinned") {
+        j = j + 1;
+        dtm[5 * (i - 1)][j] = 1;
+        dtm[5 * (i - 1) + 3][j] = 1;
+      }
+    }
+  }
+
+  //Now do the first  matrix operations
+  const lsmDtm = createLsmDtm(ssm, dtm, nodes, numEndActions, numDegreesOfFreedom);
+  // Create the Stiffness Matrix.
+  const [sm, bandWidth] = createSM(dtm, lsmDtm, numDegreesOfFreedom);
+
+  let diag = [];
+  let ltm = [];
+  if (numDegreesOfFreedom > 1) {
+    [diag, ltm] = luDecomposition(sm, bandWidth);
+  }
+
+  //Find the number of load patterns
+  beam.containsLive = false;
+  for (let i = 1; i <= beam.numLoadTypes; i++) {
+    if (beam.getsPattern[i]) { beam.containsLive = true; break }
+  }
+  const numPatterns = !beam.containsLive
+    ? 1
+    : !beam.doLiveLoadPatterns
+    ? 1
+    : numSpans > 7
+    ? beam.patterns
+    : 2;
+
+  // Initialize some variables
+  const feam = new Array(numEndActions + 1).fill(0);       // Fixed End Action Matrix
+  const nfm = new Array(numDegreesOfFreedom + 1).fill(0);  // Nodal Force Matrix
+  let mam;  // Member Action Matrix
+  let dm;   // Displacement Matrix
+  const actions = new Array(beam.numLoadTypes);
+  const deflections = new Array(beam.numLoadTypes);
+  for (let i = 0; i <= beam.numLoadTypes; i++) {
+    if (beam.getsPattern[i]) {
+      actions[i] = new Array(numEndActions + 1).fill(0);
+      for (let j = 0; j < actions[i].length; j++) {
+        actions[i][j] = new Array(numDegreesOfFreedom).fill(0);
+      }
+      deflections[i] = new Array(numDegreesOfFreedom + 1).fill(0);
+      for (let j = 0; j < deflections[i].length; j++) {
+        deflections[i][j] = Array(numSpans + 1).fill(0);
+      }
+    } else {
+      actions[i] = new Array(numEndActions).fill(0);
+      deflections[i] = new Array(numDegreesOfFreedom).fill(0);
+    }
+  }
+
+  //Find a Member end Action Matrix, mam for each type of load, Service, D, L, S, W, E, etc
+  //For the live loads, find a different mam due to loads on each individual span.
+  for (let loadType = 0; loadType <= 9; loadType++) {
+    if (loadType === 0 || gotType[loadType]) {
+      let lastK = 1;
+      let doPatterns = false; // patterned live loads
+      if (loadType === 0) {
+        doPatterns = false;
+        lastK = 1;
+      } else if (isLiveish(loadType, beam) && numPatterns > 1) {
+        doPatterns = true;
+        // To do load patterns, we have to get a Member Action Matrix, mam, for each span.
+        lastK = numSpans;
+      } else {
+        doPatterns = false;
+        lastK = 1;
+      }
+
+      for (let k = 1; k <= lastK; k++) {
+        for (let i = 1;  i <= numSpans; i++) {
+          const L = spans[i].length;
+          const iSpring = 5 * i - 4;
+          const i1 = 5 * i - 3;
+          const i2 = 5 * i - 2;
+          const i3 = 5 * i - 1;
+          const i4 = 5 * i;
+
+          // Find the fixed end actions
+          feam[iSpring] = 0;
+          feam[i1] = 0; //The left end reaction if this segment were a fixed/fixed beam.
+          feam[i2] = 0; //The left fixed end moment
+          feam[i3] = 0; //The right end reaction
+          feam[i4] = 0; //The right fixed end moment
+          let applyLoadsFromThisSpan = false;
+          if (!doPatterns) {
+            // We are not doing live load patterns.
+            // So make one pass thru the beam and get a MAM that is the result of all loads.
+            applyLoadsFromThisSpan = true;
+          } else {
+            // We are doing live load patterns.
+            // k = number of spans.
+            // Make k passes thru the beam.
+            // In the kth pass, we calclate a MAM for the entire beam that results from
+            // live loads on just the kth span.
+            // The other spans have FEAM = [0, 0, etc] as their contribution to this MAM.
+            // Having k MAMs will enable us later to superimpose forces for each pattern.
+            applyLoadsFromThisSpan = i === k;
+          }
+
+          if (applyLoadsFromThisSpan) {
+            for (let iSeg = 0; iSeg < spans[i].segments.length; iSeg++) {
+              const seg = spans[i].segments[iSeg];
+              // In the next few lines,
+              // a is the distance from the beginning of the span to the load point.
+              // b is the length of the load.
+              // c is the distance from the end of the load to the right edge of the span.
+              // e is the distance from the left edge of the load to the right end of the span.
+              // d is the distance from the right edge of the load to the left edge of the span
+              let w = 0;
+              let s = 0;
+              const a = seg.xOfLeftEnd - nodes[i].x;
+              let b = seg.length;
+              let c = L - a - b;
+              let d = a + b;
+              const e = b + c;
+              let gotOppSigns = false;
+              let a2 = 0;
+              let b2 = 0;
+              let c2 = 0;
+              let d2 = 0;
+              let e2 = 0;
+
+              if (Math.abs(seg.w1[loadType]) < 0.000000001) { seg.w1[loadType] = 0; }
+              if (Math.abs(seg.w2[loadType]) < 0.000000001) { seg.w2[loadType] = 0; }
+
+              if (seg.w1[loadType] !== 0 && seg.w2[loadType] !== 0 &&
+                      Math.sign(seg.w1[loadType]) !== Math.sign(seg.w2[loadType])) {
+                gotOppSigns = true;
+                w = 0;
+                s = (seg.w2[loadType] - seg.w1[loadType]) / b;   //slope of line load
+                a2 = a - seg.w1[loadType] / s;
+                b2 = d - a2;
+                c2 = c;
+                d2 = d;
+                e2 = d2 - b2;
+                b = a2 - a;
+                d = a + b;
+                c = L - d;
+
+              } else {
+                gotOppSigns = false;
+                w = Math.abs(seg.w1[loadType]) < Math.abs(seg.w2[loadType])
+                  ? seg.w1[loadType]
+                  : seg.w2[loadType];
+              }
+
+              if (a === 0) {
+                feam[iSpring] = seg.P[loadType];
+              } else {
+                //FEA for point loads
+                feam[i2] = feam[i2] + seg.P[loadType] * a * e ** 2 / L ** 2;
+                feam[i4] = feam[i4] - seg.P[loadType] * a ** 2 * e / L ** 2;
+                feam[i2] = feam[i2] - seg.M[loadType] * (-1 + 4 * a / L - 3 * a ** 2 / L ** 2);
+                feam[i4] = feam[i4] - seg.M[loadType] * a / L * (2 - 3 * a / L);
+                feam[i1] = feam[i1] + seg.P[loadType] * e ** 2 / L ** 3 * (3 * a + e);
+                feam[i3] = feam[i3] + seg.P[loadType] * a ** 2 / L ** 3 * (a + 3 * e);
+                feam[i1] = feam[i1] - 6 * seg.M[loadType] * a / L ** 2 * (1 - a / L);
+                feam[i3] = feam[i3] + 6 * seg.M[loadType] * a / L ** 2 * (1 - a / L);
+              }
+
+              //FEA for uniform loads
+              if (w !== 0) {
+                const mA = (w * b / (12 * L ** 2 * b)) * (e ** 3 * (4 * L - 3 * e)
+                    - c ** 3 * (4 * L - 3 * c));
+                feam[i2] = feam[i2] + mA;
+                const mB = (w * b / (12 * L ** 2 * b)) * (d ** 3 * (4 * L - 3 * d)
+                    - a ** 3 * (4 * L - 3 * a));
+                feam[i4] = feam[i4] - mB;
+                feam[i1] = feam[i1] + (w * b / (2 * L)) * (2 * c + b) + (mA - mB) / L;
+                feam[i3] = feam[i3] + (w * b / (2 * L)) * (2 * a + b) + (mB - mA) / L;
+              }
+
+              //FEA for triangular loads
+              if (Math.abs(seg.w1[loadType]) > Math.abs(seg.w2[loadType]) || gotOppSigns) {
+                const wL = seg.w1[loadType] - w;
+                // const wR = 0
+                const wT = wL;
+                const centerOfTriangle = a + b / 3;
+                const wF = wT * d / b;
+                const mA = (wF * L ** 2 / 60) * (d / L) ** 2 * (10 - 10 * d / L
+                    + 3 * d ** 2 / L ** 2)
+                    - ((wF - wT) * L ** 2 / 60) * (a / L) ** 2
+                      * (10 - 10 * a / L + 3 * a ** 2 / L ** 2)
+                    - (wT * L ** 2 / 12) * (a / L) ** 2 * (6 - 8 * a / L + 3 * a ** 2 / L ** 2);
+                feam[i2] = feam[i2] + mA;
+                const mB = (wF * L ** 2 / 60) * (d / L) ** 3 * (5 - 3 * d / L)
+                    - ((wF - wT) * L ** 2 / 60) * (a / L) ** 3 * (5 - 3 * a / L)
+                    - (wT * L ** 2 / 12) * (a / L) ** 3 * (4 - 3 * a / L);
+                feam[i4] = feam[i4] - mB;
+                feam[i1] = feam[i1]
+                          + 0.5 * (wT * b) * (L - centerOfTriangle) / L + (mA - mB) / L;
+                feam[i3] = feam[i3] + 0.5 * (wT * b) * centerOfTriangle / L + (mB - mA) / L;
+
+              } else if (Math.abs(seg.w2[loadType]) > Math.abs(seg.w1[loadType])) {
+                // const wL = 0
+                const wR = seg.w2[loadType] - w;
+                const wT = wR;
+                const centerOfTriangle = a + 2 * b / 3;
+                const wF = wT * e / b;
+                const mA = (wF * L ** 2 / 60) * (e / L) ** 3 * (5 - 3 * e / L)
+                    - ((wF - wT) * L ** 2 / 60) * (c / L) ** 3 * (5 - 3 * c / L)
+                    - (wT * L ** 2 / 12) * (c / L) ** 3 * (4 - 3 * c / L);
+                feam[i2] = feam[i2] + mA;
+                const mB = (wF * L ** 2 / 60) * (e / L) ** 2
+                      * (10 - 10 * e / L + 3 * e ** 2 / L ** 2)
+                    - ((wF - wT) * L ** 2 / 60) * (c / L) ** 2
+                      * (10 - 10 * c / L + 3 * c ** 2 / L ** 2)
+                    - (wT * L ** 2 / 12) * (c / L) ** 2 * (6 - 8 * c / L + 3 * c ** 2 / L ** 2);
+                feam[i4] = feam[i4] - mB;
+                feam[i1] = feam[i1]
+                           + 0.5 * (wT * b) * (L - centerOfTriangle) / L + (mA - mB) / L;
+                feam[i3] = feam[i3] + 0.5 * (wT * b) * centerOfTriangle / L + (mB - mA) / L;
+              }
+              if (gotOppSigns) {
+                //Do the right-hand triangle load
+                // const wL = 0
+                // const wR = seg.w2[loadType]
+                const wT = seg.w2[loadType];
+                const centerOfTriangle = a2 + 2 * b2 / 3;
+                const wF = wT * e2 / b2;
+                const mA = (wF * L ** 2 / 60) * (e2 / L) ** 3 * (5 - 3 * e2 / L)
+                    - ((wF - wT) * L ** 2 / 60) * (c2 / L) ** 3 * (5 - 3 * c2 / L)
+                    - (wT * L ** 2 / 12) * (c2 / L) ** 3 * (4 - 3 * c2 / L);
+                feam[i2] = feam[i2] + mA;
+                const mB = (wF * L ** 2 / 60) * (e2 / L) ** 2
+                    * (10 - 10 * e2 / L + 3 * e2 ** 2 / L ** 2)
+                    - ((wF - wT) * L ** 2 / 60) * (c2 / L) ** 2
+                    * (10 - 10 * c2 / L + 3 * c2 ** 2 / L ** 2)
+                    // eslint-disable-next-line max-len
+                    - (wT * L ** 2 / 12) * (c2 / L) ** 2 * (6 - 8 * c2 / L + 3 * c2 ** 2 / L ** 2);
+                feam[i4] = feam[i4] - mB;
+                feam[i1] = feam[i1]
+                          + 0.5 * (wT * b2) * (L - centerOfTriangle) / L + (mA - mB) / L;
+                feam[i3] = feam[i3] + 0.5 * (wT * b2) * centerOfTriangle / L + (mB - mA) / L;
+              }
+            }
+          }
+        }
+
+        //Find the Nodal Force Matrix, NFM
+        let j = 0;
+        for (let i = 1; i <= numNodes; i++) {
+          if (i === 1) {
+            if (nodes[i].fixity === "continuous" || nodes[i].fixity === "spring") {
+              nfm[1] = -feam[1] - feam[2];
+              nfm[2] = -feam[3];
+              if (isLiveish(loadType, beam) && numPatterns > 1) {
+                if (k === 0) {
+                  nfm[1] = nfm[1] - nodes[1].P[loadType];
+                  nfm[2] = nfm[2] - nodes[1].M[loadType];
+                }
+              } else {
+                nfm[1] = nfm[1] - nodes[1].P[loadType];
+                nfm[2] = nfm[2] - nodes[1].M[loadType];
+              }
+
+              j = 2;
+            } else if (nodes[i].fixity === "fixed") ; else if (nodes[i].fixity === "pinned") {
+              j += 1;
+              nfm[1] = -feam[3];
+              if (isLiveish(loadType, beam) && numPatterns > 1) {
+                if (k === 1) {
+                  nfm[j] = nfm[j] - nodes[1].M[loadType];
+                }
+              } else {
+                nfm[j] = nfm[j] - nodes[1].M[loadType];
+              }
+            }
+          } else if (i === numNodes) {
+            if (nodes[i].fixity === "continuous" || nodes[i].fixity === "spring") {
+              j += 1;
+              nfm[j] = -feam[5 * numSpans - 1] - feam[5 * numSpans + 1];
+              j += 1;
+              nfm[j] = -feam[5 * numSpans];
+              if (isLiveish(loadType, beam) && numPatterns > 1) {
+                if (k === numSpans) {
+                  nfm[j - 1] = nfm[j - 1] - nodes[numNodes].P[loadType];
+                  nfm[j] = nfm[j] - nodes[numNodes].M[loadType];
+                }
+              } else {
+                nfm[j - 1] = nfm[j - 1] - nodes[numNodes].P[loadType];
+                nfm[j] = nfm[j] - nodes[numNodes].M[loadType];
+              }
+            } else if (nodes[i].fixity === "fixed") ; else if (nodes[i].fixity === "pinned") {
+              j += 1;
+              nfm[j] = -feam[5 * numSpans];
+              if (isLiveish(loadType, beam) && numPatterns > 1) {
+                if (k === numSpans) {
+                  nfm[j] = nfm[j] - nodes[numNodes].M[loadType];
+                }
+              } else {
+                nfm[j] = nfm[j] - nodes[numNodes].M[loadType];
+              }
+            }
+          } else {
+            if (nodes[i].fixity === "continuous" || nodes[i].fixity === "spring") {
+              j += 1;
+              nfm[j] = -feam[5 * (i - 1) - 1] - feam[5 * (i - 1) + 1] - feam[5 * (i - 1) + 2];
+              j += 1;
+              nfm[j] = -feam[5 * (i - 1)] - feam[5 * (i - 1) + 3];
+              if ((loadType === 3 || loadType === 5 || loadType === 6) && numPatterns > 1) {
+                if (k === i) {
+                  nfm[j - 1] = nfm[j - 1] - nodes[i].P[loadType];
+                  nfm[j] = nfm[j] - nodes[i].M[loadType];
+                }
+              } else {
+                nfm[j - 1] = nfm[j - 1] - nodes[i].P[loadType];
+                nfm[j] = nfm[j] - nodes[i].M[loadType];
+              }
+            } else if (nodes[i].fixity === "hinge") {
+              j += 1;
+              nfm[j] = -feam[5 * (i - 1) - 1] - feam[5 * (i - 1) + 1] - feam[5 * (i - 1) + 2];
+              j += 1;
+              nfm[j] = -feam[5 * (i - 1)];
+              if ((loadType === 3 || loadType === 5 || loadType === 6) && numPatterns > 1) {
+                if (k === i) {
+                  nfm[j - 1] = nfm[j - 1] - nodes[i].P[loadType];
+                  nfm[j] = nfm[j] - nodes[i].M[loadType];
+                }
+              } else {
+                nfm[j - 1] = nfm[j - 1] - nodes[i].P[loadType];
+                nfm[j] = nfm[j] - nodes[i].M[loadType];
+              }
+
+              j += 1;
+              nfm[j] = -feam[5 * (i - 1) + 3];
+            } else if (nodes[i].fixity === "proppedHinge") {
+              j += 1;
+              nfm[j] = -feam[5 * (i - 1)];
+              j += 1;
+              nfm[j] = -feam[5 * (i - 1) + 3];
+            } else if (nodes[i].fixity === "fixed") ; else if (nodes[i].fixity === "pinned") {
+              j += 1;
+              nfm[j] = -feam[5 * (i - 1)] - feam[5 * (i - 1) + 3];
+              if ((loadType === 3 || loadType === 5 || loadType === 6) && numPatterns > 1) {
+                if (k === i) {
+                  nfm[j] = nfm[j] - nodes[i].M[loadType];
+                }
+              } else {
+                nfm[j] = nfm[j] - nodes[i].M[loadType];
+              }
+            }
+          }
+        }
+
+        //Now do the rest of the matrix operations for the current load type
+        if (numDegreesOfFreedom === 0) {
+          dm = [0];
+        } else if (numDegreesOfFreedom === 1) {
+          dm = [0, nfm[1] / sm[1][1]];
+        } else {
+          dm = solveViaLDLt(diag, ltm, nfm, bandWidth);
+        }
+
+        // Get the Member Action Matrix, MAM.
+        // Multiply lsmDtm times dm, then add the resulting column vector to the FEAM
+        mam = lsmDtm.map(row => dotProduct(row, dm)).map((e, i) => e + feam[i]);
+
+        //Set elements of mam = 0 where fixity so dictates
+        for (let i = 1; i <= numEndActions; i++) {
+          if (Math.abs(mam[i]) < 0.00000000000001) { mam[i] = 0; }
+        }
+
+        if ((!beam.getsPattern[loadType]) || typeof actions[loadType][0] === "number") {
+          actions[loadType] = clone(mam);
+          if (EI !== 1) { deflections[loadType] = clone(dm); }
+        } else {
+          for (let j = 1; j < 5 * numSpans + 1; j++) {
+            actions[loadType][j][k - 1] = mam[j]; //mam for live loads on span k
+          }
+          if (EI !== 1) {
+            for (let j = 1; j <= numDegreesOfFreedom; j++) {
+              deflections[loadType][j][k] = dm[j];
+            }
+          }
+        }
+
+        // Find the reactions
+        if (numPatterns === 1 || !(beam.containsLive && isLiveish(loadType, beam))) {
+          if (nodes[1].fixity === "fixed") {
+            nodes[1].Mr[loadType] = mam[3] + nodes[1].M[loadType];
+          }
+          if (nodes[1].fixity === "spring") {
+            nodes[1].Pr[loadType] = mam[1];
+          } else if (nodes[1].fixity !== "continuous") {
+            nodes[1].Pr[loadType] = -mam[2] - nodes[1].P[loadType];
+          }
+
+          for (let j = 2; j <= numSpans; j++) {
+            if (nodes[j].fixity === "fixed") {
+              nodes[j].Mr[loadType] = mam[5 * (j - 1)]
+                                       + mam[5 * (j - 1) + 3] + nodes[j].M[loadType];
+            }
+            if (nodes[j].fixity === "spring") {
+              nodes[j].Pr[loadType] = mam[5 * (j - 1) + 1];
+            } else if (nodes[j].fixity !== "continuous") {
+              nodes[j].Pr[loadType] = -mam[5 * (j - 1) - 1] - mam[5 * (j - 1) + 2]
+                  - nodes[j].P[loadType];
+            }
+          }
+
+          if (nodes[numNodes].fixity === "fixed") {
+            nodes[numNodes].Mr[loadType] = mam[5 * numSpans] + nodes[numNodes].M[loadType];
+          }
+          if (nodes[numNodes].fixity === "spring") {
+            nodes[numNodes].Pr[loadType] = mam[5 * numSpans + 1];
+          } else if (nodes[numNodes].fixity !== "continuous") {
+            nodes[numNodes].Pr[loadType] = -mam[5 * numSpans - 1] - nodes[numNodes].P[loadType];
+          }
+        } else {
+          let mTest = 0;
+          if (nodes[1].fixity === "fixed") {
+            mTest = mam[3] + nodes[1].M[loadType];
+            if (mTest > 0) { nodes[1].Mr[loadType] = nodes[1].Mr[loadType] + mTest; }
+            if (mTest < 0) { nodes[1].MrMin[loadType] = nodes[1].MrMin[loadType] + mTest; }
+          }
+          let pTest = 0;
+          if (nodes[1].fixity === "spring") {
+            pTest = mam[1];
+          } else if (nodes[1].fixity !== "continuous") {
+            pTest = -mam[2] - nodes[1].P[loadType];
+          }
+          if (pTest > 0) { nodes[1].Pr[loadType] = nodes[1].Pr[loadType] + pTest; }
+          if (pTest < 0) { nodes[1].PrMin[loadType] = nodes[1].PrMin[loadType] + pTest; }
+
+          for (let j = 1; j < numSpans; j++) {
+            if (nodes[j].fixity === "fixed") {
+              mTest = mam[5 * (j - 1)] + mam[5 * (j - 1) + 3] + nodes[j].M[loadType];
+              if (mTest > 0) { nodes[j].Mr[loadType] = nodes[j].Mr[loadType] + mTest; }
+              if (mTest < 0) { nodes[j].MrMin[loadType] = nodes[j].MrMin[loadType] + mTest; }
+            }
+            pTest = 0;
+            if (nodes[j].fixity === "spring") {
+              nodes[j].Pr[loadType] = nodes[j].Pr[loadType] + mam[5 * (j - 1) + 1];
+            } else if (nodes[j].fixity !== "continuous") {
+              pTest = -mam[5 * (j - 1) - 1] - mam[5 * (j - 1) + 2] - nodes[j].P[loadType];
+            }
+            if (pTest > 0) { nodes[j].Pr[loadType] = nodes[j].Pr[loadType] + pTest; }
+            if (pTest < 0) { nodes[j].PrMin[loadType] = nodes[j].PrMin[loadType] + pTest; }
+          }
+
+          if (nodes[numNodes].fixity === "fixed") {
+            mTest = mam[5 * numSpans] + nodes[numSpans].M[loadType];
+            if (mTest > 0) {
+              nodes[numNodes].Mr[loadType] = nodes[numNodes].Mr[loadType] + mTest;
+            }
+            if (mTest < 0) {
+              nodes[numNodes].MrMin[loadType] = nodes[numNodes].MrMin[loadType] + mTest;
+            }
+          }
+
+          pTest = 0;
+          if (nodes[numNodes].fixity === "spring") {
+            nodes[numNodes].Pr[loadType] = nodes[numNodes].Pr[loadType] + mam[5 * numSpans + 1];
+          } else if (nodes[numNodes].fixity !== "continuous") {
+            pTest = -mam[5 * numSpans - 1] - nodes[j].P[loadType];
+          }
+          if (pTest > 0) {
+            nodes[numNodes].Pr[loadType] = nodes[numNodes].Pr[loadType] + pTest;
+          }
+          if (pTest < 0) {
+            nodes[numNodes].PrMin[loadType] = nodes[numNodes].PrMin[loadType] + pTest;
+          }
+        } //finished finding the reactions
+
+      }
+    }
+  }
+  return [actions, deflections]
+}
+
+const createLsmDtm = (ssm, dtm, nodes, numEndActions, numDegreesOfFreedom) => {
+// Create LSM × DTM
+
+  let lsmDtm = new Array(numEndActions + 1).fill(0);
+  lsmDtm = lsmDtm.map(e => new Array(numDegreesOfFreedom + 1).fill(0));
+
+  for (let i = 1; i <= numEndActions; i++) {
+    const iSpan = Math.trunc((i - 1) / 5) + 1;
+    const g = i - 1 - 5 * (iSpan - 1);
+
+    for (let j = 1; j <= numDegreesOfFreedom; j++) {
+      if (g === 0) {
+        lsmDtm[i][j] = nodes[iSpan].k * dtm[i][j];
+      } else {
+        const kStart = 5 * iSpan - 3;
+        const kEnd = 5 * iSpan;
+        let h = 0;
+        for (let k = kStart; k <= kEnd; k++) {
+          h += 1;
+          lsmDtm[i][j] = lsmDtm[i][j] + ssm[iSpan][g][h] * dtm[k][j];
+        }
+      }
+    }
+  }
+  return lsmDtm
+};
+
+const createSM = (dtm, lsmDtm, numDegreesOfFreedom) => {
+  // Create the Stiffness Matrix, SM.
+  // SM = DTM**T × LsmDtm
+  let sm = Array(numDegreesOfFreedom + 1).fill(0);
+  sm = sm.map(e => Array(numDegreesOfFreedom + 1).fill(0));
+  const h = lsmDtm.length - 1;
+  let bandWidth = 1;
+  for (let i = 1; i < dtm[0].length; i++) {
+    for (let j = 1; j <= i; j++) {                       // Only the lower half of SM.
+      for (let k = 1; k <= h; k++) {
+        sm[i][j] = sm[i][j] + dtm[k][i] * lsmDtm[k][j];   // DTM**T, not DTM.
+      }
+      if (sm[i][j] !== 0 && i - j > bandWidth) { bandWidth = i - j;}  // lower band width
+    }
+  }
+  return [sm, bandWidth]
+};
+
+const luDecomposition = (sm, bandWidth) => {
+  // Perform the LU Decomposition of the stiffness matrix, SM.
+  // This is in preparation for the LDL**T matrix solution to come later.
+
+  const diag = new Array(sm.length).fill(0);
+  // Lower Triangular matrix, ltm
+  let ltm = new Array(sm.length).fill(0);
+  ltm = ltm.map(e => new Array(sm.length - 1).fill(0));
+
+  const n = sm.length - 1;    // number of equations
+
+  for (let j = 1; j <= n; j++) {
+    let kStar = Math.max(j - bandWidth, 1);
+    diag[j] = sm[j][j];
+    for (let k = kStar; k <= j - 1; k++) {
+      diag[j] = diag[j] - diag[k] * ltm[j][k] * ltm[j][k];
+    }
+
+    const iMax = Math.min(j + bandWidth, n);
+    for (let i = j + 1; i <= iMax; i++) {
+      kStar =  Math.max(i - bandWidth, 1);
+      let sum = 0;
+      for (let k = kStar; k <= j - 1; k++) {
+        sum = sum + diag[k] * ltm[j][k] * ltm[i][k];
+      }
+      ltm[i][j] = (sm[i][j] - sum) / diag[j];
+    }
+  }
+  return [diag, ltm]
+};
+
+const solveViaLDLt = (diag, ltm, b, bandWidth) => {
+  // Solve for dm() in a system of equations expressed by matrices: SM() × dm() = NFM()
+
+  // This sub// s method is a banded version of the LDL**T solver.
+  // LDL**T takes advantage of the fact that SM is a symmetric, positive-definite matrix.
+  // The algorithm will overwrite b(), which starts out as NFM and ends as dm.
+  // We already have the diag & ltm matrices, so we can go directly to the LU solution.
+
+  const n = b.length - 1;       // number of equations
+
+  // Forward substitution
+  for (let i = 2; i <= n; i++) {
+    const kStar = i - bandWidth < 1 ? 1 : i - bandWidth;
+    for (let k = kStar; k <= i - 1; k++) {
+      b[i] = b[i] - ltm[i][k] * b[k];
+    }
+  }
+
+  // Diagonal scaling and backward substitution
+  b[n] = b[n] / diag[n];
+  for (let i = n - 1; i >= 1; i--) {
+    b[i] = b[i] / diag[i];
+    const kStar = Math.min(n, i + bandWidth);
+    for (let k = i + 1; k <= kStar; k++) {
+      b[i] = b[i] - ltm[k][i] * b[k];
+    }
+  }
+
+  return b
+};
+
+function getLoadPatterns(beam, numSpans) {
+  if (!beam.containsLive || !beam.doLiveLoadPatterns) {
+    // Just one pattern. It includes each span.
+    const pattern = [1];
+    for (let i = 2; i <= numSpans; i++) {
+      pattern.push(i);
+    }
+    return [pattern]
+  } else if (beam.numPatterns === 2 || numSpans > 7) {
+    // Do 2 patterns.  One with all live load on, and one with all live load off.
+    const pattern = [1];
+    for (let i = 2; i <= numSpans; i++) {
+      pattern.push(i);
+    }
+    return [pattern, []]
+  } else {
+    switch (numSpans) {
+      case 1:
+        return [[1], []]
+      case 2:
+        return [[1, 2], [], [1], [2]]
+      case 3:
+        return [[1, 2, 3], [], [1], [2], [3], [1, 2], [1, 3], [2, 3]]
+      case 4:
+        // eslint-disable-next-line max-len
+        return [[1, 2, 3, 4], [], [1], [2], [3], [4], [1, 2], [1, 3], [1, 4], [2, 3], [2, 4], [3, 4], [1, 2, 3], [1, 2, 4], [1, 3, 4], [2, 3, 4]]
+      case 5:
+        // eslint-disable-next-line max-len
+        return [[1, 2, 3, 4, 5], [], [1], [2], [3], [4], [5], [1, 2], [1, 3], [1, 4], [1, 5], [2, 3], [2, 4], [2, 5], [3, 4], [3, 5], [4, 5], [1, 2, 3], [1, 2, 4], [1, 2, 5], [1, 3, 4], [1, 3, 5], [1, 4, 5], [2, 3, 4], [2, 3, 5], [2, 4, 5], [3, 4, 5], [1, 2, 3, 4], [1, 2, 3, 5], [1, 2, 4, 5], [1, 3, 4, 5], [2, 3, 4, 5]]
+      case 6:
+        // eslint-disable-next-line max-len
+        return [[1, 2, 3, 4, 5, 6], [], [1], [2], [3], [4], [5], [6], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [2, 3], [2, 4], [2, 5], [2, 6], [3, 4], [3, 5], [3, 6], [4, 5], [4, 6], [5, 6], [1, 2, 3], [1, 2, 4], [1, 2, 5], [1, 2, 6], [1, 3, 4], [1, 3, 5], [1, 3, 6], [1, 4, 5], [1, 4, 6], [1, 5, 6], [2, 3, 4], [2, 3, 5], [2, 3, 6], [2, 4, 5], [2, 4, 6], [2, 5, 6], [3, 4, 5], [3, 4, 6], [3, 5, 6], [4, 5, 6], [1, 2, 3, 4], [1, 2, 3, 5], [1, 2, 3, 6], [1, 2, 4, 5], [1, 2, 4, 6], [1, 2, 5, 6], [1, 3, 4, 5], [1, 3, 4, 6], [1, 3, 5, 6], [1, 4, 5, 6], [2, 3, 4, 5], [2, 3, 4, 6], [2, 3, 5, 6], [2, 4, 5, 6], [3, 4, 5, 6], [1, 2, 3, 4, 5], [1, 2, 3, 4, 6], [1, 2, 3, 5, 6], [1, 2, 4, 5, 6], [1, 3, 4, 5, 6], [2, 3, 4, 5, 6]]
+      case 7:
+        // eslint-disable-next-line max-len
+        return [[1, 2, 3, 4, 5, 6, 7], [], [1], [2], [3], [4], [5], [6], [7], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [1, 7], [2, 3], [2, 4], [2, 5], [2, 6], [2, 7], [3, 4], [3, 5], [3, 6], [3, 7], [4, 5], [4, 6], [4, 7], [5, 6], [5, 7], [6, 7], [1, 2, 3], [1, 2, 4], [1, 2, 5], [1, 2, 6], [1, 2, 7], [1, 3, 4], [1, 3, 5], [1, 3, 6], [1, 3, 7], [1, 4, 5], [1, 4, 6], [1, 4, 7], [1, 5, 6], [1, 5, 7], [1, 6, 7], [2, 3, 4], [2, 3, 5], [2, 3, 6], [2, 3, 7], [2, 4, 5], [2, 4, 6], [2, 4, 7], [2, 5, 6], [2, 5, 7], [2, 6, 7], [3, 4, 5], [3, 4, 6], [3, 4, 7], [3, 5, 6], [3, 5, 7], [3, 6, 7], [4, 5, 6], [4, 5, 7], [4, 6, 7], [5, 6, 7], [1, 2, 3, 4], [1, 2, 3, 5], [1, 2, 3, 6], [1, 2, 3, 7], [1, 2, 4, 5], [1, 2, 4, 6], [1, 2, 4, 7], [1, 2, 5, 6], [1, 2, 5, 7], [1, 2, 6, 7], [1, 3, 4, 5], [1, 3, 4, 6], [1, 3, 4, 7], [1, 3, 5, 6], [1, 3, 5, 7], [1, 3, 6, 7], [1, 4, 5, 6], [1, 4, 5, 7], [1, 4, 6, 7], [1, 5, 6, 7], [2, 3, 4, 5], [2, 3, 4, 6], [2, 3, 4, 7], [2, 3, 5, 6], [2, 3, 5, 7], [2, 3, 6, 7], [2, 4, 5, 6], [2, 4, 5, 7], [2, 4, 6, 7], [2, 5, 6, 7], [3, 4, 5, 6], [3, 4, 5, 7], [3, 4, 6, 7], [3, 5, 6, 7], [4, 5, 6, 7], [1, 2, 3, 4, 5], [1, 2, 3, 4, 6], [1, 2, 3, 4, 7], [1, 2, 3, 5, 6], [1, 2, 3, 5, 7], [1, 2, 3, 6, 7], [1, 2, 4, 5, 6], [1, 2, 4, 5, 7], [1, 2, 4, 6, 7], [1, 2, 5, 6, 7], [1, 3, 4, 5, 6], [1, 3, 4, 5, 7], [1, 3, 4, 6, 7], [1, 3, 5, 6, 7], [1, 4, 5, 6, 7], [2, 3, 4, 5, 6], [2, 3, 4, 5, 7], [2, 3, 4, 6, 7], [2, 3, 5, 6, 7], [2, 4, 5, 6, 7], [3, 4, 5, 6, 7], [1, 2, 3, 4, 5, 6], [1, 2, 3, 4, 5, 7], [1, 2, 3, 4, 6, 7], [1, 2, 3, 5, 6, 7], [1, 2, 4, 5, 6, 7], [1, 3, 4, 5, 6, 7], [2, 3, 4, 5, 6, 7]]
+        // We cannot get here.
+    }
+  }
+}
+
+function populateMAM(loadFactors, combern, loadPattern, beam, nodes, spans, actions) {
+  let mam = new Array(beam.numEndActions).fill(0); // Member end Action Matrix
+  const numSpans = spans.length - 1;
+  const numNodes = nodes.length - 1;
+  const numPatterns = beam.numPatterns;
+  const didNode = new Array(numNodes);
+
+  // Fill mam with dead load
+  const deadLoadFactor = loadFactors[1];
+  mam = mam.map((e, i) => deadLoadFactor * actions[1][i]);
+  for (let i = 1; i <= numSpans; i++) {
+    nodes[i].Pf = deadLoadFactor * nodes[i].P[1];
+    nodes[i].Mf = deadLoadFactor * nodes[i].M[1];
+    for (let j = 0; j < spans[i].segments.length; j++) {
+      const seg = spans[i].segments[j];
+      seg.w1f[combern] = deadLoadFactor * seg.w1[1];
+      seg.w2f = deadLoadFactor * seg.w2[1];
+      seg.Pf = deadLoadFactor * seg.P[1];
+      seg.Mf = deadLoadFactor * seg.M[1];
+    }
+  }
+
+  // Superimpose the other load types onto mam.
+  for (let iLoadType = 2; iLoadType <= 9; iLoadType++) {
+    const loadFactor = loadFactors[iLoadType];
+    if (loadFactor > 0 && beam.gotType[iLoadType]) {
+      if (!beam.getsPattern[iLoadType] || numPatterns === 1) {
+        mam = mam.map((e, i) => e + loadFactor * actions[iLoadType][i]);
+        for (let i = 1; i <= numSpans; i++) {
+          nodes[i].Pf = nodes[i].Pf + loadFactor * nodes[i].P[iLoadType];
+          nodes[i].Mf = nodes[i].Mf + loadFactor * nodes[i].M[iLoadType];
+          for (let j = 0; j < spans[i].segments.length; j++) {
+            const seg = spans[i].segments[j];
+            seg.w1f[combern] = seg.w1f[combern] + loadFactor * seg.w1[iLoadType];
+            seg.w2f = seg.w2f + loadFactor * seg.w2[iLoadType];
+            seg.Pf = seg.Pf + loadFactor * seg.P[iLoadType];
+            seg.Mf = seg.Mf + loadFactor * seg.M[iLoadType];
+          }
+        }
+      } else {
+        // load case includes live load patterns
+        for (let k = 1; k <= numSpans; k++) {
+          if (loadPattern.includes(k)) {
+            let ii = 0;
+            for (let j = 1; j <= numSpans; j++) {
+              ii = 5 * j - 4;
+              mam[ii] = mam[ii] + loadFactor * actions[iLoadType][ii][k - 1];
+              mam[ii + 1] = mam[ii + 1] + loadFactor * actions[iLoadType][ii + 1][k - 1];
+              mam[ii + 2] = mam[ii + 2] + loadFactor * actions[iLoadType][ii + 2][k - 1];
+              mam[ii + 3] = mam[ii + 3] + loadFactor * actions[iLoadType][ii + 3][k - 1];
+              mam[ii + 4] = mam[ii + 4] + loadFactor * actions[iLoadType][ii + 4][k - 1];
+            }
+            mam[ii + 5] = mam[ii + 5] + loadFactor * actions[iLoadType][ii + 5][k - 1];
+          }
+        }
+
+        // Do node loads.
+        // Include a node load if the span on either side is in the load pattern.
+        didNode.fill(false);
+        for (let i = 1; i <= numSpans; i++) {
+          if (loadPattern.includes(i)) {
+            if (!didNode[i]) {
+              nodes[i].Pf = nodes[i].Pf + loadFactor * nodes[i].P[iLoadType];
+              nodes[i].Mf = nodes[i].Mf + loadFactor * nodes[i].M[iLoadType];
+              didNode[i] = true;
+            }
+            if (!didNode[i + 1]) {
+              nodes[i + 1].Pf = nodes[i + 1].Pf + loadFactor * nodes[i + 1].P[iLoadType];
+              nodes[i + 1].Mf = nodes[i + 1].Mf + loadFactor * nodes[i + 1].M[iLoadType];
+              didNode[i + 1] = true;
+            }
+          }
+          for (let j = 0; j < spans[i].segments.length; j++) {
+            const seg = spans[i].segments[j];
+            if (loadPattern.includes(i)) {
+              seg.w1f[combern] = seg.w1f[combern] + loadFactor * seg.w1[iLoadType];
+              seg.w2f = seg.w2f + loadFactor * seg.w2[iLoadType];
+              seg.Pf = seg.Pf + loadFactor * seg.P[iLoadType];
+              seg.Mf = seg.Mf + loadFactor * seg.M[iLoadType];
+            }
+          }
+        }
+      }
+    }
+  }
+
+  for (let i = 1; i <= numSpans; i++) {
+    for (let j = 0; j < spans[i].segments.length; j++) {
+      const seg = spans[i].segments[j];
+      if (seg.length !== 0) {
+        seg.slope[combern] = (seg.w2f - seg.w1f[combern]) / seg.length;
+      }
+    }
+  }
+  return mam
+}
+
+function combine(beam, nodes, spans, actions, deflections, comboSet) {
+  // We already have member end actions for each load type on each span.
+  // In this function, we superimpose the load combinations and live load patterns and
+  // find the maximum and minimum shears and moments.
+  const numSpans = spans.length - 1;
+  const isService = comboSet === "service";
+  if (isService) { comboSet = [[0, 1, 1, 1, 1, 1, 1, 1, 1, 1]]; }
+  const liveLoadPatterns = getLoadPatterns(beam, numSpans);
+  const numPatterns = liveLoadPatterns.length;
+
+  let vMin = 0;
+  let vMax = 0;
+  let mMin = 0;
+  let mMax = 0;
+  let deflectionMax = 0;
+  let deflMaxCase = 0;
+  let deflectionMin = 0;
+  let deflMinCase = 0;
+
+  // Get ready to do lots of different load combinations.
+  // Definition: "combern" is a conflation of the words "combination" and "pattern".
+  const numComberns = getNumComberns(comboSet, isService, beam, numPatterns);
+
+  for (let i = 1; i <= numSpans; i++) {
+    for (let j = 0; j < spans[i].segments.length; j++) {
+      const seg = spans[i].segments[j];
+      seg.w1f = new Array(numComberns).fill(0);
+      seg.w2f = 0;
+      seg.slope = new Array(numComberns).fill(0);
+      seg.V1 = new Array(numComberns).fill(0);
+      seg.M1 = new Array(numComberns).fill(0);
+      if (beam.EI !== 1) {
+        seg.theta1 = new Array(numPatterns).fill(0);
+        seg.delta1 = new Array(numPatterns).fill(0);
+      }
+    }
+  }
+
+  // The number of interations through this next loop will be a function of
+  // both the number of load combinations and the number of load patterns.
+  // I define "combern" as a conflation of the words "combination" & "pattern"
+  // "combern" will be the loop index as we look at unique combinations of both
+  // load combinations and live load patterns.
+  // Each time through the loop, we;ll get the factored loads and the factored MAM
+  // To do this, we'll make much use of a subroutine called "PopulateMAM"
+  // It's called as:  PopulateMAM  loadFactors, combern, iPattern
+  // The load factors are factors from the ASCE or NBCC load combinations
+
+  // As you can see below, we'll find a unique MAM for each iCombo and live load pattern.
+  // Then, we'll use the MAM to find the segment shears, moments, etc.
+
+  let combern = 0;
+
+  // iCombo 0 is for deflections only. We'll go thru each load pattern.
+  // iCombo 1 thru comboSet.length is for finding shear and moment extremes. As code
+  // requires, this often means testing many load combinations.
+
+  for (let iCombo = 0; iCombo <= comboSet.length; iCombo++) {
+    const  isReqd = iCombo === 0 && beam.EI !== 0
+      ? true  // Go thru each load pattern and find deflection extremes.
+      : isService
+      ? true
+      : isReqdCombo(comboSet[iCombo - 1], beam.gotType);
+
+    if (isReqd) {
+      const loadFactors = iCombo === 0 && beam.EI !== 0
+        ? [0, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        : comboSet[iCombo - 1];
+
+      for (let iPattern = 0; iPattern < numPatterns; iPattern++) {
+        const loadPattern = liveLoadPatterns[iPattern];
+
+        // Get the Member Action Matrix, MAM, for this combern.
+        // A MAM contains the end shears and end moments for each span.
+        const mam = populateMAM(loadFactors, combern, loadPattern, beam, nodes, spans, actions);
+
+        let dm;
+        if (iCombo === 0 && beam.EI !== 1) {
+          // Create a Displacement Matrix, DM, for this load combination and load pattern.
+          dm = new Array(beam.numDegreesOfFreedom + 1).fill(0);
+          for (let iLoadType = 1; iLoadType < 10; iLoadType++) {
+            if (beam.gotType[iLoadType]) {
+              if (beam.getsPattern[iLoadType]) {
+                dm = getLiveDM(dm, deflections[iLoadType], loadPattern, numSpans);
+              } else {
+                dm = dm.map((e, i) => e + deflections[iLoadType][i]);
+              }
+            }
+          }
+        }
+
+        let iDM = 0;
+        for (let iSpan = 1; iSpan <= numSpans; iSpan++) {
+          /* eslint-disable no-useless-assignment */
+          let vMid = 0;
+          let vEnd = 0;
+          let mMid = 0;
+          let mEnd = 0;
+          let slopeEnd = 0;
+          let deflectionEnd = 0;
+          let deflectionMid = 0;
+          /* eslint-enable no-useless-assignment */
+          for (let k = 0; k < spans[iSpan].segments.length; k++) {
+            const seg = spans[iSpan].segments[k];
+
+            if (k === 0) {
+              // The first segment in this span.
+              seg.V1[combern] = -mam[5 * iSpan - 3];
+              seg.M1[combern] = mam[5 * iSpan - 2];
+              if (iCombo === 0 && beam.EI !== 1) {
+                iDM = getThetaAndDelta(nodes[iSpan].fixity, dm, seg, combern, iDM);
+              }
+            } else {
+              // Subsequent segments.
+              seg.V1[combern] = vEnd + seg.Pf;
+              seg.M1[combern] = mEnd - seg.Mf;
+              if (iCombo === 0 && beam.EI !== 1) {
+                seg.theta1[combern] = slopeEnd;
+                seg.delta1[combern] = deflectionEnd;
+              }
+            }
+
+            vEnd = seg.V1[combern] + seg.w1f[combern] * seg.length
+                 + 0.5 * seg.slope[combern] * seg.length ** 2;
+            if (Math.abs(vEnd) < 0.00000000000001) { vEnd = 0; }
+
+            mEnd = seg.M1[combern] + seg.V1[combern] * seg.length
+                 + 0.5 * seg.w1f[combern] * seg.length ** 2
+                 + seg.slope[combern] * seg.length ** 3 / 6;
+            if (Math.abs(mEnd) < 0.00000000000001) { mEnd = 0; }
+
+            if (iCombo === 0) {
+              // Check if this load pattern contains a deflection extreme.
+              if (beam.EI !== 1) {
+                slopeEnd = seg.theta1[combern] + (seg.M1[combern] * seg.length
+                  + 0.5 * seg.V1[combern] * seg.length ** 2
+                  + seg.w1f[combern] * seg.length ** 3 / 6
+                  + seg.slope[combern] * seg.length ** 4 / 24) / beam.EI;
+                deflectionMid = seg.delta1[combern] + seg.theta1[combern] * 0.5 * seg.length
+                    + (0.5 * seg.M1[combern] * (0.5 * seg.length) ** 2
+                    + seg.V1[combern] * (0.5 * seg.length) ** 3 / 6
+                    + seg.w1f[combern] * (0.5 * seg.length) ** 4 / 24
+                    + seg.slope[combern] * (0.5 * seg.length) ** 5 / 120) / beam.EI;
+                deflectionEnd = seg.delta1[combern] + seg.theta1[combern] * seg.length
+                    + (0.5 * seg.M1[combern] * seg.length ** 2
+                        + seg.V1[combern] * seg.length ** 3 / 6
+                    + seg.w1f[combern] * seg.length ** 4 / 24
+                    + seg.slope[combern] * seg.length ** 5 / 120) / beam.EI;
+                if (seg.delta1[combern] > deflectionMax) {
+                  deflectionMax = seg.delta1[combern];
+                  deflMaxCase = combern;
+                }
+                if (seg.delta1[combern] < deflectionMin) {
+                  deflectionMin = seg.delta1[combern];
+                  deflMaxCase = combern;
+                }
+                if (deflectionEnd > deflectionMax) {
+                  deflectionMax = deflectionEnd;
+                  deflMaxCase = combern;
+                }
+                if (deflectionEnd < deflectionMin) {
+                  deflectionMin = deflectionEnd;
+                  deflMinCase = combern;
+                }
+                if (deflectionMid > deflectionMax) {
+                  deflectionMax = deflectionMid;
+                  deflMaxCase = combern;
+                }
+                if (deflectionMid < deflectionMin) {
+                  deflectionMin = deflectionMid;
+                  deflMinCase = combern;
+                }
+              }
+            } else {
+              // Determine if this combern contains a shear or moment extreme.
+              // Start by finding the shear value in the middle of the segment
+              // eslint-disable-next-line no-useless-assignment
+              let xCross = 0; // initialze the variable
+              if (seg.slope[combern] !== 0) {
+                xCross = -1 * seg.w1f[combern] / seg.slope[combern];
+                if (xCross > 0 && xCross < seg.length) {
+                  vMid = seg.V1[combern] + seg.w1f[combern] * xCross
+                        + 0.5 * seg.slope[combern] * xCross ** 2;
+                } else {
+                  vMid = seg.V1[combern] + seg.w1f[combern] * (seg.length / 2)
+                        + 0.5 * seg.slope[combern] * (seg.length / 2) ** 2;
+                }
+              } else {
+                vMid = seg.V1[combern] + seg.w1f[combern] * (seg.length / 2)
+                      + 0.5 * seg.slope[combern] * (seg.length / 2) ** 2;
+              }
+
+              // Find the moment in the middle of the segment
+              xCross = 0; // initialze the variable
+              if (seg.slope[combern] === 0) {
+                if (seg.w1f[combern] !== 0) {
+                  xCross = -seg.V1[combern] / seg.w1f[combern];
+                }
+              } else {
+                if ((seg.w1f[combern] ** 2 - 2 * seg.slope[combern] * seg.V1[combern]) > 0) {
+                  xCross = -(seg.w1f[combern] + Math.sqrt(seg.w1f[combern] ** 2
+                          - 2 * seg.slope[combern] * seg.V1[combern])) / seg.slope[combern];
+                }
+              }
+              if (xCross > 0 && xCross < seg.length) {
+                mMid = seg.M1[combern] + seg.V1[combern] * xCross
+                      + 0.5 * seg.w1f[combern] * xCross ** 2
+                      + seg.slope[combern] * xCross ** 3 / 6;
+              } else {
+                mMid = seg.M1[combern] + seg.V1[combern] * (seg.length / 2)
+                    + 0.5 * seg.w1f[combern] * (seg.length / 2) ** 2
+                    + seg.slope[combern] * (seg.length / 2) ** 3 / 6;
+              }
+
+              // Check for local maximums and minimums
+              if (seg.V1[combern] > seg.Vmax.left.value && seg.V1[combern] > 0.01) {
+                seg.Vmax.left.value = seg.V1[combern];
+                seg.Vmax.left.case = combern;   // This is a case that we// ll want to plot
+                if (seg.V1[combern] > vMax) { vMax = seg.V1[combern]; }
+              }
+
+              if (vMid > seg.Vmax.mid.value && vMid > 0.01) {
+                seg.Vmax.mid.value = vMid;
+                seg.Vmax.mid.case = combern;
+                if (vMid > vMax) { vMax = vMid; }
+              }
+
+              if (vEnd > seg.Vmax.right.value && vEnd > 0.01) {
+                seg.Vmax.right.value = vEnd;
+                seg.Vmax.right.case = combern;
+                if (vEnd > vMax) { vMax = vEnd; }
+              }
+
+              if (seg.V1[combern] < seg.Vmin.left.value && seg.V1[combern] < -0.01) {
+                seg.Vmin.left.value = seg.V1[combern];
+                seg.Vmin.left.case = combern;
+                if (seg.V1[combern] < vMin) { vMin = seg.V1[combern]; }
+              }
+
+              if (vMid < seg.Vmin.mid.value && vMid < -0.01) {
+                seg.Vmin.mid.value = vMid;
+                seg.Vmin.mid.case = combern;
+                if (vMid < vMin) { vMin = vMid; }
+              }
+
+              if (vEnd < seg.Vmin.right.value && vEnd < -0.01) {
+                seg.Vmin.right.value = vEnd;
+                seg.Vmin.right.case = combern;
+                if (vEnd < vMin) { vMin = vEnd; }
+              }
+
+              if (seg.M1[combern] > seg.Mmax.left.value && seg.M1[combern] > 0.01) {
+                seg.Mmax.left.value = seg.M1[combern];
+                seg.Mmax.left.case = combern;
+                if (seg.M1[combern] > mMax) { mMax = seg.M1[combern]; }
+              }
+
+              if (mMid > seg.Mmax.mid.value && mMid > 0.01) {
+                seg.Mmax.mid.value = mMid;
+                seg.Mmax.mid.case = combern;
+                seg.Mmax.mid.x = seg.xOfLeftEnd + xCross;
+                if (mMid > mMax) { mMax = mMid; }
+              }
+
+              if (mEnd > seg.Mmax.right.value && mEnd > 0.01) {
+                seg.Mmax.right.value = mEnd;
+                seg.Mmax.right.case = combern;
+                if (mEnd > mMax) { mMax = mEnd; }
+              }
+
+              if (seg.M1[combern] < seg.Mmin.left.value && seg.M1[combern] < -0.01) {
+                seg.Mmin.left.value = seg.M1[combern];
+                seg.Mmin.left.case = combern;
+                if (seg.M1[combern] < mMin) { mMin = seg.M1[combern]; }
+              }
+
+              if (mMid < seg.Mmin.mid.value && mMid < -0.01) {
+                seg.Mmin.mid.value = mMid;
+                seg.Mmin.mid.case = combern;
+                seg.Mmin.mid.x = seg.xOfLeftEnd + xCross;
+                if (mMid < mMin) { mMin = mMid; }
+              }
+
+              if (mEnd < seg.Mmin.right.value && mEnd < -0.01) {
+                seg.Mmin.right.value = mEnd;
+                seg.Mmin.right.case = combern;
+                if (mEnd < mMin) { mMin = mEnd; }
+              }
+            }
+
+          }
+        }
+        combern += 1;
+      }
+    }
+  }
+  return [vMax, vMin, mMax, mMin, deflectionMax, deflectionMin,
+    deflMaxCase, deflMinCase, numComberns]
+}
+
+const isReqdCombo = (combo, gotType) => {
+  let isDeadLoadOnly = true;
+  for (let j = 2; j < combo.length; j++) {
+    if (combo[j] > 0) {
+      isDeadLoadOnly = false;
+      if (gotType[j]) { return true }
+    }
+  }
+  return isDeadLoadOnly
+};
+
+/*const comboContainsLive = (combo, beam) => {
+  for (let i = 1; i <= beam.numLoadTypes; i++) {
+    if (beam.getsPattern[i] && combo[i] !== 0) { return true }
+  }
+  return false
+}*/
+
+const getNumComberns = (comboSet, isService, beam, numPatterns) => {
+  // We'll do a superposition of forces for each load combination and each live load pattern.
+  // How many is that?
+  // First, count the number of comberns needed to do the deflection superpositions.
+  let numComberns = beam.EI === 1 ? 1 : numPatterns;
+  // Then add a combern for each superposition done to get shears and moments.
+  for (let i = 0; i < comboSet.length; i++) {
+    if (isService || isReqdCombo(comboSet[i], beam.gotType)) {
+      numComberns += numPatterns;
+    }
+  }
+  return numComberns
+};
+
+const getLiveDM = (a, b, loadPattern, numSpans) => {
+  if (Array.isArray(b[1])) {
+    for (let k = 1; k <= numSpans; k++) {
+      if (loadPattern.includes(k)) {
+        a = a.map((e, i) => e + b[i][k]);
+      }
+    }
+  } else {
+    a = a.map((e, i) => e  + b[i]);
+  }
+  return a
+};
+
+const getThetaAndDelta = (fixity, dm, seg, i, iDM) => {
+  if (fixity === "fixed") {
+    seg.delta1[i] = 0;
+    seg.theta1[i] = 0;
+  } else if (fixity === "pinned") {
+    seg.delta1[i] = 0;
+    iDM = iDM + 1;
+    seg.theta1[i] = -dm[iDM];
+  } else if (fixity === "continuous") {
+    iDM = iDM + 1;
+    seg.delta1[i] = -dm[iDM];
+    iDM = iDM + 1;
+    seg.theta1[i] = -dm[iDM];
+  } else if (fixity === "spring") {
+    iDM = iDM + 1;
+    seg.delta1[i] = -dm[iDM];
+    iDM = iDM + 1;
+    seg.theta1[i] = -dm[iDM];
+  } else if (fixity === "proppedHinge") {
+    iDM = iDM + 1;
+    seg.delta1[i] = 0;
+    iDM = iDM + 1;
+    seg.theta1[i] = -dm[iDM];
+  } else if (fixity === "hinge") {
+    iDM = iDM + 1;
+    seg.delta1[i] = -dm[iDM];
+    iDM = iDM + 1;
+    iDM = iDM + 1;
+    seg.theta1[i] = -dm[iDM];
+  }
+  return iDM
+};
+
+// Review the segments. Find out which comberns should be displayed
+function selectCases(spans) {
+  const shearCases = [];
+  const bendingCases = [];
+  for (let i = 1; i < spans.length; i++) {
+    for (let j = 0; j < spans[i].segments.length; j++) {
+      const seg = spans[i].segments[j];
+      if (seg.Vmax.left.value > 0) {
+        if (!shearCases.includes(seg.Vmax.left.case)) {
+          shearCases.push(seg.Vmax.left.case);
+        }
+      }
+      if (seg.Vmin.left.value < 0) {
+        if (!shearCases.includes(seg.Vmin.left.case)) {
+          shearCases.push(seg.Vmin.left.case);
+        }
+      }
+      if (seg.Mmax.left.value > 0) {
+        if (!bendingCases.includes(seg.Mmax.left.case)) {
+          bendingCases.push(seg.Mmax.left.case);
+        }
+      }
+      if (seg.Mmin.left.value < 0) {
+        if (!bendingCases.includes(seg.Mmin.left.case)) {
+          bendingCases.push(seg.Mmin.left.case);
+        }
+      }
+      if (seg.Vmax.mid.value > 0) {
+        if (!shearCases.includes(seg.Vmax.mid.case)) {
+          shearCases.push(seg.Vmax.mid.case);
+        }
+      }
+      if (seg.Vmin.mid.value < 0) {
+        if (!shearCases.includes(seg.Vmin.mid.case)) {
+          shearCases.push(seg.Vmin.mid.case);
+        }
+      }
+      if (seg.Mmax.mid.value > 0) {
+        if (!bendingCases.includes(seg.Mmax.mid.case)) {
+          bendingCases.push(seg.Mmax.mid.case);
+        }
+      }
+      if (seg.Mmin.mid.value < 0) {
+        if (!bendingCases.includes(seg.Mmin.mid.case)) {
+          bendingCases.push(seg.Mmin.mid.case);
+        }
+      }
+      if (seg.Vmax.right.value > 0) {
+        if (!shearCases.includes(seg.Vmax.right.case)) {
+          shearCases.push(seg.Vmax.right.case);
+        }
+      }
+      if (seg.Vmin.right.value < 0) {
+        if (!shearCases.includes(seg.Vmin.right.case)) {
+          shearCases.push(seg.Vmin.right.case);
+        }
+      }
+      if (seg.Mmax.right.value > 0) {
+        if (!bendingCases.includes(seg.Mmax.right.case)) {
+          bendingCases.push(seg.Mmax.right.case);
+        }
+      }
+      if (seg.Mmin.right.value < 0) {
+        if (!bendingCases.includes(seg.Mmin.right.case)) {
+          bendingCases.push(seg.Mmin.right.case);
+        }
+      }
+    }
+  }
+  return [shearCases, bendingCases]
+}
+
+function locateDiagrams(beam, extremes) {
+  // Find the y-coordinates for the shear, moment, and deflection diagrams.
+
+  // First, find out how many reaction vectors will be written onto the load diagram.
+  const [vMax, vMin, mMax, mMin, deflectionMax, deflectionMin, , , ] = extremes;
+
+  const vScale = vMax - vMin > 0 ? 60 / (vMax - vMin) : 0;
+  const mScale = mMax - mMin > 0 ? 60 / (mMax - mMin) : 0;
+  const reactionTextHeight = 16;
+
+  let yV = vMax > 0.0005
+    ? beam.yLoad + 12 + reactionTextHeight + vMax * vScale + 70
+    : beam.yLoad + 12 + reactionTextHeight;
+  yV = Math.round(yV);
+  const botOfV = vMin < -5e-4
+    ? yV + vMin * vScale + 50
+    : yV + 70;
+  const momentMax = beam.convention === 1 ? mMax : Math.abs(mMin);
+  const momentMin = beam.convention === 1 ? Math.abs(mMin) : mMax;
+  let yM = momentMax > 0.0005
+    ? botOfV + 12 + momentMax * mScale + 40
+    : botOfV + 12 + 40;
+  yM = Math.round(yM);
+  let yMax = yM;
+
+  // Get yText for moment
+  let yText = yM - mScale * mMin;
+  if (yText > yMax) { yMax = yText; }
+
+  let yDeflection = 0;
+  let deflectionScale = 0;
+  if (beam.EI !== 1) {
+    // eslint-disable-next-line max-len
+    if (deflectionMax > deflectionMin) { deflectionScale = 30 / (deflectionMax - deflectionMin); }
+    const botOfM = momentMin > (0.05 * momentMax)
+      ? yM + momentMin * mScale + 14
+      : yM + 14;
+    yDeflection = botOfM + 40 + deflectionMax * deflectionScale;
+    yDeflection = Math.round(yDeflection);
+    yMax = yDeflection;
+    if (Math.abs(deflectionMin) > 0.2 * (deflectionMax - deflectionMin)) {
+      yText = yDeflection - deflectionScale * deflectionMin;
+      if (yText > yMax) { yMax = yText; }
+    }
+  }
+  yMax += 20;
+
+  return [yV, yM, yDeflection, vScale, mScale, deflectionScale, yMax]
+
+}
+
+function drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combinations) {
+  let diagram = [];
+  // Now go thru the comberns again.  Draw the line work this time.
+  const numSpans = spans.length - 1;
+  const [vMax, vMin, mMax, mMin, , , deflMaxCase, deflMinCase, numComberns] = extremes;
+  const [shearCases, bendingCases] = cases;
+  const [yV, yM, yDeflection, vScale, mScale, deflectionScale] = yCoords;
+  const vSmall = 0.01 * (vMax - vMin);
+  const mSmall = 0.05 * (mMax - mMin);
+  let deflectionMax = 0;
+  let deflectionMin = 0;
+  let xDeflectionMax = 0;
+  let xDeflectionMin = 0;
+  const xIncrement = beam.length / 50;
+  const wV = [];
+  const wVx = [];
+  const wM = [];
+  const wMx = [];
+  const horizAlign = "middle";
+
+  // Draw the horizontal lines for the shear and moment diagrams
+  diagram.push(Draw.textNode("shear", 20, yV + 2));
+  diagram.push(Draw.textNode(`(${beam.SI ? "kN" : "kips"})`, 20, yV + 16));
+  diagram.push({
+    tag: "path",
+    attrs: { d: `M${beam.xDiagram} ${yV} h300`, stroke: "black", "stroke-width": '1.5px' }
+  });
+  diagram.push(Draw.textNode("bending", 20, yM + 2));
+  diagram.push(Draw.textNode(`(${beam.SI ? "kN-m" : "kip-ft"})`, 20, yM + 16));
+  diagram.push({
+    tag: "path",
+    attrs: { d: `M${beam.xDiagram} ${yM} h300`, stroke: "black", "stroke-width": '1.5px' }
+  });
+
+  if (combinations !== "service") {
+    diagram.push(Draw.textNode("factored", 20, yV - 12));
+    diagram.push(Draw.textNode("factored", 20, yM - 12));
+  }
+
+  // Draw the reactions.
+  // eslint-disable-next-line no-useless-assignment
+  let f = 0;
+  for (let i = 1; i < nodes.length; i++) {
+    const x = beam.xDiagram + beam.xScale * nodes[i].x;
+    if (Math.abs(nodes[i].Pr[0]) > 0) {
+      f = 1 / (beam.SI ? 1000 : 4448.2216152605);
+      const sText = round(nodes[i].Pr[0] * f, 3);
+      diagram = diagram.concat(Draw.pointForce(x, beam.yLoad, sText, nodes[i].fixity, true));
+    }
+    if (Math.abs(nodes[i].Mr[0]) > 0) {
+      f = 1 / (beam.SI ? 1000 : 4448.2216152605 * 0.3048);
+      const sText = round(nodes[i].Mr[0] * f, 3);
+      diagram = diagram.concat(Draw.pointMoment(x, beam.yLoad, sText, true));
+    }
+  }
+
+  for (let combern = 0; combern <= numComberns; combern++) {
+    // Are we in a deflection combern?
+    const inaDeflCase = (deflMinCase === combern || deflMaxCase === combern) && beam.EI !== 1;
+    // Should we plot this combern?
+    if (!(shearCases.includes(combern) || bendingCases.includes(combern) || inaDeflCase)) {
+      continue // Skip this combern.
+    }
+    // This is a combern for which we should plot the line work
+    // Find detailed shear and moments for the diagrams.  And we check local maximums to see
+    // if we should write their values onto the diagram.
+    let lastVend = 0;
+    let lastW2f = 0;
+    const x = inaDeflCase ? [] : [0];
+    const deflection = [];
+    const v = [];
+    const m = [];
+    if (!inaDeflCase) {
+      v.push(0);
+      m.push(0);
+    }
+    let k = 0;
+    for (let i = 1; i <= numSpans; i++) {
+      for (let j = 0; j < spans[i].segments.length; j++) {
+        const seg = spans[i].segments[j];
+        const vEnd = seg.V1[combern] + seg.w1f[combern] * seg.length
+            + 0.5 * seg.slope[combern] * seg.length ** 2;
+        const mEnd = seg.M1[combern] + seg.V1[combern] * seg.length
+          + 0.5 * seg.w1f[combern] * seg.length ** 2 + seg.slope[combern] * seg.length ** 3 / 6;
+        const w2f = seg.w1f[combern] + seg.slope[combern] * seg.length;
+        let deflectionEnd = 0;
+        if (inaDeflCase) {
+          deflectionEnd = seg.delta1[combern] + seg.theta1[combern] * seg.length
+            + (0.5 * seg.M1[combern] * seg.length ** 2 + seg.V1[combern] * seg.length ** 3 / 6
+            + seg.w1f[combern] * seg.length ** 4 / 24
+            + seg.slope[combern] * seg.length ** 5 / 120) / beam.EI;
+        }
+        // Details for line work
+        let xLocal = 0;
+        k += 1;
+        x.push(seg.xOfLeftEnd);
+        if (inaDeflCase) {
+          deflection.push(seg.delta1[combern]);
+          if (seg.delta1[combern] > deflectionMax) {
+            deflectionMax = seg.delta1[combern];
+            xDeflectionMax = seg.xOfLeftEnd;
+          }
+          if (seg.delta1[combern] < deflectionMin) {
+            deflectionMin = seg.delta1[combern];
+            xDeflectionMin = seg.xOfLeftEnd;
+          }
+          if (deflectionEnd > deflectionMax) {
+            deflectionMax = deflectionEnd;
+            xDeflectionMax = seg.xOfLeftEnd + seg.length;
+          }
+          if (deflectionEnd < deflectionMin) {
+            deflectionMin = deflectionEnd;
+            xDeflectionMin = seg.xOfLeftEnd + seg.length;
+          }
+        } else {
+          v.push(seg.V1[combern]);
+          m.push(seg.M1[combern]);
+        }
+
+        for (let ii = 1; ii <= Math.trunc(seg.length / xIncrement); ii++) {
+          k = k + 1;
+          x.push(x[x.length - 1] + xIncrement);
+          xLocal += xIncrement;
+          if (inaDeflCase) {
+            deflection.push(seg.delta1[combern] + seg.theta1[combern] * xLocal
+                + (0.5 * seg.M1[combern] * xLocal ** 2
+                + seg.V1[combern] * xLocal ** 3 / 6 + seg.w1f[combern] * xLocal ** 4 / 24
+                + seg.slope[combern] * xLocal ** 5 / 120) / beam.EI);
+            if (deflection[deflection.length - 1] > deflectionMax) {
+              deflectionMax = deflection[deflection.length - 1];
+              xDeflectionMax = seg.xOfLeftEnd + xLocal;
+            }
+            if (deflection[deflection.length - 1] < deflectionMin) {
+              deflectionMin = deflection[deflection.length - 1];
+              xDeflectionMin = seg.xOfLeftEnd + xLocal;
+            }
+          } else {
+            v.push(seg.V1[combern] + seg.w1f[combern] * xLocal
+              + 0.5 * seg.slope[combern] * xLocal ** 2);
+            m.push(seg.M1[combern] + seg.V1[combern] * xLocal
+              + 0.5 * seg.w1f[combern] * xLocal ** 2 + seg.slope[combern] * xLocal ** 3 / 6);
+          }
+        }
+
+        k += 1;
+        x.push(seg.xOfLeftEnd + seg.length);
+        if (inaDeflCase) {
+          deflection.push(deflectionEnd);
+        } else {
+          v.push(vEnd);
+          m.push(mEnd);
+        }
+
+        // Check for local maximums and minimums
+        if (seg.Vmax.left.case === combern || seg.Vmin.left.case === combern) {
+          // Do we also want to write this value onto the shear diagram?
+          if (i === 1 && j === 0) {
+            if (Math.abs(seg.V1[combern]) > vSmall) {
+              checkVs(seg.V1[combern], 0, wV, wVx, spans, beam.length);
+            }
+          } else if (!(lastW2f === seg.w1f[combern] &&
+              Math.abs(seg.V1[combern] - lastVend) < vSmall)) {
+            checkVs(seg.V1[combern], seg.xOfLeftEnd, wV, wVx, spans, beam.length);
+          }
+        }
+
+        if (seg.Vmax.mid.case === combern || seg.Vmin.mid.case === combern) {
+          // eslint-disable-next-line no-useless-assignment
+          let xCross = 0;
+          if (seg.slope[combern] !== 0) {
+            xCross = -1 * seg.w1f[combern] / seg.slope[combern];
+            if (xCross > 0 && xCross < seg.length) {
+              const vMid = seg.V1[combern] + seg.w1f[combern] * xCross
+                  + 0.5 * seg.slope[combern] * xCross ** 2;
+              checkVs(vMid, seg.xOfLeftEnd + xCross, wV, wVx, spans, beam.length);
+            }
+          }
+        }
+
+        if (seg.Vmax.right.case === combern || seg.Vmin.right.case === combern) {
+          if (Math.abs(vEnd) > vSmall) {
+            checkVs(vEnd, seg.xOfLeftEnd + seg.length, wV, wVx, spans, beam.length);
+          }
+        }
+
+        if (seg.Mmax.left.case === combern || seg.Mmin.left.case === combern) {
+          if (i === 1 && j === 0) {
+            if (Math.abs(seg.M1[combern]) > mSmall) {
+              checkMs(seg.M1[combern], 0, wM, wMx, spans, beam.length, mSmall);
+            }
+          } else {
+            checkMs(seg.M1[combern], seg.xOfLeftEnd, wM,
+              wMx, spans, beam.length, mSmall);
+          }
+        }
+
+        if (seg.Mmax.mid.case === combern || seg.Mmin.mid.case === combern) {
+          let xCross = 0; // initialze the variable
+          // eslint-disable-next-line no-useless-assignment
+          let mMid = 0;
+          if (seg.slope[combern] === 0) {
+            if (seg.w1f[combern] !== 0) {
+              xCross = -seg.V1[combern] / seg.w1f[combern];
+              if (xCross > 0 && xCross < seg.length) {
+                mMid = seg.M1[combern] + seg.V1[combern] * xCross
+                  + 0.5 * seg.w1f[combern] * xCross ** 2 + seg.slope[combern] * xCross ** 3 / 6;
+                checkMs(mMid, seg.xOfLeftEnd + xCross, wM, wMx, spans, beam.length, mSmall);
+              }
+            }
+          } else {
+            let mMid1 = 0;
+            let mMid2 = 0;
+            let xCross1 = 0;
+            let xCross2 = 0;
+            if ((seg.w1f[combern] ** 2 - 2 * seg.slope[combern] * seg.V1[combern]) > 0) {
+              const determinant = Math.sqrt(seg.w1f[combern] ** 2
+                    - 2 * seg.slope[combern] * seg.V1[combern]);
+              xCross1 = -(seg.w1f[combern] - determinant) / seg.slope[combern];
+              xCross2 = -(seg.w1f[combern] + determinant) / seg.slope[combern];
+              if (xCross1 > 0 && xCross1 < seg.length) {
+                xCross = xCross1;
+                mMid1 = seg.M1[combern] + seg.V1[combern] * xCross
+                  + 0.5 * seg.w1f[combern] * xCross ** 2 + seg.slope[combern] * xCross ** 3 / 6;
+              }
+              if (xCross2 > 0 && xCross2 < seg.length) {
+                xCross = xCross2;
+                mMid2 = seg.M1[combern] + seg.V1[combern] * xCross
+                  + 0.5 * seg.w1f[combern] * xCross ** 2 + seg.slope[combern] * xCross ** 3 / 6;
+              }
+            }
+            if (mMid1 > 0 || mMid2 > 0) {
+              if (mMid1 > mMid2) {
+                // eslint-disable-next-line no-useless-assignment
+                mMid = mMid1;
+                xCross = xCross1;
+              } else {
+                // eslint-disable-next-line no-useless-assignment
+                mMid = mMid2;
+                xCross = xCross2;
+              }
+            }
+            if (xCross > 0 && xCross < seg.length) {
+              mMid = seg.M1[combern] + seg.V1[combern] * xCross
+                  + 0.5 * seg.w1f[combern] * xCross ** 2 + seg.slope[combern] * xCross ** 3 / 6;
+              checkMs(mMid, seg.xOfLeftEnd + xCross, wM, wMx, spans, beam.length, mSmall);
+            }
+          }
+        }
+
+        if (seg.Mmax.right.case === combern || seg.Mmin.right.case === combern) {
+          checkMs(mEnd, seg.xOfLeftEnd + seg.length, wM, wMx, spans, beam.length, mSmall);
+        }
+
+        lastW2f = w2f;
+        lastVend = vEnd;
+      }
+    }
+
+    // Plot diagrams
+    const numDataPoints = k;
+
+    // Draw the shear diagrams
+    if (shearCases.includes(combern)) {
+      let xPoly;
+      let yPoly;
+
+      if (beam.allLoadsAreUniform) {
+        // Make the shear diagram out of straight lines.
+        let linearV = new Array(2 * beam.numSegments + 3).fill(0);
+        linearV = linearV.map(e => [0, 0]);
+        k = 1;
+        linearV[k][0] = beam.xDiagram;
+        linearV[k][1] = yV;
+        for (let i = 1; i <= numSpans; i++) {
+          for (let j = 0; j < spans[i].segments.length; j++) {
+            const seg = spans[i].segments[j];
+            k = k + 1;
+            linearV[k][0] = beam.xDiagram + beam.xScale * seg.xOfLeftEnd;
+            linearV[k][1] = yV - vScale * seg.V1[combern];
+            k = k + 1;
+            linearV[k][0] = beam.xDiagram + beam.xScale * (seg.xOfLeftEnd + seg.length);
+            const vEnd = seg.V1[combern] + seg.w1f[combern] * seg.length
+                + 0.5 * seg.slope[combern] * seg.length ** 2;
+            linearV[k][1] = yV - vScale * vEnd;
+          }
+        }
+        k = k + 1;
+        linearV[k][0] = beam.xDiagram + beam.xScale * beam.length;
+        linearV[k][1] = yV;
+        const numOfShearDataPoints = k;
+
+        xPoly = new Array(numOfShearDataPoints - 1);
+        yPoly = new Array(numOfShearDataPoints - 1);
+        for (let ii = 1; ii <= numOfShearDataPoints; ii++) {
+          xPoly[ii - 1] = linearV[ii][0].toFixed(2);
+          yPoly[ii - 1] = linearV[ii][1].toFixed(2);
+        }
+
+      } else {
+        xPoly = new Array(numDataPoints + 1).fill(0);
+        yPoly = new Array(numDataPoints + 1).fill(0);
+        for (let ii = 0; ii < numDataPoints; ii++) {
+          xPoly[ii] = (beam.xDiagram + beam.xScale * x[ii]).toFixed(2); // x(ii)
+          yPoly[ii] = (yV - vScale * v.shift()).toFixed(2);
+        }
+        xPoly[numDataPoints] = beam.xDiagram + 300;
+        yPoly[numDataPoints] = yV;
+      }
+      diagram.push(Draw.polyline(xPoly, yPoly));
+    }
+
+    // Draw the moment diagram
+    if (bendingCases.includes(combern)) {
+      const xPoly = new Array(numDataPoints + 1).fill(0);
+      const yPoly = new Array(numDataPoints + 1).fill(0);
+      for (let ii = 0; ii <= numDataPoints; ii++) {
+        xPoly[ii] = (beam.xDiagram + beam.xScale * x[ii]).toFixed(2); // x(ii)
+        yPoly[ii] = (yM - beam.convention * mScale * m.shift()).toFixed(2); // M(ii)
+      }
+      xPoly[numDataPoints + 1] = beam.xDiagram + 300;
+      yPoly[numDataPoints + 1] = yM;
+      diagram.push(Draw.polyline(xPoly, yPoly));
+    }
+
+    if (inaDeflCase) {
+      // Draw the deflection diagram
+      diagram.push(Draw.textNode("deflection", 20, yDeflection + 2));
+      diagram.push({
+        tag: "path",
+        attrs: { d: `M${beam.xDiagram} ${yDeflection} h300`,
+          stroke: "black", "stroke-width": '1.5px' }
+      });
+      const xPoly = new Array(numDataPoints - 1).fill(0);
+      const yPoly = new Array(numDataPoints - 1).fill(0);
+      xPoly[0] = beam.xDiagram.toFixed(2);
+      yPoly[0] = yDeflection.toFixed(2);
+      for (let ii = 1; ii <= numDataPoints - 1; ii++) {
+        xPoly[ii] = (beam.xDiagram + beam.xScale * x[ii]).toFixed(2); // x(ii)
+        yPoly[ii] = (yDeflection - deflectionScale * deflection[ii]).toFixed(2);
+      }
+      diagram.push(Draw.polyline(xPoly, yPoly));
+    }
+  }
+
+  // Write the values of the local shear maximums onto the diagrams.
+  f = 1 / (beam.SI ? 1000 : 4448.2216152605); // conversion factor for N to kips or MN
+  while (wV.length > 0) {
+    const xText = (beam.xDiagram + beam.xScale * wVx.shift()).toFixed(2);
+    const fudge = wV[0] > 0 ? -2 : 13;
+    const yText = (yV - vScale * wV[0] + fudge).toFixed(2);
+    // horizAlign is middle
+    diagram.push(Draw.textNode(round(wV.shift() * f, 3), xText, yText, horizAlign));
+  }
+
+  // Write the values of the local bending maximums onto the diagrams.
+  f = beam.convention / (beam.SI ? 1000 : 4448.2216152605 * 0.3048);
+  while (wM.length > 0) {
+    const xText = (beam.xDiagram + beam.xScale * wMx.shift()).toFixed(2);
+    const fudge = beam.convention * wM[0] > 0 ? -2 : 13;
+    const yText = (yM - beam.convention * mScale * wM[0] + fudge).toFixed(2);
+    const sText = round(wM.shift() * f, 3);
+    diagram.push(Draw.textNode(sText, xText, yText, horizAlign));
+  }
+
+  if (beam.EI !== 1) {
+    // Insert the max and min deflection values
+    beam.deflectionMax = Math.max(Math.abs(deflectionMax), Math.abs(deflectionMin));
+    f = beam.SI ? 1000 : (12 / 0.3048);
+    /* eslint-disable no-useless-assignment */
+    let sText = "";
+    let xText = 0;
+    let yText = 0;
+    /* eslint-enable no-useless-assignment */
+    if (deflectionMax > 0.2 * (deflectionMax - deflectionMin)) {
+      xText = beam.xDiagram + beam.xScale * xDeflectionMax;
+      yText = yDeflection - deflectionScale * deflectionMax - 2;
+      if (beam.SI) {
+        sText = (deflectionMax * f).toFixed(0) + " mm";
+      } else {
+        sText = round(deflectionMax * f, 2) + '″';
+      }
+      diagram.push(Draw.textNode(sText, xText, yText, horizAlign));
+    }
+    if (Math.abs(deflectionMin) > 0.2 * (deflectionMax - deflectionMin)) {
+      xText = beam.xDiagram + beam.xScale * xDeflectionMin;
+      yText = yDeflection - deflectionScale * deflectionMin + 13;
+      if (beam.SI) {
+        sText = (f * deflectionMin).toFixed(0) + " mm";
+      } else {
+        sText = round(f * deflectionMin, 2) + '″';
+      }
+      diagram.push(Draw.textNode(sText, xText, yText, horizAlign));
+    }
+  }
+
+  return diagram
+}
+
+const checkVs = (v, x, wV, wVx, spans, beamLength) => {
+  // Check if we should write this value onto the shear diagram
+  let gottaWrite = true; // initialize the variable
+  const shortDistance = 0.15 * beamLength;
+
+  for (let i = 1; i < spans.length; i++) {
+    for (let k = 0; k < spans[i].segments.length; k++) {
+      const seg = spans[i].segments[k];
+      const xOfRightEnd = seg.xOfLeftEnd + seg.length;
+      if (xOfRightEnd < x -  shortDistance) { continue }
+      if (seg.xOfLeftEnd > x + shortDistance) { continue }
+
+      if (Math.abs(seg.xOfLeftEnd - x) < shortDistance) {
+        if (v > 0) {
+          if (seg.Vmax.left.value > v) {
+            gottaWrite = false;
+            break
+          }
+        } else if (seg.Vmin.left.value < v) {
+          gottaWrite = false;
+          break
+        }
+      }
+
+      const xRightEnd = seg.xOfLeftEnd + seg.length;
+      if (Math.abs(x - xRightEnd < shortDistance)) {
+        if (v > 0) {
+          if (seg.Vmax.right.value > v) {
+            gottaWrite = false;
+            break
+          }
+        } else if (seg.Vmin.right.value < v) {
+          gottaWrite = false;
+          break
+        }
+      }
+    }
+  }
+
+  if (gottaWrite) {
+    wV.push(v);
+    wVx.push(x);
+  }
+};
+
+const checkMs = (m, x, wM, wMx, spans, beamLength, mSmall) => {
+  // Check if we should write this value onto the moment diagram
+  if (Math.abs(m) < mSmall) { return false }
+  let gottaWrite = true; // initialize the variable
+  const shortDistance = 0.15 * beamLength;
+
+  for (let i = 1; i < spans.length; i++) {
+    for (let k = 0; k < spans[i].segments.length; k++) {
+      const seg = spans[i].segments[k];
+      const xOfRightEnd = seg.xOfLeftEnd + seg.length;
+      if (xOfRightEnd < x -  shortDistance) { continue }
+      if (seg.xOfLeftEnd > x + shortDistance) { continue }
+
+      if (Math.abs(seg.xOfLeftEnd - x) < shortDistance) {
+        if (m > 0) {
+          if (seg.Mmax.left.value > m) {
+            gottaWrite = false;
+            break
+          }
+        } else if (seg.Mmin.left.value < m) {
+          gottaWrite = false;
+          break
+        }
+      }
+
+      if (m > 0 && Math.abs(seg.Mmax.mid.x - x) < shortDistance) {
+        if (seg.Mmax.mid.value > m) {
+          gottaWrite = false;
+          break
+        }
+      }
+      if (m < 0 && Math.abs(seg.Mmin.mid.x - x) < shortDistance) {
+        if (seg.Mmin.mid.value < m) {
+          gottaWrite = false;
+          break
+        }
+      }
+
+      const xRightEnd = seg.xOfLeftEnd + seg.length;
+      if (Math.abs(x - xRightEnd < shortDistance)) {
+        if (m > 0) {
+          if (seg.Mmax.right.value > m) {
+            gottaWrite = false;
+            break
+          }
+        } else if (seg.Mmin.right.value < m) {
+          gottaWrite = false;
+          break
+        }
+      }
+    }
+  }
+
+  if (gottaWrite) {
+    wM.push(m);
+    wMx.push(x);
+  }
+};
+
+function error(msg) {
+  if (msg === "") { return { value: "Error", unit: null, dtype: dt.ERROR } }
+  return { value: msg, unit: null, dtype: dt.ERROR }
+}
+
+const beamDiagram = (beamInputData, loadFactorInput) => {
+  // This is the main analysis function.
+
+  // Get raw data from the input dataframe.
+  const beamInput = readInputData(beamInputData);
+  if (typeof beamInput === "string") { return error(beamInput) }
+
+  // Validate input and populate data structures.
+  const [errorMsg, beam, nodes, spans, combinations] = populateData(beamInput, loadFactorInput);
+  if (errorMsg) { return error(errorMsg) }
+
+  // Start the SVG
+  const svg = { tag: 'svg', children: [], attrs: { float: "right" } };
+
+  // Create the first diagram. Show fixities, lengths, and loads.
+  const loadDiagram = createLoadDiagram(beam, nodes, spans);
+  svg.children = svg.children.concat(loadDiagram);
+
+  // Do the linear algebra. For each load type, get member end actions and node displacements.
+  const [actions, deflections] = doAnalysis(beam, nodes, spans);
+
+  // Determine shear, moment, and deflection maximums and minimums by superimposing
+  // the relevent load combinations and live load patterns.
+  const extremes = combine(beam, nodes, spans, actions, deflections, combinations);
+
+  // Decide which combinations get plotted.
+  const cases = selectCases(spans);
+
+  // Find the y coordinates for the shear, moment, and deflection diagrams.
+  const yCoords = locateDiagrams(beam, extremes);
+  const yMax = yCoords[6]; // Diagram overall height in local coords.
+
+  const diagrams = drawDiagrams(beam, nodes, spans, cases, yCoords, extremes, combinations);
+  svg.children = svg.children.concat(diagrams);
+
+  // Set the outer dimensions of the diagram.
+  svg.attrs.width = "375"; // px
+  svg.attrs.height = (375 / 450 * yMax).toFixed(0);
+  svg.attrs.viewBox = `0 0 450 ${yMax.toFixed(0)}`;
+
+  return svg
+
+};
+
+// evaluate.js
+
+/*
+ *  This module receives an RPN string and a object containing Hurmet variables.
+ *  It does the calculation, doing unit-compatibility checks along the way.
+ *  It returns a result in two formats: (1) a TeX string that can be displayed and
+ *  (2) numeric and unit data that can used for calculations by other cells.
+ *
+ *  Hurmet does automatic unit conversions and checks for unit compatibility.
+ *  Compatibility checks are done by keeping track of the unit exponents.
+ *  So for instance if we divide an area by a length, the unit exponent calculation runs as:
+ *     LENGTH^2 / LENGTH^1 = LENGTH^(2-1) = LENGTH^1
+ *  We keep track of unit exponents for each of 9 base dimensions. That's why
+ *  you see an array of 9 integers occuring in the code below.
+ *
+ *  Inside evalRpn(), Hurmet operands are each an object with three fields:
+ *     value: the value of the operand
+ *     unit:  holds unit info, either unit name, an array of exponents, or a unitMap
+ *     dtype: an integer indicating data type.
+ *
+ *     Note that an operand can be two data types at once, such as RATIONAL and MATRIX.
+ *     In such cases, dtype is the sum of the two underlying integers.
+ *     So, in constants.js, we have enumerated the data types in powers of two.
+ *     That way, we can use a bit-wise "&" operator to test for an individual type.
+ *
+ *     Numeric matrices and numeric maps can have math operations done to them.
+ *     We distinguish numeric matrices from other matrices by the fact that
+ *     (oprnd.dtype & dt.RATIONAL) returns a true if the matrix is numeric.
+ *
+ *     File operands.js contains further explanation of Hurmet operands.
+ */
+
+// Some helper functions
+
+const setComparisons = ["in", "!in", "∈", "∉", "∋", "∌", "⊂", "⊄", "⊃", "⊅"];
+
+const shapeOf = oprnd => {
+  return oprnd.dtype === dt.COMPLEX
+    ? "complex"
+    : oprnd.dtype < 128
+    ? "scalar"
+    : isVector(oprnd)
+    ? "vector"
+    : (oprnd.dtype & dt.MATRIX)
+    ? "matrix"
+    : oprnd.dtype === dt.DATAFRAME
+    ? "dataFrame"
+    : (oprnd.dtype & dt.MAP)
+    ? "map"
+    : "other"
+};
+
+const binaryShapesOf = (o1, o2) => {
+  let shape1 = shapeOf(o1);
+  let shape2 = shapeOf(o2);
+  let needsMultBreakdown = false;
+  if ((isMatrix(o1) || (o1.dtyp & dt.MAP)) && (isMatrix(o2) || (o2.dtype & dt.MAP))) {
+    // If both operands are matrices, we need to return more information.
+    // That enables the various ways to multiply two matrices.
+    needsMultBreakdown = true;
+    if (shape1 === "vector") {
+      shape1 = (o1.dtype & dt.ROWVECTOR) ? "rowVector" : "columnVector";
+    }
+    if (shape2 === "vector") {
+      shape2 = (o2.dtype & dt.ROWVECTOR) ? "rowVector" : "columnVector";
+    }
+  }
+  return [shape1, shape2, needsMultBreakdown]
+};
+
+const matrixMults = { "×": "cross", "·": "dot", "∘": "circ", ".*": "circ",
+  "*": "multiply", "∗": "multiply", "⌧": "multiply", "modulo": "modulo" };
+
+const nextToken = (tokens, i) => {
+  if (tokens.length < i + 2) { return undefined }
+  return tokens[i + 1]
+};
+
+// array of function names that return a real number from a complex argument.
+const arfn = ["abs", "angle", "imag", "real", "Γ", "gamma"];
+
+const stringFromOperand = (oprnd, formats) => {
+  return oprnd.dtype === dt.STRING
+    ? oprnd.value
+    : oprnd.dtype === dt.RATIONAL
+    ? format(oprnd.value, "h15", formats.decimalFormat)
+    : isMatrix(oprnd.dtype)
+    ? Matrix.displayAlt(oprnd, "h15", formats)
+    : (oprnd.dtype & dt.MAP)
+    ? DataFrame.displayAlt(oprnd.value, "h15", formats)
+    : oprnd.value
+};
+
+const evalRpn = (rpn, vars, formats, unitAware, lib) => {
+  // This is the function that does calculations with the rpn string.
+  const tokens = rpn.split("\u00A0");
+  const stack = [];
+  let oPrev;
+  for (let i = 0; i < tokens.length; i++) {
+    const tkn = tokens[i];
+    const ch = tkn.charAt(0);
+
+    if (ch === "®") {
+      // A rational number.⌾
+      const r = new Array(2);
+      const pos = tkn.indexOf("/");
+      r[0] = BigInt(tkn.slice(1, pos));   // numerator
+      r[1] = BigInt(tkn.slice(pos + 1));  // denominator
+      const num = Object.create(null);
+      num.value = r;
+      num.unit = Object.create(null);
+      num.unit.expos = allZeros;
+      num.dtype = dt.RATIONAL;
+      stack.push(Object.freeze(num));
+
+    } else if (ch === "⌾") {
+      const date = Object.create(null);
+      date.value = [BigInt(tkn.slice(1)), BigInt(1)];
+      date.unit = Object.create(null);
+      date.unit.expos = [0, 0, 1, 0, 0, 0, 0, 0],
+      date.dtype = dt.DATE;
+      stack.push(Object.freeze(date));
+
+    } else if (ch === "©") {
+      // A complex number.
+      const ints = tkn.slice(1).split(",");
+      const z = new Array(2);
+      z[0] = [BigInt(ints[0]), BigInt(ints[1])];  // real part
+      z[1] = [BigInt(ints[2]), BigInt(ints[3])];  // imaginary part
+      const num = Object.create(null);
+      num.value = z;
+      num.unit = Object.create(null);
+      num.unit.expos = allZeros;
+      num.dtype = dt.COMPLEX;
+      stack.push(Object.freeze(num));
+
+    } else if (ch === "¿") {
+      // A variable. Get the value from vars
+      const varName = tkn.substring(1);
+      let oprnd = Object.create(null);
+      if (varName === "undefined") {
+        oprnd.value = undefined;
+        oprnd.unit = null;
+        oprnd.dtype = 0;
+      } else if (varName === "T" && nextToken(tokens, i) === "^" &&
+            stack.length > 0 && isMatrix(stack[stack.length - 1])) {
+        i += 1;
+        oprnd = Matrix.transpose(stack.pop());
+      } else if (varName === "j" && !vars.j) {
+        oprnd.value = [Rnl.zero, Rnl.one];
+        oprnd.unit = Object.create(null);
+        oprnd.unit.expos = allZeros;
+        oprnd.dtype = dt.COMPLEX;
+      } else {
+        const cellAttrs = vars[varName];
+        if (!cellAttrs) { return errorOprnd("V_NAME", varName) }
+        oprnd = fromAssignment(cellAttrs, unitAware);
+        if (oprnd.dtype === dt.ERROR) { return oprnd }
+      }
+      stack.push(Object.freeze(oprnd));
+
+    } else if (ch === '"') {
+      // A string literal.
+      const chEnd = tkn.charAt(tkn.length - 1);
+      const str = ch === '"' && chEnd === '"' ? tkn.slice(1, -1) : tkn;
+      stack.push(Object.freeze({ value: str, unit: null, dtype: dt.STRING }));
+
+    } else if (/^``/.test(tkn)) {
+      stack.push(DataFrame.dataFrameFromTSV(tablessTrim(tkn.slice(2, -2)), vars));
+
+    } else if (ch === '`') {
+      // A rich text literal
+      const chEnd = tkn.charAt(tkn.length - 1);
+      const str = ch === '`' && chEnd === '`' ? tkn.slice(1, -1).trim() : tkn.trim();
+      stack.push(Object.freeze({ value: str, unit: null, dtype: dt.RICHTEXT }));
+
+    } else {
+      switch (tkn) {
+        case "true":
+        case "false": {
+          const bool = Object.create(null);
+          bool.value = tkn === "true";
+          bool.unit = null;
+          bool.dtype = dt.BOOLEAN;
+          stack.push(Object.freeze(bool));
+          break
+        }
+
+        case "pi":
+        case "π": {
+          const pi = Object.create(null);
+          pi.value = Rnl.pi;
+          pi.dtype = dt.RATIONAL;
+          pi.unit = Object.create(null);
+          pi.unit.expos = allZeros;
+          stack.push(Object.freeze(pi));
+          break
+        }
+
+        case "e": {
+          const e = Object.create(null);
+          e.value = "e";
+          e.dtype = dt.RATIONAL;
+          e.unit = Object.create(null);
+          e.unit.expos = allZeros;
+          stack.push(Object.freeze(e));
+          break
+        }
+
+        case "ℏ": {
+          // Reduced Plank constant
+          const hbar = Object.create(null);
+          hbar.value = Rnl.hbar;
+          hbar.dtype = dt.RATIONAL;
+          hbar.unit = Object.create(null);
+          hbar.unit.expos = Object.freeze(unitAware ? [2, 1, -1, 0, 0, 0, 0, 0] : allZeros);
+          stack.push(Object.freeze(hbar));
+          break
+        }
+
+        case "∠": {
+          // Complex number in polar notation.
+          const o2 = stack.pop();
+          const o1 = stack.pop();
+          if (o1.dtype !== dt.RATIONAL || o2.dtype !== dt.RATIONAL) {
+            return errorOprnd("NAN_OP")
+          }
+          const theta = Rnl.toNumber(o2.value);
+          const z = Object.create(null);
+          z.value = [
+            Rnl.multiply(o1.value, Rnl.fromNumber(Math.cos(theta))), // real part
+            Rnl.multiply(o1.value, Rnl.fromNumber(Math.sin(theta)))  // imaginary part
+          ];
+          z.unit = Object.create(null);
+          z.unit.expos = allZeros;
+          z.dtype = dt.COMPLEX;
+          stack.push(Object.freeze(z));
+          break
+        }
+
+        case "+":
+        case ".+":
+        case "-":
+        case ".-": {
+          const o2 = stack.pop();
+          const o1 = stack.pop();
+          const op = tkn === "+" || tkn === ".+" ? "add" : "subtract";
+          if (!(((o1.dtype & dt.RATIONAL) || (o1.dtype & dt.DATE) || (o1.dtype & dt.COMPLEX))
+           && ((o2.dtype & dt.RATIONAL) || (o2.dtype & dt.DATE) || (o2.dtype & dt.COMPLEX)))) {
+            return errorOprnd("NAN_OP")
+          }
+          if (unitAware) {
+            if (!unitsAreCompatible(o1.unit.expos, o2.unit.expos)) {
+              return errorOprnd("UNIT_ADD")
+            }
+          }
+          const [shape1, shape2] = binaryShapesOf(o1, o2);
+          const sum = Object.create(null);
+          // See file operations.js for an explanation of what goes on in the next line.
+          sum.value = Operators.binary[shape1][shape2][op](o1.value, o2.value);
+          if (sum.value.dtype && sum.value.dtype === dt.ERROR) { return sum.value }
+          sum.unit = o1.unit;
+          sum.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn);
+          stack.push(Object.freeze(sum));
+          break
+        }
+
+        case "~": {
+          // Unary minus
+          const o1 = stack.pop();
+          if (!((o1.dtype & dt.RATIONAL) || o1.dtype === dt.COMPLEX)) {
+            return errorOprnd("NAN_OP")
+          }
+          const neg = Object.create(null);
+          neg.value = Operators.unary[shapeOf(o1)]["negate"](o1.value);
+          if (neg.value.dtype && neg.value.dtype === dt.ERROR) { return neg.value }
+          neg.unit = o1.unit;
+          neg.dtype = o1.dtype;
+          stack.push(Object.freeze(neg));
+          break
+        }
+
+        case "×":
+        case "·":
+        case "*":
+        case "∗":
+        case "∘":
+        case "⌧": {
+          const oprnd2 = stack.pop();
+          const o2 = oprnd2.dtype === dt.DATAFRAME ? clone(oprnd2) : oprnd2;
+          const o1 = stack.pop();
+          if ((tkn === "*" || tkn === "∗")
+               && o1.dtype === dt.STRING && o1.dtype === dt.STRING) {
+            // Julia's string concatenation operator
+            const str1 = stringFromOperand(o1, formats);
+            const str2 = stringFromOperand(o2, formats);
+            return { value: str1 + str2, unit: null, dtype: dt.STRING }
+          }
+          if (!(((o1.dtype & dt.RATIONAL) || (o1.dtype & dt.COMPLEX)) &&
+            ((o2.dtype & dt.RATIONAL) || (o2.dtype & dt.COMPLEX) ||
+            o2.dtype === dt.DATAFRAME))) {
+            return errorOprnd("NAN_OP")
+          }
+          const product = Object.create(null);
+          let unit = Object.create(null);
+          if (unitAware) {
+            if ((o1.dtype === dt.DATAFRAME && o2.dtype === dt.RATIONAL) ||
+                (o1.dtype === dt.RATIONAL && o2.dtype === dt.DATAFRAME)) {
+              unit = o1.dtype === dt.DATAFRAME ? o1.unit : o2.unit;
+            } else {
+              unit.expos = o1.unit.expos.map((e, j) => e + o2.unit.expos[j]);
+            }
+          } else {
+            unit.expos = allZeros;
+          }
+          product.unit = o2.dtype === dt.DATAFRAME ? clone(o2.unit) : Object.freeze(unit);
+
+          const [shape1, shape2, needsMultBreakdown] = binaryShapesOf(o1, o2);
+          const op = needsMultBreakdown ? matrixMults[tkn] : "multiply";
+
+          product.dtype = (tkn === "∘" || shape1 === "scalar" || shape1 === "map" ||
+            shape1 === "complex" || shape2 === "scalar" ||
+            shape2 === "map" || shape2 === "complex")
+              ? Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, op)
+              : tkn === "·"
+              ? dt.RATIONAL
+              : tkn === "×"
+              ? dt.COLUMNVECTOR
+              : Matrix.multResultType(o1, o2);
+
+          product.value = Operators.binary[shape1][shape2][op](o1.value, o2.value);
+          if (product.value.dtype && product.value.dtype === dt.ERROR) {
+            return product.value
+          }
+
+          stack.push(Object.freeze(product));
+          break
+        }
+
+        case "/":
+        case "./":
+        case "//":
+        case "///":
+        case "\u2215": {
+          const o2 = stack.pop();
+          const o1 = stack.pop();
+          if (!(((o1.dtype & dt.RATIONAL) || o1.dtype === dt.COMPLEX) &&
+                ((o2.dtype & dt.RATIONAL) || o2.dtype === dt.COMPLEX))) {
+            return errorOprnd("NAN_OP")
+          }
+          const quotient = Object.create(null);
+          const unit = Object.create(null);
+          unit.expos = unitAware
+            ? o1.unit.expos.map((e, j) => e - o2.unit.expos[j])
+            : allZeros;
+          quotient.unit = Object.freeze(unit);
+          const [shape1, shape2] = binaryShapesOf(o1, o2);
+          quotient.value = Operators.binary[shape1][shape2]["divide"](o1.value, o2.value);
+          if (quotient.value.dtype && quotient.value.dtype === dt.ERROR) {
+            return quotient.value
+          }
+          quotient.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, "divide");
+          if (isDivByZero(quotient.value, shapeOf(quotient))) { return errorOprnd("DIV") }
+          stack.push(Object.freeze(quotient));
+          break
+        }
+
+        case "^":
+        case ".^": {
+          const o2 = stack.pop();
+          const o1 = stack.pop();
+          if (!(((o1.dtype & dt.RATIONAL) || o1.dtype === dt.COMPLEX) &&
+                ((o2.dtype & dt.RATIONAL) || o2.dtype === dt.COMPLEX) ||
+                (isMatrix(o1) && o2.value === "T"))) {
+            return errorOprnd("NAN_OP")
+          }
+          const power = Object.create(null);
+          const unit = Object.create(null);
+          unit.expos = allZeros;
+          if (unitAware) {
+            // TODO: lots to do here
+            const d = typeof o2.unit === "number" ? o2.unit : Rnl.toNumber(o2.value);
+            unit.expos = o1.unit.expos.map(e => e * d);
+          }
+          power.unit = Object.freeze(unit);
+          const [shape1, shape2] = binaryShapesOf(o1, o2);
+          power.value = Operators.binary[shape1][shape2]["power"](o1.value, o2.value);
+          if (power.value.dtype) { return power.value } // Error
+          power.dtype = Cpx.isComplex(power.value)
+            ? dt.COMPLEX
+            : Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn);
+          stack.push(Object.freeze(power));
+          break
+        }
+
+        case "modulo": {
+          if (unitAware) { return errorOprnd( "UNIT_UN", "modulo" ) }
+          const o2 = stack.pop();
+          const o1 = stack.pop();
+          if (!(o1.dtype & dt.RATIONAL) || !(o2.dtype & dt.RATIONAL)) {
+            return errorOprnd("NAN_OP")
+          }
+          const [shape1, shape2] = binaryShapesOf(o1, o2);
+          const result = Object.create(null);
+          result.unit = allZeros;
+          result.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, "modulo");
+          result.value = Operators.binary[shape1][shape2]["modulo"](o1.value, o2.value);
+          stack.push(Object.freeze(result));
+          break
+        }
+
+        case "&":
+        case "hcat":
+        case "vcat": {
+          // Concatenation
+          const o2 = stack.pop();
+          const o1 = stack.pop();
+          const opName = tkn === "vcat" ? "unshift" : "concat";
+          const [shape1, shape2] = binaryShapesOf(o1, o2);
+          let o3 = Object.create(null);
+          if (o1.dtype === dt.STRING && o1.dtype === dt.STRING) {
+            const str1 = stringFromOperand(o1, formats);
+            const str2 = stringFromOperand(o2, formats);
+            o3.value = str1 + str2;
+            o3.unit = null;
+            o3.dtype = dt.STRING;
+          } else if ((o1.dtype & dt.DATAFRAME) && isVector(o2) && tkn !== "vcat") {
+            o3 = DataFrame.append(o1, o2, vars.format.value, unitAware);
+            if (o3.dtype === dt.ERROR) { return o3 }
+          } else if (isVector(o1) && (o2.dtype & dt.DATAFRAME) && tkn !== "vcat") {
+            o3 = DataFrame.append(o1, o2, vars.format.value, unitAware);
+            if (o3.dtype === dt.ERROR) { return o3 }
+          } else if (((o1.dtype & dt.DATAFRAME) && shape2 === "scalar") ||
+                     (shape1 === "scalar" && (o2.dtype & dt.DATAFRAME))) {
+            o3 = DataFrame.append(o1, o2, vars.format.value, unitAware);
+            if (o3.dtype === dt.ERROR) { return o3 }
+          } else if ((o1.dtype & dt.MAP) || (o2.dtype & dt.MAP)) {
+            o3 = map.append(o1, o2, shape1, shape2);
+            if (o3.dtype === dt.ERROR) { return o3 }
+          } else {
+            if (unitAware) {
+              if (!unitsAreCompatible(o1.unit.expos, o2.unit.expos)) {
+                return errorOprnd("UNIT_ADD")
+              }
+            }
+            o3.value = Operators.binary[shape1][shape2][opName](o1.value, o2.value);
+            if (o3.value.dtype) { return o3.value } // Error
+            o3.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn);
+            if (o1.dtype === dt.COLUMNVECTOR && shape2 === "scalar") {
+              // Appending an element to an empty column vector
+              o3.dtype = o1.dtype + o2.dtype;
+            }
+            o3.unit = o1.unit;
+          }
+          stack.push(Object.freeze(o3));
+          break
+        }
+
+        case "√":
+        case "∛":
+        case "∜": {
+          const index = tkn.charCodeAt(0) - 8728;
+          const pow = [BigInt(1), BigInt(index)];
+          const o1 = stack.pop();
+          if (!((o1.dtype & dt.RATIONAL) || (o1.dtype & dt.COMPLEX))) {
+            return errorOprnd("NAN_OP")
+          }
+          const root = Object.create(null);
+          const unit = Object.create(null);
+          unit.expos = allZeros;
+          if (unitAware) { unit.expos = o1.unit.expos.map(e => e / index); }
+          root.unit = Object.freeze(unit);
+
+          const shape1 = shapeOf(o1);
+          root.value = Operators.binary[shape1]["scalar"]["power"](o1.value, pow);
+          if (root.value.dtype && root.value.dtype === dt.ERROR) { return root.value }
+
+          root.dtype = Cpx.isComplex(root.value)
+            ? dt.COMPLEX
+            : Operators.dtype[shape1]["scalar"](o1.dtype, dt.RATIONAL, tkn);
+
+          stack.push(Object.freeze(root));
+          break
+        }
+
+        case "root": {
+          const o2 = stack.pop();
+          const o1 = stack.pop();
+          if (!((o1.dtype & dt.RATIONAL) & (o2.dtype & dt.RATIONAL))) {
+            return errorOprnd("NAN_OP")
+          }
+          const root = Object.create(null);
+          const unit = Object.create(null);
+          unit.expos = allZeros;
+          if (unitAware) { unit.expos = o2.unit.expos.map(e => e / Number(o1.value[0])); }
+          root.unit = Object.freeze(unit);
+
+          const pow = Rnl.reciprocal(o1.value);
+          const shape1 = shapeOf(o1);
+          root.value = Operators.binary[shape1]["scalar"]["power"](o2.value, pow);
+          if (root.value.dtype && root.value.dtype === dt.ERROR) { return root.value }
+
+          root.dtype = Operators.dtype[shape1]["scalar"](o1.dtype, dt.RATIONAL, tkn);
+          stack.push(Object.freeze(root));
+          break
+        }
+
+        case ".": {
+          // Accessor of a object's property in dot notation
+          const o2 = stack.pop();
+          const o1 = stack.pop();
+          let property;
+          if ((o1.dtype === dt.DATAFRAME || o1.dtype === dt.SPREADSHEET)
+                && tokens.length - i > 2 && tokens[i + 2] === ".") {
+            // Skip creation of a vector and go straight to a call to a single cell
+            const o3 = { value: tokens[i + 1].replace(/"/g, ""), unit: null, dtype: dt.STRING };
+            const args = o1.dtype === dt.SPREADSHEET
+              ? [o2, o3]
+              : (o2.value in o1.value.columnMap)
+              ? [o3, o2]
+              : [o2, o3];
+            property = o1.dtype === dt.DATAFRAME
+              ? DataFrame.range(o1, args, unitAware)
+              : cellOprnd(o1, args, unitAware);
+            i += 2;
+          } else if ((o1.dtype === dt.DATAFRAME || o1.dtype === dt.SPREADSHEET)
+                && tokens.length - i > 3
+                && tokens[i + 2] === "[]" && tokens[i + 3] === "1"
+                && tokens[i + 1].slice(0, 1) === '"') {
+            // Skip creation of a vector and go straight to a call to a single cell
+            const o3 = { value: tokens[i + 1].replace(/"/g, ""), unit: null, dtype: dt.STRING };
+            const args =  (o2.value in o1.value.columnMap) ? [o3, o2] : [o2, o3];
+            property = o1.dtype === dt.DATAFRAME
+              ? DataFrame.range(o1, args, unitAware)
+              : cellOprnd(o1, args, unitAware);
+            i += 3;
+          } else {
+            property = propertyFromDotAccessor(o1, o2, unitAware);
+          }
+          if (property.dtype === dt.ERROR) { return property }
+          stack.push(Object.freeze(property));
+          break
+        }
+
+        case "[]": {
+          // Bracket accessor to a data frame, matrix, string, map, or module.
+          const numArgs = Number(tokens[i + 1]);
+          i += 1;
+          const args = [];
+          for (let j = 0; j < numArgs; j++) { args.unshift(stack.pop()); }
+          const o1 = stack.pop();
+          let property;
+          if (o1.dtype & dt.DATAFRAME) {
+            if (args.length === 1 && args[0].dtype === dt.STRING && tokens.length - i > 2
+                  && tokens[i + 2] === ".") {
+              // Skip creation of a vector and go straight to a call to a single cell
+              const o2 = args[0];
+              const o3 = { value: tokens[i + 1].replace(/"/g, ""), unit: null, dtype: dt.STRING };
+              const newArgs =  (o2.value in o1.value.columnMap) ? [o3, o2] : [o2, o3];
+              property = DataFrame.range(o1, newArgs, unitAware);
+              i += 2;
+            } else if (args.length === 1 && args[0].dtype === dt.STRING
+                && tokens.length - i > 3 && tokens[i + 2] === "[]" && tokens[i + 3] === "1"
+                && tokens[i + 1].slice(0, 1) === '"') {
+              // Skip creation of a vector and go straight to a call to a single cell
+              const o2 = args[0];
+              const o3 = { value: tokens[i + 1].replace(/"/g, ""), unit: null, dtype: dt.STRING };
+              const newArgs =  (o2.value in o1.value.columnMap) ? [o3, o2] : [o2, o3];
+              property = DataFrame.range(o1, newArgs, unitAware);
+              i += 3;
+            } else {
+              property = DataFrame.range(o1, args, unitAware);
+            }
+
+          } else if (o1.dtype & dt.MAP) {
+            property = map.range(o1, args, unitAware);
+
+          } else if (o1.dtype === dt.STRING) {
+            property = textRange(o1.value, args[0]);
+
+          } else if (o1.dtype === dt.MODULE) {
+            if (numArgs === 1) {
+              property = fromAssignment(o1.value[args[0].value], unitAware);
+            } else {
+              // Multiple assignment.
+              property = { value: new Map(), unit: null, dtype: dt.TUPLE };
+              for (let j = 0; j < args.length; j++) {
+                const name = args[j].value;
+                property.value.set(name, fromAssignment(o1.value[name], unitAware));
+              }
+            }
+
+          } else {
+            // o1 is a matrix or a data frame
+            const rowIndex = args[0];
+            const colIndex = (numArgs === 2)
+              ? args[1]
+              : isVector(o1)
+              ? null
+              : { value: Rnl.zero, unit: allZeros, dtype: dt.RATIONAL };
+            property = (o1.dtype & dt.DATAFRAME)
+              ? DataFrame.range(o1, rowIndex, colIndex, unitAware)
+              : Matrix.submatrix(o1, rowIndex, colIndex);
+          }
+          if (property.dtype === dt.ERROR) { return property }
+          stack.push(Object.freeze(property));
+          break
+        }
+
+        case ":": {
+          // range separator.
+          const end = stack.pop();
+          const o1 = stack.pop();
+          if (!(o1.dtype === dt.RATIONAL || o1.dtype === dt.RANGE)) {
+            return errorOprnd("NAN_OP")
+          }
+          const range = Object.create(null);
+          range.unit = null;
+          range.dtype = dt.RANGE;
+          const step = o1.dtype !== dt.RATIONAL
+            ? o1.value[2]
+            : end.value === "∞" || Rnl.lessThanOrEqualTo(o1.value, end.value)
+            ? Rnl.one
+            : Rnl.negate(Rnl.one);
+          range.value = o1.dtype === dt.RATIONAL
+            ? [o1.value, step, end.value]
+            : [o1.value[0], o1.value[2], end.value];
+          stack.push((Object.freeze(range)));
+          break
+        }
+
+        case "normal":
+        case "uniform":
+        case "lognormal": {
+          // eslint-disable-next-line no-unused-vars
+          stack.pop();
+          // eslint-disable-next-line no-unused-vars
+          stack.pop();
+          // low and high define a probablility distribution. They are the ends of a
+          // uniform distribution or they mark the 90% confidence interval of (log)normal.
+          // TODO: Implement probability distributions as a data type.
+          break
+        }
+
+        case "!":
+        case "‼":
+        case "!!": {
+          // TODO: "!!" and "¡"
+          const o1 = stack.pop();
+          if (!(o1.dtype & dt.RATIONAL)) { return errorOprnd("NAN_OP") }
+          if (unitAware) {
+            if (!unitsAreCompatible(o1.unit.expos, allZeros)) { return errorOprnd("FACT") }
+          }
+          const x = o1.value;
+          if (!Rnl.isInteger(x) || Rnl.isNegative(x)) { return errorOprnd("FACT") }
+          const factorial = Object.create(null);
+          factorial.unit = allZeros;
+          factorial.dtype = dt.RATIONAL;
+          factorial.value = tkn === "!"
+            ? Operators.unary[shapeOf(o1)]["factorial"](x)
+            : Operators.unary[shapeOf(o1)]["doubleFactorial"](x);
+          if (factorial.value.dtype) { return factorial.value } // Error
+          stack.push(Object.freeze(factorial));
+          break
+        }
+
+        case "%": {
+          // TODO: per thousand, ‰
+          const o1 = stack.pop();
+          if (!(o1.dtype & dt.RATIONAL)) { return errorOprnd("NAN_OP") }
+          const percentage = Object.create(null);
+          percentage.unit = o1.unit;
+          percentage.dtype = o1.dtype;
+          percentage.value = Operators.unary[shapeOf(o1)]["percent"](o1.value);
+          if (percentage.value) { return percentage.value } // Error
+          stack.push(Object.freeze(percentage));
+          break
+        }
+
+        case "|":
+        case "‖": {
+            // Find |x| or ‖x‖
+          const o1 = stack.pop();
+          if (!((o1.dtype & dt.RATIONAL) || o1.dtype === dt.COMPLEX)) {
+            return errorOprnd("NAN_OP")
+          }
+          const op = tkn === "|" ? "abs" : "norm";
+          const abs = Object.create(null);
+          abs.unit = o1.unit;
+          abs.dtype = dt.RATIONAL;
+          abs.value = Operators.unary[shapeOf(o1)][op](o1.value);
+          if (abs.value.dtype && abs.value.dtype === dt.ERROR) { return abs.value }
+          stack.push(Object.freeze(abs));
+          break
+        }
+
+        case "matrix": {
+          // matrix
+          const numRows = Number(tokens[i + 1]);
+          const numCols = Number(tokens[i + 2]);
+          i += 2;
+          let result;
+
+          if (stack.length > 0 && stack[stack.length - 1].dtype === dt.RANGE) {
+            // Input was [start:step:end]
+            if (unitAware) { return errorOprnd("UNIT_IN_EL") }
+            result = Matrix.operandFromRange(stack.pop().value);
+          } else {
+            result = Matrix.operandFromTokenStack(stack, numRows, numCols);
+          }
+          if (result.dtype === dt.ERROR) { return result }
+          stack.push(Object.freeze(result));
+          break
+        }
+
+        case "tuple": {
+          const numItems = Number(tokens[i + 1]);
+          i += 1;
+          const oprnd = { value: [], unit: null, dtype: dt.TUPLE };
+          for (let j = 0; j < numItems; j++) {
+            oprnd.value.unshift(stack.pop());
+          }
+          stack.push(oprnd);
+          break
+        }
+
+        case "startSvg":
+          stack.push({ value: draw.startSvg(), unit: null, dtype: dt.DRAWING });
+          break
+
+        case "beamDiagram": {
+          const numArgs = Number(tokens[i + 1]);
+          i += 1;
+          let combinations = "service";
+          if (numArgs === 2)  { combinations = stack.pop().value; }
+          const beam = stack.pop();
+          if (!(beam.dtype & dt.MAP)) { return errorOprnd("BAD_TYPE", "beamDiagram") }
+          const diagram = beamDiagram(beam.value.data, combinations);
+          if (diagram.dtype && diagram.dtype === dt.ERROR) { return diagram }
+          stack.push({ value: diagram, resultdisplay: diagram, unit: null, dtype: dt.DRAWING });
+          break
+        }
+
+        case "abs":
+        case "cos":
+        case "sin":
+        case "tan":
+        case "acos":
+        case "asin":
+        case "atan":
+        case "sec":
+        case "csc":
+        case "cot":
+        case "asec":
+        case "acsc":
+        case "acot":
+        case "exp":
+        case "log":
+        case "ln":
+        case "log10":
+        case "log2":
+        case "cosh":
+        case "sinh":
+        case "tanh":
+        case "sech":
+        case "csch":
+        case "coth":
+        case "acosh":
+        case "asinh":
+        case "atanh":
+        case "asech":
+        case "acsch":
+        case "acoth":
+        case "gamma":
+        case "Γ":
+        case "lgamma":
+        case "lfact":
+        case "factorial":
+        case "cosd":
+        case "sind":
+        case "tand":
+        case "acosd":
+        case "asind":
+        case "atand":
+        case "secd":
+        case "cscd":
+        case "cotd":
+        case "asecd":
+        case "acscd":
+        case "acotd":
+        case "real":
+        case "imag":
+        case "angle":
+        case "conj":
+        case "ceil":
+        case "floor":
+        case "Char":
+        case "round":
+        case "sqrt":
+        case "sign": {
+          // Functions with one real or complex argument.
+          const arg = stack.pop();
+          if (!((arg.dtype & dt.RATIONAL) || (arg.dtype & dt.COMPLEX))) {
+            return errorOprnd("UNREAL", tkn)
+          }
+
+          const output = Object.create(null);
+          const unit = Object.create(null);
+          unit.expos = unitAware ? Functions.functionExpos(tkn, [arg]) : allZeros;
+          if (unit.expos.dtype && unit.expos.dtype === dt.ERROR) { return unit.expos }
+          output.unit = tkn === "Char" ? null : Object.freeze(unit);
+
+          const shape = (arg.dtype & dt.RATIONAL) ? "scalar" : "complex";
+          let value;
+          if (arg.dtype & dt.MAP) {
+            value = arg.value;
+            value.data = value.data.map(col => Rnl.isRational(col[0])
+              ? col.map(e => Functions.unary[shape][tkn](e))
+              : col
+            );
+          } else {
+            value = isVector(arg)
+              ? arg.value.map(e => Functions.unary[shape][tkn](e))
+              : isMatrix(arg)
+              ? arg.value.map(row => row.map(e => Functions.unary[shape][tkn](e)))
+              : Functions.unary[shape][tkn](arg.value);
+          }
+          if (value.dtype && value.dtype === dt.ERROR) { return value }
+          output.value = Object.freeze(value);
+
+          output.dtype = tkn === "Char"
+            ? arg.dtype - dt.RATIONAL + dt.STRING
+            : (arg.dtype & dt.COMPLEX) && arfn.includes(tkn)
+            ? arg.dtype - dt.COMPLEX + dt.RATIONAL
+            : arg.dtype;
+
+          stack.push(Object.freeze(output));
+          break
+        }
+
+        case "logn":
+        case "atan2":
+        case "gcd":
+        case "rms":
+        case "binomial":
+        case "ones":
+        case "zeros":
+        case "mod":
+        case "rem": {
+          // Functions with two real arguments.
+          const args = [];
+          args.push(stack.pop());
+          args.unshift(stack.pop());
+          if (!(args[0].dtype & dt.RATIONAL)) { return errorOprnd("") }
+
+          const output = Object.create(null);
+          const unit = Object.create(null);
+          unit.expos = unitAware ? Functions.functionExpos(tkn, args) : allZeros;
+          if (unit.dtype && unit.dtype === dt.ERROR) { return unit }
+          output.unit = Object.freeze(unit);
+
+          const [value, dtype] = multivarFunction("binary", tkn, args);
+          if (dtype === dt.ERROR) { return value }
+          output.value = Object.freeze(value);
+          output.dtype = dtype;
+          stack.push(Object.freeze(output));
+          break
+        }
+
+        case "hypot": {
+          const numArgs = Number(tokens[i + 1]);
+          i += 1;
+
+          const args = [];
+          args.push(stack.pop());
+          if (!(args[0].dtype & dt.RATIONAL)) { return errorOprnd("") }
+          /* eslint-disable no-useless-assignment */
+          let expos = null;
+          let dtype = 0;
+          /* eslint-enable no-useless-assignment */
+          for (let j = 0; j < numArgs - 1; j++) {
+            args.push(stack.pop());
+            if (!(args[1].dtype & dt.RATIONAL)) { return errorOprnd("") }
+            expos = unitAware ? Functions.functionExpos("hypot", args) : allZeros;
+            const [value, localDtype] = multivarFunction("binary", "hypot", args);
+            if (localDtype === dt.ERROR) { return value }
+            dtype = localDtype;
+            args.pop();
+            args.pop();
+            args.push({ value, unit: { expos }, dtype });
+          }
+          const output = Object.freeze(args[0]);
+          stack.push(output);
+          break
+
+        }
+
+        case "today":
+        case "savedate" : {
+          if (tkn === "savedate" && !vars["@savedate"]) {
+            return errorOprnd("UNSAVED")
+          }
+          const oprnd = { unit: { expos: [0, 0, 1, 0, 0, 0, 0, 0] }, dtype: dt.DATE };
+          const numSeconds = tkn === "today"
+            ? dateInSecondsFromToday()
+            : dateInSecondsFromIsoString("'" + vars["@savedate"] + "'");
+          oprnd.value = Rnl.fromNumber(numSeconds);
+          stack.push(oprnd);
+          break
+        }
+
+        case "Int": {
+          const arg = stack.pop();
+          const output = Object.create(null);
+          output.unit = { expos: allZeros };
+          if (!(arg.dtype & dt.BOOLEAN)) { return errorOprnd("LOGIC", "Int") }
+          output.value = isVector(arg)
+            ? arg.value.map(e => Rnl.fromNumber(Number(e)))
+            : isMatrix(arg)
+            ? arg.value.map(row => row.map(e => Rnl.fromNumber(Number(e))))
+            : Rnl.fromNumber(Number(arg.value));
+          output.dtype = arg.dtype - dt.BOOLEAN + dt.RATIONAL;
+          stack.push(Object.freeze(output));
+          break
+        }
+
+        case "number": {
+          const arg = stack.pop();
+          const output = Object.create(null);
+          output.unit = { expos: allZeros };
+          if (!(arg.dtype & dt.STRING)) { return errorOprnd("STRING") }
+          output.value = isVector(arg)
+            ? arg.value.map(e => Rnl.fromString(e))
+            : isMatrix(arg)
+            ? arg.value.map(row => row.map(e => Rnl.fromString(e)))
+            : Rnl.fromString(arg.value);
+          output.dtype = arg.dtype - dt.STRING + dt.RATIONAL;
+          stack.push(Object.freeze(output));
+          break
+        }
+
+        case "findmax": {
+          const arg = stack.pop();
+          let max = arg.value[0];
+          let index = 1;
+          if (!(isVector(arg) && (arg.dtype & dt.RATIONAL))) {
+            return errorOprnd("NOT_VECTOR", "findmax")
+          }
+          for (let i = 1; i < arg.value.length; i++) {
+            if (Rnl.greaterThan(arg.value[i], max)) {
+              max = arg.value[i];
+              index = Rnl.fromNumber(i + 1);
+            }
+          }
+          const tuple = { value: new Map(), unit: null, dtype: dt.TUPLE };
+          tuple.value.set("max", { value: max, unit: allZeros, dtype: dt.RATIONAL });
+          tuple.value.set("index", { value: index, unit: allZeros, dtype: dt.RATIONAL });
+          stack.push(tuple);
+          break
+        }
+
+        case "findfirst": {
+          const numArgs = Number(tokens[i + 1]);
+          i += 1;
+          const args = [];
+          args.push(stack.pop());
+          if (numArgs === 2) {args.unshift(stack.pop()); }
+          const isString = numArgs === 2 && (args[1].dtype & dt.STRING);
+          const output = Object.create(null);
+          output.unit = { expos: allZeros };
+          output.value = isString && isVector(args[1])
+            ? args[1].value.map(e => findfirst(args[0], e))
+            : isString && isMatrix(args[1])
+            ? args[1].value.map(row => row.map(e => findfirst(args[0], e)))
+            : isString
+            ? findfirst(args[0], args[1])
+            : numArgs === 1
+            ? Matrix.findfirst(true, args[0])
+            : isVector(args[1])
+            ? Matrix.findfirst(args[0].value, args[1])
+            : errorOprnd("ERR_FUNC", "Error. Did not understand arguments");
+          if (isString) {
+            output.dtype = args[1].dtype - dt.STRING + dt.RATIONAL;
+          } else {
+            output.dtype = dt.RATIONAL;
+          }
+          stack.push(Object.freeze(output));
+          break
+        }
+
+        case "roundn":
+        case "string": {
+          // Round a numeric value.
+          const spec = stack.pop();
+          const num = stack.pop();
+          if (!(num.dtype & dt.RATIONAL)) { return errorOprnd("") }
+          if (!(spec.dtype & dt.STRING)) { return errorOprnd("") }
+          if (!/(?:[fr])\d+/.test(spec.value)) { return errorOprnd("") }
+          let funcName = "";
+          const output = Object.create(null);
+          if (tkn === "string") {
+            funcName = spec.value.charAt() === "f" ? "stringFixed" : "stringSignificant";
+            output.unit = null;
+            output.dtype = num.dtype - dt.RATIONAL + dt.STRING;
+          } else {
+            funcName = spec.value.charAt() === "f" ? "roundFixed" : "roundSignificant";
+            output.unit = num.unit;
+            output.dtype = num.dtype;
+          }
+          const n = Number(spec.value.slice(1));
+          let value;
+          if (num.dtype & dt.MAP) {
+            value = num.value;
+            value.data = value.data.map(
+              col => Rnl.isRational(col[0])
+                ? col.map(e => Functions.binary[funcName][tkn]([e, n]))
+                : col
+              );
+          } else {
+            value = isVector(num)
+              ? num.value.map(e => Functions.binary[funcName]([e, n]))
+              : isMatrix(num)
+              ? num.value.map(row => row.map(e => Functions.binary[funcName]([e, n])))
+              : Functions.binary[funcName]([num.value, n]);
+          }
+          if (value.dtype && value.dtype === dt.ERROR) { return value }
+          output.value = Object.freeze(value);
+          if (num.name) { output.name = num.name; }
+          stack.push(Object.freeze(output));
+          break
+        }
+
+        case "dataframe":
+        case "max":
+        case "min":
+        case "sum":
+        case "product":
+        case "range":
+        case "mean":
+        case "median":
+        case "variance":
+        case "stddev":
+        case "accumulate": {
+          // Functions that reduce multiple arguments to one result.
+          // TODO: unit-aware reducing functions.
+          const numArgs = Number(tokens[i + 1]);
+          i += 1;
+          const args = [];
+          for (let j = 0; j < numArgs; j++) {
+            const datum = stack.pop();
+            if (tkn !== "dataframe" && !(datum.dtype & dt.RATIONAL)) {
+              return errorOprnd("NANARG", tkn)
+            }
+            args.unshift(datum);
+          }
+
+          if (tkn === "dataframe") {
+            const df = DataFrame.dataFrameFromVectors(args, vars.format.value);
+            if (df.dtype && df.dtype === dt.ERROR) { return df }
+            stack.push(df);
+            break
+          }
+
+          const output = Object.create(null);
+          const unit = Object.create(null);
+          unit.expos = unitAware ? Functions.functionExpos(tkn, args) : allZeros;
+          if (unit.dtype && unit.dtype === dt.ERROR) { return errorOprnd("") }
+          output.unit = Object.freeze(unit);
+
+          const [value, dtype] = multivarFunction("reduce", tkn, args);
+          if (dtype === dt.ERROR) { return value }
+          output.value = Object.freeze(value);
+          output.dtype = dtype;
+          stack.push(Object.freeze(output));
+          break
+        }
+
+        case "spreadsheetSum": {
+          const arg = stack.pop();
+          const spreadsheet = stack.pop();
+          stack.push(spreadsheetSum(spreadsheet, arg.value, unitAware));
+          break
+        }
+
+        case "rand": {
+          const numArgs = Number(tokens[i + 1]);
+          i += 1;
+          if (numArgs === 0) {
+            const value = Rnl.fromNumber(Math.random());
+            stack.push({ value, unit: allZeros, dtype: dt.RATIONAL });
+          } else if (numArgs === 1) {
+            const n = Rnl.toNumber(stack.pop().value);
+            if (!Number.isInteger(n)) { return errorOprnd("INT_ARG", "rand") }
+            const value = new Array(n).fill(0)
+              .map(e => Rnl.fromNumber(Math.random()));
+            stack.push({ value, unit: allZeros, dtype: dt.RATIONAL + dt.COLUMNVECTOR });
+          } else if (numArgs === 2) {
+            const n = Rnl.toNumber(stack.pop().value);
+            if (!Number.isInteger(n)) { return errorOprnd("INT_ARG", "rand") }
+            const m = Rnl.toNumber(stack.pop().value);
+            if (!Number.isInteger(m)) { return errorOprnd("INT_ARG", "rand") }
+            let value = new Array(m).fill(new Array(n).fill(0));
+            value = value.map(row => row.map(e => Rnl.fromNumber(Math.random())));
+            stack.push({ value, unit: allZeros, dtype: dt.RATIONAL + dt.MATRIX });
+          } else {
+            return errorOprnd("BAD_ARGS", "rand")
+          }
+          break
+        }
+
+        case "isnan": {
+          const oprnd = stack.pop();
+          const output = Object.create(null);
+          output.value = !(oprnd.dtype & dt.RATIONAL);
+          output.unit = null;
+          output.dtype = dt.BOOLEAN;
+          stack.push(Object.freeze(output));
+          break
+        }
+
+        case "length": {
+          const arg = stack.pop();
+          const value = arg.value;
+          const length = isVector(arg)
+            ? value.length
+            : (arg.dtype & dt.MATRIX)
+            ? value.length * value[0].length
+            : (arg.dtype === dt.STRING)
+            ? Array.from(value).length
+            : (arg.dtype & dt.MAP)
+            ? arg.keys().value.length
+            : 0;
+          const output = Object.create(null);
+          output.value = Object.freeze(Rnl.fromNumber(length));
+          output.unit = Object.create(null);
+          output.unit.expos = allZeros;
+          output.dtype = dt.RATIONAL;
+          stack.push(Object.freeze(output));
+          break
+        }
+
+        case "count": {
+          const pattern = stack.pop();
+          const str = stack.pop();
+          if (pattern.dtype !== dt.STRING || str.dtype !== dt.STRING) {
+            return errorOprnd("COUNT")
+          }
+          const output = Object.create(null);
+          output.value = Object.freeze(
+            Rnl.fromNumber(str.value.split(pattern.value).length - 1)
+          );
+          output.unit = Object.create(null);
+          output.unit.expos = allZeros;
+          output.dtype = dt.RATIONAL;
+          stack.push(Object.freeze(output));
+          break
+        }
+
+        case "lerp": {
+          // linear interpolation function
+          const args = new Array(3);
+          args[2] = stack.pop();
+          args[1] = stack.pop();
+          args[0] = stack.pop();
+          const result = Functions.lerp(args, unitAware);
+          if (result.dtype === dt.ERROR) { return result }
+          stack.push(result);
+          break
+        }
+
+        case "matrix2table": {
+          const numArgs = Number(tokens[i + 1]);
+          i += 1;
+          const rowNames = numArgs === 3 ? stack.pop().value : [];
+          const colNames = stack.pop().value;
+          const matrix = stack.pop();
+          const result = DataFrame.matrix2table(matrix, colNames, rowNames);
+          if (result.dtype === dt.ERROR) { return result }
+          stack.push(result);
+          break
+        }
+
+        case "transpose":
+          stack.push(Matrix.transpose(stack.pop()));
+          break
+
+        case "trace":
+          stack.push(Matrix.trace(stack.pop()));
+          break
+
+        case "fetch":
+          // fetch() is handled in updateCalculations.js.
+          // It's easier from there to coordinate an async function with ProseMirror.
+          // So if control flow get here, we have an error.
+          return errorOprnd("FETCH")
+
+        case "function": {
+          // User defined function.
+          const functionName = tokens[i + 1];
+          const numArgs = Number(tokens[i + 2]);
+          i += 2;
+          const args = new Array(numArgs);
+          for (let j = numArgs - 1; j >= 0; j--) {
+            args[j] = stack.pop();
+          }
+          let oprnd;
+          if (vars.svg && (functionName === "plot" || (draw.functions[functionName]))) {
+            if (functionName === "plot") {
+              args.splice(1, 0, formats.decimalFormat);
+              oprnd = plot(...args);
+            } else if (functionName === "path") {
+              oprnd = draw.functions[functionName](args[0], args.slice(1));
+            } else {
+              oprnd = draw.functions[functionName](...args);
+            }
+          } else if (nextToken(tokens, i) === ".") {
+            // Function from a module
+            let lib = stack.pop().value;         // remote module
+            if (lib.value) { lib = lib.value; }  // local module
+            const udf = lib[functionName];
+            if (udf === undefined) { return errorOprnd("F_NAME", functionName) }
+            if (udf.dtype === dt.ERROR) { return udf }
+            oprnd = evalCustomFunction(udf, args, formats, unitAware, lib);
+            i += 1;
+          } else if (lib && lib[functionName]) {
+            // A module, "lib", was passed to this instance of evalRpn().
+            const udf = lib[functionName];
+            oprnd = evalCustomFunction(udf, args, formats, unitAware, lib);
+          } else if (vars[functionName] && vars[functionName].dtype === dt.MODULE) {
+            // User-defined function from a calculation node.
+            const udf = vars[functionName]["value"];
+            oprnd = evalCustomFunction(udf, args, formats, unitAware);
+          } else {
+            return errorOprnd("BAD_FUN_NM", functionName)
+          }
+          if (oprnd.dtype === dt.ERROR) { return oprnd }
+          stack.push(oprnd);
+          break
+        }
+
+        case "=":
+        case "==":
+        case "⩵":
+        case "<":
+        case ">":
+        case "<=":
+        case "≤":
+        case ">=":
+        case "≥":
+        case "≠":
+        case "!=":
+        case "∈":
+        case "in":
+        case "∉":
+        case "!in":
+        case "∋":
+        case "∌":
+        case "⊂":
+        case "⊄":
+        case "⊃":
+        case "⊅": {
+          const o2 = stack.pop();
+          const o1 = stack.pop();
+          if (unitAware &&
+            !((o1.dtype & dt.STRING) || (o2.dtype & dt.STRING) ||
+               o1.dtype === dt.NULL || o2.dtype === dt.NULL)) {
+            if (!unitsAreCompatible(o1.unit.expos, o2.unit.expos)) {
+              return errorOprnd("UNIT_COMP")
+            }
+          }
+          const bool = Object.create(null);
+          bool.unit = null;
+          const prevValue = (o1.dtype === dt.BOOLEANFROMCOMPARISON) ? oPrev.value : undefined;
+
+          if (setComparisons.includes(tkn)) {
+            bool.value = compare(tkn, o1.value, o2.value, prevValue);
+            bool.dtype = o1.dtype + dt.BOOLEANFROMCOMPARISON;
+          } else {
+            const [shape1, shape2] = binaryShapesOf(o1, o2);
+            bool.value = Operators.relations[shape1][shape2].relate(tkn, o1.value,
+              o2.value, prevValue);
+            bool.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn)
+                         + dt.BOOLEANFROMCOMPARISON;
+          }
+          if (bool.value.dtype && bool.value.dtype === dt.ERROR) { return bool.value }
+          if (bool.dtype & dt.RATIONAL) { bool.dtype -= dt.RATIONAL; }
+          if (bool.dtype & dt.COMPLEX) { bool.dtype -= dt.COMPLEX; }
+          if (bool.dtype & dt.STRING) { bool.dtype -= dt.STRING; }
+          oPrev = o2;
+          stack.push(Object.freeze(bool));
+          break
+        }
+
+        case "and":
+        case "&&":
+        case "or":
+        case "||":
+        case "∧":
+        case "∨":
+        case "⊻": {
+          const o2 = stack.pop();
+          const o1 = stack.pop();
+          if (!(o1.dtype & dt.BOOLEAN) || !(o2.dtype & dt.BOOLEAN)) {
+            return errorOprnd("LOGIC", tokens[i])
+          }
+          const op = { "and": "and", "&&": "and", "or": "or", "∧": "and",
+            "||": "or", "∨": "or", "⊻": "xor" }[tkn];
+          const [shape1, shape2] = binaryShapesOf(o1, o2);
+
+          const bool = Object.create(null);
+          bool.unit = null;
+          bool.value = Operators.binary[shape1][shape2][op](o1.value, o2.value);
+          if (bool.value.dtype && bool.value.dtype === dt.ERROR) { return bool.value }
+
+          bool.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn);
+          stack.push(Object.freeze(bool));
+          break
+        }
+
+        case "not":
+        case "¬": {
+          const o1 = stack.pop();
+          if (!(o1.dtype & dt.BOOLEAN)) { return errorOprnd("LOGIC", tkn) }
+          const bool = Object.create(null);
+          bool.unit = null;
+          bool.value = Operators.unary[shapeOf(o1)]["not"](o1.value);
+          if (bool.value.dtype && bool.value.dtype === dt.ERROR) { return bool.value }
+          bool.dtype = dt.BOOLEAN;
+          stack.push(Object.freeze(bool));
+          break
+        }
+
+        case "cases": {
+          // A multi-line cases expression. Hurmet's ternary expression.
+          const numArgs = Number(tokens[i + 1]);
+          i += 1;
+          // We evaluate cases expressions lazily. Pop the conditions into an array.
+          const conditions = new Array(numArgs);
+          for (let j = numArgs - 1; j >= 0; j--) {
+            conditions[j] = stack.pop();
+          }
+          // Check each condition.
+          // When we reach the first true condition, evaluate the corresponding expression.
+          for (let j = 0; j < numArgs; j++) {
+            if ((conditions[j].dtype & dt.BOOLEAN) === 0) {
+              return errorOprnd("LOGIC", "if")
+            }
+            const val = Operators.condition[shapeOf(conditions[j])](conditions[j].value);
+            if (val) {
+              const rpnLocal = tokens[i + j + 1].replace(/§/g, "\u00A0");
+              const oprnd = evalRpn(rpnLocal, vars, formats, unitAware, lib);
+              if (oprnd.dtype === dt.ERROR) { return oprnd }
+              stack.push(oprnd);
+              break
+            }
+          }
+          i += numArgs;  // Discard the unused expressions
+          break
+        }
+
+        case "applyUnit": {
+          // Pop a magnitude off the stack and apply a unit.
+          // This happens where a user writes a QUANTITY literal.
+          if (!unitAware) { return errorOprnd("UNIT_AWARE", tokens[i + 1]) }
+          const o1 = stack.pop();
+          if (!(o1.dtype & dt.RATIONAL)) { return errorOprnd("QUANT_NUM") }
+          const unitName = tokens[i + 1];
+          i += 1;
+          const output = Object.create(null);
+          output.unit = Object.create(null);
+          output.dtype = o1.dtype;
+          if (!unitAware) {
+            output.value = o1.value;
+            if (o1.dtype & dt.MAP) {
+              output.unit = unitFromUnitName(unitName);
+            } else {
+              output.unit.name = unitName;
+            }
+          } else {
+            // Convert the magnitude to base units.
+            const unit = unitFromUnitName(unitName);
+            if (unit.dtype && unit.dtype === dt.ERROR) { return unit }
+            if (isMatrix(o1)) {
+              output.unit.expos = o1.unit.expos.map((e, j) => e + unit.expos[j]);
+              output.value = Matrix.convertToBaseUnits(o1, unit.gauge, unit.factor);
+            } else if (o1.dtype & dt.MAP) {
+              output.unit = unit;
+              output.value = o1.value;
+              output.value.data = map.convertToBaseUnits(
+                o1.value.data,
+                unit.gauge,
+                unit.factor
+              );
+            } else {
+              output.unit.expos = o1.unit.expos.map((e, j) => e + unit.expos[j]);
+              output.value = Rnl.multiply(Rnl.add(o1.value, unit.gauge), unit.factor);
+            }
+          }
+          stack.push(Object.freeze(output));
+          break
+        }
+
+        case "rem%": {
+          const o2 = stack.pop();
+          const o1 = stack.pop();
+          if (!((o1.dtype & dt.RATIONAL) & (o2.dtype & dt.RATIONAL))) {
+            return errorOprnd("NAN_OP")
+          }
+          const [shape1, shape2] = binaryShapesOf(o1, o2);
+          const mod = Object.create(null);
+          mod.unit = Object.create(null);
+          mod.unit.expos = allZeros;
+          mod.value = Operators.binary[shape1][shape2]["rem"](o1.value, o2.value);
+          if (mod.value.dtype && mod.value.dtype === dt.ERROR) { return mod.value }
+          mod.dtype = Operators.dtype[shape1][shape2](o1.dtype, o2.dtype, tkn);
+          stack.push(Object.freeze(mod));
+          break
+        }
+
+        case "⎾⏋":
+        case "⎿⏌": {
+          // ceiling or floor
+          const o1 = stack.pop();
+          if (!(o1.dtype & dt.RATIONAL)) { return errorOprnd("NAN_OP") }
+          if (unitAware) {
+            if (!unitsAreCompatible(o1.unit.expos, allZeros)) {
+              // TODO: Write an error message.
+              { return errorOprnd("") }
+            }
+          }
+          const op = tkn === "⎾⏋" ? "ceil" : "floor";
+          const output = Object.create(null);
+          output.value = Operators.unary[shapeOf(o1)][op](o1.value);
+          if (output.value.dtype && output.value.dtype === dt.ERROR) { return output.value }
+          output.unit = o1.unit;
+          output.dtype = o1.dtype;
+          stack.push(Object.freeze(output));
+          break
+        }
+
+        case "()": {
+          // binomial
+          const args = [];
+          args.unshift(stack.pop());
+          args.unshift(stack.pop());
+          if (unitAware) {
+            if (!unitsAreCompatible(args[0].unit.expos, allZeros) ||
+              !unitsAreCompatible(args[1].unit.expos, allZeros)) {
+              return errorOprnd("BINOM")
+            }
+          }
+          const binom = Object.create(null);
+          binom.unit = Object.create(null);
+          binom.unit.expos = allZeros;
+          const [value, dtype] = multivarFunction("binary", "binomial", args);
+          binom.value = value;
+          binom.dtype = dtype;
+          stack.push(Object.freeze(binom));
+          break
+        }
+
+        case "→": {
+          // Anonymous function, e.g., x → cos x
+          const rpnLocal = stack.pop().value.replace(/§/g, "\xa0");
+          const parameter = stack.pop().value;
+          stack.push({
+            dtype: dt.MODULE,
+            unit: null,
+            value: {
+              parameters: [ { name: parameter }],
+              statements: [{ rpn: rpnLocal, stype: "return" }]
+            } });
+          break
+        }
+
+        case "∑": {
+          const rpnLocal = stack.pop().value.replace(/§/g, "\xa0");
+          const endOfRange = stack.pop().value;
+          let index = stack.pop().value;
+          const parameter = stack.pop().value;
+          let sum = Rnl.zero;
+          while (Rnl.lessThanOrEqualTo(index, endOfRange)) {
+            vars[parameter] = { value: index, unit: allZeros, dtype: dt.RATIONAL };
+            const localResult = evalRpn(rpnLocal, vars, formats, false);
+            sum = Rnl.add(sum, localResult.value);
+            index = Rnl.add(index, Rnl.one);
+          }
+          delete vars[parameter];
+          stack.push({ value: sum, unit: allZeros, dtype: dt.RATIONAL });
+          break
+        }
+
+        case "throw":
+          return { value: stack.pop().value, unit: null, dtype: dt.ERROR }
+
+        case "\\blue":
+        case "\\gray":
+        case "\\green":
+        case "\\orange":
+        case "\\pink":
+        case "\\purple":
+        case "\\red": {
+          const color = clone(stack.pop());
+          if (color.dtype === dt.STRING) { color.unit = tkn.slice(1); }
+          stack.push(color);
+          break
+        }
+          // TODO: Write an error message
+      }
+    }
+  } // next i
+
+  const oprnd = stack.pop();
+  if (stack.length > 0) {
+    return errorOprnd("ERROR")
+  }
+
+  return oprnd
+};
+
+const plot = (svg, formats, fun, numPoints, xMin, xMax) => {
+  // Plot a function.
+  // To avoid a circular reference, this function has to be here instead of in draw.js.
+  const attrs = svg.value.temp;
+  numPoints = (numPoints == null) ? Rnl.fromNumber(250) : numPoints.value;
+  const min = (xMin == null) ? Rnl.fromNumber(attrs.xmin) : xMin.value;
+  const max = (xMax == null) ? Rnl.fromNumber(attrs.xmax) : xMax.value;
+  // Vectorize the evaluation. Start by finding a vector of the input.
+  const step = Rnl.divide(Rnl.subtract(max, min), numPoints);
+  const vector = Matrix.operandFromRange([min, step, max]);
+  // Transpose the row vector into a column vector.
+  const arg = { value: vector.value, unit: null, dtype: dt.COLUMNVECTOR + dt.RATIONAL };
+  // Run the function on the vector.
+  let funResult;
+  let pathValue;
+  if (fun.value.dtype && fun.value.dtype === dt.MODULE) {
+    funResult = evalCustomFunction(fun.value, [arg], formats, false);
+    pathValue = arg.value.map((e, i) => [e, funResult.value[i]]);
+  } else if (fun.dtype === dt.STRING) {
+    if (/§matrix§1§2$/.test(fun.value)) {
+      arg.name = "t";
+      pathValue = evalRpn(fun.value.replace(/§/g, "\xa0"), { t: arg }, formats, false).value;
+    } else {
+      arg.name = "x";
+      funResult = evalRpn(fun.value.replace(/§/g, "\xa0"), { x: arg }, formats, false);
+      pathValue = arg.value.map((e, i) => [e, funResult.value[i]]);
+    }
+  } else ;
+  const path = { value: pathValue, unit: null, dtype: dt.MATRIX + dt.RATIONAL };
+  return draw.functions.path(svg, [path])
+};
+
+const elementFromIterable = (iterable, index, step) => {
+  // A helper function. This is called by `for` loops in evalCustomFunction()
+  let value;
+  let nextIndex = Rnl.increment(index);
+  const i = Rnl.toNumber(index);
+  // eslint-disable-next-line no-useless-assignment
+  let dtype = 0;
+  if (iterable.dtype === dt.RANGE) {
+    value = index;
+    nextIndex = Rnl.add(index, step);
+    dtype = dt.RATIONAL;
+  } else if (iterable.dtype === dt.STRING) {
+    if (iterable.value.slice(i - 1, i) === "\uD835") {
+      value = "\uD835" + iterable.value.slice(i + 1, i + 2);
+      nextIndex = Rnl.add(index, 1);
+    } else {
+      value = iterable.value.slice(i, i + 1);
+    }
+    dtype = dt.STRING;
+  } else {
+    value = iterable.value[i];
+    dtype = (iterable.dtype & dt.STRING)
+      ? dt.STRING
+      : (iterable.dtype & dt.ROWVECTOR)
+      ? iterable.dtype - dt.ROWVECTOR
+      : (iterable.dtype & dt.COLUMNVECTOR)
+      ? iterable.dtype - dt.COLUMNVECTOR
+      : iterable.dtype - dt.MATRIX;
+  }
+  const oprnd = { value: value, unit: iterable.unit, dtype: dtype };
+  return [oprnd, nextIndex]
+};
+
+const loopTypes = ["while", "for"];
+
+const evalCustomFunction = (udf, args, formats, isUnitAware, lib) => {
+  // UDF stands for "user-defined function"
+  // lib is short for library. If not omitted, it contains a module with more functions.
+
+  if (udf.dtype === dt.ERROR) {
+    return udf
+  }
+
+  // Populate the function parameters.
+  if (args.length > udf.parameters.length) { return errorOprnd("NUMARGS", udf.name) }
+  const vars = Object.create(null);
+  for (let i = 0; i < args.length; i++) {
+    vars[udf.parameters[i].name] = args[i];
+  }
+  if (udf.parameters.length > args.length) {
+    for (let i = args.length; i < udf.parameters.length; i++) {
+      vars[udf.parameters[i].name] = udf.parameters[i].default;
+    }
+  }
+  if (udf.dtype === dt.DRAWING) {
+    vars["svg"] = { value: draw.startSvg(), unit: null, dtype: dt.DRAWING };
+  }
+
+  // Execute the function statements.
+  // There will be nested flow of control, of course. So we'll create a
+  // "control" stack. The topmost element contains info about the control
+  // that applies to the current nesting level.
+  const control = [{ type: "if", condition: true, endOfBlock: udf.statements.length - 1 }];
+  for (let i = 0; i < udf.statements.length; i++) {
+    const statement = udf.statements[i];
+    const stype = statement.stype;
+    const level = control.length - 1;
+    switch (stype) {
+      case "statement": {
+        if (control[level].condition) {
+          const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib);
+          if (result.dtype === dt.ERROR) {
+            // eslint-disable-next-line no-console
+            console.log(statement.rpn);
+            return result
+          }
+          if (statement.name) {
+            statement.resultdisplay = isUnitAware ? "!!" : "!";
+            const [stmt, _] = conditionResult(statement, result, isUnitAware);
+            insertOneHurmetVar(vars, stmt, null, formats);
+          }
+        }
+        break
+      }
+
+      case "if": {
+        if (control[level].condition) {
+          const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib);
+          if (result.dtype === dt.ERROR) { return result }
+          const val = Operators.condition[shapeOf(result)](result.value);
+          control.push({
+            type: "if",
+            condition: val,
+            endOfBlock: statement.endOfBlock
+          });
+        } else {
+          // Skip this block
+          i = statement.endOfBlock;
+        }
+        break
+      }
+
+      case "elseif": {
+        if (control[level].type === "if" && control[level].condition) {
+          i = control[level].endOfBlock;
+          control.pop();
+        } else {
+          const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib);
+          if (result.dtype === dt.ERROR) { return result }
+          const val = Operators.condition[shapeOf(result)](result.value);
+          control[control.length - 1].condition = val;
+        }
+        break
+      }
+
+      case "else":
+        if (control[level].type === "if" && control[level].condition) {
+          i = control[level].endOfBlock;
+          control.pop();
+        } else {
+          control[level].condition = true;
+        }
+        break
+
+      case "while": {
+        if (control[level].condition) {
+          const cntrl = {
+            type: "while",
+            startStatement: i,
+            rpn: statement.rpn,
+            endOfBlock: statement.endOfBlock
+          };
+          const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib);
+          if (result.dtype === dt.ERROR) { return result }
+          const val = Operators.condition[shapeOf(result)](result.value);
+          cntrl.condition = val;
+          if (cntrl.condition === true) {
+            control.push(cntrl);
+          } else {
+            i = statement.endOfBlock;
+          }
+        } else {
+          i = statement.endOfBlock;
+        }
+        break
+      }
+
+      case "for": {
+        if (control[level].condition) {
+          const ctrl = {
+            type: "for",
+            condition: true,
+            startStatement: i,
+            endOfBlock: statement.endOfBlock
+          };
+          const tokens = statement.rpn.split("\u00A0");
+          ctrl.dummyVariable = tokens.shift().slice(1);
+          const iterable = evalRpn(tokens.join("\u00A0"), vars,
+                                   formats, isUnitAware, lib);
+          ctrl.index = (iterable.dtype & dt.RANGE) ? iterable.value[0] : Rnl.fromNumber(0);
+          ctrl.step = (iterable.dtype & dt.RANGE) ? iterable.value[1] : Rnl.fromNumber(1);
+          ctrl.endIndex = (iterable.dtype & dt.RANGE)
+            ? iterable.value[2]
+            : Rnl.fromNumber(iterable.value.length - 1);
+          const [oprnd, nextIndex] = elementFromIterable(iterable, ctrl.index, ctrl.step);
+          ctrl.nextIndex = nextIndex;
+          ctrl.iterable = iterable;
+          control.push(ctrl);
+          vars[ctrl.dummyVariable] = oprnd;
+        } else {
+          i = statement.endOfBlock;
+        }
+        break
+      }
+
+      case "break": {
+        if (control[level].condition) {
+          // Find the enclosing loop and pop out of it.
+          for (let j = control.length - 1; j > 0; j--) {
+            if (loopTypes.includes(control[j].type) || j === 0) {
+              i = control[j].endOfBlock;
+              control.pop();
+              break
+            } else {
+              control.pop();
+            }
+          }
+        }
+        break
+      }
+
+      case "end": {
+        // end of code block
+        if (control[level].type === "if" && i >= control[level].endOfBlock) {
+          control.pop();
+        } else if (control[level].type === "if" && control[level].condition) {
+          // Jump ahead to end of if block
+          if (i < control[level].endOfBlock) { i = control[level].endOfBlock; }
+          control.pop();
+        } else if (control[level].type === "while") {
+          const result = evalRpn(control[level].rpn, vars, formats, isUnitAware, lib);
+          if (result.dtype === dt.ERROR) { return result }
+          control[level].condition = result.value;
+          if (control[level].condition) {
+            i = control[level].startStatement;
+          } else {
+            control.pop();
+          }
+        } else if (control[level].type === "for") {
+          control[level].index = control[level].nextIndex;
+          const proceed = Rnl.isRational(control[level].index)
+            && Rnl.isPositive(control[level].step)
+            ? Rnl.lessThanOrEqualTo(control[level].index, control[level].endIndex)
+            : Rnl.isRational(control[level].index)
+            ? Rnl.greaterThanOrEqualTo(control[level].index, control[level].endIndex)
+            : control[level].index <= control[level].endIndex;
+          if (proceed) {
+            const [oprnd, nextIndex] = elementFromIterable(
+              control[level].iterable,
+              control[level].index, control[level].step
+            );
+            vars[control[level].dummyVariable] = oprnd;
+            control[level].nextIndex = nextIndex;
+            i = control[level].startStatement;
+          } else {
+            control.pop();
+          }
+        }
+        break
+      }
+
+      case "return":
+        if (control[level].condition) {
+          if (statement.rpn) {
+            const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib);
+            return result
+          } else {
+            return { value: Rnl.zero, unit: allZeros, dtype: dt.RATIONAL }
+          }
+        }
+        break
+
+      case "print":
+        if (control[level].condition) {
+          if (statement.rpn) {
+            const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib);
+            if (result.dtype === dt.ERROR) { return result }
+            const msg = result.dtype === dt.RATIONAL
+              ? Rnl.toNumber(result.value)
+              : result.dtype === dt.STRING || result.dtype === dt.BOOLEAN
+              ? result.value
+              : isVector(result) && (result.dtype & dt.RATIONAL)
+              ? result.value.map(e => Rnl.toNumber(e))
+              : result.dtype === dt.MATRIX + dt.RATIONAL
+              ? result.value.map(row => row.map(e => Rnl.toNumber(e)))
+              : result.value;
+            // eslint-disable-next-line no-console
+            console.log(msg);
+          }
+        }
+        break
+
+      case "throw":
+        if (control[level].condition) {
+          if (statement.rpn) {
+            const result = evalRpn(statement.rpn, vars, formats, isUnitAware, lib);
+            return { value: result.value, unit: null, dtype: dt.ERROR }
+          } else {
+            return { value: statement.rpn, unit: null, dtype: dt.ERROR }
+          }
+        }
+        break
+        // TODO: Error message.
+    }
+  }
+};
+
+const errorResult = (stmt, result) => {
+  stmt.value = null;
+  // Wrap the message in a \mathord so that browsers will put
+  // operator spacing on the previous = sign.
+  stmt.resultDisplay = "\\textcolor{firebrick}{\\text{" +
+                        result.value.replace(/%/g, "\\%") + "}}";
+  stmt.altResultDisplay = result.value;
+  stmt.error = true;
+  stmt.dtype = dt.ERROR;
+  if (stmt.resulttemplate.indexOf("!") > -1) {
+    stmt.tex += "= " + stmt.resultDisplay;
+    stmt.alt += result.value;
+  } else if (stmt.resulttemplate.indexOf("@") > -1) {
+    stmt.tex = stmt.resulttemplate.replace(/@@?/, stmt.resultDisplay);
+    stmt.alt = stmt.altresulttemplate.replace(/@@?/, stmt.altResultDisplay);
+  } else {
+    stmt.tex = stmt.tex.replace(/[?%] *[?%]|[?%]/, stmt.resultDisplay);
+    stmt.alt = stmt.alt.replace(/[?%] *[?%]|[?%]/, stmt.altResultDisplay);
+  }
+  return [stmt, result]
+};
+
+const spreadsheetSum = (sheet, index, unitAware) => {
+  let sum = Rnl.zero;
+  if (/^[A-Z]$/.test(index)) {
+    // Sum a column
+    const L = sheet.numRows - 1; // Do not include the top row.
+    for (let i = 1; i <= L - 1; i++) {
+      const cellOprnd = fromAssignment(sheet.value[index + String(i)], unitAware);
+      if (cellOprnd.dtype === dt.ERROR) { return cellOprnd }
+      sum = Rnl.add(sum, cellOprnd.value);
+    }
+  } else if (isNaN(index)) {
+    return errorOprnd("SHEET_INDEX")
+  } else {
+    // Sum a row
+    const L = Object.keys(sheet.columnMap).length;
+    for (let j = 1; j <= L - 1; j++) {
+      const cellName = String.fromCodePoint(65 + j) + index;
+      const cellOprnd = fromAssignment(sheet.value[cellName], unitAware);
+      if (cellOprnd.dtype === dt.ERROR) { return cellOprnd }
+      sum = Rnl.add(sum, cellOprnd.value);
+    }
+  }
+  return { value: sum, unit: allZeros, dtype: dt.RATIONAL }
+};
+
+const conditionResult = (stmt, oprnd, unitAware) => {
+  let result = Object.create(null);
+  result.value = oprnd.dtype === dt.DATAFRAME
+    ? oprnd.value
+    : clone(oprnd.value);
+  result.unit = clone(oprnd.unit);
+  result.dtype = oprnd.dtype;
+
+  if (result.dtype === dt.COMPLEX && Rnl.isZero(Cpx.imag(result.value))) {
+    result.value = Cpx.real(result.value);
+    result.dtype = 1;
+  }
+
+  // Check unit compatibility.
+  if (result.dtype !== dt.ERROR && unitAware && stmt.resultdisplay.indexOf("!") === -1 &&
+    (stmt.unit && stmt.unit.expos ||
+      (result.unit && result.unit.expos && Array.isArray(result.unit.expos)))) {
+    const expos = result.dtype === dt.DATE && stmt.unit === undefined
+      ? [0, 0, 1, 0, 0, 0, 0, 0]
+      : stmt.unit && stmt.unit.expos
+      ? stmt.unit.expos
+      : allZeros;
+    if (!unitsAreCompatible(result.unit.expos, expos)) {
+      const message = stmt.unit && stmt.unit.expos ? "UNIT_RES" : "UNIT_MISS";
+      result = errorOprnd(message);
+    }
+  }
+  if (result.dtype === dt.ERROR) { return errorResult(stmt, result) }
+
+  // Check for a valid display indicator.
+  if (stmt.resulttemplate && stmt.resulttemplate.indexOf("!") > -1 &&
+    !(result.dtype === dt.DATAFRAME || (result.dtype & dt.MAP) || isMatrix(result)
+    || (result.dtype & dt.TUPLE))) {
+    return errorResult(stmt, errorOprnd("BAD_DISPLAY"))
+  }
+
+  if (result.dtype & dt.RATIONAL) {
+    if (result.dtype & dt.MAP) {
+      result.value.data = result.value.data.map(column => Rnl.isRational(column[0])
+        ? column.map(e => Rnl.normalize(e))
+        : column);
+    } else {
+      result.value = isVector(result)
+        ? result.value.map(e => Rnl.normalize(e))
+        : isMatrix(result)
+        ? result.value.map(row => row.map(e => Rnl.normalize(e)))
+        : result.dtype === dt.RATIONAL
+        ? Rnl.normalize(result.value)
+        : result.value;
+    }
+  } else if (result.dtype === dt.COMPLEX) {
+    result.value = [Rnl.normalize(result.value[0]), Rnl.normalize(result.value[1])];
+  }
+  stmt.dtype = result.dtype;
+
+  // If unit-aware, convert result to desired result units.
+  const unitInResultSpec = (stmt.unit && stmt.unit.factor &&
+      (!Rnl.areEqual(stmt.unit.factor, Rnl.one) || stmt.unit.gauge));
+  const isPercent = (stmt.unit && stmt.unit.name && stmt.unit.name === "\\⦂");
+  if ((result.dtype & dt.DATAFRAME) ||
+      (typeof stmt.resultdisplay === "string" && stmt.resultdisplay.indexOf("!") > -1)) {
+    stmt.unit = result.unit;
+  } else if (unitAware && (result.dtype & dt.RATIONAL) && !isPercent) {
+    if (!unitInResultSpec & unitsAreCompatible(result.unit.expos, allZeros)) {
+      stmt.unit = { factor: Rnl.one, gauge: Rnl.zero, expos: allZeros };
+    }
+    if (result.dtype & dt.MAP) {
+      result.value.data = {
+        plain: map.convertFromBaseUnits(result.value.data, stmt.unit.gauge, stmt.unit.factor),
+        inBaseUnits: result.value.data
+      };
+    } else {
+      result.value = {
+        plain: (isMatrix(result))
+          ? Matrix.convertFromBaseUnits(
+            { value: result.value, dtype: result.dtype },
+            stmt.unit.gauge,
+            stmt.unit.factor
+            )
+          : Rnl.subtract(Rnl.divide(result.value, stmt.unit.factor), stmt.unit.gauge),
+        inBaseUnits: result.value
+      };
+    }
+    stmt.dtype += dt.QUANTITY;
+    stmt.expos = result.unit.expos;
+  } else if (unitInResultSpec && !isPercent) {
+    // A non-unit aware calculation, but with a unit attached to the result.
+    if (result.dtype & dt.MAP) {
+      const data = {
+        plain: result.value.data,
+        inBaseUnits: map.convertToBaseUnits(result.value.data,
+                                            stmt.unit.gauge, stmt.unit.factor)
+      };
+      result.value.data = data;
+    } else {
+      result.value = {
+        plain: result.value,
+        inBaseUnits: (isMatrix(result))
+          ? Matrix.convertToBaseUnits(
+            { value: result.value, dtype: result.dtype },
+            stmt.unit.gauge,
+            stmt.unit.factor
+            )
+          : Rnl.multiply(Rnl.add(result.value, stmt.unit.gauge), stmt.unit.factor)
+      };
+    }
+    stmt.dtype += dt.QUANTITY;
+
+  } else if ((result.dtype & dt.RATIONAL) || (result.dtype & dt.COMPLEX) ) {
+    if (isPercent) ; else {
+      // A numeric result with no unit specified.
+      stmt.unit = { expos: allZeros };
+    }
+  }
+  if (Object.prototype.hasOwnProperty.call(result, "value")) {
+    stmt.value = result.value;
+  }
+  return [stmt, result]
+};
+
+const evaluateDrawing = (
+  stmt,
+  vars,
+  formats = { decimalFormat: "1,000,000.", dateFormat: "yyyy-mm-dd" }
+) => {
+  const udf = stmt.value;
+  const args = [];
+  for (let i = 0; i < udf.parameters.length; i++) {
+    const argName = udf.parameters[i].name;
+    args.push(evalRpn("¿" + argName, vars, formats, false, {}));
+  }
+  const funcResult = evalCustomFunction(udf, args, formats, false, {});
+  if (funcResult.dtype === dt.ERROR) {
+    stmt.error = true;
+    stmt.tex = "\\textcolor{firebrick}{\\text{" + funcResult.value + "}}";
+    stmt.value = null;
+    stmt.dtype = dt.ERROR;
+  } else {
+    stmt.resultdisplay = funcResult.value;
+    delete stmt.resultdisplay.temp;
+  }
+  return stmt
+};
+
+const evaluate = (
+  stmt,
+  vars,
+  formats = { decimalFormat: "1,000,000.", dateFormat: "yyyy-mm-dd" }
+) => {
+  stmt.tex = stmt.template ? stmt.template : "";
+  stmt.alt = stmt.altTemplate ? stmt.altTemplate : "";
+  const isUnitAware = /\?\?|!!|%%|@@|¡¡/.test(stmt.resulttemplate);
+
+  const formatSpec = vars.format ? vars.format.value : "h15";
+
+  if (stmt.tex.indexOf("〖") > -1) {
+    const eqnWithVals = plugValsIntoEcho(stmt.tex, vars, isUnitAware, formatSpec, formats);
+    if (eqnWithVals.dtype && eqnWithVals.dtype === dt.ERROR) {
+      const [newStmt, _] = errorResult(stmt, eqnWithVals);
+      return newStmt
+    } else {
+      stmt.tex = eqnWithVals;
+    }
+  }
+
+  if (stmt.rpn) {
+    let oprnd = evalRpn(stmt.rpn, vars, formats, isUnitAware);
+    // eslint-disable-next-line no-useless-assignment
+    if (oprnd.dtype === dt.ERROR) { [stmt, oprnd] = errorResult(stmt, oprnd); return stmt}
+    let result
+    ;[stmt, result] = conditionResult(stmt, oprnd, isUnitAware);
+    if (stmt.error) { return stmt }
+    const assert = vars.assert ? vars.assert : null;
+    stmt = formatResult(stmt, result, formatSpec, formats, assert, isUnitAware);
+  }
+  return stmt
+};
+
+const numberRegEx$1 = new RegExp(Rnl.numberPattern);
+const matrixRegEx = /^[([] *(?:(?:-?[0-9.]+|"[^"]+"|true|false) *[,;\t]? *)+[)\]]/;
+// A regex to check for valid unit strings. Not comprehensive.
+// Only checks for allowed characters. Does not check structure of a compound unit.
+const unitRegEx = /^[a-zäöōA-Z0-9 μµ#$£¥'′″°()Å₨₪€℃℉ΩΩKÅ^+\-/*.•×\-−·₂⁰¹²³\u2074-\u2079]+$/;
+/* eslint-disable max-len */
+
+const numStr = "(-?(?:0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?)))";
+const nonNegNumStr = "(0x[0-9A-Fa-f]+|[0-9]+(?: [0-9]+\\/[0-9]+|(?:\\.[0-9]+)?(?:e[+-]?[0-9]+|%)?))";
+const complexRegEx = new RegExp("^" + numStr + "(?: *([+-]) *(?: j *" + nonNegNumStr + "|" + nonNegNumStr + " *∠" + numStr + "(°)?))");
+// const complexRegEx = /^(number)(?: *([+-]) *(non-negative number) *j(number)(°)?)/
+/* eslint-enable max-len */
+// Capturing groups:
+//    [1] First number, either a in a ± b im, or r in r∠θ
+//    [2] + or -. Gives the sign of the imaginary part in an a ± b im.
+//    [3] b, the imaginary part in an a ± b im expression
+//    [4] theta, the argument (phase angle ) of an r∠θ expression
+//    [5] °, optional trailing degree sign in an r∠θ expression
+
+const unitFromString = str => {
+  if (str.length === 0) { return ["", ""] }
+  const unitName = str.replace(/'/g, "").trim();
+  const unit = unitFromUnitName(unitName);
+  const unitDisplay = (unit.dtype && unit.dtype === dt.ERROR)
+    ? ""
+    : unitTeXFromString(unitName);
+  return [unit, unitDisplay]
+};
+
+const literalWithUnit = (oprnd, tex, unitStr) => {
+  let unit = (oprnd.dtype & dt.RATIONAL) ? { expos: allZeros } : null;
+  let unitDisplay = "";
+  let value = oprnd.value;
+  if (unitStr.length > 0) {
+    [unit, unitDisplay] = unitFromString(unitStr);
+    if (unit.dtype && unit.dtype === dt.ERROR) {
+      return [0, null, dt.ERROR, unit.value]
+    }
+    value = oprnd.dtype === dt.RATIONAL
+      ? {
+        plain: oprnd.value,
+        inBaseUnits: Rnl.multiply(Rnl.add(oprnd.value, unit.gauge), unit.factor)
+      }
+      : {
+        plain: oprnd.value,
+        inBaseUnits: Matrix.convertToBaseUnits(oprnd, unit.gauge, unit.factor)
+      };
+  }
+  let dtype = oprnd.dtype;
+  if (unitDisplay.length > 0) {
+    dtype += dt.QUANTITY;
+    return [value, unit, dtype, tex + "\\," + unitDisplay]
+  } else {
+    return [value, unit, dtype, tex]
+  }
+};
+
+const valueFromLiteral = (str, name, formats) => {
+  // Read a literal string and return a value
+  // The return should take the form: [value, unit, dtype, resultDisplay]
+
+  if (/^[({[].* to /.test(str)) {
+    // str defines a quantity distribution, (a to b). That is handled by calculation.js.
+    // This is not a valid literal.
+    return [0, null, dt.ERROR, ""]
+
+  } else if (str === "true" || str === "false") {
+    return [(str === "true" ? true : false), null, dt.BOOLEAN, `\\mathord{\\text{${str}}}`]
+
+  } else if (str.length > 3 && str.slice(0, 3) === '"""') {
+    // str contains a macro
+    return [str.slice(3, -3), undefined, dt.MACRO, ""]
+
+  } else if (/^\x22.+\x22/.test(str)) {
+    // str contains text between quotation marks
+    if (name === "format") {
+      return validateFormatSpec(str.slice(1, -1).trim())
+    } else {
+      const tex = parse$1(str, formats);
+      return [str.slice(1, -1), undefined, dt.STRING, tex]
+    }
+
+  } else if (matrixRegEx.test(str)) {
+    // We're processing a matrix
+    const matrixStr = matrixRegEx.exec(str)[0];
+    const [tex, rpn, _] = parse$1(matrixStr, formats, true);
+    const oprnd = evalRpn(rpn, {}, formats, false, {});
+    const unitStr = str.slice(matrixStr.length).trim();
+    if (unitStr.length > 0 && !unitRegEx.test(unitStr)) {
+      return [0, null, dt.ERROR, ""]
+    }
+    return literalWithUnit(oprnd, tex, unitStr)
+
+  } else if (/^``/.test(str)) {
+    // A TSV between double back ticks.
+    // Read the TSV into a data frame.
+    const pos = str.indexOf("``", 2);
+    const tsv = tablessTrim(str.slice(2, pos));
+    const oprnd = DataFrame.dataFrameFromTSV(tsv);
+    if (oprnd.dtype === dt.DATAFRAME) {
+      return [oprnd.value, oprnd.unit, dt.DATAFRAME,
+        DataFrame.display(oprnd.value, "h3", formats.decimalFormat)]
+    } else {
+      // It's a Hurmet Map
+      const unitStr = str.slice(pos + 2).trim();
+      let unit;
+      let unitDisplay = "";
+      if (unitStr.length > 0) {
+        [unit, unitDisplay] = unitFromString(unitStr);
+        if (unit.dtype && unit.dtype === dt.ERROR) { return [0, null, dt.ERROR, ""] }
+        oprnd.unit = unit;
+        oprnd.dtype = dt.MAP + dt.RATIONAL + dt.QUANTITY;
+        oprnd.value.data = {
+          plain: oprnd.value.data,
+          inBaseUnits: map.convertToBaseUnits(oprnd.value.data, unit.gauge, unit.factor)
+        };
+      }
+      return [oprnd.value, unit, oprnd.dtype,
+        DataFrame.display(oprnd.value, "h3", formats.decimalFormat) + "\\;" + unitDisplay]
+    }
+
+  } else if (complexRegEx.test(str)) {
+    // str is a complex number.
+    const resultDisplay = parse$1(str, formats);
+    const parts = str.match(complexRegEx);
+    let realPart;
+    let imPart;
+    if (parts[3]) {
+      // a + b im expression
+      realPart = Rnl.fromString(parts[1]);
+      imPart = Rnl.fromString(parts[3]);
+      if (parts[2] === "-") { imPart = Rnl.negate(imPart); }
+    } else {
+      // r∠θ expression
+      const r = Rnl.fromString(parts[1]);
+      let theta = Rnl.fromString(parts[4]);
+      if (parts[5]) { theta = Rnl.divide(Rnl.multiply(theta, Rnl.pi), Rnl.fromNumber(180)); }
+      realPart = Rnl.multiply(r, Rnl.fromNumber(Math.cos(Rnl.toNumber(theta))));
+      imPart = Rnl.multiply(r, Rnl.fromNumber(Math.sin(Rnl.toNumber(theta))));
+    }
+    return [[realPart, imPart], allZeros, dt.COMPLEX, resultDisplay]
+
+  } else if (dateRegEx$1.test(str)) {
+    const rnlDate = [BigInt(dateInSecondsFromIsoString(str)), BigInt(1)];
+    const dateTex = formatDate(rnlDate, formats.dateFormat);
+    return [rnlDate, { expos: [0, 0, 1, 0, 0, 0, 0, 0] }, dt.DATE, dateTex]
+
+  } else {
+    const match = numberRegEx$1.exec(str);
+    if (match) {
+      // str begins with a number.
+      const numStr = match[0];
+      const unitStr = str.slice(numStr.length).trim();
+      if (unitStr.length > 0 && !unitRegEx.test(unitStr)) {
+        return [0, null, dt.ERROR, ""]
+      }
+      const [tex, rpn, _] = parse$1(numStr, formats, true);
+      const oprnd = evalRpn(rpn, {}, formats, false, {});
+      return literalWithUnit(oprnd, tex, unitStr)
+
+    } else {
+      // TODO: Preceding currency symbol, e.g., $25.20
+      return [0, null, dt.ERROR, ""]
+    }
+  }
+};
+
+const keywordRegEx = /^(if|elseif|else|return|throw|while|for|break|print|end)(\u2002|\b)/;
+const drawCommandRegEx = /^(title|frame|view|axes|grid|stroke|strokewidth|strokedasharray|fill|fontsize|fontweight|fontstyle|fontfamily|marker|line|path|plot|curve|rect|circle|ellipse|arc|text|dot|leader|dimension)\b/;
+const leadingSpaceRegEx$1 = /^[\t ]+/;
+const oneLinerRegEx = /^( *)if ([^\n`]+) +(return|throw|print|break)\b([^\n]+)?(?: end)? *\n/gm;
+
+// If you change functionRegEx, then also change it in mathprompt.js.
+// It isn't called from there in order to avoid duplicating Hurmet code inside ProseMirror.js.
+// eslint-disable-next-line max-len
+const functionRegEx$1 = new RegExp("^function " + isValidIdentifier.source.slice(1, -1) + "\\(");
+const moduleRegEx = /^module ([A-Za-z][A-Za-z0-9]*)/;
+const drawRegEx = /^draw\(/;
+const startSvgRegEx = /^startSvg\(\)/;
+const lexRegEx = /"[^"]*"|``.*|`[^`]*`|'[^']*'|#|[^"`'#]+/g;
+
+const testForStatement = str => {
+  const pos = str.indexOf("=");
+  if (pos === -1) { return false }
+  const leadStr = str.slice(0, pos).replace(leadingSpaceRegEx$1, "").trim();
+  if (isValidIdentifier.test(leadStr)) { return true }
+  if (leadStr.indexOf(",") === -1) { return false }
+  let result = true;
+  const arry = leadStr.split(",");
+  arry.forEach(e => {
+    if (!isValidIdentifier.test(e.trim())) { result = false; }
+  });
+  return result
+};
+
+const stripComment = str => {
+  // Strip the comment, if any, from the end of a code line.
+  const matches = arrayOfRegExMatches(lexRegEx, str);
+  for (let i = 0; i < matches.length; i++) {
+    if (matches[i].value === "#") {
+      str = str.slice(0, matches[i].index);
+      break
+    }
+  }
+  return str.trim()
+};
+
+const scanModule = (str, formats) => {
+  // Scan the code and break it down into individual lines of code.
+  // Assemble the lines into functions and assign each function to parent.
+  const parent = Object.create(null);
+
+  // Expand one-liners into if ... end blocks.
+  str = str.replace(oneLinerRegEx, "$1if\u2002$2\n$1    $3\u2002$4\n$1end\n");
+
+  // Statements end at a newline.
+  const lines = str.split(/\r?\n/g);
+
+  for (let i = 0; i < lines.length; i++) {
+    // Get a single line of code and strip off any comments.
+    const line = stripComment(lines[i]);
+    if (line.length === 0) { continue }
+
+    if (functionRegEx$1.test(line) || drawRegEx.test(line)) {
+      // This line starts a new function.
+      const [funcObj, endLineNum] = scanFunction(lines, formats, i);
+      if (funcObj.dtype && funcObj.dtype === dt.ERROR) { return funcObj }
+      parent[funcObj.name] = funcObj;
+      i = endLineNum;
+    } else if (testForStatement(line)) {
+      // This line starts a Hurmet assignment.
+      const [stmt, endLineNum] = scanAssignment(lines, formats, i);
+      parent[stmt.name] = stmt;
+      i = endLineNum;
+    }
+  }
+  return { value: parent, unit: null, dtype: dt.MODULE }
+
+};
+
+const handleTSV = (expression, lines, startLineNum) => {
+  for (let i = startLineNum + 1; i < lines.length; i++) {
+    const line = tablessTrim(lines[i]);
+    if (line.length === 0) { continue }
+    expression += "\n" + line;
+    if (line.slice(-2) === "``") { return [expression, i] }
+  }
+};
+
+const scanFunction = (lines, formats, startLineNum) => {
+  const line1 = stripComment(lines[startLineNum]);
+  let isDraw = line1.charAt(0) === "d";
+  const posParen = line1.indexOf("(");
+  // eslint-disable-next-line no-useless-assignment
+  let functionName = "";
+  if (isDraw) {
+    functionName = "draw";
+  } else {
+    const posFn = line1.indexOf("function");
+    functionName = line1.slice(posFn + 8, posParen).trim();
+  }
+
+  const parameterString =  line1.slice(posParen + 1, -1).trim();
+  const parameterSplit = parameterString.length === 0 ? [] : parameterString.split(/ *[,;] */g);
+  const parameters = [];
+  for (const param of parameterSplit) {
+    const parts = param.split(/ *= */);
+    const name = parts[0];
+    let defaultVal = { name, value: null, dtype: null };
+    if (parts[1]) {
+      const [value, unit, dtype, resultDisplay] = valueFromLiteral(parts[1], "", formats);
+      defaultVal = { name, value, unit, dtype, resultDisplay };
+    }
+    parameters.push({ name, default: defaultVal });
+  }
+
+  const funcObj = {
+    name: functionName,
+    dtype: isDraw ? dt.DRAWING : dt.MODULE,
+    parameters,
+    statements: []
+  };
+
+  const stackOfCtrls = [];
+  /* eslint-disable no-useless-assignment */
+  let expression = "";
+  let name = "";
+  /* eslint-enable no-useless-assignment */
+  let prevLineEndedInContinuation = false;
+  let prevLine = "";
+  let isStatement = false;
+
+  let j = startLineNum;
+  for (let i = startLineNum + 1; i < lines.length; i++) {
+    j += 1;
+    let line = stripComment(lines[i]);
+    if (line.length === 0) { continue }
+
+    if (prevLineEndedInContinuation) {
+      // Check if the previous character is a semi-colon just before a matrix literal closes.
+      const lastChar = prevLine.slice(-1);
+      line = lastChar === ";" && "})]".indexOf(line.charAt(0)) > -1
+        ? prevLine.slice(0, -1).trim() + line
+        : lastChar === ";" || lastChar === ","
+        ? prevLine + " " + line
+        : prevLine + line;
+    }
+
+    // Line continuation characters are: { ( [ , ; + -
+    if (/[{([,;]$/.test(line)) {
+      prevLineEndedInContinuation = true;
+      prevLine = line;
+      continue
+    } else if (lines.length > i + 1 && /^\s*[+\-)\]}]/.test(lines[i + 1])) {
+      prevLineEndedInContinuation = true;
+      prevLine = line;
+      continue
+    }
+
+    let isFromOneLiner = false;
+    const keyword = keywordRegEx.exec(line);
+    if (keyword) {
+      name = keyword[1];
+      if (keyword[2]) { isFromOneLiner = true; }
+      expression = line.slice(name.length).trim();
+      if (expression.length > 0 && /^``/.test(expression)) {
+        [expression, i] = handleTSV(expression, lines, i);
+      }
+    } else if (isDraw && drawCommandRegEx.test(line)) {
+      name = "svg";
+      expression = line.indexOf(" ") === -1
+        ? line + "(svg)"
+        : line.replace(" ", "(svg, ") + ")";
+      isStatement = true;
+    } else {
+      if (testForStatement(line)) {
+        // We have an "=" assignment operator.
+        const posEq = line.indexOf("=");
+        name = line.slice(0, posEq - 1).trim();
+        expression = line.slice(posEq + 1).trim();
+        if (/^``/.test(expression)) { [expression, i] = handleTSV(expression, lines, i); }
+        if (startSvgRegEx.test(expression)) { isDraw = true; }
+        isStatement = true;
+      } else {
+        // TODO: We shouldn't get here. Write an error.
+        return [errorOprnd("FUNC_LINE", functionName + ", line " + (j + 1) + "\n" + line), i]
+      }
+    }
+    if (isFromOneLiner) { j -= 1; }
+    let rpn = "";
+    let _;
+    if (expression) {
+      [, rpn, _] = parse$1(expression, formats, true);
+      if (name === "for") {
+        rpn = rpn.replace(/\u00a0in\u00a0/, "\u00a0").replace(/\u00a0in$/, "");
+      }
+    }
+    const stype = isStatement ? "statement" : name;
+    if (isStatement && /[,;]/.test(name)) {
+      name = name.split(/[,;]/).map(e => e.trim());
+    }
+    funcObj.statements.push({ name, rpn, stype });
+    if (stype === "if" || stype === "while" || stype === "for") {
+      stackOfCtrls.push({ type: stype, statementNum: funcObj.statements.length - 1 });
+    } else if (stype === "end") {
+      if (stackOfCtrls.length === 0) {
+        // Finished the current function.
+        if (isDraw) {
+          funcObj.statements.splice(-1, 0, { name: "return", rpn: "¿svg", stype: "return" });
+        }
+        return [funcObj, i]
+      }
+      const ctrl = stackOfCtrls[stackOfCtrls.length - 1];
+      funcObj.statements[ctrl.statementNum].endOfBlock = funcObj.statements.length - 1;
+      stackOfCtrls.pop();
+    }
+
+    // Reset for next statement
+    isStatement = false;
+    prevLineEndedInContinuation = false;
+    prevLine = "";
+    /* eslint-disable no-useless-assignment */
+    name = "";
+    expression = "";
+    /* eslint-enable no-useless-assignment */
+  }
+  return [errorOprnd("END_MISS", functionName), 0]
+};
+
+const scanAssignment = (lines, formats, iStart) => {
+  let prevLineEndedInContinuation = false;
+  let str = "";
+  let iEnd = iStart;
+  for (let i = iStart; i < lines.length; i++) {
+    const line = stripComment(lines[i]);
+    if (line.length === 0) { continue }
+
+    if (prevLineEndedInContinuation) {
+      // Check if the previous character is a semi-colon just before a matrix literal closes.
+      str = str.slice(-1) === ";" && "})]".indexOf(line.charAt(0)) > -1
+        ? str.slice(0, -1).trim() + line
+        : str + line;
+    } else {
+      str = line;
+    }
+
+    // Line continuation characters are: { ( [ , ; + -
+    if (/[{([,;]$/.test(str)) {
+      prevLineEndedInContinuation = true;
+    } else if (lines.length > i + 1 && /^\s*[+\-)\]}]/.test(lines[i + 1])) {
+      prevLineEndedInContinuation = true;
+    } else {
+      iEnd = i;
+      break
+    }
+  }
+
+  const posEquals = str.indexOf("=");
+  let name = str.slice(0, posEquals).trim();
+  if (/[,;]/.test(name)) {
+    name = name.split(/[,;]/).map(e => e.trim());
+  }
+  let trailStr = str.slice(posEquals + 1).trim();
+  if (trailStr.length > 3 && trailStr.slice(0, 3) === '"""') {
+    // We're at a macro, which extends beyond normal line endings.
+    let j = iEnd;
+    let pos = trailStr.indexOf('"""', 3);
+    while (pos < 0 && j < lines.length - 1) {
+      j += 1;
+      trailStr += "\n" + lines[j];
+      pos = trailStr.indexOf('"""', 3);
+    }
+    iEnd = j;
+  }
+  const [value, unit, dtype, resultDisplay] = valueFromLiteral(trailStr, name, formats);
+  const stmt = { name, value, unit, dtype, resultDisplay };
+  return [stmt, iEnd]
+};
+
+/*  compile.js
+ *
+ *  This module is called when: (1) an author submits a Hurmet calculation dialog box, or
+ *  (2) when a new document is opened, or (3) when recalculate-all is called.
+ *  Here we do some preparation in a calculation cell prior to calculation.
+ *
+ *  This module does NOT calculate the result of an expression. It stops just short of that.
+ *  How do we choose where to draw the line between tasks done here and tasks done later?
+ *  We do as much here as we can without knowing the values that other cells have assigned
+ *  to variables. The goal is to minimize the amount of work done by each dependent cell
+ *  when an author changes an assigned value.  Later, calculation updates will not have to
+ *  repeat the work done in this module, so updates will be faster.
+ *
+ *  Variable inputStr contains the string that an author wrote into mathPrompt().
+ *
+ *  From that entry this module will:
+ *    1. Determine the name of the cell, as in "x" from "x = 12"
+ *    2. Parse the entry string into TeX, to be passed later to Temml for rendering.
+ *    3. If the input asks for a calculation:
+ *       a. Parse the expression into an echo string (in TeX) with placeholders that will be
+ *          filled in later with values when the calculation is done.
+ *       b. Compile the expression into RPN (postfix) to be passed later to evaluateRPN().
+ *       c. Process the unit of measure, if any, of the result. Save it for later calculation.
+ *    4. If an assigned value is static, not dynamically calculated, find its value.
+ *    5. Append all the display strings together.
+ *    6. Return the result. Hurmet will attach it to ProseMirror "attrs" of that node.
+ */
+
+const containsOperator = /[+\-×·*∘⌧/^%‰&√!¡|‖&=<>≟≠≤≥∈∉⋐∧∨⊻¬]|\xa0(function|mod|\\atop|root|sum|abs|cos|sin|tan|acos|asin|atan|sec|csc|cot|asec|acsc|acot|exp|log|ln|log10|log2|cosh|sinh|tanh|sech|csch|coth|acosh|asinh|atanh|asech|acsch|acoth|gamma|Γ|lgamma|logΓ|lfact|cosd|sind|tand|acosd|asind|atand|secd|cscd|cotd|asecd|acscd|acotd|real|imag|angle|Char|round|sqrt|sign|\?{}|%|⎾⏋|⎿⏌|\[\]|\(\))\xa0/;
+const mustDoCalculation = /^(?:``.+``|(?:[£¥\u20A0-\u20CF]|(?:[ACR]|HK|US)?\$)?(?:\?{1,2}|@{1,2}|%{1,3}|!{1,2})[^=!(?@!{})]*)$/;
+const percentOperatorRegEx = /((?:\?{1,2}|@{1,2}|%%|!{1,2}) *)%/;
+const assignDataFrameRegEx = /^[^=]+=\s*``[\s\S]+``\s*$/;
+const currencyRegEx = /^[$£¥\u20A0-\u20CF]/;
+// eslint-disable-next-line max-len
+const matrixOfNames = new RegExp("^[([]" + isValidIdentifier.source.slice(1, -1) + "[,;].+[)\\]]$");
+const isKeyWord = /^(π|pi|ℏ|true|false|root|if|in|else|elseif|and|or|otherwise|mod|modulo|for|while|end|break|return|throw)$/;
+const testRegEx = /^(@{1,2})test /;
+
+const shortcut = (str, formats) => {
+  // No calculation in str. Parse it just for presentation.
+  const tex = parse$1(str, formats);
+  return { entry: str, tex, alt: str }
+};
+
+const compile = (
+  inputStr,
+  formats = { decimalFormat: "1,000,000.", dateFormat: "yyyy-mm-dd" }
+) => {
+  /* eslint-disable no-useless-assignment */
+  let leadStr = "";
+  let mainStr = "";
+  let trailStr = "";
+  let isCalc = false;
+  let suppressResultDisplay = false;
+  let displayResultOnly = false;
+  let omitEcho = false;
+  let mustAlign = false;
+  let posOfFirstEquals = 0;
+  let expression = "";
+  let echo = "";
+  let rpn = "";
+  let dependencies = [];
+  let resultDisplay = "";
+  let name = "";
+  let leadsWithCurrency = false;
+  let value;
+  let unit;
+  let dtype;
+  let str = "";
+  /* eslint-enable no-useless-assignment */
+
+  const isModule = moduleRegEx.test(inputStr);
+  const isDraw = drawRegEx.test(inputStr);
+  if (functionRegEx$1.test(inputStr) || isDraw || isModule) {
+    // This cell contains a custom function.
+    let name = "";
+    if (isDraw) {
+      name = "draw";
+    } else if (isModule) {
+      name = checkForNumericSubscript(moduleRegEx.exec(inputStr)[1].trim());
+    } else if (!isModule) {
+      const posFn = inputStr.indexOf("function");
+      const posParen = inputStr.indexOf("(");
+      name = checkForNumericSubscript(inputStr.slice(posFn + 8, posParen).trim());
+    }
+    const module = scanModule(inputStr, formats);
+    const isError = module.dtype && module.dtype === dt.ERROR;
+    if (isError) {
+      // eslint-disable-next-line no-alert
+      window.alert(module.value);
+    }
+    const attrs = {
+      entry: inputStr,
+      name,
+      value: (isError || isModule) ? module.value : module.value[name],
+      // TODO: what to do with comma decimals?
+      resultdisplay: "\\text{" + name + "}",
+      dtype: isError ? dt.ERROR : name === "draw" ? dt.DRAWING : dt.MODULE,
+      error: isError
+    };
+    return attrs
+  }
+
+  str = inputStr;
+
+  if (testRegEx.test(inputStr)) {
+    str = str.replace(testRegEx, "").trim();
+    const [_, rpn, dependencies] = parse$1(str, formats, true);
+    const resulttemplate = testRegEx.exec(inputStr)[1];
+    return { entry: inputStr, template: "", rpn, dependencies, resulttemplate,
+      altresulttemplate: resulttemplate, resultdisplay: "" }
+  }
+
+  const isDataFrameAssigment = assignDataFrameRegEx.test(str);
+  const posOfLastEquals = isDataFrameAssigment
+    ? str.indexOf("=") + 1
+    : str.lastIndexOf("=") + 1;
+
+  if (posOfLastEquals > 1) {
+    // input has form:  mainStr = trailStr
+    mainStr = str.substring(0, posOfLastEquals - 1).replace(/ +$/, "");
+    if (mainStr.length > 0 && /;\s*$/.test(mainStr)) {
+      mustAlign = true;
+      mainStr = mainStr.replace(/;\s*$/, "");
+    }
+    mainStr = mainStr.trim();
+    trailStr = str.substring(posOfLastEquals).trim();
+
+    if (mustDoCalculation.test(trailStr)) {
+      // trailStr contains a ? or a @ or a % or a !. In other words,
+      // input has form:  mainStr = something [?@%!] something
+      // The [?@%!] signals that the author wants a calculation done.
+      isCalc = true;
+
+      // A ! tells us to calculate and save the result, but to NOT display the result.
+      suppressResultDisplay = trailStr.indexOf("!") > -1;
+
+      // A @ tells us to display only the result.
+      displayResultOnly = trailStr.indexOf("@") > -1;
+
+      omitEcho = trailStr.indexOf("%") > -1;
+
+      posOfFirstEquals = mainStr.indexOf("=") + 1;
+      if (posOfFirstEquals) {
+        // input has form:  leadStr = something = trailStr
+        leadStr = mainStr.slice(0, posOfFirstEquals - 1).trim();
+
+        // Input has form:  name = expression = trailStr, or
+        //                  name1, name2, = expression = trailStr
+        expression = mainStr.substring(posOfFirstEquals).trim();
+        if (matrixOfNames.test(leadStr)) { leadStr = leadStr.slice(1, -1).trim(); }
+        if (/[,;]/.test(leadStr)) {
+          const potentialIdentifiers = leadStr.split(/[,;]/);
+          for (let i = 0; i < potentialIdentifiers.length; i++) {
+            const candidate = potentialIdentifiers[i].trim();
+            if (isKeyWord.test(candidate) || !isValidIdentifier.test(candidate)) {
+              // leadStr is not a list of valid identifiers.
+              // So this isn't a valid calculation statement. Let's finish early.
+              return shortcut(str, formats)
+            }
+          }
+          // multiple assignment.
+          name = potentialIdentifiers.map(e => checkForNumericSubscript(e.trim()));
+
+        } else {
+          if (isValidIdentifier.test(leadStr) && !isKeyWord.test(leadStr)) {
+            name = checkForNumericSubscript(leadStr);
+          } else {
+            // The "=" sign is inside an expression. There is no lead identifier.
+            // This statement does not assign a value to a variable. But it may do a calc.
+            // input has form:  expression = trailStr
+            expression = mainStr;
+          }
+        }
+      } else {
+        // This calculation string contains only one "=" character.
+        // input has form:  expression = trailStr
+        expression = mainStr;
+      }
+    } else if (isDataFrameAssigment) {
+      name = checkForNumericSubscript(mainStr);
+      expression = trailStr;
+    } else  if (isValidIdentifier.test(mainStr) && !isKeyWord.test(mainStr)) {
+      // No calculation display selector is present,
+      // but there is one "=" and a valid idendtifier.
+      // It may be an assignment statement.
+      // input has form:  name = trailStr
+      name = checkForNumericSubscript(mainStr);
+      if (trailStr === "") {
+        const tex = parse$1(str, formats);
+        return { entry: str, tex, alt: str }
+      }
+    } else {
+      // input has form:  mainStr = trailStr.
+      // It almost works as an assignment statment, but mainStr is not a valid identifier.
+      // So we'll finish early.
+      return shortcut(str, formats)
+    }
+  } else {
+    // str contains no "=" character. Let's fnish early.
+    return shortcut(str, formats)
+  }
+
+  if (expression.length > 0) {
+    // The author may want a calculation done on the expression.
+    if (/^\s*fetch\(/.test(expression)) {
+      // fetch() functions are handled in updateCalculations.js, not here.
+      // It's easier from there to send a fetch() callback to a ProseMirror transaction.
+      echo = "";
+
+    } else {
+      // Parse the expression. Stop short of doing the calculation.
+      [echo, rpn, dependencies] = parse$1(expression, formats, true);
+
+      // Shoulld we display an echo of the expression, with values shown for each variable?
+      if (suppressResultDisplay || displayResultOnly || echo.indexOf("〖") === -1
+          || /\u00a0for\u00a0/.test(rpn)) {
+        // No.
+        echo = "";
+      } else if (omitEcho) {
+        echo = "";
+      } else {
+        // The expression calls a variable.
+        // If it also contains an operator or a function, then we need to show the echo.
+        if (containsOperator.test("\xa0" + rpn + "\xa0")) {
+          echo = "\\textcolor{#0000ff}{" + echo + "}";
+        } else {
+          echo = "";
+        }
+      }
+    }
+  }
+
+  // Now let's turn our attention from the expression to the trailStr.
+  if (currencyRegEx.test(trailStr)) {
+    leadsWithCurrency = true;
+    unit = trailStr.charAt(0);
+  }
+
+  // Replace a % operator with a placeholder, so that we can test for the
+  // presence of a % operator without worrying about escaped % characters in the trailStr.
+  trailStr = trailStr.replace(percentOperatorRegEx, "$1\\⦂").replace("\\%", "\\⦂");
+
+  if (isCalc) {
+    // trailStr contains a display selector.
+    value = null;
+
+    if (!leadsWithCurrency) {
+      // Check for a unit, even if it isn't a unit-aware calculation
+      unit = trailStr.replace(/[?@%!']/g, "").trim();
+    }
+
+    if (suppressResultDisplay) {
+      resultDisplay = trailStr;
+    } else {
+      if (unit) {
+        resultDisplay = trailStr.trim().replace(/([^ ?!@%]+)$/, "'" + "$1" + "'");
+        resultDisplay = parse$1(resultDisplay, formats).replace(/\\%/g, "%").replace("@ @", "@@");
+      } else {
+        resultDisplay = parse$1(trailStr, formats).replace(/\\%/g, "%").replace("@ @", "@@");
+      }
+      resultDisplay = resultDisplay.replace(/\\text\{(\?\??|%%?)\}/, "$1");
+      resultDisplay = resultDisplay.replace(/([?%]) ([?%])/, "$1" + "$2");
+    }
+
+  } else {
+    // trailStr may be a static value in an assignment statement.
+    let isPlaceholder = false;
+    if (trailStr.slice(-1) === "_") {
+      isPlaceholder = true;
+      trailStr = trailStr.slice(0, -1).trim();
+    }
+[value, unit, dtype, resultDisplay] = valueFromLiteral(trailStr, name, formats);
+    if (isPlaceholder) {
+      resultDisplay = "\\colorbox{aqua}{$" + resultDisplay + "$}";
+    }
+
+    if (dtype === dt.ERROR) {
+      // trailStr is not a valid literal. So finish early.
+      if (resultDisplay.length === 0) {
+        return shortcut(str, formats)
+      } else {
+        // trailStr has a valid number but an invalid unit.
+        return {
+          entry: str,
+          resultdisplay: "\\textcolor{firebrick}{\\text{" + resultDisplay + "}}",
+          altResultDisplay: resultDisplay,
+          tex: mainStr + " = \\textcolor{firebrick}{\\text{" + resultDisplay + "}}",
+          alt: mainStr + " = " + resultDisplay,
+          error: true,
+          dtype
+        }
+      }
+    }
+    rpn = "";
+  }
+
+  // Assemble the equation to display
+  let eqn = "";
+  let altEqn = "";
+  if (!displayResultOnly) {
+    eqn = parse$1(mainStr, formats);
+    if (mustAlign) {
+      eqn = "\\begin{aligned}" + eqn;
+      const pos = eqn.indexOf("=");
+      if (pos !== -1) {
+        eqn = eqn.slice(0, pos) + "&" + eqn.slice(pos);
+      }
+    }
+    const alignChar = mustAlign ? "\\\\ &" : "";
+    altEqn = mainStr;
+    if (echo.length > 0 && !omitEcho) {
+      eqn += ` ${alignChar}= ` + echo;
+    }
+    if (!suppressResultDisplay) {
+      eqn += " " + (mustAlign ? "\\\\&" : "") + "= " + resultDisplay;
+      altEqn += " = " + trailStr;
+    }
+    if (mustAlign) { eqn += "\\end{aligned}"; }
+  }
+
+  // Populate the object to be returned.
+  // It will eventually be attached to ProseMirror schema attrs, so call it "attrs".
+  const attrs = {
+    entry: str,
+    template: eqn,
+    altTemplate: altEqn,
+    resultdisplay: resultDisplay,
+    dtype: dtype,
+    error: false
+  };
+
+  if (name) { attrs.name = name; }
+  if (isCalc) {
+    attrs.resulttemplate = resultDisplay;
+    attrs.altresulttemplate = trailStr;
+  } else {
+    attrs.tex = eqn;
+    attrs.alt = altEqn;
+  }
+  if (rpn) { attrs.rpn = rpn; }
+  if (dependencies.length > 0) { attrs.dependencies = dependencies; }
+  if (value || dtype === dt.BOOLEAN) { attrs.value = value; }
+  if (unit) {
+    if (rpn && !attrs.value) {
+      attrs.unit = typeof unit === "string"
+        ? unitFromUnitName(unit)
+        : { factor: 1, gauge: 0, expos: allZeros };
+    } else {
+      attrs.unit = Array.isArray(unit) ? { expos:  unit } : unit;
+    }
+  }
+
+  return attrs
+};
+
+// This function is not used by the hurmet.org page.
+// It is provided for use by unit tests and by the demo box in the manual page.
+// If you are looking for the app's main calculation module, try evaluate.js.
+const calculate = (
+  entry,
+  vars = {},
+  inDraftMode = false,
+  formats = { decimalFormat: "1,000,000.", dateFormat: "yyyy-mm-dd" }
+) => {
+  let attrs = compile(entry, formats);
+  if (attrs.rpn) {
+    attrs = evaluate(clone(attrs), vars, formats);
+  } else if (attrs.dtype && attrs.dtype === dt.DRAWING) {
+    attrs = evaluateDrawing(attrs, vars, formats);
+  }
+  if (attrs.name) {
+    insertOneHurmetVar(vars, attrs);
+  }
+  return attrs.dtype && attrs.dtype === dt.DRAWING
+   ? attrs
+   : inDraftMode
+   ? attrs.alt
+   : attrs.tex
+};
+
+/* eslint-disable */
+// ::- A specification for serializing a ProseMirror document as
+// Markdown/CommonMark text.
+class MarkdownSerializer {
+  // :: (Object<(state: MarkdownSerializerState, node: Node, parent: Node, index: number)>, Object)
+  // Construct a serializer with the given configuration. The `nodes`
+  // object should map node names in a given schema to function that
+  // take a serializer state and such a node, and serialize the node.
+  //
+  // The `marks` object should hold objects with `open` and `close`
+  // properties, which hold the strings that should appear before and
+  // after a piece of text marked that way, either directly or as a
+  // function that takes a serializer state and a mark, and returns a
+  // string. `open` and `close` can also be functions, which will be
+  // called as
+  //
+  //     (state: MarkdownSerializerState, mark: Mark,
+  //      parent: Fragment, index: number) → string
+  //
+  // Where `parent` and `index` allow you to inspect the mark's
+  // context to see which nodes it applies to.
+  //
+  // Mark information objects can also have a `mixable` property
+  // which, when `true`, indicates that the order in which the mark's
+  // opening and closing syntax appears relative to other mixable
+  // marks can be varied. (For example, you can say `**a *b***` and
+  // `*a **b***`, but not `` `a *b*` ``.)
+  //
+  // To disable character escaping in a mark, you can give it an
+  // `escape` property of `false`. Such a mark has to have the highest
+  // precedence (must always be the innermost mark).
+  //
+  // The `expelEnclosingWhitespace` mark property causes the
+  // serializer to move enclosing whitespace from inside the marks to
+  // outside the marks. This is necessary for emphasis marks as
+  // CommonMark does not permit enclosing whitespace inside emphasis
+  // marks, see: http://spec.commonmark.org/0.26/#example-330
+  constructor(nodes, marks) {
+    // :: Object<(MarkdownSerializerState, Node)> The node serializer
+    // functions for this serializer.
+    this.nodes = nodes;
+    // :: Object The mark serializer info.
+    this.marks = marks;
+  }
+
+  // :: (Node, ?Object) → string
+  // Serialize the content of the given node to
+  // [CommonMark](http://commonmark.org/).
+  serialize(content, paths, footnotes, isGFM = false, withResults = false) {
+    let state = new MarkdownSerializerState(this.nodes, this.marks, paths, footnotes, isGFM, withResults);
+    state.renderContent(content);
+
+    // Write the footnotes
+    for (let i = 0; i < state.footnotes.length; i++) {
+      state.write("\n[^" + String(i + 1) + "]: ");
+      state.renderInline(state.footnotes[i]);
+      state.write("\n");
+    }
+  // Write the link and image paths
+    for (const [key, value] of state.paths.entries()) {
+      state.write("\n[" + key + "]: " + value + "\n");
+    }
+    return state.out
+  }
+}
+
+const ampRegEx = /=[^=]*@[^=]*$/;
+
+const hurmetNodes =  {
+  blockquote(state, node) {
+    state.wrapBlock("> ", null, node, () => state.renderContent(node));
+  },
+  comment(state, node) {
+    if (state.isGFM) {
+      state.renderContent(node);
+    } else {
+      state.wrapBlock("", null, node, () => state.renderContent(node), "comment");
+    }
+  },
+  indented(state, node) {
+    if (state.isGFM) {
+      state.renderContent(node);
+    } else {
+      state.wrapBlock("", null, node, () => state.renderContent(node), "indented");
+    }
+  },
+  centered(state, node) {
+    if (state.isGFM) {
+      state.renderContent(node);
+    } else {
+       state.wrapBlock("", null, node, () => state.renderContent(node), "centered");
+    }
+  },
+  right_justified(state, node) {
+    if (state.isGFM) {
+      state.renderContent(node);
+    } else {
+       state.wrapBlock("", null, node, () => state.renderContent(node), "right_justified");
+    }
+  },
+  boxed(state, node) {
+    if (state.isGFM) {
+      state.renderContent(node);
+    } else {
+      state.wrapBlock("", null, node, () => state.renderContent(node), "boxed");
+    }
+  },
+  epigraph(state, node) {
+    if (state.isGFM) {
+      state.wrapBlock("> ", null, node, () => state.renderContent(node));
+    } else {
+      state.wrapBlock("> ", null, node, () => state.renderContent(node), "epigraph");
+    }
+  },
+  note(state, node) {
+    state.wrapBlock("> ", null, node, () => state.renderContent(node), "note");
+  },
+  tip(state, node) {
+    state.wrapBlock("> ", null, node, () => state.renderContent(node), (state.isGFM ? "note" : "tip"));
+  },
+  important(state, node) {
+    state.wrapBlock("> ", null, node, () => state.renderContent(node), "important");
+  },
+  warning(state, node) {
+    state.wrapBlock("> ", null, node, () => state.renderContent(node), "warning");
+  },
+  header(state, node) {
+    if (state.isGFM) {
+      state.renderContent(node);
+    } else {
+       state.wrapBlock("", "", node, () => state.renderContent(node), "header");
+    }
+  },
+  code_block(state, node) {
+    state.write("```" + (node.attrs.params || "") + "\n");
+    state.text(node.textContent, false);
+    state.ensureNewLine();
+    state.write("```");
+    state.closeBlock(node);
+  },
+  heading(state, node) {
+    state.write(state.repeat("#", node.attrs.level) + " ");
+    state.renderInline(node);
+    state.closeBlock(node);
+  },
+  toc(state, node) {
+    state.write(`{.toc start=${node.attrs.start} end=${node.attrs.end}}\n\n`);
+  },
+  horizontal_rule(state, node) {
+    state.write(node.attrs.markup || "--------------------");
+    state.closeBlock(node);
+  },
+  page_break(state, node) {
+    state.write("\\newpage");
+    state.closeBlock(node);
+  },
+  bullet_list(state, node) {
+    state.renderList(node, "    ", () => (node.attrs.bullet || "*") + "   ");
+  },
+  ordered_list(state, node) {
+    const start = node.attrs.order || 1;
+    const className = state.isGFM ? "decimal" : node.attrs.class;
+    let maxW = String(start + node.childCount - 1).length;
+    let space = state.repeat(" ", maxW + 2);
+    state.renderList(node, space, i => {
+      let nStr = className === "decimal"
+        ? String(start + i)
+        : className === "upper-alpha"
+        ? String.fromCodePoint(start + i + 64)  // A-Z
+        : String.fromCodePoint(start + i + 96);  // a-z
+      return state.repeat(" ", maxW - nStr.length) + nStr + ".  "
+    });
+    // Write a 2nd blank line after an <ol>, to prevent an adjacent <ol> from
+    // continuing the same numbering.
+    if (state.delim === "")  { state.write("\n"); }
+  },
+  list_item(state, node) {
+    state.renderContent(node);
+  },
+  tight_list_item(state, node) {
+    state.renderInline(node);
+  },
+  paragraph(state, node) {
+    const prevLength = state.out.length;
+    if (node.content.content.length > 0) {
+      state.renderInline(node);
+    } else {
+      state.write(state.isGFM ? "&nbsp;" : "¶");
+    }
+    if (!state.isGFM) {
+      state.out = limitLineLength(state.out, prevLength, state.delim, state.lineLimit);
+    }
+    state.closeBlock(node);
+  },
+  table(state, node) {
+    state.renderTable(node, state.delim, null, state.isGFM);
+    state.closeBlock(node);
+  },
+  footnote(state, node) {
+    const note = node.content;
+    state.footnotes.push(note);
+    state.write(`[^${state.footnotes.length}]`);
+  },
+  link_node(state, node) {
+    state.write("[");
+    state.renderInline(node.content);
+    state.write("](");
+    state.write(state.esc(node.attrs.href));
+    state.write(")");
+  },
+  figure(state, node) {
+    let caption;
+    if (node.content.content[1].type.name === "table") {
+      const figureCaption = node.content.content[0];
+      state.write(": ");
+      state.renderInline(figureCaption);
+      state.closeBlock(figureCaption);
+      const L = state.out.length;
+      const table = node.content.content[1];
+      const float = node.attrs.class ? node.attrs.class.trim() : "auto";
+      state.renderTable(table, state.delim, float, state.isGFM);
+      state.closeBlock(table);
+      // Get rid of the newline between the caption and the table.
+      state.out = state.out.slice(0, L) + state.out.slice(L + 1);
+    } else {
+      if (!state.isGFM) {
+        const figureCaption = node.content.content[1];
+        const figureState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths, this.footnotes, false, false);
+        figureState.renderInline(figureCaption);
+        caption = figureState.out;
+      } else {
+        caption = node.attrs.alt;
+      }
+      const defIndex = getDefIndex(state);
+      const attrs = node.content.content[0].attrs; // image attributes
+      if (node.attrs.class) { attrs.class = node.attrs.class; }
+      let path = attrs.src;
+      if (!state.isGFM && (attrs.class || attrs.width || attrs.alt)) {
+        path += "\n{";
+        if (attrs.class) { path += "." + state.esc(attrs.class); }
+        if (attrs.width && !isNaN(attrs.width)) { path += " width=" + attrs.width; }
+        if (attrs.alt) { path += ' alt="' + state.esc(attrs.alt) + '"'; }
+        path += "}";
+      }
+      // We use reference links and defer the image paths to the end of the document.
+      state.paths.set(defIndex, path);
+      if (caption) {
+        state.write(`!![${caption}][${defIndex}]\n\n`);
+      } else {
+        state.write(`!![${defIndex}][]\n\n`);
+      }
+    }
+    
+  },
+  image(state, node) {
+    let path = state.esc(node.attrs.src);
+    if (!state.isGFM && (node.attrs.class || node.attrs.width || node.attrs.alt)) {
+      path += "\n{";
+      if (node.attrs.class) { path += "." + state.esc(node.attrs.class); }
+      if (node.attrs.width && !isNaN(node.attrs.width)) { path += " width=" + node.attrs.width; }
+      if (node.attrs.alt) { path += ' alt="' + state.esc(node.attrs.alt) + '"'; }
+      path += "}";
+    }
+    // We use reference links and defer the image paths to the end of the document.
+    const defIndex = getDefIndex(state);
+    state.paths.set(defIndex, path);
+    if (node.attrs.alt) {
+      state.write(`![${node.attrs.alt}][${defIndex}]`);
+    } else {
+      state.write(`![${defIndex}][]`);
+    }
+
+  },
+  hard_break(state, node, parent, index) {
+    for (let i = index + 1; i < parent.childCount; i++)
+      if (parent.child(i).type != node.type) {
+        state.write("\\\n");
+        return
+      }
+  },
+  text(state, node) {
+    state.text(node.text);
+  },
+  tex(state, node) {
+    const tex = node.attrs.tex.trim();
+    writeTex(state, node.attrs.displayMode, !state.close, tex);
+  },
+  calculation(state, node) {
+    let entry = node.attrs.entry.trim().replace(/\n(?: *\n)+/g, "\n").replace(/\n/gm, "\n" + state.delim);
+    if (state.isGFM) {
+      if (node.attrs.alt && node.attrs.value) {
+        if (ampRegEx.test(entry)) {
+          // A calculation cell that displays only the result.
+          state.write(node.attrs.alt);
+        } else {
+          writeTex(state, node.attrs.displayMode, !state.close, node.attrs.tex);
+        }
+      } else {
+        // Convert calculation field to TeX
+        const tex = parse$1(entry);
+        writeTex(state, node.attrs.displayMode, !state.close, tex);
+      }
+    } else {
+      if (node.attrs.entry.slice(0, 5) === "draw(") {
+        // node is a draw environment in a calculation node.
+        const defIndex = getDefIndex(state);
+        state.paths.set(defIndex, entry.replace(/\n/g, "\\n"));
+        if (titleRegEx.test(node.attrs.entry)) {
+          // Get the title.
+          state.write(`![${titleRegEx.exec(node.attrs.entry)[1].trim()}][${defIndex}]`);
+        } else {
+          state.write(`![${defIndex}][]`);
+        }
+      } else if (state.withResults) {
+        const displaySelector = node.attrs.md ? node.attrs.displaySelector : "";
+        let md = node.attrs.md ? node.attrs.md : entry;
+        if (node.attrs.displayMode) {
+          state.write("¢¢" + displaySelector + " " + md + " ¢¢");
+        } else {
+          const ticks = backticksFor({ text: entry, isText: true }, -1).trim();
+          md = "¢" + displaySelector + ticks + " " + md + " " + ticks;
+          state.write(md);
+        }
+      } else if (node.attrs.displayMode) {
+        if (!state.close) {
+          // We're inside a paragraph.
+          state.write("\n" + state.delim + "¢¢" + " " + entry + " ¢¢" + "\n" + state.delim);
+        } else {
+          state.write("¢¢ " + entry + " ¢¢");
+        }
+      } else {
+        const ticks = backticksFor({ text: entry, isText: true }, -1).trim();
+        state.write("¢" + ticks + " " + entry + " " + ticks);
+      }
+    }
+  }
+};
+
+const hurmetMarks = {
+  em: {open: "_", close: "_", mixable: true, expelEnclosingWhitespace: true},
+  strong: {open: "**", close: "**", mixable: true, expelEnclosingWhitespace: true},
+  link: {
+    open(_state, mark, parent, index) {
+      return isPlainURL(mark, parent, index, 1) ? "<" : "["
+    },
+    close(state, mark, parent, index) {
+      if (isPlainURL(mark, parent, index, -1)) {
+        return ">"
+      } else {
+        // We use reference links and defer the paths to the end of the document.
+        const defIndex = getDefIndex(state);
+        state.paths.set(defIndex, state.esc(mark.attrs.href));
+        return `][${defIndex}]`
+      }
+    }
+  },
+  code: {open(_state, _mark, parent, index) { return backticksFor(parent.child(index), -1) },
+         close(_state, _mark, parent, index) { return backticksFor(parent.child(index - 1), 1) },
+         escape: false},
+  superscript: {
+    open(state)  { return state.isGFM ? "<sup>" : "^" },
+    close(state) { return state.isGFM ? "</sup>" : "^" },
+    expelEnclosingWhitespace: true
+  },
+  subscript: {
+    open(state)  { return state.isGFM ? "<sub>" : "~" },
+    close(state) { return state.isGFM ? "</sub>" : "~" },
+    expelEnclosingWhitespace: true
+  },
+  strikethru: {open: "~~", close: "~~", mixable: true, expelEnclosingWhitespace: true},
+  underline: {open: "<u>", close: "</u>", expelEnclosingWhitespace: true},
+  highlight: {open: "<mark>", close: "</mark>", expelEnclosingWhitespace: true}
+};
+
+// :: MarkdownSerializer
+// A serializer for the schema.
+const hurmetMarkdownSerializer = new MarkdownSerializer(hurmetNodes, hurmetMarks, new Map());
+
+function backticksFor(node, side) {
+  let ticks = /`+/g, m, len = 0;
+  if (node.isText) while (m = ticks.exec(node.text)) len = Math.max(len, m[0].length);
+  let result = len > 0 && side > 0 ? " `" : "`";
+  for (let i = 0; i < len; i++) result += "`";
+  if (len > 0 && side < 0) result += " ";
+  return result
+}
+
+function isPlainURL(link, parent, index, side) {
+  if (!/^\w+:/.test(link.attrs.href)) return false
+  let content = parent.child(index + (side < 0 ? -1 : 0));
+  if (!content.isText || content.text != link.attrs.href || content.marks[content.marks.length - 1] != link) return false
+  if (index == (side < 0 ? 1 : parent.childCount - 1)) return true
+  let next = parent.child(index + (side < 0 ? -2 : 1));
+  return !link.isInSet(next.marks)
+}
+
+const titleRegEx = /\n *title +"([^\n]+)" *\n/;
+
+const getDefIndex = state => {
+  // We use reference links and defer link paths and image paths to the end of the document.
+  // Get the index number of this path.
+  // We always use index numbers, not the alt text.
+  // That enables a renumbering of the paths when snapshots are taken.
+  return isNaN(state.paths.size) ? "1" : String(state.paths.size + 1)
+};
+
+// Do not line-break on any space that would indicate a heading, list item, etc.
+const blockRegEx = /^(?:[>*+-] |#+ |\d+[.)] |[A-B]\. |\-\-\-|```|[iCFHhITWADE]> )/;
+
+function limitLineLength(str, prevLength, delim, limit) {
+  let graf = str.slice(prevLength);
+  if (graf.length <= limit) { return str }
+  if (/``|¢` *(?:function|draw\()/.test(graf)) { return str }
+
+  const leading = "\n" + delim;
+  let result = "";
+  let i = 0;
+  while (graf.length > limit) {
+    const posNewLine = graf.indexOf("\n");
+    const localLimit = limit - (i > 0 ? leading.length : 0);
+    if (posNewLine > -1) {
+      let chunk = graf.slice(0, posNewLine + 1);
+      while (chunk.length > localLimit && chunk.lastIndexOf(" ", localLimit) > -1) {
+        const pos = chunk.lastIndexOf(" ", localLimit);
+        result += chunk.slice(0, pos) + "\n";
+        chunk = chunk.slice(pos + 1);
+      } 
+      result += chunk;
+      graf = graf.slice(posNewLine + 1);
+    } else {
+      let pos = graf.lastIndexOf(" ", localLimit);
+      if (pos === -1) { break }
+      while (blockRegEx.test(graf.slice(pos + 1))) {
+        pos = graf.lastIndexOf(" ", pos - 1);
+        if (pos === -1) { break }
+      }
+      if (pos === -1 || (graf.length - pos < 7 && limit === 80)) { break }
+      result += (i > 0 ? leading : "") + graf.slice(0, pos);
+      graf = graf.slice(pos + 1);
+      i += 1;
+    }
+  }
+  result += (i > 0 ?  leading : "") + graf;
+
+  return str.slice(0, prevLength) + result
+}
+
+const newlineRegEx = /\n/gm;
+const writeTex = (state, displayMode, inParagraph, tex) => {
+  tex = tex.replace(newlineRegEx, "\n" + state.delim);
+  if (displayMode) {
+    if (inParagraph) {
+      state.write("\n" + state.delim + "$$ " + tex + " $$" + "\n" + state.delim);
+    } else {
+      state.write("$$ " + tex + " $$");
+    }
+  } else {
+    if (tex.indexOf("$") > -1) {
+      const ticks = backticksFor({ text: tex, isText: true }, -1).trim();
+      state.write("$" + ticks + tex + ticks + "$");
+    } else {
+      state.write("$" + tex + "$");
+    }
+  }
+};
+
+const justifyRegEx = /c(\d)([cr])/g;
+const trailNewlineRegEx = /\n+$/;
+
+const colWidthPicker = [0, 80, 50, 35];
+
+// ::- This is an object used to track state and expose
+// methods related to markdown serialization. Instances are passed to
+// node and mark serialization methods (see `toMarkdown`).
+class MarkdownSerializerState {
+  constructor(nodes, marks, paths, footnotes, isGFM, withResults) {
+    this.nodes = nodes;
+    this.marks = marks;
+    this.paths = paths;
+    this.footnotes = footnotes;
+    this.isGFM = isGFM;
+    this.withResults = withResults;
+    this.delim = this.out = "";
+    this.divFence = "";
+    this.closed = false;
+    this.lineLimit = 80;
+  }
+
+  flushClose(size) {
+    if (this.closed) {
+      if (!this.atBlank()) this.out += "\n";
+      if (size == null) size = 2;
+      if (size > 1) {
+        let delimMin = this.delim;
+        let trim = /\s+$/.exec(delimMin);
+        if (trim) delimMin = delimMin.slice(0, delimMin.length - trim[0].length);
+        for (let i = 1; i < size; i++)
+          this.out += delimMin + "\n";
+      }
+      this.closed = false;
+    }
+  }
+
+  // :: (string, ?string, Node, ())
+  // Render a block, prefixing each line with `delim`, and the first
+  // line in `firstDelim`. `node` should be the node that is closed at
+  // the end of the block, and `f` is a function that renders the
+  // content of the block.
+  wrapBlock(delim, firstDelim, node, f, nodeType) {
+    let old = this.delim;
+    if (nodeType) {
+      if (delim.length > 0) {
+        if (nodeType) { this.write(`> [!${nodeType.toUpperCase()}]\n`); }
+      } else {
+        this.divFence += ":::";
+        if (nodeType === "header" && node.attrs.headerPages === "all") { nodeType = "header*"; }
+        this.write(`${this.divFence} ${nodeType}\n`);
+      }
+    }
+    this.write(firstDelim || delim);
+    this.delim += delim;
+    f();
+    this.delim = old;
+    if (nodeType && delim.length === 0) {
+      this.out = this.out.replace(trailNewlineRegEx, "") + (`\n${this.delim}${this.divFence}\n`);
+      this.divFence = this.divFence.slice(0, -3);
+    }
+    this.closeBlock(node);
+  }
+
+  atBlank() {
+    return /(^|\n)$/.test(this.out)
+  }
+
+  // :: ()
+  // Ensure the current content ends with a newline.
+  ensureNewLine() {
+    if (!this.atBlank()) this.out += "\n";
+  }
+
+  // :: (?string)
+  // Prepare the state for writing output (closing closed paragraphs,
+  // adding delimiters, and so on), and then optionally add content
+  // (unescaped) to the output.
+  write(content) {
+    this.flushClose();
+    if (this.delim && this.atBlank())
+      this.out += this.delim;
+    if (content) this.out += content;
+  }
+
+  // :: (Node)
+  // Close the block for the given node.
+  closeBlock(node) {
+    this.closed = node;
+  }
+
+  // :: (string, ?bool)
+  // Add the given text to the document. When escape is not `false`,
+  // it will be escaped.
+  text(text, escape) {
+    let lines = text.split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      var startOfLine = this.atBlank() || this.closed;
+      this.write();
+      this.out += escape !== false ? this.esc(lines[i], startOfLine) : lines[i];
+      if (i != lines.length - 1) this.out += "\n";
+    }
+  }
+
+  // :: (Node)
+  // Render the given node as a block.
+  render(node, parent, index) {
+    if (typeof parent == "number") throw new Error("!")
+    this.nodes[node.type.name](this, node, parent, index);
+  }
+
+  // :: (Node)
+  // Render the contents of `parent` as block nodes.
+  renderContent(parent) {
+    parent.forEach((node, _, i) => this.render(node, parent, i));
+  }
+
+  // :: (Node)
+  // Render the contents of `parent` as inline content.
+  renderInline(parent) {
+    let active = [], trailing = "";
+    let progress = (node, _, index) => {
+      let marks = node ? node.marks : [];
+
+      // Remove marks from `hard_break` that are the last node inside
+      // that mark to prevent parser edge cases with new lines just
+      // before closing marks.
+      // (FIXME it'd be nice if we had a schema-agnostic way to
+      // identify nodes that serialize as hard breaks)
+      if (node && node.type.name === "hard_break")
+        marks = marks.filter(m => {
+          if (index + 1 == parent.childCount) return false
+          let next = parent.child(index + 1);
+          return m.isInSet(next.marks) && (!next.isText || /\S/.test(next.text))
+        });
+
+      let leading = trailing;
+      trailing = "";
+      // If whitespace has to be expelled from the node, adjust
+      // leading and trailing accordingly.
+      if (node && node.isText && marks.some(mark => {
+        let info = this.marks[mark.type.name];
+        return info && info.expelEnclosingWhitespace
+      })) {
+        let [_, lead, inner, trail] = /^(\s*)(.*?)(\s*)$/m.exec(node.text);
+        leading += lead;
+        trailing = trail;
+        if (lead || trail) {
+          node = inner ? node.withText(inner) : null;
+          if (!node) marks = active;
+        }
+      }
+
+      let inner = marks.length && marks[marks.length - 1], noEsc = inner && this.marks[inner.type.name].escape === false;
+      let len = marks.length - (noEsc ? 1 : 0);
+
+      // Try to reorder 'mixable' marks, such as em and strong, which
+      // in Markdown may be opened and closed in different order, so
+      // that order of the marks for the token matches the order in
+      // active.
+      outer: for (let i = 0; i < len; i++) {
+        let mark = marks[i];
+        if (!this.marks[mark.type.name].mixable) break
+        for (let j = 0; j < active.length; j++) {
+          let other = active[j];
+          if (!this.marks[other.type.name].mixable) break
+          if (mark.eq(other)) {
+            if (i > j)
+              marks = marks.slice(0, j).concat(mark).concat(marks.slice(j, i)).concat(marks.slice(i + 1, len));
+            else if (j > i)
+              marks = marks.slice(0, i).concat(marks.slice(i + 1, j)).concat(mark).concat(marks.slice(j, len));
+            continue outer
+          }
+        }
+      }
+
+      // Find the prefix of the mark set that didn't change
+      let keep = 0;
+      while (keep < Math.min(active.length, len) && marks[keep].eq(active[keep])) ++keep;
+
+      // Close the marks that need to be closed
+      while (keep < active.length)
+        this.text(this.markString(active.pop(), false, parent, index), false);
+
+      // Output any previously expelled trailing whitespace outside the marks
+      if (leading) this.text(leading);
+
+      // Open the marks that need to be opened
+      if (node) {
+        while (active.length < len) {
+          let add = marks[active.length];
+          active.push(add);
+          this.text(this.markString(add, true, parent, index), false);
+        }
+
+        // Render the node. Special case code marks, since their content
+        // may not be escaped.
+        if (noEsc && node.isText)
+          this.text(this.markString(inner, true, parent, index) + node.text +
+                    this.markString(inner, false, parent, index + 1), false);
+        else
+          this.render(node, parent, index);
+      }
+    };
+    parent.forEach(progress);
+    progress(null, null, parent.childCount);
+  }
+
+  // :: (Node, string, (number) → string)
+  // Render a node's content as a list. `delim` should be the extra
+  // indentation added to all lines except the first in an item,
+  // `firstDelim` is a function going from an item index to a
+  // delimiter for the first line of the item.
+  renderList(node, delim, firstDelim) {
+    this.flushClose();
+    node.forEach((child, _, i) => {
+      if (child.type.name === "tight_list_item") { this.flushClose(1); }
+      this.wrapBlock(delim, firstDelim(i), node, () => this.render(child, node, i));
+    });
+  }
+
+  paddedCell(str, justify, colWidth) {
+    const pad = " ".repeat(colWidth - str.length);
+    return justify === "r" ? (pad + str) : (str + pad)
+  }
+
+  renderTable(node, delim, float, isGFM) {
+    const isSpreadsheet = "dtype" in node.attrs ? node.attrs.dtype === dt.SPREADSHEET : false;
+    const rows = node.content.content;
+    let numCols = rows[0].content.content.length;
+    for (let i = 1; i < rows.length; i++) {
+      numCols = Math.max(numCols, rows[i].content.content.length);
+    }
+    let numRowsInHeading = 0;
+    for (let i = 0; i < rows.length; i++) {
+      if (rows[i].content.content[0].type.name === "table_header") {
+        numRowsInHeading += 1;
+      } else {
+        break
+      }
+    }
+    const tblClasses = node.attrs.class;
+    const justify = new Array(numCols).fill("L"); // default. Will change later.
+    let regExResults;
+    while ((regExResults = justifyRegEx.exec(tblClasses)) !== null) {
+      justify[Number(regExResults[1]) - 1] = regExResults[2];
+    }
+
+    // We're going to make three passes thru the table.
+    // The first pass will get the content of each cell and load it into an array.
+    // To do that, we'll create a temporary MarkdownSerializerState just for the table.
+    const table = new Array(rows.length);
+    const rowSpan = new Array(rows.length);
+    const colSpan = new Array(rows.length);
+    for (let i = 0; i < rows.length; i++) {
+      table[i] = new Array(numCols).fill("");
+      rowSpan[i] = new Array(numCols).fill(1);
+      colSpan[i] = new Array(numCols).fill(1);
+    }
+    const colWidth = new Array(numCols).fill(0);
+    const mergedCells = [];
+    // Do we need a reStructuredText grid table? Or is a GFM pipe table enough?
+    let isRst = !isGFM && numRowsInHeading > 1;
+    let tableState = new MarkdownSerializerState(hurmetNodes, hurmetMarks, this.paths,
+                                                this.footnotes, this.isGFM, this.withResults);
+    tableState.lineLimit = numCols > 3 ? 25 : colWidthPicker[numCols];
+    let i = 0;
+    let j = 0;
+    let jPM = 0;
+    while (i < rows.length) {
+      while (j < numCols) {
+        if (rowSpan[i][j] === 0 || colSpan[i][j] === 0) { j += 1; continue }
+        const cell = rows[i].content.content[jPM];
+        if (!cell) { colSpan[i][j] = 0; j += 1; continue }
+        if (cell.attrs.rowspan > 1) {
+          rowSpan[i][j] = cell.attrs.rowspan;
+          for (let ii = i + 1; ii < i + cell.attrs.rowspan; ii++) {
+            rowSpan[ii][j] = 0;
+            colSpan[ii][j] = 0;
+          }
+        }
+        if (cell.attrs.colspan > 1) {
+          colSpan[i][j] = cell.attrs.colspan;
+          for (let jj = j + 1; jj < j + cell.attrs.colspan; jj++) {
+            colSpan[i][jj] = 0;
+          }
+        }
+
+        if (cell.content.content.length > 0) {
+          if (cell.attrs.colspan > 1) {
+            mergedCells.push([i, j, jPM]);
+          } else {
+            const L = tableState.out.length;
+            if (isSpreadsheet) {
+              tableState.write(cell.content.content[0].attrs.entry);
+            } else {
+              tableState.renderContent(cell);
+            }
+            // Each table cell contains an array of strings.
+            const cellContent = tableState.out.slice(L).replace(/^\n+/, "").replace(/\n+$/, "").split("\n");
+            if (cellContent.length === 1 && cellContent[0] === "&nbsp;") { cellContent[0] = "¶"; }
+            table[i][j] = cellContent;
+            if (cellContent.length > 1 && !isGFM) { isRst = true; }
+            // Get width of cell.
+            if (colSpan[i][j] === 1) {
+              for (let line of table[i][j]) {
+                if (line.length > colWidth[j]) {
+                  colWidth[j] = line.length;
+                }
+              }
+            }
+          }
+        }
+        j += cell.attrs.colspan;
+        jPM += 1;
+      }
+      i += 1;
+      j = 0;
+      jPM = 0;
+    }
+
+    // Now we know the column widths, so get the horizontally merged cells.
+    for (const c of mergedCells) {
+      const i = c[0];
+      const j = c[1];
+      const jPM = c[2];
+      const cell = rows[i].content.content[jPM];
+      let width = colWidth[j];
+      for (let m = 1; m < colSpan[i][j]; m++) { width += colWidth[j + m] + 3; }
+      tableState.lineLimit = width;
+      const L = tableState.out.length;
+      if (isSpreadsheet) {
+        tableState.write(cell.content.content[0].attrs.entry);
+      } else {
+        tableState.renderContent(cell);
+      }
+      table[i][j] = tableState.out.slice(L).replace(/^\n+/, "").split("\n");
+    }
+
+    // The second pass. Pad each cell w/spaces.
+    for (let i = 0; i < table.length; i++) {
+      for (let j = 0; j < numCols; j++) {
+        if (rowSpan[i][j] > 0 && colSpan[i][j] > 0) {
+          let width = colWidth[j];
+          for (let m = 1; m < colSpan[i][j]; m++) { width += colWidth[j + m] + 3; }
+          for (let k = 0; k < table[i][j].length; k++) {
+            if (table[i][j][k].indexOf("|") > -1 && !isGFM) { isRst = true; }
+            // Pad the line with spaces
+            table[i][j][k] += " ".repeat(width - table[i][j][k].length);
+          }
+        }
+      }
+    }
+
+    if (mergedCells.length > 0 || tableState.out.indexOf("|") > -1) { isRst = true; }
+
+    // Now the third pass, in which we write output.
+    this.write(isRst
+      ? gridTable(table, numCols, numRowsInHeading, rowSpan, colSpan, colWidth, justify, delim)
+      : pipeTable(table, numCols, colWidth, justify, delim, numRowsInHeading)
+    );
+    // Write the table's class name and column widths.
+    let colWidths = "";
+    for (let i = 0; i < rows.length; i++) {
+      if (rows[i].content.content.length === numCols) {
+        for (const col of rows[i].content.content) {
+          const w = col.attrs.colwidth ? col.attrs.colwidth[0] : null;
+          colWidths += " " + String(w);
+        }
+        break
+      }
+    }
+    let className = node.attrs.class.replace(/ c\d+[cr]/g, "").trim();
+    if (className.indexOf(" ") > -1) { className = `"${className}"`; }
+    const tableName = "name" in node.attrs ? node.attrs.name : "";
+    let directive = `\n${delim}{`;
+    if (tableName) { directive += `#${tableName} `; } 
+    directive += `.${className}`;
+    if (float && float === "left" || float === "right") { directive += ` float="${float}"`; }
+    directive += ` colWidths="${colWidths.trim()}"}\n`;
+    if (!isGFM) { this.write(directive); }
+  }
+
+  // :: (string, ?bool) → string
+  // Escape the given string so that it can safely appear in Markdown
+  // content. If `startOfLine` is true, also escape characters that
+  // has special meaning only at the start of the line.
+  esc(str, startOfLine) {
+    str = str.replace(/([`*\\¢\$<\[_~^])/g, "\\$1");
+    if (startOfLine) {
+      str = str.replace(/^(\#|:|\-|\*|\+|>)/, "\\$1").replace(/^(\d+|[A-Za-z])\.(?= )/, "$1\\.");
+    }
+    return str
+  }
+
+  quote(str) {
+    var wrap = str.indexOf('"') == -1 ? '""' : str.indexOf("'") == -1 ? "''" : "()";
+    return wrap[0] + str + wrap[1]
+  }
+
+  // :: (string, number) → string
+  // Repeat the given string `n` times.
+  repeat(str, n) {
+    let out = "";
+    for (let i = 0; i < n; i++) out += str;
+    return out
+  }
+
+  // : (Mark, bool, string?) → string
+  // Get the markdown string for a given opening or closing mark.
+  markString(mark, open, parent, index) {
+    let info = this.marks[mark.type.name];
+    let value = open ? info.open : info.close;
+    return typeof value == "string" ? value : value(this, mark, parent, index)
+  }
+
+  // :: (string) → { leading: ?string, trailing: ?string }
+  // Get leading and trailing whitespace from a string. Values of
+  // leading or trailing property of the return object will be undefined
+  // if there is no match.
+  getEnclosingWhitespace(text) {
+    return {
+      leading: (text.match(/^(\s+)/) || [])[0],
+      trailing: (text.match(/(\s+)$/) || [])[0]
+    }
+  }
+}
+
+const pipeTable = (table, numCols, colWidth, justify, delim, numRowsInHeading) => {
+  // Write a GFM pipe table
+  let str = "";
+  // Write heading
+  if (numRowsInHeading === 0) {
+    str += "|".repeat(numCols + 1);
+  } else {
+    str += "|";
+    for (let j = 0; j < numCols; j++) {
+      let cell = table[0][j][0];
+      if (cell.trim() === "¶") { cell = cell.replace("¶", " "); }
+      str += " " + cell + " |";
+    }
+  }
+  // Write border
+  str += "\n|";
+  for (let j = 0; j < numCols; j++) {
+    let border = justify[j] === "c" ? ":" : "-";
+    border += "-".repeat(colWidth[j]);
+    border += ("cr".indexOf(justify[j]) > -1 ? ":" : "-") + "|";
+    str += border;
+  }
+  // Write body
+  const startRow = numRowsInHeading === 0 ? 0 : 1;
+  for (let i = startRow; i < table.length; i++) {
+    str += "\n" + (i === 0 ? "" : delim) + "|";
+    for (let j = 0; j < numCols; j++) {
+      let cell = table[i][j][0];
+      if (cell.trim() === "¶") { cell = cell.replace("¶", " "); }
+      str += " " + cell + " |";
+    }
+  }
+  return str
+};
+
+const gridTable = (table, numCols, numRowsInHeading, rowSpan, colSpan, colWidth, justify, delim) => {
+  // Write a reStrucuredText grid table.
+
+  const cellBorder = (ch, isColonRow, i, j) => {
+    let borderStr = "";
+    for (let k = 0; k < colSpan[(i === -1 ? 0 : i)][j]; k++) {
+      borderStr += (isColonRow && justify[j] === "c") ? ":" : ch;
+      borderStr += ch.repeat(colWidth[j + k]);
+      borderStr += (isColonRow && "cr".indexOf(justify[j]) > -1) ? ":" : ch;
+      if (i < colSpan.length - 1 && j + k < colSpan[0].length - 1) {
+        borderStr += colSpan[i + 1][j + k + 1] > 0 ? "+" : ch;
+      } else {
+        borderStr += "+";
+      }
+    }
+    return borderStr
+  };
+
+  // Start by writing the top border.
+  let topBorder = "+";
+  let ch = numRowsInHeading === 0 ? "=" : "-";
+  let isColonRow = ch === "=" || numRowsInHeading === 0;
+  for (let j = 0; j < numCols; j++) {
+    if (rowSpan[0][j] === 0) { continue }
+    topBorder += cellBorder(ch, isColonRow, -1, j);
+  }
+
+  // Set pointers frome the the grid table current location to the array of table content.
+  const current = [];
+  for (let j = 0; j < numCols; j++) {
+    current.push({ row: 0, line: 0 }); // One reference for each column.
+  }
+
+  const rowIsEmptied = new Array(table.length).fill(false); // Have we written all the row's contents?
+  let highestUnemptiedRow = 0;
+  const rowIsReadyForBorder = new Array(table.length).fill(false);
+  const lines = [topBorder];
+
+  while (current[0].row < table.length) {
+    // Each pass in this loop writes one line of the grid table output.
+    rowIsEmptied[highestUnemptiedRow] = true; // Provisional value. Likely to change.
+    let str = delim + "|";
+    for (let j = 0; j < numCols; j++) {
+      if (rowSpan[current[j].row][j] === 0) { continue }
+      if (colSpan[current[j].row][j] === 0) { continue }
+      const endRow = current[j].row + rowSpan[current[j].row][j] - 1;
+      if (table[current[j].row][j].length > current[j].line) {
+        // Write one line from one cell.
+        let cellStr = table[current[j].row][j][current[j].line];
+        if (cellStr.trim() === "¶") { cellStr = cellStr.replace("¶", " "); }
+        str += " " + cellStr + " |";
+        current[j].line += 1;
+        if (current[j].line < table[current[j].row][j].length) {
+          rowIsEmptied[endRow] = false;
+        } else if (colSpan[current[j].row][j] > 1) {
+          // We're in a wide cell.
+          // Check for a collision between a text "|" and a cell border.
+          let posBorder = 0;
+          for (let k = 0; k < j + colSpan[current[j].row][j] - 1; k++) {
+            posBorder += colWidth[k] + 3;
+            if (k >= j && str.charAt(posBorder) === "|") {
+              rowIsEmptied[endRow] = false;
+              break
+            }
+          }
+        }
+      } else if (rowIsReadyForBorder[endRow]) {
+        // Write a border under one cell.
+        if (j === 0) { str = delim + "+"; }
+        ch = numRowsInHeading === endRow + 1 ? "=" : "-";
+        isColonRow = ch === "=";
+        const border = "+" + cellBorder(ch, isColonRow, current[j].row, j);
+        str = str.slice(0, -1) + border.slice(0, -1) + "+";
+      } else {
+        // Other columns are still writing content from this table row.
+        // We can't write a bottom border yet, so write a blank line into one cell.
+        for (let k = 0; k < colSpan[current[j].row][j]; k++) {
+          const corner = k === colSpan[current[j].row][j] - 1 ? "|" : " ";
+          str += " ".repeat(colWidth[j + k] + 2) + corner;
+        }
+      }
+    }
+    if (rowIsReadyForBorder[highestUnemptiedRow]){
+      // We just wrote a bottom border. Change the references to the next table row.
+      for (let j = 0; j < numCols; j++) {
+        if (current[j].row + rowSpan[current[j].row][j] - 1 === highestUnemptiedRow) {
+          current[j].line = 0;
+          current[j].row += rowSpan[current[j].row][j];
+        }
+      }
+      highestUnemptiedRow += 1;
+    } else if (rowIsEmptied[highestUnemptiedRow]) {
+      // The next pass will write a bottom border.
+      rowIsReadyForBorder[highestUnemptiedRow] = true;
+    }
+    lines.push(str);
+  }
+  return lines.join("\n")
+};
+
+/* eslint-disable no-alert */
+
+// TODO: Edit the sheetName regex to ensure that the sheetName is a valid identifier
+const sheetNameRegEx = /^[\w]+\b/;
+
+const sheetLimits = (doc, inputPos) => {
+  // Find the extent of the table
+  let tableStart = 0;
+  let tableEnd = 0;
+  let parent;
+  for (let d = inputPos.depth; d > 0; d--) {
+    const node = inputPos.node(d);
+    if (node.type.spec.tableRole === 'table') {
+      tableStart = inputPos.before(d);
+      tableEnd =  inputPos.after(d);
+      parent = inputPos.node(d - 1);
+      break
+    }
+  }
+  return [tableStart, tableEnd, parent]
+};
+
+const numberRegEx = new RegExp(Rnl.numberPattern);
+const cellRefRegEx = /"[A-Z][1-9]+"/g;
+const innerRefRegEx = /^(?:[A-Z](?:\d+|_end)|up|left)$/;
+const sumRegEx = /¿(up|left)([\xa0§])sum[\xa0§]1(?=[\xa0§]|$)/g;
+const spreadsheetRegEx = / spreadsheet\b/;
+const grafRegEx = /\n\n/;
+
+// Compile a spreadsheet cell.
+
+const compileCell = (attrs, sheetAttrs, unit, previousAttrs,
+                            formats = "1,000,000.") => {
+  const newAttrs = { entry: attrs.entry, name: attrs.name };
+  const entry = attrs.entry;
+  if (entry.length === 0) {
+    newAttrs.value = null;
+    newAttrs.dtype = dt.NULL;
+  } else if (entry.slice(0, 1) === "=") {
+    // Get the RPN of an expression
+    const expression = entry.replace(/^==?/, "").trim();
+    // TODO: Revise the parser to handle spreadsheet cell names & sheetname
+    // eslint-disable-next-line prefer-const
+    let [_, rpn, dependencies] = parse$1(expression, formats, true, false, sheetAttrs.name);
+    const outerDependencies = new Set();
+    for (const dependency of dependencies) {
+      if (!innerRefRegEx.test(dependency)) {
+        outerDependencies.add(dependency);
+      }
+    }
+
+    // Implement sum(up) and sum(left)
+    // Orig RPN:    ¿up sum 1
+    // Desired RPN: ¿sheetName "D" spreadsheetSum   or   ¿sheetName "3" spreadsheetSum
+    let sumMatch;
+    while ((sumMatch = sumRegEx.exec(rpn)) !== null) {
+      const str = sumMatch[1] === "up" ? attrs.name.slice(0, 1) : attrs.name.slice(1, 2);
+      rpn = rpn.slice(0, sumMatch.index) + `¿${sheetAttrs.name}` + sumMatch[2]
+            + `"${str}"` + sumMatch[2] + "spreadsheetSum"
+            + rpn.slice(sumMatch.index + sumMatch[0].length);
+    }
+
+    newAttrs.rpn = rpn;
+    newAttrs.dependencies = outerDependencies.size > 0
+      ? [...(outerDependencies.values())]
+      : [];
+    newAttrs.resulttemplate = (entry.length > 1 &&  entry.slice(1, 2) === "=")
+      ? "@@"
+      : "@";
+    newAttrs.altresulttemplate = newAttrs.resulttemplate;
+    newAttrs.resultdisplay = newAttrs.resulttemplate;
+    newAttrs.unit = unit ? unit : { factor: Rnl.one, gauge: Rnl.zero, expos: allZeros };
+  } else if (entry === '"' || entry === '“') {
+    // The ditto of the previous cell
+    if (previousAttrs.rpn) {
+      let rpn = previousAttrs.rpn;
+      const matches = arrayOfRegExMatches(cellRefRegEx, rpn);
+      for (let i = matches.length - 1; i >= 0; i--) {
+        const match = matches[i];
+        const rowNum = Math.min(sheetAttrs.numRows - 1, Number(match.value.slice(2, -1)) + 1);
+        rpn = rpn.slice(0, match.index + 2) + String(rowNum)
+            + rpn.slice(match.index + match.length - String(rowNum).length);
+      }
+      newAttrs.rpn = rpn;
+      newAttrs.resulttemplate = previousAttrs.resulttemplate;
+      newAttrs.altresulttemplate = newAttrs.resulttemplate;
+      newAttrs.resultdisplay = newAttrs.resulttemplate;
+      newAttrs.unit = previousAttrs.unit;
+    } else {
+      newAttrs.value = previousAttrs.value;
+      newAttrs.dtype = previousAttrs.dtype;
+      newAttrs.display = previousAttrs.display ? previousAttrs.display : previousAttrs.entry;
+    }
+    // TODO: unitAware, dependencies
+  } else {
+    // A literal value
+    const numCandidate = entry.replace(/,/g, "");
+    if (numberRegEx.test(numCandidate)) {
+      let value = Rnl.fromString(numCandidate);
+      let dtype = dt.RATIONAL;
+      if (unit) {
+        value = {
+          plain: value,
+          inBaseUnits: Rnl.multiply(Rnl.add(value, unit.gauge), unit.factor)
+        };
+        dtype += dt.QUANTITY;
+      }
+      newAttrs.value = value;
+      newAttrs.dtype = dtype;
+    } else if (entry === "true" || entry === "false") {
+      newAttrs.value = Boolean(entry);
+      newAttrs.dtype = dt.BOOLEAN;
+    } else if (complexRegEx.test(entry)) {
+      // eslint-disable-next-line no-unused-vars
+      const [value, unit, dtype, _] = valueFromLiteral(entry, attrs.name, formats);
+      newAttrs.value = value;
+      newAttrs.dtype = dtype;
+    } else {
+      newAttrs.value = entry;
+      newAttrs.dtype = dt.STRING;
+    }
+  }
+  return newAttrs
+};
+
+// Compile a spreadsheet
+
+const compileSheet = (table, formats) => {
+  // The cell entries and the sheet name are already known.
+  // Proceed to compile the rest of the table and cell attributes.
+  // Stop short of calculations.
+  table.attrs.numRows = table.content.length;
+  table.attrs.columnMap = {};
+  table.attrs.rowMap = {};
+  table.attrs.unitMap = [];
+  table.attrs.units = {};
+  table.attrs.dependencies = [];
+  table.attrs.dtype = dt.SPREADSHEET;
+  if (table.content[0].type === "colGroup") { table.content.shift(); }
+
+  const numRows = table.content.length;
+  table.attrs.numRows = numRows;
+  const numCols = table.content[0].content.length;
+  // Proceed column-wise thru the table.
+  for (let j = 0; j < numCols; j++) {
+    let previousAttrs = {};
+    for (let i = 0; i < numRows; i++) {
+      const cell = table.content[i].content[j].content[0];
+      const cellName = String.fromCodePoint(65 + j) + String(i);
+      const entry = cell.attrs.entry;
+      if (i === 0) {
+        const str = md2text(entry);
+        // eslint-disable-next-line no-useless-assignment
+        let heading = "";
+        let unitName = "";
+        const posNewline = str.indexOf("\n");
+        if (posNewline === -1) {
+          heading = str.trim();
+        } else {
+          unitName = str.slice(posNewline + 1).trim();
+          heading = str.slice(0, posNewline).trim();
+        }
+        table.attrs.columnMap[heading] = cellName.slice(0, 1);
+        if (unitName.length > 0) {
+          const unit = unitFromUnitName(unitName);
+          if (unit.dtype && unit.dtype === dt.ERROR) {
+            unitName = "";
+          } else {
+            table.attrs.units[unitName] = unit;
+          }
+        }
+        table.attrs.unitMap.push(unitName);
+      } else {
+        // A data cell, not a top row heading
+        if (j === 0) { table.attrs.rowMap[entry] = i; }
+      }
+      const newCell = { type: "spreadsheet_cell", attrs: { entry } };
+      if (i === 0) {
+        newCell.attrs.display = md2html(entry);
+      } else {
+        newCell.attrs.name = cellName;
+        const unit = (table.attrs.unitMap[j].length > 0)
+          ? table.attrs.units[table.attrs.unitMap[j]]
+          : null;
+        newCell.attrs = compileCell(newCell.attrs, table.attrs, unit, previousAttrs,
+                                    formats);
+        previousAttrs = newCell.attrs;
+        previousAttrs.unit = unit;
+        if (newCell.attrs.dependencies) {
+          for (const d of newCell.attrs.dependencies) {
+            if (!table.attrs.dependencies.includes(d)) {
+              table.attrs.dependencies.push(d);
+            }
+          }
+        }
+      }
+      table.content[i].content[j].content = [newCell];
+    }
+  }
+  return table
+};
+
+const tableToSheet = (state, tableNode) => {
+  // Get the extent of the table.
+  const [tableStart, tableEnd, parent] = sheetLimits(state.doc, state.selection.$from);
+
+  // Get the spreadsheet's name
+  if (parent.content.content === 1 ||
+      parent.content.content[0].type.name !== "figcaption") {
+    alert("Table must have a caption that begins with the spreadsheet’s name.");
+  }
+  const caption = parent.content.content[0];
+  const str = caption.textContent;
+  if (str.length === 0) {
+    alert("Table caption must contain a string that begins with the spreadsheet’s name.");
+    return
+  }
+  const match = sheetNameRegEx.exec(str);
+  if (!match) {
+    alert("Table caption must begin with a valid identifier for the spreadsheet’s name.");
+    return
+  }
+  const sheetName = match[0];
+
+  // Copy tableNode to an object w/o all the ProseMirror methods.
+  let table = tableNode.toJSON();
+  table.attrs.name = sheetName;
+
+  // Get the cell entries.
+  const numRows = table.content.length;
+  const numCols = table.content[0].content.length;
+  // Proceed column-wise thru the table.
+  for (let j = 0; j < numCols; j++) {
+    for (let i = 0; i < numRows; i++) {
+      const cell = tableNode.content.content[i].content.content[j];
+      let entry = (i === 0)
+        ? hurmetMarkdownSerializer.serialize(cell, new Map(), [])
+        : cell.textContent;
+      if (i === 0) {
+        entry = entry.replace(grafRegEx, "\\\n");
+        if (entry === "¶") { entry = ""; }
+      }
+      const newCell = { type: "spreadsheet_cell", attrs: { entry } };
+      if (i === 0) { newCell.attrs.display = md2html(entry); }
+      table.content[i].content[j].content = [newCell];
+    }
+  }
+  const formats = {
+    decimalFormat: state.doc.attrs.decimalFormat,
+    dateFormat: state.doc.attrs.dateFormat
+  };
+  table = compileSheet(table, formats);
+  table.attrs.class += " spreadsheet";
+  table.attrs.dtype = dt.SPREADSHEET;
+  return [table, tableStart, tableEnd]
+};
+
+const sheetToTable = (state, tableNode) => {
+  const table = tableNode.toJSON();
+  const classes = table.attrs.class.replace(spreadsheetRegEx, "");
+  table.attrs = { class: classes, dtype: dt.NULL };
+  // Un-freeze the data cells. Display the entries.
+  const rows = table.content;
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i].content;
+    for (let j = 0; j < row.length; j++) {
+      const text = row[j].content[0].attrs.entry;
+      if (text.length > 0) {
+        row[j].content = [{ type: "paragraph", content: [{ type: "text", text }] }];
+      } else {
+        row[j].content = [{ type: "paragraph", content: [] }];
+      }
+    }
+  }
+  const [tableStart, tableEnd] = sheetLimits(state.doc, state.selection.$from);
+  return [table, tableStart, tableEnd]
+};
+
+/*
+ *  This module organizes one or two passes through the data structure of a Hurmet
+ *  document, calling for a calculation to be done on each Hurmet calculation cell.
+ *  If you are looking for the calculation itself, look at evaluate.js.
+ *
+ *  To be more precise, this module is called:
+ *    1. When an author submits one calculation cell, or
+ *    2. When a new Hurmet.org instance has opened (from index.js), or
+ *    3. When a user has opened a new file         (from openFile.js), or
+ *    4. When a recalculate-all has been called, possibly after a paste. (from menu.js)
+ *
+ *  Case 1 calculates the submitted cell and all dependent calculation cells.
+ *  Cases 2 thru 4 re-calculate the entire document. I.e., isCalcAll is set to true.
+ *  After calculation is complete, we send the results to ProseMirror to be
+ *  rendered in the document.
+ *
+ *   This module's main exported function is updateCalculations(…)
+ */
+
+/*
+* Note 1: state.selection shenanigans
+*
+* Before creating a ProseMirror (PM) transaction, this module first changes `state.selection`.
+* That is to say, I change the PM state without running that change thru a PM transaction.
+* PM docs advise against that, so I want to explain why I do so.
+*
+* For Undo purposes, a calculation should be atomic.
+* An Undo of a calculation should return the doc to the condition before the
+* calculation cell was edited. That will feel natural to people accustomed to Excel.
+* When a calculation is submitted, Hurmet creates a single PM transaction and into it,
+* Hurmet collects all the changes that the calculation makes to the original cell and
+* also all the changes to dependent cells.
+* When a user submits a calculation, the cell is open, so a PM Undo would ordinarily return
+* the state to a condition that once again has the cell open.
+*
+* But now consider a user who wants to Undo twice. The first Undo retreats to a condition in
+* which a cell is open. The user thinks a second Undo will change the PM document. But no!
+* Because the cell is open, the codejar plain text editor is active and the Undo is captured
+* by codejar. An Undo affects codejar but not the outer document. It's very confusing!
+* So the Undo should return to a condition in which the cell is closed. That's why I change
+* the PM state.selection object _before_ I create the PM transaction. I don't want an Undo to
+* open that cell and so I don't want the Undo to finish with the selection point inside the
+* cell. Before creating the transaction, I move the selection point to just after the cell.
+*/
+
+// eslint-disable-next-line max-len
+const fetchRegEx = new RegExp(isValidIdentifier.source.slice(0, -1) + " *= *(?:fetch|import)\\(");
+const importRegEx = /^[^=]+= *import/;
+const fileErrorRegEx = /^Error while reading file. Status Code: \d*$/;
+const textRegEx = /\\text{[^}]+}/;
+
+const urlFromEntry = entry => {
+  // Get the URL from the entry input string.
+  const str = entry.replace(/^[^()]+\("?/, "");
+  return str.replace(/"?\).*$/, "").trim()
+};
+
+// Helper function.
+const processFetchedString = (entry, text, hurmetVars, formats) => {
+  const attrs = Object.create(null);
+  attrs.entry = entry;
+  attrs.name = entry.replace(/=.+$/, "").trim();
+  let str = parse$1(entry.replace(/\s*=\s*[$$£¥\u20A0-\u20CF]?(?:!{1,2}).*$/, ""), formats);
+  const url = urlFromEntry(entry);
+  if (/\.(?:tsv|txt)$/.test(url)) {
+    // Shorten the URL.
+    const fileName = url.replace(/.+\//, "");
+    const match = textRegEx.exec(str);
+    str = str.slice(0, match.index) + "\\text{" + addTextEscapes(fileName) + "})";
+  }
+  attrs.tex = str;
+  attrs.alt = entry;
+  if (text === "File not found." || fileErrorRegEx.test(text)) {
+    attrs.dtype = dt.ERROR;
+    attrs.tex += ` = \\red{\\text{${text}}}`;
+    attrs.alt = " = " + text;
+    attrs.value = null;
+    return attrs
+  }
+  const data = importRegEx.test(entry)
+    ? scanModule(text, formats)     // import code
+    : DataFrame.dataFrameFromTSV(text);    // fetch data
+
+  // Append the data to attrs
+  attrs.value = data.value;
+  attrs.dtype = data.dtype;
+  attrs.unit = data.unit;
+  attrs.isFetch = true;
+  attrs.fallback = data.dtype === dt.MODULE ? text : "";
+  if (data.dtype === dt.MODULE && /^importedParameters *=/.test(entry)) {
+    // Assign to multiple variables, not one namespace.
+    let nameTex = "\\begin{matrix}";
+    let i = 0;
+    Object.entries(data.value).forEach(([key, value]) => {
+      hurmetVars[key] =  value;
+      nameTex += parse$1(value.name) + " & ";
+      i += 1;
+      if (i === 5) {
+        nameTex = nameTex.slice(0, -1) + "\\\\ ";
+        i = 0;
+      }
+    });
+    nameTex = nameTex.slice(0, (i === 0 ? -2 : -1)) + "\\end{matrix}";
+    attrs.tex = attrs.tex.replace("\\mathrm{importedParameters}", nameTex);
+  }
+  return attrs
+};
+
+const mustCalc = (attrs, hurmetVars, changedVars, isCalcAll, isFormat) => {
+  if (isCalcAll || isFormat) { return true }
+  if (attrs.rpn && !(attrs.name && hurmetVars[attrs.name] && hurmetVars[attrs.name].isFetch)) {
+    for (const varName of attrs.dependencies) {
+      if (changedVars.has(varName)) { return true }
+    }
+  }
+  if (attrs.dtype && attrs.dtype === dt.DRAWING && attrs.value.parameters &&
+      attrs.value.parameters.length > 0) {
+    for (const parameter of attrs.value.parameters) {
+      if (changedVars.has(parameter)) { return true }
+    }
+  }
+  return false
+};
+
+const workWithFetchedTexts = (
+  view,
+  doc,
+  inDraftMode,
+  formats,
+  isCalcAll,
+  nodeAttrs,
+  curPos,
+  hurmetVars,
+  fetchPositions,
+  texts
+) => {
+  // At this point, we have the text of each Hurmet fetch and import.
+  // Create a ProseMirror transaction.
+  // Each node update below will be one step in the transaction.
+  const state = view.state;
+  if (state.selection.to === curPos + 1) {
+    // See Note 1 above for an explanation of the state.selection shenanigans.
+    state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1));
+  }
+  const tr = state.tr;
+
+  // Load in the data from the fetch statements
+  for (let i = 0; i < texts.length; i++) {
+    const pos = fetchPositions[i];
+    const entry = isCalcAll
+      ? doc.nodeAt(pos).attrs.entry
+      : nodeAttrs.entry;
+    const attrs = processFetchedString(entry, texts[i], hurmetVars, formats);
+    attrs.inDraftMode = inDraftMode;
+    tr.replaceWith(pos, pos + 1, state.schema.nodes.calculation.createAndFill(attrs));
+    if (attrs.name) {
+      insertOneHurmetVar(hurmetVars, attrs, null, formats.decimalFormat);
+    }
+  }
+  // There. Fetches are done and are loaded into the document.
+  // Now proceed to the rest of the work.
+  proceedAfterFetch(view, isCalcAll, nodeAttrs, curPos, hurmetVars, tr);
+
+};
+
+const workAsync = (
+  view,
+  isCalcAll,
+  nodeAttrs,
+  curPos,
+  hurmetVars,
+  urls,
+  fetchPositions
+) => {
+
+  // Here we fetch the remote data.
+  const doc = view.state.doc;
+  const inDraftMode = doc.attrs.inDraftMode;
+  const formats = {
+    decimalFormat: doc.attrs.decimalFormat,
+    dateFormat: doc.attrs.dateFormat
+  };
+
+  if (!navigator.onLine) {
+    const texts = [];
+    for (const url of urls) {
+      Object.keys(doc.attrs.fallbacks).forEach(function(key) {
+        if (doc.attrs.fallbacks[key].url === url) {
+          texts.push(doc.attrs.fallbacks[key].text);
+        }
+      });
+    }
+    workWithFetchedTexts(view, doc, inDraftMode, formats, isCalcAll,
+      nodeAttrs, curPos, hurmetVars, fetchPositions, texts);
+  } else {
+    Promise.all(
+      urls.map(url => fetch(url, {
+        method: "GET",
+        headers: { "Content-Type": "text/plain;charset=UTF-8" },
+        mode: "cors"
+      }))
+    ).then(fetchResponses => {
+      // The fetch promises have resolved. Now we extract their text.
+      return Promise.all(fetchResponses.map(r => {
+        if (r.status !== 200 && r.status !== 0) {
+          // The fetch failed. Try for a fallback.
+          Object.keys(doc.attrs.fallbacks).forEach(function(key) {
+            if (doc.attrs.fallbacks[key].url === r.url) {
+              return doc.attrs.fallbacks[key].text
+            }
+          });
+          return r.status === 404
+            ? 'File not found.'
+            : 'Error while reading file. Status Code: ' + r.status
+        }
+        return r.text()
+      }))
+    }).then((texts) => {
+      workWithFetchedTexts(view, doc, inDraftMode, formats, isCalcAll,
+        nodeAttrs, curPos, hurmetVars, fetchPositions, texts);
+    });
+  }
+};
+
+const proceedAfterFetch = (
+  view,
+  isCalcAll,
+  nodeAttrs,
+  curPos,
+  hurmetVars,
+  tr
+) => {
+  // This function happens either
+  //   1. After remote, fetched data has been processed, or
+  //   2. After we know that no fetch statements need be processed.
+  const doc = view.state.doc;
+  const formats = {
+    decimalFormat: doc.attrs.decimalFormat,
+    dateFormat: doc.attrs.dateFormat
+  };
+  const calcSchema = view.state.schema.nodes.calculation;
+  // Create a set to track which variable have a changed value.
+  const changedVars = isCalcAll ? null : new Set();
+
+  if (!isCalcAll && (nodeAttrs.name || nodeAttrs.rpn ||
+    (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING))) {
+    // Load hurmetVars with values from earlier in the document.
+    doc.nodesBetween(0, curPos, function(node, pos) {
+      if (node.type.name === "calculation") {
+        const attrs = node.attrs;
+        if (attrs.name) {
+          if (attrs.name === "importedParameters") {
+            Object.entries(attrs.value).forEach(([key, value]) => {
+              hurmetVars[key] =  value;
+            });
+          } else {
+            insertOneHurmetVar(hurmetVars, attrs, null, formats.decimalFormat);
+          }
+        }
+      } else if (("dtype" in node.attrs) && node.attrs.dtype === dt.SPREADSHEET) {
+        const sheetName = node.attrs.name;
+        const sheetAttrs = clone(node.attrs);
+        sheetAttrs.value = {};
+        hurmetVars[sheetName] = sheetAttrs;
+        const numRows = node.content.content.length;
+        const numCols = node.content.content[0].content.content.length;
+        // Proceed column-wise thru the table.
+        for (let j = 0; j < numCols; j++) {
+          for (let i = 1; i < numRows; i++) {
+            const cell = node.content.content[i].content.content[j].content.content[0];
+            hurmetVars[sheetName].value[cell.attrs.name] = clone(cell.attrs);
+          }
+        }
+      }
+    });
+
+    // Hoist any user-defined functions located below the selection.
+    doc.nodesBetween(curPos + 1, doc.content.size, function(node, pos) {
+      if (node.type.name === "calculation" && node.attrs.dtype === dt.MODULE) {
+        insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat);
+      }
+    });
+
+    // Calculate the current node.
+    if (!fetchRegEx.test(nodeAttrs.entry)) {
+      // This is the typical calculation statement. We'll evalutate it.
+      if (!(("dtype" in nodeAttrs) && nodeAttrs.dtype === dt.SPREADSHEET)) {
+        let attrs = clone(nodeAttrs); // compile was already run in mathprompt.js.
+        try {
+          // Do the calculation of the cell.
+          if (attrs.rpn || (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING)) {
+            attrs = attrs.dtype && attrs.dtype === dt.DRAWING
+              ? evaluateDrawing(attrs, hurmetVars, formats)
+              : evaluate(attrs, hurmetVars, formats);
+          }
+          if (attrs.name) {
+            insertOneHurmetVar(hurmetVars, attrs, changedVars, formats.decimalFormat);
+          }
+        } catch (err) {
+          attrs.tex = "\\text{" + attrs.entry + " = " + err + "}";
+        }
+        tr.replaceWith(curPos, curPos + 1, calcSchema.createAndFill(attrs));
+      } else {
+        // Calculate all the cells in a spreadsheet
+        const tableNode = doc.nodeAt(curPos);
+        const table = tableNode.toJSON();
+        const sheetName = table.attrs.name;
+        const sheet = clone(table.attrs);
+        delete sheet["value"];
+        sheet.value = {};
+        hurmetVars[sheetName] = sheet;
+        const numRows = table.content.length;
+        const numCols = table.content[0].content.length;
+        table.attrs.rowMap = {};
+        // Proceed column-wise thru the table.
+        for (let j = 0; j < numCols; j++) {
+          for (let i = 1; i < numRows; i++) {
+            const cell = table.content[i].content[j].content[0];
+            if (cell.attrs.rpn) {
+              cell.attrs = evaluate(cell.attrs, hurmetVars, formats);
+              cell.attrs.display = cell.attrs.alt;
+              if (j === 0) { table.attrs.rowMap[cell.attrs.alt] = i; }
+            } else if (j === 0 && typeof cell.attrs.value === "string") {
+              table.attrs.rowMap[cell.attrs.value] = i;
+            }
+            hurmetVars[sheetName].value[cell.attrs.name] = cell.attrs;
+          }
+        }
+        changedVars.add(sheetName);
+        tr.replaceWith(curPos, curPos + tableNode.nodeSize,
+                       view.state.schema.nodeFromJSON(table));
+      }
+    }
+  }
+
+  // Finally, update calculations after startPos.
+  const startPos = isCalcAll ? 0 : (curPos + 1);
+  const isFormat = (nodeAttrs && nodeAttrs.name && nodeAttrs.name === "format");
+  doc.nodesBetween(startPos, doc.content.size, function(node, pos) {
+    if (node.type.name === "calculation") {
+      const notFetched = isCalcAll ? !fetchRegEx.test(node.attrs.entry) : !node.attrs.isFetch;
+      if (notFetched) {
+        const entry = node.attrs.entry;
+        let attrs = isCalcAll
+          ? compile(entry, formats)
+          : clone(node.attrs);
+        attrs.displayMode = node.attrs.displayMode;
+        const mustRedraw = attrs.dtype && attrs.dtype === dt.DRAWING &&
+          (attrs.rpn || (attrs.value.parameters.length > 0 || isCalcAll));
+        if (mustCalc(attrs, hurmetVars, changedVars, isCalcAll, isFormat)) {
+          try {
+            if (attrs.rpn || mustRedraw) {
+              attrs.error = false;
+              attrs = attrs.rpn // attrs.dtype && attrs.dtype === dt.DRAWING
+                ? evaluate(attrs, hurmetVars, formats)
+                : evaluateDrawing(attrs, hurmetVars, formats);
+            }
+            if (attrs.name) {
+              insertOneHurmetVar(hurmetVars, attrs, changedVars, formats.decimalFormat);
+            }
+          } catch (err) {
+            attrs.tex = "\\text{" + attrs.entry + " = " + err + "}";
+          }
+          if (isCalcAll || attrs.rpn || mustRedraw) {
+            tr.replaceWith(pos, pos + 1, calcSchema.createAndFill(attrs));
+          }
+        } else if (attrs.name && attrs.value) {
+          insertOneHurmetVar(hurmetVars, attrs, null, formats.decimalFormat);
+        }
+      } else if (node.attrs.name && !(isCalcAll && node.attrs.isFetch)) {
+        if (node.attrs.name) {
+          if (node.attrs.name === "importedParameters") {
+            Object.entries(node.attrs.value).forEach(([key, value]) => {
+              hurmetVars[key] =  value;
+            });
+          } else {
+            insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat);
+          }
+        }
+      }
+    } else if (("dtype" in node.attrs) && node.attrs.dtype === dt.SPREADSHEET
+                && pos !== curPos) {
+      // Calculate all the cells in a spreadsheet
+      let table = clone(node.toJSON());
+      let mustCalc = false;
+      if (isCalcAll) {
+        table = compileSheet(table, formats);
+        mustCalc = true;
+      } else {
+        for (const varName of table.attrs.dependencies) {
+          if (changedVars.has(varName)) { mustCalc = true; break }
+        }
+      }
+      if (mustCalc) {
+        const sheetName = table.attrs.name;
+        hurmetVars[sheetName] = table.attrs;
+        hurmetVars[sheetName].value = {};
+        const numRows = table.content.length;
+        const numCols = table.content[0].content.length;
+        table.attrs.rowMap = {};
+        // Proceed column-wise thru the table.
+        for (let j = 0; j < numCols; j++) {
+          for (let i = 1; i < numRows; i++) {
+            const cell = table.content[i].content[j].content[0];
+            if (cell.attrs.rpn) {
+              cell.attrs = evaluate(cell.attrs, hurmetVars, formats);
+              cell.attrs.display = cell.attrs.alt;
+              if (j === 0) { table.attrs.rowMap[cell.attrs.alt] = i; }
+            } else if (j === 0 && typeof cell.attrs.value === "string") {
+              table.attrs.rowMap[cell.attrs.value] = i;
+            }
+            hurmetVars[sheetName].value[cell.attrs.name] = cell.attrs;
+          }
+        }
+        if (!isCalcAll) { changedVars.add(sheetName); }
+        tr.replaceWith(pos, pos + node.nodeSize, view.state.schema.nodeFromJSON(table));
+      }
+    }
+  });
+
+  // All the steps are now loaded into the transaction.
+  // Dispatch the transaction to ProseMirror, which will re-render the document.
+  if (!isCalcAll) {
+    tr.setSelection(view.state.selection.constructor.near(tr.doc.resolve(curPos + 1)));
+  }
+  view.dispatch(tr);
+  view.focus();
+};
+
+function updateCalculations(
+  view,
+  isCalcAll = false,
+  nodeAttrs,
+  curPos
+) {
+  const doc = view.state.doc;
+  const calcSchema = view.state.schema.nodes.calculation;
+
+  if (!(isCalcAll || nodeAttrs.name || nodeAttrs.rpn ||
+      (nodeAttrs.dtype && nodeAttrs.dtype === dt.DRAWING))) {
+    // No calculation is required. Just render the node and get out.
+    const state = view.state;
+    if (state.selection.to === curPos + 1) {
+      // See Note 1 above for an explanation of the state.selection shenanigans.
+      state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1));
+    }
+    const tr = state.tr;
+    try {
+      tr.replaceWith(curPos, curPos + 1, calcSchema.createAndFill(nodeAttrs));
+    // eslint-disable-next-line no-unused-vars
+    } catch (err) {
+      // nada
+    } finally {
+      view.dispatch(tr);
+      view.focus();
+    }
+    return
+  }
+
+  // Create an object in which we'll hold variable values.
+  const hurmetVars = Object.create(null);
+  hurmetVars.format = { value: "h15" }; // default rounding format
+  hurmetVars["@savedate"] = doc.attrs.saveDate;
+  const formats = {
+    decimalFormat: doc.attrs.decimalFormat,
+    dateFormat: doc.attrs.dateFormat
+  };
+
+  // Get an array of all the URLs called by fetch statements.
+  const urls = [];
+  const fetchPositions = [];
+  if (!isCalcAll) {
+    // The author has submitted a single calculation cell.
+    const entry = nodeAttrs.entry;
+    if (fetchRegEx.test(entry)) {
+      let url = urlFromEntry(entry);
+      if (!/\.(tsv|txt)$/.test(url)) {
+        const pos = url.lastIndexOf("/");
+        url = url.slice(pos + 1);
+        // eslint-disable-next-line no-alert
+        alert(`Warning: Only .tsv and .txt files can be fetched.\n${url}`);
+      } else {
+        urls.push(url);
+        fetchPositions.push(curPos);
+      }
+    }
+  } else {
+    // We're updating the entire document.
+    doc.nodesBetween(0, doc.content.size, function(node, pos) {
+      if (node.type.name === "calculation" && !node.attrs.value) {
+        const entry = node.attrs.entry;
+        if (fetchRegEx.test(entry)) {
+          let url = urlFromEntry(entry);
+          if (!/\.(tsv|txt)$/.test(url)) {
+            const pos = url.lastIndexOf("/");
+            url = url.slice(pos + 1);
+                // eslint-disable-next-line no-alert
+            alert(`Warning: Only .tsv and .txt files can be fetched.\n${url}`);
+          } else {
+            urls.push(url);
+            fetchPositions.push(pos);
+          }
+        } else if (/^function /.test(entry)) {
+          node.attrs = compile(entry, formats);
+          insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat);
+        }
+      } else if (node.attrs.isFetch || (node.attrs.dtype && node.attrs.dtype === dt.MODULE)) {
+        insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat);
+      }
+    });
+  }
+
+  if (urls.length > 0) {
+    // We have to fetch some remote data. Asynchronous work ahead.
+    workAsync(view, isCalcAll, nodeAttrs, curPos,
+              hurmetVars, urls, fetchPositions);
+  } else {
+    // Skip the fetches and go directly to work that we can do synchronously.
+    const state = view.state;
+    if (state.selection.to === curPos + 1) {
+      // See Note 1 above for an explanation of the state.selection shenanigans.
+      state.selection = state.selection.constructor.near(state.doc.resolve(curPos + 1));
+    }
+    const tr = state.tr;
+    proceedAfterFetch(view, isCalcAll, nodeAttrs, curPos, hurmetVars, tr);
+  }
+}
+
+const helpers = Object.freeze({
+  fetchRegEx,
+  textRegEx,
+  urlFromEntry,
+  processFetchedString
+});
+
+async function fetchTexts(urls) {
+  // Here we fetch remote data.
+  return Promise.all(
+    urls.map(url => fetch(url, {
+      method: "GET",
+      headers: { "Content-Type": "text/plain;charset=UTF-8" },
+      mode: "cors"
+    }))
+  ).then(fetchResponses => {
+    // The fetch promises have resolved. Now we extract their text.
+    return Promise.all(fetchResponses.map(r => {
+      if (r.status !== 200 && r.status !== 0) {
+        return r.status === 404
+          ? 'File not found.'
+          : 'Error while reading file. Status Code: ' + r.status
+      }
+      return r.text()
+    }))
+  }).then((texts) => {
+    // At this point, we have the text of each Hurmet fetch and import.
+    return texts
+  })
+}
+
+async function getRemoteTexts(urls) {
+  // This is necessary to return text, not just a promise of text.
+  return await fetchTexts(urls)
+}
+
+const getCalcNodes = (ast, calcNodes) => {
+  // Create an array of calculation nodes.
+  if (Array.isArray(ast)) {
+    for (let i = 0; i < ast.length; i++) {
+      getCalcNodes(ast[i], calcNodes);
+    }
+  } else if (ast && ast.type === "calculation") {
+    calcNodes.push(ast);
+  } else if (ast && ast.type === "table" && "name" in ast.attrs) {
+    calcNodes.push(ast);
+  } else if ("content" in ast) {
+    for (let j = 0; j < ast.content.length; j++) {
+      getCalcNodes(ast.content[j], calcNodes);
+    }
+  }
+};
+
+async function updateCalcs(doc) {
+  // This function is a lot like what updateCalculations.js does for the Hurmet web site.
+
+  // Create an object in which we'll hold variable values.
+  const hurmetVars = Object.create(null);
+  hurmetVars.format = { value: "h15" }; // default rounding format
+  hurmetVars["@savedate"] = doc.attrs.saveDate;
+  const formats = {
+    decimalFormat: doc.attrs.decimalFormat,
+    dateFormat: doc.attrs.dateFormat
+  };
+
+  // Create an array of all the calculation nodes in the document
+  const calcNodes = [];
+  getCalcNodes(Array.isArray(doc) ? doc : doc.content, calcNodes);
+  if (calcNodes.length === 0) { return doc }
+
+  // Get an array of all the URLs called by fetch statements.
+  const urls = [];
+  const callers = [];
+  for (const node of calcNodes) {
+    const entry = node.attrs.entry;
+    if (helpers.fetchRegEx.test(entry)) {
+      let url = helpers.urlFromEntry(entry);
+      if (!/\.(tsv|txt)$/.test(url)) {
+        const pos = url.lastIndexOf("/");
+        url = url.slice(pos + 1);
+        // eslint-disable-next-line no-console
+        console.log(`Warning: Only .tsv and .txt files can be fetched.\n${url}`);
+      } else {
+        urls.push(url);
+        callers.push(node);
+      }
+    } else if (/^function /.test(entry)) {
+      node.attrs = compile(entry, formats);
+      insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat);
+    }
+  }
+
+  if (urls.length > 0) {
+    // We have to fetch some remote data.
+    const texts = await getRemoteTexts(urls);
+    // Fetches are now complete. Load in the data.
+    for (let i = 0; i < texts.length; i++) {
+      const node = callers[i];
+      const entry = node.attrs.entry;
+      // When we modify a node, we are also mutating the container doc.
+      node.attrs = helpers.processFetchedString(entry, texts[i], hurmetVars, formats);
+      if (node.attrs.name) {
+        if (node.attrs.name === "importedParameters") {
+          Object.entries(node.attrs.value).forEach(([key, value]) => {
+            hurmetVars[key] =  value;
+          });
+        } else {
+          insertOneHurmetVar(hurmetVars, node.attrs, null, formats.decimalFormat);
+        }
+      }
+    }
+  }
+
+  // Fetches, if any, are now complete and loaded into hurmetVars.
+  // Make a pass through the calculation nodes and calculate each result.
+  try {
+    for (const node of calcNodes) {
+      if (node.type === "calculation") {
+        if (!helpers.fetchRegEx.test(node.attrs.entry)) {
+          const entry = node.attrs.entry;
+          let attrs = compile(entry, formats);
+          attrs.displayMode = node.attrs.displayMode;
+          const mustDraw = attrs.dtype && attrs.dtype === dt.DRAWING;
+          if (attrs.rpn || mustDraw) {
+            attrs = attrs.rpn
+              ? evaluate(attrs, hurmetVars, formats)
+              : evaluateDrawing(attrs, hurmetVars, formats);
+          }
+          if (attrs.name) {
+            insertOneHurmetVar(hurmetVars, attrs, null, formats.decimalFormat);
+          }
+          // When we modify a node, we are also mutating the container doc.
+          node.attrs = attrs;
+        }
+      } else if ("dtype" in node.attrs && node.attrs.dtype === dt.SPREADSHEET) {
+        // node is a spreadsheet
+        const sheet = compileSheet(node, formats);
+        const sheetName = sheet.attrs.name;
+        hurmetVars[sheetName] = sheet.attrs;
+        hurmetVars[sheetName].value = {};
+        const numRows = sheet.content.length;
+        const numCols = sheet.content[0].content.length;
+        sheet.attrs.rowMap = {};
+        // Proceed column-wise thru the sheet.
+        for (let j = 0; j < numCols; j++) {
+          for (let i = 1; i < numRows; i++) {
+            const cell = sheet.content[i].content[j].content[0];
+            if (cell.attrs.rpn) {
+              cell.attrs.altresulttemplate = cell.attrs.resulttemplate;
+              cell.attrs = evaluate(cell.attrs, hurmetVars, formats);
+              cell.attrs.display = cell.attrs.alt;
+              if (j === 0) { sheet.attrs.rowMap[cell.attrs.alt] = i; }
+            } else if (j === 0 && typeof cell.attrs.value === "string") {
+              sheet.attrs.rowMap[cell.attrs.value] = i;
+            }
+            hurmetVars[sheetName].value[cell.attrs.name] = cell.attrs;
+          }
+        }
+        node.attrs = sheet.attrs;
+        node.content = sheet.content;
+      }
+    }
+    return doc
+  } catch (err) {
+    console.log(err); // eslint-disable-line no-console
+  }
+}
+
+const getTOCitems = (ast, tocArray, start, end, node) => {
+  if (Array.isArray(ast)) {
+    for (let i = 0; i < ast.length; i++) {
+      getTOCitems(ast[i], tocArray, start, end, node);
+    }
+  } else if (ast && ast.type === "heading") {
+    const level = ast.attrs.level;
+    if (start <= level && level <= end) {
+      tocArray.push([headingText(ast.content), level - start]);
+    }
+  } else if (ast.type === "toc") {
+    node.push(ast);
+  // eslint-disable-next-line no-prototype-builtins
+  } else if (ast.hasOwnProperty("content")) {
+    for (let j = 0; j < ast.content.length; j++) {
+      getTOCitems(ast.content[j], tocArray, start, end, node);
+    }
+  }
+};
+
+const wrapWithHead = (html, title, attrs) => {
+  title = title ? title : "Hurmet doc";
+  const fontClass = attrs && attrs.fontSize
+    ? { "10": "long-primer", "12": "pica", "18": "great-primer" }[attrs.fontSize]
+    : "long-primer";
+  const head = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${title}</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<article class="ProseMirror ${fontClass}">
+<div class="ProseMirror-setup">
+`;
+  return head + html + "\n</div></article>\n</body>\n</html>"
+};
+
+async function hurmet2html(md, title = "", inHtml = false) {
+  // Convert a Hurmet document to HTML.
+
+  // A Hurmet document is written in Markdown.
+  //     To extent possible, it matches GitHub Flavored Markdown (GFM)
+  //     For extensions beyond GFM, it matches, to the extent possible, Pandoc
+  //     For calculations, Hurmet has its own format.
+
+  // Start by converting the Markdown to an AST that matches
+  // the Hurmet internal data structure.
+  let ast = md2ast(md, inHtml);
+
+  // Populate a Hurmet Table of Contents, if any exists.
+  const tocCapture = /\n *\n{\.toc start=(\d) end=(\d)}\n/.exec(md);
+  if (tocCapture) {
+    const start = Number(tocCapture[1]);
+    const end = Number(tocCapture[2]);
+    const tocArray = [];
+    const node = [];
+    getTOCitems(ast, tocArray, start, end, node);
+    node[0].attrs.body = tocArray;
+  }
+
+  // Perform Hurmet calculations.
+  // This is asynchronous because a caclulation may need to fetch some remote data.
+  ast = await updateCalcs(ast);
+
+  // Write the HTML
+  let html = ast2html(ast);
+  // If you edit the next line, do the same in md2html.js.
+  html = html.replace(/<\/a><a href='[^']*'>/g, "");
+
+  if (title.length > 0) {
+    html = wrapWithHead(html, title, ast.attrs);
+  }
+
+  return html
+}
+
+/*
+ * teXtoCalc.js
+ * This file takes a text string and converts from TeX to Hurmet calculation format.
+*/
+
+// Delimiter types
+const PAREN = 1; // default
+const FRAC = 2;
+const TFRAC = 3;
+const BINARY = 4;
+const ENV = 5;  // environment
+const CASES = 6; // cases environment
+
+const  charAccents = {
+  "\\bar": "\u0304",
+  "\\grave": "\u0300",
+  "\\acute": "\u0301",
+  "\\hat": "\u0302",
+  "\\tilde": "\u0303",
+  "\\dot": "\u0307",
+  "\\ddot": "\u0308",
+  "\\mathring": "\u030A",
+  "\\check": "\u030C",
+  "\\underline": "\u0332",
+  "\\overleftharpoon": "\u20d0",
+  "\\overrightharpoon": "\u20d1",
+  "\\overleftarrow": "\u20d6",
+  "\\vec": "\u20d7",
+  "\\overleftrightarrow": "\u20e1"
+};
+const openParenRegEx = /^ *(?:\\(?:left|big|Big|bigg|Bigg))? *\(/;
+const leadingSpaceRegEx = /^\s+/;
+const trailingSpaceRegEx = / +$/;
+const inlineFracRegEx = /^\/(?!\/)/;
+const ignoreRegEx = /^\\(left(?!\.)|right(?!\.)|middle|big|Big|bigg|Bigg)/;
+const textSubRegEx = /^(?:(?:\\text|\\mathrm)?{([A-Za-z\u0391-\u03c9][A-Za-z0-9\u0391-\u03c9]*)}|{(?:\\text|\\mathrm)\{([A-Za-z\u0391-\u03c9][A-Za-z0-9\u0391-\u03c9]*)}})/;
+const enviroRegEx = /^(?:\\begin\{(?:(align(?:ed)?|align(?:ed)?at|d?array|d?cases|d?rcases|subarray|equation|split|gather(?:ed)?|CD|multline|smallmatrix)|(|p|b|B|v|V)matrix)\}|(\\bordermatrix)\b)/;
+const endEnviroRegEx = /^\\end\{(?:(align(?:ed)?|align(?:ed)?at|d?array|d?cases|d?rcases|subarray|equation|split|gather(?:ed)?|CD|multline|smallmatrix)|(|p|b|B|v|V)matrix)\}/;
+const ifRegEx = /^(?:\\(?:mathrm|text|mathrel{\\mathrm){)?(if|otherwise)\b/;
+// eslint-disable-next-line max-len
+const greekAlternatives = "Alpha|Beta|Gamma|Delta|Epsilon|Zeta|Eta|Theta|Iota|Kappa|Lambda|Mu|Nu|Xi|Omicron|Pi|Rho|Sigma|Tau|Upsilon|Phi|Chi|Psi|Omega|alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|omicron|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega|varphi";
+const greekRegEx = RegExp("^\\\\(" + greekAlternatives + ")\\b");
+const mathOperatorRegEx = /^\\(arcsin|arccos|arctan|arctg|arcctg|arg|ch|cos|cosec|cosh|cot|cotg|coth|csc|ctg|cth|deg|dim|exp|hom|ker|lg|ln|log|sec|sin|sinh|sh|sgn|tan|tanh|tg|th|max|min|gcd)\b/;
+// eslint-disable-next-line max-len
+const bracedCharRegEx = RegExp("^\\{([A-Za-z0-9\u0391-\u03c9]|\\\\(" + greekAlternatives + "))\\}");
+const distanceRegEx = /^[-+]?[0-9.]+(?:em|ex|mu|pt|mm|cm|in|bp|pc|dd|cc|nd|nc|sp)/;
+const greekLetters = {
+  Alpha: "Α",
+  Beta: "Β",
+  Gamma: "Γ",
+  Delta: "Δ",
+  Epsilon: "Ε",
+  Zeta: "Ζ",
+  Eta: "Η",
+  Theta: "Θ",
+  Iota: "Ι",
+  Kappa: "Κ",
+  Lambda: "Λ",
+  Mu: "Μ",
+  Nu: "Ν",
+  Xi: "Ξ",
+  Omicron: "Ο",
+  Pi: "Π",
+  Rho: "Ρ",
+  Sigma: "Σ",
+  Tau: "Τ",
+  Upsilon: "Υ",
+  Phi: "Φ",
+  Chi: "Χ",
+  Psi: "Ψ",
+  Omega: "Ω",
+  alpha: "α",
+  beta: "β",
+  gamma: "γ",
+  delta: "δ",
+  epsilon: "ε",
+  zeta: "ζ",
+  eta: "η",
+  theta: "θ",
+  iota: "ι",
+  kappa: "κ",
+  lambda: "λ",
+  mu: "μ",
+  nu: "ν",
+  xi: "ξ",
+  omicron: "ο",
+  pi: "π",
+  rho: "ρ",
+  sigma: "σ",
+  tau: "τ",
+  upsilon: "υ",
+  phi: "ϕ",
+  chi: "χ",
+  psi: "ψ",
+  omega: "ω",
+  varphi: "φ"
+};
+const boldRegEx = /^\\mathbf{([A-Za-z])}/;
+
+const matrices = {
+  m: ["{:", ":}"],
+  p: ["(", ")"],
+  b: ["[", "]"],
+  B: ["{", "}"],
+  v: ["|", "|"],
+  V: ["‖", "‖"]
+};
+
+const kerns = ["\\kern", "\\mkern", "\\mskip", "\\hskip"];
+
+const donotConvert = ["\\begin{CD}"];
+
+const eatOpenBrace = str => {
+  if (str.length === 0) { return ["", true] }
+  let didNotFindBrace = false;
+  if (str[0] === "{") {
+    str = str.slice(1);
+  } else {
+    didNotFindBrace = true;
+  }
+  str = str.replace(leadingSpaceRegEx, "");
+  return [str, didNotFindBrace]
+};
+
+const eatMatch = (str, match) => {
+  str = str.slice(match[0].length);
+  str = str.replace(leadingSpaceRegEx, "");
+  return str
+};
+
+const unbracedDistance = str => {
+  const match = distanceRegEx.exec(str);
+  if (!match) { return "" }
+  return match[0]
+};
+
+const tex2Calc = (str, displayMode = false) => {
+  let calc = "";
+  let token = {};
+  let prevToken = { input: "", ttype: 50 };
+  const delims = [{ ch: "", pos: -1, type: 0 }] ; // delimiter stack
+  let splitLongVars = true;
+  let waitingForUnbracedArg = false;
+  let justGotUnbracedArg = false;
+
+  // Trim the input string
+  str = str.replace(leadingSpaceRegEx, ""); //  trim leading white space
+  str = str.replace(/\s+$/, ""); //             trim trailing white space
+
+  // Execute the main parse loop.
+  while (str.length > 0 || justGotUnbracedArg) {
+    // Get the next token.
+
+    while (str.length > 0 && str.charAt(0) === "\n") {
+      calc += "\n";
+      str = str.replace(leadingSpaceRegEx, "");
+    }
+
+    if (justGotUnbracedArg) {
+      token = { input: "", output: "", ttype: tt.RIGHTBRACKET, closeDelim: "" };
+      justGotUnbracedArg = false;
+
+    } else if (str.length > 0 && str.charAt(0) === "'") {
+      // The Hurmet lexer will not handle an apostrophe properly. Lex it locally.
+      token = { input: "'", output: "′", ttype: tt.PRIME, closeDelim: "" };
+      str = str.slice(1);
+      str = str.replace(leadingSpaceRegEx, "");
+
+    } else if (inlineFracRegEx.test(str)) {
+      token = { input: "/", output: "\u2215", ttype: tt.MULT, closeDelim: "" };
+      str = str.slice(1);
+      str = str.replace(leadingSpaceRegEx, "");
+
+    } else if (mathOperatorRegEx.test(str)) {
+      const match = mathOperatorRegEx.exec(str);
+      token = { input: match[0], output: match[1], ttype: tt.FUNCTION, closeDelim: "" };
+      str = eatMatch(str, match);
+
+    } else if (greekRegEx.test(str)) {
+      const match = greekRegEx.exec(str);
+      token = {
+        input: match[0],
+        output: greekLetters[match[0].slice(1)],
+        ttype: tt.VAR,
+        closeDelim: ""
+      };
+      str = eatMatch(str, match);
+
+    } else if (delims[delims.length - 1].type === CASES && ifRegEx.test(str)) {
+      const match = ifRegEx.exec(str);
+      const lastChar = calc.trim().slice(-1);
+      if (lastChar === "&" || lastChar === ",") {
+        calc = calc.trim().slice(0, -1);
+      }
+      token = { input: match[0], output: match[1], ttype: tt.LOGIC, closeDelim: "" };
+      str = eatMatch(str, match);
+      if (match[0].indexOf("{") > -1) {
+        str = str.slice(1).trim();
+        const pos = match[0].lastIndexOf("{");
+        if (pos > -1 && pos !== match[0].indexOf("{")) {
+          str = str.slice(1).trim();
+        }
+      }
+
+    } else if (boldRegEx.test(str)) {
+      const match = boldRegEx.exec(str);
+      const codePoint = match[1].codePointAt(0);
+      const offset = codePoint < 91 ? 0x1D3BF : 0x1D3B9;
+      const ch = String.fromCodePoint(codePoint + offset);
+      token = { input: match[0], output: ch, ttype: tt.VAR, closeDelim: "" };
+      str = eatMatch(str, match);
+
+    } else if (enviroRegEx.test(str)) {
+      const match = enviroRegEx.exec(str);
+      if (match[1]) {
+        if (donotConvert.includes(match[0])) { return `"Unable to convert ${match[1]}"` }
+        const posAmp = str.indexOf("&");
+        if (match[1] === "cases" && ifRegEx.test(str.slice(posAmp + 1).trim())) {
+          // Change a TeX cases environment to a Hurmet { if } statement
+          token = { input: match[0], output: "{", ttype: tt.ENVIRONMENT, closeDelim: "}" };
+        } else {
+          token = { input: match[0], output:`\\${match[1]}`,
+            ttype: tt.ENVIRONMENT, closeDelim: ")" };
+        }
+      } else if (match[2]) {
+        const matrixType = match[2] || "m";
+        token = { input: match[0], output: matrices[matrixType][0],
+          ttype: tt.ENVIRONMENT, closeDelim: matrices[matrixType][1] };
+      } else {
+        // \bordermatrix
+        token = { input: match[0], output: match[3], ttype: tt.ENVIRONMENT, closeDelim: ")" };
+      }
+      str = eatMatch(str, match);
+
+    } else if (endEnviroRegEx.test(str)) {
+      const match = endEnviroRegEx.exec(str);
+      token = { input: match[0], output: match[1], ttype: tt.RIGHTBRACKET, closeDelim: "" };
+      str = eatMatch(str, match);
+
+    } else if (ignoreRegEx.test(str)) {
+      const match = ignoreRegEx.exec(str);
+      str = eatMatch(str, match);
+
+    } else {
+      // Many, many symbols are the same in TeX and in Hurmet calcs.
+      // So we can use the Hurmet lexer to identify them.
+      const tkn = lex(str, { decimalFormat: "10000000.", dateFormat: "yyyy-mm-dd" }, prevToken);
+      if (donotConvert.includes(tkn[0])) { return `'"Unable to convert ${tkn[1]}"` }
+      if (waitingForUnbracedArg && (tkn[3] === tt.LONGVAR || tkn[3] === tt.NUM)) {
+        token = { input: tkn[0][0], output: tkn[2][0], ttype: tkn[3], closeDelim: "" };
+        str = str.slice(1);
+      } else {
+        token = { input: tkn[0], output: tkn[2], ttype: tkn[3], closeDelim: tkn[4] };
+        str = str.slice(token.input.length);
+      }
+      str = str.replace(leadingSpaceRegEx, "");
+    }
+
+    switch (token.ttype) {
+      case tt.SPACE: //  spaces and newlines
+        calc += token.output;
+        break
+
+      case tt.MULT: //         inline mult/divide operators, × * · /// ÷
+      case tt.REL: //          relational operators, e.g  < > == →
+      case tt.BIN: //          infix math operators that render but don't calc, e.g. \bowtie
+      case tt.BIG_OPERATOR: // integral, sum, etc
+      case tt.LOGIC: //        if, and, or, ∀, ∃, ∧, ∨, etc
+        calc += token.output + " ";
+        break
+
+      case tt.SUPCHAR:
+        calc = calc.replace(trailingSpaceRegEx, "");
+        calc += token.output;
+        break
+
+      case tt.SUB:
+      case tt.SUP: {
+        calc = calc.replace(trailingSpaceRegEx, "");
+        calc += token.output;
+        if (token.ttype === tt.SUB && textSubRegEx.test(str)) {
+          const match = textSubRegEx.exec(str);
+          const subscript = match[1] ? match[1] : match[2];
+          calc += subscript + " ";
+          str = str.slice(match[0].length);
+        } else if (str.length > 0 && str.charAt(0) === "{") {
+          [str, waitingForUnbracedArg] = eatOpenBrace(str);
+          delims.push({ ch: ")", pos: calc.length, type: PAREN });
+          calc += "(";
+        }
+        break
+      }
+
+      case tt.ADD: { //        infix add/subtract operators, + -
+        const dType = delims[delims.length - 1].type;
+        if (token.input === "&" && (dType === ENV || dType === CASES)) {
+          calc += ", ";   // Write a comma separator for environments
+        } else {
+          calc += token.output + " ";
+        }
+        break
+      }
+
+      case tt.NUM:
+      case tt.ORD:
+      case tt.VAR: {
+        calc += token.output + " ";
+        if (waitingForUnbracedArg) {
+          justGotUnbracedArg = true;
+          waitingForUnbracedArg = false;
+        }
+        break
+      }
+
+      case tt.LONGVAR:
+        calc += splitLongVars ? token.output.split("").join(" ") + " " : token.output;
+        break
+
+      case tt.FACTORIAL:
+      case tt.PRIME:
+        calc = calc.trim() + token.output + " ";
+        break
+
+      case tt.ACCENT: {
+        if (charAccents[token.input] && bracedCharRegEx.test(str)) {
+          delims.push({ ch: charAccents[token.input], pos: calc.length, type: PAREN });
+          [str, waitingForUnbracedArg] = eatOpenBrace(str);
+        } else {
+          calc += token.output;
+          if (str.length > 0 && str.charAt(0) === "{") {
+            calc += "(";
+            delims.push( { ch: ")", pos: calc.length, type: PAREN });
+            [str, waitingForUnbracedArg] = eatOpenBrace(str);
+          }
+        }
+        break
+      }
+
+      case tt.UNARY: {
+        if (verbatims.has(token.input)) {
+          // eslint-disable-next-line no-useless-assignment
+          let arg = "";
+          if (kerns.includes(token.input) && str[0] !== "{") {
+            arg = unbracedDistance(str);
+            str = str.slice(arg.length);
+          } else {
+            arg = verbatimArg(str);
+            str = str.slice(arg.length + 2);
+          }
+          calc += token.input === "\\text"
+            ? '"' + arg + '"'
+            : token.input === "\\mathrm" && arg.length > 1 && arg.indexOf(" ") === -1
+            ? arg
+            : token.input + "(" + arg + ")";
+          if (token.input === "\\mathrm" && waitingForUnbracedArg) {
+            justGotUnbracedArg = true;
+            waitingForUnbracedArg = false;
+          }
+          str = str.replace(leadingSpaceRegEx, "");
+        } else if (token.input === "\\sqrt") {
+          if (str.slice(0, 1) === "[") {
+            const root = verbatimArg(str);
+            str = str.slice(root.length + 2);
+            str = str.replace(leadingSpaceRegEx, "");
+            calc += (root === "3") ? "∛(" : (root === "4") ? "∜(" : `root(${root})(`;
+          } else {
+            calc += "√(";
+          }
+          delims.push({ ch: ")", pos: calc.length, type: PAREN });
+          [str, waitingForUnbracedArg] = eatOpenBrace(str);
+        } else {
+          calc += token.output + "(";
+          if (str.length > 0 && str.charAt(0) === "{") {
+            delims.push({
+              ch: ")",
+              pos: calc.length,
+              type: PAREN
+            });
+          }
+          [str, waitingForUnbracedArg] = eatOpenBrace(str);
+        }
+        break
+      }
+
+      case tt.BINARY: {
+        const pos = calc.length;
+        if (token.input === "\\dfrac" || (token.input === "\\frac" && displayMode)) {
+          calc += "(";
+          delims.push({ ch: ")/(", pos, type: FRAC });
+        } else if (token.input === "\\tfrac" || (token.input === "\\frac" && !displayMode)) {
+          calc += "(";
+          delims.push({ ch: ")//(", pos, type: TFRAC });
+        } else if (verbatims.has(token.input)) {
+          const arg = verbatimArg(str);
+          calc += token.input + "(" + arg + ")(";
+          str = str.slice(arg.length + 2);
+          str = str.replace(leadingSpaceRegEx, "");
+          delims.push({ ch: ")", pos, type: PAREN });
+        } else {
+          calc += token.input + "(";
+          delims.push({ ch: ")(", pos, type: BINARY });
+        }
+        [str, waitingForUnbracedArg] = eatOpenBrace(str);
+        break
+      }
+
+      case tt.DIV: {   // \over, \atop
+        const pos = delims[delims.length - 1].pos;
+        calc = calc.slice(0, pos) + "(" + calc.slice(pos + 1);
+        delims.pop();
+        calc += token.input === "\\over" ? ")/(" : ")" + token.output + "(";
+        delims.push({ ch: ")", pos: calc.length - 1, type: PAREN });
+        break
+      }
+
+      case tt.FUNCTION: {
+        calc += token.output;
+        const pos = calc.length;
+        const match = openParenRegEx.exec(str);
+        if (match) {
+          calc += "(";
+          delims.push({ ch: ")", pos, type: PAREN });
+          str = eatMatch(str, match);
+        } else {
+          calc += " ";
+        }
+        break
+      }
+
+      case tt.LEFTBRACKET:
+      case tt.ENVIRONMENT: {
+        delims.push({
+          ch: token.closeDelim,
+          pos: calc.length,
+          type: token.input === "\\bordermatrix"
+            ? ENV
+            : token.ttype === tt.ENVIRONMENT && token.closeDelim === "}"
+            ? CASES
+            : token.ttype === tt.ENVIRONMENT
+            ? ENV
+            : PAREN
+        });
+        calc += token.output;
+        if (verbatims.has(token.output) ||
+          (token.output === "\\bordermatrix" && str.slice(0, 1) === "[")) {
+          const arg = verbatimArg(str);
+          calc += token.output === "\\bordermatrix" ? "[" + arg + "]" : "(" + arg + ")";
+          str = str.slice(arg.length + 2);
+          str = str.replace(leadingSpaceRegEx, "");
+        }
+        if (token.output === "\\bordermatrix") {
+          str = str.slice(1);
+          str = str.replace(leadingSpaceRegEx, "");
+        }
+        if (token.output.slice(0, 1) === "\\") { calc += "("; }
+        break
+      }
+
+      case tt.SEP: {
+        const inEnvironment = (delims[delims.length - 1].type === ENV);
+        if ((token.input === "\\\\" || token.input === "\\cr") && inEnvironment) {
+          calc += "; ";
+        } else {
+          calc += (token.input === "&" && inEnvironment) ?  ", " : token.output + " ";
+        }
+        break
+      }
+
+      case tt.RIGHTBRACKET: {
+        const delim = delims.pop();
+        calc = calc.replace(trailingSpaceRegEx, "");
+
+        if (delim.type === FRAC || delim.type === TFRAC) {
+          calc += delim.type === FRAC ? ") / (" : ")//(";
+          delims.push({ ch: ")", pos: calc.length - 1, type: PAREN });
+          [str, waitingForUnbracedArg] = eatOpenBrace(str);
+
+        } else if (delim.type === BINARY) {
+          calc += ")(";
+          delims.push({ ch: ")", pos: calc.length - 1, type: PAREN });
+          [str, waitingForUnbracedArg] = eatOpenBrace(str);
+
+        } else {
+          calc += delim.ch + " ";
+        }
+        if (delim.ch === '"' || delim.ch === "") { splitLongVars = true; }
+        break
+      }
+
+      default:
+        calc += token.output;
+    }
+
+    prevToken = cloneToken(token);
+  }
+
+  calc = calc.replace(/ {2,}/g, " "); // Replace multiple spaces with single space.
+  calc = calc.replace(/\s+(?=[_^'′!,;)}\]〗])/g, ""); // Delete spaces before right delims
+  calc = calc.replace(/\s+$/, ""); //                 Delete trailing space
+
+  return calc
+};
+
+// Some helper functions for handling snapshot content and path definitions in the markdown.
+
+const SNAPSHOT_PATH_DEF_START_R = /^\[(\d+)\]: /gm;
+
+function splitMarkdownPathDefinitions(markdown) {
+  const matches = Array.from(markdown.matchAll(SNAPSHOT_PATH_DEF_START_R));
+  if (matches.length === 0) {
+    return { body: markdown.replace(/\n+$/, ""), pathDefs: {} }
+  }
+
+  const body = markdown.slice(0, matches[0].index).replace(/\n+$/, "");
+  const pathDefs = {};
+
+  for (let i = 0; i < matches.length; i++) {
+    const index = matches[i][1];
+    const start = matches[i].index;
+    const end = i + 1 < matches.length ? matches[i + 1].index : markdown.length;
+    pathDefs[index] = markdown.slice(start, end).replace(/\n+$/, "");
+  }
+
+  return { body, pathDefs }
+}
+
+function pathDefPayload(pathDef) {
+  return pathDef.replace(/^\[\d+\]: /, "")
+}
+
+function renumberMarkdownPathReferences(markdown, indexMap) {
+  let result = markdown.replace(
+    /(\[[^\]]*\]\[)(\d+)(\])/g,
+    (match, open, oldIndex, close) => {
+      const newIndex = indexMap[oldIndex];
+      return newIndex ? `${open}${newIndex}${close}` : match
+    }
+  );
+
+  result = result.replace(
+    /(!!?\[)(\d+)(\]\[\])/g,
+    (match, open, oldIndex, close) => {
+      const newIndex = indexMap[oldIndex];
+      return newIndex ? `${open}${newIndex}${close}` : match
+    }
+  );
+
+  return result
+}
+
+function addDefsToCollection(sourceDefs, dedupeMap, targetDefs) {
+  const indexMap = {};
+  const keys = Object.keys(sourceDefs || {}).sort((a, b) => Number(a) - Number(b));
+
+  for (const oldIndex of keys) {
+    const payload = pathDefPayload(sourceDefs[oldIndex]);
+    let newIndex = dedupeMap.get(payload);
+
+    if (!newIndex) {
+      newIndex = String(dedupeMap.size + 1);
+      dedupeMap.set(payload, newIndex);
+      targetDefs[newIndex] = `[${newIndex}]: ${payload}`;
+    }
+
+    indexMap[oldIndex] = newIndex;
+  }
+
+  return indexMap
+}
+
+function rebuildSnapshotCacheAndContents(
+  existingSnapshots,
+  snapshotPathCache,
+  newSnapshot
+) {
+  const dedupeMap = new Map();
+  const nextCache = {};
+
+  const cacheIndexMap = addDefsToCollection(snapshotPathCache || {}, dedupeMap, nextCache);
+
+  const normalizedSnapshots = existingSnapshots.map(snapshot => {
+    const { body, pathDefs } = splitMarkdownPathDefinitions(snapshot.content);
+    const indexMap = Object.keys(pathDefs).length > 0
+      ? addDefsToCollection(pathDefs, dedupeMap, nextCache)
+      : cacheIndexMap;
+
+    return {
+      ...snapshot,
+      content: renumberMarkdownPathReferences(body, indexMap)
+    }
+  });
+
+  const newIndexMap = addDefsToCollection(newSnapshot.pathDefs, dedupeMap, nextCache);
+
+  return {
+    snapshots: normalizedSnapshots,
+    snapshotPathCache: nextCache,
+    content: renumberMarkdownPathReferences(newSnapshot.body, newIndexMap)
+  }
+}
+
+function mergeSavedMarkdownPathData(
+  currentMarkdown,
+  snapshots = [],
+  snapshotPathCache = {}
+) {
+  const { body: currentBody, pathDefs: currentPathDefs } =
+    splitMarkdownPathDefinitions(currentMarkdown);
+
+  const dedupeMap = new Map();
+  const mergedPathDefs = {};
+
+  const currentIndexMap = addDefsToCollection(currentPathDefs, dedupeMap, mergedPathDefs);
+  const snapshotCacheIndexMap = addDefsToCollection(
+    snapshotPathCache,
+    dedupeMap,
+    mergedPathDefs
+  );
+
+  const normalizedSnapshots = snapshots.map(snapshot => {
+    const { body, pathDefs } = splitMarkdownPathDefinitions(snapshot.content);
+
+    const indexMap = Object.keys(pathDefs).length > 0
+      ? addDefsToCollection(pathDefs, dedupeMap, mergedPathDefs)
+      : snapshotCacheIndexMap;
+
+    return {
+      ...snapshot,
+      content: renumberMarkdownPathReferences(body, indexMap)
+    }
+  });
+
+  return {
+    body: renumberMarkdownPathReferences(currentBody, currentIndexMap),
+    pathDefs: mergedPathDefs,
+    snapshots: normalizedSnapshots
+  }
+}
+
+function stringifyMarkdownPathDefinitions(pathDefs) {
+  return Object.keys(pathDefs || {})
+    .sort((a, b) => Number(a) - Number(b))
+    .map(key => pathDefs[key])
+    .join("\n\n") + "\n"
+}
+
+async function updateAndSave(md) {
+  // Update the calculations of a Hurmet document and return a Hurmet Markdown
+  // document with results written inline.
+
+  let ast = md2ast(md, false);
+
+  /*
+  // Populate a Hurmet Table of Contents, if any exists.
+  const tocCapture = /\n *\n{\.toc start=(\d) end=(\d)}\n/.exec(md)
+  if (tocCapture) {
+    const start = Number(tocCapture[1])
+    const end = Number(tocCapture[2])
+    const tocArray = [];
+    const node = [];
+    getTOCitems(ast, tocArray, start, end, node)
+    node[0].attrs.body = tocArray
+  }
+  */
+
+  ast = await updateCalcs(ast);
+  const pmDoc = schema.nodeFromJSON(ast);
+
+  const currentMarkdown = hurmetMarkdownSerializer.serialize(
+    pmDoc,
+    new Map(),
+    [],
+    false,
+    true
+  );
+
+  const savedPathData = mergeSavedMarkdownPathData(
+    currentMarkdown,
+    ast.attrs.snapshots,
+    ast.attrs.snapshotPathCache
+  );
+
+  let updatedMarkdown = `---------------
+decimalFormat: ${ast.attrs.decimalFormat}
+fontSize: ${ast.attrs.fontSize}
+pageSize: ${ast.attrs.pageSize}
+dateFormat: ${ast.attrs.dateFormat}
+saveDate: ${new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60 * 1000).toISOString().split("T")[0]}
+---------------
+
+${savedPathData.body}`;
+
+  const pathDefText = stringifyMarkdownPathDefinitions(savedPathData.pathDefs);
+  if (pathDefText.length > 0) {
+    updatedMarkdown += `\n\n${pathDefText}`;
+  }
+
+  // updateDoc.js cannot rebuild fallback data because it has no state.doc traversal.
+  for (const snapshot of savedPathData.snapshots) {
+    updatedMarkdown += `\n\n<!--SNAPSHOT-->\ndate: ${snapshot.date}\nmessage: ${snapshot.message}\n\n`;
+    updatedMarkdown += snapshot.content;
+  }
+
+  return updatedMarkdown
+}
+
+/*
+ * This file bundles together and exposes the calculation parts of Hurmet.
+ * I use Rollup to create a CJS module from this code.
+ * That way, one file can expose the same functionality to (1) the Hurmet.org web page,
+ * (2) the REPL in the reference manual, (3) the script that transpiles
+ * the Hurmet reference manual from Markdown to HTML, and (4) unit testing.
+ *
+ * Some of Hurmet’s exported functions are valuable only to the Hurmet.org web page.
+ * If you wish to use Hurmet’s math parsing and/or calculation abilities,
+ * the two functions you want are:
+ *   parse(entry: string, formats?: { decimalFormat: string, dateFormat: string })
+ *   calculate(entry: string, vars?: Object, draftMode?: boolean,
+ *             formats?: { decimalFormat: string, dateFormat: string })
+ *
+ *   parse() returns a TeX string.
+ *   calculate() returns either a TeX string or a string in Hurmet calculation syntax.
+ */
+
+var hurmet = {
+  parse: parse$1,
+  calculate,
+  compile,
+  md2ast,
+  md2html,
+  hurmet2html,
+  scanModule,
+  tex2Calc,
+  updateCalculations,
+  updateAndSave,
+  Rnl,
+  version: "0.1.0"
+};
+
 function draftMode(state, dispatch, calcNode) {
   // Toggle the document's draft mode.
   // When in draft mode, Hurmet displays calc zones in plain text and omits the blue echo.
@@ -54723,6 +54867,57 @@ function readFile(state, _, view, schema, format) {
     };
     input.click();
   }
+}
+
+function revertToSnapshotByPos(state, view, pos, currentMarkdown, message) {
+  const targetSnapshot = state.doc.attrs.snapshots[pos];
+  if (!targetSnapshot) { return }
+
+  const { body, pathDefs } = splitMarkdownPathDefinitions(currentMarkdown);
+  const rebuilt = rebuildSnapshotCacheAndContents(
+    state.doc.attrs.snapshots,
+    state.doc.attrs.snapshotPathCache,
+    { body, pathDefs }
+  );
+
+  const preservedCurrentSnapshot = {
+    date: new Date().toISOString().replace(/T.+/, ""),
+    message,
+    content: rebuilt.content
+  };
+
+  const allSnapshots = rebuilt.snapshots.concat(preservedCurrentSnapshot);
+  const targetContent = rebuilt.snapshots[pos].content;
+  const pathDefText = stringifyMarkdownPathDefinitions(rebuilt.snapshotPathCache);
+
+  const fileHandle = state.doc.attrs.fileHandle;
+  const inDraftMode = state.doc.attrs.inDraftMode;
+
+  let md = `---------------
+decimalFormat: ${state.doc.attrs.decimalFormat}
+fontSize: ${state.doc.attrs.fontSize}
+pageSize: ${state.doc.attrs.pageSize}
+dateFormat: ${state.doc.attrs.dateFormat}
+saveDate: ${new Date(new Date().getTime()
+  - new Date().getTimezoneOffset() * 60 * 1000).toISOString().split("T")[0]}
+---------------
+
+${targetContent}`;
+
+  if (pathDefText.length > 0) {
+    md += `\n\n${pathDefText}`;
+  }
+
+  for (const item of allSnapshots) {
+    md += `\n\n<!--SNAPSHOT-->\ndate: ${item.date}\nmessage: ${item.message}\n\n`;
+    md += item.content;
+  }
+
+  handleContents(view, schema, md, "markdown");
+
+  view.state.doc.attrs.fileHandle = fileHandle;
+  view.state.doc.attrs.saveIsValid = false;
+  view.state.doc.attrs.inDraftMode = inDraftMode;
 }
 
 var FileSaver$1 = {exports: {}};
@@ -55035,7 +55230,7 @@ const showDiff = state => {
   const callback = pos => {
     const dmp = new diff_match_patch();
     const text1 = state.doc.attrs.snapshots[pos].content;
-    const text2 = hurmetMarkdownSerializer.serialize(state.doc, new Map(), false);
+    const text2 = hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, true);
     dmp.Diff_Timeout = 2;
     dmp.Diff_EditCost = 4;
     let d = dmp.diff_main(text1, text2);
@@ -56455,200 +56650,6 @@ diff_match_patch.prototype.diff_fromDelta = function(text1, delta) {
   return diffs;
 };
 
-// Some helper functions for handling snapshot content and path definitions in the markdown.
-
-const SNAPSHOT_PATH_DEF_START_R = /^\[(\d+)\]: /gm;
-
-function splitMarkdownPathDefinitions(markdown) {
-  const matches = Array.from(markdown.matchAll(SNAPSHOT_PATH_DEF_START_R));
-  if (matches.length === 0) {
-    return { body: markdown.replace(/\n+$/, ""), pathDefs: {} }
-  }
-
-  const body = markdown.slice(0, matches[0].index).replace(/\n+$/, "");
-  const pathDefs = {};
-
-  for (let i = 0; i < matches.length; i++) {
-    const index = matches[i][1];
-    const start = matches[i].index;
-    const end = i + 1 < matches.length ? matches[i + 1].index : markdown.length;
-    pathDefs[index] = markdown.slice(start, end).replace(/\n+$/, "");
-  }
-
-  return { body, pathDefs }
-}
-
-function pathDefPayload(pathDef) {
-  return pathDef.replace(/^\[\d+\]: /, "")
-}
-
-function renumberMarkdownPathReferences(markdown, indexMap) {
-  let result = markdown.replace(
-    /(\[[^\]]*\]\[)(\d+)(\])/g,
-    (match, open, oldIndex, close) => {
-      const newIndex = indexMap[oldIndex];
-      return newIndex ? `${open}${newIndex}${close}` : match
-    }
-  );
-
-  result = result.replace(
-    /(!!?\[)(\d+)(\]\[\])/g,
-    (match, open, oldIndex, close) => {
-      const newIndex = indexMap[oldIndex];
-      return newIndex ? `${open}${newIndex}${close}` : match
-    }
-  );
-
-  return result
-}
-
-function addDefsToCollection(sourceDefs, dedupeMap, targetDefs) {
-  const indexMap = {};
-  const keys = Object.keys(sourceDefs || {}).sort((a, b) => Number(a) - Number(b));
-
-  for (const oldIndex of keys) {
-    const payload = pathDefPayload(sourceDefs[oldIndex]);
-    let newIndex = dedupeMap.get(payload);
-
-    if (!newIndex) {
-      newIndex = String(dedupeMap.size + 1);
-      dedupeMap.set(payload, newIndex);
-      targetDefs[newIndex] = `[${newIndex}]: ${payload}`;
-    }
-
-    indexMap[oldIndex] = newIndex;
-  }
-
-  return indexMap
-}
-
-function rebuildSnapshotCacheAndContents(
-  existingSnapshots,
-  snapshotPathCache,
-  newSnapshot
-) {
-  const dedupeMap = new Map();
-  const nextCache = {};
-
-  const cacheIndexMap = addDefsToCollection(snapshotPathCache || {}, dedupeMap, nextCache);
-
-  const normalizedSnapshots = existingSnapshots.map(snapshot => {
-    const { body, pathDefs } = splitMarkdownPathDefinitions(snapshot.content);
-    const indexMap = Object.keys(pathDefs).length > 0
-      ? addDefsToCollection(pathDefs, dedupeMap, nextCache)
-      : cacheIndexMap;
-
-    return {
-      ...snapshot,
-      content: renumberMarkdownPathReferences(body, indexMap)
-    }
-  });
-
-  const newIndexMap = addDefsToCollection(newSnapshot.pathDefs, dedupeMap, nextCache);
-
-  return {
-    snapshots: normalizedSnapshots,
-    snapshotPathCache: nextCache,
-    content: renumberMarkdownPathReferences(newSnapshot.body, newIndexMap)
-  }
-}
-
-function mergeSavedMarkdownPathData(
-  currentMarkdown,
-  snapshots = [],
-  snapshotPathCache = {}
-) {
-  const { body: currentBody, pathDefs: currentPathDefs } =
-    splitMarkdownPathDefinitions(currentMarkdown);
-
-  const dedupeMap = new Map();
-  const mergedPathDefs = {};
-
-  const currentIndexMap = addDefsToCollection(currentPathDefs, dedupeMap, mergedPathDefs);
-  const snapshotCacheIndexMap = addDefsToCollection(
-    snapshotPathCache,
-    dedupeMap,
-    mergedPathDefs
-  );
-
-  const normalizedSnapshots = snapshots.map(snapshot => {
-    const { body, pathDefs } = splitMarkdownPathDefinitions(snapshot.content);
-
-    const indexMap = Object.keys(pathDefs).length > 0
-      ? addDefsToCollection(pathDefs, dedupeMap, mergedPathDefs)
-      : snapshotCacheIndexMap;
-
-    return {
-      ...snapshot,
-      content: renumberMarkdownPathReferences(body, indexMap)
-    }
-  });
-
-  return {
-    body: renumberMarkdownPathReferences(currentBody, currentIndexMap),
-    pathDefs: mergedPathDefs,
-    snapshots: normalizedSnapshots
-  }
-}
-
-function stringifyMarkdownPathDefinitions(pathDefs) {
-  return Object.keys(pathDefs || {})
-    .sort((a, b) => Number(a) - Number(b))
-    .map(key => pathDefs[key])
-    .join("\n\n")
-}
-
-function revertToSnapshotByPos(state, view, pos, currentMarkdown, message) {
-  const targetSnapshot = state.doc.attrs.snapshots[pos];
-  if (!targetSnapshot) { return }
-
-  const { body, pathDefs } = splitMarkdownPathDefinitions(currentMarkdown);
-  const rebuilt = rebuildSnapshotCacheAndContents(
-    state.doc.attrs.snapshots,
-    state.doc.attrs.snapshotPathCache,
-    { body, pathDefs }
-  );
-
-  const preservedCurrentSnapshot = {
-    date: new Date().toISOString().replace(/T.+/, ""),
-    message,
-    content: rebuilt.content
-  };
-
-  const allSnapshots = rebuilt.snapshots.concat(preservedCurrentSnapshot);
-  const targetContent = rebuilt.snapshots[pos].content;
-  const pathDefText = stringifyMarkdownPathDefinitions(rebuilt.snapshotPathCache);
-
-  const fileHandle = state.doc.attrs.fileHandle;
-  const inDraftMode = state.doc.attrs.inDraftMode;
-
-  let md = `---------------
-decimalFormat: ${state.doc.attrs.decimalFormat}
-fontSize: ${state.doc.attrs.fontSize}
-pageSize: ${state.doc.attrs.pageSize}
-dateFormat: ${state.doc.attrs.dateFormat}
-saveDate: ${new Date(new Date().getTime()
-  - new Date().getTimezoneOffset() * 60 * 1000).toISOString().split("T")[0]}
----------------
-
-${targetContent}`;
-
-  if (pathDefText.length > 0) {
-    md += `\n\n${pathDefText}`;
-  }
-
-  for (const item of allSnapshots) {
-    md += `\n\n<!--SNAPSHOT-->\ndate: ${item.date}\nmessage: ${item.message}\n\n`;
-    md += item.content;
-  }
-
-  handleContents(view, schema, md, "markdown");
-
-  view.state.doc.attrs.fileHandle = fileHandle;
-  view.state.doc.attrs.saveIsValid = false;
-  view.state.doc.attrs.inDraftMode = inDraftMode;
-}
-
 /* eslint-disable */
 
 // Menu icons that are not included in node-module menu.js
@@ -57141,7 +57142,7 @@ function saveFileAsMarkdown(state, view, isSaveAs = false) {
     new Map(),
     [],
     false,
-    false
+    true // with results
   );
 
   const savedPathData = mergeSavedMarkdownPathData(
@@ -57306,8 +57307,8 @@ function liveReload() {
   })
 }
 
-function copyText(state, isGFM, withResults = false) {
-  const text = hurmetMarkdownSerializer.serialize(state.selection.content().content, new Map(), [], isGFM, withResults);
+function copyText(state, isGFM) {
+  const text = hurmetMarkdownSerializer.serialize(state.selection.content().content, new Map(), [], isGFM, true);
   const type = "text/plain";
   const blob = new Blob([text], { type });
   const data = [new ClipboardItem({ [type]: blob })];
@@ -57319,16 +57320,6 @@ function copyAsMarkdown() {
     label: "Copy as Hurmet Markdown",
     run(state, _, view) {
       copyText(state, false);
-    }
-  })
-}
-
-function copyAsMarkdownWithResults() {
-  return new MenuItem({
-    label: "Copy as MD w/Results",
-    title: "Copy as Markdown. Include human-readable results.",
-    run(state, _, view) {
-      copyText(state, false, true);
     }
   })
 }
@@ -57722,7 +57713,7 @@ function takeSnapshot() {
         fields: { message: new TextField({ label: "Commit message", required: true }) },
         callback(attrs) {
           const dateStr = new Date().toISOString().replace(/T.+/, "");
-          let md = hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, false);
+          let md = hurmetMarkdownSerializer.serialize(state.doc, new Map(), [], false, true);
           const { body, pathDefs } = splitMarkdownPathDefinitions(md);
 
           const rebuilt = rebuildSnapshotCacheAndContents(
@@ -57777,7 +57768,7 @@ function revertToSnapshot() {
           new Map(),
           [],
           false,
-          false
+          true // with results
         );
         const targetLabel =
           (new Date(target.date)).toISOString().replace(/T.+/, "") + "  " + target.message;
@@ -58849,11 +58840,9 @@ function buildMenuItems(schema) {
   ])];
 
   r.copyAsMarkdown = copyAsMarkdown();
-  r.copyAsMarkdownWithResults = copyAsMarkdownWithResults();
   r.copyAsGFM = copyAsGFM();
   r.Markdown = new Dropdown([
     r.copyAsMarkdown,
-    r.copyAsMarkdownWithResults,
     r.copyAsGFM
   ], {label: "𝐌"});
 
@@ -60226,7 +60215,7 @@ function openMathPrompt(options) {
     }
     if (!isUDF) {
       try {
-        hurmet.render(tex, mathDisplay, {
+        temml$1.render(tex, mathDisplay, {
           displayMode: options.attrs.displayMode,
           wrap: "=",
           errorColor: "#fff"
@@ -60491,7 +60480,7 @@ class FootnoteView {
 // Prosemirror core modules
 
 if (typeof window !== "undefined") {
-  window.hurmet = { round: formatFloat }; // Expose for use by sketch module.
+  window.hurmet = { version: hurmet.version, round: formatFloat }; // Expose round for use by sketch module.
 }
 
 // Bundle together the plugins.

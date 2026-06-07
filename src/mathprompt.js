@@ -2,6 +2,7 @@ import { autoCorrect } from "./autocorrect"
 import { codeJar, selectedText, textBeforeCursor, textAfterCursor } from "./codejar"
 import { findWordAtClickPos, positionOfDefinition } from "./findDefinition"
 import hurmet from "./hurmet"
+import temml from "./temml.js"
 
 const commaRegEx = /"[^"]*"|[0-9]+,[0-9]+|[A-Za-zıȷ\u0391-\u03D5\uD835][A-Za-z0-9_ıȷ\u0391-\u03D5\uD835\uDC00-\uDFFF]/g
 const dotRegEx = /"[^"]*"|[0-9]+\.[0-9]+|[A-Za-zıȷ\u0391-\u03D5\uD835][A-Za-z0-9_ıȷ\u0391-\u03D5\uD835\uDC00-\uDFFF]/g
@@ -103,7 +104,7 @@ export function openMathPrompt(options) {
     }
     if (!isUDF) {
       try {
-        hurmet.render(tex, mathDisplay, {
+        temml.render(tex, mathDisplay, {
           displayMode: options.attrs.displayMode,
           wrap: "=",
           errorColor: "#fff"

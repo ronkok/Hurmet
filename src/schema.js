@@ -5,7 +5,7 @@ import {Slice, Fragment, NodeRange} from "prosemirror-model"
 import { renderToC, tocLevels } from "./paginate"
 import { dt } from "./constants"
 import { renderSVG } from "./renderSVG"
-import hurmet from "./hurmet"
+import temml from "./temml.js"
 
 // Helpers for creating a schema that supports tables.
 
@@ -542,7 +542,7 @@ export const nodes = {
         dom.firstChild.textContent = node.attrs.alt ? node.attrs.alt : node.attrs.entry
       } else {
         const tex = node.attrs.tex
-        hurmet.render(tex, dom, {
+        temml.render(tex, dom, {
           displayMode: node.attrs.displayMode,
           trust: (context) => context.command === '\\class' && 
             (context.class === "special-fraction" || context.class === "date-result"),
@@ -589,7 +589,7 @@ export const nodes = {
       } else if ("display" in dom.dataset) {
         delete dom.dataset.display
       }
-      hurmet.render(tex, dom, { displayMode: node.attrs.displayMode, wrap: "=" })
+      temml.render(tex, dom, { displayMode: node.attrs.displayMode, wrap: "=" })
       if (node.attrs.displayMode) {
         dom.style.display = "flex"
         dom.style.justifyContent = "center"

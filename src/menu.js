@@ -24,7 +24,7 @@ import { isInTable, addColumnBefore, deleteColumn,
 import hurmet from "./hurmet"
 import { draftMode } from "./draftMode"
 import { hurmetMarkdownSerializer } from "./to_markdown"
-import { readFile, handleContents } from "./openfile"
+import { readFile, handleContents, revertToSnapshotByPos } from "./openfile"
 import { saveAs } from "filesaver.js-npm"
 import { paginate, forToC, forPrint } from "./paginate.js"
 import { showDiff } from "./diffMatchPatch"
@@ -38,8 +38,7 @@ import {
   splitMarkdownPathDefinitions,
   rebuildSnapshotCacheAndContents,
   mergeSavedMarkdownPathData,
-  stringifyMarkdownPathDefinitions,
-  revertToSnapshotByPos
+  stringifyMarkdownPathDefinitions
 } from "./snapshots.js"
 
 // Menu icons that are not included in node-module menu.js

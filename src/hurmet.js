@@ -5,7 +5,6 @@ import { md2html } from "./md2html"
 import { hurmet2html } from "./hurmet2html.js"
 import { tex2Calc } from "./tex2Calc.js"
 import { compile } from "./compile"
-import temml from "./temml.js"
 import { scanModule } from "./module"
 import { updateCalculations } from "./updateCalculations"
 import { updateAndSave } from "./updateDoc"
@@ -29,10 +28,6 @@ import { Rnl } from "./rational"
  *   calculate() returns either a TeX string or a string in Hurmet calculation syntax.
  */
 
-const render = (tex, dom, options) => {
-  temml.render(tex, dom, options)
-}
-
 export default {
   parse,
   calculate,
@@ -44,7 +39,6 @@ export default {
   tex2Calc,
   updateCalculations,
   updateAndSave,
-  render,
   Rnl,
   version: "0.1.0"
 }

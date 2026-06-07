@@ -2,6 +2,7 @@
 import { autoCorrect } from "./autocorrect"
 import { renderSVG } from "./renderSVG"
 import hurmet from "./hurmet"
+import temml from "./temml.js"
 import { dt } from "./constants"
 import { codeJar, selectedText, textBeforeCursor, textAfterCursor } from "./codejar"
 
@@ -42,7 +43,7 @@ const renderMath = (jar, demoOutput) => {
     if (typeof tex === "object" && tex.dtype && tex.dtype === dt.DRAWING) {
       demoOutput.appendChild(renderSVG(tex.resultdisplay))
     } else {
-      hurmet.render(tex, demoOutput, {
+      temml.render(tex, demoOutput, {
         trust: (context) => context.command === "\\class" && context.class === "special-fraction",
         wrap: "="
       })

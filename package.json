@@ -5,7 +5,6 @@
   "homepage": "https://hurmet.org",
   "license": "MIT",
   "packageManager": "yarn@3.2.2",
-  "private": true,
   "type": "module",
   "engines": {
     "node": ">=18.13.0"
@@ -21,33 +20,38 @@
     "url": "https://github.com/ronkok/Hurmet"
   },
   "files": [
-    "src/"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
+  "bin": {
+    "hurmet": "./dist/hurmet-cli.cjs"
+  },
   "dependencies": {
-    "filesaver.js-npm": "latest",
-    "prosemirror-commands": "latest",
-    "prosemirror-dropcursor": "latest",
-    "prosemirror-gapcursor": "latest",
-    "prosemirror-history": "latest",
-    "prosemirror-inputrules": "latest",
-    "prosemirror-keymap": "latest",
-    "prosemirror-menu": "latest",
-    "prosemirror-model": "latest",
-    "prosemirror-state": "latest",
-    "prosemirror-tables": "latest",
-    "prosemirror-transform": "latest",
-    "prosemirror-view": "latest",
-    "ws": "latest"
+    "filesaver.js-npm": "^1.0.1",
+    "prosemirror-commands": "^1.7.1",
+    "prosemirror-dropcursor": "^1.8.2",
+    "prosemirror-gapcursor": "^1.4.1",
+    "prosemirror-history": "^1.5.0",
+    "prosemirror-inputrules": "^1.5.1",
+    "prosemirror-keymap": "^1.2.3",
+    "prosemirror-menu": "^1.3.2",
+    "prosemirror-model": "^1.25.7",
+    "prosemirror-state": "^1.4.4",
+    "prosemirror-tables": "^1.8.5",
+    "prosemirror-transform": "^1.12.0",
+    "prosemirror-view": "^1.41.8",
+    "ws": "^8.21.0"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "latest",
-    "@eslint/js": "latest",
-    "@rollup/plugin-commonjs": "latest",
-    "@rollup/plugin-node-resolve": "latest",
-    "eslint": "latest",
-    "globals": "latest",
-    "rollup": "latest",
-    "terser": "latest"
+    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/js": "^10.0.1",
+    "@rollup/plugin-commonjs": "^29.0.3",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "eslint": "^10.4.1",
+    "globals": "^17.6.0",
+    "rollup": "^4.61.0",
+    "terser": "^5.48.0"
   },
   "scripts": {
     "hurmet": "rollup --config utils/rollup.hurmet.config.js",
@@ -58,12 +62,14 @@
     "site": "node preview/server.cjs \"site/index.html\"",
     "minify": "terser preview/prosemirror.js -o site/prosemirror.min.js -m && terser preview/demo.js -o site/demo.min.js -m",
     "copypm": "node utils/copyPM.cjs",
-    "build": "yarn hurmet && yarn demo && yarn pm && yarn minify",
+    "copyhurmet": "node -e \"const fs=require('fs'); fs.mkdirSync('dist',{recursive:true}); fs.copyFileSync('utils/hurmet.cjs','dist/hurmet.cjs');\"",
+    "build": "yarn hurmet && yarn copyhurmet && yarn demo && yarn pm && yarn minify",
     "rates": "node utils/updateExchangeRates.cjs",
     "docs": "node utils/buildDocs.cjs",
     "test": "yarn test:lint && node test/test.cjs",
     "test:lint": "eslint src",
     "test:unit": "node test/test.cjs",
-    "upgrade": "powershell -File ./reset-and-upgrade-all.ps1"
+    "reset": "node utils/reset-and-upgrade-all.cjs",
+    "prepack": "yarn build"
   }
 }

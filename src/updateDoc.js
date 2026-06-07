@@ -2,6 +2,11 @@ import { md2ast } from "./md2ast.js"
 import { updateCalcs } from "./updateCalcsForCLI.js"
 import { hurmetMarkdownSerializer } from "./to_markdown"
 import { headingText } from "./md2html.js"
+import { schema } from "./schema.js"
+import {
+  mergeSavedMarkdownPathData,
+  stringifyMarkdownPathDefinitions
+} from "./snapshots.js"
 
 const getTOCitems = (ast, tocArray, start, end, node) => {
   if (Array.isArray(ast)) {
@@ -27,15 +32,9 @@ export async function updateAndSave(md) {
   // Update the calculations of a Hurmet document and return a Hurmet Markdown
   // document with results written inline.
 
-  // A Hurmet document is written in Markdown.
-  //     To extent possible, it matches GitHub Flavored Markdown (GFM)
-  //     For extensions beyond GFM, it matches, to the extent possible, Pandoc
-  //     For calculations, Hurmet has its own format.
-
-  // Start by converting the Markdown to an AST that matches
-  // the Hurmet internal data structure.
   let ast = md2ast(md, false)
 
+  /*
   // Populate a Hurmet Table of Contents, if any exists.
   const tocCapture = /\n *\n{\.toc start=(\d) end=(\d)}\n/.exec(md)
   if (tocCapture) {
@@ -46,13 +45,45 @@ export async function updateAndSave(md) {
     getTOCitems(ast, tocArray, start, end, node)
     node[0].attrs.body = tocArray
   }
+  */
 
-  // Perform Hurmet calculations.
-  // This is asynchronous because a calculation may need to fetch some remote data.
   ast = await updateCalcs(ast)
+  const pmDoc = schema.nodeFromJSON(ast)
 
-  // Write the updated Markdown
-  const updatedMarkdown = hurmetMarkdownSerializer.serialize(ast, new Map(), [],
-                                                             false, true)
+  const currentMarkdown = hurmetMarkdownSerializer.serialize(
+    pmDoc,
+    new Map(),
+    [],
+    false,
+    true
+  )
+
+  const savedPathData = mergeSavedMarkdownPathData(
+    currentMarkdown,
+    ast.attrs.snapshots,
+    ast.attrs.snapshotPathCache
+  )
+
+  let updatedMarkdown = `---------------
+decimalFormat: ${ast.attrs.decimalFormat}
+fontSize: ${ast.attrs.fontSize}
+pageSize: ${ast.attrs.pageSize}
+dateFormat: ${ast.attrs.dateFormat}
+saveDate: ${new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60 * 1000).toISOString().split("T")[0]}
+---------------
+
+${savedPathData.body}`
+
+  const pathDefText = stringifyMarkdownPathDefinitions(savedPathData.pathDefs)
+  if (pathDefText.length > 0) {
+    updatedMarkdown += `\n\n${pathDefText}`
+  }
+
+  // updateDoc.js cannot rebuild fallback data because it has no state.doc traversal.
+  for (const snapshot of savedPathData.snapshots) {
+    updatedMarkdown += `\n\n<!--SNAPSHOT-->\ndate: ${snapshot.date}\nmessage: ${snapshot.message}\n\n`
+    updatedMarkdown += snapshot.content
+  }
+
   return updatedMarkdown
 }
