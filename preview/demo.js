@@ -10463,7 +10463,7 @@ const parseList = (str, state) => {
 
 const TABLES = (function() {
   const TABLE_ROW_SEPARATOR_TRIM = /^ *[|+] *| *[|+] *$/g;
-  const TABLE_RIGHT_ALIGN = /^[-=]+:$/;
+  const TABLE_RIGHT_ALIGN = /^(?:[ -]-+|=+):$/;
   const TABLE_CENTER_ALIGN = /^:[-=]+:$/;
 
   const parseTableAlign = function(source) {
@@ -10812,7 +10812,7 @@ const TABLES = (function() {
 
   return {
     parsePipeTable: parsePipeTable(),
-    PIPE_TABLE_REGEX: /^(?:: ((?:[^\n]|\n(?!\||:|<\/dl>))*)\n)?(\|.*)\n\|([-:]+[-| :]*)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
+    PIPE_TABLE_REGEX: /^(?:: ((?:[^\n]|\n(?!\||:|<\/dl>))*)\n)?(\|.*)\n\|((?:[-: ]-+[-: ]\|)+)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
     parseGridTable: parseGridTable(),
     GRID_TABLE_REGEX: /^(?:: ((?:[^\n]|\n(?!\+|:|<\/dl>))*)\n)?((\+(?:[-:=]+\+)+)\n(?:[+|][^\n]+[+|] *\n)+)(?:\{([^\n}]+)\}\n)?\n*/
   };

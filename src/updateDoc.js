@@ -1,32 +1,11 @@
 import { md2ast } from "./md2ast.js"
 import { updateCalcs } from "./updateCalcsForCLI.js"
 import { hurmetMarkdownSerializer } from "./to_markdown"
-import { headingText } from "./md2html.js"
 import { schema } from "./schema.js"
 import {
   mergeSavedMarkdownPathData,
   stringifyMarkdownPathDefinitions
 } from "./snapshots.js"
-
-const getTOCitems = (ast, tocArray, start, end, node) => {
-  if (Array.isArray(ast)) {
-    for (let i = 0; i < ast.length; i++) {
-      getTOCitems(ast[i], tocArray, start, end, node)
-    }
-  } else if (ast && ast.type === "heading") {
-    const level = ast.attrs.level
-    if (start <= level && level <= end) {
-      tocArray.push([headingText(ast.content), level - start])
-    }
-  } else if (ast.type === "toc") {
-    node.push(ast)
-  // eslint-disable-next-line no-prototype-builtins
-  } else if (ast.hasOwnProperty("content")) {
-    for (let j = 0; j < ast.content.length; j++) {
-      getTOCitems(ast.content[j], tocArray, start, end, node)
-    }
-  }
-}
 
 export async function updateAndSave(md) {
   // Update the calculations of a Hurmet document and return a Hurmet Markdown
@@ -64,6 +43,7 @@ export async function updateAndSave(md) {
     ast.attrs.snapshotPathCache
   )
 
+  /* eslint-disable max-len */
   let updatedMarkdown = `---------------
 decimalFormat: ${ast.attrs.decimalFormat}
 fontSize: ${ast.attrs.fontSize}
@@ -73,6 +53,7 @@ saveDate: ${new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60 
 ---------------
 
 ${savedPathData.body}`
+  /* eslint-enable max-len */
 
   const pathDefText = stringifyMarkdownPathDefinitions(savedPathData.pathDefs)
   if (pathDefText.length > 0) {
@@ -81,7 +62,8 @@ ${savedPathData.body}`
 
   // updateDoc.js cannot rebuild fallback data because it has no state.doc traversal.
   for (const snapshot of savedPathData.snapshots) {
-    updatedMarkdown += `\n\n<!--SNAPSHOT-->\ndate: ${snapshot.date}\nmessage: ${snapshot.message}\n\n`
+    updatedMarkdown +=
+      `\n\n<!--SNAPSHOT-->\ndate: ${snapshot.date}\nmessage: ${snapshot.message}\n\n`
     updatedMarkdown += snapshot.content
   }
 

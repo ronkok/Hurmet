@@ -55,6 +55,25 @@ window.view = new view.EditorView(document.querySelector("#editor"), {
     doc: DOMParser.fromSchema(schema).parse(document.querySelector("#content")),
     plugins: pmSetup({ schema: schema })
   }),
+  handleClick(_view, _pos, event) {
+    if ((event.ctrlKey || event.metaKey) && event.target.tagName === "A") {
+      // Ctrl-click on a link: open it in a new tab or scroll to the anchor.
+      event.preventDefault()
+      const href = event.target.getAttribute("href")
+      if (href.startsWith("#")) {
+        const anchor = document.getElementById(href.slice(1))
+        if (anchor) {
+          anchor.scrollIntoView({ behavior: 'smooth' })
+        }
+      } else {
+        const newTab = window.open(href, "_blank")
+        // eslint-disable-next-line no-alert
+        if (newTab) { alert("Opened link in new tab") }
+      }
+      return true
+    }
+    return false // Let ProseMirror handle other clicks.
+  },
   nodeViews: {
     calculation(node, view) { return new CalcView(node, view) },
     tex(node, view) { return new TexView(node, view) },
