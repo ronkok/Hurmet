@@ -433,7 +433,7 @@ const operandFromTokenStack = (tokenStack, numRows, numCols) => {
         for (let j = 0; j < numArgs; j++) {
           const token = tokenStack[j].value[i];
           if (token.unit && token.unit.isConverted) { return errorOprnd("UNIT_IN_MAT") }
-          array[i][j] = token.value
+          array[i][j] = token
         }
       }
       for (let i = 0; i < numArgs; i++) { tokenStack.pop() }

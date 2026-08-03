@@ -507,6 +507,7 @@ end`, vars)
     [`vector & 3.6 = @`, `¿vector ®36/10 &`, "[2.1; -15.3; 11; 3.6]"],
     [`1.2 & vector = @`, `®12/10 ¿vector &`, "[1.2; 2.1; -15.3; 11]"],
     [`vector & vector = @`, `¿vector ¿vector &`, "(2.1, 2.1; -15.3, -15.3; 11, 11)"],
+    [`[vector, vector] = @`, `¿vector ¿vector matrix 1 2`, "(2.1, 2.1; -15.3, -15.3; 11, 11)"],
     [`vcat(vector, vector) = @`, `¿vector ¿vector vcat`, "[2.1; -15.3; 11; 2.1; -15.3; 11]"],
     [`vector^T & vector^T = @`, `¿vector ¿T ^ ¿vector ¿T ^ &`, "[2.1, -15.3, 11, 2.1, -15.3, 11]"],
     [`vcat(vector^T, vector^T) = @`, `¿vector ¿T ^ ¿vector ¿T ^ vcat`, "(2.1, -15.3, 11; 2.1, -15.3, 11)"],
