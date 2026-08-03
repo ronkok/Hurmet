@@ -7,7 +7,7 @@
    <link rel="manifest" href="/app.webmanifest">
    <link rel="icon" href="/images/favicon.svg">
    <link rel="stylesheet" href="/docStyles.min.css">
-   <script>globalThis.currencyRates = {"USD":"1.1702","JPY":"183.21","CZK":"24.366","DKK":"7.4716","GBP":"0.86625","HUF":"364.85","PLN":"4.2605","RON":"5.1823","SEK":"10.8555","CHF":"0.9190","ISK":"144.00","NOK":"10.9123","TRY":"52.8757","AUD":"1.6371","BRL":"5.8292","CAD":"1.5994","CNY":"7.9910","HKD":"9.1662","IDR":"20297.94","ILS":"3.4553","INR":"111.0695","KRW":"1728.39","MXN":"20.4973","MYR":"4.6457","NZD":"1.9957","PHP":"71.918","SGD":"1.4934","THB":"38.084","ZAR":"19.6480","EUR":"1.0"}</script>
+   <script>globalThis.currencyRates = {"USD":"1.1535","JPY":"180.73","CZK":"24.206","DKK":"7.4749","GBP":"0.85633","HUF":"363.98","PLN":"4.3033","RON":"5.2455","SEK":"10.9845","CHF":"0.9320","ISK":"142.00","NOK":"10.9965","TRY":"54.8333","AUD":"1.6463","BRL":"5.8454","CAD":"1.6181","CNY":"7.7891","HKD":"9.0464","IDR":"20736.99","ILS":"3.5194","INR":"109.9725","KRW":"1646.10","MXN":"19.9794","MYR":"4.7242","NZD":"1.9636","PHP":"70.279","SGD":"1.4783","THB":"38.452","ZAR":"18.9979","EUR":"1.0"}</script>
 </head>
 <body>
 <main>
@@ -947,7 +947,7 @@ end</code></pre><p>… which will result in this plot …</p>
    frame 200, 200 
    view -8, 8 
    axes
-   plot [t*cos(π t), t * sin(π t)], 251, 0, 8 
+   plot [t ∘ cos(π t), t ∘ sin(π t)], 251, 0, 8 
 end</code></pre><p>… which results in this plot …</p>
 <p><img src="images/spiral.svg" alt="spiral"></p>
 <p>You can pass variables into a draw environment. And a draw environment can execute the same statements as a user-defined function. So you can create drawings that change dynamically in reaction to the rest of your document.</p>
