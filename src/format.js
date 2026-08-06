@@ -10,7 +10,7 @@ const groupByFourRegEx = /\B(?=(\d{4})+$)/g  // use sometimes in China
 // Grouping as common in south Asia: 10,10,000
 const groupByLakhCroreRegEx = /(\d)(?=(\d\d)+\d$)/g
 
-const formatRegEx = /^([beEfhkmprsStx%])?(-?[\d]+)?([∠°]{0,2})?$/
+const formatRegEx = /^([beENfhkmnprsStx%])?(-?[\d]+)?([∠°]{0,2})?$/
 
 const superscript = str => {
   // Convert a numeral string to Unicode superscript characters.
@@ -44,6 +44,21 @@ export const texFromMixedFraction = (numParts) => {
 }
 
 const intAbs = i => i >= BigInt(0) ? i : BigInt(-1) * i  // absolute value of a BigInt
+
+// Move the decimal point of a significand string `places` digits to the right.
+// Used to convert a scientific-notation significand into engineering notation.
+const shiftDecimalPoint = (str, places) => {
+  if (places === 0) { return str }
+  const sign = str.charAt(0) === "-" ? "-" : ""
+  if (sign) { str = str.slice(1) }
+  let [intPart, fracPart = ""] = str.split(".")
+  for (; places > 0; places--) {
+    if (fracPart.length === 0) { fracPart = "0" }
+    intPart += fracPart.charAt(0)
+    fracPart = fracPart.slice(1)
+  }
+  return sign + intPart + (fracPart.length > 0 ? "." + fracPart : "")
+}
 
 const roundedString = (r, spec) => {
   // Return a string rounded to the correct number of digits
@@ -222,7 +237,9 @@ export const format = (num, specStr = "h3", decimalFormat = "1,000,000.") => {
   // Round the number
   const numStr = roundedString(num, spec)
 
-  // Add separators
+  // Dress up the rounded string for display: add locale separators for
+  // decimal/integer types, or write the exponent notation
+  // (e, ×10^, SI prefix, engineering) for scientific types.
   switch (spec.ftype) {
     case "f":
     case "r":
@@ -256,11 +273,25 @@ export const format = (num, specStr = "h3", decimalFormat = "1,000,000.") => {
         }
 
         case "s":
-        case "S":
-        case "n":
-        case "N": {
+        case "S": {
           const op = spec.ftype === "S" ? "×" : "\\mkern2mu{\\cdot}\\mkern1mu"
           return significand + op + "10^{" + numStr.slice(pos + 1) + "}"
+        }
+
+        case "n":
+        case "N": {
+          // Engineering notation: exponent is a multiple of 3.
+          // Shift the decimal point in the raw (pre-comma-substitution) significand,
+          // since shiftDecimalPoint expects a "." decimal separator.
+          const exponent = Number(numStr.slice(pos + 1))
+          const mod = ((exponent % 3) + 3) % 3
+          const newExponent = exponent - mod
+          let sig = numStr.slice(0, pos)
+          if (mod !== 0) { sig = shiftDecimalPoint(sig, mod) }
+          if (decimalFormat.slice(-1) === ",") { sig = sig.replace(".", "{,}") }
+          if (newExponent === 0) { return sig }
+          const op = spec.ftype === "N" ? "×" : "\\mkern2mu{\\cdot}\\mkern1mu"
+          return sig + op + "10^{" + newExponent + "}"
         }
 
         case "k": {
