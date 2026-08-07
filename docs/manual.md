@@ -424,12 +424,12 @@ Variables
 
 : ¢`L = 3.1`   ← That kind of statement will assign a value to a variable.
   Subsequent cells can then use the variable.<br>Example: `2 L = ?` will result
-  in: ¢`2 L = \color(blue)((2))(3.1) \color(black)= 6.2`
+  in: ¢`2 L = \color(blue)(2)(3.1) \color(black)= 6.2`
 
   A variable name must be a valid [identifier](#identifiers).
 
   An assignment statement can also contain a calculation expression. Example:\
-  `b = 2 L = ?` will result in ¢` b = 2 L = \color(blue)((2))(3.1) \color(black)= 6.2 `
+  `b = 2 L = ?` will result in ¢` b = 2 L = \color(blue)(2)(3.1) \color(black)= 6.2 `
 
 </div>
 
