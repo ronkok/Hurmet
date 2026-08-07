@@ -703,6 +703,7 @@ const accentFromChar = Object.freeze({
   "\u0303": "\\tilde",
   "\u0304": "\\bar",
   "\u0305": "\\bar",
+  "\u0306": "\\breve",
   "\u0307": "\\dot",
   "\u0308": "\\ddot",
   "\u030A": "\\mathring",
