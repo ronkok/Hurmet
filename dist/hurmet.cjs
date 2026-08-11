@@ -11,7 +11,7 @@
 // utils.js
 
 // If you modify, isValidIdentifier, also modify functionRegEx in mathprompt.js
-const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))(?:[A-Za-z0-9\u0391-\u03C9\u03D5]+|[\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1])?(?:_[A-Za-z0-9\u0391-\u03C9\u03D5]+|[₀-₉]+)?′*$/;
+const isValidIdentifier = /^(?:[A-Za-zıȷ\u0391-\u03C9\u03D5\u210B\u210F\u2110\u2112\u2113\u211B\u212C\u2130\u2131\u2133]|(?:\uD835[\uDC00-\udc33\udc9c-\udcb5]))(?:[A-Za-z0-9\u0391-\u03C9\u03D5]+|[\u0300-\u0308\u030A\u030C\u0332\u20d0\u20d1\u20d6\u20d7\u20e1])?(?:(?:_(?:[A-Za-z0-9\u0391-\u03C9\u03D5]+|\([A-Za-z0-9\u0391-\u03C9\u03D5,]+\))){1,2}|[₀-₉]+)?′*$/;
 // Detect string interpolation ${varName}
 const interpolateRegEx = /\$\{[^}\s]+\}/g;
 
@@ -4124,6 +4124,8 @@ const minusRegEx = /^-(?![-=<>:])/;
 const numberRegEx$4 = new RegExp(Rnl.numberPattern);
 const unitRegEx$1 = /^(?:'[^']+'|[°ΩÅK])/;
 const dateRegEx = /^'\d{4}-\d{1,2}-\d{1,2}'/;
+const globalOpenParenRegEx = /\(/g;
+const closeParenRegEx = /\)/g;
 
 const texFromNumStr = (numParts, decimalFormat) => {
   // eslint-disable-next-line no-useless-assignment
@@ -4765,6 +4767,7 @@ const accentFromChar = Object.freeze({
   "\u0303": "\\tilde",
   "\u0304": "\\bar",
   "\u0305": "\\bar",
+  "\u0306": "\\breve",
   "\u0307": "\\dot",
   "\u0308": "\\ddot",
   "\u030A": "\\mathring",
@@ -4860,20 +4863,27 @@ const lexOneWord = (str, prevToken) => {
         let base = match.slice(0, subMatch.index);
         let subscript = match.slice(subMatch.index);
         base = checkForTrailingAccent(base);
-        subscript = subscript[0] === "_"
-          ? "_\\text{" + subscript.slice(1) + "}"
-          : subscript;
+        if (subscript.charAt(0) === "_") {
+          subscript = subscript.slice(1).replace(globalOpenParenRegEx, "{")
+            .replace(closeParenRegEx, "}");
+          const posUnderscore = subscript.indexOf("_");
+          if (posUnderscore > -1) {
+            // Double subscript.
+            const subSubscript = subscript.slice(posUnderscore + 1);
+            subscript = "_" +
+              `{\\text{${subscript.slice(0, posUnderscore)}}_\\text{${subSubscript}}}`;
+          } else {
+            // Cramp subscript placement by wrapping it with braces.
+            // This helps Cambria Math to supply a better size radical.
+            subscript = "{_\\text{" + subscript + "}}";
+            if (fc === "_") { match += "_"; } // Double subscript. The second one is empty.
+          }
+        }
         identifier = base + subscript;
         const primes = /^′*/.exec(str.slice(match.length));
         if (primes) {
           match += primes[0];
           identifier += "'".repeat(primes[0].length);
-        }
-        const pos = identifier.indexOf("_");
-        if (pos > -1) {
-          // Cramp subscript placement by wrapping it with braces.
-          // This helps Cambria Math to supply the correct size radical.
-          identifier = identifier.slice(0, pos) + "{" + identifier.slice(pos) + "}";
         }
         return [match, identifier, match, (base.length > 1) ? tt.LONGVAR : tt.VAR, ""]
       }
@@ -6394,7 +6404,11 @@ const parse$1 = (
           token.output = " & ";
         }
 
-        tex += token.output + " ";
+        if (token.input === "," && delim.delimType === dSUBSCRIPT) {
+          tex += ",";
+        } else {
+          tex += token.output + " ";
+        }
 
         if (isCalc) {
           if (delims.length === 1) {

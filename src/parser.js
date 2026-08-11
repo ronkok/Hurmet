@@ -1306,7 +1306,11 @@ export const parse = (
           token.output = " & "
         }
 
-        tex += token.output + " "
+        if (token.input === "," && delim.delimType === dSUBSCRIPT) {
+          tex += ","
+        } else {
+          tex += token.output + " "
+        }
 
         if (isCalc) {
           if (delims.length === 1) {

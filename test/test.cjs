@@ -33,8 +33,8 @@ const parserTests = [
     "{a if b; c if d}",
     "\\begin{cases}a & \\text{if}~ b \\\\ c & \\text{if}~ d \\end{cases}"
   ],
-  ["f_c′=4500 'psi'", "f{_\\text{c}'} = 4{,}500 \\; {\\text{psi}}"],
-  ["f_c′=4500psi", "f{_\\text{c}'} = 4{,}500 \\; {\\text{psi}}"],
+  ["f_c′=4500 'psi'", "f{_\\text{c}}' = 4{,}500 \\; {\\text{psi}}"],
+  ["f_c′=4500psi", "f{_\\text{c}}' = 4{,}500 \\; {\\text{psi}}"],
   ["root 3 x", "\\sqrt[3]{x}"],
   ["5 modulo 4", "5 \\mathbin{modulo} 4"],
   ["sqrt(a b)", "\\sqrt{a b}"],
@@ -47,15 +47,15 @@ const parserTests = [
   ["root 3 (a + b)", "\\sqrt[3]{a + b}"],
   ["sin^(a+b) x", "\\sin^{a + b}{x}"],
   ["(π (D - I))/4", "\\dfrac{π (D - I)}{4}"],
-  ["f_c′/200", "\\dfrac{f{_\\text{c}'}}{200}"],
+  ["f_c′/200", "\\dfrac{f{_\\text{c}}'}{200}"],
   ["(b^2/2)", "\\left(\\dfrac{b^{2}}{2}\\right)"],
-  ["sqrt f_c′", "\\sqrt{f{_\\text{c}'}}"],
+  ["sqrt f_c′", "\\sqrt{f{_\\text{c}}'}"],
   ["sqrt \\hat θ^2", "\\sqrt{\\hat{θ}^{2}}"],
   ["sin^2 \\hat θ", "\\sin^{2}{\\hat{θ}}"],
   ["((n (n+1))/2)", "\\left(\\dfrac{n (n + 1)}{2}\\right)"],
   [
     "β_1 = {0.85 if f_c′ <= 4000; 0.65 if f_c′ >= 8000; 0.85 - f_c′/20000 otherwise}",
-    "β{_\\text{1}} = \\begin{cases}0.85 & \\text{if}~ f{_\\text{c}'} ≤ 4{,}000 \\\\ 0.65 & \\text{if}~ f{_\\text{c}'} ≥ 8{,}000 \\\\ 0.85 - \\dfrac{f{_\\text{c}'}}{20{,}000}& \\text{otherwise}~ \\end{cases}"
+    "β{_\\text{1}} = \\begin{cases}0.85 & \\text{if}~ f{_\\text{c}}' ≤ 4{,}000 \\\\ 0.65 & \\text{if}~ f{_\\text{c}}' ≥ 8{,}000 \\\\ 0.85 - \\dfrac{f{_\\text{c}}'}{20{,}000}& \\text{otherwise}~ \\end{cases}"
   ],
   ["x = (-b +- sqrt(b^2-4 a c))/(2 a)", "x = \\dfrac{\\text{-} b ± \\sqrt{b^{2}- 4 \\, a c}}{2 \\, a}"],
   [
@@ -274,7 +274,10 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     ["f_2′= 4", "f₂′ = @", "4"],
     ["ph = 35 psi_", "ph = @", "35"], // trailing underscore does not change assigned value
     ["p = 15%", "p = @", "0.15"],
-    ["b2 = false", "b2 = @", "false"]
+    ["b2 = false", "b2 = @", "false"],
+    ["L_sub = 12ft", "L_sub = @@ m", "3.6576 m"],         // underscore in variable name is allowed
+    ["L_sub_sub = 12ft", "L_sub_sub = @@ m", "3.6576 m"], // two underscores in variable name are allowed
+    ["L_(1,2) = 12ft", "L_(1,2) = @@ m", "3.6576 m"]      // parentheses in variable name are allowed
   ];
 
   const tex2CalcTests = [
@@ -641,7 +644,8 @@ end`, vars)
     [`0.2 × 2 = %\\%`, `®2/10 ®2/1 ×`, "0.2 × 2 = 40%"],
     [`b2 or false = @`, "¿b2 false or", "false"],
     [`3′ = @@ inch`, `®3/1 applyUnit ′`, "36 inch"],
-    [`3″ = @@ inch`, `®3/1 applyUnit ″`, "3 inch"]
+    [`3″ = @@ inch`, `®3/1 applyUnit ″`, "3 inch"],
+    [`2 L_(1,2) = @@ m`, `®2/1 ¿L_(1,2) ⌧`, "7.3152 m"]
   ];
 
   const testRegEx = /^(@{1,2})test /

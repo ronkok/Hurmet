@@ -62,6 +62,8 @@ const minusRegEx = /^-(?![-=<>:])/
 const numberRegEx = new RegExp(Rnl.numberPattern)
 const unitRegEx = /^(?:'[^']+'|[°ΩÅK])/
 const dateRegEx = /^'\d{4}-\d{1,2}-\d{1,2}'/
+const globalOpenParenRegEx = /\(/g
+const closeParenRegEx = /\)/g
 
 export const texFromNumStr = (numParts, decimalFormat) => {
   // eslint-disable-next-line no-useless-assignment
@@ -799,20 +801,29 @@ const lexOneWord = (str, prevToken) => {
         let base = match.slice(0, subMatch.index)
         let subscript = match.slice(subMatch.index)
         base = checkForTrailingAccent(base)
-        subscript = subscript[0] === "_"
-          ? "_\\text{" + subscript.slice(1) + "}"
-          : subscript;
+        if (subscript.charAt(0) === "_") {
+          subscript = subscript.slice(1).replace(globalOpenParenRegEx, "{")
+            .replace(closeParenRegEx, "}")
+          const posUnderscore = subscript.indexOf("_")
+          if (posUnderscore > -1) {
+            // Double subscript.
+            const subSubscript = subscript.slice(posUnderscore + 1)
+            subscript = "_" +
+              `{\\text{${subscript.slice(0, posUnderscore)}}_\\text{${subSubscript}}}`
+          } else {
+            // Cramp subscript placement by wrapping it with braces.
+            // This helps Cambria Math to supply a better size radical.
+            subscript = "{_\\text{" + subscript + "}}"
+            if (fc === "_") { match += "_" } // Double subscript. The second one is empty.
+          }
+        } else {
+          // ₀-₉ Subscript digits. Do nothing.
+        }
         identifier = base + subscript
         const primes = /^′*/.exec(str.slice(match.length))
         if (primes) {
-          match += primes[0]
+          match += primes[0];
           identifier += "'".repeat(primes[0].length)
-        }
-        const pos = identifier.indexOf("_")
-        if (pos > -1) {
-          // Cramp subscript placement by wrapping it with braces.
-          // This helps Cambria Math to supply the correct size radical.
-          identifier = identifier.slice(0, pos) + "{" + identifier.slice(pos) + "}"
         }
         return [match, identifier, match, (base.length > 1) ? tt.LONGVAR : tt.VAR, ""]
       }

@@ -779,30 +779,48 @@ A, I, w_self = beam["A", "Ix", "weight"] = !!
 
 ## Identifiers
 
-*Identifier* is another word for *variable name or function name*. Hurmet will
+_Identifier_ is another word for _variable name or function name_. Hurmet will
 recognize some words as valid identifiers:
 
-*   They may be multiple characters long.
-*   The first character must be a letter from the Latin or Greek alphabet.
-    It may be bold or capitalized calligraphic Latin, or ℏ, or ℓ.
-*   Subsequent characters may be letters or numerals (0123456789).
-*   An under-score is allowed and will be interpreted as the start of a subscript.
-*   If an identifier has only one letter, then an accent character may be
-    written after it. Hurmet will render the accent above the letter, as in ¢`θ̂`.
-*   Primes may be appended to the very end, as in: ¢`f_c′`.
-*   The following keywords may not be used as variable names: `π`, `ℏ`, `pi`,
-    `true`, `false`, `root`, `if`, `else`, `elseif`, `mod`, `modulo`, `otherwise`, `end`, `and`, `or`, `in`, `to`.
-
-![letter letter-or-digit-or-accent prime](images/identifier-railroad.svg)
-
-The names of those accents are:
-
-|||||
-|---------|---------|-----|--------------|
-| grave   | acute   | hat | tilde        |
-| bar     | breve   | dot | ddot         |
-| ring    | check   | ul  | leftharpoon  |
-| harpoon | leftvec | vec | leftrightvec |
++----------------------------------------------------+----------------------------------------------------+
+| Criteria                                           | Examples                                           |
++====================================================+====================================================+
+| The first character must be a letter from the      | ¢` a `  ¢` x `  ¢` y `  ¢` M ` ¢` P ` ¢` α `  ¢` θ |
+| Latin or Greek alphabet. It may be bold or         | `  ¢` Γ ` ¢` Δ `  ¢` 𝐌 `  ¢` 𝐏 ` ¢` 𝐦 ` ¢` 𝐯   |
+| capitalized calligraphic Latin, or ℏ, or ℓ.        | `  ¢` ℳ ` ¢` 𝒫 ` ¢` ℏ ` ¢` \ell `                 |
+|                                                    |                                                    |
+| <details><summary>Formatting help:</summary>       |                                                    |
+| Greek: Write `alpha` and hit the space bar.\       |                                                    |
+| Bold: Write your letter, then **Ctrl+B**.\         |                                                    |
+| Other: Pick a symbol from the menu bar.            |                                                    |
++----------------------------------------------------+----------------------------------------------------+
+| Subsequent characters may be Latin or Greek        | ¢` rate ` ¢` soilClass ` ¢` beam1 `                |
+| letters or numerals (0123456789).                  |                                                    |
++----------------------------------------------------+----------------------------------------------------+
+| Single-character names may be topped with an       | ¢` ẋ ` ¢` ẍ ` ¢` à ` ¢` á ` ¢` å `¢` θ̂ ` ¢`  |
+| accent.                                            | ă ` ¢` ǎ ` ¢` y̅ ` ¢` x̲ ` ¢` ñ ` ¢` F⃗ ` ¢`    |
+|                                                    | F⃖ `¢` F⃑ ` ¢` F⃐ ` ¢` F⃡ `                        |
+| <details><summary>Those accent names are:</summary>|                                                    |
+| dot, ddot, grave, acute, ring, hat, breve, check,  |                                                    |
+| bar, ul, tilde, vec, harpoon, leftharpoon,         |                                                    |
+| leftrightharpoon.\                                 |                                                    |
+| Write a name and hit the space bar to auto-correct.|                                                    |
++----------------------------------------------------+----------------------------------------------------+
+| One or two under-scores are allowed, and each will | `D_base` ¢`→` ¢`D_base ` \                         |
+| be interpreted as the start of a subscript.        | `h_t_A `  ¢`→` ¢`h_t_a `\                          |
+|                                                    | `x̂_sub `  ¢`→` ¢`x̂_sub `                         |
++----------------------------------------------------+----------------------------------------------------+
+| Parentheses are allowed around a subscript.        | `F_(1,2)` ¢`→ ` ¢`F_(1,2)`                         |
+| Subscripts within parentheses may contain commas.  |                                                    |
++----------------------------------------------------+----------------------------------------------------+
+| Primes may be appended to the very end.            | `f_c′` ¢`→` ¢`f_c′ `                               |
++----------------------------------------------------+----------------------------------------------------+
+| The following keywords may not be used as variable |                                                    |
+| names: `π`, `ℏ`, `pi`, `true`, `false`, `root`,    |                                                    |
+| `if`, `else`, `elseif`, `mod`, `modulo`,           |                                                    |
+| `otherwise`, `end`, `and`, `or`, `in`, `to`.       |                                                    |
++----------------------------------------------------+----------------------------------------------------+
+{.grid}
 
 Hurmet’s auto-correct can help create identifiers.
 
