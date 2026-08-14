@@ -2053,7 +2053,7 @@ There are two aspects to how numbers are displayed: (1) decimal separators, and
 In some countries, the usual decimal separator symbol is a dot. Other countries
 use a comma. Hurmet starts up with a decimal separator based upon the browser’s
 language setting. Hurmet also allows the reader (not the document author) to
-select which display they prefer. Use the use the drop-down menu labeled
+select which display they prefer. Use the drop-down menu labeled
 Doc | Set Decimal.
 
 The same menu choice also selects how Hurmet displays thousands separators.
