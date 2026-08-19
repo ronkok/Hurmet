@@ -572,7 +572,7 @@ const TABLES = (function() {
 
   return {
     parsePipeTable: parsePipeTable(),
-    PIPE_TABLE_REGEX: /^(?:: ((?:[^\n]|\n(?!\||:|<\/dl>))*)\n)?(\|.*)\n\|((?:[-: ]-+[-: ]\|)+)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
+    PIPE_TABLE_REGEX: /^(?:: ((?:[^\n]|\n(?!\||:|<\/dl>))*)\n)?(\|.*)\n\|((?:[-: ]?-+[-: ]?\|)+)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
     parseGridTable: parseGridTable(),
     GRID_TABLE_REGEX: /^(?:: ((?:[^\n]|\n(?!\+|:|<\/dl>))*)\n)?((\+(?:[-:=]+\+)+)\n(?:[+|][^\n]+[+|] *\n)+)(?:\{([^\n}]+)\}\n)?\n*/
   };
