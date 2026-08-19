@@ -600,6 +600,12 @@ const parseRef = function(capture, state, refNode) {
 
   if (state.defs && state.defs[ref]) {
     const def = state.defs[ref];
+    if (!def.attrs || !def.attrs.src) {
+      // The image definition is undefined.
+      const brokenImage = { type: "image", attrs: { src: "undefined-image" } }
+      if (def.attrs && def.attrs.alt) { brokenImage.attrs.alt = def.attrs.alt }
+      return brokenImage
+    }
     if (refNode.type === "figure") {
       refNode = { type: "figure", attrs: def.attrs, content: [
         { type: "figimg", attrs: def.attrs },
