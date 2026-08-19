@@ -183,6 +183,8 @@ elementum integer enim neque volutpat ac. Justo laoreet sit amet cursus sit
 amet dictum sit amet. Elementum integer enim neque volutpat ac tincidunt vitae
 semper quis. Sed adipiscing diam donec adipiscing tristique risus nec feugiat.
 
+Let's demonstrate a non-crash from an undefined image: ![6][]
+
 While we’re doing images, let’s display a few Hurmet drawings.
 
 ![Tank Dimensions][]           ![Angle][]         ![Angle 2][]
@@ -351,6 +353,16 @@ cells, e.g., `|||||`. Below is an example:
 | harpoon | leftvec | vec | leftrightvec |
 {.grid colWidths="null null null null"}
 
+Let's also read a pipe table with all empty cells:
+
+|  |  |  |  |
+|--|--|--|--|
+|  |  |  |  |
+|  |  |  |  |
+|  |  |  |  |
+|  |  |  |  |
+{#Aluminum colWidths="null null null null"}
+
 #### Grid tables
 
 Hurmet can write tables with merged cells and block elements inside a cell. For
@@ -514,6 +526,9 @@ From ASCE-16 section 12.8.3, Equivalent Lateral Procedure
 
 [5]: https://hurmet.org/images/IsoTankCourses.svg
 {.right alt="Tank Iso"}
+
+[6]: undefined
+{.right alt="undefined"}
 
 [Tank Dimensions]: draw()\n    title "Tank Dimensions"\n    frame 252, 459, "inline"\n    view -12, 15, -3.5\n    rect [-11, -1.5; 11, 0]\n    rect [-9, 0; -8, 19]\n    rect [8, 0; 9, 19]\n    rect [-9, 19; 9, 20]\n    line [-8, 17; 8, 17]\n    line [-5, 16.5; -2, 16.5]\n    line [-4.5, 16; -2.5, 16]\n    line [-4, 15.5; -3, 15.5]\n    dimension [1, 0; 1, 17; 1, 10], "H~L~"\n    dimension [11, 0; 9, 19; 12.5, 10], "H"\n    marker "arrow"\n    line [-10, 12; -9, 12]\n    line [-7, 12; -8, 12]\n    text [-7, 12], "t~w~", "right"\n    line [-5, 1; -5, 0]\n    line [-5, -2.5; -5, -1.5]\n    text [-5, 1.25], "t~b~", "above"\n    line [-5, 21; -5, 20]\n    line [-5, 18; -5, 19]\n    text [-5, 21.25], "t~r~", "above"\n    marker "none"\n    circle [0, 34], 11\n    circle [0, 34], 9\n    dimension [-8, 34; 8, 34; 0, 34], "D"\n    strokedasharray "5 5"\n    circle [0, 34], 8\nend
 

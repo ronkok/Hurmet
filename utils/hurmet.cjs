@@ -10453,7 +10453,7 @@ const TABLES = (function() {
 
   return {
     parsePipeTable: parsePipeTable(),
-    PIPE_TABLE_REGEX: /^(?:: ((?:[^\n]|\n(?!\||:|<\/dl>))*)\n)?(\|.*)\n\|((?:[-: ]-+[-: ]\|)+)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
+    PIPE_TABLE_REGEX: /^(?:: ((?:[^\n]|\n(?!\||:|<\/dl>))*)\n)?(\|.*)\n\|((?:[-: ]?-+[-: ]?\|)+)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
     parseGridTable: parseGridTable(),
     GRID_TABLE_REGEX: /^(?:: ((?:[^\n]|\n(?!\+|:|<\/dl>))*)\n)?((\+(?:[-:=]+\+)+)\n(?:[+|][^\n]+[+|] *\n)+)(?:\{([^\n}]+)\}\n)?\n*/
   };
@@ -10481,6 +10481,12 @@ const parseRef = function(capture, state, refNode) {
 
   if (state.defs && state.defs[ref]) {
     const def = state.defs[ref];
+    if (!def.attrs || !def.attrs.src) {
+      // The image definition is undefined.
+      const brokenImage = { type: "image", attrs: { src: "undefined-image" } };
+      if (def.attrs && def.attrs.alt) { brokenImage.attrs.alt = def.attrs.alt; }
+      return brokenImage
+    }
     if (refNode.type === "figure") {
       refNode = { type: "figure", attrs: def.attrs, content: [
         { type: "figimg", attrs: def.attrs },
