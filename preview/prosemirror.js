@@ -22112,9 +22112,7 @@ const lexOneWord = (str, prevToken) => {
             subscript = "_" +
               `{\\text{${subscript.slice(0, posUnderscore)}}_\\text{${subSubscript}}}`;
           } else {
-            // Cramp subscript placement by wrapping it with braces.
-            // This helps Cambria Math to supply a better size radical.
-            subscript = "{_\\text{" + subscript + "}}";
+            subscript = "_\\text{" + subscript + "}";
             if (fc === "_") { match += "_"; } // Double subscript. The second one is empty.
           }
         }

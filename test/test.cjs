@@ -33,8 +33,8 @@ const parserTests = [
     "{a if b; c if d}",
     "\\begin{cases}a & \\text{if}~ b \\\\ c & \\text{if}~ d \\end{cases}"
   ],
-  ["f_c′=4500 'psi'", "f{_\\text{c}}' = 4{,}500 \\; {\\text{psi}}"],
-  ["f_c′=4500psi", "f{_\\text{c}}' = 4{,}500 \\; {\\text{psi}}"],
+  ["f_c′=4500 'psi'", "f_\\text{c}' = 4{,}500 \\; {\\text{psi}}"],
+  ["f_c′=4500psi", "f_\\text{c}' = 4{,}500 \\; {\\text{psi}}"],
   ["root 3 x", "\\sqrt[3]{x}"],
   ["5 modulo 4", "5 \\mathbin{modulo} 4"],
   ["sqrt(a b)", "\\sqrt{a b}"],
@@ -43,19 +43,19 @@ const parserTests = [
   ["log10 x", "\\log_{10}{x}"],
   ["v_(x=0)/n", "\\dfrac{v_{x = 0}}{n}"],
   ["w^sin x y", "w^{\\sin{x}} y"],
-  ["x_wind L", "x{_\\text{wind}} L"],
+  ["x_wind L", "x_\\text{wind} L"],
   ["root 3 (a + b)", "\\sqrt[3]{a + b}"],
   ["sin^(a+b) x", "\\sin^{a + b}{x}"],
   ["(π (D - I))/4", "\\dfrac{π (D - I)}{4}"],
-  ["f_c′/200", "\\dfrac{f{_\\text{c}}'}{200}"],
+  ["f_c′/200", "\\dfrac{f_\\text{c}'}{200}"],
   ["(b^2/2)", "\\left(\\dfrac{b^{2}}{2}\\right)"],
-  ["sqrt f_c′", "\\sqrt{f{_\\text{c}}'}"],
+  ["sqrt f_c′", "\\sqrt{f_\\text{c}'}"],
   ["sqrt \\hat θ^2", "\\sqrt{\\hat{θ}^{2}}"],
   ["sin^2 \\hat θ", "\\sin^{2}{\\hat{θ}}"],
   ["((n (n+1))/2)", "\\left(\\dfrac{n (n + 1)}{2}\\right)"],
   [
     "β_1 = {0.85 if f_c′ <= 4000; 0.65 if f_c′ >= 8000; 0.85 - f_c′/20000 otherwise}",
-    "β{_\\text{1}} = \\begin{cases}0.85 & \\text{if}~ f{_\\text{c}}' ≤ 4{,}000 \\\\ 0.65 & \\text{if}~ f{_\\text{c}}' ≥ 8{,}000 \\\\ 0.85 - \\dfrac{f{_\\text{c}}'}{20{,}000}& \\text{otherwise}~ \\end{cases}"
+    "β_\\text{1} = \\begin{cases}0.85 & \\text{if}~ f_\\text{c}' ≤ 4{,}000 \\\\ 0.65 & \\text{if}~ f_\\text{c}' ≥ 8{,}000 \\\\ 0.85 - \\dfrac{f_\\text{c}'}{20{,}000}& \\text{otherwise}~ \\end{cases}"
   ],
   ["x = (-b +- sqrt(b^2-4 a c))/(2 a)", "x = \\dfrac{\\text{-} b ± \\sqrt{b^{2}- 4 \\, a c}}{2 \\, a}"],
   [
@@ -73,7 +73,7 @@ const parserTests = [
   ],
   ["\\underbrace(b·b)_(n)", "\\underbrace{b ⋅ b}_{n}"],
   ["|y^n|/3", "\\dfrac{|y^{n}|}{3}"],
-  ["A_0^n n/k", "A{_\\text{0}}^{n} \\dfrac{n}{k}"],
+  ["A_0^n n/k", "A_\\text{0}^{n} \\dfrac{n}{k}"],
   ["C = <<n \\atop k>>", "C = \\left\u27E8{{n}\\atop{k}}\\right\u27E9"],
   ["(exp(-exp(u)))/((u+γ)^2+π^2)", "\\dfrac{\\exp(\\text{-} \\exp(u))}{(u + γ)^{2}+ π^{2}}"],
   [
@@ -85,7 +85,7 @@ const parserTests = [
   ["M = (\\mathcal O (a b))/5", "M = \\dfrac{\\mathcal{O}(a b)}{5}"],
   [
     "c_s = (n_c A_s)/b (√(1 + (2 b d)/(n_c A_s))-1)",
-    "c{_\\text{s}} = \\dfrac{n{_\\text{c}} A{_\\text{s}}}{b} \\left(\\sqrt{1 + \\dfrac{2 \\, b d}{n{_\\text{c}} A{_\\text{s}}}}- 1 \\right)"
+    "c_\\text{s} = \\dfrac{n_\\text{c} A_\\text{s}}{b} \\left(\\sqrt{1 + \\dfrac{2 \\, b d}{n_\\text{c} A_\\text{s}}}- 1 \\right)"
   ],
   ['A --> "heat" B', "A \\xrightarrow{\\text{heat}}B"],
   [
@@ -107,7 +107,7 @@ const parserTests = [
   ],
   [
     "σ^2 = 1/(n (n-1)) (n ∑_(i=1)^n x_i^2 - (∑_(i=1)^n x_k)^2)",
-    "σ^{2}= \\dfrac{1}{n (n - 1)}\\left(n ∑_{i = 1}^{n} x{_\\text{i}}^{2}- \\left(∑_{i = 1}^{n} x{_\\text{k}} \\right)^{2}\\right)"
+    "σ^{2}= \\dfrac{1}{n (n - 1)}\\left(n ∑_{i = 1}^{n} x_\\text{i}^{2}- \\left(∑_{i = 1}^{n} x_\\text{k} \\right)^{2}\\right)"
   ],
   ["(2 n)!!/(2 n+1)^2", "\\dfrac{(2 \\, n)!!}{(2 \\, n + 1)^{2}}"],
   ["(1	2; 3	4)", "\\begin{pmatrix}1 & 2 \\\\ 3 & 4 \\end{pmatrix}"],
