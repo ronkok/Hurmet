@@ -21668,7 +21668,6 @@ class Mark {
         if (!type)
             throw new RangeError(`There is no mark type ${json.type} in this schema`);
         let mark = type.create(json.attrs);
-        type.checkAttrs(mark.attrs);
         return mark;
     }
     /**
@@ -22648,11 +22647,11 @@ let Node$1 = class Node {
     */
     check() {
         this.type.checkContent(this.content);
-        this.type.checkAttrs(this.attrs);
+        checkAttrs(this.type.attrs, this.attrs, "node", this.type.name);
         let copy = Mark.none;
         for (let i = 0; i < this.marks.length; i++) {
             let mark = this.marks[i];
-            mark.type.checkAttrs(mark.attrs);
+            checkAttrs(mark.type.attrs, mark.attrs, "mark", mark.type.name);
             copy = mark.addToSet(copy);
         }
         if (!Mark.sameSet(copy, this.marks))
@@ -22693,7 +22692,6 @@ let Node$1 = class Node {
         }
         let content = Fragment.fromJSON(schema, json.content);
         let node = schema.nodeType(json.type).create(json.attrs, content, marks);
-        node.type.checkAttrs(node.attrs);
         return node;
     }
 };
@@ -22742,6 +22740,15 @@ function wrapMarks(marks, str) {
     for (let i = marks.length - 1; i >= 0; i--)
         str = marks[i].type.name + "(" + str + ")";
     return str;
+}
+function checkAttrs(attrs, values, type, name) {
+    for (let attr in values)
+        if (!(attr in attrs))
+            throw new RangeError(`Unsupported attribute ${attr} for ${type} of type ${name}`);
+    for (let attr in attrs) {
+        if (attrs[attr].validate)
+            attrs[attr].validate(values[attr]);
+    }
 }
 
 /**
@@ -23197,26 +23204,20 @@ function defaultAttrs(attrs) {
 function computeAttrs(attrs, value) {
     let built = Object.create(null);
     for (let name in attrs) {
+        let attr = attrs[name];
         let given = value && value[name];
         if (given === undefined) {
-            let attr = attrs[name];
             if (attr.hasDefault)
                 given = attr.default;
             else
                 throw new RangeError("No value supplied for attribute " + name);
         }
+        else if (attr.validate) {
+            attr.validate(given);
+        }
         built[name] = given;
     }
     return built;
-}
-function checkAttrs(attrs, values, type, name) {
-    for (let attr in values)
-        if (!(attr in attrs))
-            throw new RangeError(`Unsupported attribute ${attr} for ${type} of type ${name}`);
-    for (let attr in attrs) {
-        if (attrs[attr].validate)
-            attrs[attr].validate(values[attr]);
-    }
 }
 function initAttrs(typeName, attrs) {
     let result = Object.create(null);
@@ -23389,11 +23390,9 @@ class NodeType {
             throw new RangeError(`Invalid content for node ${this.name}: ${content.toString().slice(0, 50)}`);
     }
     /**
-    @internal
+    @internal no longer useful, but called by old prosemirror-view versions
     */
-    checkAttrs(attrs) {
-        checkAttrs(this.attrs, attrs, "node", this.name);
-    }
+    checkAttrs(attrs) { }
     /**
     Check whether the given mark type is allowed in this node.
     */
@@ -23538,12 +23537,6 @@ class MarkType {
         for (let i = 0; i < set.length; i++)
             if (set[i].type == this)
                 return set[i];
-    }
-    /**
-    @internal
-    */
-    checkAttrs(attrs) {
-        checkAttrs(this.attrs, attrs, "mark", this.name);
     }
     /**
     Queries whether a given mark type is
@@ -38769,7 +38762,7 @@ const nodes = {
     group: "block",
     attrs: {
       class: { default: 'grid', validate: "string" },
-      name: { default: "", validate: "string" },
+      name: { default: "", validate: "null|string" },
       numRows: { default: 0, validate: "number" }, // Used in spreadsheetSum
       columnMap: { default: {} },
       unitMap: { default: [] },
