@@ -74,7 +74,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@eslint/eslintrc@npm:^3.3.5":
+"@eslint/eslintrc@npm:3.3.7":
   version: 3.3.7
   resolution: "@eslint/eslintrc@npm:3.3.7"
   dependencies:
@@ -91,7 +91,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@eslint/js@npm:^10.0.1":
+"@eslint/js@npm:10.0.1":
   version: 10.0.1
   resolution: "@eslint/js@npm:10.0.1"
   peerDependencies:
@@ -240,7 +240,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/plugin-commonjs@npm:^29.0.3":
+"@rollup/plugin-commonjs@npm:29.0.3":
   version: 29.0.3
   resolution: "@rollup/plugin-commonjs@npm:29.0.3"
   dependencies:
@@ -260,7 +260,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/plugin-node-resolve@npm:^16.0.3":
+"@rollup/plugin-node-resolve@npm:16.0.3":
   version: 16.0.3
   resolution: "@rollup/plugin-node-resolve@npm:16.0.3"
   dependencies:
@@ -727,7 +727,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:^10.6.0":
+"eslint@npm:10.11.0":
   version: 10.11.0
   resolution: "eslint@npm:10.11.0"
   dependencies:
@@ -882,7 +882,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"filesaver.js-npm@npm:^1.0.1":
+"filesaver.js-npm@npm:1.0.1":
   version: 1.0.1
   resolution: "filesaver.js-npm@npm:1.0.1"
   checksum: 5b1df5815c28cb1d0d9eaccd6a716259e2c93f7cfaf653df3f403f8b8f141541a5ef2279a1235f80c1315e2e8dcc856fa9c9c0ac5e46cd0ba570d3fedbdc4bf8
@@ -952,17 +952,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"globals@npm:17.12.0":
+  version: 17.12.0
+  resolution: "globals@npm:17.12.0"
+  checksum: e93793811268f69ea7b8dc7e45e09de08a06b96b21038c240d185625e313adb15f08a0b5e5bcb8502fa87232f9d6498c0adfd89bbf06c31c37609cf4d612fa27
+  languageName: node
+  linkType: hard
+
 "globals@npm:^14.0.0":
   version: 14.0.0
   resolution: "globals@npm:14.0.0"
   checksum: 534b8216736a5425737f59f6e6a5c7f386254560c9f41d24a9227d60ee3ad4a9e82c5b85def0e212e9d92162f83a92544be4c7fd4c902cb913736c10e08237ac
-  languageName: node
-  linkType: hard
-
-"globals@npm:^17.7.0":
-  version: 17.12.0
-  resolution: "globals@npm:17.12.0"
-  checksum: e93793811268f69ea7b8dc7e45e09de08a06b96b21038c240d185625e313adb15f08a0b5e5bcb8502fa87232f9d6498c0adfd89bbf06c31c37609cf4d612fa27
   languageName: node
   linkType: hard
 
@@ -1009,28 +1009,28 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "hurmet@workspace:."
   dependencies:
-    "@eslint/eslintrc": ^3.3.5
-    "@eslint/js": ^10.0.1
-    "@rollup/plugin-commonjs": ^29.0.3
-    "@rollup/plugin-node-resolve": ^16.0.3
-    eslint: ^10.6.0
-    filesaver.js-npm: ^1.0.1
-    globals: ^17.7.0
-    prosemirror-commands: ^1.7.1
-    prosemirror-dropcursor: ^1.8.2
-    prosemirror-gapcursor: ^1.4.1
-    prosemirror-history: ^1.5.0
-    prosemirror-inputrules: ^1.5.1
-    prosemirror-keymap: ^1.2.3
-    prosemirror-menu: ^1.3.2
-    prosemirror-model: 1.25.9
+    "@eslint/eslintrc": 3.3.7
+    "@eslint/js": 10.0.1
+    "@rollup/plugin-commonjs": 29.0.3
+    "@rollup/plugin-node-resolve": 16.0.3
+    eslint: 10.11.0
+    filesaver.js-npm: 1.0.1
+    globals: 17.12.0
+    prosemirror-commands: 1.7.2
+    prosemirror-dropcursor: 1.8.4
+    prosemirror-gapcursor: 1.4.1
+    prosemirror-history: 1.5.0
+    prosemirror-inputrules: 1.5.1
+    prosemirror-keymap: 1.2.3
+    prosemirror-menu: 1.3.2
+    prosemirror-model: 1.25.12
     prosemirror-state: 1.4.4
-    prosemirror-tables: ^1.8.5
-    prosemirror-transform: 1.12.0
-    prosemirror-view: 1.41.9
-    rollup: ^4.62.2
-    terser: ^5.48.0
-    ws: ^8.21.0
+    prosemirror-tables: 1.8.5
+    prosemirror-transform: 1.12.2
+    prosemirror-view: 1.42.6
+    rollup: 4.63.5
+    terser: 5.51.2
+    ws: 8.22.0
   bin:
     hurmet: ./dist/hurmet-cli.cjs
   languageName: unknown
@@ -1346,7 +1346,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prosemirror-commands@npm:^1.0.0, prosemirror-commands@npm:^1.7.1":
+"prosemirror-commands@npm:1.7.2, prosemirror-commands@npm:^1.0.0":
   version: 1.7.2
   resolution: "prosemirror-commands@npm:1.7.2"
   dependencies:
@@ -1357,7 +1357,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prosemirror-dropcursor@npm:^1.8.2":
+"prosemirror-dropcursor@npm:1.8.4":
   version: 1.8.4
   resolution: "prosemirror-dropcursor@npm:1.8.4"
   dependencies:
@@ -1368,7 +1368,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prosemirror-gapcursor@npm:^1.4.1":
+"prosemirror-gapcursor@npm:1.4.1":
   version: 1.4.1
   resolution: "prosemirror-gapcursor@npm:1.4.1"
   dependencies:
@@ -1380,7 +1380,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prosemirror-history@npm:^1.0.0, prosemirror-history@npm:^1.5.0":
+"prosemirror-history@npm:1.5.0, prosemirror-history@npm:^1.0.0":
   version: 1.5.0
   resolution: "prosemirror-history@npm:1.5.0"
   dependencies:
@@ -1392,7 +1392,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prosemirror-inputrules@npm:^1.5.1":
+"prosemirror-inputrules@npm:1.5.1":
   version: 1.5.1
   resolution: "prosemirror-inputrules@npm:1.5.1"
   dependencies:
@@ -1402,7 +1402,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prosemirror-keymap@npm:^1.0.0, prosemirror-keymap@npm:^1.2.3":
+"prosemirror-keymap@npm:1.2.3, prosemirror-keymap@npm:^1.0.0, prosemirror-keymap@npm:^1.2.3":
   version: 1.2.3
   resolution: "prosemirror-keymap@npm:1.2.3"
   dependencies:
@@ -1412,7 +1412,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prosemirror-menu@npm:^1.3.2":
+"prosemirror-menu@npm:1.3.2":
   version: 1.3.2
   resolution: "prosemirror-menu@npm:1.3.2"
   dependencies:
@@ -1424,16 +1424,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prosemirror-model@npm:1.25.9":
-  version: 1.25.9
-  resolution: "prosemirror-model@npm:1.25.9"
+"prosemirror-model@npm:1.25.12, prosemirror-model@npm:^1.0.0, prosemirror-model@npm:^1.21.0, prosemirror-model@npm:^1.25.12, prosemirror-model@npm:^1.25.4":
+  version: 1.25.12
+  resolution: "prosemirror-model@npm:1.25.12"
   dependencies:
     orderedmap: ^2.0.0
-  checksum: c86ca3b080df8359997120d6008c527b0ae6e4bd6cf01ea917635163f417d5947a29bf9c338f73a257bafd4fdd23dd235b4518db81c8627ff1699357999d3d74
+  checksum: ec2b9ce237ae58917ff85ba028e7feb10feb06692bbb809c5613e449292e408c956fe17781c261ba0cc87ab98849ebcfc4aad00a5bbeba05b2fa374750e74976
   languageName: node
   linkType: hard
 
-"prosemirror-state@npm:1.4.4":
+"prosemirror-state@npm:1.4.4, prosemirror-state@npm:^1.0.0, prosemirror-state@npm:^1.2.2, prosemirror-state@npm:^1.4.4":
   version: 1.4.4
   resolution: "prosemirror-state@npm:1.4.4"
   dependencies:
@@ -1444,7 +1444,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prosemirror-tables@npm:^1.8.5":
+"prosemirror-tables@npm:1.8.5":
   version: 1.8.5
   resolution: "prosemirror-tables@npm:1.8.5"
   dependencies:
@@ -1457,23 +1457,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prosemirror-transform@npm:1.12.0":
-  version: 1.12.0
-  resolution: "prosemirror-transform@npm:1.12.0"
+"prosemirror-transform@npm:1.12.2, prosemirror-transform@npm:^1.0.0, prosemirror-transform@npm:^1.1.0, prosemirror-transform@npm:^1.10.2, prosemirror-transform@npm:^1.10.5":
+  version: 1.12.2
+  resolution: "prosemirror-transform@npm:1.12.2"
   dependencies:
     prosemirror-model: ^1.21.0
-  checksum: 2b222dfb96393639868a122ee1b47163e3be8e40163bd248edc8c4bb2abf0be87506f4d34fdf5ea91fc1c52852328502d3813f9e12453b77e5176e14ff19e15b
+  checksum: 4859f7c474f985ccf3e18d23a2705a785aa3f23f52b98df0dbd128b5feec04df8a5f5b326ed4d0c4a7b7370b66bc9fb34cedba712ed5ec6e52bf90529bb7d7fd
   languageName: node
   linkType: hard
 
-"prosemirror-view@npm:1.41.9":
-  version: 1.41.9
-  resolution: "prosemirror-view@npm:1.41.9"
+"prosemirror-view@npm:1.42.6, prosemirror-view@npm:^1.0.0, prosemirror-view@npm:^1.1.0, prosemirror-view@npm:^1.27.0, prosemirror-view@npm:^1.31.0, prosemirror-view@npm:^1.41.4":
+  version: 1.42.6
+  resolution: "prosemirror-view@npm:1.42.6"
   dependencies:
-    prosemirror-model: ^1.25.8
+    prosemirror-model: ^1.25.12
     prosemirror-state: ^1.0.0
     prosemirror-transform: ^1.1.0
-  checksum: c3c224e4addf5d6849548c6ec8671f546e56544325b17adc8a321142ecb74e69c25bed853cb7e29ad58c9023e6857ab79494e25909776e13db3fdb2817909449
+  checksum: cb3746eb0f67859d9dd8010c11b547c58d9467c23b878a429939fa8924d974f046703af4bd1beb09a5a73406367910a95db904c7e6035b22a6da6f70ab2ea0f1
   languageName: node
   linkType: hard
 
@@ -1528,7 +1528,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rollup@npm:^4.62.2":
+"rollup@npm:4.63.5":
   version: 4.63.5
   resolution: "rollup@npm:4.63.5"
   dependencies:
@@ -1697,7 +1697,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"terser@npm:^5.48.0":
+"terser@npm:5.51.2":
   version: 5.51.2
   resolution: "terser@npm:5.51.2"
   dependencies:
@@ -1782,7 +1782,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ws@npm:^8.21.0":
+"ws@npm:8.22.0":
   version: 8.22.0
   resolution: "ws@npm:8.22.0"
   peerDependencies:

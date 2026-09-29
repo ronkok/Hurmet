@@ -372,7 +372,7 @@ export const nodes = {
     group: "block",
     attrs: {
       class: { default: 'grid', validate: "string" },
-      name: { default: "", validate: "string" },
+      name: { default: "", validate: "null|string" },
       numRows: { default: 0, validate: "number" }, // Used in spreadsheetSum
       columnMap: { default: {} },
       unitMap: { default: [] },
