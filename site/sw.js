@@ -1,6 +1,6 @@
 // A service worker to enable offline use of Hurmet.app
 
-const cacheName = "hurmet-2026-09-28"
+const cacheName = "hurmet-2026-10-01"
 
 const addResourcesToCache = async(resources) => {
   const cache = await caches.open(cacheName)

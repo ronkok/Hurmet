@@ -38612,7 +38612,7 @@ const nodes = {
       src: { validate: "string" },
       alt: {default: null, validate: "null|string"},
       width: {default: null, validate: "null|string"},
-      class: {default: "inline", validate: "string"}
+      class: {default: "inline", validate: "null|string"}
     },
     group: "inline",
     draggable: true,
