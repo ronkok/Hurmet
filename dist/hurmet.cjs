@@ -38332,7 +38332,7 @@ const nodes = {
 
   figure: {
     content: "block{2,2}",
-    attrs: { class: {default: "auto", validate: "string"} },
+    attrs: { class: {default: "auto", validate: "null|string"} },
     group: "block",
     marks: "",
     parseDOM: [{tag: "figure", getAttrs(dom) {
