@@ -322,10 +322,13 @@ const hurmetNodes =  {
       if (node.attrs.entry.slice(0, 5) === "draw(") {
         // node is a draw environment in a calculation node.
         const defIndex = getDefIndex(state)
-        state.paths.set(defIndex, entry.replace(/\n/g, "\\n"))
+        // Use the entry as written, without the blank-line collapsing and
+        // delimiters applied above, since the path goes at the end of the document.
+        state.paths.set(defIndex, node.attrs.entry.trim().replace(/\n/g, "␤"))
         if (titleRegEx.test(node.attrs.entry)) {
           // Get the title.
-          state.write(`![${titleRegEx.exec(node.attrs.entry)[1].trim()}][${defIndex}]`)
+          const title = titleRegEx.exec(node.attrs.entry)[1].replace(/""/g, '"').trim()
+          state.write(`![${title}][${defIndex}]`)
         } else {
           state.write(`![${defIndex}][]`)
         }

@@ -615,7 +615,11 @@ const parseRef = function(capture, state, refNode) {
       if (def.attrs.alt) { refNode.content[0].attrs.alt = def.attrs.alt }
     } else if (refNode.type === "image") {
       if (drawRegEx.test(def.target)) {
-        const entry = def.target.replace(/\\n/g, "\n")
+        // A drawing is written on one line. Its line breaks are written as ␤.
+        // Drawings written before ␤ was adopted contain no ␤; they used \n.
+        const entry = def.target.indexOf("␤") === -1
+          ? def.target.replace(/\\n/g, "\n")
+          : def.target.replace(/␤/g, "\n")
         return { type: "calculation", attrs: { entry } }
       } else {
         refNode.attrs = def.attrs
@@ -796,7 +800,8 @@ rules.set("figure", {
 });
 rules.set("def", {
   isLeaf: true,
-  match: blockRegex(/^\[([^\]\n]+)\]: *(?:¢(`+)([\s\S]*?[^`])\2(?!`)|<?([^\n>]*)>? *(?:\n\{([^\n}]*)\})?)/),
+  // A drawing takes its whole line, which may contain ">".
+  match: blockRegex(/^\[([^\]\n]+)\]: *(?:¢(`+)([\s\S]*?[^`])\2(?!`)|draw\([^\n]*|<?([^\n>]*)>? *(?:\n\{([^\n}]*)\})?)/),
   // Link reference definitions were handled in md2ast().
   parse: function(capture, state) { return { type: "null" } }
 });
