@@ -17770,10 +17770,6 @@ const fromNumber = num => {
     const exp = BigInt(parts[7]) - BigInt(decimalFrac.length);
     if (exp < 0) {
       return [BigInt(parts[1] + parts[3] + decimalFrac), iTen ** -exp]
-    } else if (parts[5]) {
-      const denominator = BigInt(parts[5]);
-      return normalize(
-        [BigInt(parts[1] + parts[3]) * denominator + BigInt(parts[4]) ])
     } else {
       return normalize([BigInt(parts[1] + parts[3] + decimalFrac) * iTen ** exp, iOne])
     }
@@ -17787,7 +17783,7 @@ const fromString = str => {
   if (parts[5]) {
     // mixed fraction
     const denominator = BigInt(parts[5]);
-    const numerator = BigInt(parts[1] + parts[3]) * denominator + BigInt(parts[4]);
+    const numerator = BigInt(parts[3]) * denominator + BigInt(parts[4]);
     r = normalize([numerator, denominator]);
 
   } else if (parts[2]) {
@@ -24628,7 +24624,11 @@ const parseRef = function(capture, state, refNode) {
       if (def.attrs.alt) { refNode.content[0].attrs.alt = def.attrs.alt; }
     } else if (refNode.type === "image") {
       if (drawRegEx$1.test(def.target)) {
-        const entry = def.target.replace(/\\n/g, "\n");
+        // A drawing is written on one line. Its line breaks are written as ␤.
+        // Drawings written before ␤ was adopted contain no ␤; they used \n.
+        const entry = def.target.indexOf("␤") === -1
+          ? def.target.replace(/\\n/g, "\n")
+          : def.target.replace(/␤/g, "\n");
         return { type: "calculation", attrs: { entry } }
       } else {
         refNode.attrs = def.attrs;
@@ -24809,7 +24809,8 @@ rules.set("figure", {
 });
 rules.set("def", {
   isLeaf: true,
-  match: blockRegex(/^\[([^\]\n]+)\]: *(?:¢(`+)([\s\S]*?[^`])\2(?!`)|<?([^\n>]*)>? *(?:\n\{([^\n}]*)\})?)/),
+  // A drawing takes its whole line, which may contain ">".
+  match: blockRegex(/^\[([^\]\n]+)\]: *(?:¢(`+)([\s\S]*?[^`])\2(?!`)|draw\([^\n]*|<?([^\n>]*)>? *(?:\n\{([^\n}]*)\})?)/),
   // Link reference definitions were handled in md2ast().
   parse: function(capture, state) { return { type: "null" } }
 });
@@ -52447,10 +52448,13 @@ const hurmetNodes =  {
       if (node.attrs.entry.slice(0, 5) === "draw(") {
         // node is a draw environment in a calculation node.
         const defIndex = getDefIndex(state);
-        state.paths.set(defIndex, entry.replace(/\n/g, "\\n"));
+        // Use the entry as written, without the blank-line collapsing and
+        // delimiters applied above, since the path goes at the end of the document.
+        state.paths.set(defIndex, node.attrs.entry.trim().replace(/\n/g, "␤"));
         if (titleRegEx.test(node.attrs.entry)) {
           // Get the title.
-          state.write(`![${titleRegEx.exec(node.attrs.entry)[1].trim()}][${defIndex}]`);
+          const title = titleRegEx.exec(node.attrs.entry)[1].replace(/""/g, '"').trim();
+          state.write(`![${title}][${defIndex}]`);
         } else {
           state.write(`![${defIndex}][]`);
         }
