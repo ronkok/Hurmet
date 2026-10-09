@@ -50,11 +50,6 @@ const fromNumber = num => {
     const exp = BigInt(parts[7]) - BigInt(decimalFrac.length)
     if (exp < 0) {
       return [BigInt(parts[1] + parts[3] + decimalFrac), iTen ** -exp]
-    } else if (parts[5]) {
-      const denominator = BigInt(parts[5])
-      return normalize(
-        [BigInt(parts[1] + parts[3]) * denominator + BigInt(parts[4]) ], denominator
-      )
     } else {
       return normalize([BigInt(parts[1] + parts[3] + decimalFrac) * iTen ** exp, iOne])
     }
@@ -71,7 +66,7 @@ const fromString = str => {
   if (parts[5]) {
     // mixed fraction
     const denominator = BigInt(parts[5])
-    const numerator = BigInt(parts[1] + parts[3]) * denominator + BigInt(parts[4])
+    const numerator = BigInt(parts[3]) * denominator + BigInt(parts[4])
     r = normalize([numerator, denominator])
 
   } else if (parts[2]) {
