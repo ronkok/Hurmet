@@ -26556,9 +26556,17 @@ ParseError.prototype.__proto__ = Error.prototype;
  */
 
 /**
- * Provide a default value if a setting is undefined
+ * Look up `key` on a user-supplied `options` object and return its value, or
+ * `defaultIfUndefined` if the setting is absent. Reads via
+ * `Object.prototype.hasOwnProperty.call` rather than plain property access,
+ * so a key that only exists because `Object.prototype` was polluted
+ * elsewhere is never mistaken for a setting the caller actually provided.
  */
-const deflt = function(setting, defaultIfUndefined) {
+const deflt = function(options, key, defaultIfUndefined) {
+  if (!Object.prototype.hasOwnProperty.call(options, key)) {
+    return defaultIfUndefined;
+  }
+  const setting = options[key];
   return setting === undefined ? defaultIfUndefined : setting;
 };
 
@@ -26676,6 +26684,27 @@ const smalls = "acegıȷmnopqrsuvwxyzαγεηικμνοπρςστυχωϕ𝐚�
  */
 
 
+const FORBIDDEN_MACRO_KEYS = ["__proto__", "prototype", "constructor"];
+
+// Sanitize a user-supplied macros object: strip its prototype (so later
+// bracket-notation writes, e.g. from \gdef, can never reach Object.prototype)
+// and delete any own key that could be used to pollute it. This mutates
+// `macros` in place and returns the same reference, rather than a copy,
+// because callers such as auto-render.js rely on that identity to share
+// \gdef'd macros across multiple render calls that pass the same options
+// object.
+const sanitizeMacros = (macros) => {
+  if (macros == null || typeof macros !== "object") {
+    return Object.create(null);
+  }
+  for (const key of FORBIDDEN_MACRO_KEYS) {
+    if (Object.prototype.hasOwnProperty.call(macros, key)) {
+      delete macros[key];
+    }
+  }
+  return Object.setPrototypeOf(macros, null);
+};
+
 /**
  * The main Settings object
  */
@@ -26683,24 +26712,29 @@ class Settings {
   constructor(options) {
     // allow null options
     options = options || {};
-    this.displayMode = deflt(options.displayMode, false);    // boolean
-    this.annotate = deflt(options.annotate, false);           // boolean
-    this.leqno = deflt(options.leqno, false);                // boolean
-    this.throwOnError = deflt(options.throwOnError, false);  // boolean
-    this.errorColor = deflt(options.errorColor, "#b22222");  // string
-    this.macros = options.macros || {};
-    this.wrap = deflt(options.wrap, "none");                   // "none" | "tex" | "="
-    this.xml = deflt(options.xml, false);                     // boolean
-    this.colorIsTextColor = deflt(options.colorIsTextColor, false);  // boolean
-    this.strict = deflt(options.strict, false);    // boolean
-    this.trust = deflt(options.trust, false);  // trust context. See html.js.
-    this.maxSize = (options.maxSize === undefined
-      ? [Infinity, Infinity]
-      : Array.isArray(options.maxSize)
+    this.displayMode = deflt(options, "displayMode", false);    // boolean
+    this.annotate = deflt(options, "annotate", false);           // boolean
+    this.leqno = deflt(options, "leqno", false);                // boolean
+    this.throwOnError = deflt(options, "throwOnError", false);  // boolean
+    this.errorColor = deflt(options, "errorColor", "#b22222");  // string
+    this.macros = sanitizeMacros(
+      Object.prototype.hasOwnProperty.call(options, "macros") ? options.macros : undefined
+    );
+    this.wrap = deflt(options, "wrap", "none");                   // "none" | "tex" | "="
+    this.xml = deflt(options, "xml", false);                     // boolean
+    this.colorIsTextColor = deflt(options, "colorIsTextColor", false);  // boolean
+    this.strict = deflt(options, "strict", false);    // boolean
+    this.trust = deflt(options, "trust", false);  // trust context. See html.js.
+    const maxSize = Object.prototype.hasOwnProperty.call(options, "maxSize")
       ? options.maxSize
+      : undefined;
+    this.maxSize = (maxSize === undefined
+      ? [Infinity, Infinity]
+      : Array.isArray(maxSize)
+      ? maxSize
       : [Infinity, Infinity]
     );
-    this.maxExpand = Math.max(0, deflt(options.maxExpand, 1000)); // number
+    this.maxExpand = Math.max(0, deflt(options, "maxExpand", 1000)); // number
     this.wrapDelimiterPairs = true; // boolean
   }
 
@@ -27400,22 +27434,26 @@ const NON_ATOMS = {
   textord: 1
 };
 
-const symbols = {
-  math: {},
-  text: {}
-};
+const symbols = Object.create(null);
+symbols.math = Object.create(null);
+symbols.text = Object.create(null);
 
-/** `acceptUnicodeChar = true` is only applicable if `replace` is set. */
 function defineSymbol(mode, group, replace, name, acceptUnicodeChar) {
-  symbols[mode][name] = { group, replace };
+  if (mode !== "math" && mode !== "text") {
+    throw new TypeError(`Invalid mode: ${mode} called in defineSymbol`);
+  }
 
+  const entry = { group, replace };
+  symbols[mode][name] = entry;
+
+  /** `acceptUnicodeChar = true` is only applicable if `replace` is set. */
   if (acceptUnicodeChar && replace) {
-    symbols[mode][replace] = symbols[mode][name];
+    symbols[mode][replace] = entry;
   }
 }
 
 // Some abbreviations for commonly used strings.
-// This helps minify the code, and also spotting typos using jshint.
+// This helps minify the code, and also spotting typos via linter.
 
 // modes:
 const math = "math";
@@ -28253,9 +28291,11 @@ defineSymbol(math, op, "\u222b", "\\smallint");
 defineSymbol(text, inner, "\u2026", "\\textellipsis");
 defineSymbol(math, inner, "\u2026", "\\mathellipsis");
 defineSymbol(text, inner, "\u2026", "\\ldots", true);
+defineSymbol(math, inner, "\u2026", "\\dotso");
+defineSymbol(math, inner, "\u2026", "\\dotsc");
 defineSymbol(math, inner, "\u2026", "\\ldots", true);
 defineSymbol(math, inner, "\u22f0", "\\iddots", true);
-defineSymbol(math, inner, "\u22ef", "\\@cdots", true);
+defineSymbol(math, inner, "\u22ef", "\\cdots", true);
 defineSymbol(math, inner, "\u22f1", "\\ddots", true);
 defineSymbol(math, textord, "\u22ee", "\\varvdots"); // \vdots is a macro
 defineSymbol(text, textord, "\u22ee", "\\varvdots");
@@ -30045,7 +30085,7 @@ const StyleLevel = {
  * `macros.js` exports this same dictionary again and makes it public.
  * `Parser.js` requires this dictionary via `macros.js`.
  */
-const _macros = {};
+const _macros = Object.create(null);
 
 // This function might one day accept an additional argument and do more things.
 function defineMacro(name, body) {
@@ -30390,60 +30430,6 @@ defineMacro("\\dots", function(context) {
   return thedots;
 });
 
-const spaceAfterDots = {
-  // \rightdelim@ checks for the following:
-  ")": true,
-  "]": true,
-  "\\rbrack": true,
-  "\\}": true,
-  "\\rbrace": true,
-  "\\rangle": true,
-  "\\rceil": true,
-  "\\rfloor": true,
-  "\\rgroup": true,
-  "\\rmoustache": true,
-  "\\right": true,
-  "\\bigr": true,
-  "\\biggr": true,
-  "\\Bigr": true,
-  "\\Biggr": true,
-  // \extra@ also tests for the following:
-  $: true,
-  // \extrap@ checks for the following:
-  ";": true,
-  ".": true,
-  ",": true
-};
-
-defineMacro("\\dotso", function(context) {
-  const next = context.future().text;
-  if (next in spaceAfterDots) {
-    return "\\ldots\\,";
-  } else {
-    return "\\ldots";
-  }
-});
-
-defineMacro("\\dotsc", function(context) {
-  const next = context.future().text;
-  // \dotsc uses \extra@ but not \extrap@, instead specially checking for
-  // ';' and '.', but doesn't check for ','.
-  if (next in spaceAfterDots && next !== ",") {
-    return "\\ldots\\,";
-  } else {
-    return "\\ldots";
-  }
-});
-
-defineMacro("\\cdots", function(context) {
-  const next = context.future().text;
-  if (next in spaceAfterDots) {
-    return "\\@cdots\\,";
-  } else {
-    return "\\@cdots";
-  }
-});
-
 defineMacro("\\dotsb", "\\cdots");
 defineMacro("\\dotsm", "\\cdots");
 defineMacro("\\dotsi", "\\!\\cdots");
@@ -30573,7 +30559,7 @@ defineMacro("\\colon", `\\mathpunct{\\char"3a}`);
 //////////////////////////////////////////////////////////////////////
 // mathtools.sty
 
-defineMacro("\\prescript", "\\pres@cript{_{#1}^{#2}}{}{#3}");
+defineMacro("\\prescript", "\\pres@cript{^{#1}_{#2}}{}{#3}");
 
 //\providecommand\ordinarycolon{:}
 defineMacro("\\ordinarycolon", `\\char"3a`);
@@ -37915,6 +37901,11 @@ const isArrow = str => {
 defineFunctionBuilders({
   type: "atom",
   mathmlBuilder(group, style) {
+    if (group.family === "inner") {
+      // Give \dots ORD spacing, not OP spacing.
+      const tag = group.mode === "text" ? "mtext" : "mi";
+      return new MathNode(tag, [makeText(group.text, group.mode)])
+    }
     const node = new MathNode("mo", [makeText(group.text, group.mode)]);
     if (group.family === "punct") {
       node.setAttribute("separator", "true");
@@ -38470,7 +38461,7 @@ class Namespace {
    * of initial (global-level) mappings, which will constantly change
    * according to any global/top-level `set`s done.
    */
-  constructor(builtins = {}, globalMacros = {}) {
+  constructor(builtins = Object.create(null), globalMacros = Object.create(null)) {
     this.current = globalMacros;
     this.builtins = builtins;
     this.undefStack = [];
@@ -38480,7 +38471,7 @@ class Namespace {
    * Start a new nested group, affecting future local `set`s.
    */
   beginGroup() {
-    this.undefStack.push({});
+    this.undefStack.push(Object.create(null));
   }
 
   /**
@@ -40678,7 +40669,7 @@ class Style {
  * https://mit-license.org/
  */
 
-const version = "0.13.4";
+const version = "0.14.0";
 
 function postProcess(block) {
   const labelMap = {};
@@ -40999,7 +40990,7 @@ const renderMathInElement = function(elem, options) {
 
   // Enable sharing of global macros defined via `\gdef` between different
   // math elements within a single call to `renderMathInElement`.
-  optionsCopy.macros = optionsCopy.macros || {};
+  optionsCopy.macros = optionsCopy.macros || Object.create(null);
 
   renderElem(elem, optionsCopy);
   postProcess(elem);
@@ -41078,7 +41069,7 @@ const generateParseTree = function(expression, options) {
  */
 const definePreamble = function(expression, options) {
   const settings = new Settings(options);
-  settings.macros = {};
+  settings.macros = Object.create(null);
   if (!(typeof expression === "string" || expression instanceof String)) {
     throw new TypeError("Temml can only parse string typed expression")
   }
