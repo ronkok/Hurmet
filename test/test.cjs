@@ -673,6 +673,49 @@ end`, vars)
     }
   }
 
-console.log("Done.")
-console.log("Number of tests =  " + numTests)
-console.log("Number of errors = " + numErrors)
+// import() works via fetch(), so this test is asynchronous.
+// updateAndSave() runs a whole Hurmet Markdown document, including the fetch,
+// and returns the document with results written inline.
+const importTests = [
+  // variable name, expected result
+  ["E", "E = 〔29,000〕 ksi"],
+  ["β_1", "β_1 = 〔0.825〕"]
+];
+
+const testImport = async() => {
+  console.log("\nNow testing import…")
+  console.log("")
+  const md = `---------------
+decimalFormat: 1,000,000.
+dateFormat: yyyy-mm-dd
+---------------
+
+¢\`importedParameters = import("https://hurmet.org/parent.txt") = !\`
+
+¢\`E = @@ ksi\`
+
+¢\`β_1 = @\`
+`
+  let output
+  try {
+    output = await hurmet.updateAndSave(md)
+  } catch (err) {
+    output = err.message
+  }
+  for (const [name, expectedOutput] of importTests) {
+    numTests += 1
+    if (!output.includes(expectedOutput)) {
+      numErrors += 1
+      console.log("import: " + name)
+      console.log("expected: " + expectedOutput)
+      console.log("actual output:\n" + output)
+      console.log("")
+    }
+  }
+}
+
+testImport().then(() => {
+  console.log("Done.")
+  console.log("Number of tests =  " + numTests)
+  console.log("Number of errors = " + numErrors)
+})

@@ -17316,7 +17316,9 @@ const scanAssignment = (lines, formats, iStart) => {
   const posEquals = str.indexOf("=");
   let name = str.slice(0, posEquals).trim();
   if (/[,;]/.test(name)) {
-    name = name.split(/[,;]/).map(e => e.trim());
+    name = name.split(/[,;]/).map(e => checkForNumericSubscript(e.trim()));
+  } else {
+    name = checkForNumericSubscript(name);
   }
   let trailStr = str.slice(posEquals + 1).trim();
   if (trailStr.length > 3 && trailStr.slice(0, 3) === '"""') {
@@ -17330,8 +17332,8 @@ const scanAssignment = (lines, formats, iStart) => {
     }
     iEnd = j;
   }
-  const [value, unit, dtype, resultDisplay] = valueFromLiteral(trailStr, name, formats);
-  const stmt = { name, value, unit, dtype, resultDisplay };
+  const [value, unit, dtype, resultdisplay] = valueFromLiteral(trailStr, name, formats);
+  const stmt = { name, value, unit, dtype, resultdisplay };
   return [stmt, iEnd]
 };
 
