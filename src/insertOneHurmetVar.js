@@ -12,10 +12,16 @@ export function insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat
   const formatSpec = hurmetVars.format ? hurmetVars.format.value : "h15"
 
   if (!Array.isArray(attrs.name)) {
-    // This is the typical case.
-    hurmetVars[attrs.name] = attrs
-    if (changedVars) {
-      changedVars.add(attrs.name)
+    if (attrs.name === "importedParameters") {
+      Object.entries(attrs.value).forEach(([key, value]) => {
+        hurmetVars[key] =  value
+      })
+    } else {
+      // This is the typical case.
+      hurmetVars[attrs.name] = attrs
+      if (changedVars) {
+        changedVars.add(attrs.name)
+      }
     }
 
   } else if (attrs.value === null) {

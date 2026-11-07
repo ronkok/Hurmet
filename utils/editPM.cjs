@@ -26,7 +26,7 @@ str = str.replace("refRow = row == 0 || row == map.height ? null : 0;", "refRow 
 // This modifies function doPaste() in prosemirror-view
 match = /"paste"\)\);/.exec(str)
 str = str.slice(0, match.index + match[0].length)
-  + "\n    hurmet.updateCalculations(view, view.state.schema.nodes.calculation, true);\n"
+  + "\n    hurmet.updateCalculations(view, true);\n"
   + str.slice(match.index + match[0].length + 1);
 
 fs.writeFileSync('preview/prosemirror.js', str)

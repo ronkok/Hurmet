@@ -10591,7 +10591,7 @@ function doPaste(view, text, html, preferPlain, event) {
         ? view.state.tr.replaceSelectionWith(singleNode, preferPlain)
         : view.state.tr.replaceSelection(slice);
     view.dispatch(tr.scrollIntoView().setMeta("paste", true).setMeta("uiEvent", "paste"));
-    hurmet.updateCalculations(view, view.state.schema.nodes.calculation, true);
+    hurmet.updateCalculations(view, true);
     return true;
 }
 function getText(clipboardData) {
@@ -42490,10 +42490,16 @@ function insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat) {
   const formatSpec = hurmetVars.format ? hurmetVars.format.value : "h15";
 
   if (!Array.isArray(attrs.name)) {
-    // This is the typical case.
-    hurmetVars[attrs.name] = attrs;
-    if (changedVars) {
-      changedVars.add(attrs.name);
+    if (attrs.name === "importedParameters") {
+      Object.entries(attrs.value).forEach(([key, value]) => {
+        hurmetVars[key] =  value;
+      });
+    } else {
+      // This is the typical case.
+      hurmetVars[attrs.name] = attrs;
+      if (changedVars) {
+        changedVars.add(attrs.name);
+      }
     }
 
   } else if (attrs.value === null) {
