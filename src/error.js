@@ -90,6 +90,7 @@ const errorMessages = Object.freeze({
     ORIGIN:     "Error. Function \"@\" is undefined at the origin.",
     LOG_ZERO:   "Error. Logarithm of zero is negative infinity.",
     END_MISS:   "Error. Too few END statments in function @.",
+    OLD_MACRO:  "Error in macro @. Macro delimiters are now ''' instead of \"\"\".",
     BAD_CONCAT: "Error. Unmatched dimensions.",
     BAD_KEYSTR: "Error. The key in a key:value pair must be a string.",
     BAD_APPEND: "Error. Can not append a @",

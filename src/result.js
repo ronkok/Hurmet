@@ -2,7 +2,7 @@ import { dt } from "./constants"
 import { Rnl } from "./rational"
 import { parse } from "./parser"
 import { format } from "./format"
-import { formatDate } from "./date"
+import { formatDate, plainDate, isoDateString } from "./date"
 import { addTextEscapes, clone } from "./utils"
 import { Matrix, isMatrix, isVector } from "./matrix"
 import { DataFrame } from "./dataframe"
@@ -68,7 +68,10 @@ export const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAw
     stmt.value = result.value
     /* eslint-disable no-useless-assignment */
     let resultDisplay = ""
-    let altResultDisplay = ""
+    let altResultDisplay = ""   // plain text, for screen display
+    // A valid Hurmet literal, written into a saved Markdown file.
+    // Defaults to altResultDisplay.
+    let mdResultDisplay
     if (stmt.resulttemplate.indexOf("!") > -1) {
       // Suppress display of the result
       resultDisplay = ""
@@ -103,26 +106,17 @@ export const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAw
       }
 
     } else if (isMatrix(result)) {
-      resultDisplay = Matrix.display((isUnitAware || result.value.plain)
-          ? { value: result.value.plain, dtype: result.dtype }
-          : isPercent && isVector(result)
-          ? { value: result.value.map(e => times100(e)), dtype: result.dtype }
-          : isPercent
-          ? { value: result.value.map(row => row.map(e => times100(e))), dtype: result.dtype }
-          : result,
-        formatSpec,
-        decimalFormat
-      )
-      altResultDisplay = Matrix.displayAlt((isUnitAware || result.value.plain)
-          ? { value: result.value.plain, dtype: result.dtype }
-          : isPercent && isVector(result)
-          ? { value: result.value.map(e => times100(e)), dtype: result.dtype }
-          : isPercent
-          ? { value: result.value.map(row => row.map(e => times100(e))), dtype: result.dtype }
-          : result,
-        formatSpec,
-        decimalFormat
-      )
+      const matrix = (isUnitAware || result.value.plain)
+        ? { value: result.value.plain, dtype: result.dtype }
+        : isPercent && isVector(result)
+        ? { value: result.value.map(e => times100(e)), dtype: result.dtype }
+        : isPercent
+        ? { value: result.value.map(row => row.map(e => times100(e))), dtype: result.dtype }
+        : result
+      resultDisplay = Matrix.display(matrix, formatSpec, decimalFormat)
+      altResultDisplay = Matrix.displayAlt(matrix, formatSpec, decimalFormat)
+      mdResultDisplay = Matrix.displayAlt(matrix, formatSpec, decimalFormat, "literal",
+        isPercent ? "%" : "")
       if (isPercent) {
         resultDisplay += "\\%"
         altResultDisplay += "%"
@@ -166,6 +160,8 @@ export const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAw
         resultDisplay = `\\textcolor{${result.unit}}{${resultDisplay}}`
       }
       altResultDisplay = result.value
+      // Write a string literal. A doubled quotation mark, "", escapes a quotation mark.
+      mdResultDisplay = '"' + String(result.value).replace(/"/g, '""') + '"'
 
     } else if (result.dtype & dt.RICHTEXT) {
       resultDisplay = parse(result.value, formats, false)
@@ -181,20 +177,17 @@ export const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAw
 
     } else if (result.dtype === dt.DATE) {
       resultDisplay = formatDate(result.value, formats.dateFormat)
-      if (resultDisplay.dtype && resultDisplay.dtype === dt.ERROR) {
-        resultDisplay = "\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}"
-        altResultDisplay = resultDisplay.value
-      } else {
-        altResultDisplay = resultDisplay.slice(26, -2)
-      }
+      altResultDisplay = plainDate(result.value, formats.dateFormat)
+      mdResultDisplay = "'" + isoDateString(result.value) + "'"  // a date literal
 
     } else if (result.value.plain) {
       resultDisplay = format(result.value.plain, formatSpec, decimalFormat)
       if (resultDisplay.dtype && resultDisplay.dtype === dt.ERROR) {
-        resultDisplay = "\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}"
+        resultDisplay = "\\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}"
         altResultDisplay = resultDisplay.value
       } else {
-        altResultDisplay = resultDisplay.replace(/{,}/g, ",").replace(/\\/g, "")
+        altResultDisplay = format(result.value.plain, formatSpec, decimalFormat, "plain")
+        mdResultDisplay = format(result.value.plain, formatSpec, decimalFormat, "literal")
       }
 
     } else if (Rnl.isRational(result.value)) {
@@ -205,7 +198,10 @@ export const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAw
         resultDisplay = "\\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}"
         altResultDisplay = resultDisplay.value
       } else {
-        altResultDisplay = resultDisplay.replace(/{,}/g, ",").replace(/\\/g, "")
+        const value = isPercent ? times100(result.value) : result.value
+        const pct = isPercent ? "%" : ""
+        altResultDisplay = format(value, formatSpec, decimalFormat, "plain") + pct
+        mdResultDisplay = format(value, formatSpec, decimalFormat, "literal") + pct
       }
 
     } else if (result.dtype === dt.IMAGE) {
@@ -217,47 +213,61 @@ export const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAw
 
     }
 
+    if (mdResultDisplay === undefined) { mdResultDisplay = altResultDisplay }
+
     // Write the string to be plugged into echos of dependent nodes
     const resultCapture = /(\? *\??|@ *@?|%%?)/.exec(stmt.resulttemplate)
     stmt.resultdisplay = stmt.resulttemplate.slice(0, resultCapture.index) + resultDisplay +
       stmt.resulttemplate.slice(resultCapture.index + resultCapture[0].length)
 
+    // Write the Markdown for a saved document. Do this before stmt.alt is changed.
+    writeSavedResult(stmt, mdResultDisplay)
+
     // Write the TeX for this node
     if (stmt.resulttemplate.indexOf("@") > -1) {
       stmt.tex = stmt.resultdisplay
-      stmt.displaySelector = stmt.altresulttemplate.indexOf("@@") > -1 ? "@@" : "@"
-      if (testRegEx.test(stmt.entry)) {
-        stmt.md = stmt.entry + ` 〔${altResultDisplay}〕`
-      } else {
-        const pos = stmt.entry.lastIndexOf(stmt.displaySelector)
-        stmt.md = stmt.entry.slice(0, pos) + `〔${altResultDisplay}〕`
-            + stmt.entry.slice(pos + stmt.displaySelector.length)
-      }
       stmt.alt = stmt.altresulttemplate.replace(/@@?/, altResultDisplay)
     } else if (stmt.resulttemplate.indexOf("?") > -1) {
       let pos = stmt.tex.lastIndexOf("?")
       stmt.tex = stmt.tex.slice(0, pos).replace(/\? *$/, "") + resultDisplay + stmt.tex.slice(pos + 1)
-      stmt.displaySelector = stmt.altresulttemplate.indexOf("??") > -1 ? "??" : "?"
       pos = stmt.alt.lastIndexOf(stmt.displaySelector)
-      stmt.md = stmt.alt.slice(0, pos) + `〔${altResultDisplay}〕`
-          + stmt.alt.slice(pos + stmt.displaySelector.length)
       stmt.alt = stmt.alt.slice(0, pos) + altResultDisplay
           + stmt.alt.slice(pos + stmt.displaySelector.length)
     } else if (stmt.resulttemplate.indexOf("%") > -1) {
       let pos = stmt.tex.lastIndexOf("%")
       stmt.tex = stmt.tex.slice(0, pos).replace(/% *$/, "") + resultDisplay + stmt.tex.slice(pos + 1)
-      stmt.displaySelector = stmt.altresulttemplate.indexOf("%%") > -1 ? "%%" : "%"
       pos = stmt.alt.lastIndexOf(stmt.displaySelector)
-      stmt.md = stmt.alt.slice(0, pos) + `〔${altResultDisplay}〕`
-          + stmt.alt.slice(pos + stmt.displaySelector.length)
       stmt.alt = stmt.alt.slice(0, pos) + altResultDisplay
           + stmt.alt.slice(pos + stmt.displaySelector.length)
     }
   }
   stmt.tex = stmt.tex.replace(percentRegEx, "")
-  if (stmt.md) { stmt.md = stmt.md.replace(percentRegEx, "") }
   stmt.alt = stmt.alt.replace(percentRegEx, "")
   return stmt
+}
+
+export const writeSavedResult = (stmt, savedResult) => {
+  // Write stmt.md, the Markdown for a saved document, with the result between 〔…〕.
+  // savedResult is a Hurmet literal, or an error message. Call this function before
+  // the display selector in stmt.alt is replaced by a result.
+  const template = stmt.resulttemplate
+  if (template.indexOf("@") > -1) {
+    stmt.displaySelector = stmt.altresulttemplate.indexOf("@@") > -1 ? "@@" : "@"
+    if (testRegEx.test(stmt.entry)) {
+      stmt.md = stmt.entry + ` 〔${savedResult}〕`
+    } else {
+      const pos = stmt.entry.lastIndexOf(stmt.displaySelector)
+      stmt.md = stmt.entry.slice(0, pos) + `〔${savedResult}〕`
+          + stmt.entry.slice(pos + stmt.displaySelector.length)
+    }
+  } else if (template.indexOf("?") > -1 || template.indexOf("%") > -1) {
+    const ch = template.indexOf("?") > -1 ? "?" : "%"
+    stmt.displaySelector = stmt.altresulttemplate.indexOf(ch + ch) > -1 ? ch + ch : ch
+    const pos = stmt.alt.lastIndexOf(stmt.displaySelector)
+    stmt.md = stmt.alt.slice(0, pos) + `〔${savedResult}〕`
+        + stmt.alt.slice(pos + stmt.displaySelector.length)
+  }
+  if (stmt.md) { stmt.md = stmt.md.replace(percentRegEx, "") }
 }
 
 const testValue = oprnd => {

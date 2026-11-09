@@ -54,19 +54,29 @@ const processDMY = (dmy, date, language, inExpression) => {
     : String(date.getUTCFullYear())
 }
 
-export const formatDate = (dateValue, dateFormatSpec, inExpression = false) => {
+export const isoDateString = dateValue => {
   // dateValue = number of seconds after start of January 1, 1970
-  const date = new Date(Rnl.toNumber(dateValue) * 1000)
-  // Write results in the document's main font.
-  const dateClass = inExpression ? "" : "\\class{date-result}{"
+  // Return an ISO date string, e.g., "2025-01-20".
+  return new Date(Rnl.toNumber(dateValue) * 1000).toISOString().split("T")[0]
+}
 
+export const formatDate = (dateValue, dateFormatSpec, inExpression = false) => {
+  // Return TeX. Write results in the document's main font.
+  const dateClass = inExpression ? "" : "\\class{date-result}{"
+  let result = `${dateClass}\\text{${plainDate(dateValue, dateFormatSpec, inExpression)}}`
+  if (!inExpression)  { result += "}" }
+  return result
+}
+
+export const plainDate = (dateValue, dateFormatSpec, inExpression = false) => {
+  // Return a plain text date, written in the document's date format.
+  // dateValue = number of seconds after start of January 1, 1970
   if (!dateFormatSpec || dateFormatSpec === "yyyy-mm-dd" ||
     (inExpression && dateFormatSpec.indexOf("de") > -1)) {
-    let result = `${dateClass}\\text{${date.toISOString().split("T")[0]}}`
-    if (!inExpression)  { result += "}" }
-    return result
+    return isoDateString(dateValue)
   }
 
+  const date = new Date(Rnl.toNumber(dateValue) * 1000)
   const match = dateFormatRegEx.exec(dateFormatSpec)
   const language = match[7] ? match[7] : "en"
 
@@ -81,9 +91,6 @@ export const formatDate = (dateValue, dateFormatSpec, inExpression = false) => {
   str += processDMY(match[4], date, language, inExpression)
   str += match[5];
   str += processDMY(match[6], date, language, inExpression)
-
-  let result = `${dateClass}\\text{${str}}`
-  if (!inExpression)  { result += "}" }
-  return result
+  return str
 }
 

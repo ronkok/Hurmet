@@ -660,6 +660,10 @@ const unitTeXFromString = str => {
 // unit exponents of a number with no unit.
 const allZeros = Object.freeze([0, 0, 0, 0, 0, 0, 0, 0]);
 
+// An RPN token that marks the start of the argument of isnan().
+// The evaluator evaluates that argument on its own, so that it can catch an error.
+const isnanMarker = "⁅isnan";
+
 // Data types
 // Some operands will be two types at the same time, e.g. RATIONAL + MATRIX.
 // So we'll enumerate data types in powers of two.
@@ -780,6 +784,7 @@ const errorMessages = Object.freeze({
     ORIGIN:     "Error. Function \"@\" is undefined at the origin.",
     LOG_ZERO:   "Error. Logarithm of zero is negative infinity.",
     END_MISS:   "Error. Too few END statments in function @.",
+    OLD_MACRO:  "Error in macro @. Macro delimiters are now ''' instead of \"\"\".",
     BAD_CONCAT: "Error. Unmatched dimensions.",
     BAD_KEYSTR: "Error. The key in a key:value pair must be a string.",
     BAD_APPEND: "Error. Can not append a @",
@@ -1378,8 +1383,9 @@ const roundedString = (r, spec) => {
           // Mixed fraction
           const quotientStr = String(numerator / denominator);
           const remainder = numerator % denominator;
-          return sign + quotientStr + "\u00a0" + superscript(remainder) +
-            "⁄" + subscript(denominator)
+          if (remainder === BigInt(0)) { return sign + quotientStr }
+          return sign + quotientStr + "\u00a0" + superscript(String(remainder)) +
+            "⁄" + subscript(String(denominator))
         }
 
         case "t":
@@ -1406,18 +1412,21 @@ const roundedString = (r, spec) => {
   }
 };
 
+// Note: Temml renders a comma inside a number, e.g., "12,345", with no space after
+// the comma. So, unlike TeX, there is no need to write it as {,}.
+
 const formattedInteger = (intStr, decimalFormat) => {
   const thousandsSeparator = decimalFormat.charAt(1);
   if (thousandsSeparator === "0") {
     return intStr
   } else if (decimalFormat === "1,00,000.") {
-    return intStr.replace(groupByLakhCroreRegEx, "$1{,}")
+    return intStr.replace(groupByLakhCroreRegEx, "$1,")
   } else if (decimalFormat === "1,0000,0000.") {
-    return intStr.replace(groupByFourRegEx, "$1{,}")
+    return intStr.replace(groupByFourRegEx, "$1,")
   } else {
     return intStr.replace(groupByThreeRegEx,
       (thousandsSeparator === ",")
-      ? "{,}"
+      ? ","
       : (thousandsSeparator === " ")
       ? "\u2008"
       : (thousandsSeparator === "’")
@@ -1434,9 +1443,47 @@ const formattedDecimal = (numStr, decimalFormat, truncateTrailingZeros) => {
   } else {
     const intStr = numStr.slice(0, pos);
     const decimalSeparator = decimalFormat.slice(-1);
-    let frac = (decimalSeparator === "." ? "." : "{,}") + numStr.slice(pos + 1);
-    if (truncateTrailingZeros) { frac = frac.replace(/(\.|{,})?0+$/, ""); }
+    let frac = (decimalSeparator === "." ? "." : ",") + numStr.slice(pos + 1);
+    if (truncateTrailingZeros) { frac = frac.replace(/[.,]?0+$/, ""); }
     return formattedInteger(intStr, decimalFormat) + frac
+  }
+};
+
+// Unicode superscript for an exponent, e.g., "-4" → "⁻⁴". Used in plain text.
+const superscriptExponent = str => {
+  return (str.charAt(0) === "-" ? "⁻" : "") + superscript(str.replace(/^[-+]/, ""))
+};
+
+const mixedFractionLiteral = r => {
+  // Write a number in the form of a Hurmet mixed fraction literal, e.g., "5 7/8".
+  r = Rnl.normalize(r);
+  const sign = Rnl.isNegative(r) ? "-" : "";
+  const numerator = intAbs(r[0]);
+  const denominator = r[1];
+  const quotientStr = String(numerator / denominator);
+  const remainder = numerator % denominator;
+  return remainder === BigInt(0)
+    ? sign + quotientStr
+    : sign + quotientStr + " " + String(remainder) + "/" + String(denominator)
+};
+
+const literalFromRoundedString = (numStr, spec, r) => {
+  // Write a rounded number as a valid Hurmet number literal: a dot decimal symbol,
+  // no thousands separators, and e-notation for any variety of scientific notation.
+  switch (spec.ftype) {
+    case "h":
+      numStr = numStr.replace("e+", "e");
+      return /^[^e]*\.[^e]*$/.test(numStr) ? numStr.replace(/\.?0+$/, "") : numStr
+    case "%":
+    case "p":
+      return numStr.replace("e+", "e") + "%"
+    case "m":
+      return mixedFractionLiteral(r)
+    case "b":
+      // Hurmet has no binary literal. Write a decimal integer.
+      return String(Rnl.normalize(r)[0])
+    default:
+      return numStr.replace("e+", "e")
   }
 };
 
@@ -1487,14 +1534,22 @@ const validateFormatSpec = str => {
 
 const angleRegEx = /[∠°]+$/;
 
-const format = (num, specStr = "h3", decimalFormat = "1,000,000.") => {
+const format = (num, specStr = "h3", decimalFormat = "1,000,000.", mode = "tex") => {
+  // mode is one of:
+  //   "tex":     TeX for the rendered result.
+  //   "plain":   Plain text, with the document's decimal format, for screen display.
+  //   "literal": A valid Hurmet number literal, for results saved in a Markdown file.
   if (Rnl.isZero(num)) { return "0" }
+  const plain = mode === "plain";
 
   const spec = { ftype: specStr.charAt(0) };
   specStr = specStr.replace(angleRegEx, "");
   if (specStr.length > 1) { spec.numDigits = Number(specStr.slice(1)); }
 
-  if (spec.ftype === "%" || spec.ftype === "p") { num[0] = num[0] * BigInt(100); }
+  if (spec.ftype === "%" || spec.ftype === "p") {
+    // Do not mutate the caller's number.
+    num = [num[0] * BigInt(100), num[1]];
+  }
 
   if ((spec .ftype === "b" || spec.ftype === "x") && !Rnl.isInteger(num)) {
     return errorOprnd("FORM_FRAC")
@@ -1502,6 +1557,9 @@ const format = (num, specStr = "h3", decimalFormat = "1,000,000.") => {
 
   // Round the number
   const numStr = roundedString(num, spec);
+  if (typeof numStr !== "string") { return numStr } // an error
+
+  if (mode === "literal") { return literalFromRoundedString(numStr, spec, num) }
 
   // Dress up the rounded string for display: add locale separators for
   // decimal/integer types, or write the exponent notation
@@ -1515,7 +1573,7 @@ const format = (num, specStr = "h3", decimalFormat = "1,000,000.") => {
       return formattedInteger(numStr, decimalFormat)
     case "%":
     case "p":
-      return formattedDecimal(numStr, decimalFormat) + "\\%"
+      return formattedDecimal(numStr, decimalFormat) + (plain ? "%" : "\\%")
     case "m":
     case "b":
     case "x":
@@ -1525,11 +1583,14 @@ const format = (num, specStr = "h3", decimalFormat = "1,000,000.") => {
       // Some sort of scientific notation.
       const pos = numStr.indexOf("e");
       let significand = numStr.slice(0, pos);
-      if (decimalFormat.slice(-1) === ",") { significand = significand.replace(".", "{,}"); }
+      if (decimalFormat.slice(-1) === ",") {
+        significand = significand.replace(".", ",");
+      }
 
       switch (spec.ftype) {
         case "e":
         case "E": {
+          if (plain) { return significand + spec.ftype + numStr.slice(pos + 1) }
           const result = significand + "\\text{" + spec.ftype;
           if (numStr.charAt(pos + 1) === "-") {
             return result + "-}" + numStr.slice(pos + 2)
@@ -1540,6 +1601,10 @@ const format = (num, specStr = "h3", decimalFormat = "1,000,000.") => {
 
         case "s":
         case "S": {
+          if (plain) {
+            return significand + (spec.ftype === "S" ? "×" : "·") + "10" +
+              superscriptExponent(numStr.slice(pos + 1))
+          }
           const op = spec.ftype === "S" ? "×" : "\\mkern2mu{\\cdot}\\mkern1mu";
           return significand + op + "10^{" + numStr.slice(pos + 1) + "}"
         }
@@ -1554,8 +1619,12 @@ const format = (num, specStr = "h3", decimalFormat = "1,000,000.") => {
           const newExponent = exponent - mod;
           let sig = numStr.slice(0, pos);
           if (mod !== 0) { sig = shiftDecimalPoint(sig, mod); }
-          if (decimalFormat.slice(-1) === ",") { sig = sig.replace(".", "{,}"); }
+          if (decimalFormat.slice(-1) === ",") { sig = sig.replace(".", ","); }
           if (newExponent === 0) { return sig }
+          if (plain) {
+            return sig + (spec.ftype === "N" ? "×" : "·") + "10" +
+              superscriptExponent(String(newExponent))
+          }
           const op = spec.ftype === "N" ? "×" : "\\mkern2mu{\\cdot}\\mkern1mu";
           return sig + op + "10^{" + newExponent + "}"
         }
@@ -3016,20 +3085,26 @@ const convertToBaseUnits$1 = (oprnd, gauge, factor) => {
   return Object.freeze(conversion)
 };
 
-const elementDisplay = (value, dtype, formatSpec, decimalFormat, isAlt = false) => {
-  let display = value === undefined
-    ? ""
-    : (dtype & dt.RATIONAL)
-    ? format(value, formatSpec, decimalFormat)
-    : (dtype & dt.COMPLEX)
-    ? Cpx.display(value, formatSpec, decimalFormat)[0]
-    : (dtype & dt.BOOLEAN) || (dtype & dt.STRING)
-    ? (isAlt ? value : "\\text{" + value + "}")
-    : value;
-  if (isAlt && ((dtype & dt.RATIONAL) || (dtype & dt.COMPLEX))) {
-    display = display.replace(/{,}/g, ",");
+const elementDisplay = (value, dtype, formatSpec, decimalFormat, mode = "tex") => {
+  // mode is "tex", "plain" (for screen display), or "literal" (for a saved file).
+  // For backward compatibility, mode === true means "plain".
+  if (mode === true) { mode = "plain"; }
+  if (value === undefined) { return "" }
+  if (dtype & dt.RATIONAL) {
+    return format(value, formatSpec, decimalFormat, mode)
+  } else if (dtype & dt.COMPLEX) {
+    return Cpx.display(value, formatSpec, decimalFormat)[0]
+  } else if (dtype & dt.STRING) {
+    return mode === "literal"
+      ? '"' + String(value).replace(/"/g, '""') + '"'
+      : mode === "plain"
+      ? value
+      : "\\text{" + value + "}"
+  } else if (dtype & dt.BOOLEAN) {
+    return mode === "tex" ? "\\text{" + value + "}" : String(value)
+  } else {
+    return value
   }
-  return display
 };
 
 const display$2 = (m, formatSpec, decimalFormat) => {
@@ -3070,7 +3145,9 @@ const display$2 = (m, formatSpec, decimalFormat) => {
   return str
 };
 
-const displayAlt$2 = (m, formatSpec, decimalFormat) => {
+const displayAlt$2 = (m, formatSpec, decimalFormat, mode = "plain", suffix = "") => {
+  // Plain text for screen display, or, if mode is "literal", a valid Hurmet matrix
+  // literal for a saved file. suffix, e.g. "%", is appended to each element.
   let str = "";
   if (m.dtype & dt.MATRIX) {
     str += "(";
@@ -3078,7 +3155,8 @@ const displayAlt$2 = (m, formatSpec, decimalFormat) => {
     const numCols = m.value[0].length;
     for (let i = 0; i < numRows; i++) {
       for (let j = 0; j < numCols; j++) {
-        str += elementDisplay(m.value[i][j], m.dtype, formatSpec, decimalFormat, true) + ", ";
+        str += elementDisplay(m.value[i][j], m.dtype, formatSpec, decimalFormat, mode) +
+          suffix + ", ";
       }
       str = str.slice(0, -2) + "; ";
     }
@@ -3090,13 +3168,13 @@ const displayAlt$2 = (m, formatSpec, decimalFormat) => {
     if (m.value.plain) {
       const numArgs = m.value.plain.length;
       for (let i = 0; i < numArgs; i++) {
-        str += elementDisplay(m.value.plain[i], m.dtype, formatSpec, decimalFormat, true) +
-           ((i < numArgs - 1) ? argSep : "");
+        str += elementDisplay(m.value.plain[i], m.dtype, formatSpec, decimalFormat, mode) +
+           suffix + ((i < numArgs - 1) ? argSep : "");
       }
     } else {
       const numArgs = m.value.length;
       for (let i = 0; i < numArgs; i++) {
-        str += elementDisplay(m.value[i], m.dtype, formatSpec, decimalFormat, true) +
+        str += elementDisplay(m.value[i], m.dtype, formatSpec, decimalFormat, mode) + suffix +
                ((i < numArgs - 1) ? argSep : "");
       }
     }
@@ -4218,7 +4296,7 @@ const displayNum = (datum, colInfo, cellInfo, decimalFormat) => {
   if (colInfo.hasAlignChar && (n > 0 || !cellInfo.hasAlignChar)) {
     str += "\\phantom{";
     if (colInfo.hasAlignChar && !cellInfo.hasAlignChar) {
-      str += decimalFormat.slice(-1) === "." ? "." : "{,}";
+      str += decimalFormat.slice(-1) === "." ? "." : ",";
     }
     if (n > 0) { str += "0".repeat(n); }
     str += "}";
@@ -4348,9 +4426,9 @@ const displayAlt$1 = (df, formatSpec = "h3", decimalFormat = "1,000,000.",
         str += datum === undefined
           ? "\t"
           : Rnl.isRational(datum)
-          ? format(datum, formatSpec, decimalFormat).replace(/{,}/g, ",") + "\t"
+          ? format(datum, formatSpec, decimalFormat) + "\t"
           : Cpx.isComplex(datum)
-          ? Cpx.display(datum, formatSpec, decimalFormat)[1].replace(/{,}/g, ",") + "\t"
+          ? Cpx.display(datum, formatSpec, decimalFormat)[1] + "\t"
           : datum + "\t";
       } else {
         if (mixedFractionRegEx.test(datum)) {
@@ -4433,19 +4511,29 @@ const processDMY = (dmy, date, language, inExpression) => {
     : String(date.getUTCFullYear())
 };
 
-const formatDate = (dateValue, dateFormatSpec, inExpression = false) => {
+const isoDateString = dateValue => {
   // dateValue = number of seconds after start of January 1, 1970
-  const date = new Date(Rnl.toNumber(dateValue) * 1000);
-  // Write results in the document's main font.
-  const dateClass = inExpression ? "" : "\\class{date-result}{";
+  // Return an ISO date string, e.g., "2025-01-20".
+  return new Date(Rnl.toNumber(dateValue) * 1000).toISOString().split("T")[0]
+};
 
+const formatDate = (dateValue, dateFormatSpec, inExpression = false) => {
+  // Return TeX. Write results in the document's main font.
+  const dateClass = inExpression ? "" : "\\class{date-result}{";
+  let result = `${dateClass}\\text{${plainDate(dateValue, dateFormatSpec, inExpression)}}`;
+  if (!inExpression)  { result += "}"; }
+  return result
+};
+
+const plainDate = (dateValue, dateFormatSpec, inExpression = false) => {
+  // Return a plain text date, written in the document's date format.
+  // dateValue = number of seconds after start of January 1, 1970
   if (!dateFormatSpec || dateFormatSpec === "yyyy-mm-dd" ||
     (inExpression && dateFormatSpec.indexOf("de") > -1)) {
-    let result = `${dateClass}\\text{${date.toISOString().split("T")[0]}}`;
-    if (!inExpression)  { result += "}"; }
-    return result
+    return isoDateString(dateValue)
   }
 
+  const date = new Date(Rnl.toNumber(dateValue) * 1000);
   const match = dateFormatRegEx.exec(dateFormatSpec);
   const language = match[7] ? match[7] : "en";
 
@@ -4460,10 +4548,7 @@ const formatDate = (dateValue, dateFormatSpec, inExpression = false) => {
   str += processDMY(match[4], date, language, inExpression);
   str += match[5];
   str += processDMY(match[6], date, language, inExpression);
-
-  let result = `${dateClass}\\text{${str}}`;
-  if (!inExpression)  { result += "}"; }
-  return result
+  return str
 };
 
 /*
@@ -4516,7 +4601,6 @@ const tt = Object.freeze({
   DATAFRAME: 40,
   RICHTEXT: 41,
   BOOLEAN: 42,
-  MACRO: 43,
   DATE: 44  // Input format is 'yyyy-mm-dd'
 });
 
@@ -4524,6 +4608,9 @@ const minusRegEx = /^-(?![-=<>:])/;
 const numberRegEx$4 = new RegExp(Rnl.numberPattern);
 const unitRegEx$1 = /^(?:'[^']+'|[°ΩÅK])/;
 const dateRegEx = /^'\d{4}-\d{1,2}-\d{1,2}'/;
+// The content of a string, after the opening quotation mark, up to and including the
+// closing quotation mark. A doubled quotation mark, "", escapes a quotation mark.
+const textContentRegEx = /^(?:[^"]|"")*"/;
 const globalOpenParenRegEx = /\(/g;
 const closeParenRegEx = /\)/g;
 
@@ -5322,26 +5409,18 @@ const lex = (str, formats, prevToken, inRealTime = false) => {
   /* eslint-enable no-useless-assignment */
   let matchObj;
 
-  if (str.length > 3 && str.slice(0, 3) === "===") {
-    // A macro between triple-double quotation marks.
-    pos = str.indexOf('"""', 3);
-    if (pos > 0) {
-      st = str.slice(3, pos);
-      return ['"""' + st + '"""', st, st, tt.MACRO, ""]
-    } else {
-      return [str, str.slice(3), str.slice(3), tt.MACRO, ""]
-    }
-  }
-
   if (str.charAt(0) === '"') {
     // String between double quotation marks. Parser will convert it to \text{…}
-    pos = str.indexOf('"', 1);
-    if (pos > 0) {
-      // Disallow \r or \n by truncating the string.
-      st = str.substring(1, pos).replace(/\r?\n.*/, "");
-      return ['"' + st + '"', st, st, tt.STRING, ""]
+    // Within the string, a doubled quotation mark, "", is an escaped quotation mark.
+    // Disallow \r or \n by truncating the string.
+    const match = textContentRegEx.exec(str.slice(1));
+    if (match && !/[\r\n]/.test(match[0])) {
+      st = match[0].slice(0, -1).replace(/""/g, '"');
+      return ['"' + match[0], st, st, tt.STRING, ""]
     } else {
-      return [str, str.replace(/\r?\n.*/, ""), str.replace(/\r?\n.*/, ""), tt.STRING, ""]
+      // No closing quotation mark on this line.
+      st = str.replace(/\r?\n[^]*/, "").replace(/""/g, '"');
+      return [str, st, st, tt.STRING, ""]
     }
   }
 
@@ -6191,16 +6270,6 @@ const parse$1 = (
         break
       }
 
-      case tt.MACRO: {
-        popTexTokens(2, okToAppend);
-        if (isCalc) { rpn += '"""' + token.output + '"""'; }  // Keep before addTextEscapes()
-        if (isPrecededBySpace) { posOfPrevRun = tex.length; }
-        token.output = addTextEscapes(token.output);
-        tex += "\\text{" + token.output + "}";
-        okToAppend = true;
-        break
-      }
-
       case tt.DATAFRAME:
         popTexTokens(2, okToAppend);
         posOfPrevRun = tex.length;
@@ -6890,6 +6959,13 @@ const parse$1 = (
               } else if (symbol === "log" && regEx.test(rpn)) {
                 rpn = rpn.slice(0, rpn.length - 1) + "lfact";
                 break
+              } else if (symbol === "isnan" && numArgs === 1) {
+                // Mark the start of the argument, so that the evaluator can evaluate
+                // the argument on its own and catch any error. See evaluate.js.
+                const argRpn = rpn.slice(topDelim.rpnPos);
+                rpn = rpn.slice(0, topDelim.rpnPos) + (argRpn.startsWith(tokenSep)
+                  ? tokenSep + isnanMarker + argRpn
+                  : isnanMarker + tokenSep + argRpn);
               }
               rpn += (symbol.slice(-1) === "^")
                 ? firstSep + symbol
@@ -7099,10 +7175,16 @@ function insertOneHurmetVar(hurmetVars, attrs, changedVars, decimalFormat) {
   const formatSpec = hurmetVars.format ? hurmetVars.format.value : "h15";
 
   if (!Array.isArray(attrs.name)) {
-    // This is the typical case.
-    hurmetVars[attrs.name] = attrs;
-    if (changedVars) {
-      changedVars.add(attrs.name);
+    if (attrs.name === "importedParameters") {
+      Object.entries(attrs.value).forEach(([key, value]) => {
+        hurmetVars[key] =  value;
+      });
+    } else {
+      // This is the typical case.
+      hurmetVars[attrs.name] = attrs;
+      if (changedVars) {
+        changedVars.add(attrs.name);
+      }
     }
 
   } else if (attrs.value === null) {
@@ -7644,7 +7726,10 @@ const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAware) =>
     stmt.value = result.value;
     /* eslint-disable no-useless-assignment */
     let resultDisplay = "";
-    let altResultDisplay = "";
+    let altResultDisplay = "";   // plain text, for screen display
+    // A valid Hurmet literal, written into a saved Markdown file.
+    // Defaults to altResultDisplay.
+    let mdResultDisplay;
     if (stmt.resulttemplate.indexOf("!") > -1) {
       // Suppress display of the result
       resultDisplay = "";
@@ -7679,26 +7764,17 @@ const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAware) =>
       }
 
     } else if (isMatrix(result)) {
-      resultDisplay = Matrix.display((isUnitAware || result.value.plain)
-          ? { value: result.value.plain, dtype: result.dtype }
-          : isPercent && isVector(result)
-          ? { value: result.value.map(e => times100(e)), dtype: result.dtype }
-          : isPercent
-          ? { value: result.value.map(row => row.map(e => times100(e))), dtype: result.dtype }
-          : result,
-        formatSpec,
-        decimalFormat
-      );
-      altResultDisplay = Matrix.displayAlt((isUnitAware || result.value.plain)
-          ? { value: result.value.plain, dtype: result.dtype }
-          : isPercent && isVector(result)
-          ? { value: result.value.map(e => times100(e)), dtype: result.dtype }
-          : isPercent
-          ? { value: result.value.map(row => row.map(e => times100(e))), dtype: result.dtype }
-          : result,
-        formatSpec,
-        decimalFormat
-      );
+      const matrix = (isUnitAware || result.value.plain)
+        ? { value: result.value.plain, dtype: result.dtype }
+        : isPercent && isVector(result)
+        ? { value: result.value.map(e => times100(e)), dtype: result.dtype }
+        : isPercent
+        ? { value: result.value.map(row => row.map(e => times100(e))), dtype: result.dtype }
+        : result;
+      resultDisplay = Matrix.display(matrix, formatSpec, decimalFormat);
+      altResultDisplay = Matrix.displayAlt(matrix, formatSpec, decimalFormat);
+      mdResultDisplay = Matrix.displayAlt(matrix, formatSpec, decimalFormat, "literal",
+        isPercent ? "%" : "");
       if (isPercent) {
         resultDisplay += "\\%";
         altResultDisplay += "%";
@@ -7742,6 +7818,8 @@ const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAware) =>
         resultDisplay = `\\textcolor{${result.unit}}{${resultDisplay}}`;
       }
       altResultDisplay = result.value;
+      // Write a string literal. A doubled quotation mark, "", escapes a quotation mark.
+      mdResultDisplay = '"' + String(result.value).replace(/"/g, '""') + '"';
 
     } else if (result.dtype & dt.RICHTEXT) {
       resultDisplay = parse$1(result.value, formats, false);
@@ -7757,20 +7835,17 @@ const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAware) =>
 
     } else if (result.dtype === dt.DATE) {
       resultDisplay = formatDate(result.value, formats.dateFormat);
-      if (resultDisplay.dtype && resultDisplay.dtype === dt.ERROR) {
-        resultDisplay = "\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}";
-        altResultDisplay = resultDisplay.value;
-      } else {
-        altResultDisplay = resultDisplay.slice(26, -2);
-      }
+      altResultDisplay = plainDate(result.value, formats.dateFormat);
+      mdResultDisplay = "'" + isoDateString(result.value) + "'";  // a date literal
 
     } else if (result.value.plain) {
       resultDisplay = format(result.value.plain, formatSpec, decimalFormat);
       if (resultDisplay.dtype && resultDisplay.dtype === dt.ERROR) {
-        resultDisplay = "\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}";
+        resultDisplay = "\\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}";
         altResultDisplay = resultDisplay.value;
       } else {
-        altResultDisplay = resultDisplay.replace(/{,}/g, ",").replace(/\\/g, "");
+        altResultDisplay = format(result.value.plain, formatSpec, decimalFormat, "plain");
+        mdResultDisplay = format(result.value.plain, formatSpec, decimalFormat, "literal");
       }
 
     } else if (Rnl.isRational(result.value)) {
@@ -7781,7 +7856,10 @@ const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAware) =>
         resultDisplay = "\\textcolor{firebrick}{\\text{" + resultDisplay.value + "}}";
         altResultDisplay = resultDisplay.value;
       } else {
-        altResultDisplay = resultDisplay.replace(/{,}/g, ",").replace(/\\/g, "");
+        const value = isPercent ? times100(result.value) : result.value;
+        const pct = isPercent ? "%" : "";
+        altResultDisplay = format(value, formatSpec, decimalFormat, "plain") + pct;
+        mdResultDisplay = format(value, formatSpec, decimalFormat, "literal") + pct;
       }
 
     } else if (result.dtype === dt.IMAGE) {
@@ -7793,47 +7871,61 @@ const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAware) =>
 
     }
 
+    if (mdResultDisplay === undefined) { mdResultDisplay = altResultDisplay; }
+
     // Write the string to be plugged into echos of dependent nodes
     const resultCapture = /(\? *\??|@ *@?|%%?)/.exec(stmt.resulttemplate);
     stmt.resultdisplay = stmt.resulttemplate.slice(0, resultCapture.index) + resultDisplay +
       stmt.resulttemplate.slice(resultCapture.index + resultCapture[0].length);
 
+    // Write the Markdown for a saved document. Do this before stmt.alt is changed.
+    writeSavedResult(stmt, mdResultDisplay);
+
     // Write the TeX for this node
     if (stmt.resulttemplate.indexOf("@") > -1) {
       stmt.tex = stmt.resultdisplay;
-      stmt.displaySelector = stmt.altresulttemplate.indexOf("@@") > -1 ? "@@" : "@";
-      if (testRegEx$1.test(stmt.entry)) {
-        stmt.md = stmt.entry + ` 〔${altResultDisplay}〕`;
-      } else {
-        const pos = stmt.entry.lastIndexOf(stmt.displaySelector);
-        stmt.md = stmt.entry.slice(0, pos) + `〔${altResultDisplay}〕`
-            + stmt.entry.slice(pos + stmt.displaySelector.length);
-      }
       stmt.alt = stmt.altresulttemplate.replace(/@@?/, altResultDisplay);
     } else if (stmt.resulttemplate.indexOf("?") > -1) {
       let pos = stmt.tex.lastIndexOf("?");
       stmt.tex = stmt.tex.slice(0, pos).replace(/\? *$/, "") + resultDisplay + stmt.tex.slice(pos + 1);
-      stmt.displaySelector = stmt.altresulttemplate.indexOf("??") > -1 ? "??" : "?";
       pos = stmt.alt.lastIndexOf(stmt.displaySelector);
-      stmt.md = stmt.alt.slice(0, pos) + `〔${altResultDisplay}〕`
-          + stmt.alt.slice(pos + stmt.displaySelector.length);
       stmt.alt = stmt.alt.slice(0, pos) + altResultDisplay
           + stmt.alt.slice(pos + stmt.displaySelector.length);
     } else if (stmt.resulttemplate.indexOf("%") > -1) {
       let pos = stmt.tex.lastIndexOf("%");
       stmt.tex = stmt.tex.slice(0, pos).replace(/% *$/, "") + resultDisplay + stmt.tex.slice(pos + 1);
-      stmt.displaySelector = stmt.altresulttemplate.indexOf("%%") > -1 ? "%%" : "%";
       pos = stmt.alt.lastIndexOf(stmt.displaySelector);
-      stmt.md = stmt.alt.slice(0, pos) + `〔${altResultDisplay}〕`
-          + stmt.alt.slice(pos + stmt.displaySelector.length);
       stmt.alt = stmt.alt.slice(0, pos) + altResultDisplay
           + stmt.alt.slice(pos + stmt.displaySelector.length);
     }
   }
   stmt.tex = stmt.tex.replace(percentRegEx, "");
-  if (stmt.md) { stmt.md = stmt.md.replace(percentRegEx, ""); }
   stmt.alt = stmt.alt.replace(percentRegEx, "");
   return stmt
+};
+
+const writeSavedResult = (stmt, savedResult) => {
+  // Write stmt.md, the Markdown for a saved document, with the result between 〔…〕.
+  // savedResult is a Hurmet literal, or an error message. Call this function before
+  // the display selector in stmt.alt is replaced by a result.
+  const template = stmt.resulttemplate;
+  if (template.indexOf("@") > -1) {
+    stmt.displaySelector = stmt.altresulttemplate.indexOf("@@") > -1 ? "@@" : "@";
+    if (testRegEx$1.test(stmt.entry)) {
+      stmt.md = stmt.entry + ` 〔${savedResult}〕`;
+    } else {
+      const pos = stmt.entry.lastIndexOf(stmt.displaySelector);
+      stmt.md = stmt.entry.slice(0, pos) + `〔${savedResult}〕`
+          + stmt.entry.slice(pos + stmt.displaySelector.length);
+    }
+  } else if (template.indexOf("?") > -1 || template.indexOf("%") > -1) {
+    const ch = template.indexOf("?") > -1 ? "?" : "%";
+    stmt.displaySelector = stmt.altresulttemplate.indexOf(ch + ch) > -1 ? ch + ch : ch;
+    const pos = stmt.alt.lastIndexOf(stmt.displaySelector);
+    stmt.md = stmt.alt.slice(0, pos) + `〔${savedResult}〕`
+        + stmt.alt.slice(pos + stmt.displaySelector.length);
+  }
+  if (stmt.md) { stmt.md = stmt.md.replace(percentRegEx, ""); }
 };
 
 const testValue = oprnd => {
@@ -15331,12 +15423,17 @@ const stringFromOperand = (oprnd, formats) => {
   return oprnd.dtype === dt.STRING
     ? oprnd.value
     : oprnd.dtype === dt.RATIONAL
-    ? format(oprnd.value, "h15", formats.decimalFormat)
-    : isMatrix(oprnd.dtype)
-    ? Matrix.displayAlt(oprnd, "h15", formats)
+    ? format(oprnd.value, "h15", formats.decimalFormat, "plain")
+    : isMatrix(oprnd)
+    ? Matrix.displayAlt(oprnd, "h15", formats.decimalFormat)
     : (oprnd.dtype & dt.MAP)
     ? DataFrame.displayAlt(oprnd.value, "h15", formats)
     : oprnd.value
+};
+
+// For isnan(). True if an operand is an error, missing, or not numeric.
+const isNotANumber = oprnd => {
+  return !oprnd || oprnd.dtype === dt.ERROR || !(oprnd.dtype & dt.RATIONAL)
 };
 
 const evalRpn = (rpn, vars, formats, unitAware, lib) => {
@@ -15347,6 +15444,26 @@ const evalRpn = (rpn, vars, formats, unitAware, lib) => {
   for (let i = 0; i < tokens.length; i++) {
     const tkn = tokens[i];
     const ch = tkn.charAt(0);
+
+    if (tkn === isnanMarker) {
+      // The start of the argument of isnan(). Find the matching isnan token.
+      let depth = 1;
+      let j = i + 1;
+      for (; j < tokens.length; j++) {
+        if (tokens[j] === isnanMarker) {
+          depth += 1;
+        } else if (tokens[j] === "isnan") {
+          depth -= 1;
+          if (depth === 0) { break }
+        }
+      }
+      // Evaluate the argument on its own. An error ends only this sub-evaluation.
+      const arg = evalRpn(tokens.slice(i + 1, j).join(" "), vars, formats,
+        unitAware, lib);
+      stack.push(Object.freeze({ value: isNotANumber(arg), unit: null, dtype: dt.BOOLEAN }));
+      i = j;  // Skip past the isnan token.
+      continue
+    }
 
     if (ch === "®") {
       // A rational number.⌾
@@ -16357,9 +16474,10 @@ const evalRpn = (rpn, vars, formats, unitAware, lib) => {
         }
 
         case "isnan": {
+          // Usually handled at isnanMarker, above. This handles any other case.
           const oprnd = stack.pop();
           const output = Object.create(null);
-          output.value = !(oprnd.dtype & dt.RATIONAL);
+          output.value = isNotANumber(oprnd);
           output.unit = null;
           output.dtype = dt.BOOLEAN;
           stack.push(Object.freeze(output));
@@ -17084,6 +17202,10 @@ const errorResult = (stmt, result) => {
   stmt.altResultDisplay = result.value;
   stmt.error = true;
   stmt.dtype = dt.ERROR;
+  if (stmt.resulttemplate.indexOf("!") === -1) {
+    // Write the error message into the saved Markdown, between 〔…〕, unquoted.
+    writeSavedResult(stmt, result.value);
+  }
   if (stmt.resulttemplate.indexOf("!") > -1) {
     stmt.tex += "= " + stmt.resultDisplay;
     stmt.alt += result.value;
@@ -17273,6 +17395,7 @@ const evaluate = (
 ) => {
   stmt.tex = stmt.template ? stmt.template : "";
   stmt.alt = stmt.altTemplate ? stmt.altTemplate : "";
+  stmt.md = null;  // Don't let a result from a previous calculation linger in a saved file.
   const isUnitAware = /\?\?|!!|%%|@@|¡¡/.test(stmt.resulttemplate);
 
   const formatSpec = vars.format ? vars.format.value : "h15";
@@ -17301,7 +17424,7 @@ const evaluate = (
 };
 
 const numberRegEx$2 = new RegExp(Rnl.numberPattern);
-const matrixRegEx = /^[([] *(?:(?:-?[0-9.]+|"[^"]+"|true|false) *[,;\t]? *)+[)\]]/;
+const matrixRegEx = /^[([] *(?:(?:-?[0-9.]+|"(?:[^"]|"")*"|true|false) *[,;\t]? *)+[)\]]/;
 // A regex to check for valid unit strings. Not comprehensive.
 // Only checks for allowed characters. Does not check structure of a compound unit.
 const unitRegEx = /^[a-zäöōA-Z0-9 μµ#$£¥'′″°()Å₨₪€℃℉ΩΩKÅ^+\-/*.•×\-−·₂⁰¹²³\u2074-\u2079]+$/;
@@ -17369,17 +17492,17 @@ const valueFromLiteral = (str, name, formats) => {
   } else if (str === "true" || str === "false") {
     return [(str === "true" ? true : false), null, dt.BOOLEAN, `\\mathord{\\text{${str}}}`]
 
-  } else if (str.length > 3 && str.slice(0, 3) === '"""') {
+  } else if (str.length >= 6 && str.slice(0, 3) === "'''" && str.slice(-3) === "'''") {
     // str contains a macro
-    return [str.slice(3, -3), undefined, dt.MACRO, ""]
+    return [str.slice(3, -3).replace(/^\r?\n/, "").replace(/\r?\n$/, ""), undefined, dt.MACRO, ""]
 
   } else if (/^\x22.+\x22/.test(str)) {
-    // str contains text between quotation marks
+    // str contains text between quotation marks. "" is an escaped quotation mark.
     if (name === "format") {
-      return validateFormatSpec(str.slice(1, -1).trim())
+      return validateFormatSpec(str.slice(1, -1).replace(/""/g, '"').trim())
     } else {
       const tex = parse$1(str, formats);
-      return [str.slice(1, -1), undefined, dt.STRING, tex]
+      return [str.slice(1, -1).replace(/""/g, '"'), undefined, dt.STRING, tex]
     }
 
   } else if (matrixRegEx.test(str)) {
@@ -17479,7 +17602,9 @@ const functionRegEx = new RegExp("^function " + isValidIdentifier.source.slice(1
 const moduleRegEx = /^module ([A-Za-z][A-Za-z0-9]*)/;
 const drawRegEx = /^draw\(/;
 const startSvgRegEx = /^startSvg\(\)/;
-const lexRegEx = /"[^"]*"|``.*|`[^`]*`|'[^']*'|#|[^"`'#]+/g;
+const macroRegEx = /^[^=]+=\s*'''/;
+const oldMacroRegEx = /^[^=]+=\s*"""/;
+const lexRegEx = /"(?:[^"]|"")*"|``.*|`[^`]*`|'[^']*'|#|[^"`'#]+/g;
 
 const testForStatement = str => {
   const pos = str.indexOf("=");
@@ -17532,6 +17657,7 @@ const scanModule = (str, formats) => {
     } else if (testForStatement(line)) {
       // This line starts a Hurmet assignment.
       const [stmt, endLineNum] = scanAssignment(lines, formats, i);
+      if (!stmt.name && stmt.dtype === dt.ERROR) { return stmt } // e.g., an old macro
       parent[stmt.name] = stmt;
       i = endLineNum;
     }
@@ -17689,7 +17815,33 @@ const scanFunction = (lines, formats, startLineNum) => {
   return [errorOprnd("END_MISS", functionName), 0]
 };
 
+const scanMacro = (lines, iStart, delimiter) => {
+  // A macro extends beyond normal line endings. It ends at a line that ends with
+  // the delimiter. Read the raw lines, so that no Markdown is mistaken for a comment.
+  const line1 = lines[iStart];
+  const posEquals = line1.indexOf("=");
+  const name = checkForNumericSubscript(line1.slice(0, posEquals).trim());
+  let str = line1.slice(posEquals + 1).trim();
+  let iEnd = iStart;
+  const isClosed = s => s.length >= 6 && s.slice(-3) === delimiter;
+  while (!isClosed(str) && iEnd < lines.length - 1) {
+    iEnd += 1;
+    str = (str + "\n" + lines[iEnd]).replace(/\s+$/, "");
+  }
+  return [name, str, iEnd]
+};
+
 const scanAssignment = (lines, formats, iStart) => {
+  if (macroRegEx.test(lines[iStart])) {
+    const [name, str, iEnd] = scanMacro(lines, iStart, "'''");
+    const [value, unit, dtype, resultdisplay] = valueFromLiteral(str, name, formats);
+    return [{ name, value, unit, dtype, resultdisplay }, iEnd]
+  } else if (oldMacroRegEx.test(lines[iStart])) {
+    // Macro delimiters used to be """. Now they are '''. Tell the author.
+    const [name, , iEnd] = scanMacro(lines, iStart, '"""');
+    return [errorOprnd("OLD_MACRO", name), iEnd]
+  }
+
   let prevLineEndedInContinuation = false;
   let str = "";
   let iEnd = iStart;
@@ -17724,18 +17876,7 @@ const scanAssignment = (lines, formats, iStart) => {
   } else {
     name = checkForNumericSubscript(name);
   }
-  let trailStr = str.slice(posEquals + 1).trim();
-  if (trailStr.length > 3 && trailStr.slice(0, 3) === '"""') {
-    // We're at a macro, which extends beyond normal line endings.
-    let j = iEnd;
-    let pos = trailStr.indexOf('"""', 3);
-    while (pos < 0 && j < lines.length - 1) {
-      j += 1;
-      trailStr += "\n" + lines[j];
-      pos = trailStr.indexOf('"""', 3);
-    }
-    iEnd = j;
-  }
+  const trailStr = str.slice(posEquals + 1).trim();
   const [value, unit, dtype, resultdisplay] = valueFromLiteral(trailStr, name, formats);
   const stmt = { name, value, unit, dtype, resultdisplay };
   return [stmt, iEnd]
@@ -20871,7 +21012,7 @@ const tex2Calc = (str, displayMode = false) => {
             str = str.slice(arg.length + 2);
           }
           calc += token.input === "\\text"
-            ? '"' + arg + '"'
+            ? '"' + arg.replace(/"/g, '""') + '"'
             : token.input === "\\mathrm" && arg.length > 1 && arg.indexOf(" ") === -1
             ? arg
             : token.input + "(" + arg + ")";

@@ -33,8 +33,8 @@ const parserTests = [
     "{a if b; c if d}",
     "\\begin{cases}a & \\text{if}~ b \\\\ c & \\text{if}~ d \\end{cases}"
   ],
-  ["f_c′=4500 'psi'", "f_\\text{c}' = 4{,}500 \\; {\\text{psi}}"],
-  ["f_c′=4500psi", "f_\\text{c}' = 4{,}500 \\; {\\text{psi}}"],
+  ["f_c′=4500 'psi'", "f_\\text{c}' = 4,500 \\; {\\text{psi}}"],
+  ["f_c′=4500psi", "f_\\text{c}' = 4,500 \\; {\\text{psi}}"],
   ["root 3 x", "\\sqrt[3]{x}"],
   ["5 modulo 4", "5 \\mathbin{modulo} 4"],
   ["sqrt(a b)", "\\sqrt{a b}"],
@@ -55,7 +55,7 @@ const parserTests = [
   ["((n (n+1))/2)", "\\left(\\dfrac{n (n + 1)}{2}\\right)"],
   [
     "β_1 = {0.85 if f_c′ <= 4000; 0.65 if f_c′ >= 8000; 0.85 - f_c′/20000 otherwise}",
-    "β_\\text{1} = \\begin{cases}0.85 & \\text{if}~ f_\\text{c}' ≤ 4{,}000 \\\\ 0.65 & \\text{if}~ f_\\text{c}' ≥ 8{,}000 \\\\ 0.85 - \\dfrac{f_\\text{c}'}{20{,}000}& \\text{otherwise}~ \\end{cases}"
+    "β_\\text{1} = \\begin{cases}0.85 & \\text{if}~ f_\\text{c}' ≤ 4,000 \\\\ 0.65 & \\text{if}~ f_\\text{c}' ≥ 8,000 \\\\ 0.85 - \\dfrac{f_\\text{c}'}{20,000}& \\text{otherwise}~ \\end{cases}"
   ],
   ["x = (-b +- sqrt(b^2-4 a c))/(2 a)", "x = \\dfrac{\\text{-} b ± \\sqrt{b^{2}- 4 \\, a c}}{2 \\, a}"],
   [
@@ -140,16 +140,16 @@ const resultFormatterTests = [
   ["1.5", "", "", "1.5"],
   ["-1.5", "", "", "-1.5"],
   ["1", "", "", "1"],
-  ["12000", "", "", "12{,}000"],
-  ["4000", "", "", "4{,}000"],
-  ["12000.5", "", "", "12{,}000.5"],
+  ["12000", "", "", "12,000"],
+  ["4000", "", "", "4,000"],
+  ["12000.5", "", "", "12,000.5"],
   ["1.50", "", "", "1.5"],
-  ["12000.5", "", "1.000.000,", "12.000{,}5"],
+  ["12000.5", "", "1.000.000,", "12.000,5"],
   ["12000.5", "", "1 000 000.", "12 000.5"],
   ["12.100", "f2", "", "12.10"],
   ["12", "f2", "", "12.00"],
-  ["12000", "f2", "1.000.000,", "12.000{,}00"],
-  ["12000", "f2", "1 000 000,", "12 000{,}00"],
+  ["12000", "f2", "1.000.000,", "12.000,00"],
+  ["12000", "f2", "1 000 000,", "12 000,00"],
   ["12.100", "r2", "", "12"],
   ["1.100", "h3", "", "1.1"],
   ["1", "r3", "", "1.00"],
@@ -158,15 +158,15 @@ const resultFormatterTests = [
   ["155.75", "h3", "", "156"],
   ["-155.75", "h4", "", "-155.8"],
   ["155.75", "h4", "", "155.8"],
-  ["12.100", "h3", "1.000.000,", "12{,}1"],
+  ["12.100", "h3", "1.000.000,", "12,1"],
   ["12.100", "r3", "", "12.1"],
   ["12.100", "r4", "", "12.10"],
   ["12.100", "h4", "", "12.1"],
   ["49.999999999999999", "f2", "", "50.00"],
   ["49.999999999999999", "f0", "", "50"],
   ["49.999999999999999", "h3", "", "50"],
-  ["12345.100", "r3", "", "12{,}300"],
-  ["12345.100", "h3", "", "12{,}345"],
+  ["12345.100", "r3", "", "12,300"],
+  ["12345.100", "h3", "", "12,345"],
   ["1.23", "h3", "", "1.23"],
   ["12", "r3", "", "12.0"],
   ["12", "h3", "", "12"],
@@ -175,14 +175,14 @@ const resultFormatterTests = [
   ["12.348", "s3", "", "1.23\\mkern2mu{\\cdot}\\mkern1mu10^{1}"],
   ["0.5", "s3", "", "5.00\\mkern2mu{\\cdot}\\mkern1mu10^{-1}"],
   ["12348", "e3", "", "1.23\\text{e}4"],
-  ["12348", "e3", "1.000.000,", "1{,}23\\text{e}4"],
+  ["12348", "e3", "1.000.000,", "1,23\\text{e}4"],
   ["12348", "E3", "", "1.23\\text{E}4"],
-  ["12348", "E3", "1.000.000,", "1{,}23\\text{E}4"],
+  ["12348", "E3", "1.000.000,", "1,23\\text{E}4"],
   ["12348", "k3", "", "12.3k"],
   ["12348", "k3", "", "12.3k"],
   ["12348", "N3", "", "12.3×10^{3}"],
   ["12348", "n3", "", "12.3\\mkern2mu{\\cdot}\\mkern1mu10^{3}"],
-  ["12348", "N3", "1.000.000,", "12{,}3×10^{3}"],
+  ["12348", "N3", "1.000.000,", "12,3×10^{3}"],
   ["0.00001234", "N3", "", "12.3×10^{-6}"],
   ["123.48", "N3", "", "123"],
   ["398", "N3", "", "398"],
@@ -234,6 +234,41 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
   }
 }
 
+// Plain-text results, as shown on screen, e.g., in spreadsheet cells.
+const plainFormatterTests = [
+  // input, format spec, decimal format (or date format), expected output
+  ["12345.678", "h3", "", "12,346"],
+  ["12345.678", "f2", "1.000.000,", "12.345,68"],
+  ["12348", "e3", "", "1.23e4"],
+  ["12348", "e3", "1.000.000,", "1,23e4"],
+  ["12348", "s3", "", "1.23·10⁴"],
+  ["0.5", "S3", "", "5.00×10⁻¹"],
+  ["12348", "N3", "", "12.3×10³"],
+  ["12348", "k3", "", "12.3k"],
+  ["0.15", "%1", "", "15.0%"],
+  ["5.875", "m", "", "5 ⁷⁄₈"],
+  ["5", "m", "", "5"],
+  ["[1.5; 12348]", "e3", "", "[1.50e0; 1.23e4]"],
+  ['"x = " & 12345.5', "h15", "1.000.000,", "x = 12.345,5"],
+  ["'2025-01-09'", "", "d mmm yyyy", "9 Jan 2025"]
+]
+
+console.log("\nNow testing plain-text results…")
+console.log("")
+for (const [input, spec, fmt, expectedOutput] of plainFormatterTests) {
+  numTests += 1
+  const formats = { decimalFormat: /^1/.test(fmt) ? fmt : "1,000,000.",
+    dateFormat: /^1/.test(fmt) || !fmt ? "yyyy-mm-dd" : fmt }
+  const output = hurmet.calculate(input + " = @", { format: { value: spec || "h15" } }, true, formats)
+  if (output !== expectedOutput) {
+    numErrors += 1
+    console.log("input:    " + input + "  " + spec + "  " + fmt)
+    console.log("expected: " + expectedOutput)
+    console.log("actual:   " + output)
+    console.log("")
+  }
+}
+
   /* eslint-disable no-irregular-whitespace */
   // Assignment statements, w/o any calculation.
   // Some of these are here just to enable calculations below.
@@ -242,6 +277,7 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
     // input string, template for output, expected output
     ["b = true", "b = @", ""],
     ['str = "abcdef"', "str = @", "abcdef"],
+    ['quoteStr = "a ""string"""', "quoteStr = @", 'a "string"'],
     ["num = 4.2", "num = @", "4.2"],
     ["z1 = 2.34 - j 5.67", "z1 = @", "2.34 - j 5.67"],
     ["z2 = -10.2 + j 9.6", "z2 = @", "-10.2 + j 9.6"],
@@ -284,6 +320,7 @@ for (let i = 0; i < resultFormatterTests.length; i++) {
   const tex2CalcTests = [
     ["\\sqrt{f_c'} = 3000", "√(f_c′) = 3000"],
     ["3000 \\text{psi} = 3 \\mathrm{ksi}", '3000 "psi"= 3 ksi'],
+    ['\\text{say "hi"}', '"say ""hi"""'],
     ["\\Gamma(\\hat{\\theta}) = \\sin \\alpha = \\cos(y)", "Γ (θ̂) = sin α = cos(y)"],
     ["\\frac{a + b}{c + d} = \\tfrac{a + b}{c + d} = \\dfrac{wL^2}{c + d}", "(a + b)//(c + d) = (a + b)//(c + d) = (w L^2) / (c + d)"],
     ["\\approx a/b = f(a, b) = \\frac{9}{128}ql^2", "≈ a ∕ b = f(a, b) = (9)//(128) q l^2"],
@@ -445,6 +482,9 @@ end`, vars)
     [`5 modulo 4 = @`, `®5/1 ®4/1 modulo`, "1"],
     ["b = @", "¿b", "true"],
     ["str[2] = @", "¿str ®2/1 [] 1", "b"],
+    ['"a ""string""" & " works" = @', '"a "string"" " works" &', 'a "string" works'],
+    ['"" & "x" = @', '"" "x" &', "x"],
+    ["quoteStr = @", "¿quoteStr", 'a "string"'],
     ["str[2:4] = @", "¿str ®2/1 ®4/1 : [] 1", "bcd"],
     ["str[3:end] = @", `¿str ®3/1 "∞" : [] 1`, "cdef"],
     ["1/0 = @", "®1/1 ®0/1 /", "Error. Divide by zero."],
@@ -601,7 +641,13 @@ end`, vars)
     [`factorial(4) = @`, "®4/1 factorial", "24"],
     [`lgamma(5) = @`, "®5/1 lgamma", "3.17805383034795"],
     [`lfact(4) = @`, "®4/1 lfact", "3.17805383034795"],
-    [`isnan("five") = @`, `"five" isnan`, "true"],
+    [`isnan("five") = @`, `⁅isnan "five" isnan`, "true"],
+    [`isnan(5) = @`, `⁅isnan ®5/1 isnan`, "false"],
+    [`divByZero = 1/0 = @`, `¿divByZero ®1/1 ®0/1 / =`, "Error. Divide by zero."],
+    [`isnan(divByZero) = @`, `⁅isnan ¿divByZero isnan`, "true"],
+    [`isnan(divByZero + 1) = @`, `⁅isnan ¿divByZero ®1/1 + isnan`, "true"],
+    [`isnan(noSuchVariable) = @`, `⁅isnan ¿noSuchVariable isnan`, "true"],
+    [`isnan(num + 1) = @`, `⁅isnan ¿num ®1/1 + isnan`, "false"],
     [`Char(87) = @`, "®87/1 Char", "W"],
     [`!true = @`, "true ¬", "false"],
     [`true && false = @`, "true false &&", "false"],
@@ -673,12 +719,48 @@ end`, vars)
     }
   }
 
+// Modules: macros, and strings with escaped quotation marks.
+const testModules = () => {
+  console.log("\nNow testing modules…")
+  console.log("")
+  const formats = { decimalFormat: "1,000,000.", dateFormat: "yyyy-mm-dd" }
+  const check = (label, actual, expected) => {
+    numTests += 1
+    if (actual !== expected) {
+      numErrors += 1
+      console.log("module test: " + label)
+      console.log("expected: " + expected)
+      console.log("actual:   " + actual)
+      console.log("")
+    }
+  }
+  const mod = hurmet.scanModule([
+    `s = "x""#y" # a comment`,
+    "ab = '''¢` A_b = (π d_b^2) / 4 = ?? in² `, bolt area'''",
+    "multi = '''",
+    "## Heading # not a comment",
+    "Load ¢` P = 5 'kips'`, end of line",
+    "L = 12 'ft''''",
+    "after = 3"
+  ].join("\n"), formats)
+  const val = name => (mod.value && mod.value[name] ? mod.value[name].value : undefined)
+  check("escaped quote", val("s"), 'x"#y')
+  check("one-line macro", val("ab"), "¢` A_b = (π d_b^2) / 4 = ?? in² `, bolt area")
+  check("multi-line macro", val("multi"),
+    "## Heading # not a comment\nLoad ¢` P = 5 'kips'`, end of line\nL = 12 'ft'")
+  check("statement after macro", mod.value && mod.value.after ? "found" : "missing", "found")
+  const old = hurmet.scanModule(`ab = """old macro"""`, formats)
+  check("old macro delimiters", old.value,
+    `Error in macro ab. Macro delimiters are now ''' instead of """.`)
+}
+testModules()
+
 // import() works via fetch(), so this test is asynchronous.
 // updateAndSave() runs a whole Hurmet Markdown document, including the fetch,
 // and returns the document with results written inline.
 const importTests = [
   // variable name, expected result
-  ["E", "E = 〔29,000〕 ksi"],
+  ["E", "E = 〔29000〕 ksi"],
   ["β_1", "β_1 = 〔0.825〕"]
 ];
 
@@ -714,7 +796,79 @@ dateFormat: yyyy-mm-dd
   }
 }
 
-testImport().then(() => {
+// Results saved in a Markdown file, between 〔…〕 delimiters, are valid Hurmet literals:
+// strings in quotation marks, ISO dates, dot decimals, and no thousands separators.
+const savedResultTests = [
+  // a fragment expected in the saved document
+  `s = "a ""string""" & " works" = 〔"a ""string"" works"〕`,
+  `d2 = d = 〔'2025-01-09'〕`,
+  `n = 12345.678 = 〔12345.678〕`,
+  `ne = 12348 = 〔1.23e4〕`,
+  `nm = 5.875 = 〔5 7/8〕`,
+  `v = [1.5; 12345.6] = 〔[1.5; 12345.6]〕`,
+  `vs = ["a""b", "c"] = 〔["a""b", "c"]〕`,
+  `b = 3 > 2 = 〔true〕`,
+  `e = 1/0 = 〔Error. Divide by zero.〕`,
+  `ie = isnan(e) = 〔true〕`,
+  `nn = isnan(n) = 〔false〕`
+]
+
+const testSavedResults = async() => {
+  console.log("\nNow testing saved results…")
+  console.log("")
+  const md = `---------------
+decimalFormat: 1.000.000,
+dateFormat: d mmm yyyy
+---------------
+
+¢\`s = "a ""string""" & " works" = @\`
+
+¢\`d = '2025-01-09'\`
+
+¢\`d2 = d = @\`
+
+¢\`n = 12345.678 = @\`
+
+¢\`format = "e3"\`
+
+¢\`ne = 12348 = @\`
+
+¢\`format = "m"\`
+
+¢\`nm = 5.875 = @\`
+
+¢\`format = "h15"\`
+
+¢\`v = [1.5; 12345.6] = @\`
+
+¢\`vs = ["a""b", "c"] = @\`
+
+¢\`b = 3 > 2 = @\`
+
+¢\`e = 1/0 = @\`
+
+¢\`ie = isnan(e) = @\`
+
+¢\`nn = isnan(n) = @\`
+`
+  let output
+  try {
+    output = await hurmet.updateAndSave(md)
+  } catch (err) {
+    output = err.message
+  }
+  for (const expectedOutput of savedResultTests) {
+    numTests += 1
+    if (!output.includes(expectedOutput)) {
+      numErrors += 1
+      console.log("expected: " + expectedOutput)
+      console.log("actual output:\n" + output)
+      console.log("")
+    }
+  }
+}
+
+testSavedResults().then(testImport).then(() => {
   console.log("Done.")
   console.log("Number of tests =  " + numTests)
   console.log("Number of errors = " + numErrors)

@@ -735,7 +735,7 @@ const displayNum = (datum, colInfo, cellInfo, decimalFormat) => {
   if (colInfo.hasAlignChar && (n > 0 || !cellInfo.hasAlignChar)) {
     str += "\\phantom{"
     if (colInfo.hasAlignChar && !cellInfo.hasAlignChar) {
-      str += decimalFormat.slice(-1) === "." ? "." : "{,}"
+      str += decimalFormat.slice(-1) === "." ? "." : ","
     }
     if (n > 0) { str += "0".repeat(n) }
     str += "}"
@@ -865,9 +865,9 @@ const displayAlt = (df, formatSpec = "h3", decimalFormat = "1,000,000.",
         str += datum === undefined
           ? "\t"
           : Rnl.isRational(datum)
-          ? format(datum, formatSpec, decimalFormat).replace(/{,}/g, ",") + "\t"
+          ? format(datum, formatSpec, decimalFormat) + "\t"
           : Cpx.isComplex(datum)
-          ? Cpx.display(datum, formatSpec, decimalFormat)[1].replace(/{,}/g, ",") + "\t"
+          ? Cpx.display(datum, formatSpec, decimalFormat)[1] + "\t"
           : datum + "\t"
       } else {
         if (mixedFractionRegEx.test(datum)) {

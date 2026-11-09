@@ -11,7 +11,7 @@ import { map } from "./map"
 import { dateRegEx, dateInSecondsFromIsoString, formatDate } from "./date"
 
 const numberRegEx = new RegExp(Rnl.numberPattern)
-const matrixRegEx = /^[([] *(?:(?:-?[0-9.]+|"[^"]+"|true|false) *[,;\t]? *)+[)\]]/
+const matrixRegEx = /^[([] *(?:(?:-?[0-9.]+|"(?:[^"]|"")*"|true|false) *[,;\t]? *)+[)\]]/
 // A regex to check for valid unit strings. Not comprehensive.
 // Only checks for allowed characters. Does not check structure of a compound unit.
 const unitRegEx = /^[a-zäöōA-Z0-9 μµ#$£¥'′″°()Å₨₪€℃℉ΩΩKÅ^+\-/*.•×\-−·₂⁰¹²³\u2074-\u2079]+$/
@@ -79,17 +79,17 @@ export const valueFromLiteral = (str, name, formats) => {
   } else if (str === "true" || str === "false") {
     return [(str === "true" ? true : false), null, dt.BOOLEAN, `\\mathord{\\text{${str}}}`]
 
-  } else if (str.length > 3 && str.slice(0, 3) === '"""') {
+  } else if (str.length >= 6 && str.slice(0, 3) === "'''" && str.slice(-3) === "'''") {
     // str contains a macro
-    return [str.slice(3, -3), undefined, dt.MACRO, ""]
+    return [str.slice(3, -3).replace(/^\r?\n/, "").replace(/\r?\n$/, ""), undefined, dt.MACRO, ""]
 
   } else if (/^\x22.+\x22/.test(str)) {
-    // str contains text between quotation marks
+    // str contains text between quotation marks. "" is an escaped quotation mark.
     if (name === "format") {
-      return validateFormatSpec(str.slice(1, -1).trim())
+      return validateFormatSpec(str.slice(1, -1).replace(/""/g, '"').trim())
     } else {
       const tex = parse(str, formats)
-      return [str.slice(1, -1), undefined, dt.STRING, tex]
+      return [str.slice(1, -1).replace(/""/g, '"'), undefined, dt.STRING, tex]
     }
 
   } else if (matrixRegEx.test(str)) {

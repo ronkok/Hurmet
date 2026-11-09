@@ -57,20 +57,26 @@ const convertToBaseUnits = (oprnd, gauge, factor) => {
   return Object.freeze(conversion)
 }
 
-const elementDisplay = (value, dtype, formatSpec, decimalFormat, isAlt = false) => {
-  let display = value === undefined
-    ? ""
-    : (dtype & dt.RATIONAL)
-    ? format(value, formatSpec, decimalFormat)
-    : (dtype & dt.COMPLEX)
-    ? Cpx.display(value, formatSpec, decimalFormat)[0]
-    : (dtype & dt.BOOLEAN) || (dtype & dt.STRING)
-    ? (isAlt ? value : "\\text{" + value + "}")
-    : value
-  if (isAlt && ((dtype & dt.RATIONAL) || (dtype & dt.COMPLEX))) {
-    display = display.replace(/{,}/g, ",")
+const elementDisplay = (value, dtype, formatSpec, decimalFormat, mode = "tex") => {
+  // mode is "tex", "plain" (for screen display), or "literal" (for a saved file).
+  // For backward compatibility, mode === true means "plain".
+  if (mode === true) { mode = "plain" }
+  if (value === undefined) { return "" }
+  if (dtype & dt.RATIONAL) {
+    return format(value, formatSpec, decimalFormat, mode)
+  } else if (dtype & dt.COMPLEX) {
+    return Cpx.display(value, formatSpec, decimalFormat)[0]
+  } else if (dtype & dt.STRING) {
+    return mode === "literal"
+      ? '"' + String(value).replace(/"/g, '""') + '"'
+      : mode === "plain"
+      ? value
+      : "\\text{" + value + "}"
+  } else if (dtype & dt.BOOLEAN) {
+    return mode === "tex" ? "\\text{" + value + "}" : String(value)
+  } else {
+    return value
   }
-  return display
 }
 
 const display = (m, formatSpec, decimalFormat) => {
@@ -111,7 +117,9 @@ const display = (m, formatSpec, decimalFormat) => {
   return str
 }
 
-const displayAlt = (m, formatSpec, decimalFormat) => {
+const displayAlt = (m, formatSpec, decimalFormat, mode = "plain", suffix = "") => {
+  // Plain text for screen display, or, if mode is "literal", a valid Hurmet matrix
+  // literal for a saved file. suffix, e.g. "%", is appended to each element.
   let str = ""
   if (m.dtype & dt.MATRIX) {
     str += "("
@@ -119,7 +127,8 @@ const displayAlt = (m, formatSpec, decimalFormat) => {
     const numCols = m.value[0].length
     for (let i = 0; i < numRows; i++) {
       for (let j = 0; j < numCols; j++) {
-        str += elementDisplay(m.value[i][j], m.dtype, formatSpec, decimalFormat, true) + ", "
+        str += elementDisplay(m.value[i][j], m.dtype, formatSpec, decimalFormat, mode) +
+          suffix + ", "
       }
       str = str.slice(0, -2) + "; "
     }
@@ -131,13 +140,13 @@ const displayAlt = (m, formatSpec, decimalFormat) => {
     if (m.value.plain) {
       const numArgs = m.value.plain.length
       for (let i = 0; i < numArgs; i++) {
-        str += elementDisplay(m.value.plain[i], m.dtype, formatSpec, decimalFormat, true) +
-           ((i < numArgs - 1) ? argSep : "")
+        str += elementDisplay(m.value.plain[i], m.dtype, formatSpec, decimalFormat, mode) +
+           suffix + ((i < numArgs - 1) ? argSep : "")
       }
     } else {
       const numArgs = m.value.length
       for (let i = 0; i < numArgs; i++) {
-        str += elementDisplay(m.value[i], m.dtype, formatSpec, decimalFormat, true) +
+        str += elementDisplay(m.value[i], m.dtype, formatSpec, decimalFormat, mode) + suffix +
                ((i < numArgs - 1) ? argSep : "")
       }
     }

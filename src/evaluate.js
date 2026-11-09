@@ -1,4 +1,4 @@
-﻿import { dt, allZeros } from "./constants"
+﻿import { dt, allZeros, isnanMarker } from "./constants"
 import { clone, tablessTrim } from "./utils"
 import { plugValsIntoEcho } from "./echo"
 import { fromAssignment } from "./operand.js"
@@ -15,7 +15,7 @@ import { errorOprnd } from "./error"
 import { Rnl } from "./rational"
 import { format } from "./format"
 import { insertOneHurmetVar } from "./insertOneHurmetVar"
-import { formatResult } from "./result"
+import { formatResult, writeSavedResult } from "./result"
 import { Cpx } from "./complex"
 import { draw } from "./draw"
 import { beamDiagram } from "./beam/beamAnalysis.js"
@@ -106,12 +106,17 @@ const stringFromOperand = (oprnd, formats) => {
   return oprnd.dtype === dt.STRING
     ? oprnd.value
     : oprnd.dtype === dt.RATIONAL
-    ? format(oprnd.value, "h15", formats.decimalFormat)
-    : isMatrix(oprnd.dtype)
-    ? Matrix.displayAlt(oprnd, "h15", formats)
+    ? format(oprnd.value, "h15", formats.decimalFormat, "plain")
+    : isMatrix(oprnd)
+    ? Matrix.displayAlt(oprnd, "h15", formats.decimalFormat)
     : (oprnd.dtype & dt.MAP)
     ? DataFrame.displayAlt(oprnd.value, "h15", formats)
     : oprnd.value
+}
+
+// For isnan(). True if an operand is an error, missing, or not numeric.
+const isNotANumber = oprnd => {
+  return !oprnd || oprnd.dtype === dt.ERROR || !(oprnd.dtype & dt.RATIONAL)
 }
 
 export const evalRpn = (rpn, vars, formats, unitAware, lib) => {
@@ -122,6 +127,26 @@ export const evalRpn = (rpn, vars, formats, unitAware, lib) => {
   for (let i = 0; i < tokens.length; i++) {
     const tkn = tokens[i]
     const ch = tkn.charAt(0)
+
+    if (tkn === isnanMarker) {
+      // The start of the argument of isnan(). Find the matching isnan token.
+      let depth = 1
+      let j = i + 1
+      for (; j < tokens.length; j++) {
+        if (tokens[j] === isnanMarker) {
+          depth += 1
+        } else if (tokens[j] === "isnan") {
+          depth -= 1
+          if (depth === 0) { break }
+        }
+      }
+      // Evaluate the argument on its own. An error ends only this sub-evaluation.
+      const arg = evalRpn(tokens.slice(i + 1, j).join(" "), vars, formats,
+        unitAware, lib)
+      stack.push(Object.freeze({ value: isNotANumber(arg), unit: null, dtype: dt.BOOLEAN }))
+      i = j  // Skip past the isnan token.
+      continue
+    }
 
     if (ch === "®") {
       // A rational number.⌾
@@ -1132,9 +1157,10 @@ export const evalRpn = (rpn, vars, formats, unitAware, lib) => {
         }
 
         case "isnan": {
+          // Usually handled at isnanMarker, above. This handles any other case.
           const oprnd = stack.pop()
           const output = Object.create(null)
-          output.value = !(oprnd.dtype & dt.RATIONAL)
+          output.value = isNotANumber(oprnd)
           output.unit = null
           output.dtype = dt.BOOLEAN
           stack.push(Object.freeze(output))
@@ -1865,6 +1891,10 @@ const errorResult = (stmt, result) => {
   stmt.altResultDisplay = result.value
   stmt.error = true
   stmt.dtype = dt.ERROR
+  if (stmt.resulttemplate.indexOf("!") === -1) {
+    // Write the error message into the saved Markdown, between 〔…〕, unquoted.
+    writeSavedResult(stmt, result.value)
+  }
   if (stmt.resulttemplate.indexOf("!") > -1) {
     stmt.tex += "= " + stmt.resultDisplay
     stmt.alt += result.value
@@ -2056,6 +2086,7 @@ export const evaluate = (
 ) => {
   stmt.tex = stmt.template ? stmt.template : ""
   stmt.alt = stmt.altTemplate ? stmt.altTemplate : ""
+  stmt.md = null  // Don't let a result from a previous calculation linger in a saved file.
   const isUnitAware = /\?\?|!!|%%|@@|¡¡/.test(stmt.resulttemplate)
 
   const formatSpec = vars.format ? vars.format.value : "h15"

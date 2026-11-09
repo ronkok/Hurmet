@@ -352,7 +352,7 @@ export const tex2Calc = (str, displayMode = false) => {
             str = str.slice(arg.length + 2)
           }
           calc += token.input === "\\text"
-            ? '"' + arg + '"'
+            ? '"' + arg.replace(/"/g, '""') + '"'
             : token.input === "\\mathrm" && arg.length > 1 && arg.indexOf(" ") === -1
             ? arg
             : token.input + "(" + arg + ")"

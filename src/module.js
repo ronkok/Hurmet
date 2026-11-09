@@ -17,7 +17,9 @@ export const functionRegEx = new RegExp("^function " + isValidIdentifier.source.
 export const moduleRegEx = /^module ([A-Za-z][A-Za-z0-9]*)/
 export const drawRegEx = /^draw\(/
 const startSvgRegEx = /^startSvg\(\)/
-const lexRegEx = /"[^"]*"|``.*|`[^`]*`|'[^']*'|#|[^"`'#]+/g
+const macroRegEx = /^[^=]+=\s*'''/
+const oldMacroRegEx = /^[^=]+=\s*"""/
+const lexRegEx = /"(?:[^"]|"")*"|``.*|`[^`]*`|'[^']*'|#|[^"`'#]+/g
 
 const testForStatement = str => {
   const pos = str.indexOf("=")
@@ -70,6 +72,7 @@ export const scanModule = (str, formats) => {
     } else if (testForStatement(line)) {
       // This line starts a Hurmet assignment.
       const [stmt, endLineNum] = scanAssignment(lines, formats, i)
+      if (!stmt.name && stmt.dtype === dt.ERROR) { return stmt } // e.g., an old macro
       parent[stmt.name] = stmt
       i = endLineNum
     }
@@ -227,7 +230,33 @@ const scanFunction = (lines, formats, startLineNum) => {
   return [errorOprnd("END_MISS", functionName), 0]
 }
 
+const scanMacro = (lines, iStart, delimiter) => {
+  // A macro extends beyond normal line endings. It ends at a line that ends with
+  // the delimiter. Read the raw lines, so that no Markdown is mistaken for a comment.
+  const line1 = lines[iStart]
+  const posEquals = line1.indexOf("=")
+  const name = checkForNumericSubscript(line1.slice(0, posEquals).trim())
+  let str = line1.slice(posEquals + 1).trim()
+  let iEnd = iStart
+  const isClosed = s => s.length >= 6 && s.slice(-3) === delimiter
+  while (!isClosed(str) && iEnd < lines.length - 1) {
+    iEnd += 1
+    str = (str + "\n" + lines[iEnd]).replace(/\s+$/, "")
+  }
+  return [name, str, iEnd]
+}
+
 const scanAssignment = (lines, formats, iStart) => {
+  if (macroRegEx.test(lines[iStart])) {
+    const [name, str, iEnd] = scanMacro(lines, iStart, "'''")
+    const [value, unit, dtype, resultdisplay] = valueFromLiteral(str, name, formats)
+    return [{ name, value, unit, dtype, resultdisplay }, iEnd]
+  } else if (oldMacroRegEx.test(lines[iStart])) {
+    // Macro delimiters used to be """. Now they are '''. Tell the author.
+    const [name, , iEnd] = scanMacro(lines, iStart, '"""')
+    return [errorOprnd("OLD_MACRO", name), iEnd]
+  }
+
   let prevLineEndedInContinuation = false
   let str = ""
   let iEnd = iStart
@@ -262,18 +291,7 @@ const scanAssignment = (lines, formats, iStart) => {
   } else {
     name = checkForNumericSubscript(name)
   }
-  let trailStr = str.slice(posEquals + 1).trim()
-  if (trailStr.length > 3 && trailStr.slice(0, 3) === '"""') {
-    // We're at a macro, which extends beyond normal line endings.
-    let j = iEnd
-    let pos = trailStr.indexOf('"""', 3)
-    while (pos < 0 && j < lines.length - 1) {
-      j += 1
-      trailStr += "\n" + lines[j];
-      pos = trailStr.indexOf('"""', 3)
-    }
-    iEnd = j
-  }
+  const trailStr = str.slice(posEquals + 1).trim()
   const [value, unit, dtype, resultdisplay] = valueFromLiteral(trailStr, name, formats)
   const stmt = { name, value, unit, dtype, resultdisplay }
   return [stmt, iEnd]

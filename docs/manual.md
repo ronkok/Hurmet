@@ -867,10 +867,12 @@ String
 
 :   A _string_ literal is a string of text characters enclosed by a pair of
     straight double quotation marks. The string may include any Unicode character
-    except a straight double quotation mark, a newline, or a carriage return.
+    except a newline or a carriage return. To include a straight double quotation
+    mark, write two of them, `""`.
 
     ```
     "This is a string."
+    "She said, ""Hello."""
     ```
 
     You can call a subset of any string with an index or range in brackets. Hurmet
@@ -1614,7 +1616,9 @@ imag(_z_)
 
 isnan(_x_)
 
-: Indicates if the argument is not numeric.
+: Returns `true` if the argument is not numeric, if it is an error, or if it
+  depends on a variable that is missing or has no value. Otherwise, `false`.
+  For example, if ¢`e = 1/0`, then ¢`isnan(e)` returns `true`.
 
 length(a)
 
@@ -2609,10 +2613,19 @@ abbreviation for the macro expansion.
 
 A Hurmet macro is written in a module. The macro expansion is a section of a
 Hurmet document, written in Markdown format. The expansion is contained
-within `"""…"""` delimiters. Here’s an example:
+within `'''…'''` delimiters, i.e., three straight apostrophes. Here’s an example:
 
 ```
-ab = """¢` A_b = (π d_b^2) / 4 = ?? in² `, bolt area"""
+ab = '''¢` A_b = (π d_b^2) / 4 = ?? in² `, bolt area'''
+```
+
+A macro expansion may extend over several lines. The closing `'''` must be at
+the end of a line.
+
+```
+ab = '''
+¢` A_b = (π d_b^2) / 4 = ?? in² `, bolt area
+'''
 ```
 
 As you can see, the macro expansion contains an equation to find the area of a
@@ -2696,6 +2709,22 @@ button labeled “code” and get a zip file.
 In that zip file, the `preview` folder contains the files: `hurmet.js`, `styles.css`,
 `latinmodernmath.woff2`, and `Temml.woff2`. The CSS and font files need to be
 copied to the same folder as your HTML files.
+
+### Saved Results
+
+When Hurmet saves a document, it writes each calculation result into the
+Markdown file between `〔…〕` delimiters, like this:
+
+```
+¢??` A_b = (π d_b^2) / 4 = 〔0.442〕 in² `
+```
+
+Hurmet ignores those saved results when it opens a file. It recalculates instead.
+The saved results are there for other readers: people, programs, and AI agents
+that read a Hurmet document without running it.
+
+So that such a reader can parse them, saved results are written as Hurmet
+literals (with dot decimal symbols), regardless of how the result is displayed on screen.
 
 ## Troubleshooting
 

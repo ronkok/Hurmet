@@ -108,8 +108,9 @@ const roundedString = (r, spec) => {
           // Mixed fraction
           const quotientStr = String(numerator / denominator)
           const remainder = numerator % denominator
-          return sign + quotientStr + "\u00a0" + superscript(remainder) +
-            "⁄" + subscript(denominator)
+          if (remainder === BigInt(0)) { return sign + quotientStr }
+          return sign + quotientStr + "\u00a0" + superscript(String(remainder)) +
+            "⁄" + subscript(String(denominator))
         }
 
         case "t":
@@ -136,18 +137,21 @@ const roundedString = (r, spec) => {
   }
 }
 
+// Note: Temml renders a comma inside a number, e.g., "12,345", with no space after
+// the comma. So, unlike TeX, there is no need to write it as {,}.
+
 const formattedInteger = (intStr, decimalFormat) => {
   const thousandsSeparator = decimalFormat.charAt(1)
   if (thousandsSeparator === "0") {
     return intStr
   } else if (decimalFormat === "1,00,000.") {
-    return intStr.replace(groupByLakhCroreRegEx, "$1{,}")
+    return intStr.replace(groupByLakhCroreRegEx, "$1,")
   } else if (decimalFormat === "1,0000,0000.") {
-    return intStr.replace(groupByFourRegEx, "$1{,}")
+    return intStr.replace(groupByFourRegEx, "$1,")
   } else {
     return intStr.replace(groupByThreeRegEx,
       (thousandsSeparator === ",")
-      ? "{,}"
+      ? ","
       : (thousandsSeparator === " ")
       ? "\u2008"
       : (thousandsSeparator === "’")
@@ -164,9 +168,47 @@ export const formattedDecimal = (numStr, decimalFormat, truncateTrailingZeros) =
   } else {
     const intStr = numStr.slice(0, pos)
     const decimalSeparator = decimalFormat.slice(-1)
-    let frac = (decimalSeparator === "." ? "." : "{,}") + numStr.slice(pos + 1)
-    if (truncateTrailingZeros) { frac = frac.replace(/(\.|{,})?0+$/, "") }
+    let frac = (decimalSeparator === "." ? "." : ",") + numStr.slice(pos + 1)
+    if (truncateTrailingZeros) { frac = frac.replace(/[.,]?0+$/, "") }
     return formattedInteger(intStr, decimalFormat) + frac
+  }
+}
+
+// Unicode superscript for an exponent, e.g., "-4" → "⁻⁴". Used in plain text.
+const superscriptExponent = str => {
+  return (str.charAt(0) === "-" ? "⁻" : "") + superscript(str.replace(/^[-+]/, ""))
+}
+
+const mixedFractionLiteral = r => {
+  // Write a number in the form of a Hurmet mixed fraction literal, e.g., "5 7/8".
+  r = Rnl.normalize(r)
+  const sign = Rnl.isNegative(r) ? "-" : ""
+  const numerator = intAbs(r[0])
+  const denominator = r[1]
+  const quotientStr = String(numerator / denominator)
+  const remainder = numerator % denominator
+  return remainder === BigInt(0)
+    ? sign + quotientStr
+    : sign + quotientStr + " " + String(remainder) + "/" + String(denominator)
+}
+
+const literalFromRoundedString = (numStr, spec, r) => {
+  // Write a rounded number as a valid Hurmet number literal: a dot decimal symbol,
+  // no thousands separators, and e-notation for any variety of scientific notation.
+  switch (spec.ftype) {
+    case "h":
+      numStr = numStr.replace("e+", "e")
+      return /^[^e]*\.[^e]*$/.test(numStr) ? numStr.replace(/\.?0+$/, "") : numStr
+    case "%":
+    case "p":
+      return numStr.replace("e+", "e") + "%"
+    case "m":
+      return mixedFractionLiteral(r)
+    case "b":
+      // Hurmet has no binary literal. Write a decimal integer.
+      return String(Rnl.normalize(r)[0])
+    default:
+      return numStr.replace("e+", "e")
   }
 }
 
@@ -221,14 +263,22 @@ export const formatFloat = (num, specStr = "h3", decimalFormat = "1,000,000.") =
   return format(Rnl.fromNumber(num), specStr, decimalFormat)
 }
 
-export const format = (num, specStr = "h3", decimalFormat = "1,000,000.") => {
+export const format = (num, specStr = "h3", decimalFormat = "1,000,000.", mode = "tex") => {
+  // mode is one of:
+  //   "tex":     TeX for the rendered result.
+  //   "plain":   Plain text, with the document's decimal format, for screen display.
+  //   "literal": A valid Hurmet number literal, for results saved in a Markdown file.
   if (Rnl.isZero(num)) { return "0" }
+  const plain = mode === "plain"
 
   const spec = { ftype: specStr.charAt(0) }
   specStr = specStr.replace(angleRegEx, "")
   if (specStr.length > 1) { spec.numDigits = Number(specStr.slice(1)) }
 
-  if (spec.ftype === "%" || spec.ftype === "p") { num[0] = num[0] * BigInt(100) }
+  if (spec.ftype === "%" || spec.ftype === "p") {
+    // Do not mutate the caller's number.
+    num = [num[0] * BigInt(100), num[1]]
+  }
 
   if ((spec .ftype === "b" || spec.ftype === "x") && !Rnl.isInteger(num)) {
     return errorOprnd("FORM_FRAC")
@@ -236,6 +286,9 @@ export const format = (num, specStr = "h3", decimalFormat = "1,000,000.") => {
 
   // Round the number
   const numStr = roundedString(num, spec)
+  if (typeof numStr !== "string") { return numStr } // an error
+
+  if (mode === "literal") { return literalFromRoundedString(numStr, spec, num) }
 
   // Dress up the rounded string for display: add locale separators for
   // decimal/integer types, or write the exponent notation
@@ -249,7 +302,7 @@ export const format = (num, specStr = "h3", decimalFormat = "1,000,000.") => {
       return formattedInteger(numStr, decimalFormat)
     case "%":
     case "p":
-      return formattedDecimal(numStr, decimalFormat) + "\\%"
+      return formattedDecimal(numStr, decimalFormat) + (plain ? "%" : "\\%")
     case "m":
     case "b":
     case "x":
@@ -259,11 +312,14 @@ export const format = (num, specStr = "h3", decimalFormat = "1,000,000.") => {
       // Some sort of scientific notation.
       const pos = numStr.indexOf("e")
       let significand = numStr.slice(0, pos)
-      if (decimalFormat.slice(-1) === ",") { significand = significand.replace(".", "{,}") }
+      if (decimalFormat.slice(-1) === ",") {
+        significand = significand.replace(".", ",")
+      }
 
       switch (spec.ftype) {
         case "e":
         case "E": {
+          if (plain) { return significand + spec.ftype + numStr.slice(pos + 1) }
           const result = significand + "\\text{" + spec.ftype
           if (numStr.charAt(pos + 1) === "-") {
             return result + "-}" + numStr.slice(pos + 2)
@@ -274,6 +330,10 @@ export const format = (num, specStr = "h3", decimalFormat = "1,000,000.") => {
 
         case "s":
         case "S": {
+          if (plain) {
+            return significand + (spec.ftype === "S" ? "×" : "·") + "10" +
+              superscriptExponent(numStr.slice(pos + 1))
+          }
           const op = spec.ftype === "S" ? "×" : "\\mkern2mu{\\cdot}\\mkern1mu"
           return significand + op + "10^{" + numStr.slice(pos + 1) + "}"
         }
@@ -288,8 +348,12 @@ export const format = (num, specStr = "h3", decimalFormat = "1,000,000.") => {
           const newExponent = exponent - mod
           let sig = numStr.slice(0, pos)
           if (mod !== 0) { sig = shiftDecimalPoint(sig, mod) }
-          if (decimalFormat.slice(-1) === ",") { sig = sig.replace(".", "{,}") }
+          if (decimalFormat.slice(-1) === ",") { sig = sig.replace(".", ",") }
           if (newExponent === 0) { return sig }
+          if (plain) {
+            return sig + (spec.ftype === "N" ? "×" : "·") + "10" +
+              superscriptExponent(String(newExponent))
+          }
           const op = spec.ftype === "N" ? "×" : "\\mkern2mu{\\cdot}\\mkern1mu"
           return sig + op + "10^{" + newExponent + "}"
         }

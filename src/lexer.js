@@ -54,7 +54,6 @@ export const tt = Object.freeze({
   DATAFRAME: 40,
   RICHTEXT: 41,
   BOOLEAN: 42,
-  MACRO: 43,
   DATE: 44  // Input format is 'yyyy-mm-dd'
 })
 
@@ -62,6 +61,9 @@ const minusRegEx = /^-(?![-=<>:])/
 const numberRegEx = new RegExp(Rnl.numberPattern)
 const unitRegEx = /^(?:'[^']+'|[°ΩÅK])/
 const dateRegEx = /^'\d{4}-\d{1,2}-\d{1,2}'/
+// The content of a string, after the opening quotation mark, up to and including the
+// closing quotation mark. A doubled quotation mark, "", escapes a quotation mark.
+const textContentRegEx = /^(?:[^"]|"")*"/
 const globalOpenParenRegEx = /\(/g
 const closeParenRegEx = /\)/g
 
@@ -862,26 +864,18 @@ export const lex = (str, formats, prevToken, inRealTime = false) => {
   /* eslint-enable no-useless-assignment */
   let matchObj
 
-  if (str.length > 3 && str.slice(0, 3) === "===") {
-    // A macro between triple-double quotation marks.
-    pos = str.indexOf('"""', 3)
-    if (pos > 0) {
-      st = str.slice(3, pos)
-      return ['"""' + st + '"""', st, st, tt.MACRO, ""]
-    } else {
-      return [str, str.slice(3), str.slice(3), tt.MACRO, ""]
-    }
-  }
-
   if (str.charAt(0) === '"') {
     // String between double quotation marks. Parser will convert it to \text{…}
-    pos = str.indexOf('"', 1)
-    if (pos > 0) {
-      // Disallow \r or \n by truncating the string.
-      st = str.substring(1, pos).replace(/\r?\n.*/, "")
-      return ['"' + st + '"', st, st, tt.STRING, ""]
+    // Within the string, a doubled quotation mark, "", is an escaped quotation mark.
+    // Disallow \r or \n by truncating the string.
+    const match = textContentRegEx.exec(str.slice(1))
+    if (match && !/[\r\n]/.test(match[0])) {
+      st = match[0].slice(0, -1).replace(/""/g, '"')
+      return ['"' + match[0], st, st, tt.STRING, ""]
     } else {
-      return [str, str.replace(/\r?\n.*/, ""), str.replace(/\r?\n.*/, ""), tt.STRING, ""]
+      // No closing quotation mark on this line.
+      st = str.replace(/\r?\n[^]*/, "").replace(/""/g, '"')
+      return [str, st, st, tt.STRING, ""]
     }
   }
 

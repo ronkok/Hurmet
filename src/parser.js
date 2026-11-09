@@ -3,6 +3,7 @@
 import { tt, lex, unitStartRegEx, lexUnitName } from "./lexer"
 import { Rnl } from "./rational"
 import { dateRPN } from "./date"
+import { isnanMarker } from "./constants"
 
 /*
  * parser.js
@@ -691,16 +692,6 @@ export const parse = (
         if (isPrecededBySpace) { posOfPrevRun = tex.length }
         token.output = token.output === "`" ? "`" : parse(token.output, formats, false)
         tex += "{" + token.output + "}"
-        okToAppend = true
-        break
-      }
-
-      case tt.MACRO: {
-        popTexTokens(2, okToAppend)
-        if (isCalc) { rpn += '"""' + token.output + '"""' }  // Keep before addTextEscapes()
-        if (isPrecededBySpace) { posOfPrevRun = tex.length }
-        token.output = addTextEscapes(token.output)
-        tex += "\\text{" + token.output + "}"
         okToAppend = true
         break
       }
@@ -1394,6 +1385,13 @@ export const parse = (
               } else if (symbol === "log" && regEx.test(rpn)) {
                 rpn = rpn.slice(0, rpn.length - 1) + "lfact"
                 break
+              } else if (symbol === "isnan" && numArgs === 1) {
+                // Mark the start of the argument, so that the evaluator can evaluate
+                // the argument on its own and catch any error. See evaluate.js.
+                const argRpn = rpn.slice(topDelim.rpnPos)
+                rpn = rpn.slice(0, topDelim.rpnPos) + (argRpn.startsWith(tokenSep)
+                  ? tokenSep + isnanMarker + argRpn
+                  : isnanMarker + tokenSep + argRpn)
               }
               rpn += (symbol.slice(-1) === "^")
                 ? firstSep + symbol

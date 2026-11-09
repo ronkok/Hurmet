@@ -1,6 +1,10 @@
  // unit exponents of a number with no unit.
 export const allZeros = Object.freeze([0, 0, 0, 0, 0, 0, 0, 0])
 
+// An RPN token that marks the start of the argument of isnan().
+// The evaluator evaluates that argument on its own, so that it can catch an error.
+export const isnanMarker = "⁅isnan"
+
 // Data types
 // Some operands will be two types at the same time, e.g. RATIONAL + MATRIX.
 // So we'll enumerate data types in powers of two.
