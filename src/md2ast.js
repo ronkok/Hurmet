@@ -285,7 +285,7 @@ const TABLES = (function() {
         if (i > 0 && tableRow[i - 1].type === "tableSeparator") {
           node.text = node.text.replace(leadingSpaceRegEx, "")
         }
-        if (i < tableRow.length - 1) {
+        if (i < tableRow.length - 1 && tableRow[i + 1].type === "tableSeparator") {
           node.text = node.text.replace(trailingSpaceRegEx, "")
         }
       }

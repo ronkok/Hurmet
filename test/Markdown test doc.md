@@ -330,7 +330,7 @@ A typical pipe table:
 
 | Head 1  | Head 2  | Head 3             |
 |---------|:-------:|-------------------:|
-| datum 1 | datum 2 | datum 3            |
+| datum 1 | datum 2 | datum 3 `code`     |
 | datum 4 | datum 5 | ¢` x = 2 + 2 = ? ` |
 {.grid colWidths="null null null"}
 
