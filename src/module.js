@@ -160,8 +160,26 @@ const scanFunction = (lines, formats, startLineNum) => {
       continue
     }
 
+    if (isDraw && line === "group") {
+      // A group…end block exists only for Sketch, which uses it to select a
+      // set of SVG elements with one click. It has no effect on evaluation,
+      // so neither "group" nor its matching "end" is written to the statements.
+      stackOfCtrls.push({ type: "group" })
+      prevLineEndedInContinuation = false
+      prevLine = ""
+      continue
+    }
+
     let isFromOneLiner = false
     const keyword = keywordRegEx.exec(line)
+    if (keyword && keyword[1] === "end" && stackOfCtrls.length > 0 &&
+        stackOfCtrls[stackOfCtrls.length - 1].type === "group") {
+      // This "end" closes a group. Omit it from the statements.
+      stackOfCtrls.pop()
+      prevLineEndedInContinuation = false
+      prevLine = ""
+      continue
+    }
     if (keyword) {
       name = keyword[1];
       if (keyword[2]) { isFromOneLiner = true }

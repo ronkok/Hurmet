@@ -755,6 +755,79 @@ const testModules = () => {
 }
 testModules()
 
+// group…end blocks in a draw() function exist only for Sketch. Hurmet ignores them,
+// so a drawing with groups must yield the same SVG and statements as one without.
+const testDrawGroups = () => {
+  console.log("\nNow testing draw groups…")
+  console.log("")
+  const check = (label, actual, expected) => {
+    numTests += 1
+    if (actual !== expected) {
+      numErrors += 1
+      console.log("draw group test: " + label)
+      console.log("expected: " + expected)
+      console.log("actual:   " + actual)
+      console.log("")
+    }
+  }
+  const json = x => JSON.stringify(x, (k, v) => typeof v === "bigint" ? String(v) : v)
+  const drawing = (g, n) => `draw()
+title "groups"
+frame 200, 100
+view 0, 10
+${g ? "group" : ""}
+line [0, 0; 1, 1]
+n = ${n}
+if n > 1
+   ${g ? "group  # nested group in a branch" : ""}
+   rect [0, 0; 2, 1]
+   ${g ? "end" : ""}
+else
+   ${g ? "group" : ""}
+   circle [1, 1], 1
+   ${g ? "group" : ""}
+   line [1, 1; 2, 2]
+   ${g ? "end" : ""}
+   ${g ? "end" : ""}
+end
+${g ? "end" : ""}
+for i in 1:3
+   ${g ? "group" : ""}
+   dot [i, i], "closed"
+   if i == 2
+      break
+   end
+   ${g ? "end" : ""}
+end
+group = 5
+text [group, 1], "label"
+end`
+  const statements = r => json(r.value.statements.map(s => [s.name, s.rpn, s.stype, s.endOfBlock]))
+  for (const n of [2, 0]) {
+    const plain = hurmet.calculate(drawing(false, n), {})
+    const grouped = hurmet.calculate(drawing(true, n), {})
+    check(`n = ${n}, no error`, grouped.error, false)
+    check(`n = ${n}, same SVG`, json(grouped.resultdisplay), json(plain.resultdisplay))
+    check(`n = ${n}, same statements`, statements(grouped), statements(plain))
+  }
+
+  // Outside of draw(), "group" is not a keyword.
+  const vars = {}
+  hurmet.calculate(`function groupFunc(x)
+   group = 2 x
+   return group
+end`, vars)
+  check("group as a variable name", hurmet.calculate(`groupFunc(3) = @`, vars, true), "6")
+  const formats = { decimalFormat: "1,000,000.", dateFormat: "yyyy-mm-dd" }
+  const bad = hurmet.scanModule(`function g()
+   group
+   return 1
+end`, formats)
+  check("bare group outside draw()", typeof bad.value === "string" &&
+    bad.value.includes("group") ? "error" : json(bad.value), "error")
+}
+testDrawGroups()
+
 // import() works via fetch(), so this test is asynchronous.
 // updateAndSave() runs a whole Hurmet Markdown document, including the fetch,
 // and returns the document with results written inline.
