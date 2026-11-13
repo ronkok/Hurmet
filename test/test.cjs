@@ -938,6 +938,64 @@ H~2~O", "aboveright"  # a comment`)
   check("dot with no label", svgOf(px + `dot [10, 20]`).children.length, 1)
   check("dot label position", isError(px + `dot [10, 20], "A", "leader"`), true)
 
+  // Shapes
+  svg = svgOf(px + `ellipse [50, 50], 20, 10, 30`)
+  check("rotated ellipse", json(svg.children[0].attrs), json({ cx: 50, cy: 50, rx: 20,
+    ry: 10, transform: "rotate(-30, 50, 50)", "stroke-width": 1, stroke: "red",
+    fill: "none" }))
+  svg = svgOf(px + `polygon 4, [50, 50], 10`)
+  check("polygon", svg.children[0].attrs.points,
+    "40.0000,60.0000 60.0000,60.0000 60.0000,40.0000 40.0000,40.0000")
+  svg = svgOf(px + `path (0, 0; 10, 0; 10, 10)`)
+  check("straight path", svg.children[0].attrs.d,
+    "M0.0000,100.0000 L10.0000,100.0000 L10.0000,90.0000")
+  svg = svgOf(px + `path (0, 0, 0; 10, 0, 5; 10, 10, -5)`)
+  check("circular path", svg.children[0].attrs.d,
+    "M0.0000,100.0000 A5,5 0 0 0 10.0000,100.0000 A5,5 0 0 1 10.0000,90.0000")
+  svg = svgOf(px + `path (0, 0, 0, 0, 0; 10, 0, 0, 3, 0; 10, 20, 10, 5, 30; 20, 20, -5, 5, 0)`)
+  check("elliptical path", svg.children[0].attrs.d, "M0.0000,100.0000 L10.0000,100.0000 " +
+    "A10,5 -30 0 0 10.0000,80.0000 A5,5 0 0 1 20.0000,80.0000")
+  svg = svgOf(px + `freehand (10, 10; 20, 30; 40, 20)`)
+  check("freehand", json(svg.children[0].attrs), json({ d: "M10.0000,90.0000 " +
+    "C11.6667,86.6667 15.0000,71.6667 20.0000,70.0000 " +
+    "C25.0000,68.3333 36.6667,78.3333 40.0000,80.0000", "stroke-width": 1, stroke: "red",
+    fill: "none", "stroke-linecap": "round", "stroke-linejoin": "round" }))
+  svg = svgOf(px + `freehand (10, 10)`)
+  check("one-point freehand", svg.children[0].attrs.d, "M10.0000,90.0000 L10.0000,90.0000")
+  svg = svgOf(px + `marker "arrow"\nfreehand (0, 50; 40, 50; 50, 50)`)
+  check("freehand marker", lastChild(svg).attrs.d, "M38,53.9 L50,50 L38,46.1 Z")
+  svg = svgOf(px + `image (10, 10; 50, 30), "a.png", 30`)
+  check("image", json(svg.children[0].attrs), json({ x: 10, y: 70, width: 40, height: 20,
+    href: "a.png", transform: "rotate(30, 30, 80)" }))
+  svg = svgOf(px + `image (10, 10; 50, 30), "a.png"`)
+  check("image with no rotation", json(svg.children[0].attrs), json({ x: 10, y: 70,
+    width: 40, height: 20, href: "a.png" }))
+  svg = svgOf(px + `image (10, 10; 50, 30), "a.png", 30, true`)
+  check("mirrored image", svg.children[0].attrs.transform,
+    "translate(30, 80) scale(1, -1) rotate(30) translate(-30, -80)")
+  // arrow (points), "label"
+  svg = svgOf(px + `marker "dot"\narrow (0, 50, 9; 50, 50, 9)`)
+  check("arrow", json(svg.children.map(el => el.attrs.d)),
+    json(["M0.0000,50.0000 L50.0000,50.0000", "M38,53.9 L50,50 L38,46.1 Z"]))
+  check("arrow keeps the marker", lastChild(svgOf(px +
+    `marker "dot"\narrow (0, 50; 50, 50)\nline [0, 0; 9, 0]`)).tag, "circle")
+  svg = svgOf(px + `fontsize 20\narrow (40, 50; 50, 50), "A"`)
+  check("arrow label", json([lastChild(svg).attrs.x, lastChild(svg).attrs.y,
+    lastChild(svg).attrs["text-anchor"], lastChild(svg).attrs["font-size"]]),
+    json([40 - 0.3 * 13.33, 50, "end", 13.33]))
+  svg = svgOf(px + `arrow (50, 40; 51, 50), "A"`)
+  check("arrow label below", lastChild(svg).attrs.y, 60 + 0.8 * 13.33)
+  for (const bad of [`arrow (0, 0)`, `arrow (0, 0; 1, 1), 5`]) {
+    check(bad, isError(px + bad), true)
+  }
+
+  for (const bad of [`rect [10, 10]`, `circle [50, 50], -1`, `ellipse [5, 5], 0, 1`,
+    `polygon 2, [5, 5], 1`, `polygon 4.5, [5, 5], 1`, `path (0, 0)`,
+    `path (0, 0, 1, 1; 1, 1, 1, 1)`, `freehand (0, 0, 1; 1, 1, 1)`,
+    `image (0, 0; 1, 1), "a.png", "30"`]) {
+    check(bad, isError(px + bad), true)
+  }
+
   // Invalid arguments
   for (const bad of [`scene 1, "furlong", 0, 0`, `scene 0, "mm", 0, 0`,
     `linetype "5 3"`, `pattern "plaid"`, `format "x9"`, `fraction 10`, `caption "yes"`]) {

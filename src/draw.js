@@ -167,19 +167,67 @@ const chopZ = str => {
   return str.slice(0, i + 1)
 }
 
-const rationals2numbers = array => {
-  const newArray = [];
-  for (let i = 0; i < array.length; i++) {
-    const element = array[i];
-    if (element.dtype) {
-      newArray[i] = rationals2numbers(element.value)
-    } else if (Rnl.isRational(element)) {
-      newArray[i] = Rnl.toNumber(element)
-    } else {
-      newArray[i] = rationals2numbers(element)
-    }
+// The [x, y] numbers of a point operand, or null.
+const pointOf = oprnd => oprnd != null && Array.isArray(oprnd.value) &&
+  oprnd.value.length === 2 && oprnd.value.every(Rnl.isRational)
+  ? oprnd.value.map(e => Rnl.toNumber(e))
+  : null
+
+// The rows of a matrix operand, as numbers, or null. A single row may be written as a
+// vector. Every row must have the same length.
+const numberRows = oprnd => {
+  if (oprnd == null || !Array.isArray(oprnd.value) || oprnd.value.length === 0) {
+    return null
   }
-  return newArray
+  const value = oprnd.value
+  if (value.every(Rnl.isRational)) { return [value.map(e => Rnl.toNumber(e))] }
+  if (!value.every(row => Array.isArray(row) && !Rnl.isRational(row) &&
+      row.length === value[0].length && row.every(Rnl.isRational))) {
+    return null
+  }
+  return value.map(row => row.map(e => Rnl.toNumber(e)))
+}
+
+// A step's r in its simplest form, as in Sketch's arcStep.js simplifyR(). An elliptical
+// r with a zero radius is a straight step, and one with equal radii is a circular arc.
+const simplifyR = r => {
+  if (!Array.isArray(r)) { return r || 0 }
+  const [srx, ry, angle = 0] = r
+  if (srx === 0 || ry === 0) { return 0 }
+  if (Math.abs(srx) === Math.abs(ry)) { return srx }
+  return [srx, ry, angle]
+}
+
+// The r of a path row written as [x, y], [x, y, r], or [x, y, ±rx, ry, angle].
+// As in Sketch's elementObject.js stepR().
+const stepR = row => row.length === 5
+  ? simplifyR([row[2], row[3], row[4]])
+  : row.length === 3
+  ? row[2]
+  : 0
+
+// Arrow and dimension labels keep the default font size, as in Sketch's text.js.
+const labelFontSize = 13.33 // px
+
+const pxText = p => `${p[0].toFixed(4)},${p[1].toFixed(4)}`
+
+// Cubic Bezier segments through px points, from a uniform Catmull-Rom spline whose end
+// points are their own neighbors. As in Sketch's freehandMath.js.
+const catmullRomToBezier = pts => {
+  const n = pts.length
+  const segments = []
+  for (let i = 0; i < n - 1; i++) {
+    const p0 = pts[i === 0 ? 0 : i - 1]
+    const p1 = pts[i]
+    const p2 = pts[i + 1]
+    const p3 = pts[i + 2 < n ? i + 2 : n - 1]
+    segments.push({
+      cp1: [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6],
+      cp2: [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6],
+      end: p2
+    })
+  }
+  return segments
 }
 
 // Markers
@@ -662,56 +710,113 @@ const functions = {
   },
 
   path(svgOprnd, args) {
+    // path (x, y; x, y; …)                 Straight steps
+    // path (x, y, r; x, y, r; …)           r ≠ 0 makes a circular arc, + for CCW
+    // path (x, y, ±rx, ry, angle; …)       An elliptical arc, as in the arc statement.
+    //                                      ±rx, ry = 0 makes a straight step.
+    // Every row has the same length. The r of the first row is ignored.
+    // Hurmet also accepts an SVG path string, path "M…".
     const svg = svgOprnd.value
     const attrs = svg.temp
     const node = { tag: "path", attrs: {} }
-    // Get the "d" attribute of a path
-    let str = ""
-    if (args[0].dtype && args[0].dtype === dt.STRING) {
-      str = args[0].value
-    } else {
-      const segs = rationals2numbers(args[0].value)
-      if (segs[0].length === 2) {
-        // A path made up of line segments
-        str = "M" + pointText(segs[0], attrs) + " L"
-        for (let i = 1; i < segs.length; i++) {
-          str += " " + pointText(segs[i], attrs)
-        }
-      } else if (segs[0].length === 3) {
-        // Some segments are circular arcs.
-        str = "M" + pointText(segs[0], attrs)
-        for (let i = 1; i < segs.length; i++) {
-          if (segs[i][2] === 0) {
-            str += " L" + pointText(segs[i], attrs)
-          } else {
-            const r = String(Math.abs(segs[i][2]) * attrs.xunitlength)
-            const sweep = Math.sign(segs[i][2]) > 0 ? 0 : 1
-            str += ` A${r},${r} 0 0 ${sweep} ${pointText(segs[i], attrs)}`
-          }
-        }
-      }
+    if (isString(args[0])) {
+      node.attrs.d = args[0].value
+      setStrokeAndFill(node, svg)
+      svg.children.push(node)
+      return { value: svg, unit: null, dtype: dt.DRAWING }
     }
-    node.attrs.d = str
+    const rows = numberRows(args[0])
+    if (!rows || rows.length < 2 || ![2, 3, 5].includes(rows[0].length)) {
+      return drawError("path")
+    }
+    let d = "M" + pointText(rows[0], attrs)
+    for (let i = 1; i < rows.length; i++) {
+      const r = stepR(rows[i])
+      d += " " + (r ? arcCommand(attrs, r, rows[i]) : "L" + pointText(rows[i], attrs))
+    }
+    node.attrs.d = d
     setStrokeAndFill(node, svg)
     svg.children.push(node)
-    if (attrs.marker !== "none" && args[0].dtype !== dt.STRING) {
-      const rows = rationals2numbers(args[0].value)
-      if (rows.length > 1) {
-        const q = rows[rows.length - 1]
-        const r = q.length === 3 ? q[2] : 0
-        const dir = endDirection(rows[rows.length - 2], q, r)
-        drawMarker(svg, toPx(attrs, q[0], q[1]), pxDirection(attrs, dir))
-      }
+    const q = rows[rows.length - 1]
+    const dir = endDirection(rows[rows.length - 2], q, stepR(q))
+    drawMarker(svg, toPx(attrs, q[0], q[1]), pxDirection(attrs, dir))
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  arrow(svgOprnd, m, label) {
+    // arrow (x, y; x, y; …), "label"
+    // As in Sketch, an arrow is always straight. Any radii in its rows are ignored.
+    // It always ends in an arrowhead sized for the stroke width, whatever the current
+    // marker. The label is optional. It's written at the first point, on the side away
+    // from the arrow, always in the default font size.
+    let svg = svgOprnd.value
+    const attrs = svg.temp
+    const rows = numberRows(m)
+    if (!rows || rows.length < 2 || ![2, 3, 5].includes(rows[0].length) ||
+        (label != null && !isString(label))) {
+      return drawError("arrow")
     }
+    const pts = rows.map(row => row.slice(0, 2))
+    const d = "M" + pts.map(p => pointText(p, attrs)).join(" L")
+    const node = { tag: "path", attrs: { d } }
+    setStrokeAndFill(node, svg)
+    svg.children.push(node)
+    const [p, q] = pts.slice(-2)
+    const marker = attrs.marker
+    attrs.marker = "arrow"
+    drawMarker(svg, toPx(attrs, q[0], q[1]), pxDirection(attrs, [q[0] - p[0], q[1] - p[1]]))
+    attrs.marker = marker
+    if (label != null && label.value !== "") {
+      // As in Sketch's arrowGroup(), the first step picks the label's position.
+      const dx = pts[1][0] - pts[0][0]
+      const dy = pts[1][1] - pts[0][1]
+      const pos = Math.abs(dy) > Math.abs(dx)
+        ? (dy > 0 ? "below" : "above")
+        : (dx > 0 ? "leaderleft" : "leaderright")
+      svg = textLocal(svg, pts[0], label.value, pos, { fontsize: labelFontSize })
+    }
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  freehand(svgOprnd, m) {
+    // freehand (x, y; x, y; …)
+    // A smooth curve through the points, as Sketch's freehand tool draws it.
+    const svg = svgOprnd.value
+    const attrs = svg.temp
+    const rows = numberRows(m)
+    if (!rows || rows[0].length !== 2) { return drawError("freehand") }
+    // The Catmull-Rom fit commutes with the model-to-px mapping, so fit in px.
+    const pts = rows.map(([x, y]) => toPx(attrs, x, y))
+    let d = "M" + pxText(pts[0])
+    let u = [1, 0]
+    if (pts.length === 1) {
+      // A zero-length path, so that the round cap still draws a dot.
+      d += " L" + pxText(pts[0])
+    } else {
+      for (const seg of catmullRomToBezier(pts)) {
+        d += ` C${pxText(seg.cp1)} ${pxText(seg.cp2)} ${pxText(seg.end)}`
+      }
+      const last = catmullRomToBezier(pts.slice(-3)).pop()
+      const v = [last.end[0] - last.cp2[0], last.end[1] - last.cp2[1]]
+      const len = Math.hypot(v[0], v[1])
+      if (len > 0) { u = [v[0] / len, v[1] / len] }
+    }
+    const node = { tag: "path", attrs: { d } }
+    setStrokeAndFill(node, svg, false)
+    node.attrs["stroke-linecap"] = "round"
+    node.attrs["stroke-linejoin"] = "round"
+    svg.children.push(node)
+    drawMarker(svg, pts[pts.length - 1], u)
     return { value: svg, unit: null, dtype: dt.DRAWING }
   },
 
   rect(svgOprnd, m) { // opposite corners in units
     const svg = svgOprnd.value
     const attrs = svg.temp
+    const rows = numberRows(m)
+    if (!rows || rows.length !== 2 || rows[0].length !== 2) { return drawError("rect") }
+    const [p, q] = rows
     const node = { tag: "rect", attrs: {} }
-    const p = [Rnl.toNumber(m.value[0][0]), Rnl.toNumber(m.value[0][1])]
-    const q = [Rnl.toNumber(m.value[1][0]), Rnl.toNumber(m.value[1][1])]
     node.attrs.x = Math.min(p[0], q[0]) * attrs.xunitlength + attrs.origin[0]
     node.attrs.y = attrs.height - Math.max(p[1], q[1]) * attrs.yunitlength - attrs.origin[1]
     node.attrs.width = Math.abs((q[0] - p[0]) * attrs.xunitlength)
@@ -724,26 +829,94 @@ const functions = {
   circle(svgOprnd, center, radius) { // coordinates in units
     const svg = svgOprnd.value
     const attrs = svg.temp
-    const node = { tag: "circle", attrs: {} }
-    node.attrs.cx = Rnl.toNumber(center.value[0]) * attrs.xunitlength + attrs.origin[0]
-    node.attrs.cy = attrs.height - Rnl.toNumber(center.value[1]) * attrs.yunitlength
-                  - attrs.origin[1];
-    node.attrs.r = Rnl.toNumber(radius.value) * attrs.xunitlength
+    const c = pointOf(center)
+    const r = isNumber(radius) ? Rnl.toNumber(radius.value) : NaN
+    if (!c || !(r > 0)) { return drawError("circle") }
+    const [cx, cy] = toPx(attrs, c[0], c[1])
+    const node = { tag: "circle", attrs: { cx, cy, r: r * attrs.xunitlength } }
     setStrokeAndFill(node, svg)
     svg.children.push(node)
     return { value: svg, unit: null, dtype: dt.DRAWING }
   },
 
-  ellipse(svgOprnd, center, rx, ry) { // coordinates in units
+  ellipse(svgOprnd, center, rx, ry, angle) {
+    // ellipse [x, y], rx, ry, angle
+    // The ellipse is rotated angle° CCW about its center. angle is optional.
     const svg = svgOprnd.value
     const attrs = svg.temp
-    const node = { tag: "ellipse", attrs: {} }
-    node.attrs.cx = Rnl.toNumber(center.value[0]) * attrs.xunitlength + attrs.origin[0];
-    node.attrs.cy = attrs.height - Rnl.toNumber(center.value[1]) * attrs.yunitlength
-                    - attrs.origin[1];
-    node.attrs.rx = Rnl.toNumber(rx.value) * attrs.xunitlength
-    node.attrs.ry = Rnl.toNumber(ry.value) * attrs.yunitlength
+    const c = pointOf(center)
+    const radii = [rx, ry].map(r => isNumber(r) ? Rnl.toNumber(r.value) : NaN)
+    if (!c || !radii.every(r => r > 0) || (angle != null && !isNumber(angle))) {
+      return drawError("ellipse")
+    }
+    const [cx, cy] = toPx(attrs, c[0], c[1])
+    const node = { tag: "ellipse", attrs: {
+      cx, cy, rx: radii[0] * attrs.xunitlength, ry: radii[1] * attrs.yunitlength
+    } }
+    const degrees = angle == null ? 0 : Rnl.toNumber(angle.value)
+    // In px, the y-axis points down, so a CCW rotation is negative.
+    if (degrees !== 0) { node.attrs.transform = `rotate(${-degrees}, ${cx}, ${cy})` }
     setStrokeAndFill(node, svg)
+    svg.children.push(node)
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  polygon(svgOprnd, numSides, center, radius, angle) {
+    // polygon n, [x, y], r, angle
+    // A regular polygon with n sides and inscribed radius r. With angle = 0 (the
+    // default), its bottom side is level. angle rotates it CCW, in degrees.
+    // As in Sketch's elementObject.js.
+    const svg = svgOprnd.value
+    const attrs = svg.temp
+    const n = isNumber(numSides) ? Rnl.toNumber(numSides.value) : NaN
+    const c = pointOf(center)
+    const r = isNumber(radius) ? Rnl.toNumber(radius.value) : NaN
+    if (!(Number.isInteger(n) && n >= 3) || !c || !(r > 0) ||
+        (angle != null && !isNumber(angle))) {
+      return drawError("polygon")
+    }
+    const rotation = (angle == null ? 0 : Rnl.toNumber(angle.value)) * Math.PI / 180
+    const circumscribedRadius = r / Math.cos(Math.PI / n)
+    const startAngle = -Math.PI / n - Math.PI / 2 + rotation
+    const points = []
+    for (let i = 0; i < n; i++) {
+      const theta = (2 * Math.PI / n) * i + startAngle
+      points.push(pointText([c[0] + circumscribedRadius * Math.cos(theta),
+        c[1] + circumscribedRadius * Math.sin(theta)], attrs))
+    }
+    const node = { tag: "polygon", attrs: { points: points.join(" ") } }
+    setStrokeAndFill(node, svg)
+    svg.children.push(node)
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  image(svgOprnd, m, href, rotation, mirrored) {
+    // image (x, y; x, y), "href", rotation, mirrored
+    // The points are opposite corners of the image before rotation. As in Sketch,
+    // rotation is in degrees, positive for CW, about the image's center. mirrored
+    // flips the image top to bottom before the rotation. Both are optional. The
+    // defaults are 0 and false.
+    const svg = svgOprnd.value
+    const attrs = svg.temp
+    const rows = numberRows(m)
+    if (!rows || rows.length !== 2 || rows[0].length !== 2 || !isString(href) ||
+        (rotation != null && !isNumber(rotation)) ||
+        (mirrored != null && typeof mirrored.value !== "boolean")) {
+      return drawError("image")
+    }
+    const [p, q] = rows
+    const [x, y] = toPx(attrs, Math.min(p[0], q[0]), Math.max(p[1], q[1]))
+    const width = Math.abs(q[0] - p[0]) * attrs.xunitlength
+    const height = Math.abs(q[1] - p[1]) * attrs.yunitlength
+    const node = { tag: "image", attrs: { x, y, width, height, href: href.value } }
+    const degrees = rotation == null ? 0 : Rnl.toNumber(rotation.value)
+    const [cx, cy] = [x + width / 2, y + height / 2]
+    if (mirrored != null && mirrored.value) {
+      node.attrs.transform =
+        `translate(${cx}, ${cy}) scale(1, -1) rotate(${degrees}) translate(${-cx}, ${-cy})`
+    } else if (degrees !== 0) {
+      node.attrs.transform = `rotate(${degrees}, ${cx}, ${cy})`
+    }
     svg.children.push(node)
     return { value: svg, unit: null, dtype: dt.DRAWING }
   },
