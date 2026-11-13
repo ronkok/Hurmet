@@ -100,6 +100,33 @@ const handleTSV = (expression, lines, startLineNum) => {
   }
 }
 
+// Does `line` end inside a string? A string is written between double quotation
+// marks, with "" for a literal ". A # outside of a string starts a comment.
+const endsInsideString = line => {
+  let inString = false
+  for (let i = 0; i < line.length; i++) {
+    const ch = line.charAt(i)
+    if (inString) {
+      if (ch === '"') {
+        if (line.charAt(i + 1) === '"') {
+          i += 1
+        } else {
+          inString = false
+        }
+      }
+    } else if (ch === '"') {
+      inString = true
+    } else if (ch === "#") {
+      return false
+    }
+  }
+  return inString
+}
+
+// Within a string in a drawing, a line break is written as ␤ (U+2424), because
+// the lexer ends a string at a newline. textLocal in draw.js turns it back into a newline.
+const lineBreakInString = "␤"
+
 const scanFunction = (lines, formats, startLineNum) => {
   const line1 = stripComment(lines[startLineNum])
   let isDraw = line1.charAt(0) === "d"
@@ -146,7 +173,18 @@ const scanFunction = (lines, formats, startLineNum) => {
   let j = startLineNum
   for (let i = startLineNum + 1; i < lines.length; i++) {
     j += 1
-    let line = stripComment(lines[i])
+    let rawLine = lines[i]
+    if (isDraw) {
+      // A string in a drawing, e.g. multi-line text, may span several lines.
+      // Join them, raw, so that leading spaces and # characters inside the string
+      // are kept.
+      while (endsInsideString(rawLine) && i < lines.length - 1) {
+        i += 1
+        j += 1
+        rawLine += lineBreakInString + lines[i]
+      }
+    }
+    let line = stripComment(rawLine)
     if (line.length === 0) { continue }
 
     if (prevLineEndedInContinuation) {

@@ -793,7 +793,7 @@ end
 ${g ? "end" : ""}
 for i in 1:3
    ${g ? "group" : ""}
-   dot [i, i], "closed"
+   dot [i, i]
    if i == 2
       break
    end
@@ -882,6 +882,61 @@ circle [1, 1], 1`)
   // axes labels no longer throw when the step is large
   svg = svgOf(`frame 300, 100\nview 0, 3000, 0, 1000\naxes 500, 500, "labels"`)
   check("axes with a large step", lastChild(svg).tag, "path")
+
+  // Text, positioned as in Sketch. A string may span lines. "" is a literal quote, and
+  // a # inside a string doesn't start a comment.
+  svg = svgOf(`frame 200, 100
+scene 1, "px", 0, 0
+fontcolor "red"
+text [10, 50], "Say ""hi"" # not a comment
+  indented
+
+H~2~O", "aboveright"  # a comment`)
+  const textEl = lastChild(svg)
+  check("multi-line text attrs", json(textEl.attrs), json({ x: 10 + 0.3 * 13.33,
+    y: 50 - 13.33 * (1.2 * 3 + 0.7), "font-family": "sans-serif", "font-size": 13.33,
+    fill: "red", "text-anchor": "start", "dominant-baseline": "middle" }))
+  check("multi-line text lines", json(textEl.children.map(t => [t.text, t.attrs.dy])),
+    json([['Say "hi" # not a comment', 0], ["  indented", 13.33 * 1.2],
+      ["H", 2 * 13.33 * 1.2], ["2", undefined], ["O", undefined]]))
+  check("subscript", textEl.children[3].attrs["baseline-shift"], "sub")
+  check("line start x", textEl.children.filter(t => t.attrs.x === textEl.attrs.x).length, 3)
+  svg = svgOf(`frame 200, 100\nscene 1, "px", 0, 0\ntext [10, 50], "a", "belowleft"`)
+  check("text belowleft", json([lastChild(svg).attrs.x, lastChild(svg).attrs.y,
+    lastChild(svg).attrs["text-anchor"]]), json([10 - 0.3 * 13.33, 50 + 0.8 * 13.33, "end"]))
+  svg = svgOf(`frame 200, 100\nscene 1, "px", 0, 0\ntext [10, 50], "a\nb", "leaderleft"`)
+  check("leader text", lastChild(svg).attrs.y, 50)
+  check("invalid text position", isError(`frame 100, 100\ntext [1, 1], "a", "upward"`), true)
+
+  // Markers are drawn inline with Sketch's geometry, sized by stroke width, in the
+  // stroke color, at the end point only.
+  const px = `frame 100, 100\nscene 1, "px", 0, 0\nstroke "red"\n`
+  svg = svgOf(px + `marker "arrow"\nline [0, 50; 50, 50]`)
+  check("arrow", json(svg.children.slice(1)), json([{ tag: "path", attrs: {
+    d: "M38,53.9 L50,50 L38,46.1 Z", fill: "red", stroke: "none" } }]))
+  svg = svgOf(px + `strokewidth 2\nmarker "dot"\nline [0, 50; 50, 50]`)
+  check("dot marker", json(svg.children.slice(1)), json([{ tag: "circle", attrs: {
+    cx: 50, cy: 50, r: 6, fill: "red", stroke: "none" } }]))
+  svg = svgOf(px + `strokewidth 0.5\nmarker "arrowdot"\nline [50, 0; 50, 50]`)
+  check("arrowdot", json(svg.children.slice(1).map(el => el.attrs.d || el.attrs.r)),
+    json([1.5, "M53,61.5 L50,51.5 L47,61.5 Z"]))
+  svg = svgOf(px + `marker "arrow"\narc (0, 50; 50, 50), 25`)
+  check("arc end tangent", lastChild(svg).attrs.d, "M53.9,62 L50,50 L46.1,62 Z")
+  svg = svgOf(px + `marker "arrow"\narc (0, 50; 50, 50), -25`)
+  check("CW arc", json([svg.children[0].attrs.d, lastChild(svg).attrs.d]),
+    json(["M0.0000,50.0000 A25,25 0 0 1 50.0000,50.0000", "M46.1,38 L50,50 L53.9,38 Z"]))
+  svg = svgOf(px + `marker "arrow"\ndimension [0, 50; 50, 50; 25, 80], ["x"]\nline [0, 0; 9, 0]`)
+  check("dimension keeps the marker", lastChild(svg).tag, "path")
+  check("dimension keeps the marker", lastChild(svg).attrs.stroke, "none")
+  check("bad marker", isError(`frame 100, 100\nmarker "yellowdot"`), true)
+
+  // dot [x, y], "label", position
+  svg = svgOf(px + `fill "none"\ndot [10, 20], "A"`)
+  check("dot", json(svg.children[0].attrs), json({ cx: 10, cy: 80, r: 4,
+    "stroke-width": 1, stroke: "red", fill: "none" }))
+  check("dot label below", lastChild(svg).attrs.y, 80 + 0.8 * 13.33)
+  check("dot with no label", svgOf(px + `dot [10, 20]`).children.length, 1)
+  check("dot label position", isError(px + `dot [10, 20], "A", "leader"`), true)
 
   // Invalid arguments
   for (const bad of [`scene 1, "furlong", 0, 0`, `scene 0, "mm", 0, 0`,

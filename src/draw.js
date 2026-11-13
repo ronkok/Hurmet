@@ -96,10 +96,6 @@ const startSvg = (decimalFormat = "1,000,000.", roundingSpec = "h3") => {
       fontfamily: "sans-serif",
       fontsize: 13.33, // px, ~10 pt
       fontweight: "normal",
-      markerstrokewidth: 1,
-      markerstroke: "black",
-      markerfill: "yellow",
-      markersize: 4,
       marker: "none",
       dotradius: 4,
       axesstroke: "black",
@@ -171,19 +167,6 @@ const chopZ = str => {
   return str.slice(0, i + 1)
 }
 
-const markerDot = (center, attrs, s, f) => { // coordinates in units, radius in pixel
-  if (s == null) { s = attrs.stroke }
-  if (f == null) { f = attrs.fill }
-  const node = { tag: "circle", attrs: {} }
-  node.attrs.cx = center[0] * attrs.xunitlength + attrs.origin[0];
-  node.attrs.cy = attrs.height - center[1] * attrs.yunitlength - attrs.origin[1];
-  node.attrs.r = attrs.markersize
-  node.attrs["stroke-width"] = attrs.strokewidth
-  node.attrs.stroke = s
-  node.attrs.fill = f
-  return node
-}
-
 const rationals2numbers = array => {
   const newArray = [];
   for (let i = 0; i < array.length; i++) {
@@ -199,100 +182,212 @@ const rationals2numbers = array => {
   return newArray
 }
 
-const arrowhead = (svg, p, q) => { // draw arrowhead at q (in units)
-  const attrs = svg.temp
-  const v = [p[0] * attrs.xunitlength + attrs.origin[0], attrs.height -
-             p[1] * attrs.yunitlength - attrs.origin[1]];
-  const w = [q[0] * attrs.xunitlength + attrs.origin[0], attrs.height -
-             q[1] * attrs.yunitlength - attrs.origin[1]];
-  let u = [w[0] - v[0], w[1] - v[1]]
-  const d = Math.sqrt(u[0] * u[0] + u[1] * u[1])
-  if (d > 0.00000001) {
-    u = [u[0] / d, u[1] / d];
-    const z = attrs.marker === "markerdot" ? 3 : attrs.isDim ? 0 : 1
-    const up = [-u[1], u[0]];
-    const L = d > 12 ? 12.5 : 7.8125
-    const S = d > 12 ? 3 : 1.875
-    const node = { tag: "path", attrs: {} }
-    node.attrs.d = "M " + (w[0] - L * u[0] - S * up[0]) + "," +
-      (w[1] - L * u[1] - S * up[1]) + " L " + (w[0] - z * u[0]) + "," + (w[1] - z * u[1]) +
-      " L " + (w[0] - L * u[0] + S * up[0]) + "," + (w[1] - L * u[1] + S * up[1]) + " z"
-    if (attrs.isDim) {
-      node.attrs.stroke = "none"
-    } else {
-      node.attrs["stroke-width"] = attrs.markerstrokewidth
-      node.attrs.stroke = attrs.stroke
+// Markers
+// Sketch draws markers as <marker> defs sized in stroke widths. Hurmet draws the same
+// shapes inline, as plain <path> and <circle> elements, so that the SVG renders alike
+// everywhere. Each marker is filled with the stroke color.
+
+// The marker statement accepts Sketch's marker names. Every arrowhead size is "arrow",
+// every arrowdot size is "arrowdot". As in Sketch's elementObject.js, markerFamily.
+const markerFamilies = Object.freeze({
+  none: "none", dot: "dot",
+  arrow: "arrow", thinarrow: "arrow", thickarrow: "arrow", thickerarrow: "arrow",
+  arrowdot: "arrowdot", thinarrowdot: "arrowdot", thickarrowdot: "arrowdot",
+  thickerarrowdot: "arrowdot"
+})
+
+// Arrowhead [length, width], in stroke widths. The size suits the stroke width,
+// as in Sketch's arrowheadFor() and its marker defs in index.html.
+const arrowheadSize = sw => sw < 0.75
+  ? [20, 12]   // thinarrow
+  : sw < 1.5
+  ? [12, 7.8]  // arrow
+  : sw < 2.5
+  ? [8, 6]     // thickarrow
+  : [6.5, 4.4] // thickerarrow
+const dimArrowSize = [18, 12] // dimarrow
+const markerDotRadius = 3 // in stroke widths
+
+// A filled arrowhead whose tip is at px point `tip`, pointing along unit vector u.
+const arrowheadNode = (tip, u, [length, width], sw, color) => {
+  const n = [-u[1], u[0]]
+  const base = [tip[0] - length * sw * u[0], tip[1] - length * sw * u[1]]
+  const h = width / 2 * sw
+  return {
+    tag: "path",
+    attrs: {
+      d: `M${base[0] + h * n[0]},${base[1] + h * n[1]} L${tip[0]},${tip[1]} ` +
+         `L${base[0] - h * n[0]},${base[1] - h * n[1]} Z`,
+      fill: color,
+      stroke: "none"
     }
-    node.attrs.fill = attrs.stroke
-    svg.children.push(node)
   }
+}
+
+// Draw the current marker at px point `end`, where an element ends while heading
+// along px unit vector u.
+const drawMarker = (svg, end, u) => {
+  const { marker, strokewidth: sw, stroke } = svg.temp
+  if (marker === "none") { return }
+  if (marker === "dot" || marker === "arrowdot") {
+    svg.children.push({ tag: "circle", attrs: {
+      cx: end[0], cy: end[1], r: markerDotRadius * sw, fill: stroke, stroke: "none"
+    } })
+  }
+  // A dimension line gets Sketch's dimarrow.
+  const size = svg.temp.isDim ? dimArrowSize : arrowheadSize(sw)
+  if (marker === "arrow") {
+    svg.children.push(arrowheadNode(end, u, size, sw, stroke))
+  } else if (marker === "arrowdot") {
+    // The arrowhead's tip touches the dot.
+    const tip = [end[0] - markerDotRadius * sw * u[0], end[1] - markerDotRadius * sw * u[1]]
+    svg.children.push(arrowheadNode(tip, u, size, sw, stroke))
+  }
+}
+
+// The px unit vector of a model-space vector v. A zero vector points right, as in SVG.
+const pxDirection = (attrs, v) => {
+  const w = [v[0] * attrs.xunitlength, -v[1] * attrs.yunitlength]
+  const d = Math.hypot(w[0], w[1])
+  return d > 0 ? [w[0] / d, w[1] / d] : [1, 0]
+}
+
+// The direction, in model space, in which a path step from p to q is heading when it
+// reaches q. The step's r is 0 (straight), a signed radius (circular arc, + for CCW),
+// or [±rx, ry, angle] (elliptical arc, the sign of rx gives the direction). As in
+// Sketch's arcStep.js, an arc spans at most half its circle or ellipse, and radii too
+// small for the chord are scaled up, as SVG does.
+const endDirection = (p, q, r) => {
+  if (!r || (Array.isArray(r) && (r[0] === 0 || r[1] === 0))) {
+    return [q[0] - p[0], q[1] - p[1]]
+  }
+  const [srx, sry, angle = 0] = Array.isArray(r) ? r : [r, r, 0]
+  const rx = Math.abs(srx)
+  const ry = Math.abs(sry)
+  const ccw = srx >= 0
+  const rad = angle * Math.PI / 180
+  const cos = Math.cos(rad)
+  const sin = Math.sin(rad)
+  // Into the ellipse's own frame, scaled so that the ellipse is a unit circle.
+  const toUnit = pt => [(pt[0] * cos + pt[1] * sin) / rx, (-pt[0] * sin + pt[1] * cos) / ry]
+  const a = toUnit(p)
+  const b = toUnit(q)
+  const chord = [b[0] - a[0], b[1] - a[1]]
+  const len = Math.hypot(chord[0], chord[1])
+  if (len === 0) { return [q[0] - p[0], q[1] - p[1]] }
+  const h = Math.sqrt(Math.max(1 - len * len / 4, 0))
+  // A CCW arc's center is to the left of the chord.
+  const side = ccw ? 1 : -1
+  const c = [(a[0] + b[0]) / 2 - side * h * chord[1] / len,
+    (a[1] + b[1]) / 2 + side * h * chord[0] / len]
+  const t = Math.atan2(b[1] - c[1], b[0] - c[0])
+  // d/dt of center + R(angle)·(rx cos t, ry sin t), reversed for a CW arc.
+  const dx = -rx * Math.sin(t) * side
+  const dy = ry * Math.cos(t) * side
+  return [dx * cos - dy * sin, dx * sin + dy * cos]
 }
 
 const markAttribute = {
-  em:         ["font-style", "italic"],
-  strong:     ["font-weight", "bold"],
-  code:       ["font-family", "monospace"],
-  strikethru: ["text-decoration", "line-through"],
-  subscript:  ["font-size", "0.8em"],
+  em:          ["font-style", "italic"],
+  strong:      ["font-weight", "bold"],
+  code:        ["font-family", "monospace"],
+  strikethru:  ["text-decoration", "line-through"],
+  subscript:   ["font-size", "0.8em"],
   superscript: ["font-size", "0.8em"]
 }
 
-const textLocal = (svg, p, str, pos) => {
+// A text position, as in Sketch: e.g., "above", "belowright", "leaderleft".
+// The default is "middle".
+const textPositionRegEx = /^(?:above|leader|middle|below)?(?:left|right)?$/
+// A dot's label position, as in Sketch's parse.js. "leader" isn't allowed.
+const dotLabelPositionRegEx = /^(?:above|middle|below)?(?:left|right)?$/
+
+// In a string, scanFunction in module.js writes a line break as ␤ (U+2424).
+const lineBreakInString = /␤/g
+
+// Write text at model point p. The geometry is that of Sketch's text.js
+// (adjustTextPoint, getTspans), converted to px. `style` may override the
+// current fontsize and fontcolor, e.g. for axes labels.
+const textLocal = (svg, p, str, pos, style = {}) => {
   const attrs = svg.temp
-  let textanchor = "middle"
-  let dx = 0
-  let dy = attrs.fontsize / 3
-  if (pos != null) {
-    if (pos.slice(0, 5) === "above") { dy = -attrs.fontsize / 2 }
-    if (pos.slice(0, 5) === "below") { dy = 1.25 * attrs.fontsize }
-    if (pos.slice(0, 5) === "right" || pos.slice(5, 10) === "right") {
-      textanchor = "start"
-      dx = attrs.fontsize / 2
-    }
-    if (pos.slice(0, 4) === "left" || pos.slice(5, 9) === "left") {
-      textanchor = "end"
-      dx = -attrs.fontsize / 2
-    }
+  const fontsize = style.fontsize ?? attrs.fontsize
+  const fontcolor = style.fontcolor ?? attrs.fontcolor
+  const position = (pos || "middle").toLowerCase()
+  const lines = str.replace(lineBreakInString, "\n").split("\n")
+  const numLines = lines.length
+  let [x, y] = toPx(attrs, p[0], p[1])
+  // Each line's y is at the line's middle (dominant-baseline="middle").
+  if (position.includes("above")) {
+    y -= fontsize * (1.2 * (numLines - 1) + 0.7)
+  } else if (position.includes("below")) {
+    y += fontsize * 0.8
+  } else if (!position.includes("leader")) {
+    // Center the block of lines vertically. Leader text starts at the point.
+    y -= fontsize * 0.6 * (numLines - 1)
   }
+  const textanchor = position.includes("right")
+    ? "start"
+    : position.includes("left")
+    ? "end"
+    : "middle"
+  // A little padding, so that the text doesn't crowd the point.
+  if (textanchor === "start") { x += fontsize * 0.3 }
+  if (textanchor === "end") { x -= fontsize * 0.3 }
+
   const textNode = { tag: "text", children: [], attrs: {} }
-  textNode.attrs["text"] = str
-  textNode.attrs.x = p[0] * attrs.xunitlength + attrs.origin[0] + dx
-  textNode.attrs.y = attrs.height - p[1] * attrs.yunitlength - attrs.origin[1] + dy
+  textNode.attrs.x = x
+  textNode.attrs.y = y
   textNode.attrs["font-family"] = attrs.fontfamily
-  textNode.attrs["font-size"] = attrs.fontsize
+  textNode.attrs["font-size"] = fontsize
+  textNode.attrs.fill = fontcolor
   textNode.attrs["text-anchor"] = textanchor
-  // Load Markdown into an AST
-  const ast = inlineMd2ast(str)
-  // Load content of AST into <tspan> nodes.
-  if (Array.isArray(ast)) {
-    let prevNodeContainedSubscript = false
-    for (const markNode of ast) {
-      const tspan = { tag: "tspan", text: markNode.text }
-      let currentNodeContainsSubscript = false
-      if (markNode.marks) {
-        tspan.attrs = {}
-        for (const mark of markNode.marks) {
-          const markAttr = markAttribute[mark.type]
-          tspan.attrs[markAttr[0]] = markAttr[1]
-          if (mark.type === "subscript") { currentNodeContainsSubscript = true }
+  textNode.attrs["dominant-baseline"] = "middle"
+
+  // Each line is a series of <tspan> nodes, one per Markdown mark node. Each line's
+  // first tspan returns to x and moves down 1.2 em. A blank line has no tspan, so its
+  // line spacing goes to the next line that has one.
+  let linesOwed = 0
+  lines.forEach((line, i) => {
+    if (i > 0) { linesOwed += 1 }
+    const ast = inlineMd2ast(line)
+    if (!Array.isArray(ast)) { return }
+    ast.forEach((markNode, j) => {
+      const tspan = { tag: "tspan", text: markNode.text, attrs: {} }
+      if (j === 0) {
+        tspan.attrs.x = x
+        tspan.attrs.dy = linesOwed * fontsize * 1.2
+        linesOwed = 0
+      }
+      for (const mark of (markNode.marks || [])) {
+        const markAttr = markAttribute[mark.type]
+        if (!markAttr) { continue } // e.g., a link. Write its text plain.
+        tspan.attrs[markAttr[0]] = markAttr[1]
+        if (mark.type === "subscript") {
+          tspan.attrs["baseline-shift"] = "sub"
+        } else if (mark.type === "superscript") {
+          tspan.attrs["baseline-shift"] = "super"
         }
       }
-      if (currentNodeContainsSubscript) {
-        if (!prevNodeContainedSubscript) { tspan.attrs.dy  = "2" }
-      } else if (prevNodeContainedSubscript) {
-        if (!markNode.marks) { tspan.attrs = {} }
-        tspan.attrs.dy  = "-2"
-      }
-      prevNodeContainedSubscript = currentNodeContainsSubscript
       textNode.children.push(tspan)
-    }
-  }
+    })
+  })
   svg.children.push(textNode)
   return svg
 }
 
 const pointText = (point, attrs) => {
   return toPx(attrs, point[0], point[1]).map(n => n.toFixed(4)).join(",")
+}
+
+// The SVG command for an arc step that ends at model point q. r is a signed radius
+// (+ for CCW) or [±rx, ry, angle]. As in Sketch's arcStep.js arcCommand(), but in px,
+// where the y-axis points down, so CCW is sweep 0 and the rotation is negated.
+const arcCommand = (attrs, r, q) => {
+  const [srx, ry, angle = 0] = Array.isArray(r) ? r : [r, r, 0]
+  const sweep = srx >= 0 ? 0 : 1
+  const rxPx = Math.abs(srx) * attrs.xunitlength
+  const ryPx = Math.abs(ry) * attrs.yunitlength
+  return `A${rxPx},${ryPx} ${angle === 0 ? 0 : -angle} 0 ${sweep} ${pointText(q, attrs)}`
 }
 
 const functions = {
@@ -347,7 +442,11 @@ const functions = {
   },
 
   marker(svgOprnd, str) {
-    svgOprnd.value.temp.marker = str.value // "none" | "dot" | "arrow" | "arrowdot"
+    // "none" | "arrow" | "dot" | "arrowdot", or one of Sketch's sized marker names
+    if (!isString(str) || !Object.hasOwn(markerFamilies, str.value.trim())) {
+      return drawError("marker")
+    }
+    svgOprnd.value.temp.marker = markerFamilies[str.value.trim()]
     return svgOprnd
   },
 
@@ -479,7 +578,7 @@ const functions = {
     pnode.attrs.d = str
     pnode.attrs["stroke-width"] = 0.5
     pnode.attrs.stroke = attrs.gridstroke
-    pnode.attrs.fill = attrs.fill
+    pnode.attrs.fill = "none"
     svg.children.push(pnode)
     return { value: svg, unit: null, dtype: dt.DRAWING }
   },
@@ -489,9 +588,9 @@ const functions = {
     const attrs = svg.temp
     dx = (dx == null ? attrs.xunitlength : Rnl.toNumber(dx.value) * attrs.xunitlength)
     dy = (dy == null ? dx : Rnl.toNumber(dy.value) * attrs.yunitlength)
-    const parentFontsize = attrs.fontsize
-    attrs.fontsize = Math.min(dx / 2, dy / 2, 10)
-    const ticklength = attrs.fontsize / 4
+    // Axes labels are black, in a font size that fits the ticks, as in Sketch.
+    const labelStyle = { fontsize: Math.min(dx / 2, dy / 2, 10), fontcolor: "black" }
+    const ticklength = labelStyle.fontsize / 4
     if (gdx != null) {
       this.grid(svgOprnd, gdx, gdy)
     }
@@ -526,23 +625,22 @@ const functions = {
       const ddx = Math.max(0, Math.floor(1.1 - Math.log10(ldx)) + 1)
       const ddy = Math.max(0, Math.floor(1.1 - Math.log10(ldy)) + 1)
       for (let x = ldx; x <= attrs.xmax; x += ldx) {
-        svg = textLocal(svg, [x, ly], chopZ(x.toFixed(ddx)), lxp)
+        svg = textLocal(svg, [x, ly], chopZ(x.toFixed(ddx)), lxp, labelStyle)
       }
       for (let x = -ldx; attrs.xmin <= x; x -= ldx) {
-        svg = textLocal(svg, [x, ly], chopZ(x.toFixed(ddx)), lxp)
+        svg = textLocal(svg, [x, ly], chopZ(x.toFixed(ddx)), lxp, labelStyle)
       }
       for (let y = ldy; y <= attrs.ymax; y += ldy) {
-        svg = textLocal(svg, [lx, y], chopZ(y.toFixed(ddy)), lyp)
+        svg = textLocal(svg, [lx, y], chopZ(y.toFixed(ddy)), lyp, labelStyle)
       }
       for (let y = -ldy; attrs.ymin <= y; y -= ldy) {
-        svg = textLocal(svg, [lx, y], chopZ(y.toFixed(ddy)), lyp)
+        svg = textLocal(svg, [lx, y], chopZ(y.toFixed(ddy)), lyp, labelStyle)
       }
     }
     pnode.attrs.d = str
     pnode.attrs["stroke-width"] = 0.5
     pnode.attrs.stroke = attrs.axesstroke
-    pnode.attrs.fill = attrs.fill
-    svg.temp.fontsize = parentFontsize
+    pnode.attrs.fill = "none"
     svg.children.push(pnode)
     return { value: svg, unit: null, dtype: dt.DRAWING }
   },
@@ -559,13 +657,7 @@ const functions = {
        q[1] * attrs.yunitlength - attrs.origin[1]);
     setStrokeAndFill(node, svg, false)
     svg.children.push(node)
-    if (attrs.marker === "dot" || attrs.marker === "arrowdot") {
-      svg.children.push(markerDot(p, attrs, attrs.markerstroke, attrs.markerfill))
-      if (attrs.marker === "arrowdot") { arrowhead(svg, p, q) }
-      svg.children.push(markerDot(q, attrs, attrs.markerstroke, attrs.markerfill))
-    } else if (attrs.marker === "arrow") {
-      arrowhead(svg, p, q)
-    }
+    drawMarker(svg, toPx(attrs, q[0], q[1]), pxDirection(attrs, [q[0] - p[0], q[1] - p[1]]))
     return { value: svg, unit: null, dtype: dt.DRAWING }
   },
 
@@ -601,41 +693,16 @@ const functions = {
     }
     node.attrs.d = str
     setStrokeAndFill(node, svg)
-    if (attrs.marker === "dot") {
-      for (let i = 0; i < args.length; i++) {
-        const el = args[i];
-        if (typeof el[0] === "number") {
-          svg.children.push(markerDot(el, attrs, attrs.markerstroke, attrs.markerfill))
-        } else {
-          for (const row of el) {
-            svg.children.push(markerDot(row, attrs, attrs.markerstroke, attrs.markerfill))
-          }
-        }
-      }
-    } else if (attrs.marker === "arrow" || attrs.marker === "arrowdot") {
-      const segs = rationals2numbers(args[0].value)
-      if (typeof segs[0] !== "number") {
-        const end = segs[segs.length - 1]
-        arrowhead(svg, segs[segs.length - 2], end)
-        if (attrs.marker === "arrowdot") {
-          svg.children.push(markerDot(end, attrs, attrs.markerstroke, attrs.markerfill))
-        }
-      } else if (typeof segs[0] === "number") {
-        const prevEl = args[args.length - 2];
-        const end = segs
-        let start
-        if (typeof prevEl[0] === "number") {
-          start = prevEl
-        } else {
-          start = prevEl[prevEl.length - 1]
-        }
-        arrowhead(svg, start, end)
-        if (attrs.marker === "arrowdot") {
-          svg.children.push(markerDot(end, attrs, attrs.markerstroke, attrs.markerfill))
-        }
+    svg.children.push(node)
+    if (attrs.marker !== "none" && args[0].dtype !== dt.STRING) {
+      const rows = rationals2numbers(args[0].value)
+      if (rows.length > 1) {
+        const q = rows[rows.length - 1]
+        const r = q.length === 3 ? q[2] : 0
+        const dir = endDirection(rows[rows.length - 2], q, r)
+        drawMarker(svg, toPx(attrs, q[0], q[1]), pxDirection(attrs, dir))
       }
     }
-    svg.children.push(node)
     return { value: svg, unit: null, dtype: dt.DRAWING }
   },
 
@@ -681,101 +748,77 @@ const functions = {
     return { value: svg, unit: null, dtype: dt.DRAWING }
   },
 
-  arc(svgOprnd, m, radius) { // coordinates in units
+  arc(svgOprnd, m, radius) {
+    // arc (p1; p2), r          A circular arc. r > 0 for CCW, r < 0 for CW.
+    // arc (p1; p2), [±rx, ry, angle]   An elliptical arc on an ellipse rotated angle°
+    //                          CCW. The sign of rx gives the direction. angle is optional.
+    // With no radius, a CCW circular arc whose radius is the chord length.
+    // As in Sketch, an arc spans at most half of its circle or ellipse.
     const svg = svgOprnd.value
     const attrs = svg.temp
-    const node = { tag: "path", attrs: {} }
     const start = [Rnl.toNumber(m.value[0][0]), Rnl.toNumber(m.value[0][1])]
     const end = [Rnl.toNumber(m.value[1][0]), Rnl.toNumber(m.value[1][1])]
+    let r
     if (radius == null) {
-      const v = [end[0] - start[0], end[1] - start[1]];
-      radius = (Math.sqrt(v[0] * v[0] + v[1] * v[1])) * attrs.yunitlength
+      r = Math.hypot(end[0] - start[0], end[1] - start[1])
     } else if (isVector(radius)) {
-      radius = radius.value.map(e => Rnl.toNumber(e) * attrs.yunitlength)
+      if (radius.value.length < 2 || radius.value.length > 3) { return drawError("arc") }
+      r = radius.value.map(e => Rnl.toNumber(e))
+      if (r.length === 2) { r.push(0) }
+    } else if (isNumber(radius)) {
+      r = Rnl.toNumber(radius.value)
     } else {
-      radius = Rnl.toNumber(radius.value) * attrs.yunitlength
+      return drawError("arc")
     }
-    let str = "M" + (start[0] * attrs.xunitlength + attrs.origin[0]) + "," +
-      (attrs.height - start[1] * attrs.yunitlength - attrs.origin[1]) + " A"
-    str += Array.isArray(radius) ? radius[0] + "," + radius[1] : radius + "," + radius
-    str += " 0 0,0 " + (end[0] * attrs.xunitlength + attrs.origin[0]) + "," +
-      (attrs.height - end[1] * attrs.yunitlength - attrs.origin[1])
-    node.attrs.d = str
+    const node = { tag: "path", attrs: {} }
+    node.attrs.d = `M${pointText(start, attrs)} ${arcCommand(attrs, r, end)}`
     setStrokeAndFill(node, svg, false)
-    // eslint-disable-next-line no-useless-assignment
-    let v = 0
-    if (attrs.marker === "arrow" || attrs.marker === "arrowdot") {
-      const u = [(end[1] - start[1]) / 4, (start[0] - end[0]) / 4];
-      v = [(end[0] - start[0]) / 2, (end[1] - start[1]) / 2];
-      v = [start[0] + v[0] + u[0], start[1] + v[1] + u[1]];
-    } else {
-      v = [start[0], start[1]]
-    }
-    if (attrs.marker === "dot" || attrs.marker === "arrowdot") {
-      svg.children.push(markerDot(start, attrs, attrs.markerstroke, attrs.markerfill))
-      if (attrs.marker === "arrowdot") { arrowhead(svg,  v, end) }
-      svg.children.push(markerDot(end, attrs, attrs.markerstroke, attrs.markerfill))
-    } else if (attrs.marker === "arrow") {
-      arrowhead(svg, v, end)
-    }
     svg.children.push(node)
+    const direction = pxDirection(attrs, endDirection(start, end, r))
+    drawMarker(svg, toPx(attrs, end[0], end[1]), direction)
     return { value: svg, unit: null, dtype: dt.DRAWING }
   },
 
   text(svgOprnd, p, str, pos) {
+    // text [x, y], "string", position
+    // The string may span several lines. As in Sketch, it's trimmed.
+    if (p == null || !Array.isArray(p.value) || p.value.length !== 2 ||
+        !p.value.every(Rnl.isRational) || !isString(str) ||
+        (pos != null && !(isString(pos) && textPositionRegEx.test(pos.value.toLowerCase())))) {
+      return drawError("text")
+    }
+    const content = str.value.replace(lineBreakInString, "\n").trim()
     const svg = textLocal(
       svgOprnd.value,
       [Rnl.toNumber(p.value[0]), Rnl.toNumber(p.value[1])],
-      str.value,
+      content,
       pos == null ? null : pos.value
       )
     return { value: svg, unit: null, dtype: dt.DRAWING }
   },
 
-  dot(svgOprnd, center, typ, label, pos) {
+  dot(svgOprnd, center, label, pos) {
+    // dot [x, y], "label", position
+    // As in Sketch, the radius is dotradius px at any scale. The outline takes the
+    // current stroke and stroke width; the inside takes the current fill, so fill "none"
+    // gives a hollow dot. The label and its position are optional. The default position
+    // is "below".
     let svg = svgOprnd.value
     const attrs = svg.temp
-    let node
-    const cx = Rnl.toNumber(center.value[0]) * attrs.xunitlength + attrs.origin[0];
-    const cy = attrs.height - Rnl.toNumber(center.value[1]) * attrs.yunitlength
-             - attrs.origin[1];
-    if (typ.value === "+" || typ.value === "-" || typ.value === "|") {
-      node = { tag: "path", attrs: {} }
-      if (typ.value === "+") {
-        node.attrs.d = " M " + (cx - attrs.ticklength) + "," + cy
-                    + " L " + ( cx + attrs.ticklength) + "," + cy
-                    + " M " + cx + "," + (cy - attrs.ticklength) + " L " + cx
-                    + "," + (cy + attrs.ticklength)
-        node.attrs["stroke-width"] = 0.5
-        node.attrs.stroke = attrs.axesstroke
-      } else {
-        if (typ.value === "-") {
-          node.attrs.d = " M " + (cx - attrs.ticklength) + "," + cy
-                       + " L " + (cx + attrs.ticklength) + "," + cy
-        } else {
-          node.attrs.d = " M " + cx + "," + (cy - attrs.ticklength)
-                       + " L " + cx + "," + (cy + attrs.ticklength)
-        }
-        node.attrs["stroke-width"] = attrs.strokewidth
-        node.attrs["stroke"] = attrs.stroke
-      }
-    } else {
-      node = { tag: "circle", attrs: {} }
-      node.attrs.cx = cx
-      node.attrs.cy = cy
-      node.attrs.r = attrs.dotradius
-      node.attrs["stroke-width"] = attrs.strokewidth
-      node.attrs.stroke = attrs.stroke
-      node.attrs.fill =  (typ.value === "open" ? "white" : attrs.stroke)
+    if (center == null || !Array.isArray(center.value) || center.value.length !== 2 ||
+        !center.value.every(Rnl.isRational) || (label != null && !isString(label)) ||
+        (pos != null && !(isString(pos) && pos.value !== "" &&
+          dotLabelPositionRegEx.test(pos.value.toLowerCase())))) {
+      return drawError("dot")
     }
-    svg.children.push(node)
-    if (label != null) {
-      svg = textLocal(
-        svg,
-        [Rnl.toNumber(center.value[0]), Rnl.toNumber(center.value[1])],
-        label.value,
-        (pos == null ? "below" : pos.value)
-        )
+    const p = [Rnl.toNumber(center.value[0]), Rnl.toNumber(center.value[1])]
+    const [cx, cy] = toPx(attrs, p[0], p[1])
+    svg.children.push({ tag: "circle", attrs: {
+      cx, cy, r: attrs.dotradius,
+      "stroke-width": attrs.strokewidth, stroke: attrs.stroke, fill: fillPaint(svg)
+    } })
+    if (label != null && label.value !== "") {
+      svg = textLocal(svg, p, label.value, pos == null ? "below" : pos.value)
     }
     return { value: svg, unit: null, dtype: dt.DRAWING }
   },
@@ -784,6 +827,8 @@ const functions = {
     const p = clone(plistOprnd.value)
     const q = p.pop()
     const origstrokewidth = svgOprnd.value.temp.strokewidth
+    const origMarker = svgOprnd.value.temp.marker
+    svgOprnd.value.temp.marker = "none" // Extension lines have no marker.
     svgOprnd.value.temp.strokewidth = 0.5
     svgOprnd.value.temp.isDim = true // set small arrowhead
     let six = Rnl.fromNumber(6 / svgOprnd.value.temp.xunitlength)
@@ -837,7 +882,7 @@ const functions = {
       }
     }
     svg.temp.strokewidth = origstrokewidth
-    svg.temp.marker = "none"
+    svg.temp.marker = origMarker
     svg.temp.isDim = false
     return { value: svg, unit: null, dtype: dt.DRAWING }
   }
