@@ -973,6 +973,39 @@ H~2~O", "aboveright"  # a comment`)
   svg = svgOf(px + `image (10, 10; 50, 30), "a.png", 30, true`)
   check("mirrored image", svg.children[0].attrs.transform,
     "translate(30, 80) scale(1, -1) rotate(30) translate(-30, -80)")
+  // dimension (points; labelPoint), [labels], dimAngle, extAngle
+  const labelsOf = svg => svg.children.filter(el => el.tag === "text")
+    .map(el => el.children.map(t => t.text).join(""))
+  svg = svgOf(px + `dimension (0, 50; 50, 50; 25, 80), ["x"]`)
+  check("dimension", json(svg.children.map(el => el.attrs.d)), json([
+    "M0.0000,44.0000 0.0000,14.0000", "M50.0000,44.0000 50.0000,14.0000",
+    "M0.0000,20.0000 50.0000,20.0000", "M9,17 L0,20 L9,23 Z", "M41,23 L50,20 L41,17 Z",
+    undefined]))
+  check("dimension style", json(svg.children[0].attrs), json({
+    d: "M0.0000,44.0000 0.0000,14.0000", "stroke-width": 0.5, stroke: "black", fill: "none" }))
+  check("dimension label", json([lastChild(svg).attrs.y, labelsOf(svg)]),
+    json([20 - 0.7 * 13.33, ["x"]]))
+  svg = svgOf(px + `dimension (0, 0; 0, 40.5; 0, 90; 30, 20), ["", ""]\n` +
+    `dimension (0, 0; 0, 40.5; 0, 90; 30, 20)`)
+  check("dimension blank and measured labels", json(labelsOf(svg)), json(["40.5", "49.5"]))
+  check("vertical dimension", lastChild(svg).attrs["text-anchor"], "start")
+  svg = svgOf(px + `dimension (0, 0; 60, 40; 50, 100), 30, 120`)
+  check("oblique dimension", json(labelsOf(svg)), json(["72"]))
+  svg = svgOf(`frame 100, 100\nscene 1/2, "ft-in", 0, 0\nfraction 8\n` +
+    `dimension (0, 0; 3.3, 0; 51.4, 0; 140, 0; 50, 40)`)
+  check("ft-in dimension", json(labelsOf(svg)), json(["3¹⁄₄″", "4′-0¹⁄₈″", "7′-4⁵⁄₈″"]))
+  const docFormats = { decimalFormat: "1.000.000,", dateFormat: "yyyy-mm-dd", format: "f2" }
+  svg = hurmet.calculate(`draw()\n${px}dimension (0, 0; 1234.5, 0; 50, 40)\nend`, {},
+    false, docFormats).resultdisplay
+  check("document format in a dimension", json(labelsOf(svg)), json(["1.234,50"]))
+  svg = hurmet.calculate(`draw()\n${px}format "r2"\ndimension (0, 0; 1234.5, 0; 50, 40)\nend`,
+    {}, false, docFormats).resultdisplay
+  check("format statement in a dimension", json(labelsOf(svg)), json(["1.200"]))
+  for (const bad of [`dimension (0, 0; 50, 0; 25, 0; 80, 10)`, `dimension (0, 0; 1, 1)`,
+    `dimension (0, 0; 50, 0; 25, 30), 30`, `dimension (0, 0; 50, 0; 25, 30), 30, 30`]) {
+    check(bad, isError(px + bad), true)
+  }
+
   // arrow (points), "label"
   svg = svgOf(px + `marker "dot"\narrow (0, 50, 9; 50, 50, 9)`)
   check("arrow", json(svg.children.map(el => el.attrs.d)),

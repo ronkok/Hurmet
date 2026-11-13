@@ -1,5 +1,5 @@
 import { dt } from "./constants"
-import { clone } from "./utils"
+import { format } from "./format"
 import { isVector } from "./matrix"
 import { Rnl } from "./rational"
 import { inlineMd2ast } from "./md2ast"
@@ -99,8 +99,7 @@ const startSvg = (decimalFormat = "1,000,000.", roundingSpec = "h3") => {
       marker: "none",
       dotradius: 4,
       axesstroke: "black",
-      gridstroke: "grey",
-      isDim: false
+      gridstroke: "grey"
     }
   }
 }
@@ -282,8 +281,7 @@ const drawMarker = (svg, end, u) => {
       cx: end[0], cy: end[1], r: markerDotRadius * sw, fill: stroke, stroke: "none"
     } })
   }
-  // A dimension line gets Sketch's dimarrow.
-  const size = svg.temp.isDim ? dimArrowSize : arrowheadSize(sw)
+  const size = arrowheadSize(sw)
   if (marker === "arrow") {
     svg.children.push(arrowheadNode(end, u, size, sw, stroke))
   } else if (marker === "arrowdot") {
@@ -436,6 +434,171 @@ const arcCommand = (attrs, r, q) => {
   const rxPx = Math.abs(srx) * attrs.xunitlength
   const ryPx = Math.abs(ry) * attrs.yunitlength
   return `A${rxPx},${ryPx} ${angle === 0 ? 0 : -angle} 0 ${sweep} ${pointText(q, attrs)}`
+}
+
+// Dimensions
+
+const dimStrokeWidth = 0.5 // px
+const dimGap = 6 // px between a dimension point and its extension line
+
+const dimLineNode = (attrs, a, b) => {
+  return { tag: "path", attrs: {
+    d: `M${pointText(a, attrs)} ${pointText(b, attrs)}`,
+    "stroke-width": dimStrokeWidth, stroke: "black", fill: "none"
+  } }
+}
+
+// A unit vector at `deg` degrees. Multiples of 90° come out exact.
+// As in Sketch's elementObject.js.
+const unitVector = deg => {
+  const quarterTurns = deg / 90
+  if (Number.isInteger(quarterTurns)) {
+    return [[1, 0], [0, 1], [-1, 0], [0, -1]][((quarterTurns % 4) + 4) % 4]
+  }
+  const rad = deg * Math.PI / 180
+  return [Math.cos(rad), Math.sin(rad)]
+}
+
+// From a dimension's label list, a function that returns the label written for span i:
+// a string, "" for a blank span, or null if none was written.
+const labelList = oprnd => {
+  if (oprnd == null) { return () => null }
+  // Hurmet reads a one-element list, ["x"], as the string "x". Sketch writes ["x"] for
+  // a dimension with one span, so a string is a list of one label.
+  const list = Array.isArray(oprnd.value) ? oprnd.value : [oprnd.value]
+  return i => {
+    const label = list[i]
+    return typeof label === "string"
+      ? label
+      : label != null && typeof label.value === "string"
+      ? label.value
+      : null
+  }
+}
+
+// A horizontal or vertical dimension string, in model coordinates, as in Sketch's
+// elementObject.js dimensionGroup(). Returns null if labelPoint is not between the end
+// points, either vertically or horizontally.
+const orthoDimension = (pts, lp, attrs) => {
+  const n = pts.length
+  const [first, last] = [pts[0], pts[n - 1]]
+  const between = k => (first[k] < last[k] && first[k] < lp[k] && lp[k] < last[k]) ||
+    (last[k] < first[k] && last[k] < lp[k] && lp[k] < first[k])
+  const result = { extLines: [], dimLines: [], mids: [], values: [] }
+  if (between(1)) {
+    // A vertical string of dimensions
+    const six = dimGap / attrs.xunitlength * Math.sign(lp[0] - first[0])
+    for (const p of pts) { result.extLines.push([[p[0] + six, p[1]], [lp[0] + six, p[1]]]) }
+    for (let i = 0; i < n - 1; i++) {
+      result.dimLines.push([[lp[0], pts[i][1]], [lp[0], pts[i + 1][1]]])
+      result.mids.push([lp[0], (pts[i][1] + pts[i + 1][1]) / 2])
+      result.values.push(Math.abs(pts[i + 1][1] - pts[i][1]))
+    }
+    result.pos = six > 0 ? "right" : "left"
+  } else if (between(0)) {
+    // A horizontal string of dimensions
+    const six = dimGap / attrs.yunitlength * Math.sign(lp[1] - first[1])
+    for (const p of pts) { result.extLines.push([[p[0], p[1] + six], [p[0], lp[1] + six]]) }
+    for (let i = 0; i < n - 1; i++) {
+      result.dimLines.push([[pts[i][0], lp[1]], [pts[i + 1][0], lp[1]]])
+      result.mids.push([(pts[i][0] + pts[i + 1][0]) / 2, lp[1]])
+      result.values.push(Math.abs(pts[i + 1][0] - pts[i][0]))
+    }
+    result.pos = six > 0 ? "above" : "below"
+  } else {
+    return null
+  }
+  return result
+}
+
+// A dimension string whose dimension line runs at dimAngle through labelPoint, and
+// whose extension lines run at extAngle. As in Sketch's obliqueDimensionGroup().
+const obliqueDimension = (pts, lp, dimAngle, extAngle, attrs) => {
+  const n = pts.length
+  const u = unitVector(dimAngle) // Along the dimension line
+  const e = unitVector(extAngle) // Along the extension lines
+  const cross = (a, b) => a[0] * b[1] - a[1] * b[0]
+  const denominator = cross(e, u)
+  if (Math.abs(denominator) < 1e-9) { return null } // Parallel lines never meet
+  // Distance from each point to the dimension line, along e.
+  const t = pts.map(p => -cross([p[0] - lp[0], p[1] - lp[1]], u) / denominator)
+  const feet = pts.map((p, i) => [p[0] + t[i] * e[0], p[1] + t[i] * e[1]])
+  // The direction from the points toward the dimension line.
+  const sign = Math.sign(t.find(ti => Math.abs(ti) > 1e-9) ?? 1)
+  const six = dimGap / attrs.xunitlength
+  const gap = [sign * six * e[0], sign * six * e[1]]
+  const result = { extLines: [], dimLines: [], mids: [], values: [] }
+  for (let i = 0; i < n; i++) {
+    result.extLines.push([[pts[i][0] + gap[0], pts[i][1] + gap[1]],
+      [feet[i][0] + gap[0], feet[i][1] + gap[1]]])
+  }
+  for (let i = 0; i < n - 1; i++) {
+    result.dimLines.push([feet[i], feet[i + 1]])
+    result.mids.push([(feet[i][0] + feet[i + 1][0]) / 2, (feet[i][1] + feet[i + 1][1]) / 2])
+    result.values.push(Math.abs((feet[i + 1][0] - feet[i][0]) * u[0] +
+      (feet[i + 1][1] - feet[i][1]) * u[1]))
+  }
+  // Put the labels on the far side of the dimension line from the points.
+  const away = [sign * e[0], sign * e[1]]
+  if (Math.abs(u[0]) < 1e-9) {
+    result.pos = away[0] > 0 ? "right" : "left"
+  } else if (Math.abs(u[1]) < 1e-9) {
+    result.pos = away[1] > 0 ? "above" : "below"
+  } else {
+    // A sloped line. Hang the label off its lower end, so it clears the line.
+    const rising = u[0] * u[1] > 0
+    result.pos = away[1] > 0
+      ? (rising ? "aboveleft" : "aboveright")
+      : (rising ? "belowright" : "belowleft")
+  }
+  return result
+}
+
+// Lengths in feet and inches, as in Sketch's feetInches.js.
+const superscriptDigits = "⁰¹²³⁴⁵⁶⁷⁸⁹"
+const subscriptDigits = "₀₁₂₃₄₅₆₇₈₉"
+const toScript = (n, digits) => String(n).replace(/\d/g, d => digits[d])
+
+// Write `value` (in inches, ≥ 0) as whole inches and a reduced fraction rounded to the
+// nearest 1/denominator, e.g. 3³⁄₈.
+const fractionalInches = denominator => value => {
+  const ticks = Math.round(value * denominator)
+  const whole = Math.floor(ticks / denominator)
+  let num = ticks - whole * denominator
+  let den = denominator
+  if (num === 0) { return String(whole) }
+  while (num % 2 === 0) { num /= 2; den /= 2 }
+  return `${whole}${toScript(num, superscriptDigits)}⁄${toScript(den, subscriptDigits)}`
+}
+
+// A label such as 4′-3³⁄₈″, 3³⁄₈″, or 4′. `formatNum` writes the number of feet.
+const feetInchesLabel = (value, formatNum, denominator) => {
+  const writeInches = fractionalInches(denominator)
+  const sign = value < 0 ? "-" : ""
+  let feet = Math.floor(Math.abs(value) / 12)
+  let inStr = writeInches(Math.abs(value) - feet * 12)
+  const inchValue = str => Number(str.replace(",", "."))
+  if (inchValue(inStr) >= 12) {
+    // The inch part rounded up to a whole foot.
+    feet += 1
+    inStr = writeInches(0)
+  }
+  const label = feet === 0
+    ? (inchValue(inStr) === 0 ? "0″" : `${sign}${inStr}″`)
+    : inchValue(inStr) === 0
+    ? `${sign}${formatNum(feet)}′`
+    : `${sign}${formatNum(feet)}′-${inStr}″`
+  return label.replace(/^(-?)0(?=[⁰¹²³⁴⁵⁶⁷⁸⁹])/, "$1") // ³⁄₈″, not 0³⁄₈″
+}
+
+// The measured length of a dimension span, written with the drawing's rounding spec and
+// the document's decimal format. As in Sketch's elementObject.js dimensionLabel().
+const dimensionLabel = (value, attrs) => {
+  const formatNum = num => format(Rnl.fromNumber(num), attrs.roundingSpec,
+    attrs.decimalFormat, "plain")
+  return attrs.unit === "ft-in"
+    ? feetInchesLabel(value, formatNum, attrs.fraction)
+    : formatNum(value)
 }
 
 const functions = {
@@ -996,67 +1159,57 @@ const functions = {
     return { value: svg, unit: null, dtype: dt.DRAWING }
   },
 
-  dimension(svgOprnd, plistOprnd, label) {
-    const p = clone(plistOprnd.value)
-    const q = p.pop()
-    const origstrokewidth = svgOprnd.value.temp.strokewidth
-    const origMarker = svgOprnd.value.temp.marker
-    svgOprnd.value.temp.marker = "none" // Extension lines have no marker.
-    svgOprnd.value.temp.strokewidth = 0.5
-    svgOprnd.value.temp.isDim = true // set small arrowhead
-    let six = Rnl.fromNumber(6 / svgOprnd.value.temp.xunitlength)
-    const pEnd = p[p.length - 1]
-    let svg
-    // Is the label y-coord between the y-coords of the end points?
-    if ((Rnl.lessThan(p[0][1], q[1]) && Rnl.lessThan(q[1], pEnd[1])) ||
-        (Rnl.lessThan(pEnd[1], q[1]) && Rnl.lessThan(q[1], p[0][1]))) {
-      if (!Rnl.lessThan(pEnd[0], q[0])) { six = Rnl.negate(six) }
-      p.forEach(e => {
-        svgOprnd = this.line(svgOprnd, { value: [
-          [Rnl.add(e[0], six), e[1]],
-          [Rnl.add(q[0], six), e[1]]
-        ] })
-      });
-      svgOprnd.value.temp.marker = "arrow"
-      const pos = Rnl.lessThanOrEqualTo(pEnd[0], q[0]) ? "right" : "left"
-      for (let i = 0; i < p.length - 1; i++) {
-        svgOprnd = this.line(svgOprnd, { value : [[q[0], p[i][1]], [q[0], p[i + 1][1]]],
-          unit: null, dtype: dt.MATRIX })
-        svgOprnd = this.line(svgOprnd, { value : [[q[0], p[i + 1][1]], [q[0], p[i][1]]],
-          unit: null, dtype: dt.MATRIX })
-        const p3 = [
-          Rnl.toNumber(q[0]),
-          (Rnl.toNumber(p[i][1]) + Rnl.toNumber(p[i + 1][1])) / 2
-        ];
-        const str = p.length === 2 ? label.value : label.value[i];
-        svg = textLocal(svgOprnd.value, p3, str, pos)
-      }
-    } else {
-      if (!Rnl.lessThan(pEnd[1], q[1])) { six = Rnl.negate(six) }
-      p.forEach(e => {
-        svgOprnd = this.line(svgOprnd, { value: [
-          [e[0], Rnl.add(e[1], six)],
-          [e[0], Rnl.add(q[1], six)]
-        ] })
-      });
-      svgOprnd.value.temp.marker = "arrow"
-      const pos = Rnl.lessThanOrEqualTo(pEnd[1], q[1]) ? "above" : "below"
-      for (let i = 0; i < p.length - 1; i++) {
-        svgOprnd = this.line(svgOprnd, { value: [ [p[i][0], q[1]], [ p[i + 1][0], q[1]] ],
-          unit: null, dtype: dt.MATRIX })
-        svgOprnd = this.line(svgOprnd, { value: [ [ p[i + 1][0], q[1]], [p[i][0], q[1]] ],
-          unit: null, dtype: dt.MATRIX })
-        const p3 = [
-          (Rnl.toNumber(p[i][0]) + Rnl.toNumber(p[i + 1][0])) / 2,
-          Rnl.toNumber(q[1])
-        ];
-        const str = p.length === 2 ? label.value : label.value[i];
-        svg = textLocal(svgOprnd.value, p3, str, pos)
-      }
+  dimension(svgOprnd, plistOprnd, arg1, arg2, arg3) {
+    // dimension (p1; p2; …; labelPoint), ["label", …]
+    // dimension (p1; p2; …; labelPoint), ["label", …], dimAngle, extAngle
+    // As in Sketch. The label list is optional. A label "" leaves its span blank, and a
+    // span with no label shows its measured length. The dimension line runs through
+    // labelPoint. With no angles, it's horizontal or vertical, whichever puts
+    // labelPoint between the end points. With angles (in degrees), the dimension line
+    // runs at dimAngle and the extension lines run at extAngle.
+    // Dimensions are always drawn in black, 0.5 px wide, with labels in the default
+    // font size.
+    let svg = svgOprnd.value
+    const attrs = svg.temp
+    const rows = numberRows(plistOprnd)
+    let labels = arg1
+    let angles = [arg2, arg3]
+    if (isNumber(arg1)) {
+      labels = null
+      angles = [arg1, arg2] // No label list
     }
-    svg.temp.strokewidth = origstrokewidth
-    svg.temp.marker = origMarker
-    svg.temp.isDim = false
+    if (!rows || rows.length < 3 || rows[0].length !== 2 ||
+        (angles[0] != null && !isNumber(angles[0])) ||
+        (angles[1] != null && !isNumber(angles[1])) ||
+        (angles[0] != null) !== (angles[1] != null)) {
+      return drawError("dimension")
+    }
+    const writtenLabel = labelList(labels)
+    const pts = rows.slice(0, -1)
+    const labelPoint = rows[rows.length - 1]
+    const elements = angles[0] == null
+      ? orthoDimension(pts, labelPoint, attrs)
+      : obliqueDimension(pts, labelPoint, Rnl.toNumber(angles[0].value),
+        Rnl.toNumber(angles[1].value), attrs)
+    if (!elements) { return drawError("dimension") }
+    const { extLines, dimLines, mids, values, pos } = elements
+    for (const [a, b] of extLines) { svg.children.push(dimLineNode(attrs, a, b)) }
+    for (const [a, b] of dimLines) {
+      svg.children.push(dimLineNode(attrs, a, b))
+      // Arrowheads at both ends, pointing outward, as Sketch's dimarrow.
+      const pa = toPx(attrs, a[0], a[1])
+      const pb = toPx(attrs, b[0], b[1])
+      const u = pxDirection(attrs, [b[0] - a[0], b[1] - a[1]])
+      svg.children.push(arrowheadNode(pa, [-u[0], -u[1]], dimArrowSize, dimStrokeWidth,
+        "black"))
+      svg.children.push(arrowheadNode(pb, u, dimArrowSize, dimStrokeWidth, "black"))
+    }
+    mids.forEach((mid, i) => {
+      const label = writtenLabel(i)
+      if (label === "") { return }
+      const str = label ?? dimensionLabel(values[i], attrs)
+      svg = textLocal(svg, mid, str, pos, { fontsize: labelFontSize })
+    })
     return { value: svg, unit: null, dtype: dt.DRAWING }
   }
 
