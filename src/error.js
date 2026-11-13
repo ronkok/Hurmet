@@ -53,6 +53,7 @@ const errorMessages = Object.freeze({
     MATRIX_MOD:"Error. Cannot take the modulo of one matrix by another.",
     BAD_INDEX: "Error. Index to a matrix must be numeric.",
     FUNC_LINE: "Error in function @",
+    DRAW_ARG:  "Error. Invalid arguments to drawing statement “@”.",
     BAD_BREAK: "Error in function @. break called outside of a loop",
     FETCH:     "Error. A fetch() function must be the only item in its expression.",
     STR_INDEX: "Error. The index to text may be only a real number or a range.",

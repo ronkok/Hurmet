@@ -3,8 +3,61 @@ import { clone } from "./utils"
 import { isVector } from "./matrix"
 import { Rnl } from "./rational"
 import { inlineMd2ast } from "./md2ast"
+import { errorOprnd } from "./error"
 
-const startSvg = _ => {
+// px per model unit, before the scene's scale is applied. As in Sketch's utils.js.
+const unitScaleFactors = Object.freeze({
+  px: 1,
+  in: 96,
+  ft: 1152,
+  "ft-in": 96, // Model units are inches. Dimension labels are written in feet & inches.
+  mile: 609600,
+  pt: 96 / 72,
+  mm: 96 / 25.4,
+  cm: 960 / 25.4,
+  m: 96000 / 25.4,
+  km: 96000000 / 25.4
+})
+
+// Other spellings of the unit names above, as in Sketch's unitAliases.js.
+const unitAliases = Object.freeze({
+  inch: "in", "″": "in",
+  foot: "ft", feet: "ft", lf: "ft", "′": "ft",
+  mi: "mile",
+  meter: "m", metre: "m",
+  millimeter: "mm", millimetre: "mm",
+  centimeter: "cm", centimetre: "cm",
+  kilometer: "km", kilometre: "km",
+  point: "pt", "Adobe point": "pt"
+})
+
+// Line types, as in Sketch's elementObject.js. Dash lengths are in px.
+const dashMap = Object.freeze({
+  solid: null,
+  dashed: "12 6",
+  dotted: "0 8",
+  centerline: "12 6 3 6",
+  border: "12 6 3 6 3 6"
+})
+const linecapMap = Object.freeze({ dotted: "round" })
+
+// Fill patterns, as in Sketch's elementObject.js. "solid" means no pattern.
+const fillPatternNames = new Set([
+  "solid", "diagonal", "crosshatch", "grid", "dots", "wood", "sand", "gravel", "earth",
+  "concrete"
+])
+
+const roundingSpecRegEx = /^[frh][1-6]$/
+const inchFractions = new Set([8, 16, 32, 64])
+
+// A pattern's id includes its color, as in Sketch's dwg.js. A <pattern> def
+// can't take its color from the element that refers to it, so each
+// combination of pattern and color needs a def of its own.
+const sanitizeForId = str => String(str).replace(/[^a-zA-Z0-9]/g, "_")
+
+// decimalFormat and roundingSpec come from the parent document. A format statement
+// in the drawing overrides roundingSpec.
+const startSvg = (decimalFormat = "1,000,000.", roundingSpec = "h3") => {
   return {
     tag: 'svg',
     children: [],
@@ -14,6 +67,10 @@ const startSvg = _ => {
       height: 250,
       style: "display: inline;"
     },
+    // Fields outside attrs are not written as SVG attributes.
+    caption: false,  // If true, Hurmet writes the title as a caption.
+    patterns: [],    // The { name, color } of each fill pattern used. The renderer
+                     // writes a <pattern> def for each.
     temp: {
       width: 250,
       height: 250,
@@ -24,10 +81,17 @@ const startSvg = _ => {
       xunitlength: 20,  // px
       yunitlength: 20,  // px
       origin: [0, 0],   // in px (default is bottom left corner)
+      scene: null,      // { S, dx, dy } from a scene statement. S is px per model unit.
+      unit: "px",       // The scene's unit
+      roundingSpec,     // Rounding of dimension labels
+      fraction: 16,     // Denominator of the inch fractions in "ft-in" dimension labels
+      decimalFormat,    // From the parent document
       stroke: "black",
       strokewidth: 1,
-      strokedasharray: null,
+      linetype: "solid",
       fill: "none",
+      pattern: "solid",
+      fontcolor: "black",
       fontstyle: "normal",
       fontfamily: "sans-serif",
       fontsize: 13.33, // px, ~10 pt
@@ -46,13 +110,53 @@ const startSvg = _ => {
 }
 
 // Helpers
-const setStrokeAndFill = (node, attrs) => {
+const isString = oprnd => oprnd != null && oprnd.dtype === dt.STRING
+const isNumber = oprnd => oprnd != null && Rnl.isRational(oprnd.value)
+const drawError = statement => errorOprnd("DRAW_ARG", statement)
+
+// A model point, in px.
+const toPx = (attrs, x, y) => [
+  x * attrs.xunitlength + attrs.origin[0],
+  attrs.height - y * attrs.yunitlength - attrs.origin[1]
+]
+
+// The fill paint for an element: the fill color, or, while a fill pattern is
+// in effect, a reference to that pattern in the fill color. Records each
+// pattern used, so the renderer can write its <pattern> def.
+const fillPaint = svg => {
+  const { fill, pattern } = svg.temp
+  if (pattern === "solid" || !fill || fill === "none") { return fill }
+  if (!svg.patterns.some(p => p.name === pattern && p.color === fill)) {
+    svg.patterns.push({ name: pattern, color: fill })
+  }
+  return `url(#fp-${pattern}-${sanitizeForId(fill)})`
+}
+
+// Set an element's stroke, line type and fill. Elements with no inside, such
+// as lines, get no fill.
+const setStrokeAndFill = (node, svg, hasFill = true) => {
+  const attrs = svg.temp
   node.attrs["stroke-width"] = attrs.strokewidth
   node.attrs.stroke = attrs.stroke
-  node.attrs.fill = attrs.fill
-  if (attrs.strokedasharray != null && attrs.strokedasharray !== "none") {
-    node.attrs["stroke-dasharray"] = attrs.strokedasharray
+  node.attrs.fill = hasFill ? fillPaint(svg) : "none"
+  if (dashMap[attrs.linetype]) {
+    node.attrs["stroke-dasharray"] = dashMap[attrs.linetype]
+    if (linecapMap[attrs.linetype]) {
+      node.attrs["stroke-linecap"] = linecapMap[attrs.linetype]
+    }
   }
+}
+
+// Give the model-to-px mapping of a scene statement to attrs.
+const applyScene = attrs => {
+  const { S, dx, dy } = attrs.scene
+  attrs.xunitlength = S
+  attrs.yunitlength = S
+  attrs.origin = [S * dx, S * dy]
+  attrs.xmin = -dx
+  attrs.xmax = attrs.width / S - dx
+  attrs.ymin = -dy
+  attrs.ymax = attrs.height / S - dy
 }
 
 const pointZeroRegEx = /\.0+$/
@@ -188,8 +292,7 @@ const textLocal = (svg, p, str, pos) => {
 }
 
 const pointText = (point, attrs) => {
-  return (point[0] * attrs.xunitlength + attrs.origin[0]).toFixed(4) + ","
-    + (attrs.height - point[1] * attrs.yunitlength - attrs.origin[1]).toFixed(4)
+  return toPx(attrs, point[0], point[1]).map(n => n.toFixed(4)).join(",")
 }
 
 const functions = {
@@ -204,13 +307,32 @@ const functions = {
     return svgOprnd
   },
 
-  strokedasharray(svgOprnd, str) {
-    svgOprnd.value.temp.strokedasharray = str.value
+  linetype(svgOprnd, str) {
+    // "solid" | "dashed" | "dotted" | "centerline" | "border"
+    if (!isString(str) || !Object.hasOwn(dashMap, str.value)) {
+      return drawError("linetype")
+    }
+    svgOprnd.value.temp.linetype = str.value
     return svgOprnd
   },
 
   fill(svgOprnd, color) {
     svgOprnd.value.temp.fill = color.value
+    return svgOprnd
+  },
+
+  pattern(svgOprnd, str) {
+    // A fill pattern, drawn in the current fill color. "solid" means no pattern.
+    if (!isString(str) || !fillPatternNames.has(str.value)) {
+      return drawError("pattern")
+    }
+    svgOprnd.value.temp.pattern = str.value
+    return svgOprnd
+  },
+
+  fontcolor(svgOprnd, color) {
+    if (!isString(color)) { return drawError("fontcolor") }
+    svgOprnd.value.temp.fontcolor = color.value
     return svgOprnd
   },
 
@@ -236,6 +358,32 @@ const functions = {
     return svgOprnd
   },
 
+  caption(svgOprnd, bool) {
+    // caption true: Hurmet writes the title as a caption.
+    if (bool == null || typeof bool.value !== "boolean") { return drawError("caption") }
+    svgOprnd.value.caption = bool.value
+    return svgOprnd
+  },
+
+  format(svgOprnd, spec) {
+    // The rounding spec of dimension labels, e.g., "h3". Sketch wrote a decimal
+    // format as a second argument in older sketches. It's ignored. The decimal
+    // format comes from the parent document.
+    if (!isString(spec) || !roundingSpecRegEx.test(spec.value)) {
+      return drawError("format")
+    }
+    svgOprnd.value.temp.roundingSpec = spec.value
+    return svgOprnd
+  },
+
+  fraction(svgOprnd, num) {
+    // The denominator of the inch fractions in "ft-in" dimension labels.
+    const denominator = isNumber(num) ? Rnl.toNumber(num.value) : NaN
+    if (!inchFractions.has(denominator)) { return drawError("fraction") }
+    svgOprnd.value.temp.fraction = denominator
+    return svgOprnd
+  },
+
   frame(svgOprnd, width = 250, height = 250, position = "inline") {
     const svg = svgOprnd.value
     const attrs = svg.temp
@@ -245,15 +393,47 @@ const functions = {
     svg.attrs.height = attrs.height
     if (typeof position !== "string") { position = position.value }
     if (position !== "inline") { svg.attrs.float = position }
-    attrs.xunitlength = attrs.width / (attrs.xmax - attrs.xmin)
-    attrs.yunitlength = attrs.height / (attrs.ymax - attrs.ymin)
-    attrs.origin = [-attrs.xmin * attrs.xunitlength, -attrs.ymin * attrs.yunitlength]
+    if (attrs.scene) {
+      applyScene(attrs)
+    } else {
+      attrs.xunitlength = attrs.width / (attrs.xmax - attrs.xmin)
+      attrs.yunitlength = attrs.height / (attrs.ymax - attrs.ymin)
+      attrs.origin = [-attrs.xmin * attrs.xunitlength, -attrs.ymin * attrs.yunitlength]
+    }
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  scene(svgOprnd, scale, unit, dx, dy) {
+    // scene scale, "unit", dx, dy
+    // A model point (x, y) is drawn at px (S·(x + dx), frameHeight − S·(y + dy)),
+    // where S = scale × unitScaleFactors[unit] is px per model unit.
+    if (!isNumber(scale) || !isString(unit) || !isNumber(dx) || !isNumber(dy)) {
+      return drawError("scene")
+    }
+    const scaleNum = Rnl.toNumber(scale.value)
+    const unitName = unit.value.trim()
+    const canonicalUnit = Object.hasOwn(unitScaleFactors, unitName)
+      ? unitName
+      : unitAliases[unitName]
+    if (!(scaleNum > 0 && Number.isFinite(scaleNum)) || !canonicalUnit) {
+      return drawError("scene")
+    }
+    const svg = svgOprnd.value
+    const attrs = svg.temp
+    attrs.unit = canonicalUnit
+    attrs.scene = {
+      S: scaleNum * unitScaleFactors[canonicalUnit],
+      dx: Rnl.toNumber(dx.value),
+      dy: Rnl.toNumber(dy.value)
+    }
+    applyScene(attrs)
     return { value: svg, unit: null, dtype: dt.DRAWING }
   },
 
   view(svgOprnd, xmin = 0, xmax = 5, ymin, ymax) {
     const svg = svgOprnd.value
     const attrs = svg.temp
+    attrs.scene = null // Of scene and view, the later one applies.
     attrs.xmin = typeof xmin === "number" ? xmin : Rnl.toNumber(xmin.value)
     attrs.xmax = typeof xmax === "number" ? xmax : Rnl.toNumber(xmax.value)
     attrs.xunitlength = attrs.width / (attrs.xmax - attrs.xmin)
@@ -277,7 +457,7 @@ const functions = {
 
   // Draw things
 
-  grid(svgOprnd, gdx, gdy, isLocal) {
+  grid(svgOprnd, gdx, gdy) {
     const svg = svgOprnd.value
     const attrs = svg.temp
     gdx = gdx == null ? attrs.xunitlength : Rnl.toNumber(gdx.value) * attrs.xunitlength
@@ -301,9 +481,7 @@ const functions = {
     pnode.attrs.stroke = attrs.gridstroke
     pnode.attrs.fill = attrs.fill
     svg.children.push(pnode)
-    if (!isLocal) {
-      return { value: svg, unit: null, dtype: dt.DRAWING }
-    }
+    return { value: svg, unit: null, dtype: dt.DRAWING }
   },
 
   axes(svgOprnd, dx, dy, labels, gdx, gdy) {
@@ -315,7 +493,7 @@ const functions = {
     attrs.fontsize = Math.min(dx / 2, dy / 2, 10)
     const ticklength = attrs.fontsize / 4
     if (gdx != null) {
-      this.grid(svgOprnd, gdx, gdy, true)
+      this.grid(svgOprnd, gdx, gdy)
     }
     const pnode = { tag: "path", attrs: {} }
     let str = "M0," + (attrs.height - attrs.origin[1]) + " " + attrs.width + "," +
@@ -344,8 +522,9 @@ const functions = {
       const ly = (attrs.ymin > 0 || attrs.ymax < 0 ? attrs.ymin : 0)
       const lxp = (ly === 0 ? "below" : "above")
       const lyp = (lx === 0 ? "left" : "right")
-      const ddx = Math.floor(1.1 - Math.log(ldx) / Math.log(10)) + 1
-      const ddy = Math.floor(1.1 - Math.log(ldy) / Math.log(10)) + 1
+      // Digits after the decimal point. Never negative, or toFixed would throw.
+      const ddx = Math.max(0, Math.floor(1.1 - Math.log10(ldx)) + 1)
+      const ddy = Math.max(0, Math.floor(1.1 - Math.log10(ldy)) + 1)
       for (let x = ldx; x <= attrs.xmax; x += ldx) {
         svg = textLocal(svg, [x, ly], chopZ(x.toFixed(ddx)), lxp)
       }
@@ -378,7 +557,7 @@ const functions = {
       (attrs.height - p[1] * attrs.yunitlength - attrs.origin[1]) + " " +
       (q[0] * attrs.xunitlength + attrs.origin[0]) + "," + (attrs.height -
        q[1] * attrs.yunitlength - attrs.origin[1]);
-    setStrokeAndFill(node, attrs)
+    setStrokeAndFill(node, svg, false)
     svg.children.push(node)
     if (attrs.marker === "dot" || attrs.marker === "arrowdot") {
       svg.children.push(markerDot(p, attrs, attrs.markerstroke, attrs.markerfill))
@@ -421,12 +600,7 @@ const functions = {
       }
     }
     node.attrs.d = str
-    node.attrs["stroke-width"] = attrs.strokewidth
-    if (attrs.strokedasharray != null) {
-      node.attrs["stroke-dasharray"] = attrs.strokedasharray
-    }
-    node.attrs.stroke = attrs.stroke
-    node.attrs.fill = attrs.fill
+    setStrokeAndFill(node, svg)
     if (attrs.marker === "dot") {
       for (let i = 0; i < args.length; i++) {
         const el = args[i];
@@ -465,7 +639,7 @@ const functions = {
     return { value: svg, unit: null, dtype: dt.DRAWING }
   },
 
-  rect(svgOprnd, m, r) { // opposite corners in units, rounded by radius
+  rect(svgOprnd, m) { // opposite corners in units
     const svg = svgOprnd.value
     const attrs = svg.temp
     const node = { tag: "rect", attrs: {} }
@@ -475,12 +649,7 @@ const functions = {
     node.attrs.y = attrs.height - Math.max(p[1], q[1]) * attrs.yunitlength - attrs.origin[1]
     node.attrs.width = Math.abs((q[0] - p[0]) * attrs.xunitlength)
     node.attrs.height = Math.abs((q[1] - p[1]) * attrs.yunitlength)
-    if (r != null) {
-      const rNum = Rnl.toNumber(r.value) * attrs.xunitlength
-      node.attrs.rx = rNum
-      node.attrs.ry = rNum
-    }
-    setStrokeAndFill(node, attrs)
+    setStrokeAndFill(node, svg)
     svg.children.push(node)
     return { value: svg, unit: null, dtype: dt.DRAWING }
   },
@@ -493,7 +662,7 @@ const functions = {
     node.attrs.cy = attrs.height - Rnl.toNumber(center.value[1]) * attrs.yunitlength
                   - attrs.origin[1];
     node.attrs.r = Rnl.toNumber(radius.value) * attrs.xunitlength
-    setStrokeAndFill(node, attrs)
+    setStrokeAndFill(node, svg)
     svg.children.push(node)
     return { value: svg, unit: null, dtype: dt.DRAWING }
   },
@@ -507,7 +676,7 @@ const functions = {
                     - attrs.origin[1];
     node.attrs.rx = Rnl.toNumber(rx.value) * attrs.xunitlength
     node.attrs.ry = Rnl.toNumber(ry.value) * attrs.yunitlength
-    setStrokeAndFill(node, attrs)
+    setStrokeAndFill(node, svg)
     svg.children.push(node)
     return { value: svg, unit: null, dtype: dt.DRAWING }
   },
@@ -532,7 +701,7 @@ const functions = {
     str += " 0 0,0 " + (end[0] * attrs.xunitlength + attrs.origin[0]) + "," +
       (attrs.height - end[1] * attrs.yunitlength - attrs.origin[1])
     node.attrs.d = str
-    setStrokeAndFill(node, attrs)
+    setStrokeAndFill(node, svg, false)
     // eslint-disable-next-line no-useless-assignment
     let v = 0
     if (attrs.marker === "arrow" || attrs.marker === "arrowdot") {
@@ -608,30 +777,6 @@ const functions = {
         (pos == null ? "below" : pos.value)
         )
     }
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  leader(svgOprnd, plistOprnd, label) {
-    // A 'leader' is a note with an arrow (leader line) pointing to something.
-    const marker = svgOprnd.value.temp.marker
-    svgOprnd.value.temp.marker = "arrow"
-    svgOprnd.value.temp.isDim = true
-    // Draw the arrow
-    svgOprnd = this.path(svgOprnd, [plistOprnd])
-    // Get the text position
-    const p = rationals2numbers(plistOprnd.value[0])
-    const q = rationals2numbers(plistOprnd.value[plistOprnd.value.length - 1])
-    // eslint-disable-next-line no-useless-assignment
-    let pos = "right"
-    if (Math.abs(p[0] - q[0]) >= Math.abs(p[1] - q[1])) {
-      pos = p[0] >= q[0] ? "right" : "left"
-    } else {
-      pos = p[1] < q[1] ? "below" : "above"
-    }
-    // Write the text
-    const svg = textLocal(svgOprnd.value, p, label.value, pos, null)
-    svg.temp.marker = marker
-    svg.temp.isDim = false
     return { value: svg, unit: null, dtype: dt.DRAWING }
   },
 

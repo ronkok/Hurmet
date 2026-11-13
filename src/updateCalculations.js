@@ -355,8 +355,10 @@ const proceedAfterFetch = (
           ? compile(entry, formats)
           : clone(node.attrs)
         attrs.displayMode = node.attrs.displayMode
+        // A drawing's dimension labels may use the document's format, so a change
+        // in format must redraw drawings, too.
         const mustRedraw = attrs.dtype && attrs.dtype === dt.DRAWING &&
-          (attrs.rpn || (attrs.value.parameters.length > 0 || isCalcAll))
+          (attrs.rpn || (attrs.value.parameters.length > 0 || isCalcAll || isFormat))
         if (mustCalc(attrs, hurmetVars, changedVars, isCalcAll, isFormat)) {
           try {
             if (attrs.rpn || mustRedraw) {

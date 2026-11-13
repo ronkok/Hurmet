@@ -773,7 +773,11 @@ export const evalRpn = (rpn, vars, formats, unitAware, lib) => {
         }
 
         case "startSvg":
-          stack.push({ value: draw.startSvg(), unit: null, dtype: dt.DRAWING })
+          stack.push({
+            value: draw.startSvg(formats.decimalFormat, formats.format),
+            unit: null,
+            dtype: dt.DRAWING
+          })
           break
 
         case "beamDiagram": {
@@ -1658,7 +1662,11 @@ const evalCustomFunction = (udf, args, formats, isUnitAware, lib) => {
     }
   }
   if (udf.dtype === dt.DRAWING) {
-    vars["svg"] = { value: draw.startSvg(), unit: null, dtype: dt.DRAWING }
+    vars["svg"] = {
+      value: draw.startSvg(formats.decimalFormat, formats.format),
+      unit: null,
+      dtype: dt.DRAWING
+    }
   }
 
   // Execute the function statements.
@@ -2066,7 +2074,10 @@ export const evaluateDrawing = (
     const argName = udf.parameters[i].name
     args.push(evalRpn("¿" + argName, vars, formats, false, {}))
   }
-  const funcResult = evalCustomFunction(udf, args, formats, false, {})
+  // Dimension labels use the format that is active at this point in the document,
+  // unless the drawing contains a format statement of its own.
+  const drawFormats = vars.format ? { ...formats, format: vars.format.value } : formats
+  const funcResult = evalCustomFunction(udf, args, drawFormats, false, {})
   if (funcResult.dtype === dt.ERROR) {
     stmt.error = true
     stmt.tex = "\\textcolor{firebrick}{\\text{" + funcResult.value + "}}"

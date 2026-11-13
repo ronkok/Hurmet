@@ -828,6 +828,73 @@ end`, formats)
 }
 testDrawGroups()
 
+// Drawing statements shared with Sketch
+const testDrawStatements = () => {
+  console.log("\nNow testing draw statements…")
+  console.log("")
+  const check = (label, actual, expected) => {
+    numTests += 1
+    if (actual !== expected) {
+      numErrors += 1
+      console.log("draw statement test: " + label)
+      console.log("expected: " + expected)
+      console.log("actual:   " + actual)
+      console.log("")
+    }
+  }
+  const json = x => JSON.stringify(x, (k, v) => typeof v === "bigint" ? String(v) : v)
+  const svgOf = body => hurmet.calculate(`draw()\n${body}\nend`, {}).resultdisplay
+  const isError = body => typeof hurmet.calculate(`draw()\n${body}\nend`, {}) === "string"
+  const lastChild = svg => svg.children[svg.children.length - 1]
+
+  // scene scale, "unit", dx, dy maps (x, y) to (S·(x + dx), height − S·(y + dy)).
+  // Here S = 1/2 × 96 = 48 px per inch.
+  let svg = svgOf(`frame 200, 300\nscene 0 1/2, "inch", 1, 2\nline [0, 0; 1, 1]`)
+  check("scene", lastChild(svg).attrs.d, "M48,204 96,156")
+  svg = svgOf(`scene 0 1/2, "in", 1, 2\nframe 200, 300\nline [0, 0; 1, 1]`)
+  check("scene before frame", lastChild(svg).attrs.d, "M48,204 96,156")
+  svg = svgOf(`frame 200, 100\nscene 1, "ft-in", 0, 0\nline [0, 0; 1, 0]`)
+  check("ft-in scene", lastChild(svg).attrs.d, "M0,100 96,100")
+  svg = svgOf(`frame 200, 100\nscene 1, "mm", 0, 0\nview 0, 10\nline [0, 0; 1, 1]`)
+  check("view after scene", lastChild(svg).attrs.d, "M0,50 20,30")
+
+  // Style statements
+  svg = svgOf(`frame 100, 100
+fill "#f00"
+pattern "sand"
+rect [0, 0; 1, 1]
+circle [1, 1], 1
+fill "blue"
+circle [1, 1], 1
+pattern "solid"
+circle [1, 1], 1`)
+  check("pattern fill", svg.children.map(el => el.attrs.fill).join(" "),
+    "url(#fp-sand-_f00) url(#fp-sand-_f00) url(#fp-sand-blue) blue")
+  check("patterns list", json(svg.patterns),
+    json([{ name: "sand", color: "#f00" }, { name: "sand", color: "blue" }]))
+  svg = svgOf(`frame 100, 100\nlinetype "dotted"\nfill "red"\nline [0, 0; 1, 1]`)
+  check("linetype", json(lastChild(svg).attrs),
+    json({ d: "M0,100 20,80", "stroke-width": 1, stroke: "black", fill: "none",
+      "stroke-dasharray": "0 8", "stroke-linecap": "round" }))
+  check("caption default", svgOf(`frame 100, 100`).caption, false)
+  check("caption", svgOf(`caption true\nframe 100, 100`).caption, true)
+
+  // axes labels no longer throw when the step is large
+  svg = svgOf(`frame 300, 100\nview 0, 3000, 0, 1000\naxes 500, 500, "labels"`)
+  check("axes with a large step", lastChild(svg).tag, "path")
+
+  // Invalid arguments
+  for (const bad of [`scene 1, "furlong", 0, 0`, `scene 0, "mm", 0, 0`,
+    `linetype "5 3"`, `pattern "plaid"`, `format "x9"`, `fraction 10`, `caption "yes"`]) {
+    check(bad, isError(`frame 100, 100\n${bad}`), true)
+  }
+  for (const good of [`format "r2"`, `format "h3", "1,000,000."`, `fraction 32`,
+    `fontcolor "blue"`, `linetype "solid"`]) {
+    check(good, isError(`frame 100, 100\n${good}`), false)
+  }
+}
+testDrawStatements()
+
 // import() works via fetch(), so this test is asynchronous.
 // updateAndSave() runs a whole Hurmet Markdown document, including the fetch,
 // and returns the document with results written inline.

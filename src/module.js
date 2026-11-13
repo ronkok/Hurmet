@@ -6,7 +6,17 @@ import { parse } from "./parser.js"
 import { errorOprnd } from "./error.js"
 
 const keywordRegEx = /^(if|elseif|else|return|throw|while|for|break|print|end)(\u2002|\b)/
-const drawCommandRegEx = /^(title|frame|view|axes|grid|stroke|strokewidth|strokedasharray|fill|fontsize|fontweight|fontstyle|fontfamily|marker|line|path|plot|curve|rect|circle|ellipse|arc|text|dot|leader|dimension)\b/
+const drawCommands = [
+  // Header statements
+  "title", "caption", "format", "fraction", "frame", "view", "scene", "axes", "grid",
+  // Style statements
+  "stroke", "strokewidth", "linetype", "fill", "pattern", "fontsize", "fontfamily",
+  "fontcolor", "marker",
+  // Elements
+  "line", "path", "plot", "rect", "circle", "ellipse", "polygon", "arc", "freehand",
+  "image", "text", "dot", "arrow", "dimension"
+]
+const drawCommandRegEx = new RegExp(`^(${drawCommands.join("|")})\\b`)
 const leadingSpaceRegEx = /^[\t ]+/
 const oneLinerRegEx = /^( *)if ([^\n`]+) +(return|throw|print|break)\b([^\n]+)?(?: end)? *\n/gm
 
