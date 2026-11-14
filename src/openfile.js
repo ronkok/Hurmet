@@ -2,6 +2,7 @@ import hurmet from "./hurmet"
 import { schema } from "./schema"
 import { splitMarkdownPathDefinitions, stringifyMarkdownPathDefinitions } from "./snapshots"
 import { rebuildSnapshotCacheAndContents } from "./snapshots"
+import { drawSketches } from "./renderSketch"
 
 export const handleContents = (view, schema, str, format) => {
   // Strip the BOM, if any, from the beginning of the result string.
@@ -29,6 +30,11 @@ export const handleContents = (view, schema, str, format) => {
       }
     }
     doc = JSON.parse(JSON.stringify(doc))
+    // md2ast gives a sketch only its source. Draw it with the document's number formats.
+    drawSketches(doc.content, {
+      decimalFormat: doc.attrs.decimalFormat,
+      dateFormat: doc.attrs.dateFormat
+    })
   }
   const fontSize = (doc.attrs.fontSize) ? Number(doc.attrs.fontSize) : 12
   const ed = document.getElementById("editor-content")

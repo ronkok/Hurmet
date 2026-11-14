@@ -1201,7 +1201,68 @@ const testDrawingHtml = async() => {
   }
 }
 
-testSavedResults().then(testImport).then(testDrawingHtml).then(() => {
+// A sketch is saved as `![title][n]` in the body and `[n]: sketch: source` at the end,
+// with the source's line breaks written as ␤.
+const testSketches = async() => {
+  console.log("\nNow testing sketches…")
+  console.log("")
+  const check = (label, actual, expected) => {
+    numTests += 1
+    if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+      numErrors += 1
+      console.log("sketch test: " + label)
+      console.log("expected: " + JSON.stringify(expected))
+      console.log("actual:   " + JSON.stringify(actual))
+      console.log("")
+    }
+  }
+  const findSketches = (ast, found = []) => {
+    if (Array.isArray(ast)) {
+      ast.forEach(node => findSketches(node, found))
+    } else if (ast && ast.type === "sketch") {
+      found.push(ast)
+    } else if (ast && Array.isArray(ast.content)) {
+      findSketches(ast.content, found)
+    }
+    return found
+  }
+  const head = "---------------\ndecimalFormat: 1,000,000.\ndateFormat: yyyy-mm-dd\n" +
+    "---------------\n\n"
+  // The literal \n inside the text string must survive. The ">" must not end the def.
+  const source = 'title "A ""big"" [sketch]"\nframe 720, 500\nscene 1, "px", 0, 0\n' +
+    'rect (10, 10; 110, 60)\ntext [20, 20], "x > y\\nz"'
+  const def = "[1]: sketch: " + source.replace(/\n/g, "␤")
+  const md = head + "See ![A \"big\" sketch][1] here.\n\n" + def + "\n"
+
+  // md2ast
+  const ast = hurmet.md2ast(md)
+  const sketches = findSketches(ast)
+  check("md2ast source", sketches.map(s => s.attrs.source), [source])
+  check("md2ast paragraph", ast.content.map(n => n.type), ["paragraph"])
+  const figAst = hurmet.md2ast(head + "!![A caption][1]\n\n" + def + "\n")
+  check("md2ast figure", figAst.content.map(n => [n.type, n.content[0].type]),
+    [["paragraph", "sketch"]])
+
+  // Round trip through the serializer
+  const saved = await hurmet.updateAndSave(md)
+  check("save body", saved.includes('See ![A "big" sketch][1] here.'), true)
+  check("save def", saved.includes("\n" + def + "\n"), true)
+  check("reopen", findSketches(hurmet.md2ast(saved)).map(s => s.attrs.source), [source])
+
+  // A snapshot that holds the same sketch shares its definition.
+  const withSnapshot = md + "\n<!--SNAPSHOT-->\ndate: 2026-11-14\nmessage: first\n\n" +
+    "![A \"big\" sketch][1]\n\n" + def + "\n"
+  const savedSnap = await hurmet.updateAndSave(withSnapshot)
+  check("snapshot defs", savedSnap.split("[1]: sketch: ").length - 1, 1)
+  check("snapshot body", /message: first\n+!\[A "big" sketch\]\[1\]/.test(savedSnap), true)
+
+  // HTML. data-source is single-quoted and may contain ">".
+  const sketchHtmlRegEx = /<span class='hurmet-sketch' data-source='[^']*'><svg [\s\S]*x &gt; y/
+  check("md2html", sketchHtmlRegEx.test(hurmet.md2html(md)), true)
+  check("hurmet2html", sketchHtmlRegEx.test(await hurmet.hurmet2html(md)), true)
+}
+
+testSavedResults().then(testImport).then(testDrawingHtml).then(testSketches).then(() => {
   console.log("Done.")
   console.log("Number of tests =  " + numTests)
   console.log("Number of errors = " + numErrors)

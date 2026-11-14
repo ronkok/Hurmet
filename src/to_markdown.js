@@ -1,5 +1,7 @@
 import { parse } from "./parser"
 import { dt } from "./constants"
+import { renderSketch } from "./renderSketch"
+import { writeSVG } from "./md2html"
 
 /* eslint-disable */
 // ::- A specification for serializing a ProseMirror document as
@@ -299,6 +301,26 @@ const hurmetNodes =  {
   text(state, node) {
     state.text(node.text)
   },
+  sketch(state, node) {
+    // We use reference links and defer the sketch to the end of the document.
+    const defIndex = getDefIndex(state)
+    const source = node.attrs.source.trim()
+    if (state.isGFM) {
+      // Other Markdown readers get the sketch as an image of its SVG.
+      const svg = node.attrs.svg ? node.attrs.svg : renderSketch(source).svg
+      state.paths.set(defIndex, svg
+        ? "data:image/svg+xml," + encodeURIComponent(writeSVG(svg))
+        : "undefined")
+    } else {
+      // Hurmet writes the sketch source on one line. Its line breaks are written as ␤.
+      state.paths.set(defIndex, "sketch: " + source.replace(/\n/g, "␤"))
+    }
+    // The title is only a label. md2ast reads the sketch from its source.
+    // Brackets are dropped so they can't end the reference early.
+    const match = sketchTitleRegEx.exec(source)
+    const title = match ? match[1].replace(/""/g, '"').replace(/[[\]]/g, "").trim() : ""
+    state.write(title ? `![${title}][${defIndex}]` : `![${defIndex}][]`)
+  },
   tex(state, node) {
     const tex = node.attrs.tex.trim()
     writeTex(state, node.attrs.displayMode, !state.close, tex)
@@ -416,6 +438,8 @@ function isPlainURL(link, parent, index, side) {
 }
 
 const titleRegEx = /\n *title +"([^\n]+)" *\n/
+// Sketch source begins with its title. Inside the quotes, a quotation mark is written "".
+const sketchTitleRegEx = /^ *title +"((?:[^"\n]|"")*)"/
 
 const getDefIndex = state => {
   // We use reference links and defer link paths and image paths to the end of the document.

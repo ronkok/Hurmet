@@ -1,6 +1,7 @@
 import { parse } from "./parser.js"
 import { md2ast } from "./md2ast.js"
 import { dt } from "./constants"
+import { renderSketch } from "./renderSketch"
 
 const sanitizeUrl = function(url) {
   if (url == null) {
@@ -92,7 +93,7 @@ const dataStr = str => {
   }
 }
 
-const writeSVG = dwg => {
+export const writeSVG = dwg => {
   let svg = '<svg xmlns="http://www.w3.org/2000/svg"'
   Object.keys(dwg.attrs).forEach(key => {
     // xmlns is written above. float is not an SVG attribute; the calculation's
@@ -236,6 +237,20 @@ const nodes = {
     if (node.attrs.id)    { attributes.id = node.attrs.id }
     if (node.attrs.width) { attributes.width = node.attrs.width }
     return htmlTag("img", "", attributes, false) + "\n";
+  },
+  sketch(node) {
+    // hurmet2html renders the sketch with the document's number formats.
+    // md2html does no calculations, so it renders the sketch here.
+    const { svg, error } = node.attrs.svg
+      ? { svg: node.attrs.svg, error: null }
+      : renderSketch(node.attrs.source)
+    const float = svg ? svg.attrs.float : null
+    const style = float === "left" || float === "right" ? ` style='float: ${float};'` : ""
+    const content = svg
+      ? writeSVG(svg)
+      : sanitizeText(error ? "Sketch error: " + error : "Sketch")
+    return `<span class='hurmet-sketch' data-source=${dataStr(node.attrs.source)}${style}>` +
+      `${content}</span>`
   },
   footnote(node)   { return htmlTag("footnote", "") },
   calculation(node) {

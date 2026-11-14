@@ -19,6 +19,19 @@ export const renderSketch = (source, formats) => {
   }
 }
 
+// Draw every sketch node in an AST from md2ast, with the document's number formats.
+// md2ast gives a sketch node only its source.
+export const drawSketches = (ast, formats) => {
+  if (Array.isArray(ast)) {
+    ast.forEach(node => drawSketches(node, formats))
+  } else if (ast && ast.type === "sketch") {
+    const { svg } = renderSketch(ast.attrs.source, formats)
+    if (svg) { ast.attrs.svg = svg }
+  } else if (ast && Array.isArray(ast.content)) {
+    drawSketches(ast.content, formats)
+  }
+}
+
 // The attrs of a sketch node, rendered with the document's number formats.
 export const sketchAttrs = (source, doc) => {
   const formats = {

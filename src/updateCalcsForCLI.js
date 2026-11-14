@@ -4,6 +4,7 @@ import { evaluate, evaluateDrawing } from "./evaluate"
 import { dt } from "./constants"
 import { helpers } from "./updateCalculations"
 import { insertOneHurmetVar } from "./insertOneHurmetVar"
+import { drawSketches } from "./renderSketch"
 
 async function fetchTexts(urls) {
   // Here we fetch remote data.
@@ -62,6 +63,10 @@ export async function updateCalcs(doc) {
     decimalFormat: doc.attrs.decimalFormat,
     dateFormat: doc.attrs.dateFormat
   }
+
+  // A sketch does not depend on other calculations, so draw each one now,
+  // with the document's number formats.
+  drawSketches(Array.isArray(doc) ? doc : doc.content, formats)
 
   // Create an array of all the calculation nodes in the document
   const calcNodes = [];

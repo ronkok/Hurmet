@@ -592,6 +592,7 @@ const linkIndex = marks => {
 // This will be replaced in the entry with the display selector.
 const resultRegEx = /〔[^〕]*〕/
 const drawRegEx = /^draw\(/
+const sketchRegEx = /^sketch: ?/
 
 const parseRef = function(capture, state, refNode) {
   // Handle implicit refs: [title][<ref>], ![alt or caption][<ref>]
@@ -605,6 +606,18 @@ const parseRef = function(capture, state, refNode) {
       const brokenImage = { type: "image", attrs: { src: "undefined-image" } }
       if (def.attrs && def.attrs.alt) { brokenImage.attrs.alt = def.attrs.alt }
       return brokenImage
+    }
+    if (sketchRegEx.test(def.target) && refNode.type !== "link") {
+      // A sketch is written on one line, as `sketch: ` + source. Its line breaks are
+      // written as ␤. The source is the authority; the title in the body is only a label.
+      const source = def.target.replace(sketchRegEx, "").replace(/␤/g, "\n")
+      const sketch = { type: "sketch", attrs: { source } }
+      // TODO: When Hurmet supports a figure that holds a sketch, `!![caption][n]`
+      // will create one. Until then, the caption is dropped and the sketch, an inline
+      // node, is wrapped in a paragraph so it can stand at block level.
+      return refNode.type === "figure"
+        ? { type: "paragraph", content: [sketch] }
+        : sketch
     }
     if (refNode.type === "figure") {
       refNode = { type: "figure", attrs: def.attrs, content: [
@@ -800,8 +813,8 @@ rules.set("figure", {
 });
 rules.set("def", {
   isLeaf: true,
-  // A drawing takes its whole line, which may contain ">".
-  match: blockRegex(/^\[([^\]\n]+)\]: *(?:¢(`+)([\s\S]*?[^`])\2(?!`)|draw\([^\n]*|<?([^\n>]*)>? *(?:\n\{([^\n}]*)\})?)/),
+  // A drawing or a sketch takes its whole line, which may contain ">".
+  match: blockRegex(/^\[([^\]\n]+)\]: *(?:¢(`+)([\s\S]*?[^`])\2(?!`)|draw\([^\n]*|sketch:[^\n]*|<?([^\n>]*)>? *(?:\n\{([^\n}]*)\})?)/),
   // Link reference definitions were handled in md2ast().
   parse: function(capture, state) { return { type: "null" } }
 });
