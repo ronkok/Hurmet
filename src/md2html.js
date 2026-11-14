@@ -2,6 +2,7 @@ import { parse } from "./parser.js"
 import { md2ast } from "./md2ast.js"
 import { dt } from "./constants"
 import { renderSketch } from "./renderSketch"
+import { patternDefs, hurmetPatternId } from "./sketch/fillPatterns.js"
 
 const sanitizeUrl = function(url) {
   if (url == null) {
@@ -93,7 +94,9 @@ const dataStr = str => {
   }
 }
 
-export const writeSVG = dwg => {
+// `omitPatterns` names fill patterns to leave out, to keep the SVG small. Elements
+// filled with one of them are written with no fill.
+export const writeSVG = (dwg, omitPatterns = []) => {
   let svg = '<svg xmlns="http://www.w3.org/2000/svg"'
   Object.keys(dwg.attrs).forEach(key => {
     // xmlns is written above. float is not an SVG attribute; the calculation's
@@ -103,11 +106,20 @@ export const writeSVG = dwg => {
     }
   })
   svg += ">\n"
+  const patterns = dwg.patterns || []
+  if (patterns.length > 0) {
+    svg += `<defs>${patternDefs(patterns, omitPatterns)}</defs>\n`
+  }
+  const omittedFills = new Set(patterns.filter(p => omitPatterns.includes(p.name))
+    .map(p => `url(#${hurmetPatternId(p.name, p.color)})`))
   dwg.children.forEach(el => {
     svg += `<${el.tag}`
     Object.keys(el.attrs).forEach(attr => {
       if (el.tag !== "title") {
-        svg += ` ${attr}='${el.attrs[attr]}'`
+        const value = attr === "fill" && omittedFills.has(el.attrs.fill)
+          ? "none"
+          : el.attrs[attr]
+        svg += ` ${attr}='${value}'`
       }
     })
     svg += ">\n"

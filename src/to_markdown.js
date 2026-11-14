@@ -306,10 +306,12 @@ const hurmetNodes =  {
     const defIndex = getDefIndex(state)
     const source = node.attrs.source.trim()
     if (state.isGFM) {
-      // Other Markdown readers get the sketch as an image of its SVG.
+      // Other Markdown readers get the sketch as an image of its SVG. The gravel
+      // pattern is left out because its def is about 22 KB, the largest by far;
+      // gravel-filled shapes show only their outlines.
       const svg = node.attrs.svg ? node.attrs.svg : renderSketch(source).svg
       state.paths.set(defIndex, svg
-        ? "data:image/svg+xml," + encodeURIComponent(writeSVG(svg))
+        ? "data:image/svg+xml," + encodeURIComponent(writeSVG(svg, ["gravel"]))
         : "undefined")
     } else {
       // Hurmet writes the sketch source on one line. Its line breaks are written as ␤.

@@ -1,6 +1,7 @@
 import { addSnapPoints, addIntersectPointsForNewElement } from './snap.js'
 import { groups } from './groups.js'
 import { sanitizeForId } from './shared.js'
+import { fillPatterns, fillPatternDef } from './fillPatterns.js'
 
 // This file creates a virtual representation of the drawing
 // and provides methods to manipulate both the virtual representation
@@ -30,30 +31,8 @@ const domKeys = {
 // real DOM element is created or revised, so the virtual/serialized model
 // never has to store a generated pattern id.
 //
-// Tile geometry for the fill patterns built from raw shapes rather than a
-// <pattern> already defined on their menu button (see index.html's
-// .fill-pattern-options). Diagonal/crosshatch/grid/earth/wood/gravel/
-// concrete/sand are left out of this map because they already have a
-// tileable <pattern> defined inline on their own fill-pattern-btn; that
-// gets reused (see
-// fillPatternButtonIds below) rather than redescribing the same geometry
-// here.
-const fillPatternTiles = {
-  dots: {
-    width: 20, height: 20,
-    shapes: (color) =>
-      `<circle cx="5" cy="5" r="1.2" fill="${color}"/>` +
-      `<circle cx="15" cy="15" r="1.2" fill="${color}"/>`
-  }
-}
-const fillPatternButtonIds = { diagonal: 'fp-diagonal', crosshatch: 'fp-crosshatch', grid: 'fp-grid', earth: 'fp-earth', wood: 'fp-wood', gravel: 'fp-gravel', concrete: 'fp-concrete', sand: 'fp-sand' }
-
-
-function recolorPatternDef(el, color) {
-  if (el.getAttribute('fill') === '#000') el.setAttribute('fill', color)
-  if (el.getAttribute('stroke') === '#000') el.setAttribute('stroke', color)
-  for (const child of el.children) recolorPatternDef(child, color)
-}
+// Every pattern's tile comes from fillPatterns.js, which Hurmet's draw()
+// renderers also use.
 
 // A <pattern>'s tile-repeat spacing (its width/height, mapped through the
 // referencing element's ambient transform) scales along with the drawing —
@@ -128,36 +107,19 @@ function scopeIdFor(defs) {
   return defsScopes.get(defs)
 }
 
-// Create the <pattern> def itself (tile-based, or cloned from the matching
-// fill-pattern-btn) under `defs`, colored for `color`. Returns defId, or null
-// if `pattern` has no known source. See ensureFillPatternDef for the flip
-// note, and setPatternScale above for how its size stays constant on screen.
+// Create the <pattern> def itself, from fillPatterns.js, under `defs`, colored
+// for `color`. Returns defId, or null if `pattern` is unknown. See
+// ensureFillPatternDef for the flip note, and setPatternScale above for how
+// its size stays constant on screen.
 function createPatternDef(defs, defId, pattern, color) {
-  const S = getCurrentScale(defs)
-  const tile = fillPatternTiles[pattern]
-  if (tile) {
-    const patternEl = document.createElementNS('http://www.w3.org/2000/svg', 'pattern')
-    patternEl.setAttribute('id', defId)
-    patternEl.setAttribute('width', tile.width)
-    patternEl.setAttribute('height', tile.height)
-    patternEl.setAttribute('patternUnits', 'userSpaceOnUse')
-    patternEl.setAttribute('data-base-transform', 'scale(1,-1)')
-    setPatternScale(patternEl, S)
-    patternEl.innerHTML = tile.shapes(color)
-    defs.appendChild(patternEl)
-    return defId
-  }
-
-  const sourceId = fillPatternButtonIds[pattern]
-  const sourcePattern = sourceId && document.getElementById(sourceId)
-  if (!sourcePattern) return null
-  const clonedPattern = sourcePattern.cloneNode(true)
-  clonedPattern.setAttribute('id', defId)
-  const sourceTransform = sourcePattern.getAttribute('patternTransform') || ''
-  clonedPattern.setAttribute('data-base-transform', `scale(1,-1) ${sourceTransform}`.trim())
-  setPatternScale(clonedPattern, S)
-  recolorPatternDef(clonedPattern, color)
-  defs.appendChild(clonedPattern)
+  const tile = fillPatterns[pattern]
+  if (!tile) return null
+  const holder = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+  holder.innerHTML = fillPatternDef(pattern, defId, color)
+  const patternEl = holder.firstElementChild
+  patternEl.setAttribute('data-base-transform', `scale(1,-1) ${tile.transform || ''}`.trim())
+  setPatternScale(patternEl, getCurrentScale(defs))
+  defs.appendChild(patternEl)
   return defId
 }
 

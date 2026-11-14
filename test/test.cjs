@@ -869,7 +869,7 @@ circle [1, 1], 1
 pattern "solid"
 circle [1, 1], 1`)
   check("pattern fill", svg.children.map(el => el.attrs.fill).join(" "),
-    "url(#fp-sand-_f00) url(#fp-sand-_f00) url(#fp-sand-blue) blue")
+    "url(#hp-sand-_f00) url(#hp-sand-_f00) url(#hp-sand-blue) blue")
   check("patterns list", json(svg.patterns),
     json([{ name: "sand", color: "#f00" }, { name: "sand", color: "blue" }]))
   svg = svgOf(`frame 100, 100\nlinetype "dotted"\nfill "red"\nline [0, 0; 1, 1]`)
@@ -1260,6 +1260,17 @@ const testSketches = async() => {
   const sketchHtmlRegEx = /<span class='hurmet-sketch' data-source='[^']*'><svg [\s\S]*x &gt; y/
   check("md2html", sketchHtmlRegEx.test(hurmet.md2html(md)), true)
   check("hurmet2html", sketchHtmlRegEx.test(await hurmet.hurmet2html(md)), true)
+
+  // Fill patterns. Each pattern + color gets one <pattern> def, written in the SVG.
+  const patternSource = 'frame 100, 100␤scene 1, "px", 0, 0␤fill "red"␤pattern "sand"' +
+    '␤rect (0, 0; 50, 50)␤rect (50, 0; 100, 50)␤fill "blue"␤pattern "gravel"' +
+    '␤rect (0, 50; 50, 100)'
+  const patternHtml = hurmet.md2html(head + "![p][1]\n\n[1]: sketch: " + patternSource + "\n")
+  check("pattern defs", (patternHtml.match(/<pattern id="[^"]*"/g) || []),
+    ['<pattern id="hp-sand-red"', '<pattern id="hp-gravel-blue"'])
+  check("pattern color", /<pattern id="hp-sand-red"[^]*?stroke="red"/.test(patternHtml), true)
+  check("pattern fills", (patternHtml.match(/fill='url\(#[^)]*\)'/g) || []),
+    ["fill='url(#hp-sand-red)'", "fill='url(#hp-sand-red)'", "fill='url(#hp-gravel-blue)'"])
 }
 
 testSavedResults().then(testImport).then(testDrawingHtml).then(testSketches).then(() => {

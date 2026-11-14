@@ -1,3 +1,5 @@
+import { patternDefs } from "./sketch/fillPatterns.js"
+
 export const renderSVG = dwg => {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
   Object.keys(dwg.attrs).forEach(key => {
@@ -7,6 +9,12 @@ export const renderSVG = dwg => {
       svg.setAttribute(key, dwg.attrs[key])
     }
   })
+  if (dwg.patterns && dwg.patterns.length > 0) {
+    // The <pattern> defs of the fill patterns the drawing uses.
+    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs")
+    defs.innerHTML = patternDefs(dwg.patterns)
+    svg.appendChild(defs)
+  }
   dwg.children.forEach(el => {
     const node = document.createElementNS("http://www.w3.org/2000/svg", el.tag)
     Object.keys(el.attrs).forEach(attr => {

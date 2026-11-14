@@ -6,14 +6,16 @@ import { inlineMd2ast } from "./md2ast"
 import { errorOprnd } from "./error"
 import {
   unitScaleFactors, dashMap, linecapMap, fillPatternNames, arrowheadNames, arrowdotNames,
-  markerFamily, sanitizeForId, roundingSpecRegEx, inchFractions, dotLabelPositionRegEx,
+  markerFamily, roundingSpecRegEx, inchFractions, dotLabelPositionRegEx,
   markAttribute
 } from "./sketch/shared.js"
 import { resolveUnit } from "./sketch/unitAliases.js"
 import { simplifyR } from "./sketch/arcStep.js"
+import { hurmetPatternId } from "./sketch/fillPatterns.js"
 
 // Sketch (src/sketch/) and draw() read the same statements. Their shared definitions
-// live in Sketch's shared.js, unitAliases.js, and arcStep.js, which import nothing.
+// live in Sketch's shared.js, unitAliases.js, and arcStep.js, which import nothing,
+// and fillPatterns.js, which imports only shared.js.
 
 // decimalFormat and roundingSpec come from the parent document. A format statement
 // in the drawing overrides roundingSpec.
@@ -84,7 +86,7 @@ const fillPaint = svg => {
   if (!svg.patterns.some(p => p.name === pattern && p.color === fill)) {
     svg.patterns.push({ name: pattern, color: fill })
   }
-  return `url(#fp-${pattern}-${sanitizeForId(fill)})`
+  return `url(#${hurmetPatternId(pattern, fill)})`
 }
 
 // Set an element's stroke, line type and fill. Elements with no inside, such
