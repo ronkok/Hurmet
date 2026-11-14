@@ -95,7 +95,11 @@ const dataStr = str => {
 const writeSVG = dwg => {
   let svg = '<svg xmlns="http://www.w3.org/2000/svg"'
   Object.keys(dwg.attrs).forEach(key => {
-    svg += ` ${key}='${dwg.attrs[key]}'`
+    // xmlns is written above. float is not an SVG attribute; the calculation's
+    // span carries it as CSS.
+    if (key !== "xmlns" && key !== "float") {
+      svg += ` ${key}='${dwg.attrs[key]}'`
+    }
   })
   svg += ">\n"
   dwg.children.forEach(el => {
@@ -237,7 +241,8 @@ const nodes = {
   calculation(node) {
     if (node.attrs.dtype && node.attrs.dtype === dt.DRAWING) {
       const svg = writeSVG(node.attrs.resultdisplay)
-      const style = svg.indexOf('float="right"' > -1) ? " style='float: right;'" : ""
+      const float = node.attrs.resultdisplay.attrs.float
+      const style = float === "left" || float === "right" ? ` style='float: ${float};'` : ""
       return `<span class='hurmet-calc' data-entry=${dataStr(node.attrs.entry)}${style}>` +
         `${svg}</span>`
     } else if (node.attrs.dtype && node.attrs.dtype === dt.MODULE &&

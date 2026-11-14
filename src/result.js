@@ -8,6 +8,7 @@ import { Matrix, isMatrix, isVector } from "./matrix"
 import { DataFrame } from "./dataframe"
 import { Tuple } from "./tuple"
 import { Cpx } from "./complex"
+import { draw } from "./draw"
 
 // A result has been sent here from evaluate.js or updateCalculations.js.
 // Format the result for display.
@@ -49,6 +50,7 @@ export const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAw
 
   if (result.dtype === dt.DRAWING) {
     stmt.resultdisplay = result.value
+    draw.fitToContent(stmt.resultdisplay)
     delete stmt.resultdisplay.temp
     return stmt
   }

@@ -2267,24 +2267,42 @@ title "_string_"
 
 : Title of the drawing, for accessibility.
 
+caption true | false
+
+: If true, Hurmet writes the title as a caption under the drawing. Default = false.
+
 frame _width_, _height_<span class="optional">, position</span>
 
 : _width_ and _height_, in px, define the size of the drawing in the document.
-  _position_ can be "inline", "left", or "right".\
-  This command must come before anything is drawn.
+  _position_ can be "inline", "left", or "right". "left" and "right" float the drawing,
+  so that text wraps beside it.\
+  This command must come before anything is drawn.\
+  In a drawing with a `scene` and no `grid` or `axes`, Hurmet fits the drawing to its
+  contents, with a 4 px margin, so _width_ and _height_ are replaced.
+
+scene _scale_, "_unit_", _dx_, _dy_
+
+: Sets the coordinate system. A point (_x_, _y_) is drawn _scale_ × _unit_ × (_x_ + _dx_)
+  from the left edge of the frame and _scale_ × _unit_ × (_y_ + _dy_) up from its
+  bottom edge. So _dx_ and _dy_ locate the origin, in model units.\
+  _unit_ can be "px", "in", "ft", "ft-in", "mile", "pt", "mm", "cm", "m", or "km".
+  For example, `scene 1/48, "ft-in", 12, 12` draws at ¼″ = 1′-0″. In an "ft-in" scene,
+  coordinates are in inches and dimension labels are written in feet and inches.\
+  This is the coordinate system that Sketch writes.
 
 view _x_~min~, _x_~max~<span class="optional">, yₘᵢₙ, yₘₐₓ,</span>
 
-: This command is usually written directly after `frame`. The arguments set the
-  coordinate system. If _y_~min~ is omitted, the x-axis is placed in
-  the middle of the picture. If _y_~max~ is omitted, the scales along
-  the x-axis and y-axis are the same.
+: An alternative to `scene`, handy for plots. It is usually written directly after
+  `frame`. The arguments set the coordinate system. If _y_~min~ is omitted, the x-axis
+  is placed in the middle of the picture. If _y_~max~ is omitted, the scales along
+  the x-axis and y-axis are the same. Of `scene` and `view`, the later one applies.
 
-axes _dx_, _dy_<span class="optional">, "labels"</span>
+axes _dx_, _dy_<span class="optional">, "labels", gdx, gdy</span>
 
-: Draws coordinate axes.
+: Draws coordinate axes with a tick every _dx_ and _dy_. "labels" writes a number at
+  each tick. _gdx_ and _gdy_ add a grid.
 
-grid _dx_, _dy_<span class="optional">, "labels"</span>
+grid _dx_, _dy_
 
 : Draws a background grid.
 
@@ -2297,62 +2315,104 @@ strokewidth _pixelvalue_
 
 : Sets the width of lines, paths, and shape outlines.
 
-strokedasharray "_dashpixel_ _spacepixel_"
+linetype "solid" | "dashed" | "dotted" | "centerline" | "border"
 
-: Set a pattern of dashes and gaps for lines and paths. Default = null.
+: Sets the dash pattern of lines, paths, and shape outlines. Default = "solid".
 
 fill "_color_"
 
-: Sets the default color for filling in the inside of solid figures.
+: Sets the default color for filling in the inside of solid figures. Default = "none".
 
-fontfamily "sansserif" | "serif" | "fixed" | "monotype"
+pattern "solid" | "diagonal" | "crosshatch" | "grid" | "dots" | "wood" | "sand" | "gravel" | "earth" | "concrete"
 
-: Sets the font type.
+: Fills solid figures with a pattern, drawn in the current fill color.
+  Default = "solid".
+
+fontfamily "_family_"
+
+: Sets the font, e.g., "sans-serif", "serif", or "monospace". Default = "sans-serif".
 
 fontsize _pixelvalue_
 
 : Sets the font size in px. Default = 13.33 (~10 pt).
 
-marker "none" | "dot" | "arrow" | "arrowdot"
+fontcolor "_color_"
 
-: Sets the default marker symbol that is drawn at the endpoints of lines and paths.
-  Dots are also set along the intermediate points of paths and curves.
+: Sets the color of text. Default = "black".
+
+marker "none" | "arrow" | "dot" | "arrowdot"
+
+: Sets the marker that is drawn at the end point of a line, path, arc, or freehand
+  curve. The size of an arrowhead suits the stroke width. "arrowdot" draws a dot on
+  the end point, with an arrowhead that touches it. Default = "none".
+
+format "_spec_"
+
+: Sets the rounding of dimension labels, e.g., "h3" or "f2". See [rounding](#rounding-of-results).
+  Without a `format` statement, a drawing uses the format that is active at that point
+  in the document.
+
+fraction 8 | 16 | 32 | 64
+
+: In an "ft-in" scene, dimension labels round inches to the nearest 1/8, 1/16, 1/32,
+  or 1/64. Default = 16.
 
 line [_x_, _y_; _u_, _v_]
 
 : Draws a straight line from coordinate point _x_, _y_ to coordinate point _u_, _v_.
 
-path  (_x₁_, _y₁_; _x₂_, _y₂_; …; _xₙ_, _yₙ_)       or\
-path  (_x₁_, _y₁_, 0; _x₂_, _y₂_, _r₂_; …; _xₙ_, _yₙ_, _rₙ_)
+path  (_x₁_, _y₁_; _x₂_, _y₂_; …; _xₙ_, _yₙ_)       or\
+path  (_x₁_, _y₁_, 0; _x₂_, _y₂_, _r₂_; …; _xₙ_, _yₙ_, _rₙ_)       or\
+path  (_x₁_, _y₁_, 0, 0, 0; _x₂_, _y₂_, ±_rx₂_, _ry₂_, _angle₂_; …)
 
-: Draws a path connecting all the points in the matrix.
+: Draws a path connecting all the points in the matrix. Every row has the same length.
   
-  Use the second form of the statement if the path contains any circular arcs. In that case,
-  `rₙ` is the radius of the arc. Write a positive radius for arcs drawn counter-clockwise
-  and write a negative radius for arcs drawn clockwise.
+  Use the second form of the statement if the path contains any circular arcs. In that
+  case, `rₙ` is the radius of the arc that ends at point _n_. Write a positive radius for
+  arcs drawn counter-clockwise and a negative radius for arcs drawn clockwise. Write 0
+  for a straight step.
+
+  Use the third form if the path contains any elliptical arcs. The ellipse has radii _rx_
+  and _ry_ and is rotated _angle_ degrees counter-clockwise. The sign of _rx_ gives the
+  direction of the arc.
+
+  An arc spans at most half of its circle or ellipse.
+
+rect  [_x_, _y_; _u_, _v_]
+
+: Draws a rectangle with corners at points _x_, _y_ and _u_, _v_.
 
 circle  [_x_, _y_], _r_
 
 : Draws a circle of radius _r_, centered at point _x_, _y_.
 
-dot  [_x_, _y_]<span class="optional">, "open" | "closed", "label", position</span>
+ellipse  [_x_, _y_], _rx_, _ry_<span class="optional">, angle</span>
 
-: Draws a dot with an optional appended label.  _position_ can be: "above"|"below"|"left"|"right"|"aboveleft"|"aboveright"
-  |"belowleft"|"belowright"|null
+: Draws an ellipse of radii _rx_ and _ry_, centered at point _x_, _y_, and rotated
+  _angle_ degrees counter-clockwise.
 
-ellipse  [_x_, _y_], _rx_, _ry_
+polygon  _n_, [_x_, _y_], _r_<span class="optional">, angle</span>
 
-: Draws an ellipse of radii _rx_ and _ry_, centered at point _x_, _y_.
+: Draws a regular polygon with _n_ sides, centered at point _x_, _y_, with an inscribed
+  radius of _r_. With _angle_ = 0, the bottom side is level. A positive _angle_ rotates
+  the polygon counter-clockwise, in degrees.
 
-arc  [_x_, _y_; _u_, _v_], _r_ or [_rx_, _ry_]
+arc  [_x_, _y_; _u_, _v_], _r_ or [±_rx_, _ry_<span class="optional">, angle</span>]
 
-: Draws an arc in anticlockwise direction from point _x_, _y_ to point _u_, _v_.
-  It will be either a circular arc of radius _r_ or an elliptical arc of radius [_rx_, _ry_].
+: Draws an arc from point _x_, _y_ to point _u_, _v_. It will be either a circular arc of
+  radius _r_ or an elliptical arc of radii _rx_ and _ry_ on an ellipse rotated _angle_
+  degrees. A positive _r_ or _rx_ draws the arc counter-clockwise. A negative one draws
+  it clockwise. An arc spans at most half of its circle or ellipse.
 
-rect  [_x_, _y_; _u_, _v_]<span class="optional">, r</span>
+freehand  (_x₁_, _y₁_; _x₂_, _y₂_; …; _xₙ_, _yₙ_)
 
-: Draws a rectangle with corners at points _x_, _y_ and _u_, _v_. The optional _r_
-  argument defines the corner radius of a rounded rectangle.
+: Draws a smooth curve through the points.
+
+image  [_x_, _y_; _u_, _v_], "_url_"<span class="optional">, rotation, mirrored</span>
+
+: Draws an image with corners at points _x_, _y_ and _u_, _v_. _rotation_ turns it
+  clockwise about its center, in degrees. If _mirrored_ is true, the image is flipped
+  top to bottom before it is rotated.
 
 text  [_x_, _y_], "_string_"<span class="optional">, position</span>
 
@@ -2360,18 +2420,35 @@ text  [_x_, _y_], "_string_"<span class="optional">, position</span>
   
   _position_ can be "above", "below", "middle", "left", "right", "aboveleft",
   "aboveright", "belowleft", or "belowright". The default is "middle".
+  "leaderleft" and "leaderright" write the first line of text level with the point.
 
   The string can be styled with Markdown inline styles: \__italic_\_, \*\***bold**\*\*,
   \``code`\`, `~`~subscript~`~`, `^`^superscript^`^`, and `~~`~~strikethrough~~`~~`.
+  A string can span several lines.
 
-leader [_x₁_, _y₁_; _x₂_, _y₂_<span class="optional">; x₃, y₃; etc</span>], "_note_"
+dot  [_x_, _y_]<span class="optional">, "label", position</span>
 
-: Writes a note with an arrow pointing to a location.
+: Draws a dot with an optional label. The dot’s outline takes the current stroke and
+  its inside takes the current fill, so `fill "none"` gives a hollow dot.\
+  _position_ can be "above", "below", "middle", "left", "right", "aboveleft",
+  "aboveright", "belowleft", or "belowright". The default is "below".
 
-dimension [_x₁_, _y₁_; _x₂_, _y₂_; <span class="optional">x₃, y₃; etc;</span> _xLabel_, _yLabel_], "_label_" or ["_label₁_", "_label₂_", etc.]
+arrow (_x₁_, _y₁_; _x₂_, _y₂_<span class="optional">; x₃, y₃; etc</span>)<span class="optional">, "note"</span>
 
-: Writes a string of dimensions. _xLabel_ and _yLabel_ locate the labels. The
-  other points each define a witness line.
+: Draws a straight arrow, with an arrowhead at its last point. The optional note is
+  written at the first point, on the side away from the arrow.
+
+dimension (_x₁_, _y₁_; _x₂_, _y₂_; <span class="optional">x₃, y₃; etc;</span> _xLabel_, _yLabel_)<span class="optional">, ["label₁", "label₂", etc.], dimAngle, extAngle</span>
+
+: Draws a string of dimensions. The dimension line passes through point _xLabel_,
+  _yLabel_. The other points each define an extension line.
+
+  Without angles, the dimension line is horizontal or vertical, whichever puts the
+  label point between the end points. With angles, in degrees, the dimension line runs
+  at _dimAngle_ and the extension lines run at _extAngle_.
+
+  A span with no label shows its measured length, rounded by the current
+  `format`. A label of "" leaves its span blank.
 
 plot  _f_ or [_g_, _h_]<span class="optional">, 𝑛, xₘᵢₙ, xₘₐₓ</span>
 

@@ -436,6 +436,301 @@ const arcCommand = (attrs, r, q) => {
   return `A${rxPx},${ryPx} ${angle === 0 ? 0 : -angle} 0 ${sweep} ${pointText(q, attrs)}`
 }
 
+// Fitting the SVG to its contents
+// As in Sketch's utils.js computeFrame(), a drawing with a scene and no grid or axes is
+// sized to the extent of its elements plus a margin. The elements keep their px
+// coordinates; a viewBox brings the box into view. Like Sketch, the box ignores stroke
+// widths, which the margin covers. Unlike Sketch, it includes arrowheads and marker dots,
+// which Hurmet draws as elements, and it estimates text from character counts, since
+// Hurmet can't measure glyphs while it calculates.
+
+const fitMargin = 4 // px
+
+// A 2D affine matrix [a, b, c, d, e, f] maps (x, y) to (a·x + c·y + e, b·x + d·y + f).
+const identity = [1, 0, 0, 1, 0, 0]
+const multiply = (m, n) => [
+  m[0] * n[0] + m[2] * n[1], m[1] * n[0] + m[3] * n[1],
+  m[0] * n[2] + m[2] * n[3], m[1] * n[2] + m[3] * n[3],
+  m[0] * n[4] + m[2] * n[5] + m[4], m[1] * n[4] + m[3] * n[5] + m[5]
+]
+const applyMatrix = (m, [x, y]) => [m[0] * x + m[2] * y + m[4], m[1] * x + m[3] * y + m[5]]
+
+// The matrix of an SVG transform attribute: translate, scale, and rotate.
+const transformMatrix = str => {
+  let m = identity
+  for (const [, fn, argStr] of (str || "").matchAll(/(\w+)\(([^)]*)\)/g)) {
+    const a = argStr.split(/[\s,]+/).filter(s => s !== "").map(Number)
+    if (fn === "translate") {
+      m = multiply(m, [1, 0, 0, 1, a[0], a[1] || 0])
+    } else if (fn === "scale") {
+      m = multiply(m, [a[0], 0, 0, a.length > 1 ? a[1] : a[0], 0, 0])
+    } else if (fn === "rotate") {
+      const rad = a[0] * Math.PI / 180
+      const [cos, sin] = [Math.cos(rad), Math.sin(rad)]
+      const [cx, cy] = a.length === 3 ? [a[1], a[2]] : [0, 0]
+      m = multiply(m, [1, 0, 0, 1, cx, cy])
+      m = multiply(m, [cos, sin, -sin, cos, 0, 0])
+      m = multiply(m, [1, 0, 0, 1, -cx, -cy])
+    }
+  }
+  return m
+}
+
+// The parameters in [0, 1] where a cubic Bézier coordinate reaches an extreme.
+const cubicExtrema = (p0, p1, p2, p3) => {
+  // The derivative is a quadratic: a·t² + b·t + c
+  const a = 3 * (-p0 + 3 * p1 - 3 * p2 + p3)
+  const b = 6 * (p0 - 2 * p1 + p2)
+  const c = 3 * (p1 - p0)
+  const roots = []
+  if (Math.abs(a) < 1e-12) {
+    if (Math.abs(b) > 1e-12) { roots.push(-c / b) }
+  } else {
+    const disc = b * b - 4 * a * c
+    if (disc >= 0) {
+      const root = Math.sqrt(disc)
+      roots.push((-b + root) / (2 * a), (-b - root) / (2 * a))
+    }
+  }
+  return roots.filter(t => t > 0 && t < 1)
+}
+const cubicPoint = (p0, p1, p2, p3, t) => {
+  const mt = 1 - t
+  return [0, 1].map(k => mt * mt * mt * p0[k] + 3 * mt * mt * t * p1[k] +
+    3 * mt * t * t * p2[k] + t * t * t * p3[k])
+}
+
+// The points that bound an SVG elliptical arc: its end points and any extreme points
+// along the way. See the SVG spec, "Elliptical arc implementation notes", F.6.5.
+const arcExtremePoints = (p1, rx, ry, degrees, largeArc, sweep, p2) => {
+  rx = Math.abs(rx)
+  ry = Math.abs(ry)
+  if (rx === 0 || ry === 0) { return [p2] }
+  const phi = degrees * Math.PI / 180
+  const [cos, sin] = [Math.cos(phi), Math.sin(phi)]
+  const dx = (p1[0] - p2[0]) / 2
+  const dy = (p1[1] - p2[1]) / 2
+  const x1 = cos * dx + sin * dy
+  const y1 = -sin * dx + cos * dy
+  const lambda = (x1 * x1) / (rx * rx) + (y1 * y1) / (ry * ry)
+  if (lambda > 1) {
+    // The radii are too small for the chord, so scale them up, as SVG does.
+    rx *= Math.sqrt(lambda)
+    ry *= Math.sqrt(lambda)
+  }
+  const num = rx * rx * ry * ry - rx * rx * y1 * y1 - ry * ry * x1 * x1
+  const den = rx * rx * y1 * y1 + ry * ry * x1 * x1
+  const coef = (largeArc === sweep ? -1 : 1) * Math.sqrt(Math.max(0, num / den))
+  const cxp = coef * rx * y1 / ry
+  const cyp = -coef * ry * x1 / rx
+  const cx = cos * cxp - sin * cyp + (p1[0] + p2[0]) / 2
+  const cy = sin * cxp + cos * cyp + (p1[1] + p2[1]) / 2
+  const theta1 = Math.atan2((y1 - cyp) / ry, (x1 - cxp) / rx)
+  let delta = Math.atan2((-y1 - cyp) / ry, (-x1 - cxp) / rx) - theta1
+  if (sweep && delta < 0) { delta += 2 * Math.PI }
+  if (!sweep && delta > 0) { delta -= 2 * Math.PI }
+  const point = theta => [
+    cx + rx * cos * Math.cos(theta) - ry * sin * Math.sin(theta),
+    cy + rx * sin * Math.cos(theta) + ry * cos * Math.sin(theta)
+  ]
+  const tau = 2 * Math.PI
+  const onArc = theta => {
+    const t = delta >= 0
+      ? ((theta - theta1) % tau + tau) % tau
+      : ((theta1 - theta) % tau + tau) % tau
+    return t <= Math.abs(delta)
+  }
+  const thetaX = Math.atan2(-ry * sin, rx * cos)
+  const thetaY = Math.atan2(ry * cos, rx * sin)
+  const candidates = [thetaX, thetaX + Math.PI, thetaY, thetaY + Math.PI]
+  return [p2, ...candidates.filter(onArc).map(point)]
+}
+
+// The points that bound an SVG path's d attribute. Handles every path command.
+const pathPoints = d => {
+  const tokens = d.match(/[a-zA-Z]|[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?/g) || []
+  const points = []
+  let i = 0
+  let cmd = ""
+  let cur = [0, 0]
+  let start = [0, 0]
+  let lastControl = null // For S and T
+  let lastCmd = ""
+  const num = () => Number(tokens[i++])
+  while (i < tokens.length) {
+    if (/[a-zA-Z]/.test(tokens[i])) {
+      cmd = tokens[i++]
+    } else if (cmd === "M") {
+      cmd = "L" // Coordinates after a moveto are implicit linetos.
+    } else if (cmd === "m") {
+      cmd = "l"
+    }
+    const rel = cmd === cmd.toLowerCase()
+    const pt = () => {
+      const x = num()
+      const y = num()
+      return rel ? [cur[0] + x, cur[1] + y] : [x, y]
+    }
+    const upper = cmd.toUpperCase()
+    let control = null
+    if (upper === "Z") {
+      cur = start
+    } else if (upper === "M") {
+      cur = pt()
+      start = cur
+      points.push(cur)
+    } else if (upper === "L" || upper === "T") {
+      const p = pt()
+      if (upper === "T") {
+        // A quadratic whose control point reflects the last one
+        const q = lastControl && /[QT]/.test(lastCmd)
+          ? [2 * cur[0] - lastControl[0], 2 * cur[1] - lastControl[1]]
+          : cur
+        control = q
+        const c1 = [cur[0] + 2 / 3 * (q[0] - cur[0]), cur[1] + 2 / 3 * (q[1] - cur[1])]
+        const c2 = [p[0] + 2 / 3 * (q[0] - p[0]), p[1] + 2 / 3 * (q[1] - p[1])]
+        for (const k of [0, 1]) {
+          for (const t of cubicExtrema(cur[k], c1[k], c2[k], p[k])) {
+            points.push(cubicPoint(cur, c1, c2, p, t))
+          }
+        }
+      }
+      cur = p
+      points.push(cur)
+    } else if (upper === "H") {
+      cur = [rel ? cur[0] + num() : num(), cur[1]]
+      points.push(cur)
+    } else if (upper === "V") {
+      cur = [cur[0], rel ? cur[1] + num() : num()]
+      points.push(cur)
+    } else if (upper === "C" || upper === "S" || upper === "Q") {
+      let c1
+      let c2
+      let p
+      if (upper === "C") {
+        c1 = pt()
+        c2 = pt()
+        p = pt()
+        control = c2
+      } else if (upper === "S") {
+        c1 = lastControl && /[CS]/.test(lastCmd)
+          ? [2 * cur[0] - lastControl[0], 2 * cur[1] - lastControl[1]]
+          : cur
+        c2 = pt()
+        p = pt()
+        control = c2
+      } else {
+        const q = pt()
+        p = pt()
+        control = q
+        c1 = [cur[0] + 2 / 3 * (q[0] - cur[0]), cur[1] + 2 / 3 * (q[1] - cur[1])]
+        c2 = [p[0] + 2 / 3 * (q[0] - p[0]), p[1] + 2 / 3 * (q[1] - p[1])]
+      }
+      for (const k of [0, 1]) {
+        for (const t of cubicExtrema(cur[k], c1[k], c2[k], p[k])) {
+          points.push(cubicPoint(cur, c1, c2, p, t))
+        }
+      }
+      cur = p
+      points.push(cur)
+    } else if (upper === "A") {
+      const [rx, ry, angle, largeArc, sweep] = [num(), num(), num(), num(), num()]
+      const p = pt()
+      points.push(...arcExtremePoints(cur, rx, ry, angle, largeArc, sweep, p))
+      cur = p
+    } else {
+      break // Not a path command
+    }
+    lastControl = control
+    lastCmd = upper
+  }
+  return points
+}
+
+// The estimated px box of a <text> element, from its character count. As in Sketch's
+// text.js, a character is 0.6 em wide, or 0.8 of that in a subscript or superscript.
+// Each line is 1.2 em tall, centered on its y (dominant-baseline="middle").
+const textBox = el => {
+  const fs = Number(el.attrs["font-size"]) || 13.33
+  const x = Number(el.attrs.x)
+  const y = Number(el.attrs.y)
+  const lineWidths = []
+  let lineY = y
+  let top = Infinity
+  let bottom = -Infinity
+  el.children.forEach((tspan, k) => {
+    const attrs = tspan.attrs || {}
+    if (k === 0 || attrs.dy != null) {
+      if (k > 0) { lineY += Number(attrs.dy) }
+      lineWidths.push(0)
+      top = Math.min(top, lineY - 0.6 * fs)
+      bottom = Math.max(bottom, lineY + 0.6 * fs)
+    }
+    const scale = attrs["baseline-shift"] ? 0.8 : 1
+    lineWidths[lineWidths.length - 1] += tspan.text.length * 0.6 * fs * scale
+  })
+  if (lineWidths.length === 0) { return null }
+  const width = Math.max(...lineWidths)
+  const anchor = el.attrs["text-anchor"]
+  const left = anchor === "start" ? x : anchor === "end" ? x - width : x - width / 2
+  return [[left, top], [left + width, bottom]]
+}
+
+// The points that bound one element, in px.
+const elementPoints = el => {
+  const a = el.attrs
+  const m = transformMatrix(a.transform)
+  switch (el.tag) {
+    case "path":
+      return pathPoints(a.d)
+    case "polygon":
+    case "polyline":
+      return a.points.trim().split(/\s+/).map(p => p.split(",").map(Number))
+    case "rect":
+    case "image": {
+      const [x, y, w, h] = [a.x, a.y, a.width, a.height].map(Number)
+      return [[x, y], [x + w, y], [x, y + h], [x + w, y + h]].map(p => applyMatrix(m, p))
+    }
+    case "circle":
+    case "ellipse": {
+      const rx = Number(el.tag === "circle" ? a.r : a.rx)
+      const ry = Number(el.tag === "circle" ? a.r : a.ry)
+      const [cx, cy] = applyMatrix(m, [Number(a.cx), Number(a.cy)])
+      // The extent of an ellipse after a linear map
+      const halfW = Math.hypot(m[0] * rx, m[2] * ry)
+      const halfH = Math.hypot(m[1] * rx, m[3] * ry)
+      return [[cx - halfW, cy - halfH], [cx + halfW, cy + halfH]]
+    }
+    case "text":
+      return textBox(el) || []
+    default:
+      return []
+  }
+}
+
+// Size a drawing to its elements, as described above.
+const fitToContent = svg => {
+  const attrs = svg.temp
+  if (!attrs || !attrs.scene || attrs.hasBackdrop) { return }
+  let [minX, minY, maxX, maxY] = [Infinity, Infinity, -Infinity, -Infinity]
+  for (const el of svg.children) {
+    for (const [x, y] of elementPoints(el)) {
+      if (!Number.isFinite(x) || !Number.isFinite(y)) { continue }
+      minX = Math.min(minX, x)
+      minY = Math.min(minY, y)
+      maxX = Math.max(maxX, x)
+      maxY = Math.max(maxY, y)
+    }
+  }
+  if (minX === Infinity) { return } // An empty drawing keeps its frame.
+  const round = v => Math.round(v * 1e4) / 1e4
+  const left = round(minX - fitMargin)
+  const top = round(minY - fitMargin)
+  svg.attrs.width = Math.ceil(maxX + fitMargin - left)
+  svg.attrs.height = Math.ceil(maxY + fitMargin - top)
+  svg.attrs.viewBox = `${left} ${top} ${svg.attrs.width} ${svg.attrs.height}`
+}
+
 // Dimensions
 
 const dimStrokeWidth = 0.5 // px
@@ -772,6 +1067,7 @@ const functions = {
     const attrs = svg.temp
     gdx = gdx == null ? attrs.xunitlength : Rnl.toNumber(gdx.value) * attrs.xunitlength
     gdy = gdy == null ? gdx : Rnl.toNumber(gdy.value) * attrs.yunitlength
+    attrs.hasBackdrop = true // A grid fills the frame, so the frame keeps its size.
     const pnode = { tag: "path", attrs: {} }
     let str = ""
     for (let x = attrs.origin[0]; x < attrs.width; x += gdx) {
@@ -802,6 +1098,7 @@ const functions = {
     // Axes labels are black, in a font size that fits the ticks, as in Sketch.
     const labelStyle = { fontsize: Math.min(dx / 2, dy / 2, 10), fontcolor: "black" }
     const ticklength = labelStyle.fontsize / 4
+    attrs.hasBackdrop = true // Axes fill the frame, so the frame keeps its size.
     if (gdx != null) {
       this.grid(svgOprnd, gdx, gdy)
     }
@@ -1217,5 +1514,6 @@ const functions = {
 
 export const draw = Object.freeze({
   startSvg,
+  fitToContent,
   functions
 })

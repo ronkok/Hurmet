@@ -1029,6 +1029,27 @@ H~2~O", "aboveright"  # a comment`)
     check(bad, isError(px + bad), true)
   }
 
+  // A drawing with a scene, and no grid or axes, is sized to its elements, plus 4 px.
+  const big = `frame 720, 500, "right"\nscene 1, "px", 0, 0\n`
+  const sizeOf = svg => json([svg.attrs.width, svg.attrs.height, svg.attrs.viewBox,
+    svg.attrs.float])
+  check("fit rect", sizeOf(svgOf(big + `rect (10, 10; 110, 60)`)),
+    json([108, 58, "6 436 108 58", "right"]))
+  check("fit arc", sizeOf(svgOf(big + `arc (0, 100; 100, 100), 50`)),
+    json([108, 58, "-4 396 108 58", "right"]))
+  check("fit text", sizeOf(svgOf(big + `text [0, 0], "abc", "right"`)),
+    json([32, 24, "-0.001 488.002 32 24", "right"]))
+  check("fit rotated ellipse", sizeOf(svgOf(big + `ellipse [100, 100], 40, 10, 90`)),
+    json([28, 88, "86 356 28 88", "right"]))
+  check("grid keeps the frame", sizeOf(svgOf(big + `grid 10, 10\nrect (10, 10; 110, 60)`)),
+    json([720, 500, undefined, "right"]))
+  check("axes keep the frame", sizeOf(svgOf(big + `axes 10, 10\nrect (10, 10; 110, 60)`)),
+    json([720, 500, undefined, "right"]))
+  check("view keeps the frame", sizeOf(svgOf(big + `view 0, 10\nrect (1, 1; 2, 2)`)),
+    json([720, 500, undefined, "right"]))
+  check("empty drawing keeps the frame", sizeOf(svgOf(big)),
+    json([720, 500, undefined, "right"]))
+
   // Invalid arguments
   for (const bad of [`scene 1, "furlong", 0, 0`, `scene 0, "mm", 0, 0`,
     `linetype "5 3"`, `pattern "plaid"`, `format "x9"`, `fraction 10`, `caption "yes"`]) {
@@ -1154,7 +1175,33 @@ dateFormat: d mmm yyyy
   }
 }
 
-testSavedResults().then(testImport).then(() => {
+// In HTML output, frame's position floats the drawing's span. The <svg> gets no float.
+const testDrawingHtml = async() => {
+  console.log("\nNow testing drawings in HTML…")
+  console.log("")
+  const head = "---------------\ndecimalFormat: 1,000,000.\ndateFormat: yyyy-mm-dd\n" +
+    "---------------\n\n"
+  for (const [position, expectedStyle] of [["right", " style='float: right;'"],
+    ["left", " style='float: left;'"], ["inline", ""]]) {
+    const md = head + "¢`draw()\nframe 720, 500, \"" + position + "\"\n" +
+      "scene 1, \"px\", 0, 0\nrect (10, 10; 110, 60)\nend`\n"
+    const html = await hurmet.hurmet2html(md)
+    const match = /end'([^>]*)><svg([^>]*)>/.exec(html)
+    const actual = match ? [match[1], match[2]] : html
+    const expected = [expectedStyle, ` xmlns="http://www.w3.org/2000/svg" width='108' ` +
+      `height='58' style='display: inline;' viewBox='6 436 108 58'`]
+    numTests += 1
+    if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+      numErrors += 1
+      console.log("drawing HTML: " + position)
+      console.log("expected: " + JSON.stringify(expected))
+      console.log("actual:   " + JSON.stringify(actual))
+      console.log("")
+    }
+  }
+}
+
+testSavedResults().then(testImport).then(testDrawingHtml).then(() => {
   console.log("Done.")
   console.log("Number of tests =  " + numTests)
   console.log("Number of errors = " + numErrors)

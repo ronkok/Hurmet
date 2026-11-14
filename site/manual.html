@@ -958,51 +958,73 @@ end</code></pre><p>… which results in this plot …</p>
 <dl>
 <dt id='title-&quot;<em>string</em>&quot;'>title &quot;<em>string</em>&quot;</dt>
 <dd><p>Title of the drawing, for accessibility.</p></dd>
+<dt id='caption-true-|-false'>caption true | false</dt>
+<dd><p>If true, Hurmet writes the title as a caption under the drawing. Default = false.</p></dd>
 <dt id='frame-<em>width</em>,-<em>height</em><span-class="optional">,-position</span>'>frame <em>width</em>, <em>height</em><span class="optional">, position</span></dt>
-<dd><p><em>width</em> and <em>height</em>, in px, define the size of the drawing in the document. <em>position</em> can be &quot;inline&quot;, &quot;left&quot;, or &quot;right&quot;.<br>This command must come before anything is drawn.</p></dd>
+<dd><p><em>width</em> and <em>height</em>, in px, define the size of the drawing in the document. <em>position</em> can be &quot;inline&quot;, &quot;left&quot;, or &quot;right&quot;. &quot;left&quot; and &quot;right&quot; float the drawing, so that text wraps beside it.<br>This command must come before anything is drawn.<br>In a drawing with a <code>scene</code> and no <code>grid</code> or <code>axes</code>, Hurmet fits the drawing to its contents, with a 4 px margin, so <em>width</em> and <em>height</em> are replaced.</p></dd>
+<dt id='scene-<em>scale</em>,-&quot;<em>unit</em>&quot;,-<em>dx</em>,-<em>dy</em>'>scene <em>scale</em>, &quot;<em>unit</em>&quot;, <em>dx</em>, <em>dy</em></dt>
+<dd><p>Sets the coordinate system. A point (<em>x</em>, <em>y</em>) is drawn <em>scale</em> × <em>unit</em> × (<em>x</em> + <em>dx</em>) from the left edge of the frame and <em>scale</em> × <em>unit</em> × (<em>y</em> + <em>dy</em>) up from its bottom edge. So <em>dx</em> and <em>dy</em> locate the origin, in model units.<br><em>unit</em> can be &quot;px&quot;, &quot;in&quot;, &quot;ft&quot;, &quot;ft-in&quot;, &quot;mile&quot;, &quot;pt&quot;, &quot;mm&quot;, &quot;cm&quot;, &quot;m&quot;, or &quot;km&quot;. For example, <code>scene 1/48, &quot;ft-in&quot;, 12, 12</code> draws at ¼″ = 1′-0″. In an &quot;ft-in&quot; scene, coordinates are in inches and dimension labels are written in feet and inches.<br>This is the coordinate system that Sketch writes.</p></dd>
 <dt id='view-<em>x</em><sub>min</sub>,-<em>x</em><sub>max</sub><span-class="optional">,-yₘᵢₙ,-yₘₐₓ,</span>'>view <em>x</em><sub>min</sub>, <em>x</em><sub>max</sub><span class="optional">, yₘᵢₙ, yₘₐₓ,</span></dt>
-<dd><p>This command is usually written directly after <code>frame</code>. The arguments set the coordinate system. If <em>y</em><sub>min</sub> is omitted, the x-axis is placed in the middle of the picture. If <em>y</em><sub>max</sub> is omitted, the scales along the x-axis and y-axis are the same.</p></dd>
-<dt id='axes-<em>dx</em>,-<em>dy</em><span-class="optional">,-"labels"</span>'>axes <em>dx</em>, <em>dy</em><span class="optional">, "labels"</span></dt>
-<dd><p>Draws coordinate axes.</p></dd>
-<dt id='grid-<em>dx</em>,-<em>dy</em><span-class="optional">,-"labels"</span>'>grid <em>dx</em>, <em>dy</em><span class="optional">, "labels"</span></dt>
+<dd><p>An alternative to <code>scene</code>, handy for plots. It is usually written directly after <code>frame</code>. The arguments set the coordinate system. If <em>y</em><sub>min</sub> is omitted, the x-axis is placed in the middle of the picture. If <em>y</em><sub>max</sub> is omitted, the scales along the x-axis and y-axis are the same. Of <code>scene</code> and <code>view</code>, the later one applies.</p></dd>
+<dt id='axes-<em>dx</em>,-<em>dy</em><span-class="optional">,-"labels",-gdx,-gdy</span>'>axes <em>dx</em>, <em>dy</em><span class="optional">, "labels", gdx, gdy</span></dt>
+<dd><p>Draws coordinate axes with a tick every <em>dx</em> and <em>dy</em>. &quot;labels&quot; writes a number at each tick. <em>gdx</em> and <em>gdy</em> add a grid.</p></dd>
+<dt id='grid-<em>dx</em>,-<em>dy</em>'>grid <em>dx</em>, <em>dy</em></dt>
 <dd><p>Draws a background grid.</p></dd>
 <dt id='stroke-&quot;<em>color</em>&quot;'>stroke &quot;<em>color</em>&quot;</dt>
 <dd><p>Sets the default color for lines, paths, curves and outlines of solid figures. Can be any of the <a href='https://www.w3schools.com/colors/colors_names.asp'>standard HTML predefined color names</a>.</p></dd>
 <dt id='strokewidth-<em>pixelvalue</em>'>strokewidth <em>pixelvalue</em></dt>
 <dd><p>Sets the width of lines, paths, and shape outlines.</p></dd>
-<dt id='strokedasharray-&quot;<em>dashpixel</em>-<em>spacepixel</em>&quot;'>strokedasharray &quot;<em>dashpixel</em> <em>spacepixel</em>&quot;</dt>
-<dd><p>Set a pattern of dashes and gaps for lines and paths. Default = null.</p></dd>
+<dt id='linetype-&quot;solid&quot;-|-&quot;dashed&quot;-|-&quot;dotted&quot;-|-&quot;centerline&quot;-|-&quot;border&quot;'>linetype &quot;solid&quot; | &quot;dashed&quot; | &quot;dotted&quot; | &quot;centerline&quot; | &quot;border&quot;</dt>
+<dd><p>Sets the dash pattern of lines, paths, and shape outlines. Default = &quot;solid&quot;.</p></dd>
 <dt id='fill-&quot;<em>color</em>&quot;'>fill &quot;<em>color</em>&quot;</dt>
-<dd><p>Sets the default color for filling in the inside of solid figures.</p></dd>
-<dt id='fontfamily-&quot;sansserif&quot;-|-&quot;serif&quot;-|-&quot;fixed&quot;-|-&quot;monotype&quot;'>fontfamily &quot;sansserif&quot; | &quot;serif&quot; | &quot;fixed&quot; | &quot;monotype&quot;</dt>
-<dd><p>Sets the font type.</p></dd>
+<dd><p>Sets the default color for filling in the inside of solid figures. Default = &quot;none&quot;.</p></dd>
+<dt id='pattern-&quot;solid&quot;-|-&quot;diagonal&quot;-|-&quot;crosshatch&quot;-|-&quot;grid&quot;-|-&quot;dots&quot;-|-&quot;wood&quot;-|-&quot;sand&quot;-|-&quot;gravel&quot;-|-&quot;earth&quot;-|-&quot;concrete&quot;'>pattern &quot;solid&quot; | &quot;diagonal&quot; | &quot;crosshatch&quot; | &quot;grid&quot; | &quot;dots&quot; | &quot;wood&quot; | &quot;sand&quot; | &quot;gravel&quot; | &quot;earth&quot; | &quot;concrete&quot;</dt>
+<dd><p>Fills solid figures with a pattern, drawn in the current fill color. Default = &quot;solid&quot;.</p></dd>
+<dt id='fontfamily-&quot;<em>family</em>&quot;'>fontfamily &quot;<em>family</em>&quot;</dt>
+<dd><p>Sets the font, e.g., &quot;sans-serif&quot;, &quot;serif&quot;, or &quot;monospace&quot;. Default = &quot;sans-serif&quot;.</p></dd>
 <dt id='fontsize-<em>pixelvalue</em>'>fontsize <em>pixelvalue</em></dt>
 <dd><p>Sets the font size in px. Default = 13.33 (~10 pt).</p></dd>
-<dt id='marker-&quot;none&quot;-|-&quot;dot&quot;-|-&quot;arrow&quot;-|-&quot;arrowdot&quot;'>marker &quot;none&quot; | &quot;dot&quot; | &quot;arrow&quot; | &quot;arrowdot&quot;</dt>
-<dd><p>Sets the default marker symbol that is drawn at the endpoints of lines and paths. Dots are also set along the intermediate points of paths and curves.</p></dd>
+<dt id='fontcolor-&quot;<em>color</em>&quot;'>fontcolor &quot;<em>color</em>&quot;</dt>
+<dd><p>Sets the color of text. Default = &quot;black&quot;.</p></dd>
+<dt id='marker-&quot;none&quot;-|-&quot;arrow&quot;-|-&quot;dot&quot;-|-&quot;arrowdot&quot;'>marker &quot;none&quot; | &quot;arrow&quot; | &quot;dot&quot; | &quot;arrowdot&quot;</dt>
+<dd><p>Sets the marker that is drawn at the end point of a line, path, arc, or freehand curve. The size of an arrowhead suits the stroke width. &quot;arrowdot&quot; draws a dot on the end point, with an arrowhead that touches it. Default = &quot;none&quot;.</p></dd>
+<dt id='format-&quot;<em>spec</em>&quot;'>format &quot;<em>spec</em>&quot;</dt>
+<dd><p>Sets the rounding of dimension labels, e.g., &quot;h3&quot; or &quot;f2&quot;. See <a href='#rounding-of-results'>rounding</a>. Without a <code>format</code> statement, a drawing uses the format that is active at that point in the document.</p></dd>
+<dt id='fraction-8-|-16-|-32-|-64'>fraction 8 | 16 | 32 | 64</dt>
+<dd><p>In an &quot;ft-in&quot; scene, dimension labels round inches to the nearest 1/8, 1/16, 1/32, or 1/64. Default = 16.</p></dd>
 <dt id='line-[<em>x</em>,-<em>y</em>;-<em>u</em>,-<em>v</em>]'>line [<em>x</em>, <em>y</em>; <em>u</em>, <em>v</em>]</dt>
 <dd><p>Draws a straight line from coordinate point <em>x</em>, <em>y</em> to coordinate point <em>u</em>, <em>v</em>.</p></dd>
-<p>path  (<em>x₁</em>, <em>y₁</em>; <em>x₂</em>, <em>y₂</em>; …; <em>xₙ</em>, <em>yₙ</em>)       or<br>path  (<em>x₁</em>, <em>y₁</em>, 0; <em>x₂</em>, <em>y₂</em>, <em>r₂</em>; …; <em>xₙ</em>, <em>yₙ</em>, <em>rₙ</em>)</p>
-<dd><p>Draws a path connecting all the points in the matrix.</p>
-<p>Use the second form of the statement if the path contains any circular arcs. In that case, <code>rₙ</code> is the radius of the arc. Write a positive radius for arcs drawn counter-clockwise and write a negative radius for arcs drawn clockwise.</p></dd>
+<p>path  (<em>x₁</em>, <em>y₁</em>; <em>x₂</em>, <em>y₂</em>; …; <em>xₙ</em>, <em>yₙ</em>)       or<br>path  (<em>x₁</em>, <em>y₁</em>, 0; <em>x₂</em>, <em>y₂</em>, <em>r₂</em>; …; <em>xₙ</em>, <em>yₙ</em>, <em>rₙ</em>)       or<br>path  (<em>x₁</em>, <em>y₁</em>, 0, 0, 0; <em>x₂</em>, <em>y₂</em>, ±<em>rx₂</em>, <em>ry₂</em>, <em>angle₂</em>; …)</p>
+<dd><p>Draws a path connecting all the points in the matrix. Every row has the same length.</p>
+<p>Use the second form of the statement if the path contains any circular arcs. In that case, <code>rₙ</code> is the radius of the arc that ends at point <em>n</em>. Write a positive radius for arcs drawn counter-clockwise and a negative radius for arcs drawn clockwise. Write 0 for a straight step.</p>
+<p>Use the third form if the path contains any elliptical arcs. The ellipse has radii <em>rx</em> and <em>ry</em> and is rotated <em>angle</em> degrees counter-clockwise. The sign of <em>rx</em> gives the direction of the arc.</p>
+<p>An arc spans at most half of its circle or ellipse.</p></dd>
+<dt id='rect-[<em>x</em>,-<em>y</em>;-<em>u</em>,-<em>v</em>]'>rect  [<em>x</em>, <em>y</em>; <em>u</em>, <em>v</em>]</dt>
+<dd><p>Draws a rectangle with corners at points <em>x</em>, <em>y</em> and <em>u</em>, <em>v</em>.</p></dd>
 <dt id='circle-[<em>x</em>,-<em>y</em>],-<em>r</em>'>circle  [<em>x</em>, <em>y</em>], <em>r</em></dt>
 <dd><p>Draws a circle of radius <em>r</em>, centered at point <em>x</em>, <em>y</em>.</p></dd>
-<dt id='dot-[<em>x</em>,-<em>y</em>]<span-class="optional">,-"open"-|-"closed",-"label",-position</span>'>dot  [<em>x</em>, <em>y</em>]<span class="optional">, "open" | "closed", "label", position</span></dt>
-<dd><p>Draws a dot with an optional appended label.  <em>position</em> can be: &quot;above&quot;|&quot;below&quot;|&quot;left&quot;|&quot;right&quot;|&quot;aboveleft&quot;|&quot;aboveright&quot; |&quot;belowleft&quot;|&quot;belowright&quot;|null</p></dd>
-<dt id='ellipse-[<em>x</em>,-<em>y</em>],-<em>rx</em>,-<em>ry</em>'>ellipse  [<em>x</em>, <em>y</em>], <em>rx</em>, <em>ry</em></dt>
-<dd><p>Draws an ellipse of radii <em>rx</em> and <em>ry</em>, centered at point <em>x</em>, <em>y</em>.</p></dd>
-<dt id='arc-[<em>x</em>,-<em>y</em>;-<em>u</em>,-<em>v</em>],-<em>r</em>-or-[<em>rx</em>,-<em>ry</em>]'>arc  [<em>x</em>, <em>y</em>; <em>u</em>, <em>v</em>], <em>r</em> or [<em>rx</em>, <em>ry</em>]</dt>
-<dd><p>Draws an arc in anticlockwise direction from point <em>x</em>, <em>y</em> to point <em>u</em>, <em>v</em>. It will be either a circular arc of radius <em>r</em> or an elliptical arc of radius [<em>rx</em>, <em>ry</em>].</p></dd>
-<dt id='rect-[<em>x</em>,-<em>y</em>;-<em>u</em>,-<em>v</em>]<span-class="optional">,-r</span>'>rect  [<em>x</em>, <em>y</em>; <em>u</em>, <em>v</em>]<span class="optional">, r</span></dt>
-<dd><p>Draws a rectangle with corners at points <em>x</em>, <em>y</em> and <em>u</em>, <em>v</em>. The optional <em>r</em> argument defines the corner radius of a rounded rectangle.</p></dd>
+<dt id='ellipse-[<em>x</em>,-<em>y</em>],-<em>rx</em>,-<em>ry</em><span-class="optional">,-angle</span>'>ellipse  [<em>x</em>, <em>y</em>], <em>rx</em>, <em>ry</em><span class="optional">, angle</span></dt>
+<dd><p>Draws an ellipse of radii <em>rx</em> and <em>ry</em>, centered at point <em>x</em>, <em>y</em>, and rotated <em>angle</em> degrees counter-clockwise.</p></dd>
+<dt id='polygon-<em>n</em>,-[<em>x</em>,-<em>y</em>],-<em>r</em><span-class="optional">,-angle</span>'>polygon  <em>n</em>, [<em>x</em>, <em>y</em>], <em>r</em><span class="optional">, angle</span></dt>
+<dd><p>Draws a regular polygon with <em>n</em> sides, centered at point <em>x</em>, <em>y</em>, with an inscribed radius of <em>r</em>. With <em>angle</em> = 0, the bottom side is level. A positive <em>angle</em> rotates the polygon counter-clockwise, in degrees.</p></dd>
+<dt id='arc-[<em>x</em>,-<em>y</em>;-<em>u</em>,-<em>v</em>],-<em>r</em>-or-[±<em>rx</em>,-<em>ry</em><span-class="optional">,-angle</span>]'>arc  [<em>x</em>, <em>y</em>; <em>u</em>, <em>v</em>], <em>r</em> or [±<em>rx</em>, <em>ry</em><span class="optional">, angle</span>]</dt>
+<dd><p>Draws an arc from point <em>x</em>, <em>y</em> to point <em>u</em>, <em>v</em>. It will be either a circular arc of radius <em>r</em> or an elliptical arc of radii <em>rx</em> and <em>ry</em> on an ellipse rotated <em>angle</em> degrees. A positive <em>r</em> or <em>rx</em> draws the arc counter-clockwise. A negative one draws it clockwise. An arc spans at most half of its circle or ellipse.</p></dd>
+<dt id='freehand-'>freehand  (<em>x₁</em>, <em>y₁</em>; <em>x₂</em>, <em>y₂</em>; …; <em>xₙ</em>, <em>yₙ</em>)</dt>
+<dd><p>Draws a smooth curve through the points.</p></dd>
+<dt id='image-[<em>x</em>,-<em>y</em>;-<em>u</em>,-<em>v</em>],-&quot;<em>url</em>&quot;<span-class="optional">,-rotation,-mirrored</span>'>image  [<em>x</em>, <em>y</em>; <em>u</em>, <em>v</em>], &quot;<em>url</em>&quot;<span class="optional">, rotation, mirrored</span></dt>
+<dd><p>Draws an image with corners at points <em>x</em>, <em>y</em> and <em>u</em>, <em>v</em>. <em>rotation</em> turns it clockwise about its center, in degrees. If <em>mirrored</em> is true, the image is flipped top to bottom before it is rotated.</p></dd>
 <dt id='text-[<em>x</em>,-<em>y</em>],-&quot;<em>string</em>&quot;<span-class="optional">,-position</span>'>text  [<em>x</em>, <em>y</em>], &quot;<em>string</em>&quot;<span class="optional">, position</span></dt>
 <dd><p>Writes the string at a point keyed to coordinates <em>x</em>, <em>y</em>.</p>
-<p><em>position</em> can be &quot;above&quot;, &quot;below&quot;, &quot;middle&quot;, &quot;left&quot;, &quot;right&quot;, &quot;aboveleft&quot;, &quot;aboveright&quot;, &quot;belowleft&quot;, or &quot;belowright&quot;. The default is &quot;middle&quot;.</p>
-<p>The string can be styled with Markdown inline styles: _<em>italic</em>_, **<strong>bold</strong>**, `<code>code</code>`, <code>~</code><sub>subscript</sub><code>~</code>, <code>^</code><sup>superscript</sup><code>^</code>, and <code>~~</code><del>strikethrough</del><code>~~</code>.</p></dd>
-<dt id='leader-[<em>x₁</em>,-<em>y₁</em>;-<em>x₂</em>,-<em>y₂</em><span-class="optional">;-x₃,-y₃;-etc</span>],-&quot;<em>note</em>&quot;'>leader [<em>x₁</em>, <em>y₁</em>; <em>x₂</em>, <em>y₂</em><span class="optional">; x₃, y₃; etc</span>], &quot;<em>note</em>&quot;</dt>
-<dd><p>Writes a note with an arrow pointing to a location.</p></dd>
-<dt id='dimension-[<em>x₁</em>,-<em>y₁</em>;-<em>x₂</em>,-<em>y₂</em>;-<span-class="optional">x₃,-y₃;-etc;</span>-<em>xlabel</em>,-<em>ylabel</em>],-&quot;<em>label</em>&quot;-or-[&quot;<em>label₁</em>&quot;,-&quot;<em>label₂</em>&quot;,-etc.]'>dimension [<em>x₁</em>, <em>y₁</em>; <em>x₂</em>, <em>y₂</em>; <span class="optional">x₃, y₃; etc;</span> <em>xLabel</em>, <em>yLabel</em>], &quot;<em>label</em>&quot; or [&quot;<em>label₁</em>&quot;, &quot;<em>label₂</em>&quot;, etc.]</dt>
-<dd><p>Writes a string of dimensions. <em>xLabel</em> and <em>yLabel</em> locate the labels. The other points each define a witness line.</p></dd>
+<p><em>position</em> can be &quot;above&quot;, &quot;below&quot;, &quot;middle&quot;, &quot;left&quot;, &quot;right&quot;, &quot;aboveleft&quot;, &quot;aboveright&quot;, &quot;belowleft&quot;, or &quot;belowright&quot;. The default is &quot;middle&quot;. &quot;leaderleft&quot; and &quot;leaderright&quot; write the first line of text level with the point.</p>
+<p>The string can be styled with Markdown inline styles: _<em>italic</em>_, **<strong>bold</strong>**, `<code>code</code>`, <code>~</code><sub>subscript</sub><code>~</code>, <code>^</code><sup>superscript</sup><code>^</code>, and <code>~~</code><del>strikethrough</del><code>~~</code>. A string can span several lines.</p></dd>
+<dt id='dot-[<em>x</em>,-<em>y</em>]<span-class="optional">,-"label",-position</span>'>dot  [<em>x</em>, <em>y</em>]<span class="optional">, "label", position</span></dt>
+<dd><p>Draws a dot with an optional label. The dot’s outline takes the current stroke and its inside takes the current fill, so <code>fill &quot;none&quot;</code> gives a hollow dot.<br><em>position</em> can be &quot;above&quot;, &quot;below&quot;, &quot;middle&quot;, &quot;left&quot;, &quot;right&quot;, &quot;aboveleft&quot;, &quot;aboveright&quot;, &quot;belowleft&quot;, or &quot;belowright&quot;. The default is &quot;below&quot;.</p></dd>
+<dt id='arrow-'>arrow (<em>x₁</em>, <em>y₁</em>; <em>x₂</em>, <em>y₂</em><span class="optional">; x₃, y₃; etc</span>)<span class="optional">, "note"</span></dt>
+<dd><p>Draws a straight arrow, with an arrowhead at its last point. The optional note is written at the first point, on the side away from the arrow.</p></dd>
+<dt id='dimension-'>dimension (<em>x₁</em>, <em>y₁</em>; <em>x₂</em>, <em>y₂</em>; <span class="optional">x₃, y₃; etc;</span> <em>xLabel</em>, <em>yLabel</em>)<span class="optional">, ["label₁", "label₂", etc.], dimAngle, extAngle</span></dt>
+<dd><p>Draws a string of dimensions. The dimension line passes through point <em>xLabel</em>, <em>yLabel</em>. The other points each define an extension line.</p>
+<p>Without angles, the dimension line is horizontal or vertical, whichever puts the label point between the end points. With angles, in degrees, the dimension line runs at <em>dimAngle</em> and the extension lines run at <em>extAngle</em>.</p>
+<p>A span with no label shows its measured length, rounded by the current <code>format</code>. A label of &quot;&quot; leaves its span blank.</p></dd>
 <dt id='plot-<em>f</em>-or-[<em>g</em>,-<em>h</em>]<span-class="optional">,-𝑛,-xₘᵢₙ,-xₘₐₓ</span>'>plot  <em>f</em> or [<em>g</em>, <em>h</em>]<span class="optional">, 𝑛, xₘᵢₙ, xₘₐₓ</span></dt>
 <dd><p>Plots a function or a pair of parametric equations. A single function <em>f()</em> should be written with <em>x</em> as its variable. A pair of parametric equations should be written with <em>t</em> as their variable.<br>Values will be plotted from <em>x</em>ₘᵢₙ to <em>x</em>ₘₐₓ. <em>n</em> determines the number of points to be plotted. (Default = 250)</p></dd>
 </dl>

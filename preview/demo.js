@@ -747,6 +747,7 @@ const errorMessages = Object.freeze({
     MATRIX_MOD:"Error. Cannot take the modulo of one matrix by another.",
     BAD_INDEX: "Error. Index to a matrix must be numeric.",
     FUNC_LINE: "Error in function @",
+    DRAW_ARG:  "Error. Invalid arguments to drawing statement “@”.",
     BAD_BREAK: "Error in function @. break called outside of a loop",
     FETCH:     "Error. A fetch() function must be the only item in its expression.",
     STR_INDEX: "Error. The index to text may be only a real number or a range.",
@@ -977,7 +978,7 @@ const subtract$1 = (a, b) => {
     : normalize([a[0] * b[1] - b[0] * a[1], a[1] * b[1]])
 };
 
-const multiply$1 = (a, b) => [a[0] * b[0], a[1] * b[1]];
+const multiply$2 = (a, b) => [a[0] * b[0], a[1] * b[1]];
 
 const divide$1 = (a, b) => {
   let numerator = a[0] * b[1];
@@ -1190,7 +1191,7 @@ const doubleFactorial = n => {
   } else {
     let r = n;
     for (let i = Rnl.toNumber(n) - 2; i > 0; i -= 2) {
-      r = multiply$1(r, fromNumber(i));
+      r = multiply$2(r, fromNumber(i));
     }
     return r
   }
@@ -1203,7 +1204,7 @@ const lanczos$1 = xPlusOne => {
   // The following equation is from p. 116 of the Pugh thesis:
   // Γ(x+1) ≈ 2 * √(e / π) * ((x + 10.900511 + 0.5) / e) ^ (x + 0.5) * sum
   const x = subtract$1(xPlusOne, one);
-  const term1 = multiply$1(two, sqrt$1(divide$1(e$1, pi$1)));
+  const term1 = multiply$2(two, sqrt$1(divide$1(e$1, pi$1)));
   const term2 = power$1(divide$1(add$1(x, fromNumber(11.400511)), e$1), add$1(x, [iOne, iTwo]));
 
   // Coefficients from Pugh, Table 8.5
@@ -1219,7 +1220,7 @@ const lanczos$1 = xPlusOne => {
     sum = add$1(sum, divide$1(fromString(d[k]), add$1(x, fromNumber(k))));
   }
 
-  return multiply$1(multiply$1(term1, term2), sum)
+  return multiply$2(multiply$2(term1, term2), sum)
 };
 
 const Rnl = Object.freeze({
@@ -1241,7 +1242,7 @@ const Rnl = Object.freeze({
   ceil,
   add: add$1,
   subtract: subtract$1,
-  multiply: multiply$1,
+  multiply: multiply$2,
   divide: divide$1,
   reciprocal,
   gcd,
@@ -2765,7 +2766,7 @@ const angle = (z) => {
 const add = (x, y) => [Rnl.add(x[0], y[0]), Rnl.add(x[1], y[1])];
 const subtract = (x, y) => [Rnl.subtract(x[0], y[0]), Rnl.subtract(x[1], y[1])];
 
-const multiply = (x, y) => {
+const multiply$1 = (x, y) => {
   return [
     Rnl.subtract(Rnl.multiply(x[0], y[0]), Rnl.multiply(x[1], y[1])),
     Rnl.add(Rnl.multiply(x[0], y[1]), Rnl.multiply(x[1], y[0]))
@@ -2910,12 +2911,12 @@ const power = (x, y) =>{
 
 const acosh = z => {
   // acosh(z) = log( z + √(z - 1) × √(z + 1) )
-  return log(add(z, multiply(sqrt(decrement(z)), sqrt(increment(z)))))
+  return log(add(z, multiply$1(sqrt(decrement(z)), sqrt(increment(z)))))
 };
 
 const asinh = z => {
   // Log(z + Sqrt(z * z + 1))
-  const s = sqrt(add(multiply(z, z), [Rnl.one, Rnl.zero]));
+  const s = sqrt(add(multiply$1(z, z), [Rnl.one, Rnl.zero]));
   return log(add(z, s))
 };
 
@@ -2926,13 +2927,13 @@ const atanh = z => {
 
 const asin = z => {
   // arcsinh (i * z) / i
-  return divide(asinh(multiply(j, z)), j)
+  return divide(asinh(multiply$1(j, z)), j)
 };
 
 const atan = z => {
   // (Log(1 + iz) - Log(1 - iz)) / (2 * i)  cf Kahan
-  const term1 = log(increment(multiply(j, z)));
-  const term2 = log(subtract([Rnl.one, Rnl.zero],(multiply(j, z))));
+  const term1 = log(increment(multiply$1(j, z)));
+  const term2 = log(subtract([Rnl.one, Rnl.zero],(multiply$1(j, z))));
   return divide(subtract(term1, term2), [Rnl.zero, Rnl.two])  
 };
 
@@ -2951,7 +2952,7 @@ const lanczos = zPlusOne => {
   // Γ(z+1) ≈ 2 * √(e / π) * ((z + 10.900511 + 0.5) / e) ^ (z + 0.5) * sum
   const z = subtract(zPlusOne, [Rnl.one, Rnl.zero]);
   const sqr = Rnl.sqrt(Rnl.divide(e, pi));
-  const term1 = multiply([Rnl.two, Rnl.zero], [sqr, Rnl.zero]);
+  const term1 = multiply$1([Rnl.two, Rnl.zero], [sqr, Rnl.zero]);
   const k = Rnl.fromNumber(11.400511);
   const oneHalf = [[BigInt(1), BigInt(2)], Rnl.zero];
   const term2 = power(divide(add(z, [k, Rnl.zero]), [e, Rnl.zero]), add(z, oneHalf));
@@ -2971,7 +2972,7 @@ const lanczos = zPlusOne => {
     sum = add(sum, divide(d, add(z, complexK)));
   }
 
-  return multiply(multiply(term1, term2), sum)
+  return multiply$1(multiply$1(term1, term2), sum)
 };
 
 const display$3 = (z, formatSpec, decimalFormat) => {
@@ -3016,7 +3017,7 @@ const Cpx = Object.freeze({
   add,
   subtract,
   divide,
-  multiply,
+  multiply: multiply$1,
   negate,
   power,
   exp,
@@ -3195,7 +3196,7 @@ const findfirst$1 = (el, array) => {
   return Rnl.zero
 };
 
-const identity = (num, mutable) => {
+const identity$1 = (num, mutable) => {
   const n = Rnl.isRational(num) ? Rnl.toNumber(num) : num;
   if (n === 1) {
     return  [Rnl.one]
@@ -3226,7 +3227,7 @@ const invert = (matrix, returnDeterminant) => {
   let determinant = Rnl.one;
 
   const C = clone(matrix);
-  const I = identity(dim, true);
+  const I = identity$1(dim, true);
 
   for (i = 0; i < dim; i += 1) {
     // get the element temp on the diagonal
@@ -3563,7 +3564,7 @@ const Matrix = Object.freeze({
   displayAlt: displayAlt$2,
   elementDisplay,
   findfirst: findfirst$1,
-  identity,
+  identity: identity$1,
   invert,
   multResultType,
   ones,
@@ -7667,6 +7668,2897 @@ const Tuple = Object.freeze({
   displayAlt
 });
 
+/**
+ * md2ast() returns an AST that matches the memory structure  of a Hurmet.org document.
+ * Elsewhere, Hurmet uses the AST to create either a live Hurmet doc or a static HTML doc.
+ *
+ * ## Restrictions
+ *
+ * 1. **_bold-italic_** must use both * & _ delimiters. Hurmet will fail on ***wat***.
+ * 2. "Shortcut" reference links [ref] are not recognized.
+ *
+ * ## Extensions
+ *
+ * 1. Hurmet has a meta-document section at the top of the file, similar to MultiMarkdown.
+ * 2. Hurmet inline calculation is delimited ¢`…`, where "…" is the entry input by the author.
+ *    Hurmet display calculation is delimited ¢¢…¢¢.
+ *    Alternate: ¢©`name = expression = 〔result〕unit`, where "©" is a display selector.
+ * 3. LaTeX inline math is delimited $…$ or $`…`$. \(…\) is also recognized.
+ *    No space allowed after 1st $ or before 2nd $. No digit after 2nd $.
+ *    LaTeX display math is delimited  $$ … $$. \[…\] is also recognized.
+ * 4. ~subscript~
+ * 5. ^superscript^
+ * 6. ~~strikethrough~~
+ * 7. Pipe tables as per Github Flavored Markdown (GFM).
+ * 8. Grid tables as per Pandoc and reStructuredText
+ * 9. Empty paragraphs: A line consisting only of "¶" or "&nbsp;".
+ * 10. Attributes for reference link definitions
+ *       [id]: target
+ *       {.class #id width=number}
+ * 11. Figure/Caption for images. Format is a paragraph that consists entirely of:
+ *       !![caption][id]
+ * 12. Figure/Caption for tables.
+ *     The caption is on the line above a table and is preceded by `: `, as per Pandoc.
+ * 13. Table directives. They are placed on the line after the table. The format is:
+ *     {#id .class float="(left|right)" colWidths="num1 num2 …"}
+ *     {."class1 class2"}  ←  Alternate class syntax for when there is > 1 classname
+ *     Float is applied only to a table inside a figure.
+ *     A spreadsheet will include " spreadsheet" in `.class` The id will be the sheet's name.
+ * 14. Lists that allow the user to pick list ordering.
+ *        1. →  1. 2. 3.  etc.
+ *        A. →  A. B. C.  etc.
+ *        a. →  a. b. c.  etc.
+ *        a) →  (a) (b) (c)  etc. (future)
+ * 15. Alerts per GFM
+ *     > [!note] or [!tip] or [!important] or [!warning] or [!epigraph]
+ *     > Content of note
+ * 16. Fenced divs, similar to Pandoc.
+ *     ::: (centered|right_justified|comment|indented|boxed|header)
+ *     Block elements
+ *     :::
+ *     Nested divs are distinguished by number of colons. Minimum three.
+ * 17. Table of Contents
+ *     {.toc start=N end=N}
+ * 18. Page break, per Pandoc
+ *     \\newpage
+ * 19. Definition lists, per Pandoc.  (future)
+ * 20. [^1] is a reference to a footnote.
+ *     [^1]: The body of the footnote is deferred, similar to reference links.
+ * 21. [#1] is a reference to a citation. (future)
+ *     [#1]: The body of the citation is deferred, similar to reference links.
+ * 22. Line blocks begin with "| ", as per Pandoc. (future)
+ *
+ * copyright (c) 2021 - 2025 Ron Kok
+ *
+ * This file has been adapted (and heavily modified) from Simple-Markdown.
+ * Simple-Markdown copyright (c) 2014-2019 Khan Academy & Aria Buckles.
+ *
+ * Portions of Simple-Markdown were adapted from marked.js copyright (c) 2011-2014
+ * Christopher Jeffrey (https://github.com/chjj/).
+ *
+ * LICENSE (MIT):
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+
+const CR_NEWLINE_R = /\r\n?/g;
+const FORMFEED_R = /\f/g;
+const CLASS_R = /(?:^| )\.([a-z-]+)(?: |&|$)/;
+const tableClassRegEx = /(?:^| )\.(?:([a-z-]+)(?: |$)|"([^"]+)")/;
+const floatRegEx = /float="(left|right)"/;
+const WIDTH_R = /(?:^| )width="?([\d.a-z]+"?)(?: |$)/;
+const ALT_R = /(?:^| )alt="([A-Za-z\d ]+)"(?: |$)/;
+const COL_WIDTHS_R = /(?:^| )colWidths="([^"]*)"/;
+const ID_R = /(?:^| )#([A-Za-z][A-Za-z0-9]*)(?: |$)/;
+const leadingSpaceRegEx$2 = /^ +/;
+const trailingSpaceRegEx$1 = / +$/;
+
+// Turn various whitespace into easy-to-process whitespace
+const preprocess = function(source) {
+  return source.replace(CR_NEWLINE_R, "\n").replace(FORMFEED_R, "");
+};
+
+// Creates a match function for an inline scoped element from a regex
+const inlineRegex = function(regex) {
+  const match = function(source, state) {
+    return state.inline ? regex.exec(source) : null
+  };
+  match.regex = regex;
+  return match;
+};
+
+// Creates a match function for a block scoped element from a regex
+const blockRegex = function(regex) {
+  const match = function(source, state) {
+    return state.inline ? null : regex.exec(source)
+  };
+  match.regex = regex;
+  return match;
+};
+
+// Creates a match function from a regex, ignoring block/inline scope
+const anyScopeRegex = function(regex) {
+  const match = function(source, state) {
+    return regex.exec(source);
+  };
+  match.regex = regex;
+  return match;
+};
+
+const UNESCAPE_URL_R = /\\([^0-9A-Za-z\s])/g;
+const unescapeUrl = function(rawUrlString) {
+  return rawUrlString.replace(UNESCAPE_URL_R, "$1");
+};
+
+const isNotAnInteger = str => isNaN(str) || Number(str) % 1 !== 0;
+
+const indentRegEx = /^ +/;
+const insertNewlines = str => {
+  // Lists are unlike other blocks in one respect.
+  // A list might not have a preceding blank line, if the list is inside another list.
+  // Since the RegEx patterns all depend on that blank line, we will scan the top-level
+  // list and insert blank lines where needed.
+  const lines = str.split("\n");
+  let numLines = lines.length;
+  let i = 0;
+  let prevIndent = 0;
+  let prevLineWasEmpty = true;
+  while (i < numLines) {
+    const line = lines[i];
+    const isEmptyLine = (line === "");
+    if (!isEmptyLine) {
+      if (LIST_ITEM_PREFIX_R.test(line)) {
+        const match = indentRegEx.exec(line);
+        const indent = match ? match[0].length : 0;
+        if (indent !== prevIndent && !prevLineWasEmpty) {
+          // This line starts a new list and needs a preceeding blank line
+          lines.splice(i, 0, "");
+          i += 1;
+          numLines += 1;
+          prevLineWasEmpty = true;
+          continue
+        }
+        prevIndent = indent;
+      }
+    }
+    prevLineWasEmpty = isEmptyLine;
+    i += 1;
+  }
+  return lines.join("\n")
+};
+
+const parseList = (str, state) => {
+  if (!state.inList) {
+    // This is a top-level list.
+    str = str.replace(LIST_BLOCK_END_R, "\n");
+    str = insertNewlines(str);
+  }
+  const items = str.match(LIST_ITEM_R);
+  const isTight = !/\n\n/.test(str.replace(/\n*$/, ""));
+  // Backup our state for restoration afterwards.
+  const oldStateList = state.inList;
+  state.inList = true;
+  const itemContent = items.map(function(item, i) {
+    // We need to see how far indented this item is:
+    const prefixCapture = LIST_ITEM_PREFIX_R.exec(item);
+    const space = prefixCapture ? prefixCapture[0].length : 0;
+    // And then we construct a regex to "unindent" the subsequent
+    // lines of the items by that amount:
+    const spaceRegex = new RegExp("^ {1," + space + "}", "gm");
+
+    // Before processing the item, we need a couple things
+    const contentStr = item
+      // remove indents on trailing lines:
+      .replace(spaceRegex, "")
+      // remove the bullet:
+      .replace(LIST_ITEM_PREFIX_R, "");
+
+    // Backup our state for restoration afterwards.
+    const oldStateInline = state.inline;
+
+    // Parse the list item
+    state.inline = isTight;
+    const adjustedContent = contentStr.replace(LIST_ITEM_END_R, "");
+    const content = parse(adjustedContent, state);
+    const result = isTight
+      ? { type: "tight_list_item", content: [{ "type": "paragraph", "content": content }] }
+      : { type: "list_item", content };
+
+    // Restore our state before returning
+    state.inline = oldStateInline;
+    return result;
+  });
+
+  state.inList = oldStateList;
+  return itemContent
+};
+
+const TABLES = (function() {
+  const TABLE_ROW_SEPARATOR_TRIM = /^ *[|+] *| *[|+] *$/g;
+  const TABLE_RIGHT_ALIGN = /^(?:[ -]-+|=+):$/;
+  const TABLE_CENTER_ALIGN = /^:[-=]+:$/;
+
+  const parseTableAlign = function(source) {
+    // Inspect ":" characters to set column justification.
+    // Return class names that specify center or right justification on specific columns.
+    source = source.replace(TABLE_ROW_SEPARATOR_TRIM, "");
+    const alignArr = source.trim().split(/[|+]/);
+    let alignStr = "";
+    for (let i = 0; i < alignArr.length; i++) {
+      alignStr += TABLE_CENTER_ALIGN.test(alignArr[i])
+        ? ` c${String(i + 1)}c`
+        : (TABLE_RIGHT_ALIGN.test(alignArr[i])
+        ? ` c${String(i + 1)}r`
+        : "");
+    }
+    return alignStr.trim()
+  };
+
+  const tableDirectives = (directives, align) => {
+    // Get CSS class, ID, and column widths, if any.
+    if (!directives && align === "") { return ["", "", null] }
+    const userDefClass = tableClassRegEx.exec(directives);
+    let myClass = userDefClass
+      ? (userDefClass[1] ? userDefClass[1] : userDefClass[2] )
+      : "";
+    const isSpreadsheet = myClass && myClass.split(" ").includes("spreadsheet");
+    if (align.length > 0) { myClass += (myClass.length > 0 ? " " : "") + align; }
+    const userDefId = ID_R.exec(directives);
+    const myID = (userDefId) ? userDefId[1] : "";
+    const colWidthMatch = COL_WIDTHS_R.exec(directives);
+    const colWidths = (colWidthMatch) ? colWidthMatch[1].split(" ") : null;
+    return [myClass, myID, isSpreadsheet, colWidths]
+  };
+
+  const pipeRegEx = /(?<!\\)\|/;  // eslint doesn't like look behind. Disregard the warning.
+
+  const parsePipeTableRow = function(source, parse, state, isSpreadsheet,
+                                     colWidths, inHeader) {
+    const cells = source.trim().split(pipeRegEx);
+    cells.shift();
+    cells.pop();
+    const tableRow = [{ type: "tableSeparator" }];
+    for (const str of cells) {
+      const cell = isSpreadsheet
+        ? [{ type: "spreadsheet_cell", attrs: { entry: str.trim() } }]
+        : parse(str.trim(), state);
+      tableRow.push(...cell);
+      tableRow.push({ type: "tableSeparator" });
+    }
+    consolidate(tableRow);
+
+    const row = {
+      type: "table_row",
+      content: []
+    };
+    let j = -1;
+    tableRow.forEach(function(node, i) {
+      if (node.type === "text") {
+        if (i > 0 && tableRow[i - 1].type === "tableSeparator") {
+          node.text = node.text.replace(leadingSpaceRegEx$2, "");
+        }
+        if (i < tableRow.length - 1 && tableRow[i + 1].type === "tableSeparator") {
+          node.text = node.text.replace(trailingSpaceRegEx$1, "");
+        }
+      }
+      if (node.type === "tableSeparator") {
+        if (i !== tableRow.length - 1) {  // Filter out the row's  last table separator
+          // Create a new cell
+          j += 1;
+          row.content.push({
+            "type": inHeader ? "table_header" : "table_cell",
+            "attrs": {
+              "colspan": 1,
+              "rowspan": 1,
+              "colwidth": (colWidths) ? [Number(colWidths[j])] : null,
+              "background": null
+            },
+            content: (state.inHtml || isSpreadsheet
+              ? []
+              : [{ "type": "paragraph", "content": [] }]
+            )
+          });
+        }
+      } else if (state.inHtml || isSpreadsheet) {
+        // For direct to HTML, write the inline contents directly into the <td> element.
+        // row   cell    content      text
+        row.content[j].content.push(node);
+      } else {
+        // Hurmet.app table cells always contain a paragraph.
+        // row   cell  paragraph  content      text
+        row.content[j].content[0].content.push(node);
+      }
+    });
+
+    return row;
+  };
+
+  const parsePipeTable = function() {
+    return function(capture, state) {
+      state.inline = true;
+      const align = parseTableAlign(capture[3]);
+      const [myClass, myID, isSpreadsheet, colWidths] = tableDirectives(capture[5], align);
+      const table = {
+        type: "table",
+        attrs: {},
+        content: []
+      };
+      if (myID) { table.attrs.name = myID; }
+      if (myClass) { table.attrs.class = myClass; }
+      if (isSpreadsheet) { table.attrs.dtype = dt.SPREADSHEET; }
+      if (colWidths && state.inHtml) {
+        let sum = 0;
+        colWidths.forEach(el => { sum += Number(el); } );
+        table.attrs.style = `width: ${sum}px`;
+        const colGroup = { type: "colGroup", content: [] };
+        for (const width of colWidths) {
+          colGroup.content.push({ type: "col", attrs: [{ style: `width: ${width}px` }] });
+        }
+        table.content.push(colGroup);
+      }
+      if (!/^\|+$/.test(capture[2])) {
+        table.content.push(parsePipeTableRow(capture[2], parse, state, isSpreadsheet,
+                                             colWidths, true));
+      }
+      const tableBody = capture[4].trim().split("\n");
+      tableBody.forEach(row => {
+        table.content.push(parsePipeTableRow(row, parse, state, isSpreadsheet,
+                                             colWidths, false));
+      });
+      state.inline = false;
+      if (capture[1]) {
+        const figure = { type: "figure", attrs: { class: "" }, content: [
+          { type: "figcaption", content: parseInline(capture[1], state) },
+          table
+        ] };
+        if (capture[5]) {
+          const match = floatRegEx.exec(capture[5]);
+          if (match) { figure.attrs.class = match[1]; }
+        }
+        return figure
+      } else {
+        return table
+      }
+    };
+  };
+
+  const headerRegEx = /^\+:?=/;
+  const gridSplit = / *\n/g;
+  const cellCornerRegEx = /^\+[-=:]+\+[+=:-]+\+$/g;
+
+  const parseGridTable = function() {
+    return function(capture, state) {
+      const topBorder = capture[3];
+      const lines = capture[2].slice(0, -1).split(gridSplit);
+
+      // Does the grid table contain a line separating header from table body?
+      let headerExists = false;
+      let headerSepLine = lines.length + 10;
+      for (let i = 0; i < lines.length; i++) {
+        if (headerRegEx.test(lines[i])) {
+          headerExists = true;
+          headerSepLine = i;
+          break
+        }
+      }
+
+      // Get column justification
+      const alignrow = headerExists ? lines[headerSepLine] : topBorder.slice(1);
+      const align = parseTableAlign(alignrow);
+      const [myClass, myID, isSpreadsheet, colWidths] = tableDirectives(capture[4], align);
+
+      // Read the top & left borders to find a first draft of cell corner locations.
+      const colSeps = [0];
+      for (let j = 1; j < topBorder.length; j++) {
+        if (topBorder.charAt(j) === "+") { colSeps.push(j); }
+      }
+      const rowSeps = [0];
+      for (let i = 1; i < lines.length; i++) {
+        if (lines[i].charAt(0) === "+") { rowSeps.push(i); }
+      }
+
+      // Look for the cell corner locations that don't appear on top or left border
+      let rowSepIndex = 0;
+      while (rowSepIndex < rowSeps.length) {
+        // Find the next row separator
+        let nextRow = 0;
+        const isValid = new Array(colSeps.length).fill(true);
+        for (let i = rowSeps[rowSepIndex] + 1; i < lines.length; i++) {
+          for (let k = 0; k < colSeps.length; k++) {
+            if (!isValid[k]) { continue }
+            if ("+|".indexOf(lines[i][colSeps[k]]) === -1) { isValid[k] = false; continue }
+            if (lines[i][colSeps[k]] === "+") {
+              nextRow = i;
+              break
+            }
+          }
+          if (nextRow !== 0) { break }
+        }
+        if (!rowSeps.includes(nextRow)) {
+          rowSeps.splice(rowSepIndex + 1, 0, nextRow);
+        }
+
+        // Check the next horizontal border for new cell corners
+        rowSepIndex += 1;
+        const border = lines[nextRow];
+        for (let j = 0; j < colSeps.length - 1; j++) {
+          let cellBorder = border.slice(colSeps[j], colSeps[j + 1] + 1);
+          if (cellCornerRegEx.test(cellBorder)) {
+            cellBorder = cellBorder.slice(1, -1);
+            let pos = cellBorder.indexOf("+") + 1;
+            let k = 1;
+            while (pos > 0) {
+              colSeps.splice(j + k, 0, colSeps[j] + pos);
+              pos = cellBorder.indexOf("+", pos) + 1;
+              k += 1;
+            }
+          }
+        }
+      }
+
+      const numCols = colSeps.length - 1;
+      const numRows = rowSeps.length - 1;
+      const gridTable = [];
+
+      // Create default rows and cells. They may be merged later.
+      for (let i = 0; i < numRows; i++) {
+        const row = new Array(numCols);
+        for (let j = 0; j < numCols; j++) { row[j] = { rowspan: 1 }; }
+        gridTable.push(row);
+      }
+
+      for (let i = 0; i < numRows; i++) {
+        const row = gridTable[i];
+        // Determine the actual rowspan and colspan of each cell.
+        for (let j = 0; j < numCols; j++) {
+          const cell = row[j];
+          if (cell.rowspan === 0) { continue }
+          cell.colspan = 1;
+          const lastTextRow = lines[rowSeps[i + 1] - 1];
+          for (let k = j + 1; k < colSeps.length; k++) {
+            if (lastTextRow.charAt(colSeps[k]) === "|") { break }
+            cell.colspan += 1;
+            row[k].rowspan = 0;
+          }
+          for (let k = i + 1; k < rowSeps.length; k++) {
+            const ch = lines[rowSeps[k]].charAt(colSeps[j] + 1);
+            if ("-=:".indexOf(ch) > -1) { break }
+            cell.rowspan += 1;
+            for (let jj = 0; jj < cell.colspan; jj++) {
+              gridTable[k][j + jj].rowspan = 0;
+            }
+          }
+          // Now that we know the cell extents, get the cell contents.
+          const xStart = colSeps[j] + 1;
+          const xEnd = colSeps[j + cell.colspan];
+          const yStart = rowSeps[i] + 1;
+          const yEnd = rowSeps[i + cell.rowspan];
+          let str = "";
+          for (let ii = yStart; ii < yEnd; ii++) {
+            str += lines[ii].slice(xStart, xEnd).replace(/ +$/, "") + "\n";
+          }
+          cell.blob = str.slice(0, -1).replace(/^\n+/, "");
+          const leadingSpacesMatch = /^ +/.exec(cell.blob);
+          if (leadingSpacesMatch) {
+            const numLeadingSpaces = leadingSpacesMatch[0].length;
+            const spaceRegEx = new RegExp("^" + " ".repeat(numLeadingSpaces), "gm");
+            cell.blob = cell.blob.replace(spaceRegEx, "");
+          }
+
+          cell.inHeader = (headerExists && yStart < headerSepLine);
+
+          if (colWidths) {
+            // Set an attribute used by ProseMirror.
+            const cellWidth = cell.colspan === 0 ? null : [];
+            for (let k = 0; k < cell.colspan; k++) {
+              cellWidth.push(Number(colWidths[j + k]));
+            }
+            cell.width = cellWidth;
+          }
+        }
+      }
+
+      const table = {
+        type: "table",
+        attrs: {},
+        content: []
+      };
+      if (myID) { table.attrs.name = myID; }
+      if (myClass) { table.attrs.class = myClass; }
+      if (isSpreadsheet) { table.attrs.dtype = dt.SPREADSHEET; }
+      let k = 0;
+      if (colWidths && state.inHtml) {
+        let sum = 0;
+        colWidths.forEach(el => { sum += Number(el); } );
+        table.attrs.style = `width: ${sum}px`;
+        const colGroup = { type: "colGroup", attrs: null, content: [] };
+        for (const width of colWidths) {
+          colGroup.content.push({ type: "col", attrs: [{ style: `width: ${width}px` }] });
+        }
+        table.content.push(colGroup);
+        k = 1;
+      }
+      for (let i = 0; i < numRows; i++) {
+        table.content.push({ type: "table_row", content: [] } );
+        for (let j = 0; j < numCols; j++) {
+          if (gridTable[i][j].rowspan === 0) { continue }
+          const cell = gridTable[i][j];
+          state.inline = false;
+          let content = isSpreadsheet
+            ? [{ type: "spreadsheet_cell", attrs: { entry: cell.blob.trim() } }]
+            : parse(cell.blob, state);
+          if (state.inHtml && content.length === 1 && content[0].type === "paragraph") {
+            content = content[0].content;
+          }
+          if (content.length === 1 && content[0].type === "null") {
+            content = [{ type: "paragraph", content: [] }];
+          }
+          table.content[i + k].content.push({
+            "type": cell.inHeader ? "table_header" : "table_cell",
+            "attrs": {
+              "colspan": cell.colspan,
+              "rowspan": cell.rowspan,
+              "colwidth": (colWidths) ? cell.width : null,
+              "background": null
+            },
+            content: content
+          });
+        }
+      }
+      state.inline = false;
+      if (capture[1]) {
+        const figure = { type: "figure", attrs: { class: "" }, content: [
+          { type: "figcaption", attrs: null, content: parseInline(capture[1], state) },
+          table
+        ] };
+        if (capture[4]) {
+          const match = floatRegEx.exec(capture[4]);
+          if (match) { figure.attrs.class = match[1]; }
+        }
+        return figure
+      } else {
+        return table
+      }
+    };
+  };
+
+  return {
+    parsePipeTable: parsePipeTable(),
+    PIPE_TABLE_REGEX: /^(?:: ((?:[^\n]|\n(?!\||:|<\/dl>))*)\n)?(\|.*)\n\|((?:[-: ]?-+[-: ]?\|)+)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
+    parseGridTable: parseGridTable(),
+    GRID_TABLE_REGEX: /^(?:: ((?:[^\n]|\n(?!\+|:|<\/dl>))*)\n)?((\+(?:[-:=]+\+)+)\n(?:[+|][^\n]+[+|] *\n)+)(?:\{([^\n}]+)\}\n)?\n*/
+  };
+})();
+
+const LINK_INSIDE = "(?:\\[[^\\]]*\\]|[^\\[\\]]|\\](?=[^\\[]*\\]))*";
+const LINK_HREF_AND_TITLE =
+  "\\s*<?((?:\\([^)]*\\)|[^\\s\\\\]|\\\\.)*?)>?(?:\\s+['\"]([\\s\\S]*?)['\"])?\\s*";
+
+const linkIndex = marks => {
+  for (let i = 0; i < marks.length; i++) {
+    if (marks[i].type === "link") { return i }
+  }
+};
+
+// Pattern to find Hurmet calculation results.
+// This will be replaced in the entry with the display selector.
+const resultRegEx = /〔[^〕]*〕/;
+const drawRegEx$1 = /^draw\(/;
+
+const parseRef = function(capture, state, refNode) {
+  // Handle implicit refs: [title][<ref>], ![alt or caption][<ref>]
+  let ref = capture[2] ? capture[2] : capture[1];
+  ref = ref.replace(/\s+/g, " ");
+
+  if (state.defs && state.defs[ref]) {
+    const def = state.defs[ref];
+    if (!def.target || def.target === "undefined") {
+      // The image definition is undefined.
+      const brokenImage = { type: "image", attrs: { src: "undefined-image" } };
+      if (def.attrs && def.attrs.alt) { brokenImage.attrs.alt = def.attrs.alt; }
+      return brokenImage
+    }
+    if (refNode.type === "figure") {
+      refNode = { type: "figure", attrs: def.attrs, content: [
+        { type: "figimg", attrs: def.attrs },
+        { type: "figcaption", content: parseInline(refNode.attrs.alt, state) }
+      ] };
+      refNode.content[0].attrs.src = def.target;
+      if (def.attrs.alt) { refNode.content[0].attrs.alt = def.attrs.alt; }
+    } else if (refNode.type === "image") {
+      if (drawRegEx$1.test(def.target)) {
+        // A drawing is written on one line. Its line breaks are written as ␤.
+        // Drawings written before ␤ was adopted contain no ␤; they used \n.
+        const entry = def.target.indexOf("␤") === -1
+          ? def.target.replace(/\\n/g, "\n")
+          : def.target.replace(/␤/g, "\n");
+        return { type: "calculation", attrs: { entry } }
+      } else {
+        refNode.attrs = def.attrs;
+        refNode.attrs.src = def.target;
+      }
+    } else {
+      // refNode is a link
+      refNode.attrs.href = def.target;
+    }
+  }
+  return refNode;
+};
+
+const parseTextMark = (capture, state, mark, href) => {
+  const text = parseInline(capture, state);
+  if (Array.isArray(text) && text.length === 0) { return text }
+  consolidate(text);
+  const markObj = { type: mark };
+  if (href) { markObj.attrs = { href }; }
+  for (const range of text) {
+    if (range.marks) {
+      range.marks.push(markObj);
+    } else {
+      range.marks = [markObj];
+    }
+  }
+  return text
+};
+
+const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|label|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<(?:\/?(?:!DOCTYPE html|body|li|br|hr|(?:div|article|details|input|ul|ol|dl|main|nav)(?: (?:class|id|name|style|type)=(["'])[A-Za-z0-9_.:;\- ]+\2){0,2})|\/?html(?: lang=(["'])[a-z]+\3)?)>[^\n]*?(?:\n|$))/;
+
+// Rules must be applied in a specific order, so use a Map instead of an object.
+const rules = new Map();
+rules.set("html", {
+  isLeaf: true,
+  match: blockRegex(BLOCK_HTML),
+  parse: function(capture, state) {
+    if (!state.inHtml) { return null }
+    return { type: "html", text: capture[0] }
+  }
+});
+rules.set("htmlComment", {
+  isLeaf: true,
+  match: blockRegex(/^ *<!--[\s\S]*?-->[^\n]*\n/),
+  parse: function(capture, state) {
+    return { type: "null" }
+  }
+}),
+rules.set("lheading", {
+  isLeaf: false,
+  match: blockRegex(/^([^\n]+)\n *(=|-){3,} *(?:\n *)+\n/),
+  parse: function(capture, state) {
+    return {
+      type: "heading",
+      attrs: { level: capture[2] === '=' ? 1 : 2 },
+      content: parseInline(capture[1].trim(), state)
+    };
+  }
+});
+rules.set("heading", {
+  isLeaf: false,
+  match: blockRegex(/^ *(#{1,6})([^\n]+?)#*\n*\n/),
+  parse: function(capture, state) {
+    return {
+      attrs: { level: capture[1].length },
+      content: parseInline(capture[2].trim(), state)
+    };
+  }
+});
+rules.set("dt", {  // description term
+  isLeaf: false,
+  match: blockRegex(/^(([^\n]*)\n)(?=<dd>|\n: [^\n]+\n[^|+])/),
+  parse: function(capture, state) {
+    return { content: parseInline(capture[2].trim(), state) }
+  }
+});
+rules.set("horizontal_rule", {
+  isLeaf: true,
+  match: blockRegex(/^( *[-*_]){3,} *(?:\n *)+\n/),
+  parse: function(capture, parse, state) {
+    return { type: "horizontal_rule" };
+  }
+});
+rules.set("page_break", {
+  isLeaf: true,
+  match: blockRegex(/^\\newpage\n\n/),
+  parse: function(capture, parse, state) {
+    return { type: "page_break" };
+  }
+});
+rules.set("codeBlock", {
+  isLeaf: true,
+  match: blockRegex(/^(?:(?:\t| {4})[^\n]+\n*)+(?:\n *)+\n/),
+  parse: function(capture, state) {
+    const content = capture[0].replace(/^(\t| {4})/gm, '').replace(/\n+$/, '');
+    return {
+      type: "code_block",
+      content: [{ type: "text", text: content }]
+    };
+  }
+});
+rules.set("fence", {
+  isLeaf: true,
+  match: blockRegex(/^(```|~~~) *(?:(\S+) *)?\n([\s\S]+?)\n?\1 *(?:\n *)+\n/),
+  parse: function(capture, state) {
+    return {
+      type: "code_block",
+//      lang: capture[2] || undefined,
+      content: [{ type: "text", text: capture[3] }]
+    };
+  }
+});
+rules.set("alert", {
+  isLeaf: false,
+  match: blockRegex(/^(?: *> \[!(NOTE|TIP|IMPORTANT|WARNING|EPIGRAPH)\])((?:\n *>(?! *\[!)[^\n]*)+)(?:\n *)+\n/),
+  // Alert for note |tip | important | warning |epigraph
+  parse: function(capture, state) {
+    const cap = capture[2].replace(/\n *> ?/gm, "\n").replace(/^\n/, "");
+    const content = parse(cap, state);
+    return { type: capture[1].toLowerCase(), content }
+  }
+});
+rules.set("blockquote", {
+  isLeaf: false,
+  match: blockRegex(/^>([^\n]*(?:\n *>[^\n]*)*)(?:\n *)+\n/),
+  parse: function(capture, state) {
+    const content = capture[1].replace(/\n *> ?/gm, "\n");
+    return { content: parse(content, state) };
+  }
+});
+rules.set("ordered_list", {
+  isLeaf: false,
+  match: blockRegex(/^( {0,3})(?:(?:(\d{1,9})|([A-Z])|([a-z]))[.)]) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:\d{1,9}\.) )\n*|\s*$)/),
+  parse: function(capture, state) {
+    const start = capture[2]
+      ? Number(capture[2])
+      : capture[3]
+      ? capture[3].codePointAt(0) - 64
+      : capture[4].codePointAt(0) - 96;
+    const className = capture[2] ? "decimal" : capture[3] ? "upper-alpha" : "lower-alpha";
+    return {
+      attrs: { class: className, order: start },
+      content: parseList(capture[0], state)
+    }
+  }
+});
+rules.set("bullet_list", {
+  isLeaf: false,
+  match: blockRegex(/^( {0,3})([*+-]) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:[*+-]) )\n*|\s*$)/),
+  parse: function(capture, state) {
+    return { content: parseList(capture[0], state) }
+  }
+});
+rules.set("special_div", {
+  isLeaf: false,
+  match: blockRegex(/^(:{3,}) ?(indented|comment|centered|right_justified|boxed|header\*?|hidden) *\n([\s\S]+?)\n+\1 *(?:\n{2,}|\s*$)/),
+  // indented or centered or right-justified or boxed or comment div, or <header>
+  parse: function(capture, state) {
+    const content = parse(capture[3], state);
+    const blockType = capture[2];
+    if (blockType === "header*") {
+      return { type: "header", attrs: { headerPages: "all" }, content };
+    } else {
+      return { type: blockType, content };
+    }
+  }
+});
+rules.set("figure", {
+  isLeaf: true,
+  match: blockRegex(/^!!\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\] *(?:\n *)+\n/),
+  parse: function(capture, state) {
+    if (isNotAnInteger(capture[1])) {
+      return parseRef(capture, state, { type: "figure", attrs: { alt: capture[1] } });
+    } else {
+      return parseRef(capture, state, { type: "figure" });
+    }
+  }
+});
+rules.set("def", {
+  isLeaf: true,
+  // A drawing takes its whole line, which may contain ">".
+  match: blockRegex(/^\[([^\]\n]+)\]: *(?:¢(`+)([\s\S]*?[^`])\2(?!`)|draw\([^\n]*|<?([^\n>]*)>? *(?:\n\{([^\n}]*)\})?)/),
+  // Link reference definitions were handled in md2ast().
+  parse: function(capture, state) { return { type: "null" } }
+});
+rules.set("toc", {
+  isLeaf: true,
+  match: blockRegex(/^{\.toc start=(\d) end=(\d)}\n/),
+  parse: function(capture, state) {
+    return { attrs: { start: Number(capture[1]), end: Number(capture[2]), body: [] } }
+  }
+});
+rules.set("pipeTable", {
+  isLeaf: false,
+  match: blockRegex(TABLES.PIPE_TABLE_REGEX),
+  parse: TABLES.parsePipeTable
+});
+rules.set("gridTable", {
+  isLeaf: false,
+  match: blockRegex(TABLES.GRID_TABLE_REGEX),
+  parse: TABLES.parseGridTable
+});
+rules.set("dd", {  // description details
+  isLeaf: false,
+  match: blockRegex(/^:( +)[\s\S]+?(?:\n{2,}(?! |:)(?!\1)\n*|\s*$)/),
+  parse: function(capture, state) {
+    let div = " " + capture[0].slice(1);
+    const indent = 1 + capture[1].length;
+    const spaceRegex = new RegExp("^ {" + indent + "," + indent + "}", "gm");
+    div = div.replace(spaceRegex, ""); // remove indents on trailing lines:
+    return { content: parse(div, state) };
+  }
+});
+rules.set("displayTeX", {
+  isLeaf: true,
+  match: blockRegex(/^ *(?:\$\$\n? *((?:\\[\s\S]|[^\\])+?)\n?\$\$|\\\[\n? *((?:\\[\s\S]|[^\\])+?)\n?\\\]) *(?:\n|$)/),
+  parse: function(capture, state) {
+    const tex = (capture[1] ? capture[1] : capture[2]).trim();
+    return { type: "tex", attrs: { tex, displayMode: true } }
+  }
+});
+rules.set("newline", {
+  isLeaf: true,
+  match: blockRegex(/^(?:\n *)*\n/),
+  parse: function() { return { type: "null" } }
+});
+rules.set("emptyParagraph", {
+  isLeaf: true,
+  match: blockRegex(/^(¶|&nbsp;)(?:\n *)+\n/),
+  parse: function(capture, state) {
+    return { type: "paragraph", content: [] }
+  }
+});
+rules.set("paragraph", {
+  isLeaf: false,
+  match: blockRegex(/^((?:[^\n]|\n(?!(?: *\n|(?=[*+-] )|(?=(?:\d{1,9}|[A-Za-z])[.)] ))))+)\n(?:(?: *\n)+|(?=[*+-] )|(?=(?:\d{1,9}|[A-Za-z])[.)] ))/),
+  parse: function(capture, state) {
+    return { type: "paragraph", content: parseInline(capture[1], state) }
+  }
+});
+// Position tex ahead of escape in order to capture \[...\] math.
+rules.set("tex", {
+  isLeaf: true,
+  match: inlineRegex(/^(?:\\\[((?:\\[\s\S]|[^\\])+?)\\\]|\$\$((?:\\[\s\S]|[^\\])+?)\$\$|\\\(((?:\\[\s\S]|[^\\])+?)\\\)|\$(`+)((?:(?:\\[\s\S]|[^\\])+?)?)\4\$(?![0-9$])|\$(?!\s|\$)((?:(?:\\[\s\S]|[^\\])+?)?)(?<=[^\s\\$])\$(?![0-9$]))/),
+  parse: function(capture, state) {
+    if (capture[1] || capture[2]) {
+      const tex = (capture[1] ? capture[1] : capture[2]).trim();
+      return { type: "tex", attrs: { tex, displayMode: true } }
+    } else {
+      const tex = (capture[3]
+        ? capture[3]
+        : capture[5]
+        ? capture[5]
+        : capture[6]).trim();
+      return { type: "tex", attrs: { tex, displayMode: false } }
+    }
+  }
+});
+rules.set("escape", {
+  // We don't allow escaping numbers, letters, or spaces here so that
+  // backslashes used in plain text still get rendered. But allowing
+  // escaping anything else provides a very flexible escape mechanism,
+  // regardless of how this grammar is extended.
+  isLeaf: true,
+  match: inlineRegex(/^\\([^0-9A-Za-z()\s])/),
+  parse: function(capture, state) {
+    return {
+      type: "text",
+      text: capture[1]
+    };
+  }
+});
+rules.set("tableSeparator", {
+  isLeaf: true,
+  match: function(source, state) {
+    if (!state.inTable) { return null }
+    return /^ *\| */.exec(source);
+  },
+  parse: function() {
+    return { type: "tableSeparator" };
+  }
+});
+rules.set("link", {
+  isLeaf: true,
+  match: inlineRegex(
+    new RegExp("^\\[(" + LINK_INSIDE + ")\\]\\(" + LINK_HREF_AND_TITLE + "\\)")
+  ),
+  parse: function(capture, state) {
+    const content = parseInline(capture[1], state);
+    let useParseTextMark = true;
+    for (const node of content) {
+      if (node.type !== "text") { useParseTextMark = false; break }
+    }
+    if (useParseTextMark) {
+      // This is the Prosemirror default method for editable links.
+      return parseTextMark(capture[1], state, "link", unescapeUrl(capture[2]))
+    } else {
+      // When a link contains a nodeView, e.g. math, the text mark method has an edge case bug.
+      // So the Hurmet schema has a custom "link_node".
+      const href = unescapeUrl(capture[2]);
+      return [{ type: "link_node", attrs: { href, title: href }, content }]
+    }
+  }
+});
+rules.set("image", {
+  isLeaf: true,
+  match: inlineRegex(
+    new RegExp("^!\\[(" + LINK_INSIDE + ")\\]\\(" + LINK_HREF_AND_TITLE + "\\)")
+  ),
+  parse: function(capture, state) {
+    if (isNotAnInteger(capture[1])) {
+      return { attrs: { alt: capture[1], src: unescapeUrl(capture[2]) } }
+    } else {
+      return { attrs: { src: unescapeUrl(capture[2]) } }
+    }
+  }
+});
+rules.set("reflink", {
+  isLeaf: true,
+  match: inlineRegex(/^\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]/),
+  parse: function(capture, state) {
+    const defIndex = capture[2] ? capture[2] : capture[1];
+    const href = state.defs[defIndex].target;
+    const textNode = parseTextMark(capture[1], state, "link", href);
+    return textNode
+  }
+});
+rules.set("footnote", {
+  isLeaf: true,
+  match: inlineRegex(/^\[\^(\d+)\]/),
+  parse: function(capture, state) {
+    const index = Number(capture[1]) - 1;
+    return { type: "footnote", content: parseInline(state.footnotes[index], state) }
+  }
+});
+rules.set("refimage", {
+  isLeaf: true,
+  match: inlineRegex(/^!\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]/),
+  parse: function(capture, state) {
+    //if (isNotAnInteger(capture[1])) {
+    return parseRef(capture, state, { type: "image", attrs: { alt: capture[1] } });
+    //} else {
+    //  return parseRef(capture, state, { type: "image" });
+   // }
+  }
+});
+rules.set("autolink", {
+  isLeaf: true,
+  match: inlineRegex(/^<([^: >]+:\/[^ >]+)>/),
+  parse: function(capture, state) {
+    const textNode = parseTextMark(capture[1], state, "link" )[0];
+    const i = linkIndex(textNode.marks);
+    textNode.marks[i].attrs = { href: unescapeUrl(capture[1]) };
+    return textNode
+  }
+});
+rules.set("code", {
+  isLeaf: true,
+  match: inlineRegex(/^(`+)([\s\S]*?[^`])\1(?!`)/),
+  parse: function(capture, state) {
+    const text = capture[2].trim();
+    return [{ type: "text", text, marks: [{ type: "code" }] }]
+  }
+});
+rules.set("calculation", {
+  isLeaf: true,
+  match: anyScopeRegex(/^(?:¢(\?\?|\?|%%|%|@@|@)?(`+)([\s\S]*?[^`])\2(?!`)|¢¢(\?\?|\?|%%|%|@@|@)?\n?((?:\\[\s\S]|[^\\])+?)\n?¢¢)/),
+  parse: function(capture, state) {
+    if (capture[3]) {
+      let entry = capture[3].trim();
+      if (capture[1]) {
+        if (entry.slice(0, 1) === "@") {
+          entry = entry.replace(resultRegEx, "").trim();
+        } else {
+          entry = entry.replace(resultRegEx, capture[1]);
+        }
+      }
+      if (!/^(?:function|draw\()/.test(entry) && entry.indexOf("``") === -1) {
+        entry = entry.replace(/\n/g, " ");
+      }
+      return { attrs: { entry } }
+    } else {
+      let entry = capture[5].trim();
+      if (capture[4]) {
+        if (entry.slice(0, 1) === "@") {
+          entry = entry.replace(resultRegEx, "").trim();
+        } else {
+          entry = entry.replace(resultRegEx, capture[4]);
+        }
+      }
+      return { attrs: { entry, displayMode: true } }
+    }
+  }
+});
+rules.set("em", {
+  isLeaf: true,
+  match: inlineRegex(/^([_*])(?!\s|\1)((?:\\[\s\S]|[^\\])+?)\1/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[2], state, "em" )
+  }
+});
+rules.set("strong", {
+  isLeaf: true,
+  match: inlineRegex(/^(\*\*|__)(?=\S)((?:\\[\s\S]|[^\\])+?)\1/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[2], state, "strong" )
+  }
+});
+rules.set("del", {
+  isLeaf: true,
+  match: inlineRegex(/^<del>([\s\S]*?)<\/del>/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "strikethru" )
+  }
+});
+rules.set("strikethru", {
+  isLeaf: true,
+  match: inlineRegex(/^~~(?=\S)((?:\\[\s\S]|~(?!~)|[^\s~\\]|\s(?!~~))+?)~~/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "strikethru" )
+  }
+});
+rules.set("superscript", {
+  isLeaf: true,
+  match: inlineRegex(/^<sup>([\s\S]*?)<\/sup>/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "superscript" )
+  }
+});
+rules.set("carat", {
+  isLeaf: true,
+  match: inlineRegex(/^\^((?:\\[\s\S]|[^\\])+?)\^/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "superscript" )
+  }
+});
+rules.set("subscript", {
+  isLeaf: true,
+  match: inlineRegex(/^<sub>([\s\S]*?)<\/sub>/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "subscript" )
+  }
+});
+rules.set("tilde", {
+  isLeaf: true,
+  match: inlineRegex(/^~((?:\\[\s\S]|[^\\])+?)~/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "subscript" )
+  }
+});
+rules.set("underline", {
+  isLeaf: true,
+  match: inlineRegex(/^<u>([\s\S]*?)<\/u>/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "underline" )
+  }
+});
+rules.set("highlight", {
+  isLeaf: true,
+  match: inlineRegex(/^<mark>([\s\S]*?)<\/mark>/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "highlight" )
+  }
+});
+rules.set("hard_break", {
+  isLeaf: true,
+  match: anyScopeRegex(/^(\\| {2})\n/),
+  parse: function() { return { text: "\n" } }
+});
+rules.set("inline_break", {
+  isLeaf: true,
+  match: anyScopeRegex(/^<br>/),
+  parse: function() { return { type: "hard_break", text: "\n" } }
+});
+rules.set("span", {
+  isLeaf: true,
+  match: inlineRegex(/^<span [a-z =":]+>[^<]+<\/span>/),
+  parse: function(capture, state) {
+    return !state.inHtml ? null : { type: "html", text: capture[0] }
+  }
+});
+rules.set("text", {
+  // We break on symbol characters, double newlines, or double-space-newlines.
+  isLeaf: true,
+  match: anyScopeRegex(/^[\s\S]+?(?=[_*`#>|\\\-+=![({$¢¶<~^+:]|\n\n| {2,}\n|\d+[.)]|\w+:\S|$)/),
+  parse: function(capture, state) {
+    return {
+      text: capture[0].replace(/\n/g, " ")
+    };
+  }
+});
+
+
+const parse = (source, state) => {
+  if (!state.inline) { source += "\n\n"; }
+  source = preprocess(source);
+  const result = [];
+  while (source) {
+    // store the best match and its rule:
+    let capture = null;
+    let ruleName = null;
+    let rule = null;
+    for (const [currRuleName, currRule] of rules) {
+      capture = currRule.match(source, state);
+      if (capture) {
+        rule = currRule;
+        ruleName = currRuleName;
+        break
+      }
+    }
+    const parsed = rule.parse(capture, state);
+    if (Array.isArray(parsed)) {
+      Array.prototype.push.apply(result, parsed);
+    } else {
+      if (parsed.type == null) { parsed.type = ruleName; }
+      result.push(parsed);
+    }
+    state.prevCapture = capture[0];
+    source = source.substring(capture[0].length);
+  }
+  return result
+};
+
+
+
+/**
+ * Parse some content with the parser `parse`, with state.inline
+ * set to true. Useful for block elements; not generally necessary
+ * to be used by inline elements (where state.inline is already true.
+ */
+const parseInline = function(content, state) {
+  const isCurrentlyInline = state.inline || false;
+  state.inline = true;
+  const result = parse(content, state);
+  state.inline = isCurrentlyInline;
+  return result;
+};
+
+
+// recognize a `*` `-`, `+`, `1.`, `2.`, `A.`, `a,`... list bullet
+const LIST_BULLET = "(?:[*+-]|(?:\\d+|[A-Za-z])[\\.\\)])";
+// recognize the start of a list item:
+// leading space plus a bullet plus a space (`   * `)
+const LIST_ITEM_PREFIX = "( *)(" + LIST_BULLET + ") +";
+const LIST_ITEM_PREFIX_R = new RegExp("^" + LIST_ITEM_PREFIX);
+// recognize an individual list item:
+//  * hi
+//    this is part of the same item
+//
+//    as is this, which is a new paragraph in the same item
+//
+//  * but this is not part of the same item
+const LIST_ITEM_R = new RegExp(
+  LIST_ITEM_PREFIX + "[^\\n]*(?:\\n" + "(?!\\1" + LIST_BULLET + " )[^\\n]*)*(\n|$)",
+  "gm"
+);
+const BLOCK_END_R = /\n{2,}$/;
+// recognize the end of a paragraph block inside a list item:
+// two or more newlines at end end of the item
+const LIST_BLOCK_END_R = BLOCK_END_R;
+const LIST_ITEM_END_R = / *\n+$/;
+
+const consolidate = arr => {
+  if (Array.isArray(arr) && arr.length > 0) {
+    // Group any text nodes together into a single string output.
+    for (let i = arr.length - 1; i > 0; i--) {
+      const node = arr[i];
+      const prevNode = arr[i - 1];
+      if (node.type === 'text' && prevNode.type === 'text' &&
+          !node.marks && !prevNode.marks) {
+        prevNode.text += node.text;
+        arr.splice(i, 1);
+      } else if ((node.type === 'indented' && prevNode.type === 'indented') ||
+                 (node.type === 'centered' && prevNode.type === 'centered')) {
+        prevNode.content = prevNode.content.concat(node.content);
+        arr.splice(i, 1);
+      } else if (node.type === "null") {
+        arr.splice(i, 1);
+      } else if (!rules.has(node.type) || !rules.get(node.type).isLeaf) {
+        consolidate(node.content);
+      }
+    }
+
+    if (!rules.has(arr[0].type) || !rules.get(arr[0].type).isLeaf) {
+      consolidate(arr[0].content);
+    }
+  }
+};
+
+const populateTOC = ast => {
+  let tocNode;
+  for (const node of ast) {
+    if (node.type === "toc") { tocNode = node; break }
+  }
+  if (!tocNode) { return }
+  const start = tocNode.attrs.start;
+  const end = tocNode.attrs.end;
+  for (const node of ast) {
+    if (node.type === "heading") {
+      const level = node.attrs.level;
+      if (start <= level && level <= end) {
+        const tocEntry = [];
+        let str = "";
+        for (const range of node.content) { str += range.text; }
+        tocEntry.push(str);
+        tocEntry.push(level);
+        tocEntry.push(0); // page number unknown
+        tocEntry.push(0); // element number unknown
+        tocNode.attrs.body.push(tocEntry);
+      }
+    }
+  }
+};
+
+const metadataRegEx = /^---+\n((?:[A-Za-z0-9][A-Za-z0-9 _-]*:[^\n]+\n(?:[ \t]+[^\n]+\n)*)+)---+\n/;
+const metadataItemRegEx = /^[A-Za-z0-9][A-Za-z0-9 _-]*:[^\n]+\n(?:[ \t]+[^\n]+\n)*/;
+const hurmetMetadataNames = ["decimalFormat", "dateFormat", "fontSize",
+  "pageSize", "saveDate"];
+
+const parseMetadata = str => {
+  const metadata = {};
+  let capture = str.match(metadataItemRegEx);
+  while (capture) {
+    const item = capture[0].split(":");
+    const key = item[0].trim().replace(/ /g, "");
+    if (hurmetMetadataNames.includes(key)) {
+      const value = item[1].slice(0, -1).trim().replace(/ *\n[ \t]*/g, " ");
+      metadata[key] = value;
+    }
+    str = str.slice(capture[0].length);
+    capture = str.match(metadataItemRegEx);
+  }
+  return metadata
+};
+
+const dateMessageRegEx = /^date:([^\n]+)\nmessage:([^\n]+)\n/;
+
+const buildPathDefString = (def, target, directives) => {
+  return directives
+    ? `[${def}]: ${target}\n{${directives}}`
+    : `[${def}]: ${target}`
+};
+
+const inlineMd2ast = md => {
+  const state = { inline: true, defs: {}, prevCapture: "", inList: false, inHtml: false };
+  const ast = parse(md, state);
+  if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") {
+    ast.shift();
+  }
+  consolidate(ast);
+  return ast
+};
+
+const md2ast = (md, inHtml = false) => {
+  // First, check for a metadata preamble
+  let metadata = false;
+  if (metadataRegEx.test(md)) {
+    const match = metadataRegEx.exec(md);
+    metadata = parseMetadata(match[1]);
+    md = md.slice(match[0].length);
+  }
+
+  // Second, get all the link reference definitions
+  const state = {
+    inline: false,
+    inList: false,
+    defs: {},
+    footnotes: [],
+    prevCapture: "",
+    inHtml
+  };
+  const snapshotPathCache = {};
+  const defRegEx = /\n *\[([^\]\n]+)\]: *([^\n]*) *(?:\n\{([^\n}]*)\})?(?=\n)/gm;
+  const footnoteDefRegEx = /\n *\[\^\d+\]: *([^\n]*)(?=\n)/gm;
+  let capture;
+  while ((capture = defRegEx.exec(md)) !== null) {
+    const def = capture[1].replace(/\s+/g, " ");
+    const target = capture[2].trim();
+    const directives = capture[3] || "";
+
+    const attrs = isNotAnInteger(def) ? { alt: def } : {};
+    if (directives) {
+      const matchClass = CLASS_R.exec(directives);
+      const matchWidth = WIDTH_R.exec(directives);
+      const matchAlt = ALT_R.exec(directives);
+      const matchID = ID_R.exec(directives);
+      if (matchClass) { attrs.class = matchClass[1]; }
+      if (matchWidth) { attrs.width = matchWidth[1]; }
+      if (matchAlt)   { attrs.alt = matchAlt[1]; }
+      if (matchID)    { attrs.id = matchID[1]; }
+    }
+    state.defs[def] = { target, attrs };
+
+    if (!isNotAnInteger(def)) {
+      snapshotPathCache[def] = buildPathDefString(def, target, directives);
+    }
+  }
+
+  // Next, get all the footnote definitions
+  // eslint-disable-next-line no-useless-assignment
+  capture = null;
+  while ((capture = footnoteDefRegEx.exec(md)) !== null) {
+    state.footnotes.push(capture[1].trim());
+  }
+
+  // Find out if there are any snapshots.
+  let snapshotStrings = [];
+  let gotSnapshot = false;
+  if (metadata) {
+    snapshotStrings = md.split("<!--SNAPSHOT-->\n");
+    if (snapshotStrings.length > 1) {
+      gotSnapshot = true;
+      md = snapshotStrings.shift();
+    }
+  }
+
+  // Find out if there are any fallbacks for fetched files
+  let fallbackStrings = [];
+  if (metadata) {
+    fallbackStrings = md.split("<!--FALLBACKS-->\n");
+    if (fallbackStrings.length > 1) {
+      md = fallbackStrings.shift();
+    } else {
+      fallbackStrings = null;
+    }
+  }
+
+  // Proceed to parse the document.
+  const ast = parse(md, state);
+  if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") {
+    ast.shift();
+  }
+  consolidate(ast);
+  populateTOC(ast);
+  if (metadata) {
+    metadata.snapshotPathCache = snapshotPathCache;
+    if (fallbackStrings) {
+      metadata.fallbacks = JSON.parse(fallbackStrings.pop().trim());
+    }
+    if (gotSnapshot) {
+      const snapshots = [];
+      for (const str of snapshotStrings) {
+        const capture = dateMessageRegEx.exec(str);
+        snapshots.push({
+          date: capture[1] ? Date.parse(capture[1].trim()) : undefined,
+          message: capture[2] ? capture[2].trim() : undefined,
+          content: capture ? str.slice(capture[0].length) : str
+        });
+      }
+      metadata.snapshots = snapshots;
+    }
+    return { type: "doc", attrs: metadata, content: ast }
+  } else {
+    return ast
+  }
+};
+
+// px per model unit, before the scene's scale is applied. As in Sketch's utils.js.
+const unitScaleFactors = Object.freeze({
+  px: 1,
+  in: 96,
+  ft: 1152,
+  "ft-in": 96, // Model units are inches. Dimension labels are written in feet & inches.
+  mile: 609600,
+  pt: 96 / 72,
+  mm: 96 / 25.4,
+  cm: 960 / 25.4,
+  m: 96000 / 25.4,
+  km: 96000000 / 25.4
+});
+
+// Other spellings of the unit names above, as in Sketch's unitAliases.js.
+const unitAliases = Object.freeze({
+  inch: "in", "″": "in",
+  foot: "ft", feet: "ft", lf: "ft", "′": "ft",
+  mi: "mile",
+  meter: "m", metre: "m",
+  millimeter: "mm", millimetre: "mm",
+  centimeter: "cm", centimetre: "cm",
+  kilometer: "km", kilometre: "km",
+  point: "pt", "Adobe point": "pt"
+});
+
+// Line types, as in Sketch's elementObject.js. Dash lengths are in px.
+const dashMap = Object.freeze({
+  solid: null,
+  dashed: "12 6",
+  dotted: "0 8",
+  centerline: "12 6 3 6",
+  border: "12 6 3 6 3 6"
+});
+const linecapMap = Object.freeze({ dotted: "round" });
+
+// Fill patterns, as in Sketch's elementObject.js. "solid" means no pattern.
+const fillPatternNames = new Set([
+  "solid", "diagonal", "crosshatch", "grid", "dots", "wood", "sand", "gravel", "earth",
+  "concrete"
+]);
+
+const roundingSpecRegEx = /^[frh][1-6]$/;
+const inchFractions = new Set([8, 16, 32, 64]);
+
+// A pattern's id includes its color, as in Sketch's dwg.js. A <pattern> def
+// can't take its color from the element that refers to it, so each
+// combination of pattern and color needs a def of its own.
+const sanitizeForId = str => String(str).replace(/[^a-zA-Z0-9]/g, "_");
+
+// decimalFormat and roundingSpec come from the parent document. A format statement
+// in the drawing overrides roundingSpec.
+const startSvg = (decimalFormat = "1,000,000.", roundingSpec = "h3") => {
+  return {
+    tag: 'svg',
+    children: [],
+    attrs: {
+      xmlns: "http://www.w3.org/2000/svg",
+      width: 250,
+      height: 250,
+      style: "display: inline;"
+    },
+    // Fields outside attrs are not written as SVG attributes.
+    caption: false,  // If true, Hurmet writes the title as a caption.
+    patterns: [],    // The { name, color } of each fill pattern used. The renderer
+                     // writes a <pattern> def for each.
+    temp: {
+      width: 250,
+      height: 250,
+      xmin: 0,
+      xmax: 5,
+      ymin: 0,
+      ymax: 5,
+      xunitlength: 20,  // px
+      yunitlength: 20,  // px
+      origin: [0, 0],   // in px (default is bottom left corner)
+      scene: null,      // { S, dx, dy } from a scene statement. S is px per model unit.
+      unit: "px",       // The scene's unit
+      roundingSpec,     // Rounding of dimension labels
+      fraction: 16,     // Denominator of the inch fractions in "ft-in" dimension labels
+      decimalFormat,    // From the parent document
+      stroke: "black",
+      strokewidth: 1,
+      linetype: "solid",
+      fill: "none",
+      pattern: "solid",
+      fontcolor: "black",
+      fontstyle: "normal",
+      fontfamily: "sans-serif",
+      fontsize: 13.33, // px, ~10 pt
+      fontweight: "normal",
+      marker: "none",
+      dotradius: 4,
+      axesstroke: "black",
+      gridstroke: "grey"
+    }
+  }
+};
+
+// Helpers
+const isString = oprnd => oprnd != null && oprnd.dtype === dt.STRING;
+const isNumber = oprnd => oprnd != null && Rnl.isRational(oprnd.value);
+const drawError = statement => errorOprnd("DRAW_ARG", statement);
+
+// A model point, in px.
+const toPx = (attrs, x, y) => [
+  x * attrs.xunitlength + attrs.origin[0],
+  attrs.height - y * attrs.yunitlength - attrs.origin[1]
+];
+
+// The fill paint for an element: the fill color, or, while a fill pattern is
+// in effect, a reference to that pattern in the fill color. Records each
+// pattern used, so the renderer can write its <pattern> def.
+const fillPaint = svg => {
+  const { fill, pattern } = svg.temp;
+  if (pattern === "solid" || !fill || fill === "none") { return fill }
+  if (!svg.patterns.some(p => p.name === pattern && p.color === fill)) {
+    svg.patterns.push({ name: pattern, color: fill });
+  }
+  return `url(#fp-${pattern}-${sanitizeForId(fill)})`
+};
+
+// Set an element's stroke, line type and fill. Elements with no inside, such
+// as lines, get no fill.
+const setStrokeAndFill = (node, svg, hasFill = true) => {
+  const attrs = svg.temp;
+  node.attrs["stroke-width"] = attrs.strokewidth;
+  node.attrs.stroke = attrs.stroke;
+  node.attrs.fill = hasFill ? fillPaint(svg) : "none";
+  if (dashMap[attrs.linetype]) {
+    node.attrs["stroke-dasharray"] = dashMap[attrs.linetype];
+    if (linecapMap[attrs.linetype]) {
+      node.attrs["stroke-linecap"] = linecapMap[attrs.linetype];
+    }
+  }
+};
+
+// Give the model-to-px mapping of a scene statement to attrs.
+const applyScene = attrs => {
+  const { S, dx, dy } = attrs.scene;
+  attrs.xunitlength = S;
+  attrs.yunitlength = S;
+  attrs.origin = [S * dx, S * dy];
+  attrs.xmin = -dx;
+  attrs.xmax = attrs.width / S - dx;
+  attrs.ymin = -dy;
+  attrs.ymax = attrs.height / S - dy;
+};
+
+const pointZeroRegEx = /\.0+$/;
+const chopZ = str => {
+  const k = str.indexOf(".");
+  if (k === -1) { return str }
+  if (pointZeroRegEx.test(str)) { return str.replace(pointZeroRegEx, "") }
+  let i;
+  for (i = str.length - 1; i > k && str.charAt(i) === "0"; i--) {
+    if (i === k) { i--; }
+  }
+  return str.slice(0, i + 1)
+};
+
+// The [x, y] numbers of a point operand, or null.
+const pointOf = oprnd => oprnd != null && Array.isArray(oprnd.value) &&
+  oprnd.value.length === 2 && oprnd.value.every(Rnl.isRational)
+  ? oprnd.value.map(e => Rnl.toNumber(e))
+  : null;
+
+// The rows of a matrix operand, as numbers, or null. A single row may be written as a
+// vector. Every row must have the same length.
+const numberRows = oprnd => {
+  if (oprnd == null || !Array.isArray(oprnd.value) || oprnd.value.length === 0) {
+    return null
+  }
+  const value = oprnd.value;
+  if (value.every(Rnl.isRational)) { return [value.map(e => Rnl.toNumber(e))] }
+  if (!value.every(row => Array.isArray(row) && !Rnl.isRational(row) &&
+      row.length === value[0].length && row.every(Rnl.isRational))) {
+    return null
+  }
+  return value.map(row => row.map(e => Rnl.toNumber(e)))
+};
+
+// A step's r in its simplest form, as in Sketch's arcStep.js simplifyR(). An elliptical
+// r with a zero radius is a straight step, and one with equal radii is a circular arc.
+const simplifyR = r => {
+  if (!Array.isArray(r)) { return r || 0 }
+  const [srx, ry, angle = 0] = r;
+  if (srx === 0 || ry === 0) { return 0 }
+  if (Math.abs(srx) === Math.abs(ry)) { return srx }
+  return [srx, ry, angle]
+};
+
+// The r of a path row written as [x, y], [x, y, r], or [x, y, ±rx, ry, angle].
+// As in Sketch's elementObject.js stepR().
+const stepR = row => row.length === 5
+  ? simplifyR([row[2], row[3], row[4]])
+  : row.length === 3
+  ? row[2]
+  : 0;
+
+// Arrow and dimension labels keep the default font size, as in Sketch's text.js.
+const labelFontSize = 13.33; // px
+
+const pxText = p => `${p[0].toFixed(4)},${p[1].toFixed(4)}`;
+
+// Cubic Bezier segments through px points, from a uniform Catmull-Rom spline whose end
+// points are their own neighbors. As in Sketch's freehandMath.js.
+const catmullRomToBezier = pts => {
+  const n = pts.length;
+  const segments = [];
+  for (let i = 0; i < n - 1; i++) {
+    const p0 = pts[i === 0 ? 0 : i - 1];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[i + 2 < n ? i + 2 : n - 1];
+    segments.push({
+      cp1: [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6],
+      cp2: [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6],
+      end: p2
+    });
+  }
+  return segments
+};
+
+// Markers
+// Sketch draws markers as <marker> defs sized in stroke widths. Hurmet draws the same
+// shapes inline, as plain <path> and <circle> elements, so that the SVG renders alike
+// everywhere. Each marker is filled with the stroke color.
+
+// The marker statement accepts Sketch's marker names. Every arrowhead size is "arrow",
+// every arrowdot size is "arrowdot". As in Sketch's elementObject.js, markerFamily.
+const markerFamilies = Object.freeze({
+  none: "none", dot: "dot",
+  arrow: "arrow", thinarrow: "arrow", thickarrow: "arrow", thickerarrow: "arrow",
+  arrowdot: "arrowdot", thinarrowdot: "arrowdot", thickarrowdot: "arrowdot",
+  thickerarrowdot: "arrowdot"
+});
+
+// Arrowhead [length, width], in stroke widths. The size suits the stroke width,
+// as in Sketch's arrowheadFor() and its marker defs in index.html.
+const arrowheadSize = sw => sw < 0.75
+  ? [20, 12]   // thinarrow
+  : sw < 1.5
+  ? [12, 7.8]  // arrow
+  : sw < 2.5
+  ? [8, 6]     // thickarrow
+  : [6.5, 4.4]; // thickerarrow
+const dimArrowSize = [18, 12]; // dimarrow
+const markerDotRadius = 3; // in stroke widths
+
+// A filled arrowhead whose tip is at px point `tip`, pointing along unit vector u.
+const arrowheadNode = (tip, u, [length, width], sw, color) => {
+  const n = [-u[1], u[0]];
+  const base = [tip[0] - length * sw * u[0], tip[1] - length * sw * u[1]];
+  const h = width / 2 * sw;
+  return {
+    tag: "path",
+    attrs: {
+      d: `M${base[0] + h * n[0]},${base[1] + h * n[1]} L${tip[0]},${tip[1]} ` +
+         `L${base[0] - h * n[0]},${base[1] - h * n[1]} Z`,
+      fill: color,
+      stroke: "none"
+    }
+  }
+};
+
+// Draw the current marker at px point `end`, where an element ends while heading
+// along px unit vector u.
+const drawMarker = (svg, end, u) => {
+  const { marker, strokewidth: sw, stroke } = svg.temp;
+  if (marker === "none") { return }
+  if (marker === "dot" || marker === "arrowdot") {
+    svg.children.push({ tag: "circle", attrs: {
+      cx: end[0], cy: end[1], r: markerDotRadius * sw, fill: stroke, stroke: "none"
+    } });
+  }
+  const size = arrowheadSize(sw);
+  if (marker === "arrow") {
+    svg.children.push(arrowheadNode(end, u, size, sw, stroke));
+  } else if (marker === "arrowdot") {
+    // The arrowhead's tip touches the dot.
+    const tip = [end[0] - markerDotRadius * sw * u[0], end[1] - markerDotRadius * sw * u[1]];
+    svg.children.push(arrowheadNode(tip, u, size, sw, stroke));
+  }
+};
+
+// The px unit vector of a model-space vector v. A zero vector points right, as in SVG.
+const pxDirection = (attrs, v) => {
+  const w = [v[0] * attrs.xunitlength, -v[1] * attrs.yunitlength];
+  const d = Math.hypot(w[0], w[1]);
+  return d > 0 ? [w[0] / d, w[1] / d] : [1, 0]
+};
+
+// The direction, in model space, in which a path step from p to q is heading when it
+// reaches q. The step's r is 0 (straight), a signed radius (circular arc, + for CCW),
+// or [±rx, ry, angle] (elliptical arc, the sign of rx gives the direction). As in
+// Sketch's arcStep.js, an arc spans at most half its circle or ellipse, and radii too
+// small for the chord are scaled up, as SVG does.
+const endDirection = (p, q, r) => {
+  if (!r || (Array.isArray(r) && (r[0] === 0 || r[1] === 0))) {
+    return [q[0] - p[0], q[1] - p[1]]
+  }
+  const [srx, sry, angle = 0] = Array.isArray(r) ? r : [r, r, 0];
+  const rx = Math.abs(srx);
+  const ry = Math.abs(sry);
+  const ccw = srx >= 0;
+  const rad = angle * Math.PI / 180;
+  const cos = Math.cos(rad);
+  const sin = Math.sin(rad);
+  // Into the ellipse's own frame, scaled so that the ellipse is a unit circle.
+  const toUnit = pt => [(pt[0] * cos + pt[1] * sin) / rx, (-pt[0] * sin + pt[1] * cos) / ry];
+  const a = toUnit(p);
+  const b = toUnit(q);
+  const chord = [b[0] - a[0], b[1] - a[1]];
+  const len = Math.hypot(chord[0], chord[1]);
+  if (len === 0) { return [q[0] - p[0], q[1] - p[1]] }
+  const h = Math.sqrt(Math.max(1 - len * len / 4, 0));
+  // A CCW arc's center is to the left of the chord.
+  const side = ccw ? 1 : -1;
+  const c = [(a[0] + b[0]) / 2 - side * h * chord[1] / len,
+    (a[1] + b[1]) / 2 + side * h * chord[0] / len];
+  const t = Math.atan2(b[1] - c[1], b[0] - c[0]);
+  // d/dt of center + R(angle)·(rx cos t, ry sin t), reversed for a CW arc.
+  const dx = -rx * Math.sin(t) * side;
+  const dy = ry * Math.cos(t) * side;
+  return [dx * cos - dy * sin, dx * sin + dy * cos]
+};
+
+const markAttribute = {
+  em:          ["font-style", "italic"],
+  strong:      ["font-weight", "bold"],
+  code:        ["font-family", "monospace"],
+  strikethru:  ["text-decoration", "line-through"],
+  subscript:   ["font-size", "0.8em"],
+  superscript: ["font-size", "0.8em"]
+};
+
+// A text position, as in Sketch: e.g., "above", "belowright", "leaderleft".
+// The default is "middle".
+const textPositionRegEx = /^(?:above|leader|middle|below)?(?:left|right)?$/;
+// A dot's label position, as in Sketch's parse.js. "leader" isn't allowed.
+const dotLabelPositionRegEx = /^(?:above|middle|below)?(?:left|right)?$/;
+
+// In a string, scanFunction in module.js writes a line break as ␤ (U+2424).
+const lineBreakInString$1 = /␤/g;
+
+// Write text at model point p. The geometry is that of Sketch's text.js
+// (adjustTextPoint, getTspans), converted to px. `style` may override the
+// current fontsize and fontcolor, e.g. for axes labels.
+const textLocal = (svg, p, str, pos, style = {}) => {
+  const attrs = svg.temp;
+  const fontsize = style.fontsize ?? attrs.fontsize;
+  const fontcolor = style.fontcolor ?? attrs.fontcolor;
+  const position = (pos || "middle").toLowerCase();
+  const lines = str.replace(lineBreakInString$1, "\n").split("\n");
+  const numLines = lines.length;
+  let [x, y] = toPx(attrs, p[0], p[1]);
+  // Each line's y is at the line's middle (dominant-baseline="middle").
+  if (position.includes("above")) {
+    y -= fontsize * (1.2 * (numLines - 1) + 0.7);
+  } else if (position.includes("below")) {
+    y += fontsize * 0.8;
+  } else if (!position.includes("leader")) {
+    // Center the block of lines vertically. Leader text starts at the point.
+    y -= fontsize * 0.6 * (numLines - 1);
+  }
+  const textanchor = position.includes("right")
+    ? "start"
+    : position.includes("left")
+    ? "end"
+    : "middle";
+  // A little padding, so that the text doesn't crowd the point.
+  if (textanchor === "start") { x += fontsize * 0.3; }
+  if (textanchor === "end") { x -= fontsize * 0.3; }
+
+  const textNode = { tag: "text", children: [], attrs: {} };
+  textNode.attrs.x = x;
+  textNode.attrs.y = y;
+  textNode.attrs["font-family"] = attrs.fontfamily;
+  textNode.attrs["font-size"] = fontsize;
+  textNode.attrs.fill = fontcolor;
+  textNode.attrs["text-anchor"] = textanchor;
+  textNode.attrs["dominant-baseline"] = "middle";
+
+  // Each line is a series of <tspan> nodes, one per Markdown mark node. Each line's
+  // first tspan returns to x and moves down 1.2 em. A blank line has no tspan, so its
+  // line spacing goes to the next line that has one.
+  let linesOwed = 0;
+  lines.forEach((line, i) => {
+    if (i > 0) { linesOwed += 1; }
+    const ast = inlineMd2ast(line);
+    if (!Array.isArray(ast)) { return }
+    ast.forEach((markNode, j) => {
+      const tspan = { tag: "tspan", text: markNode.text, attrs: {} };
+      if (j === 0) {
+        tspan.attrs.x = x;
+        tspan.attrs.dy = linesOwed * fontsize * 1.2;
+        linesOwed = 0;
+      }
+      for (const mark of (markNode.marks || [])) {
+        const markAttr = markAttribute[mark.type];
+        if (!markAttr) { continue } // e.g., a link. Write its text plain.
+        tspan.attrs[markAttr[0]] = markAttr[1];
+        if (mark.type === "subscript") {
+          tspan.attrs["baseline-shift"] = "sub";
+        } else if (mark.type === "superscript") {
+          tspan.attrs["baseline-shift"] = "super";
+        }
+      }
+      textNode.children.push(tspan);
+    });
+  });
+  svg.children.push(textNode);
+  return svg
+};
+
+const pointText = (point, attrs) => {
+  return toPx(attrs, point[0], point[1]).map(n => n.toFixed(4)).join(",")
+};
+
+// The SVG command for an arc step that ends at model point q. r is a signed radius
+// (+ for CCW) or [±rx, ry, angle]. As in Sketch's arcStep.js arcCommand(), but in px,
+// where the y-axis points down, so CCW is sweep 0 and the rotation is negated.
+const arcCommand = (attrs, r, q) => {
+  const [srx, ry, angle = 0] = Array.isArray(r) ? r : [r, r, 0];
+  const sweep = srx >= 0 ? 0 : 1;
+  const rxPx = Math.abs(srx) * attrs.xunitlength;
+  const ryPx = Math.abs(ry) * attrs.yunitlength;
+  return `A${rxPx},${ryPx} ${angle === 0 ? 0 : -angle} 0 ${sweep} ${pointText(q, attrs)}`
+};
+
+// Fitting the SVG to its contents
+// As in Sketch's utils.js computeFrame(), a drawing with a scene and no grid or axes is
+// sized to the extent of its elements plus a margin. The elements keep their px
+// coordinates; a viewBox brings the box into view. Like Sketch, the box ignores stroke
+// widths, which the margin covers. Unlike Sketch, it includes arrowheads and marker dots,
+// which Hurmet draws as elements, and it estimates text from character counts, since
+// Hurmet can't measure glyphs while it calculates.
+
+const fitMargin = 4; // px
+
+// A 2D affine matrix [a, b, c, d, e, f] maps (x, y) to (a·x + c·y + e, b·x + d·y + f).
+const identity = [1, 0, 0, 1, 0, 0];
+const multiply = (m, n) => [
+  m[0] * n[0] + m[2] * n[1], m[1] * n[0] + m[3] * n[1],
+  m[0] * n[2] + m[2] * n[3], m[1] * n[2] + m[3] * n[3],
+  m[0] * n[4] + m[2] * n[5] + m[4], m[1] * n[4] + m[3] * n[5] + m[5]
+];
+const applyMatrix = (m, [x, y]) => [m[0] * x + m[2] * y + m[4], m[1] * x + m[3] * y + m[5]];
+
+// The matrix of an SVG transform attribute: translate, scale, and rotate.
+const transformMatrix = str => {
+  let m = identity;
+  for (const [, fn, argStr] of (str || "").matchAll(/(\w+)\(([^)]*)\)/g)) {
+    const a = argStr.split(/[\s,]+/).filter(s => s !== "").map(Number);
+    if (fn === "translate") {
+      m = multiply(m, [1, 0, 0, 1, a[0], a[1] || 0]);
+    } else if (fn === "scale") {
+      m = multiply(m, [a[0], 0, 0, a.length > 1 ? a[1] : a[0], 0, 0]);
+    } else if (fn === "rotate") {
+      const rad = a[0] * Math.PI / 180;
+      const [cos, sin] = [Math.cos(rad), Math.sin(rad)];
+      const [cx, cy] = a.length === 3 ? [a[1], a[2]] : [0, 0];
+      m = multiply(m, [1, 0, 0, 1, cx, cy]);
+      m = multiply(m, [cos, sin, -sin, cos, 0, 0]);
+      m = multiply(m, [1, 0, 0, 1, -cx, -cy]);
+    }
+  }
+  return m
+};
+
+// The parameters in [0, 1] where a cubic Bézier coordinate reaches an extreme.
+const cubicExtrema = (p0, p1, p2, p3) => {
+  // The derivative is a quadratic: a·t² + b·t + c
+  const a = 3 * (-p0 + 3 * p1 - 3 * p2 + p3);
+  const b = 6 * (p0 - 2 * p1 + p2);
+  const c = 3 * (p1 - p0);
+  const roots = [];
+  if (Math.abs(a) < 1e-12) {
+    if (Math.abs(b) > 1e-12) { roots.push(-c / b); }
+  } else {
+    const disc = b * b - 4 * a * c;
+    if (disc >= 0) {
+      const root = Math.sqrt(disc);
+      roots.push((-b + root) / (2 * a), (-b - root) / (2 * a));
+    }
+  }
+  return roots.filter(t => t > 0 && t < 1)
+};
+const cubicPoint = (p0, p1, p2, p3, t) => {
+  const mt = 1 - t;
+  return [0, 1].map(k => mt * mt * mt * p0[k] + 3 * mt * mt * t * p1[k] +
+    3 * mt * t * t * p2[k] + t * t * t * p3[k])
+};
+
+// The points that bound an SVG elliptical arc: its end points and any extreme points
+// along the way. See the SVG spec, "Elliptical arc implementation notes", F.6.5.
+const arcExtremePoints = (p1, rx, ry, degrees, largeArc, sweep, p2) => {
+  rx = Math.abs(rx);
+  ry = Math.abs(ry);
+  if (rx === 0 || ry === 0) { return [p2] }
+  const phi = degrees * Math.PI / 180;
+  const [cos, sin] = [Math.cos(phi), Math.sin(phi)];
+  const dx = (p1[0] - p2[0]) / 2;
+  const dy = (p1[1] - p2[1]) / 2;
+  const x1 = cos * dx + sin * dy;
+  const y1 = -sin * dx + cos * dy;
+  const lambda = (x1 * x1) / (rx * rx) + (y1 * y1) / (ry * ry);
+  if (lambda > 1) {
+    // The radii are too small for the chord, so scale them up, as SVG does.
+    rx *= Math.sqrt(lambda);
+    ry *= Math.sqrt(lambda);
+  }
+  const num = rx * rx * ry * ry - rx * rx * y1 * y1 - ry * ry * x1 * x1;
+  const den = rx * rx * y1 * y1 + ry * ry * x1 * x1;
+  const coef = (largeArc === sweep ? -1 : 1) * Math.sqrt(Math.max(0, num / den));
+  const cxp = coef * rx * y1 / ry;
+  const cyp = -coef * ry * x1 / rx;
+  const cx = cos * cxp - sin * cyp + (p1[0] + p2[0]) / 2;
+  const cy = sin * cxp + cos * cyp + (p1[1] + p2[1]) / 2;
+  const theta1 = Math.atan2((y1 - cyp) / ry, (x1 - cxp) / rx);
+  let delta = Math.atan2((-y1 - cyp) / ry, (-x1 - cxp) / rx) - theta1;
+  if (sweep && delta < 0) { delta += 2 * Math.PI; }
+  if (!sweep && delta > 0) { delta -= 2 * Math.PI; }
+  const point = theta => [
+    cx + rx * cos * Math.cos(theta) - ry * sin * Math.sin(theta),
+    cy + rx * sin * Math.cos(theta) + ry * cos * Math.sin(theta)
+  ];
+  const tau = 2 * Math.PI;
+  const onArc = theta => {
+    const t = delta >= 0
+      ? ((theta - theta1) % tau + tau) % tau
+      : ((theta1 - theta) % tau + tau) % tau;
+    return t <= Math.abs(delta)
+  };
+  const thetaX = Math.atan2(-ry * sin, rx * cos);
+  const thetaY = Math.atan2(ry * cos, rx * sin);
+  const candidates = [thetaX, thetaX + Math.PI, thetaY, thetaY + Math.PI];
+  return [p2, ...candidates.filter(onArc).map(point)]
+};
+
+// The points that bound an SVG path's d attribute. Handles every path command.
+const pathPoints = d => {
+  const tokens = d.match(/[a-zA-Z]|[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?/g) || [];
+  const points = [];
+  let i = 0;
+  let cmd = "";
+  let cur = [0, 0];
+  let start = [0, 0];
+  let lastControl = null; // For S and T
+  let lastCmd = "";
+  const num = () => Number(tokens[i++]);
+  while (i < tokens.length) {
+    if (/[a-zA-Z]/.test(tokens[i])) {
+      cmd = tokens[i++];
+    } else if (cmd === "M") {
+      cmd = "L"; // Coordinates after a moveto are implicit linetos.
+    } else if (cmd === "m") {
+      cmd = "l";
+    }
+    const rel = cmd === cmd.toLowerCase();
+    const pt = () => {
+      const x = num();
+      const y = num();
+      return rel ? [cur[0] + x, cur[1] + y] : [x, y]
+    };
+    const upper = cmd.toUpperCase();
+    let control = null;
+    if (upper === "Z") {
+      cur = start;
+    } else if (upper === "M") {
+      cur = pt();
+      start = cur;
+      points.push(cur);
+    } else if (upper === "L" || upper === "T") {
+      const p = pt();
+      if (upper === "T") {
+        // A quadratic whose control point reflects the last one
+        const q = lastControl && /[QT]/.test(lastCmd)
+          ? [2 * cur[0] - lastControl[0], 2 * cur[1] - lastControl[1]]
+          : cur;
+        control = q;
+        const c1 = [cur[0] + 2 / 3 * (q[0] - cur[0]), cur[1] + 2 / 3 * (q[1] - cur[1])];
+        const c2 = [p[0] + 2 / 3 * (q[0] - p[0]), p[1] + 2 / 3 * (q[1] - p[1])];
+        for (const k of [0, 1]) {
+          for (const t of cubicExtrema(cur[k], c1[k], c2[k], p[k])) {
+            points.push(cubicPoint(cur, c1, c2, p, t));
+          }
+        }
+      }
+      cur = p;
+      points.push(cur);
+    } else if (upper === "H") {
+      cur = [rel ? cur[0] + num() : num(), cur[1]];
+      points.push(cur);
+    } else if (upper === "V") {
+      cur = [cur[0], rel ? cur[1] + num() : num()];
+      points.push(cur);
+    } else if (upper === "C" || upper === "S" || upper === "Q") {
+      let c1;
+      let c2;
+      let p;
+      if (upper === "C") {
+        c1 = pt();
+        c2 = pt();
+        p = pt();
+        control = c2;
+      } else if (upper === "S") {
+        c1 = lastControl && /[CS]/.test(lastCmd)
+          ? [2 * cur[0] - lastControl[0], 2 * cur[1] - lastControl[1]]
+          : cur;
+        c2 = pt();
+        p = pt();
+        control = c2;
+      } else {
+        const q = pt();
+        p = pt();
+        control = q;
+        c1 = [cur[0] + 2 / 3 * (q[0] - cur[0]), cur[1] + 2 / 3 * (q[1] - cur[1])];
+        c2 = [p[0] + 2 / 3 * (q[0] - p[0]), p[1] + 2 / 3 * (q[1] - p[1])];
+      }
+      for (const k of [0, 1]) {
+        for (const t of cubicExtrema(cur[k], c1[k], c2[k], p[k])) {
+          points.push(cubicPoint(cur, c1, c2, p, t));
+        }
+      }
+      cur = p;
+      points.push(cur);
+    } else if (upper === "A") {
+      const [rx, ry, angle, largeArc, sweep] = [num(), num(), num(), num(), num()];
+      const p = pt();
+      points.push(...arcExtremePoints(cur, rx, ry, angle, largeArc, sweep, p));
+      cur = p;
+    } else {
+      break // Not a path command
+    }
+    lastControl = control;
+    lastCmd = upper;
+  }
+  return points
+};
+
+// The estimated px box of a <text> element, from its character count. As in Sketch's
+// text.js, a character is 0.6 em wide, or 0.8 of that in a subscript or superscript.
+// Each line is 1.2 em tall, centered on its y (dominant-baseline="middle").
+const textBox = el => {
+  const fs = Number(el.attrs["font-size"]) || 13.33;
+  const x = Number(el.attrs.x);
+  const y = Number(el.attrs.y);
+  const lineWidths = [];
+  let lineY = y;
+  let top = Infinity;
+  let bottom = -Infinity;
+  el.children.forEach((tspan, k) => {
+    const attrs = tspan.attrs || {};
+    if (k === 0 || attrs.dy != null) {
+      if (k > 0) { lineY += Number(attrs.dy); }
+      lineWidths.push(0);
+      top = Math.min(top, lineY - 0.6 * fs);
+      bottom = Math.max(bottom, lineY + 0.6 * fs);
+    }
+    const scale = attrs["baseline-shift"] ? 0.8 : 1;
+    lineWidths[lineWidths.length - 1] += tspan.text.length * 0.6 * fs * scale;
+  });
+  if (lineWidths.length === 0) { return null }
+  const width = Math.max(...lineWidths);
+  const anchor = el.attrs["text-anchor"];
+  const left = anchor === "start" ? x : anchor === "end" ? x - width : x - width / 2;
+  return [[left, top], [left + width, bottom]]
+};
+
+// The points that bound one element, in px.
+const elementPoints = el => {
+  const a = el.attrs;
+  const m = transformMatrix(a.transform);
+  switch (el.tag) {
+    case "path":
+      return pathPoints(a.d)
+    case "polygon":
+    case "polyline":
+      return a.points.trim().split(/\s+/).map(p => p.split(",").map(Number))
+    case "rect":
+    case "image": {
+      const [x, y, w, h] = [a.x, a.y, a.width, a.height].map(Number);
+      return [[x, y], [x + w, y], [x, y + h], [x + w, y + h]].map(p => applyMatrix(m, p))
+    }
+    case "circle":
+    case "ellipse": {
+      const rx = Number(el.tag === "circle" ? a.r : a.rx);
+      const ry = Number(el.tag === "circle" ? a.r : a.ry);
+      const [cx, cy] = applyMatrix(m, [Number(a.cx), Number(a.cy)]);
+      // The extent of an ellipse after a linear map
+      const halfW = Math.hypot(m[0] * rx, m[2] * ry);
+      const halfH = Math.hypot(m[1] * rx, m[3] * ry);
+      return [[cx - halfW, cy - halfH], [cx + halfW, cy + halfH]]
+    }
+    case "text":
+      return textBox(el) || []
+    default:
+      return []
+  }
+};
+
+// Size a drawing to its elements, as described above.
+const fitToContent = svg => {
+  const attrs = svg.temp;
+  if (!attrs || !attrs.scene || attrs.hasBackdrop) { return }
+  let [minX, minY, maxX, maxY] = [Infinity, Infinity, -Infinity, -Infinity];
+  for (const el of svg.children) {
+    for (const [x, y] of elementPoints(el)) {
+      if (!Number.isFinite(x) || !Number.isFinite(y)) { continue }
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x);
+      maxY = Math.max(maxY, y);
+    }
+  }
+  if (minX === Infinity) { return } // An empty drawing keeps its frame.
+  const round = v => Math.round(v * 1e4) / 1e4;
+  const left = round(minX - fitMargin);
+  const top = round(minY - fitMargin);
+  svg.attrs.width = Math.ceil(maxX + fitMargin - left);
+  svg.attrs.height = Math.ceil(maxY + fitMargin - top);
+  svg.attrs.viewBox = `${left} ${top} ${svg.attrs.width} ${svg.attrs.height}`;
+};
+
+// Dimensions
+
+const dimStrokeWidth = 0.5; // px
+const dimGap = 6; // px between a dimension point and its extension line
+
+const dimLineNode = (attrs, a, b) => {
+  return { tag: "path", attrs: {
+    d: `M${pointText(a, attrs)} ${pointText(b, attrs)}`,
+    "stroke-width": dimStrokeWidth, stroke: "black", fill: "none"
+  } }
+};
+
+// A unit vector at `deg` degrees. Multiples of 90° come out exact.
+// As in Sketch's elementObject.js.
+const unitVector = deg => {
+  const quarterTurns = deg / 90;
+  if (Number.isInteger(quarterTurns)) {
+    return [[1, 0], [0, 1], [-1, 0], [0, -1]][((quarterTurns % 4) + 4) % 4]
+  }
+  const rad = deg * Math.PI / 180;
+  return [Math.cos(rad), Math.sin(rad)]
+};
+
+// From a dimension's label list, a function that returns the label written for span i:
+// a string, "" for a blank span, or null if none was written.
+const labelList = oprnd => {
+  if (oprnd == null) { return () => null }
+  // Hurmet reads a one-element list, ["x"], as the string "x". Sketch writes ["x"] for
+  // a dimension with one span, so a string is a list of one label.
+  const list = Array.isArray(oprnd.value) ? oprnd.value : [oprnd.value];
+  return i => {
+    const label = list[i];
+    return typeof label === "string"
+      ? label
+      : label != null && typeof label.value === "string"
+      ? label.value
+      : null
+  }
+};
+
+// A horizontal or vertical dimension string, in model coordinates, as in Sketch's
+// elementObject.js dimensionGroup(). Returns null if labelPoint is not between the end
+// points, either vertically or horizontally.
+const orthoDimension = (pts, lp, attrs) => {
+  const n = pts.length;
+  const [first, last] = [pts[0], pts[n - 1]];
+  const between = k => (first[k] < last[k] && first[k] < lp[k] && lp[k] < last[k]) ||
+    (last[k] < first[k] && last[k] < lp[k] && lp[k] < first[k]);
+  const result = { extLines: [], dimLines: [], mids: [], values: [] };
+  if (between(1)) {
+    // A vertical string of dimensions
+    const six = dimGap / attrs.xunitlength * Math.sign(lp[0] - first[0]);
+    for (const p of pts) { result.extLines.push([[p[0] + six, p[1]], [lp[0] + six, p[1]]]); }
+    for (let i = 0; i < n - 1; i++) {
+      result.dimLines.push([[lp[0], pts[i][1]], [lp[0], pts[i + 1][1]]]);
+      result.mids.push([lp[0], (pts[i][1] + pts[i + 1][1]) / 2]);
+      result.values.push(Math.abs(pts[i + 1][1] - pts[i][1]));
+    }
+    result.pos = six > 0 ? "right" : "left";
+  } else if (between(0)) {
+    // A horizontal string of dimensions
+    const six = dimGap / attrs.yunitlength * Math.sign(lp[1] - first[1]);
+    for (const p of pts) { result.extLines.push([[p[0], p[1] + six], [p[0], lp[1] + six]]); }
+    for (let i = 0; i < n - 1; i++) {
+      result.dimLines.push([[pts[i][0], lp[1]], [pts[i + 1][0], lp[1]]]);
+      result.mids.push([(pts[i][0] + pts[i + 1][0]) / 2, lp[1]]);
+      result.values.push(Math.abs(pts[i + 1][0] - pts[i][0]));
+    }
+    result.pos = six > 0 ? "above" : "below";
+  } else {
+    return null
+  }
+  return result
+};
+
+// A dimension string whose dimension line runs at dimAngle through labelPoint, and
+// whose extension lines run at extAngle. As in Sketch's obliqueDimensionGroup().
+const obliqueDimension = (pts, lp, dimAngle, extAngle, attrs) => {
+  const n = pts.length;
+  const u = unitVector(dimAngle); // Along the dimension line
+  const e = unitVector(extAngle); // Along the extension lines
+  const cross = (a, b) => a[0] * b[1] - a[1] * b[0];
+  const denominator = cross(e, u);
+  if (Math.abs(denominator) < 1e-9) { return null } // Parallel lines never meet
+  // Distance from each point to the dimension line, along e.
+  const t = pts.map(p => -cross([p[0] - lp[0], p[1] - lp[1]], u) / denominator);
+  const feet = pts.map((p, i) => [p[0] + t[i] * e[0], p[1] + t[i] * e[1]]);
+  // The direction from the points toward the dimension line.
+  const sign = Math.sign(t.find(ti => Math.abs(ti) > 1e-9) ?? 1);
+  const six = dimGap / attrs.xunitlength;
+  const gap = [sign * six * e[0], sign * six * e[1]];
+  const result = { extLines: [], dimLines: [], mids: [], values: [] };
+  for (let i = 0; i < n; i++) {
+    result.extLines.push([[pts[i][0] + gap[0], pts[i][1] + gap[1]],
+      [feet[i][0] + gap[0], feet[i][1] + gap[1]]]);
+  }
+  for (let i = 0; i < n - 1; i++) {
+    result.dimLines.push([feet[i], feet[i + 1]]);
+    result.mids.push([(feet[i][0] + feet[i + 1][0]) / 2, (feet[i][1] + feet[i + 1][1]) / 2]);
+    result.values.push(Math.abs((feet[i + 1][0] - feet[i][0]) * u[0] +
+      (feet[i + 1][1] - feet[i][1]) * u[1]));
+  }
+  // Put the labels on the far side of the dimension line from the points.
+  const away = [sign * e[0], sign * e[1]];
+  if (Math.abs(u[0]) < 1e-9) {
+    result.pos = away[0] > 0 ? "right" : "left";
+  } else if (Math.abs(u[1]) < 1e-9) {
+    result.pos = away[1] > 0 ? "above" : "below";
+  } else {
+    // A sloped line. Hang the label off its lower end, so it clears the line.
+    const rising = u[0] * u[1] > 0;
+    result.pos = away[1] > 0
+      ? (rising ? "aboveleft" : "aboveright")
+      : (rising ? "belowright" : "belowleft");
+  }
+  return result
+};
+
+// Lengths in feet and inches, as in Sketch's feetInches.js.
+const superscriptDigits = "⁰¹²³⁴⁵⁶⁷⁸⁹";
+const subscriptDigits = "₀₁₂₃₄₅₆₇₈₉";
+const toScript = (n, digits) => String(n).replace(/\d/g, d => digits[d]);
+
+// Write `value` (in inches, ≥ 0) as whole inches and a reduced fraction rounded to the
+// nearest 1/denominator, e.g. 3³⁄₈.
+const fractionalInches = denominator => value => {
+  const ticks = Math.round(value * denominator);
+  const whole = Math.floor(ticks / denominator);
+  let num = ticks - whole * denominator;
+  let den = denominator;
+  if (num === 0) { return String(whole) }
+  while (num % 2 === 0) { num /= 2; den /= 2; }
+  return `${whole}${toScript(num, superscriptDigits)}⁄${toScript(den, subscriptDigits)}`
+};
+
+// A label such as 4′-3³⁄₈″, 3³⁄₈″, or 4′. `formatNum` writes the number of feet.
+const feetInchesLabel = (value, formatNum, denominator) => {
+  const writeInches = fractionalInches(denominator);
+  const sign = value < 0 ? "-" : "";
+  let feet = Math.floor(Math.abs(value) / 12);
+  let inStr = writeInches(Math.abs(value) - feet * 12);
+  const inchValue = str => Number(str.replace(",", "."));
+  if (inchValue(inStr) >= 12) {
+    // The inch part rounded up to a whole foot.
+    feet += 1;
+    inStr = writeInches(0);
+  }
+  const label = feet === 0
+    ? (inchValue(inStr) === 0 ? "0″" : `${sign}${inStr}″`)
+    : inchValue(inStr) === 0
+    ? `${sign}${formatNum(feet)}′`
+    : `${sign}${formatNum(feet)}′-${inStr}″`;
+  return label.replace(/^(-?)0(?=[⁰¹²³⁴⁵⁶⁷⁸⁹])/, "$1") // ³⁄₈″, not 0³⁄₈″
+};
+
+// The measured length of a dimension span, written with the drawing's rounding spec and
+// the document's decimal format. As in Sketch's elementObject.js dimensionLabel().
+const dimensionLabel = (value, attrs) => {
+  const formatNum = num => format(Rnl.fromNumber(num), attrs.roundingSpec,
+    attrs.decimalFormat, "plain");
+  return attrs.unit === "ft-in"
+    ? feetInchesLabel(value, formatNum, attrs.fraction)
+    : formatNum(value)
+};
+
+const functions$1 = {
+  // Set attributes
+  stroke(svgOprnd, color) {
+    svgOprnd.value.temp.stroke = color.value;
+    return svgOprnd
+  },
+
+  strokewidth(svgOprnd, num) {
+    svgOprnd.value.temp.strokewidth = Rnl.toNumber(num.value);
+    return svgOprnd
+  },
+
+  linetype(svgOprnd, str) {
+    // "solid" | "dashed" | "dotted" | "centerline" | "border"
+    if (!isString(str) || !Object.hasOwn(dashMap, str.value)) {
+      return drawError("linetype")
+    }
+    svgOprnd.value.temp.linetype = str.value;
+    return svgOprnd
+  },
+
+  fill(svgOprnd, color) {
+    svgOprnd.value.temp.fill = color.value;
+    return svgOprnd
+  },
+
+  pattern(svgOprnd, str) {
+    // A fill pattern, drawn in the current fill color. "solid" means no pattern.
+    if (!isString(str) || !fillPatternNames.has(str.value)) {
+      return drawError("pattern")
+    }
+    svgOprnd.value.temp.pattern = str.value;
+    return svgOprnd
+  },
+
+  fontcolor(svgOprnd, color) {
+    if (!isString(color)) { return drawError("fontcolor") }
+    svgOprnd.value.temp.fontcolor = color.value;
+    return svgOprnd
+  },
+
+  fontsize(svgOprnd, size) {
+    svgOprnd.value.temp.fontsize = Rnl.toNumber(size.value);
+    return svgOprnd
+  },
+
+  fontfamily(svgOprnd, str) {
+    svgOprnd.value.temp.fontfamily = str.value; // "sansserif"|"serif"|"fixed"|"monotype"
+    return svgOprnd
+  },
+
+  marker(svgOprnd, str) {
+    // "none" | "arrow" | "dot" | "arrowdot", or one of Sketch's sized marker names
+    if (!isString(str) || !Object.hasOwn(markerFamilies, str.value.trim())) {
+      return drawError("marker")
+    }
+    svgOprnd.value.temp.marker = markerFamilies[str.value.trim()];
+    return svgOprnd
+  },
+
+  // Initialize the svg.
+
+  title(svgOprnd, strOprnd) {
+    svgOprnd.value.children.push( { tag: "title", attrs: { text: strOprnd.value } });
+    return svgOprnd
+  },
+
+  caption(svgOprnd, bool) {
+    // caption true: Hurmet writes the title as a caption.
+    if (bool == null || typeof bool.value !== "boolean") { return drawError("caption") }
+    svgOprnd.value.caption = bool.value;
+    return svgOprnd
+  },
+
+  format(svgOprnd, spec) {
+    // The rounding spec of dimension labels, e.g., "h3". Sketch wrote a decimal
+    // format as a second argument in older sketches. It's ignored. The decimal
+    // format comes from the parent document.
+    if (!isString(spec) || !roundingSpecRegEx.test(spec.value)) {
+      return drawError("format")
+    }
+    svgOprnd.value.temp.roundingSpec = spec.value;
+    return svgOprnd
+  },
+
+  fraction(svgOprnd, num) {
+    // The denominator of the inch fractions in "ft-in" dimension labels.
+    const denominator = isNumber(num) ? Rnl.toNumber(num.value) : NaN;
+    if (!inchFractions.has(denominator)) { return drawError("fraction") }
+    svgOprnd.value.temp.fraction = denominator;
+    return svgOprnd
+  },
+
+  frame(svgOprnd, width = 250, height = 250, position = "inline") {
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    attrs.width = typeof width === "number" ? width : Rnl.toNumber(width.value);
+    svg.attrs.width = attrs.width;
+    attrs.height = typeof height === "number" ? height : Rnl.toNumber(height.value);
+    svg.attrs.height = attrs.height;
+    if (typeof position !== "string") { position = position.value; }
+    if (position !== "inline") { svg.attrs.float = position; }
+    if (attrs.scene) {
+      applyScene(attrs);
+    } else {
+      attrs.xunitlength = attrs.width / (attrs.xmax - attrs.xmin);
+      attrs.yunitlength = attrs.height / (attrs.ymax - attrs.ymin);
+      attrs.origin = [-attrs.xmin * attrs.xunitlength, -attrs.ymin * attrs.yunitlength];
+    }
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  scene(svgOprnd, scale, unit, dx, dy) {
+    // scene scale, "unit", dx, dy
+    // A model point (x, y) is drawn at px (S·(x + dx), frameHeight − S·(y + dy)),
+    // where S = scale × unitScaleFactors[unit] is px per model unit.
+    if (!isNumber(scale) || !isString(unit) || !isNumber(dx) || !isNumber(dy)) {
+      return drawError("scene")
+    }
+    const scaleNum = Rnl.toNumber(scale.value);
+    const unitName = unit.value.trim();
+    const canonicalUnit = Object.hasOwn(unitScaleFactors, unitName)
+      ? unitName
+      : unitAliases[unitName];
+    if (!(scaleNum > 0 && Number.isFinite(scaleNum)) || !canonicalUnit) {
+      return drawError("scene")
+    }
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    attrs.unit = canonicalUnit;
+    attrs.scene = {
+      S: scaleNum * unitScaleFactors[canonicalUnit],
+      dx: Rnl.toNumber(dx.value),
+      dy: Rnl.toNumber(dy.value)
+    };
+    applyScene(attrs);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  view(svgOprnd, xmin = 0, xmax = 5, ymin, ymax) {
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    attrs.scene = null; // Of scene and view, the later one applies.
+    attrs.xmin = typeof xmin === "number" ? xmin : Rnl.toNumber(xmin.value);
+    attrs.xmax = typeof xmax === "number" ? xmax : Rnl.toNumber(xmax.value);
+    attrs.xunitlength = attrs.width / (attrs.xmax - attrs.xmin);
+    attrs.yunitlength = attrs.xunitlength; // This may change below.
+    if (ymin == null) {
+      attrs.origin = [-attrs.xmin * attrs.xunitlength, attrs.height / 2];
+      attrs.ymin = -attrs.height / (2 * attrs.yunitlength);
+      attrs.ymax = -attrs.ymin;
+    } else {
+      attrs.ymin = Rnl.toNumber(ymin.value);
+      if (ymax != null) {
+        attrs.ymax = Rnl.toNumber(ymax.value);
+        attrs.yunitlength = attrs.height / (attrs.ymax - attrs.ymin);
+      } else {
+        attrs.ymax = attrs.height / attrs.yunitlength + attrs.ymin;
+      }
+      attrs.origin = [-attrs.xmin * attrs.xunitlength, -attrs.ymin * attrs.yunitlength];
+    }
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  // Draw things
+
+  grid(svgOprnd, gdx, gdy) {
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    gdx = gdx == null ? attrs.xunitlength : Rnl.toNumber(gdx.value) * attrs.xunitlength;
+    gdy = gdy == null ? gdx : Rnl.toNumber(gdy.value) * attrs.yunitlength;
+    attrs.hasBackdrop = true; // A grid fills the frame, so the frame keeps its size.
+    const pnode = { tag: "path", attrs: {} };
+    let str = "";
+    for (let x = attrs.origin[0]; x < attrs.width; x += gdx) {
+      str += " M" + x + ",0 " + x + "," + attrs.height;
+    }
+    for (let x = attrs.origin[0] - gdx; x > 0; x -= gdx) {
+      str += " M" + x + ",0 " + x + "," + attrs.height;
+    }
+    for (let y = attrs.height - attrs.origin[1]; y < attrs.height; y += gdy) {
+      str += " M0," + y + " " + attrs.width + "," + y;
+    }
+    for (let y = attrs.height - attrs.origin[1] - gdy; y > 0; y -= gdy) {
+      str += " M0," + y + " " + attrs.width + "," + y;
+    }
+    pnode.attrs.d = str;
+    pnode.attrs["stroke-width"] = 0.5;
+    pnode.attrs.stroke = attrs.gridstroke;
+    pnode.attrs.fill = "none";
+    svg.children.push(pnode);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  axes(svgOprnd, dx, dy, labels, gdx, gdy) {
+    let svg = svgOprnd.value;
+    const attrs = svg.temp;
+    dx = (dx == null ? attrs.xunitlength : Rnl.toNumber(dx.value) * attrs.xunitlength);
+    dy = (dy == null ? dx : Rnl.toNumber(dy.value) * attrs.yunitlength);
+    // Axes labels are black, in a font size that fits the ticks, as in Sketch.
+    const labelStyle = { fontsize: Math.min(dx / 2, dy / 2, 10), fontcolor: "black" };
+    const ticklength = labelStyle.fontsize / 4;
+    attrs.hasBackdrop = true; // Axes fill the frame, so the frame keeps its size.
+    if (gdx != null) {
+      this.grid(svgOprnd, gdx, gdy);
+    }
+    const pnode = { tag: "path", attrs: {} };
+    let str = "M0," + (attrs.height - attrs.origin[1]) + " " + attrs.width + "," +
+      (attrs.height - attrs.origin[1]) + " M" + attrs.origin[0] + ",0 " +
+      attrs.origin[0] + "," + attrs.height;
+    for (let x = attrs.origin[0] + dx; x < attrs.width; x += dx) {
+      str += " M" + x + " " + (attrs.height - attrs.origin[1] + ticklength) + " " + x
+            + "," + (attrs.height - attrs.origin[1] - ticklength);
+    }
+    for (let x = attrs.origin[0] - dx; x > 0; x -= dx) {
+      str += " M" + x + "," + (attrs.height - attrs.origin[1] + ticklength) + " " + x
+            + "," + (attrs.height - attrs.origin[1] - ticklength);
+    }
+    for (let y = attrs.height - attrs.origin[1] + dy; y < attrs.height; y += dy) {
+      str += " M" + (attrs.origin[0] + ticklength) + "," + y + " " +
+                   (attrs.origin[0] - ticklength) + "," + y;
+    }
+    for (let y = attrs.height - attrs.origin[1] - dy; y > 0; y -= dy) {
+      str += " M" + (attrs.origin[0] + ticklength) + "," + y + " " +
+                   (attrs.origin[0] - ticklength) + "," + y;
+    }
+    if (labels != null) {
+      const ldx = dx / attrs.xunitlength;
+      const ldy = dy / attrs.yunitlength;
+      const lx = (attrs.xmin > 0 || attrs.xmax < 0 ? attrs.xmin : 0);
+      const ly = (attrs.ymin > 0 || attrs.ymax < 0 ? attrs.ymin : 0);
+      const lxp = (ly === 0 ? "below" : "above");
+      const lyp = (lx === 0 ? "left" : "right");
+      // Digits after the decimal point. Never negative, or toFixed would throw.
+      const ddx = Math.max(0, Math.floor(1.1 - Math.log10(ldx)) + 1);
+      const ddy = Math.max(0, Math.floor(1.1 - Math.log10(ldy)) + 1);
+      for (let x = ldx; x <= attrs.xmax; x += ldx) {
+        svg = textLocal(svg, [x, ly], chopZ(x.toFixed(ddx)), lxp, labelStyle);
+      }
+      for (let x = -ldx; attrs.xmin <= x; x -= ldx) {
+        svg = textLocal(svg, [x, ly], chopZ(x.toFixed(ddx)), lxp, labelStyle);
+      }
+      for (let y = ldy; y <= attrs.ymax; y += ldy) {
+        svg = textLocal(svg, [lx, y], chopZ(y.toFixed(ddy)), lyp, labelStyle);
+      }
+      for (let y = -ldy; attrs.ymin <= y; y -= ldy) {
+        svg = textLocal(svg, [lx, y], chopZ(y.toFixed(ddy)), lyp, labelStyle);
+      }
+    }
+    pnode.attrs.d = str;
+    pnode.attrs["stroke-width"] = 0.5;
+    pnode.attrs.stroke = attrs.axesstroke;
+    pnode.attrs.fill = "none";
+    svg.children.push(pnode);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  line(svgOprnd, m) { // segment connecting points p,q (coordinates in units)
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const node = { tag: "path", attrs: {} };
+    const p = [Rnl.toNumber(m.value[0][0]), Rnl.toNumber(m.value[0][1])];
+    const q = [Rnl.toNumber(m.value[1][0]), Rnl.toNumber(m.value[1][1])];
+    node.attrs.d = "M" + (p[0] * attrs.xunitlength + attrs.origin[0]) + "," +
+      (attrs.height - p[1] * attrs.yunitlength - attrs.origin[1]) + " " +
+      (q[0] * attrs.xunitlength + attrs.origin[0]) + "," + (attrs.height -
+       q[1] * attrs.yunitlength - attrs.origin[1]);
+    setStrokeAndFill(node, svg, false);
+    svg.children.push(node);
+    drawMarker(svg, toPx(attrs, q[0], q[1]), pxDirection(attrs, [q[0] - p[0], q[1] - p[1]]));
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  path(svgOprnd, args) {
+    // path (x, y; x, y; …)                 Straight steps
+    // path (x, y, r; x, y, r; …)           r ≠ 0 makes a circular arc, + for CCW
+    // path (x, y, ±rx, ry, angle; …)       An elliptical arc, as in the arc statement.
+    //                                      ±rx, ry = 0 makes a straight step.
+    // Every row has the same length. The r of the first row is ignored.
+    // Hurmet also accepts an SVG path string, path "M…".
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const node = { tag: "path", attrs: {} };
+    if (isString(args[0])) {
+      node.attrs.d = args[0].value;
+      setStrokeAndFill(node, svg);
+      svg.children.push(node);
+      return { value: svg, unit: null, dtype: dt.DRAWING }
+    }
+    const rows = numberRows(args[0]);
+    if (!rows || rows.length < 2 || ![2, 3, 5].includes(rows[0].length)) {
+      return drawError("path")
+    }
+    let d = "M" + pointText(rows[0], attrs);
+    for (let i = 1; i < rows.length; i++) {
+      const r = stepR(rows[i]);
+      d += " " + (r ? arcCommand(attrs, r, rows[i]) : "L" + pointText(rows[i], attrs));
+    }
+    node.attrs.d = d;
+    setStrokeAndFill(node, svg);
+    svg.children.push(node);
+    const q = rows[rows.length - 1];
+    const dir = endDirection(rows[rows.length - 2], q, stepR(q));
+    drawMarker(svg, toPx(attrs, q[0], q[1]), pxDirection(attrs, dir));
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  arrow(svgOprnd, m, label) {
+    // arrow (x, y; x, y; …), "label"
+    // As in Sketch, an arrow is always straight. Any radii in its rows are ignored.
+    // It always ends in an arrowhead sized for the stroke width, whatever the current
+    // marker. The label is optional. It's written at the first point, on the side away
+    // from the arrow, always in the default font size.
+    let svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const rows = numberRows(m);
+    if (!rows || rows.length < 2 || ![2, 3, 5].includes(rows[0].length) ||
+        (label != null && !isString(label))) {
+      return drawError("arrow")
+    }
+    const pts = rows.map(row => row.slice(0, 2));
+    const d = "M" + pts.map(p => pointText(p, attrs)).join(" L");
+    const node = { tag: "path", attrs: { d } };
+    setStrokeAndFill(node, svg);
+    svg.children.push(node);
+    const [p, q] = pts.slice(-2);
+    const marker = attrs.marker;
+    attrs.marker = "arrow";
+    drawMarker(svg, toPx(attrs, q[0], q[1]), pxDirection(attrs, [q[0] - p[0], q[1] - p[1]]));
+    attrs.marker = marker;
+    if (label != null && label.value !== "") {
+      // As in Sketch's arrowGroup(), the first step picks the label's position.
+      const dx = pts[1][0] - pts[0][0];
+      const dy = pts[1][1] - pts[0][1];
+      const pos = Math.abs(dy) > Math.abs(dx)
+        ? (dy > 0 ? "below" : "above")
+        : (dx > 0 ? "leaderleft" : "leaderright");
+      svg = textLocal(svg, pts[0], label.value, pos, { fontsize: labelFontSize });
+    }
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  freehand(svgOprnd, m) {
+    // freehand (x, y; x, y; …)
+    // A smooth curve through the points, as Sketch's freehand tool draws it.
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const rows = numberRows(m);
+    if (!rows || rows[0].length !== 2) { return drawError("freehand") }
+    // The Catmull-Rom fit commutes with the model-to-px mapping, so fit in px.
+    const pts = rows.map(([x, y]) => toPx(attrs, x, y));
+    let d = "M" + pxText(pts[0]);
+    let u = [1, 0];
+    if (pts.length === 1) {
+      // A zero-length path, so that the round cap still draws a dot.
+      d += " L" + pxText(pts[0]);
+    } else {
+      for (const seg of catmullRomToBezier(pts)) {
+        d += ` C${pxText(seg.cp1)} ${pxText(seg.cp2)} ${pxText(seg.end)}`;
+      }
+      const last = catmullRomToBezier(pts.slice(-3)).pop();
+      const v = [last.end[0] - last.cp2[0], last.end[1] - last.cp2[1]];
+      const len = Math.hypot(v[0], v[1]);
+      if (len > 0) { u = [v[0] / len, v[1] / len]; }
+    }
+    const node = { tag: "path", attrs: { d } };
+    setStrokeAndFill(node, svg, false);
+    node.attrs["stroke-linecap"] = "round";
+    node.attrs["stroke-linejoin"] = "round";
+    svg.children.push(node);
+    drawMarker(svg, pts[pts.length - 1], u);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  rect(svgOprnd, m) { // opposite corners in units
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const rows = numberRows(m);
+    if (!rows || rows.length !== 2 || rows[0].length !== 2) { return drawError("rect") }
+    const [p, q] = rows;
+    const node = { tag: "rect", attrs: {} };
+    node.attrs.x = Math.min(p[0], q[0]) * attrs.xunitlength + attrs.origin[0];
+    node.attrs.y = attrs.height - Math.max(p[1], q[1]) * attrs.yunitlength - attrs.origin[1];
+    node.attrs.width = Math.abs((q[0] - p[0]) * attrs.xunitlength);
+    node.attrs.height = Math.abs((q[1] - p[1]) * attrs.yunitlength);
+    setStrokeAndFill(node, svg);
+    svg.children.push(node);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  circle(svgOprnd, center, radius) { // coordinates in units
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const c = pointOf(center);
+    const r = isNumber(radius) ? Rnl.toNumber(radius.value) : NaN;
+    if (!c || !(r > 0)) { return drawError("circle") }
+    const [cx, cy] = toPx(attrs, c[0], c[1]);
+    const node = { tag: "circle", attrs: { cx, cy, r: r * attrs.xunitlength } };
+    setStrokeAndFill(node, svg);
+    svg.children.push(node);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  ellipse(svgOprnd, center, rx, ry, angle) {
+    // ellipse [x, y], rx, ry, angle
+    // The ellipse is rotated angle° CCW about its center. angle is optional.
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const c = pointOf(center);
+    const radii = [rx, ry].map(r => isNumber(r) ? Rnl.toNumber(r.value) : NaN);
+    if (!c || !radii.every(r => r > 0) || (angle != null && !isNumber(angle))) {
+      return drawError("ellipse")
+    }
+    const [cx, cy] = toPx(attrs, c[0], c[1]);
+    const node = { tag: "ellipse", attrs: {
+      cx, cy, rx: radii[0] * attrs.xunitlength, ry: radii[1] * attrs.yunitlength
+    } };
+    const degrees = angle == null ? 0 : Rnl.toNumber(angle.value);
+    // In px, the y-axis points down, so a CCW rotation is negative.
+    if (degrees !== 0) { node.attrs.transform = `rotate(${-degrees}, ${cx}, ${cy})`; }
+    setStrokeAndFill(node, svg);
+    svg.children.push(node);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  polygon(svgOprnd, numSides, center, radius, angle) {
+    // polygon n, [x, y], r, angle
+    // A regular polygon with n sides and inscribed radius r. With angle = 0 (the
+    // default), its bottom side is level. angle rotates it CCW, in degrees.
+    // As in Sketch's elementObject.js.
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const n = isNumber(numSides) ? Rnl.toNumber(numSides.value) : NaN;
+    const c = pointOf(center);
+    const r = isNumber(radius) ? Rnl.toNumber(radius.value) : NaN;
+    if (!(Number.isInteger(n) && n >= 3) || !c || !(r > 0) ||
+        (angle != null && !isNumber(angle))) {
+      return drawError("polygon")
+    }
+    const rotation = (angle == null ? 0 : Rnl.toNumber(angle.value)) * Math.PI / 180;
+    const circumscribedRadius = r / Math.cos(Math.PI / n);
+    const startAngle = -Math.PI / n - Math.PI / 2 + rotation;
+    const points = [];
+    for (let i = 0; i < n; i++) {
+      const theta = (2 * Math.PI / n) * i + startAngle;
+      points.push(pointText([c[0] + circumscribedRadius * Math.cos(theta),
+        c[1] + circumscribedRadius * Math.sin(theta)], attrs));
+    }
+    const node = { tag: "polygon", attrs: { points: points.join(" ") } };
+    setStrokeAndFill(node, svg);
+    svg.children.push(node);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  image(svgOprnd, m, href, rotation, mirrored) {
+    // image (x, y; x, y), "href", rotation, mirrored
+    // The points are opposite corners of the image before rotation. As in Sketch,
+    // rotation is in degrees, positive for CW, about the image's center. mirrored
+    // flips the image top to bottom before the rotation. Both are optional. The
+    // defaults are 0 and false.
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const rows = numberRows(m);
+    if (!rows || rows.length !== 2 || rows[0].length !== 2 || !isString(href) ||
+        (rotation != null && !isNumber(rotation)) ||
+        (mirrored != null && typeof mirrored.value !== "boolean")) {
+      return drawError("image")
+    }
+    const [p, q] = rows;
+    const [x, y] = toPx(attrs, Math.min(p[0], q[0]), Math.max(p[1], q[1]));
+    const width = Math.abs(q[0] - p[0]) * attrs.xunitlength;
+    const height = Math.abs(q[1] - p[1]) * attrs.yunitlength;
+    const node = { tag: "image", attrs: { x, y, width, height, href: href.value } };
+    const degrees = rotation == null ? 0 : Rnl.toNumber(rotation.value);
+    const [cx, cy] = [x + width / 2, y + height / 2];
+    if (mirrored != null && mirrored.value) {
+      node.attrs.transform =
+        `translate(${cx}, ${cy}) scale(1, -1) rotate(${degrees}) translate(${-cx}, ${-cy})`;
+    } else if (degrees !== 0) {
+      node.attrs.transform = `rotate(${degrees}, ${cx}, ${cy})`;
+    }
+    svg.children.push(node);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  arc(svgOprnd, m, radius) {
+    // arc (p1; p2), r          A circular arc. r > 0 for CCW, r < 0 for CW.
+    // arc (p1; p2), [±rx, ry, angle]   An elliptical arc on an ellipse rotated angle°
+    //                          CCW. The sign of rx gives the direction. angle is optional.
+    // With no radius, a CCW circular arc whose radius is the chord length.
+    // As in Sketch, an arc spans at most half of its circle or ellipse.
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const start = [Rnl.toNumber(m.value[0][0]), Rnl.toNumber(m.value[0][1])];
+    const end = [Rnl.toNumber(m.value[1][0]), Rnl.toNumber(m.value[1][1])];
+    let r;
+    if (radius == null) {
+      r = Math.hypot(end[0] - start[0], end[1] - start[1]);
+    } else if (isVector(radius)) {
+      if (radius.value.length < 2 || radius.value.length > 3) { return drawError("arc") }
+      r = radius.value.map(e => Rnl.toNumber(e));
+      if (r.length === 2) { r.push(0); }
+    } else if (isNumber(radius)) {
+      r = Rnl.toNumber(radius.value);
+    } else {
+      return drawError("arc")
+    }
+    const node = { tag: "path", attrs: {} };
+    node.attrs.d = `M${pointText(start, attrs)} ${arcCommand(attrs, r, end)}`;
+    setStrokeAndFill(node, svg, false);
+    svg.children.push(node);
+    const direction = pxDirection(attrs, endDirection(start, end, r));
+    drawMarker(svg, toPx(attrs, end[0], end[1]), direction);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  text(svgOprnd, p, str, pos) {
+    // text [x, y], "string", position
+    // The string may span several lines. As in Sketch, it's trimmed.
+    if (p == null || !Array.isArray(p.value) || p.value.length !== 2 ||
+        !p.value.every(Rnl.isRational) || !isString(str) ||
+        (pos != null && !(isString(pos) && textPositionRegEx.test(pos.value.toLowerCase())))) {
+      return drawError("text")
+    }
+    const content = str.value.replace(lineBreakInString$1, "\n").trim();
+    const svg = textLocal(
+      svgOprnd.value,
+      [Rnl.toNumber(p.value[0]), Rnl.toNumber(p.value[1])],
+      content,
+      pos == null ? null : pos.value
+      );
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  dot(svgOprnd, center, label, pos) {
+    // dot [x, y], "label", position
+    // As in Sketch, the radius is dotradius px at any scale. The outline takes the
+    // current stroke and stroke width; the inside takes the current fill, so fill "none"
+    // gives a hollow dot. The label and its position are optional. The default position
+    // is "below".
+    let svg = svgOprnd.value;
+    const attrs = svg.temp;
+    if (center == null || !Array.isArray(center.value) || center.value.length !== 2 ||
+        !center.value.every(Rnl.isRational) || (label != null && !isString(label)) ||
+        (pos != null && !(isString(pos) && pos.value !== "" &&
+          dotLabelPositionRegEx.test(pos.value.toLowerCase())))) {
+      return drawError("dot")
+    }
+    const p = [Rnl.toNumber(center.value[0]), Rnl.toNumber(center.value[1])];
+    const [cx, cy] = toPx(attrs, p[0], p[1]);
+    svg.children.push({ tag: "circle", attrs: {
+      cx, cy, r: attrs.dotradius,
+      "stroke-width": attrs.strokewidth, stroke: attrs.stroke, fill: fillPaint(svg)
+    } });
+    if (label != null && label.value !== "") {
+      svg = textLocal(svg, p, label.value, pos == null ? "below" : pos.value);
+    }
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  dimension(svgOprnd, plistOprnd, arg1, arg2, arg3) {
+    // dimension (p1; p2; …; labelPoint), ["label", …]
+    // dimension (p1; p2; …; labelPoint), ["label", …], dimAngle, extAngle
+    // As in Sketch. The label list is optional. A label "" leaves its span blank, and a
+    // span with no label shows its measured length. The dimension line runs through
+    // labelPoint. With no angles, it's horizontal or vertical, whichever puts
+    // labelPoint between the end points. With angles (in degrees), the dimension line
+    // runs at dimAngle and the extension lines run at extAngle.
+    // Dimensions are always drawn in black, 0.5 px wide, with labels in the default
+    // font size.
+    let svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const rows = numberRows(plistOprnd);
+    let labels = arg1;
+    let angles = [arg2, arg3];
+    if (isNumber(arg1)) {
+      labels = null;
+      angles = [arg1, arg2]; // No label list
+    }
+    if (!rows || rows.length < 3 || rows[0].length !== 2 ||
+        (angles[0] != null && !isNumber(angles[0])) ||
+        (angles[1] != null && !isNumber(angles[1])) ||
+        (angles[0] != null) !== (angles[1] != null)) {
+      return drawError("dimension")
+    }
+    const writtenLabel = labelList(labels);
+    const pts = rows.slice(0, -1);
+    const labelPoint = rows[rows.length - 1];
+    const elements = angles[0] == null
+      ? orthoDimension(pts, labelPoint, attrs)
+      : obliqueDimension(pts, labelPoint, Rnl.toNumber(angles[0].value),
+        Rnl.toNumber(angles[1].value), attrs);
+    if (!elements) { return drawError("dimension") }
+    const { extLines, dimLines, mids, values, pos } = elements;
+    for (const [a, b] of extLines) { svg.children.push(dimLineNode(attrs, a, b)); }
+    for (const [a, b] of dimLines) {
+      svg.children.push(dimLineNode(attrs, a, b));
+      // Arrowheads at both ends, pointing outward, as Sketch's dimarrow.
+      const pa = toPx(attrs, a[0], a[1]);
+      const pb = toPx(attrs, b[0], b[1]);
+      const u = pxDirection(attrs, [b[0] - a[0], b[1] - a[1]]);
+      svg.children.push(arrowheadNode(pa, [-u[0], -u[1]], dimArrowSize, dimStrokeWidth,
+        "black"));
+      svg.children.push(arrowheadNode(pb, u, dimArrowSize, dimStrokeWidth, "black"));
+    }
+    mids.forEach((mid, i) => {
+      const label = writtenLabel(i);
+      if (label === "") { return }
+      const str = label ?? dimensionLabel(values[i], attrs);
+      svg = textLocal(svg, mid, str, pos, { fontsize: labelFontSize });
+    });
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  }
+
+};
+
+const draw = Object.freeze({
+  startSvg,
+  fitToContent,
+  functions: functions$1
+});
+
 // A result has been sent here from evaluate.js or updateCalculations.js.
 // Format the result for display.
 
@@ -7707,6 +10599,7 @@ const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAware) =>
 
   if (result.dtype === dt.DRAWING) {
     stmt.resultdisplay = result.value;
+    draw.fitToContent(stmt.resultdisplay);
     delete stmt.resultdisplay.temp;
     return stmt
   }
@@ -10369,2084 +13262,6 @@ const textRange = (str, index) => {
 
   return { value, unit: null, dtype: dt.STRING }
 };
-
-/**
- * md2ast() returns an AST that matches the memory structure  of a Hurmet.org document.
- * Elsewhere, Hurmet uses the AST to create either a live Hurmet doc or a static HTML doc.
- *
- * ## Restrictions
- *
- * 1. **_bold-italic_** must use both * & _ delimiters. Hurmet will fail on ***wat***.
- * 2. "Shortcut" reference links [ref] are not recognized.
- *
- * ## Extensions
- *
- * 1. Hurmet has a meta-document section at the top of the file, similar to MultiMarkdown.
- * 2. Hurmet inline calculation is delimited ¢`…`, where "…" is the entry input by the author.
- *    Hurmet display calculation is delimited ¢¢…¢¢.
- *    Alternate: ¢©`name = expression = 〔result〕unit`, where "©" is a display selector.
- * 3. LaTeX inline math is delimited $…$ or $`…`$. \(…\) is also recognized.
- *    No space allowed after 1st $ or before 2nd $. No digit after 2nd $.
- *    LaTeX display math is delimited  $$ … $$. \[…\] is also recognized.
- * 4. ~subscript~
- * 5. ^superscript^
- * 6. ~~strikethrough~~
- * 7. Pipe tables as per Github Flavored Markdown (GFM).
- * 8. Grid tables as per Pandoc and reStructuredText
- * 9. Empty paragraphs: A line consisting only of "¶" or "&nbsp;".
- * 10. Attributes for reference link definitions
- *       [id]: target
- *       {.class #id width=number}
- * 11. Figure/Caption for images. Format is a paragraph that consists entirely of:
- *       !![caption][id]
- * 12. Figure/Caption for tables.
- *     The caption is on the line above a table and is preceded by `: `, as per Pandoc.
- * 13. Table directives. They are placed on the line after the table. The format is:
- *     {#id .class float="(left|right)" colWidths="num1 num2 …"}
- *     {."class1 class2"}  ←  Alternate class syntax for when there is > 1 classname
- *     Float is applied only to a table inside a figure.
- *     A spreadsheet will include " spreadsheet" in `.class` The id will be the sheet's name.
- * 14. Lists that allow the user to pick list ordering.
- *        1. →  1. 2. 3.  etc.
- *        A. →  A. B. C.  etc.
- *        a. →  a. b. c.  etc.
- *        a) →  (a) (b) (c)  etc. (future)
- * 15. Alerts per GFM
- *     > [!note] or [!tip] or [!important] or [!warning] or [!epigraph]
- *     > Content of note
- * 16. Fenced divs, similar to Pandoc.
- *     ::: (centered|right_justified|comment|indented|boxed|header)
- *     Block elements
- *     :::
- *     Nested divs are distinguished by number of colons. Minimum three.
- * 17. Table of Contents
- *     {.toc start=N end=N}
- * 18. Page break, per Pandoc
- *     \\newpage
- * 19. Definition lists, per Pandoc.  (future)
- * 20. [^1] is a reference to a footnote.
- *     [^1]: The body of the footnote is deferred, similar to reference links.
- * 21. [#1] is a reference to a citation. (future)
- *     [#1]: The body of the citation is deferred, similar to reference links.
- * 22. Line blocks begin with "| ", as per Pandoc. (future)
- *
- * copyright (c) 2021 - 2025 Ron Kok
- *
- * This file has been adapted (and heavily modified) from Simple-Markdown.
- * Simple-Markdown copyright (c) 2014-2019 Khan Academy & Aria Buckles.
- *
- * Portions of Simple-Markdown were adapted from marked.js copyright (c) 2011-2014
- * Christopher Jeffrey (https://github.com/chjj/).
- *
- * LICENSE (MIT):
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
-
-
-const CR_NEWLINE_R = /\r\n?/g;
-const FORMFEED_R = /\f/g;
-const CLASS_R = /(?:^| )\.([a-z-]+)(?: |&|$)/;
-const tableClassRegEx = /(?:^| )\.(?:([a-z-]+)(?: |$)|"([^"]+)")/;
-const floatRegEx = /float="(left|right)"/;
-const WIDTH_R = /(?:^| )width="?([\d.a-z]+"?)(?: |$)/;
-const ALT_R = /(?:^| )alt="([A-Za-z\d ]+)"(?: |$)/;
-const COL_WIDTHS_R = /(?:^| )colWidths="([^"]*)"/;
-const ID_R = /(?:^| )#([A-Za-z][A-Za-z0-9]*)(?: |$)/;
-const leadingSpaceRegEx$2 = /^ +/;
-const trailingSpaceRegEx$1 = / +$/;
-
-// Turn various whitespace into easy-to-process whitespace
-const preprocess = function(source) {
-  return source.replace(CR_NEWLINE_R, "\n").replace(FORMFEED_R, "");
-};
-
-// Creates a match function for an inline scoped element from a regex
-const inlineRegex = function(regex) {
-  const match = function(source, state) {
-    return state.inline ? regex.exec(source) : null
-  };
-  match.regex = regex;
-  return match;
-};
-
-// Creates a match function for a block scoped element from a regex
-const blockRegex = function(regex) {
-  const match = function(source, state) {
-    return state.inline ? null : regex.exec(source)
-  };
-  match.regex = regex;
-  return match;
-};
-
-// Creates a match function from a regex, ignoring block/inline scope
-const anyScopeRegex = function(regex) {
-  const match = function(source, state) {
-    return regex.exec(source);
-  };
-  match.regex = regex;
-  return match;
-};
-
-const UNESCAPE_URL_R = /\\([^0-9A-Za-z\s])/g;
-const unescapeUrl = function(rawUrlString) {
-  return rawUrlString.replace(UNESCAPE_URL_R, "$1");
-};
-
-const isNotAnInteger = str => isNaN(str) || Number(str) % 1 !== 0;
-
-const indentRegEx = /^ +/;
-const insertNewlines = str => {
-  // Lists are unlike other blocks in one respect.
-  // A list might not have a preceding blank line, if the list is inside another list.
-  // Since the RegEx patterns all depend on that blank line, we will scan the top-level
-  // list and insert blank lines where needed.
-  const lines = str.split("\n");
-  let numLines = lines.length;
-  let i = 0;
-  let prevIndent = 0;
-  let prevLineWasEmpty = true;
-  while (i < numLines) {
-    const line = lines[i];
-    const isEmptyLine = (line === "");
-    if (!isEmptyLine) {
-      if (LIST_ITEM_PREFIX_R.test(line)) {
-        const match = indentRegEx.exec(line);
-        const indent = match ? match[0].length : 0;
-        if (indent !== prevIndent && !prevLineWasEmpty) {
-          // This line starts a new list and needs a preceeding blank line
-          lines.splice(i, 0, "");
-          i += 1;
-          numLines += 1;
-          prevLineWasEmpty = true;
-          continue
-        }
-        prevIndent = indent;
-      }
-    }
-    prevLineWasEmpty = isEmptyLine;
-    i += 1;
-  }
-  return lines.join("\n")
-};
-
-const parseList = (str, state) => {
-  if (!state.inList) {
-    // This is a top-level list.
-    str = str.replace(LIST_BLOCK_END_R, "\n");
-    str = insertNewlines(str);
-  }
-  const items = str.match(LIST_ITEM_R);
-  const isTight = !/\n\n/.test(str.replace(/\n*$/, ""));
-  // Backup our state for restoration afterwards.
-  const oldStateList = state.inList;
-  state.inList = true;
-  const itemContent = items.map(function(item, i) {
-    // We need to see how far indented this item is:
-    const prefixCapture = LIST_ITEM_PREFIX_R.exec(item);
-    const space = prefixCapture ? prefixCapture[0].length : 0;
-    // And then we construct a regex to "unindent" the subsequent
-    // lines of the items by that amount:
-    const spaceRegex = new RegExp("^ {1," + space + "}", "gm");
-
-    // Before processing the item, we need a couple things
-    const contentStr = item
-      // remove indents on trailing lines:
-      .replace(spaceRegex, "")
-      // remove the bullet:
-      .replace(LIST_ITEM_PREFIX_R, "");
-
-    // Backup our state for restoration afterwards.
-    const oldStateInline = state.inline;
-
-    // Parse the list item
-    state.inline = isTight;
-    const adjustedContent = contentStr.replace(LIST_ITEM_END_R, "");
-    const content = parse(adjustedContent, state);
-    const result = isTight
-      ? { type: "tight_list_item", content: [{ "type": "paragraph", "content": content }] }
-      : { type: "list_item", content };
-
-    // Restore our state before returning
-    state.inline = oldStateInline;
-    return result;
-  });
-
-  state.inList = oldStateList;
-  return itemContent
-};
-
-const TABLES = (function() {
-  const TABLE_ROW_SEPARATOR_TRIM = /^ *[|+] *| *[|+] *$/g;
-  const TABLE_RIGHT_ALIGN = /^(?:[ -]-+|=+):$/;
-  const TABLE_CENTER_ALIGN = /^:[-=]+:$/;
-
-  const parseTableAlign = function(source) {
-    // Inspect ":" characters to set column justification.
-    // Return class names that specify center or right justification on specific columns.
-    source = source.replace(TABLE_ROW_SEPARATOR_TRIM, "");
-    const alignArr = source.trim().split(/[|+]/);
-    let alignStr = "";
-    for (let i = 0; i < alignArr.length; i++) {
-      alignStr += TABLE_CENTER_ALIGN.test(alignArr[i])
-        ? ` c${String(i + 1)}c`
-        : (TABLE_RIGHT_ALIGN.test(alignArr[i])
-        ? ` c${String(i + 1)}r`
-        : "");
-    }
-    return alignStr.trim()
-  };
-
-  const tableDirectives = (directives, align) => {
-    // Get CSS class, ID, and column widths, if any.
-    if (!directives && align === "") { return ["", "", null] }
-    const userDefClass = tableClassRegEx.exec(directives);
-    let myClass = userDefClass
-      ? (userDefClass[1] ? userDefClass[1] : userDefClass[2] )
-      : "";
-    const isSpreadsheet = myClass && myClass.split(" ").includes("spreadsheet");
-    if (align.length > 0) { myClass += (myClass.length > 0 ? " " : "") + align; }
-    const userDefId = ID_R.exec(directives);
-    const myID = (userDefId) ? userDefId[1] : "";
-    const colWidthMatch = COL_WIDTHS_R.exec(directives);
-    const colWidths = (colWidthMatch) ? colWidthMatch[1].split(" ") : null;
-    return [myClass, myID, isSpreadsheet, colWidths]
-  };
-
-  const pipeRegEx = /(?<!\\)\|/;  // eslint doesn't like look behind. Disregard the warning.
-
-  const parsePipeTableRow = function(source, parse, state, isSpreadsheet,
-                                     colWidths, inHeader) {
-    const cells = source.trim().split(pipeRegEx);
-    cells.shift();
-    cells.pop();
-    const tableRow = [{ type: "tableSeparator" }];
-    for (const str of cells) {
-      const cell = isSpreadsheet
-        ? [{ type: "spreadsheet_cell", attrs: { entry: str.trim() } }]
-        : parse(str.trim(), state);
-      tableRow.push(...cell);
-      tableRow.push({ type: "tableSeparator" });
-    }
-    consolidate(tableRow);
-
-    const row = {
-      type: "table_row",
-      content: []
-    };
-    let j = -1;
-    tableRow.forEach(function(node, i) {
-      if (node.type === "text") {
-        if (i > 0 && tableRow[i - 1].type === "tableSeparator") {
-          node.text = node.text.replace(leadingSpaceRegEx$2, "");
-        }
-        if (i < tableRow.length - 1) {
-          node.text = node.text.replace(trailingSpaceRegEx$1, "");
-        }
-      }
-      if (node.type === "tableSeparator") {
-        if (i !== tableRow.length - 1) {  // Filter out the row's  last table separator
-          // Create a new cell
-          j += 1;
-          row.content.push({
-            "type": inHeader ? "table_header" : "table_cell",
-            "attrs": {
-              "colspan": 1,
-              "rowspan": 1,
-              "colwidth": (colWidths) ? [Number(colWidths[j])] : null,
-              "background": null
-            },
-            content: (state.inHtml || isSpreadsheet
-              ? []
-              : [{ "type": "paragraph", "content": [] }]
-            )
-          });
-        }
-      } else if (state.inHtml || isSpreadsheet) {
-        // For direct to HTML, write the inline contents directly into the <td> element.
-        // row   cell    content      text
-        row.content[j].content.push(node);
-      } else {
-        // Hurmet.app table cells always contain a paragraph.
-        // row   cell  paragraph  content      text
-        row.content[j].content[0].content.push(node);
-      }
-    });
-
-    return row;
-  };
-
-  const parsePipeTable = function() {
-    return function(capture, state) {
-      state.inline = true;
-      const align = parseTableAlign(capture[3]);
-      const [myClass, myID, isSpreadsheet, colWidths] = tableDirectives(capture[5], align);
-      const table = {
-        type: "table",
-        attrs: {},
-        content: []
-      };
-      if (myID) { table.attrs.name = myID; }
-      if (myClass) { table.attrs.class = myClass; }
-      if (isSpreadsheet) { table.attrs.dtype = dt.SPREADSHEET; }
-      if (colWidths && state.inHtml) {
-        let sum = 0;
-        colWidths.forEach(el => { sum += Number(el); } );
-        table.attrs.style = `width: ${sum}px`;
-        const colGroup = { type: "colGroup", content: [] };
-        for (const width of colWidths) {
-          colGroup.content.push({ type: "col", attrs: [{ style: `width: ${width}px` }] });
-        }
-        table.content.push(colGroup);
-      }
-      if (!/^\|+$/.test(capture[2])) {
-        table.content.push(parsePipeTableRow(capture[2], parse, state, isSpreadsheet,
-                                             colWidths, true));
-      }
-      const tableBody = capture[4].trim().split("\n");
-      tableBody.forEach(row => {
-        table.content.push(parsePipeTableRow(row, parse, state, isSpreadsheet,
-                                             colWidths, false));
-      });
-      state.inline = false;
-      if (capture[1]) {
-        const figure = { type: "figure", attrs: { class: "" }, content: [
-          { type: "figcaption", content: parseInline(capture[1], state) },
-          table
-        ] };
-        if (capture[5]) {
-          const match = floatRegEx.exec(capture[5]);
-          if (match) { figure.attrs.class = match[1]; }
-        }
-        return figure
-      } else {
-        return table
-      }
-    };
-  };
-
-  const headerRegEx = /^\+:?=/;
-  const gridSplit = / *\n/g;
-  const cellCornerRegEx = /^\+[-=:]+\+[+=:-]+\+$/g;
-
-  const parseGridTable = function() {
-    return function(capture, state) {
-      const topBorder = capture[3];
-      const lines = capture[2].slice(0, -1).split(gridSplit);
-
-      // Does the grid table contain a line separating header from table body?
-      let headerExists = false;
-      let headerSepLine = lines.length + 10;
-      for (let i = 0; i < lines.length; i++) {
-        if (headerRegEx.test(lines[i])) {
-          headerExists = true;
-          headerSepLine = i;
-          break
-        }
-      }
-
-      // Get column justification
-      const alignrow = headerExists ? lines[headerSepLine] : topBorder.slice(1);
-      const align = parseTableAlign(alignrow);
-      const [myClass, myID, isSpreadsheet, colWidths] = tableDirectives(capture[4], align);
-
-      // Read the top & left borders to find a first draft of cell corner locations.
-      const colSeps = [0];
-      for (let j = 1; j < topBorder.length; j++) {
-        if (topBorder.charAt(j) === "+") { colSeps.push(j); }
-      }
-      const rowSeps = [0];
-      for (let i = 1; i < lines.length; i++) {
-        if (lines[i].charAt(0) === "+") { rowSeps.push(i); }
-      }
-
-      // Look for the cell corner locations that don't appear on top or left border
-      let rowSepIndex = 0;
-      while (rowSepIndex < rowSeps.length) {
-        // Find the next row separator
-        let nextRow = 0;
-        const isValid = new Array(colSeps.length).fill(true);
-        for (let i = rowSeps[rowSepIndex] + 1; i < lines.length; i++) {
-          for (let k = 0; k < colSeps.length; k++) {
-            if (!isValid[k]) { continue }
-            if ("+|".indexOf(lines[i][colSeps[k]]) === -1) { isValid[k] = false; continue }
-            if (lines[i][colSeps[k]] === "+") {
-              nextRow = i;
-              break
-            }
-          }
-          if (nextRow !== 0) { break }
-        }
-        if (!rowSeps.includes(nextRow)) {
-          rowSeps.splice(rowSepIndex + 1, 0, nextRow);
-        }
-
-        // Check the next horizontal border for new cell corners
-        rowSepIndex += 1;
-        const border = lines[nextRow];
-        for (let j = 0; j < colSeps.length - 1; j++) {
-          let cellBorder = border.slice(colSeps[j], colSeps[j + 1] + 1);
-          if (cellCornerRegEx.test(cellBorder)) {
-            cellBorder = cellBorder.slice(1, -1);
-            let pos = cellBorder.indexOf("+") + 1;
-            let k = 1;
-            while (pos > 0) {
-              colSeps.splice(j + k, 0, colSeps[j] + pos);
-              pos = cellBorder.indexOf("+", pos) + 1;
-              k += 1;
-            }
-          }
-        }
-      }
-
-      const numCols = colSeps.length - 1;
-      const numRows = rowSeps.length - 1;
-      const gridTable = [];
-
-      // Create default rows and cells. They may be merged later.
-      for (let i = 0; i < numRows; i++) {
-        const row = new Array(numCols);
-        for (let j = 0; j < numCols; j++) { row[j] = { rowspan: 1 }; }
-        gridTable.push(row);
-      }
-
-      for (let i = 0; i < numRows; i++) {
-        const row = gridTable[i];
-        // Determine the actual rowspan and colspan of each cell.
-        for (let j = 0; j < numCols; j++) {
-          const cell = row[j];
-          if (cell.rowspan === 0) { continue }
-          cell.colspan = 1;
-          const lastTextRow = lines[rowSeps[i + 1] - 1];
-          for (let k = j + 1; k < colSeps.length; k++) {
-            if (lastTextRow.charAt(colSeps[k]) === "|") { break }
-            cell.colspan += 1;
-            row[k].rowspan = 0;
-          }
-          for (let k = i + 1; k < rowSeps.length; k++) {
-            const ch = lines[rowSeps[k]].charAt(colSeps[j] + 1);
-            if ("-=:".indexOf(ch) > -1) { break }
-            cell.rowspan += 1;
-            for (let jj = 0; jj < cell.colspan; jj++) {
-              gridTable[k][j + jj].rowspan = 0;
-            }
-          }
-          // Now that we know the cell extents, get the cell contents.
-          const xStart = colSeps[j] + 1;
-          const xEnd = colSeps[j + cell.colspan];
-          const yStart = rowSeps[i] + 1;
-          const yEnd = rowSeps[i + cell.rowspan];
-          let str = "";
-          for (let ii = yStart; ii < yEnd; ii++) {
-            str += lines[ii].slice(xStart, xEnd).replace(/ +$/, "") + "\n";
-          }
-          cell.blob = str.slice(0, -1).replace(/^\n+/, "");
-          const leadingSpacesMatch = /^ +/.exec(cell.blob);
-          if (leadingSpacesMatch) {
-            const numLeadingSpaces = leadingSpacesMatch[0].length;
-            const spaceRegEx = new RegExp("^" + " ".repeat(numLeadingSpaces), "gm");
-            cell.blob = cell.blob.replace(spaceRegEx, "");
-          }
-
-          cell.inHeader = (headerExists && yStart < headerSepLine);
-
-          if (colWidths) {
-            // Set an attribute used by ProseMirror.
-            const cellWidth = cell.colspan === 0 ? null : [];
-            for (let k = 0; k < cell.colspan; k++) {
-              cellWidth.push(Number(colWidths[j + k]));
-            }
-            cell.width = cellWidth;
-          }
-        }
-      }
-
-      const table = {
-        type: "table",
-        attrs: {},
-        content: []
-      };
-      if (myID) { table.attrs.name = myID; }
-      if (myClass) { table.attrs.class = myClass; }
-      if (isSpreadsheet) { table.attrs.dtype = dt.SPREADSHEET; }
-      let k = 0;
-      if (colWidths && state.inHtml) {
-        let sum = 0;
-        colWidths.forEach(el => { sum += Number(el); } );
-        table.attrs.style = `width: ${sum}px`;
-        const colGroup = { type: "colGroup", attrs: null, content: [] };
-        for (const width of colWidths) {
-          colGroup.content.push({ type: "col", attrs: [{ style: `width: ${width}px` }] });
-        }
-        table.content.push(colGroup);
-        k = 1;
-      }
-      for (let i = 0; i < numRows; i++) {
-        table.content.push({ type: "table_row", content: [] } );
-        for (let j = 0; j < numCols; j++) {
-          if (gridTable[i][j].rowspan === 0) { continue }
-          const cell = gridTable[i][j];
-          state.inline = false;
-          let content = isSpreadsheet
-            ? [{ type: "spreadsheet_cell", attrs: { entry: cell.blob.trim() } }]
-            : parse(cell.blob, state);
-          if (state.inHtml && content.length === 1 && content[0].type === "paragraph") {
-            content = content[0].content;
-          }
-          if (content.length === 1 && content[0].type === "null") {
-            content = [{ type: "paragraph", content: [] }];
-          }
-          table.content[i + k].content.push({
-            "type": cell.inHeader ? "table_header" : "table_cell",
-            "attrs": {
-              "colspan": cell.colspan,
-              "rowspan": cell.rowspan,
-              "colwidth": (colWidths) ? cell.width : null,
-              "background": null
-            },
-            content: content
-          });
-        }
-      }
-      state.inline = false;
-      if (capture[1]) {
-        const figure = { type: "figure", attrs: { class: "" }, content: [
-          { type: "figcaption", attrs: null, content: parseInline(capture[1], state) },
-          table
-        ] };
-        if (capture[4]) {
-          const match = floatRegEx.exec(capture[4]);
-          if (match) { figure.attrs.class = match[1]; }
-        }
-        return figure
-      } else {
-        return table
-      }
-    };
-  };
-
-  return {
-    parsePipeTable: parsePipeTable(),
-    PIPE_TABLE_REGEX: /^(?:: ((?:[^\n]|\n(?!\||:|<\/dl>))*)\n)?(\|.*)\n\|((?:[-: ]?-+[-: ]?\|)+)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
-    parseGridTable: parseGridTable(),
-    GRID_TABLE_REGEX: /^(?:: ((?:[^\n]|\n(?!\+|:|<\/dl>))*)\n)?((\+(?:[-:=]+\+)+)\n(?:[+|][^\n]+[+|] *\n)+)(?:\{([^\n}]+)\}\n)?\n*/
-  };
-})();
-
-const LINK_INSIDE = "(?:\\[[^\\]]*\\]|[^\\[\\]]|\\](?=[^\\[]*\\]))*";
-const LINK_HREF_AND_TITLE =
-  "\\s*<?((?:\\([^)]*\\)|[^\\s\\\\]|\\\\.)*?)>?(?:\\s+['\"]([\\s\\S]*?)['\"])?\\s*";
-
-const linkIndex = marks => {
-  for (let i = 0; i < marks.length; i++) {
-    if (marks[i].type === "link") { return i }
-  }
-};
-
-// Pattern to find Hurmet calculation results.
-// This will be replaced in the entry with the display selector.
-const resultRegEx = /〔[^〕]*〕/;
-const drawRegEx$1 = /^draw\(/;
-
-const parseRef = function(capture, state, refNode) {
-  // Handle implicit refs: [title][<ref>], ![alt or caption][<ref>]
-  let ref = capture[2] ? capture[2] : capture[1];
-  ref = ref.replace(/\s+/g, " ");
-
-  if (state.defs && state.defs[ref]) {
-    const def = state.defs[ref];
-    if (!def.target || def.target === "undefined") {
-      // The image definition is undefined.
-      const brokenImage = { type: "image", attrs: { src: "undefined-image" } };
-      if (def.attrs && def.attrs.alt) { brokenImage.attrs.alt = def.attrs.alt; }
-      return brokenImage
-    }
-    if (refNode.type === "figure") {
-      refNode = { type: "figure", attrs: def.attrs, content: [
-        { type: "figimg", attrs: def.attrs },
-        { type: "figcaption", content: parseInline(refNode.attrs.alt, state) }
-      ] };
-      refNode.content[0].attrs.src = def.target;
-      if (def.attrs.alt) { refNode.content[0].attrs.alt = def.attrs.alt; }
-    } else if (refNode.type === "image") {
-      if (drawRegEx$1.test(def.target)) {
-        // A drawing is written on one line. Its line breaks are written as ␤.
-        // Drawings written before ␤ was adopted contain no ␤; they used \n.
-        const entry = def.target.indexOf("␤") === -1
-          ? def.target.replace(/\\n/g, "\n")
-          : def.target.replace(/␤/g, "\n");
-        return { type: "calculation", attrs: { entry } }
-      } else {
-        refNode.attrs = def.attrs;
-        refNode.attrs.src = def.target;
-      }
-    } else {
-      // refNode is a link
-      refNode.attrs.href = def.target;
-    }
-  }
-  return refNode;
-};
-
-const parseTextMark = (capture, state, mark, href) => {
-  const text = parseInline(capture, state);
-  if (Array.isArray(text) && text.length === 0) { return text }
-  consolidate(text);
-  const markObj = { type: mark };
-  if (href) { markObj.attrs = { href }; }
-  for (const range of text) {
-    if (range.marks) {
-      range.marks.push(markObj);
-    } else {
-      range.marks = [markObj];
-    }
-  }
-  return text
-};
-
-const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|label|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<(?:\/?(?:!DOCTYPE html|body|li|br|hr|(?:div|article|details|input|ul|ol|dl|main|nav)(?: (?:class|id|name|style|type)=(["'])[A-Za-z0-9_.:;\- ]+\2){0,2})|\/?html(?: lang=(["'])[a-z]+\3)?)>[^\n]*?(?:\n|$))/;
-
-// Rules must be applied in a specific order, so use a Map instead of an object.
-const rules = new Map();
-rules.set("html", {
-  isLeaf: true,
-  match: blockRegex(BLOCK_HTML),
-  parse: function(capture, state) {
-    if (!state.inHtml) { return null }
-    return { type: "html", text: capture[0] }
-  }
-});
-rules.set("htmlComment", {
-  isLeaf: true,
-  match: blockRegex(/^ *<!--[\s\S]*?-->[^\n]*\n/),
-  parse: function(capture, state) {
-    return { type: "null" }
-  }
-}),
-rules.set("lheading", {
-  isLeaf: false,
-  match: blockRegex(/^([^\n]+)\n *(=|-){3,} *(?:\n *)+\n/),
-  parse: function(capture, state) {
-    return {
-      type: "heading",
-      attrs: { level: capture[2] === '=' ? 1 : 2 },
-      content: parseInline(capture[1].trim(), state)
-    };
-  }
-});
-rules.set("heading", {
-  isLeaf: false,
-  match: blockRegex(/^ *(#{1,6})([^\n]+?)#*\n*\n/),
-  parse: function(capture, state) {
-    return {
-      attrs: { level: capture[1].length },
-      content: parseInline(capture[2].trim(), state)
-    };
-  }
-});
-rules.set("dt", {  // description term
-  isLeaf: false,
-  match: blockRegex(/^(([^\n]*)\n)(?=<dd>|\n: [^\n]+\n[^|+])/),
-  parse: function(capture, state) {
-    return { content: parseInline(capture[2].trim(), state) }
-  }
-});
-rules.set("horizontal_rule", {
-  isLeaf: true,
-  match: blockRegex(/^( *[-*_]){3,} *(?:\n *)+\n/),
-  parse: function(capture, parse, state) {
-    return { type: "horizontal_rule" };
-  }
-});
-rules.set("page_break", {
-  isLeaf: true,
-  match: blockRegex(/^\\newpage\n\n/),
-  parse: function(capture, parse, state) {
-    return { type: "page_break" };
-  }
-});
-rules.set("codeBlock", {
-  isLeaf: true,
-  match: blockRegex(/^(?:(?:\t| {4})[^\n]+\n*)+(?:\n *)+\n/),
-  parse: function(capture, state) {
-    const content = capture[0].replace(/^(\t| {4})/gm, '').replace(/\n+$/, '');
-    return {
-      type: "code_block",
-      content: [{ type: "text", text: content }]
-    };
-  }
-});
-rules.set("fence", {
-  isLeaf: true,
-  match: blockRegex(/^(```|~~~) *(?:(\S+) *)?\n([\s\S]+?)\n?\1 *(?:\n *)+\n/),
-  parse: function(capture, state) {
-    return {
-      type: "code_block",
-//      lang: capture[2] || undefined,
-      content: [{ type: "text", text: capture[3] }]
-    };
-  }
-});
-rules.set("alert", {
-  isLeaf: false,
-  match: blockRegex(/^(?: *> \[!(NOTE|TIP|IMPORTANT|WARNING|EPIGRAPH)\])((?:\n *>(?! *\[!)[^\n]*)+)(?:\n *)+\n/),
-  // Alert for note |tip | important | warning |epigraph
-  parse: function(capture, state) {
-    const cap = capture[2].replace(/\n *> ?/gm, "\n").replace(/^\n/, "");
-    const content = parse(cap, state);
-    return { type: capture[1].toLowerCase(), content }
-  }
-});
-rules.set("blockquote", {
-  isLeaf: false,
-  match: blockRegex(/^>([^\n]*(?:\n *>[^\n]*)*)(?:\n *)+\n/),
-  parse: function(capture, state) {
-    const content = capture[1].replace(/\n *> ?/gm, "\n");
-    return { content: parse(content, state) };
-  }
-});
-rules.set("ordered_list", {
-  isLeaf: false,
-  match: blockRegex(/^( {0,3})(?:(?:(\d{1,9})|([A-Z])|([a-z]))[.)]) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:\d{1,9}\.) )\n*|\s*$)/),
-  parse: function(capture, state) {
-    const start = capture[2]
-      ? Number(capture[2])
-      : capture[3]
-      ? capture[3].codePointAt(0) - 64
-      : capture[4].codePointAt(0) - 96;
-    const className = capture[2] ? "decimal" : capture[3] ? "upper-alpha" : "lower-alpha";
-    return {
-      attrs: { class: className, order: start },
-      content: parseList(capture[0], state)
-    }
-  }
-});
-rules.set("bullet_list", {
-  isLeaf: false,
-  match: blockRegex(/^( {0,3})([*+-]) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:[*+-]) )\n*|\s*$)/),
-  parse: function(capture, state) {
-    return { content: parseList(capture[0], state) }
-  }
-});
-rules.set("special_div", {
-  isLeaf: false,
-  match: blockRegex(/^(:{3,}) ?(indented|comment|centered|right_justified|boxed|header\*?|hidden) *\n([\s\S]+?)\n+\1 *(?:\n{2,}|\s*$)/),
-  // indented or centered or right-justified or boxed or comment div, or <header>
-  parse: function(capture, state) {
-    const content = parse(capture[3], state);
-    const blockType = capture[2];
-    if (blockType === "header*") {
-      return { type: "header", attrs: { headerPages: "all" }, content };
-    } else {
-      return { type: blockType, content };
-    }
-  }
-});
-rules.set("figure", {
-  isLeaf: true,
-  match: blockRegex(/^!!\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\] *(?:\n *)+\n/),
-  parse: function(capture, state) {
-    if (isNotAnInteger(capture[1])) {
-      return parseRef(capture, state, { type: "figure", attrs: { alt: capture[1] } });
-    } else {
-      return parseRef(capture, state, { type: "figure" });
-    }
-  }
-});
-rules.set("def", {
-  isLeaf: true,
-  // A drawing takes its whole line, which may contain ">".
-  match: blockRegex(/^\[([^\]\n]+)\]: *(?:¢(`+)([\s\S]*?[^`])\2(?!`)|draw\([^\n]*|<?([^\n>]*)>? *(?:\n\{([^\n}]*)\})?)/),
-  // Link reference definitions were handled in md2ast().
-  parse: function(capture, state) { return { type: "null" } }
-});
-rules.set("toc", {
-  isLeaf: true,
-  match: blockRegex(/^{\.toc start=(\d) end=(\d)}\n/),
-  parse: function(capture, state) {
-    return { attrs: { start: Number(capture[1]), end: Number(capture[2]), body: [] } }
-  }
-});
-rules.set("pipeTable", {
-  isLeaf: false,
-  match: blockRegex(TABLES.PIPE_TABLE_REGEX),
-  parse: TABLES.parsePipeTable
-});
-rules.set("gridTable", {
-  isLeaf: false,
-  match: blockRegex(TABLES.GRID_TABLE_REGEX),
-  parse: TABLES.parseGridTable
-});
-rules.set("dd", {  // description details
-  isLeaf: false,
-  match: blockRegex(/^:( +)[\s\S]+?(?:\n{2,}(?! |:)(?!\1)\n*|\s*$)/),
-  parse: function(capture, state) {
-    let div = " " + capture[0].slice(1);
-    const indent = 1 + capture[1].length;
-    const spaceRegex = new RegExp("^ {" + indent + "," + indent + "}", "gm");
-    div = div.replace(spaceRegex, ""); // remove indents on trailing lines:
-    return { content: parse(div, state) };
-  }
-});
-rules.set("displayTeX", {
-  isLeaf: true,
-  match: blockRegex(/^ *(?:\$\$\n? *((?:\\[\s\S]|[^\\])+?)\n?\$\$|\\\[\n? *((?:\\[\s\S]|[^\\])+?)\n?\\\]) *(?:\n|$)/),
-  parse: function(capture, state) {
-    const tex = (capture[1] ? capture[1] : capture[2]).trim();
-    return { type: "tex", attrs: { tex, displayMode: true } }
-  }
-});
-rules.set("newline", {
-  isLeaf: true,
-  match: blockRegex(/^(?:\n *)*\n/),
-  parse: function() { return { type: "null" } }
-});
-rules.set("emptyParagraph", {
-  isLeaf: true,
-  match: blockRegex(/^(¶|&nbsp;)(?:\n *)+\n/),
-  parse: function(capture, state) {
-    return { type: "paragraph", content: [] }
-  }
-});
-rules.set("paragraph", {
-  isLeaf: false,
-  match: blockRegex(/^((?:[^\n]|\n(?!(?: *\n|(?=[*+-] )|(?=(?:\d{1,9}|[A-Za-z])[.)] ))))+)\n(?:(?: *\n)+|(?=[*+-] )|(?=(?:\d{1,9}|[A-Za-z])[.)] ))/),
-  parse: function(capture, state) {
-    return { type: "paragraph", content: parseInline(capture[1], state) }
-  }
-});
-// Position tex ahead of escape in order to capture \[...\] math.
-rules.set("tex", {
-  isLeaf: true,
-  match: inlineRegex(/^(?:\\\[((?:\\[\s\S]|[^\\])+?)\\\]|\$\$((?:\\[\s\S]|[^\\])+?)\$\$|\\\(((?:\\[\s\S]|[^\\])+?)\\\)|\$(`+)((?:(?:\\[\s\S]|[^\\])+?)?)\4\$(?![0-9$])|\$(?!\s|\$)((?:(?:\\[\s\S]|[^\\])+?)?)(?<=[^\s\\$])\$(?![0-9$]))/),
-  parse: function(capture, state) {
-    if (capture[1] || capture[2]) {
-      const tex = (capture[1] ? capture[1] : capture[2]).trim();
-      return { type: "tex", attrs: { tex, displayMode: true } }
-    } else {
-      const tex = (capture[3]
-        ? capture[3]
-        : capture[5]
-        ? capture[5]
-        : capture[6]).trim();
-      return { type: "tex", attrs: { tex, displayMode: false } }
-    }
-  }
-});
-rules.set("escape", {
-  // We don't allow escaping numbers, letters, or spaces here so that
-  // backslashes used in plain text still get rendered. But allowing
-  // escaping anything else provides a very flexible escape mechanism,
-  // regardless of how this grammar is extended.
-  isLeaf: true,
-  match: inlineRegex(/^\\([^0-9A-Za-z()\s])/),
-  parse: function(capture, state) {
-    return {
-      type: "text",
-      text: capture[1]
-    };
-  }
-});
-rules.set("tableSeparator", {
-  isLeaf: true,
-  match: function(source, state) {
-    if (!state.inTable) { return null }
-    return /^ *\| */.exec(source);
-  },
-  parse: function() {
-    return { type: "tableSeparator" };
-  }
-});
-rules.set("link", {
-  isLeaf: true,
-  match: inlineRegex(
-    new RegExp("^\\[(" + LINK_INSIDE + ")\\]\\(" + LINK_HREF_AND_TITLE + "\\)")
-  ),
-  parse: function(capture, state) {
-    const content = parseInline(capture[1], state);
-    let useParseTextMark = true;
-    for (const node of content) {
-      if (node.type !== "text") { useParseTextMark = false; break }
-    }
-    if (useParseTextMark) {
-      // This is the Prosemirror default method for editable links.
-      return parseTextMark(capture[1], state, "link", unescapeUrl(capture[2]))
-    } else {
-      // When a link contains a nodeView, e.g. math, the text mark method has an edge case bug.
-      // So the Hurmet schema has a custom "link_node".
-      const href = unescapeUrl(capture[2]);
-      return [{ type: "link_node", attrs: { href, title: href }, content }]
-    }
-  }
-});
-rules.set("image", {
-  isLeaf: true,
-  match: inlineRegex(
-    new RegExp("^!\\[(" + LINK_INSIDE + ")\\]\\(" + LINK_HREF_AND_TITLE + "\\)")
-  ),
-  parse: function(capture, state) {
-    if (isNotAnInteger(capture[1])) {
-      return { attrs: { alt: capture[1], src: unescapeUrl(capture[2]) } }
-    } else {
-      return { attrs: { src: unescapeUrl(capture[2]) } }
-    }
-  }
-});
-rules.set("reflink", {
-  isLeaf: true,
-  match: inlineRegex(/^\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]/),
-  parse: function(capture, state) {
-    const defIndex = capture[2] ? capture[2] : capture[1];
-    const href = state.defs[defIndex].target;
-    const textNode = parseTextMark(capture[1], state, "link", href);
-    return textNode
-  }
-});
-rules.set("footnote", {
-  isLeaf: true,
-  match: inlineRegex(/^\[\^(\d+)\]/),
-  parse: function(capture, state) {
-    const index = Number(capture[1]) - 1;
-    return { type: "footnote", content: parseInline(state.footnotes[index], state) }
-  }
-});
-rules.set("refimage", {
-  isLeaf: true,
-  match: inlineRegex(/^!\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]/),
-  parse: function(capture, state) {
-    //if (isNotAnInteger(capture[1])) {
-    return parseRef(capture, state, { type: "image", attrs: { alt: capture[1] } });
-    //} else {
-    //  return parseRef(capture, state, { type: "image" });
-   // }
-  }
-});
-rules.set("autolink", {
-  isLeaf: true,
-  match: inlineRegex(/^<([^: >]+:\/[^ >]+)>/),
-  parse: function(capture, state) {
-    const textNode = parseTextMark(capture[1], state, "link" )[0];
-    const i = linkIndex(textNode.marks);
-    textNode.marks[i].attrs = { href: unescapeUrl(capture[1]) };
-    return textNode
-  }
-});
-rules.set("code", {
-  isLeaf: true,
-  match: inlineRegex(/^(`+)([\s\S]*?[^`])\1(?!`)/),
-  parse: function(capture, state) {
-    const text = capture[2].trim();
-    return [{ type: "text", text, marks: [{ type: "code" }] }]
-  }
-});
-rules.set("calculation", {
-  isLeaf: true,
-  match: anyScopeRegex(/^(?:¢(\?\?|\?|%%|%|@@|@)?(`+)([\s\S]*?[^`])\2(?!`)|¢¢(\?\?|\?|%%|%|@@|@)?\n?((?:\\[\s\S]|[^\\])+?)\n?¢¢)/),
-  parse: function(capture, state) {
-    if (capture[3]) {
-      let entry = capture[3].trim();
-      if (capture[1]) {
-        if (entry.slice(0, 1) === "@") {
-          entry = entry.replace(resultRegEx, "").trim();
-        } else {
-          entry = entry.replace(resultRegEx, capture[1]);
-        }
-      }
-      if (!/^(?:function|draw\()/.test(entry) && entry.indexOf("``") === -1) {
-        entry = entry.replace(/\n/g, " ");
-      }
-      return { attrs: { entry } }
-    } else {
-      let entry = capture[5].trim();
-      if (capture[4]) {
-        if (entry.slice(0, 1) === "@") {
-          entry = entry.replace(resultRegEx, "").trim();
-        } else {
-          entry = entry.replace(resultRegEx, capture[4]);
-        }
-      }
-      return { attrs: { entry, displayMode: true } }
-    }
-  }
-});
-rules.set("em", {
-  isLeaf: true,
-  match: inlineRegex(/^([_*])(?!\s|\1)((?:\\[\s\S]|[^\\])+?)\1/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[2], state, "em" )
-  }
-});
-rules.set("strong", {
-  isLeaf: true,
-  match: inlineRegex(/^(\*\*|__)(?=\S)((?:\\[\s\S]|[^\\])+?)\1/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[2], state, "strong" )
-  }
-});
-rules.set("del", {
-  isLeaf: true,
-  match: inlineRegex(/^<del>([\s\S]*?)<\/del>/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "strikethru" )
-  }
-});
-rules.set("strikethru", {
-  isLeaf: true,
-  match: inlineRegex(/^~~(?=\S)((?:\\[\s\S]|~(?!~)|[^\s~\\]|\s(?!~~))+?)~~/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "strikethru" )
-  }
-});
-rules.set("superscript", {
-  isLeaf: true,
-  match: inlineRegex(/^<sup>([\s\S]*?)<\/sup>/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "superscript" )
-  }
-});
-rules.set("carat", {
-  isLeaf: true,
-  match: inlineRegex(/^\^((?:\\[\s\S]|[^\\])+?)\^/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "superscript" )
-  }
-});
-rules.set("subscript", {
-  isLeaf: true,
-  match: inlineRegex(/^<sub>([\s\S]*?)<\/sub>/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "subscript" )
-  }
-});
-rules.set("tilde", {
-  isLeaf: true,
-  match: inlineRegex(/^~((?:\\[\s\S]|[^\\])+?)~/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "subscript" )
-  }
-});
-rules.set("underline", {
-  isLeaf: true,
-  match: inlineRegex(/^<u>([\s\S]*?)<\/u>/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "underline" )
-  }
-});
-rules.set("highlight", {
-  isLeaf: true,
-  match: inlineRegex(/^<mark>([\s\S]*?)<\/mark>/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "highlight" )
-  }
-});
-rules.set("hard_break", {
-  isLeaf: true,
-  match: anyScopeRegex(/^(\\| {2})\n/),
-  parse: function() { return { text: "\n" } }
-});
-rules.set("inline_break", {
-  isLeaf: true,
-  match: anyScopeRegex(/^<br>/),
-  parse: function() { return { type: "hard_break", text: "\n" } }
-});
-rules.set("span", {
-  isLeaf: true,
-  match: inlineRegex(/^<span [a-z =":]+>[^<]+<\/span>/),
-  parse: function(capture, state) {
-    return !state.inHtml ? null : { type: "html", text: capture[0] }
-  }
-});
-rules.set("text", {
-  // We break on symbol characters, double newlines, or double-space-newlines.
-  isLeaf: true,
-  match: anyScopeRegex(/^[\s\S]+?(?=[_*`#>|\\\-+=![({$¢¶<~^+:]|\n\n| {2,}\n|\d+[.)]|\w+:\S|$)/),
-  parse: function(capture, state) {
-    return {
-      text: capture[0].replace(/\n/g, " ")
-    };
-  }
-});
-
-
-const parse = (source, state) => {
-  if (!state.inline) { source += "\n\n"; }
-  source = preprocess(source);
-  const result = [];
-  while (source) {
-    // store the best match and its rule:
-    let capture = null;
-    let ruleName = null;
-    let rule = null;
-    for (const [currRuleName, currRule] of rules) {
-      capture = currRule.match(source, state);
-      if (capture) {
-        rule = currRule;
-        ruleName = currRuleName;
-        break
-      }
-    }
-    const parsed = rule.parse(capture, state);
-    if (Array.isArray(parsed)) {
-      Array.prototype.push.apply(result, parsed);
-    } else {
-      if (parsed.type == null) { parsed.type = ruleName; }
-      result.push(parsed);
-    }
-    state.prevCapture = capture[0];
-    source = source.substring(capture[0].length);
-  }
-  return result
-};
-
-
-
-/**
- * Parse some content with the parser `parse`, with state.inline
- * set to true. Useful for block elements; not generally necessary
- * to be used by inline elements (where state.inline is already true.
- */
-const parseInline = function(content, state) {
-  const isCurrentlyInline = state.inline || false;
-  state.inline = true;
-  const result = parse(content, state);
-  state.inline = isCurrentlyInline;
-  return result;
-};
-
-
-// recognize a `*` `-`, `+`, `1.`, `2.`, `A.`, `a,`... list bullet
-const LIST_BULLET = "(?:[*+-]|(?:\\d+|[A-Za-z])[\\.\\)])";
-// recognize the start of a list item:
-// leading space plus a bullet plus a space (`   * `)
-const LIST_ITEM_PREFIX = "( *)(" + LIST_BULLET + ") +";
-const LIST_ITEM_PREFIX_R = new RegExp("^" + LIST_ITEM_PREFIX);
-// recognize an individual list item:
-//  * hi
-//    this is part of the same item
-//
-//    as is this, which is a new paragraph in the same item
-//
-//  * but this is not part of the same item
-const LIST_ITEM_R = new RegExp(
-  LIST_ITEM_PREFIX + "[^\\n]*(?:\\n" + "(?!\\1" + LIST_BULLET + " )[^\\n]*)*(\n|$)",
-  "gm"
-);
-const BLOCK_END_R = /\n{2,}$/;
-// recognize the end of a paragraph block inside a list item:
-// two or more newlines at end end of the item
-const LIST_BLOCK_END_R = BLOCK_END_R;
-const LIST_ITEM_END_R = / *\n+$/;
-
-const consolidate = arr => {
-  if (Array.isArray(arr) && arr.length > 0) {
-    // Group any text nodes together into a single string output.
-    for (let i = arr.length - 1; i > 0; i--) {
-      const node = arr[i];
-      const prevNode = arr[i - 1];
-      if (node.type === 'text' && prevNode.type === 'text' &&
-          !node.marks && !prevNode.marks) {
-        prevNode.text += node.text;
-        arr.splice(i, 1);
-      } else if ((node.type === 'indented' && prevNode.type === 'indented') ||
-                 (node.type === 'centered' && prevNode.type === 'centered')) {
-        prevNode.content = prevNode.content.concat(node.content);
-        arr.splice(i, 1);
-      } else if (node.type === "null") {
-        arr.splice(i, 1);
-      } else if (!rules.has(node.type) || !rules.get(node.type).isLeaf) {
-        consolidate(node.content);
-      }
-    }
-
-    if (!rules.has(arr[0].type) || !rules.get(arr[0].type).isLeaf) {
-      consolidate(arr[0].content);
-    }
-  }
-};
-
-const populateTOC = ast => {
-  let tocNode;
-  for (const node of ast) {
-    if (node.type === "toc") { tocNode = node; break }
-  }
-  if (!tocNode) { return }
-  const start = tocNode.attrs.start;
-  const end = tocNode.attrs.end;
-  for (const node of ast) {
-    if (node.type === "heading") {
-      const level = node.attrs.level;
-      if (start <= level && level <= end) {
-        const tocEntry = [];
-        let str = "";
-        for (const range of node.content) { str += range.text; }
-        tocEntry.push(str);
-        tocEntry.push(level);
-        tocEntry.push(0); // page number unknown
-        tocEntry.push(0); // element number unknown
-        tocNode.attrs.body.push(tocEntry);
-      }
-    }
-  }
-};
-
-const metadataRegEx = /^---+\n((?:[A-Za-z0-9][A-Za-z0-9 _-]*:[^\n]+\n(?:[ \t]+[^\n]+\n)*)+)---+\n/;
-const metadataItemRegEx = /^[A-Za-z0-9][A-Za-z0-9 _-]*:[^\n]+\n(?:[ \t]+[^\n]+\n)*/;
-const hurmetMetadataNames = ["decimalFormat", "dateFormat", "fontSize",
-  "pageSize", "saveDate"];
-
-const parseMetadata = str => {
-  const metadata = {};
-  let capture = str.match(metadataItemRegEx);
-  while (capture) {
-    const item = capture[0].split(":");
-    const key = item[0].trim().replace(/ /g, "");
-    if (hurmetMetadataNames.includes(key)) {
-      const value = item[1].slice(0, -1).trim().replace(/ *\n[ \t]*/g, " ");
-      metadata[key] = value;
-    }
-    str = str.slice(capture[0].length);
-    capture = str.match(metadataItemRegEx);
-  }
-  return metadata
-};
-
-const dateMessageRegEx = /^date:([^\n]+)\nmessage:([^\n]+)\n/;
-
-const buildPathDefString = (def, target, directives) => {
-  return directives
-    ? `[${def}]: ${target}\n{${directives}}`
-    : `[${def}]: ${target}`
-};
-
-const inlineMd2ast = md => {
-  const state = { inline: true, defs: {}, prevCapture: "", inList: false, inHtml: false };
-  const ast = parse(md, state);
-  if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") {
-    ast.shift();
-  }
-  consolidate(ast);
-  return ast
-};
-
-const md2ast = (md, inHtml = false) => {
-  // First, check for a metadata preamble
-  let metadata = false;
-  if (metadataRegEx.test(md)) {
-    const match = metadataRegEx.exec(md);
-    metadata = parseMetadata(match[1]);
-    md = md.slice(match[0].length);
-  }
-
-  // Second, get all the link reference definitions
-  const state = {
-    inline: false,
-    inList: false,
-    defs: {},
-    footnotes: [],
-    prevCapture: "",
-    inHtml
-  };
-  const snapshotPathCache = {};
-  const defRegEx = /\n *\[([^\]\n]+)\]: *([^\n]*) *(?:\n\{([^\n}]*)\})?(?=\n)/gm;
-  const footnoteDefRegEx = /\n *\[\^\d+\]: *([^\n]*)(?=\n)/gm;
-  let capture;
-  while ((capture = defRegEx.exec(md)) !== null) {
-    const def = capture[1].replace(/\s+/g, " ");
-    const target = capture[2].trim();
-    const directives = capture[3] || "";
-
-    const attrs = isNotAnInteger(def) ? { alt: def } : {};
-    if (directives) {
-      const matchClass = CLASS_R.exec(directives);
-      const matchWidth = WIDTH_R.exec(directives);
-      const matchAlt = ALT_R.exec(directives);
-      const matchID = ID_R.exec(directives);
-      if (matchClass) { attrs.class = matchClass[1]; }
-      if (matchWidth) { attrs.width = matchWidth[1]; }
-      if (matchAlt)   { attrs.alt = matchAlt[1]; }
-      if (matchID)    { attrs.id = matchID[1]; }
-    }
-    state.defs[def] = { target, attrs };
-
-    if (!isNotAnInteger(def)) {
-      snapshotPathCache[def] = buildPathDefString(def, target, directives);
-    }
-  }
-
-  // Next, get all the footnote definitions
-  // eslint-disable-next-line no-useless-assignment
-  capture = null;
-  while ((capture = footnoteDefRegEx.exec(md)) !== null) {
-    state.footnotes.push(capture[1].trim());
-  }
-
-  // Find out if there are any snapshots.
-  let snapshotStrings = [];
-  let gotSnapshot = false;
-  if (metadata) {
-    snapshotStrings = md.split("<!--SNAPSHOT-->\n");
-    if (snapshotStrings.length > 1) {
-      gotSnapshot = true;
-      md = snapshotStrings.shift();
-    }
-  }
-
-  // Find out if there are any fallbacks for fetched files
-  let fallbackStrings = [];
-  if (metadata) {
-    fallbackStrings = md.split("<!--FALLBACKS-->\n");
-    if (fallbackStrings.length > 1) {
-      md = fallbackStrings.shift();
-    } else {
-      fallbackStrings = null;
-    }
-  }
-
-  // Proceed to parse the document.
-  const ast = parse(md, state);
-  if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") {
-    ast.shift();
-  }
-  consolidate(ast);
-  populateTOC(ast);
-  if (metadata) {
-    metadata.snapshotPathCache = snapshotPathCache;
-    if (fallbackStrings) {
-      metadata.fallbacks = JSON.parse(fallbackStrings.pop().trim());
-    }
-    if (gotSnapshot) {
-      const snapshots = [];
-      for (const str of snapshotStrings) {
-        const capture = dateMessageRegEx.exec(str);
-        snapshots.push({
-          date: capture[1] ? Date.parse(capture[1].trim()) : undefined,
-          message: capture[2] ? capture[2].trim() : undefined,
-          content: capture ? str.slice(capture[0].length) : str
-        });
-      }
-      metadata.snapshots = snapshots;
-    }
-    return { type: "doc", attrs: metadata, content: ast }
-  } else {
-    return ast
-  }
-};
-
-const startSvg = _ => {
-  return {
-    tag: 'svg',
-    children: [],
-    attrs: {
-      xmlns: "http://www.w3.org/2000/svg",
-      width: 250,
-      height: 250,
-      style: "display: inline;"
-    },
-    temp: {
-      width: 250,
-      height: 250,
-      xmin: 0,
-      xmax: 5,
-      ymin: 0,
-      ymax: 5,
-      xunitlength: 20,  // px
-      yunitlength: 20,  // px
-      origin: [0, 0],   // in px (default is bottom left corner)
-      stroke: "black",
-      strokewidth: 1,
-      strokedasharray: null,
-      fill: "none",
-      fontstyle: "normal",
-      fontfamily: "sans-serif",
-      fontsize: 13.33, // px, ~10 pt
-      fontweight: "normal",
-      markerstrokewidth: 1,
-      markerstroke: "black",
-      markerfill: "yellow",
-      markersize: 4,
-      marker: "none",
-      dotradius: 4,
-      axesstroke: "black",
-      gridstroke: "grey",
-      isDim: false
-    }
-  }
-};
-
-// Helpers
-const setStrokeAndFill = (node, attrs) => {
-  node.attrs["stroke-width"] = attrs.strokewidth;
-  node.attrs.stroke = attrs.stroke;
-  node.attrs.fill = attrs.fill;
-  if (attrs.strokedasharray != null && attrs.strokedasharray !== "none") {
-    node.attrs["stroke-dasharray"] = attrs.strokedasharray;
-  }
-};
-
-const pointZeroRegEx = /\.0+$/;
-const chopZ = str => {
-  const k = str.indexOf(".");
-  if (k === -1) { return str }
-  if (pointZeroRegEx.test(str)) { return str.replace(pointZeroRegEx, "") }
-  let i;
-  for (i = str.length - 1; i > k && str.charAt(i) === "0"; i--) {
-    if (i === k) { i--; }
-  }
-  return str.slice(0, i + 1)
-};
-
-const markerDot = (center, attrs, s, f) => { // coordinates in units, radius in pixel
-  if (s == null) { s = attrs.stroke; }
-  if (f == null) { f = attrs.fill; }
-  const node = { tag: "circle", attrs: {} };
-  node.attrs.cx = center[0] * attrs.xunitlength + attrs.origin[0];
-  node.attrs.cy = attrs.height - center[1] * attrs.yunitlength - attrs.origin[1];
-  node.attrs.r = attrs.markersize;
-  node.attrs["stroke-width"] = attrs.strokewidth;
-  node.attrs.stroke = s;
-  node.attrs.fill = f;
-  return node
-};
-
-const rationals2numbers = array => {
-  const newArray = [];
-  for (let i = 0; i < array.length; i++) {
-    const element = array[i];
-    if (element.dtype) {
-      newArray[i] = rationals2numbers(element.value);
-    } else if (Rnl.isRational(element)) {
-      newArray[i] = Rnl.toNumber(element);
-    } else {
-      newArray[i] = rationals2numbers(element);
-    }
-  }
-  return newArray
-};
-
-const arrowhead = (svg, p, q) => { // draw arrowhead at q (in units)
-  const attrs = svg.temp;
-  const v = [p[0] * attrs.xunitlength + attrs.origin[0], attrs.height -
-             p[1] * attrs.yunitlength - attrs.origin[1]];
-  const w = [q[0] * attrs.xunitlength + attrs.origin[0], attrs.height -
-             q[1] * attrs.yunitlength - attrs.origin[1]];
-  let u = [w[0] - v[0], w[1] - v[1]];
-  const d = Math.sqrt(u[0] * u[0] + u[1] * u[1]);
-  if (d > 0.00000001) {
-    u = [u[0] / d, u[1] / d];
-    const z = attrs.marker === "markerdot" ? 3 : attrs.isDim ? 0 : 1;
-    const up = [-u[1], u[0]];
-    const L = d > 12 ? 12.5 : 7.8125;
-    const S = d > 12 ? 3 : 1.875;
-    const node = { tag: "path", attrs: {} };
-    node.attrs.d = "M " + (w[0] - L * u[0] - S * up[0]) + "," +
-      (w[1] - L * u[1] - S * up[1]) + " L " + (w[0] - z * u[0]) + "," + (w[1] - z * u[1]) +
-      " L " + (w[0] - L * u[0] + S * up[0]) + "," + (w[1] - L * u[1] + S * up[1]) + " z";
-    if (attrs.isDim) {
-      node.attrs.stroke = "none";
-    } else {
-      node.attrs["stroke-width"] = attrs.markerstrokewidth;
-      node.attrs.stroke = attrs.stroke;
-    }
-    node.attrs.fill = attrs.stroke;
-    svg.children.push(node);
-  }
-};
-
-const markAttribute = {
-  em:         ["font-style", "italic"],
-  strong:     ["font-weight", "bold"],
-  code:       ["font-family", "monospace"],
-  strikethru: ["text-decoration", "line-through"],
-  subscript:  ["font-size", "0.8em"],
-  superscript: ["font-size", "0.8em"]
-};
-
-const textLocal = (svg, p, str, pos) => {
-  const attrs = svg.temp;
-  let textanchor = "middle";
-  let dx = 0;
-  let dy = attrs.fontsize / 3;
-  if (pos != null) {
-    if (pos.slice(0, 5) === "above") { dy = -attrs.fontsize / 2; }
-    if (pos.slice(0, 5) === "below") { dy = 1.25 * attrs.fontsize; }
-    if (pos.slice(0, 5) === "right" || pos.slice(5, 10) === "right") {
-      textanchor = "start";
-      dx = attrs.fontsize / 2;
-    }
-    if (pos.slice(0, 4) === "left" || pos.slice(5, 9) === "left") {
-      textanchor = "end";
-      dx = -attrs.fontsize / 2;
-    }
-  }
-  const textNode = { tag: "text", children: [], attrs: {} };
-  textNode.attrs["text"] = str;
-  textNode.attrs.x = p[0] * attrs.xunitlength + attrs.origin[0] + dx;
-  textNode.attrs.y = attrs.height - p[1] * attrs.yunitlength - attrs.origin[1] + dy;
-  textNode.attrs["font-family"] = attrs.fontfamily;
-  textNode.attrs["font-size"] = attrs.fontsize;
-  textNode.attrs["text-anchor"] = textanchor;
-  // Load Markdown into an AST
-  const ast = inlineMd2ast(str);
-  // Load content of AST into <tspan> nodes.
-  if (Array.isArray(ast)) {
-    let prevNodeContainedSubscript = false;
-    for (const markNode of ast) {
-      const tspan = { tag: "tspan", text: markNode.text };
-      let currentNodeContainsSubscript = false;
-      if (markNode.marks) {
-        tspan.attrs = {};
-        for (const mark of markNode.marks) {
-          const markAttr = markAttribute[mark.type];
-          tspan.attrs[markAttr[0]] = markAttr[1];
-          if (mark.type === "subscript") { currentNodeContainsSubscript = true; }
-        }
-      }
-      if (currentNodeContainsSubscript) {
-        if (!prevNodeContainedSubscript) { tspan.attrs.dy  = "2"; }
-      } else if (prevNodeContainedSubscript) {
-        if (!markNode.marks) { tspan.attrs = {}; }
-        tspan.attrs.dy  = "-2";
-      }
-      prevNodeContainedSubscript = currentNodeContainsSubscript;
-      textNode.children.push(tspan);
-    }
-  }
-  svg.children.push(textNode);
-  return svg
-};
-
-const pointText = (point, attrs) => {
-  return (point[0] * attrs.xunitlength + attrs.origin[0]).toFixed(4) + ","
-    + (attrs.height - point[1] * attrs.yunitlength - attrs.origin[1]).toFixed(4)
-};
-
-const functions$1 = {
-  // Set attributes
-  stroke(svgOprnd, color) {
-    svgOprnd.value.temp.stroke = color.value;
-    return svgOprnd
-  },
-
-  strokewidth(svgOprnd, num) {
-    svgOprnd.value.temp.strokewidth = Rnl.toNumber(num.value);
-    return svgOprnd
-  },
-
-  strokedasharray(svgOprnd, str) {
-    svgOprnd.value.temp.strokedasharray = str.value;
-    return svgOprnd
-  },
-
-  fill(svgOprnd, color) {
-    svgOprnd.value.temp.fill = color.value;
-    return svgOprnd
-  },
-
-  fontsize(svgOprnd, size) {
-    svgOprnd.value.temp.fontsize = Rnl.toNumber(size.value);
-    return svgOprnd
-  },
-
-  fontfamily(svgOprnd, str) {
-    svgOprnd.value.temp.fontfamily = str.value; // "sansserif"|"serif"|"fixed"|"monotype"
-    return svgOprnd
-  },
-
-  marker(svgOprnd, str) {
-    svgOprnd.value.temp.marker = str.value; // "none" | "dot" | "arrow" | "arrowdot"
-    return svgOprnd
-  },
-
-  // Initialize the svg.
-
-  title(svgOprnd, strOprnd) {
-    svgOprnd.value.children.push( { tag: "title", attrs: { text: strOprnd.value } });
-    return svgOprnd
-  },
-
-  frame(svgOprnd, width = 250, height = 250, position = "inline") {
-    const svg = svgOprnd.value;
-    const attrs = svg.temp;
-    attrs.width = typeof width === "number" ? width : Rnl.toNumber(width.value);
-    svg.attrs.width = attrs.width;
-    attrs.height = typeof height === "number" ? height : Rnl.toNumber(height.value);
-    svg.attrs.height = attrs.height;
-    if (typeof position !== "string") { position = position.value; }
-    if (position !== "inline") { svg.attrs.float = position; }
-    attrs.xunitlength = attrs.width / (attrs.xmax - attrs.xmin);
-    attrs.yunitlength = attrs.height / (attrs.ymax - attrs.ymin);
-    attrs.origin = [-attrs.xmin * attrs.xunitlength, -attrs.ymin * attrs.yunitlength];
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  view(svgOprnd, xmin = 0, xmax = 5, ymin, ymax) {
-    const svg = svgOprnd.value;
-    const attrs = svg.temp;
-    attrs.xmin = typeof xmin === "number" ? xmin : Rnl.toNumber(xmin.value);
-    attrs.xmax = typeof xmax === "number" ? xmax : Rnl.toNumber(xmax.value);
-    attrs.xunitlength = attrs.width / (attrs.xmax - attrs.xmin);
-    attrs.yunitlength = attrs.xunitlength; // This may change below.
-    if (ymin == null) {
-      attrs.origin = [-attrs.xmin * attrs.xunitlength, attrs.height / 2];
-      attrs.ymin = -attrs.height / (2 * attrs.yunitlength);
-      attrs.ymax = -attrs.ymin;
-    } else {
-      attrs.ymin = Rnl.toNumber(ymin.value);
-      if (ymax != null) {
-        attrs.ymax = Rnl.toNumber(ymax.value);
-        attrs.yunitlength = attrs.height / (attrs.ymax - attrs.ymin);
-      } else {
-        attrs.ymax = attrs.height / attrs.yunitlength + attrs.ymin;
-      }
-      attrs.origin = [-attrs.xmin * attrs.xunitlength, -attrs.ymin * attrs.yunitlength];
-    }
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  // Draw things
-
-  grid(svgOprnd, gdx, gdy, isLocal) {
-    const svg = svgOprnd.value;
-    const attrs = svg.temp;
-    gdx = gdx == null ? attrs.xunitlength : Rnl.toNumber(gdx.value) * attrs.xunitlength;
-    gdy = gdy == null ? gdx : Rnl.toNumber(gdy.value) * attrs.yunitlength;
-    const pnode = { tag: "path", attrs: {} };
-    let str = "";
-    for (let x = attrs.origin[0]; x < attrs.width; x += gdx) {
-      str += " M" + x + ",0 " + x + "," + attrs.height;
-    }
-    for (let x = attrs.origin[0] - gdx; x > 0; x -= gdx) {
-      str += " M" + x + ",0 " + x + "," + attrs.height;
-    }
-    for (let y = attrs.height - attrs.origin[1]; y < attrs.height; y += gdy) {
-      str += " M0," + y + " " + attrs.width + "," + y;
-    }
-    for (let y = attrs.height - attrs.origin[1] - gdy; y > 0; y -= gdy) {
-      str += " M0," + y + " " + attrs.width + "," + y;
-    }
-    pnode.attrs.d = str;
-    pnode.attrs["stroke-width"] = 0.5;
-    pnode.attrs.stroke = attrs.gridstroke;
-    pnode.attrs.fill = attrs.fill;
-    svg.children.push(pnode);
-    if (!isLocal) {
-      return { value: svg, unit: null, dtype: dt.DRAWING }
-    }
-  },
-
-  axes(svgOprnd, dx, dy, labels, gdx, gdy) {
-    let svg = svgOprnd.value;
-    const attrs = svg.temp;
-    dx = (dx == null ? attrs.xunitlength : Rnl.toNumber(dx.value) * attrs.xunitlength);
-    dy = (dy == null ? dx : Rnl.toNumber(dy.value) * attrs.yunitlength);
-    const parentFontsize = attrs.fontsize;
-    attrs.fontsize = Math.min(dx / 2, dy / 2, 10);
-    const ticklength = attrs.fontsize / 4;
-    if (gdx != null) {
-      this.grid(svgOprnd, gdx, gdy, true);
-    }
-    const pnode = { tag: "path", attrs: {} };
-    let str = "M0," + (attrs.height - attrs.origin[1]) + " " + attrs.width + "," +
-      (attrs.height - attrs.origin[1]) + " M" + attrs.origin[0] + ",0 " +
-      attrs.origin[0] + "," + attrs.height;
-    for (let x = attrs.origin[0] + dx; x < attrs.width; x += dx) {
-      str += " M" + x + " " + (attrs.height - attrs.origin[1] + ticklength) + " " + x
-            + "," + (attrs.height - attrs.origin[1] - ticklength);
-    }
-    for (let x = attrs.origin[0] - dx; x > 0; x -= dx) {
-      str += " M" + x + "," + (attrs.height - attrs.origin[1] + ticklength) + " " + x
-            + "," + (attrs.height - attrs.origin[1] - ticklength);
-    }
-    for (let y = attrs.height - attrs.origin[1] + dy; y < attrs.height; y += dy) {
-      str += " M" + (attrs.origin[0] + ticklength) + "," + y + " " +
-                   (attrs.origin[0] - ticklength) + "," + y;
-    }
-    for (let y = attrs.height - attrs.origin[1] - dy; y > 0; y -= dy) {
-      str += " M" + (attrs.origin[0] + ticklength) + "," + y + " " +
-                   (attrs.origin[0] - ticklength) + "," + y;
-    }
-    if (labels != null) {
-      const ldx = dx / attrs.xunitlength;
-      const ldy = dy / attrs.yunitlength;
-      const lx = (attrs.xmin > 0 || attrs.xmax < 0 ? attrs.xmin : 0);
-      const ly = (attrs.ymin > 0 || attrs.ymax < 0 ? attrs.ymin : 0);
-      const lxp = (ly === 0 ? "below" : "above");
-      const lyp = (lx === 0 ? "left" : "right");
-      const ddx = Math.floor(1.1 - Math.log(ldx) / Math.log(10)) + 1;
-      const ddy = Math.floor(1.1 - Math.log(ldy) / Math.log(10)) + 1;
-      for (let x = ldx; x <= attrs.xmax; x += ldx) {
-        svg = textLocal(svg, [x, ly], chopZ(x.toFixed(ddx)), lxp);
-      }
-      for (let x = -ldx; attrs.xmin <= x; x -= ldx) {
-        svg = textLocal(svg, [x, ly], chopZ(x.toFixed(ddx)), lxp);
-      }
-      for (let y = ldy; y <= attrs.ymax; y += ldy) {
-        svg = textLocal(svg, [lx, y], chopZ(y.toFixed(ddy)), lyp);
-      }
-      for (let y = -ldy; attrs.ymin <= y; y -= ldy) {
-        svg = textLocal(svg, [lx, y], chopZ(y.toFixed(ddy)), lyp);
-      }
-    }
-    pnode.attrs.d = str;
-    pnode.attrs["stroke-width"] = 0.5;
-    pnode.attrs.stroke = attrs.axesstroke;
-    pnode.attrs.fill = attrs.fill;
-    svg.temp.fontsize = parentFontsize;
-    svg.children.push(pnode);
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  line(svgOprnd, m) { // segment connecting points p,q (coordinates in units)
-    const svg = svgOprnd.value;
-    const attrs = svg.temp;
-    const node = { tag: "path", attrs: {} };
-    const p = [Rnl.toNumber(m.value[0][0]), Rnl.toNumber(m.value[0][1])];
-    const q = [Rnl.toNumber(m.value[1][0]), Rnl.toNumber(m.value[1][1])];
-    node.attrs.d = "M" + (p[0] * attrs.xunitlength + attrs.origin[0]) + "," +
-      (attrs.height - p[1] * attrs.yunitlength - attrs.origin[1]) + " " +
-      (q[0] * attrs.xunitlength + attrs.origin[0]) + "," + (attrs.height -
-       q[1] * attrs.yunitlength - attrs.origin[1]);
-    setStrokeAndFill(node, attrs);
-    svg.children.push(node);
-    if (attrs.marker === "dot" || attrs.marker === "arrowdot") {
-      svg.children.push(markerDot(p, attrs, attrs.markerstroke, attrs.markerfill));
-      if (attrs.marker === "arrowdot") { arrowhead(svg, p, q); }
-      svg.children.push(markerDot(q, attrs, attrs.markerstroke, attrs.markerfill));
-    } else if (attrs.marker === "arrow") {
-      arrowhead(svg, p, q);
-    }
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  path(svgOprnd, args) {
-    const svg = svgOprnd.value;
-    const attrs = svg.temp;
-    const node = { tag: "path", attrs: {} };
-    // Get the "d" attribute of a path
-    let str = "";
-    if (args[0].dtype && args[0].dtype === dt.STRING) {
-      str = args[0].value;
-    } else {
-      const segs = rationals2numbers(args[0].value);
-      if (segs[0].length === 2) {
-        // A path made up of line segments
-        str = "M" + pointText(segs[0], attrs) + " L";
-        for (let i = 1; i < segs.length; i++) {
-          str += " " + pointText(segs[i], attrs);
-        }
-      } else if (segs[0].length === 3) {
-        // Some segments are circular arcs.
-        str = "M" + pointText(segs[0], attrs);
-        for (let i = 1; i < segs.length; i++) {
-          if (segs[i][2] === 0) {
-            str += " L" + pointText(segs[i], attrs);
-          } else {
-            const r = String(Math.abs(segs[i][2]) * attrs.xunitlength);
-            const sweep = Math.sign(segs[i][2]) > 0 ? 0 : 1;
-            str += ` A${r},${r} 0 0 ${sweep} ${pointText(segs[i], attrs)}`;
-          }
-        }
-      }
-    }
-    node.attrs.d = str;
-    node.attrs["stroke-width"] = attrs.strokewidth;
-    if (attrs.strokedasharray != null) {
-      node.attrs["stroke-dasharray"] = attrs.strokedasharray;
-    }
-    node.attrs.stroke = attrs.stroke;
-    node.attrs.fill = attrs.fill;
-    if (attrs.marker === "dot") {
-      for (let i = 0; i < args.length; i++) {
-        const el = args[i];
-        if (typeof el[0] === "number") {
-          svg.children.push(markerDot(el, attrs, attrs.markerstroke, attrs.markerfill));
-        } else {
-          for (const row of el) {
-            svg.children.push(markerDot(row, attrs, attrs.markerstroke, attrs.markerfill));
-          }
-        }
-      }
-    } else if (attrs.marker === "arrow" || attrs.marker === "arrowdot") {
-      const segs = rationals2numbers(args[0].value);
-      if (typeof segs[0] !== "number") {
-        const end = segs[segs.length - 1];
-        arrowhead(svg, segs[segs.length - 2], end);
-        if (attrs.marker === "arrowdot") {
-          svg.children.push(markerDot(end, attrs, attrs.markerstroke, attrs.markerfill));
-        }
-      } else if (typeof segs[0] === "number") {
-        const prevEl = args[args.length - 2];
-        const end = segs;
-        let start;
-        if (typeof prevEl[0] === "number") {
-          start = prevEl;
-        } else {
-          start = prevEl[prevEl.length - 1];
-        }
-        arrowhead(svg, start, end);
-        if (attrs.marker === "arrowdot") {
-          svg.children.push(markerDot(end, attrs, attrs.markerstroke, attrs.markerfill));
-        }
-      }
-    }
-    svg.children.push(node);
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  rect(svgOprnd, m, r) { // opposite corners in units, rounded by radius
-    const svg = svgOprnd.value;
-    const attrs = svg.temp;
-    const node = { tag: "rect", attrs: {} };
-    const p = [Rnl.toNumber(m.value[0][0]), Rnl.toNumber(m.value[0][1])];
-    const q = [Rnl.toNumber(m.value[1][0]), Rnl.toNumber(m.value[1][1])];
-    node.attrs.x = Math.min(p[0], q[0]) * attrs.xunitlength + attrs.origin[0];
-    node.attrs.y = attrs.height - Math.max(p[1], q[1]) * attrs.yunitlength - attrs.origin[1];
-    node.attrs.width = Math.abs((q[0] - p[0]) * attrs.xunitlength);
-    node.attrs.height = Math.abs((q[1] - p[1]) * attrs.yunitlength);
-    if (r != null) {
-      const rNum = Rnl.toNumber(r.value) * attrs.xunitlength;
-      node.attrs.rx = rNum;
-      node.attrs.ry = rNum;
-    }
-    setStrokeAndFill(node, attrs);
-    svg.children.push(node);
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  circle(svgOprnd, center, radius) { // coordinates in units
-    const svg = svgOprnd.value;
-    const attrs = svg.temp;
-    const node = { tag: "circle", attrs: {} };
-    node.attrs.cx = Rnl.toNumber(center.value[0]) * attrs.xunitlength + attrs.origin[0];
-    node.attrs.cy = attrs.height - Rnl.toNumber(center.value[1]) * attrs.yunitlength
-                  - attrs.origin[1];
-    node.attrs.r = Rnl.toNumber(radius.value) * attrs.xunitlength;
-    setStrokeAndFill(node, attrs);
-    svg.children.push(node);
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  ellipse(svgOprnd, center, rx, ry) { // coordinates in units
-    const svg = svgOprnd.value;
-    const attrs = svg.temp;
-    const node = { tag: "ellipse", attrs: {} };
-    node.attrs.cx = Rnl.toNumber(center.value[0]) * attrs.xunitlength + attrs.origin[0];
-    node.attrs.cy = attrs.height - Rnl.toNumber(center.value[1]) * attrs.yunitlength
-                    - attrs.origin[1];
-    node.attrs.rx = Rnl.toNumber(rx.value) * attrs.xunitlength;
-    node.attrs.ry = Rnl.toNumber(ry.value) * attrs.yunitlength;
-    setStrokeAndFill(node, attrs);
-    svg.children.push(node);
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  arc(svgOprnd, m, radius) { // coordinates in units
-    const svg = svgOprnd.value;
-    const attrs = svg.temp;
-    const node = { tag: "path", attrs: {} };
-    const start = [Rnl.toNumber(m.value[0][0]), Rnl.toNumber(m.value[0][1])];
-    const end = [Rnl.toNumber(m.value[1][0]), Rnl.toNumber(m.value[1][1])];
-    if (radius == null) {
-      const v = [end[0] - start[0], end[1] - start[1]];
-      radius = (Math.sqrt(v[0] * v[0] + v[1] * v[1])) * attrs.yunitlength;
-    } else if (isVector(radius)) {
-      radius = radius.value.map(e => Rnl.toNumber(e) * attrs.yunitlength);
-    } else {
-      radius = Rnl.toNumber(radius.value) * attrs.yunitlength;
-    }
-    let str = "M" + (start[0] * attrs.xunitlength + attrs.origin[0]) + "," +
-      (attrs.height - start[1] * attrs.yunitlength - attrs.origin[1]) + " A";
-    str += Array.isArray(radius) ? radius[0] + "," + radius[1] : radius + "," + radius;
-    str += " 0 0,0 " + (end[0] * attrs.xunitlength + attrs.origin[0]) + "," +
-      (attrs.height - end[1] * attrs.yunitlength - attrs.origin[1]);
-    node.attrs.d = str;
-    setStrokeAndFill(node, attrs);
-    // eslint-disable-next-line no-useless-assignment
-    let v = 0;
-    if (attrs.marker === "arrow" || attrs.marker === "arrowdot") {
-      const u = [(end[1] - start[1]) / 4, (start[0] - end[0]) / 4];
-      v = [(end[0] - start[0]) / 2, (end[1] - start[1]) / 2];
-      v = [start[0] + v[0] + u[0], start[1] + v[1] + u[1]];
-    } else {
-      v = [start[0], start[1]];
-    }
-    if (attrs.marker === "dot" || attrs.marker === "arrowdot") {
-      svg.children.push(markerDot(start, attrs, attrs.markerstroke, attrs.markerfill));
-      if (attrs.marker === "arrowdot") { arrowhead(svg,  v, end); }
-      svg.children.push(markerDot(end, attrs, attrs.markerstroke, attrs.markerfill));
-    } else if (attrs.marker === "arrow") {
-      arrowhead(svg, v, end);
-    }
-    svg.children.push(node);
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  text(svgOprnd, p, str, pos) {
-    const svg = textLocal(
-      svgOprnd.value,
-      [Rnl.toNumber(p.value[0]), Rnl.toNumber(p.value[1])],
-      str.value,
-      pos == null ? null : pos.value
-      );
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  dot(svgOprnd, center, typ, label, pos) {
-    let svg = svgOprnd.value;
-    const attrs = svg.temp;
-    let node;
-    const cx = Rnl.toNumber(center.value[0]) * attrs.xunitlength + attrs.origin[0];
-    const cy = attrs.height - Rnl.toNumber(center.value[1]) * attrs.yunitlength
-             - attrs.origin[1];
-    if (typ.value === "+" || typ.value === "-" || typ.value === "|") {
-      node = { tag: "path", attrs: {} };
-      if (typ.value === "+") {
-        node.attrs.d = " M " + (cx - attrs.ticklength) + "," + cy
-                    + " L " + ( cx + attrs.ticklength) + "," + cy
-                    + " M " + cx + "," + (cy - attrs.ticklength) + " L " + cx
-                    + "," + (cy + attrs.ticklength);
-        node.attrs["stroke-width"] = 0.5;
-        node.attrs.stroke = attrs.axesstroke;
-      } else {
-        if (typ.value === "-") {
-          node.attrs.d = " M " + (cx - attrs.ticklength) + "," + cy
-                       + " L " + (cx + attrs.ticklength) + "," + cy;
-        } else {
-          node.attrs.d = " M " + cx + "," + (cy - attrs.ticklength)
-                       + " L " + cx + "," + (cy + attrs.ticklength);
-        }
-        node.attrs["stroke-width"] = attrs.strokewidth;
-        node.attrs["stroke"] = attrs.stroke;
-      }
-    } else {
-      node = { tag: "circle", attrs: {} };
-      node.attrs.cx = cx;
-      node.attrs.cy = cy;
-      node.attrs.r = attrs.dotradius;
-      node.attrs["stroke-width"] = attrs.strokewidth;
-      node.attrs.stroke = attrs.stroke;
-      node.attrs.fill =  (typ.value === "open" ? "white" : attrs.stroke);
-    }
-    svg.children.push(node);
-    if (label != null) {
-      svg = textLocal(
-        svg,
-        [Rnl.toNumber(center.value[0]), Rnl.toNumber(center.value[1])],
-        label.value,
-        (pos == null ? "below" : pos.value)
-        );
-    }
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  leader(svgOprnd, plistOprnd, label) {
-    // A 'leader' is a note with an arrow (leader line) pointing to something.
-    const marker = svgOprnd.value.temp.marker;
-    svgOprnd.value.temp.marker = "arrow";
-    svgOprnd.value.temp.isDim = true;
-    // Draw the arrow
-    svgOprnd = this.path(svgOprnd, [plistOprnd]);
-    // Get the text position
-    const p = rationals2numbers(plistOprnd.value[0]);
-    const q = rationals2numbers(plistOprnd.value[plistOprnd.value.length - 1]);
-    // eslint-disable-next-line no-useless-assignment
-    let pos = "right";
-    if (Math.abs(p[0] - q[0]) >= Math.abs(p[1] - q[1])) {
-      pos = p[0] >= q[0] ? "right" : "left";
-    } else {
-      pos = p[1] < q[1] ? "below" : "above";
-    }
-    // Write the text
-    const svg = textLocal(svgOprnd.value, p, label.value, pos);
-    svg.temp.marker = marker;
-    svg.temp.isDim = false;
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  dimension(svgOprnd, plistOprnd, label) {
-    const p = clone(plistOprnd.value);
-    const q = p.pop();
-    const origstrokewidth = svgOprnd.value.temp.strokewidth;
-    svgOprnd.value.temp.strokewidth = 0.5;
-    svgOprnd.value.temp.isDim = true; // set small arrowhead
-    let six = Rnl.fromNumber(6 / svgOprnd.value.temp.xunitlength);
-    const pEnd = p[p.length - 1];
-    let svg;
-    // Is the label y-coord between the y-coords of the end points?
-    if ((Rnl.lessThan(p[0][1], q[1]) && Rnl.lessThan(q[1], pEnd[1])) ||
-        (Rnl.lessThan(pEnd[1], q[1]) && Rnl.lessThan(q[1], p[0][1]))) {
-      if (!Rnl.lessThan(pEnd[0], q[0])) { six = Rnl.negate(six); }
-      p.forEach(e => {
-        svgOprnd = this.line(svgOprnd, { value: [
-          [Rnl.add(e[0], six), e[1]],
-          [Rnl.add(q[0], six), e[1]]
-        ] });
-      });
-      svgOprnd.value.temp.marker = "arrow";
-      const pos = Rnl.lessThanOrEqualTo(pEnd[0], q[0]) ? "right" : "left";
-      for (let i = 0; i < p.length - 1; i++) {
-        svgOprnd = this.line(svgOprnd, { value : [[q[0], p[i][1]], [q[0], p[i + 1][1]]],
-          unit: null, dtype: dt.MATRIX });
-        svgOprnd = this.line(svgOprnd, { value : [[q[0], p[i + 1][1]], [q[0], p[i][1]]],
-          unit: null, dtype: dt.MATRIX });
-        const p3 = [
-          Rnl.toNumber(q[0]),
-          (Rnl.toNumber(p[i][1]) + Rnl.toNumber(p[i + 1][1])) / 2
-        ];
-        const str = p.length === 2 ? label.value : label.value[i];
-        svg = textLocal(svgOprnd.value, p3, str, pos);
-      }
-    } else {
-      if (!Rnl.lessThan(pEnd[1], q[1])) { six = Rnl.negate(six); }
-      p.forEach(e => {
-        svgOprnd = this.line(svgOprnd, { value: [
-          [e[0], Rnl.add(e[1], six)],
-          [e[0], Rnl.add(q[1], six)]
-        ] });
-      });
-      svgOprnd.value.temp.marker = "arrow";
-      const pos = Rnl.lessThanOrEqualTo(pEnd[1], q[1]) ? "above" : "below";
-      for (let i = 0; i < p.length - 1; i++) {
-        svgOprnd = this.line(svgOprnd, { value: [ [p[i][0], q[1]], [ p[i + 1][0], q[1]] ],
-          unit: null, dtype: dt.MATRIX });
-        svgOprnd = this.line(svgOprnd, { value: [ [ p[i + 1][0], q[1]], [p[i][0], q[1]] ],
-          unit: null, dtype: dt.MATRIX });
-        const p3 = [
-          (Rnl.toNumber(p[i][0]) + Rnl.toNumber(p[i + 1][0])) / 2,
-          Rnl.toNumber(q[1])
-        ];
-        const str = p.length === 2 ? label.value : label.value[i];
-        svg = textLocal(svgOprnd.value, p3, str, pos);
-      }
-    }
-    svg.temp.strokewidth = origstrokewidth;
-    svg.temp.marker = "none";
-    svg.temp.isDim = false;
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  }
-
-};
-
-const draw = Object.freeze({
-  startSvg,
-  functions: functions$1
-});
 
 // Some helper functions and objects.
 
@@ -16090,7 +16905,11 @@ const evalRpn = (rpn, vars, formats, unitAware, lib) => {
         }
 
         case "startSvg":
-          stack.push({ value: draw.startSvg(), unit: null, dtype: dt.DRAWING });
+          stack.push({
+            value: draw.startSvg(formats.decimalFormat, formats.format),
+            unit: null,
+            dtype: dt.DRAWING
+          });
           break
 
         case "beamDiagram": {
@@ -16971,7 +17790,11 @@ const evalCustomFunction = (udf, args, formats, isUnitAware, lib) => {
     }
   }
   if (udf.dtype === dt.DRAWING) {
-    vars["svg"] = { value: draw.startSvg(), unit: null, dtype: dt.DRAWING };
+    vars["svg"] = {
+      value: draw.startSvg(formats.decimalFormat, formats.format),
+      unit: null,
+      dtype: dt.DRAWING
+    };
   }
 
   // Execute the function statements.
@@ -17375,7 +18198,10 @@ const evaluateDrawing = (
     const argName = udf.parameters[i].name;
     args.push(evalRpn("¿" + argName, vars, formats, false, {}));
   }
-  const funcResult = evalCustomFunction(udf, args, formats, false, {});
+  // Dimension labels use the format that is active at this point in the document,
+  // unless the drawing contains a format statement of its own.
+  const drawFormats = vars.format ? { ...formats, format: vars.format.value } : formats;
+  const funcResult = evalCustomFunction(udf, args, drawFormats, false, {});
   if (funcResult.dtype === dt.ERROR) {
     stmt.error = true;
     stmt.tex = "\\textcolor{firebrick}{\\text{" + funcResult.value + "}}";
@@ -17383,6 +18209,7 @@ const evaluateDrawing = (
     stmt.dtype = dt.ERROR;
   } else {
     stmt.resultdisplay = funcResult.value;
+    draw.fitToContent(stmt.resultdisplay);
     delete stmt.resultdisplay.temp;
   }
   return stmt
@@ -17591,7 +18418,17 @@ const valueFromLiteral = (str, name, formats) => {
 };
 
 const keywordRegEx = /^(if|elseif|else|return|throw|while|for|break|print|end)(\u2002|\b)/;
-const drawCommandRegEx = /^(title|frame|view|axes|grid|stroke|strokewidth|strokedasharray|fill|fontsize|fontweight|fontstyle|fontfamily|marker|line|path|plot|curve|rect|circle|ellipse|arc|text|dot|leader|dimension)\b/;
+const drawCommands = [
+  // Header statements
+  "title", "caption", "format", "fraction", "frame", "view", "scene", "axes", "grid",
+  // Style statements
+  "stroke", "strokewidth", "linetype", "fill", "pattern", "fontsize", "fontfamily",
+  "fontcolor", "marker",
+  // Elements
+  "line", "path", "plot", "rect", "circle", "ellipse", "polygon", "arc", "freehand",
+  "image", "text", "dot", "arrow", "dimension"
+];
+const drawCommandRegEx = new RegExp(`^(${drawCommands.join("|")})\\b`);
 const leadingSpaceRegEx$1 = /^[\t ]+/;
 const oneLinerRegEx = /^( *)if ([^\n`]+) +(return|throw|print|break)\b([^\n]+)?(?: end)? *\n/gm;
 
@@ -17675,6 +18512,33 @@ const handleTSV = (expression, lines, startLineNum) => {
   }
 };
 
+// Does `line` end inside a string? A string is written between double quotation
+// marks, with "" for a literal ". A # outside of a string starts a comment.
+const endsInsideString = line => {
+  let inString = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line.charAt(i);
+    if (inString) {
+      if (ch === '"') {
+        if (line.charAt(i + 1) === '"') {
+          i += 1;
+        } else {
+          inString = false;
+        }
+      }
+    } else if (ch === '"') {
+      inString = true;
+    } else if (ch === "#") {
+      return false
+    }
+  }
+  return inString
+};
+
+// Within a string in a drawing, a line break is written as ␤ (U+2424), because
+// the lexer ends a string at a newline. textLocal in draw.js turns it back into a newline.
+const lineBreakInString = "␤";
+
 const scanFunction = (lines, formats, startLineNum) => {
   const line1 = stripComment(lines[startLineNum]);
   let isDraw = line1.charAt(0) === "d";
@@ -17721,7 +18585,18 @@ const scanFunction = (lines, formats, startLineNum) => {
   let j = startLineNum;
   for (let i = startLineNum + 1; i < lines.length; i++) {
     j += 1;
-    let line = stripComment(lines[i]);
+    let rawLine = lines[i];
+    if (isDraw) {
+      // A string in a drawing, e.g. multi-line text, may span several lines.
+      // Join them, raw, so that leading spaces and # characters inside the string
+      // are kept.
+      while (endsInsideString(rawLine) && i < lines.length - 1) {
+        i += 1;
+        j += 1;
+        rawLine += lineBreakInString + lines[i];
+      }
+    }
+    let line = stripComment(rawLine);
     if (line.length === 0) { continue }
 
     if (prevLineEndedInContinuation) {
@@ -17745,8 +18620,26 @@ const scanFunction = (lines, formats, startLineNum) => {
       continue
     }
 
+    if (isDraw && line === "group") {
+      // A group…end block exists only for Sketch, which uses it to select a
+      // set of SVG elements with one click. It has no effect on evaluation,
+      // so neither "group" nor its matching "end" is written to the statements.
+      stackOfCtrls.push({ type: "group" });
+      prevLineEndedInContinuation = false;
+      prevLine = "";
+      continue
+    }
+
     let isFromOneLiner = false;
     const keyword = keywordRegEx.exec(line);
+    if (keyword && keyword[1] === "end" && stackOfCtrls.length > 0 &&
+        stackOfCtrls[stackOfCtrls.length - 1].type === "group") {
+      // This "end" closes a group. Omit it from the statements.
+      stackOfCtrls.pop();
+      prevLineEndedInContinuation = false;
+      prevLine = "";
+      continue
+    }
     if (keyword) {
       name = keyword[1];
       if (keyword[2]) { isFromOneLiner = true; }
@@ -18356,7 +19249,11 @@ const dataStr = str => {
 const writeSVG = dwg => {
   let svg = '<svg xmlns="http://www.w3.org/2000/svg"';
   Object.keys(dwg.attrs).forEach(key => {
-    svg += ` ${key}='${dwg.attrs[key]}'`;
+    // xmlns is written above. float is not an SVG attribute; the calculation's
+    // span carries it as CSS.
+    if (key !== "xmlns" && key !== "float") {
+      svg += ` ${key}='${dwg.attrs[key]}'`;
+    }
   });
   svg += ">\n";
   dwg.children.forEach(el => {
@@ -18498,7 +19395,8 @@ const nodes$1 = {
   calculation(node) {
     if (node.attrs.dtype && node.attrs.dtype === dt.DRAWING) {
       const svg = writeSVG(node.attrs.resultdisplay);
-      const style = svg.indexOf('float="right"' > -1) ? " style='float: right;'" : "";
+      const float = node.attrs.resultdisplay.attrs.float;
+      const style = float === "left" || float === "right" ? ` style='float: ${float};'` : "";
       return `<span class='hurmet-calc' data-entry=${dataStr(node.attrs.entry)}${style}>` +
         `${svg}</span>`
     } else if (node.attrs.dtype && node.attrs.dtype === dt.MODULE &&
@@ -20234,8 +21132,10 @@ const proceedAfterFetch = (
           ? compile(entry, formats)
           : clone(node.attrs);
         attrs.displayMode = node.attrs.displayMode;
+        // A drawing's dimension labels may use the document's format, so a change
+        // in format must redraw drawings, too.
         const mustRedraw = attrs.dtype && attrs.dtype === dt.DRAWING &&
-          (attrs.rpn || (attrs.value.parameters.length > 0 || isCalcAll));
+          (attrs.rpn || (attrs.value.parameters.length > 0 || isCalcAll || isFormat));
         if (mustCalc(attrs, hurmetVars, changedVars, isCalcAll, isFormat)) {
           try {
             if (attrs.rpn || mustRedraw) {

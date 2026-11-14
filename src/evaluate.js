@@ -2085,6 +2085,7 @@ export const evaluateDrawing = (
     stmt.dtype = dt.ERROR
   } else {
     stmt.resultdisplay = funcResult.value
+    draw.fitToContent(stmt.resultdisplay)
     delete stmt.resultdisplay.temp
   }
   return stmt
