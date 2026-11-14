@@ -4,6 +4,7 @@ import {findWrapping, liftTarget, canSplit, ReplaceAroundStep} from "prosemirror
 import { renderToC, tocLevels } from "./paginate"
 import { dt } from "./constants"
 import { renderSVG } from "./renderSVG"
+import { renderSketch } from "./renderSketch"
 import temml from "./temml.js"
 
 // Helpers for creating a schema that supports tables.
@@ -235,6 +236,37 @@ export const nodes = {
       }
     }}],
     toDOM(node) { return ["img", node.attrs] }
+  },
+
+  // A sketch made in the Sketch dialog (src/sketch/). Edit it via SketchView in nodeviews.js.
+  sketch: {
+    atom: true,
+    inline: true,
+    group: "inline",
+    draggable: true,
+    attrs: {
+      source: { default: "" }, // The Sketch source code. Saved.
+      svg: { default: null }   // Its SVG tree, from renderSketch. Run-time only.
+    },
+    parseDOM: [{tag: "span.hurmet-sketch", getAttrs(dom) {
+      return { source: dom.getAttribute("data-source") || "" }
+    }}],
+    toDOM(node) {
+      const dom = document.createElement("span")
+      dom.className = "hurmet-sketch"
+      dom.dataset.source = node.attrs.source
+      // A pasted sketch arrives with only its source, so draw it here.
+      const { svg, error } = node.attrs.svg
+        ? { svg: node.attrs.svg, error: null }
+        : renderSketch(node.attrs.source)
+      if (svg) {
+        if (svg.attrs.float) { dom.style.float = svg.attrs.float }
+        dom.appendChild(renderSVG(svg))
+      } else {
+        dom.textContent = error ? "Sketch error: " + error : "Sketch"
+      }
+      return dom
+    }
   },
 
   // :: NodeSpec A block image (`<img>`) node, for inclusion in a <figure>

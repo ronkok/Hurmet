@@ -22,6 +22,8 @@ import { isInTable, addColumnBefore, deleteColumn,
   TableMap } from "prosemirror-tables"
 
 import hurmet from "./hurmet"
+import { openSketch } from "./sketch/sketch.js"
+import { sketchAttrs } from "./renderSketch"
 import { draftMode } from "./draftMode"
 import { hurmetMarkdownSerializer } from "./to_markdown"
 import { readFile, handleContents, revertToSnapshotByPos } from "./openfile"
@@ -82,6 +84,11 @@ const hurmetIcons = {
     width: 16,
     height: 16,
     path: "M14.998 2c0.001 0.001 0.001 0.001 0.002 0.002v11.996c-0.001 0.001-0.001 0.001-0.002 0.002h-13.996c-0.001-0.001-0.001-0.001-0.002-0.002v-11.996c0.001-0.001 0.001-0.001 0.002-0.002h13.996zM15 1h-14c-0.55 0-1 0.45-1 1v12c0 0.55 0.45 1 1 1h14c0.55 0 1-0.45 1-1v-12c0-0.55-0.45-1-1-1v0z M13 4.5c0 0.828-0.672 1.5-1.5 1.5s-1.5-0.672-1.5-1.5 0.672-1.5 1.5-1.5 1.5 0.672 1.5 1.5z M14 13h-12v-2l3.5-6 4 5h1l3.5-3z"
+  },
+  pencil: {
+    width: 16,
+    height: 16,
+    path: "M13.5 0c1.381 0 2.5 1.119 2.5 2.5 0 0.563-0.186 1.082-0.5 1.5l-1 1-3.5-3.5 1-1c0.418-0.314 0.937-0.5 1.5-0.5zM1 11.5l-1 4.5 4.5-1 9.25-9.25-3.5-3.5-9.25 9.25zM11.181 5.681l-7 7-0.862-0.862 7-7 0.862 0.862z"
   },
   comment: {
     width: 1024,
@@ -902,6 +909,23 @@ const imagePromptOptions = (
       view.focus()
     }
   }
+}
+
+// Open the Sketch dialog on a new sketch. On Close, insert it, unless it is empty.
+function insertSketch(nodeType) {
+  return new MenuItem({
+    title: "Open the sketch UI",
+    icon: hurmetIcons.pencil,
+    enable(state) { return canInsert(state, nodeType) },
+    run(state, _, view) {
+      openSketch("", source => {
+        if (!source) { return } // Cancel, or an empty sketch
+        const node = nodeType.create(sketchAttrs(source, view.state.doc))
+        view.dispatch(view.state.tr.replaceSelectionWith(node))
+        view.focus()
+      })
+    }
+  })
 }
 
 function insertLinkToImage(nodeType) {
@@ -1857,6 +1881,7 @@ export function buildMenuItems(schema) {
 
   if ((type = schema.nodes.image)) r.imageUpload = uploadImage(type)
   if ((type = schema.nodes.image)) r.imageLink = insertLinkToImage(type)
+  if ((type = schema.nodes.sketch)) r.insertSketch = insertSketch(type)
   if ((type = schema.nodes.footnote)) r.footnote = footnote(type)
   if ((type = schema.nodes.toc)) r.toc = insertToC(type)
   r.macroButton = macroButton()
@@ -2173,6 +2198,7 @@ export function buildMenuItems(schema) {
     r.pageBreak,
     r.imageUpload,
     r.imageLink,
+    r.insertSketch,
     r.footnote,
     r.toc,
     r.toggleComment

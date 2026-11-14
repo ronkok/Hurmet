@@ -1,12 +1,14 @@
 import { schema } from "./schema"
 import { openMathPrompt } from "./mathprompt"
-import { EditorState } from "prosemirror-state"
+import { EditorState, TextSelection } from "prosemirror-state"
 import { EditorView } from "prosemirror-view"
 import { toggleMark } from "prosemirror-commands"
 import { keymap } from "prosemirror-keymap"
 import { undo, redo } from "prosemirror-history"
 import { StepMap } from "prosemirror-transform"
 import hurmet from "./hurmet"
+import { openSketch } from "./sketch/sketch.js"
+import { sketchAttrs } from "./renderSketch"
 
 export class CalcView {
   constructor(node, view) {
@@ -79,6 +81,47 @@ export class TexView {
     this.dom.classList.remove("ProseMirror-selectednode")
   }
   stopEvent() { return true }
+}
+
+export class SketchView {
+  // A sketch is a ProseMirror atom. Selecting it opens the Sketch dialog on its source.
+  // Close in the dialog writes the new source back into the node.
+  // An emptied sketch is deleted. Cancel leaves the node as it was.
+  // Either way, the cursor goes after the sketch. If the sketch stayed selected,
+  // a click on it would not select it again, so it would not reopen the dialog.
+  constructor(node, view, getPos) {
+    this.node = node
+    this.outerView = view
+    this.getPos = getPos
+    this.dom = schema.nodes.sketch.spec.toDOM(node)
+  }
+
+  selectNode() {
+    this.dom.classList.add("ProseMirror-selectednode")
+    openSketch(this.node.attrs.source, source => {
+      const view = this.outerView
+      const pos = this.getPos()
+      if (pos == null) { return }
+      const tr = view.state.tr
+      if (source === "") {
+        tr.delete(pos, pos + this.node.nodeSize)
+      } else {
+        if (source !== null) {
+          tr.setNodeMarkup(pos, null, sketchAttrs(source, view.state.doc))
+        }
+        tr.setSelection(TextSelection.create(tr.doc, pos + this.node.nodeSize))
+      }
+      view.dispatch(tr)
+      view.focus()
+    })
+  }
+
+  deselectNode() {
+    this.dom.classList.remove("ProseMirror-selectednode")
+  }
+  // Let ProseMirror handle a mousedown, so that a click selects the sketch.
+  // The browser won't select an atom that holds only an SVG.
+  stopEvent(event) { return event.type !== "mousedown" }
 }
 
 export class CellView {

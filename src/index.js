@@ -17,7 +17,7 @@ import { dt } from "./constants"
 import { buildMenuItems } from "./menu"
 import { buildKeymap } from "./keymap"
 import { buildInputRules } from "./inputrules"
-import { CalcView, TexView, FootnoteView } from "./nodeviews"
+import { CalcView, TexView, FootnoteView, SketchView } from "./nodeviews"
 import { DataFrame } from "./dataframe"
 import hurmet from "./hurmet"
 import { formatFloat as round } from "./format.js"
@@ -77,7 +77,8 @@ window.view = new view.EditorView(document.querySelector("#editor"), {
   nodeViews: {
     calculation(node, view) { return new CalcView(node, view) },
     tex(node, view) { return new TexView(node, view) },
-    footnote(node, view, getPos) { return new FootnoteView(node, view, getPos) }
+    footnote(node, view, getPos) { return new FootnoteView(node, view, getPos) },
+    sketch(node, view, getPos) { return new SketchView(node, view, getPos) }
   },
   clipboardTextSerializer: (content, view) => {
     // If the selection consists of a single calc with a numeric result, return the result.

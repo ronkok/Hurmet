@@ -1943,7 +1943,8 @@ const spreadsheetSum = (sheet, index, unitAware) => {
 
 const conditionResult = (stmt, oprnd, unitAware) => {
   let result = Object.create(null)
-  result.value = oprnd.dtype === dt.DATAFRAME
+  // A data frame is copied on write. A drawing is built in place (see fromAssignment).
+  result.value = oprnd.dtype === dt.DATAFRAME || oprnd.dtype === dt.DRAWING
     ? oprnd.value
     : clone(oprnd.value)
   result.unit = clone(oprnd.unit)

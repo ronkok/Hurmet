@@ -101,6 +101,12 @@ export const fromAssignment = (cellAttrs, unitAware) => {
   } else if (cellAttrs.dtype === dt.SPREADSHEET) {
     return cellAttrs
 
+  } else if (cellAttrs.dtype === dt.DRAWING) {
+    // Pass a drawing by reference. Each statement in a draw() function compiles to
+    // svg = statement(svg, …), and the draw.js methods add to svg in place.
+    // A copy here would copy the whole drawing at every statement.
+    oprnd.value = cellAttrs.value
+
   } else {
     // For all other data types, we employ copy-on-read. So we return a deep copy from here.
     oprnd.value = clone(cellAttrs.value)

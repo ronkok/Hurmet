@@ -4,56 +4,16 @@ import { isVector } from "./matrix"
 import { Rnl } from "./rational"
 import { inlineMd2ast } from "./md2ast"
 import { errorOprnd } from "./error"
+import {
+  unitScaleFactors, dashMap, linecapMap, fillPatternNames, arrowheadNames, arrowdotNames,
+  markerFamily, sanitizeForId, roundingSpecRegEx, inchFractions, dotLabelPositionRegEx,
+  markAttribute
+} from "./sketch/shared.js"
+import { resolveUnit } from "./sketch/unitAliases.js"
+import { simplifyR } from "./sketch/arcStep.js"
 
-// px per model unit, before the scene's scale is applied. As in Sketch's utils.js.
-const unitScaleFactors = Object.freeze({
-  px: 1,
-  in: 96,
-  ft: 1152,
-  "ft-in": 96, // Model units are inches. Dimension labels are written in feet & inches.
-  mile: 609600,
-  pt: 96 / 72,
-  mm: 96 / 25.4,
-  cm: 960 / 25.4,
-  m: 96000 / 25.4,
-  km: 96000000 / 25.4
-})
-
-// Other spellings of the unit names above, as in Sketch's unitAliases.js.
-const unitAliases = Object.freeze({
-  inch: "in", "″": "in",
-  foot: "ft", feet: "ft", lf: "ft", "′": "ft",
-  mi: "mile",
-  meter: "m", metre: "m",
-  millimeter: "mm", millimetre: "mm",
-  centimeter: "cm", centimetre: "cm",
-  kilometer: "km", kilometre: "km",
-  point: "pt", "Adobe point": "pt"
-})
-
-// Line types, as in Sketch's elementObject.js. Dash lengths are in px.
-const dashMap = Object.freeze({
-  solid: null,
-  dashed: "12 6",
-  dotted: "0 8",
-  centerline: "12 6 3 6",
-  border: "12 6 3 6 3 6"
-})
-const linecapMap = Object.freeze({ dotted: "round" })
-
-// Fill patterns, as in Sketch's elementObject.js. "solid" means no pattern.
-const fillPatternNames = new Set([
-  "solid", "diagonal", "crosshatch", "grid", "dots", "wood", "sand", "gravel", "earth",
-  "concrete"
-])
-
-const roundingSpecRegEx = /^[frh][1-6]$/
-const inchFractions = new Set([8, 16, 32, 64])
-
-// A pattern's id includes its color, as in Sketch's dwg.js. A <pattern> def
-// can't take its color from the element that refers to it, so each
-// combination of pattern and color needs a def of its own.
-const sanitizeForId = str => String(str).replace(/[^a-zA-Z0-9]/g, "_")
+// Sketch (src/sketch/) and draw() read the same statements. Their shared definitions
+// live in Sketch's shared.js, unitAliases.js, and arcStep.js, which import nothing.
 
 // decimalFormat and roundingSpec come from the parent document. A format statement
 // in the drawing overrides roundingSpec.
@@ -187,16 +147,6 @@ const numberRows = oprnd => {
   return value.map(row => row.map(e => Rnl.toNumber(e)))
 }
 
-// A step's r in its simplest form, as in Sketch's arcStep.js simplifyR(). An elliptical
-// r with a zero radius is a straight step, and one with equal radii is a circular arc.
-const simplifyR = r => {
-  if (!Array.isArray(r)) { return r || 0 }
-  const [srx, ry, angle = 0] = r
-  if (srx === 0 || ry === 0) { return 0 }
-  if (Math.abs(srx) === Math.abs(ry)) { return srx }
-  return [srx, ry, angle]
-}
-
 // The r of a path row written as [x, y], [x, y, r], or [x, y, ±rx, ry, angle].
 // As in Sketch's elementObject.js stepR().
 const stepR = row => row.length === 5
@@ -235,13 +185,8 @@ const catmullRomToBezier = pts => {
 // everywhere. Each marker is filled with the stroke color.
 
 // The marker statement accepts Sketch's marker names. Every arrowhead size is "arrow",
-// every arrowdot size is "arrowdot". As in Sketch's elementObject.js, markerFamily.
-const markerFamilies = Object.freeze({
-  none: "none", dot: "dot",
-  arrow: "arrow", thinarrow: "arrow", thickarrow: "arrow", thickerarrow: "arrow",
-  arrowdot: "arrowdot", thinarrowdot: "arrowdot", thickarrowdot: "arrowdot",
-  thickerarrowdot: "arrowdot"
-})
+// every arrowdot size is "arrowdot" (markerFamily in shared.js).
+const markerNames = new Set(["none", "dot", ...arrowheadNames, ...arrowdotNames])
 
 // Arrowhead [length, width], in stroke widths. The size suits the stroke width,
 // as in Sketch's arrowheadFor() and its marker defs in index.html.
@@ -333,20 +278,10 @@ const endDirection = (p, q, r) => {
   return [dx * cos - dy * sin, dx * sin + dy * cos]
 }
 
-const markAttribute = {
-  em:          ["font-style", "italic"],
-  strong:      ["font-weight", "bold"],
-  code:        ["font-family", "monospace"],
-  strikethru:  ["text-decoration", "line-through"],
-  subscript:   ["font-size", "0.8em"],
-  superscript: ["font-size", "0.8em"]
-}
 
 // A text position, as in Sketch: e.g., "above", "belowright", "leaderleft".
 // The default is "middle".
 const textPositionRegEx = /^(?:above|leader|middle|below)?(?:left|right)?$/
-// A dot's label position, as in Sketch's parse.js. "leader" isn't allowed.
-const dotLabelPositionRegEx = /^(?:above|middle|below)?(?:left|right)?$/
 
 // In a string, scanFunction in module.js writes a line break as ␤ (U+2424).
 const lineBreakInString = /␤/g
@@ -924,7 +859,7 @@ const functions = {
 
   pattern(svgOprnd, str) {
     // A fill pattern, drawn in the current fill color. "solid" means no pattern.
-    if (!isString(str) || !fillPatternNames.has(str.value)) {
+    if (!isString(str) || !fillPatternNames.includes(str.value)) {
       return drawError("pattern")
     }
     svgOprnd.value.temp.pattern = str.value
@@ -949,10 +884,10 @@ const functions = {
 
   marker(svgOprnd, str) {
     // "none" | "arrow" | "dot" | "arrowdot", or one of Sketch's sized marker names
-    if (!isString(str) || !Object.hasOwn(markerFamilies, str.value.trim())) {
+    if (!isString(str) || !markerNames.has(str.value.trim())) {
       return drawError("marker")
     }
-    svgOprnd.value.temp.marker = markerFamilies[str.value.trim()]
+    svgOprnd.value.temp.marker = markerFamily(str.value.trim())
     return svgOprnd
   },
 
@@ -1019,7 +954,7 @@ const functions = {
     const unitName = unit.value.trim()
     const canonicalUnit = Object.hasOwn(unitScaleFactors, unitName)
       ? unitName
-      : unitAliases[unitName]
+      : resolveUnit(unitName)
     if (!(scaleNum > 0 && Number.isFinite(scaleNum)) || !canonicalUnit) {
       return drawError("scene")
     }
