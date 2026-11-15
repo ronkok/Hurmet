@@ -1,7 +1,8 @@
 import { addSnapPoints, addIntersectPointsForNewElement } from './snap.js'
+import { getChildren, getTemp } from './dwgAccess.js'
 import { groups } from './groups.js'
 import { sanitizeForId } from './shared.js'
-import { fillPatterns, fillPatternDef } from './fillPatterns.js'
+import { fillPatterns, fillPatternDef, setPatternScale } from './fillPatterns.js'
 
 // This file creates a virtual representation of the drawing
 // and provides methods to manipulate both the virtual representation
@@ -65,22 +66,6 @@ function getCurrentScale(defs) {
   const svgRoot = defs && defs.closest && defs.closest('svg')
   const S = svgRoot && parseFloat(svgRoot.style.getPropertyValue('--total-scale'))
   return S > 0 ? S : 1
-}
-
-function setPatternScale(patternEl, S) {
-  const baseTransform = patternEl.getAttribute('data-base-transform') || ''
-  patternEl.setAttribute('patternTransform', `scale(${1 / S}) ${baseTransform}`.trim())
-}
-
-// Called from utils.redrawCanvas whenever S changes, to keep every
-// already-created fill-pattern def in the live drawing (not shape
-// thumbnails — see getCurrentScale) at a constant apparent size.
-export function updateFillPatternScale(S) {
-  const canvas = document.querySelector('.active-sketch')
-  if (!canvas) return
-  canvas.querySelectorAll('defs pattern[data-base-transform]').forEach(patternEl => {
-    setPatternScale(patternEl, S)
-  })
 }
 
 // Cache the drawing's <defs> element rather than re-querying it on every
@@ -268,10 +253,7 @@ export const dwgMgr = Object.freeze({
     dwg.model.children[0].lastElementChild.remove()
     return dwg.tempEl.pop()
   },
-  getTemp(dwg) {
-    if (dwg.tempEl.length === 0) { return null; }
-    return dwg.tempEl[dwg.tempEl.length - 1];
-  },
+  getTemp,
 
   // dwg.children[0] and dwg.children[1] are static elements (title and defs)
   // dwg.children[2] is the transform group, defining model coordinates
@@ -408,9 +390,7 @@ export const dwgMgr = Object.freeze({
     if (dwg.children[2].children[0].children.length === 0) { return null; }
     return dwg.children[2].children[0].children[dwg.children[2].children[0].children.length - 1];
   },
-  getChildren(dwg) {
-    return dwg.children[2].children[0].children
-  },
+  getChildren,
   getChildById(dwg, id) {
     return dwg.children[2].children[0].children.find(child => String(child.attrs.id) === String(id))
   },

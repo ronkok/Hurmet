@@ -1,6 +1,7 @@
 import { dwgMgr } from './dwg.js'
 import { resolveFill, markerFamily, markerEnd } from './elementObject.js'
 import { actions } from './menuHandlers.js'
+import { clearTempAndSelection } from './workingState.js'
 import { moveTool } from './moveTool.js'
 import { selectTool } from './selectTool.js'
 import { text } from './text.js'
@@ -128,7 +129,7 @@ const circleCursors = ['offset', 'erase', 'reference', 'trim', 'extend', 'chamfe
 // Switching to any of these tools starts a fresh drawing/editing operation
 // that shouldn't inherit a leftover selection, temporary-layer content
 // (dimension points, trim reference line, resize handles), or local-coord
-// display from whatever was active before. See utils.clearTempAndSelection.
+// display from whatever was active before. See clearTempAndSelection in workingState.js.
 const toolsThatClearWorkingState = [
   'measure', 'image', 'line', 'polyline', 'rect', 'oval', 'polygon', 'library',
   'arrow', 'dimension', 'text', 'trim', 'join', 'fillet', 'extend', 'erase'
@@ -178,7 +179,7 @@ const init = (document, appState, domRefs, dwg) => {
         shapePreview.hide()
       }
       if (toolsThatClearWorkingState.includes(appState.tool)) {
-        utils.clearTempAndSelection(appState, domRefs, dwg)
+        clearTempAndSelection(appState, domRefs, dwg)
       }
       if (appState.tool === 'text') {
         // Editing a text element shows that element's position and size; new text gets appState's.
@@ -663,7 +664,7 @@ const handleKeyDown = (event, document, appState, domRefs, dwg, tool = null) => 
     // Delete key to erase selected elements
     if (appState.selection.length === 0) { return null }
     appState.selection.forEach(el => dwgMgr.removeChild(dwg, el.attrs.id))
-    utils.clearTempAndSelection(appState, domRefs, dwg)
+    clearTempAndSelection(appState, domRefs, dwg)
     dwgMgr.popRubberBand(dwg, appState)
     recordHistory(null, dwg)
     rebuildIntersectPoints(dwg)

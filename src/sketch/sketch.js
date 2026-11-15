@@ -22,6 +22,7 @@ import { translateVirtualElement } from './moveTool.js'
 import { eraseSegment } from './erase.js'
 import { recordHistory, applyMeta, resetHistory, sceneHeaderOf } from './history.js'
 import { utils } from './utils.js'
+import { clearTempAndSelection } from './workingState.js'
 import { coordinateText } from './feetInches.js'
 import { groups } from './groups.js'
 import { shapePreview } from './shapePreview.js'
@@ -364,6 +365,11 @@ const eventLoopBody = function*() {
               } else if (event.type == 'pointerup') {
                 // Finalize the element
                 const createdNonZeroElement = clickClickTool.finalize(event, appState, domRefs, dwg)
+                if (appState.tool === 'mirror' && createdNonZeroElement) {
+                  recordHistory(null, dwg)
+                  rebuildIntersectPoints(dwg)
+                  resizeHandle.refresh(appState, dwg)
+                }
                 if (appState.tool === 'zoom') {
                   // Set the select tool button to active
                   document.querySelector('#tool-form .palette-btn[data-tool="select"]').click()
@@ -724,7 +730,7 @@ function init(sketch) {
   const deleteCopied = () => {
     eventLoop({ type: 'toolswitch', target: null }) // Cancel an operation in progress.
     selectedUnits(appState, dwgMgr.getChildren(dwg)).forEach(el => dwgMgr.removeChild(dwg, el.attrs.id))
-    utils.clearTempAndSelection(appState, domRefs, dwg)
+    clearTempAndSelection(appState, domRefs, dwg)
     dwgMgr.popRubberBand(dwg, appState)
     recordHistory(null, dwg)
     rebuildIntersectPoints(dwg)
@@ -742,7 +748,7 @@ function init(sketch) {
     appState.tool = 'paste'
     document.querySelectorAll('#tool-form .palette-btn').forEach(b => b.classList.remove('active'))
     domRefs.canvas.style.cursor = 'crosshair'
-    utils.clearTempAndSelection(appState, domRefs, dwg)
+    clearTempAndSelection(appState, domRefs, dwg)
     shapeLibrary.setArmedShape(armed.entry, armed.unit)
     shapePreview.show(dwg, appState)
   }
@@ -833,7 +839,7 @@ let closeCallback = null // Given the sketch's source on Close.
 const settle = () => {
   eventLoop({ type: 'toolswitch', target: null })
   dwgMgr.popRubberBand(dwg, appState)
-  utils.clearTempAndSelection(appState, domRefs, dwg)
+  clearTempAndSelection(appState, domRefs, dwg)
   utils.closeInputBox(appState, domRefs)
 }
 

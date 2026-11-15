@@ -6,6 +6,7 @@ import { dimensionDefinition, scaleDenominator } from './stringify.js'
 import { applyMeta, recordHistory, sceneHeaderOf } from './history.js'
 import { rebuildIntersectPoints } from './snap.js'
 import { utils } from './utils.js'
+import { clearTempAndSelection } from './workingState.js'
 
 // The Sketch Properties… dialog: the sketch-wide properties that are written
 // at the head of the sketch source (see stringifyHeader in stringify.js).
@@ -123,7 +124,7 @@ const accept = (appState, domRefs, dwg) => {
   }, appState, domRefs, dwg)
   if (relabelSelectedDimensions(appState, domRefs, dwg)) {
     // The old selection's elements were replaced.
-    utils.clearTempAndSelection(appState, domRefs, dwg)
+    clearTempAndSelection(appState, domRefs, dwg)
   }
   recordHistory(null, dwg)
   rebuildIntersectPoints(dwg)

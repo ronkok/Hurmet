@@ -1,10 +1,7 @@
 import { text } from './text.js'
-import { recordHistory } from './history.js'
-import { rebuildIntersectPoints } from './snap.js'
 import { utils } from './utils.js'
 import { path, ellipseTransform } from './elementObject.js'
 import { refreshImageStyle } from './importImage.js'
-import { resizeHandle } from './resizeHandle.js'
 import { freehandPathD } from './freehandMath.js'
 import { mirrorR } from './arcStep.js'
 
@@ -240,7 +237,6 @@ export const mirror = (appState, refLine, dwg, dwgMgr, domRefs) => {
   if (appState.duplicateOnMove) {
     utils.updateSelection(newSelection, appState, domRefs)
   }
-  recordHistory(null, dwg)
-  rebuildIntersectPoints(dwg)
-  resizeHandle.refresh(appState, dwg)
+  // The caller, sketch.js's eventLoopBody, records history, rebuilds
+  // intersect points, and refreshes the resize handles.
 }

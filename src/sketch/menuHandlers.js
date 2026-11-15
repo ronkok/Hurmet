@@ -1,7 +1,7 @@
 import { dwgMgr } from './dwg.js'
+import { clearTempAndSelection } from './workingState.js'
 import { utils } from './utils.js'
 import { text } from './text.js'
-import { translatePathD } from './moveTool.js'
 import { stringify, stringifyElement } from './stringify.js'
 import { recordHistory, handleUndoRedo, sceneHeaderOf } from './history.js'
 import { rebuildIntersectPoints } from './snap.js'
@@ -389,7 +389,7 @@ export const actions = Object.freeze({
     delete(appState, domRefs, dwg) {
       if (appState.selection.length === 0) { return null }
       appState.selection.forEach(el => dwgMgr.removeChild(dwg, el.attrs.id))
-      utils.clearTempAndSelection(appState, domRefs, dwg)
+      clearTempAndSelection(appState, domRefs, dwg)
       recordHistory(null, dwg)
       rebuildIntersectPoints(dwg)
       return null

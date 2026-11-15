@@ -1,6 +1,6 @@
 // Utility functions
 
-import { dwgMgr, updateFillPatternScale } from './dwg.js'
+import { updateFillPatternScale } from './fillPatterns.js'
 import { groups } from './groups.js'
 import { arcCommand } from './arcStep.js'
 import { parseLength, coordinateText } from './feetInches.js'
@@ -238,7 +238,7 @@ const redrawCanvas = (appState, domRefs) => {
   domRefs.model.setAttribute('transform', `matrix(${S}, 0, 0, -${S}, ${tx}, ${ty})`)
   domRefs.backdrop?.setAttribute('transform', `matrix(${S}, 0, 0, -${S}, ${tx}, ${ty})`)
   domRefs.gridSvg.children[0].setAttribute('transform', `matrix(${S}, 0, 0, -${S}, ${tx}, ${ty})`)
-  // Fill-pattern defs (see dwg.js) can't counteract scale/zoom declaratively
+  // Fill-pattern defs (see fillPatterns.js) can't counteract scale/zoom declaratively
   // the way vector-effect="non-scaling-stroke" or a fontsize calc() can —
   // neither applies to a <pattern>'s tile spacing. --total-scale records the
   // current S for defs created from here on, and updateFillPatternScale
@@ -395,26 +395,11 @@ const updateSelection = (newSelection, appState, domRefs) => {
   })
 }
 
-// Reset everything a new drawing/editing operation shouldn't inherit from
-// whatever was active before: the temporary layer (dimension points, trim
-// reference line, resize handles), the current selection (both
-// appState.selection and the DOM 'selected' classes), the local-coordinate
-// readout, and the trim tool's in-progress reference line. Called when
-// switching to a tool that starts a fresh operation (see
-// toolsThatClearWorkingState in menuListeners.js) and on Delete.
-const clearTempAndSelection = (appState, domRefs, dwg) => {
-  dwgMgr.clearTempElements(dwg)
-  updateSelection([], appState, domRefs)
-  clearLocalCoords(domRefs)
-  appState.referenceLine = null
-}
-
 export const utils = Object.freeze({
   EPS,
   TAU,
   clearLocalCoords,
   clearMeasurement,
-  clearTempAndSelection,
   closeInputBox,
   computeFrame,
   distance,

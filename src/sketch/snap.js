@@ -1,4 +1,4 @@
-import { dwgMgr } from './dwg.js'
+import { getChildren, getTemp } from './dwgAccess.js'
 import {  utils } from './utils.js'
 import { catmullRomToBezierSegments, bezierSegmentsToLineSegments } from './freehandMath.js'
 import { isElliptical, ellipticalArcParams, ellipsePoint, isParamOnArc, lineArcIntersections } from './arcStep.js'
@@ -160,7 +160,7 @@ export const addIntersectPointsForNewElement = (dwg, element) => {
     return
   }
   const points = selfIntersections(element)
-  const others = dwgMgr.getChildren(dwg).filter(el => el !== element && isIntersectionCandidate(el))
+  const others = getChildren(dwg).filter(el => el !== element && isIntersectionCandidate(el))
   for (const other of others) {
     points.push(...crossIntersections(element, other))
   }
@@ -175,7 +175,7 @@ export const addIntersectPointsForNewElement = (dwg, element) => {
 // later element, so those points are stored only on element[i], never on
 // both.
 export const rebuildIntersectPoints = dwg => {
-  const elements = dwgMgr.getChildren(dwg)
+  const elements = getChildren(dwg)
   elements.forEach(el => { el.intersectPoints = [] })
   const candidates = elements.filter(isIntersectionCandidate)
   for (let i = 0; i < candidates.length; i++) {
@@ -228,25 +228,25 @@ export const adjustForSnapAndLock = (event, appState, dwg) => {
     }
     case 'end': {
       // Snap to nearest end point of existing lines, within 10 pixels
-      const endPoints = dwgMgr.getChildren(dwg).flatMap(child => child.endPoints || [])
+      const endPoints = getChildren(dwg).flatMap(child => child.endPoints || [])
       snapHit = closestPoint(endPoints, modelPoint, snapDistance)
       break
     }
     case 'mid': {
       // Snap to nearest mid point of existing lines, within 10 pixels
-      const midPoints = dwgMgr.getChildren(dwg).flatMap(child => child.midPoints || [])
+      const midPoints = getChildren(dwg).flatMap(child => child.midPoints || [])
       snapHit = closestPoint(midPoints, modelPoint, snapDistance)
       break
     }
     case 'centroid': {
       // Snap to nearest centroid of existing shapes, within 10 pixels
-      const centroids = dwgMgr.getChildren(dwg).flatMap(child => child.centroids || [])
+      const centroids = getChildren(dwg).flatMap(child => child.centroids || [])
       snapHit = closestPoint(centroids, modelPoint, snapDistance)
       break
     }
     case 'nearest': {
       // Snap to nearest point on existing lines, within 10 pixels
-      const segments = dwgMgr.getChildren(dwg).flatMap(child => child.segments || [])
+      const segments = getChildren(dwg).flatMap(child => child.segments || [])
       const closest = segments.reduce((closest, seg) => {
         const [dist, nearest] = pointToSegmentDistance(modelPoint, seg)
         if (dist < snapDistance && dist < closest.dist) {
@@ -263,9 +263,9 @@ export const adjustForSnapAndLock = (event, appState, dwg) => {
     case 'perpendicular': {
       // Find the nearest line segment to the current modelPoint, within 10 pixels.
       // Snap to a point perpendicular to the extension of that line segment.
-      const firstPoint = anchorPoint(dwgMgr.getTemp(dwg))
+      const firstPoint = anchorPoint(getTemp(dwg))
       if (!firstPoint) break; // Need a first point to define the line
-      const segments = dwgMgr.getChildren(dwg).flatMap(child => child.segments || []).flatMap(withPieces)
+      const segments = getChildren(dwg).flatMap(child => child.segments || []).flatMap(withPieces)
       // Find the nearest point and the segment it lies on
       let minDist = Infinity
       let bestSeg = null
@@ -317,9 +317,9 @@ export const adjustForSnapAndLock = (event, appState, dwg) => {
     }
     case 'tangent': {
       // Snap to a point on a circle or ellipse that is tangent to the line from firstPoint to modelPoint
-      const firstPoint = anchorPoint(dwgMgr.getTemp(dwg))
+      const firstPoint = anchorPoint(getTemp(dwg))
       if (!firstPoint) break; // Need a first point to define the line
-      const segments = dwgMgr.getChildren(dwg).flatMap(child => child.segments || []).flatMap(withPieces)
+      const segments = getChildren(dwg).flatMap(child => child.segments || []).flatMap(withPieces)
       // Find the nearest circle or ellipse to the current modelPoint
       let minDist = Infinity
       let bestSeg = null
@@ -398,7 +398,7 @@ export const adjustForSnapAndLock = (event, appState, dwg) => {
       // freehand strokes and text are not candidates (see
       // isIntersectionCandidate).
 
-      const points = dwgMgr.getChildren(dwg).flatMap(child => child.intersectPoints || [])
+      const points = getChildren(dwg).flatMap(child => child.intersectPoints || [])
       snapHit = closestPoint(points, modelPoint, snapDistance)
       break
     }
@@ -413,7 +413,7 @@ export const adjustForSnapAndLock = (event, appState, dwg) => {
   // Check for an oval tool or rect tool while the shift key is down
   if (ovalOrRect.includes(appState.tool) && event.shiftKey) {
     // Check if this is the second point of the element.
-    const element = dwgMgr.getTemp(dwg)
+    const element = getTemp(dwg)
     if (element && element.firstPoint && element.tag == (appState.tool === 'oval' ? 'ellipse' : 'rect')) {
       // Constrain to circle or square
       const dx = modelPoint.x - element.firstPoint.x
@@ -429,12 +429,12 @@ export const adjustForSnapAndLock = (event, appState, dwg) => {
     case 'unlock':
       break
     case 'x': {
-      const anchor = anchorPoint(dwgMgr.getTemp(dwg))
+      const anchor = anchorPoint(getTemp(dwg))
       if (anchor) { modelPoint.y = anchor.y }
       break
     }
     case 'y': {
-      const anchor = anchorPoint(dwgMgr.getTemp(dwg))
+      const anchor = anchorPoint(getTemp(dwg))
       if (anchor) { modelPoint.x = anchor.x }
       break
     }
@@ -449,7 +449,7 @@ export const nearestElementAndSegment = (modelPoint, appState, dwg) => {
   const S_zoom = appState.zoom
   const S = S_model * S_zoom
   const snapDistance = 20 / S // in model coordinates
-  const elements = dwgMgr.getChildren(dwg)
+  const elements = getChildren(dwg)
   let closestDist = Infinity
   let closestEl = null
   let closestSeg = null

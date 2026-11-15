@@ -502,3 +502,22 @@ export const patternDefs = (patterns, omit = []) => patterns
   .filter(p => !omit.includes(p.name))
   .map(p => fillPatternDef(p.name, hurmetPatternId(p.name, p.color), p.color))
   .join("")
+
+// A fill pattern's apparent size on screen must stay constant as the
+// drawing's scale/zoom S changes (see utils.redrawCanvas). The pattern's own
+// transform, kept in data-base-transform, is preceded by scale(1/S).
+export function setPatternScale(patternEl, S) {
+  const baseTransform = patternEl.getAttribute('data-base-transform') || ''
+  patternEl.setAttribute('patternTransform', `scale(${1 / S}) ${baseTransform}`.trim())
+}
+
+// Called from utils.redrawCanvas whenever S changes, to keep every
+// already-created fill-pattern def in the live drawing (not shape
+// thumbnails — see getCurrentScale in dwg.js) at a constant apparent size.
+export function updateFillPatternScale(S) {
+  const canvas = document.querySelector('.active-sketch')
+  if (!canvas) return
+  canvas.querySelectorAll('defs pattern[data-base-transform]').forEach(patternEl => {
+    setPatternScale(patternEl, S)
+  })
+}
