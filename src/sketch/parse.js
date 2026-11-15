@@ -430,6 +430,21 @@ export const parseLine = (source, appState) => {
   }
 }
 
+const equalScales = (a, b) => Math.abs(a - b) <= 1e-6 * Math.max(a, b)
+
+// Map model-space limits onto the frame, as Hurmet's draw.js does, and set
+// appState's scale and origin to match. Return the scale, in px per model unit,
+// or 0 if the x and y scales differ.
+const applyLimits = (appState, { xmin, xmax, ymin, ymax }) => {
+  const S = appState.frameWidth / (xmax - xmin)
+  if (!equalScales(S, appState.frameHeight / (ymax - ymin))) { return 0 }
+  appState.scaleFactor = S
+  appState.scale = S / utils.unitScaleFactors[appState.unit]
+  appState.deltaOriginX = -xmin
+  appState.deltaOriginY = -ymin
+  return S
+}
+
 // Parse an input text string of complete sketch into a virtual `dwg` object.
 // Don't render anything yet. Rendering will be done in batch after parsing is complete.
 export const parseDwg = (str, maxId) => {
@@ -441,6 +456,12 @@ export const parseDwg = (str, maxId) => {
   const kids = dwg.children[2].children[0].children
   const groupStack = [] // Open `group` blocks, outermost first: { num, line }
   let hasFrame = false // `view` reads the frame size, so `frame` must come first.
+  let frameLine = 0
+  // As in Hurmet's draw.js, a `frame` not governed by a `scene` takes its x and
+  // y scales from these model-space limits, which may make them unequal. Sketch
+  // requires equal scales. null when a `scene` governs. `fromView` is false for
+  // draw.js's default limits, which a later `scene` or `view` usually replaces.
+  let limits = { xmin: 0, xmax: 5, ymin: 0, ymax: 5, fromView: false }
   for (let i = 0; i < lines.length; i++) {
     let line = lines[i].trim()
     if (line === "" || line.startsWith("#")) { continue } // Skip blank lines and comments
@@ -507,6 +528,14 @@ export const parseDwg = (str, maxId) => {
           appState.frameHeight = args[1]
           appState.position = args.length === 3 ? args[2] : "inline"
           hasFrame = true
+          frameLine = i + 1
+          if (limits && limits.fromView) {
+            // A frame after a `view` rescales the view's limits to the new frame.
+            const S = applyLimits(appState, limits)
+            if (!S) {
+              throw new Error(`The frame at line ${i + 1} gives unequal x and y scales. Sketch requires them to be equal.`)
+            }
+          }
           break
         case "view": {
           // An alternative to `scene`, from Hurmet's draw.js: the frame's model-space
@@ -523,17 +552,14 @@ export const parseDwg = (str, maxId) => {
             throw new Error(`Invalid view limits at line ${i + 1}`)
           }
           const S = appState.frameWidth / (xmax - xmin) // px per model unit
-          if (ymax !== undefined) {
-            const yScale = appState.frameHeight / (ymax - ymin)
-            if (Math.abs(yScale - S) > 1e-6 * S) {
-              throw new Error(`The view at line ${i + 1} has unequal x and y scales. Sketch requires them to be equal.`)
-            }
+          // Complete the y limits as draw.js does. With no ymin, Hurmet centers
+          // the origin vertically. With no ymax, the y scale equals the x scale.
+          const yLo = ymin === undefined ? -appState.frameHeight / (2 * S) : ymin
+          const yHi = ymax === undefined ? appState.frameHeight / S + yLo : ymax
+          limits = { xmin, xmax, ymin: yLo, ymax: yHi, fromView: true }
+          if (!applyLimits(appState, limits)) {
+            throw new Error(`The view at line ${i + 1} has unequal x and y scales. Sketch requires them to be equal.`)
           }
-          appState.scaleFactor = S
-          appState.scale = S / utils.unitScaleFactors[appState.unit]
-          appState.deltaOriginX = -xmin
-          // With no ymin, Hurmet centers the origin vertically.
-          appState.deltaOriginY = ymin === undefined ? appState.frameHeight / (2 * S) : -ymin
           break
         }
         case "grid":
@@ -564,6 +590,7 @@ export const parseDwg = (str, maxId) => {
           if (!(args[0] > 0 && Number.isFinite(args[0]))) {
             throw new Error(`Invalid scale in scene command at line ${i + 1}`)
           }
+          limits = null // Of scene and view, the later one applies.
           appState.scale = args[0]
           appState.unit = args[1].trim()
           appState.deltaOriginX = args[2];
@@ -673,6 +700,11 @@ export const parseDwg = (str, maxId) => {
   if (groupStack.length > 0) {
     const opened = groupStack[groupStack.length - 1].line
     throw new Error(`Missing "end" for the group opened at line ${opened}`)
+  }
+  // With neither `scene` nor `view`, Hurmet maps its default 0…5 limits onto the frame.
+  if (hasFrame && limits && !limits.fromView &&
+      !equalScales(appState.frameWidth / 5, appState.frameHeight / 5)) {
+    throw new Error(`The frame at line ${frameLine} gives unequal x and y scales. Sketch requires them to be equal. Add a scene statement.`)
   }
   dwg.meta = {
     title: appState.title,
