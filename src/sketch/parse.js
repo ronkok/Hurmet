@@ -203,7 +203,8 @@ const validElementCommands = new Set([
 // The position of a dot's label, as in Hurmet's draw.js: e.g., "below" or "aboveleft".
 
 // Given a valid command and an array of its arguments, return the corresponding element.
-const getElement = (command, args, appState, dwg = null) => {
+// i is the statement's line index, for error messages.
+const getElement = (command, args, appState, dwg = null, i = 0) => {
   if (!validElementCommands.has(command.toLowerCase())) {
     return null
   }
@@ -274,9 +275,8 @@ const getElement = (command, args, appState, dwg = null) => {
         const numSides = args[0];
         const center = args[1];
         const radius = args[2];  // Inscribed radius
-        const circumscribedRadius = radius / Math.cos(Math.PI / numSides)
         // The trailing rotation angle (degrees) is optional, as for ellipses.
-        if ((args.length !== 3 && args.length !== 4) || typeof numSides !== "number" || typeof center !== "object" || typeof radius !== "number" || typeof center[0] !== "number" || typeof center[1] !== "number" || numSides < 3 || radius <= 0 || (args.length === 4 && typeof args[3] !== "number")) {
+        if ((args.length !== 3 && args.length !== 4) || !Number.isInteger(numSides) || typeof center !== "object" || typeof radius !== "number" || typeof center[0] !== "number" || typeof center[1] !== "number" || numSides < 3 || radius <= 0 || (args.length === 4 && typeof args[3] !== "number")) {
           throw new Error(`Invalid polygon command at line ${i + 1}`)
         }
         return elementObject("polygon", args, appState)
@@ -426,7 +426,7 @@ export const parseLine = (source, appState) => {
     return textElement
   } else {
     const args = getArgs(argString)
-    return getElement(command, args, appState)
+    return getElement(command, args, appState, null, i)
   }
 }
 
@@ -571,61 +571,61 @@ export const parseDwg = (str, maxId) => {
           appState.scaleFactor = appState.scale * utils.unitScaleFactors[appState.unit];
           break
         case "line": {
-          const lineElement = getElement(command, args, appState)
+          const lineElement = getElement(command, args, appState, null, i)
           if (!lineElement) { throw new Error(`Invalid line command at line ${i + 1}`) }
           dwgMgr.pushElement(dwg, lineElement)
           break
         }
         case 'rect': {
-          const rectElement = getElement(command, args, appState)
+          const rectElement = getElement(command, args, appState, null, i)
           if (!rectElement) { throw new Error(`Invalid rectangle command at line ${i + 1}`) }
           dwgMgr.pushElement(dwg, rectElement)
           break
         }
         case 'image': {
-          const imageElement = getElement(command, args, appState)
+          const imageElement = getElement(command, args, appState, null, i)
           if (!imageElement) { throw new Error(`Invalid image command at line ${i + 1}`) }
           dwgMgr.pushElement(dwg, imageElement)
           break
         }
         case 'circle': {
-          const circleElement = getElement(command, args, appState)
+          const circleElement = getElement(command, args, appState, null, i)
           if (!circleElement) { throw new Error(`Invalid circle command at line ${i + 1}`) }
           dwgMgr.pushElement(dwg, circleElement) 
           break
         }
         case 'ellipse': {
-          const ellipseElement = getElement(command, args, appState)
+          const ellipseElement = getElement(command, args, appState, null, i)
           if (!ellipseElement) { throw new Error(`Invalid ellipse command at line ${i + 1}`) }
           dwgMgr.pushElement(dwg, ellipseElement)
           break
         }
         case 'polygon': {
-          const polygonElement = getElement(command, args, appState)
+          const polygonElement = getElement(command, args, appState, null, i)
           if (!polygonElement) { throw new Error(`Invalid polygon command at line ${i + 1}`) }
           dwgMgr.pushElement(dwg, polygonElement)
           break
         }
         case 'arc': {
-          const arcElement = getElement(command, args, appState)
+          const arcElement = getElement(command, args, appState, null, i)
           if (!arcElement) { throw new Error(`Invalid arc command at line ${i + 1}`) }
           dwgMgr.pushElement(dwg, arcElement)
           break
         }
         case 'path': {
-          const pathElement = getElement(command, args, appState)
+          const pathElement = getElement(command, args, appState, null, i)
           if (!pathElement) { throw new Error(`Invalid path command at line ${i + 1}`) }
           dwgMgr.pushElement(dwg, pathElement)
           break
         }
         case 'freehand': {
-          const freehandElement = getElement(command, args, appState)
+          const freehandElement = getElement(command, args, appState, null, i)
           if (!freehandElement) { throw new Error(`Invalid freehand command at line ${i + 1}`) }
           dwgMgr.pushElement(dwg, freehandElement)
           break
         }
         case 'arrow': {
-          const group = getElement(command, args, appState)
+          const group = getElement(command, args, appState, null, i)
           if (!group) { throw new Error(`Invalid arrow command at line ${i + 1}`) }
           if (Array.isArray(group)) {
             // It's a group containing an arrow path and a text label.
@@ -637,7 +637,7 @@ export const parseDwg = (str, maxId) => {
           break
         }
         case 'dimension': {
-          const group = getElement(command, args, appState, dwg)
+          const group = getElement(command, args, appState, dwg, i)
           if (!group) { throw new Error(`Invalid dimension command at line ${i + 1}`) }
           dwgMgr.pushElementGroup(dwg, group, "dimension")
           break
@@ -645,7 +645,7 @@ export const parseDwg = (str, maxId) => {
         case 'dot': {
           let dot
           try {
-            dot = getElement(command, args, appState)
+            dot = getElement(command, args, appState, null, i)
           } catch {
             throw new Error(`Invalid dot command at line ${i + 1}`)
           }

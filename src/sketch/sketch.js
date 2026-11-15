@@ -582,7 +582,16 @@ function init(sketch) {
     // Button to accept text input for editing one element or replacing the entire drawing.
     // See utils.toolInputScope for the meaning of each scope.
     if (!domRefs.okButton.classList.contains('visible')) { return } // OK button is not active
-    const scope = domRefs.okButton.dataset.scope
+    try {
+      acceptInput(domRefs.okButton.dataset.scope)
+    } catch (error) {
+      // E.g., a source line Sketch can't parse. Show it to the user, not just the
+      // console, and leave the input box open so they can fix it.
+      alert(error.message)
+    }
+  })
+
+  const acceptInput = scope => {
     if (scope === "all") {
       // OK button for batch input of multiple lines
       const input = text.getInputBoxText(domRefs.inputBox)
@@ -605,6 +614,7 @@ function init(sketch) {
       const newEl = Number(scope) === 0
         ? text.replaceText(str, el, appState.scaleFactor)
         : parseLine(str, { ...appState }) // A copy, so the source's style statements don't stick
+      if (!newEl) { throw new Error("Sketch can't read this line:\n" + str.trim()) }
       dwgMgr.swapChild(dwg, el.attrs.id, newEl)
       recordHistory(null, dwg)
       rebuildIntersectPoints(dwg)
@@ -656,7 +666,7 @@ function init(sketch) {
       throw new Error(`Unknown OK button scope: ${scope}`)
     }
     utils.closeInputBox(appState, domRefs)
-  })
+  }
 
   domRefs.cancelButton.addEventListener("click", () => utils.closeInputBox(appState, domRefs))
 
