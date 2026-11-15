@@ -756,7 +756,16 @@ function init(sketch) {
       armPaste(armed)
       return
     }
-    if (document.activeElement === domRefs.inputBox) { return } // Let normal text paste proceed there.
+    if (document.activeElement === domRefs.inputBox) {
+      // The input box is a contenteditable, so a normal paste would bring in
+      // the clipboard's HTML (e.g. a copied URL arrives as an <a> link).
+      // Insert only the plain text. execCommand is deprecated but universally
+      // supported, and unlike a direct DOM edit it keeps the caret in place.
+      event.preventDefault()
+      const text = event.clipboardData ? event.clipboardData.getData('text/plain') : ''
+      if (text) { document.execCommand('insertText', false, text) }
+      return
+    }
     const items = event.clipboardData && event.clipboardData.items
     if (!items) { return }
     const imageItem = Array.from(items).find(item => image.ALLOWED_MIME_TYPES.has(item.type))
