@@ -292,6 +292,12 @@ const getElement = (command, args, appState, dwg = null) => {
         return elementObject(command.toLowerCase(), args, appState)
       }
       case 'freehand': {
+        // A one-point stroke (a click with no drag) is stringified as
+        // `freehand (x, y)`, which arrives here as a flat [x, y].
+        // Wrap it so elementObject sees a list of one point.
+        if (Array.isArray(args[0]) && typeof args[0][0] === "number") {
+          args[0] = [args[0]]
+        }
         if (!Array.isArray(args[0]) || args[0].length < 1) {
           throw new Error(`Invalid freehand command at line ${i + 1}`)
         }
