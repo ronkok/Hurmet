@@ -7,6 +7,32 @@ import { renderSVG } from "./renderSVG"
 import { renderSketch } from "./renderSketch"
 import temml from "./temml.js"
 
+// The DOM of a sketch node or, inFigure, of a figsketch node.
+const sketchDOM = (node, inFigure) => {
+  const dom = document.createElement(inFigure ? "div" : "span")
+  dom.className = inFigure ? "hurmet-sketch figsketch" : "hurmet-sketch"
+  dom.dataset.source = node.attrs.source
+  // A pasted sketch arrives with only its source, so draw it here.
+  const { svg, error } = node.attrs.svg
+    ? { svg: node.attrs.svg, error: null }
+    : renderSketch(node.attrs.source)
+  if (svg) {
+    const position = svg.attrs.float
+    if (!inFigure && (position === "left" || position === "right")) {
+      dom.style.float = position
+    } else if (!inFigure && position === "center") {
+      dom.style.display = "block"
+      dom.style.textAlign = "center"
+    }
+    const svgDOM = renderSVG(svg)
+    svgDOM.style.removeProperty("float") // The sketch's <span> or <figure> floats.
+    dom.appendChild(svgDOM)
+  } else {
+    dom.textContent = error ? "Sketch error: " + error : "Sketch"
+  }
+  return dom
+}
+
 // Helpers for creating a schema that supports tables.
 
 function getCellAttrs(dom, extraAttrs) {
@@ -251,22 +277,23 @@ export const nodes = {
     parseDOM: [{tag: "span.hurmet-sketch", getAttrs(dom) {
       return { source: dom.getAttribute("data-source") || "" }
     }}],
-    toDOM(node) {
-      const dom = document.createElement("span")
-      dom.className = "hurmet-sketch"
-      dom.dataset.source = node.attrs.source
-      // A pasted sketch arrives with only its source, so draw it here.
-      const { svg, error } = node.attrs.svg
-        ? { svg: node.attrs.svg, error: null }
-        : renderSketch(node.attrs.source)
-      if (svg) {
-        if (svg.attrs.float) { dom.style.float = svg.attrs.float }
-        dom.appendChild(renderSVG(svg))
-      } else {
-        dom.textContent = error ? "Sketch error: " + error : "Sketch"
-      }
-      return dom
-    }
+    toDOM(node) { return sketchDOM(node, false) }
+  },
+
+  // A captioned sketch, the first child of a <figure>. Its <figcaption> holds the
+  // sketch title. The figure's class, not this node, carries the sketch position.
+  figsketch: {
+    atom: true,
+    group: "block",
+    draggable: false,
+    attrs: {
+      source: { default: "" },
+      svg: { default: null }
+    },
+    parseDOM: [{tag: "div.figsketch", getAttrs(dom) {
+      return { source: dom.getAttribute("data-source") || "" }
+    }}],
+    toDOM(node) { return sketchDOM(node, true) }
   },
 
   // :: NodeSpec A block image (`<img>`) node, for inclusion in a <figure>

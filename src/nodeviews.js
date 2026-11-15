@@ -1,6 +1,6 @@
 import { schema } from "./schema"
 import { openMathPrompt } from "./mathprompt"
-import { EditorState, TextSelection } from "prosemirror-state"
+import { EditorState } from "prosemirror-state"
 import { EditorView } from "prosemirror-view"
 import { toggleMark } from "prosemirror-commands"
 import { keymap } from "prosemirror-keymap"
@@ -8,7 +8,8 @@ import { undo, redo } from "prosemirror-history"
 import { StepMap } from "prosemirror-transform"
 import hurmet from "./hurmet"
 import { openSketch } from "./sketch/sketch.js"
-import { sketchAttrs } from "./renderSketch"
+import { placeSketch } from "./placeSketch"
+import { figureSketchSource } from "./sketchSource"
 
 export class CalcView {
   constructor(node, view) {
@@ -84,35 +85,29 @@ export class TexView {
 }
 
 export class SketchView {
-  // A sketch is a ProseMirror atom. Selecting it opens the Sketch dialog on its source.
-  // Close in the dialog writes the new source back into the node.
-  // An emptied sketch is deleted. Cancel leaves the node as it was.
-  // Either way, the cursor goes after the sketch. If the sketch stayed selected,
-  // a click on it would not select it again, so it would not reopen the dialog.
+  // For a sketch node or a figsketch node, a captioned sketch in a figure.
+  // Either is a ProseMirror atom. Selecting it opens the Sketch dialog on its source.
+  // Close in the dialog writes the new source back. See placeSketch.js.
   constructor(node, view, getPos) {
     this.node = node
     this.outerView = view
     this.getPos = getPos
-    this.dom = schema.nodes.sketch.spec.toDOM(node)
+    this.dom = node.type.spec.toDOM(node)
   }
 
   selectNode() {
     this.dom.classList.add("ProseMirror-selectednode")
-    openSketch(this.node.attrs.source, source => {
-      const view = this.outerView
+    let source = this.node.attrs.source
+    if (this.node.type.name === "figsketch") {
+      // The author may have edited the caption. It becomes the title in Sketch.
+      const pos = this.getPos()
+      const figure = pos == null ? null : this.outerView.state.doc.resolve(pos).parent
+      if (figure && figure.type.name === "figure") { source = figureSketchSource(figure) }
+    }
+    openSketch(source, source => {
       const pos = this.getPos()
       if (pos == null) { return }
-      const tr = view.state.tr
-      if (source === "") {
-        tr.delete(pos, pos + this.node.nodeSize)
-      } else {
-        if (source !== null) {
-          tr.setNodeMarkup(pos, null, sketchAttrs(source, view.state.doc))
-        }
-        tr.setSelection(TextSelection.create(tr.doc, pos + this.node.nodeSize))
-      }
-      view.dispatch(tr)
-      view.focus()
+      placeSketch(this.outerView, source, this.node, pos)
     })
   }
 

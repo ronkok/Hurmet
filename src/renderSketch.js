@@ -24,7 +24,7 @@ export const renderSketch = (source, formats) => {
 export const drawSketches = (ast, formats) => {
   if (Array.isArray(ast)) {
     ast.forEach(node => drawSketches(node, formats))
-  } else if (ast && ast.type === "sketch") {
+  } else if (ast && (ast.type === "sketch" || ast.type === "figsketch")) {
     const { svg } = renderSketch(ast.attrs.source, formats)
     if (svg) { ast.attrs.svg = svg }
   } else if (ast && Array.isArray(ast.content)) {

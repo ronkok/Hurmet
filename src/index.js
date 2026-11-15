@@ -78,7 +78,8 @@ window.view = new view.EditorView(document.querySelector("#editor"), {
     calculation(node, view) { return new CalcView(node, view) },
     tex(node, view) { return new TexView(node, view) },
     footnote(node, view, getPos) { return new FootnoteView(node, view, getPos) },
-    sketch(node, view, getPos) { return new SketchView(node, view, getPos) }
+    sketch(node, view, getPos) { return new SketchView(node, view, getPos) },
+    figsketch(node, view, getPos) { return new SketchView(node, view, getPos) }
   },
   clipboardTextSerializer: (content, view) => {
     // If the selection consists of a single calc with a numeric result, return the result.

@@ -30,7 +30,7 @@ export const defaultAppState = {
   // Sketch properties. Set in the Sketch Properties… dialog (src/sketchProperties.js).
   title: "Sketch",
   caption: false, // When true, Hurmet writes the title as a caption.
-  position: "inline", // Where Hurmet places the sketch: inline, left, or right (floats). Written in `frame`.
+  position: "inline", // Where Hurmet places the sketch: inline, left or right (floats), or center. Written in `frame`.
   decimalFormat: "1,000,000.", // Thousands and decimal separators for dimension labels
   roundingSpec: "h3", // Hurmet rounding spec for dimension labels: f|r|h, then a digit count
   fraction: 16, // Denominator of the inch fractions in "ft-in" dimension labels: 8, 16, 32, or 64

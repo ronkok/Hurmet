@@ -241,7 +241,11 @@ const nodes = {
     if (node.attrs.width) { attributes.width = node.attrs.width }
     return htmlTag("img", "", attributes, false);
   },
-  figure(node)     { return htmlTag("figure", ast2html(node.content)) + "\n" },
+  figure(node) {
+    // The class holds the position of an image or sketch: inline, left, center, right.
+    const attributes = node.attrs && node.attrs.class ? { class: node.attrs.class } : {}
+    return htmlTag("figure", ast2html(node.content), attributes) + "\n"
+  },
   figcaption(node) { return htmlTag("figcaption", ast2html(node.content)) },
   figimg(node) {
     const attributes = { src: node.attrs.src, class: "figimg" };
@@ -257,12 +261,27 @@ const nodes = {
       ? { svg: node.attrs.svg, error: null }
       : renderSketch(node.attrs.source)
     const float = svg ? svg.attrs.float : null
-    const style = float === "left" || float === "right" ? ` style='float: ${float};'` : ""
+    const style = float === "left" || float === "right"
+      ? ` style='float: ${float};'`
+      : float === "center"
+      ? ` style='display: block; text-align: center;'`
+      : ""
     const content = svg
       ? writeSVG(svg)
       : sanitizeText(error ? "Sketch error: " + error : "Sketch")
     return `<span class='hurmet-sketch' data-source=${dataStr(node.attrs.source)}${style}>` +
       `${content}</span>`
+  },
+  figsketch(node) {
+    // A captioned sketch. Its <figure> carries the position.
+    const { svg, error } = node.attrs.svg
+      ? { svg: node.attrs.svg, error: null }
+      : renderSketch(node.attrs.source)
+    const content = svg
+      ? writeSVG(svg)
+      : sanitizeText(error ? "Sketch error: " + error : "Sketch")
+    return `<div class='hurmet-sketch figsketch' data-source=${dataStr(node.attrs.source)}>` +
+      `${content}</div>\n`
   },
   footnote(node)   { return htmlTag("footnote", "") },
   calculation(node) {

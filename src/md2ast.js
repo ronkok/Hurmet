@@ -88,6 +88,7 @@
  */
 
 import { dt } from "./constants"
+import { sketchHasCaption, sketchTitle, sketchPosition } from "./sketchSource"
 
 const CR_NEWLINE_R = /\r\n?/g;
 const FORMFEED_R = /\f/g;
@@ -611,13 +612,23 @@ const parseRef = function(capture, state, refNode) {
       // A sketch is written on one line, as `sketch: ` + source. Its line breaks are
       // written as ␤. The source is the authority; the title in the body is only a label.
       const source = def.target.replace(sketchRegEx, "").replace(/␤/g, "\n")
-      const sketch = { type: "sketch", attrs: { source } }
-      // TODO: When Hurmet supports a figure that holds a sketch, `!![caption][n]`
-      // will create one. Until then, the caption is dropped and the sketch, an inline
-      // node, is wrapped in a paragraph so it can stand at block level.
-      return refNode.type === "figure"
-        ? { type: "paragraph", content: [sketch] }
-        : sketch
+      if (refNode.type !== "figure") {
+        // An inline sketch. If its source says `caption true`, the caption is dropped,
+        // since a figure can't stand inside a paragraph. Hurmet writes such a sketch
+        // as `!![…][n]`, so this happens only in a hand-written file.
+        return { type: "sketch", attrs: { source } }
+      }
+      if (!sketchHasCaption(source)) {
+        // The sketch, an inline node, is wrapped in a paragraph so it can stand at
+        // block level.
+        return { type: "paragraph", content: [{ type: "sketch", attrs: { source } }] }
+      }
+      // A captioned sketch. The caption is its title, not the text in `!![…]`.
+      const title = sketchTitle(source)
+      return { type: "figure", attrs: { class: sketchPosition(source) }, content: [
+        { type: "figsketch", attrs: { source } },
+        { type: "figcaption", content: title ? [{ type: "text", text: title }] : [] }
+      ] }
     }
     if (refNode.type === "figure") {
       refNode = { type: "figure", attrs: def.attrs, content: [

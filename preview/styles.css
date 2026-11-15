@@ -638,22 +638,26 @@ figcaption:first-child {
 figure.right, figure.left {
   margin: 0px 10px 5px 10px
 }
-/* An image figure is a table whose caption is below the image. The figure
+/* An image or sketch figure is a table whose caption is below the image. The figure
    shrinks to the image and a long caption wraps at the image's width. */
-figure:has(> img.figimg) {
+figure:has(> img.figimg),
+figure:has(> .figsketch) {
   display: table;
 }
-figure.inline:has(> img.figimg) {
+figure.inline:has(> img.figimg),
+figure.inline:has(> .figsketch) {
   display: inline-table;
   vertical-align: top;
   margin: 5px 10px 5px 0;
 }
-figure > img.figimg {
+figure > img.figimg,
+figure > .figsketch {
   display: block;
   float: none;
   margin: 0 auto;
 }
-figure > img.figimg + figcaption {
+figure > img.figimg + figcaption,
+figure > .figsketch + figcaption {
   display: table-caption;
   caption-side: bottom;
 }

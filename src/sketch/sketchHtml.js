@@ -1066,11 +1066,12 @@ export const sketchHtml = `
               <label for="sketch-properties-title">Title</label>
               <input type="text" id="sketch-properties-title" style="width: 300px">
               <span></span>
-              <label class="properties-checkbox"><input type="checkbox" id="sketch-properties-caption"> Include a caption</label>
+              <label class="properties-checkbox"><input type="checkbox" id="sketch-properties-caption"> Use the title for a caption</label>
               <label for="sketch-properties-position">Position</label>
               <select id="sketch-properties-position" style="width: 110px">
                 <option value="inline">inline</option>
                 <option value="left">float left</option>
+                <option value="center">center</option>
                 <option value="right">float right</option>
               </select>
               <label for="sketch-properties-scale">Scale</label>

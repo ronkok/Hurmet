@@ -28,7 +28,7 @@ const unquote = token => token.slice(1, -1).replace(/""/g, '"')
 
 // The optional third argument of `frame`, as Hurmet's draw.js reads it.
 // The Sketch Properties… dialog shows "left" and "right" as float left & right.
-const sketchPositions = new Set(["inline", "left", "right"])
+const sketchPositions = new Set(["inline", "left", "center", "right"])
 
 const validFillPatterns = new Set(fillPatternNames)
 

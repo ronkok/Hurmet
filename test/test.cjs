@@ -1271,6 +1271,40 @@ const testSketches = async() => {
   check("pattern color", /<pattern id="hp-sand-red"[^]*?stroke="red"/.test(patternHtml), true)
   check("pattern fills", (patternHtml.match(/fill='url\(#[^)]*\)'/g) || []),
     ["fill='url(#hp-sand-red)'", "fill='url(#hp-sand-red)'", "fill='url(#hp-gravel-blue)'"])
+
+  // A captioned sketch is a figure. Its source, not the body, gives its caption
+  // (the title) and its position (the figure's class).
+  const capSource = 'title "Beam [B1] ""A"""\ncaption true\nframe 100, 50, "center"\n' +
+    'scene 1, "px", 0, 0\nrect (10, 10; 90, 40)'
+  const capDef = "[1]: sketch: " + capSource.replace(/\n/g, "␤")
+  const capMd = head + "!![Ignored][1]\n\n" + capDef + "\n"
+  const capAst = hurmet.md2ast(capMd)
+  const fig = capAst.content[0]
+  check("caption figure", [fig.type, fig.attrs.class, fig.content.map(n => n.type)],
+    ["figure", "center", ["figsketch", "figcaption"]])
+  check("caption text", fig.content[1].content, [{ type: "text", text: 'Beam [B1] "A"' }])
+  check("caption source", fig.content[0].attrs.source, capSource)
+  // An inline reference can't hold a figure. The sketch stays inline.
+  const inlineCap = hurmet.md2ast(head + "See ![x][1] here.\n\n" + capDef + "\n")
+  check("caption inline", inlineCap.content[0].content.map(n => n.type),
+    ["text", "sketch", "text"])
+  // Default position
+  const leftDef = capDef.replace(', "center"', "")
+  check("caption inline class", hurmet.md2ast(head + "!![c][1]\n\n" + leftDef + "\n")
+    .content[0].attrs.class, "inline")
+
+  // Round trip. The body label is the title, without brackets.
+  const capSaved = await hurmet.updateAndSave(capMd)
+  check("caption save body", capSaved.includes('!![Beam B1 "A"][1]\n'), true)
+  check("caption save def", capSaved.includes("\n" + capDef + "\n"), true)
+  const reopened = hurmet.md2ast(capSaved).content[0]
+  check("caption reopen", [reopened.type, reopened.content[0].attrs.source],
+    ["figure", capSource])
+
+  // HTML
+  const capHtmlRegEx = /<figure class="center"><div class='hurmet-sketch figsketch' data-source='[^']*'><svg [\s\S]*<\/div>\n<figcaption>Beam \[B1\] &quot;A&quot;<\/figcaption><\/figure>/
+  check("caption md2html", capHtmlRegEx.test(hurmet.md2html(capMd)), true)
+  check("caption hurmet2html", capHtmlRegEx.test(await hurmet.hurmet2html(capMd)), true)
 }
 
 testSavedResults().then(testImport).then(testDrawingHtml).then(testSketches).then(() => {

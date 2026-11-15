@@ -2,6 +2,7 @@ import { parse } from "./parser"
 import { dt } from "./constants"
 import { renderSketch } from "./renderSketch"
 import { writeSVG } from "./md2html"
+import { sketchTitle, figureSketchSource } from "./sketchSource"
 
 /* eslint-disable */
 // ::- A specification for serializing a ProseMirror document as
@@ -242,6 +243,12 @@ const hurmetNodes =  {
       state.closeBlock(table)
       // Get rid of the newline between the caption and the table.
       state.out = state.out.slice(0, L) + state.out.slice(L + 1)
+    } else if (node.content.content[0].type.name === "figsketch") {
+      // A captioned sketch. Its source holds its caption and position.
+      // A caption edited in the document is written as the title.
+      // Other Markdown readers get an image, with the title as its alt text.
+      const ref = writeSketchRef(state, node.content.content[0], figureSketchSource(node))
+      state.write((state.isGFM ? "!" : "!!") + ref + "\n\n")
     } else {
       if (!state.isGFM) {
         const figureCaption = node.content.content[1]
@@ -302,26 +309,7 @@ const hurmetNodes =  {
     state.text(node.text)
   },
   sketch(state, node) {
-    // We use reference links and defer the sketch to the end of the document.
-    const defIndex = getDefIndex(state)
-    const source = node.attrs.source.trim()
-    if (state.isGFM) {
-      // Other Markdown readers get the sketch as an image of its SVG. The gravel
-      // pattern is left out because its def is about 22 KB, the largest by far;
-      // gravel-filled shapes show only their outlines.
-      const svg = node.attrs.svg ? node.attrs.svg : renderSketch(source).svg
-      state.paths.set(defIndex, svg
-        ? "data:image/svg+xml," + encodeURIComponent(writeSVG(svg, ["gravel"]))
-        : "undefined")
-    } else {
-      // Hurmet writes the sketch source on one line. Its line breaks are written as ␤.
-      state.paths.set(defIndex, "sketch: " + source.replace(/\n/g, "␤"))
-    }
-    // The title is only a label. md2ast reads the sketch from its source.
-    // Brackets are dropped so they can't end the reference early.
-    const match = sketchTitleRegEx.exec(source)
-    const title = match ? match[1].replace(/""/g, '"').replace(/[[\]]/g, "").trim() : ""
-    state.write(title ? `![${title}][${defIndex}]` : `![${defIndex}][]`)
+    state.write("!" + writeSketchRef(state, node))
   },
   tex(state, node) {
     const tex = node.attrs.tex.trim()
@@ -440,8 +428,32 @@ function isPlainURL(link, parent, index, side) {
 }
 
 const titleRegEx = /\n *title +"([^\n]+)" *\n/
-// Sketch source begins with its title. Inside the quotes, a quotation mark is written "".
-const sketchTitleRegEx = /^ *title +"((?:[^"\n]|"")*)"/
+
+// Defer the definition of a sketch or figsketch node to the end of the document.
+// Return its reference, `[title][n]`, without the leading ! or !!.
+// `source` differs from the node's own source when a figure's caption was edited.
+const writeSketchRef = (state, node, source = node.attrs.source) => {
+  const defIndex = getDefIndex(state)
+  const isEdited = source !== node.attrs.source
+  source = source.trim()
+  if (state.isGFM) {
+    // Other Markdown readers get the sketch as an image of its SVG. The gravel
+    // pattern is left out because its def is about 22 KB, the largest by far;
+    // gravel-filled shapes show only their outlines.
+    const svg = node.attrs.svg && !isEdited ? node.attrs.svg : renderSketch(source).svg
+    state.paths.set(defIndex, svg
+      ? "data:image/svg+xml," + encodeURIComponent(writeSVG(svg, ["gravel"]))
+      : "undefined")
+  } else {
+    // Hurmet writes the sketch source on one line. Its line breaks are written as ␤.
+    state.paths.set(defIndex, "sketch: " + source.replace(/\n/g, "␤"))
+  }
+  // The title is only a label, even in a figure. md2ast reads the sketch, and
+  // any caption, from its source.
+  // Brackets are dropped so they can't end the reference early.
+  const title = sketchTitle(source).replace(/[[\]]/g, "").trim()
+  return title ? `[${title}][${defIndex}]` : `[${defIndex}][]`
+}
 
 const getDefIndex = state => {
   // We use reference links and defer link paths and image paths to the end of the document.

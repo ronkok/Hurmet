@@ -23,7 +23,7 @@ import { isInTable, addColumnBefore, deleteColumn,
 
 import hurmet from "./hurmet"
 import { openSketch } from "./sketch/sketch.js"
-import { sketchAttrs } from "./renderSketch"
+import { placeSketch } from "./placeSketch"
 import { draftMode } from "./draftMode"
 import { hurmetMarkdownSerializer } from "./to_markdown"
 import { readFile, handleContents, revertToSnapshotByPos } from "./openfile"
@@ -883,7 +883,7 @@ const imagePromptOptions = (
       current: attrs && attrs.class ? attrs.class : "inline"
     },
     checkbox: {
-      name: "Include a caption",
+      name: "Use the description for a caption",
       checked: inFigure
     },
     callback(attrs) {
@@ -918,12 +918,8 @@ function insertSketch(nodeType) {
     icon: hurmetIcons.pencil,
     enable(state) { return canInsert(state, nodeType) },
     run(state, _, view) {
-      openSketch("", source => {
-        if (!source) { return } // Cancel, or an empty sketch
-        const node = nodeType.create(sketchAttrs(source, view.state.doc))
-        view.dispatch(view.state.tr.replaceSelectionWith(node))
-        view.focus()
-      })
+      // Cancel, or an empty sketch, inserts nothing.
+      openSketch("", source => placeSketch(view, source))
     }
   })
 }
