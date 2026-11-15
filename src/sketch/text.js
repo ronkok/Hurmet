@@ -53,7 +53,9 @@ const getTextBoundingBox = (text, modelPoint, appState) => {
     const small = (node.marks || []).some(m => m.type === 'subscript' || m.type === 'superscript')
     return sum + node.text.length * (small ? 0.8 : 1)
   }, 0)
-  width = Math.max(...lines.map(lineWidth)) * fontSize * 0.6 / S;
+  // An empty label (a dimension label whose text was erased) still needs a box
+  // the select tool can click, so give it the width of two characters.
+  width = (Math.max(...lines.map(lineWidth)) || 2) * fontSize * 0.6 / S;
   // Estimate height: 1em per line
   height = lines.length * fontSize / S;
   // Define position, { x, y, width, height}, where (x,y) is the bottom-left corner

@@ -374,6 +374,12 @@ export const dimensionLabel = (value, appState) => {
     : formatNum(value)
 }
 
+// The text drawn for a span's written label (see writtenLabel below). A label
+// of only spaces is an erased label: an empty <text>, kept so it can be selected.
+const shownLabel = (label, dimValue, appState) => label === null
+  ? dimensionLabel(dimValue, appState)
+  : label.trim() === "" ? "" : label
+
 const dimensionGroup = (args, appState, dwg) => {
   // Optional trailing angles make an oblique dimension string:
   //   dimension (points; labelPoint), [labels], dimAngle, extAngle
@@ -383,8 +389,9 @@ const dimensionGroup = (args, appState, dwg) => {
     return obliqueDimensionGroup(args, appState)
   }
   const labels = args[1];
-  // The label written for span i. "" means leave the span
-  // blank. null means none was written, so show the measured length.
+  // The label written for span i. "" means leave the span without a label.
+  // " " means an empty label, kept so it can be selected and retyped.
+  // null means none was written, so show the measured length.
   const writtenLabel = i => {
     const label = Array.isArray(labels) ? labels[i] : undefined
     return typeof label === "string" ? label : null
@@ -443,7 +450,7 @@ const dimensionGroup = (args, appState, dwg) => {
         y: (dimPts[i][1] + dimPts[i + 1][1]) / 2
       }
       const textElement = text.createLabelElement(
-        label ?? dimensionLabel(dimValue, appState),
+        shownLabel(label, dimValue, appState),
         midPoint,
         appState
       )
@@ -496,7 +503,7 @@ const dimensionGroup = (args, appState, dwg) => {
         y: labelPoint[1]
       }
       const textElement = text.createLabelElement(
-        label ?? dimensionLabel(dimValue, appState),
+        shownLabel(label, dimValue, appState),
         midPoint,
         appState
       )
@@ -595,7 +602,7 @@ const obliqueDimensionGroup = (args, appState) => {
       x: (feet[i].x + feet[i + 1].x) / 2,
       y: (feet[i].y + feet[i + 1].y) / 2
     }
-    elements.push(text.createLabelElement(label ?? dimensionLabel(dimValue, appState), midPoint, appState))
+    elements.push(text.createLabelElement(shownLabel(label, dimValue, appState), midPoint, appState))
   }
   appState.textposition = textposition
   return elements

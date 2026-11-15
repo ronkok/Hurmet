@@ -80,7 +80,8 @@ const relabelSelectedDimensions = (appState, domRefs, dwg) => {
     // A copy of a dimension's label, made without the rest of it.
     if (members.every(m => m.tag === 'text')) { return }
     const def = dimensionDefinition(members)
-    // null asks elementObject to measure the span; "" leaves it blank.
+    // null asks elementObject to measure the span; "" leaves it without a label.
+    // An erased label arrives as " ", which keeps it.
     const labels = def.labels.map(label => {
       if (label === null) { return "" }
       return measuredLabelRegex.test(label.trim()) ? null : label

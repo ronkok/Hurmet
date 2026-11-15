@@ -234,7 +234,7 @@ const stringifyArrow = ([arrow, textElement], dwgState) => {
 //         or "oblique" (any other directions, written with its two angles)
 //   points: the dimension points, [x, y] each
 //   labelPoint: [x, y], a point on the dimension line
-//   labels: one per span; the label's text, or null for a deleted label
+//   labels: one per span; the label's text (" " if erased), or null for a deleted label
 //   dimAngle, extAngle: directions of the dimension and extension lines, in degrees
 export const dimensionDefinition = (groupElements) => {
   // Dimension lines are always 0.5px thick and black.
@@ -306,7 +306,8 @@ export const dimensionDefinition = (groupElements) => {
         nearest = j
       }
     })
-    if (nearest !== -1) { labels[nearest] = textEl.text }
+    // An erased label is written " ", since "" means a deleted one.
+    if (nearest !== -1) { labels[nearest] = textEl.text === "" ? " " : textEl.text }
   }
   return { form, points, labelPoint, labels, dimAngle: tidy(dimAngle), extAngle: tidy(extAngle) }
 }
