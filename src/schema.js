@@ -287,7 +287,14 @@ export const nodes = {
         class: "figimg"
       }
     }}],
-    toDOM(node) { return ["img", node.attrs] }
+    toDOM(node) {
+      // The position class belongs to the <figure>, not to the <img> inside it.
+      // Match md2html, which writes class="figimg".
+      const attrs = { src: node.attrs.src, class: "figimg" }
+      if (node.attrs.alt) { attrs.alt = node.attrs.alt }
+      if (node.attrs.width) { attrs.width = node.attrs.width }
+      return ["img", attrs]
+    }
   },
 
   figure: {

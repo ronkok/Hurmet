@@ -141,6 +141,27 @@ figcaption:first-child {
 figure.right, figure.left {
   margin: 0px 10px 5px 10px
 }
+figure.right { float: right; }
+figure.left { float: left; }
+/* An image figure is a table whose caption is below the image. The figure
+   shrinks to the image and a long caption wraps at the image's width. */
+figure:has(> img.figimg) {
+  display: table;
+}
+figure.inline:has(> img.figimg) {
+  display: inline-table;
+  vertical-align: top;
+  margin: 5px 10px 5px 0;
+}
+figure > img.figimg {
+  display: block;
+  float: none;
+  margin: 0 auto;
+}
+figure > img.figimg + figcaption {
+  display: table-caption;
+  caption-side: bottom;
+}
 
 .reduced {
     font-size: 80%;
