@@ -32,9 +32,9 @@
 <div style="display: none" id="content">
 
 <h2 id="welcome">Welcome</h2>
-<p>Create documents with working, well-documented calculations!</p>
+<p>Create documents with working, well-documented calculations</p>
 <p>This is a live text editor. You can click anywhere and start typing. The calculation cells are also live. You can click on one and edit it. They will all update if you close a calculation cell with <strong>Enter</strong>.</p>
-
+<p>The sketches are also live. You can click on one to open a sketch editor.</p>
 <h2 id="calculations">Calculations</h2>
 <p>To create a calculation cell, select a spot and type <strong>Alt+C</strong> or hit the <img src="./images/C.svg" alt="C" class="inline"> button. Write your calculation into the cell and write a “?” sign where the result should appear. Hit the <strong>Enter</strong> key and a completed calculation will appear, like these:</p>
 <p><span class="hurmet-calc" data-entry="1//8 × 0.375 × 13.5² = ?"></span></p>
@@ -60,7 +60,27 @@ Write a number and a unit name together with no space, as in <code>20meters</cod
 <p><span class="hurmet-calc" data-entry="oops = 3 'm' + 2 'hours' = ??"></span></p>
 
 <h2 id="vectors">Vectors</h2>
-<p>Calculations<img src="images/IsoTankCourses.svg" alt="Tank Iso" width="230" class="right"> can be done on vectors.
+<p>Calculations<span class="hurmet-sketch" data-source="title &quot;Tank Dimensions&quot;
+frame 217, 188, &quot;right&quot;
+scene 0.0075, &quot;ft&quot;, 9.4676, -23.537
+ellipse [0, 42], 6, 2.75
+arc (-6, 41.5; 6, 41.5), [6, 2.75, 0]
+line (-6, 42; -6, 29.5)
+line (6, 42; 6, 29.5)
+arc (-9, 28.5; 9, 28.5), [9, 4.5, 0]
+arc (9, 29.5; 6, 33), [9, 4.5, 0]
+arc (-6, 33; -9, 29.5), [9, 4.5, 0]
+arc (-6, 29.5; 6, 29.5), [6, 2.75, 0]
+arc (-9, 29.5; 9, 29.5), [9, 4.5, 0]
+line (-9, 28.5; -9, 29.5)
+line (9, 28.5; 9, 29.5)
+linetype &quot;dashed&quot;
+arc (-6, 37.5; 6, 37.5), [6, 2.75, 0]
+arc (-6, 33.5; 6, 33.5), [6, 2.75, 0]
+dimension (6, 37.5; 6, 33; 10, 35.25), [&quot;h&quot;]
+dimension (6, 41.5; 6, 29.5; 13.5, 35.5), [&quot;H&quot;]
+" contenteditable="false" draggable="true" style="float: right;">
+</span> can be done on vectors.
 Say that we want to build a cylindrical water tank in 5-foot courses.
 <table class="nogrid"><tbody>
   <tr>
@@ -328,8 +348,69 @@ Say that we want to build a cylindrical water tank in 5-foot courses.
 <p>Such data can be stored in a remote file. Say that we want to engineer a steel end-plate connection. The calculation could begin by fetching a chunk of data about steel shapes and loading that data into a variable, like this:</p>
 <p><span class="hurmet-calc" data-entry="wideFlanges = fetch(&quot;https://gist.githubusercontent.com/ronkok/d2ae5b3c74889e71c7bb8422b6017067/raw/AISC-v15-wideFlanges.tsv&quot;) = !"></span></p>
 <p>From that, we can load data into variables for individual dimensions.</p>
+<p><span class="hurmet-sketch" data-source="title &quot;End Plate Connection&quot;
+frame 410, 274, &quot;center&quot;
+scene 0 1/16, &quot;in&quot;, 0.6667, -0.082
+line (26, 32.284639392; 26, 1.184595353)
+line (40, 34.582349316; 40, 4.235877404)
+line (27, 32.44876153; 27, 1.402544071)
+line (39, 34.418227179; 39, 4.017928686)
+line (43.609737178, 35.174787098; 23.75, 31.915364583)
+line (43.5, 4.998697917; 24, 0.748697917)
+line (41.5, 26; 59.978577645, 26)
+line (41.5, 14; 57.19359471, 14)
+line (41.5, 25.125; 59.775505973, 25.125)
+line (41.5, 14.875; 57.396666382, 14.875)
+line (41.5, 30; 41.5, 10)
+line (41.5, 30; 40, 30)
+line (41.5, 10; 40, 10)
+line (60.372, 27.6951875; 56.836, 12.4591875)
+line (39, 28.5; 41.5, 28.5)
+line (39, 27.5; 41.5, 27.5)
+line (39, 12.5; 41.5, 12.5)
+line (39, 11.5; 41.5, 11.5)
+fill &quot;#000000&quot;
+rect (39, 27.5; 41.5, 28.5)
+rect (39, 11.5; 41.5, 12.5)
+dimension (26, 32.284639392; 40, 34.582349316; 33, 38), [&quot;d~c~&quot;]
+dimension (59.978577645, 26; 57.19359471, 14; 64, 20), [&quot;d~b~&quot;]
+strokewidth 0.5
+line (2, 34.222222222; 2, 4.4)
+line (16, 35.777777778; 16, 7.2)
+line (2.5, 30; 2.5, 10)
+line (15.5, 30; 15.5, 10)
+line (15.5, 30; 2.5, 30)
+line (15.5, 10; 2.5, 10)
+strokewidth 1
+fill &quot;#d9dde0&quot;
+path (3, 26, 0; 15, 26, 0; 15, 25.395, 0; 9.79, 25.395, 0; 9.195, 24.8, 0.595; 9.195, 15.1, 0; 9.79, 14.505, 0.595; 15, 14.505, 0; 15, 13.9, 0; 3, 13.9, 0; 3, 14.505, 0; 8.21, 14.505, 0; 8.805, 15.1, 0.595; 8.805, 24.8, 0; 8.21, 25.395, 0.595; 3, 25.395, 0; 3, 26, 0)
+line (18, 36; 0, 34)
+line (20, 8; 0, 4)
+linetype &quot;dashed&quot;
+line (9.407543952, 35.045282661; 9.398357967, 26)
+line (8.657458926, 34.961939881; 8.64835758, 26)
+line (9.398357967, 13.9; 9.398357967, 5.879671593)
+line (8.64835758, 13.9; 8.64835758, 5.729671516)
+linetype &quot;solid&quot;
+fill &quot;#000000&quot;
+circle [5, 28], 0.625
+circle [13, 28], 0.625
+circle [5, 12], 0.625
+circle [13, 12], 0.625
+dimension (2, 34.222222222; 16, 35.777777778; 9, 42), [&quot;b~c~&quot;]
+circle [5, 23.395], 0.625
+circle [13, 23.395], 0.625
+circle [5, 16.405], 0.625
+circle [13, 16.405], 0.625
+line (39, 23.895; 41.5, 23.895)
+line (39, 22.895; 41.5, 22.895)
+rect (39, 22.895; 41.5, 23.895)
+line (39, 16.905; 41.5, 16.905)
+line (39, 15.905; 41.5, 15.905)
+rect (39, 15.905; 41.5, 16.905)
+" contenteditable="false" draggable="true" style="display: block; text-align: center;"></span></p>
 
-<h4 id="beam-properties">Beam properties<img src="images/EndPlateConnection.svg" alt="End Plate Connection" width="250" class="right">:</h4>
+<h4 id="beam-properties">Beam properties:</h4>
 <p><span class="hurmet-calc" data-entry="b_bf, t_bf, t_bw, d_b = wideFlanges.W16X57[&quot;bf&quot;, &quot;tf&quot;, &quot;tw&quot;, &quot;d&quot;] = !"></span></p>
 
 <h4 id="column-properties">Column properties:</h4>
