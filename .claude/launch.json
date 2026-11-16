@@ -1,0 +1,33 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "drawCompare",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/ronko/AppData/Local/Temp/claude/c19f1fd2c76a8f68/1529b374-de95-401b-b922-ec52cc366074/scratchpad/serve.cjs"
+      ],
+      "port": 8731
+    },
+    {
+      "name": "preview",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "preview/server.cjs",
+        "preview/index.html",
+        "8001"
+      ],
+      "port": 8001
+    },
+    {
+      "name": "preview8002",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "preview/server.cjs",
+        "preview/index.html",
+        "8002"
+      ],
+      "port": 8002
+    }
+  ]
+}

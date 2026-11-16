@@ -22,6 +22,8 @@ export default [{
         "**/inputrules.js",
         "**/currencyRates.js",
         "**/temml.js",
+        // Sketch's code, moved here from its own repository, isn't reformatted yet.
+        "src/sketch/**",
     ],
 }, ...compat.extends("eslint:recommended"), {
     languageOptions: {

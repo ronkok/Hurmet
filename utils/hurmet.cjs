@@ -343,6 +343,7 @@ const errorMessages = Object.freeze({
     MATRIX_MOD:"Error. Cannot take the modulo of one matrix by another.",
     BAD_INDEX: "Error. Index to a matrix must be numeric.",
     FUNC_LINE: "Error in function @",
+    DRAW_ARG:  "Error. Invalid arguments to drawing statement “@”.",
     BAD_BREAK: "Error in function @. break called outside of a loop",
     FETCH:     "Error. A fetch() function must be the only item in its expression.",
     STR_INDEX: "Error. The index to text may be only a real number or a range.",
@@ -573,7 +574,7 @@ const subtract$1 = (a, b) => {
     : normalize([a[0] * b[1] - b[0] * a[1], a[1] * b[1]])
 };
 
-const multiply$1 = (a, b) => [a[0] * b[0], a[1] * b[1]];
+const multiply$2 = (a, b) => [a[0] * b[0], a[1] * b[1]];
 
 const divide$1 = (a, b) => {
   let numerator = a[0] * b[1];
@@ -786,7 +787,7 @@ const doubleFactorial = n => {
   } else {
     let r = n;
     for (let i = Rnl.toNumber(n) - 2; i > 0; i -= 2) {
-      r = multiply$1(r, fromNumber(i));
+      r = multiply$2(r, fromNumber(i));
     }
     return r
   }
@@ -799,7 +800,7 @@ const lanczos$1 = xPlusOne => {
   // The following equation is from p. 116 of the Pugh thesis:
   // Γ(x+1) ≈ 2 * √(e / π) * ((x + 10.900511 + 0.5) / e) ^ (x + 0.5) * sum
   const x = subtract$1(xPlusOne, one);
-  const term1 = multiply$1(two, sqrt$1(divide$1(e$1, pi$1)));
+  const term1 = multiply$2(two, sqrt$1(divide$1(e$1, pi$1)));
   const term2 = power$1(divide$1(add$1(x, fromNumber(11.400511)), e$1), add$1(x, [iOne, iTwo]));
 
   // Coefficients from Pugh, Table 8.5
@@ -815,7 +816,7 @@ const lanczos$1 = xPlusOne => {
     sum = add$1(sum, divide$1(fromString(d[k]), add$1(x, fromNumber(k))));
   }
 
-  return multiply$1(multiply$1(term1, term2), sum)
+  return multiply$2(multiply$2(term1, term2), sum)
 };
 
 const Rnl = Object.freeze({
@@ -837,7 +838,7 @@ const Rnl = Object.freeze({
   ceil,
   add: add$1,
   subtract: subtract$1,
-  multiply: multiply$1,
+  multiply: multiply$2,
   divide: divide$1,
   reciprocal,
   gcd,
@@ -1338,6 +1339,12 @@ const fromAssignment = (cellAttrs, unitAware) => {
 
   } else if (cellAttrs.dtype === dt.SPREADSHEET) {
     return cellAttrs
+
+  } else if (cellAttrs.dtype === dt.DRAWING) {
+    // Pass a drawing by reference. Each statement in a draw() function compiles to
+    // svg = statement(svg, …), and the draw.js methods add to svg in place.
+    // A copy here would copy the whole drawing at every statement.
+    oprnd.value = cellAttrs.value;
 
   } else {
     // For all other data types, we employ copy-on-read. So we return a deep copy from here.
@@ -2361,7 +2368,7 @@ const angle = (z) => {
 const add = (x, y) => [Rnl.add(x[0], y[0]), Rnl.add(x[1], y[1])];
 const subtract = (x, y) => [Rnl.subtract(x[0], y[0]), Rnl.subtract(x[1], y[1])];
 
-const multiply = (x, y) => {
+const multiply$1 = (x, y) => {
   return [
     Rnl.subtract(Rnl.multiply(x[0], y[0]), Rnl.multiply(x[1], y[1])),
     Rnl.add(Rnl.multiply(x[0], y[1]), Rnl.multiply(x[1], y[0]))
@@ -2506,12 +2513,12 @@ const power = (x, y) =>{
 
 const acosh = z => {
   // acosh(z) = log( z + √(z - 1) × √(z + 1) )
-  return log(add(z, multiply(sqrt(decrement(z)), sqrt(increment(z)))))
+  return log(add(z, multiply$1(sqrt(decrement(z)), sqrt(increment(z)))))
 };
 
 const asinh = z => {
   // Log(z + Sqrt(z * z + 1))
-  const s = sqrt(add(multiply(z, z), [Rnl.one, Rnl.zero]));
+  const s = sqrt(add(multiply$1(z, z), [Rnl.one, Rnl.zero]));
   return log(add(z, s))
 };
 
@@ -2522,13 +2529,13 @@ const atanh = z => {
 
 const asin = z => {
   // arcsinh (i * z) / i
-  return divide(asinh(multiply(j, z)), j)
+  return divide(asinh(multiply$1(j, z)), j)
 };
 
 const atan = z => {
   // (Log(1 + iz) - Log(1 - iz)) / (2 * i)  cf Kahan
-  const term1 = log(increment(multiply(j, z)));
-  const term2 = log(subtract([Rnl.one, Rnl.zero],(multiply(j, z))));
+  const term1 = log(increment(multiply$1(j, z)));
+  const term2 = log(subtract([Rnl.one, Rnl.zero],(multiply$1(j, z))));
   return divide(subtract(term1, term2), [Rnl.zero, Rnl.two])  
 };
 
@@ -2547,7 +2554,7 @@ const lanczos = zPlusOne => {
   // Γ(z+1) ≈ 2 * √(e / π) * ((z + 10.900511 + 0.5) / e) ^ (z + 0.5) * sum
   const z = subtract(zPlusOne, [Rnl.one, Rnl.zero]);
   const sqr = Rnl.sqrt(Rnl.divide(e, pi));
-  const term1 = multiply([Rnl.two, Rnl.zero], [sqr, Rnl.zero]);
+  const term1 = multiply$1([Rnl.two, Rnl.zero], [sqr, Rnl.zero]);
   const k = Rnl.fromNumber(11.400511);
   const oneHalf = [[BigInt(1), BigInt(2)], Rnl.zero];
   const term2 = power(divide(add(z, [k, Rnl.zero]), [e, Rnl.zero]), add(z, oneHalf));
@@ -2567,7 +2574,7 @@ const lanczos = zPlusOne => {
     sum = add(sum, divide(d, add(z, complexK)));
   }
 
-  return multiply(multiply(term1, term2), sum)
+  return multiply$1(multiply$1(term1, term2), sum)
 };
 
 const display$3 = (z, formatSpec, decimalFormat) => {
@@ -2612,7 +2619,7 @@ const Cpx = Object.freeze({
   add,
   subtract,
   divide,
-  multiply,
+  multiply: multiply$1,
   negate,
   power,
   exp,
@@ -2791,7 +2798,7 @@ const findfirst$1 = (el, array) => {
   return Rnl.zero
 };
 
-const identity = (num, mutable) => {
+const identity$1 = (num, mutable) => {
   const n = Rnl.isRational(num) ? Rnl.toNumber(num) : num;
   if (n === 1) {
     return  [Rnl.one]
@@ -2822,7 +2829,7 @@ const invert = (matrix, returnDeterminant) => {
   let determinant = Rnl.one;
 
   const C = clone(matrix);
-  const I = identity(dim, true);
+  const I = identity$1(dim, true);
 
   for (i = 0; i < dim; i += 1) {
     // get the element temp on the diagonal
@@ -3159,7 +3166,7 @@ const Matrix = Object.freeze({
   displayAlt: displayAlt$2,
   elementDisplay,
   findfirst: findfirst$1,
-  identity,
+  identity: identity$1,
   invert,
   multResultType,
   ones,
@@ -7263,6 +7270,3544 @@ const Tuple = Object.freeze({
   displayAlt
 });
 
+// Read a sketch's header settings from its source, without drawing it.
+// md2ast, the Markdown serializer, and the editor use these to put a captioned
+// sketch in a figure. The source is the authority: the caption is the title.
+
+// Inside the quotes, a quotation mark is written "".
+const titleRegEx$1 = /^ *title +"((?:[^"\n]|"")*)"/m;
+const captionRegEx = /^ *caption +true *$/m;
+const positionRegEx = /^ *frame +[^\n]*, *"(inline|left|center|right)" *$/m;
+
+const sketchTitle = source => {
+  const match = titleRegEx$1.exec(source);
+  return match ? match[1].replace(/""/g, '"').trim() : ""
+};
+
+// Return the source with its title replaced. A caption edited in the document
+// becomes the title this way. The source keeps its other lines as they are.
+const withSketchTitle = (source, title) => {
+  const line = `title "${title.replace(/"/g, '""')}"`;
+  return titleRegEx$1.test(source)
+    ? source.replace(titleRegEx$1, () => line)
+    : line + "\n" + source
+};
+
+// The source of the figsketch in a ProseMirror figure node, with the figure's
+// caption, which an author may have edited, as its title. The caption is flattened
+// to plain text; inline atoms such as calculations have no text, so they drop out.
+const figureSketchSource = figure => {
+  const source = figure.child(0).attrs.source;
+  const caption = figure.childCount > 1 ? figure.child(1).textContent.trim() : "";
+  return caption === sketchTitle(source) ? source : withSketchTitle(source, caption)
+};
+
+const sketchHasCaption = source => captionRegEx.test(source);
+
+// inline, left, center, or right
+const sketchPosition = source => {
+  const match = positionRegEx.exec(source);
+  return match ? match[1] : "inline"
+};
+
+/**
+ * md2ast() returns an AST that matches the memory structure  of a Hurmet.org document.
+ * Elsewhere, Hurmet uses the AST to create either a live Hurmet doc or a static HTML doc.
+ *
+ * ## Restrictions
+ *
+ * 1. **_bold-italic_** must use both * & _ delimiters. Hurmet will fail on ***wat***.
+ * 2. "Shortcut" reference links [ref] are not recognized.
+ *
+ * ## Extensions
+ *
+ * 1. Hurmet has a meta-document section at the top of the file, similar to MultiMarkdown.
+ * 2. Hurmet inline calculation is delimited ¢`…`, where "…" is the entry input by the author.
+ *    Hurmet display calculation is delimited ¢¢…¢¢.
+ *    Alternate: ¢©`name = expression = 〔result〕unit`, where "©" is a display selector.
+ * 3. LaTeX inline math is delimited $…$ or $`…`$. \(…\) is also recognized.
+ *    No space allowed after 1st $ or before 2nd $. No digit after 2nd $.
+ *    LaTeX display math is delimited  $$ … $$. \[…\] is also recognized.
+ * 4. ~subscript~
+ * 5. ^superscript^
+ * 6. ~~strikethrough~~
+ * 7. Pipe tables as per Github Flavored Markdown (GFM).
+ * 8. Grid tables as per Pandoc and reStructuredText
+ * 9. Empty paragraphs: A line consisting only of "¶" or "&nbsp;".
+ * 10. Attributes for reference link definitions
+ *       [id]: target
+ *       {.class #id width=number}
+ * 11. Figure/Caption for images. Format is a paragraph that consists entirely of:
+ *       !![caption][id]
+ * 12. Figure/Caption for tables.
+ *     The caption is on the line above a table and is preceded by `: `, as per Pandoc.
+ * 13. Table directives. They are placed on the line after the table. The format is:
+ *     {#id .class float="(left|right)" colWidths="num1 num2 …"}
+ *     {."class1 class2"}  ←  Alternate class syntax for when there is > 1 classname
+ *     Float is applied only to a table inside a figure.
+ *     A spreadsheet will include " spreadsheet" in `.class` The id will be the sheet's name.
+ * 14. Lists that allow the user to pick list ordering.
+ *        1. →  1. 2. 3.  etc.
+ *        A. →  A. B. C.  etc.
+ *        a. →  a. b. c.  etc.
+ *        a) →  (a) (b) (c)  etc. (future)
+ * 15. Alerts per GFM
+ *     > [!note] or [!tip] or [!important] or [!warning] or [!epigraph]
+ *     > Content of note
+ * 16. Fenced divs, similar to Pandoc.
+ *     ::: (centered|right_justified|comment|indented|boxed|header)
+ *     Block elements
+ *     :::
+ *     Nested divs are distinguished by number of colons. Minimum three.
+ * 17. Table of Contents
+ *     {.toc start=N end=N}
+ * 18. Page break, per Pandoc
+ *     \\newpage
+ * 19. Definition lists, per Pandoc.  (future)
+ * 20. [^1] is a reference to a footnote.
+ *     [^1]: The body of the footnote is deferred, similar to reference links.
+ * 21. [#1] is a reference to a citation. (future)
+ *     [#1]: The body of the citation is deferred, similar to reference links.
+ * 22. Line blocks begin with "| ", as per Pandoc. (future)
+ *
+ * copyright (c) 2021 - 2025 Ron Kok
+ *
+ * This file has been adapted (and heavily modified) from Simple-Markdown.
+ * Simple-Markdown copyright (c) 2014-2019 Khan Academy & Aria Buckles.
+ *
+ * Portions of Simple-Markdown were adapted from marked.js copyright (c) 2011-2014
+ * Christopher Jeffrey (https://github.com/chjj/).
+ *
+ * LICENSE (MIT):
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+
+const CR_NEWLINE_R = /\r\n?/g;
+const FORMFEED_R = /\f/g;
+const CLASS_R = /(?:^| )\.([a-z-]+)(?: |&|$)/;
+const tableClassRegEx = /(?:^| )\.(?:([a-z-]+)(?: |$)|"([^"]+)")/;
+const floatRegEx = /float="(left|right)"/;
+const WIDTH_R = /(?:^| )width="?([\d.a-z]+"?)(?: |$)/;
+const ALT_R = /(?:^| )alt="([A-Za-z\d ]+)"(?: |$)/;
+const COL_WIDTHS_R = /(?:^| )colWidths="([^"]*)"/;
+const ID_R = /(?:^| )#([A-Za-z][A-Za-z0-9]*)(?: |$)/;
+const leadingSpaceRegEx$2 = /^ +/;
+const trailingSpaceRegEx$1 = / +$/;
+
+// Turn various whitespace into easy-to-process whitespace
+const preprocess = function(source) {
+  return source.replace(CR_NEWLINE_R, "\n").replace(FORMFEED_R, "");
+};
+
+// Creates a match function for an inline scoped element from a regex
+const inlineRegex = function(regex) {
+  const match = function(source, state) {
+    return state.inline ? regex.exec(source) : null
+  };
+  match.regex = regex;
+  return match;
+};
+
+// Creates a match function for a block scoped element from a regex
+const blockRegex = function(regex) {
+  const match = function(source, state) {
+    return state.inline ? null : regex.exec(source)
+  };
+  match.regex = regex;
+  return match;
+};
+
+// Creates a match function from a regex, ignoring block/inline scope
+const anyScopeRegex = function(regex) {
+  const match = function(source, state) {
+    return regex.exec(source);
+  };
+  match.regex = regex;
+  return match;
+};
+
+const UNESCAPE_URL_R = /\\([^0-9A-Za-z\s])/g;
+const unescapeUrl = function(rawUrlString) {
+  return rawUrlString.replace(UNESCAPE_URL_R, "$1");
+};
+
+const isNotAnInteger = str => isNaN(str) || Number(str) % 1 !== 0;
+
+const indentRegEx = /^ +/;
+const insertNewlines = str => {
+  // Lists are unlike other blocks in one respect.
+  // A list might not have a preceding blank line, if the list is inside another list.
+  // Since the RegEx patterns all depend on that blank line, we will scan the top-level
+  // list and insert blank lines where needed.
+  const lines = str.split("\n");
+  let numLines = lines.length;
+  let i = 0;
+  let prevIndent = 0;
+  let prevLineWasEmpty = true;
+  while (i < numLines) {
+    const line = lines[i];
+    const isEmptyLine = (line === "");
+    if (!isEmptyLine) {
+      if (LIST_ITEM_PREFIX_R.test(line)) {
+        const match = indentRegEx.exec(line);
+        const indent = match ? match[0].length : 0;
+        if (indent !== prevIndent && !prevLineWasEmpty) {
+          // This line starts a new list and needs a preceeding blank line
+          lines.splice(i, 0, "");
+          i += 1;
+          numLines += 1;
+          prevLineWasEmpty = true;
+          continue
+        }
+        prevIndent = indent;
+      }
+    }
+    prevLineWasEmpty = isEmptyLine;
+    i += 1;
+  }
+  return lines.join("\n")
+};
+
+const parseList = (str, state) => {
+  if (!state.inList) {
+    // This is a top-level list.
+    str = str.replace(LIST_BLOCK_END_R, "\n");
+    str = insertNewlines(str);
+  }
+  const items = str.match(LIST_ITEM_R);
+  const isTight = !/\n\n/.test(str.replace(/\n*$/, ""));
+  // Backup our state for restoration afterwards.
+  const oldStateList = state.inList;
+  state.inList = true;
+  const itemContent = items.map(function(item, i) {
+    // We need to see how far indented this item is:
+    const prefixCapture = LIST_ITEM_PREFIX_R.exec(item);
+    const space = prefixCapture ? prefixCapture[0].length : 0;
+    // And then we construct a regex to "unindent" the subsequent
+    // lines of the items by that amount:
+    const spaceRegex = new RegExp("^ {1," + space + "}", "gm");
+
+    // Before processing the item, we need a couple things
+    const contentStr = item
+      // remove indents on trailing lines:
+      .replace(spaceRegex, "")
+      // remove the bullet:
+      .replace(LIST_ITEM_PREFIX_R, "");
+
+    // Backup our state for restoration afterwards.
+    const oldStateInline = state.inline;
+
+    // Parse the list item
+    state.inline = isTight;
+    const adjustedContent = contentStr.replace(LIST_ITEM_END_R, "");
+    const content = parse(adjustedContent, state);
+    const result = isTight
+      ? { type: "tight_list_item", content: [{ "type": "paragraph", "content": content }] }
+      : { type: "list_item", content };
+
+    // Restore our state before returning
+    state.inline = oldStateInline;
+    return result;
+  });
+
+  state.inList = oldStateList;
+  return itemContent
+};
+
+const TABLES = (function() {
+  const TABLE_ROW_SEPARATOR_TRIM = /^ *[|+] *| *[|+] *$/g;
+  const TABLE_RIGHT_ALIGN = /^(?:[ -]-+|=+):$/;
+  const TABLE_CENTER_ALIGN = /^:[-=]+:$/;
+
+  const parseTableAlign = function(source) {
+    // Inspect ":" characters to set column justification.
+    // Return class names that specify center or right justification on specific columns.
+    source = source.replace(TABLE_ROW_SEPARATOR_TRIM, "");
+    const alignArr = source.trim().split(/[|+]/);
+    let alignStr = "";
+    for (let i = 0; i < alignArr.length; i++) {
+      alignStr += TABLE_CENTER_ALIGN.test(alignArr[i])
+        ? ` c${String(i + 1)}c`
+        : (TABLE_RIGHT_ALIGN.test(alignArr[i])
+        ? ` c${String(i + 1)}r`
+        : "");
+    }
+    return alignStr.trim()
+  };
+
+  const tableDirectives = (directives, align) => {
+    // Get CSS class, ID, and column widths, if any.
+    if (!directives && align === "") { return ["", "", null] }
+    const userDefClass = tableClassRegEx.exec(directives);
+    let myClass = userDefClass
+      ? (userDefClass[1] ? userDefClass[1] : userDefClass[2] )
+      : "";
+    const isSpreadsheet = myClass && myClass.split(" ").includes("spreadsheet");
+    if (align.length > 0) { myClass += (myClass.length > 0 ? " " : "") + align; }
+    const userDefId = ID_R.exec(directives);
+    const myID = (userDefId) ? userDefId[1] : "";
+    const colWidthMatch = COL_WIDTHS_R.exec(directives);
+    const colWidths = (colWidthMatch) ? colWidthMatch[1].split(" ") : null;
+    return [myClass, myID, isSpreadsheet, colWidths]
+  };
+
+  const pipeRegEx = /(?<!\\)\|/;  // eslint doesn't like look behind. Disregard the warning.
+
+  const parsePipeTableRow = function(source, parse, state, isSpreadsheet,
+                                     colWidths, inHeader) {
+    const cells = source.trim().split(pipeRegEx);
+    cells.shift();
+    cells.pop();
+    const tableRow = [{ type: "tableSeparator" }];
+    for (const str of cells) {
+      const cell = isSpreadsheet
+        ? [{ type: "spreadsheet_cell", attrs: { entry: str.trim() } }]
+        : parse(str.trim(), state);
+      tableRow.push(...cell);
+      tableRow.push({ type: "tableSeparator" });
+    }
+    consolidate(tableRow);
+
+    const row = {
+      type: "table_row",
+      content: []
+    };
+    let j = -1;
+    tableRow.forEach(function(node, i) {
+      if (node.type === "text") {
+        if (i > 0 && tableRow[i - 1].type === "tableSeparator") {
+          node.text = node.text.replace(leadingSpaceRegEx$2, "");
+        }
+        if (i < tableRow.length - 1 && tableRow[i + 1].type === "tableSeparator") {
+          node.text = node.text.replace(trailingSpaceRegEx$1, "");
+        }
+      }
+      if (node.type === "tableSeparator") {
+        if (i !== tableRow.length - 1) {  // Filter out the row's  last table separator
+          // Create a new cell
+          j += 1;
+          row.content.push({
+            "type": inHeader ? "table_header" : "table_cell",
+            "attrs": {
+              "colspan": 1,
+              "rowspan": 1,
+              "colwidth": (colWidths) ? [Number(colWidths[j])] : null,
+              "background": null
+            },
+            content: (state.inHtml || isSpreadsheet
+              ? []
+              : [{ "type": "paragraph", "content": [] }]
+            )
+          });
+        }
+      } else if (state.inHtml || isSpreadsheet) {
+        // For direct to HTML, write the inline contents directly into the <td> element.
+        // row   cell    content      text
+        row.content[j].content.push(node);
+      } else {
+        // Hurmet.app table cells always contain a paragraph.
+        // row   cell  paragraph  content      text
+        row.content[j].content[0].content.push(node);
+      }
+    });
+
+    return row;
+  };
+
+  const parsePipeTable = function() {
+    return function(capture, state) {
+      state.inline = true;
+      const align = parseTableAlign(capture[3]);
+      const [myClass, myID, isSpreadsheet, colWidths] = tableDirectives(capture[5], align);
+      const table = {
+        type: "table",
+        attrs: {},
+        content: []
+      };
+      if (myID) { table.attrs.name = myID; }
+      if (myClass) { table.attrs.class = myClass; }
+      if (isSpreadsheet) { table.attrs.dtype = dt.SPREADSHEET; }
+      if (colWidths && state.inHtml) {
+        let sum = 0;
+        colWidths.forEach(el => { sum += Number(el); } );
+        table.attrs.style = `width: ${sum}px`;
+        const colGroup = { type: "colGroup", content: [] };
+        for (const width of colWidths) {
+          colGroup.content.push({ type: "col", attrs: [{ style: `width: ${width}px` }] });
+        }
+        table.content.push(colGroup);
+      }
+      if (!/^\|+$/.test(capture[2])) {
+        table.content.push(parsePipeTableRow(capture[2], parse, state, isSpreadsheet,
+                                             colWidths, true));
+      }
+      const tableBody = capture[4].trim().split("\n");
+      tableBody.forEach(row => {
+        table.content.push(parsePipeTableRow(row, parse, state, isSpreadsheet,
+                                             colWidths, false));
+      });
+      state.inline = false;
+      if (capture[1]) {
+        const figure = { type: "figure", attrs: { class: "" }, content: [
+          { type: "figcaption", content: parseInline(capture[1], state) },
+          table
+        ] };
+        if (capture[5]) {
+          const match = floatRegEx.exec(capture[5]);
+          if (match) { figure.attrs.class = match[1]; }
+        }
+        return figure
+      } else {
+        return table
+      }
+    };
+  };
+
+  const headerRegEx = /^\+:?=/;
+  const gridSplit = / *\n/g;
+  const cellCornerRegEx = /^\+[-=:]+\+[+=:-]+\+$/g;
+
+  const parseGridTable = function() {
+    return function(capture, state) {
+      const topBorder = capture[3];
+      const lines = capture[2].slice(0, -1).split(gridSplit);
+
+      // Does the grid table contain a line separating header from table body?
+      let headerExists = false;
+      let headerSepLine = lines.length + 10;
+      for (let i = 0; i < lines.length; i++) {
+        if (headerRegEx.test(lines[i])) {
+          headerExists = true;
+          headerSepLine = i;
+          break
+        }
+      }
+
+      // Get column justification
+      const alignrow = headerExists ? lines[headerSepLine] : topBorder.slice(1);
+      const align = parseTableAlign(alignrow);
+      const [myClass, myID, isSpreadsheet, colWidths] = tableDirectives(capture[4], align);
+
+      // Read the top & left borders to find a first draft of cell corner locations.
+      const colSeps = [0];
+      for (let j = 1; j < topBorder.length; j++) {
+        if (topBorder.charAt(j) === "+") { colSeps.push(j); }
+      }
+      const rowSeps = [0];
+      for (let i = 1; i < lines.length; i++) {
+        if (lines[i].charAt(0) === "+") { rowSeps.push(i); }
+      }
+
+      // Look for the cell corner locations that don't appear on top or left border
+      let rowSepIndex = 0;
+      while (rowSepIndex < rowSeps.length) {
+        // Find the next row separator
+        let nextRow = 0;
+        const isValid = new Array(colSeps.length).fill(true);
+        for (let i = rowSeps[rowSepIndex] + 1; i < lines.length; i++) {
+          for (let k = 0; k < colSeps.length; k++) {
+            if (!isValid[k]) { continue }
+            if ("+|".indexOf(lines[i][colSeps[k]]) === -1) { isValid[k] = false; continue }
+            if (lines[i][colSeps[k]] === "+") {
+              nextRow = i;
+              break
+            }
+          }
+          if (nextRow !== 0) { break }
+        }
+        if (!rowSeps.includes(nextRow)) {
+          rowSeps.splice(rowSepIndex + 1, 0, nextRow);
+        }
+
+        // Check the next horizontal border for new cell corners
+        rowSepIndex += 1;
+        const border = lines[nextRow];
+        for (let j = 0; j < colSeps.length - 1; j++) {
+          let cellBorder = border.slice(colSeps[j], colSeps[j + 1] + 1);
+          if (cellCornerRegEx.test(cellBorder)) {
+            cellBorder = cellBorder.slice(1, -1);
+            let pos = cellBorder.indexOf("+") + 1;
+            let k = 1;
+            while (pos > 0) {
+              colSeps.splice(j + k, 0, colSeps[j] + pos);
+              pos = cellBorder.indexOf("+", pos) + 1;
+              k += 1;
+            }
+          }
+        }
+      }
+
+      const numCols = colSeps.length - 1;
+      const numRows = rowSeps.length - 1;
+      const gridTable = [];
+
+      // Create default rows and cells. They may be merged later.
+      for (let i = 0; i < numRows; i++) {
+        const row = new Array(numCols);
+        for (let j = 0; j < numCols; j++) { row[j] = { rowspan: 1 }; }
+        gridTable.push(row);
+      }
+
+      for (let i = 0; i < numRows; i++) {
+        const row = gridTable[i];
+        // Determine the actual rowspan and colspan of each cell.
+        for (let j = 0; j < numCols; j++) {
+          const cell = row[j];
+          if (cell.rowspan === 0) { continue }
+          cell.colspan = 1;
+          const lastTextRow = lines[rowSeps[i + 1] - 1];
+          for (let k = j + 1; k < colSeps.length; k++) {
+            if (lastTextRow.charAt(colSeps[k]) === "|") { break }
+            cell.colspan += 1;
+            row[k].rowspan = 0;
+          }
+          for (let k = i + 1; k < rowSeps.length; k++) {
+            const ch = lines[rowSeps[k]].charAt(colSeps[j] + 1);
+            if ("-=:".indexOf(ch) > -1) { break }
+            cell.rowspan += 1;
+            for (let jj = 0; jj < cell.colspan; jj++) {
+              gridTable[k][j + jj].rowspan = 0;
+            }
+          }
+          // Now that we know the cell extents, get the cell contents.
+          const xStart = colSeps[j] + 1;
+          const xEnd = colSeps[j + cell.colspan];
+          const yStart = rowSeps[i] + 1;
+          const yEnd = rowSeps[i + cell.rowspan];
+          let str = "";
+          for (let ii = yStart; ii < yEnd; ii++) {
+            str += lines[ii].slice(xStart, xEnd).replace(/ +$/, "") + "\n";
+          }
+          cell.blob = str.slice(0, -1).replace(/^\n+/, "");
+          const leadingSpacesMatch = /^ +/.exec(cell.blob);
+          if (leadingSpacesMatch) {
+            const numLeadingSpaces = leadingSpacesMatch[0].length;
+            const spaceRegEx = new RegExp("^" + " ".repeat(numLeadingSpaces), "gm");
+            cell.blob = cell.blob.replace(spaceRegEx, "");
+          }
+
+          cell.inHeader = (headerExists && yStart < headerSepLine);
+
+          if (colWidths) {
+            // Set an attribute used by ProseMirror.
+            const cellWidth = cell.colspan === 0 ? null : [];
+            for (let k = 0; k < cell.colspan; k++) {
+              cellWidth.push(Number(colWidths[j + k]));
+            }
+            cell.width = cellWidth;
+          }
+        }
+      }
+
+      const table = {
+        type: "table",
+        attrs: {},
+        content: []
+      };
+      if (myID) { table.attrs.name = myID; }
+      if (myClass) { table.attrs.class = myClass; }
+      if (isSpreadsheet) { table.attrs.dtype = dt.SPREADSHEET; }
+      let k = 0;
+      if (colWidths && state.inHtml) {
+        let sum = 0;
+        colWidths.forEach(el => { sum += Number(el); } );
+        table.attrs.style = `width: ${sum}px`;
+        const colGroup = { type: "colGroup", attrs: null, content: [] };
+        for (const width of colWidths) {
+          colGroup.content.push({ type: "col", attrs: [{ style: `width: ${width}px` }] });
+        }
+        table.content.push(colGroup);
+        k = 1;
+      }
+      for (let i = 0; i < numRows; i++) {
+        table.content.push({ type: "table_row", content: [] } );
+        for (let j = 0; j < numCols; j++) {
+          if (gridTable[i][j].rowspan === 0) { continue }
+          const cell = gridTable[i][j];
+          state.inline = false;
+          let content = isSpreadsheet
+            ? [{ type: "spreadsheet_cell", attrs: { entry: cell.blob.trim() } }]
+            : parse(cell.blob, state);
+          if (state.inHtml && content.length === 1 && content[0].type === "paragraph") {
+            content = content[0].content;
+          }
+          if (content.length === 1 && content[0].type === "null") {
+            content = [{ type: "paragraph", content: [] }];
+          }
+          table.content[i + k].content.push({
+            "type": cell.inHeader ? "table_header" : "table_cell",
+            "attrs": {
+              "colspan": cell.colspan,
+              "rowspan": cell.rowspan,
+              "colwidth": (colWidths) ? cell.width : null,
+              "background": null
+            },
+            content: content
+          });
+        }
+      }
+      state.inline = false;
+      if (capture[1]) {
+        const figure = { type: "figure", attrs: { class: "" }, content: [
+          { type: "figcaption", attrs: null, content: parseInline(capture[1], state) },
+          table
+        ] };
+        if (capture[4]) {
+          const match = floatRegEx.exec(capture[4]);
+          if (match) { figure.attrs.class = match[1]; }
+        }
+        return figure
+      } else {
+        return table
+      }
+    };
+  };
+
+  return {
+    parsePipeTable: parsePipeTable(),
+    PIPE_TABLE_REGEX: /^(?:: ((?:[^\n]|\n(?!\||:|<\/dl>))*)\n)?(\|.*)\n\|((?:[-: ]?-+[-: ]?\|)+)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
+    parseGridTable: parseGridTable(),
+    GRID_TABLE_REGEX: /^(?:: ((?:[^\n]|\n(?!\+|:|<\/dl>))*)\n)?((\+(?:[-:=]+\+)+)\n(?:[+|][^\n]+[+|] *\n)+)(?:\{([^\n}]+)\}\n)?\n*/
+  };
+})();
+
+const LINK_INSIDE = "(?:\\[[^\\]]*\\]|[^\\[\\]]|\\](?=[^\\[]*\\]))*";
+const LINK_HREF_AND_TITLE =
+  "\\s*<?((?:\\([^)]*\\)|[^\\s\\\\]|\\\\.)*?)>?(?:\\s+['\"]([\\s\\S]*?)['\"])?\\s*";
+
+const linkIndex = marks => {
+  for (let i = 0; i < marks.length; i++) {
+    if (marks[i].type === "link") { return i }
+  }
+};
+
+// Pattern to find Hurmet calculation results.
+// This will be replaced in the entry with the display selector.
+const resultRegEx = /〔[^〕]*〕/;
+const drawRegEx$1 = /^draw\(/;
+const sketchRegEx = /^sketch: ?/;
+
+const parseRef = function(capture, state, refNode) {
+  // Handle implicit refs: [title][<ref>], ![alt or caption][<ref>]
+  let ref = capture[2] ? capture[2] : capture[1];
+  ref = ref.replace(/\s+/g, " ");
+
+  if (state.defs && state.defs[ref]) {
+    const def = state.defs[ref];
+    if (!def.target || def.target === "undefined") {
+      // The image definition is undefined.
+      const brokenImage = { type: "image", attrs: { src: "undefined-image" } };
+      if (def.attrs && def.attrs.alt) { brokenImage.attrs.alt = def.attrs.alt; }
+      return brokenImage
+    }
+    if (sketchRegEx.test(def.target) && refNode.type !== "link") {
+      // A sketch is written on one line, as `sketch: ` + source. Its line breaks are
+      // written as ␤. The source is the authority; the title in the body is only a label.
+      const source = def.target.replace(sketchRegEx, "").replace(/␤/g, "\n");
+      if (refNode.type !== "figure") {
+        // An inline sketch. If its source says `caption true`, the caption is dropped,
+        // since a figure can't stand inside a paragraph. Hurmet writes such a sketch
+        // as `!![…][n]`, so this happens only in a hand-written file.
+        return { type: "sketch", attrs: { source } }
+      }
+      if (!sketchHasCaption(source)) {
+        // The sketch, an inline node, is wrapped in a paragraph so it can stand at
+        // block level.
+        return { type: "paragraph", content: [{ type: "sketch", attrs: { source } }] }
+      }
+      // A captioned sketch. The caption is its title, not the text in `!![…]`.
+      const title = sketchTitle(source);
+      return { type: "figure", attrs: { class: sketchPosition(source) }, content: [
+        { type: "figsketch", attrs: { source } },
+        { type: "figcaption", content: title ? [{ type: "text", text: title }] : [] }
+      ] }
+    }
+    if (refNode.type === "figure") {
+      refNode = { type: "figure", attrs: def.attrs, content: [
+        { type: "figimg", attrs: def.attrs },
+        { type: "figcaption", content: parseInline(refNode.attrs.alt, state) }
+      ] };
+      refNode.content[0].attrs.src = def.target;
+      if (def.attrs.alt) { refNode.content[0].attrs.alt = def.attrs.alt; }
+    } else if (refNode.type === "image") {
+      if (drawRegEx$1.test(def.target)) {
+        // A drawing is written on one line. Its line breaks are written as ␤.
+        // Drawings written before ␤ was adopted contain no ␤; they used \n.
+        const entry = def.target.indexOf("␤") === -1
+          ? def.target.replace(/\\n/g, "\n")
+          : def.target.replace(/␤/g, "\n");
+        return { type: "calculation", attrs: { entry } }
+      } else {
+        refNode.attrs = def.attrs;
+        refNode.attrs.src = def.target;
+      }
+    } else {
+      // refNode is a link
+      refNode.attrs.href = def.target;
+    }
+  }
+  return refNode;
+};
+
+const parseTextMark = (capture, state, mark, href) => {
+  const text = parseInline(capture, state);
+  if (Array.isArray(text) && text.length === 0) { return text }
+  consolidate(text);
+  const markObj = { type: mark };
+  if (href) { markObj.attrs = { href }; }
+  for (const range of text) {
+    if (range.marks) {
+      range.marks.push(markObj);
+    } else {
+      range.marks = [markObj];
+    }
+  }
+  return text
+};
+
+const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|label|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<(?:\/?(?:!DOCTYPE html|body|li|br|hr|(?:div|article|details|input|ul|ol|dl|main|nav)(?: (?:class|id|name|style|type)=(["'])[A-Za-z0-9_.:;\- ]+\2){0,2})|\/?html(?: lang=(["'])[a-z]+\3)?)>[^\n]*?(?:\n|$))/;
+
+// Rules must be applied in a specific order, so use a Map instead of an object.
+const rules = new Map();
+rules.set("html", {
+  isLeaf: true,
+  match: blockRegex(BLOCK_HTML),
+  parse: function(capture, state) {
+    if (!state.inHtml) { return null }
+    return { type: "html", text: capture[0] }
+  }
+});
+rules.set("htmlComment", {
+  isLeaf: true,
+  match: blockRegex(/^ *<!--[\s\S]*?-->[^\n]*\n/),
+  parse: function(capture, state) {
+    return { type: "null" }
+  }
+}),
+rules.set("lheading", {
+  isLeaf: false,
+  match: blockRegex(/^([^\n]+)\n *(=|-){3,} *(?:\n *)+\n/),
+  parse: function(capture, state) {
+    return {
+      type: "heading",
+      attrs: { level: capture[2] === '=' ? 1 : 2 },
+      content: parseInline(capture[1].trim(), state)
+    };
+  }
+});
+rules.set("heading", {
+  isLeaf: false,
+  match: blockRegex(/^ *(#{1,6})([^\n]+?)#*\n*\n/),
+  parse: function(capture, state) {
+    return {
+      attrs: { level: capture[1].length },
+      content: parseInline(capture[2].trim(), state)
+    };
+  }
+});
+rules.set("dt", {  // description term
+  isLeaf: false,
+  match: blockRegex(/^(([^\n]*)\n)(?=<dd>|\n: [^\n]+\n[^|+])/),
+  parse: function(capture, state) {
+    return { content: parseInline(capture[2].trim(), state) }
+  }
+});
+rules.set("horizontal_rule", {
+  isLeaf: true,
+  match: blockRegex(/^( *[-*_]){3,} *(?:\n *)+\n/),
+  parse: function(capture, parse, state) {
+    return { type: "horizontal_rule" };
+  }
+});
+rules.set("page_break", {
+  isLeaf: true,
+  match: blockRegex(/^\\newpage\n\n/),
+  parse: function(capture, parse, state) {
+    return { type: "page_break" };
+  }
+});
+rules.set("codeBlock", {
+  isLeaf: true,
+  match: blockRegex(/^(?:(?:\t| {4})[^\n]+\n*)+(?:\n *)+\n/),
+  parse: function(capture, state) {
+    const content = capture[0].replace(/^(\t| {4})/gm, '').replace(/\n+$/, '');
+    return {
+      type: "code_block",
+      content: [{ type: "text", text: content }]
+    };
+  }
+});
+rules.set("fence", {
+  isLeaf: true,
+  match: blockRegex(/^(```|~~~) *(?:(\S+) *)?\n([\s\S]+?)\n?\1 *(?:\n *)+\n/),
+  parse: function(capture, state) {
+    return {
+      type: "code_block",
+//      lang: capture[2] || undefined,
+      content: [{ type: "text", text: capture[3] }]
+    };
+  }
+});
+rules.set("alert", {
+  isLeaf: false,
+  match: blockRegex(/^(?: *> \[!(NOTE|TIP|IMPORTANT|WARNING|EPIGRAPH)\])((?:\n *>(?! *\[!)[^\n]*)+)(?:\n *)+\n/),
+  // Alert for note |tip | important | warning |epigraph
+  parse: function(capture, state) {
+    const cap = capture[2].replace(/\n *> ?/gm, "\n").replace(/^\n/, "");
+    const content = parse(cap, state);
+    return { type: capture[1].toLowerCase(), content }
+  }
+});
+rules.set("blockquote", {
+  isLeaf: false,
+  match: blockRegex(/^>([^\n]*(?:\n *>[^\n]*)*)(?:\n *)+\n/),
+  parse: function(capture, state) {
+    const content = capture[1].replace(/\n *> ?/gm, "\n");
+    return { content: parse(content, state) };
+  }
+});
+rules.set("ordered_list", {
+  isLeaf: false,
+  match: blockRegex(/^( {0,3})(?:(?:(\d{1,9})|([A-Z])|([a-z]))[.)]) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:\d{1,9}\.) )\n*|\s*$)/),
+  parse: function(capture, state) {
+    const start = capture[2]
+      ? Number(capture[2])
+      : capture[3]
+      ? capture[3].codePointAt(0) - 64
+      : capture[4].codePointAt(0) - 96;
+    const className = capture[2] ? "decimal" : capture[3] ? "upper-alpha" : "lower-alpha";
+    return {
+      attrs: { class: className, order: start },
+      content: parseList(capture[0], state)
+    }
+  }
+});
+rules.set("bullet_list", {
+  isLeaf: false,
+  match: blockRegex(/^( {0,3})([*+-]) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:[*+-]) )\n*|\s*$)/),
+  parse: function(capture, state) {
+    return { content: parseList(capture[0], state) }
+  }
+});
+rules.set("special_div", {
+  isLeaf: false,
+  match: blockRegex(/^(:{3,}) ?(indented|comment|centered|right_justified|boxed|header\*?|hidden) *\n([\s\S]+?)\n+\1 *(?:\n{2,}|\s*$)/),
+  // indented or centered or right-justified or boxed or comment div, or <header>
+  parse: function(capture, state) {
+    const content = parse(capture[3], state);
+    const blockType = capture[2];
+    if (blockType === "header*") {
+      return { type: "header", attrs: { headerPages: "all" }, content };
+    } else {
+      return { type: blockType, content };
+    }
+  }
+});
+rules.set("figure", {
+  isLeaf: true,
+  match: blockRegex(/^!!\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\] *(?:\n *)+\n/),
+  parse: function(capture, state) {
+    if (isNotAnInteger(capture[1])) {
+      return parseRef(capture, state, { type: "figure", attrs: { alt: capture[1] } });
+    } else {
+      return parseRef(capture, state, { type: "figure" });
+    }
+  }
+});
+rules.set("def", {
+  isLeaf: true,
+  // A drawing or a sketch takes its whole line, which may contain ">".
+  match: blockRegex(/^\[([^\]\n]+)\]: *(?:¢(`+)([\s\S]*?[^`])\2(?!`)|draw\([^\n]*|sketch:[^\n]*|<?([^\n>]*)>? *(?:\n\{([^\n}]*)\})?)/),
+  // Link reference definitions were handled in md2ast().
+  parse: function(capture, state) { return { type: "null" } }
+});
+rules.set("toc", {
+  isLeaf: true,
+  match: blockRegex(/^{\.toc start=(\d) end=(\d)}\n/),
+  parse: function(capture, state) {
+    return { attrs: { start: Number(capture[1]), end: Number(capture[2]), body: [] } }
+  }
+});
+rules.set("pipeTable", {
+  isLeaf: false,
+  match: blockRegex(TABLES.PIPE_TABLE_REGEX),
+  parse: TABLES.parsePipeTable
+});
+rules.set("gridTable", {
+  isLeaf: false,
+  match: blockRegex(TABLES.GRID_TABLE_REGEX),
+  parse: TABLES.parseGridTable
+});
+rules.set("dd", {  // description details
+  isLeaf: false,
+  match: blockRegex(/^:( +)[\s\S]+?(?:\n{2,}(?! |:)(?!\1)\n*|\s*$)/),
+  parse: function(capture, state) {
+    let div = " " + capture[0].slice(1);
+    const indent = 1 + capture[1].length;
+    const spaceRegex = new RegExp("^ {" + indent + "," + indent + "}", "gm");
+    div = div.replace(spaceRegex, ""); // remove indents on trailing lines:
+    return { content: parse(div, state) };
+  }
+});
+rules.set("displayTeX", {
+  isLeaf: true,
+  match: blockRegex(/^ *(?:\$\$\n? *((?:\\[\s\S]|[^\\])+?)\n?\$\$|\\\[\n? *((?:\\[\s\S]|[^\\])+?)\n?\\\]) *(?:\n|$)/),
+  parse: function(capture, state) {
+    const tex = (capture[1] ? capture[1] : capture[2]).trim();
+    return { type: "tex", attrs: { tex, displayMode: true } }
+  }
+});
+rules.set("newline", {
+  isLeaf: true,
+  match: blockRegex(/^(?:\n *)*\n/),
+  parse: function() { return { type: "null" } }
+});
+rules.set("emptyParagraph", {
+  isLeaf: true,
+  match: blockRegex(/^(¶|&nbsp;)(?:\n *)+\n/),
+  parse: function(capture, state) {
+    return { type: "paragraph", content: [] }
+  }
+});
+rules.set("paragraph", {
+  isLeaf: false,
+  match: blockRegex(/^((?:[^\n]|\n(?!(?: *\n|(?=[*+-] )|(?=(?:\d{1,9}|[A-Za-z])[.)] ))))+)\n(?:(?: *\n)+|(?=[*+-] )|(?=(?:\d{1,9}|[A-Za-z])[.)] ))/),
+  parse: function(capture, state) {
+    return { type: "paragraph", content: parseInline(capture[1], state) }
+  }
+});
+// Position tex ahead of escape in order to capture \[...\] math.
+rules.set("tex", {
+  isLeaf: true,
+  match: inlineRegex(/^(?:\\\[((?:\\[\s\S]|[^\\])+?)\\\]|\$\$((?:\\[\s\S]|[^\\])+?)\$\$|\\\(((?:\\[\s\S]|[^\\])+?)\\\)|\$(`+)((?:(?:\\[\s\S]|[^\\])+?)?)\4\$(?![0-9$])|\$(?!\s|\$)((?:(?:\\[\s\S]|[^\\])+?)?)(?<=[^\s\\$])\$(?![0-9$]))/),
+  parse: function(capture, state) {
+    if (capture[1] || capture[2]) {
+      const tex = (capture[1] ? capture[1] : capture[2]).trim();
+      return { type: "tex", attrs: { tex, displayMode: true } }
+    } else {
+      const tex = (capture[3]
+        ? capture[3]
+        : capture[5]
+        ? capture[5]
+        : capture[6]).trim();
+      return { type: "tex", attrs: { tex, displayMode: false } }
+    }
+  }
+});
+rules.set("escape", {
+  // We don't allow escaping numbers, letters, or spaces here so that
+  // backslashes used in plain text still get rendered. But allowing
+  // escaping anything else provides a very flexible escape mechanism,
+  // regardless of how this grammar is extended.
+  isLeaf: true,
+  match: inlineRegex(/^\\([^0-9A-Za-z()\s])/),
+  parse: function(capture, state) {
+    return {
+      type: "text",
+      text: capture[1]
+    };
+  }
+});
+rules.set("tableSeparator", {
+  isLeaf: true,
+  match: function(source, state) {
+    if (!state.inTable) { return null }
+    return /^ *\| */.exec(source);
+  },
+  parse: function() {
+    return { type: "tableSeparator" };
+  }
+});
+rules.set("link", {
+  isLeaf: true,
+  match: inlineRegex(
+    new RegExp("^\\[(" + LINK_INSIDE + ")\\]\\(" + LINK_HREF_AND_TITLE + "\\)")
+  ),
+  parse: function(capture, state) {
+    const content = parseInline(capture[1], state);
+    let useParseTextMark = true;
+    for (const node of content) {
+      if (node.type !== "text") { useParseTextMark = false; break }
+    }
+    if (useParseTextMark) {
+      // This is the Prosemirror default method for editable links.
+      return parseTextMark(capture[1], state, "link", unescapeUrl(capture[2]))
+    } else {
+      // When a link contains a nodeView, e.g. math, the text mark method has an edge case bug.
+      // So the Hurmet schema has a custom "link_node".
+      const href = unescapeUrl(capture[2]);
+      return [{ type: "link_node", attrs: { href, title: href }, content }]
+    }
+  }
+});
+rules.set("image", {
+  isLeaf: true,
+  match: inlineRegex(
+    new RegExp("^!\\[(" + LINK_INSIDE + ")\\]\\(" + LINK_HREF_AND_TITLE + "\\)")
+  ),
+  parse: function(capture, state) {
+    if (isNotAnInteger(capture[1])) {
+      return { attrs: { alt: capture[1], src: unescapeUrl(capture[2]) } }
+    } else {
+      return { attrs: { src: unescapeUrl(capture[2]) } }
+    }
+  }
+});
+rules.set("reflink", {
+  isLeaf: true,
+  match: inlineRegex(/^\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]/),
+  parse: function(capture, state) {
+    const defIndex = capture[2] ? capture[2] : capture[1];
+    const href = state.defs[defIndex].target;
+    const textNode = parseTextMark(capture[1], state, "link", href);
+    return textNode
+  }
+});
+rules.set("footnote", {
+  isLeaf: true,
+  match: inlineRegex(/^\[\^(\d+)\]/),
+  parse: function(capture, state) {
+    const index = Number(capture[1]) - 1;
+    return { type: "footnote", content: parseInline(state.footnotes[index], state) }
+  }
+});
+rules.set("refimage", {
+  isLeaf: true,
+  match: inlineRegex(/^!\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]/),
+  parse: function(capture, state) {
+    //if (isNotAnInteger(capture[1])) {
+    return parseRef(capture, state, { type: "image", attrs: { alt: capture[1] } });
+    //} else {
+    //  return parseRef(capture, state, { type: "image" });
+   // }
+  }
+});
+rules.set("autolink", {
+  isLeaf: true,
+  match: inlineRegex(/^<([^: >]+:\/[^ >]+)>/),
+  parse: function(capture, state) {
+    const textNode = parseTextMark(capture[1], state, "link" )[0];
+    const i = linkIndex(textNode.marks);
+    textNode.marks[i].attrs = { href: unescapeUrl(capture[1]) };
+    return textNode
+  }
+});
+rules.set("code", {
+  isLeaf: true,
+  match: inlineRegex(/^(`+)([\s\S]*?[^`])\1(?!`)/),
+  parse: function(capture, state) {
+    const text = capture[2].trim();
+    return [{ type: "text", text, marks: [{ type: "code" }] }]
+  }
+});
+rules.set("calculation", {
+  isLeaf: true,
+  match: anyScopeRegex(/^(?:¢(\?\?|\?|%%|%|@@|@)?(`+)([\s\S]*?[^`])\2(?!`)|¢¢(\?\?|\?|%%|%|@@|@)?\n?((?:\\[\s\S]|[^\\])+?)\n?¢¢)/),
+  parse: function(capture, state) {
+    if (capture[3]) {
+      let entry = capture[3].trim();
+      if (capture[1]) {
+        if (entry.slice(0, 1) === "@") {
+          entry = entry.replace(resultRegEx, "").trim();
+        } else {
+          entry = entry.replace(resultRegEx, capture[1]);
+        }
+      }
+      if (!/^(?:function|draw\()/.test(entry) && entry.indexOf("``") === -1) {
+        entry = entry.replace(/\n/g, " ");
+      }
+      return { attrs: { entry } }
+    } else {
+      let entry = capture[5].trim();
+      if (capture[4]) {
+        if (entry.slice(0, 1) === "@") {
+          entry = entry.replace(resultRegEx, "").trim();
+        } else {
+          entry = entry.replace(resultRegEx, capture[4]);
+        }
+      }
+      return { attrs: { entry, displayMode: true } }
+    }
+  }
+});
+rules.set("em", {
+  isLeaf: true,
+  match: inlineRegex(/^([_*])(?!\s|\1)((?:\\[\s\S]|[^\\])+?)\1/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[2], state, "em" )
+  }
+});
+rules.set("strong", {
+  isLeaf: true,
+  match: inlineRegex(/^(\*\*|__)(?=\S)((?:\\[\s\S]|[^\\])+?)\1/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[2], state, "strong" )
+  }
+});
+rules.set("del", {
+  isLeaf: true,
+  match: inlineRegex(/^<del>([\s\S]*?)<\/del>/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "strikethru" )
+  }
+});
+rules.set("strikethru", {
+  isLeaf: true,
+  match: inlineRegex(/^~~(?=\S)((?:\\[\s\S]|~(?!~)|[^\s~\\]|\s(?!~~))+?)~~/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "strikethru" )
+  }
+});
+rules.set("superscript", {
+  isLeaf: true,
+  match: inlineRegex(/^<sup>([\s\S]*?)<\/sup>/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "superscript" )
+  }
+});
+rules.set("carat", {
+  isLeaf: true,
+  match: inlineRegex(/^\^((?:\\[\s\S]|[^\\])+?)\^/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "superscript" )
+  }
+});
+rules.set("subscript", {
+  isLeaf: true,
+  match: inlineRegex(/^<sub>([\s\S]*?)<\/sub>/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "subscript" )
+  }
+});
+rules.set("tilde", {
+  isLeaf: true,
+  match: inlineRegex(/^~((?:\\[\s\S]|[^\\])+?)~/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "subscript" )
+  }
+});
+rules.set("underline", {
+  isLeaf: true,
+  match: inlineRegex(/^<u>([\s\S]*?)<\/u>/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "underline" )
+  }
+});
+rules.set("highlight", {
+  isLeaf: true,
+  match: inlineRegex(/^<mark>([\s\S]*?)<\/mark>/),
+  parse: function(capture, state) {
+    return parseTextMark(capture[1], state, "highlight" )
+  }
+});
+rules.set("hard_break", {
+  isLeaf: true,
+  match: anyScopeRegex(/^(\\| {2})\n/),
+  parse: function() { return { text: "\n" } }
+});
+rules.set("inline_break", {
+  isLeaf: true,
+  match: anyScopeRegex(/^<br>/),
+  parse: function() { return { type: "hard_break", text: "\n" } }
+});
+rules.set("span", {
+  isLeaf: true,
+  match: inlineRegex(/^<span [a-z =":]+>[^<]+<\/span>/),
+  parse: function(capture, state) {
+    return !state.inHtml ? null : { type: "html", text: capture[0] }
+  }
+});
+rules.set("text", {
+  // We break on symbol characters, double newlines, or double-space-newlines.
+  isLeaf: true,
+  match: anyScopeRegex(/^[\s\S]+?(?=[_*`#>|\\\-+=![({$¢¶<~^+:]|\n\n| {2,}\n|\d+[.)]|\w+:\S|$)/),
+  parse: function(capture, state) {
+    return {
+      text: capture[0].replace(/\n/g, " ")
+    };
+  }
+});
+
+
+const parse = (source, state) => {
+  if (!state.inline) { source += "\n\n"; }
+  source = preprocess(source);
+  const result = [];
+  while (source) {
+    // store the best match and its rule:
+    let capture = null;
+    let ruleName = null;
+    let rule = null;
+    for (const [currRuleName, currRule] of rules) {
+      capture = currRule.match(source, state);
+      if (capture) {
+        rule = currRule;
+        ruleName = currRuleName;
+        break
+      }
+    }
+    const parsed = rule.parse(capture, state);
+    if (Array.isArray(parsed)) {
+      Array.prototype.push.apply(result, parsed);
+    } else {
+      if (parsed.type == null) { parsed.type = ruleName; }
+      result.push(parsed);
+    }
+    state.prevCapture = capture[0];
+    source = source.substring(capture[0].length);
+  }
+  return result
+};
+
+
+
+/**
+ * Parse some content with the parser `parse`, with state.inline
+ * set to true. Useful for block elements; not generally necessary
+ * to be used by inline elements (where state.inline is already true.
+ */
+const parseInline = function(content, state) {
+  const isCurrentlyInline = state.inline || false;
+  state.inline = true;
+  const result = parse(content, state);
+  state.inline = isCurrentlyInline;
+  return result;
+};
+
+
+// recognize a `*` `-`, `+`, `1.`, `2.`, `A.`, `a,`... list bullet
+const LIST_BULLET = "(?:[*+-]|(?:\\d+|[A-Za-z])[\\.\\)])";
+// recognize the start of a list item:
+// leading space plus a bullet plus a space (`   * `)
+const LIST_ITEM_PREFIX = "( *)(" + LIST_BULLET + ") +";
+const LIST_ITEM_PREFIX_R = new RegExp("^" + LIST_ITEM_PREFIX);
+// recognize an individual list item:
+//  * hi
+//    this is part of the same item
+//
+//    as is this, which is a new paragraph in the same item
+//
+//  * but this is not part of the same item
+const LIST_ITEM_R = new RegExp(
+  LIST_ITEM_PREFIX + "[^\\n]*(?:\\n" + "(?!\\1" + LIST_BULLET + " )[^\\n]*)*(\n|$)",
+  "gm"
+);
+const BLOCK_END_R = /\n{2,}$/;
+// recognize the end of a paragraph block inside a list item:
+// two or more newlines at end end of the item
+const LIST_BLOCK_END_R = BLOCK_END_R;
+const LIST_ITEM_END_R = / *\n+$/;
+
+const consolidate = arr => {
+  if (Array.isArray(arr) && arr.length > 0) {
+    // Group any text nodes together into a single string output.
+    for (let i = arr.length - 1; i > 0; i--) {
+      const node = arr[i];
+      const prevNode = arr[i - 1];
+      if (node.type === 'text' && prevNode.type === 'text' &&
+          !node.marks && !prevNode.marks) {
+        prevNode.text += node.text;
+        arr.splice(i, 1);
+      } else if ((node.type === 'indented' && prevNode.type === 'indented') ||
+                 (node.type === 'centered' && prevNode.type === 'centered')) {
+        prevNode.content = prevNode.content.concat(node.content);
+        arr.splice(i, 1);
+      } else if (node.type === "null") {
+        arr.splice(i, 1);
+      } else if (!rules.has(node.type) || !rules.get(node.type).isLeaf) {
+        consolidate(node.content);
+      }
+    }
+
+    if (!rules.has(arr[0].type) || !rules.get(arr[0].type).isLeaf) {
+      consolidate(arr[0].content);
+    }
+  }
+};
+
+const populateTOC = ast => {
+  let tocNode;
+  for (const node of ast) {
+    if (node.type === "toc") { tocNode = node; break }
+  }
+  if (!tocNode) { return }
+  const start = tocNode.attrs.start;
+  const end = tocNode.attrs.end;
+  for (const node of ast) {
+    if (node.type === "heading") {
+      const level = node.attrs.level;
+      if (start <= level && level <= end) {
+        const tocEntry = [];
+        let str = "";
+        for (const range of node.content) { str += range.text; }
+        tocEntry.push(str);
+        tocEntry.push(level);
+        tocEntry.push(0); // page number unknown
+        tocEntry.push(0); // element number unknown
+        tocNode.attrs.body.push(tocEntry);
+      }
+    }
+  }
+};
+
+const metadataRegEx = /^---+\n((?:[A-Za-z0-9][A-Za-z0-9 _-]*:[^\n]+\n(?:[ \t]+[^\n]+\n)*)+)---+\n/;
+const metadataItemRegEx = /^[A-Za-z0-9][A-Za-z0-9 _-]*:[^\n]+\n(?:[ \t]+[^\n]+\n)*/;
+const hurmetMetadataNames = ["decimalFormat", "dateFormat", "fontSize",
+  "pageSize", "saveDate"];
+
+const parseMetadata = str => {
+  const metadata = {};
+  let capture = str.match(metadataItemRegEx);
+  while (capture) {
+    const item = capture[0].split(":");
+    const key = item[0].trim().replace(/ /g, "");
+    if (hurmetMetadataNames.includes(key)) {
+      const value = item[1].slice(0, -1).trim().replace(/ *\n[ \t]*/g, " ");
+      metadata[key] = value;
+    }
+    str = str.slice(capture[0].length);
+    capture = str.match(metadataItemRegEx);
+  }
+  return metadata
+};
+
+const dateMessageRegEx = /^date:([^\n]+)\nmessage:([^\n]+)\n/;
+
+const buildPathDefString = (def, target, directives) => {
+  return directives
+    ? `[${def}]: ${target}\n{${directives}}`
+    : `[${def}]: ${target}`
+};
+
+const inlineMd2ast = md => {
+  const state = { inline: true, defs: {}, prevCapture: "", inList: false, inHtml: false };
+  const ast = parse(md, state);
+  if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") {
+    ast.shift();
+  }
+  consolidate(ast);
+  return ast
+};
+
+const md2ast = (md, inHtml = false) => {
+  // First, check for a metadata preamble
+  let metadata = false;
+  if (metadataRegEx.test(md)) {
+    const match = metadataRegEx.exec(md);
+    metadata = parseMetadata(match[1]);
+    md = md.slice(match[0].length);
+  }
+
+  // Second, get all the link reference definitions
+  const state = {
+    inline: false,
+    inList: false,
+    defs: {},
+    footnotes: [],
+    prevCapture: "",
+    inHtml
+  };
+  const snapshotPathCache = {};
+  const defRegEx = /\n *\[([^\]\n]+)\]: *([^\n]*) *(?:\n\{([^\n}]*)\})?(?=\n)/gm;
+  const footnoteDefRegEx = /\n *\[\^\d+\]: *([^\n]*)(?=\n)/gm;
+  let capture;
+  while ((capture = defRegEx.exec(md)) !== null) {
+    const def = capture[1].replace(/\s+/g, " ");
+    const target = capture[2].trim();
+    const directives = capture[3] || "";
+
+    const attrs = isNotAnInteger(def) ? { alt: def } : {};
+    if (directives) {
+      const matchClass = CLASS_R.exec(directives);
+      const matchWidth = WIDTH_R.exec(directives);
+      const matchAlt = ALT_R.exec(directives);
+      const matchID = ID_R.exec(directives);
+      if (matchClass) { attrs.class = matchClass[1]; }
+      if (matchWidth) { attrs.width = matchWidth[1]; }
+      if (matchAlt)   { attrs.alt = matchAlt[1]; }
+      if (matchID)    { attrs.id = matchID[1]; }
+    }
+    state.defs[def] = { target, attrs };
+
+    if (!isNotAnInteger(def)) {
+      snapshotPathCache[def] = buildPathDefString(def, target, directives);
+    }
+  }
+
+  // Next, get all the footnote definitions
+  // eslint-disable-next-line no-useless-assignment
+  capture = null;
+  while ((capture = footnoteDefRegEx.exec(md)) !== null) {
+    state.footnotes.push(capture[1].trim());
+  }
+
+  // Find out if there are any snapshots.
+  let snapshotStrings = [];
+  let gotSnapshot = false;
+  if (metadata) {
+    snapshotStrings = md.split("<!--SNAPSHOT-->\n");
+    if (snapshotStrings.length > 1) {
+      gotSnapshot = true;
+      md = snapshotStrings.shift();
+    }
+  }
+
+  // Find out if there are any fallbacks for fetched files
+  let fallbackStrings = [];
+  if (metadata) {
+    fallbackStrings = md.split("<!--FALLBACKS-->\n");
+    if (fallbackStrings.length > 1) {
+      md = fallbackStrings.shift();
+    } else {
+      fallbackStrings = null;
+    }
+  }
+
+  // Proceed to parse the document.
+  const ast = parse(md, state);
+  if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") {
+    ast.shift();
+  }
+  consolidate(ast);
+  populateTOC(ast);
+  if (metadata) {
+    metadata.snapshotPathCache = snapshotPathCache;
+    if (fallbackStrings) {
+      metadata.fallbacks = JSON.parse(fallbackStrings.pop().trim());
+    }
+    if (gotSnapshot) {
+      const snapshots = [];
+      for (const str of snapshotStrings) {
+        const capture = dateMessageRegEx.exec(str);
+        snapshots.push({
+          date: capture[1] ? Date.parse(capture[1].trim()) : undefined,
+          message: capture[2] ? capture[2].trim() : undefined,
+          content: capture ? str.slice(capture[0].length) : str
+        });
+      }
+      metadata.snapshots = snapshots;
+    }
+    return { type: "doc", attrs: metadata, content: ast }
+  } else {
+    return ast
+  }
+};
+
+// shared.js
+
+// Definitions that Sketch shares with Hurmet's draw() function (../draw.js).
+// This module must not import anything or touch the DOM: draw.js also runs in
+// Node, in the Hurmet CLI and in the unit tests.
+
+// px per model unit, before the scene's scale is applied.
+const unitScaleFactors = Object.freeze({
+  px: 1,
+  in: 96,
+  ft: 1152,       // 12 inches per foot
+  'ft-in': 96,    // Model units are inches. Labels are written in feet & inches (feetInches.js).
+  mile: 609600,   // 5280 feet per mile
+  pt: 96 / 72,    // 1 point = 1/72 inch
+  mm: 96 / 25.4,
+  cm: 960 / 25.4,
+  m: 96000 / 25.4,
+  km: 96000000 / 25.4
+});
+
+// Line types. Dash lengths are in px.
+const dashMap = Object.freeze({
+  solid: null,
+  dashed: "12 6",
+  dotted: "0 8",
+  centerline: "12 6 3 6",
+  border: "12 6 3 6 3 6" // Sync with menuListeners.js and stringify.js
+});
+const linecapMap = Object.freeze({
+  solid: null,
+  dashed: null,
+  dotted: "round",
+  centerline: null,
+  border: null
+});
+
+// The full set of recognized fill-pattern names, in menu order. "solid" means no pattern.
+const fillPatternNames = Object.freeze([
+  'solid', 'diagonal', 'crosshatch', 'grid', 'dots', 'wood', 'sand', 'gravel', 'earth', 'concrete'
+]);
+
+// Arrowhead markers are sized in stroke widths (markerUnits="strokeWidth"),
+// which looks right only near the width each was drawn for. So the user just
+// asks for "arrow" and Sketch picks the marker that suits the stroke width.
+// Dimensions keep their own `dimarrow`, which is not part of this family.
+const arrowheadNames = new Set(['thinarrow', 'arrow', 'thickarrow', 'thickerarrow']);
+const arrowdotNames = new Set([...arrowheadNames].map(name => name + 'dot'));
+
+// The marker statement value for a marker id: every arrowhead size is "arrow",
+// every arrowdot size is "arrowdot". Any other id is its own value.
+const markerFamily = id => {
+  return arrowheadNames.has(id) ? 'arrow' : arrowdotNames.has(id) ? 'arrowdot' : id
+};
+
+// A fill pattern's id includes its color. A <pattern> def can't take its color
+// from the element that refers to it, so each pattern and color needs a def of its own.
+const sanitizeForId = str => String(str).replace(/[^a-zA-Z0-9]/g, '_');
+
+// The `format` statement's rounding spec, and the `fraction` statement's denominators.
+const roundingSpecRegEx = /^[frh][1-6]$/;
+const inchFractions = new Set([8, 16, 32, 64]);
+
+// A dot's label position. Unlike a text position, "leader" isn't allowed.
+const dotLabelPositionRegEx = /^(?:above|middle|below)?(?:left|right)?$/i;
+
+// SVG attributes for the Markdown marks allowed in text.
+const markAttribute = Object.freeze({
+  em:          ["font-style", "italic"],
+  strong:      ["font-weight", "bold"],
+  code:        ["font-family", "monospace"],
+  strikethru:  ["text-decoration", "line-through"],
+  subscript:   ["font-size", "0.8em"],
+  superscript: ["font-size", "0.8em"]
+});
+
+// unitAliases.js
+
+// Recognizes the same length-unit spellings Hurmet does, so a shape-library
+// author (or a Hurmet user) can write "inch" or "centimeter" and have Sketch
+// treat it the same as its own short keys ("in", "cm" — see
+// utils.unitScaleFactors). Derived from units.js (Hurmet's own unit table,
+// kept at the project root as reference data — not a runtime dependency of
+// Sketch itself) plus Hurmet's metric-prefix rule: a unit flagged "siSymbol"
+// takes a symbol prefix ("c"+"m" -> "cm"); one flagged "siWord" takes a
+// word prefix ("centi"+"meter" -> "centimeter"). Only "m"/"meter"/"metre"
+// carry those flags among the units Sketch cares about, so mm/cm/km are the
+// only prefixed forms here.
+//
+// "pt" isn't yet in Hurmet's own unit table; it's included here as an alias
+// for "point"/"Adobe point" (the 1/72-inch PostScript point — the exact
+// value Sketch's own "pt" already means) at the project maintainer's
+// direction, pending Hurmet adding it.
+//
+// This table only maps alternate spellings to Sketch's canonical keys; it
+// does not repeat those canonical keys themselves; callers should check
+// utils.unitScaleFactors directly first (see resolveUnit below). Plural
+// spellings (Hurmet accepts most of them) are deliberately not included —
+// shape-library files should not be written with plural unit names.
+
+const unitAliases = Object.freeze({
+  in: ['inch', '″'],
+  ft: ['foot', 'feet', 'lf', '′'],
+  mile: ['mi'],
+  m: ['meter', 'metre'],
+  mm: ['millimeter', 'millimetre'],
+  cm: ['centimeter', 'centimetre'],
+  km: ['kilometer', 'kilometre'],
+  pt: ['point', 'Adobe point']
+  // px has no known synonyms.
+});
+
+const aliasToCanonical = Object.freeze(
+  Object.entries(unitAliases).reduce((table, [canonical, aliases]) => {
+    aliases.forEach(alias => { table[alias] = canonical; });
+    return table
+  }, {})
+);
+
+// Given a unit spelling that ISN'T already one of Sketch's own canonical
+// keys, return the canonical key it's an alias for — or null if it's not a
+// recognized alias either. Callers should check utils.unitScaleFactors[name]
+// directly first; this only covers the alternate spellings.
+function resolveUnit(name) {
+  return aliasToCanonical[name] || null
+}
+
+// arcStep.js
+//
+// Helpers for the arc steps of a path. A path point's r describes the segment
+// that ends at that point:
+//   0                  a straight segment
+//   a number           a circular arc: its signed radius, + for CCW, − for CW
+//   [±rx, ry, angle]   an elliptical arc on an ellipse with radii rx, ry,
+//                      rotated `angle` degrees CCW; the sign of rx gives the
+//                      direction, + for CCW, − for CW
+// Like a circular arc, an elliptical arc spans at most half of its ellipse, so
+// the SVG large-arc flag is always 0.
+//
+// This module imports nothing, so any module can use it.
+
+
+// A step's r in its simplest form. An elliptical r with a zero radius is a
+// straight step (as in SVG), and one with equal radii is a circular arc.
+const simplifyR = r => {
+  if (!Array.isArray(r)) { return r || 0 }
+  const [srx, ry, angle = 0] = r;
+  if (srx === 0 || ry === 0) { return 0 }
+  if (Math.abs(srx) === Math.abs(ry)) { return srx }
+  return [srx, ry, angle]
+};
+
+// Fill patterns, shared by Sketch and by Hurmet's draw() renderers.
+//
+// Each pattern is a tile drawn in black (#000). fillPatternDef() writes it as a
+// <pattern> element, with the fill color in place of the black. Tiles are in px.
+// Sketch rescales its copies so they look the same at any zoom (see dwg.js);
+// Hurmet draws them at this size, which is Sketch's size at zoom 1.
+
+
+const fillPatterns = {
+  // ansi31.pat: 45,0,0,0,3.175 (angle, x-origin, y-origin, x-offset, line-spacing; no
+  // dash pattern, so a solid line), at scale factor 3. The line sits mid-tile, not at
+  // x = 0, so the tile edge doesn't clip half its stroke.
+  diagonal: {
+    width: 9.525, height: 9.525, transform: "rotate(45)",
+    content: `<line x1="4.7625" y1="0" x2="4.7625" y2="9.525" stroke="#000" stroke-width="0.5"/>`
+  },
+  // diagonal, plus the perpendicular family.
+  crosshatch: {
+    width: 9.525, height: 9.525, transform: "rotate(45)",
+    content: `<line x1="0" y1="0" x2="0" y2="9.525" stroke="#000" stroke-width="1"/><line x1="0" y1="0" x2="9.525" y2="0" stroke="#000" stroke-width="1"/>`
+  },
+  // The crosshatch tile without its rotation, so the lines run horizontally and vertically.
+  grid: {
+    width: 9.525, height: 9.525,
+    content: `<line x1="0" y1="0" x2="0" y2="9.525" stroke="#000" stroke-width="1"/><line x1="0" y1="0" x2="9.525" y2="0" stroke="#000" stroke-width="1"/>`
+  },
+  // Two dots per 20 x 20 tile, at a diagonal offset.
+  dots: {
+    width: 20, height: 20,
+    content: `<circle cx="5" cy="5" r="1.2" fill="#000"/><circle cx="15" cy="15" r="1.2" fill="#000"/>`
+  },
+  // earth.pat reinterpreted (the user's own derivation; a literal AutoCAD dash
+  // reproduction didn't match the reference look): a checkerboard of 6.35-unit blocks,
+  // each holding 3 horizontal or 3 vertical solid lines, padded symmetrically
+  // ((6.35 - 4.7625) / 2 = 0.79375), at 3x scale, so each block is 19.05. The 2 x 2 tile
+  // has [H|V] on top and [V|H] below, so the blocks alternate both across and down.
+  earth: {
+    width: 38.1, height: 38.1,
+    content: `<line x1="0" y1="2.38125" x2="19.05" y2="2.38125" stroke="#000" stroke-width="0.5"/>
+<line x1="0" y1="9.525" x2="19.05" y2="9.525" stroke="#000" stroke-width="0.5"/>
+<line x1="0" y1="16.66875" x2="19.05" y2="16.66875" stroke="#000" stroke-width="0.5"/>
+<line x1="21.43125" y1="0" x2="21.43125" y2="19.05" stroke="#000" stroke-width="0.5"/>
+<line x1="28.575" y1="0" x2="28.575" y2="19.05" stroke="#000" stroke-width="0.5"/>
+<line x1="35.71875" y1="0" x2="35.71875" y2="19.05" stroke="#000" stroke-width="0.5"/>
+<line x1="2.38125" y1="19.05" x2="2.38125" y2="38.1" stroke="#000" stroke-width="0.5"/>
+<line x1="9.525" y1="19.05" x2="9.525" y2="38.1" stroke="#000" stroke-width="0.5"/>
+<line x1="16.66875" y1="19.05" x2="16.66875" y2="38.1" stroke="#000" stroke-width="0.5"/>
+<line x1="19.05" y1="21.43125" x2="38.1" y2="21.43125" stroke="#000" stroke-width="0.5"/>
+<line x1="19.05" y1="28.575" x2="38.1" y2="28.575" stroke="#000" stroke-width="0.5"/>
+<line x1="19.05" y1="35.71875" x2="38.1" y2="35.71875" stroke="#000" stroke-width="0.5"/>`
+  },
+  // legno4.pat ("legname" = wood): 3 line families at 216.8699, 206.5651 and 198.4349
+  // degrees, i.e. 180 + atan(3/4), atan(1/2), atan(1/3). Each family's one dash ends where
+  // the next family's begins (mod the 1 x 1 repeat cell), so the three chain into one
+  // continuous zigzag grain line across tile edges. Scaled 20x.
+  wood: {
+    width: 20, height: 20,
+    content: `<g stroke="#000" stroke-width="0.5" stroke-linecap="round"><line x1="8" y1="20" x2="0" y2="14"/><line x1="20" y1="14" x2="0" y2="4"/><line x1="20" y1="4" x2="8" y2="0"/></g>`
+  },
+  // ar-sand.pat: 4 families of zero-length dashes (dots) at 37.5, 7.5, -32.5 and -42.5
+  // degrees (y flipped from AutoCAD's y-up), 3 dots per dash repeat. Each family is drawn
+  // as AutoCAD defines it: parallel lines whose stroke-dasharray holds the 3 zero-length
+  // dashes, with round caps. The 4 families have no common period, so the tile is a
+  // window of the true pattern, large enough that the repeat isn't obvious. The last path
+  // holds copies of the dots that cross the tile's edges, wrapped to the opposite edge.
+  // Scale: AutoCAD units x 0.675 (0.75 x 0.9; the 0.9 makes the sand 23% denser).
+  // Lattices recovered from the earlier dot-by-dot markup (28 KB), which this matches.
+  sand: {
+    width: 540, height: 540,
+    content: `<g fill="none" stroke="#000" stroke-width="1.5" stroke-linecap="round">
+<path stroke-dasharray="0 8.572 0 30.861 0 40.291" d="M142.959 -276.499l739.626 471.194M89.567 -276.402l739.626 471.194M103.414 -233.47l739.626 471.194
+M50.022 -233.373l739.626 471.194M63.868 -190.44l739.626 471.194M77.715 -147.507l739.626 471.194
+M24.323 -147.41l739.626 471.194M38.17 -104.477l739.626 471.194M-15.222 -104.38l739.626 471.194
+M-1.375 -61.447l739.626 471.194M-54.767 -61.35l739.626 471.194M-40.92 -18.418l739.626 471.194
+M-94.312 -18.32l739.626 471.194M-80.466 24.612l739.626 471.194M-66.619 67.545l739.626 471.194
+M-120.011 67.642l739.626 471.194M-106.164 110.575l739.626 471.194M-159.556 110.672l739.626 471.194
+M-145.709 153.605l739.626 471.194M-199.101 153.702l739.626 471.194M-185.254 196.635l739.626 471.194
+M-171.408 239.567l739.626 471.194M-224.8 239.664l739.626 471.194M-210.953 282.597l739.626 471.194
+M-264.345 282.694l739.626 471.194M-250.498 325.627l739.626 471.194M-303.89 325.724l739.626 471.194
+M-290.043 368.657l739.626 471.194"/>
+<path stroke-dasharray="0 9.001 0 23.489 0 14.059" d="M709.337 624.178l-830.708 109.365M739.68 575.792l-830.708 109.365M723.872 533.482l-830.708 109.365
+M708.064 491.172l-830.708 109.365M692.257 448.862l-830.708 109.365M676.449 406.553l-830.708 109.365
+M706.792 358.167l-830.708 109.365M690.984 315.857l-830.708 109.365M675.177 273.547l-830.708 109.365
+M659.369 231.237l-830.708 109.365M689.712 182.851l-830.708 109.365M673.904 140.541l-830.708 109.365
+M658.097 98.232l-830.708 109.365M642.289 55.922l-830.708 109.365M626.482 13.612l-830.708 109.365
+M656.824 -34.774l-830.708 109.365M641.017 -77.084l-830.708 109.365M625.209 -119.394l-830.708 109.365
+M609.402 -161.704l-830.708 109.365M639.744 -210.089l-830.708 109.365"/>
+<path stroke-dasharray="0 27.86 0 29.147 0 26.061" d="M870.765 312.072l-724.922 556.252M803.783 329.605l-724.922 556.252M802.703 296.569l-724.922 556.252
+M801.623 263.534l-724.922 556.252M800.543 230.499l-724.922 556.252M799.463 197.463l-724.922 556.252
+M732.481 214.996l-724.922 556.252M731.401 181.961l-724.922 556.252M730.321 148.925l-724.922 556.252
+M729.241 115.89l-724.922 556.252M662.259 133.423l-724.922 556.252M661.179 100.388l-724.922 556.252
+M660.099 67.352l-724.922 556.252M659.019 34.317l-724.922 556.252M592.037 51.85l-724.922 556.252
+M590.957 18.814l-724.922 556.252M589.877 -14.221l-724.922 556.252M588.797 -47.256l-724.922 556.252
+M587.717 -80.292l-724.922 556.252M520.735 -62.759l-724.922 556.252M519.655 -95.794l-724.922 556.252
+M518.575 -128.83l-724.922 556.252M517.495 -161.865l-724.922 556.252
+M450.513 -144.332l-724.922 556.252M449.433 -177.367l-724.922 556.252
+M448.353 -210.403l-724.922 556.252M447.272 -243.438l-724.922 556.252
+M380.29 -225.905l-724.922 556.252M379.21 -258.94l-724.922 556.252M378.13 -291.976l-724.922 556.252
+M377.05 -325.011l-724.922 556.252"/>
+<path stroke-dasharray="0 4.286 0 20.231 0 23.146" d="M222.556 -295.425l632.536 579.613M206.157 -248.176l632.536 579.613M154.617 -233.129l632.536 579.613
+M138.218 -185.88l632.536 579.613M121.819 -138.632l632.536 579.613M70.279 -123.584l632.536 579.613
+M53.88 -76.335l632.536 579.613M2.34 -61.288l632.536 579.613M-14.06 -14.039l632.536 579.613
+M-65.6 1.009l632.536 579.613M-81.999 48.257l632.536 579.613M-98.398 95.506l632.536 579.613
+M-149.938 110.553l632.536 579.613M-166.337 157.802l632.536 579.613M-217.877 172.849l632.536 579.613
+M-234.276 220.098l632.536 579.613M-250.675 267.346l632.536 579.613M-302.215 282.394l632.536 579.613"/>
+<path d="M0 0h0M540 540h0M540 0h0M-.91 498.84h0M88.74 -.36h0M44.88 -.58h0M338.86 -.23h0M55 540.06h0
+M540.62 110.39h0M32.3 -.1h0M85.7 -.2h0M139.09 -.29h0M192.48 -.39h0M245.87 -.49h0M299.27 -.59h0
+M352.66 -.68h0M406.04 -.77h0M459.44 -.87h0M512.83 -.97h0"/>
+</g>`
+  },
+  // ar-conc.pat: 3 trios of solid-dash families whose dashes meet end to end, so every
+  // repeat closes into a triangle, plus 4 dot families at the same angles as ar-sand's.
+  // The 7 lattices have no common period, so this tile is the true pattern over a 1200 x
+  // 1200 AutoCAD-unit window (y flipped, scaled 0.5625). Triangles are written one by one
+  // (each kept once, by its centroid, and copied across any tile edge it crosses), each
+  // as a start point and its trio's fixed outline. Dots are drawn as in sand: dashed lines
+  // of zero-length dashes, plus wrapped copies of the dots on the tile's edges.
+  concrete: {
+    width: 675, height: 675,
+    content: `<path fill="none" stroke="#000" stroke-width="0.5" d="M0 675l6.89-8.21 1.65 8.96zM0 0l6.89-8.21 1.65 8.96zM675 675l6.89-8.21 1.65 8.96z
+M675 0l6.89-8.21 1.65 8.96zM3.36 146.62l6.89-8.21 1.65 8.96zM23.18 254.09l6.89-8.21 1.65 8.96z
+M43.01 361.56l6.89-8.21 1.65 8.96zM62.83 469.03l6.89-8.21 1.65 8.96z
+M82.65 576.5l6.89-8.21 1.65 8.96zM86.01 48.11l6.89-8.21 1.65 8.96z
+M105.84 155.58l6.89-8.21 1.65 8.96zM125.66 263.05l6.89-8.21 1.65 8.96z
+M145.48 370.52l6.89-8.21 1.65 8.96zM165.31 477.99l6.89-8.21 1.65 8.96z
+M185.13 585.46l6.89-8.21 1.65 8.96zM188.49 57.08l6.89-8.21 1.65 8.96z
+M208.31 164.55l6.89-8.21 1.65 8.96zM228.14 272.02l6.89-8.21 1.65 8.96z
+M247.96 379.49l6.89-8.21 1.65 8.96zM267.79 486.96l6.89-8.21 1.65 8.96z
+M287.61 594.43l6.89-8.21 1.65 8.96zM290.97 66.05l6.89-8.21 1.65 8.96z
+M310.79 173.52l6.89-8.21 1.65 8.96zM330.62 280.99l6.89-8.21 1.65 8.96z
+M350.44 388.45l6.89-8.21 1.65 8.96zM370.27 495.92l6.89-8.21 1.65 8.96z
+M390.09 603.39l6.89-8.21 1.65 8.96zM393.45 75.01l6.89-8.21 1.65 8.96z
+M413.27 182.48l6.89-8.21 1.65 8.96zM433.1 289.95l6.89-8.21 1.65 8.96z
+M452.92 397.42l6.89-8.21 1.65 8.96zM472.75 504.89l6.89-8.21 1.65 8.96z
+M492.57 612.36l6.89-8.21 1.65 8.96zM495.93 83.98l6.89-8.21 1.65 8.96z
+M515.75 191.45l6.89-8.21 1.65 8.96zM535.58 298.92l6.89-8.21 1.65 8.96z
+M555.4 406.39l6.89-8.21 1.65 8.96zM575.22 513.86l6.89-8.21 1.65 8.96z
+M595.05 621.32l6.89-8.21 1.65 8.96zM598.41 92.94l6.89-8.21 1.65 8.96z
+M618.23 200.41l6.89-8.21 1.65 8.96zM638.05 307.88l6.89-8.21 1.65 8.96z
+M657.88 415.35l6.89-8.21 1.65 8.96zM0 646.43l11.13-11.6 1.58 13.57z
+M675 646.43l11.13-11.6 1.58 13.57zM76.72 18.77l11.13-11.6 1.58 13.57z
+M95.66 181.6l11.13-11.6 1.58 13.57zM114.6 344.42l11.13-11.6 1.58 13.57z
+M133.54 507.25l11.13-11.6 1.58 13.57zM152.48 670.07l11.13-11.6 1.58 13.57z
+M229.2 42.42l11.13-11.6 1.58 13.57zM248.14 205.25l11.13-11.6 1.58 13.57z
+M267.08 368.07l11.13-11.6 1.58 13.57zM286.02 530.9l11.13-11.6 1.58 13.57z
+M381.68 66.07l11.13-11.6 1.58 13.57zM400.62 228.89l11.13-11.6 1.58 13.57z
+M419.56 391.72l11.13-11.6 1.58 13.57zM438.5 554.55l11.13-11.6 1.58 13.57z
+M534.16 89.72l11.13-11.6 1.58 13.57zM553.1 252.54l11.13-11.6 1.58 13.57z
+M572.04 415.37l11.13-11.6 1.58 13.57zM590.98 578.19l11.13-11.6 1.58 13.57z
+M17.54 20.49l10.01-3.84-2.9 8.63zM102.82 78.01l10.01-3.84-2.9 8.63z
+M68.06 181.62l10.01-3.84-2.9 8.63zM33.29 285.23l10.01-3.84-2.9 8.63z
+M-1.47 388.83l10.01-3.84-2.9 8.63zM673.53 388.83l10.01-3.84-2.9 8.63z
+M222.87 31.93l10.01-3.84-2.9 8.63zM188.1 135.54l10.01-3.84-2.9 8.63z
+M153.34 239.14l10.01-3.84-2.9 8.63zM118.58 342.75l10.01-3.84-2.9 8.63z
+M83.81 446.36l10.01-3.84-2.9 8.63zM49.05 549.96l10.01-3.84-2.9 8.63z
+M14.29 653.57l10.01-3.84-2.9 8.63zM308.15 89.46l10.01-3.84-2.9 8.63z
+M273.39 193.06l10.01-3.84-2.9 8.63zM238.62 296.67l10.01-3.84-2.9 8.63z
+M203.86 400.28l10.01-3.84-2.9 8.63zM169.1 503.88l10.01-3.84-2.9 8.63z
+M134.33 607.49l10.01-3.84-2.9 8.63zM428.2 43.38l10.01-3.84-2.9 8.63z
+M393.43 146.98l10.01-3.84-2.9 8.63zM358.67 250.59l10.01-3.84-2.9 8.63z
+M323.91 354.19l10.01-3.84-2.9 8.63zM289.14 457.8l10.01-3.84-2.9 8.63z
+M254.38 561.41l10.01-3.84-2.9 8.63zM219.62 665.01l10.01-3.84-2.9 8.63z
+M513.48 100.9l10.01-3.84-2.9 8.63zM478.72 204.51l10.01-3.84-2.9 8.63z
+M443.95 308.11l10.01-3.84-2.9 8.63zM409.19 411.72l10.01-3.84-2.9 8.63z
+M374.43 515.32l10.01-3.84-2.9 8.63zM339.66 618.93l10.01-3.84-2.9 8.63z
+M633.53 54.82l10.01-3.84-2.9 8.63zM598.76 158.42l10.01-3.84-2.9 8.63z
+M564 262.03l10.01-3.84-2.9 8.63zM529.24 365.64l10.01-3.84-2.9 8.63z
+M494.47 469.24l10.01-3.84-2.9 8.63zM459.71 572.85l10.01-3.84-2.9 8.63z
+M649.28 319.55l10.01-3.84-2.9 8.63zM614.52 423.16l10.01-3.84-2.9 8.63z
+M579.76 526.77l10.01-3.84-2.9 8.63zM544.99 630.37l10.01-3.84-2.9 8.63z
+M665.04 584.29l10.01-3.84-2.9 8.63zM-9.96 584.29l10.01-3.84-2.9 8.63z"/>
+<g fill="none" stroke="#000" stroke-width="2" stroke-linecap="round">
+<path stroke-dasharray="0 147.876 0 35.719 0 111.442" d="M84.612 -430.334l1244.157 792.618M8.342 -433.556l1244.157 792.618M-67.927 -436.779l1244.157 792.618
+M104.635 -281.478l1244.157 792.618M28.365 -284.7l1244.157 792.618M-47.905 -287.923l1244.157 792.618
+M-124.174 -291.145l1244.157 792.618M48.388 -135.844l1244.157 792.618
+M-27.882 -139.067l1244.157 792.618M-104.151 -142.289l1244.157 792.618
+M-180.421 -145.512l1244.157 792.618M-256.69 -148.734l1244.157 792.618M-84.128 6.567l1244.157 792.618
+M-160.398 3.344l1244.157 792.618M-236.668 .122l1244.157 792.618M-312.937 -3.101l1244.157 792.618
+M-140.375 152.2l1244.157 792.618M-216.645 148.978l1244.157 792.618M-292.914 145.755l1244.157 792.618
+M-369.184 142.533l1244.157 792.618M-445.453 139.31l1244.157 792.618
+M-272.891 294.611l1244.157 792.618M-349.161 291.389l1244.157 792.618
+M-425.43 288.166l1244.157 792.618M-501.7 284.944l1244.157 792.618M-329.138 440.245l1244.157 792.618
+M-405.408 437.022l1244.157 792.618"/>
+<path stroke-dasharray="0 91.012 0 54.578 0 36.076" d="M894.557 762.842l-1260.781 165.986M932.143 706.491l-1260.781 165.986
+M969.729 650.139l-1260.781 165.986M1007.315 593.787l-1260.781 165.986
+M864.79 561.148l-1260.781 165.986M902.376 504.796l-1260.781 165.986
+M939.962 448.445l-1260.781 165.986M977.548 392.093l-1260.781 165.986
+M835.023 359.454l-1260.781 165.986M872.609 303.102l-1260.781 165.986
+M910.195 246.75l-1260.781 165.986M947.781 190.399l-1260.781 165.986
+M805.256 157.759l-1260.781 165.986M842.842 101.408l-1260.781 165.986
+M880.428 45.056l-1260.781 165.986M918.014 -11.295l-1260.781 165.986
+M775.489 -43.935l-1260.781 165.986M813.075 -100.286l-1260.781 165.986
+M850.661 -156.638l-1260.781 165.986M888.247 -212.99l-1260.781 165.986
+M745.722 -245.629l-1260.781 165.986"/>
+<path stroke-dasharray="0 94.655 0 95.726 0 93.155" d="M1103.871 382.719l-1124.718 863.026M1105.608 335.157l-1124.718 863.026
+M1107.345 287.595l-1124.718 863.026M1109.082 240.033l-1124.718 863.026
+M1110.82 192.47l-1124.718 863.026M1112.557 144.908l-1124.718 863.026
+M1114.294 97.346l-1124.718 863.026M891.088 222.389l-1124.718 863.026
+M892.825 174.827l-1124.718 863.026M894.563 127.265l-1124.718 863.026M896.3 79.703l-1124.718 863.026
+M898.037 32.141l-1124.718 863.026M899.775 -15.422l-1124.718 863.026
+M901.512 -62.984l-1124.718 863.026M903.249 -110.546l-1124.718 863.026
+M904.986 -158.108l-1124.718 863.026M681.78 -33.065l-1124.718 863.026
+M683.517 -80.627l-1124.718 863.026M685.255 -128.189l-1124.718 863.026
+M686.992 -175.751l-1124.718 863.026M688.729 -223.313l-1124.718 863.026
+M690.467 -270.876l-1124.718 863.026M692.204 -318.438l-1124.718 863.026
+M693.941 -366l-1124.718 863.026M695.679 -413.562l-1124.718 863.026
+M472.472 -288.519l-1124.718 863.026M474.21 -336.081l-1124.718 863.026
+M475.947 -383.643l-1124.718 863.026"/>
+<path stroke-dasharray="0 46.434 0 74.009 0 105.013" d="M206.347 -453.434l997.343 913.897M123.024 -439.132l997.343 913.897M205.926 -272.513l997.343 913.897
+M122.603 -258.211l997.343 913.897M39.281 -243.908l997.343 913.897M-44.042 -229.606l997.343 913.897
+M38.859 -62.987l997.343 913.897M-44.463 -48.685l997.343 913.897M-127.786 -34.382l997.343 913.897
+M-211.108 -20.08l997.343 913.897M-294.431 -5.777l997.343 913.897M-211.529 160.841l997.343 913.897
+M-294.852 175.144l997.343 913.897M-378.174 189.446l997.343 913.897M-461.497 203.749l997.343 913.897
+M-378.596 370.368l997.343 913.897"/>
+<path d="M0 0h0M675 675h0M675 0h0M-.17 157.18h0"/>
+</g>`
+  },
+  // Modeled on ghiaia2.pat ("ghiaia" = gravel): crazy paving of large stones, with
+  // small wedge stones where three meet. A periodic power diagram of 5 x 5 ghiaia2
+  // cells (15 large stones per cell, 40 px per cell) with the file's stone and wedge
+  // statistics. Generated by utils/gravelPattern.cjs, which explains the method.
+  gravel: {
+    width: 200, height: 200,
+    content: `<path fill="none" stroke="#000" stroke-width="2.5" stroke-linejoin="round" transform="scale(.2)" d="M555 297l-19-38-1-8 15-28 13-6 9-1 10 6 27 41-20 30-13 9-4 1-11-2-6-4-37 11-3 28 6 11 12 2 16 11 5 14 0 5-1 1-5 2-26-2-14-11-2-7 3-10 1-2 11-3
+M536 259l-9-4-3 1-9 8-14 23-6 3-5 0-7-43-6-7-7-4-42 11-6 8 1 44 6 12 23 10 5-1 33-30M535 251l-8 4
+M550 223l-2-10-11-9-20-6-30 3 11-34-2-12-3-4-14-5-23 3-10 10-7 25 37 22 6-1 5-4M563 217l-15-4
+M572 216l13-7 14-14 8-15 1-5-7-22-10-15-14-9-18-3-3-6 8-29 7-5 3 0 7 3 13 16 1 12-5 7-13 5
+M582 222l3-13M609 263l18 2 13 31-34 16-13-3-5-3-12-4M589 293l-1 13M572 303l-8 4-15 35 0 18
+M561 301l3 6
+M364 746l0-17 9-15 30-14 12 12 3 11-5 26-49-3-3 4-2 5 3 11-1 17-6 16-9 10-24 11-11-1-17-13-5-11 4-52 26-6 18 4 19 10 3 4
+M364 729l-8-13-26-10-4-6-1-11 10-47 14-6 43 2 10 5 2 2 3 10-4 45M373 714l-17 2
+M415 712l12 5 27 3 7-5 14-23 0-13-9-24-9-7-44 2-6 5M418 723l9-6
+M413 749l9 11 4 13 0 9 2 4 3 3-4 31-7 7-6 2-9-1-4-5 1-20 6-10 14-6 6-1
+M874 333l7-41 2-2 3-2 41 19-5 27-8 6-35-5-3-1-2-1-23 1-33 29 11 32 30 18 33-9 18-27 0-1-32-40-2-2
+M881 292l-1-2-22-3-47-32 0 0-1 0 0 1 23 53 25-22M883 290l-3 0
+M886 288l15-24 4-15 0-8 7-9 22-14 15 0 37 23-22 45 0 12 28 38-1 1-19 9-4-2-30-44 1-2 13-3 12 3
+M927 307l11-7M922 334l2 13 2 2 9 6 24-1 5 2 19 43-1 15-8 12-20 6-8 10 4 20 10 10 11 1 9-8 2-16-8-23
+M914 340l10 7M879 335l-1 1
+M950 462l-5 18-17 20-7 1-6 6-8 25-19 19-31 10-11-6-20-25 4-19 5-8 49-16 12 2 13 8 6 10
+M946 442l-8-11-3-2-9-11-14-41 0-1 13-15 10-6M954 432l-16-1
+M982 449l9 11 17 1 10-3 18-33 7-1 3 1 13-5 20-21-3-8-6-5-18 0-26 14 9 17 8 7
+M-18 449l9 11 17 1 10-3 18-33 7-1 3 1 13-5 20-21-3-8-6-5-18 0-26 14 9 17 8 7M980 465l11-5
+M971 473l7 37 1 1 1 0 1 2-15 40-8 3-9-2-4-7 2-32 31-4 1 0M960 472l-15 8
+M444 959l-2-40 52-17 28 3 7 6 1 3 2 14-5 27-46 17-11 0-26-13-19 6-3 3-6 70-8 6-9 2-31-9-11 0-25 21-15 7-16-5-5-29 4-12 38-24 6 3 5 5 9 26-1 8
+M444 -41l-2-40 52-17 28 3 7 6 1 3 2 14-5 27-46 17-11 0-26-13-19 6-3 3-6 70-8 6-9 2-31-9-11 0-25 21-15 7-16-5-5-29 4-12 38-24 6 3 5 5 9 26-1 8
+M442 919l-1-1-1-1 11-42 0 0 43 27
+M522 905l6-2 7-15 20-13 31-4 19-27 1-6-1-1-2-4-39-17-16 5-11 13-5 20 5 11 18 10M529 911l-1-8
+M530 914l9 6 48 6 11 10 4 15-8 11-11 8-15 3-25-5-16-13M532 928l7-8
+M481 972l-6 9 1 55 1 3 41 1 8-3 36-28-5-21-14-20M481 -28l-6 9 1 55 1 3 41 1 8-3 36-28-5-21-14-20
+M470 972l5 9M358 939l-11-40 2-5 59-25 8 6 6 13 3 26-1 5-1 1-4 2-59 17-1 0-1 0-19 11-4 11 3 34
+M347 899l-30 6-10-3-2-2-2-14 11-40 35 48M408 869l0-32-3-9M416 875l10 4 24-5 1 0 5-19-3-9-22-17-11-2
+M422 888l4-9M425 914l5 3 9 1 1-1M424 919l6-2M423 920l-2 4-3 38 1 2 1 1 2 3M419 922l2 2
+M360 939l0 1 15 20-1 12-23 25-2 6M360 -61l0 1 15 20-1 12-23 25-2 6M359 939l1 1
+M517 455l-1-4 8-11 29-8-1 28-7 5-20-2-8-8 1 16-4 28-4 6-1 1-6 3-5 1-10-2-32-12-11 10-4 17-3 1-28-26-1-7 12-21 4-2 4 1 14 19 2 18
+M516 451l-12-16-19-17-15 0-41 51M524 440l-20-5
+M553 432l4-6 9-5 37-4 9 68 10 4 9 1 20-8 7-21-1-20-18-28-36 3 0 0 0 1M552 460l3 11 17 28 40-14
+M545 465l10 6M525 463l-7 8M35 417l1 8M26 400l-4-1-3-3-22-57 0-3 37-16 16 3 9 5 6 8-2 35 7 15
+M1026 400l-4-1-3-3-22-57 0-3 37-16 16 3 9 5 6 8-2 35 7 15M52 386l11-15
+M76 391l12 4 7-1 3 1 0 0 3 1 38-7 2-1 1-1 44 4 14 20 1 4 0 1 2 4 30 26-1 38-1 2-2 1-28 4-19 16-5 28-10 13-12 5-7 1-6-2-19-77 2-1 28-1 18 7 5 5 6 22
+M79 399l9-4M59 420l-5 16 5 27 10 10 9 5 3 11-13 18-19-4-6-20-10-4-12 3-28 28-2 5 21 21 37-33
+M1059 420l-5 16 5 27 10 10 9 5 3 11-13 18-19-4-6-20-10-4-12 3-28 28-2 5 21 21 37-33M46 425l8 11
+M423 299l-5 12-8 5-19-3-14 5-4 8 5 10 17 12 6 1 2-1 4-4 3-28
+M422 255l-4-10-2-2-11 0-44 19-3 3 18 39 15 9M428 247l-10-2M470 236l4-6 4-19-2-5M477 240l-3-10
+M483 247l28 8 4 9M457 320l-1 8 1 3 7 8 35 14 10-1M452 321l4 7M429 311l-11 0
+M474 626l0-11 21-23 11-7 2 0 7 1 14 12 5 9 3 26-4 7-18 7-18-2-18-10-5-9-2 10-5 6-10 6
+M474 615l-51-25 4-39 7-10 6-6 7-2 11 2 37 43 11 7M495 592l0-14
+M508 585l6-4 10-14 45 8 2-1 7-8 10-4 19 5 5 7 0 3-3 9-8 9-4 1-2 0-5-3-19-15 0-2 0-2M515 586l-1-5
+M529 598l9 1 33-21M534 607l4-8M537 633l6 10 5 4 1 5-19 35 0 9 4 7 39 0 4-8 1-11-11-32-10-2-8 2
+M533 640l10 3M515 647l-9 8 0 18-7 9-10 2-14-5M497 645l9 10M479 635l-7 1M19 396l-1 2-23 6-13 10
+M1019 396l-1 2-23 6-13 10M997 339l-3-2 0 0-3 0M997 336l-3 1
+M34 320l6-11-1-36 12-18 10-7 13-4 19 2 11-51 5-4 8-1 46 8 4-2 15-50-5-15-10-14-9-3-11-1-45 16-1 1 0 0 0 1 10 52 6 7
+M50 323l-10-14M59 328l13 1 20-5 10-12 9-25-5-23-13-18M65 336l7-7M22 399l-4-1
+M17 694l-7-12 2-8 3-3 10-4 15 2 3 6-2 18-7 6-5 0-12-5 3 12-7 31-14 11-6 9 0 3 4 8 17 13-1 19 9 15 21 12 25-12 2-32-25-16-11 2-20 12
+M1017 694l-7-12 2-8 3-3 10-4 15 2 3 6-2 18-7 6-5 0-12-5 3 12-7 31-14 11-6 9 0 3 4 8 17 13-1 19 9 15 21 12 25-12 2-32-25-16-11 2-20 12
+M10 682l-10-5-13-1-15-9-8-13 27-41-17-26-1-7 1-2 4-6 24-14 9 0 15 28 0 14-12 11-12 3-11-1
+M1010 682l-10-5-13-1-15-9-8-13 27-41-17-26-1-7 1-2 4-6 24-14 9 0 15 28 0 14-12 11-12 3-11-1
+M12 674l-12 3M1012 674l-12 3M15 671l3-10-7-39-9-8M1015 671l3-10-7-39-9-8M25 667l-7-6
+M40 669l7-2 4-3 15-39 9-3 21 4 0 18-9 10-36 10M43 675l4-8
+M41 693l4 11 4 5 12 8 50-1 6 3 2 2 3 8 1 11 9 14 17 13-15 29 19 47 51 5 30-18 4-7 0-9-2-4-11-9-57-34-4-9 6-13 9-6 45-4 8 64-7 2
+M34 699l11 5M29 699l-9 7
+M2 157l30-42 6-1 20 14 8 12-8 45-23-2-16-8-17-17 0-1-1 0 0 0 0 0-16-33 9-13 16-4 22 8
+M1002 157l30-42 6-1 20 14 8 12-8 45-23-2-16-8-17-17 0-1-1 0 0 0 0 0-16-33 9-13 16-4 22 8
+M38 114l-3-43-10-7-26-5-15-41 0 0-49-12-7 4-23 24-1 2 3 21 5 9 20 20 47-9 14-9 6-9
+M1038 114l-3-43-10-7-26-5-15-41 0 0-49-12-7 4-23 24-1 2 3 21 5 9 20 20 47-9 14-9 6-9
+M58 128l17 5 25-2 1-1M66 140l9-7M58 185l5 4 8 4 33 2M35 183l-15 7-26 30-6 0-15-17-3-12 31-33 0-1
+M1035 183l-15 7-26 30-6 0-15-17-3-12 31-33 0-1M19 175l1 15M2 158l-1-1M1002 158l-1-1
+M880 877l14-31 11-10 30 1 3 0 1 1 2 2 6 33-39 21-28-17-6 1-5-1-39-24 0-9 34-38 6-2 6 0 18 13 3 12 8 7
+M894 846l3-17M935 837l2-1-14-28-5-2-24 11M938 837l-1-1M939 838l2 0 22-11 9-1 2 1 8-1 24-13 16 2
+M-61 838l2 0 22-11 9-1 2 1 8-1 24-13 16 2M941 840l0-2
+M947 873l8 6-13 42 0 0 21-6 8-6 7-23 3-2 10 2 13 9 19 22-15 29-3 2-1 0-3-1-26-27-4-11
+M-53 873l8 6-13 42 0 0 21-6 8-6 7-23 3-2 10 2 13 9 19 22-15 29-3 2-1 0-3-1-26-27-4-11
+M908 894l11 21 10 6 11 2 1 0 14 41-3 8-19 17-9 1-17-7-15 2-10 7-8-2-8 3-41 47-1 1 1 0 6 35-3 10-11 11-22 6-35-9-3-2-1-2 1-6 23-51 7-3 37 11 0 0
+M908 -106l11 21 10 6 11 2 1 0 14 41-3 8-19 17-9 1-17-7-15 2-10 7-8-2-8 3-41 47-1 1 1 0 6 35-3 10-11 11-22 6-35-9-3-2-1-2 1-6 23-51 7-3 37 11 0 0
+M761 704l-1-31 0 0 40 10 3 7-1 3-9 7-32 4-8 6-8 12-8 20 3 16 29 28 55-20 2-34 41 5 1 2-24 29-9 1-11-3
+M760 673l0 0 0 0 7-20 11-7 27 3 5 19-2 10-2 3-3 9M760 673l0 0M800 683l6-2M802 693l4 13 20 26
+M793 700l13 6M966 971l21-6 22 26 3 7 1 4-29 16-18-47-6-2-8 3
+M966 -29l21-6 22 26 3 7 1 4-29 16-18-47-6-2-8 3M-34 971l21-6 22 26 3 7 1 4-29 16-18-47-6-2-8 3
+M-34 -29l21-6 22 26 3 7 1 4-29 16-18-47-6-2-8 3M987 965l14-16 3-1M-13 965l14-16 3-1
+M9 991l4 0 10-31-1-3-14-9-3 0M12 998l1-7M12 -2l1-7M13 2l24 11 6 7 6 19-2 16-7 6-15 3
+M13 1002l24 11 6 7 6 19-2 16-7 6-15 3M984 18l0 0 0 0
+M676 993l-5-27 20-7 10 2 5 10 0 12-27 11-3-1 0 5-1 2 1 5 16 33 10 6 24-2 11-5 4-4 4-15-3-25-7-7-17-4-12 1
+M676 -7l-5-27 20-7 10 2 5 10 0 12-27 11-3-1 0 5-1 2 1 5 16 33 10 6 24-2 11-5 4-4 4-15-3-25-7-7-17-4-12 1
+M671 966l-8-7-10-5-51-3M691 959l9-7 7-17 4-1 44 13 2 28 5 5 13 5 12 45
+M691 -41l9-7 7-17 4-1 44 13 2 28 5 5 13 5 12 45M701 961l-1-9M706 971l12 11M679 994l-3 4M679 -6l-3 4
+M142 552l-41 23-6 0-2 0-5-6-20-62M123 475l-2-2-1-1-3 0-23 7-13 10M125 474l-4-1
+M153 473l16-8 30-45 4 0M171 480l-2-15M176 485l25 6M177 535l6 16 14 12 5 0 11-7 9-12 7-57
+M167 548l16 3M155 553l-1 5 13 16 13 3 15-6 3 1 2 39-3 2-4 1-12-3-9-9 0-12 8-13M148 554l6 4
+M172 602l-4 11-3 3-16 3-44-6-6-33-4-5M172 590l-5-16M195 571l3-3 1-2-2-3M198 572l0-4
+M200 611l53 21-4 34 3 6 45 19-2-60 23-5 7-5-2-7-10-8-27-5-5 12 4 11 10 7
+M197 613l-2 3-3 28-24 15-2 4 0 5 4 7 10 7 36 3 6-5-30-36M193 614l2 2M181 611l-13 2
+M829 395l-10 21-9 6-33-7-8-5-4-9 4-11 33-33 16 6M851 334l-18-18-2 0-24 9-9 16 4 16
+M910 376l1 1 0 0 1-1M910 377l1 0M892 404l9 17 10 7 9-1 15 2M859 413l-1 9 6 11 11 6 19 1 5-5 2-14
+M1 157l0 1M1001 157l0 1M985 124l-40-11-14-12 1-15M994 111l3-16-5-13-13-5M10 107l-13-12
+M1010 107l-13-12M12 536l-2 11 1 11M991 515l-5-2-4-1-1 1M993 510l-7 3M21 482l2-10-3-5-12-6
+M33 479l-10-7M43 483l11-8 15-2M629 655l37-11 3 2 1 3-14 35-22-13-5-8 0-8-8-6-10-4-38 3-2-1 20-48-1-6
+M666 644l-5-47-2-4-1-1-2-3-7-27 2-9 38-33 1-1 1 0 12 11 18 1 37-19 1-18-5-11-8-7-55 43
+M669 646l4 1 13-1 9-7 23 3 11-2 13-8 7-11-1-10-6-9-29-16-21 13 3 40M670 649l3-2
+M656 684l8 14-8 39-10 13-5 3-18 4-39-13-6-11-5-30M634 671l-8-1-41 17-8 8M629 663l-3 7
+M301 60l-4 3-2 5 7 29-4 13-22 30-53-21 0-23 49-33 3-10-3-30-6-10-9-9-43 7-14 10-11 40-5 5-46 6-5-1-1-1-6-7-13-28 1-11 6-12 24-22 45 8 9 6 2 3 0 14
+M301 1060l-4 3-2 5 7 29-4 13-22 30-53-21 0-23 49-33 3-10-3-30-6-10-9-9-43 7-14 10-11 40-5 5-46 6-5-1-1-1-6-7-13-28 1-11 6-12 24-22 45 8 9 6 2 3 0 14
+M296 31l-8-10-10-2-6 4M300 19l-12 2M344 998l7-1M344 -2l7-1M358 29l10 8
+M332 58l-9 22 0 14 6 11 17 19-5 39 1 2 1 1-2 50-8 9-10 6-24 4-11-3-13-10 10-40 9-8 46-10 2 1
+M317 65l6 15M537 865l-2 23M532 854l-13-13-30-9 0-39 3-4 26-6 18 2 8 4 7 10 2 5 11 12M537 834l-18 7
+M548 821l5-17
+M603 833l4-2 16-14 20-4 12 9 1 0 27-14 43 0 7 4 5 7 5 37 0 2-29 20-43-6-6-6-9-42 0-1 0-1M605 837l2-6
+M606 838l3 5 13 8 3 10 11 6 29-1M605 844l4-1M586 871l25 23 3 0 1 0 3 0 42 13 5 8 2 8-7 25-7 6
+M846 555l3 12-3 4-2 11 2 15 9 16 7 4 16 3 37-9 7 7 1 4-2 13-15 23-22 6-2 0 0 0-1-1-10-36 7-7
+M826 530l-18 14-8 0-42-32M830 511l-5-13-8-10 9-54-7-7-9-5M835 503l-10-5M884 487l6-6-2-22-13-20
+M896 489l-6-8M909 497l12 4M907 532l3 22 15 10 3 28-3 9-3 5 0 12M888 551l22 3M857 561l-8 6
+M111 183l-2 8M101 131l-1 0M101 130l1-1 2-37 6-13 15-8 7-1M102 129l0 0M147 113l3-6-13-31-4-5
+M158 114l-8-7M167 117l27-38-4-8-6-5M177 131l16 7 17-3 13-16M182 146l11-8
+M167 196l1 6 1 2 2 7-2 46-5 12-2 2-8 5-22 0-26-12M163 198l5 4M54 475l5-12M78 478l16 1
+M88 569l-3 8-23 17-2 12 4 8 11 8M117 472l1-3 0-12 5-23 17-44 1-2M120 472l-2-3M101 575l-2 5
+M93 575l-8 2M489 832l-24 13-9 10M489 793l-3-7-1-1-8-2-46 6M492 789l-6-3
+M518 783l12-13 5-24 31 5-15 33 0 15M536 785l-6-15M544 789l7-5M164 758l-7 7-8 2
+M170 745l-2-13-3-3-19-6-20 0-4 6M179 739l-11-7M224 735l3-3 4-2 10-4 17-1 16 4 12 6 7 8M232 799l4 11
+M168 767l-11-2
+M321 458l41 1 5 4 5 22-6 10-11 4-19-8-15-31 0-2-4-2-2-3-1-1 0 0 2-2 45-20 4 1 3 1 19-12-15-37-7-6-6-1 2 54
+M362 459l7-4 3-6-4-14-3-4M367 463l2-8M372 485l8 11 4 2 13 1 3-1 10 0M366 495l14 1
+M355 499l-16 12-7 19 3 15 3 4 2 16-17 38 0 11M336 491l3 20M321 460l-4-4
+M359 376l-2-2-3-2-39-18 6-11 0-17-7-14-9-8-10-2-14 1-10 5-2 4 0 1 0 5 22 36 8 4 16-4
+M365 377l8-3 22-22 0-4M372 383l1-9M387 420l9 3 7 6 5 18-4 7-32-5M368 432l0 3M926 418l-6 9
+M912 377l-1 0M925 361l1-12M959 354l7-3 1-2 1-5M964 356l2-5M983 399l12 5M409 491l-9 7
+M421 470l0-4-6-6-11-6M425 468l-4-2M443 488l13 8M441 523l0 5 1 2 5 3M438 524l3 4
+M830 844l-11 7-2 1-9 6-8 12-4 21 3 12 13 15 17 7 40-45 0-3M864 806l1-5-20-25-10-7M870 804l-5-3
+M876 804l26-19 11-1 10 3 2 3 1 5-3 5-5 6M874 878l-5 2M830 853l-11-2M656 824l-34 27M656 823l-1-1
+M683 808l15-40 9-4 4 2 9 11 6 31M733 812l8 2 11-3 12-11 5-14M738 819l3-5
+M743 856l2 1 0 0 3 1 35 17 17-5M743 858l2-1M714 878l-10 44-3 3-27-5-7 3M671 872l-11 35
+M303 886l-13 12-12 1-15 10-9 13 19 31 44-10-4-30-6-11M314 846l-1-5-4-5-41-16-17-3-6 0-7 6
+M317 905l-4 8M305 900l-15-2M881 663l0 1-64 9-9 5M871 627l-9-10M915 611l7-5
+M923 622l4 10 18 18 1 8-14 14-26-14M921 635l6-3M884 664l-1 1 15 33-31 39M882 664l1 1M882 664l-1 0
+M126 63l-1 8M113 35l-32 18-11 1-11-2-12 3
+M114 24l-2-10-12-13-10-4-24 2-14-5-22-37 13-14 68 21-12 28-9 5
+M114 1024l-2-10-12-13-10-4-24 2-14-5-22-37 13-14 68 21-12 28-9 5M120 12l-8 2
+M144 990l-17-29 1-8 4-9 31-16 20-3 14 2 2 0 0 0 1-1 54-4M189 998l9-2 5-6 14-3 35 8 3-2 18-40
+M189 -2l9-2 5-6 14-3 35 8 3-2 18-40M198 4l0-8M198 1004l0-8M200 7l14 4M189 61l1 10M138 72l-1 4
+M846 597l-2 17-39 35M844 582l-10-9-25-11-9 0-47 39-5 10M846 571l-12 2M925 564l12-7 12-3
+M928 592l6 2 35-9 4-5M925 601l9-7M855 613l-11 1M868 739l28 13 11 0 26-20-24-31-5-2-6-1M844 768l1 8
+M423 590l-12 6-11 38 2 9M427 551l-5-5-18-2-9-6-4-30 6-9M434 541l-12 5M440 535l2-5M458 535l30-22 0-5
+M911 428l-12 7
+M439 184l-18 10-13 1-30-30-5-18 6-18 4-4 1-1 5-2 48 3 5-8 9-6 44-3 2 1 0 1 0 2-7 26 3 13
+M446 159l-2-19-7-15M456 149l-12-9M479 146l11-8M496 155l13 6 5 1 10 7 3 18-10 11M498 167l11-6
+M482 205l-4 6M395 538l-2 9-4 6-1 13 23 30M391 508l-7-10M404 544l-11 3M514 162l13-5 18-27 6-3 8-1
+M524 169l3-12M527 187l10 17M314 452l0 2-45 44-35-13-3 1M314 452l0-2-10-10-7-11-10-52 1-10 3-3 8-6
+M316 450l-2 0M315 453l-1 1M939 298l-27-32-7-17M952 295l12-9M992 336l2 1M972 346l-5 3M557 650l-9-3
+M567 652l2-2 4-2M578 684l7 3M534 703l-7 27 2 10 6 6M530 696l-5-5-12-6-14-3M530 687l-5 4M13 800l-7 13
+M34 769l7-10-3-14-25-8M45 767l-4-8M70 783l29-1 21-27 12-1M68 815l16 5 11 24 23 8 30-4 5-5
+M43 827l2 35 4 11 2 2 9 3 20-2 9-6 5-8 24-10M945 547l-8 10M947 515l-19-15M978 511l0-1M980 511l2 1
+M966 553l1 10 6 9 5 0M958 556l9 7M907 57l-5 9-32 24 0 13 11 29 11 7 7 0 12-7 11-12 23-7
+M904 36l-1-2-1-1-20-41M904 1036l-1-2-1-1-20-41M905 34l-2 0M928 10l3-10-1-3-6-7M928 1010l3-10-1-3-6-7
+M935 6l-4-6M935 1006l-4-6M984 18l0 0M993 68l-1 14M912 66l-10 0M335 961l-7-12-11-6M339 950l-11-1
+M375 960l20 5 21-2 3 1M374 972l21-7M833 309l0 4 0 3M810 256l0-1-45 23-3 16 3 12 22 19 11 16
+M810 255l0 0M811 255l0-1-2-34 43-22 49 34 4 9M811 255l0-1M703 530l9 18 1 38
+M746 476l-2-11 2-12 22-34 1-9M754 483l9 5 54 0M759 494l4-6M721 531l-9 17M556 120l-5 7
+M564 91l-2-8-10-8 14-61 3-3 11-1 17 7 22 18 0 3-35 42-3 9M571 86l-9-3M574 86l10-6
+M594 105l13 6 21-1 7 3 3 3-2 27 5 12 28 8 2-1 17-40-50-6M595 117l12-6M590 124l1 14
+M657 238l2-4 1-1 36-2 10 5 2 3 2 13-1 8-14 9-13 2-12-10-11-15-2-8-4 6-26 21
+M659 234l-1-2 0-1 0-2 14-61 1 0 46 24 5-2 16-34 0-11-10-14 24-28 3-1 14 46-20 1-11-4M660 233l-2-1
+M696 231l10-7 16-24 4 0 19 16 12 1 30-9-14-59-2-1M706 236l0-12
+M708 239l11 5 18-3 7 6 4 13-4 10-7 5-14 3-10-6-18-3M710 252l9-8M709 260l4 12
+M682 271l-10 6-17 23 1 4 35 53 6 5 2 0 7-3 30-47 13-8 4 0 12 2M670 261l2 16M659 246l-6-2
+M511 255l13 1M501 287l1 6 16 15M495 290l7 3M222 544l5 7 37 3 11-5 3-5 1-17-10-29M213 556l14-5
+M202 563l-3 3M169 204l5 4 40 12-11 48-3 1-26-4-10 4M171 211l3-3M169 257l5 8
+M162 271l-2 8 13 30-33 35-10 4-3 0-9-4-13-15-13-5M154 276l6 3M132 276l-21 11M134 796l-27-3-8-11
+M238 814l7 3M234 830l27 54 17 15M204 848l-5 78 1 0M120 755l3-15M107 793l-23 27
+M757 84l-3 2-6-4-14-4-32 2-7 7-3 33-4 2M780 33l-26-4-13 4M824 41l1-1M825 41l77-8
+M831 76l9 9 20 6 10-1M828 86l12-1M817 97l-9 19 2 17-37 16M795 103l13 13M760 94l-3 2 0 1 0 5
+M757 92l0 4M756 90l-2-4M263 909l-2-25M993 760l-2 6-25 24-3 15 4 14 5 7
+M993 757l-4-7-41-24 4-26 17-16 3-17M999 748l-10 2M-1 748l-10 2M38 745l13-23-2-13M997 768l-6-2
+M289 795l-9 10-17 8 5 7M319 737l9-12 2-19M337 741l-9-16M356 751l5-1M362 766l9 12 28 16 9-1
+M361 783l10-5M355 799l4 10 42 14M346 809l13 0M322 820l-7 9-2 5 0 7M311 819l4 10M294 806l-14-1
+M281 613l-10 10-18 9M286 601l-13-43-9-4M313 606l10-3M325 621l5 7 3 3 16 5M318 626l12 2M285 624l-14-1
+M373 326l-9 8-4 2-6 10 2 26 1 2M377 318l-1-14M407 344l2 4 22 11 6 9 5 23 12 16 16 11M403 348l6 0
+M401 349l-6 3M378 336l-14-2M571 576l-2-1M578 566l3-13-11-50 1-2 1-2M588 562l-7-9
+M607 567l8-1 11-9 6-13-3-48-7-7M612 574l3-8M612 577l8 6 35 7 3 2M609 586l11-3M601 595l-1 3 13 40-2 7
+M597 596l3 2M595 596l-4 3M442 117l1-10-9-29-10-7-9-2-7-8-3-9-6-6M451 111l-8-4
+M495 108l2-1 2-7-28-56 3-3 3-2M497 109l0-2M497 110l2 1 46 19M497 112l2-1M251 817l12-4M309 836l4-2
+M587 926l14-10 11-20 2-2M598 936l3-20M594 962l-5 15-1 20 9 20M594 -38l-5 15-1 20 9 20M583 970l6 7
+M568 973l-11 15M807 325l-20 0M831 316l2-3M636 143l-9 14-11 6-15-10M671 162l0 3 1 1 1 2M669 163l2 2
+M641 155l-14 2M866 993l0-8-20-31-3-2-3 0-65 33M874 990l-8-5M194 79l29 17
+M769 390l-12 5-32-7-14-11-7-12 2-6M819 416l0 11M777 415l-9 4M765 401l-8-6M974 587l-5-2M974 578l-1-6
+M2 558l8-11M1002 558l8-11M26 586l15 11 11 1 10-4M26 600l15-3M14 611l-3 11
+M275 222l-5 1-6 6-26 57 0 6 0 2 4 3 23 11 6 0M285 182l-2-11-6-6-1-25M294 174l-11-3M340 164l1-1
+M343 166l16-5 19 4M341 216l23 13 12 0 30-9 4 14 6 9M333 225l3 14 22 26-40 33-4 14M323 231l13 8
+M299 235l-6 6-6 53 8 8M288 232l5 9M603 416l0 0-11-31-6-7-28-1-4 2M603 416l0 0
+M639 413l23-28 6-4 6-1 16-15 1-8M657 441l17-2 24-17 9 3 33 31 6-3M658 461l16-22M651 482l38 36 1 1
+M631 490l-2 6M799 903l-6 16-38 28M796 891l-13-16M808 858l-2-7-25-13-10-10-5-10-14-7M817 852l-11-1
+M829 925l12 25 2 2M812 918l-19 1M902 785l4-8-3-17-7-8M913 784l-7-7M923 787l14-55-4 0
+M925 790l3 3 21 1 17-4M926 795l2-2M923 800l0 8M904 699l6-1 16-9 11 1 15 10M909 701l1-3M907 752l-4 8
+M1 947l0 2M1001 947l0 2M975 920l-12-5M978 886l0-4-1-2-22-1M981 884l-3-2M991 886l13-1 37-14 8 2
+M-9 886l13-1 37-14 8 2M4 895l0-10M23 917l7 0 7 5 6 21M8 946l0 2M416 963l2-1M420 965l5 0
+M416 38l32 12-12 17-12 4M408 44l-3 8M692 38l0 15-5 13-29 1-11 8-13 32 1 6M676 5l-5 0-46 32-3-1-3 2
+M675 1000l-4 5M675 0l-4 5M735 986l13-2 3-2 11-2M742 993l6-9M745 18l9 11M737 37l-3 10 7 27-7 4
+M726 42l8 5M702 44l-10 9M698 768l0-11-1-2 0-8 2-2 5-3 33 0M707 764l-9-7M711 766l16-2 13-6
+M720 777l7-13M745 722l-5-14-25-19-2-5 1-5 8-5 4-14-1-11-7-7M753 710l-13-2M358 265l0 0
+M361 262l5-22 10-11M405 243l5-9M840 952l1-2M846 954l46 2 4 16-4 13M723 278l11 13 4 7 11 6
+M737 241l8-9 2-5-2-11M744 247l1-15M748 260l8 11 9 7M744 270l12 1M737 275l-3 16M257 4l-2-5-3-4
+M257 1004l-2-5-3-4M266 13l12 6M275 53l8 9 9 2 3 4M272 63l11-1M22 957l4 0 4 0M23 960l3-3M291 354l0 10
+M269 318l-3-1-28 24-3 1 0 0-2 1-13 21-25 4-4-9-1-12 3-7 12-7 21 0 7 8 0 2M269 313l-3 4M269 312l-4-4
+M281 303l6-9M305 304l13-6M321 326l11 11 17 2 11-3M321 343l11-6M195 368l-9 23M191 359l-9-4-37 10-3 22
+M190 347l-8 8M193 340l-4-16-9-12 24-32 7-1 24 10 3-3M205 333l-16-9M226 333l13-35 3-1M233 341l2 1
+M220 364l7 28 5 5 6 2 19-21 15-7 6 0 9 6M95 844l-1 18M148 848l21 65 14 12M18 458l2 9M730 131l-38-11
+M754 103l3-6M751 149l-11 7M524 567l-17-53-4-5M628 110l6-3M616 163l-8 12M52 994l-2 11-3 3-4 12
+M52 -6l-2 11-3 3-4 12M111 964l11-4 6-7M99 992l1 9M99 -8l1 9M66 999l-16 6M66 -1l-16 6M566 751l9-6 9-1
+M625 861l-1 14-7 17 1 2M636 867l-12 8M612 896l-1-2M615 894l2-2M665 915l9 5M660 948l3 11
+M912 232l-11 0M934 218l9-9 2-5-1-9-36-51-9-5M949 218l-6-9M986 241l4-1 35 17 26-2
+M-14 241l4-1 35 17 26-2M912 266l-11-2M210 135l29 45 2 13-2 6-11 13-14 8M967 819l-4 8M963 805l-14-11
+M982 826l-4 5-1 49M974 827l4 4M578 733l-3 12M664 698l24 3 7 7 6 31 3 3M656 737l11 8 25 5 5 5
+M646 750l21-5M641 753l-9 20 2 27 9 13M623 757l9 16M557 426l1-13-6-27-4-4M566 421l-8-8M402 803l-3-9
+M422 787l4-5M427 820l4 9M414 829l-6 8M326 700l-10-5-16-3-3 0 0-1M325 689l-9 6M335 642l-2-11
+M392 638l8-4M404 645l9 5M366 240l-2-11M406 220l4-13-2-12M571 647l-2 3M613 638l8 11M964 654l-9 0-9 4
+M987 676l-18 8M647 75l-1-13-21-25M658 67l-12-5M687 66l6 9 2 12M693 75l9 5M751 982l6-7
+M723 196l0-1 1-5M723 196l3 4M723 196l-1 4M723 195l-4-3M787 208l22 12M757 217l-10 10M199 420l2-4
+M233 446l9-12 12-5 34 3 9-3M232 484l2 1M640 296l6 4 4 1 1 0 5 3
+M606 312l-4 8 11 22 4 3 1 0 4 1 39 33 7 2M593 309l9 11M692 599l-29-4-4-2M742 602l11-1
+M749 621l4 10 8 7 17 8M742 632l11-1M729 640l-4 9M485 418l20-31 17-7M514 499l3 3 51 0 3-1M510 505l7-3
+M509 506l-2 8M498 510l-10 3M279 527l12 10 31 0 13 8M278 544l13-7M275 549l-2 9M39 273l-14-16
+M61 248l7-12-2-39-3-8M74 244l-6-8M102 312l3 17M656 589l-1 1M649 562l-8-8-3-1-12 4M651 553l-10 1
+M689 520l0-2M663 595l-2 2M173 309l7 3M140 344l-2 9 7 12M130 348l8 5M127 348l-9 6-21 39 1 2
+M118 344l0 10M126 723l-7-2M146 723l19-15 7-23 8-3M165 729l0-21M744 465l-4-9M826 434l23-4 15 3
+M206 975l-8-47 1-1M206 975l11 12M206 975l-3 15M198 928l-1-1M199 927l0-1M255 993l0 6M255 -7l0 6
+M300 692l-2 1-15 32 3 10M297 692l1 1M741 74l7 8M292 64l5-1M302 97l9 4 4-1 8-6M298 110l13-9
+M288 367l-10 4M354 372l2 0M304 440l-16-8M118 457l-3-19-15-41 1-1M123 434l-8 4M140 390l-1-1
+M200 411l3 1 20-13 9-2M201 415l2-3M127 961l-5-1M132 944l-42-62-10-6M163 928l6-15M441 918l-2 0
+M451 875l0 0 0 0-1 0M451 875l0 0 0-1M453 846l12-1M527 730l-9 9-24 8-19-2-5-3-8-12-2-3 1-12
+M529 740l-11-1M170 675l2 10M166 668l-4-1-30 9-15 16-2 19 2 8M166 663l-4 4M168 659l-7-32-12-8
+M222 680l8 0 10-4 3-2 9-2M216 685l12 42 3 3M931 101l-9 19M607 180l6 15 44 34 1 2M599 195l14 0
+M115 711l-4 5M117 692l-3-18-12-14-15-6M132 676l-18-2M448 50l23-6M436 67l-2 11M415 69l-7 7-20 44 1 2
+M408 61l0 15M711 377l-1 16-8 10-28-23M704 365l-5-3M736 312l2-14M753 304l9-10M725 388l-15 5
+M249 666l-6 8M881 132l-3 11-23 16-3 39M870 103l-10-12M911 132l-3 12M892 139l-14 4M697 747l-5 3
+M699 745l2-6M242 434l1-17-5-18M254 429l-11-12M373 147l-14 14M379 129l-1-3-32-2M383 125l-5 1
+M384 124l4-4M421 194l-11 13M570 503l-2-1M632 544l6 9M990 240l1-10 3-10M655 300l-4 1M697 362l-7 3
+M552 75l-5-1-6 2-42 24M566 14l-1-4-3-1M569 11l-4-1M580 10l8-13M580 1010l8-13M619 35l3 1M945 650l10 4
+M932 672l-1 8 6 10M467 642l-1 13M37 13l10-5M49 39l10 13M40 61l-5 10M66 625l-2-11M96 626l9-13
+M96 644l6 16M165 616l-4 11M858 422l-9 8M894 440l-6 19M422 760l8 2 28-21 12 1M426 773l4-11
+M892 956l26-31 11-4M896 972l11 11M30 917l9-7 11-21 1-14M37 922l2-12M764 800l2 18
+M396 423l10-1 29-17 19 2M403 429l3-7M408 447l7 13M808 544l-4 8 0 2-4 8M800 544l4 8
+M203 268l1 5 1 1 6 5M200 269l4 4M435 405l7-14M476 36l-2 5M526 37l0 10 16 23-1 6M518 40l8 7
+M283 725l-9 4M248 717l-11-31 3-10M248 717l10 8M248 717l-7 9M237 686l-7-6M506 673l7 12M489 684l-14 8
+M45 862l-4 9M89 870l1 12M60 878l-10 11M704 922l1 6 1 2 5 4M701 925l4 3M707 935l-1-5M100 397l-2-2
+M542 70l5 4M942 921l-1 1 0 0 0 1M942 921l-1 1M508 369l-3 18M506 362l-7-9M510 350l5-14M533 349l16-7
+M554 374l4 3M553 380l-1 6M686 646l28 33M726 660l6 11 28 2M722 674l10-3M702 403l0 10 5 12
+M354 346l-5-7M658 229l-1 0M672 168l0-2M322 537l10-7M338 549l11 9 27 1 12 7M340 565l9-7M931 680l-5 9
+M477 783l5-8 0-15-7-15M485 785l-3-10M804 554l5 8M431 359l9-3 14-15 10-2M437 368l3-12M767 653l-6-15
+M810 668l7 5M650 301l-3 1-26 42 1 2M646 300l1 2M238 294l1 4M238 292l-3-3M264 229l-1-7-18-9-17-1
+M270 223l-7-1M462 730l-4 11M460 727l-6-7M494 747l-12 13M781 838l-12 0-22 18 1 2M771 828l-2 10
+M228 727l-1 5M204 280l1-6M329 105l-14-5M104 92l-3-12-19-19-12-7M110 79l-9 1M937 732l11-6
+M988 220l3 10M973 203l-15-6-4 0-9 7M970 191l-12 6M95 394l2-1M698 422l4-9M238 341l0 3 17 19 17 8
+M235 342l3 2M918 925l1-10M940 923l1-1M955 964l5 5M933 989l-3 8M376 559l13-6M71 193l-5 4
+M623 817l11-17M81 53l1 8M586 378l9-6 18-24 4-3M592 385l3-13M255 363l2 15M662 385l-1-6M745 857l2-1
+M713 684l-3 4-11 10-4 10M715 689l-5-1M613 348l0-6M618 345l3-1M60 606l-8-8M688 701l11-3M454 341l3-10
+M855 159l-45-26M944 195l10 2M277 165l-27 16-9 12M227 392l-4 7M239 180l11 1M239 199l6 14M61 717l-10 5"/>`
+  }
+};
+
+// The color goes inside an attribute value, so keep it from closing the attribute.
+const escapeColor = color => String(color).replace(/[&"<>]/g, "");
+
+// The <pattern> markup for pattern `name`, with id `id`, drawn in `color`.
+// `extraTransform` goes before the pattern's own transform; Sketch uses it to flip and
+// scale its copies. Returns "" for an unknown name.
+const fillPatternDef = (name, id, color = "#000", extraTransform = "") => {
+  const p = fillPatterns[name];
+  if (!p) { return "" }
+  const transform = `${extraTransform} ${p.transform || ""}`.trim();
+  const content = color === "#000"
+    ? p.content
+    : p.content.replace(/"#000"/g, `"${escapeColor(color)}"`);
+  return `<pattern id="${id}" width="${p.width}" height="${p.height}" ` +
+    `patternUnits="userSpaceOnUse"${transform ? ` patternTransform="${transform}"` : ""}>` +
+    `${content}</pattern>`
+};
+
+// The id of a pattern def in Hurmet's own SVG: one per pattern and color. Sketch's
+// live drawing uses "fp-" ids, which it rescales on zoom, so Hurmet uses "hp-".
+const hurmetPatternId = (name, color) => `hp-${name}-${sanitizeForId(color)}`;
+
+// The defs for a Hurmet drawing's svg.patterns, a list of { name, color }.
+// Patterns named in `omit` are left out.
+const patternDefs = (patterns, omit = []) => patterns
+  .filter(p => !omit.includes(p.name))
+  .map(p => fillPatternDef(p.name, hurmetPatternId(p.name, p.color), p.color))
+  .join("");
+
+// Sketch (src/sketch/) and draw() read the same statements. Their shared definitions
+// live in Sketch's shared.js, unitAliases.js, and arcStep.js, which import nothing,
+// and fillPatterns.js, which imports only shared.js.
+
+// decimalFormat and roundingSpec come from the parent document. A format statement
+// in the drawing overrides roundingSpec.
+const startSvg = (decimalFormat = "1,000,000.", roundingSpec = "h3") => {
+  return {
+    tag: 'svg',
+    children: [],
+    attrs: {
+      xmlns: "http://www.w3.org/2000/svg",
+      width: 250,
+      height: 250,
+      style: "display: inline;"
+    },
+    // Fields outside attrs are not written as SVG attributes.
+    caption: false,  // If true, Hurmet writes the title as a caption.
+    patterns: [],    // The { name, color } of each fill pattern used. The renderer
+                     // writes a <pattern> def for each.
+    temp: {
+      width: 250,
+      height: 250,
+      xmin: 0,
+      xmax: 5,
+      ymin: 0,
+      ymax: 5,
+      xunitlength: 20,  // px
+      yunitlength: 20,  // px
+      origin: [0, 0],   // in px (default is bottom left corner)
+      scene: null,      // { S, dx, dy } from a scene statement. S is px per model unit.
+      unit: "px",       // The scene's unit
+      roundingSpec,     // Rounding of dimension labels
+      fraction: 16,     // Denominator of the inch fractions in "ft-in" dimension labels
+      decimalFormat,    // From the parent document
+      stroke: "black",
+      strokewidth: 1,
+      linetype: "solid",
+      fill: "none",
+      pattern: "solid",
+      fontcolor: "black",
+      fontstyle: "normal",
+      fontfamily: "sans-serif",
+      fontsize: 13.33, // px, ~10 pt
+      fontweight: "normal",
+      marker: "none",
+      dotradius: 4,
+      axesstroke: "black",
+      gridstroke: "grey"
+    }
+  }
+};
+
+// Helpers
+const isString = oprnd => oprnd != null && oprnd.dtype === dt.STRING;
+const isNumber = oprnd => oprnd != null && Rnl.isRational(oprnd.value);
+const drawError = statement => errorOprnd("DRAW_ARG", statement);
+
+// A model point, in px.
+const toPx = (attrs, x, y) => [
+  x * attrs.xunitlength + attrs.origin[0],
+  attrs.height - y * attrs.yunitlength - attrs.origin[1]
+];
+
+// The fill paint for an element: the fill color, or, while a fill pattern is
+// in effect, a reference to that pattern in the fill color. Records each
+// pattern used, so the renderer can write its <pattern> def.
+const fillPaint = svg => {
+  const { fill, pattern } = svg.temp;
+  if (pattern === "solid" || !fill || fill === "none") { return fill }
+  if (!svg.patterns.some(p => p.name === pattern && p.color === fill)) {
+    svg.patterns.push({ name: pattern, color: fill });
+  }
+  return `url(#${hurmetPatternId(pattern, fill)})`
+};
+
+// Set an element's stroke, line type and fill. Elements with no inside, such
+// as lines, get no fill.
+const setStrokeAndFill = (node, svg, hasFill = true) => {
+  const attrs = svg.temp;
+  node.attrs["stroke-width"] = attrs.strokewidth;
+  node.attrs.stroke = attrs.stroke;
+  node.attrs.fill = hasFill ? fillPaint(svg) : "none";
+  if (dashMap[attrs.linetype]) {
+    node.attrs["stroke-dasharray"] = dashMap[attrs.linetype];
+    if (linecapMap[attrs.linetype]) {
+      node.attrs["stroke-linecap"] = linecapMap[attrs.linetype];
+    }
+  }
+};
+
+// Give the model-to-px mapping of a scene statement to attrs.
+const applyScene = attrs => {
+  const { S, dx, dy } = attrs.scene;
+  attrs.xunitlength = S;
+  attrs.yunitlength = S;
+  attrs.origin = [S * dx, S * dy];
+  attrs.xmin = -dx;
+  attrs.xmax = attrs.width / S - dx;
+  attrs.ymin = -dy;
+  attrs.ymax = attrs.height / S - dy;
+};
+
+const pointZeroRegEx = /\.0+$/;
+const chopZ = str => {
+  const k = str.indexOf(".");
+  if (k === -1) { return str }
+  if (pointZeroRegEx.test(str)) { return str.replace(pointZeroRegEx, "") }
+  let i;
+  for (i = str.length - 1; i > k && str.charAt(i) === "0"; i--) {
+    if (i === k) { i--; }
+  }
+  return str.slice(0, i + 1)
+};
+
+// The [x, y] numbers of a point operand, or null.
+const pointOf = oprnd => oprnd != null && Array.isArray(oprnd.value) &&
+  oprnd.value.length === 2 && oprnd.value.every(Rnl.isRational)
+  ? oprnd.value.map(e => Rnl.toNumber(e))
+  : null;
+
+// The rows of a matrix operand, as numbers, or null. A single row may be written as a
+// vector. Every row must have the same length.
+const numberRows = oprnd => {
+  if (oprnd == null || !Array.isArray(oprnd.value) || oprnd.value.length === 0) {
+    return null
+  }
+  const value = oprnd.value;
+  if (value.every(Rnl.isRational)) { return [value.map(e => Rnl.toNumber(e))] }
+  if (!value.every(row => Array.isArray(row) && !Rnl.isRational(row) &&
+      row.length === value[0].length && row.every(Rnl.isRational))) {
+    return null
+  }
+  return value.map(row => row.map(e => Rnl.toNumber(e)))
+};
+
+// The r of a path row written as [x, y], [x, y, r], or [x, y, ±rx, ry, angle].
+// As in Sketch's elementObject.js stepR().
+const stepR = row => row.length === 5
+  ? simplifyR([row[2], row[3], row[4]])
+  : row.length === 3
+  ? row[2]
+  : 0;
+
+// Arrow and dimension labels keep the default font size, as in Sketch's text.js.
+const labelFontSize = 13.33; // px
+
+const pxText = p => `${p[0].toFixed(4)},${p[1].toFixed(4)}`;
+
+// Cubic Bezier segments through px points, from a uniform Catmull-Rom spline whose end
+// points are their own neighbors. As in Sketch's freehandMath.js.
+const catmullRomToBezier = pts => {
+  const n = pts.length;
+  const segments = [];
+  for (let i = 0; i < n - 1; i++) {
+    const p0 = pts[i === 0 ? 0 : i - 1];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[i + 2 < n ? i + 2 : n - 1];
+    segments.push({
+      cp1: [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6],
+      cp2: [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6],
+      end: p2
+    });
+  }
+  return segments
+};
+
+// Markers
+// Sketch draws markers as <marker> defs sized in stroke widths. Hurmet draws the same
+// shapes inline, as plain <path> and <circle> elements, so that the SVG renders alike
+// everywhere. Each marker is filled with the stroke color.
+
+// The marker statement accepts Sketch's marker names. Every arrowhead size is "arrow",
+// every arrowdot size is "arrowdot" (markerFamily in shared.js).
+const markerNames = new Set(["none", "dot", ...arrowheadNames, ...arrowdotNames]);
+
+// Arrowhead [length, width], in stroke widths. The size suits the stroke width,
+// as in Sketch's arrowheadFor() and its marker defs in index.html.
+const arrowheadSize = sw => sw < 0.75
+  ? [20, 12]   // thinarrow
+  : sw < 1.5
+  ? [12, 7.8]  // arrow
+  : sw < 2.5
+  ? [8, 6]     // thickarrow
+  : [6.5, 4.4]; // thickerarrow
+const dimArrowSize = [18, 12]; // dimarrow
+const markerDotRadius = 3; // in stroke widths
+
+// A filled arrowhead whose tip is at px point `tip`, pointing along unit vector u.
+const arrowheadNode = (tip, u, [length, width], sw, color) => {
+  const n = [-u[1], u[0]];
+  const base = [tip[0] - length * sw * u[0], tip[1] - length * sw * u[1]];
+  const h = width / 2 * sw;
+  return {
+    tag: "path",
+    attrs: {
+      d: `M${base[0] + h * n[0]},${base[1] + h * n[1]} L${tip[0]},${tip[1]} ` +
+         `L${base[0] - h * n[0]},${base[1] - h * n[1]} Z`,
+      fill: color,
+      stroke: "none"
+    }
+  }
+};
+
+// Draw the current marker at px point `end`, where an element ends while heading
+// along px unit vector u.
+const drawMarker = (svg, end, u) => {
+  const { marker, strokewidth: sw, stroke } = svg.temp;
+  if (marker === "none") { return }
+  if (marker === "dot" || marker === "arrowdot") {
+    svg.children.push({ tag: "circle", attrs: {
+      cx: end[0], cy: end[1], r: markerDotRadius * sw, fill: stroke, stroke: "none"
+    } });
+  }
+  const size = arrowheadSize(sw);
+  if (marker === "arrow") {
+    svg.children.push(arrowheadNode(end, u, size, sw, stroke));
+  } else if (marker === "arrowdot") {
+    // The arrowhead's tip touches the dot.
+    const tip = [end[0] - markerDotRadius * sw * u[0], end[1] - markerDotRadius * sw * u[1]];
+    svg.children.push(arrowheadNode(tip, u, size, sw, stroke));
+  }
+};
+
+// The px unit vector of a model-space vector v. A zero vector points right, as in SVG.
+const pxDirection = (attrs, v) => {
+  const w = [v[0] * attrs.xunitlength, -v[1] * attrs.yunitlength];
+  const d = Math.hypot(w[0], w[1]);
+  return d > 0 ? [w[0] / d, w[1] / d] : [1, 0]
+};
+
+// The direction, in model space, in which a path step from p to q is heading when it
+// reaches q. The step's r is 0 (straight), a signed radius (circular arc, + for CCW),
+// or [±rx, ry, angle] (elliptical arc, the sign of rx gives the direction). As in
+// Sketch's arcStep.js, an arc spans at most half its circle or ellipse, and radii too
+// small for the chord are scaled up, as SVG does.
+const endDirection = (p, q, r) => {
+  if (!r || (Array.isArray(r) && (r[0] === 0 || r[1] === 0))) {
+    return [q[0] - p[0], q[1] - p[1]]
+  }
+  const [srx, sry, angle = 0] = Array.isArray(r) ? r : [r, r, 0];
+  const rx = Math.abs(srx);
+  const ry = Math.abs(sry);
+  const ccw = srx >= 0;
+  const rad = angle * Math.PI / 180;
+  const cos = Math.cos(rad);
+  const sin = Math.sin(rad);
+  // Into the ellipse's own frame, scaled so that the ellipse is a unit circle.
+  const toUnit = pt => [(pt[0] * cos + pt[1] * sin) / rx, (-pt[0] * sin + pt[1] * cos) / ry];
+  const a = toUnit(p);
+  const b = toUnit(q);
+  const chord = [b[0] - a[0], b[1] - a[1]];
+  const len = Math.hypot(chord[0], chord[1]);
+  if (len === 0) { return [q[0] - p[0], q[1] - p[1]] }
+  const h = Math.sqrt(Math.max(1 - len * len / 4, 0));
+  // A CCW arc's center is to the left of the chord.
+  const side = ccw ? 1 : -1;
+  const c = [(a[0] + b[0]) / 2 - side * h * chord[1] / len,
+    (a[1] + b[1]) / 2 + side * h * chord[0] / len];
+  const t = Math.atan2(b[1] - c[1], b[0] - c[0]);
+  // d/dt of center + R(angle)·(rx cos t, ry sin t), reversed for a CW arc.
+  const dx = -rx * Math.sin(t) * side;
+  const dy = ry * Math.cos(t) * side;
+  return [dx * cos - dy * sin, dx * sin + dy * cos]
+};
+
+
+// A text position, as in Sketch: e.g., "above", "belowright", "leaderleft".
+// The default is "middle".
+const textPositionRegEx = /^(?:above|leader|middle|below)?(?:left|right)?$/;
+
+// In a string, scanFunction in module.js writes a line break as ␤ (U+2424).
+const lineBreakInString$1 = /␤/g;
+
+// Write text at model point p. The geometry is that of Sketch's text.js
+// (adjustTextPoint, getTspans), converted to px. `style` may override the
+// current fontsize and fontcolor, e.g. for axes labels.
+const textLocal = (svg, p, str, pos, style = {}) => {
+  const attrs = svg.temp;
+  const fontsize = style.fontsize ?? attrs.fontsize;
+  const fontcolor = style.fontcolor ?? attrs.fontcolor;
+  const position = (pos || "middle").toLowerCase();
+  const lines = str.replace(lineBreakInString$1, "\n").split("\n");
+  const numLines = lines.length;
+  let [x, y] = toPx(attrs, p[0], p[1]);
+  // Each line's y is at the line's middle (dominant-baseline="middle").
+  if (position.includes("above")) {
+    y -= fontsize * (1.2 * (numLines - 1) + 0.7);
+  } else if (position.includes("below")) {
+    y += fontsize * 0.8;
+  } else if (!position.includes("leader")) {
+    // Center the block of lines vertically. Leader text starts at the point.
+    y -= fontsize * 0.6 * (numLines - 1);
+  }
+  const textanchor = position.includes("right")
+    ? "start"
+    : position.includes("left")
+    ? "end"
+    : "middle";
+  // A little padding, so that the text doesn't crowd the point.
+  if (textanchor === "start") { x += fontsize * 0.3; }
+  if (textanchor === "end") { x -= fontsize * 0.3; }
+
+  const textNode = { tag: "text", children: [], attrs: {} };
+  textNode.attrs.x = x;
+  textNode.attrs.y = y;
+  textNode.attrs["font-family"] = attrs.fontfamily;
+  textNode.attrs["font-size"] = fontsize;
+  textNode.attrs.fill = fontcolor;
+  textNode.attrs["text-anchor"] = textanchor;
+  textNode.attrs["dominant-baseline"] = "middle";
+
+  // Each line is a series of <tspan> nodes, one per Markdown mark node. Each line's
+  // first tspan returns to x and moves down 1.2 em. A blank line has no tspan, so its
+  // line spacing goes to the next line that has one.
+  let linesOwed = 0;
+  lines.forEach((line, i) => {
+    if (i > 0) { linesOwed += 1; }
+    const ast = inlineMd2ast(line);
+    if (!Array.isArray(ast)) { return }
+    ast.forEach((markNode, j) => {
+      const tspan = { tag: "tspan", text: markNode.text, attrs: {} };
+      if (j === 0) {
+        tspan.attrs.x = x;
+        tspan.attrs.dy = linesOwed * fontsize * 1.2;
+        linesOwed = 0;
+      }
+      for (const mark of (markNode.marks || [])) {
+        const markAttr = markAttribute[mark.type];
+        if (!markAttr) { continue } // e.g., a link. Write its text plain.
+        tspan.attrs[markAttr[0]] = markAttr[1];
+        if (mark.type === "subscript") {
+          tspan.attrs["baseline-shift"] = "sub";
+        } else if (mark.type === "superscript") {
+          tspan.attrs["baseline-shift"] = "super";
+        }
+      }
+      textNode.children.push(tspan);
+    });
+  });
+  svg.children.push(textNode);
+  return svg
+};
+
+const pointText = (point, attrs) => {
+  return toPx(attrs, point[0], point[1]).map(n => n.toFixed(4)).join(",")
+};
+
+// The SVG command for an arc step that ends at model point q. r is a signed radius
+// (+ for CCW) or [±rx, ry, angle]. As in Sketch's arcStep.js arcCommand(), but in px,
+// where the y-axis points down, so CCW is sweep 0 and the rotation is negated.
+const arcCommand = (attrs, r, q) => {
+  const [srx, ry, angle = 0] = Array.isArray(r) ? r : [r, r, 0];
+  const sweep = srx >= 0 ? 0 : 1;
+  const rxPx = Math.abs(srx) * attrs.xunitlength;
+  const ryPx = Math.abs(ry) * attrs.yunitlength;
+  return `A${rxPx},${ryPx} ${angle === 0 ? 0 : -angle} 0 ${sweep} ${pointText(q, attrs)}`
+};
+
+// Fitting the SVG to its contents
+// As in Sketch's utils.js computeFrame(), a drawing with a scene and no grid or axes is
+// sized to the extent of its elements plus a margin. The elements keep their px
+// coordinates; a viewBox brings the box into view. Like Sketch, the box ignores stroke
+// widths, which the margin covers. Unlike Sketch, it includes arrowheads and marker dots,
+// which Hurmet draws as elements, and it estimates text from character counts, since
+// Hurmet can't measure glyphs while it calculates.
+
+const fitMargin = 4; // px
+
+// A 2D affine matrix [a, b, c, d, e, f] maps (x, y) to (a·x + c·y + e, b·x + d·y + f).
+const identity = [1, 0, 0, 1, 0, 0];
+const multiply = (m, n) => [
+  m[0] * n[0] + m[2] * n[1], m[1] * n[0] + m[3] * n[1],
+  m[0] * n[2] + m[2] * n[3], m[1] * n[2] + m[3] * n[3],
+  m[0] * n[4] + m[2] * n[5] + m[4], m[1] * n[4] + m[3] * n[5] + m[5]
+];
+const applyMatrix = (m, [x, y]) => [m[0] * x + m[2] * y + m[4], m[1] * x + m[3] * y + m[5]];
+
+// The matrix of an SVG transform attribute: translate, scale, and rotate.
+const transformMatrix = str => {
+  let m = identity;
+  for (const [, fn, argStr] of (str || "").matchAll(/(\w+)\(([^)]*)\)/g)) {
+    const a = argStr.split(/[\s,]+/).filter(s => s !== "").map(Number);
+    if (fn === "translate") {
+      m = multiply(m, [1, 0, 0, 1, a[0], a[1] || 0]);
+    } else if (fn === "scale") {
+      m = multiply(m, [a[0], 0, 0, a.length > 1 ? a[1] : a[0], 0, 0]);
+    } else if (fn === "rotate") {
+      const rad = a[0] * Math.PI / 180;
+      const [cos, sin] = [Math.cos(rad), Math.sin(rad)];
+      const [cx, cy] = a.length === 3 ? [a[1], a[2]] : [0, 0];
+      m = multiply(m, [1, 0, 0, 1, cx, cy]);
+      m = multiply(m, [cos, sin, -sin, cos, 0, 0]);
+      m = multiply(m, [1, 0, 0, 1, -cx, -cy]);
+    }
+  }
+  return m
+};
+
+// The parameters in [0, 1] where a cubic Bézier coordinate reaches an extreme.
+const cubicExtrema = (p0, p1, p2, p3) => {
+  // The derivative is a quadratic: a·t² + b·t + c
+  const a = 3 * (-p0 + 3 * p1 - 3 * p2 + p3);
+  const b = 6 * (p0 - 2 * p1 + p2);
+  const c = 3 * (p1 - p0);
+  const roots = [];
+  if (Math.abs(a) < 1e-12) {
+    if (Math.abs(b) > 1e-12) { roots.push(-c / b); }
+  } else {
+    const disc = b * b - 4 * a * c;
+    if (disc >= 0) {
+      const root = Math.sqrt(disc);
+      roots.push((-b + root) / (2 * a), (-b - root) / (2 * a));
+    }
+  }
+  return roots.filter(t => t > 0 && t < 1)
+};
+const cubicPoint = (p0, p1, p2, p3, t) => {
+  const mt = 1 - t;
+  return [0, 1].map(k => mt * mt * mt * p0[k] + 3 * mt * mt * t * p1[k] +
+    3 * mt * t * t * p2[k] + t * t * t * p3[k])
+};
+
+// The points that bound an SVG elliptical arc: its end points and any extreme points
+// along the way. See the SVG spec, "Elliptical arc implementation notes", F.6.5.
+const arcExtremePoints = (p1, rx, ry, degrees, largeArc, sweep, p2) => {
+  rx = Math.abs(rx);
+  ry = Math.abs(ry);
+  if (rx === 0 || ry === 0) { return [p2] }
+  const phi = degrees * Math.PI / 180;
+  const [cos, sin] = [Math.cos(phi), Math.sin(phi)];
+  const dx = (p1[0] - p2[0]) / 2;
+  const dy = (p1[1] - p2[1]) / 2;
+  const x1 = cos * dx + sin * dy;
+  const y1 = -sin * dx + cos * dy;
+  const lambda = (x1 * x1) / (rx * rx) + (y1 * y1) / (ry * ry);
+  if (lambda > 1) {
+    // The radii are too small for the chord, so scale them up, as SVG does.
+    rx *= Math.sqrt(lambda);
+    ry *= Math.sqrt(lambda);
+  }
+  const num = rx * rx * ry * ry - rx * rx * y1 * y1 - ry * ry * x1 * x1;
+  const den = rx * rx * y1 * y1 + ry * ry * x1 * x1;
+  const coef = (largeArc === sweep ? -1 : 1) * Math.sqrt(Math.max(0, num / den));
+  const cxp = coef * rx * y1 / ry;
+  const cyp = -coef * ry * x1 / rx;
+  const cx = cos * cxp - sin * cyp + (p1[0] + p2[0]) / 2;
+  const cy = sin * cxp + cos * cyp + (p1[1] + p2[1]) / 2;
+  const theta1 = Math.atan2((y1 - cyp) / ry, (x1 - cxp) / rx);
+  let delta = Math.atan2((-y1 - cyp) / ry, (-x1 - cxp) / rx) - theta1;
+  if (sweep && delta < 0) { delta += 2 * Math.PI; }
+  if (!sweep && delta > 0) { delta -= 2 * Math.PI; }
+  const point = theta => [
+    cx + rx * cos * Math.cos(theta) - ry * sin * Math.sin(theta),
+    cy + rx * sin * Math.cos(theta) + ry * cos * Math.sin(theta)
+  ];
+  const tau = 2 * Math.PI;
+  const onArc = theta => {
+    const t = delta >= 0
+      ? ((theta - theta1) % tau + tau) % tau
+      : ((theta1 - theta) % tau + tau) % tau;
+    return t <= Math.abs(delta)
+  };
+  const thetaX = Math.atan2(-ry * sin, rx * cos);
+  const thetaY = Math.atan2(ry * cos, rx * sin);
+  const candidates = [thetaX, thetaX + Math.PI, thetaY, thetaY + Math.PI];
+  return [p2, ...candidates.filter(onArc).map(point)]
+};
+
+// The points that bound an SVG path's d attribute. Handles every path command.
+const pathPoints = d => {
+  const tokens = d.match(/[a-zA-Z]|[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?/g) || [];
+  const points = [];
+  let i = 0;
+  let cmd = "";
+  let cur = [0, 0];
+  let start = [0, 0];
+  let lastControl = null; // For S and T
+  let lastCmd = "";
+  const num = () => Number(tokens[i++]);
+  while (i < tokens.length) {
+    if (/[a-zA-Z]/.test(tokens[i])) {
+      cmd = tokens[i++];
+    } else if (cmd === "M") {
+      cmd = "L"; // Coordinates after a moveto are implicit linetos.
+    } else if (cmd === "m") {
+      cmd = "l";
+    }
+    const rel = cmd === cmd.toLowerCase();
+    const pt = () => {
+      const x = num();
+      const y = num();
+      return rel ? [cur[0] + x, cur[1] + y] : [x, y]
+    };
+    const upper = cmd.toUpperCase();
+    let control = null;
+    if (upper === "Z") {
+      cur = start;
+    } else if (upper === "M") {
+      cur = pt();
+      start = cur;
+      points.push(cur);
+    } else if (upper === "L" || upper === "T") {
+      const p = pt();
+      if (upper === "T") {
+        // A quadratic whose control point reflects the last one
+        const q = lastControl && /[QT]/.test(lastCmd)
+          ? [2 * cur[0] - lastControl[0], 2 * cur[1] - lastControl[1]]
+          : cur;
+        control = q;
+        const c1 = [cur[0] + 2 / 3 * (q[0] - cur[0]), cur[1] + 2 / 3 * (q[1] - cur[1])];
+        const c2 = [p[0] + 2 / 3 * (q[0] - p[0]), p[1] + 2 / 3 * (q[1] - p[1])];
+        for (const k of [0, 1]) {
+          for (const t of cubicExtrema(cur[k], c1[k], c2[k], p[k])) {
+            points.push(cubicPoint(cur, c1, c2, p, t));
+          }
+        }
+      }
+      cur = p;
+      points.push(cur);
+    } else if (upper === "H") {
+      cur = [rel ? cur[0] + num() : num(), cur[1]];
+      points.push(cur);
+    } else if (upper === "V") {
+      cur = [cur[0], rel ? cur[1] + num() : num()];
+      points.push(cur);
+    } else if (upper === "C" || upper === "S" || upper === "Q") {
+      let c1;
+      let c2;
+      let p;
+      if (upper === "C") {
+        c1 = pt();
+        c2 = pt();
+        p = pt();
+        control = c2;
+      } else if (upper === "S") {
+        c1 = lastControl && /[CS]/.test(lastCmd)
+          ? [2 * cur[0] - lastControl[0], 2 * cur[1] - lastControl[1]]
+          : cur;
+        c2 = pt();
+        p = pt();
+        control = c2;
+      } else {
+        const q = pt();
+        p = pt();
+        control = q;
+        c1 = [cur[0] + 2 / 3 * (q[0] - cur[0]), cur[1] + 2 / 3 * (q[1] - cur[1])];
+        c2 = [p[0] + 2 / 3 * (q[0] - p[0]), p[1] + 2 / 3 * (q[1] - p[1])];
+      }
+      for (const k of [0, 1]) {
+        for (const t of cubicExtrema(cur[k], c1[k], c2[k], p[k])) {
+          points.push(cubicPoint(cur, c1, c2, p, t));
+        }
+      }
+      cur = p;
+      points.push(cur);
+    } else if (upper === "A") {
+      const [rx, ry, angle, largeArc, sweep] = [num(), num(), num(), num(), num()];
+      const p = pt();
+      points.push(...arcExtremePoints(cur, rx, ry, angle, largeArc, sweep, p));
+      cur = p;
+    } else {
+      break // Not a path command
+    }
+    lastControl = control;
+    lastCmd = upper;
+  }
+  return points
+};
+
+// The estimated px box of a <text> element, from its character count. As in Sketch's
+// text.js, a character is 0.6 em wide, or 0.8 of that in a subscript or superscript.
+// Each line is 1.2 em tall, centered on its y (dominant-baseline="middle").
+const textBox = el => {
+  const fs = Number(el.attrs["font-size"]) || 13.33;
+  const x = Number(el.attrs.x);
+  const y = Number(el.attrs.y);
+  const lineWidths = [];
+  let lineY = y;
+  let top = Infinity;
+  let bottom = -Infinity;
+  el.children.forEach((tspan, k) => {
+    const attrs = tspan.attrs || {};
+    if (k === 0 || attrs.dy != null) {
+      if (k > 0) { lineY += Number(attrs.dy); }
+      lineWidths.push(0);
+      top = Math.min(top, lineY - 0.6 * fs);
+      bottom = Math.max(bottom, lineY + 0.6 * fs);
+    }
+    const scale = attrs["baseline-shift"] ? 0.8 : 1;
+    lineWidths[lineWidths.length - 1] += tspan.text.length * 0.6 * fs * scale;
+  });
+  if (lineWidths.length === 0) { return null }
+  const width = Math.max(...lineWidths);
+  const anchor = el.attrs["text-anchor"];
+  const left = anchor === "start" ? x : anchor === "end" ? x - width : x - width / 2;
+  return [[left, top], [left + width, bottom]]
+};
+
+// The points that bound one element, in px.
+const elementPoints = el => {
+  const a = el.attrs;
+  const m = transformMatrix(a.transform);
+  switch (el.tag) {
+    case "path":
+      return pathPoints(a.d)
+    case "polygon":
+    case "polyline":
+      return a.points.trim().split(/\s+/).map(p => p.split(",").map(Number))
+    case "rect":
+    case "image": {
+      const [x, y, w, h] = [a.x, a.y, a.width, a.height].map(Number);
+      return [[x, y], [x + w, y], [x, y + h], [x + w, y + h]].map(p => applyMatrix(m, p))
+    }
+    case "circle":
+    case "ellipse": {
+      const rx = Number(el.tag === "circle" ? a.r : a.rx);
+      const ry = Number(el.tag === "circle" ? a.r : a.ry);
+      const [cx, cy] = applyMatrix(m, [Number(a.cx), Number(a.cy)]);
+      // The extent of an ellipse after a linear map
+      const halfW = Math.hypot(m[0] * rx, m[2] * ry);
+      const halfH = Math.hypot(m[1] * rx, m[3] * ry);
+      return [[cx - halfW, cy - halfH], [cx + halfW, cy + halfH]]
+    }
+    case "text":
+      return textBox(el) || []
+    default:
+      return []
+  }
+};
+
+// Size a drawing to its elements, as described above.
+const fitToContent = svg => {
+  const attrs = svg.temp;
+  if (!attrs || !attrs.scene || attrs.hasBackdrop) { return }
+  let [minX, minY, maxX, maxY] = [Infinity, Infinity, -Infinity, -Infinity];
+  for (const el of svg.children) {
+    for (const [x, y] of elementPoints(el)) {
+      if (!Number.isFinite(x) || !Number.isFinite(y)) { continue }
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x);
+      maxY = Math.max(maxY, y);
+    }
+  }
+  if (minX === Infinity) { return } // An empty drawing keeps its frame.
+  const round = v => Math.round(v * 1e4) / 1e4;
+  const left = round(minX - fitMargin);
+  const top = round(minY - fitMargin);
+  svg.attrs.width = Math.ceil(maxX + fitMargin - left);
+  svg.attrs.height = Math.ceil(maxY + fitMargin - top);
+  svg.attrs.viewBox = `${left} ${top} ${svg.attrs.width} ${svg.attrs.height}`;
+};
+
+// Dimensions
+
+const dimStrokeWidth = 0.5; // px
+const dimGap = 6; // px between a dimension point and its extension line
+
+const dimLineNode = (attrs, a, b) => {
+  return { tag: "path", attrs: {
+    d: `M${pointText(a, attrs)} ${pointText(b, attrs)}`,
+    "stroke-width": dimStrokeWidth, stroke: "black", fill: "none"
+  } }
+};
+
+// A unit vector at `deg` degrees. Multiples of 90° come out exact.
+// As in Sketch's elementObject.js.
+const unitVector = deg => {
+  const quarterTurns = deg / 90;
+  if (Number.isInteger(quarterTurns)) {
+    return [[1, 0], [0, 1], [-1, 0], [0, -1]][((quarterTurns % 4) + 4) % 4]
+  }
+  const rad = deg * Math.PI / 180;
+  return [Math.cos(rad), Math.sin(rad)]
+};
+
+// From a dimension's label list, a function that returns the label written for span i:
+// a string, "" for a blank span, or null if none was written.
+const labelList = oprnd => {
+  if (oprnd == null) { return () => null }
+  // Hurmet reads a one-element list, ["x"], as the string "x". Sketch writes ["x"] for
+  // a dimension with one span, so a string is a list of one label.
+  const list = Array.isArray(oprnd.value) ? oprnd.value : [oprnd.value];
+  return i => {
+    const label = list[i];
+    return typeof label === "string"
+      ? label
+      : label != null && typeof label.value === "string"
+      ? label.value
+      : null
+  }
+};
+
+// A horizontal or vertical dimension string, in model coordinates, as in Sketch's
+// elementObject.js dimensionGroup(). Returns null if labelPoint is not between the end
+// points, either vertically or horizontally.
+const orthoDimension = (pts, lp, attrs) => {
+  const n = pts.length;
+  const [first, last] = [pts[0], pts[n - 1]];
+  const between = k => (first[k] < last[k] && first[k] < lp[k] && lp[k] < last[k]) ||
+    (last[k] < first[k] && last[k] < lp[k] && lp[k] < first[k]);
+  const result = { extLines: [], dimLines: [], mids: [], values: [] };
+  if (between(1)) {
+    // A vertical string of dimensions
+    const six = dimGap / attrs.xunitlength * Math.sign(lp[0] - first[0]);
+    for (const p of pts) { result.extLines.push([[p[0] + six, p[1]], [lp[0] + six, p[1]]]); }
+    for (let i = 0; i < n - 1; i++) {
+      result.dimLines.push([[lp[0], pts[i][1]], [lp[0], pts[i + 1][1]]]);
+      result.mids.push([lp[0], (pts[i][1] + pts[i + 1][1]) / 2]);
+      result.values.push(Math.abs(pts[i + 1][1] - pts[i][1]));
+    }
+    result.pos = six > 0 ? "right" : "left";
+  } else if (between(0)) {
+    // A horizontal string of dimensions
+    const six = dimGap / attrs.yunitlength * Math.sign(lp[1] - first[1]);
+    for (const p of pts) { result.extLines.push([[p[0], p[1] + six], [p[0], lp[1] + six]]); }
+    for (let i = 0; i < n - 1; i++) {
+      result.dimLines.push([[pts[i][0], lp[1]], [pts[i + 1][0], lp[1]]]);
+      result.mids.push([(pts[i][0] + pts[i + 1][0]) / 2, lp[1]]);
+      result.values.push(Math.abs(pts[i + 1][0] - pts[i][0]));
+    }
+    result.pos = six > 0 ? "above" : "below";
+  } else {
+    return null
+  }
+  return result
+};
+
+// A dimension string whose dimension line runs at dimAngle through labelPoint, and
+// whose extension lines run at extAngle. As in Sketch's obliqueDimensionGroup().
+const obliqueDimension = (pts, lp, dimAngle, extAngle, attrs) => {
+  const n = pts.length;
+  const u = unitVector(dimAngle); // Along the dimension line
+  const e = unitVector(extAngle); // Along the extension lines
+  const cross = (a, b) => a[0] * b[1] - a[1] * b[0];
+  const denominator = cross(e, u);
+  if (Math.abs(denominator) < 1e-9) { return null } // Parallel lines never meet
+  // Distance from each point to the dimension line, along e.
+  const t = pts.map(p => -cross([p[0] - lp[0], p[1] - lp[1]], u) / denominator);
+  const feet = pts.map((p, i) => [p[0] + t[i] * e[0], p[1] + t[i] * e[1]]);
+  // The direction from the points toward the dimension line.
+  const sign = Math.sign(t.find(ti => Math.abs(ti) > 1e-9) ?? 1);
+  const six = dimGap / attrs.xunitlength;
+  const gap = [sign * six * e[0], sign * six * e[1]];
+  const result = { extLines: [], dimLines: [], mids: [], values: [] };
+  for (let i = 0; i < n; i++) {
+    result.extLines.push([[pts[i][0] + gap[0], pts[i][1] + gap[1]],
+      [feet[i][0] + gap[0], feet[i][1] + gap[1]]]);
+  }
+  for (let i = 0; i < n - 1; i++) {
+    result.dimLines.push([feet[i], feet[i + 1]]);
+    result.mids.push([(feet[i][0] + feet[i + 1][0]) / 2, (feet[i][1] + feet[i + 1][1]) / 2]);
+    result.values.push(Math.abs((feet[i + 1][0] - feet[i][0]) * u[0] +
+      (feet[i + 1][1] - feet[i][1]) * u[1]));
+  }
+  // Put the labels on the far side of the dimension line from the points.
+  const away = [sign * e[0], sign * e[1]];
+  if (Math.abs(u[0]) < 1e-9) {
+    result.pos = away[0] > 0 ? "right" : "left";
+  } else if (Math.abs(u[1]) < 1e-9) {
+    result.pos = away[1] > 0 ? "above" : "below";
+  } else {
+    // A sloped line. Hang the label off its lower end, so it clears the line.
+    const rising = u[0] * u[1] > 0;
+    result.pos = away[1] > 0
+      ? (rising ? "aboveleft" : "aboveright")
+      : (rising ? "belowright" : "belowleft");
+  }
+  return result
+};
+
+// Lengths in feet and inches, as in Sketch's feetInches.js.
+const superscriptDigits = "⁰¹²³⁴⁵⁶⁷⁸⁹";
+const subscriptDigits = "₀₁₂₃₄₅₆₇₈₉";
+const toScript = (n, digits) => String(n).replace(/\d/g, d => digits[d]);
+
+// Write `value` (in inches, ≥ 0) as whole inches and a reduced fraction rounded to the
+// nearest 1/denominator, e.g. 3³⁄₈.
+const fractionalInches = denominator => value => {
+  const ticks = Math.round(value * denominator);
+  const whole = Math.floor(ticks / denominator);
+  let num = ticks - whole * denominator;
+  let den = denominator;
+  if (num === 0) { return String(whole) }
+  while (num % 2 === 0) { num /= 2; den /= 2; }
+  return `${whole}${toScript(num, superscriptDigits)}⁄${toScript(den, subscriptDigits)}`
+};
+
+// A label such as 4′-3³⁄₈″, 3³⁄₈″, or 4′. `formatNum` writes the number of feet.
+const feetInchesLabel = (value, formatNum, denominator) => {
+  const writeInches = fractionalInches(denominator);
+  const sign = value < 0 ? "-" : "";
+  let feet = Math.floor(Math.abs(value) / 12);
+  let inStr = writeInches(Math.abs(value) - feet * 12);
+  const inchValue = str => Number(str.replace(",", "."));
+  if (inchValue(inStr) >= 12) {
+    // The inch part rounded up to a whole foot.
+    feet += 1;
+    inStr = writeInches(0);
+  }
+  const label = feet === 0
+    ? (inchValue(inStr) === 0 ? "0″" : `${sign}${inStr}″`)
+    : inchValue(inStr) === 0
+    ? `${sign}${formatNum(feet)}′`
+    : `${sign}${formatNum(feet)}′-${inStr}″`;
+  return label.replace(/^(-?)0(?=[⁰¹²³⁴⁵⁶⁷⁸⁹])/, "$1") // ³⁄₈″, not 0³⁄₈″
+};
+
+// The measured length of a dimension span, written with the drawing's rounding spec and
+// the document's decimal format. As in Sketch's elementObject.js dimensionLabel().
+const dimensionLabel = (value, attrs) => {
+  const formatNum = num => format(Rnl.fromNumber(num), attrs.roundingSpec,
+    attrs.decimalFormat, "plain");
+  return attrs.unit === "ft-in"
+    ? feetInchesLabel(value, formatNum, attrs.fraction)
+    : formatNum(value)
+};
+
+const functions$1 = {
+  // Set attributes
+  stroke(svgOprnd, color) {
+    svgOprnd.value.temp.stroke = color.value;
+    return svgOprnd
+  },
+
+  strokewidth(svgOprnd, num) {
+    svgOprnd.value.temp.strokewidth = Rnl.toNumber(num.value);
+    return svgOprnd
+  },
+
+  linetype(svgOprnd, str) {
+    // "solid" | "dashed" | "dotted" | "centerline" | "border"
+    if (!isString(str) || !Object.hasOwn(dashMap, str.value)) {
+      return drawError("linetype")
+    }
+    svgOprnd.value.temp.linetype = str.value;
+    return svgOprnd
+  },
+
+  fill(svgOprnd, color) {
+    svgOprnd.value.temp.fill = color.value;
+    return svgOprnd
+  },
+
+  pattern(svgOprnd, str) {
+    // A fill pattern, drawn in the current fill color. "solid" means no pattern.
+    if (!isString(str) || !fillPatternNames.includes(str.value)) {
+      return drawError("pattern")
+    }
+    svgOprnd.value.temp.pattern = str.value;
+    return svgOprnd
+  },
+
+  fontcolor(svgOprnd, color) {
+    if (!isString(color)) { return drawError("fontcolor") }
+    svgOprnd.value.temp.fontcolor = color.value;
+    return svgOprnd
+  },
+
+  fontsize(svgOprnd, size) {
+    svgOprnd.value.temp.fontsize = Rnl.toNumber(size.value);
+    return svgOprnd
+  },
+
+  fontfamily(svgOprnd, str) {
+    svgOprnd.value.temp.fontfamily = str.value; // "sansserif"|"serif"|"fixed"|"monotype"
+    return svgOprnd
+  },
+
+  marker(svgOprnd, str) {
+    // "none" | "arrow" | "dot" | "arrowdot", or one of Sketch's sized marker names
+    if (!isString(str) || !markerNames.has(str.value.trim())) {
+      return drawError("marker")
+    }
+    svgOprnd.value.temp.marker = markerFamily(str.value.trim());
+    return svgOprnd
+  },
+
+  // Initialize the svg.
+
+  title(svgOprnd, strOprnd) {
+    svgOprnd.value.children.push( { tag: "title", attrs: { text: strOprnd.value } });
+    return svgOprnd
+  },
+
+  caption(svgOprnd, bool) {
+    // caption true: Hurmet writes the title as a caption.
+    if (bool == null || typeof bool.value !== "boolean") { return drawError("caption") }
+    svgOprnd.value.caption = bool.value;
+    return svgOprnd
+  },
+
+  format(svgOprnd, spec) {
+    // The rounding spec of dimension labels, e.g., "h3". Sketch wrote a decimal
+    // format as a second argument in older sketches. It's ignored. The decimal
+    // format comes from the parent document.
+    if (!isString(spec) || !roundingSpecRegEx.test(spec.value)) {
+      return drawError("format")
+    }
+    svgOprnd.value.temp.roundingSpec = spec.value;
+    return svgOprnd
+  },
+
+  fraction(svgOprnd, num) {
+    // The denominator of the inch fractions in "ft-in" dimension labels.
+    const denominator = isNumber(num) ? Rnl.toNumber(num.value) : NaN;
+    if (!inchFractions.has(denominator)) { return drawError("fraction") }
+    svgOprnd.value.temp.fraction = denominator;
+    return svgOprnd
+  },
+
+  frame(svgOprnd, width = 250, height = 250, position = "inline") {
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    attrs.width = typeof width === "number" ? width : Rnl.toNumber(width.value);
+    svg.attrs.width = attrs.width;
+    attrs.height = typeof height === "number" ? height : Rnl.toNumber(height.value);
+    svg.attrs.height = attrs.height;
+    if (typeof position !== "string") { position = position.value; }
+    if (position !== "inline") { svg.attrs.float = position; }
+    if (attrs.scene) {
+      applyScene(attrs);
+    } else {
+      attrs.xunitlength = attrs.width / (attrs.xmax - attrs.xmin);
+      attrs.yunitlength = attrs.height / (attrs.ymax - attrs.ymin);
+      attrs.origin = [-attrs.xmin * attrs.xunitlength, -attrs.ymin * attrs.yunitlength];
+    }
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  scene(svgOprnd, scale, unit, dx, dy) {
+    // scene scale, "unit", dx, dy
+    // A model point (x, y) is drawn at px (S·(x + dx), frameHeight − S·(y + dy)),
+    // where S = scale × unitScaleFactors[unit] is px per model unit.
+    if (!isNumber(scale) || !isString(unit) || !isNumber(dx) || !isNumber(dy)) {
+      return drawError("scene")
+    }
+    const scaleNum = Rnl.toNumber(scale.value);
+    const unitName = unit.value.trim();
+    const canonicalUnit = Object.hasOwn(unitScaleFactors, unitName)
+      ? unitName
+      : resolveUnit(unitName);
+    if (!(scaleNum > 0 && Number.isFinite(scaleNum)) || !canonicalUnit) {
+      return drawError("scene")
+    }
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    attrs.unit = canonicalUnit;
+    attrs.scene = {
+      S: scaleNum * unitScaleFactors[canonicalUnit],
+      dx: Rnl.toNumber(dx.value),
+      dy: Rnl.toNumber(dy.value)
+    };
+    applyScene(attrs);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  view(svgOprnd, xmin = 0, xmax = 5, ymin, ymax) {
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    attrs.scene = null; // Of scene and view, the later one applies.
+    attrs.xmin = typeof xmin === "number" ? xmin : Rnl.toNumber(xmin.value);
+    attrs.xmax = typeof xmax === "number" ? xmax : Rnl.toNumber(xmax.value);
+    attrs.xunitlength = attrs.width / (attrs.xmax - attrs.xmin);
+    attrs.yunitlength = attrs.xunitlength; // This may change below.
+    if (ymin == null) {
+      attrs.origin = [-attrs.xmin * attrs.xunitlength, attrs.height / 2];
+      attrs.ymin = -attrs.height / (2 * attrs.yunitlength);
+      attrs.ymax = -attrs.ymin;
+    } else {
+      attrs.ymin = Rnl.toNumber(ymin.value);
+      if (ymax != null) {
+        attrs.ymax = Rnl.toNumber(ymax.value);
+        attrs.yunitlength = attrs.height / (attrs.ymax - attrs.ymin);
+      } else {
+        attrs.ymax = attrs.height / attrs.yunitlength + attrs.ymin;
+      }
+      attrs.origin = [-attrs.xmin * attrs.xunitlength, -attrs.ymin * attrs.yunitlength];
+    }
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  // Draw things
+
+  grid(svgOprnd, gdx, gdy) {
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    gdx = gdx == null ? attrs.xunitlength : Rnl.toNumber(gdx.value) * attrs.xunitlength;
+    gdy = gdy == null ? gdx : Rnl.toNumber(gdy.value) * attrs.yunitlength;
+    attrs.hasBackdrop = true; // A grid fills the frame, so the frame keeps its size.
+    const pnode = { tag: "path", attrs: {} };
+    let str = "";
+    for (let x = attrs.origin[0]; x < attrs.width; x += gdx) {
+      str += " M" + x + ",0 " + x + "," + attrs.height;
+    }
+    for (let x = attrs.origin[0] - gdx; x > 0; x -= gdx) {
+      str += " M" + x + ",0 " + x + "," + attrs.height;
+    }
+    for (let y = attrs.height - attrs.origin[1]; y < attrs.height; y += gdy) {
+      str += " M0," + y + " " + attrs.width + "," + y;
+    }
+    for (let y = attrs.height - attrs.origin[1] - gdy; y > 0; y -= gdy) {
+      str += " M0," + y + " " + attrs.width + "," + y;
+    }
+    pnode.attrs.d = str;
+    pnode.attrs["stroke-width"] = 0.5;
+    pnode.attrs.stroke = attrs.gridstroke;
+    pnode.attrs.fill = "none";
+    svg.children.push(pnode);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  axes(svgOprnd, dx, dy, labels, gdx, gdy) {
+    let svg = svgOprnd.value;
+    const attrs = svg.temp;
+    dx = (dx == null ? attrs.xunitlength : Rnl.toNumber(dx.value) * attrs.xunitlength);
+    dy = (dy == null ? dx : Rnl.toNumber(dy.value) * attrs.yunitlength);
+    // Axes labels are black, in a font size that fits the ticks, as in Sketch.
+    const labelStyle = { fontsize: Math.min(dx / 2, dy / 2, 10), fontcolor: "black" };
+    const ticklength = labelStyle.fontsize / 4;
+    attrs.hasBackdrop = true; // Axes fill the frame, so the frame keeps its size.
+    if (gdx != null) {
+      this.grid(svgOprnd, gdx, gdy);
+    }
+    const pnode = { tag: "path", attrs: {} };
+    let str = "M0," + (attrs.height - attrs.origin[1]) + " " + attrs.width + "," +
+      (attrs.height - attrs.origin[1]) + " M" + attrs.origin[0] + ",0 " +
+      attrs.origin[0] + "," + attrs.height;
+    for (let x = attrs.origin[0] + dx; x < attrs.width; x += dx) {
+      str += " M" + x + " " + (attrs.height - attrs.origin[1] + ticklength) + " " + x
+            + "," + (attrs.height - attrs.origin[1] - ticklength);
+    }
+    for (let x = attrs.origin[0] - dx; x > 0; x -= dx) {
+      str += " M" + x + "," + (attrs.height - attrs.origin[1] + ticklength) + " " + x
+            + "," + (attrs.height - attrs.origin[1] - ticklength);
+    }
+    for (let y = attrs.height - attrs.origin[1] + dy; y < attrs.height; y += dy) {
+      str += " M" + (attrs.origin[0] + ticklength) + "," + y + " " +
+                   (attrs.origin[0] - ticklength) + "," + y;
+    }
+    for (let y = attrs.height - attrs.origin[1] - dy; y > 0; y -= dy) {
+      str += " M" + (attrs.origin[0] + ticklength) + "," + y + " " +
+                   (attrs.origin[0] - ticklength) + "," + y;
+    }
+    if (labels != null) {
+      const ldx = dx / attrs.xunitlength;
+      const ldy = dy / attrs.yunitlength;
+      const lx = (attrs.xmin > 0 || attrs.xmax < 0 ? attrs.xmin : 0);
+      const ly = (attrs.ymin > 0 || attrs.ymax < 0 ? attrs.ymin : 0);
+      const lxp = (ly === 0 ? "below" : "above");
+      const lyp = (lx === 0 ? "left" : "right");
+      // Digits after the decimal point. Never negative, or toFixed would throw.
+      const ddx = Math.max(0, Math.floor(1.1 - Math.log10(ldx)) + 1);
+      const ddy = Math.max(0, Math.floor(1.1 - Math.log10(ldy)) + 1);
+      for (let x = ldx; x <= attrs.xmax; x += ldx) {
+        svg = textLocal(svg, [x, ly], chopZ(x.toFixed(ddx)), lxp, labelStyle);
+      }
+      for (let x = -ldx; attrs.xmin <= x; x -= ldx) {
+        svg = textLocal(svg, [x, ly], chopZ(x.toFixed(ddx)), lxp, labelStyle);
+      }
+      for (let y = ldy; y <= attrs.ymax; y += ldy) {
+        svg = textLocal(svg, [lx, y], chopZ(y.toFixed(ddy)), lyp, labelStyle);
+      }
+      for (let y = -ldy; attrs.ymin <= y; y -= ldy) {
+        svg = textLocal(svg, [lx, y], chopZ(y.toFixed(ddy)), lyp, labelStyle);
+      }
+    }
+    pnode.attrs.d = str;
+    pnode.attrs["stroke-width"] = 0.5;
+    pnode.attrs.stroke = attrs.axesstroke;
+    pnode.attrs.fill = "none";
+    svg.children.push(pnode);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  line(svgOprnd, m) { // segment connecting points p,q (coordinates in units)
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const node = { tag: "path", attrs: {} };
+    const p = [Rnl.toNumber(m.value[0][0]), Rnl.toNumber(m.value[0][1])];
+    const q = [Rnl.toNumber(m.value[1][0]), Rnl.toNumber(m.value[1][1])];
+    node.attrs.d = "M" + (p[0] * attrs.xunitlength + attrs.origin[0]) + "," +
+      (attrs.height - p[1] * attrs.yunitlength - attrs.origin[1]) + " " +
+      (q[0] * attrs.xunitlength + attrs.origin[0]) + "," + (attrs.height -
+       q[1] * attrs.yunitlength - attrs.origin[1]);
+    setStrokeAndFill(node, svg, false);
+    svg.children.push(node);
+    drawMarker(svg, toPx(attrs, q[0], q[1]), pxDirection(attrs, [q[0] - p[0], q[1] - p[1]]));
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  path(svgOprnd, args) {
+    // path (x, y; x, y; …)                 Straight steps
+    // path (x, y, r; x, y, r; …)           r ≠ 0 makes a circular arc, + for CCW
+    // path (x, y, ±rx, ry, angle; …)       An elliptical arc, as in the arc statement.
+    //                                      ±rx, ry = 0 makes a straight step.
+    // Every row has the same length. The r of the first row is ignored.
+    // Hurmet also accepts an SVG path string, path "M…".
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const node = { tag: "path", attrs: {} };
+    if (isString(args[0])) {
+      node.attrs.d = args[0].value;
+      setStrokeAndFill(node, svg);
+      svg.children.push(node);
+      return { value: svg, unit: null, dtype: dt.DRAWING }
+    }
+    const rows = numberRows(args[0]);
+    if (!rows || rows.length < 2 || ![2, 3, 5].includes(rows[0].length)) {
+      return drawError("path")
+    }
+    let d = "M" + pointText(rows[0], attrs);
+    for (let i = 1; i < rows.length; i++) {
+      const r = stepR(rows[i]);
+      d += " " + (r ? arcCommand(attrs, r, rows[i]) : "L" + pointText(rows[i], attrs));
+    }
+    node.attrs.d = d;
+    setStrokeAndFill(node, svg);
+    svg.children.push(node);
+    const q = rows[rows.length - 1];
+    const dir = endDirection(rows[rows.length - 2], q, stepR(q));
+    drawMarker(svg, toPx(attrs, q[0], q[1]), pxDirection(attrs, dir));
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  arrow(svgOprnd, m, label) {
+    // arrow (x, y; x, y; …), "label"
+    // As in Sketch, an arrow is always straight. Any radii in its rows are ignored.
+    // It always ends in an arrowhead sized for the stroke width, whatever the current
+    // marker. The label is optional. It's written at the first point, on the side away
+    // from the arrow, always in the default font size.
+    let svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const rows = numberRows(m);
+    if (!rows || rows.length < 2 || ![2, 3, 5].includes(rows[0].length) ||
+        (label != null && !isString(label))) {
+      return drawError("arrow")
+    }
+    const pts = rows.map(row => row.slice(0, 2));
+    const d = "M" + pts.map(p => pointText(p, attrs)).join(" L");
+    const node = { tag: "path", attrs: { d } };
+    setStrokeAndFill(node, svg);
+    svg.children.push(node);
+    const [p, q] = pts.slice(-2);
+    const marker = attrs.marker;
+    attrs.marker = "arrow";
+    drawMarker(svg, toPx(attrs, q[0], q[1]), pxDirection(attrs, [q[0] - p[0], q[1] - p[1]]));
+    attrs.marker = marker;
+    if (label != null && label.value !== "") {
+      // As in Sketch's arrowGroup(), the first step picks the label's position.
+      const dx = pts[1][0] - pts[0][0];
+      const dy = pts[1][1] - pts[0][1];
+      const pos = Math.abs(dy) > Math.abs(dx)
+        ? (dy > 0 ? "below" : "above")
+        : (dx > 0 ? "leaderleft" : "leaderright");
+      svg = textLocal(svg, pts[0], label.value, pos, { fontsize: labelFontSize });
+    }
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  freehand(svgOprnd, m) {
+    // freehand (x, y; x, y; …)
+    // A smooth curve through the points, as Sketch's freehand tool draws it.
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const rows = numberRows(m);
+    if (!rows || rows[0].length !== 2) { return drawError("freehand") }
+    // The Catmull-Rom fit commutes with the model-to-px mapping, so fit in px.
+    const pts = rows.map(([x, y]) => toPx(attrs, x, y));
+    let d = "M" + pxText(pts[0]);
+    let u = [1, 0];
+    if (pts.length === 1) {
+      // A zero-length path, so that the round cap still draws a dot.
+      d += " L" + pxText(pts[0]);
+    } else {
+      for (const seg of catmullRomToBezier(pts)) {
+        d += ` C${pxText(seg.cp1)} ${pxText(seg.cp2)} ${pxText(seg.end)}`;
+      }
+      const last = catmullRomToBezier(pts.slice(-3)).pop();
+      const v = [last.end[0] - last.cp2[0], last.end[1] - last.cp2[1]];
+      const len = Math.hypot(v[0], v[1]);
+      if (len > 0) { u = [v[0] / len, v[1] / len]; }
+    }
+    const node = { tag: "path", attrs: { d } };
+    setStrokeAndFill(node, svg, false);
+    node.attrs["stroke-linecap"] = "round";
+    node.attrs["stroke-linejoin"] = "round";
+    svg.children.push(node);
+    drawMarker(svg, pts[pts.length - 1], u);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  rect(svgOprnd, m) { // opposite corners in units
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const rows = numberRows(m);
+    if (!rows || rows.length !== 2 || rows[0].length !== 2) { return drawError("rect") }
+    const [p, q] = rows;
+    const node = { tag: "rect", attrs: {} };
+    node.attrs.x = Math.min(p[0], q[0]) * attrs.xunitlength + attrs.origin[0];
+    node.attrs.y = attrs.height - Math.max(p[1], q[1]) * attrs.yunitlength - attrs.origin[1];
+    node.attrs.width = Math.abs((q[0] - p[0]) * attrs.xunitlength);
+    node.attrs.height = Math.abs((q[1] - p[1]) * attrs.yunitlength);
+    setStrokeAndFill(node, svg);
+    svg.children.push(node);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  circle(svgOprnd, center, radius) { // coordinates in units
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const c = pointOf(center);
+    const r = isNumber(radius) ? Rnl.toNumber(radius.value) : NaN;
+    if (!c || !(r > 0)) { return drawError("circle") }
+    const [cx, cy] = toPx(attrs, c[0], c[1]);
+    const node = { tag: "circle", attrs: { cx, cy, r: r * attrs.xunitlength } };
+    setStrokeAndFill(node, svg);
+    svg.children.push(node);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  ellipse(svgOprnd, center, rx, ry, angle) {
+    // ellipse [x, y], rx, ry, angle
+    // The ellipse is rotated angle° CCW about its center. angle is optional.
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const c = pointOf(center);
+    const radii = [rx, ry].map(r => isNumber(r) ? Rnl.toNumber(r.value) : NaN);
+    if (!c || !radii.every(r => r > 0) || (angle != null && !isNumber(angle))) {
+      return drawError("ellipse")
+    }
+    const [cx, cy] = toPx(attrs, c[0], c[1]);
+    const node = { tag: "ellipse", attrs: {
+      cx, cy, rx: radii[0] * attrs.xunitlength, ry: radii[1] * attrs.yunitlength
+    } };
+    const degrees = angle == null ? 0 : Rnl.toNumber(angle.value);
+    // In px, the y-axis points down, so a CCW rotation is negative.
+    if (degrees !== 0) { node.attrs.transform = `rotate(${-degrees}, ${cx}, ${cy})`; }
+    setStrokeAndFill(node, svg);
+    svg.children.push(node);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  polygon(svgOprnd, numSides, center, radius, angle) {
+    // polygon n, [x, y], r, angle
+    // A regular polygon with n sides and inscribed radius r. With angle = 0 (the
+    // default), its bottom side is level. angle rotates it CCW, in degrees.
+    // As in Sketch's elementObject.js.
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const n = isNumber(numSides) ? Rnl.toNumber(numSides.value) : NaN;
+    const c = pointOf(center);
+    const r = isNumber(radius) ? Rnl.toNumber(radius.value) : NaN;
+    if (!(Number.isInteger(n) && n >= 3) || !c || !(r > 0) ||
+        (angle != null && !isNumber(angle))) {
+      return drawError("polygon")
+    }
+    const rotation = (angle == null ? 0 : Rnl.toNumber(angle.value)) * Math.PI / 180;
+    const circumscribedRadius = r / Math.cos(Math.PI / n);
+    const startAngle = -Math.PI / n - Math.PI / 2 + rotation;
+    const points = [];
+    for (let i = 0; i < n; i++) {
+      const theta = (2 * Math.PI / n) * i + startAngle;
+      points.push(pointText([c[0] + circumscribedRadius * Math.cos(theta),
+        c[1] + circumscribedRadius * Math.sin(theta)], attrs));
+    }
+    const node = { tag: "polygon", attrs: { points: points.join(" ") } };
+    setStrokeAndFill(node, svg);
+    svg.children.push(node);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  image(svgOprnd, m, href, rotation, mirrored) {
+    // image (x, y; x, y), "href", rotation, mirrored
+    // The points are opposite corners of the image before rotation. As in Sketch,
+    // rotation is in degrees, positive for CW, about the image's center. mirrored
+    // flips the image top to bottom before the rotation. Both are optional. The
+    // defaults are 0 and false.
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const rows = numberRows(m);
+    if (!rows || rows.length !== 2 || rows[0].length !== 2 || !isString(href) ||
+        (rotation != null && !isNumber(rotation)) ||
+        (mirrored != null && typeof mirrored.value !== "boolean")) {
+      return drawError("image")
+    }
+    const [p, q] = rows;
+    const [x, y] = toPx(attrs, Math.min(p[0], q[0]), Math.max(p[1], q[1]));
+    const width = Math.abs(q[0] - p[0]) * attrs.xunitlength;
+    const height = Math.abs(q[1] - p[1]) * attrs.yunitlength;
+    const node = { tag: "image", attrs: { x, y, width, height, href: href.value } };
+    const degrees = rotation == null ? 0 : Rnl.toNumber(rotation.value);
+    const [cx, cy] = [x + width / 2, y + height / 2];
+    if (mirrored != null && mirrored.value) {
+      node.attrs.transform =
+        `translate(${cx}, ${cy}) scale(1, -1) rotate(${degrees}) translate(${-cx}, ${-cy})`;
+    } else if (degrees !== 0) {
+      node.attrs.transform = `rotate(${degrees}, ${cx}, ${cy})`;
+    }
+    svg.children.push(node);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  arc(svgOprnd, m, radius) {
+    // arc (p1; p2), r          A circular arc. r > 0 for CCW, r < 0 for CW.
+    // arc (p1; p2), [±rx, ry, angle]   An elliptical arc on an ellipse rotated angle°
+    //                          CCW. The sign of rx gives the direction. angle is optional.
+    // With no radius, a CCW circular arc whose radius is the chord length.
+    // As in Sketch, an arc spans at most half of its circle or ellipse.
+    const svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const start = [Rnl.toNumber(m.value[0][0]), Rnl.toNumber(m.value[0][1])];
+    const end = [Rnl.toNumber(m.value[1][0]), Rnl.toNumber(m.value[1][1])];
+    let r;
+    if (radius == null) {
+      r = Math.hypot(end[0] - start[0], end[1] - start[1]);
+    } else if (isVector(radius)) {
+      if (radius.value.length < 2 || radius.value.length > 3) { return drawError("arc") }
+      r = radius.value.map(e => Rnl.toNumber(e));
+      if (r.length === 2) { r.push(0); }
+    } else if (isNumber(radius)) {
+      r = Rnl.toNumber(radius.value);
+    } else {
+      return drawError("arc")
+    }
+    const node = { tag: "path", attrs: {} };
+    node.attrs.d = `M${pointText(start, attrs)} ${arcCommand(attrs, r, end)}`;
+    setStrokeAndFill(node, svg, false);
+    svg.children.push(node);
+    const direction = pxDirection(attrs, endDirection(start, end, r));
+    drawMarker(svg, toPx(attrs, end[0], end[1]), direction);
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  text(svgOprnd, p, str, pos) {
+    // text [x, y], "string", position
+    // The string may span several lines. As in Sketch, it's trimmed.
+    if (p == null || !Array.isArray(p.value) || p.value.length !== 2 ||
+        !p.value.every(Rnl.isRational) || !isString(str) ||
+        (pos != null && !(isString(pos) && textPositionRegEx.test(pos.value.toLowerCase())))) {
+      return drawError("text")
+    }
+    const content = str.value.replace(lineBreakInString$1, "\n").trim();
+    const svg = textLocal(
+      svgOprnd.value,
+      [Rnl.toNumber(p.value[0]), Rnl.toNumber(p.value[1])],
+      content,
+      pos == null ? null : pos.value
+      );
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  dot(svgOprnd, center, label, pos) {
+    // dot [x, y], "label", position
+    // As in Sketch, the radius is dotradius px at any scale. The outline takes the
+    // current stroke and stroke width; the inside takes the current fill, so fill "none"
+    // gives a hollow dot. The label and its position are optional. The default position
+    // is "below".
+    let svg = svgOprnd.value;
+    const attrs = svg.temp;
+    if (center == null || !Array.isArray(center.value) || center.value.length !== 2 ||
+        !center.value.every(Rnl.isRational) || (label != null && !isString(label)) ||
+        (pos != null && !(isString(pos) && pos.value !== "" &&
+          dotLabelPositionRegEx.test(pos.value.toLowerCase())))) {
+      return drawError("dot")
+    }
+    const p = [Rnl.toNumber(center.value[0]), Rnl.toNumber(center.value[1])];
+    const [cx, cy] = toPx(attrs, p[0], p[1]);
+    svg.children.push({ tag: "circle", attrs: {
+      cx, cy, r: attrs.dotradius,
+      "stroke-width": attrs.strokewidth, stroke: attrs.stroke, fill: fillPaint(svg)
+    } });
+    if (label != null && label.value !== "") {
+      svg = textLocal(svg, p, label.value, pos == null ? "below" : pos.value);
+    }
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  },
+
+  dimension(svgOprnd, plistOprnd, arg1, arg2, arg3) {
+    // dimension (p1; p2; …; labelPoint), ["label", …]
+    // dimension (p1; p2; …; labelPoint), ["label", …], dimAngle, extAngle
+    // As in Sketch. The label list is optional. A label "" leaves its span blank, and a
+    // span with no label shows its measured length. The dimension line runs through
+    // labelPoint. With no angles, it's horizontal or vertical, whichever puts
+    // labelPoint between the end points. With angles (in degrees), the dimension line
+    // runs at dimAngle and the extension lines run at extAngle.
+    // Dimensions are always drawn in black, 0.5 px wide, with labels in the default
+    // font size.
+    let svg = svgOprnd.value;
+    const attrs = svg.temp;
+    const rows = numberRows(plistOprnd);
+    let labels = arg1;
+    let angles = [arg2, arg3];
+    if (isNumber(arg1)) {
+      labels = null;
+      angles = [arg1, arg2]; // No label list
+    }
+    if (!rows || rows.length < 3 || rows[0].length !== 2 ||
+        (angles[0] != null && !isNumber(angles[0])) ||
+        (angles[1] != null && !isNumber(angles[1])) ||
+        (angles[0] != null) !== (angles[1] != null)) {
+      return drawError("dimension")
+    }
+    const writtenLabel = labelList(labels);
+    const pts = rows.slice(0, -1);
+    const labelPoint = rows[rows.length - 1];
+    const elements = angles[0] == null
+      ? orthoDimension(pts, labelPoint, attrs)
+      : obliqueDimension(pts, labelPoint, Rnl.toNumber(angles[0].value),
+        Rnl.toNumber(angles[1].value), attrs);
+    if (!elements) { return drawError("dimension") }
+    const { extLines, dimLines, mids, values, pos } = elements;
+    for (const [a, b] of extLines) { svg.children.push(dimLineNode(attrs, a, b)); }
+    for (const [a, b] of dimLines) {
+      svg.children.push(dimLineNode(attrs, a, b));
+      // Arrowheads at both ends, pointing outward, as Sketch's dimarrow.
+      const pa = toPx(attrs, a[0], a[1]);
+      const pb = toPx(attrs, b[0], b[1]);
+      const u = pxDirection(attrs, [b[0] - a[0], b[1] - a[1]]);
+      svg.children.push(arrowheadNode(pa, [-u[0], -u[1]], dimArrowSize, dimStrokeWidth,
+        "black"));
+      svg.children.push(arrowheadNode(pb, u, dimArrowSize, dimStrokeWidth, "black"));
+    }
+    mids.forEach((mid, i) => {
+      const label = writtenLabel(i);
+      if (label === "") { return }
+      const str = label ?? dimensionLabel(values[i], attrs);
+      svg = textLocal(svg, mid, str, pos, { fontsize: labelFontSize });
+    });
+    return { value: svg, unit: null, dtype: dt.DRAWING }
+  }
+
+};
+
+const draw = Object.freeze({
+  startSvg,
+  fitToContent,
+  functions: functions$1
+});
+
 // A result has been sent here from evaluate.js or updateCalculations.js.
 // Format the result for display.
 
@@ -7303,6 +10848,7 @@ const formatResult = (stmt, result, formatSpec, formats, assert, isUnitAware) =>
 
   if (result.dtype === dt.DRAWING) {
     stmt.resultdisplay = result.value;
+    draw.fitToContent(stmt.resultdisplay);
     delete stmt.resultdisplay.temp;
     return stmt
   }
@@ -9965,2084 +13511,6 @@ const textRange = (str, index) => {
 
   return { value, unit: null, dtype: dt.STRING }
 };
-
-/**
- * md2ast() returns an AST that matches the memory structure  of a Hurmet.org document.
- * Elsewhere, Hurmet uses the AST to create either a live Hurmet doc or a static HTML doc.
- *
- * ## Restrictions
- *
- * 1. **_bold-italic_** must use both * & _ delimiters. Hurmet will fail on ***wat***.
- * 2. "Shortcut" reference links [ref] are not recognized.
- *
- * ## Extensions
- *
- * 1. Hurmet has a meta-document section at the top of the file, similar to MultiMarkdown.
- * 2. Hurmet inline calculation is delimited ¢`…`, where "…" is the entry input by the author.
- *    Hurmet display calculation is delimited ¢¢…¢¢.
- *    Alternate: ¢©`name = expression = 〔result〕unit`, where "©" is a display selector.
- * 3. LaTeX inline math is delimited $…$ or $`…`$. \(…\) is also recognized.
- *    No space allowed after 1st $ or before 2nd $. No digit after 2nd $.
- *    LaTeX display math is delimited  $$ … $$. \[…\] is also recognized.
- * 4. ~subscript~
- * 5. ^superscript^
- * 6. ~~strikethrough~~
- * 7. Pipe tables as per Github Flavored Markdown (GFM).
- * 8. Grid tables as per Pandoc and reStructuredText
- * 9. Empty paragraphs: A line consisting only of "¶" or "&nbsp;".
- * 10. Attributes for reference link definitions
- *       [id]: target
- *       {.class #id width=number}
- * 11. Figure/Caption for images. Format is a paragraph that consists entirely of:
- *       !![caption][id]
- * 12. Figure/Caption for tables.
- *     The caption is on the line above a table and is preceded by `: `, as per Pandoc.
- * 13. Table directives. They are placed on the line after the table. The format is:
- *     {#id .class float="(left|right)" colWidths="num1 num2 …"}
- *     {."class1 class2"}  ←  Alternate class syntax for when there is > 1 classname
- *     Float is applied only to a table inside a figure.
- *     A spreadsheet will include " spreadsheet" in `.class` The id will be the sheet's name.
- * 14. Lists that allow the user to pick list ordering.
- *        1. →  1. 2. 3.  etc.
- *        A. →  A. B. C.  etc.
- *        a. →  a. b. c.  etc.
- *        a) →  (a) (b) (c)  etc. (future)
- * 15. Alerts per GFM
- *     > [!note] or [!tip] or [!important] or [!warning] or [!epigraph]
- *     > Content of note
- * 16. Fenced divs, similar to Pandoc.
- *     ::: (centered|right_justified|comment|indented|boxed|header)
- *     Block elements
- *     :::
- *     Nested divs are distinguished by number of colons. Minimum three.
- * 17. Table of Contents
- *     {.toc start=N end=N}
- * 18. Page break, per Pandoc
- *     \\newpage
- * 19. Definition lists, per Pandoc.  (future)
- * 20. [^1] is a reference to a footnote.
- *     [^1]: The body of the footnote is deferred, similar to reference links.
- * 21. [#1] is a reference to a citation. (future)
- *     [#1]: The body of the citation is deferred, similar to reference links.
- * 22. Line blocks begin with "| ", as per Pandoc. (future)
- *
- * copyright (c) 2021 - 2025 Ron Kok
- *
- * This file has been adapted (and heavily modified) from Simple-Markdown.
- * Simple-Markdown copyright (c) 2014-2019 Khan Academy & Aria Buckles.
- *
- * Portions of Simple-Markdown were adapted from marked.js copyright (c) 2011-2014
- * Christopher Jeffrey (https://github.com/chjj/).
- *
- * LICENSE (MIT):
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
-
-
-const CR_NEWLINE_R = /\r\n?/g;
-const FORMFEED_R = /\f/g;
-const CLASS_R = /(?:^| )\.([a-z-]+)(?: |&|$)/;
-const tableClassRegEx = /(?:^| )\.(?:([a-z-]+)(?: |$)|"([^"]+)")/;
-const floatRegEx = /float="(left|right)"/;
-const WIDTH_R = /(?:^| )width="?([\d.a-z]+"?)(?: |$)/;
-const ALT_R = /(?:^| )alt="([A-Za-z\d ]+)"(?: |$)/;
-const COL_WIDTHS_R = /(?:^| )colWidths="([^"]*)"/;
-const ID_R = /(?:^| )#([A-Za-z][A-Za-z0-9]*)(?: |$)/;
-const leadingSpaceRegEx$2 = /^ +/;
-const trailingSpaceRegEx$1 = / +$/;
-
-// Turn various whitespace into easy-to-process whitespace
-const preprocess = function(source) {
-  return source.replace(CR_NEWLINE_R, "\n").replace(FORMFEED_R, "");
-};
-
-// Creates a match function for an inline scoped element from a regex
-const inlineRegex = function(regex) {
-  const match = function(source, state) {
-    return state.inline ? regex.exec(source) : null
-  };
-  match.regex = regex;
-  return match;
-};
-
-// Creates a match function for a block scoped element from a regex
-const blockRegex = function(regex) {
-  const match = function(source, state) {
-    return state.inline ? null : regex.exec(source)
-  };
-  match.regex = regex;
-  return match;
-};
-
-// Creates a match function from a regex, ignoring block/inline scope
-const anyScopeRegex = function(regex) {
-  const match = function(source, state) {
-    return regex.exec(source);
-  };
-  match.regex = regex;
-  return match;
-};
-
-const UNESCAPE_URL_R = /\\([^0-9A-Za-z\s])/g;
-const unescapeUrl = function(rawUrlString) {
-  return rawUrlString.replace(UNESCAPE_URL_R, "$1");
-};
-
-const isNotAnInteger = str => isNaN(str) || Number(str) % 1 !== 0;
-
-const indentRegEx = /^ +/;
-const insertNewlines = str => {
-  // Lists are unlike other blocks in one respect.
-  // A list might not have a preceding blank line, if the list is inside another list.
-  // Since the RegEx patterns all depend on that blank line, we will scan the top-level
-  // list and insert blank lines where needed.
-  const lines = str.split("\n");
-  let numLines = lines.length;
-  let i = 0;
-  let prevIndent = 0;
-  let prevLineWasEmpty = true;
-  while (i < numLines) {
-    const line = lines[i];
-    const isEmptyLine = (line === "");
-    if (!isEmptyLine) {
-      if (LIST_ITEM_PREFIX_R.test(line)) {
-        const match = indentRegEx.exec(line);
-        const indent = match ? match[0].length : 0;
-        if (indent !== prevIndent && !prevLineWasEmpty) {
-          // This line starts a new list and needs a preceeding blank line
-          lines.splice(i, 0, "");
-          i += 1;
-          numLines += 1;
-          prevLineWasEmpty = true;
-          continue
-        }
-        prevIndent = indent;
-      }
-    }
-    prevLineWasEmpty = isEmptyLine;
-    i += 1;
-  }
-  return lines.join("\n")
-};
-
-const parseList = (str, state) => {
-  if (!state.inList) {
-    // This is a top-level list.
-    str = str.replace(LIST_BLOCK_END_R, "\n");
-    str = insertNewlines(str);
-  }
-  const items = str.match(LIST_ITEM_R);
-  const isTight = !/\n\n/.test(str.replace(/\n*$/, ""));
-  // Backup our state for restoration afterwards.
-  const oldStateList = state.inList;
-  state.inList = true;
-  const itemContent = items.map(function(item, i) {
-    // We need to see how far indented this item is:
-    const prefixCapture = LIST_ITEM_PREFIX_R.exec(item);
-    const space = prefixCapture ? prefixCapture[0].length : 0;
-    // And then we construct a regex to "unindent" the subsequent
-    // lines of the items by that amount:
-    const spaceRegex = new RegExp("^ {1," + space + "}", "gm");
-
-    // Before processing the item, we need a couple things
-    const contentStr = item
-      // remove indents on trailing lines:
-      .replace(spaceRegex, "")
-      // remove the bullet:
-      .replace(LIST_ITEM_PREFIX_R, "");
-
-    // Backup our state for restoration afterwards.
-    const oldStateInline = state.inline;
-
-    // Parse the list item
-    state.inline = isTight;
-    const adjustedContent = contentStr.replace(LIST_ITEM_END_R, "");
-    const content = parse(adjustedContent, state);
-    const result = isTight
-      ? { type: "tight_list_item", content: [{ "type": "paragraph", "content": content }] }
-      : { type: "list_item", content };
-
-    // Restore our state before returning
-    state.inline = oldStateInline;
-    return result;
-  });
-
-  state.inList = oldStateList;
-  return itemContent
-};
-
-const TABLES = (function() {
-  const TABLE_ROW_SEPARATOR_TRIM = /^ *[|+] *| *[|+] *$/g;
-  const TABLE_RIGHT_ALIGN = /^(?:[ -]-+|=+):$/;
-  const TABLE_CENTER_ALIGN = /^:[-=]+:$/;
-
-  const parseTableAlign = function(source) {
-    // Inspect ":" characters to set column justification.
-    // Return class names that specify center or right justification on specific columns.
-    source = source.replace(TABLE_ROW_SEPARATOR_TRIM, "");
-    const alignArr = source.trim().split(/[|+]/);
-    let alignStr = "";
-    for (let i = 0; i < alignArr.length; i++) {
-      alignStr += TABLE_CENTER_ALIGN.test(alignArr[i])
-        ? ` c${String(i + 1)}c`
-        : (TABLE_RIGHT_ALIGN.test(alignArr[i])
-        ? ` c${String(i + 1)}r`
-        : "");
-    }
-    return alignStr.trim()
-  };
-
-  const tableDirectives = (directives, align) => {
-    // Get CSS class, ID, and column widths, if any.
-    if (!directives && align === "") { return ["", "", null] }
-    const userDefClass = tableClassRegEx.exec(directives);
-    let myClass = userDefClass
-      ? (userDefClass[1] ? userDefClass[1] : userDefClass[2] )
-      : "";
-    const isSpreadsheet = myClass && myClass.split(" ").includes("spreadsheet");
-    if (align.length > 0) { myClass += (myClass.length > 0 ? " " : "") + align; }
-    const userDefId = ID_R.exec(directives);
-    const myID = (userDefId) ? userDefId[1] : "";
-    const colWidthMatch = COL_WIDTHS_R.exec(directives);
-    const colWidths = (colWidthMatch) ? colWidthMatch[1].split(" ") : null;
-    return [myClass, myID, isSpreadsheet, colWidths]
-  };
-
-  const pipeRegEx = /(?<!\\)\|/;  // eslint doesn't like look behind. Disregard the warning.
-
-  const parsePipeTableRow = function(source, parse, state, isSpreadsheet,
-                                     colWidths, inHeader) {
-    const cells = source.trim().split(pipeRegEx);
-    cells.shift();
-    cells.pop();
-    const tableRow = [{ type: "tableSeparator" }];
-    for (const str of cells) {
-      const cell = isSpreadsheet
-        ? [{ type: "spreadsheet_cell", attrs: { entry: str.trim() } }]
-        : parse(str.trim(), state);
-      tableRow.push(...cell);
-      tableRow.push({ type: "tableSeparator" });
-    }
-    consolidate(tableRow);
-
-    const row = {
-      type: "table_row",
-      content: []
-    };
-    let j = -1;
-    tableRow.forEach(function(node, i) {
-      if (node.type === "text") {
-        if (i > 0 && tableRow[i - 1].type === "tableSeparator") {
-          node.text = node.text.replace(leadingSpaceRegEx$2, "");
-        }
-        if (i < tableRow.length - 1) {
-          node.text = node.text.replace(trailingSpaceRegEx$1, "");
-        }
-      }
-      if (node.type === "tableSeparator") {
-        if (i !== tableRow.length - 1) {  // Filter out the row's  last table separator
-          // Create a new cell
-          j += 1;
-          row.content.push({
-            "type": inHeader ? "table_header" : "table_cell",
-            "attrs": {
-              "colspan": 1,
-              "rowspan": 1,
-              "colwidth": (colWidths) ? [Number(colWidths[j])] : null,
-              "background": null
-            },
-            content: (state.inHtml || isSpreadsheet
-              ? []
-              : [{ "type": "paragraph", "content": [] }]
-            )
-          });
-        }
-      } else if (state.inHtml || isSpreadsheet) {
-        // For direct to HTML, write the inline contents directly into the <td> element.
-        // row   cell    content      text
-        row.content[j].content.push(node);
-      } else {
-        // Hurmet.app table cells always contain a paragraph.
-        // row   cell  paragraph  content      text
-        row.content[j].content[0].content.push(node);
-      }
-    });
-
-    return row;
-  };
-
-  const parsePipeTable = function() {
-    return function(capture, state) {
-      state.inline = true;
-      const align = parseTableAlign(capture[3]);
-      const [myClass, myID, isSpreadsheet, colWidths] = tableDirectives(capture[5], align);
-      const table = {
-        type: "table",
-        attrs: {},
-        content: []
-      };
-      if (myID) { table.attrs.name = myID; }
-      if (myClass) { table.attrs.class = myClass; }
-      if (isSpreadsheet) { table.attrs.dtype = dt.SPREADSHEET; }
-      if (colWidths && state.inHtml) {
-        let sum = 0;
-        colWidths.forEach(el => { sum += Number(el); } );
-        table.attrs.style = `width: ${sum}px`;
-        const colGroup = { type: "colGroup", content: [] };
-        for (const width of colWidths) {
-          colGroup.content.push({ type: "col", attrs: [{ style: `width: ${width}px` }] });
-        }
-        table.content.push(colGroup);
-      }
-      if (!/^\|+$/.test(capture[2])) {
-        table.content.push(parsePipeTableRow(capture[2], parse, state, isSpreadsheet,
-                                             colWidths, true));
-      }
-      const tableBody = capture[4].trim().split("\n");
-      tableBody.forEach(row => {
-        table.content.push(parsePipeTableRow(row, parse, state, isSpreadsheet,
-                                             colWidths, false));
-      });
-      state.inline = false;
-      if (capture[1]) {
-        const figure = { type: "figure", attrs: { class: "" }, content: [
-          { type: "figcaption", content: parseInline(capture[1], state) },
-          table
-        ] };
-        if (capture[5]) {
-          const match = floatRegEx.exec(capture[5]);
-          if (match) { figure.attrs.class = match[1]; }
-        }
-        return figure
-      } else {
-        return table
-      }
-    };
-  };
-
-  const headerRegEx = /^\+:?=/;
-  const gridSplit = / *\n/g;
-  const cellCornerRegEx = /^\+[-=:]+\+[+=:-]+\+$/g;
-
-  const parseGridTable = function() {
-    return function(capture, state) {
-      const topBorder = capture[3];
-      const lines = capture[2].slice(0, -1).split(gridSplit);
-
-      // Does the grid table contain a line separating header from table body?
-      let headerExists = false;
-      let headerSepLine = lines.length + 10;
-      for (let i = 0; i < lines.length; i++) {
-        if (headerRegEx.test(lines[i])) {
-          headerExists = true;
-          headerSepLine = i;
-          break
-        }
-      }
-
-      // Get column justification
-      const alignrow = headerExists ? lines[headerSepLine] : topBorder.slice(1);
-      const align = parseTableAlign(alignrow);
-      const [myClass, myID, isSpreadsheet, colWidths] = tableDirectives(capture[4], align);
-
-      // Read the top & left borders to find a first draft of cell corner locations.
-      const colSeps = [0];
-      for (let j = 1; j < topBorder.length; j++) {
-        if (topBorder.charAt(j) === "+") { colSeps.push(j); }
-      }
-      const rowSeps = [0];
-      for (let i = 1; i < lines.length; i++) {
-        if (lines[i].charAt(0) === "+") { rowSeps.push(i); }
-      }
-
-      // Look for the cell corner locations that don't appear on top or left border
-      let rowSepIndex = 0;
-      while (rowSepIndex < rowSeps.length) {
-        // Find the next row separator
-        let nextRow = 0;
-        const isValid = new Array(colSeps.length).fill(true);
-        for (let i = rowSeps[rowSepIndex] + 1; i < lines.length; i++) {
-          for (let k = 0; k < colSeps.length; k++) {
-            if (!isValid[k]) { continue }
-            if ("+|".indexOf(lines[i][colSeps[k]]) === -1) { isValid[k] = false; continue }
-            if (lines[i][colSeps[k]] === "+") {
-              nextRow = i;
-              break
-            }
-          }
-          if (nextRow !== 0) { break }
-        }
-        if (!rowSeps.includes(nextRow)) {
-          rowSeps.splice(rowSepIndex + 1, 0, nextRow);
-        }
-
-        // Check the next horizontal border for new cell corners
-        rowSepIndex += 1;
-        const border = lines[nextRow];
-        for (let j = 0; j < colSeps.length - 1; j++) {
-          let cellBorder = border.slice(colSeps[j], colSeps[j + 1] + 1);
-          if (cellCornerRegEx.test(cellBorder)) {
-            cellBorder = cellBorder.slice(1, -1);
-            let pos = cellBorder.indexOf("+") + 1;
-            let k = 1;
-            while (pos > 0) {
-              colSeps.splice(j + k, 0, colSeps[j] + pos);
-              pos = cellBorder.indexOf("+", pos) + 1;
-              k += 1;
-            }
-          }
-        }
-      }
-
-      const numCols = colSeps.length - 1;
-      const numRows = rowSeps.length - 1;
-      const gridTable = [];
-
-      // Create default rows and cells. They may be merged later.
-      for (let i = 0; i < numRows; i++) {
-        const row = new Array(numCols);
-        for (let j = 0; j < numCols; j++) { row[j] = { rowspan: 1 }; }
-        gridTable.push(row);
-      }
-
-      for (let i = 0; i < numRows; i++) {
-        const row = gridTable[i];
-        // Determine the actual rowspan and colspan of each cell.
-        for (let j = 0; j < numCols; j++) {
-          const cell = row[j];
-          if (cell.rowspan === 0) { continue }
-          cell.colspan = 1;
-          const lastTextRow = lines[rowSeps[i + 1] - 1];
-          for (let k = j + 1; k < colSeps.length; k++) {
-            if (lastTextRow.charAt(colSeps[k]) === "|") { break }
-            cell.colspan += 1;
-            row[k].rowspan = 0;
-          }
-          for (let k = i + 1; k < rowSeps.length; k++) {
-            const ch = lines[rowSeps[k]].charAt(colSeps[j] + 1);
-            if ("-=:".indexOf(ch) > -1) { break }
-            cell.rowspan += 1;
-            for (let jj = 0; jj < cell.colspan; jj++) {
-              gridTable[k][j + jj].rowspan = 0;
-            }
-          }
-          // Now that we know the cell extents, get the cell contents.
-          const xStart = colSeps[j] + 1;
-          const xEnd = colSeps[j + cell.colspan];
-          const yStart = rowSeps[i] + 1;
-          const yEnd = rowSeps[i + cell.rowspan];
-          let str = "";
-          for (let ii = yStart; ii < yEnd; ii++) {
-            str += lines[ii].slice(xStart, xEnd).replace(/ +$/, "") + "\n";
-          }
-          cell.blob = str.slice(0, -1).replace(/^\n+/, "");
-          const leadingSpacesMatch = /^ +/.exec(cell.blob);
-          if (leadingSpacesMatch) {
-            const numLeadingSpaces = leadingSpacesMatch[0].length;
-            const spaceRegEx = new RegExp("^" + " ".repeat(numLeadingSpaces), "gm");
-            cell.blob = cell.blob.replace(spaceRegEx, "");
-          }
-
-          cell.inHeader = (headerExists && yStart < headerSepLine);
-
-          if (colWidths) {
-            // Set an attribute used by ProseMirror.
-            const cellWidth = cell.colspan === 0 ? null : [];
-            for (let k = 0; k < cell.colspan; k++) {
-              cellWidth.push(Number(colWidths[j + k]));
-            }
-            cell.width = cellWidth;
-          }
-        }
-      }
-
-      const table = {
-        type: "table",
-        attrs: {},
-        content: []
-      };
-      if (myID) { table.attrs.name = myID; }
-      if (myClass) { table.attrs.class = myClass; }
-      if (isSpreadsheet) { table.attrs.dtype = dt.SPREADSHEET; }
-      let k = 0;
-      if (colWidths && state.inHtml) {
-        let sum = 0;
-        colWidths.forEach(el => { sum += Number(el); } );
-        table.attrs.style = `width: ${sum}px`;
-        const colGroup = { type: "colGroup", attrs: null, content: [] };
-        for (const width of colWidths) {
-          colGroup.content.push({ type: "col", attrs: [{ style: `width: ${width}px` }] });
-        }
-        table.content.push(colGroup);
-        k = 1;
-      }
-      for (let i = 0; i < numRows; i++) {
-        table.content.push({ type: "table_row", content: [] } );
-        for (let j = 0; j < numCols; j++) {
-          if (gridTable[i][j].rowspan === 0) { continue }
-          const cell = gridTable[i][j];
-          state.inline = false;
-          let content = isSpreadsheet
-            ? [{ type: "spreadsheet_cell", attrs: { entry: cell.blob.trim() } }]
-            : parse(cell.blob, state);
-          if (state.inHtml && content.length === 1 && content[0].type === "paragraph") {
-            content = content[0].content;
-          }
-          if (content.length === 1 && content[0].type === "null") {
-            content = [{ type: "paragraph", content: [] }];
-          }
-          table.content[i + k].content.push({
-            "type": cell.inHeader ? "table_header" : "table_cell",
-            "attrs": {
-              "colspan": cell.colspan,
-              "rowspan": cell.rowspan,
-              "colwidth": (colWidths) ? cell.width : null,
-              "background": null
-            },
-            content: content
-          });
-        }
-      }
-      state.inline = false;
-      if (capture[1]) {
-        const figure = { type: "figure", attrs: { class: "" }, content: [
-          { type: "figcaption", attrs: null, content: parseInline(capture[1], state) },
-          table
-        ] };
-        if (capture[4]) {
-          const match = floatRegEx.exec(capture[4]);
-          if (match) { figure.attrs.class = match[1]; }
-        }
-        return figure
-      } else {
-        return table
-      }
-    };
-  };
-
-  return {
-    parsePipeTable: parsePipeTable(),
-    PIPE_TABLE_REGEX: /^(?:: ((?:[^\n]|\n(?!\||:|<\/dl>))*)\n)?(\|.*)\n\|((?:[-: ]?-+[-: ]?\|)+)\n((?:\|.*(?:\n|$))*)(?:\{([^\n}]+)\}\n)?\n*/,
-    parseGridTable: parseGridTable(),
-    GRID_TABLE_REGEX: /^(?:: ((?:[^\n]|\n(?!\+|:|<\/dl>))*)\n)?((\+(?:[-:=]+\+)+)\n(?:[+|][^\n]+[+|] *\n)+)(?:\{([^\n}]+)\}\n)?\n*/
-  };
-})();
-
-const LINK_INSIDE = "(?:\\[[^\\]]*\\]|[^\\[\\]]|\\](?=[^\\[]*\\]))*";
-const LINK_HREF_AND_TITLE =
-  "\\s*<?((?:\\([^)]*\\)|[^\\s\\\\]|\\\\.)*?)>?(?:\\s+['\"]([\\s\\S]*?)['\"])?\\s*";
-
-const linkIndex = marks => {
-  for (let i = 0; i < marks.length; i++) {
-    if (marks[i].type === "link") { return i }
-  }
-};
-
-// Pattern to find Hurmet calculation results.
-// This will be replaced in the entry with the display selector.
-const resultRegEx = /〔[^〕]*〕/;
-const drawRegEx$1 = /^draw\(/;
-
-const parseRef = function(capture, state, refNode) {
-  // Handle implicit refs: [title][<ref>], ![alt or caption][<ref>]
-  let ref = capture[2] ? capture[2] : capture[1];
-  ref = ref.replace(/\s+/g, " ");
-
-  if (state.defs && state.defs[ref]) {
-    const def = state.defs[ref];
-    if (!def.target || def.target === "undefined") {
-      // The image definition is undefined.
-      const brokenImage = { type: "image", attrs: { src: "undefined-image" } };
-      if (def.attrs && def.attrs.alt) { brokenImage.attrs.alt = def.attrs.alt; }
-      return brokenImage
-    }
-    if (refNode.type === "figure") {
-      refNode = { type: "figure", attrs: def.attrs, content: [
-        { type: "figimg", attrs: def.attrs },
-        { type: "figcaption", content: parseInline(refNode.attrs.alt, state) }
-      ] };
-      refNode.content[0].attrs.src = def.target;
-      if (def.attrs.alt) { refNode.content[0].attrs.alt = def.attrs.alt; }
-    } else if (refNode.type === "image") {
-      if (drawRegEx$1.test(def.target)) {
-        // A drawing is written on one line. Its line breaks are written as ␤.
-        // Drawings written before ␤ was adopted contain no ␤; they used \n.
-        const entry = def.target.indexOf("␤") === -1
-          ? def.target.replace(/\\n/g, "\n")
-          : def.target.replace(/␤/g, "\n");
-        return { type: "calculation", attrs: { entry } }
-      } else {
-        refNode.attrs = def.attrs;
-        refNode.attrs.src = def.target;
-      }
-    } else {
-      // refNode is a link
-      refNode.attrs.href = def.target;
-    }
-  }
-  return refNode;
-};
-
-const parseTextMark = (capture, state, mark, href) => {
-  const text = parseInline(capture, state);
-  if (Array.isArray(text) && text.length === 0) { return text }
-  consolidate(text);
-  const markObj = { type: mark };
-  if (href) { markObj.attrs = { href }; }
-  for (const range of text) {
-    if (range.marks) {
-      range.marks.push(markObj);
-    } else {
-      range.marks = [markObj];
-    }
-  }
-  return text
-};
-
-const BLOCK_HTML = /^ *(?:<(head|h[1-6]|p|pre|label|script|style|table)[\s>][\s\S]*?(?:<\/\1>[^\n]*\n)|<(?:\/?(?:!DOCTYPE html|body|li|br|hr|(?:div|article|details|input|ul|ol|dl|main|nav)(?: (?:class|id|name|style|type)=(["'])[A-Za-z0-9_.:;\- ]+\2){0,2})|\/?html(?: lang=(["'])[a-z]+\3)?)>[^\n]*?(?:\n|$))/;
-
-// Rules must be applied in a specific order, so use a Map instead of an object.
-const rules = new Map();
-rules.set("html", {
-  isLeaf: true,
-  match: blockRegex(BLOCK_HTML),
-  parse: function(capture, state) {
-    if (!state.inHtml) { return null }
-    return { type: "html", text: capture[0] }
-  }
-});
-rules.set("htmlComment", {
-  isLeaf: true,
-  match: blockRegex(/^ *<!--[\s\S]*?-->[^\n]*\n/),
-  parse: function(capture, state) {
-    return { type: "null" }
-  }
-}),
-rules.set("lheading", {
-  isLeaf: false,
-  match: blockRegex(/^([^\n]+)\n *(=|-){3,} *(?:\n *)+\n/),
-  parse: function(capture, state) {
-    return {
-      type: "heading",
-      attrs: { level: capture[2] === '=' ? 1 : 2 },
-      content: parseInline(capture[1].trim(), state)
-    };
-  }
-});
-rules.set("heading", {
-  isLeaf: false,
-  match: blockRegex(/^ *(#{1,6})([^\n]+?)#*\n*\n/),
-  parse: function(capture, state) {
-    return {
-      attrs: { level: capture[1].length },
-      content: parseInline(capture[2].trim(), state)
-    };
-  }
-});
-rules.set("dt", {  // description term
-  isLeaf: false,
-  match: blockRegex(/^(([^\n]*)\n)(?=<dd>|\n: [^\n]+\n[^|+])/),
-  parse: function(capture, state) {
-    return { content: parseInline(capture[2].trim(), state) }
-  }
-});
-rules.set("horizontal_rule", {
-  isLeaf: true,
-  match: blockRegex(/^( *[-*_]){3,} *(?:\n *)+\n/),
-  parse: function(capture, parse, state) {
-    return { type: "horizontal_rule" };
-  }
-});
-rules.set("page_break", {
-  isLeaf: true,
-  match: blockRegex(/^\\newpage\n\n/),
-  parse: function(capture, parse, state) {
-    return { type: "page_break" };
-  }
-});
-rules.set("codeBlock", {
-  isLeaf: true,
-  match: blockRegex(/^(?:(?:\t| {4})[^\n]+\n*)+(?:\n *)+\n/),
-  parse: function(capture, state) {
-    const content = capture[0].replace(/^(\t| {4})/gm, '').replace(/\n+$/, '');
-    return {
-      type: "code_block",
-      content: [{ type: "text", text: content }]
-    };
-  }
-});
-rules.set("fence", {
-  isLeaf: true,
-  match: blockRegex(/^(```|~~~) *(?:(\S+) *)?\n([\s\S]+?)\n?\1 *(?:\n *)+\n/),
-  parse: function(capture, state) {
-    return {
-      type: "code_block",
-//      lang: capture[2] || undefined,
-      content: [{ type: "text", text: capture[3] }]
-    };
-  }
-});
-rules.set("alert", {
-  isLeaf: false,
-  match: blockRegex(/^(?: *> \[!(NOTE|TIP|IMPORTANT|WARNING|EPIGRAPH)\])((?:\n *>(?! *\[!)[^\n]*)+)(?:\n *)+\n/),
-  // Alert for note |tip | important | warning |epigraph
-  parse: function(capture, state) {
-    const cap = capture[2].replace(/\n *> ?/gm, "\n").replace(/^\n/, "");
-    const content = parse(cap, state);
-    return { type: capture[1].toLowerCase(), content }
-  }
-});
-rules.set("blockquote", {
-  isLeaf: false,
-  match: blockRegex(/^>([^\n]*(?:\n *>[^\n]*)*)(?:\n *)+\n/),
-  parse: function(capture, state) {
-    const content = capture[1].replace(/\n *> ?/gm, "\n");
-    return { content: parse(content, state) };
-  }
-});
-rules.set("ordered_list", {
-  isLeaf: false,
-  match: blockRegex(/^( {0,3})(?:(?:(\d{1,9})|([A-Z])|([a-z]))[.)]) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:\d{1,9}\.) )\n*|\s*$)/),
-  parse: function(capture, state) {
-    const start = capture[2]
-      ? Number(capture[2])
-      : capture[3]
-      ? capture[3].codePointAt(0) - 64
-      : capture[4].codePointAt(0) - 96;
-    const className = capture[2] ? "decimal" : capture[3] ? "upper-alpha" : "lower-alpha";
-    return {
-      attrs: { class: className, order: start },
-      content: parseList(capture[0], state)
-    }
-  }
-});
-rules.set("bullet_list", {
-  isLeaf: false,
-  match: blockRegex(/^( {0,3})([*+-]) [\s\S]+?(?:\n{2,}(?! )(?!\1(?:[*+-]) )\n*|\s*$)/),
-  parse: function(capture, state) {
-    return { content: parseList(capture[0], state) }
-  }
-});
-rules.set("special_div", {
-  isLeaf: false,
-  match: blockRegex(/^(:{3,}) ?(indented|comment|centered|right_justified|boxed|header\*?|hidden) *\n([\s\S]+?)\n+\1 *(?:\n{2,}|\s*$)/),
-  // indented or centered or right-justified or boxed or comment div, or <header>
-  parse: function(capture, state) {
-    const content = parse(capture[3], state);
-    const blockType = capture[2];
-    if (blockType === "header*") {
-      return { type: "header", attrs: { headerPages: "all" }, content };
-    } else {
-      return { type: blockType, content };
-    }
-  }
-});
-rules.set("figure", {
-  isLeaf: true,
-  match: blockRegex(/^!!\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\] *(?:\n *)+\n/),
-  parse: function(capture, state) {
-    if (isNotAnInteger(capture[1])) {
-      return parseRef(capture, state, { type: "figure", attrs: { alt: capture[1] } });
-    } else {
-      return parseRef(capture, state, { type: "figure" });
-    }
-  }
-});
-rules.set("def", {
-  isLeaf: true,
-  // A drawing takes its whole line, which may contain ">".
-  match: blockRegex(/^\[([^\]\n]+)\]: *(?:¢(`+)([\s\S]*?[^`])\2(?!`)|draw\([^\n]*|<?([^\n>]*)>? *(?:\n\{([^\n}]*)\})?)/),
-  // Link reference definitions were handled in md2ast().
-  parse: function(capture, state) { return { type: "null" } }
-});
-rules.set("toc", {
-  isLeaf: true,
-  match: blockRegex(/^{\.toc start=(\d) end=(\d)}\n/),
-  parse: function(capture, state) {
-    return { attrs: { start: Number(capture[1]), end: Number(capture[2]), body: [] } }
-  }
-});
-rules.set("pipeTable", {
-  isLeaf: false,
-  match: blockRegex(TABLES.PIPE_TABLE_REGEX),
-  parse: TABLES.parsePipeTable
-});
-rules.set("gridTable", {
-  isLeaf: false,
-  match: blockRegex(TABLES.GRID_TABLE_REGEX),
-  parse: TABLES.parseGridTable
-});
-rules.set("dd", {  // description details
-  isLeaf: false,
-  match: blockRegex(/^:( +)[\s\S]+?(?:\n{2,}(?! |:)(?!\1)\n*|\s*$)/),
-  parse: function(capture, state) {
-    let div = " " + capture[0].slice(1);
-    const indent = 1 + capture[1].length;
-    const spaceRegex = new RegExp("^ {" + indent + "," + indent + "}", "gm");
-    div = div.replace(spaceRegex, ""); // remove indents on trailing lines:
-    return { content: parse(div, state) };
-  }
-});
-rules.set("displayTeX", {
-  isLeaf: true,
-  match: blockRegex(/^ *(?:\$\$\n? *((?:\\[\s\S]|[^\\])+?)\n?\$\$|\\\[\n? *((?:\\[\s\S]|[^\\])+?)\n?\\\]) *(?:\n|$)/),
-  parse: function(capture, state) {
-    const tex = (capture[1] ? capture[1] : capture[2]).trim();
-    return { type: "tex", attrs: { tex, displayMode: true } }
-  }
-});
-rules.set("newline", {
-  isLeaf: true,
-  match: blockRegex(/^(?:\n *)*\n/),
-  parse: function() { return { type: "null" } }
-});
-rules.set("emptyParagraph", {
-  isLeaf: true,
-  match: blockRegex(/^(¶|&nbsp;)(?:\n *)+\n/),
-  parse: function(capture, state) {
-    return { type: "paragraph", content: [] }
-  }
-});
-rules.set("paragraph", {
-  isLeaf: false,
-  match: blockRegex(/^((?:[^\n]|\n(?!(?: *\n|(?=[*+-] )|(?=(?:\d{1,9}|[A-Za-z])[.)] ))))+)\n(?:(?: *\n)+|(?=[*+-] )|(?=(?:\d{1,9}|[A-Za-z])[.)] ))/),
-  parse: function(capture, state) {
-    return { type: "paragraph", content: parseInline(capture[1], state) }
-  }
-});
-// Position tex ahead of escape in order to capture \[...\] math.
-rules.set("tex", {
-  isLeaf: true,
-  match: inlineRegex(/^(?:\\\[((?:\\[\s\S]|[^\\])+?)\\\]|\$\$((?:\\[\s\S]|[^\\])+?)\$\$|\\\(((?:\\[\s\S]|[^\\])+?)\\\)|\$(`+)((?:(?:\\[\s\S]|[^\\])+?)?)\4\$(?![0-9$])|\$(?!\s|\$)((?:(?:\\[\s\S]|[^\\])+?)?)(?<=[^\s\\$])\$(?![0-9$]))/),
-  parse: function(capture, state) {
-    if (capture[1] || capture[2]) {
-      const tex = (capture[1] ? capture[1] : capture[2]).trim();
-      return { type: "tex", attrs: { tex, displayMode: true } }
-    } else {
-      const tex = (capture[3]
-        ? capture[3]
-        : capture[5]
-        ? capture[5]
-        : capture[6]).trim();
-      return { type: "tex", attrs: { tex, displayMode: false } }
-    }
-  }
-});
-rules.set("escape", {
-  // We don't allow escaping numbers, letters, or spaces here so that
-  // backslashes used in plain text still get rendered. But allowing
-  // escaping anything else provides a very flexible escape mechanism,
-  // regardless of how this grammar is extended.
-  isLeaf: true,
-  match: inlineRegex(/^\\([^0-9A-Za-z()\s])/),
-  parse: function(capture, state) {
-    return {
-      type: "text",
-      text: capture[1]
-    };
-  }
-});
-rules.set("tableSeparator", {
-  isLeaf: true,
-  match: function(source, state) {
-    if (!state.inTable) { return null }
-    return /^ *\| */.exec(source);
-  },
-  parse: function() {
-    return { type: "tableSeparator" };
-  }
-});
-rules.set("link", {
-  isLeaf: true,
-  match: inlineRegex(
-    new RegExp("^\\[(" + LINK_INSIDE + ")\\]\\(" + LINK_HREF_AND_TITLE + "\\)")
-  ),
-  parse: function(capture, state) {
-    const content = parseInline(capture[1], state);
-    let useParseTextMark = true;
-    for (const node of content) {
-      if (node.type !== "text") { useParseTextMark = false; break }
-    }
-    if (useParseTextMark) {
-      // This is the Prosemirror default method for editable links.
-      return parseTextMark(capture[1], state, "link", unescapeUrl(capture[2]))
-    } else {
-      // When a link contains a nodeView, e.g. math, the text mark method has an edge case bug.
-      // So the Hurmet schema has a custom "link_node".
-      const href = unescapeUrl(capture[2]);
-      return [{ type: "link_node", attrs: { href, title: href }, content }]
-    }
-  }
-});
-rules.set("image", {
-  isLeaf: true,
-  match: inlineRegex(
-    new RegExp("^!\\[(" + LINK_INSIDE + ")\\]\\(" + LINK_HREF_AND_TITLE + "\\)")
-  ),
-  parse: function(capture, state) {
-    if (isNotAnInteger(capture[1])) {
-      return { attrs: { alt: capture[1], src: unescapeUrl(capture[2]) } }
-    } else {
-      return { attrs: { src: unescapeUrl(capture[2]) } }
-    }
-  }
-});
-rules.set("reflink", {
-  isLeaf: true,
-  match: inlineRegex(/^\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]/),
-  parse: function(capture, state) {
-    const defIndex = capture[2] ? capture[2] : capture[1];
-    const href = state.defs[defIndex].target;
-    const textNode = parseTextMark(capture[1], state, "link", href);
-    return textNode
-  }
-});
-rules.set("footnote", {
-  isLeaf: true,
-  match: inlineRegex(/^\[\^(\d+)\]/),
-  parse: function(capture, state) {
-    const index = Number(capture[1]) - 1;
-    return { type: "footnote", content: parseInline(state.footnotes[index], state) }
-  }
-});
-rules.set("refimage", {
-  isLeaf: true,
-  match: inlineRegex(/^!\[((?:(?:\\[\s\S]|[^\\])+?)?)\]\[([^\]]*)\]/),
-  parse: function(capture, state) {
-    //if (isNotAnInteger(capture[1])) {
-    return parseRef(capture, state, { type: "image", attrs: { alt: capture[1] } });
-    //} else {
-    //  return parseRef(capture, state, { type: "image" });
-   // }
-  }
-});
-rules.set("autolink", {
-  isLeaf: true,
-  match: inlineRegex(/^<([^: >]+:\/[^ >]+)>/),
-  parse: function(capture, state) {
-    const textNode = parseTextMark(capture[1], state, "link" )[0];
-    const i = linkIndex(textNode.marks);
-    textNode.marks[i].attrs = { href: unescapeUrl(capture[1]) };
-    return textNode
-  }
-});
-rules.set("code", {
-  isLeaf: true,
-  match: inlineRegex(/^(`+)([\s\S]*?[^`])\1(?!`)/),
-  parse: function(capture, state) {
-    const text = capture[2].trim();
-    return [{ type: "text", text, marks: [{ type: "code" }] }]
-  }
-});
-rules.set("calculation", {
-  isLeaf: true,
-  match: anyScopeRegex(/^(?:¢(\?\?|\?|%%|%|@@|@)?(`+)([\s\S]*?[^`])\2(?!`)|¢¢(\?\?|\?|%%|%|@@|@)?\n?((?:\\[\s\S]|[^\\])+?)\n?¢¢)/),
-  parse: function(capture, state) {
-    if (capture[3]) {
-      let entry = capture[3].trim();
-      if (capture[1]) {
-        if (entry.slice(0, 1) === "@") {
-          entry = entry.replace(resultRegEx, "").trim();
-        } else {
-          entry = entry.replace(resultRegEx, capture[1]);
-        }
-      }
-      if (!/^(?:function|draw\()/.test(entry) && entry.indexOf("``") === -1) {
-        entry = entry.replace(/\n/g, " ");
-      }
-      return { attrs: { entry } }
-    } else {
-      let entry = capture[5].trim();
-      if (capture[4]) {
-        if (entry.slice(0, 1) === "@") {
-          entry = entry.replace(resultRegEx, "").trim();
-        } else {
-          entry = entry.replace(resultRegEx, capture[4]);
-        }
-      }
-      return { attrs: { entry, displayMode: true } }
-    }
-  }
-});
-rules.set("em", {
-  isLeaf: true,
-  match: inlineRegex(/^([_*])(?!\s|\1)((?:\\[\s\S]|[^\\])+?)\1/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[2], state, "em" )
-  }
-});
-rules.set("strong", {
-  isLeaf: true,
-  match: inlineRegex(/^(\*\*|__)(?=\S)((?:\\[\s\S]|[^\\])+?)\1/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[2], state, "strong" )
-  }
-});
-rules.set("del", {
-  isLeaf: true,
-  match: inlineRegex(/^<del>([\s\S]*?)<\/del>/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "strikethru" )
-  }
-});
-rules.set("strikethru", {
-  isLeaf: true,
-  match: inlineRegex(/^~~(?=\S)((?:\\[\s\S]|~(?!~)|[^\s~\\]|\s(?!~~))+?)~~/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "strikethru" )
-  }
-});
-rules.set("superscript", {
-  isLeaf: true,
-  match: inlineRegex(/^<sup>([\s\S]*?)<\/sup>/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "superscript" )
-  }
-});
-rules.set("carat", {
-  isLeaf: true,
-  match: inlineRegex(/^\^((?:\\[\s\S]|[^\\])+?)\^/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "superscript" )
-  }
-});
-rules.set("subscript", {
-  isLeaf: true,
-  match: inlineRegex(/^<sub>([\s\S]*?)<\/sub>/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "subscript" )
-  }
-});
-rules.set("tilde", {
-  isLeaf: true,
-  match: inlineRegex(/^~((?:\\[\s\S]|[^\\])+?)~/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "subscript" )
-  }
-});
-rules.set("underline", {
-  isLeaf: true,
-  match: inlineRegex(/^<u>([\s\S]*?)<\/u>/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "underline" )
-  }
-});
-rules.set("highlight", {
-  isLeaf: true,
-  match: inlineRegex(/^<mark>([\s\S]*?)<\/mark>/),
-  parse: function(capture, state) {
-    return parseTextMark(capture[1], state, "highlight" )
-  }
-});
-rules.set("hard_break", {
-  isLeaf: true,
-  match: anyScopeRegex(/^(\\| {2})\n/),
-  parse: function() { return { text: "\n" } }
-});
-rules.set("inline_break", {
-  isLeaf: true,
-  match: anyScopeRegex(/^<br>/),
-  parse: function() { return { type: "hard_break", text: "\n" } }
-});
-rules.set("span", {
-  isLeaf: true,
-  match: inlineRegex(/^<span [a-z =":]+>[^<]+<\/span>/),
-  parse: function(capture, state) {
-    return !state.inHtml ? null : { type: "html", text: capture[0] }
-  }
-});
-rules.set("text", {
-  // We break on symbol characters, double newlines, or double-space-newlines.
-  isLeaf: true,
-  match: anyScopeRegex(/^[\s\S]+?(?=[_*`#>|\\\-+=![({$¢¶<~^+:]|\n\n| {2,}\n|\d+[.)]|\w+:\S|$)/),
-  parse: function(capture, state) {
-    return {
-      text: capture[0].replace(/\n/g, " ")
-    };
-  }
-});
-
-
-const parse = (source, state) => {
-  if (!state.inline) { source += "\n\n"; }
-  source = preprocess(source);
-  const result = [];
-  while (source) {
-    // store the best match and its rule:
-    let capture = null;
-    let ruleName = null;
-    let rule = null;
-    for (const [currRuleName, currRule] of rules) {
-      capture = currRule.match(source, state);
-      if (capture) {
-        rule = currRule;
-        ruleName = currRuleName;
-        break
-      }
-    }
-    const parsed = rule.parse(capture, state);
-    if (Array.isArray(parsed)) {
-      Array.prototype.push.apply(result, parsed);
-    } else {
-      if (parsed.type == null) { parsed.type = ruleName; }
-      result.push(parsed);
-    }
-    state.prevCapture = capture[0];
-    source = source.substring(capture[0].length);
-  }
-  return result
-};
-
-
-
-/**
- * Parse some content with the parser `parse`, with state.inline
- * set to true. Useful for block elements; not generally necessary
- * to be used by inline elements (where state.inline is already true.
- */
-const parseInline = function(content, state) {
-  const isCurrentlyInline = state.inline || false;
-  state.inline = true;
-  const result = parse(content, state);
-  state.inline = isCurrentlyInline;
-  return result;
-};
-
-
-// recognize a `*` `-`, `+`, `1.`, `2.`, `A.`, `a,`... list bullet
-const LIST_BULLET = "(?:[*+-]|(?:\\d+|[A-Za-z])[\\.\\)])";
-// recognize the start of a list item:
-// leading space plus a bullet plus a space (`   * `)
-const LIST_ITEM_PREFIX = "( *)(" + LIST_BULLET + ") +";
-const LIST_ITEM_PREFIX_R = new RegExp("^" + LIST_ITEM_PREFIX);
-// recognize an individual list item:
-//  * hi
-//    this is part of the same item
-//
-//    as is this, which is a new paragraph in the same item
-//
-//  * but this is not part of the same item
-const LIST_ITEM_R = new RegExp(
-  LIST_ITEM_PREFIX + "[^\\n]*(?:\\n" + "(?!\\1" + LIST_BULLET + " )[^\\n]*)*(\n|$)",
-  "gm"
-);
-const BLOCK_END_R = /\n{2,}$/;
-// recognize the end of a paragraph block inside a list item:
-// two or more newlines at end end of the item
-const LIST_BLOCK_END_R = BLOCK_END_R;
-const LIST_ITEM_END_R = / *\n+$/;
-
-const consolidate = arr => {
-  if (Array.isArray(arr) && arr.length > 0) {
-    // Group any text nodes together into a single string output.
-    for (let i = arr.length - 1; i > 0; i--) {
-      const node = arr[i];
-      const prevNode = arr[i - 1];
-      if (node.type === 'text' && prevNode.type === 'text' &&
-          !node.marks && !prevNode.marks) {
-        prevNode.text += node.text;
-        arr.splice(i, 1);
-      } else if ((node.type === 'indented' && prevNode.type === 'indented') ||
-                 (node.type === 'centered' && prevNode.type === 'centered')) {
-        prevNode.content = prevNode.content.concat(node.content);
-        arr.splice(i, 1);
-      } else if (node.type === "null") {
-        arr.splice(i, 1);
-      } else if (!rules.has(node.type) || !rules.get(node.type).isLeaf) {
-        consolidate(node.content);
-      }
-    }
-
-    if (!rules.has(arr[0].type) || !rules.get(arr[0].type).isLeaf) {
-      consolidate(arr[0].content);
-    }
-  }
-};
-
-const populateTOC = ast => {
-  let tocNode;
-  for (const node of ast) {
-    if (node.type === "toc") { tocNode = node; break }
-  }
-  if (!tocNode) { return }
-  const start = tocNode.attrs.start;
-  const end = tocNode.attrs.end;
-  for (const node of ast) {
-    if (node.type === "heading") {
-      const level = node.attrs.level;
-      if (start <= level && level <= end) {
-        const tocEntry = [];
-        let str = "";
-        for (const range of node.content) { str += range.text; }
-        tocEntry.push(str);
-        tocEntry.push(level);
-        tocEntry.push(0); // page number unknown
-        tocEntry.push(0); // element number unknown
-        tocNode.attrs.body.push(tocEntry);
-      }
-    }
-  }
-};
-
-const metadataRegEx = /^---+\n((?:[A-Za-z0-9][A-Za-z0-9 _-]*:[^\n]+\n(?:[ \t]+[^\n]+\n)*)+)---+\n/;
-const metadataItemRegEx = /^[A-Za-z0-9][A-Za-z0-9 _-]*:[^\n]+\n(?:[ \t]+[^\n]+\n)*/;
-const hurmetMetadataNames = ["decimalFormat", "dateFormat", "fontSize",
-  "pageSize", "saveDate"];
-
-const parseMetadata = str => {
-  const metadata = {};
-  let capture = str.match(metadataItemRegEx);
-  while (capture) {
-    const item = capture[0].split(":");
-    const key = item[0].trim().replace(/ /g, "");
-    if (hurmetMetadataNames.includes(key)) {
-      const value = item[1].slice(0, -1).trim().replace(/ *\n[ \t]*/g, " ");
-      metadata[key] = value;
-    }
-    str = str.slice(capture[0].length);
-    capture = str.match(metadataItemRegEx);
-  }
-  return metadata
-};
-
-const dateMessageRegEx = /^date:([^\n]+)\nmessage:([^\n]+)\n/;
-
-const buildPathDefString = (def, target, directives) => {
-  return directives
-    ? `[${def}]: ${target}\n{${directives}}`
-    : `[${def}]: ${target}`
-};
-
-const inlineMd2ast = md => {
-  const state = { inline: true, defs: {}, prevCapture: "", inList: false, inHtml: false };
-  const ast = parse(md, state);
-  if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") {
-    ast.shift();
-  }
-  consolidate(ast);
-  return ast
-};
-
-const md2ast = (md, inHtml = false) => {
-  // First, check for a metadata preamble
-  let metadata = false;
-  if (metadataRegEx.test(md)) {
-    const match = metadataRegEx.exec(md);
-    metadata = parseMetadata(match[1]);
-    md = md.slice(match[0].length);
-  }
-
-  // Second, get all the link reference definitions
-  const state = {
-    inline: false,
-    inList: false,
-    defs: {},
-    footnotes: [],
-    prevCapture: "",
-    inHtml
-  };
-  const snapshotPathCache = {};
-  const defRegEx = /\n *\[([^\]\n]+)\]: *([^\n]*) *(?:\n\{([^\n}]*)\})?(?=\n)/gm;
-  const footnoteDefRegEx = /\n *\[\^\d+\]: *([^\n]*)(?=\n)/gm;
-  let capture;
-  while ((capture = defRegEx.exec(md)) !== null) {
-    const def = capture[1].replace(/\s+/g, " ");
-    const target = capture[2].trim();
-    const directives = capture[3] || "";
-
-    const attrs = isNotAnInteger(def) ? { alt: def } : {};
-    if (directives) {
-      const matchClass = CLASS_R.exec(directives);
-      const matchWidth = WIDTH_R.exec(directives);
-      const matchAlt = ALT_R.exec(directives);
-      const matchID = ID_R.exec(directives);
-      if (matchClass) { attrs.class = matchClass[1]; }
-      if (matchWidth) { attrs.width = matchWidth[1]; }
-      if (matchAlt)   { attrs.alt = matchAlt[1]; }
-      if (matchID)    { attrs.id = matchID[1]; }
-    }
-    state.defs[def] = { target, attrs };
-
-    if (!isNotAnInteger(def)) {
-      snapshotPathCache[def] = buildPathDefString(def, target, directives);
-    }
-  }
-
-  // Next, get all the footnote definitions
-  // eslint-disable-next-line no-useless-assignment
-  capture = null;
-  while ((capture = footnoteDefRegEx.exec(md)) !== null) {
-    state.footnotes.push(capture[1].trim());
-  }
-
-  // Find out if there are any snapshots.
-  let snapshotStrings = [];
-  let gotSnapshot = false;
-  if (metadata) {
-    snapshotStrings = md.split("<!--SNAPSHOT-->\n");
-    if (snapshotStrings.length > 1) {
-      gotSnapshot = true;
-      md = snapshotStrings.shift();
-    }
-  }
-
-  // Find out if there are any fallbacks for fetched files
-  let fallbackStrings = [];
-  if (metadata) {
-    fallbackStrings = md.split("<!--FALLBACKS-->\n");
-    if (fallbackStrings.length > 1) {
-      md = fallbackStrings.shift();
-    } else {
-      fallbackStrings = null;
-    }
-  }
-
-  // Proceed to parse the document.
-  const ast = parse(md, state);
-  if (Array.isArray(ast) && ast.length > 0 && ast[0].type === "null") {
-    ast.shift();
-  }
-  consolidate(ast);
-  populateTOC(ast);
-  if (metadata) {
-    metadata.snapshotPathCache = snapshotPathCache;
-    if (fallbackStrings) {
-      metadata.fallbacks = JSON.parse(fallbackStrings.pop().trim());
-    }
-    if (gotSnapshot) {
-      const snapshots = [];
-      for (const str of snapshotStrings) {
-        const capture = dateMessageRegEx.exec(str);
-        snapshots.push({
-          date: capture[1] ? Date.parse(capture[1].trim()) : undefined,
-          message: capture[2] ? capture[2].trim() : undefined,
-          content: capture ? str.slice(capture[0].length) : str
-        });
-      }
-      metadata.snapshots = snapshots;
-    }
-    return { type: "doc", attrs: metadata, content: ast }
-  } else {
-    return ast
-  }
-};
-
-const startSvg = _ => {
-  return {
-    tag: 'svg',
-    children: [],
-    attrs: {
-      xmlns: "http://www.w3.org/2000/svg",
-      width: 250,
-      height: 250,
-      style: "display: inline;"
-    },
-    temp: {
-      width: 250,
-      height: 250,
-      xmin: 0,
-      xmax: 5,
-      ymin: 0,
-      ymax: 5,
-      xunitlength: 20,  // px
-      yunitlength: 20,  // px
-      origin: [0, 0],   // in px (default is bottom left corner)
-      stroke: "black",
-      strokewidth: 1,
-      strokedasharray: null,
-      fill: "none",
-      fontstyle: "normal",
-      fontfamily: "sans-serif",
-      fontsize: 13.33, // px, ~10 pt
-      fontweight: "normal",
-      markerstrokewidth: 1,
-      markerstroke: "black",
-      markerfill: "yellow",
-      markersize: 4,
-      marker: "none",
-      dotradius: 4,
-      axesstroke: "black",
-      gridstroke: "grey",
-      isDim: false
-    }
-  }
-};
-
-// Helpers
-const setStrokeAndFill = (node, attrs) => {
-  node.attrs["stroke-width"] = attrs.strokewidth;
-  node.attrs.stroke = attrs.stroke;
-  node.attrs.fill = attrs.fill;
-  if (attrs.strokedasharray != null && attrs.strokedasharray !== "none") {
-    node.attrs["stroke-dasharray"] = attrs.strokedasharray;
-  }
-};
-
-const pointZeroRegEx = /\.0+$/;
-const chopZ = str => {
-  const k = str.indexOf(".");
-  if (k === -1) { return str }
-  if (pointZeroRegEx.test(str)) { return str.replace(pointZeroRegEx, "") }
-  let i;
-  for (i = str.length - 1; i > k && str.charAt(i) === "0"; i--) {
-    if (i === k) { i--; }
-  }
-  return str.slice(0, i + 1)
-};
-
-const markerDot = (center, attrs, s, f) => { // coordinates in units, radius in pixel
-  if (s == null) { s = attrs.stroke; }
-  if (f == null) { f = attrs.fill; }
-  const node = { tag: "circle", attrs: {} };
-  node.attrs.cx = center[0] * attrs.xunitlength + attrs.origin[0];
-  node.attrs.cy = attrs.height - center[1] * attrs.yunitlength - attrs.origin[1];
-  node.attrs.r = attrs.markersize;
-  node.attrs["stroke-width"] = attrs.strokewidth;
-  node.attrs.stroke = s;
-  node.attrs.fill = f;
-  return node
-};
-
-const rationals2numbers = array => {
-  const newArray = [];
-  for (let i = 0; i < array.length; i++) {
-    const element = array[i];
-    if (element.dtype) {
-      newArray[i] = rationals2numbers(element.value);
-    } else if (Rnl.isRational(element)) {
-      newArray[i] = Rnl.toNumber(element);
-    } else {
-      newArray[i] = rationals2numbers(element);
-    }
-  }
-  return newArray
-};
-
-const arrowhead = (svg, p, q) => { // draw arrowhead at q (in units)
-  const attrs = svg.temp;
-  const v = [p[0] * attrs.xunitlength + attrs.origin[0], attrs.height -
-             p[1] * attrs.yunitlength - attrs.origin[1]];
-  const w = [q[0] * attrs.xunitlength + attrs.origin[0], attrs.height -
-             q[1] * attrs.yunitlength - attrs.origin[1]];
-  let u = [w[0] - v[0], w[1] - v[1]];
-  const d = Math.sqrt(u[0] * u[0] + u[1] * u[1]);
-  if (d > 0.00000001) {
-    u = [u[0] / d, u[1] / d];
-    const z = attrs.marker === "markerdot" ? 3 : attrs.isDim ? 0 : 1;
-    const up = [-u[1], u[0]];
-    const L = d > 12 ? 12.5 : 7.8125;
-    const S = d > 12 ? 3 : 1.875;
-    const node = { tag: "path", attrs: {} };
-    node.attrs.d = "M " + (w[0] - L * u[0] - S * up[0]) + "," +
-      (w[1] - L * u[1] - S * up[1]) + " L " + (w[0] - z * u[0]) + "," + (w[1] - z * u[1]) +
-      " L " + (w[0] - L * u[0] + S * up[0]) + "," + (w[1] - L * u[1] + S * up[1]) + " z";
-    if (attrs.isDim) {
-      node.attrs.stroke = "none";
-    } else {
-      node.attrs["stroke-width"] = attrs.markerstrokewidth;
-      node.attrs.stroke = attrs.stroke;
-    }
-    node.attrs.fill = attrs.stroke;
-    svg.children.push(node);
-  }
-};
-
-const markAttribute = {
-  em:         ["font-style", "italic"],
-  strong:     ["font-weight", "bold"],
-  code:       ["font-family", "monospace"],
-  strikethru: ["text-decoration", "line-through"],
-  subscript:  ["font-size", "0.8em"],
-  superscript: ["font-size", "0.8em"]
-};
-
-const textLocal = (svg, p, str, pos) => {
-  const attrs = svg.temp;
-  let textanchor = "middle";
-  let dx = 0;
-  let dy = attrs.fontsize / 3;
-  if (pos != null) {
-    if (pos.slice(0, 5) === "above") { dy = -attrs.fontsize / 2; }
-    if (pos.slice(0, 5) === "below") { dy = 1.25 * attrs.fontsize; }
-    if (pos.slice(0, 5) === "right" || pos.slice(5, 10) === "right") {
-      textanchor = "start";
-      dx = attrs.fontsize / 2;
-    }
-    if (pos.slice(0, 4) === "left" || pos.slice(5, 9) === "left") {
-      textanchor = "end";
-      dx = -attrs.fontsize / 2;
-    }
-  }
-  const textNode = { tag: "text", children: [], attrs: {} };
-  textNode.attrs["text"] = str;
-  textNode.attrs.x = p[0] * attrs.xunitlength + attrs.origin[0] + dx;
-  textNode.attrs.y = attrs.height - p[1] * attrs.yunitlength - attrs.origin[1] + dy;
-  textNode.attrs["font-family"] = attrs.fontfamily;
-  textNode.attrs["font-size"] = attrs.fontsize;
-  textNode.attrs["text-anchor"] = textanchor;
-  // Load Markdown into an AST
-  const ast = inlineMd2ast(str);
-  // Load content of AST into <tspan> nodes.
-  if (Array.isArray(ast)) {
-    let prevNodeContainedSubscript = false;
-    for (const markNode of ast) {
-      const tspan = { tag: "tspan", text: markNode.text };
-      let currentNodeContainsSubscript = false;
-      if (markNode.marks) {
-        tspan.attrs = {};
-        for (const mark of markNode.marks) {
-          const markAttr = markAttribute[mark.type];
-          tspan.attrs[markAttr[0]] = markAttr[1];
-          if (mark.type === "subscript") { currentNodeContainsSubscript = true; }
-        }
-      }
-      if (currentNodeContainsSubscript) {
-        if (!prevNodeContainedSubscript) { tspan.attrs.dy  = "2"; }
-      } else if (prevNodeContainedSubscript) {
-        if (!markNode.marks) { tspan.attrs = {}; }
-        tspan.attrs.dy  = "-2";
-      }
-      prevNodeContainedSubscript = currentNodeContainsSubscript;
-      textNode.children.push(tspan);
-    }
-  }
-  svg.children.push(textNode);
-  return svg
-};
-
-const pointText = (point, attrs) => {
-  return (point[0] * attrs.xunitlength + attrs.origin[0]).toFixed(4) + ","
-    + (attrs.height - point[1] * attrs.yunitlength - attrs.origin[1]).toFixed(4)
-};
-
-const functions$1 = {
-  // Set attributes
-  stroke(svgOprnd, color) {
-    svgOprnd.value.temp.stroke = color.value;
-    return svgOprnd
-  },
-
-  strokewidth(svgOprnd, num) {
-    svgOprnd.value.temp.strokewidth = Rnl.toNumber(num.value);
-    return svgOprnd
-  },
-
-  strokedasharray(svgOprnd, str) {
-    svgOprnd.value.temp.strokedasharray = str.value;
-    return svgOprnd
-  },
-
-  fill(svgOprnd, color) {
-    svgOprnd.value.temp.fill = color.value;
-    return svgOprnd
-  },
-
-  fontsize(svgOprnd, size) {
-    svgOprnd.value.temp.fontsize = Rnl.toNumber(size.value);
-    return svgOprnd
-  },
-
-  fontfamily(svgOprnd, str) {
-    svgOprnd.value.temp.fontfamily = str.value; // "sansserif"|"serif"|"fixed"|"monotype"
-    return svgOprnd
-  },
-
-  marker(svgOprnd, str) {
-    svgOprnd.value.temp.marker = str.value; // "none" | "dot" | "arrow" | "arrowdot"
-    return svgOprnd
-  },
-
-  // Initialize the svg.
-
-  title(svgOprnd, strOprnd) {
-    svgOprnd.value.children.push( { tag: "title", attrs: { text: strOprnd.value } });
-    return svgOprnd
-  },
-
-  frame(svgOprnd, width = 250, height = 250, position = "inline") {
-    const svg = svgOprnd.value;
-    const attrs = svg.temp;
-    attrs.width = typeof width === "number" ? width : Rnl.toNumber(width.value);
-    svg.attrs.width = attrs.width;
-    attrs.height = typeof height === "number" ? height : Rnl.toNumber(height.value);
-    svg.attrs.height = attrs.height;
-    if (typeof position !== "string") { position = position.value; }
-    if (position !== "inline") { svg.attrs.float = position; }
-    attrs.xunitlength = attrs.width / (attrs.xmax - attrs.xmin);
-    attrs.yunitlength = attrs.height / (attrs.ymax - attrs.ymin);
-    attrs.origin = [-attrs.xmin * attrs.xunitlength, -attrs.ymin * attrs.yunitlength];
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  view(svgOprnd, xmin = 0, xmax = 5, ymin, ymax) {
-    const svg = svgOprnd.value;
-    const attrs = svg.temp;
-    attrs.xmin = typeof xmin === "number" ? xmin : Rnl.toNumber(xmin.value);
-    attrs.xmax = typeof xmax === "number" ? xmax : Rnl.toNumber(xmax.value);
-    attrs.xunitlength = attrs.width / (attrs.xmax - attrs.xmin);
-    attrs.yunitlength = attrs.xunitlength; // This may change below.
-    if (ymin == null) {
-      attrs.origin = [-attrs.xmin * attrs.xunitlength, attrs.height / 2];
-      attrs.ymin = -attrs.height / (2 * attrs.yunitlength);
-      attrs.ymax = -attrs.ymin;
-    } else {
-      attrs.ymin = Rnl.toNumber(ymin.value);
-      if (ymax != null) {
-        attrs.ymax = Rnl.toNumber(ymax.value);
-        attrs.yunitlength = attrs.height / (attrs.ymax - attrs.ymin);
-      } else {
-        attrs.ymax = attrs.height / attrs.yunitlength + attrs.ymin;
-      }
-      attrs.origin = [-attrs.xmin * attrs.xunitlength, -attrs.ymin * attrs.yunitlength];
-    }
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  // Draw things
-
-  grid(svgOprnd, gdx, gdy, isLocal) {
-    const svg = svgOprnd.value;
-    const attrs = svg.temp;
-    gdx = gdx == null ? attrs.xunitlength : Rnl.toNumber(gdx.value) * attrs.xunitlength;
-    gdy = gdy == null ? gdx : Rnl.toNumber(gdy.value) * attrs.yunitlength;
-    const pnode = { tag: "path", attrs: {} };
-    let str = "";
-    for (let x = attrs.origin[0]; x < attrs.width; x += gdx) {
-      str += " M" + x + ",0 " + x + "," + attrs.height;
-    }
-    for (let x = attrs.origin[0] - gdx; x > 0; x -= gdx) {
-      str += " M" + x + ",0 " + x + "," + attrs.height;
-    }
-    for (let y = attrs.height - attrs.origin[1]; y < attrs.height; y += gdy) {
-      str += " M0," + y + " " + attrs.width + "," + y;
-    }
-    for (let y = attrs.height - attrs.origin[1] - gdy; y > 0; y -= gdy) {
-      str += " M0," + y + " " + attrs.width + "," + y;
-    }
-    pnode.attrs.d = str;
-    pnode.attrs["stroke-width"] = 0.5;
-    pnode.attrs.stroke = attrs.gridstroke;
-    pnode.attrs.fill = attrs.fill;
-    svg.children.push(pnode);
-    if (!isLocal) {
-      return { value: svg, unit: null, dtype: dt.DRAWING }
-    }
-  },
-
-  axes(svgOprnd, dx, dy, labels, gdx, gdy) {
-    let svg = svgOprnd.value;
-    const attrs = svg.temp;
-    dx = (dx == null ? attrs.xunitlength : Rnl.toNumber(dx.value) * attrs.xunitlength);
-    dy = (dy == null ? dx : Rnl.toNumber(dy.value) * attrs.yunitlength);
-    const parentFontsize = attrs.fontsize;
-    attrs.fontsize = Math.min(dx / 2, dy / 2, 10);
-    const ticklength = attrs.fontsize / 4;
-    if (gdx != null) {
-      this.grid(svgOprnd, gdx, gdy, true);
-    }
-    const pnode = { tag: "path", attrs: {} };
-    let str = "M0," + (attrs.height - attrs.origin[1]) + " " + attrs.width + "," +
-      (attrs.height - attrs.origin[1]) + " M" + attrs.origin[0] + ",0 " +
-      attrs.origin[0] + "," + attrs.height;
-    for (let x = attrs.origin[0] + dx; x < attrs.width; x += dx) {
-      str += " M" + x + " " + (attrs.height - attrs.origin[1] + ticklength) + " " + x
-            + "," + (attrs.height - attrs.origin[1] - ticklength);
-    }
-    for (let x = attrs.origin[0] - dx; x > 0; x -= dx) {
-      str += " M" + x + "," + (attrs.height - attrs.origin[1] + ticklength) + " " + x
-            + "," + (attrs.height - attrs.origin[1] - ticklength);
-    }
-    for (let y = attrs.height - attrs.origin[1] + dy; y < attrs.height; y += dy) {
-      str += " M" + (attrs.origin[0] + ticklength) + "," + y + " " +
-                   (attrs.origin[0] - ticklength) + "," + y;
-    }
-    for (let y = attrs.height - attrs.origin[1] - dy; y > 0; y -= dy) {
-      str += " M" + (attrs.origin[0] + ticklength) + "," + y + " " +
-                   (attrs.origin[0] - ticklength) + "," + y;
-    }
-    if (labels != null) {
-      const ldx = dx / attrs.xunitlength;
-      const ldy = dy / attrs.yunitlength;
-      const lx = (attrs.xmin > 0 || attrs.xmax < 0 ? attrs.xmin : 0);
-      const ly = (attrs.ymin > 0 || attrs.ymax < 0 ? attrs.ymin : 0);
-      const lxp = (ly === 0 ? "below" : "above");
-      const lyp = (lx === 0 ? "left" : "right");
-      const ddx = Math.floor(1.1 - Math.log(ldx) / Math.log(10)) + 1;
-      const ddy = Math.floor(1.1 - Math.log(ldy) / Math.log(10)) + 1;
-      for (let x = ldx; x <= attrs.xmax; x += ldx) {
-        svg = textLocal(svg, [x, ly], chopZ(x.toFixed(ddx)), lxp);
-      }
-      for (let x = -ldx; attrs.xmin <= x; x -= ldx) {
-        svg = textLocal(svg, [x, ly], chopZ(x.toFixed(ddx)), lxp);
-      }
-      for (let y = ldy; y <= attrs.ymax; y += ldy) {
-        svg = textLocal(svg, [lx, y], chopZ(y.toFixed(ddy)), lyp);
-      }
-      for (let y = -ldy; attrs.ymin <= y; y -= ldy) {
-        svg = textLocal(svg, [lx, y], chopZ(y.toFixed(ddy)), lyp);
-      }
-    }
-    pnode.attrs.d = str;
-    pnode.attrs["stroke-width"] = 0.5;
-    pnode.attrs.stroke = attrs.axesstroke;
-    pnode.attrs.fill = attrs.fill;
-    svg.temp.fontsize = parentFontsize;
-    svg.children.push(pnode);
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  line(svgOprnd, m) { // segment connecting points p,q (coordinates in units)
-    const svg = svgOprnd.value;
-    const attrs = svg.temp;
-    const node = { tag: "path", attrs: {} };
-    const p = [Rnl.toNumber(m.value[0][0]), Rnl.toNumber(m.value[0][1])];
-    const q = [Rnl.toNumber(m.value[1][0]), Rnl.toNumber(m.value[1][1])];
-    node.attrs.d = "M" + (p[0] * attrs.xunitlength + attrs.origin[0]) + "," +
-      (attrs.height - p[1] * attrs.yunitlength - attrs.origin[1]) + " " +
-      (q[0] * attrs.xunitlength + attrs.origin[0]) + "," + (attrs.height -
-       q[1] * attrs.yunitlength - attrs.origin[1]);
-    setStrokeAndFill(node, attrs);
-    svg.children.push(node);
-    if (attrs.marker === "dot" || attrs.marker === "arrowdot") {
-      svg.children.push(markerDot(p, attrs, attrs.markerstroke, attrs.markerfill));
-      if (attrs.marker === "arrowdot") { arrowhead(svg, p, q); }
-      svg.children.push(markerDot(q, attrs, attrs.markerstroke, attrs.markerfill));
-    } else if (attrs.marker === "arrow") {
-      arrowhead(svg, p, q);
-    }
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  path(svgOprnd, args) {
-    const svg = svgOprnd.value;
-    const attrs = svg.temp;
-    const node = { tag: "path", attrs: {} };
-    // Get the "d" attribute of a path
-    let str = "";
-    if (args[0].dtype && args[0].dtype === dt.STRING) {
-      str = args[0].value;
-    } else {
-      const segs = rationals2numbers(args[0].value);
-      if (segs[0].length === 2) {
-        // A path made up of line segments
-        str = "M" + pointText(segs[0], attrs) + " L";
-        for (let i = 1; i < segs.length; i++) {
-          str += " " + pointText(segs[i], attrs);
-        }
-      } else if (segs[0].length === 3) {
-        // Some segments are circular arcs.
-        str = "M" + pointText(segs[0], attrs);
-        for (let i = 1; i < segs.length; i++) {
-          if (segs[i][2] === 0) {
-            str += " L" + pointText(segs[i], attrs);
-          } else {
-            const r = String(Math.abs(segs[i][2]) * attrs.xunitlength);
-            const sweep = Math.sign(segs[i][2]) > 0 ? 0 : 1;
-            str += ` A${r},${r} 0 0 ${sweep} ${pointText(segs[i], attrs)}`;
-          }
-        }
-      }
-    }
-    node.attrs.d = str;
-    node.attrs["stroke-width"] = attrs.strokewidth;
-    if (attrs.strokedasharray != null) {
-      node.attrs["stroke-dasharray"] = attrs.strokedasharray;
-    }
-    node.attrs.stroke = attrs.stroke;
-    node.attrs.fill = attrs.fill;
-    if (attrs.marker === "dot") {
-      for (let i = 0; i < args.length; i++) {
-        const el = args[i];
-        if (typeof el[0] === "number") {
-          svg.children.push(markerDot(el, attrs, attrs.markerstroke, attrs.markerfill));
-        } else {
-          for (const row of el) {
-            svg.children.push(markerDot(row, attrs, attrs.markerstroke, attrs.markerfill));
-          }
-        }
-      }
-    } else if (attrs.marker === "arrow" || attrs.marker === "arrowdot") {
-      const segs = rationals2numbers(args[0].value);
-      if (typeof segs[0] !== "number") {
-        const end = segs[segs.length - 1];
-        arrowhead(svg, segs[segs.length - 2], end);
-        if (attrs.marker === "arrowdot") {
-          svg.children.push(markerDot(end, attrs, attrs.markerstroke, attrs.markerfill));
-        }
-      } else if (typeof segs[0] === "number") {
-        const prevEl = args[args.length - 2];
-        const end = segs;
-        let start;
-        if (typeof prevEl[0] === "number") {
-          start = prevEl;
-        } else {
-          start = prevEl[prevEl.length - 1];
-        }
-        arrowhead(svg, start, end);
-        if (attrs.marker === "arrowdot") {
-          svg.children.push(markerDot(end, attrs, attrs.markerstroke, attrs.markerfill));
-        }
-      }
-    }
-    svg.children.push(node);
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  rect(svgOprnd, m, r) { // opposite corners in units, rounded by radius
-    const svg = svgOprnd.value;
-    const attrs = svg.temp;
-    const node = { tag: "rect", attrs: {} };
-    const p = [Rnl.toNumber(m.value[0][0]), Rnl.toNumber(m.value[0][1])];
-    const q = [Rnl.toNumber(m.value[1][0]), Rnl.toNumber(m.value[1][1])];
-    node.attrs.x = Math.min(p[0], q[0]) * attrs.xunitlength + attrs.origin[0];
-    node.attrs.y = attrs.height - Math.max(p[1], q[1]) * attrs.yunitlength - attrs.origin[1];
-    node.attrs.width = Math.abs((q[0] - p[0]) * attrs.xunitlength);
-    node.attrs.height = Math.abs((q[1] - p[1]) * attrs.yunitlength);
-    if (r != null) {
-      const rNum = Rnl.toNumber(r.value) * attrs.xunitlength;
-      node.attrs.rx = rNum;
-      node.attrs.ry = rNum;
-    }
-    setStrokeAndFill(node, attrs);
-    svg.children.push(node);
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  circle(svgOprnd, center, radius) { // coordinates in units
-    const svg = svgOprnd.value;
-    const attrs = svg.temp;
-    const node = { tag: "circle", attrs: {} };
-    node.attrs.cx = Rnl.toNumber(center.value[0]) * attrs.xunitlength + attrs.origin[0];
-    node.attrs.cy = attrs.height - Rnl.toNumber(center.value[1]) * attrs.yunitlength
-                  - attrs.origin[1];
-    node.attrs.r = Rnl.toNumber(radius.value) * attrs.xunitlength;
-    setStrokeAndFill(node, attrs);
-    svg.children.push(node);
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  ellipse(svgOprnd, center, rx, ry) { // coordinates in units
-    const svg = svgOprnd.value;
-    const attrs = svg.temp;
-    const node = { tag: "ellipse", attrs: {} };
-    node.attrs.cx = Rnl.toNumber(center.value[0]) * attrs.xunitlength + attrs.origin[0];
-    node.attrs.cy = attrs.height - Rnl.toNumber(center.value[1]) * attrs.yunitlength
-                    - attrs.origin[1];
-    node.attrs.rx = Rnl.toNumber(rx.value) * attrs.xunitlength;
-    node.attrs.ry = Rnl.toNumber(ry.value) * attrs.yunitlength;
-    setStrokeAndFill(node, attrs);
-    svg.children.push(node);
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  arc(svgOprnd, m, radius) { // coordinates in units
-    const svg = svgOprnd.value;
-    const attrs = svg.temp;
-    const node = { tag: "path", attrs: {} };
-    const start = [Rnl.toNumber(m.value[0][0]), Rnl.toNumber(m.value[0][1])];
-    const end = [Rnl.toNumber(m.value[1][0]), Rnl.toNumber(m.value[1][1])];
-    if (radius == null) {
-      const v = [end[0] - start[0], end[1] - start[1]];
-      radius = (Math.sqrt(v[0] * v[0] + v[1] * v[1])) * attrs.yunitlength;
-    } else if (isVector(radius)) {
-      radius = radius.value.map(e => Rnl.toNumber(e) * attrs.yunitlength);
-    } else {
-      radius = Rnl.toNumber(radius.value) * attrs.yunitlength;
-    }
-    let str = "M" + (start[0] * attrs.xunitlength + attrs.origin[0]) + "," +
-      (attrs.height - start[1] * attrs.yunitlength - attrs.origin[1]) + " A";
-    str += Array.isArray(radius) ? radius[0] + "," + radius[1] : radius + "," + radius;
-    str += " 0 0,0 " + (end[0] * attrs.xunitlength + attrs.origin[0]) + "," +
-      (attrs.height - end[1] * attrs.yunitlength - attrs.origin[1]);
-    node.attrs.d = str;
-    setStrokeAndFill(node, attrs);
-    // eslint-disable-next-line no-useless-assignment
-    let v = 0;
-    if (attrs.marker === "arrow" || attrs.marker === "arrowdot") {
-      const u = [(end[1] - start[1]) / 4, (start[0] - end[0]) / 4];
-      v = [(end[0] - start[0]) / 2, (end[1] - start[1]) / 2];
-      v = [start[0] + v[0] + u[0], start[1] + v[1] + u[1]];
-    } else {
-      v = [start[0], start[1]];
-    }
-    if (attrs.marker === "dot" || attrs.marker === "arrowdot") {
-      svg.children.push(markerDot(start, attrs, attrs.markerstroke, attrs.markerfill));
-      if (attrs.marker === "arrowdot") { arrowhead(svg,  v, end); }
-      svg.children.push(markerDot(end, attrs, attrs.markerstroke, attrs.markerfill));
-    } else if (attrs.marker === "arrow") {
-      arrowhead(svg, v, end);
-    }
-    svg.children.push(node);
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  text(svgOprnd, p, str, pos) {
-    const svg = textLocal(
-      svgOprnd.value,
-      [Rnl.toNumber(p.value[0]), Rnl.toNumber(p.value[1])],
-      str.value,
-      pos == null ? null : pos.value
-      );
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  dot(svgOprnd, center, typ, label, pos) {
-    let svg = svgOprnd.value;
-    const attrs = svg.temp;
-    let node;
-    const cx = Rnl.toNumber(center.value[0]) * attrs.xunitlength + attrs.origin[0];
-    const cy = attrs.height - Rnl.toNumber(center.value[1]) * attrs.yunitlength
-             - attrs.origin[1];
-    if (typ.value === "+" || typ.value === "-" || typ.value === "|") {
-      node = { tag: "path", attrs: {} };
-      if (typ.value === "+") {
-        node.attrs.d = " M " + (cx - attrs.ticklength) + "," + cy
-                    + " L " + ( cx + attrs.ticklength) + "," + cy
-                    + " M " + cx + "," + (cy - attrs.ticklength) + " L " + cx
-                    + "," + (cy + attrs.ticklength);
-        node.attrs["stroke-width"] = 0.5;
-        node.attrs.stroke = attrs.axesstroke;
-      } else {
-        if (typ.value === "-") {
-          node.attrs.d = " M " + (cx - attrs.ticklength) + "," + cy
-                       + " L " + (cx + attrs.ticklength) + "," + cy;
-        } else {
-          node.attrs.d = " M " + cx + "," + (cy - attrs.ticklength)
-                       + " L " + cx + "," + (cy + attrs.ticklength);
-        }
-        node.attrs["stroke-width"] = attrs.strokewidth;
-        node.attrs["stroke"] = attrs.stroke;
-      }
-    } else {
-      node = { tag: "circle", attrs: {} };
-      node.attrs.cx = cx;
-      node.attrs.cy = cy;
-      node.attrs.r = attrs.dotradius;
-      node.attrs["stroke-width"] = attrs.strokewidth;
-      node.attrs.stroke = attrs.stroke;
-      node.attrs.fill =  (typ.value === "open" ? "white" : attrs.stroke);
-    }
-    svg.children.push(node);
-    if (label != null) {
-      svg = textLocal(
-        svg,
-        [Rnl.toNumber(center.value[0]), Rnl.toNumber(center.value[1])],
-        label.value,
-        (pos == null ? "below" : pos.value)
-        );
-    }
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  leader(svgOprnd, plistOprnd, label) {
-    // A 'leader' is a note with an arrow (leader line) pointing to something.
-    const marker = svgOprnd.value.temp.marker;
-    svgOprnd.value.temp.marker = "arrow";
-    svgOprnd.value.temp.isDim = true;
-    // Draw the arrow
-    svgOprnd = this.path(svgOprnd, [plistOprnd]);
-    // Get the text position
-    const p = rationals2numbers(plistOprnd.value[0]);
-    const q = rationals2numbers(plistOprnd.value[plistOprnd.value.length - 1]);
-    // eslint-disable-next-line no-useless-assignment
-    let pos = "right";
-    if (Math.abs(p[0] - q[0]) >= Math.abs(p[1] - q[1])) {
-      pos = p[0] >= q[0] ? "right" : "left";
-    } else {
-      pos = p[1] < q[1] ? "below" : "above";
-    }
-    // Write the text
-    const svg = textLocal(svgOprnd.value, p, label.value, pos);
-    svg.temp.marker = marker;
-    svg.temp.isDim = false;
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  },
-
-  dimension(svgOprnd, plistOprnd, label) {
-    const p = clone(plistOprnd.value);
-    const q = p.pop();
-    const origstrokewidth = svgOprnd.value.temp.strokewidth;
-    svgOprnd.value.temp.strokewidth = 0.5;
-    svgOprnd.value.temp.isDim = true; // set small arrowhead
-    let six = Rnl.fromNumber(6 / svgOprnd.value.temp.xunitlength);
-    const pEnd = p[p.length - 1];
-    let svg;
-    // Is the label y-coord between the y-coords of the end points?
-    if ((Rnl.lessThan(p[0][1], q[1]) && Rnl.lessThan(q[1], pEnd[1])) ||
-        (Rnl.lessThan(pEnd[1], q[1]) && Rnl.lessThan(q[1], p[0][1]))) {
-      if (!Rnl.lessThan(pEnd[0], q[0])) { six = Rnl.negate(six); }
-      p.forEach(e => {
-        svgOprnd = this.line(svgOprnd, { value: [
-          [Rnl.add(e[0], six), e[1]],
-          [Rnl.add(q[0], six), e[1]]
-        ] });
-      });
-      svgOprnd.value.temp.marker = "arrow";
-      const pos = Rnl.lessThanOrEqualTo(pEnd[0], q[0]) ? "right" : "left";
-      for (let i = 0; i < p.length - 1; i++) {
-        svgOprnd = this.line(svgOprnd, { value : [[q[0], p[i][1]], [q[0], p[i + 1][1]]],
-          unit: null, dtype: dt.MATRIX });
-        svgOprnd = this.line(svgOprnd, { value : [[q[0], p[i + 1][1]], [q[0], p[i][1]]],
-          unit: null, dtype: dt.MATRIX });
-        const p3 = [
-          Rnl.toNumber(q[0]),
-          (Rnl.toNumber(p[i][1]) + Rnl.toNumber(p[i + 1][1])) / 2
-        ];
-        const str = p.length === 2 ? label.value : label.value[i];
-        svg = textLocal(svgOprnd.value, p3, str, pos);
-      }
-    } else {
-      if (!Rnl.lessThan(pEnd[1], q[1])) { six = Rnl.negate(six); }
-      p.forEach(e => {
-        svgOprnd = this.line(svgOprnd, { value: [
-          [e[0], Rnl.add(e[1], six)],
-          [e[0], Rnl.add(q[1], six)]
-        ] });
-      });
-      svgOprnd.value.temp.marker = "arrow";
-      const pos = Rnl.lessThanOrEqualTo(pEnd[1], q[1]) ? "above" : "below";
-      for (let i = 0; i < p.length - 1; i++) {
-        svgOprnd = this.line(svgOprnd, { value: [ [p[i][0], q[1]], [ p[i + 1][0], q[1]] ],
-          unit: null, dtype: dt.MATRIX });
-        svgOprnd = this.line(svgOprnd, { value: [ [ p[i + 1][0], q[1]], [p[i][0], q[1]] ],
-          unit: null, dtype: dt.MATRIX });
-        const p3 = [
-          (Rnl.toNumber(p[i][0]) + Rnl.toNumber(p[i + 1][0])) / 2,
-          Rnl.toNumber(q[1])
-        ];
-        const str = p.length === 2 ? label.value : label.value[i];
-        svg = textLocal(svgOprnd.value, p3, str, pos);
-      }
-    }
-    svg.temp.strokewidth = origstrokewidth;
-    svg.temp.marker = "none";
-    svg.temp.isDim = false;
-    return { value: svg, unit: null, dtype: dt.DRAWING }
-  }
-
-};
-
-const draw = Object.freeze({
-  startSvg,
-  functions: functions$1
-});
 
 // Some helper functions and objects.
 
@@ -15686,7 +17154,11 @@ const evalRpn = (rpn, vars, formats, unitAware, lib) => {
         }
 
         case "startSvg":
-          stack.push({ value: draw.startSvg(), unit: null, dtype: dt.DRAWING });
+          stack.push({
+            value: draw.startSvg(formats.decimalFormat, formats.format),
+            unit: null,
+            dtype: dt.DRAWING
+          });
           break
 
         case "beamDiagram": {
@@ -16567,7 +18039,11 @@ const evalCustomFunction = (udf, args, formats, isUnitAware, lib) => {
     }
   }
   if (udf.dtype === dt.DRAWING) {
-    vars["svg"] = { value: draw.startSvg(), unit: null, dtype: dt.DRAWING };
+    vars["svg"] = {
+      value: draw.startSvg(formats.decimalFormat, formats.format),
+      unit: null,
+      dtype: dt.DRAWING
+    };
   }
 
   // Execute the function statements.
@@ -16842,7 +18318,8 @@ const spreadsheetSum = (sheet, index, unitAware) => {
 
 const conditionResult = (stmt, oprnd, unitAware) => {
   let result = Object.create(null);
-  result.value = oprnd.dtype === dt.DATAFRAME
+  // A data frame is copied on write. A drawing is built in place (see fromAssignment).
+  result.value = oprnd.dtype === dt.DATAFRAME || oprnd.dtype === dt.DRAWING
     ? oprnd.value
     : clone(oprnd.value);
   result.unit = clone(oprnd.unit);
@@ -16971,7 +18448,10 @@ const evaluateDrawing = (
     const argName = udf.parameters[i].name;
     args.push(evalRpn("¿" + argName, vars, formats, false, {}));
   }
-  const funcResult = evalCustomFunction(udf, args, formats, false, {});
+  // Dimension labels use the format that is active at this point in the document,
+  // unless the drawing contains a format statement of its own.
+  const drawFormats = vars.format ? { ...formats, format: vars.format.value } : formats;
+  const funcResult = evalCustomFunction(udf, args, drawFormats, false, {});
   if (funcResult.dtype === dt.ERROR) {
     stmt.error = true;
     stmt.tex = "\\textcolor{firebrick}{\\text{" + funcResult.value + "}}";
@@ -16979,6 +18459,7 @@ const evaluateDrawing = (
     stmt.dtype = dt.ERROR;
   } else {
     stmt.resultdisplay = funcResult.value;
+    draw.fitToContent(stmt.resultdisplay);
     delete stmt.resultdisplay.temp;
   }
   return stmt
@@ -17187,7 +18668,17 @@ const valueFromLiteral = (str, name, formats) => {
 };
 
 const keywordRegEx = /^(if|elseif|else|return|throw|while|for|break|print|end)(\u2002|\b)/;
-const drawCommandRegEx = /^(title|frame|view|axes|grid|stroke|strokewidth|strokedasharray|fill|fontsize|fontweight|fontstyle|fontfamily|marker|line|path|plot|curve|rect|circle|ellipse|arc|text|dot|leader|dimension)\b/;
+const drawCommands = [
+  // Header statements
+  "title", "caption", "format", "fraction", "frame", "view", "scene", "axes", "grid",
+  // Style statements
+  "stroke", "strokewidth", "linetype", "fill", "pattern", "fontsize", "fontfamily",
+  "fontcolor", "marker",
+  // Elements
+  "line", "path", "plot", "rect", "circle", "ellipse", "polygon", "arc", "freehand",
+  "image", "text", "dot", "arrow", "dimension"
+];
+const drawCommandRegEx = new RegExp(`^(${drawCommands.join("|")})\\b`);
 const leadingSpaceRegEx$1 = /^[\t ]+/;
 const oneLinerRegEx = /^( *)if ([^\n`]+) +(return|throw|print|break)\b([^\n]+)?(?: end)? *\n/gm;
 
@@ -17271,6 +18762,33 @@ const handleTSV = (expression, lines, startLineNum) => {
   }
 };
 
+// Does `line` end inside a string? A string is written between double quotation
+// marks, with "" for a literal ". A # outside of a string starts a comment.
+const endsInsideString = line => {
+  let inString = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line.charAt(i);
+    if (inString) {
+      if (ch === '"') {
+        if (line.charAt(i + 1) === '"') {
+          i += 1;
+        } else {
+          inString = false;
+        }
+      }
+    } else if (ch === '"') {
+      inString = true;
+    } else if (ch === "#") {
+      return false
+    }
+  }
+  return inString
+};
+
+// Within a string in a drawing, a line break is written as ␤ (U+2424), because
+// the lexer ends a string at a newline. textLocal in draw.js turns it back into a newline.
+const lineBreakInString = "␤";
+
 const scanFunction = (lines, formats, startLineNum) => {
   const line1 = stripComment(lines[startLineNum]);
   let isDraw = line1.charAt(0) === "d";
@@ -17317,7 +18835,18 @@ const scanFunction = (lines, formats, startLineNum) => {
   let j = startLineNum;
   for (let i = startLineNum + 1; i < lines.length; i++) {
     j += 1;
-    let line = stripComment(lines[i]);
+    let rawLine = lines[i];
+    if (isDraw) {
+      // A string in a drawing, e.g. multi-line text, may span several lines.
+      // Join them, raw, so that leading spaces and # characters inside the string
+      // are kept.
+      while (endsInsideString(rawLine) && i < lines.length - 1) {
+        i += 1;
+        j += 1;
+        rawLine += lineBreakInString + lines[i];
+      }
+    }
+    let line = stripComment(rawLine);
     if (line.length === 0) { continue }
 
     if (prevLineEndedInContinuation) {
@@ -17341,8 +18870,26 @@ const scanFunction = (lines, formats, startLineNum) => {
       continue
     }
 
+    if (isDraw && line === "group") {
+      // A group…end block exists only for Sketch, which uses it to select a
+      // set of SVG elements with one click. It has no effect on evaluation,
+      // so neither "group" nor its matching "end" is written to the statements.
+      stackOfCtrls.push({ type: "group" });
+      prevLineEndedInContinuation = false;
+      prevLine = "";
+      continue
+    }
+
     let isFromOneLiner = false;
     const keyword = keywordRegEx.exec(line);
+    if (keyword && keyword[1] === "end" && stackOfCtrls.length > 0 &&
+        stackOfCtrls[stackOfCtrls.length - 1].type === "group") {
+      // This "end" closes a group. Omit it from the statements.
+      stackOfCtrls.pop();
+      prevLineEndedInContinuation = false;
+      prevLine = "";
+      continue
+    }
     if (keyword) {
       name = keyword[1];
       if (keyword[2]) { isFromOneLiner = true; }
@@ -17859,6 +19406,38 @@ const calculate = (
    : attrs.tex
 };
 
+// A sketch node holds the source written by the Sketch dialog (src/sketch/).
+// Every Sketch statement is also a `draw` statement, so Hurmet renders a sketch by
+// running its source as the body of a draw() function, through the same compiler
+// and draw.js methods that render a draw() calculation.
+// Unlike a draw() calculation, a sketch is not redrawn by updateCalculations.
+
+// Returns { svg, error }: the SVG tree that renderSVG writes, or an error message.
+const renderSketch = (source, formats) => {
+  try {
+    const result = calculate(`draw()\n${source}\nend`, {}, true, formats);
+    return typeof result === "string"
+      ? { svg: null, error: result }
+      : { svg: result.resultdisplay, error: null }
+  } catch (err) {
+    // The node keeps its source either way, so the sketch can be reopened and fixed.
+    return { svg: null, error: err.message }
+  }
+};
+
+// Draw every sketch node in an AST from md2ast, with the document's number formats.
+// md2ast gives a sketch node only its source.
+const drawSketches = (ast, formats) => {
+  if (Array.isArray(ast)) {
+    ast.forEach(node => drawSketches(node, formats));
+  } else if (ast && (ast.type === "sketch" || ast.type === "figsketch")) {
+    const { svg } = renderSketch(ast.attrs.source, formats);
+    if (svg) { ast.attrs.svg = svg; }
+  } else if (ast && Array.isArray(ast.content)) {
+    drawSketches(ast.content, formats);
+  }
+};
+
 const sanitizeUrl = function(url) {
   if (url == null) {
     return null;
@@ -17949,17 +19528,32 @@ const dataStr = str => {
   }
 };
 
-const writeSVG = dwg => {
+// `omitPatterns` names fill patterns to leave out, to keep the SVG small. Elements
+// filled with one of them are written with no fill.
+const writeSVG = (dwg, omitPatterns = []) => {
   let svg = '<svg xmlns="http://www.w3.org/2000/svg"';
   Object.keys(dwg.attrs).forEach(key => {
-    svg += ` ${key}='${dwg.attrs[key]}'`;
+    // xmlns is written above. float is not an SVG attribute; the calculation's
+    // span carries it as CSS.
+    if (key !== "xmlns" && key !== "float") {
+      svg += ` ${key}='${dwg.attrs[key]}'`;
+    }
   });
   svg += ">\n";
+  const patterns = dwg.patterns || [];
+  if (patterns.length > 0) {
+    svg += `<defs>${patternDefs(patterns, omitPatterns)}</defs>\n`;
+  }
+  const omittedFills = new Set(patterns.filter(p => omitPatterns.includes(p.name))
+    .map(p => `url(#${hurmetPatternId(p.name, p.color)})`));
   dwg.children.forEach(el => {
     svg += `<${el.tag}`;
     Object.keys(el.attrs).forEach(attr => {
       if (el.tag !== "title") {
-        svg += ` ${attr}='${el.attrs[attr]}'`;
+        const value = attr === "fill" && omittedFills.has(el.attrs.fill)
+          ? "none"
+          : el.attrs[attr];
+        svg += ` ${attr}='${value}'`;
       }
     });
     svg += ">\n";
@@ -18081,7 +19675,11 @@ const nodes$1 = {
     if (node.attrs.width) { attributes.width = node.attrs.width; }
     return htmlTag("img", "", attributes, false);
   },
-  figure(node)     { return htmlTag("figure", ast2html(node.content)) + "\n" },
+  figure(node) {
+    // The class holds the position of an image or sketch: inline, left, center, right.
+    const attributes = node.attrs && node.attrs.class ? { class: node.attrs.class } : {};
+    return htmlTag("figure", ast2html(node.content), attributes) + "\n"
+  },
   figcaption(node) { return htmlTag("figcaption", ast2html(node.content)) },
   figimg(node) {
     const attributes = { src: node.attrs.src, class: "figimg" };
@@ -18090,11 +19688,41 @@ const nodes$1 = {
     if (node.attrs.width) { attributes.width = node.attrs.width; }
     return htmlTag("img", "", attributes, false) + "\n";
   },
+  sketch(node) {
+    // hurmet2html renders the sketch with the document's number formats.
+    // md2html does no calculations, so it renders the sketch here.
+    const { svg, error } = node.attrs.svg
+      ? { svg: node.attrs.svg, error: null }
+      : renderSketch(node.attrs.source);
+    const float = svg ? svg.attrs.float : null;
+    const style = float === "left" || float === "right"
+      ? ` style='float: ${float};'`
+      : float === "center"
+      ? ` style='display: block; text-align: center;'`
+      : "";
+    const content = svg
+      ? writeSVG(svg)
+      : sanitizeText(error ? "Sketch error: " + error : "Sketch");
+    return `<span class='hurmet-sketch' data-source=${dataStr(node.attrs.source)}${style}>` +
+      `${content}</span>`
+  },
+  figsketch(node) {
+    // A captioned sketch. Its <figure> carries the position.
+    const { svg, error } = node.attrs.svg
+      ? { svg: node.attrs.svg, error: null }
+      : renderSketch(node.attrs.source);
+    const content = svg
+      ? writeSVG(svg)
+      : sanitizeText(error ? "Sketch error: " + error : "Sketch");
+    return `<div class='hurmet-sketch figsketch' data-source=${dataStr(node.attrs.source)}>` +
+      `${content}</div>\n`
+  },
   footnote(node)   { return htmlTag("footnote", "") },
   calculation(node) {
     if (node.attrs.dtype && node.attrs.dtype === dt.DRAWING) {
       const svg = writeSVG(node.attrs.resultdisplay);
-      const style = svg.indexOf('float="right"' > -1) ? " style='float: right;'" : "";
+      const float = node.attrs.resultdisplay.attrs.float;
+      const style = float === "left" || float === "right" ? ` style='float: ${float};'` : "";
       return `<span class='hurmet-calc' data-entry=${dataStr(node.attrs.entry)}${style}>` +
         `${svg}</span>`
     } else if (node.attrs.dtype && node.attrs.dtype === dt.MODULE &&
@@ -18495,6 +20123,12 @@ const hurmetNodes =  {
       state.closeBlock(table);
       // Get rid of the newline between the caption and the table.
       state.out = state.out.slice(0, L) + state.out.slice(L + 1);
+    } else if (node.content.content[0].type.name === "figsketch") {
+      // A captioned sketch. Its source holds its caption and position.
+      // A caption edited in the document is written as the title.
+      // Other Markdown readers get an image, with the title as its alt text.
+      const ref = writeSketchRef(state, node.content.content[0], figureSketchSource(node));
+      state.write((state.isGFM ? "!" : "!!") + ref + "\n\n");
     } else {
       if (!state.isGFM) {
         const figureCaption = node.content.content[1];
@@ -18553,6 +20187,9 @@ const hurmetNodes =  {
   },
   text(state, node) {
     state.text(node.text);
+  },
+  sketch(state, node) {
+    state.write("!" + writeSketchRef(state, node));
   },
   tex(state, node) {
     const tex = node.attrs.tex.trim();
@@ -18671,6 +20308,32 @@ function isPlainURL(link, parent, index, side) {
 }
 
 const titleRegEx = /\n *title +"([^\n]+)" *\n/;
+
+// Defer the definition of a sketch or figsketch node to the end of the document.
+// Return its reference, `[title][n]`, without the leading ! or !!.
+// `source` differs from the node's own source when a figure's caption was edited.
+const writeSketchRef = (state, node, source = node.attrs.source) => {
+  const defIndex = getDefIndex(state);
+  const isEdited = source !== node.attrs.source;
+  source = source.trim();
+  if (state.isGFM) {
+    // Other Markdown readers get the sketch as an image of its SVG. The gravel
+    // pattern is left out because its def is about 22 KB, the largest by far;
+    // gravel-filled shapes show only their outlines.
+    const svg = node.attrs.svg && !isEdited ? node.attrs.svg : renderSketch(source).svg;
+    state.paths.set(defIndex, svg
+      ? "data:image/svg+xml," + encodeURIComponent(writeSVG(svg, ["gravel"]))
+      : "undefined");
+  } else {
+    // Hurmet writes the sketch source on one line. Its line breaks are written as ␤.
+    state.paths.set(defIndex, "sketch: " + source.replace(/\n/g, "␤"));
+  }
+  // The title is only a label, even in a figure. md2ast reads the sketch, and
+  // any caption, from its source.
+  // Brackets are dropped so they can't end the reference early.
+  const title = sketchTitle(source).replace(/[[\]]/g, "").trim();
+  return title ? `[${title}][${defIndex}]` : `[${defIndex}][]`
+};
 
 const getDefIndex = state => {
   // We use reference links and defer link paths and image paths to the end of the document.
@@ -19830,8 +21493,10 @@ const proceedAfterFetch = (
           ? compile(entry, formats)
           : clone(node.attrs);
         attrs.displayMode = node.attrs.displayMode;
+        // A drawing's dimension labels may use the document's format, so a change
+        // in format must redraw drawings, too.
         const mustRedraw = attrs.dtype && attrs.dtype === dt.DRAWING &&
-          (attrs.rpn || (attrs.value.parameters.length > 0 || isCalcAll));
+          (attrs.rpn || (attrs.value.parameters.length > 0 || isCalcAll || isFormat));
         if (mustCalc(attrs, hurmetVars, changedVars, isCalcAll, isFormat)) {
           try {
             if (attrs.rpn || mustRedraw) {
@@ -20075,6 +21740,10 @@ async function updateCalcs(doc) {
     decimalFormat: doc.attrs.decimalFormat,
     dateFormat: doc.attrs.dateFormat
   };
+
+  // A sketch does not depend on other calculations, so draw each one now,
+  // with the document's number formats.
+  drawSketches(Array.isArray(doc) ? doc : doc.content, formats);
 
   // Create an array of all the calculation nodes in the document
   const calcNodes = [];
@@ -23446,6 +25115,12 @@ const renderSVG = dwg => {
       svg.setAttribute(key, dwg.attrs[key]);
     }
   });
+  if (dwg.patterns && dwg.patterns.length > 0) {
+    // The <pattern> defs of the fill patterns the drawing uses.
+    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+    defs.innerHTML = patternDefs(dwg.patterns);
+    svg.appendChild(defs);
+  }
   dwg.children.forEach(el => {
     const node = document.createElementNS("http://www.w3.org/2000/svg", el.tag);
     Object.keys(el.attrs).forEach(attr => {
@@ -38216,6 +39891,32 @@ var temml$1 = {
 
 /* eslint-disable */
 
+// The DOM of a sketch node or, inFigure, of a figsketch node.
+const sketchDOM = (node, inFigure) => {
+  const dom = document.createElement(inFigure ? "div" : "span");
+  dom.className = inFigure ? "hurmet-sketch figsketch" : "hurmet-sketch";
+  dom.dataset.source = node.attrs.source;
+  // A pasted sketch arrives with only its source, so draw it here.
+  const { svg, error } = node.attrs.svg
+    ? { svg: node.attrs.svg, error: null }
+    : renderSketch(node.attrs.source);
+  if (svg) {
+    const position = svg.attrs.float;
+    if (!inFigure && (position === "left" || position === "right")) {
+      dom.style.float = position;
+    } else if (!inFigure && position === "center") {
+      dom.style.display = "block";
+      dom.style.textAlign = "center";
+    }
+    const svgDOM = renderSVG(svg);
+    svgDOM.style.removeProperty("float"); // The sketch's <span> or <figure> floats.
+    dom.appendChild(svgDOM);
+  } else {
+    dom.textContent = error ? "Sketch error: " + error : "Sketch";
+  }
+  return dom
+};
+
 // Helpers for creating a schema that supports tables.
 
 function getCellAttrs(dom, extraAttrs) {
@@ -38447,6 +40148,38 @@ const nodes = {
     toDOM(node) { return ["img", node.attrs] }
   },
 
+  // A sketch made in the Sketch dialog (src/sketch/). Edit it via SketchView in nodeviews.js.
+  sketch: {
+    atom: true,
+    inline: true,
+    group: "inline",
+    draggable: true,
+    attrs: {
+      source: { default: "" }, // The Sketch source code. Saved.
+      svg: { default: null }   // Its SVG tree, from renderSketch. Run-time only.
+    },
+    parseDOM: [{tag: "span.hurmet-sketch", getAttrs(dom) {
+      return { source: dom.getAttribute("data-source") || "" }
+    }}],
+    toDOM(node) { return sketchDOM(node, false) }
+  },
+
+  // A captioned sketch, the first child of a <figure>. Its <figcaption> holds the
+  // sketch title. The figure's class, not this node, carries the sketch position.
+  figsketch: {
+    atom: true,
+    group: "block",
+    draggable: false,
+    attrs: {
+      source: { default: "" },
+      svg: { default: null }
+    },
+    parseDOM: [{tag: "div.figsketch", getAttrs(dom) {
+      return { source: dom.getAttribute("data-source") || "" }
+    }}],
+    toDOM(node) { return sketchDOM(node, true) }
+  },
+
   // :: NodeSpec A block image (`<img>`) node, for inclusion in a <figure>
   figimg: {
     attrs: {
@@ -38465,7 +40198,14 @@ const nodes = {
         class: "figimg"
       }
     }}],
-    toDOM(node) { return ["img", node.attrs] }
+    toDOM(node) {
+      // The position class belongs to the <figure>, not to the <img> inside it.
+      // Match md2html, which writes class="figimg".
+      const attrs = { src: node.attrs.src, class: "figimg" };
+      if (node.attrs.alt) { attrs.alt = node.attrs.alt; }
+      if (node.attrs.width) { attrs.width = node.attrs.width; }
+      return ["img", attrs]
+    }
   },
 
   figure: {
