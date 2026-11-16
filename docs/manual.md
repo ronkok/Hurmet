@@ -60,11 +60,11 @@ document range by selecting text, then clicking one of the menu bar buttons:
 |                                      | Underline                          |
 +--------------------------------------+------------------------------------+
 | ![link][] **—** ![pagebreak][]       | Insert:\                           |
-| ![upload][] ![image][] ![footnote][] | Link…, Horizontal rule, Page break,|
-| ToC ![C][] ![T][] ![scroll][]        | Uploaded image…, Link to image…,   |
-| ![comment][]                         | Footnote, Table of Contents…,      |
-|                                      | Calculation…, TeX…,                |
-|                                      | Macro expansion, Comment…          |
+| ![upload][] ![image][] ![sketch][]   | Link…, Horizontal rule, Page break,|
+| ![footnote][] ToC ![C][] ![T][]      | Uploaded image…, Link to image…,   |
+| ![scroll][] ![comment][]             | Sketch…, Footnote,                 |
+|                                      | Table of Contents…, Calculation…,  |
+|                                      | TeX…, Macro expansion, Comment…    |
 +--------------------------------------+------------------------------------+
 | **¶** ![embed][] **H1 H2**           | Block styles:\                     |
 | ![list][] ![numbered list][]         | Plain paragraph, Code block,       |
@@ -92,6 +92,7 @@ document range by selecting text, then clicking one of the menu bar buttons:
 [pagebreak]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M0 8h2v1h-2zM3 8h3v1h-3zM7 8h2v1h-2zM10 8h3v1h-3zM14 8h2v1h-2zM13.75 0l0.25 7h-12l0.25-7h0.5l0.25 6h10l0.25-6zM2.25 16l-0.25-6h12l-0.25 6h-0.5l-0.25-5h-10l-0.25 5z'/%3E%3C/svg%3E
 [upload]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M7 9h2V5h3L8 1 4 5h3zm3-2.25v1.542L14.579 10 8 12.453 1.421 10 6 8.292V6.75L0 9v4l8 3 8-3V9z'/%3E%3C/svg%3E
 [image]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='m14.998 2 .002.002v11.996l-.002.002H1.002L1 13.998V2.002L1.002 2h13.996zM15 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h14c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1z'/%3E%3Cpath d='M13 4.5a1.5 1.5 0 1 1-3.001-.001A1.5 1.5 0 0 1 13 4.5zM14 13H2v-2l3.5-6 4 5h1L14 7z'/%3E%3C/svg%3E
+[sketch]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M13.5 0c1.381 0 2.5 1.119 2.5 2.5 0 0.563-0.186 1.082-0.5 1.5l-1 1-3.5-3.5 1-1c0.418-0.314 0.937-0.5 1.5-0.5zM1 11.5l-1 4.5 4.5-1 9.25-9.25-3.5-3.5-9.25 9.25zM11.181 5.681l-7 7-0.862-0.862 7-7 0.862 0.862z'/%3E%3C/svg%3E
 [cap]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='m14.998 2 .002.002v11.996l-.002.002H1.002L1 13.998V2.002L1.002 2h13.996zM15 1H1c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h14c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1z'/%3E%3Cpath d='M13 4.5a1.5 1.5 0 1 1-3.001-.001A1.5 1.5 0 0 1 13 4.5zM14 13H2v-2l3.5-6 4 5h1L14 7z'/%3E%3C/svg%3E
 [C]: data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' height='16' width='16'%3E%3Cpath d='M14.8 12.3c.9.2 0 1.1-.4 1.4-.7.6-1.4 1-2.2 1.5-1.8.8-3.8 1-5.8.5a7 7 0 0 1-4.3-2.9 8 8 0 0 1-1.2-5c-.1-2.2.8-4.6 2.6-6.1A8 8 0 0 1 8 0a6 6 0 0 1 2.7.4c.8.4 1.8.6 2.7.6.5-.2.4-1.4 1.1-.9.2.4 0 .8.1 1.1v3.7c-.4.8-1-.3-1.1-.8A6.3 6.3 0 0 0 9.6 1c-1-.2-2.3-.1-3 .7-1.4 1.4-1.7 3.4-1.9 5.2-.1 2.1.1 4.3 1 6.1.7 1.2 2 2 3.3 1.9 2 0 4-1 5.5-2.5l.3-.1ZM5.5 1.7c.4-.3.3-.5-.1-.2-1.5.7-2.7 1.9-3.3 3.4a8.5 8.5 0 0 0-.2 5.3 6 6 0 0 0 3.2 4.2c.4.2 1.3.7.7 0-1.2-1.2-1.6-3-1.8-4.6V6c.3-1.5.6-3 1.5-4.2Zm8 1c.2.3.4.3.3 0v-1c-.3.2-.7 0-1 .1.1.4.4.6.7.9z'/%3E%3C/svg%3E
 [T]: data:image/svg+xml;utf8,%3Csvg height='16' width='16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M.8 4.5V.3c.1-.5.6-.2 1-.3h12.8c.4.2.2.7.3 1v3.5c-.4.7-1.1-.1-1-.7a4 4 0 0 0-2.7-2.7C10.8 1 9.8.6 9.7 1v12.8c0 .8.3 1.5 1.2 1.3.6-.2 1.6.5.8.9H3.9c-.8-.6.4-1 1-.9 1 .2 1-.8 1-1.6V.8c-1.2.2-2.6.5-3.4 1.5-.7.7-.8 1.6-1 2.4-.2.2-.6.1-.7-.2ZM2.6 1c.4-.2.3-.2 0-.2h-1V2ZM9 7.8v-7H6.8l-.1 13.5c.1.4-.4 1 .2.9H9c-.3-.5.1-1.2 0-1.7Zm4.8-6.1c.1 0 .4.5.3 0V.9h-1.3l1 .9z'/%3E%3C/svg%3E
@@ -2211,6 +2212,22 @@ A test statement takes this form:
 
 If you want a unit-aware comparison, write “@@test” instead of “@test”.
 
+## Sketches
+
+Hurmet has a graphical user interface (GUI) for creating sketches. To
+open the GUI, click on the ![sketch][] menu button.
+
+When you first open the GUI, select the Sketch|Sketch Properties… menu
+choice to set the scale and units of your sketch.
+
+When your sketch is complete, select the Sketch|Close menu choice to
+close the GUI and insert the sketch into your Hurmet document.
+
+To edit an existing sketch, click on the sketch and the GUI will open.
+
+Sketch source code uses the same statement syntax as the Drawings section
+below. Exception: the `plot` statement is not valid in the GUI.
+
 ## Drawings
 
 Hurmet’s _draw_ environment can plot functions and render simple sketches. For a
@@ -2276,19 +2293,16 @@ frame _width_, _height_<span class="optional">, position</span>
 : _width_ and _height_, in px, define the size of the drawing in the document.
   _position_ can be "inline", "left", or "right". "left" and "right" float the drawing,
   so that text wraps beside it.\
-  This command must come before anything is drawn.\
+  This command must come before anything is drawn.
+
   In a drawing with a `scene` and no `grid` or `axes`, Hurmet fits the drawing to its
   contents, with a 4 px margin, so _width_ and _height_ are replaced.
 
 scene _scale_, "_unit_", _dx_, _dy_
 
-: Sets the coordinate system. A point (_x_, _y_) is drawn _scale_ × _unit_ × (_x_ + _dx_)
-  from the left edge of the frame and _scale_ × _unit_ × (_y_ + _dy_) up from its
-  bottom edge. So _dx_ and _dy_ locate the origin, in model units.\
+: _scene_ sets the coordinate system used by the Sketch GUI. _scale_ defines the sketch
+  scale. _dx_ and _dy_ locate the origin, in model units.\
   _unit_ can be "px", "in", "ft", "ft-in", "mile", "pt", "mm", "cm", "m", or "km".
-  For example, `scene 1/48, "ft-in", 12, 12` draws at ¼″ = 1′-0″. In an "ft-in" scene,
-  coordinates are in inches and dimension labels are written in feet and inches.\
-  This is the coordinate system that Sketch writes.
 
 view _x_~min~, _x_~max~<span class="optional">, yₘᵢₙ, yₘₐₓ,</span>
 
@@ -2343,8 +2357,8 @@ fontcolor "_color_"
 marker "none" | "arrow" | "dot" | "arrowdot"
 
 : Sets the marker that is drawn at the end point of a line, path, arc, or freehand
-  curve. The size of an arrowhead suits the stroke width. "arrowdot" draws a dot on
-  the end point, with an arrowhead that touches it. Default = "none".
+  curve. "arrowdot" draws a dot on the end point, with an arrowhead that touches it.
+  Default = "none".
 
 format "_spec_"
 
@@ -2365,7 +2379,7 @@ path  (_x₁_, _y₁_; _x₂_, _y₂_; …; _xₙ_, _yₙ_)       or\
 path  (_x₁_, _y₁_, 0; _x₂_, _y₂_, _r₂_; …; _xₙ_, _yₙ_, _rₙ_)       or\
 path  (_x₁_, _y₁_, 0, 0, 0; _x₂_, _y₂_, ±_rx₂_, _ry₂_, _angle₂_; …)
 
-: Draws a path connecting all the points in the matrix. Every row has the same length.
+: Draws a path connecting all the points in the matrix.
   
   Use the second form of the statement if the path contains any circular arcs. In that
   case, `rₙ` is the radius of the arc that ends at point _n_. Write a positive radius for
@@ -2429,7 +2443,8 @@ text  [_x_, _y_], "_string_"<span class="optional">, position</span>
 dot  [_x_, _y_]<span class="optional">, "label", position</span>
 
 : Draws a dot with an optional label. The dot’s outline takes the current stroke and
-  its inside takes the current fill, so `fill "none"` gives a hollow dot.\
+  its inside takes the current fill, so `fill "none"` gives a hollow dot.
+
   _position_ can be "above", "below", "middle", "left", "right", "aboveleft",
   "aboveright", "belowleft", or "belowright". The default is "below".
 
@@ -2982,6 +2997,7 @@ Copyright © 2020-2024 Ron Kok. Released under the [MIT License][]
 <li><a href="#spreadsheets">Spreadsheets</a></li>
 <li><a href="#numeral-display">Numeral Display</a></li>
 <li><a href="#tests">Tests</a></li>
+<li><a href="#sketches">Sketches</a></li>
 <li><a href="#drawings">Drawings</a></li>
 <li>
 <details><summary>UDFs</summary>
