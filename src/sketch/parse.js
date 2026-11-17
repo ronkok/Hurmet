@@ -26,6 +26,18 @@ const textPositionRegEx = /^\s*(?:,\s*"(above|leader|middle|below)?(left|right)?
 // Remove the surrounding quotes of a string token, and turn each "" into ".
 const unquote = token => token.slice(1, -1).replace(/""/g, '"')
 
+// A string may span several lines, as in Hurmet's draw.js, so a statement may too.
+// A line with an odd number of " leaves a string open, since "" stands for one ".
+// Return the index of the last line of the statement that starts at line i.
+const lastLineOfStatement = (lines, i) => {
+  let numQuotes = 0
+  for (let j = i; j < lines.length; j++) {
+    numQuotes += (lines[j].match(/"/g) || []).length
+    if (numQuotes % 2 === 0) { return j }
+  }
+  throw new Error(`Unterminated string at line ${i + 1}`)
+}
+
 // The optional third argument of `frame`, as Hurmet's draw.js reads it.
 // The Sketch Properties… dialog shows "left" and "right" as float left & right.
 const sketchPositions = new Set(["inline", "left", "center", "right"])
@@ -166,9 +178,8 @@ const getArgs = str => {
   return args
 }
 
-// `str` holds the text statement and everything after it. The string may span
-// several lines; it ends at the first " that isn't part of a "" pair.
-// Returns the text element and the number of lines the statement used.
+// `str` holds the text statement. The string may span several lines; it ends at
+// the first " that isn't part of a "" pair. Returns the text element.
 const parseText = (str, appState) => {
   str = str.replace(/\r\n/g, "\n").trim()
   const pointMatch = textElementRegex.exec(str)
@@ -185,13 +196,11 @@ const parseText = (str, appState) => {
   const positionMatch = tail.match(textPositionRegEx)
   if (!positionMatch) { throw new Error(`Invalid text command`) }
   const textPosition = (positionMatch[1] || "") + (positionMatch[2] || "") || "middle"
-  const numLines = (pointMatch[0] + contentMatch[0]).split("\n").length
   // Build via text.js's createTextElement so a parsed text element has the
   // same shape (attrs naming, modelPoint, position) as one created by the
   // text tool, dimension tool, or arrow label — see shapeParse.js's history
   // for why that shape must match exactly.
-  const textElement = text.createTextElement(content, modelPoint, { ...appState, textposition: textPosition })
-  return [textElement, numLines]
+  return text.createTextElement(content, modelPoint, { ...appState, textposition: textPosition })
 }
 
 // The commands that write an element. parseLine also accepts style statements
@@ -422,8 +431,7 @@ export const parseLine = (source, appState) => {
   }
   let argString = posSpace === -1 ? "" : line.slice(posSpace + 1).trim()
   if (command === "text") {
-    const [textElement, _] = parseText(line, appState)
-    return textElement
+    return parseText(line, appState)
   } else {
     const args = getArgs(argString)
     return getElement(command, args, appState, null, i)
@@ -465,15 +473,15 @@ export const parseDwg = (str, maxId) => {
   for (let i = 0; i < lines.length; i++) {
     let line = lines[i].trim()
     if (line === "" || line.startsWith("#")) { continue } // Skip blank lines and comments
+    const lastLine = lastLineOfStatement(lines, i)
+    if (lastLine > i) { line = lines.slice(i, lastLine + 1).join("\n").trim() }
     const posSpace = line.indexOf(" ")
     const command = posSpace === -1 ? line : line.slice(0, posSpace)
     let argString = posSpace === -1 ? "" : line.slice(posSpace + 1).trim()
     const numKidsBefore = kids.length
 
     if (command === "text") {
-      const [textElement, numLines] = parseText(lines.slice(i).join("\n"), appState) || [null, 0];
-      i += numLines > 0 ? numLines - 1 : 0
-      if (textElement) { dwgMgr.pushElement(dwg, textElement) }
+      dwgMgr.pushElement(dwg, parseText(line, appState))
     } else if (styleCommands.has(command.toLowerCase())) {
       applyStyleCommand(command.toLowerCase(), getArgs(argString), appState, i)
     } else {
@@ -696,6 +704,7 @@ export const parseDwg = (str, maxId) => {
         groups.setGroupPath(kids[j], [...outer, ...groups.groupPath(kids[j])])
       }
     }
+    i = lastLine
   }
   if (groupStack.length > 0) {
     const opened = groupStack[groupStack.length - 1].line
