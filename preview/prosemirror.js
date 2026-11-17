@@ -72164,9 +72164,15 @@ const openSketch = (source, callback) => {
 // title each time. Without `caption true`, the sketch is an inline node.
 // Afterward, the cursor goes after the sketch. If the sketch stayed selected,
 // a click on it would not select it again, so it would not reopen the dialog.
+// Undo note: prosemirror-history saves the selection from before an edit, and Undo
+// restores it. When an existing sketch is edited, that selection is a NodeSelection on
+// the sketch, so an Undo would select the sketch and reopen the Sketch dialog.
+// So, before the edit, we dispatch a separate transaction that only moves the cursor
+// to just after the sketch. It has no steps, so the history does not record it.
+// An Undo then restores the old sketch without opening the dialog.
+// Compare Note 1 in updateCalculations.js.
 const placeSketch = (view, source, node = null, pos = null) => {
-  const { state } = view;
-  const tr = state.tr;
+  let state = view.state;
   // The range that the new node replaces.
   let from = state.selection.from;
   let to = state.selection.to;
@@ -72181,7 +72187,13 @@ const placeSketch = (view, source, node = null, pos = null) => {
       to = $pos.after();
       isInFigure = true;
     }
+    if (source !== null) {
+      // See the Undo note above. The doc is unchanged, so `from` and `to` stay valid.
+      view.dispatch(state.tr.setSelection(Selection.near(state.doc.resolve(to))));
+      state = view.state;
+    }
   }
+  const tr = state.tr;
   if (source === null) {
     // Cancel
     if (!node) { return }
