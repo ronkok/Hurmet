@@ -2451,7 +2451,8 @@ dot  [_x_, _y_]<span class="optional">, "label", position</span>
 arrow (_x₁_, _y₁_; _x₂_, _y₂_<span class="optional">; x₃, y₃; etc</span>)<span class="optional">, "note"</span>
 
 : Draws a straight arrow, with an arrowhead at its last point. The optional note is
-  written at the first point, on the side away from the arrow.
+  written at the first point, on the side away from the arrow. The note can span
+  several lines.
 
 dimension (_x₁_, _y₁_; _x₂_, _y₂_; <span class="optional">x₃, y₃; etc;</span> _xLabel_, _yLabel_)<span class="optional">, ["label₁", "label₂", etc.], dimAngle, extAngle</span>
 

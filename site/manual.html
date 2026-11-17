@@ -7,7 +7,7 @@
    <link rel="manifest" href="/app.webmanifest">
    <link rel="icon" href="/images/favicon.svg">
    <link rel="stylesheet" href="/docStyles.min.css">
-   <script>globalThis.currencyRates = {"USD":"1.1165","JPY":"176.77","CZK":"24.350","DKK":"7.4752","GBP":"0.83415","HUF":"363.90","PLN":"4.3925","RON":"5.3403","SEK":"11.0260","CHF":"0.9143","ISK":"136.80","NOK":"10.5260","TRY":"55.9957","AUD":"1.6250","BRL":"6.1449","CAD":"1.5705","CNY":"7.4485","HKD":"8.7505","IDR":"20208.93","ILS":"3.5717","INR":"104.8645","KRW":"1517.02","MXN":"20.8828","MYR":"4.5319","NZD":"2.0141","PHP":"70.358","SGD":"1.4309","THB":"37.459","ZAR":"18.4649","EUR":"1.0"}</script>
+   <script>globalThis.currencyRates = {"USD":"1.1014","JPY":"175.78","CZK":"24.428","DKK":"7.4752","GBP":"0.83450","HUF":"364.35","PLN":"4.4030","RON":"5.3493","SEK":"11.0950","CHF":"0.9244","ISK":"136.80","NOK":"10.5740","TRY":"55.5020","AUD":"1.6301","BRL":"6.2838","CAD":"1.5734","CNY":"7.3425","HKD":"8.6427","IDR":"20110.00","ILS":"3.5509","INR":"103.4520","KRW":"1470.23","MXN":"20.4429","MYR":"4.5102","NZD":"1.9971","PHP":"70.439","SGD":"1.4195","THB":"37.326","ZAR":"18.6610","EUR":"1.0"}</script>
 </head>
 <body>
 <main>
@@ -1028,7 +1028,7 @@ end</code></pre><p>… which results in this plot …</p>
 <dd><p>Draws a dot with an optional label. The dot’s outline takes the current stroke and its inside takes the current fill, so <code>fill &quot;none&quot;</code> gives a hollow dot.</p>
 <p><em>position</em> can be &quot;above&quot;, &quot;below&quot;, &quot;middle&quot;, &quot;left&quot;, &quot;right&quot;, &quot;aboveleft&quot;, &quot;aboveright&quot;, &quot;belowleft&quot;, or &quot;belowright&quot;. The default is &quot;below&quot;.</p></dd>
 <dt id='arrow-'>arrow (<em>x₁</em>, <em>y₁</em>; <em>x₂</em>, <em>y₂</em><span class="optional">; x₃, y₃; etc</span>)<span class="optional">, "note"</span></dt>
-<dd><p>Draws a straight arrow, with an arrowhead at its last point. The optional note is written at the first point, on the side away from the arrow.</p></dd>
+<dd><p>Draws a straight arrow, with an arrowhead at its last point. The optional note is written at the first point, on the side away from the arrow. The note can span several lines.</p></dd>
 <dt id='dimension-'>dimension (<em>x₁</em>, <em>y₁</em>; <em>x₂</em>, <em>y₂</em>; <span class="optional">x₃, y₃; etc;</span> <em>xLabel</em>, <em>yLabel</em>)<span class="optional">, ["label₁", "label₂", etc.], dimAngle, extAngle</span></dt>
 <dd><p>Draws a string of dimensions. The dimension line passes through point <em>xLabel</em>, <em>yLabel</em>. The other points each define an extension line.</p>
 <p>Without angles, the dimension line is horizontal or vertical, whichever puts the label point between the end points. With angles, in degrees, the dimension line runs at <em>dimAngle</em> and the extension lines run at <em>extAngle</em>.</p>
